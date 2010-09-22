@@ -109,7 +109,6 @@ MAN1FILES=	acctcom.1			\
 	 	dumpcs.1			\
 	 	echo.1				\
 	 	ed.1				\
-	 	edit.1				\
 	 	egrep.1				\
 	 	eject.1				\
 	 	elfdump.1			\
@@ -121,7 +120,6 @@ MAN1FILES=	acctcom.1			\
 	 	enhance.1			\
 	 	env.1				\
 	 	eqn.1				\
-	 	ex.1				\
 	 	exec.1				\
 	 	exit.1				\
 	 	expand.1			\
@@ -292,7 +290,6 @@ MAN1FILES=	acctcom.1			\
 	 	pargs.1				\
 	 	passwd.1			\
 	 	paste.1				\
-	 	patch.1				\
 	 	pathchk.1			\
 	 	pax.1				\
 	 	pfexec.1			\
@@ -386,7 +383,6 @@ MAN1FILES=	acctcom.1			\
 	 	setlabel.1			\
 	 	setpgrp.1			\
 	 	sftp.1				\
-	 	sh.1				\
 	 	shcomp.1			\
 	 	shell_builtins.1		\
 	 	shift.1				\
@@ -458,7 +454,6 @@ MAN1FILES=	acctcom.1			\
 	 	vacation.1			\
 	 	vc.1				\
 	 	vgrind.1			\
-	 	vi.1				\
 	 	volcheck.1			\
 	 	volrmmount.1			\
 	 	w.1				\
@@ -482,5 +477,11 @@ MAN1FILES=	acctcom.1			\
 	 	ypwhich.1			\
 	 	zlogin.1			\
 	 	zonename.1
+
+HASMAN1FILES= 	edit.1	\
+		ex.1	\
+		patch.1 \
+		sh.1	\
+		vi.1
 
 include ../Makefile.man

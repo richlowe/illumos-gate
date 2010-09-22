@@ -223,6 +223,8 @@ DIRS= \
 	/usr/has \
 	/usr/has/bin \
 	/usr/has/lib \
+        /usr/has/man \
+        /usr/has/man/man1 \
 	/usr/include \
 	/usr/include/ast \
 	/usr/include/fm \
