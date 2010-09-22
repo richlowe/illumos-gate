@@ -1,0 +1,38 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy is of the CDDL is also available via the Internet
+# at http://www.illumos.org/license/CDDL.
+#
+
+# Copyright 2010, Richard Lowe
+
+include ../../Makefile.master
+
+MAN7PFILES = 	arp.7p		\
+	 	dlpi.7p		\
+	 	icmp.7p		\
+	 	icmp6.7p	\
+	 	if_tcp.7p	\
+	 	inet.7p		\
+	 	inet6.7p	\
+	 	ip.7p		\
+	 	ip6.7p		\
+	 	ipsec.7p	\
+	 	ipsecah.7p	\
+	 	ipsecesp.7p	\
+	 	pf_key.7p	\
+	 	rarp.7p		\
+	 	route.7p	\
+	 	routing.7p	\
+	 	sctp.7p		\
+	 	sip.7p		\
+	 	slp.7p		\
+	 	tcp.7p		\
+	 	udp.7p
+
+include ../Makefile.man
