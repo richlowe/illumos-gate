@@ -194,7 +194,7 @@ MAN7DFILES = 	aac.7d		\
 	 	sysmsg.7d	\
 	 	systrace.7d	\
 	 	ticlts.7d	\
-	 	todopol.7d	\
+	 	todopl.7d	\
 	 	tsalarm.7d	\
 	 	tty.7d		\
 	 	ttymux.7d	\
