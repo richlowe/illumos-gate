@@ -46,9 +46,7 @@ MAN7DFILES = 	aac.7d		\
 	 	bfe.7d		\
 	 	bge.7d		\
 	 	blk2scsa.7d	\
-	 	bpp.7d		\
 	 	bscv.7d		\
-	 	cgsix.7d	\
 	 	chxge.7d	\
 	 	cmdk.7d		\
 	 	console.7d	\
@@ -59,19 +57,15 @@ MAN7DFILES = 	aac.7d		\
 	 	dad.7d		\
 	 	dca.7d		\
 	 	dcam1394.7d	\
-	 	dda.7d		\
 	 	devinfo.7d	\
 	 	dm2s.7d		\
-	 	dmd.7d		\
 	 	dmfe.7d		\
 	 	dnet.7d		\
-	 	dpt.7d		\
 	 	dr.7d		\
 	 	dtrace.7d	\
 	 	ecpp.7d		\
 	 	ehci.7d		\
 	 	eri.7d		\
-	 	esp.7d		\
 	 	fas.7d		\
 	 	fasttrap.7d	\
 	 	fbt.7d		\
@@ -121,8 +115,6 @@ MAN7DFILES = 	aac.7d		\
 	 	lockstat.7d	\
 	 	lofi.7d		\
 	 	log.7d		\
-	 	lp.7d		\
-	 	lx_systrace.7d	\
 	 	mc-opl.7d	\
 	 	md.7d		\
 	 	mediator.7d	\
@@ -157,8 +149,6 @@ MAN7DFILES = 	aac.7d		\
 	 	pcipsy.7d	\
 	 	pcisch.7d	\
 	 	pcmcia.7d	\
-	 	pcmem.7d	\
-	 	pcram.7d	\
 	 	pcwl.7d		\
 	 	physmem.7d	\
 	 	pm.7d		\
@@ -199,14 +189,12 @@ MAN7DFILES = 	aac.7d		\
 	 	srpt.7d		\
 	 	ssd.7d		\
 	 	st.7d		\
-	 	stp4020.7d	\
 	 	su.7d		\
 	 	sv.7d		\
 	 	sysmsg.7d	\
 	 	systrace.7d	\
 	 	ticlts.7d	\
 	 	todopol.7d	\
-	 	tpf.7d		\
 	 	tsalarm.7d	\
 	 	tty.7d		\
 	 	ttymux.7d	\
@@ -231,7 +219,6 @@ MAN7DFILES = 	aac.7d		\
 	 	virtualkm.7d	\
 	 	vni.7d		\
 	 	vr.7d		\
-	 	wbsd.7d		\
 	 	wpi.7d		\
 	 	wscons.7d	\
 	 	wusb_ca.7d	\
