@@ -36,12 +36,23 @@ dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
 dir path=usr/lib/snmp group=sys
 dir path=usr/sbin
+dir path=usr/share/man
+dir path=usr/share/man/man1m
+dir path=usr/share/man/man3lib
+dir path=usr/share/man/man3snmp
 file path=usr/lib/$(ARCH64)/libssagent.so.1
 file path=usr/lib/$(ARCH64)/libssasnmp.so.1
 file path=usr/lib/libssagent.so.1
 file path=usr/lib/libssasnmp.so.1
 file path=usr/lib/snmp/snmpdx group=sys mode=0755
 file path=usr/sbin/snmp_trapsend mode=0755
+file path=usr/share/man/man1m/snmpdx.1m
+file path=usr/share/man/man1m/snmpdx.1m
+file path=usr/share/man/man3lib/libssagent.3lib
+file path=usr/share/man/man3lib/libssasnmp.3lib
+file path=usr/share/man/man3snmp/SSAAgentIsAlive.3snmp
+file path=usr/share/man/man3snmp/SSAOidCmp.3snmp
+file path=usr/share/man/man3snmp/SSAStringCpy.3snmp
 legacy pkg=SUNWsasnm \
     desc="Solstice Enterprise Agents 1.0.3 Simple Network Management Protocol" \
     name="Solstice Enterprise Agents 1.0.3 Simple Network Management Protocol"

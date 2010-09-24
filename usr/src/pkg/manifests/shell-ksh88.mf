@@ -31,6 +31,9 @@ set name=variant.arch value=$(ARCH)
 dir path=usr group=sys
 dir path=usr/has
 dir path=usr/has/bin
+dir path=usr/has/man
+dir path=usr/has/man/man1
 file path=usr/has/bin/ksh mode=0555
+file path=usr/has/man/man1/ksh.1
 hardlink path=usr/has/bin/pfksh target=../../bin/pfexec
 hardlink path=usr/has/bin/rksh target=ksh

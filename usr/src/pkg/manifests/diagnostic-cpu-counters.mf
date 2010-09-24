@@ -41,6 +41,10 @@ dir path=usr/kernel/pcbe/$(ARCH64) group=sys
 dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
 dir path=usr/sbin
+dir path=usr/share/man/man1
+dir path=usr/share/man/man1m
+dir path=usr/share/man/man3cpc
+dir path=usr/share/man/man3lib
 $(i386_ONLY)file path=usr/bin/$(ARCH32)/cputrack mode=0555
 file path=usr/bin/$(ARCH64)/cputrack mode=0555
 file path=usr/include/libcpc.h
@@ -71,6 +75,32 @@ file path=usr/lib/llib-lcpc.ln
 file path=usr/lib/llib-lpctx
 file path=usr/lib/llib-lpctx.ln
 file path=usr/sbin/cpustat mode=0555
+file path=usr/share/man/man1/cputrack.1
+file path=usr/share/man/man1m/cpustat.1m
+file path=usr/share/man/man3cpc/cpc.3cpc
+file path=usr/share/man/man3cpc/cpc_access.3cpc
+file path=usr/share/man/man3cpc/cpc_bind_curlwp.3cpc
+file path=usr/share/man/man3cpc/cpc_bind_event.3cpc
+file path=usr/share/man/man3cpc/cpc_buf_create.3cpc
+file path=usr/share/man/man3cpc/cpc_count_usr_events.3cpc
+file path=usr/share/man/man3cpc/cpc_enable.3cpc
+file path=usr/share/man/man3cpc/cpc_event.3cpc
+file path=usr/share/man/man3cpc/cpc_event_diff.3cpc
+file path=usr/share/man/man3cpc/cpc_getcpuver.3cpc
+file path=usr/share/man/man3cpc/cpc_npic.3cpc
+file path=usr/share/man/man3cpc/cpc_open.3cpc
+file path=usr/share/man/man3cpc/cpc_pctx_bind_event.3cpc
+file path=usr/share/man/man3cpc/cpc_set_create.3cpc
+file path=usr/share/man/man3cpc/cpc_seterrfn.3cpc
+file path=usr/share/man/man3cpc/cpc_seterrhndlr.3cpc
+file path=usr/share/man/man3cpc/cpc_shared_open.3cpc
+file path=usr/share/man/man3cpc/cpc_strtoevent.3cpc
+file path=usr/share/man/man3cpc/cpc_version.3cpc
+file path=usr/share/man/man3cpc/generic_events.3cpc
+file path=usr/share/man/man3cpc/pctx_capture.3cpc
+file path=usr/share/man/man3cpc/pctx_set_events.3cpc
+file path=usr/share/man/man3lib/libcpc.3lib
+file path=usr/share/man/man3lib/libpctx.3lib
 hardlink path=usr/bin/cputrack target=../lib/isaexec
 $(sparc_ONLY)hardlink path=usr/kernel/pcbe/$(ARCH64)/pcbe.23 target=pcbe.62
 $(sparc_ONLY)hardlink path=usr/kernel/pcbe/$(ARCH64)/pcbe.4.7 target=pcbe.4.6

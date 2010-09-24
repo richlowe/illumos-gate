@@ -44,6 +44,14 @@ dir path=usr/lib
 dir path=usr/lib/acct
 dir path=usr/lib/sa owner=adm
 dir path=usr/sbin
+dir path=usr/share
+dir path=usr/share/man
+dir path=usr/share/man/man1
+dir path=usr/share/man/man1
+dir path=usr/share/man/man1m
+dir path=usr/share/man/man1m
+dir path=usr/share/man/man1m
+dir path=usr/share/man/man4
 dir path=var group=sys
 dir path=var/adm group=sys mode=0775
 dir path=var/adm/acct group=adm mode=0775 owner=adm
@@ -98,6 +106,33 @@ file path=usr/lib/sa/sa1 mode=0555
 file path=usr/lib/sa/sa2 mode=0555
 file path=usr/lib/sa/sadc mode=0555
 file path=usr/sbin/sar mode=0555
+file path=usr/share/man/man1/acctcom.1 mode=0444
+file path=usr/share/man/man1/sar.1 mode=0444
+file path=usr/share/man/man1/sar.1
+file path=usr/share/man/man1/timex.1
+file path=usr/share/man/man1m/acct.1m mode=0444
+file path=usr/share/man/man1m/acct.1m
+file path=usr/share/man/man1m/acct.1m
+file path=usr/share/man/man1m/acctadm.1m mode=0444
+file path=usr/share/man/man1m/acctcms.1m mode=0444
+file path=usr/share/man/man1m/acctcms.1m
+file path=usr/share/man/man1m/acctcms.1m
+file path=usr/share/man/man1m/acctcon.1m mode=0444
+file path=usr/share/man/man1m/acctcon.1m
+file path=usr/share/man/man1m/acctcon.1m
+file path=usr/share/man/man1m/acctmerg.1m mode=0444
+file path=usr/share/man/man1m/acctmerg.1m
+file path=usr/share/man/man1m/acctmerg.1m
+file path=usr/share/man/man1m/acctprc.1m mode=0444
+file path=usr/share/man/man1m/acctprc.1m
+file path=usr/share/man/man1m/acctprc.1m
+file path=usr/share/man/man1m/acctsh.1m mode=0444
+file path=usr/share/man/man1m/fwtmp.1m
+file path=usr/share/man/man1m/fwtmp.1m
+file path=usr/share/man/man1m/runacct.1m
+file path=usr/share/man/man1m/runacct.1m
+file path=usr/share/man/man1m/sar.1m
+file path=usr/share/man/man4/holidays.4
 file path=var/spool/cron/crontabs/sys group=sys mode=0600 \
     original_name=SUNWacc:var/spool/cron/crontabs/sys preserve=true
 legacy pkg=SUNWaccr \
