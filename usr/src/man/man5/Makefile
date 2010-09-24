@@ -57,18 +57,14 @@ MAN5FILES = 	Intro.5			\
 	 	lfcompile.5		\
 	 	lfcompile64.5		\
 	 	locale.5		\
-	 	lx.5			\
 	 	man.5			\
 	 	mansun.5		\
 	 	me.5			\
 	 	mech_spnego.5		\
 	 	mm.5			\
-	 	mms.5			\
 	 	ms.5			\
 	 	mutex.5			\
-	 	native.5		\
 	 	nfssec.5		\
-	 	openssl.5		\
 	 	pam_allow.5		\
 	 	pam_authtok_check.5	\
 	 	pam_authtok_get.5	\
@@ -81,11 +77,9 @@ MAN5FILES = 	Intro.5			\
 	 	pam_ldap.5		\
 	 	pam_list.5		\
 	 	pam_passwd_auth.5	\
-	 	pam_pkcs11.5		\
 	 	pam_rhosts_auth.5	\
 	 	pam_roles.5		\
 	 	pam_sample.5		\
-	 	pam_smartcard.5		\
 	 	pam_smb_passwd.5	\
 	 	pam_smbfs_login.5	\
 	 	pam_tsol_account.5	\
@@ -115,7 +109,6 @@ MAN5FILES = 	Intro.5			\
 	 	threads.5		\
 	 	trusted_extensions.5	\
 	 	vgrindefs.5		\
-	 	xVM.5			\
 	 	zones.5
 
 include ../Makefile.man

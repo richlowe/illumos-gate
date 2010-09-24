@@ -24,7 +24,6 @@ MAN1FILES=	acctcom.1			\
 	 	apropos.1			\
 	 	ar.1				\
 	 	arch.1				\
-	 	as.1				\
 	 	asa.1				\
 	 	at.1				\
 	 	atq.1				\
@@ -34,7 +33,6 @@ MAN1FILES=	acctcom.1			\
 	 	audiorecord.1			\
 	 	audiotest.1			\
 	 	auths.1				\
-	 	auto_ef.1			\
 	 	awk.1				\
 	 	banner.1			\
 	 	basename.1			\
@@ -89,7 +87,6 @@ MAN1FILES=	acctcom.1			\
 	 	dc.1				\
 	 	deallocate.1			\
 	 	deroff.1			\
-	 	des.1				\
 	 	dhcpinfo.1			\
 	 	diff.1				\
 	 	diff3.1				\
@@ -103,12 +100,12 @@ MAN1FILES=	acctcom.1			\
 	 	dos2unix.1			\
 	 	download.1			\
 	 	dpost.1				\
-	 	dtappsession.1			\
 	 	du.1				\
 	 	dump.1				\
 	 	dumpcs.1			\
 	 	echo.1				\
 	 	ed.1				\
+		edit.1				\
 	 	egrep.1				\
 	 	eject.1				\
 	 	elfdump.1			\
@@ -133,7 +130,6 @@ MAN1FILES=	acctcom.1			\
 	 	filesync.1			\
 	 	find.1				\
 	 	finger.1			\
-	 	fmli.1				\
 	 	fmt.1				\
 	 	fmtmsg.1			\
 	 	fold.1				\
@@ -154,7 +150,6 @@ MAN1FILES=	acctcom.1			\
 	 	getzonepath.1			\
 	 	glob.1				\
 	 	gprof.1				\
-	 	graph.1				\
 	 	grep.1				\
 	 	groups.1			\
 	 	hash.1				\
@@ -182,7 +177,7 @@ MAN1FILES=	acctcom.1			\
 	 	kmfcfg.1			\
 	 	kpasswd.1			\
 	 	krb5-config.1			\
-	 	ksh.1				\
+		ksh.1				\
 	 	ksh93.1				\
 	 	ktutil.1			\
 	 	lari.1				\
@@ -234,7 +229,6 @@ MAN1FILES=	acctcom.1			\
 	 	mcs.1				\
 	 	mdb.1				\
 	 	mesg.1				\
-	 	mixerctl.1			\
 	 	mkdir.1				\
 	 	mkmsgs.1			\
 	 	mktemp.1			\
@@ -259,25 +253,6 @@ MAN1FILES=	acctcom.1			\
 	 	news.1				\
 	 	newtask.1			\
 	 	nice.1				\
-	 	NIS+.1				\
-	 	niscat.1			\
-	 	nischgrp.1			\
-	 	nischmod.1			\
-	 	nischown.1			\
-	 	nischttl.1			\
-	 	nisdefaults.1			\
-	 	niserror.1			\
-	 	nisgrpadm.1			\
-	 	nisln.1				\
-	 	nisls.1				\
-	 	nismatch.1			\
-	 	nismkdir.1			\
-	 	nisopaccess.1			\
-	 	nispasswd.1			\
-	 	nisrm.1				\
-	 	nisrmdir.1			\
-	 	nistbladm.1			\
-	 	nistest.1			\
 	 	nl.1				\
 	 	nm.1				\
 	 	nohup.1				\
@@ -295,13 +270,11 @@ MAN1FILES=	acctcom.1			\
 	 	pfexec.1			\
 	 	pg.1				\
 	 	pgrep.1				\
-	 	pkcs11_inspect.1		\
 	 	pkginfo.1			\
 	 	pkgmk.1				\
 	 	pkgparam.1			\
 	 	pkgproto.1			\
 	 	pkgtrans.1			\
-	 	pklogin_finder.1		\
 	 	pktool.1			\
 	 	plabel.1			\
 	 	plgrp.1				\
@@ -351,29 +324,13 @@ MAN1FILES=	acctcom.1			\
 	 	roffbib.1			\
 	 	roles.1				\
 	 	rpcgen.1			\
-	 	rpm2cpio.1			\
 	 	rsh.1				\
 	 	runat.1				\
 	 	rup.1				\
 	 	ruptime.1			\
 	 	rusers.1			\
 	 	rwho.1				\
-	 	sag.1				\
 	 	sar.1				\
-	 	sccs.1				\
-	 	sccs-admin.1			\
-	 	sccs-cdc.1			\
-	 	sccs-comb.1			\
-	 	sccs-delta.1			\
-	 	sccs-get.1			\
-	 	sccs-help.1			\
-	 	sccs-prs.1			\
-	 	sccs-prt.1			\
-	 	sccs-rmdel.1			\
-	 	sccs-sact.1			\
-	 	sccs-sccsdiff.1			\
-	 	sccs-unget.1			\
-	 	sccs-val.1			\
 	 	scp.1				\
 	 	script.1			\
 	 	sdiff.1				\
@@ -383,6 +340,7 @@ MAN1FILES=	acctcom.1			\
 	 	setlabel.1			\
 	 	setpgrp.1			\
 	 	sftp.1				\
+		sh.1				\
 	 	shcomp.1			\
 	 	shell_builtins.1		\
 	 	shift.1				\
@@ -394,7 +352,6 @@ MAN1FILES=	acctcom.1			\
 	 	sortbib.1			\
 	 	sotruss.1			\
 	 	spell.1				\
-	 	spline.1			\
 	 	split.1				\
 	 	srchtxt.1			\
 	 	ssh.1				\
@@ -414,7 +371,6 @@ MAN1FILES=	acctcom.1			\
 	 	svcs.1				\
 	 	symorder.1			\
 	 	sys-suspend.1			\
-	 	sysV-make.1			\
 	 	tabs.1				\
 	 	tail.1				\
 	 	talk.1				\
@@ -452,14 +408,12 @@ MAN1FILES=	acctcom.1			\
 	 	unix2dos.1			\
 	 	uptime.1			\
 	 	vacation.1			\
-	 	vc.1				\
 	 	vgrind.1			\
 	 	volcheck.1			\
 	 	volrmmount.1			\
 	 	w.1				\
 	 	wait.1				\
 	 	wc.1				\
-	 	what.1				\
 	 	whatis.1			\
 	 	which.1				\
 	 	who.1				\
@@ -485,3 +439,10 @@ HASMAN1FILES= 	edit.1	\
 		vi.1
 
 include ../Makefile.man
+
+$(ROOTMAN1)/sh.1 $(ROOTMAN1)/ksh.1:
+	$(SYMLINK) ksh93.1 $@
+
+$(ROOTMAN1)/edit.1:
+	$(SYMLINK) ../../../has/man/man1/edit.1 $@
+

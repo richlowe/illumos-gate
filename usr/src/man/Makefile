@@ -14,9 +14,7 @@
 SUBDIRS= man1 \
 	man1b \
 	man1c \
-	man1f \
 	man1m \
-	man1s \
 	man2 \
 	man3 \
 	man3bsm \
@@ -43,26 +41,19 @@ SUBDIRS= man1 \
 	man3iscsit \
 	man3kstat \
 	man3kvm \
-	man3layout \
 	man3ldap \
 	man3lgrp \
 	man3lib \
 	man3libucb \
-	man3m \
 	man3mail \
 	man3malloc \
-	man3mlib \
-	man3mms \
 	man3mp \
 	man3mpapi \
-	man3mvec \
 	man3nsl \
 	man3nvpair \
 	man3pam \
 	man3papi \
 	man3perl \
-	man3picl \
-	man3picltree \
 	man3plot \
 	man3pool \
 	man3proc \
@@ -88,7 +79,6 @@ SUBDIRS= man1 \
 	man3volmgt \
 	man3xcurses \
 	man3xnet \
-	man3xtsol \
 	man4 \
 	man4b \
 	man5 \
@@ -104,8 +94,9 @@ SUBDIRS= man1 \
 	man9p \
 	man9s
 
+sparc_SUBDIRS = man3picl man3picltree
 
-.PARALLEL: $(SUBDIRS)
+.PARALLEL: $(SUBDIRS) $($(MACH)_SUBDIRS)
 
 all :=		TARGET = all
 install :=	TARGET = install
@@ -119,3 +110,4 @@ $(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:
+

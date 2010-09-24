@@ -13,21 +13,24 @@
 
 include ../../Makefile.master
 
-MAN7MFILES = 	bufmod.7m	\
-	 	connld.7m	\
-	 	kb.7m		\
-	 	ldterm.7m	\
-	 	pckt.7m		\
-	 	pfmod.7m	\
-	 	pipemod.7m	\
-	 	ptem.7m		\
-	 	sppptun.7m	\
-	 	timod.7m	\
-	 	tirdwr.7m	\
-	 	ttcompat.7m	\
-	 	usb_ah.7m	\
-	 	usbkbm.7m	\
-	 	usbms.7m	\
-	 	vuidmice.7m
+COMMON_MAN7MFILES = 	bufmod.7m	\
+		 	connld.7m	\
+	 	 	ldterm.7m	\
+	 	 	pckt.7m		\
+	 	 	pfmod.7m	\
+	 	 	pipemod.7m	\
+	 	 	ptem.7m		\
+	 	 	sppptun.7m	\
+	 	 	timod.7m	\
+	 	 	tirdwr.7m	\
+	 	 	ttcompat.7m	\
+	 	 	usb_ah.7m	\
+	 	 	usbkbm.7m	\
+	 	 	usbms.7m	\
+	 	 	vuidmice.7m
+
+sparc_MAN7MFILES=	kb.7m
+
+MAN7MFILES = $(COMMON_MAN7MFILES) $($(MACH)_MAN7MFILES)
 
 include ../Makefile.man

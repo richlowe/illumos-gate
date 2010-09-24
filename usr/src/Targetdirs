@@ -39,17 +39,19 @@ $(BUILD64)	TARGETDIRS += $(DIRS64)
 
 TARGETDIRS	+= $(FILELINKS) $(DIRLINKS)
 
-i386_DIRS= \
-	/boot/acpi \
-	/boot/acpi/tables \
-	/boot/grub \
-	/boot/grub/bin \
-	/platform/i86pc \
-	/usr/lib/xen \
+i386_DIRS=			\
+	/boot/acpi		\
+	/boot/acpi/tables	\
+	/boot/grub		\
+	/boot/grub/bin		\
+	/platform/i86pc		\
+	/usr/lib/xen		\
 	/usr/lib/xen/bin
 
-sparc_DIRS= \
-	/usr/lib/ldoms
+sparc_DIRS=				\
+	/usr/lib/ldoms			\
+        /usr/share/man/man3picl		\
+        /usr/share/man/man3picltree	\
 
 # EXPORT DELETE START
 XDIRS= \
@@ -333,9 +335,7 @@ DIRS= \
 	/usr/share/man/man1 \
 	/usr/share/man/man1b \
 	/usr/share/man/man1c \
-	/usr/share/man/man1f \
 	/usr/share/man/man1m \
-	/usr/share/man/man1s \
 	/usr/share/man/man2 \
 	/usr/share/man/man3 \
 	/usr/share/man/man3bsm \
@@ -362,26 +362,19 @@ DIRS= \
 	/usr/share/man/man3iscsit \
 	/usr/share/man/man3kstat \
 	/usr/share/man/man3kvm \
-	/usr/share/man/man3layout \
 	/usr/share/man/man3ldap \
 	/usr/share/man/man3lgrp \
 	/usr/share/man/man3lib \
 	/usr/share/man/man3libucb \
-	/usr/share/man/man3m \
 	/usr/share/man/man3mail \
 	/usr/share/man/man3malloc \
-	/usr/share/man/man3mlib \
-	/usr/share/man/man3mms \
 	/usr/share/man/man3mp \
 	/usr/share/man/man3mpapi \
-	/usr/share/man/man3mvec \
 	/usr/share/man/man3nsl \
 	/usr/share/man/man3nvpair \
 	/usr/share/man/man3pam \
 	/usr/share/man/man3papi \
 	/usr/share/man/man3perl \
-	/usr/share/man/man3picl \
-	/usr/share/man/man3picltree \
 	/usr/share/man/man3plot \
 	/usr/share/man/man3pool \
 	/usr/share/man/man3proc \
@@ -407,7 +400,6 @@ DIRS= \
 	/usr/share/man/man3volmgt \
 	/usr/share/man/man3xcurses \
 	/usr/share/man/man3xnet \
-	/usr/share/man/man3xtsol \
 	/usr/share/man/man4 \
 	/usr/share/man/man4b \
 	/usr/share/man/man5 \

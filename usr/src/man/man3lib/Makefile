@@ -15,10 +15,8 @@ include ../../Makefile.master
 
 MAN3LIBFILES = 	libMPAPI.3lib		\
 	 	libSMHBAAPI.3lib	\
-	 	libXtsol.3lib		\
 	 	libadm.3lib		\
 	 	libaio.3lib		\
-	 	libauto_ef.3lib		\
 	 	libbsdmalloc.3lib	\
 	 	libbsm.3lib		\
 	 	libc.3lib		\
@@ -45,7 +43,6 @@ MAN3LIBFILES = 	libMPAPI.3lib		\
 	 	libfstyp.3lib		\
 	 	libgen.3lib		\
 	 	libgss.3lib		\
-	 	libidnkit.3lib		\
 	 	libintl.3lib		\
 	 	libiscsit.3lib		\
 	 	libkmf.3lib		\
@@ -53,21 +50,15 @@ MAN3LIBFILES = 	libMPAPI.3lib		\
 	 	libkstat.3lib		\
 	 	libkvm.3lib		\
 	 	libl.3lib		\
-	 	liblayout.3lib		\
 	 	liblgrp.3lib		\
-	 	libm.3lib		\
 	 	libmail.3lib		\
 	 	libmalloc.3lib		\
 	 	libmapmalloc.3lib	\
 	 	libmd.3lib		\
 	 	libmd5.3lib		\
 	 	libmenu.3lib		\
-	 	libmlib.3lib		\
-	 	libmlib_mt.3lib		\
-	 	libmms.3lib		\
 	 	libmp.3lib		\
 	 	libmtmalloc.3lib	\
-	 	libmvec.3lib		\
 	 	libnls.3lib		\
 	 	libnsl.3lib		\
 	 	libnvpair.3lib		\
@@ -108,7 +99,6 @@ MAN3LIBFILES = 	libMPAPI.3lib		\
 	 	libtsnet.3lib		\
 	 	libtsol.3lib		\
 	 	libumem.3lib		\
-	 	libusb.3lib		\
 	 	libuuid.3lib		\
 	 	libvolmgt.3lib		\
 	 	libw.3lib		\

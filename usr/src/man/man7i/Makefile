@@ -23,7 +23,6 @@ MAN7IFILES = 	agpgart_io.7i	\
 	 	hdio.7i		\
 	 	iec61883.7i	\
 	 	ipnat.7i	\
-	 	isdnio.7i	\
 	 	mhd.7i		\
 	 	mixer.7i	\
 	 	mtio.7i		\
