@@ -46,7 +46,7 @@ file path=usr/sbin/rpc.bootparamd mode=0555
 file path=usr/share/man/man1m/in.rarpd.1m
 file path=usr/share/man/man1m/rpc.bootparamd.1m
 file path=usr/share/man/man4/bootparams.4
-file path=usr/share/man/man7p/rarp.7p mode=0444
+file path=usr/share/man/man7p/rarp.7p
 legacy pkg=SUNWbsr desc="Boot Server daemons (Root)" \
     name="Boot Server daemons (Root)"
 legacy pkg=SUNWbsu desc="Boot Server daemons (Usr)" \

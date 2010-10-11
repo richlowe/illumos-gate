@@ -92,7 +92,7 @@ file path=usr/share/man/man1/smbutil.1
 file path=usr/share/man/man1m/mount_smbfs.1m
 file path=usr/share/man/man1m/smbiod.1m
 file path=usr/share/man/man4/nsmbrc.4
-file path=usr/share/man/man5/pam_smbfs_login.5 mode=0444
+file path=usr/share/man/man5/pam_smbfs_login.5
 file path=usr/share/man/man7fs/smbfs.7fs
 legacy pkg=SUNWsmbfskr desc="SMB/CIFS File System client support (Kernel)" \
     name="SMB/CIFS File System client support (Kernel)"

@@ -1831,31 +1831,31 @@ file path=usr/share/man/man5/lfcompile.5
 file path=usr/share/man/man5/lfcompile64.5
 file path=usr/share/man/man5/locale.5
 file path=usr/share/man/man5/mutex.5
-file path=usr/share/man/man5/pam_allow.5 mode=0444
-file path=usr/share/man/man5/pam_authtok_check.5 mode=0444
-file path=usr/share/man/man5/pam_authtok_get.5 mode=0444
-file path=usr/share/man/man5/pam_authtok_store.5 mode=0444
-file path=usr/share/man/man5/pam_deny.5 mode=0444
-file path=usr/share/man/man5/pam_dhkeys.5 mode=0444
-file path=usr/share/man/man5/pam_dial_auth.5 mode=0444
-file path=usr/share/man/man5/pam_ldap.5 mode=0444
-file path=usr/share/man/man5/pam_list.5 mode=0444
-file path=usr/share/man/man5/pam_passwd_auth.5 mode=0444
-file path=usr/share/man/man5/pam_rhosts_auth.5 mode=0444
-file path=usr/share/man/man5/pam_roles.5 mode=0444
-file path=usr/share/man/man5/pam_sample.5 mode=0444
-file path=usr/share/man/man5/pam_tsol_account.5 mode=0444
-file path=usr/share/man/man5/pam_unix_account.5 mode=0444
-file path=usr/share/man/man5/pam_unix_auth.5 mode=0444
-file path=usr/share/man/man5/pam_unix_cred.5 mode=0444
-file path=usr/share/man/man5/pam_unix_session.5 mode=0444
+file path=usr/share/man/man5/pam_allow.5
+file path=usr/share/man/man5/pam_authtok_check.5
+file path=usr/share/man/man5/pam_authtok_get.5
+file path=usr/share/man/man5/pam_authtok_store.5
+file path=usr/share/man/man5/pam_deny.5
+file path=usr/share/man/man5/pam_dhkeys.5
+file path=usr/share/man/man5/pam_dial_auth.5
+file path=usr/share/man/man5/pam_ldap.5
+file path=usr/share/man/man5/pam_list.5
+file path=usr/share/man/man5/pam_passwd_auth.5
+file path=usr/share/man/man5/pam_rhosts_auth.5
+file path=usr/share/man/man5/pam_roles.5
+file path=usr/share/man/man5/pam_sample.5
+file path=usr/share/man/man5/pam_tsol_account.5
+file path=usr/share/man/man5/pam_unix_account.5
+file path=usr/share/man/man5/pam_unix_auth.5
+file path=usr/share/man/man5/pam_unix_cred.5
+file path=usr/share/man/man5/pam_unix_session.5
 file path=usr/share/man/man5/pkcs11_kernel.5
 file path=usr/share/man/man5/pkcs11_softtoken.5
 file path=usr/share/man/man5/pkcs11_tpm.5
 file path=usr/share/man/man5/regex.5
 file path=usr/share/man/man5/regexp.5
 file path=usr/share/man/man5/threads.5
-file path=usr/share/man/man7p/sip.7p mode=0444
+file path=usr/share/man/man7p/sip.7p
 file path=usr/xpg4/lib/$(ARCH64)/libcurses.so.1
 file path=usr/xpg4/lib/$(ARCH64)/libcurses.so.2
 file path=usr/xpg4/lib/libcurses.so.1

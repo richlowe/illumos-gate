@@ -1005,627 +1005,627 @@ file path=usr/share/man/man7fs/objfs.7fs
 file path=usr/share/man/man7fs/sharefs.7fs
 file path=usr/share/man/man7fs/tmpfs.7fs
 file path=usr/share/man/man7fs/ufs.7fs
-file path=usr/share/man/man7m/bufmod.7m mode=0444
-file path=usr/share/man/man7m/connld.7m mode=0444
-file path=usr/share/man/man7m/ldterm.7m mode=0444
-file path=usr/share/man/man7m/pckt.7m mode=0444
-file path=usr/share/man/man7m/pfmod.7m mode=0444
-file path=usr/share/man/man7m/pipemod.7m mode=0444
-file path=usr/share/man/man7m/ptem.7m mode=0444
-file path=usr/share/man/man7m/timod.7m mode=0444
-file path=usr/share/man/man7m/tirdwr.7m mode=0444
-file path=usr/share/man/man7m/ttcompat.7m mode=0444
+file path=usr/share/man/man7m/bufmod.7m
+file path=usr/share/man/man7m/connld.7m
+file path=usr/share/man/man7m/ldterm.7m
+file path=usr/share/man/man7m/pckt.7m
+file path=usr/share/man/man7m/pfmod.7m
+file path=usr/share/man/man7m/pipemod.7m
+file path=usr/share/man/man7m/ptem.7m
+file path=usr/share/man/man7m/timod.7m
+file path=usr/share/man/man7m/tirdwr.7m
+file path=usr/share/man/man7m/ttcompat.7m
 # Sadly vuid mouse support is in different packages on different platforms
-file path=usr/share/man/man7m/vuidmice.7m mode=0444
-file path=usr/share/man/man7p/arp.7p mode=0444
-file path=usr/share/man/man7p/dlpi.7p mode=0444
-file path=usr/share/man/man7p/icmp.7p mode=0444
-file path=usr/share/man/man7p/icmp6.7p mode=0444
-file path=usr/share/man/man7p/if_tcp.7p mode=0444
-file path=usr/share/man/man7p/inet.7p mode=0444
-file path=usr/share/man/man7p/inet6.7p mode=0444
-file path=usr/share/man/man7p/ip.7p mode=0444
-file path=usr/share/man/man7p/ip6.7p mode=0444
-file path=usr/share/man/man7p/ipsec.7p mode=0444
-file path=usr/share/man/man7p/ipsecah.7p mode=0444
-file path=usr/share/man/man7p/ipsecesp.7p mode=0444
-file path=usr/share/man/man7p/pf_key.7p mode=0444
-file path=usr/share/man/man7p/route.7p mode=0444
-file path=usr/share/man/man7p/routing.7p mode=0444
-file path=usr/share/man/man7p/sctp.7p mode=0444
-file path=usr/share/man/man7p/tcp.7p mode=0444
-file path=usr/share/man/man7p/udp.7p mode=0444
-file path=usr/share/man/man9e/Intro.9e mode=0444
-file path=usr/share/man/man9e/_fini.9e mode=0444
-file path=usr/share/man/man9e/aread.9e mode=0444
-file path=usr/share/man/man9e/attach.9e mode=0444
-file path=usr/share/man/man9e/awrite.9e mode=0444
-file path=usr/share/man/man9e/chpoll.9e mode=0444
-file path=usr/share/man/man9e/close.9e mode=0444
+file path=usr/share/man/man7m/vuidmice.7m
+file path=usr/share/man/man7p/arp.7p
+file path=usr/share/man/man7p/dlpi.7p
+file path=usr/share/man/man7p/icmp.7p
+file path=usr/share/man/man7p/icmp6.7p
+file path=usr/share/man/man7p/if_tcp.7p
+file path=usr/share/man/man7p/inet.7p
+file path=usr/share/man/man7p/inet6.7p
+file path=usr/share/man/man7p/ip.7p
+file path=usr/share/man/man7p/ip6.7p
+file path=usr/share/man/man7p/ipsec.7p
+file path=usr/share/man/man7p/ipsecah.7p
+file path=usr/share/man/man7p/ipsecesp.7p
+file path=usr/share/man/man7p/pf_key.7p
+file path=usr/share/man/man7p/route.7p
+file path=usr/share/man/man7p/routing.7p
+file path=usr/share/man/man7p/sctp.7p
+file path=usr/share/man/man7p/tcp.7p
+file path=usr/share/man/man7p/udp.7p
+file path=usr/share/man/man9e/Intro.9e
+file path=usr/share/man/man9e/_fini.9e
+file path=usr/share/man/man9e/aread.9e
+file path=usr/share/man/man9e/attach.9e
+file path=usr/share/man/man9e/awrite.9e
+file path=usr/share/man/man9e/chpoll.9e
+file path=usr/share/man/man9e/close.9e
 file path=usr/share/man/man9e/csx_event_handler.9e
-file path=usr/share/man/man9e/detach.9e mode=0444
-file path=usr/share/man/man9e/devmap.9e mode=0444
-file path=usr/share/man/man9e/devmap_access.9e mode=0444
-file path=usr/share/man/man9e/devmap_contextmgt.9e mode=0444
-file path=usr/share/man/man9e/devmap_dup.9e mode=0444
-file path=usr/share/man/man9e/devmap_map.9e mode=0444
-file path=usr/share/man/man9e/devmap_unmap.9e mode=0444
-file path=usr/share/man/man9e/dump.9e mode=0444
-file path=usr/share/man/man9e/getinfo.9e mode=0444
-file path=usr/share/man/man9e/gld.9e mode=0444
-file path=usr/share/man/man9e/identify.9e mode=0444
-file path=usr/share/man/man9e/ioctl.9e mode=0444
-file path=usr/share/man/man9e/ks_snapshot.9e mode=0444
-file path=usr/share/man/man9e/ks_update.9e mode=0444
-file path=usr/share/man/man9e/mmap.9e mode=0444
-file path=usr/share/man/man9e/open.9e mode=0444
-file path=usr/share/man/man9e/power.9e mode=0444
-file path=usr/share/man/man9e/print.9e mode=0444
-file path=usr/share/man/man9e/probe.9e mode=0444
-file path=usr/share/man/man9e/prop_op.9e mode=0444
-file path=usr/share/man/man9e/put.9e mode=0444
-file path=usr/share/man/man9e/quiesce.9e mode=0444
-file path=usr/share/man/man9e/read.9e mode=0444
-file path=usr/share/man/man9e/segmap.9e mode=0444
-file path=usr/share/man/man9e/srv.9e mode=0444
-file path=usr/share/man/man9e/strategy.9e mode=0444
-file path=usr/share/man/man9e/tran_abort.9e mode=0444
-file path=usr/share/man/man9e/tran_bus_reset.9e mode=0444
-file path=usr/share/man/man9e/tran_dmafree.9e mode=0444
-file path=usr/share/man/man9e/tran_getcap.9e mode=0444
-file path=usr/share/man/man9e/tran_init_pkt.9e mode=0444
-file path=usr/share/man/man9e/tran_quiesce.9e mode=0444
-file path=usr/share/man/man9e/tran_reset.9e mode=0444
-file path=usr/share/man/man9e/tran_reset_notify.9e mode=0444
-file path=usr/share/man/man9e/tran_setup_pkt.9e mode=0444
-file path=usr/share/man/man9e/tran_start.9e mode=0444
-file path=usr/share/man/man9e/tran_sync_pkt.9e mode=0444
-file path=usr/share/man/man9e/tran_tgt_free.9e mode=0444
-file path=usr/share/man/man9e/tran_tgt_init.9e mode=0444
-file path=usr/share/man/man9e/tran_tgt_probe.9e mode=0444
-file path=usr/share/man/man9e/write.9e mode=0444
-file path=usr/share/man/man9f/ASSERT.9f mode=0444
-file path=usr/share/man/man9f/Intro.9f mode=0444
-file path=usr/share/man/man9f/OTHERQ.9f mode=0444
-file path=usr/share/man/man9f/RD.9f mode=0444
-file path=usr/share/man/man9f/SAMESTR.9f mode=0444
-file path=usr/share/man/man9f/STRUCT_DECL.9f mode=0444
-file path=usr/share/man/man9f/WR.9f mode=0444
-file path=usr/share/man/man9f/adjmsg.9f mode=0444
-file path=usr/share/man/man9f/allocb.9f mode=0444
-file path=usr/share/man/man9f/atomic_add.9f mode=0444
-file path=usr/share/man/man9f/atomic_and.9f mode=0444
-file path=usr/share/man/man9f/atomic_bits.9f mode=0444
-file path=usr/share/man/man9f/atomic_cas.9f mode=0444
-file path=usr/share/man/man9f/atomic_dec.9f mode=0444
-file path=usr/share/man/man9f/atomic_inc.9f mode=0444
-file path=usr/share/man/man9f/atomic_ops.9f mode=0444
-file path=usr/share/man/man9f/atomic_or.9f mode=0444
-file path=usr/share/man/man9f/atomic_swap.9f mode=0444
-file path=usr/share/man/man9f/backq.9f mode=0444
-file path=usr/share/man/man9f/bcanput.9f mode=0444
-file path=usr/share/man/man9f/bcmp.9f mode=0444
-file path=usr/share/man/man9f/bcopy.9f mode=0444
-file path=usr/share/man/man9f/bioclone.9f mode=0444
-file path=usr/share/man/man9f/biodone.9f mode=0444
-file path=usr/share/man/man9f/bioerror.9f mode=0444
-file path=usr/share/man/man9f/biofini.9f mode=0444
-file path=usr/share/man/man9f/bioinit.9f mode=0444
-file path=usr/share/man/man9f/biomodified.9f mode=0444
-file path=usr/share/man/man9f/bioreset.9f mode=0444
-file path=usr/share/man/man9f/biosize.9f mode=0444
-file path=usr/share/man/man9f/biowait.9f mode=0444
-file path=usr/share/man/man9f/bp_copyin.9f mode=0444
-file path=usr/share/man/man9f/bp_copyout.9f mode=0444
-file path=usr/share/man/man9f/bp_mapin.9f mode=0444
-file path=usr/share/man/man9f/bp_mapout.9f mode=0444
-file path=usr/share/man/man9f/btop.9f mode=0444
-file path=usr/share/man/man9f/btopr.9f mode=0444
-file path=usr/share/man/man9f/bufcall.9f mode=0444
-file path=usr/share/man/man9f/bzero.9f mode=0444
-file path=usr/share/man/man9f/canput.9f mode=0444
-file path=usr/share/man/man9f/clrbuf.9f mode=0444
-file path=usr/share/man/man9f/cmn_err.9f mode=0444
-file path=usr/share/man/man9f/condvar.9f mode=0444
-file path=usr/share/man/man9f/copyb.9f mode=0444
-file path=usr/share/man/man9f/copyin.9f mode=0444
-file path=usr/share/man/man9f/copymsg.9f mode=0444
-file path=usr/share/man/man9f/copyout.9f mode=0444
-file path=usr/share/man/man9f/csx_AccessConfigurationRegister.9f mode=0444
-file path=usr/share/man/man9f/csx_CS_DDI_Info.9f mode=0444
-file path=usr/share/man/man9f/csx_ConvertSize.9f mode=0444
-file path=usr/share/man/man9f/csx_ConvertSpeed.9f mode=0444
-file path=usr/share/man/man9f/csx_DeregisterClient.9f mode=0444
-file path=usr/share/man/man9f/csx_DupHandle.9f mode=0444
-file path=usr/share/man/man9f/csx_Error2Text.9f mode=0444
-file path=usr/share/man/man9f/csx_Event2Text.9f mode=0444
-file path=usr/share/man/man9f/csx_FreeHandle.9f mode=0444
-file path=usr/share/man/man9f/csx_Get8.9f mode=0444
-file path=usr/share/man/man9f/csx_GetFirstClient.9f mode=0444
-file path=usr/share/man/man9f/csx_GetFirstTuple.9f mode=0444
-file path=usr/share/man/man9f/csx_GetHandleOffset.9f mode=0444
-file path=usr/share/man/man9f/csx_GetMappedAddr.9f mode=0444
-file path=usr/share/man/man9f/csx_GetStatus.9f mode=0444
-file path=usr/share/man/man9f/csx_GetTupleData.9f mode=0444
-file path=usr/share/man/man9f/csx_MakeDeviceNode.9f mode=0444
-file path=usr/share/man/man9f/csx_MapLogSocket.9f mode=0444
-file path=usr/share/man/man9f/csx_MapMemPage.9f mode=0444
-file path=usr/share/man/man9f/csx_ModifyConfiguration.9f mode=0444
-file path=usr/share/man/man9f/csx_ModifyWindow.9f mode=0444
-file path=usr/share/man/man9f/csx_ParseTuple.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_BATTERY.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_BYTEORDER.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_CFTABLE_ENTRY.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_CONFIG.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_DATE.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_DEVICE.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_DEVICEGEO.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_DEVICEGEO_A.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_FORMAT.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_FUNCE.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_FUNCID.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_GEOMETRY.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_JEDEC_C.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_LINKTARGET.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_LONGLINK_A.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_LONGLINK_MFC.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_MANFID.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_ORG.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_SPCL.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_SWIL.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_VERS_1.9f mode=0444
-file path=usr/share/man/man9f/csx_Parse_CISTPL_VERS_2.9f mode=0444
-file path=usr/share/man/man9f/csx_Put8.9f mode=0444
-file path=usr/share/man/man9f/csx_RegisterClient.9f mode=0444
-file path=usr/share/man/man9f/csx_ReleaseConfiguration.9f mode=0444
-file path=usr/share/man/man9f/csx_RepGet8.9f mode=0444
-file path=usr/share/man/man9f/csx_RepPut8.9f mode=0444
-file path=usr/share/man/man9f/csx_RequestConfiguration.9f mode=0444
-file path=usr/share/man/man9f/csx_RequestIO.9f mode=0444
-file path=usr/share/man/man9f/csx_RequestIRQ.9f mode=0444
-file path=usr/share/man/man9f/csx_RequestSocketMask.9f mode=0444
-file path=usr/share/man/man9f/csx_RequestWindow.9f mode=0444
-file path=usr/share/man/man9f/csx_ResetFunction.9f mode=0444
-file path=usr/share/man/man9f/csx_SetEventMask.9f mode=0444
-file path=usr/share/man/man9f/csx_SetHandleOffset.9f mode=0444
-file path=usr/share/man/man9f/csx_ValidateCIS.9f mode=0444
-file path=usr/share/man/man9f/datamsg.9f mode=0444
-file path=usr/share/man/man9f/ddi_add_event_handler.9f mode=0444
-file path=usr/share/man/man9f/ddi_add_intr.9f mode=0444
-file path=usr/share/man/man9f/ddi_add_softintr.9f mode=0444
-file path=usr/share/man/man9f/ddi_binding_name.9f mode=0444
-file path=usr/share/man/man9f/ddi_btop.9f mode=0444
-file path=usr/share/man/man9f/ddi_can_receive_sig.9f mode=0444
-file path=usr/share/man/man9f/ddi_cb_register.9f mode=0444
-file path=usr/share/man/man9f/ddi_check_acc_handle.9f mode=0444
-file path=usr/share/man/man9f/ddi_copyin.9f mode=0444
-file path=usr/share/man/man9f/ddi_copyout.9f mode=0444
-file path=usr/share/man/man9f/ddi_create_minor_node.9f mode=0444
-file path=usr/share/man/man9f/ddi_cred.9f mode=0444
-file path=usr/share/man/man9f/ddi_dev_is_needed.9f mode=0444
-file path=usr/share/man/man9f/ddi_dev_is_sid.9f mode=0444
-file path=usr/share/man/man9f/ddi_dev_nintrs.9f mode=0444
-file path=usr/share/man/man9f/ddi_dev_nregs.9f mode=0444
-file path=usr/share/man/man9f/ddi_dev_regsize.9f mode=0444
-file path=usr/share/man/man9f/ddi_dev_report_fault.9f mode=0444
-file path=usr/share/man/man9f/ddi_device_copy.9f mode=0444
-file path=usr/share/man/man9f/ddi_device_zero.9f mode=0444
-file path=usr/share/man/man9f/ddi_devid_compare.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_addr_bind_handle.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_addr_setup.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_alloc_handle.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_buf_bind_handle.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_buf_setup.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_burstsizes.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_coff.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_curwin.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_devalign.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_free.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_free_handle.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_get_attr.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_getwin.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_htoc.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_mem_alloc.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_mem_free.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_movwin.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_nextcookie.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_nextseg.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_nextwin.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_numwin.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_segtocookie.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_set_sbus64.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_setup.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_sync.9f mode=0444
-file path=usr/share/man/man9f/ddi_dma_unbind_handle.9f mode=0444
-file path=usr/share/man/man9f/ddi_dmae.9f mode=0444
-file path=usr/share/man/man9f/ddi_driver_major.9f mode=0444
-file path=usr/share/man/man9f/ddi_driver_name.9f mode=0444
-file path=usr/share/man/man9f/ddi_enter_critical.9f mode=0444
-file path=usr/share/man/man9f/ddi_ffs.9f mode=0444
-file path=usr/share/man/man9f/ddi_fm_acc_err_clear.9f mode=0444
-file path=usr/share/man/man9f/ddi_fm_acc_err_get.9f mode=0444
-file path=usr/share/man/man9f/ddi_fm_ereport_post.9f mode=0444
-file path=usr/share/man/man9f/ddi_fm_handler_register.9f mode=0444
-file path=usr/share/man/man9f/ddi_fm_init.9f mode=0444
-file path=usr/share/man/man9f/ddi_fm_service_impact.9f mode=0444
-file path=usr/share/man/man9f/ddi_get8.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_cred.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_devstate.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_driver_private.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_eventcookie.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_instance.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_kt_did.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_lbolt.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_parent.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_pid.9f mode=0444
-file path=usr/share/man/man9f/ddi_get_time.9f mode=0444
-file path=usr/share/man/man9f/ddi_getiminor.9f mode=0444
-file path=usr/share/man/man9f/ddi_in_panic.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_add_handler.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_add_softint.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_alloc.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_dup_handler.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_enable.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_get_cap.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_get_hilevel_pri.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_get_nintrs.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_get_pending.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_get_pri.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_get_supported_types.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_hilevel.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_set_mask.9f mode=0444
-file path=usr/share/man/man9f/ddi_intr_set_nreq.9f mode=0444
-file path=usr/share/man/man9f/ddi_io_get8.9f mode=0444
-file path=usr/share/man/man9f/ddi_io_put8.9f mode=0444
-file path=usr/share/man/man9f/ddi_io_rep_get8.9f mode=0444
-file path=usr/share/man/man9f/ddi_io_rep_put8.9f mode=0444
-file path=usr/share/man/man9f/ddi_iomin.9f mode=0444
-file path=usr/share/man/man9f/ddi_iopb_alloc.9f mode=0444
-file path=usr/share/man/man9f/ddi_log_sysevent.9f mode=0444
-file path=usr/share/man/man9f/ddi_map_regs.9f mode=0444
-file path=usr/share/man/man9f/ddi_mem_alloc.9f mode=0444
-file path=usr/share/man/man9f/ddi_mem_get8.9f mode=0444
-file path=usr/share/man/man9f/ddi_mem_put8.9f mode=0444
-file path=usr/share/man/man9f/ddi_mem_rep_get8.9f mode=0444
-file path=usr/share/man/man9f/ddi_mem_rep_put8.9f mode=0444
-file path=usr/share/man/man9f/ddi_mmap_get_model.9f mode=0444
-file path=usr/share/man/man9f/ddi_model_convert_from.9f mode=0444
-file path=usr/share/man/man9f/ddi_modopen.9f mode=0444
-file path=usr/share/man/man9f/ddi_no_info.9f mode=0444
-file path=usr/share/man/man9f/ddi_node_name.9f mode=0444
-file path=usr/share/man/man9f/ddi_peek.9f mode=0444
-file path=usr/share/man/man9f/ddi_periodic_add.9f mode=0444
-file path=usr/share/man/man9f/ddi_periodic_delete.9f mode=0444
-file path=usr/share/man/man9f/ddi_poke.9f mode=0444
-file path=usr/share/man/man9f/ddi_prop_create.9f mode=0444
-file path=usr/share/man/man9f/ddi_prop_exists.9f mode=0444
-file path=usr/share/man/man9f/ddi_prop_get_int.9f mode=0444
-file path=usr/share/man/man9f/ddi_prop_lookup.9f mode=0444
-file path=usr/share/man/man9f/ddi_prop_op.9f mode=0444
-file path=usr/share/man/man9f/ddi_prop_update.9f mode=0444
-file path=usr/share/man/man9f/ddi_put8.9f mode=0444
-file path=usr/share/man/man9f/ddi_regs_map_free.9f mode=0444
-file path=usr/share/man/man9f/ddi_regs_map_setup.9f mode=0444
-file path=usr/share/man/man9f/ddi_remove_event_handler.9f mode=0444
-file path=usr/share/man/man9f/ddi_remove_minor_node.9f mode=0444
-file path=usr/share/man/man9f/ddi_removing_power.9f mode=0444
-file path=usr/share/man/man9f/ddi_rep_get8.9f mode=0444
-file path=usr/share/man/man9f/ddi_rep_put8.9f mode=0444
-file path=usr/share/man/man9f/ddi_report_dev.9f mode=0444
-file path=usr/share/man/man9f/ddi_root_node.9f mode=0444
-file path=usr/share/man/man9f/ddi_segmap.9f mode=0444
-file path=usr/share/man/man9f/ddi_slaveonly.9f mode=0444
-file path=usr/share/man/man9f/ddi_soft_state.9f mode=0444
-file path=usr/share/man/man9f/ddi_strtol.9f mode=0444
-file path=usr/share/man/man9f/ddi_strtoll.9f mode=0444
-file path=usr/share/man/man9f/ddi_strtoul.9f mode=0444
-file path=usr/share/man/man9f/ddi_umem_alloc.9f mode=0444
-file path=usr/share/man/man9f/ddi_umem_iosetup.9f mode=0444
-file path=usr/share/man/man9f/ddi_umem_lock.9f mode=0444
-file path=usr/share/man/man9f/delay.9f mode=0444
-file path=usr/share/man/man9f/devmap_default_access.9f mode=0444
-file path=usr/share/man/man9f/devmap_devmem_setup.9f mode=0444
-file path=usr/share/man/man9f/devmap_do_ctxmgt.9f mode=0444
-file path=usr/share/man/man9f/devmap_set_ctx_timeout.9f mode=0444
-file path=usr/share/man/man9f/devmap_setup.9f mode=0444
-file path=usr/share/man/man9f/devmap_unload.9f mode=0444
-file path=usr/share/man/man9f/disksort.9f mode=0444
-file path=usr/share/man/man9f/dlbindack.9f mode=0444
-file path=usr/share/man/man9f/drv_getparm.9f mode=0444
-file path=usr/share/man/man9f/drv_hztousec.9f mode=0444
-file path=usr/share/man/man9f/drv_priv.9f mode=0444
-file path=usr/share/man/man9f/drv_usectohz.9f mode=0444
-file path=usr/share/man/man9f/drv_usecwait.9f mode=0444
-file path=usr/share/man/man9f/dupb.9f mode=0444
-file path=usr/share/man/man9f/dupmsg.9f mode=0444
-file path=usr/share/man/man9f/enableok.9f mode=0444
-file path=usr/share/man/man9f/esballoc.9f mode=0444
-file path=usr/share/man/man9f/esbbcall.9f mode=0444
-file path=usr/share/man/man9f/flushband.9f mode=0444
-file path=usr/share/man/man9f/flushq.9f mode=0444
-file path=usr/share/man/man9f/freeb.9f mode=0444
-file path=usr/share/man/man9f/freemsg.9f mode=0444
-file path=usr/share/man/man9f/freerbuf.9f mode=0444
-file path=usr/share/man/man9f/freezestr.9f mode=0444
-file path=usr/share/man/man9f/get_pktiopb.9f mode=0444
-file path=usr/share/man/man9f/geterror.9f mode=0444
-file path=usr/share/man/man9f/gethrtime.9f mode=0444
-file path=usr/share/man/man9f/getmajor.9f mode=0444
-file path=usr/share/man/man9f/getminor.9f mode=0444
-file path=usr/share/man/man9f/getq.9f mode=0444
-file path=usr/share/man/man9f/getrbuf.9f mode=0444
-file path=usr/share/man/man9f/gld.9f mode=0444
-file path=usr/share/man/man9f/hat_getkpfnum.9f mode=0444
-file path=usr/share/man/man9f/hook_alloc.9f mode=0444
-file path=usr/share/man/man9f/hook_free.9f mode=0444
-file path=usr/share/man/man9f/id32_alloc.9f mode=0444
-file path=usr/share/man/man9f/inb.9f mode=0444
-file path=usr/share/man/man9f/insq.9f mode=0444
-file path=usr/share/man/man9f/kiconv.9f mode=0444
-file path=usr/share/man/man9f/kiconv_close.9f mode=0444
-file path=usr/share/man/man9f/kiconv_open.9f mode=0444
-file path=usr/share/man/man9f/kiconvstr.9f mode=0444
-file path=usr/share/man/man9f/kmem_alloc.9f mode=0444
-file path=usr/share/man/man9f/kmem_cache_create.9f mode=0444
-file path=usr/share/man/man9f/kstat_create.9f mode=0444
-file path=usr/share/man/man9f/kstat_delete.9f mode=0444
-file path=usr/share/man/man9f/kstat_install.9f mode=0444
-file path=usr/share/man/man9f/kstat_named_init.9f mode=0444
-file path=usr/share/man/man9f/kstat_queue.9f mode=0444
-file path=usr/share/man/man9f/ldi_add_event_handler.9f mode=0444
-file path=usr/share/man/man9f/ldi_aread.9f mode=0444
-file path=usr/share/man/man9f/ldi_devmap.9f mode=0444
-file path=usr/share/man/man9f/ldi_dump.9f mode=0444
-file path=usr/share/man/man9f/ldi_ev_finalize.9f mode=0444
-file path=usr/share/man/man9f/ldi_ev_get_cookie.9f mode=0444
-file path=usr/share/man/man9f/ldi_ev_get_type.9f mode=0444
-file path=usr/share/man/man9f/ldi_ev_notify.9f mode=0444
-file path=usr/share/man/man9f/ldi_ev_register_callbacks.9f mode=0444
-file path=usr/share/man/man9f/ldi_ev_remove_callbacks.9f mode=0444
-file path=usr/share/man/man9f/ldi_get_dev.9f mode=0444
-file path=usr/share/man/man9f/ldi_get_eventcookie.9f mode=0444
-file path=usr/share/man/man9f/ldi_get_size.9f mode=0444
-file path=usr/share/man/man9f/ldi_ident_from_dev.9f mode=0444
-file path=usr/share/man/man9f/ldi_ioctl.9f mode=0444
-file path=usr/share/man/man9f/ldi_open_by_dev.9f mode=0444
-file path=usr/share/man/man9f/ldi_poll.9f mode=0444
-file path=usr/share/man/man9f/ldi_prop_exists.9f mode=0444
-file path=usr/share/man/man9f/ldi_prop_get_int.9f mode=0444
-file path=usr/share/man/man9f/ldi_prop_lookup_int_array.9f mode=0444
-file path=usr/share/man/man9f/ldi_putmsg.9f mode=0444
-file path=usr/share/man/man9f/ldi_read.9f mode=0444
-file path=usr/share/man/man9f/ldi_remove_event_handler.9f mode=0444
-file path=usr/share/man/man9f/ldi_strategy.9f mode=0444
-file path=usr/share/man/man9f/linkb.9f mode=0444
-file path=usr/share/man/man9f/list_create.9f mode=0444
-file path=usr/share/man/man9f/makecom.9f mode=0444
-file path=usr/share/man/man9f/makedevice.9f mode=0444
-file path=usr/share/man/man9f/max.9f mode=0444
-file path=usr/share/man/man9f/mcopyin.9f mode=0444
-file path=usr/share/man/man9f/mcopymsg.9f mode=0444
-file path=usr/share/man/man9f/mcopyout.9f mode=0444
-file path=usr/share/man/man9f/membar_ops.9f mode=0444
-file path=usr/share/man/man9f/memchr.9f mode=0444
-file path=usr/share/man/man9f/merror.9f mode=0444
-file path=usr/share/man/man9f/mexchange.9f mode=0444
-file path=usr/share/man/man9f/min.9f mode=0444
-file path=usr/share/man/man9f/mioc2ack.9f mode=0444
-file path=usr/share/man/man9f/miocack.9f mode=0444
-file path=usr/share/man/man9f/miocnak.9f mode=0444
-file path=usr/share/man/man9f/miocpullup.9f mode=0444
-file path=usr/share/man/man9f/mkiocb.9f mode=0444
-file path=usr/share/man/man9f/mod_install.9f mode=0444
-file path=usr/share/man/man9f/msgdsize.9f mode=0444
-file path=usr/share/man/man9f/msgpullup.9f mode=0444
-file path=usr/share/man/man9f/msgsize.9f mode=0444
-file path=usr/share/man/man9f/mt-streams.9f mode=0444
-file path=usr/share/man/man9f/mutex.9f mode=0444
-file path=usr/share/man/man9f/net_event_notify_register.9f mode=0444
-file path=usr/share/man/man9f/net_getifname.9f mode=0444
-file path=usr/share/man/man9f/net_getlifaddr.9f mode=0444
-file path=usr/share/man/man9f/net_getmtu.9f mode=0444
-file path=usr/share/man/man9f/net_getnetid.9f mode=0444
-file path=usr/share/man/man9f/net_getpmtuenabled.9f mode=0444
-file path=usr/share/man/man9f/net_hook_register.9f mode=0444
-file path=usr/share/man/man9f/net_hook_unregister.9f mode=0444
-file path=usr/share/man/man9f/net_inject.9f mode=0444
-file path=usr/share/man/man9f/net_inject_alloc.9f mode=0444
-file path=usr/share/man/man9f/net_inject_free.9f mode=0444
-file path=usr/share/man/man9f/net_instance_alloc.9f mode=0444
-file path=usr/share/man/man9f/net_instance_free.9f mode=0444
-file path=usr/share/man/man9f/net_instance_notify_register.9f mode=0444
-file path=usr/share/man/man9f/net_instance_register.9f mode=0444
-file path=usr/share/man/man9f/net_instance_unregister.9f mode=0444
-file path=usr/share/man/man9f/net_ispartialchecksum.9f mode=0444
-file path=usr/share/man/man9f/net_isvalidchecksum.9f mode=0444
-file path=usr/share/man/man9f/net_kstat_create.9f mode=0444
-file path=usr/share/man/man9f/net_kstat_delete.9f mode=0444
-file path=usr/share/man/man9f/net_lifgetnext.9f mode=0444
-file path=usr/share/man/man9f/net_netidtozonid.9f mode=0444
-file path=usr/share/man/man9f/net_phygetnext.9f mode=0444
-file path=usr/share/man/man9f/net_phylookup.9f mode=0444
-file path=usr/share/man/man9f/net_protocol_lookup.9f mode=0444
-file path=usr/share/man/man9f/net_protocol_notify_register.9f mode=0444
-file path=usr/share/man/man9f/net_protocol_release.9f mode=0444
-file path=usr/share/man/man9f/net_protocol_walk.9f mode=0444
-file path=usr/share/man/man9f/net_routeto.9f mode=0444
-file path=usr/share/man/man9f/net_zoneidtonetid.9f mode=0444
-file path=usr/share/man/man9f/netinfo.9f mode=0444
-file path=usr/share/man/man9f/nochpoll.9f mode=0444
-file path=usr/share/man/man9f/nodev.9f mode=0444
-file path=usr/share/man/man9f/noenable.9f mode=0444
-file path=usr/share/man/man9f/nulldev.9f mode=0444
-file path=usr/share/man/man9f/nvlist_add_boolean.9f mode=0444
-file path=usr/share/man/man9f/nvlist_alloc.9f mode=0444
-file path=usr/share/man/man9f/nvlist_lookup_boolean.9f mode=0444
-file path=usr/share/man/man9f/nvlist_lookup_nvpair.9f mode=0444
-file path=usr/share/man/man9f/nvlist_next_nvpair.9f mode=0444
-file path=usr/share/man/man9f/nvlist_remove.9f mode=0444
-file path=usr/share/man/man9f/nvpair_value_byte.9f mode=0444
-file path=usr/share/man/man9f/outb.9f mode=0444
-file path=usr/share/man/man9f/pci_config_get8.9f mode=0444
-file path=usr/share/man/man9f/pci_config_setup.9f mode=0444
-file path=usr/share/man/man9f/pci_ereport_setup.9f mode=0444
-file path=usr/share/man/man9f/pci_report_pmcap.9f mode=0444
-file path=usr/share/man/man9f/pci_save_config_regs.9f mode=0444
-file path=usr/share/man/man9f/physio.9f mode=0444
-file path=usr/share/man/man9f/pm_busy_component.9f mode=0444
-file path=usr/share/man/man9f/pm_power_has_changed.9f mode=0444
-file path=usr/share/man/man9f/pm_raise_power.9f mode=0444
-file path=usr/share/man/man9f/pm_trans_check.9f mode=0444
-file path=usr/share/man/man9f/pollwakeup.9f mode=0444
-file path=usr/share/man/man9f/priv_getbyname.9f mode=0444
-file path=usr/share/man/man9f/priv_policy.9f mode=0444
-file path=usr/share/man/man9f/proc_signal.9f mode=0444
-file path=usr/share/man/man9f/ptob.9f mode=0444
-file path=usr/share/man/man9f/pullupmsg.9f mode=0444
-file path=usr/share/man/man9f/put.9f mode=0444
-file path=usr/share/man/man9f/putbq.9f mode=0444
-file path=usr/share/man/man9f/putctl.9f mode=0444
-file path=usr/share/man/man9f/putctl1.9f mode=0444
-file path=usr/share/man/man9f/putnext.9f mode=0444
-file path=usr/share/man/man9f/putnextctl.9f mode=0444
-file path=usr/share/man/man9f/putnextctl1.9f mode=0444
-file path=usr/share/man/man9f/putq.9f mode=0444
-file path=usr/share/man/man9f/qassociate.9f mode=0444
-file path=usr/share/man/man9f/qbufcall.9f mode=0444
-file path=usr/share/man/man9f/qenable.9f mode=0444
-file path=usr/share/man/man9f/qprocson.9f mode=0444
-file path=usr/share/man/man9f/qreply.9f mode=0444
-file path=usr/share/man/man9f/qsize.9f mode=0444
-file path=usr/share/man/man9f/qtimeout.9f mode=0444
-file path=usr/share/man/man9f/qunbufcall.9f mode=0444
-file path=usr/share/man/man9f/quntimeout.9f mode=0444
-file path=usr/share/man/man9f/qwait.9f mode=0444
-file path=usr/share/man/man9f/qwriter.9f mode=0444
-file path=usr/share/man/man9f/rmalloc.9f mode=0444
-file path=usr/share/man/man9f/rmalloc_wait.9f mode=0444
-file path=usr/share/man/man9f/rmallocmap.9f mode=0444
-file path=usr/share/man/man9f/rmfree.9f mode=0444
-file path=usr/share/man/man9f/rmvb.9f mode=0444
-file path=usr/share/man/man9f/rmvq.9f mode=0444
-file path=usr/share/man/man9f/rwlock.9f mode=0444
-file path=usr/share/man/man9f/scsi_abort.9f mode=0444
-file path=usr/share/man/man9f/scsi_alloc_consistent_buf.9f mode=0444
-file path=usr/share/man/man9f/scsi_cname.9f mode=0444
-file path=usr/share/man/man9f/scsi_destroy_pkt.9f mode=0444
-file path=usr/share/man/man9f/scsi_dmaget.9f mode=0444
-file path=usr/share/man/man9f/scsi_errmsg.9f mode=0444
-file path=usr/share/man/man9f/scsi_ext_sense_fields.9f mode=0444
-file path=usr/share/man/man9f/scsi_find_sense_descr.9f mode=0444
-file path=usr/share/man/man9f/scsi_free_consistent_buf.9f mode=0444
-file path=usr/share/man/man9f/scsi_get_device_type_scsi_options.9f mode=0444
-file path=usr/share/man/man9f/scsi_get_device_type_string.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_attach_setup.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_init.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_lookup_capstr.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_pkt_alloc.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_pkt_comp.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_probe.9f mode=0444
-file path=usr/share/man/man9f/scsi_hba_tran_alloc.9f mode=0444
-file path=usr/share/man/man9f/scsi_ifgetcap.9f mode=0444
-file path=usr/share/man/man9f/scsi_init_pkt.9f mode=0444
-file path=usr/share/man/man9f/scsi_log.9f mode=0444
-file path=usr/share/man/man9f/scsi_pktalloc.9f mode=0444
-file path=usr/share/man/man9f/scsi_poll.9f mode=0444
-file path=usr/share/man/man9f/scsi_probe.9f mode=0444
-file path=usr/share/man/man9f/scsi_reset.9f mode=0444
-file path=usr/share/man/man9f/scsi_reset_notify.9f mode=0444
-file path=usr/share/man/man9f/scsi_sense_key.9f mode=0444
-file path=usr/share/man/man9f/scsi_setup_cdb.9f mode=0444
-file path=usr/share/man/man9f/scsi_slave.9f mode=0444
-file path=usr/share/man/man9f/scsi_sync_pkt.9f mode=0444
-file path=usr/share/man/man9f/scsi_transport.9f mode=0444
-file path=usr/share/man/man9f/scsi_unprobe.9f mode=0444
-file path=usr/share/man/man9f/scsi_validate_sense.9f mode=0444
-file path=usr/share/man/man9f/scsi_vu_errmsg.9f mode=0444
-file path=usr/share/man/man9f/semaphore.9f mode=0444
-file path=usr/share/man/man9f/stoi.9f mode=0444
-file path=usr/share/man/man9f/string.9f mode=0444
-file path=usr/share/man/man9f/strlog.9f mode=0444
-file path=usr/share/man/man9f/strqget.9f mode=0444
-file path=usr/share/man/man9f/strqset.9f mode=0444
-file path=usr/share/man/man9f/swab.9f mode=0444
-file path=usr/share/man/man9f/taskq.9f mode=0444
-file path=usr/share/man/man9f/testb.9f mode=0444
-file path=usr/share/man/man9f/timeout.9f mode=0444
+file path=usr/share/man/man9e/detach.9e
+file path=usr/share/man/man9e/devmap.9e
+file path=usr/share/man/man9e/devmap_access.9e
+file path=usr/share/man/man9e/devmap_contextmgt.9e
+file path=usr/share/man/man9e/devmap_dup.9e
+file path=usr/share/man/man9e/devmap_map.9e
+file path=usr/share/man/man9e/devmap_unmap.9e
+file path=usr/share/man/man9e/dump.9e
+file path=usr/share/man/man9e/getinfo.9e
+file path=usr/share/man/man9e/gld.9e
+file path=usr/share/man/man9e/identify.9e
+file path=usr/share/man/man9e/ioctl.9e
+file path=usr/share/man/man9e/ks_snapshot.9e
+file path=usr/share/man/man9e/ks_update.9e
+file path=usr/share/man/man9e/mmap.9e
+file path=usr/share/man/man9e/open.9e
+file path=usr/share/man/man9e/power.9e
+file path=usr/share/man/man9e/print.9e
+file path=usr/share/man/man9e/probe.9e
+file path=usr/share/man/man9e/prop_op.9e
+file path=usr/share/man/man9e/put.9e
+file path=usr/share/man/man9e/quiesce.9e
+file path=usr/share/man/man9e/read.9e
+file path=usr/share/man/man9e/segmap.9e
+file path=usr/share/man/man9e/srv.9e
+file path=usr/share/man/man9e/strategy.9e
+file path=usr/share/man/man9e/tran_abort.9e
+file path=usr/share/man/man9e/tran_bus_reset.9e
+file path=usr/share/man/man9e/tran_dmafree.9e
+file path=usr/share/man/man9e/tran_getcap.9e
+file path=usr/share/man/man9e/tran_init_pkt.9e
+file path=usr/share/man/man9e/tran_quiesce.9e
+file path=usr/share/man/man9e/tran_reset.9e
+file path=usr/share/man/man9e/tran_reset_notify.9e
+file path=usr/share/man/man9e/tran_setup_pkt.9e
+file path=usr/share/man/man9e/tran_start.9e
+file path=usr/share/man/man9e/tran_sync_pkt.9e
+file path=usr/share/man/man9e/tran_tgt_free.9e
+file path=usr/share/man/man9e/tran_tgt_init.9e
+file path=usr/share/man/man9e/tran_tgt_probe.9e
+file path=usr/share/man/man9e/write.9e
+file path=usr/share/man/man9f/ASSERT.9f
+file path=usr/share/man/man9f/Intro.9f
+file path=usr/share/man/man9f/OTHERQ.9f
+file path=usr/share/man/man9f/RD.9f
+file path=usr/share/man/man9f/SAMESTR.9f
+file path=usr/share/man/man9f/STRUCT_DECL.9f
+file path=usr/share/man/man9f/WR.9f
+file path=usr/share/man/man9f/adjmsg.9f
+file path=usr/share/man/man9f/allocb.9f
+file path=usr/share/man/man9f/atomic_add.9f
+file path=usr/share/man/man9f/atomic_and.9f
+file path=usr/share/man/man9f/atomic_bits.9f
+file path=usr/share/man/man9f/atomic_cas.9f
+file path=usr/share/man/man9f/atomic_dec.9f
+file path=usr/share/man/man9f/atomic_inc.9f
+file path=usr/share/man/man9f/atomic_ops.9f
+file path=usr/share/man/man9f/atomic_or.9f
+file path=usr/share/man/man9f/atomic_swap.9f
+file path=usr/share/man/man9f/backq.9f
+file path=usr/share/man/man9f/bcanput.9f
+file path=usr/share/man/man9f/bcmp.9f
+file path=usr/share/man/man9f/bcopy.9f
+file path=usr/share/man/man9f/bioclone.9f
+file path=usr/share/man/man9f/biodone.9f
+file path=usr/share/man/man9f/bioerror.9f
+file path=usr/share/man/man9f/biofini.9f
+file path=usr/share/man/man9f/bioinit.9f
+file path=usr/share/man/man9f/biomodified.9f
+file path=usr/share/man/man9f/bioreset.9f
+file path=usr/share/man/man9f/biosize.9f
+file path=usr/share/man/man9f/biowait.9f
+file path=usr/share/man/man9f/bp_copyin.9f
+file path=usr/share/man/man9f/bp_copyout.9f
+file path=usr/share/man/man9f/bp_mapin.9f
+file path=usr/share/man/man9f/bp_mapout.9f
+file path=usr/share/man/man9f/btop.9f
+file path=usr/share/man/man9f/btopr.9f
+file path=usr/share/man/man9f/bufcall.9f
+file path=usr/share/man/man9f/bzero.9f
+file path=usr/share/man/man9f/canput.9f
+file path=usr/share/man/man9f/clrbuf.9f
+file path=usr/share/man/man9f/cmn_err.9f
+file path=usr/share/man/man9f/condvar.9f
+file path=usr/share/man/man9f/copyb.9f
+file path=usr/share/man/man9f/copyin.9f
+file path=usr/share/man/man9f/copymsg.9f
+file path=usr/share/man/man9f/copyout.9f
+file path=usr/share/man/man9f/csx_AccessConfigurationRegister.9f
+file path=usr/share/man/man9f/csx_CS_DDI_Info.9f
+file path=usr/share/man/man9f/csx_ConvertSize.9f
+file path=usr/share/man/man9f/csx_ConvertSpeed.9f
+file path=usr/share/man/man9f/csx_DeregisterClient.9f
+file path=usr/share/man/man9f/csx_DupHandle.9f
+file path=usr/share/man/man9f/csx_Error2Text.9f
+file path=usr/share/man/man9f/csx_Event2Text.9f
+file path=usr/share/man/man9f/csx_FreeHandle.9f
+file path=usr/share/man/man9f/csx_Get8.9f
+file path=usr/share/man/man9f/csx_GetFirstClient.9f
+file path=usr/share/man/man9f/csx_GetFirstTuple.9f
+file path=usr/share/man/man9f/csx_GetHandleOffset.9f
+file path=usr/share/man/man9f/csx_GetMappedAddr.9f
+file path=usr/share/man/man9f/csx_GetStatus.9f
+file path=usr/share/man/man9f/csx_GetTupleData.9f
+file path=usr/share/man/man9f/csx_MakeDeviceNode.9f
+file path=usr/share/man/man9f/csx_MapLogSocket.9f
+file path=usr/share/man/man9f/csx_MapMemPage.9f
+file path=usr/share/man/man9f/csx_ModifyConfiguration.9f
+file path=usr/share/man/man9f/csx_ModifyWindow.9f
+file path=usr/share/man/man9f/csx_ParseTuple.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_BATTERY.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_BYTEORDER.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_CFTABLE_ENTRY.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_CONFIG.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_DATE.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_DEVICE.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_DEVICEGEO.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_DEVICEGEO_A.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_FORMAT.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_FUNCE.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_FUNCID.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_GEOMETRY.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_JEDEC_C.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_LINKTARGET.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_LONGLINK_A.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_LONGLINK_MFC.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_MANFID.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_ORG.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_SPCL.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_SWIL.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_VERS_1.9f
+file path=usr/share/man/man9f/csx_Parse_CISTPL_VERS_2.9f
+file path=usr/share/man/man9f/csx_Put8.9f
+file path=usr/share/man/man9f/csx_RegisterClient.9f
+file path=usr/share/man/man9f/csx_ReleaseConfiguration.9f
+file path=usr/share/man/man9f/csx_RepGet8.9f
+file path=usr/share/man/man9f/csx_RepPut8.9f
+file path=usr/share/man/man9f/csx_RequestConfiguration.9f
+file path=usr/share/man/man9f/csx_RequestIO.9f
+file path=usr/share/man/man9f/csx_RequestIRQ.9f
+file path=usr/share/man/man9f/csx_RequestSocketMask.9f
+file path=usr/share/man/man9f/csx_RequestWindow.9f
+file path=usr/share/man/man9f/csx_ResetFunction.9f
+file path=usr/share/man/man9f/csx_SetEventMask.9f
+file path=usr/share/man/man9f/csx_SetHandleOffset.9f
+file path=usr/share/man/man9f/csx_ValidateCIS.9f
+file path=usr/share/man/man9f/datamsg.9f
+file path=usr/share/man/man9f/ddi_add_event_handler.9f
+file path=usr/share/man/man9f/ddi_add_intr.9f
+file path=usr/share/man/man9f/ddi_add_softintr.9f
+file path=usr/share/man/man9f/ddi_binding_name.9f
+file path=usr/share/man/man9f/ddi_btop.9f
+file path=usr/share/man/man9f/ddi_can_receive_sig.9f
+file path=usr/share/man/man9f/ddi_cb_register.9f
+file path=usr/share/man/man9f/ddi_check_acc_handle.9f
+file path=usr/share/man/man9f/ddi_copyin.9f
+file path=usr/share/man/man9f/ddi_copyout.9f
+file path=usr/share/man/man9f/ddi_create_minor_node.9f
+file path=usr/share/man/man9f/ddi_cred.9f
+file path=usr/share/man/man9f/ddi_dev_is_needed.9f
+file path=usr/share/man/man9f/ddi_dev_is_sid.9f
+file path=usr/share/man/man9f/ddi_dev_nintrs.9f
+file path=usr/share/man/man9f/ddi_dev_nregs.9f
+file path=usr/share/man/man9f/ddi_dev_regsize.9f
+file path=usr/share/man/man9f/ddi_dev_report_fault.9f
+file path=usr/share/man/man9f/ddi_device_copy.9f
+file path=usr/share/man/man9f/ddi_device_zero.9f
+file path=usr/share/man/man9f/ddi_devid_compare.9f
+file path=usr/share/man/man9f/ddi_dma_addr_bind_handle.9f
+file path=usr/share/man/man9f/ddi_dma_addr_setup.9f
+file path=usr/share/man/man9f/ddi_dma_alloc_handle.9f
+file path=usr/share/man/man9f/ddi_dma_buf_bind_handle.9f
+file path=usr/share/man/man9f/ddi_dma_buf_setup.9f
+file path=usr/share/man/man9f/ddi_dma_burstsizes.9f
+file path=usr/share/man/man9f/ddi_dma_coff.9f
+file path=usr/share/man/man9f/ddi_dma_curwin.9f
+file path=usr/share/man/man9f/ddi_dma_devalign.9f
+file path=usr/share/man/man9f/ddi_dma_free.9f
+file path=usr/share/man/man9f/ddi_dma_free_handle.9f
+file path=usr/share/man/man9f/ddi_dma_get_attr.9f
+file path=usr/share/man/man9f/ddi_dma_getwin.9f
+file path=usr/share/man/man9f/ddi_dma_htoc.9f
+file path=usr/share/man/man9f/ddi_dma_mem_alloc.9f
+file path=usr/share/man/man9f/ddi_dma_mem_free.9f
+file path=usr/share/man/man9f/ddi_dma_movwin.9f
+file path=usr/share/man/man9f/ddi_dma_nextcookie.9f
+file path=usr/share/man/man9f/ddi_dma_nextseg.9f
+file path=usr/share/man/man9f/ddi_dma_nextwin.9f
+file path=usr/share/man/man9f/ddi_dma_numwin.9f
+file path=usr/share/man/man9f/ddi_dma_segtocookie.9f
+file path=usr/share/man/man9f/ddi_dma_set_sbus64.9f
+file path=usr/share/man/man9f/ddi_dma_setup.9f
+file path=usr/share/man/man9f/ddi_dma_sync.9f
+file path=usr/share/man/man9f/ddi_dma_unbind_handle.9f
+file path=usr/share/man/man9f/ddi_dmae.9f
+file path=usr/share/man/man9f/ddi_driver_major.9f
+file path=usr/share/man/man9f/ddi_driver_name.9f
+file path=usr/share/man/man9f/ddi_enter_critical.9f
+file path=usr/share/man/man9f/ddi_ffs.9f
+file path=usr/share/man/man9f/ddi_fm_acc_err_clear.9f
+file path=usr/share/man/man9f/ddi_fm_acc_err_get.9f
+file path=usr/share/man/man9f/ddi_fm_ereport_post.9f
+file path=usr/share/man/man9f/ddi_fm_handler_register.9f
+file path=usr/share/man/man9f/ddi_fm_init.9f
+file path=usr/share/man/man9f/ddi_fm_service_impact.9f
+file path=usr/share/man/man9f/ddi_get8.9f
+file path=usr/share/man/man9f/ddi_get_cred.9f
+file path=usr/share/man/man9f/ddi_get_devstate.9f
+file path=usr/share/man/man9f/ddi_get_driver_private.9f
+file path=usr/share/man/man9f/ddi_get_eventcookie.9f
+file path=usr/share/man/man9f/ddi_get_instance.9f
+file path=usr/share/man/man9f/ddi_get_kt_did.9f
+file path=usr/share/man/man9f/ddi_get_lbolt.9f
+file path=usr/share/man/man9f/ddi_get_parent.9f
+file path=usr/share/man/man9f/ddi_get_pid.9f
+file path=usr/share/man/man9f/ddi_get_time.9f
+file path=usr/share/man/man9f/ddi_getiminor.9f
+file path=usr/share/man/man9f/ddi_in_panic.9f
+file path=usr/share/man/man9f/ddi_intr_add_handler.9f
+file path=usr/share/man/man9f/ddi_intr_add_softint.9f
+file path=usr/share/man/man9f/ddi_intr_alloc.9f
+file path=usr/share/man/man9f/ddi_intr_dup_handler.9f
+file path=usr/share/man/man9f/ddi_intr_enable.9f
+file path=usr/share/man/man9f/ddi_intr_get_cap.9f
+file path=usr/share/man/man9f/ddi_intr_get_hilevel_pri.9f
+file path=usr/share/man/man9f/ddi_intr_get_nintrs.9f
+file path=usr/share/man/man9f/ddi_intr_get_pending.9f
+file path=usr/share/man/man9f/ddi_intr_get_pri.9f
+file path=usr/share/man/man9f/ddi_intr_get_supported_types.9f
+file path=usr/share/man/man9f/ddi_intr_hilevel.9f
+file path=usr/share/man/man9f/ddi_intr_set_mask.9f
+file path=usr/share/man/man9f/ddi_intr_set_nreq.9f
+file path=usr/share/man/man9f/ddi_io_get8.9f
+file path=usr/share/man/man9f/ddi_io_put8.9f
+file path=usr/share/man/man9f/ddi_io_rep_get8.9f
+file path=usr/share/man/man9f/ddi_io_rep_put8.9f
+file path=usr/share/man/man9f/ddi_iomin.9f
+file path=usr/share/man/man9f/ddi_iopb_alloc.9f
+file path=usr/share/man/man9f/ddi_log_sysevent.9f
+file path=usr/share/man/man9f/ddi_map_regs.9f
+file path=usr/share/man/man9f/ddi_mem_alloc.9f
+file path=usr/share/man/man9f/ddi_mem_get8.9f
+file path=usr/share/man/man9f/ddi_mem_put8.9f
+file path=usr/share/man/man9f/ddi_mem_rep_get8.9f
+file path=usr/share/man/man9f/ddi_mem_rep_put8.9f
+file path=usr/share/man/man9f/ddi_mmap_get_model.9f
+file path=usr/share/man/man9f/ddi_model_convert_from.9f
+file path=usr/share/man/man9f/ddi_modopen.9f
+file path=usr/share/man/man9f/ddi_no_info.9f
+file path=usr/share/man/man9f/ddi_node_name.9f
+file path=usr/share/man/man9f/ddi_peek.9f
+file path=usr/share/man/man9f/ddi_periodic_add.9f
+file path=usr/share/man/man9f/ddi_periodic_delete.9f
+file path=usr/share/man/man9f/ddi_poke.9f
+file path=usr/share/man/man9f/ddi_prop_create.9f
+file path=usr/share/man/man9f/ddi_prop_exists.9f
+file path=usr/share/man/man9f/ddi_prop_get_int.9f
+file path=usr/share/man/man9f/ddi_prop_lookup.9f
+file path=usr/share/man/man9f/ddi_prop_op.9f
+file path=usr/share/man/man9f/ddi_prop_update.9f
+file path=usr/share/man/man9f/ddi_put8.9f
+file path=usr/share/man/man9f/ddi_regs_map_free.9f
+file path=usr/share/man/man9f/ddi_regs_map_setup.9f
+file path=usr/share/man/man9f/ddi_remove_event_handler.9f
+file path=usr/share/man/man9f/ddi_remove_minor_node.9f
+file path=usr/share/man/man9f/ddi_removing_power.9f
+file path=usr/share/man/man9f/ddi_rep_get8.9f
+file path=usr/share/man/man9f/ddi_rep_put8.9f
+file path=usr/share/man/man9f/ddi_report_dev.9f
+file path=usr/share/man/man9f/ddi_root_node.9f
+file path=usr/share/man/man9f/ddi_segmap.9f
+file path=usr/share/man/man9f/ddi_slaveonly.9f
+file path=usr/share/man/man9f/ddi_soft_state.9f
+file path=usr/share/man/man9f/ddi_strtol.9f
+file path=usr/share/man/man9f/ddi_strtoll.9f
+file path=usr/share/man/man9f/ddi_strtoul.9f
+file path=usr/share/man/man9f/ddi_umem_alloc.9f
+file path=usr/share/man/man9f/ddi_umem_iosetup.9f
+file path=usr/share/man/man9f/ddi_umem_lock.9f
+file path=usr/share/man/man9f/delay.9f
+file path=usr/share/man/man9f/devmap_default_access.9f
+file path=usr/share/man/man9f/devmap_devmem_setup.9f
+file path=usr/share/man/man9f/devmap_do_ctxmgt.9f
+file path=usr/share/man/man9f/devmap_set_ctx_timeout.9f
+file path=usr/share/man/man9f/devmap_setup.9f
+file path=usr/share/man/man9f/devmap_unload.9f
+file path=usr/share/man/man9f/disksort.9f
+file path=usr/share/man/man9f/dlbindack.9f
+file path=usr/share/man/man9f/drv_getparm.9f
+file path=usr/share/man/man9f/drv_hztousec.9f
+file path=usr/share/man/man9f/drv_priv.9f
+file path=usr/share/man/man9f/drv_usectohz.9f
+file path=usr/share/man/man9f/drv_usecwait.9f
+file path=usr/share/man/man9f/dupb.9f
+file path=usr/share/man/man9f/dupmsg.9f
+file path=usr/share/man/man9f/enableok.9f
+file path=usr/share/man/man9f/esballoc.9f
+file path=usr/share/man/man9f/esbbcall.9f
+file path=usr/share/man/man9f/flushband.9f
+file path=usr/share/man/man9f/flushq.9f
+file path=usr/share/man/man9f/freeb.9f
+file path=usr/share/man/man9f/freemsg.9f
+file path=usr/share/man/man9f/freerbuf.9f
+file path=usr/share/man/man9f/freezestr.9f
+file path=usr/share/man/man9f/get_pktiopb.9f
+file path=usr/share/man/man9f/geterror.9f
+file path=usr/share/man/man9f/gethrtime.9f
+file path=usr/share/man/man9f/getmajor.9f
+file path=usr/share/man/man9f/getminor.9f
+file path=usr/share/man/man9f/getq.9f
+file path=usr/share/man/man9f/getrbuf.9f
+file path=usr/share/man/man9f/gld.9f
+file path=usr/share/man/man9f/hat_getkpfnum.9f
+file path=usr/share/man/man9f/hook_alloc.9f
+file path=usr/share/man/man9f/hook_free.9f
+file path=usr/share/man/man9f/id32_alloc.9f
+file path=usr/share/man/man9f/inb.9f
+file path=usr/share/man/man9f/insq.9f
+file path=usr/share/man/man9f/kiconv.9f
+file path=usr/share/man/man9f/kiconv_close.9f
+file path=usr/share/man/man9f/kiconv_open.9f
+file path=usr/share/man/man9f/kiconvstr.9f
+file path=usr/share/man/man9f/kmem_alloc.9f
+file path=usr/share/man/man9f/kmem_cache_create.9f
+file path=usr/share/man/man9f/kstat_create.9f
+file path=usr/share/man/man9f/kstat_delete.9f
+file path=usr/share/man/man9f/kstat_install.9f
+file path=usr/share/man/man9f/kstat_named_init.9f
+file path=usr/share/man/man9f/kstat_queue.9f
+file path=usr/share/man/man9f/ldi_add_event_handler.9f
+file path=usr/share/man/man9f/ldi_aread.9f
+file path=usr/share/man/man9f/ldi_devmap.9f
+file path=usr/share/man/man9f/ldi_dump.9f
+file path=usr/share/man/man9f/ldi_ev_finalize.9f
+file path=usr/share/man/man9f/ldi_ev_get_cookie.9f
+file path=usr/share/man/man9f/ldi_ev_get_type.9f
+file path=usr/share/man/man9f/ldi_ev_notify.9f
+file path=usr/share/man/man9f/ldi_ev_register_callbacks.9f
+file path=usr/share/man/man9f/ldi_ev_remove_callbacks.9f
+file path=usr/share/man/man9f/ldi_get_dev.9f
+file path=usr/share/man/man9f/ldi_get_eventcookie.9f
+file path=usr/share/man/man9f/ldi_get_size.9f
+file path=usr/share/man/man9f/ldi_ident_from_dev.9f
+file path=usr/share/man/man9f/ldi_ioctl.9f
+file path=usr/share/man/man9f/ldi_open_by_dev.9f
+file path=usr/share/man/man9f/ldi_poll.9f
+file path=usr/share/man/man9f/ldi_prop_exists.9f
+file path=usr/share/man/man9f/ldi_prop_get_int.9f
+file path=usr/share/man/man9f/ldi_prop_lookup_int_array.9f
+file path=usr/share/man/man9f/ldi_putmsg.9f
+file path=usr/share/man/man9f/ldi_read.9f
+file path=usr/share/man/man9f/ldi_remove_event_handler.9f
+file path=usr/share/man/man9f/ldi_strategy.9f
+file path=usr/share/man/man9f/linkb.9f
+file path=usr/share/man/man9f/list_create.9f
+file path=usr/share/man/man9f/makecom.9f
+file path=usr/share/man/man9f/makedevice.9f
+file path=usr/share/man/man9f/max.9f
+file path=usr/share/man/man9f/mcopyin.9f
+file path=usr/share/man/man9f/mcopymsg.9f
+file path=usr/share/man/man9f/mcopyout.9f
+file path=usr/share/man/man9f/membar_ops.9f
+file path=usr/share/man/man9f/memchr.9f
+file path=usr/share/man/man9f/merror.9f
+file path=usr/share/man/man9f/mexchange.9f
+file path=usr/share/man/man9f/min.9f
+file path=usr/share/man/man9f/mioc2ack.9f
+file path=usr/share/man/man9f/miocack.9f
+file path=usr/share/man/man9f/miocnak.9f
+file path=usr/share/man/man9f/miocpullup.9f
+file path=usr/share/man/man9f/mkiocb.9f
+file path=usr/share/man/man9f/mod_install.9f
+file path=usr/share/man/man9f/msgdsize.9f
+file path=usr/share/man/man9f/msgpullup.9f
+file path=usr/share/man/man9f/msgsize.9f
+file path=usr/share/man/man9f/mt-streams.9f
+file path=usr/share/man/man9f/mutex.9f
+file path=usr/share/man/man9f/net_event_notify_register.9f
+file path=usr/share/man/man9f/net_getifname.9f
+file path=usr/share/man/man9f/net_getlifaddr.9f
+file path=usr/share/man/man9f/net_getmtu.9f
+file path=usr/share/man/man9f/net_getnetid.9f
+file path=usr/share/man/man9f/net_getpmtuenabled.9f
+file path=usr/share/man/man9f/net_hook_register.9f
+file path=usr/share/man/man9f/net_hook_unregister.9f
+file path=usr/share/man/man9f/net_inject.9f
+file path=usr/share/man/man9f/net_inject_alloc.9f
+file path=usr/share/man/man9f/net_inject_free.9f
+file path=usr/share/man/man9f/net_instance_alloc.9f
+file path=usr/share/man/man9f/net_instance_free.9f
+file path=usr/share/man/man9f/net_instance_notify_register.9f
+file path=usr/share/man/man9f/net_instance_register.9f
+file path=usr/share/man/man9f/net_instance_unregister.9f
+file path=usr/share/man/man9f/net_ispartialchecksum.9f
+file path=usr/share/man/man9f/net_isvalidchecksum.9f
+file path=usr/share/man/man9f/net_kstat_create.9f
+file path=usr/share/man/man9f/net_kstat_delete.9f
+file path=usr/share/man/man9f/net_lifgetnext.9f
+file path=usr/share/man/man9f/net_netidtozonid.9f
+file path=usr/share/man/man9f/net_phygetnext.9f
+file path=usr/share/man/man9f/net_phylookup.9f
+file path=usr/share/man/man9f/net_protocol_lookup.9f
+file path=usr/share/man/man9f/net_protocol_notify_register.9f
+file path=usr/share/man/man9f/net_protocol_release.9f
+file path=usr/share/man/man9f/net_protocol_walk.9f
+file path=usr/share/man/man9f/net_routeto.9f
+file path=usr/share/man/man9f/net_zoneidtonetid.9f
+file path=usr/share/man/man9f/netinfo.9f
+file path=usr/share/man/man9f/nochpoll.9f
+file path=usr/share/man/man9f/nodev.9f
+file path=usr/share/man/man9f/noenable.9f
+file path=usr/share/man/man9f/nulldev.9f
+file path=usr/share/man/man9f/nvlist_add_boolean.9f
+file path=usr/share/man/man9f/nvlist_alloc.9f
+file path=usr/share/man/man9f/nvlist_lookup_boolean.9f
+file path=usr/share/man/man9f/nvlist_lookup_nvpair.9f
+file path=usr/share/man/man9f/nvlist_next_nvpair.9f
+file path=usr/share/man/man9f/nvlist_remove.9f
+file path=usr/share/man/man9f/nvpair_value_byte.9f
+file path=usr/share/man/man9f/outb.9f
+file path=usr/share/man/man9f/pci_config_get8.9f
+file path=usr/share/man/man9f/pci_config_setup.9f
+file path=usr/share/man/man9f/pci_ereport_setup.9f
+file path=usr/share/man/man9f/pci_report_pmcap.9f
+file path=usr/share/man/man9f/pci_save_config_regs.9f
+file path=usr/share/man/man9f/physio.9f
+file path=usr/share/man/man9f/pm_busy_component.9f
+file path=usr/share/man/man9f/pm_power_has_changed.9f
+file path=usr/share/man/man9f/pm_raise_power.9f
+file path=usr/share/man/man9f/pm_trans_check.9f
+file path=usr/share/man/man9f/pollwakeup.9f
+file path=usr/share/man/man9f/priv_getbyname.9f
+file path=usr/share/man/man9f/priv_policy.9f
+file path=usr/share/man/man9f/proc_signal.9f
+file path=usr/share/man/man9f/ptob.9f
+file path=usr/share/man/man9f/pullupmsg.9f
+file path=usr/share/man/man9f/put.9f
+file path=usr/share/man/man9f/putbq.9f
+file path=usr/share/man/man9f/putctl.9f
+file path=usr/share/man/man9f/putctl1.9f
+file path=usr/share/man/man9f/putnext.9f
+file path=usr/share/man/man9f/putnextctl.9f
+file path=usr/share/man/man9f/putnextctl1.9f
+file path=usr/share/man/man9f/putq.9f
+file path=usr/share/man/man9f/qassociate.9f
+file path=usr/share/man/man9f/qbufcall.9f
+file path=usr/share/man/man9f/qenable.9f
+file path=usr/share/man/man9f/qprocson.9f
+file path=usr/share/man/man9f/qreply.9f
+file path=usr/share/man/man9f/qsize.9f
+file path=usr/share/man/man9f/qtimeout.9f
+file path=usr/share/man/man9f/qunbufcall.9f
+file path=usr/share/man/man9f/quntimeout.9f
+file path=usr/share/man/man9f/qwait.9f
+file path=usr/share/man/man9f/qwriter.9f
+file path=usr/share/man/man9f/rmalloc.9f
+file path=usr/share/man/man9f/rmalloc_wait.9f
+file path=usr/share/man/man9f/rmallocmap.9f
+file path=usr/share/man/man9f/rmfree.9f
+file path=usr/share/man/man9f/rmvb.9f
+file path=usr/share/man/man9f/rmvq.9f
+file path=usr/share/man/man9f/rwlock.9f
+file path=usr/share/man/man9f/scsi_abort.9f
+file path=usr/share/man/man9f/scsi_alloc_consistent_buf.9f
+file path=usr/share/man/man9f/scsi_cname.9f
+file path=usr/share/man/man9f/scsi_destroy_pkt.9f
+file path=usr/share/man/man9f/scsi_dmaget.9f
+file path=usr/share/man/man9f/scsi_errmsg.9f
+file path=usr/share/man/man9f/scsi_ext_sense_fields.9f
+file path=usr/share/man/man9f/scsi_find_sense_descr.9f
+file path=usr/share/man/man9f/scsi_free_consistent_buf.9f
+file path=usr/share/man/man9f/scsi_get_device_type_scsi_options.9f
+file path=usr/share/man/man9f/scsi_get_device_type_string.9f
+file path=usr/share/man/man9f/scsi_hba_attach_setup.9f
+file path=usr/share/man/man9f/scsi_hba_init.9f
+file path=usr/share/man/man9f/scsi_hba_lookup_capstr.9f
+file path=usr/share/man/man9f/scsi_hba_pkt_alloc.9f
+file path=usr/share/man/man9f/scsi_hba_pkt_comp.9f
+file path=usr/share/man/man9f/scsi_hba_probe.9f
+file path=usr/share/man/man9f/scsi_hba_tran_alloc.9f
+file path=usr/share/man/man9f/scsi_ifgetcap.9f
+file path=usr/share/man/man9f/scsi_init_pkt.9f
+file path=usr/share/man/man9f/scsi_log.9f
+file path=usr/share/man/man9f/scsi_pktalloc.9f
+file path=usr/share/man/man9f/scsi_poll.9f
+file path=usr/share/man/man9f/scsi_probe.9f
+file path=usr/share/man/man9f/scsi_reset.9f
+file path=usr/share/man/man9f/scsi_reset_notify.9f
+file path=usr/share/man/man9f/scsi_sense_key.9f
+file path=usr/share/man/man9f/scsi_setup_cdb.9f
+file path=usr/share/man/man9f/scsi_slave.9f
+file path=usr/share/man/man9f/scsi_sync_pkt.9f
+file path=usr/share/man/man9f/scsi_transport.9f
+file path=usr/share/man/man9f/scsi_unprobe.9f
+file path=usr/share/man/man9f/scsi_validate_sense.9f
+file path=usr/share/man/man9f/scsi_vu_errmsg.9f
+file path=usr/share/man/man9f/semaphore.9f
+file path=usr/share/man/man9f/stoi.9f
+file path=usr/share/man/man9f/string.9f
+file path=usr/share/man/man9f/strlog.9f
+file path=usr/share/man/man9f/strqget.9f
+file path=usr/share/man/man9f/strqset.9f
+file path=usr/share/man/man9f/swab.9f
+file path=usr/share/man/man9f/taskq.9f
+file path=usr/share/man/man9f/testb.9f
+file path=usr/share/man/man9f/timeout.9f
 file path=usr/share/man/man9f/u8_strcmp.9f
 file path=usr/share/man/man9f/u8_textprep_str.9f
 file path=usr/share/man/man9f/u8_validate.9f
 file path=usr/share/man/man9f/uconv_u16tou32.9f
-file path=usr/share/man/man9f/uiomove.9f mode=0444
-file path=usr/share/man/man9f/unbufcall.9f mode=0444
-file path=usr/share/man/man9f/unlinkb.9f mode=0444
-file path=usr/share/man/man9f/untimeout.9f mode=0444
-file path=usr/share/man/man9f/ureadc.9f mode=0444
-file path=usr/share/man/man9f/uwritec.9f mode=0444
-file path=usr/share/man/man9f/va_arg.9f mode=0444
-file path=usr/share/man/man9f/vsprintf.9f mode=0444
-file path=usr/share/man/man9p/ddi-forceattach.9p mode=0444
-file path=usr/share/man/man9p/inquiry-device-type.9p mode=0444
-file path=usr/share/man/man9p/no-involuntary-power-cycles.9p mode=0444
-file path=usr/share/man/man9p/pm-components.9p mode=0444
-file path=usr/share/man/man9p/pm.9p mode=0444
-file path=usr/share/man/man9p/removable-media.9p mode=0444
-file path=usr/share/man/man9p/size.9p mode=0444
-file path=usr/share/man/man9s/Intro.9s mode=0444
-file path=usr/share/man/man9s/aio_req.9s mode=0444
-file path=usr/share/man/man9s/buf.9s mode=0444
-file path=usr/share/man/man9s/cb_ops.9s mode=0444
-file path=usr/share/man/man9s/copyreq.9s mode=0444
-file path=usr/share/man/man9s/copyresp.9s mode=0444
-file path=usr/share/man/man9s/datab.9s mode=0444
-file path=usr/share/man/man9s/ddi_device_acc_attr.9s mode=0444
-file path=usr/share/man/man9s/ddi_dma_attr.9s mode=0444
-file path=usr/share/man/man9s/ddi_dma_cookie.9s mode=0444
-file path=usr/share/man/man9s/ddi_dma_lim_sparc.9s mode=0444
-file path=usr/share/man/man9s/ddi_dma_lim_x86.9s mode=0444
-file path=usr/share/man/man9s/ddi_dma_req.9s mode=0444
-file path=usr/share/man/man9s/ddi_dmae_req.9s mode=0444
-file path=usr/share/man/man9s/ddi_fm_error.9s mode=0444
-file path=usr/share/man/man9s/ddi_idevice_cookie.9s mode=0444
-file path=usr/share/man/man9s/dev_ops.9s mode=0444
-file path=usr/share/man/man9s/devmap_callback_ctl.9s mode=0444
-file path=usr/share/man/man9s/fmodsw.9s mode=0444
-file path=usr/share/man/man9s/free_rtn.9s mode=0444
-file path=usr/share/man/man9s/gld_mac_info.9s mode=0444
-file path=usr/share/man/man9s/gld_stats.9s mode=0444
-file path=usr/share/man/man9s/hook_nic_event.9s mode=0444
-file path=usr/share/man/man9s/hook_pkt_event.9s mode=0444
-file path=usr/share/man/man9s/hook_t.9s mode=0444
-file path=usr/share/man/man9s/iocblk.9s mode=0444
-file path=usr/share/man/man9s/iovec.9s mode=0444
+file path=usr/share/man/man9f/uiomove.9f
+file path=usr/share/man/man9f/unbufcall.9f
+file path=usr/share/man/man9f/unlinkb.9f
+file path=usr/share/man/man9f/untimeout.9f
+file path=usr/share/man/man9f/ureadc.9f
+file path=usr/share/man/man9f/uwritec.9f
+file path=usr/share/man/man9f/va_arg.9f
+file path=usr/share/man/man9f/vsprintf.9f
+file path=usr/share/man/man9p/ddi-forceattach.9p
+file path=usr/share/man/man9p/inquiry-device-type.9p
+file path=usr/share/man/man9p/no-involuntary-power-cycles.9p
+file path=usr/share/man/man9p/pm-components.9p
+file path=usr/share/man/man9p/pm.9p
+file path=usr/share/man/man9p/removable-media.9p
+file path=usr/share/man/man9p/size.9p
+file path=usr/share/man/man9s/Intro.9s
+file path=usr/share/man/man9s/aio_req.9s
+file path=usr/share/man/man9s/buf.9s
+file path=usr/share/man/man9s/cb_ops.9s
+file path=usr/share/man/man9s/copyreq.9s
+file path=usr/share/man/man9s/copyresp.9s
+file path=usr/share/man/man9s/datab.9s
+file path=usr/share/man/man9s/ddi_device_acc_attr.9s
+file path=usr/share/man/man9s/ddi_dma_attr.9s
+file path=usr/share/man/man9s/ddi_dma_cookie.9s
+file path=usr/share/man/man9s/ddi_dma_lim_sparc.9s
+file path=usr/share/man/man9s/ddi_dma_lim_x86.9s
+file path=usr/share/man/man9s/ddi_dma_req.9s
+file path=usr/share/man/man9s/ddi_dmae_req.9s
+file path=usr/share/man/man9s/ddi_fm_error.9s
+file path=usr/share/man/man9s/ddi_idevice_cookie.9s
+file path=usr/share/man/man9s/dev_ops.9s
+file path=usr/share/man/man9s/devmap_callback_ctl.9s
+file path=usr/share/man/man9s/fmodsw.9s
+file path=usr/share/man/man9s/free_rtn.9s
+file path=usr/share/man/man9s/gld_mac_info.9s
+file path=usr/share/man/man9s/gld_stats.9s
+file path=usr/share/man/man9s/hook_nic_event.9s
+file path=usr/share/man/man9s/hook_pkt_event.9s
+file path=usr/share/man/man9s/hook_t.9s
+file path=usr/share/man/man9s/iocblk.9s
+file path=usr/share/man/man9s/iovec.9s
 # While kstat(7D) is in SUNWcs, the structures are general
-file path=usr/share/man/man9s/kstat.9s mode=0444
-file path=usr/share/man/man9s/kstat_intr.9s mode=0444
-file path=usr/share/man/man9s/kstat_io.9s mode=0444
-file path=usr/share/man/man9s/kstat_named.9s mode=0444
-file path=usr/share/man/man9s/linkblk.9s mode=0444
-file path=usr/share/man/man9s/modldrv.9s mode=0444
-file path=usr/share/man/man9s/modlinkage.9s mode=0444
-file path=usr/share/man/man9s/modlmisc.9s mode=0444
-file path=usr/share/man/man9s/modlstrmod.9s mode=0444
-file path=usr/share/man/man9s/module_info.9s mode=0444
-file path=usr/share/man/man9s/msgb.9s mode=0444
-file path=usr/share/man/man9s/net_inject_t.9s mode=0444
-file path=usr/share/man/man9s/net_instance_t.9s mode=0444
-file path=usr/share/man/man9s/qband.9s mode=0444
-file path=usr/share/man/man9s/qinit.9s mode=0444
-file path=usr/share/man/man9s/queclass.9s mode=0444
-file path=usr/share/man/man9s/queue.9s mode=0444
-file path=usr/share/man/man9s/scsi_address.9s mode=0444
-file path=usr/share/man/man9s/scsi_arq_status.9s mode=0444
-file path=usr/share/man/man9s/scsi_asc_key_strings.9s mode=0444
-file path=usr/share/man/man9s/scsi_device.9s mode=0444
-file path=usr/share/man/man9s/scsi_extended_sense.9s mode=0444
-file path=usr/share/man/man9s/scsi_hba_tran.9s mode=0444
-file path=usr/share/man/man9s/scsi_inquiry.9s mode=0444
-file path=usr/share/man/man9s/scsi_pkt.9s mode=0444
-file path=usr/share/man/man9s/scsi_status.9s mode=0444
-file path=usr/share/man/man9s/streamtab.9s mode=0444
-file path=usr/share/man/man9s/stroptions.9s mode=0444
-file path=usr/share/man/man9s/tuple.9s mode=0444
-file path=usr/share/man/man9s/uio.9s mode=0444
+file path=usr/share/man/man9s/kstat.9s
+file path=usr/share/man/man9s/kstat_intr.9s
+file path=usr/share/man/man9s/kstat_io.9s
+file path=usr/share/man/man9s/kstat_named.9s
+file path=usr/share/man/man9s/linkblk.9s
+file path=usr/share/man/man9s/modldrv.9s
+file path=usr/share/man/man9s/modlinkage.9s
+file path=usr/share/man/man9s/modlmisc.9s
+file path=usr/share/man/man9s/modlstrmod.9s
+file path=usr/share/man/man9s/module_info.9s
+file path=usr/share/man/man9s/msgb.9s
+file path=usr/share/man/man9s/net_inject_t.9s
+file path=usr/share/man/man9s/net_instance_t.9s
+file path=usr/share/man/man9s/qband.9s
+file path=usr/share/man/man9s/qinit.9s
+file path=usr/share/man/man9s/queclass.9s
+file path=usr/share/man/man9s/queue.9s
+file path=usr/share/man/man9s/scsi_address.9s
+file path=usr/share/man/man9s/scsi_arq_status.9s
+file path=usr/share/man/man9s/scsi_asc_key_strings.9s
+file path=usr/share/man/man9s/scsi_device.9s
+file path=usr/share/man/man9s/scsi_extended_sense.9s
+file path=usr/share/man/man9s/scsi_hba_tran.9s
+file path=usr/share/man/man9s/scsi_inquiry.9s
+file path=usr/share/man/man9s/scsi_pkt.9s
+file path=usr/share/man/man9s/scsi_status.9s
+file path=usr/share/man/man9s/streamtab.9s
+file path=usr/share/man/man9s/stroptions.9s
+file path=usr/share/man/man9s/tuple.9s
+file path=usr/share/man/man9s/uio.9s
 hardlink path=kernel/misc/$(ARCH64)/md5 \
     target=../../../kernel/crypto/$(ARCH64)/md5
 hardlink path=kernel/misc/$(ARCH64)/sha1 \

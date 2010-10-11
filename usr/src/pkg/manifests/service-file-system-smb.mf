@@ -105,7 +105,7 @@ file path=usr/share/man/man1m/smbd.1m
 file path=usr/share/man/man1m/smbstat.1m
 file path=usr/share/man/man4/smb.4
 file path=usr/share/man/man4/smbautohome.4
-file path=usr/share/man/man5/pam_smb_passwd.5 mode=0444
+file path=usr/share/man/man5/pam_smb_passwd.5
 file path=var/smb/cvol/windows/system32/eventlog.dll mode=0755
 file path=var/smb/smbpasswd group=sys mode=0400 \
     original_name=SUNWsmbs:var/smb/smbpasswd preserve=true

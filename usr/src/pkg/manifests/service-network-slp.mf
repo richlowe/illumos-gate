@@ -88,7 +88,7 @@ file path=usr/share/man/man3slp/slp_api.3slp
 file path=usr/share/man/man3slp/slp_strerror.3slp
 file path=usr/share/man/man4/slp.conf.4
 file path=usr/share/man/man4/slpd.reg.4
-file path=usr/share/man/man7p/slp.7p mode=0444
+file path=usr/share/man/man7p/slp.7p
 legacy pkg=SUNWslpr \
     desc="Root filesystem portion of the Service Location Protocol (SLP) framework. Includes the SLP configuration file and start scripts for the SLP daemon." \
     name="SLP, (Root)"
