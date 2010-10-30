@@ -19,4 +19,43 @@ MAN3PROCFILES =	proc_service.3proc		\
 	 	ps_pread.3proc			\
 	 	ps_pstop.3proc
 
+MAN3PROCSOFILES =	ps_kill.3proc		\
+		 	ps_lcontinue.3proc	\
+		 	ps_lgetfpregs.3proc	\
+		 	ps_lgetxregs.3proc	\
+		 	ps_lgetxregsize.3proc	\
+		 	ps_lrolltoaddr.3proc	\
+		 	ps_lsetfpregs.3proc	\
+		 	ps_lsetregs.3proc	\
+		 	ps_lsetxregs.3proc	\
+		 	ps_lstop.3proc		\
+		 	ps_pcontinue.3proc	\
+		 	ps_pdread.3proc		\
+		 	ps_pdwrite.3proc	\
+		 	ps_pglobal_sym.3proc	\
+		 	ps_ptread.3proc		\
+		 	ps_ptwrite.3proc	\
+		 	ps_pwrite.3proc
+
+MAN3PROCFILES += $(MAN3PROCSOFILES)
+
+ps_kill.3proc		:= SOSRC = man3proc/ps_pstop.3proc
+ps_lcontinue.3proc	:= SOSRC = man3proc/ps_pstop.3proc
+ps_lgetfpregs.3proc	:= SOSRC = man3proc/ps_lgetregs.3proc
+ps_lgetxregs.3proc	:= SOSRC = man3proc/ps_lgetregs.3proc
+ps_lgetxregsize.3proc	:= SOSRC = man3proc/ps_lgetregs.3proc
+ps_lrolltoaddr.3proc	:= SOSRC = man3proc/ps_pstop.3proc
+ps_lsetfpregs.3proc	:= SOSRC = man3proc/ps_lgetregs.3proc
+ps_lsetregs.3proc	:= SOSRC = man3proc/ps_lgetregs.3proc
+ps_lsetxregs.3proc	:= SOSRC = man3proc/ps_lgetregs.3proc
+ps_lstop.3proc		:= SOSRC = man3proc/ps_pstop.3proc
+ps_pcontinue.3proc	:= SOSRC = man3proc/ps_pstop.3proc
+ps_pdread.3proc		:= SOSRC = man3proc/ps_pread.3proc
+ps_pdwrite.3proc	:= SOSRC = man3proc/ps_pread.3proc
+ps_pglobal_sym.3proc	:= SOSRC = man3proc/ps_pglobal_lookup.3proc
+ps_ptread.3proc		:= SOSRC = man3proc/ps_pread.3proc
+ps_ptwrite.3proc	:= SOSRC = man3proc/ps_pread.3proc
+ps_pwrite.3proc		:= SOSRC = man3proc/ps_pread.3proc
+
+
 include ../Makefile.man

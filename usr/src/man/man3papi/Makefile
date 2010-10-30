@@ -20,4 +20,146 @@ MAN3PAPIFILES =	papiAttributeListAddValue.3papi		\
 	 	papiServiceCreate.3papi			\
 	 	papiStatusString.3papi
 
+MAN3PAPISOFILES =	papiAttributeListAddBoolean.3papi	\
+		 	papiAttributeListAddCollection.3papi	\
+		 	papiAttributeListAddDatetime.3papi	\
+		 	papiAttributeListAddInteger.3papi	\
+		 	papiAttributeListAddMetadata.3papi	\
+		 	papiAttributeListAddRange.3papi		\
+		 	papiAttributeListAddResolution.3papi	\
+		 	papiAttributeListAddString.3papi	\
+		 	papiAttributeListDelete.3papi		\
+		 	papiAttributeListFind.3papi		\
+		 	papiAttributeListFree.3papi		\
+		 	papiAttributeListFromString.3papi	\
+		 	papiAttributeListGetBoolean.3papi	\
+		 	papiAttributeListGetCollection.3papi	\
+		 	papiAttributeListGetDatetime.3papi	\
+		 	papiAttributeListGetInteger.3papi	\
+		 	papiAttributeListGetMetadata.3papi	\
+		 	papiAttributeListGetNext.3papi		\
+		 	papiAttributeListGetRange.3papi		\
+		 	papiAttributeListGetResolution.3papi	\
+		 	papiAttributeListGetString.3papi	\
+		 	papiAttributeListGetValue.3papi		\
+		 	papiAttributeListToString.3papi		\
+		 	papiJobCancel.3papi			\
+		 	papiJobFree.3papi			\
+		 	papiJobGetAttributeList.3papi		\
+		 	papiJobGetId.3papi			\
+		 	papiJobGetJobTicket.3papi		\
+		 	papiJobGetPrinterName.3papi		\
+		 	papiJobHold.3papi			\
+		 	papiJobListFree.3papi			\
+		 	papiJobModify.3papi			\
+		 	papiJobMove.3papi			\
+		 	papiJobPromote.3papi			\
+		 	papiJobQuery.3papi			\
+		 	papiJobRelease.3papi			\
+		 	papiJobRestart.3papi			\
+		 	papiJobStreamClose.3papi		\
+		 	papiJobStreamOpen.3papi			\
+		 	papiJobStreamWrite.3papi		\
+		 	papiJobSubmitByReference.3papi		\
+		 	papiJobValidate.3papi			\
+		 	papiLibrarySupportedCalls.3papi		\
+		 	papiPrinterAdd.3papi			\
+		 	papiPrinterDisable.3papi		\
+		 	papiPrinterEnable.3papi			\
+		 	papiPrinterFree.3papi			\
+		 	papiPrinterGetAttributeList.3papi	\
+		 	papiPrinterListFree.3papi		\
+		 	papiPrinterListJobs.3papi		\
+		 	papiPrinterModify.3papi			\
+		 	papiPrinterPause.3papi			\
+		 	papiPrinterPurgeJobs.3papi		\
+		 	papiPrinterQuery.3papi			\
+		 	papiPrinterRemove.3papi			\
+		 	papiPrinterResume.3papi			\
+		 	papiServiceDestroy.3papi		\
+		 	papiServiceGetAppData.3papi		\
+		 	papiServiceGetAttributeList.3papi	\
+		 	papiServiceGetEncryption.3papi		\
+		 	papiServiceGetPassword.3papi		\
+		 	papiServiceGetServiceName.3papi		\
+		 	papiServiceGetStatusMessage.3papi	\
+		 	papiServiceGetUserName.3papi		\
+		 	papiServiceSetAppData.3papi		\
+		 	papiServiceSetAuthCB.3papi		\
+		 	papiServiceSetEncryption.3papi		\
+		 	papiServiceSetPassword.3papi		\
+		 	papiServiceSetUserName.3papi
+
+MAN3PAPIFILES += $(MAN3PAPISOFILES)
+
+papiAttributeListAddBoolean.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddCollection.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddDatetime.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddInteger.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddMetadata.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddRange.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddResolution.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListAddString.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListDelete.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListFind.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListFree.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListFromString.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetBoolean.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetCollection.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetDatetime.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetInteger.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetMetadata.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetNext.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetRange.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetResolution.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetString.3papi	:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListGetValue.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiAttributeListToString.3papi		:= SOSRC = man3papi/papiAttributeListAddValue.3papi
+papiJobCancel.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobFree.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobGetAttributeList.3papi		:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobGetId.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobGetJobTicket.3papi		:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobGetPrinterName.3papi		:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobHold.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobListFree.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobModify.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobMove.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobPromote.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobQuery.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobRelease.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobRestart.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobStreamClose.3papi		:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobStreamOpen.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobStreamWrite.3papi		:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobSubmitByReference.3papi		:= SOSRC = man3papi/papiJobSubmit.3papi
+papiJobValidate.3papi			:= SOSRC = man3papi/papiJobSubmit.3papi
+papiLibrarySupportedCalls.3papi		:= SOSRC = man3papi/papiLibrarySupportedCall.3papi
+papiPrinterAdd.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterDisable.3papi		:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterEnable.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterFree.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterGetAttributeList.3papi	:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterListFree.3papi		:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterListJobs.3papi		:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterModify.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterPause.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterPurgeJobs.3papi		:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterQuery.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterRemove.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiPrinterResume.3papi			:= SOSRC = man3papi/papiPrintersList.3papi
+papiServiceDestroy.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetAppData.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetAttributeList.3papi	:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetEncryption.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetPassword.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetServiceName.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetStatusMessage.3papi	:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceGetUserName.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceSetAppData.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceSetAuthCB.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceSetEncryption.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceSetPassword.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+papiServiceSetUserName.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
+
 include ../Makefile.man

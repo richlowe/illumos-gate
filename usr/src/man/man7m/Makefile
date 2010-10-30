@@ -31,6 +31,19 @@ COMMON_MAN7MFILES = 	bufmod.7m	\
 
 sparc_MAN7MFILES=	kb.7m
 
-MAN7MFILES = $(COMMON_MAN7MFILES) $($(MACH)_MAN7MFILES)
+MAN7MSOFILES =	vuid2ps2.7m	\
+		vuid3ps2.7m	\
+		vuidm3p.7m	\
+		vuidm4p.7m	\
+		vuidm5p.7m
+
+MAN7MFILES = $(COMMON_MAN7MFILES) $($(MACH)_MAN7MFILES) $(MAN7MSOFILES)
+
+vuid2ps2.7m	:= SOSRC = man7m/vuidmice.7m
+vuid3ps2.7m	:= SOSRC = man7m/vuidmice.7m
+vuidm3p.7m	:= SOSRC = man7m/vuidmice.7m
+vuidm4p.7m	:= SOSRC = man7m/vuidmice.7m
+vuidm5p.7m	:= SOSRC = man7m/vuidmice.7m
+
 
 include ../Makefile.man

@@ -48,6 +48,7 @@ file path=lib/llib-lMPAPI.ln variant.opensolaris.zone=global
 file path=usr/include/mpapi-sun.h
 file path=usr/include/mpapi.h
 file path=usr/share/man/man3lib/libMPAPI.3lib
+file path=usr/share/man/man3lib/libmpapi.3lib
 file path=usr/share/man/man3mpapi/MP_AssignLogicalUnitToTPG.3mpapi
 file path=usr/share/man/man3mpapi/MP_CancelOverridePath.3mpapi
 file path=usr/share/man/man3mpapi/MP_CompareOIDs.3mpapi

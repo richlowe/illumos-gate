@@ -13,6 +13,10 @@
 
 include ../../Makefile.master
 
-MAN3FILES = 	Intro.3
+MAN3SOFILES =	intro.3
+MAN3FILES = 	Intro.3 \
+		$(MAN3SOFILES)
+
+intro.3 := SOSRC = man3/Intro.3
 
 include ../Makefile.man

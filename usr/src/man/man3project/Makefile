@@ -17,4 +17,25 @@ MAN3PROJECTFILES = 	getprojent.3project		\
 	 	 	project_walk.3project		\
 	 	 	setproject.3project
 
+
+MAN3PROJECTSOFILES =	endprojent.3project		\
+		 	fgetprojent.3project		\
+		 	getdefaultproj.3project		\
+		 	getprojbyid.3project		\
+		 	getprojbyname.3project		\
+		 	getprojidbyname.3project	\
+		 	inproj.3project			\
+		 	setprojent.3project
+
+MAN3PROJECTFILES += $(MAN3PROJECTSOFILES)
+
+endprojent.3project		:= SOSRC = man3project/getprojent.3project
+fgetprojent.3project		:= SOSRC = man3project/getprojent.3project
+getdefaultproj.3project		:= SOSRC = man3project/getprojent.3project
+getprojbyid.3project		:= SOSRC = man3project/getprojent.3project
+getprojbyname.3project		:= SOSRC = man3project/getprojent.3project
+getprojidbyname.3project	:= SOSRC = man3project/getprojent.3project
+inproj.3project			:= SOSRC = man3project/getprojent.3project
+setprojent.3project		:= SOSRC = man3project/getprojent.3project
+
 include ../Makefile.man

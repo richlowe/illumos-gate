@@ -103,8 +103,12 @@ file path=usr/share/man/man1m/yppoll.1m
 file path=usr/share/man/man1m/ypset.1m
 file path=usr/share/man/man1m/ypstart.1m
 file path=usr/share/man/man1m/ypstart.1m
+file path=usr/share/man/man1m/ypstop.1m
 file path=usr/share/man/man1m/ypxfr.1m
 file path=usr/share/man/man1m/ypxfr.1m
+file path=usr/share/man/man1m/ypxfr_1perday.1m
+file path=usr/share/man/man1m/ypxfr_1perhour.1m
+file path=usr/share/man/man1m/ypxfr_2perday.1m
 file path=usr/share/man/man4/defaultdomain.4
 file path=usr/share/man/man4/publickey.4
 file path=var/yp/aliases mode=0555 original_name=SUNWnis:var/yp/aliases \

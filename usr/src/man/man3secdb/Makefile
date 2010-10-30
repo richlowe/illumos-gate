@@ -19,4 +19,55 @@ MAN3SECDBFILES = 	getauthattr.3secdb		\
 	 	 	getuserattr.3secdb		\
 	 	 	kva_match.3secdb
 
+MAN3SECDBSOFILES =	chkauthattr.3secdb	\
+		 	endauthattr.3secdb	\
+		 	endexecattr.3secdb	\
+		 	endprofattr.3secdb	\
+		 	enduserattr.3secdb	\
+		 	fgetuserattr.3secdb	\
+		 	free_authattr.3secdb	\
+		 	free_execattr.3secdb	\
+		 	free_profattr.3secdb	\
+		 	free_proflist.3secdb	\
+		 	free_userattr.3secdb	\
+		 	getauthnam.3secdb	\
+		 	getexecprof.3secdb	\
+		 	getexecuser.3secdb	\
+		 	getproflist.3secdb	\
+		 	getprofnam.3secdb	\
+		 	getusernam.3secdb	\
+		 	getuseruid.3secdb	\
+		 	match_execattr.3secdb	\
+		 	setauthattr.3secdb	\
+		 	setexecattr.3secdb	\
+		 	setprofattr.3secdb	\
+		 	setuserattr.3secdb
+
+MAN3SECDBFILES += $(MAN3SECDBSOFILES)
+
+chkauthattr.3secdb	:= SOSRC = man3secdb/getauthattr.3secdb
+endauthattr.3secdb	:= SOSRC = man3secdb/getauthattr.3secdb
+endexecattr.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
+endprofattr.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
+enduserattr.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
+fgetuserattr.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
+free_authattr.3secdb	:= SOSRC = man3secdb/getauthattr.3secdb
+free_execattr.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
+free_profattr.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
+free_proflist.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
+free_userattr.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
+getauthnam.3secdb	:= SOSRC = man3secdb/getauthattr.3secdb
+getexecprof.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
+getexecuser.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
+getproflist.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
+getprofnam.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
+getusernam.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
+getuseruid.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
+match_execattr.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
+setauthattr.3secdb	:= SOSRC = man3secdb/getauthattr.3secdb
+setexecattr.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
+setprofattr.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
+setuserattr.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
+
+
 include ../Makefile.man

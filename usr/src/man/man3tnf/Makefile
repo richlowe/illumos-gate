@@ -31,4 +31,80 @@ MAN3TNFFILES = 	TNF_DECLARE_RECORD.3tnf		\
 	 	tnfctl_trace_state_set.3tnf	\
 	 	tracing.3tnf
 
+MAN3TNFSOFILES =	TNF_DEBUG.3tnf				\
+		 	TNF_DEFINE_RECORD_1.3tnf		\
+		 	TNF_DEFINE_RECORD_2.3tnf		\
+		 	TNF_DEFINE_RECORD_3.3tnf		\
+		 	TNF_DEFINE_RECORD_4.3tnf		\
+		 	TNF_DEFINE_RECORD_5.3tnf		\
+		 	TNF_PROBE_0.3tnf			\
+		 	TNF_PROBE_0_DEBUG.3tnf			\
+		 	TNF_PROBE_1.3tnf			\
+		 	TNF_PROBE_1_DEBUG.3tnf			\
+		 	TNF_PROBE_2.3tnf			\
+		 	TNF_PROBE_2_DEBUG.3tnf			\
+		 	TNF_PROBE_3.3tnf			\
+		 	TNF_PROBE_3_DEBUG.3tnf			\
+		 	TNF_PROBE_4.3tnf			\
+		 	TNF_PROBE_4_DEBUG.3tnf			\
+		 	TNF_PROBE_5.3tnf			\
+		 	TNF_PROBE_5_DEBUG.3tnf			\
+		 	tnf_process_enable.3tnf			\
+		 	tnf_thread_disable.3tnf			\
+		 	tnf_thread_enable.3tnf			\
+		 	tnfctl_buffer_dealloc.3tnf		\
+		 	tnfctl_check_libs.3tnf			\
+		 	tnfctl_continue.3tnf			\
+		 	tnfctl_exec_open.3tnf			\
+		 	tnfctl_filter_list_add.3tnf		\
+		 	tnfctl_filter_list_delete.3tnf		\
+		 	tnfctl_filter_list_get.3tnf		\
+		 	tnfctl_filter_state_set.3tnf		\
+		 	tnfctl_probe_apply_ids.3tnf		\
+		 	tnfctl_probe_connect.3tnf		\
+		 	tnfctl_probe_disable.3tnf		\
+		 	tnfctl_probe_disconnect_all.3tnf	\
+		 	tnfctl_probe_enable.3tnf		\
+		 	tnfctl_probe_trace.3tnf			\
+		 	tnfctl_probe_untrace.3tnf
+
+MAN3TNFFILES += $(MAN3TNFSOFILES)
+
+TNF_DEBUG.3tnf				:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_DEFINE_RECORD_1.3tnf		:= SOSRC = man3tnf/TNF_DECLARE_RECORD.3tnf
+TNF_DEFINE_RECORD_2.3tnf		:= SOSRC = man3tnf/TNF_DECLARE_RECORD.3tnf
+TNF_DEFINE_RECORD_3.3tnf		:= SOSRC = man3tnf/TNF_DECLARE_RECORD.3tnf
+TNF_DEFINE_RECORD_4.3tnf		:= SOSRC = man3tnf/TNF_DECLARE_RECORD.3tnf
+TNF_DEFINE_RECORD_5.3tnf		:= SOSRC = man3tnf/TNF_DECLARE_RECORD.3tnf
+TNF_PROBE_0.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_0_DEBUG.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_1.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_1_DEBUG.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_2.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_2_DEBUG.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_3.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_3_DEBUG.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_4.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_4_DEBUG.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_5.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+TNF_PROBE_5_DEBUG.3tnf			:= SOSRC = man3tnf/TNF_PROBE.3tnf
+tnf_process_enable.3tnf			:= SOSRC = man3tnf/tnf_process_disable.3tnf
+tnf_thread_disable.3tnf			:= SOSRC = man3tnf/tnf_process_disable.3tnf
+tnf_thread_enable.3tnf			:= SOSRC = man3tnf/tnf_process_disable.3tnf
+tnfctl_buffer_dealloc.3tnf		:= SOSRC = man3tnf/tnfctl_buffer_alloc.3tnf
+tnfctl_check_libs.3tnf			:= SOSRC = man3tnf/tnfctl_indirect_open.3tnf
+tnfctl_continue.3tnf			:= SOSRC = man3tnf/tnfctl_pid_open.3tnf
+tnfctl_exec_open.3tnf			:= SOSRC = man3tnf/tnfctl_pid_open.3tnf
+tnfctl_filter_list_add.3tnf		:= SOSRC = man3tnf/tnfctl_trace_state_set.3tnf
+tnfctl_filter_list_delete.3tnf		:= SOSRC = man3tnf/tnfctl_trace_state_set.3tnf
+tnfctl_filter_list_get.3tnf		:= SOSRC = man3tnf/tnfctl_trace_state_set.3tnf
+tnfctl_filter_state_set.3tnf		:= SOSRC = man3tnf/tnfctl_trace_state_set.3tnf
+tnfctl_probe_apply_ids.3tnf		:= SOSRC = man3tnf/tnfctl_probe_apply.3tnf
+tnfctl_probe_connect.3tnf		:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
+tnfctl_probe_disable.3tnf		:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
+tnfctl_probe_disconnect_all.3tnf	:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
+tnfctl_probe_enable.3tnf		:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
+tnfctl_probe_trace.3tnf			:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
+tnfctl_probe_untrace.3tnf		:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
+
 include ../Makefile.man

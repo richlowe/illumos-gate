@@ -67,4 +67,33 @@ MAN3SASLFILES =	sasl_authorize_t.3sasl			\
 	 	sasl_verifyfile_t.3sasl			\
 	 	sasl_version.3sasl
 
+MAN3SASLSOFILES =	prop_clear.3sasl	\
+		 	prop_dispose.3sasl	\
+		 	prop_dup.3sasl		\
+		 	prop_erase.3sasl	\
+		 	prop_format.3sasl	\
+		 	prop_get.3sasl		\
+		 	prop_getnames.3sasl	\
+		 	prop_new.3sasl		\
+		 	prop_request.3sasl	\
+		 	prop_set.3sasl		\
+		 	prop_setvals.3sasl	\
+		 	sasl_encodev.3sasl
+
+MAN3SASLFILES += $(MAN3SASLSOFILES)
+
+prop_clear.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_dispose.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_dup.3sasl		:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_erase.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_format.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_get.3sasl		:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_getnames.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_new.3sasl		:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_request.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_set.3sasl		:= SOSRC = man3sasl/sasl_auxprop.3sasl
+prop_setvals.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
+sasl_encodev.3sasl	:= SOSRC = man3sasl/sasl_encode.3sasl
+
+
 include ../Makefile.man

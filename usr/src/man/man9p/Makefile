@@ -21,4 +21,26 @@ MAN9PFILES = 	ddi-forceattach.9p		\
 	 	removable-media.9p		\
 	 	size.9p
 
+MAN9PSOFILES =	Nblock.9p		\
+	 	blksize.9p		\
+	 	ddi-no-autodetach.9p	\
+	 	device-blksize.9p	\
+	 	device-nblocks.9p	\
+	 	inquiry-product-id.9p	\
+	 	inquiry-revision-id.9p	\
+	 	inquiry-serial-no.9p	\
+	 	inquiry-vendor-id.9p
+
+MAN9PFILES += $(MAN9PSOFILES)
+
+Nblock.9p		:= SOSRC = man9p/size.9p
+blksize.9p		:= SOSRC = man9p/size.9p
+ddi-no-autodetach.9p	:= SOSRC = man9p/ddi-forceattach.9p
+device-blksize.9p	:= SOSRC = man9p/size.9p
+device-nblocks.9p	:= SOSRC = man9p/size.9p
+inquiry-product-id.9p	:= SOSRC = man9p/inquiry-device-type.9p
+inquiry-revision-id.9p	:= SOSRC = man9p/inquiry-device-type.9p
+inquiry-serial-no.9p	:= SOSRC = man9p/inquiry-device-type.9p
+inquiry-vendor-id.9p	:= SOSRC = man9p/inquiry-device-type.9p
+
 include ../Makefile.man

@@ -21,4 +21,24 @@ MAN3SYSEVENTFILES =	sysevent_bind_handle.3sysevent		\
 	 	 	sysevent_post_event.3sysevent		\
 	 	 	sysevent_subscribe_event.3sysevent
 
+MAN3SYSEVENTSOFILES =	sysevent_get_pid.3sysevent		\
+		 	sysevent_get_pub_name.3sysevent		\
+		 	sysevent_get_seq.3sysevent		\
+		 	sysevent_get_size.3sysevent		\
+		 	sysevent_get_subclass_name.3sysevent	\
+		 	sysevent_get_time.3sysevent		\
+		 	sysevent_unbind_handle.3sysevent	\
+		 	sysevent_unsubscribe_event.3sysevent
+
+MAN3SYSEVENTFILES += $(MAN3SYSEVENTSOFILES)
+
+sysevent_get_pid.3sysevent		:= SOSRC = man3sysevent/sysevent_get_vendor_name.3sysevent
+sysevent_get_pub_name.3sysevent		:= SOSRC = man3sysevent/sysevent_get_vendor_name.3sysevent
+sysevent_get_seq.3sysevent		:= SOSRC = man3sysevent/sysevent_get_class_name.3sysevent
+sysevent_get_size.3sysevent		:= SOSRC = man3sysevent/sysevent_get_class_name.3sysevent
+sysevent_get_subclass_name.3sysevent	:= SOSRC = man3sysevent/sysevent_get_class_name.3sysevent
+sysevent_get_time.3sysevent		:= SOSRC = man3sysevent/sysevent_get_class_name.3sysevent
+sysevent_unbind_handle.3sysevent	:= SOSRC = man3sysevent/sysevent_bind_handle.3sysevent
+sysevent_unsubscribe_event.3sysevent	:= SOSRC = man3sysevent/sysevent_subscribe_event.3sysevent
+
 include ../Makefile.man

@@ -44,4 +44,66 @@ MAN3XNETFILES =	accept.3xnet		\
 	 	socket.3xnet		\
 	 	socketpair.3xnet
 
+MAN3XNETSOFILES =	getaddrinfo.3xnet	\
+		 	gethostbyaddr.3xnet	\
+		 	gethostbyname.3xnet	\
+		 	gethostent.3xnet	\
+		 	getnetbyaddr.3xnet	\
+		 	getnetbyname.3xnet	\
+		 	getnetent.3xnet		\
+		 	getprotobyname.3xnet	\
+		 	getprotobynumber.3xnet	\
+		 	getprotoent.3xnet	\
+		 	getservbyname.3xnet	\
+		 	getservbyport.3xnet	\
+		 	getservent.3xnet	\
+		 	htons.3xnet		\
+		 	if_freenameindex.3xnet	\
+		 	if_indextoname.3xnet	\
+		 	if_nameindex.3xnet	\
+		 	inet_lnaof.3xnet	\
+		 	inet_makeaddr.3xnet	\
+		 	inet_netof.3xnet	\
+		 	inet_network.3xnet	\
+		 	inet_ntoa.3xnet		\
+		 	inet_pton.3xnet		\
+		 	ntohl.3xnet		\
+		 	ntohs.3xnet		\
+		 	sethostent.3xnet	\
+		 	setnetent.3xnet		\
+		 	setprotoent.3xnet	\
+		 	setservent.3xnet
+
+MAN3XNETFILES += $(MAN3XNETSOFILES)
+
+getaddrinfo.3xnet	:= SOSRC = man3xnet/freeaddrinfo.3xnet
+gethostbyaddr.3xnet	:= SOSRC = man3xnet/endhostent.3xnet
+gethostbyname.3xnet	:= SOSRC = man3xnet/endhostent.3xnet
+gethostent.3xnet	:= SOSRC = man3xnet/endhostent.3xnet
+getnetbyaddr.3xnet	:= SOSRC = man3xnet/endnetent.3xnet
+getnetbyname.3xnet	:= SOSRC = man3xnet/endnetent.3xnet
+getnetent.3xnet		:= SOSRC = man3xnet/endnetent.3xnet
+getprotobyname.3xnet	:= SOSRC = man3xnet/endprotoent.3xnet
+getprotobynumber.3xnet	:= SOSRC = man3xnet/endprotoent.3xnet
+getprotoent.3xnet	:= SOSRC = man3xnet/endprotoent.3xnet
+getservbyname.3xnet	:= SOSRC = man3xnet/endservent.3xnet
+getservbyport.3xnet	:= SOSRC = man3xnet/endservent.3xnet
+getservent.3xnet	:= SOSRC = man3xnet/endservent.3xnet
+htons.3xnet		:= SOSRC = man3xnet/htonl.3xnet
+if_freenameindex.3xnet	:= SOSRC = man3xnet/if_nametoindex.3xnet
+if_indextoname.3xnet	:= SOSRC = man3xnet/if_nametoindex.3xnet
+if_nameindex.3xnet	:= SOSRC = man3xnet/if_nametoindex.3xnet
+inet_lnaof.3xnet	:= SOSRC = man3xnet/inet_addr.3xnet
+inet_makeaddr.3xnet	:= SOSRC = man3xnet/inet_addr.3xnet
+inet_netof.3xnet	:= SOSRC = man3xnet/inet_addr.3xnet
+inet_network.3xnet	:= SOSRC = man3xnet/inet_addr.3xnet
+inet_ntoa.3xnet		:= SOSRC = man3xnet/inet_addr.3xnet
+inet_pton.3xnet		:= SOSRC = man3xnet/inet_ntop.3xnet
+ntohl.3xnet		:= SOSRC = man3xnet/htonl.3xnet
+ntohs.3xnet		:= SOSRC = man3xnet/htonl.3xnet
+sethostent.3xnet	:= SOSRC = man3xnet/endhostent.3xnet
+setnetent.3xnet		:= SOSRC = man3xnet/endnetent.3xnet
+setprotoent.3xnet	:= SOSRC = man3xnet/endprotoent.3xnet
+setservent.3xnet	:= SOSRC = man3xnet/endservent.3xnet
+
 include ../Makefile.man

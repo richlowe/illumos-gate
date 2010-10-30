@@ -620,6 +620,158 @@ sparc_MAN1FILES =	cvcd.1m			\
 	 	 	sf880drd.1m		\
 	 	 	vntsd.1m
 
-MAN1MFILES = $(COMMON_MAN1MFILES) $($(MACH)_MAN1MFILES)
+MAN1MSOFILES =	acctcon1.1m	\
+	acctcon2.1m	\
+	acctdisk.1m	\
+	acctdusg.1m	\
+	accton.1m	\
+	acctprc1.1m	\
+	acctprc2.1m	\
+	acctwtmp.1m	\
+	bootparamd.1m	\
+	chargefee.1m	\
+	ckpacct.1m	\
+	closewtmp.1m	\
+	comsat.1m	\
+	dcopy.1m	\
+	devfsadmd.1m	\
+	dodisk.1m	\
+	fcadm.1m	\
+	fingerd.1m	\
+	ftpd.1m	\
+	grpck.1m	\
+	hal-find-by-capability.1m	\
+	hal-find-by-property.1m	\
+	hal-set-property.1m	\
+	intro.1m	\
+	kadmin.local.1m	\
+	lastlogin.1m	\
+	metadetach.1m	\
+	metaonline.1m	\
+	monacct.1m	\
+	nulladm.1m	\
+	poweroff.1m	\
+	prctmp.1m	\
+	prdaily.1m	\
+	prtacct.1m	\
+	quotaoff.1m	\
+	rarpd.1m	\
+	rdisc.1m	\
+	reject.1m	\
+	restricted_shell.1m	\
+	rexd.1m	\
+	rexecd.1m	\
+	rlogind.1m	\
+	routed.1m	\
+	rshd.1m	\
+	rstatd.1m	\
+	rusersd.1m	\
+	rwalld.1m	\
+	rwhod.1m	\
+	sa1.1m	\
+	sa2.1m	\
+	sadc.1m	\
+	shutacct.1m	\
+	sprayd.1m	\
+	startup.1m	\
+	talkd.1m	\
+	telinit.1m	\
+	telnetd.1m	\
+	tftpd.1m	\
+	turnacct.1m	\
+	umount.1m	\
+	umount_smbfs.1m	\
+	umountall.1m	\
+	unlink.1m	\
+	unshareall.1m	\
+	utmp2wtmp.1m	\
+	uucpd.1m	\
+	uutry.1m	\
+	wtmpfix.1m	\
+	yppasswdd.1m	\
+	ypstop.1m	\
+	ypupdated.1m	\
+	ypxfr_1perday.1m	\
+	ypxfr_1perhour.1m	\
+	ypxfr_2perday.1m	\
+	ypxfrd.1m
+
+MAN1MFILES = $(COMMON_MAN1MFILES) $($(MACH)_MAN1MFILES) $(MAN1MSOFILES)
+
+acctcon1.1m			:= SOSRC = man1m/acctcon.1m
+acctcon2.1m			:= SOSRC = man1m/acctcon.1m
+acctdisk.1m			:= SOSRC = man1m/acct.1m
+acctdusg.1m			:= SOSRC = man1m/acct.1m
+accton.1m			:= SOSRC = man1m/acct.1m
+acctprc1.1m			:= SOSRC = man1m/acctprc.1m
+acctprc2.1m			:= SOSRC = man1m/acctprc.1m
+acctwtmp.1m			:= SOSRC = man1m/acct.1m
+bootparamd.1m			:= SOSRC = man1m/rpc.bootparamd.1m
+chargefee.1m			:= SOSRC = man1m/acctsh.1m
+ckpacct.1m			:= SOSRC = man1m/acctsh.1m
+closewtmp.1m			:= SOSRC = man1m/acct.1m
+comsat.1m			:= SOSRC = man1m/in.comsat.1m
+dcopy.1m			:= SOSRC = man1m/clri.1m
+devfsadmd.1m			:= SOSRC = man1m/devfsadm.1m
+dodisk.1m			:= SOSRC = man1m/acctsh.1m
+fcadm.1m			:= SOSRC = man1m/fcinfo.1m
+fingerd.1m			:= SOSRC = man1m/in.fingerd.1m
+ftpd.1m				:= SOSRC = man1m/in.ftpd.1m
+grpck.1m			:= SOSRC = man1m/pwck.1m
+hal-find-by-capability.1m	:= SOSRC = man1m/hal-find.1m
+hal-find-by-property.1m		:= SOSRC = man1m/hal-find.1m
+hal-set-property.1m		:= SOSRC = man1m/hal-get-property.1m
+intro.1m			:= SOSRC = man1m/Intro.1m
+kadmin.local.1m			:= SOSRC = man1m/kadmin.1m
+lastlogin.1m			:= SOSRC = man1m/acctsh.1m
+metadetach.1m			:= SOSRC = man1m/metattach.1m
+metaonline.1m			:= SOSRC = man1m/metaoffline.1m
+monacct.1m			:= SOSRC = man1m/acctsh.1m
+nulladm.1m			:= SOSRC = man1m/acctsh.1m
+poweroff.1m			:= SOSRC = man1m/halt.1m
+prctmp.1m			:= SOSRC = man1m/acctsh.1m
+prdaily.1m			:= SOSRC = man1m/acctsh.1m
+prtacct.1m			:= SOSRC = man1m/acctsh.1m
+quotaoff.1m			:= SOSRC = man1m/quotaon.1m
+rarpd.1m			:= SOSRC = man1m/in.rarpd.1m
+rdisc.1m			:= SOSRC = man1m/in.rdisc.1m
+reject.1m			:= SOSRC = man1m/accept.1m
+restricted_shell.1m		:= SOSRC = man1m/rsh.1m
+rexd.1m				:= SOSRC = man1m/rpc.rexd.1m
+rexecd.1m			:= SOSRC = man1m/in.rexecd.1m
+rlogind.1m			:= SOSRC = man1m/in.rlogind.1m
+routed.1m			:= SOSRC = man1m/in.routed.1m
+rshd.1m				:= SOSRC = man1m/in.rshd.1m
+rstatd.1m			:= SOSRC = man1m/rpc.rstatd.1m
+rusersd.1m			:= SOSRC = man1m/rpc.rusersd.1m
+rwalld.1m			:= SOSRC = man1m/rpc.rwalld.1m
+rwhod.1m			:= SOSRC = man1m/in.rwhod.1m
+sa1.1m				:= SOSRC = man1m/sar.1m
+sa2.1m				:= SOSRC = man1m/sar.1m
+sadc.1m				:= SOSRC = man1m/sar.1m
+shutacct.1m			:= SOSRC = man1m/acctsh.1m
+sprayd.1m			:= SOSRC = man1m/rpc.sprayd.1m
+startup.1m			:= SOSRC = man1m/acctsh.1m
+talkd.1m			:= SOSRC = man1m/in.talkd.1m
+telinit.1m			:= SOSRC = man1m/init.1m
+telnetd.1m			:= SOSRC = man1m/in.telnetd.1m
+tftpd.1m			:= SOSRC = man1m/in.tftpd.1m
+turnacct.1m			:= SOSRC = man1m/acctsh.1m
+umount.1m			:= SOSRC = man1m/mount.1m
+umount_smbfs.1m			:= SOSRC = man1m/mount_smbfs.1m
+umountall.1m			:= SOSRC = man1m/mountall.1m
+unlink.1m			:= SOSRC = man1m/link.1m
+unshareall.1m			:= SOSRC = man1m/shareall.1m
+utmp2wtmp.1m			:= SOSRC = man1m/acct.1m
+uucpd.1m			:= SOSRC = man1m/in.uucpd.1m
+uutry.1m			:= SOSRC = man1m/Uutry.1m
+wtmpfix.1m			:= SOSRC = man1m/fwtmp.1m
+yppasswdd.1m			:= SOSRC = man1m/rpc.yppasswdd.1m
+ypstop.1m			:= SOSRC = man1m/ypstart.1m
+ypupdated.1m			:= SOSRC = man1m/rpc.ypupdated.1m
+ypxfr_1perday.1m		:= SOSRC = man1m/ypxfr.1m
+ypxfr_1perhour.1m		:= SOSRC = man1m/ypxfr.1m
+ypxfr_2perday.1m		:= SOSRC = man1m/ypxfr.1m
+ypxfrd.1m			:= SOSRC = man1m/ypserv.1m
 
 include ../Makefile.man

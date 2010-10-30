@@ -42,6 +42,7 @@ dir path=usr/share/man
 dir path=usr/share/man/man7d
 file path=kernel/misc/$(ARCH64)/uwba group=sys mode=0755
 $(i386_ONLY)file path=kernel/misc/uwba group=sys mode=0755
+file path=usr/share/man/man7d/uwb.7d
 file path=usr/share/man/man7d/uwba.7d
 legacy pkg=SUNWuwb desc="Common framework for UWB device drivers" \
     name="Ultra Wideband (UWB) support modules"

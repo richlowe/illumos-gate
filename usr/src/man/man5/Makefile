@@ -111,4 +111,72 @@ MAN5FILES = 	Intro.5			\
 	 	vgrindefs.5		\
 	 	zones.5
 
+MAN5SOFILES =	ANSI.5		\
+		C++.5		\
+		C.5		\
+		CSI.5		\
+		ISO.5		\
+		MT-Level.5	\
+		POSIX.1.5	\
+		POSIX.2.5	\
+		POSIX.5		\
+		RBAC.5		\
+		SUS.5		\
+		SUSv2.5		\
+		SUSv3.5		\
+		SVID.5		\
+		SVID3.5		\
+		XNS.5		\
+		XNS4.5		\
+		XNS5.5		\
+		XPG.5		\
+		XPG3.5		\
+		XPG4.5		\
+		XPG4v2.5	\
+		advance.5	\
+		architecture.5	\
+		availability.5	\
+		compile.5	\
+		intro.5		\
+		pthreads.5	\
+		stability.5	\
+		standard.5	\
+		step.5		\
+		teclarc.5
+
+MAN5FILES += $(MAN5SOFILES)
+
+ANSI.5		:= SOSRC = man5/standards.5
+C++.5		:= SOSRC = man5/standards.5
+C.5		:= SOSRC = man5/standards.5
+CSI.5		:= SOSRC = man5/attributes.5
+ISO.5		:= SOSRC = man5/standards.5
+MT-Level.5	:= SOSRC = man5/attributes.5
+POSIX.1.5	:= SOSRC = man5/standards.5
+POSIX.2.5	:= SOSRC = man5/standards.5
+POSIX.5		:= SOSRC = man5/standards.5
+RBAC.5		:= SOSRC = man5/rbac.5
+SUS.5		:= SOSRC = man5/standards.5
+SUSv2.5		:= SOSRC = man5/standards.5
+SUSv3.5		:= SOSRC = man5/standards.5
+SVID.5		:= SOSRC = man5/standards.5
+SVID3.5		:= SOSRC = man5/standards.5
+XNS.5		:= SOSRC = man5/standards.5
+XNS4.5		:= SOSRC = man5/standards.5
+XNS5.5		:= SOSRC = man5/standards.5
+XPG.5		:= SOSRC = man5/standards.5
+XPG3.5		:= SOSRC = man5/standards.5
+XPG4.5		:= SOSRC = man5/standards.5
+XPG4v2.5	:= SOSRC = man5/standards.5
+advance.5	:= SOSRC = man5/regexp.5
+architecture.5	:= SOSRC = man5/attributes.5
+availability.5	:= SOSRC = man5/attributes.5
+compile.5	:= SOSRC = man5/regexp.5
+intro.5		:= SOSRC = man5/Intro.5
+pthreads.5	:= SOSRC = man5/threads.5
+stability.5	:= SOSRC = man5/attributes.5
+standard.5	:= SOSRC = man5/attributes.5
+step.5		:= SOSRC = man5/regexp.5
+teclarc.5	:= SOSRC = man5/tecla.5
+
 include ../Makefile.man

@@ -15,4 +15,28 @@ include ../../Makefile.master
 
 MAN3DEVIDFILES = 	devid_get.3devid
 
+MAN3DEVIDSOFILES =	devid_compare.3devid	\
+	devid_deviceid_to_nmlist.3devid		\
+	devid_free.3devid			\
+	devid_free_nmlist.3devid		\
+	devid_get_minor_name.3devid		\
+	devid_sizeof.3devid			\
+	devid_str_decode.3devid			\
+	devid_str_encode.3devid			\
+	devid_str_free.3devid			\
+	devid_valid.3devid
+
+MAN3DEVIDFILES += $(MAN3DEVIDSOFILES)
+
+devid_compare.3devid		:= SOSRC = man3devid/devid_get.3devid
+devid_deviceid_to_nmlist.3devid := SOSRC = man3devid/devid_get.3devid
+devid_free.3devid		:= SOSRC = man3devid/devid_get.3devid
+devid_free_nmlist.3devid	:= SOSRC = man3devid/devid_get.3devid
+devid_get_minor_name.3devid	:= SOSRC = man3devid/devid_get.3devid
+devid_sizeof.3devid		:= SOSRC = man3devid/devid_get.3devid
+devid_str_decode.3devid		:= SOSRC = man3devid/devid_get.3devid
+devid_str_encode.3devid		:= SOSRC = man3devid/devid_get.3devid
+devid_str_free.3devid		:= SOSRC = man3devid/devid_get.3devid
+devid_valid.3devid		:= SOSRC = man3devid/devid_get.3devid
+
 include ../Makefile.man

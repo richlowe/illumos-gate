@@ -26,4 +26,34 @@ MAN3DNS_SDFILES = 	DNSServiceBrowse.3dns_sd		\
 		 	DNSServiceResolve.3dns_sd		\
 		 	TXTRecordCreate.3dns_sd
 
+MAN3DNS_SDSOFILES =	DNSServiceAddRecord.3dns_sd		\
+		 	DNSServiceRegisterRecord.3dns_sd	\
+		 	DNSServiceRemoveRecord.3dns_sd		\
+		 	DNSServiceUpdateRecord.3dns_sd		\
+		 	TXTRecordContainsKey.3dns_sd		\
+		 	TXTRecordDeallocate.3dns_sd		\
+		 	TXTRecordGetBytesPtr.3dns_sd		\
+		 	TXTRecordGetCount.3dns_sd		\
+		 	TXTRecordGetItemAtIndex.3dns_sd		\
+		 	TXTRecordGetLength.3dns_sd		\
+		 	TXTRecordGetValuePtr.3dns_sd		\
+		 	TXTRecordRemoveValue.3dns_sd		\
+		 	TXTRecordSetValue.3dns_sd
+
+MAN3DNS_SDFILES += $(MAN3DNS_SDSOFILES)
+
+DNSServiceAddRecord.3dns_sd		:= SOSRC = man3dns_sd/DNSServiceCreateConnection.3dns_sd
+DNSServiceRegisterRecord.3dns_sd	:= SOSRC = man3dns_sd/DNSServiceCreateConnection.3dns_sd
+DNSServiceRemoveRecord.3dns_sd		:= SOSRC = man3dns_sd/DNSServiceCreateConnection.3dns_sd
+DNSServiceUpdateRecord.3dns_sd		:= SOSRC = man3dns_sd/DNSServiceCreateConnection.3dns_sd
+TXTRecordContainsKey.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordDeallocate.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordGetBytesPtr.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordGetCount.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordGetItemAtIndex.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordGetLength.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordGetValuePtr.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordRemoveValue.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+TXTRecordSetValue.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
+
 include ../Makefile.man

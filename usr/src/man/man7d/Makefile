@@ -188,41 +188,41 @@ COMMON_MAN7DFILES = 	aac.7d		\
 	 	 	zcons.7d	\
 	 	 	zero.7d		\
 	 	 	zyd.7d
-	 
-	sparc_MAN7DFILES =	audiocs.7d	\
-	 			bbc_beep.7d	\
-	 			ctsmc.7d	\
-	 			cvc.7d		\
-	 			cvcredir.7d	\
-	 			dad.7d		\
-	 			dm2s.7d		\
-	 			dr.7d		\
-	 			eri.7d		\
-	 			fas.7d		\
-	 			gpio_87317.7d	\
-	 			grbeep.7d	\
-	 		 	idn.7d		\
-	 		 	mc-opl.7d	\
-	 		 	n2cp.7d		\
-	 		 	n2rng.7d	\
-	 		 	ncp.7d		\
-	 			ntwdt.7d	\
-	 		 	oplkmdrv.7d	\
-	 		 	oplmsu.7d	\
-	 	 		oplpanel.7d	\
-	 		 	pcicmu.7d	\
-	 		 	pcipsy.7d	\
-	 		 	pcisch.7d	\
-	 		 	schpc.7d	\
-	 		 	sf.7d		\
-	 		 	smbus.7d	\
-	 		 	socal.7d	\
-	 		 	ssd.7d		\
-	 			su.7d		\
-	 			todopl.7d	\
-	 			tsalarm.7d	\
-	 			zs.7d		\
-	 			zsh.7d
+
+sparc_MAN7DFILES =	audiocs.7d	\
+			bbc_beep.7d	\
+			ctsmc.7d	\
+			cvc.7d		\
+			cvcredir.7d	\
+			dad.7d		\
+			dm2s.7d		\
+			dr.7d		\
+			eri.7d		\
+			fas.7d		\
+			gpio_87317.7d	\
+			grbeep.7d	\
+			idn.7d		\
+			mc-opl.7d	\
+			n2cp.7d		\
+			n2rng.7d	\
+			ncp.7d		\
+			ntwdt.7d	\
+			oplkmdrv.7d	\
+			oplmsu.7d	\
+			oplpanel.7d	\
+			pcicmu.7d	\
+			pcipsy.7d	\
+			pcisch.7d	\
+			schpc.7d	\
+			sf.7d		\
+			smbus.7d	\
+			socal.7d	\
+			ssd.7d		\
+			su.7d		\
+			todopl.7d	\
+			tsalarm.7d	\
+			zs.7d		\
+			zsh.7d
 
 i386_MAN7DFILES =	npe.7d		\
 			sda.7d		\
@@ -230,7 +230,44 @@ i386_MAN7DFILES =	npe.7d		\
 			sdhost.7d	\
 			smbios.7d
 
-MAN7DFILES = $(COMMON_MAN7DFILES) $($(MACH)_MAN7DFILES)
+MAN7DSOFILES =	1394.7d		\
+	 	allkmem.7d	\
+	 	bscbus.7d	\
+	 	fdc.7d		\
+	 	firewire.7d	\
+	 	hwa1480_fw.7d	\
+	 	i2bsc.7d	\
+	 	kmem.7d		\
+	 	lo0.7d		\
+	 	ticots.7d	\
+	 	ticotsord.7d	\
+	 	urandom.7d	\
+	 	usb.7d		\
+	 	uwb.7d
+
+sparc_MAN7DSOFILES =	drmach.7d	\
+			ngdr.7d		\
+			ngdrmach.7d
+
+MAN7DFILES = $(COMMON_MAN7DFILES) $($(MACH)_MAN7DFILES) $(MAN7DSOFILES) \
+	$($(MACH)_MAN7DSOFILES)
+
+1394.7d		:= SOSRC = man7d/ieee1394.7d
+allkmem.7d	:= SOSRC = man7d/mem.7d
+bscbus.7d	:= SOSRC = man7d/bscv.7d
+drmach.7d	:= SOSRC = man7d/dr.7d
+fdc.7d		:= SOSRC = man7d/fd.7d
+firewire.7d	:= SOSRC = man7d/ieee1394.7d
+hwa1480_fw.7d	:= SOSRC = man7d/wusb_df.7d
+i2bsc.7d	:= SOSRC = man7d/bscv.7d
+kmem.7d		:= SOSRC = man7d/mem.7d
+lo0.7d		:= SOSRC = man7d/ipnet.7d
+ngdr.7d		:= SOSRC = man7d/dr.7d
+ngdrmach.7d	:= SOSRC = man7d/dr.7d
+ticots.7d	:= SOSRC = man7d/ticlts.7d
+ticotsord.7d	:= SOSRC = man7d/ticlts.7d
+urandom.7d	:= SOSRC = man7d/random.7d
+usb.7d		:= SOSRC = man7d/usba.7d
+uwb.7d		:= SOSRC = man7d/uwba.7d
 
 include ../Makefile.man
-

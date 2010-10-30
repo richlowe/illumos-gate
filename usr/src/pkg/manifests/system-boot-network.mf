@@ -43,9 +43,12 @@ file path=lib/svc/manifest/network/rarp.xml group=sys mode=0444
 file path=lib/svc/manifest/network/rpc/bootparams.xml group=sys mode=0444
 file path=usr/sbin/in.rarpd mode=0555
 file path=usr/sbin/rpc.bootparamd mode=0555
+file path=usr/share/man/man1m/bootparamd.1m
 file path=usr/share/man/man1m/in.rarpd.1m
+file path=usr/share/man/man1m/rarpd.1m
 file path=usr/share/man/man1m/rpc.bootparamd.1m
 file path=usr/share/man/man4/bootparams.4
+file path=usr/share/man/man7p/RARP.7p
 file path=usr/share/man/man7p/rarp.7p
 legacy pkg=SUNWbsr desc="Boot Server daemons (Root)" \
     name="Boot Server daemons (Root)"

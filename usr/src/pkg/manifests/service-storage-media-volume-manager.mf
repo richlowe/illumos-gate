@@ -53,6 +53,7 @@ file path=usr/bin/volrmmount mode=0555
 file path=usr/lib/rmvolmgr mode=0555
 file path=usr/share/man/man1/rmformat.1
 file path=usr/share/man/man1/rmmount.1
+file path=usr/share/man/man1/rmumount.1
 file path=usr/share/man/man1/volcheck.1
 file path=usr/share/man/man1/volrmmount.1
 file path=usr/share/man/man1m/rmmount.1m

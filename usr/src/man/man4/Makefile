@@ -214,7 +214,54 @@ sparc_MAN4FILES =	sbus.4
 
 i386_MAN4FILES =	sysbus.4
 
-MAN4FILES = $(COMMON_MAN4FILES) $($(MACH)_MAN4FILES)
+MAN4SOFILES =	addresses.4			\
+		devid_cache.4			\
+		devname_cache.4			\
+		dir.4				\
+		dumpdates.4			\
+		fbtab.4				\
+		forward.4			\
+		fs.4				\
+		intro.4				\
+		isa.4				\
+		md.cf.4				\
+		mdi_ib_cache.4			\
+		mdi_scsi_vhci_cache.4		\
+		pci_unitaddr_persistent.4	\
+		pcie.4				\
+		qop.4				\
+		rhosts.4			\
+		sendmail.cf.4			\
+		snapshot_cache.4		\
+		submit.cf.4			\
+		volume-defaults.4		\
+		wtmp.4				\
+		wtmpx.4
 
+MAN4FILES = $(COMMON_MAN4FILES) $($(MACH)_MAN4FILES) $(MAN4SOFILES)
+
+addresses.4			:= SOSRC = man4/aliases.4
+devid_cache.4			:= SOSRC = man4/devices.4
+devname_cache.4			:= SOSRC = man4/devices.4
+dir.4				:= SOSRC = man4/dir_ufs.4
+dumpdates.4			:= SOSRC = man4/ufsdump.4
+fbtab.4				:= SOSRC = man4/logindevperm.4
+forward.4			:= SOSRC = man4/aliases.4
+fs.4				:= SOSRC = man4/default_fs.4
+intro.4				:= SOSRC = man4/Intro.4
+isa.4				:= SOSRC = man4/sysbus.4
+md.cf.4				:= SOSRC = man4/md.tab.4
+mdi_ib_cache.4			:= SOSRC = man4/devices.4
+mdi_scsi_vhci_cache.4		:= SOSRC = man4/devices.4
+pci_unitaddr_persistent.4	:= SOSRC = man4/devices.4
+pcie.4				:= SOSRC = man4/pci.4
+qop.4				:= SOSRC = man4/mech.4
+rhosts.4			:= SOSRC = man4/hosts.equiv.4
+sendmail.cf.4			:= SOSRC = man4/sendmail.4
+snapshot_cache.4		:= SOSRC = man4/devices.4
+submit.cf.4			:= SOSRC = man4/sendmail.4
+volume-defaults.4		:= SOSRC = man4/volume-request.4
+wtmp.4				:= SOSRC = man4/utmp.4
+wtmpx.4				:= SOSRC = man4/utmpx.4
 
 include ../Makefile.man

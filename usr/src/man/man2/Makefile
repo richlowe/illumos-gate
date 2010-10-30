@@ -156,4 +156,170 @@ MAN2FILES = 	Intro.2			\
 	 	write.2			\
 	 	yield.2			\
 
+MAN2SOFILES =	_Exit.2				\
+	 	_exit.2				\
+	 	_lwp_cond_broadcast.2		\
+	 	_lwp_cond_reltimedwait.2	\
+	 	_lwp_cond_timedwait.2		\
+	 	_lwp_continue.2			\
+	 	_lwp_mutex_trylock.2		\
+	 	_lwp_mutex_unlock.2		\
+	 	_lwp_sema_init.2		\
+	 	_lwp_sema_post.2		\
+	 	_lwp_sema_trywait.2		\
+	 	execl.2				\
+	 	execle.2			\
+	 	execlp.2			\
+	 	execv.2				\
+	 	execve.2			\
+	 	execvp.2			\
+	 	faccessat.2			\
+	 	facl.2				\
+	 	fchdir.2			\
+	 	fchmod.2			\
+	 	fchown.2			\
+	 	fchownat.2			\
+	 	fchroot.2			\
+	 	fgetlabel.2			\
+	 	fork1.2				\
+	 	forkall.2			\
+	 	forkallx.2			\
+	 	forkx.2				\
+	 	fstat.2				\
+	 	fstatat.2			\
+	 	fstatvfs.2			\
+	 	futimesat.2			\
+	 	getaudit_addr.2			\
+	 	getegid.2			\
+	 	geteuid.2			\
+	 	getgid.2			\
+	 	getpgid.2			\
+	 	getpgrp.2			\
+	 	getpmsg.2			\
+	 	getppid.2			\
+	 	getprojid.2			\
+	 	getrctl.2			\
+	 	gettaskid.2			\
+	 	intro.2				\
+	 	lchown.2			\
+	 	lstat.2				\
+	 	openat.2			\
+	 	pathconf.2			\
+	 	pread.2				\
+	 	pset_assign.2			\
+	 	pset_destroy.2			\
+	 	pset_getattr.2			\
+	 	putacct.2			\
+	 	putpmsg.2			\
+	 	pwrite.2			\
+	 	readv.2				\
+	 	renameat.2			\
+	 	sbrk.2				\
+	 	semtimedop.2			\
+	 	setaudit.2			\
+	 	setaudit_addr.2			\
+	 	setauid.2			\
+	 	setcontext.2			\
+	 	setegid.2			\
+	 	seteuid.2			\
+	 	setgid.2			\
+	 	setgroups.2			\
+	 	setitimer.2			\
+	 	setpflags.2			\
+	 	setppriv.2			\
+	 	setrlimit.2			\
+	 	setustack.2			\
+	 	shmat.2				\
+	 	shmdt.2				\
+	 	sigsendset.2			\
+	 	umount2.2			\
+	 	unlinkat.2			\
+	 	vforkx.2			\
+	 	wracct.2			\
+	 	writev.2
+
+MAN2FILES += $(MAN2SOFILES)
+
+_Exit.2				:= SOSRC = man2/exit.2
+_exit.2				:= SOSRC = man2/exit.2
+_lwp_cond_broadcast.2		:= SOSRC = man2/_lwp_cond_signal.2
+_lwp_cond_reltimedwait.2	:= SOSRC = man2/_lwp_cond_wait.2
+_lwp_cond_timedwait.2		:= SOSRC = man2/_lwp_cond_wait.2
+_lwp_continue.2			:= SOSRC = man2/_lwp_suspend.2
+_lwp_mutex_trylock.2		:= SOSRC = man2/_lwp_mutex_lock.2
+_lwp_mutex_unlock.2		:= SOSRC = man2/_lwp_mutex_lock.2
+_lwp_sema_init.2		:= SOSRC = man2/_lwp_sema_wait.2
+_lwp_sema_post.2		:= SOSRC = man2/_lwp_sema_wait.2
+_lwp_sema_trywait.2		:= SOSRC = man2/_lwp_sema_wait.2
+execl.2				:= SOSRC = man2/exec.2
+execle.2			:= SOSRC = man2/exec.2
+execlp.2			:= SOSRC = man2/exec.2
+execv.2				:= SOSRC = man2/exec.2
+execve.2			:= SOSRC = man2/exec.2
+execvp.2			:= SOSRC = man2/exec.2
+faccessat.2			:= SOSRC = man2/access.2
+facl.2				:= SOSRC = man2/acl.2
+fchdir.2			:= SOSRC = man2/chdir.2
+fchmod.2			:= SOSRC = man2/chmod.2
+fchown.2			:= SOSRC = man2/chown.2
+fchownat.2			:= SOSRC = man2/chown.2
+fchroot.2			:= SOSRC = man2/chroot.2
+fgetlabel.2			:= SOSRC = man2/getlabel.2
+fork1.2				:= SOSRC = man2/fork.2
+forkall.2			:= SOSRC = man2/fork.2
+forkallx.2			:= SOSRC = man2/fork.2
+forkx.2				:= SOSRC = man2/fork.2
+fstat.2				:= SOSRC = man2/stat.2
+fstatat.2			:= SOSRC = man2/stat.2
+fstatvfs.2			:= SOSRC = man2/statvfs.2
+futimesat.2			:= SOSRC = man2/utimes.2
+getaudit_addr.2			:= SOSRC = man2/getaudit.2
+getegid.2			:= SOSRC = man2/getuid.2
+geteuid.2			:= SOSRC = man2/getuid.2
+getgid.2			:= SOSRC = man2/getuid.2
+getpgid.2			:= SOSRC = man2/getpid.2
+getpgrp.2			:= SOSRC = man2/getpid.2
+getpmsg.2			:= SOSRC = man2/getmsg.2
+getppid.2			:= SOSRC = man2/getpid.2
+getprojid.2			:= SOSRC = man2/settaskid.2
+getrctl.2			:= SOSRC = man2/setrctl.2
+gettaskid.2			:= SOSRC = man2/settaskid.2
+intro.2				:= SOSRC = man2/Intro.2
+lchown.2			:= SOSRC = man2/chown.2
+lstat.2				:= SOSRC = man2/stat.2
+openat.2			:= SOSRC = man2/open.2
+pathconf.2			:= SOSRC = man2/fpathconf.2
+pread.2				:= SOSRC = man2/read.2
+pset_assign.2			:= SOSRC = man2/pset_create.2
+pset_destroy.2			:= SOSRC = man2/pset_create.2
+pset_getattr.2			:= SOSRC = man2/pset_setattr.2
+putacct.2			:= SOSRC = man2/getacct.2
+putpmsg.2			:= SOSRC = man2/putmsg.2
+pwrite.2			:= SOSRC = man2/write.2
+readv.2				:= SOSRC = man2/read.2
+renameat.2			:= SOSRC = man2/rename.2
+sbrk.2				:= SOSRC = man2/brk.2
+semtimedop.2			:= SOSRC = man2/semop.2
+setaudit.2			:= SOSRC = man2/getaudit.2
+setaudit_addr.2			:= SOSRC = man2/getaudit.2
+setauid.2			:= SOSRC = man2/getauid.2
+setcontext.2			:= SOSRC = man2/getcontext.2
+setegid.2			:= SOSRC = man2/setuid.2
+seteuid.2			:= SOSRC = man2/setuid.2
+setgid.2			:= SOSRC = man2/setuid.2
+setgroups.2			:= SOSRC = man2/getgroups.2
+setitimer.2			:= SOSRC = man2/getitimer.2
+setpflags.2			:= SOSRC = man2/getpflags.2
+setppriv.2			:= SOSRC = man2/getppriv.2
+setrlimit.2			:= SOSRC = man2/getrlimit.2
+setustack.2			:= SOSRC = man2/getustack.2
+shmat.2				:= SOSRC = man2/shmop.2
+shmdt.2				:= SOSRC = man2/shmop.2
+sigsendset.2			:= SOSRC = man2/sigsend.2
+umount2.2			:= SOSRC = man2/umount.2
+unlinkat.2			:= SOSRC = man2/unlink.2
+vforkx.2			:= SOSRC = man2/vfork.2
+wracct.2			:= SOSRC = man2/getacct.2
+writev.2			:= SOSRC = man2/write.2
+
 include ../Makefile.man

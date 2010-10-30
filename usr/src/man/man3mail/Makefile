@@ -15,4 +15,12 @@ include ../../Makefile.master
 
 MAN3MAILFILES =	maillock.3mail
 
+MAN3MAILSOFILES =	mailunlock.3mail	\
+			touchlock.3mail
+
+MAN3MAILFILES += $(MAN3MAILSOFILES)
+
+mailunlock.3mail	:= SOSRC = man3mail/maillock.3mail
+touchlock.3mail		:= SOSRC = man3mail/maillock.3mail
+
 include ../Makefile.man

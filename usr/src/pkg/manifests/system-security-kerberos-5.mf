@@ -99,6 +99,7 @@ file path=usr/sbin/kproplog mode=0555
 file path=usr/share/lib/ldif/kerberos.ldif
 file path=usr/share/man/man1m/k5srvutil.1m
 file path=usr/share/man/man1m/kadmin.1m
+file path=usr/share/man/man1m/kadmin.local.1m
 file path=usr/share/man/man1m/kadmind.1m
 file path=usr/share/man/man1m/kadmind.1m
 file path=usr/share/man/man1m/kclient.1m

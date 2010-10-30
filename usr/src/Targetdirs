@@ -410,6 +410,7 @@ DIRS= \
 	/usr/share/man/man7ipp \
 	/usr/share/man/man7m \
 	/usr/share/man/man7p \
+        /usr/share/man/man9 \
 	/usr/share/man/man9e \
 	/usr/share/man/man9f \
 	/usr/share/man/man9p \

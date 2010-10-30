@@ -26,4 +26,12 @@ MAN3VOLMGTFILES = 	media_findname.3volmgt		\
 	 	 	volmgt_running.3volmgt		\
 	 	 	volmgt_symname.3volmgt
 
+MAN3VOLMGTSOFILES =	media_setattr.3volmgt	\
+			volmgt_symdev.3volmgt
+
+MAN3VOLMGTFILES += $(MAN3VOLMGTSOFILES)
+
+media_setattr.3volmgt := SOSRC = man3volmgt/media_getattr.3volmgt
+volmgt_symdev.3volmgt := SOSRC = man3volmgt/volmgt_symname.3volmgt
+
 include ../Makefile.man

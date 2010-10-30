@@ -35,4 +35,12 @@ MAN3DLPIFILES = 	dlpi_arptype.3dlpi	\
 		 	dlpi_unbind.3dlpi	\
 		 	dlpi_walk.3dlpi
 
+MAN3DLPISOFILES =	dlpi_disabmulti.3dlpi	\
+			dlpi_promiscoff.3dlpi
+
+MAN3DLPIFILES += $(MAN3DLPISOFILES)
+
+dlpi_disabmulti.3dlpi := SOSRC = man3dlpi/dlpi_enabmulti.3dlpi
+dlpi_promiscoff.3dlpi := SOSRC = man3dlpi/dlpi_promiscon.3dlpi
+
 include ../Makefile.man

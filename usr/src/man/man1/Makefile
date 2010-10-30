@@ -432,17 +432,287 @@ MAN1FILES=	acctcom.1			\
 	 	zlogin.1			\
 	 	zonename.1
 
+MAN1SOFILES =	batch.1		\
+	 	bg.1		\
+	 	case.1		\
+	 	chdir.1		\
+	 	checkeq.1	\
+	 	continue.1	\
+	 	decrypt.1	\
+	 	dirname.1	\
+	 	dirs.1		\
+	 	disable.1	\
+	 	dumpkeys.1	\
+	 	errange.1	\
+		errdate.1	\
+		errgid.1	\
+		errint.1	\
+		erritem.1	\
+		errpath.1	\
+		errstr.1	\
+		errtime.1	\
+		erruid.1	\
+		erryorn.1	\
+		eval.1		\
+		export.1	\
+		false.1		\
+		fc.1		\
+		fg.1		\
+		for.1		\
+		foreach.1	\
+		function.1	\
+		goto.1		\
+		hashcheck.1	\
+		hashmake.1	\
+		hashstat.1	\
+		helpdate.1	\
+		helpgid.1	\
+		helpint.1	\
+		helpitem.1	\
+		helppath.1	\
+		helprange.1	\
+		helpstr.1	\
+		helptime.1	\
+		helpuid.1	\
+		helpyorn.1	\
+		hist.1		\
+		i286.1		\
+		i386.1		\
+		i486.1		\
+		i860.1		\
+		iAPX286.1	\
+		if.1		\
+		intro.1		\
+		jsh.1		\
+		ldapadd.1	\
+		neqn.1		\
+		notify.1	\
+		onintr.1	\
+		page.1		\
+		pcat.1		\
+		pcred.1		\
+		pdp11.1		\
+		pfcsh.1		\
+		pfiles.1	\
+		pfksh.1		\
+		pflags.1	\
+		pfsh.1		\
+		pkill.1		\
+		pldd.1		\
+		popd.1		\
+		prun.1		\
+		psig.1		\
+		pstack.1	\
+		pstop.1		\
+		ptime.1		\
+		pushd.1		\
+		pwait.1		\
+		pwdx.1		\
+		red.1		\
+		rehash.1	\
+		remote_shell.1	\
+		remsh.1		\
+		repeat.1	\
+		return.1	\
+		rksh.1		\
+		rksh93.1	\
+		rmail.1		\
+		rmdir.1		\
+		rmumount.1	\
+		select.1	\
+		setenv.1	\
+		settime.1	\
+		snca.1		\
+		source.1	\
+		sparc.1		\
+		spellin.1	\
+		stop.1		\
+		strconf.1	\
+		sun.1		\
+		switch.1	\
+		t300.1		\
+		t300s.1		\
+		t4014.1		\
+		t450.1		\
+		tek.1		\
+		u370.1		\
+		u3b.1		\
+		u3b15.1		\
+		u3b2.1		\
+		u3b5.1		\
+		ulimit.1	\
+		unalias.1	\
+		uncompress.1	\
+		unexpand.1	\
+		unhash.1	\
+		unlimit.1	\
+		unpack.1	\
+		unset.1		\
+		unsetenv.1	\
+		until.1		\
+		valdate.1	\
+		valgid.1	\
+		valint.1	\
+		valpath.1	\
+		valrange.1	\
+		valstr.1	\
+		valtime.1	\
+		valuid.1	\
+		valyorn.1	\
+		vax.1		\
+		vedit.1		\
+		ver.1		\
+		whence.1	\
+		while.1		\
+		zcat.1
+
 HASMAN1FILES= 	edit.1	\
 		ex.1	\
 		patch.1 \
 		sh.1	\
 		vi.1
 
+MAN1FILES += $(MAN1SOFILES)
+
+batch.1 := SOSRC = man1/at.1
+bg.1 := SOSRC = man1/jobs.1
+case.1 := SOSRC = man1/shell_builtins.1
+chdir.1 := SOSRC = man1/cd.1
+checkeq.1 := SOSRC = man1/eqn.1
+continue.1 := SOSRC = man1/break.1
+decrypt.1 := SOSRC = man1/encrypt.1
+dirname.1 := SOSRC = man1/basename.1
+dirs.1 := SOSRC = man1/cd.1
+disable.1 := SOSRC = man1/enable.1
+dumpkeys.1 := SOSRC = man1/loadkeys.1
+errange.1 := SOSRC = man1/ckrange.1
+errdate.1 := SOSRC = man1/ckdate.1
+errgid.1 := SOSRC = man1/ckgid.1
+errint.1 := SOSRC = man1/ckint.1
+erritem.1 := SOSRC = man1/ckitem.1
+errpath.1 := SOSRC = man1/ckpath.1
+errstr.1 := SOSRC = man1/ckstr.1
+errtime.1 := SOSRC = man1/cktime.1
+erruid.1 := SOSRC = man1/ckuid.1
+erryorn.1 := SOSRC = man1/ckyorn.1
+eval.1 := SOSRC = man1/exec.1
+export.1 := SOSRC = man1/set.1
+false.1 := SOSRC = man1/true.1
+fc.1 := SOSRC = man1/history.1
+fg.1 := SOSRC = man1/jobs.1
+for.1 := SOSRC = man1/shell_builtins.1
+foreach.1 := SOSRC = man1/shell_builtins.1
+function.1 := SOSRC = man1/shell_builtins.1
+goto.1 := SOSRC = man1/exit.1
+hashcheck.1 := SOSRC = man1/spell.1
+hashmake.1 := SOSRC = man1/spell.1
+hashstat.1 := SOSRC = man1/hash.1
+helpdate.1 := SOSRC = man1/ckdate.1
+helpgid.1 := SOSRC = man1/ckgid.1
+helpint.1 := SOSRC = man1/ckint.1
+helpitem.1 := SOSRC = man1/ckitem.1
+helppath.1 := SOSRC = man1/ckpath.1
+helprange.1 := SOSRC = man1/ckrange.1
+helpstr.1 := SOSRC = man1/ckstr.1
+helptime.1 := SOSRC = man1/cktime.1
+helpuid.1 := SOSRC = man1/ckuid.1
+helpyorn.1 := SOSRC = man1/ckyorn.1
+hist.1 := SOSRC = man1/history.1
+i286.1 := SOSRC = man1/machid.1
+i386.1 := SOSRC = man1/machid.1
+i486.1 := SOSRC = man1/machid.1
+i860.1 := SOSRC = man1/machid.1
+iAPX286.1 := SOSRC = man1/machid.1
+if.1 := SOSRC = man1/shell_builtins.1
+intro.1 := SOSRC = man1/Intro.1
+jsh.1 := SOSRC = man1/sh.1
+ldapadd.1 := SOSRC = man1/ldapmodify.1
+neqn.1 := SOSRC = man1/eqn.1
+notify.1 := SOSRC = man1/jobs.1
+onintr.1 := SOSRC = man1/trap.1
+page.1 := SOSRC = man1/more.1
+pcat.1 := SOSRC = man1/pack.1
+pcred.1 := SOSRC = man1/proc.1
+pdp11.1 := SOSRC = man1/machid.1
+pfcsh.1 := SOSRC = man1/pfexec.1
+pfiles.1 := SOSRC = man1/proc.1
+pfksh.1 := SOSRC = man1/pfexec.1
+pflags.1 := SOSRC = man1/proc.1
+pfsh.1 := SOSRC = man1/pfexec.1
+pkill.1 := SOSRC = man1/pgrep.1
+pldd.1 := SOSRC = man1/proc.1
+popd.1 := SOSRC = man1/cd.1
+prun.1 := SOSRC = man1/proc.1
+psig.1 := SOSRC = man1/proc.1
+pstack.1 := SOSRC = man1/proc.1
+pstop.1 := SOSRC = man1/proc.1
+ptime.1 := SOSRC = man1/proc.1
+pushd.1 := SOSRC = man1/cd.1
+pwait.1 := SOSRC = man1/proc.1
+pwdx.1 := SOSRC = man1/proc.1
+red.1 := SOSRC = man1/ed.1
+rehash.1 := SOSRC = man1/hash.1
+remote_shell.1 := SOSRC = man1/rsh.1
+remsh.1 := SOSRC = man1/rsh.1
+repeat.1 := SOSRC = man1/shell_builtins.1
+return.1 := SOSRC = man1/exit.1
+rksh.1 := SOSRC = man1/ksh.1
+rksh93.1 := SOSRC = man1/ksh93.1
+rmail.1 := SOSRC = man1/mail.1
+rmdir.1 := SOSRC = man1/rm.1
+rmumount.1 := SOSRC = man1/rmmount.1
+select.1 := SOSRC = man1/shell_builtins.1
+setenv.1 := SOSRC = man1/set.1
+settime.1 := SOSRC = man1/touch.1
+snca.1 := SOSRC = man1/nca.1
+source.1 := SOSRC = man1/exec.1
+sparc.1 := SOSRC = man1/machid.1
+spellin.1 := SOSRC = man1/spell.1
+stop.1 := SOSRC = man1/jobs.1
+strconf.1 := SOSRC = man1/strchg.1
+sun.1 := SOSRC = man1/machid.1
+switch.1 := SOSRC = man1/shell_builtins.1
+t300.1 := SOSRC = man1/tplot.1
+t300s.1 := SOSRC = man1/tplot.1
+t4014.1 := SOSRC = man1/tplot.1
+t450.1 := SOSRC = man1/tplot.1
+tek.1 := SOSRC = man1/tplot.1
+u370.1 := SOSRC = man1/machid.1
+u3b.1 := SOSRC = man1/machid.1
+u3b15.1 := SOSRC = man1/machid.1
+u3b2.1 := SOSRC = man1/machid.1
+u3b5.1 := SOSRC = man1/machid.1
+ulimit.1 := SOSRC = man1/limit.1
+unalias.1 := SOSRC = man1/alias.1
+uncompress.1 := SOSRC = man1/compress.1
+unexpand.1 := SOSRC = man1/expand.1
+unhash.1 := SOSRC = man1/hash.1
+unlimit.1 := SOSRC = man1/limit.1
+unpack.1 := SOSRC = man1/pack.1
+unset.1 := SOSRC = man1/set.1
+unsetenv.1 := SOSRC = man1/set.1
+until.1 := SOSRC = man1/shell_builtins.1
+valdate.1 := SOSRC = man1/ckdate.1
+valgid.1 := SOSRC = man1/ckgid.1
+valint.1 := SOSRC = man1/ckint.1
+valpath.1 := SOSRC = man1/ckpath.1
+valrange.1 := SOSRC = man1/ckrange.1
+valstr.1 := SOSRC = man1/ckstr.1
+valtime.1 := SOSRC = man1/cktime.1
+valuid.1 := SOSRC = man1/ckuid.1
+valyorn.1 := SOSRC = man1/ckyorn.1
+vax.1 := SOSRC = man1/machid.1
+vedit.1 := SOSRC = man1/vi.1
+ver.1 := SOSRC = man1/tplot.1
+whence.1 := SOSRC = man1/typeset.1
+while.1 := SOSRC = man1/shell_builtins.1
+zcat.1 := SOSRC = man1/compress.1
+
 include ../Makefile.man
 
 $(ROOTMAN1)/sh.1 $(ROOTMAN1)/ksh.1:
-	$(SYMLINK) ksh93.1 $@
+	$(RM) $@; $(SYMLINK) ksh93.1 $@
 
 $(ROOTMAN1)/edit.1:
-	$(SYMLINK) ../../../has/man/man1/edit.1 $@
+	$(RM) $@; $(SYMLINK) ../../../has/man/man1/edit.1 $@
 

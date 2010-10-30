@@ -13,6 +13,28 @@
 
 include ../../Makefile.master
 
-MAN3CFGADMFILES = 	config_admin.3cfgadm
+MAN3CFGADMSOFILES =	config_ap_id_cmp.3cfgadm	\
+			config_change_state.3cfgadm	\
+			config_list.3cfgadm		\
+			config_list_ext.3cfgadm		\
+			config_private_func.3cfgadm	\
+			config_stat.3cfgadm		\
+			config_strerror.3cfgadm		\
+			config_test.3cfgadm		\
+			config_unload_libs.3cfgadm
+
+MAN3CFGADMFILES = 	config_admin.3cfgadm \
+			$(MAN3CFGADMSOFILES)
+
+
+config_ap_id_cmp.3cfgadm	:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_change_state.3cfgadm	:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_list.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_list_ext.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_private_func.3cfgadm	:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_stat.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_strerror.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_test.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
+config_unload_libs.3cfgadm	:= SOSRC = man3cfgadm/config_admin.3cfgadm
 
 include ../Makefile.man

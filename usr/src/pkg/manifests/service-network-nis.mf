@@ -71,16 +71,20 @@ file path=usr/sbin/mknetid mode=0555
 file path=usr/sbin/revnetgroup mode=0555
 file path=usr/share/man/man1m/inityp2l.1m
 file path=usr/share/man/man1m/inityp2l.1m
+file path=usr/share/man/man1m/rexd.1m
 file path=usr/share/man/man1m/rpc.rexd.1m
 file path=usr/share/man/man1m/rpc.yppasswdd.1m
 file path=usr/share/man/man1m/rpc.ypupdated.1m
 file path=usr/share/man/man1m/ypmake.1m
 file path=usr/share/man/man1m/ypmap2src.1m
 file path=usr/share/man/man1m/ypmap2src.1m
+file path=usr/share/man/man1m/yppasswdd.1m
 file path=usr/share/man/man1m/yppush.1m
 file path=usr/share/man/man1m/yppush.1m
 file path=usr/share/man/man1m/ypserv.1m
 file path=usr/share/man/man1m/ypserv.1m
+file path=usr/share/man/man1m/ypupdated.1m
+file path=usr/share/man/man1m/ypxfrd.1m
 file path=usr/share/man/man4/NISLDAPmapping.4
 file path=usr/share/man/man4/securenets.4
 file path=usr/share/man/man4/updaters.4

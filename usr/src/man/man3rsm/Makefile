@@ -31,4 +31,58 @@ MAN3RSMFILES = 	rsm_create_localmemory_handle.3rsm	\
 	 	rsm_memseg_import_putv.3rsm		\
 	 	rsm_memseg_import_set_mode.3rsm
 
+MAN3RSMSOFILES =	rsm_free_interconnect_topology.3rsm	\
+		 	rsm_free_localmemory_handle.3rsm	\
+		 	rsm_get_controller_attr.3rsm		\
+		 	rsm_intr_signal_wait.3rsm		\
+		 	rsm_memseg_export_destroy.3rsm		\
+		 	rsm_memseg_export_rebind.3rsm		\
+		 	rsm_memseg_export_republish.3rsm	\
+		 	rsm_memseg_export_unpublish.3rsm	\
+		 	rsm_memseg_import_close_barrier.3rsm	\
+		 	rsm_memseg_import_destroy_barrier.3rsm	\
+		 	rsm_memseg_import_disconnect.3rsm	\
+		 	rsm_memseg_import_get16.3rsm		\
+		 	rsm_memseg_import_get32.3rsm		\
+		 	rsm_memseg_import_get64.3rsm		\
+		 	rsm_memseg_import_get8.3rsm		\
+		 	rsm_memseg_import_get_mode.3rsm		\
+		 	rsm_memseg_import_getv.3rsm		\
+		 	rsm_memseg_import_order_barrier.3rsm	\
+		 	rsm_memseg_import_put16.3rsm		\
+		 	rsm_memseg_import_put32.3rsm		\
+		 	rsm_memseg_import_put64.3rsm		\
+		 	rsm_memseg_import_put8.3rsm		\
+		 	rsm_memseg_import_unmap.3rsm		\
+		 	rsm_memseg_release_pollfd.3rsm		\
+		 	rsm_release_controller.3rsm
+
+MAN3RSMFILES += $(MAN3RSMSOFILES)
+
+rsm_free_interconnect_topology.3rsm	:= SOSRC = man3rsm/rsm_get_interconnect_topology.3rsm
+rsm_free_localmemory_handle.3rsm	:= SOSRC = man3rsm/rsm_create_localmemory_handle.3rsm
+rsm_get_controller_attr.3rsm		:= SOSRC = man3rsm/rsm_get_controller.3rsm
+rsm_intr_signal_wait.3rsm		:= SOSRC = man3rsm/rsm_intr_signal_post.3rsm
+rsm_memseg_export_destroy.3rsm		:= SOSRC = man3rsm/rsm_memseg_export_create.3rsm
+rsm_memseg_export_rebind.3rsm		:= SOSRC = man3rsm/rsm_memseg_export_create.3rsm
+rsm_memseg_export_republish.3rsm	:= SOSRC = man3rsm/rsm_memseg_export_publish.3rsm
+rsm_memseg_export_unpublish.3rsm	:= SOSRC = man3rsm/rsm_memseg_export_publish.3rsm
+rsm_memseg_import_close_barrier.3rsm	:= SOSRC = man3rsm/rsm_memseg_import_open_barrier.3rsm
+rsm_memseg_import_destroy_barrier.3rsm	:= SOSRC = man3rsm/rsm_memseg_import_init_barrier.3rsm
+rsm_memseg_import_disconnect.3rsm	:= SOSRC = man3rsm/rsm_memseg_import_connect.3rsm
+rsm_memseg_import_get16.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_get.3rsm
+rsm_memseg_import_get32.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_get.3rsm
+rsm_memseg_import_get64.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_get.3rsm
+rsm_memseg_import_get8.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_get.3rsm
+rsm_memseg_import_get_mode.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_set_mode.3rsm
+rsm_memseg_import_getv.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_putv.3rsm
+rsm_memseg_import_order_barrier.3rsm	:= SOSRC = man3rsm/rsm_memseg_import_open_barrier.3rsm
+rsm_memseg_import_put16.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_put.3rsm
+rsm_memseg_import_put32.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_put.3rsm
+rsm_memseg_import_put64.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_put.3rsm
+rsm_memseg_import_put8.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_put.3rsm
+rsm_memseg_import_unmap.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_map.3rsm
+rsm_memseg_release_pollfd.3rsm		:= SOSRC = man3rsm/rsm_memseg_get_pollfd.3rsm
+rsm_release_controller.3rsm		:= SOSRC = man3rsm/rsm_get_controller.3rsm
+
 include ../Makefile.man

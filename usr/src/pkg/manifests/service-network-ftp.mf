@@ -65,6 +65,7 @@ file path=usr/share/man/man1/ftpcount.1
 file path=usr/share/man/man1/ftpwho.1
 file path=usr/share/man/man1m/ftpaddhost.1m
 file path=usr/share/man/man1m/ftpconfig.1m
+file path=usr/share/man/man1m/ftpd.1m
 file path=usr/share/man/man1m/ftprestart.1m
 file path=usr/share/man/man1m/ftpshut.1m
 file path=usr/share/man/man1m/in.ftpd.1m

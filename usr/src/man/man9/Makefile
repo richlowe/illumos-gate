@@ -13,26 +13,10 @@
 
 include ../../Makefile.master
 
-MAN1CFILES = 	ct.1c		\
-		cu.1c		\
-		rup.1c		\
-		uucp.1c		\
-		uuencode.1c	\
-		uuglist.1c	\
-		uustat.1c	\
-		uuto.1c		\
-		uux.1c		\
+MAN9SOFILES =	intro.9
 
-MAN1CSOFILES =	uudecode.1c	\
-		uulog.1c	\
-		uuname.1c	\
-		uupick.1c
+MAN9FILES += $(MAN9SOFILES)
 
-MAN1CFILES += $(MAN1CSOFILES)
-
-uudecode.1c	:= SOSRC = man1c/uuencode.1c
-uulog.1c	:= SOSRC = man1c/uucp.1c
-uuname.1c	:= SOSRC = man1c/uucp.1c
-uupick.1c	:= SOSRC = man1c/uuto.1c
+intro.9 := SOSRC = man9e/Intro.9e
 
 include ../Makefile.man

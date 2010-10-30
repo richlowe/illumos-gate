@@ -34,4 +34,18 @@ MAN3PAMFILES = 	pam.3pam			\
 	 	pam_start.3pam			\
 	 	pam_strerror.3pam
 
+MAN3PAMSOFILES =	pam_close_session.3pam	\
+		 	pam_end.3pam		\
+		 	pam_get_data.3pam	\
+		 	pam_get_item.3pam	\
+		 	pam_sm_close_session.3pam
+
+MAN3PAMFILES += $(MAN3PAMSOFILES)
+
+pam_close_session.3pam		:= SOSRC = man3pam/pam_open_session.3pam
+pam_end.3pam			:= SOSRC = man3pam/pam_start.3pam
+pam_get_data.3pam		:= SOSRC = man3pam/pam_set_data.3pam
+pam_get_item.3pam		:= SOSRC = man3pam/pam_set_item.3pam
+pam_sm_close_session.3pam	:= SOSRC = man3pam/pam_sm_open_session.3pam
+
 include ../Makefile.man

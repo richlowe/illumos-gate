@@ -13,9 +13,15 @@
 
 include ../../Makefile.master
 
+
+MAN7SOFILES =	intro.7
+
 MAN7FILES = 	FSS.7	\
 	 	Intro.7 \
 	 	cpr.7	\
-	 	ibmf.7
+	 	ibmf.7  \
+		$(MAN7SOFILES)
+
+intro.7 := SOSRC = man7/Intro.7
 
 include ../Makefile.man

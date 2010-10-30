@@ -19,4 +19,18 @@ MAN3FSTYPFILES = 	fstyp_get_attr.3fstyp	\
 		 	fstyp_mod_init.3fstyp	\
 		 	fstyp_strerror.3fstyp
 
+MAN3FSTYPSOFILES =	fstyp_fini.3fstyp	\
+	 	fstyp_mod_dump.3fstyp		\
+	 	fstyp_mod_fini.3fstyp		\
+	 	fstyp_mod_get_attr.3fstyp	\
+	 	fstyp_mod_ident.3fstyp
+
+MAN3FSTYPFILES += $(MAN3FSTYPSOFILES)
+
+fstyp_fini.3fstyp		:= SOSRC = man3fstyp/fstyp_init.3fstyp
+fstyp_mod_dump.3fstyp		:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
+fstyp_mod_fini.3fstyp		:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
+fstyp_mod_get_attr.3fstyp	:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
+fstyp_mod_ident.3fstyp		:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
+
 include ../Makefile.man

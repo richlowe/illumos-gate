@@ -25,4 +25,30 @@ MAN3GENFILES = 	bgets.3gen	\
 	 	strccpy.3gen	\
 	 	strfind.3gen
 
+MAN3GENSOFILES =	advance.3gen	\
+		 	compile.3gen	\
+		 	p2close.3gen	\
+		 	rmdirp.3gen	\
+		 	step.3gen	\
+		 	str.3gen	\
+		 	strcadd.3gen	\
+		 	streadd.3gen	\
+		 	strecpy.3gen	\
+		 	strrspn.3gen	\
+		 	strtrns.3gen
+
+MAN3GENFILES += $(MAN3GENSOFILES)
+
+advance.3gen	:= SOSRC = man3gen/regexpr.3gen
+compile.3gen	:= SOSRC = man3gen/regexpr.3gen
+p2close.3gen	:= SOSRC = man3gen/p2open.3gen
+rmdirp.3gen	:= SOSRC = man3gen/mkdirp.3gen
+step.3gen	:= SOSRC = man3gen/regexpr.3gen
+str.3gen	:= SOSRC = man3gen/strfind.3gen
+strcadd.3gen	:= SOSRC = man3gen/strccpy.3gen
+streadd.3gen	:= SOSRC = man3gen/strccpy.3gen
+strecpy.3gen	:= SOSRC = man3gen/strccpy.3gen
+strrspn.3gen	:= SOSRC = man3gen/strfind.3gen
+strtrns.3gen	:= SOSRC = man3gen/strfind.3gen
+
 include ../Makefile.man

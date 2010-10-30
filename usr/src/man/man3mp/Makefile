@@ -15,4 +15,40 @@ include ../../Makefile.master
 
 MAN3MPFILES = mp.3mp
 
+MAN3MPSOFILES =	mp_gcd.3mp	\
+	 	mp_itom.3mp	\
+	 	mp_madd.3mp	\
+	 	mp_mcmp.3mp	\
+	 	mp_mdiv.3mp	\
+	 	mp_mfree.3mp	\
+	 	mp_min.3mp	\
+	 	mp_mout.3mp	\
+	 	mp_msqrt.3mp	\
+	 	mp_msub.3mp	\
+	 	mp_mtox.3mp	\
+	 	mp_mult.3mp	\
+	 	mp_pow.3mp	\
+	 	mp_rpow.3mp	\
+	 	mp_sdiv.3mp	\
+	 	mp_xtom.3mp
+
+MAN3MPFILES += $(MAN3MPSOFILES)
+
+mp_gcd.3mp	:= SOSRC = man3mp/mp.3mp
+mp_itom.3mp	:= SOSRC = man3mp/mp.3mp
+mp_madd.3mp	:= SOSRC = man3mp/mp.3mp
+mp_mcmp.3mp	:= SOSRC = man3mp/mp.3mp
+mp_mdiv.3mp	:= SOSRC = man3mp/mp.3mp
+mp_mfree.3mp	:= SOSRC = man3mp/mp.3mp
+mp_min.3mp	:= SOSRC = man3mp/mp.3mp
+mp_mout.3mp	:= SOSRC = man3mp/mp.3mp
+mp_msqrt.3mp	:= SOSRC = man3mp/mp.3mp
+mp_msub.3mp	:= SOSRC = man3mp/mp.3mp
+mp_mtox.3mp	:= SOSRC = man3mp/mp.3mp
+mp_mult.3mp	:= SOSRC = man3mp/mp.3mp
+mp_pow.3mp	:= SOSRC = man3mp/mp.3mp
+mp_rpow.3mp	:= SOSRC = man3mp/mp.3mp
+mp_sdiv.3mp	:= SOSRC = man3mp/mp.3mp
+mp_xtom.3mp	:= SOSRC = man3mp/mp.3mp
+
 include ../Makefile.man

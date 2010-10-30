@@ -24,4 +24,20 @@ MAN3SECFILES = 	acl_check.3sec		\
 	 	acltomode.3sec		\
 	 	acltotext.3sec
 
+MAN3SECSOFILES =	acl_fromtext.3sec	\
+		 	acl_set.3sec		\
+		 	aclfrommode.3sec	\
+		 	aclfromtext.3sec	\
+		 	facl_get.3sec		\
+		 	facl_set.3sec
+
+MAN3SECFILES += $(MAN3SECSOFILES)
+
+acl_fromtext.3sec	:= SOSRC = man3sec/acl_totext.3sec
+acl_set.3sec		:= SOSRC = man3sec/acl_get.3sec
+aclfrommode.3sec	:= SOSRC = man3sec/acltomode.3sec
+aclfromtext.3sec	:= SOSRC = man3sec/acltotext.3sec
+facl_get.3sec		:= SOSRC = man3sec/acl_get.3sec
+facl_set.3sec		:= SOSRC = man3sec/acl_get.3sec
+
 include ../Makefile.man

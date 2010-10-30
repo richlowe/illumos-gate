@@ -55,4 +55,13 @@ MAN3STMFFILES =	stmfAddToHostGroup.3stmf		\
 	 	stmfSetProviderData.3stmf		\
 	 	stmfSetProviderDataProt.3stmf
 
+MAN3STMFSOFILES =	stmfGetLuProp.3stmf	\
+			stmfModifyLuByFname.3stmf
+
+MAN3STMFFILES += $(MAN3STMFSOFILES)
+
+stmfGetLuProp.3stmf		:= SOSRC = man3stmf/stmfSetLuProp.3stmf
+stmfModifyLuByFname.3stmf	:= SOSRC = man3stmf/stmfModifyLu.3stmf
+
+
 include ../Makefile.man

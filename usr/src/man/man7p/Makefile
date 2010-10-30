@@ -35,4 +35,29 @@ MAN7PFILES = 	arp.7p		\
 	 	tcp.7p		\
 	 	udp.7p
 
+MAN7PSOFILES =	AH.7p	\
+	 	ARP.7p	\
+	 	ESP.7p	\
+	 	ICMP.7p	\
+	 	IP.7p	\
+	 	RARP.7p	\
+	 	SCTP.7p	\
+	 	TCP.7p	\
+	 	UDP.7p	\
+	 	if.7p
+
+MAN7PFILES += $(MAN7PSOFILES)
+
+AH.7p	:= SOSRC = man7p/ipsecah.7p
+ARP.7p	:= SOSRC = man7p/arp.7p
+ESP.7p	:= SOSRC = man7p/ipsecesp.7p
+ICMP.7p := SOSRC = man7p/icmp.7p
+IP.7p	:= SOSRC = man7p/ip.7p
+RARP.7p := SOSRC = man7p/rarp.7p
+SCTP.7p := SOSRC = man7p/sctp.7p
+TCP.7p	:= SOSRC = man7p/tcp.7p
+UDP.7p	:= SOSRC = man7p/udp.7p
+if.7p	:= SOSRC = man7p/if_tcp.7p
+
+
 include ../Makefile.man

@@ -203,9 +203,13 @@ file path=usr/share/man/man1m/newaliases.1m
 file path=usr/share/man/man1m/sendmail.1m
 file path=usr/share/man/man1m/smrsh.1m
 file path=usr/share/man/man1m/smrsh.1m
+file path=usr/share/man/man4/addresses.4
 file path=usr/share/man/man4/alias.4
 file path=usr/share/man/man4/aliases.4
+file path=usr/share/man/man4/forward.4
 file path=usr/share/man/man4/sendmail.4
+file path=usr/share/man/man4/sendmail.cf.4
+file path=usr/share/man/man4/submit.cf.4
 legacy pkg=SUNWsndmr desc="Sendmail Configuration Files" \
     name="Sendmail (root)"
 legacy pkg=SUNWsndmu desc="Sendmail Utilities" name="Sendmail (/usr)"

@@ -17,4 +17,12 @@ MAN3RPCFILES = 	rstat.3rpc	\
 	 	rusers.3rpc	\
 	 	rwall.3rpc
 
+MAN3RPCSOFILES =	havedisk.3rpc	\
+			rnusers.3rpc
+
+MAN3RPCFILES += $(MAN3RPCSOFILES)
+
+havedisk.3rpc	:= SOSRC = man3rpc/rstat.3rpc
+rnusers.3rpc	:= SOSRC = man3rpc/rusers.3rpc
+
 include ../Makefile.man

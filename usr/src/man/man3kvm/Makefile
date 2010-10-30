@@ -20,4 +20,24 @@ MAN3KVMFILES = 	kvm_getu.3kvm		\
 	 	kvm_open.3kvm		\
 	 	kvm_read.3kvm
 
+MAN3KVMSOFILES =	kvm_close.3kvm		\
+		 	kvm_getcmd.3kvm		\
+		 	kvm_getproc.3kvm	\
+		 	kvm_kwrite.3kvm		\
+		 	kvm_setproc.3kvm	\
+		 	kvm_uread.3kvm		\
+		 	kvm_uwrite.3kvm		\
+		 	kvm_write.3kvm
+
+MAN3KVMFILES += $(MAN3KVMSOFILES)
+
+kvm_close.3kvm		:= SOSRC = man3kvm/kvm_open.3kvm
+kvm_getcmd.3kvm		:= SOSRC = man3kvm/kvm_getu.3kvm
+kvm_getproc.3kvm	:= SOSRC = man3kvm/kvm_nextproc.3kvm
+kvm_kwrite.3kvm		:= SOSRC = man3kvm/kvm_kread.3kvm
+kvm_setproc.3kvm	:= SOSRC = man3kvm/kvm_nextproc.3kvm
+kvm_uread.3kvm		:= SOSRC = man3kvm/kvm_kread.3kvm
+kvm_uwrite.3kvm		:= SOSRC = man3kvm/kvm_kread.3kvm
+kvm_write.3kvm		:= SOSRC = man3kvm/kvm_read.3kvm
+
 include ../Makefile.man

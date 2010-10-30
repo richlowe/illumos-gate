@@ -15,4 +15,39 @@ include ../../Makefile.master
 
 MAN3PLOTFILES = plot.3plot
 
+MAN3PLOTSOFILES =	arc.3plot	\
+		 	box.3plot	\
+		 	circle.3plot	\
+		 	closepl.3plot	\
+		 	closevt.3plot	\
+		 	cont.3plot	\
+		 	erase.3plot	\
+		 	label.3plot	\
+		 	line.3plot	\
+		 	linemod.3plot	\
+		 	move.3plot	\
+		 	openpl.3plot	\
+		 	openvt.3plot	\
+		 	point.3plot	\
+		 	space.3plot
+
+MAN3PLOTFILES += $(MAN3PLOTSOFILES)
+
+arc.3plot	:= SOSRC = man3plot/plot.3plot
+box.3plot	:= SOSRC = man3plot/plot.3plot
+circle.3plot	:= SOSRC = man3plot/plot.3plot
+closepl.3plot	:= SOSRC = man3plot/plot.3plot
+closevt.3plot	:= SOSRC = man3plot/plot.3plot
+cont.3plot	:= SOSRC = man3plot/plot.3plot
+erase.3plot	:= SOSRC = man3plot/plot.3plot
+label.3plot	:= SOSRC = man3plot/plot.3plot
+line.3plot	:= SOSRC = man3plot/plot.3plot
+linemod.3plot	:= SOSRC = man3plot/plot.3plot
+move.3plot	:= SOSRC = man3plot/plot.3plot
+openpl.3plot	:= SOSRC = man3plot/plot.3plot
+openvt.3plot	:= SOSRC = man3plot/plot.3plot
+point.3plot	:= SOSRC = man3plot/plot.3plot
+space.3plot	:= SOSRC = man3plot/plot.3plot
+
+
 include ../Makefile.man

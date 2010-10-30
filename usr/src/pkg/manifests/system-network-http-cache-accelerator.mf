@@ -82,6 +82,7 @@ file path=usr/lib/ncad_addr.so.1
 file path=usr/share/man/man1/nca.1
 file path=usr/share/man/man1/ncab2clf.1
 file path=usr/share/man/man1/ncakmod.1
+file path=usr/share/man/man1/snca.1
 file path=usr/share/man/man1m/ncaconfd.1m
 file path=usr/share/man/man1m/ncaconfd.1m
 file path=usr/share/man/man4/nca.if.4

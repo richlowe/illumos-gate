@@ -54,6 +54,7 @@ file path=usr/share/lib/xml/dtd/volume-request.dtd group=sys
 file path=usr/share/lib/xml/style/volume-command.xsl group=sys
 file path=usr/share/man/man1m/metassist.1m
 file path=usr/share/man/man4/volume-config.4
+file path=usr/share/man/man4/volume-defaults.4
 file path=usr/share/man/man4/volume-request.4
 legacy pkg=SUNWmdar desc="Solaris Volume Manager Assistant (Root)" \
     name="Solaris Volume Manager Assistant (Root)"

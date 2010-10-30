@@ -50,4 +50,14 @@ MAN1BFILES=	basename.1b \
 		whereis.1b	\
 		whoami.1b
 
+MAN1BSOFILES =	Mail.1b		\
+		fasthalt.1b	\
+		reset.1b
+
+MAN1BFILES += $(MAN1BSOFILES)
+
+Mail.1b		:= SOSRC = man1b/mail.1b
+fasthalt.1b	:= SOSRC = man1b/fastboot.1b
+reset.1b	:= SOSRC = man1b/tset.1b
+
 include ../Makefile.man

@@ -1160,17 +1160,22 @@ $(sparc_ONLY)file path=platform/sun4v/kernel/misc/$(ARCH64)/platmod group=sys \
 $(sparc_ONLY)file path=platform/sun4v/kernel/misc/$(ARCH64)/vis group=sys \
     mode=0755
 $(sparc_ONLY)file path=platform/sun4v/wanboot group=sys reboot-needed=true
+$(i386_ONLY)file path=usr/share/man/man4/isa.4
 $(sparc_ONLY)file path=usr/share/man/man4/sbus.4
 $(i386_ONLY)file path=usr/share/man/man4/sysbus.4
 $(sparc_ONLY)file path=usr/share/man/man7d/bbc_beep.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/ctsmc.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/dr.7d
+$(sparc_ONLY)file path=usr/share/man/man7d/drmach.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/fd.7d
+file path=usr/share/man/man7d/fdc.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/gpio_87317.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/grbeep.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/mc-opl.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/n2rng.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/ncp.7d
+$(sparc_ONLY)file path=usr/share/man/man7d/ngdr.7d
+$(sparc_ONLY)file path=usr/share/man/man7d/ngdrmach.7d
 $(i386_ONLY)file path=usr/share/man/man7d/npe.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/ntwdt.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/oplmsu.7d

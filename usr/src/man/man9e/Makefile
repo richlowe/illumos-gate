@@ -63,4 +63,46 @@ MAN9EFILES = 	Intro.9e		\
 	 	tran_tgt_probe.9e	\
 	 	write.9e
 
+MAN9ESOFILES =	_info.9e		\
+	 	_init.9e		\
+	 	gldm_get_stats.9e	\
+	 	gldm_intr.9e		\
+	 	gldm_ioctl.9e		\
+	 	gldm_reset.9e		\
+	 	gldm_send.9e		\
+	 	gldm_set_mac_addr.9e	\
+	 	gldm_set_multicast.9e	\
+	 	gldm_set_promiscuous.9e	\
+	 	gldm_start.9e		\
+	 	gldm_stop.9e		\
+	 	intro.9e		\
+	 	tran_destroy_pkt.9e	\
+	 	tran_pkt_constructor.9e	\
+	 	tran_pkt_destructor.9e	\
+	 	tran_setcap.9e		\
+	 	tran_teardown_pkt.9e	\
+	 	tran_unquiesce.9e
+
+MAN9EFILES += $(MAN9ESOFILES)
+
+_info.9e		:= SOSRC = man9e/_fini.9e
+_init.9e		:= SOSRC = man9e/_fini.9e
+gldm_get_stats.9e	:= SOSRC = man9e/gld.9e
+gldm_intr.9e		:= SOSRC = man9e/gld.9e
+gldm_ioctl.9e		:= SOSRC = man9e/gld.9e
+gldm_reset.9e		:= SOSRC = man9e/gld.9e
+gldm_send.9e		:= SOSRC = man9e/gld.9e
+gldm_set_mac_addr.9e	:= SOSRC = man9e/gld.9e
+gldm_set_multicast.9e	:= SOSRC = man9e/gld.9e
+gldm_set_promiscuous.9e := SOSRC = man9e/gld.9e
+gldm_start.9e		:= SOSRC = man9e/gld.9e
+gldm_stop.9e		:= SOSRC = man9e/gld.9e
+intro.9e		:= SOSRC = man9e/Intro.9e
+tran_destroy_pkt.9e	:= SOSRC = man9e/tran_init_pkt.9e
+tran_pkt_constructor.9e := SOSRC = man9e/tran_setup_pkt.9e
+tran_pkt_destructor.9e	:= SOSRC = man9e/tran_setup_pkt.9e
+tran_setcap.9e		:= SOSRC = man9e/tran_getcap.9e
+tran_teardown_pkt.9e	:= SOSRC = man9e/tran_setup_pkt.9e
+tran_unquiesce.9e	:= SOSRC = man9e/tran_quiesce.9e
+
 include ../Makefile.man
