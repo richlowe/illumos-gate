@@ -55,4 +55,6 @@ SSAStringToChar.3snmp	:= SOSRC = man3snmp/SSAStringCpy.3snmp
 SSAStringZero.3snmp	:= SOSRC = man3snmp/SSAStringCpy.3snmp
 SSASubagentOpen.3snmp	:= SOSRC = man3snmp/SSAAgentIsAlive.3snmp
 
+.KEEP_STATE:
+
 include ../Makefile.man

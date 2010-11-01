@@ -210,4 +210,6 @@ setservent.3socket		:= SOSRC = man3socket/getservbyname.3socket
 setsockopt.3socket		:= SOSRC = man3socket/getsockopt.3socket
 setsourcefilter.3socket		:= SOSRC = man3socket/getsourcefilter.3socket
 
+.KEEP_STATE:
+
 include ../Makefile.man

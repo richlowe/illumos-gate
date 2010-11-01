@@ -139,4 +139,6 @@ setauuser.3bsm := SOSRC = man3bsm/getauusernam.3bsm
 setddent.3bsm := SOSRC = man3bsm/getddent.3bsm
 setddfile.3bsm := SOSRC = man3bsm/getddent.3bsm
 
+.KEEP_STATE:
+
 include ../Makefile.man

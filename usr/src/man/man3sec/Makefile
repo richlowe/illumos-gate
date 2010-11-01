@@ -40,4 +40,6 @@ aclfromtext.3sec	:= SOSRC = man3sec/acltotext.3sec
 facl_get.3sec		:= SOSRC = man3sec/acl_get.3sec
 facl_set.3sec		:= SOSRC = man3sec/acl_get.3sec
 
+.KEEP_STATE:
+
 include ../Makefile.man

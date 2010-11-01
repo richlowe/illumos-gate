@@ -98,4 +98,6 @@ ddi_dma_lim.9s	:= SOSRC = man9s/ddi_dma_lim_sparc.9s
 intro.9s	:= SOSRC = man9s/Intro.9s
 mblk.9s		:= SOSRC = man9s/msgb.9s
 
+.KEEP_STATE:
+
 include ../Makefile.man

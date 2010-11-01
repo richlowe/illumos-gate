@@ -17,4 +17,6 @@ MAN3FCOEFILES = 	FCOE_CreatePort.3fcoe	\
 		 	FCOE_DeletePort.3fcoe	\
 		 	FCOE_GetPortList.3fcoe
 
+.KEEP_STATE:
+
 include ../Makefile.man

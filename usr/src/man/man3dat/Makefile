@@ -87,4 +87,6 @@ MAN3DATFILES = 	dat_cno_create.3dat			\
 	 	dat_srq_set_lw.3dat			\
 	 	dat_strerror.3dat
 
+.KEEP_STATE:
+
 include ../Makefile.man

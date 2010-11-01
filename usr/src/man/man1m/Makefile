@@ -774,4 +774,6 @@ ypxfr_1perhour.1m		:= SOSRC = man1m/ypxfr.1m
 ypxfr_2perday.1m		:= SOSRC = man1m/ypxfr.1m
 ypxfrd.1m			:= SOSRC = man1m/ypserv.1m
 
+.KEEP_STATE:
+
 include ../Makefile.man

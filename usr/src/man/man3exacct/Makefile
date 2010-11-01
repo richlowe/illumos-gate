@@ -64,4 +64,6 @@ ea_strfree.3exacct		:= SOSRC = man3exacct/ea_set_item.3exacct
 ea_unpack_object.3exacct	:= SOSRC = man3exacct/ea_pack_object.3exacct
 ea_write_object.3exacct		:= SOSRC = man3exacct/ea_pack_object.3exacct
 
+.KEEP_STATE:
+
 include ../Makefile.man

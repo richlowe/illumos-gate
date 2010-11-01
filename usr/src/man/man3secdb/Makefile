@@ -69,5 +69,6 @@ setexecattr.3secdb	:= SOSRC = man3secdb/getexecattr.3secdb
 setprofattr.3secdb	:= SOSRC = man3secdb/getprofattr.3secdb
 setuserattr.3secdb	:= SOSRC = man3secdb/getuserattr.3secdb
 
+.KEEP_STATE:
 
 include ../Makefile.man

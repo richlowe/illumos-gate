@@ -60,4 +60,6 @@ sdp_delete_all_media_field.3commputil	:= SOSRC = man3commputil/sdp_delete_all_fi
 sdp_delete_attribute.3commputil		:= SOSRC = man3commputil/sdp_delete_media.3commputil
 sdp_free_session.3commputil		:= SOSRC = man3commputil/sdp_new_session.3commputil
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -29,4 +29,6 @@ kstat_close.3kstat		:= SOSRC = man3kstat/kstat_open.3kstat
 kstat_data_lookup.3kstat	:= SOSRC = man3kstat/kstat_lookup.3kstat
 kstat_write.3kstat		:= SOSRC = man3kstat/kstat_read.3kstat
 
+.KEEP_STATE:
+
 include ../Makefile.man

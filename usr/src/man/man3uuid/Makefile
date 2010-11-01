@@ -37,4 +37,6 @@ uuid_parse.3uuid		:= SOSRC = man3uuid/uuid_clear.3uuid
 uuid_time.3uuid			:= SOSRC = man3uuid/uuid_clear.3uuid
 uuid_unparse.3uuid		:= SOSRC = man3uuid/uuid_clear.3uuid
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -23,4 +23,6 @@ MAN3MAILFILES += $(MAN3MAILSOFILES)
 mailunlock.3mail	:= SOSRC = man3mail/maillock.3mail
 touchlock.3mail		:= SOSRC = man3mail/maillock.3mail
 
+.KEEP_STATE:
+
 include ../Makefile.man

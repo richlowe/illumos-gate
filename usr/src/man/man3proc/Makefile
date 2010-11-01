@@ -57,5 +57,6 @@ ps_ptread.3proc		:= SOSRC = man3proc/ps_pread.3proc
 ps_ptwrite.3proc	:= SOSRC = man3proc/ps_pread.3proc
 ps_pwrite.3proc		:= SOSRC = man3proc/ps_pread.3proc
 
+.KEEP_STATE:
 
 include ../Makefile.man

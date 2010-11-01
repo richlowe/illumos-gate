@@ -33,4 +33,6 @@ fstyp_mod_fini.3fstyp		:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
 fstyp_mod_get_attr.3fstyp	:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
 fstyp_mod_ident.3fstyp		:= SOSRC = man3fstyp/fstyp_mod_init.3fstyp
 
+.KEEP_STATE:
+
 include ../Makefile.man

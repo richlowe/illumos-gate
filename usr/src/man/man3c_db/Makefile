@@ -102,5 +102,6 @@ td_thr_setgregs.3c_db			:= SOSRC = man3c_db/td_thr_getgregs.3c_db
 td_thr_setxregs.3c_db			:= SOSRC = man3c_db/td_thr_getgregs.3c_db
 td_thr_sigsetmask.3c_db			:= SOSRC = man3c_db/td_thr_setsigpending.3c_db
 
+.KEEP_STATE:
 
 include ../Makefile.man

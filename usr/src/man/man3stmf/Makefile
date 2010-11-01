@@ -64,4 +64,6 @@ stmfGetLuProp.3stmf		:= SOSRC = man3stmf/stmfSetLuProp.3stmf
 stmfModifyLuByFname.3stmf	:= SOSRC = man3stmf/stmfModifyLu.3stmf
 
 
+.KEEP_STATE:
+
 include ../Makefile.man

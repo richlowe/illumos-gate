@@ -37,4 +37,6 @@ MAN3LGRPFILES += $(MAN3LGRPSOFILES)
 lgrp_affinity_set.3lgrp		:= SOSRC = man3lgrp/lgrp_affinity_get.3lgrp
 lgrp_latency_cookie.3lgrp	:= SOSRC = man3lgrp/lgrp_latency.3lgrp
 
+.KEEP_STATE:
+
 include ../Makefile.man

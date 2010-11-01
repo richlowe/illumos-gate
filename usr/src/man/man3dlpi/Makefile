@@ -43,4 +43,6 @@ MAN3DLPIFILES += $(MAN3DLPISOFILES)
 dlpi_disabmulti.3dlpi := SOSRC = man3dlpi/dlpi_enabmulti.3dlpi
 dlpi_promiscoff.3dlpi := SOSRC = man3dlpi/dlpi_promiscon.3dlpi
 
+.KEEP_STATE:
+
 include ../Makefile.man

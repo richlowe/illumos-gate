@@ -461,4 +461,6 @@ sip_unregister_all_sent_by.3sip		:= SOSRC = man3sip/sip_register_sent_by.3sip
 sip_unregister_sent_by.3sip		:= SOSRC = man3sip/sip_register_sent_by.3sip
 sip_uri_errflags_to_str.3sip		:= SOSRC = man3sip/sip_is_sip_uri.3sip
 
+.KEEP_STATE:
+
 include ../Makefile.man

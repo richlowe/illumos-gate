@@ -674,4 +674,6 @@ wtouchln.3xcurses		:= SOSRC = man3xcurses/is_linetouched.3xcurses
 wvline.3xcurses			:= SOSRC = man3xcurses/hline.3xcurses
 wvline_set.3xcurses		:= SOSRC = man3xcurses/hline_set.3xcurses
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -63,4 +63,6 @@ res_search.3resolv		:= SOSRC = man3resolv/resolver.3resolv
 res_send.3resolv		:= SOSRC = man3resolv/resolver.3resolv
 res_setservers.3resolv		:= SOSRC = man3resolv/resolver.3resolv
 
+.KEEP_STATE:
+
 include ../Makefile.man

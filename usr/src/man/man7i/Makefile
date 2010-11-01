@@ -37,4 +37,6 @@ MAN7IFILES = 	agpgart_io.7i	\
 	 	visual_io.7i	\
 	 	vt.7i
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -38,4 +38,6 @@ getprojidbyname.3project	:= SOSRC = man3project/getprojent.3project
 inproj.3project			:= SOSRC = man3project/getprojent.3project
 setprojent.3project		:= SOSRC = man3project/getprojent.3project
 
+.KEEP_STATE:
+
 include ../Makefile.man

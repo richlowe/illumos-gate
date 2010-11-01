@@ -172,4 +172,6 @@ pca_set_check_fn.3tecla		:= SOSRC = man3tecla/pca_lookup_file.3tecla
 ppc_file_start.3tecla		:= SOSRC = man3tecla/pca_lookup_file.3tecla
 ppc_literal_escapes.3tecla	:= SOSRC = man3tecla/pca_lookup_file.3tecla
 
+.KEEP_STATE:
+
 include ../Makefile.man

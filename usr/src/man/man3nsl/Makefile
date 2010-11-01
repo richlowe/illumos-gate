@@ -545,4 +545,6 @@ yp_unbind.3nsl				:= SOSRC = man3nsl/ypclnt.3nsl
 yperr_string.3nsl			:= SOSRC = man3nsl/ypclnt.3nsl
 ypprot_err.3nsl				:= SOSRC = man3nsl/ypclnt.3nsl
 
+.KEEP_STATE:
+
 include ../Makefile.man

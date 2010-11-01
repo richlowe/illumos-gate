@@ -15,4 +15,6 @@ include ../../Makefile.master
 
 MAN4BFILES = 	plot.4b
 
+.KEEP_STATE:
+
 include ../Makefile.man

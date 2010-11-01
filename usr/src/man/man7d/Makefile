@@ -270,4 +270,6 @@ urandom.7d	:= SOSRC = man7d/random.7d
 usb.7d		:= SOSRC = man7d/usba.7d
 uwb.7d		:= SOSRC = man7d/uwba.7d
 
+.KEEP_STATE:
+
 include ../Makefile.man

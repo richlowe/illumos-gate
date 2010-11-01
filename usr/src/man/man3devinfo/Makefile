@@ -180,4 +180,6 @@ di_prop_strings.3devinfo		:= SOSRC = man3devinfo/di_prop_bytes.3devinfo
 di_prop_type.3devinfo			:= SOSRC = man3devinfo/di_prop_bytes.3devinfo
 di_sibling_node.3devinfo		:= SOSRC = man3devinfo/di_child_node.3devinfo
 
+.KEEP_STATE:
+
 include ../Makefile.man

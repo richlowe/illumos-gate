@@ -56,4 +56,6 @@ TXTRecordGetValuePtr.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
 TXTRecordRemoveValue.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
 TXTRecordSetValue.3dns_sd		:= SOSRC = man3dns_sd/TXTRecordCreate.3dns_sd
 
+.KEEP_STATE:
+
 include ../Makefile.man

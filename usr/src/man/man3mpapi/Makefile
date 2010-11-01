@@ -59,4 +59,6 @@ MAN3MPAPIFILES = 	MP_AssignLogicalUnitToTPG.3mpapi		\
 	 	 	MP_SetTPGAccess.3mpapi				\
 	 	 	Sun_MP_SendScsiCmd.3mpapi
 
+.KEEP_STATE:
+
 include ../Makefile.man

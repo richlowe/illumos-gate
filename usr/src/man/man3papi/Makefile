@@ -162,4 +162,6 @@ papiServiceSetEncryption.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
 papiServiceSetPassword.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
 papiServiceSetUserName.3papi		:= SOSRC = man3papi/papiServiceCreate.3papi
 
+.KEEP_STATE:
+
 include ../Makefile.man

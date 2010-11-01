@@ -179,4 +179,6 @@ standard.5	:= SOSRC = man5/attributes.5
 step.5		:= SOSRC = man5/regexp.5
 teclarc.5	:= SOSRC = man5/tecla.5
 
+.KEEP_STATE:
+
 include ../Makefile.man

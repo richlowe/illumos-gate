@@ -170,4 +170,6 @@ gelf_update_symshndx.3elf	:= SOSRC = man3elf/gelf.3elf
 gelf_xlatetof.3elf		:= SOSRC = man3elf/gelf.3elf
 gelf_xlatetom.3elf		:= SOSRC = man3elf/gelf.3elf
 
+.KEEP_STATE:
+
 include ../Makefile.man

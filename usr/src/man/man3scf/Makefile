@@ -448,4 +448,6 @@ smf_refresh_instance.3scf			:= SOSRC = man3scf/smf_enable_instance.3scf
 smf_restart_instance.3scf			:= SOSRC = man3scf/smf_enable_instance.3scf
 smf_restore_instance.3scf			:= SOSRC = man3scf/smf_enable_instance.3scf
 
+.KEEP_STATE:
+
 include ../Makefile.man

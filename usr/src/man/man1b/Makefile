@@ -60,4 +60,6 @@ Mail.1b		:= SOSRC = man1b/mail.1b
 fasthalt.1b	:= SOSRC = man1b/fastboot.1b
 reset.1b	:= SOSRC = man1b/tset.1b
 
+.KEEP_STATE:
+
 include ../Makefile.man

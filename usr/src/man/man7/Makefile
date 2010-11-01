@@ -24,4 +24,6 @@ MAN7FILES = 	FSS.7	\
 
 intro.7 := SOSRC = man7/Intro.7
 
+.KEEP_STATE:
+
 include ../Makefile.man

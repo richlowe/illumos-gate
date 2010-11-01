@@ -43,4 +43,6 @@ picl_get_next_prop.3picl	:= SOSRC = man3picl/picl_get_first_prop.3picl
 picl_get_propval_by_name.3picl	:= SOSRC = man3picl/picl_get_propval.3picl
 picl_set_propval_by_name.3picl	:= SOSRC = man3picl/picl_set_propval.3picl
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -27,4 +27,6 @@ MAN7FSFILES = 	ctfs.7fs	\
 	 	udfs.7fs	\
 	 	ufs.7fs
 
+.KEEP_STATE:
+
 include ../Makefile.man

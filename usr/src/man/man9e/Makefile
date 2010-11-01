@@ -105,4 +105,6 @@ tran_setcap.9e		:= SOSRC = man9e/tran_getcap.9e
 tran_teardown_pkt.9e	:= SOSRC = man9e/tran_setup_pkt.9e
 tran_unquiesce.9e	:= SOSRC = man9e/tran_quiesce.9e
 
+.KEEP_STATE:
+
 include ../Makefile.man

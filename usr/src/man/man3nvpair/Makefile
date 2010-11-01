@@ -213,4 +213,6 @@ nvpair_value_uint64_array.3nvpair	:= SOSRC = man3nvpair/nvpair_value_byte.3nvpai
 nvpair_value_uint8.3nvpair		:= SOSRC = man3nvpair/nvpair_value_byte.3nvpair
 nvpair_value_uint8_array.3nvpair	:= SOSRC = man3nvpair/nvpair_value_byte.3nvpair
 
+.KEEP_STATE:
+
 include ../Makefile.man

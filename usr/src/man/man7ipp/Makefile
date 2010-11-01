@@ -21,4 +21,6 @@ MAN7IPPFILES = 	dlcosmk.7ipp	\
 	 	tokenmt.7ipp	\
 	 	tswtclmt.7ipp
 
+.KEEP_STATE:
+
 include ../Makefile.man

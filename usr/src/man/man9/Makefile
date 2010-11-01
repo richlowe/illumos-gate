@@ -19,4 +19,6 @@ MAN9FILES += $(MAN9SOFILES)
 
 intro.9 := SOSRC = man9e/Intro.9e
 
+.KEEP_STATE:
+
 include ../Makefile.man

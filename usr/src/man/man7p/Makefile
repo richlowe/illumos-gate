@@ -60,4 +60,6 @@ UDP.7p	:= SOSRC = man7p/udp.7p
 if.7p	:= SOSRC = man7p/if_tcp.7p
 
 
+.KEEP_STATE:
+
 include ../Makefile.man

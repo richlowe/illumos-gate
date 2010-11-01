@@ -106,4 +106,6 @@ setnetent.3xnet		:= SOSRC = man3xnet/endnetent.3xnet
 setprotoent.3xnet	:= SOSRC = man3xnet/endprotoent.3xnet
 setservent.3xnet	:= SOSRC = man3xnet/endservent.3xnet
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -136,4 +136,6 @@ pctx_create.3cpc			:= SOSRC = man3cpc/pctx_capture.3cpc
 pctx_release.3cpc			:= SOSRC = man3cpc/pctx_capture.3cpc
 pctx_run.3cpc				:= SOSRC = man3cpc/pctx_capture.3cpc
 
+.KEEP_STATE:
+
 include ../Makefile.man

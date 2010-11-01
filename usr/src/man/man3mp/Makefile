@@ -51,4 +51,6 @@ mp_rpow.3mp	:= SOSRC = man3mp/mp.3mp
 mp_sdiv.3mp	:= SOSRC = man3mp/mp.3mp
 mp_xtom.3mp	:= SOSRC = man3mp/mp.3mp
 
+.KEEP_STATE:
+
 include ../Makefile.man

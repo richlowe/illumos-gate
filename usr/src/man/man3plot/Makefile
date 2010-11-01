@@ -49,5 +49,6 @@ openvt.3plot	:= SOSRC = man3plot/plot.3plot
 point.3plot	:= SOSRC = man3plot/plot.3plot
 space.3plot	:= SOSRC = man3plot/plot.3plot
 
+.KEEP_STATE:
 
 include ../Makefile.man

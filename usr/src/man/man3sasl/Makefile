@@ -96,4 +96,6 @@ prop_setvals.3sasl	:= SOSRC = man3sasl/sasl_auxprop.3sasl
 sasl_encodev.3sasl	:= SOSRC = man3sasl/sasl_encode.3sasl
 
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -41,4 +41,6 @@ sysevent_get_time.3sysevent		:= SOSRC = man3sysevent/sysevent_get_class_name.3sy
 sysevent_unbind_handle.3sysevent	:= SOSRC = man3sysevent/sysevent_bind_handle.3sysevent
 sysevent_unsubscribe_event.3sysevent	:= SOSRC = man3sysevent/sysevent_subscribe_event.3sysevent
 
+.KEEP_STATE:
+
 include ../Makefile.man

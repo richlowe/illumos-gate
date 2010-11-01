@@ -51,4 +51,6 @@ strecpy.3gen	:= SOSRC = man3gen/strccpy.3gen
 strrspn.3gen	:= SOSRC = man3gen/strfind.3gen
 strtrns.3gen	:= SOSRC = man3gen/strfind.3gen
 
+.KEEP_STATE:
+
 include ../Makefile.man

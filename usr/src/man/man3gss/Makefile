@@ -52,4 +52,6 @@ MAN3GSSFILES = 	gss_accept_sec_context.3gss	\
 	 	gss_wrap.3gss			\
 	 	gss_wrap_size_limit.3gss
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -43,4 +43,6 @@ inquiry-revision-id.9p	:= SOSRC = man9p/inquiry-device-type.9p
 inquiry-serial-no.9p	:= SOSRC = man9p/inquiry-device-type.9p
 inquiry-vendor-id.9p	:= SOSRC = man9p/inquiry-device-type.9p
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -212,4 +212,6 @@ setkey.3ext			:= SOSRC = man3ext/crypt.3ext
 tsalarm_set.3ext		:= SOSRC = man3ext/tsalarm_get.3ext
 write_vtoc.3ext			:= SOSRC = man3ext/read_vtoc.3ext
 
+.KEEP_STATE:
+
 include ../Makefile.man

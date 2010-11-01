@@ -1881,4 +1881,6 @@ wstol.3c				:= SOSRC = man3c/wcstol.3c
 wstostr.3c				:= SOSRC = man3c/strtows.3c
 wsxfrm.3c				:= SOSRC = man3c/wcsxfrm.3c
 
+.KEEP_STATE:
+
 include ../Makefile.man

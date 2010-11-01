@@ -107,4 +107,6 @@ tnfctl_probe_enable.3tnf		:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
 tnfctl_probe_trace.3tnf			:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
 tnfctl_probe_untrace.3tnf		:= SOSRC = man3tnf/tnfctl_probe_state_get.3tnf
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -25,4 +25,6 @@ MAN3RPCFILES += $(MAN3RPCSOFILES)
 havedisk.3rpc	:= SOSRC = man3rpc/rstat.3rpc
 rnusers.3rpc	:= SOSRC = man3rpc/rusers.3rpc
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -32,4 +32,6 @@ MAN3SLPFILES = 	SLPClose.3slp			\
 	 	slp_api.3slp			\
 	 	slp_strerror.3slp
 
+.KEEP_STATE:
+
 include ../Makefile.man

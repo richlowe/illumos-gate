@@ -199,4 +199,6 @@ libtermcap.3lib					:= SOSRC = man3lib/libcurses.3lib
 libtermlib.3lib					:= SOSRC = man3lib/libcurses.3lib
 libvt0.3lib					:= SOSRC = man3lib/libplot.3lib
 
+.KEEP_STATE:
+
 include ../Makefile.man

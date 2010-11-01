@@ -62,4 +62,6 @@ ptree_get_next_prop.3picltree		:= SOSRC = man3picltree/ptree_get_first_prop.3pic
 ptree_get_propval_by_name.3picltree	:= SOSRC = man3picltree/ptree_get_propval.3picltree
 ptree_update_propval_by_name.3picltree	:= SOSRC = man3picltree/ptree_update_propval.3picltree
 
+.KEEP_STATE:
+
 include ../Makefile.man

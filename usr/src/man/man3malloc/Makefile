@@ -54,4 +54,6 @@ umem_nofail_callback.3malloc	:= SOSRC = man3malloc/umem_alloc.3malloc
 umem_zalloc.3malloc		:= SOSRC = man3malloc/umem_alloc.3malloc
 valloc.3malloc			:= SOSRC = man3malloc/malloc.3malloc
 
+.KEEP_STATE:
+
 include ../Makefile.man

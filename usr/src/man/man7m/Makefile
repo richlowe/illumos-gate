@@ -46,4 +46,6 @@ vuidm4p.7m	:= SOSRC = man7m/vuidmice.7m
 vuidm5p.7m	:= SOSRC = man7m/vuidmice.7m
 
 
+.KEEP_STATE:
+
 include ../Makefile.man

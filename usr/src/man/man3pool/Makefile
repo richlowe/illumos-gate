@@ -144,4 +144,6 @@ pool_walk_pools.3pool			:= SOSRC = man3pool/pool_walk_components.3pool
 pool_walk_properties.3pool		:= SOSRC = man3pool/pool_get_property.3pool
 pool_walk_resources.3pool		:= SOSRC = man3pool/pool_walk_components.3pool
 
+.KEEP_STATE:
+
 include ../Makefile.man

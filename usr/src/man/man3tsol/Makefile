@@ -99,4 +99,6 @@ sbsltos.3tsol			:= SOSRC = man3tsol/sbltos.3tsol
 stobclear.3tsol			:= SOSRC = man3tsol/stobl.3tsol
 stobsl.3tsol			:= SOSRC = man3tsol/stobl.3tsol
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -19,4 +19,6 @@ MAN3LIBUCBFILES = 	libcurses.3libucb		\
 	 	 	libtermcap.3libucb		\
 	 	 	libucb.3libucb
 
+.KEEP_STATE:
+
 include ../Makefile.man

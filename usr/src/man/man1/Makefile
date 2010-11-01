@@ -708,6 +708,8 @@ whence.1 := SOSRC = man1/typeset.1
 while.1 := SOSRC = man1/shell_builtins.1
 zcat.1 := SOSRC = man1/compress.1
 
+.KEEP_STATE:
+
 include ../Makefile.man
 
 $(ROOTMAN1)/sh.1 $(ROOTMAN1)/ksh.1:

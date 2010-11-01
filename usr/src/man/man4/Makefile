@@ -264,4 +264,6 @@ volume-defaults.4		:= SOSRC = man4/volume-request.4
 wtmp.4				:= SOSRC = man4/utmp.4
 wtmpx.4				:= SOSRC = man4/utmpx.4
 
+.KEEP_STATE:
+
 include ../Makefile.man

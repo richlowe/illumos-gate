@@ -1036,4 +1036,6 @@ wtimeout.3curses		:= SOSRC = man3curses/curs_inopts.3curses
 wtouchln.3curses		:= SOSRC = man3curses/curs_touch.3curses
 wvline.3curses			:= SOSRC = man3curses/curs_border.3curses
 
+.KEEP_STATE:
+
 include ../Makefile.man

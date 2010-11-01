@@ -40,4 +40,6 @@ kvm_uread.3kvm		:= SOSRC = man3kvm/kvm_kread.3kvm
 kvm_uwrite.3kvm		:= SOSRC = man3kvm/kvm_kread.3kvm
 kvm_write.3kvm		:= SOSRC = man3kvm/kvm_read.3kvm
 
+.KEEP_STATE:
+
 include ../Makefile.man

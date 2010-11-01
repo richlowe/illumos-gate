@@ -37,4 +37,6 @@ config_strerror.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
 config_test.3cfgadm		:= SOSRC = man3cfgadm/config_admin.3cfgadm
 config_unload_libs.3cfgadm	:= SOSRC = man3cfgadm/config_admin.3cfgadm
 
+.KEEP_STATE:
+
 include ../Makefile.man

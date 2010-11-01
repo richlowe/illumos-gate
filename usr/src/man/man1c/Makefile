@@ -35,4 +35,6 @@ uulog.1c	:= SOSRC = man1c/uucp.1c
 uuname.1c	:= SOSRC = man1c/uucp.1c
 uupick.1c	:= SOSRC = man1c/uuto.1c
 
+.KEEP_STATE:
+
 include ../Makefile.man

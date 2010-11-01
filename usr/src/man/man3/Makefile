@@ -19,4 +19,6 @@ MAN3FILES = 	Intro.3 \
 
 intro.3 := SOSRC = man3/Intro.3
 
+.KEEP_STATE:
+
 include ../Makefile.man

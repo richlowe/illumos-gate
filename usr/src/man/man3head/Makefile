@@ -279,4 +279,6 @@ wchar.3head		:= SOSRC = man3head/wchar.h.3head
 wctype.3head		:= SOSRC = man3head/wctype.h.3head
 wordexp.3head		:= SOSRC = man3head/wordexp.h.3head
 
+.KEEP_STATE:
+
 include ../Makefile.man

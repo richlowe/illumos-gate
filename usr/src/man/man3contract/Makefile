@@ -165,4 +165,6 @@ ct_tmpl_set_cookie.3contract		:= SOSRC = man3contract/ct_tmpl_activate.3contract
 ct_tmpl_set_critical.3contract		:= SOSRC = man3contract/ct_tmpl_activate.3contract
 ct_tmpl_set_informative.3contract	:= SOSRC = man3contract/ct_tmpl_activate.3contract
 
+.KEEP_STATE:
+
 include ../Makefile.man

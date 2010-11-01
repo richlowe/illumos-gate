@@ -322,4 +322,6 @@ vforkx.2			:= SOSRC = man2/vfork.2
 wracct.2			:= SOSRC = man2/getacct.2
 writev.2			:= SOSRC = man2/write.2
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -39,4 +39,6 @@ devid_str_encode.3devid		:= SOSRC = man3devid/devid_get.3devid
 devid_str_free.3devid		:= SOSRC = man3devid/devid_get.3devid
 devid_valid.3devid		:= SOSRC = man3devid/devid_get.3devid
 
+.KEEP_STATE:
+
 include ../Makefile.man

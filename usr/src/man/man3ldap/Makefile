@@ -367,4 +367,6 @@ ldap_vals2text.3ldap			:= SOSRC = man3ldap/ldap_entry2text.3ldap
 ldap_value_free.3ldap			:= SOSRC = man3ldap/ldap_get_values.3ldap
 ldap_value_free_len.3ldap		:= SOSRC = man3ldap/ldap_get_values.3ldap
 
+.KEEP_STATE:
+
 include ../Makefile.man

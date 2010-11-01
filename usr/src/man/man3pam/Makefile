@@ -48,4 +48,6 @@ pam_get_data.3pam		:= SOSRC = man3pam/pam_set_data.3pam
 pam_get_item.3pam		:= SOSRC = man3pam/pam_set_item.3pam
 pam_sm_close_session.3pam	:= SOSRC = man3pam/pam_sm_open_session.3pam
 
+.KEEP_STATE:
+
 include ../Makefile.man

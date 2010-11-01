@@ -53,4 +53,6 @@ it_tpgt_create.3iscsit		:= SOSRC = man3iscsit/it_tgt_create.3iscsit
 it_tpgt_delete.3iscsit		:= SOSRC = man3iscsit/it_tgt_create.3iscsit
 it_tpgt_free.3iscsit		:= SOSRC = man3iscsit/it_tgt_create.3iscsit
 
+.KEEP_STATE:
+
 include ../Makefile.man

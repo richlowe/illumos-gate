@@ -85,4 +85,6 @@ rsm_memseg_import_unmap.3rsm		:= SOSRC = man3rsm/rsm_memseg_import_map.3rsm
 rsm_memseg_release_pollfd.3rsm		:= SOSRC = man3rsm/rsm_memseg_get_pollfd.3rsm
 rsm_release_controller.3rsm		:= SOSRC = man3rsm/rsm_get_controller.3rsm
 
+.KEEP_STATE:
+
 include ../Makefile.man

@@ -1824,4 +1824,6 @@ vcmn_err.9f				:= SOSRC = man9f/cmn_err.9f
 wr.9f					:= SOSRC = man9f/WR.9f
 zcmn_err.9f				:= SOSRC = man9f/cmn_err.9f
 
+.KEEP_STATE:
+
 include ../Makefile.man
