@@ -24,6 +24,8 @@
  *	  All Rights Reserved
  *
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+ *
+ * Copyright 2011, Richard Lowe.
  */
 
 /*
@@ -428,6 +430,7 @@ ld_create_outfile(Ofl_desc *ofl)
 		Phdr	*phdr = &(sgp->sg_phdr);
 		Word	ptype = phdr->p_type;
 		Aliste	idx2;
+		Os_desc *nonempty = NULL; /* First non-empty section */
 
 		/*
 		 * Count the number of segments that will go in the program
@@ -514,11 +517,11 @@ ld_create_outfile(Ofl_desc *ofl)
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
 			Aliste	idx3;
 			int	os_isdescs_idx;
+			Elf_Data *data;
 
 			dataidx = 0;
 
 			OS_ISDESCS_TRAVERSE(os_isdescs_idx, osp, idx3, isp) {
-				Elf_Data	*data;
 				Ifl_desc	*ifl = isp->is_file;
 
 				/*
@@ -677,6 +680,29 @@ ld_create_outfile(Ofl_desc *ofl)
 			 * again in the building of relocs.  See machrel.c.
 			 */
 			osp->os_szoutrels = 0;
+			if ((data->d_size != 0) && (nonempty == NULL)) {
+				nonempty = osp;
+			}
+		}
+
+		/*
+		 * XXX: It's likely we should do all this down below, when
+		 * we set up the shdr's again
+		 *
+		 * Maybe getdata of the non-empty output section?
+		 */
+		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
+			Elf_Data *d;
+
+			/* Stop at the first non-empty section */
+			if ((nonempty == NULL) || (osp == nonempty))
+				break;
+
+			d = elf_getdata(osp->os_scn, NULL);
+			assert(d != NULL);
+			assert(osp->os_shdr->sh_size == 0);
+
+			d->d_align = sgp->sg_align;
 		}
 	}
 
