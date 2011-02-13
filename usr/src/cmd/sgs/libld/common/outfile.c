@@ -517,12 +517,12 @@ ld_create_outfile(Ofl_desc *ofl)
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
 			Aliste	idx3;
 			int	os_isdescs_idx;
-			Elf_Data *data;
 
 			dataidx = 0;
 
 			OS_ISDESCS_TRAVERSE(os_isdescs_idx, osp, idx3, isp) {
 				Ifl_desc	*ifl = isp->is_file;
+				Elf_Data *data;
 
 				/*
 				 * An input section in the list that has
@@ -673,6 +673,10 @@ ld_create_outfile(Ofl_desc *ofl)
 
 					data->d_align = (size_t)align;
 				}
+
+				if ((data->d_size != 0) && (nonempty == NULL)) {
+					nonempty = osp;
+				}
 			}
 
 			/*
@@ -680,10 +684,6 @@ ld_create_outfile(Ofl_desc *ofl)
 			 * again in the building of relocs.  See machrel.c.
 			 */
 			osp->os_szoutrels = 0;
-
-			if ((data->d_size != 0) && (nonempty == NULL)) {
-				nonempty = osp;
-			}
 		}
 
 		/*
@@ -691,8 +691,6 @@ ld_create_outfile(Ofl_desc *ofl)
 		 * start of a segment to be at least as aligned as the first
 		 * non-empty section, such that the empty and first non-empty
 		 * sections are placed at the same offset by libelf.
-		 *
-		 * XXX: Maybe getdata of the non-empty output section?
 		 */
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
 			Elf_Data *d;
