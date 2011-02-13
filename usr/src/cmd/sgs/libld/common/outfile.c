@@ -680,16 +680,19 @@ ld_create_outfile(Ofl_desc *ofl)
 			 * again in the building of relocs.  See machrel.c.
 			 */
 			osp->os_szoutrels = 0;
+
 			if ((data->d_size != 0) && (nonempty == NULL)) {
 				nonempty = osp;
 			}
 		}
 
 		/*
-		 * XXX: It's likely we should do all this down below, when
-		 * we set up the shdr's again
+		 * We need to raise the alignment of any empty sections at the
+		 * start of a segment to be at least as aligned as the first
+		 * non-empty section, such that the empty and first non-empty
+		 * sections are placed at the same offset by libelf.
 		 *
-		 * Maybe getdata of the non-empty output section?
+		 * XXX: Maybe getdata of the non-empty output section?
 		 */
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
 			Elf_Data *d;
