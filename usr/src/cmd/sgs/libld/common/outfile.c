@@ -700,8 +700,6 @@ ld_create_outfile(Ofl_desc *ofl)
 			if ((nonempty == NULL) || (osp == nonempty))
 				break;
 
-			assert(osp->os_shdr->sh_size == 0);
-
 			d = elf_getdata(osp->os_scn, NULL);
 			ne = elf_getdata(nonempty->os_scn, NULL);
 
