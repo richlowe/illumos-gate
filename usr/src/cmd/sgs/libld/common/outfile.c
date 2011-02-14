@@ -693,17 +693,25 @@ ld_create_outfile(Ofl_desc *ofl)
 		 * sections are placed at the same offset by libelf.
 		 */
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
-			Elf_Data	*d;
+			Elf_Data	*d = NULL;
+			Elf_Data	*ne = NULL;
 
 			/* Stop at the first non-empty section */
 			if ((nonempty == NULL) || (osp == nonempty))
 				break;
 
-			d = elf_getdata(osp->os_scn, NULL);
-			assert(d != NULL);
 			assert(osp->os_shdr->sh_size == 0);
 
-			d->d_align = sgp->sg_align;
+			d = elf_getdata(osp->os_scn, NULL);
+			ne = elf_getdata(nonempty->os_scn, NULL);
+
+			assert(d != NULL);
+			assert(ne != NULL);
+
+			do {
+				d->d_align = ld_lcm(d->d_align, ne->d_align);
+				ne = elf_getdata(nonempty->os_scn, ne);
+			} while (ne != NULL);
 		}
 	}
 
