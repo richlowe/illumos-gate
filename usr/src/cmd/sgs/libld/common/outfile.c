@@ -431,6 +431,8 @@ ld_create_outfile(Ofl_desc *ofl)
 		Word	ptype = phdr->p_type;
 		Aliste	idx2;
 		Os_desc *nonempty = NULL; /* First non-empty section */
+		/* Amount to forcibly align leading empty sections */
+		Xword	empty_pad = 1;
 
 		/*
 		 * Count the number of segments that will go in the program
@@ -686,6 +688,16 @@ ld_create_outfile(Ofl_desc *ofl)
 			osp->os_szoutrels = 0;
 		}
 
+		if (nonempty != NULL) {
+			Elf_Data *ne = elf_getdata(nonempty->os_scn, NULL);
+			assert (ne != NULL);
+
+			do {
+				empty_pad = ld_lcm(empty_pad, ne->d_align);
+				ne = elf_getdata(nonempty->os_scn, ne);
+			} while (ne != NULL);
+		}
+
 		/*
 		 * We need to raise the alignment of any empty sections at the
 		 * start of a segment to be at least as aligned as the first
@@ -694,22 +706,15 @@ ld_create_outfile(Ofl_desc *ofl)
 		 */
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
 			Elf_Data	*d = NULL;
-			Elf_Data	*ne = NULL;
 
 			/* Stop at the first non-empty section */
 			if ((nonempty == NULL) || (osp == nonempty))
 				break;
 
 			d = elf_getdata(osp->os_scn, NULL);
-			ne = elf_getdata(nonempty->os_scn, NULL);
-
 			assert(d != NULL);
-			assert(ne != NULL);
 
-			do {
-				d->d_align = ld_lcm(d->d_align, ne->d_align);
-				ne = elf_getdata(nonempty->os_scn, ne);
-			} while (ne != NULL);
+			d->d_align = empty_pad;
 		}
 	}
 
