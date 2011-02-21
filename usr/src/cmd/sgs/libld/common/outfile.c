@@ -702,7 +702,7 @@ ld_create_outfile(Ofl_desc *ofl)
 		 * We need to raise the alignment of any empty sections at the
 		 * start of a segment to be at least as aligned as the first
 		 * non-empty section, such that the empty and first non-empty
-		 * sections are placed at the same offset by libelf.
+		 * sections are placed at the same offset.
 		 */
 		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
 			Elf_Data	*d = NULL;
