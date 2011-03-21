@@ -26,8 +26,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  *
  *	ct [-h] [-v] [-w n] [-x n] [-s speed] telno ...
@@ -56,11 +54,6 @@
 #include "sysfiles.h"
 #include <pwd.h>
 #include <utmpx.h>
-
-#ifdef DATAKIT
-#include <dk.h>
-extern int dkminor();
-#endif
 
 #define ROOT	0
 #define SYS	3
@@ -380,18 +373,6 @@ char   *argv[];
 
     /****** Successfully made connection ******/
     VERBOSE("Connected\n%s", "");
-
-#ifdef	DATAKIT
- 	if (!strcmp(_Dev[D_CALLER], "DK")) {
- 		strcpy(_Tty, dtnamer(dkminor(fdl)));
- 		strcpy(Dc, (strrchr(_Tty, '/')+1));
- 		if ((_Fdl = fopen(_Tty, "r+")) == NULL) {
- 			(void) fprintf(stderr, "ct: Cannot open %s, errno %d\n",
- 				_Tty, errno);
- 			cleanup(101);
- 		}
- 	}
-#endif
 
     /* ignore some signals if they were ignored upon invocation of ct */
     /* or else, have them go to graceful disconnect */

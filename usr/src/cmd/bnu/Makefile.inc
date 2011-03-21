@@ -22,16 +22,14 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # This file is included by Makefile. The idea is to unclutter it (Makefile).
 #
 
 SRCS =		account.c anlwrk.c bnuconvert.c callers.c		\
 		chremdir.c cntrl.c conn.c cpmv.c ct.c			\
-		cu.c dial.c dio.c dkbreak.c				\
-		dkdial.c dkerr.c dkminor.c dtnamer.c eio.c		\
-		expfile.c fio.c gename.c getargs.c getprm.c		\
+		cu.c eio.c expfile.c fio.c gename.c getargs.c getprm.c	\
 		getpwinfo.c gio.c gnamef.c gnxseq.c grades.c		\
 		gtcfile.c gwd.c imsg.c in.uucpd.c interface.c limits.c	\
 		line.c logent.c mailst.c perfstat.c			\
@@ -47,7 +45,7 @@ SRCS =		account.c anlwrk.c bnuconvert.c callers.c		\
 TLILIB =	-lnsl -lsocket
 PAMLIB =        -lpam
 
-PROTOCOLOBJS =	dio.o eio.o gio.o xio.o fio.o
+PROTOCOLOBJS =	eio.o gio.o xio.o fio.o
 
 OTHEROBJS =	utility.o cpmv.o expfile.o gename.o getpwinfo.o \
 		ulockf.o xqt.o logent.o gnamef.o systat.o	\

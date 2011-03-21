@@ -26,10 +26,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-
 #include "uucp.h"
 
 #if defined(BSD4_2) || defined(ATTSVR4)
@@ -69,10 +65,6 @@ EXTERN int	dial801();
 EXTERN int	open801();
 #endif
 
-#ifdef DATAKIT
-EXTERN int	dkcall();
-#endif /* DATAKIT */
-
 #ifdef V8
 int	Dialout();
 #endif
@@ -111,10 +103,6 @@ static struct caller Caller[] = {
 #endif /* UNET */
 #endif /* BSD4_2 || ATTSVR4 */
 #endif /* TCP */
-
-#ifdef DATAKIT
-	{"DK",		dkcall},	/* standard AT&T DATAKIT VCS caller */
-#endif /* DATAKIT */
 
 #ifdef SYTEK
 	{"Sytek",	sytcall},	/* untested but should work */
@@ -488,72 +476,6 @@ int narps;
 	dialreset();
 	return(0);
 }
-
-
-#ifdef DATAKIT
-
-/*
- *	dkcall(flds, dev)	make a DATAKIT VCS connection
- *				  DATAKIT VCS is a trademark of AT&T
- *
- *	return codes:
- *		>0 - file number - ok
- *		FAIL - failed
- */
-
-#include "dk.h"
-EXTERN int dkdial();
-
-/*ARGSUSED*/
-GLOBAL int
-dkcall(flds, dev)
-char *flds[], *dev[];
-{
-	int fd;
-#ifdef V8
-	extern int cdkp_ld;
-#endif
-
-	char	dialstring[64];
-	EXTERN	void dkbreak();
-
-	strcpy(dialstring, dev[D_ARG]);
-	DEBUG(4, "dkcall(%s)\n", dialstring);
-
-
-#ifdef V8
-	if (setjmp(Sjbuf)) {
-		Uerror = SS_DIAL_FAILED;
-		return(FAIL);
-	}
-
-	(void) signal(SIGALRM, alarmtr);
-	(void) alarm(connecttime);
-	DEBUG(4, "tdkdial(%s", flds[F_PHONE]);
-	DEBUG(4, ", %d)\n", atoi(dev[D_CLASS]));
-    	if ((fd = tdkdial(flds[F_PHONE], atoi(dev[D_CLASS]))) >= 0)
-	    if (dkproto(fd, cdkp_ld) < 0)
-	       {
-	    	close(fd);
-	    	fd = -1;
-	       }
-	(void) alarm(0);
-#else
-	fd = dkdial(dialstring);
-#endif
-
-	(void) strcpy(Dc, "DK");
-	if (fd < 0) {
-		Uerror = SS_DIAL_FAILED;
-		return(FAIL);
-	}
-	else {
-		genbrk = dkbreak;
-		return(fd);
-	}
-}
-
-#endif /* DATAKIT */
 
 #ifdef TCP
 

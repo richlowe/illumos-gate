@@ -49,10 +49,6 @@ FILES =		Config Devconfig Devices Dialcodes	\
 
 CLEANFILES =	$(SRCS:%.c=%.o) common.o
 
-TXTFILES =	$(FILES)	\
-		dkbreak.c dkdial.c dkerr.c dkminor.c dtnamer.c	\
-		dial.c dial.h
-
 ROOTMANIFESTDIR=	$(ROOTSVCNETWORK)
 
 CAT =		cat
@@ -129,7 +125,7 @@ include		./Makefile.inc
 
 .KEEP_STATE:
 
-all:		$(TXTFILES) $(PROG) $(SHELLS)
+all:		$(FILES) $(PROG) $(SHELLS)
 
 install:	$(ROOTDIRS) $(ROOTSYMDIRS) $(ROOTPROG)		\
 		$(ROOTUUCPPROG) $(ROOTLIBSHELLS) $(ROOTSHELLS)	\

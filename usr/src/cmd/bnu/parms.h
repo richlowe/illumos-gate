@@ -27,9 +27,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /* go through this carefully, configuring for your site */
 
 /* If running SVR4, #define all of ATTSVR4, ATTSVR3, and ATTSV */
@@ -129,7 +126,6 @@
 
 /* definitions for the types of networks and dialers that are available */
 /* used to depend on STANDALONE, but now done at runtime via Sysfiles	*/
-/* #define DATAKIT */	/* define DATAKIT if datakit is available. */
 /* #define UNET	*/	/* define UNET if you have 3com ethernet software */
 #define TCP		/* TCP (bsd systems) */
 /* #define SYTEK */	/* for sytek network */
@@ -145,22 +141,19 @@
 /*
  * Define protocols that are to be linked into uucico:
  *
- * The following table shows which protocols and networks work well
- * together.  The g protocol works over noisy links.  The e protocol
- * assumes that the underlying network provides an error free communications
- * channel that transfers the data in sequence without duplication.  The
- * d protocols makes the same assumptions as the e protocol, but in addition
- * it does Datakit specific ioctl's.  The g protocol is always included in
- * uucico.  To include the other protocols, 1) insure that the symbol from
- * the Symbol column is defined in this file and 2) include the file from
- * the File comlumn in the definition of PROTOCOLS in uucp.mk.
+ * The following table shows which protocols and networks work well together.
+ * The g protocol works over noisy links.  The e protocol assumes that the
+ * underlying network provides an error free communications channel that
+ * transfers the data in sequence without duplication.  The g protocol is
+ * always included in uucico.  To include the other protocols, 1) insure that
+ * the symbol from the Symbol column is defined in this file and 2) include
+ * the file from the File comlumn in the definition of PROTOCOLS in uucp.mk.
  *
  * Prot.
  * Letter Symbol       File	Applicable Media
  *
  *   g	  none	       -	-
  *   e	  E_PROTOCOL   eio.c	TCP, UNET, TLI, and DATAKIT.
- *   d	  D_PROTOCOL   dio.c	DATAKIT
  *   x	  X_PROTOCOL   xio.c	-
  *
  * The next six lines conditionally define the protocol symbols for d
@@ -168,13 +161,9 @@
  * x protocol you must explicitly define X_PROTOCOL.
  */
 
-#ifdef DATAKIT		/* Should include D protocol for Datakit. */
-#define D_PROTOCOL
-#endif /* DATAKIT */
-
-#if defined TCP || defined UNET || defined TLI || defined DATAKIT
+#if defined TCP || defined UNET || defined TLI
 #define E_PROTOCOL	/* Include e protocol. */
-#endif	/* TCP || UNET || TLI || DATAKIT */
+#endif	/* TCP || UNET || TLI */
 
 /* #define X_PROTOCOL */ /* define X_PROTOCOL to use the xio protocol */
 #define X_PROTOCOL /* aeh - to check compilation */

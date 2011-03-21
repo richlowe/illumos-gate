@@ -27,8 +27,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 /*	interface( label )
 	provide alternate definitions for the I/O functions through global
 	interfaces.
@@ -41,13 +39,6 @@ char *t_alloc();
 int t_bind(), t_close(), t_connect(), t_free(), t_look(), t_open(), t_rcvdis();
 int t_getinfo(), t_getstate(), t_look(), t_rcv(), t_snd(), t_sync(), t_unbind();
 #endif /*  TLI  */
-
-#ifdef DATAKIT
-#include	"dk.h"
-
-static int	dksetup();
-static int	dkteardown();
-#endif	/* DATAKIT */
 
 EXTERN void	sethup();
 EXTERN int	restline();
@@ -127,9 +118,6 @@ static
 		{ "TLIS", read, write, tioctl, tssetup, uteardown },
 #endif /*  TLIS  */
 #endif /*  TLI  */
-#ifdef DATAKIT
-		{ "DK", read, write, ioctl, dksetup, dkteardown },
-#endif /* DATAKIT */
 #ifdef UNET
 		{ "Unetserver", read, write, ioctl, usetup, uteardown },
 #endif		
@@ -197,63 +185,6 @@ uteardown( role, fdread, fdwrite )
 	}
 	return(SUCCESS);
 }
-
-#ifdef DATAKIT
-/*
- *	dksetup - DATAKIT setup routine
- *
- * Put line in block mode.
- */
-
-static int
-dksetup (role, fdreadp, fdwritep)
-
-int	role;
-int *	fdreadp;
-int *	fdwritep;
-
-{
-	static short dkrmode[3] = { DKR_BLOCK | DKR_TIME, 0, 0 };
-	int	ret;
-
-	(void) usetup(role, fdreadp, fdwritep);
-	if((ret = (*Ioctl)(*fdreadp, DIOCRMODE, dkrmode)) < 0) {
-		DEBUG(4, "dksetup: failed to set block mode. ret=%d,\n", ret);
-		DEBUG(4, "read fd=%d, ", *fdreadp);
-		DEBUG(4, "errno=%d\n", errno);
-		return(FAIL);
-	}
-	return(SUCCESS);
-}
-
-/*
- *	dkteardown  -  DATAKIT teardown routine
- */
-static int
-dkteardown( role, fdread, fdwrite )
-int	role, fdread, fdwrite;
-{
-	char	*ttyn;
-
-	if ( role == MASTER ) {
-		ttyn = ttyname(fdread);
-		if ( ttyn != NULL && Dev_mode != 0 )
-			chmod(ttyn, Dev_mode);	/* can fail, but who cares? */
-	}
-
-	/*	must flush fd's for datakit	*/
-	/*	else close can hang		*/
-	if ( ioctl(fdread, DIOCFLUSH, NULL) != 0 )
-		DEBUG(4, "dkteardown: DIOCFLUSH of input fd %d failed", fdread);
-	if ( ioctl(fdwrite, DIOCFLUSH, NULL) != 0 )
-		DEBUG(4, "dkteardown: DIOCFLUSH of output fd %d failed", fdwrite);
-
-	(void)close(fdread);
-	(void)close(fdwrite);
-	return(SUCCESS);
-}
-#endif /* DATAKIT */
-
 
 #ifdef TLI
 /*
