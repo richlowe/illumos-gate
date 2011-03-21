@@ -49,9 +49,9 @@ FILES =		Config Devconfig Devices Dialcodes	\
 
 CLEANFILES =	$(SRCS:%.c=%.o) common.o
 
-TXTFILES =	README $(FILES)	\
+TXTFILES =	$(FILES)	\
 		dkbreak.c dkdial.c dkerr.c dkminor.c dtnamer.c	\
-		Cvt Install SetUp Teardown dial.c dial.h getopt.c strpbrk.c
+		dial.c dial.h getopt.c strpbrk.c
 
 ROOTMANIFESTDIR=	$(ROOTSVCNETWORK)
 
