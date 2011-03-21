@@ -51,7 +51,7 @@ CLEANFILES =	$(SRCS:%.c=%.o) common.o
 
 TXTFILES =	$(FILES)	\
 		dkbreak.c dkdial.c dkerr.c dkminor.c dtnamer.c	\
-		dial.c dial.h getopt.c strpbrk.c
+		dial.c dial.h
 
 ROOTMANIFESTDIR=	$(ROOTSVCNETWORK)
 
