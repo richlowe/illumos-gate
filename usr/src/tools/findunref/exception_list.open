@@ -151,6 +151,7 @@
 ./usr/src/prototypes
 ./usr/src/uts/intel/io/acpica/cmp_ca.sh
 ./usr/src/uts/common/tnf/mkprobehdr.sh
+./usr/src/cmd/loadkeys/type_101/neaten.sh
 
 #
 # Ignore files that are only used by internal packages.
