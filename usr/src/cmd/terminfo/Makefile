@@ -27,7 +27,7 @@ PROG=	terminfo
 TABSETSRC= \
 	3101 beehive hds hds3 std stdcrt teleray vt100 wyse-adds xerox1720
 
-TXTS=	Doc.sed README ckout cvt.ex cvt.sed $(TABSETSRCS) termcap 
+TXTS=	README $(TABSETSRCS) termcap 
 
 TISRC=	adds.ti annarbor.ti ansi.ti att.ti beehive.ti \
 	cdc.ti colorscan.ti datamedia.ti dec.ti diablo.ti \
