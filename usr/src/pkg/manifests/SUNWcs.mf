@@ -381,6 +381,7 @@ file path=etc/default/login group=sys preserve=true
 file path=etc/default/nss group=sys preserve=true
 file path=etc/default/passwd group=sys preserve=true
 file path=etc/default/su group=sys preserve=true
+file path=etc/default/sulogin group=sys preserve=true
 file path=etc/default/syslogd group=sys preserve=true
 file path=etc/default/tar group=sys preserve=true
 file path=etc/default/utmpd group=sys preserve=true

@@ -25,6 +25,7 @@
 
 PROG =		sulogin
 ROOTFS_PROG =	$(PROG)
+DEFAULTFILES= sulogin.dfl
 
 include		../Makefile.cmd
 
@@ -40,7 +41,7 @@ $(PROG):	$(PROG).c
 		$(LINK.c) $(PROG).c -o $@ $(LDLIBS)
 		$(POST_PROCESS)
 
-install:	all $(ROOTSBINPROG)
+install:	all $(ROOTSBINPROG) $(ROOTETCDEFAULTFILES)
 		$(RM) $(ROOTETCPROG)
 		$(SYMLINK) ../sbin/$(PROG) $(ROOTETCPROG)
 
