@@ -97,9 +97,6 @@
 # Ignore ksh93/ast-related source components that are not currently
 # used but may be useful later.
 #
-./usr/src/lib/libcmd/common/cksum.c
-./usr/src/lib/libcmd/common/md5sum.c
-./usr/src/lib/libcmd/common/sum.c
 ./usr/src/lib/libshell/common/bltins/mkservice.c
 ./usr/src/lib/libshell/common/data/bash_pre_rc.sh
 ./usr/src/lib/libshell/common/include/env.h
