@@ -22,11 +22,8 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 PROG=		rpc.rexd on
-# where under
 #RPCGEN=		rpcgen
 REXDPROG=	rpc.rexd
 ONPROG	=	on
@@ -44,10 +41,7 @@ TYPEOBJS=	nfs_subr.o
 OBJS=		errprintf.o mount_nfs.o rex.o unix_login.o mntent.o $(TYPEOBJS)
 REXDOBJS=	rpc.rexd.o errprintf.o mount_nfs.o rex.o unix_login.o mntent.o
 ONOBJS= 	on.o sharetab.o where.o rex.o mntent.o
-#WHEREOBJS=	sharetab.o where.o where_main.o mntent.o
 CLEANOBJS=	exportent.o sharetab.o on.o rpc.rexd.o where.o
-#under.o where.o where_main.o
-#UNDEROBJS=	errprintf.o sharetab.o mount_nfs.o
 
 ROOTREXD=	$(ROOTUSRSBIN)
 ROOTON=		$(ROOTBIN)
@@ -80,12 +74,6 @@ on:	$(ONOBJS)
 	$(LINK.c) -o $@ $(ONOBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
-#under: $$@.o $(UNDEROBJS)
-#	$(LINK.c) -o $@ $@.o $(UNDEROBJS) $(LDLIBS)
-#
-#where: $(WHEREOBJS)
-#	$(LINK.c) -o $@ $(WHEREOBJS) $(LDLIBS)
-#
 install: all $(ROOTREXDPROG) $(ROOTONPROG) $(ROOTMANIFEST)
 
 $(ROOTREXD):	rpc.rexd
