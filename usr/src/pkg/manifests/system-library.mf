@@ -545,6 +545,10 @@ license usr/src/lib/libbsdmalloc/THIRDPARTYLICENSE \
     license=usr/src/lib/libbsdmalloc/THIRDPARTYLICENSE
 license usr/src/lib/libc/THIRDPARTYLICENSE \
     license=usr/src/lib/libc/THIRDPARTYLICENSE
+$(i386_ONLY)license usr/src/lib/libc/amd64/gen/THIRDPARTYLICENSE \
+    license=usr/src/lib/libc/amd64/gen/THIRDPARTYLICENSE
+license usr/src/lib/libc/port/fp/THIRDPARTYLICENSE \
+    license=usr/src/lib/libc/port/fp/THIRDPARTYLICENSE
 license usr/src/lib/libcmd/THIRDPARTYLICENSE \
     license=usr/src/lib/libcmd/THIRDPARTYLICENSE
 license usr/src/lib/libdll/THIRDPARTYLICENSE \
