@@ -37,8 +37,6 @@ ALL=		$(PROG) $(SHFILE1) $(SHFILE2) holidays
 SRCS=		$(PROG:%=%.c)
 SHFILE1SRCS=	$(SHFILE1:%=%.sh)
 
-TXTS=		diskusg.c
-
 BINPROG=	acctcom
 LIBPROG=	acctcms acctcon acctcon1 acctcon2 acctdisk \
 		acctdusg acctmerg accton acctprc acctprc1 acctprc2 \
@@ -92,7 +90,7 @@ $(ETCACCTPROG) :=	FILEMODE=	0644
 
 .PARALLEL: $(ALL)
 
-all: $(SUBDIRS) .WAIT $(ALL) $(TXTS)
+all: $(SUBDIRS) .WAIT $(ALL)
 
 install: all .WAIT $(DIRS) .WAIT $(USRBINPROG) $(LIBACCTPROG) $(ETCACCTPROG) \
 	$(ETCINITPROG)
