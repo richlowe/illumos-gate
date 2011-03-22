@@ -20,8 +20,6 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright (c) 1989 by Sun Microsystems, Inc.
 #
 # cmd/lp/filter/postscript/font/devpost/Makefile
@@ -38,7 +36,6 @@ FONTFILES =		AB AI AR AX BI CB CI CO	\
 FONTLNK1 =		G HM HK HL
 FONTLNK2 =		GI
 DESCFILE =		DESC
-TXTS =			DESC.big DESC.small S.big S.small LINKFILE
 
 FONTNAMES =		$(FONTFILES:%=%.name)
 FONTLNK1OUTS =		$(FONTLNK1:%=%.out)
@@ -58,23 +55,23 @@ ROOTFONTNAMES =		$(FONTNAMES:%=$(ROOTDEVPOST)/%)
 ROOTFONTOUTS =		$(FONTOUTS:%=$(ROOTDEVPOST)/%)		\
 			$(FONTLNK1OUTS:%=$(ROOTDEVPOST)/%)	\
 			$(FONTLNK2OUTS:%=$(ROOTDEVPOST)/%)
-		
+
 FILEMODE =		0444
 
 .KEEP_STATE:
 
-all :			$(TXTS) $(FONTOUTS) $(FONTNAMES) $(SUBDIRS)
+all :			$(FONTOUTS) $(FONTNAMES) $(SUBDIRS)
 
-install:		$(TXTS) $(FONTOUTS) $(FONTNAMES) \
+install:		$(FONTOUTS) $(FONTNAMES) \
 			$(ROOTDEVPOST) $(ROOTFONTFILES) $(ROOTFONTNAMES) \
 			$(ROOTFONTOUTS) $(SUBDIRS)
-		
+
 $(FONTOUTS) :		$$(@:%.out=%) $(NATIVEMAKEDEV)
 			@$(RM) $@; $(NATIVEMAKEDEV) $(@:%.out=%)
 
 $(ROOTDEVPOST) :
 			$(INS.dir)
-	
+
 $(NATIVEMAKEDEV) :
 			@cd ..; $(MAKE) native/makedev
 
