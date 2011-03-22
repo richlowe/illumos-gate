@@ -34,8 +34,9 @@
 # suffixed with .txt so we don't have to list them.
 #
 ./usr/src/cmd/oawk/EXPLAIN
-./usr/src/cmd/vi/port/ex.news
+./usr/src/cmd/sed/POSIX
 ./usr/src/cmd/ssh/doc
+./usr/src/cmd/vi/port/ex.news
 
 #
 # Ignore everything under trees that may be resynched from outside ON.
