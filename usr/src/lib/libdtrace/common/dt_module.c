@@ -843,6 +843,17 @@ dt_module_getctf(dtrace_hdl_t *dtp, dt_module_t *dmp)
 			goto err;
 		}
 
+		/*
+		 * If the label we claim the parent must have is not actually
+		 * present in the parent module, ignore the CTF entirely
+		 * rather than acquiring possibly bad type references.
+		 */
+		if (ctf_label_info(pfp, ctf_parent_label(dmp->dm_ctfp),
+		    NULL) == CTF_ERR) {
+			(void) dt_set_errno(dtp, EDT_BADCTF);
+			goto err;
+		}
+
 		if (ctf_import(dmp->dm_ctfp, pfp) == CTF_ERR) {
 			dtp->dt_ctferr = ctf_errno(dmp->dm_ctfp);
 			(void) dt_set_errno(dtp, EDT_CTF);
@@ -856,6 +867,8 @@ dt_module_getctf(dtrace_hdl_t *dtp, dt_module_t *dmp)
 	return (dmp->dm_ctfp);
 
 err:
+	dt_dprintf("could not load CTF container for %s: %s\n",
+	    dmp->dm_name, dtrace_errmsg(dtp, dtrace_errno(dtp)));
 	ctf_close(dmp->dm_ctfp);
 	dmp->dm_ctfp = NULL;
 	return (NULL);

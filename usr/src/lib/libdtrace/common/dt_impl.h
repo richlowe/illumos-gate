@@ -531,7 +531,8 @@ enum {
 	EDT_OVERSION,		/* client is requesting deprecated version */
 	EDT_ENABLING_ERR,	/* failed to enable probe */
 	EDT_NOPROBES,		/* no probes sites for declared provider */
-	EDT_CANTLOAD		/* failed to load a module */
+	EDT_CANTLOAD,		/* failed to load a module */
+	EDT_BADCTF		/* module contains invalid CTF */
 };
 
 /*

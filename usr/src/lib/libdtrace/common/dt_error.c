@@ -112,6 +112,7 @@ static const struct {
 	{ EDT_ENABLING_ERR, "Failed to enable probe" },
 	{ EDT_NOPROBES, "No probe sites found for declared provider" },
 	{ EDT_CANTLOAD, "Failed to load module" },
+	{ EDT_BADCTF, "Module contains invalid or incomplete CTF information" }
 };
 
 static const int _dt_nerr = sizeof (_dt_errlist) / sizeof (_dt_errlist[0]);

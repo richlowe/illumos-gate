@@ -629,6 +629,16 @@ fbt_getargdesc(void *arg, dtrace_id_t id, void *parg, dtrace_argdesc_t *desc)
 			goto err;
 		}
 
+		/*
+		 * If the parent module does not have the label we expect,
+		 * ignore it and fail to avoid presenting non-sensical data.
+		 */
+		if (ctf_label_info(pfp, ctf_parent_label(fp),
+		    NULL) == CTF_ERR) {
+			ctf_close(pfp);
+			goto err;
+		}
+
 		if (ctf_import(fp, pfp) != 0) {
 			ctf_close(pfp);
 			goto err;
