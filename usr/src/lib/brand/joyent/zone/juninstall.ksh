@@ -64,12 +64,4 @@ zfs destroy -rF $PDS_NAME/$bname
 
 rm -rf $ZONEPATH
 
-# Now destroy any delegated datasets. Redirect to /dev/null in case they
-# were already destroyed when we removed the zonepath dataset.
-DD=`zonecfg -z $ZONENAME info dataset | nawk '{if ($1 == "name:") print $2}'`
-for i in $DD
-do
-	zfs destroy -rF $i >/dev/null 2>&1
-done
-
 exit $ZONE_SUBPROC_OK
