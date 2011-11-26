@@ -83,6 +83,9 @@ zfs snapshot $PDS_NAME/${TMPLZONE}@${bname}
 zfs clone -o quota=${ZQUOTA}g $PDS_NAME/${TMPLZONE}@${bname} \
     $PDS_NAME/$bname
 
+# Defer-destroy the snapshot, so it's automatically cleaned up on uninstall
+zfs destroy -d $PDS_NAME/${TMPLZONE}@${bname}
+
 if [ ! -d ${ZONEPATH}/config ]; then
     mkdir -p ${ZONEPATH}/config
     chmod 755 ${ZONEPATH}/config
@@ -91,3 +94,4 @@ fi
 final_setup
 
 exit $ZONE_SUBPROC_OK
+

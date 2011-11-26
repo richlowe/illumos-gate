@@ -58,13 +58,9 @@ if [[ -z "$PDS_NAME" ]]; then
 	exit $ZONE_SUBPROC_USAGE
 fi
 
-ORIGIN=`zfs get -H -ovalue  origin $PDS_NAME/$bname`
-
 zfs destroy -rF $PDS_NAME/$bname/cores
 zfs destroy -rF $PDS_NAME/$bname
 (( $? != 0 )) && (echo "processes in zone: " && fuser $ZONEPATH)
-
-[ "$ORIGIN" != "-" ] && zfs destroy -F $ORIGIN
 
 rm -rf $ZONEPATH
 
