@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * DWARF to tdata conversion
  *
@@ -1793,6 +1791,23 @@ die_resolve(dwarf_t *dw)
 	} while (dw->dw_nunres != 0);
 }
 
+static boolean_t
+has_executable_content(Elf *elf)
+{
+	Elf_Scn *scn = NULL;
+
+	while ((scn = elf_nextscn(elf, scn)) != NULL) {
+		GElf_Shdr shdr;
+		gelf_getshdr(scn, &shdr);
+
+		if ((shdr.sh_flags & SHF_EXECINSTR) &&
+		    (shdr.sh_size != 0))
+			return (B_TRUE);
+	}
+
+	return (B_FALSE);
+}
+
 /*ARGSUSED*/
 int
 dw_read(tdata_t *td, Elf *elf, const char *filename)
@@ -1831,12 +1846,21 @@ dw_read(tdata_t *td, Elf *elf, const char *filename)
 		    dwarf_errmsg(dw.dw_err));
 	}
 
+	/*
+	 * A file may legitimately contain no type data, and thus have a
+	 * childless CU if and only if that file contains no actual code,
+	 * otherwise error to catch people who did not use -g
+	 */
 	if ((rc = dwarf_next_cu_header(dw.dw_dw, &hdrlen, &vers, &abboff,
 	    &addrsz, &nxthdr, &dw.dw_err)) != DW_DLV_OK ||
 	    (cu = die_sibling(&dw, NULL)) == NULL ||
-	    (child = die_child(&dw, cu)) == NULL)
-		terminate("file does not contain dwarf type data "
+	    ((child = die_child(&dw, cu)) == NULL &&
+	    has_executable_content(elf))) {
+		terminate("file does not contain DWARF data "
 		    "(try compiling with -g)\n");
+	} else if (child == NULL) {
+		return (0);
+	}
 
 	dw.dw_maxoff = nxthdr - 1;
 
