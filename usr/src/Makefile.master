@@ -447,10 +447,6 @@ CNOGLOBAL= -W0,-noglobal
 # In the same spirit, this will also remove the date from the N_OPT stab.
 CGLOBALSTATIC= -W0,-xglobalstatic
 
-# Normally, gcc uses indirect DWARF strings to save space.  However,
-# this causes relocations that ctfconvert cannot handle.  Disable this.
-CDWARFSTR=	-_gcc=-fno-dwarf2-indirect-strings
-
 # Sometimes we want all symbols and types in debugging information even
 # if they aren't used.
 CALLSYMS=	-W0,-xdbggen=no%usedonly
