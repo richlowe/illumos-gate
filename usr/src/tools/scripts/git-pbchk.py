@@ -249,6 +249,14 @@ def keywords(root, branch, flist, output):
 
 
 def run_checks(root, branch, cmds, paths='', opts={}):
+    """Run the checks given in 'cmds', expected to have well-known signatures,
+    and report results for any which fail.
+
+    Return failure if any of them did.
+
+    NB: the function name of the commands passed in is used to name the NOT
+    file which excepts files from them."""
+
     ret = 0
 
     for cmd in cmds:
