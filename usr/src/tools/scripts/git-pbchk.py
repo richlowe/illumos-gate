@@ -38,9 +38,12 @@ from onbld.Checks import Comments, Copyright, CStyle, HdrChk
 from onbld.Checks import JStyle, Keywords, Mapfile
 
 
+class GitError(Exception):
+    pass
+
 def git(command):
     """Run a command and return a stream containing its stdout (and write its
-    stderr to our stdout)"""
+    stderr to its stdout)"""
 
     if type(command) != list:
         command = command.split()
@@ -52,7 +55,10 @@ def git(command):
                          stderr=subprocess.STDOUT)
 
     err = p.wait()
-    return err != 0 and None or p.stdout
+    if err != 0:
+        raise GitError(p.stdout.read())
+
+    return p.stdout
 
 
 def git_root():
@@ -305,15 +311,14 @@ def pbchk(root, parent, paths):
     run_checks(root, parent, cmds)
 
 
-if __name__ == '__main__':
+def main(cmd, args):
     parent_branch = None
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'b:')
+        opts, args = getopt.getopt(args, 'b:')
     except getopt.GetoptError, e:
         sys.stderr.write(str(e) + '\n')
-        sys.stderr.write("Usage: %s [-b branch] [path...]\n" %
-                         os.path.basename(sys.argv[0]))
+        sys.stderr.write("Usage: %s [-b branch] [path...]\n" % cmd)
         sys.exit(1)
 
     for opt, arg in opts:
@@ -324,10 +329,17 @@ if __name__ == '__main__':
         parent_branch = git_parent_branch(git_branch())
 
     func = nits
-    if sys.argv[0].endswith('/git-pbchk'):
+    if cmd == 'git-pbchk':
         func = pbchk
         if args:
             sys.stderr.write("only complete workspaces may be pbchk'd\n");
             sys.exit(1)
 
     func(git_root(), parent_branch, args)
+
+if __name__ == '__main__':
+    try:
+        main(os.path.basename(sys.argv[0]), sys.argv[1:])
+    except GitError, e:
+        sys.stderr.write("failed to run git:\n %s\n" % str(e))
+        sys.exit(1)
