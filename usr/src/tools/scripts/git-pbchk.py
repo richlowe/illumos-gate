@@ -290,8 +290,9 @@ if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'b:')
     except getopt.GetoptError, e:
-        sys.stderr.write(str(e))
-        sys.stderr.write("Usage: git-nits [-b branch] [path...]\n")
+        sys.stderr.write(str(e) + '\n')
+        sys.stderr.write("Usage: %s [-b branch] [path...]\n" %
+                         os.path.basename(sys.argv[0]))
         sys.exit(1)
 
     for opt, arg in opts:
