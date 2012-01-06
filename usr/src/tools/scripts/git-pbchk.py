@@ -37,6 +37,7 @@ sys.path.insert(1, os.path.join('/opt/onbld/lib',
 from onbld.Checks import Comments, Copyright, CStyle, HdrChk
 from onbld.Checks import JStyle, Keywords, Mapfile
 
+
 def git(command):
     """Run a command and return a stream containing its stdout (and write its
     stderr to our stdout)"""
@@ -53,6 +54,7 @@ def git(command):
     err = p.wait()
     return err != 0 and None or p.stdout
 
+
 def git_root():
     """Return the root of the current git workspace"""
 
@@ -64,6 +66,7 @@ def git_root():
 
     return os.path.abspath(os.path.join(p.readlines()[0],
                                         os.path.pardir))
+
 
 def git_branch():
     """Return the current git branch"""
@@ -77,6 +80,7 @@ def git_branch():
     for elt in p:
         if elt[0] == '*':
             return elt.split()[1]
+
 
 def git_parent_branch(branch):
     """Return the parent of the current git branch.
@@ -99,6 +103,7 @@ def git_parent_branch(branch):
                 return remote
     return 'origin/master'
 
+
 def git_comments(parent):
     """Return a list of any checkin comments on this git branch"""
 
@@ -114,7 +119,8 @@ def git_comments(parent):
 def git_file_list(parent, paths=''):
     """Return the set of files which have ever changed on this brannch.
 
-    NB: This includes files which no longer exist, or no longer actually differ."""
+    NB: This includes files which no longer exist, or no longer actually
+    differ."""
 
     p = git("log --name-only --pretty=format: %s.. %s" %
              (parent, paths))
@@ -164,11 +170,13 @@ def gen_files(root, parent, paths, exclude):
                 yield f
     return ret
 
+
 def comchk(root, parent, flist, output):
     output.write("Comments:\n")
 
     return Comments.comchk(git_comments(parent), check_db=True,
                            output=output)
+
 
 def mapfilechk(root, parent, flist, output):
     ret = 0
@@ -282,6 +290,7 @@ def nits(root, parent, paths=''):
             mapfilechk]
     run_checks(root, parent, cmds, paths='')
 
+
 def pbchk(root, parent):
     cmds = [comchk,
             copyright,
@@ -291,6 +300,7 @@ def pbchk(root, parent):
             keywords,
             mapfilechk]
     run_checks(root, parent, cmds)
+
 
 if __name__ == '__main__':
     parent_branch = None
