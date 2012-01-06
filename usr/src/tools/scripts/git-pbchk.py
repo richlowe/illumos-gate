@@ -37,12 +37,14 @@ sys.path.insert(1, os.path.join('/opt/onbld/lib',
 from onbld.Checks import Comments, Copyright, CStyle, HdrChk
 from onbld.Checks import JStyle, Keywords, Mapfile
 
-def run(command):
+def git(command):
     """Run a command and return a stream containing its stdout (and write its
     stderr to our stdout)"""
 
     if type(command) != list:
         command = command.split()
+
+    command = ["git"] + command
 
     p = subprocess.Popen(command,
                          stdout=subprocess.PIPE,
@@ -54,7 +56,7 @@ def run(command):
 def git_root():
     """Return the root of the current git workspace"""
 
-    p = run('git rev-parse --git-dir')
+    p = git('rev-parse --git-dir')
 
     if not p:
         sys.stderr.write("Failed finding git workspace\n")
@@ -66,7 +68,7 @@ def git_root():
 def git_branch():
     """Return the current git branch"""
 
-    p = run('git branch')
+    p = git('branch')
 
     if not p:
         sys.stderr.write("Failed finding git branch\n")
@@ -82,9 +84,8 @@ def git_parent_branch(branch):
     If this branch tracks a remote branch, return the remote branch which is
     tracked.  If not, default to origin/master."""
 
-    p = run(["git", "for-each-ref",
-             "--format=%(refname:short) %(upstream:short)",
-             "refs/heads/"])
+    p = git("for-each-ref --format=%(refname:short) %(upstream:short) " +
+            "refs/heads/")
 
     if not p:
         sys.stderr.write("Failed finding git parent branch\n")
@@ -101,7 +102,7 @@ def git_parent_branch(branch):
 def git_comments(branch):
     """Return a list of any checkin comments on this git branch"""
 
-    p = run('git log --pretty=format:%%B %s..' % branch)
+    p = git('log --pretty=format:%%B %s..' % branch)
 
     if not p:
         sys.stderr.write("Failed getting git comments\n")
@@ -115,7 +116,7 @@ def git_file_list(branch, paths=''):
 
     NB: This includes files which no longer exist, or no longer actually differ."""
 
-    p = run("git log --name-only --pretty=format: %s.. %s" %
+    p = git("log --name-only --pretty=format: %s.. %s" %
              (branch, paths))
 
     if not p:
