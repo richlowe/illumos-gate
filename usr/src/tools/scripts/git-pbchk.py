@@ -99,10 +99,10 @@ def git_parent_branch(branch):
                 return remote
     return 'origin/master'
 
-def git_comments(branch):
+def git_comments(parent):
     """Return a list of any checkin comments on this git branch"""
 
-    p = git('log --pretty=format:%%B %s..' % branch)
+    p = git('log --pretty=format:%%B %s..' % parent)
 
     if not p:
         sys.stderr.write("Failed getting git comments\n")
@@ -111,13 +111,13 @@ def git_comments(branch):
     return map(lambda x: x.strip(), p.readlines())
 
 
-def git_file_list(branch, paths=''):
-    """Return the set of files which have ever changed between BRANCH and here.
+def git_file_list(parent, paths=''):
+    """Return the set of files which have ever changed on this brannch.
 
     NB: This includes files which no longer exist, or no longer actually differ."""
 
     p = git("log --name-only --pretty=format: %s.. %s" %
-             (branch, paths))
+             (parent, paths))
 
     if not p:
         sys.stderr.write("Failed building file-list from git\n")
@@ -144,7 +144,7 @@ def not_check(root, cmd):
         return lambda x: False
 
 
-def gen_files(root, branch, paths, exclude):
+def gen_files(root, parent, paths, exclude):
     """Return a function producing file names names, relative to the current
     directory, of any file changed on this branch (limited to 'paths' if
     requested), and excluding files for which exclude returns a true value """
@@ -158,19 +158,19 @@ def gen_files(root, branch, paths, exclude):
         return os.path.join(*[os.path.pardir] * (len(s)-l) + c[l:])
 
     def ret(select=lambda x: True):
-        for f in git_file_list(branch, paths):
+        for f in git_file_list(parent, paths):
             f = relpath(f, '.')
             if (os.path.exists(f) and select(f) and not exclude(f)):
                 yield f
     return ret
 
-def comchk(root, branch, flist, output):
+def comchk(root, parent, flist, output):
     output.write("Comments:\n")
 
-    return Comments.comchk(git_comments(branch), check_db=True,
+    return Comments.comchk(git_comments(parent), check_db=True,
                            output=output)
 
-def mapfilechk(root, branch, flist, output):
+def mapfilechk(root, parent, flist, output):
     ret = 0
 
     # We are interested in examining any file that has the following
@@ -196,7 +196,7 @@ def mapfilechk(root, branch, flist, output):
     return ret
 
 
-def copyright(root, branch, flist, output):
+def copyright(root, parent, flist, output):
     ret = 0
     output.write("Copyrights:\n")
     for f in flist():
@@ -206,7 +206,7 @@ def copyright(root, branch, flist, output):
     return ret
 
 
-def hdrchk(root, branch, flist, output):
+def hdrchk(root, parent, flist, output):
     ret = 0
     output.write("Header format:\n")
     for f in flist(lambda x: x.endswith('.h')):
@@ -216,7 +216,7 @@ def hdrchk(root, branch, flist, output):
     return ret
 
 
-def cstyle(root, branch, flist, output):
+def cstyle(root, parent, flist, output):
     ret = 0
     output.write("C style:\n")
     for f in flist(lambda x: x.endswith('.c') or x.endswith('.h')):
@@ -228,7 +228,7 @@ def cstyle(root, branch, flist, output):
     return ret
 
 
-def jstyle(root, branch, flist, output):
+def jstyle(root, parent, flist, output):
     ret = 0
     output.write("Java style:\n")
     for f in flist(lambda x: x.endswith('.java')):
@@ -238,7 +238,7 @@ def jstyle(root, branch, flist, output):
     return ret
 
 
-def keywords(root, branch, flist, output):
+def keywords(root, parent, flist, output):
     ret = 0
     output.write("SCCS Keywords:\n")
     for f in flist():
@@ -248,7 +248,7 @@ def keywords(root, branch, flist, output):
     return ret
 
 
-def run_checks(root, branch, cmds, paths='', opts={}):
+def run_checks(root, parent, cmds, paths='', opts={}):
     """Run the checks given in 'cmds', expected to have well-known signatures,
     and report results for any which fail.
 
@@ -263,7 +263,7 @@ def run_checks(root, branch, cmds, paths='', opts={}):
         s = StringIO()
 
         exclude = not_check(root, cmd.func_name)
-        result = cmd(root, branch, gen_files(root, branch, paths, exclude),
+        result = cmd(root, parent, gen_files(root, parent, paths, exclude),
                      output=s)
         ret |= result
 
@@ -273,16 +273,16 @@ def run_checks(root, branch, cmds, paths='', opts={}):
     return ret
 
 
-def nits(root, branch, paths=''):
+def nits(root, parent, paths=''):
     cmds = [copyright,
             cstyle,
             hdrchk,
             jstyle,
             keywords,
             mapfilechk]
-    run_checks(root, branch, cmds, paths='')
+    run_checks(root, parent, cmds, paths='')
 
-def pbchk(root, branch):
+def pbchk(root, parent):
     cmds = [comchk,
             copyright,
             cstyle,
@@ -290,10 +290,10 @@ def pbchk(root, branch):
             jstyle,
             keywords,
             mapfilechk]
-    run_checks(root, branch, cmds)
+    run_checks(root, parent, cmds)
 
 if __name__ == '__main__':
-    branch = None
+    parent_branch = None
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'b:')
@@ -305,13 +305,13 @@ if __name__ == '__main__':
 
     for opt, arg in opts:
         if opt == '-b':
-            branch = arg
+            parent_branch = arg
 
-    if not branch:
-        branch = git_parent_branch(git_branch())
+    if not parent_branch:
+        parent_branch = git_parent_branch(git_branch())
 
     func = nits
     if sys.argv[0].endswith('/git-pbchk'):
         func = pbchk
 
-    func(git_root(), branch)
+    func(git_root(), parent_branch)
