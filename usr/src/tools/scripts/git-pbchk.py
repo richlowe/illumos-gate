@@ -116,14 +116,14 @@ def git_comments(parent):
     return map(lambda x: x.strip(), p.readlines())
 
 
-def git_file_list(parent, paths=''):
+def git_file_list(parent, paths=None):
     """Return the set of files which have ever changed on this brannch.
 
     NB: This includes files which no longer exist, or no longer actually
     differ."""
 
     p = git("log --name-only --pretty=format: %s.. %s" %
-             (parent, paths))
+             (parent, ' '.join(paths)))
 
     if not p:
         sys.stderr.write("Failed building file-list from git\n")
@@ -163,7 +163,10 @@ def gen_files(root, parent, paths, exclude):
         l = len(os.path.commonprefix((s, c)))
         return os.path.join(*[os.path.pardir] * (len(s)-l) + c[l:])
 
-    def ret(select=lambda x: True):
+    def ret(select=None):
+        if not select:
+            select = lambda x: True
+
         for f in git_file_list(parent, paths):
             f = relpath(f, '.')
             if (os.path.exists(f) and select(f) and not exclude(f)):
@@ -281,17 +284,17 @@ def run_checks(root, parent, cmds, paths='', opts={}):
     return ret
 
 
-def nits(root, parent, paths=''):
+def nits(root, parent, paths):
     cmds = [copyright,
             cstyle,
             hdrchk,
             jstyle,
             keywords,
             mapfilechk]
-    run_checks(root, parent, cmds, paths='')
+    run_checks(root, parent, cmds, paths)
 
 
-def pbchk(root, parent):
+def pbchk(root, parent, paths):
     cmds = [comchk,
             copyright,
             cstyle,
@@ -323,5 +326,8 @@ if __name__ == '__main__':
     func = nits
     if sys.argv[0].endswith('/git-pbchk'):
         func = pbchk
+        if args:
+            sys.stderr.write("only complete workspaces may be pbchk'd\n");
+            sys.exit(1)
 
-    func(git_root(), parent_branch)
+    func(git_root(), parent_branch, args)
