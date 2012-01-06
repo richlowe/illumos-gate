@@ -16,7 +16,7 @@
 
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2008, 2011 Richard Lowe
+# Copyright 2008, 2012 Richard Lowe
 #
 
 import getopt
@@ -38,6 +38,9 @@ from onbld.Checks import Comments, Copyright, CStyle, HdrChk
 from onbld.Checks import JStyle, Keywords, Mapfile
 
 def run(command):
+    """Run a command and return a stream containing its stdout (and write its
+    stderr to our stdout)"""
+
     if type(command) != list:
         command = command.split()
 
@@ -49,6 +52,8 @@ def run(command):
     return err != 0 and None or p.stdout
 
 def git_root():
+    """Return the root of the current git workspace"""
+
     p = run('git rev-parse --git-dir')
 
     if not p:
@@ -59,6 +64,8 @@ def git_root():
                                         os.path.pardir))
 
 def git_branch():
+    """Return the current git branch"""
+
     p = run('git branch')
 
     if not p:
@@ -70,6 +77,11 @@ def git_branch():
             return elt.split()[1]
 
 def git_parent_branch(branch):
+    """Return the parent of the current git branch.
+
+    If this branch tracks a remote branch, return the remote branch which is
+    tracked.  If not, default to origin/master."""
+
     p = run(["git", "for-each-ref",
              "--format=%(refname:short) %(upstream:short)",
              "refs/heads/"])
@@ -87,6 +99,8 @@ def git_parent_branch(branch):
     return 'origin/master'
 
 def git_comments(branch):
+    """Return a list of any checkin comments on this git branch"""
+
     p = run('git log --pretty=format:%%B %s..' % branch)
 
     if not p:
@@ -97,7 +111,10 @@ def git_comments(branch):
 
 
 def git_file_list(branch, paths=''):
-    '''Set of files which have ever changed between BRANCH and here'''
+    """Return the set of files which have ever changed between BRANCH and here.
+
+    NB: This includes files which no longer exist, or no longer actually differ."""
+
     p = run("git log --name-only --pretty=format: %s.. %s" %
              (branch, paths))
 
@@ -114,7 +131,8 @@ def git_file_list(branch, paths=''):
 
 
 def not_check(root, cmd):
-    '''Return a function to do NOT matching'''
+    """Return a function which returns True if a file given as an argument
+    should be excluded from the check named by 'cmd'"""
 
     ignorefiles = filter(os.path.exists,
                          [os.path.join(root, ".git", "%s.NOT" % cmd),
@@ -126,7 +144,11 @@ def not_check(root, cmd):
 
 
 def gen_files(root, branch, paths, exclude):
-    # Taken entirely from 2.6's os.path.relpath which we would use if we
+    """Return a function producing file names names, relative to the current
+    directory, of any file changed on this branch (limited to 'paths' if
+    requested), and excluding files for which exclude returns a true value """
+
+    # Taken entirely from Python 2.6's os.path.relpath which we would use if we
     # could.
     def relpath(path, here):
         c = os.path.abspath(os.path.join(root, path)).split(os.path.sep)
