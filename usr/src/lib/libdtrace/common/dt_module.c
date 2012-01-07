@@ -647,12 +647,12 @@ dt_module_getctf(dtrace_hdl_t *dtp, dt_module_t *dmp)
 		}
 
 		/*
-		 * If the label we claim the parent must have does not match
-		 * its actual topmost label (XXX: Should check all?), ignore
-		 * the CTF entirely rather than acquiring possibly bad type
-		 * references.
+		 * If the label we claim the parent must have is not actually
+		 * present in the parent module, ignore the CTF entirely
+		 * rather than acquiring possibly bad type references.
 		 */
-		if (strcmp(ctf_label_topmost(pfp), ctf_parent_label(dmp->dm_ctfp)) != 0) {
+		if (ctf_label_info(pfp, ctf_parent_label(dmp->dm_ctfp),
+		    NULL) == CTF_ERR) {
 			(void) dt_set_errno(dtp, EDT_NOCTF);
 			goto err;
 		}
