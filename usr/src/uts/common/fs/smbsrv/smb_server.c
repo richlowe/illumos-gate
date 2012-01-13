@@ -754,6 +754,11 @@ smb_server_spooldoc(smb_ioc_spooldoc_t *ioc)
 	if ((rc = smb_server_lookup(&sv)) != 0)
 		return (rc);
 
+	if (sv->sv_cfg.skc_print_enable == 0) {
+		rc = ENOTTY;
+		goto out;
+	}
+
 	mutex_enter(&sv->sv_mutex);
 	for (;;) {
 		if (sv->sv_state != SMB_SERVER_STATE_RUNNING) {
@@ -770,22 +775,24 @@ smb_server_spooldoc(smb_ioc_spooldoc_t *ioc)
 		}
 	}
 	mutex_exit(&sv->sv_mutex);
-	if (rc == 0) {
-		spdoc = kmem_zalloc(sizeof (*spdoc), KM_SLEEP);
-		if (smb_spool_lookup_doc_byfid(sv, fid, spdoc)) {
-			ioc->spool_num = spdoc->sd_spool_num;
-			ioc->ipaddr = spdoc->sd_ipaddr;
-			(void) strlcpy(ioc->path, spdoc->sd_path,
-			    MAXPATHLEN);
-			(void) strlcpy(ioc->username,
-			    spdoc->sd_username, MAXNAMELEN);
-		} else {
-			/* Did not find that print job. */
-			rc = EAGAIN;
-		}
-		kmem_free(spdoc, sizeof (*spdoc));
-	}
+	if (rc != 0)
+		goto out;
 
+	spdoc = kmem_zalloc(sizeof (*spdoc), KM_SLEEP);
+	if (smb_spool_lookup_doc_byfid(sv, fid, spdoc)) {
+		ioc->spool_num = spdoc->sd_spool_num;
+		ioc->ipaddr = spdoc->sd_ipaddr;
+		(void) strlcpy(ioc->path, spdoc->sd_path,
+		    MAXPATHLEN);
+		(void) strlcpy(ioc->username,
+		    spdoc->sd_username, MAXNAMELEN);
+	} else {
+		/* Did not find that print job. */
+		rc = EAGAIN;
+	}
+	kmem_free(spdoc, sizeof (*spdoc));
+
+out:
 	smb_server_release(sv);
 	return (rc);
 }
@@ -1093,17 +1100,6 @@ smb_server_disconnect_share(smb_llist_t *ll, const char *sharename)
  *
  * These functions are provided the relevant smb server by the caller.
  */
-
-void
-smb_server_reconnection_check(smb_server_t *sv, smb_session_t *session)
-{
-	ASSERT(sv == session->s_server);
-
-	smb_session_reconnection_check(&sv->sv_nbt_daemon.ld_session_list,
-	    session);
-	smb_session_reconnection_check(&sv->sv_tcp_daemon.ld_session_list,
-	    session);
-}
 
 void
 smb_server_get_cfg(smb_server_t *sv, smb_kmod_cfg_t *cfg)
@@ -1858,6 +1854,20 @@ smb_server_store_cfg(smb_server_t *sv, smb_ioc_cfg_t *ioc)
 	    sizeof (sv->sv_cfg.skc_hostname));
 	(void) strlcpy(sv->sv_cfg.skc_system_comment, ioc->system_comment,
 	    sizeof (sv->sv_cfg.skc_system_comment));
+
+	if (sv->sv_cfg.skc_oplock_enable && smb_raw_mode) {
+		/*
+		 * Note that these two optional protocol features
+		 * (oplocks, raw_mode) have unfortunate interactions.
+		 * Since raw_mode is only wanted by ancient clients,
+		 * we just turn it off (that's what MS recommends).
+		 * Leave some evidence in the log if someone has
+		 * patched smb_raw_mode to enable it.
+		 */
+		cmn_err(CE_NOTE,
+		    "Raw mode enabled: Disabling opportunistic locks");
+		sv->sv_cfg.skc_oplock_enable = 0;
+	}
 }
 
 static int

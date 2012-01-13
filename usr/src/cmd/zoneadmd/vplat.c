@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2011, Joyent Inc. All rights reserved.
+ * Copyright (c) 2011, 2012, Joyent Inc. All rights reserved.
  */
 
 /*
@@ -199,7 +199,7 @@ autofs_cleanup(zoneid_t zoneid)
 	/*
 	 * Ask autofs to unmount all trigger nodes in the given zone.
 	 */
-	return (_autofssys(AUTOFS_UNMOUNTALL, (void *)zoneid));
+	return (_autofssys(AUTOFS_UNMOUNTALL, (void *)((uintptr_t)zoneid)));
 }
 
 static void
@@ -710,6 +710,7 @@ unmount_filesystems(zlog_t *zlogp, zoneid_t zoneid, boolean_t unmount_cmd)
 				if (umount2(path, MS_FORCE) == 0) {
 					unmounted = B_TRUE;
 					stuck = B_FALSE;
+					fail = 0;
 				} else {
 					/*
 					 * We may hit a failure here if there
@@ -723,12 +724,27 @@ unmount_filesystems(zlog_t *zlogp, zoneid_t zoneid, boolean_t unmount_cmd)
 					 * this case, we will wait and retry
 					 * a few times before we give up.
 					 */
-					if (fail++ < 15) {
+					fail++;
+					if (fail < 16) {
 						zerror(zlogp, B_FALSE,
 						    "unable to unmount '%s', "
 						    "retrying in 1 second",
 						    path);
 						(void) sleep(1);
+					} else if (fail == 16) {
+						char cmdbuf[MAXPATHLEN + 21];
+
+						zerror(zlogp, B_FALSE,
+						    "unable to unmount '%s', "
+						    "trying to kill GZ "
+						    "processes",
+						    path);
+						(void) snprintf(cmdbuf,
+						    sizeof (cmdbuf),
+						    "/usr/sbin/fuser -ck %s",
+						    path);
+						(void) system(cmdbuf);
+						(void) sleep(2);
 					} else {
 						error++;
 						zerror(zlogp, B_FALSE,
@@ -2439,6 +2455,7 @@ configure_shared_network_interfaces(zlog_t *zlogp)
 		for (;;) {
 			if (zonecfg_getnwifent(handle, &nwiftab) != Z_OK)
 				break;
+			nwifent_free_attrs(&nwiftab);
 			if (configure_one_interface(zlogp, zoneid, &nwiftab) !=
 			    Z_OK) {
 				(void) zonecfg_endnwifent(handle);
@@ -2930,6 +2947,7 @@ configure_exclusive_network_interfaces(zlog_t *zlogp, zoneid_t zoneid)
 		if (zonecfg_getnwifent(handle, &nwiftab) != Z_OK)
 			break;
 
+		nwifent_free_attrs(&nwiftab);
 		if (prof == NULL) {
 			if (zone_get_devroot(zone_name, rootpath,
 			    sizeof (rootpath)) != Z_OK) {
@@ -4851,6 +4869,8 @@ error:
 	}
 	if (rctlbuf != NULL)
 		free(rctlbuf);
+	if (zfsbuf != NULL)
+		free(zfsbuf);
 	priv_freeset(privs);
 	if (fp != NULL)
 		zonecfg_close_scratch(fp);
