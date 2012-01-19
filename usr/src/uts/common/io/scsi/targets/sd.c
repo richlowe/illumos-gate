@@ -24,6 +24,7 @@
  */
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright (c) 2011 Bayard G. Bell.  All rights reserved.
  */
 /*
  * Copyright 2011 cyril.galibern@opensvc.com
@@ -78,10 +79,8 @@
  */
 #if (defined(__fibre))
 #define	SD_MODULE_NAME	"SCSI SSA/FCAL Disk Driver"
-char _depends_on[]	= "misc/scsi misc/cmlb drv/fcp";
 #else /* !__fibre */
 #define	SD_MODULE_NAME	"SCSI Disk Driver"
-char _depends_on[]	= "misc/scsi misc/cmlb";
 #endif /* !__fibre */
 
 /*
@@ -27697,7 +27696,7 @@ sr_read_subchannel(dev_t dev, caddr_t data, int flag)
 
 	/* Process the returned Q sub-channel data */
 	subchnl->cdsc_audiostatus = buffer[1];
-	subchnl->cdsc_adr	= (buffer[5] & 0xF0);
+	subchnl->cdsc_adr	= (buffer[5] & 0xF0) >> 4;
 	subchnl->cdsc_ctrl	= (buffer[5] & 0x0F);
 	subchnl->cdsc_trk	= buffer[6];
 	subchnl->cdsc_ind	= buffer[7];

@@ -25,6 +25,9 @@
  * Copyright (c) 2010, Intel Corporation.
  * All rights reserved.
  */
+/*
+ * Copyright 2011 Joyent, Inc. All rights reserved.
+ */
 
 /*
  * Welcome to the world of the "real mode platter".
@@ -162,14 +165,15 @@ rmp_gdt_init(rm_platter_t *rm)
 	 * mapped address, we need to calculate it here.
 	 */
 	rm->rm_longmode64_addr = rm_platter_pa +
-	    ((uint32_t)long_mode_64 - (uint32_t)real_mode_start_cpu);
+	    (uint32_t)((uintptr_t)long_mode_64 -
+	    (uintptr_t)real_mode_start_cpu);
 #endif	/* __amd64 */
 }
 
 static void *
 mach_cpucontext_alloc_tables(struct cpu *cp)
 {
-	struct tss *ntss;
+	tss_t *ntss;
 	struct cpu_tables *ct;
 
 	/*

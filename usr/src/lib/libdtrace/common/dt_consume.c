@@ -25,6 +25,7 @@
 
 /*
  * Copyright (c) 2011, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2011 by Delphix. All rights reserved.
  */
 
 #include <stdlib.h>
@@ -827,7 +828,7 @@ dt_print_stddev(dtrace_hdl_t *dtp, FILE *fp, caddr_t addr,
 /*ARGSUSED*/
 int
 dt_print_bytes(dtrace_hdl_t *dtp, FILE *fp, caddr_t addr,
-    size_t nbytes, int width, int quiet)
+    size_t nbytes, int width, int quiet, int forceraw)
 {
 	/*
 	 * If the byte stream is a series of printable characters, followed by
@@ -839,6 +840,9 @@ dt_print_bytes(dtrace_hdl_t *dtp, FILE *fp, caddr_t addr,
 
 	if (nbytes == 0)
 		return (0);
+
+	if (forceraw)
+		goto raw;
 
 	if (dtp->dt_options[DTRACEOPT_RAWBYTES] != DTRACEOPT_UNSET)
 		goto raw;
@@ -1550,7 +1554,7 @@ dt_print_datum(dtrace_hdl_t *dtp, FILE *fp, dtrace_recdesc_t *rec,
 		    (uint32_t)normal);
 		break;
 	default:
-		err = dt_print_bytes(dtp, fp, addr, size, 50, 0);
+		err = dt_print_bytes(dtp, fp, addr, size, 50, 0, 0);
 		break;
 	}
 
@@ -1705,6 +1709,7 @@ dt_consume_cpu(dtrace_hdl_t *dtp, FILE *fp, int cpu, dtrace_bufdesc_t *buf,
 	int quiet = (dtp->dt_options[DTRACEOPT_QUIET] != DTRACEOPT_UNSET);
 	int rval, i, n;
 	dtrace_epid_t last = DTRACE_EPIDNONE;
+	uint64_t tracememsize = 0;
 	dtrace_probedata_t data;
 	uint64_t drops;
 	caddr_t addr;
@@ -1873,6 +1878,13 @@ again:
 				}
 			}
 
+			if (act == DTRACEACT_TRACEMEM_DYNSIZE &&
+			    rec->dtrd_size == sizeof (uint64_t)) {
+				/* LINTED - alignment */
+				tracememsize = *((unsigned long long *)addr);
+				continue;
+			}
+
 			rval = (*rfunc)(&data, rec, arg);
 
 			if (rval == DTRACE_CONSUME_NEXT)
@@ -1964,6 +1976,35 @@ again:
 				goto nextrec;
 			}
 
+			/*
+			 * If this is a DIF expression, and the record has a
+			 * format set, this indicates we have a CTF type name
+			 * associated with the data and we should try to print
+			 * it out by type.
+			 */
+			if (act == DTRACEACT_DIFEXPR) {
+				const char *strdata = dt_strdata_lookup(dtp,
+				    rec->dtrd_format);
+				if (strdata != NULL) {
+					n = dtrace_print(dtp, fp, strdata,
+					    addr, rec->dtrd_size);
+
+					/*
+					 * dtrace_print() will return -1 on
+					 * error, or return the number of bytes
+					 * consumed.  It will return 0 if the
+					 * type couldn't be determined, and we
+					 * should fall through to the normal
+					 * trace method.
+					 */
+					if (n < 0)
+						return (-1);
+
+					if (n > 0)
+						goto nextrec;
+				}
+			}
+
 nofmt:
 			if (act == DTRACEACT_PRINTA) {
 				dt_print_aggdata_t pd;
@@ -2032,6 +2073,23 @@ nofmt:
 				goto nextrec;
 			}
 
+			if (act == DTRACEACT_TRACEMEM) {
+				if (tracememsize == 0 ||
+				    tracememsize > rec->dtrd_size) {
+					tracememsize = rec->dtrd_size;
+				}
+
+				n = dt_print_bytes(dtp, fp, addr,
+				    tracememsize, 33, quiet, 1);
+
+				tracememsize = 0;
+
+				if (n < 0)
+					return (-1);
+
+				goto nextrec;
+			}
+
 			switch (rec->dtrd_size) {
 			case sizeof (uint64_t):
 				n = dt_printf(dtp, fp,
@@ -2055,7 +2113,7 @@ nofmt:
 				break;
 			default:
 				n = dt_print_bytes(dtp, fp, addr,
-				    rec->dtrd_size, 33, quiet);
+				    rec->dtrd_size, 33, quiet, 0);
 				break;
 			}
 

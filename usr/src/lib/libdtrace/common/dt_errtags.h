@@ -26,6 +26,7 @@
 
 /*
  * Copyright (c) 2011, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2011 by Delphix. All rights reserved.
  */
 
 #ifndef	_DT_ERRTAGS_H
@@ -189,8 +190,12 @@ typedef enum {
 	D_PRINTA_AGGPROTO,		/* printa() aggregation mismatch */
 	D_TRACE_VOID,			/* trace() argument has void type */
 	D_TRACE_DYN,			/* trace() argument has dynamic type */
+	D_PRINT_VOID,			/* print() argument has void type */
+	D_PRINT_DYN,			/* print() argument has dynamic type */
 	D_TRACEMEM_ADDR,		/* tracemem() address bad type */
 	D_TRACEMEM_SIZE,		/* tracemem() size bad type */
+	D_TRACEMEM_ARGS,		/* tracemem() illegal number of args */
+	D_TRACEMEM_DYNSIZE,		/* tracemem() dynamic size bad type */
 	D_STACK_PROTO,			/* stack() prototype mismatch */
 	D_STACK_SIZE,			/* stack() size argument bad type */
 	D_USTACK_FRAMES,		/* ustack() frames arg bad type */

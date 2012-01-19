@@ -143,14 +143,17 @@ export ON_CRYPTO_BINS="$CODEMGR_WS/on-crypto.$MACH.tar.bz2"
 #
 export REF_PROTO_LIST="$PARENT_WS/usr/src/proto_list_${MACH}"
 
+
+export ROOT="$CODEMGR_WS/proto/root_${MACH}"
+export SRC="$CODEMGR_WS/usr/src"
+export MULTI_PROTO="no"
+
 #
 #	build environment variables, including version info for mcs, motd,
 # motd, uname and boot messages. Mostly you shouldn't change this except
 # when the release slips (nah) or you move an environment file to a new
 # release
 #
-export ROOT="$CODEMGR_WS/proto/root_${MACH}"
-export SRC="$CODEMGR_WS/usr/src"
 export VERSION="$GATE"
 
 #
@@ -177,6 +180,9 @@ export PARENT_TOOLS_ROOT="$PARENT_WS/usr/src/tools/proto/root_$MACH-nd"
 #
 export PKGARCHIVE="${CODEMGR_WS}/packages/${MACH}/nightly"
 # export PKGPUBLISHER_REDIST='on-redist'
+
+# Package manifest format version.
+export PKGFMT_OUTPUT='v1'
 
 # we want make to do as much as it can, just in case there's more than
 # one problem.

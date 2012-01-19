@@ -1,6 +1,9 @@
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
  */
+/*
+ * Copyright 2011 Joyent, Inc. All rights reserved.
+ */
 
 #ifndef	_SYS_SEGMENTS_H
 #define	_SYS_SEGMENTS_H
@@ -349,8 +352,8 @@ typedef struct gate_desc {
 	uint32_t sgd_hioffset:16;	/* code seg off 31:16 */
 } gate_desc_t;
 
-#define	GATESEG_GETOFFSET(sgd)		((sgd)->sgd_looffset |		\
-					(sgd)->sgd_hioffset << 16)
+#define	GATESEG_GETOFFSET(sgd)	((uintptr_t)((sgd)->sgd_looffset |	\
+				(sgd)->sgd_hioffset << 16))
 
 #else	/* __amd64 */
 
@@ -377,9 +380,9 @@ typedef struct gate_desc {
 	uint64_t sgd_resv3:19;		/* unused, ignored */
 } gate_desc_t;
 
-#define	GATESEG_GETOFFSET(sgd)		((sgd)->sgd_looffset |		\
-					(sgd)->sgd_hioffset << 16 |	\
-					(sgd)->sgd_hi64offset << 32)
+#define	GATESEG_GETOFFSET(sgd)	((uintptr_t)((sgd)->sgd_looffset |	\
+				(sgd)->sgd_hioffset << 16 |		\
+				(uint64_t)((sgd)->sgd_hi64offset) << 32))
 
 #endif	/* __amd64 */
 
@@ -662,10 +665,10 @@ extern user_desc_t	ucs32_on;
 extern user_desc_t	ucs32_off;
 #endif  /* __amd64 */
 
-extern struct tss *ktss0;
+extern tss_t *ktss0;
 
 #if defined(__i386)
-extern struct tss *dftss0;
+extern tss_t *dftss0;
 #endif	/* __i386 */
 
 extern void div0trap(), dbgtrap(), nmiint(), brktrap(), ovflotrap();
