@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
- * Copyright (c) 2011 by Delphix. All rights reserved.
+ * Copyright (c) 2012 by Delphix. All rights reserved.
  */
 
 /*
@@ -167,15 +167,17 @@ spa_prop_add_list(nvlist_t *nvl, zpool_prop_t prop, char *strval,
 static void
 spa_prop_get_config(spa_t *spa, nvlist_t **nvp)
 {
+	vdev_t *rvd = spa->spa_root_vdev;
 	uint64_t size;
 	uint64_t alloc;
+	uint64_t space;
 	uint64_t cap, version;
 	zprop_source_t src = ZPROP_SRC_NONE;
 	spa_config_dirent_t *dp;
 
 	ASSERT(MUTEX_HELD(&spa->spa_props_lock));
 
-	if (spa->spa_root_vdev != NULL) {
+	if (rvd != NULL) {
 		alloc = metaslab_class_get_alloc(spa_normal_class(spa));
 		size = metaslab_class_get_space(spa_normal_class(spa));
 		spa_prop_add_list(*nvp, ZPOOL_PROP_NAME, spa_name(spa), 0, src);
@@ -183,6 +185,15 @@ spa_prop_get_config(spa_t *spa, nvlist_t **nvp)
 		spa_prop_add_list(*nvp, ZPOOL_PROP_ALLOCATED, NULL, alloc, src);
 		spa_prop_add_list(*nvp, ZPOOL_PROP_FREE, NULL,
 		    size - alloc, src);
+
+		space = 0;
+		for (int c = 0; c < rvd->vdev_children; c++) {
+			vdev_t *tvd = rvd->vdev_child[c];
+			space += tvd->vdev_max_asize - tvd->vdev_asize;
+		}
+		spa_prop_add_list(*nvp, ZPOOL_PROP_EXPANDSZ, NULL, space,
+		    src);
+
 		spa_prop_add_list(*nvp, ZPOOL_PROP_READONLY, NULL,
 		    (spa_mode(spa) == FREAD), src);
 
@@ -193,7 +204,7 @@ spa_prop_get_config(spa_t *spa, nvlist_t **nvp)
 		    ddt_get_pool_dedup_ratio(spa), src);
 
 		spa_prop_add_list(*nvp, ZPOOL_PROP_HEALTH, NULL,
-		    spa->spa_root_vdev->vdev_state, src);
+		    rvd->vdev_state, src);
 
 		version = spa_version(spa);
 		if (version == zpool_prop_default_numeric(ZPOOL_PROP_VERSION))
@@ -1052,8 +1063,10 @@ spa_unload(spa_t *spa)
 	}
 	spa->spa_spares.sav_count = 0;
 
-	for (i = 0; i < spa->spa_l2cache.sav_count; i++)
+	for (i = 0; i < spa->spa_l2cache.sav_count; i++) {
+		vdev_clear_stats(spa->spa_l2cache.sav_vdevs[i]);
 		vdev_free(spa->spa_l2cache.sav_vdevs[i]);
+	}
 	if (spa->spa_l2cache.sav_vdevs) {
 		kmem_free(spa->spa_l2cache.sav_vdevs,
 		    spa->spa_l2cache.sav_count * sizeof (void *));
@@ -1281,11 +1294,13 @@ spa_load_l2cache(spa_t *spa)
 
 		vd = oldvdevs[i];
 		if (vd != NULL) {
+			ASSERT(vd->vdev_isl2cache);
+
 			if (spa_l2cache_exists(vd->vdev_guid, &pool) &&
 			    pool != 0ULL && l2arc_vdev_present(vd))
 				l2arc_remove_vdev(vd);
-			(void) vdev_close(vd);
-			spa_l2cache_remove(vd);
+			vdev_clear_stats(vd);
+			vdev_free(vd);
 		}
 	}
 
@@ -1926,7 +1941,7 @@ spa_load_impl(spa_t *spa, uint64_t pool_guid, nvlist_t *config,
 	 */
 	if (type != SPA_IMPORT_ASSEMBLE) {
 		spa_config_enter(spa, SCL_ALL, FTAG, RW_WRITER);
-		error = vdev_validate(rvd);
+		error = vdev_validate(rvd, mosconfig);
 		spa_config_exit(spa, SCL_ALL, FTAG);
 
 		if (error != 0)
@@ -2786,6 +2801,7 @@ spa_validate_aux_devs(spa_t *spa, nvlist_t *nvroot, uint64_t crtxg, int mode,
 		if ((strcmp(config, ZPOOL_CONFIG_L2CACHE) == 0) &&
 		    strcmp(vd->vdev_ops->vdev_op_type, VDEV_TYPE_DISK) != 0) {
 			error = ENOTBLK;
+			vdev_free(vd);
 			goto out;
 		}
 #endif
@@ -2895,10 +2911,6 @@ spa_l2cache_drop(spa_t *spa)
 		if (spa_l2cache_exists(vd->vdev_guid, &pool) &&
 		    pool != 0ULL && l2arc_vdev_present(vd))
 			l2arc_remove_vdev(vd);
-		if (vd->vdev_isl2cache)
-			spa_l2cache_remove(vd);
-		vdev_clear_stats(vd);
-		(void) vdev_close(vd);
 	}
 }
 
@@ -3890,7 +3902,7 @@ spa_vdev_attach(spa_t *spa, uint64_t guid, nvlist_t *nvroot, int replacing)
 	pvd = oldvd->vdev_parent;
 
 	if ((error = spa_config_parse(spa, &newrootvd, nvroot, NULL, 0,
-	    VDEV_ALLOC_ADD)) != 0)
+	    VDEV_ALLOC_ATTACH)) != 0)
 		return (spa_vdev_exit(spa, NULL, txg, EINVAL));
 
 	if (newrootvd->vdev_children != 1)
