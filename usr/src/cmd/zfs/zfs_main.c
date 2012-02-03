@@ -1036,7 +1036,7 @@ destroy_print_cb(zfs_handle_t *zhp, void *arg)
 static int
 destroy_print_snapshots(zfs_handle_t *fs_zhp, destroy_cbdata_t *cb)
 {
-	int err;
+	int err = 0;
 	assert(cb->cb_firstsnap == NULL);
 	assert(cb->cb_prevsnap == NULL);
 	err = zfs_iter_snapshots_sorted(fs_zhp, destroy_print_cb, cb);
@@ -1114,7 +1114,7 @@ destroy_clones(destroy_cbdata_t *cb)
 		    ZFS_TYPE_SNAPSHOT);
 		if (zhp != NULL) {
 			boolean_t defer = cb->cb_defer_destroy;
-			int err;
+			int err = 0;
 
 			/*
 			 * We can't defer destroy non-snapshots, so set it to
@@ -1191,7 +1191,7 @@ zfs_do_destroy(int argc, char **argv)
 
 	at = strchr(argv[0], '@');
 	if (at != NULL) {
-		int err;
+		int err = 0;
 
 		/* Build the list of snaps to destroy in cb_nvl. */
 		if (nvlist_alloc(&cb.cb_nvl, NV_UNIQUE_NAME, 0) != 0)
@@ -2189,7 +2189,7 @@ userspace_cb(void *arg, const char *domain, uid_t rid, uint64_t space)
 		char sid[ZFS_MAXNAMELEN+32];
 		uid_t id;
 		uint64_t classes;
-		int err;
+		int err = 0;
 		directory_error_t e;
 
 		(void) snprintf(sid, sizeof (sid), "%s-%u", domain, rid);
@@ -6354,7 +6354,7 @@ zfs_do_diff(int argc, char **argv)
 	char *tosnap = NULL;
 	char *fromsnap = NULL;
 	char *atp, *copy;
-	int err;
+	int err = 0;
 	int c;
 
 	while ((c = getopt(argc, argv, "FHt")) != -1) {
