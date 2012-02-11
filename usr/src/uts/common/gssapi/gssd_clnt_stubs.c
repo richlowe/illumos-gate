@@ -21,6 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2012 Milan Jurik. All rights reserved.
  */
 
 /*
@@ -58,7 +59,7 @@ uint_t gss_log = 1;
 #endif /* GSSDEBUG */
 
 #ifdef  DEBUG
-extern void prom_printf();
+extern void prom_printf(const char *, ...);
 #endif
 
 char *server = "localhost";
@@ -690,10 +691,10 @@ kgss_init_sec_context_wrapped(
 	    name_type == GSS_C_NULL_OID ?
 	    (char *)NULL : (char *)name_type->elements;
 
-	arg.mech_type.GSS_OID_len =
-	    (uint_t)(mech_type != GSS_C_NULL_OID ? mech_type->length : 0);
-	arg.mech_type.GSS_OID_val =
-	    (char *)(mech_type != GSS_C_NULL_OID ? mech_type->elements : 0);
+	arg.mech_type.GSS_OID_len = (uint_t)(mech_type != GSS_C_NULL_OID ?
+	    mech_type->length : 0);
+	arg.mech_type.GSS_OID_val = (char *)(mech_type != GSS_C_NULL_OID ?
+	    mech_type->elements : 0);
 
 	arg.req_flags = req_flags;
 
@@ -1075,7 +1076,7 @@ kgss_accept_sec_context_wrapped(
 
 		*context_handle = *((gssd_ctx_id_t *)
 		    res.context_handle.GSS_CTX_ID_T_val);
-			*gssd_context_verifier = res.gssd_context_verifier;
+		*gssd_context_verifier = res.gssd_context_verifier;
 
 		/* these other parameters are only ready upon GSS_S_COMPLETE */
 		if (res.status == (OM_uint32) GSS_S_COMPLETE) {
