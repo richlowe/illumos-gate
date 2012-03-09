@@ -1,4 +1,3 @@
-
 # Illumos GCC 4
 
 ## Intro
@@ -25,22 +24,6 @@ I've made binary tarballs available, they assume a `--prefix` of
 i386:  http://richlowe.openindiana.org/~richlowe/il-gcc-444-i386.tar.bz2
 sparc: http://richlowe.openindiana.org/~richlowe/il-gcc-444-sparc.tar.bz2
 
-### Further patch GCC
-
-Unfortunately, we need to bake appropriate runpaths for libstdc++ and libgcc_s
-into the GCC spec, at least at present, so you need to further patch GCC to
-reflect the location in which you're going to install it.
-
-Choose a prefix in which to install GCC (the one you'll give to `configure
---prefix`), I'm using /opt/gcc/4.4.4.
-
-Now, look at revision a1583073 (`git show a1583073`).  In every place that
-changeset added a /usr/sfw/lib path, adding a matching path based on your
-prefix _before_ the SFW path (you need your libcc_s to be found first).
-
-I'm hoping to find a way to avoid doing this, but at present haven't come up
-with one that works in every case.
-
 ### Build GCC
 
 I've been using a script to make this easier on myself
@@ -66,7 +49,7 @@ if [[ $(mach) == "sparc" ]]; then
        CFLAGS="$CFLAGS -fkeep-inline-functions"
        AS_OPTIONS="--without-gnu-as --with-as=/usr/ccs/bin/as"
 else
-     AS_OPTIONS="--with-gnu-as --with-as=/usr/sfw/bin/as"
+     AS_OPTIONS="--with-gnu-as --with-as=/usr/sfw/bin/gas"
 fi
 
 export STAGE1_CFLAGS=$CFLAGS
