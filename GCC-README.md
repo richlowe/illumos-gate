@@ -100,13 +100,8 @@ This should be sufficient to have GCC 4 used as the primary throughout the
 build (check nightly.log, and/or run `mcs -p foo.o` to check individual
 objects.
 
-## Illumos Live is really helpful
+## SmartOS is really helpful for testing
 
-A good and convenient way to test stuff is to use Joyent's illumos-live
-(http://github.com/joyent/illumos-live).  My fork contains some additional
-changes to make it mildly more convenient if you don't have netbooting
-infrastructure.
-
-Just make sure that the projects/illumos tree is a clone of this branch, edit
-the generated illumos.sh env file as in "Build Illumos" above, and build it
-following their directions.
+A good and convenient way to test stuff is to use Joyent's smartos
+(http://github.com/joyent/smartos-live).  Which is semi-frequently synced with
+this branch.
