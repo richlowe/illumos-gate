@@ -116,8 +116,6 @@ XARCH		= $(XARCH_$(CLASS))
 COPTIMIZE_32	= -xO3
 COPTIMIZE_64	= -xO3
 COPTIMIZE	= $(COPTIMIZE_$(CLASS))
-$(__GNUC4)COPTIMIZE += -_gcc=-fno-inline-small-functions \
-	-_gcc=-fno-inline-functions-called-once
 
 CCMODE		= -Xa
 
@@ -137,6 +135,7 @@ CFLAGS		+= $(CTF_FLAGS)
 CFLAGS		+= $(C99MODE)
 CFLAGS		+= $(CCUNBOUND)
 CFLAGS		+= $(CCSTATICSYM)
+CFLAGS		+= $(CCNOAUTOINLINE)
 CFLAGS		+= $(IROPTFLAG)
 CFLAGS		+= $(CGLOBALSTATIC)
 CFLAGS		+= -xregs=no%float

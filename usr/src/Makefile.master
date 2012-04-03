@@ -329,6 +329,13 @@ CCSTATICSYM=		-Wc,-Qassembler-ounrefsym=0
 # generate 32-bit addresses in the v9 kernel. Saves memory.
 CCABS32=		-Wc,-xcode=abs32
 
+# GCC, especially, is increasingly beginning to auto-inline functions and
+# sadly does so separately not under the general -fno-inline-functions
+CCNOAUTOINLINE=		
+$(__GNUC4)CCNOAUTOINLINE= -_gcc=-fno-inline-small-functions \
+	-_gcc=-fno-inline-functions-called-once
+
+
 # One optimization the compiler might perform is to turn this:
 #	#pragma weak foo
 #	extern int foo;
@@ -424,13 +431,6 @@ sparcv9_COPTFLAG=	-xO3
 i386_COPTFLAG=		-O
 amd64_COPTFLAG=		-xO3
 
-# This would normally be added by cw(1) but cannot be while we want to support
-# Both GCC 3.x and GCC 4.x
-$(__GNUC4)$(MACH)_COPTFLAG += -_gcc=-fno-inline-small-functions \
-	-_gcc=-fno-inline-functions-called-once
-$(__GNUC4)$(MACH64)_COPTFLAG += -_gcc=-fno-inline-small-functions \
-	-_gcc=-fno-inline-functions-called-once
-
 COPTFLAG= $($(MACH)_COPTFLAG)
 COPTFLAG64= $($(MACH64)_COPTFLAG)
 
@@ -512,17 +512,17 @@ XREGSFLAG64		= $($(MACH64)_XREGSFLAG)
 
 CFLAGS=         $(COPTFLAG) $($(MACH)_CFLAGS) $(SPACEFLAG) $(CCMODE) \
 		$(ILDOFF) $(CERRWARN) $(C99MODE) $(CCUNBOUND) $(IROPTFLAG) \
-		$(CGLOBALSTATIC)
+		$(CGLOBALSTATIC) $(CCNOAUTOINLINE)
 CFLAGS64=       $(COPTFLAG64) $($(MACH64)_CFLAGS) $(SPACEFLAG64) $(CCMODE64) \
 		$(ILDOFF) $(CERRWARN) $(C99MODE) $(CCUNBOUND) $(IROPTFLAG64) \
-		$(CGLOBALSTATIC)
+		$(CGLOBALSTATIC) $(CCNOAUTOINLINE)
 #
 # Flags that are used to build parts of the code that are subsequently
 # run on the build machine (also known as the NATIVE_BUILD).
 #
 NATIVE_CFLAGS=	$(COPTFLAG) $($(NATIVE_MACH)_CFLAGS) $(CCMODE) \
 		$(ILDOFF) $(CERRWARN) $(C99MODE) $($(NATIVE_MACH)_CCUNBOUND) \
-		$(IROPTFLAG) $(CGLOBALSTATIC)
+		$(IROPTFLAG) $(CGLOBALSTATIC) $(CCNOAUTOINLINE)
 
 DTEXTDOM=-DTEXT_DOMAIN=\"$(TEXT_DOMAIN)\"	# For messaging.
 DTS_ERRNO=-D_TS_ERRNO
