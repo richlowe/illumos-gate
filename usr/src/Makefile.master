@@ -434,7 +434,6 @@ amd64_COPTFLAG=		-xO3
 COPTFLAG= $($(MACH)_COPTFLAG)
 COPTFLAG64= $($(MACH64)_COPTFLAG)
 
-
 # When -g is used, the compiler globalizes static objects
 # (gives them a unique prefix). Disable that.
 CNOGLOBAL= -W0,-noglobal
