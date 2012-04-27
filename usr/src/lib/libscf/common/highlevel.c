@@ -159,8 +159,8 @@ scferror:
 void
 scf_get_boot_config(uint8_t *boot_config)
 {
+	uint64_t ret = 0;
 	assert(boot_config);
-	*boot_config = 0;
 
 	{
 		/*
@@ -176,7 +176,7 @@ scf_get_boot_config(uint8_t *boot_config)
 		scf_propvec_t	*prop;
 
 		for (prop = ua_boot_config; prop->pv_prop != NULL; prop++)
-			prop->pv_ptr = boot_config;
+			prop->pv_ptr = &ret;
 		prop = NULL;
 		if (scf_read_propvec(FMRI_BOOT_CONFIG, BOOT_CONFIG_PG_PARAMS,
 		    B_TRUE, ua_boot_config, &prop) != SCF_FAILED) {
@@ -186,10 +186,12 @@ scf_get_boot_config(uint8_t *boot_config)
 			 * Unset both flags if the platform has been
 			 * blacklisted.
 			 */
-			if (scf_is_fb_blacklisted())
-				*boot_config &= ~(UA_FASTREBOOT_DEFAULT |
-				    UA_FASTREBOOT_ONPANIC);
+			if (scf_is_fb_blacklisted()) {
+				*boot_config = 0;
+				return;
+			}
 #endif	/* __x86 */
+			*boot_config = (uint8_t)ret;
 			return;
 		}
 #if defined(FASTREBOOT_DEBUG)
