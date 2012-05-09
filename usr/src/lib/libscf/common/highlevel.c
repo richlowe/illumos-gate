@@ -160,7 +160,9 @@ void
 scf_get_boot_config(uint8_t *boot_config)
 {
 	uint64_t ret = 0;
+
 	assert(boot_config);
+	*boot_config = 0;
 
 	{
 		/*
@@ -186,10 +188,8 @@ scf_get_boot_config(uint8_t *boot_config)
 			 * Unset both flags if the platform has been
 			 * blacklisted.
 			 */
-			if (scf_is_fb_blacklisted()) {
-				*boot_config = 0;
+			if (scf_is_fb_blacklisted())
 				return;
-			}
 #endif	/* __x86 */
 			*boot_config = (uint8_t)ret;
 			return;
