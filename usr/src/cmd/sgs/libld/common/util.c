@@ -469,6 +469,16 @@ ld_getopt(Lm_list *lml, int ndx, int argc, char **argv)
 				    arg, 'f', MSG_ORIG(MSG_ARG_T_AUXFLTR),
 				    MSG_ARG_T_AUXFLTR_SIZE, NULL)) != 0) {
 					return (c);
+
+				/*
+				 * Translate --as-needed to -z ignore
+				 */
+				} else if ((c = str2chr(lml, argc, ndx, argv,
+				    arg, 'z', MSG_ORIG(MSG_ARG_T_ASNEEDED), 0,
+				    NULL)) != 0) {
+					optarg =
+					    (char *)MSG_ORIG(MSG_ARG_IGNORE);
+					return (c);
 				}
 				break;
 			case 'd':
@@ -576,6 +586,16 @@ ld_getopt(Lm_list *lml, int ndx, int argc, char **argv)
 				    0, NULL)) != 0) {
 					optarg =
 					    (char *)MSG_ORIG(MSG_ARG_DFLEXTRT);
+					return (c);
+
+				/*
+				 * Translate --no-as-needed to -zrecord
+				 */
+				} else if ((c = str2chr(lml, ndx, argc, argv,
+				    arg, 'z', MSG_ORIG(MSG_ARG_T_NOASNEEDED),
+				    0, NULL)) != 0) {
+					optarg =
+					    (char *)MSG_ORIG(MSG_ARG_RECORD);
 					return (c);
 				}
 				break;

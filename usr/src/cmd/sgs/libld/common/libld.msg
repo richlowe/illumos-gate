@@ -1427,6 +1427,8 @@
 @ MSG_ARG_T_WL		"l,-"
 
 @ MSG_ARG_T_AUXFLTR	"-auxiliary"
+@ MSG_ARG_T_ASNEEDED	"-as-needed"
+@ MSG_ARG_T_NOASNEEDED	"-no-as-needed"
 @ MSG_ARG_T_MULDEFS	"-allow-multiple-definition"
 @ MSG_ARG_T_INTERP	"-dynamic-linker"
 @ MSG_ARG_T_ENDGROUP	"-end-group"
