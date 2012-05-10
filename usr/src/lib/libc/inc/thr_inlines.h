@@ -70,9 +70,7 @@ __curthread(void)
 #else
 #error	"port me"
 #endif
-	    "1:"
-	    : "=r" (__value)
-	    : : "cc");
+	    : "=r" (__value));
 	return (__value);
 }
 
