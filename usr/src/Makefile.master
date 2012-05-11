@@ -660,7 +660,9 @@ COMPILE.java=	$(JAVAC) $(JAVAFLAGS) -classpath $(CLASSPATH)
 # Link time macros
 #
 CCNEEDED		= -lC
+CCEXTNEEDED		= -lCrun -lCstd
 $(__GNUC)CCNEEDED	= -L$(GCCLIBDIR) -R$(GCCLIBDIR) -lstdc++ -lgcc_s
+$(__GNUC)CCEXTNEEDED	= $(CCNEEDED)
 
 LINK.c=		$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
 LINK64.c=	$(CC) $(CFLAGS64) $(CPPFLAGS) $(LDFLAGS)
