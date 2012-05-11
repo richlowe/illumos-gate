@@ -33,22 +33,31 @@
 
 /* inlines for gcc */
 
+/*
+ * ON-usable GCC 4.x emits register pseudo-ops declaring %g7 as ignored, rather
+ * than scratch, GCC 3 does the reverse.  All uses, both ones it generated
+ * (_curthread) and ones it didn't (__curthread) must agree.
+ */
+#if __GNUC__ > 3
+#define	SPARC_REG_SPEC	"#ignore"
+#else
+#define	SPARC_REG_SPEC	"#scratch"
+#endif
+
 extern __GNU_INLINE ulwp_t *
 _curthread(void)
 {
-	ulwp_t *__value;
-	__asm__ __volatile__(
 #if defined(__amd64)
-	    "movq %%fs:0, %0\n\t"
+	ulwp_t *__value;
+	__asm__ __volatile__("movq %%fs:0, %0" : "=r" (__value));
 #elif defined(__i386)
-	    "movl %%gs:0, %0\n\t"
+	ulwp_t *__value;
+	__asm__ __volatile__("movl %%gs:0, %0" : "=r" (__value));
 #elif defined(__sparc)
-	    ".register %%g7, #scratch\n\t"
-	    "mov %%g7, %0\n\t"
+	register ulwp_t *__value __asm__("g7");
 #else
 #error	"port me"
 #endif
-	    : "=r" (__value));
 	return (__value);
 }
 
@@ -62,10 +71,10 @@ __curthread(void)
 #elif defined(__i386)
 	    "movl %%gs:0, %0\n\t"
 #elif defined(__sparcv9)
-	    ".register %%g7, #scratch\n\t"
+	    ".register %%g7, " SPARC_REG_SPEC "\n\t"
 	    "ldx [%%g7 + 80], %0\n\t"
 #elif defined(__sparc)
-	    ".register %%g7, #scratch\n\t"
+	    ".register %%g7, " SPARC_REG_SPEC "\n\t"
 	    "ld [%%g7 + 80], %0\n\t"
 #else
 #error	"port me"
