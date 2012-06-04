@@ -336,13 +336,15 @@ CCSTATICSYM=		-Wc,-Qassembler-ounrefsym=0
 #
 # generate 32-bit addresses in the v9 kernel. Saves memory.
 CCABS32=		-Wc,-xcode=abs32
+#
+# generate v9 code which tolerates callers using the v7 ABI, for the sake of
+# system calls.
+$(__GNUC4)CC32BITCALLERS=		-_gcc=-massume-32bit-callers
 
 # GCC, especially, is increasingly beginning to auto-inline functions and
 # sadly does so separately not under the general -fno-inline-functions
-CCNOAUTOINLINE=		
 $(__GNUC4)CCNOAUTOINLINE= -_gcc=-fno-inline-small-functions \
 	-_gcc=-fno-inline-functions-called-once
-
 
 # One optimization the compiler might perform is to turn this:
 #	#pragma weak foo
