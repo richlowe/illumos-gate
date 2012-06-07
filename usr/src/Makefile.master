@@ -410,7 +410,7 @@ CERRWARN += -erroff=E_STATEMENT_NOT_REACHED
 
 # Normally cw(1) would translate -v into a set of options including these
 # but as they're GCC 4.x specific, we can't do that
-$(__GNUC4)CERRWARN +=	-_gcc=-Wno-address
+$(__GNUC4)CERRWARN +=	-_gcc=-Wno-address -_gcc=-Wno-array-bounds
 
 #
 # turn warnings into errors (C++)

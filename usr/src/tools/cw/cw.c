@@ -537,7 +537,6 @@ warnings(struct aelist *h)
 	newae(h, "-Wno-trigraphs");
 	newae(h, "-Wno-char-subscripts");
 	newae(h, "-Wno-switch");
-	newae(h, "-Wno-array-bounds");
 }
 
 static void
