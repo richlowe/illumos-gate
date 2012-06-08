@@ -1138,7 +1138,7 @@ $(TIL:%=pics/%) := CFLAGS64 += $(LIBCBASE)/threads/sparcv9.il
 
 # This hack is needed because sparc GCC3 generates DWARF data about TLS which
 # The Sun assembler cannot process
-$(__GNUC)pics/tls_data.o := CTF_FLAGS += -_gcc=-g1
+$(__GNUC3)pics/tls_data.o := CTF_FLAGS += -_gcc=-g1
 
 # Files in fp, port/fp subdirectories that need base.il inline template
 IL=				\
