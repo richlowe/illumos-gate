@@ -124,29 +124,5 @@ $(ROOTLINK):	$(ROOT_STRMOD_DIR) $(ROOTMODULE)
 #
 include $(UTSBASE)/intel/Makefile.targ
 
-#
-# The ip CTF data is merged into the genunix module because these types are
-# complex and heavily shared.  The genunix build will execute one of the
-# rules below to create an archive, ipctf.a, containing the ip objects.  The
-# real ip will be uniquified against genunix later in the build, and will
-# emerge containing very few types.
-#
-$(OBJS_DIR)/ipctf.a: $(OBJECTS)
-	-$(RM) $@
-	$(AR) -r $@ $(OBJECTS)
 
 $(OBJECTS): $(OBJS_DIR)
-
-CLOBBERFILES += $(OBJS_DIR)/ipctf.a
-
-ipctf.obj32: FRC
-	@BUILD_TYPE=OBJ32 VERSION='$(VERSION)' $(MAKE) obj32/ipctf.a
-
-ipctf.debug32: FRC
-	@BUILD_TYPE=DBG32 VERSION='$(VERSION)' $(MAKE) debug32/ipctf.a
-
-ipctf.obj64: FRC
-	@BUILD_TYPE=OBJ64 VERSION='$(VERSION)' $(MAKE) obj64/ipctf.a
-
-ipctf.debug64: FRC
-	@BUILD_TYPE=DBG64 VERSION='$(VERSION)' $(MAKE) debug64/ipctf.a

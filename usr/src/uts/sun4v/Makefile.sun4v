@@ -161,8 +161,6 @@ include $(UTSBASE)/common/Makefile.files
 #
 include $(UTSBASE)/Makefile.uts
 
-CTFMERGE_GUDIR	= sun4v
-
 #
 #	machine specific optimization, override default in Makefile.master
 #

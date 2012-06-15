@@ -178,7 +178,7 @@ $(UNIX_BIN):	$(UNIX_O) $(MODSTUBS_O) $(MAPFILE_NAME) \
 	$(LD) -dy -b -o $@ -e dboot_image -znointerp -M $(MAPFILE_NAME) \
 	    $(UNIX_O) $(DBOOT_O) $(MODSTUBS_O) $(LIBOPTS) \
 	    $(DTRACESTUBS)
-	$(CTFMERGE_UNIQUIFY_AGAINST_GENUNIX)
+	$(CTFMERGE_MODULE)
 	$(POST_PROCESS)
 
 $(UNIX_O):	$(OBJECTS) $(OBJS_DIR)/vers.o

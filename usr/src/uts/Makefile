@@ -111,14 +111,6 @@ install_dirs:
 $($(MACH)_ARCHITECTURES): $(PREREQ_TARGET) FRC
 	@cd $@; pwd; $(MAKE) $(NO_STATE) $(TARGET)
 
-$(PMTMO_FILE) pmtmo_file: $(PATCH_MAKEUP_TABLE)
-	@if [ -z "$(PATCH_MAKEUP_TABLE)" ] ; then \
-		echo 'ERROR: $$(PATCH_MAKEUP_TABLE) not set' \
-		    'in environment' >&2 ; \
-		exit 1 ; \
-	fi
-	RELEASE="$(RELEASE)" MACH="$(MACH)" \
-	    $(CTFCVTPTBL) -o $(PMTMO_FILE) $(PATCH_MAKEUP_TABLE)
 
 #
 # The following is the list of directories which contain Makefiles with
@@ -197,10 +189,6 @@ all_h: FRC
 	@cd common/klm; pwd; $(MAKE) $@
 
 clean clobber: $($(MACH)_ARCHITECTURES) $(DYNHDRDIRS)
-	@if [ '$(PATCH_BUILD)' != '#' ] ; then \
-		echo $(RM) $(PMTMO_FILE) ; \
-		$(RM) $(PMTMO_FILE) ; \
-	fi
 
 # testing convenience
 clobber_h: $(DYNHDRDIRS)

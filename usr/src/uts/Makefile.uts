@@ -309,53 +309,8 @@ ROOT_CONFFILE		= $(ROOT_CONFFILE_$(CLASS))
 INS.conffile= \
 	$(RM) $@; $(INS) -s -m $(CFILEMODE) -f $(@D) $(SRC_CONFFILE)
 
-#
-# The CTF merge of child kernel modules is performed against one of the genunix
-# modules.  For Intel builds, all modules will be used with a single genunix:
-# the one built in intel/genunix.  For SPARC builds, a given
-# module may be
-# used with one of a number of genunix files, depending on what platform the
-# module is deployed on.  We merge against the sun4u genunix to optimize for
-# the common case.  We also merge against the ip driver since networking is
-# typically loaded and types defined therein are shared between many modules.
-#
-CTFMERGE_GUDIR_sparc	= sun4u
-CTFMERGE_GUDIR_i386	= intel
-CTFMERGE_GUDIR		= $(CTFMERGE_GUDIR_$(MACH))
-
-CTFMERGE_GENUNIX 	= \
-	$(UTSBASE)/$(CTFMERGE_GUDIR)/genunix/$(OBJS_DIR)/genunix
-
-#
-# Used to uniquify a non-genunix module against genunix. $VERSION is used
-# for the label.
-#
-# For the ease of developers dropping modules onto possibly unrelated systems,
-# you can set NO_GENUNIX_UNIQUIFY= in the environment to skip uniquifying
-# against genunix.
-#
-NO_GENUNIX_UNIQUIFY=$(POUND_SIGN)
-CTFMERGE_GENUNIX_DFLAG=-d $(CTFMERGE_GENUNIX)
-$(NO_GENUNIX_UNIQUIFY)CTF_GENUNIX_DFLAG=
-
-CTFMERGE_UNIQUIFY_AGAINST_GENUNIX	= \
-	$(CTFMERGE) $(CTFMRGFLAGS) -L VERSION \
-	$(CTFMERGE_GENUNIX_DFLAG) -o $@ $(OBJECTS) $(CTFEXTRAOBJS)
-
-#
-# Used to merge the genunix module.
-#
-CTFMERGE_GENUNIX_MERGE		= \
-	$(CTFMERGE) $(CTFMRGFLAGS) -L VERSION -o $@ \
-	$(OBJECTS) $(CTFEXTRAOBJS) $(IPCTF_TARGET)
-
-#
-# We ctfmerge the ip objects into genunix to maximize the number of common types
-# found there, thus maximizing the effectiveness of uniquification.  We don't
-# want the genunix build to have to know about the individual ip objects, so we
-# put them in an archive.  The genunix ctfmerge then includes this archive.
-#
-IPCTF		= $(IPDRV_DIR)/$(OBJS_DIR)/ipctf.a
+CTFMERGE_MODULE=	$(CTFMERGE) $(CTFMRGFLAGS) -L VERSION -o $@ $(OBJECTS) \
+    $(CTFEXTRAOBJS)
 
 #
 # Rule for building fake shared libraries used for symbol resolution
@@ -560,13 +515,12 @@ USR_PLAT_LINKS_2	 = $(PLAT_LINKS_2:%=$(USR_PLAT_DIR)/%)
 #
 # Collection of all relevant, delivered kernel modules.
 #
-# Note that we insist on building genunix first, because everything else
-# uniquifies against it.  When doing a 'make' from usr/src/uts/, we'll enter
-# the platform directories first.  These will cd into the corresponding genunix
-# directory and build it.  So genunix /shouldn't/ get rebuilt when we get to
-# building all the kernel modules.  However, due to an as-yet-unexplained
-# problem with dependencies, sometimes it does get rebuilt, which then messes
-# up the other modules.  So we always force the issue here rather than try to
+# Note that we insist on building genunix first.  When doing a 'make' from
+# usr/src/uts/, we'll enter the platform directories first.  These will cd
+# into the corresponding genunix directory and build it.  So genunix
+# /shouldn't/ get rebuilt when we get to building all the kernel modules.
+# However, due to an as-yet-unexplained problem with dependencies, sometimes
+# it does get rebuilt.  So we always force the issue here rather than try to
 # build genunix in parallel with everything else.
 #
 PARALLEL_KMODS = $(DRV_KMODS) $(EXEC_KMODS) $(FS_KMODS) $(SCHED_KMODS) \
