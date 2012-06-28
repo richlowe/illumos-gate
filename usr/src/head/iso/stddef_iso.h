@@ -43,8 +43,6 @@
 #ifndef _ISO_STDDEF_ISO_H
 #define	_ISO_STDDEF_ISO_H
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI" /* SVr4.0 1.5 */
-
 #include <sys/isa_defs.h>
 
 #ifdef	__cplusplus
@@ -85,11 +83,15 @@ typedef unsigned int	size_t;		/* (historical version) */
 }
 #endif /* end of namespace std */
 
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+#define	offsetof(s, m) __builtin_offsetof(s, m)
+#else
 #if __cplusplus >= 199711L
 #define	offsetof(s, m)  (std::size_t)(&(((s *)0)->m))
 #else
 #define	offsetof(s, m)  (size_t)(&(((s *)0)->m))
 #endif
+#endif	/* GNUC, etc. */
 
 #ifdef	__cplusplus
 }
