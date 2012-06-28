@@ -3688,7 +3688,7 @@ pkinit_choose_tokens(krb5_context context,
 	} else {
             char *cp = reply.data;
             /* reply better be digits */
-            while (*cp != NULL) {
+            while (*cp != 0) {
                 if (!isdigit(*cp++))
                     return (EINVAL);
             }
@@ -3932,7 +3932,7 @@ pkinit_open_session(krb5_context context,
     CK_SLOT_ID_PTR slotlist = NULL, tmpslotlist = NULL;
     CK_TOKEN_INFO tinfo;
     krb5_boolean tokenmatch = FALSE;
-    CK_SESSION_HANDLE tmpsession = NULL;
+    CK_SESSION_HANDLE tmpsession = 0;
     struct _token_choices token_choices;
     int choice = 0;
 
