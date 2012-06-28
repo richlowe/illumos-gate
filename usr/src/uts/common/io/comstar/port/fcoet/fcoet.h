@@ -296,7 +296,7 @@ void fcoet_modhash_find_cb(mod_hash_key_t, mod_hash_val_t);
 		    FCOE_B2V_1((x_f)->frm_hdr->hdr_r_ctl),		\
 		    FCOE_B2V_1((x_f)->frm_hdr->hdr_type),		\
 		    FCOE_B2V_3((x_f)->frm_hdr->hdr_f_ctl),		\
-		    FCOE_B2V_4((x_f)->frm_hdr->hdr_oxid));		\
+		    FCOE_B2V_2((x_f)->frm_hdr->hdr_oxid));		\
 	}
 
 #endif	/* _KERNEL */
