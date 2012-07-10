@@ -89,6 +89,8 @@ INTEL_BLD=      $(INTEL_BLD_1:i386=)
 # __GNUC64 indicates that the 64bit build should use the GNU C compiler.
 # There is no Sun C analogue.
 #
+# __GNUCNEXT enables options specific to the next version of GCC to be used
+#
 # The following version-specific options are operative regardless of which
 # compiler is primary, and control the versions of the given compilers to be
 # used.  They also allow compiler-version specific Makefile fragments.
@@ -97,6 +99,7 @@ INTEL_BLD=      $(INTEL_BLD_1:i386=)
 __SUNC=			$(POUND_SIGN)
 $(__SUNC)__GNUC=	$(POUND_SIGN)
 __GNUC64=		$(__GNUC)
+__GNUCNEXT=		$(POUND_SIGN)
 
 # Allow build-time "configuration" to enable or disable some things.
 # The default is POUND_SIGN, meaning "not enabled". If the environment
@@ -306,6 +309,7 @@ CCABS32=		-Wc,-xcode=abs32
 # generate v9 code which tolerates callers using the v7 ABI, for the sake of
 # system calls.
 CC32BITCALLERS=		-_gcc=-massume-32bit-callers
+$(__GNUCNEXT)CC32BITCALLERS=
 
 # GCC, especially, is increasingly beginning to auto-inline functions and
 # sadly does so separately not under the general -fno-inline-functions
