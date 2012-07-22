@@ -1,3 +1,4 @@
+
 #
 # CDDL HEADER START
 #
@@ -34,3 +35,5 @@ include ../../Makefile.sparcv9
 include ../../../Makefile.module
 include ../../../common/modules/rdc/Makefile.com
 CPPFLAGS += -erroff=E_STATIC_UNUSED
+
+CERRWARN += -_gcc=-Wno-unused-function

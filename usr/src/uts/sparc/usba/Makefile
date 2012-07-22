@@ -43,6 +43,13 @@ WARLOCK_OUT	= $(USBA_OBJS:%.o=%.ll)
 WARLOCK_OK	= $(MODULE).ok
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
+CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-parentheses
+CERRWARN	+= -_gcc=-Wno-switch
+CERRWARN	+= -_gcc=-Wno-unused-label
+CERRWARN	+= -_gcc=-Wno-unused-value
+CERRWARN	+= -_gcc=-Wno-unused-variable
+
 #
 #	Include common rules.
 #
@@ -52,6 +59,13 @@ include $(UTSBASE)/sparc/Makefile.sparc
 # lint pass one enforcement 
 # 
 CFLAGS += $(CCVERBOSE)
+
+CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-parentheses
+CERRWARN	+= -_gcc=-Wno-switch
+CERRWARN	+= -_gcc=-Wno-unused-label
+CERRWARN	+= -_gcc=-Wno-unused-value
+CERRWARN	+= -_gcc=-Wno-unused-variable
 
 #
 #	Define targets

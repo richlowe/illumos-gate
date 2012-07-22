@@ -71,6 +71,7 @@ LDFLAGS         += -dy -Ncrypto/md4 -Ncrypto/md5 -Nmisc/tlimod
 # Until CR 4994570 is fixed...
 LINTTAGS	+= -erroff=E_BAD_FORMAT_ARG_TYPE2
 
+
 # The mb_put/md_get functions are intentionally used with and without
 # return value checks, so filter those out like LGREP.2 does.
 LGREP.nsmb =	egrep -v ' ignored: (mb_init|mb_put|md_get)'

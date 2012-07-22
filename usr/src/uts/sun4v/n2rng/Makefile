@@ -68,6 +68,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #
 CFLAGS += -v -DN2 -I$(COM_DIR)
 LINTFLAGS += -DN2 -I$(COM_DIR)
+CERRWARN += -_gcc=-Wno-uninitialized
 
 #
 # module dependencies

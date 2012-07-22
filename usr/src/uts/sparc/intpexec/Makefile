@@ -24,7 +24,7 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 #	This makefile drives the production of the intpexec (interpreter)
 #	exec kernel module.
@@ -61,6 +61,8 @@ include $(UTSBASE)/sparc/Makefile.sparc
 #	Overrides.
 #
 CFLAGS		+= $(CCVERBOSE)
+CERRWARN	+= -_gcc=-Wno-parentheses
+
 
 #
 #	Default build targets.

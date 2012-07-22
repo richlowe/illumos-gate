@@ -65,6 +65,8 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 CFLAGS += -v
 LDFLAGS += -dy -N"drv/nsctl" -N"drv/nskern" -N"misc/spuni"
 
+CERRWARN += -_gcc=-Wno-uninitialized
+
 .KEEP_STATE:
 
 def:		$(DEF_DEPS)

@@ -76,6 +76,8 @@ CPPFLAGS += -DPX_PLX
 #
 LDFLAGS += -dy -Nmisc/pcie
 
+CERRWARN	+= -_gcc=-Wno-unused-value
+
 #
 # For now, disable these lint checks; maintainers should endeavor
 # to investigate and remove these for maximum lint coverage.
@@ -83,6 +85,9 @@ LDFLAGS += -dy -Nmisc/pcie
 #
 LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 LINTTAGS	+= -erroff=E_STATIC_UNUSED
+
+CERRWARN	+= -_gcc=-Wno-unused-value
+CERRWARN	+= -_gcc=-Wno-unused-variable
 
 #
 #	Default build targets.

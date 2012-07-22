@@ -45,6 +45,8 @@ POFILES = $(LOCAL_OBJS:%.o=%.po)
 
 LDLIBS += -lSMHBAAPI
 
+CERRWARN += -_gcc=-Wno-unused-value
+
 INCS += -I.
 INCS += -I$(SRC)/lib/smhba/common
 INCS += -I$(SRC)/lib/hbaapi/common
@@ -81,3 +83,4 @@ lint:	lint_SRCS
 check:	$(CHKMANIFEST)
 
 include ../Makefile.targ
+

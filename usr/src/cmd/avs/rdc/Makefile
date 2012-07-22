@@ -62,6 +62,9 @@ LINTFLAGS += -erroff=E_SEC_SPRINTF_UNBOUNDED_COPY
 LINTFLAGS += -erroff=E_SEC_SCANF_UNBOUNDED_COPY
 LINTFLAGS += -erroff=E_SEC_PRINTF_VAR_FMT
 LINTFLAGS += -erroff=E_FUNC_SET_NOT_USED
+CERRWARN += -_gcc=-Wno-unused-label
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += -_gcc=-Wno-uninitialized
 POFILE = rdc_all.po
 POFILES = sndradm.po sndrboot.po
 ROOTLIBLINKS = $(ROOTLIB)/sndrd $(ROOTLIB)/sndrsyncd

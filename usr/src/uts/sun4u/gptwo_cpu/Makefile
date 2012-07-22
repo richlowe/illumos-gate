@@ -23,7 +23,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 #
 #	This makefile drives the production of the cpu portion of
 #	of the Safari Configurator. 
@@ -87,6 +86,9 @@ LDFLAGS += -dy -Nmisc/gptwocfg
 # Please do not carry these forward to new Makefiles.
 #
 LINTTAGS	+= -erroff=E_STATIC_UNUSED
+
+CERRWARN	+= -_gcc=-Wno-parentheses
+CERRWARN	+= -_gcc=-Wno-unused-function
 
 #
 #	Default build targets.

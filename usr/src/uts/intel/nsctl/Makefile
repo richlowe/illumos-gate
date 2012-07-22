@@ -68,6 +68,8 @@ LDFLAGS += -dy -N"drv/nskern" -N"drv/ncall" -N"misc/spuni"
 LINTTAGS += -erroff=E_ASSIGN_NARROW_CONV
 LINTTAGS += -erroff=E_BAD_PTR_CAST_ALIGN
 
+CERRWARN += -_gcc=-Wno-parentheses
+
 .KEEP_STATE:
 
 def:		$(DEF_DEPS)

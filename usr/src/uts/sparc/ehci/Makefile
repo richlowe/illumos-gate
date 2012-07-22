@@ -47,6 +47,9 @@ WARLOCK_OUT	= $(EHCI_OBJS:%.o=%.ll)
 WARLOCK_OK	= $(MODULE).ok
 WLCMD_DIR       = $(UTSBASE)/common/io/warlock
 
+CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-switch
+
 #
 #	Include common rules.
 #
@@ -56,6 +59,8 @@ include $(UTSBASE)/sparc/Makefile.sparc
 # lint pass one enforcement
 #
 CFLAGS += $(CCVERBOSE)   
+CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-switch
 
 #
 # depends on misc/usba

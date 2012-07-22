@@ -1,4 +1,4 @@
-#
+ #
 # CDDL HEADER START
 #
 # The contents of this file are subject to the terms of the
@@ -54,6 +54,9 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 # lint pass one enforcement
 #
 CFLAGS += $(CCVERBOSE)
+
+CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-parentheses
 
 #
 # Link to acpica for ACPI services

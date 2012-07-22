@@ -77,6 +77,9 @@ CFLAGS += -dalign -DPCICFG_INTERPRET_FCODE
 #	Dependency
 LDFLAGS += -dy -Nmisc/busra -Nmisc/fcpci -Nmisc/fcodem -Nmisc/pcie
 
+CERRWARN	+= -_gcc=-Wno-unused-function
+CERRWARN	+= -_gcc=-Wno-uninitialized
+
 #
 # For now, disable these lint checks; maintainers should endeavor
 # to investigate and remove these for maximum lint coverage.
@@ -85,6 +88,11 @@ LDFLAGS += -dy -Nmisc/busra -Nmisc/fcpci -Nmisc/fcodem -Nmisc/pcie
 LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 LINTTAGS	+= -erroff=E_STATIC_UNUSED
+
+CERRWARN	+= -_gcc=-Wno-unused-function
+CERRWARN	+= -_gcc=-Wno-unused-value
+CERRWARN	+= -_gcc=-Wno-unused-variable
+CERRWARN	+= -_gcc=-Wno-uninitialized
 
 #
 #	Default build targets.

@@ -81,6 +81,9 @@ CFLAGS64 +=	-v
 CPPFLAGS +=	$(INCS) -D_POSIX_PTHREAD_SEMANTICS
 CPPFLAGS +=	-DBUILD_TIME='"Wed Feb 4 12:00:00 2009"'
 
+CERRWARN +=	-_gcc=-Wno-parentheses
+CERRWARN +=	-_gcc=-Wno-unused-value
+
 LDLIBS		+= -ldevinfo
 LDLIBS		+= -lsysevent
 LDLIBS		+= -lnvpair

@@ -55,6 +55,9 @@ LINTFLAGS	+= -erroff=E_FUNC_RET_ALWAYS_IGNOR2
 LINTOUT=	lint.out
 LINTOUT_INTER=	lintinter.out
 
+CERRWARN	+= -_gcc=-Wno-parentheses
+CERRWARN	+= -_gcc=-Wno-unused-variable
+
 LINTSRC=	$(LINTLIB:%.ln=%)
 ROOTLINTDIR=	$(ROOTLIBDIR)
 ROOTLINT=	$(LINTSRC:%=$(ROOTLINTDIR)/%)

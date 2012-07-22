@@ -43,6 +43,8 @@ OBJECTS		= $(HIDPARSER_OBJS:%=$(OBJS_DIR)/%)
 LINTS		= $(HIDPARSER_OBJS:%.o=$(LINTS_DIR)/%.ln)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
+CERRWARN	+= -_gcc=-Wno-uninitialized
+
 #
 #	Include common rules.
 #
@@ -52,6 +54,7 @@ include $(UTSBASE)/sparc/Makefile.sparc
 # lint pass one enforcement 
 # 
 CFLAGS += $(CCVERBOSE)
+CERRWARN	+= -_gcc=-Wno-uninitialized
 
 #
 # depends on misc/usba

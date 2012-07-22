@@ -50,6 +50,9 @@ CFLAGS64 +=       -xCC
 CFLAGS64 +=       -erroff=E_IMPLICIT_DECL_FUNC_RETURN_INT
 CFLAGS64 +=       -DSOLARIS
 
+CERRWARN +=	-_gcc=-Wno-unused-variable
+CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
+
 LINTFLAGS += -DSOLARIS
 LINTFLAGS64 += -DSOLARIS
 

@@ -50,8 +50,12 @@ CPPFLAGS +=	$(NETGROUP) $(TLI) $(ALWAYS_HOSTNAME) $(AUTH) \
 		-I$(SRCDIR) 
 CFLAGS +=	$(CCVERBOSE) -erroff=E_FUNC_EXPECTS_TO_RETURN_VALUE \
 		-erroff=E_IMPLICIT_DECL_FUNC_RETURN_INT \
-		-erroff=E_OLD_STYLE_DECL_HIDES_PROTO \
-		-_gcc=-Wno-return-type
+		-erroff=E_OLD_STYLE_DECL_HIDES_PROTO
+
+CERRWARN +=	-_gcc=-Wno-return-type
+CERRWARN +=	-_gcc=-Wno-parentheses
+CERRWARN +=	-_gcc=-Wno-unused-variable
+CERRWARN +=	-_gcc=-Wno-uninitialized
 
 .KEEP_STATE:
 

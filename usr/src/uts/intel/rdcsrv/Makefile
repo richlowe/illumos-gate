@@ -66,6 +66,9 @@ CFLAGS += -v -D_SD_8K_BLKSIZE -D_SYSCALL32
 LINT_DEFS += -D_SD_8K_BLKSIZE -D_SYSCALL32
 LDFLAGS += -dy -N"strmod/rpcmod" -N"misc/rdcstub"
 
+CERRWARN	+= -_gcc=-Wno-unused-label
+CERRWARN	+= -_gcc=-Wno-unused-variable
+
 .KEEP_STATE:
 
 def:		$(DEF_DEPS)

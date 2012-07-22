@@ -21,7 +21,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 #
 #	This makefile drives the production of the mem_cache driver
 #
@@ -60,6 +59,7 @@ DSF_DIR		= $(UTSBASE)/$(PLATFORM)/mem_cache/genassym
 # lint pass one enforcement
 #
 CFLAGS += $(CCVERBOSE)
+CERRWARN += -_gcc=-Wno-parentheses
 ASFLAGS += -DCHEETAH_PLUS
 AS_INC_PATH	+= -I$(DSF_DIR)/$(OBJS_DIR)
 

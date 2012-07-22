@@ -20,10 +20,9 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 
 PROG= cscope-fast
 
@@ -45,6 +44,10 @@ PATLEN=		250
 STMTMAX=	10000
 YYLMAX=		10251
 CFLAGS +=	-DPATLEN=$(PATLEN) -DSTMTMAX=$(STMTMAX) -DYYLMAX=$(YYLMAX)
+CERRWARN +=	-_gcc=-Wno-parentheses
+CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
+CERRWARN +=	-_gcc=-Wno-unused
+CERRWARN +=	-_gcc=-Wno-uninitialized
 
 CFLAGS +=	$(CCVERBOSE)
 LDLIBS +=	-lcurses -ll

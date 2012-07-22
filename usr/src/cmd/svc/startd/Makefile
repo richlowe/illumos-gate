@@ -66,6 +66,11 @@ $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 CFLAGS += -v
 CPPFLAGS += -I. -I../common
 
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += -_gcc=-Wno-unused-label
+CERRWARN += -_gcc=-Wno-switch
+CERRWARN += -_gcc=-Wno-uninitialized
+
 $(OBJS) := CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_REENTRANT
 
 proc.o := CPPFLAGS += -D_REENTRANT

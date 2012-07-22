@@ -69,6 +69,12 @@ LINTTAGS  += -erroff=E_INCONS_ARG_DECL2
 LDFLAGS += -dy -N"drv/nsctl" -N"drv/nskern" -N"drv/ncall" -N"misc/spuni" \
 	-N"misc/rdcsrv" -N"strmod/rpcmod"
 
+CERRWARN += -_gcc=-Wno-switch
+CERRWARN += -_gcc=-Wno-unused-label
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += -_gcc=-Wno-uninitialized
+
+
 .KEEP_STATE:
 
 def:		$(DEF_DEPS)

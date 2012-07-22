@@ -59,6 +59,11 @@ include ../Makefile.cmd
 ROOTMANIFESTDIR=	$(ROOTSVCNETWORKRPC)
 
 CPPFLAGS= -I. $(CPPFLAGS.master)
+CERRWARN += -_gcc=-Wno-implicit-function-declaration
+CERRWARN += -_gcc=-Wno-unused-variable
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += -_gcc=-Wno-extra
+CERRWARN += -_gcc=-Wno-unused-function
 LDLIBS += -lnsl
 rusers :=	CFLAGS += -v
 $(BINPROG) :=	LDLIBS += -lrpcsvc

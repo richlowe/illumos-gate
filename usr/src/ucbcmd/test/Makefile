@@ -20,8 +20,6 @@
 # CDDL HEADER END
 #
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright (c) 1989,1996, by Sun Microsystems, Inc.
 # All rights reserved.
 #
@@ -33,6 +31,7 @@ include ../Makefile.ucbcmd
 FILEMODE=	755
 
 CPPFLAGS += -D_FILE_OFFSET_BITS=64
+CERRWARN += -_gcc=-Wno-parentheses
 
 .KEEP_STATE:
 

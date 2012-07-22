@@ -39,13 +39,14 @@ $(ROOTETC)/inet/$(CFGFILES):= GROUP= sys
 
 C99MODE=		$(C99_ENABLE)
 
-#
 # We need access to the ancillary data features which are only available
 # via the SUS standards.  Further, C99 support requires SUSv3 or higher.
 #
 CPPFLAGS += -D_XOPEN_SOURCE=600 -D__EXTENSIONS__
 LDLIBS += -lvrrpadm -lsocket -lnsl -ldladm -linetutil -lipadm -lsysevent -lnvpair -lsecdb
 LINTFLAGS += -erroff=E_INCONS_ARG_DECL2  -erroff=E_INCONS_ARG_USED2
+
+CERRWARN += -_gcc=-Wno-uninitialized
 
 #
 # Instrument vrrpd with CTF data to ease debugging.

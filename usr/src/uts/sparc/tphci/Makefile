@@ -28,8 +28,6 @@
 # Use is subject to license terms.
 #
 
-#ident	"%Z%%M%	%I%	%E% SMI"
-
 #
 #	This makefile drives the production of a pHCI test driver
 #	for testing the MPxIO framework.
@@ -49,6 +47,8 @@ LINTS		= $(TPHCI_OBJS:%.o=$(LINTS_DIR)/%.ln)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 
 
+CERRWARN	+= -_gcc=-Wno-parentheses
+
 #
 #	Include common rules.
 #
@@ -65,6 +65,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #	Overrides
 #
 CFLAGS		+= $(CCVERBOSE) -dalign
+CERRWARN	+= -_gcc=-Wno-parentheses
 
 #
 #	Default build targets.

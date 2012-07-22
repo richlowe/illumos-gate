@@ -22,7 +22,6 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 PLATFORMS = SUNW,SPARC-Enterprise
 
@@ -33,4 +32,6 @@ LIBFLAGS = \$$ORIGIN/../../../../lib
 XPORTLIBS = -lsocket -lnsl -ldscp
 
 include ../../common/event-transport/Makefile.etm
+
+CERRWARN += -_gcc=-Wno-parentheses
 

@@ -58,6 +58,8 @@ LDFLAGS += -dy -N misc/i2c_svc
 #
 LINTTAGS	+= -erroff=E_SUPPRESSION_DIRECTIVE_UNUSED
 
+CERRWARN	+= -_gcc=-Wno-uninitialized
+
 #
 #	Define targets
 #
