@@ -145,4 +145,6 @@ $(ROOTDIRS):
 $(ROOTONBLDLIBPY): $(ROOTDIRS)
 	$(RM) -r $@; $(SYMLINK) python2.6 $@
 
+make: ctf
+
 FRC:
