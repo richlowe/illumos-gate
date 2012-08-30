@@ -26,7 +26,6 @@
 #ifndef	_LIBIPMI_H
 #define	_LIBIPMI_H
 
-#include <sys/bmc_intf.h>
 #include <sys/byteorder.h>
 #include <sys/nvpair.h>
 #include <sys/sysmacros.h>
@@ -53,10 +52,12 @@ typedef struct ipmi_handle ipmi_handle_t;
 /*
  * Basic netfn definitions.  See section 5.1.
  */
-#define	IPMI_NETFN_CHASSIS		BMC_NETFN_CHASSIS
-#define	IPMI_NETFN_APP			BMC_NETFN_APP
-#define	IPMI_NETFN_STORAGE		BMC_NETFN_STORAGE
-#define	IPMI_NETFN_SE			BMC_NETFN_SE
+#define	IPMI_NETFN_CHASSIS		0x0
+#define	IPMI_NETFN_BRIDGE		0x2
+#define	IPMI_NETFN_SE			0x4
+#define	IPMI_NETFN_APP			0x6
+#define	IPMI_NETFN_FIRMWARE		0x8
+#define	IPMI_NETFN_STORAGE		0xa
 #define	IPMI_NETFN_TRANSPORT		0x0C
 #define	IPMI_NETFN_OEM			0x2e
 

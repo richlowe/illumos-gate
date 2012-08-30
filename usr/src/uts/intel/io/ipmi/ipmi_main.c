@@ -111,7 +111,7 @@ get_smbios_ipmi_info(void)
 		}
 		break;
 	default:
-		return;
+		return (DDI_FAILURE);
 	}
 
 	if (ipmi.smbip_intr > 15) {
