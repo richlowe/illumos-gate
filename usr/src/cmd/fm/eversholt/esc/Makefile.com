@@ -23,7 +23,6 @@
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 .KEEP_STATE:
 
@@ -37,7 +36,7 @@ OBJS = $(LOCALOBJS) $(COMMONOBJS)
 SRCS = $(LOCALOBJS:.o=.c) $(COMMONSRCS)
 
 CPPFLAGS += -I../common
-CFLAGS += -DESC $(CTF_FLAGS)
+CFLAGS += -DESC $(CTF_FLAGS_32)
 LDLIBS += -lumem
 
 all debug: $(PROG)

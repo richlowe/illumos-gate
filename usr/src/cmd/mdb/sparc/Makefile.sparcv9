@@ -21,8 +21,6 @@
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 include $(SRC)/cmd/mdb/Makefile.tools
 
@@ -32,8 +30,8 @@ MACHMODDIR=/$(MACHDIR)
 ROOTMOD = $(ROOT)/usr/lib/mdb/$(MDBTGT)$(MACHMODDIR)
 ROOTKMOD = $(ROOT)/kernel/kmdb$(MACHMODDIR)
 
-CFLAGS = $(CTF_FLAGS) $(XSTRCONST)
-CFLAGS64 += $(CTF_FLAGS) $(XSTRCONST)
+CFLAGS = $(CTF_FLAGS_32) $(XSTRCONST)
+CFLAGS64 += $(CTF_FLAGS_64) $(XSTRCONST)
 CPPFLAGS += -D_ELF64
 CTFSTABSCFLAGS = $(CFLAGS64) $(CALLSYMS)
 

@@ -2,8 +2,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 SQLITE_VERSION = 2.8.15-repcached
 
@@ -143,7 +141,7 @@ $(NATIVETARGETS) :=	CPPFLAGS = $(MYCPPFLAGS)
 $(NATIVETARGETS) :=	LDFLAGS =
 $(NATIVETARGETS) :=	LDLIBS = -lc
 
-$(OBJS) :=		CFLAGS += $(CTF_FLAGS)
+$(OBJS) :=		CFLAGS += $(CTF_FLAGS_32)
 $(OBJS) :=		CTFCONVERT_POST = $(CTFCONVERT_O)
 
 TCLBASE = /usr/sfw

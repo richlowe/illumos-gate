@@ -58,8 +58,8 @@ LINTFILES = $(SRCS:%.c=%.ln)
 CLEANFILES += parser_gram.c parser_gram.h parser_lex.c y.tab.h y.tab.c
 
 CPPFLAGS += -I. -I../common
-CFLAGS += $(CCVERBOSE) $(CTF_FLAGS)
-CFLAGS64 += $(CCVERBOSE) $(CTF_FLAGS)
+CFLAGS += $(CCVERBOSE) $(CTF_FLAGS_32)
+CFLAGS64 += $(CCVERBOSE) $(CTF_FLAGS_64)
 LDLIBS += -lkstat -lm -ltecla -lsocket -lnsl
 
 LFLAGS = -t -v

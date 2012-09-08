@@ -1315,7 +1315,7 @@ $(STRETS:%=pics/%): $(LIBCBASE)/crt/stret.s
 	$(POST_PROCESS_O)
 
 $(LIBCBASE)/crt/_rtbootld.s:	$(LIBCBASE)/crt/_rtboot.s $(LIBCBASE)/crt/_rtld.c
-	$(CC) $(CPPFLAGS) $(CTF_FLAGS) -O -S -K pic \
+	$(CC) $(CPPFLAGS) $(CTF_FLAGS_32) -O -S -K pic \
 	    $(LIBCBASE)/crt/_rtld.c -o $(LIBCBASE)/crt/_rtld.s
 	$(CAT) $(LIBCBASE)/crt/_rtboot.s $(LIBCBASE)/crt/_rtld.s > $@
 	$(RM) $(LIBCBASE)/crt/_rtld.s

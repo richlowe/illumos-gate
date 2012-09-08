@@ -64,7 +64,7 @@ lint: lintcheck
 $(OBJECTS:%=pics/%): $(OFFSETS_H)
 
 $(OFFSETS_H): $(OFFSETS_SRC)
-	$(OFFSETS_CREATE) $(CTF_FLAGS) < $(OFFSETS_SRC) >$@
+	$(OFFSETS_CREATE) $(CTF_FLAGS_32) < $(OFFSETS_SRC) >$@
 
 pics/%.o: $(ISASRCDIR)/%.s
 	$(COMPILE.s) -o $@ $<

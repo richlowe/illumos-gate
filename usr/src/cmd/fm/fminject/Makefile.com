@@ -23,7 +23,6 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 .KEEP_STATE:
 .SUFFIXES:
@@ -49,7 +48,7 @@ LINTFILES = $(SRCS:%.c=%.ln)
 CLEANFILES += inj_grammar.c inj_grammar.h inj_lex.c y.tab.h y.tab.c
 
 CPPFLAGS += -I. -I../common
-CFLAGS += $(CCVERBOSE) $(CTF_FLAGS)
+CFLAGS += $(CCVERBOSE) $(CTF_FLAGS_32)
 LDLIBS += -L$(ROOT)/usr/lib/fm -lfmd_log -lsysevent -lnvpair -lumem
 LDFLAGS += -R/usr/lib/fm
 LINTFLAGS = -mnux

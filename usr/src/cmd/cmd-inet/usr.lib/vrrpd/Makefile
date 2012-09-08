@@ -52,7 +52,7 @@ LINTFLAGS += -erroff=E_INCONS_ARG_DECL2  -erroff=E_INCONS_ARG_USED2
 #
 CTFCONVERT_HOOK = && $(CTFCONVERT_O)
 CTFMERGE_HOOK = && $(CTFMERGE) -L VERSION -o $@ $(OBJS)
-$(OBJS) := CFLAGS += $(CTF_FLAGS)
+$(OBJS) := CFLAGS += $(CTF_FLAGS_32)
 
 # for messaging catalog. No messages are present in CMN_DIR sources.
 POFILES = $(LOCAL_OBJS:%.o=%.po)

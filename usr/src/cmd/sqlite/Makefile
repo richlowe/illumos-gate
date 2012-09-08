@@ -22,8 +22,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 PROG=		sqlite
 
@@ -38,7 +36,7 @@ ROOTLIBSVCBIN=	$(ROOT)/lib/svc/bin
 ROOTSQLITE=	$(PROG:%=$(ROOTLIBSVCBIN)/%)
 
 OBJS=		shell.o
-$(OBJS) :=	CFLAGS += $(CTF_FLAGS)
+$(OBJS) :=	CFLAGS += $(CTF_FLAGS_32)
 $(OBJS) :=	CTFCONVERT_POST = $(CTFCONVERT_O)
 
 .KEEP_STATE:

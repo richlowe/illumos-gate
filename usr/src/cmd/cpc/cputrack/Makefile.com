@@ -22,8 +22,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 include	../../../Makefile.cmd
 
@@ -32,8 +30,8 @@ OBJS =		$(PROG).o caps.o time.o setgrp.o strtoset.o
 SRCS =		$(OBJS:%.o=../../common/%.c)
 LDLIBS +=	-lcpc -lpctx
 
-CFLAGS +=	$(CCVERBOSE) $(CTF_FLAGS)
-CFLAGS64 +=	$(CCVERBOSE) $(CTF_FLAGS)
+CFLAGS +=	$(CCVERBOSE) $(CTF_FLAGS_32)
+CFLAGS64 +=	$(CCVERBOSE) $(CTF_FLAGS_64)
 CPPFLAGS +=	-I$(SRC)/lib/libcpc/common
 
 LINTFLAGS +=	-u

@@ -60,7 +60,7 @@ LDLIBS +=	-ldhcpagent -ldhcputil -ldladm -ldlpi -lgen \
 #
 CTFCONVERT_HOOK = && $(CTFCONVERT_O)
 CTFMERGE_HOOK = && $(CTFMERGE) -L VERSION -o $@ $(OBJS)
-$(OBJS) := CFLAGS += $(CTF_FLAGS)
+$(OBJS) := CFLAGS += $(CTF_FLAGS_32)
 
 .KEEP_STATE:
 

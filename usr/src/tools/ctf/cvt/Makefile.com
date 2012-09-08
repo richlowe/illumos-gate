@@ -75,7 +75,7 @@ DWARFCPPFLAGS	= -I../../dwarf/common
 
 LDLIBS		+= -lz -lelf
 CPPFLAGS	+= -D_REENTRANT
-CFLAGS		+= $(CTF_FLAGS)
+CFLAGS		+= $(CTF_FLAGS_32)
 LINTFLAGS	+= -mnux
 
 C99MODE		= $(C99_ENABLE)

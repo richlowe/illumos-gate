@@ -47,6 +47,9 @@ SRCS =	kvm_amd64dep.c \
 %.ln: ../../mdb/%.c
 	$(LINT.c) -c $<
 
+%.ln: $(SRC)/common/saveargs/%.c
+	$(LINT.c) -c $<
+
 include ../../../../Makefile.cmd
 include ../../../../Makefile.cmd.64
 include ../../Makefile.amd64

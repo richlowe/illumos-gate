@@ -965,7 +965,7 @@ CRTSRCS= ../../common/amd64
 include ../../Makefile.lib
 include ../../Makefile.lib.64
 
-CFLAGS64 += $(CTF_FLAGS)
+CFLAGS64 += $(CTF_FLAGS_64)
 
 # This is necessary to avoid problems with calling _ex_unwind().
 # We probably don't want any inlining anyway.

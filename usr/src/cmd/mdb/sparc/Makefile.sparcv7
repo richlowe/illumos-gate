@@ -21,8 +21,6 @@
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 MACHDIR=sparc
 MACHMODDIR=
@@ -32,7 +30,7 @@ ROOTMOD = $(ROOT)/usr/lib/mdb/$(MDBTGT)
 $$(ROOTMOD)/%: dmod/%
 	$(INS.file)
 
-CFLAGS += $(CTF_FLAGS) $(CCVERBOSE) -xstrconst
+CFLAGS += $(CTF_FLAGS_32) $(CCVERBOSE) -xstrconst
 CTFSTABSCFLAGS = $(CFLAGS) $(CALLSYMS)
 LINTFLAGS += -u -erroff=E_BAD_FORMAT_STR2,E_BAD_FORMAT_ARG_TYPE2
 
