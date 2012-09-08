@@ -36,6 +36,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <saveargs.h>
 #include "Pcontrol.h"
 #include "Pstack.h"
 
@@ -346,6 +347,79 @@ ucontext_n_to_prgregs(const ucontext_t *src, prgregset_t dst)
 	(void) memcpy(dst, src->uc_mcontext.gregs, sizeof (gregset_t));
 }
 
+/*
+ * Read arguments from the frame indicated by regs into args, return the
+ * number of arguments successfully read
+ */
+static int
+read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
+{
+	GElf_Sym sym;
+	ctf_file_t *ctfp = NULL;
+	ctf_funcinfo_t finfo;
+	prsyminfo_t si = {0};
+	uint8_t ins[SAVEARGS_INSN_SEQ_LEN];
+	size_t insnsize;
+	int argc = 0;
+	int rettype = 0;
+	int start_index = 0;
+
+	if (Pxlookup_by_addr(P, pc, NULL, 0,
+	    &sym, &si) != 0)
+		return (0);
+
+	if ((ctfp = Paddr_to_ctf(P, pc)) == NULL)
+		return (0);
+
+	if (ctf_func_info(ctfp, si.prs_id, &finfo) == CTF_ERR)
+		return (0);
+
+	argc = finfo.ctc_argc;
+
+	if (argc == 0)
+		return (0);
+
+	rettype = ctf_type_kind(ctfp, finfo.ctc_return);
+
+	if ((rettype == CTF_K_STRUCT) || (rettype == CTF_K_UNION))
+		start_index = 1;
+	else
+		start_index = 0;
+
+	insnsize = MIN(sym.st_size, SAVEARGS_INSN_SEQ_LEN);
+
+	if (Pread(P, ins, insnsize, sym.st_value) != insnsize)
+		return (0);
+
+	if ((argc != 0) &&
+	    saveargs_has_args(ins, insnsize, argc, start_index)) {
+		int regargs = MIN(6, argc);
+		size_t size = regargs * sizeof (long);
+		int i;
+
+		if (Pread(P, args, size, (fp - size)) != size)
+			return (0);
+
+		for (i = 0; i < (regargs >> 1); i++) {
+			prgreg_t t = args[i];
+
+			args[i] = args[regargs - i - 1];
+			args[regargs - i - 1] = t;
+		}
+
+		if (argc > 6) {
+			size = (argc - 6) * sizeof (long);
+
+			if (Pread(P, &args[6], size, fp +
+			    (sizeof (uintptr_t) * 2)) != size)
+				return (6);
+		}
+
+		return (argc);
+	} else {
+		return (0);
+	}
+}
 
 int
 Pstack_iter(struct ps_prochandle *P, const prgregset_t regs,
@@ -381,7 +455,7 @@ Pstack_iter(struct ps_prochandle *P, const prgregset_t regs,
 		prgreg_t signo;
 		siginfo_t *sip;
 	} sigframe_t;
-	prgreg_t args[32];
+	prgreg_t args[32] = {0};
 
 	if (P->status.pr_dmodel != PR_MODEL_LP64)
 		return (Pstack_iter32(P, regs, func, arg));
@@ -400,20 +474,15 @@ Pstack_iter(struct ps_prochandle *P, const prgregset_t regs,
 		if (fp != 0 &&
 		    Pread(P, &frame, sizeof (frame), (uintptr_t)fp) ==
 		    sizeof (frame)) {
-
-			if (frame.pc != -1) {
-				/*
-				 * Function arguments are not available on
-				 * amd64 without extensive DWARF processing.
-				 */
-				argc = 0;
-			} else {
+			if (frame.pc == -1) {
 				argc = 3;
 				args[2] = fp + sizeof (sigframe_t);
 				if (Pread(P, &args, 2 * sizeof (prgreg_t),
 				    fp + 2 * sizeof (prgreg_t)) !=
 				    2 * sizeof (prgreg_t))
 					argc = 0;
+			} else {
+				argc = read_args(P, fp, pc, args);
 			}
 		} else {
 			(void) memset(&frame, 0, sizeof (frame));

@@ -22,8 +22,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 KMDBML += \
 	kaif_invoke.s \
@@ -31,6 +29,12 @@ KMDBML += \
 
 KMDBSRCS += \
 	kmdb_makecontext.c \
-	mdb_amd64util.c
+	mdb_amd64util.c \
+	saveargs.o
+
+%.o: $(SRC)/common/saveargs/%.c
+	$(COMPILE.c) $<
+	$(CTFCONVERT_O)
 
 SACPPFLAGS = -D__$(MACH64) -U__$(MACH)
+CPPFLAGS += -I$(SRC)/common/saveargs
