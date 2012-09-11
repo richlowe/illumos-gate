@@ -227,7 +227,7 @@ mdb_amd64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 		if (argc != 0 && saveargs_has_args(ins, insnsize,  argc,
 		    start_index)) {
 			/* Upto to 6 arguments are passed via registers */
-			reg_argc = MIN(6, mfp.mtf_argc);
+			reg_argc = MIN((6 - start_index), mfp.mtf_argc);
 			size = reg_argc * sizeof (long);
 
 			if (mdb_tgt_vread(t, fr_argv, size, (fp - size))
@@ -245,9 +245,9 @@ mdb_amd64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 				fr_argv[reg_argc - i - 1] = t;
 			}
 
-			if (argc > 6) {
-				size = (argc - 6) * sizeof (long);
-				if (mdb_tgt_vread(t, &fr_argv[6], size,
+			if (argc > reg_argc) {
+				size = (argc - reg_argc) * sizeof (long);
+				if (mdb_tgt_vread(t, &fr_argv[reg_argc], size,
 				    fp + sizeof (fr)) != size)
 					return (-1); /* errno has been set */
 			}

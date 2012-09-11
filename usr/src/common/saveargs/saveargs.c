@@ -119,6 +119,14 @@ static const uint32_t save_instr[INSTR_ARRAY_SIZE] = {
 	0xd04d894c	/* movq %r9, -0x30(%rbp) */
 };
 
+static const uint32_t save_instr_sr[INSTR_ARRAY_SIZE-1] = {
+	0xd84d894c,	/* movq %r9,-0x28(%rbp) */
+	0xe045894c,	/* movq %r8,-0x20(%rbp) */
+	0xe84d8948,	/* movq %rcx,-0x18(%rbp) */
+	0xf0558948,	/* movq %rdx,-0x10(%rbp) */
+	0xf8758948	/* movq %rsi,-0x8(%rbp) */
+};
+
 static const uint32_t save_fp_instr[] = {
 	0xe5894855,	/* pushq %rbp; movq %rsp,%rbp, encoding 1 */
 	0xec8b4855,	/* pushq %rbp; movq %rsp,%rbp, encoding 2 */
@@ -150,13 +158,15 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 	/*
 	 * Compare against Sun Studio implementation
 	 */
-	for (i = 8, j = start_index; i < size - 4; i++) {
+	for (i = 8, j = 0; i < size - 4; i++) {
 		n = INSTR4(ins, i);
 
 		if (n == save_instr[j]) {
 			i += 3;
 			if (++j >= argc)
 				return (1);
+		} else {
+			break;
 		}
 	}
 
@@ -170,6 +180,24 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 			i += 3;
 			if (--j < start_index)
 				return (1);
+		} else {
+			break;
+		}
+	}
+
+
+	/* Look for a GCC-style returned structure */
+	if (start_index != 0) {
+		for (i = 8, j = 0; i < size - 8; i++) {
+			n = INSTR4(ins, i);
+
+			if (n == save_instr_sr[j]) {
+				i += 3;
+				if (++j >= (argc - 1))
+					return (1);
+			} else {
+				break;
+			}
 		}
 	}
 

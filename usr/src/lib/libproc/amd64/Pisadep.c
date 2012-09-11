@@ -393,7 +393,7 @@ read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
 
 	if ((argc != 0) &&
 	    saveargs_has_args(ins, insnsize, argc, start_index)) {
-		int regargs = MIN(6, argc);
+		int regargs = MIN((6 - start_index), argc);
 		size_t size = regargs * sizeof (long);
 		int i;
 
@@ -407,10 +407,10 @@ read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
 			args[regargs - i - 1] = t;
 		}
 
-		if (argc > 6) {
-			size = (argc - 6) * sizeof (long);
+		if (argc > regargs) {
+			size = (argc - regargs) * sizeof (long);
 
-			if (Pread(P, &args[6], size, fp +
+			if (Pread(P, &args[regargs], size, fp +
 			    (sizeof (uintptr_t) * 2)) != size)
 				return (6);
 		}
