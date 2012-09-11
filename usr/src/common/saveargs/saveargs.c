@@ -26,11 +26,10 @@
 
 /*
  * The Sun Studio and GCC (patched for opensolaris/illumos) compilers
- * implement a argument saving scheme on amd64 via the -msave-args or
- * -Wu,-save_args options.  When the option is specified, INTEGER type
- * function arguments passed via registers will be saved on the stack
- * immediately after %rbp, and will not be modified through out the life of
- * the routine.
+ * implement a argument saving scheme on amd64 via the -Wu,save-args or
+ * options.  When the option is specified, INTEGER type function arguments
+ * passed via registers will be saved on the stack immediately after %rbp, and
+ * will not be modified through out the life of the routine.
  *
  *				+--------+
  *		%rbp	-->     |  %rbp  |
@@ -119,6 +118,13 @@ static const uint32_t save_instr[INSTR_ARRAY_SIZE] = {
 	0xd04d894c	/* movq %r9, -0x30(%rbp) */
 };
 
+/*
+ * If the return type of a function is a structure greater than 16 bytes in
+ * size, %rdi will contain the address to which it should be stored, and
+ * arguments will begin at %rsi.  Studio will push all of the normal argument
+ * registers anyway, GCC will start pushing at %rsi, so we need a separate
+ * pattern.
+ */
 static const uint32_t save_instr_sr[INSTR_ARRAY_SIZE-1] = {
 	0xd84d894c,	/* movq %r9,-0x28(%rbp) */
 	0xe045894c,	/* movq %r8,-0x20(%rbp) */

@@ -211,8 +211,9 @@ mdb_amd64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 			 * %rdi contains the address in which to store the
 			 * return value rather than for an argument.
 			 */
-			if (return_type == CTF_K_STRUCT ||
-			    return_type == CTF_K_UNION)
+			if ((return_type == CTF_K_STRUCT ||
+			    return_type == CTF_K_UNION) &&
+			    mdb_ctf_type_size(mfp.mtf_return) > 16)
 				start_index = 1;
 			else
 				start_index = 0;

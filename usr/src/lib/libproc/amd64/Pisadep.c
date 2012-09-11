@@ -381,10 +381,12 @@ read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
 
 	rettype = ctf_type_kind(ctfp, finfo.ctc_return);
 
-	if ((rettype == CTF_K_STRUCT) || (rettype == CTF_K_UNION))
+	if (((rettype == CTF_K_STRUCT) || (rettype == CTF_K_UNION)) &&
+	    ctf_type_size(ctfp, finfo.ctc_return) > 16) {
 		start_index = 1;
-	else
+	} else {
 		start_index = 0;
+	}
 
 	insnsize = MIN(sym.st_size, SAVEARGS_INSN_SEQ_LEN);
 
