@@ -79,6 +79,15 @@
  *     movq	%rsi, -0x10(%rbp)
  *     movq	%rdi, -0x8(%rbp)
  *     ...
+ * or
+ *     pushq	%rbp
+ *     movq	%rsp, %rbp
+ *     pushq	%rdi
+ *     pushq	%rsi
+ *     pushq	%rdx
+ *     pushq	%rcx
+ *     pushq	%r8
+ *     pushq	%r9
  *
  * **: The space being reserved is in addition to what the current
  *     function prolog already reserves.
@@ -101,6 +110,8 @@
  */
 #define	INSTR_ARRAY_SIZE	6
 
+#define	INSTR1(ins, off) (ins[(off)])
+#define	INSTR2(ins, off) (ins[(off)] + (ins[(off) + 1] << 8))
 #define	INSTR4(ins, off)	\
 	(ins[(off)] + (ins[(off) + 1] << 8) + (ins[(off + 2)] << 16) + \
 	(ins[(off) + 3] << 24))
@@ -116,6 +127,15 @@ static const uint32_t save_instr[INSTR_ARRAY_SIZE] = {
 	0xe04d8948,	/* movq %rcx, -0x20(%rbp) */
 	0xd845894c,	/* movq %r8, -0x28(%rbp) */
 	0xd04d894c	/* movq %r9, -0x30(%rbp) */
+};
+
+static const uint16_t save_instr_push[] = {
+	0x57,	/* pushq %rdi */
+	0x56,	/* pushq %rsi */
+	0x52,	/* pushq %rdx */
+	0x51,	/* pushq %rcx */
+	0x5041,	/* pushq %r8 */
+	0x5141	/* pushq %r9 */
 };
 
 /*
@@ -191,6 +211,20 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 		}
 	}
 
+	/*
+	 * Compare against GCC push-based implementation
+	 */
+	for (i = 4, j = start_index; i < size - 2; ) {
+		n = (i >= 7) ? INSTR2(ins, i) : INSTR1(ins, i);
+
+		if (n == save_instr_push[j]) {
+			i += (i >= 7) ? 2 : 1;
+			if (++j >= argc)
+				return (1);
+		} else {
+			break;
+		}
+	}
 
 	/* Look for a GCC-style returned structure */
 	if (start_index != 0) {
