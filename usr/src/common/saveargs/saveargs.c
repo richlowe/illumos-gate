@@ -179,7 +179,7 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 	}
 
 	if (save_fp_instr[i] == NULL)
-		return (0);
+		return (SAVEARGS_NO_ARGS);
 
 	/*
 	 * Compare against Sun Studio implementation
@@ -190,7 +190,8 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 		if (n == save_instr[j]) {
 			i += 3;
 			if (++j >= argc)
-				return (1);
+				return (start_index ? SAVEARGS_STRUCT_ARGS :
+				    SAVEARGS_TRAD_ARGS);
 		} else {
 			break;
 		}
@@ -205,7 +206,7 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 		if (n == save_instr[j]) {
 			i += 3;
 			if (--j < start_index)
-				return (1);
+				return (SAVEARGS_TRAD_ARGS);
 		} else {
 			break;
 		}
@@ -220,7 +221,7 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 		if (n == save_instr_push[j]) {
 			i += (i >= 7) ? 2 : 1;
 			if (++j >= argc)
-				return (1);
+				return (SAVEARGS_TRAD_ARGS);
 		} else {
 			break;
 		}
@@ -234,12 +235,12 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 			if (n == save_instr_sr[j]) {
 				i += 3;
 				if (++j >= (argc - 1))
-					return (1);
+					return (SAVEARGS_TRAD_ARGS);
 			} else {
 				break;
 			}
 		}
 	}
 
-	return (0);
+	return (SAVEARGS_NO_ARGS);
 }

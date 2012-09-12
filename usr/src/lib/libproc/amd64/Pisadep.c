@@ -363,6 +363,7 @@ read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
 	int argc = 0;
 	int rettype = 0;
 	int start_index = 0;
+	int args_type = 0;
 
 	if (Pxlookup_by_addr(P, pc, NULL, 0,
 	    &sym, &si) != 0)
@@ -394,11 +395,20 @@ read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
 		return (0);
 
 	if ((argc != 0) &&
-	    saveargs_has_args(ins, insnsize, argc, start_index)) {
+	  (args_type = saveargs_has_args(ins, insnsize, argc, start_index))) {
 		int regargs = MIN((6 - start_index), argc);
 		size_t size = regargs * sizeof (long);
 		int i;
 
+		/*
+		 * If Studio pushed a structure return address as an argument,
+		 * we need to read one more argument than actually exists (the
+		 * addr) to make everything line up.
+		 */
+		if (args_type == SAVEARGS_STRUCT_ARGS) {
+		    size += sizeof (long);
+		}
+		
 		if (Pread(P, args, size, (fp - size)) != size)
 			return (0);
 
