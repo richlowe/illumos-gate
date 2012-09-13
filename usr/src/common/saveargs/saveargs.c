@@ -218,10 +218,10 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 	 * Compare against GCC push-based implementation
 	 */
 	for (i = 4, j = start_index; i < size - 2; i += 1) {
-		n = (i >= 7) ? INSTR2(ins, i) : INSTR1(ins, i);
+		n = (i >= (8 - start_index)) ? INSTR2(ins, i) : INSTR1(ins, i);
 
 		if (n == save_instr_push[j]) {
-			if (i >= 7)
+			if (i >= (8 - start_index))
 				i += 1;
 			if (++j >= argc)
 				return (SAVEARGS_TRAD_ARGS);
