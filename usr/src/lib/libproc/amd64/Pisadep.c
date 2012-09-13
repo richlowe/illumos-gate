@@ -389,7 +389,14 @@ read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args)
 		start_index = 0;
 	}
 
-	insnsize = MIN(sym.st_size, SAVEARGS_INSN_SEQ_LEN);
+	/*
+	 * The number of instructions to search for argument saving is limited
+	 * such that only instructions prior to %pc are considered such that
+	 * we never read arguments from a function where the saving code has
+	 * not in fact yet executed.
+	 */
+	insnsize = MIN(MIN(sym.st_size, SAVEARGS_INSN_SEQ_LEN),
+	    pc - sym.st_value);
 
 	if (Pread(P, ins, insnsize, sym.st_value) != insnsize)
 		return (0);

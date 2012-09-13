@@ -222,7 +222,16 @@ mdb_amd64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 			argc = 0;
 		}
 
-		insnsize = MIN(s.st_size, SAVEARGS_INSN_SEQ_LEN);
+		/*
+		 * The number of instructions to search for argument saving is
+	         * limited such that only instructions prior to %pc are
+	         * considered such that we never read arguments from a
+	         * function where the saving code has not in fact yet
+	         * executed.
+		 */
+		insnsize = MIN(MIN(s.st_size, SAVEARGS_INSN_SEQ_LEN),
+		    pc - s.st_value);
+
 		if (mdb_tgt_vread(t, ins, insnsize, s.st_value) != insnsize)
 			argc = 0;
 
