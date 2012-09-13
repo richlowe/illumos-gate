@@ -37,9 +37,9 @@ extern "C" {
  */
 #define	SAVEARGS_INSN_SEQ_LEN	256
 
-#define	SAVEARGS_NO_ARGS	0	/* Contains no pushed arguments */
-#define	SAVEARGS_TRAD_ARGS	1	/* Contains traditionally located arguments */
-#define	SAVEARGS_STRUCT_ARGS	2	/* Had a struct return addr pushed as arg0 */
+#define	SAVEARGS_NO_ARGS	0	/* no saved arguments */
+#define	SAVEARGS_TRAD_ARGS	1	/* traditionally located arguments */
+#define	SAVEARGS_STRUCT_ARGS	2	/* struct return addr pushed as arg0 */
 
 int saveargs_has_args(uint8_t *, size_t, uint_t, int);
 

@@ -97,7 +97,7 @@
  * byte-by-byte, rather than doing anything smart about insn lengths, only
  * deviating from this when we know we have our insn, and can skip the rest of
  * it.
- *     
+ *
  * If there are odd number of arguments to a function, additional space is
  * reserved on the stack to maintain 16-byte alignment.  For example,
  *
