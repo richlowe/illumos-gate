@@ -92,6 +92,12 @@
  * **: The space being reserved is in addition to what the current
  *     function prolog already reserves.
  *
+ * We loop through the first SAVEARGS_INSN_SEQ_LEN bytes of the function
+ * looking for each insn saving instruction we would expect to see.  We loop
+ * byte-by-byte, rather than doing anything smart about insn lengths, only
+ * deviating from this when we know we have our insn, and can skip the rest of
+ * it.
+ *     
  * If there are odd number of arguments to a function, additional space is
  * reserved on the stack to maintain 16-byte alignment.  For example,
  *
@@ -192,8 +198,6 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 			if (++j >= argc)
 				return (start_index ? SAVEARGS_STRUCT_ARGS :
 				    SAVEARGS_TRAD_ARGS);
-		} else {
-			break;
 		}
 	}
 
@@ -207,23 +211,20 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 			i += 3;
 			if (--j < start_index)
 				return (SAVEARGS_TRAD_ARGS);
-		} else {
-			break;
 		}
 	}
 
 	/*
 	 * Compare against GCC push-based implementation
 	 */
-	for (i = 4, j = start_index; i < size - 2; ) {
+	for (i = 4, j = start_index; i < size - 2; i += 1) {
 		n = (i >= 7) ? INSTR2(ins, i) : INSTR1(ins, i);
 
 		if (n == save_instr_push[j]) {
-			i += (i >= 7) ? 2 : 1;
+			if (i >= 7)
+				i += 1;
 			if (++j >= argc)
 				return (SAVEARGS_TRAD_ARGS);
-		} else {
-			break;
 		}
 	}
 
@@ -236,8 +237,6 @@ saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 				i += 3;
 				if (++j >= (argc - 1))
 					return (SAVEARGS_TRAD_ARGS);
-			} else {
-				break;
 			}
 		}
 	}
