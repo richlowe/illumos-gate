@@ -35,7 +35,7 @@ extern "C" {
  * saved on the stack.  This value depends on compiler implementation,
  * therefore it should be examined periodically to guarantee accuracy.
  */
-#define	SAVEARGS_INSN_SEQ_LEN	80
+#define	SAVEARGS_INSN_SEQ_LEN	256
 
 #define	SAVEARGS_NO_ARGS	0	/* Contains no pushed arguments */
 #define	SAVEARGS_TRAD_ARGS	1	/* Contains traditionally located arguments */
