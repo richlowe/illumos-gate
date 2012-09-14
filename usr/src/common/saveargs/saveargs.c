@@ -118,6 +118,8 @@
 
 #define	INSTR1(ins, off) (ins[(off)])
 #define	INSTR2(ins, off) (ins[(off)] + (ins[(off) + 1] << 8))
+#define	INSTR3(ins, off)	\
+	(ins[(off)] + (ins[(off) + 1] << 8) + (ins[(off + 2)] << 16))
 #define	INSTR4(ins, off)	\
 	(ins[(off)] + (ins[(off) + 1] << 8) + (ins[(off + 2)] << 16) + \
 	(ins[(off) + 3] << 24))
@@ -159,32 +161,53 @@ static const uint32_t save_instr_sr[INSTR_ARRAY_SIZE-1] = {
 	0xf8758948	/* movq %rsi,-0x8(%rbp) */
 };
 
-static const uint32_t save_fp_instr[] = {
-	0xe5894855,	/* pushq %rbp; movq %rsp,%rbp, encoding 1 */
-	0xec8b4855,	/* pushq %rbp; movq %rsp,%rbp, encoding 2 */
-	0xe58948cc,	/* int $0x3; movq %rsp,%rbp, encoding 1 */
-	0xec8b48cc,	/* int $0x3; movq %rsp,%rbp, encoding 2 */
+static const uint8_t save_fp_pushes[] = {
+    0x55,	/* pushq %rbp */
+    0xcc	/* int $0x3 */
+};
+
+static const uint32_t save_fp_movs[] = {
+	0x00e58948,	/* movq %rsp,%rbp, encoding 1 */
+	0x00ec8b48,	/* movq %rsp,%rbp, encoding 2 */
 	NULL
 };
+
+static int
+has_saved_fp(uint8_t *ins, int size)
+{
+	int i, j;
+	uint32_t n;
+	int found_push = 0;
+
+	for (i = 0; i < size; i++) {
+		if (found_push == 0) {
+			n = INSTR1(ins, i);
+			for (j = 0; j < sizeof (save_fp_pushes); j++)
+				if (save_fp_pushes[j] == n) {
+					found_push = 1;
+					break;
+				}
+		} else {
+			n = INSTR3(ins, i);
+			for (j = 0; j < 2; j++)
+				if (save_fp_movs[j] == n)
+					return (1);
+		}
+	}
+
+	return (0);
+}
 
 int
 saveargs_has_args(uint8_t *ins, size_t size, uint_t argc, int start_index)
 {
 	int		i, j;
 	uint32_t	n;
+	int		found_push = 0;
 
 	argc = MIN((start_index + argc), INSTR_ARRAY_SIZE);
 
-	/*
-	 * Make sure framepointer has been saved.
-	 */
-	n = INSTR4(ins, 0);
-	for (i = 0; save_fp_instr[i] != NULL; i++) {
-		if (n == save_fp_instr[i])
-			break;
-	}
-
-	if (save_fp_instr[i] == NULL)
+	if (!has_saved_fp(ins, size))
 		return (SAVEARGS_NO_ARGS);
 
 	/*

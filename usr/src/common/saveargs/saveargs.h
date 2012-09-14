@@ -30,6 +30,8 @@
 extern "C" {
 #endif
 
+#include <sys/types.h>
+
 /*
  * The longest instruction sequence in bytes before all 6 arguments are
  * saved on the stack.  This value depends on compiler implementation,
