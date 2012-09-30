@@ -76,6 +76,8 @@ typedef enum {
         /** Used to report error condition */
 	LIBHAL_PROPERTY_TYPE_INVALID =    DBUS_TYPE_INVALID,
 
+	LIBHAL_PROPERTY_TYPE_ARRAY   =    DBUS_TYPE_ARRAY,
+	
 	/** Type for 32-bit signed integer property */
 	LIBHAL_PROPERTY_TYPE_INT32   =    DBUS_TYPE_INT32,
 
