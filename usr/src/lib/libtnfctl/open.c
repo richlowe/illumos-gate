@@ -450,11 +450,7 @@ step_to_end_of_exec(tnfctl_handle_t *hndl)
 	if (prbstat)
 		return (_tnfctl_map_to_errcode(prbstat));
 
-	prbstat = prb_proc_wait(proc_p, B_FALSE, NULL);
-	switch (prbstat) {
-	case PRB_STATUS_OK:
-		break;
-	case EAGAIN:
+	if ((prbstat = prb_proc_wait(proc_p, B_FALSE, NULL)) != PRB_STATUS_OK) {
 		/*
 		 * If we had exec'ed a setuid/setgid program PIOCWSTOP
 		 * will return EAGAIN.  Reopen the 'fd' and try again.
@@ -470,8 +466,7 @@ step_to_end_of_exec(tnfctl_handle_t *hndl)
 
 		prb_proc_close(oldproc_p);
 		hndl->proc_p = proc_p;
-		break;
-	default:
+	} else {
 		return (_tnfctl_map_to_errcode(prbstat));
 	}
 

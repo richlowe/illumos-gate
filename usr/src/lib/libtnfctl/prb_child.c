@@ -23,8 +23,6 @@
  * Copyright (c) 1994, by Sun Microsytems, Inc.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * interfaces to exec a command and run it till all loadobjects have
  * been loaded (rtld sync point).
@@ -265,30 +263,30 @@ sync_child(int childpid, volatile shmem_msg_t *smp, prb_proc_ctl_t **proc_pp)
 	if (prbstat)
 		goto ret_failure;
 
-	prbstat = prb_proc_wait(proc_p, B_FALSE, NULL);
-	switch (prbstat) {
-	case PRB_STATUS_OK:
-		break;
-	case EAGAIN:
-		/*
-		 * If we had exec'ed a setuid/setgid program PIOCWSTOP
-		 * will return EAGAIN.  Reopen the 'fd' and try again.
-		 * Read the last section of /proc man page - we reopen first
-		 * and then close the old fd.
-		 */
-		oldproc_p = proc_p;
-		tempstat = prb_proc_reopen(childpid, proc_pp);
-		proc_p = *proc_pp;
-		if (tempstat) {
-			/* here EACCES means exec'ed a setuid/setgid program */
-			(void) prb_proc_close(oldproc_p);
-			return (tempstat);
-		}
+	if ((prbstat = prb_proc_wait(proc_p, B_FALSE, NULL)) != PRB_STATUS_OK) {
+		if (prbstat == EAGAIN) {
+			/*
+			 * If we had exec'ed a setuid/setgid program PIOCWSTOP
+			 * will return EAGAIN.  Reopen the 'fd' and try again.
+			 * Read the last section of /proc man page - we reopen
+			 * first and then close the old fd.
+			 */
+			oldproc_p = proc_p;
+			tempstat = prb_proc_reopen(childpid, proc_pp);
+			proc_p = *proc_pp;
+			if (tempstat) {
+				/*
+				 * here EACCES means exec'ed a setuid/setgid
+				 * program
+				 */
+				(void) prb_proc_close(oldproc_p);
+				return (tempstat);
+			}
 
-		(void) prb_proc_close(oldproc_p);
-		break;
-	default:
-		goto ret_failure;
+			(void) prb_proc_close(oldproc_p);
+		} else {
+			goto ret_failure;
+		}
 	}
 
 	prbstat = prb_shmem_free(smp);
