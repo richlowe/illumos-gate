@@ -178,7 +178,7 @@ kc_help()
 int
 main(int argc, char *argv[])
 {
-	KMF_RETURN ret;
+	int ret;
 	int found;
 	int i;
 
