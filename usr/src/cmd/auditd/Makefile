@@ -38,6 +38,7 @@ CPPFLAGS += -D_REENTRANT
 CPPFLAGS += -I$(LIBBSM) -I$(AUDITD)
 
 CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += -_gcc=-Wno-switch
 
 LDLIBS += -lbsm -lsecdb
 
