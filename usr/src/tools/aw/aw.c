@@ -595,7 +595,8 @@ main(int argc, char *argv[])
 			 */
 			filename = arg;
 			if (arglen > 2 &&
-			    strcmp(arg + arglen - 2, ".s") == 0) {
+			    (strcmp(arg + arglen - 2, ".s") == 0) ||
+			    (strcmp(arg + arglen - 2, ".S") == 0)) {
 				/*
 				 * Though 'as' allows multiple assembler
 				 * files to be processed in one invocation

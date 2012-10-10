@@ -19,6 +19,8 @@
 # CDDL HEADER END
 #
 #
+# Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
+#
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
@@ -47,6 +49,7 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	assert.h	\
 	atomic.h	\
 	attr.h		\
+	complex.h	\
 	config_admin.h	\
 	cpio.h		\
 	crypt.h		\
@@ -68,7 +71,9 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	execinfo.h	\
 	fatal.h		\
 	fcntl.h		\
+	fenv.h		\
 	float.h		\
+	floatingpoint.h	\
 	fmtmsg.h	\
 	fnmatch.h	\
 	ftw.h		\
@@ -99,6 +104,7 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	locale.h	\
 	macros.h	\
 	malloc.h	\
+	math.h		\
 	mdmn_changelog.h	\
 	memory.h	\
 	meta.h		\
@@ -180,6 +186,7 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	tar.h		\
 	termio.h	\
 	termios.h	\
+	tgmath.h	\
 	thread.h	\
 	thread_db.h	\
 	time.h		\
@@ -212,6 +219,8 @@ ISOHDRS = \
 	ctype_iso.h	\
 	limits_iso.h	\
 	locale_iso.h	\
+	math_c99.h	\
+	math_iso.h	\
 	setjmp_iso.h  	\
 	signal_iso.h	\
 	stdarg_c99.h	\

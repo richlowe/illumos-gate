@@ -9,6 +9,7 @@
 # at http://www.illumos.org/license/CDDL.
 #
 
+# Copyright (c) 2012, Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2011, Richard Lowe
 
 SUBDIRS=man1		\
@@ -46,10 +47,12 @@ SUBDIRS=man1		\
 	man3lgrp	\
 	man3lib		\
 	man3libucb	\
+	man3m		\
 	man3mail	\
 	man3malloc	\
 	man3mp		\
 	man3mpapi	\
+	man3mvec	\
 	man3nsl		\
 	man3nvpair	\
 	man3pam		\
