@@ -74,10 +74,17 @@ $(ROOTSPELLD)/hstop $(ROOTSPELLD)/hlistb \
 $(ROOTSPELLD)/hlista :=	FILEMODE =	0644
 $(ROOTVARADMF) :=	FILEMODE =	0666
 
+#
+# The native versions of these share targets with the target ones. Because of
+# that it is important that we override these variables. For example, LDLIBS
+# will add in the default LDLIBS.cmd which means that we'll link against the
+# wrong versions of libc.
+#
 spellin1 hashmk1 := CC = $(NATIVECC)
 spellin1 hashmk1 := POST_PROCESS =
 spellin1 hashmk1 := CPPFLAGS =
-spellin1 hashmk1 := LDFLAGS =
+spellin1 hashmk1 := LDFLAGS = -zassert-deflib=libc.so -Bdirect
+spellin1 hashmk1 := LDLIBS =
 
 $(ROOTSPELLD)/% $(ROOTVARADMD)/% : %
 	$(INS.file)

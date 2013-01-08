@@ -128,7 +128,7 @@ $(PROG) := LDLIBS += -L$(ROOTLIB)/fm -ltopo -ldiagcode -lsysevent -lsmbios \
 		-luuid -lnvpair -lexacct -lnsl -lumem -ldevinfo -lfmd_msg
 
 $(DMOD) := CFLAGS += $(CC_PICFLAGS) -G $(XREGSFLAG)
-$(DMOD) := LDFLAGS += $(ZTEXT) $(ZDEFS) $(MAPFILE-DMOD:%=-M%)
+$(DMOD) := LDFLAGS += $(ZTEXT) $(ZDEFS) $(MAPFILE-DMOD:%=-M%) $(LDLIBS.cmd)
 
 #
 # rpcgen(1) produces code that wants to be in the foreground if we're compiled

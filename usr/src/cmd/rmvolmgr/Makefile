@@ -36,7 +36,10 @@ include ../hal/Makefile.hal
 POFILE=rmvolmgr_all.po
 POFILES=$(OBJS:%.o=%.po)
 
-LDLIBS +=	-ldbus-1 -ldbus-glib-1 -lglib-2.0 -lhal -lhal-storage -lcontract -lscf
+LDLIBS +=	-ldbus-1 -ldbus-glib-1 -lglib-2.0 -lhal -lhal-storage \
+		    -lcontract -lscf
+LDFLAGS +=	-zassert-deflib=libdbus-1.so -zassert-deflib=libdbus-glib-1.so \
+		    -zassert-deflib=libglib-2.0.so
 
 CPPFLAGS +=	$(HAL_DBUS_CPPFLAGS) $(HAL_GLIB_CPPFLAGS)
 CPPFLAGS +=	-I$(ROOT)/usr/include/hal

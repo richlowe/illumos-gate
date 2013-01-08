@@ -64,7 +64,8 @@ LDLIBS =        $(LDLIBS.cmd)
 
 LDFLAGS.cmd = \
 	$(ENVLDFLAGS1) $(ENVLDFLAGS2) $(ENVLDFLAGS3) \
-	$(MAPFILE.NES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+	$(MAPFILE.NES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%) \
+	-Bdirect
 
 LDFLAGS =       $(LDFLAGS.cmd)
 

@@ -39,6 +39,7 @@ CPPFLAGS += -DEMBED_CONFIGS -I$(ADJUNCT_PROTO)/usr/include/glib-2.0 \
 CSTD = $(CSTD_GNU99)
 LDLIBS += -lcurses -ldtrace
 all install	:= LDLIBS += -lglib-2.0
+all install	:= LDFLAGS += -zassert-deflib=libglib-2.0.so
 
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 LINTFLAGS += -erroff=E_FUNC_RET_ALWAYS_IGNOR2

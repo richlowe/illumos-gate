@@ -51,6 +51,7 @@ NATIVEPROG =		$(NATIVEDIR)/$(PROG)
 $(NATIVEPROG) :=	CC=$(NATIVECC)
 $(NATIVEPROG) :=	LDLIBS=
 $(NATIVEPROG) :=	CPPFLAGS.master=
+$(NATIVEPROG) :=	LDFLAGS=-zassert-deflib=libc.so -Bdirect
 
 .KEEP_STATE:
 

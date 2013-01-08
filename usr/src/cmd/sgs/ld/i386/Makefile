@@ -20,12 +20,12 @@
 # CDDL HEADER END
 #
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright (c) 1996 by Sun Microsystems, Inc.
 # All rights reserved.
 
 include		../Makefile.com
+
+native :=	LDFLAGS += -zassert-deflib=libc.so -Bdirect
 
 .KEEP_STATE:
 

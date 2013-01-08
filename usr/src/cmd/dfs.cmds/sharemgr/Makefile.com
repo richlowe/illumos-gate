@@ -41,6 +41,7 @@ MYCPPFLAGS = -I../../../../lib/libfsmgt/common \
 CPPFLAGS += $(MYCPPFLAGS)
 LDLIBS += -lshare -lscf -lsecdb -lumem
 all install := LDLIBS += -lxml2
+all install := LDFLAGS += -zassert-deflib=libxml2.so
 LINTFLAGS	+= -u
 
 CERRWARN	+= -_gcc=-Wno-uninitialized

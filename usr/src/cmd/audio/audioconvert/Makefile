@@ -39,7 +39,7 @@ OBJS= $(PROGSRCS:%.cc=%.o)
 
 LDLIBS += -laudio -lm -lc
 
-LDFLAGS += -L../utilities
+LDFLAGS += -L../utilities -zassert-deflib=libm.so -zassert-deflib=libC.so
 
 .PARALLEL:	$(OBJS)
 

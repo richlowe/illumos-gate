@@ -37,6 +37,7 @@ INCS += -I../../../uts/common/fs/zfs/lua
 INCS += -I../../../common/zfs
 
 LDLIBS += -lumem -lzpool -lcmdutils -lm -lnvpair -lfakekernel
+LDFLAGS += -zassert-deflib=libm.so
 
 CSTD= $(CSTD_GNU99)
 C99LMODE= -Xc99=%all

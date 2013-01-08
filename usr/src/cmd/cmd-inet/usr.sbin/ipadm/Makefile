@@ -46,12 +46,7 @@ LINTFLAGS +=	-m
 
 ROOTUSRSBINLINKS = $(PROG:%=$(ROOTUSRSBIN)/%)
 
-# ipadm uses the ancillary data feature which is available only through
-# UNIX 98 standards version of Socket interface. This interface is supposed to
-# be accessed by -lxnet. In addition -lsocket is used to capture new
-# not-yet-standard interfaces. Someday -lxnet alone should be enough when IPv6
-# inspired new interfaces are part of standards.
-LDLIBS +=	-lxnet -lsocket
+LDLIBS +=	-lxnet
 
 # these #defines are required to use UNIX 98 interfaces
 _D_UNIX98_EXTN= -D_XOPEN_SOURCE=500 -D__EXTENSIONS__

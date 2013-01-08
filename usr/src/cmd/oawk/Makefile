@@ -50,16 +50,17 @@ NATIVEOBJS =	$(NATIVEDIR)/makeprctab.o $(NATIVEDIR)/tmptoken.o
 $(MAKEPRCTAB) :=	CC = $(NATIVECC)
 $(MAKEPRCTAB) :=	POST_PROCESS=
 $(MAKEPRCTAB) :=	POST_PROCESS_O=
+$(MAKEPRCTAB) :=	LDFLAGS += -zassert-deflib=libc.so
 
 CLEANFILES =	proctab.c y.tab.h y.tab.c awk.h awk.g.c		\
 		tmptoken.c awk.lx.c $(NATIVEOBJS) $(MAKEPRCTAB)	\
 		temp
 
 YFLAGS =	-d
-XLDLIBS5CC +=	-lm 
 LDLIBS +=	-lm
 CPPFLAGS =      -I. $(CPPFLAGS.master)
 CPPFLAGS +=	-D_FILE_OFFSET_BITS=64
+LDFLAGS +=	-zassert-deflib=libm.so
 
 ROOTLINK =	$(LINKPROG:%=$(ROOTBIN)/%)
 
@@ -99,7 +100,7 @@ proctab.c :	$(MAKEPRCTAB)
 		$(MAKEPRCTAB) > $@
 
 $(MAKEPRCTAB) :	$(NATIVEDIR) $(NATIVEOBJS)
-		$(LINK.c) $(NATIVEOBJS) -o $@ $(XLDLIBS5CC)
+		$(LINK.c) $(NATIVEOBJS) -o $@
 
 install : 	all $(ROOTPROG) $(ROOTLINK)
 

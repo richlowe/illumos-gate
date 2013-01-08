@@ -31,7 +31,6 @@ ATTMK	  =	$(TYPEPROG)
 include		../../Makefile.fstype
 
 LDLIBS   +=	-L$(ROOT)/usr/lib/nfs -R/usr/lib/nfs
-LDLIBS   +=	-lnsl -lmapid -ldtrace -lidmap
 COMMON    =	nfs_resolve.o
 SRCS	  =	nfsmapid.c ../lib/nfs_resolve.c nfsmapid_server.c
 DSRC	  =	nfsmapid_dt.d
@@ -43,6 +42,8 @@ CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-uninitialized
+
+$(TYPEPROG) := LDLIBS += -lnsl -lmapid -ldtrace -lidmap
 
 all:		$(TYPEPROG) $(TESTPROG)
 

@@ -80,7 +80,8 @@ $(NATIVE_BUILD)LD =	$(NATIVELD)
 $(NATIVE_BUILD)CFLAGS =	$(NATIVE_CFLAGS)
 $(NATIVE_BUILD)CPPFLAGS = $(MYCPPFLAGS) -I$(LIBUUTIL)/common -I$(LIBSCF)/inc
 $(NATIVE_BUILD)CPPFLAGS += -DNATIVE_BUILD
-$(NATIVE_BUILD)LDFLAGS =
+$(NATIVE_BUILD)LDFLAGS = -zassert-deflib=libumem.so -zassert-deflib=libbsm.so \
+			    -zassert-deflib=libc.so -Bdirect
 $(NATIVE_BUILD)LDLIBS = -L$(ADJUNCT_PROTO)/usr/lib -R$(ADJUNCT_PROTO)/usr/lib \
 			-L$(LIBUUTIL)/native -R $(LIBUUTIL)/native $(MYLDLIBS)
 

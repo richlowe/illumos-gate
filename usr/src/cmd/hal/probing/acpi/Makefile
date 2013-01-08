@@ -33,6 +33,7 @@ include ../../Makefile.hal
 ROOTCMDDIR =	$(ROOTLIB_HAL)
 
 LDLIBS +=	-lc -ldbus-1 -lhal -lglib-2.0
+LDFLAGS +=	-zassert-deflib=libdbus-1.so -zassert-deflib=libglib-2.0.so
 
 CPPFLAGS +=	$(HAL_DBUS_CPPFLAGS) $(HAL_CONFIG_CPPFLAGS) $(HAL_GLIB_CPPFLAGS)
 CPPFLAGS +=	-I$(ROOT)/usr/include/hal -I../../utils -I../../hald

@@ -49,8 +49,6 @@ all:    $(PROG)
 
 lint:   lint_SRCS
 
-include ../../../Makefile.targ
-
 %.o:	../%.c
 	$(COMPILE.c) $<
 
@@ -68,3 +66,6 @@ $(ROOTLINK64): $(ROOTPROG64)
 
 clean:
 	$(RM) $(PROG) $(OBJS)
+
+include ../../../Makefile.targ
+

@@ -98,12 +98,10 @@ include $(UTSBASE)/intel/Makefile.targ
 #	it yourself.
 #
 #	The amd64 version of this object has the .eh_frame section tagged
-#	as SHT_PROGBITS, while the ABI requires SHT_AMD64_UNWIND. The Solaris
-#	ld enforces this, so use elfedit to bring the object in line with
-#	this requirement.
+#	as SHT_PROGBITS. Historically ld did not support this and instead we
+#	used elfedit to transform it. The reason why we don't have the source to
+#	this and instead a uuencoded .o is all together another mystery.
 #
 ATHEROS_HAL=$(UTSBASE)/common/io/ath/hal_x86_$(CLASS).o.uu
 $(OBJS_DIR)/hal.o:     $(ATHEROS_HAL)
 	uudecode -o $@ $(ATHEROS_HAL)
-	if [ `elfedit -r -e 'ehdr:e_machine' $@` = EM_AMD64 ]; \
-		then elfedit -e 'shdr:sh_type .eh_frame SHT_AMD64_UNWIND' $@; fi

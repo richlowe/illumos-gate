@@ -100,7 +100,10 @@ $(ITM) :=	sparcv9_CFLAGS += -xregs=no%appl
 LDLIBS += -lgen
 
 MY_NATIVE_CPPFLAGS = -D_FILE_OFFSET_BITS=64 -I. -I..
-MY_NATIVE_LDFLAGS = $(MAPFILE.NES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+MY_NATIVE_LDFLAGS = $(MAPFILE.NES:%=-M%) $(MAPFILE.PGA:%=-M%) \
+			$(MAPFILE.NED:%=-M%) -Bdirect \
+			-zassert-deflib=libgen.so \
+			-zassert-deflib=libc.so
 MY_NATIVE_LDLIBS = -lgen
 
 #

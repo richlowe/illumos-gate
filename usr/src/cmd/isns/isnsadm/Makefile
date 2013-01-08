@@ -30,6 +30,7 @@ OBJS = $(SRCS:%.c=%.o)
 include ../../Makefile.cmd
 
 LDLIBS += -lxml2 -lscf -lc
+LDFLAGS += -zassert-deflib=libxml2.so
 CFLAGS += $(CCVERBOSE)
 CPPFLAGS += -I. -I$(ADJUNCT_PROTO)/usr/include/libxml2 -I../isnsd
 POFILE = isnsadm_all.po

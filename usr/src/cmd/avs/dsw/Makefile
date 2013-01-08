@@ -46,6 +46,8 @@ iiboot  := LDLIBS += -ldscfg -lunistat
 iicpbmp := LDLIBS += -ldscfg -lunistat
 iicpshd := LDLIBS += -ldscfg -lunistat
 
+iiadm	:= LDFLAGS += -zassert-deflib=libm.so
+
 OBJS=	iiadm.o iiboot.o iicpbmp.o iicpshd.o
 POFILE = dsw_all.po
 SRCS=	$(OBJS:%.o=%.c)

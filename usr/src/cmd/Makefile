@@ -823,7 +823,8 @@ _dc: $(DCSUBDIRS)
 #
 # Dependencies
 #
-fs.d:	fstyp
+abi: 	sgs
+fs.d: 	fstyp
 ksh:	shcomp isaexec
 print:	lp
 fmt:	mailx

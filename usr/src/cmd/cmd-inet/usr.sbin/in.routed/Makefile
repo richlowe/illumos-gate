@@ -39,7 +39,7 @@ CPPFLAGS +=	$(_D_XOPEN_EXTN)
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-uninitialized
-LDLIBS +=	-lxnet -lmd -lsocket
+LDLIBS +=	-lxnet -lmd
 CLEAN_FILES +=	$(ROUTEDOBJS) $(RTQUERYOBJS)
 CLOBBERFILES +=	$(ROUTEDPROG) $(RTQUERYPROG)
 #

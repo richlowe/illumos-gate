@@ -44,6 +44,8 @@ LDLIBS +=	-lnsl -lnisdb -lc
 MAPFILES =	$(MAPFILE.INT) $(MAPFILE.NGB)
 LDFLAGS +=	$(MAPFILES:%=-M%)
 
+$(__SUNC)LDFLAGS +=	-zassert-deflib=libC.so
+
 # Pick up includes from library
 CPPFLAGS += -I$(SRC)/lib/libnisdb/yptol
 

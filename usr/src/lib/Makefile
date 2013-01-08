@@ -606,7 +606,7 @@ libdladm:	libdevinfo libinetutil libscf librcm libexacct libkstat \
 libdll: 	libast
 libdlpi:	libinetutil libdladm
 libds:		libsysevent
-libdscfg:	libnsctl libunistat libadm
+libdscfg:	libnsctl libunistat libadm libsocket libnsl
 libdtrace:	libproc libgen libctf libmapmalloc
 libdtrace_jni:	libuutil libdtrace
 libefi:		libuuid

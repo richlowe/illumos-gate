@@ -42,8 +42,14 @@ ROOTCMDDIR =	$(ROOTLIB_HAL)
 
 LDLIBS +=	-lc -lm -ldbus-1 -ldbus-glib-1 -lglib-2.0 -lgobject-2.0 \
 		-ldevinfo -lsysevent -lnvpair -lkstat -lcfgadm
+LDFLAGS +=	-zassert-deflib=libm.so -zassert-deflib=libdbus-1.so \
+		    -zassert-deflib=libdbus-glib-1.so \
+		    -zassert-deflib=libglib-2.0.so \
+		    -zassert-deflib=libgobject-2.0.so
+
 
 all install $(PROG) :=	LDLIBS += -lexpat
+all install $(PROG) :=	LDFLAGS += -zassert-deflib=libexpat.so
 
 CPPFLAGS +=	$(HAL_DBUS_CPPFLAGS) $(HAL_GLIB_CPPFLAGS) $(HAL_CONFIG_CPPFLAGS)
 CSTD =	$(CSTD_GNU99)

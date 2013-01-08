@@ -76,6 +76,7 @@ LIBDUMP=	../lib/libdump.a
 LINTLIBDUMP=	../lib/llib-ldump.ln -lkstat
 LDLIBS +=	$(BSTATIC) -L../lib -ldump $(BDYNAMIC) \
 		-lsocket -lnsl -ladm -lm -lkstat
+LDFLAGS +=	-zassert-deflib=libm.so
 
 UFSROOTDUMPDATES=	$(UFSROOTETC)/dumpdates
 UFSROOTLINK=		$(UFSROOTUSRSBIN)/$(PROG)

@@ -41,6 +41,7 @@ $(OBJS) :=	CTFCONVERT_POST = $(CTFCONVERT_O)
 CERRWARN +=	-_gcc=-Wno-empty-body
 
 LDLIBS +=	-lsqlite-sys
+LDFLAGS +=	$(LDLIBS.cmd)
 
 .KEEP_STATE:
 

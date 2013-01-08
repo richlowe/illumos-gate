@@ -38,6 +38,7 @@ OBJS = $(SRCS:%.c=%.o)
 LINTFILES = $(SRCS:%.c=%.ln)
 
 CERRWARN += -_gcc=-Wno-uninitialized
+LDFLAGS	+= -zassert-deflib=libz.so -zassert-deflib=libelf.so
 
 .NO_PARALLEL:
 .PARALLEL: $(OBJS) $(LINTFILES)

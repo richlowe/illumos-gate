@@ -39,6 +39,8 @@ LDLIBS +=	-lz
 CFLAGS +=	-I../../../uts/common
 LINTFLAGS +=	-I../../../uts/common
 
+LDFLAGS += -zassert-deflib=libz.so
+
 all: $(PROG)
 
 $(PROG): $(OBJS)

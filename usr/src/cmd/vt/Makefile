@@ -36,7 +36,9 @@ CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-uninitialized
 
 vtdaemon := LDLIBS += -lpam -lbsm
+vdaemon := LDFLAGS += $(LDLIBS.cmd)
 lint_vtdaemon := LDLIBS += -lpam -lbsm
+
 
 .KEEP_STATE:
 

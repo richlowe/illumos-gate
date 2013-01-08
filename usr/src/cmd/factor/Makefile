@@ -29,6 +29,7 @@ include ../Makefile.cmd
 
 LDLIBS += -lm
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
+LDFLAGS += -zassert-deflib=libm.so
 
 .KEEP_STATE:
 

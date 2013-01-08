@@ -64,6 +64,7 @@ CFLAGS +=	$(CCVERBOSE) $(C_PICFLAGS)
 CPPFLAGS +=	-D_REENTRANT
 LDLIBS +=	-L$(SRC)/lib/libsysevent -L$(SRC)/lib/libpicltree/$(MACH)
 LDLIBS +=	-lc -lpicltree -lnvpair
+LDFLAGS +=	-Bdirect
 
 LINTFLAGS +=	-L$(SRC)/lib/libpicltree/$(MACH) -lpicltree
 

@@ -41,6 +41,7 @@ MODSRCS_DIR = ../../../common/modules/dtrace
 CPPFLAGS += -I$(SRC)/uts/i86pc
 LDLIBS	+= -ldtrace -lm
 CLEANFILES += dof_names.c
+LDFLAGS += -zassert-deflib=libm.so
 
 dof_names.c: $(MODSRCS_DIR)/mkdof.sh $(SRC)/uts/common/sys/dtrace.h
 	sh $(MODSRCS_DIR)/mkdof.sh < $(SRC)/uts/common/sys/dtrace.h > $@

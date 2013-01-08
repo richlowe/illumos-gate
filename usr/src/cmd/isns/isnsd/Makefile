@@ -70,6 +70,7 @@ obj.o := CERRWARN += -erroff=E_CONST_OBJ_SHOULD_HAVE_INITIZR
 obj.o := CERRWARN += -erroff=E_IMPLICIT_DECL_FUNC_RETURN_INT
 
 LDLIBS		+= -lsecdb -lsocket -lnsl -lscf -lxml2
+LDFLAGS		+= -zassert-deflib=libxml2.so
 
 .KEEP_STATE:
 

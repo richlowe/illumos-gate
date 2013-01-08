@@ -28,7 +28,7 @@ include ../../Makefile.com
 include $(SRC)/Makefile.master.64
 
 SRCS = cpu.c
-LDFLAGS += -lkstat \
+LDLIBS += -lkstat \
 	-L$(ROOTLIB)/fm/$(MACH64) -ltopo
 LDFLAGS += -R/usr/lib/fm/$(MACH64)
 

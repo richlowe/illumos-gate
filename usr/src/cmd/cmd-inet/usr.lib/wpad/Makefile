@@ -34,6 +34,7 @@ ROOTMANIFESTDIR = $(ROOTSVCNETWORK)
 
 LDLIBS    += 	-ldladm -ldlpi
 all install := LDLIBS += -lcrypto
+all install := LDFLAGS += -zassert-deflib=libcrypto.so
 
 LINTFLAGS += 	-u
 

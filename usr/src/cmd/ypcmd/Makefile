@@ -59,6 +59,12 @@ $(NIS2LDAPPROG) := LDLIBS += -lc -lnsl -lnisdb
 stdethers :=	LDLIBS += -lsocket
 makedbm :=	MAPFILES = $(MAPFILE.INT) $(MAPFILE.NGB)
 makedbm :=	LDFLAGS += $(MAPFILES:%=-M%)
+ypxfr :=	LDFLAGS += -_cc=-zassert-deflib=libC.so
+ypxfrd :=	LDFLAGS += -_cc=-zassert-deflib=libC.so
+ypserv :=	LDFLAGS += -_cc=-zassert-deflib=libC.so
+udpublickey :=	LDFLAGS += $(LDLIBS.cmd)
+mkalias :=	LDFLAGS += $(LDLIBS.cmd)
+stdethers :=	LDFLAGS += $(LDLIBS.cmd)
 
 $(ROOTVAR_YP)/aliases :=	FILEMODE=555
 

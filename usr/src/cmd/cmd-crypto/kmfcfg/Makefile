@@ -51,6 +51,7 @@ CPPFLAGS	+= -I$(ADJUNCT_PROTO)/usr/include/libxml2 \
 		-I$(KMFDIR)/include -I.
 LDLIBS		+= -L$(ROOT)/usr/lib -lkmf -lcryptoutil
 XMLLIB		= -lxml2
+LDFLAGS		+= -zassert-deflib=libxml2.so
 
 .KEEP_STATE:
 

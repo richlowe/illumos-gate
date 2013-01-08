@@ -46,6 +46,7 @@ CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-uninitialized
 LDFLAGS =
 LDLIBS	= -lelf
+LDFLAGS += -zassert-deflib=libelf.so -zassert-deflib=libc.so -Bdirect
 
 LINTFILES = $(SRCS:%.c=%.ln)
 

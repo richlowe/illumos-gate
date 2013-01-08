@@ -34,6 +34,7 @@ CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-switch
 LINTFLAGS += -erroff=E_SEC_SPRINTF_UNBOUNDED_COPY
 CLOBBERFILES += $(DYNPROG)
+NATIVE_LDFLAGS += $(LDASSERTS) -zassert-deflib=libc.so -Bdirect
 
 .KEEP_STATE:
 
@@ -49,7 +50,7 @@ clean:
 	$(RM) $(OBJS)
 
 $(PROG):	$(OBJS)
-	$(NATIVECC) $(CFLAGS) $(OBJS) -o $@
+	$(NATIVECC) $(CFLAGS) $(NATIVE_LDFLAGS) $(OBJS) -o $@
 	$(POST_PROCESS)
 
 include	../../Makefile.targ

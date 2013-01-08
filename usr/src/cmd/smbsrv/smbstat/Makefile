@@ -32,5 +32,7 @@ OBJS=	$(SRCS:%.c=%.o)
 include ../Makefile.smbsrv.defs
 
 LDLIBS += -lkstat -lm -lumem
+LDFLAGS += -zassert-deflib=libm.so
+
 include ../Makefile.smbsrv.targ
 include ../../Makefile.targ

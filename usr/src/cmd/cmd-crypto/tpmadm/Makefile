@@ -37,6 +37,7 @@ MSGFILES=$(SRCS:%.c=%.i)
 CPPFLAGS += -xCC
 LINTFLAGS += -XCC  -L$(ADJUNCT_PROTO)/usr/lib
 LDLIBS += -ltspi -luuid
+LDFLAGS += -zassert-deflib=libtspi.so
 
 CLOBBERFILES = C.ln $(POFILE) $(POFILES)
 

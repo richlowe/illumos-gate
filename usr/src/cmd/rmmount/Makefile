@@ -34,7 +34,10 @@ SRCS =		$(LOCAL_SRCS) $(RMVOLMGR_SRCS)
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/cmd/hal/Makefile.hal
 
-LDLIBS +=	-ldbus-1 -ldbus-glib-1 -lglib-2.0 -lhal -lhal-storage -lcontract
+LDLIBS +=	-ldbus-1 -ldbus-glib-1 -lglib-2.0 -lhal -lhal-storage \
+		    -lcontract
+LDFLAGS +=	-zassert-deflib=libdbus-1.so -zassert-deflib=libdbus-glib-1.so \
+		    -zassert-deflib=libglib-2.0.so
 
 CPPFLAGS +=	$(HAL_DBUS_CPPFLAGS) $(HAL_GLIB_CPPFLAGS)
 CPPFLAGS +=	-I$(ROOT)/usr/include/hal

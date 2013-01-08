@@ -129,18 +129,26 @@ rcm_daemon := LDFLAGS += $(MAPFILES:%=-M%)
 
 LINTFLAGS += -u -erroff=E_FUNC_ARG_UNUSED
 
-LDLIBS_MODULES =
-SUNW_pool_rcm.so := LDLIBS_MODULES += -L$(ROOT)/usr/lib -lpool
-SUNW_network_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
-SUNW_vlan_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
-SUNW_vnic_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
-SUNW_ibpart_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
-SUNW_aggr_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
-SUNW_ip_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -linetutil -ldladm -lipmp -lipadm
-SUNW_ip_anon_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -linetutil
-SUNW_bridge_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
+#
+# All of the module plugins leverage the LDLIBS_MODULES, but not LDLIBS. As such
+# we define a base set for all modules that we know they need due to -zguidance
+# and only append extra libraries that individual modules need.
+#
+LDLIBS_MODULES = -L$(ROOT)/lib -L$(ROOT)/usr/lib -lc -lrcm
+SUNW_pool_rcm.so := LDLIBS_MODULES += -lpool -lnvpair
+SUNW_svm_rcm.so	:= LDLIBS_MODULES += -lmeta
+SUNW_network_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair -ldevinfo
+SUNW_vlan_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
+SUNW_vnic_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
+SUNW_ibpart_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
+SUNW_aggr_rcm.so := LDLIBS_MODULES +=  -ldladm -lnvpair
+SUNW_ip_rcm.so := LDLIBS_MODULES += -linetutil -ldladm -lipmp -lipadm -lnvpair \
+				    -lgen -lsocket -lnsl
+SUNW_ip_anon_rcm.so := LDLIBS_MODULES +=  -linetutil -lnsl
+SUNW_bridge_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
+SUNW_mpxio_rcm.so := LDLIBS_MODULES += -ldevinfo
 
-LDLIBS += -lgen -lelf -lrcm -lnvpair -ldevinfo -lnsl -lsocket
+LDLIBS += -lrcm -lnvpair
 
 SRCS = $(RCM_SRC) $(COMMON_MOD_SRC)
 

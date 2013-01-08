@@ -34,7 +34,7 @@ CPPFLAGS += $(INCLUDES)
 
 LDLIBS += -laudio -lm
 
-LDFLAGS += -L../utilities
+LDFLAGS += -L../utilities -zassert-deflib=libm.so
 
 CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-parentheses

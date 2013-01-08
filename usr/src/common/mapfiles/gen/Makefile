@@ -31,6 +31,8 @@ FILES=	\
 		$(MACH)_cc_map.noexeglobs \
 		$(MACH)_gcc_map.noexeglobs
 
+LDFLAGS +=	-zassert-deflib=libc.so -B direct
+
 $(BUILD64)FILES += \
 		$(MACH64)_cc_map.noexeglobs \
 		$(MACH64)_gcc_map.noexeglobs

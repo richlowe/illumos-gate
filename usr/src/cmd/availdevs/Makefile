@@ -39,6 +39,7 @@ INCS += -I$(ADJUNCT_PROTO)/usr/include/libxml2
 LDLIBS += -lzfs_jni -lnvpair -lzfs
 all install := LDLIBS += -lxml2
 LINTFLAGS += -xerroff=E_NAME_USED_NOT_DEF2
+LDFLAGS += -zassert-deflib=libxml2.so
 
 CPPFLAGS += $(INCS) -D_LARGEFILE64_SOURCE=1 -D_REENTRANT
 $(NOT_RELEASE_BUILD) CPPFLAGS += -DDEBUG

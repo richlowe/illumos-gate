@@ -78,6 +78,7 @@ LDLIBS		+= -lz -lelf
 CPPFLAGS	+= -D_REENTRANT
 CFLAGS		+= $(CTF_FLAGS)
 LINTFLAGS	+= -mnux
+LDFLAGS		+= -zassert-deflib=libz.so -zassert-deflib=libelf.so
 
 CERRWARN	+= -_gcc=-Wno-unused
 CERRWARN	+= -_gcc=-Wno-uninitialized
