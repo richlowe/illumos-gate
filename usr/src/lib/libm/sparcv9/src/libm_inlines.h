@@ -46,7 +46,7 @@ extern __inline__ enum fp_class_type
 fp_classf(float f)
 {
 	enum fp_class_type ret;
-	int fint;                   /* scratch for f as int */
+	int fint;		/* scratch for f as int */
 	uint64_t tmp;
 
 	__asm__ __volatile__(
@@ -89,7 +89,7 @@ fp_classf(float f)
 	    : "f" (f)
 	    : "cc");
 
-    return (ret);
+	return (ret);
 }
 
 extern __inline__ enum fp_class_type
@@ -98,7 +98,7 @@ fp_class(double d)
 	enum fp_class_type ret;
 	uint64_t dint;		/* Scratch for d-as-long */
 	uint64_t tmp;
-	
+
 	__asm__ __volatile__(
 	    "fabsd  %3,%3\n\t"
 	    "std    %3,%1\n\t"
@@ -235,7 +235,7 @@ __swapTE(int i)
 	int ret;
 	uint32_t fsr;
 	uint64_t tmp1, tmp2, tmp3;
-	
+
 	__asm__ __volatile__(
 	    "and   %5,0x1f,%0\n\t"
 	    "sll   %0,23,%2\n\t"	/* shift input to TEM bit location */
@@ -244,8 +244,8 @@ __swapTE(int i)
 	    "ld	   %1,%0\n\t"		/* %0 = fsr */
 	    /* mask of TEM (Trap Enable Mode bits) */
 	    "sethi %%hi(0x0f800000),%4\n\t"
-	    "andn  %0,%4,%3\n\t"	  
-	    "or    %2,%3,%2\n\t"        /* %2 = new fsr */
+	    "andn  %0,%4,%3\n\t"
+	    "or    %2,%3,%2\n\t"	/* %2 = new fsr */
 	    "st	   %2,%1\n\t"
 	    "ld	   %1,%%fsr\n\t"
 	    "srl   %0,23,%0\n\t"
@@ -262,31 +262,31 @@ __swapTE(int i)
 extern __inline__ double
 sqrt(double d)
 {
-    return (__inline_sqrt(d));
+	return (__inline_sqrt(d));
 }
 
 extern __inline__ float
 sqrtf(float f)
 {
-    return (__inline_sqrtf(f));
+	return (__inline_sqrtf(f));
 }
 
 extern __inline__ double
 fabs(double d)
 {
-    double ret;
+	double ret;
 
-    __asm__ __volatile__("fabsd %1,%0\n\t" : "=e" (ret) : "e" (d));
-    return (ret);
+	__asm__ __volatile__("fabsd %1,%0\n\t" : "=e" (ret) : "e" (d));
+	return (ret);
 }
 
 extern __inline__ float
 fabsf(float f)
 {
-    float ret;
+	float ret;
 
-    __asm__ __volatile__("fabss %1,%0\n\t" : "=f" (ret) : "f" (f));
-    return (ret);
+	__asm__ __volatile__("fabss %1,%0\n\t" : "=f" (ret) : "f" (f));
+	return (ret);
 }
 
 #ifdef __cplusplus

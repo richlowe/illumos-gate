@@ -74,14 +74,14 @@ extern __inline__ double
 __inline_rint(double a)
 {
 	__asm__ __volatile__(
-		"andl $0x7fffffff,%1\n\t"
-		"cmpl $0x43300000,%1\n\t"
-		"jae  1f\n\t"
-		"frndint\n\t"
-		"1: fwait\n\t"
-		: "+t" (a), "+&r" (_HI_WORD(a))
-		:
-		: "cc");
+	    "andl $0x7fffffff,%1\n\t"
+	    "cmpl $0x43300000,%1\n\t"
+	    "jae  1f\n\t"
+	    "frndint\n\t"
+	    "1: fwait\n\t"
+	    : "+t" (a), "+&r" (_HI_WORD(a))
+	    :
+	    : "cc");
 
 	return (a);
 }
@@ -145,9 +145,9 @@ extern __inline__ double
 copysign(double d1, double d2)
 {
 	__asm__ __volatile__(
-	    "andl $0x7fffffff,%0\n\t" /* %0 <-- hi_32(abs(d)) */
-	    "andl $0x80000000,%1\n\t" /* %1[31] <-- sign_bit(d2) */
-	    "orl  %1,%0\n\t"	      /* %0 <-- hi_32(copysign(x,y)) */
+	    "andl $0x7fffffff,%0\n\t"	/* %0 <-- hi_32(abs(d)) */
+	    "andl $0x80000000,%1\n\t"	/* %1[31] <-- sign_bit(d2) */
+	    "orl  %1,%0\n\t"		/* %0 <-- hi_32(copysign(x,y)) */
 	    : "+&r" (_HI_WORD(d1)), "+r" (_HI_WORD(d2))
 	    :
 	    : "cc");
@@ -273,31 +273,31 @@ sqrtl(long double ld)
 extern __inline__ int
 isnanl(long double ld)
 {
-        int ret = _HIER_WORD(ld);
+	int ret = _HIER_WORD(ld);
 
-        __asm__ __volatile__(
-            "andl  $0x00007fff,%0\n\t"
-            "jz	   1f\n\t"             /* jump if __exp is all 0 */
+	__asm__ __volatile__(
+	    "andl  $0x00007fff,%0\n\t"
+	    "jz	   1f\n\t"		/* jump if exp is all 0 */
 	    "xorl  $0x00007fff,%0\n\t"
-            "jz	   2f\n\t"             /* jump if __exp is all 1 */
+	    "jz	   2f\n\t"		/* jump if exp is all 1 */
 	    "testl $0x80000000,%1\n\t"
-	    "jz	   3f\n\t"             /* jump if leading bit is 0 */
+	    "jz	   3f\n\t"		/* jump if leading bit is 0 */
 	    "movl  $0,%0\n\t"
 	    "jmp   1f\n\t"
-            "2:\n\t"                   /* note that %0 = 0 from before */
-            "cmpl  $0x80000000,%1\n\t" /* what is first half of __significand? */
-	    "jnz   3f\n\t"	       /* jump if not equal to 0x80000000 */
-	    "testl $0xffffffff,%2\n\t" /* is second half of __significand 0? */
-	    "jnz   3f\n\t"	       /* jump if not equal to 0 */
+	    "2:\n\t"			/* note that %0 = 0 from before */
+	    "cmpl  $0x80000000,%1\n\t"	/* what is first half of significand? */
+	    "jnz   3f\n\t"		/* jump if not equal to 0x80000000 */
+	    "testl $0xffffffff,%2\n\t"	/* is second half of significand 0? */
+	    "jnz   3f\n\t"		/* jump if not equal to 0 */
 	    "jmp   1f\n\t"
-            "3:\n\t"
-            "movl  $1,%0\n\t"
-            "1:\n\t"
-            : "+&r" (ret)
-            : "r" (_HI_WORD(ld)), "r" (_LO_WORD(ld))
+	    "3:\n\t"
+	    "movl  $1,%0\n\t"
+	    "1:\n\t"
+	    : "+&r" (ret)
+	    : "r" (_HI_WORD(ld)), "r" (_LO_WORD(ld))
 	    : "cc");
 
-        return (ret);
+	return (ret);
 }
 
 #ifdef __cplusplus

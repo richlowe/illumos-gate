@@ -42,7 +42,7 @@ union fp_cwsw {
 extern __inline__ void
 __fenv_getcwsw(unsigned int *value)
 {
-	union fp_cwsw *u = (union fp_cwsw *)value;;
+	union fp_cwsw *u = (union fp_cwsw *)value;
 
 	__asm__ __volatile__(
 	    "fstsw %0\n\t"
@@ -113,7 +113,7 @@ fptan(long double x)
 	 */
 	long double ret;
 	long double dummy;
- 
+
 	__asm__ __volatile__("fptan"
 	    : "=t" (dummy), "=u" (ret)
 	    : "0" (x)
@@ -125,7 +125,7 @@ extern __inline__ long double
 fpatan(long double x, long double y)
 {
 	long double ret;
-	
+
 	__asm__ __volatile__("fpatan"
 	    : "=t" (ret)
 	    : "0" (y), "u" (x)
@@ -343,7 +343,7 @@ extern __inline__ void
 sse_cvtss2sd(float *f1, double *d1)
 {
 	double tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtss2sd %2, %1\n\t"
 	    "movsd    %1, %0"
@@ -355,7 +355,7 @@ extern __inline__ void
 sse_cvtsi2ss(int *i1, float *f1)
 {
 	double tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtsi2ss %2, %1\n\t"
 	    "movss    %1, %0"
@@ -367,7 +367,7 @@ extern __inline__ void
 sse_cvttss2si(float *f1, int *i1)
 {
 	int tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvttss2si %2, %1\n\t"
 	    "movl      %1, %0"
@@ -379,7 +379,7 @@ extern __inline__ void
 sse_cvtss2si(float *f1, int *i1)
 {
 	int tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtss2si %2, %1\n\t"
 	    "movl     %1, %0"
@@ -392,7 +392,7 @@ extern __inline__ void
 sse_cvtsi2ssq(long long *ll1, float *f1)
 {
 	double tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtsi2ssq %2, %1\n\t"
 	    "movss     %1, %0"
@@ -404,7 +404,7 @@ extern __inline__ void
 sse_cvttss2siq(float *f1, long long *ll1)
 {
 	uint64_t tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvttss2siq %2, %1\n\t"
 	    "movq       %1, %0"
@@ -416,7 +416,7 @@ extern __inline__ void
 sse_cvtss2siq(float *f1, long long *ll1)
 {
 	uint64_t tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtss2siq %2, %1\n\t"
 	    "movq      %1, %0"
@@ -531,7 +531,7 @@ extern __inline__ void
 sse_sqrtsd(double *d1, double *d2)
 {
 	double tmp;
-	
+
 	__asm__ __volatile__(
 	    "sqrtsd %2, %1\n\t"
 	    "movsd %1, %0"
@@ -555,7 +555,7 @@ extern __inline__ void
 sse_cvtsd2ss(double *d1, float *f1)
 {
 	double tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtsd2ss %2,%1\n\t"
 	    "movss    %1,%0"
@@ -578,7 +578,7 @@ extern __inline__ void
 sse_cvttsd2si(double *d1, int *i1)
 {
 	int tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvttsd2si %2,%1\n\t"
 	    "movl      %1,%0"
@@ -590,7 +590,7 @@ extern __inline__ void
 sse_cvtsd2si(double *d1, int *i1)
 {
 	int tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtsd2si %2,%1\n\t"
 	    "movl     %1,%0"
@@ -603,7 +603,7 @@ extern __inline__ void
 sse_cvtsi2sdq(long long *ll1, double *d1)
 {
 	double tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtsi2sdq %2,%1\n\t"
 	    "movsd     %1,%0"
@@ -615,7 +615,7 @@ extern __inline__ void
 sse_cvttsd2siq(double *d1, long long *ll1)
 {
 	uint64_t tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvttsd2siq %2,%1\n\t"
 	    "movq       %1,%0"
@@ -627,7 +627,7 @@ extern __inline__ void
 sse_cvtsd2siq(double *d1, long long *ll1)
 {
 	uint64_t tmp;
-	
+
 	__asm__ __volatile__(
 	    "cvtsd2siq %2,%1\n\t"
 	    "movq      %1,%0"
@@ -640,37 +640,37 @@ sse_cvtsd2siq(double *d1, long long *ll1)
 extern __inline__ void
 __fenv_getfsr(unsigned long *l)
 {
-    __asm__ __volatile__(
+	__asm__ __volatile__(
 #if defined(__sparcv9)
-        "stx %%fsr,%0\n\t"
+		"stx %%fsr,%0\n\t"
 #else
-        "st  %%fsr,%0\n\t"
+		"st  %%fsr,%0\n\t"
 #endif
-        : "=m" (*l));
+		: "=m" (*l));
 }
 
 extern __inline__ void
 __fenv_setfsr(const unsigned long *l)
 {
-    __asm__ __volatile__(
+	__asm__ __volatile__(
 #if defined(__sparcv9)
-        "ldx %0,%%fsr\n\t"
+		"ldx %0,%%fsr\n\t"
 #else
-        "ld %0,%%fsr\n\t"
+		"ld %0,%%fsr\n\t"
 #endif
-        : : "m" (*l));
+		: : "m" (*l) : "cc");
 }
 
 extern __inline__ void
 __fenv_getfsr32(unsigned int *l)
 {
-    __asm__ __volatile__("st %%fsr,%0\n\t" : "=m" (*l));
+	__asm__ __volatile__("st %%fsr,%0\n\t" : "=m" (*l));
 }
 
 extern __inline__ void
 __fenv_setfsr32(const unsigned int *l)
 {
-    __asm__ __volatile__("ld %0,%%fsr\n\t" : : "m" (*l));
+	__asm__ __volatile__("ld %0,%%fsr\n\t" : : "m" (*l));
 }
 #else
 #error "GCC FENV inlines not implemented for this platform"

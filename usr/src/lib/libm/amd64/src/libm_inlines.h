@@ -171,7 +171,7 @@ fabsf(float d)
 extern __inline__ int
 finite(double d)
 {
-	long ret = 0x7fffffffffffffff;	/* A long, so gcc chooses an %r* for %0 */
+    long ret = 0x7fffffffffffffff;
 	uint64_t tmp;
 
 	__asm__ __volatile__(

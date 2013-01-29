@@ -73,7 +73,7 @@ fp_classf(float f)
 	    "bne    1f\n\t"
 	    "nop\n\t"
 	    "mov    0,%0\n\t"
-	    "ba	2f\n\t"             /* x is 0 */
+	    "ba	2f\n\t"		/* x is 0 */
 	    "nop\n\t"
 	    "1:\n\t"
 	    "sethi  %%hi(0x7f800000),%1\n\t"
@@ -81,28 +81,28 @@ fp_classf(float f)
 	    "bne    1f\n\t"
 	    "nop\n\t"
 	    "mov    1,%0\n\t"
-	    "ba	    2f\n\t"	    /* x is subnormal */
+	    "ba	    2f\n\t"	/* x is subnormal */
 	    "nop\n\t"
 	    "1:\n\t"
 	    "cmp    %0,%1\n\t"
 	    "bge    1f\n\t"
 	    "nop\n\t"
 	    "mov    2,%0\n\t"
-	    "ba	    2f\n\t"	    /* x is normal */
+	    "ba	    2f\n\t"	/* x is normal */
 	    "nop\n\t"
 	    "1:\n\t"
 	    "bg	    1f\n\t"
 	    "nop\n\t"
 	    "mov    3,%0\n\t"
-	    "ba	    2f\n\t"	    /* x is __infinity */
+	    "ba	    2f\n\t"	/* x is __infinity */
 	    "nop\n\t"
 	    "1:\n\t"
 	    "sethi  %%hi(0x00400000),%1\n\t"
 	    "andcc  %0,%1,%%g0\n\t"
-	    "mov    4,%0\n\t"       /* x is quiet NaN */
+	    "mov    4,%0\n\t"	/* x is quiet NaN */
 	    "bne    2f\n\t"
 	    "nop\n\t"
-	    "mov    5,%0\n\t"       /* x is signaling NaN */
+	    "mov    5,%0\n\t"	/* x is signaling NaN */
 	    "2:\n\t"
 	    : "+r" (ret), "=&r" (tmp)
 	    : "r" (f)
@@ -120,47 +120,47 @@ fp_class(double d)
 	uint32_t tmp;
 
 	__asm__ __volatile__(
-	    "sethi %%hi(0x80000000),%1\n\t"   /* %1 gets 80000000 */
-	    "andn  %2,%1,%0\n\t"	      /* %2-%0 gets abs(x) */
-	    "orcc  %0,%3,%%g0\n\t"	      /* set cc as x is zero/nonzero */
-	    "bne   1f\n\t"		      /* branch if x is nonzero */
+	    "sethi %%hi(0x80000000),%1\n\t"	/* %1 gets 80000000 */
+	    "andn  %2,%1,%0\n\t"		/* %2-%0 gets abs(x) */
+	    "orcc  %0,%3,%%g0\n\t"		/* set cc as x is zero/nonzero */
+	    "bne   1f\n\t"			/* branch if x is nonzero */
 	    "nop\n\t"
 	    "mov   0,%0\n\t"
-	    "ba	   2f\n\t"		      /* x is 0 */
+	    "ba	   2f\n\t"			/* x is 0 */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "sethi %%hi(0x7ff00000),%1\n\t"   /* %1 gets 7ff00000 */
-	    "andcc %0,%1,%%g0\n\t"	      /* cc set by __exp field of x */
-	    "bne   1f\n\t"		      /* branch if normal or max __exp */
+	    "sethi %%hi(0x7ff00000),%1\n\t"	/* %1 gets 7ff00000 */
+	    "andcc %0,%1,%%g0\n\t"		/* cc set by __exp field of x */
+	    "bne   1f\n\t"			/* branch if normal or max __exp */
 	    "nop\n\t"
 	    "mov   1,%0\n\t"
-	    "ba	   2f\n\t"		      /* x is subnormal */
+	    "ba	   2f\n\t"			/* x is subnormal */
 	    "nop\n\t"
 	    "1:\n\t"
 	    "cmp   %0,%1\n\t"
-	    "bge   1f\n\t"		      /* branch if x is max __exp */
+	    "bge   1f\n\t"			/* branch if x is max __exp */
 	    "nop\n\t"
 	    "mov   2,%0\n\t"
-	    "ba	   2f\n\t"		      /* x is normal */
+	    "ba	   2f\n\t"			/* x is normal */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "andn  %0,%1,%0\n\t"	      /* o0 gets msw __significand field */
-	    "orcc  %0,%3,%%g0\n\t"	      /* set cc by OR __significand */
-	    "bne   1f\n\t"		      /* Branch if __nan */
+	    "andn  %0,%1,%0\n\t"		/* o0 gets msw __significand field */
+	    "orcc  %0,%3,%%g0\n\t"		/* set cc by OR __significand */
+	    "bne   1f\n\t"			/* Branch if __nan */
 	    "nop\n\t"
 	    "mov   3,%0\n\t"
-	    "ba	   2f\n\t"		      /* x is __infinity */
+	    "ba	   2f\n\t"			/* x is __infinity */
 	    "nop\n\t"
 	    "1:\n\t"
 	    "sethi %%hi(0x00080000),%1\n\t"
-	    "andcc %0,%1,%%g0\n\t"	      /* set cc by quiet/sig bit */
-	    "be	   1f\n\t"		      /* Branch if signaling */
+	    "andcc %0,%1,%%g0\n\t"		/* set cc by quiet/sig bit */
+	    "be	   1f\n\t"			/* Branch if signaling */
 	    "nop\n\t"
-	    "mov   4,%0\n\t"		      /* x is quiet NaN */
+	    "mov   4,%0\n\t"			/* x is quiet NaN */
 	    "ba	   2f\n\t"
 	    "nop\n\t"
 	    "1:\n\t"
-	    "mov   5,%0\n\t"		      /* x is signaling NaN */
+	    "mov   5,%0\n\t"			/* x is signaling NaN */
 	    "2:\n\t"
 	    : "=&r" (ret), "=&r" (tmp)
 	    : "r" (_HI_WORD(d)), "r" (_LO_WORD(d))
@@ -248,7 +248,7 @@ __swapTE(int i)
 	    "st   %%fsr,%1\n\t"
 	    "ld	  %1,%0\n\t"		/* %0 = fsr */
 	    "set  0x0f800000,%%o4\n\t"	/* mask of TEM (Trap Enable Mode bits) */
-	    "andn %0,%%o4,%3\n\t"	  
+	    "andn %0,%%o4,%3\n\t"
 	    "or   %2,%3,%2\n\t"		/* %2 = new fsr */
 	    "st	  %2,%1\n\t"
 	    "ld	  %1,%%fsr\n\t"
@@ -277,19 +277,19 @@ sqrtf(float f)
 extern __inline__ double
 fabs(double d)
 {
-    double ret;
+	double ret;
 
-    __asm__ __volatile__("fabsd %1,%0\n\t" : "=e" (ret) : "e" (d));
-    return (ret);
+	__asm__ __volatile__("fabsd %1,%0\n\t" : "=e" (ret) : "e" (d));
+	return (ret);
 }
 
 extern __inline__ float
 fabsf(float f)
 {
-    float ret;
+	float ret;
 
-    __asm__ __volatile__("fabss %1,%0\n\t" : "=f" (ret) : "f" (f));
-    return (ret);
+	__asm__ __volatile__("fabss %1,%0\n\t" : "=f" (ret) : "f" (f));
+	return (ret);
 }
 
 #ifdef __cplusplus
