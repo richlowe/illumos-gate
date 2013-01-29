@@ -86,17 +86,12 @@ __fminf(float x, float y) {
 	if (x != x)
 		x = y;
 
-/* if x is greater than y or x and y are unordered, replace x by y */
-#if defined(COMPARISON_MACRO_BUG)
-	if (x > y)
-#else
-	if (!islessequal(x, y))
-#endif
+	/* At this point, x and y are either both numeric, or both NaN */
+	if (!isnan(x) && !islessequal(x, y))
 		x = y;
 
 	/*
-	 * now x and y are either both NaN or both numeric; set the
-	 * sign of the result if either x or y has its sign set
+	 * set the sign of the result if either x or y has its sign set
 	 */
 	xx.f = x;
 	yy.f = y;

@@ -127,17 +127,12 @@ __fmaxf(float x, float y) {
 	if (x != x)
 		x = y;
 
-	/* if x is less than y or x and y are unordered, replace x by y */
-#if defined(COMPARISON_MACRO_BUG)
-	if (x < y)
-#else
-	if (!isgreaterequal(x, y))
-#endif
+	/* At this point, x and y are either both numeric, or both NaN */
+	if (!isnan(x) && !isgreaterequal(x, y))
 		x = y;
 
 	/*
-	 * now x and y are either both NaN or both numeric; clear the
-	 * sign of the result if either x or y has its sign clear
+	 * clear the sign of the result if either x or y has its sign clear
 	 */
 	xx.f = x;
 	yy.f = y;

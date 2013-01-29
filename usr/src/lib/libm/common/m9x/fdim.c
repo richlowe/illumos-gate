@@ -44,11 +44,7 @@
 
 double
 __fdim(double x, double y) {
-#if defined(COMPARISON_MACRO_BUG)
-	if (x == x && y == y && x <= y) {	/* } */
-#else
 	if (islessequal(x, y)) {
-#endif
 		x = 0.0;
 		y = -x;
 	}

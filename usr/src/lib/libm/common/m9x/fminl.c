@@ -51,17 +51,16 @@ __fminl(long double x, long double y) {
 	if (y != y)
 		y = x;
 
-	/* if x is greater than y or x and y are unordered, replace x by y */
-#if defined(COMPARISON_MACRO_BUG)
-	if (x != x || x > y)
-#else
-	if (!islessequal(x, y))
-#endif
+	/* if x is nan, replace it by y */
+	if (x != x)
+		x = y;
+
+	/* At this point, x and y are either both numeric, or both NaN */
+	if (!isnan(x) && !islessequal(x, y))
 		x = y;
 
 	/*
-	 * now x and y are either both NaN or both numeric; set the
-	 * sign of the result if either x or y has its sign set
+	 * set the sign of the result if either x or y has its sign set
 	 */
 	xx.ld = x;
 	yy.ld = y;
