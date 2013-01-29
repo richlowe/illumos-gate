@@ -71,7 +71,7 @@ long double
 tanl(long double x) {
 	long double y[2], z = 0.0L;
 	int n, ix;
-#if defined(_LITTLE_ENDIAN)
+#if defined(__i386) || defined(__amd64)
 	int *px = (int *) &x;
 #endif
 
@@ -80,10 +80,10 @@ tanl(long double x) {
 		return x - x;
 
 	/* High word of x. */
-#if defined(_BIG_ENDIAN)
-	ix = *(int *) &x;
-#else
+#if defined(__i386) || defined(__amd64)
 	XTOI(px, ix);
+#else
+	ix = *(int *) &x;
 #endif
 
 	/* |x| ~< pi/4 */

@@ -31,7 +31,7 @@
 
 #include "libm.h"
 
-double exp10(double);
+extern double exp10(double);
 
 float
 exp10f(float x) {

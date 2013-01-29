@@ -106,10 +106,10 @@ __k_cosl(long double x, long double y) {
 	int i, j, hx, ix;
 
 	t = 1.0;
-#if defined(_BIG_ENDIAN)
-	hx = px[0];
-#else
+#if defined(__i386) || defined(__amd64)
 	XTOI(px, hx);
+#else
+	hx = px[0];
 #endif
 	ix = hx & 0x7fffffff;
 	if (ix < 0x3ffc4000) {
@@ -127,10 +127,10 @@ __k_cosl(long double x, long double y) {
 	}
 	j = (ix + 0x400) & 0x7ffff800;
 	i = (j - 0x3ffc4000) >> 11;
-#if defined(_BIG_ENDIAN)
-	pt[0] = j;
-#else
+#if defined(__i386) || defined(__amd64)
 	ITOX(j, pt);
+#else
+	pt[0] = j;
 #endif
 	if (hx > 0)
 		x = y - (t - x);

@@ -76,7 +76,7 @@ __fma(double x, double y, double z) {
 		double d;
 	} xx, yy, zz;
 	double xhi, yhi, xlo, ylo, t;
-	unsigned xy0, xy1, xy2, xy3, z0, z1, z2, z3, rm, sticky;
+	unsigned int xy0, xy1, xy2, xy3, z0, z1, z2, z3, rm, sticky;
 	unsigned int fsr;
 	int hx, hy, hz, ex, ey, ez, exy, sxy, sz, e, ibit;
 	volatile double	dummy;
@@ -492,119 +492,6 @@ __fma(double x, double y, double z) {
 	__fenv_setcwsw(&oldcwsw);
 	return ((double) yy.e);
 }
-
-#if 0
-/*
- * another fma for x86: assumes return value will be left in
- * long double (80-bit double extended) precision
- */
-long double
-__fma(double x, double y, double z) {
-	union {
-		unsigned i[3];
-		long double e;
-	} xx, yy, zz, tt;
-	long double xe, ye, xhi, xlo, yhi, ylo, zhi, zlo;
-	int ex, ey, ez;
-	unsigned cwsw, oldcwsw, s;
-
-	/* convert the operands to double extended */
-	xx.e = (long double) x;
-	yy.e = (long double) y;
-	zz.e = (long double) z;
-
-	/* extract the exponents of the arguments */
-	ex = xx.i[2] & 0x7fff;
-	ey = yy.i[2] & 0x7fff;
-	ez = zz.i[2] & 0x7fff;
-
-	/* dispense with inf, nan, and zero cases */
-	if (ex == 0x7fff || ey == 0x7fff || ex == 0 || ey == 0)
-		/* x or y is inf, nan, or zero */
-		return (xx.e * yy.e + zz.e);
-
-	if (ez >= 0x7fff) /* z is inf or nan */
-		return (xx.e + zz.e);	/* avoid spurious inexact in x * y */
-
-	if (ez == 0) /* z is zero */
-		return (xx.e * yy.e);	/* x * y isn't zero; no need to add z */
-
-	/*
-	 * save the control and status words, mask all exceptions, and
-	 * set rounding to 64-bit precision and to-nearest
-	 */
-	__fenv_getcwsw(&oldcwsw);
-	cwsw = (oldcwsw & 0xf0c0ffff) | 0x033f0000;
-	__fenv_setcwsw(&cwsw);
-
-	/* multiply x*y to 106 bits */
-	xe = xx.e;
-	xx.i[0] = 0;
-	xhi = xx.e; /* hi 32 bits */
-	xlo = xe - xhi; /* lo 21 bits */
-	ye = yy.e;
-	yy.i[0] = 0;
-	yhi = yy.e;
-	ylo = ye - yhi;
-	xx.e = xe * ye;
-	xx.i[0] &= ~0x7ff; /* 53 bits of x*y */
-	yy.e = ((xhi * yhi - xx.e) + xhi * ylo + xlo * yhi) + xlo * ylo;
-
-	/* reduce to a sum of two terms */
-	if (yy.e != 0.0) {
-		ex = xx.i[2] & 0x7fff;
-		if (ez - ex > 10) {
-			/* collapse y into a single bit and add to x */
-			yy.i[0] = 0;
-			yy.i[1] = 0x80000000;
-			yy.i[2] = (yy.i[2] & 0x8000) | (ex - 60);
-			xx.e += yy.e;
-		} else if (ex - ez <= 10) {
-			xx.e += zz.e; /* exact */
-			zz.e = yy.e;
-		} else if (ex - ez <= 42) {
-			/* split z into two pieces */
-			tt.i[0] = 0;
-			tt.i[1] = 0x80000000;
-			tt.i[2] = ex + 11;
-			zhi = (zz.e + tt.e) - tt.e;
-			zlo = zz.e - zhi;
-			xx.e += zhi;
-			zz.e = yy.e + zlo;
-		} else if (ex - ez <= 63) {
-			zz.e += yy.e; /* exact */
-		} else if (ex - ez <= 106) {
-			/*
-			 * collapse the tail of z into a sticky bit and add z
-			 * to y without error
-			 */
-			if (ex - ez <= 81) {
-				s = 1 << (ex - ez - 50);
-				if (zz.i[0] & (s - 1))
-					zz.i[0] |= s;
-				zz.i[0] &= ~(s - 1);
-			} else {
-				s = 1 << (ex - ez - 82);
-				if ((zz.i[1] & (s - 1)) | zz.i[0])
-					zz.i[1] |= s;
-				zz.i[1] &= ~(s - 1);
-				zz.i[0] = 0;
-			}
-			zz.e += yy.e;
-		} else {
-			/* collapse z into a single bit and add to y */
-			zz.i[0] = 0;
-			zz.i[1] = 0x80000000;
-			zz.i[2] = (zz.i[2] & 0x8000) | (ex - 113);
-			zz.e += yy.e;
-		}
-	}
-
-	/* restore the control and status words, and sum */
-	__fenv_setcwsw(&oldcwsw);
-	return (xx.e + zz.e);
-}
-#endif
 
 #else
 #error Unknown architecture

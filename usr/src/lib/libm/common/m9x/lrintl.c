@@ -43,15 +43,14 @@
 long
 lrintl(long double x) {
 	union {
-		unsigned i[4];
+		unsigned int i[4];
 		long double q;
 	} xx;
 	union {
-		unsigned i;
+		unsigned int i;
 		float f;
 	} tt;
-	unsigned hx, sx, frac, l;
-	unsigned int fsr;
+	unsigned int hx, sx, frac, l, fsr;
 	int rm, j;
 	volatile float dummy;
 

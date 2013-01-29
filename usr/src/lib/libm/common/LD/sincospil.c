@@ -78,7 +78,7 @@
 
 #define I(q, m)	((int *) &(q))[m]
 #define U(q, m)	((unsigned *) &(q))[m]
-#if defined(_LITTLE_ENDIAN)
+#if defined(__i386) || defined(__amd64)
 #define LDBL_MOST_SIGNIF_I(ld)	((I(ld, 2) << 16) | (0xffff & (I(ld, 1) >> 15)))
 #define LDBL_LEAST_SIGNIF_U(ld)	U(ld, 0)
 #define PREC	64

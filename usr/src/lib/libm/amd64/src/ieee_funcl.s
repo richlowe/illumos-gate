@@ -61,8 +61,7 @@ LIBM_ANSI_PRAGMA_WEAK(signbitl,function)
 					/      iff (msb(sgnfcnd(x) /= 0 
 					/	    &  0 < bexp(x) < 0x7fff)
 	movl	12(%rsp),%eax		/ eax <-- hi_32(sgnfcnd(x))
-	movq	$0x80000000,%r8
-	andq	%r8,%rax		/ eax[31]  <-- msb(sgnfcnd(x)),
+	andl	$-0x80000000,%eax	/ eax[31]  <-- msb(sgnfcnd(x)),
 					/ rest_of(eax) <-- 0
 	jz	.L8			/ jump iff msb(sgnfcnd(x)) = 0
 	movl	16(%rsp),%eax		/ ax <-- sign and bexp of x
@@ -82,7 +81,7 @@ LIBM_ANSI_PRAGMA_WEAK(signbitl,function)
 					/ msb(sgnfcnd(x)) = 0 & frac(x) /= 0)
 	movl	12(%rsp),%eax		/ eax <-- hi_32(sgnfcnd(x))
 	testl	$0x80000000,%eax	/ eax[31] = msb(sgnfcnd(x));
-					/ set ZF if it is 0.
+					/ set ZF if it's 0.
 	jz	.may_be_subnorm		/ jump iff msb(sgnfcnd(x)) = 0
 .not_subnorm:
 	movq	$0,%rax

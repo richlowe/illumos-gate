@@ -27,8 +27,6 @@
  * Use is subject to license terms.
  */
 
-/* #include <sys/isa_defs.h> */
-
 /* the following enums must match the bit positions in fenv.h */
 enum fex_exception {
 	fex_inexact		= 0,
@@ -65,7 +63,7 @@ extern void __fex_st_result(siginfo_t *, ucontext_t *, fex_info_t *);
 
 /* inline templates and macros for accessing fp state */
 extern void __fenv_getfsr(unsigned long *);
-extern void __fenv_setfsr(unsigned const long *);
+extern void __fenv_setfsr(const unsigned long *);
 
 #if defined(__sparc)
 

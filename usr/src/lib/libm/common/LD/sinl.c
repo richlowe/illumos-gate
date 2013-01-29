@@ -72,7 +72,7 @@ long double
 sinl(long double x) {
 	long double y[2], z = 0.0L;
 	int n, ix;
-#if defined(_LITTLE_ENDIAN)
+#if defined(__i386) || defined(__amd64)
 	int *px = (int *) &x;
 #endif
 
@@ -81,16 +81,15 @@ sinl(long double x) {
 		return x - x;
 
 	/* High word of x. */
-#if defined(_BIG_ENDIAN)
-	ix = *(int *) &x;
-#else
+#if defined(__i386) || defined(__amd64)
 	XTOI(px, ix);
+#else
+	ix = *(int *) &x;
 #endif
 	/* |x| ~< pi/4 */
 	ix &= 0x7fffffff;
-	if (ix <= 0x3ffe9220) {
+	if (ix <= 0x3ffe9220)
 		return __k_sinl(x, z);
-        }
 
 	/* argument reduction needed */
 	else {
@@ -107,5 +106,5 @@ sinl(long double x) {
 		/* NOTREACHED */
 		}
 	}
-    return 0.0L;
+	return 0.0L;
 }

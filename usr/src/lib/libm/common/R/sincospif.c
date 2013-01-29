@@ -31,7 +31,7 @@
 
 #include "libm.h"
 
-void sincospi(double x, double *s, double *c);
+extern void sincospi(double, double *, double *);
 
 void
 sincospif(float x, float *s, float *c) {

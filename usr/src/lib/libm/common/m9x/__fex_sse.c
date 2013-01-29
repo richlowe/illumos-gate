@@ -243,7 +243,7 @@ __fex_parse_sse(ucontext_t *uap, sseinst_t *inst)
 			    fp_reg_set.fpchip_state.xmm[r];
 		}
 	} else if ((modrm & 0xc7) == 0x05) {
-#if defined(__amd64)
+#ifdef __amd64
 		/* address of next instruction + offset */
 		r = i + 4;
 		if (inst->op == cmpss || inst->op == cmpps ||
@@ -262,7 +262,7 @@ __fex_parse_sse(ucontext_t *uap, sseinst_t *inst)
 			sib = ip[i++];
 			if ((sib & 7) == 5 && (modrm >> 6) == 0) {
 				/* start with absolute address */
-				addr = (char *)(uintptr_t)(ip + i);
+				addr = (char *)(uintptr_t)(*(int *)(ip + i));
 				i += 4;
 			} else {
 				/* start with base */

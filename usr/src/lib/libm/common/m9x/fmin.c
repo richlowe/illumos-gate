@@ -61,7 +61,7 @@ __fmin(double x, double y) {
 
 	/* if x is greater than y or x and y are unordered, replace x by y */
 #if defined(COMPARISON_MACRO_BUG)
-	if (x != x || x > y)
+	if (x > y)
 #else
 	if (!islessequal(x, y))
 #endif

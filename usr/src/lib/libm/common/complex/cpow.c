@@ -104,7 +104,7 @@ static const double
 	zero = 0.0;
 
 static const int hiinf = 0x7ff00000;
-double atan2pi(double, double);
+extern double atan2pi(double, double);
 
 /*
  * Assuming |t[0]| > |t[1]| and |t[2]| > |t[3]|, sum4fp subroutine

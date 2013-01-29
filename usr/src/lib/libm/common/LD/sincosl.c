@@ -71,7 +71,7 @@ void
 sincosl(long double x, long double *s, long double *c) {
 	long double y[2], z = 0.0L;
 	int n, ix;
-#if defined(_LITTLE_ENDIAN)
+#if defined(__i386) || defined(__amd64)
 	int *px = (int *) &x;
 #endif
 
@@ -82,10 +82,10 @@ sincosl(long double x, long double *s, long double *c) {
 	}
 
 	/* High word of x. */
-#if defined(_BIG_ENDIAN)
-	ix = *(int *) &x;
-#else
+#if defined(__i386) || defined(__amd64)
 	XTOI(px, ix);
+#else
+	ix = *(int *) &x;
 #endif
 
 	/* |x| ~< pi/4 */

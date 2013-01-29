@@ -38,20 +38,22 @@
 #include "libm.h"
 #include <sys/isa_defs.h>
 
-#if defined(_BIG_ENDIAN)
+#if defined(__sparc)
 
 static const union {
 	unsigned i[2];
 	double d;
 } __nan_union = { 0x7fffffff, 0xffffffff };
 
-#else
+#elif defined(__i386) || defined(__amd64)
 
 static const union {
 	unsigned i[2];
 	double d;
 } __nan_union = { 0xffffffff, 0x7fffffff };
 
+#else
+#error Unknown architecture
 #endif
 
 /* ARGSUSED0 */

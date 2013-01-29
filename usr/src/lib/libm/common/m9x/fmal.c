@@ -84,17 +84,17 @@ static const unsigned int fsr_rm = 0xc0000000u;
 long double
 __fmal(long double x, long double y, long double z) {
 	union {
-		unsigned i[4];
+		unsigned int i[4];
 		long double q;
 	} xx, yy, zz;
 	union {
-		unsigned i[2];
+		unsigned int i[2];
 		double d;
 	} u;
 	double dx[5], dy[5], dxy[9], c, s;
-	unsigned xy0, xy1, xy2, xy3, xy4, xy5, xy6, xy7;
-	unsigned z0, z1, z2, z3, z4, z5, z6, z7;
-	unsigned rm, sticky;
+	unsigned int xy0, xy1, xy2, xy3, xy4, xy5, xy6, xy7;
+	unsigned int z0, z1, z2, z3, z4, z5, z6, z7;
+	unsigned int rm, sticky;
 	unsigned int fsr;
 	int hx, hy, hz, ex, ey, ez, exy, sxy, sz, e, ibit;
 	int cx, cy, cz;

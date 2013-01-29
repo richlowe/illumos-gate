@@ -79,10 +79,10 @@ cosl(long double x) {
 		return x - x;
 
 	/* High word of x. */
-#if defined(_BIG_ENDIAN)
-	ix = px[0];
-#else
+#if defined(__i386) || defined(__amd64)
 	XTOI(px, ix);
+#else
+	ix = px[0];
 #endif
 
 	/* |x| ~< pi/4 */

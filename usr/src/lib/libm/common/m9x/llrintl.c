@@ -56,8 +56,7 @@ llrintl(long double x) {
 		unsigned i;
 		float f;
 	} tt;
-	unsigned int hx, sx, frac;
-	unsigned int fsr;
+	unsigned int hx, sx, frac, fsr;
 	int rm, j;
 	volatile float dummy;
 
