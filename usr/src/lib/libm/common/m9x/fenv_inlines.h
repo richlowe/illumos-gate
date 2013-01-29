@@ -42,13 +42,12 @@ union fp_cwsw {
 extern __inline__ void
 __fenv_getcwsw(unsigned int *value)
 {
-	union fp_cwsw ret;
+	union fp_cwsw *u = (union fp_cwsw *)value;;
 
 	__asm__ __volatile__(
 	    "fstsw %0\n\t"
 	    "fstcw %1\n\t"
-	    : "=m" (ret.words.cw), "=m" (ret.words.sw));
-	*value = ret.cwsw;
+	    : "=m" (u->words.cw), "=m" (u->words.sw));
 }
 
 extern __inline__ void
@@ -66,7 +65,7 @@ __fenv_setcwsw(const unsigned int *value)
 	    "fldenv %0\n\t"
 	    "fwait\n\t"
 	    : "=m" (fenv), "=m" (fenv[0]), "=m" (fenv[2])
-	    : "d" (cwsw.words.cw), "c" (cwsw.words.sw)
+	    : "r" (cwsw.words.cw), "r" (cwsw.words.sw)
 	    /* For practical purposes, we clobber the whole FPU */
 	    : "cc", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)",
 	      "st(6)", "st(7)");
@@ -75,7 +74,7 @@ __fenv_setcwsw(const unsigned int *value)
 extern __inline__ void
 __fenv_getmxcsr(unsigned int *value)
 {
-	__asm__ __volatile__("stmxcsr %1" : "+m" (*value));
+	__asm__ __volatile__("stmxcsr %0" : "=m" (*value));
 }
 
 extern __inline__ void
@@ -111,7 +110,7 @@ fptan(long double x)
 	 */
 	long double ret;
 	long double dummy;
-
+ 
 	__asm__ __volatile__("fptan" : "=t" (dummy), "=u" (ret) : "0" (x));
 	return (ret);
 }
@@ -120,7 +119,7 @@ extern __inline__ long double
 fpatan(long double x, long double y)
 {
 	long double ret;
-
+	
 	__asm__ __volatile__("fpatan"
 	    : "=t" (ret)
 	    : "0" (y), "u" (x)
@@ -131,28 +130,22 @@ fpatan(long double x, long double y)
 extern __inline__ long double
 fxtract(long double x)
 {
-	long double ret;
-
-	__asm__ __volatile__("fxtract" : "=t" (ret) : "0" (x));
-	return (ret);
+	__asm__ __volatile__("fxtract" : "+t" (x));
+	return (x);
 }
 
 extern __inline__ long double
 fprem1(long double idend, long double div)
 {
-	long double ret;
-
-	__asm__ __volatile__("fprem1" : "=t" (ret) : "0" (div), "u" (idend));
-	return (ret);
+	__asm__ __volatile__("fprem1" : "+t" (div) : "u" (idend));
+	return (div);
 }
 
 extern __inline__ long double
 fprem(long double idend, long double div)
 {
-	long double ret;
-
-	__asm__ __volatile__("fprem" : "=t" (ret) : "0" (div), "u" (idend));
-	return (ret);
+	__asm__ __volatile__("fprem" : "+t" (div) : "u" (idend));
+	return (div);
 }
 
 extern __inline__ long double
@@ -170,28 +163,22 @@ fyl2xp1(long double y, long double x)
 extern __inline__ long double
 fsqrt(long double x)
 {
-	long double ret;
-
-	__asm__ __volatile__("fsqrt" : "=t" (ret) : "0" (x));
-	return (ret);
+	__asm__ __volatile__("fsqrt" : "+t" (x));
+	return (x);
 }
 
 extern __inline__ long double
 fsincos(long double x)
 {
-	long double ret;
-
-	__asm__ __volatile__("fsincos" : "=t" (ret) : "0" (x));
-	return (ret);
+	__asm__ __volatile__("fsincos" : "+t" (x));
+	return (x);
 }
 
 extern __inline__ long double
 frndint(long double x)
 {
-	long double ret;
-
-	__asm__ __volatile__("frndint" : "=t" (ret) : "0" (x));
-	return (ret);
+	__asm__ __volatile__("frndint" : "+t" (x));
+	return (x);
 }
 
 extern __inline__ long double
@@ -206,19 +193,15 @@ fscale(long double x, long double y)
 extern __inline__ long double
 fsin(long double x)
 {
-	long double ret;
-
-	__asm__ __volatile__("fsin" : "=t" (ret) : "0" (x));
-	return (ret);
+	__asm__ __volatile__("fsin" : "+t" (x));
+	return (x);
 }
 
 extern __inline__ long double
 fcos(long double x)
 {
-	long double ret;
-
-	__asm__ __volatile__("fcos" : "=t" (ret) : "0" (x));
-	return (ret);
+	__asm__ __volatile__("fcos" : "+t" (x));
+	return (x);
 }
 
 extern __inline__ void
@@ -227,8 +210,8 @@ sse_cmpeqss(float *f1, float *f2, int *i1)
 	__asm__ __volatile__(
 	    "cmpeqss %2, %1\n\t"
 	    "movss   %1, %0"
-	    : "=m" (*i1)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*i1), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -237,8 +220,8 @@ sse_cmpltss(float *f1, float *f2, int *i1)
 	__asm__ __volatile__(
 	    "cmpltss %2, %1\n\t"
 	    "movss   %1, %0"
-	    : "=m" (*i1)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*i1), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -247,8 +230,8 @@ sse_cmpless(float *f1, float *f2, int *i1)
 	__asm__ __volatile__(
 	    "cmpless %2, %1\n\t"
 	    "movss   %1, %0"
-	    : "=m" (*i1)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*i1), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -257,8 +240,8 @@ sse_cmpunordss(float *f1, float *f2, int *i1)
 	__asm__ __volatile__(
 	    "cmpunordss %2, %1\n\t"
 	    "movss      %1, %0"
-	    : "=m" (*i1)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*i1), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -267,8 +250,8 @@ sse_minss(float *f1, float *f2, float *f3)
 	__asm__ __volatile__(
 	    "minss %2, %1\n\t"
 	    "movss %1, %0"
-	    : "=m" (*f3)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*f3), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -277,8 +260,8 @@ sse_maxss(float *f1, float *f2, float *f3)
 	__asm__ __volatile__(
 	    "maxss %2, %1\n\t"
 	    "movss %1, %0"
-	    : "=m" (*f3)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*f3), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -287,8 +270,8 @@ sse_addss(float *f1, float *f2, float *f3)
 	__asm__ __volatile__(
 	    "addss %2, %1\n\t"
 	    "movss %1, %0"
-	    : "=m" (*f3)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*f3), "+x" (*f1)
+	    :"x" (*f2));
 }
 
 extern __inline__ void
@@ -297,8 +280,8 @@ sse_subss(float *f1, float *f2, float *f3)
 	__asm__ __volatile__(
 	    "subss %2, %1\n\t"
 	    "movss %1, %0"
-	    : "=m" (*f3)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*f3), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -307,8 +290,8 @@ sse_mulss(float *f1, float *f2, float *f3)
 	__asm__ __volatile__(
 	    "mulss %2, %1\n\t"
 	    "movss %1, %0"
-	    : "=m" (*f3)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*f3), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
@@ -317,19 +300,20 @@ sse_divss(float *f1, float *f2, float *f3)
 	__asm__ __volatile__(
 	    "divss %2, %1\n\t"
 	    "movss %1, %0"
-	    : "=m" (*f3)
-	    : "x" (*f1), "x" (*f2));
+	    : "=m" (*f3), "+x" (*f1)
+	    : "x" (*f2));
 }
 
 extern __inline__ void
 sse_sqrtss(float *f1, float *f2)
 {
+	double tmp;
+
 	__asm__ __volatile__(
-	    "sqrtss %1, %%xmm0\n\t"
-	    "movss  %%xmm0, %0"
-	    : "=m" (*f2)
-	    : "m" (*f1)
-	    : "xmm0");
+	    "sqrtss %2, %1\n\t"
+	    "movss  %1, %0"
+	    : "=m" (*f2), "=x" (tmp)
+	    : "m" (*f1));
 }
 
 extern __inline__ void
@@ -348,79 +332,86 @@ sse_comiss(float *f1, float *f2)
 extern __inline__ void
 sse_cvtss2sd(float *f1, double *d1)
 {
+	double tmp;
+	
 	__asm__ __volatile__(
-	    "cvtss2sd %1, %%xmm0\n\t"
-	    "movsd    %%xmm0, %0"
-	    : "=m" (*d1)
-	    : "m" (*f1)
-	    : "xmm0");
+	    "cvtss2sd %2, %1\n\t"
+	    "movsd    %1, %0"
+	    : "=m" (*d1), "=x" (tmp)
+	    : "m" (*f1));
 }
 
 extern __inline__ void
 sse_cvtsi2ss(int *i1, float *f1)
 {
+	double tmp;
+	
 	__asm__ __volatile__(
-	    "cvtsi2ss %1, %%xmm0\n\t"
-	    "movss    %%xmm0, %0"
-	    : "=m" (*f1)
-	    : "m" (*i1)
-	    : "xmm0");
+	    "cvtsi2ss %2, %1\n\t"
+	    "movss    %1, %0"
+	    : "=m" (*f1), "=x" (tmp)
+	    : "m" (*i1));
 }
 
 extern __inline__ void
 sse_cvttss2si(float *f1, int *i1)
 {
+	int tmp;
+	
 	__asm__ __volatile__(
-	    "cvttss2si %1, %%ecx\n\t"
-	    "movl      %%ecx, %0"
-	    : "=m" (*i1)
-	    : "m" (*f1)
-	    : "ecx");
+	    "cvttss2si %2, %1\n\t"
+	    "movl      %1, %0"
+	    : "=m" (*i1), "=r" (tmp)
+	    : "m" (*f1));
 }
 
 extern __inline__ void
 sse_cvtss2si(float *f1, int *i1)
 {
+	int tmp;
+	
 	__asm__ __volatile__(
-	    "cvtss2si %1, %%ecx\n\t"
-	    "movl     %%ecx, %0"
-	    : "=m" (*i1)
-	    : "m" (*f1)
-	    : "ecx");
+	    "cvtss2si %2, %1\n\t"
+	    "movl     %1, %0"
+	    : "=m" (*i1), "=r" (tmp)
+	    : "m" (*f1));
 }
 
 #if defined(__amd64)
 extern __inline__ void
 sse_cvtsi2ssq(long long *ll1, float *f1)
 {
+	double tmp;
+	
 	__asm__ __volatile__(
-	    "cvtsi2ssq %1, %%xmm0\n\t"
-	    "movss     %%xmm0, %0"
-	    : "=m" (*f1)
-	    : "m" (*ll1)
-	    : "xmm0");
+	    "cvtsi2ssq %2, %1\n\t"
+	    "movss     %1, %0"
+	    : "=m" (*f1), "=x" (tmp)
+	    : "m" (*ll1));
 }
 
 extern __inline__ void
 sse_cvttss2siq(float *f1, long long *ll1)
 {
+	uint64_t tmp;
+	
 	__asm__ __volatile__(
-	    "cvttss2siq %1, %%rcx\n\t"
-	    "movq       %%rcx, %0"
-	    : "=m" (*ll1)
-	    : "m" (*f1)
-	    : "rcx");
+	    "cvttss2siq %2, %1\n\t"
+	    "movq       %1, %0"
+	    : "=m" (*ll1), "=r" (tmp)
+	    : "m" (*f1));
 }
 
 extern __inline__ void
 sse_cvtss2siq(float *f1, long long *ll1)
 {
+	uint64_t tmp;
+	
 	__asm__ __volatile__(
-	    "cvtss2siq %1, %%rcx\n\t"
-	    "movq      %%rcx, %0"
-	    : "=m" (*ll1)
-	    : "m" (*f1)
-	    : "rcx");
+	    "cvtss2siq %2, %1\n\t"
+	    "movq      %1, %0"
+	    : "=m" (*ll1), "=r" (tmp)
+	    : "m" (*f1));
 }
 
 #endif
@@ -431,8 +422,8 @@ sse_cmpeqsd(double *d1, double *d2, long long *ll1)
 	__asm__ __volatile__(
 	    "cmpeqsd %2,%1\n\t"
 	    "movsd   %1,%0"
-	    : "=m" (*ll1)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*ll1), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -441,8 +432,8 @@ sse_cmpltsd(double *d1, double *d2, long long *ll1)
 	__asm__ __volatile__(
 	    "cmpltsd %2,%1\n\t"
 	    "movsd   %1,%0"
-	    : "=m" (*ll1)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*ll1), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -451,8 +442,8 @@ sse_cmplesd(double *d1, double *d2, long long *ll1)
 	__asm__ __volatile__(
 	    "cmplesd %2,%1\n\t"
 	    "movsd   %1,%0"
-	    : "=m" (*ll1)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*ll1), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -461,8 +452,8 @@ sse_cmpunordsd(double *d1, double *d2, long long *ll1)
 	__asm__ __volatile__(
 	    "cmpunordsd %2,%1\n\t"
 	    "movsd      %1,%0"
-	    : "=m" (*ll1)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*ll1), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 
@@ -472,8 +463,8 @@ sse_minsd(double *d1, double *d2, double *d3)
 	__asm__ __volatile__(
 	    "minsd %2,%1\n\t"
 	    "movsd %1,%0"
-	    : "=m" (*d3)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*d3), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -482,8 +473,8 @@ sse_maxsd(double *d1, double *d2, double *d3)
 	__asm__ __volatile__(
 	    "maxsd %2,%1\n\t"
 	    "movsd %1,%0"
-	    : "=m" (*d3)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*d3), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -492,8 +483,8 @@ sse_addsd(double *d1, double *d2, double *d3)
 	__asm__ __volatile__(
 	    "addsd %2,%1\n\t"
 	    "movsd %1,%0"
-	    : "=m" (*d3)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*d3), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -502,8 +493,8 @@ sse_subsd(double *d1, double *d2, double *d3)
 	__asm__ __volatile__(
 	    "subsd %2,%1\n\t"
 	    "movsd %1,%0"
-	    : "=m" (*d3)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*d3), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -512,8 +503,8 @@ sse_mulsd(double *d1, double *d2, double *d3)
 	__asm__ __volatile__(
 	    "mulsd %2,%1\n\t"
 	    "movsd %1,%0"
-	    : "=m" (*d3)
-	    : "x" (*d1), "x" (*d2));
+	    : "=m" (*d3), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
@@ -522,20 +513,20 @@ sse_divsd(double *d1, double *d2, double *d3)
 	__asm__ __volatile__(
 	    "divsd %2,%1\n\t"
 	    "movsd %1,%0"
-	    : "=m" (*d3)
-	    : "x" (*d1), "x" (*d2)
-	    : "xmm0");
+	    : "=m" (*d3), "=x" (*d1)
+	    : "x" (*d2));
 }
 
 extern __inline__ void
 sse_sqrtsd(double *d1, double *d2)
 {
+	double tmp;
+	
 	__asm__ __volatile__(
-	    "sqrtsd %1, %%xmm0\n\t"
-	    "movsd %%xmm0, %0"
-	    : "=m" (*d2)
-	    : "m" (*d1)
-	    : "xmm0");
+	    "sqrtsd %2, %1\n\t"
+	    "movsd %1, %0"
+	    : "=m" (*d2), "=x" (tmp)
+	    : "m" (*d1));
 }
 
 extern __inline__ void
@@ -553,82 +544,88 @@ sse_comisd(double *d1, double *d2)
 extern __inline__ void
 sse_cvtsd2ss(double *d1, float *f1)
 {
+	double tmp;
+	
 	__asm__ __volatile__(
-	    "cvtsd2ss %1,%%xmm0\n\t"
-	    "movss    %%xmm0,%0"
-	    : "=m" (*f1)
-	    : "m" (*d1)
-	    : "xmm0");
+	    "cvtsd2ss %2,%1\n\t"
+	    "movss    %1,%0"
+	    : "=m" (*f1), "=x" (tmp)
+	    : "m" (*d1));
 }
-
 
 extern __inline__ void
 sse_cvtsi2sd(int *i1, double *d1)
 {
+	double tmp;
 	__asm__ __volatile__(
-	    "cvtsi2sd %1,%%xmm0\n\t"
-	    "movsd    %%xmm0,%0"
-	    : "=m" (*d1)
-	    : "m" (*i1)
-	    : "xmm0");
+	    "cvtsi2sd %2,%1\n\t"
+	    "movsd    %1,%0"
+	    : "=m" (*d1), "=x" (tmp)
+	    : "m" (*i1));
 }
 
 extern __inline__ void
 sse_cvttsd2si(double *d1, int *i1)
 {
+	int tmp;
+	
 	__asm__ __volatile__(
-	    "cvttsd2si %1,%%ecx\n\t"
-	    "movl      %%ecx,%0"
-	    : "=m" (*i1)
-	    : "m" (*d1)
-	    : "ecx");
+	    "cvttsd2si %2,%1\n\t"
+	    "movl      %1,%0"
+	    : "=m" (*i1), "=r" (tmp)
+	    : "m" (*d1));
 }
 
 extern __inline__ void
 sse_cvtsd2si(double *d1, int *i1)
 {
+	int tmp;
+	
 	__asm__ __volatile__(
-	    "cvtsd2si %1,%%ecx\n\t"
-	    "movl     %%ecx,%0"
-	    : "=m" (*i1)
-	    : "m" (*d1)
-	    : "ecx");
+	    "cvtsd2si %2,%1\n\t"
+	    "movl     %1,%0"
+	    : "=m" (*i1), "=r" (tmp)
+	    : "m" (*d1));
 }
 
 #if defined(__amd64)
 extern __inline__ void
 sse_cvtsi2sdq(long long *ll1, double *d1)
 {
+	double tmp;
+	
 	__asm__ __volatile__(
-	    "cvtsi2sdq %1,%%xmm0\n\t"
-	    "movsd     %%xmm0,%0"
-	    : "=m" (*d1)
-	    : "m" (*ll1)
-	    : "xmm0");
+	    "cvtsi2sdq %2,%1\n\t"
+	    "movsd     %1,%0"
+	    : "=m" (*d1), "=x" (tmp)
+	    : "m" (*ll1));
 }
 
 extern __inline__ void
 sse_cvttsd2siq(double *d1, long long *ll1)
 {
+	uint64_t tmp;
+	
 	__asm__ __volatile__(
-	    "cvttsd2siq %1,%%rcx\n\t"
-	    "movq       %%rcx,%0"
-	    : "=m" (*ll1)
-	    : "m" (*d1)
-	    : "rcx");
+	    "cvttsd2siq %2,%1\n\t"
+	    "movq       %1,%0"
+	    : "=m" (*ll1), "=r" (tmp)
+	    : "m" (*d1));
 }
 
 extern __inline__ void
 sse_cvtsd2siq(double *d1, long long *ll1)
 {
+	uint64_t tmp;
+	
 	__asm__ __volatile__(
-	    "cvtsd2siq %1,%%rcx\n\t"
-	    "movq      %%rcx,%0"
-	    : "=m" (*ll1)
-	    : "m" (*d1)
-	    : "rcx");
+	    "cvtsd2siq %2,%1\n\t"
+	    "movq      %1,%0"
+	    : "=m" (*ll1), "=r" (tmp)
+	    : "m" (*d1));
 }
 #endif
+
 #elif defined(__sparc)
 extern __inline__ void
 __fenv_getfsr(unsigned long *l)
