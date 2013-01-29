@@ -47,15 +47,6 @@ extern "C" {
 #define	_HIER_WORD(x)	((uint32_t *)&x)[2]
 
 extern __inline__ double
-__ieee754_sqrt(double a)
-{
-	double ret;
-
-	__asm__ __volatile__("fsqrt\n\t" : "=t" (ret) : "0" (a));
-	return (ret);
-}
-
-extern __inline__ double
 __inline_sqrt(double a)
 {
 	double ret;
@@ -65,12 +56,9 @@ __inline_sqrt(double a)
 }
 
 extern __inline__ double
-__d_sqrt_(double *a)
+__ieee754_sqrt(double a)
 {
-	double ret;
-
-	__asm__ __volatile__("fsqrt\n\t" : "=t" (ret) : "0" (*a));
-	return (ret);
+	return (__inline_sqrt(a));
 }
 
 extern __inline__ float
@@ -85,27 +73,15 @@ __inline_sqrtf(float a)
 extern __inline__ double
 __inline_rint(double a)
 {
-	double ret;
-
 	__asm__ __volatile__(
-		"andl $0x7fffffff,%2\n\t"
-		"cmpl $0x43300000,%2\n\t"
+		"andl $0x7fffffff,%1\n\t"
+		"cmpl $0x43300000,%1\n\t"
 		"jae  1f\n\t"
 		"frndint\n\t"
 		"1: fwait\n\t"
-		: "=t" (ret)
-                : "0" (a), "r" (_HI_WORD(a)));
+		: "+t" (a), "+&r" (_HI_WORD(a)));
 
-	return (ret);
-}
-
-extern __inline__ short
-__inline_fstsw(void)
-{
-	short ret;
-
-	__asm__ __volatile__("fstsw %0\n\t" : "=r" (ret));
-	return (ret);
+	return (a);
 }
 
 /*
@@ -155,13 +131,12 @@ __swap87RD(enum fp_direction_type i)
 extern __inline__ double
 ceil(double d)
 {
-	double ret;
 	short rd = __swap87RD(fp_positive);
 
-	__asm__ __volatile__("frndint" : "=t" (ret) : "0" (d));
+	__asm__ __volatile__("frndint" : "+t" (d), "+r" (rd));
 	__swap87RD(rd);
 
-	return (ret);
+	return (d);
 }
 
 extern __inline__ double
@@ -171,8 +146,7 @@ copysign(double d1, double d2)
 	    "andl $0x7fffffff,%0\n\t" /* %0 <-- hi_32(abs(d)) */
 	    "andl $0x80000000,%1\n\t" /* %1[31] <-- sign_bit(d2) */
 	    "orl  %1,%0\n\t"	      /* %0 <-- hi_32(copysign(x,y)) */
-	    : "+r" (_HI_WORD(d1))
-	    : "r" (_HI_WORD(d2)));
+	    : "+&r" (_HI_WORD(d1)), "+r" (_HI_WORD(d2)));
 
 	return (d1);
 }
@@ -180,150 +154,80 @@ copysign(double d1, double d2)
 extern __inline__ double
 fabs(double d)
 {
-	double ret;
-
-	__asm__ __volatile__("fabs\n\t" : "=t" (ret) : "0" (d));
-	return (ret);
+	__asm__ __volatile__("fabs\n\t" : "+t" (d));
+	return (d);
 }
 
 extern __inline__ float
 fabsf(float d)
 {
-	float ret;
-
-	__asm__ __volatile__("fabs\n\t" : "=t" (ret) : "0" (d));
-	return (ret);
+	__asm__ __volatile__("fabs\n\t" : "+t" (d));
+	return (d);
 }
 
 extern __inline__ long double
 fabsl(long double d)
 {
-	long double ret;
-
-	__asm__ __volatile__("fabs\n\t" : "=t" (ret) : "0" (d));
-	return (ret);
+	__asm__ __volatile__("fabs\n\t" : "+t" (d));
+	return (d);
 }
 
 extern __inline__ int
 finite(double d)
 {
-	int ret;
+	int ret = _HI_WORD(d);
 
 	__asm__ __volatile__(
-	    "notl %1\n\t"
-	    "andl $0x7ff00000,%1\n\t"
-	    "negl %1\n\t"
-	    "shrl $31,%1\n\t"
-	    : "=r" (ret)
-	    : "0" (_HI_WORD(d)));
+	    "notl %0\n\t"
+	    "andl $0x7ff00000,%0\n\t"
+	    "negl %0\n\t"
+	    "shrl $31,%0\n\t"
+	    : "+r" (ret));
 	return (ret);
 }
 
 extern __inline__ double
 floor(double d)
 {
-	double ret;
 	short rd = __swap87RD(fp_negative);
 
-	__asm__ __volatile__("frndint" : "=t" (ret) : "0" (d));
+	__asm__ __volatile__("frndint" : "+t" (d), "+r" (rd));
 	__swap87RD(rd);
 
-	return (ret);
-}
-
-/*
- *	branchless __isnan
- *	((0x7ff00000-[((lx|-lx)>>31)&1]|ahx)>>31)&1 = 1 iff x is NaN
- */
-extern __inline__ int
-isnan(double d)
-{
-	int ret;
-
-	__asm__ __volatile__(
-	"movl %1,%%ecx\n\t"
-	"negl %%ecx\n\t"	  /* ecx <-- -lo_32(x) */
-	"orl  %%ecx,%1\n\t"
-	"shrl $31,%1\n\t"	  /* 1 iff lx != 0 */
-	"andl $0x7fffffff,%2\n\t" /* ecx <-- hi_32(abs(x)) */
-	"orl  %2,%1\n\t"
-	"subl $0x7ff00000,%1\n\t"
-	"negl %1\n\t"
-	"shrl $31,%1\n\t"
-	: "=r" (ret)
-	: "0" (_HI_WORD(d)), "r" (_LO_WORD(d))
-	: "ecx");
-
-	return (ret);
+	return (d);
 }
 
 extern __inline__ int
 isnanf(float f)
 {
-	int ret;
-
 	__asm__ __volatile__(
 	    "andl $0x7fffffff,%0\n\t"
 	    "negl %0\n\t"
 	    "addl $0x7f800000,%0\n\t"
 	    "shrl $31,%0\n\t"
-	    : "=r" (ret)
-	    : "0" (f));
+	    : "+r" (f));
 
-	return (ret);
-}
-
-extern __inline__ int
-isinf(double d)
-{
-	int ret;
-
-	__asm__ __volatile__(
-	"andl $0x7fffffff,%1\n\t"	    /* set first bit to 0 */
-	"cmpl $0x7ff00000,%1\n\t"
-	"pushfl\n\t"
-	"popl %0\n\t"
-	"cmpl $0,%2\n\t"		/* is lo_32(x) = 0? */
-	"pushfl\n\t"
-	"popl %2\n\t"	/* bit 6 of ecx <-- lo_32(x) == 0 */
-	"andl %2,%0\n\t"
-	"andl $0x40,%0\n\t"
-	"shrl $6,%0\n\t"
-	: "=r" (ret)
-	: "0" (_HI_WORD(d)), "r" (_LO_WORD(d)));
-
-	return (ret);
+	return (f);
 }
 
 extern __inline__ double
 rint(double a) {
-	double ret;
-
-	__asm__ __volatile__(
-		"andl $0x7fffffff,%2\n\t"
-		"cmpl $0x43300000,%2\n\t"
-		"jae  1f\n\t"
-		"frndint\n\t"
-		"1: fwait\n\t"
-		: "=t" (ret)
-		: "0" (a), "r" (_HI_WORD(a)));
-
-	return (ret);
+    return (__inline_rint(a));
 }
 
 extern __inline__ double
 scalbn(double d, int n)
 {
-	double ret, dummy;
+	double dummy;
 
 	__asm__ __volatile__(
-	    "fildl %3\n\t"	/* Convert N to extended */
+	    "fildl %2\n\t"	/* Convert N to extended */
 	    "fxch\n\t"
 	    "fscale\n\t"
-	    : "=t" (ret), "=u" (dummy)
-	    : "0" (d), "m" (n));
+	    : "+t" (d), "=u" (dummy)
+	    : "m" (n));
 
-	return (ret);
+	return (d);
 }
 
 extern __inline__ int
@@ -341,52 +245,47 @@ signbitf(float f)
 extern __inline__ double
 sqrt(double d)
 {
-	double ret;
-	__asm__ __volatile__("fsqrt" : "=t" (ret) : "0" (d));
-	return (ret);
+	return (__inline_sqrt(d));
 }
 
 extern __inline__ float
 sqrtf(float f)
 {
-	float ret;
-	__asm__ __volatile__("fsqrt" : "=t" (ret) : "0" (f));
-	return (ret);
+	return (__inline_sqrtf(f));
 }
 
 extern __inline__ long double
 sqrtl(long double ld)
 {
-	long double ret;
-	__asm__ __volatile__("fsqrt" : "=t" (ret) : "0" (ld));
-	return (ret);
+	__asm__ __volatile__("fsqrt" : "+t" (ld));
+	return (ld);
 }
 
 extern __inline__ int
 isnanl(long double ld)
 {
-        int ret;
+        int ret = _HIER_WORD(ld);
 
         __asm__ __volatile__(
-            "andl  $0x00007fff,%1\n\t"
+            "andl  $0x00007fff,%0\n\t"
             "jz	   1f\n\t"             /* jump if __exp is all 0 */
-	    "xorl  $0x00007fff,%1\n\t"
+	    "xorl  $0x00007fff,%0\n\t"
             "jz	   2f\n\t"             /* jump if __exp is all 1 */
-	    "testl $0x80000000,%2\n\t"
+	    "testl $0x80000000,%1\n\t"
 	    "jz	   3f\n\t"             /* jump if leading bit is 0 */
-	    "movl  $0,%1\n\t"
+	    "movl  $0,%0\n\t"
 	    "jmp   1f\n\t"
-            "2:\n\t"                   /* note that %eax = 0 from before */
-            "cmpl  $0x80000000,%2\n\t" /* what is first half of __significand? */
+            "2:\n\t"                   /* note that %0 = 0 from before */
+            "cmpl  $0x80000000,%1\n\t" /* what is first half of __significand? */
 	    "jnz   3f\n\t"	       /* jump if not equal to 0x80000000 */
-	    "testl $0xffffffff,%3\n\t" /* is second half of __significand 0? */
+	    "testl $0xffffffff,%2\n\t" /* is second half of __significand 0? */
 	    "jnz   3f\n\t"	       /* jump if not equal to 0 */
 	    "jmp   1f\n\t"
             "3:\n\t"
-            "movl  $1,%1\n\t"
+            "movl  $1,%0\n\t"
             "1:\n\t"
-            : "=r" (ret)
-            : "0" (_HIER_WORD(ld)), "r" (_HI_WORD(ld)), "r" (_LO_WORD(ld)));
+            : "+&r" (ret)
+            : "r" (_HI_WORD(ld)), "r" (_LO_WORD(ld)));
 
         return (ret);
 }

@@ -45,15 +45,6 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/ieeefp.h>
 
-extern __inline__ double
-__ieee754_sqrt(double a)
-{
-	double ret;
-
-	__asm__ __volatile__("sqrtsd %1, %0\n\t" : "=x" (ret) : "x" (a));
-	return (ret);
-}
-
 extern __inline__ float
 __inline_sqrtf(float a)
 {
@@ -72,14 +63,10 @@ __inline_sqrt(double a)
 	return (ret);
 }
 
-/* XXX: Not actually called */
-extern __inline__ short
-__inline_fstsw(void)
+extern __inline__ double
+__ieee754_sqrt(double a)
 {
-	short ret;
-
-	__asm__ __volatile__("fstsw %0\n\t" : "=r" (ret));
-	return (ret);
+	return (__inline_sqrt(a));
 }
 
 /*
@@ -131,9 +118,9 @@ abs(int i)
 {
 	int ret;
 	__asm__ __volatile__(
-	    "movl    %1,%0\n\t"
+	    "movl    %1, %0\n\t"
 	    "negl    %1\n\t"
-	    "cmovnsl %1,%0\n\t"
+	    "cmovnsl %1, %0\n\t"
 	    : "=r" (ret), "+r" (i));
 	return (ret);
 }
@@ -141,91 +128,59 @@ abs(int i)
 extern __inline__ double
 copysign(double d1, double d2)
 {
-	double ret;
+	double tmpd;
 
 	__asm__ __volatile__(
-	    "movq   $0x7fffffffffffffff,%%rax\n\t"
-	    "movd   %%rax,%%xmm2\n\t"
-	    "andpd  %%xmm2,%0\n\t"
-	    "andnpd %1,%%xmm2\n\t"
-	    "orpd   %%xmm2,%0\n\t"
-	    : "=x" (ret)
-	    : "x" (d2), "0" (d1)
-	    : "xmm2", "rax");
+	    "movd %3, %1\n\t"
+	    "andpd %1, %0\n\t"
+	    "andnpd %2, %1\n\t"
+	    "orpd %1, %0\n\t"
+	    : "+x" (d1), "+x" (tmpd)
+	    : "x" (d2), "r" (0x7fffffffffffffff));
 
-	return (ret);
-}
-
-extern __inline__ double
-d_sqrt_(double *d)
-{
-	double ret;
-	__asm__ __volatile__(
-	    "movlpd %1,%0\n\t"
-	    "sqrtsd %0,%0"
-	    : "=x" (ret)
-	    : "m" (*d));
-	return (ret);
+	return (d1);
 }
 
 extern __inline__ double
 fabs(double d)
 {
-	double ret;
+	double tmp;
 
 	__asm__ __volatile__(
-	    "movq  $0x7fffffffffffffff,%%rax\n\t"
-	    "movd  %%rax,%%xmm1\n\t"
-	    "andpd %%xmm1,%0"
-	    : "=x" (ret)
-	    : "0" (d)
-	    : "rax", "xmm1");
+	    "movd  %2, %1\n\t"
+	    "andpd %1, %0"
+	    : "+x" (d), "=x" (tmp)
+	    : "r" (0x7fffffffffffffff));
 
-	return (ret);
+	return (d);
 }
 
 extern __inline__ float
 fabsf(float d)
 {
-	float ret;
-
 	__asm__ __volatile__(
-	    "andpd %2,%0"
-	    : "=x" (ret)
-	    : "0" (d), "x" (0x7fffffff));
+	    "andpd %1, %0"
+	    : "+x" (d)
+	    : "x" (0x7fffffff));
 
-	return (ret);
+	return (d);
 }
 
 extern __inline__ int
 finite(double d)
 {
-	long ret;		    /* A long, so gcc chooses an %r* for %0 */
+	long ret = 0x7fffffffffffffff;	/* A long, so gcc chooses an %r* for %0 */
+	uint64_t tmp;
 
 	__asm__ __volatile__(
-	    "movq %1,%%rcx\n\t"
-	    "movq $0x7fffffffffffffff,%0\n\t"
-	    "andq %%rcx,%0\n\t"
-	    "movq $0x7ff0000000000000,%%rcx\n\t"
-	    "subq %%rcx,%0\n\t"
-	    "shrq $63,%0\n\t"
-	    : "=r" (ret)
-	    : "x" (d)
-	    : "rcx");
+	    "movq %2, %1\n\t"
+	    "andq %1, %0\n\t"
+	    "movq $0x7ff0000000000000, %1\n\t"
+	    "subq %1, %0\n\t"
+	    "shrq $63, %0\n\t"
+	    : "+r" (ret), "=r" (tmp)
+	    : "x" (d));
 
-	return (ret);
-}
-
-extern __inline__ float
-r_sqrt_(float *f)
-{
-	float ret;
-
-	__asm__ __volatile__(
-	    "movss  %1,%0\n\t"
-	    "sqrtss %0,%0\n\t"
-	    : "+x" (ret)
-	    : "m" (*f));
 	return (ret);
 }
 
@@ -234,47 +189,23 @@ signbit(double d)
 {
 	long ret;
 	__asm__ __volatile__(
-	    "movmskpd %1,%0\n\t"
+	    "movmskpd %1, %0\n\t"
 	    "andq     $1, %0\n\t"
 	    : "=r" (ret)
 	    : "x" (d));
 	return (ret);
 }
 
-extern __inline__ int
-signbitf(float f)
-{
-	int ret;
-	__asm__ __volatile__(
-	    "movskps %1,%0\n\t"
-	    "andq    $1, %0\n\t"
-	    : "=r" (ret)
-	    : "x" (f));
-	return (ret);
-}
-
 extern __inline__ double
 sqrt(double d)
 {
-	double ret;
-
-	__asm__ __volatile__(
-	    "sqrtsd %0, %0"
-	    : "=x" (ret)
-	    : "0" (d));
-	return (ret);
+	return (__inline_sqrt(d));
 }
 
 extern __inline__ float
 sqrtf(float f)
 {
-	float ret;
-
-	__asm__ __volatile__(
-	    "sqrtss %0, %0"
-	    : "=x" (ret)
-	    : "0" (f));
-	return (ret);
+	return (__inline_sqrtf(f));
 }
 
 #ifdef __cplusplus

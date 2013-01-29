@@ -40,10 +40,6 @@
 	sqrtsd	%xmm0,%xmm0
 	.end
 
-	.inline	__inline_fstsw,0
-	fstsw	%ax
-	.end
-
 /
 / 00 - 24 bits
 / 01 - reserved
@@ -103,11 +99,6 @@
 	orpd	%xmm2,%xmm0
 	.end
 
-	.inline	__d_sqrt_,0
-	movlpd	(%rdi),%xmm0
-	sqrtsd	%xmm0,%xmm0
-	.end
-
 	.inline	__fabs,0
 	movq	$0x7fffffffffffffff,%rax
 	movdq	%rax,%xmm1
@@ -132,18 +123,8 @@
 	addq	$16,%rsp
 	.end
 
-	.inline	__r_sqrt_,0
-	movss	(%rdi),%xmm0
-	sqrtss	%xmm0,%xmm0
-	.end
-
 	.inline	__signbit,0
 	movmskpd %xmm0,%eax
-	andq	$1,%rax
-	.end
-
-	.inline	__signbitf,0
-	movmskps %xmm0,%eax
 	andq	$1,%rax
 	.end
 
