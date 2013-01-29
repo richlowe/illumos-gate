@@ -47,7 +47,7 @@ __inline_sqrt(double d)
 {
 	double ret;
 
-	__asm__ __volatile__("fsqrtd %0,%0\n\t" : "=e" (ret) : "0" (d));
+	__asm__ __volatile__("fsqrtd %1,%0\n\t" : "=e" (ret) : "e" (d));
 	return (ret);
 }
 
@@ -56,7 +56,7 @@ __inline_sqrtf(float f)
 {
 	float ret;
 
-	__asm__ __volatile__("fsqrts %0,%0\n\t" : "=f" (ret) : "0" (f));
+	__asm__ __volatile__("fsqrts %1,%0\n\t" : "=f" (ret) : "f" (f));
 	return (ret);
 }
 
@@ -64,25 +64,27 @@ extern __inline__ enum fp_class_type
 fp_classf(float f)
 {
 	enum fp_class_type ret;
+	uint32_t tmp;
 
+	/* XXX: Separate input and output */
 	__asm__ __volatile__(
-	    "sethi  %%hi(0x80000000),%%o2\n\t"
-	    "andncc %0,%%o2,%0\n\t"
+	    "sethi  %%hi(0x80000000),%1\n\t"
+	    "andncc %3,%1,%0\n\t"
 	    "bne    1f\n\t"
 	    "nop\n\t"
 	    "mov    0,%0\n\t"
 	    "ba	2f\n\t"             /* x is 0 */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "sethi  %%hi(0x7f800000),%%o2\n\t"
-	    "andcc  %0,%%o2,%%g0\n\t"
+	    "sethi  %%hi(0x7f800000),%1\n\t"
+	    "andcc  %0,%1,%%g0\n\t"
 	    "bne    1f\n\t"
 	    "nop\n\t"
 	    "mov    1,%0\n\t"
 	    "ba	    2f\n\t"	    /* x is subnormal */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "cmp    %0,%%o2\n\t"
+	    "cmp    %0,%1\n\t"
 	    "bge    1f\n\t"
 	    "nop\n\t"
 	    "mov    2,%0\n\t"
@@ -95,16 +97,16 @@ fp_classf(float f)
 	    "ba	    2f\n\t"	    /* x is __infinity */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "sethi  %%hi(0x00400000),%%o2\n\t"
-	    "andcc  %0,%%o2,%%g0\n\t"
+	    "sethi  %%hi(0x00400000),%1\n\t"
+	    "andcc  %0,%1,%%g0\n\t"
 	    "mov    4,%0\n\t"       /* x is quiet NaN */
 	    "bne    2f\n\t"
 	    "nop\n\t"
 	    "mov    5,%0\n\t"       /* x is signaling NaN */
 	    "2:\n\t"
-	    : "=r" (ret)
-	    : "0" (f)
-	    : "o2");
+	    : "+r" (ret), "=&r" (tmp)
+	    : "r" (f)
+	    : "cc");
 	return (ret);
 }
 
@@ -115,42 +117,43 @@ extern __inline__ enum fp_class_type
 fp_class(double d)
 {
 	enum fp_class_type ret;
+	uint32_t tmp;
 
 	__asm__ __volatile__(
-	    "sethi %%hi(0x80000000),%%o2\n\t" /* o2 gets 80000000 */
-	    "andn  %0,%%o2,%0\n\t"	      /* o0-o1 gets abs(x) */
-	    "orcc  %0,%2,%%g0\n\t"	      /* set cc as x is zero/nonzero */
+	    "sethi %%hi(0x80000000),%1\n\t"   /* %1 gets 80000000 */
+	    "andn  %2,%1,%0\n\t"	      /* %2-%0 gets abs(x) */
+	    "orcc  %0,%3,%%g0\n\t"	      /* set cc as x is zero/nonzero */
 	    "bne   1f\n\t"		      /* branch if x is nonzero */
 	    "nop\n\t"
 	    "mov   0,%0\n\t"
 	    "ba	   2f\n\t"		      /* x is 0 */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "sethi %%hi(0x7ff00000),%%o2\n\t" /* o2 gets 7ff00000 */
-	    "andcc %0,%%o2,%%g0\n\t"	      /* cc set by __exp field of x */
+	    "sethi %%hi(0x7ff00000),%1\n\t"   /* %1 gets 7ff00000 */
+	    "andcc %0,%1,%%g0\n\t"	      /* cc set by __exp field of x */
 	    "bne   1f\n\t"		      /* branch if normal or max __exp */
 	    "nop\n\t"
 	    "mov   1,%0\n\t"
 	    "ba	   2f\n\t"		      /* x is subnormal */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "cmp   %0,%%o2\n\t"
+	    "cmp   %0,%1\n\t"
 	    "bge   1f\n\t"		      /* branch if x is max __exp */
 	    "nop\n\t"
 	    "mov   2,%0\n\t"
 	    "ba	   2f\n\t"		      /* x is normal */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "andn  %0,%%o2,%0\n\t"	      /* o0 gets msw __significand field */
-	    "orcc  %0,%2,%%g0\n\t"	      /* set cc by OR __significand */
+	    "andn  %0,%1,%0\n\t"	      /* o0 gets msw __significand field */
+	    "orcc  %0,%3,%%g0\n\t"	      /* set cc by OR __significand */
 	    "bne   1f\n\t"		      /* Branch if __nan */
 	    "nop\n\t"
 	    "mov   3,%0\n\t"
 	    "ba	   2f\n\t"		      /* x is __infinity */
 	    "nop\n\t"
 	    "1:\n\t"
-	    "sethi %%hi(0x00080000),%%o2\n\t"
-	    "andcc %0,%%o2,%%g0\n\t"	      /* set cc by quiet/sig bit */
+	    "sethi %%hi(0x00080000),%1\n\t"
+	    "andcc %0,%1,%%g0\n\t"	      /* set cc by quiet/sig bit */
 	    "be	   1f\n\t"		      /* Branch if signaling */
 	    "nop\n\t"
 	    "mov   4,%0\n\t"		      /* x is quiet NaN */
@@ -159,9 +162,9 @@ fp_class(double d)
 	    "1:\n\t"
 	    "mov   5,%0\n\t"		      /* x is signaling NaN */
 	    "2:\n\t"
-	    : "=r" (ret)
-	    : "0" (_HI_WORD(d)), "r" (_LO_WORD(d))
-	    : "o2");
+	    : "=&r" (ret), "=&r" (tmp)
+	    : "r" (_HI_WORD(d)), "r" (_LO_WORD(d))
+	    : "cc");
 
 	return (ret);
 }
@@ -171,23 +174,24 @@ __swapEX(int i)
 {
 	int ret;
 	uint32_t fsr;
+	uint32_t tmp1, tmp2;
 
 	__asm__ __volatile__(
-	    "and  %0,0x1f,%%o1\n\t"
-	    "sll  %%o1,5,%%o1\n\t"    /*  input to aexc bit location */
+	    "and  %4,0x1f,%3\n\t"
+	    "sll  %3,5,%3\n\t"	/* shift input to aexc bit location */
 	    ".volatile\n\t"
-	    "st   %%fsr,%2\n\t"
-	    "ld   %2,%0\n\t"          /* = fsr */
-	    "andn %0,0x3e0,%%o2\n\t"
-	    "or   %%o1,%%o2,%%o1\n\t" /* o1 = new fsr */
-	    "st	  %%o1,%2\n\t"
-	    "ld	  %2,%%fsr\n\t"
+	    "st   %%fsr,%1\n\t"
+	    "ld   %1,%0\n\t"	/* %0 = fsr */
+	    "andn %0,0x3e0,%4\n\t"
+	    "or   %3,%4,%3\n\t"	/* %3 = new fsr */
+	    "st	  %3,%1\n\t"
+	    "ld	  %1,%%fsr\n\t"
 	    "srl  %0,5,%0\n\t"
 	    "and  %0,0x1f,%0\n\t"
 	    ".nonvolatile\n\t"
-	    : "=r" (ret)
-	    : "0" (i), "m" (fsr)
-	    : "o1", "o2");
+	    : "=r" (ret), "=m" (fsr), "=r" (tmp1), "=r" (tmp2)
+	    : "r" (i)
+	    : "cc");
 
 	return (ret);
 }
@@ -208,24 +212,25 @@ __swapRD(enum fp_direction_type d)
 {
 	enum fp_direction_type ret;
 	uint32_t fsr;
+	uint32_t tmp1, tmp2, tmp3;
 
 	__asm__ __volatile__(
-	    "and  %0,0x3,%0\n\t"
-	    "sll  %0,30,%%o1\n\t"      /* input to RD bit location */
+	    "and  %5,0x3,%0\n\t"
+	    "sll  %0,30,%2\n\t"		/* shift input to RD bit location */
 	    ".volatile\n\t"
-	    "st   %%fsr,%2\n\t"
-	    "ld	  %2,%0\n\t"           /* o0 = fsr */
-	    "set  0xc0000000,%%o4\n\t" /* mask of rounding direction bits */
-	    "andn %0,%%o4,%%o2\n\t"
-	    "or   %%o1,%%o2,%%o1\n\t"  /* o1 = new fsr */
-	    "st	  %%o1,%2\n\t"
-	    "ld	  %2,%%fsr\n\t"
+	    "st   %%fsr,%1\n\t"
+	    "ld	  %1,%0\n\t"		/* %0 = fsr */
+	    "set  0xc0000000,%4\n\t"	/* mask of rounding direction bits */
+	    "andn %0,%4,%3\n\t"
+	    "or   %2,%3,%2\n\t"		/* %2 = new fsr */
+	    "st	  %2,%1\n\t"
+	    "ld	  %1,%%fsr\n\t"
 	    "srl  %0,30,%0\n\t"
 	    "and  %0,0x3,%0\n\t"
 	    ".nonvolatile\n\t"
-	    : "=r" (ret)
-	    : "0" (d), "m" (fsr)
-	    : "o1", "o2", "o4");
+	    : "=r" (ret), "=m" (fsr), "=r" (tmp1), "=r" (tmp2), "=r" (tmp3)
+	    : "r" (d)
+	    : "cc");
 
 	return (ret);
 }
@@ -234,25 +239,25 @@ extern __inline__ int
 __swapTE(int i)
 {
 	int ret;
-	uint32_t fsr;
-	
+	uint32_t fsr, tmp1, tmp2;
+
 	__asm__ __volatile__(
-	    "and  %0,0x1f,%0\n\t"
-	    "sll  %0,23,%%o1\n\t"      /* input to TEM bit location */
+	    "and  %4,0x1f,%0\n\t"
+	    "sll  %0,23,%2\n\t"		/* shift input to TEM bit location */
 	    ".volatile\n\t"
-	    "st   %%fsr,%2\n\t"
-	    "ld	  %2,%0\n\t"           /* o0 = fsr */
-	    "set  0x0f800000,%%o4\n\t" /* mask of TEM (Trap Enable Mode bits) */
-	    "andn %0,%%o4,%%o2\n\t"	  
-	    "or   %%o1,%%o2,%%o1\n\t"  /* o1 = new fsr */
-	    "st	  %%o1,%2\n\t"
-	    "ld	  %2,%%fsr\n\t"
+	    "st   %%fsr,%1\n\t"
+	    "ld	  %1,%0\n\t"		/* %0 = fsr */
+	    "set  0x0f800000,%%o4\n\t"	/* mask of TEM (Trap Enable Mode bits) */
+	    "andn %0,%%o4,%3\n\t"	  
+	    "or   %2,%3,%2\n\t"		/* %2 = new fsr */
+	    "st	  %2,%1\n\t"
+	    "ld	  %1,%%fsr\n\t"
 	    "srl  %0,23,%0\n\t"
 	    "and  %0,0x1f,%0\n\t"
 	    ".nonvolatile\n\t"
-	    : "=r" (ret)
-	    : "0" (i), "m" (fsr)
-	    : "o1", "o2", "o4");
+	    : "=r" (ret), "=m" (fsr), "=r" (tmp1), "=r" (tmp2)
+	    : "r" (i)
+	    : "cc");
 
 	return (ret);
 }
@@ -260,19 +265,13 @@ __swapTE(int i)
 extern __inline__ double
 sqrt(double d)
 {
-    double ret;
-
-    __asm__ __volatile__("fsqrtd %0,%0\n\t" : "=f" (ret) : "0" (d));
-    return (ret);
+	return (__inline_sqrt(d));
 }
 
 extern __inline__ float
 sqrtf(float f)
 {
-    float ret;
-
-    __asm__ __volatile__("fsqrts %0,%0\n\t" : "=f" (ret) : "0" (f));
-    return (ret);
+	return (__inline_sqrtf(f));
 }
 
 extern __inline__ double
@@ -280,7 +279,7 @@ fabs(double d)
 {
     double ret;
 
-    __asm__ __volatile__("fabsd %0,%0\n\t" : "=e" (ret) : "0" (d));
+    __asm__ __volatile__("fabsd %1,%0\n\t" : "=e" (ret) : "e" (d));
     return (ret);
 }
 
@@ -289,7 +288,7 @@ fabsf(float f)
 {
     float ret;
 
-    __asm__ __volatile__("fabss %0,%0\n\t" : "=f" (ret) : "0" (f));
+    __asm__ __volatile__("fabss %1,%0\n\t" : "=f" (ret) : "f" (f));
     return (ret);
 }
 

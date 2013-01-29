@@ -752,7 +752,7 @@
 
 	.inline	__swapEX,1
 	and     %o0,0x1f,%o1
-	sll     %o1,5,%o1               !  input to aexc bit location
+	sll     %o1,5,%o1               ! shift input to aexc bit location
 	.volatile
 	st      %fsr,[%sp+0x44]
 	ld      [%sp+0x44],%o0          ! o0 = fsr
@@ -777,7 +777,7 @@
 
 	.inline	__swapRD,1
 	and	%o0,0x3,%o0
-	sll     %o0,30,%o1              !  input to RD bit location
+	sll     %o0,30,%o1              ! shift input to RD bit location
 	.volatile
 	st      %fsr,[%sp+0x44]
 	ld      [%sp+0x44],%o0          ! o0 = fsr
@@ -800,7 +800,7 @@
 
 	.inline	__swapTE,1
 	and	%o0,0x1f,%o0
-	sll     %o0,23,%o1              !  input to TEM bit location
+	sll     %o0,23,%o1              ! shift input to TEM bit location
 	.volatile
 	st      %fsr,[%sp+0x44]
 	ld      [%sp+0x44],%o0            ! o0 = fsr
