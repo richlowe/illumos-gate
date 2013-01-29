@@ -30,6 +30,7 @@
 #pragma weak sinhl = __sinhl
 
 #include "libm.h"
+#include "longdouble.h"
 
 /* SINH(X)
  * RETURN THE HYPERBOLIC SINE OF X

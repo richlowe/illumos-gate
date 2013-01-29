@@ -41,6 +41,7 @@
 
 #include "libm.h"
 #include "libm_synonyms.h"
+#include "longdouble.h"
 #include <math.h>
 #if defined(__SUNPRO_C)
 #include <sunmath.h>

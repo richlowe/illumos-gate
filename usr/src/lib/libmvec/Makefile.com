@@ -170,6 +170,10 @@ LINTERROFF	+= -erroff=E_BAD_PTR_CAST_ALIGN
 LINTERROFF	+= -erroff=E_ASSIGMENT_CAUSE_LOSS_PREC
 LINTERROFF	+= -erroff=E_FUNC_SET_NOT_USED
 
+CERRWARN	+= -_gcc=-Wno-parentheses
+CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-unused-variable
+
 LINTFLAGS	+= $(LINTERROFF)
 LINTFLAGS64	+= $(LINTERROFF)
 LINTFLAGS64     += -errchk=longptr64

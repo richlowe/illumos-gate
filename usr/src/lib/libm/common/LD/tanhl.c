@@ -60,6 +60,7 @@
  */
 
 #include "libm.h"
+#include "longdouble.h"
 
 static const long double small = 1.0e-20L, one = 1.0, two = 2.0,
 #ifndef lint

@@ -32,6 +32,7 @@
 #endif
 
 #include "libm.h"
+#include "longdouble.h"
 
 static const double d_one = 1.0;
 

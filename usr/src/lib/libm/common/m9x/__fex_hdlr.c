@@ -378,7 +378,7 @@ not_ieee:
 #define test_sse_hw	1
 #else
 extern int _sse_hw;
-#define test_sse_hw	&_sse_hw && _sse_hw
+#define test_sse_hw	_sse_hw
 #endif
 
 #if !defined(REG_PC)

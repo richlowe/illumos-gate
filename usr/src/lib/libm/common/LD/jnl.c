@@ -58,6 +58,7 @@
  */
 
 #include "libm.h"
+#include "longdouble.h"
 #include <float.h>	/* LDBL_MAX */
 
 #define GENERIC long double

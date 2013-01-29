@@ -32,6 +32,7 @@
 #endif
 
 #include "libm.h"
+#include "longdouble.h"
 
 /*
  * COSH(X)
