@@ -88,7 +88,7 @@ f2xm1(long double x)
 {
 	long double ret;
 
-	__asm__ __volatile__("f2xm1" : "=t" (ret) : "0" (x));
+	__asm__ __volatile__("f2xm1" : "=t" (ret) : "0" (x) : "cc");
 	return (ret);
 }
 
@@ -97,7 +97,10 @@ fyl2x(long double y, long double x)
 {
 	long double ret;
 
-	__asm__ __volatile__("fyl2x" : "=t" (ret): "0" (x), "u" (y) : "st(1)");
+	__asm__ __volatile__("fyl2x"
+	    : "=t" (ret)
+	    : "0" (x), "u" (y)
+	    : "st(1)", "cc");
 	return (ret);
 }
 
@@ -111,7 +114,10 @@ fptan(long double x)
 	long double ret;
 	long double dummy;
  
-	__asm__ __volatile__("fptan" : "=t" (dummy), "=u" (ret) : "0" (x));
+	__asm__ __volatile__("fptan"
+	    : "=t" (dummy), "=u" (ret)
+	    : "0" (x)
+	    : "cc");
 	return (ret);
 }
 
@@ -123,28 +129,28 @@ fpatan(long double x, long double y)
 	__asm__ __volatile__("fpatan"
 	    : "=t" (ret)
 	    : "0" (y), "u" (x)
-	    : "st(1)");
+	    : "st(1)", "cc");
 	return (ret);
 }
 
 extern __inline__ long double
 fxtract(long double x)
 {
-	__asm__ __volatile__("fxtract" : "+t" (x));
+	__asm__ __volatile__("fxtract" : "+t" (x) : : "cc");
 	return (x);
 }
 
 extern __inline__ long double
 fprem1(long double idend, long double div)
 {
-	__asm__ __volatile__("fprem1" : "+t" (div) : "u" (idend));
+	__asm__ __volatile__("fprem1" : "+t" (div) : "u" (idend) : "cc");
 	return (div);
 }
 
 extern __inline__ long double
 fprem(long double idend, long double div)
 {
-	__asm__ __volatile__("fprem" : "+t" (div) : "u" (idend));
+	__asm__ __volatile__("fprem" : "+t" (div) : "u" (idend) : "cc");
 	return (div);
 }
 
@@ -156,28 +162,28 @@ fyl2xp1(long double y, long double x)
 	__asm__ __volatile__("fyl2xp1"
 	    : "=t" (ret)
 	    : "0" (x), "u" (y)
-	    : "st(1)");
+	    : "st(1)", "cc");
 	return (ret);
 }
 
 extern __inline__ long double
 fsqrt(long double x)
 {
-	__asm__ __volatile__("fsqrt" : "+t" (x));
+	__asm__ __volatile__("fsqrt" : "+t" (x) : : "cc");
 	return (x);
 }
 
 extern __inline__ long double
 fsincos(long double x)
 {
-	__asm__ __volatile__("fsincos" : "+t" (x));
+	__asm__ __volatile__("fsincos" : "+t" (x) : : "cc");
 	return (x);
 }
 
 extern __inline__ long double
 frndint(long double x)
 {
-	__asm__ __volatile__("frndint" : "+t" (x));
+	__asm__ __volatile__("frndint" : "+t" (x) : : "cc");
 	return (x);
 }
 
@@ -186,21 +192,21 @@ fscale(long double x, long double y)
 {
 	long double ret;
 
-	__asm__ __volatile__("fscale" : "=t" (ret) : "0" (y), "u" (x));
+	__asm__ __volatile__("fscale" : "=t" (ret) : "0" (y), "u" (x) : "cc");
 	return (ret);
 }
 
 extern __inline__ long double
 fsin(long double x)
 {
-	__asm__ __volatile__("fsin" : "+t" (x));
+	__asm__ __volatile__("fsin" : "+t" (x) : : "cc");
 	return (x);
 }
 
 extern __inline__ long double
 fcos(long double x)
 {
-	__asm__ __volatile__("fcos" : "+t" (x));
+	__asm__ __volatile__("fcos" : "+t" (x) : : "cc");
 	return (x);
 }
 
@@ -211,7 +217,8 @@ sse_cmpeqss(float *f1, float *f2, int *i1)
 	    "cmpeqss %2, %1\n\t"
 	    "movss   %1, %0"
 	    : "=m" (*i1), "+x" (*f1)
-	    : "x" (*f2));
+	    : "x" (*f2)
+	    : "cc");
 }
 
 extern __inline__ void
@@ -221,7 +228,8 @@ sse_cmpltss(float *f1, float *f2, int *i1)
 	    "cmpltss %2, %1\n\t"
 	    "movss   %1, %0"
 	    : "=m" (*i1), "+x" (*f1)
-	    : "x" (*f2));
+	    : "x" (*f2)
+	    : "cc");
 }
 
 extern __inline__ void
@@ -231,7 +239,8 @@ sse_cmpless(float *f1, float *f2, int *i1)
 	    "cmpless %2, %1\n\t"
 	    "movss   %1, %0"
 	    : "=m" (*i1), "+x" (*f1)
-	    : "x" (*f2));
+	    : "x" (*f2)
+	    : "cc");
 }
 
 extern __inline__ void
@@ -241,7 +250,8 @@ sse_cmpunordss(float *f1, float *f2, int *i1)
 	    "cmpunordss %2, %1\n\t"
 	    "movss      %1, %0"
 	    : "=m" (*i1), "+x" (*f1)
-	    : "x" (*f2));
+	    : "x" (*f2)
+	    : "cc");
 }
 
 extern __inline__ void
@@ -271,7 +281,7 @@ sse_addss(float *f1, float *f2, float *f3)
 	    "addss %2, %1\n\t"
 	    "movss %1, %0"
 	    : "=m" (*f3), "+x" (*f1)
-	    :"x" (*f2));
+	    : "x" (*f2));
 }
 
 extern __inline__ void

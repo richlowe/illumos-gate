@@ -217,24 +217,6 @@
 	addl	$8,%esp
 	.end
 
-/
-/	branchless __isnan
-/	((0x7ff00000-[((lx|-lx)>>31)&1]|ahx)>>31)&1 = 1 iff x is NaN
-/
-	.inline	__isnan,0
-	movl	(%esp),%eax		/// eax <-- lo_32(x)
-	movl	%eax,%ecx
-	negl	%ecx			/ ecx <-- -lo_32(x)
-	orl	%ecx,%eax
-	shrl	$31,%eax		/ 1 iff lx != 0
-	movl	4(%esp),%ecx		/// ecx <-- hi_32(x)
-	andl	$0x7fffffff,%ecx	/ ecx <-- hi_32(abs(x))
-	orl	%ecx,%eax
-	subl	$0x7ff00000,%eax
-	negl	%eax
-	shrl	$31,%eax
-	.end
-
 	.inline	__isnanf,0
 	movl	(%esp),%eax
 	andl	$0x7fffffff,%eax
@@ -243,19 +225,6 @@
 	shrl	$31,%eax
 	.end
 
-	.inline	__isinf,0
-	movl	4(%esp),%eax		/ eax <-- hi_32(x)
-	andl    $0x7fffffff,%eax        / set first bit to 0
-	cmpl    $0x7ff00000,%eax
-	pushfl
-	popl    %eax
-	cmpl    $0,(%esp)		/ is lo_32(x) = 0?
-	pushfl
-	popl    %ecx			/ bit 6 of ecx <-- lo_32(x) == 0
-	andl    %ecx,%eax
-	andl    $0x40,%eax
-	shrl    $6,%eax
-	.end
 
 	.inline	__isnormal,0
 					/ TRUE iff (x is _finite, but

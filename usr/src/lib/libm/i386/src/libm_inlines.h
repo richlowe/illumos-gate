@@ -51,7 +51,7 @@ __inline_sqrt(double a)
 {
 	double ret;
 
-	__asm__ __volatile__("fsqrt\n\t" : "=t" (ret) : "0" (a));
+	__asm__ __volatile__("fsqrt\n\t" : "=t" (ret) : "0" (a) : "cc");
 	return (ret);
 }
 
@@ -66,7 +66,7 @@ __inline_sqrtf(float a)
 {
 	float ret;
 
-	__asm__ __volatile__("fsqrt\n\t" : "=t" (ret) : "0" (a));
+	__asm__ __volatile__("fsqrt\n\t" : "=t" (ret) : "0" (a) : "cc");
 	return (ret);
 }
 
@@ -79,7 +79,9 @@ __inline_rint(double a)
 		"jae  1f\n\t"
 		"frndint\n\t"
 		"1: fwait\n\t"
-		: "+t" (a), "+&r" (_HI_WORD(a)));
+		: "+t" (a), "+&r" (_HI_WORD(a))
+		:
+		: "cc");
 
 	return (a);
 }
@@ -133,7 +135,7 @@ ceil(double d)
 {
 	short rd = __swap87RD(fp_positive);
 
-	__asm__ __volatile__("frndint" : "+t" (d), "+r" (rd));
+	__asm__ __volatile__("frndint" : "+t" (d), "+r" (rd) : : "cc");
 	__swap87RD(rd);
 
 	return (d);
@@ -146,7 +148,9 @@ copysign(double d1, double d2)
 	    "andl $0x7fffffff,%0\n\t" /* %0 <-- hi_32(abs(d)) */
 	    "andl $0x80000000,%1\n\t" /* %1[31] <-- sign_bit(d2) */
 	    "orl  %1,%0\n\t"	      /* %0 <-- hi_32(copysign(x,y)) */
-	    : "+&r" (_HI_WORD(d1)), "+r" (_HI_WORD(d2)));
+	    : "+&r" (_HI_WORD(d1)), "+r" (_HI_WORD(d2))
+	    :
+	    : "cc");
 
 	return (d1);
 }
@@ -154,21 +158,21 @@ copysign(double d1, double d2)
 extern __inline__ double
 fabs(double d)
 {
-	__asm__ __volatile__("fabs\n\t" : "+t" (d));
+	__asm__ __volatile__("fabs\n\t" : "+t" (d) : : "cc");
 	return (d);
 }
 
 extern __inline__ float
 fabsf(float d)
 {
-	__asm__ __volatile__("fabs\n\t" : "+t" (d));
+	__asm__ __volatile__("fabs\n\t" : "+t" (d) : : "cc");
 	return (d);
 }
 
 extern __inline__ long double
 fabsl(long double d)
 {
-	__asm__ __volatile__("fabs\n\t" : "+t" (d));
+	__asm__ __volatile__("fabs\n\t" : "+t" (d) : : "cc");
 	return (d);
 }
 
@@ -182,7 +186,9 @@ finite(double d)
 	    "andl $0x7ff00000,%0\n\t"
 	    "negl %0\n\t"
 	    "shrl $31,%0\n\t"
-	    : "+r" (ret));
+	    : "+r" (ret)
+	    :
+	    : "cc");
 	return (ret);
 }
 
@@ -191,7 +197,7 @@ floor(double d)
 {
 	short rd = __swap87RD(fp_negative);
 
-	__asm__ __volatile__("frndint" : "+t" (d), "+r" (rd));
+	__asm__ __volatile__("frndint" : "+t" (d), "+r" (rd) : : "cc");
 	__swap87RD(rd);
 
 	return (d);
@@ -205,7 +211,9 @@ isnanf(float f)
 	    "negl %0\n\t"
 	    "addl $0x7f800000,%0\n\t"
 	    "shrl $31,%0\n\t"
-	    : "+r" (f));
+	    : "+r" (f)
+	    :
+	    : "cc");
 
 	return (f);
 }
@@ -225,7 +233,8 @@ scalbn(double d, int n)
 	    "fxch\n\t"
 	    "fscale\n\t"
 	    : "+t" (d), "=u" (dummy)
-	    : "m" (n));
+	    : "m" (n)
+	    : "cc");
 
 	return (d);
 }
@@ -257,7 +266,7 @@ sqrtf(float f)
 extern __inline__ long double
 sqrtl(long double ld)
 {
-	__asm__ __volatile__("fsqrt" : "+t" (ld));
+	__asm__ __volatile__("fsqrt" : "+t" (ld) : : "cc");
 	return (ld);
 }
 
@@ -285,7 +294,8 @@ isnanl(long double ld)
             "movl  $1,%0\n\t"
             "1:\n\t"
             : "+&r" (ret)
-            : "r" (_HI_WORD(ld)), "r" (_LO_WORD(ld)));
+            : "r" (_HI_WORD(ld)), "r" (_LO_WORD(ld))
+	    : "cc");
 
         return (ret);
 }

@@ -121,7 +121,9 @@ abs(int i)
 	    "movl    %1, %0\n\t"
 	    "negl    %1\n\t"
 	    "cmovnsl %1, %0\n\t"
-	    : "=r" (ret), "+r" (i));
+	    : "=r" (ret), "+r" (i)
+	    :
+	    : "cc");
 	return (ret);
 }
 
@@ -179,7 +181,8 @@ finite(double d)
 	    "subq %1, %0\n\t"
 	    "shrq $63, %0\n\t"
 	    : "+r" (ret), "=r" (tmp)
-	    : "x" (d));
+	    : "x" (d)
+	    : "cc");
 
 	return (ret);
 }
@@ -192,7 +195,8 @@ signbit(double d)
 	    "movmskpd %1, %0\n\t"
 	    "andq     $1, %0\n\t"
 	    : "=r" (ret)
-	    : "x" (d));
+	    : "x" (d)
+	    : "cc");
 	return (ret);
 }
 
