@@ -24,6 +24,7 @@
  * Copyright (c) 2012 by Delphix. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2012, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -145,8 +146,8 @@ const char *const FCNTLname[] = {
 	"F_GETLK64",
 	"F_SETLK64",
 	"F_SETLKW64",
-	NULL,		/* 36 */
-	NULL,		/* 37 */
+	"F_DUP2FD_CLOEXEC",
+	"F_DUPFD_CLOEXEC",
 	NULL,		/* 38 */
 	NULL,		/* 39 */
 	"F_SHARE",
@@ -1918,7 +1919,7 @@ pathconfname(int code)
 #define	ALL_O_FLAGS \
 	(O_NDELAY|O_APPEND|O_SYNC|O_DSYNC|O_NONBLOCK|O_CREAT|O_TRUNC\
 	|O_EXCL|O_NOCTTY|O_LARGEFILE|O_RSYNC|O_XATTR|O_NOFOLLOW|O_NOLINKS\
-	|FXATTRDIROPEN)
+	|O_CLOEXEC|FXATTRDIROPEN)
 
 const char *
 openarg(private_t *pri, int arg)
@@ -1976,6 +1977,8 @@ openarg(private_t *pri, int arg)
 		(void) strlcat(str, "|O_NOFOLLOW", sizeof (pri->code_buf));
 	if (arg & O_NOLINKS)
 		(void) strlcat(str, "|O_NOLINKS", sizeof (pri->code_buf));
+	if (arg & O_CLOEXEC)
+		(void) strlcat(str, "|O_CLOEXEC", sizeof (pri->code_buf));
 	if (arg & FXATTRDIROPEN)
 		(void) strlcat(str, "|FXATTRDIROPEN", sizeof (pri->code_buf));
 

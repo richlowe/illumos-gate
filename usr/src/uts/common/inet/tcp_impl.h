@@ -21,6 +21,8 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2011, Joyent Inc. All rights reserved.
+ * Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 #ifndef	_INET_TCP_IMPL_H
@@ -51,6 +53,17 @@ extern struct qinit	tcp_sock_winit;
 extern struct qinit	tcp_winit;
 
 extern sock_downcalls_t sock_tcp_downcalls;
+
+/*
+ * Note that by default, the _snd_lowat_fraction tunable controls the value of
+ * the transmit low water mark.  TCP_XMIT_LOWATER (and thus the _xmit_lowat
+ * property) is only used if the administrator has disabled _snd_lowat_fraction
+ * by setting it to 0.
+ */
+#define	TCP_XMIT_LOWATER	4096
+#define	TCP_XMIT_HIWATER	49152
+#define	TCP_RECV_LOWATER	2048
+#define	TCP_RECV_HIWATER	128000
 
 /*
  * Bind hash list size and has function.  It has to be a power of 2 for
@@ -199,12 +212,39 @@ typedef struct tcp_squeue_priv_s {
  * should be 0 and we use the formula in RFC 3390 to set tcp_cwnd.
  * If the upper layer has changed set the tcp_init_cwnd, just use
  * it to calculate the tcp_cwnd.
+ *
+ * "An Argument for Increasing TCP's Initial Congestion Window"
+ * ACM SIGCOMM Computer Communications Review, vol. 40 (2010), pp. 27-33
+ *  -- Nandita Dukkipati, Tiziana Refice, Yuchung Cheng,
+ *     Hsiao-keng Jerry Chu, Tom Herbert, Amit Agarwal,
+ *     Arvind Jain, Natalia Sutin
+ *
+ *   "Based on the results from our experiments, we believe the
+ *    initial congestion window should be at least ten segments
+ *    and the same be investigated for standardization by the IETF."
+ *
+ * As such, the def_max_init_cwnd argument with which this macro is
+ * invoked is either the tcps_slow_start_initial or
+ * tcps_slow_start_after_idle which both default to 0 and will respect
+ * RFC 3390 exactly.  If the tunables are explicitly set by the operator,
+ * then the initial congestion window should be set as the operator
+ * demands, within reason. We shall arbitrarily define reason as a
+ * maximum of 16 (same as used by the TCP_INIT_CWND setsockopt).
  */
+
+/* Maximum TCP initial cwin (start/restart). */
+#define	TCP_MAX_INIT_CWND	16
+
 #define	TCP_SET_INIT_CWND(tcp, mss, def_max_init_cwnd)			\
 {									\
 	if ((tcp)->tcp_init_cwnd == 0) {				\
-		(tcp)->tcp_cwnd = MIN(def_max_init_cwnd * (mss),	\
-		    MIN(4 * (mss), MAX(2 * (mss), 4380 / (mss) * (mss)))); \
+		if (def_max_init_cwnd == 0) {				\
+			(tcp)->tcp_cwnd = MIN(4 * (mss),		\
+			    MAX(2 * (mss), 4380 / (mss) * (mss)));	\
+		} else {						\
+			(tcp)->tcp_cwnd = MIN(TCP_MAX_INIT_CWND * (mss),\
+			    def_max_init_cwnd * (mss));			\
+		}							\
 	} else {							\
 		(tcp)->tcp_cwnd = (tcp)->tcp_init_cwnd * (mss);		\
 	}								\

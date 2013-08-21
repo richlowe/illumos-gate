@@ -41,18 +41,12 @@ ROOTLIBDIR =	$(ROOT)/usr/lib/gss
 ROOTLIBDIR64 = 	$(ROOT)/usr/lib/$(MACH64)/gss
 SRCDIR =	../mech
 
-MAPFILE_EXPORT = ../mapfile-vers-clean
-$(EXPORT_RELEASE_BUILD)MAPFILE_EXPORT = \
-		$(CLOSED)/lib/gss_mechs/mech_spnego/mapfile-vers-export
-MAPFILES =	../mapfile-vers $(MAPFILE_EXPORT)
+MAPFILES =	../mapfile-vers
 
 CPPFLAGS += -I$(SRC)/uts/common/gssapi/include $(DEBUG) -I$(SRC)/lib/gss_mechs/mech_krb5/include -I$(SRC)/uts/common/gssapi/mechs/krb5/include -I$(SRC)/lib/gss_mechs/mech_krb5/mech
 
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-type-limits
-
-MAKEFILE_EXPORT = $(CLOSED)/lib/gss_mechs/mech_spnego/Makefile.export
-$(EXPORT_RELEASE_BUILD)include $(MAKEFILE_EXPORT)
 
 .KEEP_STATE:
 

@@ -23,6 +23,8 @@
  * Copyright (c) 1995, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 
+/* Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved. */
+
 #include <sys/types.h>
 #include <sys/t_lock.h>
 #include <sys/param.h>
@@ -96,13 +98,20 @@ extern int	sockfs_defer_nl7c_init;
  * devpath for the kernel to use.
  */
 int
-so_socket(int family, int type, int protocol, char *devpath, int version)
+so_socket(int family, int type_w_flags, int protocol, char *devpath,
+    int version)
 {
 	struct sonode *so;
 	vnode_t *vp;
 	struct file *fp;
 	int fd;
 	int error;
+	int type;
+
+	type = type_w_flags & SOCK_TYPE_MASK;
+	type_w_flags &= ~SOCK_TYPE_MASK;
+	if (type_w_flags & ~(SOCK_CLOEXEC|SOCK_NDELAY|SOCK_NONBLOCK))
+		return (set_errno(EINVAL));
 
 	if (devpath != NULL) {
 		char *buf;
@@ -135,8 +144,19 @@ so_socket(int family, int type, int protocol, char *devpath, int version)
 	/*
 	 * Now fill in the entries that falloc reserved
 	 */
+	if (type_w_flags & SOCK_NDELAY) {
+		so->so_state |= SS_NDELAY;
+		fp->f_flag |= FNDELAY;
+	}
+	if (type_w_flags & SOCK_NONBLOCK) {
+		so->so_state |= SS_NONBLOCK;
+		fp->f_flag |= FNONBLOCK;
+	}
 	mutex_exit(&fp->f_tlock);
 	setf(fd, fp);
+	if ((type_w_flags & SOCK_CLOEXEC) != 0) {
+		f_setfd(fd, FD_CLOEXEC);
+	}
 
 	return (fd);
 }
@@ -330,6 +350,7 @@ so_socketpair(int sv[2])
 	int svs[2];
 	struct sonode *so1, *so2;
 	int error;
+	int orig_flags;
 	struct sockaddr_ux *name;
 	size_t namelen;
 	sotpi_info_t *sti1;
@@ -479,20 +500,42 @@ so_socketpair(int sv[2])
 			goto done;
 		}
 		/*
+		 * copy over FNONBLOCK and FNDELAY flags should they exist
+		 */
+		if (so1->so_state & SS_NONBLOCK)
+			nfp->f_flag |= FNONBLOCK;
+		if (so1->so_state & SS_NDELAY)
+			nfp->f_flag |= FNDELAY;
+
+		/*
 		 * fill in the entries that falloc reserved
 		 */
 		mutex_exit(&nfp->f_tlock);
 		setf(nfd, nfp);
 
+		/*
+		 * get the original flags before we release
+		 */
+		VERIFY(f_getfd_error(svs[0], &orig_flags) == 0);
+
 		releasef(svs[0]);
 		releasef(svs[1]);
-		svs[0] = nfd;
+
+		/*
+		 * If FD_CLOEXEC was set on the filedescriptor we're
+		 * swapping out, we should set it on the new one too.
+		 */
+		if (orig_flags & FD_CLOEXEC) {
+			f_setfd(nfd, FD_CLOEXEC);
+		}
 
 		/*
 		 * The socketpair library routine will close the original
 		 * svs[0] when this code passes out a different file
 		 * descriptor.
 		 */
+		svs[0] = nfd;
+
 		if (copyout(svs, sv, sizeof (svs))) {
 			(void) closeandsetf(nfd, NULL);
 			eprintline(EFAULT);
@@ -580,7 +623,8 @@ listen(int sock, int backlog, int version)
 
 /*ARGSUSED3*/
 int
-accept(int sock, struct sockaddr *name, socklen_t *namelenp, int version)
+accept(int sock, struct sockaddr *name, socklen_t *namelenp, int version,
+    int flags)
 {
 	struct sonode *so;
 	file_t *fp;
@@ -590,11 +634,23 @@ accept(int sock, struct sockaddr *name, socklen_t *namelenp, int version)
 	struct vnode *nvp;
 	struct file *nfp;
 	int nfd;
+	int ssflags;
 	struct sockaddr *addrp;
 	socklen_t addrlen;
 
 	dprint(1, ("accept(%d, %p, %p)\n",
 	    sock, (void *)name, (void *)namelenp));
+
+	if (flags & ~(SOCK_CLOEXEC|SOCK_NONBLOCK|SOCK_NDELAY)) {
+		return (set_errno(EINVAL));
+	}
+
+	/* Translate SOCK_ flags to their SS_ variant */
+	ssflags = 0;
+	if (flags & SOCK_NONBLOCK)
+		ssflags |= SS_NONBLOCK;
+	if (flags & SOCK_NDELAY)
+		ssflags |= SS_NDELAY;
 
 	if ((so = getsonode(sock, &error, &fp)) == NULL)
 		return (set_errno(error));
@@ -674,15 +730,23 @@ accept(int sock, struct sockaddr *name, socklen_t *namelenp, int version)
 	setf(nfd, nfp);
 
 	/*
-	 * Copy FNDELAY and FNONBLOCK from listener to acceptor
+	 * Act on SOCK_CLOEXEC from flags
 	 */
-	if (so->so_state & (SS_NDELAY|SS_NONBLOCK)) {
+	if (flags & SOCK_CLOEXEC) {
+		f_setfd(nfd, FD_CLOEXEC);
+	}
+
+	/*
+	 * Copy FNDELAY and FNONBLOCK from listener to acceptor
+	 * and from ssflags
+	 */
+	if ((ssflags | so->so_state) & (SS_NDELAY|SS_NONBLOCK)) {
 		uint_t oflag = nfp->f_flag;
 		int arg = 0;
 
-		if (so->so_state & SS_NONBLOCK)
+		if ((ssflags | so->so_state) & SS_NONBLOCK)
 			arg |= FNONBLOCK;
-		else if (so->so_state & SS_NDELAY)
+		else if ((ssflags | so->so_state) & SS_NDELAY)
 			arg |= FNDELAY;
 
 		/*

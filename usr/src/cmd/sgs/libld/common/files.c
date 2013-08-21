@@ -2343,7 +2343,7 @@ process_group(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 	 * Indicate that this input file has groups to process.  Groups are
 	 * processed after all input sections have been processed.
 	 */
-	ifl->ifl_flags |= FLG_IS_GROUPS;
+	ifl->ifl_flags |= FLG_IF_GROUPS;
 
 	return (1);
 }
@@ -2807,7 +2807,7 @@ process_elf(Ifl_desc *ifl, Elf *elf, Ofl_desc *ofl)
 	 * of placement.  In addition, COMDAT names may require transformation
 	 * to indicate different output section placement.
 	 */
-	if (ifl->ifl_flags & FLG_IS_GROUPS) {
+	if (ifl->ifl_flags & FLG_IF_GROUPS) {
 		for (ndx = 1; ndx < ifl->ifl_shnum; ndx++) {
 			Is_desc	*isp;
 
@@ -2819,6 +2819,14 @@ process_elf(Ifl_desc *ifl, Elf *elf, Ofl_desc *ofl)
 				return (S_ERROR);
 		}
 	}
+
+	/*
+	 * Now group information has been processed, we can safely validate
+	 * that nothing is fishy about the section COMDAT description.  We
+	 * need to do this prior to placing the section (where any
+	 * SHT_SUNW_COMDAT sections will be restored to being PROGBITS)
+	 */
+	ld_comdat_validate(ofl, ifl);
 
 	/*
 	 * Now that all of the input sections have been processed, place

@@ -35,6 +35,8 @@
  * contributors.
  */
 
+/* Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved. */
+
 #ifndef	_SYS_SOCKET_H
 #define	_SYS_SOCKET_H
 
@@ -101,6 +103,14 @@ typedef	void		*_RESTRICT_KYWD Psocklen_t;
 #endif	/* !defined(_XPG4_2) || defined(__EXTENSIONS__) */
 #define	SOCK_RDM	5		/* reliably-delivered message */
 #define	SOCK_SEQPACKET	6		/* sequenced packet stream */
+#define	SOCK_TYPE_MASK	0xffff		/* type reside in these bits only */
+
+/*
+ * Flags for socket() and accept4()
+ */
+#define	SOCK_CLOEXEC	0x080000	/* like open(2) O_CLOEXEC for socket */
+#define	SOCK_NONBLOCK	0x100000	/* like O_NONBLOCK */
+#define	SOCK_NDELAY	0x200000	/* like O_NDELAY */
 
 /*
  * Option flags per-socket.
@@ -514,6 +524,7 @@ struct cmsghdr {
 #if !defined(_KERNEL) || defined(_BOOT)
 #ifdef	__STDC__
 extern int accept(int, struct sockaddr *_RESTRICT_KYWD, Psocklen_t);
+extern int accept4(int, struct sockaddr *_RESTRICT_KYWD, Psocklen_t, int);
 extern int bind(int, const struct sockaddr *, socklen_t);
 extern int connect(int, const struct sockaddr *, socklen_t);
 extern int getpeername(int, struct sockaddr *_RESTRICT_KYWD, Psocklen_t);
@@ -538,6 +549,7 @@ extern int sockatmark(int);
 #endif /* !defined(_XPG4_2) || defined(_XPG6) || defined(__EXTENSIONS__) */
 #else	/* __STDC__ */
 extern int accept();
+extern int accept4();
 extern int bind();
 extern int connect();
 extern int getpeername();

@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -60,7 +61,6 @@
 
 /*
  * This is the string displayed by modinfo, etc.
- * Make sure you keep the version ID up to date!
  */
 static char ahci_ident[] = "ahci driver";
 
@@ -105,13 +105,14 @@ static	int ahci_check_slot_handle(ahci_port_t *, int);
 /*
  * Local function prototypes
  */
+static	int ahci_setup_port_base_addresses(ahci_ctl_t *, ahci_port_t *);
 static	int ahci_alloc_ports_state(ahci_ctl_t *);
 static	void ahci_dealloc_ports_state(ahci_ctl_t *);
 static	int ahci_alloc_port_state(ahci_ctl_t *, uint8_t);
 static	void ahci_dealloc_port_state(ahci_ctl_t *, uint8_t);
-static	int ahci_alloc_rcvd_fis(ahci_ctl_t *, ahci_port_t *, uint8_t);
+static	int ahci_alloc_rcvd_fis(ahci_ctl_t *, ahci_port_t *);
 static	void ahci_dealloc_rcvd_fis(ahci_port_t *);
-static	int ahci_alloc_cmd_list(ahci_ctl_t *, ahci_port_t *, uint8_t);
+static	int ahci_alloc_cmd_list(ahci_ctl_t *, ahci_port_t *);
 static	void ahci_dealloc_cmd_list(ahci_ctl_t *, ahci_port_t *);
 static  int ahci_alloc_cmd_tables(ahci_ctl_t *, ahci_port_t *);
 static  void ahci_dealloc_cmd_tables(ahci_ctl_t *, ahci_port_t *);
@@ -122,6 +123,7 @@ static	int ahci_initialize_controller(ahci_ctl_t *);
 static	void ahci_uninitialize_controller(ahci_ctl_t *);
 static	int ahci_initialize_port(ahci_ctl_t *, ahci_port_t *, ahci_addr_t *);
 static	int ahci_config_space_init(ahci_ctl_t *);
+static	void ahci_staggered_spin_up(ahci_ctl_t *, uint8_t);
 
 static	void ahci_drain_ports_taskq(ahci_ctl_t *);
 static	int ahci_rdwr_pmult(ahci_ctl_t *, ahci_addr_t *, uint8_t, uint32_t *,
@@ -454,6 +456,10 @@ _init(void)
 		goto err_out;
 	}
 
+	/* watchdog tick */
+	ahci_watchdog_tick = drv_usectohz(
+	    (clock_t)ahci_watchdog_timeout * 1000000);
+
 	ret = mod_install(&modlinkage);
 	if (ret != 0) {
 		sata_hba_fini(&modlinkage);
@@ -464,9 +470,6 @@ _init(void)
 		goto err_out;
 	}
 
-	/* watchdog tick */
-	ahci_watchdog_tick = drv_usectohz(
-	    (clock_t)ahci_watchdog_timeout * 1000000);
 	return (ret);
 
 err_out:
@@ -517,6 +520,7 @@ ahci_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	int status;
 	int attach_state;
 	uint32_t cap_status, ahci_version;
+	uint32_t ghc_control;
 	int intr_types;
 	int i;
 	pci_regspec_t *regs;
@@ -544,6 +548,16 @@ ahci_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		ahci_ctlp = ddi_get_soft_state(ahci_statep, instance);
 		mutex_enter(&ahci_ctlp->ahcictl_mutex);
 
+		/*
+		 * GHC.AE must be set to 1 before any other AHCI register
+		 * is accessed
+		 */
+		ghc_control = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+		    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp));
+		ghc_control |= AHCI_HBA_GHC_AE;
+		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+		    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp), ghc_control);
+
 		/* Restart watch thread */
 		if (ahci_ctlp->ahcictl_timeout_id == 0)
 			ahci_ctlp->ahcictl_timeout_id = timeout(
@@ -567,7 +581,7 @@ ahci_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		}
 
 		mutex_enter(&ahci_ctlp->ahcictl_mutex);
-		ahci_ctlp->ahcictl_flags &= ~ AHCI_SUSPEND;
+		ahci_ctlp->ahcictl_flags &= ~AHCI_SUSPEND;
 		mutex_exit(&ahci_ctlp->ahcictl_mutex);
 
 		return (DDI_SUCCESS);
@@ -655,6 +669,16 @@ ahci_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	attach_state |= AHCI_ATTACH_STATE_REG_MAP;
 
+	/*
+	 * GHC.AE must be set to 1 before any other AHCI register
+	 * is accessed
+	 */
+	ghc_control = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp));
+	ghc_control |= AHCI_HBA_GHC_AE;
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp), ghc_control);
+
 	/* Get the AHCI version information */
 	ahci_version = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_GLOBAL_VS(ahci_ctlp));
@@ -677,6 +701,18 @@ ahci_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "hba capabilities = 0x%x",
 	    cap_status);
+
+	/* CAP2 (HBA Capabilities Extended) is available since AHCI spec 1.2 */
+	if (ahci_version >= 0x00010200) {
+		uint32_t cap2_status;
+
+		/* Get the HBA capabilities extended information */
+		cap2_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+		    (uint32_t *)AHCI_GLOBAL_CAP2(ahci_ctlp));
+
+		AHCIDBG(AHCIDBG_INIT, ahci_ctlp,
+		    "hba capabilities extended = 0x%x", cap2_status);
+	}
 
 #if AHCI_DEBUG
 	/* Get the interface speed supported by the HBA */
@@ -709,20 +745,12 @@ ahci_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "hba implementation of ports: 0x%x",
 	    ahci_ctlp->ahcictl_ports_implemented);
 
-	/*
-	 * According to the AHCI spec, CAP.NP should indicate the maximum
-	 * number of ports supported by the HBA silicon, but we found
-	 * this value of ICH8 chipset only indicates the number of ports
-	 * implemented (exposed) by it. Therefore, the driver should calculate
-	 * the potential maximum value by checking PI register, and use
-	 * the maximum of this value and CAP.NP.
-	 */
-	ahci_ctlp->ahcictl_num_ports = max(
-	    (cap_status & AHCI_HBA_CAP_NP) + 1,
-	    ddi_fls(ahci_ctlp->ahcictl_ports_implemented));
+	/* Max port number implemented */
+	ahci_ctlp->ahcictl_num_ports =
+	    ddi_fls(ahci_ctlp->ahcictl_ports_implemented);
 
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "hba number of ports: %d",
-	    ahci_ctlp->ahcictl_num_ports);
+	    (cap_status & AHCI_HBA_CAP_NP) + 1);
 
 	/* Get the number of implemented ports by the HBA */
 	ahci_ctlp->ahcictl_num_implemented_ports =
@@ -1435,7 +1463,7 @@ ahci_tran_probe_port(dev_info_t *dip, sata_device_t *sd)
 		break;
 
 	case SATA_DTYPE_PMULT:
-		ASSERT(AHCI_ADDR_IS_PORT(&addr)||AHCI_ADDR_IS_PMULT(&addr));
+		ASSERT(AHCI_ADDR_IS_PORT(&addr) || AHCI_ADDR_IS_PMULT(&addr));
 		sd->satadev_type = SATA_DTYPE_PMULT;
 
 		/* Update the number of pmports. */
@@ -1759,9 +1787,6 @@ fail_out:
  *
  * If SATA_OPMODE_POLLING flag is set, then we must poll the command
  * without interrupt, otherwise we can still use the interrupt.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_do_sync_start(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -1773,6 +1798,8 @@ ahci_do_sync_start(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	int instance = ddi_get_instance(ahci_ctlp->ahcictl_dip);
 	uint8_t port = addrp->aa_port;
 
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp, "ahci_do_sync_start enter: "
 	    "port %d:%d spkt 0x%p", port, addrp->aa_pmport, spkt);
 
@@ -1780,7 +1807,7 @@ ahci_do_sync_start(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 		ahci_portp->ahciport_flags |= AHCI_PORT_FLAG_POLLING;
 		if ((rval = ahci_deliver_satapkt(ahci_ctlp, ahci_portp,
 		    addrp, spkt)) == AHCI_FAILURE) {
-			ahci_portp->ahciport_flags &= ~ AHCI_PORT_FLAG_POLLING;
+			ahci_portp->ahciport_flags &= ~AHCI_PORT_FLAG_POLLING;
 			return (rval);
 		}
 
@@ -1854,9 +1881,6 @@ ahci_do_sync_start(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
  * algorithm.
  * 	1. REQUEST SENSE or READ LOG EXT command during error recovery process
  * 	2. READ/WRITE PORTMULT command
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_claim_free_slot(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -1865,6 +1889,8 @@ ahci_claim_free_slot(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint32_t port_cmd_issue;
 	uint32_t free_slots;
 	int slot;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp, "ahci_claim_free_slot enter "
 	    "ahciport_pending_tags = 0x%x "
@@ -2012,8 +2038,6 @@ out:
  * Returns:
  * 	slot number if we can obtain a slot successfully
  *	otherwise, return AHCI_FAILURE
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_deliver_satapkt(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -2034,6 +2058,8 @@ ahci_deliver_satapkt(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint32_t *ptr;
 	uint8_t *ptr2;
 #endif
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	port = addrp->aa_port;
 	pmport = addrp->aa_pmport;
@@ -2578,7 +2604,6 @@ ahci_tran_abort(dev_info_t *dip, sata_pkt_t *spkt, int flag)
  * during the reset operation.
  *
  * NOTE: ONLY called by ahci_tran_reset_dport
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_reset_device_reject_pkts(ahci_ctl_t *ahci_ctlp,
@@ -2590,6 +2615,8 @@ ahci_reset_device_reject_pkts(ahci_ctl_t *ahci_ctlp,
 	uint8_t port = addrp->aa_port;
 	sata_device_t sdevice;
 	int ret;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_reset_device_reject_pkts on port: %d", port);
@@ -2677,7 +2704,6 @@ ahci_reset_device_reject_pkts(ahci_ctl_t *ahci_ctlp,
  * during the reset operation.
  *
  * NOTE: ONLY called by ahci_tran_reset_dport
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_reset_pmdevice_reject_pkts(ahci_ctl_t *ahci_ctlp,
@@ -2687,6 +2713,8 @@ ahci_reset_pmdevice_reject_pkts(ahci_ctl_t *ahci_ctlp,
 	uint8_t port = addrp->aa_port;
 	uint8_t pmport = addrp->aa_pmport;
 	sata_device_t sdevice;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY|AHCIDBG_PMULT, ahci_ctlp,
 	    "ahci_reset_pmdevice_reject_pkts at port %d:%d", port, pmport);
@@ -2778,8 +2806,6 @@ ahci_reset_pmdevice_reject_pkts(ahci_ctl_t *ahci_ctlp,
 /*
  * Used to do port reset and reject all the pending packets on a port during
  * the reset operation.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_reset_port_reject_pkts(ahci_ctl_t *ahci_ctlp,
@@ -2789,6 +2815,8 @@ ahci_reset_port_reject_pkts(ahci_ctl_t *ahci_ctlp,
 	uint32_t reset_tags = 0;
 	uint32_t finished_tags = 0;
 	uint8_t port = addrp->aa_port;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_reset_port_reject_pkts at port: %d", port);
@@ -3233,8 +3261,6 @@ ahci_tran_hotplug_port_deactivate(dev_info_t *dip, sata_device_t *satadev)
 /*
  * To be used to mark all the outstanding pkts with SATA_PKT_ABORTED
  * when a device is unplugged or a port is deactivated.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static void
 ahci_reject_all_abort_pkts(ahci_ctl_t *ahci_ctlp,
@@ -3242,6 +3268,8 @@ ahci_reject_all_abort_pkts(ahci_ctl_t *ahci_ctlp,
 {
 	uint32_t slot_status = 0;
 	uint32_t abort_tags = 0;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY|AHCIDBG_INTR, ahci_ctlp,
 	    "ahci_reject_all_abort_pkts at port: %d", port);
@@ -3396,7 +3424,7 @@ ahci_fm_fini(ahci_ctl_t *ahci_ctlp)
 
 		/* Adjust access and dma attributes for FMA */
 		accattr.devacc_attr_access = DDI_DEFAULT_ACC;
-		buffer_dma_attr.dma_attr_flags &=  ~DDI_DMA_FLAGERR;
+		buffer_dma_attr.dma_attr_flags &= ~DDI_DMA_FLAGERR;
 		rcvd_fis_dma_attr.dma_attr_flags &= ~DDI_DMA_FLAGERR;
 		cmd_list_dma_attr.dma_attr_flags &= ~DDI_DMA_FLAGERR;
 		cmd_table_dma_attr.dma_attr_flags &= ~DDI_DMA_FLAGERR;
@@ -3455,23 +3483,33 @@ ahci_fm_ereport(ahci_ctl_t *ahci_ctlp, char *detail)
 }
 
 /*
- * Check if all handles are correctly allocated. This function is only called
- * by ahci_attach(), so we do not need hold any mutex here.
+ * Check if all handles are correctly allocated.
  */
 static int
 ahci_check_all_handle(ahci_ctl_t *ahci_ctlp)
 {
 	int port;
+
 	if (ahci_check_ctl_handle(ahci_ctlp) != DDI_SUCCESS) {
 		return (DDI_FAILURE);
 	}
+
 	for (port = 0; port < ahci_ctlp->ahcictl_num_ports; port++) {
+		ahci_port_t *ahci_portp;
+
 		if (!AHCI_PORT_IMPLEMENTED(ahci_ctlp, port))
 			continue;
+
+		ahci_portp = ahci_ctlp->ahcictl_ports[port];
+
+		mutex_enter(&ahci_portp->ahciport_mutex);
 		if (ahci_check_port_handle(ahci_ctlp, port) != DDI_SUCCESS) {
+			mutex_exit(&ahci_portp->ahciport_mutex);
 			return (DDI_FAILURE);
 		}
+		mutex_exit(&ahci_portp->ahciport_mutex);
 	}
+
 	return (DDI_SUCCESS);
 }
 
@@ -3493,14 +3531,15 @@ ahci_check_ctl_handle(ahci_ctl_t *ahci_ctlp)
 
 /*
  * Check the DMA handles and the access handles of a controller port.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_check_port_handle(ahci_ctl_t *ahci_ctlp, int port)
 {
 	ahci_port_t *ahci_portp = ahci_ctlp->ahcictl_ports[port];
 	int slot;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
 	if ((ahci_check_dma_handle(ahci_portp->
 	    ahciport_rcvd_fis_dma_handle) != DDI_FM_OK) ||
 	    (ahci_check_dma_handle(ahci_portp->
@@ -3511,8 +3550,7 @@ ahci_check_port_handle(ahci_ctl_t *ahci_ctlp, int port)
 	    ahciport_cmd_list_acc_handle) != DDI_FM_OK)) {
 		return (DDI_FAILURE);
 	}
-	for (slot = 0; slot < ahci_ctlp->ahcictl_num_cmd_slots;
-	    slot ++) {
+	for (slot = 0; slot < ahci_ctlp->ahcictl_num_cmd_slots; slot++) {
 		if (ahci_check_slot_handle(ahci_portp, slot)
 		    != DDI_SUCCESS) {
 			return (DDI_FAILURE);
@@ -3523,12 +3561,12 @@ ahci_check_port_handle(ahci_ctl_t *ahci_ctlp, int port)
 
 /*
  * Check the DMA handles and the access handles of a cmd table slot.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_check_slot_handle(ahci_port_t *ahci_portp, int slot)
 {
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
 	if ((ahci_check_acc_handle(ahci_portp->
 	    ahciport_cmd_tables_acc_handle[slot]) != DDI_FM_OK) ||
 	    (ahci_check_dma_handle(ahci_portp->
@@ -3537,6 +3575,7 @@ ahci_check_slot_handle(ahci_port_t *ahci_portp, int slot)
 	}
 	return (DDI_SUCCESS);
 }
+
 /*
  * Allocate the ports structure, only called by ahci_attach
  */
@@ -3628,35 +3667,20 @@ ahci_drain_ports_taskq(ahci_ctl_t *ahci_ctlp)
  * PM_LEVEL_D0 and DDI_RESUME. The DDI_ATTACH case is different from
  * other two cases; device signature probing are attempted only during
  * DDI_ATTACH case.
- *
- * WARNING!!! Disable the whole controller's interrupts before calling and
- * the interrupts will be enabled upon successfully return.
  */
 static int
 ahci_initialize_controller(ahci_ctl_t *ahci_ctlp)
 {
 	ahci_port_t *ahci_portp;
 	ahci_addr_t addr;
-	uint32_t ghc_control;
 	int port;
 
 	AHCIDBG(AHCIDBG_INIT|AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_initialize_controller enter", NULL);
 
+	/* Disable the whole controller interrupts */
 	mutex_enter(&ahci_ctlp->ahcictl_mutex);
-
-	/*
-	 * Indicate that system software is AHCI aware by setting
-	 * GHC.AE to 1
-	 */
-	ghc_control = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp));
-
-	ghc_control |= AHCI_HBA_GHC_AE;
-	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp),
-	    ghc_control);
-
+	ahci_disable_all_intrs(ahci_ctlp);
 	mutex_exit(&ahci_ctlp->ahcictl_mutex);
 
 	/* Initialize the implemented ports and structures */
@@ -3747,14 +3771,14 @@ ahci_uninitialize_controller(ahci_ctl_t *ahci_ctlp)
  * 2. Allocate ahci_pmult_info structure.
  *
  * NOTE: Must stop port before the function is called.
- * WARNING!!! ahciport_mutex should be acquired before the function is
- * called.
  */
 static void
 ahci_alloc_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 {
 	uint32_t port_cmd_status;
 	uint8_t port = ahci_portp->ahciport_port_num;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
@@ -3789,14 +3813,14 @@ ahci_alloc_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
  * 2. Deallocate ahci_pmult_info structure.
  *
  * NOTE: Must stop port before the function is called.
- * WARNING!!! ahciport_mutex should be acquired before the function is
- * called.
  */
 static void
 ahci_dealloc_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 {
 	uint32_t port_cmd_status;
 	uint8_t port = ahci_portp->ahciport_port_num;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
@@ -3821,15 +3845,47 @@ ahci_dealloc_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 }
 
 /*
- * The routine is to initialize a port. First put the port in NOTRunning
+ * Staggered Spin-up.
+ */
+static void
+ahci_staggered_spin_up(ahci_ctl_t *ahci_ctlp, uint8_t port)
+{
+	uint32_t cap_status;
+	uint32_t port_cmd_status;
+
+	ASSERT(MUTEX_HELD(&ahci_ctlp->ahcictl_ports[port]->ahciport_mutex));
+
+	cap_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_GLOBAL_CAP(ahci_ctlp));
+
+	/* Check for staggered spin-up support */
+	if (!(cap_status & AHCI_HBA_CAP_SSS))
+		return;
+
+	port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
+
+	/* If PxCMD.SUD == 1, no staggered spin-up is needed */
+	if (port_cmd_status & AHCI_CMD_STATUS_SUD)
+		return;
+
+	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "Spin-up at port %d", port);
+
+	/* Set PxCMD.SUD */
+	port_cmd_status |= AHCI_CMD_STATUS_SUD;
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
+	    port_cmd_status);
+}
+
+/*
+ * The routine is to initialize a port. First put the port in NotRunning
  * state, then enable port interrupt and clear Serror register. And under
  * AHCI_ATTACH case, find device signature and then try to start the port.
  *
  * Called by
  *    1. ahci_initialize_controller
  *    2. ahci_intr_phyrdy_change (hotplug)
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_initialize_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -3840,7 +3896,7 @@ ahci_initialize_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	boolean_t resuming = B_TRUE;	/*  processing DDI_RESUME */
 	int ret;
 
-	ASSERT(mutex_owned(&ahci_portp->ahciport_mutex));
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/* AHCI_ADDR_PORT: We've no idea of the attached device here.  */
 	ASSERT(AHCI_ADDR_IS_PORT(addrp));
@@ -3874,15 +3930,9 @@ ahci_initialize_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 		    "set PxCLB, PxCLBU, PxFB and PxFBU "
 		    "during resume", port);
 
-		/* Config Port Received FIS Base Address */
-		ddi_put64(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint64_t *)AHCI_PORT_PxFB(ahci_ctlp, port),
-		    ahci_portp->ahciport_rcvd_fis_dma_cookie.dmac_laddress);
-
-		/* Config Port Command List Base Address */
-		ddi_put64(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint64_t *)AHCI_PORT_PxCLB(ahci_ctlp, port),
-		    ahci_portp->ahciport_cmd_list_dma_cookie.dmac_laddress);
+		if (ahci_setup_port_base_addresses(ahci_ctlp, ahci_portp) !=
+		    AHCI_SUCCESS)
+			return (AHCI_FAILURE);
 	}
 
 	port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
@@ -3903,6 +3953,9 @@ ahci_initialize_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 		(void) ahci_put_port_into_notrunning_state(ahci_ctlp,
 		    ahci_portp, port);
 	}
+
+	/* Make sure the drive is spun-up */
+	ahci_staggered_spin_up(ahci_ctlp, port);
 
 	/* Disable interrupt */
 	ahci_disable_port_intrs(ahci_ctlp, port);
@@ -3939,7 +3992,7 @@ ahci_initialize_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 		if (ret != AHCI_SUCCESS) {
 			AHCIDBG(AHCIDBG_INIT|AHCIDBG_ERRS, ahci_ctlp,
 			    "ahci_initialize_port:"
-			    "port reset faild at port %d", port);
+			    "port reset failed at port %d", port);
 			return (AHCI_FAILURE);
 		}
 
@@ -3952,24 +4005,26 @@ ahci_initialize_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 			return (AHCI_FAILURE);
 		}
 	}
+
 	AHCIPORT_SET_STATE(ahci_portp, addrp, SATA_STATE_READY);
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "port %d is ready now.", port);
 
 	/*
 	 * Try to get the device signature if the port is not empty.
 	 */
-	if (!resuming && ahci_portp->ahciport_device_type != SATA_DTYPE_NONE)
+	if (!resuming && AHCIPORT_DEV_TYPE(ahci_portp, addrp) !=
+	    SATA_DTYPE_NONE)
 		ahci_find_dev_signature(ahci_ctlp, ahci_portp, addrp);
 
 	/* Return directly if no device connected */
-	if (ahci_portp->ahciport_device_type == SATA_DTYPE_NONE) {
+	if (AHCIPORT_DEV_TYPE(ahci_portp, addrp) == SATA_DTYPE_NONE) {
 		AHCIDBG(AHCIDBG_INIT, ahci_ctlp,
 		    "No device connected to port %d", port);
 		goto out;
 	}
 
 	/* If this is a port multiplier, we need do some initialization */
-	if (ahci_portp->ahciport_device_type == SATA_DTYPE_PMULT) {
+	if (AHCIPORT_DEV_TYPE(ahci_portp, addrp) == SATA_DTYPE_PMULT) {
 		AHCIDBG(AHCIDBG_INFO|AHCIDBG_PMULT, ahci_ctlp,
 		    "Port multiplier found at port %d", port);
 		ahci_alloc_pmult(ahci_ctlp, ahci_portp);
@@ -4242,9 +4297,6 @@ ahci_config_space_init(ahci_ctl_t *ahci_ctlp)
 /*
  * Read/Write a register at port multiplier by SATA READ PORTMULT / SATA WRITE
  * PORTMULT command. SYNC & POLLING mode is used.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_rdwr_pmult(ahci_ctl_t *ahci_ctlp, ahci_addr_t *addrp,
@@ -4267,7 +4319,7 @@ ahci_rdwr_pmult(ahci_ctl_t *ahci_ctlp, ahci_addr_t *addrp,
 	ahci_portp = ahci_ctlp->ahcictl_ports[port];
 
 	ASSERT(AHCI_ADDR_IS_PMPORT(addrp) || AHCI_ADDR_IS_PMULT(addrp));
-	ASSERT(mutex_owned(&ahci_portp->ahciport_mutex));
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/* Check the existence of the port multiplier */
 	if (ahci_portp->ahciport_device_type != SATA_DTYPE_PMULT)
@@ -4408,14 +4460,14 @@ ahci_write_pmult(ahci_ctl_t *ahci_ctlp, ahci_addr_t *addrp,
  * Update sata registers on port multiplier, including GSCR/PSCR registers.
  * ahci_update_pmult_gscr()
  * ahci_update_pmult_pscr()
- *
- * WARNING!!! ahciport_mutex should be acquired before those functions
- * get called.
  */
 static int
 ahci_update_pmult_gscr(ahci_ctl_t *ahci_ctlp, ahci_addr_t *addrp,
     sata_pmult_gscr_t *sg)
 {
+	ASSERT(MUTEX_HELD(
+	    &ahci_ctlp->ahcictl_ports[addrp->aa_port]->ahciport_mutex));
+
 	READ_PMULT(addrp, SATA_PMULT_GSCR0, &sg->gscr0, err);
 	READ_PMULT(addrp, SATA_PMULT_GSCR1, &sg->gscr1, err);
 	READ_PMULT(addrp, SATA_PMULT_GSCR2, &sg->gscr2, err);
@@ -4432,6 +4484,8 @@ ahci_update_pmult_pscr(ahci_ctl_t *ahci_ctlp, ahci_addr_t *addrp,
     sata_device_t *sd)
 {
 	ASSERT(AHCI_ADDR_IS_PMPORT(addrp));
+	ASSERT(MUTEX_HELD(
+	    &ahci_ctlp->ahcictl_ports[addrp->aa_port]->ahciport_mutex));
 
 	READ_PMULT(addrp, SATA_PMULT_REG_SSTS, &sd->satadev_scr.sstatus, err);
 	READ_PMULT(addrp, SATA_PMULT_REG_SERR, &sd->satadev_scr.serror, err);
@@ -4450,9 +4504,6 @@ err:	/* R/W PMULT error */
  * Initialize a port multiplier, including
  * 1. Enable FEATURES register at port multiplier. (SATA Chp.16)
  * 2. Redefine MASK register. (SATA Chap 16.?)
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_initialize_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -4462,7 +4513,8 @@ ahci_initialize_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint32_t gscr64;
 	uint8_t port = addrp->aa_port;
 
-	ASSERT(mutex_owned(&ahci_portp->ahciport_mutex));
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
 	AHCIDBG(AHCIDBG_INFO|AHCIDBG_PMULT, ahci_ctlp,
 	    "[Initialize] Port-multiplier at port %d.", port);
 
@@ -4529,7 +4581,6 @@ err:	/* R/W PMULT error */
  * issue a COMRESET, then a software reset to get its signature.
  *
  * NOTE: This function should only be called in ahci_probe_pmport()
- * WARNING!!! ahciport_mutex should be acquired before the function.
  */
 static int
 ahci_initialize_pmport(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -4540,6 +4591,7 @@ ahci_initialize_pmport(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint8_t pmport = addrp->aa_pmport;
 	int ret = AHCI_FAILURE;
 
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 	ASSERT(AHCI_ADDR_IS_PMPORT(addrp));
 
 	AHCIDBG(AHCIDBG_INIT|AHCIDBG_ENTRY, ahci_ctlp,
@@ -4663,7 +4715,6 @@ out:
  * handle hotplug events on port multiplier ports.
  *
  * NOTE: Only called from ahci_tran_probe_port()
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static int
 ahci_probe_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -4676,6 +4727,8 @@ ahci_probe_pmult(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	int dev_exists_now = 0, dev_existed_previously = 0;
 	uint8_t port = addrp->aa_port;
 	int npmport;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/* The bits in GSCR32 refers to the pmport that has a hot-plug event. */
 	READ_PMULT(addrp, SATA_PMULT_GSCR32, &gscr32, err);
@@ -4799,9 +4852,6 @@ err:	/* R/W PMULT error */
 /*
  * Probe and initialize a port multiplier port.
  * A port multiplier port could only be initilaizer here.
- *
- * WARNING!!! ahcictl_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_probe_pmport(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -4810,6 +4860,8 @@ ahci_probe_pmport(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint32_t port_state;
 	uint8_t port = addrp->aa_port;
 	ahci_addr_t addr_pmult;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/*
 	 * Check the parent - port multiplier first.
@@ -4883,9 +4935,6 @@ ahci_probe_pmport(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
  * PxCMD.ST to clear PxCI. And before issuing the software reset,
  * the port must be idle and PxTFD.STS.BSY and PxTFD.STS.DRQ must be
  * cleared unless command list override (PxCMD.CLO) is supported.
- *
- * WARNING!!! ahciport_mutex should be acquired and PxCMD.FRE should be
- * set before the function is called.
  */
 static int
 ahci_software_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -4899,6 +4948,8 @@ ahci_software_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint8_t port = addrp->aa_port;
 	uint8_t pmport = addrp->aa_pmport;
 	int rval = AHCI_FAILURE;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "port %d:%d device software resetting (FIS)", port, pmport);
@@ -5130,33 +5181,31 @@ out:
  *
  * When an HBA or port reset occurs, Phy communication is going to
  * be re-established with the device through a COMRESET followed by the
- * normal out-of-band communication sequence defined in Serial ATA. AT
+ * normal out-of-band communication sequence defined in Serial ATA. At
  * the end of reset, the device, if working properly, will send a D2H
  * Register FIS, which contains the device signature. When the HBA receives
  * this FIS, it updates PxTFD.STS and PxTFD.ERR register fields, and updates
  * the PxSIG register with the signature.
  *
- * Staggered spin-up is an optional feature in SATA II, and it enables an HBA
- * to individually spin-up attached devices. Please refer to chapter 10.9 of
- * AHCI 1.0 spec.
- */
-/*
- * WARNING!!! ahciport_mutex should be acquired, and PxCMD.ST should be also
- * cleared before the function is called.
+ * NOTE: It is expected both PxCMD.ST and PxCMD.CR are cleared before the
+ * function is called. If not, it is assumed the interface is in hung
+ * condition.
  */
 static int
 ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
     ahci_addr_t *addrp)
 {
 	ahci_addr_t pmult_addr;
-	uint32_t cap_status, port_cmd_status;
-	uint32_t port_scontrol, port_sstatus, port_serror;
-	uint32_t port_intr_status, port_task_file;
+	uint32_t port_cmd_status;
+	uint32_t port_scontrol, port_sstatus;
+	uint32_t port_task_file;
 	uint32_t port_state;
 	uint8_t port = addrp->aa_port;
 
 	int loop_count;
 	int instance = ddi_get_instance(ahci_ctlp->ahcictl_dip);
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/* Target is a port multiplier port? */
 	if (AHCI_ADDR_IS_PMPORT(addrp))
@@ -5169,123 +5218,51 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	    "Port %d port resetting...", port);
 	ahci_portp->ahciport_port_state = 0;
 
-	cap_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint32_t *)AHCI_GLOBAL_CAP(ahci_ctlp));
-
 	port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
 
-	if (cap_status & AHCI_HBA_CAP_SSS) {
-		/*
-		 * HBA support staggered spin-up, if the port has
-		 * not spin up yet, then force it to do spin-up
-		 */
-		if (!(port_cmd_status & AHCI_CMD_STATUS_SUD)) {
-			if (!(ahci_portp->ahciport_flags
-			    & AHCI_PORT_FLAG_SPINUP)) {
-				AHCIDBG(AHCIDBG_INIT, ahci_ctlp,
-				    "Port %d PxCMD.SUD is zero, force "
-				    "it to do spin-up", port);
-				ahci_portp->ahciport_flags |=
-				    AHCI_PORT_FLAG_SPINUP;
-			}
-		}
-	} else {
-		/*
-		 * HBA doesn't support stagger spin-up, force it
-		 * to do normal COMRESET
-		 */
-		if (ahci_portp->ahciport_flags &
-		    AHCI_PORT_FLAG_SPINUP) {
-			AHCIDBG(AHCIDBG_INIT, ahci_ctlp,
-			    "HBA does not support staggered spin-up "
-			    "force it to do normal COMRESET", NULL);
-			ahci_portp->ahciport_flags &=
-			    ~AHCI_PORT_FLAG_SPINUP;
-		}
-	}
+	/*
+	 * According to the spec, SUD bit should be set here,
+	 * but JMicron JMB363 doesn't follow it, so print
+	 * a debug message.
+	 */
+	if (!(port_cmd_status & AHCI_CMD_STATUS_SUD))
+		AHCIDBG(AHCIDBG_ERRS, ahci_ctlp,
+		    "ahci_port_reset: port %d SUD bit not set", port);
 
-	if (!(ahci_portp->ahciport_flags & AHCI_PORT_FLAG_SPINUP)) {
-		/* Do normal COMRESET */
-		AHCIDBG(AHCIDBG_INFO, ahci_ctlp,
-		    "ahci_port_reset: do normal COMRESET", port);
+	port_scontrol = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port));
+	SCONTROL_SET_DET(port_scontrol, SCONTROL_DET_COMRESET);
 
-		/*
-		 * According to the spec, SUD bit should be set here,
-		 * but JMicron JMB363 doesn't follow it, so remove
-		 * the assertion, and just print a debug message.
-		 */
-#if AHCI_DEBUG
-		if (!(port_cmd_status & AHCI_CMD_STATUS_SUD))
-			AHCIDBG(AHCIDBG_ERRS, ahci_ctlp,
-			    "port %d SUD bit not set", port)
-#endif
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port),
+	    port_scontrol);
 
-		port_scontrol = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port));
-		SCONTROL_SET_DET(port_scontrol, SCONTROL_DET_COMRESET);
-
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port),
-		    port_scontrol);
-
-		/* Enable PxCMD.FRE to read device */
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
-		    port_cmd_status|AHCI_CMD_STATUS_FRE);
-
-		/*
-		 * Give time for COMRESET to percolate, according to the AHCI
-		 * spec, software shall wait at least 1 millisecond before
-		 * clearing PxSCTL.DET
-		 */
-		drv_usecwait(AHCI_1MS_USECS*2);
-
-		/* Fetch the SCONTROL again and rewrite the DET part with 0 */
-		port_scontrol = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port));
-		SCONTROL_SET_DET(port_scontrol, SCONTROL_DET_NOACTION);
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port),
-		    port_scontrol);
-	} else {
-		/* Do staggered spin-up */
-		port_scontrol = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port));
-		SCONTROL_SET_DET(port_scontrol, SCONTROL_DET_NOACTION);
-
-		/* PxSCTL.DET must be 0 */
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port),
-		    port_scontrol);
-
-		port_cmd_status &= ~AHCI_CMD_STATUS_SUD;
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
-		    port_cmd_status);
-
-		/* 0 -> 1 edge */
-		drv_usecwait(AHCI_1MS_USECS*2);
-
-		/* Set PxCMD.SUD to 1 */
-		port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
-		port_cmd_status |= AHCI_CMD_STATUS_SUD;
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
-		    port_cmd_status);
-
-		/* Enable PxCMD.FRE to read device */
-		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
-		    port_cmd_status|AHCI_CMD_STATUS_FRE);
-	}
+	/* Enable PxCMD.FRE to read device */
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
+	    port_cmd_status|AHCI_CMD_STATUS_FRE);
 
 	/*
-	 * The port enters P:StartComm state, and HBA tells link layer to
-	 * start communication, which involves sending COMRESET to device.
-	 * And the HBA resets PxTFD.STS to 7Fh.
+	 * The port enters P:StartComm state, and the HBA tells the link layer
+	 * to start communication, which involves sending COMRESET to the
+	 * device. And the HBA resets PxTFD.STS to 7Fh.
 	 *
+	 * Give time for COMRESET to percolate, according to the AHCI
+	 * spec, software shall wait at least 1 millisecond before
+	 * clearing PxSCTL.DET
+	 */
+	drv_usecwait(AHCI_1MS_USECS * 2);
+
+	/* Fetch the SCONTROL again and rewrite the DET part with 0 */
+	port_scontrol = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port));
+	SCONTROL_SET_DET(port_scontrol, SCONTROL_DET_NOACTION);
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxSCTL(ahci_ctlp, port),
+	    port_scontrol);
+
+	/*
 	 * When a COMINIT is received from the device, then the port enters
 	 * P:ComInit state. And HBA sets PxTFD.STS to FFh or 80h. HBA sets
 	 * PxSSTS.DET to 1h to indicate a device is detected but communication
@@ -5297,7 +5274,7 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	 * that the interface is in active state.
 	 */
 	loop_count = 0;
-	do {
+	for (;;) {
 		port_sstatus = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 		    (uint32_t *)AHCI_PORT_PxSSTS(ahci_ctlp, port));
 
@@ -5310,6 +5287,9 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 			SSTATUS_SET_DET(port_sstatus, SSTATUS_DET_NODEV);
 		}
 
+		if (SSTATUS_GET_DET(port_sstatus) == SSTATUS_DET_DEVPRE_PHYCOM)
+			break;
+
 		if (loop_count++ > AHCI_POLLRATE_PORT_SSTATUS) {
 			/*
 			 * We are effectively timing out after 0.1 sec.
@@ -5319,15 +5299,14 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 
 		/* Wait for 10 millisec */
 		drv_usecwait(AHCI_10MS_USECS);
-	} while (SSTATUS_GET_DET(port_sstatus) != SSTATUS_DET_DEVPRE_PHYCOM);
+	}
 
 	AHCIDBG(AHCIDBG_INIT|AHCIDBG_POLL_LOOP, ahci_ctlp,
 	    "ahci_port_reset: 1st loop count: %d, "
 	    "port_sstatus = 0x%x port %d",
 	    loop_count, port_sstatus, port);
 
-	if ((SSTATUS_GET_IPM(port_sstatus) != SSTATUS_IPM_ACTIVE) ||
-	    (SSTATUS_GET_DET(port_sstatus) != SSTATUS_DET_DEVPRE_PHYCOM)) {
+	if (SSTATUS_GET_DET(port_sstatus) != SSTATUS_DET_DEVPRE_PHYCOM) {
 		/*
 		 * Either the port is not active or there
 		 * is no device present.
@@ -5336,60 +5315,25 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 		return (AHCI_SUCCESS);
 	}
 
-	/* Now we can make sure there is a device connected to the port */
-	port_intr_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint32_t *)AHCI_PORT_PxIS(ahci_ctlp, port));
-	port_serror = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint32_t *)AHCI_PORT_PxSERR(ahci_ctlp, port));
-
-	/*
-	 * A COMINIT signal is supposed to be received
-	 * PxSERR.DIAG.X or PxIS.PCS should be set
-	 */
-	if (!(port_intr_status & AHCI_INTR_STATUS_PCS) &&
-	    !(port_serror & SERROR_EXCHANGED_ERR)) {
-		cmn_err(CE_WARN, "!ahci%d: ahci_port_reset port %d "
-		    "COMINIT signal from the device not received",
-		    instance, port);
-		AHCIPORT_SET_STATE(ahci_portp, addrp, SATA_PSTATE_FAILED);
-		return (AHCI_FAILURE);
-	}
-
-	/*
-	 * According to the spec, when PxSCTL.DET is set to 0h, upon
-	 * receiving a COMINIT from the attached device, PxTFD.STS.BSY
-	 * shall be set to '1' by the HBA.
-	 *
-	 * However, we found JMicron JMB363 doesn't follow this, so
-	 * remove this check, and just print a debug message.
-	 */
-#if AHCI_DEBUG
-	port_task_file = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint32_t *)AHCI_PORT_PxTFD(ahci_ctlp, port));
-	if (!(port_task_file & AHCI_TFD_STS_BSY)) {
-		AHCIDBG(AHCIDBG_ERRS, ahci_ctlp, "ahci_port_reset: "
-		    "port %d BSY bit is not set after COMINIT signal "
-		    "is received", port);
-	}
-#endif
-
-	/*
-	 * PxSERR.DIAG.X has to be cleared in order to update PxTFD with
-	 * the D2H FIS received by HBA.
-	 */
+	/* Clear port serror register for the port */
 	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_PORT_PxSERR(ahci_ctlp, port),
-	    SERROR_EXCHANGED_ERR);
+	    AHCI_SERROR_CLEAR_ALL);
 
 	/*
 	 * Devices should return a FIS contains its signature to HBA after
-	 * COMINIT signal. Check whether a D2H FIS is received by polling
-	 * PxTFD.STS.ERR bit.
+	 * COMINIT signal. Check whether a D2H Register FIS is received by
+	 * polling PxTFD.STS.
 	 */
 	loop_count = 0;
-	do {
-		/* Wait for 10 millisec */
-		drv_usecwait(AHCI_10MS_USECS);
+	for (;;) {
+		port_task_file =
+		    ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+		    (uint32_t *)AHCI_PORT_PxTFD(ahci_ctlp, port));
+
+		if ((port_task_file & (AHCI_TFD_STS_BSY | AHCI_TFD_STS_DRQ |
+		    AHCI_TFD_STS_ERR)) == 0)
+			break;
 
 		if (loop_count++ > AHCI_POLLRATE_PORT_TFD_ERROR) {
 			/*
@@ -5401,7 +5345,8 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 			    instance, port);
 
 			AHCIDBG(AHCIDBG_ERRS, ahci_ctlp, "ahci_port_reset: "
-			    "port %d PxTFD.STS.ERR is not set, we need another "
+			    "port %d: some or all of BSY, DRQ and ERR in "
+			    "PxTFD.STS are not clear. We need another "
 			    "software reset.", port);
 
 			/* Clear port serror register for the port */
@@ -5423,19 +5368,7 @@ ahci_port_reset(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 
 		/* Wait for 10 millisec */
 		drv_usecwait(AHCI_10MS_USECS);
-
-		/*
-		 * The Error bit '1' means COMRESET is finished successfully
-		 * The device hardware has been initialized and the power-up
-		 * diagnostics successfully completed. The device requests
-		 * that the Transport layer transmit a Register - D2H FIS to
-		 * the host. (SATA spec 11.5, v2.6)
-		 */
-		port_task_file =
-		    ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
-		    (uint32_t *)AHCI_PORT_PxTFD(ahci_ctlp, port));
-	} while (((port_task_file & AHCI_TFD_ERR_MASK)
-	    >> AHCI_TFD_ERR_SHIFT) != AHCI_TFD_ERR_SGS);
+	}
 
 	AHCIDBG(AHCIDBG_INIT|AHCIDBG_POLL_LOOP, ahci_ctlp,
 	    "ahci_port_reset: 2nd loop count: %d, "
@@ -5645,7 +5578,7 @@ err:	/* R/W PMULT error */
  *
  * When an HBA reset occurs, Phy communication will be re-established with
  * the device through a COMRESET followed by the normal out-of-band
- * communication sequence defined in Serial ATA. AT the end of reset, the
+ * communication sequence defined in Serial ATA. At the end of reset, the
  * device, if working properly, will send a D2H Register FIS, which contains
  * the device signature. When the HBA receives this FIS, it updates PxTFD.STS
  * and PxTFD.ERR register fields, and updates the PxSIG register with the
@@ -5657,7 +5590,6 @@ static int
 ahci_hba_reset(ahci_ctl_t *ahci_ctlp)
 {
 	ahci_port_t *ahci_portp;
-	ahci_addr_t addr;
 	uint32_t ghc_control;
 	uint8_t port;
 	int loop_count;
@@ -5728,7 +5660,8 @@ ahci_hba_reset(ahci_ctl_t *ahci_ctlp)
 		ahci_portp = ahci_ctlp->ahcictl_ports[port];
 		mutex_enter(&ahci_portp->ahciport_mutex);
 
-		AHCI_ADDR_SET_PORT(&addr, port);
+		/* Make sure the drive is spun-up */
+		ahci_staggered_spin_up(ahci_ctlp, port);
 
 		if (ahci_restart_port_wait_till_ready(ahci_ctlp, ahci_portp,
 		    port, AHCI_PORT_RESET|AHCI_RESET_NO_EVENTS_UP, NULL) !=
@@ -5758,8 +5691,7 @@ ahci_hba_reset(ahci_ctl_t *ahci_ctlp)
  * physical communication has been established so that the signature could
  * be retrieved by software reset.
  *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called. And the port interrupt is disabled.
+ * NOTE: The port interrupts should be disabled before the function is called.
  */
 static void
 ahci_find_dev_signature(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
@@ -5771,6 +5703,7 @@ ahci_find_dev_signature(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	uint8_t pmport = addrp->aa_pmport;
 	int rval;
 
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 	ASSERT(AHCI_ADDR_IS_VALID(addrp));
 
 	/*
@@ -5854,7 +5787,6 @@ ahci_find_dev_signature(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	signature = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_PORT_PxSIG(ahci_ctlp, port));
 
-#ifdef AHCI_DEBUG
 	if (AHCI_ADDR_IS_PMPORT(addrp)) {
 		AHCIDBG(AHCIDBG_INIT|AHCIDBG_INFO|AHCIDBG_PMULT, ahci_ctlp,
 		    "ahci_find_dev_signature: signature = 0x%x at port %d:%d",
@@ -5864,7 +5796,6 @@ ahci_find_dev_signature(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 		    "ahci_find_dev_signature: signature = 0x%x at port %d",
 		    signature, port);
 	}
-#endif
 
 	/* NOTE: Only support ATAPI device at controller port. */
 	if (signature == AHCI_SIGNATURE_ATAPI && !AHCI_ADDR_IS_PORT(addrp))
@@ -5942,14 +5873,13 @@ ahci_disable_interface_pm(ahci_ctl_t *ahci_ctlp, uint8_t port)
  * Software shall not set PxCMD.ST to '1' unless a functional device is
  * present on the port(as determined by PxTFD.STS.BSY = '0',
  * PxTFD.STS.DRQ = '0', and PxSSTS.DET = 3h).
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_start_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp, uint8_t port)
 {
 	uint32_t port_cmd_status;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp, "ahci_start_port: %d enter", port);
 
@@ -5995,12 +5925,90 @@ ahci_start_port(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp, uint8_t port)
 }
 
 /*
+ * Setup PxCLB, PxCLBU, PxFB, and PxFBU for particular port. First, we need
+ * to make sure PxCMD.ST, PxCMD.CR, PxCMD.FRE, and PxCMD.FR are all cleared.
+ * Then set PxCLB, PxCLBU, PxFB, and PxFBU.
+ */
+static int
+ahci_setup_port_base_addresses(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
+{
+	uint8_t port = ahci_portp->ahciport_port_num;
+	uint32_t port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
+	/* Step 1: Make sure both PxCMD.ST and PxCMD.CR are cleared. */
+	if (port_cmd_status & (AHCI_CMD_STATUS_ST | AHCI_CMD_STATUS_CR)) {
+		if (ahci_put_port_into_notrunning_state(ahci_ctlp, ahci_portp,
+		    port) != AHCI_SUCCESS)
+			return (AHCI_FAILURE);
+
+		port_cmd_status = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
+	}
+
+	/* Step 2: Make sure both PxCMD.FRE and PxCMD.FR are cleared. */
+	if (port_cmd_status & (AHCI_CMD_STATUS_FRE | AHCI_CMD_STATUS_FR)) {
+		int loop_count = 0;
+
+		/* Clear PxCMD.FRE */
+		port_cmd_status &= ~AHCI_CMD_STATUS_FRE;
+		ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+		    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port),
+		    port_cmd_status);
+
+		/* Wait until PxCMD.FR is cleared */
+		for (;;) {
+			port_cmd_status =
+			    ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
+			    (uint32_t *)AHCI_PORT_PxCMD(ahci_ctlp, port));
+
+			if (!(port_cmd_status & AHCI_CMD_STATUS_FR))
+				break;
+
+			if (loop_count++ >= AHCI_POLLRATE_PORT_IDLE_FR) {
+				AHCIDBG(AHCIDBG_INIT | AHCIDBG_ERRS, ahci_ctlp,
+				    "ahci_setup_port_base_addresses: cannot "
+				    "clear PxCMD.FR for port %d.", port);
+
+				/*
+				 * We are effectively timing out after 0.5 sec.
+				 * This value is specified in AHCI spec.
+				 */
+				return (AHCI_FAILURE);
+			}
+
+			/* Wait for 1 millisec */
+			drv_usecwait(AHCI_1MS_USECS);
+		}
+	}
+
+	/* Step 3: Config Port Command List Base Address */
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxCLB(ahci_ctlp, port),
+	    ahci_portp->ahciport_cmd_list_dma_cookie.dmac_address);
+
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxCLBU(ahci_ctlp, port),
+	    ahci_portp->ahciport_cmd_list_dma_cookie.dmac_notused);
+
+	/* Step 4: Config Port Received FIS Base Address */
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxFB(ahci_ctlp, port),
+	    ahci_portp->ahciport_rcvd_fis_dma_cookie.dmac_address);
+
+	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
+	    (uint32_t *)AHCI_PORT_PxFBU(ahci_ctlp, port),
+	    ahci_portp->ahciport_rcvd_fis_dma_cookie.dmac_notused);
+
+	return (AHCI_SUCCESS);
+}
+
+/*
  * Allocate the ahci_port_t including Received FIS and Command List.
  * The argument - port is the physical port number, and not logical
  * port number seen by the SATA framework.
- *
- * WARNING!!! ahcictl_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_alloc_port_state(ahci_ctl_t *ahci_ctlp, uint8_t port)
@@ -6008,6 +6016,8 @@ ahci_alloc_port_state(ahci_ctl_t *ahci_ctlp, uint8_t port)
 	dev_info_t *dip = ahci_ctlp->ahcictl_dip;
 	ahci_port_t *ahci_portp;
 	char taskq_name[64] = "event_handle_taskq";
+
+	ASSERT(MUTEX_HELD(&ahci_ctlp->ahcictl_mutex));
 
 	ahci_portp =
 	    (ahci_port_t *)kmem_zalloc(sizeof (ahci_port_t), KM_SLEEP);
@@ -6028,12 +6038,18 @@ ahci_alloc_port_state(ahci_ctl_t *ahci_ctlp, uint8_t port)
 	 * Allocate memory for received FIS structure and
 	 * command list for this port
 	 */
-	if (ahci_alloc_rcvd_fis(ahci_ctlp, ahci_portp, port) != AHCI_SUCCESS) {
+	if (ahci_alloc_rcvd_fis(ahci_ctlp, ahci_portp) != AHCI_SUCCESS) {
 		goto err_case1;
 	}
 
-	if (ahci_alloc_cmd_list(ahci_ctlp, ahci_portp, port) != AHCI_SUCCESS) {
+	if (ahci_alloc_cmd_list(ahci_ctlp, ahci_portp) != AHCI_SUCCESS) {
 		goto err_case2;
+	}
+
+	/* Setup PxCMD.CLB, PxCMD.CLBU, PxCMD.FB, and PxCMD.FBU */
+	if (ahci_setup_port_base_addresses(ahci_ctlp, ahci_portp) !=
+	    AHCI_SUCCESS) {
+		goto err_case3;
 	}
 
 	(void) snprintf(taskq_name + strlen(taskq_name),
@@ -6087,16 +6103,14 @@ err_case1:
 }
 
 /*
- * Reverse of ahci_dealloc_port_state().
- *
- * WARNING!!! ahcictl_mutex should be acquired before the function
- * is called.
+ * Reverse of ahci_alloc_port_state().
  */
 static void
 ahci_dealloc_port_state(ahci_ctl_t *ahci_ctlp, uint8_t port)
 {
 	ahci_port_t *ahci_portp = ahci_ctlp->ahcictl_ports[port];
 
+	ASSERT(MUTEX_HELD(&ahci_ctlp->ahcictl_mutex));
 	ASSERT(ahci_portp != NULL);
 
 	mutex_enter(&ahci_portp->ahciport_mutex);
@@ -6121,17 +6135,15 @@ ahci_dealloc_port_state(ahci_ctl_t *ahci_ctlp, uint8_t port)
 
 /*
  * Allocates memory for the Received FIS Structure
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
-ahci_alloc_rcvd_fis(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
-    uint8_t port)
+ahci_alloc_rcvd_fis(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 {
 	size_t rcvd_fis_size;
 	size_t ret_len;
 	uint_t cookie_count;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	rcvd_fis_size = sizeof (ahci_rcvd_fis_t);
 
@@ -6185,11 +6197,6 @@ ahci_alloc_rcvd_fis(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 
 	bzero((void *)ahci_portp->ahciport_rcvd_fis, rcvd_fis_size);
 
-	/* Config Port Received FIS Base Address */
-	ddi_put64(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint64_t *)AHCI_PORT_PxFB(ahci_ctlp, port),
-	    ahci_portp->ahciport_rcvd_fis_dma_cookie.dmac_laddress);
-
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "64-bit, dma address: 0x%llx",
 	    ahci_portp->ahciport_rcvd_fis_dma_cookie.dmac_laddress);
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "32-bit, dma address: 0x%x",
@@ -6200,13 +6207,12 @@ ahci_alloc_rcvd_fis(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 
 /*
  * Deallocates the Received FIS Structure
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_dealloc_rcvd_fis(ahci_port_t *ahci_portp)
 {
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
 	/* Unbind the cmd list dma handle first. */
 	(void) ddi_dma_unbind_handle(ahci_portp->ahciport_rcvd_fis_dma_handle);
 
@@ -6221,17 +6227,15 @@ ahci_dealloc_rcvd_fis(ahci_port_t *ahci_portp)
  * Allocates memory for the Command List, which contains up to 32 entries.
  * Each entry contains a command header, which is a 32-byte structure that
  * includes the pointer to the command table.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
-ahci_alloc_cmd_list(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
-    uint8_t port)
+ahci_alloc_cmd_list(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 {
 	size_t cmd_list_size;
 	size_t ret_len;
 	uint_t cookie_count;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	cmd_list_size =
 	    ahci_ctlp->ahcictl_num_cmd_slots * sizeof (ahci_cmd_header_t);
@@ -6285,11 +6289,6 @@ ahci_alloc_cmd_list(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 
 	bzero((void *)ahci_portp->ahciport_cmd_list, cmd_list_size);
 
-	/* Config Port Command List Base Address */
-	ddi_put64(ahci_ctlp->ahcictl_ahci_acc_handle,
-	    (uint64_t *)AHCI_PORT_PxCLB(ahci_ctlp, port),
-	    ahci_portp->ahciport_cmd_list_dma_cookie.dmac_laddress);
-
 	AHCIDBG(AHCIDBG_INIT, ahci_ctlp, "64-bit, dma address: 0x%llx",
 	    ahci_portp->ahciport_cmd_list_dma_cookie.dmac_laddress);
 
@@ -6317,13 +6316,12 @@ err_out:
 
 /*
  * Deallocates the Command List
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_dealloc_cmd_list(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 {
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
+
 	/* First dealloc command table */
 	ahci_dealloc_cmd_tables(ahci_ctlp, ahci_portp);
 
@@ -6340,9 +6338,6 @@ ahci_dealloc_cmd_list(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 /*
  * Allocates memory for all Command Tables, which contains Command FIS,
  * ATAPI Command and Physical Region Descriptor Table.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_alloc_cmd_tables(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
@@ -6351,6 +6346,8 @@ ahci_alloc_cmd_tables(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 	ddi_dma_cookie_t cmd_table_dma_cookie;
 	uint_t cookie_count;
 	int slot;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_INIT|AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_alloc_cmd_tables: port %d enter",
@@ -6450,14 +6447,13 @@ err_out:
 
 /*
  * Deallocates memory for all Command Tables.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_dealloc_cmd_tables(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 {
 	int slot;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_dealloc_cmd_tables: %d enter",
@@ -6480,14 +6476,13 @@ ahci_dealloc_cmd_tables(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp)
 
 /*
  * Update SATA registers at controller ports
- *
- * WARNING!!! ahciport_mutex should be acquired before those functions
- * get called.
  */
 static void
 ahci_update_sata_registers(ahci_ctl_t *ahci_ctlp, uint8_t port,
     sata_device_t *sd)
 {
+	ASSERT(MUTEX_HELD(&ahci_ctlp->ahcictl_ports[port]->ahciport_mutex));
+
 	sd->satadev_scr.sstatus =
 	    ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)(AHCI_PORT_PxSSTS(ahci_ctlp, port)));
@@ -7000,9 +6995,6 @@ ahci_intr_set_device_bits(ahci_ctl_t *ahci_ctlp,
 /*
  * NCQ interrupt handler. Called upon a NCQ command is completed.
  * Only be called from ahci_intr_set_device_bits().
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is
- * called.
  */
 static int
 ahci_intr_ncq_events(ahci_ctl_t *ahci_ctlp,
@@ -7976,13 +7968,12 @@ ahci_intr_cold_port_detect(ahci_ctl_t *ahci_ctlp,
 
 /*
  * Enable the interrupts for a particular port.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_enable_port_intrs(ahci_ctl_t *ahci_ctlp, uint8_t port)
 {
+	ASSERT(MUTEX_HELD(&ahci_ctlp->ahcictl_ports[port]->ahciport_mutex));
+
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_enable_port_intrs enter, port %d", port);
 
@@ -8033,14 +8024,13 @@ ahci_enable_port_intrs(ahci_ctl_t *ahci_ctlp, uint8_t port)
 
 /*
  * Enable interrupts for all the ports.
- *
- * WARNING!!! ahcictl_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_enable_all_intrs(ahci_ctl_t *ahci_ctlp)
 {
 	uint32_t ghc_control;
+
+	ASSERT(MUTEX_HELD(&ahci_ctlp->ahcictl_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp, "ahci_enable_all_intrs enter", NULL);
 
@@ -8055,13 +8045,13 @@ ahci_enable_all_intrs(ahci_ctl_t *ahci_ctlp)
 
 /*
  * Disable interrupts for a particular port.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_disable_port_intrs(ahci_ctl_t *ahci_ctlp, uint8_t port)
 {
+	ASSERT(ahci_ctlp->ahcictl_flags & AHCI_QUIESCE ||
+	    MUTEX_HELD(&ahci_ctlp->ahcictl_ports[port]->ahciport_mutex));
+
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_disable_port_intrs enter, port %d", port);
 
@@ -8074,14 +8064,14 @@ ahci_disable_port_intrs(ahci_ctl_t *ahci_ctlp, uint8_t port)
  *
  * The global bit is cleared, then all interrupt sources from all
  * ports are disabled.
- *
- * WARNING!!! ahcictl_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_disable_all_intrs(ahci_ctl_t *ahci_ctlp)
 {
 	uint32_t ghc_control;
+
+	ASSERT(ahci_ctlp->ahcictl_flags & (AHCI_ATTACH | AHCI_QUIESCE) ||
+	    MUTEX_HELD(&ahci_ctlp->ahcictl_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp, "ahci_disable_all_intrs enter",
 	    NULL);
@@ -8089,7 +8079,7 @@ ahci_disable_all_intrs(ahci_ctl_t *ahci_ctlp)
 	ghc_control = ddi_get32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp));
 
-	ghc_control &= ~ AHCI_HBA_GHC_IE;
+	ghc_control &= ~AHCI_HBA_GHC_IE;
 
 	ddi_put32(ahci_ctlp->ahcictl_ahci_acc_handle,
 	    (uint32_t *)AHCI_GLOBAL_GHC(ahci_ctlp), ghc_control);
@@ -8302,7 +8292,7 @@ ahci_add_intrs(ahci_ctl_t *ahci_ctlp, int intr_type)
  * Removes the registered interrupts irrespective of whether they
  * were legacy or MSI.
  *
- * WARNING!!! The controller interrupts must be disabled before calling
+ * NOTE: The controller interrupts must be disabled before calling
  * this routine.
  */
 static void
@@ -8339,9 +8329,6 @@ ahci_rem_intrs(ahci_ctl_t *ahci_ctlp)
  * This routine tries to put port into P:NotRunning state by clearing
  * PxCMD.ST. HBA will clear PxCI to 0h, PxSACT to 0h, PxCMD.CCS to 0h
  * and PxCMD.CR to '0'.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static int
 ahci_put_port_into_notrunning_state(ahci_ctl_t *ahci_ctlp,
@@ -8349,6 +8336,9 @@ ahci_put_port_into_notrunning_state(ahci_ctl_t *ahci_ctlp,
 {
 	uint32_t port_cmd_status;
 	int loop_count;
+
+	ASSERT(ahci_ctlp->ahcictl_flags & AHCI_QUIESCE ||
+	    MUTEX_HELD(&ahci_ctlp->ahcictl_ports[port]->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_put_port_into_notrunning_state enter: port %d", port);
@@ -8418,11 +8408,6 @@ ahci_put_port_into_notrunning_state(ahci_ctl_t *ahci_ctlp,
  *	+ Fatal error recovery
  *	+ To abort the timeout packet(s)
  *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called. And ahciport_mutex will be released before the reset
- * event is reported to sata module by calling sata_hba_event_notify,
- * and then be acquired again later.
- *
  * NOTES!!! During this procedure, PxSERR register will be cleared, and
  * according to the spec, the clearance of three bits will also clear
  * three interrupt status bits.
@@ -8449,6 +8434,8 @@ ahci_restart_port_wait_till_ready(ahci_ctl_t *ahci_ctlp,
 	uint32_t previous_dev_type = ahci_portp->ahciport_device_type;
 	int npmport = 0;
 	uint8_t cport = ahci_ctlp->ahcictl_port_to_cport[port];
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_restart_port_wait_till_ready: port %d enter", port);
@@ -8579,7 +8566,9 @@ out:
 	 * The COMRESET will make port multiplier enter legacy mode.
 	 * Issue a software reset to make it work again.
 	 */
+	ahci_disable_port_intrs(ahci_ctlp, port);
 	ahci_find_dev_signature(ahci_ctlp, ahci_portp, &addr_port);
+	ahci_enable_port_intrs(ahci_ctlp, port);
 
 	/*
 	 * Following codes are specific for the port multiplier
@@ -8693,8 +8682,6 @@ out:
  *
  * In all these scenarios, we need to send any pending unfinished
  * commands up to sata framework.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static void
 ahci_mop_commands(ahci_ctl_t *ahci_ctlp,
@@ -8712,6 +8699,8 @@ ahci_mop_commands(ahci_ctl_t *ahci_ctlp,
 	int ncq_cmd_in_progress = 0;
 	int err_retri_cmd_in_progress = 0;
 	int rdwr_pmult_cmd_in_progress = 0;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ERRS|AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_mop_commands entered: port: %d slot_status: 0x%x",
@@ -9113,7 +9102,7 @@ loop:
 	ahci_portp->ahciport_err_retri_pkt = NULL;
 
 	/* Remove the flag after READ LOG EXT command is completed */
-	ahci_portp->ahciport_flags &= ~ AHCI_PORT_FLAG_RDLOGEXT;
+	ahci_portp->ahciport_flags &= ~AHCI_PORT_FLAG_RDLOGEXT;
 
 	if (rdlog_spkt->satapkt_reason == SATA_PKT_COMPLETED) {
 		/* Update the request log data */
@@ -9235,7 +9224,7 @@ loop:
 	ahci_portp->ahciport_err_retri_pkt = NULL;
 
 	/* Remove the flag after REQUEST SENSE command is completed */
-	ahci_portp->ahciport_flags &= ~ AHCI_PORT_FLAG_RQSENSE;
+	ahci_portp->ahciport_flags &= ~AHCI_PORT_FLAG_RQSENSE;
 
 	if (rs_spkt->satapkt_reason == SATA_PKT_COMPLETED) {
 		/* Update the request sense data */
@@ -9292,8 +9281,6 @@ loop:
  *	PxIS.HBDS - Host Bus Data Error Status
  *	PxIS.HBFS - Host Bus Fatal Error Status
  *	PxIS.TFES - Task File Error Status
- *
- * WARNING!!! ahciport_mutex should be acquired before the function is called.
  */
 static void
 ahci_fatal_error_recovery_handler(ahci_ctl_t *ahci_ctlp,
@@ -9313,6 +9300,8 @@ ahci_fatal_error_recovery_handler(ahci_ctl_t *ahci_ctlp,
 	uint8_t		port = addrp->aa_port;
 	int		instance = ddi_get_instance(ahci_ctlp->ahcictl_dip);
 	int		rval;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_fatal_error_recovery_handler enter: port %d", port);
@@ -9489,9 +9478,6 @@ out:
  * Nothing will be done when Command-based switching is employed.
  *
  * Currently code is neither completed nor tested.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_pmult_error_recovery_handler(ahci_ctl_t *ahci_ctlp,
@@ -9503,6 +9489,8 @@ ahci_pmult_error_recovery_handler(ahci_ctl_t *ahci_ctlp,
 	uint32_t	port_fbs_ctrl;
 	int loop_count = 0;
 	ahci_addr_t	addr;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/* Nothing will be done under Command-based switching. */
 	if (!(ahci_ctlp->ahcictl_cap & AHCI_CAP_PMULT_FBSS))
@@ -10238,6 +10226,8 @@ ahci_quiesce(dev_info_t *dip)
 	ahci_debug_flags = 0;
 #endif
 
+	ahci_ctlp->ahcictl_flags |= AHCI_QUIESCE;
+
 	/* disable all the interrupts. */
 	ahci_disable_all_intrs(ahci_ctlp);
 
@@ -10262,19 +10252,19 @@ ahci_quiesce(dev_info_t *dip)
 		    ahci_portp, port);
 	}
 
+	ahci_ctlp->ahcictl_flags &= ~AHCI_QUIESCE;
+
 	return (DDI_SUCCESS);
 }
 
 /*
  * The function will add a sata packet to the done queue.
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_add_doneq(ahci_port_t *ahci_portp, sata_pkt_t *satapkt, int reason)
 {
 	ASSERT(satapkt != NULL);
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	/* set the reason for all packets */
 	satapkt->satapkt_reason = reason;
@@ -10289,7 +10279,7 @@ ahci_add_doneq(ahci_port_t *ahci_portp, sata_pkt_t *satapkt, int reason)
 		*ahci_portp->ahciport_doneqtail = satapkt;
 		ahci_portp->ahciport_doneqtail =
 		    (sata_pkt_t **)&(satapkt->satapkt_hba_driver_private);
-		ahci_portp->ahciport_doneq_len ++;
+		ahci_portp->ahciport_doneq_len++;
 
 	} else if ((satapkt->satapkt_op_mode & SATA_OPMODE_SYNCH) &&
 	    ! (satapkt->satapkt_op_mode & SATA_OPMODE_POLLING))
@@ -10302,14 +10292,13 @@ ahci_add_doneq(ahci_port_t *ahci_portp, sata_pkt_t *satapkt, int reason)
 /*
  * The function will call completion callback of sata packet on the
  * completed queue
- *
- * WARNING!!! ahciport_mutex should be acquired before the function
- * is called.
  */
 static void
 ahci_flush_doneq(ahci_port_t *ahci_portp)
 {
 	sata_pkt_t *satapkt, *next;
+
+	ASSERT(MUTEX_HELD(&ahci_portp->ahciport_mutex));
 
 	if (ahci_portp->ahciport_doneq) {
 		satapkt = ahci_portp->ahciport_doneq;

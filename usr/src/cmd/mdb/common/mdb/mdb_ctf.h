@@ -22,6 +22,10 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
+/*
+ * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ */
 
 #ifndef	_MDB_CTF_H
 #define	_MDB_CTF_H
@@ -98,6 +102,29 @@ extern const char *mdb_ctf_enum_name(mdb_ctf_id_t, int);
 extern int mdb_ctf_member_iter(mdb_ctf_id_t, mdb_ctf_member_f *, void *);
 extern int mdb_ctf_enum_iter(mdb_ctf_id_t, mdb_ctf_enum_f *, void *);
 extern int mdb_ctf_type_iter(const char *, mdb_ctf_type_f *, void *);
+extern int mdb_ctf_type_delete(const mdb_ctf_id_t *);
+
+/*
+ * Special values for mdb_ctf_type_iter.
+ */
+#define	MDB_CTF_SYNTHETIC_ITER	(const char *)(-1L)
+
+#define	SYNTHETIC_ILP32	1
+#define	SYNTHETIC_LP64	2
+extern int mdb_ctf_synthetics_create_base(int);
+extern int mdb_ctf_synthetics_reset(void);
+
+/*
+ * Synthetic creation routines
+ */
+extern int mdb_ctf_add_typedef(const char *, const mdb_ctf_id_t *,
+    mdb_ctf_id_t *);
+extern int mdb_ctf_add_struct(const char *, mdb_ctf_id_t *);
+extern int mdb_ctf_add_union(const char *, mdb_ctf_id_t *);
+extern int mdb_ctf_add_member(const mdb_ctf_id_t *, const char *,
+    const mdb_ctf_id_t *, mdb_ctf_id_t *);
+extern int mdb_ctf_add_array(const mdb_ctf_arinfo_t *, mdb_ctf_id_t *);
+extern int mdb_ctf_add_pointer(const mdb_ctf_id_t *, mdb_ctf_id_t *);
 
 /* utility stuff */
 extern ctf_id_t mdb_ctf_type_id(mdb_ctf_id_t);
@@ -108,17 +135,15 @@ extern int mdb_ctf_member_info(mdb_ctf_id_t, const char *,
     ulong_t *, mdb_ctf_id_t *);
 extern int mdb_ctf_offsetof(mdb_ctf_id_t, const char *, ulong_t *);
 extern int mdb_ctf_num_members(mdb_ctf_id_t);
+extern int mdb_ctf_offsetof_by_name(const char *, const char *);
 
 extern ssize_t mdb_ctf_offset_to_name(mdb_ctf_id_t, ulong_t, char *, size_t,
     int, mdb_ctf_id_t *, ulong_t *);
 
-#define	MDB_CTF_VREAD_IGNORE_GROW	0x01
-#define	MDB_CTF_VREAD_IGNORE_ABSENT	0x02
-#define	MDB_CTF_VREAD_IGNORE_UNIONS	0x04
+#define	MDB_CTF_VREAD_QUIET		0x100
 
-#define	MDB_CTF_VREAD_IGNORE_ALL	0x07
-
-extern int mdb_ctf_vread(void *, const char *, uintptr_t, uint_t);
+extern int mdb_ctf_vread(void *, const char *, const char *,
+    uintptr_t, uint_t);
 extern int mdb_ctf_readsym(void *, const char *, const char *, uint_t);
 
 #ifdef _MDB
@@ -127,6 +152,9 @@ extern ctf_file_t *mdb_ctf_open(const char *, int *);		/* Internal */
 extern ctf_file_t *mdb_ctf_bufopen(const void *, size_t,	/* Internal */
     const void *, Shdr *, const void *, Shdr *, int *);
 extern void mdb_ctf_close(ctf_file_t *fp);			/* Internal */
+extern int mdb_ctf_synthetics_init(void);			/* Internal */
+extern void mdb_ctf_synthetics_fini(void);			/* Internal */
+extern int mdb_ctf_synthetics_from_file(const char *);		/* Internal */
 
 #endif
 

@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 #include <mdb/mdb_modapi.h>
@@ -120,7 +121,7 @@ ssize_t
 mdb_readsym(void *buf, size_t nbytes, const char *name)
 {
 	ssize_t rbytes = mdb_tgt_readsym(mdb.m_target, MDB_TGT_AS_VIRT,
-	    buf, nbytes, MDB_TGT_OBJ_EXEC, name);
+	    buf, nbytes, MDB_TGT_OBJ_EVERY, name);
 
 	if (rbytes > 0 && rbytes < nbytes)
 		return (set_errbytes(rbytes, nbytes));
@@ -132,7 +133,7 @@ ssize_t
 mdb_writesym(const void *buf, size_t nbytes, const char *name)
 {
 	return (mdb_tgt_writesym(mdb.m_target, MDB_TGT_AS_VIRT,
-	    buf, nbytes, MDB_TGT_OBJ_EXEC, name));
+	    buf, nbytes, MDB_TGT_OBJ_EVERY, name));
 }
 
 ssize_t
@@ -140,7 +141,7 @@ mdb_readvar(void *buf, const char *name)
 {
 	GElf_Sym sym;
 
-	if (mdb_tgt_lookup_by_name(mdb.m_target, MDB_TGT_OBJ_EXEC,
+	if (mdb_tgt_lookup_by_name(mdb.m_target, MDB_TGT_OBJ_EVERY,
 	    name, &sym, NULL))
 		return (-1);
 
@@ -156,7 +157,7 @@ mdb_writevar(const void *buf, const char *name)
 {
 	GElf_Sym sym;
 
-	if (mdb_tgt_lookup_by_name(mdb.m_target, MDB_TGT_OBJ_EXEC,
+	if (mdb_tgt_lookup_by_name(mdb.m_target, MDB_TGT_OBJ_EVERY,
 	    name, &sym, NULL))
 		return (-1);
 
@@ -170,7 +171,7 @@ mdb_writevar(const void *buf, const char *name)
 int
 mdb_lookup_by_name(const char *name, GElf_Sym *sym)
 {
-	return (mdb_lookup_by_obj(MDB_TGT_OBJ_EXEC, name, sym));
+	return (mdb_lookup_by_obj(MDB_TGT_OBJ_EVERY, name, sym));
 }
 
 int
@@ -510,16 +511,44 @@ done:
 	return (rval);
 }
 
+typedef struct pwalk_step {
+	mdb_walk_cb_t ps_cb;
+	void *ps_private;
+} pwalk_step_t;
+
+static int
+pwalk_step(uintptr_t addr, const void *data, void *private)
+{
+	pwalk_step_t *psp = private;
+	int ret;
+
+	mdb.m_frame->f_cbactive = B_TRUE;
+	ret = psp->ps_cb(addr, data, psp->ps_private);
+	mdb.m_frame->f_cbactive = B_FALSE;
+
+	return (ret);
+}
+
 int
-mdb_pwalk(const char *name, mdb_walk_cb_t func, void *data, uintptr_t addr)
+mdb_pwalk(const char *name, mdb_walk_cb_t func, void *private, uintptr_t addr)
 {
 	mdb_iwalker_t *iwp = mdb_walker_lookup(name);
+	pwalk_step_t p;
 
 	if (func == NULL)
 		return (set_errno(EINVAL));
 
-	if (iwp != NULL)
-		return (walk_common(mdb_wcb_create(iwp, func, data, addr)));
+	p.ps_cb = func;
+	p.ps_private = private;
+
+	if (iwp != NULL) {
+		int ret;
+		int cbactive = mdb.m_frame->f_cbactive;
+		mdb.m_frame->f_cbactive = B_FALSE;
+		ret = walk_common(mdb_wcb_create(iwp, pwalk_step, &p, addr));
+		mdb.m_frame->f_cbactive = cbactive;
+		return (ret);
+	}
 
 	return (-1); /* errno is set for us */
 }
@@ -790,6 +819,55 @@ mdb_object_iter(mdb_object_cb_t cb, void *data)
 		return (-1);
 
 	return (arg.oi_rval);
+}
+
+/*
+ * Private callback structure for implementing mdb_symbol_iter, below.
+ */
+typedef struct {
+	mdb_symbol_cb_t si_cb;
+	void *si_arg;
+	int si_rval;
+} symbol_iter_arg_t;
+
+/*ARGSUSED*/
+static int
+mdb_symbol_cb(void *data, const GElf_Sym *gsym, const char *name,
+    const mdb_syminfo_t *sip, const char *obj)
+{
+	symbol_iter_arg_t *arg = data;
+	mdb_symbol_t sym;
+
+	if (arg->si_rval != 0)
+		return (0);
+
+	bzero(&sym, sizeof (sym));
+	sym.sym_name = name;
+	sym.sym_object = obj;
+	sym.sym_sym = gsym;
+	sym.sym_table = sip->sym_table;
+	sym.sym_id = sip->sym_id;
+
+	arg->si_rval = arg->si_cb(&sym, arg->si_arg);
+
+	return (0);
+}
+
+int
+mdb_symbol_iter(const char *obj, uint_t which, uint_t type,
+    mdb_symbol_cb_t cb, void *data)
+{
+	symbol_iter_arg_t arg;
+
+	arg.si_cb = cb;
+	arg.si_arg = data;
+	arg.si_rval = 0;
+
+	if (mdb_tgt_symbol_iter(mdb.m_target, obj, which, type,
+	    mdb_symbol_cb, &arg) != 0)
+		return (-1);
+
+	return (arg.si_rval);
 }
 
 /*

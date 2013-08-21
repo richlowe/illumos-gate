@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2013, Joyent, Inc. All rights reserved.
 #
 
 include $(SRC)/uts/Makefile.uts
@@ -156,7 +157,7 @@ CHKHDRS=			\
 	ddi_impldefs.h		\
 	ddi_implfuncs.h		\
 	ddi_obsolete.h		\
-	ddi_timer.h		\
+	ddi_periodic.h		\
 	ddidevmap.h		\
 	ddidmareq.h		\
 	ddimapreq.h		\
@@ -1382,16 +1383,3 @@ clobber:	clean
 check:	$(CHECKHDRS)
 
 FRC:
-
-# EXPORT DELETE START
-EXPORT_SRC:
-	$(RM) wanboot_impl.h+ Makefile+
-	sed -e "/EXPORT DELETE START/,/EXPORT DELETE END/d" \
-		< wanboot_impl.h > wanboot_impl.h+
-	$(MV) wanboot_impl.h+ wanboot_impl.h
-	sed -e "/^# EXPORT DELETE START/,/^# EXPORT DELETE END/d" \
-		< Makefile > Makefile+
-	$(RM) Makefile
-	$(MV) Makefile+ Makefile
-	$(CHMOD) 444 Makefile wanboot_impl.h
-# EXPORT DELETE END

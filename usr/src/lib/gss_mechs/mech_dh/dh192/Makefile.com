@@ -22,8 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 #
 # This make file will build dh192.so.1. This shared object
@@ -42,9 +40,6 @@ OBJECTS= $(DH192)
 # include library definitions
 include ../../../../Makefile.lib
 
-MAKEFILE_EXPORT = $(CLOSED)/lib/gss_mechs/mech_dh/dh192/Makefile.export
-$(EXPORT_RELEASE_BUILD)include $(MAKEFILE_EXPORT)
-
 CPPFLAGS += -I../../backend/mech -I../../backend/crypto
 CPPFLAGS += -I$(SRC)/lib/libnsl/include
 CPPFLAGS += -I$(SRC)/uts/common/gssapi/include
@@ -60,8 +55,6 @@ LIBS = $(DYNLIB)
 LIBNAME = $(LIBRARY:%.a=%)
 
 MAPFILES =	../mapfile-vers
-$(EXPORT_RELEASE_BUILD)MAPFILES = \
-	$(CLOSED)/lib/gss_mechs/mech_dh/dh192/mapfile-vers-export
 
 LDLIBS += -lnsl -lmp -lc
 

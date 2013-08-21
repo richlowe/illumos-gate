@@ -23,6 +23,7 @@
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2013 David Hoeppner. All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright (c) 2013, Joyent, Inc. All rights reserved.
  */
 
 /*
@@ -33,7 +34,6 @@
  *
  * Incompatibilities:
  *	- perl regular expressions replaced with extended REs bracketed by '/'
- *	- options checking is stricter
  *
  * Flags added:
  *	-C	similar to the -p option but value is separated by a colon
@@ -255,12 +255,6 @@ main(int argc, char **argv)
 				}
 			}
 
-			if (m < 4) {
-				free(uselector);
-				usage();
-				exit(2);
-			}
-
 			uselflg = B_TRUE;
 			list_insert_tail(&selector_list, uselector);
 		} else {
@@ -297,7 +291,7 @@ main(int argc, char **argv)
 	if (uselflg) {
 		if (nselflg) {
 			(void) fprintf(stderr, gettext(
-			    "module:instance:name:statistic and "
+			    "[module[:instance[:name[:statistic]]]] and "
 			    "-m -i -n -s are mutually exclusive"));
 			usage();
 			exit(2);
@@ -362,7 +356,7 @@ usage(void)
 	    "      [ -m module ] [ -i instance ] [ -n name ] [ -s statistic ]\n"
 	    "      [ interval [ count ] ]\n"
 	    "kstat [ -Cjlpq ] [ -T d|u ] [ -c class ]\n"
-	    "      [ module:instance:name:statistic ... ]\n"
+	    "      [ module[:instance[:name[:statistic]]] ... ]\n"
 	    "      [ interval [ count ] ]\n"));
 }
 
@@ -628,7 +622,7 @@ ks_instances_read(kstat_ctl_t *kc)
 		skip = B_TRUE;
 		selector = list_head(&selector_list);
 		while (selector != NULL) {
-			if (ks_match(kp->ks_module, &selector->ks_module) ||
+			if (ks_match(kp->ks_module, &selector->ks_module) &&
 			    ks_match(kp->ks_name, &selector->ks_name)) {
 				skip = B_FALSE;
 				break;
@@ -925,9 +919,9 @@ save_cpu_stat(kstat_t *kp, ks_instance_t *ksi)
 	SAVE_UINT32_X(ksi, "user", sysinfo->cpu[CPU_USER]);
 	SAVE_UINT32_X(ksi, "kernel", sysinfo->cpu[CPU_KERNEL]);
 	SAVE_UINT32_X(ksi, "wait", sysinfo->cpu[CPU_WAIT]);
-	SAVE_UINT32_X(ksi, "wait_io", sysinfo->cpu[W_IO]);
-	SAVE_UINT32_X(ksi, "wait_swap", sysinfo->cpu[W_SWAP]);
-	SAVE_UINT32_X(ksi, "wait_pio", sysinfo->cpu[W_PIO]);
+	SAVE_UINT32_X(ksi, "wait_io", sysinfo->wait[W_IO]);
+	SAVE_UINT32_X(ksi, "wait_swap", sysinfo->wait[W_SWAP]);
+	SAVE_UINT32_X(ksi, "wait_pio", sysinfo->wait[W_PIO]);
 	SAVE_UINT32(ksi, sysinfo, bread);
 	SAVE_UINT32(ksi, sysinfo, bwrite);
 	SAVE_UINT32(ksi, sysinfo, lread);

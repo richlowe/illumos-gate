@@ -20,8 +20,8 @@
  */
 /*
  * Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
- *
- * Copyright 2012 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 /* Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T */
@@ -58,7 +58,6 @@
 #include <nfs/nfs_cmd.h>
 
 #include <sys/strsubr.h>
-
 #include <sys/tsol/label.h>
 #include <sys/tsol/tndb.h>
 
@@ -433,25 +432,16 @@ rfs3_lookup(LOOKUP3args *args, LOOKUP3res *resp, struct exportinfo *exi,
 		goto out1;
 	}
 
-	exi_hold(exi);
-
 	/*
 	 * If the public filehandle is used then allow
 	 * a multi-component lookup
 	 */
 	if (PUBLIC_FH3(&args->what.dir)) {
-		struct exportinfo *new;
-
 		publicfh_flag = TRUE;
-
 		error = rfs_publicfh_mclookup(name, dvp, cr, &vp,
-		    &new, &sec);
-
-		if (error == 0) {
-			exi_rele(exi);
-			exi = new;
-		}
-
+		    &exi, &sec);
+		if (error && exi != NULL)
+			exi_rele(exi); /* See comment below Re: publicfh_flag */
 		/*
 		 * Since WebNFS may bypass MOUNT, we need to ensure this
 		 * request didn't come from an unlabeled admin_low client.
@@ -473,6 +463,8 @@ rfs3_lookup(LOOKUP3args *args, LOOKUP3res *resp, struct exportinfo *exi,
 			if (tp == NULL || tp->tpc_tp.tp_doi !=
 			    l_admin_low->tsl_doi || tp->tpc_tp.host_type !=
 			    SUN_CIPSO) {
+				if (exi != NULL)
+					exi_rele(exi);
 				VN_RELE(vp);
 				resp->status = NFS3ERR_ACCES;
 				error = 1;
@@ -498,6 +490,8 @@ rfs3_lookup(LOOKUP3args *args, LOOKUP3res *resp, struct exportinfo *exi,
 		if (!blequal(&l_admin_low->tsl_label, clabel)) {
 			if (!do_rfs_label_check(clabel, dvp,
 			    DOMINANCE_CHECK, exi)) {
+				if (publicfh_flag && exi != NULL)
+					exi_rele(exi);
 				VN_RELE(vp);
 				resp->status = NFS3ERR_ACCES;
 				error = 1;
@@ -519,6 +513,15 @@ rfs3_lookup(LOOKUP3args *args, LOOKUP3res *resp, struct exportinfo *exi,
 			auth_weak = TRUE;
 	}
 
+	/*
+	 * If publicfh_flag is true then we have called rfs_publicfh_mclookup
+	 * and have obtained a new exportinfo in exi which needs to be
+	 * released. Note that the original exportinfo pointed to by exi
+	 * will be released by the caller, common_dispatch.
+	 */
+	if (publicfh_flag)
+		exi_rele(exi);
+
 	if (error) {
 		VN_RELE(vp);
 		goto out;
@@ -527,7 +530,6 @@ rfs3_lookup(LOOKUP3args *args, LOOKUP3res *resp, struct exportinfo *exi,
 	va.va_mask = AT_ALL;
 	vap = rfs4_delegated_getattr(vp, &va, 0, cr) ? NULL : &va;
 
-	exi_rele(exi);
 	VN_RELE(vp);
 
 	resp->status = NFS3_OK;
@@ -549,12 +551,6 @@ rfs3_lookup(LOOKUP3args *args, LOOKUP3res *resp, struct exportinfo *exi,
 	return;
 
 out:
-	/*
-	 * The passed argument exportinfo is released by the
-	 * caller, common_dispatch
-	 */
-	exi_rele(exi);
-
 	if (curthread->t_flag & T_WOULDBLOCK) {
 		curthread->t_flag &= ~T_WOULDBLOCK;
 		resp->status = NFS3ERR_JUKEBOX;
@@ -925,11 +921,11 @@ rfs3_read(READ3args *args, READ3res *resp, struct exportinfo *exi,
 	vnode_t *vp;
 	struct vattr *vap;
 	struct vattr va;
-	struct iovec iov;
+	struct iovec iov, *iovp = NULL;
+	int iovcnt;
 	struct uio uio;
 	u_offset_t offset;
 	mblk_t *mp = NULL;
-	int alloc_err = 0;
 	int in_crit = 0;
 	int need_rwunlock = 0;
 	caller_context_t ct;
@@ -1117,25 +1113,21 @@ rfs3_read(READ3args *args, READ3res *resp, struct exportinfo *exi,
 	 */
 	if (rdma_used) {
 		(void) rdma_get_wchunk(req, &iov, args->wlist);
+		uio.uio_iov = &iov;
+		uio.uio_iovcnt = 1;
 	} else {
 		/*
 		 * mp will contain the data to be sent out in the read reply.
-		 * This will be freed after the reply has been sent out (by the
-		 * driver).
-		 * Let's roundup the data to a BYTES_PER_XDR_UNIT multiple, so
-		 * that the call to xdrmblk_putmblk() never fails.
+		 * For UDP, this will be freed after the reply has been sent
+		 * out by the driver.  For TCP, it will be freed after the last
+		 * segment associated with the reply has been ACKed by the
+		 * client.
 		 */
-		mp = allocb_wait(RNDUP(args->count), BPRI_MED, STR_NOSIG,
-		    &alloc_err);
-		ASSERT(mp != NULL);
-		ASSERT(alloc_err == 0);
-
-		iov.iov_base = (caddr_t)mp->b_datap->db_base;
-		iov.iov_len = args->count;
+		mp = rfs_read_alloc(args->count, &iovp, &iovcnt);
+		uio.uio_iov = iovp;
+		uio.uio_iovcnt = iovcnt;
 	}
 
-	uio.uio_iov = &iov;
-	uio.uio_iovcnt = 1;
 	uio.uio_segflg = UIO_SYSSPACE;
 	uio.uio_extflg = UIO_COPY_CACHED;
 	uio.uio_loffset = args->offset;
@@ -1206,6 +1198,9 @@ done:
 
 	VN_RELE(vp);
 
+	if (iovp != NULL)
+		kmem_free(iovp, iovcnt * sizeof (struct iovec));
+
 	return;
 
 out:
@@ -1226,6 +1221,9 @@ out1:
 		VN_RELE(vp);
 	}
 	vattr_to_post_op_attr(vap, &resp->resfail.file_attributes);
+
+	if (iovp != NULL)
+		kmem_free(iovp, iovcnt * sizeof (struct iovec));
 }
 
 void
@@ -3915,7 +3913,6 @@ out:
 void *
 rfs3_fsinfo_getfh(FSINFO3args *args)
 {
-
 	return (&args->fsroot);
 }
 

@@ -12,6 +12,7 @@
 #
 # Copyright 2011, Richard Lowe
 # Copyright 2011 Nexenta Systems, Inc. All rights reserved.
+# Copyright 2013 OmniTI Computer Consulting, Inc. All rights reserved.
 #
 
 file path=usr/share/man/man3c/FD_CLR.3c
@@ -282,6 +283,7 @@ file path=usr/share/man/man3c/door_unbind.3c
 file path=usr/share/man/man3c/double_to_decimal.3c
 file path=usr/share/man/man3c/drand48.3c
 file path=usr/share/man/man3c/dup2.3c
+file path=usr/share/man/man3c/dup3.3c
 file path=usr/share/man/man3c/econvert.3c
 file path=usr/share/man/man3c/ecvt.3c
 file path=usr/share/man/man3c/edata.3c
@@ -382,6 +384,7 @@ file path=usr/share/man/man3c/getchar_unlocked.3c
 file path=usr/share/man/man3c/getcpuid.3c
 file path=usr/share/man/man3c/getcwd.3c
 file path=usr/share/man/man3c/getdate.3c
+file path=usr/share/man/man3c/getdelim.3c
 file path=usr/share/man/man3c/getdtablesize.3c
 file path=usr/share/man/man3c/getenv.3c
 file path=usr/share/man/man3c/getexecname.3c
@@ -397,6 +400,7 @@ file path=usr/share/man/man3c/gethostid.3c
 file path=usr/share/man/man3c/gethostname.3c
 file path=usr/share/man/man3c/gethrtime.3c
 file path=usr/share/man/man3c/gethrvtime.3c
+file path=usr/share/man/man3c/getline.3c
 file path=usr/share/man/man3c/getloadavg.3c
 file path=usr/share/man/man3c/getlogin.3c
 file path=usr/share/man/man3c/getlogin_r.3c
@@ -555,6 +559,8 @@ file path=usr/share/man/man3c/memset.3c
 file path=usr/share/man/man3c/minor.3c
 file path=usr/share/man/man3c/mkdtemp.3c
 file path=usr/share/man/man3c/mkfifo.3c
+file path=usr/share/man/man3c/mkostemp.3c
+file path=usr/share/man/man3c/mkostemps.3c
 file path=usr/share/man/man3c/mkstemp.3c
 file path=usr/share/man/man3c/mkstemps.3c
 file path=usr/share/man/man3c/mktemp.3c

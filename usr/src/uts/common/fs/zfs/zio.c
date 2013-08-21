@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2012 by Delphix. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright (c) 2011 Nexenta Systems, Inc. All rights reserved.
  */
 
@@ -345,7 +345,7 @@ zio_decompress(zio_t *zio, void *data, uint64_t size)
 	if (zio->io_error == 0 &&
 	    zio_decompress_data(BP_GET_COMPRESS(zio->io_bp),
 	    zio->io_data, data, zio->io_size, size) != 0)
-		zio->io_error = EIO;
+		zio->io_error = SET_ERROR(EIO);
 }
 
 /*
@@ -697,7 +697,21 @@ zio_write_override(zio_t *zio, blkptr_t *bp, int copies, boolean_t nopwrite)
 void
 zio_free(spa_t *spa, uint64_t txg, const blkptr_t *bp)
 {
-	bplist_append(&spa->spa_free_bplist[txg & TXG_MASK], bp);
+	metaslab_check_free(spa, bp);
+
+	/*
+	 * Frees that are for the currently-syncing txg, are not going to be
+	 * deferred, and which will not need to do a read (i.e. not GANG or
+	 * DEDUP), can be processed immediately.  Otherwise, put them on the
+	 * in-memory list for later processing.
+	 */
+	if (BP_IS_GANG(bp) || BP_GET_DEDUP(bp) ||
+	    txg != spa->spa_syncing_txg ||
+	    spa_sync_pass(spa) >= zfs_sync_pass_deferred_free) {
+		bplist_append(&spa->spa_free_bplist[txg & TXG_MASK], bp);
+	} else {
+		VERIFY0(zio_wait(zio_free_sync(NULL, spa, txg, bp, 0)));
+	}
 }
 
 zio_t *
@@ -705,6 +719,7 @@ zio_free_sync(zio_t *pio, spa_t *spa, uint64_t txg, const blkptr_t *bp,
     enum zio_flag flags)
 {
 	zio_t *zio;
+	enum zio_stage stage = ZIO_FREE_PIPELINE;
 
 	dprintf_bp(bp, "freeing in txg %llu, pass %u",
 	    (longlong_t)txg, spa->spa_sync_pass);
@@ -713,9 +728,21 @@ zio_free_sync(zio_t *pio, spa_t *spa, uint64_t txg, const blkptr_t *bp,
 	ASSERT(spa_syncing_txg(spa) == txg);
 	ASSERT(spa_sync_pass(spa) < zfs_sync_pass_deferred_free);
 
+	metaslab_check_free(spa, bp);
+	arc_freed(spa, bp);
+
+	/*
+	 * GANG and DEDUP blocks can induce a read (for the gang block header,
+	 * or the DDT), so issue them asynchronously so that this thread is
+	 * not tied up.
+	 */
+	if (BP_IS_GANG(bp) || BP_GET_DEDUP(bp))
+		stage |= ZIO_STAGE_ISSUE_ASYNC;
+
 	zio = zio_create(pio, spa, txg, bp, NULL, BP_GET_PSIZE(bp),
 	    NULL, NULL, ZIO_TYPE_FREE, ZIO_PRIORITY_FREE, flags,
-	    NULL, 0, NULL, ZIO_STAGE_OPEN, ZIO_FREE_PIPELINE);
+	    NULL, 0, NULL, ZIO_STAGE_OPEN, stage);
+
 
 	return (zio);
 }
@@ -1107,7 +1134,7 @@ zio_free_bp_init(zio_t *zio)
  */
 
 static void
-zio_taskq_dispatch(zio_t *zio, enum zio_taskq_type q, boolean_t cutinline)
+zio_taskq_dispatch(zio_t *zio, zio_taskq_type_t q, boolean_t cutinline)
 {
 	spa_t *spa = zio->io_spa;
 	zio_type_t t = zio->io_type;
@@ -1128,10 +1155,11 @@ zio_taskq_dispatch(zio_t *zio, enum zio_taskq_type q, boolean_t cutinline)
 		t = ZIO_TYPE_NULL;
 
 	/*
-	 * If this is a high priority I/O, then use the high priority taskq.
+	 * If this is a high priority I/O, then use the high priority taskq if
+	 * available.
 	 */
 	if (zio->io_priority == ZIO_PRIORITY_NOW &&
-	    spa->spa_zio_taskq[t][q + 1] != NULL)
+	    spa->spa_zio_taskq[t][q + 1].stqs_count != 0)
 		q++;
 
 	ASSERT3U(q, <, ZIO_TASKQ_TYPES);
@@ -1142,19 +1170,24 @@ zio_taskq_dispatch(zio_t *zio, enum zio_taskq_type q, boolean_t cutinline)
 	 * to dispatch the zio to another taskq at the same time.
 	 */
 	ASSERT(zio->io_tqent.tqent_next == NULL);
-	taskq_dispatch_ent(spa->spa_zio_taskq[t][q],
-	    (task_func_t *)zio_execute, zio, flags, &zio->io_tqent);
+	spa_taskq_dispatch_ent(spa, t, q, (task_func_t *)zio_execute, zio,
+	    flags, &zio->io_tqent);
 }
 
 static boolean_t
-zio_taskq_member(zio_t *zio, enum zio_taskq_type q)
+zio_taskq_member(zio_t *zio, zio_taskq_type_t q)
 {
 	kthread_t *executor = zio->io_executor;
 	spa_t *spa = zio->io_spa;
 
-	for (zio_type_t t = 0; t < ZIO_TYPES; t++)
-		if (taskq_member(spa->spa_zio_taskq[t][q], executor))
-			return (B_TRUE);
+	for (zio_type_t t = 0; t < ZIO_TYPES; t++) {
+		spa_taskqs_t *tqs = &spa->spa_zio_taskq[t][q];
+		uint_t i;
+		for (i = 0; i < tqs->stqs_count; i++) {
+			if (taskq_member(tqs->stqs_taskq[i], executor))
+				return (B_TRUE);
+		}
+	}
 
 	return (B_FALSE);
 }
@@ -1175,13 +1208,16 @@ zio_interrupt(zio_t *zio)
 
 /*
  * Execute the I/O pipeline until one of the following occurs:
- * (1) the I/O completes; (2) the pipeline stalls waiting for
- * dependent child I/Os; (3) the I/O issues, so we're waiting
- * for an I/O completion interrupt; (4) the I/O is delegated by
- * vdev-level caching or aggregation; (5) the I/O is deferred
- * due to vdev-level queueing; (6) the I/O is handed off to
- * another thread.  In all cases, the pipeline stops whenever
- * there's no CPU work; it never burns a thread in cv_wait().
+ *
+ *	(1) the I/O completes
+ *	(2) the pipeline stalls waiting for dependent child I/Os
+ *	(3) the I/O issues, so we're waiting for an I/O completion interrupt
+ *	(4) the I/O is delegated by vdev-level caching or aggregation
+ *	(5) the I/O is deferred due to vdev-level queueing
+ *	(6) the I/O is handed off to another thread.
+ *
+ * In all cases, the pipeline stops whenever there's no CPU work; it never
+ * burns a thread in cv_wait().
  *
  * There's no locking on io_stage because there's no legitimate way
  * for multiple threads to be attempting to process the same I/O.
@@ -1994,7 +2030,7 @@ zio_ddt_collision(zio_t *zio, ddt_t *ddt, ddt_entry_t *dde)
 
 			ddt_exit(ddt);
 
-			error = arc_read_nolock(NULL, spa, &blk,
+			error = arc_read(NULL, spa, &blk,
 			    arc_getbuf_func, &abuf, ZIO_PRIORITY_SYNC_READ,
 			    ZIO_FLAG_CANFAIL | ZIO_FLAG_SPECULATIVE,
 			    &aflags, &zio->io_bookmark);
@@ -2003,8 +2039,8 @@ zio_ddt_collision(zio_t *zio, ddt_t *ddt, ddt_entry_t *dde)
 				if (arc_buf_size(abuf) != zio->io_orig_size ||
 				    bcmp(abuf->b_data, zio->io_orig_data,
 				    zio->io_orig_size) != 0)
-					error = EEXIST;
-				VERIFY(arc_buf_remove_ref(abuf, &abuf) == 1);
+					error = SET_ERROR(EEXIST);
+				VERIFY(arc_buf_remove_ref(abuf, &abuf));
 			}
 
 			ddt_enter(ddt);
@@ -2465,7 +2501,7 @@ zio_vdev_io_start(zio_t *zio)
 			return (ZIO_PIPELINE_STOP);
 
 		if (!vdev_accessible(vd, zio)) {
-			zio->io_error = ENXIO;
+			zio->io_error = SET_ERROR(ENXIO);
 			zio_interrupt(zio);
 			return (ZIO_PIPELINE_STOP);
 		}
@@ -2502,7 +2538,7 @@ zio_vdev_io_done(zio_t *zio)
 
 		if (zio->io_error) {
 			if (!vdev_accessible(vd, zio)) {
-				zio->io_error = ENXIO;
+				zio->io_error = SET_ERROR(ENXIO);
 			} else {
 				unexpected_error = B_TRUE;
 			}
@@ -2587,15 +2623,16 @@ zio_vdev_io_assess(zio_t *zio)
 	 */
 	if (zio->io_error && vd != NULL && vd->vdev_ops->vdev_op_leaf &&
 	    !vdev_accessible(vd, zio))
-		zio->io_error = ENXIO;
+		zio->io_error = SET_ERROR(ENXIO);
 
 	/*
 	 * If we can't write to an interior vdev (mirror or RAID-Z),
 	 * set vdev_cant_write so that we stop trying to allocate from it.
 	 */
 	if (zio->io_error == ENXIO && zio->io_type == ZIO_TYPE_WRITE &&
-	    vd != NULL && !vd->vdev_ops->vdev_op_leaf)
+	    vd != NULL && !vd->vdev_ops->vdev_op_leaf) {
 		vd->vdev_cant_write = B_TRUE;
+	}
 
 	if (zio->io_error)
 		zio->io_pipeline = ZIO_INTERLOCK_PIPELINE;
@@ -3017,10 +3054,9 @@ zio_done(zio_t *zio)
 			 * Hand it off to the otherwise-unused claim taskq.
 			 */
 			ASSERT(zio->io_tqent.tqent_next == NULL);
-			taskq_dispatch_ent(
-			    spa->spa_zio_taskq[ZIO_TYPE_CLAIM][ZIO_TASKQ_ISSUE],
-			    (task_func_t *)zio_reexecute, zio, 0,
-			    &zio->io_tqent);
+			spa_taskq_dispatch_ent(spa, ZIO_TYPE_CLAIM,
+			    ZIO_TASKQ_ISSUE, (task_func_t *)zio_reexecute, zio,
+			    0, &zio->io_tqent);
 		}
 		return (ZIO_PIPELINE_STOP);
 	}

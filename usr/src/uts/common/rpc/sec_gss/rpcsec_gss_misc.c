@@ -24,14 +24,16 @@
  * All rights reserved.  Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
  * $Header:
  * /afs/gza.com/product/secure/rel-eng/src/1.1/rpc/RCS/auth_gssapi_misc.c,v 1.10
  * 1994/10/27 12:39:23 jik Exp $
+ */
+
+/*
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 #include <sys/param.h>
@@ -142,10 +144,8 @@ __rpc_gss_wrap_data(service, qop, context, seq_num, out_xdrs,
 	OM_uint32		major, minor;
 	gss_buffer_desc		in_buf, out_buf;
 	XDR			temp_xdrs;
-	char			*mp;
-/* EXPORT DELETE START */
+	char			*temp_data;
 	bool_t			conf_state;
-/* EXPORT DELETE END */
 	bool_t			ret = FALSE;
 	int			size;
 
@@ -154,10 +154,10 @@ __rpc_gss_wrap_data(service, qop, context, seq_num, out_xdrs,
 	 * We need an extra bit for the sequence number serialized first.
 	 */
 	size = xdr_sizeof(xdr_func, xdr_ptr) + BYTES_PER_XDR_UNIT;
-	mp = kmem_alloc(size, KM_SLEEP);
+	temp_data = kmem_alloc(size, KM_SLEEP);
 	out_buf.length = 0;
 
-	xdrmem_create(&temp_xdrs, mp, size, XDR_ENCODE);
+	xdrmem_create(&temp_xdrs, temp_data, size, XDR_ENCODE);
 
 	/*
 	 * serialize the sequence number into tmp memory
@@ -183,7 +183,6 @@ __rpc_gss_wrap_data(service, qop, context, seq_num, out_xdrs,
 	switch (service) {
 	case rpc_gss_svc_privacy:
 
-/* EXPORT DELETE START */
 		if ((major = kgss_seal(&minor, context, TRUE, qop, &in_buf,
 				&conf_state, &out_buf)) != GSS_S_COMPLETE) {
 			RPCGSS_LOG1(1, "rpc_gss_wrap: kgss_seal failed."
@@ -192,11 +191,8 @@ __rpc_gss_wrap_data(service, qop, context, seq_num, out_xdrs,
 		}
 		in_buf.length = 0;	/* in_buf not needed */
 		if (!conf_state)
-/* EXPORT DELETE END */
 			goto fail;
-/* EXPORT DELETE START */
 		break;
-/* EXPORT DELETE END */
 	case rpc_gss_svc_integrity:
 		if ((major = kgss_sign(&minor, context, qop, &in_buf,
 				&out_buf)) != GSS_S_COMPLETE) {
@@ -221,7 +217,7 @@ __rpc_gss_wrap_data(service, qop, context, seq_num, out_xdrs,
 		goto fail;
 	ret = TRUE;
 fail:
-	kmem_free(mp, size);
+	kmem_free(temp_data, size);
 	if (out_buf.length != 0)
 		(void) gss_release_buffer(&minor, &out_buf);
 	return (ret);
@@ -262,10 +258,8 @@ __rpc_gss_unwrap_data(service, context, seq_num, qop_check, in_xdrs,
 
 	if (service == rpc_gss_svc_privacy) {
 		major = GSS_S_FAILURE;
-/* EXPORT DELETE START */
 		major = kgss_unseal(&minor, context, &in_buf, &out_buf, &conf,
 					&qop);
-/* EXPORT DELETE END */
 		kmem_free(in_buf.value, in_buf.length);
 		if (major != GSS_S_COMPLETE) {
 			RPCGSS_LOG1(1, "rpc_gss_unwrap: kgss_unseal failed."

@@ -146,7 +146,7 @@ GENUNIX_OBJS +=	\
 		ddi_intr_impl.o	\
 		ddi_intr_irm.o	\
 		ddi_nodeid.o	\
-		ddi_timer.o	\
+		ddi_periodic.o	\
 		devcfg.o	\
 		devcache.o	\
 		device.o	\
@@ -1346,8 +1346,10 @@ ZFS_COMMON_OBJS +=		\
 	dsl_dir.o		\
 	dsl_dataset.o		\
 	dsl_deadlist.o		\
+	dsl_destroy.o		\
 	dsl_pool.o		\
 	dsl_synctask.o		\
+	dsl_userhold.o		\
 	dmu_zfetch.o		\
 	dsl_deleg.o		\
 	dsl_prop.o		\
@@ -1358,6 +1360,7 @@ ZFS_COMMON_OBJS +=		\
 	lzjb.o			\
 	metaslab.o		\
 	refcount.o		\
+	rrwlock.o		\
 	sa.o			\
 	sha256.o		\
 	spa.o			\
@@ -1417,7 +1420,6 @@ ZFS_OBJS +=			\
 	zfs_onexit.o		\
 	zfs_replay.o		\
 	zfs_rlock.o		\
-	rrwlock.o		\
 	zfs_vfsops.o		\
 	zfs_vnops.o		\
 	zvol.o
@@ -1644,10 +1646,7 @@ K5_KRB= kfree.o copy_key.o \
 K5_OS=  timeofday.o toffset.o \
 	init_os_ctx.o c_ustime.o
 
-SEAL=
-# EXPORT DELETE START
 SEAL=	seal.o unseal.o
-# EXPORT DELETE END
 
 MECH=	delete_sec_context.o \
 	import_sec_context.o \
@@ -1876,6 +1875,19 @@ CH_OBJS = ch.o glue.o pe.o sge.o
 CH_COM_OBJS =	ch_mac.o ch_subr.o cspi.o espi.o ixf1010.o mc3.o mc4.o mc5.o \
 		mv88e1xxx.o mv88x201x.o my3126.o pm3393.o tp.o ulp.o \
 		vsc7321.o vsc7326.o xpak.o
+
+#
+#	Chelsio Terminator 4 10G NIC nexus driver module
+#
+CXGBE_FW_OBJS  =	t4_fw.o t4_cfg.o
+CXGBE_COM_OBJS =	t4_hw.o common.o
+CXGBE_NEX_OBJS =	t4_nexus.o t4_sge.o t4_mac.o t4_ioctl.o shared.o \
+			t4_l2t.o adapter.o osdep.o
+
+#
+#	Chelsio Terminator 4 10G NIC driver module
+#
+CXGBE_OBJS =	cxgbe.o
 
 #
 #	PCI strings file

@@ -34,6 +34,7 @@
 #include <sys/stat.h>
 #include <sys/processor.h>
 #include <sys/zfs_context.h>
+#include <sys/rrwlock.h>
 #include <sys/zmod.h>
 #include <sys/utsname.h>
 #include <sys/systeminfo.h>
@@ -80,8 +81,8 @@ zk_thread_create(void (*func)(), void *arg)
  */
 /*ARGSUSED*/
 kstat_t *
-kstat_create(char *module, int instance, char *name, char *class,
-    uchar_t type, ulong_t ndata, uchar_t ks_flag)
+kstat_create(const char *module, int instance, const char *name,
+    const char *class, uchar_t type, ulong_t ndata, uchar_t ks_flag)
 {
 	return (NULL);
 }
@@ -94,6 +95,36 @@ kstat_install(kstat_t *ksp)
 /*ARGSUSED*/
 void
 kstat_delete(kstat_t *ksp)
+{}
+
+/*ARGSUSED*/
+void
+kstat_waitq_enter(kstat_io_t *kiop)
+{}
+
+/*ARGSUSED*/
+void
+kstat_waitq_exit(kstat_io_t *kiop)
+{}
+
+/*ARGSUSED*/
+void
+kstat_runq_enter(kstat_io_t *kiop)
+{}
+
+/*ARGSUSED*/
+void
+kstat_runq_exit(kstat_io_t *kiop)
+{}
+
+/*ARGSUSED*/
+void
+kstat_waitq_to_runq(kstat_io_t *kiop)
+{}
+
+/*ARGSUSED*/
+void
+kstat_runq_back_to_waitq(kstat_io_t *kiop)
 {}
 
 /*
@@ -281,6 +312,41 @@ top:
 
 	ts.tv_sec = delta / hz;
 	ts.tv_nsec = (delta % hz) * (NANOSEC / hz);
+
+	ASSERT(mutex_owner(mp) == curthread);
+	mp->m_owner = NULL;
+	error = cond_reltimedwait(cv, &mp->m_lock, &ts);
+	mp->m_owner = curthread;
+
+	if (error == ETIME)
+		return (-1);
+
+	if (error == EINTR)
+		goto top;
+
+	ASSERT(error == 0);
+
+	return (1);
+}
+
+/*ARGSUSED*/
+clock_t
+cv_timedwait_hires(kcondvar_t *cv, kmutex_t *mp, hrtime_t tim, hrtime_t res,
+    int flag)
+{
+	int error;
+	timestruc_t ts;
+	hrtime_t delta;
+
+	ASSERT(flag == 0);
+
+top:
+	delta = tim - gethrtime();
+	if (delta <= 0)
+		return (-1);
+
+	ts.tv_sec = delta / NANOSEC;
+	ts.tv_nsec = delta % NANOSEC;
 
 	ASSERT(mutex_owner(mp) == curthread);
 	mp->m_owner = NULL;
@@ -829,6 +895,8 @@ umem_out_of_memory(void)
 void
 kernel_init(int mode)
 {
+	extern uint_t rrw_tsd_key;
+
 	umem_nofail_callback(umem_out_of_memory);
 
 	physmem = sysconf(_SC_PHYS_PAGES);
@@ -847,6 +915,8 @@ kernel_init(int mode)
 	mutex_init(&cpu_lock, NULL, MUTEX_DEFAULT, NULL);
 
 	spa_init(mode);
+
+	tsd_create(&rrw_tsd_key, rrw_tsd_destroy);
 }
 
 void

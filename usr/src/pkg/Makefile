@@ -152,10 +152,6 @@ sparc_ARCH32= sparcv7
 i386_ARCH64= amd64
 sparc_ARCH64= sparcv9
 
-OPENSSL	=	/usr/bin/openssl
-OPENSSL10.cmd = $(OPENSSL) version | $(NAWK) '{if($$2<1){print "\043";}}'
-OPENSSL10_ONLY	=	$(OPENSSL10.cmd:sh)
-
 #
 # macros and transforms needed by pkgmogrify
 #
@@ -172,7 +168,6 @@ PM_INC= transforms manifests
 PKGMOG_DEFINES= \
 	i386_ONLY=$(POUND_SIGN) \
 	sparc_ONLY=$(POUND_SIGN) \
-	OPENSSL10_ONLY=$(OPENSSL10_ONLY) \
 	$(PKGMACH)_ONLY= \
 	ARCH=$(PKGMACH) \
 	ARCH32=$($(PKGMACH)_ARCH32) \
@@ -723,23 +718,3 @@ i386/% sparc/%:
 i386 sparc: $$(@)/install
 
 FRC:
-
-# EXPORT DELETE START
-XMOD_PKGS= \
-	BRCMbnx \
-	BRCMbnxe \
-	SUNWadpu320 \
-	SUNWibsdpib \
-	SUNWkdc \
-	SUNWlsimega \
-	SUNWwbint \
-	SUNWwbsup
-
-EXPORT_SRC: CRYPT_SRC
-	$(RM) $(XMOD_PKGS:%=manifests/%.mf)
-	$(RM) Makefile+
-	$(SED) -e "/^# EXPORT DELETE START/,/^# EXPORT DELETE END/d" \
-		< Makefile > Makefile+
-	$(MV) -f Makefile+ Makefile
-	$(CHMOD) 444 Makefile
-# EXPORT DELETE END

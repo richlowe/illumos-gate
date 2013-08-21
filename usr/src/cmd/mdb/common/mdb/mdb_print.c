@@ -24,7 +24,7 @@
  */
 
 /*
- * Copyright (c) 2012 by Delphix. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright (c) 2012 Joyent, Inc. All rights reserved.
  */
 
@@ -72,6 +72,7 @@ typedef struct printarg {
 	int pa_nest;			/* array nesting depth */
 	int pa_tab;			/* tabstop width */
 	uint_t pa_maxdepth;		/* Limit max depth */
+	uint_t pa_nooutdepth;		/* don't print output past this depth */
 } printarg_t;
 
 #define	PA_SHOWTYPE	0x001		/* print type name */
@@ -696,8 +697,7 @@ setup_vcb(const char *name, uintptr_t addr)
 int
 cmd_list(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-	mdb_ctf_id_t id;
-	ulong_t offset;
+	int offset;
 	uintptr_t a, tmp;
 	int ret;
 
@@ -707,9 +707,10 @@ cmd_list(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	if (argv->a_type != MDB_TYPE_STRING) {
 		/*
 		 * We are being given a raw offset in lieu of a type and
-		 * member; confirm the arguments.
+		 * member; confirm the number of arguments and argument
+		 * type.
 		 */
-		if (argv->a_type != MDB_TYPE_IMMEDIATE)
+		if (argc != 1 || argv->a_type != MDB_TYPE_IMMEDIATE)
 			return (DCMD_USAGE);
 
 		offset = argv->a_un.a_val;
@@ -726,38 +727,32 @@ cmd_list(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		char buf[MDB_SYM_NAMLEN];
 		int ret;
 
+		/*
+		 * Check that we were provided 2 arguments: a type name
+		 * and a member of that type.
+		 */
+		if (argc != 2)
+			return (DCMD_USAGE);
+
 		ret = args_to_typename(&argc, &argv, buf, sizeof (buf));
 		if (ret != 0)
 			return (ret);
 
-		if (mdb_ctf_lookup_by_name(buf, &id) != 0) {
-			mdb_warn("failed to look up type %s", buf);
-			return (DCMD_ABORT);
-		}
-
 		argv++;
 		argc--;
-
-		if (argc < 1 || argv->a_type != MDB_TYPE_STRING)
-			return (DCMD_USAGE);
 
 		member = argv->a_un.a_str;
+		offset = mdb_ctf_offsetof_by_name(buf, member);
+		if (offset == -1)
+			return (DCMD_ABORT);
 
 		argv++;
 		argc--;
 
-		if (mdb_ctf_offsetof(id, member, &offset) != 0) {
-			mdb_warn("failed to find member %s of type %s",
-			    member, buf);
-			return (DCMD_ABORT);
-		}
-
-		if (offset % (sizeof (uintptr_t) * NBBY) != 0) {
+		if (offset % (sizeof (uintptr_t)) != 0) {
 			mdb_warn("%s is not a word-aligned member\n", member);
 			return (DCMD_ABORT);
 		}
-
-		offset /= NBBY;
 	}
 
 	/*
@@ -955,6 +950,7 @@ print_int_val(const char *type, ctf_encoding_t *ep, ulong_t off,
 		uint16_t i2;
 		uint8_t i1;
 		time_t t;
+		ipaddr_t I;
 	} u;
 
 	if (!(pap->pa_flags & PA_SHOWVAL))
@@ -989,12 +985,20 @@ print_int_val(const char *type, ctf_encoding_t *ep, ulong_t off,
 	}
 
 	/*
-	 * We pretty-print time_t values as a calendar date and time.
+	 * We pretty-print some integer based types.  time_t values are
+	 * printed as a calendar date and time, and IPv4 addresses as human
+	 * readable dotted quads.
 	 */
-	if (!(pap->pa_flags & (PA_INTHEX | PA_INTDEC)) &&
-	    strcmp(type, "time_t") == 0 && u.t != 0) {
-		mdb_printf("%Y", u.t);
-		return (0);
+	if (!(pap->pa_flags & (PA_INTHEX | PA_INTDEC))) {
+		if (strcmp(type, "time_t") == 0 && u.t != 0) {
+			mdb_printf("%Y", u.t);
+			return (0);
+		}
+		if (strcmp(type, "ipaddr_t") == 0 ||
+		    strcmp(type, "in_addr_t") == 0) {
+			mdb_printf("%I", u.I);
+			return (0);
+		}
 	}
 
 	/*
@@ -1294,6 +1298,46 @@ static int
 print_sou(const char *type, const char *name, mdb_ctf_id_t id,
     mdb_ctf_id_t base, ulong_t off, printarg_t *pap)
 {
+	mdb_tgt_addr_t addr = pap->pa_addr + off / NBBY;
+
+	/*
+	 * We have pretty-printing for some structures where displaying
+	 * structure contents has no value.
+	 */
+	if (pap->pa_flags & PA_SHOWVAL) {
+		if (strcmp(type, "in6_addr_t") == 0 ||
+		    strcmp(type, "struct in6_addr") == 0) {
+			in6_addr_t in6addr;
+
+			if (mdb_tgt_aread(pap->pa_tgt, pap->pa_as, &in6addr,
+			    sizeof (in6addr), addr) != sizeof (in6addr)) {
+				mdb_warn("failed to read %s pointer at %llx",
+				    name, addr);
+				return (1);
+			}
+			mdb_printf("%N", &in6addr);
+			/*
+			 * Don't print anything further down in the
+			 * structure.
+			 */
+			pap->pa_nooutdepth = pap->pa_depth;
+			return (0);
+		}
+		if (strcmp(type, "struct in_addr") == 0) {
+			in_addr_t inaddr;
+
+			if (mdb_tgt_aread(pap->pa_tgt, pap->pa_as, &inaddr,
+			    sizeof (inaddr), addr) != sizeof (inaddr)) {
+				mdb_warn("failed to read %s pointer at %llx",
+				    name, addr);
+				return (1);
+			}
+			mdb_printf("%I", inaddr);
+			pap->pa_nooutdepth = pap->pa_depth;
+			return (0);
+		}
+	}
+
 	if (pap->pa_depth == pap->pa_maxdepth)
 		mdb_printf("{ ... }");
 	else
@@ -1498,10 +1542,19 @@ elt_print(const char *name, mdb_ctf_id_t id, mdb_ctf_id_t base,
 	int kind, rc, d;
 	printarg_t *pap = data;
 
-	for (d = pap->pa_depth - 1; d >= depth; d--)
-		print_close_sou(pap, d);
+	for (d = pap->pa_depth - 1; d >= depth; d--) {
+		if (d < pap->pa_nooutdepth)
+			print_close_sou(pap, d);
+	}
 
-	if (depth > pap->pa_maxdepth)
+	/*
+	 * Reset pa_nooutdepth if we've come back out of the structure we
+	 * didn't want to print.
+	 */
+	if (depth <= pap->pa_nooutdepth)
+		pap->pa_nooutdepth = (uint_t)-1;
+
+	if (depth > pap->pa_maxdepth || depth > pap->pa_nooutdepth)
 		return (0);
 
 	if (!mdb_ctf_type_valid(base) ||
@@ -2287,6 +2340,7 @@ cmd_print(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	pa.pa_nholes = 0;
 	pa.pa_depth = 0;
 	pa.pa_maxdepth = opt_s;
+	pa.pa_nooutdepth = (uint_t)-1;
 
 	if ((flags & DCMD_ADDRSPEC) && !opt_i)
 		pa.pa_addr = opt_p ? mdb_get_dot() : addr;
@@ -2865,6 +2919,7 @@ cmd_printf(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 			funcs[nfmts] = printf_ipv6;
 			break;
 
+		case 'H':
 		case 'o':
 		case 'r':
 		case 'u':
@@ -2982,8 +3037,9 @@ static char _mdb_printf_help[] =
 "  %a    Prints the member in symbolic form.\n"
 "  %d    Prints the member as a decimal integer.  If the member is a signed\n"
 "        integer type, the output will be signed.\n"
-"  %I    Prints the member a IPv4 address (must be a 32-bit integer type).\n"
-"  %N    Prints the member an IPv6 address (must be of type in6_addr_t).\n"
+"  %H    Prints the member as a human-readable size.\n"
+"  %I    Prints the member as an IPv4 address (must be 32-bit integer type).\n"
+"  %N    Prints the member as an IPv6 address (must be of type in6_addr_t).\n"
 "  %o    Prints the member as an unsigned octal integer.\n"
 "  %p    Prints the member as a pointer, in hexadecimal.\n"
 "  %q    Prints the member in signed octal.  Honk if you ever use this!\n"

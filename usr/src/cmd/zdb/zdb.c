@@ -21,10 +21,11 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2012 by Delphix. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdio_ext.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -241,18 +242,18 @@ zdb_nicenum(uint64_t num, char *buf)
 		nicenum(num, buf);
 }
 
-const char dump_zap_stars[] = "****************************************";
-const int dump_zap_width = sizeof (dump_zap_stars) - 1;
+const char histo_stars[] = "****************************************";
+const int histo_width = sizeof (histo_stars) - 1;
 
 static void
-dump_zap_histogram(uint64_t histo[ZAP_HISTOGRAM_SIZE])
+dump_histogram(const uint64_t *histo, int size)
 {
 	int i;
-	int minidx = ZAP_HISTOGRAM_SIZE - 1;
+	int minidx = size - 1;
 	int maxidx = 0;
 	uint64_t max = 0;
 
-	for (i = 0; i < ZAP_HISTOGRAM_SIZE; i++) {
+	for (i = 0; i < size; i++) {
 		if (histo[i] > max)
 			max = histo[i];
 		if (histo[i] > 0 && i > maxidx)
@@ -261,12 +262,14 @@ dump_zap_histogram(uint64_t histo[ZAP_HISTOGRAM_SIZE])
 			minidx = i;
 	}
 
-	if (max < dump_zap_width)
-		max = dump_zap_width;
+	if (max < histo_width)
+		max = histo_width;
 
-	for (i = minidx; i <= maxidx; i++)
-		(void) printf("\t\t\t%u: %6llu %s\n", i, (u_longlong_t)histo[i],
-		    &dump_zap_stars[(max - histo[i]) * dump_zap_width / max]);
+	for (i = minidx; i <= maxidx; i++) {
+		(void) printf("\t\t\t%3u: %6llu %s\n",
+		    i, (u_longlong_t)histo[i],
+		    &histo_stars[(max - histo[i]) * histo_width / max]);
+	}
 }
 
 static void
@@ -317,19 +320,19 @@ dump_zap_stats(objset_t *os, uint64_t object)
 	    (u_longlong_t)zs.zs_salt);
 
 	(void) printf("\t\tLeafs with 2^n pointers:\n");
-	dump_zap_histogram(zs.zs_leafs_with_2n_pointers);
+	dump_histogram(zs.zs_leafs_with_2n_pointers, ZAP_HISTOGRAM_SIZE);
 
 	(void) printf("\t\tBlocks with n*5 entries:\n");
-	dump_zap_histogram(zs.zs_blocks_with_n5_entries);
+	dump_histogram(zs.zs_blocks_with_n5_entries, ZAP_HISTOGRAM_SIZE);
 
 	(void) printf("\t\tBlocks n/10 full:\n");
-	dump_zap_histogram(zs.zs_blocks_n_tenths_full);
+	dump_histogram(zs.zs_blocks_n_tenths_full, ZAP_HISTOGRAM_SIZE);
 
 	(void) printf("\t\tEntries with n chunks:\n");
-	dump_zap_histogram(zs.zs_entries_using_n_chunks);
+	dump_histogram(zs.zs_entries_using_n_chunks, ZAP_HISTOGRAM_SIZE);
 
 	(void) printf("\t\tBuckets with n entries:\n");
-	dump_zap_histogram(zs.zs_buckets_with_n_entries);
+	dump_histogram(zs.zs_buckets_with_n_entries, ZAP_HISTOGRAM_SIZE);
 }
 
 /*ARGSUSED*/
@@ -571,7 +574,7 @@ static void
 dump_metaslab_stats(metaslab_t *msp)
 {
 	char maxbuf[32];
-	space_map_t *sm = &msp->ms_map;
+	space_map_t *sm = msp->ms_map;
 	avl_tree_t *t = sm->sm_pp_root;
 	int free_pct = sm->sm_space * 100 / sm->sm_size;
 
@@ -587,7 +590,7 @@ dump_metaslab(metaslab_t *msp)
 {
 	vdev_t *vd = msp->ms_group->mg_vd;
 	spa_t *spa = vd->vdev_spa;
-	space_map_t *sm = &msp->ms_map;
+	space_map_t *sm = msp->ms_map;
 	space_map_obj_t *smo = &msp->ms_smo;
 	char freebuf[32];
 
@@ -949,7 +952,7 @@ sprintf_blkptr_compact(char *blkbuf, const blkptr_t *bp)
 	const dva_t *dva = bp->blk_dva;
 	int ndvas = dump_opt['d'] > 5 ? BP_GET_NDVAS(bp) : 1;
 
-	if (dump_opt['b'] >= 5) {
+	if (dump_opt['b'] >= 6) {
 		sprintf_blkptr(blkbuf, bp);
 		return;
 	}
@@ -1016,7 +1019,7 @@ visit_indirect(spa_t *spa, const dnode_phys_t *dnp,
 		arc_buf_t *buf;
 		uint64_t fill = 0;
 
-		err = arc_read_nolock(NULL, spa, bp, arc_getbuf_func, &buf,
+		err = arc_read(NULL, spa, bp, arc_getbuf_func, &buf,
 		    ZIO_PRIORITY_ASYNC_READ, ZIO_FLAG_CANFAIL, &flags, zb);
 		if (err)
 			return (err);
@@ -1222,7 +1225,7 @@ dump_bpobj_cb(void *arg, const blkptr_t *bp, dmu_tx_t *tx)
 }
 
 static void
-dump_bpobj(bpobj_t *bpo, char *name)
+dump_bpobj(bpobj_t *bpo, char *name, int indent)
 {
 	char bytes[32];
 	char comp[32];
@@ -1232,31 +1235,57 @@ dump_bpobj(bpobj_t *bpo, char *name)
 		return;
 
 	zdb_nicenum(bpo->bpo_phys->bpo_bytes, bytes);
-	if (bpo->bpo_havesubobj) {
+	if (bpo->bpo_havesubobj && bpo->bpo_phys->bpo_subobjs != 0) {
 		zdb_nicenum(bpo->bpo_phys->bpo_comp, comp);
 		zdb_nicenum(bpo->bpo_phys->bpo_uncomp, uncomp);
-		(void) printf("\n    %s: %llu local blkptrs, %llu subobjs, "
-		    "%s (%s/%s comp)\n",
-		    name, (u_longlong_t)bpo->bpo_phys->bpo_num_blkptrs,
+		(void) printf("    %*s: object %llu, %llu local blkptrs, "
+		    "%llu subobjs, %s (%s/%s comp)\n",
+		    indent * 8, name,
+		    (u_longlong_t)bpo->bpo_object,
+		    (u_longlong_t)bpo->bpo_phys->bpo_num_blkptrs,
 		    (u_longlong_t)bpo->bpo_phys->bpo_num_subobjs,
 		    bytes, comp, uncomp);
+
+		for (uint64_t i = 0; i < bpo->bpo_phys->bpo_num_subobjs; i++) {
+			uint64_t subobj;
+			bpobj_t subbpo;
+			int error;
+			VERIFY0(dmu_read(bpo->bpo_os,
+			    bpo->bpo_phys->bpo_subobjs,
+			    i * sizeof (subobj), sizeof (subobj), &subobj, 0));
+			error = bpobj_open(&subbpo, bpo->bpo_os, subobj);
+			if (error != 0) {
+				(void) printf("ERROR %u while trying to open "
+				    "subobj id %llu\n",
+				    error, (u_longlong_t)subobj);
+				continue;
+			}
+			dump_bpobj(&subbpo, "subobj", indent + 1);
+			bpobj_close(&subbpo);
+		}
 	} else {
-		(void) printf("\n    %s: %llu blkptrs, %s\n",
-		    name, (u_longlong_t)bpo->bpo_phys->bpo_num_blkptrs, bytes);
+		(void) printf("    %*s: object %llu, %llu blkptrs, %s\n",
+		    indent * 8, name,
+		    (u_longlong_t)bpo->bpo_object,
+		    (u_longlong_t)bpo->bpo_phys->bpo_num_blkptrs,
+		    bytes);
 	}
 
 	if (dump_opt['d'] < 5)
 		return;
 
-	(void) printf("\n");
 
-	(void) bpobj_iterate_nofree(bpo, dump_bpobj_cb, NULL, NULL);
+	if (indent == 0) {
+		(void) bpobj_iterate_nofree(bpo, dump_bpobj_cb, NULL, NULL);
+		(void) printf("\n");
+	}
 }
 
 static void
 dump_deadlist(dsl_deadlist_t *dl)
 {
 	dsl_deadlist_entry_t *dle;
+	uint64_t unused;
 	char bytes[32];
 	char comp[32];
 	char uncomp[32];
@@ -1275,14 +1304,24 @@ dump_deadlist(dsl_deadlist_t *dl)
 
 	(void) printf("\n");
 
+	/* force the tree to be loaded */
+	dsl_deadlist_space_range(dl, 0, UINT64_MAX, &unused, &unused, &unused);
+
 	for (dle = avl_first(&dl->dl_tree); dle;
 	    dle = AVL_NEXT(&dl->dl_tree, dle)) {
-		(void) printf("      mintxg %llu -> obj %llu\n",
-		    (longlong_t)dle->dle_mintxg,
-		    (longlong_t)dle->dle_bpobj.bpo_object);
+		if (dump_opt['d'] >= 5) {
+			char buf[128];
+			(void) snprintf(buf, sizeof (buf), "mintxg %llu -> ",
+			    (longlong_t)dle->dle_mintxg,
+			    (longlong_t)dle->dle_bpobj.bpo_object);
 
-		if (dump_opt['d'] >= 5)
-			dump_bpobj(&dle->dle_bpobj, "");
+			dump_bpobj(&dle->dle_bpobj, buf, 0);
+		} else {
+			(void) printf("mintxg %llu -> obj %llu\n",
+			    (longlong_t)dle->dle_mintxg,
+			    (longlong_t)dle->dle_bpobj.bpo_object);
+
+		}
 	}
 }
 
@@ -1305,7 +1344,7 @@ fuid_table_destroy()
  * print uid or gid information.
  * For normal POSIX id just the id is printed in decimal format.
  * For CIFS files with FUID the fuid is printed in hex followed by
- * the doman-rid string.
+ * the domain-rid string.
  */
 static void
 print_idstr(uint64_t id, const char *id_type)
@@ -1658,7 +1697,9 @@ dump_dir(objset_t *os)
 	int print_header = 1;
 	int i, error;
 
+	dsl_pool_config_enter(dmu_objset_pool(os), FTAG);
 	dmu_objset_fast_stat(os, &dds);
+	dsl_pool_config_exit(dmu_objset_pool(os), FTAG);
 
 	if (dds.dds_type < DMU_OST_NUMTYPES)
 		type = objset_types[dds.dds_type];
@@ -1950,11 +1991,15 @@ dump_one_dir(const char *dsname, void *arg)
 /*
  * Block statistics.
  */
+#define	PSIZE_HISTO_SIZE (SPA_MAXBLOCKSIZE / SPA_MINBLOCKSIZE + 1)
 typedef struct zdb_blkstats {
-	uint64_t	zb_asize;
-	uint64_t	zb_lsize;
-	uint64_t	zb_psize;
-	uint64_t	zb_count;
+	uint64_t zb_asize;
+	uint64_t zb_lsize;
+	uint64_t zb_psize;
+	uint64_t zb_count;
+	uint64_t zb_gangs;
+	uint64_t zb_ditto_samevdev;
+	uint64_t zb_psize_histogram[PSIZE_HISTO_SIZE];
 } zdb_blkstats_t;
 
 /*
@@ -1978,6 +2023,9 @@ typedef struct zdb_cb {
 	zdb_blkstats_t	zcb_type[ZB_TOTAL + 1][ZDB_OT_TOTAL + 1];
 	uint64_t	zcb_dedup_asize;
 	uint64_t	zcb_dedup_blocks;
+	uint64_t	zcb_start;
+	uint64_t	zcb_lastprint;
+	uint64_t	zcb_totalasize;
 	uint64_t	zcb_errors[256];
 	int		zcb_readfails;
 	int		zcb_haderrors;
@@ -1998,12 +2046,35 @@ zdb_count_block(zdb_cb_t *zcb, zilog_t *zilog, const blkptr_t *bp,
 	for (int i = 0; i < 4; i++) {
 		int l = (i < 2) ? BP_GET_LEVEL(bp) : ZB_TOTAL;
 		int t = (i & 1) ? type : ZDB_OT_TOTAL;
+		int equal;
 		zdb_blkstats_t *zb = &zcb->zcb_type[l][t];
 
 		zb->zb_asize += BP_GET_ASIZE(bp);
 		zb->zb_lsize += BP_GET_LSIZE(bp);
 		zb->zb_psize += BP_GET_PSIZE(bp);
 		zb->zb_count++;
+		zb->zb_psize_histogram[BP_GET_PSIZE(bp) >> SPA_MINBLOCKSHIFT]++;
+
+		zb->zb_gangs += BP_COUNT_GANG(bp);
+
+		switch (BP_GET_NDVAS(bp)) {
+		case 2:
+			if (DVA_GET_VDEV(&bp->blk_dva[0]) ==
+			    DVA_GET_VDEV(&bp->blk_dva[1]))
+				zb->zb_ditto_samevdev++;
+			break;
+		case 3:
+			equal = (DVA_GET_VDEV(&bp->blk_dva[0]) ==
+			    DVA_GET_VDEV(&bp->blk_dva[1])) +
+			    (DVA_GET_VDEV(&bp->blk_dva[0]) ==
+			    DVA_GET_VDEV(&bp->blk_dva[2])) +
+			    (DVA_GET_VDEV(&bp->blk_dva[1]) ==
+			    DVA_GET_VDEV(&bp->blk_dva[2]));
+			if (equal != 0)
+				zb->zb_ditto_samevdev++;
+			break;
+		}
+
 	}
 
 	if (dump_opt['L'])
@@ -2073,9 +2144,8 @@ zdb_blkptr_done(zio_t *zio)
 	mutex_exit(&spa->spa_scrub_lock);
 }
 
-/* ARGSUSED */
 static int
-zdb_blkptr_cb(spa_t *spa, zilog_t *zilog, const blkptr_t *bp, arc_buf_t *pbuf,
+zdb_blkptr_cb(spa_t *spa, zilog_t *zilog, const blkptr_t *bp,
     const zbookmark_t *zb, const dnode_phys_t *dnp, void *arg)
 {
 	zdb_cb_t *zcb = arg;
@@ -2110,12 +2180,11 @@ zdb_blkptr_cb(spa_t *spa, zilog_t *zilog, const blkptr_t *bp, arc_buf_t *pbuf,
 
 		zio_nowait(zio_read(NULL, spa, bp, data, size,
 		    zdb_blkptr_done, zcb, ZIO_PRIORITY_ASYNC_READ, flags, zb));
-
 	}
 
 	zcb->zcb_readfails = 0;
 
-	if (dump_opt['b'] >= 4) {
+	if (dump_opt['b'] >= 5) {
 		sprintf_blkptr(blkbuf, bp);
 		(void) printf("objset %llu object %llu "
 		    "level %lld offset 0x%llx %s\n",
@@ -2124,6 +2193,28 @@ zdb_blkptr_cb(spa_t *spa, zilog_t *zilog, const blkptr_t *bp, arc_buf_t *pbuf,
 		    (longlong_t)zb->zb_level,
 		    (u_longlong_t)blkid2offset(dnp, bp, zb),
 		    blkbuf);
+	}
+
+	if (dump_opt['b'] < 5 && isatty(STDERR_FILENO) &&
+	    gethrtime() > zcb->zcb_lastprint + NANOSEC) {
+		uint64_t now = gethrtime();
+		char buf[10];
+		uint64_t bytes = zcb->zcb_type[ZB_TOTAL][ZDB_OT_TOTAL].zb_asize;
+		int kb_per_sec =
+		    1 + bytes / (1 + ((now - zcb->zcb_start) / 1000 / 1000));
+		int sec_remaining =
+		    (zcb->zcb_totalasize - bytes) / 1024 / kb_per_sec;
+
+		zfs_nicenum(bytes, buf, sizeof (buf));
+		(void) fprintf(stderr,
+		    "\r%5s completed (%4dMB/s) "
+		    "estimated time remaining: %uhr %02umin %02usec        ",
+		    buf, kb_per_sec / 1024,
+		    sec_remaining / 60 / 60,
+		    sec_remaining / 60 % 60,
+		    sec_remaining % 60);
+
+		zcb->zcb_lastprint = now;
 	}
 
 	return (0);
@@ -2217,11 +2308,11 @@ zdb_leak_init(spa_t *spa, zdb_cb_t *zcb)
 			for (int m = 0; m < vd->vdev_ms_count; m++) {
 				metaslab_t *msp = vd->vdev_ms[m];
 				mutex_enter(&msp->ms_lock);
-				space_map_unload(&msp->ms_map);
-				VERIFY(space_map_load(&msp->ms_map,
+				space_map_unload(msp->ms_map);
+				VERIFY(space_map_load(msp->ms_map,
 				    &zdb_space_map_ops, SM_ALLOC, &msp->ms_smo,
 				    spa->spa_meta_objset) == 0);
-				msp->ms_map.sm_ppd = vd;
+				msp->ms_map->sm_ppd = vd;
 				mutex_exit(&msp->ms_lock);
 			}
 		}
@@ -2244,7 +2335,7 @@ zdb_leak_fini(spa_t *spa)
 			for (int m = 0; m < vd->vdev_ms_count; m++) {
 				metaslab_t *msp = vd->vdev_ms[m];
 				mutex_enter(&msp->ms_lock);
-				space_map_unload(&msp->ms_map);
+				space_map_unload(msp->ms_map);
 				mutex_exit(&msp->ms_lock);
 			}
 		}
@@ -2257,7 +2348,7 @@ count_block_cb(void *arg, const blkptr_t *bp, dmu_tx_t *tx)
 {
 	zdb_cb_t *zcb = arg;
 
-	if (dump_opt['b'] >= 4) {
+	if (dump_opt['b'] >= 5) {
 		char blkbuf[BP_SPRINTF_LEN];
 		sprintf_blkptr(blkbuf, bp);
 		(void) printf("[%s] %s\n",
@@ -2276,7 +2367,7 @@ dump_block_stats(spa_t *spa)
 	int flags = TRAVERSE_PRE | TRAVERSE_PREFETCH_METADATA | TRAVERSE_HARD;
 	int leaks = 0;
 
-	(void) printf("\nTraversing all blocks %s%s%s%s%s...\n",
+	(void) printf("\nTraversing all blocks %s%s%s%s%s...\n\n",
 	    (dump_opt['c'] || !dump_opt['L']) ? "to verify " : "",
 	    (dump_opt['c'] == 1) ? "metadata " : "",
 	    dump_opt['c'] ? "checksums " : "",
@@ -2298,8 +2389,10 @@ dump_block_stats(spa_t *spa)
 	 */
 	(void) bpobj_iterate_nofree(&spa->spa_deferred_bpobj,
 	    count_block_cb, &zcb, NULL);
-	(void) bpobj_iterate_nofree(&spa->spa_dsl_pool->dp_free_bpobj,
-	    count_block_cb, &zcb, NULL);
+	if (spa_version(spa) >= SPA_VERSION_DEADLISTS) {
+		(void) bpobj_iterate_nofree(&spa->spa_dsl_pool->dp_free_bpobj,
+		    count_block_cb, &zcb, NULL);
+	}
 	if (spa_feature_is_active(spa,
 	    &spa_feature_table[SPA_FEATURE_ASYNC_DESTROY])) {
 		VERIFY3U(0, ==, bptree_iterate(spa->spa_meta_objset,
@@ -2310,6 +2403,8 @@ dump_block_stats(spa_t *spa)
 	if (dump_opt['c'] > 1)
 		flags |= TRAVERSE_PREFETCH_DATA;
 
+	zcb.zcb_totalasize = metaslab_class_get_alloc(spa_normal_class(spa));
+	zcb.zcb_start = zcb.zcb_lastprint = gethrtime();
 	zcb.zcb_haderrors |= traverse_pool(spa, 0, flags, zdb_blkptr_cb, &zcb);
 
 	/*
@@ -2368,6 +2463,8 @@ dump_block_stats(spa_t *spa)
 	(void) printf("\n");
 	(void) printf("\tbp count:      %10llu\n",
 	    (u_longlong_t)tzb->zb_count);
+	(void) printf("\tganged count:  %10llu\n",
+	    (longlong_t)tzb->zb_gangs);
 	(void) printf("\tbp logical:    %10llu      avg: %6llu\n",
 	    (u_longlong_t)tzb->zb_lsize,
 	    (u_longlong_t)(tzb->zb_lsize / tzb->zb_count));
@@ -2389,6 +2486,11 @@ dump_block_stats(spa_t *spa)
 	(void) printf("\tSPA allocated: %10llu     used: %5.2f%%\n",
 	    (u_longlong_t)norm_alloc, 100.0 * norm_alloc / norm_space);
 
+	if (tzb->zb_ditto_samevdev != 0) {
+		(void) printf("\tDittoed blocks on same vdev: %llu\n",
+		    (longlong_t)tzb->zb_ditto_samevdev);
+	}
+
 	if (dump_opt['b'] >= 2) {
 		int l, t, level;
 		(void) printf("\nBlocks\tLSIZE\tPSIZE\tASIZE"
@@ -2396,7 +2498,7 @@ dump_block_stats(spa_t *spa)
 
 		for (t = 0; t <= ZDB_OT_TOTAL; t++) {
 			char csize[32], lsize[32], psize[32], asize[32];
-			char avg[32];
+			char avg[32], gang[32];
 			char *typename;
 
 			if (t < DMU_OT_NUMTYPES)
@@ -2437,6 +2539,7 @@ dump_block_stats(spa_t *spa)
 				zdb_nicenum(zb->zb_psize, psize);
 				zdb_nicenum(zb->zb_asize, asize);
 				zdb_nicenum(zb->zb_asize / zb->zb_count, avg);
+				zdb_nicenum(zb->zb_gangs, gang);
 
 				(void) printf("%6s\t%5s\t%5s\t%5s\t%5s"
 				    "\t%5.2f\t%6.2f\t",
@@ -2449,6 +2552,19 @@ dump_block_stats(spa_t *spa)
 				else
 					(void) printf("    L%d %s\n",
 					    level, typename);
+
+				if (dump_opt['b'] >= 3 && zb->zb_gangs > 0) {
+					(void) printf("\t number of ganged "
+					    "blocks: %s\n", gang);
+				}
+
+				if (dump_opt['b'] >= 4) {
+					(void) printf("psize "
+					    "(in 512-byte sectors): "
+					    "number of blocks\n");
+					dump_histogram(zb->zb_psize_histogram,
+					    PSIZE_HISTO_SIZE);
+				}
 			}
 		}
 	}
@@ -2476,7 +2592,7 @@ typedef struct zdb_ddt_entry {
 /* ARGSUSED */
 static int
 zdb_ddt_add_cb(spa_t *spa, zilog_t *zilog, const blkptr_t *bp,
-    arc_buf_t *pbuf, const zbookmark_t *zb, const dnode_phys_t *dnp, void *arg)
+    const zbookmark_t *zb, const dnode_phys_t *dnp, void *arg)
 {
 	avl_tree_t *t = arg;
 	avl_index_t where;
@@ -2596,10 +2712,11 @@ dump_zpool(spa_t *spa)
 	if (dump_opt['d'] || dump_opt['i']) {
 		dump_dir(dp->dp_meta_objset);
 		if (dump_opt['d'] >= 3) {
-			dump_bpobj(&spa->spa_deferred_bpobj, "Deferred frees");
+			dump_bpobj(&spa->spa_deferred_bpobj,
+			    "Deferred frees", 0);
 			if (spa_version(spa) >= SPA_VERSION_DEADLISTS) {
 				dump_bpobj(&spa->spa_dsl_pool->dp_free_bpobj,
-				    "Pool snapshot frees");
+				    "Pool snapshot frees", 0);
 			}
 
 			if (spa_feature_is_active(spa,

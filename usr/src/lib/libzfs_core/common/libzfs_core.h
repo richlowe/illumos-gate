@@ -20,7 +20,7 @@
  */
 
 /*
- * Copyright (c) 2012 by Delphix. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 #ifndef	_LIBZFS_CORE_H
@@ -46,6 +46,10 @@ int lzc_destroy_snaps(nvlist_t *snaps, boolean_t defer, nvlist_t **errlist);
 int lzc_snaprange_space(const char *firstsnap, const char *lastsnap,
     uint64_t *usedp);
 
+int lzc_hold(nvlist_t *holds, int cleanup_fd, nvlist_t **errlist);
+int lzc_release(nvlist_t *holds, nvlist_t **errlist);
+int lzc_get_holds(const char *snapname, nvlist_t **holdsp);
+
 int lzc_send(const char *snapname, const char *fromsnap, int fd);
 int lzc_receive(const char *snapname, nvlist_t *props, const char *origin,
     boolean_t force, int fd);
@@ -54,6 +58,7 @@ int lzc_send_space(const char *snapname, const char *fromsnap,
 
 boolean_t lzc_exists(const char *dataset);
 
+int lzc_rollback(const char *fsname, char *snapnamebuf, int snapnamelen);
 
 #ifdef	__cplusplus
 }

@@ -20,6 +20,10 @@
  */
 
 /*
+ * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
+ */
+
+/*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
@@ -178,8 +182,8 @@ main(int argc, char *argv[])
 
 	/*
 	 * Check for options:
-	 * 	cp  -r|-R [-H|-L|-P] [-fip@/] file1 [file2 ...] target
-	 * 	cp [-fiprR@/] file1 [file2 ...] target
+	 * 	cp [ -r|-R [-H|-L|-P]] [-afip@/] file1 [file2 ...] target
+	 * 	cp [-afiprR@/] file1 [file2 ...] target
 	 *	ln [-f] [-n] [-s] file1 [file2 ...] target
 	 *	ln [-f] [-n] [-s] file1 [file2 ...]
 	 *	mv [-f|i] file1 [file2 ...] target
@@ -187,7 +191,7 @@ main(int argc, char *argv[])
 	 */
 
 	if (cpy) {
-		while ((c = getopt(argc, argv, "fHiLpPrR@/")) != EOF)
+		while ((c = getopt(argc, argv, "afHiLpPrR@/")) != EOF)
 			switch (c) {
 			case 'f':
 				fflg++;
@@ -232,6 +236,13 @@ main(int argc, char *argv[])
 				Rflg++;
 				/*FALLTHROUGH*/
 			case 'r':
+				rflg++;
+				break;
+			case 'a':
+				Lflg = Hflg = 0;
+				pflg++;
+				Pflg++;
+				Rflg++;
 				rflg++;
 				break;
 			case '@':
@@ -1319,10 +1330,10 @@ usage(void)
 #endif
 	} else if (cpy) {
 		(void) fprintf(stderr, gettext(
-		    "Usage: cp [-f] [-i] [-p] [-@] [-/] f1 f2\n"
-		    "       cp [-f] [-i] [-p] [-@] [-/] f1 ... fn d1\n"
-		    "       cp -r|-R [-H|-L|-P] [-f] [-i] [-p] [-@] [-/] "
-		    "d1 ... dn-1 dn\n"));
+		    "Usage: cp [-a] [-f] [-i] [-p] [-@] [-/] f1 f2\n"
+		    "       cp [-a] [-f] [-i] [-p] [-@] [-/] f1 ... fn d1\n"
+		    "       cp [-r|-R [-H|-L|-P]] [-a] [-f] [-i] [-p] [-@] "
+		    "[-/] d1 ... dn-1 dn\n"));
 	}
 	exit(2);
 }
@@ -1348,7 +1359,8 @@ chg_time(char *to, struct stat ss)
 	times[0] = ss.st_atim;
 	times[1] = ss.st_mtim;
 
-	rc = utimensat(AT_FDCWD, to, times, 0);
+	rc = utimensat(AT_FDCWD, to, times,
+	    ISLNK(s1) ? AT_SYMLINK_NOFOLLOW : 0);
 #ifdef XPG4
 	if ((pflg || mve) && rc != 0) {
 		(void) fprintf(stderr,
@@ -1383,6 +1395,11 @@ static int
 chg_mode(char *target, uid_t uid, gid_t gid, mode_t mode)
 {
 	int clearflg = 0; /* controls message printed upon chown() error */
+	struct stat st;
+
+	/* Don't change mode if target is symlink */
+	if (lstat(target, &st) == 0 && ISLNK(st))
+		return (0);
 
 	if (chown(target, uid, gid) != 0) {
 #ifdef XPG4

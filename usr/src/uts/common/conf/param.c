@@ -534,20 +534,12 @@ char hw_provider[] = "Oracle Corporation";
 
 #elif defined(__i386)
 
-/*
- * On x86 machines, read hw_serial, hw_provider and srpc_domain from
- * /etc/bootrc at boot time.
- */
 char architecture[] = "i386";
 char architecture_32[] = "i386";
 char hw_provider[SYS_NMLN] = "";
 
 #elif defined(__amd64)
 
-/*
- * On amd64 machines, read hw_serial, hw_provider and srpc_domain from
- * /etc/bootrc at boot time.
- */
 char architecture[] = "amd64";
 char architecture_32[] = "i386";
 char hw_provider[SYS_NMLN] = "";
@@ -695,10 +687,10 @@ param_init(void)
 	 * should re-evaluate their usage and specify the appropriate
 	 * resolution.
 	 */
-	time_res[TR_NANOSEC] = SEC;
-	time_res[TR_MICROSEC] = MILLISEC;
-	time_res[TR_MILLISEC] = MICROSEC;
-	time_res[TR_SEC] = NANOSEC;
+	time_res[TR_NANOSEC] = NANOSEC / NANOSEC;
+	time_res[TR_MICROSEC] = NANOSEC / MICROSEC;
+	time_res[TR_MILLISEC] = NANOSEC / MILLISEC;
+	time_res[TR_SEC] = NANOSEC / SEC;
 	time_res[TR_CLOCK_TICK] = nsec_per_tick;
 }
 

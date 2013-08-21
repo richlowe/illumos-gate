@@ -163,25 +163,6 @@ function filelist {
 	DEST=$1
 	PATTERN=$2
 	cd ${DEST}
-
-	OBJFILES=${ORIG_SRC}/xmod/obj_files
-	if [ ! -f ${OBJFILES} ]; then
-		return;
-	fi
-	for i in `grep -v '^#' ${OBJFILES} | \
-	    grep ${PATTERN} | cut -d: -f2 | tr -d ' \t'`
-	do
-		# wildcard expansion
-		for j in $i
-		do
-			if [ -f "$j" ]; then
-				echo $j
-			fi
-			if [ -d "$j" ]; then
-				echo $j
-			fi
-		done
-	done | sort | uniq
 }
 
 # function to save off binaries after a full build for later
@@ -415,55 +396,6 @@ function set_up_source_build {
 
 	echo "clearing state files." >> $LOGFILE
 	find . -name '.make*' -exec rm -f {} \;
-
-	cd ${DEST}
-	if [ "${MAKETARG}" = "CRYPT_SRC" ]; then
-		rm -f ${CODEMGR_WS}/crypt_files.cpio.Z
-		echo "\n==== xmod/cry_files that don't exist ====\n" | \
-		    tee -a $mail_msg_file >> $LOGFILE
-		CRYPT_FILES=${WS}/usr/src/xmod/cry_files
-		for i in `cat ${CRYPT_FILES}`
-		do
-			# make sure the files exist
-			if [ -f "$i" ]; then
-				continue
-			fi
-			if [ -d "$i" ]; then
-				continue
-			fi
-			echo "$i" | tee -a $mail_msg_file >> $LOGFILE
-		done
-		find `cat ${CRYPT_FILES}` -print 2>/dev/null | \
-		    cpio -ocB 2>/dev/null | \
-		    compress > ${CODEMGR_WS}/crypt_files.cpio.Z
-	fi
-
-	if [ "${MAKETARG}" = "EXPORT_SRC" ]; then
-		# rename first, since we might restore a file
-		# of the same name (mapfiles)
-		rename_files ${EXPORT_SRC} EXPORT_SRC
-		if [ "$SH_FLAG" = "y" ]; then
-			hybridize_files ${EXPORT_SRC} EXPORT_SRC
-		fi
-	fi
-
-	# save the cleartext
-	echo "\n==== Creating ${MAKETARG}.cpio.Z ====\n" | \
-	    tee -a $mail_msg_file >> $LOGFILE
-	cd ${DEST}
-	rm -f ${MAKETARG}.cpio.Z
-	find usr -depth -print | \
-	    grep -v usr/src/${MAKETARG}.out | \
-	    cpio -ocB 2>/dev/null | \
-	    compress > ${CODEMGR_WS}/${MAKETARG}.cpio.Z
-	if [ "${MAKETARG}" = "EXPORT_SRC" ]; then
-		restore_binaries ${EXPORT_SRC} EXPORT_SRC
-	fi
-
-	if [ "${MAKETARG}" = "CRYPT_SRC" ]; then
-		restore_binaries ${CRYPT_SRC} CRYPT_SRC
-	fi
-
 }
 
 # Return library search directive as function of given root.
@@ -1098,8 +1030,6 @@ NIGHTLY_OPTIONS variable in the <env_file> as follows:
 		O - build (only) open source
 '
 #
-#	-x	less public handling of xmod source for the source product
-#
 #	A log file will be generated under the name $LOGFILE
 #	for partially completed build and log.`date '+%F'`
 #	in the same directory for fully completed builds.
@@ -1700,7 +1630,7 @@ ENVCPPFLAGS4=
 PARENT_ROOT=
 
 export ENVLDLIBS3 ENVCPPFLAGS1 ENVCPPFLAGS2 ENVCPPFLAGS3 ENVCPPFLAGS4 \
-	PARENT_ROOT
+	ENVLDLIBS1 ENVLDLIBS2 PARENT_ROOT
 
 PKGARCHIVE_ORIG=$PKGARCHIVE
 IA32_IHV_PKGS_ORIG=$IA32_IHV_PKGS
@@ -2713,7 +2643,6 @@ if is_source_build && [ $build_ok = y ] ; then
 		fi
 	fi
 
-	export EXPORT_RELEASE_BUILD ; EXPORT_RELEASE_BUILD=#
 	normal_build
 fi
 

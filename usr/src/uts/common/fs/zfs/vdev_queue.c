@@ -29,23 +29,28 @@
 
 #include <sys/zfs_context.h>
 #include <sys/vdev_impl.h>
+#include <sys/spa_impl.h>
 #include <sys/zio.h>
 #include <sys/avl.h>
 
 /*
  * These tunables are for performance analysis.
  */
-/*
- * zfs_vdev_max_pending is the maximum number of i/os concurrently
- * pending to each device.  zfs_vdev_min_pending is the initial number
- * of i/os pending to each device (before it starts ramping up to
- * max_pending).
- */
+
+/* The maximum number of I/Os concurrently pending to each device. */
 int zfs_vdev_max_pending = 10;
+
+/*
+ * The initial number of I/Os pending to each device, before it starts ramping
+ * up to zfs_vdev_max_pending.
+ */
 int zfs_vdev_min_pending = 4;
 
-/* deadline = pri + ddi_get_lbolt64() >> time_shift) */
-int zfs_vdev_time_shift = 6;
+/*
+ * The deadlines are grouped into buckets based on zfs_vdev_time_shift:
+ * deadline = pri + gethrtime() >> time_shift)
+ */
+int zfs_vdev_time_shift = 29; /* each bucket is 0.537 seconds */
 
 /* exponential I/O issue ramp-up rate */
 int zfs_vdev_ramp_rate = 2;
@@ -142,15 +147,62 @@ vdev_queue_fini(vdev_t *vd)
 static void
 vdev_queue_io_add(vdev_queue_t *vq, zio_t *zio)
 {
+	spa_t *spa = zio->io_spa;
 	avl_add(&vq->vq_deadline_tree, zio);
 	avl_add(zio->io_vdev_tree, zio);
+
+	if (spa->spa_iokstat != NULL) {
+		mutex_enter(&spa->spa_iokstat_lock);
+		kstat_waitq_enter(spa->spa_iokstat->ks_data);
+		mutex_exit(&spa->spa_iokstat_lock);
+	}
 }
 
 static void
 vdev_queue_io_remove(vdev_queue_t *vq, zio_t *zio)
 {
+	spa_t *spa = zio->io_spa;
 	avl_remove(&vq->vq_deadline_tree, zio);
 	avl_remove(zio->io_vdev_tree, zio);
+
+	if (spa->spa_iokstat != NULL) {
+		mutex_enter(&spa->spa_iokstat_lock);
+		kstat_waitq_exit(spa->spa_iokstat->ks_data);
+		mutex_exit(&spa->spa_iokstat_lock);
+	}
+}
+
+static void
+vdev_queue_pending_add(vdev_queue_t *vq, zio_t *zio)
+{
+	spa_t *spa = zio->io_spa;
+	avl_add(&vq->vq_pending_tree, zio);
+	if (spa->spa_iokstat != NULL) {
+		mutex_enter(&spa->spa_iokstat_lock);
+		kstat_runq_enter(spa->spa_iokstat->ks_data);
+		mutex_exit(&spa->spa_iokstat_lock);
+	}
+}
+
+static void
+vdev_queue_pending_remove(vdev_queue_t *vq, zio_t *zio)
+{
+	spa_t *spa = zio->io_spa;
+	avl_remove(&vq->vq_pending_tree, zio);
+	if (spa->spa_iokstat != NULL) {
+		kstat_io_t *ksio = spa->spa_iokstat->ks_data;
+
+		mutex_enter(&spa->spa_iokstat_lock);
+		kstat_runq_exit(spa->spa_iokstat->ks_data);
+		if (zio->io_type == ZIO_TYPE_READ) {
+			ksio->reads++;
+			ksio->nread += zio->io_size;
+		} else if (zio->io_type == ZIO_TYPE_WRITE) {
+			ksio->writes++;
+			ksio->nwritten += zio->io_size;
+		}
+		mutex_exit(&spa->spa_iokstat_lock);
+	}
 }
 
 static void
@@ -317,7 +369,7 @@ again:
 			zio_execute(dio);
 		} while (dio != lio);
 
-		avl_add(&vq->vq_pending_tree, aio);
+		vdev_queue_pending_add(vq, aio);
 
 		return (aio);
 	}
@@ -339,7 +391,7 @@ again:
 		goto again;
 	}
 
-	avl_add(&vq->vq_pending_tree, fio);
+	vdev_queue_pending_add(vq, fio);
 
 	return (fio);
 }
@@ -364,7 +416,7 @@ vdev_queue_io(zio_t *zio)
 
 	mutex_enter(&vq->vq_lock);
 
-	zio->io_timestamp = ddi_get_lbolt64();
+	zio->io_timestamp = gethrtime();
 	zio->io_deadline = (zio->io_timestamp >> zfs_vdev_time_shift) +
 	    zio->io_priority;
 
@@ -395,10 +447,9 @@ vdev_queue_io_done(zio_t *zio)
 
 	mutex_enter(&vq->vq_lock);
 
-	avl_remove(&vq->vq_pending_tree, zio);
+	vdev_queue_pending_remove(vq, zio);
 
-	vq->vq_io_complete_ts = ddi_get_lbolt64();
-	vq->vq_io_delta_ts = vq->vq_io_complete_ts - zio->io_timestamp;
+	vq->vq_io_complete_ts = gethrtime();
 
 	for (int i = 0; i < zfs_vdev_ramp_rate; i++) {
 		zio_t *nio = vdev_queue_io_to_issue(vq, zfs_vdev_max_pending);

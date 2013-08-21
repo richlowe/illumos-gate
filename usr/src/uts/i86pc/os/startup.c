@@ -21,6 +21,7 @@
 /*
  * Copyright (c) 1993, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
+ * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
  */
 /*
  * Copyright (c) 2010, Intel Corporation.
@@ -117,7 +118,7 @@
 #include <sys/smbios.h>
 #include <sys/debug_info.h>
 #include <sys/bootinfo.h>
-#include <sys/ddi_timer.h>
+#include <sys/ddi_periodic.h>
 #include <sys/systeminfo.h>
 #include <sys/multiboot.h>
 
@@ -1534,7 +1535,7 @@ startup_modules(void)
 	 */
 	microfind();
 
-	if (get_hwenv() == HW_XEN_HVM)
+	if ((get_hwenv() & HW_XEN_HVM) != 0)
 		update_default_path();
 #endif
 
@@ -1663,7 +1664,7 @@ startup_modules(void)
 	 * Initialize a handle for the boot cpu - others will initialize
 	 * as they startup.  Do not do this if we know we are in an HVM domU.
 	 */
-	if ((get_hwenv() != HW_XEN_HVM) &&
+	if ((get_hwenv() & HW_XEN_HVM) == 0 &&
 	    (hdl = cmi_init(CMI_HDL_NATIVE, cmi_ntv_hwchipid(CPU),
 	    cmi_ntv_hwcoreid(CPU), cmi_ntv_hwstrandid(CPU))) != NULL &&
 	    is_x86_feature(x86_featureset, X86FSET_MCA)) {
@@ -2244,14 +2245,13 @@ startup_end(void)
 	    "softlevel1", NULL, NULL); /* XXX to be moved later */
 
 	/*
-	 * Register these software interrupts for ddi timer.
+	 * Register software interrupt handlers for ddi_periodic_add(9F).
 	 * Software interrupts up to the level 10 are supported.
 	 */
 	for (i = DDI_IPL_1; i <= DDI_IPL_10; i++) {
-		char name[sizeof ("timer_softintr") + 2];
-		(void) sprintf(name, "timer_softintr%02d", i);
 		(void) add_avsoftintr((void *)&softlevel_hdl[i-1], i,
-		    (avfunc)timer_softintr, name, (caddr_t)(uintptr_t)i, NULL);
+		    (avfunc)ddi_periodic_softintr, "ddi_periodic",
+		    (caddr_t)(uintptr_t)i, NULL);
 	}
 
 #if !defined(__xpv)
@@ -2298,7 +2298,7 @@ post_startup(void)
 		 * Startup the memory scrubber.
 		 * XXPV	This should be running somewhere ..
 		 */
-		if (get_hwenv() != HW_XEN_HVM)
+		if ((get_hwenv() & HW_VIRTUAL) == 0)
 			memscrub_init();
 #endif
 	}

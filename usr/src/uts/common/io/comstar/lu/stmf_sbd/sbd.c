@@ -18,10 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
- *
- * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
+ * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
 #include <sys/conf.h>
@@ -1719,7 +1720,6 @@ sbd_create_register_lu(sbd_create_and_reg_lu_t *slu, int struct_sz,
 	char *namebuf;
 	sbd_lu_t *sl;
 	stmf_lu_t *lu;
-	sbd_status_t sret;
 	char *p;
 	int sz;
 	int alloc_sz;
@@ -1835,11 +1835,6 @@ sbd_create_register_lu(sbd_create_and_reg_lu_t *slu, int struct_sz,
 	if (slu->slu_write_protected) {
 		sl->sl_flags |= SL_WRITE_PROTECTED;
 	}
-	if (slu->slu_writeback_cache_disable) {
-		sl->sl_flags |= SL_WRITEBACK_CACHE_DISABLE |
-		    SL_SAVED_WRITE_CACHE_DISABLE;
-	}
-
 	if (slu->slu_blksize_valid) {
 		if ((slu->slu_blksize & (slu->slu_blksize - 1)) ||
 		    (slu->slu_blksize > (32 * 1024)) ||
@@ -1876,27 +1871,30 @@ sbd_create_register_lu(sbd_create_and_reg_lu_t *slu, int struct_sz,
 	}
 
 	/*
-	 * set write cache disable on the device
-	 * if it fails, we'll support it using sync/flush
+	 * Check if we were explicitly asked to disable/enable write
+	 * cache on the device, otherwise get current device setting.
 	 */
-	if (slu->slu_writeback_cache_disable) {
-		(void) sbd_wcd_set(1, sl);
-		wcd = 1;
-	/*
-	 * Attempt to set it to enable, if that fails and it was explicitly set
-	 * return an error, otherwise get the current setting and use that
-	 */
+	if (slu->slu_writeback_cache_disable_valid) {
+		if (slu->slu_writeback_cache_disable) {
+			/*
+			 * Set write cache disable on the device. If it fails,
+			 * we'll support it using sync/flush.
+			 */
+			(void) sbd_wcd_set(1, sl);
+			wcd = 1;
+		} else {
+			/*
+			 * Set write cache enable on the device. If it fails,
+			 * return an error.
+			 */
+			if (sbd_wcd_set(0, sl) != SBD_SUCCESS) {
+				*err_ret = SBD_RET_WRITE_CACHE_SET_FAILED;
+				ret = EFAULT;
+				goto scm_err_out;
+			}
+		}
 	} else {
-		sret = sbd_wcd_set(0, sl);
-		if (slu->slu_writeback_cache_disable_valid &&
-		    sret != SBD_SUCCESS) {
-			*err_ret = SBD_RET_WRITE_CACHE_SET_FAILED;
-			ret = EFAULT;
-			goto scm_err_out;
-		}
-		if (sret != SBD_SUCCESS) {
-			sbd_wcd_get(&wcd, sl);
-		}
+		sbd_wcd_get(&wcd, sl);
 	}
 
 	if (wcd) {
@@ -3000,7 +2998,6 @@ sbd_data_read(sbd_lu_t *sl, struct scsi_task *task,
 {
 	int ret;
 	long resid;
-	hrtime_t xfer_start, xfer_done;
 
 	if ((offset + size) > sl->sl_lu_size) {
 		return (SBD_IO_PAST_EOF);
@@ -3019,8 +3016,6 @@ sbd_data_read(sbd_lu_t *sl, struct scsi_task *task,
 		size = store_end;
 	}
 
-	xfer_start = gethrtime();
-	stmf_lu_xfer_start(task);
 	DTRACE_PROBE5(backing__store__read__start, sbd_lu_t *, sl,
 	    uint8_t *, buf, uint64_t, size, uint64_t, offset,
 	    scsi_task_t *, task);
@@ -3041,8 +3036,6 @@ sbd_data_read(sbd_lu_t *sl, struct scsi_task *task,
 	    &resid);
 	rw_exit(&sl->sl_access_state_lock);
 
-	xfer_done = gethrtime() - xfer_start;
-	stmf_lu_xfer_done(task, B_TRUE /* read */, size, xfer_done);
 	DTRACE_PROBE6(backing__store__read__end, sbd_lu_t *, sl,
 	    uint8_t *, buf, uint64_t, size, uint64_t, offset,
 	    int, ret, scsi_task_t *, task);
@@ -3065,7 +3058,6 @@ sbd_data_write(sbd_lu_t *sl, struct scsi_task *task,
 	long resid;
 	sbd_status_t sret = SBD_SUCCESS;
 	int ioflag;
-	hrtime_t xfer_start, xfer_done;
 
 	if ((offset + size) > sl->sl_lu_size) {
 		return (SBD_IO_PAST_EOF);
@@ -3080,8 +3072,6 @@ sbd_data_write(sbd_lu_t *sl, struct scsi_task *task,
 		ioflag = 0;
 	}
 
-	xfer_start = gethrtime();
-	stmf_lu_xfer_start(task);
 	DTRACE_PROBE5(backing__store__write__start, sbd_lu_t *, sl,
 	    uint8_t *, buf, uint64_t, size, uint64_t, offset,
 	    scsi_task_t *, task);
@@ -3102,8 +3092,6 @@ sbd_data_write(sbd_lu_t *sl, struct scsi_task *task,
 	    &resid);
 	rw_exit(&sl->sl_access_state_lock);
 
-	xfer_done = gethrtime() - xfer_start;
-	stmf_lu_xfer_done(task, B_FALSE /* write */, size, xfer_done);
 	DTRACE_PROBE6(backing__store__write__end, sbd_lu_t *, sl,
 	    uint8_t *, buf, uint64_t, size, uint64_t, offset,
 	    int, ret, scsi_task_t *, task);

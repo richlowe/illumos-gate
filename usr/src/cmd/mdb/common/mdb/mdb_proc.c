@@ -23,6 +23,9 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
+/*
+ * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ */
 
 /*
  * User Process Target
@@ -120,6 +123,13 @@ static int pt_lookup_by_name_thr(mdb_tgt_t *, const char *,
     const char *, GElf_Sym *, mdb_syminfo_t *, mdb_tgt_tid_t);
 static int tlsbase(mdb_tgt_t *, mdb_tgt_tid_t, Lmid_t, const char *,
     psaddr_t *);
+
+/*
+ * When debugging postmortem, we don't resolve names as we may very well not
+ * be on a system on which those names resolve.
+ */
+#define	PT_LIBPROC_RESOLVE(P) \
+	(!(mdb.m_flags & MDB_FL_LMRAW) && Pstate(P) != PS_DEAD)
 
 /*
  * The Perror_printf() function interposes on the default, empty libproc
@@ -2805,7 +2815,7 @@ pt_lookup_by_addr(mdb_tgt_t *t, uintptr_t addr, uint_t flags,
 	 * Once we get the closest symbol, we perform the EXACT match or
 	 * smart-mode or absolute distance check ourself:
 	 */
-	if ((mdb.m_flags & MDB_FL_LMRAW) == 0) {
+	if (PT_LIBPROC_RESOLVE(P)) {
 		rv = Pxlookup_by_addr_resolved(P, addr, buf, nbytes,
 		    symp, &si);
 	} else {
@@ -2850,7 +2860,7 @@ found:
 		const char *prefix = pmp->pr_mapname;
 		Lmid_t lmid;
 
-		if ((mdb.m_flags & MDB_FL_LMRAW) == 0) {
+		if (PT_LIBPROC_RESOLVE(P)) {
 			if (Pobjname_resolved(P, addr, pt->p_objname,
 			    MDB_TGT_MAPSZ))
 				prefix = pt->p_objname;
@@ -2952,7 +2962,7 @@ pt_symbol_iter(mdb_tgt_t *t, const char *object, uint_t which,
 			    which, type, pt_symbol_iter_cb, &ps);
 			return (0);
 		} else if (Prd_agent(t->t_pshandle) != NULL) {
-			if ((mdb.m_flags & MDB_FL_LMRAW) == 0) {
+			if (PT_LIBPROC_RESOLVE(t->t_pshandle)) {
 				(void) Pobject_iter_resolved(t->t_pshandle,
 				    pt_objsym_iter, &ps);
 			} else {
@@ -2991,7 +3001,7 @@ pt_prmap_to_mdbmap(mdb_tgt_t *t, const prmap_t *prp, mdb_map_t *mp)
 	char *rv, name[MAXPATHLEN];
 	Lmid_t lmid;
 
-	if ((mdb.m_flags & MDB_FL_LMRAW) == 0) {
+	if (PT_LIBPROC_RESOLVE(P)) {
 		rv = Pobjname_resolved(P, prp->pr_vaddr, name, sizeof (name));
 	} else {
 		rv = Pobjname(P, prp->pr_vaddr, name, sizeof (name));
@@ -3057,7 +3067,7 @@ pt_mapping_iter(mdb_tgt_t *t, mdb_tgt_map_f *func, void *private)
 		pm.pmap_func = func;
 		pm.pmap_private = private;
 
-		if ((mdb.m_flags & MDB_FL_LMRAW) == 0) {
+		if (PT_LIBPROC_RESOLVE(t->t_pshandle)) {
 			(void) Pmapping_iter_resolved(t->t_pshandle,
 			    pt_map_apply, &pm);
 		} else {
@@ -3086,7 +3096,7 @@ pt_object_iter(mdb_tgt_t *t, mdb_tgt_map_f *func, void *private)
 		pm.pmap_func = func;
 		pm.pmap_private = private;
 
-		if ((mdb.m_flags & MDB_FL_LMRAW) == 0) {
+		if (PT_LIBPROC_RESOLVE(t->t_pshandle)) {
 			(void) Pobject_iter_resolved(t->t_pshandle,
 			    pt_map_apply, &pm);
 		} else {
@@ -4495,6 +4505,14 @@ pt_getareg(mdb_tgt_t *t, mdb_tgt_tid_t tid,
 			 */
 			if (PTL_GETREGS(t, tid, grs) == 0) {
 				*rp = r | (ulong_t)grs[rd_num];
+				if (rd_flags & MDB_TGT_R_32)
+					*rp &= 0xffffffffULL;
+				else if (rd_flags & MDB_TGT_R_16)
+					*rp &= 0xffffULL;
+				else if (rd_flags & MDB_TGT_R_8H)
+					*rp = (*rp & 0xff00ULL) >> 8;
+				else if (rd_flags & MDB_TGT_R_8L)
+					*rp &= 0xffULL;
 				return (0);
 			}
 			return (-1);
@@ -4521,6 +4539,16 @@ pt_putareg(mdb_tgt_t *t, mdb_tgt_tid_t tid, const char *rname, mdb_tgt_reg_t r)
 		ushort_t rd_flags = MDB_TGT_R_FLAGS(rd_nval);
 
 		if (!MDB_TGT_R_IS_FP(rd_flags)) {
+
+			if (rd_flags & MDB_TGT_R_32)
+				r &= 0xffffffffULL;
+			else if (rd_flags & MDB_TGT_R_16)
+				r &= 0xffffULL;
+			else if (rd_flags & MDB_TGT_R_8H)
+				r = (r & 0xffULL) << 8;
+			else if (rd_flags & MDB_TGT_R_8L)
+				r &= 0xffULL;
+
 #if defined(__sparc) && defined(_ILP32)
 			/*
 			 * If we are debugging on 32-bit SPARC, the globals and

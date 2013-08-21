@@ -19,17 +19,14 @@
  * CDDL HEADER END
  */
 
-/* ONC_PLUS EXTRACT START */
-
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Milan Jurik. All rights reserved.
+ * Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
-
-/* ONC_PLUS EXTRACT END */
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -52,7 +49,6 @@
 struct hrtsysa;
 struct mmaplf32a;
 
-/* ONC_PLUS EXTRACT START */
 /*
  * This table is the switch used to transfer to the appropriate
  * routine for processing a system call.  Each row contains the
@@ -60,7 +56,6 @@ struct mmaplf32a;
  * in trap.c whether a setjmp() is not necessary, and a pointer
  * to the routine.
  */
-/* ONC_PLUS EXTRACT END */
 
 int	access(char *, int);
 int	alarm(int);
@@ -315,7 +310,7 @@ int	so_socket(int, int, int, char *, int);
 int	so_socketpair(int[2]);
 int	bind(int, struct sockaddr *, socklen_t, int);
 int	listen(int, int, int);
-int	accept(int, struct sockaddr *, socklen_t *, int);
+int	accept(int, struct sockaddr *, socklen_t *, int, int);
 int	connect(int, struct sockaddr *, socklen_t, int);
 int	shutdown(int, int, int);
 ssize_t	recv(int, void *, size_t, int);
@@ -421,7 +416,6 @@ typedef int64_t	(*llfcn_t)();	/* for casting one-word returns */
  */
 #define	SYSENT_LOADABLE()	\
 	{ 0, SE_LOADABLE, (int (*)())nosys, NULL, loadable_syscall }
-/* ONC_PLUS EXTRACT END */
 
 /*
  * Initialization macro for loadable 32-bit compatibility system calls.
@@ -432,13 +426,11 @@ typedef int64_t	(*llfcn_t)();	/* for casting one-word returns */
 
 struct sysent nosys_ent = SYSENT_NOSYS();
 
-/* ONC_PLUS EXTRACT START */
 /*
  * Native sysent table.
  */
 struct sysent sysent[NSYSCALL] =
 {
-/* ONC_PLUS EXTRACT END */
 	/*  0 */ IF_LP64(
 			SYSENT_NOSYS(),
 			SYSENT_C("indir",	indir,		1)),
@@ -563,9 +555,7 @@ struct sysent sysent[NSYSCALL] =
 	/* 103 */ SYSENT_CI("statvfs",		statvfs,	2),
 	/* 104 */ SYSENT_CI("fstatvfs",		fstatvfs,	2),
 	/* 105 */ SYSENT_CI("getloadavg",	getloadavg,	2),
-/* ONC_PLUS EXTRACT START */
 	/* 106 */ SYSENT_LOADABLE(),		/* nfssys */
-/* ONC_PLUS EXTRACT END */
 	/* 107 */ SYSENT_CI("waitsys",		waitsys,	4),
 	/* 108 */ SYSENT_CI("sigsendset",	sigsendsys,	2),
 	/* 109 */ IF_x86(
@@ -742,7 +732,7 @@ struct sysent sysent[NSYSCALL] =
 	/* 231 */ SYSENT_CI("so_socketpair",	so_socketpair,	1),
 	/* 232 */ SYSENT_CI("bind",		bind,		4),
 	/* 233 */ SYSENT_CI("listen",		listen,		3),
-	/* 234 */ SYSENT_CI("accept",		accept,		4),
+	/* 234 */ SYSENT_CI("accept",		accept,		5),
 	/* 235 */ SYSENT_CI("connect",		connect,	4),
 	/* 236 */ SYSENT_CI("shutdown",		shutdown,	3),
 	/* 237 */ SYSENT_CL("recv",		recv,		4),
@@ -764,9 +754,7 @@ struct sysent sysent[NSYSCALL] =
 	/* 253 */ SYSENT_CI("cladm",		cladm,		3),
 	/* 254 */ SYSENT_CI("uucopy",		uucopy,		3),
 	/* 255 */ SYSENT_CI("umount2",		umount2,	2)
-/* ONC_PLUS EXTRACT START */
 };
-/* ONC_PLUS EXTRACT END */
 
 
 #ifdef _SYSCALL32_IMPL
@@ -820,14 +808,12 @@ extern ssize_t sendto32(int32_t, caddr32_t, size32_t, int32_t, caddr32_t,
 extern int privsys32(int, priv_op_t, priv_ptype_t, caddr32_t, size32_t, int);
 extern int ucredsys32(int, int, caddr32_t);
 
-/* ONC_PLUS EXTRACT START */
 /*
  * sysent table for ILP32 processes running on
  * a LP64 kernel.
  */
 struct sysent sysent32[NSYSCALL] =
 {
-/* ONC_PLUS EXTRACT END */
 	/*  0 */ SYSENT_C("indir",		indir,		1),
 	/*  1 */ SYSENT_CI("exit",	(int (*)())rexit,	1),
 	/*  2 */ SYSENT_LOADABLE32(),			/* (was forkall) */
@@ -936,9 +922,7 @@ struct sysent sysent32[NSYSCALL] =
 	/* 103 */ SYSENT_CI("statvfs",		statvfs32,	2),
 	/* 104 */ SYSENT_CI("fstatvfs",		fstatvfs32,	2),
 	/* 105 */ SYSENT_CI("getloadavg",	getloadavg,	2),
-/* ONC_PLUS EXTRACT START */
 	/* 106 */ SYSENT_LOADABLE32(),		/* nfssys */
-/* ONC_PLUS EXTRACT END */
 	/* 107 */ SYSENT_CI("waitsys",		waitsys32,	4),
 	/* 108 */ SYSENT_CI("sigsendset",	sigsendsys,	2),
 	/* 109 */ IF_x86(
@@ -1073,7 +1057,7 @@ struct sysent sysent32[NSYSCALL] =
 	/* 231 */ SYSENT_CI("so_socketpair",	so_socketpair,	1),
 	/* 232 */ SYSENT_CI("bind",		bind,		4),
 	/* 233 */ SYSENT_CI("listen",		listen,		3),
-	/* 234 */ SYSENT_CI("accept",		accept,		4),
+	/* 234 */ SYSENT_CI("accept",		accept,		5),
 	/* 235 */ SYSENT_CI("connect",		connect,	4),
 	/* 236 */ SYSENT_CI("shutdown",		shutdown,	3),
 	/* 237 */ SYSENT_CI("recv",		recv32,		4),
@@ -1095,9 +1079,7 @@ struct sysent sysent32[NSYSCALL] =
 	/* 253 */ SYSENT_CI("cladm",		cladm,		3),
 	/* 254 */ SYSENT_CI("uucopy",		uucopy,		3),
 	/* 255 */ SYSENT_CI("umount2",		umount2,	2)
-/* ONC_PLUS EXTRACT START */
 };
-/* ONC_PLUS EXTRACT END */
 #endif /* _SYSCALL32_IMPL */
 
 /*
