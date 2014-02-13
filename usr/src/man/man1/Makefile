@@ -646,21 +646,6 @@ unlimit.1	:= LINKSRC = limit.1
 
 dumpkeys.1	:= LINKSRC = loadkeys.1
 
-i286.1		:= LINKSRC = machid.1
-i386.1		:= LINKSRC = machid.1
-i486.1		:= LINKSRC = machid.1
-i860.1		:= LINKSRC = machid.1
-iAPX286.1	:= LINKSRC = machid.1
-pdp11.1		:= LINKSRC = machid.1
-sparc.1		:= LINKSRC = machid.1
-sun.1		:= LINKSRC = machid.1
-u370.1		:= LINKSRC = machid.1
-u3b.1		:= LINKSRC = machid.1
-u3b15.1		:= LINKSRC = machid.1
-u3b2.1		:= LINKSRC = machid.1
-u3b5.1		:= LINKSRC = machid.1
-vax.1		:= LINKSRC = machid.1
-
 rmail.1		:= LINKSRC = mail.1
 
 page.1		:= LINKSRC = more.1
