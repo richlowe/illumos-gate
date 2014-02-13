@@ -53,6 +53,7 @@ CERRWARN +=	-_gcc=-Wno-unused-label
 LINTFLAGS += -erroff=E_INCONS_ARG_DECL2
 LINTFLAGS += -erroff=E_INCONS_VAL_TYPE_DECL2
 LINTFLAGS += -erroff=E_NAME_DEF_NOT_USED2
+LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 
 all: $(PROG)
 

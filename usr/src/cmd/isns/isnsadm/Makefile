@@ -36,6 +36,7 @@ POFILE = isnsadm_all.po
 POFILES = $(OBJS:%.o=%.po)
 
 LINTFLAGS += -xerroff=E_BAD_FORMAT_STR2
+LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-uninitialized

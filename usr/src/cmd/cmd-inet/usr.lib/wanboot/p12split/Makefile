@@ -28,6 +28,8 @@ PROG=		p12split
 LDLIBS +=	-lwanboot -linetutil -lwanbootutil -lcrypto
 CPPFLAGS +=	-I$(CMNCRYPTDIR)
 
+LINTFLAGS +=	-erroff=E_NAME_USED_NOT_DEF2
+
 all:		$(PROG)
 
 install:	all $(ROOTCMD)
