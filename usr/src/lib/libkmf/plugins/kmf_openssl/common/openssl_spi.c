@@ -3772,7 +3772,7 @@ set_pkey_attrib(EVP_PKEY *pkey, ASN1_TYPE *attrib, int nid)
 			a = sk_X509_ATTRIBUTE_value(pkey->attributes, i);
 			if (OBJ_obj2nid(a->object) == nid) {
 				X509_ATTRIBUTE_free(a);
-				sk_X509_ATTRIBUTE_set(pkey->attributes,
+				(void) sk_X509_ATTRIBUTE_set(pkey->attributes,
 				    i, attr);
 				return (KMF_OK);
 			}
