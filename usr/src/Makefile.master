@@ -343,8 +343,8 @@ CCUNBOUND	= $($(MACH)_CCUNBOUND)
 # overridable for testing.
 sparc_XARCH=	-m32
 sparcv9_XARCH=	-m64
-i386_XARCH=
-amd64_XARCH=	-m64 -Ui386 -U__i386
+i386_XARCH=	-_gcc=-march=i386
+amd64_XARCH=	-m64 -_gcc=-march=x86-64 -Ui386 -U__i386
 
 # assembler '-xarch' flag.  Different from compiler '-xarch' flag.
 sparc_AS_XARCH=		-xarch=v8plus
