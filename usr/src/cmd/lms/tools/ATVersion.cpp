@@ -40,6 +40,7 @@
 #include <cerrno>
 #include <fstream>
 #include <dirent.h>
+#include <unistd.h>
 
 #define AT_VERSION_ARGUMENT "--version"
 #define AT_VERSION_MAXSIZE 40
