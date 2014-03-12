@@ -2,27 +2,27 @@
  *
  * Copyright (c) 2003-2004, Apple Computer, Inc. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without 
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * 1.  Redistributions of source code must retain the above copyright notice, 
- *     this list of conditions and the following disclaimer. 
- * 2.  Redistributions in binary form must reproduce the above copyright notice, 
- *     this list of conditions and the following disclaimer in the documentation 
- *     and/or other materials provided with the distribution. 
- * 3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of its 
- *     contributors may be used to endorse or promote products derived from this 
- *     software without specific prior written permission. 
+ * 1.  Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ * 2.  Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ * 3.  Neither the name of Apple Computer, Inc. ("Apple") nor the names of its
+ *     contributors may be used to endorse or promote products derived from this
+ *     software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY 
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
- * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY 
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES 
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND 
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+ * THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     Change History (most recent first):
@@ -189,11 +189,9 @@ Update to APSL 2.0
 
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <errno.h>
 #include <stdlib.h>
-
+#include <sys/ccompile.h>
 #include "dnssd_ipc.h"
 
 #if defined(_WIN32)
@@ -361,7 +359,7 @@ static DNSServiceRef connect_to_server(void)
 		{
 		WSADATA wsaData;
 		DNSServiceErrorType err;
-		
+
 		g_initWinsock = 1;
 
 		err = WSAStartup( MAKEWORD( 2, 2 ), &wsaData );
@@ -369,7 +367,7 @@ static DNSServiceRef connect_to_server(void)
 		if (err != 0) return NULL;
 		}
 
-	// <rdar://problem/4096913> If the system service is disabled, we only want to try 
+	// <rdar://problem/4096913> If the system service is disabled, we only want to try
 	// to connect once
 
 	if ( IsSystemServiceDisabled() )
@@ -833,7 +831,7 @@ DNSServiceErrorType DNSSD_API DNSServiceSetDefaultDomainForUser
 static void handle_regservice_response(DNSServiceRef sdr, ipc_msg_hdr *hdr, char *data)
     {
     DNSServiceFlags flags;
-    uint32_t interfaceIndex;
+    uint32_t interfaceIndex __UNUSED;
     DNSServiceErrorType errorCode;
     char name[256], regtype[kDNSServiceMaxDomainName], domain[kDNSServiceMaxDomainName];
     int str_error = 0;
@@ -1005,7 +1003,7 @@ error:
 static void handle_regrecord_response(DNSServiceRef sdr, ipc_msg_hdr *hdr, char *data)
     {
     DNSServiceFlags flags;
-    uint32_t interfaceIndex;
+    uint32_t interfaceIndex __UNUSED;
     DNSServiceErrorType errorCode;
     DNSRecordRef rref = hdr->client_context.context;
 
@@ -1246,4 +1244,3 @@ DNSServiceErrorType DNSSD_API DNSServiceReconfirmRecord
     DNSServiceRefDeallocate(tmp);
     return(kDNSServiceErr_NoError);
     }
-
