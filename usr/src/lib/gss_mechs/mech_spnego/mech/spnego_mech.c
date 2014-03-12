@@ -9,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -240,7 +240,7 @@ static struct gss_config spnego_mechanism =
 #ifndef LEAN_CLIENT
 	glue_spnego_gss_accept_sec_context,
 #else
-	NULL,				
+	NULL,
 #endif  /* LEAN_CLIENT */
 	NULL,  /* unseal */
 	NULL,				/* gss_process_context_token */
@@ -1167,7 +1167,6 @@ make_NegHints(OM_uint32 *minor_status,
 	OM_uint32 minor;
 	unsigned int tlen = 0;
 	unsigned int hintNameSize = 0;
-	unsigned int negHintsSize = 0;
 	unsigned char *ptr;
 	unsigned char *t;
 
@@ -1251,7 +1250,6 @@ make_NegHints(OM_uint32 *minor_status,
 
 	/* Length of DER encoded hintName */
 	tlen += 1 + gssint_der_length_size(hintNameSize);
-	negHintsSize = tlen;
 
 	t = (unsigned char *)malloc(tlen);
 	if (t == NULL) {
@@ -1855,7 +1853,12 @@ spnego_gss_accept_sec_context(
 	gss_buffer_t mechtok_in, mic_in, mic_out;
 	gss_buffer_desc mechtok_out = GSS_C_EMPTY_BUFFER;
 	spnego_gss_ctx_id_t sc = NULL;
-	OM_uint32 mechstat = GSS_S_FAILURE;
+	/*
+	 * XXX: This should not be flagged unused, it seems potentially
+	 * important perhaps we should be setting 'ret' instead? perhaps we
+	 * should be returning this sometimes?
+	 */
+	OM_uint32 mechstat __UNUSED = GSS_S_FAILURE;
 	int sendTokenInit = 0, tmpret;
 
 	mechtok_in = mic_in = mic_out = GSS_C_NO_BUFFER;
@@ -2345,7 +2348,7 @@ spnego_gss_delete_sec_context(
 		(void) release_spnego_ctx(ctx);
                 /* SUNW17PACresync - MIT 1.7 bug (and our fix) */
 		if (output_token) {
-			output_token->length = 0; 
+			output_token->length = 0;
 			output_token->value = NULL;
 		}
 	} else {
@@ -2810,7 +2813,7 @@ get_available_mechs(OM_uint32 *minor_status,
 	 */
 	if (found > 0 && major_status == GSS_S_COMPLETE && creds != NULL) {
 		major_status = gss_acquire_cred(minor_status,
-						name, GSS_C_INDEFINITE, 
+						name, GSS_C_INDEFINITE,
 						*rmechs, usage, creds,
 						&goodmechs, NULL);
 
@@ -3299,7 +3302,7 @@ negotiate_mech_type(OM_uint32 *minor_status,
 		 * we actually want to select it if the client supports, as this
 		 * will enable features on MS clients that allow credential
 		 * refresh on rekeying and caching system times from servers.
-		 */ 
+		 */
 #if 0
 		/* Accept wrong mechanism OID from MS clients */
 		if (mech_oid->length == gss_mech_krb5_wrong_oid.length &&
@@ -3957,9 +3960,9 @@ is_kerb_mech(gss_OID oid)
 	int answer = 0;
 	OM_uint32 minor;
 	extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
-	
+
 	(void) gss_test_oid_set_member(&minor,
 		oid, (gss_OID_set)gss_mech_set_krb5_both, &answer);
-	
+
 	return (answer);
 }
