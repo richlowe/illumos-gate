@@ -130,8 +130,5 @@ static PyMethodDef solarismethods[] = {
 void
 initmisc(void)
 {
-	char *noop;
-
-	noop = _("noop");
 	PyObject *solaris_misc = Py_InitModule("solaris.misc", solarismethods);
 }
