@@ -48,9 +48,12 @@ CLEANFILES +=	$(LINTOUT) $(LINTLIB)
 
 CPPFLAGS +=	-D_REENTRANT
 CFLAGS +=	$(CCVERBOSE)
+LDLIBS +=	-lc -lsecdb -lproc -lpool
+
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-uninitialized
-LDLIBS +=	-lc -lsecdb -lproc -lpool
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 $(LINTLIB) :=	SRCS = ../common/llib-lproject
 
