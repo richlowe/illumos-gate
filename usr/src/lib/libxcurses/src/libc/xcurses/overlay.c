@@ -24,11 +24,9 @@
  * All rights reserved.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * overlay.c
- * 
+ *
  * XCurses Library
  *
  * Copyright 1990, 1995 by Mortice Kern Systems Inc.  All rights reserved.
@@ -48,13 +46,11 @@ int
 const WINDOW *s;
 WINDOW *t;
 {
-	int code;
-
 #ifdef M_CURSES_TRACE
 	__m_trace("overlay(%p, %p)", s, t);
 #endif
 
-	code = __m_copywin(s, t, 1);
+	(void) __m_copywin(s, t, 1);
 
 	return __m_return_code("overlay", ERR);
 }
@@ -64,13 +60,11 @@ int
 const WINDOW *s;
 WINDOW *t;
 {
-	int code;
-
 #ifdef M_CURSES_TRACE
 	__m_trace("overwrite(%p, %p)", s, t);
 #endif
 
-	code = __m_copywin(s, t, 0);
+	(void) __m_copywin(s, t, 0);
 
 	return __m_return_code("overwrite", ERR);
 }
