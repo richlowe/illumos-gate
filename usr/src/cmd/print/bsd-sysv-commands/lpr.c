@@ -27,8 +27,6 @@
 
 /* $Id: lpr.c 146 2006-03-24 00:26:54Z njacobs $ */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -75,7 +73,6 @@ main(int ac, char *av[])
 	papi_encryption_t encryption = PAPI_ENCRYPT_NEVER;
 	int dump = 0;
 	int validate = 0;
-	int remove = 0;
 	int copy = 1;	/* default is to copy the data */
 	char *document_format = "text/plain";
 	int c;
@@ -169,8 +166,7 @@ main(int ac, char *av[])
 			papiAttributeListAddBoolean(&list, PAPI_ATTR_EXCL,
 				"rfc-1179-mail", 1);
 			break;
-		case 'r':
-			remove = 1;
+		case 'r':	/* Not implemented */
 			break;
 		case 's':
 			copy = 0;
