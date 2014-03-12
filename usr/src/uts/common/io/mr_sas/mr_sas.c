@@ -6863,7 +6863,7 @@ enable_intr_ppc(struct mrsas_instance *instance)
 static void
 disable_intr_ppc(struct mrsas_instance *instance)
 {
-	uint32_t	mask;
+	uint32_t	mask __UNUSED; /* XXX: MAKE SURE NOT OPTIMIZED AWAY */
 
 	con_log(CL_ANN1, (CE_NOTE, "disable_intr_ppc: called"));
 

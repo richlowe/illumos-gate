@@ -168,7 +168,7 @@ getaudit(caddr_t info_p)
 {
 	STRUCT_DECL(auditinfo, info);
 	const auditinfo_addr_t	*ainfo;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	if (secpolicy_audit_getattr(CRED(), B_FALSE) != 0)
 		return (EPERM);
@@ -217,7 +217,7 @@ getaudit_addr(caddr_t info_p, int len)
 {
 	STRUCT_DECL(auditinfo_addr, info);
 	const auditinfo_addr_t	*ainfo;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	if (secpolicy_audit_getattr(CRED(), B_FALSE) != 0)
 		return (EPERM);
@@ -271,7 +271,7 @@ setaudit(caddr_t info_p)
 	STRUCT_DECL(auditinfo, info);
 	proc_t *p;
 	cred_t	*newcred;
-	model_t	model;
+	model_t	model __UNUSED;
 	auditinfo_addr_t *ainfo;
 
 	if (secpolicy_audit_config(CRED()) != 0)
@@ -329,7 +329,7 @@ setaudit_addr(caddr_t info_p, int len)
 	STRUCT_DECL(auditinfo_addr, info);
 	proc_t *p;
 	cred_t	*newcred;
-	model_t	model;
+	model_t	model __UNUSED;
 	int i;
 	int type;
 	auditinfo_addr_t *ainfo;
@@ -552,7 +552,7 @@ static int
 getkaudit(caddr_t info_p, int len)
 {
 	STRUCT_DECL(auditinfo_addr, info);
-	model_t model;
+	model_t model __UNUSED;
 	au_kcontext_t	*kctx = GET_KCTX_PZ;
 
 	model = get_udatamodel();
@@ -605,7 +605,7 @@ static int
 setkaudit(caddr_t info_p, int len)
 {
 	STRUCT_DECL(auditinfo_addr, info);
-	model_t model;
+	model_t model __UNUSED;
 	au_kcontext_t	*kctx;
 
 	if (!(audit_policy & AUDIT_PERZONE) && !INGLOBALZONE(curproc))
@@ -876,7 +876,7 @@ setumask(caddr_t data)
 	STRUCT_DECL(auditinfo, user_info);
 	struct proc *p;
 	const auditinfo_addr_t	*ainfo;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	/* setumask not applicable in non-global zones without perzone policy */
 	if (!(audit_policy & AUDIT_PERZONE) && (!INGLOBALZONE(curproc)))
@@ -959,7 +959,7 @@ setsmask(caddr_t data)
 	STRUCT_DECL(auditinfo, user_info);
 	struct proc *p;
 	const auditinfo_addr_t	*ainfo;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	/* setsmask not applicable in non-global zones without perzone policy */
 	if (!(audit_policy & AUDIT_PERZONE) && (!INGLOBALZONE(curproc)))
@@ -1152,7 +1152,7 @@ getpinfo(caddr_t data)
 	STRUCT_DECL(auditpinfo, apinfo);
 	proc_t *proc;
 	const auditinfo_addr_t	*ainfo;
-	model_t	model;
+	model_t	model __UNUSED;
 	cred_t	*cr, *newcred;
 
 	model = get_udatamodel();
@@ -1224,7 +1224,7 @@ getpinfo_addr(caddr_t data, int len)
 	STRUCT_DECL(auditpinfo_addr, apinfo);
 	proc_t *proc;
 	const auditinfo_addr_t	*ainfo;
-	model_t	model;
+	model_t	model __UNUSED;
 	cred_t	*cr, *newcred;
 
 	model = get_udatamodel();
@@ -1300,8 +1300,7 @@ setpmask(caddr_t data)
 	cred_t	*newcred;
 	auditinfo_addr_t	*ainfo;
 	struct p_audit_data	*pad;
-
-	model_t	model;
+	model_t	model __UNUSED;
 
 	model = get_udatamodel();
 	STRUCT_INIT(apinfo, model);

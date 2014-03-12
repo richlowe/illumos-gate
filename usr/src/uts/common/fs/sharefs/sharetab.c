@@ -335,7 +335,7 @@ sharefs_impl(enum sharefs_sys_op opcode, share_t *sh_in, uint32_t iMaxLen)
 
 	sharefs_lens_t	shl;
 
-	model_t		model;
+	model_t		model __UNUSED;
 
 	char		*buf = NULL;
 

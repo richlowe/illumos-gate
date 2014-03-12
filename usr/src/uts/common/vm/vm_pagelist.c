@@ -3427,7 +3427,7 @@ page_geti_contig_pages(int mnode, uint_t bin, uchar_t szc, int flags,
 	page_t *pp, *randpp, *endpp;
 	uint_t colors, ceq_mask;
 	/* LINTED : set but not used in function */
-	uint_t color_mask;
+	uint_t color_mask __UNUSED;
 	pfn_t hi, lo;
 	uint_t skip;
 	MEM_NODE_ITERATOR_DECL(it);

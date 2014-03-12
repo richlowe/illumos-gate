@@ -4749,7 +4749,7 @@ disable_intr_xscale(struct megasas_instance *instance)
 static void
 disable_intr_ppc(struct megasas_instance *instance)
 {
-	uint32_t	mask;
+	uint32_t	mask __UNUSED; /* XXX: MAKE CERTAIN NOT OPTIMIZED AWAY */
 
 	con_log(CL_ANN1, (CE_NOTE, "disable_intr_ppc: called\n"));
 

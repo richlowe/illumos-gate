@@ -4231,7 +4231,7 @@ zfs_putapage(vnode_t *vp, page_t *pp, u_offset_t *offp,
 
 	if (err == 0) {
 		uint64_t mtime[2], ctime[2];
-		sa_bulk_attr_t bulk[3];
+		sa_bulk_attr_t bulk[3] __UNUSED;
 		int count = 0;
 
 		SA_ADD_BULK_ATTR(bulk, count, SA_ZPL_MTIME(zfsvfs), NULL,

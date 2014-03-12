@@ -1031,7 +1031,7 @@ recvmsg(int sock, struct nmsghdr *msg, int flags)
 	ssize_t len;
 	int i;
 	int *flagsp;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	dprint(1, ("recvmsg(%d, %p, %d)\n",
 	    sock, (void *)msg, flags));
@@ -1271,7 +1271,7 @@ sendmsg(int sock, struct nmsghdr *msg, int flags)
 	int iovcnt;
 	ssize_t len;
 	int i;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	dprint(1, ("sendmsg(%d, %p, %d)\n", sock, (void *)msg, flags));
 

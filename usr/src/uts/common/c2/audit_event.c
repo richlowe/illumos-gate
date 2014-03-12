@@ -3458,7 +3458,7 @@ aus_modctl(struct t_audit_data *tad)
 		char *drvname, *mc_drvname;
 		char *name;
 		extern char *ddi_major_to_name(major_t);
-		model_t model;
+		model_t model __UNUSED;
 
 		uintptr_t data = (uintptr_t)((modconfiga_t *)a)->data;
 

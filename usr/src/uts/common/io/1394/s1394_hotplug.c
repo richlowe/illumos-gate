@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * s1394_hotplug.c
  *    1394 Services Layer Hotplug Routines
@@ -143,7 +141,7 @@ s1394_create_devinfo(s1394_hal_t *hal, s1394_node_t *node, uint32_t *unit_dir,
 	int node_ven, node_hw, node_spec, node_sw;
 
 	/*LINTED type is unused*/
-	uint32_t type, key, value;
+	uint32_t type __UNUSED, key, value;
 	uint32_t unit_spec_id, unit_sw_version;
 	uint32_t node_spec_id, node_sw_version;
 	uint32_t node_vendor_id, node_hw_version;

@@ -2092,7 +2092,8 @@ dump_ttrace(void)
 			extern struct av_head autovect[];
 			int type;
 			ulong_t	off;
-			char *sym, *stype;
+			/* XXX: This must be fixed properly */
+			char *sym, *stype __UNUSED;
 
 			if (current < ttc->ttc_first)
 				current =
@@ -2136,6 +2137,10 @@ dump_ttrace(void)
 				default:
 					break;
 				}
+				/*
+				 * XXX: This should presumably be printing
+				 * 'stype' and something connected to same
+				 */
 				printf(fmt2, "sysc", rec->ttr_sysnum);
 				if (sys != NULL) {
 					sym = kobj_getsymname(

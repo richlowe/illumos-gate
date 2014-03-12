@@ -1044,7 +1044,7 @@ pathconf_copyin(struct nfs_args *args, struct pathcnf *pc)
 	STRUCT_DECL(pathcnf, pc_tmp);
 	STRUCT_HANDLE(nfs_args, ap);
 	int i;
-	model_t	model;
+	model_t	model __UNUSED;
 
 	model = get_udatamodel();
 	STRUCT_INIT(pc_tmp, model);
