@@ -108,7 +108,7 @@ evCreate(evContext *opaqueCtx) {
 #ifndef USE_POLL
 	ctx->highestFD = FD_SETSIZE - 1;
 	memset(ctx->fdTable, 0, sizeof ctx->fdTable);
-#else   
+#else
 	ctx->highestFD = INT_MAX / sizeof(struct pollfd);
 	ctx->fdTable = NULL;
 #endif /* USE_POLL */
@@ -415,7 +415,7 @@ evGetNext(evContext opaqueCtx, evEvent *opaqueEv, int options) {
 				 * selects is the total number of bits in
 				 * all masks that are set, and on others it's
 				 * the number of fd's that have some bit set,
-				 * and on others, it's just broken.  We 
+				 * and on others, it's just broken.  We
 				 * always assume that it's the number of
 				 * bits set in all masks, because that's what
 				 * the man page says it should do, and
@@ -568,7 +568,7 @@ evDispatch(evContext opaqueCtx, evEvent opaqueEv) {
 #ifdef EVENTLIB_TIME_CHECKS
 	if (ctx->debug > 0) {
 		interval = evSubTime(evNowTime(), start_time);
-		/* 
+		/*
 		 * Complain if it took longer than 50 milliseconds.
 		 *
 		 * We call getuid() to make an easy to find mark in a kernel
@@ -622,7 +622,7 @@ evDrop(evContext opaqueCtx, evEvent opaqueEv) {
 		 */
 		if (this->inter.tv_sec == (time_t)0 &&
 		    this->inter.tv_nsec == 0L) {
-			opaque.opaque = this;			
+			opaque.opaque = this;
 			(void) evClearTimer(opaqueCtx, opaque);
 		} else {
 			opaque.opaque = this;
@@ -689,7 +689,7 @@ evSetOption(evContext *opaqueCtx, const char *option, int value) {
 	UNUSED(value);
 #ifndef CLOCK_MONOTONIC
 	UNUSED(option);
-#endif 
+#endif
 
 #ifdef CLOCK_MONOTONIC
 	if (strcmp(option, "monotime") == 0) {
@@ -702,7 +702,7 @@ evSetOption(evContext *opaqueCtx, const char *option, int value) {
 			errno = EINVAL;
 			return (-1);
 		}
-	} 
+	}
 #endif
 	errno = ENOENT;
 	return (-1);
@@ -716,7 +716,7 @@ evGetOption(evContext *opaqueCtx, const char *option, int *value) {
 #ifndef CLOCK_MONOTONIC
 	UNUSED(value);
 	UNUSED(option);
-#endif 
+#endif
 
 #ifdef CLOCK_MONOTONIC
 	if (strcmp(option, "monotime") == 0) {
@@ -737,7 +737,7 @@ pselect(int nfds, void *rfds, void *wfds, void *efds,
 	struct timespec *tsp,
 	const sigset_t *sigmask)
 {
-	struct timeval tv, *tvp;
+	struct timeval tv;
 	sigset_t sigs;
 	int n;
 #ifdef USE_POLL
@@ -747,16 +747,20 @@ pselect(int nfds, void *rfds, void *wfds, void *efds,
 	nfds_t		pnfds;
 
 	UNUSED(nfds);
-#endif /* USE_POLL */
+#else /* USE_POLL */
+	struct timeval  *tvp = NULL;
+#endif
+
 
 	if (tsp) {
-		tvp = &tv;
 		tv = evTimeVal(*tsp);
 #ifdef USE_POLL
 		polltimeout = 1000 * tv.tv_sec + tv.tv_usec / 1000;
-#endif /* USE_POLL */
-	} else
-		tvp = NULL;
+#else /* USE_POLL */
+		tvp = &tv;
+#endif
+	}
+
 	if (sigmask)
 		sigprocmask(SIG_SETMASK, sigmask, &sigs);
 #ifndef USE_POLL
@@ -811,32 +815,32 @@ pselect(int nfds, void *rfds, void *wfds, void *efds,
 #ifdef USE_POLL
 int
 evPollfdRealloc(evContext_p *ctx, int pollfd_chunk_size, int fd) {
- 
+
 	int     i, maxnfds;
 	void	*pollfds, *fdTable;
- 
+
 	if (fd < ctx->maxnfds)
 		return (0);
- 
+
 	/* Don't allow ridiculously small values for pollfd_chunk_size */
 	if (pollfd_chunk_size < 20)
 		pollfd_chunk_size = 20;
- 
+
 	maxnfds = (1 + (fd/pollfd_chunk_size)) * pollfd_chunk_size;
- 
+
 	pollfds = realloc(ctx->pollfds, maxnfds * sizeof(*ctx->pollfds));
 	if (pollfds != NULL)
 		ctx->pollfds = pollfds;
 	fdTable = realloc(ctx->fdTable, maxnfds * sizeof(*ctx->fdTable));
 	if (fdTable != NULL)
 		ctx->fdTable = fdTable;
- 
+
 	if (pollfds == NULL || fdTable == NULL) {
 		evPrintf(ctx, 2, "pollfd() realloc (%ld) failed\n",
 			 (long)maxnfds*sizeof(struct pollfd));
 		return (-1);
 	}
- 
+
 	for (i = ctx->maxnfds; i < maxnfds; i++) {
 		ctx->pollfds[i].fd = -1;
 		ctx->pollfds[i].events = 0;
@@ -847,23 +851,23 @@ evPollfdRealloc(evContext_p *ctx, int pollfd_chunk_size, int fd) {
 
 	return (0);
 }
- 
+
 /* Find the appropriate 'events' or 'revents' field in the pollfds array */
 short *
 __fd_eventfield(int fd, __evEmulMask *maskp) {
- 
+
 	evContext_p     *ctx = (evContext_p *)maskp->ctx;
- 
+
 	if (!maskp->result || maskp->type == EV_WASNONBLOCKING)
 		return (&(ctx->pollfds[fd].events));
 	else
 		return (&(ctx->pollfds[fd].revents));
 }
- 
+
 /* Translate to poll(2) event */
 short
 __poll_event(__evEmulMask *maskp) {
- 
+
 	switch ((maskp)->type) {
 	case EV_READ:
 		return (POLLRDNORM);
@@ -877,7 +881,7 @@ __poll_event(__evEmulMask *maskp) {
 		return (0);
 	}
 }
- 
+
 /*
  * Clear the events corresponding to the specified mask. If this leaves
  * the events mask empty (apart from the POLLHUP bit), set the fd field
@@ -885,9 +889,9 @@ __poll_event(__evEmulMask *maskp) {
  */
 void
 __fd_clr(int fd, __evEmulMask *maskp) {
- 
+
 	evContext_p     *ctx = maskp->ctx;
- 
+
 	*__fd_eventfield(fd, maskp) &= ~__poll_event(maskp);
 	if ((ctx->pollfds[fd].events & ~POLLHUP) == 0) {
 		ctx->pollfds[fd].fd = -1;
@@ -908,7 +912,7 @@ __fd_clr(int fd, __evEmulMask *maskp) {
 		}
 	}
 }
- 
+
 /*
  * Set the events bit(s) corresponding to the specified mask. If the events
  * field has any other bits than POLLHUP set, also set the fd field so that
@@ -916,7 +920,7 @@ __fd_clr(int fd, __evEmulMask *maskp) {
  */
 void
 __fd_set(int fd, __evEmulMask *maskp) {
- 
+
 	evContext_p     *ctx = maskp->ctx;
 
 	*__fd_eventfield(fd, maskp) |= __poll_event(maskp);
