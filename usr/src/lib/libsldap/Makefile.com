@@ -54,6 +54,8 @@ LINTFLAGS64 +=	-erroff=E_BAD_PTR_CAST_ALIGN
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-uninitialized
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 .KEEP_STATE:
 
