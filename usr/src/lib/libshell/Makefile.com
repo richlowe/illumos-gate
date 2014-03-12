@@ -160,6 +160,9 @@ CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-uninitialized
 CERRWARN	+= -_gcc=-Wno-clobbered
 CERRWARN	+= -_gcc=-Wno-char-subscripts
+CERRWARN	+= -_gcc=-Wno-sequence-point
+$(__GNUCNEXT)CERRWARN += -_gcc=-Wno-unused-but-set-parameter
+$(__GNUCNEXT)CERRWARN += -_gcc=-Wno-unused-but-set-variable
 
 pics/sh/macro.o		:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
 pics/sh/nvdisc.o	:= CERRWARN += -erroff=E_END_OF_LOOP_CODE_NOT_REACHED
