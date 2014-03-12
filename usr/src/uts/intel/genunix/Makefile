@@ -61,9 +61,8 @@ include $(UTSBASE)/intel/Makefile.intel
 #
 #	Define targets
 #
-ALL_TARGET	= $(LIBGEN)
 LINT_TARGET	= $(MODULE).lint
-INSTALL_TARGET	= $(GENUNIX) $(ROOTMODULE)
+INSTALL_TARGET	= $(LIBGEN) $(GENUNIX) $(ROOTMODULE)
 
 #
 #	Overrides
