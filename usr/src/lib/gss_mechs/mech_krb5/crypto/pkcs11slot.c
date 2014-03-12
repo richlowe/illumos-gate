@@ -3,8 +3,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <etypes.h>
 #include <security/cryptoki.h>
 #include <security/pkcs11.h>
@@ -141,7 +139,7 @@ slot_supports_krb5(CK_SLOT_ID_PTR slotid)
 			continue;
 		}
 		if (ENC_DEFINED(algos)) {
-			size_t keysize, keylength;
+			size_t keylength;
 			rv = C_GetMechanismInfo(*slotid, algos.enc_algo, &info);
 			if (rv != CKR_OK) {
 				KRB5_LOG1(KRB5_ERR, "C_GetMechanismInfo failed "
@@ -155,7 +153,6 @@ slot_supports_krb5(CK_SLOT_ID_PTR slotid)
 			 * make sure it supports the correct key sizes.
 			 * If not, disable this enctype and continue.
 			 */
-			keysize = krb5_enctypes_list[i].enc->keybytes;
 			keylength = krb5_enctypes_list[i].enc->keylength;
 
 			if (keylength > info.ulMaxKeySize) {

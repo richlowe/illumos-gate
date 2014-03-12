@@ -260,6 +260,7 @@ CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-address
+$(__GNUCNEXT)CERRWARN += -_gcc=-Wno-unused-but-set-variable
 
 MAPFILES =	../mapfile-vers
 
