@@ -48,6 +48,9 @@ LIBTSOLINC =	$(SRC)/lib/libtsol/common
 
 CPPFLAGS +=	-D_REENTRANT -I$(LIBTSOLINC)
 CERRWARN +=	-_gcc=-Wno-uninitialized
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
+
 
 .KEEP_STATE:
 
