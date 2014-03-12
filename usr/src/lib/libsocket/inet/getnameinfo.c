@@ -25,8 +25,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
@@ -312,7 +310,6 @@ addzoneid(const struct sockaddr_in6 *sa, char *host, size_t hostlen)
 static size_t
 getzonestr(const struct sockaddr_in6 *sa, char *zonestr, size_t zonelen)
 {
-	const in6_addr_t *addr;
 	uint32_t ifindex;
 	char *retstr;
 
@@ -320,7 +317,6 @@ getzonestr(const struct sockaddr_in6 *sa, char *zonestr, size_t zonelen)
 		return (0);
 	}
 
-	addr = &sa->sin6_addr;
 	/*
 	 * Since this implementation only supports link scope addresses,
 	 * there is a one-to-one mapping between interface index and
