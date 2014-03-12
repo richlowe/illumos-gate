@@ -59,6 +59,8 @@ CFLAGS		+= $(CCVERBOSE)
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-uninitialized
 CERRWARN	+= -_gcc=-Wno-unused-label
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 lint	:=	SRCS= $(OBJ:%.o=$(SRCDIR)/%.c)
 
