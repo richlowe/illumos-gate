@@ -208,6 +208,8 @@ CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-clobbered
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 LIBMP =		-lmp
 lint :=		LIBMP =
