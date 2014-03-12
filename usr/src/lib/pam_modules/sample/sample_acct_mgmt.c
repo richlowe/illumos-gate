@@ -30,6 +30,7 @@
 #include <security/pam_appl.h>
 #include <security/pam_modules.h>
 #include <libintl.h>
+#include <sys/ccompile.h>
 
 static int parse_allow_name(char *, char *);
 
@@ -51,9 +52,9 @@ pam_sm_acct_mgmt(
 	char	*pg;
 	int	i;
 	/*LINTED - set but not used. Would be used in a real module. */
-	int	debug = 0;
+	int	debug __UNUSED = 0;
 	/*LINTED - set but not used. Would be used in a real module. */
-	int	nowarn = 0;
+	int	nowarn __UNUSED = 0;
 	int	error = 0;
 
 	if (argc == 0)
