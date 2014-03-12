@@ -86,7 +86,7 @@ FREESZ(void *p, size_t sz)
 static void
 ifree_sid(i_ntsid_t *sid)
 {
-	size_t sz;
+	size_t sz __UNUSED;
 
 	if (sid == NULL)
 		return;
@@ -307,7 +307,7 @@ static void
 ifree_acl(i_ntacl_t *acl)
 {
 	i_ntace_t **acep;
-	size_t sz;
+	size_t sz __UNUSED;
 	int i;
 
 	if (acl == NULL)
