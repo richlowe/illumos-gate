@@ -584,7 +584,7 @@ static void
 show_options(const uint8_t *data, int len)
 {
 	dhcpv6_option_t d6o;
-	uint_t olen, retlen;
+	uint_t olen;
 	uint16_t val16;
 	uint16_t type;
 	uint32_t val32;
@@ -766,7 +766,7 @@ show_options(const uint8_t *data, int len)
 			if (olen > 0) {
 				oldnest = prot_nest_prefix;
 				prot_nest_prefix = prot_prefix;
-				retlen = interpret_dhcpv6(F_DTAIL, data, olen);
+				(void) interpret_dhcpv6(F_DTAIL, data, olen);
 				prot_prefix = prot_nest_prefix;
 				prot_nest_prefix = oldnest;
 			}

@@ -293,22 +293,21 @@ rpcsec_gss_control_proc(int type, int flags, int xid)
 void
 extract_rpcsec_gss_cred_info(int xid)
 {
-	unsigned int seq_num;
-	unsigned int handle_len;
-	unsigned int flavor_len;
+	unsigned int seq_num __UNUSED;
+	unsigned int flavor_len __UNUSED;
 	unsigned int rpcsec_gss_ver;
 	rpc_gss_service_t rpcsec_gss_service;
 	unsigned int rpcsec_gss_proc;
 	struct cache_struct *x;
 
-	flavor_len = getxdr_u_long();
+	xdr_skip(4);		/* skip flavor len */
 	rpcsec_gss_ver = getxdr_u_long();
 	/* see if we know this version or not */
 	if (rpcsec_gss_ver != 1) {
 		longjmp(xdr_err, 1);
 	}
 	rpcsec_gss_proc   = getxdr_u_long();
-	seq_num    = getxdr_u_long();
+	xdr_skip(4);		/* skip sequence number */
 	rpcsec_gss_service    = getxdr_enum();
 	/* skip the handle */
 	xdr_skip(RNDUP(getxdr_u_long()));
@@ -317,7 +316,6 @@ extract_rpcsec_gss_cred_info(int xid)
 		x->xid_gss_service = rpcsec_gss_service;
 		x->xid_gss_proc = rpcsec_gss_proc;
 	}
-
 }
 
 /*
@@ -327,7 +325,7 @@ static void
 print_rpc_gss_init_arg(int flags, struct cache_struct *x)
 {
 
-	char *token, *line;
+	char *token __UNUSED, *line;
 	unsigned int token_len;
 	int pos = 0;
 
@@ -363,7 +361,7 @@ void
 print_rpc_gss_init_res(int flags)
 {
 
-	char *handle, *token, *line;
+	char *handle, *token __UNUSED, *line;
 	unsigned int token_len, handle_len;
 	unsigned int major, minor, seq_window;
 
