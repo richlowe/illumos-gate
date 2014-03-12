@@ -23,8 +23,6 @@
  * Copyright (c) 1994, by Sun Microsytems, Inc.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Functions that know how to create and decode combinations that are
  * used for connecting probe functions.
@@ -506,7 +504,7 @@ add(tnfctl_handle_t *hndl, comb_op_t op, uintptr_t down, uintptr_t next,
 {
 	comb_key_t	 *new_p;
 	/* LINTED set but not used in function */
-	comb_key_t	**ret_pp;
+	comb_key_t	**ret_pp __UNUSED;
 
 	new_p = (comb_key_t *) malloc(sizeof (comb_key_t));
 	if (!new_p)
