@@ -27,9 +27,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include	"uucp.h"
 
 #define MAXLENGTH 256
@@ -129,13 +126,11 @@ rproc()
 	FILE *cfd;
 	char line[BUFSIZ];
 	char *carray[C_MAX];
-	int na;
 
 	cfd = fopen(GRADES, "r");
 
 	while (rdfulline(cfd, line, BUFSIZ) != 0) {
-
-		na = getargs(line, carray, C_MAX);
+		(void) getargs(line, carray, C_MAX);
 		insert(carray[0]);
 	}
 
@@ -156,7 +151,7 @@ uproc()
 	while (rdfulline(cfd, line, BUFSIZ) != 0) {
 
 		na = getargs(line, carray, C_MAX);
-		
+
 		if (upermit(carray, na) != FAIL)
 			insert(carray[0]);
 	}
