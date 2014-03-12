@@ -1,4 +1,3 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*-
  * Copyright (c) 1990, 1993, 1994
@@ -74,7 +73,6 @@ static char sccsid[] = "@(#)hash_page.c	8.11 (Berkeley) 11/7/95";
 static int32_t	 add_bigptr __P((HTAB *, ITEM_INFO *, indx_t));
 static u_int32_t *fetch_bitmap __P((HTAB *, int32_t));
 static u_int32_t first_free __P((u_int32_t));
-static indx_t	 next_realkey __P((PAGE16 *, indx_t));
 static u_int16_t overflow_page __P((HTAB *));
 static void	 page_init __P((HTAB *, PAGE16 *, db_pgno_t, u_int8_t));
 static indx_t	 prev_realkey __P((PAGE16 *, indx_t));
@@ -104,7 +102,7 @@ __get_item(hashp, cursorp, key, val, item_info)
 			cursorp->pgno = ADDR(cursorp->pagep);
 			cursorp->ndx = 0;
 			cursorp->pgndx = 0;
-		} else 
+		} else
 			cursorp->pagep =
 			    __get_page(hashp, cursorp->pgno, A_RAW);
 		if (!cursorp->pagep) {
@@ -142,7 +140,7 @@ __get_item(hashp, cursorp, key, val, item_info)
 			    KEY_OFF(cursorp->pagep, cursorp->pgndx);
 	}
 
-	/* 
+	/*
 	 * All of this information will be set incorrectly for big keys, but
 	 * it will be ignored anyway.
 	 */
@@ -185,7 +183,7 @@ __get_item_done(hashp, cursorp)
 		__put_page(hashp, cursorp->pagep, A_RAW, 0);
 	cursorp->pagep = NULL;
 
-	/* 
+	/*
 	 * We don't throw out the page number since we might want to
 	 * continue getting on this page.
 	 */
@@ -254,6 +252,7 @@ putpair(p, key, val)
  * Returns the index of the next non-bigkey pair after n on the page.
  * Returns -1 if there are no more non-big things on the page.
  */
+#ifdef DEBUG
 static indx_t
 #ifdef __STDC__
 next_realkey(PAGE16 * pagep, indx_t n)
@@ -270,6 +269,7 @@ next_realkey(pagep, n)
 			return (i);
 	return (-1);
 }
+#endif	/* DEBUG */
 
 /*
  * Returns the index of the previous non-bigkey pair after n on the page.
@@ -307,7 +307,7 @@ __delpair(hashp, cursorp, item_info)
 	PAGE16 *pagep;
 	indx_t ndx;
 	short check_ndx;
-	int16_t delta, len, next_key;
+	int16_t delta, len;
 	int32_t n;
 	u_int8_t *src, *dest;
 
@@ -356,7 +356,7 @@ __delpair(hashp, cursorp, item_info)
 			 * item on the page.
 			 */
 			src = (u_int8_t *)pagep + OFFSET(pagep) + 1;
-			/* 
+			/*
 			 * Length is the distance between where to start
 			 * deleting and end of the data on the page.
 			 */
@@ -378,9 +378,8 @@ __delpair(hashp, cursorp, item_info)
 	/* Adjust the offsets. */
 	for (n = ndx; n < NUM_ENT(pagep) - 1; n++)
 		if (KEY_OFF(pagep, (n + 1)) != BIGPAIR) {
-			next_key = next_realkey(pagep, n);
 #ifdef DEBUG
-			assert(next_key != -1);
+			assert(next_realkey(pagep, n) != -1);
 #endif
 			KEY_OFF(pagep, n) = KEY_OFF(pagep, (n + 1)) + delta;
 			DATA_OFF(pagep, n) = DATA_OFF(pagep, (n + 1)) + delta;
@@ -401,7 +400,7 @@ __delpair(hashp, cursorp, item_info)
 		db_pgno_t to_find, next_pgno, link_page;
 
 		/*
-		 * We need to go back to the first page in the chain and 
+		 * We need to go back to the first page in the chain and
 		 * look for this page so that we can update the previous
 		 * page's NEXT_PGNO field.
 		 */
@@ -513,7 +512,7 @@ __split_page(hashp, obucket, nbucket)
 }
 
 /*
- * Add the given pair to the page.  
+ * Add the given pair to the page.
  *
  *
  * Returns:
@@ -547,7 +546,7 @@ __addel(hashp, item_info, key, val, num_items, expanding)
 
 	/* Advance to first page in chain with room for item. */
 	while (NUM_ENT(pagep) && NEXT_PGNO(pagep) != INVALID_PGNO) {
-		/* 
+		/*
 		 * This may not be the end of the chain, but the pair may fit
 		 * anyway.
 		 */
@@ -579,9 +578,9 @@ __addel(hashp, item_info, key, val, num_items, expanding)
 			return (-1);
 		}
 	}
- 
+
 	/* At this point, we know the page fits, so we just add it */
- 
+
 	if (ISBIG(PAIRSIZE(key, val), hashp)) {
 		if (__big_insert(hashp, pagep, key, val))
 			return (-1);
@@ -626,7 +625,7 @@ __addel(hashp, item_info, key, val, num_items, expanding)
 	return (0);
 }
 
-/* 
+/*
  * Special __addel used in big splitting; this one just puts the pointer
  * to an already-allocated big page in the appropriate bucket.
  */
@@ -868,8 +867,8 @@ __pgin_routine(pg_cookie, pgno, page)
 	pagep = (PAGE16 *)page;
 	hashp = (HTAB *)pg_cookie;
 
-	/* 
-	 * There are the following cases for swapping: 
+	/*
+	 * There are the following cases for swapping:
 	 * 0) New page that may be unitialized.
 	 * 1) Bucket page or overflow page.  Either swap
 	 *	the header or initialize the page.
@@ -908,8 +907,8 @@ __pgout_routine(pg_cookie, pgno, page)
 	pagep = (PAGE16 *)page;
 	hashp = (HTAB *)pg_cookie;
 
-	/* 
-	 * There are the following cases for swapping: 
+	/*
+	 * There are the following cases for swapping:
 	 * 1) Bucket page or overflow page.  Just swap the header.
 	 * 2) Bitmap page.  Swap the whole page!
 	 * 3) Header pages.  Not handled here; these are written directly

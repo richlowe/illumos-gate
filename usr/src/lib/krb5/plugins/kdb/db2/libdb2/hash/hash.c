@@ -329,9 +329,7 @@ init_hash(hashp, file, info)
 	const HASHINFO *info;
 {
 	struct stat statbuf;
-	int32_t nelem;
 
-	nelem = 1;
 	hashp->hdr.nkeys = 0;
 	hashp->hdr.lorder = DB_BYTE_ORDER;
 	hashp->hdr.bsize = DEF_BUCKET_SIZE;
@@ -436,15 +434,14 @@ hget_header(hashp, page_size)
 	HTAB *hashp;
 	u_int32_t page_size;
 {
-	u_int32_t num_copied, i;
+	u_int32_t num_copied;
 	u_int8_t *hdr_dest;
 
 	num_copied = 0;
-	i = 0;
 
 	hdr_dest = (u_int8_t *)&hashp->hdr;
 
-	/* 
+	/*
 	 * XXX
 	 * This should not be printing to stderr on a "normal" error case.
 	 */
@@ -538,14 +535,14 @@ hdestroy(hashp)
 		free(hashp->bigkey_buf);
 	if (hashp->bigdata_buf)
 		free(hashp->bigdata_buf);
- 
+
 	/* XXX This should really iterate over the cursor queue, but
 	   it's not clear how to do that, and the only cursor a hash
 	   table ever creates is the one used by hash_seq().  Passing
 	   NULL as the first arg is also a kludge, but I know that
 	   it's never used, so I do it.  The intent is to plug the
 	   memory leak.  Correctness can come later. */
- 
+
 	if (hashp->seq_cursor)
 		hashp->seq_cursor->delete(NULL, hashp->seq_cursor, 0);
 
@@ -556,7 +553,7 @@ hdestroy(hashp)
 	if (hashp->fp != -1)
 		(void)close(hashp->fp);
 
-	/* 
+	/*
 	 * *** This may cause problems if hashp->fname is set in any case
 	 * other than the case that we are generating a temporary file name.
 	 * Note that the new version of mpool should support temporary
@@ -729,7 +726,7 @@ hash_access(hashp, action, key, val)
 
 	num_items = 0;
 
-	/* 
+	/*
 	 * Set up item_info so that we're looking for space to add an item
 	 * as we cycle through the pages looking for the key.
 	 */
@@ -893,7 +890,7 @@ cursor_get(dbp, cursorp, key, val, flags)
 	/*
 	 * This needs to be changed around.  As is, get_item_next advances
 	 * the pointers on the page but this function actually advances
-	 * bucket pointers.  This works, since the only other place we 
+	 * bucket pointers.  This works, since the only other place we
 	 * use get_item_next is in hash_access which only deals with one
 	 * bucket at a time.  However, there is the problem that certain other
 	 * functions (such as find_bigpair and delpair) depend on the
@@ -945,7 +942,7 @@ cursor_delete(dbp, cursor, flags)
 	/* XXX this is empirically determined, so it might not be completely
 	   correct, but it seems to work.  At the very least it fixes
 	   a memory leak */
- 
+
 	free(cursor->internal);
 	free(cursor);
 
@@ -962,7 +959,7 @@ hash_seq(dbp, key, val, flag)
 
 	/*
 	 * Seq just uses the default cursor to go sequecing through the
-	 * database.  Note that the default cursor is the first in the list. 
+	 * database.  Note that the default cursor is the first in the list.
 	 */
 
 	hashp = (HTAB *)dbp->internal;
