@@ -27,8 +27,6 @@
 
 /* $Id: psm.c 146 2006-03-24 00:26:54Z njacobs $ */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -79,17 +77,19 @@ psm_close(void *handle)
 void *
 psm_sym(service_t *svc, char *name)
 {
-	char *error = "invalid input";
 	void *func = NULL;
 
 	if ((svc != NULL) && (svc->so_handle != NULL) && (name != NULL)) {
-		if ((func = dlsym(svc->so_handle, name)) == NULL)
-			error = dlerror();
-	}
+		if ((func = dlsym(svc->so_handle, name)) == NULL) {
 #ifdef DEBUG
-	if (func == NULL)
-		detailed_error(svc, "psm_sym(%s): %s", name, error);
+			detailed_error(svc, "psm_sym(%s): %s", name, dlerror());
 #endif
+		}
+	} else {
+#ifdef DEBUG
+		detailed_error(svc, "psm_sym(%s): %s", name, "invalid input");
+#endif
+	}
 
 	return (func);
 }
