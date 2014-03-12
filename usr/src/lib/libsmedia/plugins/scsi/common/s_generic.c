@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * s_generic.c :
  *      This file contains generic SCSI related functions for scsi plug-in
@@ -366,7 +364,6 @@ _m_media_format(rmedia_handle_t *handle, void *ip)
 	int32_t ret_val;
 	struct format_flags *ffl = (struct format_flags *)ip;
 	smedia_reqformat_t	reqformat;
-	smedia_retformat_t	*retformat;
 	smedia_reterror_t	*reterror;
 	door_arg_t	door_args;
 	char	rbuf[sizeof (smedia_services_t) + sizeof (door_desc_t)];
@@ -397,10 +394,7 @@ _m_media_format(rmedia_handle_t *handle, void *ip)
 		perror("door_call");
 		return (size_t)(-1);
 	}
-	retformat = (smedia_retformat_t *)((void *)door_args.data_ptr);
-#ifdef lint
-	retformat = retformat;
-#endif
+
 	reterror = (smedia_reterror_t *)((void *)door_args.data_ptr);
 	if (reterror->cnum == SMEDIA_CNUM_ERROR) {
 		DPRINTF1("Error in format. errnum = 0x%x \n", reterror->errnum);
