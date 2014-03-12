@@ -75,7 +75,7 @@ static HalDeviceStore *temporary_device_list = NULL;
 
 
 static void
-addon_terminated (HalDevice *device, guint32 exit_type, 
+addon_terminated (HalDevice *device, guint32 exit_type,
 		  gint return_code, gchar **error,
 		  gpointer data1, gpointer data2)
 {
@@ -83,7 +83,7 @@ addon_terminated (HalDevice *device, guint32 exit_type,
 
 	/* TODO: log to syslog - addons shouldn't just terminate, this is a bug with the addon */
 
-	/* however, the world can stop, mark this addon as ready 
+	/* however, the world can stop, mark this addon as ready
 	 * (TODO: potential bug if the addon crashed after calling libhal_device_addon_is_ready())
 	 */
 	if (hal_device_inc_num_ready_addons (device)) {
@@ -114,11 +114,11 @@ gdl_store_changed (HalDeviceStore *store, HalDevice *device,
 
 				command_line = (const gchar *) i->data;
 				if (hald_runner_start(device, command_line, extra_env, addon_terminated, NULL, NULL)) {
-					HAL_INFO (("Started addon %s for udi %s", 
+					HAL_INFO (("Started addon %s for udi %s",
 						   command_line, hal_device_get_udi(device)));
 					hal_device_inc_num_addons (device);
 				} else {
-					HAL_ERROR (("Cannot start addon %s for udi %s", 
+					HAL_ERROR (("Cannot start addon %s for udi %s",
 						    command_line, hal_device_get_udi(device)));
 				}
 			}
@@ -170,7 +170,7 @@ hald_get_gdl (void)
 {
 	if (global_device_list == NULL) {
 		global_device_list = hal_device_store_new ();
-		
+
 		g_signal_connect (global_device_list,
 				  "store_changed",
 				  G_CALLBACK (gdl_store_changed), NULL);
@@ -190,7 +190,7 @@ hald_get_tdl (void)
 {
 	if (temporary_device_list == NULL) {
 		temporary_device_list = hal_device_store_new ();
-		
+
 	}
 
 	return temporary_device_list;
@@ -238,10 +238,9 @@ dbus_bool_t hald_use_syslog = FALSE;
 static int sigterm_unix_signal_pipe_fds[2];
 static GIOChannel *sigterm_iochn;
 
-static void 
+static void
 handle_sigterm (int value)
 {
-	ssize_t written;
 	static char marker[1] = {'S'};
 
 	/* write a 'S' character to the other end to tell about
@@ -250,12 +249,12 @@ handle_sigterm (int value)
 	 * defer this since UNIX signal handlers are evil
 	 *
 	 * Oh, and write(2) is indeed reentrant */
-	written = write (sigterm_unix_signal_pipe_fds[1], marker, 1);
+	(void) write (sigterm_unix_signal_pipe_fds[1], marker, 1);
 }
 
 static gboolean
-sigterm_iochn_data (GIOChannel *source, 
-		    GIOCondition condition, 
+sigterm_iochn_data (GIOChannel *source,
+		    GIOCondition condition,
 		    gpointer user_data)
 {
 	GError *err = NULL;
@@ -263,7 +262,7 @@ sigterm_iochn_data (GIOChannel *source,
 	gsize bytes_read;
 
 	/* Empty the pipe */
-	if (G_IO_STATUS_NORMAL != 
+	if (G_IO_STATUS_NORMAL !=
 	    g_io_channel_read_chars (source, data, 1, &bytes_read, &err)) {
 		HAL_ERROR (("Error emptying sigterm pipe: %s",
 				   err->message));
@@ -290,13 +289,13 @@ static int startup_daemonize_pipe[2];
 
 static gboolean child_died = FALSE;
 
-static void 
+static void
 handle_sigchld (int value)
 {
 	child_died = TRUE;
 }
 
-static int 
+static int
 parent_wait_for_child (int child_fd, pid_t child_pid)
 {
 	fd_set rfds;
@@ -362,7 +361,6 @@ int
 main (int argc, char *argv[])
 {
 	GMainLoop *loop;
-	guint sigterm_iochn_listener_source_id;
 	char *path;
 	char newpath[512];
 
@@ -386,7 +384,7 @@ main (int argc, char *argv[])
 	} else {
 		/* No PATH was set */
 		newpath[0] = '\0';
-	} 
+	}
 
 	g_strlcat (newpath, PACKAGE_LIBEXEC_DIR, sizeof (newpath));
 	g_strlcat (newpath, ":", sizeof (newpath));
@@ -475,9 +473,8 @@ main (int argc, char *argv[])
 		int child_pid;
 		int dev_null_fd;
 		int pf;
-		ssize_t written;
 		char pid[9];
-		
+
 		HAL_INFO (("Will daemonize"));
 		HAL_INFO (("Becoming a daemon"));
 
@@ -529,7 +526,7 @@ main (int argc, char *argv[])
 		/* Make a new one */
 		if ((pf= open (HALD_PID_FILE, O_WRONLY|O_CREAT|O_TRUNC|O_EXCL, 0644)) > 0) {
 			snprintf (pid, sizeof(pid), "%lu\n", (long unsigned) getpid ());
-			written = write (pf, pid, strlen(pid));
+			(void) write (pf, pid, strlen(pid));
 			close (pf);
 			atexit (delete_pid);
 		}
@@ -547,16 +544,16 @@ main (int argc, char *argv[])
 	if (pipe (sigterm_unix_signal_pipe_fds) != 0) {
 		DIE (("Could not setup pipe, errno=%d", errno));
 	}
-	
+
 	/* setup glib handler - 0 is for reading, 1 is for writing */
 	sigterm_iochn = g_io_channel_unix_new (sigterm_unix_signal_pipe_fds[0]);
 	if (sigterm_iochn == NULL)
 		DIE (("Could not create GIOChannel"));
-	
+
 	/* get callback when there is data to read */
-	sigterm_iochn_listener_source_id = g_io_add_watch (
-		sigterm_iochn, G_IO_IN, sigterm_iochn_data, NULL);
-	
+	(void) g_io_add_watch (sigterm_iochn, G_IO_IN, sigterm_iochn_data,
+	    NULL);
+
 	/* Finally, setup unix signal handler for TERM */
 	signal (SIGTERM, handle_sigterm);
 
@@ -592,10 +589,10 @@ static gboolean
 my_shutdown (gpointer data)
 {
 	HalDeviceStore *gdl;
-	
+
 	printf ("Num devices in TDL: %d\n", g_slist_length ((hald_get_tdl ())->devices));
 	printf ("Num devices in GDL: %d\n", g_slist_length ((hald_get_gdl ())->devices));
-	
+
 	gdl = hald_get_gdl ();
 next:
 	if (g_slist_length (gdl->devices) > 0) {
@@ -604,16 +601,15 @@ next:
 		g_object_unref (d);
 		goto next;
 	}
-	
+
 	printf ("hal_device_object_delta = %d (should be zero)\n", dbg_hal_device_object_delta);
 	exit (1);
 }
 #endif
 
-void 
+void
 osspec_probe_done (void)
 {
-	ssize_t written;
 	char buf[1] = {0};
 
 	HAL_INFO (("Device probing completed"));
@@ -624,7 +620,7 @@ osspec_probe_done (void)
 	}
 
 	/* tell parent to exit */
-	written = write (startup_daemonize_pipe[1], buf, sizeof (buf));
+	(void) write (startup_daemonize_pipe[1], buf, sizeof (buf));
 	close (startup_daemonize_pipe[0]);
 	close (startup_daemonize_pipe[1]);
 
