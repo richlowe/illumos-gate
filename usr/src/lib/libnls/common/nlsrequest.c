@@ -22,9 +22,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-
-#ident	"%Z%%M%	%I%	%E% SMI"        /* SVr4.0 1.5.1.1	*/
-
 /*
  *
  * nlsrequest(3):
@@ -67,7 +64,7 @@ nlsrequest(int fd, char *svc_code)
 	int	len, err, flags;
 	char 	buf[256];
 	char	*p;
-	int	version, ret;
+	int	ret;
 	extern  int t_errno;
 
 	t_errno = 0;		/* indicates a 'name' problem	*/
@@ -114,9 +111,9 @@ nlsrequest(int fd, char *svc_code)
 	} while (*p++ != '\0');
 
 
+	/* skip version */
 	if ((p = strtok(_nlsbuf, ":")) == (char *)0)
 		goto parsefail;
-	version = atoi(p);
 
 	if ((p = strtok((char *)0, ":")) == (char *)0)
 		goto parsefail;
