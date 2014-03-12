@@ -535,8 +535,8 @@ netname2hashname(
 void
 __getpublickey_flush_g(const char *netname, keylen_t keylen, algtype_t algtype)
 {
-	char	*p, hashname[MAXNETNAMELEN+1];
-	p = netname2hashname(netname, hashname, MAXNETNAMELEN, keylen, algtype);
+	char	hashname[MAXNETNAMELEN+1];
+	(void) netname2hashname(netname, hashname, MAXNETNAMELEN, keylen, algtype);
 }
 
 /*
