@@ -22,7 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
 #
 
 LIBRARY =		libprint.a
@@ -45,6 +44,9 @@ $(LINTLIB):=	SRCS = $(SRCDIR)/$(LINTSRC)
 CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-I$(SRCDIR)
 CPPFLAGS +=	-I../../head -D_REENTRANT
+
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 LDLIBS +=	-lnsl -lsocket -lc -lldap
 
