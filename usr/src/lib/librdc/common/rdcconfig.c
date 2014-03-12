@@ -635,7 +635,6 @@ rdc_usync(rdcconfig_t *rdc)
 	rdc_rc_t	*rc = NULL;
 	rdc_rc_t	*rcp = NULL;
 	rdc_rc_t	*tmprc;
-	int trc;
 
 	rdcp = rdc;
 
@@ -646,7 +645,7 @@ rdc_usync(rdcconfig_t *rdc)
 		rdccfg->command = RDC_CMD_COPY;
 		rdccfg->options = RDC_OPT_UPDATE|RDC_OPT_FORWARD;
 		populate_addrs(&rdccfg->rdc_set[0], 0);
-		trc = thr_create(NULL, 0, rdc_mtconfig,
+		(void) thr_create(NULL, 0, rdc_mtconfig,
 		    (void **) rdccfg, THR_BOUND, NULL);
 		rdcp = rdcp->next;
 		if (!rdcp)
@@ -679,7 +678,6 @@ rdc_fsync(rdcconfig_t *rdc)
 	rdc_rc_t	*rc = NULL;
 	rdc_rc_t	*rcp = NULL;
 	rdc_rc_t	*tmprc = NULL;
-	int trc;
 
 	rdcp = rdc;
 	rc = new_rc();
@@ -695,7 +693,7 @@ rdc_fsync(rdcconfig_t *rdc)
 		rdccfg->command = RDC_CMD_COPY;
 		rdccfg->options = RDC_OPT_FULL|RDC_OPT_FORWARD;
 		populate_addrs(&rdccfg->rdc_set[0], 0);
-		trc = thr_create(NULL, 0, rdc_mtconfig,
+		(void) thr_create(NULL, 0, rdc_mtconfig,
 		    (void **) rdccfg, THR_BOUND, NULL);
 		rdcp = rdcp->next;
 		if (!rdcp)
@@ -728,7 +726,6 @@ rdc_rsync(rdcconfig_t *rdc)
 	rdc_rc_t	*rc = NULL;
 	rdc_rc_t	*rcp = NULL;
 	rdc_rc_t	*tmprc = NULL;
-	int trc;
 
 	rdcp = rdc;
 	rc = new_rc();
@@ -755,7 +752,7 @@ rdc_rsync(rdcconfig_t *rdc)
 		rdccfg->command = RDC_CMD_COPY;
 		rdccfg->options = RDC_OPT_REVERSE|RDC_OPT_FULL;
 		populate_addrs(&rdccfg->rdc_set[0], 0);
-		trc = thr_create(NULL, 0, rdc_mtconfig,
+		(void) thr_create(NULL, 0, rdc_mtconfig,
 		    (void **) rdccfg, THR_BOUND, NULL);
 next:
 		rdcp = rdcp->next;
@@ -788,7 +785,6 @@ rdc_ursync(rdcconfig_t *rdc)
 	rdc_rc_t	*rc = NULL;
 	rdc_rc_t	*rcp = NULL;
 	rdc_rc_t	*tmprc = NULL;
-	int trc;
 
 	rdcp = rdc;
 
@@ -810,7 +806,7 @@ rdc_ursync(rdcconfig_t *rdc)
 		rdccfg->command = RDC_CMD_COPY;
 		rdccfg->options = RDC_OPT_REVERSE | RDC_OPT_UPDATE;
 		populate_addrs(&rdccfg->rdc_set[0], 0);
-		trc = thr_create(NULL, 0, rdc_mtconfig,
+		(void) thr_create(NULL, 0, rdc_mtconfig,
 		    (void **) rdccfg, THR_BOUND, NULL);
 next:
 		rdcp = rdcp->next;
