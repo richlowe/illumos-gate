@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -674,12 +672,8 @@ shmat(int shmid, const void *shmaddr, int shmflag)
 	void *result;
 	int advice = -1;
 	struct shmid_ds	mds;
-#ifdef MADVDEBUG
-	int rc;
-#else
 	/* LINTED */
-	int rc;
-#endif
+	int rc __UNUSED;
 
 	if (!shmatfunc) {
 		shmatfunc = (caddr_t (*)()) dlsym(RTLD_NEXT, "shmat");
@@ -727,12 +721,8 @@ mmap(caddr_t addr, size_t len, int prot, int flags, int fd, off_t pos)
 	static caddr_t (*mmapfunc)() = NULL;
 	caddr_t result;
 	int advice = -1;
-#ifdef MADVDEBUG
-	int rc;
-#else
 	/* LINTED */
-	int rc;
-#endif
+	int rc __UNUSED;
 
 	if (!mmapfunc) {
 		mmapfunc = (caddr_t (*)()) dlsym(RTLD_NEXT, "mmap");
@@ -779,12 +769,8 @@ mmap64(caddr_t addr, size_t len, int prot, int flags, int fd, off64_t pos)
 	static caddr_t (*mmap64func)();
 	caddr_t result;
 	int advice = -1;
-#ifdef MADVDEBUG
-	int rc;
-#else
 	/* LINTED */
-	int rc;
-#endif
+	int rc __UNUSED;
 
 	if (!mmap64func) {
 		mmap64func = (caddr_t (*)()) dlsym(RTLD_NEXT, "mmap64");
