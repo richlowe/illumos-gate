@@ -3,26 +3,26 @@
  * Use is subject to license terms.
  */
 
-/* 
+/*
  * The contents of this file are subject to the Netscape Public
  * License Version 1.1 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of
  * the License at http://www.mozilla.org/NPL/
- *  
+ *
  * Software distributed under the License is distributed on an "AS
  * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
  * implied. See the License for the specific language governing
  * rights and limitations under the License.
- *  
+ *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
- * 
+ *
  * The Initial Developer of the Original Code is Netscape
  * Communications Corporation. Portions created by Netscape are
  * Copyright (C) 1998-1999 Netscape Communications Corporation. All
  * Rights Reserved.
- * 
- * Contributor(s): 
+ *
+ * Contributor(s):
  */
 
 /*
@@ -234,7 +234,7 @@ ldaptool_berval_from_ldif_value( const char *value, int vlen,
     int	rc = LDAPTOOL_FILEURL_SUCCESS;	/* optimistic */
     const char	*url = NULL;
     struct stat	fstats;
-        
+
     /* recognize "attr :< url" syntax if LDIF version is >= 1 */
 
 #ifdef notdef
@@ -266,28 +266,28 @@ ldaptool_berval_from_ldif_value( const char *value, int vlen,
 	    if ( reporterrs ) fprintf( stderr, gettext("%s: unsupported URL \"%s\";"
 				       " use a file:// URL instead.\n"), ldaptool_progname, url );
 	    break;
-		
+
 	case LDAPTOOL_FILEURL_MISSINGPATH:
 	    if ( reporterrs ) fprintf( stderr,
 				       gettext("%s: unable to process URL \"%s\" --"
 				       " missing path.\n"), ldaptool_progname, url );
 	    break;
-		
+
 	case LDAPTOOL_FILEURL_NONLOCAL:
 	    if ( reporterrs ) fprintf( stderr,
 				       gettext("%s: unable to process URL \"%s\" -- only"
 				       " local file:// URLs are supported.\n"),
 				       ldaptool_progname, url );
 	    break;
-		
+
 	case LDAPTOOL_FILEURL_NOMEMORY:
 	    if ( reporterrs ) perror( "ldaptool_fileurl2path" );
 	    break;
-		
+
 	case LDAPTOOL_FILEURL_SUCCESS:
 	    if ( stat( path, &fstats ) != 0 ) {
 		if ( reporterrs ) perror( path );
-	    } else if (S_ISDIR(fstats.st_mode)) {	
+	    } else if (S_ISDIR(fstats.st_mode)) {
 		if ( reporterrs ) fprintf( stderr,
 					   gettext("%s: %s is a directory, not a file\n"),
 					   ldaptool_progname, path );
@@ -297,7 +297,7 @@ ldaptool_berval_from_ldif_value( const char *value, int vlen,
 	    }
 	    free( path );
 	    break;
-		
+
 	default:
 	    if ( reporterrs ) fprintf( stderr,
 				       gettext("%s: unable to process URL \"%s\""
@@ -316,7 +316,7 @@ ldaptool_berval_from_ldif_value( const char *value, int vlen,
 	    bvp->bv_val[ vlen ] = '\0';
 	}
     }
-    
+
     return( rc );
 }
 
@@ -341,7 +341,7 @@ ldaptool_fileurlerr2ldaperr( int lderr )
     }
 
     return( rc );
-} 
+}
 
 
 /*
@@ -360,7 +360,6 @@ berval_from_file( const char *path, struct berval *bvp, int reporterrs )
 {
     FILE	*fp;
     long	rlen;
-    int		eof;
 #if defined( XP_WIN32 )
     char	mode[20] = "r+b";
 #else
@@ -397,7 +396,6 @@ berval_from_file( const char *path, struct berval *bvp, int reporterrs )
     }
 
     rlen = fread( bvp->bv_val, 1, bvp->bv_len, fp );
-    eof = feof( fp );
     fclose( fp );
 
     if ( rlen != (long)bvp->bv_len ) {
