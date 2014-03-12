@@ -328,7 +328,6 @@ __s_api_parseASearchDesc(const char *service,
 {
 	ns_ldap_search_desc_t	*ptr;
 	char			*sptr, *dptr;
-	char			buf[BUFSIZ];
 	int			i, rc;
 	ns_ldap_error_t		**errorp = NULL;
 	ns_ldap_error_t		*error = NULL;
@@ -456,7 +455,6 @@ __s_api_parseASearchDesc(const char *service,
 			state = P_FILTER;
 			break;
 		case P_SCOPE:
-			buf[0] = '\0';
 			if (*sptr == SEMITOK) {
 				/* no more SSD */
 				state = P_EXIT;
