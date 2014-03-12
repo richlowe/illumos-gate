@@ -37,8 +37,6 @@
  * contributors.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include "talk.h"
 #include "ctl.h"
 #include <locale.h>
@@ -65,7 +63,6 @@ char *argv[];
 	char *my_name;
 	char *my_machine_name;
 	char *rem_machine_name;
-	char *my_tty;
 	char *rem_tty;
 	char *ptr;
 	int name_length;
@@ -101,8 +98,6 @@ char *argv[];
 	name_length = HOST_NAME_LENGTH;
 	(void) sysinfo(SI_HOSTNAME, hostname, name_length);
 	my_machine_name = hostname;
-
-	my_tty = strrchr(ttyname(0), '/') + 1;
 
 	/*
 	 * check for, and strip out, the machine name of the target
