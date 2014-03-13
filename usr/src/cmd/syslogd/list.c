@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <pthread.h>
 #include <malloc.h>
 #include <memory.h>
@@ -105,7 +103,7 @@ ll_check(llh_t *head)
 {
 	int i = 0;
 	ll_t *ptr = head->front;
-	ll_t **prev = &head->front;
+	ll_t **prev __UNUSED = &head->front;
 
 	while (ptr) {
 		i++;
