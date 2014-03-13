@@ -591,8 +591,6 @@ do_realpath(struct sftp_conn *conn, char *path)
 	Buffer msg;
 	u_int type, expected_id, count, id;
 	char *filename, *longname;
-	/* LINTED */
-	Attrib *a;
 
 	expected_id = id = conn->msg_id++;
 	send_string_request(conn->fd_out, id, SSH2_FXP_REALPATH, path,
@@ -622,7 +620,7 @@ do_realpath(struct sftp_conn *conn, char *path)
 
 	filename = buffer_get_string(&msg, NULL);
 	longname = buffer_get_string(&msg, NULL);
-	a = decode_attrib(&msg);
+	(void) decode_attrib(&msg);
 
 	debug3("SSH_FXP_REALPATH %s -> %s", path, filename);
 
