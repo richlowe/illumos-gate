@@ -4703,7 +4703,7 @@ rc_node_delete(rc_node_ptr_t *npp)
 	rc_notify_delete_t *ndp;
 	permcheck_t *pcp;
 	int granted;
-	au_event_t event_id = 0;
+	au_event_t event_id __UNUSED = 0;
 	size_t sz_out;
 	audit_event_data_t audit_data;
 	int audit_failure = 0;
