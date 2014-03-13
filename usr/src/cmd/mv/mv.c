@@ -1354,7 +1354,7 @@ static int
 chg_time(char *to, struct stat ss)
 {
 	struct timespec times[2];
-	int rc;
+	int rc __UNUSED;
 
 	times[0] = ss.st_atim;
 	times[1] = ss.st_mtim;
