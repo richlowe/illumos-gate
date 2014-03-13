@@ -12,9 +12,6 @@
  * specifies the terms and conditions for redistribution.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-
 #include <stdio.h>
 #include <ctype.h>
 
@@ -26,7 +23,7 @@ grepcall(char *in, char *out, char *arg)
 	char line[200], *s, argig[100], *cv[50];
 	char *inp, inb[500];
 	FILE *qf, *gf;
-	int c, oldc = 0, alph = 0, nv = 0;
+	int c, alph = 0, nv = 0;
 	int sv0, sv1;
 	strcpy(argig, arg);
 	strcat(argig, ".ig");
@@ -47,7 +44,6 @@ grepcall(char *in, char *out, char *arg)
 			cv[nv++] = inp;
 		if (alph > 6)
 			*inp = 0;
-		oldc = c;
 	}
 #if D1
 	fprintf(stderr, "%d args set up\n", nv);

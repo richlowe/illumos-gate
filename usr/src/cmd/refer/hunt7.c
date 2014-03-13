@@ -12,8 +12,6 @@
  * specifies the terms and conditions for redistribution.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <locale.h>
 #include <assert.h>
@@ -37,7 +35,7 @@ findline(char *in, char **out, int outlen, long indexdate)
 	extern long gdate();
 	static FILE *fa = NULL;
 	long lp, llen;
-	int len, k, nofil;
+	int len __UNUSED, k, nofil;
 
 #if D1
 	fprintf(stderr, "findline: %s\n", in);
