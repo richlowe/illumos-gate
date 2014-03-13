@@ -36,6 +36,9 @@ LDLIBS += -lbsm -lpam -lnsl
 FILEMODE = 06555
 XGETFLAGS += -a -x $(PROG).xcl
 
+# XXX: This is necessary because NSS_XbyY_FINI is horrible.  Is it public, or can we fix it somehow?
+CERRWARN +=	-_gcc=-Wno-unused-value
+
 .KEEP_STATE:
 
 all: $(PROG)
