@@ -81,7 +81,7 @@ main(int argc, char *argv[])
 	statsvar sv;
 	statstime st;
 	int single, nfailed;
-	enum clnt_stat bstat;
+	enum clnt_stat bstat __UNUSED;
 
 	/*
 	 * set number of slots to be 256 to begin with,
