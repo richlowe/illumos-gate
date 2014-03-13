@@ -167,13 +167,13 @@ force_unmount (LibHalContext *ctx, const char *udi)
 	}
 	dbus_error_free (&error);
 
-	if (!dbus_message_append_args (msg, 
+	if (!dbus_message_append_args (msg,
 				       DBUS_TYPE_ARRAY, DBUS_TYPE_STRING, &options, num_options,
 				       DBUS_TYPE_INVALID)) {
 		HAL_DEBUG (("Could not append args to dbus message for %s", udi));
 		goto out;
 	}
-	
+
 	if (!(reply = dbus_connection_send_with_reply_and_block (dbus_connection, msg, -1, &error))) {
 		HAL_DEBUG (("Unmount failed for %s: %s : %s\n", udi, error.name, error.message));
 		goto out;
@@ -196,7 +196,7 @@ out:
 		dbus_message_unref (reply);
 }
 
-static void 
+static void
 unmount_childs (LibHalContext *ctx, const char *udi)
 {
 	DBusError error;
@@ -310,7 +310,7 @@ drop_privileges ()
 	priv_freeset(lPrivSet);
 }
 
-int 
+int
 main (int argc, char *argv[])
 {
 	char *device_file, *raw_device_file;
@@ -318,8 +318,6 @@ main (int argc, char *argv[])
 	char *bus;
 	char *drive_type;
 	int state, last_state;
-	char *support_media_changed_str;
-	int support_media_changed;
 	int fd = -1;
 
 	if ((udi = getenv ("UDI")) == NULL)
@@ -340,12 +338,6 @@ main (int argc, char *argv[])
 	setup_logger ();
 
 	sysevent_init ();
-
-	support_media_changed_str = getenv ("HAL_PROP_STORAGE_CDROM_SUPPORT_MEDIA_CHANGED");
-	if (support_media_changed_str != NULL && strcmp (support_media_changed_str, "true") == 0)
-		support_media_changed = TRUE;
-	else
-		support_media_changed = FALSE;
 
 	dbus_error_init (&error);
 
