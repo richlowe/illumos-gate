@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #define	BSD_COMP
 #include <errno.h>
 #include <fcntl.h>
@@ -574,7 +572,6 @@ HelperRead(pollfd_t *fdp, int nfds, int *pollretval)
 	char buf[128];
 	int retval;
 	extern int errno;
-	int mask;
 	int master = -1;
 	int inputsocket = -1;
 
@@ -590,8 +587,7 @@ HelperRead(pollfd_t *fdp, int nfds, int *pollretval)
 			inputsocket = i;
 	}
 
-/*	mask = sigsetmask (sigmask (SIGCHLD));	*/
-	mask = sighold(SIGCHLD);
+	(void) sighold(SIGCHLD);
 	retval = 0;
 	if (master != -1) {
 		if (!(fdp[master].revents & (POLLERR | POLLHUP | POLLNVAL))) {
@@ -642,6 +638,5 @@ HelperRead(pollfd_t *fdp, int nfds, int *pollretval)
 	}
 
 	done:
-/*	sigsetmask (mask);	*/
 	sigrelse(SIGCHLD);
 }

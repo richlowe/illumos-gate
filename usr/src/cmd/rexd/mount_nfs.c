@@ -30,8 +30,6 @@
  *  mount_nfs.c - procedural interface to the NFS mount operation
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #define	NFSCLIENT
 #include <sys/types.h>
 #include <memory.h>
@@ -112,7 +110,6 @@ mount_nfs(char *fsname, char *dir, char *error)
 	int printed1 = 0;
 	int printed2 = 0;
 	unsigned winks = 1;	/* seconds of sleep time */
-	struct mnttab mnt;
 	FILE *mnted;
 	int flags;
 	struct nfs_args args;
@@ -389,17 +386,6 @@ mount_nfs(char *fsname, char *dir, char *error)
 		printf("stat of new mount (%d)\n", errno);
 
 	(void) sprintf(opts, "rw,noquota,hard,intr,dev=%x", st.st_dev);
-
-	/*
-	 * update /etc/mtab
-	 */
-
-	mnt.mnt_special = fsname;
-	mnt.mnt_mountp = dir;
-	mnt.mnt_fstype = MNTTYPE_NFS;
-	mnt.mnt_mntopts = opts;
-	(void) sprintf(tbuf, "%ld", time(0L));
-	mnt.mnt_time = tbuf;
 
 	return (0);
 }
