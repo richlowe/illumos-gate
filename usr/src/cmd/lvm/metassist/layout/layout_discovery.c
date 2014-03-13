@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <limits.h>
 #include <libdiskmgt.h>
 #include <libintl.h>
@@ -2165,17 +2163,6 @@ print_unusable_devices(
 	dlist_t	*iter = NULL;
 	dlist_t	*slices = NULL;
 	char	*preamble;
-
-	struct {
-		char *msg;
-		dlist_t *list;
-	}	devs[2];
-
-	/* report bad disks and slices */
-	devs[0].msg = gettext("disks");
-	devs[0].list = bad_disks;
-	devs[1].msg = gettext("slices");
-	devs[1].list = bad_slices;
 
 	if (bad_disks != NULL) {
 	    oprintf(OUTPUT_VERBOSE,
