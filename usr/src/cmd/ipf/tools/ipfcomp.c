@@ -7,8 +7,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #if !defined(lint)
 static const char sccsid[] = "@(#)ip_fil.c	2.41 6/5/96 (C) 1993-2000 Darren Reed";
 static const char rcsid[] = "@(#)$Id: ipfcomp.c,v 1.24.2.2 2004/04/28 10:34:44 darrenr Exp $";
@@ -69,7 +67,6 @@ static	FILE	*cfile = NULL;
 void printc(fr)
 frentry_t *fr;
 {
-	fripf_t *ipf;
 	u_long *ulp;
 	char *and;
 	FILE *fp;
@@ -82,7 +79,6 @@ frentry_t *fr;
 	if ((fr->fr_type == FR_T_IPF) &&
 	    ((fr->fr_datype != FRI_NORMAL) || (fr->fr_satype != FRI_NORMAL)))
 		return;
-	ipf = fr->fr_ipf;
 
 	if (cfile == NULL)
 		cfile = fopen("ip_rules.c", "w");
@@ -953,7 +949,7 @@ u_int incount, outcount;
 			fr->fr_flags & FR_INQUE ? "in" : "out",
 			fr->fr_group, num);
 	}
-	if (n == NULL) { 
+	if (n == NULL) {
 		n = (mc_t *)malloc(sizeof(*n) * FRC_MAX);
 		if (n == NULL) {
 			fprintf(stderr, "out of memory\n");
@@ -971,13 +967,13 @@ int dir;
 	static mc_t *m = NULL;
 	frgroup_t *g;
 
-	if (m == NULL) { 
+	if (m == NULL) {
 		m = (mc_t *)calloc(1, sizeof(*m) * FRC_MAX);
-		if (m == NULL) { 
-			fprintf(stderr, "out of memory\n"); 
-			exit(1); 
-		} 
-	} 
+		if (m == NULL) {
+			fprintf(stderr, "out of memory\n");
+			exit(1);
+		}
+	}
 
 	for (g = groups; g != NULL; g = g->fg_next) {
 		if ((dir == 0) && ((g->fg_flags & FR_INQUE) != 0))
