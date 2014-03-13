@@ -54,9 +54,6 @@ main(int argc, char **argv)
 {
 	const char	*opts = "itv";
 	int		c;
-	boolean_t	opt_i = B_FALSE;
-	boolean_t	opt_t = B_FALSE;
-	boolean_t	opt_v = B_FALSE;
 	LibHalContext	*hal_ctx;
 	DBusError	error;
 	rmm_error_t	rmm_error;
@@ -66,14 +63,11 @@ main(int argc, char **argv)
 
 	while ((c = getopt(argc, argv, opts)) != EOF) {
 		switch (c) {
-		case 'i':
-			opt_i = B_TRUE;
+		case 'i':	/* Not implemented */
 			break;
-		case 't':
-			opt_t = B_TRUE;
+		case 't':	/* Not implemented */
 			break;
-		case 'v':
-			opt_v = B_TRUE;
+		case 'v':	/* Not implemented */
 			break;
 		default:
 			usage();
