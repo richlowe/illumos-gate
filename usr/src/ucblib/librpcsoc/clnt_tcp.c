@@ -39,8 +39,6 @@
  * contributors.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * clnt_tcp.c, Implements a TCP/IP based, client side RPC.
  *
@@ -119,7 +117,6 @@ clnttcp_create(raddr, prog, vers, sockp, sendsz, recvsz)
 	register struct ct_data *ct;
 	struct timeval now;
 	struct rpc_msg call_msg;
-	int i;
 
 	h  = (CLIENT *)mem_alloc(sizeof (*h));
 	if (h == NULL) {
@@ -155,7 +152,7 @@ clnttcp_create(raddr, prog, vers, sockp, sendsz, recvsz)
 	 */
 	if (*sockp < 0) {
 		*sockp = _socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		i = bindresvport(*sockp, (struct sockaddr_in *)0);
+		(void) bindresvport(*sockp, (struct sockaddr_in *)0);
 		if ((*sockp < 0)||
 			(connect(*sockp, (struct sockaddr *)raddr,
 			sizeof (*raddr)) < 0)) {
