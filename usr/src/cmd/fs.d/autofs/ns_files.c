@@ -25,8 +25,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -50,7 +48,7 @@
 
 static int read_execout(char *key, char **lp, char *fname, char *line,
 			int linesz);
-static int call_read_execout(char *key, char **lp, char *fname, char *line,
+static int call_read_execout(char *key, char *fname, char *line,
 			int linesz);
 static FILE *file_open(char *, char *, char **, char ***);
 
@@ -116,7 +114,7 @@ getmapent_files(key, mapname, ml, stack, stkptr, iswildcard, isrestricted)
 				fname, key);
 		}
 
-		rc = call_read_execout(key, &lp, fname, ml->linebuf, LINESZ);
+		rc = call_read_execout(key, fname, ml->linebuf, LINESZ);
 
 		if (rc != 0) {
 			nserr = __NSW_UNAVAIL;
@@ -681,7 +679,7 @@ automountd_do_exec_map(void *cookie, char *argp, size_t arg_size,
 }
 
 int
-call_read_execout(char *key, char **lp, char *fname, char *line,
+call_read_execout(char *key, char *fname, char *line,
 			int linesz)
 {
 	command_t command;
@@ -703,6 +701,5 @@ call_read_execout(char *key, char **lp, char *fname, char *line,
 
 	ret = door_call(did_exec_map, &darg);
 
-	lp = &line;
 	return (ret);
 }
