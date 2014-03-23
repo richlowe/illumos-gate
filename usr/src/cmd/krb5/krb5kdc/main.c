@@ -13,7 +13,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -27,7 +27,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Main procedure body for the KDC server process.
  */
@@ -171,7 +171,7 @@ init_realm(krb5_context kcontext, char *progname, kdc_realm_t *rdp, char *realm,
 	kret = EINVAL;
 	goto whoops;
     }
-	
+
     rdp->realm_name = realm;
     kret = krb5int_init_context_kdc(&rdp->realm_context);
     if (kret) {
@@ -192,7 +192,7 @@ init_realm(krb5_context kcontext, char *progname, kdc_realm_t *rdp, char *realm,
 	com_err(progname, kret, gettext("while reading realm parameters"));
 	goto whoops;
     }
-    
+
     /* Handle profile file name */
     if (rparams && rparams->realm_profile)
 	rdp->realm_profile = strdup(rparams->realm_profile);
@@ -256,11 +256,11 @@ init_realm(krb5_context kcontext, char *progname, kdc_realm_t *rdp, char *realm,
     }
 
     /* first open the database  before doing anything */
-#ifdef KRBCONF_KDC_MODIFIES_KDB    
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
+#ifdef KRBCONF_KDC_MODIFIES_KDB
+    if ((kret = krb5_db_open(rdp->realm_context, db_args,
 			     KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC))) {
 #else
-    if ((kret = krb5_db_open(rdp->realm_context, db_args, 
+    if ((kret = krb5_db_open(rdp->realm_context, db_args,
 			     KRB5_KDB_OPEN_RO | KRB5_KDB_SRV_TYPE_KDC))) {
 #endif
 	/*
@@ -332,7 +332,7 @@ init_realm(krb5_context kcontext, char *progname, kdc_realm_t *rdp, char *realm,
     }
 
     if (!rkey_init_done) {
-	krb5_data seed;
+	krb5_data seed __UNUSED;
 #ifdef KRB5_KRB4_COMPAT
 	krb5_keyblock temp_key;
 #endif
@@ -368,7 +368,7 @@ init_realm(krb5_context kcontext, char *progname, kdc_realm_t *rdp, char *realm,
      * If we choked, then clean up any dirt we may have dropped on the floor.
      */
     if (kret) {
-        
+
 	finish_realm(rdp);
     }
 
@@ -451,7 +451,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     int 		c;
     char		*db_name = (char *) NULL;
     char		*mkey_name = (char *) NULL;
-    char		*rcname = KDCRCACHE;
+    char		*rcname __UNUSED = KDCRCACHE;
     char		*lrealm = NULL;
     krb5_error_code	retval;
     krb5_enctype	menctype = ENCTYPE_UNKNOWN;
@@ -524,7 +524,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	case 'r':			/* realm name for db */
 	    if (!find_realm_data(optarg, (krb5_ui_4) strlen(optarg))) {
 		if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
-		    if ((retval = init_realm(kcontext, argv[0], rdatap, optarg, 
+		    if ((retval = init_realm(kcontext, argv[0], rdatap, optarg,
 					     mkey_name, menctype,
 					     default_udp_ports,
 					     default_tcp_ports, manual, db_args))) {
@@ -625,7 +625,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 
 #ifdef KRB5_KRB4_COMPAT
     /*
-     * Setup the v4 mode 
+     * Setup the v4 mode
      */
     process_v4_mode(argv[0], v4mode);
     free(v4mode);
@@ -647,7 +647,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	    exit(1);
 	}
 	if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
-	    if ((retval = init_realm(kcontext, argv[0], rdatap, lrealm, 
+	    if ((retval = init_realm(kcontext, argv[0], rdatap, lrealm,
 				     mkey_name, menctype, default_udp_ports,
 				     default_tcp_ports, manual, db_args))) {
 		/* Solaris Kerberos: Keep error messages consistent */
@@ -744,7 +744,7 @@ int main(int argc, char **argv)
     if (strrchr(argv[0], '/'))
 	argv[0] = strrchr(argv[0], '/')+1;
 
-    if (!(kdc_realmlist = (kdc_realm_t **) malloc(sizeof(kdc_realm_t *) * 
+    if (!(kdc_realmlist = (kdc_realm_t **) malloc(sizeof(kdc_realm_t *) *
 						  KRB5_KDC_MAX_REALMS))) {
 	fprintf(stderr, gettext("%s: cannot get memory for realm list\n"), argv[0]);
 	exit(1);
@@ -844,7 +844,7 @@ int main(int argc, char **argv)
     unload_preauth_plugins(kcontext);
     krb5_klog_close(kdc_context);
     finish_realms(argv[0]);
-    if (kdc_realmlist) 
+    if (kdc_realmlist)
       free(kdc_realmlist);
 #ifdef USE_RCACHE
     (void) krb5_rc_close(kcontext, kdc_rcache);
@@ -855,7 +855,3 @@ int main(int argc, char **argv)
     krb5_free_context(kcontext);
     return errout;
 }
-
-
-
-

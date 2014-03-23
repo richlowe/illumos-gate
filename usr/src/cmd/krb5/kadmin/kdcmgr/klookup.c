@@ -52,7 +52,7 @@ main(int argc, char **argv)
 {
 	unsigned char answer[NS_MAXMSG], *ansp = NULL, *end, a, b, c, d;
 	int len = 0, anslen, hostlen, nq, na, type, class;
-	int ttl, priority, weight, port, size;
+	int ttl __UNUSED, priority __UNUSED, weight __UNUSED, port, size;
 	char name[NS_MAXDNAME], *cp, *typestr = NULL;
 	char nbuf[INET6_ADDRSTRLEN];
 	struct __res_state stat;

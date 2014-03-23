@@ -64,6 +64,7 @@ CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
+$(__GNUCNEXT)CERRWARN +=	-_gcc=-Wno-unused-but-set-variable
 
 LDFLAGS += $(KRUNPATH) $(KERBRUNPATH)
 LDLIBS += -L $(ROOT_KLIBDIR) -L $(KRB5LIB) -lkadm5srv -lkdb -lkdb_ldap \
