@@ -32,8 +32,6 @@
  * under license from the Regents of the University of California.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * This contains the mainline code for the YP server.  Data
  * structures which are process-global are also in this module.
@@ -174,7 +172,7 @@ static void
 ypinit(int argc, char **argv)
 {
 	int pid;
-	int stat, t;
+	int stat;
 	struct sigaction act;
 	int ufd, tfd;
 	SVCXPRT *utransp, *ttransp;
@@ -236,8 +234,6 @@ ypinit(int argc, char **argv)
 		    freopen(logfile, "a", stdout);
 		    freopen(logfile, "a", stderr);
 		}
-
-		t = open("/dev/tty", 2);
 
 		setpgrp();
 	}
