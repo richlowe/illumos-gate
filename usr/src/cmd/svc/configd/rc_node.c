@@ -367,6 +367,7 @@
 #include <syslog.h>
 #include <unistd.h>
 #include <secdb.h>
+#include <sys/ccompile.h>
 
 #include "configd.h"
 
@@ -4692,6 +4693,15 @@ get_delete_event_id(rep_protocol_entity_t entity, uint32_t pgflags)
  *   _TRUNCATED
  * and whatever object_delete() fails with.
  */
+/* XXX: A bootstrapping hack */
+#if !defined(__UNUSED)
+#if defined(__GNUC__)
+#define	__UNUSED	__attribute__((__unused__))
+#else
+#define __UNUSED
+#endif
+#endif
+
 int
 rc_node_delete(rc_node_ptr_t *npp)
 {
