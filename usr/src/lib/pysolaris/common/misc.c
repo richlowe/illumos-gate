@@ -33,8 +33,6 @@
 #define	dgettext(x, y) y
 #endif
 
-#define	_(s) dgettext(TEXT_DOMAIN, s)
-
 extern int sid_to_id(char *sid, boolean_t user, uid_t *id);
 
 static PyObject *
