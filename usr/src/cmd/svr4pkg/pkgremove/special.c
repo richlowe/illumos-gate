@@ -499,7 +499,7 @@ special_contents_remove(int ient, struct cfent **ppcfent, const char *pcroot)
 {
 	int result = 0;		/* Assume we will succeed.  Return result. */
 	char **ppcSC = NULL;	/* The special contents rules, sorted. */
-	int i, j;		/* Indexes into contents & special contents */
+	int i;			/* Index into contents */
 	FILE *fpi = NULL,	/* Input of contents file */
 	    *fpo = NULL;	/* Output to temp contents file */
 	char cpath[PATH_MAX],	/* Contents file path */
@@ -599,7 +599,7 @@ special_contents_remove(int ient, struct cfent **ppcfent, const char *pcroot)
 	 */
 	(void) memset(line, 0, LINESZ);
 
-	for (i = 0, j = 0; fgets(line, LINESZ, fpi) != NULL; ) {
+	for (i = 0; fgets(line, LINESZ, fpi) != NULL; ) {
 
 		char *pcpath = NULL;
 
