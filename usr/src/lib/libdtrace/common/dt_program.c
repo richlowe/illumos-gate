@@ -31,11 +31,16 @@
 #include <assert.h>
 #include <ctype.h>
 #include <alloca.h>
+#include <limits.h>
+#include <sys/ipc.h>
+#include <md5.h>
 
 #include <dt_impl.h>
 #include <dt_program.h>
 #include <dt_printf.h>
 #include <dt_provider.h>
+
+extern FILE *dt_preproc(dtrace_hdl_t *, FILE *);
 
 dtrace_prog_t *
 dt_program_create(dtrace_hdl_t *dtp)
@@ -145,6 +150,14 @@ dtrace_program_info(dtrace_hdl_t *dtp, dtrace_prog_t *pgp,
 			pip->dpi_recgens++;
 		}
 	}
+}
+
+/*ARGSUSED*/
+void
+dtrace_program_setversion(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t vers)
+{
+	assert(vers <= DOF_VERSION);
+	pgp->dp_dofversion = vers;
 }
 
 int
@@ -614,4 +627,127 @@ dtrace_program_header(dtrace_hdl_t *dtp, FILE *out, const char *fname)
 		return (dt_set_errno(dtp, errno));
 
 	return (0);
+}
+
+int
+dt_header_script_fencode(dtrace_hdl_t *dtp, FILE *ifp, int cflags, FILE *out)
+{
+	FILE *script = ifp;
+	char *line = NULL;
+	char fdpath[PATH_MAX];
+	size_t llen;
+	key_t id;
+
+	(void) snprintf(fdpath, PATH_MAX, "/proc/%d/fd/%d",
+	    getpid(), fileno(ifp));
+	id = ftok(fdpath, 0);
+
+	if (cflags & DTRACE_C_CPP)
+		script = dt_preproc(dtp, ifp);
+
+	/*
+	 * XXX: The nested backquoting in here is almost certainly a war
+	 * crime
+	 */
+	(void) fprintf(out, "#if !defined(__DTRACE_SCRIPT_%d) && "
+	    "_DTRACE_VERSION\n", id);
+	(void) fprintf(out, "#define __DTRACE_SCRIPT_%d\n", id);
+	(void) fprintf(out, "static void __attribute__"
+	    "((__used__,__unused__))\n");
+	(void) fprintf(out, "__dtrace_dummy_%d(void) {\n", id);
+	(void) fprintf(out, "\t__asm__ __volatile__(\n");
+	(void) fprintf(out, "\t    \".pushsection .SUNW_dscript\\n\"\n");
+	(void) fprintf(out, "\t    \"__dtrace_script_%d:\\n\"\n", id);
+
+	while (getline(&line, &llen, script) != -1) {
+		int i;
+
+		(void) fprintf(out, "\t    \"\\t.ascii \\\"");
+		for (i = 0; i < llen && line[i] != '\0'; i++) {
+			if (line[i] == '"') {
+				(void) fprintf(out, "\\\\\\\"");
+			} else if (line[i] == '\\') {
+				(void) fprintf(out, "\\\\\\\\");
+			} else if (line[i] == '\n') {
+				(void) fprintf(out, "\\\\n");
+			} else {
+				(void) fprintf(out, "%c", line[i]);
+			}
+		}
+		(void) fprintf(out, "\\\"\\n\"\n");
+		free(line);
+		line = NULL;
+	}
+
+	/* Ensure null termination */
+	(void) fprintf(out, "\t    \"\\t.byte 0x0\\n\"\n");
+	(void) fprintf(out, "\t    \".weak __dtrace_script_%d\\n\"\n", id);
+	(void) fprintf(out, "\t    \".popsection\\n\"\n");
+	(void) fprintf(out, "\t);\n");
+	(void) fprintf(out, "}\n");
+	(void) fprintf(out, "#endif\n");
+	(void) fclose(script);
+
+	return (0);
+}
+
+/* ARGSUSED */
+int
+dt_header_script_strencode(dtrace_hdl_t *dtp, char *script, int cflags,
+    FILE *out)
+{
+	uint16_t md5[8];
+	key_t id;
+	int i;
+
+	md5_calc((uint8_t *)&md5, (uint8_t *)script, strlen(script));
+	id = md5[7];
+
+	/*
+	 * XXX: The nested backquoting in here is almost certainly a war
+	 * crime
+	 */
+	(void) fprintf(out, "#if !defined(__DTRACE_SCRIPT_%d) && "
+	    "_DTRACE_VERSION\n", id);
+	(void) fprintf(out, "#define __DTRACE_SCRIPT_%d\n", id);
+	(void) fprintf(out, "static void __attribute__"
+	    "((__used__,__unused__))\n");
+	(void) fprintf(out, "__dtrace_dummy_%d(void) {\n", id);
+	(void) fprintf(out, "\t__asm__(\n");
+	(void) fprintf(out, "\t    \".pushsection .SUNW_dscript\\n\"\n");
+	(void) fprintf(out, "\t    \"__dtrace_script_%d:\\n\"\n", id);
+
+	(void) fprintf(out, "\t    \"\\t.ascii \\\"");
+	for (i = 0; script[i] != '\0'; i++) {
+		if (script[i] == '"') {
+			(void) fprintf(out, "\\\\\\\"");
+		} else if (script[i] == '\n') {
+			(void) fprintf(out, "\\\\n");
+		} else {
+			(void) fprintf(out, "%c", script[i]);
+		}
+	}
+	(void) fprintf(out, "\\\"\\n\"\n");
+
+	/* Ensure null termination */
+	(void) fprintf(out, "\t    \"\\t.byte 0x0\\n\"\n");
+	(void) fprintf(out, "\t    \".weak __dtrace_script_%d\\n\"\n", id);
+	(void) fprintf(out, "\t    \".popsection\\n\"\n");
+	(void) fprintf(out, "\t);\n");
+	(void) fprintf(out, "}\n");
+	(void) fprintf(out, "#endif\n");
+
+	return (0);
+}
+
+const char *
+dt_header_script_decode(void *data)
+{
+	/*
+	 * At present, the data is a NULL-terminated char[] of the raw script
+	 * text, not encoded in the least.
+	 *
+	 * But we want to allow some flexibility
+	 */
+	return ((const char *)data);
 }

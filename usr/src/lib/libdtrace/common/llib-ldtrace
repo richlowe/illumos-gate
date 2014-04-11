@@ -24,9 +24,8 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*LINTLIBRARY*/
 /*PROTOLIB1*/
 
 #include <dtrace.h>
+#include <dt_link.h>

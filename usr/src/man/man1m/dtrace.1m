@@ -112,7 +112,8 @@ not required as \fBdtrace\fR selects the native data model as the default. The
 data model affects the sizes of integer types and other language properties. D
 programs compiled for either data model can be executed on both 32-bit and
 64-bit kernels. The \fB-32\fR and \fB-64\fR options also determine the ELF file
-format (ELF32 or ELF64) produced by the \fB-G\fR option.
+format (ELF32 or ELF64) produced by the \fB-G\fR option, and any relevant
+pre-processor macro definitions used by the \fB-C\fR option.
 .RE
 
 .sp
@@ -264,6 +265,11 @@ is saved using the pathname specified as the argument for this operand. If the
 whose name is \fB\fIfilename\fR.d\fR, then the ELF file is saved using the name
 \fB\fIfilename\fR.o\fR. Otherwise the ELF file is saved using the name
 \fBd.out\fR.
+
+This option is provided for compatibility with prior releases and other
+systems including DTrace.  It is generally recommend that the \fB-h\fR option
+be used to generate a header containing any provider and helper definitions,
+as well as macros for the invocation of any probes.
 .RE
 
 .sp
@@ -287,9 +293,10 @@ invocation, causing it to display the list of pathnames, one for each line, to
 .sp .6
 .RS 4n
 Generate a header file containing macros that correspond to probes in the
-specified provider definitions. This option should be used to generate a header
-file that is included by other source files for later use with the \fB-G\fR
-option. If the \fB-o\fR option is present, the header file is saved using the
+specified provider definitions.  This option should be used to generate a
+header file that is included by the source files containing the probe points
+for a given provider (or in the case of a helper, any corresponding source
+file).  If the \fB-o\fR option is present, the header file is saved using the
 pathname specified as the argument for that option. If the \fB-o\fR option is
 not present and the DTrace program is contained with a file whose name is
 \fIfilename\fR\fB\&.d\fR, then the header file is saved using the name

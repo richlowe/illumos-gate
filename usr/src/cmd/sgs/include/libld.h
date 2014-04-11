@@ -288,9 +288,9 @@ struct ofl_desc {
 	APlist		*ofl_extrarels;	/* relocation sections which have */
 					/*    a NULL sh_info */
 	avl_tree_t	*ofl_groups;	/* pointer to head of Groups AVL tree */
-	APlist		*ofl_initarray;	/* list of init array func names */
-	APlist		*ofl_finiarray;	/* list of fini array func names */
-	APlist		*ofl_preiarray;	/* list of preinit array func names */
+	APlist		*ofl_initarray;	/* list of init array func syms */
+	APlist		*ofl_finiarray;	/* list of fini array func syms */
+	APlist		*ofl_preiarray;	/* list of preinit array func syms */
 	APlist		*ofl_rtldinfo;	/* list of rtldinfo syms */
 	APlist		*ofl_osgroups;	/* list of output GROUP sections */
 	APlist		*ofl_ostlsseg;	/* pointer to sections in TLS segment */
@@ -406,6 +406,8 @@ struct ofl_desc {
 	avl_tree_t	*ofl_wrap;	/* -z wrap symbols */
 	ofl_guideflag_t	ofl_guideflags;	/* -z guide flags */
 	APlist		*ofl_assdeflib;	/* -z assert-deflib exceptions */
+	APlist		*ofl_dofarray;	/* List of DOF symbols */
+	Os_desc		*ofl_osdofarray; /* .SUNW_dof_array output section */
 };
 
 #define	FLG_OF_DYNAMIC	0x00000001	/* generate dynamic output module */
@@ -519,6 +521,7 @@ struct ofl_desc {
 #define	FLG_OF1_OVMACHCAP 0x0800000000	/* override CA_SUNW_MACH capability */
 #define	FLG_OF1_OVPLATCAP 0x1000000000	/* override CA_SUNW_PLAT capability */
 #define	FLG_OF1_OVIDCAP	0x2000000000	/* override CA_SUNW_ID capability */
+#define	FLG_OF1_NEEDDRTI 0x4000000000	/* output files need DTrace runtime  */
 
 /*
  * Guidance flags. The flags with the FLG_OFG_NO_ prefix are used to suppress
@@ -924,6 +927,7 @@ struct is_desc {			/* input section descriptor */
 					/*	processing and ident used for */
 					/*	 placing/ordering sections */
 	Word		is_flags;	/* Various flags */
+	Boolean		is_newdata;	/* is_indata is ours, to allow change */
 };
 
 #define	FLG_IS_ORDERED	0x0001		/* this is a SHF_ORDERED section */
@@ -1206,6 +1210,7 @@ struct sym_avlnode {
 #define	SDAUX_ID_PLT	5		/* _PROCEDURE_LINKAGE_TABLE_ symbol */
 #define	SDAUX_ID_GOT	6		/* _GLOBAL_OFFSET_TABLE_ symbol */
 #define	SDAUX_ID_START	7		/* START_ && _START_ symbol */
+#define	SDAUX_ID_DOFSEC	8		/* __SUNW_dof_sec symbol */
 
 /*
  * Flags for sym_desc.sd_flags

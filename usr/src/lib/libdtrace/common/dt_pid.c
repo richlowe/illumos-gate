@@ -561,9 +561,8 @@ dt_pid_usdt_mapping(void *data, const prmap_t *pmp, const char *oname)
 
 			dh.dofhp_dof = dofaddr;
 
-			if (fd == -1 &&
-			    (fd = pr_open(P, "/dev/dtrace/helper",
-				O_RDWR, 0)) < 0) {
+			if (fd == -1 && (fd = pr_open(P, "/dev/dtrace/helper",
+			    O_RDWR, 0)) < 0) {
 				dt_dprintf("pr_open of helper device "
 				    "failed: %s\n", strerror(errno));
 				return (-1); /* errno is set for us */
@@ -571,8 +570,8 @@ dt_pid_usdt_mapping(void *data, const prmap_t *pmp, const char *oname)
 
 			if (pr_ioctl(P, fd, DTRACEHIOC_ADDDOF, &dh,
 			    sizeof (dh)) < 0) {
-				dt_dprintf("DOF was rejected for %s\n",
-				    dh.dofhp_mod);
+				dt_dprintf("DOF was rejected for %s: %s\n",
+				    dh.dofhp_mod, strerror(errno));
 			}
 		}
 	}
@@ -603,7 +602,8 @@ dt_pid_usdt_mapping(void *data, const prmap_t *pmp, const char *oname)
 		}
 
 		if (pr_ioctl(P, fd, DTRACEHIOC_ADDDOF, &dh, sizeof (dh)) < 0)
-			dt_dprintf("DOF was rejected for %s\n", dh.dofhp_mod);
+			dt_dprintf("DOF was rejected for %s: %s\n",
+			    dh.dofhp_mod, strerror(errno));
 	}
 
 	if (fd != -1)

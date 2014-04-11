@@ -25,7 +25,7 @@
 
 include ../Makefile.lib
 
-HDRS = dtrace.h
+HDRS = dtrace.h dt_link.h
 HDRDIR = common
 
 SUBDIRS = $(MACH) 

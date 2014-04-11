@@ -1799,7 +1799,7 @@ dt_reduce(dtrace_hdl_t *dtp, dt_version_t v)
  * and return a FILE handle for the cpp output.  We use the /dev/fd filesystem
  * here to simplify the code by leveraging file descriptor inheritance.
  */
-static FILE *
+FILE *
 dt_preproc(dtrace_hdl_t *dtp, FILE *ifp)
 {
 	int argc = dtp->dt_cpp_argc;

@@ -131,17 +131,14 @@ la_activity(uintptr_t *cookie, uint_t flags)
 		if (Plookup_by_name(P, name, "___SUNW_dof", &sym) == 0)
 			dofs[i++] = sym.st_value;
 
-		/*
-		 * XXX: This loads all DOF, not just lazy-loaded DOF.
-		 * The same is true of dt_pid, however, so maybe that's safe?
-		 */
+		/* XXX: Loads all DOF than just lazy-loaded DOF. */
 		if (Plookup_by_name(P, name, "__SUNW_dof_array", &sym) == 0) {
 			uintptr_t dofaddr, p;
 
 			for (p = sym.st_value; ; p += sizeof (p)) {
 				if (Pread(P, &dofaddr, sizeof (dofaddr), p) !=
 				    sizeof (dofaddr)) {
-					dprintf(0, "libaudit: __SUNW_dof_array"
+					dprintf(0, "forceload: __SUNW_dof_array"
 					    " corrupt");
 					free(dofs);
 					return;
@@ -152,7 +149,7 @@ la_activity(uintptr_t *cookie, uint_t flags)
 					if ((dofs = realloc(dofs,
 					    sizeof (uintptr_t) * ndofs)) ==
 					    NULL) {
-						dprintf(0, "libaudit: couldn't"
+						dprintf(0, "forceload: couldn't"
 						    " allocate");
 						return;
 					}

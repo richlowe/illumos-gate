@@ -29,21 +29,63 @@ VERS =		.4
 
 COMOBJS =	debug.o		globals.o	util.o
 
-COMOBJS32 =	args32.o	entry32.o	exit32.o	groups32.o \
-		ldentry32.o	ldlibs32.o	ldmachdep32.o	ldmain32.o \
-		libs32.o	files32.o	map32.o		map_core32.o \
-		map_support32.o	map_v232.o	order32.o	outfile32.o \
-		place32.o	relocate32.o	resolve32.o	sections32.o \
-		sunwmove32.o	support32.o	syms32.o	update32.o \
-		unwind32.o	version32.o	wrap32.o
+COMOBJS32 =	args32.o	\
+		dtrace32.o	\
+		entry32.o	\
+		exit32.o	\
+		groups32.o 	\
+		ldentry32.o	\
+		ldlibs32.o	\
+		ldmachdep32.o	\
+		ldmain32.o 	\
+		libs32.o	\
+		files32.o	\
+		map32.o		\
+		map_core32.o 	\
+		map_support32.o	\
+		map_v232.o	\
+		order32.o	\
+		outfile32.o 	\
+		place32.o	\
+		relocate32.o	\
+		resolve32.o	\
+		sections32.o 	\
+		sunwmove32.o	\
+		support32.o	\
+		syms32.o	\
+		update32.o 	\
+		unwind32.o	\
+		version32.o	\
+		wrap32.o
 
-COMOBJS64 =	args64.o	entry64.o	exit64.o	groups64.o \
-		ldentry64.o	ldlibs64.o	ldmachdep64.o	ldmain64.o \
-		libs64.o	files64.o	map64.o		map_core64.o \
-		map_support64.o	map_v264.o	order64.o	outfile64.o \
-		place64.o	relocate64.o	resolve64.o	sections64.o \
-		sunwmove64.o	support64.o	syms64.o	update64.o \
-		unwind64.o	version64.o	wrap64.o
+COMOBJS64 =	args64.o	\
+		dtrace64.o	\
+		entry64.o	\
+		exit64.o	\
+		groups64.o	\
+		ldentry64.o	\
+		ldlibs64.o	\
+		ldmachdep64.o	\
+		ldmain64.o	\
+		libs64.o	\
+		files64.o	\
+		map64.o		\
+		map_core64.o	\
+		map_support64.o	\
+		map_v264.o	\
+		order64.o	\
+		outfile64.o	\
+		place64.o	\
+		relocate64.o	\
+		resolve64.o	\
+		sections64.o	\
+		sunwmove64.o	\
+		support64.o	\
+		syms64.o	\
+		update64.o	\
+		unwind64.o	\
+		version64.o	\
+		wrap64.o
 
 TOOLOBJS =	alist.o		assfail.o	findprime.o	string_table.o \
 		strhash.o
@@ -77,10 +119,14 @@ L_MACHOBJS64 =	$(L_SPARC_MACHOBJS64) \
 BLTOBJ =	msg.o
 ELFCAPOBJ =	elfcap.o
 
+DTOBJ	=	ldprobes.o
+
 OBJECTS =	$(BLTOBJ) $(G_MACHOBJS32) $(G_MACHOBJS64) \
 		$(L_MACHOBJS32) $(L_MACHOBJS64) \
 		$(COMOBJS) $(COMOBJS32) $(COMOBJS64) \
 		$(TOOLOBJS) $(E_TOOLOBJS) $(AVLOBJ) $(ELFCAPOBJ)
+
+EXTPICS =	$(DTOBJ:%=pics/%)
 
 include 	$(SRC)/lib/Makefile.lib
 include 	$(SRC)/cmd/sgs/Makefile.com
@@ -94,6 +140,7 @@ CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-char-subscripts
 CERRWARN += -_gcc=-Wno-type-limits
 
+#
 # Location of the shared relocation engines maintained under usr/src/uts.
 #
 KRTLD_I386 = $(SRCBASE)/uts/$(VAR_PLAT_i386)/krtld
@@ -105,14 +152,19 @@ CPPFLAGS +=	-DUSE_LIBLD_MALLOC -I$(SRCBASE)/lib/libc/inc \
 		    -I$(SRCBASE)/uts/common/krtld -I$(SRCBASE)/uts/sparc \
 		    $(VAR_LIBLD_CPPFLAGS)
 LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) $(LDDBGLIBDIR) $(LDDBG_LIB) \
-		    $(ELFLIBDIR) -lelf $(DLLIB) -lc
+		    $(ELFLIBDIR) -lelf $(DLLIB) -ldtrace -lc
 
-LINTFLAGS +=	-u -D_REENTRANT
-LINTFLAGS64 +=	-u -D_REENTRANT
+LINTFLAGS +=	-u -D_REENTRANT -erroff=E_NAME_DECL_NOT_USED_DEF2
+LINTFLAGS64 +=	-u -D_REENTRANT -erroff=E_NAME_DECL_NOT_USED_DEF2
 
 DYNFLAGS +=	$(VERSREF) $(CC_USE_PROTO) '-R$$ORIGIN'
 
 native:=	DYNFLAGS	+= $(CONVLIBDIR)
+
+# At times, unimportant subsets of ld will depend on system features from the
+# same integration.  This allows those features to be conditioned out of the
+# native ld to make bootstrapping easier.
+native:=	CPPFLAGS	+= -D_NATIVE_BUILD
 
 BLTDEFS =	msg.h
 BLTDATA =	msg.c

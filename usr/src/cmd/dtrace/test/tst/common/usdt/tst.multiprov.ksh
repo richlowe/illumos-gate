@@ -40,7 +40,7 @@ echo '#pragma D option aggsortkey' >> test.d
 cat > test.c <<EOF
 #include <unistd.h>
 
-void
+int
 main()
 {
 EOF
@@ -83,6 +83,7 @@ EOF
 	echo $oogle'$target:::{@[probefunc] = count()}' >> test.d
 done
 
+echo "    return (0);" >> test.c
 echo "}" >> test.c
 
 echo 'END{printa("%-10s %@d\\n", @)}' >> test.d

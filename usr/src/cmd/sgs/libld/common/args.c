@@ -80,6 +80,7 @@
 #include	<elf.h>
 #include	<unistd.h>
 #include	<debug.h>
+#include	<limits.h>
 #include	"msg.h"
 #include	"_libld.h"
 
@@ -940,7 +941,6 @@ assdeflib_parse(Ofl_desc *ofl, char *optarg)
 	    MSG_STR_SOEXT_SIZE;
 	if (olen > MSG_ARG_ASSDEFLIB_SIZE) {
 		if (optarg[MSG_ARG_ASSDEFLIB_SIZE] != '=') {
-			ld_eprintf(ofl, ERR_FATAL, "Missing =\n");
 			ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ARG_ILLEGAL),
 			    MSG_ORIG(MSG_ARG_ASSDEFLIB), optarg);
 			return (TRUE);
@@ -1988,11 +1988,10 @@ ld_process_flags(Ofl_desc *ofl, int argc, char **argv)
 static uintptr_t
 process_files_com(Ofl_desc *ofl, int argc, char **argv)
 {
+	static Boolean	inserted_drti = FALSE;
+
 	for (; optind < argc; optind++) {
-		int		fd;
-		uintptr_t	open_ret;
-		char		*path;
-		Rej_desc	rej = { 0 };
+		uintptr_t	ret;
 
 		/*
 		 * If we detect some more options return to getopt().
@@ -2009,40 +2008,77 @@ process_files_com(Ofl_desc *ofl, int argc, char **argv)
 		if (optind >= argc)
 			break;
 
-		path = argv[optind];
-		if ((fd = open(path, O_RDONLY)) == -1) {
-			int err = errno;
+		if ((ret = ld_add_file(ofl, argv[optind], optind)) != 0)
+			return (ret);
 
-			ld_eprintf(ofl, ERR_FATAL,
-			    MSG_INTL(MSG_SYS_OPEN), path, strerror(err));
-			continue;
-		}
+		if ((ofl->ofl_flags1 & FLG_OF1_NEEDDRTI) && !inserted_drti) {
+			const char *env;
+			char drtipath[PATH_MAX];
 
-		DBG_CALL(Dbg_args_file(ofl->ofl_lml, optind, path));
+			inserted_drti = TRUE;
+			if ((env = getenv(MSG_ORIG(MSG_DTRACE_LIB_ENV))) ==
+			    NULL)
+				env = MSG_ORIG(MSG_DTRACE_LIBPATH);
 
-		open_ret = ld_process_open(path, path, &fd, ofl,
-		    (FLG_IF_CMDLINE | FLG_IF_NEEDED), &rej, NULL);
-		if (fd != -1)
-			(void) close(fd);
-		if (open_ret == S_ERROR)
-			return (S_ERROR);
+			if (ld_targ.t_m.m_class == ELFCLASS32)
+				(void) snprintf(drtipath, PATH_MAX, "%s/%s",
+				    env, MSG_ORIG(MSG_DRTI_PATH_32));
+			else
+				(void) snprintf(drtipath, PATH_MAX, "%s/%s",
+				    env, MSG_ORIG(MSG_DRTI_PATH_64));
 
-		/*
-		 * Check for mismatched input.
-		 */
-		if (rej.rej_type) {
-			Conv_reject_desc_buf_t rej_buf;
-
-			ld_eprintf(ofl, ERR_FATAL,
-			    MSG_INTL(reject[rej.rej_type]),
-			    rej.rej_name ? rej.rej_name :
-			    MSG_INTL(MSG_STR_UNKNOWN),
-			    conv_reject_desc(&rej, &rej_buf,
-			    ld_targ.t_m.m_mach));
-			return (1);
+			if ((ret = ld_add_file(ofl, drtipath, -1)) != 0) {
+				ld_eprintf(ofl, ERR_FATAL,
+				    MSG_INTL(MSG_DRTI_FAILED),
+				    ofl->ofl_name, drtipath);
+				return (ret);
+			}
 		}
 	}
+
 	return (1);
+}
+
+uintptr_t
+ld_add_file(Ofl_desc *ofl, const char *path, int ndx)
+{
+	int		fd;
+	Rej_desc	rej = { 0 };
+	uintptr_t	open_ret;
+
+	if ((fd = open(path, O_RDONLY)) == -1) {
+		int err = errno;
+
+		ld_eprintf(ofl, ERR_FATAL,
+		    MSG_INTL(MSG_SYS_OPEN), path, strerror(err));
+		return (S_ERROR);
+	}
+
+	DBG_CALL(Dbg_args_file(ofl->ofl_lml, ndx, path));
+
+	open_ret = ld_process_open(path, path, &fd, ofl,
+	    (FLG_IF_CMDLINE | FLG_IF_NEEDED), &rej, NULL);
+	if (fd != -1)
+		(void) close(fd);
+	if (open_ret == S_ERROR)
+		return (S_ERROR);
+
+	/*
+	 * Check for mismatched input.
+	 */
+	if (rej.rej_type) {
+		Conv_reject_desc_buf_t rej_buf;
+
+		ld_eprintf(ofl, ERR_FATAL,
+		    MSG_INTL(reject[rej.rej_type]),
+		    rej.rej_name ? rej.rej_name :
+		    MSG_INTL(MSG_STR_UNKNOWN),
+		    conv_reject_desc(&rej, &rej_buf,
+		    ld_targ.t_m.m_mach));
+		return (1);
+	}
+
+	return (0);
 }
 
 uintptr_t

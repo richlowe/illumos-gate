@@ -629,9 +629,10 @@ ld_altexec(char **argv, char **envp)
 	/*
 	 * Get a pointer to the actual string.  If it's a null entry, return.
 	 */
-	execstr = strdup(*str + MSG_LD_ALTEXEC_SIZE);
-	if (*execstr == '\0')
+	if ((*str)[MSG_LD_ALTEXEC_SIZE] == '\0')
 		return (0);
+
+	execstr = strdup(*str + MSG_LD_ALTEXEC_SIZE);
 
 	/*
 	 * Null out the LD_ALTEXEC= environment entry.

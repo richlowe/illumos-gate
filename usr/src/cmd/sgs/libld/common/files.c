@@ -178,6 +178,7 @@ process_section(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 	isp->is_scnndx = ndx;
 	isp->is_flags = FLG_IS_EXTERNAL;
 	isp->is_keyident = ident;
+	isp->is_newdata = FALSE;
 
 	if ((isp->is_indata = elf_getdata(scn, NULL)) == NULL) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_GETDATA),
@@ -185,7 +186,12 @@ process_section(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 		return (0);
 	}
 
-	if ((shdr->sh_flags & SHF_EXCLUDE) &&
+	/*
+	 * DTrace script sections should be discarded, but unfortunately can't
+	 * have SHF_EXCLUDE set by the compiler, so we have to do it by name.
+	 */
+	if (((shdr->sh_flags & SHF_EXCLUDE) ||
+	    strcmp(isp->is_name, MSG_ORIG(MSG_SCN_DSCRIPT)) == 0) &&
 	    ((ofl->ofl_flags & FLG_OF_RELOBJ) == 0)) {
 		isp->is_flags |= FLG_IS_DISCARD;
 	}

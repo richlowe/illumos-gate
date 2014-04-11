@@ -223,3 +223,6 @@ NOSYMSORT	usr/lib/amd64/libfru\.so\.1			# C++
 UNREF_OBJ	lib/(libdevinfo|libcfgadm)\.so\.1; .*\ of\ .*SUNW,Netra-CP2300/lib/libprtdiag_psr\.so\.1
 
 
+# libdl is linked against libc_pic.  This means that the references to libc
+# from libsaveargs bind to the static copies in libdl, and not libc
+UNREF_OBJ	lib/amd64/libc\.so\.1; .* of .*lib/amd64/libsaveargs.so.1

@@ -209,11 +209,13 @@ typedef struct {
 #define	free			libld_free
 #define	malloc			libld_malloc
 #define	realloc			libld_realloc
+#define	asprintf		libld_asprintf
 
 #define	libld_calloc(x, a)	libld_malloc(((size_t)x) * ((size_t)a))
 extern void			libld_free(void *);
 extern void			*libld_malloc(size_t);
 extern void			*libld_realloc(void *, size_t);
+extern int			libld_asprintf(char **, const char *, ...);
 #endif
 
 /*

@@ -33,6 +33,7 @@
 #include <sys/wait.h>
 
 #include <dtrace.h>
+#include <dt_link.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -47,7 +48,10 @@
 #include <libproc.h>
 
 typedef struct dtrace_cmd {
-	void (*dc_func)(struct dtrace_cmd *);	/* function to compile arg */
+	/* function to compile arg */
+	void (*dc_comp_func)(struct dtrace_cmd *);
+	/* function to encode arg for header */
+	void (*dc_enc_func)(struct dtrace_cmd *);
 	dtrace_probespec_t dc_spec;		/* probe specifier context */
 	char *dc_arg;				/* argument from main argv */
 	const char *dc_name;			/* name for error messages */
@@ -729,6 +733,28 @@ compile_file(dtrace_cmd_t *dcp)
 }
 
 static void
+encode_file(dtrace_cmd_t *dcp)
+{
+	FILE *fp;
+
+	if ((fp = fopen(dcp->dc_arg, "r")) == NULL)
+		fatal("failed to open %s", dcp->dc_arg);
+
+	if (dt_header_script_fencode(g_dtp, fp, g_cflags, g_ofp) != 0)
+		fatal("failed to encode script from %s\n", dcp->dc_arg);
+
+	(void) fclose(fp);
+}
+
+static void
+encode_str(dtrace_cmd_t *dcp)
+{
+	if (dt_header_script_strencode(g_dtp, dcp->dc_arg,
+	    g_cflags, g_ofp) != 0)
+		fatal("failed to encode script: %s\n", dcp->dc_arg);
+}
+
+static void
 compile_str(dtrace_cmd_t *dcp)
 {
 	char *p;
@@ -737,8 +763,15 @@ compile_str(dtrace_cmd_t *dcp)
 	    dcp->dc_spec, g_cflags | DTRACE_C_PSPEC, g_argc, g_argv)) == NULL)
 		dfatal("invalid probe specifier %s", dcp->dc_arg);
 
-	if ((p = strpbrk(dcp->dc_arg, "{/;")) != NULL)
-		*p = '\0'; /* crop name for reporting */
+	if ((p = strpbrk(dcp->dc_arg, "{/;")) == NULL)
+		p = dcp->dc_arg + strlen(dcp->dc_arg);
+
+	if ((dcp->dc_name = calloc((p - dcp->dc_arg) + 1,
+	    sizeof (char))) == NULL)
+		fatal("couldn't allocate memory");
+
+	(void) strlcpy((char *)dcp->dc_name, dcp->dc_arg,
+	    (p - dcp->dc_arg) + 1);
 
 	dcp->dc_desc = "description";
 	dcp->dc_name = dcp->dc_arg;
@@ -1407,7 +1440,8 @@ main(int argc, char *argv[])
 
 			case 'f':
 				dcp = &g_cmdv[g_cmdc++];
-				dcp->dc_func = compile_str;
+				dcp->dc_comp_func = compile_str;
+				dcp->dc_enc_func = encode_str;
 				dcp->dc_spec = DTRACE_PROBESPEC_FUNC;
 				dcp->dc_arg = optarg;
 				break;
@@ -1424,7 +1458,8 @@ main(int argc, char *argv[])
 
 			case 'i':
 				dcp = &g_cmdv[g_cmdc++];
-				dcp->dc_func = compile_str;
+				dcp->dc_comp_func = compile_str;
+				dcp->dc_enc_func = encode_str;
 				dcp->dc_spec = DTRACE_PROBESPEC_NAME;
 				dcp->dc_arg = optarg;
 				break;
@@ -1441,21 +1476,24 @@ main(int argc, char *argv[])
 
 			case 'm':
 				dcp = &g_cmdv[g_cmdc++];
-				dcp->dc_func = compile_str;
+				dcp->dc_comp_func = compile_str;
+				dcp->dc_enc_func = encode_str;
 				dcp->dc_spec = DTRACE_PROBESPEC_MOD;
 				dcp->dc_arg = optarg;
 				break;
 
 			case 'n':
 				dcp = &g_cmdv[g_cmdc++];
-				dcp->dc_func = compile_str;
+				dcp->dc_comp_func = compile_str;
+				dcp->dc_enc_func = encode_str;
 				dcp->dc_spec = DTRACE_PROBESPEC_NAME;
 				dcp->dc_arg = optarg;
 				break;
 
 			case 'P':
 				dcp = &g_cmdv[g_cmdc++];
-				dcp->dc_func = compile_str;
+				dcp->dc_comp_func = compile_str;
+				dcp->dc_enc_func = encode_str;
 				dcp->dc_spec = DTRACE_PROBESPEC_PROVIDER;
 				dcp->dc_arg = optarg;
 				break;
@@ -1471,7 +1509,8 @@ main(int argc, char *argv[])
 
 			case 's':
 				dcp = &g_cmdv[g_cmdc++];
-				dcp->dc_func = compile_file;
+				dcp->dc_comp_func = compile_file;
+				dcp->dc_enc_func = encode_file;
 				dcp->dc_spec = DTRACE_PROBESPEC_NONE;
 				dcp->dc_arg = optarg;
 				break;
@@ -1568,11 +1607,12 @@ main(int argc, char *argv[])
 	}
 
 	/*
-	 * In our fourth pass we finish g_cmdv[] by calling dc_func to convert
-	 * each string or file specification into a compiled program structure.
+	 * In our fourth pass we finish g_cmdv[] by calling dc_comp_func to
+	 * convert each string or file specification into a compiled program
+	 * structure.
 	 */
 	for (i = 0; i < g_cmdc; i++)
-		g_cmdv[i].dc_func(&g_cmdv[i]);
+		g_cmdv[i].dc_comp_func(&g_cmdv[i]);
 
 	if (g_mode != DMODE_LIST) {
 		if (dtrace_handle_err(g_dtp, &errhandler, NULL) == -1)
@@ -1714,7 +1754,7 @@ main(int argc, char *argv[])
 		}
 
 		if (g_ofile == NULL) {
-			char *p;
+			char *out, *p;
 
 			if (g_cmdc > 1) {
 				(void) fprintf(stderr, "%s: -h requires an "
@@ -1724,11 +1764,14 @@ main(int argc, char *argv[])
 				return (E_USAGE);
 			}
 
-			if ((p = strrchr(g_cmdv[0].dc_arg, '.')) == NULL ||
+			out = strdup(g_cmdv[0].dc_arg);
+
+			if ((p = strrchr(out, '.')) == NULL ||
 			    strcmp(p, ".d") != 0) {
 				(void) fprintf(stderr, "%s: -h requires an "
 				    "output file if no scripts are "
 				    "specified\n", g_pname);
+				free(out);
 				dtrace_close(g_dtp);
 				return (E_USAGE);
 			}
@@ -1736,13 +1779,17 @@ main(int argc, char *argv[])
 			p[0] = '\0'; /* strip .d suffix */
 			g_ofile = p = g_cmdv[0].dc_ofile;
 			(void) snprintf(p, sizeof (g_cmdv[0].dc_ofile),
-			    "%s.h", basename(g_cmdv[0].dc_arg));
+			    "%s.h", basename(out));
+			free(out);
 		}
 
 		if ((g_ofp = fopen(g_ofile, "w")) == NULL)
 			fatal("failed to open header file '%s'", g_ofile);
 
 		oprintf("/*\n * Generated by dtrace(1M).\n */\n\n");
+
+		for (i = 0; i < g_cmdc; i++)
+			g_cmdv[i].dc_enc_func(&g_cmdv[i]);
 
 		if (dtrace_program_header(g_dtp, g_ofp, g_ofile) != 0 ||
 		    fclose(g_ofp) == EOF)

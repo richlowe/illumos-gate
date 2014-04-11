@@ -38,6 +38,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <ldprobes.h>
 #include <errno.h>
 #include <sgs.h>
 #include <libintl.h>
@@ -96,6 +97,8 @@ dz_map(size_t size)
 		    strerror(err));
 		return (MAP_FAILED);
 	}
+
+	LD_HEAP_GROW(size);
 	return (addr);
 }
 
@@ -122,8 +125,10 @@ libld_malloc(size_t size)
 		if (tsize < HEAPBLOCK)
 			tsize = HEAPBLOCK;
 
-		if ((nhp = dz_map(tsize)) == MAP_FAILED)
+		if ((nhp = dz_map(tsize)) == MAP_FAILED) {
+			LD_MALLOC_FAILURE(size);
 			return (NULL);
+		}
 
 		nhp->lh_next = chp;
 		nhp->lh_free = (void *)((size_t)nhp + hsize);
@@ -139,6 +144,8 @@ libld_malloc(size_t size)
 	 */
 	*((size_t *)vptr) = size;
 	vptr = (void *)((size_t)vptr + HEAPALIGN);
+
+	LD_MALLOC_SUCCESS(size);
 
 	/*
 	 * Increment free to point to next available block
@@ -174,6 +181,31 @@ libld_realloc(void *ptr, size_t size)
 		(void) memcpy(vptr, ptr, psize);
 
 	return (vptr);
+}
+
+static int
+libld_vasprintf(char **str, const char *format, va_list ap)
+{
+	int len = vsnprintf(NULL, 0, format, ap) + 1;
+
+	if ((*str = libld_malloc(len)) == NULL)
+		return (NULL);
+
+	return (vsnprintf(*str, len, format, ap));
+}
+
+int
+libld_asprintf(char **str, const char *format, ...)
+{
+	va_list ap;
+	int ret;
+
+	*str = NULL;
+	va_start(ap, format);
+	ret = libld_vasprintf(str, format, ap);
+	va_end(ap);
+
+	return (ret);
 }
 
 void

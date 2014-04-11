@@ -58,7 +58,7 @@ Dbg_args_Wldel(Lm_list *lml, int ndx, const char *opt)
 }
 
 void
-Dbg_args_file(Lm_list *lml, int ndx, char *file)
+Dbg_args_file(Lm_list *lml, int ndx, const char *file)
 {
 	if (DBG_NOTCLASS(DBG_C_ARGS))
 		return;

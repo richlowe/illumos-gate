@@ -136,7 +136,6 @@ ld_init_target(Lm_list *lml, Half mach)
 	return (0);
 }
 
-
 /*
  * The main program
  */
@@ -319,6 +318,11 @@ ld_main(int argc, char **argv, Half mach)
 		    ofl->ofl_name);
 		return (ld_exit(ofl));
 	}
+
+#ifndef _NATIVE_BUILD
+	if (ld_process_dprov_syms(ofl) != 0)
+		return (ld_exit(ofl));
+#endif	/* _NATIVE_BUILD */
 
 	ld_sup_input_done(ofl);
 

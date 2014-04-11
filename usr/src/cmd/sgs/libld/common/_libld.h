@@ -669,6 +669,7 @@ extern void		lds_atexit(Ofl_desc *, int);
 extern void		libld_free(void *);
 extern void		*libld_malloc(size_t);
 extern void		*libld_realloc(void *, size_t);
+extern int		libld_asprintf(char **, const char *, ...);
 
 extern int		isdavl_compare(const void *, const void *);
 
@@ -679,6 +680,7 @@ extern Sdf_desc		*sdf_find(const char *, APlist *);
 
 #define	ld_add_actrel		ld64_add_actrel
 #define	ld_add_libdir		ld64_add_libdir
+#define	ld_add_file		ld64_add_file
 #define	ld_adj_movereloc	ld64_adj_movereloc
 #define	ld_am_I_partial		ld64_am_I_partial
 #define	ld_ar_member		ld64_ar_member
@@ -715,6 +717,7 @@ extern Sdf_desc		*sdf_find(const char *, APlist *);
 #define	ld_place_path_info_init	ld64_place_path_info_init
 #define	ld_place_section	ld64_place_section
 #define	ld_process_archive	ld64_process_archive
+#define	ld_process_dprov_syms	ld64_process_dprov_syms
 #define	ld_process_files	ld64_process_files
 #define	ld_process_flags	ld64_process_flags
 #define	ld_process_ifl		ld64_process_ifl
@@ -777,6 +780,7 @@ extern Sdf_desc		*sdf_find(const char *, APlist *);
 
 #define	ld_add_actrel		ld32_add_actrel
 #define	ld_add_libdir		ld32_add_libdir
+#define	ld_add_file		ld32_add_file
 #define	ld_adj_movereloc	ld32_adj_movereloc
 #define	ld_am_I_partial		ld32_am_I_partial
 #define	ld_ar_member		ld32_ar_member
@@ -813,6 +817,7 @@ extern Sdf_desc		*sdf_find(const char *, APlist *);
 #define	ld_place_path_info_init	ld32_place_path_info_init
 #define	ld_place_section	ld32_place_section
 #define	ld_process_archive	ld32_process_archive
+#define	ld_process_dprov_syms	ld32_process_dprov_syms
 #define	ld_process_files	ld32_process_files
 #define	ld_process_flags	ld32_process_flags
 #define	ld_process_ifl		ld32_process_ifl
@@ -878,6 +883,7 @@ extern int		dbg_setup(Ofl_desc *, const char *, int);
 
 extern uintptr_t	ld_add_actrel(Word, Rel_desc *, Ofl_desc *);
 extern uintptr_t	ld_add_libdir(Ofl_desc *, const char *);
+extern uintptr_t	ld_add_file(Ofl_desc *, const char *, int);
 extern void 		ld_adj_movereloc(Ofl_desc *, Rel_desc *);
 extern Sym_desc * 	ld_am_I_partial(Rel_desc *, Xword);
 extern void		ld_ar_member(Ar_desc *, Elf_Arsym *, Ar_aux *,
@@ -937,6 +943,7 @@ extern Os_desc		*ld_place_section(Ofl_desc *, Is_desc *,
 			    Place_path_info *path_info,  int, const char *);
 extern Boolean		ld_process_archive(const char *, int, Ar_desc *,
 			    Ofl_desc *);
+extern int		ld_process_dprov_syms(Ofl_desc *);
 extern uintptr_t	ld_process_files(Ofl_desc *, int, char **);
 extern uintptr_t	ld_process_flags(Ofl_desc *, int, char **);
 extern uintptr_t	ld_process_ifl(const char *, const char *, int, Elf *,

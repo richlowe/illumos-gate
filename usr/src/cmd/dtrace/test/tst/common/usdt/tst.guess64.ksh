@@ -86,7 +86,7 @@ script()
 EOF
 }
 
-if [ `isainfo -b` -ne '64']; then
+if [ `isainfo -b` -eq '64' ]; then
 	script
 	status=$?
 else

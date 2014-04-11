@@ -1,0 +1,109 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the
+# Common Development and Distribution License (the "License").
+# You may not use this file except in compliance with the License.
+#
+# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+# or http://www.opensolaris.org/os/licensing.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each
+# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+# If applicable, add the following below this CDDL HEADER, with the
+# fields enclosed by brackets "[]" replaced with your own identifying
+# information: Portions Copyright [yyyy] [name of copyright owner]
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2013, Joyent, Inc. All rights reserved.
+#
+
+if [ $# != 1 ]; then
+	echo expected one argument: '<'dtrace-path'>'
+	exit 2
+fi
+
+dtrace=$1
+DIR=/var/tmp/dtest.$$
+
+mkdir $DIR
+cd $DIR
+
+echo '#pragma D option quiet' > test.d
+echo '#pragma D option aggsortkey' >> test.d
+
+cat > test.c <<EOF
+#include <unistd.h>
+
+int
+main()
+{
+EOF
+
+objs=
+
+for oogle in doogle bagnoogle; do
+	OOGLE=$(echo $oogle | tr '[a-z]' '[A-Z]')
+	cat > $oogle.c <<EOF
+#include <sys/sdt.h>
+#include "$oogle.h"
+
+void
+$oogle()
+{
+	${OOGLE}_KNOWS();
+}
+EOF
+
+	cat > $oogle.d <<EOF
+provider $oogle {
+	probe knows();
+};
+EOF
+
+	$dtrace -h -s $oogle.d
+
+	gcc -m32 -c $oogle.c
+
+	if [ $? -ne 0 ]; then
+		print -u2 "failed to compile $oogle.c"
+		exit 1
+	fi
+
+	if [ $? -ne 0 ]; then
+		print -u2 "failed to process $oogle.d"
+		exit 1
+	fi
+
+	objs="$objs $oogle.o"
+	echo $oogle'();' >> test.c
+	echo $oogle'$target:::{@[probefunc] = count()}' >> test.d
+done
+
+echo "    return (0);" >> test.c
+echo "}" >> test.c
+
+echo 'END{printa("%-10s %@d\\n", @)}' >> test.d
+
+gcc -m32 -o test test.c $objs
+
+if [ $? -ne 0 ]; then
+	print -u2 "failed to compile test.c"
+	exit 1
+fi
+
+$dtrace -s ./test.d -Zc ./test
+
+if [ $? -ne 0 ]; then
+	print -u2 "failed to execute test"
+	exit 1
+fi
+
+cd /
+/usr/bin/rm -rf $DIR
+exit 0

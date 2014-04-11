@@ -22,8 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 pics/%.o:	../common/%.c
 		$(COMPILE.c) -o $@ $<
@@ -81,11 +79,17 @@ pics/%_sparc_32.o: $(KRTLD_SPARC)/%.c
 		$(COMPILE.c) -o $@ -DDO_RELOC_LIBLD $<
 		$(POST_PROCESS_O)
 
-pics/%_sparc_64.o: \
-		$(KRTLD_SPARC)/%.c
+pics/%_sparc_64.o: $(KRTLD_SPARC)/%.c
 		$(COMPILE.c) -o $@ -D_ELF64 -DDO_RELOC_LIBLD $<
 		$(POST_PROCESS_O)
 
+pics/%.o: ../common/%.d $(PICS)
+	$(COMPILE.d) -s $< -o $@ $(PICS)
+
+%.h: ../common/%.d
+	$(DTRACE) -h -s $< -o $@
+
+$(PICS): ldprobes.h
 
 $(LIBLINKS):
 		$(RM) $@; $(SYMLINK) $(DYNLIB) $@
@@ -104,7 +108,7 @@ lint:		$(LINTLIB32) $(LINTOUT32) $(LINTLIB64) $(LINTOUT64) \
 native:		$(SGSPROTO)/$(DYNLIB)
 
 $(SGSPROTO)/$(DYNLIB): \
-		pics .WAIT $$(PICS)
+		pics .WAIT $$(PICS) $$(EXTPICS)
 		$(BUILD.SO)
 		$(POST_PROCESS_SO)
 		@$(RM) $(SGSPROTO)/$(LIBLINKS)

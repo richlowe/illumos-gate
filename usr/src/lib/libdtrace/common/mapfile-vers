@@ -98,6 +98,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	dtrace_program_header;
 	dtrace_program_info;
 	dtrace_program_link;
+	dtrace_program_setversion;
 	dtrace_program_strcompile;
 	dtrace_provider_modules;
 	dtrace_setopt;
@@ -122,6 +123,16 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	dtrace_vopen;
 	dtrace_work;
 	dtrace_xstr2desc;
+	# Private between libdtrace and the link-editor ld(1)
+	dtrace_parse_symbol;
+	dtrace_dof_elf;
+	dt_modtext;
+	dt_provider_lookup;
+	dt_probe_lookup;
+	dt_probe_define;
+	dt_header_script_fencode;
+	dt_header_script_strencode;
+	dt_header_script_decode;
     local:
 	*;
 };

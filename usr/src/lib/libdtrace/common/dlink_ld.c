@@ -40,12 +40,6 @@
 
 #include <dlink.h>
 
-
-/*
- * XXX: The way gen is used in dlink_init.c smells of a bug?  We don't
- * initialize it from the ioctl, but I think we may be being clever with it
- * being static and linked as we are.
- */
 static int *gen;			/* current DOF helper generation */
 extern dof_hdr_t *__SUNW_dof_array[];
 

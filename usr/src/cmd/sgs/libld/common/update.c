@@ -1768,6 +1768,15 @@ update_osym(Ofl_desc *ofl)
 				    ofl_osgot->os_scn);
 				sdp->sd_flags &= ~FLG_SY_SPECSEC;
 				break;
+			case SDAUX_ID_DOFSEC:
+				sym->st_value += ofl->
+				    ofl_osdofarray->os_shdr->sh_addr;
+				sym->st_size = ofl->
+				    ofl_osdofarray->os_shdr->sh_size;
+				sectndx = elf_ndxscn(ofl->
+				    ofl_osdofarray->os_scn);
+				sdp->sd_flags &= ~FLG_SY_SPECSEC;
+				break;
 			default:
 				/* NOTHING */
 				;

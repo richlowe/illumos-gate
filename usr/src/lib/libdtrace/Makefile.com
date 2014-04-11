@@ -134,7 +134,7 @@ CERRWARN += -_gcc=-Wno-uninitialized
 CERRWARN += -_gcc=-Wno-switch
 
 YYCFLAGS =
-LDLIBS += -lgen -lproc -lrtld_db -lnsl -lsocket -lctf -lelf -lc
+LDLIBS += -lgen -lproc -lrtld_db -lnsl -lsocket -lctf -lelf -lc -lmd
 DRTILDLIBS = $(LDLIBS.lib) -lc
 
 yydebug := YYCFLAGS += -DYYDEBUG

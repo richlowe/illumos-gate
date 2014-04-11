@@ -36,6 +36,8 @@
 #include	<stdio.h>
 #include	<string.h>
 #include	<debug.h>
+#include	<dtrace.h>
+#include	<dt_link.h>
 #include	"msg.h"
 #include	"_libld.h"
 
@@ -946,6 +948,12 @@ ld_sym_spec(Ofl_desc *ofl)
 			return (S_ERROR);
 	}
 
+	if ((aplist_nitems(ofl->ofl_dofarray) > 0) &&
+	    sym_add_spec(NULL, MSG_ORIG(MSG_SYM_SUNWDOFARRAY),
+	    SDAUX_ID_DOFSEC, 0, (FLG_SY_DEFAULT | FLG_SY_EXPDEF |
+	    FLG_SY_HIDDEN), ofl) == S_ERROR)
+		return (S_ERROR);
+
 	return (1);
 }
 
@@ -1350,9 +1358,33 @@ ld_sym_validate(Ofl_desc *ofl)
 		 * original index for validation, and propagation to the output
 		 * file.
 		 */
-		if (sdp->sd_flags & FLG_SY_IGNORE)
+		if (sdp->sd_flags & FLG_SY_IGNORE) {
 			sdp->sd_shndx = SHN_SUNW_IGNORE;
-
+		}
+#ifndef _NATIVE_BUILD
+		else if (aplist_nitems(ofl->ofl_dofarray) > 0) {
+			dtrace_probedesc_t pd;
+			/*
+			 * If the symbol isn't ignored, but refers to a DTrace
+			 * probe, we have probe points for a provider which
+			 * has not been defined.
+			 */
+			switch (dtrace_parse_symbol(sdp->sd_name, &pd, NULL)) {
+			case -1: /* Error */
+				(void) ld_eprintf(ofl, ERR_FATAL,
+				    MSG_INTL(MSG_DTRACE_NOT_DSYM),
+				    ofl->ofl_name, sdp->sd_name);
+				return (S_ERROR);
+			case 1:	/* Non-DTrace symbol */
+				break;
+			case 0: /* A DTrace symbol, should be gone by now */
+				(void) ld_eprintf(ofl, ERR_FATAL,
+				    MSG_INTL(MSG_DTRACE_NOPROV),
+				    ofl->ofl_name, pd.dtpd_provider);
+				return (S_ERROR);
+			}
+		}
+#endif	/* _NATIVE_BUILD */
 		if (undef) {
 			/*
 			 * If a non-weak reference remains undefined, or if a
@@ -1761,6 +1793,10 @@ ld_sym_validate(Ofl_desc *ofl)
 		ret += ensure_array_local(ofl, ofl->ofl_preiarray,
 		    MSG_ORIG(MSG_SYM_PREINITARRAY));
 	}
+	if (ofl->ofl_dofarray) {
+		ret += ensure_array_local(ofl, ofl->ofl_dofarray,
+		    MSG_ORIG(MSG_SYM_SUNWDOFARRAY));
+	}
 
 	if (ret)
 		return (S_ERROR);
@@ -1890,7 +1926,7 @@ typedef struct {
  * input sections from this input file have been assigned an input section
  * descriptor which is saved in the `ifl_isdesc' array.
  *
- *  -	local symbols are saved (as is) if the input file is a 	relocatable
+ *  -	local symbols are saved (as is) if the input file is a relocatable
  *	object
  *
  *  -	global symbols are added to the linkers internal symbol table if they
@@ -2379,6 +2415,10 @@ ld_sym_process(Is_desc *isc, Ifl_desc *ifl, Ofl_desc *ofl)
 		if ((name = string(ofl, ifl, nsym, strs, strsize, ndx, shndx,
 		    symsecndx, symsecname, strsecname, &sdflags)) == NULL)
 			continue;
+
+		if (strncmp(name, MSG_ORIG(MSG_SYM_DTRACE_SCRIPT),
+		    MSG_SYM_DTRACE_SCRIPT_SIZE) == 0)
+			ofl->ofl_flags1 |= FLG_OF1_NEEDDRTI;
 
 		/*
 		 * Now that we have the name, report an erroneous section index.

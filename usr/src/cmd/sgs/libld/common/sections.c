@@ -828,8 +828,10 @@ make_array(Ofl_desc *ofl, Word shtype, const char *sectname, APlist *alp)
 	if (alp == NULL)
 		return (1);
 
-	entcount = 0;
-	for (APLIST_TRAVERSE(alp, idx, sdp))
+	entcount = aplist_nitems(alp);
+
+	/* SHT_SUNW_DOF_ARRAY is NULL terminated, so needs an extra entry */
+	if (shtype == SHT_SUNW_DOF_ARRAY)
 		entcount++;
 
 	if (new_section(ofl, shtype, sectname, entcount, &isec, &shdr, &data) ==
@@ -847,10 +849,14 @@ make_array(Ofl_desc *ofl, Word shtype, const char *sectname, APlist *alp)
 
 	if ((ofl->ofl_osinitarray == NULL) && (shtype == SHT_INIT_ARRAY))
 		ofl->ofl_osinitarray = osp;
-	if ((ofl->ofl_ospreinitarray == NULL) && (shtype == SHT_PREINIT_ARRAY))
+	else if ((ofl->ofl_ospreinitarray == NULL) &&
+	    (shtype == SHT_PREINIT_ARRAY))
 		ofl->ofl_ospreinitarray = osp;
 	else if ((ofl->ofl_osfiniarray == NULL) && (shtype == SHT_FINI_ARRAY))
 		ofl->ofl_osfiniarray = osp;
+	else if ((ofl->ofl_osdofarray == NULL) &&
+	    (shtype == SHT_SUNW_DOF_ARRAY))
+		ofl->ofl_osdofarray = osp;
 
 	/*
 	 * Create relocations against this section to initialize it to the
@@ -3136,6 +3142,10 @@ ld_make_sections(Ofl_desc *ofl)
 
 	if (make_array(ofl, SHT_PREINIT_ARRAY, MSG_ORIG(MSG_SCN_PREINITARRAY),
 	    ofl->ofl_preiarray) == S_ERROR)
+		return (S_ERROR);
+
+	if (make_array(ofl, SHT_SUNW_DOF_ARRAY, MSG_ORIG(MSG_SCN_SUNWDOFARRAY),
+	    ofl->ofl_dofarray) == S_ERROR)
 		return (S_ERROR);
 
 	/*

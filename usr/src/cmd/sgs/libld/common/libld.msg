@@ -817,6 +817,7 @@
 @ MSG_SCN_SUNWCAP	".SUNW_cap"
 @ MSG_SCN_SUNWCAPINFO	".SUNW_capinfo"
 @ MSG_SCN_SUNWCAPCHAIN	".SUNW_capchain"
+@ MSG_SCN_SUNWDOFARRAY  ".SUNW_dof_array"
 @ MSG_SCN_SYMTAB	".symtab"
 @ MSG_SCN_SYMTAB_SHNDX	".symtab_shndx"
 @ MSG_SCN_TBSS		".tbss"
@@ -826,6 +827,7 @@
 @ MSG_SYM_FINIARRAY	"finiarray"
 @ MSG_SYM_INITARRAY	"initarray"
 @ MSG_SYM_PREINITARRAY	"preinitarray"
+@ MSG_SYM_SUNWDOFARRAY	"__SUNW_dof_array"
 
 #
 # GNU section names
@@ -1275,6 +1277,25 @@
 @ MSG_ARG_ASSDEFLIB_FOUND	"dynamic library found on default search path \
 				(%s): lib%s.so"
 
+@ MSG_DRTI_FAILED	"%s: couldn't add DTrace runtime %s to link\n"
+@ MSG_DTRACE_OPEN_FAILED "%s: couldn't open dtrace handle: %s\n"
+@ MSG_DTRACE_COMPILE_FAILED "%s: couldn't compile embedded script '%s': %s\n"
+@ MSG_DTRACE_OBJMOD_FAILED "%s: failed to process DTrace probes in object %s\n"
+@ MSG_DTRACE_DOF_FAILED "%s: failed to create DOF for embedded script '%s': %s\n"
+@ MSG_DTRACE_OBJ_FAILED "%s: failed to create ELF object for embedded script '%s': %s\n"
+@ MSG_DTRACE_STR_EMBSCRIPT "embedded script: %s"
+@ MSG_DTRACE_OBJ_BAD "%s: couldn't process ELF object for embedded script '%s'\n"
+@ MSG_DTRACE_DOFREG_FAILED "%s: couldn't register DOF from embedded script '%s'\n"
+@ MSG_DTRACE_NOPROV "%s: unknown dtrace provider '%s'\n"
+@ MSG_DTRACE_ERR_SYMTAB "%s: invalid symbol table entry\n"
+@ MSG_DTRACE_NOT_DSYM "%s: couldn't parse symbol '%s' as probe point\n"
+@ MSG_DTRACE_NO_PROBE "%s: no such probe '%s' in provider '%s'\n"
+@ MSG_DTRACE_OFFSET_NO_SYMBOL "%s: no symbol covers offset %lx\n"
+@ MSG_DTRACE_SURR_FAILED "%s: couldn't enter global surrogate %s for %s\n"  
+@ MSG_DTRACE_NO_MODDTEXT "%s: couldn't modify text for probe %s::%s\n"
+@ MSG_DTRACE_NO_PROBEDEF "%s: couldn't define probe %s::%s\n"
+@ MSG_DTRACE_BAD_SURSYM "%s: malformed dtrace surrogate ysmbol '%s'\n"
+
 @ _END_
 
 
@@ -1590,3 +1611,13 @@
 
 
 @ MSG_STR_DTRACE	"PT_SUNWDTRACE"
+
+@ MSG_DTRACE_LIBPATH	"/usr/lib/dtrace/"
+@ MSG_DTRACE_LIB_ENV	"LD_DRTI_PATH"
+@ MSG_DRTI_PATH_32	"/ldrti.o"
+@ MSG_DRTI_PATH_64	"/64/ldrti.o"
+@ MSG_SCN_DSCRIPT	".SUNW_dscript"
+@ MSG_DTRACE_PROBE_PREFIX	"$dtrace"
+@ MSG_DTRACE_PROBE_FMT	"%s%d.%s"
+@ MSG_SYM_SUNW_DOF "__SUNW_dof_%d"
+@ MSG_SYM_DTRACE_SCRIPT "__dtrace_script_"

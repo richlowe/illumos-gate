@@ -103,7 +103,7 @@ typedef struct dof_elf {
 
 static int
 prepare_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf_t *dep,
-    int elfclass)
+    const char *symname, int elfclass)
 {
 	dof_sec_t *dofs, *s;
 	dof_relohdr_t *dofrh;
@@ -145,13 +145,13 @@ prepare_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf_t *dep,
 	dep->de_nrel = count;
 	dep->de_nsym = count + 1; /* the first symbol is always null */
 
-	if (dtp->dt_lazyload) {
+	if (symname != NULL)
+		dep->de_strlen += strlen(symname) + 1;
+	else if (dtp->dt_lazyload)
 		dep->de_strlen += sizeof (DOFLAZYSTR);
-		dep->de_nsym++;
-	} else {
+	else
 		dep->de_strlen += sizeof (DOFSTR);
-		dep->de_nsym++;
-	}
+	dep->de_nsym++;
 
 	if ((dep->de_rel = calloc(dep->de_nrel, sizeof (GElf_Rela))) == NULL) {
 		return (dt_set_errno(dtp, EDT_NOMEM));
@@ -249,7 +249,11 @@ prepare_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf_t *dep,
 	sym->st_shndx = ESHDR_DOF;
 	sym++;
 
-	if (dtp->dt_lazyload) {
+	if (symname != NULL) {
+		bcopy(symname, dep->de_strtab + strtabsz,
+		    strlen(symname) + 1);
+		strtabsz += strlen(symname) + 1;
+	} else if (dtp->dt_lazyload) {
 		bcopy(DOFLAZYSTR, dep->de_strtab + strtabsz,
 		    sizeof (DOFLAZYSTR));
 		strtabsz += sizeof (DOFLAZYSTR);
@@ -266,17 +270,35 @@ prepare_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf_t *dep,
 
 /* A relocation-type generic gelf_update_rel/rela */
 static int
-dt_update_rel(Elf_Data *dst, int ndx, GElf_Rela *src, int type)
+dt_update_rel(Elf_Data *data, int ndx, GElf_Rela *src, int type)
 {
 	GElf_Rel rel;
 
 	if (type == SHT_RELA)
-		return (gelf_update_rela(dst, ndx, src));
+		return (gelf_update_rela(data, ndx, src));
 
 	rel.r_offset = src->r_offset;
 	rel.r_info = src->r_info;
 
-	return (gelf_update_rel(dst, ndx, &rel));
+	return (gelf_update_rel(data, ndx, &rel));
+}
+
+static GElf_Rela *
+dt_get_rel(Elf_Data *data, int ndx, GElf_Rela *rel, int type)
+{
+	GElf_Rel r;
+
+	if (type == SHT_RELA) {
+		return (gelf_getrela(data, ndx, rel));
+	} else {
+		if (gelf_getrel(data, ndx, &r) == NULL)
+			return (NULL);
+
+		rel->r_offset = r.r_offset;
+		rel->r_info = r.r_info;
+		rel->r_addend = 0;
+		return (rel);
+	}
 }
 
 static int
@@ -322,7 +344,7 @@ create_scn(Elf *elf, Elf_Scn **scn, GElf_Shdr *shp, Elf_Data **data)
 }
 
 static int
-dump_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
+dump_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, const char *symname, int fd)
 {
 	Elf *elf;
 	int elfclass = (dtp->dt_oflags & DTRACE_O_LP64) ?
@@ -336,7 +358,7 @@ dump_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 	void *symtab = NULL;
 	int i;
 
-	if (prepare_elf(dtp, dof, &de, elfclass) != 0)
+	if (prepare_elf(dtp, dof, &de, symname, elfclass) != 0)
 		return (-1);
 
 	if ((elf = elf_begin(fd, ELF_C_WRITE, NULL)) == NULL)
@@ -515,7 +537,7 @@ dump_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
 }
 
 Elf *
-dtrace_dof_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof)
+dtrace_dof_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, const char *symname)
 {
 	int fd;
 	char fmt[] = "/tmp/dtraceXXXXXXXX.o";
@@ -527,7 +549,7 @@ dtrace_dof_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof)
 	if (getenv("DTRACE_DEBUG_KEEP_DOF_OBJ") == NULL)
 		(void) unlink(fmt);
 
-	if (dump_elf(dtp, dof, fd) == -1)
+	if (dump_elf(dtp, dof, symname, fd) == -1)
 		return (NULL);
 
 	return (elf_begin(fd, ELF_C_RDWR, NULL));
@@ -695,7 +717,7 @@ dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
 #define	DT_OP_XOR_EAX_0		0x33
 #define	DT_OP_XOR_EAX_1		0xc0
 
-static int
+int
 dt_modtext(dtrace_hdl_t *dtp, char *p, int isenabled, GElf_Rela *rela,
     uint32_t *off)
 {
@@ -825,12 +847,54 @@ dt_link_error(dtrace_hdl_t *dtp, Elf *elf, int fd, dt_link_pair_t *bufs,
 	return (dt_set_errno(dtp, EDT_COMPILER));
 }
 
+/*
+ * Return < 0 on error, 0 or success, > 0 for symbols unrelated to DTrace
+ * set isenabled if this is an isenabled symbol rather than a probe point.
+ */
+int
+dtrace_parse_symbol(const char *symname, dtrace_probedesc_t *pd, int *isenabled)
+{
+	static const char dt_prefix[] = "__dtrace";
+	static const char dt_enabled[] = "enabled";
+	char *p;
+
+	if (strncmp(symname, dt_prefix, strlen(dt_prefix)) != 0)
+		return (1);	/* Not a DTrace symbol */
+
+	symname += strlen(dt_prefix);
+
+	if (strncmp(symname, dt_enabled, strlen(dt_enabled)) == 0) {
+		symname += strlen(dt_enabled);
+		if (isenabled != NULL)
+			*isenabled = 1;
+	} else {
+		if (isenabled != NULL)
+			*isenabled = 0;
+	}
+
+	if (*symname++ != '_')
+		return (-1);
+
+	if ((p = strstr(symname, "___")) == NULL ||
+	    p - symname >= DTRACE_PROVNAMELEN)
+		return (-1);
+
+	(void) strlcpy(pd->dtpd_provider, symname, (p - symname) + 1);
+
+	/* don't let strhyphenate damage symname */
+	p = strdup(p + 3);		 /* + strlen("___"); */
+
+	(void) strlcpy(pd->dtpd_name, strhyphenate(p), DTRACE_NAMELEN);
+
+	free(p);
+	return (0);
+}
+
 static int
 process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 {
 	static const char dt_prefix[] = "__dtrace";
 	static const char dt_symprefix[] = "$dtrace";
-	static const char dt_enabled[] = "enabled";
 	static const char dt_symfmt[] = "%s%d.%s";
 	int fd, i, ndx, eprobe, mod = 0;
 	Elf *elf = NULL;
@@ -841,7 +905,6 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 	GElf_Sym rsym, fsym, dsym;
 	GElf_Rela rela;
 	char *s, *p, *r;
-	char pname[DTRACE_PROVNAMELEN];
 	dt_provider_t *pvp;
 	dt_probe_t *prp;
 	uint32_t off, eclass, emachine1, emachine2;
@@ -1000,18 +1063,9 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 			str_size += d->d_size;
 
 		for (i = 0; i < shdr_rel.sh_size / shdr_rel.sh_entsize; i++) {
-
-			if (shdr_rel.sh_type == SHT_RELA) {
-				if (gelf_getrela(data_rel, i, &rela) == NULL)
-					continue;
-			} else {
-				GElf_Rel rel;
-				if (gelf_getrel(data_rel, i, &rel) == NULL)
-					continue;
-				rela.r_offset = rel.r_offset;
-				rela.r_info = rel.r_info;
-				rela.r_addend = 0;
-			}
+			if (dt_get_rel(data_rel, i, &rela, shdr_rel.sh_type) ==
+			    NULL)
+				continue;
 
 			if (gelf_getsym(data_sym, GELF_R_SYM(rela.r_info),
 			    &rsym) == NULL) {
@@ -1124,18 +1178,11 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 		 * modifications described above.
 		 */
 		for (i = 0; i < shdr_rel.sh_size / shdr_rel.sh_entsize; i++) {
+			dtrace_probedesc_t pd;
 
-			if (shdr_rel.sh_type == SHT_RELA) {
-				if (gelf_getrela(data_rel, i, &rela) == NULL)
-					continue;
-			} else {
-				GElf_Rel rel;
-				if (gelf_getrel(data_rel, i, &rel) == NULL)
-					continue;
-				rela.r_offset = rel.r_offset;
-				rela.r_info = rel.r_info;
-				rela.r_addend = 0;
-			}
+			if (dt_get_rel(data_rel, i, &rela, shdr_rel.sh_type) ==
+			    NULL)
+				continue;
 
 			ndx = GELF_R_SYM(rela.r_info);
 
@@ -1145,37 +1192,17 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 
 			s = (char *)data_str->d_buf + rsym.st_name;
 
-			if (strncmp(s, dt_prefix, sizeof (dt_prefix) - 1) != 0)
+			switch (dtrace_parse_symbol(s, &pd, &eprobe)) {
+			case -1: /* Error */
+				goto err;
+			case 1:	/* non-DTrace symbol */
 				continue;
-
-			s += sizeof (dt_prefix) - 1;
-
-			/*
-			 * Check to see if this is an 'is-enabled' check as
-			 * opposed to a normal probe.
-			 */
-			if (strncmp(s, dt_enabled,
-			    sizeof (dt_enabled) - 1) == 0) {
-				s += sizeof (dt_enabled) - 1;
-				eprobe = 1;
-				*eprobesp = 1;
-				dt_dprintf("is-enabled probe\n");
-			} else {
-				eprobe = 0;
-				dt_dprintf("normal probe\n");
+			default:
+				break;
 			}
 
-			if (*s++ != '_')
-				goto err;
-
-			if ((p = strstr(s, "___")) == NULL ||
-			    p - s >= sizeof (pname))
-				goto err;
-
-			bcopy(s, pname, p - s);
-			pname[p - s] = '\0';
-
-			p = strhyphenate(p + 3); /* strlen("___") */
+			if (eprobe != 0)
+				*eprobesp = 1;
 
 			if (dt_symtab_lookup(data_newsym, newsym,
 			    rela.r_offset, shdr_rel.sh_info, &fsym) == 0) {
@@ -1231,14 +1258,16 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 				s++;
 			}
 
-			if ((pvp = dt_provider_lookup(dtp, pname)) == NULL) {
+			if ((pvp = dt_provider_lookup(dtp, pd.dtpd_provider)) ==
+			    NULL) {
 				return (dt_link_error(dtp, elf, fd, bufs,
-				    "no such provider %s", pname));
+				    "no such provider %s", pd.dtpd_provider));
 			}
 
-			if ((prp = dt_probe_lookup(pvp, p)) == NULL) {
+			if ((prp = dt_probe_lookup(pvp, pd.dtpd_name)) ==
+			    NULL) {
 				return (dt_link_error(dtp, elf, fd, bufs,
-				    "no such probe %s", p));
+				    "no such probe %s", pd.dtpd_name));
 			}
 
 			assert(fsym.st_value <= rela.r_offset);
@@ -1401,13 +1430,12 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 	}
 
 	if (dtp->dt_lazyload) {
-		/* XXX: lazy dof never has an RTI, why set both? */
 		dof->dofh_rtflags |= (DOF_RTFL_LAZY | DOF_RTFL_NODRTI);
 	} else {
 		(void) unlink(file);
 	}
 
-	if ((status = dump_elf(dtp, dof, fd)) != 0)
+	if ((status = dump_elf(dtp, dof, NULL, fd)) != 0)
 		return (-1);	/* errno is set for us */
 
 	if (lseek(fd, 0, SEEK_SET) != 0) {
