@@ -24,7 +24,9 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright (c) 2013 by Delphix. All rights reserved.
+ */
 
 #define	ELF_TARGET_ALL
 #include <elf.h>
@@ -1030,6 +1032,8 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 	key_t objkey;
 	dt_link_pair_t *pair, *bufs = NULL;
 	dt_strtab_t *strtab;
+	Elf_Data *data_newsym, *data_newstr;
+	size_t newsym = 0;
 
 	if ((fd = open64(obj, O_RDWR)) == -1) {
 		return (dt_link_error(dtp, elf, fd, bufs,
@@ -1262,14 +1266,13 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 			if ((pair = dt_alloc(dtp, sizeof (*pair))) == NULL)
 				goto err;
 
-			if ((pair->dlp_str = dt_alloc(dtp, data_str->d_size +
-			    len)) == NULL) {
+			if ((pair->dlp_str = dt_alloc(dtp, len)) == NULL) {
 				dt_free(dtp, pair);
 				goto err;
 			}
 
-			if ((pair->dlp_sym = dt_alloc(dtp, data_sym->d_size +
-			    nsym * symsize)) == NULL) {
+			if ((pair->dlp_sym =
+			    dt_alloc(dtp, nsym * symsize)) == NULL) {
 				dt_free(dtp, pair->dlp_str);
 				dt_free(dtp, pair);
 				goto err;
@@ -1278,21 +1281,15 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 			pair->dlp_next = bufs;
 			bufs = pair;
 
-			bcopy(data_str->d_buf, pair->dlp_str, data_str->d_size);
-			data_str->d_buf = pair->dlp_str;
-			data_str->d_size += len;
-			(void) elf_flagdata(data_str, ELF_C_SET, ELF_F_DIRTY);
+			if ((data_newstr = elf_newdata(scn_str)) == NULL)
+				goto err;
+			data_newstr->d_size = len;
+			data_newstr->d_buf = pair->dlp_str;
 
-			shdr_str.sh_size += len;
-			(void) gelf_update_shdr(scn_str, &shdr_str);
-
-			bcopy(data_sym->d_buf, pair->dlp_sym, data_sym->d_size);
-			data_sym->d_buf = pair->dlp_sym;
-			data_sym->d_size += nsym * symsize;
-			(void) elf_flagdata(data_sym, ELF_C_SET, ELF_F_DIRTY);
-
-			shdr_sym.sh_size += nsym * symsize;
-			(void) gelf_update_shdr(scn_sym, &shdr_sym);
+			if ((data_newsym = elf_newdata(scn_sym)) == NULL)
+				goto err;
+			data_newsym->d_size = nsym * symsize;
+			data_newsym->d_buf = pair->dlp_sym;
 
 			nsym += isym;
 		} else {
@@ -1357,12 +1354,21 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 
 			p = strhyphenate(p + 3); /* strlen("___") */
 
-			if (dt_symtab_lookup(data_sym, isym, rela.r_offset,
-			    shdr_rel.sh_info, &fsym) != 0)
+			if (dt_symtab_lookup(data_newsym, newsym,
+			    rela.r_offset, shdr_rel.sh_info, &fsym) == 0) {
+				if (fsym.st_name >= data_str->d_size +
+				    data_newstr->d_size)
+					goto err;
+				s = (char *)data_newstr->d_buf +
+				    fsym.st_name - data_str->d_size;
+			} else if (dt_symtab_lookup(data_sym, isym,
+			    rela.r_offset, shdr_rel.sh_info, &fsym) == 0) {
+				if (fsym.st_name >= data_str->d_size)
+					goto err;
+				s = (char *)data_str->d_buf + fsym.st_name;
+			} else {
 				goto err;
-
-			if (fsym.st_name > data_str->d_size)
-				goto err;
+			}
 
 			assert(GELF_ST_TYPE(fsym.st_info) == STT_FUNC);
 
@@ -1375,7 +1381,6 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 			 * alias for the locally scoped symbol (we prefer
 			 * global symbols to locals in dt_symtab_lookup()).
 			 */
-			s = (char *)data_str->d_buf + fsym.st_name;
 			r = NULL;
 
 			if (GELF_ST_BIND(fsym.st_info) == STB_LOCAL) {
@@ -1385,12 +1390,15 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 				    STT_FUNC);
 				dsym.st_other =
 				    ELF64_ST_VISIBILITY(STV_ELIMINATE);
-				(void) gelf_update_sym(data_sym, isym, &dsym);
+				(void) gelf_update_sym(data_newsym, newsym,
+				    &dsym);
 
-				r = (char *)data_str->d_buf + istr;
+				r = (char *)data_newstr->d_buf +
+				    (istr - data_str->d_size);
 				istr += 1 + sprintf(r, dt_symfmt,
 				    dt_symprefix, objkey, s);
 				isym++;
+				newsym++;
 				assert(isym <= nsym);
 
 			} else if (strncmp(s, dt_symprefix,
