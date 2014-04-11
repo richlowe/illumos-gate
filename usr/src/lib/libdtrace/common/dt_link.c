@@ -1028,12 +1028,10 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 	dt_provider_t *pvp;
 	dt_probe_t *prp;
 	uint32_t off, eclass, emachine1, emachine2;
-	size_t symsize, nsym, isym, istr, len;
+	size_t symsize, nsym, isym, len;
 	key_t objkey;
 	dt_link_pair_t *pair, *bufs = NULL;
 	dt_strtab_t *strtab;
-	Elf_Data *data_newsym, *data_newstr;
-	size_t newsym = 0;
 
 	if ((fd = open64(obj, O_RDWR)) == -1) {
 		return (dt_link_error(dtp, elf, fd, bufs,
@@ -1103,6 +1101,11 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 
 	scn_rel = NULL;
 	while ((scn_rel = elf_nextscn(elf, scn_rel)) != NULL) {
+		size_t str_size;
+		size_t newstr = 0;
+		size_t newsym = 0;
+		Elf_Data *data_newsym, *data_newstr, *d;
+
 		if (gelf_getshdr(scn_rel, &shdr_rel) == NULL)
 			goto err;
 
@@ -1173,7 +1176,11 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 		strtab = dt_strtab_create(1);
 		nsym = 0;
 		isym = data_sym->d_size / symsize;
-		istr = data_str->d_size;
+
+		d = data_str;
+		str_size = d->d_size;
+		while ((d = elf_getdata(scn_str, d)) != NULL)
+			str_size += d->d_size;
 
 		for (i = 0; i < shdr_rel.sh_size / shdr_rel.sh_entsize; i++) {
 
@@ -1244,12 +1251,10 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 		}
 
 		/*
-		 * If needed, allocate the additional space for the symbol
-		 * table and string table copying the old data into the new
-		 * buffers, and marking the buffers as dirty. We inject those
-		 * newly allocated buffers into the libelf data structures, but
-		 * are still responsible for freeing them once we're done with
-		 * the elf handle.
+		 * If needed, allocate additional data descriptors for the
+		 * symbol table and string table.  We remain responsible for
+		 * freeing the buffers allocated for these data descriptors
+		 * when we are done with them.
 		 */
 		if (nsym > 0) {
 			/*
@@ -1290,6 +1295,7 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 				goto err;
 			data_newsym->d_size = nsym * symsize;
 			data_newsym->d_buf = pair->dlp_sym;
+			data_newsym->d_type = ELF_T_SYM;
 
 			nsym += isym;
 		} else {
@@ -1356,11 +1362,11 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 
 			if (dt_symtab_lookup(data_newsym, newsym,
 			    rela.r_offset, shdr_rel.sh_info, &fsym) == 0) {
-				if (fsym.st_name >= data_str->d_size +
+				if (fsym.st_name >= str_size +
 				    data_newstr->d_size)
 					goto err;
 				s = (char *)data_newstr->d_buf +
-				    fsym.st_name - data_str->d_size;
+				    fsym.st_name - str_size;
 			} else if (dt_symtab_lookup(data_sym, isym,
 			    rela.r_offset, shdr_rel.sh_info, &fsym) == 0) {
 				if (fsym.st_name >= data_str->d_size)
@@ -1385,7 +1391,7 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 
 			if (GELF_ST_BIND(fsym.st_info) == STB_LOCAL) {
 				dsym = fsym;
-				dsym.st_name = istr;
+				dsym.st_name = str_size + newstr;
 				dsym.st_info = GELF_ST_INFO(STB_GLOBAL,
 				    STT_FUNC);
 				dsym.st_other =
@@ -1393,9 +1399,8 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 				(void) gelf_update_sym(data_newsym, newsym,
 				    &dsym);
 
-				r = (char *)data_newstr->d_buf +
-				    (istr - data_str->d_size);
-				istr += 1 + sprintf(r, dt_symfmt,
+				r = (char *)data_newstr->d_buf + newstr;
+				newstr += 1 + sprintf(r, dt_symfmt,
 				    dt_symprefix, objkey, s);
 				isym++;
 				newsym++;
