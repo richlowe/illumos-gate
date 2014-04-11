@@ -427,7 +427,8 @@ typedef struct {
 
 /* Solaris ABI specific values */
 #define	SHT_LOOS		0x60000000	/* OS specific range */
-#define	SHT_LOSUNW		0x6fffffef
+#define	SHT_LOSUNW		0x6fffffee
+#define	SHT_SUNW_DOF_ARRAY	0x6fffffee
 #define	SHT_SUNW_capchain	0x6fffffef
 #define	SHT_SUNW_capinfo	0x6ffffff0
 #define	SHT_SUNW_symsort	0x6ffffff1

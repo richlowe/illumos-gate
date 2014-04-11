@@ -526,6 +526,57 @@ dt_pid_usdt_mapping(void *data, const prmap_t *pmp, const char *oname)
 	const char *syms[] = { "___SUNW_dof", "__SUNW_dof" };
 	int i, fd = -1;
 
+	if ((mname = strrchr(oname, '/')) == NULL)
+		mname = oname;
+	else
+		mname++;
+
+	if (Pread(P, &e_type, sizeof (e_type), pmp->pr_vaddr +
+	    offsetof(Elf64_Ehdr, e_type)) != sizeof (e_type)) {
+		dt_dprintf("read of ELF header failed");
+		return (-1);
+	}
+
+	dh.dofhp_addr = (e_type == ET_EXEC) ? 0 : pmp->pr_vaddr;
+
+	if (Pxlookup_by_name(P, PR_LMID_EVERY, oname, "__SUNW_dof_array",
+	    &sym, &sip) == 0) {
+		uintptr_t dofaddr, p;
+
+		dt_dprintf("lookup of __SUNW_dof_array succeeded for %s\n",
+		    mname);
+
+		dt_pid_objname(dh.dofhp_mod, sizeof (dh.dofhp_mod),
+		    sip.prs_lmid, mname);
+
+		for (p = sym.st_value; ; p += sizeof (p)) {
+			if (Pread(P, &dofaddr, sizeof (dofaddr), p) !=
+			    sizeof (dofaddr)) {
+				dt_dprintf("__SUNW_dof_array corrupt");
+				return (-1);
+			}
+
+			if (dofaddr == 0)
+				break;
+
+			dh.dofhp_dof = dofaddr;
+
+			if (fd == -1 &&
+			    (fd = pr_open(P, "/dev/dtrace/helper",
+				O_RDWR, 0)) < 0) {
+				dt_dprintf("pr_open of helper device "
+				    "failed: %s\n", strerror(errno));
+				return (-1); /* errno is set for us */
+			}
+
+			if (pr_ioctl(P, fd, DTRACEHIOC_ADDDOF, &dh,
+			    sizeof (dh)) < 0) {
+				dt_dprintf("DOF was rejected for %s\n",
+				    dh.dofhp_mod);
+			}
+		}
+	}
+
 	/*
 	 * The symbol ___SUNW_dof is for lazy-loaded DOF sections, and
 	 * __SUNW_dof is for actively-loaded DOF sections. We try to force
@@ -538,22 +589,9 @@ dt_pid_usdt_mapping(void *data, const prmap_t *pmp, const char *oname)
 			continue;
 		}
 
-		if ((mname = strrchr(oname, '/')) == NULL)
-			mname = oname;
-		else
-			mname++;
-
 		dt_dprintf("lookup of %s succeeded for %s\n", syms[i], mname);
 
-		if (Pread(P, &e_type, sizeof (e_type), pmp->pr_vaddr +
-		    offsetof(Elf64_Ehdr, e_type)) != sizeof (e_type)) {
-			dt_dprintf("read of ELF header failed");
-			continue;
-		}
-
 		dh.dofhp_dof = sym.st_value;
-		dh.dofhp_addr = (e_type == ET_EXEC) ? 0 : pmp->pr_vaddr;
-
 		dt_pid_objname(dh.dofhp_mod, sizeof (dh.dofhp_mod),
 		    sip.prs_lmid, mname);
 

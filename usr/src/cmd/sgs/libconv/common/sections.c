@@ -106,6 +106,7 @@ sec_type_strings(conv_iter_osabi_t osabi, Half mach, Conv_fmt_flags_t fmt_flags)
 
 
 	static const Msg usecs_def[SHT_HISUNW - SHT_LOSUNW + 1] = {
+		MSG_SHT_SUNW_DOF_ARRAY,
 		MSG_SHT_SUNW_CAPCHAIN,		MSG_SHT_SUNW_CAPINFO,
 		MSG_SHT_SUNW_SYMSORT,		MSG_SHT_SUNW_TLSSORT,
 		MSG_SHT_SUNW_LDYNSYM,		MSG_SHT_SUNW_DOF,
@@ -117,6 +118,7 @@ sec_type_strings(conv_iter_osabi_t osabi, Half mach, Conv_fmt_flags_t fmt_flags)
 		MSG_SHT_SUNW_VERSYM
 	};
 	static const Msg usecs_dmp[SHT_HISUNW - SHT_LOSUNW + 1] = {
+		MSG_SHT_SUNW_DOF_ARRAY_DMP,
 		MSG_SHT_SUNW_CAPCHAIN_DMP,	MSG_SHT_SUNW_CAPINFO_DMP,
 		MSG_SHT_SUNW_SYMSORT_DMP,	MSG_SHT_SUNW_TLSSORT_DMP,
 		MSG_SHT_SUNW_LDYNSYM_DMP,	MSG_SHT_SUNW_DOF_DMP,
@@ -128,6 +130,7 @@ sec_type_strings(conv_iter_osabi_t osabi, Half mach, Conv_fmt_flags_t fmt_flags)
 		MSG_SHT_SUNW_VERSYM_DMP
 	};
 	static const Msg usecs_cf[SHT_HISUNW - SHT_LOSUNW + 1] = {
+		MSG_SHT_SUNW_DOF_ARRAY_CF,
 		MSG_SHT_SUNW_CAPCHAIN_CF,	MSG_SHT_SUNW_CAPINFO_CF,
 		MSG_SHT_SUNW_SYMSORT_CF,	MSG_SHT_SUNW_TLSSORT_CF,
 		MSG_SHT_SUNW_LDYNSYM_CF,	MSG_SHT_SUNW_DOF_CF,
@@ -139,6 +142,7 @@ sec_type_strings(conv_iter_osabi_t osabi, Half mach, Conv_fmt_flags_t fmt_flags)
 		MSG_SHT_SUNW_VERSYM_CF
 	};
 	static const Msg usecs_nf[SHT_HISUNW - SHT_LOSUNW + 1] = {
+		MSG_SHT_SUNW_DOF_ARRAY_NF,
 		MSG_SHT_SUNW_CAPCHAIN_NF,	MSG_SHT_SUNW_CAPINFO_NF,
 		MSG_SHT_SUNW_SYMSORT_NF,	MSG_SHT_SUNW_TLSSORT_NF,
 		MSG_SHT_SUNW_LDYNSYM_NF,	MSG_SHT_SUNW_DOF_NF,
@@ -149,17 +153,17 @@ sec_type_strings(conv_iter_osabi_t osabi, Half mach, Conv_fmt_flags_t fmt_flags)
 		MSG_SHT_SUNW_VERDEF_NF,		MSG_SHT_SUNW_VERNEED_NF,
 		MSG_SHT_SUNW_VERSYM_NF
 	};
-#if	(SHT_LOSUNW != SHT_SUNW_capchain)
+#if	(SHT_LOSUNW != SHT_SUNW_DOF_ARRAY)
 #error	"SHT_LOSUNW has moved"
 #endif
 	static const conv_ds_msg_t ds_usecs_def = {
-	    CONV_DS_MSG_INIT(SHT_SUNW_capchain, usecs_def) };
+	    CONV_DS_MSG_INIT(SHT_LOSUNW, usecs_def) };
 	static const conv_ds_msg_t ds_usecs_dmp = {
-	    CONV_DS_MSG_INIT(SHT_SUNW_capchain, usecs_dmp) };
+	    CONV_DS_MSG_INIT(SHT_LOSUNW, usecs_dmp) };
 	static const conv_ds_msg_t ds_usecs_cf = {
-	    CONV_DS_MSG_INIT(SHT_SUNW_capchain, usecs_cf) };
+	    CONV_DS_MSG_INIT(SHT_LOSUNW, usecs_cf) };
 	static const conv_ds_msg_t ds_usecs_nf = {
-	    CONV_DS_MSG_INIT(SHT_SUNW_capchain, usecs_nf) };
+	    CONV_DS_MSG_INIT(SHT_LOSUNW, usecs_nf) };
 
 
 	/* The Linux osabi range has two separate sequences */

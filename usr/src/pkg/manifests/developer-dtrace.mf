@@ -183,6 +183,7 @@ file path=usr/lib/$(ARCH64)/libdtrace_jni.so.1
 file path=usr/lib/$(ARCH64)/llib-ldtrace.ln
 file path=usr/lib/devfsadm/linkmod/SUNW_dtrace_link.so group=sys
 file path=usr/lib/dtrace/64/drti.o mode=0444
+file path=usr/lib/dtrace/64/ldrti.o mode=0444
 file path=usr/lib/dtrace/64/libdtrace_forceload.so mode=0555
 file path=usr/lib/dtrace/drti.o mode=0444
 file path=usr/lib/dtrace/errno.d mode=0444
@@ -190,6 +191,7 @@ file path=usr/lib/dtrace/fc.d mode=0444
 file path=usr/lib/dtrace/io.d mode=0444
 file path=usr/lib/dtrace/ip.d mode=0444
 file path=usr/lib/dtrace/iscsit.d mode=0444
+file path=usr/lib/dtrace/ldrti.o mode=0444
 file path=usr/lib/dtrace/libdtrace_forceload.so mode=0555
 file path=usr/lib/dtrace/net.d mode=0444
 file path=usr/lib/dtrace/nfs.d mode=0444

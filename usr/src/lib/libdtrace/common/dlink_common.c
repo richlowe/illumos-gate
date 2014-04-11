@@ -92,7 +92,7 @@ dtrace_link_init(void)
 		dof_init_debug = B_TRUE;
 }
 
-void
+int
 dtrace_link_dof(dof_hdr_t *dof, Lmid_t lmid, const char *name, uintptr_t addr)
 {
 	const char *modname;
@@ -104,9 +104,10 @@ dtrace_link_dof(dof_hdr_t *dof, Lmid_t lmid, const char *name, uintptr_t addr)
 #endif
 	dof_helper_t dh;
 	int fd;
+	int rval;
 
 	if (getenv("DTRACE_DOF_INIT_DISABLE") != NULL)
-		return;
+		return (-1);
 
 	if ((modname = strrchr(name, '/')) == NULL)
 		modname = name;
@@ -118,7 +119,7 @@ dtrace_link_dof(dof_hdr_t *dof, Lmid_t lmid, const char *name, uintptr_t addr)
 	    dof->dofh_ident[DOF_ID_MAG2] != DOF_MAG_MAG2 ||
 	    dof->dofh_ident[DOF_ID_MAG3] != DOF_MAG_MAG3) {
 		dprintf(0, ".SUNW_dof section corrupt for %s\n", modname);
-		return;
+		return (-1);
 	}
 
 	elf = (void *)addr;
@@ -145,17 +146,17 @@ dtrace_link_dof(dof_hdr_t *dof, Lmid_t lmid, const char *name, uintptr_t addr)
 		 * the old device path.
 		 */
 		if (p != NULL)
-			return;
+			return (-1);
 
 		devname = olddevname;
 
 		if ((fd = open64(devname, O_RDWR)) < 0) {
 			dprintf(1, "failed to open helper device %s", devname);
-			return;
+			return (-1);
 		}
 	}
 
-	if (ioctl(fd, DTRACEHIOC_ADDDOF, &dh) == -1) {
+	if ((rval = ioctl(fd, DTRACEHIOC_ADDDOF, &dh)) == -1) {
 		dprintf(1, "DTrace ioctl failed for DOF at %p in %s", dof,
 		    name);
 	} else {
@@ -163,4 +164,5 @@ dtrace_link_dof(dof_hdr_t *dof, Lmid_t lmid, const char *name, uintptr_t addr)
 		    name);
 	}
 	(void) close(fd);
+	return (rval);
 }

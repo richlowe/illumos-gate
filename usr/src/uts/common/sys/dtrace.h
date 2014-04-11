@@ -608,7 +608,8 @@ typedef struct dof_hdr {
 	uint64_t dofh_secoff;		/* file offset of section headers */
 	uint64_t dofh_loadsz;		/* file size of loadable portion */
 	uint64_t dofh_filesz;		/* file size of entire DOF file */
-	uint64_t dofh_pad;		/* reserved for future use */
+	uint8_t dofh_rtflags;		/* runtime flags */
+	uint8_t dofh_pad[7];		/* reserved for future use */
 } dof_hdr_t;
 
 #define	DOF_ID_MAG0	0	/* first byte of magic number */
@@ -654,6 +655,9 @@ typedef struct dof_hdr {
 #define	DOF_VERSION_1	1	/* DOF version 1: Solaris 10 FCS */
 #define	DOF_VERSION_2	2	/* DOF version 2: Solaris Express 6/06 */
 #define	DOF_VERSION	DOF_VERSION_2	/* Latest DOF version */
+
+#define	DOF_RTFL_NODRTI	1	/* DOF section without its own drti instance */
+#define	DOF_RTFL_LAZY	2	/* DOF section which should be lazily loaded */
 
 #define	DOF_FL_VALID	0	/* mask of all valid dofh_flags bits */
 

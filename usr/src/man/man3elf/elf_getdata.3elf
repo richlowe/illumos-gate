@@ -216,6 +216,7 @@ Section Type	Elf_Type	32-bit Type
 \fBSHT_STRTAB\fR	\fBELF_T_BYTE\fR	\fBunsigned char\fR
 \fBSHT_SYMTAB\fR	\fBELF_T_SYM\fR	\fBElf32_Sym\fR
 \fBSHT_SUNW_comdat\fR	\fBELF_T_BYTE\fR	\fBunsigned char\fR
+\fBSHT_SUNW_DOF_ARRAY\fR	\fBELF_T_ADDR\fR	\fBElf32_Addr\fR
 \fBSHT_SUNW_move\fR	\fBELF_T_MOVE\fR	\fBElf32_Move\fR (sparc)
 \fBSHT_SUNW_move\fR	\fBELF_T_MOVEP\fR	\fBElf32_Move\fR (ia32)
 \fBSHT_SUNW_syminfo\fR	\fBELF_T_SYMINFO\fR	\fBElf32_Syminfo\fR

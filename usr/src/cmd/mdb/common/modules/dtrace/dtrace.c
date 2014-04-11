@@ -472,7 +472,8 @@ dtracemdb_dof_create(dtrace_state_t *state, int isanon)
 	dof->dofh_secoff = sizeof (dof_hdr_t);
 	dof->dofh_loadsz = len;
 	dof->dofh_filesz = len;
-	dof->dofh_pad = 0;
+	dof->dofh_rtflags = 0;
+	bzero(dof->dofh_pad, sizeof (dof->dofh_pad));
 
 	/*
 	 * Fill in the option section header...

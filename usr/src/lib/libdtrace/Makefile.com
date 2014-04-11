@@ -74,6 +74,10 @@ DRTISRCS = dlink_init.c dlink_common.c
 DRTIOBJS = $(DRTISRCS:%.c=pics/%.o)
 DRTIOBJ = drti.o
 
+LDRTISRCS = dlink_ld.c dlink_common.c
+LDRTIOBJS = $(LDRTISRCS:%.c=pics/%.o)
+LDRTIOBJ = ldrti.o
+
 LIBDAUDITSRCS = dlink_audit.c dlink_common.c
 LIBDAUDITOBJS = $(LIBDAUDITSRCS:%.c=pics/%.o)
 LIBDAUDIT = libdtrace_forceload.so
@@ -117,9 +121,9 @@ CLEANFILES += ../common/dt_errtags.c ../common/dt_names.c
 CLEANFILES += ../common/sysevent.sed ../common/sysevent.d
 CLEANFILES += ../common/tcp.sed ../common/tcp.d
 CLEANFILES += ../common/udp.sed ../common/udp.d
-CLEANFILES += $(LIBDAUDITOBJS) $(DRTIOBJS)
+CLEANFILES += $(LIBDAUDITOBJS) $(DRTIOBJS) $(LDRTIOBJS)
 
-CLOBBERFILES += $(LIBDAUDIT) drti.o
+CLOBBERFILES += $(LIBDAUDIT) $(DRTIOBJ) $(LDRTIOBJ)
 
 CPPFLAGS += -I../common -I.
 CFLAGS += $(CCVERBOSE) $(C_BIGPICFLAGS)
@@ -144,8 +148,10 @@ ROOTDLIBDIR = $(ROOT)/usr/lib/dtrace
 ROOTDLIBDIR64 = $(ROOT)/usr/lib/dtrace/64
 
 ROOTDLIBS = $(DLIBSRCS:%=$(ROOTDLIBDIR)/%)
-ROOTDOBJS = $(ROOTDLIBDIR)/$(DRTIOBJ) $(ROOTDLIBDIR)/$(LIBDAUDIT)
-ROOTDOBJS64 = $(ROOTDLIBDIR64)/$(DRTIOBJ) $(ROOTDLIBDIR64)/$(LIBDAUDIT)
+ROOTDOBJS = $(ROOTDLIBDIR)/$(DRTIOBJ) $(ROOTDLIBDIR)/$(LIBDAUDIT) \
+	$(ROOTDLIBDIR)/$(LDRTIOBJ)
+ROOTDOBJS64 = $(ROOTDLIBDIR64)/$(DRTIOBJ) $(ROOTDLIBDIR64)/$(LIBDAUDIT) \
+	$(ROOTDLIBDIR64)/$(LDRTIOBJ)
 
 $(ROOTDLIBDIR)/%.d := FILEMODE=444
 $(ROOTDLIBDIR)/%.o := FILEMODE=444
@@ -232,6 +238,10 @@ $(LIBDAUDIT): $(LIBDAUDITOBJS)
 	    $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%) $(LIBDAUDITOBJS) \
 	    -lmapmalloc -lc -lproc
 	$(POST_PROCESS_SO)
+
+$(LDRTIOBJ): $(LDRTIOBJS)
+	$(LD) -o $@ -r -Blocal -Breduce $(LDRTIOBJS)
+	$(POST_PROCESS_O)
 
 $(ROOTDLIBDIR):
 	$(INS.dir)

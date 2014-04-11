@@ -723,6 +723,8 @@ _elf32_mtype(Elf * elf, Elf32_Word shtype, unsigned ver)
 		return (ELF_T_WORD);
 	case SHT_SUNW_capinfo:
 		return (ELF_T_WORD);
+        case SHT_SUNW_DOF_ARRAY:
+		return (ELF_T_ADDR);
 	case SHT_SUNW_SIGNATURE:
 		return (ELF_T_BYTE);
 	case SHT_SUNW_ANNOTATE:

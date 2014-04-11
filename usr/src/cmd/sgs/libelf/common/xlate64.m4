@@ -774,6 +774,8 @@ _elf64_mtype(Elf * elf, Elf64_Word shtype, unsigned ver)
 		return (ELF_T_SYM);
 	case SHT_SUNW_dof:
 		return (ELF_T_BYTE);
+        case SHT_SUNW_DOF_ARRAY:
+		return (ELF_T_ADDR);
 	case SHT_SUNW_cap:
 		return (ELF_T_CAP);
 	case SHT_SUNW_capchain:

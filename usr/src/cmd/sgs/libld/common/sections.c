@@ -540,6 +540,9 @@ new_section(Ofl_desc *ofl, Word shtype, const char *shname, Xword entcnt,
 		SET_SEC_INFO(ELF_T_BYTE, 0, SHF_ALLOC | SHF_WRITE, 0)
 		break;
 
+	case SHT_SUNW_DOF_ARRAY:
+		ofl->ofl_flags |= FLG_OF_OSABI;
+		/* FALLTHROUGH */
 	case SHT_INIT_ARRAY:
 	case SHT_FINI_ARRAY:
 	case SHT_PREINIT_ARRAY:

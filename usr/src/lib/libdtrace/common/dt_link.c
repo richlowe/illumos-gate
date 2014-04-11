@@ -829,8 +829,8 @@ static int
 process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 {
 	static const char dt_prefix[] = "__dtrace";
-	static const char dt_enabled[] = "enabled";
 	static const char dt_symprefix[] = "$dtrace";
+	static const char dt_enabled[] = "enabled";
 	static const char dt_symfmt[] = "%s%d.%s";
 	int fd, i, ndx, eprobe, mod = 0;
 	Elf *elf = NULL;
@@ -1400,8 +1400,12 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 		    "invalid link type %u\n", dtp->dt_linktype));
 	}
 
-	if (!dtp->dt_lazyload)
+	if (dtp->dt_lazyload) {
+		/* XXX: lazy dof never has an RTI, why set both? */
+		dof->dofh_rtflags |= (DOF_RTFL_LAZY | DOF_RTFL_NODRTI);
+	} else {
 		(void) unlink(file);
+	}
 
 	if ((status = dump_elf(dtp, dof, fd)) != 0)
 		return (-1);	/* errno is set for us */
@@ -1413,13 +1417,17 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 
 	if (!dtp->dt_lazyload) {
 		const char *fmt = "%s -o %s -r -Blocal -Breduce /dev/fd/%d %s";
+		const char *libdir;
+
+		if ((libdir = getenv("DTRACE_DRTI_PATH")) == NULL)
+			libdir = _dtrace_libdir;
 
 		if (dtp->dt_oflags & DTRACE_O_LP64) {
 			(void) snprintf(drti, sizeof (drti),
-			    "%s/64/drti.o", _dtrace_libdir);
+			    "%s/64/drti.o", libdir);
 		} else {
 			(void) snprintf(drti, sizeof (drti),
-			    "%s/drti.o", _dtrace_libdir);
+			    "%s/drti.o", libdir);
 		}
 
 		len = snprintf(&tmp, 1, fmt, dtp->dt_ld_path, file, fd,
