@@ -60,12 +60,10 @@
 #define	ESHDR_REL	5
 #define	ESHDR_NUM	6
 
-#define	PWRITE_SCN(index, data) \
-	(lseek64(fd, (off64_t)elf_file.shdr[(index)].sh_offset, SEEK_SET) != \
-	(off64_t)elf_file.shdr[(index)].sh_offset || \
-	dt_write(dtp, fd, (data), elf_file.shdr[(index)].sh_size) != \
-	elf_file.shdr[(index)].sh_size)
-
+/*
+ * NB: We rely on the indices into DTRACE_SHSTRTAB* being the same regardless of
+ * 32 or 64bit
+ */
 static const char DTRACE_SHSTRTAB32[] = "\0"
 ".shstrtab\0"		/* 1 */
 ".SUNW_dof\0"		/* 11 */
@@ -84,8 +82,8 @@ static const char DTRACE_SHSTRTAB64[] = "\0"
 ".symtab\0"		/* 29 */
 ".rela.SUNW_dof";	/* 37 */
 
-static const char DOFSTR[] = "__SUNW_dof";
-static const char DOFLAZYSTR[] = "___SUNW_dof";
+static const char DOFSTR[]	= "__SUNW_dof";
+static const char DOFLAZYSTR[]	= "___SUNW_dof";
 
 typedef struct dt_link_pair {
 	struct dt_link_pair *dlp_next;	/* next pair in linked list */
@@ -93,22 +91,19 @@ typedef struct dt_link_pair {
 	void *dlp_sym;			/* buffer for symbol table */
 } dt_link_pair_t;
 
-typedef struct dof_elf32 {
+typedef struct dof_elf {
 	uint32_t de_nrel;		/* relocation count */
-#ifdef __sparc
-	Elf32_Rela *de_rel;		/* array of relocations for sparc */
-#else
-	Elf32_Rel *de_rel;		/* array of relocations for x86 */
-#endif
+	GElf_Rela *de_rel;		/* array of relocations */
 	uint32_t de_nsym;		/* symbol count */
-	Elf32_Sym *de_sym;		/* array of symbols */
+	GElf_Sym *de_sym;		/* array of symbols */
 	uint32_t de_strlen;		/* size of of string table */
 	char *de_strtab;		/* string table */
 	uint32_t de_global;		/* index of the first global symbol */
-} dof_elf32_t;
+} dof_elf_t;
 
 static int
-prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
+prepare_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf_t *dep,
+    int elfclass)
 {
 	dof_sec_t *dofs, *s;
 	dof_relohdr_t *dofrh;
@@ -118,12 +113,8 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 	size_t strtabsz = 1;
 	uint32_t count = 0;
 	size_t base;
-	Elf32_Sym *sym;
-#ifdef __sparc
-	Elf32_Rela *rel;
-#else
-	Elf32_Rel *rel;
-#endif
+	GElf_Sym *sym;
+	GElf_Rela *rel;
 
 	/*LINTED*/
 	dofs = (dof_sec_t *)((char *)dof + dof->dofh_secoff);
@@ -162,12 +153,11 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 		dep->de_nsym++;
 	}
 
-	if ((dep->de_rel = calloc(dep->de_nrel,
-	    sizeof (dep->de_rel[0]))) == NULL) {
+	if ((dep->de_rel = calloc(dep->de_nrel, sizeof (GElf_Rela))) == NULL) {
 		return (dt_set_errno(dtp, EDT_NOMEM));
 	}
 
-	if ((dep->de_sym = calloc(dep->de_nsym, sizeof (Elf32_Sym))) == NULL) {
+	if ((dep->de_sym = calloc(dep->de_nsym, sizeof (GElf_Sym))) == NULL) {
 		free(dep->de_rel);
 		return (dt_set_errno(dtp, EDT_NOMEM));
 	}
@@ -188,7 +178,7 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 	/*
 	 * The first symbol table entry must be zeroed and is always ignored.
 	 */
-	bzero(sym, sizeof (Elf32_Sym));
+	bzero(sym, sizeof (GElf_Sym));
 	sym++;
 
 	/*
@@ -219,8 +209,8 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 #if defined(__i386) || defined(__amd64)
 			rel->r_offset = s->dofs_offset +
 			    dofr[j].dofr_offset;
-			rel->r_info = ELF32_R_INFO(count + dep->de_global,
-			    R_386_32);
+			rel->r_info = GELF_R_INFO(count + dep->de_global,
+			    elfclass == ELFCLASS32 ? R_386_32 : R_AMD64_32);
 #elif defined(__sparc)
 			/*
 			 * Add 4 bytes to hit the low half of this 64-bit
@@ -228,180 +218,8 @@ prepare_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf32_t *dep)
 			 */
 			rel->r_offset = s->dofs_offset +
 			    dofr[j].dofr_offset + 4;
-			rel->r_info = ELF32_R_INFO(count + dep->de_global,
-			    R_SPARC_32);
-#else
-#error unknown ISA
-#endif
-
-			sym->st_name = base + dofr[j].dofr_name - 1;
-			sym->st_value = 0;
-			sym->st_size = 0;
-			sym->st_info = ELF32_ST_INFO(STB_GLOBAL, STT_FUNC);
-			sym->st_other = 0;
-			sym->st_shndx = SHN_UNDEF;
-
-			rel++;
-			sym++;
-			count++;
-		}
-	}
-
-	/*
-	 * Add a symbol for the DOF itself. We use a different symbol for
-	 * lazily and actively loaded DOF to make them easy to distinguish.
-	 */
-	sym->st_name = strtabsz;
-	sym->st_value = 0;
-	sym->st_size = dof->dofh_filesz;
-	sym->st_info = ELF32_ST_INFO(STB_GLOBAL, STT_OBJECT);
-	sym->st_other = 0;
-	sym->st_shndx = ESHDR_DOF;
-	sym++;
-
-	if (dtp->dt_lazyload) {
-		bcopy(DOFLAZYSTR, dep->de_strtab + strtabsz,
-		    sizeof (DOFLAZYSTR));
-		strtabsz += sizeof (DOFLAZYSTR);
-	} else {
-		bcopy(DOFSTR, dep->de_strtab + strtabsz, sizeof (DOFSTR));
-		strtabsz += sizeof (DOFSTR);
-	}
-
-	assert(count == dep->de_nrel);
-	assert(strtabsz == dep->de_strlen);
-
-	return (0);
-}
-
-
-typedef struct dof_elf64 {
-	uint32_t de_nrel;
-	Elf64_Rela *de_rel;
-	uint32_t de_nsym;
-	Elf64_Sym *de_sym;
-
-	uint32_t de_strlen;
-	char *de_strtab;
-
-	uint32_t de_global;
-} dof_elf64_t;
-
-static int
-prepare_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf64_t *dep)
-{
-	dof_sec_t *dofs, *s;
-	dof_relohdr_t *dofrh;
-	dof_relodesc_t *dofr;
-	char *strtab;
-	int i, j, nrel;
-	size_t strtabsz = 1;
-	uint32_t count = 0;
-	size_t base;
-	Elf64_Sym *sym;
-	Elf64_Rela *rel;
-
-	/*LINTED*/
-	dofs = (dof_sec_t *)((char *)dof + dof->dofh_secoff);
-
-	/*
-	 * First compute the size of the string table and the number of
-	 * relocations present in the DOF.
-	 */
-	for (i = 0; i < dof->dofh_secnum; i++) {
-		if (dofs[i].dofs_type != DOF_SECT_URELHDR)
-			continue;
-
-		/*LINTED*/
-		dofrh = (dof_relohdr_t *)((char *)dof + dofs[i].dofs_offset);
-
-		s = &dofs[dofrh->dofr_strtab];
-		strtab = (char *)dof + s->dofs_offset;
-		assert(strtab[0] == '\0');
-		strtabsz += s->dofs_size - 1;
-
-		s = &dofs[dofrh->dofr_relsec];
-		/*LINTED*/
-		dofr = (dof_relodesc_t *)((char *)dof + s->dofs_offset);
-		count += s->dofs_size / s->dofs_entsize;
-	}
-
-	dep->de_strlen = strtabsz;
-	dep->de_nrel = count;
-	dep->de_nsym = count + 1; /* the first symbol is always null */
-
-	if (dtp->dt_lazyload) {
-		dep->de_strlen += sizeof (DOFLAZYSTR);
-		dep->de_nsym++;
-	} else {
-		dep->de_strlen += sizeof (DOFSTR);
-		dep->de_nsym++;
-	}
-
-	if ((dep->de_rel = calloc(dep->de_nrel,
-	    sizeof (dep->de_rel[0]))) == NULL) {
-		return (dt_set_errno(dtp, EDT_NOMEM));
-	}
-
-	if ((dep->de_sym = calloc(dep->de_nsym, sizeof (Elf64_Sym))) == NULL) {
-		free(dep->de_rel);
-		return (dt_set_errno(dtp, EDT_NOMEM));
-	}
-
-	if ((dep->de_strtab = calloc(dep->de_strlen, 1)) == NULL) {
-		free(dep->de_rel);
-		free(dep->de_sym);
-		return (dt_set_errno(dtp, EDT_NOMEM));
-	}
-
-	count = 0;
-	strtabsz = 1;
-	dep->de_strtab[0] = '\0';
-	rel = dep->de_rel;
-	sym = dep->de_sym;
-	dep->de_global = 1;
-
-	/*
-	 * The first symbol table entry must be zeroed and is always ignored.
-	 */
-	bzero(sym, sizeof (Elf64_Sym));
-	sym++;
-
-	/*
-	 * Take a second pass through the DOF sections filling in the
-	 * memory we allocated.
-	 */
-	for (i = 0; i < dof->dofh_secnum; i++) {
-		if (dofs[i].dofs_type != DOF_SECT_URELHDR)
-			continue;
-
-		/*LINTED*/
-		dofrh = (dof_relohdr_t *)((char *)dof + dofs[i].dofs_offset);
-
-		s = &dofs[dofrh->dofr_strtab];
-		strtab = (char *)dof + s->dofs_offset;
-		bcopy(strtab + 1, dep->de_strtab + strtabsz, s->dofs_size);
-		base = strtabsz;
-		strtabsz += s->dofs_size - 1;
-
-		s = &dofs[dofrh->dofr_relsec];
-		/*LINTED*/
-		dofr = (dof_relodesc_t *)((char *)dof + s->dofs_offset);
-		nrel = s->dofs_size / s->dofs_entsize;
-
-		s = &dofs[dofrh->dofr_tgtsec];
-
-		for (j = 0; j < nrel; j++) {
-#if defined(__i386) || defined(__amd64)
-			rel->r_offset = s->dofs_offset +
-			    dofr[j].dofr_offset;
-			rel->r_info = ELF64_R_INFO(count + dep->de_global,
-			    R_AMD64_64);
-#elif defined(__sparc)
-			rel->r_offset = s->dofs_offset +
-			    dofr[j].dofr_offset;
-			rel->r_info = ELF64_R_INFO(count + dep->de_global,
-			    R_SPARC_64);
+			rel->r_info = GELF_R_INFO(count + dep->de_global,
+			    elfclass == ELFCLASS32 ? R_SPARC_32 : R_SPARC_64);
 #else
 #error unknown ISA
 #endif
@@ -446,274 +264,273 @@ prepare_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, dof_elf64_t *dep)
 	return (0);
 }
 
-/*
- * Write out an ELF32 file prologue consisting of a header, section headers,
- * and a section header string table.  The DOF data will follow this prologue
- * and complete the contents of the given ELF file.
- */
+/* A relocation-type generic gelf_update_rel/rela */
 static int
-dump_elf32(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
+dt_update_rel(Elf_Data *dst, int ndx, GElf_Rela *src, int type)
 {
-	struct {
-		Elf32_Ehdr ehdr;
-		Elf32_Shdr shdr[ESHDR_NUM];
-	} elf_file;
+	GElf_Rel rel;
 
-	Elf32_Shdr *shp;
-	Elf32_Off off;
-	dof_elf32_t de;
-	int ret = 0;
-	uint_t nshdr;
+	if (type == SHT_RELA)
+		return (gelf_update_rela(dst, ndx, src));
 
-	if (prepare_elf32(dtp, dof, &de) != 0)
-		return (-1); /* errno is set for us */
+	rel.r_offset = src->r_offset;
+	rel.r_info = src->r_info;
 
-	/*
-	 * If there are no relocations, we only need enough sections for
-	 * the shstrtab and the DOF.
-	 */
-	nshdr = de.de_nrel == 0 ? ESHDR_SYMTAB + 1 : ESHDR_NUM;
-
-	bzero(&elf_file, sizeof (elf_file));
-
-	elf_file.ehdr.e_ident[EI_MAG0] = ELFMAG0;
-	elf_file.ehdr.e_ident[EI_MAG1] = ELFMAG1;
-	elf_file.ehdr.e_ident[EI_MAG2] = ELFMAG2;
-	elf_file.ehdr.e_ident[EI_MAG3] = ELFMAG3;
-	elf_file.ehdr.e_ident[EI_VERSION] = EV_CURRENT;
-	elf_file.ehdr.e_ident[EI_CLASS] = ELFCLASS32;
-#if defined(_BIG_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2MSB;
-#elif defined(_LITTLE_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2LSB;
-#endif
-	elf_file.ehdr.e_type = ET_REL;
-#if defined(__sparc)
-	elf_file.ehdr.e_machine = EM_SPARC;
-#elif defined(__i386) || defined(__amd64)
-	elf_file.ehdr.e_machine = EM_386;
-#endif
-	elf_file.ehdr.e_version = EV_CURRENT;
-	elf_file.ehdr.e_shoff = sizeof (Elf32_Ehdr);
-	elf_file.ehdr.e_ehsize = sizeof (Elf32_Ehdr);
-	elf_file.ehdr.e_phentsize = sizeof (Elf32_Phdr);
-	elf_file.ehdr.e_shentsize = sizeof (Elf32_Shdr);
-	elf_file.ehdr.e_shnum = nshdr;
-	elf_file.ehdr.e_shstrndx = ESHDR_SHSTRTAB;
-	off = sizeof (elf_file) + nshdr * sizeof (Elf32_Shdr);
-
-	shp = &elf_file.shdr[ESHDR_SHSTRTAB];
-	shp->sh_name = 1; /* DTRACE_SHSTRTAB32[1] = ".shstrtab" */
-	shp->sh_type = SHT_STRTAB;
-	shp->sh_offset = off;
-	shp->sh_size = sizeof (DTRACE_SHSTRTAB32);
-	shp->sh_addralign = sizeof (char);
-	off = P2ROUNDUP(shp->sh_offset + shp->sh_size, 8);
-
-	shp = &elf_file.shdr[ESHDR_DOF];
-	shp->sh_name = 11; /* DTRACE_SHSTRTAB32[11] = ".SUNW_dof" */
-	shp->sh_flags = SHF_ALLOC;
-	shp->sh_type = SHT_SUNW_dof;
-	shp->sh_offset = off;
-	shp->sh_size = dof->dofh_filesz;
-	shp->sh_addralign = 8;
-	off = shp->sh_offset + shp->sh_size;
-
-	shp = &elf_file.shdr[ESHDR_STRTAB];
-	shp->sh_name = 21; /* DTRACE_SHSTRTAB32[21] = ".strtab" */
-	shp->sh_flags = SHF_ALLOC;
-	shp->sh_type = SHT_STRTAB;
-	shp->sh_offset = off;
-	shp->sh_size = de.de_strlen;
-	shp->sh_addralign = sizeof (char);
-	off = P2ROUNDUP(shp->sh_offset + shp->sh_size, 4);
-
-	shp = &elf_file.shdr[ESHDR_SYMTAB];
-	shp->sh_name = 29; /* DTRACE_SHSTRTAB32[29] = ".symtab" */
-	shp->sh_flags = SHF_ALLOC;
-	shp->sh_type = SHT_SYMTAB;
-	shp->sh_entsize = sizeof (Elf32_Sym);
-	shp->sh_link = ESHDR_STRTAB;
-	shp->sh_offset = off;
-	shp->sh_info = de.de_global;
-	shp->sh_size = de.de_nsym * sizeof (Elf32_Sym);
-	shp->sh_addralign = 4;
-	off = P2ROUNDUP(shp->sh_offset + shp->sh_size, 4);
-
-	if (de.de_nrel == 0) {
-		if (dt_write(dtp, fd, &elf_file,
-		    sizeof (elf_file)) != sizeof (elf_file) ||
-		    PWRITE_SCN(ESHDR_SHSTRTAB, DTRACE_SHSTRTAB32) ||
-		    PWRITE_SCN(ESHDR_STRTAB, de.de_strtab) ||
-		    PWRITE_SCN(ESHDR_SYMTAB, de.de_sym) ||
-		    PWRITE_SCN(ESHDR_DOF, dof)) {
-			ret = dt_set_errno(dtp, errno);
-		}
-	} else {
-		shp = &elf_file.shdr[ESHDR_REL];
-		shp->sh_name = 37; /* DTRACE_SHSTRTAB32[37] = ".rel.SUNW_dof" */
-		shp->sh_flags = SHF_ALLOC;
-#ifdef __sparc
-		shp->sh_type = SHT_RELA;
-#else
-		shp->sh_type = SHT_REL;
-#endif
-		shp->sh_entsize = sizeof (de.de_rel[0]);
-		shp->sh_link = ESHDR_SYMTAB;
-		shp->sh_info = ESHDR_DOF;
-		shp->sh_offset = off;
-		shp->sh_size = de.de_nrel * sizeof (de.de_rel[0]);
-		shp->sh_addralign = 4;
-
-		if (dt_write(dtp, fd, &elf_file,
-		    sizeof (elf_file)) != sizeof (elf_file) ||
-		    PWRITE_SCN(ESHDR_SHSTRTAB, DTRACE_SHSTRTAB32) ||
-		    PWRITE_SCN(ESHDR_STRTAB, de.de_strtab) ||
-		    PWRITE_SCN(ESHDR_SYMTAB, de.de_sym) ||
-		    PWRITE_SCN(ESHDR_REL, de.de_rel) ||
-		    PWRITE_SCN(ESHDR_DOF, dof)) {
-			ret = dt_set_errno(dtp, errno);
-		}
-	}
-
-	free(de.de_strtab);
-	free(de.de_sym);
-	free(de.de_rel);
-
-	return (ret);
+	return (gelf_update_rel(dst, ndx, &rel));
 }
 
-/*
- * Write out an ELF64 file prologue consisting of a header, section headers,
- * and a section header string table.  The DOF data will follow this prologue
- * and complete the contents of the given ELF file.
- */
 static int
-dump_elf64(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
+dt_elf_error(dtrace_hdl_t *dtp, dof_elf_t *de, Elf *elf, void *symtab,
+    void *rel, int err, const char *format, ...)
 {
-	struct {
-		Elf64_Ehdr ehdr;
-		Elf64_Shdr shdr[ESHDR_NUM];
-	} elf_file;
+	va_list ap;
 
-	Elf64_Shdr *shp;
-	Elf64_Off off;
-	dof_elf64_t de;
-	int ret = 0;
-	uint_t nshdr;
+	va_start(ap, format);
+	dt_set_errmsg(dtp, NULL, NULL, NULL, 0, format, ap);
+	va_end(ap);
 
-	if (prepare_elf64(dtp, dof, &de) != 0)
-		return (-1); /* errno is set for us */
+	if (de->de_rel != NULL)
+		free(de->de_rel);
+	if (de->de_sym != NULL)
+		free(de->de_sym);
+	if (de->de_strtab != NULL)
+		free(de->de_strtab);
 
-	/*
-	 * If there are no relocations, we only need enough sections for
-	 * the shstrtab and the DOF.
-	 */
-	nshdr = de.de_nrel == 0 ? ESHDR_SYMTAB + 1 : ESHDR_NUM;
+	if (rel != NULL)
+		free(rel);
+	if (symtab != NULL)
+		free(symtab);
 
-	bzero(&elf_file, sizeof (elf_file));
+	if (elf != NULL)
+		(void) elf_end(elf);
+	return (dt_set_errno(dtp, err));
+}
 
-	elf_file.ehdr.e_ident[EI_MAG0] = ELFMAG0;
-	elf_file.ehdr.e_ident[EI_MAG1] = ELFMAG1;
-	elf_file.ehdr.e_ident[EI_MAG2] = ELFMAG2;
-	elf_file.ehdr.e_ident[EI_MAG3] = ELFMAG3;
-	elf_file.ehdr.e_ident[EI_VERSION] = EV_CURRENT;
-	elf_file.ehdr.e_ident[EI_CLASS] = ELFCLASS64;
-#if defined(_BIG_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2MSB;
-#elif defined(_LITTLE_ENDIAN)
-	elf_file.ehdr.e_ident[EI_DATA] = ELFDATA2LSB;
-#endif
-	elf_file.ehdr.e_type = ET_REL;
+int
+create_scn(Elf *elf, Elf_Scn **scn, GElf_Shdr *shp, Elf_Data **data)
+{
+	if ((*scn = elf_newscn(elf)) == NULL)
+		return (-1);
+
+	(void) gelf_getshdr(*scn, shp);
+
+	if ((*data = elf_newdata(*scn)) == NULL)
+		return (-1);
+
+	return (0);
+
+}
+
+static int
+dump_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof, int fd)
+{
+	Elf *elf;
+	int elfclass = (dtp->dt_oflags & DTRACE_O_LP64) ?
+	    ELFCLASS64 : ELFCLASS32;
+	GElf_Ehdr ehp;
+	GElf_Shdr shp;
+	Elf_Scn *scn;
+	Elf_Data *data;
+	dof_elf_t de = { 0 };
+	void *rel = NULL;
+	void *symtab = NULL;
+	int i;
+
+	if (prepare_elf(dtp, dof, &de, elfclass) != 0)
+		return (-1);
+
+	if ((elf = elf_begin(fd, ELF_C_WRITE, NULL)) == NULL)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not create ELF: %s", elf_errmsg(-1)));
+
+	if (gelf_newehdr(elf, elfclass) == 0)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not create ELF header: %s", elf_errmsg(-1)));
+
+	(void) gelf_getehdr(elf, &ehp);
+
+	ehp.e_ident[EI_DATA] = M_DATA;
+	ehp.e_ident[EI_CLASS] = elfclass;
 #if defined(__sparc)
-	elf_file.ehdr.e_machine = EM_SPARCV9;
+	ehp.e_machine = (elfclass == ELFCLASS32) ? EM_SPARC : EM_SPARCV9;
 #elif defined(__i386) || defined(__amd64)
-	elf_file.ehdr.e_machine = EM_AMD64;
+	ehp.e_machine = (elfclass == ELFCLASS32) ? EM_386 : EM_AMD64;
 #endif
-	elf_file.ehdr.e_version = EV_CURRENT;
-	elf_file.ehdr.e_shoff = sizeof (Elf64_Ehdr);
-	elf_file.ehdr.e_ehsize = sizeof (Elf64_Ehdr);
-	elf_file.ehdr.e_phentsize = sizeof (Elf64_Phdr);
-	elf_file.ehdr.e_shentsize = sizeof (Elf64_Shdr);
-	elf_file.ehdr.e_shnum = nshdr;
-	elf_file.ehdr.e_shstrndx = ESHDR_SHSTRTAB;
-	off = sizeof (elf_file) + nshdr * sizeof (Elf64_Shdr);
+	ehp.e_type = ET_REL;
+	ehp.e_version = EV_CURRENT;
+	ehp.e_shstrndx = ESHDR_SHSTRTAB;
 
-	shp = &elf_file.shdr[ESHDR_SHSTRTAB];
-	shp->sh_name = 1; /* DTRACE_SHSTRTAB64[1] = ".shstrtab" */
-	shp->sh_type = SHT_STRTAB;
-	shp->sh_offset = off;
-	shp->sh_size = sizeof (DTRACE_SHSTRTAB64);
-	shp->sh_addralign = sizeof (char);
-	off = P2ROUNDUP(shp->sh_offset + shp->sh_size, 8);
+	(void) gelf_update_ehdr(elf, &ehp);
 
-	shp = &elf_file.shdr[ESHDR_DOF];
-	shp->sh_name = 11; /* DTRACE_SHSTRTAB64[11] = ".SUNW_dof" */
-	shp->sh_flags = SHF_ALLOC;
-	shp->sh_type = SHT_SUNW_dof;
-	shp->sh_offset = off;
-	shp->sh_size = dof->dofh_filesz;
-	shp->sh_addralign = 8;
-	off = shp->sh_offset + shp->sh_size;
+	if (create_scn(elf, &scn, &shp, &data) == -1)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not create ELF section: %s", elf_errmsg(-1)));
 
-	shp = &elf_file.shdr[ESHDR_STRTAB];
-	shp->sh_name = 21; /* DTRACE_SHSTRTAB64[21] = ".strtab" */
-	shp->sh_flags = SHF_ALLOC;
-	shp->sh_type = SHT_STRTAB;
-	shp->sh_offset = off;
-	shp->sh_size = de.de_strlen;
-	shp->sh_addralign = sizeof (char);
-	off = P2ROUNDUP(shp->sh_offset + shp->sh_size, 8);
+	shp.sh_name = 1; /* DTRACE_SHSTRTAB[1] = ".shstrtab" */
+	shp.sh_type = SHT_STRTAB;
+	shp.sh_addralign = sizeof (char);
 
-	shp = &elf_file.shdr[ESHDR_SYMTAB];
-	shp->sh_name = 29; /* DTRACE_SHSTRTAB64[29] = ".symtab" */
-	shp->sh_flags = SHF_ALLOC;
-	shp->sh_type = SHT_SYMTAB;
-	shp->sh_entsize = sizeof (Elf64_Sym);
-	shp->sh_link = ESHDR_STRTAB;
-	shp->sh_offset = off;
-	shp->sh_info = de.de_global;
-	shp->sh_size = de.de_nsym * sizeof (Elf64_Sym);
-	shp->sh_addralign = 8;
-	off = P2ROUNDUP(shp->sh_offset + shp->sh_size, 8);
-
-	if (de.de_nrel == 0) {
-		if (dt_write(dtp, fd, &elf_file,
-		    sizeof (elf_file)) != sizeof (elf_file) ||
-		    PWRITE_SCN(ESHDR_SHSTRTAB, DTRACE_SHSTRTAB64) ||
-		    PWRITE_SCN(ESHDR_STRTAB, de.de_strtab) ||
-		    PWRITE_SCN(ESHDR_SYMTAB, de.de_sym) ||
-		    PWRITE_SCN(ESHDR_DOF, dof)) {
-			ret = dt_set_errno(dtp, errno);
-		}
+	if (elfclass == ELFCLASS32) {
+		data->d_buf = (void *)DTRACE_SHSTRTAB32;
+		data->d_size = sizeof (DTRACE_SHSTRTAB32);
 	} else {
-		shp = &elf_file.shdr[ESHDR_REL];
-		shp->sh_name = 37; /* DTRACE_SHSTRTAB64[37] = ".rel.SUNW_dof" */
-		shp->sh_flags = SHF_ALLOC;
-		shp->sh_type = SHT_RELA;
-		shp->sh_entsize = sizeof (de.de_rel[0]);
-		shp->sh_link = ESHDR_SYMTAB;
-		shp->sh_info = ESHDR_DOF;
-		shp->sh_offset = off;
-		shp->sh_size = de.de_nrel * sizeof (de.de_rel[0]);
-		shp->sh_addralign = 8;
+		data->d_buf = (void *)DTRACE_SHSTRTAB64;
+		data->d_size = sizeof (DTRACE_SHSTRTAB64);
+	}
+	data->d_align = 1;
 
-		if (dt_write(dtp, fd, &elf_file,
-		    sizeof (elf_file)) != sizeof (elf_file) ||
-		    PWRITE_SCN(ESHDR_SHSTRTAB, DTRACE_SHSTRTAB64) ||
-		    PWRITE_SCN(ESHDR_STRTAB, de.de_strtab) ||
-		    PWRITE_SCN(ESHDR_SYMTAB, de.de_sym) ||
-		    PWRITE_SCN(ESHDR_REL, de.de_rel) ||
-		    PWRITE_SCN(ESHDR_DOF, dof)) {
-			ret = dt_set_errno(dtp, errno);
+	(void) gelf_update_shdr(scn, &shp);
+
+	if (create_scn(elf, &scn, &shp, &data) == -1)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not create ELF section: %s", elf_errmsg(-1)));
+
+	shp.sh_name = 11; /* DTRACE_SHSTRTAB[11] = ".SUNW_dof" */
+	shp.sh_flags = SHF_ALLOC;
+	shp.sh_type = SHT_SUNW_dof;
+	shp.sh_addralign = 8;
+
+	data->d_size = dof->dofh_filesz;
+	data->d_align = 1;
+	data->d_buf = (void *)dof;
+
+	(void) gelf_update_shdr(scn, &shp);
+
+
+	if (create_scn(elf, &scn, &shp, &data) == -1)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not create ELF section: %s", elf_errmsg(-1)));
+
+	shp.sh_name = 21; /* DTRACE_SHSTRTAB[21] = ".strtab" */
+	shp.sh_flags = SHF_ALLOC;
+	shp.sh_type = SHT_STRTAB;
+	shp.sh_addralign = sizeof (char);
+
+	data->d_size = de.de_strlen;
+	data->d_align = 1;
+	data->d_buf = (void *)de.de_strtab;
+
+	(void) gelf_update_shdr(scn, &shp);
+
+
+	if (create_scn(elf, &scn, &shp, &data) == -1)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not create ELF section: %s", elf_errmsg(-1)));
+
+	shp.sh_name = 29; /* DTRACE_SHSTRTAB[29] = ".symtab" */
+	shp.sh_flags = SHF_ALLOC;
+	shp.sh_type = SHT_SYMTAB;
+	shp.sh_link = ESHDR_STRTAB;
+	shp.sh_info = de.de_global;
+
+	if (elfclass == ELFCLASS32) {
+		shp.sh_entsize = sizeof (Elf32_Sym);
+		shp.sh_addralign = 4;
+	} else {
+		shp.sh_entsize = sizeof (Elf64_Sym);
+		shp.sh_addralign = 8;
+	}
+
+	data->d_size = de.de_nsym * shp.sh_entsize;
+	data->d_align = shp.sh_addralign;
+
+	if ((symtab = data->d_buf = calloc(de.de_nsym, shp.sh_entsize)) == NULL)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel,
+		    EDT_NOMEM, ""));
+
+	for (i = 0; i < de.de_nsym; i++) {
+		if (gelf_update_sym(data, i, &de.de_sym[i]) == 0) {
+			return (dt_elf_error(dtp, &de, elf, symtab, rel,
+			    EDT_COMPILER, "couldn't update ELF symbol: %s",
+			    elf_errmsg(-1)));
 		}
 	}
 
-	free(de.de_strtab);
-	free(de.de_sym);
-	free(de.de_rel);
+	(void) gelf_update_shdr(scn, &shp);
 
-	return (ret);
+	if (de.de_nrel > 0) {
+		if (create_scn(elf, &scn, &shp, &data) == -1)
+			return (dt_elf_error(dtp, &de, elf, symtab, rel,
+			    EDT_COMPILER, "could not create ELF section: %s",
+			    elf_errmsg(-1)));
+
+		shp.sh_name = 37; /* DTRACE_SHSTRTAB[37] = ".rel.SUNW_dof" */
+		shp.sh_flags = SHF_ALLOC;
+#ifdef __sparc
+		shp.sh_type = SHT_RELA;
+#else
+		if (elfclass == ELFCLASS32)
+			shp.sh_type = SHT_REL;
+		else
+			shp.sh_type = SHT_RELA;
+#endif
+		shp.sh_link = ESHDR_SYMTAB;
+		shp.sh_info = ESHDR_DOF;
+
+		if (elfclass == ELFCLASS32) {
+			if (shp.sh_type == SHT_REL)
+				shp.sh_entsize = sizeof (Elf32_Rel);
+			else
+				shp.sh_entsize = sizeof (Elf32_Rela);
+			shp.sh_addralign = 4;
+		} else {
+			/* 64bit is all RELA */
+			shp.sh_entsize = sizeof (Elf64_Rela);
+			shp.sh_addralign = 8;
+		}
+
+		data->d_size = de.de_nrel * shp.sh_entsize;
+		data->d_align = shp.sh_addralign;
+
+		if ((rel = data->d_buf = calloc(de.de_nrel, shp.sh_entsize))
+		    == NULL)
+			return (dt_elf_error(dtp, &de, elf, symtab, rel,
+			    EDT_NOMEM, ""));
+
+		for (i = 0; i < de.de_nrel; i++) {
+			if (dt_update_rel(data, i, &de.de_rel[i],
+			    shp.sh_type) == 0) {
+				return (dt_elf_error(dtp, &de, elf, symtab, rel,
+				    EDT_COMPILER,
+				    "could not update ELF relocation: %s",
+				    elf_errmsg(-1)));
+			}
+		}
+
+		(void) gelf_update_shdr(scn, &shp);
+	}
+
+	(void) elf_flagelf(elf, ELF_C_SET, ELF_F_DIRTY);
+	if (elf_update(elf, ELF_C_WRITE) == -1)
+		return (dt_elf_error(dtp, &de, elf, symtab, rel, EDT_COMPILER,
+		    "could not update ELF file: %s", elf_errmsg(-1)));
+
+	free(de.de_rel);
+	free(de.de_sym);
+	free(de.de_strtab);
+	free(rel);
+	free(symtab);
+	(void) elf_end(elf);
+	return (0);
+}
+
+Elf *
+dtrace_dof_elf(dtrace_hdl_t *dtp, const dof_hdr_t *dof)
+{
+	int fd;
+	char fmt[] = "/tmp/dtraceXXXXXXXX.o";
+
+	if ((fd = mkstemps(fmt, 3)) == -1) {
+		(void) dt_set_errno(dtp, errno);
+		return (NULL);
+	}
+	if (getenv("DTRACE_DEBUG_KEEP_DOF_OBJ") == NULL)
+		(void) unlink(fmt);
+
+	if (dump_elf(dtp, dof, fd) == -1)
+		return (NULL);
+
+	return (elf_begin(fd, ELF_C_RDWR, NULL));
 }
 
 static int
@@ -1092,7 +909,7 @@ process_obj(dtrace_hdl_t *dtp, const char *obj, int *eprobesp)
 	/*
 	 * We use this token as a relatively unique handle for this file on the
 	 * system in order to disambiguate potential conflicts between files of
-	 * the same name which contain identially named local symbols.
+	 * the same name which contain identically named local symbols.
 	 */
 	if ((objkey = ftok(obj, 0)) == (key_t)-1) {
 		return (dt_link_error(dtp, elf, fd, bufs,
@@ -1583,16 +1400,13 @@ dtrace_program_link(dtrace_hdl_t *dtp, dtrace_prog_t *pgp, uint_t dflags,
 		    "invalid link type %u\n", dtp->dt_linktype));
 	}
 
-
 	if (!dtp->dt_lazyload)
 		(void) unlink(file);
 
-	if (dtp->dt_oflags & DTRACE_O_LP64)
-		status = dump_elf64(dtp, dof, fd);
-	else
-		status = dump_elf32(dtp, dof, fd);
+	if ((status = dump_elf(dtp, dof, fd)) != 0)
+		return (-1);	/* errno is set for us */
 
-	if (status != 0 || lseek(fd, 0, SEEK_SET) != 0) {
+	if (lseek(fd, 0, SEEK_SET) != 0) {
 		return (dt_link_error(dtp, NULL, -1, NULL,
 		    "failed to write %s: %s", file, strerror(errno)));
 	}

@@ -73,7 +73,7 @@ EOF
 # With probes in static functions put each function in its own section so it
 # gets its own relocation section.  This makes sure we correctly handle having
 # to add several new data descriptors to the string and symbol tables.
-gcc -c -ffunction-sections test.c
+gcc -m32 -c -ffunction-sections test.c
 if [ $? -ne 0 ]; then
 	print -u2 "failed to compile test.c"
 	exit 1
@@ -83,7 +83,7 @@ if [ $? -ne 0 ]; then
 	print -u2 "failed to create DOF"
 	exit 1
 fi
-gcc -o test test.o prov.o
+gcc -m32 -o test test.o prov.o
 if [ $? -ne 0 ]; then
 	print -u2 "failed to link final executable"
 	exit 1

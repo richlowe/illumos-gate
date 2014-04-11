@@ -125,8 +125,6 @@ CPPFLAGS += -I../common -I.
 CFLAGS += $(CCVERBOSE) $(C_BIGPICFLAGS)
 CFLAGS64 += $(CCVERBOSE) $(C_BIGPICFLAGS)
 
-CERRWARN += -_gcc=-Wno-unused-label
-CERRWARN += -_gcc=-Wno-unused-variable
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-uninitialized
 CERRWARN += -_gcc=-Wno-switch
@@ -176,6 +174,8 @@ pics/dt_lex.o pics/dt_grammar.o := CFLAGS += $(YYCFLAGS)
 pics/dt_lex.o pics/dt_grammar.o := CFLAGS64 += $(YYCFLAGS)
 
 pics/dt_lex.o pics/dt_grammar.o := CERRWARN += -erroff=E_STATEMENT_NOT_REACHED
+pics/dt_lex.o pics/dt_grammar.o := CERRWARN += -_gcc=-Wno-unused-variable
+pics/dt_lex.o pics/dt_grammar.o := CERRWARN += -_gcc=-Wno-unused-label
 pics/dt_lex.o pics/dt_grammar.o := CCVERBOSE =
 
 ../common/dt_errtags.c: ../common/mkerrtags.sh ../common/dt_errtags.h
