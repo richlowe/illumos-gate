@@ -436,6 +436,7 @@ dump_auxv(note_state_t *state, const char *title)
 		Conv_cap_val_hw2_buf_t		hw2;
 		Conv_cnote_auxv_af_buf_t	auxv_af;
 		Conv_ehdr_flags_buf_t		ehdr_flags;
+		Conv_secflags_buf_t		secflags;
 		Conv_inv_buf_t			inv;
 	} conv_buf;
 	sl_fmtbuf_t	buf;
@@ -485,6 +486,11 @@ dump_auxv(note_state_t *state, const char *title)
 		case AT_IGNORE:
 		case AT_SUN_IFLUSH:
 			num_fmt = SL_FMT_NUM_HEX;
+			break;
+
+		case AT_SUN_SECFLAGS:
+			w = extract_as_word(state, &layout->a_val);
+			vstr = conv_psecflags(w, 0, &conv_buf.secflags);
 			break;
 
 		case AT_EXECFD:
@@ -827,6 +833,26 @@ dump_timestruc(note_state_t *state, const char *title)
 	indent_exit(state);
 }
 
+/*
+ * Output information from psecflags_t structure.
+ */
+static void
+dump_secflags(note_state_t *state, const char *title)
+{
+	const sl_psecflags_layout_t *layout = state->ns_arch->psecflags;
+	Conv_secflags_buf_t inv;
+	Word w;
+
+	indent_enter(state, title, &layout->psf_effective);
+
+	w = extract_as_word(state, &layout->psf_effective);
+	print_str(state, MSG_ORIG(MSG_CNOTE_T_PSF_EFFECTIVE),
+	    conv_psecflags(w, 0, &inv));
+
+	w = extract_as_word(state, &layout->psf_inherit);
+	print_str(state, MSG_ORIG(MSG_CNOTE_T_PSF_INHERIT),
+	    conv_psecflags(w, 0, &inv));
+}
 
 /*
  * Output information from utsname structure.
@@ -1097,6 +1123,10 @@ dump_pstatus(note_state_t *state, const char *title)
 	state->ns_vcol += 5;
 	state->ns_t2col += 5;
 	state->ns_v2col += 5;
+
+	PRINT_SUBTYPE(MSG_ORIG(MSG_CNOTE_T_PR_SECFLAGS), pr_secflags,
+	    dump_secflags);
+
 	PRINT_SUBTYPE(MSG_ORIG(MSG_CNOTE_T_PR_LWP), pr_lwp, dump_lwpstatus);
 	state->ns_vcol -= 5;
 	state->ns_t2col -= 5;

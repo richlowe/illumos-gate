@@ -1077,6 +1077,11 @@ getproc(proc_t **cpp, pid_t pid, uint_t flags)
 	cp->p_ppid = pp->p_pid;
 	cp->p_ancpid = pp->p_pid;
 	cp->p_portcnt = pp->p_portcnt;
+	/*
+	 * Security flags are preserved on fork, the inherited copy come into
+	 * effect on exec
+	 */
+	bcopy(&pp->p_secflags, &cp->p_secflags, sizeof (psecflags_t));
 
 	/*
 	 * Initialize watchpoint structures

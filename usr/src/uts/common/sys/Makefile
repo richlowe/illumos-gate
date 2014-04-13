@@ -485,6 +485,7 @@ CHKHDRS=			\
 	sad.h			\
 	schedctl.h		\
 	sdt.h			\
+	secflags.h		\
 	select.h		\
 	sem.h			\
 	sem_impl.h		\

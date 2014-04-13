@@ -555,6 +555,7 @@
 @ MSG_CNOTE_T_PR_RUID			"pr_ruid:"
 @ MSG_CNOTE_T_PR_RVAL1			"pr_rval1:"
 @ MSG_CNOTE_T_PR_RVAL2			"pr_rval2:"
+@ MSG_CNOTE_T_PR_SECFLAGS		"pr_secflags:"
 @ MSG_CNOTE_T_PR_SETS			"pr_sets:"
 @ MSG_CNOTE_T_PR_SETSIZE		"pr_setsize:"
 @ MSG_CNOTE_T_PR_SGID			"pr_sgid:"
@@ -589,6 +590,8 @@
 @ MSG_CNOTE_T_PR_WSTAT			"pr_wstat:"
 @ MSG_CNOTE_T_PR_ZOMB			"pr_zomb:"
 @ MSG_CNOTE_T_PR_ZONEID			"pr_zoneid:"
+@ MSG_CNOTE_T_PSF_EFFECTIVE		"psf_effective:"
+@ MSG_CNOTE_T_PSF_INHERIT		"psf_inherit:"
 @ MSG_CNOTE_T_SA_FLAGS			"sa_flags:"
 @ MSG_CNOTE_T_SA_HANDLER		"sa_handler:"
 @ MSG_CNOTE_T_SA_MASK			"sa_mask:"
@@ -652,3 +655,4 @@
 @ MSG_PHDRNAM_TLSSORT		".SUNW_tlssort(phdr)"
 @ MSG_PHDRNAM_UNWIND		".eh_frame_hdr(phdr)"
 @ MSG_PHDRNAM_VER		".SUNW_version(phdr)"
+

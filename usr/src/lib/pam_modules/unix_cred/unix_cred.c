@@ -592,6 +592,7 @@ adt_done:
 			goto out;
 		}
 		priv_basicset(def);
+		(void) priv_addset(def, PRIV_PROC_SECFLAGS);
 		errno = 0;
 		if ((pathconf("/", _PC_CHOWN_RESTRICTED) == -1) && (errno == 0))
 			(void) priv_addset(def, PRIV_FILE_CHOWN_SELF);

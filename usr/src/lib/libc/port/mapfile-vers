@@ -2825,6 +2825,7 @@ $endif
 	option_to_attr;
 	__priv_bracket;
 	__priv_relinquish;
+	psecflags;
 	pset_assign_forced;
 	pset_bind_lwp;
 	_psignal;

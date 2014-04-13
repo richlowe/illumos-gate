@@ -59,6 +59,7 @@
 #include <sys/vmsystm.h>
 #include <sys/swap.h>
 #include <sys/dumphdr.h>
+#include <sys/random.h>
 
 #include <vm/hat.h>
 #include <vm/as.h>
@@ -637,6 +638,13 @@ map_addr_vacalign_check(caddr_t addr, u_offset_t off)
 }
 
 /*
+ * The maximum amount a randomized mapping will be slewed.  We should perhaps
+ * arrange things so these tunables can be separate for mmap, mmapobj, and
+ * ld.so
+ */
+volatile size_t aslr_max_map_skew = 256 * 1024 * 1024; /* 256MB */
+
+/*
  * map_addr_proc() is the routine called when the system is to
  * choose an address for the user.  We will pick an address
  * range which is the highest available below userlimit.
@@ -752,6 +760,7 @@ map_addr_proc(
 	ASSERT(align_amount == 0 || align_amount >= PAGESIZE);
 
 	off = off & (align_amount - 1);
+
 	/*
 	 * Look for a large enough hole starting below userlimit.
 	 * After finding it, use the upper part.
@@ -777,6 +786,23 @@ map_addr_proc(
 		addr += (uintptr_t)off;
 		if (addr > as_addr) {
 			addr -= align_amount;
+		}
+
+		/*
+		 * If randomization is requested, slew the allocation
+		 * backwards, within the same gap, by a random amount.
+		 *
+		 * XXX: This will fall over in processes like Java, which
+		 * commonly have a great many small mappings.
+		 */
+		if (flags & _MAP_RANDOMIZE) {
+			uint32_t slew;
+
+			(void) random_get_pseudo_bytes((uint8_t *)&slew,
+			    sizeof (slew));
+
+			slew = slew % MIN(aslr_max_map_skew, (addr - base));
+			addr -= P2ALIGN(slew, align_amount);
 		}
 
 		ASSERT(addr > base);
@@ -3925,12 +3951,6 @@ teardown_vaddr_for_ppcopy(struct cpu *cpup)
 void
 dcache_flushall()
 {}
-
-size_t
-exec_get_spslew(void)
-{
-	return (0);
-}
 
 /*
  * Allocate a memory page.  The argument 'seed' can be any pseudo-random

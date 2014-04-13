@@ -72,6 +72,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/proc.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -92,6 +93,8 @@
 
 #include "startd.h"
 #include "protocol.h"
+
+extern int psecflags(idtype_t, id_t, psecflags_cmd_t, uint_t);
 
 ssize_t max_scf_name_size;
 ssize_t max_scf_fmri_size;
@@ -341,6 +344,69 @@ startd_thread_create(void *(*func)(void *), void *ptr)
 
 extern int info_events_all;
 
+struct psf_desc {
+	char *name;
+	uint_t flag;
+} procsec_flag_tbl[] = {
+	{ "aslr",	PROC_SEC_ASLR },
+	{ NULL, NULL }
+};
+
+static void
+init_secflags(scf_handle_t *hndl)
+{
+	scf_property_t *prop;
+	scf_value_t *val;
+	struct psf_desc *psfd = NULL;
+	char *proc_sec_fmri = "svc:/system/process-security/"
+	    ":properties/secflags";
+
+	for (psfd = procsec_flag_tbl; psfd->name != NULL; psfd++) {
+		char *pfmri;
+		uint8_t flag;
+
+		prop = safe_scf_property_create(hndl);
+		val = safe_scf_value_create(hndl);
+
+		if ((pfmri = uu_msprintf("%s/%s", proc_sec_fmri, psfd->name)) == NULL)
+			uu_die("Allocation failure\n");
+
+		if (scf_handle_decode_fmri(hndl, pfmri,
+		    NULL, NULL, NULL, NULL, prop, NULL) != 0)
+			goto next;
+
+		if (scf_property_get_value(prop, val) != 0)
+			goto next;
+
+		(void) scf_value_get_boolean(val, &flag);
+
+		/*
+		 * XXX: This will fail if the zone had PRIV_PROC_SECFLAGS
+		 * removed.
+		 *
+		 * I'm not sure what we should do in that case -- I'd still
+		 * like this to be settable based on a zonecfg setting, too.
+		 *
+		 * We only set things explicitly _on_ here, rather than
+		 * explicitly _off_ such that a zone's settings do not
+		 * permanently override those from the GZ.
+		 *
+		 * XXX: This might be a bit crap, we sorta want a tri-state
+		 */
+		if (flag != 0) {
+			if (psecflags(P_PID, P_MYID,
+			    PSECFLAGS_ENABLE, psfd->flag) != 0) {
+				uu_warn("couldn't set security flags: %s\n",
+				    strerror(errno));
+			}
+		}
+next:
+		uu_free(pfmri);
+		scf_value_destroy(val);
+		scf_property_destroy(prop);
+	}
+}
+
 static int
 read_startd_config(void)
 {
@@ -469,6 +535,13 @@ timestamp:
 	    NULL, NULL, prop, NULL) != -1 &&
 	    scf_property_get_value(prop, val) == 0)
 		(void) scf_value_get_boolean(val, &prop_reconfig);
+
+	/*
+	 * Set up the initial process secflags.  We do this super early, and
+	 * in svc.startd, so that it's inherited by as much stuff as possible
+	 * upon boot.
+	 */
+	init_secflags(hndl);
 
 	if (scf_handle_decode_fmri(hndl, startd_options_fmri, NULL, NULL, NULL,
 	    pg, NULL, SCF_DECODE_FMRI_TRUNCATE) == -1) {

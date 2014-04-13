@@ -38,6 +38,7 @@
 #include <sys/auxv.h>
 #include <sys/old_procfs.h>
 #include <sys/utsname.h>
+#include <sys/secflags.h>
 
 
 
@@ -219,6 +220,7 @@ gen_pstatus(void)
 	SCALAR_FIELD(pstatus_t,		pr_projid,	1);
 	SCALAR_FIELD(pstatus_t,		pr_nzomb,	1);
 	SCALAR_FIELD(pstatus_t,		pr_zoneid,	1);
+	SCALAR_FIELD(pstatus_t,		pr_secflags,	0);
 	SCALAR_FIELD(pstatus_t,		pr_lwp,		0);
 
 	END;
@@ -577,6 +579,16 @@ gen_prfdinfo(void)
 	END;
 }
 
+static void
+gen_psecflags(void)
+{
+	START(psecflags, psecflags_t);
+
+	SCALAR_FIELD(psecflags_t, psf_effective, 0);
+	SCALAR_FIELD(psecflags_t, psf_inherit, 0);
+
+	END;
+}
 
 /*ARGSUSED*/
 int
@@ -606,7 +618,7 @@ main(int argc, char *argv[])
 	gen_timestruc();
 	gen_utsname();
 	gen_prfdinfo();
-
+	gen_psecflags();
 
 	/*
 	 * Generate the full arch_layout description
@@ -634,6 +646,7 @@ main(int argc, char *argv[])
 	(void) printf(fmt, "timestruc");
 	(void) printf(fmt, "utsname");
 	(void) printf(fmt, "prfdinfo");
+	(void) printf(fmt, "psecflags");
 	(void) printf("};\n");
 
 	/*

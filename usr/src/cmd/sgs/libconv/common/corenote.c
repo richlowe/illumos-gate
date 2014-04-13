@@ -104,19 +104,20 @@ conv_cnote_auxv_type(Word type, Conv_fmt_flags_t fmt_flags,
 	static const conv_ds_msg_t ds_types_2000_2011 = {
 	    CONV_DS_MSG_INIT(2000, types_2000_2011) };
 
-	static const Msg	types_2014_2023[] = {
+	static const Msg	types_2014_2024[] = {
 		MSG_AUXV_AT_SUN_EXECNAME,	MSG_AUXV_AT_SUN_MMU,
 		MSG_AUXV_AT_SUN_LDDATA,		MSG_AUXV_AT_SUN_AUXFLAGS,
 		MSG_AUXV_AT_SUN_EMULATOR,	MSG_AUXV_AT_SUN_BRANDNAME,
 		MSG_AUXV_AT_SUN_BRAND_AUX1,	MSG_AUXV_AT_SUN_BRAND_AUX2,
-		MSG_AUXV_AT_SUN_BRAND_AUX3,	MSG_AUXV_AT_SUN_HWCAP2
+		MSG_AUXV_AT_SUN_BRAND_AUX3,	MSG_AUXV_AT_SUN_HWCAP2,
+		MSG_AUXV_AT_SUN_SECFLAGS
 	};
-	static const conv_ds_msg_t ds_types_2014_2023 = {
-	    CONV_DS_MSG_INIT(2014, types_2014_2023) };
+	static const conv_ds_msg_t ds_types_2014_2024 = {
+	    CONV_DS_MSG_INIT(2014, types_2014_2024) };
 
 	static const conv_ds_t	*ds[] = {
 		CONV_DS_ADDR(ds_types_0_22), CONV_DS_ADDR(ds_types_2000_2011),
-		CONV_DS_ADDR(ds_types_2014_2023), NULL };
+		CONV_DS_ADDR(ds_types_2014_2024), NULL };
 
 	return (conv_map_ds(ELFOSABI_NONE, EM_NONE, type, ds, fmt_flags,
 	    inv_buf));
@@ -2581,4 +2582,46 @@ conv_cnote_filemode(uint32_t mode, Conv_fmt_flags_t fmt_flags,
 
 	(void) conv_expn_field(&arg, vda, fmt_flags);
 	return (buf);
+}
+
+
+#define	PROCSECFLGSZ	CONV_EXPN_FIELD_DEF_PREFIX_SIZE + \
+	MSG_PROC_SEC_ASLR_SIZE		+ CONV_EXPN_FIELD_DEF_SEP_SIZE + \
+	CONV_INV_BUFSIZE		+ CONV_EXPN_FIELD_DEF_SUFFIX_SIZE
+
+/*
+ * Ensure that Conv_cnote_pr_secflags_buf_t is large enough:
+ *
+ * PROCSECFLGSZ is the real minimum size of the buffer required by
+ * conv_cnote_psecflags(). However, Conv_cnote_pr_secflags_buf_t uses
+ * CONV_CNOTE_PSECFLAGS_FLAG_BUFSIZE to set the buffer size. We do things this
+ * way because the definition of PROCSECFLGSZ uses information that is not
+ * available in the environment of other programs that include the conv.h
+ * header file.
+ */
+#if (CONV_PSECFLAGS_BUFSIZE != PROCSECFLGSZ) && !defined(__lint)
+#define	REPORT_BUFSIZE PROCSECFLGSZ
+#include "report_bufsize.h"
+#error "CONV_PSECFLAGS_BUFSIZE does not match PROCSECFLGSZ"
+#endif
+
+const char *
+conv_psecflags(int flags, Conv_fmt_flags_t fmt_flags,
+    Conv_secflags_buf_t *secflags_buf)
+{
+	static const Val_desc vda[] = {
+		{ 0x0001,		MSG_PROC_SEC_ASLR },
+		{ 0,			0 }
+	};
+	static CONV_EXPN_FIELD_ARG conv_arg = {
+	    NULL, sizeof (secflags_buf->buf) };
+
+	if (flags == 0)
+		return (MSG_ORIG(MSG_GBL_ZERO));
+
+	conv_arg.buf = secflags_buf->buf;
+	conv_arg.oflags = conv_arg.rflags = flags;
+	(void) conv_expn_field(&conv_arg, vda, fmt_flags);
+
+	return ((const char *)secflags_buf->buf);
 }

@@ -111,6 +111,7 @@ long	pcsample(void *, long);
 int	privsys(int, priv_op_t, priv_ptype_t, void *, size_t, int);
 int	profil(unsigned short *, size_t, ulong_t, uint_t);
 ssize_t	pread(int, void *, size_t, off_t);
+int	psecflags();
 ssize_t	pwrite(int, void *, size_t, off_t);
 ssize_t	read(int, void *, size_t);
 int	rename(char *, char *);
@@ -435,7 +436,7 @@ struct sysent sysent[NSYSCALL] =
 			SYSENT_NOSYS(),
 			SYSENT_C("indir",	indir,		1)),
 	/*  1 */ SYSENT_CI("exit",		rexit,		1),
-	/*  2 */ SYSENT_LOADABLE(),			/* (was forkall) */
+	/*  2 */ SYSENT_CI("psecflags",		psecflags,	3),
 	/*  3 */ SYSENT_CL("read",		read,		3),
 	/*  4 */ SYSENT_CL("write",		write,		3),
 	/*  5 */ SYSENT_CI("open",		open,		3),
@@ -816,7 +817,7 @@ struct sysent sysent32[NSYSCALL] =
 {
 	/*  0 */ SYSENT_C("indir",		indir,		1),
 	/*  1 */ SYSENT_CI("exit",	(int (*)())rexit,	1),
-	/*  2 */ SYSENT_LOADABLE32(),			/* (was forkall) */
+	/*  2 */ SYSENT_CI("psecflags",		psecflags,	3),
 	/*  3 */ SYSENT_CI("read",		read32,		3),
 	/*  4 */ SYSENT_CI("write",		write32,	3),
 	/*  5 */ SYSENT_CI("open",		open32,		3),

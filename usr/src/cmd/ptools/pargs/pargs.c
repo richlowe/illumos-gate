@@ -772,6 +772,30 @@ at_flags(long val, char *instr, size_t n, char *str)
 	}
 }
 
+static struct auxsecfl {
+	uint_t af_flag;
+	const char *af_name;
+} auxsecfl[] = {
+	{ PROC_SEC_ASLR,	"aslr" },
+};
+
+/*ARGSUSED*/
+static void
+at_secflags(long val, char *instr, size_t n, char *str)
+{
+	int i;
+
+	*str = '\0';
+
+	for (i = 0; i < sizeof (auxsecfl)/sizeof (struct auxsecfl); i++) {
+		if ((val & auxsecfl[i].af_flag) != 0) {
+			if (*str != '\0')
+				(void) strlcat(str, ",", n);
+			(void) strlcat(str, auxsecfl[i].af_name, n);
+		}
+	}
+}
+
 #define	MAX_AT_NAME_LEN	15
 
 struct aux_id {
@@ -812,7 +836,8 @@ static struct aux_id aux_arr[] = {
 	{ AT_SUN_BRANDNAME,	"AT_SUN_BRANDNAME",	at_str	},
 	{ AT_SUN_BRAND_AUX1,	"AT_SUN_BRAND_AUX1",	at_null	},
 	{ AT_SUN_BRAND_AUX2,	"AT_SUN_BRAND_AUX2",	at_null	},
-	{ AT_SUN_BRAND_AUX3,	"AT_SUN_BRAND_AUX3",	at_null	}
+	{ AT_SUN_BRAND_AUX3,	"AT_SUN_BRAND_AUX3",	at_null	},
+	{ AT_SUN_SECFLAGS,	"AT_SUN_SECFLAGS",	at_secflags },
 };
 
 #define	N_AT_ENTS (sizeof (aux_arr) / sizeof (struct aux_id))

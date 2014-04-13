@@ -325,6 +325,12 @@ typedef union {
 	char				buf[CONV_CNOTE_PROC_FLAG_BUFSIZE];
 } Conv_cnote_proc_flag_buf_t;
 
+/* conv_psecflags() */
+#define	CONV_PSECFLAGS_BUFSIZE		31
+typedef union {
+	Conv_inv_buf_t			inv_buf;
+	char				buf[CONV_PSECFLAGS_BUFSIZE];
+} Conv_secflags_buf_t;
 
 /* conv_cnote_sigset() */
 #define	CONV_CNOTE_SIGSET_BUFSIZE	639
@@ -822,6 +828,8 @@ extern	const char	*conv_cnote_pr_why(short, Conv_fmt_flags_t,
 			    Conv_inv_buf_t *);
 extern	const char	*conv_cnote_priv(int, Conv_fmt_flags_t,
 			    Conv_inv_buf_t *);
+extern	const char	*conv_psecflags(int, Conv_fmt_flags_t,
+			    Conv_secflags_buf_t *);
 extern	const char	*conv_cnote_psetid(int, Conv_fmt_flags_t,
 			    Conv_inv_buf_t *);
 extern	const char	*conv_cnote_sa_flags(int, Conv_fmt_flags_t,

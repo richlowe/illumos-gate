@@ -136,6 +136,7 @@ static void	aus_memcntl(struct t_audit_data *);
 static void	aus_mmap(struct t_audit_data *);
 static void	aus_munmap(struct t_audit_data *);
 static void	aus_priocntlsys(struct t_audit_data *);
+static void	aus_psecflags(struct t_audit_data *);
 static void	aus_setegid(struct t_audit_data *);
 static void	aus_setgroups(struct t_audit_data *);
 static void	aus_seteuid(struct t_audit_data *);
@@ -204,7 +205,7 @@ aui_null,	AUE_NULL,	aus_null,	/* 0 unused (indirect) */
 		auf_null,	0,
 aui_null,	AUE_EXIT,	aus_exit,	/* 1 exit */
 		auf_null,	S2E_NPT,
-aui_null,	AUE_NULL,	aus_null,	/* 2 (loadable) was forkall */
+aui_null,	AUE_PSECFLAGS,	aus_psecflags,	/* 2 psecflags */
 		auf_null,	0,
 aui_null,	AUE_READ,	aus_null,	/* 3 read */
 		auf_read,	S2E_PUB,
@@ -741,6 +742,20 @@ aus_exit(struct t_audit_data *tad)
 
 	rval = (uint32_t)uap->rval;
 	au_uwrite(au_to_arg32(1, "exit status", rval));
+}
+
+/*ARGSUSED*/
+static void
+aus_psecflags(struct t_audit_data *tad)
+{
+	struct a {
+		uintptr_t psp;	/* procset_t */
+		uint_t cmd;	/* psecflags_cmd_t */
+		uint_t arg;
+	} *uap = (struct a *)ttolwp(curthread)->lwp_ap;
+
+	au_uwrite(au_to_arg32(2, "cmd", (uint_t)uap->cmd));
+	au_uwrite(au_to_arg32(3, "arg", (uint_t)uap->arg));
 }
 
 /* acct start function */

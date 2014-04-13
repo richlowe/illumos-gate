@@ -30,7 +30,6 @@
 #include <struct_layout.h>
 
 
-
 static const sl_auxv_layout_t auxv_layout = {
 	{ 0,	8,	0,	0 },		/* sizeof (auxv_t) */
 	{ 0,	4,	0,	1 },		/* a_type */
@@ -105,6 +104,7 @@ static const sl_pstatus_layout_t pstatus_layout = {
 	{ 264,	4,	0,	1 },		/* pr_projid */
 	{ 268,	4,	0,	1 },		/* pr_nzomb */
 	{ 272,	4,	0,	1 },		/* pr_zoneid */
+	{ 276,	8,	0,	0 },		/* pr_secflags */
 	{ 336,	800,	0,	0 },		/* pr_lwp */
 };
 
@@ -378,6 +378,13 @@ static const sl_prfdinfo_layout_t prfdinfo_layout = {
 };
 
 
+static const sl_psecflags_layout_t psecflags_layout = {
+	{ 0,	8,	0,	0 },		/* sizeof (psecflags_t) */
+	{ 0,	4,	0,	0 },		/* psf_effective */
+	{ 4,	4,	0,	0 },		/* psf_inherit */
+};
+
+
 
 
 static const sl_arch_layout_t layout_i386 = {
@@ -401,6 +408,7 @@ static const sl_arch_layout_t layout_i386 = {
 	&timestruc_layout,
 	&utsname_layout,
 	&prfdinfo_layout,
+	&psecflags_layout,
 };
 
 

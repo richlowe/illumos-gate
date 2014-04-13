@@ -47,6 +47,7 @@
 #include <sys/list.h>
 #include <sys/avl.h>
 #include <sys/door_impl.h>
+#include <sys/secflags.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -347,6 +348,7 @@ typedef struct	proc {
 	struct vnode	*p_execdir;	/* directory that p_exec came from */
 	struct brand	*p_brand;	/* process's brand  */
 	void		*p_brand_data;	/* per-process brand state */
+	psecflags_t	p_secflags;	/* per-process security flags */
 
 	/* additional lock to protect p_sessp (but not its contents) */
 	kmutex_t p_splock;
@@ -783,6 +785,13 @@ extern	void	lwp_mmodel_shared_as(caddr_t, size_t);
 #define	LWP_MMODEL_NEWLWP()
 #define	LWP_MMODEL_SHARED_AS(addr, sz)
 #endif
+
+/* Security flag manipulation */
+extern boolean_t secflag_enabled(proc_t *, uint_t);
+extern void secflag_set(proc_t *, uint_t);
+extern void secflag_enable(proc_t *, uint_t);
+extern void secflag_disable(proc_t *, uint_t);
+extern void secflag_promote(proc_t *);
 
 /*
  * Signal queue function prototypes. Must be here due to header ordering

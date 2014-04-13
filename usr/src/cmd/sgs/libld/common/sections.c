@@ -1262,6 +1262,9 @@ make_dynamic(Ofl_desc *ofl)
 
 		if (flags & FLG_OF_SYMBOLIC)
 			cnt++;			/* DT_SYMBOLIC */
+
+		if (ofl->ofl_aslr != 0)		/* DT_SUNW_ASLR */
+			cnt++;
 	}
 
 	/*

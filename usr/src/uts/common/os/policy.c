@@ -1728,6 +1728,19 @@ secpolicy_pset(const cred_t *cr)
 	return (PRIV_POLICY(cr, PRIV_SYS_RES_CONFIG, B_FALSE, EPERM, NULL));
 }
 
+/* Process security flags */
+int
+secpolicy_psecflags(const cred_t *cr, proc_t *tp, proc_t *sp)
+{
+	if (PRIV_POLICY(cr, PRIV_PROC_SECFLAGS, B_FALSE, EPERM, NULL) != 0)
+		return (EPERM);
+
+	if (!prochasprocperm(tp, sp, cr))
+		return (EPERM);
+
+	return (0);
+}
+
 /*
  * Processor set binding.
  */

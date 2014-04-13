@@ -139,7 +139,9 @@ extern "C" {
 #define	SKC	98		/* print sockconfig subcode */
 #define	ACF	99		/* accept4 flags */
 #define	PFD	100		/* pipe fds[2] */
-#define	HID	101		/* hidden argument, don't print */
+#define	PSFCMD	101		/* psecflags(2) command */
+#define PSFLG	102		/* psecflags(2) flags */
+#define	HID	103		/* hidden argument, don't print */
 				/* make sure HID is always the last member */
 
 /*

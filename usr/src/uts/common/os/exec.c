@@ -69,6 +69,7 @@
 #include <sys/sdt.h>
 #include <sys/brand.h>
 #include <sys/klpd.h>
+#include <sys/random.h>
 
 #include <c2/audit.h>
 
@@ -97,6 +98,20 @@ uint_t auxv_hwcap32_2 = 0;	/* 32-bit version of auxv_hwcap2 */
 #endif
 
 #define	PSUIDFLAGS		(SNOCD|SUGID)
+
+/*
+ * These are consumed within the specific exec modules, but are defined here because
+ *
+ * 1) The exec modules are unloadable, which would make this near useless.
+ *
+ * 2) We want them to be common across all of them, should more than ELF come
+ *    to support them.
+ *
+ * All must be powers of 2.
+ */
+volatile size_t aslr_max_brk_skew = 16 * 1024 * 1024; /* 16MB */
+#pragma weak exec_stackgap = aslr_max_stack_skew      /* Old, compatible name */
+volatile size_t aslr_max_stack_skew = 64 * 1024;      /* 64KB */
 
 /*
  * exece() - system call wrapper around exec_common()
@@ -659,6 +674,10 @@ gexec(
 		CR_EPRIV(cred) = CR_PPRIV(cred) = CR_IPRIV(cred);
 		priv_adjust_PA(cred);
 	}
+
+	/* The new image gets the inheritable secflags as its secflags */
+	/* XXX: This probably means we have the wrong secflags when exec fails */
+	secflag_promote(pp);
 
 	/* SunOS 4.x buy-back */
 	if ((vp->v_vfsp->vfs_flag & VFS_NOSETUID) &&
@@ -1755,6 +1774,43 @@ stk_copyout(uarg_t *args, char *usrstack, void **auxvpp, user_t *up)
 }
 
 /*
+ * Though the actual stack base is constant, slew the %sp by a random aligned
+ * amount in [0,aslr_max_stack_skew).  Mostly, this makes life slightly more
+ * complicated for buffer overflows hoping to overwrite the return address.
+ *
+ * On some platforms this helps avoid cache thrashing when identical processes
+ * simultaneously share caches that don't provide enough associativity
+ * (e.g. sun4v systems). In this case stack slewing makes the same hot stack
+ * variables in different processes live in different cache sets increasing
+ * effective associativity.
+ */
+size_t
+exec_get_spslew(void)
+{
+#ifdef sun4v
+	static uint_t sp_color_stride = 16;
+	static uint_t sp_color_mask = 0x1f;
+	static uint_t sp_current_color = (uint_t)-1;
+#endif
+	size_t off;
+
+	ASSERT(ISP2(aslr_max_stack_skew));
+
+	if ((aslr_max_stack_skew == 0) ||
+	    !secflag_enabled(curproc, PROC_SEC_ASLR)) {
+#ifdef sun4v
+		uint_t spcolor = atomic_inc_32_nv(&sp_current_color);
+		return ((size_t)((spcolor & sp_color_mask) * SA(sp_color_stride)));
+#else
+		return (0);
+#endif
+	}
+
+	(void) random_get_pseudo_bytes((uint8_t *)&off, sizeof (off));
+	return SA(P2PHASE(off, aslr_max_stack_skew));
+}
+
+/*
  * Initialize a new user stack with the specified arguments and environment.
  * The initial user stack layout is as follows:
  *
@@ -1984,17 +2040,10 @@ exec_args(execa_t *uap, uarg_t *args, intpdata_t *intp, void **auxvpp)
 	p->p_flag |= SAUTOLPG;	/* kernel controls page sizes */
 	mutex_exit(&p->p_lock);
 
-	/*
-	 * Some platforms may choose to randomize real stack start by adding a
-	 * small slew (not more than a few hundred bytes) to the top of the
-	 * stack. This helps avoid cache thrashing when identical processes
-	 * simultaneously share caches that don't provide enough associativity
-	 * (e.g. sun4v systems). In this case stack slewing makes the same hot
-	 * stack variables in different processes to live in different cache
-	 * sets increasing effective associativity.
-	 */
 	sp_slew = exec_get_spslew();
 	ASSERT(P2PHASE(sp_slew, args->stk_align) == 0);
+	/* Be certain we don't underflow */
+	VERIFY((curproc->p_usrstack - (size + sp_slew)) < curproc->p_usrstack);
 	exec_set_sp(size + sp_slew);
 
 	as = as_alloc();

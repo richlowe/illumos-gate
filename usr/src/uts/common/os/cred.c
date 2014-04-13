@@ -215,6 +215,8 @@ cred_init(void)
 	priv_fillset(&CR_LPRIV(kcred));
 	CR_IPRIV(kcred) = *priv_basic;
 
+	priv_addset(&CR_IPRIV(kcred), PRIV_PROC_SECFLAGS);
+
 	/* Not a basic privilege, if chown is not restricted add it to I0 */
 	if (!rstchown)
 		priv_addset(&CR_IPRIV(kcred), PRIV_FILE_CHOWN_SELF);

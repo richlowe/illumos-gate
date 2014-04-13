@@ -64,6 +64,7 @@ extern "C" {
 #include <sys/priv.h>
 #include <sys/stat.h>
 #include <sys/param.h>
+#include <sys/secflags.h>
 
 /*
  * System call interfaces for /proc.
@@ -180,7 +181,8 @@ typedef struct pstatus {
 	projid_t pr_projid;	/* project id */
 	int	pr_nzomb;	/* number of zombie lwps in the process */
 	zoneid_t pr_zoneid;	/* zone id */
-	int	pr_filler[15];	/* reserved for future use */
+	psecflags_t pr_secflags; /* security flags */
+	int	pr_filler[13];	/* reserved for future use */
 	lwpstatus_t pr_lwp;	/* status of the representative lwp */
 } pstatus_t;
 
@@ -637,7 +639,8 @@ typedef struct pstatus32 {
 	id32_t	pr_projid;	/* project id */
 	int	pr_nzomb;	/* number of zombie lwps in the process */
 	id32_t	pr_zoneid;	/* zone id */
-	int	pr_filler[15];	/* reserved for future use */
+	psecflags_t pr_secflags; /* security flags */
+	int	pr_filler[13];	/* reserved for future use */
 	lwpstatus32_t pr_lwp;	/* status of the representative lwp */
 } pstatus32_t;
 

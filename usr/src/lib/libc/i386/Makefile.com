@@ -253,6 +253,7 @@ COMSYSOBJS=			\
 	processor_bind.o	\
 	processor_info.o	\
 	profil.o		\
+	psecflagsset.o		\
 	putmsg.o		\
 	putpmsg.o		\
 	pwrite.o		\
@@ -510,6 +511,7 @@ PORTGEN=			\
 	priocntl.o		\
 	privlib.o		\
 	priv_str_xlate.o	\
+	psecflags.o		\
 	psiginfo.o		\
 	psignal.o		\
 	pt.o			\

@@ -20,7 +20,7 @@ ld \- link-editor for object files
 [\fB-Q\fR y | n] [\fB-R\fR \fIpath\fR] [\fB-s\fR] [\fB-S\fR \fIsupportlib\fR] [\fB-t\fR]
 [\fB-u\fR \fIsymname\fR] [\fB-V\fR] [\fB-Y P\fR\fI,dirlist\fR] [\fB-z\fR absexec]
 [\fB-z\fR allextract | defaultextract | weakextract ] [\fB-z\fR altexec64]
-[\fB-z\fR assert-deflib ] [ \fB-z\fR assert-deflib=\fIlibname\fR ]
+[\fB-z\fR aslr[=\fIstate\fR]] [\fB-z\fR assert-deflib] [ \fB-z\fR assert-deflib=\fIlibname\fR]
 [\fB-z\fR combreloc | nocombreloc ] [\fB-z\fR defs | nodefs]
 [\fB-z\fR direct | nodirect] [\fB-z\fR endfiltee]
 [\fB-z\fR fatal-warnings | nofatal-warnings ] [\fB-z\fR finiarray=\fIfunction\fR]
@@ -840,6 +840,23 @@ exhaust the virtual memory that is available to the 32-bit \fBld\fR. The
 64-bit \fBld\fR. The 64-bit \fBld\fR provides a larger virtual address space
 for building 32-bit objects. See \fIThe 32-bit link-editor and 64-bit
 link-editor\fR in \fILinker and Libraries Guide\fR.
+.RE
+
+.sp
+.ne 2
+.na
+\fB-z\fR \fBaslr[=\fIstate\fR]\fR
+.ad
+.sp .6
+.RS 4n
+Specify whether the executable's address space should be randomized on
+execution.  If \fIstate\fR is "enabled" randomization will always occur when
+this executable is run (regardless of inherited settings).  If \fIstate\fR is
+"disabled" randomization will never occur when this executable is run.  If
+\fIstate\fR is omitted, ASLR is enabled.
+
+An executable that should simple use the settings inherited from its
+environment should not use this flag at all.
 .RE
 
 .sp

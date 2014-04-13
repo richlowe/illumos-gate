@@ -23,8 +23,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 %.o:		../common/%.c
 		$(COMPILE.c) -o $@ $<
@@ -42,8 +40,10 @@
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
+gen_struct_layout := CPPFLAGS = $(CPPFLAGS.native)
+
 gen_struct_layout:	../common/gen_struct_layout.c
-		$(NATIVECC) $(NATIVECC_CFLAGS) $(CFLAGS) -o $@ \
+		$(NATIVECC) $(NATIVE_CFLAGS) $(CPPFLAGS) $(CFLAGS) -o $@ \
 			../common/gen_struct_layout.c
 
 $(PROG):	$(OBJS) $(MAPFILE) gen_struct_layout

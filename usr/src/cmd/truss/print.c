@@ -66,6 +66,7 @@
 #include <sys/rtpriocntl.h>
 #include <sys/fsspriocntl.h>
 #include <sys/fxpriocntl.h>
+#include <sys/proc.h>
 #include <netdb.h>
 #include <nss_dbdefs.h>
 #include <sys/socketvar.h>
@@ -1598,6 +1599,56 @@ prt_pc5(private_t *pri, int raw, long val)
 }
 
 /*
+ * Print a psecflags(2) command
+ */
+void
+prt_psfcmd(private_t *pri, int raw, long val)
+{
+	const char *s = NULL;
+
+	if (raw == 0) {
+		switch ((psecflags_cmd_t)val) {
+		case PSECFLAGS_SET:
+			s = "PSECFLAGS_SET";
+			break;
+		case PSECFLAGS_DISABLE:
+			s = "PSECFLAGS_DISABLE";
+			break;
+		case PSECFLAGS_ENABLE:
+			s = "PSECFLAGS_ENABLE";
+			break;
+		}
+	}
+
+	if (s == NULL)
+		prt_dec(pri, 0, val);
+	else
+		outstring(pri, s);
+}
+
+void
+prt_psflags(private_t *pri, int raw, long val)
+{
+	char *str = pri->code_buf;
+
+	if (raw == 1) {
+		prt_hex(pri, 0, val);
+		return;
+	}
+
+	*str = '\0';
+	if (val & PROC_SEC_ASLR) {
+		(void) strlcat(str, "|PROC_SEC_ASLR", sizeof (pri->code_buf));
+		val &= ~PROC_SEC_ASLR;
+	}
+
+	if (val != 0)
+		(void) snprintf(str, sizeof (pri->code_buf), "%s|%x", str, val);
+
+	outstring(pri, str + 1);
+}
+
+/*
  * Print processor set id, including logical expansion of "special" ids.
  */
 void
@@ -2846,5 +2897,7 @@ void (* const Print[])() = {
 	prt_skc,	/* SKC -- print sockconfig() subcode */
 	prt_acf,	/* ACF -- print accept4 flags */
 	prt_pfd,	/* PFD -- print pipe fds */
+	prt_psfcmd,	/* PSFCMD -- print psecflags(2) command */
+	prt_psflags,	/* PSFLG -- print psecflags(2) flags */
 	prt_dec,	/* HID -- hidden argument, make this the last one */
 };

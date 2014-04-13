@@ -159,3 +159,30 @@ freepctx(proc_t *p, int isexec)
 	}
 	kpreempt_enable();
 }
+
+boolean_t
+secflag_enabled(proc_t *p, uint_t flag)
+{
+	return ((p->p_secflags.psf_effective & flag) != 0);
+}
+
+void
+secflag_set(proc_t *p, uint_t flag)
+{
+	p->p_secflags.psf_inherit = flag;
+}
+
+void
+secflag_enable(proc_t *p, uint_t flag) {
+	p->p_secflags.psf_inherit |= flag;
+}
+
+void
+secflag_disable(proc_t *p, uint_t flag) {
+	p->p_secflags.psf_inherit &= ~flag;
+}
+
+void
+secflag_promote(proc_t *p) {
+	p->p_secflags.psf_effective = p->p_secflags.psf_inherit;
+}
