@@ -47,7 +47,7 @@ P_ASOBJS=	boot.o		boot_elf.o	caller.o
 
 S_ASOBJS=	boot_a.out.o
 
-CRTSRCS=	../../../../lib/common/sparc
+CRTSRCS=	../../../../lib/crt/sparcv7
 CRTI=		pics/crti.o
 CRTN=		pics/crtn.o
 CRTS=		$(CRTI)		$(CRTN)

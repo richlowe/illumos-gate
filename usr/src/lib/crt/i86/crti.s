@@ -20,8 +20,11 @@
  * CDDL HEADER END
  */
 /*
- *	Copyright (c) 2001 by Sun Microsystems, Inc.
- *	All rights reserved.
+ * Copyright (c) 2001 by Sun Microsystems, Inc.
+ * All rights reserved.
+ */
+/*
+ * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
  */
 
 /*
@@ -33,22 +36,51 @@
  *
  * For further details - see bug#4433015
  */
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
-	.file		"crtn.s"
-
-/*
- * _init function epilogue
- */
-	.section	".init"
-	.align	4
-	ret
-	restore
+	.file	"crti.s"
 
 /*
- * _fini function epilogue
+ * Note that when _init and _fini are called the stack needs to be 16-byte
+ * aligned with a 4-byte bias.  See comment in lib/libc/i386/gen/makectxt.c.
+ *
+ * Note: If you change it, you need to change it in the following files as
+ * well:
+ *
+ *  - lib/libc/i386/threads/machdep.c
+ *  - lib/libc/i386/gen/makectxt.c
+ *  - lib/crt/i86/mach-crt1.s
  */
-	.section	".fini"
-	.align	4
-	ret
-	restore
+
+/*
+ * _init function prologue
+ */
+	.section	.init,"ax"
+	.globl	_init
+	.type	_init,@function
+	.align	16
+_init:
+	pushl	%ebp
+	movl	%esp, %ebp
+	andl	$-16,%esp
+	subl	$12,%esp
+	pushl	%ebx
+	call	.L1
+.L1:	popl	%ebx
+	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L1], %ebx
+
+/*
+ * _fini function prologue
+ */
+	.section	.fini,"ax"
+	.globl	_fini
+	.type	_fini,@function
+	.align	16
+_fini:
+	pushl	%ebp
+	movl	%esp, %ebp
+	andl	$-16,%esp
+	subl	$12,%esp
+	pushl	%ebx
+	call	.L2
+.L2:	popl	%ebx
+	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L2], %ebx
