@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #pragma weak _sbrk = sbrk
 #pragma weak _brk = brk
 
@@ -40,12 +38,11 @@
 #include "mtlib.h"
 #include "libc.h"
 
-extern int _end;
-void *_nd = &_end;
+void *_nd = NULL;
 mutex_t __sbrk_lock = DEFAULTMUTEX;
 
-extern int _brk_unlocked(void *);
-extern void *_sbrk_unlocked(intptr_t);
+extern intptr_t _brk_unlocked(void *);
+void *_sbrk_unlocked(intptr_t);
 
 /*
  * The break must always be at least 8-byte aligned
@@ -87,8 +84,15 @@ sbrk(intptr_t addend)
 void *
 _sbrk_unlocked(intptr_t addend)
 {
-	char *old_brk = BRKALIGN(_nd);
-	char *new_brk = BRKALIGN(old_brk + addend);
+	char *old_brk;
+	char *new_brk;
+
+	if (_nd == NULL) {
+		_nd = (void *)_brk_unlocked(0);
+	}
+
+	old_brk = BRKALIGN(_nd);
+	new_brk = BRKALIGN(old_brk + addend);
 
 	if ((addend > 0 && new_brk < old_brk) ||
 	    (addend < 0 && new_brk > old_brk)) {
@@ -134,6 +138,10 @@ _sbrk_grow_aligned(size_t min_size, size_t low_align, size_t high_align,
 
 	lmutex_lock(&__sbrk_lock);
 
+	if (_nd == NULL) {
+		_nd = (void *)_brk_unlocked(0);
+	}
+
 	old_brk = (uintptr_t)BRKALIGN(_nd);
 	ret_brk = P2ROUNDUP(old_brk, low_align);
 	high_brk = ret_brk + min_size;
@@ -148,7 +156,7 @@ _sbrk_grow_aligned(size_t min_size, size_t low_align, size_t high_align,
 		return ((void *)-1);
 	}
 
-	if ((brk_result = _brk_unlocked((void *)new_brk)) == 0)
+	if ((brk_result = (int)_brk_unlocked((void *)new_brk)) == 0)
 		_nd = (void *)new_brk;
 	lmutex_unlock(&__sbrk_lock);
 
@@ -165,6 +173,15 @@ brk(void *new_brk)
 {
 	int result;
 
+	/*
+	 * brk(2) will return the current brk if given an argument of 0, so we
+	 * need to fail it here
+	 */
+	if (new_brk == 0) {
+		errno = ENOMEM;
+		return (-1);
+	}
+
 	if (!primary_link_map) {
 		errno = ENOTSUP;
 		return (-1);
@@ -175,7 +192,7 @@ brk(void *new_brk)
 	new_brk = BRKALIGN(new_brk);
 
 	lmutex_lock(&__sbrk_lock);
-	if ((result = _brk_unlocked(new_brk)) == 0)
+	if ((result = (int)_brk_unlocked(new_brk)) == 0)
 		_nd = new_brk;
 	lmutex_unlock(&__sbrk_lock);
 

@@ -65,11 +65,18 @@ int use_stk_lpg = 1;
 static int brk_lpg(caddr_t nva);
 static int grow_lpg(caddr_t sp);
 
-int
+intptr_t
 brk(caddr_t nva)
 {
 	int error;
 	proc_t *p = curproc;
+
+	/*
+	 * As a special case to aid the implementation of sbrk(3C), if given a
+	 * new brk of 0, return the current brk.  We'll hide this in brk(3C).
+	 */
+	if (nva == 0)
+		return ((intptr_t)(p->p_brkbase + p->p_brksize));
 
 	/*
 	 * Serialize brk operations on an address space.
