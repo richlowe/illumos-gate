@@ -30,6 +30,7 @@
 #include <struct_layout.h>
 
 
+
 static const sl_auxv_layout_t auxv_layout = {
 	{ 0,	8,	0,	0 },		/* sizeof (auxv_t) */
 	{ 0,	4,	0,	1 },		/* a_type */
@@ -359,22 +360,24 @@ static const sl_utsname_layout_t utsname_layout = {
 
 
 static const sl_prfdinfo_layout_t prfdinfo_layout = {
-	{ 0,	1088,	0,	0 },	/* sizeof (prfdinfo_t) */
-	{ 0,	4,	0,	0 },	/* pr_fd */
-	{ 4,	4,	0,	0 },	/* pr_mode */
-	{ 8,	4,	0,	0 },	/* pr_uid */
-	{ 12,	4,	0,	0 },	/* pr_gid */
-	{ 16,	4,	0,	0 },	/* pr_major */
-	{ 20,	4,	0,	0 },	/* pr_minor */
-	{ 24,	4,	0,	0 },	/* pr_rmajor */
-	{ 28,	4,	0,	0 },	/* pr_rminor */
-	{ 32,	8,	0,	0 },	/* pr_ino */
-	{ 40,	8,	0,	0 },	/* pr_offset */
-	{ 48,	8,	0,	0 },	/* pr_size */
-	{ 56,	4,	0,	0 },	/* pr_filefags */
-	{ 60,	4,	0,	0 },	/* pr_fdflags */
-	{ 64,	1,	1024,	0 },	/* pr_path */
+	{ 0,	1088,	0,	0 },		/* sizeof (prfdinfo_t) */
+	{ 0,	4,	0,	0 },		/* pr_fd */
+	{ 4,	4,	0,	0 },		/* pr_mode */
+	{ 8,	4,	0,	0 },		/* pr_uid */
+	{ 12,	4,	0,	0 },		/* pr_gid */
+	{ 16,	4,	0,	0 },		/* pr_major */
+	{ 20,	4,	0,	0 },		/* pr_minor */
+	{ 24,	4,	0,	0 },		/* pr_rmajor */
+	{ 28,	4,	0,	0 },		/* pr_rminor */
+	{ 32,	8,	0,	0 },		/* pr_ino */
+	{ 40,	8,	0,	0 },		/* pr_offset */
+	{ 48,	8,	0,	0 },		/* pr_size */
+	{ 56,	4,	0,	0 },		/* pr_fileflags */
+	{ 60,	4,	0,	0 },		/* pr_fdflags */
+	{ 64,	1,	1024,	0 },		/* pr_path[] */
 };
+
+
 
 
 static const sl_arch_layout_t layout_i386 = {
