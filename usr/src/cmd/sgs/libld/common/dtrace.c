@@ -93,7 +93,7 @@ make_is_writable(Ofl_desc *ofl, Is_desc *isp)
 {
 	void *newtext;
 
-	if (isp->is_newdata == TRUE)
+	if (isp->is_writable == TRUE)
 		return (0);
 
 	if ((newtext = libld_malloc(isp->is_indata->d_size)) == NULL) {
@@ -104,7 +104,7 @@ make_is_writable(Ofl_desc *ofl, Is_desc *isp)
 
 	(void) memcpy(newtext, isp->is_indata->d_buf, isp->is_indata->d_size);
 	isp->is_indata->d_buf = newtext;
-	isp->is_newdata = TRUE;
+	isp->is_writable = TRUE;
 	return (0);
 }
 

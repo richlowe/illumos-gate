@@ -927,7 +927,7 @@ struct is_desc {			/* input section descriptor */
 					/*	processing and ident used for */
 					/*	 placing/ordering sections */
 	Word		is_flags;	/* Various flags */
-	Boolean		is_newdata;	/* is_indata is ours, to allow change */
+	Boolean		is_writable;	/* is_indata is ours, to allow change */
 };
 
 #define	FLG_IS_ORDERED	0x0001		/* this is a SHF_ORDERED section */

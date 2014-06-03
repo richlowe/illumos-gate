@@ -178,7 +178,7 @@ process_section(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 	isp->is_scnndx = ndx;
 	isp->is_flags = FLG_IS_EXTERNAL;
 	isp->is_keyident = ident;
-	isp->is_newdata = FALSE;
+	isp->is_writable = FALSE;
 
 	if ((isp->is_indata = elf_getdata(scn, NULL)) == NULL) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_GETDATA),
