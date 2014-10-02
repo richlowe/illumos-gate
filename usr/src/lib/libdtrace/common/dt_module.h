@@ -55,6 +55,9 @@ extern int dt_module_getlibid(dtrace_hdl_t *, dt_module_t *,
 extern ctf_file_t *dt_module_getctflib(dtrace_hdl_t *, dt_module_t *,
     const char *);
 
+extern boolean_t dt_is_forward_decl(ctf_file_t *, ctf_id_t);
+extern void dt_resolve_forward_decl(ctf_file_t **, ctf_id_t *);
+
 #ifdef	__cplusplus
 }
 #endif

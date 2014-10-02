@@ -50,6 +50,7 @@ dt_xlator_create_member(const char *name, ctf_id_t type, ulong_t off, void *arg)
 	dt_xlator_t *dxp = arg;
 	dtrace_hdl_t *dtp = dxp->dx_hdl;
 	dt_node_t *enp, *mnp;
+	ctf_file_t *ctfp;
 
 	if ((enp = dt_node_xalloc(dtp, DT_NODE_XLATOR)) == NULL)
 		return (dt_set_errno(dtp, EDT_NOMEM));
@@ -71,7 +72,14 @@ dt_xlator_create_member(const char *name, ctf_id_t type, ulong_t off, void *arg)
 	enp->dn_op = DT_TOK_XLATE;
 	enp->dn_xlator = dxp;
 	enp->dn_xmember = mnp;
-	dt_node_type_assign(enp, dxp->dx_dst_ctfp, type, B_FALSE);
+	/*
+	 * XXX: Is it ok for the CTF of the type to not be from the dst ctf?
+	 *
+	 * I suspect it's actually unnecessary, but I'm also unclear on
+	 * dynamic translators
+	 */
+	dt_resolve_forward_decl(&ctfp, &type);
+	dt_node_type_assign(enp, ctfp, type, B_FALSE);
 
 	/*
 	 * For the member itself, we use a DT_NODE_MEMBER as usual with the

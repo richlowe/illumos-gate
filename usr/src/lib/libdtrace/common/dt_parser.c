@@ -678,11 +678,6 @@ dt_node_type_assign(dt_node_t *dnp, ctf_file_t *fp, ctf_id_t type,
 	uint_t kind = ctf_type_kind(fp, base);
 	ctf_encoding_t e;
 
-	/*
-	 * If type is (eventually) CTF_K_FORWARD, find an equivalent type that
-	 * isn't and use that instead.
-	 */
-
 	dnp->dn_flags &=
 	    ~(DT_NF_SIGNED | DT_NF_REF | DT_NF_BITFIELD | DT_NF_USERLAND);
 
@@ -1804,6 +1799,7 @@ dt_node_offsetof(dt_decl_t *ddp, char *s)
 
 	ctf_membinfo_t ctm;
 	ctf_id_t type;
+	ctf_file_t *ctfp;
 	uint_t kind;
 
 	name = strdupa(s);
@@ -1829,7 +1825,15 @@ dt_node_offsetof(dt_decl_t *ddp, char *s)
 	}
 
 	bzero(&dn, sizeof (dn));
-	dt_node_type_assign(&dn, dtt.dtt_ctfp, ctm.ctm_type, B_FALSE);
+	/*
+	 * Resolution of CTF_K_FORWARD is unnecessary here, since it can't be
+	 * both forward _and_ a bitfield, but is done for completeness.
+	 */
+	type = ctm.ctm_type;
+	ctfp = dtt.dtt_ctfp;
+
+	dt_resolve_forward_decl(&ctfp, &type);
+	dt_node_type_assign(&dn, ctfp, type, B_FALSE);
 
 	if (dn.dn_flags & DT_NF_BITFIELD) {
 		xyerror(D_OFFSETOF_BITFIELD,
@@ -3733,24 +3737,16 @@ asgn_common:
 		 * If we follow a reference to a forward declaration tag,
 		 * search the entire type space for the actual definition.
 		 */
-		while (kind == CTF_K_FORWARD) {
-			char *tag = ctf_type_name(ctfp, type, n1, sizeof (n1));
-			dtrace_typeinfo_t dtt;
+		dt_resolve_forward_decl(&ctfp, &type);
+		kind = ctf_type_kind(ctfp, type);
 
-			if (tag != NULL && dt_type_lookup(tag, &dtt) == 0 &&
-			    (dtt.dtt_ctfp != ctfp || dtt.dtt_type != type)) {
-				ctfp = dtt.dtt_ctfp;
-				type = ctf_type_resolve(ctfp, dtt.dtt_type);
-				kind = ctf_type_kind(ctfp, type);
-			} else {
-				xyerror(D_OP_INCOMPLETE,
-				    "operator %s cannot be applied to a "
-				    "forward declaration: no %s definition "
-				    "is available\n", opstr(op), tag);
-			}
-		}
-
-		if (kind != CTF_K_STRUCT && kind != CTF_K_UNION) {
+		if (kind == CTF_K_FORWARD) {
+			xyerror(D_OP_INCOMPLETE,
+			    "operator %s cannot be applied to a "
+			    "forward declaration: no %s definition "
+			    "is available\n", opstr(op),
+			    ctf_type_name(ctfp, type, n1, sizeof (n1)));
+		} else if (kind != CTF_K_STRUCT && kind != CTF_K_UNION) {
 			if (op == DT_TOK_PTR) {
 				xyerror(D_OP_SOU, "operator -> cannot be "
 				    "applied to pointer to type \"%s\"; must "
@@ -3770,11 +3766,14 @@ asgn_common:
 			    ctf_type_name(ctfp, type, n1, sizeof (n1)));
 		}
 
-		type = ctf_type_resolve(ctfp, m.ctm_type);
-		kind = ctf_type_kind(ctfp, type);
+		type = m.ctm_type;
 
-		dt_node_type_assign(dnp, ctfp, m.ctm_type, B_FALSE);
+		dt_resolve_forward_decl(&ctfp, &type);
+		dt_node_type_assign(dnp, ctfp, type, B_FALSE);
 		dt_node_attr_assign(dnp, lp->dn_attr);
+
+		type = ctf_type_resolve(ctfp, type);
+		kind = ctf_type_kind(ctfp, type);
 
 		if (op == DT_TOK_PTR && (kind != CTF_K_ARRAY ||
 		    dt_node_is_string(dnp)))
@@ -4283,6 +4282,8 @@ dt_cook_xlator(dt_node_t *dnp, uint_t idflags)
 
 	dtrace_attribute_t attr = _dtrace_maxattr;
 	ctf_membinfo_t ctm;
+	ctf_id_t type;
+	ctf_file_t *ctfp;
 
 	/*
 	 * Before cooking each translator member, we push a reference to the
@@ -4301,7 +4302,16 @@ dt_cook_xlator(dt_node_t *dnp, uint_t idflags)
 		}
 
 		(void) dt_node_cook(mnp, DT_IDFLG_REF);
-		dt_node_type_assign(mnp, dxp->dx_dst_ctfp, ctm.ctm_type,
+		ctfp = dxp->dx_dst_ctfp;
+		type = ctm.ctm_type;
+
+		/*
+		 *
+		 * This probably doesn't need to be resolved, because it's of
+		 * the translator, but is done for completeness right now.
+		 */
+		dt_resolve_forward_decl(&ctfp, &type);
+		dt_node_type_assign(mnp, ctfp, type,
 		    B_FALSE);
 		attr = dt_attr_min(attr, mnp->dn_attr);
 

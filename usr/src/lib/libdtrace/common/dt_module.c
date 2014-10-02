@@ -1385,6 +1385,39 @@ dtrace_lookup_by_addr(dtrace_hdl_t *dtp, GElf_Addr addr,
 	return (0);
 }
 
+boolean_t
+dt_is_forward_decl(ctf_file_t *file, ctf_id_t type)
+{
+	ctf_id_t kind = ctf_type_kind(file, type);
+
+	while ((type = ctf_type_reference(file, type)) != CTF_ERR) {
+		type = ctf_type_resolve(file, type);
+		kind = ctf_type_kind(file, type);
+	}
+
+	return (kind == CTF_K_FORWARD);
+}
+
+void
+dt_resolve_forward_decl(ctf_file_t **ctfp, ctf_id_t *type)
+{
+	char name[DT_TYPE_NAMELEN];
+
+	while (dt_is_forward_decl(*ctfp, *type)) {
+		char *tag = ctf_type_name(*ctfp, *type, name, sizeof (name));
+		dtrace_typeinfo_t dtt;
+
+		if (tag != NULL && dt_type_lookup(tag, &dtt) == 0 &&
+		    (dtt.dtt_ctfp != *ctfp) || dtt.dtt_type != *type) {
+			*ctfp = dtt.dtt_ctfp;
+			*type = dtt.dtt_type;
+		} else {
+			/* All we have is the forward definition */
+			break;
+		}
+	}
+}
+
 int
 dtrace_lookup_by_type(dtrace_hdl_t *dtp, const char *object, const char *name,
     dtrace_typeinfo_t *tip)
@@ -1476,8 +1509,7 @@ dtrace_lookup_by_type(dtrace_hdl_t *dtp, const char *object, const char *name,
 			tip->dtt_object = dmp->dm_name;
 			tip->dtt_ctfp = fp;
 			tip->dtt_type = id;
-			if (ctf_type_kind(fp, ctf_type_resolve(fp, id)) !=
-			    CTF_K_FORWARD)
+			if (!dt_is_forward_decl(fp, ctf_type_resolve(fp, id)))
 				return (0);
 
 			found++;

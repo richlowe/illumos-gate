@@ -41,6 +41,7 @@
 
 #include <dt_impl.h>
 #include <dt_grammar.h>
+#include <dt_module.h>
 #include <dt_parser.h>
 #include <dt_provider.h>
 
@@ -70,18 +71,7 @@ dt_cg_node_alloc(uint_t label, dif_instr_t instr)
 static ctf_file_t *
 dt_cg_membinfo(ctf_file_t *fp, ctf_id_t type, const char *s, ctf_membinfo_t *mp)
 {
-	while (ctf_type_kind(fp, type) == CTF_K_FORWARD) {
-		char n[DT_TYPE_NAMELEN];
-		dtrace_typeinfo_t dtt;
-
-		if (ctf_type_name(fp, type, n, sizeof (n)) == NULL ||
-		    dt_type_lookup(n, &dtt) == -1 || (
-		    dtt.dtt_ctfp == fp && dtt.dtt_type == type))
-			break; /* unable to improve our position */
-
-		fp = dtt.dtt_ctfp;
-		type = ctf_type_resolve(fp, dtt.dtt_type);
-	}
+	dt_resolve_forward_decl(&fp, &type);
 
 	if (ctf_member_info(fp, type, s, mp) == CTF_ERR)
 		return (NULL); /* ctf_errno is set for us */
