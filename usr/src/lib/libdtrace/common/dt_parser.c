@@ -678,6 +678,11 @@ dt_node_type_assign(dt_node_t *dnp, ctf_file_t *fp, ctf_id_t type,
 	uint_t kind = ctf_type_kind(fp, base);
 	ctf_encoding_t e;
 
+	/*
+	 * If type is (eventually) CTF_K_FORWARD, find an equivalent type that
+	 * isn't and use that instead.
+	 */
+
 	dnp->dn_flags &=
 	    ~(DT_NF_SIGNED | DT_NF_REF | DT_NF_BITFIELD | DT_NF_USERLAND);
 
@@ -1369,7 +1374,8 @@ dt_node_type(dt_decl_t *ddp)
 	dnp->dn_op = DT_TOK_IDENT;
 	dnp->dn_string = name;
 
-	dt_node_type_assign(dnp, dtt.dtt_ctfp, dtt.dtt_type, dtt.dtt_flags);
+	dt_node_type_assign(dnp, dtt.dtt_ctfp, dtt.dtt_type,
+	    dtt.dtt_flags & DTT_FL_USER ? B_TRUE : B_FALSE);
 
 	if (dtt.dtt_ctfp == dtp->dt_cdefs->dm_ctfp ||
 	    dtt.dtt_ctfp == dtp->dt_ddefs->dm_ctfp)
@@ -2433,7 +2439,7 @@ dt_node_member(dt_decl_t *ddp, char *name, dt_node_t *expr)
 
 	if (ddp != NULL)
 		dt_node_type_assign(dnp, dtt.dtt_ctfp, dtt.dtt_type,
-		    dtt.dtt_flags);
+		    dtt.dtt_flags & DTT_FL_USER ? B_TRUE : B_FALSE);
 
 	return (dnp);
 }
@@ -2790,7 +2796,7 @@ dt_xcook_ident(dt_node_t *dnp, dt_idhash_t *dhp, uint_t idkind, int create)
 		dnp->dn_flags |= DT_NF_LVALUE;
 
 		dt_node_type_assign(dnp, dtt.dtt_ctfp, dtt.dtt_type,
-		    dtt.dtt_flags);
+		    dtt.dtt_flags & DTT_FL_USER ? B_TRUE : B_FALSE);
 		dt_node_attr_assign(dnp, _dtrace_symattr);
 
 		if (uref) {
@@ -2942,7 +2948,7 @@ dt_cook_op1(dt_node_t *dnp, uint_t idflags)
 
 		dt_ident_type_assign(cp->dn_ident, dtt.dtt_ctfp, dtt.dtt_type);
 		dt_node_type_assign(cp, dtt.dtt_ctfp, dtt.dtt_type,
-		    dtt.dtt_flags);
+		    dtt.dtt_flags & DTT_FL_USER ? B_TRUE : B_FALSE);
 	}
 
 	if (cp->dn_kind == DT_NODE_VAR)
