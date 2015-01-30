@@ -58,11 +58,7 @@ depvar_add_to_list(Name name, Boolean cmdline)
 {
 	Depvar		dv;
 
-#ifdef SUNOS4_AND_AFTER
 	dv = ALLOC(Depvar);
-#else
-	dv = (Depvar) Malloc(sizeof(struct _Depvar));
-#endif
 	dv->name = name;
 	dv->next = NULL;
 	dv->cmdline = cmdline;
@@ -87,11 +83,7 @@ depvar_dep_macro_used(Name name)
 	for (dv = depvar_list; dv != NULL; dv = dv->next) {
 		if (name == dv->name) {
 #ifdef NSE
-#ifdef SUNOS4_AND_AFTER
 			if (dv->cmdline) {
-#else
-			if (is_true(dv->cmdline)) {
-#endif
 				nse_dep_cmdmacro(dv->name->string);
 			}
 #endif
@@ -114,11 +106,7 @@ depvar_rule_macro_used(Name name)
 
 	for (dv = depvar_list; dv != NULL; dv = dv->next) {
 		if (name == dv->name) {
-#ifdef SUNOS4_AND_AFTER
 			if (dv->cmdline) {
-#else
-			if (is_true(dv->cmdline)) {
-#endif
 				nse_rule_cmdmacro(dv->name->string);
 			}
 			break;
