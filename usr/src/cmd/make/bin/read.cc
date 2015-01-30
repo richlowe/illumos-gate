@@ -32,7 +32,7 @@
 /*
  * Included files
  */
-#include <avo/avo_alloca.h>		/* alloca() */
+#include <alloca.h>		/* alloca() */
 #include <errno.h>		/* errno */
 #include <fcntl.h>		/* fcntl() */
 #include <mk/defs.h>

@@ -32,7 +32,7 @@
 /*
  * Included files
  */
-#include <avo/avo_alloca.h>		/* alloca() */
+#include <alloca.h>		/* alloca() */
 #if defined(TEAMWARE_MAKE_CMN)
 #include <avo/util.h>		/* avo_get_user(), avo_hostname() */
 #endif

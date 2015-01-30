@@ -34,7 +34,7 @@
  * Included files
  */
 #include <sys/wait.h>			/* WIFEXITED(status) */
-#include <avo/avo_alloca.h>		/* alloca() */
+#include <alloca.h>		/* alloca() */
 
 #if defined(TEAMWARE_MAKE_CMN) || defined(MAKETOOL) /* tolik */
 #	include <avo/strings.h>	/* AVO_STRDUP() */

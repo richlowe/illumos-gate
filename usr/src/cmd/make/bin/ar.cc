@@ -39,7 +39,7 @@
 /*
  * Included files
  */
-#include <avo/avo_alloca.h>		/* alloca() */
+#include <alloca.h>		/* alloca() */
 #include <ar.h>
 #include <errno.h>		/* errno */
 #include <fcntl.h>		/* open() */
