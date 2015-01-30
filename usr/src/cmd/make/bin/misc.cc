@@ -164,9 +164,7 @@ fatal(char * message, ...)
 	}
 	(void) fflush(stderr);
 	if (fatal_in_progress) {
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		exit_status = 1;
-#endif
 		exit(1);
 	}
 	fatal_in_progress = true;
@@ -200,9 +198,7 @@ fatal(char * message, ...)
 	job_adjust_fini();
 #endif
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	exit_status = 1;
-#endif
 	exit(1);
 }
 
@@ -290,11 +286,7 @@ get_current_path(void)
 	static char		*current_path;
 
 	if (current_path == NULL) {
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		getcwd(pwd, sizeof(pwd));
-#else
-		(void) getwd(pwd);
-#endif
 		if (pwd[0] == (int) nul_char) {
 			pwd[0] = (int) slash_char;
 			pwd[1] = (int) nul_char;
@@ -734,15 +726,11 @@ load_cached_names(void)
 	#ifdef HP_UX
 	MBSTOWCS(wcs_buffer, NOCATGETS("/bin/posix/sh"));
 	#else
-	#if defined(SUN5_0)
 	if (posix) {
 	  MBSTOWCS(wcs_buffer, NOCATGETS("/usr/xpg4/bin/sh"));
 	} else {
 	  MBSTOWCS(wcs_buffer, NOCATGETS("/bin/sh"));
 	}
-	#else  /* ^SUN5_0 */
-	MBSTOWCS(wcs_buffer, NOCATGETS("/bin/sh"));
-	#endif /* ^SUN5_0 */
 	#endif
 	(void) SETVAR(shell_name, GETNAME(wcs_buffer, FIND_LENGTH), false);
 

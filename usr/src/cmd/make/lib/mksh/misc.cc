@@ -49,9 +49,7 @@
 #include <sys/signal.h>		/* SIG_DFL */
 #include <sys/wait.h>		/* wait() */
 
-#ifdef SUN5_0
 #include <string.h>		/* strerror() */
-#endif
 
 #if defined (HP_UX) || defined (linux)
 #include <unistd.h>
@@ -68,19 +66,12 @@
 /*
  * Static variables
  */
-#ifdef SUN5_0
 extern "C" {
 	void		(*sigivalue)(int) = SIG_DFL;
 	void		(*sigqvalue)(int) = SIG_DFL;
 	void		(*sigtvalue)(int) = SIG_DFL;
 	void		(*sighvalue)(int) = SIG_DFL;
 }
-#else
-static	void		(*sigivalue)(int) = (void (*) (int)) SIG_DFL;
-static	void		(*sigqvalue)(int) = (void (*) (int)) SIG_DFL;
-static	void		(*sigtvalue)(int) = (void (*) (int)) SIG_DFL;
-static	void		(*sighvalue)(int) = (void (*) (int)) SIG_DFL;
-#endif
 
 long	getname_bytes_count = 0;
 long	getname_names_count = 0;
@@ -122,9 +113,7 @@ getmem(register int size)
 		sprintf(buf, NOCATGETS("*** Error: malloc(%d) failed: %s\n"), size, strerror(errno));
 		strcat(buf, catgets(libmksdmsi18n_catd, 1, 126, "mksh: Fatal error: Out of memory\n"));
 		fputs(buf, stderr);
-#ifdef SUN5_0
 		exit_status = 1;
-#endif
 		exit(1);
 	}
 	return result;
@@ -284,32 +273,16 @@ free_name(Name name)
 void
 enable_interrupt(register void (*handler) (int))
 {
-#ifdef SUN5_0
 	if (sigivalue != SIG_IGN) {
-#else
-	if (sigivalue != (void (*) (int)) SIG_IGN) {
-#endif
 		(void) bsd_signal(SIGINT, (SIG_PF) handler);
 	}
-#ifdef SUN5_0
 	if (sigqvalue != SIG_IGN) {
-#else
-	if (sigqvalue != (void (*) (int)) SIG_IGN) {
-#endif
 		(void) bsd_signal(SIGQUIT, (SIG_PF) handler);
 	}
-#ifdef SUN5_0
 	if (sigtvalue != SIG_IGN) {
-#else
-	if (sigtvalue != (void (*) (int)) SIG_IGN) {
-#endif
 		(void) bsd_signal(SIGTERM, (SIG_PF) handler);
 	}
-#ifdef SUN5_0
 	if (sighvalue != SIG_IGN) {
-#else
-	if (sighvalue != (void (*) (int)) SIG_IGN) {
-#endif
 		(void) bsd_signal(SIGHUP, (SIG_PF) handler);
 	}
 }
@@ -394,9 +367,7 @@ errmsg(int errnum)
 #ifdef SUN4_x
 		return(sys_errlist[errnum]);
 #endif
-#ifdef SUN5_0
 		return strerror(errnum);
-#endif
 
 	}
 #endif // linux
@@ -455,9 +426,7 @@ fatal_mksh(const char *message, ...)
 	if (buf != static_buf) {
 		retmem_mb(buf);
 	}
-#ifdef SUN5_0
 	exit_status = 1;
-#endif
 	exit(1);
 }
 
@@ -519,9 +488,7 @@ fatal_reader_mksh(const char * pattern, ...)
 			       get_current_path_mksh());
 	}
 	(void) fflush(stderr);
-#ifdef SUN5_0
 	exit_status = 1;
-#endif
 	exit(1);
 }
 
@@ -573,11 +540,7 @@ get_current_path_mksh(void)
 	static char		*current_path;
 
 	if (current_path == NULL) {
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		getcwd(pwd, sizeof(pwd));
-#else
-		(void) getwd(pwd);
-#endif
 		if (pwd[0] == (int) nul_char) {
 			pwd[0] = (int) slash_char;
 			pwd[1] = (int) nul_char;
@@ -866,14 +829,8 @@ handle_interrupt_mksh(int)
 		kill(childPid, SIGTERM);
 		childPid = -1;
 	}
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	while (wait((int *) NULL) != -1);
-#if defined(SUN5_0)
 	exit_status = 2;
-#endif
-#else
-	while (wait((union wait *) NULL) != -1);
-#endif
 	exit(2);
 }
 
@@ -893,17 +850,10 @@ handle_interrupt_mksh(int)
 void
 setup_interrupt(register void (*handler) (int))
 {
-#ifdef SUN5_0
 	sigivalue = bsd_signal(SIGINT, SIG_IGN);
 	sigqvalue = bsd_signal(SIGQUIT, SIG_IGN);
 	sigtvalue = bsd_signal(SIGTERM, SIG_IGN);
 	sighvalue = bsd_signal(SIGHUP, SIG_IGN);
-#else
-	sigivalue = (void (*) (int)) bsd_signal(SIGINT, SIG_IGN);
-	sigqvalue = (void (*) (int)) bsd_signal(SIGQUIT, SIG_IGN);
-	sigtvalue = (void (*) (int)) bsd_signal(SIGTERM, SIG_IGN);
-	sighvalue = (void (*) (int)) bsd_signal(SIGHUP, SIG_IGN);
-#endif
 	enable_interrupt(handler);
 }
 

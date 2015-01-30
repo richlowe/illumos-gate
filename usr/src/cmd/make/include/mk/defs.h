@@ -77,7 +77,6 @@
 #define SETVAR(name, value, append) \
 				setvar_daemon(name, value, append, no_daemon, \
 					      true, debug_level)
-#ifdef SUN5_0
 #define MAX(a,b)		(((a)>(b))?(a):(b))
 /*
  * New feature added to SUN5_0 make,  invoke the vanilla svr4 make when
@@ -85,7 +84,6 @@
  */
 #define SVR4_MAKE		"/usr/ccs/lib/svr4.make"
 #define USE_SVR4_MAKE		"USE_SVR4_MAKE"
-#endif
 /*
  * The standard MAXHOSTNAMELEN is 64. We want 32.
  */

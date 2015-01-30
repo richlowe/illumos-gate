@@ -131,11 +131,7 @@ file_lock(char *name, char *lockname, int *file_locked, int timeout)
 
 			if ((counter > 5) && (!printed_warning)) {
 				/* Print waiting message after 5 secs */
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 				(void) getcwd(msg, MAXPATHLEN);
-#else
-				(void) getwd(msg);
-#endif
 				fprintf(stderr,
 					catgets(libmksdmsi18n_catd, 1, 162, "file_lock: file %s is already locked.\n"),
 					name);
@@ -177,9 +173,7 @@ file_lock_error(char *msg, char *file, char *str, int arg1, int arg2)
 #ifdef SUN4_x
 		strcat(msg, sys_errlist[errno]);
 #endif
-#ifdef SUN5_0
 		strcat(msg, strerror(errno));
-#endif
 	} else {
 		len = strlen(msg);
 		sprintf(&msg[len], NOCATGETS("errno %d"), errno);

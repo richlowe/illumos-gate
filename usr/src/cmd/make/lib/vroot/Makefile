@@ -30,10 +30,8 @@ OBJECTS =	access.o	\
 		report.o	\
 		rmdir.o		\
 		stat.o		\
-		statfs.o	\
 		truncate.o	\
 		unlink.o	\
-		unmount.o	\
 		utimes.o	\
 		vroot.o		\
 		setenv.o

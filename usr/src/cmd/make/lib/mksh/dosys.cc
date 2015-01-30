@@ -627,24 +627,7 @@ Boolean
 await(register Boolean ignore_error, register Boolean silent_error, Name target, wchar_t *command, pid_t running_pid, Boolean send_mtool_msgs, void *xdrs_p, int job_msg_id)
 #endif
 {
-#ifdef SUN5_0
         int                     status;
-#else
-#ifndef WEXITSTATUS
-#define WEXITSTATUS(stat)       stat.w_T.w_Retcode
-#endif
-#ifndef WTERMSIG
-#define WTERMSIG(stat)          stat.w_T.w_Termsig
-#endif
-#ifndef WCOREDUMP
-#define WCOREDUMP(stat)         stat.w_T.w_Coredump
-#endif
-#if defined (HP_UX) || defined (linux)
-	int			status;
-#else
-	union wait		status;
-#endif
-#endif
 	char			*buffer;
 	int			core_dumped;
 	int			exit_status;
@@ -668,7 +651,6 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 	(void) fflush(stdout);
 	(void) fflush(stderr);
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
         if (status == 0) {
 
 #ifdef PRINT_EXIT_STATUS
@@ -682,11 +664,6 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 	warning_mksh(NOCATGETS("I'm in await(), and status is *NOT* 0."));
 #endif
 
-#else
-        if (status.w_status == 0) {
-                return succeeded;
-	}
-#endif
 
         exit_status = WEXITSTATUS(status);
 
@@ -719,9 +696,6 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 					       exit_status);
 			);
 		} else {
-#if ! defined(SUN5_0) && ! defined(HP_UX) && ! defined(linux)
-			if (termination_signal > NSIG) {
-#endif
 				(void) fprintf(stdout,
 					       catgets(libmksdmsi18n_catd, 1, 105, "*** Signal %d"),
 					       termination_signal);
@@ -730,18 +704,6 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 						       catgets(libmksdmsi18n_catd, 1, 106, "*** Signal %d"),
 						       termination_signal);
 				);
-#if ! defined(SUN5_0) && ! defined(HP_UX) && ! defined(linux)
-			} else {
-				(void) fprintf(stdout,
-					       "*** %s",
-					       sys_siglist[termination_signal]);
-				SEND_MTOOL_MSG(
-					(void) sprintf(&tmp_buf[strlen(tmp_buf)],
-						       "*** %s",
-						       sys_siglist[termination_signal]);
-				);
-			}
-#endif
 			if (core_dumped) {
 				(void) fprintf(stdout,
 					       catgets(libmksdmsi18n_catd, 1, 107, " - core dumped"));

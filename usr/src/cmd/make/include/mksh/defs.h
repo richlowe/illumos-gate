@@ -91,11 +91,7 @@ enum {
 #ifdef sun386
 	ar_member_name_len = 14,
 #else
-#if defined(SUN5_0) || defined(linux)
 	ar_member_name_len = 1024,
-#else
-	ar_member_name_len = 15,
-#endif
 #endif
 
 	hashsize = 2048			/* size of hash table */
@@ -950,9 +946,7 @@ extern Boolean		dollarless_flag;
 extern Name		dollarless_value;
 extern char		**environ;
 extern Envvar		envvar;
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 extern int		exit_status;
-#endif
 extern wchar_t		*file_being_read;
 /* Variable gnu_style=true if env. var. SUN_MAKE_COMPAT_MODE=GNU (RFE 4866328) */
 extern Boolean		gnu_style;

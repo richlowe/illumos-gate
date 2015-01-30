@@ -1172,11 +1172,9 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 		sccs_get_rule = sccs_get_posix_rule;
 			/* turn keep state off being SunPro make specific */
 		keep_state = false;
-		#if defined(SUN5_0)
 		/* Use /usr/xpg4/bin/sh on Solaris */
 		MBSTOWCS(wcs_buffer, NOCATGETS("/usr/xpg4/bin/sh"));
 		(void) SETVAR(shell_name, GETNAME(wcs_buffer, FIND_LENGTH), false);
-		#endif
 		if (trace_reader) {
 			(void) printf("%s:\n", posix_name->string_mb);
 		}
@@ -1925,9 +1923,7 @@ fatal_reader(char * pattern, ...)
 			       get_current_path());
 	}
 	(void) fflush(stderr);
-#if defined(SUN5_0) || defined(HP_UX)
 	exit_status = 1;
-#endif
 	exit(1);
 }
 

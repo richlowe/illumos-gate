@@ -36,11 +36,7 @@
 /*
  * Included files
  */
-#if defined(SUN5_0) || defined(HP_UX)
 #include <dirent.h>		/* opendir() */
-#else
-#include <sys/dir.h>		/* opendir() */
-#endif
 #include <errno.h>		/* errno */
 #include <mk/defs.h>
 #include <mksh/macro.h>		/* getvar() */
@@ -306,12 +302,8 @@ read_dir(Name dir, wchar_t *pattern, Property line, wchar_t *library)
 	wchar_t			tmp_wcs_buffer[MAXPATHLEN];
 	DIR			*dir_fd;
 	int			m_local_dependency=0;
-#if defined(SUN5_0) || defined(HP_UX)
 #define d_fileno d_ino
         register struct dirent  *dp;
-#else
-        register struct direct  *dp;
-#endif
 	wchar_t			*vpath = NULL;
 	wchar_t			*p;
 	int			result = 0;

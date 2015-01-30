@@ -46,7 +46,6 @@
 #include <mk/defs.h>
 #include <mksh/misc.h>		/* retmem_mb() */
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 struct ranlib {
 	union {
 		off_t	ran_strx;	/* string table index of */
@@ -54,9 +53,6 @@ struct ranlib {
 	}	ran_un;
 	off_t	ran_off;		/* library member at this offset */
 };
-#else
-#include <ranlib.h>
-#endif
 
 #if defined(linux)
 #include <ctype.h>		/* isspace */
@@ -288,30 +284,6 @@ open_archive(char *filename, register Ar *arp)
 	}
 	(void) fcntl(fileno(arp->fd), F_SETFD, 1);
 
-#if !defined(SUN5_0) && !defined(linux) //XXX
-	/* Read enough of the archive to distinguish between the formats */
-	if (fread(mag_5, AR_5_MAGIC_LENGTH, 1, arp->fd) != 1) {
-		return failed;
-	}
-	if (IS_EQUALN(mag_5, AR_5_MAGIC, AR_5_MAGIC_LENGTH)) {
-		arp->type = AR_5;
-		/* Must read in header to set necessary info */
-		if (fseek(arp->fd, 0L, 0) != 0 ||
-		    fread((char *) &arp->arh_5, sizeof (Arh_5), 1, arp->fd) !=
-									1) {
-			return failed;
-		}
-		arp->sym_begin = ftell(arp->fd);
-		arp->num_symbols = sgetl(arp->arh_5.ar_syms);
-		arp->first_ar_mem = arp->sym_begin +
-					sizeof (Ars_5) * arp->num_symbols;
-		arp->sym_size = 0L;
-		return succeeded;
-	}
-	if (fseek(arp->fd, 0L, 0) != 0) {
-		return failed;
-	}
-#endif
 	if (fread(mag_port, AR_PORT_MAGIC_LENGTH, 1, arp->fd) != 1) {
 		return failed;
 	}
@@ -344,23 +316,12 @@ open_archive(char *filename, register Ar *arp)
 		 * name __.SYMDEF, in SVr4, it has the name "/        "
 		 */
 /*
-#ifdef SUN5_0
-		MBSTOWCS(wcs_buffer, NOCATGETS("/               "));
+		MBSTOWCS(wcs_buffer, "/               ");
 		if (IS_WEQUALN(arp->ar_port.ar_name, wcs_buffer, 16)) {
-#else
-		MBSTOWCS(wcs_buffer, NOCATGETS("__.SYMDEF       "));
-		if (IS_WEQUALN(arp->ar_port.ar_name, wcs_buffer, 16)) {
-#endif
  */
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		if (IS_EQUALN(arp->ar_port.ar_name,
 			      NOCATGETS("/               "),
 			      16)) {
-#else
-		if (IS_EQUALN(arp->ar_port.ar_name,
-			      NOCATGETS("__.SYMDEF       "),
-			      16)) {
-#endif
 			if (sscanf(arp->ar_port.ar_size,
 				   "%ld",
 				   &arp->sym_size) != 1) {
@@ -416,11 +377,7 @@ close_archive(register Ar *arp)
  *	Global variables used:
  */
 static Boolean
-#if defined(SUN5_0) || defined(linux) //XXX
 read_archive_dir(register Ar *arp, Name library, char **long_names_table)
-#else
-read_archive_dir(register Ar *arp, Name library, char **)
-#endif
 {
 	wchar_t			*name_string;
 	wchar_t			*member_string;
@@ -432,7 +389,6 @@ read_archive_dir(register Ar *arp, Name library, char **)
 	long			ptr;
 	long			date;
 
-#if defined(SUN5_0) || defined(linux) //XXX
 	int			offset;
 
 	/*
@@ -442,7 +398,6 @@ read_archive_dir(register Ar *arp, Name library, char **)
 	if (process_long_names_member(arp, long_names_table, library->string_mb) == failed) {
 		return failed;
 	}
-#endif
 	name_string = ALLOC_WC((int) (library->hash.length +
 				      (int) ar_member_name_len * 2));
 	(void) mbstowcs(name_string, library->string_mb, (int) library->hash.length);
@@ -518,7 +473,6 @@ read_archive_dir(register Ar *arp, Name library, char **)
 				ftell(arp->fd)
 			    );
 		    }
-#if defined(SUN5_0) || defined(linux) //XXX
 		    /* If it's a long name, retrieve it from long name table */
 		    if (arp->ar_port.ar_name[0] == '/') {
 			    /*
@@ -537,10 +491,6 @@ read_archive_dir(register Ar *arp, Name library, char **)
 			    q = arp->ar_port.ar_name;	
 			    len = sizeof arp->ar_port.ar_name;
 		    }
-#else
-		    q = arp->ar_port.ar_name;	
-		    len = sizeof arp->ar_port.ar_name;
-#endif
 		    
 		    for (p = member_string;
 			 (len > 0) &&
@@ -784,7 +734,6 @@ translate_entry(register Ar *arp, Name target, register Property member, char **
 					      arp->ar_port.ar_name,
 					      target->string_mb);
 				}
-#if defined(SUN5_0) || defined(linux) //XXX
 		    /* If it's a long name, retrieve it from long name table */
 		    if (arp->ar_port.ar_name[0] == '/') {
 			    sscanf(arp->ar_port.ar_name + 1,
@@ -796,9 +745,6 @@ translate_entry(register Ar *arp, Name target, register Property member, char **
 			    len = sizeof arp->ar_port.ar_name;
 			    hp = arp->ar_port.ar_name;	
 		    }
-#else
-		    hp = arp->ar_port.ar_name;	
-#endif
 				ap = member_string;
 				while (*hp &&
 				       (*hp != (int) slash_char) &&
