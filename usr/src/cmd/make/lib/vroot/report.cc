@@ -306,7 +306,7 @@ report_search_path(char *iflag)
 }
 
 void
-report_dependency(register char *name)
+report_dependency(const char *name)
 {
 	register char	*filename;
 	char		buffer[MAXPATHLEN+1];

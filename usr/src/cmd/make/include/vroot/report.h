@@ -30,7 +30,7 @@
 
 extern FILE	*get_report_file(void);
 extern char	*get_target_being_reported_for(void);
-extern void	report_dependency(register char *name);
+extern void	report_dependency(const char *name);
 extern int	file_lock(char *name, char *lockname, int *file_locked, int timeout);
 #ifdef NSE
 extern char	*setenv(char *name, char *value);
