@@ -325,10 +325,8 @@ extern	long int	hostid;
 /*
  * Declarations of system defined variables
  */
-#if !defined(linux)
 /* On linux this variable is defined in 'signal.h' */
 extern	char		*sys_siglist[];
-#endif
 
 /*
  * Declarations of system supplied functions
@@ -406,7 +404,6 @@ extern	Boolean		get_pmake_machinesfile_specified(void);
 extern	XDR		*get_xdrs_ptr(void);
 #endif
 extern	wchar_t		*getmem_wc(register int size);
-#if !defined(linux)
 /* On linux getwd(char *) is defined in 'unistd.h' */
 #ifdef __cplusplus
 extern "C" {
@@ -414,7 +411,6 @@ extern "C" {
 extern	char		*getwd(char *);
 #ifdef __cplusplus
 }
-#endif
 #endif
 extern	void		handle_interrupt(int);
 extern	Boolean		is_running(Name target);

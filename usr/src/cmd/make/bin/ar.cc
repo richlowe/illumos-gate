@@ -54,11 +54,7 @@ struct ranlib {
 	off_t	ran_off;		/* library member at this offset */
 };
 
-#if defined(linux)
-#include <ctype.h>		/* isspace */
-#else
 #include <unistd.h>		/* close() */
-#endif
 
 
 /*

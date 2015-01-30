@@ -57,16 +57,7 @@
 #include <ulimit.h>		/* ulimit() */
 #include <unistd.h>		/* close(), dup2() */
 
-#if defined (HP_UX) || defined (linux)
-#	include <sys/param.h>
-#	include <wctype.h>
-#	include <wchar.h>
-#endif
 
-#if defined (linux)
-#	define wslen(x) wcslen(x)
-#	define wscpy(x,y) wcscpy(x,y)
-#endif
 
 /*
  * Defined macros
@@ -101,19 +92,7 @@ static Boolean	exec_vp(register char *name, register char **argv, char **envp, r
 int
 my_open(const char *path, int oflag, mode_t mode) {
 	int res = open(path, oflag, mode);
-#ifdef linux
-// Workaround for NFS problem: even when all directories in 'path'
-// exist, 'open' (file creation) fails with ENOENT.
-	int nattempt = 0;
-	while (res < 0 && (errno == ESTALE || errno == EAGAIN || errno == ENOENT)) {
-		nattempt++;
-		if(nattempt > 30) {
-			break;
-		}
-		sleep(1);
-#else
 	if (res < 0 && (errno == ESTALE || errno == EAGAIN)) {
-#endif
 		/* Stale NFS file handle. Try again */
 		res = open(path, oflag, mode);
 	}
@@ -132,17 +111,9 @@ redirect_io(char *stdout_file, char *stderr_file)
 	long		descriptor_limit;
 	int		i;
 
-#if defined (HP_UX) || defined (linux)
-        /*
-         *  HP-UX does not support the UL_GDESLIM command for ulimit().
-	 *  NOFILE == max num open files per process (from <sys/param.h>)
-         */
-	descriptor_limit = NOFILE;
-#else
 	if ((descriptor_limit = ulimit(UL_GDESLIM)) < 0) {
 		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 89, "ulimit() failed: %s"), errmsg(errno));
 	}
-#endif
 	for (i = 3; i < descriptor_limit; i++) {
 		(void) close(i);
 	}
@@ -344,15 +315,7 @@ doshell(wchar_t *command, register Boolean ignore_error, Boolean redirect_out_er
 		argv[argv_index++] = strdup(nice_prio_buf);
 	}
 	argv[argv_index++] = shellname;
-#if defined(linux)
-	if(0 == strcmp(shell->string_mb, (char*)NOCATGETS("/bin/sh"))) {
-		argv[argv_index++] = (char*)(ignore_error ? NOCATGETS("-c") : NOCATGETS("-ce"));
-	} else {
-		argv[argv_index++] = (char*)NOCATGETS("-c");
-	}
-#else
 	argv[argv_index++] = (char*)(ignore_error ? NOCATGETS("-c") : NOCATGETS("-ce"));
-#endif
 	if ((length = wslen(command)) >= MAXPATHLEN) {
 		tmp_mbs_buffer = getmem((length * MB_LEN_MAX) + 1);
                 (void) wcstombs(tmp_mbs_buffer, command, (length * MB_LEN_MAX) + 1);
@@ -362,15 +325,6 @@ doshell(wchar_t *command, register Boolean ignore_error, Boolean redirect_out_er
 	} else {
 		WCSTOMBS(mbs_buffer, command);
 		cmd_argv_index = argv_index;
-#if defined(linux)
-		int mbl = strlen(mbs_buffer);
-		if(mbl > 2) {
-			if(mbs_buffer[mbl-1] == '\n' && mbs_buffer[mbl-2] == '\\') {
-				mbs_buffer[mbl] = '\n';
-				mbs_buffer[mbl+1] = 0;
-			}
-		}
-#endif
 		argv[argv_index++] = strdup(mbs_buffer);
 	}
 	argv[argv_index] = NULL;

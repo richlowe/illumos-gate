@@ -38,9 +38,6 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <rpc/rpc.h>		/* host2netname(), netname2host() */
-#ifdef linux
-#	include <unistd.h>	/* getdomainname() */
-#endif
 
 /*
  * Defined macros
@@ -198,13 +195,8 @@ read_make_machines(Name make_machines_name)
 	// There is no getdomainname() function on Solaris.
 	// And netname2host() function does not work on Linux.
 	// So we have to use different APIs.
-#ifdef linux
-	if (getdomainname(mbs_buffer, MAXNETNAMELEN+1) == 0) {
-		sprintf(mbs_buffer2, "%s.%s", local_host_mb, mbs_buffer);
-#else
 	if (host2netname(mbs_buffer, NULL, NULL) &&
 	    netname2host(mbs_buffer, mbs_buffer2, MAXNETNAMELEN+1)) {
-#endif
 		MBSTOWCS(full_host, mbs_buffer2);
 		full_host_wslen = wslen(full_host);
 	}

@@ -148,12 +148,7 @@ exists(register Name target)
 			/* target->stat.time = buf.st_mtime; */
 /* BID_1129806 */
 /* vis@nbsp.nsk.su */
-#if defined(linux)
-			timestruc_t ttime = { buf.st_mtime, 0 };
-			target->stat.time = MAX(ttime, file_min_time);
-#else
 			target->stat.time = MAX(buf.st_mtim, file_min_time);
-#endif
 		}
 	}
 	if ((target->colon_splits > 0) &&
@@ -190,12 +185,7 @@ set_target_stat(register Name target, struct stat buf)
 		/* target->stat.time = buf.st_mtime; */
 /* BID_1129806 */
 /* vis@nbsp.nsk.su */
-#if defined(linux)
-		timestruc_t ttime = { buf.st_mtime, 0 };
-		target->stat.time = ttime;
-#else
 		target->stat.time = MAX(buf.st_mtim, file_min_time);
-#endif
 	}
 }
 

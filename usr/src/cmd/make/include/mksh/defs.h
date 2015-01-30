@@ -43,30 +43,9 @@
 #include <sys/time.h>		/* timestruc_t */
 #include <errno.h>		/* errno */
 
-#if defined (HP_UX) || defined (linux)
-#define  MAXNAMELEN           256
-#define  RW_NO_OVERLOAD_WCHAR 1  /* Rogue Wave, belongs in <rw/compiler.h> */
-#else
 #include <wctype.h>
 #include <widec.h>
-#endif
 
-#if defined (linux)
-/*
- * Definition of wchar functions.
- */
-#	include <wctype.h>
-#	include <wchar.h>
-#	define wsdup(x) wcsdup(x)
-#	define wschr(x,y) wcschr(x,y)
-#	define wscat(x,y) wcscat(x,y)
-#	define wsrchr(x,y) wcsrchr(x,y)
-#	define wslen(x) wcslen(x)
-#	define wscpy(x,y) wcscpy(x,y)
-#	define wsncpy(x,y,z) wcsncpy(x,y,z)
-#	define wscmp(x,y) wcscmp(x,y)
-#	define wsncmp(x,y,z) wcsncmp(x,y,z)
-#endif
 
 /*
  * A type and some utilities for boolean values
@@ -88,12 +67,7 @@ typedef enum {
  */
 enum {
 	update_delay = 30,		/* time between rstat checks */
-#ifdef sun386
-	ar_member_name_len = 14,
-#else
 	ar_member_name_len = 1024,
-#endif
-
 	hashsize = 2048			/* size of hash table */
 };
 
@@ -394,9 +368,6 @@ typedef enum {
  * Magic values for the timestamp stored with each name object
  */
 
-#if defined (linux)
-typedef struct timespec timestruc_t;
-#endif
 
 extern const timestruc_t file_no_time;
 extern const timestruc_t file_doesnt_exist;
@@ -461,11 +432,7 @@ struct _Macro {
 	* is translated into a string iff it is referenced.
 	* This is why  some macro values need a daemon. 
 	*/
-#if defined(HP_UX) || defined(linux)
-	Daemon			daemon;
-#else
 	Daemon			daemon:2;
-#endif
 };
 
 struct _Macro_list {
@@ -491,13 +458,6 @@ struct _Name {
 		int			stat_errno;	/* error from "stat" */
 		off_t			size;		/* Of file */
 		mode_t			mode;		/* Of file */
-#if defined(HP_UX) || defined(linux)
-		Boolean			is_file;
-		Boolean			is_dir;
-		Boolean			is_sym_link;
-		Boolean			is_precious;
-		enum sccs_stat		has_sccs;
-#else
 		Boolean			is_file:1;
 		Boolean			is_dir:1;
 		Boolean			is_sym_link:1;
@@ -506,7 +466,6 @@ struct _Name {
                 Boolean                 is_derived_src:1;
 #endif
 		enum sccs_stat		has_sccs:2;
-#endif
 	}                       stat;
 	/*
 	 * Count instances of :: definitions for this target
@@ -542,15 +501,9 @@ struct _Name {
 	/*
 	 * This name is a magic name that the reader must know about
 	 */
-#if defined(HP_UX) || defined(linux)
-	Special			special_reader;
-	Doname			state;
-	Separator		colons;
-#else
 	Special			special_reader:5;
 	Doname			state:3;
 	Separator		colons:3;
-#endif
 	Boolean			has_depe_list_expanded:1;
 	Boolean			suffix_scan_done:1;
 	Boolean			has_complained:1;	/* For sccs */
@@ -765,11 +718,7 @@ union Body {
 #define PROPERTY_HEAD_SIZE (sizeof (struct _Property)-sizeof (union Body))
 struct _Property {
 	struct _Property	*next;
-#if defined(HP_UX) || defined(linux)
-	Property_id		type;
-#else
 	Property_id		type:4;
-#endif
 	union Body		body;
 };
 

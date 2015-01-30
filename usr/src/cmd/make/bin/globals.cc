@@ -95,9 +95,6 @@
 	Name		dot_keep_state;
 	Name		dot_keep_state_file;
 	Name		empty_name;
-#if defined(HP_UX) ||  defined(linux)
-	int		exit_status;
-#endif
 	Boolean		fatal_in_progress;
 	int		file_number;
 #if 0

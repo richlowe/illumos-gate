@@ -37,10 +37,8 @@
 #include <signal.h>
 #include <errno.h>			/* errno */
 
-#if !defined(linux)
 extern	char		*sys_errlist[];
 extern	int		sys_nerr;
-#endif
 
 static	void		file_lock_error(char *msg, char *file, char *str, int arg1, int arg2);
 
@@ -168,18 +166,11 @@ file_lock_error(char *msg, char *file, char *str, int arg1, int arg2)
 	len = strlen(msg);
 	sprintf(&msg[len], str, arg1, arg2);
 	strcat(msg, catgets(libmksdmsi18n_catd, 1, 146, " failed - "));
-#if !defined(linux)
 	if (errno < sys_nerr) {
-#ifdef SUN4_x
-		strcat(msg, sys_errlist[errno]);
-#endif
 		strcat(msg, strerror(errno));
 	} else {
 		len = strlen(msg);
 		sprintf(&msg[len], NOCATGETS("errno %d"), errno);
 	}
-#else
-	strcat(msg, strerror(errno));
-#endif
 }
 

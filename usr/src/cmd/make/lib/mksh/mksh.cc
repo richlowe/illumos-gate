@@ -44,9 +44,6 @@
 #include <errno.h>
 #include <signal.h>
 
-#ifdef HP_UX
-	extern void (*sigset(int, void (*)(__harg)))(__harg);
-#endif
 
 /*
  * Workaround for NFS bug. Sometimes, when running 'chdir' on a remote
