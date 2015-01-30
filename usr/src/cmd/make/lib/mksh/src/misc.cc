@@ -22,11 +22,7 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)misc.cc 1.31 06/12/12
- */
 
-#pragma	ident	"@(#)misc.cc	1.31	06/12/12"
 
 /*
  *	misc.cc

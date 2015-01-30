@@ -22,11 +22,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)globals.cc 1.42 06/12/12
- */
-
-#pragma	ident	"@(#)globals.cc	1.42	06/12/12"
 
 /*
  *	globals.cc

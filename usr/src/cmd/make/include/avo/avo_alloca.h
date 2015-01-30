@@ -22,11 +22,6 @@
  * Copyright 1998 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)avo_alloca.h 1.4 06/12/12
- */
-
-#pragma ident   "@(#)avo_alloca.h 1.4     06/12/12"
 
 #ifndef _AVO_ALLOCA_H
 #define _AVO_ALLOCA_H
@@ -46,4 +41,3 @@ extern "C" void *__builtin_alloca(size_t);
 #endif  // ifdef __SunOS_5_4
 
 #endif  // ifdef _AVO_ALLOCA_H
-

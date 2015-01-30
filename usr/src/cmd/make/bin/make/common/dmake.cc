@@ -22,8 +22,4 @@
  * Copyright 1993 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)dmake.cc 1.2 06/12/12
- */
 
-#pragma	ident	"@(#)dmake.cc	1.2	06/12/12"

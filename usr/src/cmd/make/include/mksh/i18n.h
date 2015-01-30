@@ -24,11 +24,6 @@
  * Copyright 1994 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)i18n.h 1.2 06/12/12
- */
-
-#pragma	ident	"@(#)i18n.h	1.2	06/12/12"
 
 #include <mksh/defs.h>
 

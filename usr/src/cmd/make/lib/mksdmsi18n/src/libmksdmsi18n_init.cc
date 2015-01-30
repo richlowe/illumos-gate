@@ -22,11 +22,6 @@
  * Copyright 1996 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)libmksdmsi18n_init.cc 1.5 06/12/12
- */
-
-#pragma	ident	"@(#)libmksdmsi18n_init.cc	1.5	06/12/12"
 
 #include <avo/intl.h>
 #include <stdio.h>

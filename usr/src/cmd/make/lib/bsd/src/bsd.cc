@@ -22,11 +22,7 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)bsd.cc 1.6 06/12/12
- */
 
-#pragma	ident	"@(#)bsd.cc	1.6	06/12/12"
 
 #include <signal.h>
 

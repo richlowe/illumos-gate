@@ -22,11 +22,6 @@
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)parallel.cc 1.75 06/12/12
- */
-
-#pragma	ident	"@(#)parallel.cc	1.75	06/12/12"
 
 #ifdef TEAMWARE_MAKE_CMN
 

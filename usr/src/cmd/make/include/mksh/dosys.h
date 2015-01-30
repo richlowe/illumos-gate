@@ -24,11 +24,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)dosys.h 1.9 06/12/12
- */
-
-#pragma	ident	"@(#)dosys.h	1.9	06/12/12"
 
 #include <mksh/defs.h>
 #if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */

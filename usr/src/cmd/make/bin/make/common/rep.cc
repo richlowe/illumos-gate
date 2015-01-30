@@ -22,11 +22,6 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)rep.cc 1.25 06/12/12
- */
-
-#pragma	ident	"@(#)rep.cc	1.25	06/12/12"
 
 /*
  *	rep.c

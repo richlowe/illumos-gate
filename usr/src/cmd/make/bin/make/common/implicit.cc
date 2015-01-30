@@ -22,11 +22,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)implicit.cc 1.64 06/12/12
- */
-
-#pragma	ident	"@(#)implicit.cc	1.64	06/12/12"
 
 /*
  *	implicit.c

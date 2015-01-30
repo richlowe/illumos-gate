@@ -22,11 +22,7 @@
  * Copyright 1995 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)mount.cc 1.5 06/12/12
- */
 
-#pragma	ident	"@(#)mount.cc	1.5	06/12/12"
 
 #include <sys/types.h>
 #include <sys/mount.h>

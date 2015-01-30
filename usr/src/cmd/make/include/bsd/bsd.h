@@ -22,11 +22,6 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)bsd.h 1.6 06/12/12
- */
-
-#pragma	ident	"@(#)bsd.h	1.6	06/12/12"
 
 /*
  * bsd/bsd.h: Interface definitions to BSD compatibility functions for SVR4.
@@ -55,4 +50,3 @@ extern void (*bsd_signal(int, void (*) (int))) (int);
 extern void bsd_signals(void);
 
 #endif
-

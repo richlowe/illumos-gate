@@ -22,8 +22,3 @@
  * Copyright 1993 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)make.cc 1.2 06/12/12
- */
-
-#pragma	ident	"@(#)make.cc	1.2	06/12/12"

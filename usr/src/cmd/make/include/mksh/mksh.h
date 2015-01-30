@@ -24,11 +24,7 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)mksh.h 1.7 06/12/12
- */
 
-#pragma	ident	"@(#)mksh.h	1.7	06/12/12"
 
 /*
  * Included files

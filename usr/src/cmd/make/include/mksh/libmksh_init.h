@@ -24,11 +24,6 @@
  * Copyright 1995 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)libmksh_init.h 1.2 06/12/12
- */
-
-#pragma	ident	"@(#)libmksh_init.h	1.2	06/12/12"
 
 int libmksh_init()
 void libmksh_fini();

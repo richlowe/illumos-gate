@@ -22,11 +22,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)ar.cc 1.28 06/12/12
- */
-
-#pragma	ident	"@(#)ar.cc	1.28	06/12/12"
 
 /*
  *	ar.c

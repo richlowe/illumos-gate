@@ -21,8 +21,6 @@
 # Copyright 1993 Sun Microsystems, Inc. All rights reserved.
 # Use is subject to license terms.
 #
-# @(#)default.mk.file 1.4 06/12/12
-#
 
 SUFFIXES = .o .c .c~ .cc .cc~ .s .s~ .S .S~ .ln .f .f~ .F .F~ .l .l~ \
 	.mod .mod~ .sym .def .def~ .p .p~ .r .r~ .y .y~ .h .h~ .sh .sh~ \

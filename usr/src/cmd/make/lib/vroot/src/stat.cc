@@ -22,11 +22,7 @@
  * Copyright 1998 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)stat.cc 1.6 06/12/12
- */
 
-#pragma	ident	"@(#)stat.cc	1.6	06/12/12"
 
 #include <sys/types.h>
 #include <sys/stat.h>

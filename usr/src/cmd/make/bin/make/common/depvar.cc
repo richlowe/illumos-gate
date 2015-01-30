@@ -22,11 +22,6 @@
  * Copyright 1995 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)depvar.cc 1.14 06/12/12
- */
-
-#pragma	ident	"@(#)depvar.cc	1.14	06/12/12"
 
 /*
  * Included files

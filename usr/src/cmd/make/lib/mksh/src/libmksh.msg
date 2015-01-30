@@ -26,7 +26,6 @@ $
 $ Copyright 1996 Sun Microsystems, Inc. All rights reserved.
 $ Use is subject to license terms.
 $
-$ @(#)libmksh.msg 1.2 06/12/12
 $
 89	"ulimit() failed: %s"
 90	"Couldn't open standard out temp file `%s': %s"

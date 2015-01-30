@@ -22,11 +22,6 @@
  * Copyright 1993 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)unmount.cc 1.5 06/12/12
- */
-
-#pragma	ident	"@(#)unmount.cc	1.5	06/12/12"
 
 #ifndef SUN5_0
 #include <vroot/vroot.h>

@@ -24,11 +24,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)defs.h 1.61 06/12/12
- */
-
-#pragma	ident	"@(#)defs.h	1.61	06/12/12"
 
 /*
  * Included files
@@ -78,7 +73,7 @@
 
 #define OUT_OF_DATE_SEC(a,b) \
 	(((a).tv_sec < (b).tv_sec) || (((a).tv_sec == file_doesnt_exist.tv_sec) && ((b).tv_sec == file_doesnt_exist.tv_sec)))
-	
+
 #define SETVAR(name, value, append) \
 				setvar_daemon(name, value, append, no_daemon, \
 					      true, debug_level)
@@ -167,9 +162,9 @@ struct _Recursive_make {
 	wchar_t			*target;/* Name of target */
 	wchar_t			*oldline;/* Original line in .nse_depinfo */
 	wchar_t			*newline;/* New line in .nse_depinfo */
-	wchar_t			*cond_macrostring; 
-					/* string built from value of 
-					 * conditional macros used by 
+	wchar_t			*cond_macrostring;
+					/* string built from value of
+					 * conditional macros used by
 					 * this target
 					 */
 	Boolean			removed;/* This target is no longer recursive*/
@@ -463,7 +458,7 @@ extern	Name		vpath_translation(register Name cmd);
 
 #ifdef NSE
 
-/* 
+/*
  *  NSE version for depinfo format
  */
 extern Boolean		nse;

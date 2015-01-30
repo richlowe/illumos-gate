@@ -22,11 +22,6 @@
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)doname.cc 1.115 06/12/12
- */
-
-#pragma	ident	"@(#)doname.cc	1.115	06/12/12"
 
 /*
  *	doname.c

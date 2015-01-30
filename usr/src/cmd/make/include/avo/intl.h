@@ -22,11 +22,6 @@
  * Copyright 2001 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)intl.h 1.19 06/12/12
- */
-
-#pragma	ident	"@(#)intl.h	1.19	06/12/12"
 
 #ifndef _AVO_INTL_H
 #define _AVO_INTL_H
@@ -35,7 +30,7 @@
 #include <avo/widefake.h>
 #endif
 
-/* 
+/*
  * For catgets
  */
 #include <nl_types.h>

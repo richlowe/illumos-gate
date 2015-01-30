@@ -22,11 +22,7 @@
  * Copyright 1993 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)args.cc 1.3 06/12/12
- */
 
-#pragma	ident	"@(#)args.cc	1.3	06/12/12"
 
 #include <vroot/vroot.h>
 #include <vroot/args.h>
