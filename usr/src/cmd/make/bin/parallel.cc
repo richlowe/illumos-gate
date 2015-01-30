@@ -442,11 +442,7 @@ append_dmake_cmd(Avo_DoJobMsg *dmake_job_msg,
 #include <sys/ipc.h>		/* ftok() */
 #include <sys/shm.h>		/* shmget(), shmat(), shmdt(), shmctl() */
 #include <semaphore.h>		/* sem_init(), sem_trywait(), sem_post(), sem_destroy() */
-#if defined(linux)
-#define	LOADAVG_1MIN	0
-#else
 #include <sys/loadavg.h>	/* getloadavg() */
-#endif /* linux */
 
 /*
  *	adjust_pmake_max_jobs (int pmake_max_jobs)
@@ -2174,11 +2170,6 @@ run_rule_commands(char *host, char **commands)
 				if (!do_not_exec_rule ||
 				    !working_on_targets ||
 				    always_exec) {
-#if defined(linux)
-					if (0 != strcmp(shell->string_mb, (char*)NOCATGETS("/bin/sh"))) {
-						DO_CHECK(fprintf(scrfp, NOCATGETS("%s -c %s\n"), shell->string_mb, cmd));
-					} else
-#endif
 					DO_CHECK(fprintf(scrfp, NOCATGETS("%s -ce %s\n"), shell->string_mb, cmd));
 					DO_CHECK(fputs(NOCATGETS("__DMAKECMDEXITSTAT=$?\nif [ ${__DMAKECMDEXITSTAT} -ne 0 ]; then\n"), scrfp));
 					if (ignore) {

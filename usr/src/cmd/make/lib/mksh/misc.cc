@@ -51,9 +51,6 @@
 
 #include <string.h>		/* strerror() */
 
-#if defined (HP_UX) || defined (linux)
-#include <unistd.h>
-#endif
 
 /*
  * Defined macros
@@ -349,14 +346,8 @@ setup_char_semantics(void)
 char *
 errmsg(int errnum)
 {
-#ifdef linux
-	return strerror(errnum);
-#else // linux
 
 	extern int		sys_nerr;
-#ifdef SUN4_x
-	extern char		*sys_errlist[];
-#endif
 	char			*errbuf;
 
 	if ((errnum < 0) || (errnum > sys_nerr)) {
@@ -364,13 +355,9 @@ errmsg(int errnum)
 		(void) sprintf(errbuf, catgets(libmksdmsi18n_catd, 1, 127, "Error %d"), errnum);
 		return errbuf;
 	} else {
-#ifdef SUN4_x
-		return(sys_errlist[errnum]);
-#endif
 		return strerror(errnum);
 
 	}
-#endif // linux
 }
 
 static char static_buf[MAXPATHLEN*3];

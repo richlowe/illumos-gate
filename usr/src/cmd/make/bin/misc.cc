@@ -46,9 +46,6 @@
 #include <stdarg.h>		/* va_list, va_start(), va_end() */
 #include <vroot/report.h>	/* SUNPRO_DEPENDENCIES */
 
-#if defined(HP_UX) || defined(linux)
-#include <unistd.h>
-#endif
 
 #ifdef TEAMWARE_MAKE_CMN
 #define MAXJOBS_ADJUST_RFE4694000
@@ -58,9 +55,6 @@ extern void job_adjust_fini();
 #endif /* MAXJOBS_ADJUST_RFE4694000 */
 #endif /* TEAMWARE_MAKE_CMN */
 
-#if defined(linux)
-#include <time.h>		/* localtime() */
-#endif
 
 /*
  * Defined macros
@@ -723,15 +717,11 @@ load_cached_names(void)
 	dollar->dollar = false;
 
 	/* Set the value of $(SHELL) */
-	#ifdef HP_UX
-	MBSTOWCS(wcs_buffer, NOCATGETS("/bin/posix/sh"));
-	#else
 	if (posix) {
 	  MBSTOWCS(wcs_buffer, NOCATGETS("/usr/xpg4/bin/sh"));
 	} else {
 	  MBSTOWCS(wcs_buffer, NOCATGETS("/bin/sh"));
 	}
-	#endif
 	(void) SETVAR(shell_name, GETNAME(wcs_buffer, FIND_LENGTH), false);
 
 	/*

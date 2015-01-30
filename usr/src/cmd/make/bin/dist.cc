@@ -42,12 +42,7 @@
 #include <rw/queuecol.h>
 #include <rw/xdrstrea.h>
 #include <signal.h>
-#ifdef linux
-#include <sstream>
-using namespace std;
-#else
 #include <strstream.h>
-#endif
 #include <sys/stat.h>		/* stat() */
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -264,11 +259,7 @@ startup_rxm(void)
 		(void) sprintf(&rxm_command[strlen(rxm_command)],
 		               NOCATGETS(" %d %d"),
 		               pipe1[0], pipe2[1]);
-#ifdef linux
-		execl(NOCATGETS("/bin/sh"),
-#else
 		execl(NOCATGETS("/usr/bin/sh"),
-#endif
 		      NOCATGETS("sh"),
 		      NOCATGETS("-c"),
 		      rxm_command,

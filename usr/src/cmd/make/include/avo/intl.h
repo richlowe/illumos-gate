@@ -26,28 +26,12 @@
 #ifndef _AVO_INTL_H
 #define _AVO_INTL_H
 
-#if defined(SUN4_x) || defined(HP_UX)
-#include <avo/widefake.h>
-#endif
 
 /*
  * For catgets
  */
 #include <nl_types.h>
 
-#ifdef HP_UX
-#ifdef __cplusplus
-#ifndef _STDLIB_INCLUDED
-#include <stdlib.h>             /* for wchar_t definition and HP-UX - */
-#endif                          /* wide character function prototypes. */
-extern "C" {
-char *gettext(char *msg);
-char *dgettext(const char *, const char *);
-char *bindtextdomain(const char *, const char *);
-char *textdomain(char *);
-}
-#endif /* __cplusplus */
-#endif
 
 /*
  * NOCATGETS is a dummy macro that returns it argument.

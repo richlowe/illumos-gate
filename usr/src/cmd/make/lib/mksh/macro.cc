@@ -924,11 +924,7 @@ init_arch_macros(void)
 #ifdef NSE
 	Property	macro;
 #endif
-#if defined(linux)
-	const char	*mach_command = NOCATGETS("/bin/uname -p");
-#else
 	const char	*mach_command = NOCATGETS("/bin/mach");
-#endif
 
 	set_host = (get_prop(host_arch->prop, macro_prop) == NULL);
 	set_target = (get_prop(target_arch->prop, macro_prop) == NULL);
@@ -1379,22 +1375,11 @@ found_it:;
 			new_value = ALLOC_WC(length);
 			new_value_allocated = true;
 			WCSTOMBS(mbs_buffer, old_vr);
-#if !defined(linux)
 			(void) wsprintf(new_value,
 				        NOCATGETS("/usr/arch/%s/%s:%s"),
 				        ha->string_mb + 1,
 				        ta->string_mb + 1,
 				        mbs_buffer);
-#else
-			char * mbs_new_value = (char *)getmem(length);
-			(void) sprintf(mbs_new_value,
-				        NOCATGETS("/usr/arch/%s/%s:%s"),
-				        ha->string_mb + 1,
-				        ta->string_mb + 1,
-				        mbs_buffer);
-			MBSTOWCS(new_value, mbs_new_value);
-			retmem_mb(mbs_new_value);
-#endif
 		}
 		if (new_value[0] != 0) {
 			(void) setvar_daemon(virtual_root,

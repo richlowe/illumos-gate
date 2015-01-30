@@ -27,9 +27,7 @@
 #include <sys/types.h>
 #include <sys/mount.h>
 
-#ifndef HP_UX
 extern int mount(const char *spec, const char *dir, int mflag, ...);
-#endif
 
 #include <vroot/vroot.h>
 #include <vroot/args.h>

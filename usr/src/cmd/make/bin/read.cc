@@ -42,10 +42,6 @@
 #include <sys/uio.h>		/* read() */
 #include <unistd.h>		/* read(), unlink() */
 
-#if defined(HP_UX) || defined(linux)
-#include <avo/types.h>
-extern "C" Avo_err *avo_find_run_dir(char **dirp);
-#endif
 
 /*
  * typedefs & structs
@@ -117,10 +113,6 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 	register wchar_t        *string_end;
 
 
-#if defined(HP_UX) || defined(linux)
-	Avo_err                 *findrundir_err;
-	char                    *run_dir, makerules_dir[BUFSIZ];
-#endif
 
 	wchar_t * wcb = get_wstring(makefile_name->string_mb);
 

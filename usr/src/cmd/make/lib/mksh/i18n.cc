@@ -35,11 +35,6 @@
  */
 #include <mksh/i18n.h>
 #include <mksh/misc.h>		/* setup_char_semantics() */
-#if defined (linux)
-#	include <wctype.h>
-#	include <wchar.h>
-#	define wschr(x,y) wcschr(x,y)
-#endif
 
 /*
  *	get_char_semantics_value(ch)

@@ -102,9 +102,6 @@ extern void job_adjust_fini();
 #endif /* MAXJOBS_ADJUST_RFE4694000 */
 #endif /* TEAMWARE_MAKE_CMN */
 
-#if defined(linux)
-#include <ctype.h>
-#endif
 
 /*
  * Defined macros
@@ -201,9 +198,7 @@ extern void expand_value(Name, register String , Boolean);
 #endif
 
 jmp_buf jmpbuffer;
-#if !defined(linux)
 extern nl_catd catd;
-#endif
 
 /*
  *	main(argc, argv)
@@ -263,16 +258,6 @@ main(int argc, char *argv[])
 
 	(void) setlocale(LC_ALL, "");
 
-#if defined (HP_UX) || defined(linux)
-       /* HP-UX users typically will not have NLSPATH set, and this binary
-        * requires that it be set.  On HP-UX 9.0x, /usr/lib/nls/%L/%N.cat is
-        * the path to set it to.
-        */
-
-       if (getenv(NOCATGETS("NLSPATH")) == NULL) {
-         putenv(NOCATGETS("NLSPATH=/usr/lib/nls/%L/%N.cat"));
-	}
-#endif
 
 #ifdef DMAKE_STATISTICS
 	if (getenv(NOCATGETS("DMAKE_STATISTICS"))) {
@@ -415,12 +400,10 @@ main(int argc, char *argv[])
 			posix = false;
 		}
 	}
-#if !defined(HP_UX) && !defined(linux)
 	if (getenv(USE_SVR4_MAKE) || getenv(NOCATGETS("USE_SVID"))){
 	   svr4 = true;
 	   posix = false;
 	}
-#endif
 
 	/*
 	 * Find the dmake_compat_mode: posix, sun, svr4, or gnu_style, .
@@ -1375,19 +1358,6 @@ read_command_options(register int argc, register char **argv)
 			}
 		}
 
-#if defined(linux)
-		if (ch == 1) {
-			if(optind < argc) {
-				//optind++;
-				//current_optind++;
-			makefile_next = 0;
-			current_optind = optind;
-				continue;
-			} else {
-				break;
-			}
-		}
-#endif
 
 
 		makefile_next |= parse_command_option(ch);
@@ -1727,9 +1697,6 @@ parse_command_option(register char ch)
 		if (invert_this) {
 			debug_level--;
 		} else {
-#if defined( HP_UX) || defined(linux)
-		      if (debug_level < 2)  /* Fixes a bug on HP-UX */
-#endif
 			debug_level++;
 		}
 		return 0;

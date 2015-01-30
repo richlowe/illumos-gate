@@ -32,11 +32,6 @@
 
 #include <signal.h>
 
-#if defined (HP_UX) || defined (linux)
-typedef void SIG_FUNC_TYP(int);
-typedef SIG_FUNC_TYP *SIG_TYP;
-#define SIG_PF SIG_TYP
-#endif
 
 #ifndef __cplusplus
 typedef void (*SIG_PF) (int);

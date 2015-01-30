@@ -61,9 +61,7 @@
 
 #include <signal.h>
 
-#ifndef HP_UX
 #	include <stropts.h>
-#endif
 
 #include <sys/errno.h>
 #include <sys/stat.h>
@@ -3559,11 +3557,7 @@ pollResults(char *outFn, char *errFn, char *hostNm)
 		break;
 	case 0:
 		enable_interrupt((void (*) (int))SIG_DFL);
-#ifdef linux
-		(void) signal(SIGUSR1, Avo_PollResultsAction_Sigusr1Handler);
-#else
 		(void) sigset(SIGUSR1, Avo_PollResultsAction_Sigusr1Handler);
-#endif
 		pollResultsAction(outFn, errFn);
 
 		exit(0);
@@ -3617,13 +3611,6 @@ pollResultsAction(char *outFn, char *errFn)
 	}
 
 	while (!pollResultsActionTimeToFinish && stat(outFn, &statbuf) == 0) {
-#ifdef linux
-		if ((statbuf.st_mtime > file_time)
-		   ) {
-			file_time = statbuf.st_mtime;
-			rxmGetNextResultsBlock(fd);
-		}
-#else
 		if ((statbuf.st_mtim.tv_sec > file_time) ||
 		    ((statbuf.st_mtim.tv_sec == file_time) &&
 		    (statbuf.st_mtim.tv_nsec > file_time_nsec))
@@ -3632,7 +3619,6 @@ pollResultsAction(char *outFn, char *errFn)
 			file_time_nsec = statbuf.st_mtim.tv_nsec;
 			rxmGetNextResultsBlock(fd);
 		}
-#endif
 		us_sleep(STAT_RETRY_SLEEP_TIME);
 	}
 	// Check for the rest of output
