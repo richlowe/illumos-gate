@@ -201,7 +201,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 			if (doname(makefile_name, true, false) == build_dont_know) {
 				/* Try normalized filename */
 				string_start=get_wstring(makefile_name->string_mb);
-				for (string_end=string_start+1; *string_end != NULL; string_end++);
+				for (string_end=string_start+1; *string_end != L'\0'; string_end++);
 				normalized_makefile_name=normalize_name(string_start, string_end - string_start);
 				if ((strcmp(makefile_name->string_mb, normalized_makefile_name->string_mb) == 0) || 
 					(doname(normalized_makefile_name, true, false) == build_dont_know)) {

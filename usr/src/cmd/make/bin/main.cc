@@ -208,7 +208,7 @@ extern void expand_value(Name, register String , Boolean);
 
 jmp_buf jmpbuffer;
 #if !defined(linux)
-nl_catd catd;
+extern nl_catd catd;
 #endif
 
 /*
@@ -1447,54 +1447,54 @@ read_command_options(register int argc, register char **argv)
 				}
 				break;
 			case 1:	/* -f seen */
-				argv[i] = NOCATGETS("-f");
+				argv[i] = (char *)NOCATGETS("-f");
 				break;
 			case 2:	/* -c seen */
-				argv[i] = NOCATGETS("-c");
+				argv[i] = (char *)NOCATGETS("-c");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 281, "Ignoring DistributedMake -c option"));
 #endif
 				break;
 			case 4:	/* -g seen */
-				argv[i] = NOCATGETS("-g");
+				argv[i] = (char *)NOCATGETS("-g");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 282, "Ignoring DistributedMake -g option"));
 #endif
 				break;
 			case 8:	/* -j seen */
-				argv[i] = NOCATGETS("-j");
+				argv[i] = (char *)NOCATGETS("-j");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 283, "Ignoring DistributedMake -j option"));
 #endif
 				break;
 			case 16: /* -M seen */
-				argv[i] = NOCATGETS("-M");
+				argv[i] = (char *)NOCATGETS("-M");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 284, "Ignoring ParallelMake -M option"));
 #endif
 				break;
 			case 32: /* -m seen */
-				argv[i] = NOCATGETS("-m");
+				argv[i] = (char *)NOCATGETS("-m");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 285, "Ignoring DistributedMake -m option"));
 #endif
 				break;
 #ifndef PARALLEL
 			case 128: /* -O seen */
-				argv[i] = NOCATGETS("-O");
+				argv[i] = (char *)NOCATGETS("-O");
 				break;
 #endif
 			case 256: /* -K seen */
-				argv[i] = NOCATGETS("-K");
+				argv[i] = (char *)NOCATGETS("-K");
 			        break;
 			case 512:	/* -o seen */
-				argv[i] = NOCATGETS("-o");
+				argv[i] = (char *)NOCATGETS("-o");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 311, "Ignoring DistributedMake -o option"));
 #endif
 				break;
 			case 1024: /* -x seen */
-				argv[i] = NOCATGETS("-x");
+				argv[i] = (char *)NOCATGETS("-x");
 #ifndef TEAMWARE_MAKE_CMN
 				warning(catgets(catd, 1, 353, "Ignoring DistributedMake -x option"));
 #endif
@@ -1650,7 +1650,7 @@ setup_makeflags_argv()
 	}
 	/* Allocate memory for the new MAKEFLAGS argv */
 	mf_argv = (char **) malloc((mf_argc + 1) * sizeof(char *));
-	mf_argv[0] = NOCATGETS("MAKEFLAGS");
+	mf_argv[0] = (char *)NOCATGETS("MAKEFLAGS");
 	/*
 	 * Convert the MAKEFLAGS string value into a vector of char *,
 	 * similar to argv.
@@ -3020,7 +3020,7 @@ enter_argv_values(int argc, char *argv[], ASCII_Dyn_Array *makeflags_and_macro)
 static void
 append_makeflags_string(Name name, register String makeflags_string)
 {
-	char		*option;
+	const char	*option;
 
 	if (strcmp(name->string_mb, NOCATGETS("DMAKE_GROUP")) == 0) {
 		option = NOCATGETS(" -g ");

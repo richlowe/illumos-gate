@@ -339,7 +339,7 @@ doshell(wchar_t *command, register Boolean ignore_error, Boolean redirect_out_er
 	 * Nice priorities can be a positive or a negative number.
 	 */
 	if (nice_prio != 0) {
-		argv[argv_index++] = NOCATGETS("nice");
+		argv[argv_index++] = (char *)NOCATGETS("nice");
 		(void) sprintf(nice_prio_buf, NOCATGETS("-%d"), nice_prio);
 		argv[argv_index++] = strdup(nice_prio_buf);
 	}

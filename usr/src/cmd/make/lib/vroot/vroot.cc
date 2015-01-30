@@ -39,7 +39,7 @@
 typedef struct {
 	short		init;
 	pathpt		vector;
-	char		*env_var;
+	const char	*env_var;
 } vroot_patht;
 
 typedef struct {
@@ -59,7 +59,7 @@ static vroot_datat	vroot_data= {
 	"", NULL, NULL, NULL, 0, 1};
 
 void
-add_dir_to_path(register char *path, register pathpt *pointer, register int position)
+add_dir_to_path(const char *path, register pathpt *pointer, register int position)
 {
 	register int		size= 0;
 	register int		length;
@@ -107,13 +107,13 @@ parse_path_string(register char *string, register int remove_slash)
 	return((pathpt)NULL);
 }
 
-char *
+const char *
 get_vroot_name(void)
 {
 	return(vroot_data.vroot.env_var);
 }
 
-char *
+const char *
 get_path_name(void)
 {
 	return(vroot_data.path.env_var);

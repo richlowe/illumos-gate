@@ -69,10 +69,12 @@
  * Static variables
  */
 #ifdef SUN5_0
-extern "C" void		(*sigivalue)(int) = SIG_DFL;
-extern "C" void		(*sigqvalue)(int) = SIG_DFL;
-extern "C" void		(*sigtvalue)(int) = SIG_DFL;
-extern "C" void		(*sighvalue)(int) = SIG_DFL;
+extern "C" {
+	void		(*sigivalue)(int) = SIG_DFL;
+	void		(*sigqvalue)(int) = SIG_DFL;
+	void		(*sigtvalue)(int) = SIG_DFL;
+	void		(*sighvalue)(int) = SIG_DFL;
+}
 #else
 static	void		(*sigivalue)(int) = (void (*) (int)) SIG_DFL;
 static	void		(*sigqvalue)(int) = (void (*) (int)) SIG_DFL;
@@ -325,7 +327,7 @@ enable_interrupt(register void (*handler) (int))
 void
 setup_char_semantics(void)
 {
-	char		*s;
+	const char	*s;
 	wchar_t		wc_buffer[1];
 	int		entry;
 
@@ -413,7 +415,7 @@ static char static_buf[MAXPATHLEN*3];
  */
 /*VARARGS*/
 void
-fatal_mksh(char * message, ...)
+fatal_mksh(const char *message, ...)
 {
 	va_list args;
 	char    *buf = static_buf;
@@ -468,7 +470,7 @@ fatal_mksh(char * message, ...)
  */
 /*VARARGS*/
 void
-fatal_reader_mksh(char * pattern, ...)
+fatal_reader_mksh(const char * pattern, ...)
 {
 	va_list args;
 	char	message[1000];

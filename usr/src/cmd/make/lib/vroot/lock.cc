@@ -111,7 +111,7 @@ file_lock(char *name, char *lockname, int *file_locked, int timeout)
 		UNBLOCK_INTERUPTS;
 
 		if (errno != EEXIST) {
-			file_lock_error(msg, name, NOCATGETS("symlink(%s, %s)"),
+			file_lock_error(msg, name, (char *)NOCATGETS("symlink(%s, %s)"),
 			    (int) name, (int) lockname);
 			fprintf(stderr, "%s", msg);
 			return errno;

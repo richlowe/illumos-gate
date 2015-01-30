@@ -862,8 +862,8 @@ check_if_exec(char *file)
  *	-1 for error (with errno set properly)
  */
 static int
-resolve (char	*indir,	/* search directory */
-	 char	*cmd,	/* search for name */
+resolve (const char *indir,	/* search directory */
+	 const char *cmd,	/* search for name */
 	 char	*dir,	/* directory buffer */
 	 char	**run)	/* resultion name ptr ptr */
 {

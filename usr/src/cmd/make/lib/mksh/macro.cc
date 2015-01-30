@@ -40,6 +40,8 @@
 #include <mksh/read.h>		/* get_next_block_fn() */
 #include <mksdmsi18n/mksdmsi18n.h>	/* libmksdmsi18n_init() */
 
+#include <widec.h>
+
 /*
  * File table of contents
  */
@@ -864,7 +866,7 @@ add_macro_to_global_list(Name macro_to_add)
 	char		*name_on_list = (char*)NULL;
 	char		*name_to_add = macro_to_add->string_mb;
 	char		*value_on_list = (char*)NULL;
-	char		*value_to_add = (char*)NULL;
+	const char	*value_to_add = (char*)NULL;
 
 	if (macro_to_add->prop->body.macro.value != NULL) {
 		value_to_add = macro_to_add->prop->body.macro.value->string_mb;
