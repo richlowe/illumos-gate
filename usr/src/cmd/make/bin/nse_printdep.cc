@@ -69,11 +69,7 @@ print_dependencies(register Name target, register Property line)
 	Dependency	dp;
 	static Boolean	makefiles_printed = false;
 
-#ifdef SUNOS4_AND_AFTER
 	if (target_variants) {
-#else
-	if (is_true(flag.target_variants)) {
-#endif
 		depvar_print_results();
 	}
 	
@@ -101,17 +97,11 @@ print_dependencies(register Name target, register Property line)
 		makefiles_printed = true;
 	}
 	print_deps(target, line);
-#ifdef SUNOS4_AND_AFTER
 /*
 	print_more_deps(target, init);
 	print_more_deps(target, done);
  */
 	if (target_variants) {
-#else
-	print_more_deps(target, cached_names.init);
-	print_more_deps(target, cached_names.done);
-	if (is_true(flag.target_variants)) {
-#endif
 		print_forest(target);
 	}
 }
@@ -167,12 +157,8 @@ print_deps(register Name target, register Property line)
 {
 	register Dependency	dep;
 
-#ifdef SUNOS4_AND_AFTER
 	if ((target->dependency_printed) ||
 	    (target == force)) {
-#else
-	if (is_true(target->dependency_printed)) {
-#endif
 		return;
 	}
 	target->dependency_printed = true;
@@ -289,11 +275,7 @@ should_print_dep(Property line)
 	if (line->body.line.dependencies != NULL) {
 		return true;
 	}
-#ifdef SUNOS4_AND_AFTER
 	if (line->body.line.sccs_command) {
-#else
-	if (is_true(line->body.line.sccs_command)) {
-#endif
 		return false;
 	}
 	return true;
@@ -310,13 +292,7 @@ print_forest(Name target)
 	Property	line;
 
  	for (np = hashtab.begin(), e = hashtab.end(); np != e; np++) {
-#ifdef SUNOS4_AND_AFTER
 			if (np->is_target && !np->has_parent && np != target) {
-#else
-			if (is_true(np->is_target) && 
-			    is_false(np->has_parent) &&
-			    np != target) {
-#endif
 				(void) doname_check(np, true, false, false);
 				line = get_prop(np->prop, line_prop);
 				printf("-\n");
@@ -325,120 +301,6 @@ print_forest(Name target)
 	}
 }
 
-#ifndef SUNOS4_AND_AFTER
-printdesc()
-{
-	Name_set::iterator	p, e;
-	register Property	prop;
-	register Dependency	dep;
-	register Cmd_line	rule;
-	Percent			percent, percent_depe;
-
-	/* Default target */
-	if (default_target_to_build != NULL) {
-		print_rule(default_target_to_build);
-		default_target_to_build->dependency_printed= true;
-	};
-	(void)printf("\n");
-
-	/* .AR_REPLACE */
-	if (ar_replace_rule != NULL) {
-		(void)printf("%s:\n", cached_names.ar_replace->string_mb);
-		for (rule= ar_replace_rule; rule != NULL; rule= rule->next)
-			(void)printf("\t%s\n", rule->command_line->string_mb);
-	};
-
-	/* .DEFAULT */
-	if (default_rule != NULL) {
-		(void)printf("%s:\n", cached_names.default_rule->string_mb);
-		for (rule= default_rule; rule != NULL; rule= rule->next)
-			(void)printf("\t%s\n", rule->command_line->string_mb);
-	};
-
-	/* .IGNORE */
-	if (is_true(flag.ignore_errors))
-		(void)printf("%s:\n", cached_names.ignore->string_mb);
-
-	/* .KEEP_STATE: */
-	if (is_true(flag.keep_state))
-		(void)printf("%s:\n\n", cached_names.dot_keep_state->string_mb);
-
-	/* .PRECIOUS */
-	(void)printf("%s: ", cached_names.precious->string_mb);
- 	for (p = hashtab.begin(), e = hashtab.end(); p != e; p++)
-			if (is_true(p->stat.is_precious | all_precious))
-				(void)printf("%s ", p->string_mb);
-	(void)printf("\n");
-
-	/* .SCCS_GET */
-	if (sccs_get_rule != NULL) {
-		(void)printf("%s:\n", cached_names.sccs_get->string_mb);
-		for (rule= sccs_get_rule; rule != NULL; rule= rule->next)
-			(void)printf("\t%s\n", rule->command_line->string_mb);
-	};
-
-	/* .SILENT */
-	if (is_true(flag.silent))
-		(void)printf("%s:\n", cached_names.silent->string_mb);
-
-	/* .SUFFIXES: */
-	(void)printf("%s: ", cached_names.suffixes->string_mb);
-	for (dep= suffixes; dep != NULL; dep= dep->next) {
-		(void)printf("%s ", dep->name->string_mb);
-		build_suffix_list(dep->name);
-	};
-	(void)printf("\n\n");
-
-	/* % rules */
-	for (percent= percent_list; percent != NULL; percent= percent->next) {
-		(void) printf("%s:", percent->name->string_mb);
-
-		for (percent_depe= percent->dependencies; percent_depe != NULL; percent_depe = percent_depe->next)
-			(void) printf(" %s", percent_depe->name->string_mb);
-
-		(void) printf("\n");
-
-		for (rule= percent->command_template; rule != NULL; rule= rule->next)
-			(void)printf("\t%s\n", rule->command_line->string_mb);
-	};
-
-	/* Suffix rules */
- 	for (p = hashtab.begin(), e = hashtab.end(); p != e; p++)
-			if (is_false(p->dependency_printed) && (p->string[0] == PERIOD)) {
-				print_rule(p);
-				p->dependency_printed= true;
-			};
-
-	/* Macro assignments */
- 	for (p = hashtab.begin(), e = hashtab.end(); p != e; p++)
-			if (((prop= get_prop(p->prop, macro_prop)) != NULL) &&
-			    (prop->body.macro.value != NULL)) {
-				(void)printf("%s", p->string_mb);
-				print_value(prop->body.macro.value,
-					    prop->body.macro.daemon);
-			};
-	(void)printf("\n");
-
-	/* Delays */
- 	for (p = hashtab.begin(), e = hashtab.end(); p != e; p++)
-			for (prop= get_prop(p->prop, conditional_prop);
-			     prop != NULL;
-			     prop= get_prop(prop->next, conditional_prop)) {
-				(void)printf("%s := %s",
-					     p->string_mb,
-					     prop->body.conditional.name->string_mb);
-				print_value(prop->body.conditional.value, no_daemon);
-			};
-	(void)printf("\n");
-
-	/* All other dependencies */
- 	for (p = hashtab.begin(), e = hashtab.end(); p != e; p++)
-			if (is_false(p->dependency_printed) && (p->colons != no_colon))
-				print_rule(p);
-	(void)printf("\n");
-	exit(0);
-}
-#endif
 
 /*
  *	This is a set  of routines for dumping the internal make state
@@ -447,11 +309,7 @@ printdesc()
 void
 print_value(register Name value, Daemon daemon)
 	             		      
-#ifdef SUNOS4_AND_AFTER
               			       
-#else
-	           		       
-#endif
 {
 	Chain			cp;
 

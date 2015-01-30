@@ -94,11 +94,7 @@ nse_check_cd(Property prop)
 	wchar_t		*our_template;
 	int		len;
 	Boolean		cd;
-#ifdef SUNOS4_AND_AFTER
 	String_rec	string;
-#else
-	String		string;
-#endif
 	Name		name;
 	Name		target;
 	struct	Line	*line;
@@ -110,11 +106,7 @@ nse_check_cd(Property prop)
 #ifdef LTEST
 	printf("In nse_check_cd, nse = %d, nse_did_recursion = %d\n", nse, nse_did_recursion);
 #endif
-#ifdef SUNOS4_AND_AFTER
 	if (!nse_did_recursion || !nse) {
-#else
-	if (is_false(nse_did_recursion) || is_false(flag.nse)) {
-#endif
 #ifdef LTEST
 		printf ("returning,  nse = %d,  nse_did_recursion = %d\n", nse, nse_did_recursion);
 #endif
@@ -132,23 +124,14 @@ nse_check_cd(Property prop)
 #ifdef LTEST
 		printf("in gettoken loop\n");
 #endif
-#ifdef SUNOS4_AND_AFTER
 		if (IS_WEQUAL(tok, (wchar_t *) "cd")) {
-#else
-		if (is_equal(tok, "cd")) {
-#endif
 			cd = true;
 		} else if (cd && tok[0] == '$') {
 			nse_backquote_seen = NULL;
 			nse_shell_var_used = NULL;
 			nse_watch_vars = true;
-#ifdef SUNOS4_AND_AFTER
 			INIT_STRING_FROM_STACK(string, strbuf);
 			name = GETNAME(tok, FIND_LENGTH);
-#else
-			init_string_from_stack(string, strbuf);
-			name = getname(tok, FIND_LENGTH);
-#endif
 			expand_value(name, &string, false);
 			nse_watch_vars = false;
 
@@ -190,15 +173,9 @@ nse_check_cd(Property prop)
 		recurse = get_prop(target->prop, recursive_prop);
 		while (recurse != NULL) {
 			r = &recurse->body.recursive;
-#ifdef SUNOS4_AND_AFTER
 			if (IS_WEQUAL(r->directory->string, (wchar_t *) ".") &&
 			    !IS_WEQUAL(r->makefiles->name->string, 
                             primary_makefile->string)) {
-#else
-			if (is_equal(r->directory->string, ".") &&
-			    !is_equal(r->makefiles->name->string, 
-			    primary_makefile->string)) {
-#endif
 				nse_warning();
 				fprintf(stderr, "\tRecursion to makefile `%s' in the same directory\n\tCommand line: %s\n",
 				    r->makefiles->name->string_mb,
@@ -217,11 +194,7 @@ nse_check_cd(Property prop)
 static void
 nse_warning(void)
 {
-#ifdef SUNOS4_AND_AFTER
 	if (report_dependencies_level > 0) {
-#else
-	if (is_true(flag.report_dependencies)) {
-#endif
 		our_exit_status = 1;
 	}
 	if (primary_makefile != NULL) {
@@ -275,18 +248,10 @@ nse_check_sccs(wchar_t *targ, wchar_t *dep)
 	wchar_t		*slash;
 	wchar_t		*p;
 
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
-#ifdef SUNOS4_AND_AFTER
 	slash = wsrchr(dep, (int) slash_char); 
-#else
-	slash = rindex(dep, '/');
-#endif
 	if (slash == NULL) {
 		return;
 	}
@@ -303,12 +268,8 @@ nse_check_sccs(wchar_t *targ, wchar_t *dep)
 		}
 	}
 	p++;
-#ifdef SUNOS4_AND_AFTER
 	MBSTOWCS(wcs_buffer, "SCCS/");
 	if (IS_WEQUALN(p, wcs_buffer, wslen(wcs_buffer))) {
-#else
-	if (is_equaln(p, "SCCS/", 5)) {
-#endif
 		nse_warning();
 		WCSTOMBS(mbs_buffer, targ);
 		WCSTOMBS(mbs_buffer2, dep);
@@ -326,11 +287,7 @@ nse_check_sccs(wchar_t *targ, wchar_t *dep)
 void
 nse_check_file_backquotes(wchar_t *file)
 {
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
 	if (nse_backquotes(file)) {
@@ -349,15 +306,9 @@ nse_backquotes(wchar_t *str)
 {
 	wchar_t		*bq;
 
-#ifdef SUNOS4_AND_AFTER
 	bq = wschr(str, (int) backquote_char);
 	if (bq) {
 		bq = wschr(&bq[1], (int) backquote_char);
-#else
-	bq = index(str, '`');
-	if (bq) {
-		bq = index(&bq[1], '`');
-#endif
 		if (bq) {
 			return true;
 		}
@@ -373,11 +324,7 @@ nse_backquotes(wchar_t *str)
 void
 nse_dep_cmdmacro(wchar_t *macro)
 {
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
 	nse_warning();
@@ -395,11 +342,7 @@ nse_dep_cmdmacro(wchar_t *macro)
 void
 nse_rule_cmdmacro(wchar_t *macro)
 {
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
 	nse_warning();
@@ -416,11 +359,7 @@ nse_rule_cmdmacro(wchar_t *macro)
 void
 nse_wildcard(wchar_t *targ, wchar_t *dep)
 {
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
 	nse_warning();
@@ -448,13 +387,8 @@ nse_init_source_suffixes(void)
 	}
 	bpatch = &sufx_hdr;
 	while (fscanf(fp, "%s %*s", suffix) == 1) {
-#ifdef SUNOS4_AND_AFTER
 		sufx = ALLOC(Nse_suffix);  
 		sufx->suffix = wscpy(ALLOC_WC(wslen(suffix) + 1), suffix);
-#else
-		sufx = alloc(Nse_suffix);
-		sufx->suffix = strcpy(malloc(strlen(suffix) + 1), suffix);
-#endif
 		sufx->next = NULL;
 		*bpatch = sufx;
 		bpatch = &sufx->next;
@@ -478,35 +412,19 @@ nse_check_derived_src(Name target, wchar_t *dep, Cmd_line command_template)
 	wchar_t		*suffix;
 	wchar_t		*depsufx;
 
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
-#ifdef SUNOS4_AND_AFTER
 	if (target->stat.is_derived_src) {
-#else
-	if (is_true(target->stat.is_derived_src)) {
-#endif
 		return;
 	}
 	if (command_template != NULL) {
 		return;
 	}
-#ifdef SUNOS4_AND_AFTER
 	suffix = wsrchr(target->string, (int) period_char ); 
-#else
-	suffix = rindex(target->string, '.');
-#endif
 	if (suffix != NULL) {
 		for (sufx = sufx_hdr; sufx != NULL; sufx = sufx->next) {
-#ifdef SUNOS4_AND_AFTER
 			if (IS_WEQUAL(sufx->suffix, suffix)) {
-#else
-			if (is_equal(sufx->suffix, suffix)) {
-#endif
 				nse_warning();
 				WCSTOMBS(mbs_buffer, dep);
 				fprintf(stderr, "\tProbable source file `%s' appears as a derived file\n\tas it depends upon file `%s', but there is\n\tno rule to build it\n",
@@ -528,42 +446,22 @@ nse_check_no_deps_no_rule(Name target, Property line, Property command)
 	Nse_suffix	sufx;
 	wchar_t		*suffix;
 
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
-#ifdef SUNOS4_AND_AFTER
 	if (target->stat.is_derived_src) {
-#else
-	if (is_true(target->stat.is_derived_src)) {
-#endif
 		return;
 	}
 	if (line != NULL && line->body.line.dependencies != NULL) {
 		return;
 	}
-#ifdef SUNOS4_AND_AFTER
 	if (command->body.line.sccs_command) {
-#else
-	if (is_true(command->body.line.sccs_command)) {
-#endif
 		return;
 	}
-#ifdef SUNOS4_AND_AFTER
 	suffix = wsrchr(target->string, (int) period_char); 
-#else
-	suffix = rindex(target->string, '.');
-#endif
 	if (suffix != NULL) {
 		for (sufx = sufx_hdr; sufx != NULL; sufx = sufx->next) {
-#ifdef SUNOS4_AND_AFTER
 			if (IS_WEQUAL(sufx->suffix, suffix)) {
-#else
-			if (is_equal(sufx->suffix, suffix)) {
-#endif
 				if (command->body.line.command_template == NULL) {
 					nse_warning();
 					fprintf(stderr, "\tProbable source file `%s' appears as a derived file because\n\tit is on the left-hand side, but it has no dependencies and\n\tno rule to build it\n",
@@ -581,11 +479,7 @@ nse_check_no_deps_no_rule(Name target, Property line, Property command)
 void
 nse_no_makefile(Name target)
 {
-#ifdef SUNOS4_AND_AFTER
 	if (!nse) {
-#else
-	if (is_false(flag.nse)) {
-#endif
 		return;
 	}
 	nse_warning();
