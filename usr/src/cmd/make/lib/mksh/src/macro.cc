@@ -22,11 +22,7 @@
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)macro.cc 1.22 06/12/12
- */
 
-#pragma	ident	"@(#)macro.cc	1.22	06/12/12"
 
 /*
  *	macro.cc

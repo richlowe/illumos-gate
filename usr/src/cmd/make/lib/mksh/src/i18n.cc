@@ -22,11 +22,7 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)i18n.cc 1.3 06/12/12
- */
 
-#pragma	ident	"@(#)i18n.cc	1.3	06/12/12"
 
 /*
  *      i18n.cc

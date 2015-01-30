@@ -22,11 +22,6 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)nse_printdep.cc 1.18 06/12/12
- */
-
-#pragma	ident	"@(#)nse_printdep.cc	1.18	06/12/12"
 
 /*
  * Included files

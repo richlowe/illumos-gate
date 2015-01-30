@@ -22,11 +22,6 @@
  * Copyright 1994 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)nse.cc 1.15 06/12/12
- */
-
-#pragma	ident	"@(#)nse.cc	1.15	06/12/12"
 
 #ifdef NSE
 

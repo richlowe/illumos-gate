@@ -22,11 +22,7 @@
  * Copyright 1994 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)setenv.cc 1.6 06/12/12
- */
 
-#pragma	ident	"@(#)setenv.cc	1.6	06/12/12"
 
 #include <stdlib.h>
 #include <string.h>

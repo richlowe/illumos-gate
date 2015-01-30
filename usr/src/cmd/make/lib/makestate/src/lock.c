@@ -22,9 +22,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)lock.c 1.5 06/12/12
- */
 
 #include <stdio.h>
 #include <stdlib.h>

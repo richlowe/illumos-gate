@@ -22,11 +22,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)dosys.cc 1.45 06/12/12
- */
-
-#pragma	ident	"@(#)dosys.cc	1.45	06/12/12"
 
 /*
  *	dosys.cc

@@ -26,8 +26,6 @@ $
 $ Copyright 1996 Sun Microsystems, Inc. All rights reserved.
 $ Use is subject to license terms.
 $
-$ @(#)libvroot.msg 1.2 06/12/12
-$
 142	"file_lock: file %s is already locked.\n"
 143	"file_lock: will periodically check the lockfile %s for two minutes.\n"
 144	"Current working directory %s\n"

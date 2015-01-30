@@ -22,11 +22,6 @@
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)main.cc 1.158 06/12/12
- */
-
-#pragma	ident	"@(#)main.cc	1.158	06/12/12"
 
 /*
  *	main.cc

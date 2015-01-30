@@ -22,11 +22,6 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)dist.cc 1.35 06/12/12
- */
-
-#pragma	ident	"@(#)dist.cc	1.25	96/03/12"
 
 #ifdef DISTRIBUTED
 /*

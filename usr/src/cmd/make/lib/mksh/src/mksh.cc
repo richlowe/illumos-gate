@@ -22,11 +22,7 @@
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)mksh.cc 1.22 06/12/12
- */
 
-#pragma	ident	"@(#)mksh.cc	1.22	06/12/12"
 
 /*
  *	mksh.cc

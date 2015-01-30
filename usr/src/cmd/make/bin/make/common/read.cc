@@ -22,11 +22,6 @@
  * Copyright 2006 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)read.cc 1.64 06/12/12
- */
-
-#pragma	ident	"@(#)read.cc	1.64	06/12/12"
 
 /*
  *	read.c

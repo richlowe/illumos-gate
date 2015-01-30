@@ -22,11 +22,7 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)vroot.h 1.10 06/12/12
- */
 
-#pragma	ident	"@(#)vroot.h	1.10	06/12/12"
 
 #ifndef _VROOT_H_
 #define _VROOT_H_

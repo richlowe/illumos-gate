@@ -21,8 +21,6 @@
 # Copyright 2003 Sun Microsystems, Inc. All rights reserved.
 # Use is subject to license terms.
 #
-# @(#)make.rules.file 1.22 06/12/12
-#
 
 SUFFIXES = .o .c .c~ .cc .cc~ .y .y~ .l .l~ .s .s~ .sh .sh~ .S .S~ .i .ln \
 	.h .h~ .f .f~ .for .for~ .F .F~ .f90 .f90~ .ftn .ftn~ .mod .mod~ \

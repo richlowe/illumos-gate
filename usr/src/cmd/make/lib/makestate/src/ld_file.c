@@ -22,10 +22,6 @@
  * Copyright 1998 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)ld_file.c 1.7 06/12/12
- */
-#pragma ident	"@(#)ld_file.c	1.7	06/12/12"
 
 #pragma init(ld_support_init)
 
@@ -163,7 +159,7 @@ ld_atexit(int exit_code)
 {
 	if (exit_code)
 	   return;
-	
+
 	mk_state_update_exit();
 
 } /* ld_atexit() */
@@ -186,7 +182,7 @@ ld_atexit64(int exit_code)
 {
 	if (exit_code)
 	   return;
-	
+
 	mk_state_update_exit();
 
 } /* ld_atexit64() */

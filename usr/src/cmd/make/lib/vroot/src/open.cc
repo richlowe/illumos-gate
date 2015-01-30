@@ -22,11 +22,7 @@
  * Copyright 1993 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)open.cc 1.4 06/12/12
- */
 
-#pragma	ident	"@(#)open.cc	1.4	06/12/12"
 
 #include <sys/types.h>
 #include <sys/stat.h>

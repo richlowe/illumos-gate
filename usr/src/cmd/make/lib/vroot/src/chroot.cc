@@ -22,11 +22,7 @@
  * Copyright 1993 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
-/*
- * @(#)chroot.cc 1.4 06/12/12
- */
 
-#pragma	ident	"@(#)chroot.cc	1.4	06/12/12"
 
 #include <unistd.h>
 
