@@ -2328,11 +2328,7 @@ run_rule_commands(char *host, char **commands)
 				errmsg(errno));
 			_exit(1);
 		} else {
-#if defined (HP_UX) || defined (linux) || defined (SUN5_0)
 			int		status;
-#else
-			union wait	status;
-#endif
 			pid_t pid;
 			while ((pid = wait(&status)) != childPid) {
 				if (pid == -1) {

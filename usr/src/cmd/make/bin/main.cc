@@ -83,9 +83,7 @@
 #include <sys/stat.h>		/* fstat() */
 #include <fcntl.h>		/* open() */
 
-#ifdef SUN5_0
 #	include <sys/systeminfo.h>	/* sysinfo() */
-#endif
 
 #include <sys/types.h>		/* stat() */
 #include <sys/wait.h>		/* wait() */
@@ -162,11 +160,7 @@ static	Boolean		getname_stat = false;
 /*
  * File table of contents
  */
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	extern "C" void		cleanup_after_exit(void);
-#else
-	extern	void		cleanup_after_exit(int, ...);
-#endif
 
 #ifdef TEAMWARE_MAKE_CMN
 extern "C" {
@@ -489,11 +483,7 @@ main(int argc, char *argv[])
 	 * If running with .KEEP_STATE, curdir will be set with
 	 * the connected directory.
 	 */
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	(void) atexit(cleanup_after_exit);
-#else
-	(void) on_exit(cleanup_after_exit, (char *) NULL);
-#endif
 
 	load_cached_names();
 
@@ -742,20 +732,16 @@ main(int argc, char *argv[])
 	working_on_targets = true;
 	if (trace_status) {
 		dump_make_state();
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		fclose(stdout);
 		fclose(stderr);
 		exit_status = 0;
-#endif
 		exit(0);
 	}
 	if (list_all_targets) {
 		dump_target_list();
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		fclose(stdout);
 		fclose(stderr);
 		exit_status = 0;
-#endif
 		exit(0);
 	}
 	trace_reader = false;
@@ -804,16 +790,12 @@ main(int argc, char *argv[])
         exit(nse_exit_status());
 #else
 	if (build_failed_ever_seen) {
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		if (posix) {
 			exit_status = 1;
 		}
-#endif
 		exit(1);
 	}
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	exit_status = 0;
-#endif
 	exit(0);
 #endif
 	/* NOTREACHED */
@@ -846,12 +828,8 @@ main(int argc, char *argv[])
  *		usage_tracking  Should have been constructed in main()
  *			        should destroyed just before exiting
  */
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 extern "C" void
 cleanup_after_exit(void)
-#else
-void cleanup_after_exit(int status, ...)
-#endif
 {
 	Running		rp;
 #ifdef NSE
@@ -907,21 +885,15 @@ if(getname_stat) {
  */
 
 	parallel = false;
-#ifdef SUN5_0
 	/* If we used the SVR4_MAKE, don't build .DONE or .FAILED */
 	if (!getenv(USE_SVR4_MAKE)){
-#endif
 	    /* Build the target .DONE or .FAILED if we caught an error */
 	    if (!quest && !list_all_targets) {
 		Name		failed_name;
 
 		MBSTOWCS(wcs_buffer, NOCATGETS(".FAILED"));
 		failed_name = GETNAME(wcs_buffer, FIND_LENGTH);
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		if ((exit_status != 0) && (failed_name->prop != NULL)) {
-#else
-		if ((status != 0) && (failed_name->prop != NULL)) {
-#endif
 #ifdef TEAMWARE_MAKE_CMN
 			/*
 			 * [tolik] switch DMake to serial mode
@@ -943,9 +915,7 @@ if(getname_stat) {
 		    }
 		}
 	    }
-#ifdef SUN5_0
 	}
-#endif
 	/*
 	 * Remove the temp file utilities report dependencies thru if it
 	 * is still around
@@ -1122,11 +1092,7 @@ handle_interrupt(int)
 
 	/* Make sure the processes running under us terminate first */
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	while (wait((int *) NULL) != -1);
-#else
-	while (wait((union wait*) NULL) != -1);
-#endif
 	/* Delete the current targets unless they are precious */
 	if ((current_target != NULL) &&
 	    current_target->is_member &&
@@ -1227,9 +1193,7 @@ handle_interrupt(int)
 
 	report_dir_enter_leave(false);
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	exit_status = 2;
-#endif
 	exit(2);
 }
 
@@ -1964,9 +1928,7 @@ parse_command_option(register char ch)
 		} else {
 #ifdef TEAMWARE_MAKE_CMN
 			fprintf(stdout, NOCATGETS("dmake: %s\n"), verstring);
-#ifdef SUN5_0
 			exit_status = 0;
-#endif
 			exit(0);
 #else
 			warning(catgets(catd, 1, 324, "Ignoring DistributedMake -v option"));
@@ -2218,7 +2180,6 @@ read_files_and_state(int argc, char **argv)
 		trace_reader = true;
 	}
 	if (!ignore_default_mk) {
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		if (svr4) {
 			MBSTOWCS(wcs_buffer, NOCATGETS("svr4.make.rules"));
 			default_makefile = GETNAME(wcs_buffer, FIND_LENGTH);
@@ -2226,10 +2187,6 @@ read_files_and_state(int argc, char **argv)
 			MBSTOWCS(wcs_buffer, NOCATGETS("make.rules"));
 			default_makefile = GETNAME(wcs_buffer, FIND_LENGTH);
 		}
-#else		
-		MBSTOWCS(wcs_buffer, NOCATGETS("default.mk"));
-		default_makefile = GETNAME(wcs_buffer, FIND_LENGTH);
-#endif
 		default_makefile->stat.is_file = true;
 
 		(void) read_makefile(default_makefile,

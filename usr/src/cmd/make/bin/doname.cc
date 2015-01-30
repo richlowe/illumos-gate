@@ -1703,9 +1703,7 @@ run_command(register Property line, Boolean)
 			result = execute_serial(line);
 #endif
 		}
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		exit_status = 1;
-#endif
 		exit(1);
 	}
 	/* We actually had to do something this time */

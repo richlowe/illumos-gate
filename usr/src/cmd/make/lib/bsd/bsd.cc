@@ -41,7 +41,6 @@ extern SIG_PF
 bsd_signal (int Signal, SIG_PF Handler)
 {
   auto SIG_PF                   previous_handler;
-#ifdef SUN5_0
 #ifdef sun
   previous_handler = sigset (Signal, Handler);
 #else
@@ -57,11 +56,6 @@ bsd_signal (int Signal, SIG_PF Handler)
 
   previous_handler = (SIG_PF) old_action.sa_handler;
 #endif
-#elif defined(linux)
-  previous_handler = sigset (Signal, Handler);
-#else
-  previous_handler = signal (Signal, Handler);
-#endif
   return previous_handler;
 }
 
@@ -73,105 +67,6 @@ bsd_signals (void)
   if (initialized == 0)
     {
       initialized = 1;
-#if !defined(SUN5_0) && !defined(linux)
-#if defined(SIGHUP)
-      (void) bsd_signal (SIGHUP, SIG_DFL);
-#endif
-#if defined(SIGINT)
-      (void) bsd_signal (SIGINT, SIG_DFL);
-#endif
-#if defined(SIGQUIT)
-      (void) bsd_signal (SIGQUIT, SIG_DFL);
-#endif
-#if defined(SIGILL)
-      (void) bsd_signal (SIGILL, SIG_DFL);
-#endif
-#if defined(SIGTRAP)
-      (void) bsd_signal (SIGTRAP, SIG_DFL);
-#endif
-#if defined(SIGIOT)
-      (void) bsd_signal (SIGIOT, SIG_DFL);
-#endif
-#if defined(SIGABRT)
-      (void) bsd_signal (SIGABRT, SIG_DFL);
-#endif
-#if defined(SIGEMT)
-      (void) bsd_signal (SIGEMT, SIG_DFL);
-#endif
-#if defined(SIGFPE)
-      (void) bsd_signal (SIGFPE, SIG_DFL);
-#endif
-#if defined(SIGBUS)
-      (void) bsd_signal (SIGBUS, SIG_DFL);
-#endif
-#if defined(SIGSEGV)
-      (void) bsd_signal (SIGSEGV, SIG_DFL);
-#endif
-#if defined(SIGSYS)
-      (void) bsd_signal (SIGSYS, SIG_DFL);
-#endif
-#if defined(SIGPIPE)
-      (void) bsd_signal (SIGPIPE, SIG_DFL);
-#endif
-#if defined(SIGALRM)
-      (void) bsd_signal (SIGALRM, SIG_DFL);
-#endif
-#if defined(SIGTERM)
-      (void) bsd_signal (SIGTERM, SIG_DFL);
-#endif
-#if defined(SIGUSR1)
-      (void) bsd_signal (SIGUSR1, SIG_DFL);
-#endif
-#if defined(SIGUSR2)
-      (void) bsd_signal (SIGUSR2, SIG_DFL);
-#endif
-#if defined(SIGCLD)
-      (void) bsd_signal (SIGCLD, SIG_DFL);
-#endif
-#if defined(SIGCHLD)
-      (void) bsd_signal (SIGCHLD, SIG_DFL);
-#endif
-#if defined(SIGPWR)
-      (void) bsd_signal (SIGPWR, SIG_DFL);
-#endif
-#if defined(SIGWINCH)
-      (void) bsd_signal (SIGWINCH, SIG_DFL);
-#endif
-#if defined(SIGURG)
-      (void) bsd_signal (SIGURG, SIG_DFL);
-#endif
-#if defined(SIGIO)
-      (void) bsd_signal (SIGIO, SIG_DFL);
-#else
-#if defined(SIGPOLL)
-      (void) bsd_signal (SIGPOLL, SIG_DFL);
-#endif
-#endif
-#if defined(SIGTSTP)
-      (void) bsd_signal (SIGTSTP, SIG_DFL);
-#endif
-#if defined(SIGCONT)
-      (void) bsd_signal (SIGCONT, SIG_DFL);
-#endif
-#if defined(SIGTTIN)
-      (void) bsd_signal (SIGTTIN, SIG_DFL);
-#endif
-#if defined(SIGTTOU)
-      (void) bsd_signal (SIGTTOU, SIG_DFL);
-#endif
-#if defined(SIGVTALRM)
-      (void) bsd_signal (SIGVTALRM, SIG_DFL);
-#endif
-#if defined(SIGPROF)
-      (void) bsd_signal (SIGPROF, SIG_DFL);
-#endif
-#if defined(SIGXCPU)
-      (void) bsd_signal (SIGXCPU, SIG_DFL);
-#endif
-#if defined(SIGXFSZ)
-      (void) bsd_signal (SIGXFSZ, SIG_DFL);
-#endif
-#endif
     }
 
   return;

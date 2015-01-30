@@ -53,9 +53,6 @@ union Args {
 	struct { int flags; int mode;} open;
 	struct { char *buffer; int buffer_size;} readlink;
 	struct { struct stat *buffer;} stat;
-#ifndef SUN5_0
-	struct { struct statfs *buffer;} statfs;
-#endif
 	struct { int length;} truncate;
 	struct { struct timeval *time;} utimes;
 };

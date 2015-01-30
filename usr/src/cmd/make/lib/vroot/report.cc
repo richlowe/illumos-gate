@@ -59,7 +59,6 @@ get_target_being_reported_for(void)
 	return(target_being_reported_for);
 }
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 extern "C" {
 static void
 close_report_file(void)
@@ -68,14 +67,6 @@ close_report_file(void)
 	(void)fclose(report_file);
 }
 } // extern "C"
-#else
-static void
-close_report_file(int, ...)
-{
-	(void)fputs("\n", report_file);
-	(void)fclose(report_file);
-}
-#endif
 
 static void
 clean_up(FILE *nse_depinfo_fp, FILE *merge_fp, char *nse_depinfo_file, char *merge_file, int unlinkf)
@@ -97,14 +88,9 @@ clean_up(FILE *nse_depinfo_fp, FILE *merge_fp, char *nse_depinfo_file, char *mer
  *  to change in that case.
  */
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 extern "C" {
 static void
 close_file(void)
-#else
-static void
-close_file(int, ...)
-#endif
 {
 	char		line[MAXPATHLEN+2];
 	char		buf[MAXPATHLEN+2];
@@ -214,9 +200,7 @@ close_file(int, ...)
 	}
 }
 
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 } // extern "C"
-#endif
 
 static void
 report_dep(char *iflag, char *filename)
@@ -232,11 +216,7 @@ report_dep(char *iflag, char *filename)
 		if ((search_dir = getenv(NOCATGETS("NSE_DEP"))) == NULL) {
 			return;
 		}
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		atexit(close_file);
-#else
-		on_exit(close_file, 0);
-#endif
 		strcpy(sfile, filename);
 		if (iflag == NULL || *iflag == '\0') {
 			return;
@@ -288,11 +268,7 @@ report_search_path(char *iflag)
 		return;
 	}
 	sprintf(filename, NOCATGETS("%s-CPP"), ptr+1);
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 	getcwd(curdir, sizeof(curdir));
-#else
-	getwd(curdir);
-#endif
 	if (strcmp(curdir, sdir) != 0 && strlen(iflag) > 2 && 
 	    iflag[2] != '/') {
 		/* Makefile must have had an "cd xx; cc ..." */
@@ -338,11 +314,7 @@ report_dependency(const char *name)
 				return;
 			}
 		}
-#if defined(SUN5_0) || defined(HP_UX) || defined(linux)
 		atexit(close_report_file);
-#else
-		(void)on_exit(close_report_file, (char *)report_file);
-#endif
 		if ((p2= strchr(p+1, ' ')) != NULL)
 			*p2= 0;
 		target_being_reported_for= (char *)malloc((unsigned)(strlen(p+1)+1));
