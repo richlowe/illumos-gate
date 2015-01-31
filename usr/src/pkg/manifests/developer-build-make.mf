@@ -18,11 +18,15 @@ set name=info.classification \
     value="org.opensolaris.category.2008:Development/Source Code Management"
 set name=variant.arch value=$(ARCH)
 dir path=usr/share/lib/make
+dir path=usr/share/man/man1
+dir path=usr/share/man/man1s
 file path=usr/bin/make mode=0555
 file path=usr/lib/$(ARCH64)/libmakestate.so.1
 file path=usr/lib/libmakestate.so.1
 file path=usr/share/lib/make/make.rules
 file path=usr/share/lib/make/svr4.make.rules
+file path=usr/share/man/man1/sysV-make.1
+file path=usr/share/man/man1s/make.1s
 link path=usr/bin/dmake target=make
 link path=usr/ccs/bin/make target=../../bin/make
 link path=usr/ccs/lib/svr4.make target=../../bin/make
