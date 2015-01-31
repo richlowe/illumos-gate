@@ -40,6 +40,7 @@
 
 
 #include <locale.h>		/* setlocale() */
+#include <libgen.h>
 #include <mk/defs.h>
 #include <mksdmsi18n/mksdmsi18n.h>	/* libmksdmsi18n_init() */
 #include <mksh/macro.h>		/* getvar() */
@@ -413,13 +414,27 @@ main(int argc, char *argv[])
 	 */
     if ((!pmake_cap_r_specified) &&
         (!pmake_machinesfile_specified)) {
+	char *s = strdup(argv[0]);    
+	    
 	MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MODE"));
 	dmake_name2 = GETNAME(wcs_buffer, FIND_LENGTH);
 	prop2 = get_prop(dmake_name2->prop, macro_prop);
-	if (prop2 == NULL) {
-		/* DMAKE_MODE not defined, default to parallel mode */
-		dmake_mode_type = parallel_mode;
-		no_parallel = false;
+	// If we're invoked as 'make' run serially, regardless of DMAKE_MODE
+	// If we're invoked as 'make' but passed -j, run parallel
+	// If we're invoked as 'dmake', without DMAKE_MODE, default parallel
+	// If we're invoked as 'dmake' and DMAKE_MODE is set, honour it.
+	if ((strcmp(basename(s), NOCATGETS("make")) == 0) &&
+	    !dmake_max_jobs_specified) {
+		dmake_mode_type = serial_mode;
+		no_parallel = true;
+	} else if (prop2 == NULL) {
+		/* DMAKE_MODE not defined, default based on our name */
+		char *s = strdup(argv[0]);
+
+		if (strcmp(basename(s), NOCATGETS("dmake")) == 0) {
+			dmake_mode_type = parallel_mode;
+			no_parallel = false;
+		}
 	} else {
 		dmake_value2 = prop2->body.macro.value;
 		if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("parallel"))) {
@@ -432,7 +447,7 @@ main(int argc, char *argv[])
 			fatal(catgets(catd, 1, 307, "Unknown dmake mode argument `%s' after -m flag"), dmake_value2->string_mb);
 		}
 	}
-
+	free(s);
     }
 
 	parallel_flag = true;
@@ -1363,6 +1378,8 @@ parse_command_option(register char ch)
 		if (invert_this) {
 			dmake_max_jobs_specified = false;
 		} else {
+			dmake_mode_type = parallel_mode;
+			no_parallel = false;
 			dmake_max_jobs_specified = true;
 		}
 		return 8;
