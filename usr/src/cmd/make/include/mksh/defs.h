@@ -145,30 +145,17 @@ enum {
 	question_char_entry,		/* 23 */
 	quote_char_entry,		/* 24 */
 	semicolon_char_entry,		/* 25 */
-#ifdef SGE_SUPPORT
-	space_char_entry,		/* 26 */
-	tab_char_entry,			/* 27 */
-	no_semantics_entry		/* 28 */
-#else
 	no_semantics_entry		/* 26 */
-#endif /* SGE_SUPPORT */
 };
 
 /*
  * CHAR_SEMANTICS_ENTRIES should be the number of entries above.
  * The last entry in char_semantics[] should be blank.
  */
-#ifdef SGE_SUPPORT
-#define CHAR_SEMANTICS_ENTRIES	29
-/*
-#define CHAR_SEMANTICS_STRING	"&*@`\\|[]:$=!>-\n#()%+?;^<'\" \t"
- */
-#else
 #define CHAR_SEMANTICS_ENTRIES	27
 /*
 #define CHAR_SEMANTICS_STRING	"&*@`\\|[]:$=!>-\n#()%+?;^<'\""
  */
-#endif /* SGE_SUPPORT */
 
 /*
  * Some utility macros

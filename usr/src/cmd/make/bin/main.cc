@@ -508,13 +508,6 @@ main(int argc, char *argv[])
 		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("parallel"))) {
 			dmake_mode_type = parallel_mode;
 			no_parallel = false;
-#ifdef SGE_SUPPORT
-			grid = false;
-		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("grid"))) {
-			dmake_mode_type = parallel_mode;
-			no_parallel = false;
-			grid = true;
-#endif
 		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("serial"))) {
 			dmake_mode_type = serial_mode;
 			no_parallel = true;
@@ -1089,12 +1082,6 @@ handle_interrupt(int)
 		}
 	}
 
-#ifdef SGE_SUPPORT
-	/* Remove SGE script file */
-	if (grid) {
-		unlink(script_file);
-	}
-#endif
 
 	/* Have we locked .make.state or .nse_depinfo? */
 	if ((make_state_lockfile != NULL) && (make_state_locked)) {

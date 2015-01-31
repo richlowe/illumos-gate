@@ -53,9 +53,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#ifdef SGE_SUPPORT
-#include <dmthread/Avo_PathNames.h>
-#endif
 
 
 /*
@@ -866,30 +863,6 @@ distribute_process(char **commands, Property line)
 	}
 #endif
 
-#ifdef SGE_SUPPORT
-	if (grid) {
-		static char *dir4gridscripts = NULL;
-		static char *hostName = NULL;
-		if (dir4gridscripts == NULL) {
-			Name		dmakeOdir_name, dmakeOdir_value;
-			Property	prop;
-			MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_ODIR"));
-			dmakeOdir_name = GETNAME(wcs_buffer, FIND_LENGTH);
-			if (((prop = get_prop(dmakeOdir_name->prop, macro_prop)) != NULL) &&
-			    ((dmakeOdir_value = prop->body.macro.value) != NULL)) {
-				dir4gridscripts = dmakeOdir_value->string_mb;
-			}
-			dir4gridscripts = Avo_PathNames::pathname_output_directory(dir4gridscripts);
-			hostName = Avo_PathNames::pathname_local_host();
-		}
-		(void) sprintf(script_file,
-		        	NOCATGETS("%s/dmake.script.%s.%d.%d.XXXXXX"),
-				dir4gridscripts,
-				hostName,
-			        getpid(),
-		                file_number++);
-	}
-#endif /* SGE_SUPPORT */
 	process_running = run_rule_commands(local_host, commands);
 
 	return build_running;
@@ -2050,14 +2023,6 @@ is_running(Name target)
  * This function replaces the makesh binary.
  */
  
-#ifdef SGE_SUPPORT
-#define DO_CHECK(f)	if (f <= 0) { \
-				fprintf(stderr, \
-					catgets(catd, 1, 347, "Could not write to file: %s: %s\n"), \
-						script_file, errmsg(errno)); \
-				_exit(1); \
-			}
-#endif /* SGE_SUPPORT */
 
 static pid_t
 run_rule_commands(char *host, char **commands)
@@ -2068,14 +2033,7 @@ run_rule_commands(char *host, char **commands)
 	int		length;
 	Doname		result;
 	Boolean		silent_flag;
-#ifdef SGE_SUPPORT
-	wchar_t		*wcmd, *tmp_wcs_buffer = NULL;
-	char		*cmd, *tmp_mbs_buffer = NULL;
-	FILE		*scrfp;
-	Name		shell = getvar(shell_name);
-#else
 	wchar_t		*tmp_wcs_buffer;
-#endif /* SGE_SUPPORT */
 
 	childPid = fork();
 	switch (childPid) {
@@ -2095,20 +2053,6 @@ run_rule_commands(char *host, char **commands)
 #else
 		redirect_io(stdout_file, (char*)NULL);
 #endif
-#ifdef SGE_SUPPORT
-		if (grid) {
-			int fdes = mkstemp(script_file);
-			if ((fdes < 0) || (scrfp = fdopen(fdes, "w")) == NULL) {
-				fprintf(stderr,
-					catgets(catd, 1, 341, "Could not create file: %s: %s\n"),
-					script_file, errmsg(errno));
-				_exit(1);
-			}
-			if (IS_EQUAL(shell->string_mb, "")) {
-				shell = shell_name;
-			}
-		}
-#endif /* SGE_SUPPORT */
 		for (commands = commands;
 		     (*commands != (char *)NULL);
 		     commands++) {
@@ -2129,83 +2073,6 @@ run_rule_commands(char *host, char **commands)
 				}
 				(*commands)++;
 			}
-#ifdef SGE_SUPPORT
-			if (grid) {
-				if ((length = strlen(*commands)) >= MAXPATHLEN / 2) {
-					wcmd = tmp_wcs_buffer = ALLOC_WC(length * 2 + 1);
-					(void) mbstowcs(tmp_wcs_buffer, *commands, length * 2 + 1);
-				} else {
-					MBSTOWCS(wcs_buffer, *commands);
-					wcmd = wcs_buffer;
-					cmd = mbs_buffer;
-				}
-				wchar_t	*from = wcmd + wslen(wcmd);
-				wchar_t	*to = from + (from - wcmd);
-				*to = (int) nul_char;
-				while (from > wcmd) {
-					*--to = *--from;
-					if (*from == (int) newline_char) { // newline symbols are already quoted
-						*--to = *--from;
-					} else if (wschr(char_semantics_char, *from)) {
-						*--to = (int) backslash_char;
-					}
-				}
-				if (length >= MAXPATHLEN*MB_LEN_MAX/2) { // sizeof(mbs_buffer) / 2
-					cmd = tmp_mbs_buffer = getmem((length * MB_LEN_MAX * 2) + 1);
-					(void) wcstombs(tmp_mbs_buffer, to, (length * MB_LEN_MAX * 2) + 1);
-				} else {
-					WCSTOMBS(mbs_buffer, to);
-					cmd = mbs_buffer;
-				}
-				char *mbst, *mbend;
-				if ((length > 0) &&
-				    !silent_flag) {
-				    	for (mbst = cmd; (mbend = strstr(mbst, "\\\n")) != NULL; mbst = mbend + 2) {
-						*mbend = '\0';
-						DO_CHECK(fprintf(scrfp, NOCATGETS("/usr/bin/printf '%%s\\n' %s\\\\\n"), mbst));
-						*mbend = '\\';
-					}
-					DO_CHECK(fprintf(scrfp, NOCATGETS("/usr/bin/printf '%%s\\n' %s\n"), mbst));
-				}
-				if (!do_not_exec_rule ||
-				    !working_on_targets ||
-				    always_exec) {
-					DO_CHECK(fprintf(scrfp, NOCATGETS("%s -ce %s\n"), shell->string_mb, cmd));
-					DO_CHECK(fputs(NOCATGETS("__DMAKECMDEXITSTAT=$?\nif [ ${__DMAKECMDEXITSTAT} -ne 0 ]; then\n"), scrfp));
-					if (ignore) {
-						DO_CHECK(fprintf(scrfp, NOCATGETS("\techo %s ${__DMAKECMDEXITSTAT} %s\n"),
-							catgets(catd, 1, 343, "\"*** Error code"),
-							catgets(catd, 1, 344, "(ignored)\"")));
-					} else {
-						DO_CHECK(fprintf(scrfp, NOCATGETS("\techo %s ${__DMAKECMDEXITSTAT}\n"),
-							catgets(catd, 1, 342, "\"*** Error code\"")));
-					}
-					if (silent_flag) {
-						DO_CHECK(fprintf(scrfp, NOCATGETS("\techo %s\n"),
-							catgets(catd, 1, 345, "The following command caused the error:")));
-				 	   	for (mbst = cmd; (mbend = strstr(mbst, "\\\n")) != NULL; mbst = mbend + 2) {
-							*mbend = '\0';
-							DO_CHECK(fprintf(scrfp, NOCATGETS("\t/usr/bin/printf '%%s\\n' %s\\\\\n"), mbst));
-							*mbend = '\\';
-						}
-						DO_CHECK(fprintf(scrfp, NOCATGETS("\t/usr/bin/printf '%%s\\n' %s\n"), mbst));
-					}
-					if (!ignore) {
-						DO_CHECK(fputs(NOCATGETS("\texit ${__DMAKECMDEXITSTAT}\n"), scrfp));
-					}
-					DO_CHECK(fputs(NOCATGETS("fi\n"), scrfp));
-				}
-				if (tmp_wcs_buffer) {
-					retmem_mb(tmp_mbs_buffer);
-					tmp_mbs_buffer = NULL;
-				}
-				if (tmp_wcs_buffer) {
-					retmem(tmp_wcs_buffer);
-					tmp_wcs_buffer = NULL;
-				}
-				continue;
-			}
-#endif /* SGE_SUPPORT */
 			if ((length = strlen(*commands)) >= MAXPATHLEN) {
 				tmp_wcs_buffer = ALLOC_WC(length + 1);
 				(void) mbstowcs(tmp_wcs_buffer, *commands, length + 1);
@@ -2236,120 +2103,7 @@ run_rule_commands(char *host, char **commands)
 				}
 			}
 		}
-#ifndef SGE_SUPPORT
 		_exit(0);
-#else
-		if (!grid) {
-			_exit(0);
-		}
-		DO_CHECK(fputs(NOCATGETS("exit 0\n"), scrfp));
-		if (fclose(scrfp) != 0) {
-			fprintf(stderr,
-				catgets(catd, 1, 346, "Could not close file: %s: %s\n"),
-				script_file, errmsg(errno));
-			_exit(1);
-		}
-		{
-
-#define DEFAULT_QRSH_TRIES_NUMBER	1
-#define DEFAULT_QRSH_TIMEOUT		0
-
-		static char	*sge_env_var = NULL;
-		static int	qrsh_tries_number = DEFAULT_QRSH_TRIES_NUMBER;
-		static int	qrsh_timeout = DEFAULT_QRSH_TIMEOUT;
-#define SGE_DEBUG
-#ifdef SGE_DEBUG
-		static	Boolean do_not_remove = false;
-#endif /* SGE_DEBUG */
-		if (sge_env_var == NULL) {
-			sge_env_var = getenv(NOCATGETS("__SPRO_DMAKE_SGE_TRIES"));
-			if (sge_env_var != NULL) {
-				qrsh_tries_number = atoi(sge_env_var);
-				if (qrsh_tries_number < 1 || qrsh_tries_number > 9) {
-					qrsh_tries_number = DEFAULT_QRSH_TRIES_NUMBER;
-				}
-			}
-			sge_env_var = getenv(NOCATGETS("__SPRO_DMAKE_SGE_TIMEOUT"));
-			if (sge_env_var != NULL) {
-				qrsh_timeout = atoi(sge_env_var);
-				if (qrsh_timeout <= 0) {
-					qrsh_timeout = DEFAULT_QRSH_TIMEOUT;
-				}
-			} else {
-				sge_env_var = "";
-			}
-#ifdef SGE_DEBUG
-			sge_env_var = getenv(NOCATGETS("__SPRO_DMAKE_SGE_DEBUG"));
-			if (sge_env_var == NULL) {
-				sge_env_var = "";
-			}
-			if (strstr(sge_env_var, NOCATGETS("noqrsh")) != NULL)
-				qrsh_tries_number = 0;
-			if (strstr(sge_env_var, NOCATGETS("donotremove")) != NULL)
-				do_not_remove = true;
-#endif /* SGE_DEBUG */
-		}
-		for (int i = qrsh_tries_number; ; i--)
-		if ((childPid = fork()) < 0) {
-			fatal(catgets(catd, 1, 348, "Could not fork child process for qrsh job: %s"),
-		      		errmsg(errno));
-			_exit(1);
-		} else if (childPid == 0) {
-			enable_interrupt((void (*) (int))SIG_DFL);
-			if (i > 0) {
-				static char qrsh_cmd[50+MAXPATHLEN] = NOCATGETS("qrsh -cwd -V -noshell -nostdin /bin/sh ");
-				static char *fname_ptr = NULL;
-				static char *argv[] = { NOCATGETS("sh"),
-							NOCATGETS("-fce"),
-							qrsh_cmd,
-							NULL};
-				if (fname_ptr == NULL) {
-					fname_ptr = qrsh_cmd + strlen(qrsh_cmd);
-				}
-				strcpy(fname_ptr, script_file);
-				(void) execve(NOCATGETS("/bin/sh"), argv, environ);
-			} else {
-				static char *argv[] = { NOCATGETS("sh"),
-							script_file,
-							NULL};
-				(void) execve(NOCATGETS("/bin/sh"), argv, environ);
-			}
-			fprintf(stderr,
-				catgets(catd, 1, 349, "Could not load `qrsh': %s\n"),
-				errmsg(errno));
-			_exit(1);
-		} else {
-			int		status;
-			pid_t pid;
-			while ((pid = wait(&status)) != childPid) {
-				if (pid == -1) {
-					fprintf(stderr,
-						catgets(catd, 1, 350, "wait() failed: %s\n"),
-						errmsg(errno));
-					_exit(1);
-				}
-			}
-			if (status != 0 && i > 0) {
-				if (i > 1) {
-					sleep(qrsh_timeout);
-				}
-				continue;
-			}
-#ifdef SGE_DEBUG
-			if (do_not_remove) {
-				if (status) {
-					fprintf(stderr,
-						NOCATGETS("SGE script failed: %s\n"),
-						script_file);
-				}
-				_exit(status ? 1 : 0);
-			}
-#endif /* SGE_DEBUG */
-			(void) unlink(script_file);
-			_exit(status ? 1 : 0);
-		}
-		}
-#endif /* SGE_SUPPORT */
 		break;
 	default:
 		break;
