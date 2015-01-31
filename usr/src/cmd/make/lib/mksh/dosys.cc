@@ -36,13 +36,6 @@
 #include <sys/wait.h>			/* WIFEXITED(status) */
 #include <alloca.h>		/* alloca() */
 
-#if defined(TEAMWARE_MAKE_CMN) || defined(MAKETOOL) /* tolik */
-#if defined(DISTRIBUTED)
-#	include <dm/Avo_CmdOutput.h>
-#	include <rw/xdrstrea.h>
-#endif
-#endif
-
 #include <stdio.h>		/* errno */
 #include <errno.h>		/* errno */
 #include <fcntl.h>		/* open() */
@@ -61,14 +54,7 @@
 /*
  * Defined macros
  */
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-#define SEND_MTOOL_MSG(cmds) \
-	if (send_mtool_msgs) { \
-		cmds \
-	}
-#else
 #define SEND_MTOOL_MSG(cmds)
-#endif
 
 /*
  * typedefs & structs
@@ -572,29 +558,18 @@ doexec(register wchar_t *command, register Boolean ignore_error, Boolean redirec
  *	Global variables used:
  *		filter_stderr	Set if -X is on
  */
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-Boolean
-await(register Boolean ignore_error, register Boolean silent_error, Name target, wchar_t *command, pid_t running_pid, Boolean send_mtool_msgs, XDR *xdrs_p, int job_msg_id)
-#else
 Boolean
 await(register Boolean ignore_error, register Boolean silent_error, Name target, wchar_t *command, pid_t running_pid, Boolean send_mtool_msgs, void *xdrs_p, int job_msg_id)
-#endif
 {
         int                     status;
 	char			*buffer;
 	int			core_dumped;
 	int			exit_status;
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-	Avo_CmdOutput		*make_output_msg;
-#endif
 	FILE			*outfp;
 	register pid_t		pid;
 	struct stat		stat_buff;
 	int			termination_signal;
 	char			tmp_buf[MAXPATHLEN];
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-	RWCollectable		*xdr_msg;
-#endif
 
 	while ((pid = wait(&status)) != running_pid) {
 		if (pid == -1) {

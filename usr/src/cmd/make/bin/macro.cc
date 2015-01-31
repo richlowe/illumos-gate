@@ -32,10 +32,6 @@
 /*
  * Included files
  */
-#ifdef DISTRIBUTED
-#include <avo/strings.h>	/* AVO_STRDUP() */
-#include <dm/Avo_DoJobMsg.h>
-#endif
 #include <mk/defs.h>
 #include <mksh/macro.h>		/* getvar(), expand_value() */
 #include <mksh/misc.h>		/* getmem() */
@@ -113,17 +109,10 @@ setvar_append(register Name name, register Name value)
  *		envvar		A list of environment vars with $ in value
  */
 void
-#ifdef DISTRIBUTED
-setvar_envvar(Avo_DoJobMsg *dmake_job_msg)
-#else
 setvar_envvar(void)
-#endif
 {
 	wchar_t			buffer[STRING_BUFFER_LENGTH];
 	int			length;
-#ifdef DISTRIBUTED
-	Property		macro;
-#endif
 	register	char	*mbs, *tmp_mbs_buffer = NULL;
 	register	char	*env, *tmp_mbs_buffer2 = NULL;
 	Envvar			p;
@@ -131,9 +120,6 @@ setvar_envvar(void)
 
 	for (p = envvar; p != NULL; p = p->next) {
 		if (p->already_put
-#ifdef DISTRIBUTED
-		    && !dmake_job_msg
-#endif
 		    ) {
 			continue;
 		}
@@ -167,11 +153,6 @@ setvar_envvar(void)
 			p->env_string = env;
 			tmp_mbs_buffer2 = NULL; // We should not return this memory now
 		}
-#ifdef DISTRIBUTED
-		if (dmake_job_msg) {
-			dmake_job_msg->appendVar(env);
-		}
-#endif
 		if (tmp_mbs_buffer2) {
 			retmem_mb(tmp_mbs_buffer2);
 			tmp_mbs_buffer2 = NULL;
@@ -181,29 +162,6 @@ setvar_envvar(void)
 			tmp_mbs_buffer = NULL;
 		}
 	}
-#ifdef DISTRIBUTED
-	/* Append SUNPRO_DEPENDENCIES to the dmake_job_msg. */
-	if (keep_state && dmake_job_msg) {
-		macro = get_prop(sunpro_dependencies->prop, macro_prop);
-		length = 2 +
-		         strlen(sunpro_dependencies->string_mb) +
-		         strlen(macro->body.macro.value->string_mb);
-		if (length > (MAXPATHLEN * MB_LEN_MAX)) {
-			env = tmp_mbs_buffer2 = getmem(length);
-		} else {
-			env = mbs_buffer2;
-		}
-		(void) sprintf(env,
-			       "%s=%s",
-			       sunpro_dependencies->string_mb,
-			       macro->body.macro.value->string_mb);
-		dmake_job_msg->appendVar(env);
-		if (tmp_mbs_buffer2) {
-			retmem_mb(tmp_mbs_buffer2);
-			tmp_mbs_buffer2 = NULL;
-		}
-	}
-#endif
 }
 
 

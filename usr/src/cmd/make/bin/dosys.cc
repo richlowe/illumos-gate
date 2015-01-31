@@ -130,13 +130,8 @@ dosys(register Name command, register Boolean ignore_error, register Boolean cal
 		 	   stdout_file, stderr_file,
 	                   vroot_path, 0),
 	          send_mtool_msgs,
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-                  get_xdrs_ptr(),
-                  get_job_msg_id()
-#else
                   NULL,
                   -1
-#endif
 	          )) {
 		result = build_ok;
 	} else {

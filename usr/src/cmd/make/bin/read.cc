@@ -210,11 +210,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 			    (doname(makefile_name, true, false) == build_failed)) {
 				if (complain) {
 					(void) fprintf(stderr,
-#ifdef DISTRIBUTED
-						       catgets(catd, 1, 67, "dmake: Couldn't dmake `%s'\n"),
-#else
 						       catgets(catd, 1, 237, "make: Couldn't make `%s'\n"),
-#endif
 						       makefile_name->string_mb);
 				}
 				max_include_depth--;

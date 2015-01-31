@@ -60,14 +60,8 @@
 	Boolean		assign_done;
 	int foo;	
 	Boolean		build_failed_seen;
-#ifdef DISTRIBUTED
-	Boolean		building_serial;
-#endif
 	Name		built_last_make_run;
 	Name		c_at;
-#ifdef DISTRIBUTED
-	Boolean		called_make = false;
-#endif
 	Boolean		cleanup;
 	Boolean		close_report;
 	Boolean		command_changed;

@@ -28,17 +28,9 @@
 /*
  * Included files
  */
-#ifdef DISTRIBUTED
-#	include <dm/Avo_AcknowledgeMsg.h>
-#	include <dm/Avo_DoJobMsg.h>
-#	include <dm/Avo_JobResultMsg.h>
-#endif
 
 #include <mksh/defs.h>
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-#	include <rw/xdrstrea.h>
-#endif
 
 
 /*
@@ -198,14 +190,8 @@ extern	Boolean		sdot_target;
 extern	Boolean		all_parallel;
 extern	Boolean		assign_done;
 extern	Boolean		build_failed_seen;
-#ifdef DISTRIBUTED
-extern	Boolean		building_serial;
-#endif
 extern	Name		built_last_make_run;
 extern	Name		c_at;
-#ifdef DISTRIBUTED
-extern	Boolean		called_make;
-#endif
 extern	Boolean		command_changed;
 extern	Boolean		commands_done;
 extern	Chain		conditional_targets;
@@ -335,9 +321,6 @@ extern	void		add_running(Name target, Name true_target, Property command, int re
 extern	void		add_serial(Name target, int recursion_level, Boolean do_get, Boolean implicit);
 extern	void		add_subtree(Name target, int recursion_level, Boolean do_get, Boolean implicit);
 extern  void 		append_or_replace_macro_in_dyn_array(ASCII_Dyn_Array *Ar, char *macro);
-#ifdef DISTRIBUTED
-extern	Doname		await_dist(Boolean waitflg);
-#endif
 #ifdef TEAMWARE_MAKE_CMN
 extern	void		await_parallel(Boolean waitflg);
 #endif
@@ -348,12 +331,6 @@ extern	void		cond_macros_into_string(Name np, String_rec *buffer);
 extern	void		construct_target_string();
 extern	void		create_xdrs_ptr(void);
 extern	void		depvar_add_to_list (Name name, Boolean cmdline);
-#ifdef DISTRIBUTED
-extern	void		distribute_rxm(Avo_DoJobMsg *dmake_job_msg);
-extern	int 		getRxmMessage(void);
-extern	Avo_JobResultMsg* getJobResultMsg(void);
-extern	Avo_AcknowledgeMsg* getAcknowledgeMsg(void);
-#endif
 extern	Doname		doname(register Name target, register Boolean do_get, register Boolean implicit, register Boolean automatic = false);
 extern	Doname		doname_check(register Name target, register Boolean do_get, register Boolean implicit, register Boolean automatic);
 extern	Doname		doname_parallel(Name target, Boolean do_get, Boolean implicit);
@@ -386,17 +363,6 @@ extern  void		gather_recursive_deps(void);
 extern	char		*get_current_path(void);
 extern	int		get_job_msg_id(void);
 extern	FILE		*get_mtool_msgs_fp(void);
-#ifdef DISTRIBUTED
-extern	Boolean		get_dmake_group_specified(void);
-extern	Boolean		get_dmake_max_jobs_specified(void);
-extern	Boolean		get_dmake_mode_specified(void);
-extern	Boolean		get_dmake_odir_specified(void);
-extern	Boolean		get_dmake_rcfile_specified(void);
-extern	Boolean		get_pmake_machinesfile_specified(void);
-#endif
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-extern	XDR		*get_xdrs_ptr(void);
-#endif
 extern	wchar_t		*getmem_wc(register int size);
 /* On linux getwd(char *) is defined in 'unistd.h' */
 #ifdef __cplusplus
@@ -427,11 +393,7 @@ extern	Recursive_make	find_recursive_target(Name target);
 extern	void		reset_locals(register Name target, register Property old_locals, register Property conditional, register int index);
 extern	void		set_locals(register Name target, register Property old_locals);
 extern	void		setvar_append(register Name name, register Name value);
-#ifdef DISTRIBUTED
-extern	void		setvar_envvar(Avo_DoJobMsg *dmake_job_msg);
-#else
 extern	void		setvar_envvar(void);
-#endif
 extern	void		special_reader(Name target, register Name_vector depes, Cmd_line command);
 extern	void		startup_rxm();
 extern	Doname		target_can_be_built(register Name target);

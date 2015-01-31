@@ -34,11 +34,6 @@
 /*
  * Included files
  */
-#ifdef DISTRIBUTED
-#include <avo/strings.h>	/* AVO_STRDUP() */
-#include <dm/Avo_DoJobMsg.h>
-#include <dm/Avo_MToolJobResultMsg.h>
-#endif
 #include <errno.h>		/* errno */
 #include <fcntl.h>
 #include <mk/defs.h>
@@ -89,11 +84,6 @@ static	Name		subtree_conflict2;
 /*
  * File table of contents
  */
-#ifdef DISTRIBUTED
-static	void		append_dmake_cmd(Avo_DoJobMsg *dmake_job_msg, char *orig_cmd_line, int cmd_options);
-static	void		append_job_result_msg(Avo_MToolJobResultMsg *msg, char *outFn, char *errFn);
-static	void		send_job_result_msg(Running rp);
-#endif
 static	void		delete_running_struct(Running rp);
 static	Boolean		dependency_conflict(Name target);
 static	Doname		distribute_process(char **commands, Property line);
@@ -128,9 +118,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 	int			cmd_options = 0;
 	char			*commands[MAXRULES + 5];
 	char			*cp;
-#ifdef DISTRIBUTED
-	Avo_DoJobMsg		*dmake_job_msg = NULL;
-#endif
 	Name			dmake_name;
 	Name			dmake_value;
 	int			ignore;
@@ -177,11 +164,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 				pmake_max_jobs = PMAKE_DEF_MAX_JOBS;
 			}
 		}
-#ifdef DISTRIBUTED
-		if (send_mtool_msgs) {
-			send_rsrc_info_msg(pmake_max_jobs, local_host, user_name);
-		}
-#endif
 	}
 
 	if ((dmake_mode_type == serial_mode) ||
@@ -189,19 +171,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 		return (execute_serial(line));
 	}
 
-#ifdef DISTRIBUTED
-	if (dmake_mode_type == distributed_mode) {
-		if(local) {
-//			return (execute_serial(line));
-			waitflg = true;
-		}
-		dmake_job_msg = new Avo_DoJobMsg();
-		dmake_job_msg->setJobId(++job_msg_id);
-		dmake_job_msg->setTarget(target->string_mb);
-		dmake_job_msg->setImmediateOutput(0);
-		called_make = false;
-	} else
-#endif
 	{
 		p = commands;
 	}
@@ -236,52 +205,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 					return build_serial;
 				}
 			}
-#ifdef DISTRIBUTED
-			if (dmake_mode_type == distributed_mode) {
-				/*
-				 * XXX - set assign_mask to tell rxm
-				 * to do the following.
-				 */
-/* From execute_serial():
-				if (rule->assign) {
-					result = build_ok;
-					do_assign(rule->command_line, target);
- */
-				if (0) {
-				} else if (report_dependencies_level == 0) {
-					if (rule->ignore_error) {
-						cmd_options |= ignore_mask;
-					}
-					if (rule->silent) {
-						cmd_options |= silent_mask;
-					}
-					if (rule->command_line->meta) {
-						cmd_options |= meta_mask;
-					}
-					if (rule->make_refd) {
-						cmd_options |= make_refd_mask;
-					}
-					if (do_not_exec_rule) {
-						cmd_options |= do_not_exec_mask;
-					}
-					append_dmake_cmd(dmake_job_msg,
-					                 rule->command_line->string_mb,
-					                 cmd_options);
-					/* Copying dosys()... */
-					if (rule->make_refd) {
-						if (waitflg) {
-							dmake_job_msg->setImmediateOutput(1);
-						}
-						called_make = true;
-						if (command_changed &&
-						    !wrote_state_file) {
-							write_state_file(0, false);
-							wrote_state_file = true;
-						}
-					}
-				}
-			} else
-#endif
 			{
 				if (rule->silent && !silent) {
 					silent_flag = true;
@@ -313,74 +236,8 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 	}
 	if ((argcnt == 0) ||
 	    (report_dependencies_level > 0)) {
-#ifdef DISTRIBUTED
-		if (dmake_job_msg) {
-			delete dmake_job_msg;
-		}
-#endif
 		return build_ok;
 	}
-#ifdef DISTRIBUTED
-	if (dmake_mode_type == distributed_mode) {
-		// Send  a DoJob message to the rxm process.
-		distribute_rxm(dmake_job_msg);
-
-		// Wait for an acknowledgement.
-		Avo_AcknowledgeMsg *ackMsg = getAcknowledgeMsg();
-		if (ackMsg) {
-			delete ackMsg;
-		}
-
-		if (waitflg) {
-			// Wait for, and process a job result.
-			result = await_dist(waitflg);
-			if (called_make) {
-				maybe_reread_make_state();
-			}
-			check_state(temp_file_name);
-			if (result == build_failed) {
-				if (!continue_after_error) {
-
-#ifdef PRINT_EXIT_STATUS
-					warning(NOCATGETS("I'm in execute_parallel. await_dist() returned build_failed"));
-#endif
-
-					fatal(catgets(catd, 1, 252, "Command failed for target `%s'"),
-					      target->string_mb);
-				}
-				/*
-				 * Make sure a failing command is not
-				 * saved in .make.state.
-				 */
-				line->body.line.command_used = NULL;
-			}
-			if (temp_file_name != NULL) {
-				free_name(temp_file_name);
-			}
-			temp_file_name = NULL;
-			Property spro = get_prop(sunpro_dependencies->prop, macro_prop);
-			if(spro != NULL) {
-				Name val = spro->body.macro.value;
-				if(val != NULL) {
-					free_name(val);
-					spro->body.macro.value = NULL;
-				}
-			}
-			spro = get_prop(sunpro_dependencies->prop, env_mem_prop);
-			if(spro) {
-				char *val = spro->body.env_mem.value;
-				if(val != NULL) {
-					retmem_mb(val);
-					spro->body.env_mem.value = NULL;
-				}
-			}
-			return result;
-		} else {
-			parallel_process_cnt++;
-			return build_running;
-		}
-	} else
-#endif
 	{
 		*p = NULL;
 
@@ -403,29 +260,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 	}
 }
 
-#ifdef DISTRIBUTED
-/*
- *	append_dmake_cmd()
- *
- *	Replaces all escaped newline's (\<cr>)
- *	  in the original command line with space's,
- *	  then append the new command line to the DoJobMsg object.
- */
-static void
-append_dmake_cmd(Avo_DoJobMsg *dmake_job_msg,
-                 char *orig_cmd_line,
-                 int cmd_options)
-{
-/*
-	Avo_DmakeCommand	*tmp_dmake_command;
-
-	tmp_dmake_command = new Avo_DmakeCommand(orig_cmd_line, cmd_options);
-	dmake_job_msg->appendCmd(tmp_dmake_command);
-	delete tmp_dmake_command;
- */
-	dmake_job_msg->appendCmd(new Avo_DmakeCommand(orig_cmd_line, cmd_options));
-}
-#endif
 
 #ifdef TEAMWARE_MAKE_CMN
 #define MAXJOBS_ADJUST_RFE4694000
@@ -795,16 +629,7 @@ distribute_process(char **commands, Property line)
 		}
 	}
 #endif /* TEAMWARE_MAKE_CMN && MAXJOBS_ADJUST_RFE4694000 */
-#ifdef DISTRIBUTED
-	if (send_mtool_msgs) {
-		send_job_start_msg(line);
-	}
-#endif
-#ifdef DISTRIBUTED
-	setvar_envvar((Avo_DoJobMsg *)NULL);
-#else
 	setvar_envvar();
-#endif
 	/*
 	 * Tell the user what DMake is doing.
 	 */
@@ -945,17 +770,6 @@ void
 finish_running(void)
 {
 	while (running_list != NULL) {
-#ifdef DISTRIBUTED
-		if (dmake_mode_type == distributed_mode) {
-			if ((just_did_subtree) ||
-			    (parallel_process_cnt == 0)) {
-				just_did_subtree = false;
-			} else {
-				(void) await_dist(false);
-				finish_children(true);
-			}
-		} else
-#endif
 		{
 			await_parallel(false);
 			finish_children(true);
@@ -1119,9 +933,6 @@ start_loop_3:
 					doname_subtree(rp->target,
 						       rp->do_get,
 						       rp->implicit);
-#ifdef DISTRIBUTED
-					just_did_subtree = true;
-#endif
 					quiescent = false;
 					delete_running_struct(rp);
 					goto start_loop_3;
@@ -1156,9 +967,6 @@ start_loop_3:
 			}
 			recursion_level = rp->recursion_level;
 			doname_subtree(rp->target, rp->do_get, rp->implicit);
-#ifdef DISTRIBUTED
-			just_did_subtree = true;
-#endif
 			delete_running_struct(rp);
 		}
 	}
@@ -1429,14 +1237,6 @@ bypass_for_loop_inc_4:
 					maybe_reread_make_state();
 				}
 			} else {
-				/*
-				 * Send an Avo_MToolJobResultMsg to maketool.
-				 */
-#ifdef DISTRIBUTED
-				if (send_mtool_msgs) {
-					send_job_result_msg(rp);
-				}
-#endif
 				/*
 				 * Check if there were any job output
 				 * from the parallel build.
@@ -1745,12 +1545,6 @@ add_running(Name target, Name true_target, Property command, int recursion_level
 	} else {
 		rp->automatics = NULL;
 	}
-#ifdef DISTRIBUTED
-	if (dmake_mode_type == distributed_mode) {
-		rp->make_refd = called_make;
-		called_make = false;
-	} else
-#endif
 	{
 		rp->pid = process_running;
 		process_running = -1;
@@ -2109,54 +1903,6 @@ maybe_reread_make_state(void)
 	}
 }
 
-#ifdef DISTRIBUTED
-/*
- * Create and send an Avo_MToolJobResultMsg.
- */
-static void
-send_job_result_msg(Running rp)
-{
-	Avo_MToolJobResultMsg	*msg;
-	RWCollectable		*xdr_msg;
-
-	msg = new Avo_MToolJobResultMsg();
-	msg->setResult(rp->job_msg_id,
-	               (rp->state == build_ok) ? 0 : 1,
-	               DONE);
-	append_job_result_msg(msg,
-				rp->stdout_file,
-				rp->stderr_file);
-
-	xdr_msg = (RWCollectable *)msg;
-	xdr(get_xdrs_ptr(), xdr_msg);
-	(void) fflush(get_mtool_msgs_fp());
-
-	delete msg;
-}
-
-/*
- * Append the stdout/err to Avo_MToolJobResultMsg.
- */
-static void
-append_job_result_msg(Avo_MToolJobResultMsg *msg, char *outFn, char *errFn)
-{
-	FILE		*fp;
-	char		line[MAXPATHLEN];
-
-	fp = fopen(outFn, "r");
-	if (fp == NULL) {
-		/* Hmmm... what should we do here? */
-		return;
-	}
-	while (fgets(line, MAXPATHLEN, fp) != NULL) {
-		if (line[strlen(line) - 1] == '\n') {
-			line[strlen(line) - 1] = '\0';
-		}
-		msg->appendOutput(AVO_STRDUP(line));
-	}
-	(void) fclose(fp);
-}
-#endif
 
 static void
 delete_running_struct(Running rp)

@@ -34,16 +34,6 @@
  */
 #include <alloca.h>		/* alloca() */
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-#	include <avo/strings.h>	/* AVO_STRDUP() */
-#	include <dm/Avo_MToolJobResultMsg.h>
-#	include <dm/Avo_MToolJobStartMsg.h>
-#	include <dm/Avo_MToolRsrcInfoMsg.h>
-#	include <dm/Avo_macro_defs.h> /* AVO_BLOCK_INTERUPTS & AVO_UNBLOCK_INTERUPTS */
-#	include <dmthread/Avo_ServerState.h>
-#	include <rw/pstream.h>
-#	include <rw/xdrstrea.h>
-#endif
 
 #include <fcntl.h>
 #include <mk/defs.h>
@@ -71,14 +61,7 @@
 
 #define MAXRULES 100
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-#define SEND_MTOOL_MSG(cmds) \
-	if (send_mtool_msgs) { \
-		cmds \
-	}
-#else
 #define SEND_MTOOL_MSG(cmds) 
-#endif
 
 // Sleep for .1 seconds between stat()'s
 const int	STAT_RETRY_SLEEP_TIME = 100000;
@@ -93,11 +76,6 @@ const int	STAT_RETRY_SLEEP_TIME = 100000;
 static char	hostName[MAXNAMELEN] = "";
 static char	userName[MAXNAMELEN] = "";
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-	static FILE	*mtool_msgs_fp;
-	static XDR 	xdrs;
-	static int	sent_rsrc_info_msg = 0;
-#endif
 
 static int	second_pass = 0;
 
@@ -130,14 +108,6 @@ static	void		delete_query_chain(Chain ch);
 extern	Name		normalize_name(register wchar_t *name_string, register int length);
 
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-	static void		append_job_result_msg(Avo_MToolJobResultMsg *job_result_msg);
-	static int		pollResults(char *outFn, char *errFn, char *hostNm);
-	static void		pollResultsAction(char *outFn, char *errFn);
-	static void		rxmGetNextResultsBlock(int fd);
-	static int		us_sleep(unsigned int nusecs);
-	extern "C" void		Avo_PollResultsAction_Sigusr1Handler(int foo);
-#endif
 
 /*
  * DONE.
@@ -1019,16 +989,6 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 			if (dependencies_running) {
 				break;
 			}
-#ifdef DISTRIBUTED
-		} else if ((!parallel_ok(dependency->name, false)) &&
-			   (dependencies_running)) {
-			/*
-			 * If we can't execute the current dependency in
-			 * parallel, hold off the dependency processing
-			 * to preserve the order of the dependencies.
-			 */
-			break;
-#endif
 		} else {
 			timestruc_t	depe_time = file_doesnt_exist;
 
@@ -1844,10 +1804,6 @@ Doname
 execute_serial(Property line)
 {
 	int			child_pid = 0;
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-	Avo_MToolJobResultMsg	*job_result_msg;
-	RWCollectable		*xdr_msg;
-#endif
 	Boolean			printed_serial;
 	Doname			result = build_ok;
 	Cmd_line		rule, cmd_tail, command = NULL;
@@ -1930,11 +1886,7 @@ execute_serial(Property line)
 				do_assign(rule->command_line, target);
 			} else if (report_dependencies_level == 0) {
 				/* Execute command line. */
-#ifdef DISTRIBUTED
-				setvar_envvar((Avo_DoJobMsg *)NULL);
-#else
 				setvar_envvar();
-#endif
 				result = dosys(rule->command_line,
 				               (Boolean) rule->ignore_error,
 				               (Boolean) rule->make_refd,
@@ -2038,130 +1990,6 @@ execute_serial(Property line)
 }
 
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-
-/*
- * Create and send an Avo_MToolRsrcInfoMsg.
- */
-void
-send_rsrc_info_msg(int max_jobs, char *hostname, char *username)
-{
-	static int		first = 1;
-	Avo_MToolRsrcInfoMsg	*msg;
-	RWSlistCollectables	server_list;
-	Avo_ServerState		*server_state;
-	RWCollectable		*xdr_msg;
-
-	if (!first) {
-		return;
-	}
-	first = 0;
-
-	create_xdrs_ptr();
-
-	server_state = new Avo_ServerState(max_jobs, hostname, username);
-	server_list.append(server_state);
-	msg = new Avo_MToolRsrcInfoMsg(&server_list);
-
-	xdr_msg = (RWCollectable *)msg;
-	xdr(get_xdrs_ptr(), xdr_msg);
-	(void) fflush(get_mtool_msgs_fp());
-
-	delete server_state;
-	delete msg;
-}
-
-/*
- * Create and send an Avo_MToolJobStartMsg.
- */
-void
-send_job_start_msg(Property line)
-{
-	int			cmd_options = 0;
-	Avo_MToolJobStartMsg	*msg;
-	Cmd_line		rule;
-	Name			target = line->body.line.target;
-	RWCollectable		*xdr_msg;
-
-	if (userName[0] == '\0') {
-		avo_get_user(userName, NULL);
-	}
-	if (hostName[0] == '\0') {
-		strcpy(hostName, avo_hostname());
-	}
-
-	msg = new Avo_MToolJobStartMsg();
-	msg->setJobId(++job_msg_id);
-	msg->setTarget(AVO_STRDUP(target->string_mb));
-	msg->setHost(AVO_STRDUP(hostName));
-	msg->setUser(AVO_STRDUP(userName));
-
-        for (rule = line->body.line.command_used;
-             rule != NULL;
-             rule = rule->next) {
-		if (posix && (touch || quest) && !rule->always_exec) {
-			continue;
-		}
-                if (vpath_defined) {
-                        rule->command_line =
-                          vpath_translation(rule->command_line);
-                }
-		cmd_options = 0;
-		if (rule->ignore_error || ignore_errors) {
-			cmd_options |= ignore_mask;
-		}
-		if (rule->silent || silent) {
-			cmd_options |= silent_mask;
-		}
-		if (rule->command_line->meta) {
-			cmd_options |= meta_mask;
-		}
-                if (!touch && (rule->command_line->hash.length > 0)) {
-			msg->appendCmd(new Avo_DmakeCommand(rule->command_line->string_mb, cmd_options));
-                }
-        }
-
-	xdr_msg = (RWCollectable*) msg;
-	xdr(&xdrs, xdr_msg);
-	(void) fflush(mtool_msgs_fp);
-
-/* tolik, 08/39/2002.
-   I commented out this code because it causes using unallocated memory.
-	delete msg;
-*/
-}
-
-/*
- * Append the stdout/err to Avo_MToolJobResultMsg.
- */
-static void
-append_job_result_msg(Avo_MToolJobResultMsg *job_result_msg)
-{
-	FILE		*fp;
-	char		line[MAXPATHLEN];
-	char		stdout_file2[MAXPATHLEN];
-
-	if (stdout_file != NULL) {
-		fp = fopen(stdout_file, "r");
-		if (fp == NULL) {
-			/* Hmmm... what should we do here? */
-			warning(catgets(catd, 1, 326, "fopen() of stdout_file failed. Output may be lost"));
-			return;
-		}
-		while (fgets(line, MAXPATHLEN, fp) != NULL) {
-			if (line[strlen(line) - 1] == '\n') {
-				line[strlen(line) - 1] = '\0';
-			}
-			job_result_msg->appendOutput(AVO_STRDUP(line));
-		}
-		(void) fclose(fp);
-		us_sleep(STAT_RETRY_SLEEP_TIME);
-	} else {
-		/* Hmmm... stdout_file shouldn't be NULL */
-		warning(catgets(catd, 1, 327, "Internal stdout_file variable shouldn't be NULL. Output may be lost"));
-	}
-}
-#endif /* TEAMWARE_MAKE_CMN */
 
 /*
  *	vpath_translation(cmd)
@@ -2793,14 +2621,6 @@ touch_command(register Property line, register Name target, Doname result)
 	Name			touch_cmd;
 	Cmd_line		rule;
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-	Avo_MToolJobResultMsg	*job_result_msg;
-	RWCollectable		*xdr_msg;
-	int			child_pid = 0;
-	wchar_t			string[MAXPATHLEN];
-	char			mbstring[MAXPATHLEN];
-	int			filed;
-#endif
 
 	SEND_MTOOL_MSG(
 		if (!sent_rsrc_info_msg) {
@@ -3460,164 +3280,6 @@ check_auto_dependencies(Name target, int auto_count, Name *automatics)
 	}
 }
 
-#if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
-void
-create_xdrs_ptr(void)
-{
-	static int	xdrs_init = 0;
-
-	if (!xdrs_init) {
-		xdrs_init = 1;
-		mtool_msgs_fp = fdopen(mtool_msgs_fd, "a");
-		xdrstdio_create(&xdrs,
-		                mtool_msgs_fp,
-		                XDR_ENCODE);
-	}
-}
-
-XDR *
-get_xdrs_ptr(void)
-{
-	return &xdrs;
-}
-
-FILE *
-get_mtool_msgs_fp(void)
-{
-	return mtool_msgs_fp;
-}
-
-int
-get_job_msg_id(void)
-{
-	return job_msg_id;
-}
-
-// Continuously poll and show the results of remotely executing a job,
-// i.e., output the stdout and stderr files.
-
-static int
-pollResults(char *outFn, char *errFn, char *hostNm)
-{
-	int		child;
-
-	child = fork();
-	switch (child) {
-	case -1:
-		break;
-	case 0:
-		enable_interrupt((void (*) (int))SIG_DFL);
-		(void) sigset(SIGUSR1, Avo_PollResultsAction_Sigusr1Handler);
-		pollResultsAction(outFn, errFn);
-
-		exit(0);
-		break;
-	default:
-		break;
-	}
-	return child;
-}
-
-// This is the PollResultsAction SIGUSR1 handler.
-
-static bool_t pollResultsActionTimeToFinish = FALSE;
-
-extern "C" void
-Avo_PollResultsAction_Sigusr1Handler(int foo)
-{
-	pollResultsActionTimeToFinish = TRUE;
-}
-
-static void
-pollResultsAction(char *outFn, char *errFn)
-{
-	int			fd;
-	time_t			file_time = 0;
-	long			file_time_nsec = 0;
-	struct stat		statbuf;
-	int			stat_rc;
-
-	// Keep stat'ing until file exists.
-	while (((stat_rc = stat(outFn, &statbuf)) != 0) &&
-	       (errno == ENOENT) && 
-	       !pollResultsActionTimeToFinish) {
-		us_sleep(STAT_RETRY_SLEEP_TIME);
-	}
-	// The previous stat() could be failed due to EINTR
-	// So one more try is needed
-	if (stat_rc != 0 && stat(outFn, &statbuf) != 0) {
-		// stat() failed
-		warning(NOCATGETS("Internal error: stat(\"%s\", ...) failed: %s\n"),
-			outFn, strerror(errno));
-		exit(1);
-	}
-
-	if ((fd = open(outFn, O_RDONLY)) < 0
-		&& (errno != EINTR || (fd = open(outFn, O_RDONLY)) < 0)) {
-		// open() failed
-		warning(NOCATGETS("Internal error: open(\"%s\", O_RDONLY) failed: %s\n"),
-			outFn, strerror(errno));
-		exit(1);
-	}
-
-	while (!pollResultsActionTimeToFinish && stat(outFn, &statbuf) == 0) {
-		if ((statbuf.st_mtim.tv_sec > file_time) ||
-		    ((statbuf.st_mtim.tv_sec == file_time) &&
-		    (statbuf.st_mtim.tv_nsec > file_time_nsec))
-		   ) {
-			file_time = statbuf.st_mtim.tv_sec;
-			file_time_nsec = statbuf.st_mtim.tv_nsec;
-			rxmGetNextResultsBlock(fd);
-		}
-		us_sleep(STAT_RETRY_SLEEP_TIME);
-	}
-	// Check for the rest of output
-	rxmGetNextResultsBlock(fd);
-
-	(void) close(fd);
-}
-
-static void
-rxmGetNextResultsBlock(int fd)
-{
-	size_t			to_read = 8 * 1024;
-	ssize_t			bytes_read;
-	ssize_t			bytes_written;
-	char			results_buf[8 * 1024];
-	sigset_t		newset;
-	sigset_t		oldset;
-
-	// Read some more from the output/results file.
-	// Hopefully the kernel managed to prefetch the stuff.
-	bytes_read = read(fd, results_buf, to_read);
-	while (bytes_read > 0) {
-		AVO_BLOCK_INTERUPTS;
-		bytes_written = write(1, results_buf, bytes_read);
-		AVO_UNBLOCK_INTERUPTS;
-		if (bytes_written != bytes_read) {
-			// write() failed
-			warning(NOCATGETS("Internal error: write(1, ...) failed: %s\n"),
-				strerror(errno));
-			exit(1);
-		}
-		bytes_read = read(fd, results_buf, to_read);
-	}
-}
-
-// Generic, interruptable microsecond resolution sleep member function.
-
-static int
-us_sleep(unsigned int nusecs)
-{
-	struct pollfd dummy;
-	int timeout;
-
-	if ((timeout = nusecs/1000) <= 0) {
-		timeout = 1;
-	}
-	return poll(&dummy, 0, timeout);
-}
-#endif /* TEAMWARE_MAKE_CMN */
 
 // Recursively delete each of the Chain struct on the chain.
 
