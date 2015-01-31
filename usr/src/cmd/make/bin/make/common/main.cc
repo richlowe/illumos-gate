@@ -64,7 +64,6 @@
 #endif
 
 #include <locale.h>		/* setlocale() */
-#include <mk/copyright.h>
 #include <mk/defs.h>
 #include <mksdmsi18n/mksdmsi18n.h>	/* libmksdmsi18n_init() */
 #include <mksh/macro.h>		/* getvar() */
