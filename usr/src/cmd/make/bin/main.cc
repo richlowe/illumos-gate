@@ -39,11 +39,7 @@
 #	include <avo/find_dir.h>	/* avo_find_run_dir() */
 #	include <avo/version_string.h>
 #	include <avo/util.h>		/* avo_init() */
-#ifdef USE_DMS_CCR
-#	include <avo/usage_tracking.h>
-#else
 #	include <avo/cleanup.h>
-#endif
 #endif
 
 #if defined(TEAMWARE_MAKE_CMN)
@@ -70,9 +66,6 @@
 #include <mksh/misc.h>		/* getmem(), setup_char_semantics() */
 
 #if defined(TEAMWARE_MAKE_CMN)
-#ifdef USE_DMS_CCR
-#	include <pubdmsi18n/pubdmsi18n.h>	/* libpubdmsi18n_init() */
-#endif
 #endif
 
 #include <pwd.h>		/* getpwnam() */
@@ -147,11 +140,7 @@ static	Boolean		getname_stat = false;
 	static	time_t		start_time;
 	static	int		g_argc;
 	static	char		**g_argv;
-#ifdef USE_DMS_CCR
-	static  Avo_usage_tracking *usageTracking = NULL;
-#else
 	static  Avo_cleanup	*cleanup = NULL;
-#endif
 #endif
 
 /*
@@ -275,11 +264,7 @@ main(int argc, char *argv[])
 	avo_init(argv[0]);
 	umask(um);
 
-#ifdef USE_DMS_CCR
-	usageTracking = new Avo_usage_tracking(NOCATGETS("dmake"), argc, argv);
-#else
 	cleanup = new Avo_cleanup(NOCATGETS("dmake"), argc, argv);
-#endif
 #endif
 
 #if defined(TEAMWARE_MAKE_CMN)
@@ -311,9 +296,6 @@ main(int argc, char *argv[])
  * from avo_util library. 
  */
 	libmksdmsi18n_init();
-#ifdef USE_DMS_CCR
-	libpubdmsi18n_init();
-#endif
 #endif
 
 
@@ -796,8 +778,6 @@ main(int argc, char *argv[])
  *		running_list	List of parallel running processes
  *		temp_file_name	The temp file is removed, if any
  *		catd	the message catalog file
- *		usage_tracking  Should have been constructed in main()
- *			        should destroyed just before exiting
  */
 extern "C" void
 cleanup_after_exit(void)
@@ -934,13 +914,8 @@ if(getname_stat) {
 
 #ifdef TEAMWARE_MAKE_CMN
 	// Deleting the usage tracking object sends the usage mail 
-#ifdef USE_DMS_CCR
-	//usageTracking->setExitStatus(exit_status, NULL);
-	//delete usageTracking;
-#else
 	cleanup->set_exit_status(exit_status);
 	delete cleanup;
-#endif
 #endif
 
 /*
