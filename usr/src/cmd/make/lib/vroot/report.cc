@@ -331,33 +331,4 @@ report_dependency(const char *name)
 	(void)fputs(" ", report_file);
 }
 
-#ifdef MAKE_IT
-void
-make_it(filename)
-	register char	*filename;
-{
-	register char	*command;
-	register char	*argv[6];
-	register int	pid;
-	union wait	foo;
-
-	if (getenv(SUNPRO_DEPENDENCIES) == NULL) return;
-	command= alloca(strlen(filename)+32);
-	(void)sprintf(command, NOCATGETS("make %s\n"), filename);
-	switch (pid= fork()) {
-		case 0: /* child */
-			argv[0]= NOCATGETS("csh");
-			argv[1]= NOCATGETS("-c");
-			argv[2]= command;
-			argv[3]= 0;			
-			(void)dup2(2, 1);
-			execve(NOCATGETS("/bin/sh"), argv, environ);
-			perror(NOCATGETS("execve error"));
-			exit(1);
-		case -1: /* error */
-			perror(NOCATGETS("fork error"));
-		default: /* parent */
-			while (wait(&foo) != pid);};
-}
-#endif
 
