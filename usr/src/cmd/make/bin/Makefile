@@ -25,7 +25,6 @@ OBJS=	ar.o		\
 	make.o		\
 	misc.o		\
 	nse_printdep.o	\
-	nse.o		\
 	parallel.o	\
 	pmake.o		\
 	read.o		\

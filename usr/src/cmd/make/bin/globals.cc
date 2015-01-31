@@ -120,17 +120,6 @@
 	char		*mbs_ptr2;
 	int		mtool_msgs_fd;
 	Boolean		depinfo_already_read = false;
-#ifdef NSE
-        Name		derived_src;
-	Boolean		nse;				/* NSE on */
-        Name            nse_backquote_seen;
-	char		nse_depinfo_lockfile[MAXPATHLEN];
-	Boolean		nse_depinfo_locked;
-        Boolean         nse_did_recursion;
-        Name            nse_shell_var_used;
-        Boolean         nse_watch_vars = false;
-	wchar_t		current_makefile[MAXPATHLEN];
-#endif
 	Boolean		no_action_was_taken = true;	/* true if we've not **
 							** run any command   */
 

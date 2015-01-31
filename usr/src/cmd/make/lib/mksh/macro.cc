@@ -46,11 +46,7 @@
  * File table of contents
  */
 static void	add_macro_to_global_list(Name macro_to_add);
-#ifdef NSE
-static void	expand_value_with_daemon(Name name, register Property macro, register String destination, Boolean cmd);
-#else
 static void	expand_value_with_daemon(Name, register Property macro, register String destination, Boolean cmd);
-#endif
 
 static void	init_arch_macros(void);
 static void	init_mach_macros(void);
@@ -629,18 +625,6 @@ get_macro_value:
 	}
 	/* Get the macro value. */
 	macro = get_prop(name->prop, macro_prop);
-#ifdef NSE
-        if (nse_watch_vars && nse && macro != NULL) {
-                if (macro->body.macro.imported) {
-                        nse_shell_var_used= name;
-		}
-                if (macro->body.macro.value != NULL){
-	              if (nse_backquotes(macro->body.macro.value->string)) {
-	                       nse_backquote_seen= name;
-		      }
-	       }
-	}
-#endif
 	if ((macro != NULL) && macro->body.macro.is_conditional) {
 		conditional_macro_used = true;
 		/*
@@ -921,9 +905,6 @@ init_arch_macros(void)
 	FILE		*pipe;
 	Name		value;
 	int		set_host, set_target;
-#ifdef NSE
-	Property	macro;
-#endif
 	const char	*mach_command = NOCATGETS("/bin/mach");
 
 	set_host = (get_prop(host_arch->prop, macro_prop) == NULL);
@@ -946,19 +927,12 @@ init_arch_macros(void)
 
 		value = GETNAME(result_string.buffer.start, wslen(result_string.buffer.start));
 
-#ifdef NSE
-	        macro = setvar_daemon(host_arch, value, false, no_daemon, true, 0);
-	        macro->body.macro.imported= true;
-	        macro = setvar_daemon(target_arch, value, false, no_daemon, true, 0);
-	        macro->body.macro.imported= true;
-#else
 		if (set_host) {
 			(void) setvar_daemon(host_arch, value, false, no_daemon, true, 0);
 		}
 		if (set_target) {
 			(void) setvar_daemon(target_arch, value, false, no_daemon, true, 0);
 		}
-#endif
 	}
 }
 
@@ -1032,33 +1006,10 @@ init_mach_macros(void)
  *	Global variables used:
  */
 static void
-#ifdef NSE
-expand_value_with_daemon(Name name, register Property macro, register String destination, Boolean cmd)
-#else
 expand_value_with_daemon(Name, register Property macro, register String destination, Boolean cmd)
-#endif
 {
 	register Chain		chain;
 
-#ifdef NSE
-        if (reading_dependencies) {
-                /*
-                 * Processing the dependencies themselves
-                 */
-                depvar_dep_macro_used(name);
-	} else {
-                /*
-	         * Processing the rules for the targets
-	         * the nse_watch_vars flags chokes off most
-	         * checks.  it is true only when processing
-	         * the output from a recursive make run
-	         * which is all we are interested in here.
-	         */
-	         if (nse_watch_vars) {
-	                depvar_rule_macro_used(name);
-		}
-	 }
-#endif
 
 	switch (macro->body.macro.daemon) {
 	case no_daemon:
@@ -1136,9 +1087,6 @@ setvar_daemon(register Name name, register Name value, Boolean append, Daemon da
 	wchar_t			*val_string = (wchar_t*)NULL;
 	Wstring			wcb;
 
-#ifdef NSE
-        macro->body.macro.imported = false;
-#endif
 
 	if ((makefile_type != reading_nothing) &&
 	    macro->body.macro.read_only) {

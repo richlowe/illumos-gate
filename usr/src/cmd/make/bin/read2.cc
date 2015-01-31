@@ -586,9 +586,6 @@ enter_dependencies(register Name target, Chain target_group, register Name_vecto
 	/* Check if this is a .RECURSIVE line */
 	if ((depes->used >= 3) &&
 	    (depes->names[0] == recursive_name)) {
-#ifdef NSE
-                nse_did_recursion= true;
-#endif
 		target->has_recursive_dependency = true;
 		depes->names[0] = NULL;
 		recursive_state = 0;
@@ -886,10 +883,6 @@ enter_dependency(Property line, register Name depe, Boolean automatic)
 				if (automatic) {
 					dp->built = false;
 					depe->stat.is_file = true;
-#ifdef NSE
-				        depe->has_parent= true;
-				        depe->is_target= true;
-#endif
 				}
 			}
 			dp->stale = false;
@@ -904,18 +897,11 @@ enter_dependency(Property line, register Name depe, Boolean automatic)
 	dp->stale = false;
 	dp->built = false;
 	depe->stat.is_file = true;
-#ifdef NSE
-        depe->has_parent= true;
-        depe->is_target= true;
-#endif
 
 	if ((makefile_type == reading_makefile) &&
 	    (line != NULL) &&
 	    (line->body.line.target != NULL)) {
 		line->body.line.target->has_regular_dependency = true;
-#ifdef NSE
-                line->body.line.target->is_target= true;
-#endif
 	}
 }
 
@@ -1197,18 +1183,6 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 		}
 		break;
 
-#ifdef NSE
-	case derived_src_special:
-		for (; depes != NULL; depes= depes->next)
-			for (n= 0; n < depes->used; n++) {
-				if (trace_reader)
-					(void)printf("%s:\t%s\n",
-					precious->string_mb,
-					depes->names[n]->string_mb);
-				depes->names[n]->stat.is_derived_src= true;
-			};
-	        break;
-#endif
 
 	case ignore_special:
 		if ((depes->used != 0) &&(!posix)){

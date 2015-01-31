@@ -32,23 +32,17 @@ extern FILE	*get_report_file(void);
 extern char	*get_target_being_reported_for(void);
 extern void	report_dependency(const char *name);
 extern int	file_lock(char *name, char *lockname, int *file_locked, int timeout);
-#ifdef NSE
-extern char	*setenv(char *name, char *value);
-#endif
 
 #define SUNPRO_DEPENDENCIES "SUNPRO_DEPENDENCIES"
 #define LD 	"LD"
 #define COMP 	"COMP"
 
-/* the following definitions define the interface between make and
- * NSE - the two systems must track each other.
+/*
+ * These relate to Sun's ancient source control system that predated TeamWare,
+ * named NSE.  They appear to be used regardless of its presence, however, and
+ * so linger.
  */
 #define NSE_DEPINFO 		".nse_depinfo"
 #define NSE_DEPINFO_LOCK 	".nse_depinfo.lock"
-#define NSE_DEP_ENV 		"NSE_DEP"
-#define NSE_TFS_PUSH 		"/usr/nse/bin/tfs_push"
-#define NSE_TFS_PUSH_LEN 	8
-#define NSE_VARIANT_ENV 	"NSE_VARIANT"
-#define NSE_RT_SOURCE_NAME 	"Shared_Source"
 
 #endif

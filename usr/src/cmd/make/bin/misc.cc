@@ -608,10 +608,6 @@ load_cached_names(void)
 	posix_name = GETNAME(wcs_buffer, FIND_LENGTH);
 	MBSTOWCS(wcs_buffer, NOCATGETS(".DEFAULT"));
 	default_rule_name = GETNAME(wcs_buffer, FIND_LENGTH);
-#ifdef NSE
-	MBSTOWCS(wcs_buffer, NOCATGETS(".DERIVED_SRC"));
-        derived_src= GETNAME(wcs_buffer, FIND_LENGTH);
-#endif
 	MBSTOWCS(wcs_buffer, NOCATGETS("$"));
 	dollar = GETNAME(wcs_buffer, FIND_LENGTH);
 	MBSTOWCS(wcs_buffer, NOCATGETS(".DONE"));
@@ -694,9 +690,6 @@ load_cached_names(void)
 	posix_name->special_reader = posix_special;
 	built_last_make_run->special_reader = built_last_make_run_special;
 	default_rule_name->special_reader = default_special;
-#ifdef NSE
-        derived_src->special_reader= derived_src_special;
-#endif
 	dot_keep_state->special_reader = keep_state_special;
 	dot_keep_state_file->special_reader = keep_state_file_special;
 	ignore_name->special_reader = ignore_special;
