@@ -131,8 +131,7 @@ struct _Running {
 
 typedef enum {
 	serial_mode,
-	parallel_mode,
-	distributed_mode
+	parallel_mode
 } DMake_mode;
 
 typedef enum {
