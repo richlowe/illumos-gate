@@ -22,7 +22,6 @@ OBJS=	ar.o		\
 	implicit.o	\
 	macro.o		\
 	main.o		\
-	make.o		\
 	misc.o		\
 	nse_printdep.o	\
 	parallel.o	\
@@ -36,7 +35,7 @@ include ../../Makefile.cmd
 include ../Makefile.com
 
 LDLIBS += ../lib/mksh/libmksh.a ../lib/mksdmsi18n/libmksdmsi18n.a ../lib/vroot/libvroot.a
-LDLIBS += ../lib/bsd/libbsd.a -lc
+LDLIBS += ../lib/bsd/libbsd.a -lc -lnsl -lumem
 
 CPPFLAGS += -D_FILE_OFFSET_BITS=64
 

@@ -33,9 +33,6 @@
  * Included files
  */
 #include <alloca.h>		/* alloca() */
-#if defined(TEAMWARE_MAKE_CMN)
-#include <avo/util.h>		/* avo_get_user(), avo_hostname() */
-#endif
 
 #if defined(DISTRIBUTED) || defined(MAKETOOL) /* tolik */
 #	include <avo/strings.h>	/* AVO_STRDUP() */
@@ -3301,11 +3298,9 @@ set_locals(register Name target, register Property old_locals)
 	Chain			cond_name;
 	Chain			cond_chain;
 
-#ifdef DISTRIBUTED
 	if (target->dont_activate_cond_values) {
 		return;
 	}
-#endif
 
 	saved_conditional_macro_used = conditional_macro_used;
 
@@ -3362,11 +3357,9 @@ reset_locals(register Name target, register Property old_locals, register Proper
 	register Property	this_conditional;
 	Chain			cond_chain;
 
-#ifdef DISTRIBUTED
 	if (target->dont_activate_cond_values) {
 		return;
 	}
-#endif
 
 	/* Scan the list of conditional properties and restore the old value */
 	/* to each one Reverse the order relative to when we assigned macros */

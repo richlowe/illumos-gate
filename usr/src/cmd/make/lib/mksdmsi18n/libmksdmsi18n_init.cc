@@ -39,7 +39,6 @@ libmksdmsi18n_init()
 	char		name[20];
 
 	if (getenv(NOCATGETS("NLSPATH")) == NULL) {
-		fprintf(stderr, NOCATGETS("Internal error: Set NLSPATH before opening catalogue file\n"));
 		return 1;
 	}
 	sprintf(name, NOCATGETS("libmksdmsi18n_%d"), I18N_VERSION);

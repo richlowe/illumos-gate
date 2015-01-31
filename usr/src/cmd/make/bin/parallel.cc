@@ -41,7 +41,6 @@
 #endif
 #include <errno.h>		/* errno */
 #include <fcntl.h>
-#include <avo/util.h>		/* avo_get_user(), avo_hostname() */
 #include <mk/defs.h>
 #include <mksh/dosys.h>		/* redirect_io() */
 #include <mksh/macro.h>		/* expand_value() */
@@ -52,6 +51,7 @@
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <netdb.h>
 
 
 
@@ -145,11 +145,8 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 
 	if ((pmake_max_jobs == 0) &&
 	    (dmake_mode_type == parallel_mode)) {
-		if (user_name[0] == '\0') {
-			avo_get_user(user_name, NULL);
-		}
 		if (local_host[0] == '\0') {
-			strcpy(local_host, avo_hostname());
+			(void) gethostname(local_host, MAXNAMELEN);
 		}
 		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MAX_JOBS"));
 		dmake_name = GETNAME(wcs_buffer, FIND_LENGTH);
@@ -669,7 +666,7 @@ job_adjust_error() {
 		warning(catgets(catd, 1, 339, "Encountered max jobs auto adjustment error - disabling auto adjustment."));
 
 		/* switch off job adjustment for the children */
-		putenv(NOCATGETS("DMAKE_ADJUST_MAX_JOBS=NO"));
+		putenv(strdup(NOCATGETS("DMAKE_ADJUST_MAX_JOBS=NO")));
 
 		/* and for this dmake */
 		job_adjust_mode = ADJUST_NONE;
@@ -1736,16 +1733,6 @@ add_running(Name target, Name true_target, Property command, int recursion_level
 	rp->target = target;
 	rp->true_target = true_target;
 	rp->command = command;
-	Property spro_val = get_prop(sunpro_dependencies->prop, macro_prop);
-	if(spro_val) {
-		rp->sprodep_value = spro_val->body.macro.value;
-		spro_val->body.macro.value = NULL;
-		spro_val = get_prop(sunpro_dependencies->prop, env_mem_prop);
-		if(spro_val) {
-			rp->sprodep_env = spro_val->body.env_mem.value;
-			spro_val->body.env_mem.value = NULL;
-		}
-	}
 	rp->recursion_level = recursion_level;
 	rp->do_get = do_get;
 	rp->implicit = implicit;

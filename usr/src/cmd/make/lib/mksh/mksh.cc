@@ -33,10 +33,6 @@
 /*
  * Included files
  */
-#if defined(TEAMWARE_MAKE_CMN) || defined(MAKETOOL) /* tolik */
-#	include <avo/util.h>
-#endif
-
 #include <mksh/dosys.h>		/* redirect_io() */
 #include <mksh/misc.h>		/* retmem() */
 #include <mksh/mksh.h>

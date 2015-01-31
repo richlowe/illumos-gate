@@ -371,7 +371,7 @@ extern	Boolean		exec_vp(register char *name, register char **argv, char **envp, 
 extern	Doname		execute_parallel(Property line, Boolean waitflg, Boolean local = false);
 extern	Doname		execute_serial(Property line);
 extern	timestruc_t&  	exists(register Name target);
-extern	void		fatal(char *, ...);
+extern	void		fatal(const char *, ...);
 extern	void		fatal_reader(char *, ...);
 extern	Doname		find_ar_suffix_rule(register Name target, Name true_target, Property *command, Boolean rechecking);
 extern	Doname		find_double_suffix_rule(register Name target, Property *command, Boolean rechecking);
