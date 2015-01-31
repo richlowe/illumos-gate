@@ -236,9 +236,7 @@ main(int argc, char *argv[])
 	int			statval;
 #endif
 
-#ifndef PARALLEL
 	struct stat		out_stat, err_stat;
-#endif
 	hostid = gethostid();
 #ifdef TEAMWARE_MAKE_CMN
 	avo_get_user(NULL, NULL); // Initialize user name
@@ -416,7 +414,6 @@ main(int argc, char *argv[])
 		}
 	}
 
-#ifndef PARALLEL
 	/* find out if stdout and stderr point to the same place */
 	if (fstat(1, &out_stat) < 0) {
 		fatal(catgets(catd, 1, 165, "fstat of standard out failed: %s"), errmsg(errno));
@@ -430,9 +427,6 @@ main(int argc, char *argv[])
 	} else {
 		stdout_stderr_same = false;
 	}
-#else
-	stdout_stderr_same = false;
-#endif
 	/* Make the vroot package scan the path using shell semantics */
 	set_path_style(0);
 
@@ -1333,11 +1327,9 @@ read_command_options(register int argc, register char **argv)
 				warning(catgets(catd, 1, 285, "Ignoring DistributedMake -m option"));
 #endif
 				break;
-#ifndef PARALLEL
 			case 128: /* -O seen */
 				argv[i] = (char *)NOCATGETS("-O");
 				break;
-#endif
 			case 256: /* -K seen */
 				argv[i] = (char *)NOCATGETS("-K");
 			        break;
@@ -1697,7 +1689,6 @@ parse_command_option(register char ch)
 			do_not_exec_rule = true;
 		}
 		return 0;
-#ifndef PARALLEL
 	case 'O':			 /* Send job start & result msgs */
 		if (invert_this) {
 			send_mtool_msgs = false;
@@ -1707,7 +1698,6 @@ parse_command_option(register char ch)
 #endif
 		}
 		return 128;
-#endif
 	case 'o':			 /* Use alternative dmake output dir */
 		if (invert_this) {
 			dmake_odir_specified = false;
@@ -2207,7 +2197,6 @@ read_files_and_state(int argc, char **argv)
 		append_char('w', &makeflags_string);
 		append_char('w', &makeflags_string_posix);
 	}
-#ifndef PARALLEL
 	/* -c dmake_rcfile */
 	if (dmake_rcfile_specified) {
 		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_RCFILE"));
@@ -2273,7 +2262,6 @@ read_files_and_state(int argc, char **argv)
 		append_char((int) hyphen_char, &makeflags_string_posix);
 		append_char('R', &makeflags_string_posix);
 	}
-#endif
 
 /*
  *	Make sure MAKEFLAGS is exported

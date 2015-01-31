@@ -55,9 +55,6 @@
 #include <mksh/misc.h>		/* getmem() */
 #include <poll.h>
 
-#ifdef PARALLEL
-#	include <rx/api.h>
-#endif
 
 #include <signal.h>
 
@@ -73,9 +70,7 @@
 /*
  * Defined macros
  */
-#ifndef PARALLEL
 #	define LOCALHOST "localhost"
-#endif
 
 #define MAXRULES 100
 
@@ -547,11 +542,6 @@ recheck_target:
 		line->body.line.query = out_of_date_list;
 	}
 
-#ifdef PARALLEL
-	if (doing_subtree) {
-		parallel = false;
-	}
-#endif
 
 /*
  * If the target is a :: type, do not try to find the rule for the target,
