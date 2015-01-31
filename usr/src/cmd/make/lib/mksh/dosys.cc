@@ -37,7 +37,6 @@
 #include <alloca.h>		/* alloca() */
 
 #if defined(TEAMWARE_MAKE_CMN) || defined(MAKETOOL) /* tolik */
-#	include <avo/strings.h>	/* AVO_STRDUP() */
 #if defined(DISTRIBUTED)
 #	include <dm/Avo_CmdOutput.h>
 #	include <rw/xdrstrea.h>
@@ -635,7 +634,7 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 	SEND_MTOOL_MSG(
 		make_output_msg = new Avo_CmdOutput();
 		(void) sprintf(tmp_buf, "%d", job_msg_id);
-		make_output_msg->appendOutput(AVO_STRDUP(tmp_buf));
+		make_output_msg->appendOutput(strdup(tmp_buf));
 	);
 
 	tmp_buf[0] = (int) nul_char;
@@ -678,7 +677,7 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 		(void) fprintf(stdout, "\n");
 		(void) fflush(stdout);
 		SEND_MTOOL_MSG(
-			make_output_msg->appendOutput(AVO_STRDUP(tmp_buf));
+			make_output_msg->appendOutput(strdup(tmp_buf));
 		);
 	}
 	SEND_MTOOL_MSG(

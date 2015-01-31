@@ -137,7 +137,7 @@ free_chain(Name_vector ptr)
  */
 /*VARARGS*/
 void
-fatal(char * message, ...)
+fatal(const char *message, ...)
 {
 	va_list args;
 
