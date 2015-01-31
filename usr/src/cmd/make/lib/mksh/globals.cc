@@ -74,10 +74,6 @@ wchar_t		char_semantics_char[] = {
 	question_char,
 	quote_char,
 	semicolon_char,
-#ifdef SGE_SUPPORT
-	space_char,
-	tab_char,
-#endif
 	nul_char
 };
 Macro_list	cond_macro_list;

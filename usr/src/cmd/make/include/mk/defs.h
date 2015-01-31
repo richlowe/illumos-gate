@@ -255,9 +255,6 @@ extern	char		*mbs_ptr2;
 extern	Boolean		no_action_was_taken;
 extern	int		mtool_msgs_fd;
 extern	Boolean		no_parallel;
-#ifdef SGE_SUPPORT
-extern	Boolean		grid;
-#endif
 extern	Name		no_parallel_name;
 extern	Name		not_auto;
 extern	Boolean		only_parallel;
@@ -298,9 +295,6 @@ extern	Boolean		silent;
 extern	Name		silent_name;
 extern	char		*stderr_file;
 extern	char		*stdout_file;
-#ifdef SGE_SUPPORT
-extern	char		script_file[];
-#endif
 extern	Boolean		stdout_stderr_same;
 extern	Dependency	suffixes;
 extern	Name		suffixes_name;

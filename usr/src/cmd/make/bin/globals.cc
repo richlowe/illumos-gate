@@ -124,9 +124,6 @@
 							** run any command   */
 
 	Boolean		no_parallel = false;		/* TEAMWARE_MAKE_CMN */
-#ifdef SGE_SUPPORT
-	Boolean		grid = false;			/* TEAMWARE_MAKE_CMN */
-#endif
 	Name		no_parallel_name;
 	Name		not_auto;
 	Boolean		only_parallel;			/* TEAMWARE_MAKE_CMN */
@@ -167,9 +164,6 @@
 	Name		silent_name;
 	char		*stderr_file = NULL;
 	char		*stdout_file = NULL;
-#ifdef SGE_SUPPORT
-	char		script_file[MAXPATHLEN] = "";
-#endif
 	Boolean		stdout_stderr_same;
 	Dependency	suffixes;
 	Name		suffixes_name;
