@@ -83,8 +83,13 @@ extern void job_adjust_fini();
 #define	LD_SUPPORT_ENV_VAR_32	NOCATGETS("SGS_SUPPORT_32")
 #define	LD_SUPPORT_ENV_VAR_64	NOCATGETS("SGS_SUPPORT_64")
 #define	LD_SUPPORT_MAKE_LIB	NOCATGETS("libmakestate.so.1")
-#define	LD_SUPPORT_MAKE_LIB_DIR	NOCATGETS("/lib")
-#define	LD_SUPPORT_MAKE_LIB_DIR_64	NOCATGETS("/64")
+#ifdef __i386
+#define	LD_SUPPORT_MAKE_ARCH	NOCATGETS("i386")
+#elif __sparc
+#define	LD_SUPPORT_MAKE_ARCH	NOCATGETS("sparc")
+#else
+#error "Unsupported architecture"
+#endif
 
 /*
  * typedefs & structs
@@ -1616,6 +1621,50 @@ int   done=0;
 	}
 }
 
+char *
+make_install_prefix(void)
+{
+	int ret;
+	char origin[PATH_MAX];
+	char *dir;
+
+	if ((ret = readlink("/proc/self/path/a.out", origin,
+	    PATH_MAX - 1)) < 0)
+		fatal("failed to read origin from /proc\n");
+
+	
+	origin[ret] = '\0';
+	return strdup(dirname(origin));
+}
+
+static char *
+add_to_env(const char *var, const char *value, const char *fallback)
+{
+	const char *oldpath;
+	char *newpath;
+
+	oldpath = getenv(var);
+	if (oldpath == NULL) {
+		if (value != NULL) {
+			asprintf(&newpath, "%s=%s",
+			    var, value);
+		} else {
+			asprintf(&newpath, "%s=%s",
+			    var, fallback);
+		}
+	} else {
+		if (value != NULL) {
+			asprintf(&newpath, "%s=%s:%s",
+			    var, oldpath, value);
+		} else {
+			asprintf(&newpath, "%s=%s:%s",
+			    var, oldpath, fallback);			
+		}
+	}
+
+	return (newpath);
+}
+
 /*
  *	set_sgs_support()
  *
@@ -1635,56 +1684,43 @@ set_sgs_support()
 {
 	int		len;
 	char		*newpath, *newpath64;
-	char		*oldpath, *oldpath64;
+	char 		*lib32, *lib64;
 	static char	*prev_path, *prev_path64;
+	char		*origin = make_install_prefix();
+	struct stat st;
 
-	oldpath = getenv(LD_SUPPORT_ENV_VAR_32);
-	if (oldpath == NULL) {
-		len = snprintf(NULL, 0, "%s=%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_32,
-		    MAKE_PREFIX,
-		    LD_SUPPORT_MAKE_LIB_DIR,
-		    LD_SUPPORT_MAKE_LIB, LD_SUPPORT_MAKE_LIB) + 1;
-		newpath = (char *) malloc(len);
-		sprintf(newpath, "%s=%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_32,
-		    MAKE_PREFIX,
-		    LD_SUPPORT_MAKE_LIB_DIR,
-		    LD_SUPPORT_MAKE_LIB, LD_SUPPORT_MAKE_LIB);
-	} else {
-		len = snprintf(NULL, 0, "%s=%s:%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_32, oldpath, MAKE_PREFIX,
-		    LD_SUPPORT_MAKE_LIB_DIR, LD_SUPPORT_MAKE_LIB,
-		    LD_SUPPORT_MAKE_LIB) + 1;
-		newpath = (char *) malloc(len);
-		sprintf(newpath, "%s=%s:%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_32, oldpath, MAKE_PREFIX,
-		    LD_SUPPORT_MAKE_LIB_DIR, LD_SUPPORT_MAKE_LIB,
-		    LD_SUPPORT_MAKE_LIB);
+	asprintf(&lib32, "%s/%s/%s", origin, "../lib",
+	    LD_SUPPORT_MAKE_LIB);
+
+	if (stat(lib32, &st) != 0) {
+		free(lib32);
+		// Try the tools path
+		asprintf(&lib32, "%s/%s/%s/%s", origin, "../../lib/",
+		    LD_SUPPORT_MAKE_ARCH, LD_SUPPORT_MAKE_LIB);
+
+		if (stat(lib32, &st) != 0) {
+			free(lib32);
+			lib32 = NULL;
+		}
 	}
 
-	oldpath64 = getenv(LD_SUPPORT_ENV_VAR_64);
-	if (oldpath64 == NULL) {
-		len = snprintf(NULL, 0, "%s=%s/%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_64, MAKE_PREFIX, LD_SUPPORT_MAKE_LIB_DIR,
-		    LD_SUPPORT_MAKE_LIB_DIR_64, LD_SUPPORT_MAKE_LIB,
-		    LD_SUPPORT_MAKE_LIB) + 1;
-		newpath64 = (char *) malloc(len);
-		sprintf(newpath64, "%s=%s/%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_64, MAKE_PREFIX, LD_SUPPORT_MAKE_LIB_DIR,
-		    LD_SUPPORT_MAKE_LIB_DIR_64, LD_SUPPORT_MAKE_LIB,
-		    LD_SUPPORT_MAKE_LIB);
-	} else {
-		len = snprintf(NULL, 0, "%s=%s:%s/%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_64, oldpath64, MAKE_PREFIX,
-		    LD_SUPPORT_MAKE_LIB_DIR, LD_SUPPORT_MAKE_LIB_DIR_64,
-		    LD_SUPPORT_MAKE_LIB, LD_SUPPORT_MAKE_LIB) + 1;
-		newpath64 = (char *) malloc(len);
-		sprintf(newpath64, "%s=%s:%s/%s/%s/%s:%s",
-		    LD_SUPPORT_ENV_VAR_64, oldpath64, MAKE_PREFIX,
-		    LD_SUPPORT_MAKE_LIB_DIR, LD_SUPPORT_MAKE_LIB_DIR_64,
-		    LD_SUPPORT_MAKE_LIB, LD_SUPPORT_MAKE_LIB);
+	asprintf(&lib64, "%s/%s/64/%s", origin, "../lib",
+	    LD_SUPPORT_MAKE_LIB);
+
+	if (stat(lib64, &st) != 0) {
+		free(lib64);
+		// Try the tools path
+		asprintf(&lib64, "%s/%s/%s/64/%s", origin, "../../lib/",
+		    LD_SUPPORT_MAKE_ARCH, LD_SUPPORT_MAKE_LIB);
+
+		if (stat(lib64, &st) != 0) {
+			free(lib64);
+			lib64 = NULL;
+		}
 	}
+
+	newpath = add_to_env(LD_SUPPORT_ENV_VAR_32, lib32, LD_SUPPORT_MAKE_LIB);
+	newpath64 = add_to_env(LD_SUPPORT_ENV_VAR_64, lib64, LD_SUPPORT_MAKE_LIB);
 
 	putenv(newpath);
 	if (prev_path) {
@@ -1697,6 +1733,9 @@ set_sgs_support()
 		free(prev_path64);
 	}
 	prev_path64 = newpath64;
+	free(lib32);
+	free(lib64);
+	free(origin);
 }
 
 /*
