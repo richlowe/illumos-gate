@@ -133,15 +133,31 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 		if ((makefile->body.makefile.contents == NULL) &&
 		    (doname_it)) {
 			if (makefile_path == NULL) {
+				char *pfx = make_install_prefix();
+				char *path;
+
 				add_dir_to_path(".",
 						&makefile_path,
 						-1);
+
+				// As regularly installed
+				asprintf(&path, "%s/../share/lib/make", pfx);
+				add_dir_to_path(path, &makefile_path, -1);
+				free(path);
+
+				// Tools build
+				asprintf(&path, "%s/../../share/", pfx);
+				add_dir_to_path(path, &makefile_path, -1);
+				free(path);
+				    
 				add_dir_to_path(NOCATGETS("/usr/share/lib/make"),
 						&makefile_path,
 						-1);
 				add_dir_to_path(NOCATGETS("/etc/default"),
 						&makefile_path,
 						-1);
+
+				free(pfx);
 			}
 			save_makefile_type = makefile_type;
 			makefile_type = reading_nothing;

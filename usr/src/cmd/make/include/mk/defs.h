@@ -391,6 +391,7 @@ extern	void		update_target(Property line, Doname result);
 extern	void		warning(char *, ...);
 extern	void		write_state_file(int report_recursive, Boolean exiting);
 extern	Name		vpath_translation(register Name cmd);
+extern	char 		*make_install_prefix(void);
 
 #define DEPINFO_FMT_VERSION "VERS2$"
 #define VER_LEN strlen(DEPINFO_FMT_VERSION)
