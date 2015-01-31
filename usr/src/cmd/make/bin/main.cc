@@ -38,11 +38,6 @@
 
 #include <bsd/bsd.h>		/* bsd_signal() */
 
-#ifdef DISTRIBUTED
-#	include <dm/Avo_AcknowledgeMsg.h>
-#	include <rw/xdrstrea.h>
-#	include <dmrc/dmrc.h> /* dmakerc file processing */
-#endif
 
 #include <locale.h>		/* setlocale() */
 #include <mk/defs.h>
@@ -165,12 +160,6 @@ static	void		report_dir_enter_leave(Boolean entering);
 
 extern void expand_value(Name, register String , Boolean);
 
-#ifdef DISTRIBUTED
-	extern	int		dmake_ofd;
-	extern	FILE*		dmake_ofp;
-	extern	int		rxmPid;
-	extern	XDR 		xdrs_out;
-#endif
 #ifdef TEAMWARE_MAKE_CMN
 	static const char	verstring[] = "illumos make";
 #endif
@@ -245,7 +234,7 @@ main(int argc, char *argv[])
 // ---> fprintf(stderr, catgets(catd, 15, 666, "--- SUN make ---\n"));
 
 
-#if defined(TEAMWARE_MAKE_CMN) || defined(MAKETOOL)
+#if defined(TEAMWARE_MAKE_CMN)
 /*
  * I put libmksdmsi18n_init() under #ifdef because it requires avo_i18n_init()
  * from avo_util library. 
@@ -476,47 +465,10 @@ main(int argc, char *argv[])
 		 * If neither is defined, and $(HOME)/.dmakerc does not exists,
 		 * then print a message, and default to parallel mode.
 		 */
-#ifdef DISTRIBUTED
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_RCFILE"));
-		dmake_name = GETNAME(wcs_buffer, FIND_LENGTH);
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MODE"));
-		dmake_name2 = GETNAME(wcs_buffer, FIND_LENGTH);
-		if ((((prop = get_prop(dmake_name->prop, macro_prop)) == NULL) ||
-		     ((dmake_value = prop->body.macro.value) == NULL)) &&
-		    (((prop2 = get_prop(dmake_name2->prop, macro_prop)) == NULL) ||
-		     ((dmake_value2 = prop2->body.macro.value) == NULL))) {
-			Boolean empty_dmakerc = true;
-			char *homedir = getenv(NOCATGETS("HOME"));
-			if ((homedir != NULL) && (strlen(homedir) < (sizeof(def_dmakerc_path) - 16))) {
-				sprintf(def_dmakerc_path, NOCATGETS("%s/.dmakerc"), homedir);
-				if ((((statval = stat(def_dmakerc_path, &statbuf)) != 0) && (errno == ENOENT)) ||
-					((statval == 0) && (statbuf.st_size == 0))) {
-				} else {
-					Avo_dmakerc	*rcfile = new Avo_dmakerc();
-					Avo_err		*err = rcfile->read(def_dmakerc_path, NULL, TRUE);
-					if (err) {
-						fatal(err->str);
-					}
-					empty_dmakerc = rcfile->was_empty();
-					delete rcfile;
-				}
-			}
-			if (empty_dmakerc) {
-				if (getenv(NOCATGETS("DMAKE_DEF_PRINTED")) == NULL) {
-					putenv(NOCATGETS("DMAKE_DEF_PRINTED=TRUE"));
-					(void) fprintf(stdout, catgets(catd, 1, 302, "dmake: defaulting to parallel mode.\n"));
-					(void) fprintf(stdout, catgets(catd, 1, 303, "See the man page dmake(1) for more information on setting up the .dmakerc file.\n"));
-				}
-				dmake_mode_type = parallel_mode;
-				no_parallel = false;
-			}
-		}
-#else
 		if(dmake_mode_type == distributed_mode) {
 			dmake_mode_type = parallel_mode;
 			no_parallel = false;
 		}
-#endif	/* DISTRIBUTED */
 	}
     }
 #endif
@@ -564,18 +516,6 @@ main(int argc, char *argv[])
 	}
 #endif
 
-#ifdef DISTRIBUTED
-	/*
-	 * At this point, DMake should startup an rxm with any and all
-	 * DMake command line options. Rxm will, among other things,
-	 * read the rc file.
-	 */
-	if ((!list_all_targets) &&
-	    (report_dependencies_level == 0) &&
-	    (dmake_mode_type == distributed_mode)) {
-		startup_rxm();
-	}
-#endif
 		
 /*
  *	Enable interrupt handler for alarms
@@ -653,9 +593,6 @@ main(int argc, char *argv[])
  		}
  	}
 
-#ifdef DISTRIBUTED
-	building_serial = false;
-#endif
 
 	report_dir_enter_leave(true);
 
@@ -744,12 +681,6 @@ if(getname_stat) {
 }
 #endif
 
-/*
-#ifdef DISTRIBUTED
-    if (get_parent() == TRUE) {
-#endif
- */
-
 	parallel = false;
 	/* If we used the SVR4_MAKE, don't build .DONE or .FAILED */
 	if (!getenv(USE_SVR4_MAKE)){
@@ -831,11 +762,6 @@ if(getname_stat) {
 	}
 	/* Write .make.state */
 	write_state_file(1, (Boolean) 1);
-/*
-#ifdef DISTRIBUTED
-    }
-#endif
- */
 
 #if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
 	job_adjust_fini();
@@ -843,27 +769,6 @@ if(getname_stat) {
 
 #ifdef TEAMWARE_MAKE_CMN
 	catclose(catd);
-#endif
-#ifdef DISTRIBUTED
-	if (rxmPid > 0) {
-		// Tell rxm to exit by sending it an Avo_AcknowledgeMsg
-		Avo_AcknowledgeMsg acknowledgeMsg;
-		RWCollectable *msg = (RWCollectable *)&acknowledgeMsg;
-
-		int xdrResult = xdr(&xdrs_out, msg);
-
-		if (xdrResult) {
-			fflush(dmake_ofp);
-		} else {
-/*
-			fatal(catgets(catd, 1, 266, "couldn't tell rxm to exit"));
- */
-			kill(rxmPid, SIGTERM);
-		}
-
-		waitpid(rxmPid, NULL, 0);
-		rxmPid = 0;
-	}
 #endif
 }
 
@@ -888,22 +793,6 @@ handle_interrupt(int)
 	Running			rp;
 
 	(void) fflush(stdout);
-#ifdef DISTRIBUTED
-	if (rxmPid > 0) {
-		// Tell rxm to exit by sending it an Avo_AcknowledgeMsg
-		Avo_AcknowledgeMsg acknowledgeMsg;
-		RWCollectable *msg = (RWCollectable *)&acknowledgeMsg;
-
-		int xdrResult = xdr(&xdrs_out, msg);
-
-		if (xdrResult) {
-			fflush(dmake_ofp);
-		} else {
-			kill(rxmPid, SIGTERM);
-			rxmPid = 0;
-		}
-	}
-#endif
 	if (childPid > 0) {
 		kill(childPid, SIGTERM);
 		childPid = -1;
@@ -1619,9 +1508,6 @@ parse_command_option(register char ch)
 		if (invert_this) {
 			send_mtool_msgs = false;
 		} else {
-#ifdef DISTRIBUTED
-			send_mtool_msgs = true;
-#endif
 		}
 		return 128;
 	case 'o':			 /* Use alternative dmake output dir */
@@ -3409,53 +3295,6 @@ dmake_message_callback(char *err_msg)
 }
 #endif
 
-#ifdef DISTRIBUTED
-/*
- * Returns whether -c is set or not.
- */
-Boolean
-get_dmake_rcfile_specified(void)
-{
-	return(dmake_rcfile_specified);
-}
-
-/*
- * Returns whether -g is set or not.
- */
-Boolean
-get_dmake_group_specified(void)
-{
-	return(dmake_group_specified);
-}
-
-/*
- * Returns whether -j is set or not.
- */
-Boolean
-get_dmake_max_jobs_specified(void)
-{
-	return(dmake_max_jobs_specified);
-}
-
-/*
- * Returns whether -m is set or not.
- */
-Boolean
-get_dmake_mode_specified(void)
-{
-	return(dmake_mode_specified);
-}
-
-/*
- * Returns whether -o is set or not.
- */
-Boolean
-get_dmake_odir_specified(void)
-{
-	return(dmake_odir_specified);
-}
-
-#endif
 
 static void
 report_dir_enter_leave(Boolean entering)

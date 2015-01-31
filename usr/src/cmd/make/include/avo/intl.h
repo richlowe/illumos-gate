@@ -45,12 +45,6 @@
 /*
  * Define the various text domains
  */
-#define	AVO_DOMAIN_CODEMGR	"codemgr"
-#define AVO_DOMAIN_VERTOOL	"vertool"
-#define AVO_DOMAIN_FILEMERGE	"filemerge"
 #define AVO_DOMAIN_DMAKE	"dmake"
-#define AVO_DOMAIN_PMAKE	"pmake"
-#define AVO_DOMAIN_FREEZEPOINT	"freezept"
-#define AVO_DOMAIN_MAKETOOL	"maketool"
 
 #endif

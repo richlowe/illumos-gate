@@ -14,7 +14,6 @@
 PROG=	make
 OBJS=	ar.o		\
 	depvar.o	\
-	dist.o		\
 	doname.o	\
 	dosys.o		\
 	files.o		\

@@ -1871,22 +1871,14 @@ fatal_reader(char * pattern, ...)
 	}
 
 	(void) fflush(stdout);
-#ifdef DISTRIBUTED
-	(void) fprintf(stderr, catgets(catd, 1, 113, "dmake: Fatal error in reader: "));
-#else
 	(void) fprintf(stderr, catgets(catd, 1, 238, "make: Fatal error in reader: "));
-#endif
 	(void) vfprintf(stderr, pattern, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
 
 	if (temp_file_name != NULL) {
 		(void) fprintf(stderr,
-#ifdef DISTRIBUTED
-			       catgets(catd, 1, 114, "dmake: Temp-file %s not removed\n"),
-#else
 			       catgets(catd, 1, 239, "make: Temp-file %s not removed\n"),
-#endif
 			       temp_file_name->string_mb);
 		temp_file_name = NULL;
 	}

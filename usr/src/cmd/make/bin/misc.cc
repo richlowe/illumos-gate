@@ -143,11 +143,7 @@ fatal(const char *message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-#ifdef DISTRIBUTED
-	(void) fprintf(stderr, catgets(catd, 1, 262, "dmake: Fatal error: "));
-#else
 	(void) fprintf(stderr, catgets(catd, 1, 263, "make: Fatal error: "));
-#endif
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
@@ -175,15 +171,7 @@ fatal(const char *message, ...)
 	}
 
 	while (parallel_process_cnt > 0) {
-#ifdef DISTRIBUTED
-		if (dmake_mode_type == distributed_mode) {
-			(void) await_dist(false);
-		} else {
-			await_parallel(true);
-		}
-#else
 		await_parallel(true);
-#endif
 		finish_children(false);
 	}
 #endif
@@ -216,11 +204,7 @@ warning(char * message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-#ifdef DISTRIBUTED
-	(void) fprintf(stderr, catgets(catd, 1, 264, "dmake: Warning: "));
-#else
 	(void) fprintf(stderr, catgets(catd, 1, 265, "make: Warning: "));
-#endif
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
@@ -284,17 +268,8 @@ get_current_path(void)
 		if (pwd[0] == (int) nul_char) {
 			pwd[0] = (int) slash_char;
 			pwd[1] = (int) nul_char;
-#ifdef DISTRIBUTED
-			current_path = strdup(pwd);
-		} else if (IS_EQUALN(pwd, NOCATGETS("/tmp_mnt"), 8)) {
-			current_path = strdup(pwd + 8);
-		} else {
-			current_path = strdup(pwd);
-		}
-#else
 		}
 		current_path = strdup(pwd);
-#endif
 	}
 	return current_path;
 }
