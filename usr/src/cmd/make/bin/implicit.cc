@@ -286,10 +286,6 @@ posix_attempts:
 							       line_prop))) {
 					result = (Doname) source->state;
 				} else {
-#ifdef NSE
-		                        nse_check_derived_src(target, source->string,
-		                         source_suffix->body.suffix.command_template);
-#endif
 #if 0  /* with_squiggle sends false, which is buggy. : djay */
 					result = doname(source,
 							(Boolean) source_suffix->body.

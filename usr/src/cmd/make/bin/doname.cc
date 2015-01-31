@@ -342,9 +342,6 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 	Boolean			saved_commands_done;
 	Boolean			restart = false;
 	Boolean			save_parallel = parallel;
-#ifdef NSE
-	Boolean			save_readdep;
-#endif
 	Boolean			doing_subtree = false;
 
 	Boolean			recheck_conditionals = false;
@@ -374,9 +371,6 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 			}
 		}
 	}
-#ifdef NSE
-        nse_check_file_backquotes(target->string);
-#endif
 #endif
 	/*
 	 * If the target is a constructed one for a "::" target,
@@ -524,14 +518,7 @@ recheck_target:
  */
 	if (!target->has_depe_list_expanded)
 	{
-#ifdef NSE
-		save_readdep = reading_dependencies;
-		reading_dependencies= true;
-#endif
 		dynamic_dependencies(target);
-#ifdef NSE
-		reading_dependencies= save_readdep;
-#endif
 	}
 
 /*
@@ -799,10 +786,6 @@ r_command:
 		if (result != build_failed) {
 			result = run_command(command, 
 					     (Boolean) ((parallel || save_parallel) && !silent));
-#ifdef NSE
-			nse_check_no_deps_no_rule(target,
-				get_prop(target->prop, line_prop), command);
-#endif
 		}
 		switch (result) {
 #ifdef TEAMWARE_MAKE_CMN
@@ -1070,13 +1053,6 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 			    (dependency->name->state == build_failed)) {
 				dep_result = (Doname) dependency->name->state;
 			} else {
-#ifdef NSE
-				nse_check_sccs(target->string,
-					       dependency->name->string);
-                                nse_check_derived_src(target,
-	                                       dependency->name->string,
-	                                       line->body.line.command_template);
-#endif
 				dep_result = doname_check(dependency->name,
 							  do_get,
 							  false,
@@ -1585,9 +1561,6 @@ dynamic_dependencies(Name target)
 		/* If dependency name string contains shell wildcards */
 		/* replace the name with the expansion */
 		if (dependency->name->wildcard) {
-#ifdef NSE
-	                nse_wildcard(target->string, dependency->name->string);
-#endif
 			wcb.init(dependency->name);
 			if ((start = (wchar_t *) wschr(wcb.get_string(),
 					   (int) parenleft_char)) != NULL) {
@@ -1985,13 +1958,7 @@ execute_serial(Property line)
 				               (Boolean) rule->always_exec,
 				               target,
 				               send_mtool_msgs);
-#ifdef NSE
-				nse_did_recursion= false;
-#endif
 				check_state(temp_file_name);
-#ifdef NSE
-				nse_check_cd(line);
-#endif
 			}
 			SEND_MTOOL_MSG(
 				append_job_result_msg(job_result_msg);

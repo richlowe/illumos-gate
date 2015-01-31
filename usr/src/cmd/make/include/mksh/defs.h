@@ -334,9 +334,6 @@ typedef enum {
 	no_special,
 	built_last_make_run_special,
 	default_special,
-#ifdef NSE
-	derived_src_special,
-#endif
 	get_posix_special,
 	get_special,
 	ignore_special,
@@ -418,9 +415,6 @@ struct _Macro {
 	* Name "ABC" get one macro prop
 	*/
 	struct _Name		*value;
-#ifdef NSE
-	Boolean                 imported:1;
-#endif
 	Boolean			exported:1;
 	Boolean			read_only:1;
 	/*
@@ -462,9 +456,6 @@ struct _Name {
 		Boolean			is_dir:1;
 		Boolean			is_sym_link:1;
 		Boolean			is_precious:1;
-#ifdef NSE
-                Boolean                 is_derived_src:1;
-#endif
 		enum sccs_stat		has_sccs:2;
 	}                       stat;
 	/*

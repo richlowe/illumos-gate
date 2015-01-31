@@ -82,38 +82,12 @@ depvar_dep_macro_used(Name name)
 
 	for (dv = depvar_list; dv != NULL; dv = dv->next) {
 		if (name == dv->name) {
-#ifdef NSE
-			if (dv->cmdline) {
-				nse_dep_cmdmacro(dv->name->string);
-			}
-#endif
 			variant_deps = true;
 			break;
 		}
 	}
 }
 
-#ifdef NSE
-/*
- * The macro `name' has been used in either the argument
- * to a cd before a recursive make.  See if it was
- * defined on the command-line and, if so, complain.
- */
-void
-depvar_rule_macro_used(Name name)
-{
-	Depvar		dv;
-
-	for (dv = depvar_list; dv != NULL; dv = dv->next) {
-		if (name == dv->name) {
-			if (dv->cmdline) {
-				nse_rule_cmdmacro(dv->name->string);
-			}
-			break;
-		}
-	}
-}
-#endif
 
 /*
  * Print the results.  If any of the Dependency Variables

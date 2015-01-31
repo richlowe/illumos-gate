@@ -116,12 +116,6 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 
 	wchar_t * wcb = get_wstring(makefile_name->string_mb);
 
-#ifdef NSE
-	if (report_file){
-		wscpy(previous_current_makefile, current_makefile);
-		wscpy(current_makefile, wcb);
-	}
-#endif 
 	if (max_include_depth++ >= 40) {
 		fatal(catgets(catd, 1, 66, "Too many nested include statements"));
 	}
@@ -407,11 +401,6 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 		(void) printf(catgets(catd, 1, 74, ">>>>>>>>>>>>>>>> End of makefile %s\n"),
 			      makefile_name->string_mb);
 	}
-#ifdef NSE
-	if (report_file && (previous_current_makefile[0] != NULL)) {
-		wscpy(current_makefile, previous_current_makefile);
-	}
-#endif
 	if(file_being_read) {
 		retmem(file_being_read);
 	}

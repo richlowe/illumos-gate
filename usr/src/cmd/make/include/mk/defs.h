@@ -450,35 +450,5 @@ extern	Name		vpath_translation(register Name cmd);
 #define DEPINFO_FMT_VERSION "VERS2$"
 #define VER_LEN strlen(DEPINFO_FMT_VERSION)
 
-#ifdef NSE
-
-/*
- *  NSE version for depinfo format
- */
-extern Boolean		nse;
-extern Name		nse_backquote_seen;
-extern Boolean		nse_did_recursion;
-extern Name		nse_shell_var_used;
-extern Boolean		nse_watch_vars;
-extern wchar_t		current_makefile[MAXPATHLEN];
-extern Boolean		nse_depinfo_locked;
-extern char		nse_depinfo_lockfile[MAXPATHLEN];
-extern Name		derived_src;
-
-extern void		depvar_dep_macro_used(Name);
-extern void		depvar_rule_macro_used(Name);
-extern Boolean		nse_backquotes(wchar_t *);
-extern void		nse_check_cd(Property);
-extern void		nse_check_derived_src(Name, wchar_t *, Cmd_line);
-extern void		nse_check_file_backquotes(wchar_t *);
-extern void		nse_check_no_deps_no_rule(Name, Property, Property);
-extern void		nse_check_sccs(wchar_t *, wchar_t *);
-extern void		nse_dep_cmdmacro(wchar_t *);
-extern int		nse_exit_status(void);
-extern void		nse_init_source_suffixes(void);
-extern void		nse_no_makefile(Name);
-extern void		nse_rule_cmdmacro(wchar_t *);
-extern void		nse_wildcard(wchar_t *, wchar_t *);
-#endif
 
 #endif

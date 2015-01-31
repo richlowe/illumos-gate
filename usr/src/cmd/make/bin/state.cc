@@ -118,11 +118,7 @@ static	void		print_auto_depes(register Dependency dependency, register FILE *fd,
  */
 
 void
-#ifdef NSE
-write_state_file(int report_recursive, Boolean exiting)
-#else
 write_state_file(int, Boolean exiting)
-#endif
 {
 	register FILE		*fd;
 	int			lock_err;
@@ -198,11 +194,6 @@ write_state_file(int, Boolean exiting)
 		      make_state_tempfile,
 		      errmsg(lock_err));
 	}
-#ifdef NSE
-	if (nse) {
-		(void) fchmod(fileno(fd), 0666); 
-	}
-#endif
 	/*
 	 * Set a trap for failed writes. If a write fails, the routine
 	 * will try saving the .make.state file under another name in /tmp.
@@ -398,11 +389,6 @@ write_state_file(int, Boolean exiting)
 		make_state_lockfile = NULL;
 		make_state_locked = false;
 	}
-#ifdef NSE
-	if (report_recursive) {
-		report_recursive_done();
-	}
-#endif
 }
 
 /*

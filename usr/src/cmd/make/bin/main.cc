@@ -371,10 +371,6 @@ main(int argc, char *argv[])
 	make_state_lockfile = NULL;
 	make_state_locked = false;
 
-#ifdef NSE
-	nse_depinfo_lockfile[0] = '\0';
-	nse_depinfo_locked = false; 
-#endif
 
 	/*
 	 * look for last slash char in the path to look at the binary 
@@ -698,15 +694,11 @@ main(int argc, char *argv[])
 	}
 
 /*
- *	Make sure SUNPRO_DEPENDENCIES is exported (or not) properly
- *      and NSE_DEP.
+ *	Make sure SUNPRO_DEPENDENCIES is exported (or not) properly.
  */
 	if (keep_state) {
 		maybe_append_prop(sunpro_dependencies, macro_prop)->
 		  body.macro.exported = true;
-#ifdef NSE
-		(void) setenv(NOCATGETS("NSE_DEP"), get_current_path());
-#endif
 	} else {
 		maybe_append_prop(sunpro_dependencies, macro_prop)->
 		  body.macro.exported = false;
@@ -769,9 +761,6 @@ main(int argc, char *argv[])
 
 	report_dir_enter_leave(false);
 
-#ifdef NSE
-        exit(nse_exit_status());
-#else
 	if (build_failed_ever_seen) {
 		if (posix) {
 			exit_status = 1;
@@ -780,7 +769,6 @@ main(int argc, char *argv[])
 	}
 	exit_status = 0;
 	exit(0);
-#endif
 	/* NOTREACHED */
 }
 
@@ -815,11 +803,6 @@ extern "C" void
 cleanup_after_exit(void)
 {
 	Running		rp;
-#ifdef NSE
-	char		push_cmd[NSE_TFS_PUSH_LEN + 3 +
-			         (MAXPATHLEN * MB_LEN_MAX) + 12];
-	char		*active;
-#endif
 
 extern long	getname_bytes_count;
 extern long	getname_names_count;
@@ -958,24 +941,6 @@ if(getname_stat) {
 	cleanup->set_exit_status(exit_status);
 	delete cleanup;
 #endif
-#endif
-
-#ifdef NSE
-        /* If running inside an activated environment, push the */
-	/* .nse_depinfo file (if written) */
-	active = getenv(NSE_VARIANT_ENV);
-	if (keep_state &&
-	    (active != NULL) &&
-	    !IS_EQUAL(active, NSE_RT_SOURCE_NAME) &&
-	    !do_not_exec_rule &&
-	    (report_dependencies_level == 0)) {
-		(void) sprintf(push_cmd,
-			       "%s %s/%s",
-			       NSE_TFS_PUSH,
-			       get_current_path(),
-			       NSE_DEPINFO);
-		(void) system(push_cmd);
-	}
 #endif
 
 /*
@@ -1162,13 +1127,6 @@ handle_interrupt(int)
 		make_state_lockfile = NULL;
 		make_state_locked = false;
 	}
-#ifdef NSE
-	if ((nse_depinfo_lockfile[0] != '\0') && (nse_depinfo_locked)) {
-		unlink(nse_depinfo_lockfile);
-		nse_depinfo_lockfile[0] = '\0';
-		nse_depinfo_locked = false;
-	}
-#endif
 	/*
 	 * Re-read .make.state file (it might be changed by recursive make)
 	 */
@@ -1700,16 +1658,6 @@ parse_command_option(register char ch)
 			debug_level++;
 		}
 		return 0;
-#ifdef NSE
-	case 'E':
-		if (invert_this) {
-			nse = false;
-		} else {
-			nse = true;
-		}
-		nse_init_source_suffixes();
-		return 0;
-#endif
 	case 'e':			 /* Environment override flag */
 		if (invert_this) {
 			env_wins = false;
@@ -2060,7 +2008,6 @@ set_sgs_support()
  *		makefile_type	Set to type of file being read
  *		makeflags	The Name "MAKEFLAGS", used to set macro value
  *		not_auto	dwight
- *		nse		Set if NSE_ENV is in the environment
  *		read_trace_level Checked to se if the reader should trace
  *		report_dependencies If -P is on we do not read .make.state
  *		trace_reader	Set if reader should trace
@@ -2127,11 +2074,6 @@ read_files_and_state(int argc, char **argv)
 /*
  *	Set flag if NSE is active
  */
-#ifdef NSE
-	if (getenv(NOCATGETS("NSE_ENV")) != NULL) {
-		nse = true;
-	}
-#endif
 
 /*
  *	initialize global dependency entry for .NOT_AUTO
@@ -2236,11 +2178,6 @@ read_files_and_state(int argc, char **argv)
 		append_char('d', &makeflags_string);
 		append_char('d', &makeflags_string_posix);
 	}
-#ifdef NSE
-	if (nse) {
-		append_char('E', &makeflags_string);
-	}
-#endif
 	if (env_wins) {
 		append_char('e', &makeflags_string);
 		append_char('e', &makeflags_string_posix);
@@ -3044,25 +2981,17 @@ read_environment(Boolean read_only)
 		}
 
 		/*
-		 * We ignore SUNPRO_DEPENDENCIES and NSE_DEP. Those
-		 * environment variables are set by make and read by 
-		 * cpp which then writes info to .make.dependency.xxx and 
-		 * .nse_depinfo. When make is invoked by another make 
-		 * (recursive make), we don't want to read this because 
-		 * then the child make will end up writing to the parent 
-		 * directory's .make.state and .nse_depinfo and clobbering
-		 * them. 
+		 * We ignore SUNPRO_DEPENDENCIES. This environment variable is
+		 * set by make and read by cpp which then writes info to
+		 * .make.dependency.xxx.  When make is invoked by another make
+		 * (recursive make), we don't want to read this because then
+		 * the child make will end up writing to the parent
+		 * directory's .make.state and clobbering them.
 		 */
 		MBSTOWCS(wcs_buffer2, NOCATGETS("SUNPRO_DEPENDENCIES"));
 		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
 			continue;
 		}
-#ifdef NSE
-		MBSTOWCS(wcs_buffer2, NOCATGETS("NSE_DEP"));
-		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
-			continue;
-		}
-#endif
 
 		macro = GETNAME(name, value - name);
 		maybe_append_prop(macro, macro_prop)->body.macro.exported =
@@ -3076,13 +3005,6 @@ read_environment(Boolean read_only)
 					    GETNAME(value + 1, FIND_LENGTH),
 					    false, no_daemon, false, debug_level);
 		}
-#ifdef NSE
-                /*
-	         * Must be after the call to setvar() as it sets
-	         * imported to false.
-	         */
-		maybe_append_prop(macro, macro_prop)->body.macro.imported = true;
-#endif
 		val->body.macro.read_only = read_only_saved;
 		if (alloced_tmp_wcs_buffer) {
 			retmem(tmp_wcs_buffer);
@@ -3117,9 +3039,6 @@ read_makefile(register Name makefile, Boolean complain, Boolean must_exist, Bool
 	
 	makefile_type = reading_makefile;
 	recursion_level = 0;
-#ifdef NSE
-	wscpy(current_makefile, makefile->string);
-#endif
 	reading_dependencies = true;
 	b = read_simple_file(makefile, true, true, complain,
 			     must_exist, report_file, false);
@@ -3410,9 +3329,6 @@ report_recursion(register Name target)
 		 * This can happen when there is no makefile and
 		 * only implicit rules are being used.
 		 */
-#ifdef NSE
-		nse_no_makefile(target);
-#endif
 		return;
 	}
 	(void) fprintf(report_file,

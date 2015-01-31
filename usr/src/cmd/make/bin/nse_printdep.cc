@@ -167,9 +167,6 @@ print_deps(register Name target, register Property line)
 	 * files and are not the result of sccs get.
 	 */
 	if (should_print_dep(line)) {
-#ifdef NSE
-		nse_check_no_deps_no_rule(target, line, line);
-#endif
 		if ((report_dependencies_level == 2) ||
 		    (report_dependencies_level == 4)) {
 			if (is_out_of_date(line)) {
