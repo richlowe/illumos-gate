@@ -409,7 +409,7 @@ main(int argc, char *argv[])
 		}
 	}
 	/*
-	 * Find the dmake_mode: distributed, parallel, or serial.
+	 * Find the dmake_mode: parallel, or serial.
 	 */
     if ((!pmake_cap_r_specified) &&
         (!pmake_machinesfile_specified)) {
@@ -417,16 +417,12 @@ main(int argc, char *argv[])
 	dmake_name2 = GETNAME(wcs_buffer, FIND_LENGTH);
 	prop2 = get_prop(dmake_name2->prop, macro_prop);
 	if (prop2 == NULL) {
-		/* DMAKE_MODE not defined, default to distributed mode */
-		dmake_mode_type = distributed_mode;
+		/* DMAKE_MODE not defined, default to parallel mode */
+		dmake_mode_type = parallel_mode;
 		no_parallel = false;
 	} else {
 		dmake_value2 = prop2->body.macro.value;
-		if ((dmake_value2 == NULL) ||
-		    (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("distributed")))) {
-			dmake_mode_type = distributed_mode;
-			no_parallel = false;
-		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("parallel"))) {
+		if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("parallel"))) {
 			dmake_mode_type = parallel_mode;
 			no_parallel = false;
 		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("serial"))) {
@@ -437,20 +433,6 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if ((!list_all_targets) &&
-	    (report_dependencies_level == 0)) {
-		/*
-		 * Check to see if either DMAKE_RCFILE or DMAKE_MODE is defined.
-		 * They could be defined in the env, in the makefile, or on the
-		 * command line.
-		 * If neither is defined, and $(HOME)/.dmakerc does not exists,
-		 * then print a message, and default to parallel mode.
-		 */
-		if(dmake_mode_type == distributed_mode) {
-			dmake_mode_type = parallel_mode;
-			no_parallel = false;
-		}
-	}
     }
 
 	parallel_flag = true;
@@ -780,7 +762,7 @@ handle_interrupt(int)
 		bsd_signal(SIGTERM, SIG_IGN);
 		kill (-getpid(), SIGTERM);
 	}
-	/* Clean up all parallel/distributed children already finished */
+	/* Clean up all parallel children already finished */
         finish_children(false);
 
 	/* Make sure the processes running under us terminate first */
@@ -1787,10 +1769,6 @@ read_files_and_state(int argc, char **argv)
 	sdotmakefile_name = GETNAME(wcs_buffer, FIND_LENGTH);
 	MBSTOWCS(wcs_buffer, NOCATGETS("s.Makefile"));
 	sdotMakefile = GETNAME(wcs_buffer, FIND_LENGTH);
-
-/*
- *	Set flag if NSE is active
- */
 
 /*
  *	initialize global dependency entry for .NOT_AUTO

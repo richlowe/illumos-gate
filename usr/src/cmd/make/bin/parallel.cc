@@ -100,7 +100,6 @@ static	void		store_conditionals(Running rp);
  *
  *	DMake 2.x:
  *	parallel mode: spawns a parallel process to execute the command group.
- *	distributed mode: sends the command group down the pipe to rxm.
  *
  *	Return value:
  *				The result of the execution
@@ -183,24 +182,13 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 			rule->command_line =
 			  vpath_translation(rule->command_line);
 		}
-		if (dmake_mode_type == distributed_mode) {
-			cmd_options = 0;
-			if(local) {
-				cmd_options |= local_host_mask;
-			}
-		} else {
-			silent_flag = false;
-			ignore = 0;
-		}
+		
+		silent_flag = false;
+		ignore = 0;
+
 		if (rule->command_line->hash.length > 0) {
 			if (++argcnt == MAXRULES) {
-				if (dmake_mode_type == distributed_mode) {
-					/* XXX - tell rxm to execute on local host. */
-					/* I WAS HERE!!! */
-				} else {
-					/* Too many rules, run serially instead. */
-					return build_serial;
-				}
+				return build_serial;
 			}
 			{
 				if (rule->silent && !silent) {
@@ -1226,56 +1214,54 @@ bypass_for_loop_inc_4:
 			if ((line2 = rp->command) == NULL) {
 				line2 = get_prop(rp->target->prop, line_prop);
 			}
-			if (dmake_mode_type == distributed_mode) {
-				if (rp->make_refd) {
-					maybe_reread_make_state();
-				}
-			} else {
-				/*
-				 * Check if there were any job output
-				 * from the parallel build.
-				 */
-				if (rp->stdout_file != NULL) {
-					if (stat(rp->stdout_file, &out_buf) < 0) {
-						fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
-						      rp->stdout_file,
-						      errmsg(errno));
-					}
-					if ((line2 != NULL) &&
-					    (out_buf.st_size > 0)) {
-						cmds_length = 0;
-						for (rule = line2->body.line.command_used,
-						     silent_flag = silent;
-						     rule != NULL;
-						     rule = rule->next) {
-							cmds_length += rule->command_line->hash.length + 1;
-							silent_flag = BOOLEAN(silent_flag || rule->silent);
-						}
-						if (out_buf.st_size != cmds_length || silent_flag ||
-						    output_mode == txt2_mode) {
-							dump_out_file(rp->stdout_file, false);
-						}
-					}
-					(void) unlink(rp->stdout_file);
-					retmem_mb(rp->stdout_file);
-					rp->stdout_file = NULL;
+
+
+			/*
+			 * Check if there were any job output
+			 * from the parallel build.
+			 */
+			if (rp->stdout_file != NULL) {
+				if (stat(rp->stdout_file, &out_buf) < 0) {
+					fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
+					    rp->stdout_file,
+					    errmsg(errno));
 				}
 
-				if (!out_err_same && (rp->stderr_file != NULL)) {
-					if (stat(rp->stderr_file, &out_buf) < 0) {
-						fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
-						      rp->stderr_file,
-						      errmsg(errno));
+				if ((line2 != NULL) &&
+				    (out_buf.st_size > 0)) {
+					cmds_length = 0;
+					for (rule = line2->body.line.command_used,
+						 silent_flag = silent;
+					     rule != NULL;
+					     rule = rule->next) {
+						cmds_length += rule->command_line->hash.length + 1;
+						silent_flag = BOOLEAN(silent_flag || rule->silent);
 					}
-					if ((line2 != NULL) &&
-					    (out_buf.st_size > 0)) {
-						dump_out_file(rp->stderr_file, true);
+					if (out_buf.st_size != cmds_length || silent_flag ||
+					    output_mode == txt2_mode) {
+						dump_out_file(rp->stdout_file, false);
 					}
-					(void) unlink(rp->stderr_file);
-					retmem_mb(rp->stderr_file);
-					rp->stderr_file = NULL;
 				}
+				(void) unlink(rp->stdout_file);
+				retmem_mb(rp->stdout_file);
+				rp->stdout_file = NULL;
 			}
+
+			if (!out_err_same && (rp->stderr_file != NULL)) {
+				if (stat(rp->stderr_file, &out_buf) < 0) {
+					fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
+					    rp->stderr_file,
+					    errmsg(errno));
+				}
+				if ((line2 != NULL) &&
+				    (out_buf.st_size > 0)) {
+					dump_out_file(rp->stderr_file, true);
+				}
+				(void) unlink(rp->stderr_file);
+				retmem_mb(rp->stderr_file);
+				rp->stderr_file = NULL;
+			}
+			
 			check_state(rp->temp_file);
 			if (rp->temp_file != NULL) {
 				free_name(rp->temp_file);
