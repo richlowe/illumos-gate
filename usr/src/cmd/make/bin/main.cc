@@ -268,21 +268,6 @@ main(int argc, char *argv[])
 #if defined(TEAMWARE_MAKE_CMN)
 	catd = catopen(AVO_DOMAIN_DMAKE, NL_CAT_LOCALE);
 	libcli_init();
-
-#ifdef _CHECK_UPDATE_H
-	/* This is for dmake only (not for Solaris make).
-	 * Check (in background) if there is an update (dmake patch)
-	 * and inform user
-	 */
-	{
-		Avo_err		*err;
-		char		*dir;
-		err = avo_find_run_dir(&dir);
-		if (AVO_OK == err) {
-			AU_check_update_service(NOCATGETS("Dmake"), dir);
-		}
-	}
-#endif /* _CHECK_UPDATE_H */
 #endif
 
 // ---> fprintf(stderr, catgets(catd, 15, 666, "--- SUN make ---\n"));

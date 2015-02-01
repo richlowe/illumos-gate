@@ -1322,9 +1322,6 @@ dependency_conflict(Name target)
 void
 await_parallel(Boolean waitflg)
 {
-#ifdef _CHECK_UPDATE_H
-	static int number_of_unknown_children = 0;
-#endif /* _CHECK_UPDATE_H */
 	Boolean		nohang;
 	pid_t		pid;
 	int		status;
@@ -1360,13 +1357,6 @@ await_parallel(Boolean waitflg)
 			;
 		}
 		if (rp == NULL) {
-#ifdef _CHECK_UPDATE_H
-			/* Ignore first child - it is check_update */
-			if (number_of_unknown_children <= 0) {
-				number_of_unknown_children = 1;
-				return;
-			}
-#endif /* _CHECK_UPDATE_H */
 			if (send_mtool_msgs) {
 				continue;
 			} else {
