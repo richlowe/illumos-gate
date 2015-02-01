@@ -247,9 +247,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 }
 
 
-#define MAXJOBS_ADJUST_RFE4694000
-
-#ifdef MAXJOBS_ADJUST_RFE4694000
 
 #include <unistd.h>	/* sysconf(_SC_NPROCESSORS_ONLN) */
 #include <sys/ipc.h>		/* ftok() */
@@ -535,7 +532,6 @@ job_adjust_init() {
 	}
 }
 
-#endif /* MAXJOBS_ADJUST_RFE4694000 */
 
 /*
  *	distribute_process(char **commands, Property line)
@@ -548,9 +544,7 @@ job_adjust_init() {
  *
  *	Static variables used:
  *		process_running	Set to the pid of the process set running
- * #if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
  *		job_adjust_mode	Current job adjust mode
- * #endif
  */
 static Doname
 distribute_process(char **commands, Property line)
@@ -563,12 +557,6 @@ distribute_process(char **commands, Property line)
 	int		tmp_index;
 	char		*tmp_index_str_ptr;
 
-#if !defined (TEAMWARE_MAKE_CMN) || !defined (MAXJOBS_ADJUST_RFE4694000)
-	while (parallel_process_cnt >= pmake_max_jobs) {
-		await_parallel(false);
-		finish_children(true);
-	}
-#else /* TEAMWARE_MAKE_CMN && MAXJOBS_ADJUST_RFE4694000 */
 	/* initialize adjust mode, if not initialized */
 	if (job_adjust_mode == ADJUST_UNKNOWN) {
 		job_adjust_init();
@@ -612,7 +600,7 @@ distribute_process(char **commands, Property line)
 			finish_children(true);
 		}
 	}
-#endif /* TEAMWARE_MAKE_CMN && MAXJOBS_ADJUST_RFE4694000 */
+
 	setvar_envvar();
 	/*
 	 * Tell the user what DMake is doing.
@@ -1152,13 +1140,11 @@ await_parallel(Boolean waitflg)
 		nohang = true;
 		parallel_process_cnt--;
 
-#if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
 		if (job_adjust_mode == ADJUST_M2) {
 			if (m2_release_job()) {
 				job_adjust_error();
 			}
 		}
-#endif
 	}
 }
 

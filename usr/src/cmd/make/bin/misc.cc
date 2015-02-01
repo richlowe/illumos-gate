@@ -47,13 +47,7 @@
 #include <vroot/report.h>	/* SUNPRO_DEPENDENCIES */
 #include <libintl.h>
 
-
-#define MAXJOBS_ADJUST_RFE4694000
-
-#ifdef MAXJOBS_ADJUST_RFE4694000
 extern void job_adjust_fini();
-#endif /* MAXJOBS_ADJUST_RFE4694000 */
-
 
 /*
  * Defined macros
@@ -173,9 +167,7 @@ fatal(const char *message, ...)
 		finish_children(false);
 	}
 
-#if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
 	job_adjust_fini();
-#endif
 
 	exit_status = 1;
 	exit(1);

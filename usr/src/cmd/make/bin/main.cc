@@ -62,9 +62,7 @@ extern	Name		normalize_name(register wchar_t *name_string, register int length);
 // From parallel.cc
 #define MAXJOBS_ADJUST_RFE4694000
 
-#ifdef MAXJOBS_ADJUST_RFE4694000
 extern void job_adjust_fini();
-#endif /* MAXJOBS_ADJUST_RFE4694000 */
 
 
 /*
@@ -715,9 +713,7 @@ if(getname_stat) {
 	/* Write .make.state */
 	write_state_file(1, (Boolean) 1);
 
-#if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
 	job_adjust_fini();
-#endif
 }
 
 /*
@@ -1164,12 +1160,14 @@ setup_makeflags_argv()
 			/* New MAKEFLAGS format */
 
 			add_hyphen = false;
-#ifdef ADDFIX5060758			
+
 			/* Check if MAKEFLAGS value begins with multiple
 			 * hyphen characters, and remove all duplicates.
 			 * Usually it happens when the next command is
 			 * used: $(MAKE) -$(MAKEFLAGS)
-			 * This is a workaround for BugID 5060758.
+			 * 
+			 * This was a workaround for BugID 5060758, but
+			 * appears to have survived as a fix in make.
 			 */
 			while (*cp) {
 				if (*cp != (int) hyphen_char) {
@@ -1187,7 +1185,6 @@ setup_makeflags_argv()
 					break;
 				}
 			}
-#endif
 		} else {
 
 			/* Old MAKEFLAGS format */
