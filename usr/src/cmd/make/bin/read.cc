@@ -41,6 +41,7 @@
 #include <mksh/read.h>		/* get_next_block_fn() */
 #include <sys/uio.h>		/* read() */
 #include <unistd.h>		/* read(), unlink() */
+#include <libintl.h>
 
 
 /*
@@ -117,7 +118,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 	wchar_t * wcb = get_wstring(makefile_name->string_mb);
 
 	if (max_include_depth++ >= 40) {
-		fatal(catgets(catd, 1, 66, "Too many nested include statements"));
+		fatal(gettext("Too many nested include statements"));
 	}
 	if (makefile->body.makefile.contents != NULL) {
 		retmem(makefile->body.makefile.contents);
@@ -150,10 +151,10 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 				add_dir_to_path(path, &makefile_path, -1);
 				free(path);
 				    
-				add_dir_to_path(NOCATGETS("/usr/share/lib/make"),
+				add_dir_to_path("/usr/share/lib/make",
 						&makefile_path,
 						-1);
-				add_dir_to_path(NOCATGETS("/etc/default"),
+				add_dir_to_path("/etc/default",
 						&makefile_path,
 						-1);
 
@@ -204,16 +205,16 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 		if (lock_makefile && 
 		    !do_not_exec_rule) {
 
-			 make_state_lockfile = getmem(strlen(make_state->string_mb) + strlen(NOCATGETS(".lock")) + 1);
+			 make_state_lockfile = getmem(strlen(make_state->string_mb) + strlen(".lock") + 1);
 			 (void) sprintf(make_state_lockfile,
-						NOCATGETS("%s.lock"),
+						"%s.lock",
 						make_state->string_mb);
 			(void) file_lock(make_state->string_mb,
 					 make_state_lockfile,
 					 (int *) &make_state_locked,
 					 0);
 			if(!make_state_locked) {
-				printf(NOCATGETS("-- NO LOCKING for read\n"));
+				printf("-- NO LOCKING for read\n");
 				retmem_mb(make_state_lockfile);
 				make_state_lockfile = 0;
 				return failed;
@@ -226,7 +227,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 			    (doname(makefile_name, true, false) == build_failed)) {
 				if (complain) {
 					(void) fprintf(stderr,
-						       catgets(catd, 1, 237, "make: Couldn't make `%s'\n"),
+						       gettext("make: Couldn't make `%s'\n"),
 						       makefile_name->string_mb);
 				}
 				max_include_depth--;
@@ -243,12 +244,12 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 				if (complain ||
 				    (makefile_name->stat.stat_errno != ENOENT)) {
 					if (must_exist) {
-						fatal(catgets(catd, 1, 68, "Can't find `%s': %s"),
+						fatal(gettext("Can't find `%s': %s"),
 						      makefile_name->string_mb,
 						      errmsg(makefile_name->
 							     stat.stat_errno));
 					} else {
-						warning(catgets(catd, 1, 69, "Can't find `%s': %s"),
+						warning(gettext("Can't find `%s': %s"),
 							makefile_name->string_mb,
 							errmsg(makefile_name->
 							       stat.stat_errno));
@@ -293,11 +294,11 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 			if (source->fd < 0) {
 				if (complain || (errno != ENOENT)) {
 					if (must_exist) {
-						fatal(catgets(catd, 1, 70, "Can't open `%s': %s"),
+						fatal(gettext("Can't open `%s': %s"),
 						      makefile_name->string_mb,
 						      errmsg(errno));
 					} else {
-						warning(catgets(catd, 1, 71, "Can't open `%s': %s"),
+						warning(gettext("Can't open `%s': %s"),
 							makefile_name->string_mb,
 							errmsg(errno));
 					}
@@ -339,7 +340,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 		int		num_mb_chars;
 		size_t		num_wc_chars;
 
-		MBSTOWCS(wcs_buffer, NOCATGETS("Standard in"));
+		MBSTOWCS(wcs_buffer, "Standard in");
 		makefile_name = GETNAME(wcs_buffer, FIND_LENGTH);
 		/*
 		 * Memory to read standard in, then convert it
@@ -348,7 +349,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 		stdin_buffer_start =
 		  stdin_text_p = getmem(length = 1024);
 		stdin_buffer_end = stdin_text_p + length;
-		MBSTOWCS(wcs_buffer, NOCATGETS("standard input"));
+		MBSTOWCS(wcs_buffer, "standard input");
 		file_being_read = (wchar_t *) wsdup(wcs_buffer);
 		line_number = 0;
 		while ((n = read(fileno(stdin),
@@ -374,7 +375,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 			}
 		}
 		if (n < 0) {
-			fatal(catgets(catd, 1, 72, "Error reading standard input: %s"),
+			fatal(gettext("Error reading standard input: %s"),
 			      errmsg(errno));
 		}
 		stdin_text_p = stdin_buffer_start;
@@ -405,12 +406,12 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 	}
 	line_number = 1;
 	if (trace_reader) {
-		(void) printf(catgets(catd, 1, 73, ">>>>>>>>>>>>>>>> Reading makefile %s\n"),
+		(void) printf(gettext(">>>>>>>>>>>>>>>> Reading makefile %s\n"),
 			      makefile_name->string_mb);
 	}
 	parse_makefile(makefile_name, source);
 	if (trace_reader) {
-		(void) printf(catgets(catd, 1, 74, ">>>>>>>>>>>>>>>> End of makefile %s\n"),
+		(void) printf(gettext(">>>>>>>>>>>>>>>> End of makefile %s\n"),
 			      makefile_name->string_mb);
 	}
 	if(file_being_read) {
@@ -729,8 +730,8 @@ start_new_line_no_skip:
 	if ((makefile_type == reading_makefile) &&
 	    !source->already_expanded) {
 	    if (include_space[0] == (int) nul_char) {
-		MBSTOWCS(include_space, NOCATGETS("include "));
-		MBSTOWCS(include_tab, NOCATGETS("include\t"));
+		MBSTOWCS(include_space, "include ");
+		MBSTOWCS(include_tab, "include\t");
 	    }
 	    if ((IS_WEQUALN(source_p, include_space, 8)) ||
 		(IS_WEQUALN(source_p, include_tab, 8))) {
@@ -873,7 +874,7 @@ start_new_line_no_skip:
 					     false,
 					     true,
 					     false) == failed) {
-				fatal_reader(catgets(catd, 1, 75, "Read of include file `%s' failed"),
+				fatal_reader(gettext("Read of include file `%s' failed"),
 					     makefile_name->string_mb);
 			}
 			makefile_type = save_makefile_type;
@@ -1059,10 +1060,10 @@ case scan_name_state:
 			break;
 		case newline_char:
 			if (paren_count > 0) {
-				fatal_reader(catgets(catd, 1, 76, "Unmatched `(' on line"));
+				fatal_reader(gettext("Unmatched `(' on line"));
 			}
 			if (brace_count > 0) {
-				fatal_reader(catgets(catd, 1, 77, "Unmatched `{' on line"));
+				fatal_reader(gettext("Unmatched `{' on line"));
 			}
 			source_p++;
 			/* Enter name */
@@ -1115,7 +1116,7 @@ case scan_name_state:
 			if (paren_count + brace_count > 0) {
 				break;
 			}
-			fatal_reader(catgets(catd, 1, 78, "Unexpected comment seen"));
+			fatal_reader(gettext("Unexpected comment seen"));
 		case dollar_char:
 			if (source->already_expanded) {
 				break;
@@ -1150,7 +1151,7 @@ case scan_name_state:
 			break;
 		case parenright_char:
 			if (--paren_count < 0) {
-				fatal_reader(catgets(catd, 1, 79, "Unmatched `)' on line"));
+				fatal_reader(gettext("Unmatched `)' on line"));
 			}
 			break;
 		case braceleft_char:
@@ -1158,7 +1159,7 @@ case scan_name_state:
 			break;
 		case braceright_char:
 			if (--brace_count < 0) {
-				fatal_reader(catgets(catd, 1, 80, "Unmatched `}' on line"));
+				fatal_reader(gettext("Unmatched `}' on line"));
 			}
 			break;
 		case ampersand_char:
@@ -1203,7 +1204,7 @@ case scan_name_state:
 			/* End of the target list. We now start reading */
 			/* dependencies or a conditional assignment */
 			if (separator != none_seen) {
-				fatal_reader(catgets(catd, 1, 81, "Extra `:', `::', or `:=' on dependency line"));
+				fatal_reader(gettext("Extra `:', `::', or `:=' on dependency line"));
 			}
 			/* Enter the last target */
 			if ((string_start != source_p) ||
@@ -1235,7 +1236,7 @@ case scan_name_state:
 				goto scan_colon_label;
 			case equal_char:
 				if(svr4) {
-				  fatal_reader(catgets(catd, 1, 82, "syntax error"));
+				  fatal_reader(gettext("syntax error"));
 				}
 				separator = conditional_seen;
 				source_p++;
@@ -1258,7 +1259,7 @@ case scan_name_state:
 			/* End of reading names. Start reading the rule */
 			if ((separator != one_colon) &&
 			    (separator != two_colon)) {
-				fatal_reader(catgets(catd, 1, 83, "Unexpected command seen"));
+				fatal_reader(gettext("Unexpected command seen"));
 			}
 			/* Enter the last dependency */
 			if ((string_start != source_p) ||
@@ -1385,7 +1386,7 @@ case scan_name_state:
 				if(!svr4) {
 				  append = true;
 				} else {
-				  fatal_reader(catgets(catd, 1, 84, "Must be a separator on rules"));
+				  fatal_reader(gettext("Must be a separator on rules"));
 				}
 				break;
 			default:
@@ -1412,9 +1413,9 @@ case scan_name_state:
 				/* Reader must special check for "MACRO:sh=" */
 				/* notation */
 				if (sh_name == NULL) {
-					MBSTOWCS(wcs_buffer, NOCATGETS("sh"));
+					MBSTOWCS(wcs_buffer, "sh");
 					sh_name = GETNAME(wcs_buffer, FIND_LENGTH);
-					MBSTOWCS(wcs_buffer, NOCATGETS("shell"));
+					MBSTOWCS(wcs_buffer, "shell");
 					shell_name = GETNAME(wcs_buffer, FIND_LENGTH);
 				}
 
@@ -1483,10 +1484,10 @@ case scan_name_state:
 					break;
 				} 
 				if(svr4) {
-				  fatal_reader(catgets(catd, 1, 85, "syntax error"));
+				  fatal_reader(gettext("syntax error"));
 				}
 				else {
-				  fatal_reader(catgets(catd, 1, 86, "Macro assignment on dependency line"));
+				  fatal_reader(gettext("Macro assignment on dependency line"));
 				}
 			}
 			if (append) {
@@ -1985,21 +1986,21 @@ case enter_conditional_state:
  *	Error states
  */
 case illegal_bytes_state:
-	fatal_reader(catgets(catd, 1, 340, "Invalid byte sequence"));
+	fatal_reader(gettext("Invalid byte sequence"));
 case illegal_eoln_state:
 	if (line_number > 1) {
 		if (line_started_with_space == (line_number - 1)) {
 			line_number--;
-			fatal_reader(catgets(catd, 1, 90, "Unexpected end of line seen\n\t*** missing separator (did you mean TAB instead of 8 spaces?)"));
+			fatal_reader(gettext("Unexpected end of line seen\n\t*** missing separator (did you mean TAB instead of 8 spaces?)"));
 		}
 	}
-	fatal_reader(catgets(catd, 1, 87, "Unexpected end of line seen"));
+	fatal_reader(gettext("Unexpected end of line seen"));
 case poorly_formed_macro_state:
-	fatal_reader(catgets(catd, 1, 88, "Badly formed macro assignment"));
+	fatal_reader(gettext("Badly formed macro assignment"));
 case exit_state:
 	return;
 default:
-	fatal_reader(catgets(catd, 1, 89, "Internal error. Unknown reader state"));
+	fatal_reader(gettext("Internal error. Unknown reader state"));
 }
 }
 
@@ -2087,7 +2088,7 @@ enter_target_groups_and_dependencies(Name_vector target, Name_vector depes, Cmd_
 					target_group_member =
 					  find_target_groups(target, i, reset);
 					if(target_group_member == NULL) {
-						fatal_reader(catgets(catd, 1, 328, "Unexpected '+' on dependency line"));
+						fatal_reader(gettext("Unexpected '+' on dependency line"));
 					}
 				}
 				reset = false;

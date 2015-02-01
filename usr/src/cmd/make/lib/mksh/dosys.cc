@@ -42,12 +42,12 @@
 #include <mksh/dosys.h>
 #include <mksh/macro.h>		/* getvar() */
 #include <mksh/misc.h>		/* getmem(), fatal_mksh(), errmsg() */
-#include <mksdmsi18n/mksdmsi18n.h>	/* libmksdmsi18n_init() */
 #include <sys/signal.h>		/* SIG_DFL */
 #include <sys/stat.h>		/* open() */
 #include <sys/wait.h>		/* wait() */
 #include <ulimit.h>		/* ulimit() */
 #include <unistd.h>		/* close(), dup2() */
+#include <libintl.h>
 
 /*
  * typedefs & structs
@@ -90,7 +90,7 @@ redirect_io(char *stdout_file, char *stderr_file)
 	int		i;
 
 	if ((descriptor_limit = ulimit(UL_GDESLIM)) < 0) {
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 89, "ulimit() failed: %s"), errmsg(errno));
+		fatal_mksh(gettext("ulimit() failed: %s"), errmsg(errno));
 	}
 	for (i = 3; i < descriptor_limit; i++) {
 		(void) close(i);
@@ -98,30 +98,30 @@ redirect_io(char *stdout_file, char *stderr_file)
 	if ((i = my_open(stdout_file,
 	         O_WRONLY | O_CREAT | O_TRUNC | O_DSYNC,
 	         S_IREAD | S_IWRITE)) < 0) {
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 90, "Couldn't open standard out temp file `%s': %s"),
+		fatal_mksh(gettext("Couldn't open standard out temp file `%s': %s"),
 		      stdout_file,
 		      errmsg(errno));
 	} else {
 		if (dup2(i, 1) == -1) {
-			fatal_mksh(NOCATGETS("*** Error: dup2(3, 1) failed: %s"),
+			fatal_mksh("*** Error: dup2(3, 1) failed: %s",
 				errmsg(errno));
 		}
 		close(i);
 	}
 	if (stderr_file == NULL) {
 		if (dup2(1, 2) == -1) {
-			fatal_mksh(NOCATGETS("*** Error: dup2(1, 2) failed: %s"),
+			fatal_mksh("*** Error: dup2(1, 2) failed: %s",
 				errmsg(errno));
 		}
 	} else if ((i = my_open(stderr_file,
 	                O_WRONLY | O_CREAT | O_TRUNC | O_DSYNC,
 	                S_IREAD | S_IWRITE)) < 0) {
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 91, "Couldn't open standard error temp file `%s': %s"),
+		fatal_mksh(gettext("Couldn't open standard error temp file `%s': %s"),
 		      stderr_file,
 		      errmsg(errno));
 	} else {
 		if (dup2(i, 2) == -1) {
-			fatal_mksh(NOCATGETS("*** Error: dup2(3, 2) failed: %s"),
+			fatal_mksh("*** Error: dup2(3, 2) failed: %s",
 				errmsg(errno));
 		}
 		close(i);
@@ -173,12 +173,12 @@ doshell(wchar_t *command, register Boolean ignore_error, char *stdout_file, char
 	 * Nice priorities can be a positive or a negative number.
 	 */
 	if (nice_prio != 0) {
-		argv[argv_index++] = (char *)NOCATGETS("nice");
-		(void) sprintf(nice_prio_buf, NOCATGETS("-%d"), nice_prio);
+		argv[argv_index++] = (char *)"nice";
+		(void) sprintf(nice_prio_buf, "-%d", nice_prio);
 		argv[argv_index++] = strdup(nice_prio_buf);
 	}
 	argv[argv_index++] = shellname;
-	argv[argv_index++] = (char*)(ignore_error ? NOCATGETS("-c") : NOCATGETS("-ce"));
+	argv[argv_index++] = (char*)(ignore_error ? "-c" : "-ce");
 	if ((length = wslen(command)) >= MAXPATHLEN) {
 		tmp_mbs_buffer = getmem((length * MB_LEN_MAX) + 1);
                 (void) wcstombs(tmp_mbs_buffer, command, (length * MB_LEN_MAX) + 1);
@@ -200,18 +200,18 @@ doshell(wchar_t *command, register Boolean ignore_error, char *stdout_file, char
 		}
 #endif
 		if (nice_prio != 0) {
-			(void) execve(NOCATGETS("/usr/bin/nice"), argv, environ);
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 92, "Could not load `/usr/bin/nice': %s"),
+			(void) execve("/usr/bin/nice", argv, environ);
+			fatal_mksh(gettext("Could not load `/usr/bin/nice': %s"),
 			      errmsg(errno));
 		} else {
 			(void) execve(shell->string_mb, argv, environ);
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 93, "Could not load Shell from `%s': %s"),
+			fatal_mksh(gettext("Could not load Shell from `%s': %s"),
 			      shell->string_mb,
 			      errmsg(errno));
 		}
 	}
 	if (childPid  == -1) {
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 94, "fork failed: %s"),
+		fatal_mksh(gettext("fork failed: %s"),
 		      errmsg(errno));
 	}
 	retmem_mb(argv[cmd_argv_index]);
@@ -266,7 +266,7 @@ exec_vp(register char *name, register char **argv, char **envp, register Boolean
 				shellname++;
 			}
 			shargv[0] = shellname;
-			shargv[1] = (char*)(ignore_error ? NOCATGETS("-c") : NOCATGETS("-ce"));
+			shargv[1] = (char*)(ignore_error ? "-c" : "-ce");
 			shargv[2] = argv[0];
 			shargv[3] = NULL;
 			tmp_shell = getvar(shell_name);
@@ -353,8 +353,8 @@ doexec(register wchar_t *command, register Boolean ignore_error, char *stdout_fi
 	}
 
 	if (nice_prio != 0) {
-		*p++ = strdup(NOCATGETS("/usr/bin/nice"));
-		(void) sprintf(nice_prio_buf, NOCATGETS("-%d"), nice_prio);
+		*p++ = strdup("/usr/bin/nice");
+		(void) sprintf(nice_prio_buf, "-%d", nice_prio);
 		*p++ = strdup(nice_prio_buf);
 	}
 	/* Build list of argument words. */
@@ -362,7 +362,7 @@ doexec(register wchar_t *command, register Boolean ignore_error, char *stdout_fi
 		if (p >= &argv[arg_count]) {
 			/* This should never happen, right? */
 			WCSTOMBS(mbs_buffer, command);
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 95, "Command `%s' has more than %d arguments"),
+			fatal_mksh(gettext("Command `%s' has more than %d arguments"),
 			      mbs_buffer,
 			      arg_count);
 		}
@@ -395,10 +395,10 @@ doexec(register wchar_t *command, register Boolean ignore_error, char *stdout_fi
 		}
 #endif
 		(void) exec_vp(argv[1], argv, environ, ignore_error, vroot_path);
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 96, "Cannot load command `%s': %s"), argv[1], errmsg(errno));
+		fatal_mksh(gettext("Cannot load command `%s': %s"), argv[1], errmsg(errno));
 	}
 	if (childPid  == -1) {
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 97, "fork failed: %s"),
+		fatal_mksh(gettext("fork failed: %s"),
 		      errmsg(errno));
 	}
 	for (int i = 0; argv[i] != NULL; i++) {
@@ -445,7 +445,7 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 
 	while ((pid = wait(&status)) != running_pid) {
 		if (pid == -1) {
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 98, "wait() failed: %s"), errmsg(errno));
+			fatal_mksh(gettext("wait() failed: %s"), errmsg(errno));
 		}
 	}
 	(void) fflush(stdout);
@@ -454,21 +454,21 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
         if (status == 0) {
 
 #ifdef PRINT_EXIT_STATUS
-		warning_mksh(NOCATGETS("I'm in await(), and status is 0."));
+		warning_mksh("I'm in await(), and status is 0.");
 #endif
 
                 return succeeded;
 	}
 
 #ifdef PRINT_EXIT_STATUS
-	warning_mksh(NOCATGETS("I'm in await(), and status is *NOT* 0."));
+	warning_mksh("I'm in await(), and status is *NOT* 0.");
 #endif
 
 
         exit_status = WEXITSTATUS(status);
 
 #ifdef PRINT_EXIT_STATUS
-	warning_mksh(NOCATGETS("I'm in await(), and exit_status is %d."), exit_status);
+	warning_mksh("I'm in await(), and exit_status is %d.", exit_status);
 #endif
 
         termination_signal = WTERMSIG(status);
@@ -483,27 +483,27 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 	if (!silent_error) {
 		if (exit_status != 0) {
 			(void) fprintf(stdout,
-				       catgets(libmksdmsi18n_catd, 1, 103, "*** Error code %d"),
+				       gettext("*** Error code %d"),
 				       exit_status);
 		} else {
 				(void) fprintf(stdout,
-					       catgets(libmksdmsi18n_catd, 1, 105, "*** Signal %d"),
+					       gettext("*** Signal %d"),
 					       termination_signal);
 			if (core_dumped) {
 				(void) fprintf(stdout,
-					       catgets(libmksdmsi18n_catd, 1, 107, " - core dumped"));
+					       gettext(" - core dumped"));
 			}
 		}
 		if (ignore_error) {
 			(void) fprintf(stdout,
-				       catgets(libmksdmsi18n_catd, 1, 109, " (ignored)"));
+				       gettext(" (ignored)"));
 		}
 		(void) fprintf(stdout, "\n");
 		(void) fflush(stdout);
 	}
 
 #ifdef PRINT_EXIT_STATUS
-	warning_mksh(NOCATGETS("I'm in await(), returning failed."));
+	warning_mksh("I'm in await(), returning failed.");
 #endif
 
 	return failed;
@@ -536,7 +536,7 @@ sh_command2string(register String command, register String destination)
 	WCSTOMBS(mbs_buffer, command->buffer.start);
 	if ((fd = popen(mbs_buffer, "r")) == NULL) {
 		WCSTOMBS(mbs_buffer, command->buffer.start);
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 111, "Could not run command `%s' for :sh transformation"),
+		fatal_mksh(gettext("Could not run command `%s' for :sh transformation"),
 		      mbs_buffer);
 	}
 	while ((chr = getc(fd)) != EOF) {
@@ -569,7 +569,7 @@ sh_command2string(register String command, register String destination)
 	status = pclose(fd);
 	if (status != 0) {
 		WCSTOMBS(mbs_buffer, command->buffer.start);
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 112, "The command `%s' returned status `%d'"),
+		fatal_mksh(gettext("The command `%s' returned status `%d'"),
 		      mbs_buffer,
 		      WEXITSTATUS(status));
 	}

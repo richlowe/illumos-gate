@@ -26,6 +26,8 @@
 /*
  * Included files
  */
+#include <libintl.h>
+
 #include <mk/defs.h>
 #include <mksh/misc.h>		/* getmem() */
 
@@ -98,9 +100,9 @@ void
 depvar_print_results(void)
 {
 	if (variant_deps) {
-		printf(catgets(catd, 1, 234, "differ\n"));
+		printf(gettext("differ\n"));
 	} else {
-		printf(catgets(catd, 1, 235, "same\n"));
+		printf(gettext("same\n"));
 	}
 }
 

@@ -23,7 +23,6 @@
  * Use is subject to license terms.
  */
 
-#include <avo/intl.h>	/* for NOCATGETS */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,9 +32,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vroot/vroot.h>
-#include <mksdmsi18n/mksdmsi18n.h>
 #include <signal.h>
 #include <errno.h>			/* errno */
+#include <libintl.h>
 
 extern	char		*sys_errlist[];
 extern	int		sys_nerr;
@@ -109,7 +108,7 @@ file_lock(char *name, char *lockname, int *file_locked, int timeout)
 		UNBLOCK_INTERUPTS;
 
 		if (errno != EEXIST) {
-			file_lock_error(msg, name, (char *)NOCATGETS("symlink(%s, %s)"),
+			file_lock_error(msg, name, (char *)"symlink(%s, %s)",
 			    (int) name, (int) lockname);
 			fprintf(stderr, "%s", msg);
 			return errno;
@@ -131,13 +130,13 @@ file_lock(char *name, char *lockname, int *file_locked, int timeout)
 				/* Print waiting message after 5 secs */
 				(void) getcwd(msg, MAXPATHLEN);
 				fprintf(stderr,
-					catgets(libmksdmsi18n_catd, 1, 162, "file_lock: file %s is already locked.\n"),
+					gettext("file_lock: file %s is already locked.\n"),
 					name);
 				fprintf(stderr,
-					catgets(libmksdmsi18n_catd, 1, 163, "file_lock: will periodically check the lockfile %s for two minutes.\n"),
+					gettext("file_lock: will periodically check the lockfile %s for two minutes.\n"),
 					lockname);
 				fprintf(stderr,
-					catgets(libmksdmsi18n_catd, 1, 144, "Current working directory %s\n"),
+					gettext("Current working directory %s\n"),
 					msg);
 
 				printed_warning = 1;
@@ -162,15 +161,15 @@ file_lock_error(char *msg, char *file, char *str, int arg1, int arg2)
 {
 	int		len;
 
-	sprintf(msg, catgets(libmksdmsi18n_catd, 1, 145, "Could not lock file `%s'; "), file);
+	sprintf(msg, gettext("Could not lock file `%s'; "), file);
 	len = strlen(msg);
 	sprintf(&msg[len], str, arg1, arg2);
-	strcat(msg, catgets(libmksdmsi18n_catd, 1, 146, " failed - "));
+	strcat(msg, gettext(" failed - "));
 	if (errno < sys_nerr) {
 		strcat(msg, strerror(errno));
 	} else {
 		len = strlen(msg);
-		sprintf(&msg[len], NOCATGETS("errno %d"), errno);
+		sprintf(&msg[len], "errno %d", errno);
 	}
 }
 

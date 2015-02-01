@@ -36,7 +36,6 @@
 #include <mksh/dosys.h>		/* redirect_io() */
 #include <mksh/misc.h>		/* retmem() */
 #include <mksh/mksh.h>
-#include <mksdmsi18n/mksdmsi18n.h>
 #include <errno.h>
 #include <signal.h>
 
@@ -81,13 +80,13 @@ static void
 init_mksh_globals(char *shell)
 {
 /*
-	MBSTOWCS(wcs_buffer, NOCATGETS("SHELL"));
+	MBSTOWCS(wcs_buffer, "SHELL");
 	shell_name = GETNAME(wcs_buffer, FIND_LENGTH);
 	MBSTOWCS(wcs_buffer, shell);
 	(void) SETVAR(shell_name, GETNAME(wcs_buffer, FIND_LENGTH), false);
  */
 	char * dmake_shell;
-	if ((dmake_shell = getenv(NOCATGETS("DMAKE_SHELL"))) == NULL) {
+	if ((dmake_shell = getenv("DMAKE_SHELL")) == NULL) {
 		dmake_shell = shell;
 	} 
 	MBSTOWCS(wcs_buffer, dmake_shell);
@@ -108,7 +107,7 @@ change_sunpro_dependencies_value(char *oldpath, char *newpath)
 	char		*sp_dep_value;
 
 	/* check if SUNPRO_DEPENDENCIES is set in the environment */
-	if ((sp_dep_value = getenv(NOCATGETS("SUNPRO_DEPENDENCIES"))) != NULL) {
+	if ((sp_dep_value = getenv("SUNPRO_DEPENDENCIES")) != NULL) {
 		oldpathlen = strlen(oldpath);
 		/* check if oldpath is indeed in the value of SUNPRO_DEPENDENCIES */
 		if (strncmp(oldpath, sp_dep_value, oldpathlen) == 0) {
@@ -117,12 +116,12 @@ change_sunpro_dependencies_value(char *oldpath, char *newpath)
 				       newpath,
 				       sp_dep_value + oldpathlen);
 			length = 2 +
-				strlen(NOCATGETS("SUNPRO_DEPENDENCIES")) +
+				strlen("SUNPRO_DEPENDENCIES") +
 				strlen(buf);
 			env = getmem(length);
 			(void) sprintf(env,
 				       "%s=%s",
-				       NOCATGETS("SUNPRO_DEPENDENCIES"),
+				       "SUNPRO_DEPENDENCIES",
 				       buf);
 			(void) putenv(env);
 		}

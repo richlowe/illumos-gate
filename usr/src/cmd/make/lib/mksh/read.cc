@@ -35,9 +35,9 @@
  */
 #include <mksh/misc.h>		/* retmem() */
 #include <mksh/read.h>
-#include <mksdmsi18n/mksdmsi18n.h>
 #include <sys/uio.h>		/* read() */
 #include <unistd.h>		/* close(), unlink(), read() */
+#include <libintl.h>
 
 #define	STRING_LEN_TO_CONVERT	(8*1024)
 
@@ -110,10 +110,10 @@ get_next_block_fn(register Source source)
 		if (length != to_read) {
 			WCSTOMBS(mbs_buffer, file_being_read);
 			if (length == 0) {
-				fatal_mksh(catgets(libmksdmsi18n_catd, 1, 140, "Error reading `%s': Premature EOF"),
+				fatal_mksh(gettext("Error reading `%s': Premature EOF"),
 				      mbs_buffer);
 			} else {
-				fatal_mksh(catgets(libmksdmsi18n_catd, 1, 141, "Error reading `%s': %s"),
+				fatal_mksh(gettext("Error reading `%s': %s"),
 				      mbs_buffer,
 				      errmsg(errno));
 			}
@@ -153,7 +153,7 @@ get_next_block_fn(register Source source)
 	if (source->inp_buf_ptr >= source->inp_buf_end) {
 		if (*(source->string.text.end - 1) != (int) newline_char) {
 			WCSTOMBS(mbs_buffer, file_being_read);
-			warning_mksh(catgets(libmksdmsi18n_catd, 1, 142, "newline is not last character in file %s"),
+			warning_mksh(gettext("newline is not last character in file %s"),
 					     mbs_buffer);
 			*source->string.text.end++ = (int) newline_char;
 			*source->string.text.end = (int) nul_char;

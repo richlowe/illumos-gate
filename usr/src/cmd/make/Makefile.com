@@ -16,3 +16,8 @@ $(RELEASE_BUILD)MAKE_DEFS += -DNDEBUG
 CFLAGS += $(CCVERBOSE)
 CPPFLAGS += -I$(MAKE_INCLUDE) $(MAKE_DEFS)
 
+# So that it's set even for the libraries we build
+TEXT_DOMAIN = SUNW_OST_OSCMD
+
+$(POFILE): $(POFILES)
+	$(CAT) $(POFILES) > $@

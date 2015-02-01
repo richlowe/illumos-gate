@@ -34,8 +34,6 @@
 #include <sys/param.h>
 #include <sys/file.h>
 
-#include <avo/intl.h>	/* for NOCATGETS */
-
 typedef struct {
 	short		init;
 	pathpt		vector;
@@ -54,8 +52,8 @@ typedef struct {
 } vroot_datat, *vroot_datapt;
 
 static vroot_datat	vroot_data= {
-	{ 0, NULL, NOCATGETS("VIRTUAL_ROOT")},
-	{ 0, NULL, NOCATGETS("PATH")},
+	{ 0, NULL, "VIRTUAL_ROOT"},
+	{ 0, NULL, "PATH"},
 	"", NULL, NULL, NULL, 0, 1};
 
 void

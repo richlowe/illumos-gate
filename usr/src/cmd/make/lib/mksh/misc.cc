@@ -43,13 +43,13 @@
 #include <bsd/bsd.h>		/* bsd_signal() */
 #include <mksh/i18n.h>		/* get_char_semantics_value() */
 #include <mksh/misc.h>
-#include <mksdmsi18n/mksdmsi18n.h>
 #include <stdarg.h>		/* va_list, va_start(), va_end() */
 #include <stdlib.h>		/* mbstowcs() */
 #include <sys/signal.h>		/* SIG_DFL */
 #include <sys/wait.h>		/* wait() */
 
 #include <string.h>		/* strerror() */
+#include <libintl.h>
 
 
 /*
@@ -107,8 +107,8 @@ getmem(register int size)
 	register char          *result = (char *) malloc((unsigned) size);
 	if (result == NULL) {
 		char buf[FATAL_ERROR_MSG_SIZE];
-		sprintf(buf, NOCATGETS("*** Error: malloc(%d) failed: %s\n"), size, strerror(errno));
-		strcat(buf, catgets(libmksdmsi18n_catd, 1, 126, "mksh: Fatal error: Out of memory\n"));
+		sprintf(buf, "*** Error: malloc(%d) failed: %s\n", size, strerror(errno));
+		strcat(buf, gettext("mksh: Fatal error: Out of memory\n"));
 		fputs(buf, stderr);
 		exit_status = 1;
 		exit(1);
@@ -352,7 +352,7 @@ errmsg(int errnum)
 
 	if ((errnum < 0) || (errnum > sys_nerr)) {
 		errbuf = getmem(6+1+11+1);
-		(void) sprintf(errbuf, catgets(libmksdmsi18n_catd, 1, 127, "Error %d"), errnum);
+		(void) sprintf(errbuf, gettext("Error %d"), errnum);
 		return errbuf;
 	} else {
 		return strerror(errnum);
@@ -377,8 +377,8 @@ fatal_mksh(const char *message, ...)
 {
 	va_list args;
 	char    *buf = static_buf;
-	char	*mksh_fat_err = catgets(libmksdmsi18n_catd, 1, 128, "mksh: Fatal error: ");
-	char	*cur_wrk_dir = catgets(libmksdmsi18n_catd, 1, 129, "Current working directory: ");
+	char	*mksh_fat_err = gettext("mksh: Fatal error: ");
+	char	*cur_wrk_dir = gettext("Current working directory: ");
 	int	mksh_fat_err_len = strlen(mksh_fat_err);
 
 	va_start(args, message);
@@ -437,7 +437,7 @@ fatal_reader_mksh(const char * pattern, ...)
 		WCSTOMBS(mbs_buffer, file_being_read);
 		if (line_number != 0) {
 			(void) sprintf(message,
-				       catgets(libmksdmsi18n_catd, 1, 130, "%s, line %d: %s"),
+				       gettext("%s, line %d: %s"),
 				       mbs_buffer,
 				       line_number,
 				       pattern);
@@ -452,7 +452,7 @@ fatal_reader_mksh(const char * pattern, ...)
  */
 
 	(void) fflush(stdout);
-	(void) fprintf(stderr, catgets(libmksdmsi18n_catd, 1, 131, "mksh: Fatal error in reader: "));
+	(void) fprintf(stderr, gettext("mksh: Fatal error in reader: "));
 	(void) vfprintf(stderr, pattern, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
@@ -460,7 +460,7 @@ fatal_reader_mksh(const char * pattern, ...)
 /*
 	if (temp_file_name != NULL) {
 		(void) fprintf(stderr,
-			       catgets(libmksdmsi18n_catd, 1, 132, "mksh: Temp-file %s not removed\n"),
+			       gettext("mksh: Temp-file %s not removed\n"),
 			       temp_file_name->string_mb);
 		temp_file_name = NULL;
 	}
@@ -471,7 +471,7 @@ fatal_reader_mksh(const char * pattern, ...)
  */
 	if (1) {
 		(void) fprintf(stderr,
-			       catgets(libmksdmsi18n_catd, 1, 133, "Current working directory %s\n"),
+			       gettext("Current working directory %s\n"),
 			       get_current_path_mksh());
 	}
 	(void) fflush(stderr);
@@ -496,7 +496,7 @@ warning_mksh(char * message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-	(void) fprintf(stderr, catgets(libmksdmsi18n_catd, 1, 134, "mksh: Warning: "));
+	(void) fprintf(stderr, gettext("mksh: Warning: "));
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
@@ -505,7 +505,7 @@ warning_mksh(char * message, ...)
  */
 	if (1) {
 		(void) fprintf(stderr,
-			       catgets(libmksdmsi18n_catd, 1, 135, "Current working directory %s\n"),
+			       gettext("Current working directory %s\n"),
 			       get_current_path_mksh());
 	}
 	(void) fflush(stderr);
@@ -602,7 +602,7 @@ append_prop(register Name target, register Property_id type)
 		size = sizeof (struct _Env_mem);
 		break;
 	default:
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 136, "Internal error. Unknown prop type %d"), type);
+		fatal_mksh(gettext("Internal error. Unknown prop type %d"), type);
 	}
 	for (; prop != NULL; insert = &prop->next, prop = *insert);
 	size += PROPERTY_HEAD_SIZE;
@@ -849,7 +849,7 @@ void
 mbstowcs_with_check(wchar_t *pwcs, const char *s, size_t n)
 {
 	if(mbstowcs(pwcs, s, n) == -1) {
-		fatal_mksh(catgets(libmksdmsi18n_catd, 1, 143, "The string `%s' is not valid in current locale"), s);
+		fatal_mksh(gettext("The string `%s' is not valid in current locale"), s);
 	}
 }
 

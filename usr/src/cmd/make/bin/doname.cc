@@ -33,20 +33,15 @@
  * Included files
  */
 #include <alloca.h>		/* alloca() */
-
-
 #include <fcntl.h>
 #include <mk/defs.h>
 #include <mksh/i18n.h>		/* get_char_semantics_value() */
 #include <mksh/macro.h>		/* getvar(), expand_value() */
 #include <mksh/misc.h>		/* getmem() */
 #include <poll.h>
-
-
+#include <libintl.h>
 #include <signal.h>
-
-#	include <stropts.h>
-
+#include <stropts.h>
 #include <sys/errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -143,7 +138,7 @@ try_again:
 		return build_running;
 	case build_failed:
 		if (!continue_after_error) {
-			fatal(catgets(catd, 1, 13, "Target `%s' not remade because of errors"),
+			fatal(gettext("Target `%s' not remade because of errors"),
 			      target->string_mb);
 		}
 		build_failed_seen = true;
@@ -169,12 +164,12 @@ try_again:
 		}
 		second_pass = 0;
 		if (continue_after_error && !svr4) {
-			warning(catgets(catd, 1, 14, "Don't know how to make target `%s'"),
+			warning(gettext("Don't know how to make target `%s'"),
 				target->string_mb);
 			build_failed_seen = true;
 			return build_failed;
 		}
-		fatal(catgets(catd, 1, 15, "Don't know how to make target `%s'"), target->string_mb);
+		fatal(gettext("Don't know how to make target `%s'"), target->string_mb);
 		break;
 	}
 #ifdef lint
@@ -439,7 +434,7 @@ recheck_target:
 		}
 	}
 	if (debug_level > 1) {
-		(void) printf(NOCATGETS("%*sdoname(%s)\n"),
+		(void) printf("%*sdoname(%s)\n",
 			      recursion_level,
 			      "",
 			      target->string_mb);
@@ -447,7 +442,7 @@ recheck_target:
 	recursion_level++;
 	/* Avoid infinite loops */
 	if (target->state == build_in_progress) {
-		warning(catgets(catd, 1, 16, "Infinite loop: Target `%s' depends on itself"),
+		warning(gettext("Infinite loop: Target `%s' depends on itself"),
 			target->string_mb);
 		return build_ok;
 	}
@@ -685,7 +680,7 @@ recheck_target:
 			if (build_unconditional || out_of_date) {
 				line->body.line.is_out_of_date = true;
 				if (debug_level > 0) {
-					(void) printf(catgets(catd, 1, 17, "%*sBuilding %s using .DEFAULT because it is out of date\n"),
+					(void) printf(gettext("%*sBuilding %s using .DEFAULT because it is out of date\n"),
 						      recursion_level,
 						      "",
 						      true_target->string_mb);
@@ -879,7 +874,7 @@ r_command:
 							    auto_count,
 							    automatics)) {
 		if (debug_level > 0) {
-			(void) printf(catgets(catd, 1, 18, "%*sTarget `%s' acquired new dependencies from build, rechecking all dependencies\n"),
+			(void) printf(gettext("%*sTarget `%s' acquired new dependencies from build, rechecking all dependencies\n"),
 				      recursion_level,
 				      "",
 				      true_target->string_mb);
@@ -1032,7 +1027,7 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 				  command_changed =
 				    true;
 				if (debug_level > 0) {
-					(void) printf(catgets(catd, 1, 19, "Target %s rebuilt because dependency %s does not exist\n"),
+					(void) printf(gettext("Target %s rebuilt because dependency %s does not exist\n"),
 						     true_target->string_mb,
 						     dependency->name->string_mb);
 				}
@@ -1062,14 +1057,14 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 			}
 
 			if (debug_level > 1) {
-				(void) printf(catgets(catd, 1, 20, "%*sDate(%s)=%s \n"),
+				(void) printf(gettext("%*sDate(%s)=%s \n"),
 					      recursion_level,
 					      "",
 					      dependency->name->string_mb,
 					      time_to_string(dependency->name->
 							     stat.time));
 				if (dependency->name->stat.time > line->body.line.dependency_time) {
-					(void) printf(catgets(catd, 1, 21, "%*sDate-dependencies(%s) set to %s\n"),
+					(void) printf(gettext("%*sDate-dependencies(%s) set to %s\n"),
 						      recursion_level,
 						      "",
 						      true_target->string_mb,
@@ -1128,13 +1123,13 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 				out_of_date_tail = &(*out_of_date_tail)->next;
 				if (debug_level > 0) {
 					if (dependency->name->stat.time == file_max_time) {
-						(void) printf(catgets(catd, 1, 22, "%*sBuilding %s because %s does not exist\n"),
+						(void) printf(gettext("%*sBuilding %s because %s does not exist\n"),
 							      recursion_level,
 							      "",
 							      true_target->string_mb,
 							      dependency->name->string_mb);
 					} else {
-						(void) printf(catgets(catd, 1, 23, "%*sBuilding %s because it is out of date relative to %s\n"),
+						(void) printf(gettext("%*sBuilding %s because it is out of date relative to %s\n"),
 							      recursion_level,
 							      "",
 							      true_target->string_mb,
@@ -1204,7 +1199,7 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 	 */
 	if (line->body.line.command_template != NULL) {
 		if (line->body.line.command_template_redefined) {
-			warning(catgets(catd, 1, 24, "Too many rules defined for target %s"),
+			warning(gettext("Too many rules defined for target %s"),
 				target->string_mb);
 		}
 		*command = line;
@@ -1424,7 +1419,7 @@ dynamic_dependencies(Name target)
 				dependency->name = normalize_name(start, p - start);
 				if ((debug_level > 0) &&
 				    (first_member == NULL)) {
-					(void) printf(catgets(catd, 1, 25, "%*sDynamic dependency `%s' for target `%s'\n"),
+					(void) printf(gettext("%*sDynamic dependency `%s' for target `%s'\n"),
 						      recursion_level,
 						      "",
 						      dependency->name->string_mb,
@@ -1459,7 +1454,7 @@ dynamic_dependencies(Name target)
 					retmem(string.buffer.start);
 				}
 				if (debug_level > 0) {
-					(void) printf(catgets(catd, 1, 26, "%*sDynamic dependency `%s' for target `%s'\n"),
+					(void) printf(gettext("%*sDynamic dependency `%s' for target `%s'\n"),
 						      recursion_level,
 						      "",
 						      first_member->name->
@@ -1616,7 +1611,7 @@ run_command(register Property line, Boolean)
 	    line->body.line.sccs_command &&
 	    (target->stat.time != file_doesnt_exist) &&
 	    ((target->stat.mode & 0222) != 0)) {
-		fatal(catgets(catd, 1, 27, "%s is writable so it cannot be sccs gotten"),
+		fatal(gettext("%s is writable so it cannot be sccs gotten"),
 		      target->string_mb);
 		target->has_complained = remember_only = true;
 	}
@@ -1637,7 +1632,7 @@ run_command(register Property line, Boolean)
 		   strcpy(tmp_file_path, temp_file_directory);
 		}
 		sprintf(mbs_buffer,
-				NOCATGETS("%s/.make.dependency.%08x.%d.%d"),
+				"%s/.make.dependency.%08x.%d.%d",
 			        tmp_file_path,
 			        hostid,
 			        getpid(),
@@ -1827,12 +1822,12 @@ execute_serial(Property line)
 		}
 		if (result == build_failed) {
 			if (silent || rule->silent) {
-				(void) printf(catgets(catd, 1, 242, "The following command caused the error:\n%s\n"),
+				(void) printf(gettext("The following command caused the error:\n%s\n"),
 				              rule->command_line->string_mb);
 			}
 			if (!rule->ignore_error && !ignore_errors) {
 				if (!continue_after_error) {
-					fatal(catgets(catd, 1, 244, "Command failed for target `%s'"),
+					fatal(gettext("Command failed for target `%s'"),
 					      target->string_mb);
 				}
 				/*
@@ -2110,7 +2105,7 @@ do_assign(register Name line, register Name target)
 	}
 	switch (*equal) {
 	case nul_char:
-		fatal(catgets(catd, 1, 31, "= expected in rule `%s' for target `%s'"),
+		fatal(gettext("= expected in rule `%s' for target `%s'"),
 		      line->string_mb,
 		      target->string_mb);
 	case plus_char:
@@ -2404,7 +2399,7 @@ build_command_strings(Name target, register Property line)
 					if (used->command_line != NULL
 					    && *used->command_line->string_mb !=
 					    '\0') {
-						(void) printf(catgets(catd, 1, 32, "%*sBuilding %s because new command \n\t%s\n%*sdifferent from old\n\t%s\n"),
+						(void) printf(gettext("%*sBuilding %s because new command \n\t%s\n%*sdifferent from old\n\t%s\n"),
 							      recursion_level,
 							      "",
 							      target->string_mb,
@@ -2415,7 +2410,7 @@ build_command_strings(Name target, register Property line)
 							      command_line->
 							      string_mb);
 					} else {
-						(void) printf(catgets(catd, 1, 33, "%*sBuilding %s because new command \n\t%s\n%*sdifferent from empty old command\n"),
+						(void) printf(gettext("%*sBuilding %s because new command \n\t%s\n%*sdifferent from empty old command\n"),
 							      recursion_level,
 							      "",
 							      target->string_mb,
@@ -2440,7 +2435,7 @@ build_command_strings(Name target, register Property line)
 		if (keep_state &&
 		    !ignore_all_command_dependency) {
 			if (debug_level > 0) {
-				(void) printf(catgets(catd, 1, 34, "%*sBuilding %s because new command shorter than old\n"),
+				(void) printf(gettext("%*sBuilding %s because new command shorter than old\n"),
 					      recursion_level,
 					      "",
 					      target->string_mb);
@@ -2455,7 +2450,7 @@ build_command_strings(Name target, register Property line)
 	    !ignore_all_command_dependency &&
 	    keep_state) {
 		if (debug_level > 0) {
-			(void) printf(catgets(catd, 1, 35, "%*sBuilding %s because new command longer than old\n"),
+			(void) printf(gettext("%*sBuilding %s because new command longer than old\n"),
 				      recursion_level,
 				      "",
 				      target->string_mb);
@@ -2521,7 +2516,7 @@ touch_command(register Property line, register Name target, Doname result)
 			 * "touch" in .make.state.
 			 */
 			INIT_STRING_FROM_STACK(touch_string, buffer);
-			MBSTOWCS(wcs_buffer, NOCATGETS("touch "));
+			MBSTOWCS(wcs_buffer, "touch ");
 			append_string(wcs_buffer, &touch_string, FIND_LENGTH);
 			touch_cmd = name;
 			if (name->has_vpath_alias_prop) {
@@ -2686,7 +2681,7 @@ sccs_get(register Name target, register Property *command)
 	/* For sccs, we need to chase symlinks. */
         while (target->stat.is_sym_link) {
 		if (sym_link_depth++ > 90) {
-			fatal(catgets(catd, 1, 95, "Can't read symbolic link `%s': Number of symbolic links encountered during path name traversal exceeds 90."),
+			fatal(gettext("Can't read symbolic link `%s': Number of symbolic links encountered during path name traversal exceeds 90."),
 			      target->string_mb);
 		}
                 /* Read the value of the link. */
@@ -2696,7 +2691,7 @@ sccs_get(register Name target, register Property *command)
 					NULL,
 					VROOT_DEFAULT);
                 if (result == -1) {
-                        fatal(catgets(catd, 1, 36, "Can't read symbolic link `%s': %s"),
+                        fatal(gettext("Can't read symbolic link `%s': %s"),
                               target->string_mb, errmsg(errno));
 		}
 		link[result] = 0;
@@ -2768,7 +2763,7 @@ sccs_get(register Name target, register Property *command)
 			 */
 			line->body.line.is_out_of_date = true;
 			if (debug_level > 0) {
-				(void) printf(catgets(catd, 1, 37, "%*sSccs getting %s because s. file is younger than source file\n"),
+				(void) printf(gettext("%*sSccs getting %s because s. file is younger than source file\n"),
 					      recursion_level,
 					      "",
 					      target->string_mb);
@@ -2830,9 +2825,9 @@ read_directory_of_file(register Name file)
 	static Name		usr_include_sys;
 
 	if (usr_include == NULL) {
-		MBSTOWCS(usr_include_buf, NOCATGETS("/usr/include"));
+		MBSTOWCS(usr_include_buf, "/usr/include");
 		usr_include = GETNAME(usr_include_buf, FIND_LENGTH);
-		MBSTOWCS(usr_include_sys_buf, NOCATGETS("/usr/include/sys"));
+		MBSTOWCS(usr_include_sys_buf, "/usr/include/sys");
 		usr_include_sys = GETNAME(usr_include_sys_buf, FIND_LENGTH);
 	}
 
@@ -2965,7 +2960,7 @@ set_locals(register Name target, register Property old_locals)
 		  maybe_append_prop(conditional->body.conditional.name,
 				    macro_prop)->body.macro;
 		if (debug_level > 1) {
-			(void) printf(catgets(catd, 1, 38, "%*sActivating conditional value: "),
+			(void) printf(gettext("%*sActivating conditional value: "),
 				      recursion_level,
 				      "");
 		}
@@ -3021,7 +3016,7 @@ reset_locals(register Name target, register Property old_locals, register Proper
 		/* Remove conditional target from chain */
 		if (conditional_targets == NULL ||
 		    conditional_targets->name != target) {
-			warning(catgets(catd, 1, 39, "Internal error: reset target not at head of condtional_targets chain"));
+			warning(gettext("Internal error: reset target not at head of condtional_targets chain"));
 		} else {
 			cond_chain = conditional_targets->next;
 			retmem_mb((caddr_t) conditional_targets);
@@ -3035,7 +3030,7 @@ reset_locals(register Name target, register Property old_locals, register Proper
 	}
 	if (debug_level > 1) {
 		if (old_locals[index].body.macro.value != NULL) {
-			(void) printf(catgets(catd, 1, 40, "%*sdeactivating conditional value: %s= %s\n"),
+			(void) printf(gettext("%*sdeactivating conditional value: %s= %s\n"),
 				      recursion_level,
 				      "",
 				      conditional->body.conditional.name->
@@ -3043,7 +3038,7 @@ reset_locals(register Name target, register Property old_locals, register Proper
 				      old_locals[index].body.macro.value->
 				      string_mb);
 		} else {
-			(void) printf(catgets(catd, 1, 41, "%*sdeactivating conditional value: %s =\n"),
+			(void) printf(gettext("%*sdeactivating conditional value: %s =\n"),
 				      recursion_level,
 				      "",
 				      conditional->body.conditional.name->

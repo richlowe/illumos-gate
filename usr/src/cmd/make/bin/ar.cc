@@ -43,6 +43,7 @@
 #include <ar.h>
 #include <errno.h>		/* errno */
 #include <fcntl.h>		/* open() */
+#include <libintl.h>
 #include <mk/defs.h>
 #include <mksh/misc.h>		/* retmem_mb() */
 
@@ -223,7 +224,7 @@ read_archive(register Name target)
 			}
 			return target->stat.time = file_doesnt_exist;
 		} else {
-			fatal(catgets(catd, 1, 1, "Can't access archive `%s': %s"),
+			fatal(gettext("Can't access archive `%s': %s"),
 			      member->body.member.library->string_mb,
 			      errmsg(errno));
 		}
@@ -232,7 +233,7 @@ read_archive(register Name target)
 		if (read_archive_dir(&ar, member->body.member.library, 
 				     &long_names_table)
 		    == failed){
-			fatal(catgets(catd, 1, 2, "Can't access archive `%s': %s"),
+			fatal(gettext("Can't access archive `%s': %s"),
 			      member->body.member.library->string_mb,
 			      errmsg(errno));
 		}
@@ -316,7 +317,7 @@ open_archive(char *filename, register Ar *arp)
 		if (IS_WEQUALN(arp->ar_port.ar_name, wcs_buffer, 16)) {
  */
 		if (IS_EQUALN(arp->ar_port.ar_name,
-			      NOCATGETS("/               "),
+			      "/               ",
 			      16)) {
 			if (sscanf(arp->ar_port.ar_size,
 				   "%ld",
@@ -334,7 +335,7 @@ open_archive(char *filename, register Ar *arp)
 		}
 		return succeeded;
 	}
-	fatal(catgets(catd, 1, 3, "`%s' is not an archive"), filename);
+	fatal(gettext("`%s' is not an archive"), filename);
 	/* NOTREACHED */
 	return failed;
 }
@@ -464,7 +465,7 @@ read_archive_dir(register Ar *arp, Name library, char **long_names_table)
 				    return succeeded;
 			    }
 			    fatal(
-				catgets(catd, 1, 28, "Read error in archive `%s': invalid archive file member header at 0x%x"),
+				gettext("Read error in archive `%s': invalid archive file member header at 0x%x"),
 				library->string_mb,
 				ftell(arp->fd)
 			    );
@@ -511,7 +512,7 @@ read_archive_dir(register Ar *arp, Name library, char **long_names_table)
 		    }
 		    if (sscanf(arp->ar_port.ar_date, "%ld", &date) != 1) {
 			    WCSTOMBS(mbs_buffer, name_string);
-			    fatal(catgets(catd, 1, 4, "Bad date field for member `%s' in archive `%s'"),
+			    fatal(gettext("Bad date field for member `%s' in archive `%s'"),
 				  mbs_buffer,
 				  library->string_mb);
 		    }
@@ -524,7 +525,7 @@ read_archive_dir(register Ar *arp, Name library, char **long_names_table)
 		    }
 		    if (sscanf(arp->ar_port.ar_size, "%ld", &ptr) != 1) {
 			    WCSTOMBS(mbs_buffer, name_string);
-			    fatal(catgets(catd, 1, 5, "Bad size field for member `%s' in archive `%s'"),
+			    fatal(gettext("Bad size field for member `%s' in archive `%s'"),
 				  mbs_buffer,
 				  library->string_mb);
 		    }
@@ -538,7 +539,7 @@ read_archive_dir(register Ar *arp, Name library, char **long_names_table)
 
 	/* Only here if fread() [or IS_EQUALN()] failed and not at EOF */
 read_error:
-	fatal(catgets(catd, 1, 6, "Read error in archive `%s': %s"),
+	fatal(gettext("Read error in archive `%s': %s"),
 	      library->string_mb,
 	      errmsg(errno));
 	    /* NOTREACHED */
@@ -571,7 +572,7 @@ process_long_names_member(register Ar *arp, char **long_names_table, char *filen
 	}
 	if ((ar_member_header = 
 	     (Ar_port *) alloca((int) sizeof(Ar_port))) == NULL){
-		perror(catgets(catd, 1, 7, "memory allocation failure"));
+		perror(gettext("memory allocation failure"));
 		return failed;
 	} 
 	int ret = read_member_header(ar_member_header, arp->fd, filename);
@@ -583,7 +584,7 @@ process_long_names_member(register Ar *arp, char **long_names_table, char *filen
 	}
 	/* Do we have special member containing long names? */
 	if (IS_EQUALN(ar_member_header->ar_name, 
-		      NOCATGETS("//              "),
+		      "//              ",
 		      16)){
 		if (sscanf(ar_member_header->ar_size,
 			   "%ld",
@@ -631,7 +632,7 @@ translate_entry(register Ar *arp, Name target, register Property member, char **
 	char		buffer[4];
 
 	if (arp->sym_begin == 0L || arp->num_symbols == 0L) {
-		fatal(catgets(catd, 1, 8, "Cannot find symbol `%s' in archive `%s'"),
+		fatal(gettext("Cannot find symbol `%s' in archive `%s'"),
 		      member->body.member.entry->string_mb,
 		      member->body.member.library->string_mb);
 	}
@@ -726,7 +727,7 @@ translate_entry(register Ar *arp, Name target, register Property member, char **
 				if (sscanf(arp->ar_port.ar_date,
 					   "%ld",
 					   &date) != 1) {
-					fatal(catgets(catd, 1, 9, "Bad date field for member `%s' in archive `%s'"),
+					fatal(gettext("Bad date field for member `%s' in archive `%s'"),
 					      arp->ar_port.ar_name,
 					      target->string_mb);
 				}
@@ -761,18 +762,18 @@ translate_entry(register Ar *arp, Name target, register Property member, char **
 			syms++;
 		}
 	}
-	fatal(catgets(catd, 1, 10, "Cannot find symbol `%s' in archive `%s'"),
+	fatal(gettext("Cannot find symbol `%s' in archive `%s'"),
 	      member->body.member.entry->string_mb,
 	      member->body.member.library->string_mb);
 	/*NOTREACHED*/
 
 read_error:
 	if (ferror(arp->fd)) {
-		fatal(catgets(catd, 1, 11, "Read error in archive `%s': %s"),
+		fatal(gettext("Read error in archive `%s': %s"),
 		      member->body.member.library->string_mb,
 		      errmsg(errno));
 	} else {
-		fatal(catgets(catd, 1, 12, "Read error in archive `%s': Premature EOF"),
+		fatal(gettext("Read error in archive `%s': Premature EOF"),
 		      member->body.member.library->string_mb);
 	}
 }
@@ -835,7 +836,7 @@ read_member_header(Ar_port *header, FILE *fd, char* filename)
 	    )
 	) {
 		fatal(
-			catgets(catd, 1, 28, "Read error in archive `%s': invalid archive file member header at 0x%x"),
+			gettext("Read error in archive `%s': invalid archive file member header at 0x%x"),
 			filename,
 			ftell(fd)
 		);

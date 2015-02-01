@@ -32,22 +32,14 @@
 /*
  * Included files
  */
-#if defined(TEAMWARE_MAKE_CMN)
-#       include <avo/intl.h>
-#endif
-
 #include <bsd/bsd.h>		/* bsd_signal() */
 
 
 #include <locale.h>		/* setlocale() */
 #include <libgen.h>
 #include <mk/defs.h>
-#include <mksdmsi18n/mksdmsi18n.h>	/* libmksdmsi18n_init() */
 #include <mksh/macro.h>		/* getvar() */
 #include <mksh/misc.h>		/* getmem(), setup_char_semantics() */
-
-#if defined(TEAMWARE_MAKE_CMN)
-#endif
 
 #include <pwd.h>		/* getpwnam() */
 #include <setjmp.h>
@@ -78,15 +70,14 @@ extern void job_adjust_fini();
 /*
  * Defined macros
  */
-#define MAKE_PREFIX		NOCATGETS("/usr")
-#define	LD_SUPPORT_ENV_VAR	NOCATGETS("SGS_SUPPORT_32")
-#define	LD_SUPPORT_ENV_VAR_32	NOCATGETS("SGS_SUPPORT_32")
-#define	LD_SUPPORT_ENV_VAR_64	NOCATGETS("SGS_SUPPORT_64")
-#define	LD_SUPPORT_MAKE_LIB	NOCATGETS("libmakestate.so.1")
+#define	LD_SUPPORT_ENV_VAR	"SGS_SUPPORT_32"
+#define	LD_SUPPORT_ENV_VAR_32	"SGS_SUPPORT_32"
+#define	LD_SUPPORT_ENV_VAR_64	"SGS_SUPPORT_64"
+#define	LD_SUPPORT_MAKE_LIB	"libmakestate.so.1"
 #ifdef __i386
-#define	LD_SUPPORT_MAKE_ARCH	NOCATGETS("i386")
+#define	LD_SUPPORT_MAKE_ARCH	"i386"
 #elif __sparc
-#define	LD_SUPPORT_MAKE_ARCH	NOCATGETS("sparc")
+#define	LD_SUPPORT_MAKE_ARCH	"sparc"
 #else
 #error "Unsupported architecture"
 #endif
@@ -163,7 +154,6 @@ extern void expand_value(Name, register String , Boolean);
 static const char	verstring[] = "illumos make";
 
 jmp_buf jmpbuffer;
-extern nl_catd catd;
 
 /*
  *	main(argc, argv)
@@ -218,24 +208,15 @@ main(int argc, char *argv[])
 
 
 #ifdef DMAKE_STATISTICS
-	if (getenv(NOCATGETS("DMAKE_STATISTICS"))) {
+	if (getenv("DMAKE_STATISTICS")) {
 		getname_stat = true;
 	}
 #endif
 
-	catd = catopen(AVO_DOMAIN_DMAKE, NL_CAT_LOCALE);
-
-// ---> fprintf(stderr, catgets(catd, 15, 666, "--- SUN make ---\n"));
-
-
-/*
- * I put libmksdmsi18n_init() under #ifdef because it requires avo_i18n_init()
- * from avo_util library. 
- */
-	libmksdmsi18n_init();
-
-
-	textdomain(NOCATGETS("SUNW_SPRO_MAKE"));
+#ifndef TEXT_DOMAIN
+#define	TEXT_DOMAIN	"SYS_TEST"	
+#endif
+	textdomain(TEXT_DOMAIN);
 
 	g_argc = argc;
 	g_argv = (char **) malloc((g_argc + 1) * sizeof(char *));
@@ -295,7 +276,7 @@ main(int argc, char *argv[])
 	/* Sun OS make standart */
 	svr4 = false;  
 	posix = false;
-	if(!strcmp(argv_zero_string, NOCATGETS("/usr/xpg4/bin/make"))) {
+	if(!strcmp(argv_zero_string, "/usr/xpg4/bin/make")) {
 		svr4 = false;
 		posix = true;
 	} else {
@@ -305,12 +286,12 @@ main(int argc, char *argv[])
 		} else {
 			prognameptr = argv[0];
 		}
-		if(!strcmp(prognameptr, NOCATGETS("svr4.make"))) {
+		if(!strcmp(prognameptr, "svr4.make")) {
 			svr4 = true;
 			posix = false;
 		}
 	}
-	if (getenv(USE_SVR4_MAKE) || getenv(NOCATGETS("USE_SVID"))){
+	if (getenv(USE_SVR4_MAKE) || getenv("USE_SVID")){
 	   svr4 = true;
 	   posix = false;
 	}
@@ -318,9 +299,9 @@ main(int argc, char *argv[])
 	/*
 	 * Find the dmake_compat_mode: posix, sun, svr4, or gnu_style, .
 	 */
-	char * dmake_compat_mode_var = getenv(NOCATGETS("SUN_MAKE_COMPAT_MODE"));
+	char * dmake_compat_mode_var = getenv("SUN_MAKE_COMPAT_MODE");
 	if (dmake_compat_mode_var != NULL) {
-		if (0 == strcasecmp(dmake_compat_mode_var, NOCATGETS("GNU"))) {
+		if (0 == strcasecmp(dmake_compat_mode_var, "GNU")) {
 			gnu_style = true;
 		}
 		//svr4 = false;
@@ -330,14 +311,14 @@ main(int argc, char *argv[])
 	/*
 	 * Temporary directory set up.
 	 */
-	char * tmpdir_var = getenv(NOCATGETS("TMPDIR"));
+	char * tmpdir_var = getenv("TMPDIR");
 	if (tmpdir_var != NULL && *tmpdir_var == '/' && strlen(tmpdir_var) < MAXPATHLEN) {
 		strcpy(mbs_buffer, tmpdir_var);
 		for (tmpdir_var = mbs_buffer+strlen(mbs_buffer);
 			*(--tmpdir_var) == '/' && tmpdir_var > mbs_buffer;
 			*tmpdir_var = '\0');
 		if (strlen(mbs_buffer) + 32 < MAXPATHLEN) { /* 32 = strlen("/dmake.stdout.%d.%d.XXXXXX") */
-			sprintf(mbs_buffer2, NOCATGETS("%s/dmake.tst.%d.XXXXXX"),
+			sprintf(mbs_buffer2, "%s/dmake.tst.%d.XXXXXX",
 				mbs_buffer, getpid());
 			int fd = mkstemp(mbs_buffer2);
 			if (fd >= 0) {
@@ -350,10 +331,10 @@ main(int argc, char *argv[])
 
 	/* find out if stdout and stderr point to the same place */
 	if (fstat(1, &out_stat) < 0) {
-		fatal(catgets(catd, 1, 165, "fstat of standard out failed: %s"), errmsg(errno));
+		fatal(gettext("fstat of standard out failed: %s"), errmsg(errno));
 	}
 	if (fstat(2, &err_stat) < 0) {
-		fatal(catgets(catd, 1, 166, "fstat of standard error failed: %s"), errmsg(errno));
+		fatal(gettext("fstat of standard error failed: %s"), errmsg(errno));
 	}
 	if ((out_stat.st_dev == err_stat.st_dev) &&
 	    (out_stat.st_ino == err_stat.st_ino)) {
@@ -384,7 +365,7 @@ main(int argc, char *argv[])
 	read_command_options(argc, argv);
 	if (debug_level > 0) {
 		cp = getenv(makeflags->string_mb);
-		(void) printf(catgets(catd, 1, 167, "MAKEFLAGS value: %s\n"), cp == NULL ? "" : cp);
+		(void) printf(gettext("MAKEFLAGS value: %s\n"), cp == NULL ? "" : cp);
 	}
 
 	setup_interrupt(handle_interrupt);
@@ -394,7 +375,7 @@ main(int argc, char *argv[])
 	/*
 	 * Find the dmake_output_mode: TXT1, TXT2 or HTML1.
 	 */
-	MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_OUTPUT_MODE"));
+	MBSTOWCS(wcs_buffer, "DMAKE_OUTPUT_MODE");
 	dmake_name2 = GETNAME(wcs_buffer, FIND_LENGTH);
 	prop2 = get_prop(dmake_name2->prop, macro_prop);
 	if (prop2 == NULL) {
@@ -403,14 +384,14 @@ main(int argc, char *argv[])
 	} else {
 		dmake_value2 = prop2->body.macro.value;
 		if ((dmake_value2 == NULL) ||
-		    (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("TXT1")))) {
+		    (IS_EQUAL(dmake_value2->string_mb, "TXT1"))) {
 			output_mode = txt1_mode;
-		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("TXT2"))) {
+		} else if (IS_EQUAL(dmake_value2->string_mb, "TXT2")) {
 			output_mode = txt2_mode;
-		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("HTML1"))) {
+		} else if (IS_EQUAL(dmake_value2->string_mb, "HTML1")) {
 			output_mode = html1_mode;
 		} else {
-			warning(catgets(catd, 1, 352, "Unsupported value `%s' for DMAKE_OUTPUT_MODE after -x flag (ignored)"),
+			warning(gettext("Unsupported value `%s' for DMAKE_OUTPUT_MODE after -x flag (ignored)"),
 			      dmake_value2->string_mb);
 		}
 	}
@@ -421,14 +402,14 @@ main(int argc, char *argv[])
         (!pmake_machinesfile_specified)) {
 	char *s = strdup(argv[0]);    
 	    
-	MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MODE"));
+	MBSTOWCS(wcs_buffer, "DMAKE_MODE");
 	dmake_name2 = GETNAME(wcs_buffer, FIND_LENGTH);
 	prop2 = get_prop(dmake_name2->prop, macro_prop);
 	// If we're invoked as 'make' run serially, regardless of DMAKE_MODE
 	// If we're invoked as 'make' but passed -j, run parallel
 	// If we're invoked as 'dmake', without DMAKE_MODE, default parallel
 	// If we're invoked as 'dmake' and DMAKE_MODE is set, honour it.
-	if ((strcmp(basename(s), NOCATGETS("make")) == 0) &&
+	if ((strcmp(basename(s), "make") == 0) &&
 	    !dmake_max_jobs_specified) {
 		dmake_mode_type = serial_mode;
 		no_parallel = true;
@@ -436,27 +417,27 @@ main(int argc, char *argv[])
 		/* DMAKE_MODE not defined, default based on our name */
 		char *s = strdup(argv[0]);
 
-		if (strcmp(basename(s), NOCATGETS("dmake")) == 0) {
+		if (strcmp(basename(s), "dmake") == 0) {
 			dmake_mode_type = parallel_mode;
 			no_parallel = false;
 		}
 	} else {
 		dmake_value2 = prop2->body.macro.value;
-		if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("parallel"))) {
+		if (IS_EQUAL(dmake_value2->string_mb, "parallel")) {
 			dmake_mode_type = parallel_mode;
 			no_parallel = false;
-		} else if (IS_EQUAL(dmake_value2->string_mb, NOCATGETS("serial"))) {
+		} else if (IS_EQUAL(dmake_value2->string_mb, "serial")) {
 			dmake_mode_type = serial_mode;
 			no_parallel = true;
 		} else {
-			fatal(catgets(catd, 1, 307, "Unknown dmake mode argument `%s' after -m flag"), dmake_value2->string_mb);
+			fatal(gettext("Unknown dmake mode argument `%s' after -m flag"), dmake_value2->string_mb);
 		}
 	}
 	free(s);
     }
 
 	parallel_flag = true;
-	putenv(strdup(NOCATGETS("DMAKE_CHILD=TRUE")));
+	putenv(strdup("DMAKE_CHILD=TRUE"));
 
 //
 // If dmake is running with -t option, set dmake_mode_type to serial.
@@ -477,8 +458,8 @@ main(int argc, char *argv[])
 	 * the 'old' behaviour.
 	 */
 	out_err_same = true;
-	char * dmake_sep_var = getenv(NOCATGETS("__DMAKE_SEPARATE_STDERR"));
-	if (dmake_sep_var == NULL || (0 != strcasecmp(dmake_sep_var, NOCATGETS("NO")))) {
+	char * dmake_sep_var = getenv("__DMAKE_SEPARATE_STDERR");
+	if (dmake_sep_var == NULL || (0 != strcasecmp(dmake_sep_var, "NO"))) {
 		struct stat stdout_stat;
 		struct stat stderr_stat;
 		if( (fstat(1, &stdout_stat) == 0)
@@ -610,7 +591,6 @@ main(int argc, char *argv[])
  *				True if -P flag on
  *		running_list	List of parallel running processes
  *		temp_file_name	The temp file is removed, if any
- *		catd	the message catalog file
  */
 extern "C" void
 cleanup_after_exit(void)
@@ -631,24 +611,24 @@ extern long	env_alloc_bytes;
 
 #ifdef DMAKE_STATISTICS
 if(getname_stat) {
-	printf(NOCATGETS(">>> Getname statistics:\n"));
-	printf(NOCATGETS("  Allocated:\n"));
-	printf(NOCATGETS("        Names: %ld\n"), getname_names_count);
-	printf(NOCATGETS("      Strings: %ld Kb (%ld bytes)\n"), getname_bytes_count/1000, getname_bytes_count);
-	printf(NOCATGETS("      Structs: %ld Kb (%ld bytes)\n"), getname_struct_count/1000, getname_struct_count);
-	printf(NOCATGETS("  Total bytes: %ld Kb (%ld bytes)\n"), getname_struct_count/1000 + getname_bytes_count/1000, getname_struct_count + getname_bytes_count);
+	printf(">>> Getname statistics:\n");
+	printf("  Allocated:\n");
+	printf("        Names: %ld\n", getname_names_count);
+	printf("      Strings: %ld Kb (%ld bytes)\n", getname_bytes_count/1000, getname_bytes_count);
+	printf("      Structs: %ld Kb (%ld bytes)\n", getname_struct_count/1000, getname_struct_count);
+	printf("  Total bytes: %ld Kb (%ld bytes)\n", getname_struct_count/1000 + getname_bytes_count/1000, getname_struct_count + getname_bytes_count);
 
-	printf(NOCATGETS("\n  Unallocated: %ld\n"), freename_names_count);
-	printf(NOCATGETS("        Names: %ld\n"), freename_names_count);
-	printf(NOCATGETS("      Strings: %ld Kb (%ld bytes)\n"), freename_bytes_count/1000, freename_bytes_count);
-	printf(NOCATGETS("      Structs: %ld Kb (%ld bytes)\n"), freename_struct_count/1000, freename_struct_count);
-	printf(NOCATGETS("  Total bytes: %ld Kb (%ld bytes)\n"), freename_struct_count/1000 + freename_bytes_count/1000, freename_struct_count + freename_bytes_count);
+	printf("\n  Unallocated: %ld\n", freename_names_count);
+	printf("        Names: %ld\n", freename_names_count);
+	printf("      Strings: %ld Kb (%ld bytes)\n", freename_bytes_count/1000, freename_bytes_count);
+	printf("      Structs: %ld Kb (%ld bytes)\n", freename_struct_count/1000, freename_struct_count);
+	printf("  Total bytes: %ld Kb (%ld bytes)\n", freename_struct_count/1000 + freename_bytes_count/1000, freename_struct_count + freename_bytes_count);
 
-	printf(NOCATGETS("\n  Total used: %ld Kb (%ld bytes)\n"), (getname_struct_count/1000 + getname_bytes_count/1000) - (freename_struct_count/1000 + freename_bytes_count/1000), (getname_struct_count + getname_bytes_count) - (freename_struct_count + freename_bytes_count));
+	printf("\n  Total used: %ld Kb (%ld bytes)\n", (getname_struct_count/1000 + getname_bytes_count/1000) - (freename_struct_count/1000 + freename_bytes_count/1000), (getname_struct_count + getname_bytes_count) - (freename_struct_count + freename_bytes_count));
 
-	printf(NOCATGETS("\n>>> Other:\n"));
+	printf("\n>>> Other:\n");
 	printf(
-		NOCATGETS("       Env (%ld): %ld Kb (%ld bytes)\n"),
+		"       Env (%ld): %ld Kb (%ld bytes)\n",
 		env_alloc_num,
 		env_alloc_bytes/1000,
 		env_alloc_bytes
@@ -664,7 +644,7 @@ if(getname_stat) {
 	    if (!quest && !list_all_targets) {
 		Name		failed_name;
 
-		MBSTOWCS(wcs_buffer, NOCATGETS(".FAILED"));
+		MBSTOWCS(wcs_buffer, ".FAILED");
 		failed_name = GETNAME(wcs_buffer, FIND_LENGTH);
 		if ((exit_status != 0) && (failed_name->prop != NULL)) {
 			/*
@@ -738,10 +718,6 @@ if(getname_stat) {
 #if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
 	job_adjust_fini();
 #endif
-
-#ifdef TEAMWARE_MAKE_CMN
-	catclose(catd);
-#endif
 }
 
 /*
@@ -810,15 +786,15 @@ handle_interrupt(int)
 				       current_target->string_mb);
 			if (current_target->stat.is_dir) {
 				(void) fprintf(stderr,
-					       catgets(catd, 1, 168, "not removed.\n"),
+					       gettext("not removed.\n"),
 					       current_target->string_mb);
 			} else if (unlink(current_target->string_mb) == 0) {
 				(void) fprintf(stderr,
-					       catgets(catd, 1, 169, "removed.\n"),
+					       gettext("removed.\n"),
 					       current_target->string_mb);
 			} else {
 				(void) fprintf(stderr,
-					       catgets(catd, 1, 170, "could not be removed: %s.\n"),
+					       gettext("could not be removed: %s.\n"),
 					       current_target->string_mb,
 					       errmsg(errno));
 			}
@@ -845,15 +821,15 @@ handle_interrupt(int)
 					       rp->target->string_mb);
 				if (rp->target->stat.is_dir) {
 					(void) fprintf(stderr,
-						       catgets(catd, 1, 171, "not removed.\n"),
+						       gettext("not removed.\n"),
 						       rp->target->string_mb);
 				} else if (unlink(rp->target->string_mb) == 0) {
 					(void) fprintf(stderr,
-						       catgets(catd, 1, 172, "removed.\n"),
+						       gettext("removed.\n"),
 						       rp->target->string_mb);
 				} else {
 					(void) fprintf(stderr,
-						       catgets(catd, 1, 173, "could not be removed: %s.\n"),
+						       gettext("could not be removed: %s.\n"),
 						       rp->target->string_mb,
 						       errmsg(errno));
 				}
@@ -1013,27 +989,27 @@ read_command_options(register int argc, register char **argv)
 		if (ch == '?') {
 			if (svr4) {
 				fprintf(stderr,
-					catgets(catd, 1, 267, "Usage : dmake [ -f makefile ][ -c dmake_rcfile ][ -g dmake_group ]\n"));
+					gettext("Usage : dmake [ -f makefile ][ -c dmake_rcfile ][ -g dmake_group ]\n"));
 				fprintf(stderr,
-					catgets(catd, 1, 268, "              [ -j dmake_max_jobs ][ -m dmake_mode ][ -o dmake_odir ]...\n"));
+					gettext("              [ -j dmake_max_jobs ][ -m dmake_mode ][ -o dmake_odir ]...\n"));
 				fprintf(stderr,
-					catgets(catd, 1, 269, "              [ -e ][ -i ][ -k ][ -n ][ -p ][ -q ][ -r ][ -s ][ -t ][ -v ]\n"));
+					gettext("              [ -e ][ -i ][ -k ][ -n ][ -p ][ -q ][ -r ][ -s ][ -t ][ -v ]\n"));
 				tptr = strchr(SVR4_CMD_OPTS, optopt);
 			} else {
 				fprintf(stderr,
-					catgets(catd, 1, 272, "Usage : dmake [ -f makefile ][ -c dmake_rcfile ][ -g dmake_group ]\n"));
+					gettext("Usage : dmake [ -f makefile ][ -c dmake_rcfile ][ -g dmake_group ]\n"));
 				fprintf(stderr,
-					catgets(catd, 1, 273, "              [ -j dmake_max_jobs ][ -K statefile ][ -m dmake_mode ][ -x MODE_NAME=VALUE ][ -o dmake_odir ]...\n"));
+					gettext("              [ -j dmake_max_jobs ][ -K statefile ][ -m dmake_mode ][ -x MODE_NAME=VALUE ][ -o dmake_odir ]...\n"));
 				fprintf(stderr,
-					catgets(catd, 1, 274, "              [ -d ][ -dd ][ -D ][ -DD ][ -e ][ -i ][ -k ][ -n ][ -p ][ -P ][ -u ][ -w ]\n"));
+					gettext("              [ -d ][ -dd ][ -D ][ -DD ][ -e ][ -i ][ -k ][ -n ][ -p ][ -P ][ -u ][ -w ]\n"));
 				fprintf(stderr,
-					catgets(catd, 1, 275, "              [ -q ][ -r ][ -s ][ -S ][ -t ][ -v ][ -V ][ target... ][ macro=value... ][ \"macro +=value\"... ]\n"));
+					gettext("              [ -q ][ -r ][ -s ][ -S ][ -t ][ -v ][ -V ][ target... ][ macro=value... ][ \"macro +=value\"... ]\n"));
 				tptr = strchr(SUNPRO_CMD_OPTS, optopt);
 			}
 			if (!tptr) {
-				fatal(catgets(catd, 1, 279, "Unknown option `-%c'"), optopt);
+				fatal(gettext("Unknown option `-%c'"), optopt);
 			} else {
-				fatal(catgets(catd, 1, 280, "Missing argument after `-%c'"), optopt);
+				fatal(gettext("Missing argument after `-%c'"), optopt);
 			}
 		}
 
@@ -1060,37 +1036,37 @@ read_command_options(register int argc, register char **argv)
 				}
 				break;
 			case 1:	/* -f seen */
-				argv[i] = (char *)NOCATGETS("-f");
+				argv[i] = (char *)"-f";
 				break;
 			case 2:	/* -c seen */
-				argv[i] = (char *)NOCATGETS("-c");
+				argv[i] = (char *)"-c";
 				break;
 			case 4:	/* -g seen */
-				argv[i] = (char *)NOCATGETS("-g");
+				argv[i] = (char *)"-g";
 				break;
 			case 8:	/* -j seen */
-				argv[i] = (char *)NOCATGETS("-j");
+				argv[i] = (char *)"-j";
 				break;
 			case 16: /* -M seen */
-				argv[i] = (char *)NOCATGETS("-M");
+				argv[i] = (char *)"-M";
 				break;
 			case 32: /* -m seen */
-				argv[i] = (char *)NOCATGETS("-m");
+				argv[i] = (char *)"-m";
 				break;
 			case 128: /* -O seen */
-				argv[i] = (char *)NOCATGETS("-O");
+				argv[i] = (char *)"-O";
 				break;
 			case 256: /* -K seen */
-				argv[i] = (char *)NOCATGETS("-K");
+				argv[i] = (char *)"-K";
 			        break;
 			case 512:	/* -o seen */
-				argv[i] = (char *)NOCATGETS("-o");
+				argv[i] = (char *)"-o";
 				break;
 			case 1024: /* -x seen */
-				argv[i] = (char *)NOCATGETS("-x");
+				argv[i] = (char *)"-x";
 				break;
 			default: /* > 1 of -c, f, g, j, K, M, m, O, o, x seen */
-				fatal(catgets(catd, 1, 286, "Illegal command line. More than one option requiring\nan argument given in the same argument group"));
+				fatal(gettext("Illegal command line. More than one option requiring\nan argument given in the same argument group"));
 			}
 
 			makefile_next = 0;
@@ -1240,7 +1216,7 @@ setup_makeflags_argv()
 	}
 	/* Allocate memory for the new MAKEFLAGS argv */
 	mf_argv = (char **) malloc((mf_argc + 1) * sizeof(char *));
-	mf_argv[0] = (char *)NOCATGETS("MAKEFLAGS");
+	mf_argv[0] = (char *)"MAKEFLAGS";
 	/*
 	 * Convert the MAKEFLAGS string value into a vector of char *,
 	 * similar to argv.
@@ -1527,7 +1503,7 @@ parse_command_option(register char ch)
 	case 'v':			/* Version flag */
 		if (invert_this) {
 		} else {
-			fprintf(stdout, NOCATGETS("dmake: %s\n"), verstring);
+			fprintf(stdout, "dmake: %s\n", verstring);
 			exit_status = 0;
 			exit(0);
 		}
@@ -1573,7 +1549,7 @@ uid_t uid;
 int   done=0;
 
 	/* Check if we should use PROJECTDIR when reading the SCCS dir. */
-	sccs_dir_path = getenv(NOCATGETS("PROJECTDIR"));
+	sccs_dir_path = getenv("PROJECTDIR");
 	if ((sccs_dir_path != NULL) &&
 	    (sccs_dir_path[0] != (int) slash_char)) {
 		struct passwd *pwent;
@@ -1582,18 +1558,18 @@ int   done=0;
 		uid = getuid();
 		pwent = getpwuid(uid);
 		if (pwent == NULL) {
-		   fatal(catgets(catd, 1, 188, "Bogus USERID "));
+		   fatal(gettext("Bogus USERID "));
 		}
 		if ((pwent = getpwnam(sccs_dir_path)) == NULL) {
 			/*empty block : it'll go & check cwd  */
 		}
 		else {
-		  (void) sprintf(path, NOCATGETS("%s/src"), pwent->pw_dir);
+		  (void) sprintf(path, "%s/src", pwent->pw_dir);
 		  if (access(path, F_OK) == 0) {
 			sccs_dir_path = path;
 			done = 1;
 		  } else {
-			(void) sprintf(path, NOCATGETS("%s/source"), pwent->pw_dir);
+			(void) sprintf(path, "%s/source", pwent->pw_dir);
 			if (access(path, F_OK) == 0) {
 				sccs_dir_path = path;
 				done = 1;
@@ -1603,12 +1579,12 @@ int   done=0;
 		if (!done) {
 		    if (getcwd(cwdpath, MAXPATHLEN - 1 )) {
 
-		       (void) sprintf(path, NOCATGETS("%s/%s"), cwdpath,sccs_dir_path);
+		       (void) sprintf(path, "%s/%s", cwdpath,sccs_dir_path);
 		       if (access(path, F_OK) == 0) {
 		        	sccs_dir_path = path;
 				done = 1;
 		        } else {
-		  	       	fatal(catgets(catd, 1, 189, "Bogus PROJECTDIR '%s'"), sccs_dir_path);
+		  	       	fatal(gettext("Bogus PROJECTDIR '%s'"), sccs_dir_path);
 		        }
 		    }
 		}
@@ -1810,15 +1786,15 @@ read_files_and_state(int argc, char **argv)
  */
 	is_xpg4 = posix;
 
-	MBSTOWCS(wcs_buffer, NOCATGETS("KEEP_STATE"));
+	MBSTOWCS(wcs_buffer, "KEEP_STATE");
 	keep_state_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("Makefile"));
+	MBSTOWCS(wcs_buffer, "Makefile");
 	Makefile = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("makefile"));
+	MBSTOWCS(wcs_buffer, "makefile");
 	makefile_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("s.makefile"));
+	MBSTOWCS(wcs_buffer, "s.makefile");
 	sdotmakefile_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("s.Makefile"));
+	MBSTOWCS(wcs_buffer, "s.Makefile");
 	sdotMakefile = GETNAME(wcs_buffer, FIND_LENGTH);
 
 /*
@@ -1836,10 +1812,10 @@ read_files_and_state(int argc, char **argv)
 	}
 	if (!ignore_default_mk) {
 		if (svr4) {
-			MBSTOWCS(wcs_buffer, NOCATGETS("svr4.make.rules"));
+			MBSTOWCS(wcs_buffer, "svr4.make.rules");
 			default_makefile = GETNAME(wcs_buffer, FIND_LENGTH);
 		} else {
-			MBSTOWCS(wcs_buffer, NOCATGETS("make.rules"));
+			MBSTOWCS(wcs_buffer, "make.rules");
 			default_makefile = GETNAME(wcs_buffer, FIND_LENGTH);
 		}
 		default_makefile->stat.is_file = true;
@@ -1856,12 +1832,12 @@ read_files_and_state(int argc, char **argv)
 	 * change the macro value of MAKE to be some form
 	 * of argv[0] for recursive MAKE builds.
 	 */
-	MBSTOWCS(wcs_buffer, NOCATGETS("MAKE"));
+	MBSTOWCS(wcs_buffer, "MAKE");
 	def_make_name = GETNAME(wcs_buffer, wslen(wcs_buffer));
 	def_make_macro = get_prop(def_make_name->prop, macro_prop);
 	if ((def_make_macro != NULL) &&
 	    (IS_EQUAL(def_make_macro->body.macro.value->string_mb,
-	              NOCATGETS("make")))) {
+	              "make"))) {
 		MBSTOWCS(wcs_buffer, argv_zero_string);
 		new_make_value = GETNAME(wcs_buffer, wslen(wcs_buffer));
 		(void) SETVAR(def_make_name,
@@ -1993,56 +1969,56 @@ read_files_and_state(int argc, char **argv)
 	}
 	/* -c dmake_rcfile */
 	if (dmake_rcfile_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_RCFILE"));
+		MBSTOWCS(wcs_buffer, "DMAKE_RCFILE");
 		dmake_rcfile = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(dmake_rcfile, &makeflags_string);
 		append_makeflags_string(dmake_rcfile, &makeflags_string_posix);
 	}
 	/* -g dmake_group */
 	if (dmake_group_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_GROUP"));
+		MBSTOWCS(wcs_buffer, "DMAKE_GROUP");
 		dmake_group = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(dmake_group, &makeflags_string);
 		append_makeflags_string(dmake_group, &makeflags_string_posix);
 	}
 	/* -j dmake_max_jobs */
 	if (dmake_max_jobs_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MAX_JOBS"));
+		MBSTOWCS(wcs_buffer, "DMAKE_MAX_JOBS");
 		dmake_max_jobs = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(dmake_max_jobs, &makeflags_string);
 		append_makeflags_string(dmake_max_jobs, &makeflags_string_posix);
 	}
 	/* -m dmake_mode */
 	if (dmake_mode_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MODE"));
+		MBSTOWCS(wcs_buffer, "DMAKE_MODE");
 		dmake_mode = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(dmake_mode, &makeflags_string);
 		append_makeflags_string(dmake_mode, &makeflags_string_posix);
 	}
 	/* -x dmake_compat_mode */
 //	if (dmake_compat_mode_specified) {
-//		MBSTOWCS(wcs_buffer, NOCATGETS("SUN_MAKE_COMPAT_MODE"));
+//		MBSTOWCS(wcs_buffer, "SUN_MAKE_COMPAT_MODE");
 //		dmake_compat_mode = GETNAME(wcs_buffer, FIND_LENGTH);
 //		append_makeflags_string(dmake_compat_mode, &makeflags_string);
 //		append_makeflags_string(dmake_compat_mode, &makeflags_string_posix);
 //	}
 	/* -x dmake_output_mode */
 	if (dmake_output_mode_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_OUTPUT_MODE"));
+		MBSTOWCS(wcs_buffer, "DMAKE_OUTPUT_MODE");
 		dmake_output_mode = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(dmake_output_mode, &makeflags_string);
 		append_makeflags_string(dmake_output_mode, &makeflags_string_posix);
 	}
 	/* -o dmake_odir */
 	if (dmake_odir_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_ODIR"));
+		MBSTOWCS(wcs_buffer, "DMAKE_ODIR");
 		dmake_odir = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(dmake_odir, &makeflags_string);
 		append_makeflags_string(dmake_odir, &makeflags_string_posix);
 	}
 	/* -M pmake_machinesfile */
 	if (pmake_machinesfile_specified) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("PMAKE_MACHINESFILE"));
+		MBSTOWCS(wcs_buffer, "PMAKE_MACHINESFILE");
 		pmake_machinesfile = GETNAME(wcs_buffer, FIND_LENGTH);
 		append_makeflags_string(pmake_machinesfile, &makeflags_string);
 		append_makeflags_string(pmake_machinesfile, &makeflags_string_posix);
@@ -2065,13 +2041,13 @@ read_files_and_state(int argc, char **argv)
 
 	if (makeflags_string.buffer.start[1] != (int) nul_char) {
 		if (makeflags_string.buffer.start[1] != (int) space_char) {
-			MBSTOWCS(wcs_buffer, NOCATGETS("MFLAGS"));
+			MBSTOWCS(wcs_buffer, "MFLAGS");
 			(void) SETVAR(GETNAME(wcs_buffer, FIND_LENGTH),
 				      GETNAME(makeflags_string.buffer.start,
 					      FIND_LENGTH),
 				      false);
 		} else {
-			MBSTOWCS(wcs_buffer, NOCATGETS("MFLAGS"));
+			MBSTOWCS(wcs_buffer, "MFLAGS");
 			(void) SETVAR(GETNAME(wcs_buffer, FIND_LENGTH),
 				      GETNAME(makeflags_string.buffer.start + 2,
 					      FIND_LENGTH),
@@ -2143,7 +2119,7 @@ read_files_and_state(int argc, char **argv)
 		    (argv[i][2] == (int) nul_char)) {
 			argv[i] = NULL;		/* Remove -f */
 			if (i >= argc - 1) {
-				fatal(catgets(catd, 1, 190, "No filename argument after -f flag"));
+				fatal(gettext("No filename argument after -f flag"));
 			}
 			MBSTOWCS(wcs_buffer, argv[++i]);
 			primary_makefile = GETNAME(wcs_buffer, FIND_LENGTH);
@@ -2178,7 +2154,7 @@ read_files_and_state(int argc, char **argv)
 	    if (!posix) {
 		if (makefile_name->stat.is_file) {
 			if (Makefile->stat.is_file) {
-				warning(catgets(catd, 1, 310, "Both `makefile' and `Makefile' exist"));
+				warning(gettext("Both `makefile' and `Makefile' exist"));
 			}
 			primary_makefile = makefile_name;
 			makefile_read = read_makefile(makefile_name,
@@ -2201,7 +2177,7 @@ read_files_and_state(int argc, char **argv)
 
 		if (makefile_name->stat.is_file) {
 			if (Makefile->stat.is_file) {
-				warning(catgets(catd, 1, 191, "Both `makefile' and `Makefile' exist"));
+				warning(gettext("Both `makefile' and `Makefile' exist"));
 			}
 		}
 		if (makefile_name->stat.is_file) {
@@ -2311,13 +2287,13 @@ read_files_and_state(int argc, char **argv)
 		 * change the macro value of ARFLAGS to be in accordance
 		 * with "POSIX" requirements.
 		 */
-		MBSTOWCS(wcs_buffer, NOCATGETS("ARFLAGS"));
+		MBSTOWCS(wcs_buffer, "ARFLAGS");
 		name = GETNAME(wcs_buffer, wslen(wcs_buffer));
 		macro = get_prop(name->prop, macro_prop);
 		if ((macro != NULL) && /* Maybe (macro == NULL) || ? */
 		    (IS_EQUAL(macro->body.macro.value->string_mb,
-		              NOCATGETS("rv")))) {
-			MBSTOWCS(wcs_buffer, NOCATGETS("-rv"));
+		              "rv"))) {
+			MBSTOWCS(wcs_buffer, "-rv");
 			value = GETNAME(wcs_buffer, wslen(wcs_buffer));
 			(void) SETVAR(name,
 			              value,
@@ -2377,8 +2353,8 @@ read_files_and_state(int argc, char **argv)
 			 make_state->hash.length = 0;
 			 make_state->string_mb[0] = '\0';
 		      }
-	   	      sprintf(state_file_str_mb,NOCATGETS("%s%s"),
-		       make_state->string_mb,NOCATGETS("/.make.state"));
+	   	      sprintf(state_file_str_mb,"%s%s",
+		       make_state->string_mb,"/.make.state");
 		      make_state = &state_filename;
 			/* adjust the length to reflect the appended string */
 		      make_state->hash.length += 12;
@@ -2393,10 +2369,10 @@ read_files_and_state(int argc, char **argv)
 			tmp_path[slashp - make_state->string_mb]=0;
 		      if(strlen(tmp_path)) {
 		        if(stat(tmp_path, &make_state_stat)) {
-			  warning(catgets(catd, 1, 192, "directory %s for .KEEP_STATE_FILE does not exist"),tmp_path);
+			  warning(gettext("directory %s for .KEEP_STATE_FILE does not exist"),tmp_path);
 		        }
 		        if (access(tmp_path, F_OK) != 0) {
-			  warning(catgets(catd, 1, 193, "can't access dir %s"),tmp_path);
+			  warning(gettext("can't access dir %s"),tmp_path);
 		        }
 		      }
 		   }
@@ -2460,42 +2436,42 @@ enter_argv_values(int argc, char *argv[], ASCII_Dyn_Array *makeflags_and_macro)
 				continue;
 			case 2:	/* -c seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 194, "No dmake rcfile argument after -c flag"));
+					fatal(gettext("No dmake rcfile argument after -c flag"));
 				}
-				MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_RCFILE"));
+				MBSTOWCS(wcs_buffer, "DMAKE_RCFILE");
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
 			case 4:	/* -g seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 195, "No dmake group argument after -g flag"));
+					fatal(gettext("No dmake group argument after -g flag"));
 				}
-				MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_GROUP"));
+				MBSTOWCS(wcs_buffer, "DMAKE_GROUP");
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
 			case 8:	/* -j seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 196, "No dmake max jobs argument after -j flag"));
+					fatal(gettext("No dmake max jobs argument after -j flag"));
 				}
-				MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MAX_JOBS"));
+				MBSTOWCS(wcs_buffer, "DMAKE_MAX_JOBS");
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
 			case 16: /* -M seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 323, "No pmake machinesfile argument after -M flag"));
+					fatal(gettext("No pmake machinesfile argument after -M flag"));
 				}
-				MBSTOWCS(wcs_buffer, NOCATGETS("PMAKE_MACHINESFILE"));
+				MBSTOWCS(wcs_buffer, "PMAKE_MACHINESFILE");
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
 			case 32: /* -m seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 197, "No dmake mode argument after -m flag"));
+					fatal(gettext("No dmake mode argument after -m flag"));
 				}
-				MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MODE"));
+				MBSTOWCS(wcs_buffer, "DMAKE_MODE");
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
 			case 256: /* -K seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 288, "No makestate filename argument after -K flag"));
+					fatal(gettext("No makestate filename argument after -K flag"));
 				}
 				MBSTOWCS(wcs_buffer, argv[i+1]);
 				make_state = GETNAME(wcs_buffer, FIND_LENGTH);
@@ -2505,31 +2481,31 @@ enter_argv_values(int argc, char *argv[], ASCII_Dyn_Array *makeflags_and_macro)
 				continue;
 			case 512:	/* -o seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 312, "No dmake output dir argument after -o flag"));
+					fatal(gettext("No dmake output dir argument after -o flag"));
 				}
-				MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_ODIR"));
+				MBSTOWCS(wcs_buffer, "DMAKE_ODIR");
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
 			case 1024: /* -x seen */
 				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 351, "No argument after -x flag"));
+					fatal(gettext("No argument after -x flag"));
 				}
-				length = strlen( NOCATGETS("SUN_MAKE_COMPAT_MODE="));
-				if (strncmp(argv[i+1], NOCATGETS("SUN_MAKE_COMPAT_MODE="), length) == 0) {
+				length = strlen( "SUN_MAKE_COMPAT_MODE=");
+				if (strncmp(argv[i+1], "SUN_MAKE_COMPAT_MODE=", length) == 0) {
 					argv[i+1] = &argv[i+1][length];
-					MBSTOWCS(wcs_buffer, NOCATGETS("SUN_MAKE_COMPAT_MODE"));
+					MBSTOWCS(wcs_buffer, "SUN_MAKE_COMPAT_MODE");
 					name = GETNAME(wcs_buffer, FIND_LENGTH);
 					dmake_compat_mode_specified = dmake_add_mode_specified;
 					break;
 				}
-				length = strlen( NOCATGETS("DMAKE_OUTPUT_MODE="));
-				if (strncmp(argv[i+1], NOCATGETS("DMAKE_OUTPUT_MODE="), length) == 0) {
+				length = strlen( "DMAKE_OUTPUT_MODE=");
+				if (strncmp(argv[i+1], "DMAKE_OUTPUT_MODE=", length) == 0) {
 					argv[i+1] = &argv[i+1][length];
-					MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_OUTPUT_MODE"));
+					MBSTOWCS(wcs_buffer, "DMAKE_OUTPUT_MODE");
 					name = GETNAME(wcs_buffer, FIND_LENGTH);
 					dmake_output_mode_specified = dmake_add_mode_specified;
 				} else {
-					warning(catgets(catd, 1, 354, "Unknown argument `%s' after -x flag (ignored)"),
+					warning(gettext("Unknown argument `%s' after -x flag (ignored)"),
 					      argv[i+1]);
 					argv[i] = argv[i + 1] = NULL;
 					continue;
@@ -2615,24 +2591,24 @@ append_makeflags_string(Name name, register String makeflags_string)
 {
 	const char	*option;
 
-	if (strcmp(name->string_mb, NOCATGETS("DMAKE_GROUP")) == 0) {
-		option = NOCATGETS(" -g ");
-	} else if (strcmp(name->string_mb, NOCATGETS("DMAKE_MAX_JOBS")) == 0) {
-		option = NOCATGETS(" -j ");
-	} else if (strcmp(name->string_mb, NOCATGETS("DMAKE_MODE")) == 0) {
-		option = NOCATGETS(" -m ");
-	} else if (strcmp(name->string_mb, NOCATGETS("DMAKE_ODIR")) == 0) {
-		option = NOCATGETS(" -o ");
-	} else if (strcmp(name->string_mb, NOCATGETS("DMAKE_RCFILE")) == 0) {
-		option = NOCATGETS(" -c ");
-	} else if (strcmp(name->string_mb, NOCATGETS("PMAKE_MACHINESFILE")) == 0) {
-		option = NOCATGETS(" -M ");
-	} else if (strcmp(name->string_mb, NOCATGETS("DMAKE_OUTPUT_MODE")) == 0) {
-		option = NOCATGETS(" -x DMAKE_OUTPUT_MODE=");
-	} else if (strcmp(name->string_mb, NOCATGETS("SUN_MAKE_COMPAT_MODE")) == 0) {
-		option = NOCATGETS(" -x SUN_MAKE_COMPAT_MODE=");
+	if (strcmp(name->string_mb, "DMAKE_GROUP") == 0) {
+		option = " -g ";
+	} else if (strcmp(name->string_mb, "DMAKE_MAX_JOBS") == 0) {
+		option = " -j ";
+	} else if (strcmp(name->string_mb, "DMAKE_MODE") == 0) {
+		option = " -m ";
+	} else if (strcmp(name->string_mb, "DMAKE_ODIR") == 0) {
+		option = " -o ";
+	} else if (strcmp(name->string_mb, "DMAKE_RCFILE") == 0) {
+		option = " -c ";
+	} else if (strcmp(name->string_mb, "PMAKE_MACHINESFILE") == 0) {
+		option = " -M ";
+	} else if (strcmp(name->string_mb, "DMAKE_OUTPUT_MODE") == 0) {
+		option = " -x DMAKE_OUTPUT_MODE=";
+	} else if (strcmp(name->string_mb, "SUN_MAKE_COMPAT_MODE") == 0) {
+		option = " -x SUN_MAKE_COMPAT_MODE=";
 	} else {
-		fatal(catgets(catd, 1, 289, "Internal error: name not recognized in append_makeflags_string()"));
+		fatal(gettext("Internal error: name not recognized in append_makeflags_string()"));
 	}
 	Property prop = maybe_append_prop(name, macro_prop);
 	if( prop == 0 || prop->body.macro.value == 0 ||
@@ -2693,11 +2669,11 @@ read_environment(Boolean read_only)
 		if (!value) {
 			continue;
 		}
-		MBSTOWCS(wcs_buffer2, NOCATGETS("SHELL="));
+		MBSTOWCS(wcs_buffer2, "SHELL=");
 		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
 			continue;
 		}
-		MBSTOWCS(wcs_buffer2, NOCATGETS("MAKEFLAGS="));
+		MBSTOWCS(wcs_buffer2, "MAKEFLAGS=");
 		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
 			report_pwd = true;
 			/*
@@ -2720,7 +2696,7 @@ read_environment(Boolean read_only)
 		 * the child make will end up writing to the parent
 		 * directory's .make.state and clobbering them.
 		 */
-		MBSTOWCS(wcs_buffer2, NOCATGETS("SUNPRO_DEPENDENCIES"));
+		MBSTOWCS(wcs_buffer2, "SUNPRO_DEPENDENCIES");
 		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
 			continue;
 		}
@@ -2868,11 +2844,11 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 				    (exists(default_target_to_build) > file_doesnt_exist)  */) {
 					if (posix) {
 						if (!commands_done) {
-							(void) printf(catgets(catd, 1, 293, "`%s' is updated.\n"),
+							(void) printf(gettext("`%s' is updated.\n"),
 						 		      default_target_to_build->string_mb);
 						} else {
 							if (no_action_was_taken) {
-								(void) printf(catgets(catd, 1, 294, "`%s': no action was taken.\n"),
+								(void) printf(gettext("`%s': no action was taken.\n"),
 						 			      default_target_to_build->string_mb);
 							}
 						}
@@ -2880,7 +2856,7 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 						default_target_to_build->stat.time = file_no_time;
 						if (!commands_done &&
 						    (exists(default_target_to_build) > file_doesnt_exist)) {
-							(void) printf(catgets(catd, 1, 295, "`%s' is up to date.\n"),
+							(void) printf(gettext("`%s' is up to date.\n"),
 								      default_target_to_build->string_mb);
 						}
 					}
@@ -2922,7 +2898,7 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 			gather_recursive_deps();
 			if (build_failed_seen) {
 				build_failed_ever_seen = true;
-				warning(catgets(catd, 1, 200, "Target `%s' not remade because of errors"),
+				warning(gettext("Target `%s' not remade because of errors"),
 					default_target_to_build->string_mb);
 			}
 			build_failed_seen = false;
@@ -2945,18 +2921,18 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 			    (exists(default_target_to_build) > file_doesnt_exist)  */) {
 				if (posix) {
 					if (!commands_done) {
-						(void) printf(catgets(catd, 1, 296, "`%s' is updated.\n"),
+						(void) printf(gettext("`%s' is updated.\n"),
 					 		      default_target_to_build->string_mb);
 					} else {
 						if (no_action_was_taken) {
-							(void) printf(catgets(catd, 1, 297, "`%s': no action was taken.\n"),
+							(void) printf(gettext("`%s': no action was taken.\n"),
 					 			      default_target_to_build->string_mb);
 						}
 					}
 				} else {
 					if (!commands_done &&
 					    (exists(default_target_to_build) > file_doesnt_exist)) {
-						(void) printf(catgets(catd, 1, 298, "`%s' is up to date.\n"),
+						(void) printf(gettext("`%s' is up to date.\n"),
 							      default_target_to_build->string_mb);
 					}
 				}
@@ -2970,15 +2946,15 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
  */
 	if (!target_to_make_found) {
 		if (default_target_to_build == NULL) {
-			fatal(catgets(catd, 1, 202, "No arguments to build"));
+			fatal(gettext("No arguments to build"));
 		}
 		commands_done = false;
 		top_level_target = get_wstring(default_target_to_build->string_mb);
 		report_recursion(default_target_to_build);
 
 
-		if (getenv(NOCATGETS("SPRO_EXPAND_ERRORS"))){
-			(void) printf(NOCATGETS("::(%s)\n"),
+		if (getenv("SPRO_EXPAND_ERRORS")){
+			(void) printf("::(%s)\n",
 				      default_target_to_build->string_mb);
 		}
 
@@ -2987,7 +2963,7 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 		gather_recursive_deps();
 		if (build_failed_seen) {
 			build_failed_ever_seen = true;
-			warning(catgets(catd, 1, 203, "Target `%s' not remade because of errors"),
+			warning(gettext("Target `%s' not remade because of errors"),
 				default_target_to_build->string_mb);
 		}
 		build_failed_seen = false;
@@ -3008,18 +2984,18 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 		    (exists(default_target_to_build) > file_doesnt_exist)  */) {
 			if (posix) {
 				if (!commands_done) {
-					(void) printf(catgets(catd, 1, 299, "`%s' is updated.\n"),
+					(void) printf(gettext("`%s' is updated.\n"),
 				 		      default_target_to_build->string_mb);
 				} else {
 					if (no_action_was_taken) {
-						(void) printf(catgets(catd, 1, 300, "`%s': no action was taken.\n"),
+						(void) printf(gettext("`%s': no action was taken.\n"),
 							      default_target_to_build->string_mb);
 					}
 				}
 			} else {
 				if (!commands_done &&
 				    (exists(default_target_to_build) > file_doesnt_exist)) {
-					(void) printf(catgets(catd, 1, 301, "`%s' is up to date.\n"),
+					(void) printf(gettext("`%s' is up to date.\n"),
 						      default_target_to_build->string_mb);
 				}
 			}
@@ -3196,7 +3172,7 @@ static	char *	mlev = NULL;
 	char *	make_level_str = NULL;
 	int	make_level_val = 0;
 
-	make_level_str = getenv(NOCATGETS("MAKELEVEL"));
+	make_level_str = getenv("MAKELEVEL");
 	if(make_level_str) {
 		make_level_val = atoi(make_level_str);
 	}
@@ -3204,10 +3180,10 @@ static	char *	mlev = NULL;
 		mlev = (char*) malloc(MAXPATHLEN);
 	}
 	if(entering) {
-		sprintf(mlev, NOCATGETS("MAKELEVEL=%d"), make_level_val + 1);
+		sprintf(mlev, "MAKELEVEL=%d", make_level_val + 1);
 	} else {
 		make_level_val--;
-		sprintf(mlev, NOCATGETS("MAKELEVEL=%d"), make_level_val);
+		sprintf(mlev, "MAKELEVEL=%d", make_level_val);
 	}
 	putenv(mlev);
 
@@ -3215,24 +3191,24 @@ static	char *	mlev = NULL;
 		if(make_level_val <= 0) {
 			if(entering) {
 				sprintf( rcwd
-				       , catgets(catd, 1, 329, "dmake: Entering directory `%s'\n")
+				       , gettext("dmake: Entering directory `%s'\n")
 				       , get_current_path());
 			} else {
 				sprintf( rcwd
-				       , catgets(catd, 1, 331, "dmake: Leaving directory `%s'\n")
+				       , gettext("dmake: Leaving directory `%s'\n")
 				       , get_current_path());
 			}
 		} else {
 			if(entering) {
 				sprintf( rcwd
-				       , catgets(catd, 1, 333, "dmake[%d]: Entering directory `%s'\n")
+				       , gettext("dmake[%d]: Entering directory `%s'\n")
 				       , make_level_val, get_current_path());
 			} else {
 				sprintf( rcwd
-				       , catgets(catd, 1, 335, "dmake[%d]: Leaving directory `%s'\n")
+				       , gettext("dmake[%d]: Leaving directory `%s'\n")
 				       , make_level_val, get_current_path());
 			}
 		}
-		printf(NOCATGETS("%s"), rcwd);
+		printf("%s", rcwd);
 	}
 }

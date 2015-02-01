@@ -618,6 +618,7 @@ MSGSUBDIRS=		\
 	luxadm		\
 	lvm		\
 	mailx		\
+	make		\
 	man		\
 	mesg		\
 	mkdir		\

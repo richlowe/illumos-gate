@@ -29,11 +29,10 @@
 #include <sys/param.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <libintl.h>
 
 #include <vroot/report.h>
 #include <vroot/vroot.h>
-#include <mksdmsi18n/mksdmsi18n.h>
-#include <avo/intl.h>	/* for NOCATGETS */
 #include <mk/defs.h>	/* for tmpdir */
 
 static	FILE	*report_file;
@@ -110,12 +109,12 @@ close_file(void)
 		return;
 	}
 	sprintf(nse_depinfo_file, "%s/%s", search_dir, NSE_DEPINFO);
-	sprintf(merge_file, NOCATGETS("%s/.tmp%s.%d"), search_dir, NSE_DEPINFO, getpid());
+	sprintf(merge_file, "%s/.tmp%s.%d", search_dir, NSE_DEPINFO, getpid());
 	sprintf(lock_file, "%s/%s", search_dir, NSE_DEPINFO_LOCK);
 	err = file_lock(nse_depinfo_file, lock_file, &file_locked, 0);
 	if (err) {
 		if (warning_ptr != (void (*) (char *, ...)) NULL) {
-			(*warning_ptr)(catgets(libmksdmsi18n_catd, 1, 147, "Couldn't write to %s"), nse_depinfo_file);
+			(*warning_ptr)(gettext("Couldn't write to %s"), nse_depinfo_file);
                       }
 		unlink(command_output_tmpfile);
 		return;
@@ -125,7 +124,7 @@ close_file(void)
 		if (is_path) {
 			if ((nse_depinfo_fp = 
 			     fopen(nse_depinfo_file, "w")) == NULL) {
-				fprintf(stderr, catgets(libmksdmsi18n_catd, 1, 148, "Cannot open `%s' for writing\n"),
+				fprintf(stderr, gettext("Cannot open `%s' for writing\n"),
 				    nse_depinfo_file);
 				unlink(command_output_tmpfile);
 
@@ -146,7 +145,7 @@ close_file(void)
 		return;
 	}
 	if ((merge_fp = fopen(merge_file, "w")) == NULL) {
-		fprintf(stderr, catgets(libmksdmsi18n_catd, 1, 149, "Cannot open %s for writing\n"), merge_file);
+		fprintf(stderr, gettext("Cannot open %s for writing\n"), merge_file);
 		if (file_locked) {
 			unlink(lock_file);
 		}
@@ -208,12 +207,12 @@ report_dep(char *iflag, char *filename)
 
 	if (command_output_fp == NULL) {
 		sprintf(command_output_tmpfile, 
-			NOCATGETS("%s/%s.%d.XXXXXX"), tmpdir, NSE_DEPINFO, getpid());
+			"%s/%s.%d.XXXXXX", tmpdir, NSE_DEPINFO, getpid());
 		int fd = mkstemp(command_output_tmpfile);
 		if ((fd < 0) || (command_output_fp = fdopen(fd, "w")) == NULL) {
 			return;
 		}
-		if ((search_dir = getenv(NOCATGETS("NSE_DEP"))) == NULL) {
+		if ((search_dir = getenv("NSE_DEP")) == NULL) {
 			return;
 		}
 		atexit(close_file);
@@ -257,7 +256,7 @@ report_search_path(char *iflag)
 	char		filename[MAXPATHLEN];
 	char		*p, *ptr;
 
-	if ((sdir = getenv(NOCATGETS("NSE_DEP"))) == NULL) {
+	if ((sdir = getenv("NSE_DEP")) == NULL) {
 		return;
 	}
 	if ((p= getenv(SUNPRO_DEPENDENCIES)) == NULL) {
@@ -267,7 +266,7 @@ report_search_path(char *iflag)
 	if( ! ptr ) {
 		return;
 	}
-	sprintf(filename, NOCATGETS("%s-CPP"), ptr+1);
+	sprintf(filename, "%s-CPP", ptr+1);
 	getcwd(curdir, sizeof(curdir));
 	if (strcmp(curdir, sdir) != 0 && strlen(iflag) > 2 && 
 	    iflag[2] != '/') {

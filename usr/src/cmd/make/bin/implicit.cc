@@ -35,6 +35,7 @@
 #include <mk/defs.h>
 #include <mksh/macro.h>		/* expand_value() */
 #include <mksh/misc.h>		/* retmem() */
+#include <libintl.h>
 
 /*
  * Defined macros
@@ -139,7 +140,7 @@ find_suffix_rule(Name target, Name target_body, Name target_suffix, Property *co
 				       target_prop)->body.target.target;
 	}
 	if (debug_level > 1) {
-		(void) printf(NOCATGETS("%*sfind_suffix_rule(%s,%s,%s)\n"),
+		(void) printf("%*sfind_suffix_rule(%s,%s,%s)\n",
 			      recursion_level,
 			      "",
 			      true_target->string_mb,
@@ -189,7 +190,7 @@ posix_attempts:
 			  (int) nul_char;
 			if (debug_level > 1) {
 				WCSTOMBS(mbs_buffer, sourcename);
-				(void) printf(catgets(catd, 1, 218, "%*sTrying %s\n"),
+				(void) printf(gettext("%*sTrying %s\n"),
 					      recursion_level,
 					      "",
 					      mbs_buffer);
@@ -239,13 +240,13 @@ posix_attempts:
 			          }
 				  /* copy everything including '/' */
 				  strncpy(tmpbuf, source->string_mb, p - source->string_mb + 1);
-				  strcat(tmpbuf, NOCATGETS("s."));
+				  strcat(tmpbuf, "s.");
 				  strcat(tmpbuf, p+1);
 				  retmem((wchar_t *) source->string_mb); 
 				  source->string_mb = tmpbuf;
 				
 			        } else {
-				  strcpy(tmpbuf, NOCATGETS("s."));
+				  strcpy(tmpbuf, "s.");
 				  strcat(tmpbuf, source->string_mb);
 				  retmem((wchar_t *) source->string_mb); 
 				  source->string_mb = tmpbuf;
@@ -349,7 +350,7 @@ posix_attempts:
 			
 			if (debug_level > 1) {
 				WCSTOMBS(mbs_buffer, sourcename);
-				(void) printf(catgets(catd, 1, 219, "%*sFound %s\n"),
+				(void) printf(gettext("%*sFound %s\n"),
 					      recursion_level,
 					      "",
 					      mbs_buffer);
@@ -369,7 +370,7 @@ posix_attempts:
 			}
 			if ((source->stat.time > (*command)->body.line.dependency_time) &&
 			    (debug_level > 1)) {
-				(void) printf(catgets(catd, 1, 220, "%*sDate(%s)=%s Date-dependencies(%s)=%s\n"),
+				(void) printf(gettext("%*sDate(%s)=%s Date-dependencies(%s)=%s\n"),
 					      recursion_level,
 					      "",
 					      source->string_mb,
@@ -400,7 +401,7 @@ posix_attempts:
 					line->body.line.is_out_of_date = true;
 				}
 				if (debug_level > 0) {
-					(void) printf(catgets(catd, 1, 221, "%*sBuilding %s using suffix rule for %s%s because it is out of date relative to %s\n"),
+					(void) printf(gettext("%*sBuilding %s using suffix rule for %s%s because it is out of date relative to %s\n"),
 						      recursion_level,
 						      "",
 						      true_target->string_mb,
@@ -436,7 +437,7 @@ posix_attempts:
 			  extern Name dollarless_value;
 
 			  if(tilde_rule) {
-			      MBSTOWCS(wcs_buffer, NOCATGETS(source->string_mb));
+			      MBSTOWCS(wcs_buffer, source->string_mb);
 			      dollarless_value = GETNAME(wcs_buffer,FIND_LENGTH);
 			  }
 			  else {
@@ -506,7 +507,7 @@ find_ar_suffix_rule(register Name target, Name true_target, Property *command, B
 	Wstring			suf_string;
 
 	if (dot_a == NULL) {
-		MBSTOWCS(wcs_buffer, NOCATGETS(".a"));
+		MBSTOWCS(wcs_buffer, ".a");
 		dot_a = GETNAME(wcs_buffer, FIND_LENGTH);
 	}
 	target_end = targ_string.get_string() + true_target->hash.length;
@@ -516,7 +517,7 @@ find_ar_suffix_rule(register Name target, Name true_target, Property *command, B
 	 * from .SUFFIXES.
 	 */
 	if (debug_level > 1) {
-		(void) printf(NOCATGETS("%*sfind_ar_suffix_rule(%s)\n"),
+		(void) printf("%*sfind_ar_suffix_rule(%s)\n",
 			      recursion_level,
 			      "",
 			      true_target->string_mb);
@@ -617,7 +618,7 @@ find_double_suffix_rule(register Name target, Property *command, Boolean recheck
 	 */
 	target_end = targ_string.get_string() + true_target->hash.length;
 	if (debug_level > 1) {
-		(void) printf(NOCATGETS("%*sfind_double_suffix_rule(%s)\n"),
+		(void) printf("%*sfind_double_suffix_rule(%s)\n",
 			      recursion_level,
 			      "",
 			      true_target->string_mb);
@@ -709,7 +710,7 @@ build_suffix_list(register Name target_suffix)
 		return;
 	}
 	if (debug_level > 1) {
-		(void) printf(NOCATGETS("%*sbuild_suffix_list(%s) "),
+		(void) printf("%*sbuild_suffix_list(%s) ",
 			      recursion_level,
 			      "",
 			      target_suffix->string_mb);
@@ -822,7 +823,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 				       long_member_name_prop)->body.long_member_name.member_name;
 	}
 	if (debug_level > 1) {
-		(void) printf(catgets(catd, 1, 222, "%*sLooking for %% rule for %s\n"),
+		(void) printf(gettext("%*sLooking for %% rule for %s\n"),
 			      recursion_level,
 			      "",
 			      true_target->string_mb);
@@ -903,7 +904,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 						result = build_ok;
 				} else {
 					if (debug_level > 1) {
-						(void) printf(catgets(catd, 1, 223, "%*sTrying %s\n"),
+						(void) printf(gettext("%*sTrying %s\n"),
 							      recursion_level,
 							      "",
 							      depe_to_check->string_mb);
@@ -993,7 +994,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 	}
 
 	if (debug_level > 1) {
-		(void) printf(catgets(catd, 1, 224, "%*sMatched %s:"),
+		(void) printf(gettext("%*sMatched %s:"),
 				      recursion_level,
 				      "",
 				      target->string_mb);
@@ -1019,7 +1020,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 			}
 		}
 
-		(void) printf(catgets(catd, 1, 225, " from: %s:"),
+		(void) printf(gettext(" from: %s:"),
 			      pat_rule->name->string_mb);
 
 		for (pat_depe = pat_rule->dependencies;
@@ -1069,7 +1070,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 
 			if ((depe->name->stat.time > line->body.line.dependency_time) &&
 			    (debug_level > 1)) {
-				(void) printf(catgets(catd, 1, 226, "%*sDate(%s)=%s Date-dependencies(%s)=%s\n"),
+				(void) printf(gettext("%*sDate(%s)=%s Date-dependencies(%s)=%s\n"),
 					      recursion_level,
 					      "",
 					      depe->name->string_mb,
@@ -1095,7 +1096,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 				add_target_to_chain(depe->name, &(line->body.line.query));
 
 				if (debug_level > 0) {
-					(void) printf(catgets(catd, 1, 227, "%*sBuilding %s using pattern rule %s:"),
+					(void) printf(gettext("%*sBuilding %s using pattern rule %s:"),
 						      recursion_level,
 						      "",
 						      true_target->string_mb,
@@ -1107,7 +1108,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 						(void) printf(" %s", pat_depe->name->string_mb);
 					}
 
-					(void) printf(catgets(catd, 1, 228, " because it is out of date relative to %s\n"), 
+					(void) printf(gettext(" because it is out of date relative to %s\n"), 
 						      depe->name->string_mb);
 				}	
 			}
@@ -1119,14 +1120,14 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 				line->body.line.is_out_of_date = true;
 			}
 			if (debug_level > 0) {
-				(void) printf(catgets(catd, 1, 229, "%*sBuilding %s using pattern rule %s: "),
+				(void) printf(gettext("%*sBuilding %s using pattern rule %s: "),
 					      recursion_level,
 					      "",
 					      true_target->string_mb,
 					      pat_rule->name->string_mb,
 					      (target->stat.time > file_doesnt_exist) ?
-					      catgets(catd, 1, 230, "because it is out of date") :
-					      catgets(catd, 1, 236, "because it does not exist"));
+					      gettext("because it is out of date") :
+					      gettext("because it does not exist"));
 			}
 		}
 	}

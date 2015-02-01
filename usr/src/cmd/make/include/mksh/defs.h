@@ -25,12 +25,10 @@
  * Use is subject to license terms.
  */
 
-#include <avo/intl.h>
 #include <limits.h>		/* MB_LEN_MAX */
 #include <stdio.h>
 #include <stdlib.h>		/* wchar_t */
 #include <string.h>		/* strcmp() */
-#include <nl_types.h>		/* catgets() */
 #include <sys/param.h>		/* MAXPATHLEN */
 #include <sys/types.h>		/* time_t, caddr_t */
 #include <vroot/vroot.h>	/* pathpt */
@@ -898,7 +896,6 @@ extern Name		vpath_name;
 extern Boolean		make_state_locked;
 extern Boolean		out_err_same;
 extern pid_t		childPid;
-extern nl_catd		libmksh_catd;
 
 /*
  * RFE 1257407: make does not use fine granularity time info available from stat.

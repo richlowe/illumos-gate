@@ -46,6 +46,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <libintl.h>
 
 
 
@@ -131,14 +132,14 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 		if (local_host[0] == '\0') {
 			(void) gethostname(local_host, MAXNAMELEN);
 		}
-		MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MAX_JOBS"));
+		MBSTOWCS(wcs_buffer, "DMAKE_MAX_JOBS");
 		dmake_name = GETNAME(wcs_buffer, FIND_LENGTH);
 		if (((prop = get_prop(dmake_name->prop, macro_prop)) != NULL) &&
 		    ((dmake_value = prop->body.macro.value) != NULL)) {
 			pmake_max_jobs = atoi(dmake_value->string_mb);
 			if (pmake_max_jobs <= 0) {
-				warning(catgets(catd, 1, 308, "DMAKE_MAX_JOBS cannot be less than or equal to zero."));
-				warning(catgets(catd, 1, 309, "setting DMAKE_MAX_JOBS to %d."), PMAKE_DEF_MAX_JOBS);
+				warning(gettext("DMAKE_MAX_JOBS cannot be less than or equal to zero."));
+				warning(gettext("setting DMAKE_MAX_JOBS to %d."), PMAKE_DEF_MAX_JOBS);
 				pmake_max_jobs = PMAKE_DEF_MAX_JOBS;
 			}
 		} else {
@@ -148,7 +149,7 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 			 * should parse the PMake startup file
 			 * $(HOME)/.make.machines to get the pmake_max_jobs.
 			 */
-			MBSTOWCS(wcs_buffer, NOCATGETS("PMAKE_MACHINESFILE"));
+			MBSTOWCS(wcs_buffer, "PMAKE_MACHINESFILE");
 			dmake_name = GETNAME(wcs_buffer, FIND_LENGTH);
 			if (((prop = get_prop(dmake_name->prop, macro_prop)) != NULL) &&
 			    ((dmake_value = prop->body.macro.value) != NULL)) {
@@ -322,9 +323,9 @@ m2_init() {
 	char	*var;
 	key_t	key;
 
-	if ((var = getenv(NOCATGETS("__DMAKE_M2_FILE__"))) == 0) {
+	if ((var = getenv("__DMAKE_M2_FILE__")) == 0) {
 		/* compose tmp file name */
-		sprintf(m2_file, NOCATGETS("%s/dmake.m2.%d.XXXXXX"), tmpdir, getpid());
+		sprintf(m2_file, "%s/dmake.m2.%d.XXXXXX", tmpdir, getpid());
 
 		/* create tmp file */
 		int fd = mkstemp(m2_file);
@@ -366,7 +367,7 @@ m2_init() {
 		}
 
 		/* put key to env */
-		sprintf(var, NOCATGETS("__DMAKE_M2_FILE__=%s"), m2_file);
+		sprintf(var, "__DMAKE_M2_FILE__=%s", m2_file);
 		if (putenv(var)) {
 			return -1;
 		}
@@ -481,10 +482,10 @@ job_adjust_error() {
 		job_adjust_fini();
 
 		/* warning message for the user */
-		warning(catgets(catd, 1, 339, "Encountered max jobs auto adjustment error - disabling auto adjustment."));
+		warning(gettext("Encountered max jobs auto adjustment error - disabling auto adjustment."));
 
 		/* switch off job adjustment for the children */
-		putenv(strdup(NOCATGETS("DMAKE_ADJUST_MAX_JOBS=NO")));
+		putenv(strdup("DMAKE_ADJUST_MAX_JOBS=NO"));
 
 		/* and for this dmake */
 		job_adjust_mode = ADJUST_NONE;
@@ -517,10 +518,10 @@ job_adjust_init() {
 		job_adjust_mode = ADJUST_M1;
 
 		/* determine adjust mode */
-		if (char *var = getenv(NOCATGETS("DMAKE_ADJUST_MAX_JOBS"))) {
-			if (strcasecmp(var, NOCATGETS("NO")) == 0) {
+		if (char *var = getenv("DMAKE_ADJUST_MAX_JOBS")) {
+			if (strcasecmp(var, "NO") == 0) {
 				job_adjust_mode = ADJUST_NONE;
-			} else if (strcasecmp(var, NOCATGETS("M2")) == 0) {
+			} else if (strcasecmp(var, "M2") == 0) {
 				job_adjust_mode = ADJUST_M2;
 			}
 		}
@@ -621,10 +622,10 @@ distribute_process(char **commands, Property line)
 		 * Print local_host --> x job(s).
 		 */
 		(void) fprintf(stdout,
-		               catgets(catd, 1, 325, "%s --> %d %s\n"),
+		               gettext("%s --> %d %s\n"),
 		               local_host,
 		               parallel_process_cnt + 1,
-		               (parallel_process_cnt == 0) ? catgets(catd, 1, 124, "job") : catgets(catd, 1, 125, "jobs"));
+		               (parallel_process_cnt == 0) ? gettext("job") : gettext("jobs"));
 
 		/* Print command line(s). */
 		tmp_index = 0;
@@ -645,7 +646,7 @@ distribute_process(char **commands, Property line)
 	}
 
 	(void) sprintf(mbstring,
-		        NOCATGETS("%s/dmake.stdout.%d.%d.XXXXXX"),
+		        "%s/dmake.stdout.%d.%d.XXXXXX",
 			tmpdir,
 		        getpid(),
 	                file_number++);
@@ -657,7 +658,7 @@ distribute_process(char **commands, Property line)
 
 	if (!out_err_same) {
 		(void) sprintf(mbstring,
-			        NOCATGETS("%s/dmake.stderr.%d.%d.XXXXXX"),
+			        "%s/dmake.stderr.%d.%d.XXXXXX",
 				tmpdir,
 			        getpid(),
 		                file_number++);
@@ -934,11 +935,11 @@ start_loop_3:
 	 */
 	if (quiescent) {
 		if (subtree_target == NULL) {
-			fatal(catgets(catd, 1, 126, "Internal error: deadlock detected in process_next"));
+			fatal(gettext("Internal error: deadlock detected in process_next"));
 		} else {
 			rp = *subtree_target;
 			if (debug_level > 0) {
-				warning(catgets(catd, 1, 127, "Conditional macro conflict encountered for %s between %s and %s"),
+				warning(gettext("Conditional macro conflict encountered for %s between %s and %s"),
 					subtree_conflict2->string_mb,
 					rp->target->string_mb,
 					subtree_conflict->string_mb);
@@ -1144,7 +1145,7 @@ await_parallel(Boolean waitflg)
 			;
 		}
 		if (rp == NULL) {
-			fatal(catgets(catd, 1, 128, "Internal error: returned child pid not in running_list"));
+			fatal(gettext("Internal error: returned child pid not in running_list"));
 		} else {
 			rp->state = (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? build_ok : build_failed;
 		}
@@ -1218,7 +1219,7 @@ bypass_for_loop_inc_4:
 			 */
 			if (rp->stdout_file != NULL) {
 				if (stat(rp->stdout_file, &out_buf) < 0) {
-					fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
+					fatal(gettext("stat of %s failed: %s"),
 					    rp->stdout_file,
 					    errmsg(errno));
 				}
@@ -1245,7 +1246,7 @@ bypass_for_loop_inc_4:
 
 			if (!out_err_same && (rp->stderr_file != NULL)) {
 				if (stat(rp->stderr_file, &out_buf) < 0) {
-					fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
+					fatal(gettext("stat of %s failed: %s"),
 					    rp->stderr_file,
 					    errmsg(errno));
 				}
@@ -1271,7 +1272,7 @@ bypass_for_loop_inc_4:
 				if (continue_after_error ||
 				    fatal_in_progress ||
 				    !docheck) {
-					warning(catgets(catd, 1, 256, "Command failed for target `%s'"),
+					warning(gettext("Command failed for target `%s'"),
 						rp->command ? line2->body.line.target->string_mb : rp->target->string_mb);
 					build_failed_seen = true;
 				} else {
@@ -1280,10 +1281,10 @@ bypass_for_loop_inc_4:
 					 * but shouldn't call fatal().
 					 */
 #ifdef PRINT_EXIT_STATUS
-					warning(NOCATGETS("I'm in finish_children. rp->state == build_failed."));
+					warning("I'm in finish_children. rp->state == build_failed.");
 #endif
 
-					fatal(catgets(catd, 1, 258, "Command failed for target `%s'"),
+					fatal(gettext("Command failed for target `%s'"),
 						rp->command ? line2->body.line.target->string_mb : rp->target->string_mb);
 				}
 			}
@@ -1331,15 +1332,15 @@ dump_out_file(char *filename, Boolean err)
 	int		out_fd = (err ? 2 : 1);
 
 	if ((fd = open(filename, O_RDONLY)) < 0) {
-		fatal(catgets(catd, 1, 141, "open failed for output file %s: %s"),
+		fatal(gettext("open failed for output file %s: %s"),
 		      filename,
 		      errmsg(errno));
 	}
 	if (!silent && output_mode != txt2_mode) {
 		(void) fprintf(err ? stderr : stdout,
 		               err ?
-				catgets(catd, 1, 338, "%s --> Job errors\n") :
-				catgets(catd, 1, 259, "%s --> Job output\n"),
+				gettext("%s --> Job errors\n") :
+				gettext("%s --> Job output\n"),
 		               local_host);
 		(void) fflush(err ? stderr : stdout);
 	}
@@ -1350,7 +1351,7 @@ dump_out_file(char *filename, Boolean err)
 		 * Read buffers from the source file until end or error.
 		 */
 		if (write(out_fd, copybuf, chars_read) < 0) {
-			fatal(catgets(catd, 1, 260, "write failed for output file %s: %s"),
+			fatal(gettext("write failed for output file %s: %s"),
 			      filename,
 			      errmsg(errno));
 		}
@@ -1384,9 +1385,9 @@ finish_doname(Running rp)
 	recursion_level = rp->recursion_level;
 	if (result == build_ok) {
 		if (true_target == NULL) {
-			(void) printf(NOCATGETS("Target = %s\n"), target->string_mb);
-			(void) printf(NOCATGETS(" State = %d\n"), result);
-			fatal(NOCATGETS("Internal error: NULL true_target in finish_doname"));
+			(void) printf("Target = %s\n", target->string_mb);
+			(void) printf(" State = %d\n", result);
+			fatal("Internal error: NULL true_target in finish_doname");
 		}
 		/* If all went OK, set a nice timestamp */
 		if (true_target->stat.time == file_doesnt_exist) {
@@ -1416,7 +1417,7 @@ finish_doname(Running rp)
 							    auto_count,
 							    automatics)) {
 		if (debug_level > 0) {
-			(void) printf(catgets(catd, 1, 261, "%*sTarget `%s' acquired new dependencies from build, checking all dependencies\n"),
+			(void) printf(gettext("%*sTarget `%s' acquired new dependencies from build, checking all dependencies\n"),
 				      recursion_level,
 				      "",
 				      true_target->string_mb);
@@ -1784,7 +1785,7 @@ run_rule_commands(char *host, char **commands)
 	childPid = fork();
 	switch (childPid) {
 	case -1:	/* Error */
-		fatal(catgets(catd, 1, 337, "Could not fork child process for dmake job: %s"),
+		fatal(gettext("Could not fork child process for dmake job: %s"),
 		      errmsg(errno));
 		break;
 	case 0:		/* Child */
@@ -1837,7 +1838,7 @@ run_rule_commands(char *host, char **commands)
 			               (Name) NULL);
 			if (result == build_failed) {
 				if (silent_flag) {
-					(void) printf(catgets(catd, 1, 152, "The following command caused the error:\n%s\n"), command->string_mb);
+					(void) printf(gettext("The following command caused the error:\n%s\n"), command->string_mb);
 				}
 				if (!ignore) {
 					_exit(1);

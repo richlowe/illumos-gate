@@ -25,6 +25,8 @@ lint	:=	TARGET = lint
 
 all clean clobber lint install: $(SUBDIRS)
 
+_msg:
+
 $(SUBDIRS):	FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 

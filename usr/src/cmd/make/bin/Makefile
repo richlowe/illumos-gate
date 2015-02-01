@@ -12,6 +12,7 @@
 # Copyright 2015, Richard Lowe.
 
 PROG=	make
+POFILE=	make.po
 OBJS=	ar.o		\
 	depvar.o	\
 	doname.o	\
@@ -29,11 +30,12 @@ OBJS=	ar.o		\
 	read2.o		\
 	rep.o		\
 	state.o
+POFILES= $(OBJS:%.o=%.po)
 
 include ../../Makefile.cmd
 include ../Makefile.com
 
-LDLIBS += ../lib/mksh/libmksh.a ../lib/mksdmsi18n/libmksdmsi18n.a ../lib/vroot/libvroot.a
+LDLIBS += ../lib/mksh/libmksh.a ../lib/vroot/libvroot.a
 LDLIBS += ../lib/bsd/libbsd.a -lc -lnsl -lumem
 
 CPPFLAGS += -D_FILE_OFFSET_BITS=64

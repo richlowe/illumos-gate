@@ -288,7 +288,6 @@ extern	Name		wait_name;
 extern	wchar_t		wcs_buffer2[];
 extern	wchar_t		*wcs_ptr;
 extern	wchar_t		*wcs_ptr2;
-extern	nl_catd		catd;
 extern	long int	hostid;
 
 /*
