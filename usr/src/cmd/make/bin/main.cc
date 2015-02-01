@@ -42,15 +42,6 @@
 #	include <avo/cleanup.h>
 #endif
 
-#if defined(TEAMWARE_MAKE_CMN)
-/* This is for dmake only (not for Solaris make).
- * Include code to check updates (dmake patches)
- */
-#ifdef _CHECK_UPDATE_H
-#include <libAU.h>
-#endif
-#endif
-
 #include <bsd/bsd.h>		/* bsd_signal() */
 
 #ifdef DISTRIBUTED
