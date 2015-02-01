@@ -292,7 +292,6 @@ set_dmake_env_vars()
 	Name		dmake_value;
 	Property	prop;
 
-#ifdef REDIRECT_ERR
 	/* Set __DMAKE_REDIRECT_STDERR */
 	length = 2 + strlen(NOCATGETS("__DMAKE_REDIRECT_STDERR")) + 1;
 	env = getmem(length);
@@ -301,7 +300,6 @@ set_dmake_env_vars()
 	               NOCATGETS("__DMAKE_REDIRECT_STDERR"),
 	               out_err_same ? NOCATGETS("0") : NOCATGETS("1"));
 	(void) putenv(env);
-#endif
 
 	/* Set DMAKE_PWD to the current working directory */
 	current_path = get_current_path();

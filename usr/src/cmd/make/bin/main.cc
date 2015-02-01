@@ -581,7 +581,7 @@ main(int argc, char *argv[])
 	parallel_flag = false;
 #endif
 
-#if defined (TEAMWARE_MAKE_CMN) && defined(REDIRECT_ERR)
+#if defined (TEAMWARE_MAKE_CMN)
 	/*
 	 * Check whether stdout and stderr are physically same.
 	 * This is in order to decide whether we need to redirect
