@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 #include <rpc/rpc.h>		/* host2netname(), netname2host() */
+#include <libintl.h>
 
 /*
  * Defined macros
@@ -98,16 +99,16 @@ read_make_machines(Name make_machines_name)
 	struct utsname		uts_info;
 
 
-	MBSTOWCS(wcs_buffer, NOCATGETS("MAKE_MACHINES"));
+	MBSTOWCS(wcs_buffer, "MAKE_MACHINES");
 	MAKE_MACHINES = GETNAME(wcs_buffer, FIND_LENGTH);
 	/* Did the user specify a .make.machines file on the command line? */
 	default_make_machines = false;
 	if (make_machines_name == NULL) {
 		/* Try reading the default .make.machines file, in $(HOME). */
-		homedir = getenv(NOCATGETS("HOME"));
+		homedir = getenv("HOME");
 		if ((homedir != NULL) && (strlen(homedir) < (sizeof(mb_make_machines_path) - 16))) {
 			sprintf(mb_make_machines_path,
-			 NOCATGETS("%s/.make.machines"), homedir);
+			 "%s/.make.machines", homedir);
 			MBSTOWCS(make_machines_path, mb_make_machines_path);
 			make_machines_name = GETNAME(make_machines_path, FIND_LENGTH);
 			default_make_machines = true;
@@ -127,7 +128,7 @@ read_make_machines(Name make_machines_name)
 	if ((make_machines_file = fopen(make_machines_name->string_mb, "r")) == NULL) {
 		if (!default_make_machines) {
 			/* Error opening .make.machines file. */
-			fatal(catgets(catd, 1, 314, "Open of %s failed: %s"),
+			fatal(gettext("Open of %s failed: %s"),
 			      make_machines_name->string_mb,
 			      errmsg(errno));
 		} else {
@@ -140,7 +141,7 @@ read_make_machines(Name make_machines_name)
 	/* Stat the .make.machines file to get the size of the file.  */
 	} else if (fstat(fileno(make_machines_file), &make_machines_buf) < 0) {
 		/* Error stat'ing .make.machines file. */
-		fatal(catgets(catd, 1, 315, "Stat of %s failed: %s"),
+		fatal(gettext("Stat of %s failed: %s"),
 		      make_machines_name->string_mb,
 		      errmsg(errno));
 	} else {
@@ -161,7 +162,7 @@ read_make_machines(Name make_machines_name)
 			 * Error reading .make.machines file.
 			 * Return 0 for PMake max jobs.
 			 */
-			warning(catgets(catd, 1, 316, "Unable to read %s"),
+			warning(gettext("Unable to read %s"),
 				make_machines_name->string_mb);
 			(void) fclose(make_machines_file);
 			retmem_mb((caddr_t) make_machines_list_mb);
@@ -174,7 +175,7 @@ read_make_machines(Name make_machines_name)
 			  1 +
 			  make_machines_buf.st_size) = (int) nul_char;
 			if (putenv(make_machines_list_mb) != 0) {
-				warning(catgets(catd, 1, 317, "Couldn't put contents of %s in environment"),
+				warning(gettext("Couldn't put contents of %s in environment"),
 					make_machines_name->string_mb);
 			} else {
 				make_machines_list_mb += strlen(MAKE_MACHINES->string_mb) + 1;
@@ -238,7 +239,7 @@ read_make_machines(Name make_machines_name)
 			 */
 			if ((wslen(mp) > MAX_HOSTNAMELEN) ||
 			    ((hp = gethostbyname(mbs_buffer)) == NULL)) {
-				warning(catgets(catd, 1, 318, "Ignoring unknown host %s"),
+				warning(gettext("Ignoring unknown host %s"),
 					mbs_buffer);
 				SKIPTOEND(ms);
 				/* Increment ptr if not end of file. */
@@ -274,7 +275,7 @@ read_make_machines(Name make_machines_name)
 				/* If we get here, local_host is in .make.machines. */
 				if (c != '\n')  {
 					/* Now look for keyword 'max'. */
-					MBSTOWCS(wcs_buffer, NOCATGETS("max"));
+					MBSTOWCS(wcs_buffer, "max");
 					SKIPSPACE(ms);
 					while ((*ms != '\n') && (*ms)) {
 						if (*ms == '#') {
@@ -285,7 +286,7 @@ read_make_machines(Name make_machines_name)
 							pmake_max_jobs = get_max(&ms, mp); 
 							SKIPSPACE(ms);
 						} else {
-							warning(catgets(catd, 1, 322, "unknown option for host %s"), mbs_buffer);
+							warning(gettext("unknown option for host %s"), mbs_buffer);
 							SKIPTOEND(ms);
 							break;
 						}
@@ -393,7 +394,7 @@ get_max(wchar_t **ms_address, wchar_t *hostname)
 	SKIPSPACE(ms);
 	if ((!*ms) || (*ms == '\n') || (*ms != '=')) {
 		SKIPTOEND(ms);
-		warning(catgets(catd, 1, 319, "expected `=' after max, ignoring rest of line for host %s"),
+		warning(gettext("expected `=' after max, ignoring rest of line for host %s"),
 			mbs_buffer);
 		*ms_address = ms;
 		return((int) limit);
@@ -405,11 +406,11 @@ get_max(wchar_t **ms_address, wchar_t *hostname)
 			limit = (int) wcstol(ms, &ms, 10);
 			if (limit < 1) {
 				limit = PMAKE_DEF_MAX_JOBS;
-				warning(catgets(catd, 1, 320, "max value cannot be less than or equal to zero for host %s"), mbs_buffer);
+				warning(gettext("max value cannot be less than or equal to zero for host %s"), mbs_buffer);
 			}
 		} else {
 			/* No "max" value after "max=". */
-			warning(catgets(catd, 1, 321, "no max value specified for host %s"), mbs_buffer);
+			warning(gettext("no max value specified for host %s"), mbs_buffer);
 		}
 		*ms_address = ms;
 		return(limit);

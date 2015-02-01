@@ -145,9 +145,9 @@ write_state_file(int, Boolean exiting)
 		return;
 	}
 	/* Lock the file for writing. */
- 	make_state_lockfile = getmem(strlen(make_state->string_mb) + strlen(NOCATGETS(".lock")) + 1);
+ 	make_state_lockfile = getmem(strlen(make_state->string_mb) + strlen(".lock") + 1);
  	(void) sprintf(make_state_lockfile,
- 	               NOCATGETS("%s.lock"),
+ 	               "%s.lock",
  	               make_state->string_mb);
 	if (lock_err = file_lock(make_state->string_mb, 
 				 make_state_lockfile, 
@@ -162,25 +162,25 @@ write_state_file(int, Boolean exiting)
 		 */
 		
 		if (exiting) {
-			(void) sprintf(buffer, NOCATGETS("%s/.make.state.%d.XXXXXX"), tmpdir, getpid());
+			(void) sprintf(buffer, "%s/.make.state.%d.XXXXXX", tmpdir, getpid());
 			report_pwd = true;
-			warning(catgets(catd, 1, 60, "Writing to %s"), buffer);
+			warning(gettext("Writing to %s"), buffer);
 			int fdes = mkstemp(buffer);
 			if ((fdes < 0) || (fd = fdopen(fdes, "w")) == NULL) {
 				fprintf(stderr,
-					catgets(catd, 1, 61, "Could not open statefile `%s': %s"),
+					gettext("Could not open statefile `%s': %s"),
 					buffer,
 					errmsg(errno));
 				return;
 			}
 		} else {
 			report_pwd = true;
-			fatal(catgets(catd, 1, 62, "Can't lock .make.state"));
+			fatal(gettext("Can't lock .make.state"));
 		}
 	}
 
 	(void) sprintf(make_state_tempfile,
-	               NOCATGETS("%s.tmp"),
+	               "%s.tmp",
 	               make_state->string_mb);
 	/* Delete old temporary statefile (in case it exists) */
 	(void) unlink(make_state_tempfile);
@@ -190,7 +190,7 @@ write_state_file(int, Boolean exiting)
  		retmem_mb(make_state_lockfile);
 		make_state_lockfile = NULL;
 		make_state_locked = false;
-		fatal(catgets(catd, 1, 59, "Could not open temporary statefile `%s': %s"),
+		fatal(gettext("Could not open temporary statefile `%s': %s"),
 		      make_state_tempfile,
 		      errmsg(lock_err));
 	}
@@ -208,17 +208,17 @@ write_state_file(int, Boolean exiting)
 				make_state_lockfile = NULL;
 				make_state_locked = false;
 			}
-			fatal(catgets(catd, 1, 63, "Giving up on writing statefile"));
+			fatal(gettext("Giving up on writing statefile"));
 		}
 		sleep(10);
-		(void) sprintf(buffer, NOCATGETS("%s/.make.state.%d.XXXXXX"), tmpdir, getpid());
+		(void) sprintf(buffer, "%s/.make.state.%d.XXXXXX", tmpdir, getpid());
 		int fdes = mkstemp(buffer);
 		if ((fdes < 0) || (fd = fdopen(fdes, "w")) == NULL) {
-			fatal(catgets(catd, 1, 64, "Could not open statefile `%s': %s"),
+			fatal(gettext("Could not open statefile `%s': %s"),
 			      buffer,
 			      errmsg(errno));
 		}
-		warning(catgets(catd, 1, 65, "Initial write of statefile failed. Trying again on %s"),
+		warning(gettext("Initial write of statefile failed. Trying again on %s"),
 			buffer);
 	}
 
@@ -365,7 +365,7 @@ write_state_file(int, Boolean exiting)
 	 		retmem_mb(make_state_lockfile);
 			make_state_lockfile = NULL;
 			make_state_locked = false;
-			fatal(catgets(catd, 1, 356, "Could not delete old statefile `%s': %s"),
+			fatal(gettext("Could not delete old statefile `%s': %s"),
 			      make_state->string_mb,
 			      errmsg(lock_err));
 		}
@@ -377,7 +377,7 @@ write_state_file(int, Boolean exiting)
 	 		retmem_mb(make_state_lockfile);
 			make_state_lockfile = NULL;
 			make_state_locked = false;
-			fatal(catgets(catd, 1, 357, "Could not rename `%s' to `%s': %s"),
+			fatal(gettext("Could not rename `%s' to `%s': %s"),
 			      make_state_tempfile,
 			      make_state->string_mb,
 			      errmsg(lock_err));

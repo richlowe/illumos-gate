@@ -159,8 +159,8 @@
 	Name		suffixes_name;
 	Name		sunpro_dependencies;
         Boolean		target_variants;
-	const char	*tmpdir = NOCATGETS("/tmp");
-	const char	*temp_file_directory = NOCATGETS(".");
+	const char	*tmpdir = "/tmp";
+	const char	*temp_file_directory = ".";
 	Name		temp_file_name;
 	short		temp_file_number;
 	time_t		timing_start;
@@ -173,7 +173,6 @@
 	wchar_t		wcs_buffer2[MAXPATHLEN];
 	wchar_t		*wcs_ptr;
 	wchar_t		*wcs_ptr2;
-	nl_catd		catd;
 	long int	hostid;
 
 /*

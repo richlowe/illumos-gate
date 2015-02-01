@@ -24,6 +24,9 @@ OBJECTS =	dosys.o \
 include $(SRC)/lib/Makefile.lib
 include ../../Makefile.com
 
+POFILE = libmksh.po
+POFILES = $(OBJECTS:%.o=%.po)
+
 LIBS = $(LIBRARY)
 SRCDIR = ../
 MAPFILES=
@@ -34,5 +37,12 @@ all: $(LIBS)
 install: all
 
 lint:
+
+$(POFILE): $(POFILES)
+	$(CAT) $(POFILES) > $@
+
+_msg: $(MSGDOMAIN) $(POFILE)
+	$(RM) $(MSGDOMAIN)/$(POFILE)
+	$(CP) $(POFILE) $(MSGDOMAIN)
 
 include $(SRC)/lib/Makefile.targ

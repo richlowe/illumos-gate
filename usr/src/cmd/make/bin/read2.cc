@@ -37,6 +37,7 @@
 #include <mksh/macro.h>		/* expand_value() */
 #include <mksh/misc.h>		/* retmem() */
 #include <stdarg.h>		/* va_list, va_start(), va_end() */
+#include <libintl.h>
 
 /*
  * Defined macros
@@ -671,7 +672,7 @@ enter_dependencies(register Name target, Chain target_group, register Name_vecto
 			target->colons = separator;
 		} else {
 			if (target->colons != separator) {
-				fatal_reader(catgets(catd, 1, 92, ":/:: conflict for target `%s'"),
+				fatal_reader(gettext(":/:: conflict for target `%s'"),
 					     target->string_mb);
 			}
 		}
@@ -805,13 +806,13 @@ enter_dependencies(register Name target, Chain target_group, register Name_vecto
 		}
 		break;
 	default:
-		fatal_reader(catgets(catd, 1, 93, "Internal error. Unknown makefile type %d"),
+		fatal_reader(gettext("Internal error. Unknown makefile type %d"),
 			     makefile_type);
 	}
 	/* A target may only be involved in one target group */
 	if (line->body.line.target_group != NULL) {
 		if (target_group != NULL) {
-			fatal_reader(catgets(catd, 1, 94, "Too many target groups for target `%s'"),
+			fatal_reader(gettext("Too many target groups for target `%s'"),
 				     target->string_mb);
 		}
 	} else {
@@ -1078,7 +1079,7 @@ enter_dyntarget(register Name target)
 	*insert = result;
 
 	if (trace_reader) {
-		(void) printf(NOCATGETS("Dynamic target %s:\n"), result->name->string_mb);
+		(void) printf("Dynamic target %s:\n", result->name->string_mb);
 	}
 	return( result);
 }
@@ -1133,7 +1134,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case svr4_special:
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 98, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		svr4  = true;
@@ -1150,7 +1151,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 		if(svr4)
 		  break;
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 99, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		posix  = true;
@@ -1159,7 +1160,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 			/* turn keep state off being SunPro make specific */
 		keep_state = false;
 		/* Use /usr/xpg4/bin/sh on Solaris */
-		MBSTOWCS(wcs_buffer, NOCATGETS("/usr/xpg4/bin/sh"));
+		MBSTOWCS(wcs_buffer, "/usr/xpg4/bin/sh");
 		(void) SETVAR(shell_name, GETNAME(wcs_buffer, FIND_LENGTH), false);
 		if (trace_reader) {
 			(void) printf("%s:\n", posix_name->string_mb);
@@ -1172,7 +1173,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case default_special:
 		if (depes->used != 0) {
-			warning(catgets(catd, 1, 100, "Illegal dependency list for target `%s'"),
+			warning(gettext("Illegal dependency list for target `%s'"),
 				target->string_mb);
 		}
 		default_rule = command;
@@ -1186,7 +1187,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case ignore_special:
 		if ((depes->used != 0) &&(!posix)){
-			fatal_reader(catgets(catd, 1, 101, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		if (depes->used == 0)
@@ -1214,7 +1215,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 		if(posix)
 		  break;
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 102, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		keep_state = true;
@@ -1234,7 +1235,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 			*/
 		keep_state = true;
 		if (depes->used != 0) {
-		   if((!make_state) ||(!strcmp(make_state->string_mb,NOCATGETS(".make.state")))) {
+		   if((!make_state) ||(!strcmp(make_state->string_mb,".make.state"))) {
 		     make_state = depes->names[0];
 		   }
 		}
@@ -1243,7 +1244,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 		if(svr4)
 		  break;
 		if (depes->used != 1) {
-			fatal_reader(catgets(catd, 1, 103, "Illegal dependency list for target `%s'"),
+			fatal_reader(gettext("Illegal dependency list for target `%s'"),
 				     target->string_mb);
 		}
 		if (depes->names[0] != current_make_version) {
@@ -1252,16 +1253,16 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 			 * are identical.
 			 */
 			if (!IS_EQUAL(depes->names[0]->string_mb,
-				      NOCATGETS("VERSION-1.1")) ||
+				      "VERSION-1.1") ||
 			    !IS_EQUAL(current_make_version->string_mb,
-				      NOCATGETS("VERSION-1.0"))) {
+				      "VERSION-1.0")) {
 				/*
 				 * Version mismatches should cause the
 				 * .make.state file to be skipped.
 				 * This is currently not true - it is read
 				 * anyway.
 				 */
-				warning(catgets(catd, 1, 104, "Version mismatch between current version `%s' and `%s'"),
+				warning(gettext("Version mismatch between current version `%s' and `%s'"),
 					current_make_version->string_mb,
 					depes->names[0]->string_mb);
 			}
@@ -1365,7 +1366,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case sccs_get_special:
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 105, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		sccs_get_rule = command;
@@ -1378,7 +1379,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case sccs_get_posix_special:
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 106, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		sccs_get_posix_rule = command;
@@ -1390,7 +1391,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case get_posix_special:
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 107, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		get_posix_rule = command;
@@ -1405,7 +1406,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 		  break;
 		}
 		if (depes->used != 0) {
-			fatal_reader(catgets(catd, 1, 108, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		get_rule = command;
@@ -1418,7 +1419,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	case silent_special:
 		if ((depes->used != 0) && (!posix)){
-			fatal_reader(catgets(catd, 1, 109, "Illegal dependencies for target `%s'"),
+			fatal_reader(gettext("Illegal dependencies for target `%s'"),
 				     target->string_mb);
 		}
 		if (depes->used == 0)
@@ -1445,7 +1446,7 @@ special_reader(Name target, register Name_vector depes, Cmd_line command)
 
 	default:
 
-		fatal_reader(catgets(catd, 1, 110, "Internal error: Unknown special reader"));
+		fatal_reader(gettext("Internal error: Unknown special reader"));
 	}
 }
 
@@ -1753,11 +1754,11 @@ enter_equal(Name name, Name value, register Boolean append)
 	if (string[0]=='F' &&
 	    string[1]=='C' &&
 	    string[2]=='\0') {
-		MBSTOWCS(wcs_buffer, NOCATGETS("F77"));
+		MBSTOWCS(wcs_buffer, "F77");
 		temp = GETNAME(wcs_buffer, FIND_LENGTH);
 		(void) SETVAR(temp, value, append);
 /*
-		fprintf(stderr, catgets(catd, 1, 111, "warning: FC is obsolete, use F77 instead\n"));
+		fprintf(stderr, gettext("warning: FC is obsolete, use F77 instead\n"));
  */
 	}
 
@@ -1799,8 +1800,8 @@ sh_transform(Name *name, Name *value)
 	static wchar_t	colon_shell[7];
 
 	if (colon_sh[0] == (int) nul_char) {
-		MBSTOWCS(colon_sh, NOCATGETS(":sh"));
-		MBSTOWCS(colon_shell, NOCATGETS(":shell"));
+		MBSTOWCS(colon_sh, ":sh");
+		MBSTOWCS(colon_shell, ":shell");
 	}
 	Wstring nms((*name));
 	wchar_t * wcb = nms.get_string();
@@ -1857,7 +1858,7 @@ fatal_reader(char * pattern, ...)
 		WCSTOMBS(mbs_buffer, file_being_read);
 		if (line_number != 0) {
 			(void) sprintf(message,
-				       catgets(catd, 1, 112, "%s, line %d: %s"),
+				       gettext("%s, line %d: %s"),
 				       mbs_buffer,
 				       line_number,
 				       pattern);
@@ -1871,21 +1872,21 @@ fatal_reader(char * pattern, ...)
 	}
 
 	(void) fflush(stdout);
-	(void) fprintf(stderr, catgets(catd, 1, 238, "make: Fatal error in reader: "));
+	(void) fprintf(stderr, gettext("make: Fatal error in reader: "));
 	(void) vfprintf(stderr, pattern, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
 
 	if (temp_file_name != NULL) {
 		(void) fprintf(stderr,
-			       catgets(catd, 1, 239, "make: Temp-file %s not removed\n"),
+			       gettext("make: Temp-file %s not removed\n"),
 			       temp_file_name->string_mb);
 		temp_file_name = NULL;
 	}
 
 	if (report_pwd) {
 		(void) fprintf(stderr,
-			       catgets(catd, 1, 115, "Current working directory %s\n"),
+			       gettext("Current working directory %s\n"),
 			       get_current_path());
 	}
 	(void) fflush(stderr);

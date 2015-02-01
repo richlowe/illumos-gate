@@ -45,6 +45,7 @@
 #include <mksh/misc.h>		/* enable_interrupt() */
 #include <stdarg.h>		/* va_list, va_start(), va_end() */
 #include <vroot/report.h>	/* SUNPRO_DEPENDENCIES */
+#include <libintl.h>
 
 
 #define MAXJOBS_ADJUST_RFE4694000
@@ -141,13 +142,13 @@ fatal(const char *message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-	(void) fprintf(stderr, catgets(catd, 1, 263, "make: Fatal error: "));
+	(void) fprintf(stderr, gettext("make: Fatal error: "));
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
 	if (report_pwd) {
 		(void) fprintf(stderr,
-			       catgets(catd, 1, 156, "Current working directory %s\n"),
+			       gettext("Current working directory %s\n"),
 			       get_current_path());
 	}
 	(void) fflush(stderr);
@@ -160,10 +161,10 @@ fatal(const char *message, ...)
 	if ((dmake_mode_type == parallel_mode) &&
 	    (parallel_process_cnt > 0)) {
 		(void) fprintf(stderr,
-			       catgets(catd, 1, 157, "Waiting for %d %s to finish\n"),
+			       gettext("Waiting for %d %s to finish\n"),
 			       parallel_process_cnt,
 			       parallel_process_cnt == 1 ?
-			       catgets(catd, 1, 158, "job") : catgets(catd, 1, 159, "jobs"));
+			       gettext("job") : gettext("jobs"));
 		(void) fflush(stderr);
 	}
 
@@ -200,13 +201,13 @@ warning(char * message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-	(void) fprintf(stderr, catgets(catd, 1, 265, "make: Warning: "));
+	(void) fprintf(stderr, gettext("make: Warning: "));
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
 	if (report_pwd) {
 		(void) fprintf(stderr,
-			       catgets(catd, 1, 161, "Current working directory %s\n"),
+			       gettext("Current working directory %s\n"),
 			       get_current_path());
 	}
 	(void) fflush(stderr);
@@ -233,13 +234,13 @@ time_to_string(const timestruc_t &time)
 	char			buf[128];
 
         if (time == file_doesnt_exist) {
-                return catgets(catd, 1, 163, "File does not exist");
+                return gettext("File does not exist");
         }
         if (time == file_max_time) {
-                return catgets(catd, 1, 164, "Younger than any file");
+                return gettext("Younger than any file");
         }
 	tm = localtime(&time.tv_sec);
-	strftime(buf, sizeof (buf), NOCATGETS("%c %Z"), tm);
+	strftime(buf, sizeof (buf), "%c %Z", tm);
         buf[127] = (int) nul_char;
         return strdup(buf);
 }
@@ -558,11 +559,11 @@ load_cached_names(void)
 	Name		dollar;
 
 	/* Load the cached_names struct */
-	MBSTOWCS(wcs_buffer, NOCATGETS(".BUILT_LAST_MAKE_RUN"));
+	MBSTOWCS(wcs_buffer, ".BUILT_LAST_MAKE_RUN");
 	built_last_make_run = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("@"));
+	MBSTOWCS(wcs_buffer, "@");
 	c_at = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(" *conditionals* "));
+	MBSTOWCS(wcs_buffer, " *conditionals* ");
 	conditionals = GETNAME(wcs_buffer, FIND_LENGTH);
 	/*
 	 * A version of make was released with NSE 1.0 that used
@@ -571,87 +572,87 @@ load_cached_names(void)
 	 * situation.  If the version number is changed from 1.0
 	 * it should go to 1.2.
 	 */
-	MBSTOWCS(wcs_buffer, NOCATGETS("VERSION-1.0"));
+	MBSTOWCS(wcs_buffer, "VERSION-1.0");
 	current_make_version = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".SVR4"));
+	MBSTOWCS(wcs_buffer, ".SVR4");
 	svr4_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".POSIX"));
+	MBSTOWCS(wcs_buffer, ".POSIX");
 	posix_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".DEFAULT"));
+	MBSTOWCS(wcs_buffer, ".DEFAULT");
 	default_rule_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("$"));
+	MBSTOWCS(wcs_buffer, "$");
 	dollar = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".DONE"));
+	MBSTOWCS(wcs_buffer, ".DONE");
 	done = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("."));
+	MBSTOWCS(wcs_buffer, ".");
 	dot = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".KEEP_STATE"));
+	MBSTOWCS(wcs_buffer, ".KEEP_STATE");
 	dot_keep_state = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".KEEP_STATE_FILE"));
+	MBSTOWCS(wcs_buffer, ".KEEP_STATE_FILE");
 	dot_keep_state_file = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(""));
+	MBSTOWCS(wcs_buffer, "");
 	empty_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(" FORCE"));
+	MBSTOWCS(wcs_buffer, " FORCE");
 	force = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("HOST_ARCH"));
+	MBSTOWCS(wcs_buffer, "HOST_ARCH");
 	host_arch = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("HOST_MACH"));
+	MBSTOWCS(wcs_buffer, "HOST_MACH");
 	host_mach = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".IGNORE"));
+	MBSTOWCS(wcs_buffer, ".IGNORE");
 	ignore_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".INIT"));
+	MBSTOWCS(wcs_buffer, ".INIT");
 	init = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".LOCAL"));
+	MBSTOWCS(wcs_buffer, ".LOCAL");
 	localhost_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".make.state"));
+	MBSTOWCS(wcs_buffer, ".make.state");
 	make_state = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("MAKEFLAGS"));
+	MBSTOWCS(wcs_buffer, "MAKEFLAGS");
 	makeflags = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".MAKE_VERSION"));
+	MBSTOWCS(wcs_buffer, ".MAKE_VERSION");
 	make_version = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".NO_PARALLEL"));
+	MBSTOWCS(wcs_buffer, ".NO_PARALLEL");
 	no_parallel_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".NOT_AUTO"));
+	MBSTOWCS(wcs_buffer, ".NOT_AUTO");
 	not_auto = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".PARALLEL"));
+	MBSTOWCS(wcs_buffer, ".PARALLEL");
 	parallel_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("PATH"));
+	MBSTOWCS(wcs_buffer, "PATH");
 	path_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("+"));
+	MBSTOWCS(wcs_buffer, "+");
 	plus = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".PRECIOUS"));
+	MBSTOWCS(wcs_buffer, ".PRECIOUS");
 	precious = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("?"));
+	MBSTOWCS(wcs_buffer, "?");
 	query = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("^"));
+	MBSTOWCS(wcs_buffer, "^");
 	hat = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".RECURSIVE"));
+	MBSTOWCS(wcs_buffer, ".RECURSIVE");
 	recursive_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".SCCS_GET"));
+	MBSTOWCS(wcs_buffer, ".SCCS_GET");
 	sccs_get_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".SCCS_GET_POSIX"));
+	MBSTOWCS(wcs_buffer, ".SCCS_GET_POSIX");
 	sccs_get_posix_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".GET"));
+	MBSTOWCS(wcs_buffer, ".GET");
 	get_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".GET_POSIX"));
+	MBSTOWCS(wcs_buffer, ".GET_POSIX");
 	get_posix_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("SHELL"));
+	MBSTOWCS(wcs_buffer, "SHELL");
 	shell_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".SILENT"));
+	MBSTOWCS(wcs_buffer, ".SILENT");
 	silent_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".SUFFIXES"));
+	MBSTOWCS(wcs_buffer, ".SUFFIXES");
 	suffixes_name = GETNAME(wcs_buffer, FIND_LENGTH);
 	MBSTOWCS(wcs_buffer, SUNPRO_DEPENDENCIES);
 	sunpro_dependencies = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("TARGET_ARCH"));
+	MBSTOWCS(wcs_buffer, "TARGET_ARCH");
 	target_arch = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("TARGET_MACH"));
+	MBSTOWCS(wcs_buffer, "TARGET_MACH");
 	target_mach = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("VIRTUAL_ROOT"));
+	MBSTOWCS(wcs_buffer, "VIRTUAL_ROOT");
 	virtual_root = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS("VPATH"));
+	MBSTOWCS(wcs_buffer, "VPATH");
 	vpath_name = GETNAME(wcs_buffer, FIND_LENGTH);
-	MBSTOWCS(wcs_buffer, NOCATGETS(".WAIT"));
+	MBSTOWCS(wcs_buffer, ".WAIT");
 	wait_name = GETNAME(wcs_buffer, FIND_LENGTH);
 
 	wait_name->state = build_ok;
@@ -682,9 +683,9 @@ load_cached_names(void)
 
 	/* Set the value of $(SHELL) */
 	if (posix) {
-	  MBSTOWCS(wcs_buffer, NOCATGETS("/usr/xpg4/bin/sh"));
+	  MBSTOWCS(wcs_buffer, "/usr/xpg4/bin/sh");
 	} else {
-	  MBSTOWCS(wcs_buffer, NOCATGETS("/bin/sh"));
+	  MBSTOWCS(wcs_buffer, "/bin/sh");
 	}
 	(void) SETVAR(shell_name, GETNAME(wcs_buffer, FIND_LENGTH), false);
 
@@ -706,9 +707,9 @@ load_cached_names(void)
 	/* Check if there is NO PATH variable. If not we construct one. */
 	if (getenv(path_name->string_mb) == NULL) {
 		vroot_path = NULL;
-		add_dir_to_path(NOCATGETS("."), &vroot_path, -1);
-		add_dir_to_path(NOCATGETS("/bin"), &vroot_path, -1);
-		add_dir_to_path(NOCATGETS("/usr/bin"), &vroot_path, -1);
+		add_dir_to_path(".", &vroot_path, -1);
+		add_dir_to_path("/bin", &vroot_path, -1);
+		add_dir_to_path("/usr/bin", &vroot_path, -1);
 	}
 }
 

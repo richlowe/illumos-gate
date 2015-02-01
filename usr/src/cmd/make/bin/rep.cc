@@ -86,7 +86,7 @@ report_recursive_init(void)
 		depinfo_already_read = true;
 	}
 					
-	search_dir = getenv(NOCATGETS("NSE_DEP"));
+	search_dir = getenv("NSE_DEP");
 	if (search_dir == NULL) {
 		return;
 	}

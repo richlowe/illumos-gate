@@ -38,9 +38,9 @@
 #include <mksh/macro.h>
 #include <mksh/misc.h>		/* retmem() */
 #include <mksh/read.h>		/* get_next_block_fn() */
-#include <mksdmsi18n/mksdmsi18n.h>	/* libmksdmsi18n_init() */
 
 #include <widec.h>
+#include <libintl.h>
 
 /*
  * File table of contents
@@ -149,7 +149,7 @@ expand_value(Name value, register String destination, Boolean cmd)
 	}
 
 	if (value->being_expanded) {
-		fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 113, "Loop detected when expanding macro value `%s'"),
+		fatal_reader_mksh(gettext("Loop detected when expanding macro value `%s'"),
 			     value->string_mb);
 	}
 	value->being_expanded = true;
@@ -214,7 +214,7 @@ expand_value(Name value, register String destination, Boolean cmd)
 				return;
 			}
 			if (source->error_converting) {
-				fatal_reader_mksh(NOCATGETS("Internal error: Invalid byte sequence in expand_value()"));
+				fatal_reader_mksh("Internal error: Invalid byte sequence in expand_value()");
 			}
 			block_start = source_p;
 			source_p--;
@@ -299,11 +299,11 @@ expand_macro(register Source source, register String destination, wchar_t *curre
 	}			replacement = no_replace;
 
 	if (make == NULL) {
-		MBSTOWCS(wcs_buffer, NOCATGETS("MAKE"));
+		MBSTOWCS(wcs_buffer, "MAKE");
 		make = GETNAME(wcs_buffer, FIND_LENGTH);
 
-		MBSTOWCS(colon_sh, NOCATGETS(":sh"));
-		MBSTOWCS(colon_shell, NOCATGETS(":shell"));
+		MBSTOWCS(colon_sh, ":sh");
+		MBSTOWCS(colon_shell, ":shell");
 	}
 
 	right_hand[0] = NULL;
@@ -317,11 +317,11 @@ recheck_first_char:
 		GET_NEXT_BLOCK_NOCHK(source);
 		if (source == NULL) {
 			WCSTOMBS(mbs_buffer, current_string);
-			fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 114, "'$' at end of string `%s'"),
+			fatal_reader_mksh(gettext("'$' at end of string `%s'"),
 				     mbs_buffer);
 		}
 		if (source->error_converting) {
-			fatal_reader_mksh(NOCATGETS("Internal error: Invalid byte sequence in expand_macro()"));
+			fatal_reader_mksh("Internal error: Invalid byte sequence in expand_macro()");
 		}
 		goto recheck_first_char;
 	case parenleft_char:
@@ -333,7 +333,7 @@ recheck_first_char:
 		closer = (int) braceright_char;
 		break;
 	case newline_char:
-		fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 115, "'$' at end of line"));
+		fatal_reader_mksh(gettext("'$' at end of line"));
 	default:
 		/* Single char macro name. Just suck it up */
 		append_char(*source_p, &string);
@@ -354,24 +354,24 @@ recheck_first_char:
 			if (source == NULL) {
 				if (current_string != NULL) {
 					WCSTOMBS(mbs_buffer, current_string);
-					fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 116, "Unmatched `%c' in string `%s'"),
+					fatal_reader_mksh(gettext("Unmatched `%c' in string `%s'"),
 						     closer ==
 						     (int) braceright_char ?
 						     (int) braceleft_char :
 						     (int) parenleft_char,
 						     mbs_buffer);
 				} else {
-					fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 117, "Premature EOF"));
+					fatal_reader_mksh(gettext("Premature EOF"));
 				}
 			}
 			if (source->error_converting) {
-				fatal_reader_mksh(NOCATGETS("Internal error: Invalid byte sequence in expand_macro()"));
+				fatal_reader_mksh("Internal error: Invalid byte sequence in expand_macro()");
 			}
 			block_start = source_p;
 			source_p--;
 			continue;
 		case newline_char:
-			fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 118, "Unmatched `%c' on line"),
+			fatal_reader_mksh(gettext("Unmatched `%c' on line"),
 				     closer == (int) braceright_char ?
 				     (int) braceleft_char :
 				     (int) parenleft_char);
@@ -454,7 +454,7 @@ get_macro_value:
 			break;
 		default:
 			WCSTOMBS(mbs_buffer, string.buffer.start);
-			fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 119, "Illegal macro reference `%s'"),
+			fatal_reader_mksh(gettext("Illegal macro reference `%s'"),
 				     mbs_buffer);
 		}
 		/* Internalize the macro name using the first char only. */
@@ -481,7 +481,7 @@ get_macro_value:
 			while (colon != NULL) {
 				if ((eq = (wchar_t *) wschr(colon + 1,
 							    (int) equal_char)) == NULL) {
-					fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 120, "= missing from replacement macro reference"));
+					fatal_reader_mksh(gettext("= missing from replacement macro reference"));
 				}
 				left_tail_len = eq - colon - 1;
 				if(left_tail) {
@@ -516,14 +516,14 @@ get_macro_value:
 		} else {
 			if ((eq = (wchar_t *) wschr(colon + 1,
 						    (int) equal_char)) == NULL) {
-				fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 121, "= missing from replacement macro reference"));
+				fatal_reader_mksh(gettext("= missing from replacement macro reference"));
 			}
 			if ((percent = (wchar_t *) wschr(colon + 1,
 							 (int) percent_char)) == NULL) {
-				fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 122, "%% missing from replacement macro reference"));
+				fatal_reader_mksh(gettext("%% missing from replacement macro reference"));
 			}
 			if (eq < percent) {
-				fatal_reader_mksh(catgets(libmksdmsi18n_catd, 1, 123, "%% missing from replacement macro reference"));
+				fatal_reader_mksh(gettext("%% missing from replacement macro reference"));
 			}
 
 			if (percent > (colon + 1)) {
@@ -574,7 +574,7 @@ get_macro_value:
 					right_hand[i][percent-eq] =
 					  (int) nul_char;
 					if (i++ >= VSIZEOF(right_hand)) {
-						fatal_mksh(catgets(libmksdmsi18n_catd, 1, 124, "Too many %% in pattern"));
+						fatal_mksh(gettext("Too many %% in pattern"));
 					}
 					eq = percent + 1;
 					if (eq[0] == (int) nul_char) {
@@ -633,7 +633,7 @@ get_macro_value:
 		 */
 		add_macro_to_global_list(name);
 		if (makefile_type == reading_makefile) {
-			warning_mksh(catgets(libmksdmsi18n_catd, 1, 164, "Conditional macro `%s' referenced in file `%ws', line %d"),
+			warning_mksh(gettext("Conditional macro `%s' referenced in file `%ws', line %d"),
 					name->string_mb, file_being_read, line_number);
 		}
 	}
@@ -812,7 +812,7 @@ get_macro_value:
 		 * This is for the case when the macro name did not
 		 * specify transforms.
 		 */
-		if (!strncmp(name->string_mb, NOCATGETS("GET"), 3)) {
+		if (!strncmp(name->string_mb, "GET", 3)) {
 			dollarget_seen = true;
 		}
 		dollarless_flag = false;
@@ -905,7 +905,7 @@ init_arch_macros(void)
 	FILE		*pipe;
 	Name		value;
 	int		set_host, set_target;
-	const char	*mach_command = NOCATGETS("/bin/mach");
+	const char	*mach_command = "/bin/mach";
 
 	set_host = (get_prop(host_arch->prop, macro_prop) == NULL);
 	set_target = (get_prop(target_arch->prop, macro_prop) == NULL);
@@ -915,14 +915,14 @@ init_arch_macros(void)
 		append_char((int) hyphen_char, &result_string);
 
 		if ((pipe = popen(mach_command, "r")) == NULL) {
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 185, "Execute of %s failed"), mach_command);
+			fatal_mksh(gettext("Execute of %s failed"), mach_command);
 		}
 		while (fgets(mb_buf, sizeof(mb_buf), pipe) != NULL) {
 			MBSTOWCS(wcs_buffer, mb_buf);
 			append_string(wcs_buffer, &result_string, wslen(wcs_buffer));
 		}
 		if (pclose(pipe) != 0) {
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 186, "Execute of %s failed"), mach_command);
+			fatal_mksh(gettext("Execute of %s failed"), mach_command);
 		}
 
 		value = GETNAME(result_string.buffer.start, wslen(result_string.buffer.start));
@@ -960,7 +960,7 @@ init_mach_macros(void)
 	FILE		*pipe;
 	Name		value;
 	int		set_host, set_target;
-	const char	*arch_command = NOCATGETS("/bin/arch");
+	const char	*arch_command = "/bin/arch";
 
 	set_host = (get_prop(host_mach->prop, macro_prop) == NULL);
 	set_target = (get_prop(target_mach->prop, macro_prop) == NULL);
@@ -970,14 +970,14 @@ init_mach_macros(void)
 		append_char((int) hyphen_char, &result_string);
 
 		if ((pipe = popen(arch_command, "r")) == NULL) {
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 183, "Execute of %s failed"), arch_command);
+			fatal_mksh(gettext("Execute of %s failed"), arch_command);
 		}
 		while (fgets(mb_buf, sizeof(mb_buf), pipe) != NULL) {
 			MBSTOWCS(wcs_buffer, mb_buf);
 			append_string(wcs_buffer, &result_string, wslen(wcs_buffer));
 		}
 		if (pclose(pipe) != 0) {
-			fatal_mksh(catgets(libmksdmsi18n_catd, 1, 184, "Execute of %s failed"), arch_command);
+			fatal_mksh(gettext("Execute of %s failed"), arch_command);
 		}
 
 		value = GETNAME(result_string.buffer.start, wslen(result_string.buffer.start));
@@ -1251,7 +1251,7 @@ found_it:;
 			/*
 			 * We use a permanent buffer to reset SUNPRO_DEPENDENCIES value.
 			 */
-			if (!strncmp(name->string_mb, NOCATGETS("SUNPRO_DEPENDENCIES"), 19)) {
+			if (!strncmp(name->string_mb, "SUNPRO_DEPENDENCIES", 19)) {
 				if (length >= sunpro_dependencies_buf_size) {
 					sunpro_dependencies_buf_size=length*2;
 					if (sunpro_dependencies_buf_size < 4096)
@@ -1302,7 +1302,7 @@ found_it:;
 		    wslen(wcb_ta) +
 		      wslen(wcb_vr);
 		old_vr = wcb_vr;
-		MBSTOWCS(wcs_buffer, NOCATGETS("/usr/arch/"));
+		MBSTOWCS(wcs_buffer, "/usr/arch/");
 		if (IS_WEQUALN(old_vr,
 			       wcs_buffer,
 			       wslen(wcs_buffer))) {
@@ -1315,7 +1315,7 @@ found_it:;
 			new_value_allocated = true;
 			WCSTOMBS(mbs_buffer, old_vr);
 			(void) wsprintf(new_value,
-				        NOCATGETS("/usr/arch/%s/%s:%s"),
+				        "/usr/arch/%s/%s:%s",
 				        ha->string_mb + 1,
 				        ta->string_mb + 1,
 				        mbs_buffer);

@@ -58,6 +58,4 @@ extern	int		lstat_vroot(char *path, struct stat *buffer, pathpt vroot_path, path
 extern	int		stat_vroot(char *path, struct stat *buffer, pathpt vroot_path, pathpt vroot_vroot);
 extern	int		readlink_vroot(char *path, char *buffer, int buffer_size, pathpt vroot_path, pathpt vroot_vroot);
 
-
-extern nl_catd	libvroot_catd;
 #endif

@@ -42,6 +42,7 @@
 #include <mksh/macro.h>		/* getvar() */
 #include <mksh/misc.h>		/* get_prop(), append_prop() */
 #include <sys/stat.h>		/* lstat() */
+#include <libintl.h>
 
 /*
  * Defined macros
@@ -102,7 +103,7 @@ exists(register Name target)
 	}
 
 	if (debug_level > 1) {
-		(void) printf(NOCATGETS("%*sstat(%s)\n"),
+		(void) printf("%*sstat(%s)\n",
 		              recursion_level,
 		              "",
 		              target->string_mb);
@@ -360,7 +361,7 @@ vpath_loop:
 			 */
 			if (debug_level > 0){
 				WCSTOMBS(mbs_buffer, pattern);
-				(void) printf(catgets(catd, 1, 231, "'%s: %s' due to %s expansion\n"),
+				(void) printf(gettext("'%s: %s' due to %s expansion\n"),
 					      line->body.line.target->string_mb,
 					      file->string_mb,
 					      mbs_buffer);
@@ -397,7 +398,7 @@ vpath_loop:
 			    amatch(tmp_wcs_buffer, pattern)) {
 				if (debug_level > 0) {
 					WCSTOMBS(mbs_buffer, pattern);
-					(void) printf(catgets(catd, 1, 232, "'%s: %s' due to %s expansion\n"),
+					(void) printf(gettext("'%s: %s' due to %s expansion\n"),
 						      line->body.line.target->
 						      string_mb,
 						      plain_file->string_mb,
@@ -452,21 +453,21 @@ vpath_loop:
 			tmp_wchar = *file_name_p;
 			*file_name_p = 0;
 			WCSTOMBS(mbs_buffer, file_name);
-			(void) sprintf(mb_path, NOCATGETS("%s/%s/SCCS"),
+			(void) sprintf(mb_path, "%s/%s/SCCS",
 				        sccs_dir_path,
 				        mbs_buffer);
 			*file_name_p = tmp_wchar;
 		} else {
-			(void) sprintf(mb_path, NOCATGETS("%s/SCCS"), sccs_dir_path);
+			(void) sprintf(mb_path, "%s/SCCS", sccs_dir_path);
 		}
 		MBSTOWCS(path, mb_path);
 		(void) wscpy(file_name, path);
 	  } else {
-		MBSTOWCS(wcs_buffer, NOCATGETS("SCCS"));
+		MBSTOWCS(wcs_buffer, "SCCS");
 		(void) wscpy(file_name_p, wcs_buffer);
 	  }
 	} else {
-		MBSTOWCS(wcs_buffer, NOCATGETS("."));
+		MBSTOWCS(wcs_buffer, ".");
 		(void) wscpy(file_name_p, wcs_buffer);
 	}
 	/* Internalize the constructed SCCS dir name. */
@@ -532,7 +533,7 @@ try_pattern:
 			    amatch(tmp_wcs_buffer, pattern)) {
 				if (debug_level > 0) {
 					WCSTOMBS(mbs_buffer, pattern);
-					(void) printf(catgets(catd, 1, 233, "'%s: %s' due to %s expansion\n"),
+					(void) printf(gettext("'%s: %s' due to %s expansion\n"),
 						      line->body.line.target->
 						      string_mb,
 						      plain_file->string_mb,
