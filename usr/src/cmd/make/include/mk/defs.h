@@ -120,19 +120,13 @@ struct _Running {
 	int			auto_count;
 	struct _Name		**automatics;
 	pid_t			pid;
-#ifdef TEAMWARE_MAKE_CMN
 	int			job_msg_id;
-#else
-	int			host;
-#endif
 	char			*stdout_file;
 	char			*stderr_file;
 	struct _Name		*temp_file;
 	int			conditional_cnt;
 	struct _Name		**conditional_targets;
-#ifdef TEAMWARE_MAKE_CMN
 	Boolean			make_refd;
-#endif
 };
 
 typedef enum {
@@ -228,9 +222,7 @@ extern	Name		init;
 extern	int		job_msg_id;
 extern	Boolean		keep_state;
 extern	Name		make_state;
-#ifdef TEAMWARE_MAKE_CMN
 extern	timestruc_t	make_state_before;
-#endif
 extern	Boolean		make_state_locked;
 extern	Dependency	makefiles_used;
 extern	Name		makeflags;
@@ -321,9 +313,7 @@ extern	void		add_running(Name target, Name true_target, Property command, int re
 extern	void		add_serial(Name target, int recursion_level, Boolean do_get, Boolean implicit);
 extern	void		add_subtree(Name target, int recursion_level, Boolean do_get, Boolean implicit);
 extern  void 		append_or_replace_macro_in_dyn_array(ASCII_Dyn_Array *Ar, char *macro);
-#ifdef TEAMWARE_MAKE_CMN
 extern	void		await_parallel(Boolean waitflg);
-#endif
 extern	void		build_suffix_list(Name target_suffix);
 extern	Boolean		check_auto_dependencies(Name target, int auto_count, Name *automatics);
 extern	void		check_state(Name temp_file_name);

@@ -1158,14 +1158,7 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 	}
 	pat_rule->being_expanded = false;
 
-#ifdef TEAMWARE_MAKE_CMN
-	/*
-	 * This #ifdef fixes a dmake bug, but introduces bugid 1136156.
-	 */
 	return result;
-#else
-	return build_ok;
-#endif
 }
 
 /*

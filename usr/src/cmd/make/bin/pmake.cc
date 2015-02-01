@@ -23,7 +23,6 @@
  * Use is subject to license terms.
  */
 
-#ifdef TEAMWARE_MAKE_CMN
 
 /*
  * Included files
@@ -417,5 +416,4 @@ get_max(wchar_t **ms_address, wchar_t *hostname)
 	}
 }
 
-#endif
 

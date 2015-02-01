@@ -23,7 +23,6 @@
  * Use is subject to license terms.
  */
 
-#ifdef TEAMWARE_MAKE_CMN
 
 /*
  *	parallel.cc
@@ -69,11 +68,9 @@ const int local_host_mask = 0x20;
 /*
  * Static variables
  */
-#ifdef TEAMWARE_MAKE_CMN
 static	Boolean		just_did_subtree = false;
 static	char		local_host[MAXNAMELEN] = "";
 static	char		user_name[MAXNAMELEN] = "";
-#endif
 static	int		pmake_max_jobs = 0;
 static	pid_t		process_running = -1;
 static	Running		*running_tail = &running_list;
@@ -261,7 +258,6 @@ execute_parallel(Property line, Boolean waitflg, Boolean local)
 }
 
 
-#ifdef TEAMWARE_MAKE_CMN
 #define MAXJOBS_ADJUST_RFE4694000
 
 #ifdef MAXJOBS_ADJUST_RFE4694000
@@ -551,7 +547,6 @@ job_adjust_init() {
 }
 
 #endif /* MAXJOBS_ADJUST_RFE4694000 */
-#endif /* TEAMWARE_MAKE_CMN */
 
 /*
  *	distribute_process(char **commands, Property line)
@@ -671,7 +666,7 @@ distribute_process(char **commands, Property line)
 
 	stdout_file = strdup(mbstring);
 	stderr_file = NULL;
-#if defined (TEAMWARE_MAKE_CMN)
+
 	if (!out_err_same) {
 		(void) sprintf(mbstring,
 			        NOCATGETS("%s/dmake.stderr.%d.%d.XXXXXX"),
@@ -683,7 +678,6 @@ distribute_process(char **commands, Property line)
 
 		stderr_file = strdup(mbstring);
 	}
-#endif
 
 	process_running = run_rule_commands(local_host, commands);
 
@@ -1927,5 +1921,4 @@ delete_running_struct(Running rp)
 
 }
 
-#endif
 

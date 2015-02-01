@@ -25,12 +25,6 @@
  * Use is subject to license terms.
  */
 
-/*
- * This is not "#ifdef TEAMWARE_MAKE_CMN" because we're currently
- * using the TW fake i18n headers and libraries to build both
- * SMake and PMake on SPARC/S1 and x86/S2.
- */
-
 #include <avo/intl.h>
 #include <limits.h>		/* MB_LEN_MAX */
 #include <stdio.h>
@@ -902,9 +896,7 @@ extern Name		virtual_root;
 extern Boolean		vpath_defined;
 extern Name		vpath_name;
 extern Boolean		make_state_locked;
-#if defined (TEAMWARE_MAKE_CMN)
 extern Boolean		out_err_same;
-#endif
 extern pid_t		childPid;
 extern nl_catd		libmksh_catd;
 

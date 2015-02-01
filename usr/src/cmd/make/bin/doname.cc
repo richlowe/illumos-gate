@@ -289,9 +289,7 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 {
 	Doname			result = build_dont_know;
 	Chain			out_of_date_list = NULL;
-#ifdef TEAMWARE_MAKE_CMN
 	Chain			target_group;
-#endif
 	Property		old_locals = NULL;
 	register Property	line;
 	Property		command = NULL;
@@ -312,7 +310,6 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 		return build_running;
 	}
 	line = get_prop(target->prop, line_prop);
-#ifdef TEAMWARE_MAKE_CMN
 	if (line != NULL) {
 		/*
 		 * If this target is a member of target group and one of the
@@ -333,7 +330,6 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 			}
 		}
 	}
-#endif
 	/*
 	 * If the target is a constructed one for a "::" target,
 	 * we need to consider that.
@@ -379,7 +375,6 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 		target->state = build_dont_know;
 		restart = true;
 /*
-#ifdef TEAMWARE_MAKE_CMN
 	} else if (parallel &&
 		   keep_state &&
 		   (target->conditional_cnt > 0)) {
@@ -388,7 +383,6 @@ doname(register Name target, register Boolean do_get, register Boolean implicit,
 		target->state = build_running;
 		return build_running;
 	    }
-#endif
  */
 	}
 	/*
@@ -532,7 +526,6 @@ recheck_target:
 			case build_failed:
 				result = build_failed;
 				break;
-#ifdef TEAMWARE_MAKE_CMN
 			case build_running:
 				target->state = build_running;
 				add_pending(target,
@@ -548,7 +541,6 @@ recheck_target:
 						     0);
 				}
 				return build_running;
-#endif
 			case build_ok:
 				result = build_ok;
 				break;
@@ -569,7 +561,6 @@ recheck_target:
 				case build_failed:
 					result = build_failed;
 					break;
-#ifdef TEAMWARE_MAKE_CMN
 				case build_running:
 					target->state = build_running;
 					add_pending(target,
@@ -585,7 +576,6 @@ recheck_target:
 							 0);
 				    }
 					return build_running;
-#endif
 				default:
 					/* ALWAYS bind $% for old style */
 					/* ar rules */
@@ -605,7 +595,6 @@ recheck_target:
 				case build_failed:
 					result = build_failed;
 					break;
-#ifdef TEAMWARE_MAKE_CMN
 				case build_running:
 					target->state = build_running;
 					add_pending(target,
@@ -622,7 +611,6 @@ recheck_target:
 							     0);
 					}
 					return build_running;
-#endif
 				}
 			}
 		}
@@ -655,7 +643,6 @@ recheck_target:
 			case build_failed:
 				result = build_failed;
 				break;
-#ifdef TEAMWARE_MAKE_CMN
 			case build_running:
 				target->state = build_running;
 				add_pending(target,
@@ -671,7 +658,6 @@ recheck_target:
 						     0);
 				}
 				return build_running;
-#endif
 			}
 		}
 		/* Try to sccs get */
@@ -745,7 +731,6 @@ r_command:
 					     (Boolean) ((parallel || save_parallel) && !silent));
 		}
 		switch (result) {
-#ifdef TEAMWARE_MAKE_CMN
 		case build_running:
 			add_running(target,
 				    true_target,
@@ -792,7 +777,6 @@ r_command:
 					     0);
 			}
 			return build_running;
-#endif
 		case build_ok:
 			/* If all went OK set a nice timestamp */
 			if (true_target->stat.time == file_doesnt_exist) {
@@ -946,11 +930,7 @@ r_command:
  *		wait_name	The Name ".WAIT", compared against
  */
 static Boolean
-#ifdef TEAMWARE_MAKE_CMN
 check_dependencies(Doname *result, Property line, Boolean do_get, Name target, Name true_target, Boolean doing_subtree, Chain *out_of_date_tail, Property old_locals, Boolean implicit, Property *command, Name less, Boolean rechecking_target, Boolean recheck_conditionals)
-#else
-check_dependencies(Doname *result, Property line, Boolean do_get, Name target, Name true_target, Boolean, Chain *out_of_date_tail, Property, Boolean, Property *command, Name less, Boolean rechecking_target, Boolean recheck_conditionals)
-#endif
 {
 	Boolean			dependencies_running;
 	register Dependency	dependency;
@@ -1163,7 +1143,6 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 			}
 		}
 	}
-#ifdef TEAMWARE_MAKE_CMN
 	if (dependencies_running) {
 		if (doing_subtree) {
 			if (target->conditional_cnt > 0) {
@@ -1191,7 +1170,6 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 			return true;
 		}
 	}
-#endif
 	/*
 	 * Collect the timestamp of the youngest double colon target
 	 * dependency.
@@ -1615,11 +1593,7 @@ run_command(register Property line, Boolean)
 	/* If quest, then exit(1) because the target is out of date */
 	if (quest) {
 		if (posix) {
-#ifdef TEAMWARE_MAKE_CMN
 			result = execute_parallel(line, true);
-#else
-			result = execute_serial(line);
-#endif
 		}
 		exit_status = 1;
 		exit(1);
@@ -1699,18 +1673,13 @@ run_command(register Property line, Boolean)
 	} else if (touch) {
 		result = touch_command(line, target, result);
 		if (posix) {
-#ifdef TEAMWARE_MAKE_CMN
 			result = execute_parallel(line, true);
-#else
-			result = execute_serial(line);
-#endif
 		}
 	} else {
 		/*
 		 * If this is not a touch run, we need to execute the
 		 * proper command(s) for the target.
 		 */
-#ifdef TEAMWARE_MAKE_CMN
 		if (parallel) {
 			if (!parallel_ok(target, true)) {
 				/*
@@ -1722,11 +1691,7 @@ run_command(register Property line, Boolean)
 				 * do this one, else wait.
 				 */
 				if (parallel_process_cnt == 0) {
-#ifdef TEAMWARE_MAKE_CMN
 					result = execute_parallel(line, true, target->localhost);
-#else
-					result = execute_serial(line);
-#endif
 				} else {
 					current_target = NULL;
 					current_line = NULL;
@@ -1743,11 +1708,7 @@ run_command(register Property line, Boolean)
 					return build_running;
 				case build_serial:
 					if (parallel_process_cnt == 0) {
-#ifdef TEAMWARE_MAKE_CMN
 						result = execute_parallel(line, true, target->localhost);
-#else
-						result = execute_serial(line);
-#endif
 					} else {
 						current_target = NULL;
 						current_line = NULL;
@@ -1759,15 +1720,8 @@ run_command(register Property line, Boolean)
 				}
 			}
 		} else {
-#endif
-#ifdef TEAMWARE_MAKE_CMN
 			result = execute_parallel(line, true, target->localhost);
-#else
-			result = execute_serial(line);
-#endif
-#ifdef TEAMWARE_MAKE_CMN
 		}
-#endif
 	}
 	temp_file_name = NULL;
 	if (report_dependencies_level == 0){

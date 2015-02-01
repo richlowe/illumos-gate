@@ -56,7 +56,7 @@
 	Name		posix_name;
 	Name		svr4_name;
 	Boolean		sdot_target;	/* used to identify s.m(/M)akefile */
-	Boolean		all_parallel;			/* TEAMWARE_MAKE_CMN */
+	Boolean		all_parallel;
 	Boolean		assign_done;
 	int foo;	
 	Boolean		build_failed_seen;
@@ -102,9 +102,7 @@
 	int		job_msg_id;
 	Boolean		keep_state;
 	Name		make_state;
-#ifdef TEAMWARE_MAKE_CMN
 	timestruc_t	make_state_before;
-#endif
 	Dependency	makefiles_used;
 	Name		makeflags;
 //	Boolean		make_state_locked; // Moved to lib/mksh
@@ -117,11 +115,11 @@
 	Boolean		no_action_was_taken = true;	/* true if we've not **
 							** run any command   */
 
-	Boolean		no_parallel = false;		/* TEAMWARE_MAKE_CMN */
+	Boolean		no_parallel = false;
 	Name		no_parallel_name;
 	Name		not_auto;
-	Boolean		only_parallel;			/* TEAMWARE_MAKE_CMN */
-	Boolean		parallel;			/* TEAMWARE_MAKE_CMN */
+	Boolean		only_parallel;
+	Boolean		parallel;
 	Name		parallel_name;
 	Name		localhost_name;
 	int		parallel_process_cnt;

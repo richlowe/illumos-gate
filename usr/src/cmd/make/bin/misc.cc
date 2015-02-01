@@ -47,13 +47,11 @@
 #include <vroot/report.h>	/* SUNPRO_DEPENDENCIES */
 
 
-#ifdef TEAMWARE_MAKE_CMN
 #define MAXJOBS_ADJUST_RFE4694000
 
 #ifdef MAXJOBS_ADJUST_RFE4694000
 extern void job_adjust_fini();
 #endif /* MAXJOBS_ADJUST_RFE4694000 */
-#endif /* TEAMWARE_MAKE_CMN */
 
 
 /*
@@ -158,7 +156,6 @@ fatal(const char *message, ...)
 		exit(1);
 	}
 	fatal_in_progress = true;
-#ifdef TEAMWARE_MAKE_CMN
 	/* Let all parallel children finish */
 	if ((dmake_mode_type == parallel_mode) &&
 	    (parallel_process_cnt > 0)) {
@@ -174,7 +171,6 @@ fatal(const char *message, ...)
 		await_parallel(true);
 		finish_children(false);
 	}
-#endif
 
 #if defined (TEAMWARE_MAKE_CMN) && defined (MAXJOBS_ADJUST_RFE4694000)
 	job_adjust_fini();
