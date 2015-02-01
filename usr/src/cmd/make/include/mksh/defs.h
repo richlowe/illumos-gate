@@ -411,15 +411,15 @@ struct _Macro {
 	/*
 	* The list for $? is stored as a structured list that
 	* is translated into a string iff it is referenced.
-	* This is why  some macro values need a daemon. 
+	* This is why  some macro values need a daemon.
 	*/
 	Daemon			daemon:2;
 };
 
 struct _Macro_list {
 	struct _Macro_list	*next;
-	char			*macro_name; 
-	char			*value; 
+	char			*macro_name;
+	char			*value;
 };
 
 enum sccs_stat {
@@ -461,8 +461,8 @@ struct _Name {
 	 * A conditional macro was used when building this target
 	 */
 	Boolean			depends_on_conditional:1;
-	/* 
-	 * Pointer to list of conditional macros which were used to build 
+	/*
+	 * Pointer to list of conditional macros which were used to build
 	 * this target
 	 */
 	struct _Macro_list	*conditional_macro_list;
@@ -700,7 +700,7 @@ struct _Property {
 	union Body		body;
 };
 
-/* Structure for dynamic "ascii" arrays */ 
+/* Structure for dynamic "ascii" arrays */
 struct ASCII_Dyn_Array {
 	char			*start;
 	size_t			size;
@@ -781,7 +781,7 @@ struct Name_set {
 private:
 	// single node in a tree
 	struct entry {
-		entry(Name name_, entry *parent_) : 
+		entry(Name name_, entry *parent_) :
 			name(name_),
 			parent(parent_),
 			left(0),
@@ -902,7 +902,7 @@ extern Name		virtual_root;
 extern Boolean		vpath_defined;
 extern Name		vpath_name;
 extern Boolean		make_state_locked;
-#if defined (TEAMWARE_MAKE_CMN) && defined(REDIRECT_ERR)
+#if defined (TEAMWARE_MAKE_CMN)
 extern Boolean		out_err_same;
 #endif
 extern pid_t		childPid;

@@ -114,7 +114,7 @@ Boolean		vpath_defined;
 Name		vpath_name;
 wchar_t		wcs_buffer[MAXPATHLEN];
 Boolean		working_on_targets;
-#if defined (TEAMWARE_MAKE_CMN) && defined(REDIRECT_ERR)
+#if defined (TEAMWARE_MAKE_CMN)
 Boolean		out_err_same;
 #endif
 pid_t		childPid = -1;	// This variable is used for killing child's process

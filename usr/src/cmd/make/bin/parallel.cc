@@ -849,7 +849,7 @@ distribute_process(char **commands, Property line)
 
 	stdout_file = strdup(mbstring);
 	stderr_file = NULL;
-#if defined (TEAMWARE_MAKE_CMN) && defined(REDIRECT_ERR)
+#if defined (TEAMWARE_MAKE_CMN)
 	if (!out_err_same) {
 		(void) sprintf(mbstring,
 			        NOCATGETS("%s/dmake.stderr.%d.%d.XXXXXX"),
@@ -1469,7 +1469,7 @@ bypass_for_loop_inc_4:
 					retmem_mb(rp->stdout_file);
 					rp->stdout_file = NULL;
 				}
-#if defined(REDIRECT_ERR)
+
 				if (!out_err_same && (rp->stderr_file != NULL)) {
 					if (stat(rp->stderr_file, &out_buf) < 0) {
 						fatal(catgets(catd, 1, 130, "stat of %s failed: %s"),
@@ -1484,7 +1484,6 @@ bypass_for_loop_inc_4:
 					retmem_mb(rp->stderr_file);
 					rp->stderr_file = NULL;
 				}
-#endif
 			}
 			check_state(rp->temp_file);
 			if (rp->temp_file != NULL) {
@@ -2034,15 +2033,11 @@ run_rule_commands(char *host, char **commands)
 	case 0:		/* Child */
 		/* To control the processed targets list is not the child's business */
 		running_list = NULL;
-#if defined(REDIRECT_ERR)
 		if(out_err_same) {
 			redirect_io(stdout_file, (char*)NULL);
 		} else {
 			redirect_io(stdout_file, stderr_file);
 		}
-#else
-		redirect_io(stdout_file, (char*)NULL);
-#endif
 		for (commands = commands;
 		     (*commands != (char *)NULL);
 		     commands++) {
