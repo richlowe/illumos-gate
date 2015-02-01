@@ -67,13 +67,11 @@
 extern	Name		normalize_name(register wchar_t *name_string, register int length);
 
 // From parallel.cc
-#if defined(TEAMWARE_MAKE_CMN)
 #define MAXJOBS_ADJUST_RFE4694000
 
 #ifdef MAXJOBS_ADJUST_RFE4694000
 extern void job_adjust_fini();
 #endif /* MAXJOBS_ADJUST_RFE4694000 */
-#endif /* TEAMWARE_MAKE_CMN */
 
 
 /*
@@ -121,23 +119,19 @@ static	Boolean		trace_status;			/* `-p' */
 static	Boolean		getname_stat = false;
 #endif
 
-#if defined(TEAMWARE_MAKE_CMN)
 	static	time_t		start_time;
 	static	int		g_argc;
 	static	char		**g_argv;
-#endif
 
 /*
  * File table of contents
  */
 	extern "C" void		cleanup_after_exit(void);
 
-#ifdef TEAMWARE_MAKE_CMN
 extern "C" {
 	extern	void		dmake_exit_callback(void);
 	extern	void		dmake_message_callback(char *);
 }
-#endif
 
 extern	Name		normalize_name(register wchar_t *name_string, register int length);
 
@@ -160,9 +154,7 @@ static	void		report_dir_enter_leave(Boolean entering);
 
 extern void expand_value(Name, register String , Boolean);
 
-#ifdef TEAMWARE_MAKE_CMN
-	static const char	verstring[] = "illumos make";
-#endif
+static const char	verstring[] = "illumos make";
 
 jmp_buf jmpbuffer;
 extern nl_catd catd;
@@ -204,7 +196,6 @@ main(int argc, char *argv[])
 	char 			*slash_ptr;
 	mode_t			um;
 	int			i;
-#ifdef TEAMWARE_MAKE_CMN
 	struct itimerval	value;
 	char			def_dmakerc_path[MAXPATHLEN];
 	Name			dmake_name, dmake_name2;
@@ -212,7 +203,6 @@ main(int argc, char *argv[])
 	Property		prop, prop2;
 	struct stat		statbuf;
 	int			statval;
-#endif
 
 	struct stat		out_stat, err_stat;
 	hostid = gethostid();
@@ -227,34 +217,26 @@ main(int argc, char *argv[])
 	}
 #endif
 
-#if defined(TEAMWARE_MAKE_CMN)
 	catd = catopen(AVO_DOMAIN_DMAKE, NL_CAT_LOCALE);
-#endif
 
 // ---> fprintf(stderr, catgets(catd, 15, 666, "--- SUN make ---\n"));
 
 
-#if defined(TEAMWARE_MAKE_CMN)
 /*
  * I put libmksdmsi18n_init() under #ifdef because it requires avo_i18n_init()
  * from avo_util library. 
  */
 	libmksdmsi18n_init();
-#endif
 
 
-#ifndef TEAMWARE_MAKE_CMN
 	textdomain(NOCATGETS("SUNW_SPRO_MAKE"));
-#endif /* TEAMWARE_MAKE_CMN */
 
-#ifdef TEAMWARE_MAKE_CMN
 	g_argc = argc;
 	g_argv = (char **) malloc((g_argc + 1) * sizeof(char *));
 	for (i = 0; i < argc; i++) {
 		g_argv[i] = argv[i];
 	}
 	g_argv[i] = NULL;
-#endif /* TEAMWARE_MAKE_CMN */
 
 	/*
 	 * Set argv_zero_string to some form of argv[0] for
@@ -403,7 +385,6 @@ main(int argc, char *argv[])
 
 	read_files_and_state(argc, argv);
 
-#ifdef TEAMWARE_MAKE_CMN
 	/*
 	 * Find the dmake_output_mode: TXT1, TXT2 or HTML1.
 	 */
@@ -471,9 +452,7 @@ main(int argc, char *argv[])
 		}
 	}
     }
-#endif
 
-#ifdef TEAMWARE_MAKE_CMN
 	parallel_flag = true;
 	putenv(strdup(NOCATGETS("DMAKE_CHILD=TRUE")));
 
@@ -486,11 +465,7 @@ main(int argc, char *argv[])
 		dmake_mode_type = serial_mode;
 		no_parallel = true;
 	}
-#else
-	parallel_flag = false;
-#endif
 
-#if defined (TEAMWARE_MAKE_CMN)
 	/*
 	 * Check whether stdout and stderr are physically same.
 	 * This is in order to decide whether we need to redirect
@@ -514,7 +489,6 @@ main(int argc, char *argv[])
 			}
 		}
 	}
-#endif
 
 		
 /*
@@ -691,23 +665,19 @@ if(getname_stat) {
 		MBSTOWCS(wcs_buffer, NOCATGETS(".FAILED"));
 		failed_name = GETNAME(wcs_buffer, FIND_LENGTH);
 		if ((exit_status != 0) && (failed_name->prop != NULL)) {
-#ifdef TEAMWARE_MAKE_CMN
 			/*
 			 * [tolik] switch DMake to serial mode
 			 */
 			dmake_mode_type = serial_mode;
 			no_parallel = true;
-#endif
 			(void) doname(failed_name, false, true);
 		} else {
 		    if (!trace_status) {
-#ifdef TEAMWARE_MAKE_CMN
 			/*
 			 * Switch DMake to serial mode
 			 */
 			dmake_mode_type = serial_mode;
 			no_parallel = true;
-#endif
 			(void) doname(done, false, true);
 		    }
 		}
@@ -810,10 +780,8 @@ handle_interrupt(int)
 		bsd_signal(SIGTERM, SIG_IGN);
 		kill (-getpid(), SIGTERM);
 	}
-#ifdef TEAMWARE_MAKE_CMN
 	/* Clean up all parallel/distributed children already finished */
         finish_children(false);
-#endif
 
 	/* Make sure the processes running under us terminate first */
 
@@ -965,11 +933,7 @@ read_command_options(register int argc, register char **argv)
 
 #define SUNPRO_CMD_OPTS	"-~Bbc:Ddef:g:ij:K:kM:m:NnO:o:PpqRrSsTtuVvwx:"
 
-#ifdef TEAMWARE_MAKE_CMN
 #	define SVR4_CMD_OPTS   "-c:ef:g:ij:km:nO:o:pqrsTtVv"
-#else
-#	define SVR4_CMD_OPTS   "-ef:iknpqrstV"
-#endif
 
 	/*
 	 * Added V in SVR4_CMD_OPTS also, which is going to be a hidden
@@ -1046,22 +1010,14 @@ read_command_options(register int argc, register char **argv)
 
 		if (ch == '?') {
 			if (svr4) {
-#ifdef TEAMWARE_MAKE_CMN
 				fprintf(stderr,
 					catgets(catd, 1, 267, "Usage : dmake [ -f makefile ][ -c dmake_rcfile ][ -g dmake_group ]\n"));
 				fprintf(stderr,
 					catgets(catd, 1, 268, "              [ -j dmake_max_jobs ][ -m dmake_mode ][ -o dmake_odir ]...\n"));
 				fprintf(stderr,
 					catgets(catd, 1, 269, "              [ -e ][ -i ][ -k ][ -n ][ -p ][ -q ][ -r ][ -s ][ -t ][ -v ]\n"));
-#else
-				fprintf(stderr,
-					catgets(catd, 1, 270, "Usage : make [ -f makefile ]... [ -e ][ -i ][ -k ][ -n ][ -p ][ -q ][ -r ]\n"));
-				fprintf(stderr,
-					catgets(catd, 1, 271, "             [ -s ][ -t ]\n"));
-#endif
 				tptr = strchr(SVR4_CMD_OPTS, optopt);
 			} else {
-#ifdef TEAMWARE_MAKE_CMN
 				fprintf(stderr,
 					catgets(catd, 1, 272, "Usage : dmake [ -f makefile ][ -c dmake_rcfile ][ -g dmake_group ]\n"));
 				fprintf(stderr,
@@ -1070,14 +1026,6 @@ read_command_options(register int argc, register char **argv)
 					catgets(catd, 1, 274, "              [ -d ][ -dd ][ -D ][ -DD ][ -e ][ -i ][ -k ][ -n ][ -p ][ -P ][ -u ][ -w ]\n"));
 				fprintf(stderr,
 					catgets(catd, 1, 275, "              [ -q ][ -r ][ -s ][ -S ][ -t ][ -v ][ -V ][ target... ][ macro=value... ][ \"macro +=value\"... ]\n"));
-#else
-				fprintf(stderr,
-					catgets(catd, 1, 276, "Usage : make [ -f makefile ][ -K statefile ]... [ -d ][ -dd ][ -D ][ -DD ]\n"));
-				fprintf(stderr,
-					catgets(catd, 1, 277, "             [ -e ][ -i ][ -k ][ -n ][ -p ][ -P ][ -q ][ -r ][ -s ][ -S ][ -t ]\n"));
-				fprintf(stderr,
-					catgets(catd, 1, 278, "             [ -u ][ -w ][ -V ][ target... ][ macro=value... ][ \"macro +=value\"... ]\n"));
-#endif
 				tptr = strchr(SUNPRO_CMD_OPTS, optopt);
 			}
 			if (!tptr) {
@@ -1114,33 +1062,18 @@ read_command_options(register int argc, register char **argv)
 				break;
 			case 2:	/* -c seen */
 				argv[i] = (char *)NOCATGETS("-c");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 281, "Ignoring DistributedMake -c option"));
-#endif
 				break;
 			case 4:	/* -g seen */
 				argv[i] = (char *)NOCATGETS("-g");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 282, "Ignoring DistributedMake -g option"));
-#endif
 				break;
 			case 8:	/* -j seen */
 				argv[i] = (char *)NOCATGETS("-j");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 283, "Ignoring DistributedMake -j option"));
-#endif
 				break;
 			case 16: /* -M seen */
 				argv[i] = (char *)NOCATGETS("-M");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 284, "Ignoring ParallelMake -M option"));
-#endif
 				break;
 			case 32: /* -m seen */
 				argv[i] = (char *)NOCATGETS("-m");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 285, "Ignoring DistributedMake -m option"));
-#endif
 				break;
 			case 128: /* -O seen */
 				argv[i] = (char *)NOCATGETS("-O");
@@ -1150,15 +1083,9 @@ read_command_options(register int argc, register char **argv)
 			        break;
 			case 512:	/* -o seen */
 				argv[i] = (char *)NOCATGETS("-o");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 311, "Ignoring DistributedMake -o option"));
-#endif
 				break;
 			case 1024: /* -x seen */
 				argv[i] = (char *)NOCATGETS("-x");
-#ifndef TEAMWARE_MAKE_CMN
-				warning(catgets(catd, 1, 353, "Ignoring DistributedMake -x option"));
-#endif
 				break;
 			default: /* > 1 of -c, f, g, j, K, M, m, O, o, x seen */
 				fatal(catgets(catd, 1, 286, "Illegal command line. More than one option requiring\nan argument given in the same argument group"));
@@ -1541,7 +1468,6 @@ parse_command_option(register char ch)
 		}
 		return 0;
 	case 'R':			 /* Don't run in parallel */
-#ifdef TEAMWARE_MAKE_CMN
 		if (invert_this) {
 			pmake_cap_r_specified = false;
 			no_parallel = false;
@@ -1550,9 +1476,6 @@ parse_command_option(register char ch)
 			dmake_mode_type = serial_mode;
 			no_parallel = true;
 		}
-#else
-		warning(catgets(catd, 1, 182, "Ignoring ParallelMake -R option"));
-#endif
 		return 0;
 	case 'r':			 /* Turn off internal rules */
 		if (invert_this) {
@@ -1605,13 +1528,9 @@ parse_command_option(register char ch)
 	case 'v':			/* Version flag */
 		if (invert_this) {
 		} else {
-#ifdef TEAMWARE_MAKE_CMN
 			fprintf(stdout, NOCATGETS("dmake: %s\n"), verstring);
 			exit_status = 0;
 			exit(0);
-#else
-			warning(catgets(catd, 1, 324, "Ignoring DistributedMake -v option"));
-#endif
 		}
 		return 0;
 	case 'w':			 /* Unconditional flag */
@@ -2876,7 +2795,6 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 /*
  *	make remaining args
  */
-#ifdef TEAMWARE_MAKE_CMN
 /*
 	if ((report_dependencies_level == 0) && parallel) {
  */
@@ -2957,7 +2875,6 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 		//		setjmp(jmpbuffer);
 		
 	}
-#endif
 	for (i = 1; i < argc; i++) {
 		if ((cp = argv[i]) != NULL) {
 			target_to_make_found = true;
@@ -3049,12 +2966,7 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 		}
 
 
-#ifdef TEAMWARE_MAKE_CMN
 		result = doname_parallel(default_target_to_build, true, false);
-#else
-		result = doname_check(default_target_to_build, true,
-				      false, false);
-#endif
 		gather_recursive_deps();
 		if (build_failed_seen) {
 			build_failed_ever_seen = true;
@@ -3322,47 +3234,23 @@ static	char *	mlev = NULL;
 	if(report_cwd) {
 		if(make_level_val <= 0) {
 			if(entering) {
-#ifdef TEAMWARE_MAKE_CMN
 				sprintf( rcwd
 				       , catgets(catd, 1, 329, "dmake: Entering directory `%s'\n")
 				       , get_current_path());
-#else
-				sprintf( rcwd
-				       , catgets(catd, 1, 330, "make: Entering directory `%s'\n")
-				       , get_current_path());
-#endif
 			} else {
-#ifdef TEAMWARE_MAKE_CMN
 				sprintf( rcwd
 				       , catgets(catd, 1, 331, "dmake: Leaving directory `%s'\n")
 				       , get_current_path());
-#else
-				sprintf( rcwd
-				       , catgets(catd, 1, 332, "make: Leaving directory `%s'\n")
-				       , get_current_path());
-#endif
 			}
 		} else {
 			if(entering) {
-#ifdef TEAMWARE_MAKE_CMN
 				sprintf( rcwd
 				       , catgets(catd, 1, 333, "dmake[%d]: Entering directory `%s'\n")
 				       , make_level_val, get_current_path());
-#else
-				sprintf( rcwd
-				       , catgets(catd, 1, 334, "make[%d]: Entering directory `%s'\n")
-				       , make_level_val, get_current_path());
-#endif
 			} else {
-#ifdef TEAMWARE_MAKE_CMN
 				sprintf( rcwd
 				       , catgets(catd, 1, 335, "dmake[%d]: Leaving directory `%s'\n")
 				       , make_level_val, get_current_path());
-#else
-				sprintf( rcwd
-				       , catgets(catd, 1, 336, "make[%d]: Leaving directory `%s'\n")
-				       , make_level_val, get_current_path());
-#endif
 			}
 		}
 		printf(NOCATGETS("%s"), rcwd);
