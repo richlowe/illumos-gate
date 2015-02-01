@@ -49,13 +49,6 @@
 #include <ulimit.h>		/* ulimit() */
 #include <unistd.h>		/* close(), dup2() */
 
-
-
-/*
- * Defined macros
- */
-#define SEND_MTOOL_MSG(cmds)
-
 /*
  * typedefs & structs
  */
@@ -136,121 +129,6 @@ redirect_io(char *stdout_file, char *stderr_file)
 }
 
 /*
- *	dosys_mksh(command, ignore_error, call_make, silent_error, target)
- *
- *	Check if command string contains meta chars and dispatch to
- *	the proper routine for executing one command line.
- *
- *	Return value:
- *				Indicates if the command execution failed
- *
- *	Parameters:
- *		command		The command to run
- *		ignore_error	Should we abort when an error is seen?
- *		call_make	Did command reference $(MAKE) ?
- *		silent_error	Should error messages be suppressed for dmake?
- *		target		Target we are building
- *
- *	Global variables used:
- *		do_not_exec_rule Is -n on?
- *		working_on_targets We started processing real targets
- */
-Doname
-dosys_mksh(register Name command, register Boolean ignore_error, register Boolean call_make, Boolean silent_error, Boolean always_exec, Name target, Boolean redirect_out_err, char *stdout_file, char *stderr_file, pathpt vroot_path, int nice_prio)
-{
-	register int		length = command->hash.length;
-	register wchar_t	*p;
-	register wchar_t	*q;
-	register wchar_t	*cmd_string;
-	struct stat		before;
-	Doname			result;
-	Boolean			working_on_targets_mksh = true;
-	Wstring wcb(command);
-	p = wcb.get_string();
-	cmd_string = p;
-
-	/* Strip spaces from head of command string */
-	while (iswspace(*p)) {
-		p++, length--;
-	}
-	if (*p == (int) nul_char) {
-		return build_failed;
-	}
-	/* If we are faking it we just return */
-	if (do_not_exec_rule &&
-	    working_on_targets_mksh &&
-	    !call_make &&
-	    !always_exec) {
-		return build_ok;
-	}
-
-	/* Copy string to make it OK to write it. */
-	q = ALLOC_WC(length + 1);
-	(void) wscpy(q, p);
-	/* Write the state file iff this command uses make. */
-/* XXX - currently does not support recursive make's, $(MAKE)'s
-	if (call_make && command_changed) {
-		write_state_file(0, false);
-	}
-	(void) stat(make_state->string_mb, &before);
- */
-	/*
-	 * Run command directly if it contains no shell meta chars,
-	 * else run it using the shell.
-	 */
-	/* XXX - command->meta *may* not be set correctly */
-	if (await(ignore_error,
-		  silent_error,
-		  target,
-		  cmd_string,
-                  command->meta ?
-	            doshell(q, ignore_error, redirect_out_err, stdout_file, stderr_file, nice_prio) :
-	            doexec(q, ignore_error, redirect_out_err, stdout_file, stderr_file, vroot_path, nice_prio),
-	          false,
-	          NULL,
-	          -1)) {
-
-#ifdef PRINT_EXIT_STATUS
-		warning_mksh(NOCATGETS("I'm in dosys_mksh(), and await() returned result of build_ok."));
-#endif
-
-		result = build_ok;
-	} else {
-
-#ifdef PRINT_EXIT_STATUS
-		warning_mksh(NOCATGETS("I'm in dosys_mksh(), and await() returned result of build_failed."));
-#endif
-
-		result = build_failed;
-	}
-	retmem(q);
-
-/* XXX - currently does not support recursive make's, $(MAKE)'s
-	if ((report_dependencies_level == 0) &&
-	    call_make) {
-		make_state->stat.time = (time_t)file_no_time;
-		(void)exists(make_state);
-		if (before.st_mtime == make_state->stat.time) {
-			return result;
-		}
-		makefile_type = reading_statefile;
-		if (read_trace_level > 1) {
-			trace_reader = true;
-		}
-		(void) read_simple_file(make_state,
-					false,
-					false,
-					false,
-					false,
-					false,
-					true);
-		trace_reader = false;
-	}
- */
-	return result;
-}
-
-/*
  *	doshell(command, ignore_error)
  *
  *	Used to run command lines that include shell meta-characters.
@@ -268,7 +146,7 @@ dosys_mksh(register Name command, register Boolean ignore_error, register Boolea
  *		shell_name	The Name "SHELL", used to get the path to shell
  */
 int
-doshell(wchar_t *command, register Boolean ignore_error, Boolean redirect_out_err, char *stdout_file, char *stderr_file, int nice_prio)
+doshell(wchar_t *command, register Boolean ignore_error, char *stdout_file, char *stderr_file, int nice_prio)
 {
 	char			*argv[6];
 	int			argv_index = 0;
@@ -316,9 +194,6 @@ doshell(wchar_t *command, register Boolean ignore_error, Boolean redirect_out_er
 	(void) fflush(stdout);
 	if ((childPid = fork()) == 0) {
 		enable_interrupt((void (*) (int)) SIG_DFL);
-		if (redirect_out_err) {
-			redirect_io(stdout_file, stderr_file);
-		}
 #if 0
 		if (filter_stderr) {
 			redirect_stderr();
@@ -436,7 +311,7 @@ exec_vp(register char *name, register char **argv, char **envp, register Boolean
  *		filter_stderr	If -X is on we redirect stderr
  */
 int
-doexec(register wchar_t *command, register Boolean ignore_error, Boolean redirect_out_err, char *stdout_file, char *stderr_file, pathpt vroot_path, int nice_prio)
+doexec(register wchar_t *command, register Boolean ignore_error, char *stdout_file, char *stderr_file, pathpt vroot_path, int nice_prio)
 {
 	int			arg_count = 5;
 	char			**argv;
@@ -514,9 +389,6 @@ doexec(register wchar_t *command, register Boolean ignore_error, Boolean redirec
 	(void) fflush(stdout);
 	if ((childPid = fork()) == 0) {
 		enable_interrupt((void (*) (int)) SIG_DFL);
-		if (redirect_out_err) {
-			redirect_io(stdout_file, stderr_file);
-		}
 #if 0
 		if (filter_stderr) {
 			redirect_stderr();
@@ -559,7 +431,7 @@ doexec(register wchar_t *command, register Boolean ignore_error, Boolean redirec
  *		filter_stderr	Set if -X is on
  */
 Boolean
-await(register Boolean ignore_error, register Boolean silent_error, Name target, wchar_t *command, pid_t running_pid, Boolean send_mtool_msgs, void *xdrs_p, int job_msg_id)
+await(register Boolean ignore_error, register Boolean silent_error, Name target, wchar_t *command, pid_t running_pid, void *xdrs_p, int job_msg_id)
 {
         int                     status;
 	char			*buffer;
@@ -606,60 +478,29 @@ await(register Boolean ignore_error, register Boolean silent_error, Name target,
 	 * If the child returned an error, we now try to print a
 	 * nice message about it.
 	 */
-	SEND_MTOOL_MSG(
-		make_output_msg = new Avo_CmdOutput();
-		(void) sprintf(tmp_buf, "%d", job_msg_id);
-		make_output_msg->appendOutput(strdup(tmp_buf));
-	);
-
+	
 	tmp_buf[0] = (int) nul_char;
 	if (!silent_error) {
 		if (exit_status != 0) {
 			(void) fprintf(stdout,
 				       catgets(libmksdmsi18n_catd, 1, 103, "*** Error code %d"),
 				       exit_status);
-			SEND_MTOOL_MSG(
-				(void) sprintf(&tmp_buf[strlen(tmp_buf)],
-					       catgets(libmksdmsi18n_catd, 1, 104, "*** Error code %d"),
-					       exit_status);
-			);
 		} else {
 				(void) fprintf(stdout,
 					       catgets(libmksdmsi18n_catd, 1, 105, "*** Signal %d"),
 					       termination_signal);
-				SEND_MTOOL_MSG(
-					(void) sprintf(&tmp_buf[strlen(tmp_buf)],
-						       catgets(libmksdmsi18n_catd, 1, 106, "*** Signal %d"),
-						       termination_signal);
-				);
 			if (core_dumped) {
 				(void) fprintf(stdout,
 					       catgets(libmksdmsi18n_catd, 1, 107, " - core dumped"));
-				SEND_MTOOL_MSG(
-					(void) sprintf(&tmp_buf[strlen(tmp_buf)],
-						       catgets(libmksdmsi18n_catd, 1, 108, " - core dumped"));
-				);
 			}
 		}
 		if (ignore_error) {
 			(void) fprintf(stdout,
 				       catgets(libmksdmsi18n_catd, 1, 109, " (ignored)"));
-			SEND_MTOOL_MSG(
-				(void) sprintf(&tmp_buf[strlen(tmp_buf)],
-					       catgets(libmksdmsi18n_catd, 1, 110, " (ignored)"));
-			);
 		}
 		(void) fprintf(stdout, "\n");
 		(void) fflush(stdout);
-		SEND_MTOOL_MSG(
-			make_output_msg->appendOutput(strdup(tmp_buf));
-		);
 	}
-	SEND_MTOOL_MSG(
-		xdr_msg = (RWCollectable*) make_output_msg;
-		xdr(xdrs_p, xdr_msg);
-		delete make_output_msg;
-	);
 
 #ifdef PRINT_EXIT_STATUS
 	warning_mksh(NOCATGETS("I'm in await(), returning failed."));

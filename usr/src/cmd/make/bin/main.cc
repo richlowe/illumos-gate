@@ -1314,7 +1314,6 @@ setup_makeflags_argv()
  *		quest			Set for make -q
  *		read_trace_level	Set for make -D
  *		report_dependencies	Set for make -P
- *		send_mtool_msgs		Set for make -K
  *		silent_all		Set for make -s
  *		touch			Set for make -t
  */
@@ -1435,12 +1434,8 @@ parse_command_option(register char ch)
 			do_not_exec_rule = true;
 		}
 		return 0;
-	case 'O':			 /* Send job start & result msgs */
-		if (invert_this) {
-			send_mtool_msgs = false;
-		} else {
-		}
-		return 128;
+	case 'O':			 /* Integrate with maketool, obsolete */
+		return 0;
 	case 'o':			 /* Use alternative dmake output dir */
 		if (invert_this) {
 			dmake_odir_specified = false;
@@ -2498,18 +2493,6 @@ enter_argv_values(int argc, char *argv[], ASCII_Dyn_Array *makeflags_and_macro)
 				MBSTOWCS(wcs_buffer, NOCATGETS("DMAKE_MODE"));
 				name = GETNAME(wcs_buffer, FIND_LENGTH);
 				break;
-			case 128: /* -O seen */
-				if (argv[i+1] == NULL) {
-					fatal(catgets(catd, 1, 287, "No file descriptor argument after -O flag"));
-				}
-				mtool_msgs_fd = atoi(argv[i+1]);
-				/* find out if mtool_msgs_fd is a valid file descriptor */
-				if (fstat(mtool_msgs_fd, &statbuf) < 0) {
-					fatal(catgets(catd, 1, 355, "Invalid file descriptor %d after -O flag"), mtool_msgs_fd);
-				}
-				argv[i] = NULL;
-				argv[i+1] = NULL;
-				continue;
 			case 256: /* -K seen */
 				if (argv[i+1] == NULL) {
 					fatal(catgets(catd, 1, 288, "No makestate filename argument after -K flag"));
@@ -3204,43 +3187,6 @@ ERROR_MACRO:
 	/* Macro without '=' or with invalid left/right part */
 	return;
 }
-
-#ifdef TEAMWARE_MAKE_CMN
-/*
- * This function, if registered w/ avo_cli_get_license(), will be called
- * if the application is about to exit because:
- *   1) there has been certain unrecoverable error(s) that cause the
- *      application to exit immediately.
- *   2) the user has lost a license while the application is running.
- */
-extern "C" void
-dmake_exit_callback(void)
-{
-	fatal(catgets(catd, 1, 306, "can not get a license, exiting..."));
-	exit(1);
-}
-
-/*
- * This function, if registered w/ avo_cli_get_license(), will be called
- * if the application can not get a license.
- */
-extern "C" void
-dmake_message_callback(char *err_msg)
-{
-	static Boolean	first = true;
-
-	if (!first) {
-		return;
-	}
-	first = false;
-	if ((!list_all_targets) &&
-	    (report_dependencies_level == 0) &&
-	    (dmake_mode_type != serial_mode)) {
-		warning(catgets(catd, 1, 313, "can not get a TeamWare license, defaulting to serial mode..."));
-	}
-}
-#endif
-
 
 static void
 report_dir_enter_leave(Boolean entering)
