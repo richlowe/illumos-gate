@@ -1224,7 +1224,7 @@ setvar_daemon(register Name name, register Name value, Boolean append, Daemon da
 	if (macro->body.macro.exported) {
 		static char	*env;
 
-		if (!reading_environment && (value != NULL) && value->dollar) {
+		if (!reading_environment && (value != NULL)) {
 			Envvar	p;
 
 			for (p = envvar; p != NULL; p = p->next) {
@@ -1242,7 +1242,7 @@ setvar_daemon(register Name name, register Name value, Boolean append, Daemon da
 			p->already_put = false;
 			envvar = p;
 found_it:;
-		} else {
+		} if (reading_environment || (value == NULL) || !value->dollar) {
 			length = 2 + strlen(name->string_mb);
 			if (value != NULL) {
 				length += strlen(value->string_mb);

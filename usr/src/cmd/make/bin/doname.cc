@@ -969,6 +969,14 @@ check_dependencies(Doname *result, Property line, Boolean do_get, Name target, N
 			if (dependencies_running) {
 				break;
 			}
+		} else if ((!parallel_ok(dependency->name, false)) &&
+			   (dependencies_running)) {
+			/*
+			 * If we can't execute the current dependency in
+			 * parallel, hold off the dependency processing
+			 * to preserve the order of the dependencies.
+			 */
+			break;
 		} else {
 			timestruc_t	depe_time = file_doesnt_exist;
 
