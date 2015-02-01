@@ -1144,11 +1144,7 @@ await_parallel(Boolean waitflg)
 			;
 		}
 		if (rp == NULL) {
-			if (send_mtool_msgs) {
-				continue;
-			} else {
-				fatal(catgets(catd, 1, 128, "Internal error: returned child pid not in running_list"));
-			}
+			fatal(catgets(catd, 1, 128, "Internal error: returned child pid not in running_list"));
 		} else {
 			rp->state = (WIFEXITED(status) && WEXITSTATUS(status) == 0) ? build_ok : build_failed;
 		}
@@ -1838,8 +1834,7 @@ run_rule_commands(char *host, char **commands)
 			               false, /* bugs #4085164 & #4990057 */
 			               /* BOOLEAN(silent_flag && ignore), */
 			               always_exec, 
-			               (Name) NULL,
-			               false);
+			               (Name) NULL);
 			if (result == build_failed) {
 				if (silent_flag) {
 					(void) printf(catgets(catd, 1, 152, "The following command caused the error:\n%s\n"), command->string_mb);

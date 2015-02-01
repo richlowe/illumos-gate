@@ -110,7 +110,6 @@
 	char		mbs_buffer2[(MAXPATHLEN * MB_LEN_MAX)];
 	char		*mbs_ptr;
 	char		*mbs_ptr2;
-	int		mtool_msgs_fd;
 	Boolean		depinfo_already_read = false;
 	Boolean		no_action_was_taken = true;	/* true if we've not **
 							** run any command   */
@@ -148,7 +147,6 @@
 	Cmd_line	get_rule;
 	Name		get_posix_name;
 	Cmd_line	get_posix_rule;
-	Boolean		send_mtool_msgs;		/* `-K' */
 	Boolean		all_precious;
 	Boolean		silent_all;			/* `-s' */
 	Boolean		report_cwd;			/* `-w' */

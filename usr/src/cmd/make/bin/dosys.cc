@@ -79,7 +79,7 @@ static	void		redirect_stderr(void);
  *		working_on_targets We started processing real targets
  */
 Doname
-dosys(register Name command, register Boolean ignore_error, register Boolean call_make, Boolean silent_error, Boolean always_exec, Name target, Boolean redirect_out_err)
+dosys(register Name command, register Boolean ignore_error, register Boolean call_make, Boolean silent_error, Boolean always_exec, Name target)
 {
 	timestruc_t		before;
 	register int		length = command->hash.length;
@@ -124,12 +124,11 @@ dosys(register Name command, register Boolean ignore_error, register Boolean cal
 		  target,
 		  wcb.get_string(),
                   command->meta ?
-	            doshell(q, ignore_error, redirect_out_err,
+	            doshell(q, ignore_error, 
 			    stdout_file, stderr_file, 0) :
-	            doexec(q, ignore_error, redirect_out_err,
+	            doexec(q, ignore_error, 
 		 	   stdout_file, stderr_file,
 	                   vroot_path, 0),
-	          send_mtool_msgs,
                   NULL,
                   -1
 	          )) {

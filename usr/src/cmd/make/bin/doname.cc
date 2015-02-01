@@ -61,8 +61,6 @@
 
 #define MAXRULES 100
 
-#define SEND_MTOOL_MSG(cmds) 
-
 // Sleep for .1 seconds between stat()'s
 const int	STAT_RETRY_SLEEP_TIME = 100000;
 
@@ -1773,21 +1771,6 @@ execute_serial(Property line)
 	int			filed;
 	Name			target = line->body.line.target;
 
-	SEND_MTOOL_MSG(
-		if (!sent_rsrc_info_msg) {
-			if (userName[0] == '\0') {
-				avo_get_user(userName, NULL);
-			}
-			if (hostName[0] == '\0') {
-				strcpy(hostName, avo_hostname());
-			}
-			send_rsrc_info_msg(1, hostName, userName);
-			sent_rsrc_info_msg = 1;
-		}
-		send_job_start_msg(line);
-		job_result_msg = new Avo_MToolJobResultMsg();
-	);
-
 	target->has_recursive_dependency = false;
 	// We have to create a copy of the rules chain for processing because
 	// the original one can be destroyed during .make.state file rereading.
@@ -1819,29 +1802,8 @@ execute_serial(Property line)
 		    (!rule->silent || do_not_exec_rule) &&
 		    (report_dependencies_level == 0)) {
 			(void) printf("%s\n", rule->command_line->string_mb);
-			SEND_MTOOL_MSG(
-				job_result_msg->appendOutput(AVO_STRDUP(rule->command_line->string_mb));
-			);
 		}
 		if (rule->command_line->hash.length > 0) {
-			SEND_MTOOL_MSG(
-				(void) sprintf(mbstring,
-						NOCATGETS("%s/make.stdout.%d.%d.XXXXXX"),
-						tmpdir,
-						getpid(),
-						file_number++);
-
-				int tmp_fd = mkstemp(mbstring);
-				if(tmp_fd) {
-					(void) close(tmp_fd);
-				}
-
-				stdout_file = strdup(mbstring);
-				stderr_file = NULL;
-				child_pid = pollResults(stdout_file,
-							(char *)NULL,
-							(char *)NULL);
-			);
 			/* Do assignment if command line prefixed with "=" */
 			if (rule->assign) {
 				result = build_ok;
@@ -1857,22 +1819,9 @@ execute_serial(Property line)
 				               /* BOOLEAN(rule->silent &&
 				                       rule->ignore_error), */
 				               (Boolean) rule->always_exec,
-				               target,
-				               send_mtool_msgs);
+				               target);
 				check_state(temp_file_name);
 			}
-			SEND_MTOOL_MSG(
-				append_job_result_msg(job_result_msg);
-				if (child_pid > 0) {
-					kill(child_pid, SIGUSR1);
-					while (!((waitpid(child_pid, 0, 0) == -1)
-						&& (errno == ECHILD)));
-				}
-				child_pid = 0;
-				(void) unlink(stdout_file);
-				retmem_mb(stdout_file);
-				stdout_file = NULL;
-			);
 		} else {
 			result = build_ok;
 		}
@@ -1880,21 +1829,9 @@ execute_serial(Property line)
 			if (silent || rule->silent) {
 				(void) printf(catgets(catd, 1, 242, "The following command caused the error:\n%s\n"),
 				              rule->command_line->string_mb);
-				SEND_MTOOL_MSG(
-					job_result_msg->appendOutput(AVO_STRDUP(catgets(catd, 1, 243, "The following command caused the error:")));
-					job_result_msg->appendOutput(AVO_STRDUP(rule->command_line->string_mb));
-				);
 			}
 			if (!rule->ignore_error && !ignore_errors) {
 				if (!continue_after_error) {
-					SEND_MTOOL_MSG(
-						job_result_msg->setResult(job_msg_id, (result == build_ok) ? 0 : 1, DONE);
-						xdr_msg = (RWCollectable*)
-							job_result_msg;
-						xdr(&xdrs, xdr_msg);
-						(void) fflush(mtool_msgs_fp);
-						delete job_result_msg;
-					);
 					fatal(catgets(catd, 1, 244, "Command failed for target `%s'"),
 					      target->string_mb);
 				}
@@ -1914,14 +1851,6 @@ execute_serial(Property line)
 		free(rule);
 	}
 	command = NULL;
-	SEND_MTOOL_MSG(
-		job_result_msg->setResult(job_msg_id, (result == build_ok) ? 0 : 1, DONE);
-		xdr_msg = (RWCollectable*) job_result_msg;
-		xdr(&xdrs, xdr_msg);
-		(void) fflush(mtool_msgs_fp);
-
-		delete job_result_msg;
-	);
 	if (temp_file_name != NULL) {
 		free_name(temp_file_name);
 	}
@@ -2583,21 +2512,6 @@ touch_command(register Property line, register Name target, Doname result)
 	Name			touch_cmd;
 	Cmd_line		rule;
 
-
-	SEND_MTOOL_MSG(
-		if (!sent_rsrc_info_msg) {
-			if (userName[0] == '\0') {
-				avo_get_user(userName, NULL);
-			}
-			if (hostName[0] == '\0') {
-				strcpy(hostName, avo_hostname());
-			}
-			send_rsrc_info_msg(1, hostName, userName);
-			sent_rsrc_info_msg = 1;
-		}
-		send_job_start_msg(line);
-		job_result_msg = new Avo_MToolJobResultMsg();
-	);
 	for (name = target, target_group = NULL; name != NULL;) {
 		if (!name->is_member) {
 			/*
@@ -2627,53 +2541,15 @@ touch_command(register Property line, register Name target, Doname result)
 			    do_not_exec_rule &&
 			    (target_group == NULL)) {
 				(void) printf("%s\n", touch_cmd->string_mb);
-				SEND_MTOOL_MSG(
-					job_result_msg->appendOutput(AVO_STRDUP(touch_cmd->string_mb));
-				);
 			}
 			/* Run the touch command, or simulate it */
 			if (!do_not_exec_rule) {
-
-				SEND_MTOOL_MSG(
-					(void) sprintf(mbstring,
-							NOCATGETS("%s/make.stdout.%d.%d.XXXXXX"),
-							tmpdir,
-							getpid(),
-							file_number++);
-				
-					int tmp_fd = mkstemp(mbstring);
-					if(tmp_fd) {
-						(void) close(tmp_fd);
-					}
-
-					stdout_file = strdup(mbstring);
-					stderr_file = NULL;
-					child_pid = pollResults(stdout_file,
-								(char *)NULL,
-								(char *)NULL);
-				);
-
 				result = dosys(touch_cmd,
 					       false,
 					       false,
 					       false,
 					       false,
-					       name,
-					       send_mtool_msgs);
-
-				SEND_MTOOL_MSG(
-					append_job_result_msg(job_result_msg);
-					if (child_pid > 0) {
-						kill(child_pid, SIGUSR1);
-						while (!((waitpid(child_pid, 0, 0) == -1)
-							&& (errno == ECHILD)));
-					}
-					child_pid = 0;
-					(void) unlink(stdout_file);
-					retmem_mb(stdout_file);
-					stdout_file = NULL;
-				);
-
+					       name);
 			} else {
 				result = build_ok;
 			}
@@ -2691,13 +2567,6 @@ touch_command(register Property line, register Name target, Doname result)
 			name = NULL;
 		}
 	}
-	SEND_MTOOL_MSG(
-		job_result_msg->setResult(job_msg_id, (result == build_ok) ? 0 : 1, DONE);
-		xdr_msg = (RWCollectable*) job_result_msg;
-		xdr(&xdrs, xdr_msg);
-		(void) fflush(mtool_msgs_fp);
-		delete job_result_msg;
-	);
 	return result;
 }
 
