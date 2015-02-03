@@ -1500,7 +1500,7 @@ parse_command_option(register char ch)
 	case 'v':			/* Version flag */
 		if (invert_this) {
 		} else {
-			fprintf(stdout, "dmake: %s\n", verstring);
+			fprintf(stdout, "%s: %s\n", getprogname(), verstring);
 			exit_status = 0;
 			exit(0);
 		}
@@ -3187,23 +3187,27 @@ static	char *	mlev = NULL;
 	if(report_cwd) {
 		if(make_level_val <= 0) {
 			if(entering) {
-				sprintf( rcwd
-				       , gettext("dmake: Entering directory `%s'\n")
-				       , get_current_path());
+				sprintf(rcwd,
+				    gettext("%s: Entering directory `%s'\n"),
+				    getprogname(),
+				    get_current_path());
 			} else {
-				sprintf( rcwd
-				       , gettext("dmake: Leaving directory `%s'\n")
-				       , get_current_path());
+				sprintf(rcwd,
+				    gettext("%s: Leaving directory `%s'\n"),
+				    getprogname(),
+				    get_current_path());
 			}
 		} else {
 			if(entering) {
-				sprintf( rcwd
-				       , gettext("dmake[%d]: Entering directory `%s'\n")
-				       , make_level_val, get_current_path());
+				sprintf(rcwd,
+				    gettext("%s[%d]: Entering directory `%s'\n"),
+				    getprogname(),
+				    make_level_val, get_current_path());
 			} else {
-				sprintf( rcwd
-				       , gettext("dmake[%d]: Leaving directory `%s'\n")
-				       , make_level_val, get_current_path());
+				sprintf(rcwd,
+				    gettext("%s[%d]: Leaving directory `%s'\n"),
+				    getprogname(),
+				    make_level_val, get_current_path());
 			}
 		}
 		printf("%s", rcwd);

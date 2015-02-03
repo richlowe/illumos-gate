@@ -227,7 +227,8 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 			    (doname(makefile_name, true, false) == build_failed)) {
 				if (complain) {
 					(void) fprintf(stderr,
-						       gettext("make: Couldn't make `%s'\n"),
+						       gettext("%s: Couldn't make `%s'\n"),
+						       getprogname(),
 						       makefile_name->string_mb);
 				}
 				max_include_depth--;

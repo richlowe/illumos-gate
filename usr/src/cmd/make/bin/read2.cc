@@ -1872,14 +1872,16 @@ fatal_reader(char * pattern, ...)
 	}
 
 	(void) fflush(stdout);
-	(void) fprintf(stderr, gettext("make: Fatal error in reader: "));
+	(void) fprintf(stderr, gettext("%s: Fatal error in reader: "),
+	    getprogname());
 	(void) vfprintf(stderr, pattern, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
 
 	if (temp_file_name != NULL) {
 		(void) fprintf(stderr,
-			       gettext("make: Temp-file %s not removed\n"),
+			       gettext("%s: Temp-file %s not removed\n"),
+			       getprogname(),
 			       temp_file_name->string_mb);
 		temp_file_name = NULL;
 	}
