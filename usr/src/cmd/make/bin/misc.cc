@@ -136,7 +136,7 @@ fatal(const char *message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-	(void) fprintf(stderr, gettext("make: Fatal error: "));
+	(void) fprintf(stderr, gettext("%s: Fatal error: "), getprogname());
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
@@ -193,7 +193,7 @@ warning(char * message, ...)
 
 	va_start(args, message);
 	(void) fflush(stdout);
-	(void) fprintf(stderr, gettext("make: Warning: "));
+	(void) fprintf(stderr, gettext("%s: Warning: "), getprogname());
 	(void) vfprintf(stderr, message, args);
 	(void) fprintf(stderr, "\n");
 	va_end(args);
