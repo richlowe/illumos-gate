@@ -190,7 +190,7 @@ read_make_machines(Name make_machines_name)
 	uname(&uts_info);
 	strcpy(local_host_mb, &uts_info.nodename[0]);
 	MBSTOWCS(local_host, local_host_mb);
-	local_host_wslen = wslen(local_host);
+	local_host_wslen = wcslen(local_host);
 
 	// There is no getdomainname() function on Solaris.
 	// And netname2host() function does not work on Linux.
@@ -198,7 +198,7 @@ read_make_machines(Name make_machines_name)
 	if (host2netname(mbs_buffer, NULL, NULL) &&
 	    netname2host(mbs_buffer, mbs_buffer2, MAXNETNAMELEN+1)) {
 		MBSTOWCS(full_host, mbs_buffer2);
-		full_host_wslen = wslen(full_host);
+		full_host_wslen = wcslen(full_host);
 	}
 
 	for (ms = make_machines_list;
@@ -237,7 +237,7 @@ read_make_machines(Name make_machines_name)
 			 * 1) hostname is longer than MAX_HOSTNAMELEN, or
 			 * 2) hostname is unknown
 			 */
-			if ((wslen(mp) > MAX_HOSTNAMELEN) ||
+			if ((wcslen(mp) > MAX_HOSTNAMELEN) ||
 			    ((hp = gethostbyname(mbs_buffer)) == NULL)) {
 				warning(gettext("Ignoring unknown host %s"),
 					mbs_buffer);
@@ -248,7 +248,7 @@ read_make_machines(Name make_machines_name)
 				}
 			} else {
 				/* Compare current hostname with local_host. */
-				if (wslen(mp) == local_host_wslen &&
+				if (wcslen(mp) == local_host_wslen &&
 				    IS_WEQUALN(mp, local_host, local_host_wslen)) {
 					/*
 					 * Bingo, local_host is in .make.machines.
@@ -256,7 +256,7 @@ read_make_machines(Name make_machines_name)
 					 */
 					pmake_max_jobs = PMAKE_DEF_MAX_JOBS;
 				/* Compare current hostname with full_host. */
-				} else if (wslen(mp) == full_host_wslen &&
+				} else if (wcslen(mp) == full_host_wslen &&
 					   IS_WEQUALN(mp, full_host, full_host_wslen)) {
 					/*
 					 * Bingo, full_host is in .make.machines.

@@ -1488,16 +1488,16 @@ dynamic_dependencies(Name target)
 		/* replace the name with the expansion */
 		if (dependency->name->wildcard) {
 			wcb.init(dependency->name);
-			if ((start = (wchar_t *) wschr(wcb.get_string(),
+			if ((start = (wchar_t *) wcschr(wcb.get_string(),
 					   (int) parenleft_char)) != NULL) {
 				/* lib(*) type pattern */
 				library = buffer;
-				(void) wsncpy(buffer,
+				(void) wcsncpy(buffer,
 					      wcb.get_string(),
 					      start - wcb.get_string());
 				buffer[start-wcb.get_string()] =
 				  (int) nul_char;
-				(void) wsncpy(pattern,
+				(void) wcsncpy(pattern,
 					      start + 1,
 (int) (dependency->name->hash.length-(start-wcb.get_string())-2));
 				pattern[dependency->name->hash.length -
@@ -1505,13 +1505,13 @@ dynamic_dependencies(Name target)
 					  (int) nul_char;
 			} else {
 				library = NULL;
-				(void) wsncpy(pattern,
+				(void) wcsncpy(pattern,
 					      wcb.get_string(),
 					      (int) dependency->name->hash.length);
 				pattern[dependency->name->hash.length] =
 				  (int) nul_char;
 			}
-			start = (wchar_t *) wsrchr(pattern, (int) slash_char);
+			start = (wchar_t *) wcsrchr(pattern, (int) slash_char);
 			if (start == NULL) {
 				directory = dot;
 				p = pattern;
@@ -2700,7 +2700,7 @@ sccs_get(register Name target, register Property *command)
 
 		Wstring wcb(target);
                 if ((link[0] != slash_char) &&
-                    ((p = (wchar_t *) wsrchr(wcb.get_string(), slash_char)) != NULL)) {
+                    ((p = (wchar_t *) wcsrchr(wcb.get_string(), slash_char)) != NULL)) {
                         append_string(wcb.get_string(), &string, p - wcb.get_string() + 1);
 		}
                 append_string(link, &string, result);
@@ -2818,7 +2818,7 @@ read_directory_of_file(register Name file)
 	wchar_t usr_include_sys_buf[MAXPATHLEN];
 
 	register Name		directory = dot;
-	register wchar_t	*p = (wchar_t *) wsrchr(wcb,
+	register wchar_t	*p = (wchar_t *) wcsrchr(wcb,
 							(int) slash_char);
 	register int		length = p - wcb;
 	static Name		usr_include;
@@ -2892,9 +2892,9 @@ add_pattern_conditionals(register Name target)
 		wcb1.init(conditional->body.conditional.target);
 		pattern = wcb1.get_string();
 		if (pattern[1] != 0) {
-			percent = (wchar_t *) wschr(pattern, (int) percent_char);
+			percent = (wchar_t *) wcschr(pattern, (int) percent_char);
 			if (!wcb.equaln(pattern, percent-pattern) ||
-			    !IS_WEQUAL(wcb.get_string(wcb.length()-wslen(percent+1)), percent+1)) {
+			    !IS_WEQUAL(wcb.get_string(wcb.length()-wcslen(percent+1)), percent+1)) {
 				continue;
 			}
 		}

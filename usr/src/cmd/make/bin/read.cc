@@ -351,7 +351,7 @@ read_simple_file(register Name makefile_name, register Boolean chase_path, regis
 		  stdin_text_p = getmem(length = 1024);
 		stdin_buffer_end = stdin_text_p + length;
 		MBSTOWCS(wcs_buffer, "standard input");
-		file_being_read = (wchar_t *) wsdup(wcs_buffer);
+		file_being_read = (wchar_t *) wcsdup(wcs_buffer);
 		line_number = 0;
 		while ((n = read(fileno(stdin),
 				 stdin_text_p,
@@ -827,7 +827,7 @@ start_new_line_no_skip:
 						      &include_name,
 						      true_makefile_name->hash.length);
 
-					wchar_t *slash = wsrchr(include_name.buffer.start, (int) slash_char);
+					wchar_t *slash = wcsrchr(include_name.buffer.start, (int) slash_char);
 					if (slash != NULL) {
 						include_name.text.p = slash + 1;
 						append_string(name_start,

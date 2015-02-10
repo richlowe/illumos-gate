@@ -36,8 +36,6 @@
 #include <errno.h>		/* errno */
 
 #include <wctype.h>
-#include <widec.h>
-
 
 /*
  * A type and some utilities for boolean values
@@ -158,8 +156,8 @@ enum {
 #define GETNAME(a,b)		getname_fn((a), (b), false)
 #define IS_EQUAL(a,b)		(!strcmp((a), (b)))
 #define IS_EQUALN(a,b,n)	(!strncmp((a), (b), (n)))
-#define IS_WEQUAL(a,b)		(!wscmp((a), (b)))
-#define IS_WEQUALN(a,b,n)	(!wsncmp((a), (b), (n)))
+#define IS_WEQUAL(a,b)		(!wcscmp((a), (b)))
+#define IS_WEQUALN(a,b,n)	(!wcsncmp((a), (b), (n)))
 #define MBLEN(a)		mblen((a), MB_LEN_MAX)
 #define MBSTOWCS(a,b)		(void) mbstowcs_with_check((a), (b), MAXPATHLEN)
 #define	MBTOWC(a,b)		mbtowc((a), (b), MB_LEN_MAX)
@@ -244,7 +242,7 @@ class Wstring {
 		void init(struct _Name * name);
 		void init(wchar_t * name, unsigned length);
 		unsigned length() {
-			return wslen(string.buffer.start);
+			return wcslen(string.buffer.start);
 		};
 		void append_to_str(struct _String * str, unsigned off, unsigned length);
 

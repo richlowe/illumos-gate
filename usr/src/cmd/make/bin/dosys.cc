@@ -107,7 +107,7 @@ dosys(register Name command, register Boolean ignore_error, register Boolean cal
 
 	/* Copy string to make it OK to write it. */
 	q = ALLOC_WC(length + 1);
-	(void) wscpy(q, p);
+	(void) wcscpy(q, p);
 	/* Write the state file iff this command uses make. */
 	if (call_make && command_changed) {
 		write_state_file(0, false);

@@ -360,7 +360,7 @@ print_rec_info(Name target)
 		/* 
 		 * if found,  print starting with the space after the ':'
 		 */
-		colon = (wchar_t *) wschr(rp->oldline, (int) colon_char);
+		colon = (wchar_t *) wcschr(rp->oldline, (int) colon_char);
 		(void) printf("%s", colon + 1);
 	}
 }

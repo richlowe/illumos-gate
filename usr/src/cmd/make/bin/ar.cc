@@ -199,7 +199,7 @@ read_archive(register Name target)
 	if (member->body.member.member != NULL) {
 		Wstring member_string(member->body.member.member);
 		wchar_t * wcb = member_string.get_string();
-		if((slash = (wchar_t *) wsrchr(wcb, (int) slash_char)) != NULL) {
+		if((slash = (wchar_t *) wcsrchr(wcb, (int) slash_char)) != NULL) {
 			INIT_STRING_FROM_STACK(true_member_name, buffer);
 			append_string(member->body.member.library->string_mb,
 				      &true_member_name,
@@ -667,9 +667,9 @@ translate_entry(register Ar *arp, Name target, register Property member, char **
 					goto read_error;
 				}
 				MBSTOWCS(wcs_buffer, arp->arf_5.arf_name);
-				(void) wsncpy(member_string,
+				(void) wcsncpy(member_string,
 					      wcs_buffer,
-					      wslen(wcs_buffer));
+					      wcslen(wcs_buffer));
 				member_string[sizeof(arp->arf_5.arf_name)] =
 								(int) nul_char;
 				member->body.member.member =

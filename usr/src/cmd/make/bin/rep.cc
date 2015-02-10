@@ -101,12 +101,12 @@ report_recursive_init(void)
 	Wstring rns(recursive_name);
 	wchar_t * wcb = rns.get_string();
 	while (fgetws(line, line_size, fp) != NULL) {
-		while (wslen(line) == line_index) {
-			if (line[wslen(line) - 1] == '\n') {
+		while (wcslen(line) == line_index) {
+			if (line[wcslen(line) - 1] == '\n') {
 				continue;
 			}
 			bigger_line = ALLOC_WC(2 * line_size);
-			wscpy(bigger_line, line);
+			wcscpy(bigger_line, line);
 			retmem(line);
 			line = bigger_line;
 			if (fgetws(&line[line_index], line_size, fp) == NULL)
@@ -115,12 +115,12 @@ report_recursive_init(void)
 			line_size = 2 * line_size;
 		}
 
-		colon = (wchar_t *) wschr(line, (int) colon_char);
+		colon = (wchar_t *) wcschr(line, (int) colon_char);
 		if (colon == NULL) {
 			continue;
 		}
-		dollar = (wchar_t *) wschr(line, (int) dollar_char);
-		line[wslen(line) - 1] = (int) nul_char;
+		dollar = (wchar_t *) wcschr(line, (int) dollar_char);
+		line[wcslen(line) - 1] = (int) nul_char;
 		if (IS_WEQUALN(&colon[2], wcb,
 	            (int) recursive_name->hash.length)) {
 			/*
@@ -136,16 +136,16 @@ report_recursive_init(void)
 			/*
 			 * set conditional_macro_string if string is present
 			 */
-			rp->oldline = (wchar_t *) wsdup(line);
+			rp->oldline = (wchar_t *) wcsdup(line);
 			if ( dollar != NULL ){
 				rp->cond_macrostring = 
-				    (wchar_t *) wsdup(dollar - VER_LEN + 1);
+				    (wchar_t *) wcsdup(dollar - VER_LEN + 1);
 			}
 			/* 
 			 * get target name into recursive struct
 			 */
 			*colon = (int) nul_char;
-			rp->target = (wchar_t *) wsdup(line);
+			rp->target = (wchar_t *) wcsdup(line);
 			*bpatch = rp;
 			bpatch = &rp->next;
 		}
@@ -183,14 +183,14 @@ report_recursive_dep(Name target, wchar_t *line)
 		(void) memset((char *) rp, 0, sizeof (Recursive_make_rec));
 		wchar_t * wcb = get_wstring(target->string_mb); // XXX Tolik: needs retmem
                 rp->target = wcb;
-		rp->newline = (wchar_t *) wsdup(line);
-		rp->cond_macrostring = (wchar_t *) wsdup(rec_buf);
+		rp->newline = (wchar_t *) wcsdup(line);
+		rp->cond_macrostring = (wchar_t *) wcsdup(rec_buf);
 		*bpatch = rp;
 		bpatch = &rp->next;
 		changed = true;
 	} else {
 		if ((rp->oldline != NULL) && !IS_WEQUAL(rp->oldline, line)) {
-			rp->newline = (wchar_t *) wsdup(line);
+			rp->newline = (wchar_t *) wcsdup(line);
 			changed = true;
 		}
 		rp->removed = false;
