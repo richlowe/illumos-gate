@@ -497,7 +497,7 @@ dump_target_list(void)
 			if ((p->colons != no_colon) &&
 			    ((wcb[0] != (int) period_char) ||
 			     ((wcb[0] == (int) period_char) &&
-			      (wschr(wcb, (int) slash_char))))) {
+			      (wcschr(wcb, (int) slash_char))))) {
 				print_target_n_deps(p);
 			}
 	}

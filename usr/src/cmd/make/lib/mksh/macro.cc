@@ -39,7 +39,6 @@
 #include <mksh/misc.h>		/* retmem() */
 #include <mksh/read.h>		/* get_next_block_fn() */
 
-#include <widec.h>
 #include <libintl.h>
 
 /*
@@ -155,7 +154,7 @@ expand_value(Name value, register String destination, Boolean cmd)
 	value->being_expanded = true;
 	/* Setup the structure we read from */
 	Wstring vals(value);
-	sourceb.string.text.p = sourceb.string.buffer.start = wsdup(vals.get_string());
+	sourceb.string.text.p = sourceb.string.buffer.start = wcsdup(vals.get_string());
 	sourceb.string.free_after_use = true;
 	sourceb.string.text.end =
 	  sourceb.string.buffer.end =
@@ -459,10 +458,10 @@ get_macro_value:
 		}
 		/* Internalize the macro name using the first char only. */
 		name = GETNAME(string.buffer.start, 1);
-		(void) wscpy(string.buffer.start, string.buffer.start + 2);
+		(void) wcscpy(string.buffer.start, string.buffer.start + 2);
 	}
 	/* Check for other kinds of translations. */
-	if ((colon = (wchar_t *) wschr(string.buffer.start,
+	if ((colon = (wchar_t *) wcschr(string.buffer.start,
 				       (int) colon_char)) != NULL) {
 		/*
 		 * We have a $(FOO:.c=.o) type translation.
@@ -476,10 +475,10 @@ get_macro_value:
 		if (IS_WEQUAL(colon, colon_sh) || IS_WEQUAL(colon, colon_shell)) {
 			replacement = sh_replace;
 		} else if ((svr4) ||
-		           ((percent = (wchar_t *) wschr(colon + 1,
+		           ((percent = (wchar_t *) wcschr(colon + 1,
 							 (int) percent_char)) == NULL)) {
 			while (colon != NULL) {
-				if ((eq = (wchar_t *) wschr(colon + 1,
+				if ((eq = (wchar_t *) wcschr(colon + 1,
 							    (int) equal_char)) == NULL) {
 					fatal_reader_mksh(gettext("= missing from replacement macro reference"));
 				}
@@ -488,19 +487,19 @@ get_macro_value:
 					retmem(left_tail);
 				}
 				left_tail = ALLOC_WC(left_tail_len + 1);
-				(void) wsncpy(left_tail,
+				(void) wcsncpy(left_tail,
 					      colon + 1,
 					      eq - colon - 1);
 				left_tail[eq - colon - 1] = (int) nul_char;
 				replacement = suffix_replace;
-				if ((colon = (wchar_t *) wschr(eq + 1,
+				if ((colon = (wchar_t *) wcschr(eq + 1,
 							       (int) colon_char)) != NULL) {
 					tmp_len = colon - eq;
 					if(right_tail) {
 						retmem(right_tail);
 					}
 					right_tail = ALLOC_WC(tmp_len);
-					(void) wsncpy(right_tail,
+					(void) wcsncpy(right_tail,
 						      eq + 1,
 						      colon - eq - 1);
 					right_tail[colon - eq - 1] =
@@ -509,16 +508,16 @@ get_macro_value:
 					if(right_tail) {
 						retmem(right_tail);
 					}
-					right_tail = ALLOC_WC(wslen(eq) + 1);
-					(void) wscpy(right_tail, eq + 1);
+					right_tail = ALLOC_WC(wcslen(eq) + 1);
+					(void) wcscpy(right_tail, eq + 1);
 				}
 			}
 		} else {
-			if ((eq = (wchar_t *) wschr(colon + 1,
+			if ((eq = (wchar_t *) wcschr(colon + 1,
 						    (int) equal_char)) == NULL) {
 				fatal_reader_mksh(gettext("= missing from replacement macro reference"));
 			}
-			if ((percent = (wchar_t *) wschr(colon + 1,
+			if ((percent = (wchar_t *) wcschr(colon + 1,
 							 (int) percent_char)) == NULL) {
 				fatal_reader_mksh(gettext("%% missing from replacement macro reference"));
 			}
@@ -532,7 +531,7 @@ get_macro_value:
 					retmem(left_head);
 				}
 				left_head = ALLOC_WC(tmp_len);
-				(void) wsncpy(left_head,
+				(void) wcsncpy(left_head,
 					      colon + 1,
 					      percent - colon - 1);
 				left_head[percent-colon-1] = (int) nul_char;
@@ -548,7 +547,7 @@ get_macro_value:
 					retmem(left_tail);
 				}
 				left_tail = ALLOC_WC(tmp_len);
-				(void) wsncpy(left_tail,
+				(void) wcsncpy(left_tail,
 					      percent + 1,
 					      eq - percent - 1);
 				left_tail[eq-percent-1] = (int) nul_char;
@@ -558,17 +557,17 @@ get_macro_value:
 				left_tail_len = 0;
 			}
 
-			if ((percent = (wchar_t *) wschr(++eq,
+			if ((percent = (wchar_t *) wcschr(++eq,
 							 (int) percent_char)) == NULL) {
 
-				right_hand[0] = ALLOC_WC(wslen(eq) + 1);
+				right_hand[0] = ALLOC_WC(wcslen(eq) + 1);
 				right_hand[1] = NULL;
-				(void) wscpy(right_hand[0], eq);
+				(void) wcscpy(right_hand[0], eq);
 			} else {
 				i = 0;
 				do {
 					right_hand[i] = ALLOC_WC(percent-eq+1);
-					(void) wsncpy(right_hand[i],
+					(void) wcsncpy(right_hand[i],
 						      eq,
 						      percent - eq);
 					right_hand[i][percent-eq] =
@@ -579,14 +578,14 @@ get_macro_value:
 					eq = percent + 1;
 					if (eq[0] == (int) nul_char) {
 						MBSTOWCS(wcs_buffer, "");
-						right_hand[i] = (wchar_t *) wsdup(wcs_buffer);
+						right_hand[i] = (wchar_t *) wcsdup(wcs_buffer);
 						i++;
 						break;
 					}
-				} while ((percent = (wchar_t *) wschr(eq, (int) percent_char)) != NULL);
+				} while ((percent = (wchar_t *) wcschr(eq, (int) percent_char)) != NULL);
 				if (eq[0] != (int) nul_char) {
-					right_hand[i] = ALLOC_WC(wslen(eq) + 1);
-					(void) wscpy(right_hand[i], eq);
+					right_hand[i] = ALLOC_WC(wcslen(eq) + 1);
+					(void) wcscpy(right_hand[i], eq);
 					i++;
 				}
 				right_hand[i] = NULL;
@@ -696,7 +695,7 @@ get_macro_value:
 					chr = *p;
 					*p = (int) nul_char;
 				}
-				eq = (wchar_t *) wsrchr(block_start, (int) slash_char);
+				eq = (wchar_t *) wcsrchr(block_start, (int) slash_char);
 				if (p != NULL) {
 					*p = chr;
 				}
@@ -718,7 +717,7 @@ get_macro_value:
 					chr = *p;
 					*p = (int) nul_char;
 				}
-				eq = (wchar_t *) wsrchr(block_start, (int) slash_char);
+				eq = (wchar_t *) wcsrchr(block_start, (int) slash_char);
 				if (p != NULL) {
 					*p = chr;
 				}
@@ -919,13 +918,13 @@ init_arch_macros(void)
 		}
 		while (fgets(mb_buf, sizeof(mb_buf), pipe) != NULL) {
 			MBSTOWCS(wcs_buffer, mb_buf);
-			append_string(wcs_buffer, &result_string, wslen(wcs_buffer));
+			append_string(wcs_buffer, &result_string, wcslen(wcs_buffer));
 		}
 		if (pclose(pipe) != 0) {
 			fatal_mksh(gettext("Execute of %s failed"), mach_command);
 		}
 
-		value = GETNAME(result_string.buffer.start, wslen(result_string.buffer.start));
+		value = GETNAME(result_string.buffer.start, wcslen(result_string.buffer.start));
 
 		if (set_host) {
 			(void) setvar_daemon(host_arch, value, false, no_daemon, true, 0);
@@ -974,13 +973,13 @@ init_mach_macros(void)
 		}
 		while (fgets(mb_buf, sizeof(mb_buf), pipe) != NULL) {
 			MBSTOWCS(wcs_buffer, mb_buf);
-			append_string(wcs_buffer, &result_string, wslen(wcs_buffer));
+			append_string(wcs_buffer, &result_string, wcslen(wcs_buffer));
 		}
 		if (pclose(pipe) != 0) {
 			fatal_mksh(gettext("Execute of %s failed"), arch_command);
 		}
 
-		value = GETNAME(result_string.buffer.start, wslen(result_string.buffer.start));
+		value = GETNAME(result_string.buffer.start, wcslen(result_string.buffer.start));
 
 		if (set_host) {
 			(void) setvar_daemon(host_mach, value, false, no_daemon, true, 0);
@@ -1298,24 +1297,24 @@ found_it:;
 		wchar_t * wcb_vr = vr_str.get_string();
 
 		length = 32 +
-		  wslen(wcb_ha) +
-		    wslen(wcb_ta) +
-		      wslen(wcb_vr);
+		  wcslen(wcb_ha) +
+		    wcslen(wcb_ta) +
+		      wcslen(wcb_vr);
 		old_vr = wcb_vr;
 		MBSTOWCS(wcs_buffer, "/usr/arch/");
 		if (IS_WEQUALN(old_vr,
 			       wcs_buffer,
-			       wslen(wcs_buffer))) {
-			old_vr = (wchar_t *) wschr(old_vr, (int) colon_char) + 1;
+			       wcslen(wcs_buffer))) {
+			old_vr = (wchar_t *) wcschr(old_vr, (int) colon_char) + 1;
 		}
-		if ( (ha == ta) || (wslen(wcb_ta) == 0) ) {
+		if ( (ha == ta) || (wcslen(wcb_ta) == 0) ) {
 			new_value = old_vr;
 		} else {
 			new_value = ALLOC_WC(length);
 			new_value_allocated = true;
 			WCSTOMBS(mbs_buffer, old_vr);
-			(void) wsprintf(new_value,
-				        "/usr/arch/%s/%s:%s",
+			(void) swprintf(new_value, length * SIZEOFWCHAR_T, 
+				        L"/usr/arch/%s/%s:%s",
 				        ha->string_mb + 1,
 				        ta->string_mb + 1,
 				        mbs_buffer);

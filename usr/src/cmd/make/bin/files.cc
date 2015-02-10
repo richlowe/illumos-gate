@@ -231,7 +231,7 @@ vpath_exists(register Name target)
 			*name_p++ = *vpath++;
 		}
 		*name_p++ = (int) slash_char;
-		(void) wscpy(name_p, wcb1.get_string());
+		(void) wcscpy(name_p, wcb1.get_string());
 		alias = GETNAME(file_name, FIND_LENGTH);
 		if (exists(alias) != file_doesnt_exist) {
 			target->stat.is_file = true;
@@ -324,10 +324,10 @@ read_dir(Name dir, wchar_t *pattern, Property line, wchar_t *library)
 	 * files in the directory.
 	 */
 	if ((dir->hash.length > 1) || (wcb.get_string()[0] != (int) period_char)) {
-		(void) wscpy(file_name, wcb.get_string());
+		(void) wcscpy(file_name, wcb.get_string());
 		MBSTOWCS(wcs_buffer, "/");
-		(void) wscat(file_name, wcs_buffer);
-		file_name_p = file_name + wslen(file_name);
+		(void) wcscat(file_name, wcs_buffer);
+		file_name_p = file_name + wcslen(file_name);
 	}
 
 	/* Open the directory. */
@@ -352,7 +352,7 @@ vpath_loop:
 		 * path supplied to the function.
 		 */
 		MBSTOWCS(tmp_wcs_buffer, dp->d_name);
-		(void) wscpy(file_name_p, tmp_wcs_buffer);
+		(void) wcscpy(file_name_p, tmp_wcs_buffer);
 		file = enter_file_name(file_name, library);
 		if ((pattern != NULL) && amatch(tmp_wcs_buffer, pattern)) {
 			/*
@@ -383,7 +383,7 @@ vpath_loop:
 	
 			MBSTOWCS(tmp_wcs_buffer, dp->d_name + 2);
 			plain_file_name_p = plain_file_name;
-			(void) wscpy(plain_file_name_p, tmp_wcs_buffer);
+			(void) wcscpy(plain_file_name_p, tmp_wcs_buffer);
 			plain_file = GETNAME(plain_file_name, FIND_LENGTH);
 			plain_file->stat.is_file = true;
 			plain_file->stat.has_sccs = HAS_SCCS;
@@ -436,11 +436,11 @@ vpath_loop:
  * files in the plain directory. They are also entered in their own right.
  * Prepare the string where we build the true name of the SCCS files.
  */
-	(void) wsncpy(plain_file_name,
+	(void) wcsncpy(plain_file_name,
 		      file_name,
 		      file_name_p - file_name);
 	plain_file_name[file_name_p - file_name] = 0;
-	plain_file_name_p = plain_file_name + wslen(plain_file_name);
+	plain_file_name_p = plain_file_name + wcslen(plain_file_name);
 
         if(!svr4) {
 
@@ -461,14 +461,14 @@ vpath_loop:
 			(void) sprintf(mb_path, "%s/SCCS", sccs_dir_path);
 		}
 		MBSTOWCS(path, mb_path);
-		(void) wscpy(file_name, path);
+		(void) wcscpy(file_name, path);
 	  } else {
 		MBSTOWCS(wcs_buffer, "SCCS");
-		(void) wscpy(file_name_p, wcs_buffer);
+		(void) wcscpy(file_name_p, wcs_buffer);
 	  }
 	} else {
 		MBSTOWCS(wcs_buffer, ".");
-		(void) wscpy(file_name_p, wcs_buffer);
+		(void) wcscpy(file_name_p, wcs_buffer);
 	}
 	/* Internalize the constructed SCCS dir name. */
 	(void) exists(dir = GETNAME(file_name, FIND_LENGTH));
@@ -482,8 +482,8 @@ vpath_loop:
 		return result;
 	}
 	MBSTOWCS(wcs_buffer, "/");
-	(void) wscat(file_name, wcs_buffer);
-	file_name_p = file_name + wslen(file_name);
+	(void) wcscat(file_name, wcs_buffer);
+	file_name_p = file_name + wcslen(file_name);
 
 	while ((dp = readdir(dir_fd)) != NULL) {
 		if ((dp->d_fileno == 0) ||
@@ -495,7 +495,7 @@ vpath_loop:
 		}
 		/* Construct and internalize the true name of the SCCS file. */
 		MBSTOWCS(wcs_buffer, dp->d_name);
-		(void) wscpy(file_name_p, wcs_buffer);
+		(void) wcscpy(file_name_p, wcs_buffer);
 		file = GETNAME(file_name, FIND_LENGTH);
 		file->stat.is_file = true;
 		file->stat.has_sccs = NO_SCCS;
@@ -507,7 +507,7 @@ vpath_loop:
 		    (dp->d_name[1] == (int) period_char)) {
 	
 			MBSTOWCS(wcs_buffer, dp->d_name + 2);
-			(void) wscpy(plain_file_name_p, wcs_buffer);
+			(void) wcscpy(plain_file_name_p, wcs_buffer);
 			plain_file = GETNAME(plain_file_name, FIND_LENGTH);
 			plain_file->stat.is_file = true;
 			plain_file->stat.has_sccs = HAS_SCCS;

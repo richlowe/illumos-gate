@@ -125,7 +125,7 @@ setvar_envvar(void)
 		}
 		INIT_STRING_FROM_STACK(value, buffer);		
 		expand_value(p->value, &value, false);
-		if ((length = wslen(value.buffer.start)) >= MAXPATHLEN) {
+		if ((length = wcslen(value.buffer.start)) >= MAXPATHLEN) {
 			mbs = tmp_mbs_buffer = getmem((length + 1) * MB_LEN_MAX);
 			(void) wcstombs(mbs,
 			                value.buffer.start,

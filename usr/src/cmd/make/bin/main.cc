@@ -1830,13 +1830,13 @@ read_files_and_state(int argc, char **argv)
 	 * of argv[0] for recursive MAKE builds.
 	 */
 	MBSTOWCS(wcs_buffer, "MAKE");
-	def_make_name = GETNAME(wcs_buffer, wslen(wcs_buffer));
+	def_make_name = GETNAME(wcs_buffer, wcslen(wcs_buffer));
 	def_make_macro = get_prop(def_make_name->prop, macro_prop);
 	if ((def_make_macro != NULL) &&
 	    (IS_EQUAL(def_make_macro->body.macro.value->string_mb,
 	              "make"))) {
 		MBSTOWCS(wcs_buffer, argv_zero_string);
-		new_make_value = GETNAME(wcs_buffer, wslen(wcs_buffer));
+		new_make_value = GETNAME(wcs_buffer, wcslen(wcs_buffer));
 		(void) SETVAR(def_make_name,
 		              new_make_value,
 		              false);
@@ -2285,13 +2285,13 @@ read_files_and_state(int argc, char **argv)
 		 * with "POSIX" requirements.
 		 */
 		MBSTOWCS(wcs_buffer, "ARFLAGS");
-		name = GETNAME(wcs_buffer, wslen(wcs_buffer));
+		name = GETNAME(wcs_buffer, wcslen(wcs_buffer));
 		macro = get_prop(name->prop, macro_prop);
 		if ((macro != NULL) && /* Maybe (macro == NULL) || ? */
 		    (IS_EQUAL(macro->body.macro.value->string_mb,
 		              "rv"))) {
 			MBSTOWCS(wcs_buffer, "-rv");
-			value = GETNAME(wcs_buffer, wslen(wcs_buffer));
+			value = GETNAME(wcs_buffer, wcslen(wcs_buffer));
 			(void) SETVAR(name,
 			              value,
 			              false);
@@ -2547,7 +2547,7 @@ enter_argv_values(int argc, char *argv[], ASCII_Dyn_Array *makeflags_and_macro)
 			*cp = (int) nul_char;
 			MBSTOWCS(wcs_buffer, argv[i]);
 			*cp = tmp_char;
-			name = GETNAME(wcs_buffer, wslen(wcs_buffer));
+			name = GETNAME(wcs_buffer, wcslen(wcs_buffer));
 			while (*cp != (int) equal_char) {
 				cp++;
 			}
@@ -2657,7 +2657,7 @@ read_environment(Boolean read_only)
 			MBSTOWCS(wcs_buffer, *environment);
 			name = wcs_buffer;
 		}
-		value = (wchar_t *) wschr(name, (int) equal_char);
+		value = (wchar_t *) wcschr(name, (int) equal_char);
 
 		/*
 		 * Looks like there's a bug in the system, but sometimes
@@ -2667,11 +2667,11 @@ read_environment(Boolean read_only)
 			continue;
 		}
 		MBSTOWCS(wcs_buffer2, "SHELL=");
-		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
+		if (IS_WEQUALN(name, wcs_buffer2, wcslen(wcs_buffer2))) {
 			continue;
 		}
 		MBSTOWCS(wcs_buffer2, "MAKEFLAGS=");
-		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
+		if (IS_WEQUALN(name, wcs_buffer2, wcslen(wcs_buffer2))) {
 			report_pwd = true;
 			/*
 			 * In POSIX mode we do not want MAKEFLAGS to be readonly.
@@ -2694,7 +2694,7 @@ read_environment(Boolean read_only)
 		 * directory's .make.state and clobbering them.
 		 */
 		MBSTOWCS(wcs_buffer2, "SUNPRO_DEPENDENCIES");
-		if (IS_WEQUALN(name, wcs_buffer2, wslen(wcs_buffer2))) {
+		if (IS_WEQUALN(name, wcs_buffer2, wcslen(wcs_buffer2))) {
 			continue;
 		}
 
@@ -2811,7 +2811,7 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 				//default_target_to_build = GETNAME(wcs_buffer,
 				//				  FIND_LENGTH);
 				default_target_to_build = normalize_name(wcs_buffer,
-								  wslen(wcs_buffer));
+								  wcslen(wcs_buffer));
 				if (default_target_to_build == wait_name) {
 					if (parallel_process_cnt > 0) {
 						finish_running();
@@ -2880,7 +2880,7 @@ make_targets(int argc, char **argv, Boolean parallel_flag)
 					continue;
 				}
 			MBSTOWCS(wcs_buffer, cp);
-			default_target_to_build = normalize_name(wcs_buffer, wslen(wcs_buffer));
+			default_target_to_build = normalize_name(wcs_buffer, wcslen(wcs_buffer));
 			top_level_target = get_wstring(default_target_to_build->string_mb);
 			report_recursion(default_target_to_build);
 			commands_done = false;

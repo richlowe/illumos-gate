@@ -111,9 +111,9 @@ enter_name(String string, Boolean tail_present, register wchar_t *string_start, 
 	 * Check if there are any ( or [ that are not prefixed with $.
 	 * If there are, we have to deal with the lib.a(members) format.
 	 */
-	for (cp = (wchar_t *) wschr(string_start, (int) parenleft_char);
+	for (cp = (wchar_t *) wcschr(string_start, (int) parenleft_char);
 	     cp != NULL;
-	     cp = (wchar_t *) wschr(cp + 1, (int) parenleft_char)) {
+	     cp = (wchar_t *) wcschr(cp + 1, (int) parenleft_char)) {
 		if (*(cp - 1) != (int) dollar_char) {
 			*string_end = ch;
 			return enter_member_name(string_start,
@@ -216,7 +216,7 @@ enter_member_name(register wchar_t *lib_start, register wchar_t *member_start, r
 	}
 	/* Move the library name to the buffer where we intend to build the */
 	/* "lib.a(member)" for each member */
-	(void) wsncpy(buffer, lib_start, member_start - lib_start);
+	(void) wcsncpy(buffer, lib_start, member_start - lib_start);
 	memberp = buffer + (member_start-lib_start);
 	while (1) {
 		long_member_name = NULL;
@@ -245,7 +245,7 @@ enter_member_name(register wchar_t *lib_start, register wchar_t *member_start, r
 		/* Internalize the member name */
 		member = GETNAME(memberp, cq - memberp);
 		*cq = 0;
-		if ((q = (wchar_t *) wsrchr(memberp, (int) slash_char)) == NULL) {
+		if ((q = (wchar_t *) wcsrchr(memberp, (int) slash_char)) == NULL) {
 			q = memberp;
 		}
 		if ((cq - q > (int) ar_member_name_len) &&
@@ -397,7 +397,7 @@ removed_one:
 	current_component =
 	  cdp =
 	    string =
-	      ALLOC_WC((length = wslen(name_string)) + 1);
+	      ALLOC_WC((length = wcslen(name_string)) + 1);
 	while (length > 0) {
 		if (((length > 3) &&
 		     (name_string[0] == (int) slash_char) &&
@@ -658,7 +658,7 @@ enter_dependencies(register Name target, Chain target_group, register Name_vecto
 	if ((makefile_type == reading_makefile) &&
 	    (default_target_to_build == NULL) &&
 	    ((wcb[0] != (int) period_char) ||
-	     wschr(wcb, (int) slash_char))) {
+	     wcschr(wcb, (int) slash_char))) {
 
 /* BID 1181577: $(EMPTY_MACRO) + $(EMPTY_MACRO):
 ** The target with empty name cannot be default_target_to_build
@@ -747,7 +747,7 @@ enter_dependencies(register Name target, Chain target_group, register Name_vecto
 				line->body.line.command_template_redefined =
 				  true;
 				if ((wcb[0] == (int) period_char) &&
-				    !wschr(wcb, (int) slash_char)) {
+				    !wcschr(wcb, (int) slash_char)) {
 					line->body.line.command_template =
 					  command;
 				}
@@ -756,7 +756,7 @@ enter_dependencies(register Name target, Chain target_group, register Name_vecto
 			}
 		} else {
 			if ((wcb[0] == (int) period_char) &&
-			    !wschr(wcb, (int) slash_char)) {
+			    !wcschr(wcb, (int) slash_char)) {
 				line->body.line.command_template = command;
 			}
 		}
@@ -947,7 +947,7 @@ enter_percent(register Name target, Chain target_group, register Name_vector dep
 	Wstring wcb(target);
 	cp = wcb.get_string();
 	while (true) {
-		cp = (wchar_t *) wschr(cp, (int) percent_char);
+		cp = (wchar_t *) wcschr(cp, (int) percent_char);
 		if (cp != NULL) {
 			result->patterns_total++;
 			cp++;
@@ -964,7 +964,7 @@ enter_percent(register Name target, Chain target_group, register Name_vector dep
 	cp = wcb.get_string();
 	pattern = 0;
 	while (true) {
-		cp1 = (wchar_t *) wschr(cp, (int) percent_char);
+		cp1 = (wchar_t *) wcschr(cp, (int) percent_char);
 		if (cp1 != NULL) {
 			result->patterns[pattern] = GETNAME(cp, cp1 - cp);
 			cp = cp1 + 1;
@@ -998,7 +998,7 @@ enter_percent(register Name target, Chain target_group, register Name_vector dep
 				wcb1.init(depe->name);
 				cp = wcb1.get_string();
 				while (true) {
-					cp = (wchar_t *) wschr(cp, (int) percent_char);
+					cp = (wchar_t *) wcschr(cp, (int) percent_char);
 					if (cp != NULL) {
 						depe->patterns_total++;
 						cp++;
@@ -1015,7 +1015,7 @@ enter_percent(register Name target, Chain target_group, register Name_vector dep
 				cp = wcb1.get_string();
 				pattern = 0;
 				while (true) {
-					cp1 = (wchar_t *) wschr(cp, (int) percent_char);
+					cp1 = (wchar_t *) wcschr(cp, (int) percent_char);
 					if (cp1 != NULL) {
 						depe->patterns[pattern] = GETNAME(cp, cp1 - cp);
 						cp = cp1 + 1;
@@ -1568,12 +1568,12 @@ make_relative(wchar_t *to, wchar_t *result)
 
 	/* Check if the path is already relative. */
 	if (to[0] != (int) slash_char) {
-		(void) wscpy(result, to);
+		(void) wcscpy(result, to);
 		return;
 	}
 
 	MBSTOWCS(wcs_buffer, get_current_path());
-	from = allocated = (wchar_t *) wsdup(wcs_buffer);
+	from = allocated = (wchar_t *) wcsdup(wcs_buffer);
 
 	/*
 	 * Find the number of components in the from name.
@@ -1608,7 +1608,7 @@ make_relative(wchar_t *to, wchar_t *result)
 	if (*from == (int) nul_char) {
 		if (*to == (int) nul_char) {
 			MBSTOWCS(wcs_buffer, ".");
-			(void) wscpy(result, wcs_buffer);
+			(void) wcscpy(result, wcs_buffer);
 			retmem(allocated);
 			return;
 		}
@@ -1623,15 +1623,15 @@ make_relative(wchar_t *to, wchar_t *result)
 	/* Add on the ".."s. */
 	for (i = 0; i < ncomps; i++) {
 		MBSTOWCS(wcs_buffer, "../");
-		(void) wscat(result, wcs_buffer);
+		(void) wcscat(result, wcs_buffer);
 	}
 
 	/* Add on the remainder of the to name, if any. */
 	if (*tocomp == (int) nul_char) {
-		len = wslen(result);
+		len = wcslen(result);
 		result[len - 1] = (int) nul_char;
 	} else {
-		(void) wscat(result, tocomp);
+		(void) wcscat(result, tocomp);
 	}
 	retmem(allocated);
 	return;
@@ -1806,7 +1806,7 @@ sh_transform(Name *name, Name *value)
 	Wstring nms((*name));
 	wchar_t * wcb = nms.get_string();
 
-	colon = (wchar_t *) wsrchr(wcb, (int) colon_char);
+	colon = (wchar_t *) wcsrchr(wcb, (int) colon_char);
 	if ((colon != NULL) && (IS_WEQUAL(colon, colon_sh) || IS_WEQUAL(colon, colon_shell))) {
 		INIT_STRING_FROM_STACK(destination, buffer);
 

@@ -77,7 +77,7 @@ get_char_semantics_entry(wchar_t ch)
 {
 	wchar_t		*char_sem_char;
 
-	char_sem_char = (wchar_t *) wschr(char_semantics_char, ch);
+	char_sem_char = (wchar_t *) wcschr(char_semantics_char, ch);
 	if (char_sem_char == NULL) {
 		/*
 		 * Return the integer entry for the last slot,

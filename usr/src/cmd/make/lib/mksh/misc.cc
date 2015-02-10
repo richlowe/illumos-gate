@@ -170,7 +170,7 @@ getname_fn(wchar_t *name, register int len, register Boolean dont_enter, registe
 	 * If the len argument is -1 we count the chars here.
 	 */
 	if (len == FIND_LENGTH) {
-		length = wslen(name);
+		length = wcslen(name);
 	} else {
 		length = len;
 	}
@@ -681,7 +681,7 @@ void
 append_string(register wchar_t *from, register String to, register int length)
 {
 	if (length == FIND_LENGTH) {
-		length = wslen(from);
+		length = wcslen(from);
 	}
 	if (to->buffer.start == NULL) {
 		expand_string(to, 32 + length);
@@ -692,7 +692,7 @@ append_string(register wchar_t *from, register String to, register int length)
 			      length);
 	}
 	if (length > 0) {
-		(void) wsncpy(to->text.p, from, length);
+		(void) wcsncpy(to->text.p, from, length);
 		to->text.p += length;
 	}
 	*(to->text.p) = (int) nul_char;
@@ -767,7 +767,7 @@ expand_string(register String string, register int length)
 	 */
 	expandstring_count++;
 	p = ALLOC_WC(length);
-	(void) wscpy(p, string->buffer.start);
+	(void) wcscpy(p, string->buffer.start);
 	string->text.p = p + (string->text.p - string->buffer.start);
 	string->text.end = p + (string->text.end - string->buffer.start);
 	string->buffer.end = p + length;

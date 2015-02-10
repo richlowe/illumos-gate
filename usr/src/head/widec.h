@@ -76,8 +76,7 @@ extern size_t	wscspn(const wchar_t *, const wchar_t *);
 extern int	wscoll(const wchar_t *, const wchar_t *);
 extern size_t	wsxfrm(wchar_t *, const wchar_t *, size_t);
 
-#if (!defined(_STRICT_STDC) && !defined(__XOPEN_OR_POSIX)) || \
-    defined(__EXTENSIONS__)
+#if !defined(_STRICT_STDC) && !defined(__XOPEN_OR_POSIX)
 
 extern wchar_t	*wsdup(const wchar_t *);
 extern int	wscol(const wchar_t *);

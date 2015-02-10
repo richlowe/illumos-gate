@@ -179,7 +179,7 @@ doshell(wchar_t *command, register Boolean ignore_error, char *stdout_file, char
 	}
 	argv[argv_index++] = shellname;
 	argv[argv_index++] = (char*)(ignore_error ? "-c" : "-ce");
-	if ((length = wslen(command)) >= MAXPATHLEN) {
+	if ((length = wcslen(command)) >= MAXPATHLEN) {
 		tmp_mbs_buffer = getmem((length * MB_LEN_MAX) + 1);
                 (void) wcstombs(tmp_mbs_buffer, command, (length * MB_LEN_MAX) + 1);
 		cmd_argv_index = argv_index;
@@ -342,7 +342,7 @@ doexec(register wchar_t *command, register Boolean ignore_error, char *stdout_fi
 	 * In fact, doing it may cause the sh command to fail!
 	 */
 	p = &argv[1];
-	if ((length = wslen(command)) >= MAXPATHLEN) {
+	if ((length = wcslen(command)) >= MAXPATHLEN) {
 		tmp_mbs_buffer = getmem((length * MB_LEN_MAX) + 1);
 		(void) wcstombs(tmp_mbs_buffer, command, (length * MB_LEN_MAX) + 1);
 		argv[0] = strdup(tmp_mbs_buffer);
@@ -373,7 +373,7 @@ doexec(register wchar_t *command, register Boolean ignore_error, char *stdout_fi
 		if (*t) {
 			for (*t++ = (int) nul_char; iswspace(*t); t++);
 		}
-		if ((length = wslen(q)) >= MAXPATHLEN) {
+		if ((length = wcslen(q)) >= MAXPATHLEN) {
 			tmp_mbs_buffer = getmem((length * MB_LEN_MAX) + 1);
 			(void) wcstombs(tmp_mbs_buffer, q, (length * MB_LEN_MAX) + 1);
 			*p++ = strdup(tmp_mbs_buffer);

@@ -1146,8 +1146,8 @@ find_percent_rule(register Name target, Property *command, Boolean rechecking)
 	if (lmn_target->parenleft) {
 		Wstring lmn_string(lmn_target);
 
-		wchar_t *left = (wchar_t *) wschr(lmn_string.get_string(), (int) parenleft_char);
-		wchar_t *right = (wchar_t *) wschr(lmn_string.get_string(), (int) parenright_char);
+		wchar_t *left = (wchar_t *) wcschr(lmn_string.get_string(), (int) parenleft_char);
+		wchar_t *right = (wchar_t *) wcschr(lmn_string.get_string(), (int) parenright_char);
 
 		if ((left == NULL) || (right == NULL)) {
 			line->body.line.percent = NULL;
