@@ -18,10 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012 by Delphix. All rights reserved.
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -56,6 +57,7 @@
 #include <sys/sdt.h>
 #include <sys/ddi.h>
 #include <sys/zone.h>
+#include <sys/kstat.h>
 
 #include <fs/fs_reparse.h>
 
@@ -282,7 +284,39 @@ struct rfsv4disp {
 	void	(*dis_proc)();		/* proc to call */
 	void	(*dis_resfree)();	/* frees space allocated by proc */
 	int	dis_flags;		/* RPC_IDEMPOTENT, etc... */
+	int	op_type;		/* operation type, see below */
 };
+
+/*
+ * operation types; used primarily for the per-exportinfo kstat implementation
+ */
+#define	NFS4_OP_NOFH	0	/* The operation does not operate with any */
+				/* particular filehandle; we cannot associate */
+				/* it with any exportinfo. */
+
+#define	NFS4_OP_CFH	1	/* The operation works with the current */
+				/* filehandle; we associate the operation */
+				/* with the exportinfo related to the current */
+				/* filehandle (as set before the operation is */
+				/* executed). */
+
+#define	NFS4_OP_SFH	2	/* The operation works with the saved */
+				/* filehandle; we associate the operation */
+				/* with the exportinfo related to the saved */
+				/* filehandle (as set before the operation is */
+				/* executed). */
+
+#define	NFS4_OP_POSTCFH	3	/* The operation ignores the current */
+				/* filehandle, but sets the new current */
+				/* filehandle instead; we associate the */
+				/* operation with the exportinfo related to */
+				/* the current filehandle as set after the */
+				/* operation is successfuly executed.  Since */
+				/* we do not know the particular exportinfo */
+				/* (and thus the kstat) before the operation */
+				/* is done, there is no simple way how to */
+				/* update some I/O kstat statistics related */
+				/* to kstat_queue(9F). */
 
 static struct rfsv4disp rfsv4disptab[] = {
 	/*
@@ -290,124 +324,126 @@ static struct rfsv4disp rfsv4disptab[] = {
 	 */
 
 	/* RFS_NULL = 0 */
-	{rfs4_op_illegal, nullfree, 0},
+	{rfs4_op_illegal, nullfree, 0, NFS4_OP_NOFH},
 
 	/* UNUSED = 1 */
-	{rfs4_op_illegal, nullfree, 0},
+	{rfs4_op_illegal, nullfree, 0, NFS4_OP_NOFH},
 
 	/* UNUSED = 2 */
-	{rfs4_op_illegal, nullfree, 0},
+	{rfs4_op_illegal, nullfree, 0, NFS4_OP_NOFH},
 
 	/* OP_ACCESS = 3 */
-	{rfs4_op_access, nullfree, RPC_IDEMPOTENT},
+	{rfs4_op_access, nullfree, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_CLOSE = 4 */
-	{rfs4_op_close, nullfree, 0},
+	{rfs4_op_close, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_COMMIT = 5 */
-	{rfs4_op_commit, nullfree, RPC_IDEMPOTENT},
+	{rfs4_op_commit, nullfree, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_CREATE = 6 */
-	{rfs4_op_create, nullfree, 0},
+	{rfs4_op_create, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_DELEGPURGE = 7 */
-	{rfs4_op_delegpurge, nullfree, 0},
+	{rfs4_op_delegpurge, nullfree, 0, NFS4_OP_NOFH},
 
 	/* OP_DELEGRETURN = 8 */
-	{rfs4_op_delegreturn, nullfree, 0},
+	{rfs4_op_delegreturn, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_GETATTR = 9 */
-	{rfs4_op_getattr, rfs4_op_getattr_free, RPC_IDEMPOTENT},
+	{rfs4_op_getattr, rfs4_op_getattr_free, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_GETFH = 10 */
-	{rfs4_op_getfh, rfs4_op_getfh_free, RPC_ALL},
+	{rfs4_op_getfh, rfs4_op_getfh_free, RPC_ALL, NFS4_OP_CFH},
 
 	/* OP_LINK = 11 */
-	{rfs4_op_link, nullfree, 0},
+	{rfs4_op_link, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_LOCK = 12 */
-	{rfs4_op_lock, lock_denied_free, 0},
+	{rfs4_op_lock, lock_denied_free, 0, NFS4_OP_CFH},
 
 	/* OP_LOCKT = 13 */
-	{rfs4_op_lockt, lock_denied_free, 0},
+	{rfs4_op_lockt, lock_denied_free, 0, NFS4_OP_CFH},
 
 	/* OP_LOCKU = 14 */
-	{rfs4_op_locku, nullfree, 0},
+	{rfs4_op_locku, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_LOOKUP = 15 */
-	{rfs4_op_lookup, nullfree, (RPC_IDEMPOTENT | RPC_PUBLICFH_OK)},
+	{rfs4_op_lookup, nullfree, (RPC_IDEMPOTENT | RPC_PUBLICFH_OK),
+	    NFS4_OP_CFH},
 
 	/* OP_LOOKUPP = 16 */
-	{rfs4_op_lookupp, nullfree, (RPC_IDEMPOTENT | RPC_PUBLICFH_OK)},
+	{rfs4_op_lookupp, nullfree, (RPC_IDEMPOTENT | RPC_PUBLICFH_OK),
+	    NFS4_OP_CFH},
 
 	/* OP_NVERIFY = 17 */
-	{rfs4_op_nverify, nullfree, RPC_IDEMPOTENT},
+	{rfs4_op_nverify, nullfree, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_OPEN = 18 */
-	{rfs4_op_open, rfs4_free_reply, 0},
+	{rfs4_op_open, rfs4_free_reply, 0, NFS4_OP_CFH},
 
 	/* OP_OPENATTR = 19 */
-	{rfs4_op_openattr, nullfree, 0},
+	{rfs4_op_openattr, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_OPEN_CONFIRM = 20 */
-	{rfs4_op_open_confirm, nullfree, 0},
+	{rfs4_op_open_confirm, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_OPEN_DOWNGRADE = 21 */
-	{rfs4_op_open_downgrade, nullfree, 0},
+	{rfs4_op_open_downgrade, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_OPEN_PUTFH = 22 */
-	{rfs4_op_putfh, nullfree, RPC_ALL},
+	{rfs4_op_putfh, nullfree, RPC_ALL, NFS4_OP_POSTCFH},
 
 	/* OP_PUTPUBFH = 23 */
-	{rfs4_op_putpubfh, nullfree, RPC_ALL},
+	{rfs4_op_putpubfh, nullfree, RPC_ALL, NFS4_OP_POSTCFH},
 
 	/* OP_PUTROOTFH = 24 */
-	{rfs4_op_putrootfh, nullfree, RPC_ALL},
+	{rfs4_op_putrootfh, nullfree, RPC_ALL, NFS4_OP_POSTCFH},
 
 	/* OP_READ = 25 */
-	{rfs4_op_read, rfs4_op_read_free, RPC_IDEMPOTENT},
+	{rfs4_op_read, rfs4_op_read_free, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_READDIR = 26 */
-	{rfs4_op_readdir, rfs4_op_readdir_free, RPC_IDEMPOTENT},
+	{rfs4_op_readdir, rfs4_op_readdir_free, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_READLINK = 27 */
-	{rfs4_op_readlink, rfs4_op_readlink_free, RPC_IDEMPOTENT},
+	{rfs4_op_readlink, rfs4_op_readlink_free, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_REMOVE = 28 */
-	{rfs4_op_remove, nullfree, 0},
+	{rfs4_op_remove, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_RENAME = 29 */
-	{rfs4_op_rename, nullfree, 0},
+	{rfs4_op_rename, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_RENEW = 30 */
-	{rfs4_op_renew, nullfree, 0},
+	{rfs4_op_renew, nullfree, 0, NFS4_OP_NOFH},
 
 	/* OP_RESTOREFH = 31 */
-	{rfs4_op_restorefh, nullfree, RPC_ALL},
+	{rfs4_op_restorefh, nullfree, RPC_ALL, NFS4_OP_SFH},
 
 	/* OP_SAVEFH = 32 */
-	{rfs4_op_savefh, nullfree, RPC_ALL},
+	{rfs4_op_savefh, nullfree, RPC_ALL, NFS4_OP_CFH},
 
 	/* OP_SECINFO = 33 */
-	{rfs4_op_secinfo, rfs4_op_secinfo_free, 0},
+	{rfs4_op_secinfo, rfs4_op_secinfo_free, 0, NFS4_OP_CFH},
 
 	/* OP_SETATTR = 34 */
-	{rfs4_op_setattr, nullfree, 0},
+	{rfs4_op_setattr, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_SETCLIENTID = 35 */
-	{rfs4_op_setclientid, nullfree, 0},
+	{rfs4_op_setclientid, nullfree, 0, NFS4_OP_NOFH},
 
 	/* OP_SETCLIENTID_CONFIRM = 36 */
-	{rfs4_op_setclientid_confirm, nullfree, 0},
+	{rfs4_op_setclientid_confirm, nullfree, 0, NFS4_OP_NOFH},
 
 	/* OP_VERIFY = 37 */
-	{rfs4_op_verify, nullfree, RPC_IDEMPOTENT},
+	{rfs4_op_verify, nullfree, RPC_IDEMPOTENT, NFS4_OP_CFH},
 
 	/* OP_WRITE = 38 */
-	{rfs4_op_write, nullfree, 0},
+	{rfs4_op_write, nullfree, 0, NFS4_OP_CFH},
 
 	/* OP_RELEASE_LOCKOWNER = 39 */
-	{rfs4_op_release_lockowner, nullfree, 0},
+	{rfs4_op_release_lockowner, nullfree, 0, NFS4_OP_NOFH},
 };
 
 static uint_t rfsv4disp_cnt = sizeof (rfsv4disptab) / sizeof (rfsv4disptab[0]);
@@ -869,7 +905,7 @@ static nfsstat4
 do_rfs4_op_secinfo(struct compound_state *cs, char *nm, SECINFO4res *resp)
 {
 	int error, different_export = 0;
-	vnode_t *dvp, *vp, *tvp;
+	vnode_t *dvp, *vp;
 	struct exportinfo *exi = NULL;
 	fid_t fid;
 	uint_t count, i;
@@ -950,14 +986,12 @@ do_rfs4_op_secinfo(struct compound_state *cs, char *nm, SECINFO4res *resp)
 	 * If it's a mountpoint, then traverse it.
 	 */
 	if (vn_ismntpt(vp)) {
-		tvp = vp;
-		if ((error = traverse(&tvp)) != 0) {
+		if ((error = traverse(&vp)) != 0) {
 			VN_RELE(vp);
 			return (puterrno4(error));
 		}
 		/* remember that we had to traverse mountpoint */
 		did_traverse = TRUE;
-		vp = tvp;
 		different_export = 1;
 	} else if (vp->v_vfsp != dvp->v_vfsp) {
 		/*
@@ -1063,7 +1097,7 @@ do_rfs4_op_secinfo(struct compound_state *cs, char *nm, SECINFO4res *resp)
 			perm = secp[i].s_flags;
 
 			access = nfsauth4_secinfo_access(exi, cs->req,
-			    flavor, perm);
+			    flavor, perm, cs->basecr);
 
 			if (! (access & NFSAUTH_DENIED) &&
 			    ! (access & NFSAUTH_WRONGSEC)) {
@@ -1274,7 +1308,7 @@ rfs4_op_access(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 	 * Special files are interpreted by the client, so the underlying
 	 * permissions are sent back to the client for interpretation.
 	 */
-	if (rdonly4(cs->exi, cs->vp, req) &&
+	if (rdonly4(req, cs) &&
 	    (vp->v_type == VREG || vp->v_type == VDIR))
 		checkwriteperm = 0;
 	else
@@ -1410,7 +1444,7 @@ rfs4_op_commit(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		*cs->statusp = resp->status = puterrno4(error);
 		goto out;
 	}
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		goto out;
 	}
@@ -1581,7 +1615,7 @@ rfs4_op_create(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		goto out;
 	}
 
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		goto out;
 	}
@@ -1693,7 +1727,8 @@ rfs4_op_create(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		/*
 		 * symlink names must be treated as data
 		 */
-		lnm = utf8_to_str(&args->ftype4_u.linkdata, &llen, NULL);
+		lnm = utf8_to_str((utf8string *)&args->ftype4_u.linkdata,
+		    &llen, NULL);
 
 		if (lnm == NULL) {
 			*cs->statusp = resp->status = NFS4ERR_INVAL;
@@ -2520,7 +2555,7 @@ rfs4_op_link(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		goto out;
 	}
 
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		kmem_free(nm, len);
 		goto out;
@@ -2610,7 +2645,7 @@ do_rfs4_op_lookup(char *nm, struct svc_req *req, struct compound_state *cs)
 {
 	int error;
 	int different_export = 0;
-	vnode_t *vp, *tvp, *pre_tvp = NULL, *oldvp = NULL;
+	vnode_t *vp, *pre_tvp = NULL, *oldvp = NULL;
 	struct exportinfo *exi = NULL, *pre_exi = NULL;
 	nfsstat4 stat;
 	fid_t fid;
@@ -2708,13 +2743,11 @@ do_rfs4_op_lookup(char *nm, struct svc_req *req, struct compound_state *cs)
 		 * need pre_tvp below if checkexport4 fails
 		 */
 		VN_HOLD(pre_tvp);
-		tvp = vp;
-		if ((error = traverse(&tvp)) != 0) {
+		if ((error = traverse(&vp)) != 0) {
 			VN_RELE(vp);
 			VN_RELE(pre_tvp);
 			return (puterrno4(error));
 		}
-		vp = tvp;
 		different_export = 1;
 	} else if (vp->v_vfsp != cs->vp->v_vfsp) {
 		/*
@@ -3045,7 +3078,7 @@ rfs4_op_openattr(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 	 * Returning NOTSUPP is more appropriate in this case
 	 * because the object will never be able to have an attrdir.
 	 */
-	if (args->createdir && ! (exp_ro = rdonly4(cs->exi, cs->vp, req)))
+	if (args->createdir && ! (exp_ro = rdonly4(req, cs)))
 		lookup_flags |= CREATE_XATTR_DIR;
 
 	error = VOP_LOOKUP(cs->vp, "", &avp, NULL, lookup_flags, NULL, cs->cr,
@@ -3537,7 +3570,6 @@ rfs4_op_putfh(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		cs->cr = NULL;
 	}
 
-
 	if (args->object.nfs_fh4_len < NFS_FH4_LEN) {
 		*cs->statusp = resp->status = NFS4ERR_BADHANDLE;
 		goto out;
@@ -3856,7 +3888,7 @@ rfs4_op_readlink(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 	/*
 	 * treat link name as data
 	 */
-	(void) str_to_utf8(name, &resp->link);
+	(void) str_to_utf8(name, (utf8string *)&resp->link);
 
 	if (name != data)
 		kmem_free(name, MAXPATHLEN + 1);
@@ -3872,7 +3904,7 @@ static void
 rfs4_op_readlink_free(nfs_resop4 *resop)
 {
 	READLINK4res *resp = &resop->nfs_resop4_u.opreadlink;
-	utf8string *symlink = &resp->link;
+	utf8string *symlink = (utf8string *)&resp->link;
 
 	if (symlink->utf8string_val) {
 		UTF8STRING_FREE(*symlink)
@@ -4131,7 +4163,7 @@ rfs4_op_remove(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		goto out;
 	}
 
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		kmem_free(nm, len);
 		goto out;
@@ -4493,7 +4525,7 @@ rfs4_op_rename(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 	}
 
 
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		if (onm != converted_onm)
 			kmem_free(converted_onm, MAXPATHLEN + 1);
@@ -5388,7 +5420,7 @@ rfs4_op_setattr(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 
 	resp->attrsset = 0;
 
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		goto out;
 	}
@@ -5615,7 +5647,7 @@ rfs4_op_write(nfs_argop4 *argop, nfs_resop4 *resop, struct svc_req *req,
 		goto out;
 	}
 
-	if (rdonly4(cs->exi, cs->vp, req)) {
+	if (rdonly4(req, cs)) {
 		*cs->statusp = resp->status = NFS4ERR_ROFS;
 		goto out;
 	}
@@ -5855,11 +5887,42 @@ rfs4_compound(COMPOUND4args *args, COMPOUND4res *resp, struct exportinfo *exi,
 		op = (uint_t)resop->resop;
 
 		if (op < rfsv4disp_cnt) {
+			kstat_t *ksp = rfsprocio_v4_ptr[op];
+			kstat_t *exi_ksp = NULL;
+
 			/*
 			 * Count the individual ops here; NULL and COMPOUND
 			 * are counted in common_dispatch()
 			 */
 			rfsproccnt_v4_ptr[op].value.ui64++;
+
+			if (ksp != NULL) {
+				mutex_enter(ksp->ks_lock);
+				kstat_runq_enter(KSTAT_IO_PTR(ksp));
+				mutex_exit(ksp->ks_lock);
+			}
+
+			switch (rfsv4disptab[op].op_type) {
+			case NFS4_OP_CFH:
+				resop->exi = cs.exi;
+				break;
+			case NFS4_OP_SFH:
+				resop->exi = cs.saved_exi;
+				break;
+			default:
+				ASSERT(resop->exi == NULL);
+				break;
+			}
+
+			if (resop->exi != NULL) {
+				exi_ksp = resop->exi->exi_kstats->
+				    rfsprocio_v4_ptr[op];
+				if (exi_ksp != NULL) {
+					mutex_enter(exi_ksp->ks_lock);
+					kstat_runq_enter(KSTAT_IO_PTR(exi_ksp));
+					mutex_exit(exi_ksp->ks_lock);
+				}
+			}
 
 			NFS4_DEBUG(rfs4_debug > 1,
 			    (CE_NOTE, "Executing %s", rfs4_op_string[op]));
@@ -5868,6 +5931,33 @@ rfs4_compound(COMPOUND4args *args, COMPOUND4res *resp, struct exportinfo *exi,
 			    rfs4_op_string[op], *cs.statusp));
 			if (*cs.statusp != NFS4_OK)
 				cs.cont = FALSE;
+
+			if (rfsv4disptab[op].op_type == NFS4_OP_POSTCFH &&
+			    *cs.statusp == NFS4_OK &&
+			    (resop->exi = cs.exi) != NULL) {
+				exi_ksp = resop->exi->exi_kstats->
+				    rfsprocio_v4_ptr[op];
+			}
+
+			if (exi_ksp != NULL) {
+				mutex_enter(exi_ksp->ks_lock);
+				KSTAT_IO_PTR(exi_ksp)->nwritten +=
+				    argop->opsize;
+				KSTAT_IO_PTR(exi_ksp)->writes++;
+				if (rfsv4disptab[op].op_type != NFS4_OP_POSTCFH)
+					kstat_runq_exit(KSTAT_IO_PTR(exi_ksp));
+				mutex_exit(exi_ksp->ks_lock);
+
+				exi_hold(resop->exi);
+			} else {
+				resop->exi = NULL;
+			}
+
+			if (ksp != NULL) {
+				mutex_enter(ksp->ks_lock);
+				kstat_runq_exit(KSTAT_IO_PTR(ksp));
+				mutex_exit(ksp->ks_lock);
+			}
 		} else {
 			/*
 			 * This is effectively dead code since XDR code
@@ -5888,13 +5978,13 @@ rfs4_compound(COMPOUND4args *args, COMPOUND4res *resp, struct exportinfo *exi,
 		 */
 		if ((i + 1) < args->array_len && !cs.cont) {
 			nfs_resop4 *new_res = kmem_alloc(
-			    (i+1) * sizeof (nfs_resop4), KM_SLEEP);
+			    (i + 1) * sizeof (nfs_resop4), KM_SLEEP);
 			bcopy(resp->array,
-			    new_res, (i+1) * sizeof (nfs_resop4));
+			    new_res, (i + 1) * sizeof (nfs_resop4));
 			kmem_free(resp->array,
 			    args->array_len * sizeof (nfs_resop4));
 
-			resp->array_len =  i + 1;
+			resp->array_len = i + 1;
 			resp->array = new_res;
 		}
 	}
@@ -5975,6 +6065,70 @@ rfs4_compound_flagproc(COMPOUND4args *args, int *flagp)
 			flag = 0;
 	}
 	*flagp = flag;
+}
+
+void
+rfs4_compound_kstat_args(COMPOUND4args *args)
+{
+	int i;
+
+	for (i = 0; i < args->array_len; i++) {
+		uint_t op = (uint_t)args->array[i].argop;
+
+		if (op < rfsv4disp_cnt) {
+			kstat_t *ksp = rfsprocio_v4_ptr[op];
+
+			if (ksp != NULL) {
+				mutex_enter(ksp->ks_lock);
+				KSTAT_IO_PTR(ksp)->nwritten +=
+				    args->array[i].opsize;
+				KSTAT_IO_PTR(ksp)->writes++;
+				mutex_exit(ksp->ks_lock);
+			}
+		}
+	}
+}
+
+void
+rfs4_compound_kstat_res(COMPOUND4res *res)
+{
+	int i;
+
+	for (i = 0; i < res->array_len; i++) {
+		uint_t op = (uint_t)res->array[i].resop;
+
+		if (op < rfsv4disp_cnt) {
+			kstat_t *ksp = rfsprocio_v4_ptr[op];
+			struct exportinfo *exi = res->array[i].exi;
+
+			if (ksp != NULL) {
+				mutex_enter(ksp->ks_lock);
+				KSTAT_IO_PTR(ksp)->nread +=
+				    res->array[i].opsize;
+				KSTAT_IO_PTR(ksp)->reads++;
+				mutex_exit(ksp->ks_lock);
+			}
+
+			if (exi != NULL) {
+				kstat_t *exi_ksp;
+
+				rw_enter(&exported_lock, RW_READER);
+
+				exi_ksp = exi->exi_kstats->rfsprocio_v4_ptr[op];
+				if (exi_ksp != NULL) {
+					mutex_enter(exi_ksp->ks_lock);
+					KSTAT_IO_PTR(exi_ksp)->nread +=
+					    res->array[i].opsize;
+					KSTAT_IO_PTR(exi_ksp)->reads++;
+					mutex_exit(exi_ksp->ks_lock);
+				}
+
+				rw_exit(&exported_lock);
+
+				exi_rele(exi);
+			}
+		}
+	}
 }
 
 nfsstat4
@@ -6284,7 +6438,7 @@ check_open_access(uint32_t access, struct compound_state *cs,
 	 * to open for write, then return NFS4ERR_ROFS
 	 */
 
-	readonly = rdonly4(cs->exi, cs->vp, req);
+	readonly = rdonly4(req, cs);
 
 	if ((access & OPEN4_SHARE_ACCESS_WRITE) && readonly)
 		return (NFS4ERR_ROFS);
@@ -6338,7 +6492,7 @@ rfs4_createfile(OPEN4args *args, struct svc_req *req, struct compound_state *cs,
 	dvp = cs->vp;
 
 	/* Check if the file system is read only */
-	if (rdonly4(cs->exi, dvp, req))
+	if (rdonly4(req, cs))
 		return (NFS4ERR_ROFS);
 
 	/* check the label of including directory */
@@ -8544,6 +8698,20 @@ finish:
 	return (NFS4_OK);
 }
 
+/*
+ * The NFSv4.0 LOCK operation does not support the blocking lock (at the
+ * NFSv4.0 protocol level) so the client needs to resend the LOCK request in a
+ * case the lock is denied by the NFSv4.0 server.  NFSv4.0 clients are prepared
+ * for that (obviously); they are sending the LOCK requests with some delays
+ * between the attempts.  See nfs4frlock() and nfs4_block_and_wait() for the
+ * locking and delay implementation at the client side.
+ *
+ * To make the life of the clients easier, the NFSv4.0 server tries to do some
+ * fast retries on its own (the for loop below) in a hope the lock will be
+ * available soon.  And if not, the client won't need to resend the LOCK
+ * requests so fast to check the lock availability.  This basically saves some
+ * network traffic and tries to make sure the client gets the lock ASAP.
+ */
 static int
 setlock(vnode_t *vp, struct flock64 *flock, int flag, cred_t *cred)
 {
@@ -8552,6 +8720,7 @@ setlock(vnode_t *vp, struct flock64 *flock, int flag, cred_t *cred)
 	int i;
 	clock_t delaytime;
 	int cmd;
+	int spin_cnt = 0;
 
 	cmd = nbl_need_check(vp) ? F_SETLK_NBMAND : F_SETLK;
 retry:
@@ -8575,15 +8744,53 @@ retry:
 		/* Get the owner of the lock */
 		flk = *flock;
 		LOCK_PRINT(rfs4_debug, "setlock", F_GETLK, &flk);
-		if (VOP_FRLOCK(vp, F_GETLK, &flk, flag,
-		    (u_offset_t)0, NULL, cred, NULL) == 0) {
+		if (VOP_FRLOCK(vp, F_GETLK, &flk, flag, 0, NULL, cred,
+		    NULL) == 0) {
+			/*
+			 * There's a race inherent in the current VOP_FRLOCK
+			 * design where:
+			 * a: "other guy" takes a lock that conflicts with a
+			 * lock we want
+			 * b: we attempt to take our lock (non-blocking) and
+			 * the attempt fails.
+			 * c: "other guy" releases the conflicting lock
+			 * d: we ask what lock conflicts with the lock we want,
+			 * getting F_UNLCK (no lock blocks us)
+			 *
+			 * If we retry the non-blocking lock attempt in this
+			 * case (restart at step 'b') there's some possibility
+			 * that many such attempts might fail.  However a test
+			 * designed to actually provoke this race shows that
+			 * the vast majority of cases require no retry, and
+			 * only a few took as many as three retries.  Here's
+			 * the test outcome:
+			 *
+			 *	   number of retries    how many times we needed
+			 *				that many retries
+			 *	   0			79461
+			 *	   1			  862
+			 *	   2			   49
+			 *	   3			    5
+			 *
+			 * Given those empirical results, we arbitrarily limit
+			 * the retry count to ten.
+			 *
+			 * If we actually make to ten retries and give up,
+			 * nothing catastrophic happens, but we're unable to
+			 * return the information about the conflicting lock to
+			 * the NFS client.  That's an acceptable trade off vs.
+			 * letting this retry loop run forever.
+			 */
 			if (flk.l_type == F_UNLCK) {
-				/* No longer locked, retry */
-				goto retry;
+				if (spin_cnt++ < 10) {
+					/* No longer locked, retry */
+					goto retry;
+				}
+			} else {
+				*flock = flk;
+				LOCK_PRINT(rfs4_debug, "setlock(blocking lock)",
+				    F_GETLK, &flk);
 			}
-			*flock = flk;
-			LOCK_PRINT(rfs4_debug, "setlock(blocking lock)",
-			    F_GETLK, &flk);
 		}
 	}
 

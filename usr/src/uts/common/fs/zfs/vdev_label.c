@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright (c) 2012, 2015 by Delphix. All rights reserved.
  */
 
 /*
@@ -179,7 +179,7 @@ vdev_label_number(uint64_t psize, uint64_t offset)
 
 static void
 vdev_label_read(zio_t *zio, vdev_t *vd, int l, void *buf, uint64_t offset,
-	uint64_t size, zio_done_func_t *done, void *private, int flags)
+    uint64_t size, zio_done_func_t *done, void *private, int flags)
 {
 	ASSERT(spa_config_held(zio->io_spa, SCL_STATE_ALL, RW_WRITER) ==
 	    SCL_STATE_ALL);
@@ -193,7 +193,7 @@ vdev_label_read(zio_t *zio, vdev_t *vd, int l, void *buf, uint64_t offset,
 
 static void
 vdev_label_write(zio_t *zio, vdev_t *vd, int l, void *buf, uint64_t offset,
-	uint64_t size, zio_done_func_t *done, void *private, int flags)
+    uint64_t size, zio_done_func_t *done, void *private, int flags)
 {
 	ASSERT(spa_config_held(zio->io_spa, SCL_ALL, RW_WRITER) == SCL_ALL ||
 	    (spa_config_held(zio->io_spa, SCL_CONFIG | SCL_STATE, RW_READER) ==
@@ -596,7 +596,8 @@ vdev_inuse(vdev_t *vd, uint64_t crtxg, vdev_labeltype_t reason,
 	 * read-only.  Instead we look to see if the pools is marked
 	 * read-only in the namespace and set the state to active.
 	 */
-	if ((spa = spa_by_guid(pool_guid, device_guid)) != NULL &&
+	if (state != POOL_STATE_SPARE && state != POOL_STATE_L2CACHE &&
+	    (spa = spa_by_guid(pool_guid, device_guid)) != NULL &&
 	    spa_mode(spa) == FREAD)
 		state = POOL_STATE_ACTIVE;
 
@@ -976,7 +977,7 @@ vdev_uberblock_sync_done(zio_t *zio)
 	uint64_t *good_writes = zio->io_private;
 
 	if (zio->io_error == 0 && zio->io_vd->vdev_top->vdev_ms_array != 0)
-		atomic_add_64(good_writes, 1);
+		atomic_inc_64(good_writes);
 }
 
 /*
@@ -1051,7 +1052,7 @@ vdev_label_sync_done(zio_t *zio)
 	uint64_t *good_writes = zio->io_private;
 
 	if (zio->io_error == 0)
-		atomic_add_64(good_writes, 1);
+		atomic_inc_64(good_writes);
 }
 
 /*

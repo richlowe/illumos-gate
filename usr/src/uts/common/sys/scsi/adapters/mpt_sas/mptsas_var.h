@@ -21,8 +21,9 @@
 
 /*
  * Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2012 Nexenta Systems, Inc. All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2014, Tegile Systems Inc. All rights reserved.
  */
 
 /*
@@ -56,6 +57,7 @@
 #define	_SYS_SCSI_ADAPTERS_MPTVAR_H
 
 #include <sys/byteorder.h>
+#include <sys/queue.h>
 #include <sys/isa_defs.h>
 #include <sys/sunmdi.h>
 #include <sys/mdi_impldefs.h>
@@ -98,6 +100,7 @@ typedef uint16_t		mptsas_phymask_t;
  */
 #define	MPTSAS_SMP_BUCKET_COUNT		23
 #define	MPTSAS_TARGET_BUCKET_COUNT	97
+#define	MPTSAS_TMP_TARGET_BUCKET_COUNT	13
 
 /*
  * MPT HW defines
@@ -140,15 +143,21 @@ typedef uint16_t		mptsas_phymask_t;
 #define	MPTSAS_MAX_FRAME_SGES(mpt) \
 	(((mpt->m_req_frame_size - (sizeof (MPI2_SCSI_IO_REQUEST))) / 8) + 1)
 
+#define	MPTSAS_SGE_SIZE(mpt)					\
+	((mpt)->m_MPI25 ? sizeof (MPI2_IEEE_SGE_SIMPLE64) :	\
+	    sizeof (MPI2_SGE_SIMPLE64))
+
 /*
- * Caculating how many 64-bit DMA simple elements can be stored in the first
+ * Calculating how many 64-bit DMA simple elements can be stored in the first
  * frame. Note that msg_scsi_io_request contains 2 double-words (8 bytes) for
  * element storage.  And 64-bit dma element is 3 double-words (12 bytes) in
- * size.
+ * size. IEEE 64-bit dma element used for SAS3 controllers is 4 double-words
+ * (16 bytes).
  */
 #define	MPTSAS_MAX_FRAME_SGES64(mpt) \
 	((mpt->m_req_frame_size - \
-	(sizeof (MPI2_SCSI_IO_REQUEST)) + sizeof (MPI2_SGE_IO_UNION)) / 12)
+	sizeof (MPI2_SCSI_IO_REQUEST) + sizeof (MPI2_SGE_IO_UNION)) / \
+	MPTSAS_SGE_SIZE(mpt))
 
 /*
  * Scatter-gather list structure defined by HBA hardware
@@ -200,6 +209,9 @@ typedef struct mptsas_target_addr {
 	mptsas_phymask_t mta_phymask;
 } mptsas_target_addr_t;
 
+TAILQ_HEAD(mptsas_active_cmdq, mptsas_cmd);
+typedef struct mptsas_active_cmdq mptsas_active_cmdq_t;
+
 typedef	struct mptsas_target {
 		mptsas_target_addr_t	m_addr;
 		refhash_link_t		m_link;
@@ -208,8 +220,7 @@ typedef	struct mptsas_target {
 		uint32_t		m_deviceinfo;
 		uint8_t			m_phynum;
 		uint32_t		m_dups;
-		int32_t			m_timeout;
-		int32_t			m_timebase;
+		mptsas_active_cmdq_t	m_active_cmdq;
 		int32_t			m_t_throttle;
 		int32_t			m_t_ncmds;
 		int32_t			m_reset_delay;
@@ -217,10 +228,12 @@ typedef	struct mptsas_target {
 
 		uint16_t		m_qfull_retry_interval;
 		uint8_t			m_qfull_retries;
+		uint16_t		m_io_flags;
 		uint16_t		m_enclosure;
 		uint16_t		m_slot_num;
 		uint32_t		m_tgt_unconfigured;
 		uint8_t			m_led_status;
+		uint8_t			m_scsi_req_desc_type;
 
 } mptsas_target_t;
 
@@ -241,7 +254,7 @@ typedef struct mptsas_cache_frames {
 	ddi_dma_handle_t m_dma_hdl;
 	ddi_acc_handle_t m_acc_hdl;
 	caddr_t m_frames_addr;
-	uint32_t m_phys_addr;
+	uint64_t m_phys_addr;
 } mptsas_cache_frames_t;
 
 typedef struct	mptsas_cmd {
@@ -255,24 +268,22 @@ typedef struct	mptsas_cmd {
 	off_t			cmd_dma_offset;
 	size_t			cmd_dma_len;
 	uint32_t		cmd_totaldmacount;
-
-	ddi_dma_handle_t	cmd_arqhandle;	/* dma arq handle */
-	ddi_dma_cookie_t	cmd_arqcookie;
-	struct buf		*cmd_arq_buf;
-	ddi_dma_handle_t	cmd_ext_arqhandle; /* dma extern arq handle */
-	ddi_dma_cookie_t	cmd_ext_arqcookie;
-	struct buf		*cmd_ext_arq_buf;
+	caddr_t			cmd_arq_buf;
 
 	int			cmd_pkt_flags;
 
-	/* timer for command in active slot */
-	int			cmd_active_timeout;
+	/* pending expiration time for command in active slot */
+	hrtime_t		cmd_active_expiration;
+	TAILQ_ENTRY(mptsas_cmd)	cmd_active_link;
 
 	struct scsi_pkt		*cmd_pkt;
 	struct scsi_arq_status	cmd_scb;
 	uchar_t			cmd_cdblen;	/* length of cdb */
 	uchar_t			cmd_rqslen;	/* len of requested rqsense */
 	uchar_t			cmd_privlen;
+	uint16_t		cmd_extrqslen;	/* len of extended rqsense */
+	uint16_t		cmd_extrqschunks; /* len in map chunks */
+	uint16_t		cmd_extrqsidx;	/* Index into map */
 	uint_t			cmd_scblen;
 	uint32_t		cmd_dmacount;
 	uint64_t		cmd_dma_addr;
@@ -320,7 +331,6 @@ typedef struct	mptsas_cmd {
 #define	CFLAG_PMM_RECEIVED	0x200000 /* use cmd_pmm* for saving pointers */
 #define	CFLAG_RETRY		0x400000 /* cmd has been retried */
 #define	CFLAG_CMDIOC		0x800000 /* cmd is just for for ioc, no io */
-#define	CFLAG_EXTARQBUFVALID	0x1000000 /* extern arq buf handle is valid */
 #define	CFLAG_PASSTHRU		0x2000000 /* cmd is a passthrough command */
 #define	CFLAG_XARQ		0x4000000 /* cmd requests for extra sense */
 #define	CFLAG_CMDACK		0x8000000 /* cmd for event ack */
@@ -367,6 +377,8 @@ typedef struct mptsas_pt_request {
 	uint32_t data_size;
 	uint32_t dataout_size;
 	uint32_t direction;
+	uint8_t simple;
+	uint16_t sgl_offset;
 	ddi_dma_cookie_t data_cookie;
 	ddi_dma_cookie_t dataout_cookie;
 } mptsas_pt_request_t;
@@ -546,6 +558,7 @@ _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas_topo_change_list_t::flags))
 #define	DEV_INFO_WRONG_DEVICE_TYPE	0x2
 #define	DEV_INFO_PHYS_DISK		0x3
 #define	DEV_INFO_FAIL_ALLOC		0x4
+#define	DEV_INFO_FAIL_GUID		0x5
 
 /*
  * mpt hotplug event defines
@@ -688,6 +701,7 @@ typedef struct mptsas {
 
 	refhash_t	*m_targets;
 	refhash_t	*m_smp_targets;
+	refhash_t	*m_tmp_targets;
 
 	m_raidconfig_t	m_raidconfig[MPTSAS_MAX_RAIDCONFIGS];
 	uint8_t		m_num_raid_configs;
@@ -735,6 +749,8 @@ typedef struct mptsas {
 
 	ddi_dma_handle_t m_dma_req_frame_hdl;
 	ddi_acc_handle_t m_acc_req_frame_hdl;
+	ddi_dma_handle_t m_dma_req_sense_hdl;
+	ddi_acc_handle_t m_acc_req_sense_hdl;
 	ddi_dma_handle_t m_dma_reply_frame_hdl;
 	ddi_acc_handle_t m_acc_reply_frame_hdl;
 	ddi_dma_handle_t m_dma_free_queue_hdl;
@@ -790,17 +806,22 @@ typedef struct mptsas {
 	 */
 	caddr_t		m_req_frame;
 	uint64_t	m_req_frame_dma_addr;
+	caddr_t		m_req_sense;
+	caddr_t		m_extreq_sense;
+	uint64_t	m_req_sense_dma_addr;
 	caddr_t		m_reply_frame;
 	uint64_t	m_reply_frame_dma_addr;
 	caddr_t		m_free_queue;
 	uint64_t	m_free_queue_dma_addr;
 	caddr_t		m_post_queue;
 	uint64_t	m_post_queue_dma_addr;
+	struct map	*m_erqsense_map;
 
 	m_replyh_arg_t *m_replyh_args;
 
 	uint16_t	m_max_requests;
 	uint16_t	m_req_frame_size;
+	uint16_t	m_req_sense_size;
 
 	/*
 	 * Max frames per request reprted in IOC Facts
@@ -895,6 +916,9 @@ typedef struct mptsas {
 	mptsas_fw_diagnostic_buffer_t
 		m_fw_diag_buffer_list[MPI2_DIAG_BUF_TYPE_COUNT];
 
+	/* GEN3 support */
+	uint8_t			m_MPI25;
+
 	/*
 	 * Event Replay flag (MUR support)
 	 */
@@ -939,9 +963,7 @@ _NOTE(SCHEME_PROTECTS_DATA("stable data", mptsas::m_kmem_cache))
 _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_io_dma_attr.dma_attr_sgllen))
 _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_devid))
 _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_productid))
-_NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_port_type))
 _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_mpxio_enable))
-_NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_ntargets))
 _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_instance))
 
 /*
@@ -1109,11 +1131,11 @@ _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_instance))
 			(uint32_t *)(mpt->m_devaddr + NREG_DSPS)))
 
 
-#define	MPTSAS_START_CMD(mpt, req_desc_lo, req_desc_hi) \
-	ddi_put32(mpt->m_datap, &mpt->m_reg->RequestDescriptorPostLow,\
-	    req_desc_lo);\
-	ddi_put32(mpt->m_datap, &mpt->m_reg->RequestDescriptorPostHigh,\
-	    req_desc_hi);
+#define	MPTSAS_START_CMD(mpt, req_desc) \
+	ddi_put32(mpt->m_datap, &mpt->m_reg->RequestDescriptorPostLow,	\
+	    req_desc & 0xffffffffu);					\
+	ddi_put32(mpt->m_datap, &mpt->m_reg->RequestDescriptorPostHigh,	\
+	    (req_desc >> 32) & 0xffffffffu);
 
 #define	INTPENDING(mpt) \
 	(MPTSAS_GET_ISTAT(mpt) & MPI2_HIS_REPLY_DESCRIPTOR_INTERRUPT)
@@ -1169,7 +1191,7 @@ _NOTE(DATA_READABLE_WITHOUT_LOCK(mptsas::m_instance))
  */
 #define	DEFAULT_SCSI_OPTIONS	SCSI_OPTIONS_DR
 #define	DEFAULT_TAG_AGE_LIMIT	2
-#define	DEFAULT_WD_TICK		10
+#define	DEFAULT_WD_TICK		1
 
 /*
  * invalid hostid.
@@ -1256,14 +1278,6 @@ void mptsas_waitq_add(mptsas_t *mpt, mptsas_cmd_t *cmd);
 void mptsas_log(struct mptsas *mpt, int level, char *fmt, ...);
 int mptsas_poll(mptsas_t *mpt, mptsas_cmd_t *poll_cmd, int polltime);
 int mptsas_do_dma(mptsas_t *mpt, uint32_t size, int var, int (*callback)());
-int mptsas_send_config_request_msg(mptsas_t *mpt, uint8_t action,
-	uint8_t pagetype, uint32_t pageaddress, uint8_t pagenumber,
-	uint8_t pageversion, uint8_t pagelength, uint32_t
-	SGEflagslength, uint32_t SGEaddress32);
-int mptsas_send_extended_config_request_msg(mptsas_t *mpt, uint8_t action,
-	uint8_t extpagetype, uint32_t pageaddress, uint8_t pagenumber,
-	uint8_t pageversion, uint16_t extpagelength,
-	uint32_t SGEflagslength, uint32_t SGEaddress32);
 int mptsas_update_flash(mptsas_t *mpt, caddr_t ptrbuffer, uint32_t size,
 	uint8_t type, int mode);
 int mptsas_check_flash(mptsas_t *mpt, caddr_t origfile, uint32_t size,
@@ -1295,11 +1309,11 @@ int mptsas_get_handshake_msg(mptsas_t *mpt, caddr_t memp, int numbytes,
 int mptsas_send_config_request_msg(mptsas_t *mpt, uint8_t action,
     uint8_t pagetype, uint32_t pageaddress, uint8_t pagenumber,
     uint8_t pageversion, uint8_t pagelength, uint32_t SGEflagslength,
-    uint32_t SGEaddress32);
+    uint64_t SGEaddress);
 int mptsas_send_extended_config_request_msg(mptsas_t *mpt, uint8_t action,
     uint8_t extpagetype, uint32_t pageaddress, uint8_t pagenumber,
     uint8_t pageversion, uint16_t extpagelength,
-    uint32_t SGEflagslength, uint32_t SGEaddress32);
+    uint32_t SGEflagslength, uint64_t SGEaddress);
 
 int mptsas_request_from_pool(mptsas_t *mpt, mptsas_cmd_t **cmd,
     struct scsi_pkt **pkt);
@@ -1335,7 +1349,7 @@ int mptsas_ioc_init(mptsas_t *mpt);
 int mptsas_get_sas_device_page0(mptsas_t *mpt, uint32_t page_address,
     uint16_t *dev_handle, uint64_t *sas_wwn, uint32_t *dev_info,
     uint8_t *physport, uint8_t *phynum, uint16_t *pdevhandle,
-    uint16_t *slot_num, uint16_t *enclosure);
+    uint16_t *slot_num, uint16_t *enclosure, uint16_t *io_flags);
 int mptsas_get_sas_io_unit_page(mptsas_t *mpt);
 int mptsas_get_sas_io_unit_page_hndshk(mptsas_t *mpt);
 int mptsas_get_sas_expander_page0(mptsas_t *mpt, uint32_t page_address,
@@ -1370,14 +1384,25 @@ void mptsas_raid_action_system_shutdown(mptsas_t *mpt);
 #define	MPTSAS_IOCSTATUS(status) (status & MPI2_IOCSTATUS_MASK)
 /*
  * debugging.
+ * MPTSAS_DBGLOG_LINECNT must be a power of 2.
  */
+#define	MPTSAS_DBGLOG_LINECNT	128
+#define	MPTSAS_DBGLOG_LINELEN	256
+#define	MPTSAS_DBGLOG_BUFSIZE	(MPTSAS_DBGLOG_LINECNT * MPTSAS_DBGLOG_LINELEN)
+
 #if defined(MPTSAS_DEBUG)
 
+extern uint32_t mptsas_debugprt_flags;
+extern uint32_t mptsas_debuglog_flags;
+
 void mptsas_printf(char *fmt, ...);
+void mptsas_debug_log(char *fmt, ...);
 
 #define	MPTSAS_DBGPR(m, args)	\
-	if (mptsas_debug_flags & (m)) \
-		mptsas_printf args
+	if (mptsas_debugprt_flags & (m)) \
+		mptsas_printf args;   \
+	if (mptsas_debuglog_flags & (m)) \
+		mptsas_debug_log args
 #else	/* ! defined(MPTSAS_DEBUG) */
 #define	MPTSAS_DBGPR(m, args)
 #endif	/* defined(MPTSAS_DEBUG) */
@@ -1400,9 +1425,9 @@ void mptsas_printf(char *fmt, ...);
 #define	NDBG12(args)	MPTSAS_DBGPR(0x1000, args)	/* enumeration */
 #define	NDBG13(args)	MPTSAS_DBGPR(0x2000, args)	/* configuration page */
 #define	NDBG14(args)	MPTSAS_DBGPR(0x4000, args)	/* LED control */
-#define	NDBG15(args)	MPTSAS_DBGPR(0x8000, args)
+#define	NDBG15(args)	MPTSAS_DBGPR(0x8000, args)	/* Passthrough */
 
-#define	NDBG16(args)	MPTSAS_DBGPR(0x010000, args)
+#define	NDBG16(args)	MPTSAS_DBGPR(0x010000, args)	/* SAS Broadcasts */
 #define	NDBG17(args)	MPTSAS_DBGPR(0x020000, args)	/* scatter/gather */
 #define	NDBG18(args)	MPTSAS_DBGPR(0x040000, args)
 #define	NDBG19(args)	MPTSAS_DBGPR(0x080000, args)	/* handshaking */
@@ -1415,7 +1440,7 @@ void mptsas_printf(char *fmt, ...);
 #define	NDBG24(args)	MPTSAS_DBGPR(0x1000000, args)	/* capabilities */
 #define	NDBG25(args)	MPTSAS_DBGPR(0x2000000, args)	/* flushing */
 #define	NDBG26(args)	MPTSAS_DBGPR(0x4000000, args)
-#define	NDBG27(args)	MPTSAS_DBGPR(0x8000000, args)
+#define	NDBG27(args)	MPTSAS_DBGPR(0x8000000, args)	/* passthrough */
 
 #define	NDBG28(args)	MPTSAS_DBGPR(0x10000000, args)	/* hotplug */
 #define	NDBG29(args)	MPTSAS_DBGPR(0x20000000, args)	/* timeouts */

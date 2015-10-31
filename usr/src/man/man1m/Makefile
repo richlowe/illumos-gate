@@ -12,7 +12,7 @@
 #
 # Copyright 2011, Richard Lowe
 # Copyright (c) 2012, Joyent, Inc.  All rights reserved.
-# Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 #
 
 include		$(SRC)//Makefile.master
@@ -53,11 +53,6 @@ _MANFILES=	6to4relay.1m		\
 		bootadm.1m		\
 		bootconfchk.1m		\
 		busstat.1m		\
-		cachefsd.1m		\
-		cachefslog.1m		\
-		cachefspack.1m		\
-		cachefsstat.1m		\
-		cachefswssize.1m	\
 		captoinfo.1m		\
 		catman.1m		\
 		cfgadm.1m		\
@@ -69,10 +64,8 @@ _MANFILES=	6to4relay.1m		\
 		cfgadm_sata.1m		\
 		cfgadm_sbd.1m		\
 		cfgadm_scsi.1m		\
-		cfgadm_sdcard.1m	\
 		cfgadm_sysctrl.1m	\
 		cfgadm_usb.1m		\
-		cfsadmin.1m		\
 		chat.1m			\
 		check-hostname.1m	\
 		check-permissions.1m	\
@@ -105,9 +98,6 @@ _MANFILES=	6to4relay.1m		\
 		dfshares.1m		\
 		dfshares_nfs.1m		\
 		dhcpagent.1m		\
-		dhcpconfig.1m		\
-		dhcpmgr.1m		\
-		dhtadm.1m		\
 		disks.1m		\
 		diskscan.1m		\
 		dispadmin.1m		\
@@ -123,7 +113,6 @@ _MANFILES=	6to4relay.1m		\
 		dscfgadm.1m		\
 		dscfglockd.1m		\
 		dsstat.1m		\
-		dsvclockd.1m		\
 		dtrace.1m		\
 		dumpadm.1m		\
 		editmap.1m		\
@@ -146,7 +135,6 @@ _MANFILES=	6to4relay.1m		\
 		format.1m		\
 		fruadm.1m		\
 		fsck.1m			\
-		fsck_cachefs.1m		\
 		fsck_pcfs.1m		\
 		fsck_udfs.1m		\
 		fsck_ufs.1m		\
@@ -158,10 +146,6 @@ _MANFILES=	6to4relay.1m		\
 		fssnap_ufs.1m		\
 		fsstat.1m		\
 		fstyp.1m		\
-		ftpaddhost.1m		\
-		ftpconfig.1m		\
-		ftprestart.1m		\
-		ftpshut.1m		\
 		fuser.1m		\
 		fwflash.1m		\
 		fwtmp.1m		\
@@ -169,7 +153,6 @@ _MANFILES=	6to4relay.1m		\
 		getdevpolicy.1m		\
 		getdgrp.1m		\
 		getent.1m		\
-		gettable.1m		\
 		getty.1m		\
 		getvol.1m		\
 		groupadd.1m		\
@@ -186,7 +169,6 @@ _MANFILES=	6to4relay.1m		\
 		halt.1m			\
 		hextoalabel.1m		\
 		hostconfig.1m		\
-		htable.1m		\
 		ickey.1m		\
 		id.1m			\
 		idmap.1m		\
@@ -203,11 +185,9 @@ _MANFILES=	6to4relay.1m		\
 		in.chargend.1m		\
 		in.comsat.1m		\
 		in.daytimed.1m		\
-		in.dhcpd.1m		\
 		in.discardd.1m		\
 		in.echod.1m		\
 		in.fingerd.1m		\
-		in.ftpd.1m		\
 		in.iked.1m		\
 		in.lpd.1m		\
 		in.mpathd.1m		\
@@ -302,6 +282,7 @@ _MANFILES=	6to4relay.1m		\
 		lpusers.1m		\
 		luxadm.1m		\
 		mail.local.1m		\
+		mailwrapper.1m		\
 		makedbm.1m		\
 		makemap.1m		\
 		mdmonitord.1m		\
@@ -337,7 +318,6 @@ _MANFILES=	6to4relay.1m		\
 		modload.1m		\
 		modunload.1m		\
 		mount.1m		\
-		mount_cachefs.1m	\
 		mount_hsfs.1m		\
 		mount_nfs.1m		\
 		mount_pcfs.1m		\
@@ -355,6 +335,7 @@ _MANFILES=	6to4relay.1m		\
 		ncheck.1m		\
 		ncheck_ufs.1m		\
 		ndd.1m			\
+		ndp.1m			\
 		ndmpadm.1m		\
 		ndmpd.1m		\
 		ndmpstat.1m		\
@@ -384,7 +365,6 @@ _MANFILES=	6to4relay.1m		\
 		plockstat.1m		\
 		pmadm.1m		\
 		pmconfig.1m		\
-		pntadm.1m		\
 		polkit-is-privileged.1m \
 		pooladm.1m		\
 		poolbind.1m		\
@@ -578,7 +558,6 @@ _MANFILES=	6to4relay.1m		\
 		wificonfig.1m		\
 		wpad.1m			\
 		wracct.1m		\
-		wusbadm.1m		\
 		ypbind.1m		\
 		ypinit.1m		\
 		ypmake.1m		\
@@ -599,21 +578,8 @@ _MANFILES=	6to4relay.1m		\
 		zpool.1m		\
 		zstreamdump.1m
 
-i386_MANFILES=	lms.1m			\
-		parted.1m		\
-		mkntfs.1m		\
-		ntfscat.1m		\
-		ntfsclone.1m		\
-		ntfscluster.1m		\
-		ntfscmp.1m		\
-		ntfscp.1m		\
-		ntfsfix.1m		\
-		ntfsinfo.1m		\
-		ntfslabel.1m		\
-		ntfsls.1m		\
-		ntfsprogs.1m		\
-		ntfsresize.1m		\
-		ntfsundelete.1m
+i386_MANFILES=				\
+		lms.1m
 
 sparc_MANFILES=	cvcd.1m			\
 		dcs.1m			\
@@ -646,7 +612,6 @@ MANLINKS=	acctcon1.1m			\
 		dodisk.1m			\
 		fcadm.1m			\
 		fingerd.1m			\
-		ftpd.1m				\
 		grpck.1m			\
 		hal-find-by-capability.1m	\
 		hal-find-by-property.1m		\
@@ -755,7 +720,6 @@ poweroff.1m			:= LINKSRC = halt.1m
 
 comsat.1m			:= LINKSRC = in.comsat.1m
 fingerd.1m			:= LINKSRC = in.fingerd.1m
-ftpd.1m				:= LINKSRC = in.ftpd.1m
 rarpd.1m			:= LINKSRC = in.rarpd.1m
 rdisc.1m			:= LINKSRC = in.rdisc.1m
 rexecd.1m			:= LINKSRC = in.rexecd.1m

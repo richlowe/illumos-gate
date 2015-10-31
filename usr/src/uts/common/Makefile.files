@@ -21,9 +21,10 @@
 
 #
 # Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright (c) 2012 Nexenta Systems, Inc. All rights reserved.
-# Copyright (c) 2013 by Delphix. All rights reserved.
+# Copyright (c) 2012 Joyent, Inc.  All rights reserved.
+# Copyright (c) 2011, 2014 by Delphix. All rights reserved.
 # Copyright (c) 2013 by Saso Kiselkov. All rights reserved.
+# Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 #
 
 #
@@ -277,6 +278,7 @@ GENUNIX_OBJS +=	\
 		profil.o	\
 		project.o	\
 		qsort.o		\
+		getrandom.o	\
 		rctl.o		\
 		rctlsys.o	\
 		readlink.o	\
@@ -507,6 +509,10 @@ MD5_OBJS +=	md5.o md5_mod.o
 SHA1_OBJS +=	sha1.o sha1_mod.o
 
 SHA2_OBJS +=	sha2.o sha2_mod.o
+
+SKEIN_OBJS +=	skein.o skein_block.o skein_iv.o skein_mod.o
+
+EDONR_OBJS +=	edonr.o edonr_mod.o
 
 IPGPC_OBJS +=   classifierddi.o classifier.o filters.o trie.o table.o \
 		ba_table.o
@@ -757,8 +763,6 @@ BOFI_OBJS += bofi.o
 
 HID_OBJS += hid.o
 
-HWA_RC_OBJS += hwarc.o
-
 USBSKEL_OBJS += usbskel.o
 
 USBVC_OBJS += usbvc.o usbvc_v4l2.o
@@ -786,8 +790,6 @@ USBSER_KEYSPAN_OBJS += usbser_keyspan.o keyspan_dsd.o keyspan_pipe.o
 USBS49_FW_OBJS += keyspan_49fw.o
 
 USBSPRL_OBJS += usbser_pl2303.o pl2303_dsd.o
-
-WUSB_CA_OBJS += wusb_ca.o
 
 USBFTDI_OBJS += usbser_uftdi.o uftdi_dsd.o
 
@@ -823,9 +825,6 @@ SMP_OBJS +=	smp.o
 SATA_OBJS +=	sata.o
 
 USBA_OBJS +=	hcdi.o	usba.o	usbai.o hubdi.o parser.o genconsole.o \
-		usbai_pipe_mgmt.o usbai_req.o usbai_util.o usbai_register.o \
-		usba_devdb.o usba10_calls.o usba_ugen.o whcdi.o wa.o
-USBA_WITHOUT_WUSB_OBJS +=	hcdi.o	usba.o	usbai.o hubdi.o parser.o genconsole.o \
 		usbai_pipe_mgmt.o usbai_req.o usbai_util.o usbai_register.o \
 		usba_devdb.o usba10_calls.o usba_ugen.o
 
@@ -993,6 +992,8 @@ DEVPOLL_OBJS += devpoll.o
 
 DEVPOOL_OBJS += devpool.o
 
+EVENTFD_OBJS +=	eventfd.o
+
 I8042_OBJS +=	i8042.o
 
 KB8042_OBJS +=	\
@@ -1031,6 +1032,8 @@ PSHOT_OBJS += pshot.o
 GEN_DRV_OBJS += gen_drv.o
 
 TCLIENT_OBJS +=	tclient.o
+
+TIMERFD_OBJS +=	timerfd.o
 
 TPHCI_OBJS += tphci.o
 
@@ -1113,15 +1116,6 @@ JAVAEXEC_OBJS +=java.o
 #
 AUTOFS_OBJS +=	auto_vfsops.o auto_vnops.o auto_subr.o auto_xdr.o auto_sys.o
 
-CACHEFS_OBJS +=	cachefs_cnode.o		cachefs_cod.o \
-		cachefs_dir.o		cachefs_dlog.o	cachefs_filegrp.o \
-		cachefs_fscache.o	cachefs_ioctl.o	cachefs_log.o \
-		cachefs_module.o \
-		cachefs_noopc.o		cachefs_resource.o \
-		cachefs_strict.o \
-		cachefs_subr.o		cachefs_vfsops.o \
-		cachefs_vnops.o
-
 DCFS_OBJS +=	dc_vnops.o
 
 DEVFS_OBJS +=	devfs_subr.o	devfs_vfsops.o	devfs_vnops.o
@@ -1189,10 +1183,12 @@ SMBSRV_SHARED_OBJS += \
 SMBSRV_OBJS +=	$(SMBSRV_SHARED_OBJS)			\
 		smb_acl.o				\
 		smb_alloc.o				\
+		smb_authenticate.o			\
 		smb_close.o				\
 		smb_common_open.o			\
 		smb_common_transact.o			\
 		smb_create.o				\
+		smb_cred.o				\
 		smb_delete.o				\
 		smb_directory.o				\
 		smb_dispatch.o				\
@@ -1202,10 +1198,11 @@ SMBSRV_OBJS +=	$(SMBSRV_SHARED_OBJS)			\
 		smb_flush.o				\
 		smb_fsinfo.o				\
 		smb_fsops.o				\
+		smb_idmap.o				\
 		smb_init.o				\
 		smb_kdoor.o				\
 		smb_kshare.o				\
-                smb_kutil.o				\
+		smb_kutil.o				\
 		smb_lock.o				\
 		smb_lock_byte_range.o			\
 		smb_locking_andx.o			\
@@ -1216,14 +1213,14 @@ SMBSRV_OBJS +=	$(SMBSRV_SHARED_OBJS)			\
 		smb_negotiate.o				\
 		smb_net.o				\
 		smb_node.o				\
-                smb_nt_cancel.o				\
+		smb_nt_cancel.o				\
 		smb_nt_create_andx.o			\
-                smb_nt_transact_create.o		\
+		smb_nt_transact_create.o		\
 		smb_nt_transact_ioctl.o			\
 		smb_nt_transact_notify_change.o		\
 		smb_nt_transact_quota.o			\
 		smb_nt_transact_security.o		\
-                smb_odir.o				\
+		smb_odir.o				\
 		smb_ofile.o				\
 		smb_open_andx.o				\
 		smb_opipe.o				\
@@ -1240,8 +1237,10 @@ SMBSRV_OBJS +=	$(SMBSRV_SHARED_OBJS)			\
 		smb_session.o				\
 		smb_session_setup_andx.o		\
 		smb_set_fileinfo.o			\
+		smb_sign_kcf.o				\
 		smb_signing.o				\
-                smb_tree.o				\
+		smb_thread.o				\
+		smb_tree.o				\
 		smb_trans2_create_directory.o		\
 		smb_trans2_dfs.o			\
 		smb_trans2_find.o			\
@@ -1251,8 +1250,7 @@ SMBSRV_OBJS +=	$(SMBSRV_SHARED_OBJS)			\
 		smb_vfs.o				\
 		smb_vops.o				\
 		smb_vss.o				\
-		smb_write.o				\
-		smb_write_raw.o
+		smb_write.o
 
 PCFS_OBJS +=	pc_alloc.o	pc_dir.o	pc_node.o	pc_subr.o \
 		pc_vfsops.o	pc_vnops.o
@@ -1329,9 +1327,11 @@ TRANS_OBJS += mdtrans.o trans_ioctl.o trans_log.o
 
 ZFS_COMMON_OBJS +=		\
 	arc.o			\
+	blkptr.o		\
 	bplist.o		\
 	bpobj.o			\
 	bptree.o		\
+	bqueue.o		\
 	dbuf.o			\
 	ddt.o			\
 	ddt_zap.o		\
@@ -1361,11 +1361,14 @@ ZFS_COMMON_OBJS +=		\
 	lz4.o			\
 	lzjb.o			\
 	metaslab.o		\
+	multilist.o		\
 	range_tree.o		\
 	refcount.o		\
 	rrwlock.o		\
 	sa.o			\
 	sha256.o		\
+	edonr_zfs.o		\
+	skein_zfs.o		\
 	spa.o			\
 	spa_config.o		\
 	spa_errlog.o		\
@@ -1740,14 +1743,7 @@ USB_MID_OBJS += usb_mid.o
 
 USB_IA_OBJS += usb_ia.o
 
-UWBA_OBJS += uwba.o uwbai.o
-
 SCSA2USB_OBJS += scsa2usb.o usb_ms_bulkonly.o usb_ms_cbi.o
-
-HWAHC_OBJS += hwahc.o hwahc_util.o
-
-WUSB_DF_OBJS += wusb_df.o
-WUSB_FWMOD_OBJS += wusb_fwmod.o
 
 IPF_OBJS += ip_fil_solaris.o fil.o solaris.o ip_state.o ip_frag.o ip_nat.o \
 	    ip_proxy.o ip_auth.o ip_pool.o ip_htable.o ip_lookup.o \
@@ -1866,6 +1862,10 @@ VR_OBJS += vr.o
 ATGE_OBJS += atge_main.o atge_l1e.o atge_mii.o atge_l1.o atge_l1c.o
 
 YGE_OBJS = yge.o
+
+SKD_OBJS = skd.o
+
+NVME_OBJS = nvme.o
 
 #
 #	Build up defines and paths.
@@ -1993,6 +1993,9 @@ VIRTIO_OBJS = virtio.o
 # Virtio block driver
 VIOBLK_OBJS = vioblk.o
 
+# Virtio network driver
+VIOIF_OBJS = vioif.o
+
 #
 #	kiconv modules
 #
@@ -2074,3 +2077,60 @@ MYRI10GE_OBJS =	myri10ge.o myri10ge_lro.o
 NULLDRIVER_OBJS =	nulldriver.o
 
 TPM_OBJS =	tpm.o tpm_hcall.o
+
+#
+#	BNXE objects
+#
+BNXE_OBJS +=	bnxe_cfg.o		\
+		bnxe_fcoe.o		\
+		bnxe_debug.o		\
+		bnxe_gld.o		\
+		bnxe_hw.o		\
+		bnxe_intr.o		\
+		bnxe_kstat.o		\
+		bnxe_lock.o		\
+		bnxe_main.o		\
+		bnxe_mm.o		\
+		bnxe_mm_l4.o		\
+		bnxe_mm_l5.o		\
+		bnxe_rr.o		\
+		bnxe_rx.o		\
+		bnxe_timer.o		\
+		bnxe_tx.o		\
+		bnxe_workq.o		\
+		bnxe_clc.o		\
+		ecore_sp_verbs.o	\
+		bnxe_context.o		\
+		57710_init_values.o	\
+		57711_init_values.o	\
+		57712_init_values.o	\
+		bnxe_fw_funcs.o		\
+		bnxe_hw_debug.o		\
+		lm_l4fp.o		\
+		lm_l4rx.o		\
+		lm_l4sp.o		\
+		lm_l4tx.o		\
+		lm_l5.o			\
+		lm_l5sp.o		\
+		lm_dcbx.o		\
+		lm_devinfo.o		\
+		lm_dmae.o		\
+		lm_er.o			\
+		lm_hw_access.o		\
+		lm_hw_attn.o		\
+		lm_hw_init_reset.o	\
+		lm_main.o		\
+		lm_mcp.o		\
+		lm_niv.o		\
+		lm_nvram.o		\
+		lm_phy.o		\
+		lm_power.o		\
+		lm_recv.o		\
+		lm_resc.o		\
+		lm_sb.o			\
+		lm_send.o		\
+		lm_sp.o			\
+		lm_dcbx_mp.o		\
+		lm_sp_req_mgr.o		\
+		lm_stats.o		\
+		lm_util.o

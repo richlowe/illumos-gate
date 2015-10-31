@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -43,8 +44,6 @@ init_mapping_system()
 {
 	int rc = 0;
 
-	if (rwlock_init(&_idmapdstate.rwlk_cfg, USYNC_THREAD, NULL) != 0)
-		return (-1);
 	if ((rc = load_config()) < 0)
 		return (rc);
 
@@ -119,8 +118,12 @@ reload_gcs()
 	int		num_trustfor = pgcfg->num_trusted_forests;
 	ad_disc_domainsinforest_t *domain_in_forest;
 
-	if (pgcfg->domain_name == NULL) {
-		/* No domain name specified - workgroup mode. */
+	if (pgcfg->use_ads == B_FALSE ||
+	    pgcfg->domain_name == NULL) {
+		/*
+		 * ADS disabled, or no domain name specified.
+		 * Not using adutils. (but still can use lsa)
+		 */
 		new_gcs = NULL;
 		new_num_gcs = 0;
 		goto out;
@@ -134,7 +137,7 @@ reload_gcs()
 		 * If that stops working we'll go into degraded mode anyways
 		 * when it does.
 		 */
-		degrade_svc(0,
+		idmapdlog(LOG_INFO,
 		    "Global Catalog servers not configured/discoverable");
 		return;
 	}
@@ -248,8 +251,12 @@ reload_dcs(void)
 	int		old_num_dcs = _idmapdstate.num_dcs;
 	idmap_pg_config_t *pgcfg = &_idmapdstate.cfg->pgcfg;
 
-	if (pgcfg->domain_name == NULL) {
-		/* No domain name specified - workgroup mode. */
+	if (pgcfg->use_ads == B_FALSE ||
+	    pgcfg->domain_name == NULL) {
+		/*
+		 * ADS disabled, or no domain name specified.
+		 * Not using adutils. (but still can use lsa)
+		 */
 		new_dcs = NULL;
 		new_num_dcs = 0;
 		goto out;
@@ -263,7 +270,7 @@ reload_dcs(void)
 		 * If that stops working we'll go into degraded mode anyways
 		 * when it does.
 		 */
-		degrade_svc(0,
+		idmapdlog(LOG_INFO,
 		    "Domain controller servers not configured/discoverable");
 		return;
 	}

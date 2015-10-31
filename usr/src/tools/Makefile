@@ -21,6 +21,7 @@
 
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
 include ../Makefile.master
@@ -39,12 +40,13 @@ COMMON_SUBDIRS= \
 	depcheck \
 	env \
 	findunref \
-	ndrgen \
-	onbld \
-	pmodes \
 	gk \
 	install.bin \
 	lintdump \
+	make \
+	ndrgen \
+	onbld \
+	pmodes \
 	protocmp \
 	protolist \
 	scripts
@@ -53,7 +55,8 @@ COMMON_SUBDIRS= \
 #  special versions of commands for use only in build
 #
 UNSHIPPED_SUBDIRS = \
-	elfsign
+	elfsign \
+	mandoc
 
 sparc_SUBDIRS= \
 	chk4ubin \
@@ -89,6 +92,7 @@ ROOTDIRS= \
 	$(ROOTONBLD)/bin/$(MACH) \
 	$(ROOTONBLD)/lib \
 	$(ROOTONBLD)/lib/$(MACH) \
+	$(ROOTONBLD)/lib/$(MACH)/64 \
 	$(ROOTONBLD)/lib/perl \
 	$(ROOTONBLD)/lib/python2.6 \
 	$(ROOTONBLD)/lib/python2.6/onbld \
@@ -98,9 +102,10 @@ ROOTDIRS= \
 	$(ROOTONBLD)/env \
 	$(ROOTONBLD)/etc \
 	$(ROOTONBLD)/etc/exception_lists \
+	$(ROOTONBLD)/share \
 	$(ROOTONBLD)/gk \
 	$(ROOTONBLD)/man \
-	$(ROOTONBLD)/man/man1
+	$(ROOTONBLD)/man/man1onbld
 
 all :=		TARGET= install
 install :=	TARGET= install
@@ -142,5 +147,7 @@ $(ROOTDIRS):
 
 $(ROOTONBLDLIBPY): $(ROOTDIRS)
 	$(RM) -r $@; $(SYMLINK) python2.6 $@
+
+make: ctf
 
 FRC:

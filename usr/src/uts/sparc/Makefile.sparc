@@ -21,6 +21,8 @@
 
 # Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2013 Andrew Stormont.  All rights reserved.
+# Copyright (c) 2015, Joyent, Inc. All rights reserved.
+# Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 
 
 #
@@ -219,6 +221,7 @@ DRV_KMODS	+= spdsock
 DRV_KMODS	+= tcp tcp6 tl tnf ttymux udp udp6 wc winlock zcons
 DRV_KMODS	+= ippctl
 DRV_KMODS	+= dld
+DRV_KMODS	+= ipd
 DRV_KMODS	+= ipf
 DRV_KMODS	+= rpcib
 DRV_KMODS	+= dlpistub
@@ -235,6 +238,7 @@ DRV_KMODS	+= nulldriver
 DRV_KMODS	+= bridge trill
 DRV_KMODS	+= bpf
 DRV_KMODS	+= dca
+DRV_KMODS	+= eventfd
 
 #
 #       Hardware Drivers in common space
@@ -247,6 +251,7 @@ DRV_KMODS	+= audiols
 DRV_KMODS	+= audiop16x
 DRV_KMODS	+= audiopci
 DRV_KMODS	+= audiots
+DRV_KMODS	+= bnxe
 DRV_KMODS	+= e1000g
 DRV_KMODS	+= efe
 DRV_KMODS	+= hxge
@@ -275,7 +280,6 @@ DRV_KMODS	+= usb_as usb_ac
 DRV_KMODS	+= usbskel
 DRV_KMODS	+= usbvc
 DRV_KMODS	+= usbftdi
-DRV_KMODS	+= wusb_df hwahc hwarc wusb_ca
 DRV_KMODS	+= usbecm
 DRV_KMODS	+= hci1394 av1394 scsa1394 dcam1394
 DRV_KMODS	+= sbp2
@@ -350,7 +354,7 @@ SCHED_KMODS	+= RT TS RT_DPTBL TS_DPTBL IA FSS FX FX_DPTBL SDC
 #	File System Modules (/kernel/fs):
 #
 FS_KMODS	+= dev devfs fdfs fifofs hsfs lofs namefs nfs pcfs tmpfs zfs
-FS_KMODS	+= zut specfs udfs ufs autofs cachefs procfs sockfs mntfs
+FS_KMODS	+= zut specfs udfs ufs autofs procfs sockfs mntfs
 FS_KMODS	+= ctfs objfs sharefs dcfs smbfs
 
 #
@@ -416,7 +420,6 @@ MISC_KMODS	+= qlc_fw_2500
 MISC_KMODS	+= qlc_fw_6322
 MISC_KMODS	+= qlc_fw_8100
 MISC_KMODS	+= spuni
-MISC_KMODS	+= hwa1480_fw uwba
 MISC_KMODS	+= mii
 
 MISC_KMODS	+= klmmod klmops
@@ -428,12 +431,14 @@ CRYPTO_KMODS	+= aes
 CRYPTO_KMODS	+= arcfour
 CRYPTO_KMODS	+= blowfish
 CRYPTO_KMODS	+= des
+CRYPTO_KMODS	+= ecc
+CRYPTO_KMODS	+= edonr
 CRYPTO_KMODS	+= md4
 CRYPTO_KMODS	+= md5
-CRYPTO_KMODS	+= ecc
 CRYPTO_KMODS	+= rsa
 CRYPTO_KMODS	+= sha1
 CRYPTO_KMODS	+= sha2
+CRYPTO_KMODS	+= skein
 CRYPTO_KMODS	+= swrand
 
 #

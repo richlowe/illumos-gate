@@ -20,14 +20,16 @@
  */
 
 /*
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ */
+
+/*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
 #ifndef	_MOUNTD_H
 #define	_MOUNTD_H
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #include <door.h>
 #include <nfs/nfs.h>
@@ -46,6 +48,7 @@ extern void mntlist_delete(char *host, char *path);
 extern void mntlist_delete_all(char *host);
 extern void netgroup_init(void);
 extern int  netgroup_check(struct nd_hostservlist *, char *, int);
+extern void netgrp_cache_flush(void);
 extern void export(struct svc_req *);
 extern void nfsauth_func(void *, char *, size_t, door_desc_t *, uint_t);
 extern char *inet_ntoa_r(struct in_addr, char *);
@@ -63,8 +66,12 @@ extern void *exmalloc(size_t);
 
 extern struct share *findentry(char *);
 extern int check_client(struct share *, struct netbuf *,
-				struct nd_hostservlist *, int);
+    struct nd_hostservlist *, int, uid_t, gid_t, uint_t, gid_t *, uid_t *,
+    gid_t *, uint_t *, gid_t **);
 extern struct nd_hostservlist *anon_client(char *host);
+
+extern int in_access_list(SVCXPRT *, struct netbuf **,
+    struct nd_hostservlist **, char *);
 
 /*
  * These functions are defined here due to the fact
@@ -79,11 +86,6 @@ extern struct nd_hostservlist *anon_client(char *host);
 extern void audit_mountd_setup(void);
 extern void audit_mountd_mount(char *, char *, int);
 extern void audit_mountd_umount(char *, char *);
-
-/*
- * This is a hidden function in the rpc libraries (libnsl).
- */
-extern int __rpc_negotiate_uid(int);
 
 /*
  * This appears to be a hidden function in libc.

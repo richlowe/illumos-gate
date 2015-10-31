@@ -260,7 +260,6 @@
 #
 @ MSG_GRP_INVALNDX	"file %s: group section [%u]%s: entry %d: \
 			 invalid section index: %d"
-@ MSG_GRP_INVALSYM	"file %s: group section [%u]%s: invalid group symbol %s"
 
 # Relocation processing messages (some of these are required to satisfy
 # do_reloc(), which is common code used by cmd/sgs/rtld - make sure both
@@ -473,6 +472,10 @@
 
 @ MSG_SCN_MULTICOMDAT	"file %s: section [%u]%s: cannot be susceptible to multiple \
 			 COMDAT mechanisms: %s"
+
+@ MSG_SCN_DWFOVRFLW	"%s: section %s: encoded DWARF data exceeds \
+			 section size"
+@ MSG_SCN_DWFBADENC	"%s: section %s: invalid DWARF encoding: %#x"                         
 
 # Symbol processing errors
 

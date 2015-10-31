@@ -21,8 +21,8 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013 by Delphix. All rights reserved.
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright (c) 2013, 2015 by Delphix. All rights reserved.
+ * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <stdio.h>
@@ -186,9 +186,6 @@ zfs_iter_bookmarks(zfs_handle_t *zhp, zfs_iter_f func, void *data)
 	fnvlist_add_boolean(props, zfs_prop_to_name(ZFS_PROP_CREATETXG));
 	fnvlist_add_boolean(props, zfs_prop_to_name(ZFS_PROP_CREATION));
 
-	/* Allocate an nvlist to hold the bookmarks. */
-	bmarks = fnvlist_alloc();
-
 	if ((err = lzc_get_bookmarks(zhp->zfs_name, props, &bmarks)) != 0)
 		goto out;
 
@@ -311,7 +308,8 @@ typedef struct {
 } snapspec_arg_t;
 
 static int
-snapspec_cb(zfs_handle_t *zhp, void *arg) {
+snapspec_cb(zfs_handle_t *zhp, void *arg)
+{
 	snapspec_arg_t *ssa = arg;
 	char *shortsnapname;
 	int err = 0;

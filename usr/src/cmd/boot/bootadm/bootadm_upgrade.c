@@ -21,6 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2015 Toomas Soome <tsoome@me.com>
  */
 
 #include <stdio.h>
@@ -56,8 +57,6 @@ get_findroot_cap(const char *osroot)
 	int		error;
 	int		ret;
 	const char	*fcn = "get_findroot_cap()";
-
-	assert(is_grub(osroot));
 
 	(void) snprintf(path, sizeof (path), "%s/%s",
 	    osroot, "boot/grub/capability");
@@ -121,11 +120,6 @@ get_boot_cap(const char *osroot)
 		bam_direct = BAM_DIRECT_DBOOT;
 		BAM_DPRINTF((D_IS_SPARC_DBOOT, fcn));
 		return (BAM_SUCCESS);
-	}
-
-	if (!is_grub(osroot)) {
-		bam_error(NOT_GRUB_ROOT, osroot);
-		return (BAM_ERROR);
 	}
 
 	(void) snprintf(fname, PATH_MAX, "%s/%s", osroot,
@@ -893,7 +887,7 @@ upgrade_menu(menu_t *mp, char *osroot, char *menu_root)
 	 */
 	if (bam_is_findroot != BAM_FINDROOT_PRESENT ||
 	    bam_direct != BAM_DIRECT_DBOOT) {
-		bam_error(DOWNGRADE_NOTSUP, osroot);
+		bam_error(DOWNGRADE_NOTSUP);
 		return (BAM_ERROR);
 	}
 

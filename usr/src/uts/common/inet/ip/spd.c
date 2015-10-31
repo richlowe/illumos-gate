@@ -1073,8 +1073,7 @@ ipsec_rl_strlog(netstack_t *ns, short mid, short sid, char level, ushort_t sl,
 
 	if (ipst->ips_ipsec_policy_log_interval) {
 		if (ipss->ipsec_policy_failure_last +
-		    ((hrtime_t)ipst->ips_ipsec_policy_log_interval *
-		    (hrtime_t)1000000) <= current) {
+		    MSEC2NSEC(ipst->ips_ipsec_policy_log_interval) <= current) {
 			va_start(adx, fmt);
 			(void) vstrlog(mid, sid, level, sl, fmt, adx);
 			va_end(adx);
@@ -3264,7 +3263,7 @@ ipsec_action_free(ipsec_action_t *ap)
 		if (ap == NULL)
 			break;
 		membar_exit();
-		if (atomic_add_32_nv(&(ap)->ipa_refs, -1) != 0)
+		if (atomic_dec_32_nv(&(ap)->ipa_refs) != 0)
 			break;
 		/* End inlined IPACT_REFRELE */
 	}
@@ -4521,10 +4520,9 @@ iplatch_free(ipsec_latch_t *ipl)
 ipsec_latch_t *
 iplatch_create()
 {
-	ipsec_latch_t *ipl = kmem_alloc(sizeof (*ipl), KM_NOSLEEP);
+	ipsec_latch_t *ipl = kmem_zalloc(sizeof (*ipl), KM_NOSLEEP);
 	if (ipl == NULL)
 		return (ipl);
-	bzero(ipl, sizeof (*ipl));
 	mutex_init(&ipl->ipl_lock, NULL, MUTEX_DEFAULT, NULL);
 	ipl->ipl_refcnt = 1;
 	return (ipl);

@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright (c) 2012, Joyent Inc. All rights reserved.
+ * Copyright (c) 2015, Joyent Inc. All rights reserved.
  */
 
 #include <sys/timer.h>
@@ -66,7 +66,7 @@ clock_highres_getres(timespec_t *ts)
 
 /*ARGSUSED*/
 static int
-clock_highres_timer_create(itimer_t *it, struct sigevent *ev)
+clock_highres_timer_create(itimer_t *it, void (*fire)(itimer_t *))
 {
 	/*
 	 * CLOCK_HIGHRES timers of sufficiently high resolution can deny
@@ -80,6 +80,7 @@ clock_highres_timer_create(itimer_t *it, struct sigevent *ev)
 	}
 
 	it->it_arg = kmem_zalloc(sizeof (cyclic_id_t), KM_SLEEP);
+	it->it_fire = fire;
 
 	return (0);
 }
@@ -93,9 +94,9 @@ clock_highres_fire(void *arg)
 
 	do {
 		old = *addr;
-	} while (cas64((uint64_t *)addr, old, new) != old);
+	} while (atomic_cas_64((uint64_t *)addr, old, new) != old);
 
-	timer_fire(it);
+	it->it_fire(it);
 }
 
 static int
@@ -235,10 +236,10 @@ clock_highres_timer_gettime(itimer_t *it, struct itimerspec *when)
 	hrtime_t last;
 
 	/*
-	 * We're using cas64() here only to assure that we slurp the entire
-	 * timestamp atomically.
+	 * We're using atomic_cas_64() here only to assure that we slurp the
+	 * entire timestamp atomically.
 	 */
-	last = cas64((uint64_t *)addr, 0, 0);
+	last = atomic_cas_64((uint64_t *)addr, 0, 0);
 
 	*when = it->it_itime;
 

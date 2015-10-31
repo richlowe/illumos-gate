@@ -1543,10 +1543,10 @@ vread_helper(mdb_ctf_id_t modid, char *modbuf,
  *
  * typedef struct mdb_zio {
  *         enum zio_type io_type;
- *         void *io_waiter;
+ *         uintptr_t io_waiter;
  *         struct {
  *                 struct {
- *                         void *list_next;
+ *                         uintptr_t list_next;
  *                 } list_head;
  *         } io_parent_list;
  *         int io_error;
@@ -2141,4 +2141,30 @@ cleanup:
 	if (ret != 0)
 		(void) ctf_discard(syn);
 	return (ret);
+}
+
+int
+mdb_ctf_synthetics_to_file(const char *file)
+{
+	int err;
+	ctf_file_t *fp = mdb.m_synth;
+
+	if (fp == NULL) {
+		mdb_warn("synthetic types are disabled, not writing "
+		    "anything\n");
+		return (DCMD_ERR);
+	}
+
+	err = mdb_ctf_write(file, fp);
+	if (err != 0) {
+		if (err == CTF_ERR)
+			(void) set_errno(ctf_to_errno(ctf_errno(fp)));
+		else
+			(void) set_errno(err);
+		err = DCMD_ERR;
+	} else {
+		err = DCMD_OK;
+	}
+
+	return (err);
 }

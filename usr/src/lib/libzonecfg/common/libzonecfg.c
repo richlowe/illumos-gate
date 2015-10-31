@@ -20,7 +20,9 @@
  */
 
 /*
+ * Copyright 2014 Gary Mills
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
  */
 
 #include <libsysevent.h>
@@ -1767,7 +1769,7 @@ match_prop(xmlNodePtr cur, const xmlChar *attr, char *user_prop)
 		return (B_FALSE);
 	prop_result = xmlStrcmp(gotten_prop, (const xmlChar *) user_prop);
 	xmlFree(gotten_prop);
-	return ((prop_result == 0));
+	return ((prop_result == 0));	/* empty strings will match */
 }
 
 static int
@@ -2255,7 +2257,7 @@ zonecfg_delete_nwif_core(zone_dochandle_t handle, struct zone_nwiftab *tabptr)
 		phys_match = match_prop(cur, DTD_ATTR_PHYSICAL,
 		    tabptr->zone_nwif_physical);
 
-		if ((addr_match || allowed_addr_match) && phys_match) {
+		if (addr_match && allowed_addr_match && phys_match) {
 			xmlUnlinkNode(cur);
 			xmlFreeNode(cur);
 			return (Z_OK);
@@ -5816,8 +5818,7 @@ zonecfg_valid_fs_type(const char *type)
 	if (strcmp(type, "proc") == 0 ||
 	    strcmp(type, "mntfs") == 0 ||
 	    strcmp(type, "autofs") == 0 ||
-	    strncmp(type, "nfs", sizeof ("nfs") - 1) == 0 ||
-	    strcmp(type, "cachefs") == 0)
+	    strncmp(type, "nfs", sizeof ("nfs") - 1) == 0)
 		return (B_FALSE);
 	/*
 	 * The caller may do more detailed verification to make sure other

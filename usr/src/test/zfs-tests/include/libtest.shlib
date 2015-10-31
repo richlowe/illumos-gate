@@ -25,7 +25,7 @@
 #
 
 #
-# Copyright (c) 2013 by Delphix. All rights reserved.
+# Copyright (c) 2012, 2015 by Delphix. All rights reserved.
 #
 
 . ${STF_TOOLS}/contrib/include/logapi.shlib
@@ -1111,12 +1111,26 @@ function destroy_pool #pool
 	if is_global_zone ; then
 		if poolexists "$pool" ; then
 			mtpt=$(get_prop mountpoint "$pool")
-			log_must $ZPOOL destroy -f $pool
+
+			# At times, syseventd activity can cause attempts to
+			# destroy a pool to fail with EBUSY. We retry a few
+			# times allowing failures before requiring the destroy
+			# to succeed.
+			typeset -i wait_time=10 ret=1 count=0
+			must=""
+			while [[ $ret -ne 0 ]]; do
+				$must $ZPOOL destroy -f $pool
+				ret=$?
+				[[ $ret -eq 0 ]] && break
+				log_note "zpool destroy failed with $ret"
+				[[ count++ -ge 7 ]] && must=log_must
+				$SLEEP $wait_time
+			done
 
 			[[ -d $mtpt ]] && \
 				log_must $RM -rf $mtpt
 		else
-			log_note "Pool not exist. ($pool)"
+			log_note "Pool does not exist. ($pool)"
 			return 1
 		fi
 	fi
@@ -1352,22 +1366,6 @@ function get_disklist # pool
 	    $EGREP -v -e "^(mirror|raidz1|raidz2|spare|log|cache)$")
 
 	$ECHO $disklist
-}
-
-#
-# Destroy all existing metadevices and state database
-#
-function destroy_metas
-{
-	typeset metad
-
-	for metad in $($METASTAT -p | $AWK '{print $1}'); do
-		log_must $METACLEAR -rf $metad
-	done
-
-	for metad in $($METADB | $CUT -f6 | $GREP dev | $UNIQ); do
-		log_must $METADB -fd $metad
-	done
 }
 
 # /**
@@ -1665,8 +1663,7 @@ function get_remote_pkgpath
 #/**
 # A function to find and locate free disks on a system or from given
 # disks as the parameter. It works by locating disks that are in use
-# as swap devices, SVM devices, and dump devices, and also disks
-# listed in /etc/vfstab
+# as swap devices and dump devices, and also disks listed in /etc/vfstab
 #
 # $@ given disks to find which are free, default is all disks in
 # the test system
@@ -1676,12 +1673,10 @@ function get_remote_pkgpath
 function find_disks
 {
 	sfi=/tmp/swaplist.$$
-	msi=/tmp/metastat.$$
 	dmpi=/tmp/dumpdev.$$
 	max_finddisksnum=${MAX_FINDDISKSNUM:-6}
 
 	$SWAP -l > $sfi
-	$METASTAT -c > $msi 2>/dev/null
 	$DUMPADM > $dmpi 2>/dev/null
 
 # write an awk script that can process the output of format
@@ -1722,9 +1717,6 @@ EOF
 	# Check for swap
 		$GREP "${disk}[sp]" $sfi >/dev/null
 		(($? == 0)) && continue
-	# Check for SVM
-		$GREP "${disk}" $msi >/dev/null
-		(($? == 0)) && continue
 	# check for dump device
 		$GREP "${disk}[sp]" $dmpi >/dev/null
 		(($? == 0)) && continue
@@ -1735,7 +1727,6 @@ EOF
 		unused_candidates="$unused_candidates $disk"
 	done
 	$RM $sfi
-	$RM $msi
 	$RM $dmpi
 
 # now just check to see if those disks do actually exist
@@ -2573,7 +2564,12 @@ function is_te_enabled
 # Utility function to determine if a system has multiple cpus.
 function is_mp
 {
-	(($(psrinfo -p) > 1))
+	(($($PSRINFO | $WC -l) > 1))
+}
+
+function get_cpu_freq
+{
+	$PSRINFO -v 0 | $AWK '/processor operates at/ {print $6}'
 }
 
 # Run the given command as the user provided.
@@ -2584,4 +2580,37 @@ function user_run
 
 	eval \$SU \$user -c \"$@\" > /tmp/out 2>/tmp/err
 	return $?
+}
+
+#
+# Check if the pool contains the specified vdevs
+#
+# $1 pool
+# $2..n <vdev> ...
+#
+# Return 0 if the vdevs are contained in the pool, 1 if any of the specified
+# vdevs is not in the pool, and 2 if pool name is missing.
+#
+function vdevs_in_pool
+{
+	typeset pool=$1
+	typeset vdev
+
+        if [[ -z $pool ]]; then
+                log_note "Missing pool name."
+                return 2
+        fi
+
+	shift
+
+	typeset tmpfile=$($MKTEMP)
+	$ZPOOL list -Hv "$pool" >$tmpfile
+	for vdev in $@; do
+		$GREP -w ${vdev##*/} $tmpfile >/dev/null 2>&1
+		[[ $? -ne 0 ]] && return 1
+	done
+
+	$RM -f $tmpfile
+
+	return 0;
 }

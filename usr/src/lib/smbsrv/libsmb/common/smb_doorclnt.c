@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <assert.h>
@@ -111,24 +112,24 @@ smb_lookup_name(const char *name, sid_type_t sidtype, lsa_account_t *acct)
 	return (rc);
 }
 
-uint32_t
-smb_join(smb_joininfo_t *jdi)
+int
+smb_join(smb_joininfo_t *jdi, smb_joinres_t *jres)
 {
-	uint32_t	status;
 	int		rc;
 
-	if (jdi == NULL)
-		return (NT_STATUS_INVALID_PARAMETER);
-
 	rc = smb_door_call(SMB_DR_JOIN, jdi, smb_joininfo_xdr,
-	    &status, xdr_uint32_t);
+	    jres, smb_joinres_xdr);
 
 	if (rc != 0) {
+		/*
+		 * This usually means the SMB service is not running.
+		 */
 		syslog(LOG_DEBUG, "smb_join: %m");
-		status = NT_STATUS_INTERNAL_ERROR;
+		jres->status = NT_STATUS_SERVER_DISABLED;
+		return (rc);
 	}
 
-	return (status);
+	return (0);
 }
 
 /*
@@ -194,6 +195,23 @@ smb_joininfo_xdr(XDR *xdrs, smb_joininfo_t *objp)
 	return (TRUE);
 }
 
+bool_t
+smb_joinres_xdr(XDR *xdrs, smb_joinres_t *objp)
+{
+
+	if (!xdr_uint32_t(xdrs, &objp->status))
+		return (FALSE);
+
+	if (!xdr_int(xdrs, &objp->join_err))
+		return (FALSE);
+
+	if (!xdr_vector(xdrs, (char *)objp->dc_name, MAXHOSTNAMELEN,
+	    sizeof (char), (xdrproc_t)xdr_char))
+		return (FALSE);
+
+	return (TRUE);
+}
+
 /*
  * Parameters:
  *   fqdn (input) - fully-qualified domain name
@@ -245,6 +263,19 @@ smb_find_ads_server(char *fqdn, char *buf, int buflen)
 	return (found);
 }
 
+void
+smb_notify_dc_changed(void)
+{
+	int rc;
+
+	rc = smb_door_call(SMB_DR_NOTIFY_DC_CHANGED,
+	    NULL, NULL, NULL, NULL);
+
+	if (rc != 0)
+		syslog(LOG_DEBUG, "smb_notify_dc_changed: %m");
+}
+
+
 /*
  * After a successful door call the local door_arg->data_ptr is assigned
  * to the caller's arg->rbuf so that arg has references to both input and
@@ -260,6 +291,7 @@ smb_door_call(uint32_t cmd, void *req_data, xdrproc_t req_xdr,
 	smb_doorarg_t	da;
 	int		fd;
 	int		rc;
+	char		*door_name;
 
 	bzero(&da, sizeof (smb_doorarg_t));
 	da.da_opcode = cmd;
@@ -276,7 +308,11 @@ smb_door_call(uint32_t cmd, void *req_data, xdrproc_t req_xdr,
 		return (-1);
 	}
 
-	if ((fd = open(SMBD_DOOR_NAME, O_RDONLY)) < 0) {
+	door_name = getenv("SMBD_DOOR_NAME");
+	if (door_name == NULL)
+		door_name = SMBD_DOOR_NAME;
+
+	if ((fd = open(door_name, O_RDONLY)) < 0) {
 		syslog(LOG_DEBUG, "smb_door_call[%s]: %m", da.da_opname);
 		return (-1);
 	}

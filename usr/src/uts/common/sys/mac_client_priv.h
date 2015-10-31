@@ -22,6 +22,7 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2013 Joyent, Inc.  All rights reserved.
  */
 
 /*
@@ -91,9 +92,6 @@ extern boolean_t mac_client_is_vlan_vnic(mac_client_handle_t);
 extern void mac_client_poll_enable(mac_client_handle_t);
 extern void mac_client_poll_disable(mac_client_handle_t);
 
-extern int mac_resource_ctl_set(mac_client_handle_t, mac_resource_props_t *);
-extern void mac_resource_ctl_get(mac_client_handle_t, mac_resource_props_t *);
-
 /*
  * Flow-related APIs for MAC clients.
  */
@@ -138,6 +136,7 @@ extern mblk_t *mac_hwring_tx(mac_ring_handle_t, mblk_t *);
 extern int mac_hwring_getstat(mac_ring_handle_t, uint_t, uint64_t *);
 extern mblk_t *mac_hwring_send_priv(mac_client_handle_t,
     mac_ring_handle_t, mblk_t *);
+extern void mac_hwring_set_default(mac_handle_t, mac_ring_handle_t);
 
 #define	MAC_HWRING_POLL(ring, bytes)			\
 	(((ring)->mr_info.mri_poll)			\

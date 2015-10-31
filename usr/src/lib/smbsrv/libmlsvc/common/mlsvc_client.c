@@ -20,8 +20,8 @@
  */
 
 /*
- * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -43,32 +43,12 @@
 
 #include <netsmb/smbfs_api.h>
 #include <smbsrv/libsmb.h>
+#include <smbsrv/libsmbns.h>
 #include <smbsrv/libmlrpc.h>
 #include <smbsrv/libmlsvc.h>
 #include <smbsrv/ndl/srvsvc.ndl>
 #include <libsmbrdr.h>
 #include <mlsvc.h>
-
-/*
- * Server info cache entry expiration in seconds.
- */
-#define	NDR_SVINFO_TIMEOUT	1800
-
-typedef struct ndr_svinfo {
-	list_node_t		svi_lnd;
-	time_t			svi_tcached;
-	char			svi_server[MAXNAMELEN];
-	char			svi_domain[MAXNAMELEN];
-	srvsvc_server_info_t	svi_svinfo;
-} ndr_svinfo_t;
-
-typedef struct ndr_svlist {
-	list_t		svl_list;
-	mutex_t		svl_mtx;
-	boolean_t	svl_init;
-} ndr_svlist_t;
-
-static ndr_svlist_t ndr_svlist;
 
 static int ndr_xa_init(ndr_client_t *, ndr_xa_t *);
 static int ndr_xa_exchange(ndr_client_t *, ndr_xa_t *);
@@ -77,53 +57,6 @@ static void ndr_xa_preserve(ndr_client_t *, ndr_xa_t *);
 static void ndr_xa_destruct(ndr_client_t *, ndr_xa_t *);
 static void ndr_xa_release(ndr_client_t *);
 
-static int ndr_svinfo_lookup(char *, char *, srvsvc_server_info_t *);
-static boolean_t ndr_svinfo_match(const char *, const char *, const
-    ndr_svinfo_t *);
-static boolean_t ndr_svinfo_expired(ndr_svinfo_t *);
-
-/*
- * Initialize the RPC client interface: create the server info cache.
- */
-void
-ndr_rpc_init(void)
-{
-	(void) mutex_lock(&ndr_svlist.svl_mtx);
-
-	if (!ndr_svlist.svl_init) {
-		list_create(&ndr_svlist.svl_list, sizeof (ndr_svinfo_t),
-		    offsetof(ndr_svinfo_t, svi_lnd));
-		ndr_svlist.svl_init = B_TRUE;
-	}
-
-	(void) mutex_unlock(&ndr_svlist.svl_mtx);
-}
-
-/*
- * Terminate the RPC client interface: flush and destroy the server info
- * cache.
- */
-void
-ndr_rpc_fini(void)
-{
-	ndr_svinfo_t *svi;
-
-	(void) mutex_lock(&ndr_svlist.svl_mtx);
-
-	if (ndr_svlist.svl_init) {
-		while ((svi = list_head(&ndr_svlist.svl_list)) != NULL) {
-			list_remove(&ndr_svlist.svl_list, svi);
-			free(svi->svi_svinfo.sv_name);
-			free(svi->svi_svinfo.sv_comment);
-			free(svi);
-		}
-
-		list_destroy(&ndr_svlist.svl_list);
-		ndr_svlist.svl_init = B_FALSE;
-	}
-
-	(void) mutex_unlock(&ndr_svlist.svl_mtx);
-}
 
 /*
  * This call must be made to initialize an RPC client structure and bind
@@ -137,8 +70,18 @@ ndr_rpc_fini(void)
  * The client points to this top-level handle so that we know when to
  * unbind and teardown the connection.  As each handle is initialized it
  * will inherit a reference to the client context.
+ *
+ * Returns 0 or an NT_STATUS:
+ *	NT_STATUS_BAD_NETWORK_PATH	(get server addr)
+ *	NT_STATUS_NETWORK_ACCESS_DENIED	(connect, auth)
+ *	NT_STATUS_BAD_NETWORK_NAME	(tcon, open)
+ *	NT_STATUS_ACCESS_DENIED		(open pipe)
+ *	NT_STATUS_INVALID_PARAMETER	(rpc bind)
+ *
+ *	NT_STATUS_INTERNAL_ERROR	(bad args etc)
+ *	NT_STATUS_NO_MEMORY
  */
-int
+DWORD
 ndr_rpc_bind(mlsvc_handle_t *handle, char *server, char *domain,
     char *username, const char *service)
 {
@@ -146,22 +89,23 @@ ndr_rpc_bind(mlsvc_handle_t *handle, char *server, char *domain,
 	ndr_client_t		*clnt = NULL;
 	ndr_service_t		*svc;
 	srvsvc_server_info_t	svinfo;
+	DWORD			status;
 	int			fd = -1;
 	int			rc;
 
-	if (handle == NULL || server == NULL ||
+	if (handle == NULL || server == NULL || server[0] == '\0' ||
 	    domain == NULL || username == NULL)
-		return (-1);
+		return (NT_STATUS_INTERNAL_ERROR);
 
+	/* In case the service was not registered... */
 	if ((svc = ndr_svc_lookup_name(service)) == NULL)
-		return (-1);
+		return (NT_STATUS_INTERNAL_ERROR);
 
 	/*
 	 * Set the default based on the assumption that most
-	 * servers will be Windows 2000 or later.
-	 * Don't lookup the svinfo if this is a SRVSVC request
-	 * because the SRVSVC is used to get the server info.
-	 * None of the SRVSVC calls depend on the server info.
+	 * servers will be Windows 2000 or later.  This used to
+	 * try to get the actual server version, but that RPC
+	 * is not necessarily allowed anymore, so don't bother.
 	 */
 	bzero(&svinfo, sizeof (srvsvc_server_info_t));
 	svinfo.sv_platform_id = SV_PLATFORM_ID_NT;
@@ -170,19 +114,30 @@ ndr_rpc_bind(mlsvc_handle_t *handle, char *server, char *domain,
 	svinfo.sv_type = SV_TYPE_DEFAULT;
 	svinfo.sv_os = NATIVE_OS_WIN2000;
 
-	if (strcasecmp(service, "SRVSVC") != 0)
-		(void) ndr_svinfo_lookup(server, domain, &svinfo);
+	/*
+	 * Some callers pass this when they want a NULL session.
+	 * Todo: have callers pass an empty string for that.
+	 */
+	if (strcmp(username, MLSVC_ANON_USER) == 0)
+		username = "";
 
 	/*
 	 * Setup smbfs library handle, authenticate, connect to
 	 * the IPC$ share.  This will reuse an existing connection
 	 * if the driver already has one for this combination of
-	 * server, user, domain.
+	 * server, user, domain.  It may return any of:
+	 *	NT_STATUS_BAD_NETWORK_PATH	(get server addr)
+	 *	NT_STATUS_NETWORK_ACCESS_DENIED	(connect, auth)
+	 *	NT_STATUS_BAD_NETWORK_NAME	(tcon)
 	 */
-	if ((rc = smbrdr_ctx_new(&ctx, server, domain, username)) != 0) {
-		syslog(LOG_ERR, "ndr_rpc_bind: "
-		    "smbrdr_ctx_new(S=%s, D=%s, U=%s), err=%d",
-		    server, domain, username, rc);
+	status = smbrdr_ctx_new(&ctx, server, domain, username);
+	if (status != NT_STATUS_SUCCESS) {
+		syslog(LOG_ERR, "ndr_rpc_bind: smbrdr_ctx_new"
+		    "(Srv=%s Dom=%s User=%s), %s (0x%x)",
+		    server, domain, username,
+		    xlate_nt_status(status), status);
+		/* Tell the DC Locator this DC failed. */
+		smb_ddiscover_bad_dc(server);
 		goto errout;
 	}
 
@@ -191,16 +146,28 @@ ndr_rpc_bind(mlsvc_handle_t *handle, char *server, char *domain,
 	 */
 	fd = smb_fh_open(ctx, svc->endpoint, O_RDWR);
 	if (fd < 0) {
+		rc = errno;
 		syslog(LOG_DEBUG, "ndr_rpc_bind: "
-		    "smb_fh_open, err=%d", errno);
+		    "smb_fh_open (%s) err=%d",
+		    svc->endpoint, rc);
+		switch (rc) {
+		case EACCES:
+			status = NT_STATUS_ACCESS_DENIED;
+			break;
+		default:
+			status = NT_STATUS_BAD_NETWORK_NAME;
+			break;
+		}
 		goto errout;
 	}
 
 	/*
 	 * Setup the RPC client handle.
 	 */
-	if ((clnt = malloc(sizeof (ndr_client_t))) == NULL)
-		return (-1);
+	if ((clnt = malloc(sizeof (ndr_client_t))) == NULL) {
+		status = NT_STATUS_NO_MEMORY;
+		goto errout;
+	}
 	bzero(clnt, sizeof (ndr_client_t));
 
 	clnt->handle = &handle->handle;
@@ -216,8 +183,10 @@ ndr_rpc_bind(mlsvc_handle_t *handle, char *server, char *domain,
 	ndr_svc_binding_pool_init(&clnt->binding_list,
 	    clnt->binding_pool, NDR_N_BINDING_POOL);
 
-	if ((clnt->heap = ndr_heap_create()) == NULL)
+	if ((clnt->heap = ndr_heap_create()) == NULL) {
+		status = NT_STATUS_NO_MEMORY;
 		goto errout;
+	}
 
 	/*
 	 * Fill in the caller's handle.
@@ -230,14 +199,26 @@ ndr_rpc_bind(mlsvc_handle_t *handle, char *server, char *domain,
 	 * Do the OtW RPC bind.
 	 */
 	rc = ndr_clnt_bind(clnt, service, &clnt->binding);
-	if (NDR_DRC_IS_FAULT(rc)) {
-		syslog(LOG_DEBUG, "ndr_rpc_bind: "
-		    "ndr_clnt_bind, rc=0x%x", rc);
-		goto errout;
+	switch (rc) {
+	case NDR_DRC_FAULT_OUT_OF_MEMORY:
+		status = NT_STATUS_NO_MEMORY;
+		break;
+	case NDR_DRC_FAULT_API_SERVICE_INVALID:	/* not registered */
+		status = NT_STATUS_INTERNAL_ERROR;
+		break;
+	default:
+		if (NDR_DRC_IS_FAULT(rc)) {
+			status = NT_STATUS_INVALID_PARAMETER;
+			break;
+		}
+		/* FALLTHROUGH */
+	case NDR_DRC_OK:
+		return (NT_STATUS_SUCCESS);
 	}
 
-	/* Success! */
-	return (0);
+	syslog(LOG_DEBUG, "ndr_rpc_bind: "
+	    "ndr_clnt_bind, %s (0x%x)",
+	    xlate_nt_status(status), status);
 
 errout:
 	handle->clnt = NULL;
@@ -251,7 +232,7 @@ errout:
 		smbrdr_ctx_free(ctx);
 	}
 
-	return (-1);
+	return (status);
 }
 
 /*
@@ -623,107 +604,6 @@ ndr_xa_release(ndr_client_t *clnt)
 	}
 }
 
-/*
- * Lookup platform, type and version information about a server.
- * If the cache doesn't already contain the data, contact the server and
- * cache the response before returning the server info to the caller.
- *
- * We don't provide the name or comment for now, which avoids the need
- * to deal with unnecessary memory management.
- */
-static int
-ndr_svinfo_lookup(char *server, char *domain, srvsvc_server_info_t *svinfo)
-{
-	static boolean_t	timechecked = B_FALSE;
-	ndr_svinfo_t *svi;
-
-	(void) mutex_lock(&ndr_svlist.svl_mtx);
-	if (!ndr_svlist.svl_init)
-		return (-1);
-
-	svi = list_head(&ndr_svlist.svl_list);
-	while (svi != NULL) {
-		if (ndr_svinfo_expired(svi)) {
-			svi = list_head(&ndr_svlist.svl_list);
-			continue;
-		}
-
-		if (ndr_svinfo_match(server, domain, svi)) {
-			bcopy(&svi->svi_svinfo, svinfo,
-			    sizeof (srvsvc_server_info_t));
-			svinfo->sv_name = NULL;
-			svinfo->sv_comment = NULL;
-			(void) mutex_unlock(&ndr_svlist.svl_mtx);
-			return (0);
-		}
-
-		svi = list_next(&ndr_svlist.svl_list, svi);
-	}
-
-	if ((svi = malloc(sizeof (ndr_svinfo_t))) == NULL) {
-		(void) mutex_unlock(&ndr_svlist.svl_mtx);
-		return (-1);
-	}
-
-	if (srvsvc_net_server_getinfo(server, domain, &svi->svi_svinfo) < 0) {
-		(void) mutex_unlock(&ndr_svlist.svl_mtx);
-		free(svi);
-		return (-1);
-	}
-
-	(void) time(&svi->svi_tcached);
-	(void) strlcpy(svi->svi_server, server, MAXNAMELEN);
-	(void) strlcpy(svi->svi_domain, domain, MAXNAMELEN);
-	list_insert_tail(&ndr_svlist.svl_list, svi);
-	bcopy(&svi->svi_svinfo, svinfo, sizeof (srvsvc_server_info_t));
-	svinfo->sv_name = NULL;
-	svinfo->sv_comment = NULL;
-
-	if (!timechecked) {
-		timechecked = B_TRUE;
-		ndr_srvsvc_timecheck(server, domain);
-	}
-
-	(void) mutex_unlock(&ndr_svlist.svl_mtx);
-	return (0);
-}
-
-static boolean_t
-ndr_svinfo_match(const char *server, const char *domain,
-    const ndr_svinfo_t *svi)
-{
-	if ((smb_strcasecmp(server, svi->svi_server, 0) == 0) &&
-	    (smb_strcasecmp(domain, svi->svi_domain, 0) == 0)) {
-		return (B_TRUE);
-	}
-
-	return (B_FALSE);
-}
-
-/*
- * If the server info in the cache has expired, discard it and return true.
- * Otherwise return false.
- *
- * This is a private function to support ndr_svinfo_lookup() that assumes
- * the list mutex is held.
- */
-static boolean_t
-ndr_svinfo_expired(ndr_svinfo_t *svi)
-{
-	time_t	tnow;
-
-	(void) time(&tnow);
-
-	if (difftime(tnow, svi->svi_tcached) > NDR_SVINFO_TIMEOUT) {
-		list_remove(&ndr_svlist.svl_list, svi);
-		free(svi->svi_svinfo.sv_name);
-		free(svi->svi_svinfo.sv_comment);
-		free(svi);
-		return (B_TRUE);
-	}
-
-	return (B_FALSE);
-}
 
 /*
  * Compare the time here with the remote time on the server

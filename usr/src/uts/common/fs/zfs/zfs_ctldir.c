@@ -20,7 +20,8 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright (c) 2012, 2014 by Delphix. All rights reserved.
+ * Copyright 2015, OmniTI Computer Consulting, Inc. All rights reserved.
  */
 
 /*
@@ -966,11 +967,12 @@ zfsctl_shares_lookup(vnode_t *dvp, char *nm, vnode_t **vpp, pathname_t *pnp,
 		ZFS_EXIT(zfsvfs);
 		return (SET_ERROR(ENOTSUP));
 	}
-	if ((error = zfs_zget(zfsvfs, zfsvfs->z_shares_dir, &dzp)) == 0)
+	if ((error = zfs_zget(zfsvfs, zfsvfs->z_shares_dir, &dzp)) == 0) {
 		error = VOP_LOOKUP(ZTOV(dzp), nm, vpp, pnp,
 		    flags, rdir, cr, ct, direntflags, realpnp);
+		VN_RELE(ZTOV(dzp));
+	}
 
-	VN_RELE(ZTOV(dzp));
 	ZFS_EXIT(zfsvfs);
 
 	return (error);
@@ -1212,10 +1214,15 @@ zfsctl_snapshot_inactive(vnode_t *vp, cred_t *cr, caller_context_t *ct)
 
 	mutex_enter(&sdp->sd_lock);
 
+	mutex_enter(&vp->v_lock);
 	if (vp->v_count > 1) {
+		vp->v_count--;
+		mutex_exit(&vp->v_lock);
 		mutex_exit(&sdp->sd_lock);
+		VN_RELE(dvp);
 		return;
 	}
+	mutex_exit(&vp->v_lock);
 	ASSERT(!vn_ismntpt(vp));
 
 	sep = avl_first(&sdp->sd_snaps);

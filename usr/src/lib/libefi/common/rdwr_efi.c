@@ -21,7 +21,8 @@
 
 /*
  * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2012 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2014 Toomas Soome <tsoome@me.com>
  */
 
 #include <stdio.h>
@@ -54,7 +55,7 @@ static struct uuid_to_ptag {
 	{ EFI_VAR },
 	{ EFI_HOME },
 	{ EFI_ALTSCTR },
-	{ 0 },			/* CACHE (cachefs) is never used */
+	{ 0 },			/* CACHE is never used */
 	{ EFI_RESERVED },
 	{ EFI_SYSTEM },
 	{ EFI_LEGACY_MBR },
@@ -68,6 +69,7 @@ static struct uuid_to_ptag {
 	{ EFI_DELL_RESV },
 	{ EFI_AAPL_HFS },
 	{ EFI_AAPL_UFS },
+	{ EFI_BIOS_BOOT },
 	{ EFI_FREEBSD_BOOT },
 	{ EFI_FREEBSD_SWAP },
 	{ EFI_FREEBSD_UFS },
@@ -589,11 +591,11 @@ write_pmbr(int fd, struct dk_gpt *vtoc)
 	/* LINTED -- always longlong aligned */
 	dk_ioc.dki_data = (efi_gpt_t *)buf;
 	if (efi_ioctl(fd, DKIOCGETEFI, &dk_ioc) == -1) {
-		(void *) memcpy(&mb, buf, sizeof (mb));
+		(void) memcpy(&mb, buf, sizeof (mb));
 		bzero(&mb, sizeof (mb));
 		mb.signature = LE_16(MBB_MAGIC);
 	} else {
-		(void *) memcpy(&mb, buf, sizeof (mb));
+		(void) memcpy(&mb, buf, sizeof (mb));
 		if (mb.signature != LE_16(MBB_MAGIC)) {
 			bzero(&mb, sizeof (mb));
 			mb.signature = LE_16(MBB_MAGIC);
@@ -633,7 +635,7 @@ write_pmbr(int fd, struct dk_gpt *vtoc)
 		*cp++ = 0xff;
 	}
 
-	(void *) memcpy(buf, &mb, sizeof (mb));
+	(void) memcpy(buf, &mb, sizeof (mb));
 	/* LINTED -- always longlong aligned */
 	dk_ioc.dki_data = (efi_gpt_t *)buf;
 	dk_ioc.dki_lba = 0;

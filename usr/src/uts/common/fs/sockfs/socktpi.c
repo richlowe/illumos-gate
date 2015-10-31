@@ -21,9 +21,8 @@
 
 /*
  * Copyright (c) 1995, 2010, Oracle and/or its affiliates. All rights reserved.
- */
-/*
  * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <sys/types.h>
@@ -3223,6 +3222,8 @@ sotpi_recvmsg(struct sonode *so, struct nmsghdr *msg, struct uio *uiop,
 
 	if (flags & MSG_DONTWAIT)
 		timout = 0;
+	else if (so->so_rcvtimeo != 0)
+		timout = TICK_TO_MSEC(so->so_rcvtimeo);
 	else
 		timout = -1;
 	opflag = pflag;
@@ -6270,6 +6271,13 @@ sotpi_poll(
 
 	if (sti->sti_conn_ind_head != NULL)
 		*reventsp |= (POLLIN|POLLRDNORM) & events;
+
+	if (so->so_state & SS_CANTRCVMORE) {
+		*reventsp |= POLLRDHUP & events;
+
+		if (so->so_state & SS_CANTSENDMORE)
+			*reventsp |= POLLHUP;
+	}
 
 	if (so->so_state & SS_OOBPEND)
 		*reventsp |= POLLRDBAND & events;

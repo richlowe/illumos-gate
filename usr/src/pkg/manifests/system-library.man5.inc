@@ -11,7 +11,7 @@
 
 #
 # Copyright 2011, Richard Lowe
-# Copyright 2012 Nexenta Systems, Inc. All rights reserved.
+# Copyright 2014 Nexenta Systems, Inc.
 #
 
 file path=usr/share/man/man5/audit_binfile.5
@@ -27,6 +27,7 @@ file path=usr/share/man/man5/crypt_sha512.5
 file path=usr/share/man/man5/crypt_sunmd5.5
 file path=usr/share/man/man5/crypt_unix.5
 file path=usr/share/man/man5/environ.5
+file path=usr/share/man/man5/eventfd.5
 file path=usr/share/man/man5/extendedFILE.5
 file path=usr/share/man/man5/fnmatch.5
 file path=usr/share/man/man5/isalist.5
@@ -49,6 +50,7 @@ file path=usr/share/man/man5/pam_passwd_auth.5
 file path=usr/share/man/man5/pam_rhosts_auth.5
 file path=usr/share/man/man5/pam_roles.5
 file path=usr/share/man/man5/pam_sample.5
+file path=usr/share/man/man5/pam_timestamp.5
 file path=usr/share/man/man5/pam_tsol_account.5
 file path=usr/share/man/man5/pam_unix_account.5
 file path=usr/share/man/man5/pam_unix_auth.5
@@ -59,6 +61,7 @@ file path=usr/share/man/man5/pkcs11_softtoken.5
 file path=usr/share/man/man5/pkcs11_tpm.5
 file path=usr/share/man/man5/regex.5
 file path=usr/share/man/man5/regexp.5
+file path=usr/share/man/man5/timerfd.5
 file path=usr/share/man/man5/threads.5
 link path=usr/share/man/man5/advance.5 target=regexp.5
 link path=usr/share/man/man5/compile.5 target=regexp.5

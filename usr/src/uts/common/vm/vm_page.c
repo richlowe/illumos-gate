@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 1986, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989  AT&T	*/
@@ -78,8 +79,6 @@
 #include <fs/fs_subr.h>
 #include <sys/ddi.h>
 #include <sys/modctl.h>
-
-static int nopageage = 0;
 
 static pgcnt_t max_page_get;	/* max page_get request size in pages */
 pgcnt_t total_pages = 0;	/* total number of pages (used by /proc) */
@@ -269,39 +268,29 @@ uint_t	alloc_pages[9];
 uint_t	page_exphcontg[19];
 uint_t  page_create_large_cnt[10];
 
-/*
- * Collects statistics.
- */
-#define	PAGE_HASH_SEARCH(index, pp, vp, off) { \
-	uint_t	mylen = 0; \
-			\
-	for ((pp) = page_hash[(index)]; (pp); (pp) = (pp)->p_hash, mylen++) { \
-		if ((pp)->p_vnode == (vp) && (pp)->p_offset == (off)) \
-			break; \
-	} \
-	if ((pp) != NULL) \
-		pagecnt.pc_find_hit++; \
-	else \
-		pagecnt.pc_find_miss++; \
-	if (mylen > PC_HASH_CNT) \
-		mylen = PC_HASH_CNT; \
-	pagecnt.pc_find_hashlen[mylen]++; \
+#endif
+
+static inline page_t *
+page_hash_search(ulong_t index, vnode_t *vnode, u_offset_t off)
+{
+	uint_t mylen = 0;
+	page_t *page;
+
+	for (page = page_hash[index]; page; page = page->p_hash, mylen++)
+		if (page->p_vnode == vnode && page->p_offset == off)
+			break;
+
+#ifdef	VM_STATS
+	if (page != NULL)
+		pagecnt.pc_find_hit++;
+	else
+		pagecnt.pc_find_miss++;
+
+	pagecnt.pc_find_hashlen[MIN(mylen, PC_HASH_CNT)]++;
+#endif
+
+	return (page);
 }
-
-#else	/* VM_STATS */
-
-/*
- * Don't collect statistics
- */
-#define	PAGE_HASH_SEARCH(index, pp, vp, off) { \
-	for ((pp) = page_hash[(index)]; (pp); (pp) = (pp)->p_hash) { \
-		if ((pp)->p_vnode == (vp) && (pp)->p_offset == (off)) \
-			break; \
-	} \
-}
-
-#endif	/* VM_STATS */
-
 
 
 #ifdef DEBUG
@@ -317,7 +306,7 @@ struct memseg_stats {
 } memseg_stats;
 
 #define	MEMSEG_STAT_INCR(v) \
-	atomic_add_32(&memseg_stats.v, 1)
+	atomic_inc_32(&memseg_stats.v)
 #else
 #define	MEMSEG_STAT_INCR(x)
 #endif
@@ -752,7 +741,7 @@ page_lookup_create(
 	index = PAGE_HASH_FUNC(vp, off);
 	phm = NULL;
 top:
-	PAGE_HASH_SEARCH(index, pp, vp, off);
+	pp = page_hash_search(index, vp, off);
 	if (pp != NULL) {
 		VM_STAT_ADD(page_lookup_cnt[1]);
 		es = (newpp != NULL) ? 1 : 0;
@@ -786,8 +775,8 @@ top:
 		 * Reconfirm we locked the correct page.
 		 *
 		 * Both the p_vnode and p_offset *must* be cast volatile
-		 * to force a reload of their values: The PAGE_HASH_SEARCH
-		 * macro will have stuffed p_vnode and p_offset into
+		 * to force a reload of their values: The page_hash_search
+		 * function will have stuffed p_vnode and p_offset into
 		 * registers before calling page_trylock(); another thread,
 		 * actually holding the hash lock, could have changed the
 		 * page's identity in memory, but our registers would not
@@ -950,7 +939,7 @@ page_lookup_nowait(vnode_t *vp, u_offset_t off, se_t se)
 	VM_STAT_ADD(page_lookup_nowait_cnt[0]);
 
 	index = PAGE_HASH_FUNC(vp, off);
-	PAGE_HASH_SEARCH(index, pp, vp, off);
+	pp = page_hash_search(index, vp, off);
 	locked = 0;
 	if (pp == NULL) {
 top:
@@ -958,7 +947,7 @@ top:
 		locked = 1;
 		phm = PAGE_HASH_MUTEX(index);
 		mutex_enter(phm);
-		PAGE_HASH_SEARCH(index, pp, vp, off);
+		pp = page_hash_search(index, vp, off);
 	}
 
 	if (pp == NULL || PP_ISFREE(pp)) {
@@ -1020,7 +1009,7 @@ page_find(vnode_t *vp, u_offset_t off)
 	phm = PAGE_HASH_MUTEX(index);
 
 	mutex_enter(phm);
-	PAGE_HASH_SEARCH(index, pp, vp, off);
+	pp = page_hash_search(index, vp, off);
 	mutex_exit(phm);
 
 	ASSERT(pp == NULL || PAGE_LOCKED(pp) || panicstr);
@@ -1038,16 +1027,14 @@ page_find(vnode_t *vp, u_offset_t off)
 page_t *
 page_exists(vnode_t *vp, u_offset_t off)
 {
-	page_t	*pp;
 	ulong_t		index;
 
 	ASSERT(MUTEX_NOT_HELD(page_vnode_mutex(vp)));
 	VM_STAT_ADD(page_exists_cnt);
 
 	index = PAGE_HASH_FUNC(vp, off);
-	PAGE_HASH_SEARCH(index, pp, vp, off);
 
-	return (pp);
+	return (page_hash_search(index, vp, off));
 }
 
 /*
@@ -1094,7 +1081,7 @@ again:
 	phm = PAGE_HASH_MUTEX(index);
 
 	mutex_enter(phm);
-	PAGE_HASH_SEARCH(index, pp, vp, off);
+	pp = page_hash_search(index, vp, off);
 	mutex_exit(phm);
 
 	VM_STAT_ADD(page_exphcontg[1]);
@@ -1321,7 +1308,7 @@ page_exists_forreal(vnode_t *vp, u_offset_t off, uint_t *szc)
 	phm = PAGE_HASH_MUTEX(index);
 
 	mutex_enter(phm);
-	PAGE_HASH_SEARCH(index, pp, vp, off);
+	pp = page_hash_search(index, vp, off);
 	if (pp != NULL) {
 		*szc = pp->p_szc;
 		rc = 1;
@@ -2449,7 +2436,7 @@ top:
 		 */
 		phm = PAGE_HASH_MUTEX(index);
 		mutex_enter(phm);
-		PAGE_HASH_SEARCH(index, pp, vp, off);
+		pp = page_hash_search(index, vp, off);
 		if (pp == NULL) {
 			VM_STAT_ADD(page_create_new);
 			pp = npp;
@@ -2691,7 +2678,7 @@ page_free(page_t *pp, int dontneed)
 	} else {
 		PP_CLRAGED(pp);
 
-		if (!dontneed || nopageage) {
+		if (!dontneed) {
 			/* move it to the tail of the list */
 			page_list_add(pp, PG_CACHE_LIST | PG_LIST_TAIL);
 
@@ -3279,7 +3266,7 @@ top:
 	 * lock, again preventing another page from being created with
 	 * this identity.
 	 */
-	PAGE_HASH_SEARCH(index, pp, vp, off);
+	pp = page_hash_search(index, vp, off);
 	if (pp != NULL) {
 		VM_STAT_ADD(page_rename_exists);
 

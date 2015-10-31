@@ -21,6 +21,7 @@
 /*
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
@@ -36,10 +37,12 @@
  * contributors.
  */
 
+/*
+ * Copyright (c) 2013 by Delphix. All rights reserved.
+ */
+
 #ifndef _SYS_FILIO_H
 #define	_SYS_FILIO_H
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
  * General file ioctl definitions.
@@ -84,11 +87,6 @@ extern "C" {
 #define	_FIOISBUSY	_IO('f', 75)		/* networker/ufs protocol */
 #define	_FIODIRECTIO	_IO('f', 76)		/* directio */
 #define	_FIOTUNE	_IO('f', 77)		/* tuning */
-
-/*
- * WARNING: These 'f' ioctls are also defined in sys/fs/cachefs_fs.h
- * It currently defines 78-86.
- */
 
 /*
  * Internal Logging UFS
@@ -136,6 +134,11 @@ extern "C" {
  * boot archive compression
  */
 #define	_FIO_COMPRESSED		_IO('f', 99) /* mark file as compressed */
+
+/*
+ * Expose fill information through ioctl
+ */
+#define	_FIO_COUNT_FILLED	_IO('f', 100)	/* count holes in a file */
 
 #ifdef	__cplusplus
 }

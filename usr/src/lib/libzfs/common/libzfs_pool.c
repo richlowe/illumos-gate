@@ -20,9 +20,9 @@
  */
 
 /*
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2011 Nexenta Systems, Inc. All rights reserved.
- * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2015 by Delphix. All rights reserved.
  * Copyright (c) 2013, Joyent, Inc. All rights reserved.
  */
 
@@ -275,7 +275,7 @@ zpool_get_prop(zpool_handle_t *zhp, zpool_prop_t prop, char *buf, size_t len,
 		case ZPOOL_PROP_ALLOCATED:
 		case ZPOOL_PROP_FREE:
 		case ZPOOL_PROP_FREEING:
-		case ZPOOL_PROP_EXPANDSZ:
+		case ZPOOL_PROP_LEAKED:
 			if (literal) {
 				(void) snprintf(buf, len, "%llu",
 				    (u_longlong_t)intval);
@@ -283,7 +283,16 @@ zpool_get_prop(zpool_handle_t *zhp, zpool_prop_t prop, char *buf, size_t len,
 				(void) zfs_nicenum(intval, buf, len);
 			}
 			break;
-
+		case ZPOOL_PROP_EXPANDSZ:
+			if (intval == 0) {
+				(void) strlcpy(buf, "-", len);
+			} else if (literal) {
+				(void) snprintf(buf, len, "%llu",
+				    (u_longlong_t)intval);
+			} else {
+				(void) zfs_nicenum(intval, buf, len);
+			}
+			break;
 		case ZPOOL_PROP_CAPACITY:
 			if (literal) {
 				(void) snprintf(buf, len, "%llu",
@@ -293,13 +302,19 @@ zpool_get_prop(zpool_handle_t *zhp, zpool_prop_t prop, char *buf, size_t len,
 				    (u_longlong_t)intval);
 			}
 			break;
-
+		case ZPOOL_PROP_FRAGMENTATION:
+			if (intval == UINT64_MAX) {
+				(void) strlcpy(buf, "-", len);
+			} else {
+				(void) snprintf(buf, len, "%llu%%",
+				    (u_longlong_t)intval);
+			}
+			break;
 		case ZPOOL_PROP_DEDUPRATIO:
 			(void) snprintf(buf, len, "%llu.%02llux",
 			    (u_longlong_t)(intval / 100),
 			    (u_longlong_t)(intval % 100));
 			break;
-
 		case ZPOOL_PROP_HEALTH:
 			verify(nvlist_lookup_nvlist(zpool_get_config(zhp, NULL),
 			    ZPOOL_CONFIG_VDEV_TREE, &nvroot) == 0);
@@ -358,27 +373,6 @@ bootfs_name_valid(const char *pool, char *bootfs)
 	return (B_FALSE);
 }
 
-/*
- * Inspect the configuration to determine if any of the devices contain
- * an EFI label.
- */
-static boolean_t
-pool_uses_efi(nvlist_t *config)
-{
-	nvlist_t **child;
-	uint_t c, children;
-
-	if (nvlist_lookup_nvlist_array(config, ZPOOL_CONFIG_CHILDREN,
-	    &child, &children) != 0)
-		return (read_efi_label(config, NULL) >= 0);
-
-	for (c = 0; c < children; c++) {
-		if (pool_uses_efi(child[c]))
-			return (B_TRUE);
-	}
-	return (B_FALSE);
-}
-
 boolean_t
 zpool_is_bootable(zpool_handle_t *zhp)
 {
@@ -407,7 +401,6 @@ zpool_valid_proplist(libzfs_handle_t *hdl, const char *poolname,
 	char *slash, *check;
 	struct stat64 statbuf;
 	zpool_handle_t *zhp;
-	nvlist_t *nvroot;
 
 	if (nvlist_alloc(&retprops, NV_UNIQUE_NAME, 0) != 0) {
 		(void) no_memory(hdl);
@@ -524,21 +517,6 @@ zpool_valid_proplist(libzfs_handle_t *hdl, const char *poolname,
 				zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
 				    "could not open pool '%s'"), poolname);
 				(void) zfs_error(hdl, EZFS_OPENFAILED, errbuf);
-				goto error;
-			}
-			verify(nvlist_lookup_nvlist(zpool_get_config(zhp, NULL),
-			    ZPOOL_CONFIG_VDEV_TREE, &nvroot) == 0);
-
-			/*
-			 * bootfs property cannot be set on a disk which has
-			 * been EFI labeled.
-			 */
-			if (pool_uses_efi(nvroot)) {
-				zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
-				    "property '%s' not supported on "
-				    "EFI labeled devices"), propname);
-				(void) zfs_error(hdl, EZFS_POOL_NOTSUP, errbuf);
-				zpool_close(zhp);
 				goto error;
 			}
 			zpool_close(zhp);
@@ -1116,8 +1094,8 @@ zpool_create(libzfs_handle_t *hdl, const char *pool, nvlist_t *nvroot,
 		    zfs_prop_to_name(ZFS_PROP_ZONED), &zonestr) == 0) &&
 		    strcmp(zonestr, "on") == 0);
 
-		if ((zc_fsprops = zfs_valid_proplist(hdl,
-		    ZFS_TYPE_FILESYSTEM, fsprops, zoned, NULL, msg)) == NULL) {
+		if ((zc_fsprops = zfs_valid_proplist(hdl, ZFS_TYPE_FILESYSTEM,
+		    fsprops, zoned, NULL, NULL, msg)) == NULL) {
 			goto create_failed;
 		}
 		if (!zc_props &&
@@ -1152,6 +1130,21 @@ zpool_create(libzfs_handle_t *hdl, const char *pool, nvlist_t *nvroot,
 			zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
 			    "one or more vdevs refer to the same device"));
 			return (zfs_error(hdl, EZFS_BADDEV, msg));
+
+		case ERANGE:
+			/*
+			 * This happens if the record size is smaller or larger
+			 * than the allowed size range, or not a power of 2.
+			 *
+			 * NOTE: although zfs_valid_proplist is called earlier,
+			 * this case may have slipped through since the
+			 * pool does not exist yet and it is therefore
+			 * impossible to read properties e.g. max blocksize
+			 * from the pool.
+			 */
+			zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
+			    "record size invalid"));
+			return (zfs_error(hdl, EZFS_BADPROP, msg));
 
 		case EOVERFLOW:
 			/*
@@ -1261,25 +1254,6 @@ zpool_add(zpool_handle_t *zhp, nvlist_t *nvroot)
 		zfs_error_aux(hdl, dgettext(TEXT_DOMAIN, "pool must be "
 		    "upgraded to add hot spares"));
 		return (zfs_error(hdl, EZFS_BADVERSION, msg));
-	}
-
-	if (zpool_is_bootable(zhp) && nvlist_lookup_nvlist_array(nvroot,
-	    ZPOOL_CONFIG_SPARES, &spares, &nspares) == 0) {
-		uint64_t s;
-
-		for (s = 0; s < nspares; s++) {
-			char *path;
-
-			if (nvlist_lookup_string(spares[s], ZPOOL_CONFIG_PATH,
-			    &path) == 0 && pool_uses_efi(spares[s])) {
-				zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
-				    "device '%s' contains an EFI label and "
-				    "cannot be used on root pools."),
-				    zpool_vdev_name(hdl, NULL, spares[s],
-				    B_FALSE));
-				return (zfs_error(hdl, EZFS_POOL_NOTSUP, msg));
-			}
-		}
 	}
 
 	if (zpool_get_prop_int(zhp, ZPOOL_PROP_VERSION, NULL) <
@@ -1667,7 +1641,7 @@ zpool_import_props(libzfs_handle_t *hdl, nvlist_t *config, const char *newname,
 		thename = origname;
 	}
 
-	if (props) {
+	if (props != NULL) {
 		uint64_t version;
 		prop_flags_t flags = { .create = B_FALSE, .import = B_TRUE };
 
@@ -1675,12 +1649,13 @@ zpool_import_props(libzfs_handle_t *hdl, nvlist_t *config, const char *newname,
 		    &version) == 0);
 
 		if ((props = zpool_valid_proplist(hdl, origname,
-		    props, version, flags, errbuf)) == NULL) {
+		    props, version, flags, errbuf)) == NULL)
 			return (-1);
-		} else if (zcmd_write_src_nvlist(hdl, &zc, props) != 0) {
+		if (zcmd_write_src_nvlist(hdl, &zc, props) != 0) {
 			nvlist_free(props);
 			return (-1);
 		}
+		nvlist_free(props);
 	}
 
 	(void) strlcpy(zc.zc_name, thename, sizeof (zc.zc_name));
@@ -1689,11 +1664,11 @@ zpool_import_props(libzfs_handle_t *hdl, nvlist_t *config, const char *newname,
 	    &zc.zc_guid) == 0);
 
 	if (zcmd_write_conf_nvlist(hdl, &zc, config) != 0) {
-		nvlist_free(props);
+		zcmd_free_nvlists(&zc);
 		return (-1);
 	}
 	if (zcmd_alloc_dst_nvlist(hdl, &zc, zc.zc_nvlist_conf_size * 2) != 0) {
-		nvlist_free(props);
+		zcmd_free_nvlists(&zc);
 		return (-1);
 	}
 
@@ -1709,6 +1684,9 @@ zpool_import_props(libzfs_handle_t *hdl, nvlist_t *config, const char *newname,
 		error = errno;
 
 	(void) zcmd_read_dst_nvlist(hdl, &zc, &nv);
+
+	zcmd_free_nvlists(&zc);
+
 	zpool_get_rewind_policy(config, &policy);
 
 	if (error) {
@@ -1814,9 +1792,6 @@ zpool_import_props(libzfs_handle_t *hdl, nvlist_t *config, const char *newname,
 		return (0);
 	}
 
-	zcmd_free_nvlists(&zc);
-	nvlist_free(props);
-
 	return (ret);
 }
 
@@ -1880,7 +1855,8 @@ zpool_scan(zpool_handle_t *zhp, pool_scan_func_t func)
  * and the like.
  */
 static int
-ctd_check_path(char *str) {
+ctd_check_path(char *str)
+{
 	/*
 	 * If it starts with a slash, check the last component.
 	 */
@@ -2295,11 +2271,9 @@ zpool_get_config_physpath(nvlist_t *config, char *physpath, size_t phypath_size)
 		return (EZFS_INVALCONFIG);
 
 	/*
-	 * root pool can not have EFI labeled disks and can only have
-	 * a single top-level vdev.
+	 * root pool can only have a single top-level vdev.
 	 */
-	if (strcmp(type, VDEV_TYPE_ROOT) != 0 || count != 1 ||
-	    pool_uses_efi(vdev_root))
+	if (strcmp(type, VDEV_TYPE_ROOT) != 0 || count != 1)
 		return (EZFS_POOL_INVALARG);
 
 	(void) vdev_get_physpaths(child[0], physpath, phypath_size, &rsz,
@@ -2600,16 +2574,6 @@ zpool_vdev_attach(zpool_handle_t *zhp,
 	else
 		(void) snprintf(msg, sizeof (msg), dgettext(TEXT_DOMAIN,
 		    "cannot attach %s to %s"), new_disk, old_disk);
-
-	/*
-	 * If this is a root pool, make sure that we're not attaching an
-	 * EFI labeled device.
-	 */
-	if (rootpool && pool_uses_efi(nvroot)) {
-		zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
-		    "EFI labeled devices are not supported on root pools."));
-		return (zfs_error(hdl, EZFS_POOL_NOTSUP, msg));
-	}
 
 	(void) strlcpy(zc.zc_name, zhp->zpool_name, sizeof (zc.zc_name));
 	if ((tgt = zpool_find_vdev(zhp, old_disk, &avail_spare, &l2cache,
@@ -3266,8 +3230,10 @@ devid_to_path(char *devid_str)
 	if (ret != 0)
 		return (NULL);
 
-	if ((path = strdup(list[0].devname)) == NULL)
-		return (NULL);
+	/*
+	 * In a case the strdup() fails, we will just return NULL below.
+	 */
+	path = strdup(list[0].devname);
 
 	devid_free_nmlist(list);
 
@@ -3448,9 +3414,9 @@ zpool_vdev_name(libzfs_handle_t *hdl, zpool_handle_t *zhp, nvlist_t *nv,
 }
 
 static int
-zbookmark_compare(const void *a, const void *b)
+zbookmark_mem_compare(const void *a, const void *b)
 {
-	return (memcmp(a, b, sizeof (zbookmark_t)));
+	return (memcmp(a, b, sizeof (zbookmark_phys_t)));
 }
 
 /*
@@ -3462,7 +3428,7 @@ zpool_get_errlog(zpool_handle_t *zhp, nvlist_t **nverrlistp)
 {
 	zfs_cmd_t zc = { 0 };
 	uint64_t count;
-	zbookmark_t *zb = NULL;
+	zbookmark_phys_t *zb = NULL;
 	int i;
 
 	/*
@@ -3475,7 +3441,7 @@ zpool_get_errlog(zpool_handle_t *zhp, nvlist_t **nverrlistp)
 	if (count == 0)
 		return (0);
 	if ((zc.zc_nvlist_dst = (uintptr_t)zfs_alloc(zhp->zpool_hdl,
-	    count * sizeof (zbookmark_t))) == (uintptr_t)NULL)
+	    count * sizeof (zbookmark_phys_t))) == (uintptr_t)NULL)
 		return (-1);
 	zc.zc_nvlist_dst_size = count;
 	(void) strcpy(zc.zc_name, zhp->zpool_name);
@@ -3484,11 +3450,14 @@ zpool_get_errlog(zpool_handle_t *zhp, nvlist_t **nverrlistp)
 		    &zc) != 0) {
 			free((void *)(uintptr_t)zc.zc_nvlist_dst);
 			if (errno == ENOMEM) {
+				void *dst;
+
 				count = zc.zc_nvlist_dst_size;
-				if ((zc.zc_nvlist_dst = (uintptr_t)
-				    zfs_alloc(zhp->zpool_hdl, count *
-				    sizeof (zbookmark_t))) == (uintptr_t)NULL)
+				dst = zfs_alloc(zhp->zpool_hdl, count *
+				    sizeof (zbookmark_phys_t));
+				if (dst == NULL)
 					return (-1);
+				zc.zc_nvlist_dst = (uintptr_t)dst;
 			} else {
 				return (-1);
 			}
@@ -3504,11 +3473,11 @@ zpool_get_errlog(zpool_handle_t *zhp, nvlist_t **nverrlistp)
 	 * _not_ copied as part of the process.  So we point the start of our
 	 * array appropriate and decrement the total number of elements.
 	 */
-	zb = ((zbookmark_t *)(uintptr_t)zc.zc_nvlist_dst) +
+	zb = ((zbookmark_phys_t *)(uintptr_t)zc.zc_nvlist_dst) +
 	    zc.zc_nvlist_dst_size;
 	count -= zc.zc_nvlist_dst_size;
 
-	qsort(zb, count, sizeof (zbookmark_t), zbookmark_compare);
+	qsort(zb, count, sizeof (zbookmark_phys_t), zbookmark_mem_compare);
 
 	verify(nvlist_alloc(nverrlistp, 0, KM_SLEEP) == 0);
 
@@ -3686,22 +3655,24 @@ zpool_history_unpack(char *buf, uint64_t bytes_read, uint64_t *leftover,
 	return (0);
 }
 
-#define	HIS_BUF_LEN	(128*1024)
-
 /*
  * Retrieve the command history of a pool.
  */
 int
 zpool_get_history(zpool_handle_t *zhp, nvlist_t **nvhisp)
 {
-	char buf[HIS_BUF_LEN];
+	char *buf;
+	int buflen = 128 * 1024;
 	uint64_t off = 0;
 	nvlist_t **records = NULL;
 	uint_t numrecords = 0;
 	int err, i;
 
+	buf = malloc(buflen);
+	if (buf == NULL)
+		return (ENOMEM);
 	do {
-		uint64_t bytes_read = sizeof (buf);
+		uint64_t bytes_read = buflen;
 		uint64_t leftover;
 
 		if ((err = get_history(zhp, buf, &off, &bytes_read)) != 0)
@@ -3715,9 +3686,22 @@ zpool_get_history(zpool_handle_t *zhp, nvlist_t **nvhisp)
 		    &leftover, &records, &numrecords)) != 0)
 			break;
 		off -= leftover;
+		if (leftover == bytes_read) {
+			/*
+			 * no progress made, because buffer is not big enough
+			 * to hold this record; resize and retry.
+			 */
+			buflen *= 2;
+			free(buf);
+			buf = malloc(buflen);
+			if (buf == NULL)
+				return (ENOMEM);
+		}
 
 		/* CONSTCOND */
 	} while (1);
+
+	free(buf);
 
 	if (!err) {
 		verify(nvlist_alloc(nvhisp, NV_UNIQUE_NAME, 0) == 0);
@@ -3865,13 +3849,6 @@ zpool_label_disk(libzfs_handle_t *hdl, zpool_handle_t *zhp, char *name)
 
 	if (zhp) {
 		nvlist_t *nvroot;
-
-		if (zpool_is_bootable(zhp)) {
-			zfs_error_aux(hdl, dgettext(TEXT_DOMAIN,
-			    "EFI labeled devices are not supported on root "
-			    "pools."));
-			return (zfs_error(hdl, EZFS_POOL_NOTSUP, errbuf));
-		}
 
 		verify(nvlist_lookup_nvlist(zhp->zpool_config,
 		    ZPOOL_CONFIG_VDEV_TREE, &nvroot) == 0);

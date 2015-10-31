@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
@@ -69,14 +70,6 @@ typedef struct {
  * File identifier.  Should be unique per filesystem on a single
  * machine.  This is typically called by a stateless file server
  * in order to generate "file handles".
- *
- * Do not change the definition of struct fid ... fid_t without
- * letting the CacheFS group know about it!  They will have to do at
- * least two things, in the same change that changes this structure:
- *   1. change CFSVERSION in usr/src/uts/common/sys/fs/cachefs_fs.h
- *   2. put the old version # in the canupgrade array
- *	in cachfs_upgrade() in usr/src/cmd/fs.d/cachefs/fsck/fsck.c
- * This is necessary because CacheFS stores FIDs on disk.
  *
  * Many underlying file systems cast a struct fid into other
  * file system dependent structures which may require 4 byte alignment.
@@ -428,7 +421,7 @@ enum {
  */
 #define	VFSSP_VERBATIM	0x1	/* do not prefix the supplied path */
 
-#if defined(_KERNEL)
+#if defined(_KERNEL) || defined(_FAKE_KERNEL)
 
 /*
  * Private vfs data, NOT to be used by a file system implementation.

@@ -1498,7 +1498,7 @@ icmp_inbound_v4(mblk_t *mp, ip_recv_attr_t *ira)
 		/* Compute # of milliseconds since midnight */
 		gethrestime(&now);
 		ts = (now.tv_sec % (24 * 60 * 60)) * 1000 +
-		    now.tv_nsec / (NANOSEC / MILLISEC);
+		    NSEC2MSEC(now.tv_nsec);
 		*tsp++ = htonl(ts);	/* Lay in 'receive time' */
 		*tsp++ = htonl(ts);	/* Lay in 'send time' */
 		BUMP_MIB(&ipst->ips_icmp_mib, icmpOutTimestampReps);
@@ -4420,6 +4420,27 @@ ip_stack_fini(netstackid_t stackid, void *arg)
 
 	dce_stack_destroy(ipst);
 	ip_mrouter_stack_destroy(ipst);
+
+	/*
+	 * Quiesce all of our timers. Note we set the quiesce flags before we
+	 * call untimeout. The slowtimers may actually kick off another instance
+	 * of the non-slow timers.
+	 */
+	mutex_enter(&ipst->ips_igmp_timer_lock);
+	ipst->ips_igmp_timer_quiesce = B_TRUE;
+	mutex_exit(&ipst->ips_igmp_timer_lock);
+
+	mutex_enter(&ipst->ips_mld_timer_lock);
+	ipst->ips_mld_timer_quiesce = B_TRUE;
+	mutex_exit(&ipst->ips_mld_timer_lock);
+
+	mutex_enter(&ipst->ips_igmp_slowtimeout_lock);
+	ipst->ips_igmp_slowtimeout_quiesce = B_TRUE;
+	mutex_exit(&ipst->ips_igmp_slowtimeout_lock);
+
+	mutex_enter(&ipst->ips_mld_slowtimeout_lock);
+	ipst->ips_mld_slowtimeout_quiesce = B_TRUE;
+	mutex_exit(&ipst->ips_mld_slowtimeout_lock);
 
 	ret = untimeout(ipst->ips_igmp_timeout_id);
 	if (ret == -1) {
@@ -9117,7 +9138,7 @@ ip_forward_options(mblk_t *mp, ipha_t *ipha, ill_t *dst_ill,
 				/* Compute # of milliseconds since midnight */
 				gethrestime(&now);
 				ts = (now.tv_sec % (24 * 60 * 60)) * 1000 +
-				    now.tv_nsec / (NANOSEC / MILLISEC);
+				    NSEC2MSEC(now.tv_nsec);
 				bcopy(&ts, (char *)opt + off, IPOPT_TS_TIMELEN);
 				opt[IPOPT_OFFSET] += IPOPT_TS_TIMELEN;
 				break;
@@ -9343,7 +9364,7 @@ ip_input_local_options(mblk_t *mp, ipha_t *ipha, ip_recv_attr_t *ira)
 				/* Compute # of milliseconds since midnight */
 				gethrestime(&now);
 				ts = (now.tv_sec % (24 * 60 * 60)) * 1000 +
-				    now.tv_nsec / (NANOSEC / MILLISEC);
+				    NSEC2MSEC(now.tv_nsec);
 				bcopy(&ts, (char *)opt + off, IPOPT_TS_TIMELEN);
 				opt[IPOPT_OFFSET] += IPOPT_TS_TIMELEN;
 				break;
@@ -12025,7 +12046,7 @@ ip_output_local_options(ipha_t *ipha, ip_stack_t *ipst)
 				/* Compute # of milliseconds since midnight */
 				gethrestime(&now);
 				ts = (now.tv_sec % (24 * 60 * 60)) * 1000 +
-				    now.tv_nsec / (NANOSEC / MILLISEC);
+				    NSEC2MSEC(now.tv_nsec);
 				bcopy(&ts, (char *)opt + off, IPOPT_TS_TIMELEN);
 				opt[IPOPT_OFFSET] += IPOPT_TS_TIMELEN;
 				break;
@@ -12120,7 +12141,6 @@ ip_xmit_attach_llhdr(mblk_t *mp, nce_t *nce)
 		    priority;
 	}
 	return (mp1);
-#undef rptr
 }
 
 /*

@@ -21,6 +21,8 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -157,8 +159,10 @@ smb_mbc_vdecodef(mbuf_chain_t *mbc, char *fmt, va_list ap)
 	uint32_t	lval;
 	int		unicode = 0;
 	int		repc;
+	boolean_t	repc_specified;
 
 	while ((c = *fmt++) != 0) {
+		repc_specified = B_FALSE;
 		repc = 1;
 
 		if ('0' <= c && c <= '9') {
@@ -167,9 +171,11 @@ smb_mbc_vdecodef(mbuf_chain_t *mbc, char *fmt, va_list ap)
 				repc = repc * 10 + c - '0';
 				c = *fmt++;
 			} while ('0' <= c && c <= '9');
+			repc_specified = B_TRUE;
 		} else if (c == '#') {
 			repc = va_arg(ap, int);
 			c = *fmt++;
+			repc_specified = B_TRUE;
 		}
 
 		switch (c) {
@@ -296,7 +302,7 @@ smb_mbc_vdecodef(mbuf_chain_t *mbc, char *fmt, va_list ap)
 ascii_conversion:
 			ASSERT(sr != NULL);
 			cvalpp = va_arg(ap, uint8_t **);
-			if (repc <= 1)
+			if (!repc_specified)
 				repc = 0;
 			if (mbc_marshal_get_ascii_string(sr,
 			    mbc, cvalpp, repc) != 0)
@@ -307,7 +313,7 @@ ascii_conversion:
 unicode_translation:
 			ASSERT(sr != 0);
 			cvalpp = va_arg(ap, uint8_t **);
-			if (repc <= 1)
+			if (!repc_specified)
 				repc = 0;
 			if (mbc->chain_offset & 1)
 				mbc->chain_offset++;
@@ -508,12 +514,14 @@ smb_mbc_vencodef(mbuf_chain_t *mbc, char *fmt, va_list ap)
 	uint32_t	lval;
 	uint_t		tag;
 	int		unicode = 0;
-	int		repc = 1;
+	int		repc;
+	boolean_t	repc_specified;
 	uint16_t	wval;
 	uint8_t		cval;
 	uint8_t		c;
 
 	while ((c = *fmt++) != 0) {
+		repc_specified = B_FALSE;
 		repc = 1;
 
 		if ('0' <= c && c <= '9') {
@@ -522,9 +530,12 @@ smb_mbc_vencodef(mbuf_chain_t *mbc, char *fmt, va_list ap)
 				repc = repc * 10 + c - '0';
 				c = *fmt++;
 			} while ('0' <= c && c <= '9');
+			repc_specified = B_TRUE;
 		} else if (c == '#') {
 			repc = va_arg(ap, int);
 			c = *fmt++;
+			repc_specified = B_TRUE;
+
 		}
 
 		switch (c) {
@@ -647,6 +658,8 @@ smb_mbc_vencodef(mbuf_chain_t *mbc, char *fmt, va_list ap)
 
 		case 's':	/* ASCII/multibyte string */
 ascii_conversion:	cvalp = va_arg(ap, uint8_t *);
+			if (!repc_specified)
+				repc = 0;
 			if (mbc_marshal_put_ascii_string(mbc,
 			    (char *)cvalp, repc) != 0)
 				return (DECODE_NO_MORE_DATA);
@@ -696,6 +709,8 @@ unicode_translation:
 			if (mbc->chain_offset & 1)
 				mbc->chain_offset++;
 			cvalp = va_arg(ap, uint8_t *);
+			if (!repc_specified)
+				repc = 0;
 			if (mbc_marshal_put_unicode_string(mbc,
 			    (char *)cvalp, repc) != 0)
 				return (DECODE_NO_MORE_DATA);
@@ -750,6 +765,128 @@ smb_mbc_poke(mbuf_chain_t *mbc, int offset, char *fmt, ...)
 	xx = smb_mbc_vencodef(&tmp, fmt, ap);
 	va_end(ap);
 	return (xx);
+}
+
+/*
+ * Copy data from the src mbuf chain to the dst mbuf chain,
+ * at the given offset in the src and current offset in dst,
+ * for copy_len bytes.  Does NOT update src->chain_offset.
+ */
+int
+smb_mbc_copy(mbuf_chain_t *dst_mbc, const mbuf_chain_t *src_mbc,
+	int copy_offset, int copy_len)
+{
+	mbuf_t	*src_m;
+	int offset, len;
+	int rc;
+
+	if (copy_len <= 0)
+		return (0);
+	if (copy_offset < 0)
+		return (EINVAL);
+	if ((copy_offset + copy_len) > src_mbc->max_bytes)
+		return (EMSGSIZE);
+
+	/*
+	 * Advance to the src mbuf where we start copying.
+	 */
+	offset = copy_offset;
+	src_m = src_mbc->chain;
+	while (src_m && offset >= src_m->m_len) {
+		offset -= src_m->m_len;
+		src_m = src_m->m_next;
+	}
+	if (src_m == NULL)
+		return (EFAULT);
+
+	/*
+	 * Copy the first part, which may start somewhere past
+	 * the beginning of the current mbuf.
+	 */
+	len = src_m->m_len - offset;
+	if (len > copy_len)
+		len = copy_len;
+	rc = smb_mbc_put_mem(dst_mbc, src_m->m_data + offset, len);
+	if (rc != 0)
+		return (rc);
+	copy_len -= len;
+
+	/*
+	 * Copy remaining mbufs...
+	 */
+	while (copy_len > 0) {
+		src_m = src_m->m_next;
+		if (src_m == NULL)
+			break;
+		len = src_m->m_len;
+		if (len > copy_len)
+			len = copy_len;
+		rc = smb_mbc_put_mem(dst_mbc, src_m->m_data, len);
+		copy_len -= len;
+	}
+
+	return (0);
+}
+
+/*
+ * Copy data from the passed memory buffer into the mbuf chain
+ * at the current offset.
+ */
+int
+smb_mbc_put_mem(mbuf_chain_t *mbc, void *vmem, int mem_len)
+{
+	caddr_t mem = vmem;
+	mbuf_t	*m;
+	int32_t	offset, tlen;
+	int rc;
+
+	if (mem_len <= 0)
+		return (0);
+
+	if ((rc = mbc_marshal_make_room(mbc, mem_len)) != 0)
+		return (rc);
+
+	/*
+	 * Advance to the dst mbuf where we start copying.
+	 * Allocations were done by _make_room().
+	 */
+	offset = mbc->chain_offset;
+	m = mbc->chain;
+	while (offset >= m->m_len) {
+		ASSERT(m->m_len > 0);
+		offset -= m->m_len;
+		m = m->m_next;
+	}
+
+	/*
+	 * Copy the first part, which may start somewhere past
+	 * the beginning of the current mbuf.
+	 */
+	tlen = m->m_len - offset;
+	if (tlen > mem_len)
+		tlen = mem_len;
+	bcopy(mem, m->m_data + offset, tlen);
+	mbc->chain_offset += tlen;
+	mem += tlen;
+	mem_len -= tlen;
+
+	/*
+	 * Copy remaining mem into mbufs.  These all start
+	 * at the beginning of each mbuf, and the last may
+	 * end somewhere short of m_len.
+	 */
+	while (mem_len > 0) {
+		m = m->m_next;
+		tlen = m->m_len;
+		if (tlen > mem_len)
+			tlen = mem_len;
+		bcopy(mem, m->m_data, tlen);
+		mbc->chain_offset += tlen;
+		mem += tlen;
+		mem_len -= tlen;
+	}
+
+	return (0);
 }
 
 /*
@@ -918,7 +1055,7 @@ mbc_marshal_put_ascii_string(mbuf_chain_t *mbc, char *mbs, int repc)
 
 	length += sizeof (char);
 
-	if ((repc > 1) && (repc < length))
+	if ((repc > 0) && (repc < length))
 		length = repc;
 	if (mbc_marshal_make_room(mbc, length))
 		return (DECODE_NO_MORE_DATA);
@@ -955,7 +1092,7 @@ mbc_marshal_put_unicode_string(mbuf_chain_t *mbc, char *ascii, int repc)
 
 	length += sizeof (smb_wchar_t);
 
-	if ((repc > 1) && (repc < length))
+	if ((repc > 0) && (repc < length))
 		length = repc;
 
 	if (mbc_marshal_make_room(mbc, length))
@@ -991,7 +1128,7 @@ mbc_marshal_put_uio(mbuf_chain_t *mbc, struct uio *uio)
 	for (i = 0; i < iov_cnt; i++) {
 		MGET(m, M_WAIT, MT_DATA);
 		m->m_ext.ext_buf = iov->iov_base;
-		m->m_ext.ext_ref = smb_noop;
+		m->m_ext.ext_ref = mclrefnoop;
 		m->m_data = m->m_ext.ext_buf;
 		m->m_flags |= M_EXT;
 		m->m_len = m->m_ext.ext_size = iov->iov_len;
@@ -1304,11 +1441,13 @@ done:	*ch = 0;
 static int /*ARGSUSED*/
 mbc_marshal_get_mbufs(mbuf_chain_t *mbc, int32_t bytes, mbuf_t **m)
 {
+	*m = NULL;
 	if (MBC_ROOM_FOR(mbc, bytes) == 0) {
 		/* Data will never be available */
 		return (DECODE_NO_MORE_DATA);
 	}
-	return (0);
+	/* not yet implemented */
+	return (-1);
 }
 
 static int

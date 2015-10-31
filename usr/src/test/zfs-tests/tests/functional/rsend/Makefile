@@ -10,7 +10,7 @@
 #
 
 #
-# Copyright (c) 2013 by Delphix. All rights reserved.
+# Copyright (c) 2013, 2014 by Delphix. All rights reserved.
 #
 
 include $(SRC)/Makefile.master
@@ -32,6 +32,12 @@ PROGS = cleanup \
 	rsend_011_pos \
 	rsend_012_pos \
 	rsend_013_pos \
+	rsend_014_pos \
+	rsend_019_pos \
+	rsend_020_pos \
+	rsend_021_pos \
+	rsend_022_pos \
+	rsend_024_pos \
 	setup
 
 FILES = rsend.cfg \

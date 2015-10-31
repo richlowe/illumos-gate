@@ -22,6 +22,7 @@
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright Milan Jurik 2012. All rights reserved.
  * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2015 Joyent, Inc.
  */
 
 
@@ -1653,7 +1654,7 @@ idmap_get_w2u_mapping(
 	    TIMEOUT);
 
 	if (retcode != IDMAP_SUCCESS)
-		return (retcode);
+		goto out;
 
 	retcode = result.retcode;
 
@@ -2173,7 +2174,7 @@ idmap_getgidbywinname(const char *name, const char *domain, int flag,
 /*
  * Get winname given pid
  */
-static idmap_retcode
+idmap_stat
 idmap_getwinnamebypid(uid_t pid, int is_user, int flag, char **name,
 	char **domain)
 {

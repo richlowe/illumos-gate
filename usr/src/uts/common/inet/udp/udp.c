@@ -25,6 +25,7 @@
  */
 /* Copyright (c) 1990 Mentat Inc. */
 
+#include <sys/sysmacros.h>
 #include <sys/types.h>
 #include <sys/stream.h>
 #include <sys/stropts.h>
@@ -2733,7 +2734,7 @@ udp_output_ancillary(conn_t *connp, sin_t *sin, sin6_t *sin6, mblk_t *mp,
 		else
 			ixa->ixa_flags &= ~IXAF_IS_IPV4;
 		if (srcid != 0 && IN6_IS_ADDR_UNSPECIFIED(&v6src)) {
-			if (ip_srcid_find_id(srcid, &v6src, IPCL_ZONEID(connp),
+			if (!ip_srcid_find_id(srcid, &v6src, IPCL_ZONEID(connp),
 			    v4mapped, connp->conn_netstack)) {
 				/* Mismatch - v4mapped/v6 specified by srcid. */
 				mutex_exit(&connp->conn_lock);
@@ -3754,7 +3755,7 @@ udp_output_newdst(conn_t *connp, mblk_t *data_mp, sin_t *sin, sin6_t *sin6,
 		else
 			ixa->ixa_flags &= ~IXAF_IS_IPV4;
 		if (srcid != 0 && IN6_IS_ADDR_UNSPECIFIED(&v6src)) {
-			if (ip_srcid_find_id(srcid, &v6src, IPCL_ZONEID(connp),
+			if (!ip_srcid_find_id(srcid, &v6src, IPCL_ZONEID(connp),
 			    v4mapped, connp->conn_netstack)) {
 				/* Mismatched v4mapped/v6 specified by srcid. */
 				mutex_exit(&connp->conn_lock);
@@ -4384,7 +4385,7 @@ udp_stack_init(netstackid_t stackid, netstack_t *ns)
 	us->us_bind_fanout_size = udp_bind_fanout_size;
 
 	/* Roundup variable that might have been modified in /etc/system */
-	if (us->us_bind_fanout_size & (us->us_bind_fanout_size - 1)) {
+	if (!ISP2(us->us_bind_fanout_size)) {
 		/* Not a power of two. Round up to nearest power of two */
 		for (i = 0; i < 31; i++) {
 			if (us->us_bind_fanout_size < (1 << i))
@@ -5571,7 +5572,7 @@ udp_do_connect(conn_t *connp, const struct sockaddr *sa, socklen_t len,
 		srcid = sin6->__sin6_src_id;
 		v4mapped = IN6_IS_ADDR_V4MAPPED(&v6dst);
 		if (srcid != 0 && IN6_IS_ADDR_UNSPECIFIED(&v6src)) {
-			if (ip_srcid_find_id(srcid, &v6src, IPCL_ZONEID(connp),
+			if (!ip_srcid_find_id(srcid, &v6src, IPCL_ZONEID(connp),
 			    v4mapped, connp->conn_netstack)) {
 				/* Mismatch v4mapped/v6 specified by srcid. */
 				return (EADDRNOTAVAIL);

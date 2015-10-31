@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <sys/list.h>
@@ -37,31 +38,13 @@
 #include <fcntl.h>
 #include <pthread.h>
 #include <strings.h>
+#include <note.h>
 #include <smbsrv/smb_door.h>
 #include <smbsrv/smb_xdr.h>
 #include <smbsrv/smb_token.h>
 #include <smbsrv/libmlsvc.h>
 #include <smbsrv/libsmbns.h>
 #include "smbd.h"
-
-#define	SMBD_ARG_MAGIC		0x53415247	/* 'SARG' */
-
-/*
- * Parameter for door operations.
- */
-typedef struct smbd_arg {
-	uint32_t	magic;
-	list_node_t	lnd;
-	smb_doorhdr_t	hdr;
-	const char	*opname;
-	char		*data;
-	size_t		datalen;
-	char		*rbuf;
-	size_t		rsize;
-	boolean_t	response_ready;
-	boolean_t	response_abort;
-	uint32_t	status;
-} smbd_arg_t;
 
 /*
  * The list contains asynchronous requests that have been initiated
@@ -92,6 +75,7 @@ static int smbd_dop_quota_set(smbd_arg_t *);
 static int smbd_dop_dfs_get_referrals(smbd_arg_t *);
 static int smbd_dop_shr_hostaccess(smbd_arg_t *);
 static int smbd_dop_shr_exec(smbd_arg_t *);
+static int smbd_dop_notify_dc_changed(smbd_arg_t *);
 
 typedef int (*smbd_dop_t)(smbd_arg_t *);
 
@@ -118,7 +102,8 @@ smbd_doorop_t smbd_doorops[] = {
 	{ SMB_DR_QUOTA_SET,		smbd_dop_quota_set },
 	{ SMB_DR_DFS_GET_REFERRALS,	smbd_dop_dfs_get_referrals },
 	{ SMB_DR_SHR_HOSTACCESS,	smbd_dop_shr_hostaccess },
-	{ SMB_DR_SHR_EXEC,		smbd_dop_shr_exec }
+	{ SMB_DR_SHR_EXEC,		smbd_dop_shr_exec },
+	{ SMB_DR_NOTIFY_DC_CHANGED,	smbd_dop_notify_dc_changed }
 };
 
 static int smbd_ndoorop = (sizeof (smbd_doorops) / sizeof (smbd_doorops[0]));
@@ -127,11 +112,11 @@ static smbd_doorsvc_t smbd_doorsvc;
 static int smbd_door_fd = -1;
 static int smbd_door_cookie = 0x534D4244;	/* SMBD */
 static smbd_door_t smbd_door_sdh;
+static char *smbd_door_name = NULL;
 
 static void smbd_door_dispatch(void *, char *, size_t, door_desc_t *, uint_t);
 static int smbd_door_dispatch_async(smbd_arg_t *);
 static void smbd_door_release_async(smbd_arg_t *);
-static void *smbd_door_dispatch_op(void *);
 
 /*
  * Start the smbd door service.  Create and bind to a door.
@@ -150,6 +135,10 @@ smbd_door_start(void)
 		return (-1);
 	}
 
+	smbd_door_name = getenv("SMBD_DOOR_NAME");
+	if (smbd_door_name == NULL)
+		smbd_door_name = SMBD_DOOR_NAME;
+
 	smbd_door_init(&smbd_door_sdh, "doorsrv");
 
 	list_create(&smbd_doorsvc.sd_async_list, sizeof (smbd_arg_t),
@@ -165,9 +154,9 @@ smbd_door_start(void)
 		return (-1);
 	}
 
-	(void) unlink(SMBD_DOOR_NAME);
+	(void) unlink(smbd_door_name);
 
-	if ((newfd = creat(SMBD_DOOR_NAME, 0644)) < 0) {
+	if ((newfd = creat(smbd_door_name, 0644)) < 0) {
 		(void) fprintf(stderr, "smb_doorsrv_start: open: %s",
 		    strerror(errno));
 		(void) door_revoke(smbd_door_fd);
@@ -177,9 +166,9 @@ smbd_door_start(void)
 	}
 
 	(void) close(newfd);
-	(void) fdetach(SMBD_DOOR_NAME);
+	(void) fdetach(smbd_door_name);
 
-	if (fattach(smbd_door_fd, SMBD_DOOR_NAME) < 0) {
+	if (fattach(smbd_door_fd, smbd_door_name) < 0) {
 		(void) fprintf(stderr, "smb_doorsrv_start: fattach: %s",
 		    strerror(errno));
 		(void) door_revoke(smbd_door_fd);
@@ -202,8 +191,10 @@ smbd_door_stop(void)
 
 	smbd_door_fini(&smbd_door_sdh);
 
+	if (smbd_door_name)
+		(void) fdetach(smbd_door_name);
+
 	if (smbd_door_fd != -1) {
-		(void) fdetach(SMBD_DOOR_NAME);
 		(void) door_revoke(smbd_door_fd);
 		smbd_door_fd = -1;
 	}
@@ -377,7 +368,7 @@ smbd_door_release_async(smbd_arg_t *arg)
  * We send a notification when asynchronous (ASYNC) door calls
  * from the kernel (SYSSPACE) have completed.
  */
-static void *
+void *
 smbd_door_dispatch_op(void *thread_arg)
 {
 	smbd_arg_t	*arg = (smbd_arg_t *)thread_arg;
@@ -435,7 +426,7 @@ smbd_door_dispatch_op(void *thread_arg)
 void
 smbd_door_init(smbd_door_t *sdh, const char *name)
 {
-	(void) strlcpy(sdh->sd_name, name, SMBD_DOOR_NAMESZ);
+	(void) strlcpy(sdh->sd_name, name, sizeof (sdh->sd_name));
 }
 
 void
@@ -584,27 +575,10 @@ smbd_dop_user_auth_logoff(smbd_arg_t *arg)
 static int
 smbd_dop_user_auth_logon(smbd_arg_t *arg)
 {
-	smb_logon_t	*user_info;
-	smb_token_t	*token;
+	_NOTE(ARGUNUSED(arg))
 
-	user_info = smb_logon_decode((uint8_t *)arg->data,
-	    arg->datalen);
-	if (user_info == NULL)
-		return (SMB_DOP_DECODE_ERROR);
-
-	token = smbd_user_auth_logon(user_info);
-
-	smb_logon_free(user_info);
-
-	if (token == NULL)
-		return (SMB_DOP_EMPTYBUF);
-
-	arg->rbuf = (char *)smb_token_encode(token, &arg->rsize);
-	smb_token_destroy(token);
-
-	if (arg->rbuf == NULL)
-		return (SMB_DOP_ENCODE_ERROR);
-	return (SMB_DOP_SUCCESS);
+	/* No longer used */
+	return (SMB_DOP_EMPTYBUF);
 }
 
 static int
@@ -696,17 +670,18 @@ static int
 smbd_dop_join(smbd_arg_t *arg)
 {
 	smb_joininfo_t	jdi;
-	uint32_t	status;
+	smb_joinres_t	jdres;
 
 	bzero(&jdi, sizeof (smb_joininfo_t));
+	bzero(&jdres, sizeof (smb_joinres_t));
 
 	if (smb_common_decode(arg->data, arg->datalen,
 	    smb_joininfo_xdr, &jdi) != 0)
 		return (SMB_DOP_DECODE_ERROR);
 
-	status = smbd_join(&jdi);
+	smbd_join(&jdi, &jdres);
 
-	arg->rbuf = smb_common_encode(&status, xdr_uint32_t, &arg->rsize);
+	arg->rbuf = smb_common_encode(&jdres, smb_joinres_xdr, &arg->rsize);
 
 	if (arg->rbuf == NULL)
 		return (SMB_DOP_ENCODE_ERROR);
@@ -721,7 +696,7 @@ smbd_dop_get_dcinfo(smbd_arg_t *arg)
 	if (!smb_domain_getinfo(&dxi))
 		return (SMB_DOP_EMPTYBUF);
 
-	arg->rbuf = smb_string_encode(dxi.d_dc, &arg->rsize);
+	arg->rbuf = smb_string_encode(dxi.d_dci.dc_name, &arg->rsize);
 
 	if (arg->rbuf == NULL)
 		return (SMB_DOP_ENCODE_ERROR);
@@ -856,7 +831,7 @@ smbd_dop_ads_find_host(smbd_arg_t *arg)
 	if (smb_string_decode(&fqdn, arg->data, arg->datalen) != 0)
 		return (SMB_DOP_DECODE_ERROR);
 
-	if ((hinfo = smb_ads_find_host(fqdn.buf, NULL)) != NULL)
+	if ((hinfo = smb_ads_find_host(fqdn.buf)) != NULL)
 		hostname = hinfo->name;
 
 	xdr_free(smb_string_xdr, (char *)&fqdn);
@@ -1007,5 +982,15 @@ smbd_dop_shr_exec(smbd_arg_t *arg)
 
 	if (arg->rbuf == NULL)
 		return (SMB_DOP_ENCODE_ERROR);
+	return (SMB_DOP_SUCCESS);
+}
+
+/* ARGSUSED */
+static int
+smbd_dop_notify_dc_changed(smbd_arg_t *arg)
+{
+
+	smbd_dc_monitor_refresh();
+
 	return (SMB_DOP_SUCCESS);
 }

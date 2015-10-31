@@ -19,8 +19,13 @@
 # CDDL HEADER END
 #
 #
+# Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
+#
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
+# Copyright 2013 Garrett D'Amore <garrett@damore.org>
+# Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 #
 # head/Makefile
 #
@@ -47,6 +52,7 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	assert.h	\
 	atomic.h	\
 	attr.h		\
+	complex.h	\
 	config_admin.h	\
 	cpio.h		\
 	crypt.h		\
@@ -68,7 +74,9 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	execinfo.h	\
 	fatal.h		\
 	fcntl.h		\
+	fenv.h		\
 	float.h		\
+	floatingpoint.h	\
 	fmtmsg.h	\
 	fnmatch.h	\
 	ftw.h		\
@@ -99,6 +107,7 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	locale.h	\
 	macros.h	\
 	malloc.h	\
+	math.h		\
 	mdmn_changelog.h	\
 	memory.h	\
 	meta.h		\
@@ -180,6 +189,7 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	tar.h		\
 	termio.h	\
 	termios.h	\
+	tgmath.h	\
 	thread.h	\
 	thread_db.h	\
 	time.h		\
@@ -203,15 +213,17 @@ HDRS=   $($(MACH)_HDRS)  $(ATTRDB_HDRS) \
 	wctype.h	\
 	widec.h		\
 	wordexp.h	\
+	xlocale.h	\
 	xti.h		\
 	xti_inet.h	\
 	zone.h
 
 ISOHDRS = \
-	ctype_c99.h	\
 	ctype_iso.h	\
 	limits_iso.h	\
 	locale_iso.h	\
+	math_c99.h	\
+	math_iso.h	\
 	setjmp_iso.h  	\
 	signal_iso.h	\
 	stdarg_c99.h	\
@@ -225,7 +237,6 @@ ISOHDRS = \
 	time_iso.h	\
 	wchar_c99.h	\
 	wchar_iso.h	\
-	wctype_c99.h	\
 	wctype_iso.h
 
 ARPAHDRS = 		\
@@ -323,8 +334,6 @@ ROOTHDRS= $(HDRS:%=$(ROOT)/usr/include/%)  \
 
 DIRS= iso arpa audio rpcsvc protocols security uuid kerberosv5
 ROOTDIRS= $(DIRS:%=$(ROOT)/usr/include/%)
-
-SED=	sed
 
 # check files really don't exist
 #
@@ -445,52 +454,52 @@ rpcsvc/nis.h:	rpcsvc/nis.x
 
 meta_basic.h:	../uts/common/sys/lvm/meta_basic.x
 	$(RPCGEN) $(RPCGENFLAGS)  ../uts/common/sys/lvm/meta_basic.x | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
 
 metad.h:	metad.x
 	$(RPCGEN) $(RPCGENFLAGS)  metad.x | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
 
 mhdx.h:	../uts/common/sys/lvm/mhdx.x
 	$(RPCGEN) $(RPCGENFLAGS) ../uts/common/sys/lvm/mhdx.x | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
 
 mdiox.h:	../uts/common/sys/lvm/mdiox.x
 	$(RPCGEN) $(RPCGENFLAGS) ../uts/common/sys/lvm/mdiox.x | \
-	nawk '{sub(/sys\/lvm\/md_mhdx/, "mhdx"); print $$0}' | \
-	nawk '{sub(/sys\/lvm\/md_basic/, "meta_basic"); print $$0}' | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(NAWK) '{sub(/sys\/lvm\/md_mhdx/, "mhdx"); print $$0}' | \
+	$(NAWK) '{sub(/sys\/lvm\/md_basic/, "meta_basic"); print $$0}' | \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
 
 metamed.h:	../uts/common/sys/lvm/metamed.x
 	$(RPCGEN) $(RPCGENFLAGS) ../uts/common/sys/lvm/metamed.x | \
-	nawk '{sub(/sys\/lvm\/md_basic/, "meta_basic"); print $$0}' | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(NAWK) '{sub(/sys\/lvm\/md_basic/, "meta_basic"); print $$0}' | \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
 
 metamhd.h:	metamhd.x
 	$(RPCGEN) $(RPCGENFLAGS) metamhd.x | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
 
 metacl.h:	metacl.x
 	$(RPCGEN) $(RPCGENFLAGS) metacl.x | \
-	awk '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
+	$(AWK) '/<synch.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@

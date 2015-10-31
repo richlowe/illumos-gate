@@ -194,7 +194,7 @@ feature of the C preprocessor. For instance, the following mapfile declares
 a version SUNW_1.1 that always exports a symbol foo, and also exports
 the symbol bar on 32-bit sparc platforms:
 
-$mapfile_version
+$mapfile_version 2
 SYMBOL_VERSION SUNW_1.1 {
         foo;
 $if _sparc && _ELF32
@@ -487,7 +487,7 @@ If there are no Private interfaces, the ILLUMOSprivate section would be
 omitted and the two lines:
     local:
 	*;
-would be moved into SUNW_1.1
+would be moved into ILLUMOS_0.1.
 
 To decide which interfaces are Public (part of the ABI) and which are
 Private (unstable interfaces not intended to be used by third parties), the

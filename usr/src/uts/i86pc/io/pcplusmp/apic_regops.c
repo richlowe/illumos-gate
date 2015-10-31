@@ -22,6 +22,10 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
+/*
+ * Copyright 2014 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
+ * Copyright (c) 2014 by Delphix. All rights reserved.
+ */
 
 #include <sys/cpuvar.h>
 #include <sys/psm.h>
@@ -61,7 +65,10 @@ static void local_x2apic_write_int_cmd(uint32_t cpu_id, uint32_t cmd1);
  * -----------------------------------------------------------
  */
 int	x2apic_enable = 1;
-int 	apic_mode = LOCAL_APIC;		/* Default mode is Local APIC */
+apic_mode_t apic_mode = LOCAL_APIC;	/* Default mode is Local APIC */
+
+/* See apic_directed_EOI_supported().  Currently 3-state variable. */
+volatile int apic_directed_eoi_state = 2;
 
 /* Uses MMIO (Memory Mapped IO) */
 static apic_reg_ops_t local_apic_regs_ops = {
@@ -94,7 +101,6 @@ apic_reg_ops_t *apic_reg_ops = &local_apic_regs_ops;
 void apic_send_EOI();
 void apic_send_directed_EOI(uint32_t irq);
 
-#define	X2APIC_CPUID_BIT	21
 #define	X2APIC_ENABLE_BIT	10
 
 /*
@@ -233,15 +239,10 @@ apic_send_directed_EOI(uint32_t irq)
 int
 apic_detect_x2apic(void)
 {
-	struct cpuid_regs cp;
-
 	if (x2apic_enable == 0)
 		return (0);
 
-	cp.cp_eax = 1;
-	(void) __cpuid_insn(&cp);
-
-	return ((cp.cp_ecx & (0x1 << X2APIC_CPUID_BIT)) ? 1 : 0);
+	return (is_x86_feature(x86_featureset, X86FSET_X2APIC));
 }
 
 void
@@ -296,6 +297,41 @@ int
 apic_directed_EOI_supported()
 {
 	uint32_t ver;
+
+	/*
+	 * There are some known issues with some versions of Linux KVM and QEMU
+	 * where by directed EOIs do not properly function and instead get
+	 * coalesced at the hypervisor, causing the host not to see interrupts.
+	 * Thus, when the platform is KVM, we would like to disable it by
+	 * default, but keep it available otherwise.
+	 *
+	 * We use a three-state variable (apic_directed_eoi_state) to determine
+	 * how we handle directed EOI.
+	 *
+	 * 0 --> Don't do directed EOI at all.
+	 * 1 --> Do directed EOI if available, no matter the HW environment.
+	 * 2 --> Don't do directed EOI on KVM, but do it otherwise if available.
+	 *
+	 * If some grinning weirdo put something else in there, treat it as '2'
+	 * (i.e. the current default).
+	 *
+	 * Note, at this time illumos KVM does not identify as KVM. If it does,
+	 * we'll need to do some work to determine if it should be caught by
+	 * this or if it should show up as its own value of platform_type.
+	 */
+	switch (apic_directed_eoi_state) {
+	case 0:
+		/* Don't do it at all. */
+		return (0);
+	case 1:
+		break;
+	case 2:
+	default:
+		/* Only do it if we aren't on KVM. */
+		if (get_hwenv() == HW_KVM)
+			return (0);
+		/* FALLTHRU */
+	}
 
 	ver = apic_reg_ops->apic_read(APIC_VERS_REG);
 	if (ver & APIC_DIRECTED_EOI_BIT)

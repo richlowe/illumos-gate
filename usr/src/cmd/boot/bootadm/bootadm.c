@@ -24,7 +24,7 @@
  */
 
 /*
- * Copyright 2011 Nexenta Systems, Inc. All rights reserved.
+ * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
  */
 
 /*
@@ -72,7 +72,7 @@
 #include <libfdisk.h>
 #endif
 
-#if !defined(_OPB)
+#if !defined(_OBP)
 #include <sys/ucode.h>
 #endif
 
@@ -83,6 +83,7 @@
 #include <sys/efi_partition.h>
 #include <regex.h>
 #include <locale.h>
+#include <sys/mkdev.h>
 
 #include "message.h"
 #include "bootadm.h"
@@ -96,7 +97,8 @@
 /* Primary subcmds */
 typedef enum {
 	BAM_MENU = 3,
-	BAM_ARCHIVE
+	BAM_ARCHIVE,
+	BAM_INSTALL
 } subcmd_t;
 
 typedef enum {
@@ -116,12 +118,15 @@ typedef struct {
 #define	ENTRY_INIT	-1	/* entryNum initial value */
 #define	ALL_ENTRIES	-2	/* selects all boot entries */
 
+#define	PARTNO_NOTFOUND -1	/* Solaris partition not found */
+#define	PARTNO_EFI	-2	/* EFI partition table found */
+
 #define	GRUB_DIR		"/boot/grub"
 #define	GRUB_STAGE2		GRUB_DIR "/stage2"
 #define	GRUB_MENU		"/boot/grub/menu.lst"
 #define	MENU_TMP		"/boot/grub/menu.lst.tmp"
 #define	GRUB_BACKUP_MENU	"/etc/lu/GRUB_backup_menu"
-#define	RAMDISK_SPECIAL		"/ramdisk"
+#define	RAMDISK_SPECIAL		"/dev/ramdisk/"
 #define	STUBBOOT		"/stubboot"
 #define	MULTIBOOT		"/platform/i86pc/multiboot"
 #define	GRUBSIGN_DIR		"/boot/grub/bootsign"
@@ -230,12 +235,14 @@ static int bam_purge = 0;
 static char *bam_subcmd;
 static char *bam_opt;
 static char **bam_argv;
+static char *bam_pool;
 static int bam_argc;
 static int bam_check;
 static int bam_saved_check;
 static int bam_smf_check;
 static int bam_lock_fd = -1;
 static int bam_zfs;
+static int bam_mbr;
 static char rootbuf[PATH_MAX] = "/";
 static int bam_update_all;
 static int bam_alt_platform;
@@ -246,6 +253,7 @@ static char *bam_home_env = NULL;
 static void parse_args_internal(int, char *[]);
 static void parse_args(int, char *argv[]);
 static error_t bam_menu(char *, char *, int, char *[]);
+static error_t bam_install(char *, char *);
 static error_t bam_archive(char *, char *);
 
 static void bam_lock(void);
@@ -266,6 +274,7 @@ static error_t delete_all_entries(menu_t *, char *, char *);
 static error_t update_entry(menu_t *mp, char *menu_root, char *opt);
 static error_t update_temp(menu_t *mp, char *dummy, char *opt);
 
+static error_t install_bootloader(void);
 static error_t update_archive(char *, char *);
 static error_t list_archive(char *, char *);
 static error_t update_all(char *, char *);
@@ -289,7 +298,7 @@ static int umount_top_dataset(char *pool, zfs_mnted_t mnted, char *mntpt);
 static int ufs_add_to_sign_list(char *sign);
 static error_t synchronize_BE_menu(void);
 
-#if !defined(_OPB)
+#if !defined(_OBP)
 static void ucode_install();
 #endif
 
@@ -312,6 +321,12 @@ static subcmd_defn_t arch_subcmds[] = {
 	"update",		OPT_ABSENT,	update_archive, 0, /* PUB */
 	"update_all",		OPT_ABSENT,	update_all, 0,	/* PVT */
 	"list",			OPT_OPTIONAL,	list_archive, 1, /* PUB */
+	NULL,			0,		NULL, 0	/* must be last */
+};
+
+/* Install related sub commands */
+static subcmd_defn_t inst_subcmds[] = {
+	"install_bootloader",	OPT_ABSENT,	install_bootloader, 0, /* PUB */
 	NULL,			0,		NULL, 0	/* must be last */
 };
 
@@ -440,10 +455,17 @@ usage(void)
 
 	/* archive usage */
 	(void) fprintf(stderr,
-	    "\t%s update-archive [-vn] [-R altroot [-p platform>]]\n", prog);
+	    "\t%s update-archive [-vn] [-R altroot [-p platform]]\n", prog);
 	(void) fprintf(stderr,
-	    "\t%s list-archive [-R altroot [-p platform>]]\n", prog);
-#if !defined(_OPB)
+	    "\t%s list-archive [-R altroot [-p platform]]\n", prog);
+#if defined(_OBP)
+	(void) fprintf(stderr,
+	    "\t%s install-bootloader [-fv] [-R altroot] [-P pool]\n", prog);
+#else
+	(void) fprintf(stderr,
+	    "\t%s install-bootloader [-Mfv] [-R altroot] [-P pool]\n", prog);
+#endif
+#if !defined(_OBP)
 	/* x86 only */
 	(void) fprintf(stderr, "\t%s set-menu [-R altroot] key=value\n", prog);
 	(void) fprintf(stderr, "\t%s list-menu [-R altroot]\n", prog);
@@ -537,6 +559,9 @@ main(int argc, char *argv[])
 		case BAM_ARCHIVE:
 			ret = bam_archive(bam_subcmd, bam_opt);
 			break;
+		case BAM_INSTALL:
+			ret = bam_install(bam_subcmd, bam_opt);
+			break;
 		default:
 			usage();
 			bam_exit(1);
@@ -556,6 +581,7 @@ main(int argc, char *argv[])
  *	set-menu	-- -m set_option
  *	list-menu	-- -m list_entry
  *	update-menu	-- -m update_entry
+ *	install-bootloader	-- -i install_bootloader
  */
 static struct cmd_map {
 	char *bam_cmdname;
@@ -567,6 +593,7 @@ static struct cmd_map {
 	{ "set-menu",		BAM_MENU,	"set_option"},
 	{ "list-menu",		BAM_MENU,	"list_entry"},
 	{ "update-menu",	BAM_MENU,	"update_entry"},
+	{ "install-bootloader",	BAM_INSTALL,	"install_bootloader"},
 	{ NULL,			0,		NULL}
 };
 
@@ -608,6 +635,7 @@ parse_args(int argc, char *argv[])
  *	-a update			-- update-archive
  *	-a list				-- list-archive
  *	-a update-all			-- (reboot to sync all mnted OS archive)
+ *	-i install_bootloader		-- install-bootloader
  *	-m update_entry			-- update-menu
  *	-m list_entry			-- list-menu
  *	-m update_temp			-- (reboot -- [boot-args])
@@ -627,12 +655,17 @@ parse_args_internal(int argc, char *argv[])
 	int c, error;
 	extern char *optarg;
 	extern int optind, opterr;
+#if defined(_OBP)
+	const char *optstring = "a:d:fi:m:no:veFCR:p:P:XZ";
+#else
+	const char *optstring = "a:d:fi:m:no:veFCMR:p:P:XZ";
+#endif
 
 	/* Suppress error message from getopt */
 	opterr = 0;
 
 	error = 0;
-	while ((c = getopt(argc, argv, "a:d:fm:no:veFCR:p:XZ")) != -1) {
+	while ((c = getopt(argc, argv, optstring)) != -1) {
 		switch (c) {
 		case 'a':
 			if (bam_cmd) {
@@ -655,6 +688,14 @@ parse_args_internal(int argc, char *argv[])
 		case 'F':
 			bam_purge = 1;
 			break;
+		case 'i':
+			if (bam_cmd) {
+				error = 1;
+				bam_error(MULT_CMDS, c);
+			}
+			bam_cmd = BAM_INSTALL;
+			bam_subcmd = optarg;
+			break;
 		case 'm':
 			if (bam_cmd) {
 				error = 1;
@@ -663,6 +704,11 @@ parse_args_internal(int argc, char *argv[])
 			bam_cmd = BAM_MENU;
 			bam_subcmd = optarg;
 			break;
+#if !defined(_OBP)
+		case 'M':
+			bam_mbr = 1;
+			break;
+#endif
 		case 'n':
 			bam_check = 1;
 			/*
@@ -689,6 +735,13 @@ parse_args_internal(int argc, char *argv[])
 			break;
 		case 'C':
 			bam_smf_check = 1;
+			break;
+		case 'P':
+			if (bam_pool != NULL) {
+				error = 1;
+				bam_error(DUP_OPT, c);
+			}
+			bam_pool = optarg;
 			break;
 		case 'R':
 			if (bam_root) {
@@ -766,6 +819,14 @@ parse_args_internal(int argc, char *argv[])
 	} else if (optind < argc) {
 		bam_argv = &argv[optind];
 		bam_argc = argc - optind;
+	}
+
+	/*
+	 * mbr and pool are options for install_bootloader
+	 */
+	if (bam_cmd != BAM_INSTALL && (bam_mbr || bam_pool != NULL)) {
+		usage();
+		bam_exit(0);
 	}
 
 	/*
@@ -975,6 +1036,241 @@ list_setting(menu_t *mp, char *which, char *setting)
 	}
 
 	return (BAM_SUCCESS);
+}
+
+static error_t
+install_bootloader(void)
+{
+	nvlist_t	*nvl;
+	uint16_t	flags = 0;
+	int		found = 0;
+	struct extmnttab mnt;
+	struct stat	statbuf = {0};
+	be_node_list_t	*be_nodes, *node;
+	FILE		*fp;
+	char		*root_ds = NULL;
+	int		ret;
+
+	if (nvlist_alloc(&nvl, NV_UNIQUE_NAME, 0) != 0) {
+		bam_error(_("out of memory\n"));
+		return (BAM_ERROR);
+	}
+
+	/*
+	 * if bam_alt_root is set, the stage files are used from alt root.
+	 * if pool is set, the target devices are pool devices, stage files
+	 * are read from pool bootfs unless alt root is set.
+	 *
+	 * use arguments as targets, stage files are from alt or current root
+	 * if no arguments and no pool, install on current boot pool.
+	 */
+
+	if (bam_alt_root) {
+		if (stat(bam_root, &statbuf) != 0) {
+			bam_error(STAT_FAIL, bam_root, strerror(errno));
+			ret = BAM_ERROR;
+			goto done;
+		}
+		if ((fp = fopen(MNTTAB, "r")) == NULL) {
+			bam_error(OPEN_FAIL, MNTTAB, strerror(errno));
+			ret = BAM_ERROR;
+			goto done;
+		}
+		resetmnttab(fp);
+		while (getextmntent(fp, &mnt, sizeof (mnt)) == 0) {
+			if (mnt.mnt_major == major(statbuf.st_dev) &&
+			    mnt.mnt_minor == minor(statbuf.st_dev)) {
+				found = 1;
+				root_ds = strdup(mnt.mnt_special);
+				break;
+			}
+		}
+		(void) fclose(fp);
+
+		if (found == 0) {
+			bam_error(NOT_IN_MNTTAB, bam_root);
+			ret = BAM_ERROR;
+			goto done;
+		}
+		if (root_ds == NULL) {
+			bam_error(_("out of memory\n"));
+			ret = BAM_ERROR;
+			goto done;
+		}
+
+		if (be_list(NULL, &be_nodes) != BE_SUCCESS) {
+			bam_error(_("No BE's found\n"));
+			ret = BAM_ERROR;
+			goto done;
+		}
+		for (node = be_nodes; node != NULL; node = node->be_next_node)
+			if (strcmp(root_ds, node->be_root_ds) == 0)
+				break;
+
+		if (node == NULL)
+			bam_error(_("BE (%s) does not exist\n"), root_ds);
+
+		free(root_ds);
+		root_ds = NULL;
+		if (node == NULL) {
+			be_free_list(be_nodes);
+			ret = BAM_ERROR;
+			goto done;
+		}
+		ret = nvlist_add_string(nvl, BE_ATTR_ORIG_BE_NAME,
+		    node->be_node_name);
+		ret |= nvlist_add_string(nvl, BE_ATTR_ORIG_BE_ROOT,
+		    node->be_root_ds);
+		be_free_list(be_nodes);
+		if (ret) {
+			ret = BAM_ERROR;
+			goto done;
+		}
+	}
+
+	if (bam_force)
+		flags |= BE_INSTALLBOOT_FLAG_FORCE;
+	if (bam_mbr)
+		flags |= BE_INSTALLBOOT_FLAG_MBR;
+	if (bam_verbose)
+		flags |= BE_INSTALLBOOT_FLAG_VERBOSE;
+
+	if (nvlist_add_uint16(nvl, BE_ATTR_INSTALL_FLAGS, flags) != 0) {
+		bam_error(_("out of memory\n"));
+		goto done;
+	}
+
+	/*
+	 * if altroot was set, we got be name and be root, only need
+	 * to set pool name as target.
+	 * if no altroot, need to find be name and root from pool.
+	 */
+	if (bam_pool != NULL) {
+		ret = nvlist_add_string(nvl, BE_ATTR_ORIG_BE_POOL, bam_pool);
+		if (ret) {
+			ret = BAM_ERROR;
+			goto done;
+		}
+		if (found) {
+			ret = be_installboot(nvl);
+			if (ret)
+				ret = BAM_ERROR;
+			goto done;
+		}
+	}
+
+	if (be_list(NULL, &be_nodes) != BE_SUCCESS) {
+		bam_error(_("No BE's found\n"));
+		ret = BAM_ERROR;
+		goto done;
+	}
+
+	if (bam_pool != NULL) {
+		/*
+		 * find active be_node in bam_pool
+		 */
+		for (node = be_nodes; node != NULL; node = node->be_next_node) {
+			if (strcmp(bam_pool, node->be_rpool) != 0)
+				continue;
+			if (node->be_active_on_boot)
+				break;
+		}
+		if (node == NULL) {
+			bam_error(_("No active BE in %s\n"), bam_pool);
+			be_free_list(be_nodes);
+			ret = BAM_ERROR;
+			goto done;
+		}
+		ret = nvlist_add_string(nvl, BE_ATTR_ORIG_BE_NAME,
+		    node->be_node_name);
+		ret |= nvlist_add_string(nvl, BE_ATTR_ORIG_BE_ROOT,
+		    node->be_root_ds);
+		be_free_list(be_nodes);
+		if (ret) {
+			ret = BAM_ERROR;
+			goto done;
+		}
+		ret = be_installboot(nvl);
+		if (ret)
+			ret = BAM_ERROR;
+		goto done;
+	}
+
+	/*
+	 * get dataset for "/" and fill up the args.
+	 */
+	if ((fp = fopen(MNTTAB, "r")) == NULL) {
+		bam_error(OPEN_FAIL, MNTTAB, strerror(errno));
+		ret = BAM_ERROR;
+		be_free_list(be_nodes);
+		goto done;
+	}
+	resetmnttab(fp);
+	found = 0;
+	while (getextmntent(fp, &mnt, sizeof (mnt)) == 0) {
+		if (strcmp(mnt.mnt_mountp, "/") == 0) {
+			found = 1;
+			root_ds = strdup(mnt.mnt_special);
+			break;
+		}
+	}
+	(void) fclose(fp);
+
+	if (found == 0) {
+		bam_error(NOT_IN_MNTTAB, "/");
+		ret = BAM_ERROR;
+		be_free_list(be_nodes);
+		goto done;
+	}
+	if (root_ds == NULL) {
+		bam_error(_("out of memory\n"));
+		ret = BAM_ERROR;
+		be_free_list(be_nodes);
+		goto done;
+	}
+
+	for (node = be_nodes; node != NULL; node = node->be_next_node) {
+		if (strcmp(root_ds, node->be_root_ds) == 0)
+			break;
+	}
+
+	if (node == NULL) {
+		bam_error(_("No such BE: %s\n"), root_ds);
+		free(root_ds);
+		be_free_list(be_nodes);
+		ret = BAM_ERROR;
+		goto done;
+	}
+	free(root_ds);
+
+	ret = nvlist_add_string(nvl, BE_ATTR_ORIG_BE_NAME, node->be_node_name);
+	ret |= nvlist_add_string(nvl, BE_ATTR_ORIG_BE_ROOT, node->be_root_ds);
+	ret |= nvlist_add_string(nvl, BE_ATTR_ORIG_BE_POOL, node->be_rpool);
+	be_free_list(be_nodes);
+
+	if (ret)
+		ret = BAM_ERROR;
+	else
+		ret = be_installboot(nvl) ? BAM_ERROR : 0;
+done:
+	nvlist_free(nvl);
+
+	return (ret);
+}
+
+static error_t
+bam_install(char *subcmd, char *opt)
+{
+	error_t (*f)(void);
+
+	/*
+	 * Check arguments
+	 */
+	if (check_subcmd_and_options(subcmd, opt, inst_subcmds, &f) ==
+	    BAM_ERROR)
+		return (BAM_ERROR);
+
+	return (f());
 }
 
 static error_t
@@ -1270,7 +1566,7 @@ bam_archive(
 	if (strcmp(subcmd, "update_all") == 0)
 		bam_update_all = 1;
 
-#if !defined(_OPB)
+#if !defined(_OBP)
 	ucode_install(bam_root);
 #endif
 
@@ -2266,7 +2562,7 @@ is_valid_archive(char *root, int what)
 	if (stat(timestamp_path, &timestamp) != 0 ||
 	    sb.st_mtime > timestamp.st_mtime) {
 		if (bam_verbose && !bam_check)
-			bam_print(UPDATE_CACHE_OLD, timestamp);
+			bam_print(UPDATE_CACHE_OLD);
 		/*
 		 * Don't generate a false positive for the boot-archive service
 		 * but trigger an update of the archive cache in
@@ -2685,7 +2981,7 @@ update_timestamp(char *root)
 	 */
 	if (creat(timestamp_path, FILE_STAT_MODE) < 0) {
 		bam_error(OPEN_FAIL, timestamp_path, strerror(errno));
-		bam_error(TIMESTAMP_FAIL, rootbuf);
+		bam_error(TIMESTAMP_FAIL);
 	}
 }
 
@@ -3466,7 +3762,8 @@ is_ramdisk(char *root)
 		return (0);
 	}
 
-	if (strstr(mnt.mnt_special, RAMDISK_SPECIAL) != NULL) {
+	if (strncmp(mnt.mnt_special, RAMDISK_SPECIAL,
+	    strlen(RAMDISK_SPECIAL)) == 0) {
 		if (bam_verbose)
 			bam_error(IS_RAMDISK, bam_root);
 		(void) fclose(fp);
@@ -4915,14 +5212,14 @@ create_diskmap(char *osroot)
 static int
 get_partition(char *device)
 {
-	int i, fd, is_pcfs, partno = -1;
+	int i, fd, is_pcfs, partno = PARTNO_NOTFOUND;
 	struct mboot *mboot;
 	char boot_sect[SECTOR_SIZE];
 	char *wholedisk, *slice;
 #ifdef i386
 	ext_part_t *epp;
 	uint32_t secnum, numsec;
-	int rval, pno, ext_partno = -1;
+	int rval, pno, ext_partno = PARTNO_NOTFOUND;
 #endif
 
 	/* form whole disk (p0) */
@@ -4978,6 +5275,11 @@ get_partition(char *device)
 				break;
 			}
 		} else {	/* look for solaris partition, old and new */
+			if (part->systid == EFI_PMBR) {
+				partno = PARTNO_EFI;
+				break;
+			}
+
 #ifdef i386
 			if ((part->systid == SUNIXOS &&
 			    (fdisk_is_linux_swap(epp, part->relsect,
@@ -4998,7 +5300,7 @@ get_partition(char *device)
 	}
 #ifdef i386
 	/* If no primary solaris partition, check extended partition */
-	if ((partno == -1) && (ext_partno != -1)) {
+	if ((partno == PARTNO_NOTFOUND) && (ext_partno != PARTNO_NOTFOUND)) {
 		rval = fdisk_get_solaris_part(epp, &pno, &secnum, &numsec);
 		if (rval == FDISK_SUCCESS) {
 			partno = pno - 1;
@@ -5071,13 +5373,18 @@ get_grubroot(char *osroot, char *osdev, char *menu_root)
 	}
 
 	fdiskpart = get_partition(osdev);
-	INJECT_ERROR1("GRUBROOT_FDISK_FAIL", fdiskpart = -1);
-	if (fdiskpart == -1) {
+	INJECT_ERROR1("GRUBROOT_FDISK_FAIL", fdiskpart = PARTNO_NOTFOUND);
+	if (fdiskpart == PARTNO_NOTFOUND) {
 		bam_error(FDISKPART_FAIL, osdev);
 		return (NULL);
 	}
 
 	grubroot = s_calloc(1, 10);
+	if (fdiskpart == PARTNO_EFI) {
+		fdiskpart = atoi(&slice[1]);
+		slice = NULL;
+	}
+
 	if (slice) {
 		(void) snprintf(grubroot, 10, "(hd%s,%d,%c)",
 		    grubhd, fdiskpart, slice[1] + 'a' - '0');
@@ -7102,14 +7409,19 @@ get_grubsign(char *osroot, char *osdev)
 		bam_print(GRUBSIGN_FOUND_OR_CREATED, sign, osdev);
 
 	fdiskpart = get_partition(osdev);
-	INJECT_ERROR1("GET_GRUBSIGN_FDISK", fdiskpart = -1);
-	if (fdiskpart == -1) {
+	INJECT_ERROR1("GET_GRUBSIGN_FDISK", fdiskpart = PARTNO_NOTFOUND);
+	if (fdiskpart == PARTNO_NOTFOUND) {
 		bam_error(FDISKPART_FAIL, osdev);
 		free(sign);
 		return (NULL);
 	}
 
 	slice = strrchr(osdev, 's');
+
+	if (fdiskpart == PARTNO_EFI) {
+		fdiskpart = atoi(&slice[1]);
+		slice = NULL;
+	}
 
 	grubsign = s_calloc(1, MAXNAMELEN + 10);
 	if (slice) {
@@ -9625,7 +9937,7 @@ append_to_flist(filelist_t *flistp, char *s)
 	flistp->tail = lp;
 }
 
-#if !defined(_OPB)
+#if !defined(_OBP)
 
 UCODE_VENDORS;
 

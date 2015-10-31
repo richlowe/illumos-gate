@@ -21,7 +21,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
- * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright (c) 2012, 2014 by Delphix. All rights reserved.
  * Copyright (c) 2012, Joyent, Inc. All rights reserved.
  */
 
@@ -116,8 +116,18 @@ extern int aok;
 
 /*
  * DTrace SDT probes have different signatures in userland than they do in
- * kernel.  If they're being used in kernel code, re-define them out of
+ * the kernel.  If they're being used in kernel code, re-define them out of
  * existence for their counterparts in libzpool.
+ *
+ * Here's an example of how to use the set-error probes in userland:
+ * zfs$target:::set-error /arg0 == EBUSY/ {stack();}
+ *
+ * Here's an example of how to use DTRACE_PROBE probes in userland:
+ * If there is a probe declared as follows:
+ * DTRACE_PROBE2(zfs__probe_name, uint64_t, blkid, dnode_t *, dn);
+ * Then you can use it as follows:
+ * zfs$target:::probe2 /copyinstr(arg0) == "zfs__probe_name"/
+ *     {printf("%u %p\n", arg1, arg2);}
  */
 
 #ifdef DTRACE_PROBE
@@ -215,11 +225,13 @@ extern int _mutex_destroy(mutex_t *mp);
 
 #define	mutex_init(mp, b, c, d)		zmutex_init((kmutex_t *)(mp))
 #define	mutex_destroy(mp)		zmutex_destroy((kmutex_t *)(mp))
+#define	mutex_enter(mp)			zmutex_enter(mp)
+#define	mutex_exit(mp)			zmutex_exit(mp)
 
 extern void zmutex_init(kmutex_t *mp);
 extern void zmutex_destroy(kmutex_t *mp);
-extern void mutex_enter(kmutex_t *mp);
-extern void mutex_exit(kmutex_t *mp);
+extern void zmutex_enter(kmutex_t *mp);
+extern void zmutex_exit(kmutex_t *mp);
 extern int mutex_tryenter(kmutex_t *mp);
 extern void *mutex_owner(kmutex_t *mp);
 
@@ -389,8 +401,10 @@ typedef struct vnode {
 	uint64_t	v_size;
 	int		v_fd;
 	char		*v_path;
+	int		v_dump_fd;
 } vnode_t;
 
+extern char *vn_dumpdir;
 #define	AV_SCANSTAMP_SZ	32		/* length of anti-virus scanstamp */
 
 typedef struct xoptattr {
@@ -503,6 +517,7 @@ extern void delay(clock_t ticks);
 	} while (0);
 
 #define	max_ncpus	64
+#define	boot_ncpus	(sysconf(_SC_NPROCESSORS_ONLN))
 
 #define	minclsyspri	60
 #define	maxclsyspri	99
@@ -516,7 +531,7 @@ extern void delay(clock_t ticks);
 
 extern uint64_t physmem;
 
-extern int highbit(ulong_t i);
+extern int highbit64(uint64_t i);
 extern int random_get_bytes(uint8_t *ptr, size_t len);
 extern int random_get_pseudo_bytes(uint8_t *ptr, size_t len);
 

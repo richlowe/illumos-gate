@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, Joyent, Inc. All rights reserved.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -83,6 +84,7 @@
 #include <sys/rctl_impl.h>
 #include <sys/fork.h>
 #include <sys/task.h>
+#include <sys/random.h>
 #include "ramdata.h"
 #include "print.h"
 #include "proto.h"
@@ -1991,6 +1993,9 @@ tcp_optname(private_t *pri, long val)
 	case TCP_RTO_MIN:		return ("TCP_RTO_MIN");
 	case TCP_RTO_MAX:		return ("TCP_RTO_MAX");
 	case TCP_LINGER2:		return ("TCP_LINGER2");
+	case TCP_KEEPIDLE:		return ("TCP_KEEPIDLE");
+	case TCP_KEEPCNT:		return ("TCP_KEEPCNT");
+	case TCP_KEEPINTVL:		return ("TCP_KEEPINTVL");
 
 	default:			(void) snprintf(pri->code_buf,
 					    sizeof (pri->code_buf),
@@ -2792,6 +2797,27 @@ prt_snf(private_t *pri, int raw, long val)
 		prt_hex(pri, 0, val);
 }
 
+void
+prt_grf(private_t *pri, int raw, long val)
+{
+	int first = 1;
+
+	if (raw != 0 || val == 0 ||
+	    (val & ~(GRND_NONBLOCK | GRND_RANDOM)) != 0) {
+		outstring(pri, "0");
+		return;
+	}
+
+	if (val & GRND_NONBLOCK) {
+		outstring(pri, "|GRND_NONBLOCK" + first);
+		first = 0;
+	}
+	if (val & GRND_RANDOM) {
+		outstring(pri, "|GRND_RANDOM" + first);
+		first = 0;
+	}
+}
+
 /*
  * Array of pointers to print functions, one for each format.
  */
@@ -2897,6 +2923,7 @@ void (* const Print[])() = {
 	prt_skc,	/* SKC -- print sockconfig() subcode */
 	prt_acf,	/* ACF -- print accept4 flags */
 	prt_pfd,	/* PFD -- print pipe fds */
+	prt_grf,	/* GRF -- print getrandom flags */
 	prt_psfcmd,	/* PSFCMD -- print psecflags(2) command */
 	prt_psflags,	/* PSFLG -- print psecflags(2) flags */
 	prt_dec,	/* HID -- hidden argument, make this the last one */

@@ -20,11 +20,13 @@
 #
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
 #
 
 PROG =		idmapd
 MANIFEST =	idmap.xml
 SERVEROBJS =				\
+	adspriv_impl.o			\
 	directory_provider_builtin.o	\
 	directory_provider_nsswitch.o	\
 	directory_provider_ad.o		\
@@ -35,13 +37,18 @@ SERVEROBJS =				\
 	idmapd.o			\
 	init.o				\
 	idmap_lsa.o			\
+	krb5_lookup.o			\
 	nldaputils.o			\
-	rpc_svc.o			\
 	server.o			\
 	wksids.o
 
+GENOBJS =				\
+	adspriv_srv.o			\
+	rpc_svc.o
+
 SERVERSRCS =	$(SERVEROBJS:%.o=%.c)
-OBJS =		$(SERVEROBJS)
+GENSRCS = 	$(GENOBJS:%.o=%.c)
+OBJS =		$(SERVEROBJS) $(GENOBJS)
 SRCS =		$(SERVERSRCS)
 POFILES =	$(OBJS:%.o=%.po)
 
@@ -49,9 +56,6 @@ all :=		TARGET = all
 install :=	TARGET = install
 clean :=	TARGET = clean
 clobber :=	TARGET = clobber
-
-LIBSQLITE =	$(ROOT)/usr/lib/libsqlite.o
-SQLITELINT =	$(ROOT)/usr/lib/llib-lsqlite.ln
 
 include ../../Makefile.cmd
 
@@ -72,17 +76,28 @@ RPC_MSGOUT_OPT = -DRPC_MSGOUT=idmap_rpc_msgout
 
 ROOTMANIFESTDIR = $(ROOTSVCSYSTEM)
 $(ROOTMANIFEST) := FILEMODE= 444
+RPCSVC= ../../../uts/common/rpcsvc
+ADS_CMN=../../../lib/libads/common
 
-INCS += -I. -I../../../lib/libidmap/common\
-	 -I../../../lib/libsldap/common\
+INCS += -I. -I../../../lib/libidmap/common \
+	 -I../../../lib/libsldap/common \
 	 -I../../../lib/libadutils/common \
+	 -I $(ADS_CMN) \
 	 -I../../../lib/smbsrv/libsmb/common
+
+# Should not have to do this, but the Kerberos includes are a mess.
+INCS += -I $(ROOT)/usr/include/kerberosv5
 
 $(OBJS) := CPPFLAGS += $(INCS) -D_REENTRANT
 $(POFILE) := CPPFLAGS += $(INCS)
 
+LINTFLAGS += -xerroff=E_NAME_DEF_NOT_USED2
+LINTFLAGS += -xerroff=E_NAME_USED_NOT_DEF2
+
 CFLAGS += $(CCVERBOSE)
-LDLIBS += -lsecdb \
+LDLIBS += \
+	-lsqlite-sys \
+	-lsecdb \
 	-lsocket \
 	-lnsl \
 	-lidmap \
@@ -91,6 +106,7 @@ LDLIBS += -lsecdb \
 	-lldap \
 	-luuid \
 	-ladutils \
+	-lads \
 	-lumem \
 	-lnvpair \
 	-luutil \
@@ -107,7 +123,6 @@ DIRMODE = 0755
 FILEMODE = 0555
 
 lint_SRCS := CPPFLAGS += $(INCS) -D_REENTRANT $(RPC_MSGOUT_OPT)
-lint := LDLIBS += $(SQLITELINT)
 
 .KEEP_STATE:
 
@@ -116,7 +131,7 @@ lint := LDLIBS += $(SQLITELINT)
 all: $(PROG)
 
 $(PROG): $(OBJS) $$(MAPFILES)
-	$(LINK.c) -o $@ $(OBJS) $(LIBSQLITE) $(LDLIBS)
+	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 $(POFILE): $(POFILES)
@@ -128,15 +143,22 @@ install: all $(ROOTLIBPROG) $(ROOTMANIFEST)
 check: $(CHKMANIFEST)
 
 clean:
-	$(RM) $(OBJS)
-
-clobber:
+	$(RM) $(OBJS) $(GENSRCS)
 
 lint:   lint_SRCS
 
 lint_SRCS:
 
+RPCGENFLAGS = -CMN
+
+adspriv_srv.o : adspriv_srv.c
+
+adspriv_srv.c: 
+	$(RPCGEN) $(RPCGENFLAGS) -m $(ADS_CMN)/ads_priv.x > $@
+
+rpc_svc.o : rpc_svc.c
+
+rpc_svc.c : $(RPCSVC)/idmap_prot.x
+	$(RPCGEN) $(RPCGENFLAGS) -m $(RPCSVC)/idmap_prot.x > $@
+
 include ../../Makefile.targ
-
-FRC:
-

@@ -237,7 +237,9 @@ lz4_decompress(void *s_start, void *d_start, size_t s_len, size_t d_len, int n)
 #define	LZ4_FORCE_UNALIGNED_ACCESS 1
 #endif
 
-/* #define	LZ4_FORCE_SW_BITCOUNT */
+#ifdef __sparc
+#define	LZ4_FORCE_SW_BITCOUNT
+#endif
 
 /*
  * Compiler Options
@@ -958,6 +960,9 @@ real_LZ4_uncompress(const char *source, char *dest, int osize)
 		}
 		/* copy literals */
 		cpy = op + length;
+		/* CORNER-CASE: cpy might overflow. */
+		if (cpy < op)
+			goto _output_error;	/* cpy was overflowed, bail! */
 		if unlikely(cpy > oend - COPYLENGTH) {
 			if (cpy != oend)
 				/* Error: we must necessarily stand at EOF */
@@ -1073,6 +1078,9 @@ LZ4_uncompress_unknownOutputSize(const char *source, char *dest, int isize,
 		}
 		/* copy literals */
 		cpy = op + length;
+		/* CORNER-CASE: cpy might overflow. */
+		if (cpy < op)
+			goto _output_error;	/* cpy was overflowed, bail! */
 		if ((cpy > oend - COPYLENGTH) ||
 		    (ip + length > iend - COPYLENGTH)) {
 			if (cpy > oend)

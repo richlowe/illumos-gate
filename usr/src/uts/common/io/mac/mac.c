@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2015 Joyent, Inc.
  */
 
 /*
@@ -263,6 +264,13 @@
  * subflows before attempting a link property change.
  * Some of the above rules can be overridden by specifying additional command
  * line options while creating or modifying link or subflow properties.
+ *
+ * Datapath
+ * --------
+ *
+ * For information on the datapath, the world of soft rings, hardware rings, how
+ * it is structured, and the path of an mblk_t between a driver and a mac
+ * client, see mac_sched.c.
  */
 
 #include <sys/types.h>
@@ -1676,6 +1684,37 @@ mac_hwring_send_priv(mac_client_handle_t mch, mac_ring_handle_t rh, mblk_t *mp)
 	return (mp);
 }
 
+/*
+ * Private function that is only used by aggr to update the default transmission
+ * ring. Because aggr exposes a pseudo Tx ring even for ports that may
+ * temporarily be down, it may need to update the default ring that is used by
+ * MAC such that it refers to a link that can actively be used to send traffic.
+ * Note that this is different from the case where the port has been removed
+ * from the group. In those cases, all of the rings will be torn down because
+ * the ring will no longer exist. It's important to give aggr a case where the
+ * rings can still exist such that it may be able to continue to send LACP PDUs
+ * to potentially restore the link.
+ *
+ * Finally, we explicitly don't do anything if the ring hasn't been enabled yet.
+ * This is to help out aggr which doesn't really know the internal state that
+ * MAC does about the rings and can't know that it's not quite ready for use
+ * yet.
+ */
+void
+mac_hwring_set_default(mac_handle_t mh, mac_ring_handle_t rh)
+{
+	mac_impl_t *mip = (mac_impl_t *)mh;
+	mac_ring_t *ring = (mac_ring_t *)rh;
+
+	ASSERT(MAC_PERIM_HELD(mh));
+	VERIFY(mip->mi_state_flags & MIS_IS_AGGR);
+
+	if (ring->mr_state != MR_INUSE)
+		return;
+
+	mip->mi_default_tx_ring = rh;
+}
+
 int
 mac_hwgroup_addmac(mac_group_handle_t gh, const uint8_t *addr)
 {
@@ -2255,7 +2294,7 @@ mac_minor_hold(boolean_t sleep)
 	/*
 	 * Grab a value from the arena.
 	 */
-	atomic_add_32(&minor_count, 1);
+	atomic_inc_32(&minor_count);
 
 	if (sleep)
 		minor = (uint_t)id_alloc(minor_ids);
@@ -2263,7 +2302,7 @@ mac_minor_hold(boolean_t sleep)
 		minor = (uint_t)id_alloc_nosleep(minor_ids);
 
 	if (minor == 0) {
-		atomic_add_32(&minor_count, -1);
+		atomic_dec_32(&minor_count);
 		return (0);
 	}
 
@@ -2280,7 +2319,7 @@ mac_minor_rele(minor_t minor)
 	 * Return the value to the arena.
 	 */
 	id_free(minor_ids, minor);
-	atomic_add_32(&minor_count, -1);
+	atomic_dec_32(&minor_count);
 }
 
 uint32_t
@@ -2682,6 +2721,110 @@ mac_margin_update(mac_handle_t mh, uint32_t margin)
 		i_mac_notify(mip, MAC_NOTE_MARGIN);
 
 	return (margin_needed <= margin);
+}
+
+/*
+ * MAC clients use this interface to request that a MAC device not change its
+ * MTU below the specified amount. At this time, that amount must be within the
+ * range of the device's current minimum and the device's current maximum. eg. a
+ * client cannot request a 3000 byte MTU when the device's MTU is currently
+ * 2000.
+ *
+ * If "current" is set to B_TRUE, then the request is to simply to reserve the
+ * current underlying mac's maximum for this mac client and return it in mtup.
+ */
+int
+mac_mtu_add(mac_handle_t mh, uint32_t *mtup, boolean_t current)
+{
+	mac_impl_t		*mip = (mac_impl_t *)mh;
+	mac_mtu_req_t		*prev, *cur;
+	mac_propval_range_t	mpr;
+	int			err;
+
+	i_mac_perim_enter(mip);
+	rw_enter(&mip->mi_rw_lock, RW_WRITER);
+
+	if (current == B_TRUE)
+		*mtup = mip->mi_sdu_max;
+	mpr.mpr_count = 1;
+	err = mac_prop_info(mh, MAC_PROP_MTU, "mtu", NULL, 0, &mpr, NULL);
+	if (err != 0) {
+		rw_exit(&mip->mi_rw_lock);
+		i_mac_perim_exit(mip);
+		return (err);
+	}
+
+	if (*mtup > mip->mi_sdu_max ||
+	    *mtup < mpr.mpr_range_uint32[0].mpur_min) {
+		rw_exit(&mip->mi_rw_lock);
+		i_mac_perim_exit(mip);
+		return (ENOTSUP);
+	}
+
+	prev = NULL;
+	for (cur = mip->mi_mtrp; cur != NULL; cur = cur->mtr_nextp) {
+		if (*mtup == cur->mtr_mtu) {
+			cur->mtr_ref++;
+			rw_exit(&mip->mi_rw_lock);
+			i_mac_perim_exit(mip);
+			return (0);
+		}
+
+		if (*mtup > cur->mtr_mtu)
+			break;
+
+		prev = cur;
+	}
+
+	cur = kmem_alloc(sizeof (mac_mtu_req_t), KM_SLEEP);
+	cur->mtr_mtu = *mtup;
+	cur->mtr_ref = 1;
+	if (prev != NULL) {
+		cur->mtr_nextp = prev->mtr_nextp;
+		prev->mtr_nextp = cur;
+	} else {
+		cur->mtr_nextp = mip->mi_mtrp;
+		mip->mi_mtrp = cur;
+	}
+
+	rw_exit(&mip->mi_rw_lock);
+	i_mac_perim_exit(mip);
+	return (0);
+}
+
+int
+mac_mtu_remove(mac_handle_t mh, uint32_t mtu)
+{
+	mac_impl_t *mip = (mac_impl_t *)mh;
+	mac_mtu_req_t *cur, *prev;
+
+	i_mac_perim_enter(mip);
+	rw_enter(&mip->mi_rw_lock, RW_WRITER);
+
+	prev = NULL;
+	for (cur = mip->mi_mtrp; cur != NULL; cur = cur->mtr_nextp) {
+		if (cur->mtr_mtu == mtu) {
+			ASSERT(cur->mtr_ref > 0);
+			cur->mtr_ref--;
+			if (cur->mtr_ref == 0) {
+				if (prev == NULL) {
+					mip->mi_mtrp = cur->mtr_nextp;
+				} else {
+					prev->mtr_nextp = cur->mtr_nextp;
+				}
+				kmem_free(cur, sizeof (mac_mtu_req_t));
+			}
+			rw_exit(&mip->mi_rw_lock);
+			i_mac_perim_exit(mip);
+			return (0);
+		}
+
+		prev = cur;
+	}
+
+	rw_exit(&mip->mi_rw_lock);
+	i_mac_perim_exit(mip);
+	return (ENOENT);
 }
 
 /*
@@ -3924,11 +4067,11 @@ mac_init_rings(mac_impl_t *mip, mac_ring_type_t rtype)
 		 * Driver must register group->mgi_addmac/remmac() for rx groups
 		 * to support multiple MAC addresses.
 		 */
-		if (rtype == MAC_RING_TYPE_RX) {
-			if ((group_info.mgi_addmac == NULL) ||
-			    (group_info.mgi_addmac == NULL)) {
-				goto bail;
-			}
+		if (rtype == MAC_RING_TYPE_RX &&
+		    ((group_info.mgi_addmac == NULL) ||
+		    (group_info.mgi_remmac == NULL))) {
+			err = EINVAL;
+			goto bail;
 		}
 
 		/* Cache driver-supplied information */

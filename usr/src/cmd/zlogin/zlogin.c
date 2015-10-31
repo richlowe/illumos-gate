@@ -22,6 +22,7 @@
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2013 DEY Storage Systems, Inc.
  * Copyright (c) 2014 Gary Mills
+ * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
  */
 
 /*
@@ -103,6 +104,7 @@ static priv_set_t *dropprivs;
 
 static int nocmdchar = 0;
 static int failsafe = 0;
+static int disconnect = 0;
 static char cmdchar = '~';
 static int quiet = 0;
 
@@ -151,7 +153,7 @@ static boolean_t forced_login = B_FALSE;
 static void
 usage(void)
 {
-	(void) fprintf(stderr, gettext("usage: %s [ -nQCES ] [ -e cmdchar ] "
+	(void) fprintf(stderr, gettext("usage: %s [ -dnQCES ] [ -e cmdchar ] "
 	    "[-l user] zonename [command [args ...] ]\n"), pname);
 	exit(2);
 }
@@ -277,8 +279,8 @@ get_console_master(const char *zname)
 	}
 	masterfd = sockfd;
 
-	msglen = snprintf(clientid, sizeof (clientid), "IDENT %lu %s\n",
-	    getpid(), setlocale(LC_MESSAGES, NULL));
+	msglen = snprintf(clientid, sizeof (clientid), "IDENT %lu %s %d\n",
+	    getpid(), setlocale(LC_MESSAGES, NULL), disconnect);
 
 	if (msglen >= sizeof (clientid) || msglen < 0) {
 		zerror("protocol error");
@@ -554,9 +556,7 @@ static void
 sig_forward(int s)
 {
 	if (child_pid != -1) {
-		pid_t pgid = getpgid(child_pid);
-		if (pgid != -1)
-			(void) sigsend(P_PGID, pgid, s);
+		(void) sigsend(P_PGID, child_pid, s);
 	}
 }
 
@@ -672,7 +672,7 @@ retry:
 
 				/* sleep for 10 milliseconds */
 				rqtp.tv_sec = 0;
-				rqtp.tv_nsec = 10 * (NANOSEC / MILLISEC);
+				rqtp.tv_nsec = MSEC2NSEC(10);
 				(void) nanosleep(&rqtp, NULL);
 				if (!dead)
 					goto retry;
@@ -1754,7 +1754,7 @@ main(int argc, char **argv)
 	(void) getpname(argv[0]);
 	username = get_username();
 
-	while ((arg = getopt(argc, argv, "nECR:Se:l:Q")) != EOF) {
+	while ((arg = getopt(argc, argv, "dnECR:Se:l:Q")) != EOF) {
 		switch (arg) {
 		case 'C':
 			console = 1;
@@ -1779,6 +1779,9 @@ main(int argc, char **argv)
 			break;
 		case 'S':
 			failsafe = 1;
+			break;
+		case 'd':
+			disconnect = 1;
 			break;
 		case 'e':
 			set_cmdchar(optarg);
@@ -1825,6 +1828,12 @@ main(int argc, char **argv)
 
 	if (failsafe != 0 && lflag != 0) {
 		zerror(gettext("-l may not be specified for failsafe login"));
+		usage();
+	}
+
+	if (!console && disconnect != 0) {
+		zerror(gettext(
+		    "-d may only be specified with console login"));
 		usage();
 	}
 

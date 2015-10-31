@@ -21,7 +21,7 @@
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Milan Jurik. All rights reserved.
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2015 Joyent, Inc.
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
@@ -123,13 +123,6 @@ int utimes(const char *path, const struct timeval timeval_ptr[]);
 
 #define	min(a, b)  ((a) < (b) ? (a) : (b))
 #define	max(a, b)  ((a) > (b) ? (a) : (b))
-
-/* -DDEBUG	ONLY for debugging */
-#ifdef	DEBUG
-#undef	DEBUG
-#define	DEBUG(a, b, c)\
-	(void) fprintf(stderr, "DEBUG - "), (void) fprintf(stderr, a, b, c)
-#endif
 
 #define	TBLOCK	512	/* tape block size--should be universal */
 
@@ -482,7 +475,7 @@ static int checkupdate(char *arg);
 static int checkw(char c, char *name);
 static int cmp(char *b, char *s, int n);
 static int defset(char *arch);
-static int endtape(void);
+static boolean_t endtape(void);
 static int is_in_table(file_list_t *table[], char *str);
 static int notsame(void);
 static int is_prefix(char *s1, char *s2);
@@ -558,6 +551,8 @@ static char *add_suffix();
 static void wait_pid(pid_t);
 static void verify_compress_opt(const char *t);
 static void detect_compress(void);
+static void dlog(const char *, ...);
+static boolean_t should_enable_debug(void);
 
 static	struct stat stbuf;
 
@@ -565,7 +560,7 @@ static	char	*myname;
 static	char	*xtract_chdir = NULL;
 static	int	checkflag = 0;
 static	int	Xflag, Fflag, iflag, hflag, Bflag, Iflag;
-static	int	rflag, xflag, vflag, tflag, mt, svmt, cflag, mflag, pflag;
+static	int	rflag, xflag, vflag, tflag, mt, cflag, mflag, pflag;
 static	int	uflag;
 static	int	errflag;
 static	int	oflag;
@@ -633,7 +628,7 @@ static	int	extno;		/* number of extent:  starts at 1 */
 static	int	extotal;	/* total extents in this file */
 static	off_t	extsize;	/* size of current extent during extraction */
 static	ushort_t	Oumask = 0;	/* old umask value */
-static 	int is_posix;	/* true if archive we're reading is POSIX-conformant */
+static 	boolean_t is_posix;	/* true if archive is POSIX-conformant */
 static	const	char	*magic_type = "ustar";
 static	size_t	xrec_size = 8 * PATH_MAX;	/* extended rec initial size */
 static	char	*xrec_ptr;
@@ -643,6 +638,10 @@ static	int	charset_type = 0;
 
 static	u_longlong_t	xhdr_flgs;	/* Bits set determine which items */
 					/*   need to be in extended header. */
+static	pid_t	comp_pid = 0;
+
+static boolean_t debug_output = B_FALSE;
+
 #define	_X_DEVMAJOR	0x1
 #define	_X_DEVMINOR	0x2
 #define	_X_GID		0x4
@@ -725,8 +724,6 @@ main(int argc, char *argv[])
 	char		*cp;
 	char		*tmpdirp;
 	pid_t		thispid;
-	pid_t		pid;
-	int		wstat;
 
 	(void) setlocale(LC_ALL, "");
 #if !defined(TEXT_DOMAIN)	/* Should be defined by cc -D */
@@ -735,6 +732,8 @@ main(int argc, char *argv[])
 	(void) textdomain(TEXT_DOMAIN);
 	if (argc < 2)
 		usage();
+
+	debug_output = should_enable_debug();
 
 	tfile = NULL;
 	if ((myname = strdup(argv[0])) == NULL) {
@@ -1114,10 +1113,8 @@ main(int argc, char *argv[])
 		if (Aflag && vflag)
 			(void) printf(
 			gettext("Suppressing absolute pathnames\n"));
-		if (cflag && compress_opt != NULL) {
-			pid = compress_file();
-			wait_pid(pid);
-		}
+		if (cflag && compress_opt != NULL)
+			comp_pid = compress_file();
 		dorep(argv);
 		if (rflag && !cflag && (compress_opt != NULL))
 			compress_back();
@@ -1168,10 +1165,8 @@ main(int argc, char *argv[])
 
 		if (strcmp(usefile, "-") != 0) {
 			check_compression();
-			if (compress_opt != NULL) {
-				pid = uncompress_file();
-				wait_pid(pid);
-			}
+			if (compress_opt != NULL)
+				comp_pid = uncompress_file();
 		}
 		if (xflag) {
 			if (xtract_chdir != NULL) {
@@ -1195,6 +1190,49 @@ main(int argc, char *argv[])
 
 	/* Not reached:  keep compiler quiet */
 	return (1);
+}
+
+static boolean_t
+should_enable_debug(void)
+{
+	const char *val;
+	const char *truth[] = {
+		"true",
+		"1",
+		"yes",
+		"y",
+		"please",
+		NULL
+	};
+	unsigned int i;
+
+	if ((val = getenv("DEBUG_TAR")) == NULL) {
+		return (B_FALSE);
+	}
+
+	for (i = 0; truth[i] != NULL; i++) {
+		if (strcmp(val, truth[i]) == 0) {
+			return (B_TRUE);
+		}
+	}
+
+	return (B_FALSE);
+}
+
+/*PRINTFLIKE1*/
+static void
+dlog(const char *format, ...)
+{
+	va_list ap;
+
+	if (!debug_output) {
+		return;
+	}
+
+	va_start(ap, format);
+	(void) fprintf(stderr, "tar: DEBUG: ");
+	(void) vfprintf(stderr, format, ap);
+	va_end(ap);
 }
 
 static void
@@ -1431,13 +1469,26 @@ dorep(char *argv[])
  *			1 if	 EOT, tape position unaffected
  */
 
-static int
+static boolean_t
 endtape(void)
 {
-	if (dblock.dbuf.name[0] == '\0') {	/* null header = EOT */
-		return (1);
-	} else
-		return (0);
+	if (dblock.dbuf.name[0] != '\0') {
+		/*
+		 * The name field is populated.
+		 */
+		return (B_FALSE);
+	}
+
+	if (is_posix && dblock.dbuf.prefix[0] != '\0') {
+		/*
+		 * This is a ustar/POSIX archive, and although the name
+		 * field is empty the prefix field is not.
+		 */
+		return (B_FALSE);
+	}
+
+	dlog("endtape(): found null header; EOT\n");
+	return (B_TRUE);
 }
 
 /*
@@ -1475,9 +1526,11 @@ top:
 	is_posix = (strcmp(dblock.dbuf.magic, magic_type) == 0);
 
 	sp->st_mode = Gen.g_mode;
-	if (is_posix && (sp->st_mode & S_IFMT) == 0)
+	if (is_posix && (sp->st_mode & S_IFMT) == 0) {
 		switch (dblock.dbuf.typeflag) {
-		case '0': case 0: case _XATTR_HDRTYPE:
+		case '0':
+		case 0:
+		case _XATTR_HDRTYPE:
 			sp->st_mode |= S_IFREG;
 			break;
 		case '1':	/* hard link */
@@ -1502,6 +1555,7 @@ top:
 				sp->st_mode |= S_IFREG;
 			break;
 		}
+	}
 
 	if ((dblock.dbuf.typeflag == 'X') || (dblock.dbuf.typeflag == 'L')) {
 		Xhdrflag = 1;	/* Currently processing extended header */
@@ -1609,7 +1663,7 @@ top:
  *	The tape directory entry must be in dblock.dbuf. This
  *	routine just eats the number of blocks computed from the
  *	directory size entry; the tape must be (logically) positioned
- *	right after thee directory info.
+ *	right after the directory info.
  */
 
 static void
@@ -1617,6 +1671,18 @@ passtape(void)
 {
 	blkcnt_t blocks;
 	char buf[TBLOCK];
+
+	/*
+	 * Print some debugging information about the directory entry
+	 * we are skipping over:
+	 */
+	dlog("passtape: typeflag \"%c\"\n", dblock.dbuf.typeflag);
+	if (dblock.dbuf.name[0] != '\0') {
+		dlog("passtape: name \"%s\"\n", dblock.dbuf.name);
+	}
+	if (is_posix && dblock.dbuf.prefix[0] != '\0') {
+		dlog("passtape: prefix \"%s\"\n", dblock.dbuf.prefix);
+	}
 
 	/*
 	 * Types link(1), sym-link(2), char special(3), blk special(4),
@@ -1628,6 +1694,8 @@ passtape(void)
 	    dblock.dbuf.typeflag == '5' || dblock.dbuf.typeflag == '6')
 		return;
 	blocks = TBLOCKS(stbuf.st_size);
+
+	dlog("passtape: block count %" FMT_blkcnt_t "\n", blocks);
 
 	/* if operating on disk, seek instead of reading */
 	if (NotTape)
@@ -2074,11 +2142,9 @@ putfile(char *longname, char *shortname, char *parent, attr_data_t *attrinfo,
 			(void) writetbuf((char *)&dblock, 1);
 		}
 		if (vflag) {
-#ifdef DEBUG
-			if (NotTape)
-				DEBUG("seek = %" FMT_blkcnt_t "K\t", K(tapepos),
-				    0);
-#endif
+			if (NotTape) {
+				dlog("seek = %" FMT_blkcnt_t "K\n", K(tapepos));
+			}
 			if (filetype == XATTR_FILE && Hiddendir) {
 				(void) fprintf(vfile,
 				    gettext("a %s attribute %s "),
@@ -2087,12 +2153,13 @@ putfile(char *longname, char *shortname, char *parent, attr_data_t *attrinfo,
 			} else {
 				(void) fprintf(vfile, "a %s/ ", longname);
 			}
-			if (NotTape)
+			if (NotTape) {
 				(void) fprintf(vfile, "%" FMT_blkcnt_t "K\n",
 				    K(blocks));
-			else
+			} else {
 				(void) fprintf(vfile, gettext("%" FMT_blkcnt_t
 				    " tape blocks\n"), blocks);
+			}
 		}
 
 		/*
@@ -2274,20 +2341,16 @@ putfile(char *longname, char *shortname, char *parent, attr_data_t *attrinfo,
 			}
 			newvol();	/* not worth it--just get new volume */
 		}
-#ifdef DEBUG
-		DEBUG("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
+		dlog("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
 		    blocks);
-#endif
 		if (build_dblock(name, tchar, '0', filetype,
 		    &stbuf, stbuf.st_dev, prefix) != 0) {
 			goto out;
 		}
 		if (vflag) {
-#ifdef DEBUG
-			if (NotTape)
-				DEBUG("seek = %" FMT_blkcnt_t "K\t", K(tapepos),
-				    0);
-#endif
+			if (NotTape) {
+				dlog("seek = %" FMT_blkcnt_t "K\n", K(tapepos));
+			}
 			(void) fprintf(vfile, "a %s%s%s%s ", longname,
 			    rw_sysattr ? gettext(" system") : "",
 			    (filetype == XATTR_FILE) ? gettext(
@@ -2371,23 +2434,19 @@ putfile(char *longname, char *shortname, char *parent, attr_data_t *attrinfo,
 			}
 			newvol();
 		}
-#ifdef DEBUG
-		DEBUG("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
+		dlog("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
 		    blocks);
-#endif
 		if (vflag) {
-#ifdef DEBUG
-			if (NotTape)
-				DEBUG("seek = %" FMT_blkcnt_t "K\t", K(tapepos),
-				    0);
-#endif
-			if (NotTape)
+			if (NotTape) {
+				dlog("seek = %" FMT_blkcnt_t "K\n", K(tapepos));
+
 				(void) fprintf(vfile, gettext("a %s %"
 				    FMT_blkcnt_t "K\n "), longname, K(blocks));
-			else
+			} else {
 				(void) fprintf(vfile, gettext(
 				    "a %s %" FMT_blkcnt_t " tape blocks\n"),
 				    longname, blocks);
+			}
 		}
 		if (build_dblock(name, tchar, '6', filetype,
 		    &stbuf, stbuf.st_dev, prefix) != 0)
@@ -2422,23 +2481,19 @@ putfile(char *longname, char *shortname, char *parent, attr_data_t *attrinfo,
 			}
 			newvol();
 		}
-#ifdef DEBUG
-		DEBUG("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
+		dlog("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
 		    blocks);
-#endif
 		if (vflag) {
-#ifdef DEBUG
-			if (NotTape)
-				DEBUG("seek = %" FMT_blkcnt_t "K\t", K(tapepos),
-				    0);
-#endif
-			if (NotTape)
+			if (NotTape) {
+				dlog("seek = %" FMT_blkcnt_t "K\t", K(tapepos));
+
 				(void) fprintf(vfile, gettext("a %s %"
 				    FMT_blkcnt_t "K\n"), longname, K(blocks));
-			else
+			} else {
 				(void) fprintf(vfile, gettext("a %s %"
 				    FMT_blkcnt_t " tape blocks\n"), longname,
 				    blocks);
+			}
 		}
 		if (build_dblock(name, tchar, '3',
 		    filetype, &stbuf, stbuf.st_rdev, prefix) != 0)
@@ -2473,16 +2528,13 @@ putfile(char *longname, char *shortname, char *parent, attr_data_t *attrinfo,
 			}
 			newvol();
 		}
-#ifdef DEBUG
-		DEBUG("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
+		dlog("putfile: %s wants %" FMT_blkcnt_t " blocks\n", longname,
 		    blocks);
-#endif
 		if (vflag) {
-#ifdef DEBUG
-			if (NotTape)
-				DEBUG("seek = %" FMT_blkcnt_t "K\t", K(tapepos),
-				    0);
-#endif
+			if (NotTape) {
+				dlog("seek = %" FMT_blkcnt_t "K\n", K(tapepos));
+			}
+
 			(void) fprintf(vfile, "a %s ", longname);
 			if (NotTape)
 				(void) fprintf(vfile, "%" FMT_blkcnt_t "K\n",
@@ -4794,9 +4846,7 @@ newvol(void)
 	int c;
 
 	if (dumping) {
-#ifdef DEBUG
-		DEBUG("newvol called with 'dumping' set\n", 0, 0);
-#endif
+		dlog("newvol called with 'dumping' set\n");
 		putempty((blkcnt_t)2);	/* 2 EOT marks */
 		closevol();
 		flushtape();
@@ -4829,10 +4879,8 @@ newvol(void)
 		    "tar: cannot reopen %s (%s)\n"),
 		    dumping ? gettext("output") : gettext("input"), usefile);
 
-#ifdef DEBUG
-		DEBUG("update=%d, usefile=%s ", update, usefile);
-		DEBUG("mt=%d, [%s]\n", mt, strerror(errno));
-#endif
+		dlog("update=%d, usefile=%s ", update, usefile);
+		dlog("mt=%d, [%s]\n", mt, strerror(errno));
 
 		done(2);
 	}
@@ -4876,6 +4924,13 @@ done(int n)
 			exit(2);
 		}
 	}
+	/*
+	 * If we have a compression child, we should have a child process that
+	 * we're waiting for to finish compressing or uncompressing the tar
+	 * stream.
+	 */
+	if (comp_pid != 0)
+		wait_pid(comp_pid);
 	exit(n);
 }
 
@@ -5010,9 +5065,7 @@ seekdisk(blkcnt_t blocks)
 #endif
 
 	tapepos += blocks;
-#ifdef DEBUG
-	DEBUG("seekdisk(%" FMT_blkcnt_t ") called\n", blocks, 0);
-#endif
+	dlog("seekdisk(%" FMT_blkcnt_t ") called\n", blocks);
 	if (recno + blocks <= nblock) {
 		recno += blocks;
 		return;
@@ -5023,10 +5076,8 @@ seekdisk(blkcnt_t blocks)
 	recno = nblock;	/* so readtape() reads next time through */
 #if SYS_BLOCK > TBLOCK
 	nxb = (blkcnt_t)(seekval % (off_t)(SYS_BLOCK / TBLOCK));
-#ifdef DEBUG
-	DEBUG("xtrablks=%" FMT_blkcnt_t " seekval=%" FMT_blkcnt_t " blks\n",
+	dlog("xtrablks=%" FMT_blkcnt_t " seekval=%" FMT_blkcnt_t " blks\n",
 	    nxb, seekval);
-#endif
 	if (nxb && nxb > seekval) /* don't seek--we'll read */
 		goto noseek;
 	seekval -=  nxb;	/* don't seek quite so far */
@@ -5040,9 +5091,7 @@ seekdisk(blkcnt_t blocks)
 	/* read those extra blocks */
 noseek:
 	if (nxb) {
-#ifdef DEBUG
-		DEBUG("reading extra blocks\n", 0, 0);
-#endif
+		dlog("reading extra blocks\n");
 		if (read(mt, tbuf, TBLOCK*nblock) < 0) {
 			(void) fprintf(stderr, gettext(
 			    "tar: read error while skipping file\n"));
@@ -5214,10 +5263,8 @@ static void
 backtape(void)
 {
 	struct mtop mtcmd;
-#ifdef DEBUG
-	DEBUG("backtape() called, recno=%" FMT_blkcnt_t " nblock=%d\n", recno,
+	dlog("backtape() called, recno=%" FMT_blkcnt_t " nblock=%d\n", recno,
 	    nblock);
-#endif
 	/*
 	 * Backup to the position in the archive where the record
 	 * currently sitting in the tbuf buffer is situated.
@@ -5275,9 +5322,7 @@ backtape(void)
 static void
 flushtape(void)
 {
-#ifdef DEBUG
-	DEBUG("flushtape() called, recno=%" FMT_blkcnt_t "\n", recno, 0);
-#endif
+	dlog("flushtape() called, recno=%" FMT_blkcnt_t "\n", recno);
 	if (recno > 0) {	/* anything buffered? */
 		if (NotTape) {
 #if SYS_BLOCK > TBLOCK
@@ -5290,20 +5335,16 @@ flushtape(void)
 			 * boundary.
 			 */
 			if ((i = recno % (SYS_BLOCK / TBLOCK)) != 0) {
-#ifdef DEBUG
-				DEBUG("flushtape() %d rounding blocks\n", i, 0);
-#endif
+				dlog("flushtape() %d rounding blocks\n", i);
 				recno += i;	/* round up to even SYS_BLOCK */
 			}
 #endif
 			if (recno > nblock)
 				recno = nblock;
 		}
-#ifdef DEBUG
-		DEBUG("writing out %" FMT_blkcnt_t " blocks of %" FMT_blkcnt_t
+		dlog("writing out %" FMT_blkcnt_t " blocks of %" FMT_blkcnt_t
 		    " bytes\n", (blkcnt_t)(NotTape ? recno : nblock),
 		    (blkcnt_t)(NotTape ? recno : nblock) * TBLOCK);
-#endif
 		if (write(mt, tbuf,
 		    (size_t)(NotTape ? recno : nblock) * TBLOCK) < 0) {
 			(void) fprintf(stderr, gettext(
@@ -5433,12 +5474,10 @@ defset(char *arch)
 	else
 		NotTape = (blocklim != 0);
 	(void) defopen(NULL);
-#ifdef DEBUG
-	DEBUG("defset: archive='%s'; usefile='%s'\n", arch, usefile);
-	DEBUG("defset: nblock='%d'; blocklim='%" FMT_blkcnt_t "'\n",
+	dlog("defset: archive='%s'; usefile='%s'\n", arch, usefile);
+	dlog("defset: nblock='%d'; blocklim='%" FMT_blkcnt_t "'\n",
 	    nblock, blocklim);
-	DEBUG("defset: not tape = %d\n", NotTape, 0);
-#endif
+	dlog("defset: not tape = %d\n", NotTape);
 	return (TRUE);
 }
 
@@ -5749,6 +5788,9 @@ top:
 
 	if (endtape()) {
 		if (Bflag) {
+			ssize_t sz;
+			size_t extra_blocks = 0;
+
 			/*
 			 * Logically at EOT - consume any extra blocks
 			 * so that write to our stdin won't fail and
@@ -5757,10 +5799,13 @@ top:
 			 * will produce a bogus error message from "dd".
 			 */
 
-			while (read(mt, tbuf, TBLOCK*nblock) > 0) {
-				/* empty body */
+			while ((sz = read(mt, tbuf, TBLOCK*nblock)) > 0) {
+				extra_blocks += sz;
 			}
+			dlog("wantit(): %d bytes of extra blocks\n",
+			    extra_blocks);
 		}
+		dlog("wantit(): at end of tape.\n");
 		return (-1);
 	}
 
@@ -6109,7 +6154,6 @@ check_prefix(char **namep, char **dirp, char **compp)
 	if ((tflag || xflag) && !Pflag) {
 		if (is_absolute(fullname) || has_dot_dot(fullname)) {
 			char *stripped_prefix;
-			size_t prefix_len = 0;
 
 			(void) strcpy(savename, fullname);
 			strcpy(fullname,
@@ -7891,7 +7935,7 @@ xattrs_put(char *longname, char *shortname, char *parent, char *attrparent)
 		return;
 	}
 
-	while (dp = readdir(dirp)) {
+	while ((dp = readdir(dirp)) != NULL) {
 		if (strcmp(dp->d_name, "..") == 0) {
 			continue;
 		} else if (strcmp(dp->d_name, ".") == 0) {
@@ -8014,11 +8058,9 @@ put_link(char *name, char *longname, char *component, char *longattrname,
 			 */
 
 			if (vflag) {
-#ifdef DEBUG
 				if (NotTape)
-					DEBUG("seek = %" FMT_blkcnt_t
-					    "K\t", K(tapepos), 0);
-#endif
+					dlog("seek = %" FMT_blkcnt_t
+					    "K\n", K(tapepos));
 				if (filetype == XATTR_FILE) {
 					(void) fprintf(vfile, gettext(
 					    "a %s attribute %s link to "
@@ -9191,9 +9233,6 @@ static void
 compress_back()
 {
 	pid_t	pid;
-	int status;
-	int wret;
-	struct	stat statb;
 
 	if (vflag) {
 		(void) fprintf(vfile,
@@ -9299,9 +9338,6 @@ void
 decompress_file(void)
 {
 	pid_t 	pid;
-	int	status;
-	char	cmdstr[PATH_MAX];
-	char	fname[PATH_MAX];
 	char	*added_suffix;
 
 
@@ -9344,7 +9380,7 @@ compress_file(void)
 	if (pipe(fd) < 0) {
 		vperror(1, gettext("Could not create pipe"));
 	}
-	if (pid = fork() > 0) {
+	if ((pid = fork()) > 0) {
 		mt = fd[1];
 		(void) close(fd[0]);
 		return (pid);
@@ -9373,7 +9409,7 @@ uncompress_file(void)
 	if (pipe(fd) < 0) {
 		vperror(1, gettext("Could not create pipe"));
 	}
-	if (pid = fork() > 0) {
+	if ((pid = fork()) > 0) {
 		mt = fd[0];
 		(void) close(fd[1]);
 		return (pid);

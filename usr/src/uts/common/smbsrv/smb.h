@@ -20,7 +20,9 @@
  */
 
 /*
+ * Copyright 2012 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #ifndef _SMBSRV_SMB_H
@@ -30,9 +32,7 @@
 /*
  * SMB definitions and interfaces, mostly defined in the SMB and CIFS specs.
  */
-#ifdef _KERNEL
 #include <sys/types.h>
-#endif
 #include <smbsrv/string.h>
 #include <smbsrv/msgbuf.h>
 
@@ -778,20 +778,12 @@ typedef uint32_t smb_utime_t;
  * The following bits may be set in the SecurityMode field of the
  * SMB_COM_NEGOTIATE response.
  *
- * Notes:
- * NEGOTIATE_SECURITY_SHARE_LEVEL is a montana2 invention.
- *
- * The NTDDK definitions are:
- * #define	NEGOTIATE_USER_SECURITY			    0x01
- * #define	NEGOTIATE_ENCRYPT_PASSWORDS		    0x02
- * #define	NEGOTIATE_SECURITY_SIGNATURES_ENABLED	    0x04
- * #define	NEGOTIATE_SECURITY_SIGNATURES_REQUIRED	    0x08
+ * Note: Same as the NTDDK definitions.
  */
-#define	NEGOTIATE_SECURITY_SHARE_LEVEL		    0x00
-#define	NEGOTIATE_SECURITY_USER_LEVEL		    0x01
-#define	NEGOTIATE_SECURITY_CHALLENGE_RESPONSE	    0x02
-#define	NEGOTIATE_SECURITY_SIGNATURES_ENABLED	    0x04
-#define	NEGOTIATE_SECURITY_SIGNATURES_REQUIRED	    0x08
+#define	NEGOTIATE_USER_SECURITY				0x01
+#define	NEGOTIATE_ENCRYPT_PASSWORDS			0x02
+#define	NEGOTIATE_SECURITY_SIGNATURES_ENABLED		0x04
+#define	NEGOTIATE_SECURITY_SIGNATURES_REQUIRED		0x08
 
 
 /*

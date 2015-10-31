@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2015, Joyent, Inc. All rights reserved.
  */
 
 #include <sys/atomic.h>
@@ -928,11 +928,21 @@ fasttrap_pid_enable(void *arg, dtrace_id_t id, void *parg)
 		mutex_enter(&pidlock);
 		p = prfind(probe->ftp_pid);
 
+		if (p == NULL) {
+			/*
+			 * So it's not that the target process is being born,
+			 * it's that it isn't there at all (and we simply
+			 * happen to be forking).  Anyway, we know that the
+			 * target is definitely gone, so bail out.
+			 */
+			mutex_exit(&pidlock);
+			return (0);
+		}
+
 		/*
 		 * Confirm that curproc is indeed forking the process in which
 		 * we're trying to enable probes.
 		 */
-		ASSERT(p != NULL);
 		ASSERT(p->p_parent == curproc);
 		ASSERT(p->p_stat == SIDL);
 
@@ -1182,7 +1192,7 @@ fasttrap_proc_lookup(pid_t pid)
 			mutex_enter(&fprc->ftpc_mtx);
 			mutex_exit(&bucket->ftb_mtx);
 			fprc->ftpc_rcount++;
-			atomic_add_64(&fprc->ftpc_acount, 1);
+			atomic_inc_64(&fprc->ftpc_acount);
 			ASSERT(fprc->ftpc_acount <= fprc->ftpc_rcount);
 			mutex_exit(&fprc->ftpc_mtx);
 
@@ -1212,7 +1222,7 @@ fasttrap_proc_lookup(pid_t pid)
 			mutex_enter(&fprc->ftpc_mtx);
 			mutex_exit(&bucket->ftb_mtx);
 			fprc->ftpc_rcount++;
-			atomic_add_64(&fprc->ftpc_acount, 1);
+			atomic_inc_64(&fprc->ftpc_acount);
 			ASSERT(fprc->ftpc_acount <= fprc->ftpc_rcount);
 			mutex_exit(&fprc->ftpc_mtx);
 
@@ -1424,7 +1434,7 @@ fasttrap_provider_free(fasttrap_provider_t *provider)
 	 * count of active providers on the associated process structure.
 	 */
 	if (!provider->ftp_retired) {
-		atomic_add_64(&provider->ftp_proc->ftpc_acount, -1);
+		atomic_dec_64(&provider->ftp_proc->ftpc_acount);
 		ASSERT(provider->ftp_proc->ftpc_acount <
 		    provider->ftp_proc->ftpc_rcount);
 	}
@@ -1499,7 +1509,7 @@ fasttrap_provider_retire(pid_t pid, const char *name, int mprov)
 	 * bucket lock therefore protects the integrity of the provider hash
 	 * table.
 	 */
-	atomic_add_64(&fp->ftp_proc->ftpc_acount, -1);
+	atomic_dec_64(&fp->ftp_proc->ftpc_acount);
 	ASSERT(fp->ftp_proc->ftpc_acount < fp->ftp_proc->ftpc_rcount);
 
 	fp->ftp_retired = 1;
@@ -1595,10 +1605,10 @@ fasttrap_add_probe(fasttrap_probe_spec_t *pdata)
 			    pdata->ftps_mod, pdata->ftps_func, name_str) != 0)
 				continue;
 
-			atomic_add_32(&fasttrap_total, 1);
+			atomic_inc_32(&fasttrap_total);
 
 			if (fasttrap_total > fasttrap_max) {
-				atomic_add_32(&fasttrap_total, -1);
+				atomic_dec_32(&fasttrap_total);
 				goto no_mem;
 			}
 
@@ -1774,6 +1784,18 @@ fasttrap_meta_provide(void *arg, dtrace_helper_provdesc_t *dhpv, pid_t pid)
 	return (provider);
 }
 
+/*
+ * We know a few things about our context here:  we know that the probe being
+ * created doesn't already exist (DTrace won't load DOF at the same address
+ * twice, even if explicitly told to do so) and we know that we are
+ * single-threaded with respect to the meta provider machinery. Knowing that
+ * this is a new probe and that there is no way for us to race with another
+ * operation on this provider allows us an important optimization: we need not
+ * lookup a probe before adding it.  Saving this lookup is important because
+ * this code is in the fork path for processes with USDT probes, and lookups
+ * here are potentially very expensive because of long hash conflicts on
+ * module, function and name (DTrace doesn't hash on provider name).
+ */
 /*ARGSUSED*/
 static void
 fasttrap_meta_create_probe(void *arg, void *parg,
@@ -1810,19 +1832,6 @@ fasttrap_meta_create_probe(void *arg, void *parg,
 			return;
 	}
 
-	/*
-	 * Grab the creation lock to ensure consistency between calls to
-	 * dtrace_probe_lookup() and dtrace_probe_create() in the face of
-	 * other threads creating probes.
-	 */
-	mutex_enter(&provider->ftp_cmtx);
-
-	if (dtrace_probe_lookup(provider->ftp_provid, dhpb->dthpb_mod,
-	    dhpb->dthpb_func, dhpb->dthpb_name) != 0) {
-		mutex_exit(&provider->ftp_cmtx);
-		return;
-	}
-
 	ntps = dhpb->dthpb_noffs + dhpb->dthpb_nenoffs;
 	ASSERT(ntps > 0);
 
@@ -1830,7 +1839,6 @@ fasttrap_meta_create_probe(void *arg, void *parg,
 
 	if (fasttrap_total > fasttrap_max) {
 		atomic_add_32(&fasttrap_total, -ntps);
-		mutex_exit(&provider->ftp_cmtx);
 		return;
 	}
 
@@ -1894,8 +1902,6 @@ fasttrap_meta_create_probe(void *arg, void *parg,
 	 */
 	pp->ftp_id = dtrace_probe_create(provider->ftp_provid, dhpb->dthpb_mod,
 	    dhpb->dthpb_func, dhpb->dthpb_name, FASTTRAP_OFFSET_AFRAMES, pp);
-
-	mutex_exit(&provider->ftp_cmtx);
 }
 
 /*ARGSUSED*/
@@ -2156,7 +2162,7 @@ fasttrap_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	if (nent == 0 || nent > 0x1000000)
 		nent = FASTTRAP_TPOINTS_DEFAULT_SIZE;
 
-	if ((nent & (nent - 1)) == 0)
+	if (ISP2(nent))
 		fasttrap_tpoints.fth_nent = nent;
 	else
 		fasttrap_tpoints.fth_nent = 1 << fasttrap_highbit(nent);
@@ -2169,7 +2175,7 @@ fasttrap_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	 * ... and the providers hash table...
 	 */
 	nent = FASTTRAP_PROVIDERS_DEFAULT_SIZE;
-	if ((nent & (nent - 1)) == 0)
+	if (ISP2(nent))
 		fasttrap_provs.fth_nent = nent;
 	else
 		fasttrap_provs.fth_nent = 1 << fasttrap_highbit(nent);
@@ -2182,7 +2188,7 @@ fasttrap_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	 * ... and the procs hash table.
 	 */
 	nent = FASTTRAP_PROCS_DEFAULT_SIZE;
-	if ((nent & (nent - 1)) == 0)
+	if (ISP2(nent))
 		fasttrap_procs.fth_nent = nent;
 	else
 		fasttrap_procs.fth_nent = 1 << fasttrap_highbit(nent);

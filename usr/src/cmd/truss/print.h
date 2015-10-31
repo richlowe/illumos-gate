@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2015, Joyent, Inc.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -139,9 +140,10 @@ extern "C" {
 #define	SKC	98		/* print sockconfig subcode */
 #define	ACF	99		/* accept4 flags */
 #define	PFD	100		/* pipe fds[2] */
-#define	PSFCMD	101		/* psecflags(2) command */
-#define PSFLG	102		/* psecflags(2) flags */
-#define	HID	103		/* hidden argument, don't print */
+#define	GRF	101		/* getrandom flags */
+#define	PSFCMD	102		/* psecflags(2) command */
+#define PSFLG	103		/* psecflags(2) flags */
+#define	HID	104		/* hidden argument, don't print */
 				/* make sure HID is always the last member */
 
 /*

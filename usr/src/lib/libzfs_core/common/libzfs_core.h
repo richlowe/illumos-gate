@@ -20,7 +20,7 @@
  */
 
 /*
- * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright (c) 2012, 2014 by Delphix. All rights reserved.
  */
 
 #ifndef	_LIBZFS_CORE_H
@@ -52,8 +52,17 @@ int lzc_hold(nvlist_t *, int, nvlist_t **);
 int lzc_release(nvlist_t *, nvlist_t **);
 int lzc_get_holds(const char *, nvlist_t **);
 
-int lzc_send(const char *, const char *, int);
+enum lzc_send_flags {
+	LZC_SEND_FLAG_EMBED_DATA = 1 << 0,
+	LZC_SEND_FLAG_LARGE_BLOCK = 1 << 1
+};
+
+int lzc_send(const char *, const char *, int, enum lzc_send_flags);
+int lzc_send_resume(const char *, const char *, int,
+    enum lzc_send_flags, uint64_t, uint64_t);
 int lzc_receive(const char *, nvlist_t *, const char *, boolean_t, int);
+int lzc_receive_resumable(const char *, nvlist_t *, const char *,
+    boolean_t, int);
 int lzc_send_space(const char *, const char *, uint64_t *);
 
 boolean_t lzc_exists(const char *);

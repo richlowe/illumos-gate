@@ -11,10 +11,11 @@
 
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
+# Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
 .PARALLEL: $(SUBDIRS)
 
-SUBDIRS = os-tests test-runner zfs-tests
+SUBDIRS = libc-tests os-tests test-runner util-tests zfs-tests
 
 include Makefile.com

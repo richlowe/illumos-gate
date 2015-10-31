@@ -22,6 +22,8 @@
 #
 # Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2012 by Delphix. All rights reserved.
+# Copyright 2014 Garrett D'Amore <garrett@damore.org>
+# Copyright 2015 OmniTI Computer Consulting, Inc. All rights reserved.
 #
 
 #
@@ -64,6 +66,9 @@ PARALLEL_DIRS = uts lib man
 
 # The check target also causes smf(5) service manifests to be validated.
 CHKMFSTSUBDIRS=	cmd
+
+# And man page formats
+CHKMANSUBDIRS = man
 
 MSGSUBDIRS=	cmd ucbcmd lib
 DOMAINS= \
@@ -133,8 +138,17 @@ clobber_local:
 	@cd common/mapfiles; pwd; $(MAKE) clobber
 	@cd msg; pwd; $(MAKE) clobber
 
+# If the tarballs are included inside ON_CLOSED_BINS, use those to extract and
+# preserve the permissions (in case a distro ships them).
+
 closedbins: bldtools $(ROOTDIRS) FRC
 	@CLOSED_ROOT="$$ON_CLOSED_BINS/root_$(MACH)$${RELEASE_BUILD+-nd}"; \
+	if [ -f "$$ON_CLOSED_BINS/on-closed-bins$${RELEASE_BUILD+-nd}.$(MACH).tar.bz2" ]; then \
+		$(ECHO) "Extracting tarball $$ON_CLOSED_BINS/on-closed-bins$${RELEASE_BUILD+-nd}.$(MACH).tar.bz2"; \
+		(cd $(CODEMGR_WS); \
+		   $(TAR) xjpf $$ON_CLOSED_BINS/on-closed-bins$${RELEASE_BUILD+-nd}.$(MACH).tar.bz2); \
+		CLOSED_ROOT="$(CODEMGR_WS)/closed/root_$(MACH)$${RELEASE_BUILD+-nd}"; \
+	fi; \
 	if [ ! -d "$$CLOSED_ROOT" ]; then \
 		$(ECHO) "Error: ON_CLOSED_BINS must point to closed" \
 		    "binaries."; \
@@ -205,7 +219,7 @@ cmdheaders: FRC
 	@cd cmd/fm; pwd; $(MAKE) install_h
 	@cd cmd/mdb; pwd; $(MAKE) install_h
 
-check:	$(CHKHDRSUBDIRS) $(CHKMFSTSUBDIRS)
+check:	$(CHKHDRSUBDIRS) $(CHKMFSTSUBDIRS) $(CHKMANSUBDIRS)
 
 #
 # Cross-reference customization: skip all of the subdirectories that

@@ -22,8 +22,8 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
-# Copyright 2011 Nexenta Systems, Inc. All rights reserved.
 # Copyright 2012 OmniTI Computer Consulting, Inc.  All rights reserved.
+# Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 #
 
 
@@ -46,11 +46,11 @@ LIBS=		$(DYNLIB) $(LINTLIB)
 
 SRCDIR= 	../common
 
-INCS += -I$(SRCDIR)
+INCS += -I$(SRCDIR) -I$(SRC)/cmd/boot/common
 
 C99MODE= 	$(C99_ENABLE)
 
-LDLIBS +=	-lzfs -linstzones -luuid -lnvpair -lc -lgen -ldevinfo
+LDLIBS +=	-lzfs -linstzones -luuid -lnvpair -lc -lgen -ldevinfo -lefi
 CPPFLAGS +=	$(INCS)
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-uninitialized

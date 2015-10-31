@@ -18,12 +18,14 @@
  *
  * CDDL HEADER END
  */
+
+/*
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ */
+
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- */
-/*
- * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
  */
 
 #ifndef _NFS4_H
@@ -49,9 +51,19 @@
 extern "C" {
 #endif
 
-#define	NFS4_MAX_UTF8STRING	65536
-#define	NFS4_MAX_PATHNAME4	65536
 #define	NFS4_MAX_SECOID4	65536
+#define	NFS4_MAX_UTF8STRING	65536
+#define	NFS4_MAX_LINKTEXT4	65536
+#define	NFS4_MAX_PATHNAME4	65536
+
+struct nfs_fsl_info {
+	uint_t netbuf_len;
+	uint_t netnm_len;
+	uint_t knconf_len;
+	char *netname;
+	struct netbuf *addr;
+	struct knetconfig *knconf;
+};
 
 #ifdef _KERNEL
 
@@ -1336,6 +1348,7 @@ extern struct nfs4_ntov_map nfs4_ntov_map[];
 extern uint_t nfs4_ntov_map_size;
 
 extern kstat_named_t	*rfsproccnt_v4_ptr;
+extern kstat_t		**rfsprocio_v4_ptr;
 extern struct vfsops	*nfs4_vfsops;
 extern struct vnodeops	*nfs4_vnodeops;
 extern const struct	fs_operation_def nfs4_vnodeops_template[];
@@ -1368,6 +1381,8 @@ extern void	rfs4_compound(COMPOUND4args *, COMPOUND4res *,
 			struct exportinfo *, struct svc_req *, cred_t *, int *);
 extern void	rfs4_compound_free(COMPOUND4res *);
 extern void	rfs4_compound_flagproc(COMPOUND4args *, int *);
+extern void	rfs4_compound_kstat_args(COMPOUND4args *);
+extern void	rfs4_compound_kstat_res(COMPOUND4res *);
 
 extern int	rfs4_srvrinit(void);
 extern void	rfs4_srvrfini(void);

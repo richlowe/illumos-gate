@@ -20,6 +20,10 @@
  */
 
 /*
+ * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ */
+
+/*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
@@ -33,8 +37,6 @@
 
 #ifndef _NFS_DISPATCH_H
 #define	_NFS_DISPATCH_H
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #ifdef	__cplusplus
 extern "C" {
@@ -61,7 +63,7 @@ typedef struct rpcdisp {
 #define	RPC_IDEMPOTENT	0x1	/* idempotent or not */
 /*
  * Be very careful about which NFS procedures get the RPC_ALLOWANON bit.
- * Right now, it this bit is on, we ignore the results of per NFS request
+ * Right now, if this bit is on, we ignore the results of per NFS request
  * access control.
  */
 #define	RPC_ALLOWANON	0x2	/* allow anonymous access */
@@ -73,10 +75,12 @@ typedef struct rpc_disptable {
 	int dis_nprocs;
 	char **dis_procnames;
 	kstat_named_t **dis_proccntp;
+	kstat_t ***dis_prociop;
 	struct rpcdisp *dis_table;
 } rpc_disptable_t;
 
-void	rpc_null(caddr_t *, caddr_t *);
+void	rpc_null(caddr_t *, caddr_t *, struct exportinfo *, struct svc_req *,
+    cred_t *, bool_t);
 
 #ifdef	__cplusplus
 }

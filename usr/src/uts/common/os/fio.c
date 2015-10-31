@@ -67,7 +67,7 @@ static uint32_t afd_alloc;	/* count of kmem_alloc()s */
 static uint32_t afd_free;	/* count of kmem_free()s */
 static uint32_t afd_wait;	/* count of waits on non-zero ref count */
 #define	MAXFD(x)	(afd_maxfd = ((afd_maxfd >= (x))? afd_maxfd : (x)))
-#define	COUNT(x)	atomic_add_32(&x, 1)
+#define	COUNT(x)	atomic_inc_32(&x)
 
 #else	/* DEBUG */
 
@@ -1209,7 +1209,8 @@ f_getfl(int fd, int *flagp)
 			error = EBADF;
 		else {
 			vnode_t *vp = fp->f_vnode;
-			int flag = fp->f_flag | (fp->f_flag2 << 16);
+			int flag = fp->f_flag |
+			    ((fp->f_flag2 & ~FEPOLLED) << 16);
 
 			/*
 			 * BSD fcntl() FASYNC compatibility.
