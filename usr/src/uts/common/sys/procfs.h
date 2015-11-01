@@ -181,8 +181,7 @@ typedef struct pstatus {
 	projid_t pr_projid;	/* project id */
 	int	pr_nzomb;	/* number of zombie lwps in the process */
 	zoneid_t pr_zoneid;	/* zone id */
-	psecflags_t pr_secflags; /* security flags */
-	int	pr_filler[13];	/* reserved for future use */
+	int	pr_filler[15];	/* reserved for future use */
 	lwpstatus_t pr_lwp;	/* status of the representative lwp */
 } pstatus_t;
 
@@ -399,6 +398,14 @@ typedef struct prpriv {
 	uint32_t	pr_infosize;		/* size of supplementary data */
 	priv_chunk_t	pr_sets[1];		/* array of sets */
 } prpriv_t;
+
+#define	PRSECFLAGS_VERSION_1		1
+#define	PRSECFLAGS_VERSION_CURRENT	PRSECFLAGS_VERSION_1
+typedef struct prsecflags {
+	uint32_t pr_version;
+	secflagset_t pr_effective;
+	secflagset_t pr_inherit;
+} prsecflags_t;
 
 /*
  * Watchpoint interface.  PCWATCH and /proc/<pid>/watch
@@ -639,8 +646,7 @@ typedef struct pstatus32 {
 	id32_t	pr_projid;	/* project id */
 	int	pr_nzomb;	/* number of zombie lwps in the process */
 	id32_t	pr_zoneid;	/* zone id */
-	psecflags_t pr_secflags; /* security flags */
-	int	pr_filler[13];	/* reserved for future use */
+	int	pr_filler[15];	/* reserved for future use */
 	lwpstatus32_t pr_lwp;	/* status of the representative lwp */
 } pstatus32_t;
 

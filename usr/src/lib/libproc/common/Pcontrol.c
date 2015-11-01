@@ -53,6 +53,7 @@
 #include <sys/syscall.h>
 #include <sys/sysmacros.h>
 #include <sys/systeminfo.h>
+#include <sys/secflags.h>
 
 #include "libproc.h"
 #include "Pcontrol.h"
@@ -173,6 +174,13 @@ static int
 Pcred_live(struct ps_prochandle *P, prcred_t *pcrp, int ngroups, void *data)
 {
 	return (proc_get_cred(P->pid, pcrp, ngroups));
+}
+
+/* ARGSUSED */
+static int
+Psecflags_live(struct ps_prochandle *P, prsecflags_t *psf, void *data)
+{
+	return (proc_get_secflags(P->pid, psf));
 }
 
 /*ARGSUSED*/
@@ -325,6 +333,7 @@ static const ps_ops_t P_live_ops = {
 	.pop_uname	= Puname_live,
 	.pop_zonename	= Pzonename_live,
 	.pop_execname	= Pexecname_live,
+	.pop_secflags	= Psecflags_live,
 #if defined(__i386) || defined(__amd64)
 	.pop_ldt	= Pldt_live
 #endif
@@ -1290,6 +1299,20 @@ int
 Pcred(struct ps_prochandle *P, prcred_t *pcrp, int ngroups)
 {
 	return (P->ops.pop_cred(P, pcrp, ngroups, P->data));
+}
+
+int
+Psecflags(struct ps_prochandle *P, prsecflags_t *psf)
+{
+	int ret;
+	if ((ret = P->ops.pop_secflags(P, psf, P->data)) == 0) {
+		if (psf->pr_version != PRSECFLAGS_VERSION_1) {
+			errno = EINVAL;
+			return (-1);
+		}
+	}
+
+	return (ret);
 }
 
 static prheader_t *

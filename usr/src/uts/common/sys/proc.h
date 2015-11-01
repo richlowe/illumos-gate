@@ -787,10 +787,7 @@ extern	void	lwp_mmodel_shared_as(caddr_t, size_t);
 #endif
 
 /* Security flag manipulation */
-extern boolean_t secflag_enabled(proc_t *, uint_t);
-extern void secflag_set(proc_t *, uint_t);
-extern void secflag_enable(proc_t *, uint_t);
-extern void secflag_disable(proc_t *, uint_t);
+extern boolean_t secflag_enabled(proc_t *, secflagset_t);
 extern void secflag_promote(proc_t *);
 
 /*

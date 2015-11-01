@@ -37,6 +37,7 @@
 #include <sys/machsystm.h>
 #include <sys/kdi.h>
 #include <sys/cpu_module.h>
+#include <sys/secflags.h>
 
 #include <vm/hat_sfmmu.h>
 
@@ -375,6 +376,10 @@ valid_usr_range(caddr_t addr, size_t len, uint_t prot, struct as *as,
 	caddr_t eaddr = addr + len;
 
 	if (eaddr <= addr || addr >= userlimit || eaddr > userlimit)
+		return (RANGE_BADADDR);
+
+	if ((addr == NULL) &&
+	    secflag_enabled(as->a_proc, PROC_SEC_FORBIDNULLMAP))
 		return (RANGE_BADADDR);
 
 	/*

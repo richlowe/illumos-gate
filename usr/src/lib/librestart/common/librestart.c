@@ -53,6 +53,7 @@
 #include <syslog.h>
 #include <sys/corectl.h>
 #include <sys/machelf.h>
+#include <sys/secflags.h>
 #include <sys/task.h>
 #include <sys/types.h>
 #include <time.h>
@@ -2802,6 +2803,7 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 	int mc_used = 0;
 	mc_error_t *err = NULL;
 	struct method_context *cip;
+	secflagset_t default_secflags = 0;
 
 	if ((err = malloc(sizeof (mc_error_t))) == NULL)
 		return (mc_error_create(NULL, ENOMEM, NULL));
@@ -3103,6 +3105,85 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 		}
 	}
 
+	/* get security flags */
+	if ((methpg != NULL && scf_pg_get_property(methpg,
+	    SCF_PROPERTY_SECFLAGS, prop) == SCF_SUCCESS) ||
+	    (instpg != NULL && scf_pg_get_property(instpg,
+	    SCF_PROPERTY_SECFLAGS, prop) == SCF_SUCCESS)) {
+		if (scf_property_get_value(prop, val) != SCF_SUCCESS) {
+			ret = scf_error();
+			switch (ret) {
+			case SCF_ERROR_CONNECTION_BROKEN:
+				err = mc_error_create(err, ret, RCBROKEN);
+				break;
+
+			case SCF_ERROR_CONSTRAINT_VIOLATED:
+				err = mc_error_create(err, ret,
+				    "\"%s\" property has multiple values.",
+				    SCF_PROPERTY_SECFLAGS);
+				break;
+
+			case SCF_ERROR_NOT_FOUND:
+				err = mc_error_create(err, ret,
+				    "\"%s\" property has no values.",
+				    SCF_PROPERTY_SECFLAGS);
+				break;
+
+			default:
+				bad_fail("scf_property_get_value", ret);
+			}
+
+			(void) strcpy(cip->vbuf, ":default");
+		} else {
+			ret = scf_value_get_astring(val, cip->vbuf,
+			    cip->vbuf_sz);
+			assert(ret != -1);
+		}
+		mc_used++;
+	} else {
+		ret = scf_error();
+		switch (ret) {
+		case SCF_ERROR_NOT_FOUND:
+			/* okay if missing. */
+			(void) strcpy(cip->vbuf, ":default");
+			break;
+
+		case SCF_ERROR_CONNECTION_BROKEN:
+			err = mc_error_create(err, ret, RCBROKEN);
+			goto out;
+
+		case SCF_ERROR_DELETED:
+			err = mc_error_create(err, ret,
+			    "Property group could not be found");
+			goto out;
+
+		case SCF_ERROR_HANDLE_MISMATCH:
+		case SCF_ERROR_INVALID_ARGUMENT:
+		case SCF_ERROR_NOT_SET:
+		default:
+			bad_fail("scf_pg_get_property", ret);
+		}
+	}
+
+
+	if (scf_default_secflags(h, &default_secflags) != 0) {
+		err = mc_error_create(err, EINVAL, "couldn't fetch "
+		    "default security-flags\n");
+		goto out;
+	}
+
+	if (strcmp(cip->vbuf, ":default") == 0) {
+		cip->secflags.psd_assign = default_secflags;
+		cip->secflags.psd_ass_active = B_TRUE;
+	} else {
+		if (secflags_parse(default_secflags, cip->vbuf,
+		    &(cip->secflags)) != 0) {
+			err = mc_error_create(err, EINVAL, "couldn't parse "
+			    "security flags: %s\n", cip->vbuf);
+			goto out;
+		}
+	}
+
 	/* get (optional) corefile pattern */
 	if ((methpg != NULL && scf_pg_get_property(methpg,
 	    SCF_PROPERTY_COREFILE_PATTERN, prop) == SCF_SUCCESS) ||
@@ -3343,6 +3424,8 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 		cip->gid = 0;
 		cip->euid = (uid_t)-1;
 		cip->egid = (gid_t)-1;
+		cip->secflags.psd_ass_active = B_TRUE;
+		cip->secflags.psd_assign = default_secflags;
 	}
 
 	*mcpp = cip;
@@ -3508,6 +3591,12 @@ restarter_set_method_context(struct method_context *cip, const char **fp)
 			ret = -1;
 			goto out;
 		}
+	}
+
+	if (psecflags(P_PID, P_MYID, &(cip->secflags)) != 0) {
+		*fp = "psecflags";
+		ret = errno;
+		goto out;
 	}
 
 	if (restarter_rm_libs_loadable()) {

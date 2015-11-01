@@ -328,6 +328,7 @@ typedef struct scf_tmpl_error scf_tmpl_error_t;
 #define	SCF_PROPERTY_RESTART_INTERVAL	((const char *)"restart_interval")
 #define	SCF_PROPERTY_RESTART_ON		((const char *)"restart_on")
 #define	SCF_PROPERTY_RESTORE		((const char *)"restore")
+#define	SCF_PROPERTY_SECFLAGS		((const char *)"security_flags")
 #define	SCF_PROPERTY_SINGLE_INSTANCE	((const char *)"single_instance")
 #define	SCF_PROPERTY_START_METHOD_TIMESTAMP	\
 	((const char *)"start_method_timestamp")

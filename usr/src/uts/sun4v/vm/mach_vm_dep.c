@@ -173,7 +173,7 @@ static void *contig_mem_prealloc_buf;
  * arrange things so these tunables can be separate for mmap, mmapobj, and
  * ld.so
  */
-volatile size_t aslr_max_map_skew = 256 * 1024 * 1024; /* 256MB */
+size_t aslr_max_map_skew = 256 * 1024 * 1024; /* 256MB */
 
 /*
  * map_addr_proc() is the routine called when the system is to
@@ -331,9 +331,6 @@ map_addr_proc(caddr_t *addrp, size_t len, offset_t off, int vacalign,
 		/*
 		 * If randomization is requested, slew the allocation
 		 * backwards, within the same gap, by a random amount.
-		 *
-		 * XXX: This will fall over in processes like Java, which
-		 * commonly have a great many small mappings.
 		 */
 		if (flags & _MAP_RANDOMIZE) {
 			uint32_t slew;

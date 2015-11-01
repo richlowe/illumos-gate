@@ -81,6 +81,7 @@
 #include <sys/cmn_err.h>
 #include <sys/archsystm.h>
 #include <sys/machsystm.h>
+#include <sys/secflags.h>
 
 #include <sys/vtrace.h>
 #include <sys/ddidmareq.h>
@@ -642,7 +643,7 @@ map_addr_vacalign_check(caddr_t addr, u_offset_t off)
  * arrange things so these tunables can be separate for mmap, mmapobj, and
  * ld.so
  */
-volatile size_t aslr_max_map_skew = 256 * 1024 * 1024; /* 256MB */
+size_t aslr_max_map_skew = 256 * 1024 * 1024; /* 256MB */
 
 /*
  * map_addr_proc() is the routine called when the system is to
@@ -791,9 +792,6 @@ map_addr_proc(
 		/*
 		 * If randomization is requested, slew the allocation
 		 * backwards, within the same gap, by a random amount.
-		 *
-		 * XXX: This will fall over in processes like Java, which
-		 * commonly have a great many small mappings.
 		 */
 		if (flags & _MAP_RANDOMIZE) {
 			uint32_t slew;
@@ -940,6 +938,10 @@ valid_usr_range(caddr_t addr, size_t len, uint_t prot, struct as *as,
 	caddr_t eaddr = addr + len;
 
 	if (eaddr <= addr || addr >= userlimit || eaddr > userlimit)
+		return (RANGE_BADADDR);
+
+	if ((addr == NULL) &&
+	    secflag_enabled(as->a_proc, PROC_SEC_FORBIDNULLMAP))
 		return (RANGE_BADADDR);
 
 #if defined(__amd64)

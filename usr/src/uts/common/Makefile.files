@@ -297,6 +297,7 @@ GENUNIX_OBJS +=	\
 		sched.o		\
 		schedctl.o	\
 		sctp_crc32.o	\
+		secflags.o	\
 		seg_dev.o	\
 		seg_kp.o	\
 		seg_kpm.o	\

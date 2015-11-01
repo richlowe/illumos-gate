@@ -13,6 +13,6 @@
 # Copyright (c) 2012 by Delphix. All rights reserved.
 #
 
-SUBDIRS = poll sigqueue
+SUBDIRS = poll secflags sigqueue
 
 include $(SRC)/test/Makefile.com

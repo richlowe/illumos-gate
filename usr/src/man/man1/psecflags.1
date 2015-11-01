@@ -8,6 +8,7 @@
 .\" source.  A copy of the CDDL is also available via the Internet at
 .\" http://www.illumos.org/license/CDDL.
 .\"
+.\" Copyright 2015, Richard Lowe.
 .\"
 .TH "PSECFLAGS" "1" "May 3, 2014"
 .SH "NAME"
@@ -15,12 +16,12 @@
 .SH "SYNOPSIS"
 .LP
 .nf
-\fB/usr/bin/psecflags\fR \fI-s\fR [-+]flags \fI-e\fR \fIcommand\fR
+\fB/usr/bin/psecflags\fR \fI-s\fR \fIspec\fR \fI-e\fR \fIcommand\fR
 	[\fIarg\fR]...
 .fi
 .LP
 .nf
-\fB/usr/bin/psecflags\fR \fI-s\fR [-+]flags [\fI-i\fR \fIidtype\fR]
+\fB/usr/bin/psecflags\fR \fI-s\fR \fIspec\fR [\fI-i\fR \fIidtype\fR]
 	\fIid\fR ...
 .fi
 .LP
@@ -42,9 +43,9 @@ by \fIidtype\fR and \fIid\fR according as described by the \fI-s\fR argument.
 .P
 The third invocation describes the security-flags of the specified processes
 or core files.  The effective set is signified by '\fBE\fR', and the
-inheritable set by '\fBI\fR'
+inheritable set by '\fBI\fR'.
 .P
-The fourth invocation lists the supported process security-flags
+The fourth invocation lists the supported process security-flags.
 
 .SH "OPTIONS"
 The following options are supported:
@@ -175,7 +176,7 @@ arguments are modified.
 .ad
 .RS 11n
 The security-flags of any process running in the zones matching the given
-\fIid\fR arguments are modified
+\fIid\fR arguments are modified.
 .RE
 .RE
 
@@ -185,7 +186,7 @@ The security-flags of any process running in the zones matching the given
 \fB-l\fR
 .ad
 .RS 11n
-List all supported process security-flags
+List all supported process security-flags.
 .RE
 
 .sp
@@ -195,20 +196,18 @@ List all supported process security-flags
 .ad
 .RS 11n
 Modify the process security-flags according to
-\fIspecification\fR. Specifications take the form \fB[-+]flagspec\fR. Where
-\fB+\fR indicates that the given flags should be enabled in addition to the
-current flags, \fB-\fR indicates the given flags should be disabled, and the
-default (with neither) the given flags should replace the current flags.
+\fIspecification\fR. Specifications take the form of a comma-separated list of
+flags, optionally preceded by a '-' or '!'. Where '-' and '!' indicate that the
+given flag should be removed from the specification.  The pseudo-flags "all",
+"none" and "current" are supported, to indicate that all flags, no flags, or
+the current set of flags (respectively) are to be included.
 .P
-\fBflagspec\fR is a comma-separated list of security flags, or the string
-\fB"none"\fR, which indicates that the security-flags are to be cleared.
-.P
-For a list of valid security-flags, see \fBpsecflags -l\fR
+For a list of valid security-flags, see \fBpsecflags -l\fR.
 .RE
 
 .SH "EXAMPLES"
 .LP
-\fBExample 1\fR Display the security-flags of the current shell
+\fBExample 1\fR Display the security-flags of the current shell.
 .sp
 .in +2
 .nf
@@ -226,7 +225,7 @@ inherited security flags.
 .sp
 .in +2
 .nf
-example$ \fBpsecflags -s +aslr -e /bin/sh\fR
+example$ \fBpsecflags -s current,aslr -e /bin/sh\fR
 $ psecflags $$
 100724:	-sh
 	E:	none
@@ -240,7 +239,7 @@ $ psecflags $$
 .sp
 .in +2
 .nf
-example# \fBpsecflags -s -aslr -i uid bob\fR
+example# \fBpsecflags -s current,-aslr -i uid bob\fR
 .fi
 .in -2
 
@@ -250,15 +249,14 @@ The following exit values are returned:
 .TP
 \fB0\fR
 .IP
-Success
+Success.
 
 .TP
 \fBnon-zero\fR
 .IP
-An error has occured
+An error has occured.
 
 .SH "ATTRIBUTES"
-.sp
 .LP
 See \fBattributes\fR(5) for descriptions of the following attributes:
 .sp

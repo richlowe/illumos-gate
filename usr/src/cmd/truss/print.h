@@ -141,9 +141,8 @@ extern "C" {
 #define	ACF	99		/* accept4 flags */
 #define	PFD	100		/* pipe fds[2] */
 #define	GRF	101		/* getrandom flags */
-#define	PSFCMD	102		/* psecflags(2) command */
-#define PSFLG	103		/* psecflags(2) flags */
-#define	HID	104		/* hidden argument, don't print */
+#define	PSDLT	102		/* psecflags(2) flags */
+#define	HID	103		/* hidden argument, don't print */
 				/* make sure HID is always the last member */
 
 /*

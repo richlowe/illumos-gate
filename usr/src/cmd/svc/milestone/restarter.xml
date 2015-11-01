@@ -656,6 +656,22 @@ the project attribute.
 				<cardinality min='1' max='1'/>
 			</prop_pattern>
 
+			<prop_pattern name='security_flags' type='astring'
+			    required='false'>
+				<common_name>
+					<loctext xml:lang='C'>
+method credential security flags
+					</loctext>
+				</common_name>
+				<description>
+					<loctext xml:lang='C'>
+An optional string specifying the security flags as defined in security-flags(5).
+					</loctext>
+				</description>
+				<cardinality min='1' max='1'/>
+				<internal_separators>,</internal_separators>
+			</prop_pattern>
+
 			<!-- method_credential properties -->
 			<prop_pattern name='user' type='astring'
 			    required='false'>
@@ -748,7 +764,7 @@ user, group, privileges, and limit_privileges properties.
 			    required='false'>
 				<common_name>
 					<loctext xml:lang='C'>
-method profile RBAC profile specification 
+method profile RBAC profile specification
 					</loctext>
 				</common_name>
 				<description>
@@ -903,6 +919,22 @@ the project attribute.
 				<cardinality min='1' max='1'/>
 			</prop_pattern>
 
+			<prop_pattern name='security_flags' type='astring'
+			    required='false'>
+				<common_name>
+					<loctext xml:lang='C'>
+method credential security flags
+					</loctext>
+				</common_name>
+				<description>
+					<loctext xml:lang='C'>
+An optional string specifying the security flags as defined in security-flags(5).
+					</loctext>
+				</description>
+				<cardinality min='1' max='1'/>
+				<internal_separators>,</internal_separators>
+			</prop_pattern>
+
 			<!-- method_credential properties -->
 			<prop_pattern name='user' type='astring'
 			    required='false'>
@@ -995,7 +1027,7 @@ user, group, privileges, and limit_privileges properties.
 			    required='false'>
 				<common_name>
 					<loctext xml:lang='C'>
-method profile RBAC profile specification 
+method profile RBAC profile specification
 					</loctext>
 				</common_name>
 				<description>
@@ -1149,6 +1181,21 @@ the project attribute.
 				</description>
 				<cardinality min='1' max='1'/>
 			</prop_pattern>
+			<prop_pattern name='security_flags' type='astring'
+			    required='false'>
+				<common_name>
+					<loctext xml:lang='C'>
+method security flags
+					</loctext>
+				</common_name>
+				<description>
+					<loctext xml:lang='C'>
+An optional string specifying the security flags as defined in security-flags(5).
+					</loctext>
+				</description>
+				<cardinality min='1' max='1'/>
+				<internal_separators>,</internal_separators>
+			</prop_pattern>
 
 			<!-- method_credential properties -->
 			<prop_pattern name='user' type='astring'
@@ -1242,7 +1289,7 @@ user, group, privileges, and limit_privileges properties.
 			    required='false'>
 				<common_name>
 					<loctext xml:lang='C'>
-method profile RBAC profile specification 
+method profile RBAC profile specification
 					</loctext>
 				</common_name>
 				<description>

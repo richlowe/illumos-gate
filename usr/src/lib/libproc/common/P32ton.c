@@ -369,8 +369,6 @@ pstatus_32_to_n(const pstatus32_t *src, pstatus_t *dst)
 	dst->pr_sysexit = src->pr_sysexit;
 	dst->pr_dmodel = src->pr_dmodel;
 
-	(void) memcpy(&dst->pr_secflags, &src->pr_secflags, sizeof (psecflags_t));
-
 	lwpstatus_32_to_n(&src->pr_lwp, &dst->pr_lwp);
 }
 
@@ -743,8 +741,6 @@ pstatus_n_to_32(const pstatus_t *src, pstatus32_t *dst)
 	dst->pr_sysentry = src->pr_sysentry;
 	dst->pr_sysexit = src->pr_sysexit;
 	dst->pr_dmodel = src->pr_dmodel;
-
-	(void) memcpy(&dst->pr_secflags, &src->pr_secflags, sizeof (psecflags_t));
 
 	lwpstatus_n_to_32(&src->pr_lwp, &dst->pr_lwp);
 }

@@ -19,13 +19,18 @@ This unfortunately means that to enable ASLR fully system-wide, requires a
 reboot or at least restart of a majority of services.
 
 The system-wide ASLR flag is an SMF property on the new service
-`svc:/system/process-security`, which contains a `secflags` property group,
-with one boolean property per implemented flag (see, again,
-`security-flags(5)`).  At present, this will not take effect (at all) until a
-reboot.
+`svc:/system/process-security`, which contains a `security_flags` property
+group, with one boolean property per implemented flag (see, again,
+`security-flags(5)`).  These will only affect services (and their
+children) started via SMF after the values have been changed.
 
 Per-process setting (and inspecting) of security-flags is done via
 `psecflags(1)`.
+
+Per-service setting of security-flags is achievable by the `security_flags`
+property on the service `method_context`.  A `default` pseudo-flag specifies
+the flags from `svc:/system/process-security`, and flags can be
+added/subtracted from there much the same as with `privileges(5)`.
 
 ## Privilege
 
@@ -109,7 +114,8 @@ security-flags of a zone, and then take `PRIV_PROC_SECFLAGS` away from that
 zone, such that the security-flag configuration of the zone is forced upon it.
 
 This is somewhat ugly though, since `svc:/system/process-security` and its
-settings in the zone will thus be inoperative.
+settings in the zone will thus be inoperative, and I'm not sure how this would
+look from a UI perspective.
 
 ### Randomisation of executable base addresses requires PIE
 

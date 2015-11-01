@@ -1014,6 +1014,10 @@ lxml_get_method_context(pgroup_t *pg, xmlNodePtr ctx)
 	    SCF_TYPE_ASTRING, ctx, "resource_pool", NULL) != 0)
 		return (-1);
 
+	if (new_opt_str_prop_from_attr(pg, SCF_PROPERTY_SECFLAGS,
+	    SCF_TYPE_ASTRING, ctx, "security_flags", NULL) != 0)
+		return (-1);
+
 	for (cursor = ctx->xmlChildrenNode; cursor != NULL;
 	    cursor = cursor->next) {
 		if (lxml_ignorable_block(cursor))
@@ -1100,7 +1104,8 @@ lxml_get_exec_method(entity_t *entity, xmlNodePtr emeth)
 	/*
 	 * There is a possibility that a method context also exists, in which
 	 * case the following attributes are defined: project, resource_pool,
-	 * working_directory, profile, user, group, privileges, limit_privileges
+	 * working_directory, profile, user, group, privileges,
+	 * limit_privileges, security_flags
 	 */
 	for (cursor = emeth->xmlChildrenNode; cursor != NULL;
 	    cursor = cursor->next) {

@@ -26,6 +26,7 @@
 /*
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
  */
+
 #include <struct_layout.h>
 
 
@@ -103,7 +104,6 @@ static const sl_pstatus_layout_t pstatus_layout = {
 	{ 312,	4,	0,	1 },		/* pr_projid */
 	{ 316,	4,	0,	1 },		/* pr_nzomb */
 	{ 320,	4,	0,	1 },		/* pr_zoneid */
-	{ 324,	8,	0,	0 },		/* pr_secflags */
 	{ 384,	1296,	0,	0 },		/* pr_lwp */
 };
 
@@ -377,10 +377,11 @@ static const sl_prfdinfo_layout_t prfdinfo_layout = {
 };
 
 
-static const sl_psecflags_layout_t psecflags_layout = {
-	{ 0,	8,	0,	0 },		/* sizeof (psecflags_t) */
-	{ 0,	4,	0,	0 },		/* psf_effective */
-	{ 4,	4,	0,	0 },		/* psf_inherit */
+static const sl_prsecflags_layout_t prsecflags_layout = {
+	{ 0,	12,	0,	0 },		/* sizeof (prsecflags_t) */
+	{ 0,	4,	0,	0 },		/* pr_version */
+	{ 4,	4,	0,	0 },		/* pr_effective */
+	{ 8,	4,	0,	0 },		/* pr_inherit */
 };
 
 
@@ -407,7 +408,7 @@ static const sl_arch_layout_t layout_amd64 = {
 	&timestruc_layout,
 	&utsname_layout,
 	&prfdinfo_layout,
-	&psecflags_layout,
+	&prsecflags_layout,
 };
 
 

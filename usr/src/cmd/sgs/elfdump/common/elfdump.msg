@@ -310,6 +310,8 @@
 			 otherwise malformed\n"
 @ MSG_NOTE_BADCORETYPE	"%s: unknown note type %#x\n"
 
+@ MSG_NOTE_BAD_SECFLAGS_VER	"unknown prsecflags_t version: "
+
 @ _END_
 
 # The following strings represent reserved words, files, pathnames and symbols.
@@ -465,7 +467,7 @@
 @ MSG_CNOTE_DESC_PSTATUS_T		"desc: (pstatus_t)"
 @ MSG_CNOTE_DESC_STRUCT_UTSNAME		"desc: (struct utsname)"
 @ MSG_CNOTE_DESC_PRFDINFO_T		"desc: (prfdinfo_t)"
-
+@ MSG_CNOTE_DESC_PRSECFLAGS_T		"desc: (prsecflags_t)"
 
 @ MSG_CNOTE_FMT_LINE		"%*s%-*s%s"
 @ MSG_CNOTE_FMT_LINE_2UP	"%*s%-*s%-*s%-*s%s"
@@ -561,7 +563,6 @@
 @ MSG_CNOTE_T_PR_RUID			"pr_ruid:"
 @ MSG_CNOTE_T_PR_RVAL1			"pr_rval1:"
 @ MSG_CNOTE_T_PR_RVAL2			"pr_rval2:"
-@ MSG_CNOTE_T_PR_SECFLAGS		"pr_secflags:"
 @ MSG_CNOTE_T_PR_SETS			"pr_sets:"
 @ MSG_CNOTE_T_PR_SETSIZE		"pr_setsize:"
 @ MSG_CNOTE_T_PR_SGID			"pr_sgid:"
@@ -596,8 +597,9 @@
 @ MSG_CNOTE_T_PR_WSTAT			"pr_wstat:"
 @ MSG_CNOTE_T_PR_ZOMB			"pr_zomb:"
 @ MSG_CNOTE_T_PR_ZONEID			"pr_zoneid:"
-@ MSG_CNOTE_T_PSF_EFFECTIVE		"psf_effective:"
-@ MSG_CNOTE_T_PSF_INHERIT		"psf_inherit:"
+@ MSG_CNOTE_T_PR_EFFECTIVE		"psf_effective:"
+@ MSG_CNOTE_T_PR_INHERIT		"psf_inherit:"
+@ MSG_CNOTE_T_PR_VERSION		"pr_version:"
 @ MSG_CNOTE_T_SA_FLAGS			"sa_flags:"
 @ MSG_CNOTE_T_SA_HANDLER		"sa_handler:"
 @ MSG_CNOTE_T_SA_MASK			"sa_mask:"

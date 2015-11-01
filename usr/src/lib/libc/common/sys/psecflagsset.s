@@ -9,9 +9,7 @@
  * http://www.illumos.org/license/CDDL.
  */
 
-/*
- * Copyright 2014 <contributor>.  All rights reserved.
- */
+/* Copyright 2015, Richard Lowe */
 
 	.file	"psecflagsset.s"
 

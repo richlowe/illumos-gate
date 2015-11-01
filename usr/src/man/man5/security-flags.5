@@ -8,6 +8,8 @@
 .\" source.  A copy of the CDDL is also available via the Internet at
 .\" http://www.illumos.org/license/CDDL.
 .\"
+.\" Copyright 2015, Richard Lowe.
+.\"
 .TH "SECURITY-FLAGS" "5" "May 5, 2014"
 .SH "NAME"
 \fBsecurity-flags\fR - process security flags
@@ -33,7 +35,7 @@ Currently available features are:
 .sp
 .ne 2
 .na
-Address Space Layout Randomisation (ASLR)
+Address Space Layout Randomisation (\fBASLR\fR)
 .ad
 .RS 11n
 The base addresses of the stack, heap and shared library (including
@@ -50,14 +52,34 @@ tag has a value of 1, ASLR will be enabled. If the flag has a value of
 ASLR flag will be inherited as normal.
 .RE
 
+.sp
+.ne 2
+.na
+Forbid mappings at NULL (\fBFORBIDNULLMAP\fR)
+.ad
+.RS 11n
+Mappings with an address of 0 are forbidden, and return EINVAL rather than
+being honored.
+.RE
+
+.sp
+.ne 2
+.na
+Make the userspace stack non-executable (\fBNOEXECSTACK\fR)
+.ad
+.RS 11n
+The stack will be mapped without executable permission, and attempts to
+execute it will fault.
+.RE
+
 System default security-flags are configured via properties on the
 \fBsvc:/system/process-security\fR service, which contains a boolean property
-per-flag in the \fBsecflags\fR property group.  For example, to enable ASLR by
+per-flag in the \fBsecurity_flags\fR property group.  For example, to enable ASLR by
 default you would execute the following commands:
 .sp
 .in +2
 .nf
-# svccfg -s svc:/system/process-security setprop secflags/aslr = true
+# svccfg -s svc:/system/process-security setprop security_flags/aslr = true
 .fi
 .in -2
 .sp

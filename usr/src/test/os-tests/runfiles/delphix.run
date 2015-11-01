@@ -24,5 +24,10 @@ outputdir = /var/tmp/test_results
 [/opt/os-tests/tests/poll_test]
 user = root
 
+[/opt/os-tests/tests/secflags]
+user = root
+tests = ['secflags_auxv']
+
 [/opt/os-tests/tests/sigqueue]
 tests = ['sigqueue_queue_size']
+

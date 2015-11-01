@@ -100,7 +100,8 @@ uint_t auxv_hwcap32_2 = 0;	/* 32-bit version of auxv_hwcap2 */
 #define	PSUIDFLAGS		(SNOCD|SUGID)
 
 /*
- * These are consumed within the specific exec modules, but are defined here because
+ * These are consumed within the specific exec modules, but are defined here
+ * because
  *
  * 1) The exec modules are unloadable, which would make this near useless.
  *
@@ -109,9 +110,9 @@ uint_t auxv_hwcap32_2 = 0;	/* 32-bit version of auxv_hwcap2 */
  *
  * All must be powers of 2.
  */
-volatile size_t aslr_max_brk_skew = 16 * 1024 * 1024; /* 16MB */
-#pragma weak exec_stackgap = aslr_max_stack_skew      /* Old, compatible name */
-volatile size_t aslr_max_stack_skew = 64 * 1024;      /* 64KB */
+size_t aslr_max_brk_skew = 16 * 1024 * 1024; /* 16MB */
+#pragma weak exec_stackgap = aslr_max_stack_skew /* Old, compatible name */
+size_t aslr_max_stack_skew = 64 * 1024; /* 64KB */
 
 /*
  * exece() - system call wrapper around exec_common()
@@ -676,7 +677,10 @@ gexec(
 	}
 
 	/* The new image gets the inheritable secflags as its secflags */
-	/* XXX: This probably means we have the wrong secflags when exec fails */
+	/*
+	 * XXX: This probably means we have the wrong secflags when exec
+	 * fails
+	 */
 	secflag_promote(pp);
 
 	/* SunOS 4.x buy-back */
@@ -739,7 +743,8 @@ gexec(
 	 * Use /etc/system variable to determine if the stack
 	 * should be marked as executable by default.
 	 */
-	if (noexec_user_stack)
+	if ((noexec_user_stack != 0) ||
+	    secflag_enabled(pp, PROC_SEC_NOEXECSTACK))
 		args->stk_prot &= ~PROT_EXEC;
 
 	args->execswp = eswp; /* Save execsw pointer in uarg for exec_func */
@@ -1819,14 +1824,15 @@ exec_get_spslew(void)
 	    !secflag_enabled(curproc, PROC_SEC_ASLR)) {
 #ifdef sun4v
 		uint_t spcolor = atomic_inc_32_nv(&sp_current_color);
-		return ((size_t)((spcolor & sp_color_mask) * SA(sp_color_stride)));
+		return ((size_t)((spcolor & sp_color_mask) *
+		    SA(sp_color_stride)));
 #else
 		return (0);
 #endif
 	}
 
 	(void) random_get_pseudo_bytes((uint8_t *)&off, sizeof (off));
-	return SA(P2PHASE(off, aslr_max_stack_skew));
+	return (SA(P2PHASE(off, aslr_max_stack_skew)));
 }
 
 /*

@@ -772,28 +772,18 @@ at_flags(long val, char *instr, size_t n, char *str)
 	}
 }
 
-static struct auxsecfl {
-	uint_t af_flag;
-	const char *af_name;
-} auxsecfl[] = {
-	{ PROC_SEC_ASLR,	"aslr" },
-};
-
 /*ARGSUSED*/
 static void
 at_secflags(long val, char *instr, size_t n, char *str)
 {
-	int i;
+	char *buf;
 
 	*str = '\0';
+	if ((buf = secflags_to_str(val)) == NULL)
+		return;		/* stringifying to NULL is fine */
 
-	for (i = 0; i < sizeof (auxsecfl)/sizeof (struct auxsecfl); i++) {
-		if ((val & auxsecfl[i].af_flag) != 0) {
-			if (*str != '\0')
-				(void) strlcat(str, ",", n);
-			(void) strlcat(str, auxsecfl[i].af_name, n);
-		}
-	}
+	(void) strlcpy(str, buf, n);
+	free(buf);
 }
 
 #define	MAX_AT_NAME_LEN	15

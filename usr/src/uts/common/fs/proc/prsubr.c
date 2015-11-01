@@ -893,7 +893,6 @@ prgetstatus(proc_t *p, pstatus_t *sp, zone_t *zp)
 	sp->pr_taskid = p->p_task->tk_tkid;
 	sp->pr_projid = p->p_task->tk_proj->kpj_id;
 	sp->pr_zoneid = p->p_zone->zone_id;
-	bcopy(&p->p_secflags, &sp->pr_secflags, sizeof (psecflags_t));
 	hrt2ts(mstate_aggr_state(p, LMS_USER), &sp->pr_utime);
 	hrt2ts(mstate_aggr_state(p, LMS_SYSTEM), &sp->pr_stime);
 	TICK_TO_TIMESTRUC(p->p_cutime, &sp->pr_cutime);
@@ -1117,7 +1116,6 @@ prgetstatus32(proc_t *p, pstatus32_t *sp, zone_t *zp)
 	sp->pr_taskid = p->p_task->tk_tkid;
 	sp->pr_projid = p->p_task->tk_proj->kpj_id;
 	sp->pr_zoneid = p->p_zone->zone_id;
-	bcopy(&p->p_secflags, &sp->pr_secflags, sizeof (psecflags_t));
 	hrt2ts32(mstate_aggr_state(p, LMS_USER), &sp->pr_utime);
 	hrt2ts32(mstate_aggr_state(p, LMS_SYSTEM), &sp->pr_stime);
 	TICK_TO_TIMESTRUC32(p->p_cutime, &sp->pr_cutime);
@@ -4155,6 +4153,16 @@ prgetcred(proc_t *p, prcred_t *pcrp)
 	mutex_enter(&p->p_crlock);
 	cred2prcred(p->p_cred, pcrp);
 	mutex_exit(&p->p_crlock);
+}
+
+void
+prgetsecflags(proc_t *p, prsecflags_t *psfp)
+{
+	ASSERT(psfp != NULL);
+
+	psfp->pr_version = PRSECFLAGS_VERSION_CURRENT;
+	psfp->pr_effective = p->p_secflags.psf_effective;
+	psfp->pr_inherit = p->p_secflags.psf_inherit;
 }
 
 /*

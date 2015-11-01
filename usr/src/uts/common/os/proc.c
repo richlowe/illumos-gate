@@ -161,25 +161,9 @@ freepctx(proc_t *p, int isexec)
 }
 
 boolean_t
-secflag_enabled(proc_t *p, uint_t flag)
+secflag_enabled(proc_t *p, secflagset_t flag)
 {
-	return ((p->p_secflags.psf_effective & flag) != 0);
-}
-
-void
-secflag_set(proc_t *p, uint_t flag)
-{
-	p->p_secflags.psf_inherit = flag;
-}
-
-void
-secflag_enable(proc_t *p, uint_t flag) {
-	p->p_secflags.psf_inherit |= flag;
-}
-
-void
-secflag_disable(proc_t *p, uint_t flag) {
-	p->p_secflags.psf_inherit &= ~flag;
+	return (secflag_isset(p->p_secflags.psf_effective, flag));
 }
 
 void

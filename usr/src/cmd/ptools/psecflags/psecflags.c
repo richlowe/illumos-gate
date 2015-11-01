@@ -9,6 +9,8 @@
  * http://www.illumos.org/license/CDDL.
  */
 
+/* Copyright 2015, Richard Lowe. */
+
 #include <err.h>
 #include <errno.h>
 #include <grp.h>
@@ -19,120 +21,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/secflags.h>
+#include <sys/types.h>
 
 #include <libproc.h>
 #include <libzonecfg.h>
 
 extern const char *__progname;
-extern int psecflags(idtype_t, id_t, psecflags_cmd_t, uint_t);
-
-struct flagdesc {
-	uint_t value;
-	char *name;
-} flagdescs[] = {
-	{ PROC_SEC_ASLR, "aslr" },
-	{ 0x0, NULL }
-};
 
 void
-print_flags(char *set, uint_t flags)
+print_flags(char *set, secflagset_t flags)
 {
 	char *buf;
-	size_t buflen = 13;	/* 0x + 8 digits + comma + space + NUL */
-	struct flagdesc *fd;
 
-	if (flags == 0) {
-		(void) printf(gettext("\t%s:\tnone\n"), set);
-		return;
-	}
-
-	for (fd = flagdescs; fd->value != 0x0; fd++)
-		buflen += strlen(fd->name) + 2; /* + comma, space */
-
-	if ((buf = calloc(buflen, sizeof (char))) == NULL)
-		err(1, gettext("allocation failed"));
-
-	for (fd = flagdescs; fd->value != 0; fd++) {
-		if (flags & fd->value)
-			(void) snprintf(buf, buflen, "%s, %s", buf, fd->name);
-		flags &= ~fd->value;
-	}
-
-	if (flags != 0)	/* Contained unknown flags */
-		(void) snprintf(buf, buflen, "%s, 0x%08x", buf, flags);
-
-	buf += 2;		/* Skip the comma on the first entry */
+	if ((buf = secflags_to_str(flags)) == NULL)
+		err(1, gettext("could not stringify security-flags"));
 
 	(void) printf("\t%s:\t%s\n", set, buf);
 	free(buf);
-}
-
-typedef struct {
-	psecflags_cmd_t cmd;
-	uint_t value;
-} act_arg_t;
-
-act_arg_t *
-parse_secflags(const char *spec)
-{
-	char *flag = NULL;
-	char *s;
-	struct flagdesc *fd;
-	boolean_t fail = B_FALSE;
-	act_arg_t *ret;
-
-	if ((ret = malloc(sizeof (act_arg_t))) == NULL)
-		err(1, gettext("allocation failed"));
-
-	if ((s = strdup(spec)) == NULL)
-		err(1, gettext("allocation failed"));
-
-	if (s[0] == '+') {
-		ret->cmd = PSECFLAGS_ENABLE;
-		s++;
-	} else if (s[0] == '-') {
-		ret->cmd = PSECFLAGS_DISABLE;
-		s++;
-	} else {
-		ret->cmd = PSECFLAGS_SET;
-	}
-
-	if (strncasecmp("none", s, strlen(s)) == 0) {
-		if (ret->cmd != PSECFLAGS_SET)
-			errx(1, gettext("'none' is only valid with set, not "
-			    "enable or disable"));
-		ret->value = 0x0;
-		free(s);
-		return (ret);
-	}
-
-next:
-	while ((flag = strsep(&s, ",")) != NULL) {
-		for (fd = flagdescs; fd->value != 0x0; fd++) {
-			if (strncasecmp(flag, fd->name,
-			    strlen(fd->name)) == 0) {
-				ret->value |= fd->value;
-				goto next;
-			}
-		}
-
-		if (strncasecmp("none", flag, strlen(flag)) == 0) {
-			(void) fprintf(stderr, gettext("%s: 'none' is not "
-			    "valid with other flags\n"), __progname);
-		} else {
-			(void) fprintf(stderr, gettext("%s: invalid "
-			    "security-flag: '%s'\n"),
-			    __progname, flag);
-		}
-		fail = B_TRUE;
-	}
-
-	free(s);
-
-	if (fail)
-		exit(1);
-
-	return (ret);
 }
 
 /*
@@ -220,7 +126,7 @@ getid(idtype_t type, char *value)
 int
 main(int argc, char **argv)
 {
-	act_arg_t *act = NULL;
+	psecflagdelta_t act;
 	int ret = 0;
 	int pgrab_flags = PGRAB_RDONLY;
 	int opt;
@@ -229,6 +135,7 @@ main(int argc, char **argv)
 	boolean_t usage = B_FALSE;
 	boolean_t e_flag = B_FALSE;
 	boolean_t l_flag = B_FALSE;
+	boolean_t s_flag = B_FALSE;
 
 	while ((opt = getopt(argc, argv, "eFi:ls:")) != -1) {
 		switch (opt) {
@@ -242,7 +149,10 @@ main(int argc, char **argv)
 			idtypename = optarg;
 			break;
 		case 's':
-			act = parse_secflags(optarg);
+			s_flag = B_TRUE;
+			if (secflags_parse(0, optarg, &act) == -1)
+				errx(1, "couldn't pares security flags: %s\n",
+				    optarg);
 			break;
 		case 'l':
 			l_flag = B_TRUE;
@@ -256,11 +166,11 @@ main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	if (l_flag && ((idtypename != NULL) || (act != NULL) || (argc != 0)))
+	if (l_flag && ((idtypename != NULL) || s_flag || (argc != 0)))
 		usage = B_TRUE;
-	if ((idtypename != NULL) && (act == NULL))
+	if ((idtypename != NULL) && !s_flag)
 		usage = B_TRUE;
-	if (e_flag && (act == NULL))
+	if (e_flag && !s_flag)
 		usage = B_TRUE;
 	if (!l_flag && argc <= 0)
 		usage = B_TRUE;
@@ -270,29 +180,29 @@ main(int argc, char **argv)
 		    gettext("usage:\t%s [-F] { pid | core } ...\n"),
 		    __progname);
 		(void) fprintf(stderr,
-		    gettext("\t%s -s [-+]flags [-i idtype] id ...\n"),
+		    gettext("\t%s -s spec [-i idtype] id ...\n"),
 		    __progname);
 		(void) fprintf(stderr,
-		    gettext("\t%s -s [-+]flags -e command [arg]...\n"),
+		    gettext("\t%s -s spec -e command [arg]...\n"),
 		    __progname);
 		(void) fprintf(stderr, gettext("\t%s -l\n"), __progname);
 		return (2);
 	}
 
 	if (l_flag) {
-		struct flagdesc *fd;
+		secflagset_t i;
+		const char *name;
 
-		for (fd = flagdescs; fd->value != 0x0; fd++) {
-			(void) printf("%s\n", fd->name);
-		}
+		for (i = 0; (name = secflag_to_str(i)) != NULL; i++)
+			(void) printf("%s\n", name);
 		return (0);
-	} else if ((act != NULL) && e_flag) {
-		if (psecflags(P_PID, P_MYID, act->cmd, act->value) != 0)
+	} else if (s_flag && e_flag) {
+		if (psecflags(P_PID, P_MYID, &act) != 0)
 			err(1, gettext("failed setting security-flags"));
 
 		(void) execvp(argv[0], &argv[0]);
 		err(1, "%s", argv[0]);
-	} else if (act != NULL) {
+	} else if (s_flag) {
 		int i;
 		id_t id;
 
@@ -307,7 +217,7 @@ main(int argc, char **argv)
 				    "identifier: '%s'"), argv[i]);
 			}
 
-			if (psecflags(idtype, id, act->cmd, act->value) != 0)
+			if (psecflags(idtype, id, &act) != 0)
 				err(1, gettext("failed setting "
 				    "security-flags"));
 		}
@@ -320,6 +230,7 @@ main(int argc, char **argv)
 		struct ps_prochandle *Pr;
 		const char *arg;
 		psinfo_t psinfo;
+		prsecflags_t psf;
 		int gcode;
 
 		if ((Pr = proc_arg_grab(arg = *argv++, PR_ARG_ANY,
@@ -341,8 +252,11 @@ main(int argc, char **argv)
 			    (int)psinfo.pr_pid, psinfo.pr_psargs);
 		}
 
-		print_flags("E", Pstatus(Pr)->pr_secflags.psf_effective);
-		print_flags("I", Pstatus(Pr)->pr_secflags.psf_inherit);
+		if (Psecflags(Pr, &psf) != 0)
+			err(1, gettext("cannot read secflags of %s"), arg);
+
+		print_flags("E", psf.pr_effective);
+		print_flags("I", psf.pr_inherit);
 
 		Prelease(Pr, 0);
 	}

@@ -483,40 +483,39 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 	}
 
 	/* If the binary has an explicit ASLR flag, it must be honoured */
-	if (dynamicphdr != NULL) {
+	if ((dynamicphdr != NULL) &&
+	    ((dynsize = dynamicphdr->p_filesz) > 0) &&
+	    /* XXX: This limit is entirely arbitrary */
+	    (dynsize <= 100 * sizeof (*dyn))) {
+		int ndyns = dynsize / sizeof (*dyn);
 		Dyn *dp;
 
 		dynsize = dynamicphdr->p_filesz;
 		dyn = kmem_alloc(dynsize, KM_SLEEP);
 
 		if ((error = vn_rdwr(UIO_READ, vp, (caddr_t)dyn, dynsize,
-		    (offset_t)dynamicphdr->p_offset, UIO_SYSSPACE, 0, (rlim64_t)0,
-		    CRED(), &resid)) != 0) {
+		    (offset_t)dynamicphdr->p_offset, UIO_SYSSPACE, 0,
+		    (rlim64_t)0, CRED(), &resid)) != 0) {
 			uprintf("%s: cannot read .dynamic section\n",
 			    exec_file);
 			goto out;
 		}
 
-		if (resid != 0)
-			goto out;
-
-		dp = dyn;
-		while (dp->d_tag != DT_NULL) {
+		for (dp = dyn; dp < (dyn + ndyns); dp++) {
 			if (dp->d_tag == DT_SUNW_ASLR) {
-				if (dp->d_un.d_val != 0) {
-					curproc->p_secflags.psf_effective |=
-					    PROC_SEC_ASLR;
-					curproc->p_secflags.psf_inherit |=
-					    PROC_SEC_ASLR;
+				secflagset_t *ef =
+				    &curproc->p_secflags.psf_effective;
+				secflagset_t *in =
+				    &curproc->p_secflags.psf_inherit;
 
+				if (dp->d_un.d_val != 0) {
+					secflag_set(ef, PROC_SEC_ASLR);
+					secflag_set(in, PROC_SEC_ASLR);
 				} else {
-					curproc->p_secflags.psf_effective &=
-					    ~PROC_SEC_ASLR;
-					curproc->p_secflags.psf_inherit &=
-					    ~PROC_SEC_ASLR;
+					secflag_clear(ef, PROC_SEC_ASLR);
+					secflag_clear(in, PROC_SEC_ASLR);
 				}
 			}
-			dp++;
 		}
 	}
 
@@ -814,6 +813,7 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 		 * implementation in userland.
 		 */
 		ADDAUX(aux, AT_SUN_SECFLAGS, p->p_secflags.psf_effective);
+
 		/*
 		 * Hardware capability flag word (performance hints)
 		 * Used for choosing faster library routines.
@@ -1249,7 +1249,7 @@ mapelfexec(
 	extern int use_brk_lpg;
 
 	if (ehdr->e_type == ET_DYN) {
-		uint_t flags = 0;
+		secflagset_t flags = 0;
 		/*
 		 * Obtain the virtual address of a hole in the
 		 * address space to map the "interpreter".

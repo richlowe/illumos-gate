@@ -1600,54 +1600,61 @@ prt_pc5(private_t *pri, int raw, long val)
 	prt_dec(pri, 0, PC_KY_NULL);
 }
 
-/*
- * Print a psecflags(2) command
- */
-void
-prt_psfcmd(private_t *pri, int raw, long val)
-{
-	const char *s = NULL;
-
-	if (raw == 0) {
-		switch ((psecflags_cmd_t)val) {
-		case PSECFLAGS_SET:
-			s = "PSECFLAGS_SET";
-			break;
-		case PSECFLAGS_DISABLE:
-			s = "PSECFLAGS_DISABLE";
-			break;
-		case PSECFLAGS_ENABLE:
-			s = "PSECFLAGS_ENABLE";
-			break;
-		}
-	}
-
-	if (s == NULL)
-		prt_dec(pri, 0, val);
-	else
-		outstring(pri, s);
-}
 
 void
-prt_psflags(private_t *pri, int raw, long val)
+prt_psflags(private_t *pri, secflagset_t val)
 {
-	char *str = pri->code_buf;
+	char str[1024];
 
-	if (raw == 1) {
-		prt_hex(pri, 0, val);
+	if (val == 0) {
+		outstring(pri, "0x0");
 		return;
 	}
 
 	*str = '\0';
-	if (val & PROC_SEC_ASLR) {
-		(void) strlcat(str, "|PROC_SEC_ASLR", sizeof (pri->code_buf));
-		val &= ~PROC_SEC_ASLR;
+	if (secflag_isset(val, PROC_SEC_ASLR)) {
+		(void) strlcat(str, "|PROC_SEC_ASLR", sizeof (str));
+		secflag_clear(&val, PROC_SEC_ASLR);
+	}
+	if (secflag_isset(val, PROC_SEC_FORBIDNULLMAP)) {
+		(void) strlcat(str, "|PROC_SEC_FORBIDNULLMAP",
+		    sizeof (str));
+		secflag_clear(&val, PROC_SEC_FORBIDNULLMAP);
+	}
+	if (secflag_isset(val, PROC_SEC_NOEXECSTACK)) {
+		(void) strlcat(str, "|PROC_SEC_NOEXECSTACK",
+		    sizeof (str));
+		secflag_clear(&val, PROC_SEC_NOEXECSTACK);
 	}
 
 	if (val != 0)
-		(void) snprintf(str, sizeof (pri->code_buf), "%s|%x", str, val);
+		(void) snprintf(str, sizeof (str), "%s|%#x", str, val);
 
 	outstring(pri, str + 1);
+}
+
+/*
+ * Print a psecflags(2) delta
+ */
+void
+prt_psdelta(private_t *pri, int raw, long value)
+{
+	psecflagdelta_t psd;
+
+	if ((raw != 0) ||
+	    (Pread(Proc, &psd, sizeof (psd), value) != sizeof (psd))) {
+		prt_hex(pri, 0, value);
+		return;
+	}
+	outstring(pri, "{ ");
+	prt_psflags(pri, psd.psd_add);
+	outstring(pri, ", ");
+	prt_psflags(pri, psd.psd_rem);
+	outstring(pri, ", ");
+	prt_psflags(pri, psd.psd_assign);
+	outstring(pri, ", ");
+	outstring(pri, psd.psd_ass_active ? "B_TRUE" : "B_FALSE");
+	outstring(pri, " }");
 }
 
 /*
@@ -2924,7 +2931,6 @@ void (* const Print[])() = {
 	prt_acf,	/* ACF -- print accept4 flags */
 	prt_pfd,	/* PFD -- print pipe fds */
 	prt_grf,	/* GRF -- print getrandom flags */
-	prt_psfcmd,	/* PSFCMD -- print psecflags(2) command */
-	prt_psflags,	/* PSFLG -- print psecflags(2) flags */
+	prt_psdelta,	/* PSDLT -- print psecflags(2) delta */
 	prt_dec,	/* HID -- hidden argument, make this the last one */
 };

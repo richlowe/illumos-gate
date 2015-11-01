@@ -620,11 +620,15 @@ smmap_common(caddr_t *addrp, size_t len,
 		return (EINVAL);
 	}
 
-	if ((flags & (MAP_FIXED | _MAP_RANDOMIZE)) == (MAP_FIXED | _MAP_RANDOMIZE)) {
+	if ((flags & (MAP_FIXED | _MAP_RANDOMIZE)) ==
+	    (MAP_FIXED | _MAP_RANDOMIZE)) {
 		return (EINVAL);
 	}
 
-	/* If it's not a fixed allocation and mmap ASLR is enabled, randomize it. */
+	/*
+	 * If it's not a fixed allocation and mmap ASLR is enabled, randomize
+	 * it.
+	 */
 	if (((flags & MAP_FIXED) == 0) &&
 	    secflag_enabled(curproc, PROC_SEC_ASLR))
 		flags |= _MAP_RANDOMIZE;

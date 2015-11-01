@@ -568,6 +568,7 @@ stubs_base:
 	NO_UNLOAD_STUB(procfs, prgetcred,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prgetpriv,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prgetprivsize,	nomod_zero);
+	NO_UNLOAD_STUB(procfs, prgetsecflags,	nomod_zero);        
 	NO_UNLOAD_STUB(procfs, prgetstatus,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prgetlwpstatus,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prgetpsinfo,	nomod_zero);

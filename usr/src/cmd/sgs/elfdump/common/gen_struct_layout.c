@@ -198,7 +198,6 @@ gen_pstatus(void)
 	SCALAR_FIELD(pstatus_t,		pr_projid,	1);
 	SCALAR_FIELD(pstatus_t,		pr_nzomb,	1);
 	SCALAR_FIELD(pstatus_t,		pr_zoneid,	1);
-	SCALAR_FIELD(pstatus_t,		pr_secflags,	0);
 	SCALAR_FIELD(pstatus_t,		pr_lwp,		0);
 
 	END;
@@ -589,13 +588,12 @@ gen_prfdinfo(void)
 }
 
 static void
-gen_psecflags(void)
+gen_prsecflags(void)
 {
-	START(psecflags, psecflags_t);
-
-	SCALAR_FIELD(psecflags_t, psf_effective, 0);
-	SCALAR_FIELD(psecflags_t, psf_inherit, 0);
-
+	START(prsecflags, prsecflags_t);
+	SCALAR_FIELD(prsecflags_t, pr_version, 0);
+	SCALAR_FIELD(prsecflags_t, pr_effective, 0);
+	SCALAR_FIELD(prsecflags_t, pr_inherit, 0);
 	END;
 }
 
@@ -639,7 +637,7 @@ main(int argc, char *argv[])
 	gen_timestruc();
 	gen_utsname();
 	gen_prfdinfo();
-	gen_psecflags();
+	gen_prsecflags();
 
 	/*
 	 * Generate the full arch_layout description
@@ -667,7 +665,7 @@ main(int argc, char *argv[])
 	(void) printf(fmt, "timestruc");
 	(void) printf(fmt, "utsname");
 	(void) printf(fmt, "prfdinfo");
-	(void) printf(fmt, "psecflags");
+	(void) printf(fmt, "prsecflags");
 	(void) printf("};\n");
 
 	/*

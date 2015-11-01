@@ -9,9 +9,7 @@
  * http://www.illumos.org/license/CDDL.
  */
 
-/*
- * Copyright 2014 <contributor>.  All rights reserved.
- */
+/* Copyright 2015, Richard Lowe. */
 
 #include <sys/ddi.h>
 #include <sys/errno.h>
@@ -21,13 +19,8 @@
 #include <sys/systm.h>
 #include <sys/types.h>
 
-struct psecargs {
-	psecflags_cmd_t cmd;
-	uint_t val;
-};
-
 static int
-psecdo(proc_t *p, struct psecargs *args)
+psecdo(proc_t *p, psecflagdelta_t *args)
 {
 	mutex_enter(&p->p_lock);
 
@@ -36,31 +29,31 @@ psecdo(proc_t *p, struct psecargs *args)
 		return (EPERM);
 	}
 
-	switch (args->cmd) {
-	case PSECFLAGS_SET:
-		secflag_set(p, args->val);
-		break;
-	case PSECFLAGS_DISABLE:
-		secflag_disable(p, args->val);
-		break;
-	case PSECFLAGS_ENABLE:
-		secflag_enable(p, args->val);
-		break;
+	if (args->psd_ass_active) {
+		p->p_secflags.psf_inherit = args->psd_assign;
+	} else {
+		if (!secflag_isempty(args->psd_add)) {
+			p->p_secflags.psf_inherit |= args->psd_add;
+		}
+		if (!secflag_isempty(args->psd_rem)) {
+			p->p_secflags.psf_inherit &= ~args->psd_rem;
+		}
 	}
+
 	mutex_exit(&p->p_lock);
 
 	return (0);
 }
 
 int
-psecflags(procset_t *psp, psecflags_cmd_t cmd, uint_t arg)
+psecflags(procset_t *psp, psecflagdelta_t *ap)
 {
 	procset_t procset;
-	struct psecargs args = { 0 };
+	psecflagdelta_t args;
 	int rv = 0;
 
 	/*
-	 * We don't check the validity in 'arg' for the sake of newer
+	 * We don't check the validity of the bits for the sake of newer
 	 * software on older systems not just falling down dead.
 	 *
 	 * XXX: I'm not particularly confident that's not dumb.
@@ -69,23 +62,15 @@ psecflags(procset_t *psp, psecflags_cmd_t cmd, uint_t arg)
 	if (copyin(psp, &procset, sizeof (procset)) != 0)
 		return (set_errno(EFAULT));
 
+	if (copyin(ap, &args, sizeof (psecflagdelta_t)) != 0)
+		return (set_errno(EFAULT));
+
 	/* secflags are per-process, procset must be in terms of processes */
 	if ((procset.p_lidtype == P_LWPID) ||
 	    (procset.p_ridtype == P_LWPID))
 		return (set_errno(EINVAL));
 
-	switch (cmd) {
-	case PSECFLAGS_SET:
-	case PSECFLAGS_DISABLE:
-	case PSECFLAGS_ENABLE:
-		args.cmd = cmd;
-		args.val = arg;
-		rv = dotoprocs(&procset, psecdo,
-		    (caddr_t)&args);
-		break;
-	default:
-		return (set_errno(EINVAL));
-	}
+	rv = dotoprocs(&procset, psecdo, (caddr_t)&args);
 
 	return (rv ? set_errno(rv) : 0);
 }

@@ -2985,6 +2985,16 @@ $endif
 	_rpcsys;
 	_sbrk_grow_aligned;
 	scrwidth;
+        secflag_by_name;
+        secflag_clear;
+        secflag_isempty;
+        secflag_isset;
+        secflag_set;
+        secflag_to_bit;
+        secflag_to_str;
+        secflag_zero;
+        secflags_parse;
+        secflags_to_str;
 	semctl64;
 	_semctl64;
 	set_setcontext_enforcement;

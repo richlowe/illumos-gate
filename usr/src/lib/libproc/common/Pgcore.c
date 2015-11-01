@@ -1418,6 +1418,17 @@ Pfgcore(struct ps_prochandle *P, int fd, core_content_t content)
 			goto err;
 	}
 
+
+	{
+		prsecflags_t psf;
+
+		if (Psecflags(P, &psf) != 0)
+			goto err;
+
+		if (write_note(fd, NT_SECFLAGS, &psf, sizeof (psf), &doff) != 0)
+			goto err;
+	}
+
 #if defined(__i386) || defined(__amd64)
 	/* CSTYLED */
 	{

@@ -805,6 +805,9 @@ RTOBJS=				\
 	shm.o			\
 	sigev_thread.o
 
+SECFLAGSOBJS=			\
+	secflags.o
+
 TPOOLOBJS=			\
 	thread_pool.o
 
@@ -955,6 +958,7 @@ MOSTOBJS=			\
 	$(PORTSYS64)		\
 	$(AIOOBJS)		\
 	$(RTOBJS)		\
+	$(SECFLAGSOBJS)		\
 	$(TPOOLOBJS)		\
 	$(THREADSOBJS)		\
 	$(THREADSMACHOBJS)	\
@@ -1083,6 +1087,7 @@ SRCS=							\
 	$(PORTSYS:%.o=$(LIBCDIR)/port/sys/%.c)			\
 	$(AIOOBJS:%.o=$(LIBCDIR)/port/aio/%.c)			\
 	$(RTOBJS:%.o=$(LIBCDIR)/port/rt/%.c)			\
+	$(SECFLAGSOBJS:%.o=$(SRC)/common/secflags/%.c)		\
 	$(TPOOLOBJS:%.o=$(LIBCDIR)/port/tpool/%.c)		\
 	$(THREADSOBJS:%.o=$(LIBCDIR)/port/threads/%.c)		\
 	$(THREADSMACHOBJS:%.o=threads/%.c)		\
