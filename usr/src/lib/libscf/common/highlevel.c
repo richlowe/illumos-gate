@@ -373,7 +373,7 @@ scf_default_secflags(scf_handle_t *hndl, secflagset_t *flags)
 	/* Ensure sane defaults */
 	secflag_zero(flags);
 
-	for (i = 1; (flagname = secflag_to_str(i)) != NULL; i++) {
+	for (i = 0; (flagname = secflag_to_str(i)) != NULL; i++) {
 		char *pfmri;
 		uint8_t flagval = 0;
 
