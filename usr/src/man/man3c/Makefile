@@ -131,6 +131,7 @@ MANFILES= 	__fbufsize.3c					\
 	 	fgetpos.3c					\
 	 	fgetwc.3c					\
 	 	floating_to_decimal.3c				\
+		flock.3c					\
 	 	flockfile.3c					\
 	 	fmtmsg.3c					\
 	 	fnmatch.3c					\
@@ -411,6 +412,7 @@ MANFILES= 	__fbufsize.3c					\
 	 	sigfpe.3c					\
 	 	siginterrupt.3c					\
 	 	signal.3c					\
+		signalfd.3c					\
 	 	sigqueue.3c					\
 	 	sigsetops.3c					\
 	 	sigstack.3c					\

@@ -21,7 +21,7 @@
 .\"
 .\" Copyright (c) 2009 Sun Microsystems, Inc. All Rights Reserved.
 .\" Copyright 2011 Joshua M. Clulow <josh@sysmgr.org>
-.\" Copyright (c) 2011, 2014 by Delphix. All rights reserved.
+.\" Copyright (c) 2011, 2015 by Delphix. All rights reserved.
 .\" Copyright (c) 2013 by Saso Kiselkov. All rights reserved.
 .\" Copyright (c) 2014, Joyent, Inc. All rights reserved.
 .\" Copyright (c) 2014 by Adam Stevko. All rights reserved.
@@ -773,7 +773,7 @@ in which case it will be interpreted as a snapshot in the same filesystem as
 this dataset. The
 .Em snapshot
 may be a full snapshot name
-.No Po Em filesystem Ns @ Ns Em snapshot Pc ,
+.Po Em filesystem Ns @ Ns Em snapshot Pc ,
 which for clones may be a snapshot in the origin's filesystem
 .Pq or the origin of the origin's filesystem, etc.
 .El
@@ -1620,7 +1620,7 @@ administrators can use them to annotate datasets
 .Pq file systems, volumes, and snapshots .
 .Pp
 User property names must contain a colon
-.No Po Ns Sy \&:  Ns Pc
+.Pq Qq Sy \&:
 character to distinguish them from native properties. They may contain lowercase
 letters, numbers, and the following punctuation characters: colon
 .Pq Qq Sy \&: ,
@@ -2775,8 +2775,11 @@ Do not actually receive the stream. This can be useful in conjunction with the
 option to verify the name the receive operation would use.
 .It Fl o Sy origin Ns = Ns Ar snapshot
 Forces the stream to be received as a clone of the given snapshot.
-This is only valid if the stream is an incremental stream whose source
-is the same as the provided origin.
+If the stream is a full send stream, this will create the filesystem
+described by the stream as a clone of the specified snapshot. Which
+snapshot was specified will not affect the success or failure of the
+receive, as long as the snapshot does exist.  If the stream is an
+incremental send stream, all the normal verification will be performed.
 .It Fl u
 File system that is associated with the received stream is not mounted.
 .It Fl v
@@ -3527,7 +3530,7 @@ M       F       /tank/test/modified
 .Sh INTERFACE STABILITY
 .Sy Commited .
 .Sh SEE ALSO
-.Xr gzip 1,
+.Xr gzip 1 ,
 .Xr ssh 1 ,
 .Xr mount 1M ,
 .Xr share 1M ,
