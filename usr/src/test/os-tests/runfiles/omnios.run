@@ -26,7 +26,14 @@ user = root
 
 [/opt/os-tests/tests/secflags]
 user = root
-tests = ['secflags_auxv']
+tests = ['secflags_aslr',
+         'secflags_core',
+         'secflags_dts',
+         'secflags_elfdump',
+         'secflags_forbidnullmap',
+         'secflags_noexecstack',
+         'secflags_proc',
+         'secflags_psecflags']
 
 [/opt/os-tests/tests/sigqueue]
 tests = ['sigqueue_queue_size']

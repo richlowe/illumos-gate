@@ -46,18 +46,19 @@ static struct flagdesc {
 	{ 0x0, NULL }
 };
 
-/* XXX: secflagset_t as an int64 so this can fail still? */
-int
-secflag_by_name(const char *str)
+boolean_t
+secflag_by_name(const char *str, secflagset_t *ret)
 {
 	struct flagdesc *fd;
 
 	for (fd = flagdescs; fd->name != NULL; fd++) {
-		if (strcasecmp(str, fd->name) == 0)
-			return (fd->value);
+		if (strcasecmp(str, fd->name) == 0) {
+			*ret = fd->value;
+			return (B_TRUE);
+		}
 	}
 
-	return (-1);
+	return (B_FALSE);
 }
 
 const char *
@@ -127,7 +128,7 @@ secflags_parse(secflagset_t defaults, const char *flags, psecflagdelta_t *ret)
 
 
 	while ((flag = strsep(&s, ",")) != NULL) {
-		int sf = 0;
+		secflagset_t sf = 0;
 		boolean_t del = B_FALSE;
 
 		if (strcasecmp(flag, "default") == 0) {
@@ -151,7 +152,7 @@ secflags_parse(secflagset_t defaults, const char *flags, psecflagdelta_t *ret)
 			flag++;
 		}
 
-		if ((sf = secflag_by_name(flag)) == -1) {
+		if ((secflag_by_name(flag, &sf)) != B_TRUE) {
 			errno = EINVAL;
 			free(ss);
 			return (-1);

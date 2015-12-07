@@ -159,7 +159,7 @@ Pcred_core(struct ps_prochandle *P, prcred_t *pcrp, int ngroups, void *data)
 
 /*ARGSUSED*/
 static int
-Psecflags_core(struct ps_prochandle *P, prsecflags_t *psf, void *data)
+Psecflags_core(struct ps_prochandle *P, prsecflags_t **psf, void *data)
 {
 	core_info_t *core = data;
 
@@ -168,7 +168,10 @@ Psecflags_core(struct ps_prochandle *P, prsecflags_t *psf, void *data)
 		return (-1);
 	}
 
-	(void) memcpy(psf, core->core_secflags, sizeof (*psf));
+	if ((*psf = calloc(1, sizeof (prsecflags_t))) == NULL)
+		return (-1);
+
+	(void) memcpy(*psf, core->core_secflags, sizeof (prsecflags_t));
 
 	return (0);
 }
@@ -773,8 +776,11 @@ note_secflags(struct ps_prochandle *P, size_t nbytes)
 	if (core->core_secflags != NULL)
 		return (0);	/* Already seen */
 
-	if (sizeof (*psf) != nbytes)
+	if (sizeof (*psf) != nbytes) {
+		dprintf("Pgrab_core: NT_SECFLAGS changed size."
+		    "  Need to handle a version change?\n");
 		return (-1);
+	}
 
 	if (nbytes != 0 && ((psf = malloc(nbytes)) != NULL)) {
 		if (read(P->asfd, psf, nbytes) != nbytes) {

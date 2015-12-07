@@ -111,7 +111,6 @@ conv_cnote_auxv_type(Word type, Conv_fmt_flags_t fmt_flags,
 		MSG_AUXV_AT_SUN_EMULATOR,	MSG_AUXV_AT_SUN_BRANDNAME,
 		MSG_AUXV_AT_SUN_BRAND_AUX1,	MSG_AUXV_AT_SUN_BRAND_AUX2,
 		MSG_AUXV_AT_SUN_BRAND_AUX3,	MSG_AUXV_AT_SUN_HWCAP2,
-		MSG_AUXV_AT_SUN_SECFLAGS
 	};
 	static const conv_ds_msg_t ds_types_2014_2024 = {
 	    CONV_DS_MSG_INIT(2014, types_2014_2024) };

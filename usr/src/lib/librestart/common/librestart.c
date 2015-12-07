@@ -3133,7 +3133,7 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 				bad_fail("scf_property_get_value", ret);
 			}
 
-			(void) strcpy(cip->vbuf, ":default");
+			(void) strlcpy(cip->vbuf, ":default", cip->vbuf_sz);
 		} else {
 			ret = scf_value_get_astring(val, cip->vbuf,
 			    cip->vbuf_sz);
@@ -3145,7 +3145,7 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 		switch (ret) {
 		case SCF_ERROR_NOT_FOUND:
 			/* okay if missing. */
-			(void) strcpy(cip->vbuf, ":default");
+			(void) strlcpy(cip->vbuf, ":default", cip->vbuf_sz);
 			break;
 
 		case SCF_ERROR_CONNECTION_BROKEN:

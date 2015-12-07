@@ -29,7 +29,7 @@
 
 extern const char *__progname;
 
-void
+static void
 print_flags(char *set, secflagset_t flags)
 {
 	char *buf;
@@ -43,8 +43,7 @@ print_flags(char *set, secflagset_t flags)
 
 /*
  * Structure defining idtypes known to the priocntl command
- * along with the corresponding names and a liberal guess
- * of the max number of procs sharing any given ID of that type.
+ * along with the corresponding names.
  * The idtype values themselves are defined in <sys/procset.h>.
  */
 static struct idtypes {
@@ -72,7 +71,7 @@ static struct idtypes {
 	{ 0, 		NULL		}
 };
 
-int
+static int
 str2idtype(char *idtypnm, idtype_t *idtypep)
 {
 	struct idtypes	*curp;
@@ -87,7 +86,7 @@ str2idtype(char *idtypnm, idtype_t *idtypep)
 	return (-1);
 }
 
-id_t
+static id_t
 getid(idtype_t type, char *value)
 {
 	struct passwd *pwd;
@@ -116,8 +115,11 @@ getid(idtype_t type, char *value)
 		break;
 	}
 
+	errno = 0;
+
 	ret = (id_t)strtoul(value, &endp, 10);
-	if (errno || *endp != '\0')
+
+	if ((errno != 0) || (*endp != '\0'))
 		return ((id_t)-1);
 
 	return (ret);
@@ -230,7 +232,7 @@ main(int argc, char **argv)
 		struct ps_prochandle *Pr;
 		const char *arg;
 		psinfo_t psinfo;
-		prsecflags_t psf;
+		prsecflags_t *psf;
 		int gcode;
 
 		if ((Pr = proc_arg_grab(arg = *argv++, PR_ARG_ANY,
@@ -255,9 +257,10 @@ main(int argc, char **argv)
 		if (Psecflags(Pr, &psf) != 0)
 			err(1, gettext("cannot read secflags of %s"), arg);
 
-		print_flags("E", psf.pr_effective);
-		print_flags("I", psf.pr_inherit);
+		print_flags("E", psf->pr_effective);
+		print_flags("I", psf->pr_inherit);
 
+		Psecflags_free(&psf);
 		Prelease(Pr, 0);
 	}
 

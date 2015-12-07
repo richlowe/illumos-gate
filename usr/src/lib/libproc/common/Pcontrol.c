@@ -178,7 +178,7 @@ Pcred_live(struct ps_prochandle *P, prcred_t *pcrp, int ngroups, void *data)
 
 /* ARGSUSED */
 static int
-Psecflags_live(struct ps_prochandle *P, prsecflags_t *psf, void *data)
+Psecflags_live(struct ps_prochandle *P, prsecflags_t **psf, void *data)
 {
 	return (proc_get_secflags(P->pid, psf));
 }
@@ -1301,18 +1301,27 @@ Pcred(struct ps_prochandle *P, prcred_t *pcrp, int ngroups)
 	return (P->ops.pop_cred(P, pcrp, ngroups, P->data));
 }
 
+/* Return an allocated prsecflags_t */
 int
-Psecflags(struct ps_prochandle *P, prsecflags_t *psf)
+Psecflags(struct ps_prochandle *P, prsecflags_t **psf)
 {
 	int ret;
+
 	if ((ret = P->ops.pop_secflags(P, psf, P->data)) == 0) {
-		if (psf->pr_version != PRSECFLAGS_VERSION_1) {
+		if ((*psf)->pr_version != PRSECFLAGS_VERSION_1) {
 			errno = EINVAL;
 			return (-1);
 		}
 	}
 
 	return (ret);
+}
+
+void
+Psecflags_free(prsecflags_t **psf)
+{
+	free(*psf);
+	*psf = NULL;
 }
 
 static prheader_t *

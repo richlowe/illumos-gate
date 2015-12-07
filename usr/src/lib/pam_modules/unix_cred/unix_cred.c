@@ -592,6 +592,16 @@ adt_done:
 			goto out;
 		}
 		priv_basicset(def);
+		/*
+		 * If we can have PROC_SECFLAGS, add it.
+		 * If we can't, don't worry.
+		 *
+		 * This is part of the unfortunate inability to add privs that
+		 * users may wish to remove from "basic" while having them be
+		 * defaults.
+		 *
+		 * XXX: and needs a better solution.
+		 */
 		(void) priv_addset(def, PRIV_PROC_SECFLAGS);
 		errno = 0;
 		if ((pathconf("/", _PC_CHOWN_RESTRICTED) == -1) && (errno == 0))

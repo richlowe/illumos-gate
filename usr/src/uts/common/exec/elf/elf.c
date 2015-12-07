@@ -273,7 +273,6 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 	Cap		*cap = NULL;
 	ssize_t		capsize;
 	Dyn		*dyn = NULL;
-	ssize_t		dynsize;
 	int		hasu = 0;
 	int		hasauxv = 0;
 	int		hasintp = 0;
@@ -428,7 +427,6 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 		 *	AT_SUN_AUXFLAGS
 		 *	AT_SUN_HWCAP
 		 *	AT_SUN_HWCAP2
-		 *	AT_SUN_SECFLAGS
 		 *	AT_SUN_PLATFORM (added in stk_copyout)
 		 *	AT_SUN_EXECNAME (added in stk_copyout)
 		 *	AT_NULL
@@ -484,38 +482,47 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 	/* If the binary has an explicit ASLR flag, it must be honoured */
 	if ((dynamicphdr != NULL) &&
-	    ((dynsize = dynamicphdr->p_filesz) > 0) &&
-	    /* XXX: This limit is entirely arbitrary */
-	    (dynsize <= 100 * sizeof (*dyn))) {
-		int ndyns = dynsize / sizeof (*dyn);
+	    (dynamicphdr->p_filesz > 0)) {
 		Dyn *dp;
+		off_t i = 0;
 
-		dynsize = dynamicphdr->p_filesz;
-		dyn = kmem_alloc(dynsize, KM_SLEEP);
+#define	DYN_STRIDE	100
+		for (i = 0; i < dynamicphdr->p_filesz;
+		     i += sizeof (*dyn) * DYN_STRIDE) {
+			int ndyns = (dynamicphdr->p_filesz - i) / sizeof (*dyn);
+			size_t dynsize;
 
-		if ((error = vn_rdwr(UIO_READ, vp, (caddr_t)dyn, dynsize,
-		    (offset_t)dynamicphdr->p_offset, UIO_SYSSPACE, 0,
-		    (rlim64_t)0, CRED(), &resid)) != 0) {
-			uprintf("%s: cannot read .dynamic section\n",
-			    exec_file);
-			goto out;
-		}
+			ndyns = MIN(DYN_STRIDE, ndyns);
+			dynsize = ndyns * sizeof (*dyn);
 
-		for (dp = dyn; dp < (dyn + ndyns); dp++) {
-			if (dp->d_tag == DT_SUNW_ASLR) {
-				secflagset_t *ef =
-				    &curproc->p_secflags.psf_effective;
-				secflagset_t *in =
-				    &curproc->p_secflags.psf_inherit;
+			dyn = kmem_alloc(dynsize, KM_SLEEP);
 
-				if (dp->d_un.d_val != 0) {
-					secflag_set(ef, PROC_SEC_ASLR);
-					secflag_set(in, PROC_SEC_ASLR);
-				} else {
-					secflag_clear(ef, PROC_SEC_ASLR);
-					secflag_clear(in, PROC_SEC_ASLR);
+			if ((error = vn_rdwr(UIO_READ, vp, (caddr_t)dyn, dynsize,
+			    (offset_t)(dynamicphdr->p_offset + i),
+			    UIO_SYSSPACE, 0, (rlim64_t)0, CRED(), &resid)) != 0) {
+				uprintf("%s: cannot read .dynamic section\n",
+				    exec_file);
+				goto out;
+			}
+
+			for (dp = dyn; dp < (dyn + ndyns); dp++) {
+				if (dp->d_tag == DT_SUNW_ASLR) {
+					secflagset_t *ef =
+					    &curproc->p_secflags.psf_effective;
+					secflagset_t *in =
+					    &curproc->p_secflags.psf_inherit;
+
+					if (dp->d_un.d_val != 0) {
+						secflag_set(ef, PROC_SEC_ASLR);
+						secflag_set(in, PROC_SEC_ASLR);
+					} else {
+						secflag_clear(ef, PROC_SEC_ASLR);
+						secflag_clear(in, PROC_SEC_ASLR);
+					}
 				}
 			}
+
+			kmem_free(dyn, dynsize);
 		}
 	}
 
@@ -808,13 +815,6 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 		ADDAUX(aux, AT_SUN_AUXFLAGS, auxf);
 
 		/*
-		 * Put the effective security-flags into the aux vector, for
-		 * the sake of flags that need partial (or complete)
-		 * implementation in userland.
-		 */
-		ADDAUX(aux, AT_SUN_SECFLAGS, p->p_secflags.psf_effective);
-
-		/*
 		 * Hardware capability flag word (performance hints)
 		 * Used for choosing faster library routines.
 		 * (Potentially different between 32-bit and 64-bit ABIs)
@@ -954,8 +954,6 @@ out:
 		kmem_free(phdrbase, phdrsize);
 	if (cap != NULL)
 		kmem_free(cap, capsize);
-	if (dyn != NULL)
-		kmem_free(dyn, dynsize);
 	kmem_free(bigwad, sizeof (struct bigwad));
 	return (error);
 }

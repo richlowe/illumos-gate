@@ -663,4 +663,3 @@
 @ MSG_PHDRNAM_TLSSORT		".SUNW_tlssort(phdr)"
 @ MSG_PHDRNAM_UNWIND		".eh_frame_hdr(phdr)"
 @ MSG_PHDRNAM_VER		".SUNW_version(phdr)"
-

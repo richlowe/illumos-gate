@@ -203,7 +203,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/proc.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -221,7 +220,6 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
-#include <sys/procset.h>
 
 #include "startd.h"
 #include "protocol.h"

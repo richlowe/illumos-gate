@@ -39,7 +39,3 @@ if ! diff -u /tmp/expected.$$ /tmp/output.$$; then
 fi
 
 exit 0
-
-
-
-

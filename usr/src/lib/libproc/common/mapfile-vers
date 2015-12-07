@@ -276,6 +276,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	ps_ptwrite		{ FLAGS = NODYNSORT };	# Alias of ps_pwrite
 	ps_pwrite;
 	Psecflags;
+        Psecflags_free;
 	Pstack_iter;
 	Pstate;
 	Pstatus;

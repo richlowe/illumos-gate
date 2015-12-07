@@ -16,13 +16,13 @@ include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
 PROG =	secflags_aslr		\
-	secflags_auxv		\
-	secflags_proc		\
 	secflags_core		\
+	secflags_dts		\
 	secflags_elfdump	\
-	secflags_psecflags	\
 	secflags_forbidnullmap	\
-	secflags_noexecstack
+	secflags_noexecstack	\
+	secflags_proc		\
+	secflags_psecflags
 
 PROG += addrs-32 addrs-64 stacky
 

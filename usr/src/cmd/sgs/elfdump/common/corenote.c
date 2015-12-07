@@ -489,11 +489,6 @@ dump_auxv(note_state_t *state, const char *title)
 			num_fmt = SL_FMT_NUM_HEX;
 			break;
 
-		case AT_SUN_SECFLAGS:
-			w = extract_as_word(state, &layout->a_val);
-			vstr = conv_prsecflags(w, 0, &conv_buf.secflags);
-			break;
-
 		case AT_EXECFD:
 		case AT_PHENT:
 		case AT_PHNUM:

@@ -358,6 +358,9 @@ scf_is_fastboot_default(void)
 /*
  * Read the default security-flags from system/process-security and return a
  * secflagset_t suitable for psecflags(2)
+ *
+ * Unfortunately, this symbol must _exist_ in the native build, for the sake
+ * of the mapfile, even though we don't ever use it, and it will never work.
  */
 int
 scf_default_secflags(scf_handle_t *hndl, secflagset_t *flags)

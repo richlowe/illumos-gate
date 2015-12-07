@@ -47,8 +47,8 @@
 #include <sys/list.h>
 #include <sys/avl.h>
 #include <sys/door_impl.h>
-#include <sys/secflags.h>
 #include <sys/signalfd.h>
+#include <sys/secflags.h>
 
 #ifdef	__cplusplus
 extern "C" {

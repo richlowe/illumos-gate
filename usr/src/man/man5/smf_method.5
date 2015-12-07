@@ -459,11 +459,16 @@ launch the method. If the property is unset, \fB:home\fR is used.
 .sp .6
 .RS 4n
 The security flags to apply when launching the method.  See \fBsecurity-flags\fR(5).
-
+.sp
+.LP
 The "default" keyword specifies those flags specified in
 \fBsvc:/system/process-security\fR.  The "all" keyword enables all flags, the
 "none" keyword enables no flags.  Further flags may be added by specifying
 their name, or removed by specifying their name prefixed by '-' or '!'.
+.sp
+.LP
+Use of "all" has associated risks, as future versions of the system may
+include further flags which may harm poorly implemented software.
 .RE
 
 .sp

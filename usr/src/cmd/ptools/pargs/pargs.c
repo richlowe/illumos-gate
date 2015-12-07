@@ -772,20 +772,6 @@ at_flags(long val, char *instr, size_t n, char *str)
 	}
 }
 
-/*ARGSUSED*/
-static void
-at_secflags(long val, char *instr, size_t n, char *str)
-{
-	char *buf;
-
-	*str = '\0';
-	if ((buf = secflags_to_str(val)) == NULL)
-		return;		/* stringifying to NULL is fine */
-
-	(void) strlcpy(str, buf, n);
-	free(buf);
-}
-
 #define	MAX_AT_NAME_LEN	15
 
 struct aux_id {
@@ -827,7 +813,6 @@ static struct aux_id aux_arr[] = {
 	{ AT_SUN_BRAND_AUX1,	"AT_SUN_BRAND_AUX1",	at_null	},
 	{ AT_SUN_BRAND_AUX2,	"AT_SUN_BRAND_AUX2",	at_null	},
 	{ AT_SUN_BRAND_AUX3,	"AT_SUN_BRAND_AUX3",	at_null	},
-	{ AT_SUN_SECFLAGS,	"AT_SUN_SECFLAGS",	at_secflags },
 };
 
 #define	N_AT_ENTS (sizeof (aux_arr) / sizeof (struct aux_id))

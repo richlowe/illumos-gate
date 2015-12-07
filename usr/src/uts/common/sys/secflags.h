@@ -59,7 +59,7 @@ extern void secflag_zero(secflagset_t *);
     secflag_to_bit(PROC_SEC_NOEXECSTACK))
 
 #if !defined(_KERNEL)
-extern int secflag_by_name(const char *);
+extern boolean_t secflag_by_name(const char *, secflagset_t *);
 extern const char *secflag_to_str(secflagset_t);
 extern char *secflags_to_str(secflagset_t);
 extern int secflags_parse(secflagset_t, const char *, psecflagdelta_t *);

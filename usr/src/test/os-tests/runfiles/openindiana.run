@@ -27,8 +27,8 @@ user = root
 [/opt/os-tests/tests/secflags]
 user = root
 tests = ['secflags_aslr',
-         'secflags_auxv',
          'secflags_core',
+         'secflags_dts',
          'secflags_elfdump',
          'secflags_forbidnullmap',
          'secflags_noexecstack',
