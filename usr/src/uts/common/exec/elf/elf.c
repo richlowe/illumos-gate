@@ -431,7 +431,7 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 		 *	AT_SUN_EXECNAME (added in stk_copyout)
 		 *	AT_NULL
 		 *
-		 * total == 10
+		 * total == 9
 		 */
 		if (hasintp && hasu) {
 			/*
@@ -446,7 +446,7 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 			 *
 			 * total = 5
 			 */
-			args->auxsize = (10 + 5) * sizeof (aux_entry_t);
+			args->auxsize = (9 + 5) * sizeof (aux_entry_t);
 		} else if (hasintp) {
 			/*
 			 * Has PT_INTERP but no PT_PHDR
@@ -456,9 +456,9 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 			 *
 			 * total = 2
 			 */
-			args->auxsize = (10 + 2) * sizeof (aux_entry_t);
+			args->auxsize = (9 + 2) * sizeof (aux_entry_t);
 		} else {
-			args->auxsize = 10 * sizeof (aux_entry_t);
+			args->auxsize = 9 * sizeof (aux_entry_t);
 		}
 	} else {
 		args->auxsize = 0;
