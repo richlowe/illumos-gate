@@ -365,9 +365,9 @@ valid_va_range(caddr_t *basep, size_t *lenp, size_t minlen, int dir)
 }
 
 /*
- * Default to forbidding the first 64k of address space.
- * This protects most reasonably sized structures from dereferences through NULL:
- * ((foo_t *)0)->bar
+ * Default to forbidding the first 64k of address space.  This protects most
+ * reasonably sized structures from dereferences through NULL:
+ *     ((foo_t *)0)->bar
  */
 uintptr_t forbidden_null_mapping_sz = 0x10000;
 

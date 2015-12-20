@@ -61,7 +61,8 @@ check() {
     return $?
 }
 
-ACCEPTABLE=70                   # XXX: Arbitrary
+# Somewhat arbitrary
+ACCEPTABLE=70
 
 ret=0
 check 32bit /opt/os-tests/tests/secflags/addrs-32

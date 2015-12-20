@@ -22,7 +22,7 @@
 #
 # CDDL HEADER END
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # This file generates three different C files:
 #
@@ -107,7 +107,7 @@ BEGIN	{
 		priv = toupper($3)
 		if (set[key] != "")
 			set[key] = set[key] ";"
-		set[key] = set[key] "\\\n\t\tPRIV_ASSERT((set), " priv ")"
+		set[key] = set[key] "\\\n\t\tPRIV_ADDSET((set), " priv ")"
 	} else {
 		priv = toupper($2);
 	}
@@ -357,7 +357,7 @@ END	{
 
 		# Special privilege categories.
 		for (s in set)
-			print "\n#define\tPRIV_" s "_ASSERT(set)" set[s] \
+			print "\n#define\tPRIV_" s "_ADDSET(set)" set[s] \
 				> privhfile
 
 		print "\n#endif /* _KERNEL */" > privhfile

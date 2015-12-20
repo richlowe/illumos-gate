@@ -424,7 +424,7 @@ ignore_section_processing(Ofl_desc *ofl)
  */
 static uintptr_t
 new_section(Ofl_desc *ofl, Word shtype, const char *shname, Xword entcnt,
-	Is_desc **ret_isec, Shdr **ret_shdr, Elf_Data **ret_data)
+    Is_desc **ret_isec, Shdr **ret_shdr, Elf_Data **ret_data)
 {
 	typedef struct sec_info {
 		Word d_type;
@@ -689,7 +689,7 @@ new_section(Ofl_desc *ofl, Word shtype, const char *shname, Xword entcnt,
  */
 static uintptr_t
 new_section_from_template(Ofl_desc *ofl, Is_desc *tmpl_isp, size_t size,
-	Is_desc **ret_isec, Shdr **ret_shdr, Elf_Data **ret_data)
+    Is_desc **ret_isec, Shdr **ret_shdr, Elf_Data **ret_data)
 {
 	Shdr		*shdr;
 	Elf_Data	*data;

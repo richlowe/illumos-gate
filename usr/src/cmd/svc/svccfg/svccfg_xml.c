@@ -3358,7 +3358,8 @@ lxml_get_single_instance(entity_t *entity, xmlNodePtr si)
  * that are still located in the /var/svc manifests directory.
  */
 static int
-lxml_check_upgrade(const char *service) {
+lxml_check_upgrade(const char *service)
+{
 	scf_handle_t	*h = NULL;
 	scf_scope_t	*sc = NULL;
 	scf_service_t	*svc = NULL;

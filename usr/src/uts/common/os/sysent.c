@@ -112,7 +112,7 @@ long	pcsample(void *, long);
 int	privsys(int, priv_op_t, priv_ptype_t, void *, size_t, int);
 int	profil(unsigned short *, size_t, ulong_t, uint_t);
 ssize_t	pread(int, void *, size_t, off_t);
-int	psecflags(procset_t *, psecflagdelta_t *);
+int	psecflags(procset_t *, psecflagwhich_t, psecflagdelta_t *);
 ssize_t	pwrite(int, void *, size_t, off_t);
 ssize_t	read(int, void *, size_t);
 int	rename(char *, char *);

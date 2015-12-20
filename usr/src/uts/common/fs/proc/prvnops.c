@@ -416,7 +416,7 @@ out:
 /* ARGSUSED */
 static int
 prclose(vnode_t *vp, int flag, int count, offset_t offset, cred_t *cr,
-	caller_context_t *ct)
+    caller_context_t *ct)
 {
 	prnode_t *pnp = VTOP(vp);
 	prcommon_t *pcp = pnp->pr_pcommon;
@@ -2795,7 +2795,7 @@ prwrite(vnode_t *vp, uio_t *uiop, int ioflag, cred_t *cr, caller_context_t *ct)
 
 static int
 prgetattr(vnode_t *vp, vattr_t *vap, int flags, cred_t *cr,
-	caller_context_t *ct)
+    caller_context_t *ct)
 {
 	prnode_t *pnp = VTOP(vp);
 	prnodetype_t type = pnp->pr_type;
@@ -3370,8 +3370,8 @@ static vnode_t *(*pr_lookup_function[PR_NFILES])() = {
 
 static int
 prlookup(vnode_t *dp, char *comp, vnode_t **vpp, pathname_t *pathp,
-	int flags, vnode_t *rdir, cred_t *cr, caller_context_t *ct,
-	int *direntflags, pathname_t *realpnp)
+    int flags, vnode_t *rdir, cred_t *cr, caller_context_t *ct,
+    int *direntflags, pathname_t *realpnp)
 {
 	prnode_t *pnp = VTOP(dp);
 	prnodetype_t type = pnp->pr_type;
@@ -3421,8 +3421,8 @@ prlookup(vnode_t *dp, char *comp, vnode_t **vpp, pathname_t *pathp,
 /* ARGSUSED */
 static int
 prcreate(vnode_t *dp, char *comp, vattr_t *vap, vcexcl_t excl,
-	int mode, vnode_t **vpp, cred_t *cr, int flag, caller_context_t *ct,
-	vsecattr_t *vsecp)
+    int mode, vnode_t **vpp, cred_t *cr, int flag, caller_context_t *ct,
+    vsecattr_t *vsecp)
 {
 	int error;
 
@@ -4721,7 +4721,7 @@ static int (*pr_readdir_function[PR_NFILES])() = {
 /* ARGSUSED */
 static int
 prreaddir(vnode_t *vp, uio_t *uiop, cred_t *cr, int *eofp,
-	caller_context_t *ct, int flags)
+    caller_context_t *ct, int flags)
 {
 	prnode_t *pnp = VTOP(vp);
 
@@ -5937,7 +5937,7 @@ prrealvp(vnode_t *vp, vnode_t **vpp, caller_context_t *ct)
 /*ARGSUSED5*/
 static int
 prpoll(vnode_t *vp, short events, int anyyet, short *reventsp,
-	pollhead_t **phpp, caller_context_t *ct)
+    pollhead_t **phpp, caller_context_t *ct)
 {
 	prnode_t *pnp = VTOP(vp);
 	prcommon_t *pcp = pnp->pr_common;

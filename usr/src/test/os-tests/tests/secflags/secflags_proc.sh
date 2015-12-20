@@ -32,7 +32,7 @@ $pid:	sleep 100000
 	I:	aslr
 EOF
 
-/usr/bin/psecflags $pid > /tmp/output.$$
+/usr/bin/psecflags $pid | grep -v '[LU]:' > /tmp/output.$$
 
 if ! diff -u /tmp/expected.$$ /tmp/output.$$; then
     exit 1;

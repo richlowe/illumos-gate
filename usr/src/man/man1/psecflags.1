@@ -42,8 +42,8 @@ The second invocation modifies the security-flags of the processes described
 by \fIidtype\fR and \fIid\fR according as described by the \fI-s\fR argument.
 .P
 The third invocation describes the security-flags of the specified processes
-or core files.  The effective set is signified by '\fBE\fR', and the
-inheritable set by '\fBI\fR'.
+or core files.  The effective set is signified by '\fBE\fR', the inheritable
+set by '\fBI\fR', the lower set by '\fBL\fR', and the upper set by '\fBU\fR'.
 .P
 The fourth invocation lists the supported process security-flags.
 
@@ -202,6 +202,9 @@ given flag should be removed from the specification.  The pseudo-flags "all",
 "none" and "current" are supported, to indicate that all flags, no flags, or
 the current set of flags (respectively) are to be included.
 .P
+By default, the inheritable flags are changed.  You may optionally specify the
+set to change using their single-letter identifiers and an equals sign.
+.P
 For a list of valid security-flags, see \fBpsecflags -l\fR.
 .RE
 
@@ -215,6 +218,8 @@ example$ \fBpsecflags $$\fR
 100718:	-sh
 	E:	aslr
 	I:	aslr
+        L:	none
+        U:	aslr, forbidnullmap, noexecstack
 .fi
 .in -2
 .sp
@@ -230,6 +235,8 @@ $ psecflags $$
 100724:	-sh
 	E:	none
 	I:	aslr
+        L:	none
+        U:	aslr, forbidnullmap, noexecstack
 .fi
 .in -2
 .sp
@@ -240,6 +247,16 @@ $ psecflags $$
 .in +2
 .nf
 example# \fBpsecflags -s current,-aslr -i uid bob\fR
+.fi
+.in -2
+
+.LP
+\fBExample 4\fR Add the aslr flag to the lower set, so that all future
+child processes must have this flag set.
+.sp
+.in +2
+.nf
+example# \fBpsecflags -s L=current,aslr $$\fR
 .fi
 .in -2
 

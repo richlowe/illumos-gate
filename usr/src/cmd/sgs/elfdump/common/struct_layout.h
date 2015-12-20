@@ -531,6 +531,8 @@ typedef struct {
 	sl_field_t		pr_version;
 	sl_field_t		pr_effective;
 	sl_field_t		pr_inherit;
+	sl_field_t		pr_lower;
+	sl_field_t		pr_upper;
 } sl_prsecflags_layout_t;
 
 /*

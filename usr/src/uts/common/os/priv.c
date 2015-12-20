@@ -89,8 +89,8 @@ priv_init(void)
 #endif
 	rw_init(&privinfo_lock, NULL, RW_DRIVER, NULL);
 
-	PRIV_BASIC_ASSERT(priv_basic);
-	PRIV_UNSAFE_ASSERT(&priv_unsafe);
+	PRIV_BASIC_ADDSET(priv_basic);
+	PRIV_UNSAFE_ADDSET(&priv_unsafe);
 	priv_fillset(&priv_fullset);
 
 	/*
@@ -480,21 +480,21 @@ void
 priv_addset(priv_set_t *set, int priv)
 {
 	ASSERT(priv >= 0 && priv < MAX_PRIVILEGE);
-	__PRIV_ASSERT(set, priv);
+	__PRIV_ADDSET(set, priv);
 }
 
 void
 priv_delset(priv_set_t *set, int priv)
 {
 	ASSERT(priv >= 0 && priv < MAX_PRIVILEGE);
-	__PRIV_CLEAR(set, priv);
+	__PRIV_DELSET(set, priv);
 }
 
 boolean_t
 priv_ismember(const priv_set_t *set, int priv)
 {
 	ASSERT(priv >= 0 && priv < MAX_PRIVILEGE);
-	return (__PRIV_ISASSERT(set, priv) ? B_TRUE : B_FALSE);
+	return (__PRIV_ISMEMBER(set, priv) ? B_TRUE : B_FALSE);
 }
 
 #define	PRIV_TEST_BODY(test) \

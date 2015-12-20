@@ -42,6 +42,7 @@
 #include <sys/kmem.h>
 #include <sys/proc.h>
 #include <sys/pathname.h>
+#include <sys/policy.h>
 #include <sys/cmn_err.h>
 #include <sys/systm.h>
 #include <sys/elf.h>
@@ -160,6 +161,43 @@ dtrace_safe_phdr(Phdr *phdrp, struct uarg *args, uintptr_t base)
 		return (-1);
 
 	args->thrptr = phdrp->p_vaddr + base;
+
+	return (0);
+}
+
+static int
+handle_secflag_dt(proc_t *p, uint_t dt, uint_t val)
+{
+	uint_t flag;
+
+	switch (dt) {
+	case DT_SUNW_ASLR:
+		flag = PROC_SEC_ASLR;
+		break;
+	default:
+		return (EINVAL);
+	}
+
+	if (val == 0) {
+		if (secflag_isset(p->p_secflags.psf_lower, flag))
+			return (EPERM);
+		if ((secpolicy_psecflags(CRED(), p, p) != 0) &&
+		    secflag_isset(p->p_secflags.psf_inherit, flag))
+			return (EPERM);
+
+		secflag_clear(&p->p_secflags.psf_inherit, flag);
+		secflag_clear(&p->p_secflags.psf_effective, flag);
+	} else {
+		if (!secflag_isset(p->p_secflags.psf_upper, flag))
+			return (EPERM);
+
+		if ((secpolicy_psecflags(CRED(), p, p) != 0) &&
+		    !secflag_isset(p->p_secflags.psf_inherit, flag))
+			return (EPERM);
+
+		secflag_set(&p->p_secflags.psf_inherit, flag);
+		secflag_set(&p->p_secflags.psf_effective, flag);
+	}
 
 	return (0);
 }
@@ -494,7 +532,7 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 #define	DYN_STRIDE	100
 		for (i = 0; i < dynamicphdr->p_filesz;
-		     i += sizeof (*dyn) * DYN_STRIDE) {
+		    i += sizeof (*dyn) * DYN_STRIDE) {
 			int ndyns = (dynamicphdr->p_filesz - i) / sizeof (*dyn);
 			size_t dynsize;
 
@@ -503,9 +541,10 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 			dyn = kmem_alloc(dynsize, KM_SLEEP);
 
-			if ((error = vn_rdwr(UIO_READ, vp, (caddr_t)dyn, dynsize,
-			    (offset_t)(dynamicphdr->p_offset + i),
-			    UIO_SYSSPACE, 0, (rlim64_t)0, CRED(), &resid)) != 0) {
+			if ((error = vn_rdwr(UIO_READ, vp, (caddr_t)dyn,
+			    dynsize, (offset_t)(dynamicphdr->p_offset + i),
+			    UIO_SYSSPACE, 0, (rlim64_t)0,
+			    CRED(), &resid)) != 0) {
 				uprintf("%s: cannot read .dynamic section\n",
 				    exec_file);
 				goto out;
@@ -513,17 +552,14 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 			for (dp = dyn; dp < (dyn + ndyns); dp++) {
 				if (dp->d_tag == DT_SUNW_ASLR) {
-					secflagset_t *ef =
-					    &curproc->p_secflags.psf_effective;
-					secflagset_t *in =
-					    &curproc->p_secflags.psf_inherit;
-
-					if (dp->d_un.d_val != 0) {
-						secflag_set(ef, PROC_SEC_ASLR);
-						secflag_set(in, PROC_SEC_ASLR);
-					} else {
-						secflag_clear(ef, PROC_SEC_ASLR);
-						secflag_clear(in, PROC_SEC_ASLR);
+					if ((error = handle_secflag_dt(p,
+					    DT_SUNW_ASLR,
+					    dp->d_un.d_val)) != 0) {
+						uprintf("%s: error setting "
+						    "security-flag from "
+						    "DT_SUNW_ASLR: %d\n",
+						    exec_file, error);
+						goto out;
 					}
 				}
 			}

@@ -39,7 +39,7 @@ core 'core.$pid' of $pid:	sleep 100000
 	I:	aslr
 EOF
 
-/usr/bin/psecflags core.${pid} > gcore-output.$$
+/usr/bin/psecflags core.${pid} | grep -v '[LU]:' > gcore-output.$$
 
 if ! diff -u gcore-expected.$$ gcore-output.$$; then
     exit 1;
@@ -54,7 +54,7 @@ core 'core' of $pid:	sleep 100000
 	I:	aslr
 EOF
 
-/usr/bin/psecflags core > core-output.$$
+/usr/bin/psecflags core | grep -v '[LU]:' > core-output.$$
 
 if ! diff -u core-expected.$$ core-output.$$; then
     exit 1;

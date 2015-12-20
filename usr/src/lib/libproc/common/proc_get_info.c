@@ -79,7 +79,8 @@ proc_get_secflags(pid_t pid, prsecflags_t **psf)
 	(void) snprintf(fname, sizeof (fname), "%s/%d/secflags",
 	    procfs_path, (int)pid);
 	if ((fd = open(fname, O_RDONLY)) >= 0) {
-		if (read(fd, *psf, sizeof (prsecflags_t)) == sizeof (prsecflags_t))
+		if (read(fd, *psf, sizeof (prsecflags_t)) ==
+		    sizeof (prsecflags_t))
 			rv = 0;
 		(void) close(fd);
 	}

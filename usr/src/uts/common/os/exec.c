@@ -830,7 +830,7 @@ gexec(
 			crfree(oldcred);
 
 			if (priv_basic_test >= 0 &&
-			    !PRIV_ISASSERT(&CR_IPRIV(newcred),
+			    !PRIV_ISMEMBER(&CR_IPRIV(newcred),
 			    priv_basic_test)) {
 				pid_t pid = pp->p_pid;
 				char *fn = PTOU(pp)->u_comm;

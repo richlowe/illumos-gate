@@ -856,6 +856,14 @@ dump_secflags(note_state_t *state, const char *title)
 		w = extract_as_word(state, &layout->pr_inherit);
 		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_INHERIT),
 		    conv_prsecflags(w, 0, &inv));
+
+		w = extract_as_word(state, &layout->pr_lower);
+		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_LOWER),
+		    conv_prsecflags(w, 0, &inv));
+
+		w = extract_as_word(state, &layout->pr_upper);
+		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_UPPER),
+		    conv_prsecflags(w, 0, &inv));
 	}
 
 	indent_exit(state);

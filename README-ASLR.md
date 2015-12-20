@@ -5,12 +5,13 @@ Briefly, see: `psecflags(1)`, `security-flags(5)`
 ## Administration
 
 ASLR is implemented via process security-flags (which we introduce), there are
-two sets of flags per-process:  The effective set and the inheritable set (see
-`security-flags(5)`).  The effective set is immutable, it can only change when
-the process calls `exec(2)`, at which point the effective set is replaced by
-the inheritable set (with one exception).  Security flags are inherited upon
-`fork(2)` (but the inheritable set is not promoted until `exec(2)`, as
-mentioned).
+four sets of flags per-process: The effective, inheritable, upper, and lower
+sets (see `security-flags(5)`).  The effective set is immutable, it can only
+change when the process calls `exec(2)`, at which point the effective set is
+replaced by the inheritable set (with one exception).  Security flags are
+inherited upon `fork(2)` (but the inheritable set is not promoted until
+`exec(2)`, as mentioned).  The upper and lower sets bound the permitted values
+of the inheritable set.
 
 This is such that a given execution of an executable has a constant set of
 security-flags, which simplifies things for everyone.
@@ -19,10 +20,10 @@ This unfortunately means that to enable ASLR fully system-wide, requires a
 reboot or at least restart of a majority of services.
 
 The system-wide ASLR flag is an SMF property on the new service
-`svc:/system/process-security`, which contains a `security_flags` property
-group, with one boolean property per implemented flag (see, again,
-`security-flags(5)`).  These will only affect services (and their
-children) started via SMF after the values have been changed.
+`svc:/system/process-security`, which contains `default`, `upper`, and `lower`
+property groups, with one boolean property per implemented flag (see, again,
+`security-flags(5)`).  These will only affect services (and their children)
+started via SMF after the values have been changed.
 
 Per-process setting (and inspecting) of security-flags is done via
 `psecflags(1)`.
@@ -53,6 +54,15 @@ This allows a process for which ASLR is known to be problematic to explicitly
 forbid it, and for processes of special sensitivity to mandate it.
 
 This is controlled via the `-z aslr` flag to `ld(1)`.
+
+ 
+## Per-zone configuration
+
+The default security flags for a zone, and the upper and lower limits, may be
+specified with the security-flags resource in zonecfg(1M).  These are applied
+to every process in NGZs (unlike the GZ, where there are a small number of
+processes we must miss)
+
 
 ## Missing bits/Problems/Worries
 
@@ -100,22 +110,6 @@ uses `dlopen(3c)` at unpredictable times (rather than, as is most common, during
 setup).  Dynamic objects tend to have strict (and high) alignment requirements
 which in such a process are likely to only be fulfillable at a single location
 in the address space gap we choose, and thus be entirely predictable.
- 
-### We want a per-zone configuration item, but it's not implemented yet
-
-I plan to implement a per-zone configuration item similar to `limitpriv` which
-describes a zones default security-flags.  This will be set during
-`zone_create` and apply to _every_ process in a zone (rather than the GZ
-implementation, from which `svc.startd(1M)`, `svc.configd(1M)`, and `init(1M)`
-are immune unless tagged).
-
-This will also allow a global zone administrator to configure the
-security-flags of a zone, and then take `PRIV_PROC_SECFLAGS` away from that
-zone, such that the security-flag configuration of the zone is forced upon it.
-
-This is somewhat ugly though, since `svc:/system/process-security` and its
-settings in the zone will thus be inoperative, and I'm not sure how this would
-look from a UI perspective.
 
 ### Randomisation of executable base addresses requires PIE
 

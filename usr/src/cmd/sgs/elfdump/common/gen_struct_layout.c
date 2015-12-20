@@ -594,6 +594,8 @@ gen_prsecflags(void)
 	SCALAR_FIELD(prsecflags_t, pr_version, 0);
 	SCALAR_FIELD(prsecflags_t, pr_effective, 0);
 	SCALAR_FIELD(prsecflags_t, pr_inherit, 0);
+	SCALAR_FIELD(prsecflags_t, pr_lower, 0);
+	SCALAR_FIELD(prsecflags_t, pr_upper, 0);
 	END;
 }
 
@@ -769,7 +771,7 @@ do_scalar_field(char *tname, char *fname, int _sign, char *dotfield)
 
 static void
 do_array_field(char *tname, char *fname,
-	int _sign, char *dotfield)
+    int _sign, char *dotfield)
 {
 	char comment[100];
 	ctf_arinfo_t ai;
@@ -845,7 +847,7 @@ static int gfi_iter(const char *fname, ctf_id_t mbrtid,
  */
 static int
 get_field_info(char *tname, char *fname, char *dotname,
-	int *offp, int *tidp)
+    int *offp, int *tidp)
 {
 	struct gfinfo gfi;
 	ctf_id_t stype;

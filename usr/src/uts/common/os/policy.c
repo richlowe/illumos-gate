@@ -145,10 +145,10 @@ int priv_basic_test = -1;
 #define	HAS_ALLZONEPRIVS(cr)	priv_issubset(ZONEPRIVS(cr), &CR_OEPRIV(cr))
 #define	HAS_PRIVILEGE(cr, pr)	((pr) == PRIV_ALL ? \
 					HAS_ALLPRIVS(cr) : \
-					PRIV_ISASSERT(&CR_OEPRIV(cr), pr))
+					PRIV_ISMEMBER(&CR_OEPRIV(cr), pr))
 
 #define	FAST_BASIC_CHECK(cr, priv)	\
-	if (PRIV_ISASSERT(&CR_OEPRIV(cr), priv)) { \
+	if (PRIV_ISMEMBER(&CR_OEPRIV(cr), priv)) { \
 		DTRACE_PROBE2(priv__ok, int, priv, boolean_t, B_FALSE); \
 		return (0); \
 	}
@@ -401,7 +401,7 @@ priv_policy_ap(const cred_t *cr, int priv, boolean_t allzone, int err,
 	    (!servicing_interrupt() &&
 	    priv_policy_override(cr, priv, allzone, ap) == 0)) {
 		if ((allzone || priv == PRIV_ALL ||
-		    !PRIV_ISASSERT(priv_basic, priv)) &&
+		    !PRIV_ISMEMBER(priv_basic, priv)) &&
 		    !servicing_interrupt()) {
 			PTOU(curproc)->u_acflag |= ASU; /* Needed for SVVS */
 			if (AU_AUDITING())
@@ -449,7 +449,7 @@ priv_policy_choice(const cred_t *cr, int priv, boolean_t allzone)
 
 	/* Audit success only */
 	if (res && AU_AUDITING() &&
-	    (allzone || priv == PRIV_ALL || !PRIV_ISASSERT(priv_basic, priv)) &&
+	    (allzone || priv == PRIV_ALL || !PRIV_ISMEMBER(priv_basic, priv)) &&
 	    !servicing_interrupt()) {
 		audit_priv(priv, allzone ? ZONEPRIVS(cr) : NULL, 1);
 	}
@@ -972,14 +972,14 @@ secpolicy_vnode_access2(const cred_t *cr, vnode_t *vp, uid_t owner,
 
 	/* Inline the basic privileges tests. */
 	if ((wantmode & VREAD) &&
-	    !PRIV_ISASSERT(&CR_OEPRIV(cr), PRIV_FILE_READ) &&
+	    !PRIV_ISMEMBER(&CR_OEPRIV(cr), PRIV_FILE_READ) &&
 	    priv_policy_va(cr, PRIV_FILE_READ, B_FALSE, EACCES, NULL,
 	    KLPDARG_VNODE, vp, (char *)NULL, KLPDARG_NOMORE) != 0) {
 		return (EACCES);
 	}
 
 	if ((wantmode & VWRITE) &&
-	    !PRIV_ISASSERT(&CR_OEPRIV(cr), PRIV_FILE_WRITE) &&
+	    !PRIV_ISMEMBER(&CR_OEPRIV(cr), PRIV_FILE_WRITE) &&
 	    priv_policy_va(cr, PRIV_FILE_WRITE, B_FALSE, EACCES, NULL,
 	    KLPDARG_VNODE, vp, (char *)NULL, KLPDARG_NOMORE) != 0) {
 		return (EACCES);
@@ -1384,9 +1384,9 @@ secpolicy_xvattr(xvattr_t *xvap, uid_t owner, cred_t *cr, vtype_t vtype)
 
 int
 secpolicy_vnode_setattr(cred_t *cr, struct vnode *vp, struct vattr *vap,
-	const struct vattr *ovap, int flags,
-	int unlocked_access(void *, int, cred_t *),
-	void *node)
+    const struct vattr *ovap, int flags,
+    int unlocked_access(void *, int, cred_t *),
+    void *node)
 {
 	int mask = vap->va_mask;
 	int error = 0;

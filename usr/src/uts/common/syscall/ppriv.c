@@ -187,7 +187,7 @@ retry:
 	 * empty. That is not portable.
 	 */
 	if ((type == PRIV_EFFECTIVE || type == PRIV_PERMITTED) &&
-	    priv_basic_test >= 0 && !PRIV_ISASSERT(target, priv_basic_test)) {
+	    priv_basic_test >= 0 && !PRIV_ISMEMBER(target, priv_basic_test)) {
 		proc_t *p = curproc;
 		pid_t pid = p->p_pid;
 		char *fn = PTOU(p)->u_comm;

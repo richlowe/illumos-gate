@@ -169,5 +169,5 @@ secflag_enabled(proc_t *p, secflagset_t flag)
 void
 secflag_promote(proc_t *p)
 {
-	p->p_secflags.psf_effective = p->p_secflags.psf_inherit;
+	secflag_copy(&p->p_secflags.psf_effective, &p->p_secflags.psf_inherit);
 }

@@ -1425,7 +1425,8 @@ Pfgcore(struct ps_prochandle *P, int fd, core_content_t content)
 		if (Psecflags(P, &psf) != 0)
 			goto err;
 
-		if (write_note(fd, NT_SECFLAGS, psf, sizeof (prsecflags_t), &doff) != 0) {
+		if (write_note(fd, NT_SECFLAGS, psf,
+		    sizeof (prsecflags_t), &doff) != 0) {
 			Psecflags_free(&psf);
 			goto err;
 		}

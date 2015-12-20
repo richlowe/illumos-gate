@@ -40,7 +40,7 @@
 		  <propval name='duration' type='astring' value='transient' />
 		</property_group>
 
-		<property_group name='security_flags' type='application'>
+		<property_group name='default' type='application'>
 		  <propval name='aslr' type='boolean' value='false' />
 		  <propval name='forbidnullmap' type='boolean' value='false' />
 		  <propval name='noexecstack' type='boolean' value='false' />
@@ -48,6 +48,26 @@
 		  <propval name='value_authorization' type='astring'
 			   value='solaris.smf.value.process-security' />
 		</property_group>
+
+                <property_group name='lower' type='application'>
+		  <propval name='aslr' type='boolean' value='false' />
+		  <propval name='forbidnullmap' type='boolean' value='false' />
+		  <propval name='noexecstack' type='boolean' value='false' />
+
+		  <propval name='value_authorization' type='astring'
+			   value='solaris.smf.value.process-security' />
+		</property_group>
+
+                <property_group name='upper' type='application'>
+		  <propval name='aslr' type='boolean' value='true' />
+		  <propval name='forbidnullmap' type='boolean' value='true' />
+		  <propval name='noexecstack' type='boolean' value='true' />
+
+		  <propval name='value_authorization' type='astring'
+			   value='solaris.smf.value.process-security' />
+		</property_group>
+
+
 
 		<stability value="Unstable" />
 

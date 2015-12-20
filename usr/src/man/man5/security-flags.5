@@ -18,13 +18,16 @@ Each process on an illumos system has an associated set of security-flags
 which describe additional per-process security and exploit mitigation
 features which are enabled for that process.
 .P
-There are two sets of these flags for each process, the effective set
+There are four sets of these flags for each process, the effective set
 (abbreviated \fIE\fR) are the set which currently apply to the process and are
 immutable. The inheritable set (abbreviated \fII\fR) are the flags which will
 become effective the next time the process calls one of the \fBexec(2)\fR
 family of functions, and will be inherited as both the effective and
-inheritable sets by any child processes. The inheritable set may be changed
-at any time, subject to permissions.
+inheritable sets by any child processes. The upper set (abbreviated \fIU\fR)
+specify the maximal flags that a process can have in its inheritable set.  The
+lower set (abbreviated \fIL\fR) specify the minimal amount of flags that a
+process must have in its inheritable set.  The inheritable set may be changed
+at any time, subject to permissions and the lower and upper sets.
 .P
 To change the security-flags of a process one must have both permissions
 equivalent to those required to send a signal to the process and have the
@@ -74,12 +77,13 @@ execute it will fault.
 
 System default security-flags are configured via properties on the
 \fBsvc:/system/process-security\fR service, which contains a boolean property
-per-flag in the \fBsecurity_flags\fR property group.  For example, to enable ASLR by
-default you would execute the following commands:
+per-flag in the \fBdefault\fR, \fBlower\fR and \fBupper\fR, property groups.
+For example, to enable ASLR by default you would execute the following
+commands:
 .sp
 .in +2
 .nf
-# svccfg -s svc:/system/process-security setprop security_flags/aslr = true
+# svccfg -s svc:/system/process-security setprop default/aslr = true
 .fi
 .in -2
 .sp

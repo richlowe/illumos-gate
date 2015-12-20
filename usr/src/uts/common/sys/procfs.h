@@ -405,6 +405,8 @@ typedef struct prsecflags {
 	uint32_t pr_version;
 	secflagset_t pr_effective;
 	secflagset_t pr_inherit;
+	secflagset_t pr_lower;
+	secflagset_t pr_upper;
 } prsecflags_t;
 
 /*

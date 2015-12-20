@@ -35,17 +35,19 @@ gcore $pid >/dev/null
 
 cat > gcore-expected.$$ <<EOF
     namesz: 0x5
-    descsz: 0xc
+    descsz: 0x14
     type:   [ NT_SECFLAGS ]
     name:
         CORE\0
     desc: (prsecflags_t)
         pr_version:    1
-        psf_effective: [ ASLR ]
-        psf_inherit:   [ ASLR ]
+        pr_effective:  [ ASLR ]
+        pr_inherit:    [ ASLR ]
+        pr_lower:      0
+        pr_upper:      [ ASLR FORBIDNULLMAP NOEXECSTACK ]
 EOF
 
-/usr/bin/elfdump -n core.${pid} | grep -B5 -A3 prsecflags_t > gcore-output.$$
+/usr/bin/elfdump -n core.${pid} | grep -B5 -A5 prsecflags_t > gcore-output.$$
 
 if ! diff -u gcore-expected.$$ gcore-output.$$; then
     exit 1;
@@ -56,17 +58,19 @@ kill -SEGV $pid
 
 cat > core-expected.$$ <<EOF
     namesz: 0x5
-    descsz: 0xc
+    descsz: 0x14
     type:   [ NT_SECFLAGS ]
     name:
         CORE\0
     desc: (prsecflags_t)
         pr_version:    1
-        psf_effective: [ ASLR ]
-        psf_inherit:   [ ASLR ]
+        pr_effective:  [ ASLR ]
+        pr_inherit:    [ ASLR ]
+        pr_lower:      0
+        pr_upper:      [ ASLR FORBIDNULLMAP NOEXECSTACK ]
 EOF
 
-/usr/bin/elfdump -n core | grep -B5 -A3 prsecflags_t > core-output.$$
+/usr/bin/elfdump -n core | grep -B5 -A5 prsecflags_t > core-output.$$
 
 if ! diff -u core-expected.$$ core-output.$$; then
     exit 1;

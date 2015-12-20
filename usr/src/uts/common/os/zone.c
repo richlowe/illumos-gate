@@ -2048,6 +2048,7 @@ zone_zsd_init(void)
 	zone0.zone_domain = srpc_domain;
 	zone0.zone_hostid = HW_INVALID_HOSTID;
 	zone0.zone_fs_allowed = NULL;
+	secflags_default(&zone0.zone_secflags);
 	zone0.zone_ref = 1;
 	zone0.zone_id = GLOBAL_ZONEID;
 	zone0.zone_status = ZONE_IS_RUNNING;
@@ -2491,6 +2492,32 @@ zone_set_brand(zone_t *zone, const char *brand)
 	ZBROP(zone)->b_init_brand_data(zone);
 
 	mutex_exit(&zone_status_lock);
+	return (0);
+}
+
+static int
+zone_set_secflags(zone_t *zone, const psecflags_t *zone_secflags)
+{
+	int err = 0;
+	psecflags_t psf;
+
+	ASSERT(zone != global_zone);
+
+	if ((err = copyin(zone_secflags, &psf, sizeof (psf))) != 0)
+		return (err);
+
+	if (zone_status_get(zone) > ZONE_IS_READY)
+		return (EINVAL);
+
+	if (!secflags_validate(&psf))
+		return (EINVAL);
+
+	(void) memcpy(&zone->zone_secflags, &psf, sizeof (psf));
+
+	/* Set security flags on the zone's zsched */
+	(void) memcpy(&zone->zone_zsched->p_secflags, &zone->zone_secflags,
+	    sizeof (zone->zone_zsched->p_secflags));
+
 	return (0);
 }
 
@@ -3956,6 +3983,7 @@ zsched(void *arg)
 			mutex_exit(&pp->p_lock);
 		}
 	}
+
 	/*
 	 * Tell the world that we're done setting up.
 	 *
@@ -4239,7 +4267,8 @@ out:
 }
 
 int
-zone_create_error(int er_error, int er_ext, int *er_out) {
+zone_create_error(int er_error, int er_ext, int *er_out)
+{
 	if (er_out != NULL) {
 		if (copyout(&er_ext, er_out, sizeof (int))) {
 			return (set_errno(EFAULT));
@@ -4409,6 +4438,12 @@ zone_create(const char *zone_name, const char *zone_root,
 	zone->zone_ipc.ipcq_msgmni = 0;
 	zone->zone_bootargs = NULL;
 	zone->zone_fs_allowed = NULL;
+
+	secflag_zero(&zone0.zone_secflags.psf_lower);
+	secflag_zero(&zone0.zone_secflags.psf_effective);
+	secflag_zero(&zone0.zone_secflags.psf_inherit);
+	secflag_fullset(&zone0.zone_secflags.psf_upper);
+
 	zone->zone_initname =
 	    kmem_alloc(strlen(zone_default_initname) + 1, KM_SLEEP);
 	(void) strcpy(zone->zone_initname, zone_default_initname);
@@ -5530,6 +5565,13 @@ zone_getattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 				error = EFAULT;
 		}
 		break;
+	case ZONE_ATTR_SECFLAGS:
+		size = sizeof (zone->zone_secflags);
+		if (bufsize > size)
+			bufsize = size;
+		if ((err = copyout(&zone->zone_secflags, buf, bufsize)) != 0)
+			error = EFAULT;
+		break;
 	case ZONE_ATTR_NETWORK:
 		zbuf = kmem_alloc(bufsize, KM_SLEEP);
 		if (copyin(buf, zbuf, bufsize) != 0) {
@@ -5613,6 +5655,9 @@ zone_setattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 		break;
 	case ZONE_ATTR_FS_ALLOWED:
 		err = zone_set_fs_allowed(zone, (const char *)buf);
+		break;
+	case ZONE_ATTR_SECFLAGS:
+		err = zone_set_secflags(zone, (psecflags_t *)buf);
 		break;
 	case ZONE_ATTR_PHYS_MCAP:
 		err = zone_set_phys_mcap(zone, (const uint64_t *)buf);

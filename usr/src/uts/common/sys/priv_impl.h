@@ -27,8 +27,6 @@
 #ifndef	_SYS_PRIV_IMPL_H
 #define	_SYS_PRIV_IMPL_H
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/priv_const.h>
 #include <sys/priv.h>
 
@@ -96,23 +94,23 @@ extern void priv_init(void);
 #define	privword(n)	((n)/__NBWRD)
 
 /*
- * PRIV_ASSERT(a, b) sets privilege "b" in privilege set "a".
- * PRIV_CLEAR(a,b) clears privilege "b" in privilege set "a".
- * PRIV_ISASSERT tests if privilege 'b' is asserted in privilege set 'a'.
+ * PRIV_ADDSET(a, b) sets privilege "b" in privilege set "a".
+ * PRIV_DELSET(a, b) clears privilege "b" in privilege set "a".
+ * PRIV_ISMEMBER(a, b) tests if privilege 'b' is asserted in privilege set 'a'.
  */
 
-#define	__PRIV_ASSERT(a, b)	((a)->pbits[privword(b)] |= privmask(b))
-#define	__PRIV_CLEAR(a, b)	((a)->pbits[privword(b)] &= ~privmask(b))
-#define	__PRIV_ISASSERT(a, b)	((a)->pbits[privword(b)] & privmask(b))
+#define	__PRIV_ADDSET(a, b)	((a)->pbits[privword(b)] |= privmask(b))
+#define	__PRIV_DELSET(a, b)	((a)->pbits[privword(b)] &= ~privmask(b))
+#define	__PRIV_ISMEMBER(a, b)	((a)->pbits[privword(b)] & privmask(b))
 
 #ifdef DEBUG
-#define	PRIV_CLEAR(a, b)	priv_delset((a), (b))
-#define	PRIV_ASSERT(a, b)	priv_addset((a), (b))
-#define	PRIV_ISASSERT(a, b)	priv_ismember((a), (b))
+#define	PRIV_DELSET(a, b)	priv_delset((a), (b))
+#define	PRIV_ADDSET(a, b)	priv_addset((a), (b))
+#define	PRIV_ISMEMBER(a, b)	priv_ismember((a), (b))
 #else
-#define	PRIV_CLEAR(a, b)	__PRIV_CLEAR((a), (b))
-#define	PRIV_ASSERT(a, b)	__PRIV_ASSERT((a), (b))
-#define	PRIV_ISASSERT(a, b)	__PRIV_ISASSERT((a), (b))
+#define	PRIV_DELSET(a, b)	__PRIV_DELSET((a), (b))
+#define	PRIV_ADDSET(a, b)	__PRIV_ADDSET((a), (b))
+#define	PRIV_ISMEMBER(a, b)	__PRIV_ISMEMBER((a), (b))
 #endif
 
 #endif /* _KERNEL */

@@ -129,6 +129,7 @@ int
 main(int argc, char **argv)
 {
 	psecflagdelta_t act;
+	psecflagwhich_t which = PSF_INHERIT;
 	int ret = 0;
 	int pgrab_flags = PGRAB_RDONLY;
 	int opt;
@@ -138,6 +139,7 @@ main(int argc, char **argv)
 	boolean_t e_flag = B_FALSE;
 	boolean_t l_flag = B_FALSE;
 	boolean_t s_flag = B_FALSE;
+	int errc = 0;
 
 	while ((opt = getopt(argc, argv, "eFi:ls:")) != -1) {
 		switch (opt) {
@@ -152,8 +154,31 @@ main(int argc, char **argv)
 			break;
 		case 's':
 			s_flag = B_TRUE;
-			if (secflags_parse(0, optarg, &act) == -1)
-				errx(1, "couldn't pares security flags: %s\n",
+			if ((strlen(optarg) >= 2) &&
+			    ((optarg[1] == '='))) {
+				switch (optarg[0]) {
+				case 'L':
+					which = PSF_LOWER;
+					break;
+				case 'U':
+					which = PSF_UPPER;
+					break;
+				case 'I':
+					which = PSF_INHERIT;
+					break;
+				case 'E':
+					errx(1, "the effective flags cannot "
+					    "be changed", optarg[0]);
+				default:
+					errx(1, "unknown security flag "
+					    "set: '%c'", optarg[0]);
+				}
+
+				optarg += 2;
+			}
+
+			if (secflags_parse(NULL, optarg, &act) == -1)
+				errx(1, "couldn't parse security flags: %s",
 				    optarg);
 			break;
 		case 'l':
@@ -199,8 +224,21 @@ main(int argc, char **argv)
 			(void) printf("%s\n", name);
 		return (0);
 	} else if (s_flag && e_flag) {
-		if (psecflags(P_PID, P_MYID, &act) != 0)
+		/*
+		 * Don't use the strerror() message for EPERM, "Not Owner"
+		 * which is misleading.
+		 */
+		errc = psecflags(P_PID, P_MYID, which, &act);
+		switch (errc) {
+		case 0:
+			break;
+		case EPERM:
+			errx(1, gettext("failed setting "
+			    "security-flags: Permission denied"));
+			break;
+		default:
 			err(1, gettext("failed setting security-flags"));
+		}
 
 		(void) execvp(argv[0], &argv[0]);
 		err(1, "%s", argv[0]);
@@ -219,9 +257,22 @@ main(int argc, char **argv)
 				    "identifier: '%s'"), argv[i]);
 			}
 
-			if (psecflags(idtype, id, &act) != 0)
-				err(1, gettext("failed setting "
-				    "security-flags"));
+			/*
+			 * Don't use the strerror() message for EPERM, "Not
+			 * Owner" which is misleading.
+			 */
+			if (psecflags(idtype, id, which, &act) != 0) {
+				switch (errno) {
+				case EPERM:
+					errx(1, gettext("failed setting "
+					    "security-flags: "
+					    "Permission denied"));
+					break;
+				default:
+					err(1, gettext("failed setting "
+					    "security-flags"));
+				}
+			}
 		}
 
 		return (0);
@@ -259,6 +310,8 @@ main(int argc, char **argv)
 
 		print_flags("E", psf->pr_effective);
 		print_flags("I", psf->pr_inherit);
+		print_flags("L", psf->pr_lower);
+		print_flags("U", psf->pr_upper);
 
 		Psecflags_free(&psf);
 		Prelease(Pr, 0);

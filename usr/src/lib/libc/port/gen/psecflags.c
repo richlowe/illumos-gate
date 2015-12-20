@@ -24,16 +24,17 @@
 #include <sys/syscall.h>
 #include <sys/secflags.h>
 
-extern int __psecflagsset(procset_t *, psecflagdelta_t *);
+extern int __psecflagsset(procset_t *, psecflagwhich_t, psecflagdelta_t *);
 
 int
-psecflags(idtype_t idtype, id_t id, psecflagdelta_t *delta)
+psecflags(idtype_t idtype, id_t id, psecflagwhich_t which,
+    psecflagdelta_t *delta)
 {
 	procset_t procset;
 
 	setprocset(&procset, POP_AND, idtype, id, P_ALL, 0);
 
-	return (__psecflagsset(&procset, delta));
+	return (__psecflagsset(&procset, which, delta));
 }
 
 static struct flagdesc {
@@ -114,7 +115,7 @@ secflags_to_str(secflagset_t flags)
 }
 
 int
-secflags_parse(secflagset_t defaults, const char *flags, psecflagdelta_t *ret)
+secflags_parse(secflagset_t *defaults, const char *flags, psecflagdelta_t *ret)
 {
 	char *flag;
 	char *s, *ss;
@@ -132,13 +133,18 @@ secflags_parse(secflagset_t defaults, const char *flags, psecflagdelta_t *ret)
 		boolean_t del = B_FALSE;
 
 		if (strcasecmp(flag, "default") == 0) {
-			ret->psd_add |= defaults;
+			if (defaults != NULL) {
+				secflag_union(&ret->psd_add, defaults);
+			} else {
+				errno = EINVAL;
+				return (-1);
+			}
 			continue;
 		} else if (strcasecmp(flag, "all") == 0) {
-			ret->psd_add = PROC_SEC_MASK;
+			secflag_fullset(&ret->psd_add);
 			continue;
 		} else if (strcasecmp(flag, "none") == 0) {
-			ret->psd_rem = PROC_SEC_MASK;
+			secflag_fullset(&ret->psd_rem);
 			continue;
 		} else if (strcasecmp(flag, "current") == 0) {
 			current = B_TRUE;
@@ -169,11 +175,11 @@ secflags_parse(secflagset_t defaults, const char *flags, psecflagdelta_t *ret)
 	 * Negatives "win".
 	 */
 	if (!current) {
-		ret->psd_assign = ret->psd_add;
-		ret->psd_assign &= ~ret->psd_rem;
+		secflag_copy(&ret->psd_assign, &ret->psd_add);
+		secflag_difference(&ret->psd_assign, &ret->psd_rem);
 		ret->psd_ass_active = B_TRUE;
-		secflag_zero(&(ret->psd_add));
-		secflag_zero(&(ret->psd_rem));
+		secflag_zero(&ret->psd_add);
+		secflag_zero(&ret->psd_rem);
 	}
 
 	free(ss);

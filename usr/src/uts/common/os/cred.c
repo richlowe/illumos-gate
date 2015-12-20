@@ -1257,7 +1257,7 @@ eph_gid_alloc(zone_t *zone, int flags, gid_t *start, int count)
 
 void
 get_ephemeral_data(zone_t *zone, uid_t *min_uid, uid_t *last_uid,
-	gid_t *min_gid, gid_t *last_gid)
+    gid_t *min_gid, gid_t *last_gid)
 {
 	ephemeral_zsd_t *eph_zsd = get_ephemeral_zsd(zone);
 
@@ -1276,7 +1276,7 @@ get_ephemeral_data(zone_t *zone, uid_t *min_uid, uid_t *last_uid,
 
 void
 set_ephemeral_data(zone_t *zone, uid_t min_uid, uid_t last_uid,
-	gid_t min_gid, gid_t last_gid)
+    gid_t min_gid, gid_t last_gid)
 {
 	ephemeral_zsd_t *eph_zsd = get_ephemeral_zsd(zone);
 

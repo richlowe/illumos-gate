@@ -20,9 +20,11 @@ PROG =	secflags_aslr		\
 	secflags_dts		\
 	secflags_elfdump	\
 	secflags_forbidnullmap	\
+	secflags_limits		\
 	secflags_noexecstack	\
 	secflags_proc		\
-	secflags_psecflags
+	secflags_psecflags	\
+	secflags_zonecfg
 
 PROG += addrs-32 addrs-64 stacky
 

@@ -190,5 +190,6 @@ child_add
 child_remove
 child_all
 child_none
+list
 
 exit 0
