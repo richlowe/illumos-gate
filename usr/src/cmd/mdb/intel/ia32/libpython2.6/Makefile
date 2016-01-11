@@ -36,6 +36,10 @@ include ../../../Makefile.module
 
 %.o := CPPFLAGS +=	-_gcc=-isystem -_gcc=$(ADJUNCT_PROTO)/usr/include
 
+# Studio provides no equivalent to -isystem, so we have to be heavy handed
+CERRWARN +=	-_cc=-erroff=E_MACRO_REDEFINED
+LINTFLAGS +=	-erroff=E_MACRO_REDEFINED
+
 dmod/$(MODULE) := LDLIBS += -lproc
 
 %.o: $(MODSRCS_DIR)/%.c

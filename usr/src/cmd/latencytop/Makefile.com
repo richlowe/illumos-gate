@@ -42,12 +42,13 @@ all install	:= LDLIBS += -lglib-2.0
 
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 LINTFLAGS += -erroff=E_FUNC_RET_ALWAYS_IGNOR2
+LINTFLAGS += -erroff=E_STATIC_UNUSED
 LINTFLAGS64 += -erroff=E_NAME_USED_NOT_DEF2
 LINTFLAGS64 += -erroff=E_FUNC_RET_ALWAYS_IGNOR2
+LINTFLAGS64 += -erroff=E_STATIC_UNUSED
 
 FILEMODE = 0555
 
-ELFWRAP = elfwrap
 WRAPOBJ = latencytop_wrap.o
 
 CLEANFILES += $(OBJS) $(WRAPOBJ) ./latencytop_d ./latencytop_trans

@@ -30,6 +30,10 @@ CPPFLAGS =	$(POLICYKIT_DBUS_CPPFLAGS) $(POLICYKIT_GLIB_CPPFLAGS) $(CPPFLAGS.mast
 
 CERRWARN +=	-_gcc=-Wno-unused-variable
 
+# This is, unfortunately, from the glib headers.  Studio provides no
+# equivalent to -isystem
+CERRWARN +=	-_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
+
 C99MODE =	$(C99_ENABLE)
 
 ROOTLIBPCDIR =	$(ROOT)/usr/lib/pkgconfig
