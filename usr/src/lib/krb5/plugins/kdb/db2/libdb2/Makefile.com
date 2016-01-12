@@ -91,7 +91,8 @@ POFILES = generic.po
 #override liblink
 INS.liblink=	-$(RM) $@; $(SYMLINK) $(LIBLINKS)$(VERS) $@
 
-CPPFLAGS += 	-DHAVE_CONFIG_H \
+# We need to ensure we find our own libdb2, not any that happen to be on the system
+CPPFLAGS.first += -DHAVE_CONFIG_H \
 		-I$(SRC)/lib/krb5/plugins/kdb/db2/libdb2/mpool \
 		-I$(SRC)/lib/krb5/plugins/kdb/db2/libdb2/db \
 		-I$(SRC)/lib/krb5/plugins/kdb/db2/libdb2/hash \
