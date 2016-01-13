@@ -19,7 +19,7 @@ include $(SRC)/lib/Makefile.lib
 # but as they were also needed in usr/src/pkg/Makefile,
 # the definition was moved to usr/src/Makefile.master
 
-PERLDIR = $(ADJUNCT_PROTO)/usr/perl5/$(PERL_VERSION)
+PERLDIR = $(NATIVE_ADJUNCT)/usr/perl5/$(PERL_VERSION)
 PERLLIBDIR = $(PERLDIR)/lib/$(PERL_ARCH)
 PERLINCDIR = $(PERLLIBDIR)/CORE
 
