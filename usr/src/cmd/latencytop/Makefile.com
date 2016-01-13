@@ -42,10 +42,10 @@ all install	:= LDLIBS += -lglib-2.0
 
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 LINTFLAGS += -erroff=E_FUNC_RET_ALWAYS_IGNOR2
-LINTFLAGS += -erroff=E_STATIC_UNUSED
+LINTFLAGS += -errhdr=no%$(ADJUNCT_PROTO)/usr/include/glib-2.0
 LINTFLAGS64 += -erroff=E_NAME_USED_NOT_DEF2
 LINTFLAGS64 += -erroff=E_FUNC_RET_ALWAYS_IGNOR2
-LINTFLAGS64 += -erroff=E_STATIC_UNUSED
+LINTFLAGS64 += -errhdr=no%$(ADJUNCT_PROTO)/usr/include/glib-2.0
 
 FILEMODE = 0555
 

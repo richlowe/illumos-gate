@@ -36,9 +36,9 @@ include ../../../Makefile.module
 
 %.o := CPPFLAGS +=	-_gcc=-isystem -_gcc=$(ADJUNCT_PROTO)/usr/include
 
-# Studio provides no equivalent to -isystem, so we have to be heavy handed
-CERRWARN +=	-_cc=-erroff=E_MACRO_REDEFINED
-LINTFLAGS +=	-erroff=E_MACRO_REDEFINED
+CERRWARN +=	-_cc=-errhdr=no%%$(ADJUNCT_PROTO)/usr/include/python2.6
+LINTFLAGS += -errhdr=no%$(ADJUNCT_PROTO)/usr/include/python2.6
+
 
 dmod/$(MODULE) := LDLIBS += -lproc
 
