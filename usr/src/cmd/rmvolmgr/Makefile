@@ -48,9 +48,7 @@ CERRWARN += 	-_gcc=-Wno-unused-variable
 CERRWARN += 	-_gcc=-Wno-parentheses
 CERRWARN += 	-_gcc=-Wno-unused-function
 
-# This is, unfortunately, from the glib headers.  Studio provides no
-# equivalent to -isystem
-CERRWARN +=	-_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
+CERRWARN +=	-_cc=-errhdr=no%$(ADJUNCT_PROTO)/usr/include/glib-2.0
 
 ROOTCMDDIR =		$(ROOTLIB)
 ROOTMANIFESTDIR =	$(ROOTSVCSYSTEMFILESYSTEM)

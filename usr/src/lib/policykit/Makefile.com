@@ -30,9 +30,7 @@ CPPFLAGS =	$(POLICYKIT_DBUS_CPPFLAGS) $(POLICYKIT_GLIB_CPPFLAGS) $(CPPFLAGS.mast
 
 CERRWARN +=	-_gcc=-Wno-unused-variable
 
-# This is, unfortunately, from the glib headers.  Studio provides no
-# equivalent to -isystem
-CERRWARN +=	-_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
+CERRWARN +=	-_cc=-errhdr=no%$(ADJUNCT_PROTO)/usr/include/glib-2.0
 
 C99MODE =	$(C99_ENABLE)
 
