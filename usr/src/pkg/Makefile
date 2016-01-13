@@ -253,8 +253,8 @@ PROC_SYNTH_PKGS= $(SYNTH_PKGS:%=$(PDIR)/%.mog)
 # Root of pkg image to use for dependency resolution Normally / on the machine
 # used to build the binaries, or the ADJUNCT_PROTO
 #
-PKG_ADJUNCT.cmd= if [[ -d $${ADJUNCT_PROTO}/var/pkg ]]; then \
-		echo $$ADJUNCT_PROTO; \
+PKG_ADJUNCT.cmd= AP=$${ADJUNCT_PROTO:-/}; if [[ -d $${AP}/var/pkg ]]; then \
+		echo $$AP; \
 	else	\
 		echo /;	\
 	fi
