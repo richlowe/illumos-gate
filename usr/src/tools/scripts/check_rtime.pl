@@ -22,6 +22,7 @@
 
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2015, Nexenta Systems Inc.
 #
 
 #
@@ -871,14 +872,15 @@ sub ProcFindElf {
 }
 
 
-## AltObjectConfig(file)
+## AltObjectConfig(proto, adjunct)
 #
 # Recurse through a directory hierarchy looking for appropriate dependencies
 # to map from their standard system locations to the proto area via a crle
 # config file.
 #
 # entry:
-#	file - File of ELF objects, in 'find_elf -r' format, to examine.
+#	proto, adjunct - Files of ELF objects, in 'find_elf -r' format, to
+#       examine.
 #
 # exit:
 #	Scripts are generated for the 32 and 64-bit cases to run crle
@@ -901,78 +903,87 @@ sub AltObjectConfig {
 	my $obj_active = 0;
 	my $obj_class;
 
-	my $prefix = OpenFindElf($file, \*FIND_ELF);
+        my $prefix;
+FILE:
+        while ($prefix = OpenFindElf($file, \*FIND_ELF)) {
+        
+	LINE:
+		while ($line = onbld_elfmod::GetLine(\*FIND_ELF, \$LineNum)) {
+		      ITEM: {
 
-LINE:
-	while ($line = onbld_elfmod::GetLine(\*FIND_ELF, \$LineNum)) {
-	      ITEM: {
+				if ($line =~ /^OBJECT\s/i) {
+					my ($item, $class, $type, $verdef, $obj)
+					    = split(/\s+/, $line, 5);
 
-			if ($line =~ /^OBJECT\s/i) {
-				my ($item, $class, $type, $verdef, $obj) =
-				    split(/\s+/, $line, 5);
-
-				if ($type eq 'DYN') {
-					$obj_active = 1;
-					$obj_path = $obj;
-					$obj_class = $class;
-				} else {
-					# Only want sharable objects
-					$obj_active = 0;
+					if ($type eq 'DYN') {
+						$obj_active = 1;
+						$obj_path = $obj;
+						$obj_class = $class;
+					} else {
+						# Only want sharable objects
+						$obj_active = 0;
+					}
+					last ITEM;
 				}
-				last ITEM;
+
+				# We need to follow links to sharable objects
+				# so that any dependencies are expressed in all
+				# their available forms. We depend on ALIAS
+				# lines directly following the object they
+				# alias, so if we have a current object, this
+				# alias belongs to it.
+				if ($obj_active && ($line =~ /^ALIAS\s/i)) {
+					my ($item, $real_obj, $obj) =
+					    split(/\s+/, $line, 3);
+					$obj_path = $obj;
+					last ITEM;
+				}
+
+				# Skip unrecognized item
+				next LINE;
 			}
 
-			# We need to follow links to sharable objects so
-			# that any dependencies are expressed in all their
-			# available forms. We depend on ALIAS lines directly
-			# following the object they alias, so if we have
-			# a current object, this alias belongs to it.
-			if ($obj_active && ($line =~ /^ALIAS\s/i)) {
-				my ($item, $real_obj, $obj) =
-				    split(/\s+/, $line, 3);
-				$obj_path = $obj;
-				last ITEM;
+			next if !$obj_active;
+
+			my $full = "$prefix/$obj_path";
+
+			next if defined($EXRE_nocrlealt) &&
+			    ($obj_path =~ $EXRE_nocrlealt);
+
+			my $Dir = $full;
+			$Dir =~ s/^(.*)\/.*$/$1/;
+
+			# Create a crle(1) script for the dependency we've
+			# found. We build separate scripts for the 32 and 64-bit
+			# cases. We create and initialize each script when we
+			# encounter the first object that needs it.
+			if ($obj_class == 32) {
+				if (!$Crle32) {
+					$Crle32 = "$Tmpdir/$Prog.crle32.$$";
+					open(CRLE32, "> $Crle32") || die
+					    "$Prog: open failed: $Crle32: $!";
+					print CRLE32 "#!/bin/sh\ncrle \\\n";
+				}
+				print CRLE32 "\t-o $Dir -a /$obj_path \\\n";
+			} elsif ($Ena64) {
+				if (!$Crle64) {
+					$Crle64 = "$Tmpdir/$Prog.crle64.$$";
+					open(CRLE64, "> $Crle64") || die
+					    "$Prog: open failed: $Crle64: $!";
+					print CRLE64 "#!/bin/sh\ncrle -64\\\n";
+                                }
+				print CRLE64 "\t-o $Dir -a /$obj_path \\\n";
 			}
+                }
 
-			# Skip unrecognized item
-			next LINE;
-		}
+		close FIND_ELF;
+		if ($file eq $_[0]) {
+			$file = $_[1];
+			next FILE;
+        	}
 
-		next if !$obj_active;
-
-		my $full = "$prefix/$obj_path";
-
-		next if defined($EXRE_nocrlealt) &&
-		    ($obj_path =~ $EXRE_nocrlealt);
-
-		my $Dir = $full;
-		$Dir =~ s/^(.*)\/.*$/$1/;
-
-		# Create a crle(1) script for the dependency we've found.
-		# We build separate scripts for the 32 and 64-bit cases.
-		# We create and initialize each script when we encounter
-		# the first object that needs it.
-		if ($obj_class == 32) {
-			if (!$Crle32) {
-				$Crle32 = "$Tmpdir/$Prog.crle32.$$";
-				open(CRLE32, "> $Crle32") ||
-				    die "$Prog: open failed: $Crle32: $!";
-				print CRLE32 "#!/bin/sh\ncrle \\\n";
-			}
-			print CRLE32 "\t-o $Dir -a /$obj_path \\\n";
-		} elsif ($Ena64) {
-			if (!$Crle64) {
-				$Crle64 = "$Tmpdir/$Prog.crle64.$$";
-				open(CRLE64, "> $Crle64") ||
-				    die "$Prog: open failed: $Crle64: $!";
-				print CRLE64 "#!/bin/sh\ncrle -64\\\n";
-			}
-			print CRLE64 "\t-o $Dir -a /$obj_path \\\n";
-		}
+	        last FILE;
 	}
-
-	close FIND_ELF;
-
 
 	# Now that the config scripts are complete, use them to generate
 	# runtime linker config files.
@@ -1051,12 +1062,14 @@ if ($Mach =~ /sparc/) {
 $Env = '';
 
 # Check that we have arguments.
-if ((getopts('D:d:E:e:f:I:imosvw:', \%opt) == 0) ||
+if ((getopts('A:a:D:d:E:e:f:I:imosvw:', \%opt) == 0) ||
     (!$opt{f} && ($#ARGV == -1))) {
-	print "usage: $Prog [-imosv] [-D depfile | -d depdir] [-E errfile]\n";
+	print "usage: $Prog [-imosv] [-A depfile | -a depdir ] [-D depfile | -d depdir] [-E errfile]\n";
 	print "\t\t[-e exfile] [-f listfile] [-I infofile] [-w outdir]\n";
 	print "\t\t[file | dir]...\n";
 	print "\n";
+	print "\t[-A depfile]\testablish adjunct dependencies from 'find_elf -r' file list\n";
+	print "\t[-a depdir]\testablish adjunct dependencies from under directory\n";
 	print "\t[-D depfile]\testablish dependencies from 'find_elf -r' file list\n";
 	print "\t[-d depdir]\testablish dependencies from under directory\n";
 	print "\t[-E errfile]\tdirect error output to file\n";
@@ -1072,6 +1085,7 @@ if ((getopts('D:d:E:e:f:I:imosvw:', \%opt) == 0) ||
 	exit 1;
 }
 
+die "$Prog: -A and -a options are mutually exclusive\n" if ($opt{A} && $opt{A});
 die "$Prog: -D and -d options are mutually exclusive\n" if ($opt{D} && $opt{d});
 
 $Tmpdir = "/tmp" if (!($Tmpdir = $ENV{TMPDIR}) || (! -d $Tmpdir));
@@ -1097,6 +1111,22 @@ if ($opt{d}) {
 	$Proto = $Root if ($Root = $ENV{ROOT}) && (-d $Root);
 }
 
+# Is there an adjunct proto area available, either via the -a option,
+# or because we are part of an activated workspace?
+my $Adjunct;
+if ($opt{a}) {
+	# User specified dependency directory - make sure it exists.
+	-d $opt{a} || die "$Prog: $opt{a} is not a directory\n";
+	$Adjunct = $opt{a};
+} elsif ($ENV{CODEMGR_WS}) {
+	my $Root;
+
+	# Without a user specified dependency directory see if we're
+	# part of a codemanager workspace and if an adjunct proto area
+        # exists.
+	$Adjunct = $Root if ($Root = $ENV{ADJUNCT_PROTO}) && (-d $Root);
+}
+
 # If we are basing this analysis off the sharable objects found in
 # a proto area, then gather dependencies and construct an alternative
 # dependency mapping via a crle(1) configuration file.
@@ -1104,7 +1134,7 @@ if ($opt{d}) {
 # To support alternative dependency mapping we'll need ldd(1)'s
 # -e option.  This is relatively new (s81_30), so make sure
 # ldd(1) is capable before gathering any dependency information.
-if ($opt{D} || $Proto) {
+if ($opt{D} || $Proto || $Adjunct) {
 	if (system('ldd -e /usr/lib/lddstub 2> /dev/null')) {
 		print "ldd: does not support -e, unable to ";
 		print "create alternative dependency mappingings.\n";
@@ -1114,7 +1144,8 @@ if ($opt{D} || $Proto) {
 		# 'find_elf -r' format, and can use it directly. Otherwise,
 		# we will run find_elf as a child process to find the
 		# sharable objects found under $Proto.
-		AltObjectConfig($opt{D} ? $opt{D} : "find_elf -frs $Proto|");
+		AltObjectConfig($opt{D} ? $opt{D} : "find_elf -frs $Proto|",
+			$opt{A} ? $opt{A} : $Adjunct ? "find_elf -frs $Adjunct|" : "/dev/null");
 	}
 }
 
