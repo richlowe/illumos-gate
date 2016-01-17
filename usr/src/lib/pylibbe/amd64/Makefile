@@ -26,4 +26,6 @@
 include ../Makefile.com
 include ../../Makefile.lib.64
 
+LINTFLAGS64 += -errhdr=no%$(ADJUNCT_PROTO)/usr/include/python2.6
+
 install: all $(ROOTLIBS64)
