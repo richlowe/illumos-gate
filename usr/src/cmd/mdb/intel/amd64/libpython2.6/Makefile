@@ -36,6 +36,7 @@ include ../../Makefile.amd64
 include ../../../Makefile.module
 
 dmod/$(MODULE) := LDLIBS += -lproc
+LINTFLAGS64 += -errhdr=no%$(ADJUNCT_PROTO)/usr/include/python2.6
 
 %.o: $(MODSRCS_DIR)/%.c
 	$(COMPILE.c) $<
