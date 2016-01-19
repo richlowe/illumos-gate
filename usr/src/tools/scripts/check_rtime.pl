@@ -55,7 +55,7 @@
 
 
 # Define all global variables (required for strict)
-use vars  qw($Prog $Env $Ena64 $Tmpdir);
+use vars  qw($Prog $Env $Ena64 $Tmpdir $Adjunct $Proto);
 use vars  qw($LddNoU $Conf32 $Conf64);
 use vars  qw(%opt);
 use vars  qw($ErrFH $ErrTtl $InfoFH $InfoTtl $OutCnt1 $OutCnt2);
@@ -988,6 +988,12 @@ FILE:
 	# Now that the config scripts are complete, use them to generate
 	# runtime linker config files.
 	if ($Crle64) {
+		print CRLE64
+			"\t-l ${Proto}/lib/64:${Proto}/usr/lib/64 \\\n";
+
+		print CRLE64
+		    "\t-l ${Adjunct}/lib/64:${Adjunct}/usr/lib/64 \\\n";
+
 		$Conf64 = "$Tmpdir/$Prog.conf64.$$";
 		print CRLE64 "\t-c $Conf64\n";
 
@@ -1000,6 +1006,9 @@ FILE:
 		unlink $Crle64;
 	}
 	if ($Crle32) {
+		print CRLE32 "\t-l ${Proto}/lib:${Proto}/usr/lib \\\n";
+		print CRLE32 "\t-l ${Adjunct}/lib:${Adjunct}/usr/lib \\\n";
+
 		$Conf32 = "$Tmpdir/$Prog.conf32.$$";
 		print CRLE32 "\t-c $Conf32\n";
 
@@ -1098,7 +1107,6 @@ onbld_elfmod::LoadExceptionsToEXRE('check_rtime');
 
 # Is there a proto area available, either via the -d option, or because
 # we are part of an activated workspace?
-my $Proto;
 if ($opt{d}) {
 	# User specified dependency directory - make sure it exists.
 	-d $opt{d} || die "$Prog: $opt{d} is not a directory\n";
@@ -1113,7 +1121,6 @@ if ($opt{d}) {
 
 # Is there an adjunct proto area available, either via the -a option,
 # or because we are part of an activated workspace?
-my $Adjunct;
 if ($opt{a}) {
 	# User specified dependency directory - make sure it exists.
 	-d $opt{a} || die "$Prog: $opt{a} is not a directory\n";
