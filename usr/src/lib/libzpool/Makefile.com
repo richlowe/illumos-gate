@@ -76,6 +76,8 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-unused-label
+# Compile time assertions will leave this
+CERRWARN +=	-_gcc=-Wno-unused-local-typedefs
 
 .KEEP_STATE:
 
