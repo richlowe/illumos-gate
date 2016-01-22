@@ -523,7 +523,7 @@ rt2860_read_eeprom(struct rt2860_softc *sc)
 			sc->txpow2[14 + i] = 5;
 		RWN_DEBUG(RT2860_DBG_EEPROM, "rwn: rt2860_read_eeprom(): "
 		    "chan %d: power1=%d, power2=%d\n",
-		    rt2860_rf2850[14 + i].chan, sc->txpow1[14 + i],
+		    rt2860_rf2850[i].chan, sc->txpow1[14 + i],
 		    sc->txpow2[14 + i]);
 	}
 
