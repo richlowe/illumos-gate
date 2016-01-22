@@ -3021,7 +3021,7 @@ mrsas_tbolt_set_pd_lba(U8 cdb[], uint8_t *cdb_len_ptr, U64 start_blk,
 			control = cdb[11];
 		}
 
-		bzero(cdb, sizeof (cdb));
+		bzero(cdb, cdb_len);
 
 		cdb[0] = opcode;
 		cdb[1] = flagvals;
@@ -3054,7 +3054,7 @@ mrsas_tbolt_set_pd_lba(U8 cdb[], uint8_t *cdb_len_ptr, U64 start_blk,
 			break;
 		}
 
-		bzero(cdb, sizeof (cdb));
+		bzero(cdb, cdb_len);
 
 		cdb[0] = opcode;
 		cdb[1] = flagvals;
@@ -3074,7 +3074,7 @@ mrsas_tbolt_set_pd_lba(U8 cdb[], uint8_t *cdb_len_ptr, U64 start_blk,
 		opcode = cdb[0] == READ_6 ? READ_10 : WRITE_10;
 		control = cdb[5];
 
-		bzero(cdb, sizeof (cdb));
+		bzero(cdb, cdb_len);
 		cdb[0] = opcode;
 		cdb[9] = control;
 
