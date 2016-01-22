@@ -86,6 +86,7 @@ LINTTAGS	+= -erroff=E_SUSPICIOUS_COMPARISON
 
 CERRWARN	+= -_gcc=-Wno-unused-value
 CERRWARN	+= -_gcc=-Wno-unused-label
+CERRWARN	+= -_gcc=-Wno-unused-but-set-variable # This likely hides a real bug
 CERRWARN	+= -_gcc=-Wno-uninitialized
 CERRWARN	+= -_gcc=-Wno-type-limits
 
