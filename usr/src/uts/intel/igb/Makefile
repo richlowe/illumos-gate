@@ -56,6 +56,7 @@ LINTFLAGS += \
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-unused-but-set-variable
 CERRWARN	+= -_cc=-erroff=E_STATEMENT_NOT_REACHED
 
 CFLAGS		+= -I$(UTSBASE)/common/io/e1000api
