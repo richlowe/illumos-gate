@@ -219,6 +219,7 @@ CERRWARN += -_gcc=-Wno-sign-compare
 CERRWARN += -_gcc=-Wno-unknown-pragmas
 CERRWARN += -_gcc=-Wno-unused-parameter
 CERRWARN += -_gcc=-Wno-missing-field-initializers
+CERRWARN += -_gcc=-Wno-maybe-uninitialized
 
 # DEBUG v. -nd make for frequent unused variables, empty conditions, etc. in
 # -nd builds
