@@ -240,8 +240,6 @@ native_t unm_niu_enable_gbe_port(struct unm_adapter_s *adapter,
 	int one = 1;
 	u32 port_mode = 0;
 
-	mode_dont_care = 0;
-
 	if ((port < 0) || (port > UNM_NIU_MAX_GBE_PORTS)) {
 		return (-1);
 	}
