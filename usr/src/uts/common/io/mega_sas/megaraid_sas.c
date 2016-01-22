@@ -3307,7 +3307,6 @@ build_cmd(struct megasas_instance *instance, struct scsi_address *ap,
 {
 	uint16_t	flags = 0;
 	uint32_t	i;
-	uint32_t 	context;
 	uint32_t	sge_bytes;
 
 	struct megasas_cmd		*cmd;
@@ -3396,8 +3395,6 @@ build_cmd(struct megasas_instance *instance, struct scsi_address *ap,
 			ldio->sge_count = acmd->cmd_cookiecnt;
 			mfi_sgl = (struct megasas_sge64	*)&ldio->sgl;
 
-			context = ldio->context;
-
 			if (acmd->cmd_cdblen == CDB_GROUP0) {
 				ldio->lba_count	= host_to_le16(
 				    (uint16_t)(pkt->pkt_cdbp[4]));
@@ -3474,15 +3471,11 @@ build_cmd(struct megasas_instance *instance, struct scsi_address *ap,
 		pthru->sense_buf_phys_addr_hi = 0;
 		pthru->sense_buf_phys_addr_lo = cmd->sense_phys_addr;
 
-		context = pthru->context;
-
 		bcopy(pkt->pkt_cdbp, pthru->cdb, acmd->cmd_cdblen);
 
 		break;
 	}
-#ifdef lint
-	context = context;
-#endif
+
 	/* bzero(mfi_sgl, sizeof (struct megasas_sge64) * MAX_SGL); */
 
 	/* prepare the scatter-gather list for the firmware */
