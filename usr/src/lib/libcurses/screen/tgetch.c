@@ -41,6 +41,7 @@
 #include	"curses_inc.h"
 #include	<signal.h>
 #include	<unistd.h>
+#include	<fcntl.h>
 #ifdef	DEBUG
 #include	<ctype.h>
 #endif	/* DEBUG */
@@ -533,7 +534,6 @@ _fpk(void)
 		if (cur_term->_check_fd != -1)
 			rc = read(cur_term->_check_fd, (char *)&c, 1);
 		else {
-#include	<fcntl.h>
 			int	fcflags = fcntl(infd, F_GETFL, 0);
 
 			(void) fcntl(infd, F_SETFL, fcflags | O_NDELAY);

@@ -37,13 +37,16 @@
  * contributors.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*LINTLIBRARY*/
 
 #include	<unistd.h>
 #include	<sys/types.h>
 #include	"curses_inc.h"
+
+#ifdef	SYSV
+#include	<fcntl.h>
+#endif
+
 
 /*
  * Set the file descriptor for typeahead checks to fd.  fd can be -1
@@ -62,7 +65,6 @@ typeahead(int fd)
 	 * 9.2% of the time in fcntl().
 	 */
 
-#include	<fcntl.h>
 	int	savefd = cur_term->_check_fd;
 
 	/* Close the previous duped file descriptor. */
