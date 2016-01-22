@@ -89,6 +89,8 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-unused-label
+# Compile-time assertions will induce these
+CERRWARN	+= -_gcc=-Wno-unused-local-typedefs
 
 #
 #	Default build targets.
