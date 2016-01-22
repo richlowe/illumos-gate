@@ -76,16 +76,18 @@ static xge_hal_status_e
 __hal_channel_dtr_next_not_completed(xge_hal_channel_h channelh,
 		xge_hal_dtr_h *dtrh)
 {
-	/* LINTED E_FUNC_SET_NOT_USED */
+#ifdef	XGE_DEBUG_ASSERT
 	xge_hal_ring_rxd_1_t *rxdp; /* doesn't matter 1, 3 or 5... */
+#endif
 
 	__hal_channel_dtr_try_complete(channelh, dtrh);
 	if (*dtrh == NULL) {
 		return XGE_HAL_INF_NO_MORE_COMPLETED_DESCRIPTORS;
 	}
-
+#ifdef XGE_DEBUG_ASSERT
 	rxdp = (xge_hal_ring_rxd_1_t *)*dtrh;
 	xge_assert(rxdp->host_control!=0);
+#endif
 
 	__hal_channel_dtr_complete(channelh);
 
