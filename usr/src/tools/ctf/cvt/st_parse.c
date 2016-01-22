@@ -405,6 +405,7 @@ parse_stab(stab_t *stab, char *cp, iidesc_t **iidescp)
 	iidesc_t *ii = NULL;
 	iitype_t (*parse)(char *, iidesc_t *);
 	int rc;
+	char *ccp = NULL;
 
 	/*
 	 * set up for reset()
@@ -412,9 +413,9 @@ parse_stab(stab_t *stab, char *cp, iidesc_t **iidescp)
 	if (setjmp(resetbuf))
 		return (-1);
 
-	cp = whitesp(cp);
+	ccp = whitesp(cp);
 	ii = iidesc_new(NULL);
-	cp = name(cp, &ii->ii_name);
+	ccp = name(ccp, &ii->ii_name);
 
 	switch (stab->n_type) {
 	case N_FUN:
@@ -422,9 +423,9 @@ parse_stab(stab_t *stab, char *cp, iidesc_t **iidescp)
 		break;
 
 	case N_LSYM:
-		if (*cp == 't')
+		if (*ccp == 't')
 			parse = parse_type;
-		else if (*cp == 'T')
+		else if (*ccp == 'T')
 			parse = parse_sou;
 		else
 			parse = parse_sym;
@@ -439,12 +440,12 @@ parse_stab(stab_t *stab, char *cp, iidesc_t **iidescp)
 		parse = parse_sym;
 		break;
 	default:
-		parse_debug(1, cp, "Unknown stab type %#x", stab->n_type);
+		parse_debug(1, ccp, "Unknown stab type %#x", stab->n_type);
 		bzero(&resetbuf, sizeof (resetbuf));
 		return (-1);
 	}
 
-	rc = parse(cp, ii);
+	rc = parse(ccp, ii);
 	bzero(&resetbuf, sizeof (resetbuf));
 
 	if (rc < 0 || ii->ii_type == II_NOT) {
