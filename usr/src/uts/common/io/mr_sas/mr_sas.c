@@ -5076,7 +5076,7 @@ build_cmd(struct mrsas_instance *instance, struct scsi_address *ap,
 {
 	uint16_t	flags = 0;
 	uint32_t	i;
-	uint32_t	context;
+	uint32_t	context __UNUSED;
 	uint32_t	sge_bytes;
 	uint32_t	tmp_data_xfer_len;
 	ddi_acc_handle_t acc_handle;
