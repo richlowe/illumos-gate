@@ -735,6 +735,8 @@ CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += -_gcc=-Wno-empty-body
 CERRWARN += -_gcc=-Wno-type-limits
 CERRWARN += -_gcc=-Wno-address
+CERRWARN += -_gcc=-Wno-unused-but-set-parameter
+CERRWARN += -_gcc=-Wno-unused-but-set-variable
 
 pics/$(MACH)/src/lib/libast/conftab.o \
 pics/$(MACH64)/src/lib/libast/conftab.o	:= CERRWARN += -erroff=E_INIT_DOES_NOT_FIT
