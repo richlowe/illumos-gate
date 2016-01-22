@@ -86,13 +86,13 @@ CPPFLAGS	+= -DLM_RXPKT_NON_CONTIGUOUS \
 		   -I$(SRCDIR)
 
 LDFLAGS		+= -dy -r -Ndrv/ip -Nmisc/mac
-#CERRWARN	+= -_gcc=-Wno-old-style-declaration
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-uninitialized
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-unused-value
 CERRWARN	+= -_gcc=-Wno-unused-variable
+CERRWARN	+= -_gcc=-Wno-unused-but-set-variable
 CERRWARN	+= -_cc=-erroff=E_STATEMENT_NOT_REACHED
 CERRWARN	+= -_cc=-erroff=E_ARGUEMENT_MISMATCH
 CERRWARN	+= -_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
