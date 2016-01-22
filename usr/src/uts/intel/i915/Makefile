@@ -58,6 +58,8 @@ LDFLAGS	+= -dy -Nmisc/drm
 include $(UTSBASE)/intel/Makefile.intel
 
 CERRWARN	+= -_gcc=-Wno-unused-label
+# A _clear and obvious_ bug, but without a clear and obvious fix
+CERRWARN	+= -_gcc=-Wno-aggressive-loop-optimizations 
 
 #
 #	Re-define targets
