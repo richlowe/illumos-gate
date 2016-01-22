@@ -252,12 +252,12 @@ tparm(char *instring, long fp1, long fp2, long p3, long p4,
 	long		vars[26];
 	STACK		stk;
 	char		*cp = instring;
-	char		*outp = result;
+	volatile char	*outp = result;
 	char		c;
 	long		op;
 	long		op2;
 	int		sign;
-	int		onrow = 0;
+	volatile int	onrow = 0;
 	volatile long	p1 = fp1, p2 = fp2; /* copy in case < 2 actual parms */
 	char		*xp;
 	char		formatbuffer[100];
@@ -386,10 +386,10 @@ tparm(char *instring, long fp1, long fp2, long p3, long p4,
 			 * now.
 			 */
 			if (c == 's')
-				(void) sprintf(outp, formatbuffer,
+				(void) sprintf((char *)outp, formatbuffer,
 				    (char *) op);
 			else
-				(void) sprintf(outp, formatbuffer, op);
+				(void) sprintf((char *)outp, formatbuffer, op);
 			/*
 			 * Advance outp past what sprintf just did.
 			 * sprintf returns an indication of its length on some
@@ -721,7 +721,7 @@ tparm(char *instring, long fp1, long fp2, long p3, long p4,
 				return (NULL);
 		}
 	}
-	(void) strcpy(outp, added);
+	(void) strcpy((char *)outp, added);
 	free_stack(&stk);
 	return (result);
 }
