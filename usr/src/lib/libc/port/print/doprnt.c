@@ -449,18 +449,17 @@ _ndoprnt(const char *format, va_list in_args, FILE *iop, int prflag)
 	size_t bpsize;
 	wchar_t	*p;
 	char	*cbp;
-	char	*cp;
 
 #else  /* _WIDE */
 	/* Starting and ending points for value to be printed */
 	char	*bp;
 	char *p;
+	ssize_t sec_display = 0;
 #endif /* _WIDE */
 	/* Field width and precision */
 	int	prec = 0;
 	ssize_t width;
 	ssize_t num;
-	ssize_t sec_display;
 	wchar_t *wp;
 	ssize_t preco;
 	ssize_t wcount = 0;
@@ -714,7 +713,6 @@ _ndoprnt(const char *format, va_list in_args, FILE *iop, int prflag)
 		format++;
 		wflag = 0;
 		lflag = 0;
-		sec_display = 0;
 		quote = 0;
 
 	charswitch:
@@ -1840,7 +1838,6 @@ wide_S:
 						return (EOF);
 					}
 					nwc = mbstowcs(wstr, cbp, nwc);
-					cp = cbp + strlen(cbp);
 					wcount = nwc;
 					bp = wstr;
 					p = wstr + nwc;

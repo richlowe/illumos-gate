@@ -385,7 +385,9 @@ dissect(struct match *m, const char *start, const char *stop, sopno startst,
 	const char *ssp;	/* start of string matched by subsubRE */
 	const char *sep;	/* end of string matched by subsubRE */
 	const char *oldssp;	/* previous ssp */
+#ifndef NDEBUG
 	const char *dp;
+#endif
 
 	AT("diss", start, stop, startst, stopst);
 	sp = start;
@@ -444,10 +446,9 @@ dissect(struct match *m, const char *start, const char *stop, sopno startst,
 			esub = es - 1;
 			/* did innards match? */
 			if (slow(m, sp, rest, ssub, esub) != NULL) {
+#ifndef NDEBUG
 				dp = dissect(m, sp, rest, ssub, esub);
 				assert(dp == rest);
-#if defined(__lint)
-				(void) dp;
 #endif
 			} else		/* no */
 				assert(sp == rest);
@@ -485,8 +486,10 @@ dissect(struct match *m, const char *start, const char *stop, sopno startst,
 			}
 			assert(sep == rest);	/* must exhaust substring */
 			assert(slow(m, ssp, sep, ssub, esub) == rest);
+#ifndef NDEBUG
 			dp = dissect(m, ssp, sep, ssub, esub);
 			assert(dp == sep);
+#endif
 			sp = rest;
 			break;
 		case OCH_:
@@ -520,8 +523,10 @@ dissect(struct match *m, const char *start, const char *stop, sopno startst,
 				else
 					assert(OP(m->g->strip[esub]) == O_CH);
 			}
+#ifndef NDEBUG
 			dp = dissect(m, sp, rest, ssub, esub);
 			assert(dp == rest);
+#endif
 			sp = rest;
 			break;
 		case O_PLUS:

@@ -56,7 +56,7 @@ void
 __base_conversion_set_exception(fp_exception_field_type ef)
 {
 	double	t;
-	volatile double tstored;
+	volatile double tstored __UNUSED;
 
 	if (ef == (1 << fp_inexact)) {
 		t = 9.999999962747097015E-1;
