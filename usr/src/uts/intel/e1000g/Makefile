@@ -69,6 +69,8 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-unused-variable
+# XXX: This may hide bugs, if code is optimized out
+CERRWARN	+= -_gcc=-Wno-unused-but-set-variable
 CERRWARN	+= -_cc=-erroff=E_STATEMENT_NOT_REACHED
 
 #
