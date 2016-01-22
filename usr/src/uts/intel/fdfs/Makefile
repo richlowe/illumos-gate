@@ -25,7 +25,6 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 #
 #	This makefile drives the production of the fdfs file system
 #	kernel module.
@@ -50,6 +49,10 @@ ROOTMODULE	= $(USR_FS_DIR)/$(MODULE)
 #	Include common rules.
 #
 include $(UTSBASE)/intel/Makefile.intel
+
+# Unfortunately, the compiler can't intuit that dirent64->d_name is variable length
+# in fdreaddir().
+CERRWARN	+= -_gcc=-Wno-array-bounds
 
 #
 #	Define targets
