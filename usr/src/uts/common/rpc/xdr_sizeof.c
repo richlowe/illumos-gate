@@ -113,7 +113,6 @@ xdr_sizeof(xdrproc_t func, void *data)
 	struct xdr_ops ops;
 	bool_t stat;
 	/* to stop ANSI-C compiler from complaining */
-	typedef  bool_t (* dummyfunc1)(XDR *, long *);
 	typedef  bool_t (* dummyfunc2)(XDR *, caddr_t, int);
 	typedef  bool_t (* dummyfunc3)(XDR *, int32_t *);
 	typedef	 bool_t (* dummyfunc4)(XDR *, int, void *);

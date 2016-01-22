@@ -275,7 +275,6 @@ xdrrdma_xops(void)
 	static struct xdr_ops ops;
 
 	/* to stop ANSI-C compiler from complaining */
-	typedef  bool_t (* dummyfunc1)(XDR *, long *);
 	typedef  bool_t (* dummyfunc2)(XDR *, caddr_t, int);
 	typedef  bool_t (* dummyfunc3)(XDR *, int32_t *);
 
