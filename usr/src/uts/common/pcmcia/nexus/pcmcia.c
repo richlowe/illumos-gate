@@ -1771,17 +1771,17 @@ pcm_fix_bits(socket_enum_t src, socket_enum_t dst, int num, int dir)
 {
 	int i;
 
-	PR_ZERO(dst);
+	bzero(dst, sizeof (socket_enum_t));
 
 	if (dir == 0) {
 				/* LEFT */
-		for (i = 0; i <= (sizeof (dst) * PR_WORDSIZE) - num; i++) {
+		for (i = 0; i <= (sizeof (socket_enum_t) * PR_WORDSIZE) - num; i++) {
 			if (PR_GET(src, i))
 				PR_SET(dst, i + num);
 		}
 	} else {
 				/* RIGHT */
-		for (i = num; i < sizeof (dst) * PR_WORDSIZE; i++) {
+		for (i = num; i < sizeof (socket_enum_t) * PR_WORDSIZE; i++) {
 			if (PR_GET(src, i))
 				PR_SET(dst, i - num);
 		}
