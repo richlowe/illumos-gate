@@ -397,6 +397,9 @@ CERRWARN += -_gcc=-Wno-missing-field-initializers
 # Unfortunately, this option can misfire very easily and unfixably.
 CERRWARN +=	-_gcc=-Wno-array-bounds
 
+# Sadly loud and often wrong
+$(__GNUCNEXT)CERRWARN += -_gcc=-Wno-maybe-uninitialized
+
 # DEBUG v. -nd make for frequent unused variables, empty conditions, etc. in
 # -nd builds
 $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-unused
