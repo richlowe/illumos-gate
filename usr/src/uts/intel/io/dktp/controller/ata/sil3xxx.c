@@ -1,23 +1,3 @@
-/*
- * CDDL HEADER START
- *
- * The contents of this file are subject to the terms of the
- * Common Development and Distribution License (the "License").  
- * You may not use this file except in compliance with the License.
- *
- * You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
- * or http://www.opensolaris.org/os/licensing.
- * See the License for the specific language governing permissions
- * and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL HEADER in each
- * file and include the License file at usr/src/OPENSOLARIS.LICENSE.
- * If applicable, add the following below this CDDL HEADER, with the
- * fields enclosed by brackets "[]" replaced with your own identifying
- * information: Portions Copyright [yyyy] [name of copyright owner]
- *
- * CDDL HEADER END
- */
 
 /*
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
@@ -35,8 +15,6 @@
  * 5. Power Management
  * 6. Hot Plug Support
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #include "ata_common.h"
 #include "sil3xxx.h"
@@ -58,7 +36,7 @@ sil3xxx_init_controller(dev_info_t *dip,
 	uint32_t fifo_cnt_ctl;
 	int ports, i;
 
-#ifdef	DEBUG
+#ifdef	ATA_DEBUG
 	/* LINTED */
 	ushort_t sfiscfg_val;
 #endif
@@ -125,7 +103,7 @@ sil3xxx_init_controller(dev_info_t *dip,
 		/*
 		 * Correct default setting for FIS0cfg
 		 */
-#ifdef	DEBUG
+#ifdef	ATA_DEBUG
 		GET_BAR5_INDIRECT(pci_conf_handle, sfiscfg[i],
 			sfiscfg_val);
 		ADBG_WARN(("sil3xxx_init_controller: old val SFISCfg "
@@ -133,7 +111,7 @@ sil3xxx_init_controller(dev_info_t *dip,
 #endif
 		PUT_BAR5_INDIRECT(pci_conf_handle, sfiscfg[i],
 			SFISCFG_ERRATA);
-#ifdef	DEBUG
+#ifdef	ATA_DEBUG
 		GET_BAR5_INDIRECT(pci_conf_handle, sfiscfg[i],
 			sfiscfg_val);
 		ADBG_WARN(("sil3xxx_init_controller: new val SFISCfg "
