@@ -76,6 +76,9 @@ LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-uninitialized
+# Unfortunately, the compiler can't intuit that dirent64->d_name is variable length
+# in fdreaddir().
+CERRWARN	+= -_gcc=-Wno-array-bounds
 #
 #	Default build targets.
 #
