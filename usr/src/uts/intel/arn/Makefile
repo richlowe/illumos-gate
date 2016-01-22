@@ -66,6 +66,7 @@ CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-uninitialized
 CERRWARN	+= -_gcc=-Wno-char-subscripts
 CERRWARN	+= -_gcc=-Wno-empty-body
+CERRWARN	+= -_gcc=-Wno-switch
 
 #
 #	Default build targets.
