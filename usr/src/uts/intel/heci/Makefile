@@ -44,6 +44,10 @@ LDFLAGS +=	-dy
 #
 include $(UTSBASE)/intel/Makefile.intel
 
+# XXX: These hide an obvious bug
+CERRWARN += -_gcc=-Wno-bool-compare
+CERRWARN += -_gcc=-Wno-logical-not-parentheses
+
 #
 #	Define targets
 #
