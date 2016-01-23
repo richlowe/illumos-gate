@@ -947,7 +947,7 @@ pfile_callback(uintptr_t addr, const struct file *f, struct pfiles_cbdata *cb)
 	}
 
 	type = "?";
-	for (i = 0; i <= NUM_FS_TYPES; i++) {
+	for (i = 0; i < NUM_FS_TYPES; i++) {
 		if (fs_types[i].type == v.v_type)
 			type = fs_types[i].name;
 	}
