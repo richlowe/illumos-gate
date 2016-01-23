@@ -161,7 +161,8 @@ static GENERIC v0[8] = {
 
 GENERIC
 y0l(x) GENERIC x; {
-	GENERIC z, d, s, c, ss, cc, u, v;
+	GENERIC z, s, c, ss, cc, u, v;
+	GENERIC d __UNUSED;
 	int i;
 
 	if (isnanl(x))
