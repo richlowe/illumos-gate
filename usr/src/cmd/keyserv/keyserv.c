@@ -753,8 +753,8 @@ __key_get_conv_2_svc(uid, arg, res)
 {
 
 	if (debugging)
-		(void) fprintf(stderr, "get_conv(%d, %.*s) = ", uid,
-			sizeof (arg), arg);
+		(void) fprintf(stderr, "get_conv(%d, %s) = ", uid,
+		    arg);
 
 
 	res->status = pk_get_conv_key(uid, arg, res);
