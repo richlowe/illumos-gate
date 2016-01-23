@@ -695,11 +695,12 @@ void
 do_interactive(FILE *infile, char *configfile, char *promptstring,
     char *my_fmri, parse_cmdln_fn parseit, CplMatchFn *match_fn)
 {
-	char		ibuf[IBUF_SIZE], holder[IBUF_SIZE];
-	char		*hptr, **thisargv, *ebuf;
-	int		thisargc;
-	boolean_t	continue_in_progress = B_FALSE;
-	char		*s;
+	char			ibuf[IBUF_SIZE], holder[IBUF_SIZE];
+	volatile char		*volatile hptr;
+	char 			**thisargv, *ebuf;
+	int			thisargc;
+	volatile boolean_t	continue_in_progress = B_FALSE;
+	char			*s;
 
 	(void) setjmp(env);
 
@@ -751,7 +752,7 @@ do_interactive(FILE *infile, char *configfile, char *promptstring,
 			}
 		} else {
 			/* Handle continuations... */
-			(void) strncpy(hptr, ibuf,
+			(void) strncpy((char *)hptr, ibuf,
 			    (size_t)(&(holder[IBUF_SIZE]) - hptr));
 			if (holder[IBUF_SIZE - 1] != '\0') {
 				ipsecutil_exit(SERVICE_FATAL, my_fmri,
@@ -759,9 +760,9 @@ do_interactive(FILE *infile, char *configfile, char *promptstring,
 				    "Command buffer overrun."));
 			}
 			/* Use - 2 because of \n from fgets. */
-			if (hptr[strlen(hptr) - 2] == CONT_CHAR) {
+			if (hptr[strlen((char *)hptr) - 2] == CONT_CHAR) {
 				bzero(ibuf, IBUF_SIZE);
-				hptr += strlen(hptr);
+				hptr += strlen((char *)hptr);
 
 				/* Remove the CONT_CHAR from the string. */
 				hptr[-2] = ' ';
