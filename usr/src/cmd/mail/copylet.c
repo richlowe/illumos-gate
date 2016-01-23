@@ -27,8 +27,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include "mail.h"
 
 /*
@@ -50,14 +48,14 @@
 */
 
 int
-copylet(int letnum, FILE *f, int type) 
+copylet(int letnum, FILE *f, int type)
 {
 	int		pos = ftell(f);
 	int		rc  = xxxcopylet(letnum, f, type);
 
 	if (fflush(f) != 0)
 		rc = FALSE;
-	
+
 	/*
 	 * On error, truncate the file to its original position so that a
 	 * partial message is not left in the mailbox.
@@ -69,7 +67,7 @@ copylet(int letnum, FILE *f, int type)
 }
 
 int
-xxxcopylet(int letnum, FILE *f, int type) 
+xxxcopylet(int letnum, FILE *f, int type)
 {
 	static char	pn[] = "copylet";
 	char	buf[LSIZE], lastc;
@@ -90,7 +88,6 @@ xxxcopylet(int letnum, FILE *f, int type)
 					/* H_RECEIVED lines? */
 	long	clen = -1L;
 	int	htype;			/* header type */
-	int	sav_htype;	/* Header type of last non-H_CONT header line */
 	struct hdrs *hptr;
 
 	if (!sending) {
@@ -164,7 +161,7 @@ xxxcopylet(int letnum, FILE *f, int type)
 					sav_errno = errno;
 					return(FALSE);
 				}
-				
+
 				break;
 
 			case TTY:
@@ -247,7 +244,7 @@ xxxcopylet(int letnum, FILE *f, int type)
 			sav_errno = errno;
 			return(FALSE);
 		}
-		
+
 		break;
 	}
 	/* if not ZAP, copy balance of header */
@@ -296,7 +293,6 @@ xxxcopylet(int letnum, FILE *f, int type)
 			sav_suppress = suppress;
 			suppress = FALSE;
 			print_from_struct = FALSE;
-			sav_htype = htype;
 			htype = isheader (buf, &ctf);
 			Dout(pn, 5, "loop 2: buf = %s, htype= %d/%s\n", buf, htype, header[htype].tag);
 			/* The following order is defined in the MTA documents. */
