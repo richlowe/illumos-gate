@@ -3,16 +3,14 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
  /*
   * rfc931() speaks a common subset of the RFC 931, AUTH, TAP, IDENT and RFC
   * 1413 protocols. It queries an RFC 931 etc. compatible daemon on a remote
   * host to look up the owner of a connection. The information should not be
   * used for authentication purposes. This routine intercepts alarm signals.
-  * 
+  *
   * Diagnostics are reported through syslog(3).
-  * 
+  *
   * Author: Wietse Venema, Eindhoven University of Technology, The Netherlands.
   */
 
@@ -88,9 +86,9 @@ char   *dest;
     char    user[256];			/* XXX */
     char    buffer[512];		/* XXX */
     char   *cp;
-    char   *result = unknown;
+    volatile char   *volatile result = unknown;
     FILE   *fp;
-    unsigned saved_timeout = 0;
+    volatile unsigned saved_timeout = 0;
     struct sigaction nact, oact;
 
     /*
@@ -191,5 +189,5 @@ char   *dest;
 		alarm(saved_timeout);
 	fclose(fp);
     }
-    STRN_CPY(dest, result, STRING_LENGTH);
+    STRN_CPY(dest, (char *)result, STRING_LENGTH);
 }
