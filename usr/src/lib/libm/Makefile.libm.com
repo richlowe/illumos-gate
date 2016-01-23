@@ -33,7 +33,8 @@ ASSUFFIX	= $(ASSUFFIX_$(MACH))
 # We must then, unfortunately, defeat the GNU compiler _defaulting_ to C99, by
 # in that case setting it back to gnu89, which _also_ accepts C99 syntax as
 # far as is important.
-C99MODE		= -_gcc=-std=gnu89
+C99MODE		=
+CFLAGS		+= -_gcc=-std=gnu89
 
 
 M4FLAGS		= -D__STDC__ -DPIC
