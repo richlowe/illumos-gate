@@ -22,7 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
 #
 
 LIBRARY= libmail.a
@@ -48,6 +47,8 @@ LINTSRC=	$(LINTLIB:%.ln=%)
 CPPFLAGS =	-I../inc -I../../common/inc $(CPPFLAGS.master)
 CFLAGS +=	$(CCVERBOSE)
 LDLIBS +=	-lc
+
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 .KEEP_STATE:
 
