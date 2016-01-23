@@ -23,13 +23,18 @@ ASSUFFIX_sparc	= S
 ASSUFFIX_i386	= s
 ASSUFFIX	= $(ASSUFFIX_$(MACH))
 
-# C99MODE of neither enabled nor disabled is "no_lib", whereby we expect
-# C99-the-language, but don't modify the behaviour of library routines.  This
-# is VERY IMPORTANT, as -xc99=%all, for instance, would link us with
+# With studio C99MODE of neither enabled nor disabled is "no_lib", whereby we
+# expect C99-the-language, but don't modify the behaviour of library routines.
+# This is VERY IMPORTANT, as -xc99=%all, for instance, would link us with
 # values-xpg6, which would introduce an __xpg6 to our object with the C99
 # flags set, causing us to default C99 libm behaviour on, breaking
 # compatibility.
-C99MODE		=
+#
+# We must then, unfortunately, defeat the GNU compiler _defaulting_ to C99, by
+# in that case setting it back to gnu89, which _also_ accepts C99 syntax as
+# far as is important.
+C99MODE		= -_gcc=-std=gnu89
+
 
 M4FLAGS		= -D__STDC__ -DPIC
 
