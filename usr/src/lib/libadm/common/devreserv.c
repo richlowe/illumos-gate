@@ -28,7 +28,6 @@
  * All rights reserved.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 /*LINTLIBRARY*/
 
 /*
@@ -472,7 +471,7 @@ writelks(int tblcnt)
 		/* Write the table as we currently know it */
 		tblsz = tblcnt * sizeof (struct devlks);
 		if (tblsz)
-		    if (!write(lkfilefd, locklist, tblsz) == (ssize_t)tblsz)
+		    if (write(lkfilefd, locklist, tblsz) != (ssize_t)tblsz)
 			noerr = FALSE;  /* Write of locks failed */
 
 	    } else noerr = FALSE;  /* write() of count failed */
