@@ -651,8 +651,8 @@ AMT_STATUS PTHICommand::SetEnterpriseAccess(UINT8 Flags, UINT8 HostIPAddress[16]
 
 	memcpy(command, &(SET_ENTERPRISE_ACCESS_HEADER), sizeof(SET_ENTERPRISE_ACCESS_HEADER));
 	memcpy(command + sizeof(SET_ENTERPRISE_ACCESS_HEADER), &(Flags), sizeof(UINT8));
-	memcpy(command + sizeof(SET_ENTERPRISE_ACCESS_HEADER) + sizeof(UINT8), HostIPAddress, sizeof(HostIPAddress));
-	memcpy(command + sizeof(SET_ENTERPRISE_ACCESS_HEADER) + sizeof(UINT8) + sizeof(HostIPAddress), &(EnterpriseAccess), sizeof(UINT8));
+	memcpy(command + sizeof(SET_ENTERPRISE_ACCESS_HEADER) + sizeof(UINT8), HostIPAddress, 16);
+	memcpy(command + sizeof(SET_ENTERPRISE_ACCESS_HEADER) + sizeof(UINT8) + 16, &(EnterpriseAccess), sizeof(UINT8));
 
 	AMT_STATUS status = _call(command, command_size, &readBuffer, SET_ENTERPRISE_ACCESS_RESPONSE, sizeof(CFG_SET_ENTERPRISE_ACCESS_RESPONSE));
 
