@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <assert.h>
 #include <string.h>
 #include <libintl.h>
@@ -2317,11 +2315,11 @@ is_named_device_avail(
 
 	check_type_t	check_type;
 
-	typedef enum list_types {
+	enum list_types {
 		AVAIL = 0,
 		UNAVAIL,
 		N_LISTS
-	} list_type_t;
+	};
 
 	dlist_t		*lists[N_CHECKS][N_LISTS];
 	boolean_t	includes;
