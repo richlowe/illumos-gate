@@ -445,13 +445,16 @@ dissect(struct match *m, const char *start, const char *stop, sopno startst,
 			ssub = ss + 1;
 			esub = es - 1;
 			/* did innards match? */
+			/* LINTED */
 			if (slow(m, sp, rest, ssub, esub) != NULL) {
 #ifndef NDEBUG
 				dp = dissect(m, sp, rest, ssub, esub);
 				assert(dp == rest);
 #endif
-			} else		/* no */
+			} else { /* no */
 				assert(sp == rest);
+			}
+
 			sp = rest;
 			break;
 		case OPLUS_:
