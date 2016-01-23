@@ -27,7 +27,6 @@
  *	Copyright (c) 1998 by Sun Microsystems, Inc.
  *	All rights reserved.
  */
-#pragma ident	"%Z%%M%	%I%	%E% SMI" 	/* SVr4.0 1.2	*/
 
 #include <ctype.h>
 #include <setjmp.h>
@@ -117,10 +116,9 @@ char *c;
 }
 
 char *
-demangle(c)
-char *c;
+demangle(char *c)
 {
-	register int i = 0;
+	volatile int i = 0;
 	extern jmp_buf jbuf;
 	static mutex_t	mlock = DEFAULTMUTEX;
 
