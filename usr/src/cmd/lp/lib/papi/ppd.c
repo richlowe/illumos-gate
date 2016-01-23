@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * This file contains an extremely rudimentary implementation of PPD file
  * parsing support.  The parsing done here converts the contents of a PPD
@@ -90,7 +88,6 @@ PPDFileToAttributesList(papi_attribute_t ***attributes, char *filename)
 	char capability[256];
 	char def[256];
 	char supported[256];
-	char *current_group_name = NULL;
 
 	int ui = 0;
 
@@ -120,7 +117,6 @@ PPDFileToAttributesList(papi_attribute_t ***attributes, char *filename)
 		if (strcasecmp(key, "OpenGroup") == 0) {
 			if (value == NULL)
 				value = "unknown";
-			current_group_name = strdup(value);
 		} else if (strcasecmp(key, "OpenUI") == 0) {
 			if ((strcasecmp(value, "PageSize") == 0) ||
 			    (strcasecmp(value, "InputSlot") == 0))
