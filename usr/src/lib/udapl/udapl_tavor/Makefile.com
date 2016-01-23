@@ -151,6 +151,7 @@ LINTFLAGS64 +=	-DDAPL_DBG
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-uninitialized
 CERRWARN +=	-_gcc=-Wno-switch
+CERRWARN +=	-_gcc=-Wno-unused-value
 
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDAPL_DBG
 debug := COPTFLAG = -g
