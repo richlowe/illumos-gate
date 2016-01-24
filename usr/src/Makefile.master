@@ -320,6 +320,8 @@ CCNOAUTOINLINE= -_gcc=-fno-inline-small-functions \
 	-_gcc=-fno-inline-functions-called-once \
 	-_gcc=-fno-ipa-cp
 
+$(__GNUCNEXT)CCNOAUTOINLINE += -_gcc=-fno-ipa-icf 
+
 # One optimization the compiler might perform is to turn this:
 #	#pragma weak foo
 #	extern int foo;
