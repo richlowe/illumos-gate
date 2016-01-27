@@ -158,8 +158,10 @@ extern "C++" {
 #undef	__X
 #undef	__Y
 	inline double abs(double __X) { return fabs(__X); }
+#if __cpplusplus < 201103L
 	inline double pow(double __X, int __Y) { return
 		pow(__X, (double) (__Y)); }
+#endif
 
 	inline float abs(float __X) { return __fabsf(__X); }
 	inline float acos(float __X) { return __acosf(__X); }
@@ -179,8 +181,10 @@ extern "C++" {
 	inline float log10(float __X) { return __log10f(__X); }
 	inline float modf(float __X, float *__Y) { return __modff(__X, __Y); }
 	inline float pow(float __X, float __Y) { return __powf(__X, __Y); }
+#if __cplusplus < 201103L
 	inline float pow(float __X, int __Y) { return
 		pow((double) (__X), (double) (__Y)); }
+#endif
 	inline float sin(float __X) { return __sinf(__X); }
 	inline float sinh(float __X) { return __sinhf(__X); }
 	inline float sqrt(float __X) { return __sqrtf(__X); }
@@ -211,8 +215,10 @@ extern "C++" {
 		__modfl(__X, __Y); }
 	inline long double pow(long double __X, long double __Y) { return
 		__powl(__X, __Y); }
+#if __cplusplus < 201103L
 	inline long double pow(long double __X, int __Y) { return
 		__powl(__X, (long double) (__Y)); }
+#endif
 	inline long double sin(long double __X) { return __sinl(__X); }
 	inline long double sinh(long double __X) { return __sinhl(__X); }
 	inline long double sqrt(long double __X) { return __sqrtl(__X); }
