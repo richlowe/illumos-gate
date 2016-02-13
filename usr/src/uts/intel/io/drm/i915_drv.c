@@ -40,6 +40,10 @@
  */
 
 /*
+ * Copyright (c) 2006, 2013, Oracle and/or its affiliates. All rights reserved.
+ */
+
+/*
  * I915 DRM Driver for Solaris
  *
  * This driver provides the hardware 3D acceleration support for Intel
@@ -127,11 +131,11 @@ static struct modlinkage modlinkage = {
 	MODREV_1, (void *) &modldrv, NULL
 };
 
-static ddi_device_acc_attr_t s3_attr = {                              
-        DDI_DEVICE_ATTR_V0,                                                     
-        DDI_NEVERSWAP_ACC,                                                      
-        DDI_STRICTORDER_ACC     /* must be DDI_STRICTORDER_ACC */               
-}; 
+static ddi_device_acc_attr_t s3_attr = {
+        DDI_DEVICE_ATTR_V0,
+        DDI_NEVERSWAP_ACC,
+        DDI_STRICTORDER_ACC     /* must be DDI_STRICTORDER_ACC */
+};
 
 /*
  * softstate head
@@ -167,7 +171,7 @@ _fini(void)
 		return (error);
 
 	(void) ddi_soft_state_fini(&i915_statep);
-	
+
 	return (0);
 
 }	/* _fini() */
@@ -390,7 +394,7 @@ i915_restore_vga(struct drm_device *dev)
 		cr_data = VGA_CR_DATA_MDA;
 		st01 = VGA_ST01_MDA;
         }
-	
+
 	/* Sequencer registers, don't write SR07 */
         for (i = 0; i < 7; i++)
 		i915_write_indexed(&regmap, VGA_SR_INDEX, VGA_SR_DATA, i,
@@ -549,7 +553,7 @@ void i915_restore_display(struct drm_device *dev)
 
 	S3_WRITE(DSPARB, s3_priv->saveDSPARB);
 
-	/* 
+	/*
 	 * Pipe & plane A info
 	 * Prime the clock
 	 */
@@ -591,7 +595,7 @@ void i915_restore_display(struct drm_device *dev)
 	/* Enable the plane */
 	S3_WRITE(DSPACNTR, s3_priv->saveDSPACNTR);
 	S3_WRITE(DSPABASE, S3_READ(DSPABASE));
-	
+
 	/* Pipe & plane B info */
 	if (s3_priv->saveDPLL_B & DPLL_VCO_ENABLE) {
 		S3_WRITE(DPLL_B, s3_priv->saveDPLL_B &
@@ -664,7 +668,7 @@ void i915_restore_display(struct drm_device *dev)
 	S3_WRITE(VCLK_DIVISOR_VGA1, s3_priv->saveVCLK_DIVISOR_VGA1);
 	S3_WRITE(VCLK_POST_DIV, s3_priv->saveVCLK_POST_DIV);
 	drv_usecwait(150);
-	
+
 	i915_restore_vga(dev);
 }
 static int
@@ -705,10 +709,10 @@ i915_resume(struct drm_device *dev)
 
 	/* Memory arbitration state */
 	S3_WRITE (MI_ARB_STATE, s3_priv->saveMI_ARB_STATE | 0xffff0000);
-	
+
 	for (i = 0; i < 16; i++) {
 		S3_WRITE(SWF0 + (i << 2), s3_priv->saveSWF0[i]);
-		S3_WRITE(SWF10 + (i << 2), s3_priv->saveSWF1[i+7]);
+		S3_WRITE(SWF10 + (i << 2), s3_priv->saveSWF1[i]);
         }
 	for (i = 0; i < 3; i++)
 		S3_WRITE(SWF30 + (i << 2), s3_priv->saveSWF2[i]);
@@ -799,7 +803,7 @@ i915_map_regs(dev_info_t *dip, caddr_t *save_addr, ddi_acc_handle_t *handlep)
 		cmn_err(CE_WARN, "i915_map_regs: failed to get nregs");
 		return (DDI_FAILURE);
 	}
-	
+
 	for (rnumber = 1; rnumber < nregs; rnumber++) {
 		(void) ddi_dev_regsize(dip, rnumber, &size);
 		if ((size == 0x80000) ||
@@ -830,7 +834,7 @@ i915_unmap_regs(ddi_acc_handle_t *handlep)
 }
 static int
 i915_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
-{	
+{
 	drm_device_t		*statep;
 	s3_i915_private_t	*s3_private;
 	void		*handle;
@@ -846,7 +850,7 @@ i915_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	default:
 		DRM_ERROR("i915_attach: attach and resume ops are supported");
 		return (DDI_FAILURE);
-		
+
 	}
 
 	if (ddi_soft_state_zalloc(i915_statep, unit) != DDI_SUCCESS) {
@@ -864,13 +868,13 @@ i915_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	if (statep->s3_private == NULL) {
 		cmn_err(CE_WARN, "i915_attach: failed to allocate s3 priv");
 		goto err_exit1;
-	}	
+	}
 
 	/*
 	 * Map in the mmio register space for s3.
 	 */
 	s3_private = (s3_i915_private_t *)statep->s3_private;
-	
+
 	if (i915_map_regs(dip, &s3_private->saveAddr,
 	    &s3_private->saveHandle)) {
 		cmn_err(CE_WARN, "i915_attach: failed to map MMIO");
@@ -920,7 +924,7 @@ err_exit1:
 }	/* i915_attach() */
 
 static int
-i915_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)    
+i915_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 {
 	drm_device_t		*statep;
 	int		unit;
@@ -1028,7 +1032,7 @@ static void i915_configure(drm_driver_t *driver)
 }
 
 static int i915_quiesce(dev_info_t *dip)
-{	
+{
 	drm_device_t		*statep;
 	int		unit;
 
