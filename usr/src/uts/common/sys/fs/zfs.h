@@ -24,6 +24,7 @@
  * Copyright (c) 2011, 2014 by Delphix. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2014 Integros [integros.com]
  */
 
 /* Portions Copyright 2010 Robert Milkowski */
@@ -77,7 +78,8 @@ typedef enum dmu_objset_type {
  * the property table in usr/src/common/zfs/zfs_prop.c.
  */
 typedef enum {
-	ZFS_PROP_TYPE,
+	ZFS_PROP_BAD = -1,
+	ZFS_PROP_TYPE = 0,
 	ZFS_PROP_CREATION,
 	ZFS_PROP_USED,
 	ZFS_PROP_AVAILABLE,

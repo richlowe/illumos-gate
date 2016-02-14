@@ -29,6 +29,10 @@
  */
 
 /*
+ * Copyright 2014 PALO, Richard.
+ */
+
+/*
  * An application should not include this header directly.  Instead it
  * should be included only through the inclusion of other Sun headers.
  *
@@ -44,6 +48,7 @@
 #define	_ISO_STDDEF_ISO_H
 
 #include <sys/isa_defs.h>
+#include <sys/null.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -51,14 +56,6 @@ extern "C" {
 
 #if __cplusplus >= 199711L
 namespace std {
-#endif
-
-#ifndef	NULL
-#if defined(_LP64)
-#define	NULL    0L
-#else
-#define	NULL    0
-#endif
 #endif
 
 #if !defined(_PTRDIFF_T) || __cplusplus >= 199711L

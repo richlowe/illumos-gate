@@ -483,7 +483,7 @@ uhci_td_walk_step(mdb_walk_state_t *wsp)
 
 
 	if (mdb_vread(wsp->walk_data, sizeof (uhci_td_t), wsp->walk_addr)
-		== -1) {
+	    == -1) {
 		mdb_warn("failed to read td at %p", wsp->walk_addr);
 		return (WALK_DONE);
 	}

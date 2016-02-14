@@ -459,8 +459,6 @@ typedef struct {
 #define	VM_CPU_DATA_PADSIZE						\
 	(P2ROUNDUP(sizeof (vm_cpu_data_t), L2CACHE_ALIGN_MAX))
 
-#define	MAX_PRAGMA_ALIGN	128
-
 /*
  * When a bin is empty, and we can't satisfy a color request correctly,
  * we scan.  If we assume that the programs have reasonable spatial

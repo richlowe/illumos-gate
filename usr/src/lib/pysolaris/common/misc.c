@@ -29,10 +29,6 @@
 #include <idmap.h>
 #include <directory.h>
 
-#ifdef __lint
-#define	dgettext(x, y) y
-#endif
-
 extern int sid_to_id(char *sid, boolean_t user, uid_t *id);
 
 static PyObject *
