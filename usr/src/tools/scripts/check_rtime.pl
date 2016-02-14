@@ -988,11 +988,15 @@ FILE:
 	# Now that the config scripts are complete, use them to generate
 	# runtime linker config files.
 	if ($Crle64) {
-		print CRLE64
-			"\t-l ${Proto}/lib/64:${Proto}/usr/lib/64 \\\n";
+		if (defined($Proto)) {
+			print CRLE64
+			    "\t-l ${Proto}/lib/64:${Proto}/usr/lib/64 \\\n";
+		}
 
-		print CRLE64
-		    "\t-l ${Adjunct}/lib/64:${Adjunct}/usr/lib/64 \\\n";
+		if (defined ($Adjunct)) {
+			print CRLE64
+			    "\t-l ${Adjunct}/lib/64:${Adjunct}/usr/lib/64 \\\n";
+		}
 
 		$Conf64 = "$Tmpdir/$Prog.conf64.$$";
 		print CRLE64 "\t-c $Conf64\n";
@@ -1006,8 +1010,14 @@ FILE:
 		unlink $Crle64;
 	}
 	if ($Crle32) {
-		print CRLE32 "\t-l ${Proto}/lib:${Proto}/usr/lib \\\n";
-		print CRLE32 "\t-l ${Adjunct}/lib:${Adjunct}/usr/lib \\\n";
+		if (defined($Proto)) {
+			print CRLE32 "\t-l ${Proto}/lib:${Proto}/usr/lib \\\n";
+		}
+
+		if (defined($Adjunct)) {
+			print CRLE32
+			    "\t-l ${Adjunct}/lib:${Adjunct}/usr/lib \\\n";
+		}
 
 		$Conf32 = "$Tmpdir/$Prog.conf32.$$";
 		print CRLE32 "\t-c $Conf32\n";
