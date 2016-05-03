@@ -24,6 +24,7 @@ SUBDIRS = chg_usr_exec \
 	getholes \
 	largest_file \
 	mkbusy \
+	mkfiles \
 	mkholes \
 	mktree \
 	mmapwrite \

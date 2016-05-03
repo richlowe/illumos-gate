@@ -180,8 +180,9 @@ export PKGFMT_OUTPUT='v1'
 # one problem.
 export MAKEFLAGS='k'
 
-# Magic variable to prevent the devpro compilers/teamware from sending
-# mail back to devpro on every use.
+# Magic variables to prevent the devpro compilers/teamware from checking
+# for updates or sending mail back to devpro on every use.
+export SUNW_NO_UPDATE_NOTIFY='1'
 export UT_NO_USAGE_TRACKING='1'
 
 # Build tools - don't change these unless you know what you're doing.  These
@@ -194,6 +195,9 @@ export BUILD_TOOLS='/opt'
 #export ONBLD_TOOLS='/opt/onbld'
 export SPRO_ROOT='/opt/SUNWspro'
 export SPRO_VROOT="$SPRO_ROOT"
+
+# Disable shadow compilation by default.
+export CW_NO_SHADOW='1'
 
 # This goes along with lint - it is a series of the form "A [y|n]" which
 # means "go to directory A and run 'make lint'" Then mail me (y) the

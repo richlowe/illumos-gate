@@ -22,7 +22,8 @@
  * Copyright (c) 1993, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
- * Copyright 2013 Joyent, Inc.  All rights reserved.
+ * Copyright 2015 Joyent, Inc.
+ * Copyright (c) 2015 by Delphix. All rights reserved.
  */
 /*
  * Copyright (c) 2010, Intel Corporation.
@@ -284,6 +285,12 @@ int segzio_fromheap = 1;
 #endif
 
 /*
+ * Give folks an escape hatch for disabling SMAP via kmdb. Doesn't work
+ * post-boot.
+ */
+int disable_smap = 0;
+
+/*
  * new memory fragmentations are possible in startup() due to BOP_ALLOCs. this
  * depends on number of BOP_ALLOC calls made and requested size, memory size
  * combination and whether boot.bin memory needs to be freed.
@@ -398,9 +405,9 @@ static pgcnt_t kphysm_init(page_t *, pgcnt_t);
  *		|---       GDT       ---|- GDT page (GDT_VA)
  *		|---    debug info   ---|- debug info (DEBUG_INFO_VA)
  *		|			|
- * 		|   page_t structures	|
- * 		|   memsegs, memlists, 	|
- * 		|   page hash, etc.	|
+ *		|   page_t structures	|
+ *		|   memsegs, memlists,	|
+ *		|   page hash, etc.	|
  * ---	       -|-----------------------|- ekernelheap, valloc_base (floating)
  *		|			|  (segkp is just an arena in the heap)
  *		|			|
@@ -408,7 +415,7 @@ static pgcnt_t kphysm_init(page_t *, pgcnt_t);
  *		|			|
  *		|			|
  * ---         -|-----------------------|- kernelheap (floating)
- * 		|        Segkmap	|
+ *		|        Segkmap	|
  * 0xC3002000  -|-----------------------|- segmap_start (floating)
  *		|	Red Zone	|
  * 0xC3000000  -|-----------------------|- kernelbase / userlimit (floating)
@@ -432,7 +439,7 @@ static pgcnt_t kphysm_init(page_t *, pgcnt_t);
  * 0xFFFFFFFF.FFC00000  |-----------------------|- ARGSBASE
  *			|	debugger (?)	|
  * 0xFFFFFFFF.FF800000  |-----------------------|- SEGDEBUGBASE
- *			|      unused    	|
+ *			|      unused		|
  *			+-----------------------+
  *			|      Kernel Data	|
  * 0xFFFFFFFF.FBC00000  |-----------------------|
@@ -441,7 +448,7 @@ static pgcnt_t kphysm_init(page_t *, pgcnt_t);
  *			|---       GDT       ---|- GDT page (GDT_VA)
  *			|---    debug info   ---|- debug info (DEBUG_INFO_VA)
  *			|			|
- * 			|      Core heap	| (used for loadable modules)
+ *			|      Core heap	| (used for loadable modules)
  * 0xFFFFFFFF.C0000000  |-----------------------|- core_base / ekernelheap
  *			|	 Kernel		|
  *			|	  heap		|
@@ -454,23 +461,23 @@ static pgcnt_t kphysm_init(page_t *, pgcnt_t);
  * 0xFFFFFXXX.XXX00000  |-----------------------|- segzio_base (floating)
  *			|	  segkp		|
  * ---                  |-----------------------|- segkp_base (floating)
- * 			|   page_t structures	|  valloc_base + valloc_sz
- * 			|   memsegs, memlists, 	|
- * 			|   page hash, etc.	|
- * 0xFFFFFF00.00000000  |-----------------------|- valloc_base (lower if > 1TB)
+ *			|   page_t structures	|  valloc_base + valloc_sz
+ *			|   memsegs, memlists,	|
+ *			|   page hash, etc.	|
+ * 0xFFFFFF00.00000000  |-----------------------|- valloc_base (lower if >256GB)
  *			|	 segkpm		|
  * 0xFFFFFE00.00000000  |-----------------------|
  *			|	Red Zone	|
- * 0xFFFFFD80.00000000  |-----------------------|- KERNELBASE (lower if > 1TB)
+ * 0xFFFFFD80.00000000  |-----------------------|- KERNELBASE (lower if >256GB)
  *			|     User stack	|- User space memory
- * 			|			|
- * 			| shared objects, etc	|	(grows downwards)
+ *			|			|
+ *			| shared objects, etc	|	(grows downwards)
  *			:			:
- * 			|			|
+ *			|			|
  * 0xFFFF8000.00000000  |-----------------------|
- * 			|			|
- * 			| VA Hole / unused	|
- * 			|			|
+ *			|			|
+ *			| VA Hole / unused	|
+ *			|			|
  * 0x00008000.00000000  |-----------------------|
  *			|			|
  *			|			|
@@ -673,6 +680,60 @@ perform_allocations(void)
 }
 
 /*
+ * Set up and enable SMAP now before we start other CPUs, but after the kernel's
+ * VM has been set up so we can use hot_patch_kernel_text().
+ *
+ * We can only patch 1, 2, or 4 bytes, but not three bytes. So instead, we
+ * replace the four byte word at the patch point. See uts/intel/ia32/ml/copy.s
+ * for more information on what's going on here.
+ */
+static void
+startup_smap(void)
+{
+	int i;
+	uint32_t inst;
+	uint8_t *instp;
+	char sym[128];
+
+	extern int _smap_enable_patch_count;
+	extern int _smap_disable_patch_count;
+
+	if (disable_smap != 0)
+		remove_x86_feature(x86_featureset, X86FSET_SMAP);
+
+	if (is_x86_feature(x86_featureset, X86FSET_SMAP) == B_FALSE)
+		return;
+
+	for (i = 0; i < _smap_enable_patch_count; i++) {
+		int sizep;
+
+		VERIFY3U(i, <, _smap_enable_patch_count);
+		VERIFY(snprintf(sym, sizeof (sym), "_smap_enable_patch_%d", i) <
+		    sizeof (sym));
+		instp = (uint8_t *)(void *)kobj_getelfsym(sym, NULL, &sizep);
+		VERIFY(instp != 0);
+		inst = (instp[3] << 24) | (SMAP_CLAC_INSTR & 0x00ffffff);
+		hot_patch_kernel_text((caddr_t)instp, inst, 4);
+	}
+
+	for (i = 0; i < _smap_disable_patch_count; i++) {
+		int sizep;
+
+		VERIFY(snprintf(sym, sizeof (sym), "_smap_disable_patch_%d",
+		    i) < sizeof (sym));
+		instp = (uint8_t *)(void *)kobj_getelfsym(sym, NULL, &sizep);
+		VERIFY(instp != 0);
+		inst = (instp[3] << 24) | (SMAP_STAC_INSTR & 0x00ffffff);
+		hot_patch_kernel_text((caddr_t)instp, inst, 4);
+	}
+
+	hot_patch_kernel_text((caddr_t)smap_enable, SMAP_CLAC_INSTR, 4);
+	hot_patch_kernel_text((caddr_t)smap_disable, SMAP_STAC_INSTR, 4);
+	setcr4(getcr4() | CR4_SMAP);
+	smap_enable();
+}
+
+/*
  * Our world looks like this at startup time.
  *
  * In a 32-bit OS, boot loads the kernel text at 0xfe800000 and kernel data
@@ -727,6 +788,7 @@ startup(void)
 	 * the irq routing table (used for pci labels).
 	 */
 	startup_pci_bios();
+	startup_smap();
 #endif
 #if defined(__xpv)
 	startup_xen_mca();
@@ -1182,20 +1244,45 @@ startup_memlist(void)
 
 	/*
 	 * The default values of VALLOC_BASE and SEGKPM_BASE should work
-	 * for values of physmax up to 1 Terabyte. They need adjusting when
-	 * memory is at addresses above 1 TB. When adjusted, segkpm_base must
+	 * for values of physmax up to 256GB (1/4 TB). They need adjusting when
+	 * memory is at addresses above 256GB. When adjusted, segkpm_base must
 	 * be aligned on KERNEL_REDZONE_SIZE boundary (span of top level pte).
+	 *
+	 * In the general case (>256GB), we use (4 * physmem) for the
+	 * kernel's virtual addresses, which is divided approximately
+	 * as follows:
+	 *  - 1 * physmem for segkpm
+	 *  - 1.5 * physmem for segzio
+	 *  - 1.5 * physmem for heap
+	 * Total: 4.0 * physmem
+	 *
+	 * Note that the segzio and heap sizes are more than physmem so that
+	 * VA fragmentation does not prevent either of them from being
+	 * able to use nearly all of physmem.  The value of 1.5x is determined
+	 * experimentally and may need to change if the workload changes.
 	 */
-	if (physmax + 1 > mmu_btop(TERABYTE) ||
-	    plat_dr_physmax > mmu_btop(TERABYTE)) {
+	if (physmax + 1 > mmu_btop(TERABYTE / 4) ||
+	    plat_dr_physmax > mmu_btop(TERABYTE / 4)) {
 		uint64_t kpm_resv_amount = mmu_ptob(physmax + 1);
 
 		if (kpm_resv_amount < mmu_ptob(plat_dr_physmax)) {
 			kpm_resv_amount = mmu_ptob(plat_dr_physmax);
 		}
 
-		segkpm_base = -(P2ROUNDUP((2 * kpm_resv_amount),
-		    KERNEL_REDZONE_SIZE));	/* down from top VA */
+		/*
+		 * This is what actually controls the KVA : UVA split.
+		 * The kernel uses high VA, and this is lowering the
+		 * boundary, thus increasing the amount of VA for the kernel.
+		 * This gives the kernel 4 * (amount of physical memory) VA.
+		 *
+		 * The maximum VA is UINT64_MAX and we are using
+		 * 64-bit 2's complement math, so e.g. if you have 512GB
+		 * of memory, segkpm_base = -(4 * 512GB) == -2TB ==
+		 * UINT64_MAX - 2TB (approximately).  So the kernel's
+		 * VA is [UINT64_MAX-2TB to UINT64_MAX].
+		 */
+		segkpm_base = -(P2ROUNDUP((4 * kpm_resv_amount),
+		    KERNEL_REDZONE_SIZE));
 
 		/* make sure we leave some space for user apps above hole */
 		segkpm_base = MAX(segkpm_base, AMD64_VA_HOLE_END + TERABYTE);
@@ -1611,11 +1698,34 @@ startup_modules(void)
 	if (DOMAIN_IS_INITDOMAIN(xen_info))
 #endif
 	{
+		id_t smid;
+		smbios_system_t smsys;
+		smbios_info_t sminfo;
+		char *mfg;
 		/*
 		 * Load the System Management BIOS into the global ksmbios
 		 * handle, if an SMBIOS is present on this system.
+		 * Also set "si-hw-provider" property, if not already set.
 		 */
 		ksmbios = smbios_open(NULL, SMB_VERSION, ksmbios_flags, NULL);
+		if (ksmbios != NULL &&
+		    ((smid = smbios_info_system(ksmbios, &smsys)) != SMB_ERR) &&
+		    (smbios_info_common(ksmbios, smid, &sminfo)) != SMB_ERR) {
+			mfg = (char *)sminfo.smbi_manufacturer;
+			if (BOP_GETPROPLEN(bootops, "si-hw-provider") < 0) {
+				extern char hw_provider[];
+				int i;
+				for (i = 0; i < SYS_NMLN; i++) {
+					if (isprint(mfg[i]))
+						hw_provider[i] = mfg[i];
+					else {
+						hw_provider[i] = '\0';
+						break;
+					}
+				}
+				hw_provider[SYS_NMLN - 1] = '\0';
+			}
+		}
 	}
 
 
@@ -1822,8 +1932,9 @@ layout_kernel_va(void)
 	 * segment (from kernel heap) so that we can easily tell not to
 	 * include it in kernel crash dumps on 64 bit kernels. The trick is
 	 * to give it lots of VA, but not constrain the kernel heap.
-	 * We scale the size of segzio linearly with physmem up to
-	 * SEGZIOMAXSIZE. Above that amount it scales at 50% of physmem.
+	 * We can use 1.5x physmem for segzio, leaving approximately
+	 * another 1.5x physmem for heap.  See also the comment in
+	 * startup_memlist().
 	 */
 	segzio_base = segkp_base + mmu_ptob(segkpsize);
 	if (segzio_fromheap) {
@@ -1831,15 +1942,10 @@ layout_kernel_va(void)
 	} else {
 		size_t physmem_size = mmu_ptob(physmem);
 		size_t size = (segziosize == 0) ?
-		    physmem_size : mmu_ptob(segziosize);
+		    physmem_size * 3 / 2 : mmu_ptob(segziosize);
 
 		if (size < SEGZIOMINSIZE)
 			size = SEGZIOMINSIZE;
-		if (size > SEGZIOMAXSIZE) {
-			size = SEGZIOMAXSIZE;
-			if (physmem_size > size)
-				size += (physmem_size - size) / 2;
-		}
 		segziosize = mmu_btop(ROUND_UP_LPAGE(size));
 	}
 	PRM_DEBUG(segziosize);

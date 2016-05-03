@@ -11,6 +11,7 @@
 
 #
 # Copyright (c) 2012, 2015 by Delphix. All rights reserved.
+# Copyright 2016, OmniTI Computer Consulting, Inc. All rights reserved.
 #
 
 [DEFAULT]
@@ -72,6 +73,15 @@ tests = ['cachefile_001_pos', 'cachefile_002_pos', 'cachefile_003_pos',
 pre =
 post =
 
+[/opt/zfs-tests/tests/functional/casenorm]
+tests = ['case_all_values', 'norm_all_values',
+    'sensitive_none_lookup', 'sensitive_none_delete',
+    'sensitive_formd_lookup', 'sensitive_formd_delete',
+    'insensitive_none_lookup', 'insensitive_none_delete',
+    'insensitive_formd_lookup', 'insensitive_formd_delete',
+    'mixed_none_lookup', 'mixed_none_lookup_ci', 'mixed_none_delete',
+    'mixed_formd_lookup', 'mixed_formd_lookup_ci', 'mixed_formd_delete']
+
 [/opt/zfs-tests/tests/functional/checksum]
 tests = ['run_edonr_test', 'run_sha2_test', 'run_skein_test']
 pre =
@@ -82,7 +92,7 @@ tests = [ 'clean_mirror_001_pos', 'clean_mirror_002_pos',
     'clean_mirror_003_pos', 'clean_mirror_004_pos']
 
 [/opt/zfs-tests/tests/functional/cli_root/zdb]
-tests = ['zdb_001_neg']
+tests = ['zdb_001_neg', 'zdb_002_pos']
 pre =
 post =
 
@@ -140,7 +150,7 @@ tests = ['zfs_written_property_001_pos']
 tests = ['zfs_receive_001_pos', 'zfs_receive_002_pos', 'zfs_receive_003_pos',
     'zfs_receive_005_neg', 'zfs_receive_006_pos',
     'zfs_receive_007_neg', 'zfs_receive_008_pos', 'zfs_receive_009_neg',
-    'zfs_receive_010_pos']
+    'zfs_receive_010_pos', 'zfs_receive_011_pos', 'zfs_receive_012_pos']
 
 [/opt/zfs-tests/tests/functional/cli_root/zfs_rename]
 tests = ['zfs_rename_001_pos', 'zfs_rename_002_pos', 'zfs_rename_003_pos',
@@ -158,7 +168,8 @@ tests = ['zfs_rollback_001_pos', 'zfs_rollback_002_pos',
 
 [/opt/zfs-tests/tests/functional/cli_root/zfs_send]
 tests = ['zfs_send_001_pos', 'zfs_send_002_pos', 'zfs_send_003_pos',
-    'zfs_send_004_neg', 'zfs_send_005_pos', 'zfs_send_006_pos']
+    'zfs_send_004_neg', 'zfs_send_005_pos', 'zfs_send_006_pos',
+    'zfs_send_007_pos']
 
 [/opt/zfs-tests/tests/functional/cli_root/zfs_set]
 tests = ['cache_001_pos', 'cache_002_neg', 'canmount_001_pos',
@@ -351,6 +362,8 @@ tests = ['grow_pool_001_pos']
 
 [/opt/zfs-tests/tests/functional/grow_replicas]
 tests = ['grow_replicas_001_pos']
+pre =
+post =
 
 [/opt/zfs-tests/tests/functional/history]
 tests = ['history_001_pos', 'history_002_pos', 'history_003_pos',
@@ -509,6 +522,11 @@ tests = ['groupspace_001_pos', 'groupspace_002_pos', 'userquota_001_pos',
 tests = ['utils_test_001_pos', 'utils_test_002_pos', 'utils_test_003_pos',
     'utils_test_004_pos', 'utils_test_005_pos', 'utils_test_006_pos',
     'utils_test_007_pos', 'utils_test_008_pos', 'utils_test_009_pos']
+
+[/opt/zfs-tests/tests/functional/vdev_zaps]
+tests = ['vdev_zaps_001_pos', 'vdev_zaps_002_pos', 'vdev_zaps_003_pos',
+    'vdev_zaps_004_pos', 'vdev_zaps_005_pos', 'vdev_zaps_006_pos',
+    'vdev_zaps_007_pos']
 
 [/opt/zfs-tests/tests/functional/write_dirs]
 tests = ['write_dirs_001_pos', 'write_dirs_002_pos']

@@ -348,8 +348,14 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 	 * We do this because now the brand library can just check
 	 * args->to_model to see if the target is 32-bit or 64-bit without
 	 * having do duplicate all the code above.
+	 *
+	 * The level checks associated with brand handling below are used to
+	 * prevent a loop since the brand elfexec function typically comes back
+	 * through this function. We must check <= here since the nested
+	 * handling in the #! interpreter code will increment the level before
+	 * calling gexec to run the final elfexec interpreter.
 	 */
-	if ((level < 2) &&
+	if ((level <= INTP_MAXDEPTH) &&
 	    (brand_action != EBA_NATIVE) && (PROC_IS_BRANDED(p))) {
 		error = BROP(p)->b_elfexec(vp, uap, args,
 		    idatap, level + 1, execsz, setid, exec_file, cred,
@@ -1842,7 +1848,7 @@ top:
 	ASSERT(p == ttoproc(curthread));
 	prstop(0, 0);
 
-	AS_LOCK_ENTER(as, &as->a_lock, RW_WRITER);
+	AS_LOCK_ENTER(as, RW_WRITER);
 	nphdrs = prnsegs(as, 0) + 2;		/* two CORE note sections */
 
 	/*
@@ -1853,7 +1859,7 @@ top:
 		(void) process_scns(content, p, credp, NULL, NULL, NULL, 0,
 		    NULL, &nshdrs);
 	}
-	AS_LOCK_EXIT(as, &as->a_lock);
+	AS_LOCK_EXIT(as);
 
 	ASSERT(nshdrs == 0 || nshdrs > 1);
 
@@ -1969,7 +1975,7 @@ top:
 
 	mutex_exit(&p->p_lock);
 
-	AS_LOCK_ENTER(as, &as->a_lock, RW_WRITER);
+	AS_LOCK_ENTER(as, RW_WRITER);
 	i = 2;
 	for (seg = AS_SEGFIRST(as); seg != NULL; seg = AS_SEGNEXT(as, seg)) {
 		caddr_t eaddr = seg->s_base + pr_getsegsize(seg, 0);
@@ -2069,7 +2075,7 @@ exclude:
 		}
 		ASSERT(tmp == NULL);
 	}
-	AS_LOCK_EXIT(as, &as->a_lock);
+	AS_LOCK_EXIT(as);
 
 	if (overflow || i != nphdrs) {
 		if (ntries++ == 0) {
@@ -2218,14 +2224,14 @@ exclude:
 			bigwad->shdr[0].sh_info = nphdrs;
 
 		if (nshdrs > 1) {
-			AS_LOCK_ENTER(as, &as->a_lock, RW_WRITER);
+			AS_LOCK_ENTER(as, RW_WRITER);
 			if ((error = process_scns(content, p, credp, vp,
 			    &bigwad->shdr[0], nshdrs, rlimit, &doffset,
 			    NULL)) != 0) {
-				AS_LOCK_EXIT(as, &as->a_lock);
+				AS_LOCK_EXIT(as);
 				goto done;
 			}
-			AS_LOCK_EXIT(as, &as->a_lock);
+			AS_LOCK_EXIT(as);
 		}
 
 		if ((error = core_write(vp, UIO_SYSSPACE, soffset,

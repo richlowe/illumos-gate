@@ -44,6 +44,7 @@ file path=opt/os-tests/tests/secflags/secflags_proc mode=0555
 file path=opt/os-tests/tests/secflags/secflags_psecflags mode=0555
 file path=opt/os-tests/tests/secflags/stacky mode=0555
 file path=opt/os-tests/tests/sigqueue/sigqueue_queue_size mode=0555
+file path=opt/os-tests/tests/spoof-ras mode=0555
 license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 depend fmri=system/test/testrunner type=require

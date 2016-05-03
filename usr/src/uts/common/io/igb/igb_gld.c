@@ -27,6 +27,7 @@
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2013, Nexenta Systems, Inc. All rights reserved.
  * Copyright 2014 Pluribus Networks Inc.
+ * Copyright 2016 OmniTI Computer Consulting, Inc. All rights reserved.
  */
 
 #include "igb_sw.h"
@@ -1116,7 +1117,7 @@ setup_link:
 		err = igb_set_priv_prop(igb, pr_name, pr_valsize, pr_val);
 		break;
 	default:
-		err = EINVAL;
+		err = ENOTSUP;
 		break;
 	}
 
@@ -1218,7 +1219,7 @@ igb_m_getprop(void *arg, const char *pr_name, mac_prop_id_t pr_num,
 		err = igb_get_priv_prop(igb, pr_name, pr_valsize, pr_val);
 		break;
 	default:
-		err = EINVAL;
+		err = ENOTSUP;
 		break;
 	}
 	return (err);
@@ -1374,13 +1375,15 @@ igb_set_priv_prop(igb_t *igb, const char *pr_name,
 			case e1000_i350:
 				/* Must set this prior to the set call. */
 				hw->dev_spec._82575.eee_disable = !result;
-				if (e1000_set_eee_i350(hw) != E1000_SUCCESS)
+				if (e1000_set_eee_i350(hw, result,
+				    result) != E1000_SUCCESS)
 					err = EIO;
 				break;
 			case e1000_i354:
 				/* Must set this prior to the set call. */
 				hw->dev_spec._82575.eee_disable = !result;
-				if (e1000_set_eee_i354(hw) != E1000_SUCCESS)
+				if (e1000_set_eee_i354(hw, result,
+				    result) != E1000_SUCCESS)
 					err = EIO;
 				break;
 			default:

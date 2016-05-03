@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2015 Joyent, Inc. All rights reserved.
  * Copyright 2014 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2014 Igor Kozhukhov <ikozhukhov@gmail.com>.
  */
@@ -383,6 +383,15 @@ typedef struct zone_kstat {
 struct cpucap;
 
 typedef struct {
+	kstat_named_t	zm_zonename;
+	kstat_named_t	zm_pgpgin;
+	kstat_named_t	zm_anonpgin;
+	kstat_named_t	zm_execpgin;
+	kstat_named_t	zm_fspgin;
+	kstat_named_t	zm_anon_alloc_fail;
+} zone_mcap_kstat_t;
+
+typedef struct {
 	kstat_named_t	zm_zonename;	/* full name, kstat truncates name */
 	kstat_named_t	zm_utime;
 	kstat_named_t	zm_stime;
@@ -390,15 +399,13 @@ typedef struct {
 	kstat_named_t	zm_avenrun1;
 	kstat_named_t	zm_avenrun5;
 	kstat_named_t	zm_avenrun15;
-	kstat_named_t	zm_run_ticks;
-	kstat_named_t	zm_run_wait;
-	kstat_named_t	zm_fss_shr_pct;
-	kstat_named_t	zm_fss_pri_hi;
-	kstat_named_t	zm_fss_pri_avg;
 	kstat_named_t	zm_ffcap;
 	kstat_named_t	zm_ffnoproc;
 	kstat_named_t	zm_ffnomem;
 	kstat_named_t	zm_ffmisc;
+	kstat_named_t	zm_nested_intp;
+	kstat_named_t	zm_init_pid;
+	kstat_named_t	zm_boot_time;
 } zone_misc_kstat_t;
 
 typedef struct zone {
@@ -562,6 +569,15 @@ typedef struct zone {
 						/* zone_rctls->rcs_lock */
 	kstat_t		*zone_nprocs_kstat;
 
+	kmutex_t	zone_mcap_lock;	/* protects mcap statistics */
+	kstat_t		*zone_mcap_ksp;
+	zone_mcap_kstat_t *zone_mcap_stats;
+	uint64_t	zone_pgpgin;		/* pages paged in */
+	uint64_t	zone_anonpgin;		/* anon pages paged in */
+	uint64_t	zone_execpgin;		/* exec pages paged in */
+	uint64_t	zone_fspgin;		/* fs pages paged in */
+	uint64_t	zone_anon_alloc_fail;	/* cnt of anon alloc fails */
+
 	/*
 	 * Misc. kstats and counters for zone cpu-usage aggregation.
 	 * The zone_Xtime values are the sum of the micro-state accounting
@@ -585,6 +601,8 @@ typedef struct zone {
 	uint32_t	zone_ffnoproc;		/* get proc/lwp error */
 	uint32_t	zone_ffnomem;		/* as_dup/memory error */
 	uint32_t	zone_ffmisc;		/* misc. other error */
+
+	uint32_t	zone_nested_intp;	/* nested interp. kstat */
 
 	struct loadavg_s zone_loadavg;		/* loadavg for this zone */
 	uint64_t	zone_hp_avenrun[3];	/* high-precision avenrun */

@@ -22,7 +22,8 @@
 # Use is subject to license terms.
 #
 # Copyright 2010 Nexenta Systems, Inc. All rights reserved.
-# Copyright (c) 2012 by Delphix. All rights reserved.
+# Copyright (c) 2012, 2015 by Delphix. All rights reserved.
+# Copyright 2016 Igor Kozhukhov <ikozhukhov@gmail.com>.
 #
 
 PROG=		zfs
@@ -50,14 +51,8 @@ CPPFLAGS += -D_LARGEFILE64_SOURCE=1 -D_REENTRANT $(INCS)
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 
 # lint complains about unused _umem_* functions
-LINTFLAGS += -xerroff=E_NAME_DEF_NOT_USED2 
-LINTFLAGS64 += -xerroff=E_NAME_DEF_NOT_USED2 
-
-CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-type-limits
-CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
-CERRWARN += -_gcc=-Wno-old-style-declaration
+LINTFLAGS += -xerroff=E_NAME_DEF_NOT_USED2
+LINTFLAGS64 += -xerroff=E_NAME_DEF_NOT_USED2
 
 ROOTUSRSBINLINKS = $(PROG:%=$(ROOTUSRSBIN)/%)
 USRLIBFSTYPELINKS = $(LINKPROGS:%=$(USRLIBFSTYPE)/%)

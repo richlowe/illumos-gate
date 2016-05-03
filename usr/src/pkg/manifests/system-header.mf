@@ -24,7 +24,7 @@
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2013 Saso Kiselkov. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
-# Copyright 2015 Nexenta Systems, Inc. All rights reserved.
+# Copyright 2016 Nexenta Systems, Inc.
 #
 
 set name=pkg.fmri value=pkg:/system/header@$(PKGVERS)
@@ -1222,6 +1222,7 @@ $(i386_ONLY)file path=usr/include/sys/mc_amd.h
 $(i386_ONLY)file path=usr/include/sys/mc_intel.h
 $(i386_ONLY)file path=usr/include/sys/mca_amd.h
 $(i386_ONLY)file path=usr/include/sys/mca_x86.h
+file path=usr/include/sys/mcontext.h
 file path=usr/include/sys/md4.h
 file path=usr/include/sys/md5.h
 file path=usr/include/sys/md5_consts.h
@@ -1262,6 +1263,7 @@ file path=usr/include/sys/neti.h
 file path=usr/include/sys/netstack.h
 file path=usr/include/sys/nexusdefs.h
 file path=usr/include/sys/note.h
+file path=usr/include/sys/null.h
 file path=usr/include/sys/nvpair.h
 file path=usr/include/sys/nvpair_impl.h
 file path=usr/include/sys/objfs.h
@@ -1395,6 +1397,7 @@ file path=usr/include/sys/scsi/scsi.h
 file path=usr/include/sys/scsi/scsi_address.h
 file path=usr/include/sys/scsi/scsi_ctl.h
 file path=usr/include/sys/scsi/scsi_fm.h
+file path=usr/include/sys/scsi/scsi_names.h
 file path=usr/include/sys/scsi/scsi_params.h
 file path=usr/include/sys/scsi/scsi_pkt.h
 file path=usr/include/sys/scsi/scsi_resource.h

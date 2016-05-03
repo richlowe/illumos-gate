@@ -20,6 +20,8 @@
 #
 #
 # Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2016 Igor Kozhukhov <ikozhukhov@gmail.com>.
+# Copyright (c) 2015 by Delphix. All rights reserved.
 #
 
 PROG= zpool
@@ -45,12 +47,8 @@ CPPFLAGS += -D_LARGEFILE64_SOURCE=1 -D_REENTRANT $(INCS)
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 
 # lint complains about unused _umem_* functions
-LINTFLAGS += -xerroff=E_NAME_DEF_NOT_USED2 
-LINTFLAGS64 += -xerroff=E_NAME_DEF_NOT_USED2  
-
-CERRWARN += -_gcc=-Wno-unused-function
-CERRWARN += -_gcc=-Wno-uninitialized
-CERRWARN += -_gcc=-Wno-parentheses
+LINTFLAGS += -xerroff=E_NAME_DEF_NOT_USED2
+LINTFLAGS64 += -xerroff=E_NAME_DEF_NOT_USED2
 
 ROOTUSRSBINLINKS = $(PROG:%=$(ROOTUSRSBIN)/%)
 

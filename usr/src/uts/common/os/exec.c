@@ -1297,12 +1297,12 @@ execmap(struct vnode *vp, caddr_t addr, size_t len, size_t zfodlen,
 			 * other return values from as_setprot.
 			 */
 
-			AS_LOCK_ENTER(as, &as->a_lock, RW_READER);
+			AS_LOCK_ENTER(as, RW_READER);
 			seg = as_segat(curproc->p_as, (caddr_t)end);
 			if (seg != NULL)
 				SEGOP_GETPROT(seg, (caddr_t)end, zfoddiff - 1,
 				    &zprot);
-			AS_LOCK_EXIT(as, &as->a_lock);
+			AS_LOCK_EXIT(as);
 
 			if (seg != NULL && (zprot & PROT_WRITE) == 0) {
 				if (as_setprot(as, (caddr_t)end, zfoddiff - 1,
@@ -1580,13 +1580,26 @@ stk_copyin(execa_t *uap, uarg_t *args, intpdata_t *intp, void **auxvpp)
 
 	/*
 	 * Copy interpreter's name and argument to argv[0] and argv[1].
+	 * In the rare case that we have nested interpreters then those names
+	 * and arguments are also copied to the subsequent slots in argv.
 	 */
-	if (intp != NULL && intp->intp_name != NULL) {
-		if ((error = stk_add(args, intp->intp_name, UIO_SYSSPACE)) != 0)
-			return (error);
-		if (intp->intp_arg != NULL &&
-		    (error = stk_add(args, intp->intp_arg, UIO_SYSSPACE)) != 0)
-			return (error);
+	if (intp != NULL && intp->intp_name[0] != NULL) {
+		int i;
+
+		for (i = 0; i < INTP_MAXDEPTH; i++) {
+			if (intp->intp_name[i] == NULL)
+				break;
+			error = stk_add(args, intp->intp_name[i], UIO_SYSSPACE);
+			if (error != 0)
+				return (error);
+			if (intp->intp_arg[i] != NULL) {
+				error = stk_add(args, intp->intp_arg[i],
+				    UIO_SYSSPACE);
+				if (error != 0)
+					return (error);
+			}
+		}
+
 		if (args->fname != NULL)
 			error = stk_add(args, args->fname, UIO_SYSSPACE);
 		else

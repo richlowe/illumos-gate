@@ -3352,7 +3352,7 @@ arc_kmem_reap_now(void)
 static void
 arc_reclaim_thread(void)
 {
-	clock_t			growtime = 0;
+	hrtime_t		growtime = 0;
 	callb_cpr_t		cpr;
 
 	CALLB_CPR_INIT(&cpr, &arc_reclaim_lock, callb_generic_cpr, FTAG);
@@ -3373,7 +3373,7 @@ arc_reclaim_thread(void)
 			 * Wait at least zfs_grow_retry (default 60) seconds
 			 * before considering growing.
 			 */
-			growtime = ddi_get_lbolt() + (arc_grow_retry * hz);
+			growtime = gethrtime() + SEC2NSEC(arc_grow_retry);
 
 			arc_kmem_reap_now();
 
@@ -3393,7 +3393,7 @@ arc_reclaim_thread(void)
 			}
 		} else if (free_memory < arc_c >> arc_no_grow_shift) {
 			arc_no_grow = B_TRUE;
-		} else if (ddi_get_lbolt() >= growtime) {
+		} else if (gethrtime() >= growtime) {
 			arc_no_grow = B_FALSE;
 		}
 
@@ -3424,8 +3424,8 @@ arc_reclaim_thread(void)
 			 * even if we aren't being signalled)
 			 */
 			CALLB_CPR_SAFE_BEGIN(&cpr);
-			(void) cv_timedwait(&arc_reclaim_thread_cv,
-			    &arc_reclaim_lock, ddi_get_lbolt() + hz);
+			(void) cv_timedwait_hires(&arc_reclaim_thread_cv,
+			    &arc_reclaim_lock, SEC2NSEC(1), MSEC2NSEC(1), 0);
 			CALLB_CPR_SAFE_END(&cpr, &arc_reclaim_lock);
 		}
 	}
@@ -4999,18 +4999,6 @@ arc_init(void)
 	/* Convert seconds to clock ticks */
 	arc_min_prefetch_lifespan = 1 * hz;
 
-	/* Start out with 1/8 of all memory */
-	arc_c = allmem / 8;
-
-#ifdef _KERNEL
-	/*
-	 * On architectures where the physical memory can be larger
-	 * than the addressable space (intel in 32-bit mode), we may
-	 * need to limit the cache to 1/8 of VM size.
-	 */
-	arc_c = MIN(arc_c, vmem_size(heap_arena, VMEM_ALLOC | VMEM_FREE) / 8);
-#endif
-
 	/* set min cache to 1/32 of all memory, or 64MB, whichever is more */
 	arc_c_min = MAX(allmem / 32, 64 << 20);
 	/* set max to 3/4 of all memory, or all but 1GB, whichever is more */
@@ -5044,6 +5032,15 @@ arc_init(void)
 
 	/* limit meta-data to 1/4 of the arc capacity */
 	arc_meta_limit = arc_c_max / 4;
+
+#ifdef _KERNEL
+	/*
+	 * Metadata is stored in the kernel's heap.  Don't let us
+	 * use more than half the heap for the ARC.
+	 */
+	arc_meta_limit = MIN(arc_meta_limit,
+	    vmem_size(heap_arena, VMEM_ALLOC | VMEM_FREE) / 2);
+#endif
 
 	/* Allow the tunable to override if it is reasonable */
 	if (zfs_arc_meta_limit > 0 && zfs_arc_meta_limit <= arc_c_max)

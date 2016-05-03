@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013, Joyent Inc. All rights reserved.
+ * Copyright 2015, Joyent Inc. All rights reserved.
  */
 
 /*
@@ -1817,6 +1817,62 @@ zone_kstat_create_common(zone_t *zone, char *name,
 	return (ksp);
 }
 
+
+static int
+zone_mcap_kstat_update(kstat_t *ksp, int rw)
+{
+	zone_t *zone = ksp->ks_private;
+	zone_mcap_kstat_t *zmp = ksp->ks_data;
+
+	if (rw == KSTAT_WRITE)
+		return (EACCES);
+
+	zmp->zm_pgpgin.value.ui64 = zone->zone_pgpgin;
+	zmp->zm_anonpgin.value.ui64 = zone->zone_anonpgin;
+	zmp->zm_execpgin.value.ui64 = zone->zone_execpgin;
+	zmp->zm_fspgin.value.ui64 = zone->zone_fspgin;
+	zmp->zm_anon_alloc_fail.value.ui64 = zone->zone_anon_alloc_fail;
+
+	return (0);
+}
+
+static kstat_t *
+zone_mcap_kstat_create(zone_t *zone)
+{
+	kstat_t *ksp;
+	zone_mcap_kstat_t *zmp;
+
+	if ((ksp = kstat_create_zone("memory_cap", zone->zone_id,
+	    zone->zone_name, "zone_memory_cap", KSTAT_TYPE_NAMED,
+	    sizeof (zone_mcap_kstat_t) / sizeof (kstat_named_t),
+	    KSTAT_FLAG_VIRTUAL, zone->zone_id)) == NULL)
+		return (NULL);
+
+	if (zone->zone_id != GLOBAL_ZONEID)
+		kstat_zone_add(ksp, GLOBAL_ZONEID);
+
+	zmp = ksp->ks_data = kmem_zalloc(sizeof (zone_mcap_kstat_t), KM_SLEEP);
+	ksp->ks_data_size += strlen(zone->zone_name) + 1;
+	ksp->ks_lock = &zone->zone_mcap_lock;
+	zone->zone_mcap_stats = zmp;
+
+	/* The kstat "name" field is not large enough for a full zonename */
+	kstat_named_init(&zmp->zm_zonename, "zonename", KSTAT_DATA_STRING);
+	kstat_named_setstr(&zmp->zm_zonename, zone->zone_name);
+	kstat_named_init(&zmp->zm_pgpgin, "pgpgin", KSTAT_DATA_UINT64);
+	kstat_named_init(&zmp->zm_anonpgin, "anonpgin", KSTAT_DATA_UINT64);
+	kstat_named_init(&zmp->zm_execpgin, "execpgin", KSTAT_DATA_UINT64);
+	kstat_named_init(&zmp->zm_fspgin, "fspgin", KSTAT_DATA_UINT64);
+	kstat_named_init(&zmp->zm_anon_alloc_fail, "anon_alloc_fail",
+	    KSTAT_DATA_UINT64);
+
+	ksp->ks_update = zone_mcap_kstat_update;
+	ksp->ks_private = zone;
+
+	kstat_install(ksp);
+	return (ksp);
+}
+
 static int
 zone_misc_kstat_update(kstat_t *ksp, int rw)
 {
@@ -1845,6 +1901,11 @@ zone_misc_kstat_update(kstat_t *ksp, int rw)
 	zmp->zm_ffnoproc.value.ui32 = zone->zone_ffnoproc;
 	zmp->zm_ffnomem.value.ui32 = zone->zone_ffnomem;
 	zmp->zm_ffmisc.value.ui32 = zone->zone_ffmisc;
+
+	zmp->zm_nested_intp.value.ui32 = zone->zone_nested_intp;
+
+	zmp->zm_init_pid.value.ui32 = zone->zone_proc_initpid;
+	zmp->zm_boot_time.value.ui64 = (uint64_t)zone->zone_boot_time;
 
 	return (0);
 }
@@ -1884,7 +1945,10 @@ zone_misc_kstat_create(zone_t *zone)
 	    KSTAT_DATA_UINT32);
 	kstat_named_init(&zmp->zm_ffnomem, "forkfail_nomem", KSTAT_DATA_UINT32);
 	kstat_named_init(&zmp->zm_ffmisc, "forkfail_misc", KSTAT_DATA_UINT32);
-
+	kstat_named_init(&zmp->zm_nested_intp, "nested_interp",
+	    KSTAT_DATA_UINT32);
+	kstat_named_init(&zmp->zm_init_pid, "init_pid", KSTAT_DATA_UINT32);
+	kstat_named_init(&zmp->zm_boot_time, "boot_time", KSTAT_DATA_UINT64);
 
 	ksp->ks_update = zone_misc_kstat_update;
 	ksp->ks_private = zone;
@@ -1902,6 +1966,11 @@ zone_kstat_create(zone_t *zone)
 	    "swapresv", zone_swapresv_kstat_update);
 	zone->zone_nprocs_kstat = zone_kstat_create_common(zone,
 	    "nprocs", zone_nprocs_kstat_update);
+
+	if ((zone->zone_mcap_ksp = zone_mcap_kstat_create(zone)) == NULL) {
+		zone->zone_mcap_stats = kmem_zalloc(
+		    sizeof (zone_mcap_kstat_t), KM_SLEEP);
+	}
 
 	if ((zone->zone_misc_ksp = zone_misc_kstat_create(zone)) == NULL) {
 		zone->zone_misc_stats = kmem_zalloc(
@@ -1931,6 +2000,8 @@ zone_kstat_delete(zone_t *zone)
 	    sizeof (zone_kstat_t));
 	zone_kstat_delete_common(&zone->zone_nprocs_kstat,
 	    sizeof (zone_kstat_t));
+	zone_kstat_delete_common(&zone->zone_mcap_ksp,
+	    sizeof (zone_mcap_kstat_t));
 	zone_kstat_delete_common(&zone->zone_misc_ksp,
 	    sizeof (zone_misc_kstat_t));
 }
@@ -4401,8 +4472,7 @@ zone_create(const char *zone_name, const char *zone_root,
 	 */
 	if (curthread != pp->p_agenttp && !holdlwps(SHOLDFORK)) {
 		zone_free(zone);
-		if (rctls)
-			nvlist_free(rctls);
+		nvlist_free(rctls);
 		return (zone_create_error(error, 0, extended_error));
 	}
 
@@ -4412,8 +4482,7 @@ zone_create(const char *zone_name, const char *zone_root,
 			continuelwps(pp);
 		mutex_exit(&pp->p_lock);
 		zone_free(zone);
-		if (rctls)
-			nvlist_free(rctls);
+		nvlist_free(rctls);
 		return (zone_create_error(error, 0, extended_error));
 	}
 
@@ -4558,8 +4627,7 @@ zone_create(const char *zone_name, const char *zone_root,
 	 * The zone is fully visible, so we can let mounts progress.
 	 */
 	resume_mounts(zone);
-	if (rctls)
-		nvlist_free(rctls);
+	nvlist_free(rctls);
 
 	return (zoneid);
 
@@ -4574,8 +4642,7 @@ errout:
 	mutex_exit(&pp->p_lock);
 
 	resume_mounts(zone);
-	if (rctls)
-		nvlist_free(rctls);
+	nvlist_free(rctls);
 	/*
 	 * There is currently one reference to the zone, a cred_ref from
 	 * zone_kcred.  To free the zone, we call crfree, which will call
@@ -5609,7 +5676,7 @@ as_can_change_zones(void)
 	int allow = 1;
 
 	ASSERT(pp->p_as != &kas);
-	AS_LOCK_ENTER(as, &as->a_lock, RW_READER);
+	AS_LOCK_ENTER(as, RW_READER);
 	for (seg = AS_SEGFIRST(as); seg != NULL; seg = AS_SEGNEXT(as, seg)) {
 
 		/*
@@ -5632,7 +5699,7 @@ as_can_change_zones(void)
 			break;
 		}
 	}
-	AS_LOCK_EXIT(as, &as->a_lock);
+	AS_LOCK_EXIT(as);
 	return (allow);
 }
 
@@ -5648,7 +5715,7 @@ as_swresv(void)
 	size_t swap = 0;
 
 	ASSERT(pp->p_as != &kas);
-	ASSERT(AS_WRITE_HELD(as, &as->a_lock));
+	ASSERT(AS_WRITE_HELD(as));
 	for (seg = AS_SEGFIRST(as); seg != NULL; seg = AS_SEGNEXT(as, seg))
 		swap += seg_swresv(seg);
 
@@ -5853,7 +5920,7 @@ zone_enter(zoneid_t zoneid)
 	 * memory and reserve swap via MCL_FUTURE and MAP_NORESERVE
 	 * segments respectively.
 	 */
-	AS_LOCK_ENTER(pp->as, &pp->p_as->a_lock, RW_WRITER);
+	AS_LOCK_ENTER(pp->p_as, RW_WRITER);
 	swap = as_swresv();
 	mutex_enter(&pp->p_lock);
 	zone_proj0 = zone->zone_zsched->p_task->tk_proj;
@@ -5900,7 +5967,7 @@ zone_enter(zoneid_t zoneid)
 	pp->p_flag |= SZONETOP;
 	pp->p_zone = zone;
 	mutex_exit(&pp->p_lock);
-	AS_LOCK_EXIT(pp->p_as, &pp->p_as->a_lock);
+	AS_LOCK_EXIT(pp->p_as);
 
 	/*
 	 * Joining the zone cannot fail from now on.
@@ -6875,8 +6942,7 @@ zone_remove_datalink(zoneid_t zoneid, datalink_id_t linkid)
 		err = ENXIO;
 	} else {
 		list_remove(&zone->zone_dl_list, zdl);
-		if (zdl->zdl_net != NULL)
-			nvlist_free(zdl->zdl_net);
+		nvlist_free(zdl->zdl_net);
 		kmem_free(zdl, sizeof (zone_dl_t));
 	}
 	mutex_exit(&zone->zone_lock);
