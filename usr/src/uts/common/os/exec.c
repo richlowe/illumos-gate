@@ -576,6 +576,9 @@ gexec(
 	int privflags = 0;
 	int setidfl;
 	priv_set_t fset;
+	secflagset_t old_secflags;
+
+	secflag_copy(&old_secflags, &pp->p_secflags.psf_effective);
 
 	/*
 	 * If the SNOCD or SUGID flag is set, turn it off and remember the
@@ -677,10 +680,6 @@ gexec(
 	}
 
 	/* The new image gets the inheritable secflags as its secflags */
-	/*
-	 * XXX: This probably means we have the wrong secflags when exec
-	 * fails
-	 */
 	secflag_promote(pp);
 
 	/* SunOS 4.x buy-back */
@@ -900,11 +899,17 @@ bad_noclose:
 	if (error == 0)
 		error = ENOEXEC;
 
+	mutex_enter(&pp->p_lock);
 	if (suidflags) {
-		mutex_enter(&pp->p_lock);
 		pp->p_flag |= suidflags;
-		mutex_exit(&pp->p_lock);
 	}
+	/*
+	 * Restore the effective secflags, to maintain the invariant they
+	 * never change for a given process
+	 */
+	secflag_copy(&pp->p_secflags.psf_effective, &old_secflags);
+	mutex_exit(&pp->p_lock);
+
 	return (error);
 }
 
