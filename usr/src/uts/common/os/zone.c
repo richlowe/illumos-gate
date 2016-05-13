@@ -2048,7 +2048,7 @@ zone_zsd_init(void)
 	zone0.zone_domain = srpc_domain;
 	zone0.zone_hostid = HW_INVALID_HOSTID;
 	zone0.zone_fs_allowed = NULL;
-	secflags_default(&zone0.zone_secflags);
+	psecflags_default(&zone0.zone_secflags);
 	zone0.zone_ref = 1;
 	zone0.zone_id = GLOBAL_ZONEID;
 	zone0.zone_status = ZONE_IS_RUNNING;
@@ -2509,7 +2509,7 @@ zone_set_secflags(zone_t *zone, const psecflags_t *zone_secflags)
 	if (zone_status_get(zone) > ZONE_IS_READY)
 		return (EINVAL);
 
-	if (!secflags_validate(&psf))
+	if (!psecflags_validate(&psf))
 		return (EINVAL);
 
 	(void) memcpy(&zone->zone_secflags, &psf, sizeof (psf));
@@ -4439,10 +4439,10 @@ zone_create(const char *zone_name, const char *zone_root,
 	zone->zone_bootargs = NULL;
 	zone->zone_fs_allowed = NULL;
 
-	secflag_zero(&zone0.zone_secflags.psf_lower);
-	secflag_zero(&zone0.zone_secflags.psf_effective);
-	secflag_zero(&zone0.zone_secflags.psf_inherit);
-	secflag_fullset(&zone0.zone_secflags.psf_upper);
+	secflags_zero(&zone0.zone_secflags.psf_lower);
+	secflags_zero(&zone0.zone_secflags.psf_effective);
+	secflags_zero(&zone0.zone_secflags.psf_inherit);
+	secflags_fullset(&zone0.zone_secflags.psf_upper);
 
 	zone->zone_initname =
 	    kmem_alloc(strlen(zone_default_initname) + 1, KM_SLEEP);

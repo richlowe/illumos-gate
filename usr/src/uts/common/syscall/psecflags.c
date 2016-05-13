@@ -21,13 +21,13 @@
 
 struct psdargs {
 	psecflagwhich_t which;
-	psecflagdelta_t *delta;
+	secflagdelta_t *delta;
 };
 
 static int
 psecdo(proc_t *p, struct psdargs *args)
 {
-	psecflagdelta_t *delta = args->delta;
+	secflagdelta_t *delta = args->delta;
 	secflagset_t *set;
 	int ret = 0;
 
@@ -40,7 +40,7 @@ psecdo(proc_t *p, struct psdargs *args)
 
 	ASSERT(args->which != PSF_EFFECTIVE);
 
-	if (!secflag_validate_delta(&p->p_secflags, delta)) {
+	if (!psecflags_validate_delta(&p->p_secflags, delta)) {
 		ret = EINVAL;
 		goto out;
 	}
@@ -62,20 +62,20 @@ psecdo(proc_t *p, struct psdargs *args)
 	 * lower never shrink.
 	 */
 	if (delta->psd_ass_active) {
-		secflag_copy(set, &delta->psd_assign);
+		secflags_copy(set, &delta->psd_assign);
 	} else {
-		if (!secflag_isempty(delta->psd_add)) {
-			secflag_union(set, &delta->psd_add);
+		if (!secflags_isempty(delta->psd_add)) {
+			secflags_union(set, &delta->psd_add);
 		}
-		if (!secflag_isempty(delta->psd_rem)) {
-			secflag_difference(set, &delta->psd_rem);
+		if (!secflags_isempty(delta->psd_rem)) {
+			secflags_difference(set, &delta->psd_rem);
 		}
 	}
 
 	/*
 	 * Add any flag now in the lower that is not in the inheritable.
 	 */
-	secflag_union(&p->p_secflags.psf_inherit, &p->p_secflags.psf_lower);
+	secflags_union(&p->p_secflags.psf_inherit, &p->p_secflags.psf_lower);
 
 out:
 	mutex_exit(&p->p_lock);
@@ -83,10 +83,10 @@ out:
 }
 
 int
-psecflags(procset_t *psp, psecflagwhich_t which, psecflagdelta_t *ap)
+psecflags(procset_t *psp, psecflagwhich_t which, secflagdelta_t *ap)
 {
 	procset_t procset;
-	psecflagdelta_t args;
+	secflagdelta_t args;
 	int rv = 0;
 	struct psdargs psd = {
 		.which = which,
@@ -99,7 +99,7 @@ psecflags(procset_t *psp, psecflagwhich_t which, psecflagdelta_t *ap)
 	if (copyin(psp, &procset, sizeof (procset)) != 0)
 		return (set_errno(EFAULT));
 
-	if (copyin(ap, &args, sizeof (psecflagdelta_t)) != 0)
+	if (copyin(ap, &args, sizeof (secflagdelta_t)) != 0)
 		return (set_errno(EFAULT));
 
 	psd.delta = &args;

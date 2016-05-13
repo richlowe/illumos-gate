@@ -4596,7 +4596,7 @@ setup_zone_secflags(zone_dochandle_t handle, zlog_t *zlogp, zoneid_t zoneid)
 {
 	psecflags_t secflags;
 	struct zone_secflagstab tab = {0};
-	psecflagdelta_t delt;
+	secflagdelta_t delt;
 	int res;
 
 	res = zonecfg_lookup_secflags(handle, &tab);
@@ -4632,8 +4632,8 @@ setup_zone_secflags(zone_dochandle_t handle, zlog_t *zlogp, zoneid_t zoneid)
 		    tab.zone_secflags_default);
 		return (Z_BAD_PROPERTY);
 	} else {
-		secflag_copy(&secflags.psf_inherit, &delt.psd_assign);
-		secflag_copy(&secflags.psf_effective, &delt.psd_assign);
+		secflags_copy(&secflags.psf_inherit, &delt.psd_assign);
+		secflags_copy(&secflags.psf_effective, &delt.psd_assign);
 	}
 
 	if (secflags_parse(NULL, tab.zone_secflags_lower,
@@ -4648,7 +4648,7 @@ setup_zone_secflags(zone_dochandle_t handle, zlog_t *zlogp, zoneid_t zoneid)
 		    tab.zone_secflags_lower);
 		return (Z_BAD_PROPERTY);
 	} else {
-		secflag_copy(&secflags.psf_lower, &delt.psd_assign);
+		secflags_copy(&secflags.psf_lower, &delt.psd_assign);
 	}
 
 	if (secflags_parse(NULL, tab.zone_secflags_upper,
@@ -4663,10 +4663,10 @@ setup_zone_secflags(zone_dochandle_t handle, zlog_t *zlogp, zoneid_t zoneid)
 		    tab.zone_secflags_upper);
 		return (Z_BAD_PROPERTY);
 	} else {
-		secflag_copy(&secflags.psf_upper, &delt.psd_assign);
+		secflags_copy(&secflags.psf_upper, &delt.psd_assign);
 	}
 
-	if (!secflags_validate(&secflags)) {
+	if (!psecflags_validate(&secflags)) {
 		zerror(zlogp, B_TRUE, "security-flags violate invariants");
 		return (Z_BAD_PROPERTY);
 	}

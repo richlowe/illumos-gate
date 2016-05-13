@@ -275,7 +275,7 @@ struct method_context {
 	int		ngroups;		/* -1 means use initgroups(). */
 	gid_t		groups[NGROUPS_MAX];
 	psecflags_t	def_secflags;
-	psecflagdelta_t	secflag_delta;
+	secflagdelta_t	secflag_delta;
 	priv_set_t	*lpriv_set, *priv_set;
 	char		*corefile_pattern;	/* Optional. */
 	char		*project;		/* NULL for no change */

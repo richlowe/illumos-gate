@@ -578,7 +578,7 @@ gexec(
 	priv_set_t fset;
 	secflagset_t old_secflags;
 
-	secflag_copy(&old_secflags, &pp->p_secflags.psf_effective);
+	secflags_copy(&old_secflags, &pp->p_secflags.psf_effective);
 
 	/*
 	 * If the SNOCD or SUGID flag is set, turn it off and remember the
@@ -680,7 +680,7 @@ gexec(
 	}
 
 	/* The new image gets the inheritable secflags as its secflags */
-	secflag_promote(pp);
+	secflags_promote(pp);
 
 	/* SunOS 4.x buy-back */
 	if ((vp->v_vfsp->vfs_flag & VFS_NOSETUID) &&
@@ -907,7 +907,7 @@ bad_noclose:
 	 * Restore the effective secflags, to maintain the invariant they
 	 * never change for a given process
 	 */
-	secflag_copy(&pp->p_secflags.psf_effective, &old_secflags);
+	secflags_copy(&pp->p_secflags.psf_effective, &old_secflags);
 	mutex_exit(&pp->p_lock);
 
 	return (error);

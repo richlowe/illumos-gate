@@ -788,10 +788,6 @@ extern	void	lwp_mmodel_shared_as(caddr_t, size_t);
 #define	LWP_MMODEL_SHARED_AS(addr, sz)
 #endif
 
-/* Security flag manipulation */
-extern boolean_t secflag_enabled(proc_t *, secflagset_t);
-extern void secflag_promote(proc_t *);
-
 /*
  * Signal queue function prototypes. Must be here due to header ordering
  * dependencies.

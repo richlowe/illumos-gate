@@ -5998,9 +5998,9 @@ add_nwif(struct zone_nwiftab *nwif)
 boolean_t
 verify_secflags(struct zone_secflagstab *tab)
 {
-	psecflagdelta_t def = {0};
-	psecflagdelta_t upper = {0};
-	psecflagdelta_t lower = {0};
+	secflagdelta_t def = {0};
+	secflagdelta_t upper = {0};
+	secflagdelta_t lower = {0};
 	boolean_t def_set = B_FALSE;
 	boolean_t upper_set = B_FALSE;
 	boolean_t lower_set = B_FALSE;
@@ -6015,7 +6015,7 @@ verify_secflags(struct zone_secflagstab *tab)
 			ret = B_FALSE;
 		}
 	} else {
-		secflag_zero(&def.psd_assign);
+		secflags_zero(&def.psd_assign);
 		def.psd_ass_active = B_TRUE;
 	}
 
@@ -6028,7 +6028,7 @@ verify_secflags(struct zone_secflagstab *tab)
 			ret = B_FALSE;
 		}
 	} else {
-		secflag_fullset(&upper.psd_assign);
+		secflags_fullset(&upper.psd_assign);
 		upper.psd_ass_active = B_TRUE;
 	}
 
@@ -6041,7 +6041,7 @@ verify_secflags(struct zone_secflagstab *tab)
 			ret = B_FALSE;
 		}
 	} else {
-		secflag_zero(&lower.psd_assign);
+		secflags_zero(&lower.psd_assign);
 		lower.psd_ass_active = B_TRUE;
 	}
 

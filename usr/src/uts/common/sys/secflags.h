@@ -21,6 +21,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/procset.h>
 
+struct proc;
 typedef uint32_t secflagset_t;
 
 typedef struct psecflags {
@@ -30,12 +31,12 @@ typedef struct psecflags {
 	secflagset_t psf_upper;
 } psecflags_t;
 
-typedef struct psecflagdelta {
+typedef struct secflagdelta {
 	secflagset_t psd_add;		/* Flags to add */
 	secflagset_t psd_rem;		/* Flags to remove */
 	secflagset_t psd_assign;	/* Flags to assign */
 	boolean_t psd_ass_active;	/* Need to assign */
-} psecflagdelta_t;
+} secflagdelta_t;
 
 typedef enum {
 	PSF_EFFECTIVE = 0,
@@ -61,19 +62,19 @@ extern secflagset_t secflag_to_bit(secflag_t);
 extern boolean_t secflag_isset(secflagset_t, secflag_t);
 extern void secflag_clear(secflagset_t *, secflag_t);
 extern void secflag_set(secflagset_t *, secflag_t);
-extern boolean_t secflag_isempty(secflagset_t);
-extern void secflag_zero(secflagset_t *);
-extern void secflag_fullset(secflagset_t *);
-extern void secflag_copy(secflagset_t *, const secflagset_t *);
-extern boolean_t secflag_issubset(secflagset_t, secflagset_t);
-extern boolean_t secflag_issuperset(secflagset_t, secflagset_t);
-extern boolean_t secflag_intersection(secflagset_t, secflagset_t);
-extern void secflag_union(secflagset_t *, secflagset_t *);
-extern void secflag_difference(secflagset_t *, secflagset_t *);
-extern boolean_t secflag_validate_delta(const psecflags_t *,
-    const psecflagdelta_t *);
-extern boolean_t secflags_validate(const psecflags_t *);
-extern void secflags_default(psecflags_t *sf);
+extern boolean_t secflags_isempty(secflagset_t);
+extern void secflags_zero(secflagset_t *);
+extern void secflags_fullset(secflagset_t *);
+extern void secflags_copy(secflagset_t *, const secflagset_t *);
+extern boolean_t secflags_issubset(secflagset_t, secflagset_t);
+extern boolean_t secflags_issuperset(secflagset_t, secflagset_t);
+extern boolean_t secflags_intersection(secflagset_t, secflagset_t);
+extern void secflags_union(secflagset_t *, secflagset_t *);
+extern void secflags_difference(secflagset_t *, secflagset_t *);
+extern boolean_t psecflags_validate_delta(const psecflags_t *,
+    const secflagdelta_t *);
+extern boolean_t psecflags_validate(const psecflags_t *);
+extern void psecflags_default(psecflags_t *sf);
 
 
 /* All valid bits */
@@ -82,11 +83,16 @@ extern void secflags_default(psecflags_t *sf);
     secflag_to_bit(PROC_SEC_NOEXECSTACK))
 
 #if !defined(_KERNEL)
-extern boolean_t secflag_by_name(const char *, secflagset_t *);
-extern const char *secflag_to_str(secflagset_t);
+extern boolean_t secflag_by_name(const char *, secflag_t *);
+extern const char *secflag_to_str(secflag_t);
 extern char *secflags_to_str(secflagset_t);
-extern int secflags_parse(secflagset_t *, const char *, psecflagdelta_t *);
-extern int psecflags(idtype_t, id_t, psecflagwhich_t, psecflagdelta_t *);
+extern int secflags_parse(secflagset_t *, const char *, secflagdelta_t *);
+extern int psecflags(idtype_t, id_t, psecflagwhich_t, secflagdelta_t *);
+#endif
+
+#if defined(_KERNEL)
+extern boolean_t secflag_enabled(struct proc *, secflag_t);
+extern void secflags_promote(struct proc *);
 #endif
 
 #ifdef __cplusplus

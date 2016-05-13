@@ -391,7 +391,7 @@ scf_default_secflags(scf_handle_t *hndl, psecflags_t *flags)
 	groups[2].set = &flags->psf_upper;
 
 	/* Ensure sane defaults */
-	secflags_default(flags);
+	psecflags_default(flags);
 
 	for (g = groups; g->set != NULL; g++) {
 		for (flag = 0; (flagname = secflag_to_str(flag)) != NULL;
@@ -432,7 +432,7 @@ next:
 		}
 	}
 
-	if (!secflags_validate(flags))
+	if (!psecflags_validate(flags))
 		return (-1);
 
 #endif	/* !NATIVE_BUILD */

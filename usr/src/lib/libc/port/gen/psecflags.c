@@ -24,11 +24,11 @@
 #include <sys/syscall.h>
 #include <sys/secflags.h>
 
-extern int __psecflagsset(procset_t *, psecflagwhich_t, psecflagdelta_t *);
+extern int __psecflagsset(procset_t *, psecflagwhich_t, secflagdelta_t *);
 
 int
 psecflags(idtype_t idtype, id_t id, psecflagwhich_t which,
-    psecflagdelta_t *delta)
+    secflagdelta_t *delta)
 {
 	procset_t procset;
 
@@ -38,7 +38,7 @@ psecflags(idtype_t idtype, id_t id, psecflagwhich_t which,
 }
 
 static struct flagdesc {
-	secflagset_t value;
+	secflag_t value;
 	const char *name;
 } flagdescs[] = {
 	{ PROC_SEC_ASLR,		"aslr" },
@@ -48,7 +48,7 @@ static struct flagdesc {
 };
 
 boolean_t
-secflag_by_name(const char *str, secflagset_t *ret)
+secflag_by_name(const char *str, secflag_t *ret)
 {
 	struct flagdesc *fd;
 
@@ -63,7 +63,7 @@ secflag_by_name(const char *str, secflagset_t *ret)
 }
 
 const char *
-secflag_to_str(secflagset_t sf)
+secflag_to_str(secflag_t sf)
 {
 	struct flagdesc *fd;
 
@@ -115,7 +115,7 @@ secflags_to_str(secflagset_t flags)
 }
 
 int
-secflags_parse(secflagset_t *defaults, const char *flags, psecflagdelta_t *ret)
+secflags_parse(secflagset_t *defaults, const char *flags, secflagdelta_t *ret)
 {
 	char *flag;
 	char *s, *ss;
@@ -129,22 +129,22 @@ secflags_parse(secflagset_t *defaults, const char *flags, psecflagdelta_t *ret)
 
 
 	while ((flag = strsep(&s, ",")) != NULL) {
-		secflagset_t sf = 0;
+		secflag_t sf = 0;
 		boolean_t del = B_FALSE;
 
 		if (strcasecmp(flag, "default") == 0) {
 			if (defaults != NULL) {
-				secflag_union(&ret->psd_add, defaults);
+				secflags_union(&ret->psd_add, defaults);
 			} else {
 				errno = EINVAL;
 				return (-1);
 			}
 			continue;
 		} else if (strcasecmp(flag, "all") == 0) {
-			secflag_fullset(&ret->psd_add);
+			secflags_fullset(&ret->psd_add);
 			continue;
 		} else if (strcasecmp(flag, "none") == 0) {
-			secflag_fullset(&ret->psd_rem);
+			secflags_fullset(&ret->psd_rem);
 			continue;
 		} else if (strcasecmp(flag, "current") == 0) {
 			current = B_TRUE;
@@ -175,11 +175,11 @@ secflags_parse(secflagset_t *defaults, const char *flags, psecflagdelta_t *ret)
 	 * Negatives "win".
 	 */
 	if (!current) {
-		secflag_copy(&ret->psd_assign, &ret->psd_add);
-		secflag_difference(&ret->psd_assign, &ret->psd_rem);
+		secflags_copy(&ret->psd_assign, &ret->psd_add);
+		secflags_difference(&ret->psd_assign, &ret->psd_rem);
 		ret->psd_ass_active = B_TRUE;
-		secflag_zero(&ret->psd_add);
-		secflag_zero(&ret->psd_rem);
+		secflags_zero(&ret->psd_add);
+		secflags_zero(&ret->psd_rem);
 	}
 
 	free(ss);

@@ -1640,7 +1640,7 @@ prt_psflags(private_t *pri, secflagset_t val)
 void
 prt_psdelta(private_t *pri, int raw, long value)
 {
-	psecflagdelta_t psd;
+	secflagdelta_t psd;
 
 	if ((raw != 0) ||
 	    (Pread(Proc, &psd, sizeof (psd), value) != sizeof (psd))) {

@@ -128,7 +128,7 @@ getid(idtype_t type, char *value)
 int
 main(int argc, char **argv)
 {
-	psecflagdelta_t act;
+	secflagdelta_t act;
 	psecflagwhich_t which = PSF_INHERIT;
 	int ret = 0;
 	int pgrab_flags = PGRAB_RDONLY;
@@ -217,7 +217,7 @@ main(int argc, char **argv)
 	}
 
 	if (l_flag) {
-		secflagset_t i;
+		secflag_t i;
 		const char *name;
 
 		for (i = 0; (name = secflag_to_str(i)) != NULL; i++)
