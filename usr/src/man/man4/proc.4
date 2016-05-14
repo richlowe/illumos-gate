@@ -1036,7 +1036,17 @@ The full size of the structure can be computed using
 .SS "secflags"
 .LP
 This file contains the security-flags of the process.  It contains a
-\fBpsecflags_t\fR structure, defined in <\fBsys/secflags.h\fR>.
+description of the security flags associated with the process.
+.sp
+.in +2
+.nf
+typedef struct prsecflags {
+	uint32_t pr_version;		/* ABI Versioning of this structure */
+	secflagset_t pr_effective;	/* Effective flags */
+	secflagset_t pr_inherit;	/* Inheritable flags */
+	secflagset_t pr_lower;		/* Lower flags */
+	secflagset_t pr_upper;		/* Upper flags */
+} prsecflags_t;
 .SS "sigact"
 .LP
 Contains an array of \fBsigaction structures\fR describing the current
