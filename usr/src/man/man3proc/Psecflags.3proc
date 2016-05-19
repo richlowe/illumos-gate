@@ -18,7 +18,7 @@
 .Nm Psecflags ,
 .Nm Psecflags_free
 .Nd get and free process security flags
-.Sh SYNOPSISn
+.Sh SYNOPSIS
 .Lb libproc
 .In libproc.h
 .Ft int
