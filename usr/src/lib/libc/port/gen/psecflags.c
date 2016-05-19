@@ -159,8 +159,8 @@ secflags_parse(secflagset_t *defaults, const char *flags, secflagdelta_t *ret)
 		}
 
 		if ((secflag_by_name(flag, &sf)) != B_TRUE) {
-			errno = EINVAL;
 			free(ss);
+			errno = EINVAL;
 			return (-1);
 		}
 
