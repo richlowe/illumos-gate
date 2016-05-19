@@ -313,7 +313,7 @@ main(int argc, char **argv)
 		print_flags("L", psf->pr_lower);
 		print_flags("U", psf->pr_upper);
 
-		Psecflags_free(&psf);
+		Psecflags_free(psf);
 		Prelease(Pr, 0);
 	}
 

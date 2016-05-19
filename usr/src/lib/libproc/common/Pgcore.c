@@ -1427,11 +1427,11 @@ Pfgcore(struct ps_prochandle *P, int fd, core_content_t content)
 
 		if (write_note(fd, NT_SECFLAGS, psf,
 		    sizeof (prsecflags_t), &doff) != 0) {
-			Psecflags_free(&psf);
+			Psecflags_free(psf);
 			goto err;
 		}
 
-		Psecflags_free(&psf);
+		Psecflags_free(psf);
 	}
 
 #if defined(__i386) || defined(__amd64)

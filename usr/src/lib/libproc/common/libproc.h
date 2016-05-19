@@ -274,7 +274,7 @@ extern	int	Pgetareg(struct ps_prochandle *, int, prgreg_t *);
 extern	int	Pputareg(struct ps_prochandle *, int, prgreg_t);
 extern	int	Psetrun(struct ps_prochandle *, int, int);
 extern	int	Psecflags(struct ps_prochandle *, prsecflags_t **);
-extern	void	Psecflags_free(prsecflags_t **);
+extern	void	Psecflags_free(prsecflags_t *);
 extern	ssize_t	Pread(struct ps_prochandle *, void *, size_t, uintptr_t);
 extern	ssize_t Pread_string(struct ps_prochandle *, char *, size_t, uintptr_t);
 extern	ssize_t	Pwrite(struct ps_prochandle *, const void *, size_t, uintptr_t);

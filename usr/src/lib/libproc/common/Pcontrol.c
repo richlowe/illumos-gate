@@ -1319,10 +1319,9 @@ Psecflags(struct ps_prochandle *P, prsecflags_t **psf)
 }
 
 void
-Psecflags_free(prsecflags_t **psf)
+Psecflags_free(prsecflags_t *psf)
 {
-	free(*psf);
-	*psf = NULL;
+	free(psf);
 }
 
 static prheader_t *
