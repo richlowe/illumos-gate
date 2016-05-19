@@ -1047,6 +1047,12 @@ typedef struct prsecflags {
 	secflagset_t pr_lower;		/* Lower flags */
 	secflagset_t pr_upper;		/* Upper flags */
 } prsecflags_t;
+.in -2
+
+.sp
+.LP
+The \fBpr_version\fR field is a version number for the structure, currently
+\fBPRSECFLAGS_VERSION_1\fR.
 .SS "sigact"
 .LP
 Contains an array of \fBsigaction structures\fR describing the current
