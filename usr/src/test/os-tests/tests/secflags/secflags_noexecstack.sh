@@ -23,6 +23,3 @@ ret=0
 
 kill -9 $pid
 exit $ret
-
-
-
