@@ -191,8 +191,6 @@ extern uint_t getisax(uint32_t *, uint_t);
  * Note that 2023 is reserved for the AT_SUN_HWCAP2 word defined above.
  */
 
-#define	AT_SUN_SECFLAGS		2024
-
 /*
  * The kernel is in a better position to determine whether a process needs to
  * ignore dangerous LD environment variables.  If set, this flags tells
