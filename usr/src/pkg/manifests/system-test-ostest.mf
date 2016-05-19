@@ -43,6 +43,7 @@ file path=opt/os-tests/tests/secflags/secflags_limits mode=0555
 file path=opt/os-tests/tests/secflags/secflags_noexecstack mode=0555
 file path=opt/os-tests/tests/secflags/secflags_proc mode=0555
 file path=opt/os-tests/tests/secflags/secflags_psecflags mode=0555
+file path=opt/os-tests/tests/secflags/secflags_syscall mode=0555
 file path=opt/os-tests/tests/secflags/secflags_zonecfg mode=0555
 file path=opt/os-tests/tests/secflags/stacky mode=0555
 file path=opt/os-tests/tests/sigqueue/sigqueue_queue_size mode=0555

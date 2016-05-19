@@ -35,6 +35,7 @@ tests = ['secflags_aslr',
          'secflags_noexecstack',
          'secflags_proc',
          'secflags_psecflags',
+         'secflags_syscall',
          'secflags_zonecfg']
 
 [/opt/os-tests/tests/sigqueue]

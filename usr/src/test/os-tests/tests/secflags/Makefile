@@ -24,6 +24,7 @@ PROG =	secflags_aslr		\
 	secflags_noexecstack	\
 	secflags_proc		\
 	secflags_psecflags	\
+	secflags_syscall	\
 	secflags_zonecfg
 
 PROG += addrs-32 addrs-64 stacky
@@ -51,6 +52,10 @@ addrs-64: addrs-64.o
 stacky := MAPFILE.NES=			# Will foil the test, clearly
 stacky: stacky.o
 	$(LINK.c) -m32 stacky.o -o $@ $(LDLIBS)
+	$(POST_PROCESS)
+
+secflags_syscall: secflags_syscall.c
+	$(LINK.c) -m32 secflags_syscall.c -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
 all: $(PROG)
