@@ -136,6 +136,7 @@ secflags_parse(secflagset_t *defaults, const char *flags, secflagdelta_t *ret)
 			if (defaults != NULL) {
 				secflags_union(&ret->psd_add, defaults);
 			} else {
+				free(ss);
 				errno = EINVAL;
 				return (-1);
 			}
