@@ -983,6 +983,7 @@ fcnname/**/_info:							\
 	NO_UNLOAD_STUB(c2audit, audit_fdrecv,		nomod_zero);
 	NO_UNLOAD_STUB(c2audit, audit_priv,		nomod_zero);
 	NO_UNLOAD_STUB(c2audit, audit_setppriv,		nomod_zero);
+	NO_UNLOAD_STUB(c2audit, audit_psecflags,	nomod_zero);
 	NO_UNLOAD_STUB(c2audit, audit_devpolicy,	nomod_zero);
 	NO_UNLOAD_STUB(c2audit, audit_setfsat_path,	nomod_zero);
 	NO_UNLOAD_STUB(c2audit, audit_cryptoadm,	nomod_zero);

@@ -18,16 +18,32 @@
 #include <sys/procset.h>
 #include <sys/systm.h>
 #include <sys/types.h>
+#include <c2/audit.h>
 
 struct psdargs {
 	psecflagwhich_t which;
-	secflagdelta_t *delta;
+	const secflagdelta_t *delta;
 };
+
+void
+secflags_apply_delta(secflagset_t *set, const secflagdelta_t *delta)
+{
+	if (delta->psd_ass_active) {
+		secflags_copy(set, &delta->psd_assign);
+	} else {
+		if (!secflags_isempty(delta->psd_add)) {
+			secflags_union(set, &delta->psd_add);
+		}
+		if (!secflags_isempty(delta->psd_rem)) {
+			secflags_difference(set, &delta->psd_rem);
+		}
+	}
+}
+
 
 static int
 psecdo(proc_t *p, struct psdargs *args)
 {
-	secflagdelta_t *delta = args->delta;
 	secflagset_t *set;
 	int ret = 0;
 
@@ -40,10 +56,13 @@ psecdo(proc_t *p, struct psdargs *args)
 
 	ASSERT(args->which != PSF_EFFECTIVE);
 
-	if (!psecflags_validate_delta(&p->p_secflags, delta)) {
+	if (!psecflags_validate_delta(&p->p_secflags, args->delta)) {
 		ret = EINVAL;
 		goto out;
 	}
+
+	if (AU_AUDITING())
+		audit_psecflags(p, args->which, args->delta);
 
 	switch (args->which) {
 	case PSF_INHERIT:
@@ -57,20 +76,7 @@ psecdo(proc_t *p, struct psdargs *args)
 		break;
 	}
 
-	/*
-	 * The checks below also serve to enforce that upper can never grow,
-	 * lower never shrink.
-	 */
-	if (delta->psd_ass_active) {
-		secflags_copy(set, &delta->psd_assign);
-	} else {
-		if (!secflags_isempty(delta->psd_add)) {
-			secflags_union(set, &delta->psd_add);
-		}
-		if (!secflags_isempty(delta->psd_rem)) {
-			secflags_difference(set, &delta->psd_rem);
-		}
-	}
+	secflags_apply_delta(set, args->delta);
 
 	/*
 	 * Add any flag now in the lower that is not in the inheritable.

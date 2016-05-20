@@ -92,6 +92,7 @@ extern int psecflags(idtype_t, id_t, psecflagwhich_t, secflagdelta_t *);
 #if defined(_KERNEL)
 extern boolean_t secflag_enabled(struct proc *, secflag_t);
 extern void secflags_promote(struct proc *);
+extern void secflags_apply_delta(secflagset_t *, const secflagdelta_t *);
 #endif
 
 #ifdef __cplusplus
