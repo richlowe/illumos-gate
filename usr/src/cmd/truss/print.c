@@ -1659,6 +1659,41 @@ prt_psdelta(private_t *pri, int raw, long value)
 }
 
 /*
+ * Print a psecflagswhich_t
+ */
+void
+prt_psfw(private_t *pri, int raw, long value)
+{
+	psecflagwhich_t which = (psecflagwhich_t)value;
+	char *s;
+
+	if (raw != 0) {
+		prt_dec(pri, 0, value);
+		return;
+	}
+
+	switch (which) {
+	case PSF_EFFECTIVE:
+		s = "PSF_EFFECTIVE";
+		break;
+	case PSF_INHERIT:
+		s = "PSF_INHERIT";
+		break;
+	case PSF_LOWER:
+		s = "PSF_LOWER";
+		break;
+	case PSF_UPPER:
+		s = "PSF_UPPER";
+		break;
+	}
+
+	if (s == NULL)
+		prt_dec(pri, 0, value);
+	else
+		outstring(pri, s);
+}
+
+/*
  * Print processor set id, including logical expansion of "special" ids.
  */
 void
@@ -2933,5 +2968,6 @@ void (* const Print[])() = {
 	prt_pfd,	/* PFD -- print pipe fds */
 	prt_grf,	/* GRF -- print getrandom flags */
 	prt_psdelta,	/* PSDLT -- print psecflags(2) delta */
+	prt_psfw,	/* PSFW -- print psecflags(2) set */
 	prt_dec,	/* HID -- hidden argument, make this the last one */
 };

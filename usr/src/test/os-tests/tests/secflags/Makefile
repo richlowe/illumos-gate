@@ -25,6 +25,7 @@ PROG =	secflags_aslr		\
 	secflags_proc		\
 	secflags_psecflags	\
 	secflags_syscall	\
+	secflags_truss		\
 	secflags_zonecfg
 
 PROG += addrs-32 addrs-64 stacky
