@@ -69,13 +69,15 @@ extern void secflags_copy(secflagset_t *, const secflagset_t *);
 extern boolean_t secflags_issubset(secflagset_t, secflagset_t);
 extern boolean_t secflags_issuperset(secflagset_t, secflagset_t);
 extern boolean_t secflags_intersection(secflagset_t, secflagset_t);
-extern void secflags_union(secflagset_t *, secflagset_t *);
-extern void secflags_difference(secflagset_t *, secflagset_t *);
+extern void secflags_union(secflagset_t *, const secflagset_t *);
+extern void secflags_difference(secflagset_t *, const secflagset_t *);
 extern boolean_t psecflags_validate_delta(const psecflags_t *,
     const secflagdelta_t *);
 extern boolean_t psecflags_validate(const psecflags_t *);
 extern void psecflags_default(psecflags_t *sf);
-
+extern const char *secflag_to_str(secflag_t);
+extern boolean_t secflag_by_name(const char *, secflag_t *);
+extern void secflags_to_str(secflagset_t, char *, size_t);
 
 /* All valid bits */
 #define	PROC_SEC_MASK	(secflag_to_bit(PROC_SEC_ASLR) |	\
@@ -83,9 +85,6 @@ extern void psecflags_default(psecflags_t *sf);
     secflag_to_bit(PROC_SEC_NOEXECSTACK))
 
 #if !defined(_KERNEL)
-extern boolean_t secflag_by_name(const char *, secflag_t *);
-extern const char *secflag_to_str(secflag_t);
-extern char *secflags_to_str(secflagset_t);
 extern int secflags_parse(secflagset_t *, const char *, secflagdelta_t *);
 extern int psecflags(idtype_t, id_t, psecflagwhich_t, secflagdelta_t *);
 #endif

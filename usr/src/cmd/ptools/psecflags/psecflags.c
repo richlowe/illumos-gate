@@ -30,15 +30,12 @@
 extern const char *__progname;
 
 static void
-print_flags(char *set, secflagset_t flags)
+print_flags(const char *set, secflagset_t flags)
 {
-	char *buf;
+	char buf[1024];
 
-	if ((buf = secflags_to_str(flags)) == NULL)
-		err(1, gettext("could not stringify security-flags"));
-
+	secflags_to_str(flags, buf, sizeof (buf));
 	(void) printf("\t%s:\t%s\n", set, buf);
-	free(buf);
 }
 
 /*

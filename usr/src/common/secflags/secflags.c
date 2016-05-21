@@ -14,6 +14,16 @@
 #include <sys/secflags.h>
 #include <sys/types.h>
 
+#if defined(_KERNEL)
+#include <sys/kmem.h>
+#include <sys/sunddi.h>
+#else
+#include "lint.h"		/* libc header */
+#include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
+#endif
+
 secflagset_t
 secflag_to_bit(secflag_t secflag)
 {
@@ -56,7 +66,6 @@ secflags_fullset(secflagset_t *flags)
 	*flags = PROC_SEC_MASK;
 }
 
-
 void
 secflags_copy(secflagset_t *dst, const secflagset_t *src)
 {
@@ -82,13 +91,13 @@ secflags_intersection(secflagset_t a, secflagset_t b)
 }
 
 void
-secflags_union(secflagset_t *a, secflagset_t *b)
+secflags_union(secflagset_t *a, const secflagset_t *b)
 {
 	*a |= *b;
 }
 
 void
-secflags_difference(secflagset_t *a, secflagset_t *b)
+secflags_difference(secflagset_t *a, const secflagset_t *b)
 {
 	*a &= ~*b;
 }
@@ -158,4 +167,75 @@ psecflags_default(psecflags_t *sf)
 	secflags_zero(&sf->psf_inherit);
 	secflags_zero(&sf->psf_lower);
 	secflags_fullset(&sf->psf_upper);
+}
+
+static struct flagdesc {
+	secflag_t value;
+	const char *name;
+} flagdescs[] = {
+	{ PROC_SEC_ASLR,		"aslr" },
+	{ PROC_SEC_FORBIDNULLMAP,	"forbidnullmap" },
+	{ PROC_SEC_NOEXECSTACK,		"noexecstack" },
+	{ 0x0, NULL }
+};
+
+boolean_t
+secflag_by_name(const char *str, secflag_t *ret)
+{
+	struct flagdesc *fd;
+
+	for (fd = flagdescs; fd->name != NULL; fd++) {
+		if (strcasecmp(str, fd->name) == 0) {
+			*ret = fd->value;
+			return (B_TRUE);
+		}
+	}
+
+	return (B_FALSE);
+}
+
+const char *
+secflag_to_str(secflag_t sf)
+{
+	struct flagdesc *fd;
+
+	for (fd = flagdescs; fd->name != NULL; fd++) {
+		if (sf == fd->value)
+			return (fd->name);
+	}
+
+	return (NULL);
+}
+
+void
+secflags_to_str(secflagset_t flags, char *buf, size_t buflen)
+{
+	struct flagdesc *fd;
+
+	if (buflen >= 1)
+		buf[0] = '\0';
+
+	if (flags == 0) {
+		(void) strlcpy(buf, "none", buflen);
+		return;
+	}
+
+	for (fd = flagdescs; fd->name != NULL; fd++) {
+		if (secflag_isset(flags, fd->value)) {
+			if (buf[0] != '\0')
+				(void) strlcat(buf, ", ", buflen);
+			(void) strlcat(buf, fd->name, buflen);
+		}
+
+		secflag_clear(&flags, fd->value);
+	}
+
+	if (flags != 0) { 	/* unknown flags */
+		char hexbuf[11]; /* 0x%08x */
+
+		(void) snprintf(hexbuf, sizeof (hexbuf), "0x%08x", flags);
+		if (buf[0] != '\0')
+			(void) strlcat(buf, ", ", buflen);
+		(void) strlcat(buf, hexbuf, buflen);
+	}
 }
