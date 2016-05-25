@@ -38,7 +38,8 @@ psecflags(idtype_t idtype, id_t id, psecflagwhich_t which,
 }
 
 int
-secflags_parse(secflagset_t *defaults, const char *flags, secflagdelta_t *ret)
+secflags_parse(const secflagset_t *defaults, const char *flags,
+    secflagdelta_t *ret)
 {
 	char *flag;
 	char *s, *ss;
