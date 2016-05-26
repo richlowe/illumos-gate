@@ -30,6 +30,7 @@ MANFILES=	Intro.5			\
 		audit_remote.5		\
 		audit_syslog.5		\
 		brands.5		\
+		byteorder.5		\
 		cancellation.5		\
 		charmap.5		\
 		condition.5		\
@@ -155,6 +156,7 @@ MANLINKS=	ANSI.5		\
 		architecture.5	\
 		availability.5	\
 		compile.5	\
+		endian.5	\
 		intro.5		\
 		pthreads.5	\
 		stability.5	\
@@ -170,6 +172,8 @@ architecture.5	:= LINKSRC = attributes.5
 availability.5	:= LINKSRC = attributes.5
 stability.5	:= LINKSRC = attributes.5
 standard.5	:= LINKSRC = attributes.5
+
+endian.5	:= LINKSRC = byteorder.5
 
 RBAC.5		:= LINKSRC = rbac.5
 
