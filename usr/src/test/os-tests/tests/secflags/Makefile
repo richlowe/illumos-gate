@@ -36,18 +36,12 @@ TESTDIR = $(ROOTOPTPKG)/tests/secflags
 CMDS = $(PROG:%=$(TESTDIR)/%)
 $(CMDS) := FILEMODE = 0555
 
-addrs-32.o: addrs.c
-	$(COMPILE.c) -m32 addrs.c -o $@
-
-addrs-64.o: addrs.c
-	$(COMPILE.c) -m64 addrs.c -o $@
-
-addrs-32: addrs-32.o
-	$(LINK.c) -m32 addrs-32.o -o $@ $(LDLIBS)
+addrs-32: addrs.c
+	$(LINK.c) addrs.c -o $@
 	$(POST_PROCESS)
 
-addrs-64: addrs-64.o
-	$(LINK.c) -m64 addrs-64.o -o $@ $(LDLIBS)
+addrs-64: addrs.c
+	$(LINK64.c) addrs.c -o $@
 	$(POST_PROCESS)
 
 stacky := MAPFILE.NES=			# Will foil the test, clearly
