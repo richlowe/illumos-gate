@@ -37,11 +37,11 @@ CMDS = $(PROG:%=$(TESTDIR)/%)
 $(CMDS) := FILEMODE = 0555
 
 addrs-32: addrs.c
-	$(LINK.c) addrs.c -o $@
+	$(LINK.c) addrs.c -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
 addrs-64: addrs.c
-	$(LINK64.c) addrs.c -o $@
+	$(LINK64.c) addrs.c -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
 stacky := MAPFILE.NES=			# Will foil the test, clearly
