@@ -102,7 +102,6 @@ static au_event_t	aui_privsys(au_event_t);
 static au_event_t	aui_forksys(au_event_t);
 static au_event_t	aui_labelsys(au_event_t);
 static au_event_t	aui_setpgrp(au_event_t);
-static au_event_t	aui_psecflags(au_event_t);
 
 
 static void	aus_exit(struct t_audit_data *);
@@ -207,7 +206,7 @@ aui_null,	AUE_NULL,	aus_null,	/* 0 unused (indirect) */
 		auf_null,	0,
 aui_null,	AUE_EXIT,	aus_exit,	/* 1 exit */
 		auf_null,	S2E_NPT,
-aui_psecflags,	AUE_PSECFLAGS,	aus_null,	/* 2 psecflags */
+aui_null,	AUE_PSECFLAGS,	aus_null,	/* 2 psecflags */
 		auf_null,	0,
 aui_null,	AUE_READ,	aus_null,	/* 3 read */
 		auf_read,	S2E_PUB,
@@ -2377,16 +2376,6 @@ aus_ioctl(struct t_audit_data *tad)
  */
 static au_event_t
 aui_memcntl(au_event_t e)
-{
-	return (e);
-}
-
-/*
- * XXX: auditing _something_ seems like a necessity, doing so without baking
- * the ABI into the audit trail seems vexing, and privileges appear to punt.
- */
-static au_event_t
-aui_psecflags(au_event_t e)
 {
 	return (e);
 }
