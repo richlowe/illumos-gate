@@ -22,12 +22,12 @@
 .Lb libproc
 .In libproc.h
 .Ft int
-.Fo Ppriv
+.Fo Psecflags
 .Fa "struct ps_prochandle *P"
 .Fa "prsecflags_t **psf"
 .Fc
 .Ft void
-.Fo Ppriv_free
+.Fo Psecflags_free
 .Fa "struct ps_prochandle *P"
 .Fa "prsecflags_t *psf"
 .Fc
@@ -59,7 +59,7 @@ function returns
 .Sy 0
 and
 .Fa psf
-is updated with a pointer to the allocated privilege set. Otherwise,
+is updated with a pointer to the allocated security flags. Otherwise,
 .Sy -1
 is returned and
 .Fa psf
