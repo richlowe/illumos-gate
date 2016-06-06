@@ -435,6 +435,9 @@ next:
 	if (!psecflags_validate(flags))
 		return (-1);
 
-#endif	/* !NATIVE_BUILD */
 	return (0);
+#else
+	assert(0);
+	abort();
+#endif /* !NATIVE_BUILD */
 }
