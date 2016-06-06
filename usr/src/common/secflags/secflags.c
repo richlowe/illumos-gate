@@ -223,7 +223,7 @@ secflags_to_str(secflagset_t flags, char *buf, size_t buflen)
 	for (fd = flagdescs; fd->name != NULL; fd++) {
 		if (secflag_isset(flags, fd->value)) {
 			if (buf[0] != '\0')
-				(void) strlcat(buf, ", ", buflen);
+				(void) strlcat(buf, ",", buflen);
 			(void) strlcat(buf, fd->name, buflen);
 		}
 
@@ -235,7 +235,7 @@ secflags_to_str(secflagset_t flags, char *buf, size_t buflen)
 
 		(void) snprintf(hexbuf, sizeof (hexbuf), "0x%08x", flags);
 		if (buf[0] != '\0')
-			(void) strlcat(buf, ", ", buflen);
+			(void) strlcat(buf, ",", buflen);
 		(void) strlcat(buf, hexbuf, buflen);
 	}
 }

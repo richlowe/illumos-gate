@@ -50,7 +50,7 @@ self_add() {
     echo "Add (self)"
     /usr/bin/psecflags -s current,noexecstack $$
     cat > expected <<EOF
-	I:	aslr, noexecstack
+	I:	aslr,noexecstack
 EOF
 
     /usr/bin/psecflags $$ | grep I: > output
@@ -110,8 +110,8 @@ child_add() {
     /usr/bin/psecflags -s current,noexecstack -e sleep 10000 &
     pid=$!
     cat > expected <<EOF
-	E:	aslr, noexecstack
-	I:	aslr, noexecstack
+	E:	aslr,noexecstack
+	I:	aslr,noexecstack
 EOF
     /usr/bin/psecflags $pid | grep '[IE]:' > output
     kill $pid
