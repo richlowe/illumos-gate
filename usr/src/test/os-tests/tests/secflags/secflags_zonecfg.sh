@@ -11,7 +11,7 @@
 # http://www.illumos.org/license/CDDL.
 #
 
-# Copyright 2015, Richald Lowe.
+# Copyright 2015, Richard Lowe.
 
 # Verify that zones can be configured with security-flags
 LC_ALL=C                        # Collation is important

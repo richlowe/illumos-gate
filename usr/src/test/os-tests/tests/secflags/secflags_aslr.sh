@@ -11,9 +11,10 @@
 # http://www.illumos.org/license/CDDL.
 #
 
-# Copyright 2015, Richald Lowe.
+# Copyright 2015, Richard Lowe.
 
-# Verify that aslr musses things up, by comparing the mappings of 2 identical processes
+# Verify that aslr messes things up, by comparing the mappings of 2 identical
+# processes
 
 LC_ALL=C                        # Collation is important
 
