@@ -2621,12 +2621,12 @@ conv_prsecflags(secflagset_t flags, Conv_fmt_flags_t fmt_flags,
 		{ 0, 0 }
 	};
 	static CONV_EXPN_FIELD_ARG conv_arg = {
-	    NULL, sizeof (secflags_buf->buf) };
+	    NULL, sizeof (secflags_buf->buf)
+	};
 	int i;
 
-	for (i = 0; vda[i].v_msg != 0; i++) {
+	for (i = 0; vda[i].v_msg != 0; i++)
 		vda[i].v_val = secflag_to_bit(i);
-	}
 
 	if (flags == 0)
 		return (MSG_ORIG(MSG_GBL_ZERO));
