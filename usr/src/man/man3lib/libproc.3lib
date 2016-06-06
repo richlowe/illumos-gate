@@ -11,7 +11,7 @@
 .\"
 .\" Copyright 2015 Joyent, Inc.
 .\"
-.Dd May 08, 2016
+.Dd June 06, 2016
 .Dt LIBPROC 3LIB
 .Os
 .Sh NAME

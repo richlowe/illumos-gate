@@ -11,7 +11,7 @@
 .\"
 .\" Copyright 2016, Richard Lowe.
 .\"
-.Dd May 14, 2016
+.Dd June 06, 2016
 .Dt PSECFLAGS 3PROC
 .Os
 .Sh NAME
