@@ -46,11 +46,11 @@ addrs-64: addrs.c
 
 stacky := MAPFILE.NES=			# Will foil the test, clearly
 stacky: stacky.o
-	$(LINK.c) -m32 stacky.o -o $@ $(LDLIBS)
+	$(LINK.c) stacky.o -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
 secflags_syscall: secflags_syscall.c
-	$(LINK.c) -m32 secflags_syscall.c -o $@ $(LDLIBS)
+	$(LINK.c) secflags_syscall.c -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
 all: $(PROG)
