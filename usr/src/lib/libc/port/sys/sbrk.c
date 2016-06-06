@@ -122,7 +122,7 @@ _sbrk_grow_aligned(size_t min_size, size_t low_align, size_t high_align,
 	uintptr_t ret_brk;
 	uintptr_t high_brk;
 	uintptr_t new_brk;
-	int brk_result;
+	intptr_t brk_result;
 
 	if (!primary_link_map) {
 		errno = ENOTSUP;
@@ -138,9 +138,8 @@ _sbrk_grow_aligned(size_t min_size, size_t low_align, size_t high_align,
 
 	lmutex_lock(&__sbrk_lock);
 
-	if (_nd == NULL) {
+	if (_nd == NULL)
 		_nd = (void *)_brk_unlocked(0);
-	}
 
 	old_brk = (uintptr_t)BRKALIGN(_nd);
 	ret_brk = P2ROUNDUP(old_brk, low_align);
@@ -156,7 +155,7 @@ _sbrk_grow_aligned(size_t min_size, size_t low_align, size_t high_align,
 		return ((void *)-1);
 	}
 
-	if ((brk_result = (int)_brk_unlocked((void *)new_brk)) == 0)
+	if ((brk_result = _brk_unlocked((void *)new_brk)) == 0)
 		_nd = (void *)new_brk;
 	lmutex_unlock(&__sbrk_lock);
 
@@ -171,7 +170,7 @@ _sbrk_grow_aligned(size_t min_size, size_t low_align, size_t high_align,
 int
 brk(void *new_brk)
 {
-	int result;
+	intptr_t result;
 
 	/*
 	 * brk(2) will return the current brk if given an argument of 0, so we
@@ -192,7 +191,7 @@ brk(void *new_brk)
 	new_brk = BRKALIGN(new_brk);
 
 	lmutex_lock(&__sbrk_lock);
-	if ((result = (int)_brk_unlocked(new_brk)) == 0)
+	if ((result = _brk_unlocked(new_brk)) == 0)
 		_nd = new_brk;
 	lmutex_unlock(&__sbrk_lock);
 
