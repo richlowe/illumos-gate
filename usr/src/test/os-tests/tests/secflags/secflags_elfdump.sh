@@ -35,7 +35,7 @@ gcore $pid >/dev/null
 
 cat > gcore-expected.$$ <<EOF
     namesz: 0x5
-    descsz: 0x14
+    descsz: 0x28
     type:   [ NT_SECFLAGS ]
     name:
         CORE\0
@@ -58,7 +58,7 @@ kill -SEGV $pid
 
 cat > core-expected.$$ <<EOF
     namesz: 0x5
-    descsz: 0x14
+    descsz: 0x28
     type:   [ NT_SECFLAGS ]
     name:
         CORE\0

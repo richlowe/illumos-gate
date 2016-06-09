@@ -837,6 +837,7 @@ dump_secflags(note_state_t *state, const char *title)
 {
 	const sl_prsecflags_layout_t *layout = state->ns_arch->prsecflags;
 	Conv_secflags_buf_t inv;
+	Lword lw;
 	Word w;
 
 	indent_enter(state, title, &layout->pr_version);
@@ -849,21 +850,21 @@ dump_secflags(note_state_t *state, const char *title)
 		    4, 3);
 	} else {
 		PRINT_DEC(MSG_ORIG(MSG_CNOTE_T_PR_VERSION), pr_version);
-		w = extract_as_word(state, &layout->pr_effective);
+		lw = extract_as_lword(state, &layout->pr_effective);
 		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_EFFECTIVE),
-		    conv_prsecflags(w, 0, &inv));
+		    conv_prsecflags(lw, 0, &inv));
 
-		w = extract_as_word(state, &layout->pr_inherit);
+		lw = extract_as_lword(state, &layout->pr_inherit);
 		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_INHERIT),
-		    conv_prsecflags(w, 0, &inv));
+		    conv_prsecflags(lw, 0, &inv));
 
-		w = extract_as_word(state, &layout->pr_lower);
+		lw = extract_as_lword(state, &layout->pr_lower);
 		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_LOWER),
-		    conv_prsecflags(w, 0, &inv));
+		    conv_prsecflags(lw, 0, &inv));
 
-		w = extract_as_word(state, &layout->pr_upper);
+		lw = extract_as_lword(state, &layout->pr_upper);
 		print_str(state, MSG_ORIG(MSG_CNOTE_T_PR_UPPER),
-		    conv_prsecflags(w, 0, &inv));
+		    conv_prsecflags(lw, 0, &inv));
 	}
 
 	indent_exit(state);

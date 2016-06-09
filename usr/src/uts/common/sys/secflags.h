@@ -22,7 +22,7 @@ extern "C" {
 #include <sys/procset.h>
 
 struct proc;
-typedef uint32_t secflagset_t;
+typedef uint64_t secflagset_t;
 
 typedef struct psecflags {
 	secflagset_t psf_effective;

@@ -403,6 +403,7 @@ typedef struct prpriv {
 #define	PRSECFLAGS_VERSION_CURRENT	PRSECFLAGS_VERSION_1
 typedef struct prsecflags {
 	uint32_t pr_version;
+	char pr_pad[4];
 	secflagset_t pr_effective;
 	secflagset_t pr_inherit;
 	secflagset_t pr_lower;
