@@ -233,7 +233,7 @@ secflags_to_str(secflagset_t flags, char *buf, size_t buflen)
 	if (flags != 0) { 	/* unknown flags */
 		char hexbuf[19]; /* 0x%16 PRIx64 */
 
-		(void) snprintf(hexbuf, sizeof (hexbuf), "0x%19" PRIx64, flags);
+		(void) snprintf(hexbuf, sizeof (hexbuf), "0x%16" PRIx64, flags);
 		if (buf[0] != '\0')
 			(void) strlcat(buf, ",", buflen);
 		(void) strlcat(buf, hexbuf, buflen);
