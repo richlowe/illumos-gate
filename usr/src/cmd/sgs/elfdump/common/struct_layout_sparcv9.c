@@ -377,6 +377,16 @@ static const sl_prfdinfo_layout_t prfdinfo_layout = {
 };
 
 
+static const sl_prsecflags_layout_t prsecflags_layout = {
+       { 0,    20,     0,      0 },            /* sizeof (prsecflags_t) */
+       { 0,    4,      0,      0 },            /* pr_version */
+       { 4,    4,      0,      0 },            /* pr_effective */
+       { 8,    4,      0,      0 },            /* pr_inherit */
+       { 12,   4,      0,      0 },            /* pr_lower */
+       { 16,   4,      0,      0 },            /* pr_upper */
+};
+
+
 
 
 static const sl_arch_layout_t layout_sparcv9 = {
@@ -400,10 +410,9 @@ static const sl_arch_layout_t layout_sparcv9 = {
 	&timestruc_layout,
 	&utsname_layout,
 	&prfdinfo_layout,
+	&prsecflags_layout,
 };
-
-
-const sl_arch_layout_t *
+ const sl_arch_layout_t *
 struct_layout_sparcv9(void)
 {
 	return (&layout_sparcv9);
