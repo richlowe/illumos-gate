@@ -83,6 +83,10 @@ expect_fail() {
 
 ret=0
 
+expect_success valid-no-config <<EOF
+EOF
+(( $? != 0 )) && ret=1
+
 expect_success valid-full-config <<EOF
 add security-flags
 set lower=none

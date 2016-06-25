@@ -2117,17 +2117,14 @@ export_func(cmd_t *cmd)
 
 	(void) zonecfg_endadminent(handle);
 
-	if ((err = zonecfg_getsecflagsent(handle, &secflagstab)) != Z_OK) {
-		zone_perror(zone, err, B_FALSE);
-		goto done;
+	if (zonecfg_getsecflagsent(handle, &secflagstab) == Z_OK) {
+		(void) fprintf(of, "%s %s\n", cmd_to_str(CMD_ADD),
+		    rt_to_str(RT_SECFLAGS));
+		export_prop(of, PT_DEFAULT, secflagstab.zone_secflags_default);
+		export_prop(of, PT_LOWER, secflagstab.zone_secflags_lower);
+		export_prop(of, PT_UPPER, secflagstab.zone_secflags_upper);
+		(void) fprintf(of, "%s\n", cmd_to_str(CMD_END));
 	}
-
-	(void) fprintf(of, "%s %s\n", cmd_to_str(CMD_ADD),
-	    rt_to_str(RT_SECFLAGS));
-	export_prop(of, PT_DEFAULT, secflagstab.zone_secflags_default);
-	export_prop(of, PT_LOWER, secflagstab.zone_secflags_lower);
-	export_prop(of, PT_UPPER, secflagstab.zone_secflags_upper);
-	(void) fprintf(of, "%s\n", cmd_to_str(CMD_END));
 
 	/*
 	 * There is nothing to export for pcap since this resource is just
@@ -6393,18 +6390,15 @@ verify_func(cmd_t *cmd)
 	}
 	(void) zonecfg_endadminent(handle);
 
-	if ((err = zonecfg_getsecflagsent(handle, &secflagstab)) != Z_OK) {
-		zone_perror(zone, err, B_TRUE);
-		return;
-	}
-
-	/*
-	 * No properties are required, but any specified should be
-	 * valid
-	 */
-	if (verify_secflags(&secflagstab) != B_TRUE) {
-		/* Error is reported from verify_secflags */
-		ret_val = Z_BAD_PROPERTY;
+	if (zonecfg_getsecflagsent(handle, &secflagstab) == Z_OK) {
+		/*
+		 * No properties are required, but any specified should be
+		 * valid
+		 */
+		if (verify_secflags(&secflagstab) != B_TRUE) {
+			/* Error is reported from verify_secflags */
+			ret_val = Z_BAD_PROPERTY;
+		}
 	}
 
 	if (!global_scope) {
