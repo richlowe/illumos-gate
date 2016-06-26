@@ -5621,14 +5621,10 @@ static void
 info_secflags(zone_dochandle_t handle, FILE *fp)
 {
 	struct zone_secflagstab sftab;
-	int err;
 
-	if ((err = zonecfg_lookup_secflags(handle, &sftab)) != Z_OK) {
-		zone_perror(zone, err, B_TRUE);
-		return;
+	if (zonecfg_lookup_secflags(handle, &sftab) == Z_OK) {
+		output_secflags(fp, &sftab);
 	}
-
-	output_secflags(fp, &sftab);
 }
 
 void
