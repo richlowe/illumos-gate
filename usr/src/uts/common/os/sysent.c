@@ -63,7 +63,7 @@ int	alarm(int);
 int	auditsys(struct auditcalls *, rval_t *);
 int64_t	brandsys(int, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
     uintptr_t);
-int	brk(caddr_t);
+intptr_t	brk(caddr_t);
 int	chdir(char *);
 int	chmod(char *, int);
 int	chown(char *, uid_t, gid_t);
