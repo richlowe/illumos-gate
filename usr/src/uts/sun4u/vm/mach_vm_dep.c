@@ -315,7 +315,7 @@ map_addr_proc(caddr_t *addrp, size_t len, offset_t off, int vacalign,
 			 */
 			maxslew = MIN(maxslew, (addr - errata57_limit));
 
-			slew = slew % MIN(MIN(aslr_max_map_skew, (addr - base)),
+			slew = slew % MIN(MIN(maxslew, (addr - base)),
 			    addr - errata57_limit);
 			addr -= P2ALIGN(slew, align_amount);
 		}
