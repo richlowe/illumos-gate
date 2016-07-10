@@ -1361,6 +1361,7 @@ pool_do_bind(pool_t *pool, idtype_t idtype, id_t id, int flags)
 	int rv = 0;
 	proc_t *p;
 	id_t cid = -1;
+	reftoken_t *rt;
 
 	ASSERT(pool_lock_held());
 
@@ -1368,11 +1369,11 @@ pool_do_bind(pool_t *pool, idtype_t idtype, id_t id, int flags)
 		return (EINVAL);
 
 	if (idtype == P_ZONEID) {
-		zone = zone_find_by_id(id);
+		zone = zone_find_by_id(id, &rt);
 		if (zone == NULL)
 			return (ESRCH);
 		if (zone_status_get(zone) > ZONE_IS_RUNNING) {
-			zone_rele(zone);
+			zone_rele(zone, rt);
 			return (EBUSY);
 		}
 	}
@@ -1713,7 +1714,7 @@ out:	switch (idtype) {
 			mutex_exit(&cpu_lock);
 		}
 		zone->zone_pool_mod = gethrtime();
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		break;
 	}
 

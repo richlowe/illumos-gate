@@ -1960,7 +1960,7 @@ taskq_create_common(const char *name, int instance, int nthreads, pri_t pri,
 	 * makes sure all the taskq threads are gone.  This hold is
 	 * similar in purpose to those taken by zthread_create().
 	 */
-	zone_hold(tq->tq_proc->p_zone);
+	tq->tq_zonehold = zone_hold(tq->tq_proc->p_zone);
 
 	/*
 	 * Create the first thread, which will create any other threads
@@ -2144,7 +2144,7 @@ taskq_destroy(taskq_t *tq)
 	 * Now that all the taskq threads are gone, we can
 	 * drop the zone hold taken in taskq_create_common
 	 */
-	zone_rele(tq->tq_proc->p_zone);
+	zone_rele(tq->tq_proc->p_zone, tq->tq_zonehold);
 
 	tq->tq_threads_ncpus_pct = 0;
 	tq->tq_totaltime = 0;

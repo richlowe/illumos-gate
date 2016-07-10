@@ -368,10 +368,12 @@ auto_mount(vfs_t *vfsp, vnode_t *vp, struct mounta *uap, cred_t *cr)
 
 	if (zone == global_zone) {
 		zone_t *mntzone;
+		reftoken_t *rt;
 
-		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt),
+		    &rt);
 		ASSERT(mntzone != NULL);
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 		if (mntzone != zone) {
 			return (EBUSY);
 		}

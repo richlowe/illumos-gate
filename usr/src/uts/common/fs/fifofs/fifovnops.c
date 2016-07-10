@@ -69,6 +69,7 @@
 #include <sys/vtrace.h>
 #include <sys/policy.h>
 #include <sys/tsol/label.h>
+#include <sys/refcnt.h>
 
 /*
  * Define the routines/data structures used in this file.
@@ -193,8 +194,9 @@ tsol_fifo_access(vnode_t *vp, int flag, cred_t *crp)
 			 */
 			if (vnodetopath(rootdir, vp, vpath, sizeof (vpath),
 			    kcred) == 0) {
-				fifo_zone = zone_find_by_path(vpath);
-				zone_rele(fifo_zone);
+				reftoken_t *rt;
+				fifo_zone = zone_find_by_path(vpath, &rt);
+				zone_rele(fifo_zone, rt);
 
 				if (fifo_zone != global_zone &&
 				    fifo_zone != proc_zone) {

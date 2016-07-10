@@ -24,7 +24,7 @@
  */
 
 #include <sys/zfs_context.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 
 #ifdef	ZFS_DEBUG
 
@@ -39,53 +39,53 @@ static kmem_cache_t *reference_cache;
 static kmem_cache_t *reference_history_cache;
 
 void
-refcount_init(void)
+trackcount_init(void)
 {
 	reference_cache = kmem_cache_create("reference_cache",
-	    sizeof (reference_t), 0, NULL, NULL, NULL, NULL, NULL, 0);
+	    sizeof (trackref_t), 0, NULL, NULL, NULL, NULL, NULL, 0);
 
 	reference_history_cache = kmem_cache_create("reference_history_cache",
 	    sizeof (uint64_t), 0, NULL, NULL, NULL, NULL, NULL, 0);
 }
 
 void
-refcount_fini(void)
+trackcount_fini(void)
 {
 	kmem_cache_destroy(reference_cache);
 	kmem_cache_destroy(reference_history_cache);
 }
 
 void
-refcount_create(refcount_t *rc)
+trackcount_create(trackcount_t *rc)
 {
-	mutex_init(&rc->rc_mtx, NULL, MUTEX_DEFAULT, NULL);
-	list_create(&rc->rc_list, sizeof (reference_t),
-	    offsetof(reference_t, ref_link));
-	list_create(&rc->rc_removed, sizeof (reference_t),
-	    offsetof(reference_t, ref_link));
-	rc->rc_count = 0;
-	rc->rc_removed_count = 0;
-	rc->rc_tracked = reference_tracking_enable;
+	mutex_init(&rc->tc_mtx, NULL, MUTEX_DEFAULT, NULL);
+	list_create(&rc->tc_list, sizeof (trackref_t),
+	    offsetof(trackref_t, ref_link));
+	list_create(&rc->rc_removed, sizeof (trackref_t),
+	    offsetof(trackref_t, ref_link));
+	rc->tc_count = 0;
+	rc->tc_removed_count = 0;
+	rc->tc_tracked = reference_tracking_enable;
 }
 
 void
-refcount_create_untracked(refcount_t *rc)
+trackcount_create_untracked(trackcount_t *rc)
 {
-	refcount_create(rc);
-	rc->rc_tracked = B_FALSE;
+	trackcount_create(rc);
+	rc->tc_tracked = B_FALSE;
 }
 
 void
-refcount_destroy_many(refcount_t *rc, uint64_t number)
+trackcount_destroy_many(trackcount_t *rc, uint64_t number)
 {
-	reference_t *ref;
+	trackref_t *ref;
 
-	ASSERT(rc->rc_count == number);
-	while (ref = list_head(&rc->rc_list)) {
-		list_remove(&rc->rc_list, ref);
+	ASSERT(rc->tc_count == number);
+	while (ref = list_head(&rc->tc_list)) {
+		list_remove(&rc->tc_list, ref);
 		kmem_cache_free(reference_cache, ref);
 	}
-	list_destroy(&rc->rc_list);
+	list_destroy(&rc->tc_list);
 
 	while (ref = list_head(&rc->rc_removed)) {
 		list_remove(&rc->rc_removed, ref);
@@ -93,95 +93,95 @@ refcount_destroy_many(refcount_t *rc, uint64_t number)
 		kmem_cache_free(reference_cache, ref);
 	}
 	list_destroy(&rc->rc_removed);
-	mutex_destroy(&rc->rc_mtx);
+	mutex_destroy(&rc->tc_mtx);
 }
 
 void
-refcount_destroy(refcount_t *rc)
+trackcount_destroy(trackcount_t *rc)
 {
-	refcount_destroy_many(rc, 0);
+	trackcount_destroy_many(rc, 0);
 }
 
 int
-refcount_is_zero(refcount_t *rc)
+trackcount_is_zero(trackcount_t *rc)
 {
-	return (rc->rc_count == 0);
+	return (rc->tc_count == 0);
 }
 
 int64_t
-refcount_count(refcount_t *rc)
+trackcount_count(trackcount_t *rc)
 {
-	return (rc->rc_count);
+	return (rc->tc_count);
 }
 
 int64_t
-refcount_add_many(refcount_t *rc, uint64_t number, void *holder)
+trackcount_add_many(trackcount_t *rc, uint64_t number, void *holder)
 {
-	reference_t *ref = NULL;
+	trackref_t *ref = NULL;
 	int64_t count;
 
-	if (rc->rc_tracked) {
+	if (rc->tc_tracked) {
 		ref = kmem_cache_alloc(reference_cache, KM_SLEEP);
 		ref->ref_holder = holder;
 		ref->ref_number = number;
 	}
-	mutex_enter(&rc->rc_mtx);
-	ASSERT(rc->rc_count >= 0);
-	if (rc->rc_tracked)
-		list_insert_head(&rc->rc_list, ref);
-	rc->rc_count += number;
-	count = rc->rc_count;
-	mutex_exit(&rc->rc_mtx);
+	mutex_enter(&rc->tc_mtx);
+	ASSERT(rc->tc_count >= 0);
+	if (rc->tc_tracked)
+		list_insert_head(&rc->tc_list, ref);
+	rc->tc_count += number;
+	count = rc->tc_count;
+	mutex_exit(&rc->tc_mtx);
 
 	return (count);
 }
 
 int64_t
-refcount_add(refcount_t *rc, void *holder)
+trackcount_add(trackcount_t *rc, void *holder)
 {
-	return (refcount_add_many(rc, 1, holder));
+	return (trackcount_add_many(rc, 1, holder));
 }
 
 int64_t
-refcount_remove_many(refcount_t *rc, uint64_t number, void *holder)
+trackcount_remove_many(trackcount_t *rc, uint64_t number, void *holder)
 {
-	reference_t *ref;
+	trackref_t *ref;
 	int64_t count;
 
-	mutex_enter(&rc->rc_mtx);
-	ASSERT(rc->rc_count >= number);
+	mutex_enter(&rc->tc_mtx);
+	ASSERT(rc->tc_count >= number);
 
-	if (!rc->rc_tracked) {
-		rc->rc_count -= number;
-		count = rc->rc_count;
-		mutex_exit(&rc->rc_mtx);
+	if (!rc->tc_tracked) {
+		rc->tc_count -= number;
+		count = rc->tc_count;
+		mutex_exit(&rc->tc_mtx);
 		return (count);
 	}
 
-	for (ref = list_head(&rc->rc_list); ref;
-	    ref = list_next(&rc->rc_list, ref)) {
+	for (ref = list_head(&rc->tc_list); ref;
+	    ref = list_next(&rc->tc_list, ref)) {
 		if (ref->ref_holder == holder && ref->ref_number == number) {
-			list_remove(&rc->rc_list, ref);
+			list_remove(&rc->tc_list, ref);
 			if (reference_history > 0) {
 				ref->ref_removed =
 				    kmem_cache_alloc(reference_history_cache,
 				    KM_SLEEP);
 				list_insert_head(&rc->rc_removed, ref);
-				rc->rc_removed_count++;
-				if (rc->rc_removed_count > reference_history) {
+				rc->tc_removed_count++;
+				if (rc->tc_removed_count > reference_history) {
 					ref = list_tail(&rc->rc_removed);
 					list_remove(&rc->rc_removed, ref);
 					kmem_cache_free(reference_history_cache,
 					    ref->ref_removed);
 					kmem_cache_free(reference_cache, ref);
-					rc->rc_removed_count--;
+					rc->tc_removed_count--;
 				}
 			} else {
 				kmem_cache_free(reference_cache, ref);
 			}
-			rc->rc_count -= number;
-			count = rc->rc_count;
-			mutex_exit(&rc->rc_mtx);
+			rc->tc_count -= number;
+			count = rc->tc_count;
+			mutex_exit(&rc->tc_mtx);
 			return (count);
 		}
 	}
@@ -191,37 +191,37 @@ refcount_remove_many(refcount_t *rc, uint64_t number, void *holder)
 }
 
 int64_t
-refcount_remove(refcount_t *rc, void *holder)
+trackcount_remove(trackcount_t *rc, void *holder)
 {
-	return (refcount_remove_many(rc, 1, holder));
+	return (trackcount_remove_many(rc, 1, holder));
 }
 
 void
-refcount_transfer(refcount_t *dst, refcount_t *src)
+trackcount_transfer(trackcount_t *dst, trackcount_t *src)
 {
 	int64_t count, removed_count;
 	list_t list, removed;
 
-	list_create(&list, sizeof (reference_t),
-	    offsetof(reference_t, ref_link));
-	list_create(&removed, sizeof (reference_t),
-	    offsetof(reference_t, ref_link));
+	list_create(&list, sizeof (trackref_t),
+	    offsetof(trackref_t, ref_link));
+	list_create(&removed, sizeof (trackref_t),
+	    offsetof(trackref_t, ref_link));
 
-	mutex_enter(&src->rc_mtx);
-	count = src->rc_count;
-	removed_count = src->rc_removed_count;
-	src->rc_count = 0;
-	src->rc_removed_count = 0;
-	list_move_tail(&list, &src->rc_list);
+	mutex_enter(&src->tc_mtx);
+	count = src->tc_count;
+	removed_count = src->tc_removed_count;
+	src->tc_count = 0;
+	src->tc_removed_count = 0;
+	list_move_tail(&list, &src->tc_list);
 	list_move_tail(&removed, &src->rc_removed);
-	mutex_exit(&src->rc_mtx);
+	mutex_exit(&src->tc_mtx);
 
-	mutex_enter(&dst->rc_mtx);
-	dst->rc_count += count;
-	dst->rc_removed_count += removed_count;
-	list_move_tail(&dst->rc_list, &list);
+	mutex_enter(&dst->tc_mtx);
+	dst->tc_count += count;
+	dst->tc_removed_count += removed_count;
+	list_move_tail(&dst->tc_list, &list);
 	list_move_tail(&dst->rc_removed, &removed);
-	mutex_exit(&dst->rc_mtx);
+	mutex_exit(&dst->tc_mtx);
 
 	list_destroy(&list);
 	list_destroy(&removed);

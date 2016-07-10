@@ -71,6 +71,7 @@ GENUNIX_SRCS =		\
 	nvpair.c	\
 	pg.c		\
 	rctl.c		\
+	refcnt.c	\
 	sobj.c		\
 	streams.c	\
 	sysevent.c	\

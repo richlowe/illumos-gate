@@ -67,6 +67,7 @@
 #include <sys/mode.h>
 #include <sys/acl.h>
 #include <sys/sdt.h>
+#include <sys/refcnt.h>
 
 #include <rpc/types.h>
 #include <rpc/auth.h>
@@ -3285,10 +3286,12 @@ nfs_getflabel(vnode_t *vp, struct exportinfo *exi)
 	zone_t *zone;
 	ts_label_t *zone_label;
 	char *path;
+	reftoken_t *rt;
 
 	mutex_enter(&vp->v_lock);
 	if (vp->v_path != NULL) {
-		zone = zone_find_by_any_path(vp->v_path, B_FALSE);
+		zone = zone_find_by_any_path(vp->v_path, B_FALSE,
+			&rt);
 		mutex_exit(&vp->v_lock);
 	} else {
 		/*
@@ -3302,7 +3305,7 @@ nfs_getflabel(vnode_t *vp, struct exportinfo *exi)
 			mutex_exit(&vp->v_lock);
 			return (NULL);
 		}
-		zone = zone_find_by_any_path(path, B_FALSE);
+		zone = zone_find_by_any_path(path, B_FALSE, &rt);
 		mutex_exit(&vp->v_lock);
 	}
 	/*
@@ -3313,7 +3316,7 @@ nfs_getflabel(vnode_t *vp, struct exportinfo *exi)
 	 */
 	zone_label = zone->zone_slabel;
 	label_hold(zone_label);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	return (zone_label);
 }
 

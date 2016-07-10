@@ -60,7 +60,7 @@
 
 #include <sys/dmu.h>
 #include <sys/dmu_objset.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/stat.h>
 #include <sys/zap.h>
 #include <sys/zfs_znode.h>

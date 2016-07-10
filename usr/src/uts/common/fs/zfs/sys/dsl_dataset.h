@@ -38,7 +38,7 @@
 #include <sys/dsl_synctask.h>
 #include <sys/zfs_context.h>
 #include <sys/dsl_deadlist.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <zfeature_common.h>
 
 #ifdef	__cplusplus
@@ -183,7 +183,7 @@ typedef struct dsl_dataset {
 	 * Owning counts as a long hold.  See the comments above
 	 * dsl_pool_hold() for details.
 	 */
-	refcount_t ds_longholds;
+	trackcount_t ds_longholds;
 
 	/* no locking; only for making guesses */
 	uint64_t ds_trysnap_txg;

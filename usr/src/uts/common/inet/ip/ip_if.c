@@ -16058,6 +16058,7 @@ ip_sioctl_slifzone(ipif_t *ipif, sin_t *sin, queue_t *q, mblk_t *mp,
 	zone_t *zptr;
 	zone_status_t status;
 	zoneid_t zoneid;
+	reftoken_t *rt;
 
 	ASSERT(ipip->ipi_cmd_type == LIF_CMD);
 	if ((zoneid = lifr->lifr_zoneid) == ALL_ZONES) {
@@ -16080,10 +16081,10 @@ ip_sioctl_slifzone(ipif_t *ipif, sin_t *sin, queue_t *q, mblk_t *mp,
 	 * function is called, we resolve the possible races by rechecking the
 	 * zone status in the restart function.
 	 */
-	if ((zptr = zone_find_by_id(zoneid)) == NULL)
+	if ((zptr = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (EINVAL);
 	status = zone_status_get(zptr);
-	zone_rele(zptr);
+	zone_rele(zptr, rt);
 
 	if (status != ZONE_IS_READY && status != ZONE_IS_RUNNING)
 		return (EINVAL);
@@ -16161,6 +16162,7 @@ ip_sioctl_slifzone_restart(ipif_t *ipif, sin_t *sin, queue_t *q, mblk_t *mp,
 	zoneid_t zoneid;
 	zone_t *zptr;
 	zone_status_t status;
+	reftoken_t *rt;
 
 	ASSERT(ipip->ipi_cmd_type == LIF_CMD);
 	if ((zoneid = lifr->lifr_zoneid) == ALL_ZONES)
@@ -16186,9 +16188,9 @@ ip_sioctl_slifzone_restart(ipif_t *ipif, sin_t *sin, queue_t *q, mblk_t *mp,
 	 * ipif_up_done[_v6]().
 	 */
 	status = ZONE_IS_UNINITIALIZED;
-	if ((zptr = zone_find_by_id(zoneid)) != NULL) {
+	if ((zptr = zone_find_by_id(zoneid, &rt)) != NULL) {
 		status = zone_status_get(zptr);
-		zone_rele(zptr);
+		zone_rele(zptr, rt);
 	}
 	if (status != ZONE_IS_READY && status != ZONE_IS_RUNNING) {
 		if (ipif->ipif_isv6) {
@@ -17398,6 +17400,7 @@ ip_ipmp_v6intfid(ill_t *ill, in6_addr_t *v6addr)
 	ulong_t 	hostid;
 	MD5_CTX		ctx;
 	ipmp_ifcookie_t	ic = { 0 };
+	reftoken_t	*rt;
 
 	ASSERT(IS_IPMP(ill));
 
@@ -17406,9 +17409,9 @@ ip_ipmp_v6intfid(ill_t *ill, in6_addr_t *v6addr)
 
 	(void) strlcpy(ic.ic_ifname, ill->ill_name, LIFNAMSIZ);
 
-	if ((zp = zone_find_by_id(ill->ill_zoneid)) != NULL) {
+	if ((zp = zone_find_by_id(ill->ill_zoneid, &rt)) != NULL) {
 		(void) strlcpy(ic.ic_zonename, zp->zone_name, ZONENAME_MAX);
-		zone_rele(zp);
+		zone_rele(zp, rt);
 	}
 
 	MD5Init(&ctx);

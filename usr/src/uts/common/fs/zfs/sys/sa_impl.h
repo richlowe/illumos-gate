@@ -28,7 +28,7 @@
 #define	_SYS_SA_IMPL_H
 
 #include <sys/dmu.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/list.h>
 
 /*
@@ -110,7 +110,7 @@ typedef struct sa_idx_tab {
 	list_node_t	sa_next;
 	sa_lot_t	*sa_layout;
 	uint16_t	*sa_variable_lengths;
-	refcount_t	sa_refcount;
+	trackcount_t	sa_refcount;
 	uint32_t	*sa_idx_tab;	/* array of offsets */
 } sa_idx_tab_t;
 

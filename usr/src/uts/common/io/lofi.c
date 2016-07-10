@@ -542,8 +542,8 @@ lofi_destroy(struct lofi_state *lsp, cred_t *credp)
 		lsp->ls_uncomp_seg_sz = 0;
 	}
 
-	rctl_decr_lofi(lsp->ls_zone.zref_zone, 1);
-	zone_rele_ref(&lsp->ls_zone, ZONE_REF_LOFI);
+	rctl_decr_lofi(lsp->ls_zone, 1);
+	zone_rele(lsp->ls_zone, lsp->ls_zone_ref);
 
 	mutex_destroy(&lsp->ls_comp_cache_lock);
 	mutex_destroy(&lsp->ls_comp_bufs_lock);
@@ -586,7 +586,7 @@ lofi_zone_shutdown(zoneid_t zoneid, void *arg)
 		/* lofi_destroy() frees lsp */
 		next = list_next(&lofi_list, lsp);
 
-		if (lsp->ls_zone.zref_zone->zone_id != zoneid)
+		if (lsp->ls_zone->zone_id != zoneid)
 			continue;
 
 		/*
@@ -1810,8 +1810,7 @@ lofi_zone_bind(struct lofi_state *lsp)
 		rctl_decr_lofi(curproc->p_zone, 1);
 		error = EINVAL;
 	} else {
-		zone_init_ref(&lsp->ls_zone);
-		zone_hold_ref(curzone, &lsp->ls_zone, ZONE_REF_LOFI);
+		lsp->ls_zone_ref = zone_hold(curzone);
 	}
 	return (error);
 }
@@ -1821,7 +1820,7 @@ lofi_zone_unbind(struct lofi_state *lsp)
 {
 	(void) ddi_prop_remove(DDI_DEV_T_NONE, lsp->ls_dip, ZONE_PROP_NAME);
 	rctl_decr_lofi(curproc->p_zone, 1);
-	zone_rele_ref(&lsp->ls_zone, ZONE_REF_LOFI);
+	zone_rele(lsp->ls_zone, lsp->ls_zone_ref);
 }
 
 static int
@@ -2125,7 +2124,7 @@ static int
 lofi_access(struct lofi_state *lsp)
 {
 	ASSERT(MUTEX_HELD(&lofi_lock));
-	if (INGLOBALZONE(curproc) || lsp->ls_zone.zref_zone == curzone)
+	if (INGLOBALZONE(curproc) || lsp->ls_zone == curzone)
 		return (0);
 	return (EPERM);
 }

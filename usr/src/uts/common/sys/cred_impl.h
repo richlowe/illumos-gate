@@ -31,6 +31,7 @@
 #include <sys/cred.h>
 #include <sys/priv_impl.h>
 #include <sys/sid.h>
+#include <sys/refcnt.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -87,6 +88,7 @@ struct cred {
 	struct credklpd *cr_klpd;	/* pointer to the cred's klpd */
 	credsid_t	*cr_ksid;	/* pointer to SIDs */
 	credgrp_t	*cr_grps;	/* supplemental groups */
+	reftoken_t	*cr_zone_rt;	/* token for the zone reference */
 					/* audit info is defined dynamically */
 					/* and valid only when audit enabled */
 	/* auditinfo_addr_t	cr_auinfo;	audit info */

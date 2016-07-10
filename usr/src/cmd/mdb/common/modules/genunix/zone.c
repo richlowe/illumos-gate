@@ -87,7 +87,6 @@ zoneprt(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	char name[ZONE_NAMELEN];
 	char path[ZONE_PATHLEN];
 	int len;
-	uint_t vopt_given;
 	uint_t ropt_given;
 
 	if (argc > 2)
@@ -105,16 +104,9 @@ zoneprt(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	 * Get the optional -r (reference counts) and -v (verbose output)
 	 * arguments.
 	 */
-	vopt_given = FALSE;
 	ropt_given = FALSE;
-	if (argc > 0 && mdb_getopts(argc, argv, 'v', MDB_OPT_SETBITS, TRUE,
-	    &vopt_given, 'r', MDB_OPT_SETBITS, TRUE, &ropt_given, NULL) != argc)
-		return (DCMD_USAGE);
-
-	/*
-	 * -v can only be specified with -r.
-	 */
-	if (vopt_given == TRUE && ropt_given == FALSE)
+	if (argc > 0 && mdb_getopts(argc, argv,
+	    'r', MDB_OPT_SETBITS, TRUE, &ropt_given, NULL) != argc)
 		return (DCMD_USAGE);
 
 	/*
@@ -125,7 +117,7 @@ zoneprt(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 			mdb_printf("%<u>%?s %6s %-13s %-20s %-s%</u>\n",
 			    "ADDR", "ID", "STATUS", "NAME", "PATH");
 		else
-			mdb_printf("%<u>%?s %6s %10s %10s %-20s%</u>\n",
+			mdb_printf("%<u>%?s %6s %?s %10s %-20s%</u>\n",
 			    "ADDR", "ID", "REFS", "CREFS", "NAME");
 	}
 
@@ -167,85 +159,8 @@ zoneprt(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		mdb_printf("%0?p %6d %-13s %-20s %s\n", addr, zn.zone_id,
 		    statusp, name, path);
 	} else {
-		/*
-		 * Display the zone's reference counts.
-		 * Display the zone's subsystem-specific reference counts if
-		 * the user specified the '-v' option.
-		 */
-		mdb_printf("%0?p %6d %10u %10u %-20s\n", addr, zn.zone_id,
-		    zn.zone_ref, zn.zone_cred_ref, name);
-		if (vopt_given == TRUE) {
-			GElf_Sym subsys_names_sym;
-			uintptr_t **zone_ref_subsys_names;
-			uint_t num_subsys;
-			uint_t n;
-
-			/*
-			 * Read zone_ref_subsys_names from the kernel image.
-			 */
-			if (mdb_lookup_by_name("zone_ref_subsys_names",
-			    &subsys_names_sym) != 0) {
-				mdb_warn("can't find zone_ref_subsys_names");
-				return (DCMD_ERR);
-			}
-			if (subsys_names_sym.st_size != ZONE_REF_NUM_SUBSYS *
-			    sizeof (char *)) {
-				mdb_warn("number of subsystems in target "
-				    "differs from what mdb expects (mismatched"
-				    " kernel versions?)");
-				if (subsys_names_sym.st_size <
-				    ZONE_REF_NUM_SUBSYS * sizeof (char *))
-					num_subsys = subsys_names_sym.st_size /
-					    sizeof (char *);
-				else
-					num_subsys = ZONE_REF_NUM_SUBSYS;
-			} else {
-				num_subsys = ZONE_REF_NUM_SUBSYS;
-			}
-			if ((zone_ref_subsys_names = mdb_alloc(
-			    subsys_names_sym.st_size, UM_GC)) == NULL) {
-				mdb_warn("out of memory");
-				return (DCMD_ERR);
-			}
-			if (mdb_readvar(zone_ref_subsys_names,
-			    "zone_ref_subsys_names") == -1) {
-				mdb_warn("can't find zone_ref_subsys_names");
-				return (DCMD_ERR);
-			}
-
-			/*
-			 * Display each subsystem's reference count if it's
-			 * nonzero.
-			 */
-			mdb_inc_indent(7);
-			for (n = 0; n < num_subsys; ++n) {
-				char subsys_name[16];
-
-				/*
-				 * Skip subsystems lacking outstanding
-				 * references.
-				 */
-				if (zn.zone_subsys_ref[n] == 0)
-					continue;
-
-				/*
-				 * Each subsystem's name must be read from
-				 * the target's image.
-				 */
-				if (mdb_readstr(subsys_name,
-				    sizeof (subsys_name),
-				    (uintptr_t)zone_ref_subsys_names[n]) ==
-				    -1) {
-					mdb_warn("unable to read subsystem name"
-					    " from zone_ref_subsys_names[%u]",
-					    n);
-					return (DCMD_ERR);
-				}
-				mdb_printf("%15s: %10u\n", subsys_name,
-				    zn.zone_subsys_ref[n]);
-			}
-			mdb_dec_indent(7);
-		}
+		mdb_printf("%0?p %6d %0?p %?p %-20s\n", addr, zn.zone_id,
+		    zn.zone_refcnt, zn.zone_cred_refcnt, name);
 	}
 	return (DCMD_OK);
 }

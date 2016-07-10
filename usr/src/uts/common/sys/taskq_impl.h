@@ -34,6 +34,7 @@
 #include <sys/vmem.h>
 #include <sys/list.h>
 #include <sys/kstat.h>
+#include <sys/refcnt.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -147,6 +148,7 @@ struct taskq {
 	int		tq_maxtasks;	/* Max number of tasks in the queue */
 	int		tq_tcreates;
 	int		tq_tdeaths;
+	reftoken_t	*tq_zonehold;
 };
 
 /* Special form of taskq dispatch that uses preallocated entries. */

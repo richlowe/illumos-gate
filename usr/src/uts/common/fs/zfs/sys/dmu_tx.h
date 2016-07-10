@@ -32,7 +32,7 @@
 #include <sys/inttypes.h>
 #include <sys/dmu.h>
 #include <sys/txg.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -82,8 +82,8 @@ struct dmu_tx {
 	uint64_t tx_space_tofree;
 	uint64_t tx_space_tooverwrite;
 	uint64_t tx_space_tounref;
-	refcount_t tx_space_written;
-	refcount_t tx_space_freed;
+	trackcount_t tx_space_written;
+	trackcount_t tx_space_freed;
 #endif
 };
 
@@ -102,12 +102,12 @@ typedef struct dmu_tx_hold {
 	dmu_tx_t *txh_tx;
 	list_node_t txh_node;
 	struct dnode *txh_dnode;
-	refcount_t txh_space_towrite;
-	refcount_t txh_space_tofree;
-	refcount_t txh_space_tooverwrite;
-	refcount_t txh_space_tounref;
-	refcount_t txh_memory_tohold;
-	refcount_t txh_fudge;
+	trackcount_t txh_space_towrite;
+	trackcount_t txh_space_tofree;
+	trackcount_t txh_space_tooverwrite;
+	trackcount_t txh_space_tounref;
+	trackcount_t txh_memory_tohold;
+	trackcount_t txh_fudge;
 #ifdef ZFS_DEBUG
 	enum dmu_tx_hold_type txh_type;
 	uint64_t txh_arg1;

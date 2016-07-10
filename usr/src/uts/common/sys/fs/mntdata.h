@@ -29,6 +29,7 @@
 #include <sys/poll.h>
 #include <sys/mnttab.h>
 #include <sys/zone.h>
+#include <sys/refcnt.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -84,7 +85,8 @@ typedef struct mntnode {
 #if defined(_KERNEL)
 
 typedef struct mntdata {
-	zone_ref_t mnt_zone_ref;	/* zone for mount point */
+	struct zone *mnt_zone;		/* zone for mount point */
+	reftoken_t *mnt_zone_rt;	/* token for zone hold */
 	uint_t mnt_nopen;		/* count of vnodes open */
 	size_t mnt_size;		/* size of last normal snapshot */
 	size_t mnt_hidden_size;		/* size of last hidden snapshot */

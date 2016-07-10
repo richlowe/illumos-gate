@@ -417,7 +417,7 @@ smbfsgetattr(vnode_t *vp, struct vattr *vap, cred_t *cr)
 
 	smi = VTOSMI(vp);
 
-	ASSERT(curproc->p_zone == smi->smi_zone_ref.zref_zone);
+	ASSERT(curproc->p_zone == smi->smi_zone);
 
 	/*
 	 * If asked for UID or GID, update n_uid, n_gid.
@@ -609,7 +609,7 @@ smbfs_zonelist_add(smbmntinfo_t *smi)
 {
 	smi_globals_t *smg;
 
-	smg = zone_getspecific(smi_list_key, smi->smi_zone_ref.zref_zone);
+	smg = zone_getspecific(smi_list_key, smi->smi_zone);
 	mutex_enter(&smg->smg_lock);
 	list_insert_head(&smg->smg_list, smi);
 	mutex_exit(&smg->smg_lock);
@@ -623,7 +623,7 @@ smbfs_zonelist_remove(smbmntinfo_t *smi)
 {
 	smi_globals_t *smg;
 
-	smg = zone_getspecific(smi_list_key, smi->smi_zone_ref.zref_zone);
+	smg = zone_getspecific(smi_list_key, smi->smi_zone);
 	mutex_enter(&smg->smg_lock);
 	list_remove(&smg->smg_list, smi);
 	/*

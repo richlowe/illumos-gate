@@ -841,7 +841,7 @@ ipc_rele(ipc_service_t *s, kipc_perm_t *perm)
 		ASSERT(IPC_FREE(perm));		/* ipc_rmid clears IPC_ALLOC */
 		s->ipcs_dtor(perm);
 		project_rele(perm->ipc_proj);
-		zone_rele_ref(&perm->ipc_zone_ref, ZONE_REF_IPC);
+		zone_rele(perm->ipc_zone, perm->ipc_zone_rt);
 		kmem_free(perm, s->ipcs_ssize);
 	}
 }
@@ -1063,13 +1063,12 @@ ipc_commit_begin(ipc_service_t *service, key_t key, int flag,
 	ASSERT(IPC_FREE(newperm));
 
 	/*
-	 * Set ipc_proj and ipc_zone_ref so that future calls to ipc_cleanup()
+	 * Set ipc_proj and ipc_zone so that future calls to ipc_cleanup()
 	 * clean up the necessary state.  This must be done before the
 	 * potential call to ipcs_dtor() below.
 	 */
 	newperm->ipc_proj = pp->p_task->tk_proj;
-	zone_init_ref(&newperm->ipc_zone_ref);
-	zone_hold_ref(pp->p_zone, &newperm->ipc_zone_ref, ZONE_REF_IPC);
+	newperm->ipc_zone_rt = zone_hold(newperm->ipc_zone = pp->p_zone);
 
 	mutex_enter(&service->ipcs_lock);
 	/*
@@ -1097,7 +1096,7 @@ ipc_commit_begin(ipc_service_t *service, key_t key, int flag,
 errout:
 	mutex_exit(&service->ipcs_lock);
 	service->ipcs_dtor(newperm);
-	zone_rele_ref(&newperm->ipc_zone_ref, ZONE_REF_IPC);
+	zone_rele(newperm->ipc_zone, newperm->ipc_zone_rt);
 	kmem_free(newperm, service->ipcs_ssize);
 	return (error);
 }
@@ -1173,8 +1172,8 @@ ipc_cleanup(ipc_service_t *service, kipc_perm_t *perm)
 		mutex_exit(&service->ipcs_lock);
 		service->ipcs_dtor(perm);
 	}
-	if (perm->ipc_zone_ref.zref_zone != NULL)
-		zone_rele_ref(&perm->ipc_zone_ref, ZONE_REF_IPC);
+	if (perm->ipc_zone != NULL)
+		zone_rele(perm->ipc_zone, perm->ipc_zone_rt);
 	kmem_free(perm, service->ipcs_ssize);
 }
 

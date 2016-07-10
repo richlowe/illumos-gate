@@ -3228,7 +3228,7 @@ nfs_free_mi(mntinfo_t *mi)
 	cv_destroy(&mi->mi_async_work_cv[NFS_ASYNC_PGOPS_QUEUE]);
 	cv_destroy(&mi->mi_async_reqs_cv);
 	cv_destroy(&mi->mi_async_cv);
-	zone_rele_ref(&mi->mi_zone_ref, ZONE_REF_NFS);
+	zone_rele(mi->mi_zone, mi->mi_zone_rt);
 	kmem_free(mi, sizeof (*mi));
 }
 

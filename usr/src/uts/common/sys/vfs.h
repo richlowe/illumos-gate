@@ -42,6 +42,7 @@
 #include <sys/vnode.h>
 #include <sys/statvfs.h>
 #include <sys/refstr.h>
+#include <sys/refcnt.h>
 #include <sys/avl.h>
 #include <sys/time.h>
 
@@ -442,7 +443,7 @@ typedef struct vfs_impl {
 
 	timespec_t	vi_hrctime; 		/* High-res creation time */
 
-	zone_ref_t	vi_zone_ref;		/* reference to zone */
+	reftoken_t	*vi_zone_rt;		/* token for zone reference */
 } vfs_impl_t;
 
 /*

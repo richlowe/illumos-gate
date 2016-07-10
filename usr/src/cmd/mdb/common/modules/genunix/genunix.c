@@ -96,6 +96,7 @@
 #include "nvpair.h"
 #include "pg.h"
 #include "rctl.h"
+#include "refcnt.h"
 #include "sobj.h"
 #include "streams.h"
 #include "sysevent.h"
@@ -4119,6 +4120,11 @@ static const mdb_dcmd_t dcmds[] = {
 	{ "rctl_validate", ":[-v] [-n #]", "test resource control value "
 		"sequence", rctl_validate },
 
+	/* from refcnt.c */
+	{ "reftoken", ":[-v]", "display a reftoken_t", reftoken },
+	{ "refcount", ":", "display the count of a refcnt_t", refcount },
+	{ "reflog", ":", "display the refcnt_t log information", reflog },
+
 	/* from sobj.c */
 	{ "rwlock", ":", "dump out a readers/writer lock", rwlock },
 	{ "mutex", ":[-f]", "dump out an adaptive or spin mutex", mutex,
@@ -4513,6 +4519,10 @@ static const mdb_walker_t walkers[] = {
 		rctl_set_walk_step, NULL },
 	{ "rctl_val", "given a rctl_t, walk all rctl_val entries associated",
 		rctl_val_walk_init, rctl_val_walk_step },
+
+	/* from refcnt.c */
+	{ "reftoken", "walk tokens for holders of this ref",
+	  reftoken_walk_init, generic_walk_step, NULL },
 
 	/* from sobj.c */
 	{ "blocked", "walk threads blocked on a given sobj",

@@ -43,6 +43,7 @@
 #include <sys/policy.h>
 #include <sys/zone.h>
 #include <sys/contract/process_impl.h>
+#include <sys/refcnt.h>
 
 static int	pset(int, long, long, long, long);
 
@@ -541,6 +542,7 @@ pset_bind(psetid_t pset, idtype_t idtype, id_t id, psetid_t *opset)
 	psetid_t	oldpset;
 	int		error = 0;
 	void		*projbuf, *zonebuf;
+	reftoken_t	*rt;
 
 	pool_lock();
 	if ((pset != PS_QUERY) && (pset != PS_SOFT) &&
@@ -641,14 +643,14 @@ pset_bind(psetid_t pset, idtype_t idtype, id_t id, psetid_t *opset)
 	case P_ZONEID:
 		if (id == P_MYID)
 			id = getzoneid();
-		if ((zptr = zone_find_by_id(id)) == NULL) {
+		if ((zptr = zone_find_by_id(id, &rt)) == NULL) {
 			error = ESRCH;
 			break;
 		}
 		mutex_enter(&pidlock);
 		error = pset_bind_zone(zptr, pset, &oldpset, projbuf, zonebuf);
 		mutex_exit(&pidlock);
-		zone_rele(zptr);
+		zone_rele(zptr, rt);
 		break;
 
 	case P_CTID:

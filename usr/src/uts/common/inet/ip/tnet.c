@@ -1218,13 +1218,14 @@ tsol_attr_to_zoneid(const ip_recv_attr_t *ira)
 {
 	zone_t *zone;
 	ts_label_t *label;
+	reftoken_t *rt;
 
 	if ((label = ira->ira_tsl) != NULL) {
-		zone = zone_find_by_label(label);
+		zone = zone_find_by_label(label, &rt);
 		if (zone != NULL) {
 			zoneid_t zoneid = zone->zone_id;
 
-			zone_rele(zone);
+			zone_rele(zone, rt);
 			return (zoneid);
 		}
 	}
@@ -2054,6 +2055,7 @@ tsol_check_interface_address(const ipif_t *ipif)
 	boolean_t retval;
 	tsol_rhent_t rhent;
 	netstack_t *ns = ipif->ipif_ill->ill_ipst->ips_netstack;
+	reftoken_t *rt;
 
 	if (IN6_IS_ADDR_V4MAPPED(&ipif->ipif_v6lcl_addr)) {
 		af = AF_INET;
@@ -2070,10 +2072,11 @@ tsol_check_interface_address(const ipif_t *ipif)
 		zone = NULL;
 	} else if (ns->netstack_stackid == GLOBAL_NETSTACKID) {
 		/* Shared stack case */
-		zone = zone_find_by_id(ipif->ipif_zoneid);
+		zone = zone_find_by_id(ipif->ipif_zoneid, &rt);
 	} else {
 		/* Exclusive stack case */
-		zone = zone_find_by_id(crgetzoneid(ipif->ipif_ill->ill_credp));
+		zone = zone_find_by_id(crgetzoneid(ipif->ipif_ill->ill_credp),
+			&rt);
 	}
 	if (zone != NULL) {
 		plabel = zone->zone_slabel;
@@ -2101,7 +2104,7 @@ tsol_check_interface_address(const ipif_t *ipif)
 	    (_blinrange(label, &tp->tpc_tp.tp_sl_range_cipso) ||
 	    blinlset(label, tp->tpc_tp.tp_sl_set_cipso))))))) {
 		if (zone != NULL)
-			zone_rele(zone);
+			zone_rele(zone, rt);
 		TPC_RELE(tp);
 		return (B_TRUE);
 	}
@@ -2145,7 +2148,7 @@ tsol_check_interface_address(const ipif_t *ipif)
 	}
 
 	if (zone != NULL)
-		zone_rele(zone);
+		zone_rele(zone, rt);
 	if (tp != NULL)
 		TPC_RELE(tp);
 	if (retval) {

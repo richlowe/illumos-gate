@@ -63,6 +63,7 @@
 #include <sys/cred_impl.h>
 #include <inet/kssl/kssl.h>
 #include <net/pfpolicy.h>
+#include <sys/refcnt.h>
 
 static void add_return_token(caddr_t *, unsigned int scid, int err, int rval);
 
@@ -2092,6 +2093,7 @@ audit_pf_policy(int cmd, cred_t *cred, netstack_t *ns, char *tun,
 
 	if (flag = audit_success(kctx, tad, error, cred)) {
 		zone_t *nszone;
+		reftoken_t *rt;
 
 		/*
 		 * For now, just audit that an event happened,
@@ -2114,7 +2116,7 @@ audit_pf_policy(int cmd, cred_t *cred, netstack_t *ns, char *tun,
 		 */
 
 		nszone = zone_find_by_id(netstackid_to_zoneid(
-		    ns->netstack_stackid));
+		    ns->netstack_stackid), &rt);
 		if (nszone != NULL) {
 			if (strncmp(crgetzone(cred)->zone_name,
 			    nszone->zone_name, ZONENAME_MAX) != 0) {
@@ -2123,7 +2125,7 @@ audit_pf_policy(int cmd, cred_t *cred, netstack_t *ns, char *tun,
 				ztoken = au_to_zonename(0, nszone);
 				au_write((caddr_t *)&ad, ztoken);
 			}
-			zone_rele(nszone);
+			zone_rele(nszone, rt);
 		}
 
 		if (tun != NULL) {

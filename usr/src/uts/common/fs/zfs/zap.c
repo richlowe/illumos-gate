@@ -45,7 +45,7 @@
 #include <sys/zfs_znode.h>
 #include <sys/fs/zfs.h>
 #include <sys/zap.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/zap_impl.h>
 #include <sys/zap_leaf.h>
 
@@ -1317,8 +1317,8 @@ fzap_get_stats(zap_t *zap, zap_stats_t *zs)
 }
 
 int
-fzap_count_write(zap_name_t *zn, int add, refcount_t *towrite,
-    refcount_t *tooverwrite)
+fzap_count_write(zap_name_t *zn, int add, trackcount_t *towrite,
+    trackcount_t *tooverwrite)
 {
 	zap_t *zap = zn->zn_zap;
 	zap_leaf_t *l;
@@ -1328,10 +1328,10 @@ fzap_count_write(zap_name_t *zn, int add, refcount_t *towrite,
 	 * Account for the header block of the fatzap.
 	 */
 	if (!add && dmu_buf_freeable(zap->zap_dbuf)) {
-		(void) refcount_add_many(tooverwrite,
+		(void) trackcount_add_many(tooverwrite,
 		    zap->zap_dbuf->db_size, FTAG);
 	} else {
-		(void) refcount_add_many(towrite,
+		(void) trackcount_add_many(towrite,
 		    zap->zap_dbuf->db_size, FTAG);
 	}
 
@@ -1345,10 +1345,10 @@ fzap_count_write(zap_name_t *zn, int add, refcount_t *towrite,
 	 */
 	if (add) {
 		if (zap_f_phys(zap)->zap_ptrtbl.zt_blk == 0) {
-			(void) refcount_add_many(towrite,
+			(void) trackcount_add_many(towrite,
 			    zap->zap_dbuf->db_size, FTAG);
 		} else {
-			(void) refcount_add_many(towrite,
+			(void) trackcount_add_many(towrite,
 			    zap->zap_dbuf->db_size * 3, FTAG);
 		}
 	}
@@ -1363,13 +1363,13 @@ fzap_count_write(zap_name_t *zn, int add, refcount_t *towrite,
 	}
 
 	if (!add && dmu_buf_freeable(l->l_dbuf)) {
-		(void) refcount_add_many(tooverwrite, l->l_dbuf->db_size, FTAG);
+		(void) trackcount_add_many(tooverwrite, l->l_dbuf->db_size, FTAG);
 	} else {
 		/*
 		 * If this an add operation, the leaf block could split.
 		 * Hence, we need to account for an additional leaf block.
 		 */
-		(void) refcount_add_many(towrite,
+		(void) trackcount_add_many(towrite,
 		    (add ? 2 : 1) * l->l_dbuf->db_size, FTAG);
 	}
 

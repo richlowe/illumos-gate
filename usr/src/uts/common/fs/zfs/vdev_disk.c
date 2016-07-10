@@ -27,7 +27,7 @@
 
 #include <sys/zfs_context.h>
 #include <sys/spa_impl.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/vdev_disk.h>
 #include <sys/vdev_impl.h>
 #include <sys/fs/zfs.h>

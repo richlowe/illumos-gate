@@ -288,7 +288,7 @@ crget(void)
 
 	bcopy(kcred, cr, crsize);
 	cr->cr_ref = 1;
-	zone_cred_hold(cr->cr_zone);
+	cr->cr_zone_rt = zone_cred_hold(cr->cr_zone);
 	if (cr->cr_label)
 		label_hold(cr->cr_label);
 	ASSERT(cr->cr_klpd == NULL);
@@ -362,7 +362,7 @@ crfree(cred_t *cr)
 		if (cr->cr_klpd)
 			crklpd_rele(cr->cr_klpd);
 		if (cr->cr_zone)
-			zone_cred_rele(cr->cr_zone);
+			zone_cred_rele(cr->cr_zone, cr->cr_zone_rt);
 		if (cr->cr_ksid)
 			kcrsid_rele(cr->cr_ksid);
 		if (cr->cr_grps)
@@ -385,7 +385,7 @@ crcopy(cred_t *cr)
 	newcr = cralloc();
 	bcopy(cr, newcr, crsize);
 	if (newcr->cr_zone)
-		zone_cred_hold(newcr->cr_zone);
+		newcr->cr_zone_rt = zone_cred_hold(newcr->cr_zone);
 	if (newcr->cr_label)
 		label_hold(newcr->cr_label);
 	if (newcr->cr_ksid)
@@ -413,7 +413,7 @@ crcopy_to(cred_t *oldcr, cred_t *newcr)
 
 	bcopy(oldcr, newcr, crsize);
 	if (newcr->cr_zone)
-		zone_cred_hold(newcr->cr_zone);
+		newcr->cr_zone_rt = zone_cred_hold(newcr->cr_zone);
 	if (newcr->cr_label)
 		label_hold(newcr->cr_label);
 	if (newcr->cr_klpd)
@@ -445,7 +445,7 @@ crdup_flags(const cred_t *cr, int flgs)
 
 	bcopy(cr, newcr, crsize);
 	if (newcr->cr_zone)
-		zone_cred_hold(newcr->cr_zone);
+		newcr->cr_zone_rt = zone_cred_hold(newcr->cr_zone);
 	if (newcr->cr_label)
 		label_hold(newcr->cr_label);
 	if (newcr->cr_klpd)
@@ -477,7 +477,7 @@ crdup_to(cred_t *oldcr, cred_t *newcr)
 
 	bcopy(oldcr, newcr, crsize);
 	if (newcr->cr_zone)
-		zone_cred_hold(newcr->cr_zone);
+		newcr->cr_zone_rt = zone_cred_hold(newcr->cr_zone);
 	if (newcr->cr_label)
 		label_hold(newcr->cr_label);
 	if (newcr->cr_klpd)
@@ -1088,13 +1088,14 @@ void
 crsetzone(cred_t *cr, zone_t *zptr)
 {
 	zone_t *oldzptr = cr->cr_zone;
+	reftoken_t *oldtok = cr->cr_zone_rt;
 
 	ASSERT(cr != kcred);
 	ASSERT(cr->cr_ref <= 2);
 	cr->cr_zone = zptr;
-	zone_cred_hold(zptr);
-	if (oldzptr)
-		zone_cred_rele(oldzptr);
+	cr->cr_zone_rt = zone_cred_hold(zptr);
+	if (oldzptr != NULL)
+		zone_cred_rele(oldzptr, oldtok);
 }
 
 /*

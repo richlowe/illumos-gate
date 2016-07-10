@@ -60,6 +60,7 @@
 #include <vm/seg.h>
 #include <fs/proc/prdata.h>
 #include <sys/contract/process_impl.h>
+#include <sys/refcnt.h>
 
 static	void	pr_settrace(proc_t *, sigset_t *);
 static	int	pr_setfpregs(prnode_t *, prfpregset_t *);
@@ -2271,12 +2272,13 @@ pr_szoneid(proc_t *p, zoneid_t zoneid, cred_t *cr)
 	cred_t *newcred;
 	zone_t *zptr;
 	zoneid_t oldzoneid;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(cr) != 0)
 		return (EPERM);
 	if (zoneid != GLOBAL_ZONEID && zoneid != p->p_zone->zone_id)
 		return (EINVAL);
-	if ((zptr = zone_find_by_id(zoneid)) == NULL)
+	if ((zptr = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (EINVAL);
 	mutex_exit(&p->p_lock);
 	mutex_enter(&p->p_crlock);
@@ -2288,7 +2290,7 @@ pr_szoneid(proc_t *p, zoneid_t zoneid, cred_t *cr)
 	crfree(oldcred);
 
 	crsetzone(newcred, zptr);
-	zone_rele(zptr);
+	zone_rele(zptr, rt);
 
 	mutex_enter(&p->p_crlock);
 	oldcred = p->p_cred;

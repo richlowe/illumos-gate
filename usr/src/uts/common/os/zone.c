@@ -104,7 +104,7 @@
  *   removed from the list of active zones.  zone_destroy() returns, and
  *   the zone can be recreated.
  *
- *   ZONE_IS_FREE (internal state): zone_ref goes to 0, ZSD destructor
+ *   ZONE_IS_FREE (internal state): zone_refcnt goes to 0, ZSD destructor
  *   callbacks are executed, and all memory associated with the zone is
  *   freed.
  *
@@ -348,20 +348,6 @@ const char  *zone_status_table[] = {
 	ZONE_EVENT_SHUTTING_DOWN,	/* down */
 	ZONE_EVENT_SHUTTING_DOWN,	/* dying */
 	ZONE_EVENT_UNINITIALIZED,	/* dead */
-};
-
-/*
- * This array contains the names of the subsystems listed in zone_ref_subsys_t
- * (see sys/zone.h).
- */
-static char *zone_ref_subsys_names[] = {
-	"NFS",		/* ZONE_REF_NFS */
-	"NFSv4",	/* ZONE_REF_NFSV4 */
-	"SMBFS",	/* ZONE_REF_SMBFS */
-	"MNTFS",	/* ZONE_REF_MNTFS */
-	"LOFI",		/* ZONE_REF_LOFI */
-	"VFS",		/* ZONE_REF_VFS */
-	"IPC"		/* ZONE_REF_IPC */
 };
 
 /*
@@ -1772,12 +1758,13 @@ zone_get_kcred(zoneid_t zoneid)
 {
 	zone_t *zone;
 	cred_t *cr;
+	reftoken_t *rt;
 
-	if ((zone = zone_find_by_id(zoneid)) == NULL)
+	if ((zone = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (NULL);
 	cr = zone->zone_kcred;
 	crhold(cr);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	return (cr);
 }
 
@@ -2080,7 +2067,13 @@ zone_zsd_init(void)
 	zone0.zone_domain = srpc_domain;
 	zone0.zone_hostid = HW_INVALID_HOSTID;
 	zone0.zone_fs_allowed = NULL;
-	zone0.zone_ref = 1;
+	zone0.zone_refcnt = refcnt_init(&zone0.zone_lock);
+	zone0.zone_cred_refcnt = refcnt_init(&zone0.zone_lock);
+	/* Zones always hold themselves */
+	/* XXX: Taking the lock here sure is sad */
+	mutex_enter(&zone0.zone_lock);
+	zone0.zone_token = refcnt_hold_locked(zone0.zone_refcnt);
+	mutex_exit(&zone0.zone_lock);
 	zone0.zone_id = GLOBAL_ZONEID;
 	zone0.zone_status = ZONE_IS_RUNNING;
 	zone0.zone_rootpath = "/";
@@ -2098,8 +2091,6 @@ zone_zsd_init(void)
 	zone0.zone_utime = 0;
 	zone0.zone_wtime = 0;
 
-	list_create(&zone0.zone_ref_list, sizeof (zone_ref_t),
-	    offsetof(zone_ref_t, zref_linkage));
 	list_create(&zone0.zone_zsd, sizeof (struct zsd_entry),
 	    offsetof(struct zsd_entry, zsd_linkage));
 	list_insert_head(&zone_active, &zone0);
@@ -2359,11 +2350,11 @@ zone_free(zone_t *zone)
 	ASSERT(zone->zone_ntasks == 0);
 	ASSERT(zone->zone_nlwps == 0);
 	ASSERT(zone->zone_nprocs == 0);
-	ASSERT(zone->zone_cred_ref == 0);
 	ASSERT(zone->zone_kcred == NULL);
 	ASSERT(zone_status_get(zone) == ZONE_IS_DEAD ||
 	    zone_status_get(zone) == ZONE_IS_UNINITIALIZED);
-	ASSERT(list_is_empty(&zone->zone_ref_list));
+	ASSERT(!refcnt_isheld(zone->zone_refcnt));
+	ASSERT(!refcnt_isheld(zone->zone_cred_refcnt));
 
 	/*
 	 * Remove any zone caps.
@@ -2374,13 +2365,12 @@ zone_free(zone_t *zone)
 
 	/* remove from deathrow list */
 	if (zone_status_get(zone) == ZONE_IS_DEAD) {
-		ASSERT(zone->zone_ref == 0);
+		ASSERT(!refcnt_isheld(zone->zone_refcnt));
 		mutex_enter(&zone_deathrow_lock);
 		list_remove(&zone_deathrow, zone);
 		mutex_exit(&zone_deathrow_lock);
 	}
 
-	list_destroy(&zone->zone_ref_list);
 	zone_free_zsd(zone);
 	zone_free_datasets(zone);
 	list_destroy(&zone->zone_dl_list);
@@ -2409,6 +2399,10 @@ zone_free(zone_t *zone)
 		strfree(zone->zone_fs_allowed);
 	if (zone->zone_pfexecd != NULL)
 		klpd_freelist(&zone->zone_pfexecd);
+	if (zone->zone_refcnt != NULL)
+		refcnt_destroy(zone->zone_refcnt);
+	if (zone->zone_cred_refcnt != NULL)
+		refcnt_destroy(zone->zone_cred_refcnt);
 	id_free(zoneid_space, zone->zone_id);
 	mutex_destroy(&zone->zone_lock);
 	cv_destroy(&zone->zone_cv);
@@ -2702,50 +2696,45 @@ zone_status_timedwait_sig(zone_t *zone, clock_t tim, zone_status_t status)
 
 /*
  * Zones have two reference counts: one for references from credential
- * structures (zone_cred_ref), and one (zone_ref) for everything else.
+ * structures (zone_cred_refcnt), and one (zone_refcnt) for everything else.
  * This is so we can allow a zone to be rebooted while there are still
  * outstanding cred references, since certain drivers cache dblks (which
- * implicitly results in cached creds).  We wait for zone_ref to drop to
- * 0 (actually 1), but not zone_cred_ref.  The zone structure itself is
- * later freed when the zone_cred_ref drops to 0, though nothing other
- * than the zone id and privilege set should be accessed once the zone
- * is "dead".
+ * implicitly results in cached creds).  We wait for zone_refcnt to drop to 0
+ * (actually 1, because of the ref from zsched), but not zone_cred_refcnt.
+ * The zone structure itself is later freed when the zone_cred_refcnt drops to
+ * 0, though nothing other than the zone id and privilege set should be
+ * accessed once the zone is "dead".
  *
  * A debugging flag, zone_wait_for_cred, can be set to a non-zero value
- * to force halt/reboot to block waiting for the zone_cred_ref to drop
+ * to force halt/reboot to block waiting for the zone_cred_refcnt to drop
  * to 0.  This can be useful to flush out other sources of cached creds
  * that may be less innocuous than the driver case.
- *
- * Zones also provide a tracked reference counting mechanism in which zone
- * references are represented by "crumbs" (zone_ref structures).  Crumbs help
- * debuggers determine the sources of leaked zone references.  See
- * zone_hold_ref() and zone_rele_ref() below for more information.
  */
 
 int zone_wait_for_cred = 0;
 
-static void
+static reftoken_t *
 zone_hold_locked(zone_t *z)
 {
+	reftoken_t *rt;
 	ASSERT(MUTEX_HELD(&z->zone_lock));
-	z->zone_ref++;
-	ASSERT(z->zone_ref != 0);
+	rt = refcnt_hold_locked(z->zone_refcnt);
+	return (rt);
 }
 
 /*
  * Increment the specified zone's reference count.  The zone's zone_t structure
  * will not be freed as long as the zone's reference count is nonzero.
  * Decrement the zone's reference count via zone_rele().
- *
- * NOTE: This function should only be used to hold zones for short periods of
- * time.  Use zone_hold_ref() if the zone must be held for a long time.
  */
-void
+reftoken_t *
 zone_hold(zone_t *z)
 {
+	reftoken_t *rt;
 	mutex_enter(&z->zone_lock);
-	zone_hold_locked(z);
+	rt = zone_hold_locked(z);
 	mutex_exit(&z->zone_lock);
+	return (rt);
 }
 
 /*
@@ -2753,31 +2742,24 @@ zone_hold(zone_t *z)
  * is 0 or we aren't waiting for cred references, the zone is ready to
  * be destroyed.
  */
-#define	ZONE_IS_UNREF(zone)	((zone)->zone_ref == 1 && \
-	    (!zone_wait_for_cred || (zone)->zone_cred_ref == 0))
+#define	ZONE_IS_UNREF(zone)	(refcnt_count(zone->zone_refcnt) == 1 && \
+	    (!zone_wait_for_cred || refcnt_count(zone->zone_cred_refcnt) == 0))
 
 /*
- * Common zone reference release function invoked by zone_rele() and
- * zone_rele_ref().  If subsys is ZONE_REF_NUM_SUBSYS, then the specified
- * zone's subsystem-specific reference counters are not affected by the
- * release.  If ref is not NULL, then the zone_ref_t to which it refers is
- * removed from the specified zone's reference list.  ref must be non-NULL iff
- * subsys is not ZONE_REF_NUM_SUBSYS.
+ * Decrement the specified zone's reference count.  The specified zone will
+ * cease to exist after this function returns if the reference count drops to
+ * zero.  This function should be paired with zone_hold().
  */
-static void
-zone_rele_common(zone_t *z, zone_ref_t *ref, zone_ref_subsys_t subsys)
+void
+zone_rele(zone_t *z, reftoken_t *rt)
 {
 	boolean_t wakeup;
 
 	mutex_enter(&z->zone_lock);
-	ASSERT(z->zone_ref != 0);
-	z->zone_ref--;
-	if (subsys != ZONE_REF_NUM_SUBSYS) {
-		ASSERT(z->zone_subsys_ref[subsys] != 0);
-		z->zone_subsys_ref[subsys]--;
-		list_remove(&z->zone_ref_list, ref);
-	}
-	if (z->zone_ref == 0 && z->zone_cred_ref == 0) {
+
+	/* XXX: Need to do something clever here? */
+	if ((refcnt_rele(z->zone_refcnt, rt) == RS_FREEABLE) &&
+	    (refcnt_count(z->zone_cred_refcnt) == 0)) {
 		/* no more refs, free the structure */
 		mutex_exit(&z->zone_lock);
 		zone_free(z);
@@ -2798,101 +2780,26 @@ zone_rele_common(zone_t *z, zone_ref_t *ref, zone_ref_subsys_t subsys)
 	}
 }
 
-/*
- * Decrement the specified zone's reference count.  The specified zone will
- * cease to exist after this function returns if the reference count drops to
- * zero.  This function should be paired with zone_hold().
- */
-void
-zone_rele(zone_t *z)
-{
-	zone_rele_common(z, NULL, ZONE_REF_NUM_SUBSYS);
-}
-
-/*
- * Initialize a zone reference structure.  This function must be invoked for
- * a reference structure before the structure is passed to zone_hold_ref().
- */
-void
-zone_init_ref(zone_ref_t *ref)
-{
-	ref->zref_zone = NULL;
-	list_link_init(&ref->zref_linkage);
-}
-
-/*
- * Acquire a reference to zone z.  The caller must specify the
- * zone_ref_subsys_t constant associated with its subsystem.  The specified
- * zone_ref_t structure will represent a reference to the specified zone.  Use
- * zone_rele_ref() to release the reference.
- *
- * The referenced zone_t structure will not be freed as long as the zone_t's
- * zone_status field is not ZONE_IS_DEAD and the zone has outstanding
- * references.
- *
- * NOTE: The zone_ref_t structure must be initialized before it is used.
- * See zone_init_ref() above.
- */
-void
-zone_hold_ref(zone_t *z, zone_ref_t *ref, zone_ref_subsys_t subsys)
-{
-	ASSERT(subsys >= 0 && subsys < ZONE_REF_NUM_SUBSYS);
-
-	/*
-	 * Prevent consumers from reusing a reference structure before
-	 * releasing it.
-	 */
-	VERIFY(ref->zref_zone == NULL);
-
-	ref->zref_zone = z;
-	mutex_enter(&z->zone_lock);
-	zone_hold_locked(z);
-	z->zone_subsys_ref[subsys]++;
-	ASSERT(z->zone_subsys_ref[subsys] != 0);
-	list_insert_head(&z->zone_ref_list, ref);
-	mutex_exit(&z->zone_lock);
-}
-
-/*
- * Release the zone reference represented by the specified zone_ref_t.
- * The reference is invalid after it's released; however, the zone_ref_t
- * structure can be reused without having to invoke zone_init_ref().
- * subsys should be the same value that was passed to zone_hold_ref()
- * when the reference was acquired.
- */
-void
-zone_rele_ref(zone_ref_t *ref, zone_ref_subsys_t subsys)
-{
-	zone_rele_common(ref->zref_zone, ref, subsys);
-
-	/*
-	 * Set the zone_ref_t's zref_zone field to NULL to generate panics
-	 * when consumers dereference the reference.  This helps us catch
-	 * consumers who use released references.  Furthermore, this lets
-	 * consumers reuse the zone_ref_t structure without having to
-	 * invoke zone_init_ref().
-	 */
-	ref->zref_zone = NULL;
-}
-
-void
+reftoken_t *
 zone_cred_hold(zone_t *z)
 {
+	reftoken_t *rt;
+
 	mutex_enter(&z->zone_lock);
-	z->zone_cred_ref++;
-	ASSERT(z->zone_cred_ref != 0);
+	rt = refcnt_hold_locked(z->zone_cred_refcnt);
 	mutex_exit(&z->zone_lock);
+	return (rt);
 }
 
 void
-zone_cred_rele(zone_t *z)
+zone_cred_rele(zone_t *z, reftoken_t *rt)
 {
 	boolean_t wakeup;
 
 	mutex_enter(&z->zone_lock);
-	ASSERT(z->zone_cred_ref != 0);
-	z->zone_cred_ref--;
-	if (z->zone_ref == 0 && z->zone_cred_ref == 0) {
+
+	if ((refcnt_rele(z->zone_cred_refcnt, rt) == RS_FREEABLE) &&
+	    !refcnt_isheld(z->zone_refcnt)) {
 		/* no more refs, free the structure */
 		mutex_exit(&z->zone_lock);
 		zone_free(z);
@@ -2917,6 +2824,7 @@ zone_cred_rele(zone_t *z)
 	}
 }
 
+/* XXX: use refcnts? */
 void
 zone_task_hold(zone_t *z)
 {
@@ -2930,6 +2838,7 @@ void
 zone_task_rele(zone_t *zone)
 {
 	uint_t refcnt;
+	reftoken_t *rt;
 
 	mutex_enter(&zone->zone_lock);
 	ASSERT(zone->zone_ntasks != 0);
@@ -2938,7 +2847,7 @@ zone_task_rele(zone_t *zone)
 		mutex_exit(&zone->zone_lock);
 		return;
 	}
-	zone_hold_locked(zone);	/* so we can use the zone_t later */
+	rt = zone_hold_locked(zone);	/* so we can use the zone_t later */
 	mutex_exit(&zone->zone_lock);
 	if (refcnt == 1) {
 		/*
@@ -2976,7 +2885,7 @@ zone_task_rele(zone_t *zone)
 	zone_status_set(zone, ZONE_IS_DEAD);
 out:
 	mutex_exit(&zone_status_lock);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 }
 
 zoneid_t
@@ -3043,7 +2952,7 @@ zone_find_all_by_name(char *name)
  * function returns, but may be safely used until zone_rele() is called.
  */
 zone_t *
-zone_find_by_id(zoneid_t zoneid)
+zone_find_by_id(zoneid_t zoneid, reftoken_t **rt)
 {
 	zone_t *zone;
 	zone_status_t status;
@@ -3061,7 +2970,7 @@ zone_find_by_id(zoneid_t zoneid)
 		mutex_exit(&zonehash_lock);
 		return (NULL);
 	}
-	zone_hold(zone);
+	*rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 	return (zone);
 }
@@ -3070,7 +2979,7 @@ zone_find_by_id(zoneid_t zoneid)
  * Similar to zone_find_by_id, but using zone label as the key.
  */
 zone_t *
-zone_find_by_label(const ts_label_t *label)
+zone_find_by_label(const ts_label_t *label, reftoken_t **rt)
 {
 	zone_t *zone;
 	zone_status_t status;
@@ -3089,7 +2998,7 @@ zone_find_by_label(const ts_label_t *label)
 		mutex_exit(&zonehash_lock);
 		return (NULL);
 	}
-	zone_hold(zone);
+	*rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 	return (zone);
 }
@@ -3098,7 +3007,7 @@ zone_find_by_label(const ts_label_t *label)
  * Similar to zone_find_by_id, but using zone name as the key.
  */
 zone_t *
-zone_find_by_name(char *name)
+zone_find_by_name(char *name, reftoken_t **rt)
 {
 	zone_t *zone;
 	zone_status_t status;
@@ -3116,7 +3025,7 @@ zone_find_by_name(char *name)
 		mutex_exit(&zonehash_lock);
 		return (NULL);
 	}
-	zone_hold(zone);
+	*rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 	return (zone);
 }
@@ -3134,7 +3043,7 @@ zone_find_by_name(char *name)
  * responsible for zone_rele()ing the return value of this function.
  */
 zone_t *
-zone_find_by_path(const char *path)
+zone_find_by_path(const char *path, reftoken_t **rt)
 {
 	zone_t *zone;
 	zone_t *zret = NULL;
@@ -3144,7 +3053,7 @@ zone_find_by_path(const char *path)
 		/*
 		 * Call from rootconf().
 		 */
-		zone_hold(global_zone);
+		*rt = zone_hold(global_zone);
 		return (global_zone);
 	}
 	ASSERT(*path == '/');
@@ -3162,7 +3071,7 @@ zone_find_by_path(const char *path)
 		 */
 		zret = global_zone;
 	}
-	zone_hold(zret);
+	*rt = zone_hold(zret);
 	mutex_exit(&zonehash_lock);
 	return (zret);
 }
@@ -3533,8 +3442,9 @@ zthread_create(
 	kthread_t *t;
 	zone_t *zone = curproc->p_zone;
 	proc_t *pp = zone->zone_zsched;
+	reftoken_t *rt;
 
-	zone_hold(zone);	/* Reference to be dropped when thread exits */
+	rt = zone_hold(zone);	/* Reference to be dropped when thread exits */
 
 	/*
 	 * No-one should be trying to create threads if the zone is shutting
@@ -3560,6 +3470,7 @@ zthread_create(
 		tx->t_back->t_forw = t;
 		tx->t_back = t;
 	}
+	t->t_zone_ref = rt;
 	zone->zone_kthreads = t;
 	mutex_exit(&zone_status_lock);
 
@@ -3583,7 +3494,7 @@ zthread_create(
 
 /*
  * Similar to thread_exit().  Must be called by threads created via
- * zthread_exit().
+ * zthread_create().
  */
 void
 zthread_exit(void)
@@ -3634,7 +3545,7 @@ zthread_exit(void)
 			zone->zone_kthreads = t->t_forw;
 	}
 	mutex_exit(&zone_status_lock);
-	zone_rele(zone);
+	zone_rele(zone, t->t_zone_ref);
 	thread_exit();
 	/* NOTREACHED */
 }
@@ -3807,7 +3718,8 @@ zsched(void *arg)
 	 * visible yet we don't need to grab any locks before initializing its
 	 * zone_proc pointer.
 	 */
-	zone_hold(zone);  /* this hold is released by zone_destroy() */
+	/* this hold is released by zone_destroy() */
+	zone->zone_token = zone_hold(zone);
 	zone->zone_zsched = pp;
 	mutex_enter(&pp->p_lock);
 	pp->p_zone = zone;
@@ -4087,13 +3999,13 @@ zsched(void *arg)
 		VERIFY(contract_abandon(ct, curproc, B_TRUE) == 0);
 
 	/*
-	 * Allow kcred to be freed when all referring processes
-	 * (including this one) go away.  We can't just do this in
-	 * zone_free because we need to wait for the zone_cred_ref to
-	 * drop to 0 before calling zone_free, and the existence of
-	 * zone_kcred will prevent that.  Thus, we call crfree here to
-	 * balance the crdup in zone_create.  The crhold calls earlier
-	 * in zsched will be dropped when the thread and process exit.
+	 * Allow kcred to be freed when all referring processes (including
+	 * this one) go away.  We can't just do this in zone_free because we
+	 * need to wait for the zone_cred_refcnt to drop to 0 before calling
+	 * zone_free, and the existence of zone_kcred will prevent that.
+	 * Thus, we call crfree here to balance the crdup in zone_create.  The
+	 * crhold calls earlier in zsched will be dropped when the thread and
+	 * process exit.
 	 */
 	crfree(zone->zone_kcred);
 	zone->zone_kcred = NULL;
@@ -4397,8 +4309,6 @@ zone_create(const char *zone_name, const char *zone_root,
 	mutex_init(&zone->zone_nlwps_lock, NULL, MUTEX_DEFAULT, NULL);
 	mutex_init(&zone->zone_mem_lock, NULL, MUTEX_DEFAULT, NULL);
 	cv_init(&zone->zone_cv, NULL, CV_DEFAULT, NULL);
-	list_create(&zone->zone_ref_list, sizeof (zone_ref_t),
-	    offsetof(zone_ref_t, zref_linkage));
 	list_create(&zone->zone_zsd, sizeof (struct zsd_entry),
 	    offsetof(struct zsd_entry, zsd_linkage));
 	list_create(&zone->zone_datasets, sizeof (zone_dataset_t),
@@ -4407,6 +4317,8 @@ zone_create(const char *zone_name, const char *zone_root,
 	    offsetof(zone_dl_t, zdl_linkage));
 	rw_init(&zone->zone_mlps.mlpl_rwlock, NULL, RW_DEFAULT, NULL);
 	rw_init(&zone->zone_mntfs_db_lock, NULL, RW_DEFAULT, NULL);
+	zone->zone_refcnt = refcnt_init(&zone->zone_lock);
+	zone->zone_cred_refcnt = refcnt_init(&zone->zone_lock);
 
 	if (flags & ZCF_NET_EXCL) {
 		zone->zone_flags |= ZF_NET_EXCL;
@@ -4680,9 +4592,9 @@ errout:
 	 * zone_kcred.  To free the zone, we call crfree, which will call
 	 * zone_cred_rele, which will call zone_free.
 	 */
-	ASSERT(zone->zone_cred_ref == 1);
+	ASSERT(refcnt_count(zone->zone_cred_refcnt) == 1);
 	ASSERT(zone->zone_kcred->cr_ref == 1);
-	ASSERT(zone->zone_ref == 0);
+	ASSERT(!refcnt_isheld(zone->zone_refcnt));
 	zkcr = zone->zone_kcred;
 	zone->zone_kcred = NULL;
 	crfree(zkcr);				/* triggers call to zone_free */
@@ -4700,6 +4612,7 @@ zone_boot(zoneid_t zoneid)
 {
 	int err;
 	zone_t *zone;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(CRED()) != 0)
 		return (set_errno(EPERM));
@@ -4725,11 +4638,11 @@ zone_boot(zoneid_t zoneid)
 	zone_status_set(zone, ZONE_IS_BOOTING);
 	mutex_exit(&zone_status_lock);
 
-	zone_hold(zone);	/* so we can use the zone_t later */
+	rt = zone_hold(zone);	/* so we can use the zone_t later */
 	mutex_exit(&zonehash_lock);
 
 	if (zone_status_wait_sig(zone, ZONE_IS_RUNNING) == 0) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(EINTR));
 	}
 
@@ -4739,7 +4652,7 @@ zone_boot(zoneid_t zoneid)
 	 * be placed in zone->zone_boot_err, and so we return that.
 	 */
 	err = zone->zone_boot_err;
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	return (err ? set_errno(err) : 0);
 }
 
@@ -4821,6 +4734,7 @@ zone_shutdown(zoneid_t zoneid)
 	int error;
 	zone_t *zone;
 	zone_status_t status;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(CRED()) != 0)
 		return (set_errno(EPERM));
@@ -4841,7 +4755,7 @@ zone_shutdown(zoneid_t zoneid)
 	 * We have to drop zonehash_lock before calling block_mounts.
 	 * Hold the zone so we can continue to use the zone_t.
 	 */
-	zone_hold(zone);
+	rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 
 	/*
@@ -4853,7 +4767,7 @@ zone_shutdown(zoneid_t zoneid)
 	 *
 	 */
 	if (block_mounts(zone) == 0) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(EINTR));
 	}
 
@@ -4867,7 +4781,7 @@ zone_shutdown(zoneid_t zoneid)
 		mutex_exit(&zone_status_lock);
 		mutex_exit(&zonehash_lock);
 		resume_mounts(zone);
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(EINVAL));
 	}
 	/*
@@ -4878,7 +4792,7 @@ zone_shutdown(zoneid_t zoneid)
 		mutex_exit(&zone_status_lock);
 		mutex_exit(&zonehash_lock);
 		resume_mounts(zone);
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (0);
 	}
 	/*
@@ -4918,7 +4832,7 @@ zone_shutdown(zoneid_t zoneid)
 	resume_mounts(zone);
 
 	if (error = zone_empty(zone)) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(error));
 	}
 	/*
@@ -4935,7 +4849,7 @@ zone_shutdown(zoneid_t zoneid)
 	 * without any adverse effects.
 	 */
 	if (pool_lock_intr() != 0) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(EINTR));
 	}
 	if (pool_state == POOL_ENABLED) {
@@ -4964,7 +4878,7 @@ zone_shutdown(zoneid_t zoneid)
 	 * Wait for kernel threads to drain.
 	 */
 	if (!zone_status_wait_sig(zone, ZONE_IS_DOWN)) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(EINTR));
 	}
 
@@ -4974,7 +4888,7 @@ zone_shutdown(zoneid_t zoneid)
 	 * (i.e. don't add code here)
 	 */
 
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	return (0);
 }
 
@@ -4985,92 +4899,20 @@ zone_shutdown(zoneid_t zoneid)
 static void
 zone_log_refcounts(zone_t *zone)
 {
-	char *buffer;
-	char *buffer_position;
-	uint32_t buffer_size;
-	uint32_t index;
 	uint_t ref;
 	uint_t cred_ref;
 
-	/*
-	 * Construct a string representing the subsystem-specific reference
-	 * counts.  The counts are printed in ascending order by index into the
-	 * zone_t::zone_subsys_ref array.  The list will be surrounded by
-	 * square brackets [] and will only contain nonzero reference counts.
-	 *
-	 * The buffer will hold two square bracket characters plus ten digits,
-	 * one colon, one space, one comma, and some characters for a
-	 * subsystem name per subsystem-specific reference count.  (Unsigned 32-
-	 * bit integers have at most ten decimal digits.)  The last
-	 * reference count's comma is replaced by the closing square
-	 * bracket and a NULL character to terminate the string.
-	 *
-	 * NOTE: We have to grab the zone's zone_lock to create a consistent
-	 * snapshot of the zone's reference counters.
-	 *
-	 * First, figure out how much space the string buffer will need.
-	 * The buffer's size is stored in buffer_size.
-	 */
-	buffer_size = 2;			/* for the square brackets */
 	mutex_enter(&zone->zone_lock);
 	zone->zone_flags |= ZF_REFCOUNTS_LOGGED;
-	ref = zone->zone_ref;
-	cred_ref = zone->zone_cred_ref;
-	for (index = 0; index < ZONE_REF_NUM_SUBSYS; ++index)
-		if (zone->zone_subsys_ref[index] != 0)
-			buffer_size += strlen(zone_ref_subsys_names[index]) +
-			    13;
-	if (buffer_size == 2) {
-		/*
-		 * No subsystems had nonzero reference counts.  Don't bother
-		 * with allocating a buffer; just log the general-purpose and
-		 * credential reference counts.
-		 */
-		mutex_exit(&zone->zone_lock);
-		(void) strlog(0, 0, 1, SL_CONSOLE | SL_NOTE,
-		    "Zone '%s' (ID: %d) is shutting down, but %u zone "
-		    "references and %u credential references are still extant",
-		    zone->zone_name, zone->zone_id, ref, cred_ref);
-		return;
-	}
-
-	/*
-	 * buffer_size contains the exact number of characters that the
-	 * buffer will need.  Allocate the buffer and fill it with nonzero
-	 * subsystem-specific reference counts.  Surround the results with
-	 * square brackets afterwards.
-	 */
-	buffer = kmem_alloc(buffer_size, KM_SLEEP);
-	buffer_position = &buffer[1];
-	for (index = 0; index < ZONE_REF_NUM_SUBSYS; ++index) {
-		/*
-		 * NOTE: The DDI's version of sprintf() returns a pointer to
-		 * the modified buffer rather than the number of bytes written
-		 * (as in snprintf(3C)).  This is unfortunate and annoying.
-		 * Therefore, we'll use snprintf() with INT_MAX to get the
-		 * number of bytes written.  Using INT_MAX is safe because
-		 * the buffer is perfectly sized for the data: we'll never
-		 * overrun the buffer.
-		 */
-		if (zone->zone_subsys_ref[index] != 0)
-			buffer_position += snprintf(buffer_position, INT_MAX,
-			    "%s: %u,", zone_ref_subsys_names[index],
-			    zone->zone_subsys_ref[index]);
-	}
+	ref = refcnt_count(zone->zone_refcnt);
+	cred_ref = refcnt_count(zone->zone_cred_refcnt);
 	mutex_exit(&zone->zone_lock);
-	buffer[0] = '[';
-	ASSERT((uintptr_t)(buffer_position - buffer) < buffer_size);
-	ASSERT(buffer_position[0] == '\0' && buffer_position[-1] == ',');
-	buffer_position[-1] = ']';
 
-	/*
-	 * Log the reference counts and free the message buffer.
-	 */
 	(void) strlog(0, 0, 1, SL_CONSOLE | SL_NOTE,
-	    "Zone '%s' (ID: %d) is shutting down, but %u zone references and "
-	    "%u credential references are still extant %s", zone->zone_name,
-	    zone->zone_id, ref, cred_ref, buffer);
-	kmem_free(buffer, buffer_size);
+	    "Zone '%s' (ID: %d) is shutting down, but %u zone "
+	    "references and %u credential references are still extant",
+	    zone->zone_name, zone->zone_id, ref, cred_ref);
+	return;
 }
 
 /*
@@ -5089,6 +4931,7 @@ zone_destroy(zoneid_t zoneid)
 	zone_status_t status;
 	clock_t wait_time;
 	boolean_t log_refcounts;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(CRED()) != 0)
 		return (set_errno(EPERM));
@@ -5119,7 +4962,7 @@ zone_destroy(zoneid_t zoneid)
 		zone_status_set(zone, ZONE_IS_DYING); /* Tell zsched to exit */
 	}
 	mutex_exit(&zone_status_lock);
-	zone_hold(zone);
+	rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 
 	/*
@@ -5129,7 +4972,7 @@ zone_destroy(zoneid_t zoneid)
 	zone_zsd_callbacks(zone, ZSD_DESTROY);
 	zone->zone_netstack = NULL;
 	uniqid = zone->zone_uniqid;
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	zone = NULL;	/* potentially free'd */
 
 	log_refcounts = B_FALSE;
@@ -5165,7 +5008,7 @@ zone_destroy(zoneid_t zoneid)
 		}
 
 		/*
-		 * Wait for zone_rele_common() or zone_cred_rele() to signal
+		 * Wait for zone_rele() or zone_cred_rele() to signal
 		 * zone_destroy_cv.  zone_destroy_cv is signaled only when
 		 * some zone's general-purpose reference count reaches one.
 		 * If ZONE_DESTROY_TIMEOUT_SECS seconds elapse while waiting
@@ -5287,7 +5130,7 @@ zone_destroy(zoneid_t zoneid)
 	 * Drop last reference (which was added by zsched()), this will
 	 * free the zone unless there are outstanding cred references.
 	 */
-	zone_rele(zone);
+	zone_rele(zone, zone->zone_token);
 	return (0);
 }
 
@@ -5308,6 +5151,7 @@ zone_getattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 	boolean_t inzone = (curzone->zone_id == zoneid);
 	ushort_t flags;
 	zone_net_data_t *zbuf;
+	reftoken_t *rt;
 
 	mutex_enter(&zonehash_lock);
 	if ((zone = zone_find_all_by_id(zoneid)) == NULL) {
@@ -5319,7 +5163,7 @@ zone_getattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 		mutex_exit(&zonehash_lock);
 		return (set_errno(EINVAL));
 	}
-	zone_hold(zone);
+	rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 
 	/*
@@ -5328,7 +5172,7 @@ zone_getattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 	 * the other zone.
 	 */
 	if (!zone_list_access(zone)) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (set_errno(EINVAL));
 	}
 
@@ -5581,7 +5425,7 @@ zone_getattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 			error = EINVAL;
 		}
 	}
-	zone_rele(zone);
+	zone_rele(zone, rt);
 
 	if (error)
 		return (set_errno(error));
@@ -5599,6 +5443,7 @@ zone_setattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 	zone_status_t zone_status;
 	int err = -1;
 	zone_net_data_t *zbuf;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(CRED()) != 0)
 		return (set_errno(EPERM));
@@ -5616,7 +5461,7 @@ zone_setattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 		mutex_exit(&zonehash_lock);
 		return (set_errno(EINVAL));
 	}
-	zone_hold(zone);
+	rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 
 	/*
@@ -5684,7 +5529,7 @@ zone_setattr(zoneid_t zoneid, int attr, void *buf, size_t bufsize)
 	}
 
 done:
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	ASSERT(err != -1);
 	return (err != 0 ? set_errno(err) : 0);
 }
@@ -5784,6 +5629,7 @@ zone_enter(zoneid_t zoneid)
 	rctl_entity_p_t e;
 	size_t swap;
 	kthread_id_t t;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(CRED()) != 0)
 		return (set_errno(EPERM));
@@ -5893,7 +5739,7 @@ zone_enter(zoneid_t zoneid)
 	 * bind curproc to the pool it should be running in.  This is safe
 	 * since the zone can't disappear (we have a hold on it).
 	 */
-	zone_hold(zone);
+	rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 
 	/*
@@ -5902,7 +5748,7 @@ zone_enter(zoneid_t zoneid)
 	 * until we join the zone.
 	 */
 	if (pool_lock_intr() != 0) {
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		err = EINTR;
 		goto out;
 	}
@@ -5916,7 +5762,7 @@ zone_enter(zoneid_t zoneid)
 	    (err = pool_do_bind(newpool, P_PID, P_MYID,
 	    POOL_BIND_ALL)) != 0) {
 		pool_unlock();
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		goto out;
 	}
 
@@ -5940,7 +5786,7 @@ zone_enter(zoneid_t zoneid)
 			(void) pool_do_bind(oldpool, P_PID, P_MYID,
 			    POOL_BIND_ALL);
 		pool_unlock();
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		err = EINVAL;
 		goto out;
 	}
@@ -6123,7 +5969,7 @@ zone_enter(zoneid_t zoneid)
 	 * We don't need to retain a hold on the zone since we already
 	 * incremented zone_ntasks, so the zone isn't going anywhere.
 	 */
-	zone_rele(zone);
+	zone_rele(zone, rt);
 
 	/*
 	 * Chroot
@@ -6431,6 +6277,7 @@ zone(int cmd, void *arg1, void *arg2, void *arg3, void *arg4)
 struct zarg {
 	zone_t *zone;
 	zone_cmd_arg_t arg;
+	reftoken_t *rt;
 };
 
 static int
@@ -6469,9 +6316,11 @@ zone_ki_call_zoneadmd(struct zarg *zargp)
 	size_t size;
 	int error;
 	int retry;
+	reftoken_t *rt;
 
 	zone = zargp->zone;
 	arg = zargp->arg;
+	rt = zargp->rt;
 	kmem_free(zargp, sizeof (*zargp));
 
 	zone_namelen = strlen(zone->zone_name) + 1;
@@ -6487,7 +6336,7 @@ zone_ki_call_zoneadmd(struct zarg *zargp)
 	ASSERT(curproc == &p0);
 	(void) zone_empty(zone);
 	ASSERT(zone_status_get(zone) >= ZONE_IS_EMPTY);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 
 	size = sizeof (arg);
 	darg.rbuf = (char *)&arg;
@@ -6545,7 +6394,7 @@ next:
 		 * the same time: the first one wins.  This means we lose, so we
 		 * bail.
 		 */
-		if ((zone = zone_find_by_id(zoneid)) == NULL) {
+		if ((zone = zone_find_by_id(zoneid, &rt)) == NULL) {
 			/*
 			 * Problem is solved.
 			 */
@@ -6555,7 +6404,7 @@ next:
 			/*
 			 * zoneid recycled
 			 */
-			zone_rele(zone);
+			zone_rele(zone, rt);
 			break;
 		}
 		/*
@@ -6563,7 +6412,7 @@ next:
 		 * be much point in doing that (plus, it would mean that
 		 * zone_free() isn't called until this thread exits).
 		 */
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		delay(hz);
 		darg = save_arg;
 	}
@@ -6671,7 +6520,8 @@ zone_kadmin(int cmd, int fcn, const char *mdep, cred_t *credp)
 	if (mdep != NULL)
 		(void) strlcpy(zargp->arg.bootbuf, mdep,
 		    sizeof (zargp->arg.bootbuf));
-	zone_hold(zone);
+
+	zargp->rt = zone_hold(zone);
 
 	(void) thread_create(NULL, 0, zone_ki_call_zoneadmd, zargp, 0, &p0,
 	    TS_RUN, minclsyspri);
@@ -6852,13 +6702,13 @@ zone_dataset_visible(const char *dataset, int *write)
  * The caller is responsible for zone_rele of the returned zone.
  */
 zone_t *
-zone_find_by_any_path(const char *path, boolean_t treat_abs)
+zone_find_by_any_path(const char *path, boolean_t treat_abs, reftoken_t **rt)
 {
 	zone_t *zone;
 	int path_offset = 0;
 
 	if (path == NULL) {
-		zone_hold(global_zone);
+		*rt = zone_hold(global_zone);
 		return (global_zone);
 	}
 
@@ -6890,7 +6740,7 @@ zone_find_by_any_path(const char *path, boolean_t treat_abs)
 	}
 	if (zone == NULL)
 		zone = global_zone;
-	zone_hold(zone);
+	*rt = zone_hold(zone);
 	mutex_exit(&zonehash_lock);
 	return (zone);
 }
@@ -6933,8 +6783,9 @@ zone_add_datalink(zoneid_t zoneid, datalink_id_t linkid)
 	zone_dl_t *zdl;
 	zone_t *zone;
 	zone_t *thiszone;
+	reftoken_t *thisrt;
 
-	if ((thiszone = zone_find_by_id(zoneid)) == NULL)
+	if ((thiszone = zone_find_by_id(zoneid, &thisrt)) == NULL)
 		return (set_errno(ENXIO));
 
 	/* Verify that the datalink ID doesn't already belong to a zone. */
@@ -6943,7 +6794,7 @@ zone_add_datalink(zoneid_t zoneid, datalink_id_t linkid)
 	    zone = list_next(&zone_active, zone)) {
 		if (zone_dl_exists(zone, linkid)) {
 			mutex_exit(&zonehash_lock);
-			zone_rele(thiszone);
+			zone_rele(thiszone, thisrt);
 			return (set_errno((zone == thiszone) ? EEXIST : EPERM));
 		}
 	}
@@ -6955,7 +6806,7 @@ zone_add_datalink(zoneid_t zoneid, datalink_id_t linkid)
 	list_insert_head(&thiszone->zone_dl_list, zdl);
 	mutex_exit(&thiszone->zone_lock);
 	mutex_exit(&zonehash_lock);
-	zone_rele(thiszone);
+	zone_rele(thiszone, thisrt);
 	return (0);
 }
 
@@ -6965,8 +6816,9 @@ zone_remove_datalink(zoneid_t zoneid, datalink_id_t linkid)
 	zone_dl_t *zdl;
 	zone_t *zone;
 	int err = 0;
+	reftoken_t *rt;
 
-	if ((zone = zone_find_by_id(zoneid)) == NULL)
+	if ((zone = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (set_errno(EINVAL));
 
 	mutex_enter(&zone->zone_lock);
@@ -6978,7 +6830,7 @@ zone_remove_datalink(zoneid_t zoneid, datalink_id_t linkid)
 		kmem_free(zdl, sizeof (zone_dl_t));
 	}
 	mutex_exit(&zone->zone_lock);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	return (err == 0 ? 0 : set_errno(err));
 }
 
@@ -6992,12 +6844,13 @@ zone_check_datalink(zoneid_t *zoneidp, datalink_id_t linkid)
 {
 	zone_t *zone;
 	int err = ENXIO;
+	reftoken_t *rt;
 
 	if (*zoneidp != ALL_ZONES) {
-		if ((zone = zone_find_by_id(*zoneidp)) != NULL) {
+		if ((zone = zone_find_by_id(*zoneidp, &rt)) != NULL) {
 			if (zone_dl_exists(zone, linkid))
 				err = 0;
-			zone_rele(zone);
+			zone_rele(zone, rt);
 		}
 		return (err);
 	}
@@ -7031,10 +6884,11 @@ zone_list_datalink(zoneid_t zoneid, int *nump, datalink_id_t *idarray)
 	zone_t *zone;
 	zone_dl_t *zdl;
 	datalink_id_t *idptr = idarray;
+	reftoken_t *rt;
 
 	if (copyin(nump, &dlcount, sizeof (dlcount)) != 0)
 		return (set_errno(EFAULT));
-	if ((zone = zone_find_by_id(zoneid)) == NULL)
+	if ((zone = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (set_errno(ENXIO));
 
 	num = 0;
@@ -7049,13 +6903,13 @@ zone_list_datalink(zoneid_t zoneid, int *nump, datalink_id_t *idarray)
 			continue;
 		if (copyout(&zdl->zdl_id, idptr, sizeof (*idptr)) != 0) {
 			mutex_exit(&zone->zone_lock);
-			zone_rele(zone);
+			zone_rele(zone, rt);
 			return (set_errno(EFAULT));
 		}
 		idptr++;
 	}
 	mutex_exit(&zone->zone_lock);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 
 	/* Increased or decreased, caller should be notified. */
 	if (num != dlcount) {
@@ -7105,8 +6959,9 @@ zone_datalink_walk(zoneid_t zoneid, int (*cb)(datalink_id_t, void *),
 	datalink_id_t	*idarray;
 	uint_t		idcount = 0;
 	int		i, ret = 0;
+	reftoken_t	*rt;
 
-	if ((zone = zone_find_by_id(zoneid)) == NULL)
+	if ((zone = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (ENOENT);
 
 	/*
@@ -7121,14 +6976,14 @@ zone_datalink_walk(zoneid_t zoneid, int (*cb)(datalink_id_t, void *),
 
 	if (idcount == 0) {
 		mutex_exit(&zone->zone_lock);
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (0);
 	}
 
 	idarray = kmem_alloc(sizeof (datalink_id_t) * idcount, KM_NOSLEEP);
 	if (idarray == NULL) {
 		mutex_exit(&zone->zone_lock);
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		return (ENOMEM);
 	}
 
@@ -7144,7 +6999,7 @@ zone_datalink_walk(zoneid_t zoneid, int (*cb)(datalink_id_t, void *),
 			break;
 	}
 
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	kmem_free(idarray, sizeof (datalink_id_t) * idcount);
 	return (ret);
 }
@@ -7173,6 +7028,7 @@ zone_set_network(zoneid_t zoneid, zone_net_data_t *znbuf)
 	char *nvname;
 	int bufsize;
 	datalink_id_t linkid = znbuf->zn_linkid;
+	reftoken_t *rt;
 
 	if (secpolicy_zone_config(CRED()) != 0)
 		return (set_errno(EPERM));
@@ -7186,7 +7042,7 @@ zone_set_network(zoneid_t zoneid, zone_net_data_t *znbuf)
 	if (nvname == NULL)
 		return (set_errno(EINVAL));
 
-	if ((zone = zone_find_by_id(zoneid)) == NULL) {
+	if ((zone = zone_find_by_id(zoneid, &rt)) == NULL) {
 		return (set_errno(EINVAL));
 	}
 
@@ -7211,7 +7067,7 @@ zone_set_network(zoneid_t zoneid, zone_net_data_t *znbuf)
 	ASSERT(err == 0);
 done:
 	mutex_exit(&zone->zone_lock);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	if (err != 0)
 		return (set_errno(err));
 	else
@@ -7231,6 +7087,7 @@ zone_get_network(zoneid_t zoneid, zone_net_data_t *znbuf)
 	int bufsize;
 	void *buf;
 	datalink_id_t linkid = znbuf->zn_linkid;
+	reftoken_t *rt;
 
 	if (zoneid == GLOBAL_ZONEID)
 		return (set_errno(EINVAL));
@@ -7241,7 +7098,7 @@ zone_get_network(zoneid_t zoneid, zone_net_data_t *znbuf)
 
 	if (nvname == NULL)
 		return (set_errno(EINVAL));
-	if ((zone = zone_find_by_id(zoneid)) == NULL)
+	if ((zone = zone_find_by_id(zoneid, &rt)) == NULL)
 		return (set_errno(EINVAL));
 
 	mutex_enter(&zone->zone_lock);
@@ -7264,7 +7121,7 @@ zone_get_network(zoneid_t zoneid, zone_net_data_t *znbuf)
 	bcopy(ptr, buf, psize);
 done:
 	mutex_exit(&zone->zone_lock);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	if (err != 0)
 		return (set_errno(err));
 	else

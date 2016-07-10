@@ -57,8 +57,8 @@ dmu_tx_create_dd(dsl_dir_t *dd)
 	    offsetof(dmu_tx_callback_t, dcb_node));
 	tx->tx_start = gethrtime();
 #ifdef ZFS_DEBUG
-	refcount_create(&tx->tx_space_written);
-	refcount_create(&tx->tx_space_freed);
+	trackcount_create(&tx->tx_space_written);
+	trackcount_create(&tx->tx_space_freed);
 #endif
 	return (tx);
 }
@@ -121,7 +121,7 @@ dmu_tx_hold_object_impl(dmu_tx_t *tx, objset_t *os, uint64_t object,
 			 */
 			ASSERT(dn->dn_assigned_txg == 0);
 			dn->dn_assigned_txg = tx->tx_txg;
-			(void) refcount_add(&dn->dn_tx_holds, tx);
+			(void) trackcount_add(&dn->dn_tx_holds, tx);
 			mutex_exit(&dn->dn_mtx);
 		}
 	}
@@ -129,12 +129,12 @@ dmu_tx_hold_object_impl(dmu_tx_t *tx, objset_t *os, uint64_t object,
 	txh = kmem_zalloc(sizeof (dmu_tx_hold_t), KM_SLEEP);
 	txh->txh_tx = tx;
 	txh->txh_dnode = dn;
-	refcount_create(&txh->txh_space_towrite);
-	refcount_create(&txh->txh_space_tofree);
-	refcount_create(&txh->txh_space_tooverwrite);
-	refcount_create(&txh->txh_space_tounref);
-	refcount_create(&txh->txh_memory_tohold);
-	refcount_create(&txh->txh_fudge);
+	trackcount_create(&txh->txh_space_towrite);
+	trackcount_create(&txh->txh_space_tofree);
+	trackcount_create(&txh->txh_space_tooverwrite);
+	trackcount_create(&txh->txh_space_tounref);
+	trackcount_create(&txh->txh_memory_tohold);
+	trackcount_create(&txh->txh_fudge);
 #ifdef ZFS_DEBUG
 	txh->txh_type = type;
 	txh->txh_arg1 = arg1;
@@ -208,15 +208,15 @@ dmu_tx_count_twig(dmu_tx_hold_t *txh, dnode_t *dn, dmu_buf_impl_t *db,
 	    dsl_dataset_block_freeable(ds, bp, bp->blk_birth)));
 
 	if (freeable) {
-		(void) refcount_add_many(&txh->txh_space_tooverwrite,
+		(void) trackcount_add_many(&txh->txh_space_tooverwrite,
 		    space, FTAG);
 	} else {
-		(void) refcount_add_many(&txh->txh_space_towrite,
+		(void) trackcount_add_many(&txh->txh_space_towrite,
 		    space, FTAG);
 	}
 
 	if (bp) {
-		(void) refcount_add_many(&txh->txh_space_tounref,
+		(void) trackcount_add_many(&txh->txh_space_tounref,
 		    bp_get_dsize(os->os_spa, bp), FTAG);
 	}
 
@@ -349,7 +349,7 @@ dmu_tx_count_write(dmu_tx_hold_t *txh, uint64_t off, uint64_t len)
 				epbs = min_ibs - SPA_BLKPTRSHIFT;
 				for (bits -= epbs * (nlvls - 1);
 				    bits >= 0; bits -= epbs) {
-					(void) refcount_add_many(
+					(void) trackcount_add_many(
 					    &txh->txh_fudge,
 					    1ULL << max_ibs, FTAG);
 				}
@@ -368,7 +368,7 @@ dmu_tx_count_write(dmu_tx_hold_t *txh, uint64_t off, uint64_t len)
 	 */
 	start = P2ALIGN(off, 1ULL << max_bs);
 	end = P2ROUNDUP(off + len, 1ULL << max_bs) - 1;
-	(void) refcount_add_many(&txh->txh_space_towrite,
+	(void) trackcount_add_many(&txh->txh_space_towrite,
 	    end - start + 1, FTAG);
 
 	start >>= min_bs;
@@ -384,21 +384,21 @@ dmu_tx_count_write(dmu_tx_hold_t *txh, uint64_t off, uint64_t len)
 		start >>= epbs;
 		end >>= epbs;
 		ASSERT3U(end, >=, start);
-		(void) refcount_add_many(&txh->txh_space_towrite,
+		(void) trackcount_add_many(&txh->txh_space_towrite,
 		    (end - start + 1) << max_ibs, FTAG);
 		if (start != 0) {
 			/*
 			 * We also need a new blkid=0 indirect block
 			 * to reference any existing file data.
 			 */
-			(void) refcount_add_many(&txh->txh_space_towrite,
+			(void) trackcount_add_many(&txh->txh_space_towrite,
 			    1ULL << max_ibs, FTAG);
 		}
 	}
 
 out:
-	if (refcount_count(&txh->txh_space_towrite) +
-	    refcount_count(&txh->txh_space_tooverwrite) >
+	if (trackcount_count(&txh->txh_space_towrite) +
+	    trackcount_count(&txh->txh_space_tooverwrite) >
 	    2 * DMU_MAX_ACCESS)
 		err = SET_ERROR(EFBIG);
 
@@ -417,13 +417,13 @@ dmu_tx_count_dnode(dmu_tx_hold_t *txh)
 	if (dn && dn->dn_dbuf->db_blkptr &&
 	    dsl_dataset_block_freeable(dn->dn_objset->os_dsl_dataset,
 	    dn->dn_dbuf->db_blkptr, dn->dn_dbuf->db_blkptr->blk_birth)) {
-		(void) refcount_add_many(&txh->txh_space_tooverwrite,
+		(void) trackcount_add_many(&txh->txh_space_tooverwrite,
 		    space, FTAG);
-		(void) refcount_add_many(&txh->txh_space_tounref, space, FTAG);
+		(void) trackcount_add_many(&txh->txh_space_tounref, space, FTAG);
 	} else {
-		(void) refcount_add_many(&txh->txh_space_towrite, space, FTAG);
+		(void) trackcount_add_many(&txh->txh_space_towrite, space, FTAG);
 		if (dn && dn->dn_dbuf->db_blkptr) {
-			(void) refcount_add_many(&txh->txh_space_tounref,
+			(void) trackcount_add_many(&txh->txh_space_tounref,
 			    space, FTAG);
 		}
 	}
@@ -547,7 +547,7 @@ dmu_tx_count_free(dmu_tx_hold_t *txh, uint64_t off, uint64_t len)
 			break;
 		}
 
-		(void) refcount_add_many(&txh->txh_memory_tohold,
+		(void) trackcount_add_many(&txh->txh_memory_tohold,
 		    dbuf->db.db_size, FTAG);
 
 		/*
@@ -601,7 +601,7 @@ dmu_tx_count_free(dmu_tx_hold_t *txh, uint64_t off, uint64_t len)
 		    (dn->dn_indblkshift - SPA_BLKPTRSHIFT);
 
 		while (level++ < maxlevel) {
-			(void) refcount_add_many(&txh->txh_memory_tohold,
+			(void) trackcount_add_many(&txh->txh_memory_tohold,
 			    MAX(MIN(blkcnt, nl1blks), 1) << dn->dn_indblkshift,
 			    FTAG);
 			blkcnt = 1 + (blkcnt >> epbs);
@@ -610,14 +610,14 @@ dmu_tx_count_free(dmu_tx_hold_t *txh, uint64_t off, uint64_t len)
 
 	/* account for new level 1 indirect blocks that might show up */
 	if (skipped > 0) {
-		(void) refcount_add_many(&txh->txh_fudge,
+		(void) trackcount_add_many(&txh->txh_fudge,
 		    skipped << dn->dn_indblkshift, FTAG);
 		skipped = MIN(skipped, DMU_MAX_DELETEBLKCNT >> epbs);
-		(void) refcount_add_many(&txh->txh_memory_tohold,
+		(void) trackcount_add_many(&txh->txh_memory_tohold,
 		    skipped << dn->dn_indblkshift, FTAG);
 	}
-	(void) refcount_add_many(&txh->txh_space_tofree, space, FTAG);
-	(void) refcount_add_many(&txh->txh_space_tounref, unref, FTAG);
+	(void) trackcount_add_many(&txh->txh_space_tofree, space, FTAG);
+	(void) trackcount_add_many(&txh->txh_space_tounref, unref, FTAG);
 }
 
 /*
@@ -643,9 +643,9 @@ dmu_tx_mark_netfree(dmu_tx_t *tx)
 	 * cause overflows when doing math with these values (e.g. in
 	 * dmu_tx_try_assign()).
 	 */
-	(void) refcount_add_many(&txh->txh_space_tofree,
+	(void) trackcount_add_many(&txh->txh_space_tofree,
 	    1024 * 1024 * 1024, FTAG);
-	(void) refcount_add_many(&txh->txh_space_tounref,
+	(void) trackcount_add_many(&txh->txh_space_tounref,
 	    1024 * 1024 * 1024, FTAG);
 }
 
@@ -789,14 +789,14 @@ dmu_tx_hold_zap(dmu_tx_t *tx, uint64_t object, int add, const char *name)
 		bp = &dn->dn_phys->dn_blkptr[0];
 		if (dsl_dataset_block_freeable(dn->dn_objset->os_dsl_dataset,
 		    bp, bp->blk_birth)) {
-			(void) refcount_add_many(&txh->txh_space_tooverwrite,
+			(void) trackcount_add_many(&txh->txh_space_tooverwrite,
 			    MZAP_MAX_BLKSZ, FTAG);
 		} else {
-			(void) refcount_add_many(&txh->txh_space_towrite,
+			(void) trackcount_add_many(&txh->txh_space_towrite,
 			    MZAP_MAX_BLKSZ, FTAG);
 		}
 		if (!BP_IS_HOLE(bp)) {
-			(void) refcount_add_many(&txh->txh_space_tounref,
+			(void) trackcount_add_many(&txh->txh_space_tounref,
 			    MZAP_MAX_BLKSZ, FTAG);
 		}
 		return;
@@ -836,10 +836,10 @@ dmu_tx_hold_zap(dmu_tx_t *tx, uint64_t object, int add, const char *name)
 		uint64_t num_indirects = 1 + (dn->dn_maxblkid >> (epbs * lvl));
 		uint64_t spc = MIN(3, num_indirects) << dn->dn_indblkshift;
 		if (ds_phys->ds_prev_snap_obj != 0) {
-			(void) refcount_add_many(&txh->txh_space_towrite,
+			(void) trackcount_add_many(&txh->txh_space_towrite,
 			    spc, FTAG);
 		} else {
-			(void) refcount_add_many(&txh->txh_space_tooverwrite,
+			(void) trackcount_add_many(&txh->txh_space_tooverwrite,
 			    spc, FTAG);
 		}
 	}
@@ -867,7 +867,7 @@ dmu_tx_hold_space(dmu_tx_t *tx, uint64_t space)
 	txh = dmu_tx_hold_object_impl(tx, tx->tx_objset,
 	    DMU_NEW_OBJECT, THT_SPACE, space, 0);
 
-	(void) refcount_add_many(&txh->txh_space_towrite, space, FTAG);
+	(void) trackcount_add_many(&txh->txh_space_towrite, space, FTAG);
 }
 
 int
@@ -1212,15 +1212,15 @@ dmu_tx_try_assign(dmu_tx_t *tx, txg_how_t txg_how)
 			if (dn->dn_assigned_txg == 0)
 				dn->dn_assigned_txg = tx->tx_txg;
 			ASSERT3U(dn->dn_assigned_txg, ==, tx->tx_txg);
-			(void) refcount_add(&dn->dn_tx_holds, tx);
+			(void) trackcount_add(&dn->dn_tx_holds, tx);
 			mutex_exit(&dn->dn_mtx);
 		}
-		towrite += refcount_count(&txh->txh_space_towrite);
-		tofree += refcount_count(&txh->txh_space_tofree);
-		tooverwrite += refcount_count(&txh->txh_space_tooverwrite);
-		tounref += refcount_count(&txh->txh_space_tounref);
-		tohold += refcount_count(&txh->txh_memory_tohold);
-		fudge += refcount_count(&txh->txh_fudge);
+		towrite += trackcount_count(&txh->txh_space_towrite);
+		tofree += trackcount_count(&txh->txh_space_tofree);
+		tooverwrite += trackcount_count(&txh->txh_space_tooverwrite);
+		tounref += trackcount_count(&txh->txh_space_tounref);
+		tohold += trackcount_count(&txh->txh_memory_tohold);
+		fudge += trackcount_count(&txh->txh_fudge);
 	}
 
 	/*
@@ -1289,7 +1289,7 @@ dmu_tx_unassign(dmu_tx_t *tx)
 		mutex_enter(&dn->dn_mtx);
 		ASSERT3U(dn->dn_assigned_txg, ==, tx->tx_txg);
 
-		if (refcount_remove(&dn->dn_tx_holds, tx) == 0) {
+		if (trackcount_remove(&dn->dn_tx_holds, tx) == 0) {
 			dn->dn_assigned_txg = 0;
 			cv_broadcast(&dn->dn_notxholds);
 		}
@@ -1414,11 +1414,11 @@ dmu_tx_willuse_space(dmu_tx_t *tx, int64_t delta)
 		return;
 
 	if (delta > 0) {
-		ASSERT3U(refcount_count(&tx->tx_space_written) + delta, <=,
+		ASSERT3U(trackcount_count(&tx->tx_space_written) + delta, <=,
 		    tx->tx_space_towrite);
-		(void) refcount_add_many(&tx->tx_space_written, delta, NULL);
+		(void) trackcount_add_many(&tx->tx_space_written, delta, NULL);
 	} else {
-		(void) refcount_add_many(&tx->tx_space_freed, -delta, NULL);
+		(void) trackcount_add_many(&tx->tx_space_freed, -delta, NULL);
 	}
 #endif
 }
@@ -1432,18 +1432,18 @@ dmu_tx_destroy(dmu_tx_t *tx)
 		dnode_t *dn = txh->txh_dnode;
 
 		list_remove(&tx->tx_holds, txh);
-		refcount_destroy_many(&txh->txh_space_towrite,
-		    refcount_count(&txh->txh_space_towrite));
-		refcount_destroy_many(&txh->txh_space_tofree,
-		    refcount_count(&txh->txh_space_tofree));
-		refcount_destroy_many(&txh->txh_space_tooverwrite,
-		    refcount_count(&txh->txh_space_tooverwrite));
-		refcount_destroy_many(&txh->txh_space_tounref,
-		    refcount_count(&txh->txh_space_tounref));
-		refcount_destroy_many(&txh->txh_memory_tohold,
-		    refcount_count(&txh->txh_memory_tohold));
-		refcount_destroy_many(&txh->txh_fudge,
-		    refcount_count(&txh->txh_fudge));
+		trackcount_destroy_many(&txh->txh_space_towrite,
+		    trackcount_count(&txh->txh_space_towrite));
+		trackcount_destroy_many(&txh->txh_space_tofree,
+		    trackcount_count(&txh->txh_space_tofree));
+		trackcount_destroy_many(&txh->txh_space_tooverwrite,
+		    trackcount_count(&txh->txh_space_tooverwrite));
+		trackcount_destroy_many(&txh->txh_space_tounref,
+		    trackcount_count(&txh->txh_space_tounref));
+		trackcount_destroy_many(&txh->txh_memory_tohold,
+		    trackcount_count(&txh->txh_memory_tohold));
+		trackcount_destroy_many(&txh->txh_fudge,
+		    trackcount_count(&txh->txh_fudge));
 		kmem_free(txh, sizeof (dmu_tx_hold_t));
 		if (dn != NULL)
 			dnode_rele(dn, tx);
@@ -1452,10 +1452,10 @@ dmu_tx_destroy(dmu_tx_t *tx)
 	list_destroy(&tx->tx_callbacks);
 	list_destroy(&tx->tx_holds);
 #ifdef ZFS_DEBUG
-	refcount_destroy_many(&tx->tx_space_written,
-	    refcount_count(&tx->tx_space_written));
-	refcount_destroy_many(&tx->tx_space_freed,
-	    refcount_count(&tx->tx_space_freed));
+	trackcount_destroy_many(&tx->tx_space_written,
+	    trackcount_count(&tx->tx_space_written));
+	trackcount_destroy_many(&tx->tx_space_freed,
+	    trackcount_count(&tx->tx_space_freed));
 #endif
 	kmem_free(tx, sizeof (dmu_tx_t));
 }
@@ -1479,7 +1479,7 @@ dmu_tx_commit(dmu_tx_t *tx)
 		mutex_enter(&dn->dn_mtx);
 		ASSERT3U(dn->dn_assigned_txg, ==, tx->tx_txg);
 
-		if (refcount_remove(&dn->dn_tx_holds, tx) == 0) {
+		if (trackcount_remove(&dn->dn_tx_holds, tx) == 0) {
 			dn->dn_assigned_txg = 0;
 			cv_broadcast(&dn->dn_notxholds);
 		}
@@ -1497,8 +1497,8 @@ dmu_tx_commit(dmu_tx_t *tx)
 
 #ifdef ZFS_DEBUG
 	dprintf("towrite=%llu written=%llu tofree=%llu freed=%llu\n",
-	    tx->tx_space_towrite, refcount_count(&tx->tx_space_written),
-	    tx->tx_space_tofree, refcount_count(&tx->tx_space_freed));
+	    tx->tx_space_towrite, trackcount_count(&tx->tx_space_written),
+	    tx->tx_space_tofree, trackcount_count(&tx->tx_space_freed));
 #endif
 	dmu_tx_destroy(tx);
 }
@@ -1611,7 +1611,7 @@ dmu_tx_hold_spill(dmu_tx_t *tx, uint64_t object)
 
 	/* If blkptr doesn't exist then add space to towrite */
 	if (!(dn->dn_phys->dn_flags & DNODE_FLAG_SPILL_BLKPTR)) {
-		(void) refcount_add_many(&txh->txh_space_towrite,
+		(void) trackcount_add_many(&txh->txh_space_towrite,
 		    SPA_OLD_MAXBLOCKSIZE, FTAG);
 	} else {
 		blkptr_t *bp;
@@ -1619,14 +1619,14 @@ dmu_tx_hold_spill(dmu_tx_t *tx, uint64_t object)
 		bp = &dn->dn_phys->dn_spill;
 		if (dsl_dataset_block_freeable(dn->dn_objset->os_dsl_dataset,
 		    bp, bp->blk_birth)) {
-			(void) refcount_add_many(&txh->txh_space_tooverwrite,
+			(void) trackcount_add_many(&txh->txh_space_tooverwrite,
 			    SPA_OLD_MAXBLOCKSIZE, FTAG);
 		} else {
-			(void) refcount_add_many(&txh->txh_space_towrite,
+			(void) trackcount_add_many(&txh->txh_space_towrite,
 			    SPA_OLD_MAXBLOCKSIZE, FTAG);
 		}
 		if (!BP_IS_HOLE(bp)) {
-			(void) refcount_add_many(&txh->txh_space_tounref,
+			(void) trackcount_add_many(&txh->txh_space_tounref,
 			    SPA_OLD_MAXBLOCKSIZE, FTAG);
 		}
 	}

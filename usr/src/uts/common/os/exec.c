@@ -666,9 +666,10 @@ gexec(
 		char path[MAXNAMELEN];
 		refstr_t *mntpt = NULL;
 		int ret = -1;
+		reftoken_t *rt;
 
 		bzero(path, sizeof (path));
-		zone_hold(pp->p_zone);
+		rt = zone_hold(pp->p_zone);
 
 		ret = vnodetopath(pp->p_zone->zone_rootvp, vp, path,
 		    sizeof (path), cred);
@@ -706,7 +707,7 @@ gexec(
 		if (mntpt != NULL)
 			refstr_rele(mntpt);
 
-		zone_rele(pp->p_zone);
+		zone_rele(pp->p_zone, rt);
 	}
 
 	/*

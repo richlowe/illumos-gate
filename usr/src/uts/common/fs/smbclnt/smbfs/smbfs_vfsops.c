@@ -61,6 +61,7 @@
 #include <sys/tsol/label.h>
 #include <sys/tsol/tndb.h>
 #include <inet/ip.h>
+#include <sys/refcnt.h>
 
 #include <netsmb/smb_osdep.h>
 #include <netsmb/smb.h>
@@ -315,8 +316,8 @@ smbfs_free_smi(smbmntinfo_t *smi)
 	if (smi == NULL)
 		return;
 
-	if (smi->smi_zone_ref.zref_zone != NULL)
-		zone_rele_ref(&smi->smi_zone_ref, ZONE_REF_SMBFS);
+	if (smi->smi_zone != NULL)
+		zone_rele(smi->smi_zone, smi->smi_zone_rt);
 
 	if (smi->smi_share != NULL)
 		smb_share_rele(smi->smi_share);
@@ -348,6 +349,7 @@ smbfs_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	smb_share_t 	*ssp = NULL;
 	smb_cred_t 	scred;
 	int		flags, sec;
+	reftoken_t 	*rt;
 
 	STRUCT_DECL(smbfs_args, args);		/* smbfs mount arguments */
 
@@ -421,10 +423,10 @@ smbfs_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	/*
 	 * Determine the zone we're being mounted into.
 	 */
-	zone_hold(mntzone = zone);		/* start with this assumption */
+	rt = zone_hold(mntzone = zone);		/* start with this assumption */
 	if (getzoneid() == GLOBAL_ZONEID) {
-		zone_rele(mntzone);
-		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+		zone_rele(mntzone, rt);
+		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt), &rt);
 		ASSERT(mntzone != NULL);
 		if (mntzone != zone) {
 			error = EBUSY;
@@ -487,9 +489,8 @@ smbfs_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	 * Convert the anonymous zone hold acquired via zone_hold() above
 	 * into a zone reference.
 	 */
-	zone_init_ref(&smi->smi_zone_ref);
-	zone_hold_ref(mntzone, &smi->smi_zone_ref, ZONE_REF_SMBFS);
-	zone_rele(mntzone);
+	smi->smi_zone_rt = zone_hold(smi->smi_zone = mntzone);
+	zone_rele(mntzone, rt);
 	mntzone = NULL;
 
 	/*
@@ -626,7 +627,7 @@ errout:
 		smbfs_free_smi(smi);
 
 	if (mntzone != NULL)
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 
 	if (ssp != NULL)
 		smb_share_rele(ssp);
@@ -744,7 +745,7 @@ smbfs_root(vfs_t *vfsp, vnode_t **vpp)
 
 	smi = VFTOSMI(vfsp);
 
-	if (curproc->p_zone != smi->smi_zone_ref.zref_zone)
+	if (curproc->p_zone != smi->smi_zone)
 		return (EPERM);
 
 	if (smi->smi_flags & SMI_DEAD || vfsp->vfs_flag & VFS_UNMOUNTED)
@@ -778,7 +779,7 @@ smbfs_statvfs(vfs_t *vfsp, statvfs64_t *sbp)
 	hrtime_t now;
 	smb_cred_t	scred;
 
-	if (curproc->p_zone != smi->smi_zone_ref.zref_zone)
+	if (curproc->p_zone != smi->smi_zone)
 		return (EPERM);
 
 	if (smi->smi_flags & SMI_DEAD || vfsp->vfs_flag & VFS_UNMOUNTED)
@@ -952,11 +953,13 @@ smbfs_mount_label_policy(vfs_t *vfsp, void *ipaddr, int addr_type, cred_t *cr)
 	tsol_tpc_t	*tp;
 	ts_label_t	*tsl = NULL;
 	int		retv;
+	reftoken_t	*rt;
 
 	/*
 	 * Get the zone's label.  Each zone on a labeled system has a label.
 	 */
-	mntzone = zone_find_by_any_path(refstr_value(vfsp->vfs_mntpt), B_FALSE);
+	mntzone = zone_find_by_any_path(refstr_value(vfsp->vfs_mntpt), B_FALSE,
+		&rt);
 	zlabel = mntzone->zone_slabel;
 	ASSERT(zlabel != NULL);
 	label_hold(zlabel);
@@ -1012,7 +1015,7 @@ rel_tpc:
 	TPC_RELE(tp);
 out:
 	if (mntzone)
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 	label_rele(zlabel);
 	return (retv);
 }

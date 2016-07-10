@@ -80,7 +80,7 @@
  */
 
 #include <sys/dmu.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -218,7 +218,7 @@ int zap_prefetch_uint64(objset_t *os, uint64_t zapobj, const uint64_t *key,
     int key_numints);
 
 int zap_count_write(objset_t *os, uint64_t zapobj, const char *name,
-    int add, refcount_t *towrite, refcount_t *tooverwrite);
+    int add, trackcount_t *towrite, trackcount_t *tooverwrite);
 
 /*
  * Create an attribute with the given name and value.

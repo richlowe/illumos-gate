@@ -35,7 +35,7 @@ extern "C" {
 
 #include <sys/inttypes.h>
 #include <sys/zfs_context.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 
 /*
  * A reader-writer lock implementation that allows re-entrant reads, but
@@ -55,8 +55,8 @@ typedef struct rrwlock {
 	kmutex_t	rr_lock;
 	kcondvar_t	rr_cv;
 	kthread_t	*rr_writer;
-	refcount_t	rr_anon_rcount;
-	refcount_t	rr_linked_rcount;
+	trackcount_t	rr_anon_rcount;
+	trackcount_t	rr_linked_rcount;
 	boolean_t	rr_writer_wanted;
 	boolean_t	rr_track_all;
 } rrwlock_t;

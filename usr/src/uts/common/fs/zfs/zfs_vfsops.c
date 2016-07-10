@@ -65,6 +65,7 @@
 #include <sys/dnlc.h>
 #include <sys/dmu_objset.h>
 #include <sys/spa_boot.h>
+#include <sys/refcnt.h>
 #include "zfs_comutil.h"
 
 int zfsfstype;
@@ -1343,6 +1344,7 @@ zfs_mount_label_policy(vfs_t *vfsp, char *osname)
 	bslabel_t	*mnt_sl;
 	bslabel_t	ds_sl;
 	char		ds_hexsl[MAXNAMELEN];
+	reftoken_t	*rt;
 
 	retv = EACCES;				/* assume the worst */
 
@@ -1371,11 +1373,12 @@ zfs_mount_label_policy(vfs_t *vfsp, char *osname)
 	 * zoned property is off), the label must be default or
 	 * admin_low/admin_high only; no other checks are needed.
 	 */
-	mntzone = zone_find_by_any_path(refstr_value(vfsp->vfs_mntpt), B_FALSE);
+	mntzone = zone_find_by_any_path(refstr_value(vfsp->vfs_mntpt), B_FALSE,
+		&rt);
 	if (mntzone->zone_id == GLOBAL_ZONEID) {
 		uint64_t zoned;
 
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 
 		if (dsl_prop_get_integer(osname,
 		    zfs_prop_to_name(ZFS_PROP_ZONED), &zoned, NULL))
@@ -1425,7 +1428,7 @@ zfs_mount_label_policy(vfs_t *vfsp, char *osname)
 	}
 
 	label_rele(mnt_tsl);
-	zone_rele(mntzone);
+	zone_rele(mntzone, rt);
 	return (retv);
 }
 

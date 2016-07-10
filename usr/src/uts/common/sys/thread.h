@@ -34,6 +34,7 @@
 #include <sys/time.h>
 #include <sys/signal.h>
 #include <sys/kcpc.h>
+#include <sys/refcnt.h>
 #if defined(__GNUC__) && defined(_ASM_INLINES) && defined(_KERNEL)
 #include <asm/thread.h>
 #endif
@@ -345,6 +346,11 @@ typedef struct _kthread {
 	kmutex_t	t_ctx_lock;	/* protects t_ctx in removectx() */
 	struct waitq	*t_waitq;	/* wait queue */
 	kmutex_t	t_wait_mutex;	/* used in CV wait functions */
+	/*
+	 * XXX: Used by zthread_create/exit.  _not_ used just for any process
+	 * in a zone (each process doesn't take a hold)
+	 */
+	reftoken_t	*t_zone_ref;	/* reference token for the zone hold */
 } kthread_t;
 
 /*

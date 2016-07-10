@@ -48,6 +48,7 @@
 #include <fs/fs_subr.h>
 #include <sys/fs/mntdata.h>
 #include <sys/zone.h>
+#include <sys/refcnt.h>
 
 /*
  * This is the loadable module wrapper.
@@ -190,10 +191,12 @@ mntmount(struct vfs *vfsp, struct vnode *mvp,
 	 */
 	if (zone == global_zone) {
 		zone_t *mntzone;
+		reftoken_t *rt;
 
-		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt),
+			&rt);
 		ASSERT(mntzone != NULL);
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 		if (mntzone != zone)
 			return (EBUSY);
 	}
@@ -213,8 +216,7 @@ mntmount(struct vfs *vfsp, struct vnode *mvp,
 	}
 	mutex_exit(&mvp->v_lock);
 
-	zone_init_ref(&mnt->mnt_zone_ref);
-	zone_hold_ref(zone, &mnt->mnt_zone_ref, ZONE_REF_MNTFS);
+	mnt->mnt_zone_rt = zone_hold(mnt->mnt_zone = zone);
 	mnp = &mnt->mnt_node;
 
 	vfsp->vfs_fstype = mntfstype;
@@ -257,7 +259,7 @@ mntunmount(struct vfs *vfsp, int flag, struct cred *cr)
 	}
 
 	mutex_exit(&vp->v_lock);
-	zone_rele_ref(&mnt->mnt_zone_ref, ZONE_REF_MNTFS);
+	zone_rele(mnt->mnt_zone, mnt->mnt_zone_rt);
 	vn_invalid(vp);
 	vn_free(vp);
 	kmem_free(mnt, sizeof (*mnt));

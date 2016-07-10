@@ -173,6 +173,7 @@ getflabel_cipso(vfs_t *vfsp)
 	char	*nfspath, *respath;
 	refstr_t	*resource_ref;
 	boolean_t	treat_abs = B_FALSE;
+	reftoken_t	*rt, *nrt;
 
 	if (vfsp->vfs_resource == NULL)
 		return (NULL);			/* error */
@@ -187,11 +188,11 @@ getflabel_cipso(vfs_t *vfsp)
 		treat_abs = B_TRUE;
 	}
 
-	reszone = zone_find_by_any_path(respath, treat_abs);
+	reszone = zone_find_by_any_path(respath, treat_abs, &rt);
 	if (reszone == global_zone) {
 		refstr_rele(resource_ref);
 		label_hold(l_admin_low);
-		zone_rele(reszone);
+		zone_rele(reszone, rt);
 		return (l_admin_low);
 	}
 
@@ -205,18 +206,19 @@ getflabel_cipso(vfs_t *vfsp)
 		/* Check if we now have something like "/zone/public/" */
 
 		respath += 5;			/* skip "/root" first */
-		new_reszone = zone_find_by_any_path(respath, B_FALSE);
+		new_reszone = zone_find_by_any_path(respath, B_FALSE, &nrt);
 		if (new_reszone != global_zone) {
-			zone_rele(reszone);
+			zone_rele(reszone, rt);
 			reszone = new_reszone;
+			rt = nrt;
 		} else {
-			zone_rele(new_reszone);
+			zone_rele(new_reszone, nrt);
 		}
 	}
 
 	refstr_rele(resource_ref);
 	label_hold(reszone->zone_slabel);
-	zone_rele(reszone);
+	zone_rele(reszone, rt);
 
 	return (reszone->zone_slabel);
 }
@@ -322,6 +324,7 @@ getflabel(vnode_t *vp)
 	int		err;
 	boolean_t	vfs_is_held = B_FALSE;
 	char		vpath[MAXPATHLEN];
+	reftoken_t	*zrt;
 
 	ASSERT(vp);
 	vfsp = vp->v_vfsp;
@@ -352,7 +355,7 @@ getflabel(vnode_t *vp)
 		if ((strcmp(vfssw[rvfsp->vfs_fstype].vsw_name,
 		    "lofs") != 0)) {
 			zone = rvfsp->vfs_zone;
-			zone_hold(zone);
+			zrt = zone_hold(zone);
 			goto zone_out;		/* return this label */
 		}
 	}
@@ -365,7 +368,7 @@ getflabel(vnode_t *vp)
 	err = vnodetopath(rootdir, rvp, vpath, sizeof (vpath), kcred);
 	if ((err != 0) || (*vpath != '/')) {
 		zone = curproc->p_zone;
-		zone_hold(zone);
+		zrt = zone_hold(zone);
 		goto zone_out;
 	}
 
@@ -394,7 +397,7 @@ getflabel(vnode_t *vp)
 		vfs_is_held = B_TRUE;
 	}
 
-	zone = zone_find_by_any_path(vpath, B_FALSE);
+	zone = zone_find_by_any_path(vpath, B_FALSE, &zrt);
 
 	/*
 	 * If the vnode source zone is properly set to a non-global zone, or
@@ -408,7 +411,7 @@ getflabel(vnode_t *vp)
 	 * our zone.
 	 */
 	if ((zone = curproc->p_zone) != global_zone) {
-		zone_hold(zone);
+		zrt = zone_hold(zone);
 		goto zone_out;		/* return this label */
 	}
 
@@ -419,8 +422,8 @@ getflabel(vnode_t *vp)
 	 * (i.e., no ".", "..", "//", and so on).
 	 */
 
-	zone_rele(zone);
-	zone = zone_find_by_any_path(vpath, B_FALSE);
+	zone_rele(zone, zrt);
+	zone = zone_find_by_any_path(vpath, B_FALSE, &zrt);
 
 zone_out:
 	if ((curproc->p_zone == global_zone) && (zone == global_zone)) {
@@ -447,9 +450,10 @@ zone_out:
 
 		if ((mntpt != NULL) && (*mntpt == '/')) {
 			zone_t	*to_zone;
+			reftoken_t *tzrt;
 
-			to_zone = zone_find_by_any_path(mntpt, B_FALSE);
-			zone_rele(to_zone);
+			to_zone = zone_find_by_any_path(mntpt, B_FALSE, &tzrt);
+			zone_rele(to_zone, tzrt);
 			if (to_zone != global_zone) {
 				/* force admin_low */
 				exported = B_TRUE;
@@ -514,7 +518,7 @@ zone_out:
 	 */
 	zl = zone->zone_slabel;
 	label_hold(zl);
-	zone_rele(zone);
+	zone_rele(zone, zrt);
 	return (zl);
 
 out_high:
@@ -522,7 +526,7 @@ out_high:
 		VFS_RELE(vfsp);
 
 	label_hold(l_admin_high);
-	zone_rele(zone);
+	zone_rele(zone, zrt);
 	return (l_admin_high);
 }
 

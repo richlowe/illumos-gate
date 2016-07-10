@@ -52,6 +52,7 @@
 #include <sys/policy.h>
 #include <fs/fs_subr.h>
 #include <fs/proc/prdata.h>
+#include <sys/refcnt.h>
 
 /*
  * This is the loadable module wrapper.
@@ -193,6 +194,7 @@ prmount(struct vfs *vfsp, struct vnode *mvp,
 {
 	prnode_t *pnp;
 	zone_t *zone = curproc->p_zone;
+	reftoken_t *rt;
 
 	if (secpolicy_fs_mount(cr, mvp, vfsp) != 0)
 		return (EPERM);
@@ -203,8 +205,9 @@ prmount(struct vfs *vfsp, struct vnode *mvp,
 	if (zone == global_zone) {
 		zone_t *mntzone;
 
-		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
-		zone_rele(mntzone);
+		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt),
+			&rt);
+		zone_rele(mntzone, rt);
 		if (zone != mntzone)
 			return (EBUSY);
 	}

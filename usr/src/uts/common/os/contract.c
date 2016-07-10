@@ -972,6 +972,7 @@ contract_status_common(contract_t *ct, zone_t *zone, void *status,
 	    zone->zone_uniqid == ct->ct_czuniqid) {
 		zone_t *czone;
 		zoneid_t zoneid = -1;
+		reftoken_t *rt;
 
 		/*
 		 * Contracts don't have holds on the zones they were
@@ -981,10 +982,11 @@ contract_status_common(contract_t *ct, zone_t *zone, void *status,
 		if (zone->zone_uniqid == ct->ct_czuniqid ||
 		    ct->ct_czuniqid == GLOBAL_ZONEUNIQID) {
 			zoneid = ct->ct_zoneid;
-		} else if ((czone = zone_find_by_id(ct->ct_zoneid)) != NULL) {
+		} else if ((czone = zone_find_by_id(ct->ct_zoneid,
+		    &rt)) != NULL) {
 			if (czone->zone_uniqid == ct->ct_mzuniqid)
 				zoneid = ct->ct_zoneid;
-			zone_rele(czone);
+			zone_rele(czone, rt);
 		}
 
 		STRUCT_FSET(lstatus, ctst_zoneid, zoneid);

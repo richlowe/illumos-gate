@@ -30,7 +30,7 @@
 #include <sys/dmu.h>
 #include <sys/zfs_context.h>
 #include <sys/zap.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/zap_impl.h>
 #include <sys/zap_leaf.h>
 #include <sys/avl.h>
@@ -1363,7 +1363,7 @@ zap_get_stats(objset_t *os, uint64_t zapobj, zap_stats_t *zs)
 
 int
 zap_count_write(objset_t *os, uint64_t zapobj, const char *name, int add,
-    refcount_t *towrite, refcount_t *tooverwrite)
+    trackcount_t *towrite, trackcount_t *tooverwrite)
 {
 	zap_t *zap;
 	int err = 0;
@@ -1380,7 +1380,7 @@ zap_count_write(objset_t *os, uint64_t zapobj, const char *name, int add,
 	 * large microzap results in a promotion to fatzap.
 	 */
 	if (name == NULL) {
-		(void) refcount_add_many(towrite,
+		(void) trackcount_add_many(towrite,
 		    (3 + (add ? 4 : 0)) * SPA_OLD_MAXBLOCKSIZE, FTAG);
 		return (err);
 	}
@@ -1405,7 +1405,7 @@ zap_count_write(objset_t *os, uint64_t zapobj, const char *name, int add,
 			/*
 			 * We treat this case as similar to (name == NULL)
 			 */
-			(void) refcount_add_many(towrite,
+			(void) trackcount_add_many(towrite,
 			    (3 + (add ? 4 : 0)) * SPA_OLD_MAXBLOCKSIZE, FTAG);
 		}
 	} else {
@@ -1425,15 +1425,15 @@ zap_count_write(objset_t *os, uint64_t zapobj, const char *name, int add,
 		 *			ptrtbl blocks
 		 */
 		if (dmu_buf_freeable(zap->zap_dbuf)) {
-			(void) refcount_add_many(tooverwrite,
+			(void) trackcount_add_many(tooverwrite,
 			    MZAP_MAX_BLKSZ, FTAG);
 		} else {
-			(void) refcount_add_many(towrite,
+			(void) trackcount_add_many(towrite,
 			    MZAP_MAX_BLKSZ, FTAG);
 		}
 
 		if (add) {
-			(void) refcount_add_many(towrite,
+			(void) trackcount_add_many(towrite,
 			    4 * MZAP_MAX_BLKSZ, FTAG);
 		}
 	}

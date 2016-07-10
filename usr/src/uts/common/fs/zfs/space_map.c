@@ -34,7 +34,7 @@
 #include <sys/dsl_pool.h>
 #include <sys/zio.h>
 #include <sys/space_map.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/zfeature.h>
 
 /*

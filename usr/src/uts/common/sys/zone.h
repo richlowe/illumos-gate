@@ -40,6 +40,7 @@
 #include <sys/uadmin.h>
 #include <sys/ksynch.h>
 #include <sys/socket_impl.h>
+#include <sys/refcnt.h>
 #include <netinet/in.h>
 
 #ifdef	__cplusplus
@@ -288,6 +289,7 @@ typedef struct zone_cmd_rval {
 /*
  * Threads that read or write the following flag must hold zone_lock.
  */
+/* XXX: Should/can this go away? */
 #define	ZF_REFCOUNTS_LOGGED	0x1	/* a thread logged the zone's refs */
 
 /*
@@ -330,38 +332,6 @@ typedef struct zone_net_data {
 
 struct pool;
 struct brand;
-
-/*
- * Each of these constants identifies a kernel subsystem that acquires and
- * releases zone references.  Each subsystem that invokes
- * zone_hold_ref() and zone_rele_ref() should specify the
- * zone_ref_subsys_t constant associated with the subsystem.  Tracked holds
- * help users and developers quickly identify subsystems that stall zone
- * shutdowns indefinitely.
- *
- * NOTE: You must modify zone_ref_subsys_names in usr/src/uts/common/os/zone.c
- * when you modify this enumeration.
- */
-typedef enum zone_ref_subsys {
-	ZONE_REF_NFS,			/* NFS */
-	ZONE_REF_NFSV4,			/* NFSv4 */
-	ZONE_REF_SMBFS,			/* SMBFS */
-	ZONE_REF_MNTFS,			/* MNTFS */
-	ZONE_REF_LOFI,			/* LOFI devices */
-	ZONE_REF_VFS,			/* VFS infrastructure */
-	ZONE_REF_IPC,			/* IPC infrastructure */
-	ZONE_REF_NUM_SUBSYS		/* This must be the last entry. */
-} zone_ref_subsys_t;
-
-/*
- * zone_ref represents a general-purpose references to a zone.  Each zone's
- * references are linked into the zone's zone_t::zone_ref_list.  This allows
- * debuggers to walk zones' references.
- */
-typedef struct zone_ref {
-	struct zone	*zref_zone; /* the zone to which the reference refers */
-	list_node_t	zref_linkage; /* linkage for zone_t::zone_ref_list */
-} zone_ref_t;
 
 /*
  * Structure to record list of ZFS datasets exported to a zone.
@@ -431,10 +401,8 @@ typedef struct zone {
 					/* if not emulated */
 	/*
 	 * zone_lock protects the following fields of a zone_t:
-	 * 	zone_ref
-	 * 	zone_cred_ref
-	 * 	zone_subsys_ref
-	 * 	zone_ref_list
+	 * 	zone_refcnt
+	 * 	zone_cred_refcnt
 	 * 	zone_ntasks
 	 * 	zone_flags
 	 * 	zone_zsd
@@ -447,16 +415,9 @@ typedef struct zone {
 	 */
 	list_node_t	zone_linkage;
 	zoneid_t	zone_id;	/* ID of zone */
-	uint_t		zone_ref;	/* count of zone_hold()s on zone */
-	uint_t		zone_cred_ref;	/* count of zone_hold_cred()s on zone */
-	/*
-	 * Fixed-sized array of subsystem-specific reference counts
-	 * The sum of all of the counts must be less than or equal to zone_ref.
-	 * The array is indexed by the counts' subsystems' zone_ref_subsys_t
-	 * constants.
-	 */
-	uint_t		zone_subsys_ref[ZONE_REF_NUM_SUBSYS];
-	list_t		zone_ref_list;	/* list of zone_ref_t structs */
+	refcnt_t	*zone_refcnt;
+	refcnt_t	*zone_cred_refcnt;
+
 	/*
 	 * zone_rootvp and zone_rootpath can never be modified once set.
 	 */
@@ -626,6 +587,11 @@ typedef struct zone {
 	int		zone_mounts_in_progress;
 	kcondvar_t	zone_mount_cv;
 	kmutex_t	zone_mount_lock;
+	/*
+	 * Zones hold a reference to themselves via zsched().
+	 * Ours is not to reason why.
+	 */
+	reftoken_t	*zone_token;
 } zone_t;
 
 /*
@@ -643,20 +609,17 @@ extern rctl_hndl_t rc_zone_nprocs;
 extern long zone(int, void *, void *, void *, void *);
 extern void zone_zsd_init(void);
 extern void zone_init(void);
-extern void zone_hold(zone_t *);
-extern void zone_rele(zone_t *);
-extern void zone_init_ref(zone_ref_t *);
-extern void zone_hold_ref(zone_t *, zone_ref_t *, zone_ref_subsys_t);
-extern void zone_rele_ref(zone_ref_t *, zone_ref_subsys_t);
-extern void zone_cred_hold(zone_t *);
-extern void zone_cred_rele(zone_t *);
+extern reftoken_t *zone_hold(zone_t *);
+extern void zone_rele(zone_t *, reftoken_t *);
+extern reftoken_t *zone_cred_hold(zone_t *);
+extern void zone_cred_rele(zone_t *, reftoken_t *);
 extern void zone_task_hold(zone_t *);
 extern void zone_task_rele(zone_t *);
-extern zone_t *zone_find_by_id(zoneid_t);
-extern zone_t *zone_find_by_label(const ts_label_t *);
-extern zone_t *zone_find_by_name(char *);
-extern zone_t *zone_find_by_any_path(const char *, boolean_t);
-extern zone_t *zone_find_by_path(const char *);
+extern zone_t *zone_find_by_id(zoneid_t, reftoken_t **);
+extern zone_t *zone_find_by_label(const ts_label_t *, reftoken_t **);
+extern zone_t *zone_find_by_name(char *, reftoken_t **);
+extern zone_t *zone_find_by_any_path(const char *, boolean_t, reftoken_t **);
+extern zone_t *zone_find_by_path(const char *, reftoken_t **);
 extern zoneid_t getzoneid(void);
 extern zone_t *zone_find_by_id_nolock(zoneid_t);
 extern int zone_datalink_walk(zoneid_t, int (*)(datalink_id_t, void *), void *);

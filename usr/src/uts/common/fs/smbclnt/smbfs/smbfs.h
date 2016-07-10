@@ -56,6 +56,7 @@
 #include <sys/vfs_opreg.h>
 #include <sys/fs/smbfs_mount.h>
 #include <sys/zone.h>
+#include <sys/refcnt.h>
 
 /*
  * Path component length
@@ -140,7 +141,8 @@ typedef struct smbmntinfo {
 	/*
 	 * Zones support.
 	 */
-	zone_ref_t		smi_zone_ref;	/* Zone FS is mounted in */
+	zone_t			*smi_zone;	/* Zone mounted in */
+	reftoken_t		*smi_zone_rt;	/* Zone hold token */
 	list_node_t		smi_zone_node;	/* Link to per-zone smi list */
 	/* Lock for the list is: smi_globals_t -> smg_lock */
 

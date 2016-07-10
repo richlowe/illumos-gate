@@ -34,7 +34,7 @@
 #include <sys/dsl_dir.h>
 #include <sys/dsl_pool.h>
 #include <sys/dnode.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/spa.h>
 
 /*

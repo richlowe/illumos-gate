@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/acctctl.h>
 #include <sys/cmn_err.h>
 #include <sys/cred.h>
@@ -39,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/user.h>
 #include <sys/policy.h>
+#include <sys/refcnt.h>
 
 /*
  * getacct(2), putacct(2), and wracct(2) system calls
@@ -195,14 +194,15 @@ putacct(idtype_t idtype, id_t id, void *buf, size_t bufsize, int flags)
 			error = ESRCH;
 		} else {
 			zone_t *zone = p->p_zone;
+			reftoken_t *rt;
 
 			tkid = p->p_task->tk_tkid;
-			zone_hold(zone);
+			rt = zone_hold(zone);
 			mutex_exit(&pidlock);
 
 			error = exacct_tag_proc(&acg->ac_proc, id, tkid, kbuf,
 			    bufsize, flags, zone->zone_nodename);
-			zone_rele(zone);
+			zone_rele(zone, rt);
 		}
 		break;
 	case P_TASKID:

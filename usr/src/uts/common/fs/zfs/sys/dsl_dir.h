@@ -31,7 +31,7 @@
 #include <sys/dmu.h>
 #include <sys/dsl_pool.h>
 #include <sys/dsl_synctask.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/zfs_context.h>
 
 #ifdef	__cplusplus

@@ -75,7 +75,7 @@
 #include <sys/zfs_ioctl.h>
 #include <sys/mkdev.h>
 #include <sys/zil.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/zfs_znode.h>
 #include <sys/zfs_rlock.h>
 #include <sys/vdev_disk.h>

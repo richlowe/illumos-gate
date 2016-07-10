@@ -59,6 +59,7 @@
 #include <sys/list.h>
 #include <sys/mntent.h>
 #include <sys/tsol/label.h>
+#include <sys/refcnt.h>
 
 #include <rpc/types.h>
 #include <rpc/auth.h>
@@ -712,6 +713,7 @@ nfs4_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	zone_t *zone = nfs_zone();
 	nfs4_error_t n4e;
 	zone_t *mntzone = NULL;
+	reftoken_t *rt;
 
 	if (secpolicy_fs_mount(cr, mvp, vfsp) != 0)
 		return (EPERM);
@@ -1088,10 +1090,11 @@ more:
 	/*
 	 * Determine the zone we're being mounted into.
 	 */
-	zone_hold(mntzone = zone);		/* start with this assumption */
+	rt = zone_hold(mntzone = zone);		/* start with this assumption */
 	if (getzoneid() == GLOBAL_ZONEID) {
-		zone_rele(mntzone);
-		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+		zone_rele(mntzone, rt);
+		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt),
+			&rt);
 		ASSERT(mntzone != NULL);
 		if (mntzone != zone) {
 			error = EBUSY;
@@ -1177,12 +1180,11 @@ errout:
 			if (rtvp != NULL)
 				VN_RELE(rtvp);
 			if (mntzone != NULL)
-				zone_rele(mntzone);
+				zone_rele(mntzone, rt);
 			/* need to remove it from the zone */
 			removed = nfs4_mi_zonelist_remove(mi);
 			if (removed)
-				zone_rele_ref(&mi->mi_zone_ref,
-				    ZONE_REF_NFSV4);
+				zone_rele(mi->mi_zone, mi->mi_zone_rt);
 			MI4_RELE(mi);
 			if (!(uap->flags & MS_SYSSPACE) && args) {
 				nfs4_free_args(args);
@@ -1202,7 +1204,7 @@ errout:
 		VN_RELE(rtvp);
 
 	if (mntzone != NULL)
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 
 	return (error);
 }
@@ -2386,9 +2388,7 @@ nfs4rootvp(vnode_t **rtvpp, vfs_t *vfsp, struct servinfo4 *svp_head,
 	cv_init(&mi->mi_inact_req_cv, NULL, CV_DEFAULT, NULL);
 
 	mi->mi_vfsp = vfsp;
-	mi->mi_zone = zone;
-	zone_init_ref(&mi->mi_zone_ref);
-	zone_hold_ref(zone, &mi->mi_zone_ref, ZONE_REF_NFSV4);
+	mi->mi_zone_rt = zone_hold(mi->mi_zone = zone);
 	nfs4_mi_zonelist_add(mi);
 
 	/*
@@ -2651,7 +2651,7 @@ bad:
 	nfs4_async_manager_stop(vfsp);
 	removed = nfs4_mi_zonelist_remove(mi);
 	if (removed)
-		zone_rele_ref(&mi->mi_zone_ref, ZONE_REF_NFSV4);
+		zone_rele(mi->mi_zone, mi->mi_zone_rt);
 
 	/*
 	 * This releases the initial "hold" of the mi since it will never
@@ -2776,7 +2776,7 @@ nfs4_unmount(vfs_t *vfsp, int flag, cred_t *cr)
 	nfs4_remove_mi_from_server(mi, NULL);
 	removed = nfs4_mi_zonelist_remove(mi);
 	if (removed)
-		zone_rele_ref(&mi->mi_zone_ref, ZONE_REF_NFSV4);
+		zone_rele(mi->mi_zone, mi->mi_zone_rt);
 
 	return (0);
 }
@@ -4407,7 +4407,7 @@ nfs4_free_mount(vfs_t *vfsp, int flag, cred_t *cr)
 
 	removed = nfs4_mi_zonelist_remove(mi);
 	if (removed)
-		zone_rele_ref(&mi->mi_zone_ref, ZONE_REF_NFSV4);
+		zone_rele(mi->mi_zone, mi->mi_zone_rt);
 }
 
 /* Referral related sub-routines */

@@ -197,6 +197,7 @@ processor_bind(idtype_t idtype, id_t id, processorid_t bind,
 	kproject_t	*kpj;
 	zone_t		*zptr;
 	contract_t	*ct;
+	reftoken_t	*rt;
 
 	/*
 	 * Since we might be making a binding to a processor, hold the
@@ -306,13 +307,13 @@ processor_bind(idtype_t idtype, id_t id, processorid_t bind,
 		if (id == P_MYID)
 			id = getzoneid();
 
-		if ((zptr = zone_find_by_id(id)) == NULL) {
+		if ((zptr = zone_find_by_id(id, &rt)) == NULL) {
 			ret = ESRCH;
 		} else {
 			mutex_enter(&pidlock);
 			ret = cpu_bind_zone(zptr, bind, &obind, &err);
 			mutex_exit(&pidlock);
-			zone_rele(zptr);
+			zone_rele(zptr, rt);
 		}
 		break;
 

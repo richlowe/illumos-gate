@@ -28,6 +28,7 @@
 #include <sys/errno.h>
 #include <sys/cred.h>
 #include <sys/policy.h>
+#include <sys/refcnt.h>
 
 #include <sys/fs/autofs.h>
 
@@ -43,18 +44,19 @@ autofssys(enum autofssys_op opcode, uintptr_t arg)
 		zone_t *zone;
 		zoneid_t zoneid;
 		struct autofs_globals *fngp;
+		reftoken_t *rt;
 
 		zoneid = (zoneid_t)arg;
 		if (secpolicy_fs_unmount(CRED(), NULL) != 0 ||
 		    crgetzoneid(CRED()) != GLOBAL_ZONEID)
 			return (set_errno(EPERM));
-		if ((zone = zone_find_by_id(zoneid)) == NULL)
+		if ((zone = zone_find_by_id(zoneid, &rt)) == NULL)
 			return (set_errno(EINVAL));
 		mutex_enter(&autofs_minor_lock);
 		fngp = zone_getspecific(autofs_key, zone);
 		if (fngp == NULL) {
 			mutex_exit(&autofs_minor_lock);
-			zone_rele(zone);
+			zone_rele(zone, rt);
 			/*
 			 * There were no mounts, so no work to do. Success.
 			 */
@@ -62,7 +64,7 @@ autofssys(enum autofssys_op opcode, uintptr_t arg)
 		}
 		mutex_exit(&autofs_minor_lock);
 		unmount_tree(fngp, B_TRUE);
-		zone_rele(zone);
+		zone_rele(zone, rt);
 		break;
 	}
 	case AUTOFS_SETDOOR: { /* set door handle for zone */

@@ -2932,7 +2932,7 @@ nfs4_mi_shutdown(zoneid_t zoneid, void *data)
 		 */
 		list_remove(&mig->mig_list, mi);
 		mutex_exit(&mig->mig_lock);
-		zone_rele_ref(&mi->mi_zone_ref, ZONE_REF_NFSV4);
+		zone_rele(mi->mi_zone, mi->mi_zone_rt);
 
 		/*
 		 * Release hold on vfs and mi done to prevent race with zone

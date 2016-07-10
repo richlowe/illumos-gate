@@ -32,7 +32,7 @@
 #include <sys/spa.h>
 #include <sys/txg.h>
 #include <sys/zio.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/dmu_zfetch.h>
 #include <sys/zrlock.h>
 
@@ -208,8 +208,8 @@ typedef struct dnode {
 	uint8_t *dn_dirtyctx_firstset;		/* dbg: contents meaningless */
 
 	/* protected by own devices */
-	refcount_t dn_tx_holds;
-	refcount_t dn_holds;
+	trackcount_t dn_tx_holds;
+	trackcount_t dn_holds;
 
 	kmutex_t dn_dbufs_mtx;
 	/*

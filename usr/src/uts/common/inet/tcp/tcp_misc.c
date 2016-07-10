@@ -431,6 +431,7 @@ tcp_ioctl_abort_conn(queue_t *q, mblk_t *mp)
 	zoneid_t	zoneid = connp->conn_zoneid;
 	tcp_t		*tcp = connp->conn_tcp;
 	tcp_stack_t	*tcps = tcp->tcp_tcps;
+	reftoken_t	*rt;
 
 	iocp = (IOCP)mp->b_rptr;
 
@@ -457,9 +458,9 @@ tcp_ioctl_abort_conn(queue_t *q, mblk_t *mp)
 
 	/* check that a zone with the supplied zoneid exists */
 	if (acp->ac_zoneid != GLOBAL_ZONEID && acp->ac_zoneid != ALL_ZONES) {
-		zptr = zone_find_by_id(zoneid);
+		zptr = zone_find_by_id(zoneid, &rt);
 		if (zptr != NULL) {
-			zone_rele(zptr);
+			zone_rele(zptr, rt);
 		} else {
 			err = EINVAL;
 			goto out;

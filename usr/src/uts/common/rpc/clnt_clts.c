@@ -65,6 +65,7 @@
 #include <sys/list.h>
 #include <sys/atomic.h>
 #include <sys/zone.h>
+#include <sys/refcnt.h>
 #include <netinet/in.h>
 #include <rpc/types.h>
 #include <rpc/xdr.h>
@@ -2192,6 +2193,7 @@ done_xid_copy:
 	} else {
 		zone_t *zone;
 		struct rpcstat *rpcstat;
+		reftoken_t *rt;
 
 		mutex_exit(&chtp->ct_lock);
 		RPCLOG(8, "clnt_dispatch_notify (clts): no caller for reply "
@@ -2201,7 +2203,7 @@ done_xid_copy:
 		 * This is unfortunate, but we need to lookup the zone so we
 		 * can increment its "rcbadxids" counter.
 		 */
-		zone = zone_find_by_id(zoneid);
+		zone = zone_find_by_id(zoneid, &rt);
 		if (zone == NULL) {
 			/*
 			 * The zone went away...
@@ -2213,11 +2215,11 @@ done_xid_copy:
 			/*
 			 * Not interested
 			 */
-			zone_rele(zone);
+			zone_rele(zone, rt);
 			return;
 		}
 		RCSTAT_INCR(rpcstat->rpc_clts_client, rcbadxids);
-		zone_rele(zone);
+		zone_rele(zone, rt);
 	}
 }
 

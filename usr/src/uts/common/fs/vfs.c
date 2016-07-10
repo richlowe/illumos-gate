@@ -1134,6 +1134,7 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 	vsk_anchor_t	*vskap;
 	char fstname[FSTYPSZ];
 	zone_t		*zone;
+	reftoken_t 	*rt;
 
 	/*
 	 * The v_flag value for the mount point vp is permanently set
@@ -1602,7 +1603,7 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 	 * inside a NGZ, then we know what zone we are.
 	 */
 	if (INGLOBALZONE(curproc)) {
-		zone = zone_find_by_path(mountpt);
+		zone = zone_find_by_path(mountpt, &rt);
 		ASSERT(zone != NULL);
 	} else {
 		zone = curproc->p_zone;
@@ -1610,7 +1611,7 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 		 * zone_find_by_path does a hold, so do one here too so that
 		 * we can do a zone_rele after mount_completed.
 		 */
-		zone_hold(zone);
+		rt = zone_hold(zone);
 	}
 	mount_in_progress(zone);
 	/*
@@ -1782,7 +1783,7 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 		vfs_unlock(vfsp);
 	}
 	mount_completed(zone);
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	if (splice)
 		vn_vfsunlock(vp);
 
@@ -3522,6 +3523,7 @@ void
 vfs_list_add(struct vfs *vfsp)
 {
 	zone_t *zone;
+	reftoken_t *into_rt;
 
 	/*
 	 * Typically, the vfs_t will have been created on behalf of the file
@@ -3538,18 +3540,16 @@ vfs_list_add(struct vfs *vfsp)
 	/*
 	 * The zone that owns the mount is the one that performed the mount.
 	 * Note that this isn't necessarily the same as the zone mounted into.
-	 * The corresponding zone_rele_ref() will be done when the vfs_t
+	 * The corresponding zone_rele() will be done when the vfs_t
 	 * is being free'd.
 	 */
 	vfsp->vfs_zone = curproc->p_zone;
-	zone_init_ref(&vfsp->vfs_implp->vi_zone_ref);
-	zone_hold_ref(vfsp->vfs_zone, &vfsp->vfs_implp->vi_zone_ref,
-	    ZONE_REF_VFS);
+	vfsp->vfs_implp->vi_zone_rt = zone_hold(vfsp->vfs_zone);
 
 	/*
 	 * Find the zone mounted into, and put this mount on its vfs list.
 	 */
-	zone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+	zone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt), &into_rt);
 	ASSERT(zone != NULL);
 	/*
 	 * Special casing for the root vfs.  This structure is allocated
@@ -3618,15 +3618,16 @@ vfs_list_add(struct vfs *vfsp)
 	 */
 	vfs_mnttab_modtimeupd();
 	vfs_list_unlock();
-	zone_rele(zone);
+	zone_rele(zone, into_rt);
 }
 
 void
 vfs_list_remove(struct vfs *vfsp)
 {
 	zone_t *zone;
+	reftoken_t *rt;
 
-	zone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+	zone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt), &rt);
 	ASSERT(zone != NULL);
 	/*
 	 * Callers are responsible for preventing attempts to unmount the
@@ -3669,7 +3670,7 @@ vfs_list_remove(struct vfs *vfsp)
 	 */
 	vfs_mnttab_modtimeupd();
 	vfs_list_unlock();
-	zone_rele(zone);
+	zone_rele(zone, rt);
 }
 
 struct vfs *
@@ -4369,8 +4370,7 @@ vfs_rele(vfs_t *vfsp)
 		VFS_FREEVFS(vfsp);
 		lofi_remove(vfsp);
 		if (vfsp->vfs_zone)
-			zone_rele_ref(&vfsp->vfs_implp->vi_zone_ref,
-			    ZONE_REF_VFS);
+			zone_rele(vfsp->vfs_zone, vfsp->vfs_implp->vi_zone_rt);
 		vfs_freemnttab(vfsp);
 		vfs_free(vfsp);
 	}

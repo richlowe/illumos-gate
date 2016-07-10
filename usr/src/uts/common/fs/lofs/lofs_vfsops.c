@@ -43,6 +43,7 @@
 #include <sys/cmn_err.h>
 #include <sys/policy.h>
 #include <sys/tsol/label.h>
+#include <sys/refcnt.h>
 #include "fs/fs_subr.h"
 
 /*
@@ -213,6 +214,7 @@ lo_mount(struct vfs *vfsp,
 		char	specname[MAXPATHLEN];
 		zone_t	*from_zptr;
 		zone_t	*to_zptr;
+		reftoken_t *frt, *trt;
 
 		if (vnodetopath(NULL, realrootvp, specname,
 		    sizeof (specname), CRED()) != 0) {
@@ -220,8 +222,9 @@ lo_mount(struct vfs *vfsp,
 			return (EACCES);
 		}
 
-		from_zptr = zone_find_by_path(specname);
-		to_zptr = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+		from_zptr = zone_find_by_path(specname, &frt);
+		to_zptr = zone_find_by_path(refstr_value(vfsp->vfs_mntpt),
+		    &trt);
 
 		/*
 		 * Special case for scratch zones used for Live Upgrade:
@@ -266,14 +269,14 @@ lo_mount(struct vfs *vfsp,
 					vfs_setmntopt(vfsp, MNTOPT_RO, NULL, 0);
 				} else {
 					VN_RELE(realrootvp);
-					zone_rele(to_zptr);
-					zone_rele(from_zptr);
+					zone_rele(to_zptr, trt);
+					zone_rele(from_zptr, frt);
 					return (EACCES);
 				}
 			}
 		}
-		zone_rele(to_zptr);
-		zone_rele(from_zptr);
+		zone_rele(to_zptr, trt);
+		zone_rele(from_zptr, frt);
 	}
 
 	/*

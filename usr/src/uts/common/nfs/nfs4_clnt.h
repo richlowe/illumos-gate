@@ -48,6 +48,7 @@
 #include <sys/door.h>
 #include <sys/condvar_impl.h>
 #include <sys/zone.h>
+#include <sys/refcnt.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -1084,7 +1085,7 @@ typedef struct mntinfo4 {
 	 * Zones support.
 	 */
 	struct zone	*mi_zone;	/* Zone in which FS is mounted */
-	zone_ref_t	mi_zone_ref;	/* Reference to aforementioned zone */
+	reftoken_t	*mi_zone_rt;	/* token for hold on mi_zone */
 	list_node_t	mi_zone_node;  /* linkage into per-zone mi list */
 
 	/*

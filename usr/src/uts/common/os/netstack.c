@@ -960,8 +960,9 @@ netstack_find_by_zoneid(zoneid_t zoneid)
 {
 	netstack_t *ns;
 	zone_t *zone;
+	reftoken_t *rt;
 
-	zone = zone_find_by_id(zoneid);
+	zone = zone_find_by_id(zoneid, &rt);
 
 	if (zone == NULL)
 		return (NULL);
@@ -973,7 +974,7 @@ netstack_find_by_zoneid(zoneid_t zoneid)
 	else
 		netstack_hold(ns);
 
-	zone_rele(zone);
+	zone_rele(zone, rt);
 	return (ns);
 }
 

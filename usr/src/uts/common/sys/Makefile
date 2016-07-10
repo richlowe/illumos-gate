@@ -430,6 +430,8 @@ CHKHDRS=			\
 	pathname.h		\
 	pattr.h			\
 	queue.h			\
+	refcnt.h		\
+	refcnt_impl.h		\
 	serializer.h		\
 	pbio.h			\
 	pccard.h		\

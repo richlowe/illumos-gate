@@ -37,6 +37,7 @@
 #include <sys/list.h>
 #include <sys/crypto/api.h>
 #include <sys/zone.h>
+#include <sys/refcnt.h>
 #ifdef _KERNEL
 #include <sys/cmlb.h>
 #include <sys/open.h>
@@ -264,7 +265,8 @@ struct lofi_state {
 	kstat_t		*ls_kstat;
 	kmutex_t	ls_kstat_lock;
 	struct dk_geom	ls_dkg;
-	zone_ref_t	ls_zone;
+	zone_t		*ls_zone;
+	reftoken_t	*ls_zone_ref;
 	list_node_t	ls_list;	/* all lofis */
 	dev_info_t	*ls_dip;
 	dev_t		ls_dev;		/* this node's dev_t */

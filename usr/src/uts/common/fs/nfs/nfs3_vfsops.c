@@ -55,6 +55,7 @@
 #include <sys/socket.h>
 #include <sys/netconfig.h>
 #include <sys/tsol/tnet.h>
+#include <sys/refcnt.h>
 
 #include <rpc/types.h>
 #include <rpc/auth.h>
@@ -495,6 +496,7 @@ nfs3_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	int flags, addr_type;
 	zone_t *zone = nfs_zone();
 	zone_t *mntzone = NULL;
+	reftoken_t *rt;
 
 
 	if ((error = secpolicy_fs_mount(cr, mvp, vfsp)) != 0)
@@ -910,10 +912,10 @@ more:
 	/*
 	 * Determine the zone we're being mounted into.
 	 */
-	zone_hold(mntzone = zone);		/* start with this assumption */
+	rt = zone_hold(mntzone = zone);		/* start with this assumption */
 	if (getzoneid() == GLOBAL_ZONEID) {
-		zone_rele(mntzone);
-		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt));
+		zone_rele(mntzone, rt);
+		mntzone = zone_find_by_path(refstr_value(vfsp->vfs_mntpt), &rt);
 		ASSERT(mntzone != NULL);
 		if (mntzone != zone) {
 			error = EBUSY;
@@ -995,7 +997,7 @@ errout:
 	}
 
 	if (mntzone != NULL)
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 
 	return (error);
 }
@@ -1122,8 +1124,7 @@ nfs3rootvp(vnode_t **rtvpp, vfs_t *vfsp, struct servinfo *svp,
 
 	mi->mi_vfsp = vfsp;
 	mi->mi_zone = zone;
-	zone_init_ref(&mi->mi_zone_ref);
-	zone_hold_ref(zone, &mi->mi_zone_ref, ZONE_REF_NFS);
+	mi->mi_zone_rt = zone_hold(mi->mi_zone = zone);
 	nfs_mi_zonelist_add(mi);
 
 	/*

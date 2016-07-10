@@ -66,6 +66,7 @@
 #include <inet/ipclassifier.h>
 #include <inet/sctp_ip.h>
 #include <sys/tsol/tnet.h>
+#include <sys/refcnt.h>
 
 /*
  * This source file contains Security Association Database (SADB) common
@@ -3454,6 +3455,7 @@ sadb_common_add(queue_t *pfkey_q, mblk_t *mp, sadb_msg_t *samsg,
 		uint32_t *peer_addr_ptr;
 		zoneid_t zoneid = GLOBAL_ZONEID;
 		zone_t *zone;
+		reftoken_t *rt;
 
 		peer_addr_ptr = is_inbound ? src_addr_ptr : dst_addr_ptr;
 
@@ -3480,10 +3482,10 @@ sadb_common_add(queue_t *pfkey_q, mblk_t *mp, sadb_msg_t *samsg,
 
 		newbie->ipsa_otsl = tsl;
 
-		zone = zone_find_by_label(tsl);
+		zone = zone_find_by_label(tsl, &rt);
 		if (zone != NULL) {
 			zoneid = zone->zone_id;
-			zone_rele(zone);
+			zone_rele(zone, rt);
 		}
 		/*
 		 * For exclusive stacks we set the zoneid to zero to operate

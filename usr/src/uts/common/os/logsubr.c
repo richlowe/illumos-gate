@@ -389,6 +389,7 @@ log_update(log_t *target, queue_t *q, short flags, log_filter_t *filter)
 	log_zone_t *lzp;
 	zoneid_t zoneid = target->log_zoneid;
 	int i;
+	reftoken_t *rt;
 
 	log_enter();
 
@@ -404,7 +405,7 @@ log_update(log_t *target, queue_t *q, short flags, log_filter_t *filter)
 	 */
 	if (zoneid == GLOBAL_ZONEID) {
 		lzp = &log_global;
-	} else if ((zptr = zone_find_by_id(zoneid)) == NULL) {
+	} else if ((zptr = zone_find_by_id(zoneid, &rt)) == NULL) {
 		log_exit();
 		return;		/* zone is being destroyed, ignore update */
 	} else {
@@ -420,7 +421,7 @@ log_update(log_t *target, queue_t *q, short flags, log_filter_t *filter)
 	lzp->lz_active = active;
 
 	if (zptr)
-		zone_rele(zptr);
+		zone_rele(zptr, rt);
 
 	if (log_consq == target->log_q) {
 		if (flags & SL_CONSOLE)
@@ -559,6 +560,7 @@ log_sendmsg(mblk_t *mp, zoneid_t zoneid)
 	log_zone_t *lzp;
 	int i;
 	int backlog;
+	reftoken_t *rt;
 
 	/*
 	 * Need to special case the global zone here since this may be
@@ -566,7 +568,7 @@ log_sendmsg(mblk_t *mp, zoneid_t zoneid)
 	 */
 	if (zoneid == GLOBAL_ZONEID) {
 		lzp = &log_global;
-	} else if ((zptr = zone_find_by_id(zoneid)) == NULL) {
+	} else if ((zptr = zone_find_by_id(zoneid, &rt)) == NULL) {
 		/* specified zone doesn't exist, free message and return */
 		log_freemsg(mp);
 		return;
@@ -577,7 +579,7 @@ log_sendmsg(mblk_t *mp, zoneid_t zoneid)
 
 	if ((lc->flags & lzp->lz_active) == 0) {
 		if (zptr)
-			zone_rele(zptr);
+			zone_rele(zptr, rt);
 		log_freemsg(mp);
 		return;
 	}
@@ -677,7 +679,7 @@ log_sendmsg(mblk_t *mp, zoneid_t zoneid)
 	}
 
 	if (zptr)
-		zone_rele(zptr);
+		zone_rele(zptr, rt);
 
 	if ((flags & SL_CONSOLE) && (lc->pri & LOG_FACMASK) == LOG_KERN) {
 		if ((mp2 == NULL || log_consq == log_backlogq || panicstr) &&

@@ -76,7 +76,7 @@ dbuf_cons(void *vdb, void *unused, int kmflag)
 
 	mutex_init(&db->db_mtx, NULL, MUTEX_DEFAULT, NULL);
 	cv_init(&db->db_changed, NULL, CV_DEFAULT, NULL);
-	refcount_create(&db->db_holds);
+	trackcount_create(&db->db_holds);
 
 	return (0);
 }
@@ -88,7 +88,7 @@ dbuf_dest(void *vdb, void *unused)
 	dmu_buf_impl_t *db = vdb;
 	mutex_destroy(&db->db_mtx);
 	cv_destroy(&db->db_changed);
-	refcount_destroy(&db->db_holds);
+	trackcount_destroy(&db->db_holds);
 }
 
 /*
@@ -221,7 +221,7 @@ dbuf_hash_remove(dmu_buf_impl_t *db)
 	 * We musn't hold db_mtx to maintain lock ordering:
 	 * DBUF_HASH_MUTEX > db_mtx.
 	 */
-	ASSERT(refcount_is_zero(&db->db_holds));
+	ASSERT(trackcount_is_zero(&db->db_holds));
 	ASSERT(db->db_state == DB_EVICTING);
 	ASSERT(!MUTEX_HELD(&db->db_mtx));
 
@@ -260,7 +260,7 @@ dbuf_verify_user(dmu_buf_impl_t *db, dbvu_verify_type_t verify_type)
 	ASSERT(db->db.db_data != NULL);
 	ASSERT3U(db->db_state, ==, DB_CACHED);
 
-	holds = refcount_count(&db->db_holds);
+	holds = trackcount_count(&db->db_holds);
 	if (verify_type == DBVU_EVICTING) {
 		/*
 		 * Immediate eviction occurs when holds == dirtycnt.
@@ -569,7 +569,7 @@ dbuf_loan_arcbuf(dmu_buf_impl_t *db)
 	arc_buf_t *abuf;
 
 	mutex_enter(&db->db_mtx);
-	if (arc_released(db->db_buf) || refcount_count(&db->db_holds) > 1) {
+	if (arc_released(db->db_buf) || trackcount_count(&db->db_holds) > 1) {
 		int blksz = db->db.db_size;
 		spa_t *spa = db->db_objset->os_spa;
 
@@ -630,7 +630,7 @@ dbuf_read_done(zio_t *zio, arc_buf_t *buf, void *vdb)
 	/*
 	 * All reads are synchronous, so we must have a hold on the dbuf
 	 */
-	ASSERT(refcount_count(&db->db_holds) > 0);
+	ASSERT(trackcount_count(&db->db_holds) > 0);
 	ASSERT(db->db_buf == NULL);
 	ASSERT(db->db.db_data == NULL);
 	if (db->db_level == 0 && db->db_freed_in_flight) {
@@ -663,7 +663,7 @@ dbuf_read_impl(dmu_buf_impl_t *db, zio_t *zio, uint32_t flags)
 
 	DB_DNODE_ENTER(db);
 	dn = DB_DNODE(db);
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 	/* We need the struct_rwlock to prevent db_blkptr from changing. */
 	ASSERT(RW_LOCK_HELD(&dn->dn_struct_rwlock));
 	ASSERT(MUTEX_HELD(&db->db_mtx));
@@ -760,7 +760,7 @@ dbuf_read(dmu_buf_impl_t *db, zio_t *zio, uint32_t flags)
 	 * We don't have to hold the mutex to check db_state because it
 	 * can't be freed while we have a hold on the buffer.
 	 */
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 
 	if (db->db_state == DB_NOFILL)
 		return (SET_ERROR(EIO));
@@ -840,7 +840,7 @@ dbuf_read(dmu_buf_impl_t *db, zio_t *zio, uint32_t flags)
 static void
 dbuf_noread(dmu_buf_impl_t *db)
 {
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 	ASSERT(db->db_blkid != DMU_BONUS_BLKID);
 	mutex_enter(&db->db_mtx);
 	while (db->db_state == DB_READ || db->db_state == DB_FILL)
@@ -902,7 +902,7 @@ dbuf_fix_old_data(dmu_buf_impl_t *db, uint64_t txg)
 		dr->dt.dl.dr_data = zio_buf_alloc(DN_MAX_BONUSLEN);
 		arc_space_consume(DN_MAX_BONUSLEN, ARC_SPACE_OTHER);
 		bcopy(db->db.db_data, dr->dt.dl.dr_data, DN_MAX_BONUSLEN);
-	} else if (refcount_count(&db->db_holds) > db->db_dirtycnt) {
+	} else if (trackcount_count(&db->db_holds) > db->db_dirtycnt) {
 		int size = db->db.db_size;
 		arc_buf_contents_t type = DBUF_GET_BUFC_TYPE(db);
 		spa_t *spa = db->db_objset->os_spa;
@@ -1031,7 +1031,7 @@ dbuf_free_range(dnode_t *dn, uint64_t start_blkid, uint64_t end_blkid,
 			mutex_exit(&db->db_mtx);
 			continue;
 		}
-		if (refcount_count(&db->db_holds) == 0) {
+		if (trackcount_count(&db->db_holds) == 0) {
 			ASSERT(db->db_buf);
 			dbuf_clear(db);
 			continue;
@@ -1212,7 +1212,7 @@ dbuf_dirty(dmu_buf_impl_t *db, dmu_tx_t *tx)
 	int txgoff = tx->tx_txg & TXG_MASK;
 
 	ASSERT(tx->tx_txg != 0);
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 	DMU_TX_DIRTY_BUF(tx, db);
 
 	DB_DNODE_ENTER(db);
@@ -1555,7 +1555,7 @@ dbuf_undirty(dmu_buf_impl_t *db, dmu_tx_t *tx)
 	ASSERT(db->db_dirtycnt > 0);
 	db->db_dirtycnt -= 1;
 
-	if (refcount_remove(&db->db_holds, (void *)(uintptr_t)txg) == 0) {
+	if (trackcount_remove(&db->db_holds, (void *)(uintptr_t)txg) == 0) {
 		arc_buf_t *buf = db->db_buf;
 
 		ASSERT(db->db_state == DB_NOFILL || arc_released(buf));
@@ -1575,7 +1575,7 @@ dmu_buf_will_dirty(dmu_buf_t *db_fake, dmu_tx_t *tx)
 	int rf = DB_RF_MUST_SUCCEED | DB_RF_NOPREFETCH;
 
 	ASSERT(tx->tx_txg != 0);
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 
 	/*
 	 * Quick check for dirtyness.  For already dirty blocks, this
@@ -1627,7 +1627,7 @@ dmu_buf_will_fill(dmu_buf_t *db_fake, dmu_tx_t *tx)
 	ASSERT(db->db_blkid != DMU_BONUS_BLKID);
 	ASSERT(tx->tx_txg != 0);
 	ASSERT(db->db_level == 0);
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 
 	ASSERT(db->db.db_object != DMU_META_DNODE_OBJECT ||
 	    dmu_tx_private_ok(tx));
@@ -1702,7 +1702,7 @@ dmu_buf_write_embedded(dmu_buf_t *dbuf, void *data,
 void
 dbuf_assign_arcbuf(dmu_buf_impl_t *db, arc_buf_t *buf, dmu_tx_t *tx)
 {
-	ASSERT(!refcount_is_zero(&db->db_holds));
+	ASSERT(!trackcount_is_zero(&db->db_holds));
 	ASSERT(db->db_blkid != DMU_BONUS_BLKID);
 	ASSERT(db->db_level == 0);
 	ASSERT(DBUF_GET_BUFC_TYPE(db) == ARC_BUFC_DATA);
@@ -1721,7 +1721,7 @@ dbuf_assign_arcbuf(dmu_buf_impl_t *db, arc_buf_t *buf, dmu_tx_t *tx)
 	ASSERT(db->db_state == DB_CACHED || db->db_state == DB_UNCACHED);
 
 	if (db->db_state == DB_CACHED &&
-	    refcount_count(&db->db_holds) - 1 > db->db_dirtycnt) {
+	    trackcount_count(&db->db_holds) - 1 > db->db_dirtycnt) {
 		mutex_exit(&db->db_mtx);
 		(void) dbuf_dirty(db, tx);
 		bcopy(buf->b_data, db->db.db_data, db->db.db_size);
@@ -1783,7 +1783,7 @@ dbuf_clear(dmu_buf_impl_t *db)
 	boolean_t dbuf_gone = B_FALSE;
 
 	ASSERT(MUTEX_HELD(&db->db_mtx));
-	ASSERT(refcount_is_zero(&db->db_holds));
+	ASSERT(trackcount_is_zero(&db->db_holds));
 
 	dbuf_evict_user(db);
 
@@ -1987,8 +1987,8 @@ dbuf_create(dnode_t *dn, uint8_t level, uint64_t blkid,
 		dbuf_add_ref(parent, db);
 
 	ASSERT(dn->dn_object == DMU_META_DNODE_OBJECT ||
-	    refcount_count(&dn->dn_holds) > 0);
-	(void) refcount_add(&dn->dn_holds, db);
+	    trackcount_count(&dn->dn_holds) > 0);
+	(void) trackcount_add(&dn->dn_holds, db);
 	atomic_inc_32(&dn->dn_dbufs_count);
 
 	dprintf_dbuf(db, "db=%p\n", db);
@@ -2004,7 +2004,7 @@ dbuf_do_evict(void *private)
 	if (!MUTEX_HELD(&db->db_mtx))
 		mutex_enter(&db->db_mtx);
 
-	ASSERT(refcount_is_zero(&db->db_holds));
+	ASSERT(trackcount_is_zero(&db->db_holds));
 
 	if (db->db_state != DB_EVICTING) {
 		ASSERT(db->db_state == DB_CACHED);
@@ -2021,7 +2021,7 @@ dbuf_do_evict(void *private)
 static void
 dbuf_destroy(dmu_buf_impl_t *db)
 {
-	ASSERT(refcount_is_zero(&db->db_holds));
+	ASSERT(trackcount_is_zero(&db->db_holds));
 
 	if (db->db_blkid != DMU_BONUS_BLKID) {
 		/*
@@ -2309,7 +2309,7 @@ top:
 		return (SET_ERROR(ENOENT));
 	}
 
-	if (db->db_buf && refcount_is_zero(&db->db_holds)) {
+	if (db->db_buf && trackcount_is_zero(&db->db_holds)) {
 		arc_buf_add_ref(db->db_buf, db);
 		if (db->db_buf->b_data == NULL) {
 			dbuf_clear(db);
@@ -2345,7 +2345,7 @@ top:
 		}
 	}
 
-	(void) refcount_add(&db->db_holds, tag);
+	(void) trackcount_add(&db->db_holds, tag);
 	DBUF_VERIFY(db);
 	mutex_exit(&db->db_mtx);
 
@@ -2417,7 +2417,7 @@ dbuf_rm_spill(dnode_t *dn, dmu_tx_t *tx)
 void
 dbuf_add_ref(dmu_buf_impl_t *db, void *tag)
 {
-	int64_t holds = refcount_add(&db->db_holds, tag);
+	int64_t holds = trackcount_add(&db->db_holds, tag);
 	ASSERT(holds > 1);
 }
 
@@ -2437,7 +2437,7 @@ dbuf_try_add_ref(dmu_buf_t *db_fake, objset_t *os, uint64_t obj, uint64_t blkid,
 
 	if (found_db != NULL) {
 		if (db == found_db && dbuf_refcount(db) > db->db_dirtycnt) {
-			(void) refcount_add(&db->db_holds, tag);
+			(void) trackcount_add(&db->db_holds, tag);
 			result = B_TRUE;
 		}
 		mutex_exit(&db->db_mtx);
@@ -2482,7 +2482,7 @@ dbuf_rele_and_unlock(dmu_buf_impl_t *db, void *tag)
 	 * dnode so we can guarantee in dnode_move() that a referenced bonus
 	 * buffer has a corresponding dnode hold.
 	 */
-	holds = refcount_remove(&db->db_holds, tag);
+	holds = trackcount_remove(&db->db_holds, tag);
 	ASSERT(holds >= 0);
 
 	/*
@@ -2590,7 +2590,7 @@ dbuf_rele_and_unlock(dmu_buf_impl_t *db, void *tag)
 uint64_t
 dbuf_refcount(dmu_buf_impl_t *db)
 {
-	return (refcount_count(&db->db_holds));
+	return (trackcount_count(&db->db_holds));
 }
 
 void *
@@ -2851,7 +2851,7 @@ dbuf_sync_leaf(dbuf_dirty_record_t *dr, dmu_tx_t *tx)
 
 	if (db->db_state != DB_NOFILL &&
 	    dn->dn_object != DMU_META_DNODE_OBJECT &&
-	    refcount_count(&db->db_holds) > 1 &&
+	    trackcount_count(&db->db_holds) > 1 &&
 	    dr->dt.dl.dr_override_state != DR_OVERRIDDEN &&
 	    *datap == db->db_buf) {
 		/*

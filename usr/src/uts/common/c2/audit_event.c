@@ -77,6 +77,7 @@
 #include <netinet/in.h>
 #include <sys/ddi.h>
 #include <sys/port_impl.h>
+#include <sys/refcnt.h>
 
 static au_event_t	aui_fchownat(au_event_t);
 static au_event_t	aui_fchmodat(au_event_t);
@@ -2904,11 +2905,12 @@ aus_labelsys(struct t_audit_data *tad)
 			au_uwrite(au_to_text("shared"));
 		} else {
 			zone_t	*zone;
+			reftoken_t *rt;
 
-			zone = zone_find_by_id(mlpent->tsme_zoneid);
+			zone = zone_find_by_id(mlpent->tsme_zoneid, &rt);
 			if (zone != NULL) {
 				au_uwrite(au_to_text(zone->zone_name));
-				zone_rele(zone);
+				zone_rele(zone, rt);
 			}
 		}
 

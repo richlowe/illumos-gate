@@ -63,6 +63,7 @@
 #include <sys/priv.h>
 #include <sys/sdt.h>
 #include <sys/attr.h>
+#include <sys/refcnt.h>
 
 #include <inet/ip6.h>
 
@@ -5048,11 +5049,13 @@ nfs_mount_label_policy(vfs_t *vfsp, struct netbuf *addr,
 	tsol_tpc_t	*tp;
 	ts_label_t	*tsl = NULL;
 	int		retv;
+	reftoken_t	*rt;
 
 	/*
 	 * Get the zone's label.  Each zone on a labeled system has a label.
 	 */
-	mntzone = zone_find_by_any_path(refstr_value(vfsp->vfs_mntpt), B_FALSE);
+	mntzone = zone_find_by_any_path(refstr_value(vfsp->vfs_mntpt), B_FALSE,
+		&rt);
 	zlabel = mntzone->zone_slabel;
 	ASSERT(zlabel != NULL);
 	label_hold(zlabel);
@@ -5128,7 +5131,7 @@ rel_tpc:
 	TPC_RELE(tp);
 out:
 	if (mntzone)
-		zone_rele(mntzone);
+		zone_rele(mntzone, rt);
 	label_rele(zlabel);
 	return (retv);
 }

@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/systm.h>
 #include <sys/types.h>
 #include <sys/stream.h>
@@ -921,6 +919,7 @@ tnmlp(int cmd, void *buf)
 	zone_t *zone;
 	tsol_mlp_list_t *mlpl;
 	tsol_mlp_entry_t *tme;
+	reftoken_t *rt;
 
 	/* Make sure user has sufficient privilege */
 	if (cmd != TNDB_GET &&
@@ -941,7 +940,7 @@ tnmlp(int cmd, void *buf)
 		zone = NULL;
 		mlpl = &shared_mlps;
 	} else {
-		zone = zone_find_by_id(tsme.tsme_zoneid);
+		zone = zone_find_by_id(tsme.tsme_zoneid, &rt);
 		if (zone == NULL)
 			return (set_errno(EINVAL));
 		mlpl = &zone->zone_mlps;
@@ -1017,7 +1016,7 @@ tnmlp(int cmd, void *buf)
 	}
 
 	if (zone != NULL)
-		zone_rele(zone);
+		zone_rele(zone, rt);
 
 	if (cmd == TNDB_GET && retv == 0) {
 		/* Copy out result */

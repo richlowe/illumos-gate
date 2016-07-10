@@ -37,7 +37,7 @@
 #include <sys/uberblock_impl.h>
 #include <sys/zfs_context.h>
 #include <sys/avl.h>
-#include <sys/refcount.h>
+#include <sys/trackcount.h>
 #include <sys/bplist.h>
 #include <sys/bpobj.h>
 #include <sys/zfeature.h>
@@ -76,7 +76,7 @@ typedef struct spa_config_lock {
 	kthread_t	*scl_writer;
 	int		scl_write_wanted;
 	kcondvar_t	scl_cv;
-	refcount_t	scl_count;
+	trackcount_t	scl_count;
 } spa_config_lock_t;
 
 typedef struct spa_config_dirent {
@@ -277,12 +277,12 @@ struct spa {
 
 	/*
 	 * spa_refcount & spa_config_lock must be the last elements
-	 * because refcount_t changes size based on compilation options.
+	 * because trackcount_t changes size based on compilation options.
 	 * In order for the MDB module to function correctly, the other
 	 * fields must remain in the same location.
 	 */
 	spa_config_lock_t spa_config_lock[SCL_LOCKS]; /* config changes */
-	refcount_t	spa_refcount;		/* number of opens */
+	trackcount_t	spa_refcount;		/* number of opens */
 };
 
 extern const char *spa_config_path;
