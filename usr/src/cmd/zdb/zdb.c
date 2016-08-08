@@ -1264,7 +1264,7 @@ visit_indirect(spa_t *spa, const dnode_phys_t *dnp,
 		}
 		if (!err)
 			ASSERT3U(fill, ==, BP_GET_FILL(bp));
-		(void) arc_buf_remove_ref(buf, &buf);
+		arc_buf_destroy(buf, &buf);
 	}
 
 	return (err);
@@ -3533,6 +3533,7 @@ main(int argc, char **argv)
 	uint64_t max_txg = UINT64_MAX;
 	int rewind = ZPOOL_NEVER_REWIND;
 	char *spa_config_path_env;
+	boolean_t target_is_spa = B_TRUE;
 
 	(void) setrlimit(RLIMIT_NOFILE, &rl);
 	(void) enable_extended_FILE_stdio(-1, -1);
@@ -3711,8 +3712,23 @@ main(int argc, char **argv)
 		}
 	}
 
+	if (strpbrk(target, "/@") != NULL) {
+		size_t targetlen;
+
+		target_is_spa = B_FALSE;
+		/*
+		 * Remove any trailing slash.  Later code would get confused
+		 * by it, but we want to allow it so that "pool/" can
+		 * indicate that we want to dump the topmost filesystem,
+		 * rather than the whole pool.
+		 */
+		targetlen = strlen(target);
+		if (targetlen != 0 && target[targetlen - 1] == '/')
+			target[targetlen - 1] = '\0';
+	}
+
 	if (error == 0) {
-		if (strpbrk(target, "/@") == NULL || dump_opt['R']) {
+		if (target_is_spa || dump_opt['R']) {
 			error = spa_open_rewind(target, &spa, FTAG, policy,
 			    NULL);
 			if (error) {
