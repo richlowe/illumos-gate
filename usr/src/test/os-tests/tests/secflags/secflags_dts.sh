@@ -46,11 +46,12 @@ gcc -o many-dts-noaslr tester.c -Wl,-z,aslr=disabled $(for elt in /usr/lib/lib*.
 check() {
     bin=$1
     state=$2
+    set=$3
     ret=0
 
     $bin &
     pid=$!
-    psecflags $pid | grep -q 'E:.*aslr'
+    psecflags $pid | grep -q "${set}:.*aslr"
     (( $? != $state )) && ret=1
     kill -9 $pid
     return $ret
@@ -62,10 +63,11 @@ fail() {
 }
 
 psecflags -s none $$
-check ./tester-aslr 0 || fail "DT_SUNW_ASLR 1 failed"
-check ./many-dts-aslr 0 || fail "DT_SUNW_ASLR 1 with many DTs failed"
+check ./tester-aslr 0 E || fail "DT_SUNW_ASLR 1 failed"
+check ./many-dts-aslr 0 E || fail "DT_SUNW_ASLR 1 with many DTs failed"
+check ./tester-aslr 1 I || fail "DT_SUNW_ASLR 1 incorrectly set the inheritable flag"
 
 psecflags -s aslr $$
-check ./tester-noaslr 1 || fail "DT_SUNW_ASLR 0 failed"
-check ./many-dts-noaslr 1 || fail "DT_SUNW_ASLR 0 with many DTs failed"
+check ./tester-noaslr 1 E || fail "DT_SUNW_ASLR 0 failed"
+check ./many-dts-noaslr 1 E || fail "DT_SUNW_ASLR 0 with many DTs failed"
 

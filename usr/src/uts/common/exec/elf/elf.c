@@ -185,7 +185,6 @@ handle_secflag_dt(proc_t *p, uint_t dt, uint_t val)
 		    secflag_isset(p->p_secflags.psf_inherit, flag))
 			return (EPERM);
 
-		secflag_clear(&p->p_secflags.psf_inherit, flag);
 		secflag_clear(&p->p_secflags.psf_effective, flag);
 	} else {
 		if (!secflag_isset(p->p_secflags.psf_upper, flag))
@@ -195,7 +194,6 @@ handle_secflag_dt(proc_t *p, uint_t dt, uint_t val)
 		    !secflag_isset(p->p_secflags.psf_inherit, flag))
 			return (EPERM);
 
-		secflag_set(&p->p_secflags.psf_inherit, flag);
 		secflag_set(&p->p_secflags.psf_effective, flag);
 	}
 
