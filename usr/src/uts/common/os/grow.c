@@ -62,6 +62,12 @@
 int use_brk_lpg = 1;
 int use_stk_lpg = 1;
 
+/*
+ * If set, we will not randomize mappings where the 'addr' argument is
+ * non-NULL and not an alignment.
+ */
+int aslr_respect_mmap_hint = 0;
+
 static int brk_lpg(caddr_t nva);
 static int grow_lpg(caddr_t sp);
 
@@ -595,6 +601,9 @@ zmap(struct as *as, caddr_t *addrp, size_t len, uint_t uprot, int flags,
 	return (as_map(as, *addrp, len, segvn_create, &vn_a));
 }
 
+#define	RANDOMIZABLE_MAPPING(addr, flags) (((flags & MAP_FIXED) == 0) && \
+	!(((flags & MAP_ALIGN) == 0) && (addr != 0) && aslr_respect_mmap_hint))
+
 static int
 smmap_common(caddr_t *addrp, size_t len,
     int prot, int flags, struct file *fp, offset_t pos)
@@ -629,7 +638,7 @@ smmap_common(caddr_t *addrp, size_t len,
 	 * If it's not a fixed allocation and mmap ASLR is enabled, randomize
 	 * it.
 	 */
-	if (((flags & MAP_FIXED) == 0) &&
+	if (RANDOMIZABLE_MAPPING(*addrp, flags) &&
 	    secflag_enabled(curproc, PROC_SEC_ASLR))
 		flags |= _MAP_RANDOMIZE;
 
