@@ -1,6 +1,6 @@
-/*	$Id: st.c,v 1.13 2015/10/06 18:32:20 schwarze Exp $ */
+/*	$Id: mandoc_ohash.h,v 1.2 2015/11/07 14:01:16 schwarze Exp $	*/
 /*
- * Copyright (c) 2009 Kristaps Dzonsons <kristaps@bsd.lv>
+ * Copyright (c) 2015 Ingo Schwarze <schwarze@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,24 +14,10 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-#include "config.h"
+#if HAVE_OHASH
+#include <ohash.h>
+#else
+#include "compat_ohash.h"
+#endif
 
-#include <sys/types.h>
-
-#include <string.h>
-
-#include "roff.h"
-#include "mdoc.h"
-#include "libmdoc.h"
-
-#define LINE(x, y) \
-	if (0 == strcmp(p, x)) return(y);
-
-const char *
-mdoc_a2st(const char *p)
-{
-
-#include "st.in"
-
-	return NULL;
-}
+void		  mandoc_ohash_init(struct ohash *, unsigned int, ptrdiff_t);
