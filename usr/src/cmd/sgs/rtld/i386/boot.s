@@ -27,7 +27,6 @@
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
  * Bootstrap routine for run-time linker.
@@ -93,12 +92,18 @@ main()
 	.globl	_setup
 	.globl	_GLOBAL_OFFSET_TABLE_
 	.type	_rt_boot,@function
-	.align	4
+	.align	4		/ XXX: Do I need this at 16 too?
 
+	/ init is called from the _init symbol in the CRT, however .init_array
+	/ are called "naturally" from call_init.  Because of that, we need the
+	/ stack aligned here so that initializers called via _array sections may
+	/ safely use SIMD instructions.
 _rt_alias:
 	jmp	.get_ip			/ in case we were invoked from libc.so
 _rt_boot:
 	movl	%esp,%ebp		/ save for referencing args
+	andl	$-16,%esp
+	subl	$12,%esp
 	subl	$EB_MAX_SIZE32,%esp	/ make room for a max sized boot vector
 	movl	%esp,%esi		/ use esi as a pointer to &eb[0]
 	movl	$EB_ARGV,0(%esi)	/ set up tag for argv
