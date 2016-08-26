@@ -55,6 +55,7 @@ fi
 
 ## kernel-produced core
 kill -SEGV $pid
+wait $pid >/dev/null 2>&1
 
 cat > core-expected.$$ <<EOF
     namesz: 0x5

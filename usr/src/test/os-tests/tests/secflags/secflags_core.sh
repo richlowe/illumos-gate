@@ -47,6 +47,7 @@ fi
 
 ## kernel-produced core
 kill -SEGV $pid
+wait $pid >/dev/null 2>&1
 
 cat > core-expected.$$ <<EOF
 core 'core' of $pid:	sleep 100000
