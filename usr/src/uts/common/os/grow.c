@@ -78,18 +78,21 @@ brk(caddr_t nva)
 	proc_t *p = curproc;
 
 	/*
-	 * As a special case to aid the implementation of sbrk(3C), if given a
-	 * new brk of 0, return the current brk.  We'll hide this in brk(3C).
-	 */
-	if (nva == 0)
-		return ((intptr_t)(p->p_brkbase + p->p_brksize));
-
-	/*
 	 * Serialize brk operations on an address space.
 	 * This also serves as the lock protecting p_brksize
 	 * and p_brkpageszc.
 	 */
 	as_rangelock(p->p_as);
+
+	/*
+	 * As a special case to aid the implementation of sbrk(3C), if given a
+	 * new brk of 0, return the current brk.  We'll hide this in brk(3C).
+	 */
+	if (nva == 0) {
+		as_rangeunlock(p->p_as);
+		return ((intptr_t)(p->p_brkbase + p->p_brksize));
+	}
+
 	if (use_brk_lpg && (p->p_flag & SAUTOLPG) != 0) {
 		error = brk_lpg(nva);
 	} else {
