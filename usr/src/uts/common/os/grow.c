@@ -89,8 +89,9 @@ brk(caddr_t nva)
 	 * new brk of 0, return the current brk.  We'll hide this in brk(3C).
 	 */
 	if (nva == 0) {
+		intptr_t base = (intptr_t)(p->p_brkbase + p->p_brksize);
 		as_rangeunlock(p->p_as);
-		return ((intptr_t)(p->p_brkbase + p->p_brksize));
+		return (base);
 	}
 
 	if (use_brk_lpg && (p->p_flag & SAUTOLPG) != 0) {
