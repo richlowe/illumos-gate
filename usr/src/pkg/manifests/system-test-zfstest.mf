@@ -633,6 +633,8 @@ file path=opt/zfs-tests/tests/functional/cli_root/zfs_mount/zfs_mount_010_neg \
     mode=0555
 file path=opt/zfs-tests/tests/functional/cli_root/zfs_mount/zfs_mount_011_neg \
     mode=0555
+file path=opt/zfs-tests/tests/functional/cli_root/zfs_mount/zfs_mount_012_neg \
+    mode=0555
 file \
     path=opt/zfs-tests/tests/functional/cli_root/zfs_mount/zfs_mount_all_001_pos \
     mode=0555
@@ -709,6 +711,9 @@ file \
     mode=0555
 file \
     path=opt/zfs-tests/tests/functional/cli_root/zfs_receive/zfs_receive_012_pos \
+    mode=0555
+file \
+    path=opt/zfs-tests/tests/functional/cli_root/zfs_receive/zfs_receive_013_pos \
     mode=0555
 file path=opt/zfs-tests/tests/functional/cli_root/zfs_rename/cleanup mode=0555
 file path=opt/zfs-tests/tests/functional/cli_root/zfs_rename/setup mode=0555
