@@ -66,7 +66,7 @@ int use_stk_lpg = 1;
  * If set, we will not randomize mappings where the 'addr' argument is
  * non-NULL and not an alignment.
  */
-int aslr_respect_mmap_hint = 0;
+int aslr_respect_mmap_hint = 1;
 
 static int brk_lpg(caddr_t nva);
 static int grow_lpg(caddr_t sp);
