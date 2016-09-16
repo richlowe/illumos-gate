@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <libuutil.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <sys/systeminfo.h>
 #include <sys/uadmin.h>
@@ -363,12 +364,12 @@ scf_is_fastboot_default(void)
  * of the mapfile, even though we don't ever use it, and it will never work.
  */
 struct group_desc {
-	secflagset_t *set;
+	secflagdelta_t *delta;
 	char *fmri;
 };
 
 int
-scf_default_secflags(scf_handle_t *hndl, psecflags_t *flags)
+scf_default_secflags(scf_handle_t *hndl, scf_secflags_t *flags)
 {
 #if !defined(NATIVE_BUILD)
 	scf_property_t *prop;
@@ -386,14 +387,13 @@ scf_default_secflags(scf_handle_t *hndl, psecflags_t *flags)
 		{NULL, NULL}
 	};
 
-	groups[0].set = &flags->psf_inherit;
-	groups[1].set = &flags->psf_lower;
-	groups[2].set = &flags->psf_upper;
+	bzero(flags, sizeof (*flags));
 
-	/* Ensure sane defaults */
-	psecflags_default(flags);
+	groups[0].delta = &flags->ss_default;
+	groups[1].delta = &flags->ss_lower;
+	groups[2].delta = &flags->ss_upper;
 
-	for (g = groups; g->set != NULL; g++) {
+	for (g = groups; g->delta != NULL; g++) {
 		for (flag = 0; (flagname = secflag_to_str(flag)) != NULL;
 		    flag++) {
 			char *pfmri;
@@ -421,9 +421,9 @@ scf_default_secflags(scf_handle_t *hndl, psecflags_t *flags)
 			(void) scf_value_get_boolean(val, &flagval);
 
 			if (flagval != 0)
-				secflag_set(g->set, flag);
+				secflag_set(&g->delta->psd_add, flag);
 			else
-				secflag_clear(g->set, flag);
+				secflag_set(&g->delta->psd_rem, flag);
 
 next:
 			uu_free(pfmri);
@@ -431,9 +431,6 @@ next:
 			scf_property_destroy(prop);
 		}
 	}
-
-	if (!psecflags_validate(flags))
-		return (-1);
 
 	return (0);
 #else

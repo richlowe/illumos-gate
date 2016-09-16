@@ -274,7 +274,7 @@ struct method_context {
 	gid_t		gid, egid;
 	int		ngroups;		/* -1 means use initgroups(). */
 	gid_t		groups[NGROUPS_MAX];
-	psecflags_t	def_secflags;
+	scf_secflags_t	def_secflags;
 	secflagdelta_t	secflag_delta;
 	priv_set_t	*lpriv_set, *priv_set;
 	char		*corefile_pattern;	/* Optional. */

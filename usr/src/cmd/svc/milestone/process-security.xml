@@ -41,27 +41,27 @@
 		</property_group>
 
 		<property_group name='default' type='application'>
-		  <propval name='aslr' type='boolean' value='false' />
-		  <propval name='forbidnullmap' type='boolean' value='false' />
-		  <propval name='noexecstack' type='boolean' value='false' />
+		  <property name='aslr' type='boolean' />
+		  <property name='forbidnullmap' type='boolean' />
+		  <property name='noexecstack' type='boolean' />
 
 		  <propval name='value_authorization' type='astring'
 			   value='solaris.smf.value.process-security' />
 		</property_group>
 
                 <property_group name='lower' type='application'>
-		  <propval name='aslr' type='boolean' value='false' />
-		  <propval name='forbidnullmap' type='boolean' value='false' />
-		  <propval name='noexecstack' type='boolean' value='false' />
+		  <property name='aslr' type='boolean' />
+		  <property name='forbidnullmap' type='boolean' />
+		  <property name='noexecstack' type='boolean' />
 
 		  <propval name='value_authorization' type='astring'
 			   value='solaris.smf.value.process-security' />
 		</property_group>
 
                 <property_group name='upper' type='application'>
-		  <propval name='aslr' type='boolean' value='true' />
-		  <propval name='forbidnullmap' type='boolean' value='true' />
-		  <propval name='noexecstack' type='boolean' value='true' />
+		  <property name='aslr' type='boolean' />
+		  <property name='forbidnullmap' type='boolean' />
+		  <property name='noexecstack' type='boolean' />
 
 		  <propval name='value_authorization' type='astring'
 			   value='solaris.smf.value.process-security' />

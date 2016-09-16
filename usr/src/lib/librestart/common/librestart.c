@@ -3171,15 +3171,8 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 		goto out;
 	}
 
-	if (strcmp(cip->vbuf, ":default") == 0) {
-		if (secflags_parse(&cip->def_secflags.psf_inherit, "default",
-		    &cip->secflag_delta) != 0) {
-			err = mc_error_create(err, EINVAL, "couldn't parse "
-			    "security flags: %s", cip->vbuf);
-			goto out;
-		}
-	} else {
-		if (secflags_parse(&cip->def_secflags.psf_inherit, cip->vbuf,
+	if (strcmp(cip->vbuf, ":default") != 0) {
+		if (secflags_parse(NULL, cip->vbuf,
 		    &cip->secflag_delta) != 0) {
 			err = mc_error_create(err, EINVAL, "couldn't parse "
 			    "security flags: %s", cip->vbuf);
@@ -3433,13 +3426,6 @@ restarter_get_method_context(uint_t version, scf_instance_t *inst,
 			    "default security-flags");
 			goto out;
 		}
-
-		if (secflags_parse(&cip->def_secflags.psf_inherit, "default",
-		    &cip->secflag_delta) != 0) {
-			err = mc_error_create(err, EINVAL, "couldn't parse "
-			    "security flags: %s", cip->vbuf);
-			goto out;
-		}
 	}
 
 	*mcpp = cip;
@@ -3512,7 +3498,6 @@ restarter_set_method_context(struct method_context *cip, const char **fp)
 {
 	pid_t mypid = -1;
 	int r, ret;
-	secflagdelta_t delta = {0};
 
 	cip->pwbuf = NULL;
 	*fp = NULL;
@@ -3609,34 +3594,30 @@ restarter_set_method_context(struct method_context *cip, const char **fp)
 	}
 
 
-	delta.psd_ass_active = B_TRUE;
-	secflags_copy(&delta.psd_assign, &cip->def_secflags.psf_inherit);
 	if (psecflags(P_PID, P_MYID, PSF_INHERIT,
-	    &delta) != 0) {
-		*fp = "psecflags (inherit defaults)";
+	    &cip->def_secflags.ss_default) != 0) {
+		*fp = "psecflags (default inherit)";
+		ret = errno;
+		goto out;
+	}
+
+	if (psecflags(P_PID, P_MYID, PSF_LOWER,
+	    &cip->def_secflags.ss_lower) != 0) {
+		*fp = "psecflags (default lower)";
+		ret = errno;
+		goto out;
+	}
+
+	if (psecflags(P_PID, P_MYID, PSF_UPPER,
+	    &cip->def_secflags.ss_upper) != 0) {
+		*fp = "psecflags (default upper)";
 		ret = errno;
 		goto out;
 	}
 
 	if (psecflags(P_PID, P_MYID, PSF_INHERIT,
 	    &cip->secflag_delta) != 0) {
-		*fp = "psecflags (inherit)";
-		ret = errno;
-		goto out;
-	}
-
-	secflags_copy(&delta.psd_assign, &cip->def_secflags.psf_lower);
-	if (psecflags(P_PID, P_MYID, PSF_LOWER,
-	    &delta) != 0) {
-		*fp = "psecflags (lower)";
-		ret = errno;
-		goto out;
-	}
-
-	secflags_copy(&delta.psd_assign, &cip->def_secflags.psf_upper);
-	if (psecflags(P_PID, P_MYID, PSF_UPPER,
-	    &delta) != 0) {
-		*fp = "psecflags (upper)";
+		*fp = "psecflags (from manifest)";
 		ret = errno;
 		goto out;
 	}

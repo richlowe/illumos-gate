@@ -78,12 +78,22 @@ execute it will fault.
 System default security-flags are configured via properties on the
 \fBsvc:/system/process-security\fR service, which contains a boolean property
 per-flag in the \fBdefault\fR, \fBlower\fR and \fBupper\fR, property groups.
-For example, to enable ASLR by default you would execute the following
-commands:
+The value indicates the setting of the flag, flags with no value take their
+defaults.  For example, to enable ASLR by default you would execute the
+following commands:
 .sp
 .in +2
 .nf
 # svccfg -s svc:/system/process-security setprop default/aslr = true
+.fi
+.in -2
+.sp
+.P
+To restore the setting to the defaults you would execute:
+.sp
+.in +2
+.nf
+# svccfg -s svc:/system/process-security delpropvalue default/aslr true
 .fi
 .in -2
 .sp
