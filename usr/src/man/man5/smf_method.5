@@ -463,8 +463,9 @@ The security flags to apply when launching the method.  See \fBsecurity-flags\fR
 .LP
 The "default" keyword specifies those flags specified in
 \fBsvc:/system/process-security\fR.  The "all" keyword enables all flags, the
-"none" keyword enables no flags.  Further flags may be added by specifying
-their name, or removed by specifying their name prefixed by '-' or '!'.
+"none" keyword enables no flags.  The "current" keyword specifies the current
+flags.  Flags may be added by specifying their name (optionally preceded
+by '+'), and removed by preceding their name with '-').
 .sp
 .LP
 Use of "all" has associated risks, as future versions of the system may
