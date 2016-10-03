@@ -6178,6 +6178,17 @@ zone_enter(zoneid_t zoneid)
 	zone_chdir(vp, &PTOU(pp)->u_rdir, pp);
 
 	/*
+	 * Change process security flags.  Note that the _effective_ flags
+	 * cannot change
+	 */
+	secflags_copy(&pp->p_secflags.psf_lower,
+	    &zone->zone_secflags.psf_lower);
+	secflags_copy(&pp->p_secflags.psf_upper,
+	    &zone->zone_secflags.psf_upper);
+	secflags_copy(&pp->p_secflags.psf_inherit,
+	    &zone->zone_secflags.psf_inherit);
+
+	/*
 	 * Change process credentials
 	 */
 	newcr = cralloc();
