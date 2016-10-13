@@ -12,6 +12,7 @@
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2014, OmniTI Computer Consulting, Inc. All rights reserved.
+# Copyright 2016, Joyent, Inc.
 #
 
 set name=pkg.fmri value=pkg:/system/test/ostest@$(PKGVERS)
@@ -28,9 +29,7 @@ dir path=opt/os-tests/tests/secflags
 dir path=opt/os-tests/tests/sigqueue
 file path=opt/os-tests/README mode=0444
 file path=opt/os-tests/bin/ostest mode=0555
-file path=opt/os-tests/runfiles/delphix.run mode=0444
-file path=opt/os-tests/runfiles/omnios.run mode=0444
-file path=opt/os-tests/runfiles/openindiana.run mode=0444
+file path=opt/os-tests/runfiles/default.run mode=0444
 file path=opt/os-tests/tests/poll_test mode=0555
 file path=opt/os-tests/tests/secflags/addrs-32 mode=0555
 file path=opt/os-tests/tests/secflags/addrs-64 mode=0555
