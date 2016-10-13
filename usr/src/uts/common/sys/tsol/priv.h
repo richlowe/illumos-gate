@@ -26,6 +26,8 @@
 #ifndef	_SYS_TSOL_PRIV_H
 #define	_SYS_TSOL_PRIV_H
 
+#pragma ident	"%Z%%M%	%I%	%E% SMI"
+
 #include <sys/priv.h>
 
 #ifdef	__cplusplus
@@ -39,9 +41,6 @@ typedef enum priv_ftype {
 
 /*
  * Privilege macros.
- *
- * These names are here for compatibility reasons, and thus do not match
- * priv_impl.h
  */
 
 /*
