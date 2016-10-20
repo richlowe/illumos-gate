@@ -250,6 +250,8 @@
 			 text\n"
 @ MSG_ARG_DETAIL_ZTW	"\t[-z textwarn]\twarn if there are relocations \
 			 against text\n"
+@ MSG_ARG_DETAIL_ZTY	"\t[-z type=type]\tspecify the type of object \
+			 (exec, reloc, shared)\n"
 @ MSG_ARG_DETAIL_ZWRAP	"\t[-z wrap=symbol], [-wrap=symbol], [--wrap=symbol]\n\
 			 \t\t\twrap symbol references\n"
 @ MSG_ARG_DETAIL_ZVER	"\t[-z verbose]\t\
@@ -1441,6 +1443,7 @@
 @ MSG_ARG_DEFERRED	"deferred"
 @ MSG_ARG_NODEFERRED	"nodeferred"
 @ MSG_ARG_ASSDEFLIB	"assert-deflib"
+@ MSG_ARG_TYPE		"type"
 
 @ MSG_ARG_LCOM		"L,"
 @ MSG_ARG_PCOM		"P,"
@@ -1487,6 +1490,11 @@
 @ MSG_ARG_GUIDE_NO_MAPFILE	"nomapfile"
 @ MSG_ARG_GUIDE_NO_TEXT		"notext"
 @ MSG_ARG_GUIDE_NO_UNUSED	"nounused"
+
+# -z type= strings
+@ MSG_ARG_TYPE_RELOC	"reloc"
+@ MSG_ARG_TYPE_EXEC	"exec"
+@ MSG_ARG_TYPE_SHARED	"shared"
 
 # Environment variable strings
 
