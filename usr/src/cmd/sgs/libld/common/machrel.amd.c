@@ -1232,7 +1232,8 @@ ld_reloc_local(Rel_desc * rsp, Ofl_desc * ofl)
 	 *	build R_AMD64_RELATIVE
 	 * fi
 	 */
-	if ((flags & FLG_OF_SHAROBJ) && (rsp->rel_flags & FLG_REL_LOAD) &&
+	if ((flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) &&
+	    (rsp->rel_flags & FLG_REL_LOAD) &&
 	    !(IS_PC_RELATIVE(rsp->rel_rtype)) && !(IS_SIZE(rsp->rel_rtype)) &&
 	    !(IS_GOT_BASED(rsp->rel_rtype)) &&
 	    !(rsp->rel_isdesc != NULL &&

@@ -2795,7 +2795,8 @@ at_sym_flags(Mapfile *mf, Token eq_tok, void *uvalue)
 				ofl->ofl_flags |= FLG_OF_SYMINFO;
 				break;
 			case FLG_SY_INTPOSE:
-				if (!(ofl->ofl_flags & FLG_OF_EXEC)) {
+				if (!(ofl->ofl_flags &
+				    (FLG_OF_EXEC | FLG_OF_PIE))) {
 					mf_fatal0(mf,
 					    MSG_INTL(MSG_MAP_NOINTPOSE));
 					ss->ss_mv.mv_errcnt++;

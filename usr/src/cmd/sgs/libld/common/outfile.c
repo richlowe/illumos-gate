@@ -84,8 +84,8 @@ ld_open_outfile(Ofl_desc * ofl)
 	 * Determine the required file mode from the type of output file we
 	 * are creating.
 	 */
-	mode = (ofl->ofl_flags & (FLG_OF_EXEC | FLG_OF_SHAROBJ))
-	    ? 0777 : 0666;
+	mode = (ofl->ofl_flags & (FLG_OF_EXEC | FLG_OF_SHAROBJ |
+	    FLG_OF_PIE)) ? 0777 : 0666;
 
 	/* Determine if the output file already exists */
 	if (stat(ofl->ofl_name, &status) == 0) {

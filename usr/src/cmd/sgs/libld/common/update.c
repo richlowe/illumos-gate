@@ -2991,7 +2991,7 @@ update_oehdr(Ofl_desc * ofl)
 		}
 	}
 
-	if (ofl->ofl_flags & FLG_OF_SHAROBJ)
+	if (ofl->ofl_flags & (FLG_OF_SHAROBJ | FLG_OF_PIE))
 		ehdr->e_type = ET_DYN;
 	else if (ofl->ofl_flags & FLG_OF_RELOBJ)
 		ehdr->e_type = ET_REL;

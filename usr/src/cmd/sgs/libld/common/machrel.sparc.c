@@ -1415,7 +1415,7 @@ ld_add_outrel(Word flags, Rel_desc *rsp, Ofl_desc *ofl)
 	 * if building a shared object do a sanity check on the output
 	 * relocations being created.
 	 */
-	if (ofl->ofl_flags & FLG_OF_SHAROBJ) {
+	if (ofl->ofl_flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) {
 		Word	rtype = rsp->rel_rtype;
 		/*
 		 * Because the R_SPARC_HIPLT22 & R_SPARC_LOPLT10 relocations
@@ -1598,7 +1598,8 @@ ld_reloc_local(Rel_desc *rsp, Ofl_desc *ofl)
 	 *	fi
 	 * fi
 	 */
-	if ((flags & FLG_OF_SHAROBJ) && (rsp->rel_flags & FLG_REL_LOAD) &&
+	if ((flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) &&
+	    (rsp->rel_flags & FLG_REL_LOAD) &&
 	    !(IS_PC_RELATIVE(rsp->rel_rtype)) && !(IS_SIZE(rsp->rel_rtype)) &&
 	    !(IS_GOT_BASED(rsp->rel_rtype)) &&
 	    !(rsp->rel_isdesc != NULL &&

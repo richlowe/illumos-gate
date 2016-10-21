@@ -467,6 +467,8 @@ struct ofl_desc {
 #define	FLG_OF_FATWARN	0x400000000000	/* make warnings fatal */
 #define	FLG_OF_ADEFLIB	0x800000000000	/* no libraries in default path */
 
+#define	FLG_OF_PIE	0x0001000000000000 /* create PIE executable */
+
 /*
  * In the flags1 arena, establish any options that are applicable to archive
  * extraction first, and associate a mask.  These values are recorded with any

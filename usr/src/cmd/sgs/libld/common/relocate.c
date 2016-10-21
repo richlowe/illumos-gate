@@ -886,7 +886,7 @@ ld_reloc_GOT_relative(Boolean local, Rel_desc *rsp, Ofl_desc *ofl)
 		 * are processed as is.
 		 */
 		if (local == TRUE) {
-			if ((flags & FLG_OF_SHAROBJ) &&
+			if ((flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) &&
 			    (((sdp->sd_flags & FLG_SY_SPECSEC) == 0) ||
 			    ((sdp->sd_sym->st_shndx != SHN_ABS)) ||
 			    (sdp->sd_aux && sdp->sd_aux->sa_symspec))) {
@@ -991,7 +991,7 @@ ld_reloc_plt(Rel_desc *rsp, Ofl_desc *ofl)
 	/*
 	 * Perform relocation to PLT table entry.
 	 */
-	if ((ofl->ofl_flags & FLG_OF_SHAROBJ) &&
+	if ((ofl->ofl_flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) &&
 	    IS_ADD_RELATIVE(rsp->rel_rtype)) {
 		Word	ortype	= rsp->rel_rtype;
 
@@ -1543,7 +1543,7 @@ ld_process_sym_reloc(Ofl_desc *ofl, Rel_desc *reld, Rel *reloc, Is_desc *isp,
 	 *  -	the -Bsymbolic flag is in use when building a shared object,
 	 *	and the symbol hasn't explicitly been defined as nodirect.
 	 *
-	 *  -	an executable (fixed address) is being created, and the symbol
+	 *  -	an executable is being created, and the symbol
 	 *	is defined in the executable.
 	 *
 	 *  -	the relocation is against a segment which will not be loaded
@@ -1577,7 +1577,7 @@ ld_process_sym_reloc(Ofl_desc *ofl, Rel_desc *reld, Rel *reloc, Is_desc *isp,
 			if ((sdp->sd_flags &
 			    (FLG_SY_HIDDEN | FLG_SY_PROTECT)))
 				local = TRUE;
-			else if ((flags & FLG_OF_EXEC) ||
+			else if ((flags & (FLG_OF_EXEC | FLG_OF_PIE)) ||
 			    ((flags & FLG_OF_SYMBOLIC) &&
 			    ((sdp->sd_flags & FLG_SY_NDIR) == 0))) {
 				local = TRUE;
@@ -1591,7 +1591,7 @@ ld_process_sym_reloc(Ofl_desc *ofl, Rel_desc *reld, Rel *reloc, Is_desc *isp,
 	 * relocated symbol (PSARC 1999/636, bugid 4187211).  Scan the input
 	 * files symbol table to cross reference this relocation offset.
 	 */
-	if ((ofl->ofl_flags & FLG_OF_SHAROBJ) &&
+	if ((ofl->ofl_flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) &&
 	    IS_PC_RELATIVE(rtype) &&
 	    (IS_GOT_PC(rtype) == 0) &&
 	    (IS_PLT(rtype) == 0)) {
@@ -1671,7 +1671,8 @@ ld_process_sym_reloc(Ofl_desc *ofl, Rel_desc *reld, Rel *reloc, Is_desc *isp,
 		return (ld_reloc_plt(reld, ofl));
 
 	if ((sdp->sd_ref == REF_REL_NEED) ||
-	    (flags & FLG_OF_BFLAG) || (flags & FLG_OF_SHAROBJ) ||
+	    (flags & FLG_OF_BFLAG) ||
+	    (flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) ||
 	    (ELF_ST_TYPE(sdp->sd_sym->st_info) == STT_NOTYPE))
 		return ((*ld_targ.t_mr.mr_add_outrel)(NULL, reld, ofl));
 

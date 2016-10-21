@@ -116,6 +116,7 @@ enum output_type {
 	OT_RELOC,
 	OT_SHARED,
 	OT_EXEC,
+	OT_PIE,
 };
 
 static enum output_type	otype = OT_EXEC;
@@ -381,7 +382,7 @@ check_flags(Ofl_desc * ofl, int argc)
 		    MSG_ORIG(MSG_ARG_ZRELAXRELOC),
 		    MSG_ORIG(MSG_ARG_ZNORELAXRELOC));
 
-	if (ofl->ofl_filtees && otype != OT_SHARED)
+	if (ofl->ofl_filtees && (otype != OT_SHARED))
 		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_MARG_ST_ONLYAVL),
 		    ((ofl->ofl_flags & FLG_OF_AUX) ?
 		    MSG_INTL(MSG_MARG_FILTER_AUX) : MSG_INTL(MSG_MARG_FILTER)));
@@ -435,7 +436,8 @@ check_flags(Ofl_desc * ofl, int argc)
 			ofl->ofl_guideflags |= FLG_OFG_NO_TEXT;
 		}
 
-		if ((otype == OT_SHARED) || (otype == OT_EXEC)) {
+		if ((otype == OT_SHARED) || (otype == OT_EXEC) ||
+		    (otype == OT_PIE)) {
 			/*
 			 * Create a dynamic object.  -Bdirect indicates that all
 			 * references should be bound directly.  This also
@@ -499,28 +501,33 @@ check_flags(Ofl_desc * ofl, int argc)
 				ld_eprintf(ofl, ERR_FATAL,
 				    MSG_INTL(MSG_MARG_DY_INCOMP),
 				    MSG_INTL(MSG_MARG_SONAME));
-		} else if (otype == OT_SHARED) {
+		} else if ((otype == OT_SHARED) || (otype == OT_PIE)) {
 			/*
-			 * Shared library.
+			 * Shared Object.
 			 */
-			ofl->ofl_flags |= FLG_OF_SHAROBJ;
+			if (otype == OT_PIE) {
+				ofl->ofl_flags |= FLG_OF_PIE;
+			} else {
+				ofl->ofl_flags |= FLG_OF_SHAROBJ;
 
-			/*
-			 * By default, print text relocation warnings for
-			 * executables but *not* for shared objects. However,
-			 * if -z guidance is on, issue warnings for shared
-			 * objects as well.
-			 *
-			 * If -z textwarn is explicitly specified, also issue
-			 * guidance messages if -z guidance is on, but not
-			 * for -z text or -z textoff.
-			 */
-			if (ztflag == NULL) {
-				if (!OFL_GUIDANCE(ofl, FLG_OFG_NO_TEXT))
-					ofl->ofl_flags1 |= FLG_OF1_TEXTOFF;
-			} else if ((ofl->ofl_flags & FLG_OF_PURETXT) ||
-			    (ofl->ofl_flags1 & FLG_OF1_TEXTOFF)) {
-				ofl->ofl_guideflags |= FLG_OFG_NO_TEXT;
+				/*
+				 * By default, print text relocation warnings
+				 * for executables but *not* for shared
+				 * objects. However, if -z guidance is on,
+				 * issue warnings for shared objects as well.
+				 *
+				 * If -z textwarn is explicitly specified,
+				 * also issue guidance messages if -z guidance
+				 * is on, but not for -z text or -z textoff.
+				 */
+				if (ztflag == NULL) {
+					if (!OFL_GUIDANCE(ofl, FLG_OFG_NO_TEXT))
+						ofl->ofl_flags1 |=
+						    FLG_OF1_TEXTOFF;
+				} else if ((ofl->ofl_flags & FLG_OF_PURETXT) ||
+				    (ofl->ofl_flags1 & FLG_OF1_TEXTOFF)) {
+					ofl->ofl_guideflags |= FLG_OFG_NO_TEXT;
+				}
 			}
 
 			if (Bsflag) {
@@ -549,6 +556,13 @@ check_flags(Ofl_desc * ofl, int argc)
 				    MSG_INTL(MSG_MARG_REL),
 				    MSG_ORIG(MSG_ARG_CI));
 		}
+
+		assert((ofl->ofl_flags & (FLG_OF_SHAROBJ|FLG_OF_PIE)) !=
+		    (FLG_OF_SHAROBJ|FLG_OF_PIE));
+		assert((ofl->ofl_flags & (FLG_OF_SHAROBJ|FLG_OF_EXEC)) !=
+		    (FLG_OF_SHAROBJ|FLG_OF_EXEC));
+		assert((ofl->ofl_flags & (FLG_OF_EXEC|FLG_OF_PIE)) !=
+		    (FLG_OF_EXEC|FLG_OF_PIE));
 	} else {
 		ofl->ofl_flags |= FLG_OF_STATIC;
 
@@ -570,7 +584,7 @@ check_flags(Ofl_desc * ofl, int argc)
 		if (ztflag)
 			ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ARG_ST_INCOMP),
 			    MSG_ORIG(MSG_ARG_ZTEXTALL));
-		if (otype == OT_SHARED)
+		if ((otype == OT_SHARED) || (otype == OT_PIE))
 			ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_MARG_ST_INCOMP),
 			    MSG_INTL(MSG_MARG_SO));
 		if (aflag && (otype == OT_RELOC))
@@ -1523,6 +1537,9 @@ parseopt_pass1(Ofl_desc *ofl, int argc, char **argv, int *usage)
 				} else if (strcmp(p,
 				    MSG_ORIG(MSG_ARG_TYPE_SHARED)) == 0) {
 					otype = OT_SHARED;
+				} else if (strcmp(p,
+				    MSG_ORIG(MSG_ARG_TYPE_PIE)) == 0) {
+					otype = OT_PIE;
 				} else {
 					ld_eprintf(ofl, ERR_FATAL,
 					    MSG_INTL(MSG_ARG_ILLEGAL),

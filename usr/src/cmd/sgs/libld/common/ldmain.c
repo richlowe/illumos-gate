@@ -300,7 +300,7 @@ ld_main(int argc, char **argv, Half mach)
 	 * Call ld_start() with the etype of our output file and the
 	 * output file name.
 	 */
-	if (ofl->ofl_flags & FLG_OF_SHAROBJ)
+	if (ofl->ofl_flags & (FLG_OF_SHAROBJ | FLG_OF_PIE))
 		etype = ET_DYN;
 	else if (ofl->ofl_flags & FLG_OF_RELOBJ)
 		etype = ET_REL;

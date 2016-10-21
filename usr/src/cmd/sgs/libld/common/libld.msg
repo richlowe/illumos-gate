@@ -251,7 +251,7 @@
 @ MSG_ARG_DETAIL_ZTW	"\t[-z textwarn]\twarn if there are relocations \
 			 against text\n"
 @ MSG_ARG_DETAIL_ZTY	"\t[-z type=type]\tspecify the type of object \
-			 (exec, reloc, shared)\n"
+			 (exec, pie, reloc, shared)\n"
 @ MSG_ARG_DETAIL_ZWRAP	"\t[-z wrap=symbol], [-wrap=symbol], [--wrap=symbol]\n\
 			 \t\t\twrap symbol references\n"
 @ MSG_ARG_DETAIL_ZVER	"\t[-z verbose]\t\
@@ -1495,6 +1495,7 @@
 @ MSG_ARG_TYPE_RELOC	"reloc"
 @ MSG_ARG_TYPE_EXEC	"exec"
 @ MSG_ARG_TYPE_SHARED	"shared"
+@ MSG_ARG_TYPE_PIE	"pie"
 
 # Environment variable strings
 

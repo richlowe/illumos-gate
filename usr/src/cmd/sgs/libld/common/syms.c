@@ -1188,7 +1188,7 @@ ld_sym_validate(Ofl_desc *ofl)
 	 *	condition will be indicated.
 	 *
 	 * warning:
-	 *	If we're creating a shared object, and either the -Bsymbolic
+	 *	If we're creating a shared library, and either the -Bsymbolic
 	 *	flag is set, or the user has turned on the -z guidance feature,
 	 *	then a non-fatal warning is issued for each symbol.
 	 *

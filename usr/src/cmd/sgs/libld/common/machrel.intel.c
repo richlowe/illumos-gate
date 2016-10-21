@@ -183,7 +183,7 @@ plt_entry(Ofl_desc * ofl, Word rel_off, Sym_desc * sdp)
 		/* LINTED */
 		*(Word *)gotent = ld_bswap_Word(*(Word *)gotent);
 
-	if (!(ofl->ofl_flags & FLG_OF_SHAROBJ)) {
+	if (!(ofl->ofl_flags & (FLG_OF_SHAROBJ | FLG_OF_PIE))) {
 		pltent[0] = M_SPECIAL_INST;
 		pltent[1] = M_JMP_DISP_IND;
 		pltent += 2;
@@ -1217,7 +1217,8 @@ ld_reloc_local(Rel_desc * rsp, Ofl_desc * ofl)
 	 *	build R_386_RELATIVE
 	 * fi
 	 */
-	if ((flags & FLG_OF_SHAROBJ) && (rsp->rel_flags & FLG_REL_LOAD) &&
+	if ((flags & (FLG_OF_SHAROBJ | FLG_OF_PIE)) &&
+	    (rsp->rel_flags & FLG_REL_LOAD) &&
 	    !(IS_PC_RELATIVE(rsp->rel_rtype)) && !(IS_SIZE(rsp->rel_rtype)) &&
 	    !(IS_GOT_BASED(rsp->rel_rtype)) &&
 	    !(rsp->rel_isdesc != NULL &&
@@ -1488,7 +1489,7 @@ ld_fillin_gotplt(Ofl_desc *ofl)
 		uchar_t *pltent;
 
 		pltent = (uchar_t *)ofl->ofl_osplt->os_outdata->d_buf;
-		if (!(flags & FLG_OF_SHAROBJ)) {
+		if (!(flags & (FLG_OF_SHAROBJ | FLG_OF_PIE))) {
 			pltent[0] = M_SPECIAL_INST;
 			pltent[1] = M_PUSHL_DISP;
 			pltent += 2;

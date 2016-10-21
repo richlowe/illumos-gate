@@ -305,7 +305,8 @@ sf1_cap(Ofl_desc *ofl, Xword val, Ifl_desc *ifl, Is_desc *cisp)
 		 * that an appropriate dependency will be provided at runtime.
 		 * The runtime linker will refuse to use this dependency.
 		 */
-		if ((val & SF1_SUNW_ADDR32) && (ofl->ofl_flags & FLG_OF_EXEC) &&
+		if ((val & SF1_SUNW_ADDR32) &&
+		    (ofl->ofl_flags & (FLG_OF_EXEC | FLG_OF_PIE)) &&
 		    ((ofl->ofl_ocapset.oc_sf_1.cm_val &
 		    SF1_SUNW_ADDR32) == 0)) {
 			ld_eprintf(ofl, ERR_WARNING,
@@ -2210,7 +2211,7 @@ process_dynamic(Is_desc *isc, Ifl_desc *ifl, Ofl_desc *ofl)
 			 * at initialization time, and cannot be added later.
 			 */
 			if ((dyn->d_un.d_val & DF_1_INTERPOSE) &&
-			    (ofl->ofl_flags & FLG_OF_EXEC))
+			    (ofl->ofl_flags & (FLG_OF_EXEC | FLG_OF_PIE)))
 				ifl->ifl_flags |= FLG_IF_DEPREQD;
 
 		} else if ((dyn->d_tag == DT_AUDIT) &&

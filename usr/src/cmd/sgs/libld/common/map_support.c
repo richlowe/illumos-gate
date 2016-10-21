@@ -1031,7 +1031,8 @@ ld_map_sym_filtee(Mapfile *mf, ld_map_ver_t *mv, ld_map_sym_t *ms,
 	}
 
 	/* Symbol filtering is only for sharable objects */
-	if (!(mf->mf_ofl->ofl_flags & FLG_OF_SHAROBJ)) {
+	if (!(mf->mf_ofl->ofl_flags & FLG_OF_SHAROBJ) ||
+	    (mf->mf_ofl->ofl_flags & FLG_OF_PIE)) {
 		mf_fatal0(mf, MSG_INTL(MSG_MAP_FLTR_ONLYAVL));
 		mv->mv_errcnt++;
 		return;

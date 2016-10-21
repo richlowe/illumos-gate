@@ -506,7 +506,8 @@ map_equal(Mapfile *mf, Sg_desc *sgp)
 		}
 
 		if (sgp->sg_phdr.p_type == PT_LOAD) {
-			if ((mf->mf_ofl->ofl_flags & FLG_OF_EXEC) == 0) {
+			if ((mf->mf_ofl->ofl_flags &
+			    (FLG_OF_EXEC | FLG_OF_PIE)) == 0) {
 				mf_fatal0(mf, MSG_INTL(MSG_MAP_SEGEMPEXE));
 				return (FALSE);
 			}
@@ -1124,7 +1125,8 @@ map_version(Mapfile *mf, char *name)
 				} else if (strcmp(tkv.tkv_str,
 				    MSG_ORIG(MSG_MAP_INTERPOSE)) == 0) {
 					/* BEGIN CSTYLED */
-					if (!(ofl->ofl_flags & FLG_OF_EXEC)) {
+					if (!(ofl->ofl_flags &
+					    (FLG_OF_EXEC|FLG_OF_PIE))) {
 					    mf_fatal0(mf,
 						MSG_INTL(MSG_MAP_NOINTPOSE));
 					    mv.mv_errcnt++;

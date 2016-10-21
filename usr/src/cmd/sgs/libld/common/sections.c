@@ -1374,8 +1374,11 @@ make_interp(Ofl_desc *ofl)
 	 * the user knows what they are doing.  Refer to the generic ELF ABI
 	 * section 5-4, and the ld(1) -I option.
 	 */
-	if (((ofl->ofl_flags & (FLG_OF_DYNAMIC | FLG_OF_EXEC |
-	    FLG_OF_RELOBJ)) != (FLG_OF_DYNAMIC | FLG_OF_EXEC)) && !iname)
+	if ((ofl->ofl_flags & FLG_OF_RELOBJ) == 1 ||
+	    (ofl->ofl_flags & FLG_OF_DYNAMIC) != 1)
+		return (1);
+	if (((ofl->ofl_flags & (FLG_OF_EXEC|FLG_OF_PIE)) == 0) &&
+	    (iname == NULL))
 		return (1);
 
 	/*
