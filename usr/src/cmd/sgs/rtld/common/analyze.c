@@ -1307,7 +1307,7 @@ file_open(int err, Lm_list *lml, Rt_map *clmp, uint_t flags, Fdesc *fdp,
 			 * the object is appropriate for ld.so.1 processing.
 			 */
 			fdp->fd_ftp = map_obj(lml, fdp, status.st_size, nname,
-			    fd, rej);
+			    fd, FALSE, rej);
 			(void) close(fd);
 
 			if (fdp->fd_ftp != NULL) {
@@ -1634,7 +1634,7 @@ unmap_obj(mmapobj_result_t *mpp, uint_t mapnum)
  */
 Fct *
 map_obj(Lm_list *lml, Fdesc *fdp, size_t fsize, const char *name, int fd,
-    Rej_desc *rej)
+    Boolean is_primary, Rej_desc *rej)
 {
 	static mmapobj_result_t	*smpp = NULL;
 	static uint_t		smapnum;
@@ -1663,6 +1663,9 @@ map_obj(Lm_list *lml, Fdesc *fdp, size_t fsize, const char *name, int fd,
 		mflags = MMOBJ_INTERPRET;
 		padding = NULL;
 	}
+
+	if (is_primary)
+		mflags |= MMOBJ_PRIMARY;
 
 	/*
 	 * Map the file.  If the number of mappings required by this file

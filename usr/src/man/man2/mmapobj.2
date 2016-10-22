@@ -17,7 +17,6 @@ mmapobj \- map a file object in the appropriate manner
 .fi
 
 .SH PARAMETERS
-.sp
 .ne 2
 .na
 \fB\fIfd\fR\fR
@@ -60,6 +59,17 @@ protections. To use this address space, the protections for it will need to be
 changed. This padding request will be ignored for the \fBAOUT\fR format.
 .RE
 
+.sp
+.ne 2
+.na
+\fBMMOBJ_PRIMARY\fR
+.ad
+.sp .6
+.RS 4n
+When mapping an interpretted ELF file, treat this file as the primary
+executable file of the process.
+.RE
+
 .RE
 
 .sp
@@ -97,7 +107,6 @@ request. Only the \fBMMOBJ_PADDING\fR request uses this argument. If
 .RE
 
 .SH DESCRIPTION
-.sp
 .LP
 The \fBmmapobj()\fR function establishes a set of mappings between a process's
 address space and a file.  By default, \fBmmapobj()\fR maps the whole file as a
@@ -207,7 +216,6 @@ also include any non-file data that are required to provide \fBNOBITS\fR data
 \fImr_msize\fR bytes of memory but only \fImr_msize\fR bytes will be available
 to the caller of \fBmmapobj()\fR.
 .SH RETURN VALUES
-.sp
 .LP
 Upon successful completion, 0 is returned and \fIelements\fR contains the
 number of program headers that are mapped for \fIfd\fR. The data describing
@@ -218,7 +226,6 @@ of the storage array contain valid mapping data.
 On failure, -1 is returned and \fBerrno\fR is set to indicate the error. No
 data is copied to storage.
 .SH ERRORS
-.sp
 .LP
 The \fBmmapobj()\fR function will fail if:
 .sp
@@ -341,7 +348,6 @@ object.
 .RE
 
 .SH ATTRIBUTES
-.sp
 .LP
 See \fBattributes\fR(5) for descriptions of the following attributes:
 .sp
@@ -359,7 +365,6 @@ MT-Level	Async-Signal-Safe
 .TE
 
 .SH SEE ALSO
-.sp
 .LP
 \fBld.so.1\fR(1), \fBfcntl\fR(2), \fBmemcntl\fR(2), \fBmmap\fR(2),
 \fBmprotect\fR(2), \fBmunmap\fR(2), \fBelf\fR(3ELF), \fBmadvise\fR(3C),

@@ -96,6 +96,7 @@ extern "C" {
 #ifdef _KERNEL
 #define	_MAP_TEXTREPL	0x1000
 #define	_MAP_RANDOMIZE	0x2000
+#define	_MAP_STARTLOW	0x4000
 #endif /* _KERNEL */
 
 #if	(_POSIX_C_SOURCE <= 2) && !defined(_XPG4_2)
@@ -132,8 +133,11 @@ extern "C" {
 /* External flags for mmapobj syscall (Exclusive of MAP_* flags above) */
 #define	MMOBJ_PADDING		0x10000
 #define	MMOBJ_INTERPRET		0x20000
+#define	MMOBJ_PRIMARY		0x40000
 
-#define	MMOBJ_ALL_FLAGS		(MMOBJ_PADDING | MMOBJ_INTERPRET)
+#define	MMOBJ_ALL_FLAGS		(MMOBJ_PADDING |	\
+    MMOBJ_INTERPRET |					\
+    MMOBJ_PRIMARY)
 
 /*
  * Values for mr_flags field of mmapobj_result_t below.

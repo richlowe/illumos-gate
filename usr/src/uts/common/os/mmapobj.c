@@ -719,7 +719,7 @@ mmapobj_lookup_start_addr(struct lib_va *lvp)
  */
 static caddr_t
 mmapobj_alloc_start_addr(struct lib_va **lvpp, size_t len, int use_lib_va,
-    int randomize, size_t align, vattr_t *vap)
+    int randomize, int primary, size_t align, vattr_t *vap)
 {
 	proc_t *p = curproc;
 	struct as *as = p->p_as;
@@ -734,7 +734,9 @@ mmapobj_alloc_start_addr(struct lib_va **lvpp, size_t len, int use_lib_va,
 	size_t lib_va_len;
 
 	ASSERT(lvpp != NULL);
-	ASSERT((randomize & use_lib_va) != 1);
+	ASSERT(!(randomize && use_lib_va));
+	/* XXX: I'd prefer not to need to do this */
+	ASSERT(!(primary && use_lib_va));
 
 	MOBJ_STAT_ADD(alloc_start);
 	model = get_udatamodel();
@@ -753,6 +755,9 @@ mmapobj_alloc_start_addr(struct lib_va **lvpp, size_t len, int use_lib_va,
 
 	if (randomize != 0)
 		ma_flags |= _MAP_RANDOMIZE;
+
+	if (primary != 0)
+		ma_flags |= _MAP_STARTLOW;
 
 	if (use_lib_va) {
 		/*
@@ -1547,7 +1552,8 @@ check_exec_addrs(int loadable, mmapobj_result_t *mrp, caddr_t start_addr)
  */
 static int
 process_phdrs(Ehdr *ehdrp, caddr_t phdrbase, int nphdrs, mmapobj_result_t *mrp,
-    vnode_t *vp, uint_t *num_mapped, size_t padding, cred_t *fcred)
+    vnode_t *vp, uint_t *num_mapped, size_t padding, cred_t *fcred,
+    uint_t flags)
 {
 	int i;
 	caddr_t start_addr = NULL;
@@ -1602,7 +1608,8 @@ process_phdrs(Ehdr *ehdrp, caddr_t phdrbase, int nphdrs, mmapobj_result_t *mrp,
 		}
 	}
 
-	if ((padding != 0) || secflag_enabled(curproc, PROC_SEC_ASLR)) {
+	if ((padding != 0) || secflag_enabled(curproc, PROC_SEC_ASLR) ||
+	    (flags & MMOBJ_PRIMARY) != 0) {
 		use_lib_va = 0;
 	}
 	if (e_type == ET_DYN) {
@@ -1725,6 +1732,7 @@ process_phdrs(Ehdr *ehdrp, caddr_t phdrbase, int nphdrs, mmapobj_result_t *mrp,
 		start_addr = mmapobj_alloc_start_addr(&lvp, len,
 		    use_lib_va,
 		    secflag_enabled(curproc, PROC_SEC_ASLR),
+		    flags & MMOBJ_PRIMARY,
 		    align, &vattr);
 		if (start_addr == NULL) {
 			if (lvp) {
@@ -1935,7 +1943,7 @@ process_phdrs(Ehdr *ehdrp, caddr_t phdrbase, int nphdrs, mmapobj_result_t *mrp,
  */
 static int
 doelfwork(Ehdr *ehdrp, vnode_t *vp, mmapobj_result_t *mrp,
-    uint_t *num_mapped, size_t padding, cred_t *fcred)
+    uint_t *num_mapped, size_t padding, cred_t *fcred, uint_t flags)
 {
 	int error;
 	offset_t phoff;
@@ -2051,7 +2059,7 @@ doelfwork(Ehdr *ehdrp, vnode_t *vp, mmapobj_result_t *mrp,
 
 	/* Now process the phdr's */
 	error = process_phdrs(ehdrp, phbasep, nphdrs, mrp, vp, num_mapped,
-	    padding, fcred);
+	    padding, fcred, flags);
 	kmem_free(phbasep, phsizep);
 	return (error);
 }
@@ -2311,7 +2319,7 @@ doaoutwork(vnode_t *vp, mmapobj_result_t *mrp,
  */
 static int
 mmapobj_map_interpret(vnode_t *vp, mmapobj_result_t *mrp,
-    uint_t *num_mapped, size_t padding, cred_t *fcred)
+    uint_t *num_mapped, size_t padding, cred_t *fcred, uint_t flags)
 {
 	int error = 0;
 	vattr_t vattr;
@@ -2411,7 +2419,7 @@ mmapobj_map_interpret(vnode_t *vp, mmapobj_result_t *mrp,
 	if (header[EI_MAG0] == ELFMAG0 && header[EI_MAG1] == ELFMAG1 &&
 	    header[EI_MAG2] == ELFMAG2 && header[EI_MAG3] == ELFMAG3) {
 		return (doelfwork((Ehdr *)lheader, vp, mrp, num_mapped,
-		    padding, fcred));
+		    padding, fcred, flags));
 	}
 
 #if defined(__sparc)
@@ -2473,6 +2481,7 @@ mmapobj(vnode_t *vp, uint_t flags, mmapobj_result_t *mrp,
 		return (0);
 	}
 
-	error = mmapobj_map_interpret(vp, mrp, num_mapped, padding, fcred);
+	error = mmapobj_map_interpret(vp, mrp, num_mapped, padding, fcred,
+	    flags);
 	return (error);
 }

@@ -365,6 +365,13 @@ static kmutex_t	contig_lock;
 #define	PFN_16M		(mmu_btop((uint64_t)0x1000000))
 
 /*
+ * Default to forbidding the first 64k of address space.  This protects most
+ * reasonably sized structures from dereferences through NULL:
+ *     ((foo_t *)0)->bar
+ */
+uintptr_t forbidden_null_mapping_sz = 0x10000;
+
+/*
  * Return the optimum page size for a given mapping
  */
 /*ARGSUSED*/
@@ -647,9 +654,9 @@ map_addr_vacalign_check(caddr_t addr, u_offset_t off)
 size_t aslr_max_map_skew = 256 * 1024 * 1024; /* 256MB */
 
 /*
- * map_addr_proc() is the routine called when the system is to
- * choose an address for the user.  We will pick an address
- * range which is the highest available below userlimit.
+ * map_addr_proc() is the routine called when the system is to choose an
+ * address for the user.  We will pick an address range which is the highest
+ * or lowest (depending on flags) available below userlimit.
  *
  * Every mapping will have a redzone of a single page on either side of
  * the request. This is done to leave one page unmapped between segments.
@@ -686,10 +693,21 @@ map_addr_proc(
 	caddr_t base;
 	size_t slen;
 	size_t align_amount;
+	int direction = (flags & _MAP_STARTLOW) ? AH_LO : AH_HI;
 
 	ASSERT32(userlimit == as->a_userlimit);
 
-	base = p->p_brkbase;
+	base = MAX(p->p_brkbase, (caddr_t)forbidden_null_mapping_sz);
+
+	/*
+	 * For 32bit processes the stack is low in memory.  We never want to
+	 * map things below it.
+	 */
+#if defined(__amd64)
+	if (p->p_model != DATAMODEL_NATIVE)
+#endif
+		base = MAX(base, p->p_usrstack);
+
 #if defined(__amd64)
 	/*
 	 * XX64 Yes, this needs more work.
@@ -761,13 +779,13 @@ map_addr_proc(
 	ASSERT(ISP2(align_amount));
 	ASSERT(align_amount == 0 || align_amount >= PAGESIZE);
 
-	off = off & (align_amount - 1);
+	off = P2PHASE(off, align_amount);
 
 	/*
 	 * Look for a large enough hole starting below userlimit.
 	 * After finding it, use the upper part.
 	 */
-	if (as_gap_aligned(as, len, &base, &slen, AH_HI, NULL, align_amount,
+	if (as_gap_aligned(as, len, &base, &slen, direction, NULL, align_amount,
 	    PAGESIZE, off) == 0) {
 		caddr_t as_addr;
 
@@ -775,24 +793,33 @@ map_addr_proc(
 		 * addr is the highest possible address to use since we have
 		 * a PAGESIZE redzone at the beginning and end.
 		 */
-		addr = base + slen - (PAGESIZE + len);
-		as_addr = addr;
-		/*
-		 * Round address DOWN to the alignment amount and
-		 * add the offset in.
-		 * If addr is greater than as_addr, len would not be large
-		 * enough to include the redzone, so we must adjust down
-		 * by the alignment amount.
-		 */
-		addr = (caddr_t)((uintptr_t)addr & (~(align_amount - 1)));
-		addr += (uintptr_t)off;
-		if (addr > as_addr) {
-			addr -= align_amount;
+		if (direction == AH_HI) {
+			addr = base + slen - (PAGESIZE + len);
+			as_addr = addr;
+
+			/*
+			 * Round address to the alignment amount and add the
+			 * offset in.  If addr is greater than as_addr, len
+			 * would not be large enough to include the redzone,
+			 * so we must adjust down by the alignment amount.
+			 */
+			addr = (caddr_t)P2ALIGN((uintptr_t)addr, align_amount);
+			addr += (uintptr_t)off;
+			if (addr > as_addr) {
+				addr -= align_amount;
+			}
+		} else if (direction == AH_LO) {
+			addr = as_addr = (base + PAGESIZE);
+
+			addr = (caddr_t)P2ROUNDUP((uintptr_t)addr,
+			    align_amount);
+			addr += (uintptr_t)off;
+			/* XXX: Check for flow? */
 		}
 
 		/*
-		 * If randomization is requested, slew the allocation
-		 * backwards, within the same gap, by a random amount.
+		 * If randomization is requested, slew the allocation the same
+		 * gap, by a random amount.
 		 */
 		if (flags & _MAP_RANDOMIZE) {
 			uint32_t slew;
@@ -800,14 +827,20 @@ map_addr_proc(
 			(void) random_get_pseudo_bytes((uint8_t *)&slew,
 			    sizeof (slew));
 
-			slew = slew % MIN(aslr_max_map_skew, (addr - base));
-			addr -= P2ALIGN(slew, align_amount);
+			if (direction == AH_HI) {
+				slew = slew % MIN(aslr_max_map_skew,
+				    (addr - base));
+				addr -= P2ALIGN(slew, align_amount);
+			} else if (direction == AH_LO) {
+				slew = slew % MIN(aslr_max_map_skew,
+				    ((base + slen) - addr));
+				addr += P2ALIGN(slew, align_amount);
+			}
 		}
 
-		ASSERT(addr > base);
-		ASSERT(addr + len < base + slen);
-		ASSERT(((uintptr_t)addr & (align_amount - 1)) ==
-		    ((uintptr_t)(off)));
+		ASSERT3P(addr, >, base);
+		ASSERT3P((addr + len), <, (base + slen));
+		ASSERT(P2PHASE((uintptr_t)addr, align_amount) == off);
 		*addrp = addr;
 	} else {
 		*addrp = NULL;	/* no more virtual space */
@@ -927,13 +960,6 @@ valid_va_range(caddr_t *basep, size_t *lenp, size_t minlen, int dir)
 {
 	return (valid_va_range_aligned(basep, lenp, minlen, dir, 0, 0, 0));
 }
-
-/*
- * Default to forbidding the first 64k of address space.  This protects most
- * reasonably sized structures from dereferences through NULL:
- *     ((foo_t *)0)->bar
- */
-uintptr_t forbidden_null_mapping_sz = 0x10000;
 
 /*
  * Determine whether [addr, addr+len] are valid user addresses.

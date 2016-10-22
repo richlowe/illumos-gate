@@ -788,11 +788,11 @@ prt_mty(private_t *pri, int raw, long val) /* print mmap() mapping type flags */
 void
 prt_mob(private_t *pri, int raw, long val) /* print mmapobj() flags */
 {
-	if (val == 0)
+	if (val == 0) {
 		prt_dec(pri, 0, val);
-	else if (raw || (val & ~(MMOBJ_PADDING|MMOBJ_INTERPRET)) != 0)
+	} else if (raw || (val & ~(MMOBJ_ALL_FLAGS)) != 0) {
 		prt_hhx(pri, 0, val);
-	else {
+	} else {
 #define	CBSIZE	sizeof (pri->code_buf)
 		char *s = pri->code_buf;
 
@@ -801,6 +801,8 @@ prt_mob(private_t *pri, int raw, long val) /* print mmapobj() flags */
 			(void) strlcat(s, "|MMOBJ_PADDING", CBSIZE);
 		if (val & MMOBJ_INTERPRET)
 			(void) strlcat(s, "|MMOBJ_INTERPRET", CBSIZE);
+		if (val & MMOBJ_PRIMARY)
+			(void) strlcat(s, "|MMOBJ_PRIMARY", CBSIZE);
 		outstring(pri, s + 1);
 #undef CBSIZE
 	}

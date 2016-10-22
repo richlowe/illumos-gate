@@ -741,7 +741,7 @@ extern const char	*load_trace(Lm_list *, Pdesc *, Rt_map *, Fdesc *);
 extern void		nfavl_insert(const char *, avl_index_t);
 extern void		*nu_map(Lm_list *, caddr_t, size_t, int, int);
 extern Fct		*map_obj(Lm_list *, Fdesc *, size_t, const char *, int,
-			    Rej_desc *);
+			    Boolean, Rej_desc *);
 extern void		*malloc(size_t);
 extern int		machcap_check(Syscapset *, const char *, Rej_desc *);
 extern void		machine_name(Syscapset *);

@@ -466,7 +466,7 @@ setup(char **envp, auxv_t *auxv, Word _flags, char *_platform, int _syspagsz,
 		(void) rtld_fstat(fd, &status);
 		fdm.fd_oname = argvname;
 		fdm.fd_ftp = map_obj(&lml_main, &fdm, status.st_size, argvname,
-		    fd, &rej);
+		    fd, TRUE, &rej);
 		(void) close(fd);
 
 		if (fdm.fd_ftp == NULL) {

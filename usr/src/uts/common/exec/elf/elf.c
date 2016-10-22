@@ -82,7 +82,8 @@ static int getelfshdr(vnode_t *, cred_t *, const Ehdr *, int, int, caddr_t *,
 static size_t elfsize(Ehdr *, int, caddr_t, uintptr_t *);
 static int mapelfexec(vnode_t *, Ehdr *, int, caddr_t,
     Phdr **, Phdr **, Phdr **, Phdr **, Phdr *,
-    caddr_t *, caddr_t *, intptr_t *, intptr_t *, size_t, long *, size_t *);
+    caddr_t *, caddr_t *, intptr_t *, intptr_t *, size_t, long *, size_t *,
+    boolean_t);
 
 typedef enum {
 	STR_CTF,
@@ -248,7 +249,7 @@ mapexec_brand(vnode_t *vp, uarg_t *args, Ehdr *ehdr, Addr *uphdr_vaddr,
 
 	if (error = mapelfexec(vp, ehdr, nphdrs, phdrbase, &uphdr, &dynphdr,
 	    &junk, &dtrphdr, NULL, bssbase, brkbase, voffset, &minaddr,
-	    len, &execsz, brksize)) {
+	    len, &execsz, brksize, B_TRUE)) {
 		uprintf("%s: Cannot map %s\n", exec_file, args->pathname);
 		kmem_free(phdrbase, phdrsize);
 		return (error);
@@ -618,7 +619,7 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 	if ((error = mapelfexec(vp, ehdrp, nphdrs, phdrbase, &uphdr, &intphdr,
 	    &stphdr, &dtrphdr, dataphdrp, &bssbase, &brkbase, &voffset, NULL,
-	    len, execsz, &brksize)) != 0)
+	    len, execsz, &brksize, B_TRUE)) != 0)
 		goto bad;
 
 	if (uphdr != NULL && intphdr == NULL)
@@ -729,7 +730,8 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 		 * Setup the "aux" vector.
 		 */
 		if (uphdr) {
-			if (ehdrp->e_type == ET_DYN) {
+			if ((ehdrp->e_type == ET_DYN) &&
+			    (ehdrp->e_entry == 0)) {
 				/* don't use the first page */
 				bigwad->exenv.ex_brkbase = (caddr_t)PAGESIZE;
 				bigwad->exenv.ex_bssbase = (caddr_t)PAGESIZE;
@@ -792,7 +794,7 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 		error = mapelfexec(nvp, ehdrp, nphdrs, phdrbase, &junk, &junk,
 		    &junk, &dtrphdr, NULL, NULL, NULL, &voffset, NULL, len,
-		    execsz, NULL);
+		    execsz, NULL, B_FALSE);
 		if (error || junk != NULL) {
 			VN_RELE(nvp);
 			uprintf("%s: Cannot map %s\n", exec_file, dlnp);
@@ -1282,7 +1284,8 @@ mapelfexec(
 	intptr_t *minaddr,
 	size_t len,
 	long *execsz,
-	size_t *brksize)
+	size_t *brksize,
+	boolean_t primary)
 {
 	Phdr *phdr;
 	int i, prot, error;
@@ -1303,6 +1306,9 @@ mapelfexec(
 		 */
 		if (secflag_enabled(curproc, PROC_SEC_ASLR))
 			flags |= _MAP_RANDOMIZE;
+
+		if (primary)
+			flags |= _MAP_STARTLOW;
 
 		map_addr(&addr, len, (offset_t)0, 1, flags);
 		if (addr == NULL)
