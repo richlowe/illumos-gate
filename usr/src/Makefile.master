@@ -866,6 +866,7 @@ ZNOLAZYLOAD=	-znolazyload
 ZNOLDYNSYM=	-znoldynsym
 ZNORELOC=	-znoreloc
 ZNOVERSION=	-znoversion
+ZPIE=		-_gcc=-pie
 ZRECORD=	-zrecord
 ZREDLOCSYM=	-zredlocsym
 ZTEXT=		-ztext
@@ -884,12 +885,16 @@ amd64_C_PICFLAGS =	-K pic
 C_PICFLAGS =		$($(MACH)_C_PICFLAGS)
 C_PICFLAGS64 =		$($(MACH64)_C_PICFLAGS)
 
+C_PIEFLAGS =		-_gcc=-fpie
+
 sparc_C_BIGPICFLAGS =	-K PIC
 sparcv9_C_BIGPICFLAGS =	-K PIC
 i386_C_BIGPICFLAGS =	-K PIC
 amd64_C_BIGPICFLAGS =	-K PIC
 C_BIGPICFLAGS =		$($(MACH)_C_BIGPICFLAGS)
 C_BIGPICFLAGS64 =	$($(MACH64)_C_BIGPICFLAGS)
+
+C_BIGPIEFLAGS =		-fPIE
 
 # CC requires there to be no space between '-K' and 'pic' or 'PIC'.
 sparc_CC_PICFLAGS =	-Kpic

@@ -46,7 +46,8 @@ include		../../../../lib/Makefile.lib
 # Specifically request the construction of a static library.
 # This library is not installed in the proto area.
 LIBS = $(LIBRARY)
-
+CFLAGS +=	$(C_PICFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS64)
 CPPFLAGS =	-I../../include $(CPPFLAGS.master)
 
 CERRWARN +=	-_gcc=-Wno-uninitialized

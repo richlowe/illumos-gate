@@ -23,8 +23,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 .KEEP_STATE:
 .SUFFIXES:
@@ -40,6 +38,8 @@ SCHEME :sh= cd ..; basename `pwd`
 PROG = $(SCHEME:%=%.so)
 SRCS = scheme.c
 OBJS = $(SRCS:%.c=%.o)
+
+EXECTYPE = shared
 
 ROOTPROG = $(ROOT)/usr/lib/fm/fmd/schemes/$(PROG)
 ROOTPROG64 = $(ROOT)/usr/lib/fm/fmd/schemes/$(MACH64)/$(PROG)

@@ -22,10 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
-#cmd/ipf/lib/Makefile.com
-#
 
 LIBRARY=	libipf.a
 VERS= .1
@@ -66,7 +62,8 @@ SRCDIR= ../common
 SRCS=	$(OBJECTS:%.o=../common/%.c)
 
 LIBS=		$(LIBRARY)
-
+CFLAGS +=	$(C_PICFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS64)
 CPPFLAGS	+= -I../../tools
 
 .KEEP_STATE:

@@ -21,6 +21,8 @@ include ../../Makefile.com
 LIBS = $(LIBRARY)
 SRCDIR = ../
 CPPFLAGS += -D_FILE_OFFSET_BITS=64
+CFLAGS += $(C_PIEFLAGS)
+CCFLAGS += $(C_PIEFLAGS)
 
 all: $(LIBS)
 

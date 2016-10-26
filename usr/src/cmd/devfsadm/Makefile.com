@@ -107,6 +107,8 @@ SUNW_md_link.so :=	LDLIBS += -lmeta
 SUNW_disk_link.so :=	LDLIBS += -ldevid
 SUNW_sgen_link.so :=	LDLIBS += -ldevid
 
+$(LINK_MODS)	:= EXECTYPE = shared
+
 # All libraries are built from the same SUNW_%.so rule (see below), and define
 # their own SONAME using -h explicitly.  Null the generic -h macro that gets
 # inherited from Makefile.lib, otherwise we'll get two -h definitions.

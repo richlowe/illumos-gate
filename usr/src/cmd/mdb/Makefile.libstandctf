@@ -53,6 +53,7 @@ CFLAGS64 += $(STAND_FLAGS_64)
 LDFLAGS = $(ZNOVERSION) $(BREDUCE) -M $(MAPFILE) -dy -r
 
 LIB = libstandctf.so
+EXECTYPE= exec
 OBJS = $(CTF_COMMON_SRCS:%.c=%.o) $(CTF_STUB_SRCS:%.c=%.o)
 LINTFILES = $(OBJS:%.o=%.ln)
 

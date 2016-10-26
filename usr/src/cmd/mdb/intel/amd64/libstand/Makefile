@@ -23,8 +23,6 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 SRCS += \
 	setjmp.s
@@ -34,6 +32,8 @@ include ../../../../Makefile.cmd.64
 include ../../Makefile.amd64
 include ../../../Makefile.libstand
 
+C_PIEFLAGS=
+C_PIEFLAGS64=
 CPPFLAGS += -I.
 
 %.o: %.c

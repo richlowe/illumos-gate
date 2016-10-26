@@ -22,19 +22,18 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
 #
 
 LIBRARY =	psm-lpsched.a
 VERS=.1
-
 LPSCHED_OBJS =	lpsched-msgs.o lpsched-service.o lpsched-printers.o \
 		lpsched-jobs.o lpsched-misc.o
 OBJECTS =	$(LPSCHED_OBJS) service.o printer.o job.o ppd.o library.o
-		
 
 include		../../../../lib/Makefile.lib
 include         ../../Makefile.lp
+
+EXECTYPE=	shared
 
 ROOTLIBDIR=	$(ROOT)/usr/lib/print
 

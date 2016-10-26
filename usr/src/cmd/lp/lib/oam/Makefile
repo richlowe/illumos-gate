@@ -23,10 +23,6 @@
 # Copyright 1990-2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/lp/lib/oam/Makefile
-#
 include         ../../Makefile.lp
 
 LIBRARY =		liblpoam.a
@@ -68,8 +64,9 @@ include			../../../../lib/Makefile.lib
 # Specifically request the construction of a static library.
 # This library is not installed in the proto area.
 LIBS = $(LIBRARY)
-
-CPPFLAGS =		-I$(LPINC) $(CPPFLAGS.master)
+CFLAGS +=	$(C_PICFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS64)
+CPPFLAGS =	-I$(LPINC) $(CPPFLAGS.master)
 
 .KEEP_STATE:
 

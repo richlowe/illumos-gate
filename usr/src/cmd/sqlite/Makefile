@@ -26,17 +26,14 @@
 PROG=		sqlite
 
 include ../Makefile.cmd
+include ../Makefile.ctf
 
-include $(SRC)/lib/Makefile.lib
-
-SQLITEHDRDIR=	$(ROOTHDRDIR)/sqlite-sys
+SQLITEHDRDIR=	$(ROOT)/usr/include/sqlite-sys
 
 ROOTLIBSVCBIN=	$(ROOT)/lib/svc/bin
 ROOTSQLITE=	$(PROG:%=$(ROOTLIBSVCBIN)/%)
 
 OBJS=		shell.o
-$(OBJS) :=	CFLAGS += $(CTF_FLAGS)
-$(OBJS) :=	CTFCONVERT_POST = $(CTFCONVERT_O)
 
 CERRWARN +=	-_gcc=-Wno-empty-body
 

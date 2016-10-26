@@ -80,6 +80,9 @@ pics/%_w.o:=	DEFLIST = -DEUC -DJLSLEX  -DWOPTION -D$*=$*_w
 objs/%_e.o:=	DEFLIST = -DEUC -DJLSLEX  -DEOPTION -D$*=$*_e
 pics/%_e.o:=	DEFLIST = -DEUC -DJLSLEX  -DEOPTION -D$*=$*_e
 
+CFLAGS +=	$(C_PICFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS64)
+
 CPPFLAGS=	$(INCLIST) $(DEFLIST) $(CPPFLAGS.master)
 BUILD.AR=	$(AR) $(ARFLAGS) $@ `$(LORDER) $(OBJS) | $(TSORT)`
 

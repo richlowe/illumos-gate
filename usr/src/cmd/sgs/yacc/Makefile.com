@@ -63,6 +63,8 @@ $(LINTLIB):=	SRCS = $(SRCDIR)/$(LINTSRC)
 
 INCLIST=	-I../../include -I../../include/$(MACH)
 CPPFLAGS=	$(INCLIST) $(DEFLIST) $(CPPFLAGS.master)
+CFLAGS +=	$(C_PICFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS64)
 $(PROG):=	LDLIBS = $(LDLIBS.cmd)
 BUILD.AR=	$(AR) $(ARFLAGS) $@ `$(LORDER) $(OBJS) | $(TSORT)`
 

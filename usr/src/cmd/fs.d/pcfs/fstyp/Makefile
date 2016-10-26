@@ -22,8 +22,6 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 FSTYP_VERS=1
 FSTYPE=		pcfs
@@ -35,6 +33,7 @@ include ../../Makefile.fstype
 # There should be a mapfile here
 MAPFILES =
 
+EXECTYPE=	shared
 CFLAGS +=	$(C_PICFLAGS)
 DYNLIB=		$(LIBPROG)
 

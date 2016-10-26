@@ -45,12 +45,11 @@ OBJECTS= 	putgrent.o \
 		vprojname.o
 
 # include library definitions
-include ../../Makefile.cmd
 include ../../../lib/Makefile.lib
+include ../../Makefile.cmd
 
 SRCDIR =	.
 
-GREP= 		grep
 FILEMODE=	$(LIBFILEMODE)
 
 PRODUCT=	$(LIBRARY) $(DATEFILE)

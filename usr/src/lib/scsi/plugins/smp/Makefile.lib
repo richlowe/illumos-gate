@@ -37,6 +37,9 @@ PROG = $(MODULE:%=%.so)
 YOBJS = $(YSRCS:%.y=%.o)
 OBJS = $(YOBJS) $(SRCS:%.c=%.o)
 
+#XXX: I have no idea why this stuff is using Makefile.cmd
+EXECTYPE= shared
+
 #
 # A module may set DMOD and DMOD_SRCS if it has a mdb proc module.
 # DMOD, if set, must match PROG above (for mdb autoloading) so it will

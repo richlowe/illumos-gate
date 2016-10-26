@@ -28,6 +28,8 @@
 
 PROG = esc
 
+EXECTYPE= exec			#XXX: PIE Bootstrap hack
+
 include $(SRC)/cmd/fm/eversholt/Makefile.esc.com
 
 EFTCLASS = writer

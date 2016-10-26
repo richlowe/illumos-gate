@@ -144,6 +144,8 @@ SUNW_bridge_rcm.so := LDLIBS_MODULES += -L$(ROOT)/lib -ldladm
 
 LDLIBS += -lgen -lelf -lrcm -lnvpair -ldevinfo -lnsl -lsocket
 
+$(COMMON_RCM_MODS) $($(MACH)_RCM_MODS) := EXECTYPE= shared
+
 SRCS = $(RCM_SRC) $(COMMON_MOD_SRC)
 
 POFILES = $(SRCS:.c=.po)

@@ -45,6 +45,9 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-uninitialized
 
+CFLAGS	+= $(C_PICFLAGS)
+CFLAGS64+= $(C_PICFLAGS64)
+
 objs/%.o: ../%.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)

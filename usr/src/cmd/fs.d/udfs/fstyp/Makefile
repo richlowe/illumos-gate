@@ -33,6 +33,7 @@ include ../../Makefile.fstype
 # There should be a mapfile here
 MAPFILES =
 
+EXECTYPE=	shared
 CFLAGS +=	$(C_PICFLAGS)
 DYNLIB=		$(LIBPROG)
 

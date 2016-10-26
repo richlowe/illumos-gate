@@ -103,6 +103,8 @@ DMOD_SRCS = fmd_mdb.c
 DMOD_OBJS = $(DMOD_SRCS:%.c=%.o)
 DMOD_LINT = $(DMOD_SRCS:%.c=%.ln)
 
+$(DMOD) := EXECTYPE= shared
+
 HDRS = fmd_api.h fmd_fmri.h
 ROOTCDIR = $(ROOT)/etc/fm/$(PROG)
 ROOTHDIR = $(ROOT)/usr/include/fm
@@ -156,6 +158,8 @@ $(LOGADMDIR)/%.conf: ../common/%.conf
 	$(INS.file)
 
 $(PROG): $(OBJS)
+# XXX: This hits a bug in gcc 4.4.4
+	$(STRIP) -x fmd_svc_api.o
 	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
 	$(CTFMERGE) -L VERSION -o $@ $(OBJS)
 	$(POST_PROCESS)

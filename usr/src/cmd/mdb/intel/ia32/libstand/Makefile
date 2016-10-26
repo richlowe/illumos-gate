@@ -23,16 +23,17 @@
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 SRCS += \
 	setjmp.s \
 	muldiv.s
-	
+
 include ../../../../Makefile.cmd
 include ../../Makefile.ia32
 include ../../../Makefile.libstand
+
+C_PIEFLAGS=
+C_PIEFLAGS64=
 
 CPPFLAGS += -I. -I$(SRC)/uts/i86pc
 AS_CPPFLAGS += -I$(SRC)/uts/i86pc

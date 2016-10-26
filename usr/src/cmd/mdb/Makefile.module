@@ -168,6 +168,7 @@ lint: $$(LINTFILES)
 .PARALLEL: $(MODOBJS) $(KMODOBJS) mdb_tgt kmdb_tgt dmod kmod \
 	$(TARGETS) $(LINTFILES)
 
+$(MODFILE) := EXECTYPE= shared
 $(MODFILE): dmod .WAIT $(MODOBJS) $$(MAPFILE-EXT)
 	$(LINK.c) $(ZDEFS) $(ZIGNORE) $(MAPFILE-EXT:%=-M%) $(GSHARED) \
 	    $(MODOBJS) -o $@ $(LDLIBS) -lc
@@ -202,6 +203,9 @@ $(KMDB_LINKTEST_ENABLE)KMDB_LINKTEST_CMD = $(KMDB_LINKTEST)
 # Ensure that dmods don't use floating point
 #
 KMDB_FPTEST_CMD = $(KMDB_FPTEST)
+
+$(KMODOBJS) := EXECTYPE=exec
+$(KMODFILE) := EXECTYPE=exec
 
 $(KMODFILE): kmod .WAIT $(KMODOBJS) $(MAPFILE)
 	$(LD) -dy -r $(MAPFILE:%=-M%) -Nmisc/kmdbmod -o $@ $(KMODOBJS) \

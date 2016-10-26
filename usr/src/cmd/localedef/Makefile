@@ -279,6 +279,7 @@ $(NDIR)/mkdirp.o : ../../lib/libgen/common/mkdirp.c
 	$(NATIVECC) $(NATIVE_CFLAGS) $(NATIVE_CPPFLAGS) -o $@ -c \
 	  ../../lib/libgen/common/mkdirp.c
 
+$(NPROG) := EXECTYPE= exec
 $(NPROG): $(NDIR) .WAIT $(NOBJS)
 	$(LINK.c) $(NOBJS) -o $@ $(NATIVELDLIBS)
 	$(POST_PROCESS)

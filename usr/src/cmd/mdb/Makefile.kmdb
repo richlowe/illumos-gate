@@ -36,6 +36,10 @@ include ../../../Makefile.versions
 include ../../../Makefile.tools
 include ../../../Makefile.kmdb.files
 
+EXECMODE= exec
+C_PIEFLAGS=
+C_PIEFLAGS64=
+
 OBJS += mdb_lex.o mdb_grammar.o
 
 .NO_PARALLEL:

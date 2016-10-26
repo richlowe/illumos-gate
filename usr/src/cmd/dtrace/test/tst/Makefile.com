@@ -59,7 +59,7 @@ $(ROOT_EXES) := FILEMODE = 0555
 # utterly subvert.  We force the compiler to not optimize rather than engage
 # in an arms race with increasingly belligerent optimizers.
 COPTFLAG=	-xO0
-
+EXECTYPE=	exec
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration

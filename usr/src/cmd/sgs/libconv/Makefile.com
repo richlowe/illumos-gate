@@ -42,13 +42,13 @@ COMOBJS=	arch.o			audit.o \
 		dwarf_ehe.o 		dynamic.o \
 		elf.o			entry.o \
 		globals.o		group.o \
- 		lddstub.o		map.o \
+		lddstub.o		map.o \
 		phdr.o			relocate.o \
- 		relocate_i386.o		relocate_amd64.o \
+		relocate_i386.o		relocate_amd64.o \
 		relocate_sparc.o	sections.o \
 		segments.o    		strproc.o \
 		symbols.o  		syminfo.o \
-  		tokens.o  		time.o \
+		tokens.o  		time.o \
 		version.o
 
 ELFCAP_OBJS=	elfcap.o
@@ -64,7 +64,7 @@ BLTOBJS=	arch_msg.o		audit_msg.o \
 		dwarf_ehe_msg.o 	dynamic_msg.o \
 		elf_msg.o 		entry_msg.o \
 		globals_msg.o		group_msg.o \
- 		map_msg.o		lddstub_msg.o \
+		map_msg.o		lddstub_msg.o \
 		phdr_msg.o 		relocate_amd64_msg.o \
 		relocate_i386_msg.o	relocate_sparc_msg.o \
 		sections_msg.o 		segments_msg.o \
@@ -89,6 +89,9 @@ include 	$(SRC)/cmd/sgs/Makefile.com
 
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-switch
+
+CFLAGS		+= $(C_PICFLAGS)
+CFLAGS64	+= $(C_PICFLAGS64)
 
 CTFCONVERT_O=
 

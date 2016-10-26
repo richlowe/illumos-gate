@@ -23,10 +23,6 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/lp/lib/forms/Makefile
-#
 
 LIBRARY	=	liblpfrm.a
 
@@ -45,8 +41,8 @@ include         ../../Makefile.lp
 # Specifically request the construction of a static library.
 # This library is not installed in the proto area.
 LIBS = $(LIBRARY)
-
 CFLAGS +=	$(C_BIGPICFLAGS)
+CFLAGS64 +=	$(C_BIGPICFLAGS64)
 CPPFLAGS =	-I../../include $(CPPFLAGS.master)
 
 POFILE =	lp_lib_forms.po

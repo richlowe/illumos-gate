@@ -21,6 +21,8 @@ SRCS = $(OBJECTS:.o=.c)
 
 CERRWARN += -_gcc=-Wno-unused-function
 
+CFLAGS += $(C_PICFLAGS)
+CFLAGS64 += $(C_PICFLAGS64)
 CPPFLAGS += -I$(SRC)/uts/intel/sys/acpi -DACPI_APPLICATION
 
 LDLIBS += -lc

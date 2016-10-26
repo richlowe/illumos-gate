@@ -23,10 +23,6 @@
 # Copyright 1990-2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/lp/lib/users/Makefile
-#
 
 LIBRARY	=	liblpusr.a
 
@@ -41,7 +37,8 @@ include         ../../Makefile.lp
 # Specifically request the construction of a static library.
 # This library is not installed in the proto area.
 LIBS = $(LIBRARY)
-
+CFLAGS +=	$(C_PICFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS64)
 CPPFLAGS =	-I../../include $(CPPFLAGS.master)
 
 POFILE =	lp_lib_users.po

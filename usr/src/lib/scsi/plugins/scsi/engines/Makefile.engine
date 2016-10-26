@@ -23,7 +23,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
 
 .KEEP_STATE:
 .SUFFIXES:
@@ -38,6 +37,9 @@ include ../../../../../Makefile.defs
 PROG = $(MODULE:%=%.so)
 YOBJS = $(YSRCS:%.y=%.o)
 OBJS = $(YOBJS) $(SRCS:%.c=%.o)
+
+#XXX: I have no idea why this stuff is using Makefile.cmd
+EXECTYPE= shared
 
 #
 # A module may set DMOD and DMOD_SRCS if it has a mdb proc module.
