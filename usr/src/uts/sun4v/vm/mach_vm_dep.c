@@ -218,6 +218,7 @@ map_addr_proc(caddr_t *addrp, size_t len, offset_t off, int vacalign,
 	size_t slen;
 	uintptr_t align_amount;
 	int allow_largepage_alignment = 1;
+	int direction = (flags & _MAP_STARTLOW) ? AH_LO : AH_HI;
 
 	base = p->p_brkbase;
 	if (userlimit < as->a_userlimit) {
@@ -304,28 +305,39 @@ map_addr_proc(caddr_t *addrp, size_t len, offset_t off, int vacalign,
 	 * After finding it, use the upper part.
 	 */
 	as_purge(as);
-	off = off & (align_amount - 1);
-	if (as_gap_aligned(as, len, &base, &slen, AH_HI, NULL, align_amount,
+	off = P2PHASE(off, align_amount);
+
+	if (as_gap_aligned(as, len, &base, &slen, direction, NULL, align_amount,
 	    PAGESIZE, off) == 0) {
 		caddr_t as_addr;
 
-		/*
-		 * addr is the highest possible address to use since we have
-		 * a PAGESIZE redzone at the beginning and end.
-		 */
-		addr = base + slen - (PAGESIZE + len);
-		as_addr = addr;
-		/*
-		 * Round address DOWN to the alignment amount and
-		 * add the offset in.
-		 * If addr is greater than as_addr, len would not be large
-		 * enough to include the redzone, so we must adjust down
-		 * by the alignment amount.
-		 */
-		addr = (caddr_t)((uintptr_t)addr & (~(align_amount - 1l)));
-		addr += (long)off;
-		if (addr > as_addr) {
-			addr -= align_amount;
+		if (direction == AH_HI) {
+			/*
+			 * addr is the highest possible address to use since
+			 * we have a PAGESIZE redzone at the beginning and
+			 * end.
+			 */
+			addr = base + slen - (PAGESIZE + len);
+			as_addr = addr;
+			/*
+			 * Round address DOWN to the alignment amount and add
+			 * the offset in.  If addr is greater than as_addr,
+			 * len would not be large enough to include the
+			 * redzone, so we must adjust down by the alignment
+			 * amount.
+			 */
+			addr = (caddr_t)P2ALIGN((uintptr_t)addr, align_amount);
+			addr += (uintptr_t)off;
+			if (addr > as_addr) {
+				addr -= align_amount;
+			}
+		} else if (direction == AH_LO) {
+			addr = as_addr = (base + PAGESIZE);
+
+			addr = (caddr_t)P2ROUNDUP((uintptr_t)addr,
+			    align_amount);
+			addr += (uintptr_t)off;
+			/* XXX: Check for flow? */
 		}
 
 		/*
@@ -338,16 +350,21 @@ map_addr_proc(caddr_t *addrp, size_t len, offset_t off, int vacalign,
 			(void) random_get_pseudo_bytes((uint8_t *)&slew,
 			    sizeof (slew));
 
-			slew = slew % MIN(aslr_max_map_skew, (addr - base));
-			addr -= P2ALIGN(slew, align_amount);
+			if (direction == AH_HI) {
+				slew = slew % MIN(aslr_max_map_skew,
+				    (addr - base));
+				addr -= P2ALIGN(slew, align_amount);
+			} else if (direction == AH_LO) {
+				slew = slew % MIN(aslr_max_map_skew,
+				    ((base + slen) - addr));
+				addr += P2ALIGN(slew, align_amount);
+			}
 		}
 
-		ASSERT(addr > base);
-		ASSERT(addr + len < base + slen);
-		ASSERT(((uintptr_t)addr & (align_amount - 1l)) ==
-		    ((uintptr_t)(off)));
+		ASSERT3P(addr, >, base);
+		ASSERT3P((addr + len), <, (base + slen));
+		ASSERT(P2PHASE((uintptr_t)addr, align_amount) == off);
 		*addrp = addr;
-
 	} else {
 		*addrp = NULL;	/* no more virtual space */
 	}
