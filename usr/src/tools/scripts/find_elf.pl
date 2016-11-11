@@ -44,7 +44,7 @@
 use strict;
 
 use vars  qw($Prog %Output @SaveArgv);
-use vars  qw(%opt $HaveElfedit);
+use vars  qw(%opt);
 
 # Hashes used to detect aliases --- symlinks that reference a common file
 #
@@ -64,7 +64,7 @@ use IO::Dir;
 # Return a 3 element output array describing the object
 # given by path. The elements of the array contain:
 #
-#	Index   Meaning
+#	Index	Meaning
 #	-----------------------------------------------
 #	0	ELFCLASS of object (0 if not an ELF object)
 #	1	Type of object (NONE if not an ELF object)
@@ -73,86 +73,52 @@ use IO::Dir;
 sub GetObjectInfo {
 	my $path = $_[0];
 
-	# If elfedit is available, we use it to obtain the desired information
-	# by executing three commands in order, to produce a 0, 2, or 3
-	# element output array.
+	# We use elfedit to obtain the desired information:
 	#
-	#	Command                 Meaning
+	#	Command			Meaning
 	#	-----------------------------------------------
 	#	ehdr:ei_class		ELFCLASS of object
-	#	ehdr:ei_e_type		Type of object
+	#	ehdr:e_type		Type of object
 	#	dyn:tag verdef		Address of verdef items
+	#	phdr:interp		Path to interpreter
 	#
-	# We discard stderr, and simply examine the resulting array to
-	# determine the situation:
+	# We discard stderr, and simply examine the result to determine the
+	# situation:
 	#
 	#	# Array Elements	Meaning
 	#	-----------------------------------------------
-	#	  0			File is not ELF object
-	#	  2			Object with no versions (no VERDEF)
-	#	  3			Object that has versions
-	if ($HaveElfedit) {
-		my $ecmd = "elfedit -r -o simple -e ehdr:ei_class " .
-		    "-e ehdr:e_type -e 'dyn:tag verdef'";
-		my @Elf = split(/\n/, `$ecmd $path 2>/dev/null`);
+	#	  no class		File is not ELF object
+	#	  verdef/no verdef	Object does/does not have versions
+	#	  interp/no interp	Dynamic object is PIE executable.
+	#
+	# You may think that we could do all this in one command, we can't
+	# because elfedit(1) exits on the first error, and we need to always
+	# get (possibly empty) output for each case.
+	#
+	# You may think we can tell whether a dynamic object is a PIE based on
+	# whether it has an entry point, via ehdr:e_entry.  Unfortunately, the
+	# GNU link-editor gives every shared object an entry point, regardless
+	# of whether they're PIE (and, indeed, whether that entry point will
+	# do anything other than crash).  We check for the presence of an
+	# interpreter because this is equally (in-)accurate, but less
+	# surprising in its results.
+	my $elfedit = "elfedit -r -o simple";
+	my ($class, $type) = split(/\n/,
+	    `$elfedit -e ehdr:ei_class -e ehdr:e_type $path 2>/dev/null`);
+	my $verdef = `$elfedit -e 'dyn:tag verdef' $path 2>/dev/null`;
+	my $interp = `$elfedit -e phdr:interp $path 2>/dev/null`;
 
-		my $ElfCnt = scalar @Elf;
+	# If not an elf object, return NONE
+	return (0, 'NONE', 'NOVERDEF') if (not defined $class);
 
-		# Return ET_NONE array if not an ELF object
-		return (0, 'NONE', 'NOVERDEF') if ($ElfCnt == 0);
-
-		# Otherwise, convert the result to standard form
-		$Elf[0] =~ s/^ELFCLASS//;
-		$Elf[1] =~ s/^ET_//;
-		$Elf[2] = ($ElfCnt == 3) ? 'VERDEF' : 'NOVERDEF';
-		return @Elf;
+	# Otherwise, convert the result to standard form
+	$class =~ s/^ELFCLASS//;
+	$type =~ s/^ET_//;
+	if (($type eq "DYN") && ($interp ne "")) {
+	    $type = "PIE";
 	}
-
-	# For older platforms, we use elfdump to get the desired information.
-	my @Elf = split(/\n/, `elfdump -ed $path 2>&1`);
-	my $Header = 'None';
-	my $Verdef = 'NOVERDEF';
-	my ($Class, $Type);
-
-	foreach my $Line (@Elf) {
-		# If we have an invalid file type (which we can tell from the
-		# first line), or we're processing an archive, bail.
-		if ($Header eq 'None') {
-			if (($Line =~ /invalid file/) ||
-			    ($Line =~ /$path(.*):/)) {
-				return (0, 'NONE', 'NOVERDEF');
-			}
-		}
-
-		if ($Line =~ /^ELF Header/) {
-			$Header = 'Ehdr';
-			next;
-		}
-
-		if ($Line =~ /^Dynamic Section/) {
-			$Header = 'Dyn';
-			next;
-		}
-
-		if ($Header eq 'Ehdr') {
-			if ($Line =~ /e_type:\s*ET_([^\s]+)/) {
-				$Type = $1;
-				next;
-			}
-			if ($Line =~ /ei_class:\s+ELFCLASS(\d+)/) {
-				$Class = $1;
-				next;
-			}
-			next;
-		}
-
-		if (($Header eq 'Dyn') &&
-		    ($Line =~ /^\s*\[\d+\]\s+VERDEF\s+/)) {
-			$Verdef = 'VERDEF';
-			next;
-		}
-	}
-	return ($Class, $Type, $Verdef);
+	$verdef = ($verdef eq "") ? "NOVERDEF" : "VERDEF";
+	return ($class, $type, $verdef);
 }
 
 
@@ -194,11 +160,11 @@ sub ProcFile {
 	# Obtain the ELF information for this object.
 	@Elf = GetObjectInfo($FullPath);
 
-        # Return quietly if:
+	# Return quietly if:
 	#	- Not an executable or sharable object
 	#	- An executable, but the -s option was used.
-	if ((($Elf[1] ne 'EXEC') && ($Elf[1] ne 'DYN')) ||
-	    (($Elf[1] eq 'EXEC') && $opt{s})) {
+	if ((($Elf[1] ne 'EXEC') && ($Elf[1] ne 'DYN')) && ($Elf[1] ne 'PIE') ||
+	    ((($Elf[1] eq 'EXEC') || ($Elf[1] eq 'PIE')) && $opt{s})) {
 		return;
 	}
 
@@ -326,14 +292,13 @@ if ((getopts('afrs', \%opt) == 0) || (scalar(@ARGV) != 1)) {
 	print "\t[-a]\texpand symlink aliases\n";
 	print "\t[-f]\tuse file name at mode to speed search\n";
 	print "\t[-r]\treport relative paths\n";
-	print "\t[-s]\tonly remote sharable (ET_DYN) objects\n";
+	print "\t[-s]\tonly report shared libraries objects\n";
 	exit 1;
 }
 
 %Output = ();
 %id_hash = ();
 %alias_hash = ();
-$HaveElfedit = -x '/usr/bin/elfedit';
 
 my $Arg = $ARGV[0];
 my $Error = 0;
@@ -376,7 +341,7 @@ foreach my $Alias (sort keys %alias_hash) {
 	my $id = $alias_hash{$Alias};
 	if (defined($id_hash{$id})) {
 		my $obj = $id_hash{$id};
-		my $str = "ALIAS                   $id_hash{$id}\t$Alias\n";
+		my $str = "ALIAS		   $id_hash{$id}\t$Alias\n";
 
 		if (defined($alias_text{$obj})) {
 			$alias_text{$obj} .= $str;

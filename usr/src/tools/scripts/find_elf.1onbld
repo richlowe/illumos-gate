@@ -76,17 +76,16 @@ For each object found, an OBJECT line is produced to describe it:
 .sp
 .in +4
 .nf
-OBJECT [32 | 64] [DYN | EXEC] [VERDEF | NOVERDEF] object-path
+OBJECT [32 | 64] [DYN | EXEC | PIE] [VERDEF | NOVERDEF] object-path
 .fi
 .in -4
 .sp
-The first field provides the ELF class of the object, and will be
-either 32 or 64.
-The second field provides the type of object, either
-a shared object (DYN) or executable (EXEC).
-The third field will be VERDEF if the object contains ELF
-version definitions, and NOVERDEF if the object is not versioned.
-The final field gives the path to the object.
+The first field provides the ELF class of the object, and will be either 32 or
+64.  The second field provides the type of object, either a shared library
+(DYN), a Position Independent Executable (PIE) or executable (EXEC).  The
+third field will be VERDEF if the object contains ELF version definitions, and
+NOVERDEF if the object is not versioned.  The final field gives the path to
+the object.
 .P
 Under Unix, a file can have multiple names. In the context of ELF
 objects, this often happens for one of two reasons:

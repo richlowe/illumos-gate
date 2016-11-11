@@ -28,7 +28,7 @@
 # Check versioning information.
 #
 # This script descends a directory hierarchy inspecting ELF shared objects for
-# version definitions.  The general theme is to verify that common versioning
+# version definitions.	The general theme is to verify that common versioning
 # rules have been used to build these objects.
 #
 # As always, a number of components don't follow the rules, or require
@@ -141,8 +141,8 @@ sub ProcFile {
 
 	# If there are no versions in the file we're done.
 	if ($Verdef eq 'NOVERDEF') {
-	        # Report the lack of versioning, unless the object is
-	    	# a known plugin, or is explicitly exempt.
+		# Report the lack of versioning, unless the object is
+		# a known plugin, or is explicitly exempt.
 		if ($NotPlugin &&
 		    (!defined($EXRE_noverdef) || ($RelPath !~ $EXRE_noverdef))) {
 			onbld_elfmod::OutMsg($ErrFH, \$Ttl, $RelPath,
@@ -180,7 +180,7 @@ sub ProcFile {
 	foreach my $Line (split(/\n/, `pvs -dos $FullPath 2>&1`)) {
 		my($Ver) = $Line;
 		
-		$Ver =~ s/^.*-\t(.*): .*/$1/; 		# isolate version
+		$Ver =~ s/^.*-\t(.*): .*/$1/;		# isolate version
 
 		# See if we've already caught this version name. We only look
 		# at each version once.
@@ -252,7 +252,7 @@ sub ProcFile {
 	# Produce an interface description for the object.
 	# For each version, generate a VERSION declaration of the form:
 	#
-	#	[TOP_]VERSION  version  direct-count  total-count
+	#	[TOP_]VERSION  version	direct-count  total-count
 	#		symname1
 	#		symname2
 	#		...
@@ -395,7 +395,7 @@ sub ProcFindElf {
 
 		my $alias = defined($ObjToAlias{$obj}) ? $ObjToAlias{$obj} : '';
 
-		# We are only interested in sharable objects. We may see
+		# We are only interested in shared libraries. We may see
 		# other file types if processing a list of objects
 		# supplied via the -f option.
 		next if ($type ne 'DYN');

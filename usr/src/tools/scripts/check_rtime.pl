@@ -40,7 +40,7 @@
 # more terse output which is better for sorting/diffing with "nightly".
 #
 # NOTE: missing dependencies, symbols or versions are reported by running the
-# file through ldd(1).  As objects within a proto area are built to exist in a
+# file through ldd(1).	As objects within a proto area are built to exist in a
 # base system, standard use of ldd(1) will bind any objects to dependencies
 # that exist in the base system.  It is frequently the case that newer objects
 # exist in the proto area that are required to satisfy other objects
@@ -180,7 +180,7 @@ sub ProcFile {
 	my($HasDirectBinding);
 
 	# Only look at executables and sharable objects
-	return if ($Type ne 'EXEC') && ($Type ne 'DYN');
+	return if ($Type ne 'EXEC') && ($Type ne 'DYN') && ($Type ne 'PIE');
 
 	# Ignore symbolic links
 	return if -l $FullPath;
@@ -337,7 +337,7 @@ sub ProcFile {
 			# influenced by any alternative dependency mappings.
 	
 			my $File = $RelPath;
-			$File =~ s!^.*/!!;      # basename
+			$File =~ s!^.*/!!;	# basename
 
 			my($TmpPath) = "$Tmpdir/$File";
 
@@ -603,7 +603,8 @@ ELF:	foreach my $Line (@Elf) {
 
 	# A shared object, that contains non-plt relocations, should have a
 	# combined relocation section indicating it was built with -z combreloc.
-	if (($Type eq 'DYN') && $Relsz && ($Relsz != $Pltsz) && ($Sun == 0)) {
+	if ((($Type eq 'DYN') || ($Type eq 'PIE')) &&
+	    $Relsz && ($Relsz != $Pltsz) && ($Sun == 0)) {
 		onbld_elfmod::OutMsg($ErrFH, $ErrTtl, $RelPath,
 		    ".SUNW_reloc section missing\t\t<no -zcombreloc?>");
 	}
@@ -795,7 +796,7 @@ sub ProcVerdef {
 		    } else {
 			if ($cur_ver ne $ver) {
 			    onbld_elfmod::OutMsg($InfoFH, $InfoTtl,
-			        $RelPath, "VERSION=$ver");
+				$RelPath, "VERSION=$ver");
 			    $cur_ver = $ver;
 			}			    
 			onbld_elfmod::OutMsg($InfoFH, $InfoTtl,
@@ -916,7 +917,7 @@ LINE:
 					$obj_path = $obj;
 					$obj_class = $class;
 				} else {
-					# Only want sharable objects
+					# Only want shared libraries
 					$obj_active = 0;
 				}
 				last ITEM;
