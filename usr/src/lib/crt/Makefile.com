@@ -69,6 +69,7 @@ lint:	$(VALUES:%.o=%.lint) $(COMMON_CRT:%.o=%.lint)
 
 $(CRT1): $(COMMON_CRT) $(MACH_CRT)
 	$(LD) -r $(MACH_CRT) $(COMMON_CRT) -o $(CRT1)
+	$(POST_PROCESS_O)
 
 %.o:	../common/%.c
 	$(COMPILE.c) -o $@ $<
