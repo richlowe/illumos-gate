@@ -26,4 +26,3 @@
 #
 
 echo_file usr/src/cmd/expr/compile.c
-

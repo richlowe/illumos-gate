@@ -56,7 +56,7 @@
  * One slightly confusing detail to keep in mind is that the 16-byte
  * alignment (%esp & 0xf == 0) is true just *before* the call instruction.
  * The call instruction will then push a return value, decrementing %esp by
- * 4.  Therefore, if one dumps %esp at the at the very first instruction in
+ * 4.  Therefore, if one dumps %esp at the very first instruction in
  * a function, it will end with a 0xc.  The compiler expects this and
  * compensates for it properly.
  *

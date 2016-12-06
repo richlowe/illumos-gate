@@ -69,7 +69,7 @@ ENTRY_NP(_start)
 	add	%sp, -SA(MINFRAME - EB_MAX_SIZE), %sp
 
 	ldn	[%l0], %o0			! argc
-	add	%l0, CPTRSIZE, %o1	! argv
+	add	%l0, CPTRSIZE, %o1		! argv
 	call	_start_crt
 	    mov %g1, %o2			! exit_handler in delay slot
 SET_SIZE(_start)
