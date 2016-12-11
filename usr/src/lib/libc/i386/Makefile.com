@@ -38,6 +38,11 @@ VALUES=		values-Xa.o
 
 # objects are grouped by source directory
 
+# Symbol capabilities objects
+EXTPICS=	\
+	$(LIBCDIR)/capabilities/i386-sse/i386/pics/symcap.o \
+	$(LIBCDIR)/capabilities/i386-sse2/i386/pics/symcap.o
+
 # local objects
 STRETS=
 
@@ -1082,7 +1087,7 @@ MAPFILES =	$(LIBCDIR)/port/mapfile-vers
 #
 # EXTN_CPPFLAGS and EXTN_CFLAGS set in enclosing Makefile
 #
-CFLAGS +=	$(EXTN_CFLAGS)
+CFLAGS +=	-xtarget=pentium_pro
 CPPFLAGS=	-D_REENTRANT -Di386 $(EXTN_CPPFLAGS) $(THREAD_DEBUG) \
 		-I$(LIBCBASE)/inc -I$(LIBCDIR)/inc $(CPPFLAGS.master)
 ASFLAGS=	$(AS_PICFLAGS) -P -D__STDC__ -D_ASM $(CPPFLAGS) $(i386_AS_XARCH)

@@ -24,5 +24,5 @@
 $mapfile_version 2
 
 CAPABILITY {
-	hw += fpu cmov amd_sysc mmx sse sse2;
+	hw += fpu cmov amd_sysc mmx;
 };

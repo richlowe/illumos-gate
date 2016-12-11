@@ -23,18 +23,9 @@
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-include		$(SRC)/Makefile.master
+include		$(SRC)/lib/Makefile.lib
 
-# Each target directory is responsible for making a symbol capabilities object.
-$(SPARC_BLD)SUBDIRS = \
-		sun4u \
-		sun4u-opl \
-		sun4u-us3-hwcap1 \
-		sun4u-us3-hwcap2 \
-		sun4v-hwcap1 \
-		sun4v-hwcap2
-$(INTEL_BLD)SUBDIRS = i386-sse \
-		i386-sse2
+SUBDIRS =	$(MACH)
 
 all :=		TARGET= all
 clean :=	TARGET= clean

@@ -18,31 +18,27 @@
 #
 # CDDL HEADER END
 #
-#
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
-#
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# lib/libc/i386_hwcap3/Makefile
-#
 
-LIBCBASE=	../i386
-
-LIBRARY=	libc_hwcap3.a
-
-EXTN_CPPFLAGS=	-D_CMOV_INSN -D_SSE_INSN -D_MMX_INSN
-EXTN_CFLAGS=	-xtarget=pentium_pro
-EXTN_DYNFLAGS=	-M mapfile
-
-# Defining this means build targets will first try to use source from this
-# directory before falling back to unoptimized i386 source.
 #
-# Currently, the only differences between hwcap3 and hwcap1 is the kernel entry
-# method (hwcap1 uses "sysenter" and hwcap2 uses "syscall" while hwcap3 uses
-# "int 0x91".  So for now, build libc_hwcap3 with the optimized sources for
-# libc_hwcap1.
+# Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
-OPTIMIZED_LIBCBASE=../i386_hwcap1
+TRG_PLATFORM =	i386
 
-include ../i386/Makefile.com
+include ../Makefile.com
+
+# We do indeed need the rest of the directory structure to make the pattern rules work :(
+
+OBJECTS =	memset.o memcpy.o
+
+include		$(SRC)/lib/Makefile.lib
+
+MAPFILE-CAP =  ../common/mapfile-cap
+
+ASFLAGS += -P
+AS_CPPFLAGS += -D_ASM -D_SSE_INSN
+
+.KEEP_STATE:
+
+all install:	$(SYMCAP)
+
+include	../../Makefile.targ

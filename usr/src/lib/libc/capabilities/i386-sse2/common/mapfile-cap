@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
 # CDDL HEADER START
 #
@@ -23,6 +23,18 @@
 
 $mapfile_version 2
 
-CAPABILITY {
-	hw += fpu cmov mmx sse;
+CAPABILITY i386-sse2 {
+	hw += cmov sse sse2;
+};
+
+SYMBOL_SCOPE {
+	global:
+		_memcpy;
+		_memmove;
+		_memset;
+		memcpy;
+		memmove;
+		memset;
+	local:
+		*;
 };

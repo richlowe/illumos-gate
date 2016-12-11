@@ -29,7 +29,7 @@
 #
 # This first rule picks up optimized sources for libc variants.
 #
-pics/%.o: $(OPTIMIZED_LIBCBASE)/gen/%.s
+pics/%.o: $(OPTIMIZED_LIBCBASE)/common/%.s
 	$(BUILD.s)
 	$(POST_PROCESS_O)
 

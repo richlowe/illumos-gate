@@ -1,4 +1,6 @@
 #
+# Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
+#
 # CDDL HEADER START
 #
 # The contents of this file are subject to the terms of the
@@ -18,39 +20,20 @@
 #
 # CDDL HEADER END
 #
+$mapfile_version 2
 
-#
-# Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
-#
+CAPABILITY i386-sse {
+	hw += cmov sse;
+};
 
-include		$(SRC)/Makefile.master
-
-# Each target directory is responsible for making a symbol capabilities object.
-$(SPARC_BLD)SUBDIRS = \
-		sun4u \
-		sun4u-opl \
-		sun4u-us3-hwcap1 \
-		sun4u-us3-hwcap2 \
-		sun4v-hwcap1 \
-		sun4v-hwcap2
-$(INTEL_BLD)SUBDIRS = i386-sse \
-		i386-sse2
-
-all :=		TARGET= all
-clean :=	TARGET= clean
-clobber :=	TARGET= clobber
-install :=	TARGET= install
-
-.KEEP_STATE:
-
-.PARALLEL:	$(SUBDIRS)
-
-all clean clobber install: \
-		$(SUBDIRS)
-
-lint:
-
-$(SUBDIRS):	FRC
-		@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
+SYMBOL_SCOPE {
+	global:
+		_memcpy;
+		_memmove;
+		_memset;
+		memcpy;
+		memmove;
+		memset;
+	local:
+		*;
+};

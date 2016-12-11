@@ -22,35 +22,23 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
+TRG_PLATFORM =	i386
 
-include		$(SRC)/Makefile.master
+include ../Makefile.com
 
-# Each target directory is responsible for making a symbol capabilities object.
-$(SPARC_BLD)SUBDIRS = \
-		sun4u \
-		sun4u-opl \
-		sun4u-us3-hwcap1 \
-		sun4u-us3-hwcap2 \
-		sun4v-hwcap1 \
-		sun4v-hwcap2
-$(INTEL_BLD)SUBDIRS = i386-sse \
-		i386-sse2
+# We do indeed need the rest of the directory structure to make the pattern rules work :(
 
-all :=		TARGET= all
-clean :=	TARGET= clean
-clobber :=	TARGET= clobber
-install :=	TARGET= install
+OBJECTS =	memset.o memcpy.o
+
+include		$(SRC)/lib/Makefile.lib
+
+MAPFILE-CAP =  ../common/mapfile-cap
+
+ASFLAGS += -P
+AS_CPPFLAGS += -D_ASM -D_SSE_INSN -D_SSE2_INSN
 
 .KEEP_STATE:
 
-.PARALLEL:	$(SUBDIRS)
+all install:	$(SYMCAP)
 
-all clean clobber install: \
-		$(SUBDIRS)
-
-lint:
-
-$(SUBDIRS):	FRC
-		@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
+include	../../Makefile.targ

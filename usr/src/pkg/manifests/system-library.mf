@@ -400,7 +400,6 @@ file path=usr/lib/libast.so.1
 file path=usr/lib/libbsdmalloc.so.1
 $(i386_ONLY)file path=usr/lib/libc/libc_hwcap1.so.1 reboot-needed=true
 $(i386_ONLY)file path=usr/lib/libc/libc_hwcap2.so.1 reboot-needed=true
-$(i386_ONLY)file path=usr/lib/libc/libc_hwcap3.so.1 reboot-needed=true
 file path=usr/lib/libcfgadm.so.1
 file path=usr/lib/libcmd.so.1
 file path=usr/lib/libcommputil.so.1
