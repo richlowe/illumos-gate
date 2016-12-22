@@ -507,6 +507,9 @@ check_flags(Ofl_desc * ofl, int argc)
 			 */
 			if (otype == OT_PIE) {
 				ofl->ofl_flags |= FLG_OF_PIE;
+
+				if (zdflag != SET_FALSE)
+					ofl->ofl_flags |= FLG_OF_NOUNDEF;
 			} else {
 				ofl->ofl_flags |= FLG_OF_SHAROBJ;
 
