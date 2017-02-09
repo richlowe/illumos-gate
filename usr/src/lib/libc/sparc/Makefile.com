@@ -1070,7 +1070,7 @@ TRACEOBJS=			\
 # Since libc contains no C++ code, linking with the minimal crti.o and
 # crtn.o modules is safe and avoids the problems described above.
 OBJECTS= $(CRTI) $(MOSTOBJS) $(CRTN)
-CRTSRCS= ../../crt/sparcv7
+CRTSRCS= ../../crt/sparc
 
 # include common library definitions
 include $(SRC)/lib/Makefile.lib

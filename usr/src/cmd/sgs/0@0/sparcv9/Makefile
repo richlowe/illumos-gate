@@ -24,7 +24,7 @@
 # Use is subject to license terms.
 #
 
-CRTSRCS=        $(SRC)/lib/crt/sparcv9
+CRTSRCS=        $(SRC)/lib/crt/sparc
 include		$(SRC)/cmd/sgs/0@0/Makefile.com
 
 .KEEP_STATE:

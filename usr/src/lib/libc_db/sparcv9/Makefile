@@ -24,7 +24,7 @@
 # Use is subject to license terms.
 #
 
-CRTSRCS= ../../crt/sparcv9
+CRTSRCS= ../../crt/sparc
 
 include ../Makefile.com
 include ../../Makefile.lib.64
