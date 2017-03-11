@@ -26,7 +26,6 @@
 #
 
 include $(SRC)/Makefile.master
-include $(SRC)/Makefile.buildnum
 
 #
 # Make sure we're getting a consistent execution environment for the
@@ -137,7 +136,21 @@ PKGPUBLISHER= $(PKGPUBLISHER_REDIST)
 #
 PKGVERS_COMPONENT= 0.$(RELEASE)
 PKGVERS_BUILTON= $(RELEASE)
-PKGVERS_BRANCH= 0.$(ONNV_BUILDNUM)
+# These should be passed into the build from its environment.
+# The defaults are merely to preserve syntax in error cases.
+PKGVERS_MAJOR=8888
+PKGVERS_MINOR=7777
+PKGVERS_MICRO=6666
+PKGVERS_PATCH=5555
+NEW_BRANCH= $(PKGVERS_MAJOR).$(PKGVERS_MINOR).$(PKGVERS_MICRO).$(PKGVERS_PATCH)
+OLD_BRANCH = 0.$(ONNV_BUILDNUM)
+BRANCH.cmd= /bin/ksh93 -c "if [[ -n '$(ONNV_BUILDNUM)' ]]; then \
+	echo '$(OLD_BRANCH)'; \
+    else \
+	echo '$(NEW_BRANCH)'; \
+    fi"
+PKGVERS_BRANCH=$(BRANCH.cmd:sh)
+
 PKGVERS= $(PKGVERS_COMPONENT),$(PKGVERS_BUILTON)-$(PKGVERS_BRANCH)
 
 #
@@ -323,7 +336,7 @@ PKGLISTS= \
 #		| use pkgsend to publish the package
 #		|
 #	placeholder to indicate successful publication (mypkg.pub)
-#	
+#
 # * This may be suppressed via SUPPRESSPKGDEP.  The resulting
 #   packages will install correctly, but care must be taken to
 #   install all dependencies, because pkg will not have the input
@@ -372,7 +385,7 @@ PKGLISTS= \
 #					| pkgdepend
 #					|
 #				processed manifests
-# 
+#
 
 ALL_TARGETS= $(PROC_SYNTH_PKGS) proto_list_$(PKGMACH)
 
@@ -698,7 +711,7 @@ protocmp: makesilent
 
 pmodes: makesilent
 	@validate_pkg -a $(PKGMACH) -M -m $(PDIR) \
-		-e $(CODEMGR_WS)/exception_lists/pmodes 
+		-e $(CODEMGR_WS)/exception_lists/pmodes
 
 check: protocmp pmodes
 

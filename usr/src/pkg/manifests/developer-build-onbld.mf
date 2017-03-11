@@ -129,7 +129,10 @@ file path=opt/onbld/bin/ws mode=0555
 file path=opt/onbld/bin/wsdiff mode=0555
 file path=opt/onbld/bin/xref mode=0555
 file path=opt/onbld/bin/xref.mk
-file path=opt/onbld/env/illumos
+file path=opt/onbld/env/common.sh
+file path=opt/onbld/env/debug
+file path=opt/onbld/env/full
+file path=opt/onbld/env/release
 file path=opt/onbld/etc/SampleLinks
 file path=opt/onbld/etc/SamplePkgLinks
 file path=opt/onbld/etc/exception_lists/check_rtime
@@ -268,6 +271,8 @@ license usr/src/tools/onbld/THIRDPARTYLICENSE \
     license=usr/src/tools/onbld/THIRDPARTYLICENSE
 link path=opt/onbld/bin/$(ARCH)/dmake target=make
 link path=opt/onbld/bin/git-nits target=git-pbchk
+link path=opt/onbld/env/illumos target=debug
+link path=opt/onbld/env/illumos target=debug
 link path=opt/onbld/lib/python target=python$(PYTHON_VERSION)
 link path=opt/onbld/man/man1onbld/git-nits.1onbld target=git-pbchk.1onbld
 # webrev(1) requires ps2pdf
