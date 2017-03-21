@@ -120,7 +120,7 @@ function normal_build {
 #
 # usage: run_hook HOOKNAME ARGS...
 #
-# If variable "$HOOKNAME" is defined, insert a section header into 
+# If variable "$HOOKNAME" is defined, insert a section header into
 # our logs and then run the command with ARGS
 #
 function run_hook {
@@ -128,7 +128,7 @@ function run_hook {
     	eval HOOKCMD=\$$HOOKNAME
 	shift
 
-	if [ -n "$HOOKCMD" ]; then 
+	if [ -n "$HOOKCMD" ]; then
 	    	(
 			echo "\n==== Running $HOOKNAME command: $HOOKCMD ====\n"
 		    	( $HOOKCMD "$@" 2>&1 )
@@ -783,21 +783,28 @@ unset ONBLD_TOOLS
 #
 if [ -f /etc/nightly.conf ]; then
 	. /etc/nightly.conf
-fi    
+fi
 
-if [ -f $1 ]; then
-	if [[ $1 = */* ]]; then
-		. $1
-	else
-		. ./$1
-	fi
+# Take a guess at where the workspace may be, so we can look in _it_ for env
+# files too.
+$WHICH_SCM | read junk possiblews
+
+if [[ -f $1 ]]; then
+	ENVFILE=$1
+elif [[ -f $possiblews/env/$1 ]]; then
+	ENVFILE=$possiblews/env/$1
+elif [[ -f $OPTHOME/onbld/env/$1 ]]; then
+	ENVFILE=$OPTHOME/onbld/env/$1
 else
-	if [ -f $OPTHOME/onbld/env/$1 ]; then
-		. $OPTHOME/onbld/env/$1
-	else
-		echo "Cannot find env file as either $1 or $OPTHOME/onbld/env/$1"
-		exit 1
-	fi
+	echo "Cannot find env file as either $1," \
+            "$possiblews/env/$1, or $OPTHOME/onbld/env/$1"
+	exit 1
+fi
+
+if [[ $ENVFILE = */* ]]; then
+	. $ENVFILE
+else
+	. ./$ENVFILE
 fi
 
 # contents of stdenv.sh inserted after next line:
@@ -962,7 +969,7 @@ if [[ -z "$MAKE" ]]; then
 	MAKE=dmake
 elif [[ ! -x "$MAKE" ]]; then
 	echo "\$MAKE is set to garbage in the environment"
-	exit 1	
+	exit 1
 fi
 export PATH
 export MAKE
@@ -1436,7 +1443,7 @@ function parent_wstype {
 		else
 			scm_type="none"
 		fi
-	fi    
+	fi
 
 	# fold both unsupported and unrecognized results into "none"
 	case "$scm_type" in
@@ -1901,7 +1908,7 @@ if [ "$U_FLAG" = "y" -a "$build_ok" = "y" ]; then
 		mkdir -p $NIGHTLY_PARENT_TOOLS_ROOT
 		if [[ "$MULTI_PROTO" = no || "$D_FLAG" = y ]]; then
 			( cd $TOOLS_PROTO; tar cf - . |
-			    ( cd $NIGHTLY_PARENT_TOOLS_ROOT; 
+			    ( cd $NIGHTLY_PARENT_TOOLS_ROOT;
 			    umask 0; tar xpf - ) ) 2>&1 |
 			    tee -a $mail_msg_file >> $LOGFILE
 		fi
@@ -1990,7 +1997,7 @@ if [[ ($build_ok = y) && (($A_FLAG = y) || ($r_FLAG = y)) ]]; then
 			build_extras_ok=n
 		fi
 
-		# check_rtime -I output needs to be sorted in order to 
+		# check_rtime -I output needs to be sorted in order to
 		# compare it to that from previous builds.
 		sort $elf_ddir/runtime.attr.raw > $elf_ddir/runtime.attr
 		rm $elf_ddir/runtime.attr.raw
@@ -2031,7 +2038,7 @@ if [[ ($build_ok = y) && (($A_FLAG = y) || ($r_FLAG = y)) ]]; then
 		# These files are used asynchronously by other builds for ABI
 		# verification, as above for the -A option. As such, we require
 		# the file replacement to be atomic. Copy the data to a temp
-		# file in the same filesystem and then rename into place. 
+		# file in the same filesystem and then rename into place.
 		(
 			cd $elf_ddir
 			for elf_dfile in *; do

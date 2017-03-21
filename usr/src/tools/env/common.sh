@@ -24,32 +24,8 @@
 # Copyright 2015, OmniTI Computer Consulting, Inc. All rights reserved.
 #
 
-# Configuration variables for the runtime environment of the nightly
-# build script and other tools for construction and packaging of
-# releases.
-# This example is suitable for building an illumos workspace, which
-# will contain the resulting archives. It is based off the onnv
-# release. It sets NIGHTLY_OPTIONS to make nightly do:
-#       DEBUG build only (-D, -F)
-#       do not bringover from the parent (-n)
-#       runs 'make check' (-C)
-#       checks for new interfaces in libraries (-A)
-#       runs lint in usr/src (-l plus the LINTDIRS variable)
-#       sends mail on completion (-m and the MAILTO variable)
-#       creates packages for PIT/RE (-p)
-#       checks for changes in ELF runpaths (-r)
-#       build and use this workspace's tools in $SRC/tools (-t)
-#
-# - This file is sourced by "bldenv.sh" and "nightly.sh" and should not 
-#   be executed directly.
-# - This script is only interpreted by ksh93 and explicitly allows the
-#   use of ksh93 language extensions.
-#
-export NIGHTLY_OPTIONS='-FnCDAlmprt'
-
 # CODEMGR_WS - where is your workspace at
-#export CODEMGR_WS="$HOME/ws/illumos-gate"
-export CODEMGR_WS="`git rev-parse --show-toplevel`"
+export CODEMGR_WS=$(git rev-parse --show-toplevel)
 
 # Maximum number of dmake jobs.  The recommended number is 2 + NCPUS,
 # where NCPUS is the number of logical CPUs on your build system.
@@ -146,7 +122,14 @@ export MULTI_PROTO="no"
 # when the release slips (nah) or you move an environment file to a new
 # release
 #
-export VERSION="`git describe --long --all HEAD | cut -d/ -f2-`"
+export VERSION=$(git describe --long --all HEAD | cut -d/ -f2-)
+
+# Set the package version build number to a suitably granular timestamp, such
+# that it consistently increases, and is ideally newer than any distribution package.
+export PKGVERS_MAJOR=$(date "+%-Y")
+export PKGVERS_MINOR=$(date "+%-m")
+export PKGVERS_MICRO=$(date "+%-d")
+export PKGVERS_PATCH=$(date "+%-H")
 
 #
 # the RELEASE and RELEASE_DATE variables are set in Makefile.master;

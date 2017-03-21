@@ -40,3 +40,4 @@ usr/src/test/zfs-tests/tests/functional/cli_root/zpool_upgrade/blockfiles/zfs-po
 usr/src/test/zfs-tests/tests/functional/delegate/delegate_common.kshlib
 usr/src/test/test-runner/cmd/run
 usr/src/uts/common/io/iwn/fw-iw/*.ucode
+usr/src/tools/env/common.sh

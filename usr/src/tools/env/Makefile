@@ -22,7 +22,9 @@
 #
 
 ENVFILES= \
-	illumos
+	debug \
+	full \
+	release
 
 include ../Makefile.tools
 
@@ -32,13 +34,22 @@ CLOBBERFILES= $(ENVFILES)
 
 .KEEP_STATE:
 
+$(ROOTONBLDENV)/illumos := INSLINKTARGET= debug
+
+$(ROOTONBLDENV)/illumos: FRC
+	$(INS.symlink)
+
+$(ROOTONBLDENV)/common.sh: common.sh
+	$(INS.file) common.sh
+
 all:	$(ENVFILES)
 
-install: all .WAIT $(ROOTONBLDENVFILES)
+install: all .WAIT $(ROOTONBLDENVFILES) $(ROOTONBLDENV)/common.sh $(ROOTONBLDENV)/illumos
 
 clean:
 
 clobber:
 
-include ../Makefile.targ
+FRC:
 
+include ../Makefile.targ
