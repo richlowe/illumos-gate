@@ -131,12 +131,6 @@ export PKGVERS_MINOR=$(date "+%-m")
 export PKGVERS_MICRO=$(date "+%-d")
 export PKGVERS_PATCH=$(date "+%-H")
 
-# Can't have 0 in package versions.
-if (( $PKGVERS_PATCH == 0 )); then
-    PKGVERS_MICRO=$(($PKGVERS_MICRO - 1))
-    PKGVERS_PATCH=24
-fi
-
 #
 # the RELEASE and RELEASE_DATE variables are set in Makefile.master;
 # there might be special reasons to override them here, but that
