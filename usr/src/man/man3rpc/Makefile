@@ -20,7 +20,8 @@ MANSECT= 	3rpc
 
 MANFILES= 	rstat.3rpc	\
 	 	rusers.3rpc	\
-	 	rwall.3rpc
+	 	rwall.3rpc	\
+		spray.3rpc
 
 MANLINKS=	havedisk.3rpc	\
 		rnusers.3rpc

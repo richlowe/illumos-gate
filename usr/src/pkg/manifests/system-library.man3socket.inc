@@ -52,7 +52,6 @@ file path=usr/share/man/man3socket/shutdown.3socket
 file path=usr/share/man/man3socket/sockaddr.3socket
 file path=usr/share/man/man3socket/socket.3socket
 file path=usr/share/man/man3socket/socketpair.3socket
-file path=usr/share/man/man3socket/spray.3socket
 link path=usr/share/man/man3socket/accept4.3socket target=accept.3socket
 link path=usr/share/man/man3socket/endnetent.3socket \
     target=getnetbyname.3socket

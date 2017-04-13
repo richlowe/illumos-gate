@@ -55,8 +55,7 @@ MANFILES= 	accept.3socket		\
 		sockaddr.3socket	\
 		shutdown.3socket	\
 		socket.3socket		\
-		socketpair.3socket	\
-		spray.3socket
+		socketpair.3socket
 
 MANLINKS=	accept4.3socket			\
 		endnetent.3socket		\

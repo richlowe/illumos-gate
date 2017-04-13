@@ -23,7 +23,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
 
 #
 # This script tests that several of the the mib:::udp* probes fire and fire
@@ -50,10 +49,10 @@ script()
 EOF
 }
 
-rupper()
+udpper()
 {
 	while true; do
-		rup localhost
+		showmount localhost >/dev/null 2>&1
 		/usr/bin/sleep 1
 	done
 }
@@ -65,10 +64,10 @@ fi
 
 dtrace=$1
 
-rupper &
-rupper=$!
+udpper &
+udpper=$!
 script
 status=$?
 
-kill $rupper
+kill $udpper
 exit $status

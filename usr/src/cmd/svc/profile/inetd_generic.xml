@@ -56,28 +56,10 @@
 	<service name='network/rpc/gss' version='1' type='service'>
 		<instance name='default' enabled='true'/>
 	</service>
-	<service name='network/rpc/rstat' version='1' type='service'>
-		<instance name='default' enabled='true'/>
-	</service>
-	<service name='network/rpc/rusers' version='1' type='service'>
-		<instance name='default' enabled='true'/>
-	</service>
 	<service name='network/rpc/smserver' version='1' type='service'>
 		<instance name='default' enabled='true'/>
 	</service>
 	<service name='network/security/ktkt_warn' version='1' type='service'>
 		<instance name='default' enabled='true'/>
 	</service>
-
-	<!--
-		Enable CDE services.
-	-->
-	<service name='network/rpc/cde-ttdbserver' version='1' type='service'>
-		<instance name='tcp' enabled='true' />
-	</service>
-	<service name='network/rpc/cde-calendar-manager' version='1'
-		type='service'>
-		<instance name='default' enabled='true' />
-	</service>
-
 </service_bundle>

@@ -14,5 +14,6 @@
 file path=usr/share/man/man3rpc/rstat.3rpc
 file path=usr/share/man/man3rpc/rusers.3rpc
 file path=usr/share/man/man3rpc/rwall.3rpc
+file path=usr/share/man/man3rpc/spray.3rpc
 link path=usr/share/man/man3rpc/havedisk.3rpc target=rstat.3rpc
 link path=usr/share/man/man3rpc/rnusers.3rpc target=rusers.3rpc

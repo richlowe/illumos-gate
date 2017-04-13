@@ -113,7 +113,6 @@ file path=usr/lib/uucp/uuxqt group=uucp mode=4511 owner=uucp
 file path=usr/sbin/in.uucpd group=uucp mode=0555
 file path=usr/share/man/man1c/ct.1c
 file path=usr/share/man/man1c/cu.1c
-file path=usr/share/man/man1c/rup.1c
 file path=usr/share/man/man1c/uucp.1c
 file path=usr/share/man/man1c/uuencode.1c
 file path=usr/share/man/man1c/uuglist.1c

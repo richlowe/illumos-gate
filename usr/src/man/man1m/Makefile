@@ -409,11 +409,7 @@ _MANFILES=	6to4relay.1m		\
 		route.1m		\
 		routeadm.1m		\
 		rpc.bootparamd.1m	\
-		rpc.rstatd.1m		\
-		rpc.rusersd.1m		\
-		rpc.rwalld.1m		\
 		rpc.smserverd.1m	\
-		rpc.sprayd.1m		\
 		rpc.yppasswdd.1m	\
 		rpc.ypupdated.1m	\
 		rpcbind.1m		\
@@ -423,7 +419,6 @@ _MANFILES=	6to4relay.1m		\
 		rtc.1m			\
 		rtquery.1m		\
 		runacct.1m		\
-		rwall.1m		\
 		sac.1m			\
 		sacadm.1m		\
 		saf.1m			\
@@ -456,7 +451,6 @@ _MANFILES=	6to4relay.1m		\
 		snoop.1m		\
 		soconfig.1m		\
 		sppptun.1m		\
-		spray.1m		\
 		statd.1m		\
 		stmfadm.1m		\
 		stmsboot.1m		\
@@ -609,15 +603,10 @@ MANLINKS=	acctcon1.1m			\
 		rlogind.1m			\
 		routed.1m			\
 		rshd.1m				\
-		rstatd.1m			\
-		rusersd.1m			\
-		rwalld.1m			\
-		rwhod.1m			\
 		sa1.1m				\
 		sa2.1m				\
 		sadc.1m				\
 		shutacct.1m			\
-		sprayd.1m			\
 		startup.1m			\
 		talkd.1m			\
 		telinit.1m			\
@@ -722,10 +711,6 @@ grpck.1m			:= LINKSRC = pwck.1m
 quotaoff.1m			:= LINKSRC = quotaon.1m
 
 bootparamd.1m			:= LINKSRC = rpc.bootparamd.1m
-rstatd.1m			:= LINKSRC = rpc.rstatd.1m
-rusersd.1m			:= LINKSRC = rpc.rusersd.1m
-rwalld.1m			:= LINKSRC = rpc.rwalld.1m
-sprayd.1m			:= LINKSRC = rpc.sprayd.1m
 yppasswdd.1m			:= LINKSRC = rpc.yppasswdd.1m
 ypupdated.1m			:= LINKSRC = rpc.ypupdated.1m
 
