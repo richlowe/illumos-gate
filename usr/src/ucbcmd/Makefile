@@ -121,8 +121,6 @@ BINLINKS=		\
 	renice		\
 	rlogin		\
 	rsh		\
-	ruptime		\
-	rwho		\
 	script		\
 	tail		\
 	talk		\

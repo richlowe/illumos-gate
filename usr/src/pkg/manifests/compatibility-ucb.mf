@@ -199,8 +199,6 @@ link path=usr/ucb/renice target=../bin/renice
 link path=usr/ucb/reset target=./tset
 link path=usr/ucb/rlogin target=../bin/rlogin
 link path=usr/ucb/rsh target=../bin/rsh
-link path=usr/ucb/ruptime target=../bin/ruptime
-link path=usr/ucb/rwho target=../bin/rwho
 link path=usr/ucb/script target=../bin/script
 link path=usr/ucb/tail target=../bin/tail
 link path=usr/ucb/talk target=../bin/talk

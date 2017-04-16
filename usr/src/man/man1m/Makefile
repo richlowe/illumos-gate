@@ -201,7 +201,6 @@ _MANFILES=	6to4relay.1m		\
 		in.rlogind.1m		\
 		in.routed.1m		\
 		in.rshd.1m		\
-		in.rwhod.1m		\
 		in.talkd.1m		\
 		in.telnetd.1m		\
 		in.tftpd.1m		\

@@ -323,8 +323,6 @@ MANFILES=	acctcom.1			\
 	 	rpcgen.1			\
 	 	rsh.1				\
 	 	runat.1				\
-	 	ruptime.1			\
-	 	rwho.1				\
 	 	sar.1				\
 	 	script.1			\
 	 	sdiff.1				\

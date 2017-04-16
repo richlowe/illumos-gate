@@ -26,7 +26,7 @@
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 #
 
-PROG=		finger rdate ruptime rwho whois
+PROG=		finger rdate whois
 SUIDPROG=	rcp rlogin rsh
 ALL=		$(PROG) $(SUIDPROG)
 SRCS=		$(ALL:%=%.c)
@@ -39,7 +39,7 @@ MSGSUBDIRS=	nca talk
 
 # As programs get lint-clean, add them here.  Eventually.
 # This hack should go away, and all in PROG should be lint-clean.
-LINTCLEAN=	rlogin.c rsh.c rcp.c rdate.c rwho.c whois.c
+LINTCLEAN=	rlogin.c rsh.c rcp.c rdate.c whois.c
 
 # Likewise, as subdirs get lint-clean, add them here.  Once
 # they're all clean, replace the dependency of the lint target

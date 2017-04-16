@@ -42,7 +42,6 @@ file path=usr/bin/rdate mode=0555
 file path=usr/bin/rdist mode=4555
 file path=usr/bin/rlogin mode=4555
 file path=usr/bin/rsh mode=4555
-file path=usr/bin/ruptime mode=0555
 file path=usr/bin/whois mode=0555
 file path=usr/sbin/rmt mode=0555
 file path=usr/sbin/snoop mode=0555
@@ -51,7 +50,6 @@ file path=usr/share/man/man1/rcp.1
 file path=usr/share/man/man1/rdist.1
 file path=usr/share/man/man1/rlogin.1
 file path=usr/share/man/man1/rsh.1
-file path=usr/share/man/man1/ruptime.1
 file path=usr/share/man/man1/whois.1
 file path=usr/share/man/man1m/rdate.1m
 file path=usr/share/man/man1m/rmt.1m

@@ -28,7 +28,7 @@ SYNCPROG=	syncinit syncloop syncstat
 
 PROG=		6to4relay arp if_mpadm \
 		in.comsat in.fingerd in.rarpd in.rexecd in.rlogind \
-		in.rshd in.rwhod in.telnetd in.tftpd ipaddrsel \
+		in.rshd in.telnetd in.tftpd ipaddrsel \
 		ndd ndp $(SYNCPROG) wanbootutil
 
 MANIFEST=	rarp.xml telnet.xml comsat.xml finger.xml \
@@ -43,9 +43,9 @@ AUDITPROG=	in.rexecd in.rlogind in.rshd in.telnetd
 PAMPROG=	in.rexecd in.rlogind in.rshd in.telnetd
 SOCKETPROG=	6to4relay arp hostconfig if_mpadm in.comsat \
 		in.fingerd in.rarpd in.rexecd in.rlogind in.rshd \
-		in.rwhod in.telnetd in.tftpd ipaddrsel ndp route
+		in.telnetd in.tftpd ipaddrsel ndp route
 NSLPROG=	6to4relay arp hostconfig in.comsat in.rarpd \
-		in.rexecd in.rlogind in.rshd in.rwhod in.telnetd \
+		in.rexecd in.rlogind in.rshd in.telnetd \
 		in.tftpd ipaddrsel ndp route
 CMDPROG=	in.telnetd
 K5PROGS=	in.telnetd in.rlogind in.rshd

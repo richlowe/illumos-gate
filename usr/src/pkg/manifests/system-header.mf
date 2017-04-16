@@ -627,7 +627,6 @@ file path=usr/include/prof_attr.h
 file path=usr/include/project.h
 file path=usr/include/protocols/dumprestore.h
 file path=usr/include/protocols/routed.h
-file path=usr/include/protocols/rwhod.h
 file path=usr/include/protocols/timed.h
 file path=usr/include/pthread.h
 file path=usr/include/pw.h
