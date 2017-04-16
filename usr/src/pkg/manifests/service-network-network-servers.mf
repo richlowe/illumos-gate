@@ -25,8 +25,7 @@
 #
 
 set name=pkg.fmri value=pkg:/service/network/network-servers@$(PKGVERS)
-set name=pkg.description \
-    value="Remote Network Server Commands (includes finger, talk, commands)"
+set name=pkg.description value="Berkeley Remote Network Server Commands"
 set name=pkg.summary value="Remote Network Server Commands"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
 set name=variant.arch value=$(ARCH)
@@ -45,28 +44,15 @@ dir path=usr/share/man
 dir path=usr/share/man/man1
 dir path=usr/share/man/man1m
 dir path=usr/share/man/man4
-file path=lib/svc/manifest/network/comsat.xml group=sys mode=0444
-file path=lib/svc/manifest/network/finger.xml group=sys mode=0444
 file path=lib/svc/manifest/network/login.xml group=sys mode=0444
 file path=lib/svc/manifest/network/rexec.xml group=sys mode=0444
 file path=lib/svc/manifest/network/shell.xml group=sys mode=0444
-file path=lib/svc/manifest/network/talk.xml group=sys mode=0444
-file path=usr/bin/finger mode=0555
-file path=usr/bin/talk mode=0555
-file path=usr/sbin/in.comsat mode=0555
-file path=usr/sbin/in.fingerd mode=0555
 file path=usr/sbin/in.rexecd mode=0555
 file path=usr/sbin/in.rlogind mode=0555
 file path=usr/sbin/in.rshd mode=0555
-file path=usr/sbin/in.talkd mode=0555
-file path=usr/share/man/man1/finger.1
-file path=usr/share/man/man1/talk.1
-file path=usr/share/man/man1m/in.comsat.1m
-file path=usr/share/man/man1m/in.fingerd.1m
 file path=usr/share/man/man1m/in.rexecd.1m
 file path=usr/share/man/man1m/in.rlogind.1m
 file path=usr/share/man/man1m/in.rshd.1m
-file path=usr/share/man/man1m/in.talkd.1m
 file path=usr/share/man/man4/hosts.equiv.4
 legacy pkg=SUNWrcmdr desc="Remote Network Server Commands (Root)" \
     name="Remote Network Server Commands (Root)"
@@ -75,15 +61,12 @@ legacy pkg=SUNWrcmds \
     name="Remote Network Server Commands (Usr)"
 license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
-license usr/src/cmd/cmd-inet/usr.sbin/THIRDPARTYLICENSE.comsat \
-    license=usr/src/cmd/cmd-inet/usr.sbin/THIRDPARTYLICENSE.comsat
 license usr/src/cmd/cmd-inet/usr.sbin/THIRDPARTYLICENSE.rlogind \
     license=usr/src/cmd/cmd-inet/usr.sbin/THIRDPARTYLICENSE.rlogind
 link path=etc/rmt target=../usr/sbin/rmt
-link path=usr/share/man/man1m/comsat.1m target=in.comsat.1m
-link path=usr/share/man/man1m/fingerd.1m target=in.fingerd.1m
 link path=usr/share/man/man1m/rexecd.1m target=in.rexecd.1m
 link path=usr/share/man/man1m/rlogind.1m target=in.rlogind.1m
 link path=usr/share/man/man1m/rshd.1m target=in.rshd.1m
-link path=usr/share/man/man1m/talkd.1m target=in.talkd.1m
 link path=usr/share/man/man4/rhosts.4 target=hosts.equiv.4
+depend fmri=network/finger type=group
+depend fmri=network/talk type=group

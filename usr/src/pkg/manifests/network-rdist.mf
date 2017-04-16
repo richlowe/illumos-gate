@@ -1,0 +1,27 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+# Copyright 2017, Richard Lowe
+
+set name=pkg.fmri value=pkg:/network/rdist@$(PKGVERS)
+set name=pkg.summary value="file distribution and synchronization service"
+set name=info.classification \
+    value="org.opensolaris.category.2008:Applications/System Utilities"
+set name=org.opensolaris.noincorp value=true
+set name=variant.arch value=$(ARCH)
+file path=usr/bin/rdist mode=4555
+file path=usr/share/man/man1/rdist.1
+license cr_Sun license=cr_Sun
+license lic_CDDL license=lic_CDDL
+license usr/src/cmd/cmd-inet/THIRDPARTYLICENSE.kcmd \
+    license=usr/src/cmd/cmd-inet/THIRDPARTYLICENSE.kcmd
+license usr/src/cmd/cmd-inet/usr.bin/rdist/THIRDPARTYLICENSE \
+    license=usr/src/cmd/cmd-inet/usr.bin/rdist/THIRDPARTYLICENSE
