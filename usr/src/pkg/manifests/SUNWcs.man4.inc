@@ -70,7 +70,6 @@ file path=usr/share/man/man4/nologin.4
 file path=usr/share/man/man4/notrouter.4
 file path=usr/share/man/man4/nscd.conf.4
 file path=usr/share/man/man4/nsswitch.conf.4
-file path=usr/share/man/man4/packingrules.4
 file path=usr/share/man/man4/pam.conf.4
 file path=usr/share/man/man4/passwd.4
 file path=usr/share/man/man4/phones.4
