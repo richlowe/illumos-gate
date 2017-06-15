@@ -139,8 +139,8 @@ static struct module_info pts_info = {
 	0xface,
 	"pts",
 	0,
-	512,
-	512,
+	_TTY_BUFSIZ,
+	_TTY_BUFSIZ,
 	128
 };
 
@@ -409,7 +409,7 @@ ptsopen(
 	mop->b_wptr += sizeof (struct stroptions);
 	sop = (struct stroptions *)mop->b_rptr;
 	sop->so_flags = SO_HIWAT | SO_LOWAT | SO_ISTTY;
-	sop->so_hiwat = 512;
+	sop->so_hiwat = _TTY_BUFSIZ;
 	sop->so_lowat = 256;
 	putnext(rqp, mop);
 
