@@ -215,7 +215,7 @@ static struct module_info zc_info = {
 	"zcons",
 	0,
 	INFPSZ,
-	2048,
+	_TTY_BUFSIZ,
 	128
 };
 
@@ -501,7 +501,7 @@ zc_master_open(zc_state_t *zcs,
 		sop->so_flags = SO_HIWAT | SO_LOWAT;
 	else
 		sop->so_flags = SO_HIWAT | SO_LOWAT | SO_ISTTY;
-	sop->so_hiwat = 512;
+	sop->so_hiwat = _TTY_BUFSIZ;
 	sop->so_lowat = 256;
 	putnext(rqp, mop);
 
@@ -576,7 +576,7 @@ zc_slave_open(zc_state_t *zcs,
 	mop->b_wptr += sizeof (struct stroptions);
 	sop = (struct stroptions *)(void *)mop->b_rptr;
 	sop->so_flags = SO_HIWAT | SO_LOWAT | SO_ISTTY;
-	sop->so_hiwat = 512;
+	sop->so_hiwat = _TTY_BUFSIZ;
 	sop->so_lowat = 256;
 	putnext(rqp, mop);
 

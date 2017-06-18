@@ -28,8 +28,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI" /* from S5R4 1.13 */
-
 /*
  * Description:
  *
@@ -106,8 +104,8 @@ static struct module_info ptem_info = {
 	0xabcd,
 	"ptem",
 	0,
-	512,
-	512,
+	_TTY_BUFSIZ,
+	_TTY_BUFSIZ,
 	128
 };
 
@@ -201,7 +199,7 @@ ptemopen(
 	mop->b_wptr += sizeof (struct stroptions);
 	sop = (struct stroptions *)mop->b_rptr;
 	sop->so_flags = SO_HIWAT | SO_LOWAT | SO_ISTTY;
-	sop->so_hiwat = 512;
+	sop->so_hiwat = _TTY_BUFSIZ;
 	sop->so_lowat = 256;
 
 	/*
