@@ -287,8 +287,8 @@ compile(char *instring, char *ep, const char *endbuf, int seof)
 						ERROR(25);
 					*ep++ = CBACK;
 					*ep++ = (char)c;
-					continue;
 				}
+				continue;
 			}
 	/* Drop through to default to use \ to turn off special chars */
 
