@@ -2283,8 +2283,8 @@ icmp_inbound_error_fanout_v4(mblk_t *mp, icmph_t *icmph, ip_recv_attr_t *ira)
 			return;
 		}
 		/* No self-encapsulated */
-		/* FALLTHRU */
 	}
+	/* FALLTHROUGH */
 	case IPPROTO_IPV6:
 		if ((connp = ipcl_iptun_classify_v4(&ripha.ipha_src,
 		    &ripha.ipha_dst, ipst)) != NULL) {

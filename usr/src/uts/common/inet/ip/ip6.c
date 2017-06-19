@@ -962,8 +962,8 @@ icmp_inbound_error_fanout_v6(mblk_t *mp, icmp6_t *icmp6, ip_recv_attr_t *ira)
 			icmp_inbound_error_fanout_v6(mp, icmp6, ira);
 			return;
 		}
-		/* FALLTHRU */
 	}
+	/* FALLTHROUGH */
 	case IPPROTO_ENCAP:
 		if ((connp = ipcl_iptun_classify_v6(&rip6h.ip6_src,
 		    &rip6h.ip6_dst, ipst)) != NULL) {
@@ -977,7 +977,7 @@ icmp_inbound_error_fanout_v6(mblk_t *mp, icmp6_t *icmp6, ip_recv_attr_t *ira)
 		 * No IP tunnel is interested, fallthrough and see
 		 * if a raw socket will want it.
 		 */
-		/* FALLTHRU */
+		/* FALLTHROUGH */
 	default:
 		ira->ira_flags |= IRAF_ICMP_ERROR;
 		ASSERT(ira->ira_protocol == nexthdr);
