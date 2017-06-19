@@ -929,7 +929,7 @@ again:
 
 				goto end;
 			}
-			/* else FALL THROUGH TO */
+			/* FALLTHROUGH */
 
 		default:
 			__tli_sys_strerror(errorstr, sizeof (errorstr),
