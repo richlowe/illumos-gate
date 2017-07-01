@@ -2145,6 +2145,7 @@ bge_ape_lock(bge_t *bgep, int locknum)
 	case BGE_APE_LOCK_GPIO:
 		if (bgep->chipid.device == DEVICE_ID_5761)
 			return (0);
+		/* FALLTHROUGH */
 	case BGE_APE_LOCK_GRC:
 	case BGE_APE_LOCK_MEM:
 		if (!bgep->pci_func)
@@ -2206,6 +2207,7 @@ bge_ape_unlock(bge_t *bgep, int locknum)
 	case BGE_APE_LOCK_GPIO:
 		if (bgep->chipid.device == DEVICE_ID_5761)
 			return;
+		/* FALLTHROUGH */
 	case BGE_APE_LOCK_GRC:
 	case BGE_APE_LOCK_MEM:
 		if (!bgep->pci_func)
