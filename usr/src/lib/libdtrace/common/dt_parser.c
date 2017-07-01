@@ -1467,6 +1467,7 @@ dt_node_decl(void)
 		xyerror(D_DECL_BADCLASS, "specified storage class not "
 		    "appropriate in D\n");
 		/*NOTREACHED*/
+		break;
 
 	case DT_DC_EXTERN: {
 		dtrace_typeinfo_t ott;
@@ -3605,6 +3606,7 @@ dt_cook_op2(dt_node_t *dnp, uint_t idflags)
 		    dt_node_type_name(lp, n1, sizeof (n1)), opstr(op),
 		    dt_node_type_name(rp, n2, sizeof (n2)));
 		/*NOTREACHED*/
+		break;
 
 	case DT_TOK_ADD_EQ:
 	case DT_TOK_SUB_EQ:
