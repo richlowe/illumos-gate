@@ -24,12 +24,8 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
- *
- * $Id: svc_auth_gssapi.c,v 1.19 1994/10/27 12:38:51 jik Exp $
  */
 
 /*
@@ -941,7 +937,7 @@ __svcrpcsec_gss(rqst, msg, no_dispatch)
 				goto success;
 			    }
 			}
-			/* fall thru to default */
+			/* FALLTHROUGH */
 
 		    default:
 			syslog(LOG_ERR, "_svcrpcsec_gss: non-data request "
