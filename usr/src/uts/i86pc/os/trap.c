@@ -605,11 +605,11 @@ trap(struct regs *rp, caddr_t addr, processorid_t cpuid)
 			siginfo.si_addr  = (caddr_t)rp->r_pc;
 			siginfo.si_trapno = type & ~USER;
 			fault = FLTILL;
-			break;
 		} else {
 			(void) die(type, rp, addr, cpuid);
 			/*NOTREACHED*/
 		}
+		break;
 
 	case T_PGFLT:		/* system page fault */
 		/*
