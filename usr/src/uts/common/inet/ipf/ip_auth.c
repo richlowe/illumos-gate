@@ -470,11 +470,11 @@ fr_authioctlloop:
 
 		MUTEX_ENTER(&ifs->ifs_ipf_authmx);
 #ifdef	_KERNEL
-# if	SOLARIS
+# if	(defined(sun) && (defined(__svr4__) || defined(__SVR4)))
 		error = 0;
 		if (!cv_wait_sig(&ifs->ifs_ipfauthwait, &ifs->ifs_ipf_authmx.ipf_lk))
 			error = EINTR;
-# else /* SOLARIS */
+# else /* (defined(sun) && (defined(__svr4__) || defined(__SVR4))) */
 #  ifdef __hpux
 		{
 		lock_t *l;
@@ -492,7 +492,7 @@ fr_authioctlloop:
 		error = SLEEP(&ifs->ifs_fr_authnext, "fr_authnext");
 #   endif /* __osf__ */
 #  endif /* __hpux */
-# endif /* SOLARIS */
+# endif /* (defined(sun) && (defined(__svr4__) || defined(__SVR4))) */
 #endif
 		MUTEX_EXIT(&ifs->ifs_ipf_authmx);
 		READ_ENTER(&ifs->ifs_ipf_global);

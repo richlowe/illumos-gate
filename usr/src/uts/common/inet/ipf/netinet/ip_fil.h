@@ -17,10 +17,6 @@
 #include "netinet/ip_compat.h"
 #include <sys/zone.h>
 
-#ifndef	SOLARIS
-# define SOLARIS (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
-#endif
-
 #ifndef	__P
 # ifdef	__STDC__
 #  define	__P(x)	x
@@ -1375,7 +1371,7 @@ extern	int	ipl_disable __P((void));
 # ifdef MENTAT
 extern	int	fr_check __P((struct ip *, int, void *, int, void *,
 			      mblk_t **, ipf_stack_t *));
-#  if SOLARIS
+#  if (defined(sun) && (defined(__svr4__) || defined(__SVR4)))
 #   if SOLARIS2 >= 7
 extern	int	iplioctl __P((dev_t, int, intptr_t, int, cred_t *, int *));
 #   else

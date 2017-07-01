@@ -362,7 +362,8 @@ ifs_ircpxy_t *ifsirc;
 
 		linkb(m1, nm);
 	} else {
-# if SOLARIS && defined(ICK_VALID)
+# if (defined(sun) && (defined(__svr4__) || defined(__SVR4))) && \
+    defined(ICK_VALID)
 		if (m1->b_datap->db_struiolim == m1->b_wptr)
 			m1->b_datap->db_struiolim += inc;
 		m1->b_datap->db_struioflag &= ~STRUIO_IP;
