@@ -37,8 +37,6 @@
  * contributors.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*LINTLIBRARY*/
 
 #include	"curses_inc.h"
@@ -289,7 +287,7 @@ err:
 			/* clear the hash table */
 			for (y = curscr->_maxy; y > 0; --y)
 				*hash++ = _NOHASH;
-		/* LINTED */ /* Known fall-through on case statement. */
+			/* FALLTHROUGH */
 		case 0:
 			{
 			int	saveflag = curscr->_flags & _CANT_BE_IMMED;
