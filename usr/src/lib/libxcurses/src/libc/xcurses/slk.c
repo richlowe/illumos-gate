@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * slk.c
  * 
@@ -34,12 +32,6 @@
  * Copyright 1990, 1995 by Mortice Kern Systems Inc.  All rights reserved.
  *
  */
-
-#if M_RCSID
-#ifndef lint
-static char rcsID[] = "$Header: /rd/src/libc/xcurses/rcs/slk.c 1.1 1995/07/19 16:38:06 ant Exp $";
-#endif
-#endif
 
 #include <private.h>
 
@@ -314,11 +306,11 @@ slk_wset(int index, const wchar_t *label, int justify)
 	if (index < 1 || 8 < index || justify < 0 || 2 < justify)
 		goto error1;
 
-	if (label == (wchar_t *) 0)
+	if (label == NULL)
 		label = M_MB_L("");
 
 	/* Copy the characters that fill the first 8 columns of the label. */
-	for (wp = wcs, width = 0; label != '\0'; label += i, wp += cc._n) {
+	for (wp = wcs, width = 0; *label != '\0'; label += i, wp += cc._n) {
 		if ((i = __m_wcs_cc(label, A_NORMAL, 0, &cc)) < 0)
 			goto error1;	
 
@@ -335,9 +327,9 @@ slk_wset(int index, const wchar_t *label, int justify)
 
 	/* Remember the new label. */
 	__m_screen->_slk._justify[index] = (short) justify;
-	if (__m_screen->_slk._labels[index] != (char *) 0)
+	if (__m_screen->_slk._labels[index] != NULL)
 		free(__m_screen->_slk._labels[index]);
-	if ((__m_screen->_slk._labels[index] = m_strdup(mbs)) == (char *) 0)
+	if ((__m_screen->_slk._labels[index] = m_strdup(mbs)) == NULL)
 		goto error1;
 	
 	if (__m_screen->_slk._w != (WINDOW *) 0) {
