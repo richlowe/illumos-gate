@@ -769,6 +769,8 @@ FCOE_GetPortList(
 			case FCOEIOE_MORE_DATA:
 				status = FCOE_STATUS_ERROR_MORE_DATA;
 				retry++;
+				break;
+
 			default:
 				status = FCOE_STATUS_ERROR;
 				(void) close(fcoe_fd);
