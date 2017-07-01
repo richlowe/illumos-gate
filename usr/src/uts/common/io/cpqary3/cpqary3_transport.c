@@ -480,6 +480,7 @@ cpqary3_dma_alloc(cpqary3_t *cpqary3p, struct scsi_pkt *scsi_pktp,
 	case DDI_DMA_INUSE:
 		cmn_err(CE_PANIC, "CPQary3: Another I/O transaction "
 		    "is using the DMA handle");
+		break;
 
 	default:
 		cmn_err(CE_PANIC, "CPQary3: Unexpected ERROR "
