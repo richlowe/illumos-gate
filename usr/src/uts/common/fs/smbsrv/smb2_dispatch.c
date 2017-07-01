@@ -68,8 +68,7 @@ void smb2sr_do_async(smb_request_t *);
 smb_sdrc_t smb2_invalid_cmd(smb_request_t *);
 static void smb2_tq_work(void *);
 
-static const smb_disp_entry_t const
-smb2_disp_table[SMB2__NCMDS] = {
+static const smb_disp_entry_t smb2_disp_table[SMB2__NCMDS] = {
 
 	/* text-name, pre, func, post, cmd-code, dialect, flags */
 
