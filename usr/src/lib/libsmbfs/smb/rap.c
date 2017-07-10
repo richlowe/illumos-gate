@@ -190,6 +190,7 @@ smb_rap_rqparam(struct smb_rap *rap, char ptype, char plen, int value)
 		p = rap->r_npbuf;
 		memset(p, uv, plen);
 		len = plen;
+		break;
 	default:
 		return (EINVAL);
 	}
