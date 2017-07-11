@@ -98,7 +98,7 @@ ascii2hex(char *anHexaStr, int *aResLen)
 		return (NULL);
 	while (isxdigit(*anHexaStr)) {
 		theRes[theLen] = unhex(*anHexaStr) << 4;
-		if (++anHexaStr != '\0') {
+		if (*(++anHexaStr) != '\0') {
 			theRes[theLen] += unhex(*anHexaStr);
 			anHexaStr++;
 		}
