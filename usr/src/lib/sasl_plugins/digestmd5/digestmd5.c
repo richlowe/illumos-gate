@@ -5091,6 +5091,7 @@ digestmd5_client_mech_step(void *conn_context,
 	}
 
 	/* fall through and respond to challenge */
+	/* FALLTHROUGH */
 
     case 3:
 	if (serverin && !strncasecmp(serverin, "rspauth=", 8)) {
@@ -5121,6 +5122,7 @@ digestmd5_client_mech_step(void *conn_context,
 	text->realm = text->nonce = text->cnonce = NULL;
 #endif /* _SUN_SDK_ */
 	ctext->cipher = NULL;
+	/* FALLTHROUGH */
 
     case 2:
 	return digestmd5_client_mech_step2(ctext, params,
