@@ -3,8 +3,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -86,6 +84,7 @@ got_it:
     case 0:
 	(void) dup2(fd, 0); /* put file on stdin */
 	ss_page_stdin();
+	/* FALLTHROUGH */
     default:
 	(void) close(fd); /* what can we do if it fails? */
 #ifdef WAIT_USES_INT

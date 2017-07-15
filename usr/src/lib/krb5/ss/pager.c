@@ -3,8 +3,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Pager: Routines to create a "more" running out of a particular file
  * descriptor.
@@ -53,6 +51,7 @@ int ss_pager_create()
 		if (dup2(filedes[0], 0) == -1)
 			exit(1);
 		ss_page_stdin();
+		/* FALLTHROUGH */
 	default:
 		/*
 		 * Parent:  close "read" side of pipe, return
