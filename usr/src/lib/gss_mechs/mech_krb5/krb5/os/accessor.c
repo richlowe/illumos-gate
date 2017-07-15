@@ -30,11 +30,16 @@
 
 /* If this trick gets used elsewhere, move it to k5-platform.h.  */
 #ifndef DESIGNATED_INITIALIZERS
-#define DESIGNATED_INITIALIZERS				\
-  /* ANSI/ISO C 1999 supports this...  */		\
-  (__STDC_VERSION__ >= 199901L				\
-   /* ...as does GCC, since version 2.something.  */	\
+#if (__STDC_VERSION__ >= 199901L			\
    || (!defined __cplusplus && __GNUC__ >= 3))
+	/*
+	 * ANSI/ISO C 1999 supports this...
+	 * ...as does GCC, since version 2.something.
+	 */
+#define DESIGNATED_INITIALIZERS (1)
+#else
+#define DESIGNATED_INITIALIZERS (0)
+#endif
 #endif
 
 krb5_error_code KRB5_CALLCONV
