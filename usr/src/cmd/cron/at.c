@@ -959,6 +959,7 @@ parse_time(char *t)
 		case 12:	/* CCYYMMDDhhmm */
 			century = atoi_for2(t);
 			t += 2;
+			/* FALLTHROUGH */
 		case 10:	/* YYMMDDhhmm */
 			tm.tm_year = atoi_for2(t);
 			t += 2;
@@ -967,6 +968,7 @@ parse_time(char *t)
 					tm.tm_year += 100;
 			} else
 				tm.tm_year += (century - 19) * 100;
+			/* FALLTHROUGH */
 		case 8:		/* MMDDhhmm */
 			tm.tm_mon = atoi_for2(t) - 1;
 			t += 2;
