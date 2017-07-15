@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  *  Back-end functions for spec to mapfile converter
  */
@@ -927,7 +925,7 @@ writemapfile(FILE *mapfp)
 				}
 				/* Print name of all parents. */
 				for (p = parents_of(b);
-				    p !=  NULL && *p != '\0'; ++p) {
+				    p !=  NULL && *p != NULL; ++p) {
 					(void) fprintf(mapfp, " %s", *p);
 				}
 				bl = b->b_uncles;
