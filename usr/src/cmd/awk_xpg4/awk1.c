@@ -67,7 +67,7 @@ static void	awkvarinit(void);
 static wint_t	lexgetc(void);
 static void	lexungetc(wint_t c);
 static size_t	lexescape(wint_t endc, int regx, int cmd_line_operand);
-static void	awkierr(int perr, char *fmt, va_list ap);
+static void	awkierr(int perr, char *fmt, va_list ap) __NORETURN;
 static int	usage(void);
 void		strescape(wchar_t *str);
 static const char	*toprint(wint_t);
@@ -557,6 +557,7 @@ yylex()
 			case '}':
 				if (nbrace != 0)
 					continue;
+				/* FALLTHROUGH */
 
 			default:
 				c = ';';
@@ -795,6 +796,7 @@ lexid(wint_t c)
 		case PRINT:
 		case PRINTF:
 			++inprint;
+			/* FALLTHROUGH */
 		default:
 			return ((int)np->n_keywtype);
 		}

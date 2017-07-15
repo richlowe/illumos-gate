@@ -34,8 +34,6 @@
  *
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -286,7 +284,7 @@ wchar_t	*erealloc(wchar_t *, unsigned);
 /* Global functions -- awk2.c */
 void	awk(void);
 void	dobegin(void);
-void	doend(int status);
+void	doend(int status) __NORETURN;
 int	nextrecord(wchar_t *buf, FILE *fp);
 wchar_t	*defrecord(wchar_t *bp, int lim, FILE *fp);
 wchar_t	*charrecord(wchar_t *bp, int lim, FILE *fp);

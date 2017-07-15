@@ -29,8 +29,6 @@
  * Based on MKS awk(1) ported to be /usr/xpg4/bin/awk with POSIX/XCU4 changes
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include "awk.h"
 #include "y.tab.h"
 
@@ -269,6 +267,7 @@ top:
 	case UFUNC:
 		awkerr(gettext("cannot assign to function \"%s\""),
 		    left->n_name);
+		/* FALLTHROUGH */
 
 	default:
 		awkerr(gettext("lvalue required in assignment"));
@@ -748,6 +747,7 @@ action(NODE *wp)
 				if (isstring(l->n_flags) &&
 				    l->n_string == _null)
 					break;
+				/* FALLTHROUGH */
 			default:
 				awkerr(gettext(
 				    "may delete only array element or array"));
