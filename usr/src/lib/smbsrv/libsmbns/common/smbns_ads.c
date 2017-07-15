@@ -1849,7 +1849,7 @@ adjoin_cleanup:
 
 struct xlate_table {
 	int err;
-	const char const *msg;
+	const char *msg;
 };
 
 static const struct xlate_table
