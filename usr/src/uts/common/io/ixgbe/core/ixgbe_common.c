@@ -250,7 +250,7 @@ s32 ixgbe_setup_fc_generic(struct ixgbe_hw *hw)
 		if (ret_val != IXGBE_SUCCESS)
 			goto out;
 
-		/* only backplane uses autoc so fall though */
+		/* FALLTHROUGH */
 	case ixgbe_media_type_fiber_fixed:
 	case ixgbe_media_type_fiber_qsfp:
 	case ixgbe_media_type_fiber:
@@ -4565,7 +4565,7 @@ void ixgbe_set_rxpba_generic(struct ixgbe_hw *hw, int num_pb, u32 headroom,
 		rxpktsize <<= IXGBE_RXPBSIZE_SHIFT;
 		for (; i < (num_pb / 2); i++)
 			IXGBE_WRITE_REG(hw, IXGBE_RXPBSIZE(i), rxpktsize);
-		/* Fall through to configure remaining packet buffers */
+		/* FALLTHROUGH */
 	case PBA_STRATEGY_EQUAL:
 		rxpktsize = (pbsize / (num_pb - i)) << IXGBE_RXPBSIZE_SHIFT;
 		for (; i < num_pb; i++)
