@@ -1729,7 +1729,7 @@ gld_wput(queue_t *q, mblk_t *mp)
 		 */
 		GLD_CLEAR_MBLK_VTAG(mp);
 		multidata = B_FALSE;
-		/* LINTED: E_CASE_FALLTHRU */
+		/* FALLTHROUGH */
 	case M_MULTIDATA:
 		/* Only call gld_start() directly if nothing queued ahead */
 		/* No guarantees about ordering with different threads */
