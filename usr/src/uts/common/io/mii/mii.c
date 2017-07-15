@@ -71,7 +71,7 @@ static const char *mii_errors[] = {
 };
 
 /* Indexed by XCVR_ type */
-static const const char *mii_xcvr_types[] = {
+static const char *mii_xcvr_types[] = {
 	"Undefined",
 	"Unknown",
 	"10 Mbps",
