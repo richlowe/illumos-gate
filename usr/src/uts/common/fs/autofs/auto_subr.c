@@ -162,7 +162,7 @@ auto_lookup_aux(fnnode_t *fnp, char *name, cred_t *cred)
 	bzero(&link, sizeof (link));
 	error = auto_lookup_request(fnip, name, &link, TRUE, &mountreq, cred);
 	if (!error) {
-		if (link.link != NULL || link.link != '\0') {
+		if (link.link != NULL && *link.link != '\0') {
 			/*
 			 * This node should be a symlink
 			 */
