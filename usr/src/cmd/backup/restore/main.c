@@ -12,8 +12,6 @@
  * specifies the terms and conditions for redistribution.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  *	Modified to recursively extract all files within a subtree
  *	(supressed by the h option) and recreate the heirarchical
@@ -379,7 +377,7 @@ If set, the envar TMPDIR selects where temporary files are kept\n"),
 		initpagercmd();
 		runcmdshell();
 		done(0);
-		/* NOTREACHED */
+		/* FALLTHROUGH */
 	/*
 	 * Incremental restoration of a file system.
 	 */
@@ -427,7 +425,7 @@ If set, the envar TMPDIR selects where temporary files are kept\n"),
 		}
 		dumpsymtable(symtbl, (long)1);
 		done(0);
-		/* NOTREACHED */
+		/* FALLTHROUGH */
 	/*
 	 * Resume an incremental file system restoration.
 	 */
@@ -442,7 +440,7 @@ If set, the envar TMPDIR selects where temporary files are kept\n"),
 		checkrestore();
 		dumpsymtable(symtbl, (long)1);
 		done(0);
-		/* NOTREACHED */
+		/* FALLTHROUGH */
 	/*
 	 * List contents of tape.
 	 */
@@ -461,7 +459,7 @@ If set, the envar TMPDIR selects where temporary files are kept\n"),
 			treescan(name, ino, listfile);
 		}
 		done(0);
-		/* NOTREACHED */
+		/* FALLTHROUGH */
 	/*
 	 * Batch extraction of tape contents.
 	 */
