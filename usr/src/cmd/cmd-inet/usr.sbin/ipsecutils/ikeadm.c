@@ -3419,6 +3419,7 @@ parseit(int argc, char **argv, char *notused, boolean_t notused_either)
 		break;
 	case IKE_SVC_ERROR:
 		usage();
+		/* FALLTHROUGH */
 	default:
 		exit(0);
 	}
