@@ -1625,6 +1625,7 @@ lxml_get_notification_parameters(entity_t *entity, xmlNodePtr np)
 
 			lxml_get_event(entity, pgname, np);
 		}
+		/* FALLTHROUGH */
 
 	default:	/* smf state transition tokens */
 		if (entity->sc_etype == SVCCFG_SERVICE_OBJECT &&
