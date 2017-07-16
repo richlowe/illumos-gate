@@ -3500,6 +3500,7 @@ main(int argc, char **argv)
 				argserr(progname);
 				/* NOTREACHED */
 			}
+			break;
 
 		case 'd':
 		case 'D':
@@ -3610,6 +3611,7 @@ main(int argc, char **argv)
 		case '?':
 			argserr(progname);
 			/* NOTREACHED */
+			break;
 
 		default:
 			assert(0);
