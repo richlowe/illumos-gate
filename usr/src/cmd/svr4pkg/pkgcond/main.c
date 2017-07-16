@@ -3462,7 +3462,7 @@ resolvePath(char **r_path)
 
 	/* return error if the path is completely empty */
 
-	if (*r_path == '\0') {
+	if (*r_path == NULL) {
 		return (R_FAILURE);
 	}
 
