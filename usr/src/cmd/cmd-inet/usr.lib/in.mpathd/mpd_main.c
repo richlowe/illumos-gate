@@ -2332,6 +2332,7 @@ loopback_cmd(int sock, int family)
 			(void) close(newfd);
 			return;
 		}
+		/* FALLTHROUGH */
 
 	default:
 		logdebug("loopback_cmd: family %d\n", family);
