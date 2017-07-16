@@ -11,11 +11,7 @@
  *
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sendmail.h>
-
-SM_RCSID("@(#)$Id: alias.c,v 8.219 2006/10/24 18:04:09 ca Exp $")
 
 #define SEPARATOR ':'
 # define ALIAS_SPEC_SEPARATORS	" ,/:"
@@ -990,6 +986,7 @@ forward(user, sendq, aliaslevel, e)
 				break;
 #endif /* _FFR_FORWARD_SYSERR */
 
+				/* FALLTHROUGH */
 			  default:
 				if (LogLevel > (RunAsUid == 0 ? 2 : 10))
 					sm_syslog(LOG_WARNING, e->e_id,

@@ -20,8 +20,6 @@ SM_IDSTR(copyright,
      Copyright (c) 1988, 1993\n\
 	The Regents of the University of California.  All rights reserved.\n")
 
-SM_IDSTR(id, "@(#)$Id: praliases.c,v 8.96 2008/07/10 20:13:10 ca Exp $")
-
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -217,6 +215,7 @@ main(argc, argv)
 				}
 				praliases(b, argc, argv);
 			}
+			/* FALLTHROUGH */
 
 		  default:
 			continue;

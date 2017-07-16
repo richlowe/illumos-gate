@@ -11,22 +11,7 @@
  *
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sm/gen.h>
-#ifndef lint
-SM_UNUSED(static char copyright[]) =
-"@(#) Copyright (c) 1998-2001 Sendmail, Inc. and its suppliers.\n\
-	All rights reserved.\n\
-     Copyright (c) 1992 Eric P. Allman.  All rights reserved.\n\
-     Copyright (c) 1992, 1993\n\
-	The Regents of the University of California.  All rights reserved.\n";
-#endif /* ! lint */
-
-#ifndef lint
-SM_UNUSED(static char id[]) = "@(#)$Id: editmap.c,v 1.25 2007/05/11 18:50:35 ca Exp $";
-#endif /* ! lint */
-
 
 #include <sys/types.h>
 #ifndef ISC_UNIX
@@ -263,7 +248,7 @@ main(argc, argv)
 # endif /* UID_MAX */
 				break;
 			}
-
+			/* FALLTHROUGH */
 
 		  default:
 			continue;

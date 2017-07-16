@@ -11,16 +11,8 @@
  *
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sendmail.h>
 #include "map.h"
-
-#if NAMED_BIND
-SM_RCSID("@(#)$Id: domain.c,v 8.202 2006/12/19 01:15:07 ca Exp $ (with name server)")
-#else /* NAMED_BIND */
-SM_RCSID("@(#)$Id: domain.c,v 8.202 2006/12/19 01:15:07 ca Exp $ (without name server)")
-#endif /* NAMED_BIND */
 
 #if NAMED_BIND
 
@@ -1043,9 +1035,9 @@ nexttype:
 				**  Such MX matches are as good as an A match,
 				**  fall through.
 				*/
-				/* FALLTHROUGH */
 
 # if NETINET6
+				/* FALLTHROUGH */
 			  case T_AAAA:
 # endif /* NETINET6 */
 			  case T_A:

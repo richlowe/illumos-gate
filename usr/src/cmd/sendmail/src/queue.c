@@ -14,8 +14,6 @@
 #include <sendmail.h>
 #include <sm/sem.h>
 
-SM_RCSID("@(#)$Id: queue.c,v 8.987 2009/12/18 17:08:01 ca Exp $")
-
 #include <dirent.h>
 
 # define RELEASE_QUEUE	(void) 0
@@ -4468,6 +4466,7 @@ readqf(e, openonly)
 			/* format: flag (1 char) space long-integer */
 			e->e_dlvr_flag = buf[1];
 			e->e_deliver_by = strtol(&buf[3], NULL, 10);
+			/* FALLTHROUGH */
 
 		  case '$':		/* define macro */
 			{

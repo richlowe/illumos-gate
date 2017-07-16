@@ -11,19 +11,7 @@
  *
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sm/gen.h>
-
-SM_IDSTR(copyright,
-"@(#) Copyright (c) 1998-2002, 2004 Sendmail, Inc. and its suppliers.\n\
-	All rights reserved.\n\
-     Copyright (c) 1992 Eric P. Allman.  All rights reserved.\n\
-     Copyright (c) 1992, 1993\n\
-	The Regents of the University of California.  All rights reserved.\n")
-
-SM_IDSTR(id, "@(#)$Id: makemap.c,v 8.179 2008/04/14 02:06:16 ca Exp $")
-
 
 #include <sys/types.h>
 #ifndef ISC_UNIX
@@ -290,7 +278,7 @@ main(argc, argv)
 # endif /* UID_MAX */
 				break;
 			}
-
+			/* FALLTHROUGH */
 
 		  default:
 			continue;

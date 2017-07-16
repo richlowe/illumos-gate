@@ -13,19 +13,6 @@
  * Use is subject to license terms.
  */
 
-#ifndef lint
-static char copyright[] =
-"@(#) Copyright (c) 1990, 1993, 1994\n\
-	The Regents of the University of California.  All rights reserved.\n";
-#endif /* not lint */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-#ifndef lint
-static char sccsid[] = "@(#)mail.local.c	8.83 (Berkeley) 12/17/98";
-static char sccsi2[] = "%W% (Sun) %G%";
-#endif /* not lint */
-
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
@@ -1145,9 +1132,9 @@ e_to_sys(num)
 			eval = EX_UNAVAILABLE;
 			break;
 		}
-		/* FALLTHROUGH */
 #endif /* EDQUOT */
 #ifdef EAGAIN
+		/* FALLTHROUGH */
 	case EAGAIN:		/* Resource temporarily unavailable */
 #endif
 #ifdef EBUSY
