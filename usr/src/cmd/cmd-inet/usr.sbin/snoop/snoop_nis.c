@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SunOS	*/
-
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <setjmp.h>
@@ -529,6 +527,7 @@ nisreply(proc)
 	case YPPROC_MASTER:
 		(void) detail_ypstat();
 		(void) showxdr_string(YPMAXPEER, "Peer = %s");
+		/* FALLTHROUGH */
 	case YPPROC_ORDER:
 		(void) detail_ypstat();
 		(void) showxdr_u_long("Order=%lu");
