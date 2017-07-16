@@ -376,6 +376,7 @@ iprop_full_resync_1(
 					error_message(errno));
 			goto out;
 		}
+		/* FALLTHROUGH */
 
 	default: /* parent */
 		ret.ret = UPDATE_OK;
