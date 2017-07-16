@@ -386,7 +386,7 @@ get_snapshot(const scf_instance_t *inst, const char *snapshot)
 		switch (scf_error()) {
 		case SCF_ERROR_INVALID_ARGUMENT:
 			die(gettext("Invalid snapshot name.\n"));
-			/* NOTREACHED */
+			/* FALLTHROUGH */
 
 		case SCF_ERROR_NOT_FOUND:
 			if (sflag == 0) {
@@ -816,7 +816,7 @@ do_wait(void *unused, scf_walkinfo_t *wip)
 				case SCF_ERROR_NOT_FOUND:
 					die(emsg_not_found);
 
-					/* NOTREACHED */
+					/* FALLTHROUGH */
 
 				default:
 					scfdie();
@@ -846,7 +846,7 @@ do_wait(void *unused, scf_walkinfo_t *wip)
 			case SCF_ERROR_NOT_FOUND:
 				die(emsg_not_found);
 
-				/* NOTREACHED */
+				/* FALLTHROUGH */
 
 			default:
 				scfdie();
@@ -867,7 +867,7 @@ do_wait(void *unused, scf_walkinfo_t *wip)
 				case SCF_ERROR_NOT_FOUND:
 					die(emsg_not_found);
 
-					/* NOTREACHED */
+					/* FALLTHROUGH */
 
 				default:
 					scfdie();
@@ -894,6 +894,7 @@ do_wait(void *unused, scf_walkinfo_t *wip)
 
 			case SCF_ERROR_NOT_FOUND:
 				die(emsg_not_found);
+				/* FALLTHROUGH */
 
 			default:
 				scfdie();
@@ -916,7 +917,7 @@ do_wait(void *unused, scf_walkinfo_t *wip)
 				case SCF_ERROR_NOT_FOUND:
 					die(emsg_not_found);
 
-					/* NOTREACHED */
+					/* FALLTHROUGH */
 
 				default:
 					scfdie();
