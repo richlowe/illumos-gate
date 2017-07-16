@@ -1026,6 +1026,7 @@ main(int argc, char *argv[])
 			} else {
 				usage(B_FALSE);
 			}
+			/* FALLTHROUGH */
 		default:
 			usage(B_FALSE);
 		}
