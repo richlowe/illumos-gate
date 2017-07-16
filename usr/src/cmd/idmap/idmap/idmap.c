@@ -1204,7 +1204,7 @@ print_mapping(print_handle_t *pnm, name_mapping_t *nm)
 			free(winname);
 			return (-1);
 		}
-	/* LINTED E_CASE_FALLTHRU */
+		/* FALLTHROUGH */
 	case MAPPING_ID:
 		if (pnm->format == MAPPING_ID) {
 			if (nm->sidprefix == NULL) {
