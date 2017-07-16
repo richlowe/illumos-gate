@@ -1307,9 +1307,9 @@ ckreturn(int retcode, char *msg)
 	    case 12:
 	    case 22:
 		warnflag++;
-		/*FALLTHRU*/
 		if (msg)
 			progerr(msg);
+		/*FALLTHRU*/
 	    case 10:
 	    case 20:
 		if (retcode >= 10)
