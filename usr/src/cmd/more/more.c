@@ -1061,7 +1061,7 @@ command(char *filename, register FILE *f)
         case 'q':
         case 'Q':
             end_it(0);
-	    /*NOTREACHED*/
+	    /* FALLTHROUGH */
         case 's':
         case 'f':
             if (nlines == 0) nlines++;
@@ -1175,6 +1175,7 @@ command(char *filename, register FILE *f)
                 execute (filename, VI, "vi", cmdbuf, fnames[fnum], 0);
                 break;
             }
+	    /* FALLTHROUGH */
         default:
 		if (dum_opt) {
 			kill_line ();
@@ -1248,6 +1249,7 @@ colon(char *filename, int cmd, off_t nlines)
         case 'q':
         case 'Q':
                 end_it(0);
+		/* FALLTHROUGH */
         default:
                 write (2, &Bell, 1);
                 return (-1);
@@ -1702,6 +1704,7 @@ expand(char *outbuf, char *inbuf)
                 *out_str++ = *in_str++;
                 break;
             }
+	    /* FALLTHROUGH */
         default:
             *out_str++ = ch;
         }
