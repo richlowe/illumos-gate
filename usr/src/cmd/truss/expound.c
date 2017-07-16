@@ -5268,11 +5268,11 @@ expound(private_t *pri, long r0, int raw)
 			show_dents32(pri, (long)pri->sys_args[1], r0);
 			break;
 		}
-		/* FALLTHROUGH */
 #else
 		show_dents32(pri, (long)pri->sys_args[1], r0);
 		break;
 #endif
+		/* FALLTHROUGH */
 	case SYS_getdents64:
 		if (err || pri->sys_nargs <= 1 || r0 <= 0)
 			break;
