@@ -2671,6 +2671,7 @@ iscsi_sm_audit_impl(uintptr_t addr)
 			mdb_printf("%s|%s (%d)\n\t%9s %s (%d)\n",
 			    ts_string, state_name, sar->sar_state,
 			    "New State", new_state_name, sar->sar_new_state);
+			/* FALLTHROUGH */
 		default:
 			state_name = new_state_name = "N/A";
 			break;

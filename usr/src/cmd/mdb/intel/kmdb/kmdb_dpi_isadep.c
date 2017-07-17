@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Intel-specific portions of the DPI
  */
@@ -51,6 +49,7 @@ kmdb_dpi_handle_fault(kreg_t trapno, kreg_t pc, kreg_t sp, int cpuid)
 	switch (trapno) {
 	case T_GPFLT:
 		errno = EACCES;
+		break;
 	default:
 		errno = EMDB_NOMAP;
 	}
