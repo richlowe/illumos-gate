@@ -101,6 +101,7 @@ main(argc, argv)
 			insecure = 0;
 			break;
 		}
+		/* FALLTHROUGH */
 	default:
 		fprintf(stderr, "%s: warning -- options ignored\n", cmd);
 		break;
@@ -251,6 +252,7 @@ ypupdate_prog(rqstp, transp)
 			netname = namebuf;
 			break;
 		}
+		/* FALLTHROUGH */
 	default:
 		svcerr_weakauth(transp);
 		return;

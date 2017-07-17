@@ -32,12 +32,6 @@
  * under license from the Regents of the University of California.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-#if !defined(lint) && defined(SCCSIDS)
-static char sccsid[] = "%Z%%M%	%I%	%E% SMI";
-#endif
-
 /*
  * openchild.c
  *
@@ -46,6 +40,7 @@ static char sccsid[] = "%Z%%M%	%I%	%E% SMI";
  * interface, but for internal use only!
  */
 #include <stdio.h>
+#include <stdlib.h>
 
 extern void *malloc();
 extern char *strrchr();
