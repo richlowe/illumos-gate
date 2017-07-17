@@ -30,8 +30,6 @@
 #ifndef	_SED_H
 #define	_SED_H
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * sed -- stream  editor
  */
@@ -153,7 +151,7 @@ char    *compsub();
 struct label    *search();
 char    *gline();
 char    *place();
-void comperr(char *);
+void comperr(char *) __NORETURN;
 void execute(char *);
 
 #endif	/* _SED_H */

@@ -135,6 +135,7 @@ compile(char *instring, char *ep, const char *endbuf, int seof)
 					ERROR(42);
 				RETURN(ep);
 			} else ERROR(36);
+			/* FALLTHROUGH */
 		case '*':
 			if (lastep == NULL || *lastep == CBRA ||
 			    *lastep == CKET)
@@ -276,6 +277,7 @@ compile(char *instring, char *ep, const char *endbuf, int seof)
 
 			case '\n':
 				ERROR(36);
+				/* FALLTHROUGH */
 
 			case 'n':
 				c = '\n';
