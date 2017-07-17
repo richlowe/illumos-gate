@@ -25,12 +25,6 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#ifndef lint
-char copyright[] =
-"@(#) Copyright(c) 1988 Regents of the University of California.\n\
-All rights reserved.\n";
-#endif /* not lint */
-
 /*
  *  fsdb - file system debugger
  *
@@ -423,6 +417,7 @@ main(int argc, char *argv[])
 			/* Should exit() before here */
 			/*NOTREACHED*/
 #endif /* OLD_FSDB_COMPATIBILITY */
+			/* FALLTHROUGH */
 		case 'o':
 			/* UFS Specific Options */
 			subopts = optarg;
