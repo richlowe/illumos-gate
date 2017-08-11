@@ -813,6 +813,7 @@ t4_ring_rx(struct sge_rxq *rxq, int budget)
 				panic("%s: line %d.", __func__,
 				    __LINE__);
 			}
+			/* FALLTHROUGH */
 
 		case X_RSPD_TYPE_CPL:
 			ASSERT(rss->opcode < NUM_CPL_CMDS);
