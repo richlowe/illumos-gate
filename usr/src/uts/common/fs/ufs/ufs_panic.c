@@ -492,12 +492,11 @@ ufs_fault_v(vnode_t *vp, char *fmt, va_list adx)
 		if (!(DEBUG_FLAGS & DBGFLG_FIXWOULDPANIC)) {
 			break;
 		}
-		/* FALLTHROUGH */
-
 #else
 		break;
 
 #endif /* DEBUG */
+		/* FALLTHROUGH */
 
 	case TRIAGE_ATTEND_TO:
 
