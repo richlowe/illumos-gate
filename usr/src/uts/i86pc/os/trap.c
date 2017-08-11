@@ -2159,12 +2159,12 @@ dump_ttrace(void)
 				switch (rec->ttr_marker) {
 				case TT_SYSC64:
 					sys = &sysent[rec->ttr_sysnum];
-					/*FALLTHROUGH*/
 #elif defined(__i386)
 				sys = &sysent[rec->ttr_sysnum];
 				switch (rec->ttr_marker) {
 				case TT_SYSC64:
 #endif
+					/* FALLTHROUGH */
 				case TT_SYSC:
 					stype = "sysc";	/* syscall */
 					break;
