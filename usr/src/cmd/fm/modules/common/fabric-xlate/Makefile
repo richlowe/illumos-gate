@@ -35,7 +35,8 @@ INCDIRS = $(SRC)/uts/common
 CFLAGS += -I$(INCDIRS)
 LINTFLAGS += -I$(INCDIRS)
 
-LDFLAGS += -L$(ROOT)/usr/lib/fm -R/usr/lib/fm -zassert-deflib=libxml2.so
+LDFLAGS += -L$(ROOT)/usr/lib/fm -R/usr/lib/fm
+ADJUNCT_LIBS = libxml2.so
 LDLIBS += -luutil -lxml2 -L$(ROOTLIB)/fm -ltopo
 
 CERRWARN += -_gcc=-Wno-parentheses

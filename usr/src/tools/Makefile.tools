@@ -51,8 +51,8 @@ ELFSIGN_O=		$(TRUE)
 LDLIBS=
 LDFLAGS=		$(MAPFILE.NES:%=-M%) $(MAPFILE.NED:%=-M%) \
 			    $(MAPFILE.PGA:%=-M%) \
-			    -zassert-deflib=libc.so \
 			    -B direct
+NATIVE_LIBS= 		libc.so
 
 ROOTONBLDPROG=		$(PROG:%=$(ROOTONBLDBIN)/%)
 ROOTONBLDMACHPROG=	$(PROG:%=$(ROOTONBLDBINMACH)/%)

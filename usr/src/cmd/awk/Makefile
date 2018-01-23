@@ -55,8 +55,8 @@ YFLAGS += -d
 LDLIBS += -lm
 LINTFLAGS += -u
 CLEANFILES= maketab proctab.c awk.g.c awk.lx.c y.tab.h
-LDFLAGS += -zassert-deflib=libm.so
-NATIVELDFLAGS += -Bdirect $(LDASSERTS) -zassert-deflib=libc.so
+NATIVELDFLAGS += -Bdirect $(LDCHECKS)
+NATIVE_LIBS= libc.so		# because this is a native tool
 
 .KEEP_STATE:
 
@@ -79,7 +79,7 @@ proctab.c: maketab
 	rm -f $@; ./maketab > $@
 
 maketab: maketab.c
-	$(NATIVECC) $(NATIV_CFLAGS) -O maketab.c -o $@ $(NATIVELDFLAGS) $(LDLIBS)
+	$(NATIVECC) $(NATIVE_CFLAGS) -O maketab.c -o $@ $(NATIVELDFLAGS)
 
 install: all $(ROOTPROG) $(ROOTLINK)
 

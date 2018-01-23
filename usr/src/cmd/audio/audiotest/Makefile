@@ -34,7 +34,6 @@ include ../../Makefile.cmd
 
 CFLAGS += $(CCVERBOSE)
 XGETFLAGS += -a -x audiotest.xcl
-LDFLAGS += $(LDLIBS.cmd)
 
 .KEEP_STATE:
 

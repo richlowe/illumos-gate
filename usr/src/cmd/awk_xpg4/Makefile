@@ -47,7 +47,6 @@ CERRWARN += -_gcc=-Wno-uninitialized
 YFLAGS += -d
 LDLIBS += -lm
 CLEANFILES= awk.c y.tab.h
-LDFLAGS += -zassert-deflib=libm.so
 
 # for messaging catalog
 

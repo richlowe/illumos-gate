@@ -18,6 +18,8 @@ CMDDIR=		$(SRC)/cmd/vtfontcvt
 include		../Makefile.tools
 include		$(CMDDIR)/Makefile.common
 
+NATIVE_LIBS += libumem.so
+
 .KEEP_STATE:
 
 all:		$(PROG)

@@ -81,3 +81,4 @@ CSTD =	$(CSTD_GNU99)
 CPPFLAGS +=	-DOSNAME="\"illumos\""
 
 LDLIBS +=	-lz
+ADJUNCT_LIBS += libz.so

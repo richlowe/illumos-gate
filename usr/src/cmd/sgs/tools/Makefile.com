@@ -45,7 +45,7 @@ NATOBJS=	piglatin.o
 
 OBJECTS=	$(COMOBJS)  $(NATOBJS)
 NATIVECC_CFLAGS = -O
-NATIVE_LDFLAGS = $(LDASSERTS) -zassert-deflib=libc.so -Bdirect
+NATIVE_LDFLAGS = $(LDCHECKS) -zassert-deflib=libc.so -Bdirect
 
 AVLOBJ=		avl.o
 TOOL_OBJS=	sgsmsg.o string_table.o findprime.o assfail.o

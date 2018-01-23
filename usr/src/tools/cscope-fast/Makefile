@@ -52,7 +52,7 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 
 CFLAGS +=	$(CCVERBOSE)
 LDLIBS +=	-lcurses -ll
-LDFLAGS +=	-zassert-deflib=libcurses.so -zassert-deflib=libl.so
+NATIVE_LIBS += libcurses.so libl.so
 
 .KEEP_STATE:
 

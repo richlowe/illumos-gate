@@ -41,7 +41,7 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 CERRWARN +=	-_gcc=-Wno-parentheses
 CPPFLAGS +=	-D_REENTRANT -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(HAL_DBUS_CPPFLAGS)
 LINTFLAGS += 	-um
-LDFLAGS +=	-zassert-deflib=libdbus-1.so
+ADJUNCT_LIBS =	libdbus-1.so
 
 $(ROOTBIN)/cdrw := FILEMODE = 04755
 

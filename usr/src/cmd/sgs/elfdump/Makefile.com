@@ -55,7 +55,7 @@ LDFLAGS +=	$(VERSREF) $(CC_USE_PROTO) $(MAPOPT) $(LLDFLAGS)
 LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) $(LDDBG_LIB) \
 		    $(CONVLIBDIR) $(CONV_LIB)
 
-NATIVE_LDFLAGS = $(LDASSERTS) -Bdirect -zassert-deflib=libc.so
+NATIVE_LDFLAGS = $(LDCHECKS) -Bdirect -zassert-deflib=libc.so
 
 LINTFLAGS +=	-x
 LINTFLAGS64 +=	-x

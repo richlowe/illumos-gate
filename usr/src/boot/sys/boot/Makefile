@@ -25,6 +25,8 @@ clean	:=	TARGET = clean
 clobber	:=	TARGET = clobber
 install	:=	TARGET = install
 
+ficl: zfs libstand
+
 all clean clobber: $(SUBDIRS)
 
 #

@@ -31,7 +31,7 @@ include ../Makefile.cmd
 include $(SRC)/lib/policykit/Makefile.policykit
 
 LDLIBS +=	-lpolkit $(POLICYKIT_GLIB_LDLIBS)
-LDFLAGS +=	$(POLICYKIT_GLIB_LDFLAGS)
+ADJUNCT_LIBS +=	$(POLICYKIT_GLIB_EXTERNS)
 
 CPPFLAGS +=	-I$(ROOT)/usr/include/libpolkit
 CPPFLAGS +=	$(POLICYKIT_DBUS_CPPFLAGS) $(POLICYKIT_GLIB_CPPFLAGS)

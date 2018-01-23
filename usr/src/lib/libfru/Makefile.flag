@@ -40,7 +40,8 @@ CFLAGS +=	$(CCVERBOSE)
 CCFLAGS64 += 	-mt
 CCFLAGS +=	-mt
 LDLIBS +=	-lc
-LDFLAGS += 	-zassert-deflib=libC.so
+
+$(__SUNC)ADJUNCT_LIBS = 	libC.so
 
 CLEANFILES +=	pics/lex.fru.cc pics/y.tab.cc pics/y.tab.h
 

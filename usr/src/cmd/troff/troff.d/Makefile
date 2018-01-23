@@ -70,7 +70,6 @@ ta:=		POBJS=	$(TAOBJS)
 makedev:=	POBJS=	$(MAKEDEVOBJS)
 
 ta:=		LDLIBS += -lm
-ta:=		LDFLAGS += -zassert-deflib=libm.so
 troff:=		LDLIBS += -lmapmalloc
 
 # build rule for common source above

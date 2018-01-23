@@ -25,7 +25,8 @@
 
 include		../Makefile.com
 
-native :=	LDFLAGS += -zassert-deflib=libc.so -Bdirect
+native :=	NATIVE_LIBS= libc.so
+native :=	LDFLAGS += -Bdirect
 
 .KEEP_STATE:
 

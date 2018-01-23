@@ -53,7 +53,6 @@ include ../../Makefile.amd64
 include ../../../Makefile.module
 
 dmod/$(MODULE) := LDLIBS += -lm -lproc
-dmod/$(MODULE) := LDFLAGS += -zassert-deflib=libm.so
 
 #
 # We are not actually hardwiring some dependency on i86pc, we just need to

@@ -83,7 +83,8 @@ $(ROOTVARADMF) :=	FILEMODE =	0666
 spellin1 hashmk1 := CC = $(NATIVECC)
 spellin1 hashmk1 := POST_PROCESS =
 spellin1 hashmk1 := CPPFLAGS =
-spellin1 hashmk1 := LDFLAGS = -zassert-deflib=libc.so -Bdirect
+spellin1 hashmk1 := LDFLAGS = -Bdirect
+spellin1 hashmk1 := NATIVE_LIBS = libc.so
 spellin1 hashmk1 := LDLIBS =
 
 $(ROOTSPELLD)/% $(ROOTVARADMD)/% : %

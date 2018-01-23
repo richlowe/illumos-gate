@@ -60,19 +60,16 @@ include ../../Makefile.cmd
 include ../Makefile.hal
 
 $(HAL_PROG) :=		LDLIBS += -lc -ldbus-1 -lhal
-$(HAL_PROG) :=		LDFLAGS += -zassert-deflib=libdbus-1.so
+$(HAL_PROG) :=		ADJUNCT_LIBS = libdbus-1.so
 
 lshal :=		LDLIBS += -ldbus-glib-1 -lglib-2.0
-lshal :=		LDFLAGS += -zassert-deflib=libdbus-glib-1.so
-lshal :=		LDFLAGS += -zassert-deflib=libglib-2.0.so
+lshal :=		ADJUNCT_LIBS = libdbus-glib-1.so libdbus-1.so libglib-2.0.so 
 
 $(HAL_LIB) :=	LDLIBS += -lc -ldbus-1 -lpolkit $(ZIGNORE) -lglib-2.0
-$(HAL_LIB) :=	LDFLAGS += -zassert-deflib=libdbus-1.so
-$(HAL_LIB) :=	LDFLAGS += -zassert-deflib=libglib-2.0.so
+$(HAL_LIB) :=	ADJUNCT_LIBS = libdbus-1.so libglib-2.0.so
 
 $(STORAGE_PROG)	:=	LDLIBS += -lc -ldbus-1 -lglib-2.0 -lhal -lhal-storage -lbsm
-$(STORAGE_PROG) :=	LDFLAGS += -zassert-deflib=libdbus-1.so
-$(STORAGE_PROG) :=	LDFLAGS += -zassert-deflib=libglib-2.0.so
+$(STORAGE_PROG) :=	ADJUNCT_LIBS = libdbus-1.so libglib-2.0.so
 
 $(STORAGE_METHOD_PROG) := LDLIBS += -lpolkit
 

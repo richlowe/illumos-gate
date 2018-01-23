@@ -39,7 +39,7 @@ SRCS = \
 include ../../Makefile.ctf
 
 LDLIBS += -lctf
-LDFLAGS += -zassert-deflib=libctf.so
+NATIVE_LIBS += libctf.so
 
 OBJS = $(SRCS:%.c=%.o)
 LINTFILES = $(SRCS:%.c=%.ln)

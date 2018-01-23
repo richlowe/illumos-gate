@@ -37,7 +37,6 @@ clean $(XPG4) := OBJS += values-xpg4.o
 FILEMODE= 0555
 
 CERRWARN += -_gcc=-Wno-parentheses
-LDFLAGS += $(LDLIBS.cmd)
 
 .KEEP_STATE:
 

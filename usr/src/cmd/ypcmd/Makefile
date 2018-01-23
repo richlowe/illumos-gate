@@ -59,12 +59,19 @@ $(NIS2LDAPPROG) := LDLIBS += -lc -lnsl -lnisdb
 stdethers :=	LDLIBS += -lsocket
 makedbm :=	MAPFILES = $(MAPFILE.INT) $(MAPFILE.NGB)
 makedbm :=	LDFLAGS += $(MAPFILES:%=-M%)
-ypxfr :=	LDFLAGS += -_cc=-zassert-deflib=libC.so
-ypxfrd :=	LDFLAGS += -_cc=-zassert-deflib=libC.so
-ypserv :=	LDFLAGS += -_cc=-zassert-deflib=libC.so
-udpublickey :=	LDFLAGS += $(LDLIBS.cmd)
-mkalias :=	LDFLAGS += $(LDLIBS.cmd)
-stdethers :=	LDFLAGS += $(LDLIBS.cmd)
+
+# These things link with libnisdb, and thus are 'C++', but are otherwise
+# entirely C.  A result of this is they probably don't _actually_ use the C++
+# runtime, but may in future (depending on compiler implementation)
+#
+# Give up.
+ypxfr :=	ZGUIDANCE= -zguidance=nounused
+ypxfrd :=	ZGUIDANCE= -zguidance=nounused
+ypserv :=	ZGUIDANCE= -zguidance=nounused
+
+$(__SUNC)ypxfr :=	ADJUNCT_LIBS = libC.so
+$(__SUNC)ypxfrd :=	ADJUNCT_LIBS = libC.so 
+$(__SUNC)ypserv :=	ADJUNCT_LIBS = libC.so
 
 $(ROOTVAR_YP)/aliases :=	FILEMODE=555
 

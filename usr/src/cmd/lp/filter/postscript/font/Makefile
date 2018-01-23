@@ -20,12 +20,10 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# cmd/lp/filter/postscript/font/Makefile
 #
 
 include			../../../Makefile.lp
@@ -51,7 +49,8 @@ NATIVEPROG =		$(NATIVEDIR)/$(PROG)
 $(NATIVEPROG) :=	CC=$(NATIVECC)
 $(NATIVEPROG) :=	LDLIBS=
 $(NATIVEPROG) :=	CPPFLAGS.master=
-$(NATIVEPROG) :=	LDFLAGS=-zassert-deflib=libc.so -Bdirect
+$(NATIVEPROG) :=	LDFLAGS= -Bdirect
+$(NATIVEPROG) :=	NATIVE_LIBS=libc.so
 
 .KEEP_STATE:
 

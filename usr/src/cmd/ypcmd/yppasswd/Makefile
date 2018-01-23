@@ -44,7 +44,14 @@ LDLIBS +=	-lnsl -lnisdb -lc
 MAPFILES =	$(MAPFILE.INT) $(MAPFILE.NGB)
 LDFLAGS +=	$(MAPFILES:%=-M%)
 
-$(__SUNC)LDFLAGS +=	-zassert-deflib=libC.so
+# This links with libnisdb, and thus is 'C++', but is otherwise entirely C.  A
+# result of this is that it probably doesn't _actually_ use the C++ runtime, but
+# may in future (depending on compiler implementation)
+#
+# Give up.
+ZGUIDANCE= -zguidance=nounused
+
+$(__SUNC)ADJUNCT_LIBS =	libC.so
 
 # Pick up includes from library
 CPPFLAGS += -I$(SRC)/lib/libnisdb/yptol

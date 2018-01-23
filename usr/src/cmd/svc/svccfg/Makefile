@@ -89,7 +89,7 @@ CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h \
 
 SVCCFG_EXTRA_LIBS = -lxml2 -lscf -ll -luutil -lumem -lmd5 -lnvpair
 $(NOT_NATIVE)SVCCFG_EXTRA_LIBS += -ltecla
-$(NOT_NATIVE)LDFLAGS += -zassert-deflib=libxml2.so
+$(NOT_NATIVE)ADJUNCT_LIBS += libxml2.so
 
 LIBSCF		= $(SRC)/lib/libscf
 LIBTECLA	= $(SRC)/lib/libtecla		# just for the header
@@ -111,12 +111,8 @@ $(NATIVE_BUILD)CPPFLAGS = \
 	-I$(LIBSCF)/inc \
 	-I$(LIBTECLA) \
 	-I$(LIBUUTIL)/common
-$(NATIVE_BUILD)LDFLAGS =	-Bdirect -zassert-deflib=libxml2.so \
-				    -zassert-deflib=libl.so \
-				    -zassert-deflib=libumem.so \
-				    -zassert-deflib=libmd5.so \
-				    -zassert-deflib=libnvpair.so \
-				    -zassert-deflib=libc.so
+$(NATIVE_BUILD)LDFLAGS =	-Bdirect
+$(NATIVE_BUILD)NATIVE_LIBS = libxml2.so libl.so libumem.so libmd5.so libnvpair.so libc.so
 $(NATIVE_BUILD)LDLIBS = \
 	-L$(LIBUUTIL)/native -R $(LIBUUTIL)/native \
 	-L$(LIBSCF)/native -R $(LIBSCF)/native \

@@ -34,7 +34,7 @@ CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-type-limits
 CPPFLAGS += -I../protocmp
 LDLIBS += -lgen
-LDFLAGS += -zassert-deflib=libgen.so
+NATIVE_LIBS += libgen.so
 CLEANFILES += $(OBJS)
 
 .KEEP_STATE:

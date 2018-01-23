@@ -49,7 +49,6 @@ include ../../Makefile.amd64
 include ../../../Makefile.module
 
 dmod/$(MODULE) := LDLIBS += -lproc -lm
-dmod/$(MODULE) := LDFLAGS += -zassert-deflib=libm.so
 
 CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-parentheses

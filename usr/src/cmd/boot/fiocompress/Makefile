@@ -39,7 +39,7 @@ LDLIBS +=	-lz
 CFLAGS +=	-I../../../uts/common
 LINTFLAGS +=	-I../../../uts/common
 
-LDFLAGS += -zassert-deflib=libz.so
+ADJUNCT_LIBS = libz.so
 
 all: $(PROG)
 

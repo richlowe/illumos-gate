@@ -29,7 +29,8 @@ SOURCES=	$(FR:%=$(SOFTCORE)/%)
 
 OBJS=	makesoftcore.o lz4.o
 SRCS=	makesoftcore.c lz4.c
-LDLIBS= -lumem
+LDLIBS += -lumem -lc
+NATIVE_LIBS = libumem.so libc.so
 
 CPPFLAGS += -I.. -I$(SRC)/common/ficl
 
@@ -37,7 +38,7 @@ softcore.c: $(PROG) $(SOURCES)
 	./$(PROG) $(SOURCES)
 
 $(PROG): $(OBJS)
-	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
+	$(LINK.c) -o $@ $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 %.o: $(SOFTCORE)/%.c
 	$(COMPILE.c) $<

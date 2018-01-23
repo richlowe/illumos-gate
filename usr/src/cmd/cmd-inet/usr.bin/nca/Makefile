@@ -49,7 +49,6 @@ INC_PATH +=	../../../../uts/common/inet/nca -I.
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CPPFLAGS +=	-I$(INC_PATH)
-LDFLAGS +=	$(LDLIBS.cmd)
 
 .KEEP_STATE:
 
