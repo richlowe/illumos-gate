@@ -3499,6 +3499,7 @@ ata_prop_lookup_int(dev_t match_dev, dev_info_t *dip,
 static void
 ata_init_pm(dev_info_t *dip)
 {
+#ifdef ATA_USE_AUTOPM
 	char		pmc_name[16];
 	char		*pmc[] = {
 				NULL,
@@ -3506,6 +3507,7 @@ ata_init_pm(dev_info_t *dip)
 				"3=PowerOn (PCI D0 State)",
 				NULL
 			};
+#endif
 	int		instance;
 	ata_ctl_t 	*ata_ctlp;
 
@@ -3518,10 +3520,10 @@ ata_init_pm(dev_info_t *dip)
 	if (!ata_is_pci(dip))
 		return;
 
+#ifdef	ATA_USE_AUTOPM
 	(void) sprintf(pmc_name, "NAME=ata%d", instance);
 	pmc[0] = pmc_name;
 
-#ifdef	ATA_USE_AUTOPM
 	if (ddi_prop_update_string_array(DDI_DEV_T_NONE, dip,
 	    "pm-components", pmc, 3) != DDI_PROP_SUCCESS) {
 		return;
