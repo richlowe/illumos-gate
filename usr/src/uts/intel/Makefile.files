@@ -53,6 +53,7 @@ CORE_OBJS +=		\
 	lock_prim.o	\
 	ovbcopy.o	\
 	polled_io.o	\
+	retpoline.o	\
 	sseblk.o	\
 	sundep.o	\
 	swtch.o		\

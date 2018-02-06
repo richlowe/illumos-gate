@@ -27,8 +27,6 @@
 #ifndef _IA32_SYS_ASM_LINKAGE_H
 #define	_IA32_SYS_ASM_LINKAGE_H
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/stack.h>
 #include <sys/trap.h>
 
@@ -285,6 +283,24 @@ name:
  */
 #define	SET_SIZE(x) \
 	.size	x, [.-x]
+
+#if defined(__amd64)
+/* Provide macros to call retpoline trampolines */
+#define INDIRECT_JMP(to)	\
+	push to;		\
+	jmp __x86_indirect_thunk;
+
+#define INDIRECT_CALL(to)		\
+	jmp 2f;				\
+1:					\
+	push to;			\
+	jmp __x86_indirect_thunk;	\
+2:					\
+	call 1b;
+
+#define INDIRECT_JMP_REG(reg) jmp __x86_indirect_thunk_/**/reg;
+#define INDIRECT_CALL_REG(reg) call __x86_indirect_thunk_/**/reg;
+#endif
 
 /*
  * NWORD provides native word value.
