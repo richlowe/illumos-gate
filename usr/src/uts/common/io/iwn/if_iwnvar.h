@@ -400,7 +400,7 @@ struct iwn_ks_txpower {
 		struct {
 			kstat_named_t	rf_gain;
 			kstat_named_t	dsp_gain;
-		} rate[IWN_RIDX_MAX];
+		} rate[IWN_RIDX_MAX + 1];
 	} txchain[2];
 };
 
