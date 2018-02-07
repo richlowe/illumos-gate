@@ -1642,9 +1642,15 @@ die_variable_create(dwarf_t *dw, Dwarf_Die die, Dwarf_Off off, tdesc_t *tdp)
 	char *name;
 
 	debug(3, "die %llu: creating object definition\n", off);
+	name = die_name(dw, die);
 
-	if (die_isdecl(dw, die) || (name = die_name(dw, die)) == NULL)
-		return; /* skip prototypes and nameless objects */
+	/*
+	 * We used to skip variables that were die_isdecl() But GCC 7 emits
+	 * only these when a concrete definition follows an extern definition
+	 * in the same CU.
+	 */
+	if (name == NULL)
+		return;
 
 	ii = xcalloc(sizeof (iidesc_t));
 	ii->ii_type = die_isglobal(dw, die) ? II_GVAR : II_SVAR;
