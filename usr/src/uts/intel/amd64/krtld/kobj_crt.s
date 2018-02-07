@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * exit routine from linker/loader to kernel
  */
@@ -64,7 +62,7 @@ exitto(caddr_t entrypoint)
 	movq    (%rax), %rdx
 
 	/ Call destination
-	call   *%r11
+	INDIRECT_CALL_REG(r11)
 
 	SET_SIZE(exitto)
 

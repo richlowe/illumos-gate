@@ -164,7 +164,7 @@ hypercall_page:
 #define	TRAP_INSTR			\
 	shll	$5, %eax;		\
 	addq	$hypercall_page, %rax;	\
-	jmp	*%rax
+	INDIRECT_JMP_REG(rax)
 #else
 #define	TRAP_INSTR			\
 	shll	$5, %eax;		\

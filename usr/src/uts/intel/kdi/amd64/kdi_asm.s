@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * Debugger entry for both master and slave CPUs
  */
@@ -678,7 +676,7 @@ kdi_resume(void)
 
 	movl	$AD_BOOT, %edi
 	movl	$A_SHUTDOWN, %esi
-	call	*psm_shutdownf
+	INDIRECT_CALL(psm_shutdownf)
 #if defined(__xpv)
 	movl	$SHUTDOWN_reboot, %edi
 	call	HYPERVISOR_shutdown

@@ -99,7 +99,7 @@ _interrupt(void)
 #endif
 
 	movq	%rsp, %rdi		/* pass struct regs pointer */
-	call	*do_interrupt_common
+        INDIRECT_CALL(do_interrupt_common)
 
 	jmp	_sys_rtt_ints_disabled
 	/*NOTREACHED*/

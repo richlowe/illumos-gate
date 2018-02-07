@@ -482,7 +482,7 @@ do_copy:
 	addq	%rdx, %rsi
 	movslq	(%r10,%rdx,4), %rcx
 	leaq	(%rcx,%r10,1), %r10
-	jmpq	*%r10
+	INDIRECT_JMP_REG(r10)
 
 	.p2align 4
 L(fwdPxQx):
@@ -938,7 +938,7 @@ L(do_remainder):
 	addq	%rdx, %rsi
 	movslq	(%r10,%rdx,4), %rcx
 	leaq	(%rcx,%r10,1), %r10
-	jmpq	*%r10
+	INDIRECT_JMP_REG(r10)
 
 	/*
 	 * Use rep smovq. Clear remainder via unrolled code
@@ -1169,7 +1169,7 @@ do_zero:
 	addq	%rsi, %rdi
 	movslq	(%r10,%rsi,4), %rcx
 	leaq	(%rcx,%r10,1), %r10
-	jmpq	*%r10
+	INDIRECT_JMP_REG(r10)
 
 	.p2align 4
 L(setPxQx):
@@ -1440,7 +1440,7 @@ L(bzero_loop):
 	addq	%rsi, %rdi
 	movslq	(%r10,%rsi,4), %rcx
 	leaq	(%rcx,%r10,1), %r10
-	jmpq	*%r10
+	INDIRECT_JMP_REG(r10)
 
 	/*
 	 * Use rep sstoq. Clear any remainder via unrolled code
@@ -1576,7 +1576,7 @@ _copyin_err:
 	movq	0x8(%rsp), %rsi
 	movq	0x10(%rsp), %rdx
 	leave
-	jmp	*CP_COPYIN(%rax)
+	INDIRECT_JMP(CP_COPYIN(%rax))
 
 2:	movl	$-1, %eax	
 	leave
@@ -1616,7 +1616,7 @@ _copyin_err:
 	movl	T_COPYOPS(%edx), %eax
 	cmpl	$0, %eax
 	jz	2f
-	jmp	*CP_COPYIN(%eax)
+	INDIRECT_JMP(CP_COPYIN(%eax))
 
 2:	movl	$-1, %eax
 	ret
@@ -1721,7 +1721,7 @@ _xcopyin_nta_err:
 	movq	0x8(%rsp), %rsi
 	movq	0x10(%rsp), %rdx
 	leave
-	jmp	*CP_XCOPYIN(%r8)
+	INDIRECT_JMP(CP_XCOPYIN(%r8))
 
 2:	leave
 	ret
@@ -1787,7 +1787,7 @@ _xcopyin_err:
 	cmpl	$0, T_COPYOPS(%edx)
 	jz	2f
 	movl	T_COPYOPS(%edx), %eax
-	jmp	*CP_XCOPYIN(%eax)
+	INDIRECT_JMP(CP_XCOPYIN(%eax))
 
 2:	rep; 	ret	/* use 2 byte return instruction when branch target */
 			/* AMD Software Optimization Guide - Section 6.2 */
@@ -1864,7 +1864,7 @@ _copyout_err:
 	movq	0x8(%rsp), %rsi
 	movq	0x10(%rsp), %rdx
 	leave
-	jmp	*CP_COPYOUT(%rax)
+	INDIRECT_JMP(CP_COPYOUT(%rax))
 
 2:	movl	$-1, %eax
 	leave
@@ -1903,7 +1903,7 @@ _copyout_err:
 	movl	T_COPYOPS(%edx), %eax
 	cmpl	$0, %eax
 	jz	2f
-	jmp	*CP_COPYOUT(%eax)
+	INDIRECT_JMP(CP_COPYOUT(%eax))
 
 2:	movl	$-1, %eax
 	ret
@@ -2009,7 +2009,7 @@ _xcopyout_nta_err:
 	movq	0x8(%rsp), %rsi
 	movq	0x10(%rsp), %rdx
 	leave
-	jmp	*CP_XCOPYOUT(%r8)
+	INDIRECT_JMP(CP_XCOPYOUT(%r8))
 
 2:	leave
 	ret
@@ -2323,7 +2323,7 @@ _copyinstr_error:
 	movq	0x10(%rsp), %rdx
 	movq	0x18(%rsp), %rcx
 	leave
-	jmp	*CP_COPYINSTR(%rax)
+	INDIRECT_JMP(CP_COPYINSTR(%rax))
 	
 2:	movl	$EFAULT, %eax		/* return EFAULT */
 	leave
@@ -2445,7 +2445,7 @@ _copyoutstr_error:
 	movq	0x10(%rsp), %rdx
 	movq	0x18(%rsp), %rcx
 	leave
-	jmp	*CP_COPYOUTSTR(%rax)
+	INDIRECT_JMP(CP_COPYOUTSTR(%rax))
 	
 2:	movl	$EFAULT, %eax		/* return EFAULT */
 	leave
@@ -2561,7 +2561,7 @@ _flt_/**/NAME:					\
 	movq	T_COPYOPS(%r9), %rax;		\
 	cmpq	$0, %rax;			\
 	jz	2f;				\
-	jmp	*COPYOP(%rax);			\
+	INDIRECT_JMP(COPYOP(%rax))		\
 2:						\
 	movl	$-1, %eax;			\
 	ret;					\
@@ -2670,7 +2670,7 @@ _flt_/**/NAME:					\
 	movq	T_COPYOPS(%r9), %rax;		\
 	cmpq	$0, %rax;			\
 	jz	3f;				\
-	jmp	*COPYOP(%rax);			\
+	INDIRECT_JMP(COPYOP(%rax))		\
 3:						\
 	movl	$-1, %eax;			\
 	ret;					\

@@ -1,3 +1,4 @@
+/* XXX retpoline: what about stubs? */
 /*
  * CDDL HEADER START
  *
@@ -122,7 +123,7 @@ module/**/_modinfo:			\
  * The data section in the stub_common macro is the
  * mod_stub_info structure for the stub function
  */
-
+/* XXX retpoline: what about stubs? */
 #define STUB_COMMON(module, fcnname, install_fcn, retfcn, weak)		\
 	ENTRY(fcnname);							\
 	leaq	fcnname/**/_info(%rip), %rax;				\
@@ -142,7 +143,7 @@ fcnname/**/_info:							\
 	.quad	retfcn;			/* 0x18 */			\
 	.long	weak;			/* 0x20 */			\
 	SET_SIZE(fcnname/**/_info)
-
+/* XXX retpoline: what about stubs? */
 #define STUB_UNLOADABLE(module, fcnname, install_fcn, retfcn, weak)	\
 	ENTRY(fcnname);							\
 	leaq	fcnname/**/_info(%rip), %rax;				\
@@ -219,6 +220,7 @@ fcnname/**/_info:							\
 	pushq	(%rsp, %r11, 8)
 	pushq	(%rsp, %r11, 8)
 	pushq	(%rsp, %r11, 8)
+        /* XXX retpoline: What about retpoline? */
 	call	*(%r15)			/* call the stub fn(arg, ..) */
 	addq	$0x20, %rsp		/* pop off last 4 args */
 	pushq	%rax			/* save any return values */

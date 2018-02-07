@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/asm_linkage.h>
 #include <sys/asm_misc.h>
 #include <sys/regset.h>
@@ -101,6 +99,7 @@ getlgrp(void)
 	.globl	gethrtimef
 	ENTRY_NP(get_hrtime)
 	FAST_INTR_PUSH
+	/* XXX retpoline: what abut fasttraps? */
 	call	*gethrtimef(%rip)
 	movq	%rax, %rdx
 	shrq	$32, %rdx			/* high 32-bit in %edx */
@@ -127,6 +126,7 @@ getlgrp(void)
 	FAST_INTR_PUSH
 	subq	$TIMESPEC_SIZE, %rsp
 	movq	%rsp, %rdi
+	/* XXX retpoline: what abut fasttraps? */
 	call	*gethrestimef(%rip)
 	movl	(%rsp), %eax
 	movl	CLONGSIZE(%rsp), %edx

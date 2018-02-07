@@ -326,7 +326,7 @@ kernel_cs_code:
 	 * Complete the rest of the setup and call mp_startup().
 	 */
 	movq	%gs:CPU_THREAD, %rax	/* get thread ptr */
-	call	*T_PC(%rax)		/* call mp_startup */
+        INDIRECT_CALL(T_PC(%rax))
 	/* not reached */
 	int	$20			/* whoops, returned somehow! */
 

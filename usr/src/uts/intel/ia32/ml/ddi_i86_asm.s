@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #if defined(lint) || defined(__lint)
 #include <sys/types.h>
 #include <sys/sunddi.h>
@@ -289,7 +287,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	movzbq	(%rsi), %rax
 	ret
 2:
-	jmp	*ACC_GETB(%rdi)
+	INDIRECT_JMP(ACC_GETB(%rdi))
 	SET_SIZE(ddi_get8)
 	SET_SIZE(ddi_getb)
 	SET_SIZE(ddi_mem_getb)
@@ -351,7 +349,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	movzwq	(%rsi), %rax
 	ret
 4:
-	jmp	*ACC_GETW(%rdi)
+	INDIRECT_JMP(ACC_GETW(%rdi))
 	SET_SIZE(ddi_get16)
 	SET_SIZE(ddi_getw)
 	SET_SIZE(ddi_mem_getw)
@@ -412,7 +410,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	movl	(%rsi), %eax
 	ret
 6:
-	jmp	*ACC_GETL(%rdi)
+	INDIRECT_JMP(ACC_GETL(%rdi))
 	SET_SIZE(ddi_get32)
 	SET_SIZE(ddi_getl)
 	SET_SIZE(ddi_mem_getl)
@@ -458,7 +456,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_getll)
 	ALTENTRY(ddi_mem_getll)
 	ALTENTRY(ddi_mem_get64)
-	jmp	*ACC_GETLL(%rdi)
+	INDIRECT_JMP(ACC_GETLL(%rdi))
 	SET_SIZE(ddi_get64)
 	SET_SIZE(ddi_getll)
 	SET_SIZE(ddi_mem_getll)
@@ -500,7 +498,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	movb	%dl, (%rsi)
 	ret
 8:
-	jmp	*ACC_PUTB(%rdi)
+	INDIRECT_JMP(ACC_PUTB(%rdi))
 	SET_SIZE(ddi_put8)
 	SET_SIZE(ddi_putb)
 	SET_SIZE(ddi_mem_putb)
@@ -563,7 +561,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	movw	%dx, (%rsi)
 	ret
 9:
-	jmp	*ACC_PUTW(%rdi)
+	INDIRECT_JMP(ACC_PUTW(%rdi))
 	SET_SIZE(ddi_put16)
 	SET_SIZE(ddi_putw)
 	SET_SIZE(ddi_mem_putw)
@@ -626,7 +624,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	movl	%edx, (%rsi)
 	ret
 9:
-	jmp	*ACC_PUTL(%rdi)
+	INDIRECT_JMP(ACC_PUTL(%rdi))
 	SET_SIZE(ddi_put32)
 	SET_SIZE(ddi_putl)
 	SET_SIZE(ddi_mem_putl)
@@ -674,7 +672,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_putll)
 	ALTENTRY(ddi_mem_putll)
 	ALTENTRY(ddi_mem_put64)
-	jmp	*ACC_PUTLL(%rdi)
+	INDIRECT_JMP(ACC_PUTLL(%rdi))
 	SET_SIZE(ddi_put64)
 	SET_SIZE(ddi_putll)
 	SET_SIZE(ddi_mem_putll)
@@ -701,7 +699,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_getb)
 	ALTENTRY(ddi_mem_rep_getb)
 	ALTENTRY(ddi_mem_rep_get8)
-	jmp	*ACC_REP_GETB(%rdi)
+	INDIRECT_JMP(ACC_REP_GETB(%rdi))
 	SET_SIZE(ddi_rep_get8)
 	SET_SIZE(ddi_rep_getb)
 	SET_SIZE(ddi_mem_rep_getb)
@@ -728,7 +726,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_getw)
 	ALTENTRY(ddi_mem_rep_getw)
 	ALTENTRY(ddi_mem_rep_get16)
-	jmp	*ACC_REP_GETW(%rdi)
+	INDIRECT_JMP(ACC_REP_GETW(%rdi))
 	SET_SIZE(ddi_rep_get16)
 	SET_SIZE(ddi_rep_getw)
 	SET_SIZE(ddi_mem_rep_getw)
@@ -755,7 +753,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_getl)
 	ALTENTRY(ddi_mem_rep_getl)
 	ALTENTRY(ddi_mem_rep_get32)
-	jmp	*ACC_REP_GETL(%rdi)
+	INDIRECT_JMP(ACC_REP_GETL(%rdi))
 	SET_SIZE(ddi_rep_get32)
 	SET_SIZE(ddi_rep_getl)
 	SET_SIZE(ddi_mem_rep_getl)
@@ -782,7 +780,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_getll)
 	ALTENTRY(ddi_mem_rep_getll)
 	ALTENTRY(ddi_mem_rep_get64)
-	jmp	*ACC_REP_GETLL(%rdi)
+	INDIRECT_JMP(ACC_REP_GETLL(%rdi))
 	SET_SIZE(ddi_rep_get64)
 	SET_SIZE(ddi_rep_getll)
 	SET_SIZE(ddi_mem_rep_getll)
@@ -809,7 +807,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_putb)
 	ALTENTRY(ddi_mem_rep_putb)
 	ALTENTRY(ddi_mem_rep_put8)
-	jmp	*ACC_REP_PUTB(%rdi)
+	INDIRECT_JMP(ACC_REP_PUTB(%rdi))
 	SET_SIZE(ddi_rep_put8)
 	SET_SIZE(ddi_rep_putb)
 	SET_SIZE(ddi_mem_rep_putb)
@@ -836,7 +834,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_putw)
 	ALTENTRY(ddi_mem_rep_putw)
 	ALTENTRY(ddi_mem_rep_put16)
-	jmp	*ACC_REP_PUTW(%rdi)
+	INDIRECT_JMP(ACC_REP_PUTW(%rdi))
 	SET_SIZE(ddi_rep_put16)
 	SET_SIZE(ddi_rep_putw)
 	SET_SIZE(ddi_mem_rep_putw)
@@ -863,7 +861,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_putl)
 	ALTENTRY(ddi_mem_rep_putl)
 	ALTENTRY(ddi_mem_rep_put32)
-	jmp	*ACC_REP_PUTL(%rdi)
+	INDIRECT_JMP(ACC_REP_PUTL(%rdi))
 	SET_SIZE(ddi_rep_put32)
 	SET_SIZE(ddi_rep_putl)
 	SET_SIZE(ddi_mem_rep_putl)
@@ -890,7 +888,7 @@ ddi_mem_rep_put64(ddi_acc_handle_t handle, uint64_t *host_addr,
 	ALTENTRY(ddi_rep_putll)
 	ALTENTRY(ddi_mem_rep_putll)
 	ALTENTRY(ddi_mem_rep_put64)
-	jmp	*ACC_REP_PUTLL(%rdi)
+	INDIRECT_JMP(ACC_REP_PUTLL(%rdi))
 	SET_SIZE(ddi_rep_put64)
 	SET_SIZE(ddi_rep_putll)
 	SET_SIZE(ddi_mem_rep_putll)

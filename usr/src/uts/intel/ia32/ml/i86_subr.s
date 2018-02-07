@@ -2570,7 +2570,8 @@ ip_ocsum(
 	leaq	(%rdi, %rcx, 8), %rdi
 	xorl	%ecx, %ecx
 	clc
-	jmp 	*(%rdi)
+        /* XXX retpoline: what about retpoline? */
+	jmp	*(%rdi)
 
 	.align	8
 .ip_ocsum_jmptbl:
@@ -3620,7 +3621,7 @@ hrtime_t hrtime_base;
 	 * At worst, performing this now instead of under CLOCK_LOCK may
 	 * introduce some jitter in pc_gethrestime().
 	 */
-	call	*gethrtimef(%rip)
+	INDIRECT_CALL(gethrtimef(%rip))
 	movq	%rax, %r8
 
 	leaq	hres_lock(%rip), %rax
@@ -4100,7 +4101,7 @@ switch_sp_and_call(void *newsp, void (*func)(uint_t, uint_t), uint_t arg1,
 	movq	%rdx, %rdi		/* pass func arg 1 */
 	movq	%rsi, %r11		/* save function to call */
 	movq	%rcx, %rsi		/* pass func arg 2 */
-	call	*%r11			/* call function */
+	INDIRECT_CALL_REG(r11)		/* call function */
 	leave				/* restore stack */
 	ret
 	SET_SIZE(switch_sp_and_call)

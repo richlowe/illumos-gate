@@ -1226,6 +1226,7 @@ check_for_user_address:
 	orl	%eax, %eax	/* (zero extend top 32-bits) */
 	leaq	fasttable(%rip), %r11
 	leaq	(%r11, %rax, CLONGSIZE), %r11
+	/* XXX retpoline: what abut fasttraps? */
 	jmp	*(%r11)
 1:
 	/*

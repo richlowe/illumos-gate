@@ -199,7 +199,7 @@
 	je	1f							   ;\
 	movq	%r15, 16(%rsp)		/* save the callback pointer	*/ ;\
 	push_userland_ret		/* push the return address	*/ ;\
-	call	*24(%rsp)		/* call callback		*/ ;\
+	INDIRECT_CALL(24(%rsp))		/* call callback		*/ ;\
 1:	movq	%gs:CPU_RTMP_R15, %r15	/* restore %r15			*/ ;\
 	movq	%gs:CPU_RTMP_RSP, %rsp	/* restore the stack pointer	*/
 
@@ -536,7 +536,7 @@ _syscall_invoke:
 	shll	$SYSENT_SIZE_SHIFT, %eax
 	leaq	sysent(%rax), %rbx
 
-	call	*SY_CALLC(%rbx)
+        INDIRECT_CALL(SY_CALLC(%rbx))
 
 	movq	%rax, %r12
 	movq	%rdx, %r13
@@ -835,7 +835,7 @@ _syscall32_save:
 	movl	0x20(%rsp), %r8d
 	movl	0x28(%rsp), %r9d
 
-	call	*SY_CALLC(%rbx)
+        INDIRECT_CALL(SY_CALLC(%rbx))
 
 	movq	%rbp, %rsp	/* pop the args */
 
@@ -1090,7 +1090,7 @@ sys_sysenter()
 	movl	0x20(%rsp), %r8d
 	movl	0x28(%rsp), %r9d
 
-	call	*SY_CALLC(%rbx)
+        INDIRECT_CALL(SY_CALLC(%rbx))
 
 	movq	%rbp, %rsp	/* pop the args */
 

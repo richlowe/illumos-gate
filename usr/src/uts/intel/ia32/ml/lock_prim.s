@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #if defined(lint) || defined(__lint)
 #include <sys/types.h>
 #include <sys/thread.h>
@@ -588,7 +586,7 @@ mutex_exit(kmutex_t *lp)
 	pushq	%rbp				/* align stack properly */
 	movq	%rsp, %rbp
 	movl	%eax, %edi
-	call	*lockstat_probe
+	INDIRECT_CALL(lockstat_probe)
 	leave					/* unwind stack */
 1:
 	movq	%gs:CPU_THREAD, %rdx		/* reload thread ptr */
@@ -610,7 +608,7 @@ mutex_exit(kmutex_t *lp)
 	pushq	%rbp				/* align stack properly */
 	movq	%rsp, %rbp
 	movl	%eax, %edi
-	call	*lockstat_probe
+	INDIRECT_CALL(lockstat_probe)
 	leave					/* unwind stack */
 1:
 	movq	%gs:CPU_THREAD, %rdx		/* reload thread ptr */

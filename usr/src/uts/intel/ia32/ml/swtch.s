@@ -909,7 +909,7 @@ thread_start(void)
 	popq	%rdi		/* arg */
 	popq	%rsi		/* len */
 	movq	%rsp, %rbp
-	call	*%rax
+	INDIRECT_CALL_REG(rax)
 	call	thread_exit	/* destroy thread if it returns. */
 	/*NOTREACHED*/
 	SET_SIZE(thread_start)

@@ -760,10 +760,10 @@ kernel_wc_code:
 	 */
 	cmpq	$0, ap_mlsetup
 	je	3f
-	call	*ap_mlsetup
+        INDIRECT_CALL(ap_mlsetup)
 3:
 
-	call    *cpr_start_cpu_func
+        INDIRECT_CALL(cpr_start_cpu_func)
 
 / restore %rbx to the value it ahd before we called the functions above
 	movq    rm_platter_va, %rbx
