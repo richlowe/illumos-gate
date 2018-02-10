@@ -70,7 +70,6 @@
  * -h <name>	Assign <name> to generated dynamic shared library
  * -I<dir>	Add <dir> to preprocessor #include file search path
  * -i		Passed to linker to ignore any LD_LIBRARY_PATH setting
- * -keeptmp	Keep temporary files created during compilation
  * -KPIC	Compile position independent code with 32-bit addresses
  * -Kpic	Compile position independent code
  * -L<dir>	Pass to linker to add <dir> to the library search path
@@ -196,7 +195,6 @@
  * -h <name>			pass-thru
  * -I<dir>			pass-thru
  * -i				pass-thru
- * -keeptmp			-save-temps
  * -KPIC			-fPIC
  * -Kpic			-fpic
  * -L<dir>			pass-thru
@@ -901,13 +899,6 @@ do_gcc(cw_ictx_t *ctx)
 		case 'G':
 			newae(ctx->i_ae, "-shared");
 			nolibc = 1;
-			break;
-		case 'k':
-			if (strcmp(arg, "-keeptmp") == 0) {
-				newae(ctx->i_ae, "-save-temps");
-				break;
-			}
-			error(arg);
 			break;
 		case 'K':
 			if (arglen == 1) {
