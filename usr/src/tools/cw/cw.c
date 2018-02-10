@@ -111,7 +111,6 @@
  * -xbuiltin[=<b>] When profitable inline, or substitute intrinisic functions
  *		for system functions, b={%all,%none}
  * -xCC		Accept C++ style comments
- * -xchar_byte_order=<o> Specify multi-char byte order <o> (default, high, low)
  * -xchip=<c>	Specify the target processor for use by the optimizer
  * -xcode=<c>	Generate different code for forming addresses
  * -xcrossfile[=<n>] Enable optimization and inlining across source files,
@@ -239,7 +238,6 @@
  * -xarch=<a>			table
  * -xbuiltin[=<b>]		-fbuiltin (-fno-builtin otherwise)
  * -xCC				ignore
- * -xchar_byte_order=<o>	error
  * -xchip=<c>			table
  * -xcode=<c>			table
  * -xdebugformat=<format>	ignore (always use dwarf-2 for gcc)
@@ -1032,18 +1030,6 @@ do_gcc(cw_ictx_t *ctx)
 			    strncmp(arg, "-Wp,", 4) == 0 ||
 			    strncmp(arg, "-Wl,", 4) == 0) {
 				newae(ctx->i_ae, arg);
-				break;
-			}
-			if (strcmp(arg, "-W0,-xc99=pragma") == 0) {
-				/* (undocumented) enables _Pragma */
-				break;
-			}
-			if (strcmp(arg, "-W0,-xc99=%none") == 0) {
-				/*
-				 * This is a polite way of saying
-				 * "no c99 constructs allowed!"
-				 * For now, just accept and ignore this.
-				 */
 				break;
 			}
 			if (strcmp(arg, "-W0,-noglobal") == 0 ||
