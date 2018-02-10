@@ -1062,13 +1062,6 @@ do_gcc(cw_ictx_t *ctx)
 				 */
 				break;
 			}
-			if (strcmp(arg, "-W2,-Rcond_elim") == 0) {
-				/*
-				 * Elimination and expansion of conditionals;
-				 * gcc has no direct equivalent.
-				 */
-				break;
-			}
 			if (strcmp(arg, "-Wd,-xsafe=unboundsym") == 0) {
 				/*
 				 * Prevents optimizing away checks for
