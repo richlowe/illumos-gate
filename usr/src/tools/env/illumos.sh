@@ -196,8 +196,30 @@ export BUILD_TOOLS='/opt'
 export SPRO_ROOT='/opt/SUNWspro'
 export SPRO_VROOT="$SPRO_ROOT"
 
-# Disable shadow compilation by default.
-export CW_NO_SHADOW='1'
+# Compilers maybe specified using the following variables:
+# PRIMARY_CC	- primary C compiler
+# PRIMARY_CCC	- primary C++ compiler
+#
+# SHADOW_CCS    - list of shadow C compilers
+# SHADOW_CCCS	- list of shadow C++ compilers
+#
+# Each entry has the form <name>,<path to binary>,<style> where name is a
+# free-form name (possibly used in the makefiles to guard options), path is
+# the path to the executable.  style is the 'style' of command line taken by
+# the compiler, currently either gnu/gcc or sun/cc (also used by Makefiles to
+# guard options).
+#
+# __SUNC and __GNUC must still be set to reflect the style of the primary
+# compiler (and to influence the default primary, otherwise)
+#
+# for example:
+# export PRIMARY_CC=gcc4,/opt/gcc/4.4.4/bin/gcc,gnu
+# export PRIMARY_CCC=gcc4,/opt/gcc/4.4.4/bin/g++,gnu
+# export SHADOW_CCS=studio12,/opt/SUNWspro/bin/cc,sun
+# export SHADOW_CCCS=studio12,/opt/SUNWspro/bin/CC,sun
+#
+# There can be several space-separated entries in SHADOW_* to run multiple
+# shadow compilers.
 
 # This goes along with lint - it is a series of the form "A [y|n]" which
 # means "go to directory A and run 'make lint'" Then mail me (y) the

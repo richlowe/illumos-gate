@@ -39,18 +39,14 @@ CFLAGS += $(CCVERBOSE)
 
 # Override CFLAGS.  This is needed only for bootstrap of cw.
 $(__GNUC)CFLAGS=	-O -D__sun -Wall -Wno-unknown-pragmas -Werror \
-			-std=gnu89 -nodefaultlibs
+			-std=gnu99 -nodefaultlibs
 $(__SUNC)CFLAGS=	-xspace -Xa  -xildoff -errtags=yes -errwarn=%all \
-			-xc99=%none    -W0,-xglobalstatic -v
+			-xc99=%all    -W0,-xglobalstatic -v
 
 
 $(__GNUC)LDLIBS +=	-lc
 $(__GNUC)LDFLAGS= 	$(MAPFILE.NES:%=-Wl,-M%)
 
-CPPFLAGS += -DDEFAULT_CC_DIR='"$(SPRO_VROOT)/bin"'
-CPPFLAGS += -DDEFAULT_GCC_DIR='"$(GCC_ROOT)/bin"'
-CPPFLAGS += -DDEFAULT_CPLUSPLUS_DIR='"$(SPRO_VROOT)/bin"'
-CPPFLAGS += -DDEFAULT_GPLUSPLUS_DIR='"$(GCC_ROOT)/bin"'
 
 $(ROOTONBLDMAN1ONBLDFILES) := FILEMODE=      644
 

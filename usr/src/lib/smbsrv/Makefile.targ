@@ -29,7 +29,7 @@
 #
 
 %_ndr.c: $(NDLDIR)/%.ndl
-	$(NDRGEN) -Y $(CC) $<
+	$(NDRGEN) -Y "$(CC)" $<
 
 pics/%.o:	$(SRC)/common/smbsrv/%.c
 	$(COMPILE.c) -o $@ $<

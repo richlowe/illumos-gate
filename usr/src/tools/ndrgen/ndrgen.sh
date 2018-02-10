@@ -77,12 +77,6 @@ if [[ $CC_FLAG = "y" ]] ; then
 	else
 		CC=$1
 		shift $(($OPTIND - 1))
-
-		# Check for cw being invoked with -_cc or -_gcc
-		if [[ $1 = "-_cc" || $1 = "-_gcc" ]] ; then
-			CC_ARG=$1
-			shift $(($OPTIND - 1))
-		fi
 	fi
 fi
 
@@ -90,7 +84,10 @@ if [[ $CC = "" ]] ; then
 	ndrgen_usage "C pre-processor is not defined"
 fi
 
-if [ ! -f $CC ] || [ ! -x $CC ] ; then
+# Remove the non-cw options
+CC=${CC%% -- *}
+
+if [ ! -f ${CC%% *} ] || [ ! -x ${CC%% *} ] ; then
 	ndrgen_usage "cannot run $CC"
 fi
 
@@ -106,7 +103,7 @@ do
 
 	cp $i $TMP_NAME
 
-	if $CC $CC_ARG -E  -D__a64 -D__EXTENSIONS__ -D_FILE_OFFSET_BITS=64 \
+	if $CC  -E  -D__a64 -D__EXTENSIONS__ -D_FILE_OFFSET_BITS=64 \
 		-I. -I${INCDIR} -I${INCDIR}/ndl -DNDRGEN $TMP_NAME | \
 		$NDRPROG > $BASENAME.raw
 	then
