@@ -55,7 +55,6 @@
  *		as errors
  * -fast	Optimize using a selection of options
  * -fd		Report old-style function definitions and declarations
- * -features=zla	Allow zero-length arrays
  * -flags	Show this summary of compiler options
  * -fnonstd	Initialize floating-point hardware to non-standard preferences
  * -fns[=<yes|no>] Select non-standard floating point mode
@@ -182,7 +181,6 @@
  * -errwarn=%all		-Werror else -Wno-error
  * -fast			error
  * -fd				error
- * -features=zla		ignore
  * -flags			--help
  * -fnonstd			error
  * -fns[=<yes|no>]		error
@@ -896,13 +894,6 @@ do_gcc(cw_ictx_t *ctx)
 		case 'f':
 			if (strcmp(arg, "-flags") == 0) {
 				newae(ctx->i_ae, "--help");
-				break;
-			}
-			if (strncmp(arg, "-features=zla", 13) == 0) {
-				/*
-				 * Accept but ignore this -- gcc allows
-				 * zero length arrays.
-				 */
 				break;
 			}
 			error(arg);
