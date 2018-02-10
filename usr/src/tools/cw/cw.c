@@ -1181,8 +1181,6 @@ do_gcc(cw_ictx_t *ctx)
 						pic = 1;
 					break;
 				}
-				if (strncmp(arg, "-xcache=", 8) == 0)
-					break;
 				if (strncmp(arg, "-xcrossfile", 11) == 0)
 					break;
 				error(arg);
