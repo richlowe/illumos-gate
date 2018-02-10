@@ -1186,8 +1186,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 			case 'd':
-				if (strcmp(arg, "-xdepend") == 0)
-					break;
 				if (strncmp(arg, "-xdebugformat=", 14) == 0)
 					break;
 				error(arg);
