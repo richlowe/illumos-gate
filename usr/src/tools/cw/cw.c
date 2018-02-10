@@ -1357,10 +1357,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'Q':
-			/*
-			 * We could map -Qy into -Wl,-Qy etc.
-			 */
 		default:
 			error(arg);
 			break;
