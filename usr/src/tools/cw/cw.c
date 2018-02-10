@@ -36,7 +36,7 @@
  */
 
 /* If you modify this file, you must increment CW_VERSION */
-#define	CW_VERSION	"1.30"
+#define	CW_VERSION	"1.31"
 
 /*
  * -#		Verbose mode
@@ -84,7 +84,6 @@
  * -nofstore	Do not force floating pt. values to target precision
  *		on assignment
  * -nolib	Same as -xnolib
- * -noqueue	Disable queuing of compiler license requests
  * -norunpath	Do not build in a runtime path for shared libraries
  * -O		Use default optimization level (-xO2 or -xO3. Check man page.)
  * -o <outputfile> Set name of output file to <outputfile>
@@ -211,7 +210,6 @@
  * -native			error
  * -nofstore			error
  * -nolib			-nodefaultlibs
- * -noqueue			ignore
  * -norunpath			ignore
  * -O				-O1 (Check the man page to be certain)
  * -o <outputfile>		pass-thru
@@ -984,15 +982,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, s);
 				free(s);
 			}
-			break;
-		case 'n':
-			if (strcmp(arg, "-noqueue") == 0) {
-				/*
-				 * Horrid license server stuff - n/a
-				 */
-				break;
-			}
-			error(arg);
 			break;
 		case 'O':
 			if (arglen == 1) {
