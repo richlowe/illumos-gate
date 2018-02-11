@@ -221,7 +221,6 @@
  * -Wp,<arg>			pass-thru except -xc99=<a>
  * -Wl,<arg>			pass-thru
  * -W{m,0,2,h,i,u>		error/ignore
- * -Wu,-xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
  * -xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
  * -Wu,-save_args		-msave-args
  * -w				pass-thru
@@ -711,6 +710,8 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'g':
+			/* XXX: use the debugformat option we already have to pass this */
+			/* just accept -g */
 			newae(ctx->i_ae, "-gdwarf-2");
 			break;
 		case 'E':
@@ -942,13 +943,6 @@ do_gcc(cw_ictx_t *ctx)
 				break;
 			}
 #if defined(__x86)
-			if (strcmp(arg, "-Wu,-xmodel=kernel") == 0) {
-				newae(ctx->i_ae, "-ffreestanding");
-				newae(ctx->i_ae, "-mno-red-zone");
-				model = "-mcmodel=kernel";
-				nolibc = 1;
-				break;
-			}
 			if (strcmp(arg, "-Wu,-save_args") == 0) {
 				newae(ctx->i_ae, "-msave-args");
 				break;
