@@ -1017,16 +1017,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'F':
-				/*
-				 * Compile for mapfile reordering, or unused
-				 * section elimination, syntax can be -xF or
-				 * more complex, like -xF=%all -- ignore.
-				 */
-				if (strncmp(arg, "-xF", 3) == 0)
-					break;
-				error(arg);
-				break;
 #if defined(__x86)
 			case 'm':
 				if (strcmp(arg, "-xmodel=kernel") == 0) {
