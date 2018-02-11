@@ -291,8 +291,8 @@ BUILD64=	$($(MACH)_BUILD64)
 # so force extended ANSI mode globally. Lower level makefiles can
 # override this by setting CCMODE.
 #
-CCMODE=			-Xa
-CCMODE64=		-Xa
+CCMODE=			-_cc=-Xa
+CCMODE64=		-_cc=-Xa
 
 #
 # C compiler verbose mode. This is so we can enable it globally,

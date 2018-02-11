@@ -100,11 +100,8 @@
  * -v		Do stricter semantic checking
  * -W<c>,<arg>	Pass <arg> to specified component <c> (a,l,m,p,0,2,h,i,u)
  * -w		Suppress compiler warning messages
- * -Xa		Compile assuming ANSI C conformance, allow K & R extensions
- *		(default mode)
  * -Xc		Compile assuming strict ANSI C conformance
  * -Xs		Compile assuming (pre-ANSI) K & R C style code
- * -Xt		Compile assuming K & R conformance, allow ANSI C
  * -x386	Generate code for the 80386 processor
  * -x486	Generate code for the 80486 processor
  * -xarch=<a>	Specify target architecture instruction set
@@ -229,9 +226,7 @@
  * -xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
  * -Wu,-save_args		-msave-args
  * -w				pass-thru
- * -Xa				-std=iso9899:199409 or -ansi
  * -Xc				-ansi -pedantic
- * -Xt				error
  * -Xs				-traditional -std=c89
  * -x386			-march=i386 (x86 only)
  * -x486			-march=i486 (x86 only)
@@ -539,12 +534,6 @@ optim_disable(struct aelist *h, int level)
 		newae(h, "-fno-unit-at-a-time");
 		newae(h, "-fno-optimize-sibling-calls");
 	}
-}
-
-/* ARGSUSED */
-static void
-Xamode(struct aelist *h)
-{
 }
 
 static void
@@ -1106,11 +1095,6 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'X':
-			if (strcmp(arg, "-Xa") == 0 ||
-			    strcmp(arg, "-Xt") == 0) {
-				Xamode(ctx->i_ae);
-				break;
-			}
 			if (strcmp(arg, "-Xc") == 0) {
 				Xcmode(ctx->i_ae);
 				break;

@@ -59,7 +59,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #
 #	Overrides.
 #
-CCMODE		= -Xt
+CCMODE		= -_cc=-Xt
 CFLAGS		+= $(CCVERBOSE)
 
 #
