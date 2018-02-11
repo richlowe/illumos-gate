@@ -1011,14 +1011,6 @@ do_gcc(cw_ictx_t *ctx)
 				    "-fno-eliminate-unused-debug-types");
 				break;
 			}
-			if (strcmp(arg, "-Wd,-xsafe=unboundsym") == 0) {
-				/*
-				 * Prevents optimizing away checks for
-				 * unbound weak symbol addresses.  gcc does
-				 * not do this, so it's not needed.
-				 */
-				break;
-			}
 			if (strncmp(arg, "-Wc,-xcode=", 11) == 0) {
 				xlate(ctx->i_ae, arg + 11, xcode_tbl);
 				if (strncmp(arg + 11, "pic", 3) == 0)

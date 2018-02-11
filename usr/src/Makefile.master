@@ -347,7 +347,7 @@ CCNOAUTOINLINE= -_gcc=-fno-inline-small-functions \
 # but provided only for some cpu modules or platforms), we disable this
 # optimization.
 #
-sparc_CCUNBOUND	= -Wd,-xsafe=unboundsym
+sparc_CCUNBOUND	= -_cc=-Wd,-xsafe=unboundsym
 i386_CCUNBOUND	=
 CCUNBOUND	= $($(MACH)_CCUNBOUND)
 
