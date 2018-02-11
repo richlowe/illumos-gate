@@ -1019,22 +1019,6 @@ do_gcc(cw_ictx_t *ctx)
 			if (arglen == 1)
 				error(arg);
 			switch (arg[2]) {
-#if defined(__x86)
-			case '3':
-				if (strcmp(arg, "-x386") == 0) {
-					newae(ctx->i_ae, "-march=i386");
-					break;
-				}
-				error(arg);
-				break;
-			case '4':
-				if (strcmp(arg, "-x486") == 0) {
-					newae(ctx->i_ae, "-march=i486");
-					break;
-				}
-				error(arg);
-				break;
-#endif	/* __x86 */
 			case 'a':
 				if (strncmp(arg, "-xarch=", 7) == 0) {
 					mflag |= xlate_xtb(ctx->i_ae, arg + 7);
