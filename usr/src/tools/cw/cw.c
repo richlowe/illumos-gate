@@ -936,12 +936,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 				break;
 			}
-#if defined(__x86)
-			if (strcmp(arg, "-Wu,-save_args") == 0) {
-				newae(ctx->i_ae, "-msave-args");
-				break;
-			}
-#endif	/* __x86 */
 			error(arg);
 			break;
 		case 'X':
