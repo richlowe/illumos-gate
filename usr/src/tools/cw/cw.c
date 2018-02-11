@@ -1077,17 +1077,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 #endif	/* __x86 */
-			case 'M':
-				if (strcmp(arg, "-xM") == 0) {
-					newae(ctx->i_ae, "-M");
-					break;
-				}
-				if (strcmp(arg, "-xM1") == 0) {
-					newae(ctx->i_ae, "-MM");
-					break;
-				}
-				error(arg);
-				break;
 			case 'n':
 				if (strcmp(arg, "-xnolib") == 0) {
 					nolibc = 1;
