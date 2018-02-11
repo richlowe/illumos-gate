@@ -858,7 +858,6 @@ do_gcc(cw_ictx_t *ctx)
 			break;
 		case 'B':	/* linker options */
 		case 'M':
-		case 'z':
 			{
 				char *opt;
 				size_t len;

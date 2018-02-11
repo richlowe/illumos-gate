@@ -31,7 +31,7 @@ SRCDIR		= ../common/
 
 CPPFLAGS	+= -DLIBM_BUILD
 MAPFILEDIR	= ../common/
-DYNFLAGS 	+= -zignore -Wl,-F'libm.so.2'
+DYNFLAGS 	+= $(ZIGNORE) -Wl,-F'libm.so.2'
 LINTFLAGS64     += -errchk=longptr64
 
 .KEEP_STATE:
