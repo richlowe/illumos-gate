@@ -1126,14 +1126,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 			case 't':
-				if (strcmp(arg, "-xtrigraphs=yes") == 0) {
-					newae(ctx->i_ae, "-trigraphs");
-					break;
-				}
-				if (strcmp(arg, "-xtrigraphs=no") == 0) {
-					newae(ctx->i_ae, "-notrigraphs");
-					break;
-				}
 				if (strncmp(arg, "-xtarget=", 9) == 0) {
 					xlate(ctx->i_ae, arg + 9, xtarget_tbl);
 					break;
