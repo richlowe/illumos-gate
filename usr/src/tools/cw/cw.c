@@ -1111,6 +1111,7 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 			case 'r':
+				/* XXX: Easily -_cc guarded */
 				if (strncmp(arg, "-xregs=", 7) == 0) {
 					xlate(ctx->i_ae, arg + 7, xregs_tbl);
 					break;
@@ -1125,10 +1126,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 			case 't':
-				if (strcmp(arg, "-xtransition") == 0) {
-					newae(ctx->i_ae, "-Wtransition");
-					break;
-				}
 				if (strcmp(arg, "-xtrigraphs=yes") == 0) {
 					newae(ctx->i_ae, "-trigraphs");
 					break;
