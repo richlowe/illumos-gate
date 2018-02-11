@@ -1034,12 +1034,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'C':
-				/* Accept C++ style comments -- ignore */
-				if (strcmp(arg, "-xCC") == 0)
-					break;
-				error(arg);
-				break;
 			case 'c':
 				if (strncmp(arg, "-xc99=%all", 10) == 0) {
 					newae(ctx->i_ae, "-std=gnu99");

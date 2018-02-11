@@ -55,7 +55,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 LDFLAGS		+= -dy
 
-CFLAGS		+= -xCC
+CFLAGS		+= -_cc=-xCC
 
 # This is for everything except /usr/include/tss/
 CPPFLAGS	+= -I$(ROOT)/usr/include

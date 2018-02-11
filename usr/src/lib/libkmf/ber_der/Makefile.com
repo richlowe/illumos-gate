@@ -41,8 +41,8 @@ LIBS=	$(DYNLIB) $(LINTLIB)
 
 $(LINTLIB) := SRCS = $(SRCDIR)/$(LINTSRC)
 
-CFLAGS		+=	$(CCVERBOSE) -xCC
-CFLAGS64	+=	$(CCVERBOSE) -xCC
+CFLAGS		+=	$(CCVERBOSE) -_cc=-xCC
+CFLAGS64	+=	$(CCVERBOSE) -_cc=-xCC
 CPPFLAGS	+=	-I$(ADJUNCT_PROTO)/usr/include/libxml2 \
 			-I$(INCDIR) -I../../include
 CPPFLAGS64	+=	-I$(ADJUNCT_PROTO)/usr/include/libxml2 \

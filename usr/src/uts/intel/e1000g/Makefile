@@ -60,7 +60,7 @@ LINTFLAGS += \
 	-I$(UTSBASE)/common/io/e1000g \
 	-I$(UTSBASE)/common/io/e1000api
 
-CFLAGS_CPP_COMMENTS = -xCC
+CFLAGS_CPP_COMMENTS = -_cc=-xCC
 
 CFLAGS += $(CFLAGS_CPP_COMMENTS)
 

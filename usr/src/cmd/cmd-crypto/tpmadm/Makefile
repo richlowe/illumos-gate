@@ -34,7 +34,7 @@ POFILES = $(OBJS:%.o=%.po)
 POFILE = $(PROG)_msg.po
 MSGFILES=$(SRCS:%.c=%.i)
 
-CPPFLAGS += -xCC
+CFLAGS += -_cc=-xCC
 LINTFLAGS += -XCC  -L$(ADJUNCT_PROTO)/usr/lib
 LDLIBS += -ltspi -luuid
 
