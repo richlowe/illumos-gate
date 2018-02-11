@@ -663,10 +663,6 @@ do_gcc(cw_ictx_t *ctx)
 		}
 
 		if (ctx->i_flags & CW_F_CXX) {
-			if (strncmp(arg, "-compat=", 8) == 0) {
-				/* discard -compat=4 and -compat=5 */
-				continue;
-			}
 			if (strcmp(arg, "-Qoption") == 0) {
 				/* discard -Qoption and its two arguments */
 				if (ctx->i_oldargc < 3)

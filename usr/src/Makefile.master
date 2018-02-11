@@ -610,19 +610,19 @@ BUILD.po= $(XGETTEXT) $(XGETFLAGS) -d $(<F) $<.i ;\
 #
 POFILE= $(PROG).po
 
-sparc_CCFLAGS=		-cg92 -compat=4 \
+sparc_CCFLAGS=		-cg92 -_cc=-compat=4 \
 			-Qoption ccfe -messages=no%anachronism \
 			$(CCERRWARN)
-sparcv9_CCFLAGS=	$(sparcv9_XARCH) -dalign -compat=5 \
+sparcv9_CCFLAGS=	$(sparcv9_XARCH) -dalign -_cc=-compat=5 \
 			-Qoption ccfe -messages=no%anachronism \
 			-Qoption ccfe -features=no%conststrings \
 			$(CCCREGSYM) \
 			$(CCERRWARN)
-i386_CCFLAGS=		-compat=4 \
+i386_CCFLAGS=		-_cc=-compat=4 \
 			-Qoption ccfe -messages=no%anachronism \
 			-Qoption ccfe -features=no%conststrings \
 			$(CCERRWARN)
-amd64_CCFLAGS=		$(amd64_XARCH) -compat=5 \
+amd64_CCFLAGS=		$(amd64_XARCH) -_cc=-compat=5 \
 			-Qoption ccfe -messages=no%anachronism \
 			-Qoption ccfe -features=no%conststrings \
 			$(CCERRWARN)
