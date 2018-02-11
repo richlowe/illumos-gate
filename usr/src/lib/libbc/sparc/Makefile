@@ -385,8 +385,8 @@ s5pics/%.o:= CPPFLAGS = -Dsparc -DS5EMUL -K pic -DPIC -I. -Iinc \
 	-I../inc/5include -I../inc/include -I../inc/include/sys \
 	$(CPPFLAGS.master)
 
-s5pics/%.o := CFLAGS += -xregs=no%appl
-pics/%.o := CFLAGS += -xregs=no%appl
+s5pics/%.o := CFLAGS += -_cc=-xregs=no%appl -_gcc=-mno-app-regs
+pics/%.o := CFLAGS += -_cc=-xregs=no%appl -_gcc=-mno-app-regs
 
 $(DYNLIB4X):= DIR = pics
 $(DYNLIBS5):= DIR = s5pics

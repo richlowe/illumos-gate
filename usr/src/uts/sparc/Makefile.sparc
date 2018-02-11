@@ -142,7 +142,7 @@ CFLAGS		+= $(CC32BITCALLERS)
 CFLAGS		+= $(CCNOAUTOINLINE)
 CFLAGS		+= $(IROPTFLAG)
 CFLAGS		+= $(CGLOBALSTATIC)
-CFLAGS		+= -xregs=no%float
+CFLAGS		+= -_cc=-xregs=no%float -_gcc=-mno-fpu
 CFLAGS		+= -xstrconst
 CFLAGS		+= $(CSOURCEDEBUGFLAGS)
 CFLAGS		+= $(CUSERFLAGS)

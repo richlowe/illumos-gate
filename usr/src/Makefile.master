@@ -522,8 +522,8 @@ amd64_IROPTFLAG		=
 IROPTFLAG		= $($(MACH)_IROPTFLAG)
 IROPTFLAG64		= $($(MACH64)_IROPTFLAG)
 
-sparc_XREGSFLAG		= -xregs=no%appl
-sparcv9_XREGSFLAG	= -xregs=no%appl
+sparc_XREGSFLAG		= -_cc=-xregs=no%appl -_gcc=-mno-app-regs
+sparcv9_XREGSFLAG	= -_cc=-xregs=no%appl -_gcc=-mno-app-regs
 i386_XREGSFLAG		=
 amd64_XREGSFLAG		=
 

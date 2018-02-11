@@ -431,23 +431,6 @@ static const char *xcode_tbl[] = {
 	NULL,		NULL
 };
 
-static const char *xtarget_tbl[] = {
-#if defined(__x86)
-	"pentium_pro",	"-march=pentiumpro", NULL,
-#endif	/* __x86 */
-	NULL,		NULL
-};
-
-static const char *xregs_tbl[] = {
-#if defined(__sparc)
-	"appl",		"-mapp-regs", NULL,
-	"no%appl",	"-mno-app-regs", NULL,
-	"float",	"-mfpu", NULL,
-	"no%float",	"-mno-fpu", NULL,
-#endif	/* __sparc */
-	NULL,		NULL
-};
-
 static void
 nomem(void)
 {
@@ -1110,15 +1093,8 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'r':
-				/* XXX: Easily -_cc guarded */
-				if (strncmp(arg, "-xregs=", 7) == 0) {
-					xlate(ctx->i_ae, arg + 7, xregs_tbl);
-					break;
-				}
-				error(arg);
-				break;
 			case 's':
+				/* XXX: All these can be guards */
 				if (strcmp(arg, "-xs") == 0 ||
 				    strcmp(arg, "-xspace") == 0 ||
 				    strcmp(arg, "-xstrconst") == 0)

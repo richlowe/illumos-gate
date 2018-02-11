@@ -67,7 +67,7 @@ include		$(SRC)/cmd/sgs/rtld/Makefile.com
 # Add any a.out and machine specific flags.
 
 CPPFLAGS +=	-I../../../../uts/sparc/krtld -DA_OUT
-CFLAGS +=	-xregs=no%appl
+CFLAGS +=	-_cc=-xregs=no%appl -_gcc=-mno-app-regs
 ASFLAGS +=	-K pic
 LINTFLAGS +=	-DA_OUT
 ADBGENCFLAGS +=	-erroff=%all

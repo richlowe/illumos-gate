@@ -94,8 +94,8 @@ CFLAGS 		+= -D_FILE_OFFSET_BITS=64
 
 $(ITM) :=	CFLAGS += $(GSHARED) $(C_PICFLAGS) $(ZTEXT) -h $@
 $(ITM) :=	CPPFLAGS += -D_REENTRANT 
-$(ITM) :=	sparc_CFLAGS += -xregs=no%appl
-$(ITM) :=	sparcv9_CFLAGS += -xregs=no%appl
+$(ITM) :=	sparc_CFLAGS += -_cc=-xregs=no%appl -_gcc=-mno-app-regs
+$(ITM) :=	sparcv9_CFLAGS += -_cc=-xregs=no%appl -_gcc=-mno-app-regs
 
 LDLIBS += -lgen
 
