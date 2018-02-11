@@ -76,7 +76,7 @@ COPTIMIZE	= -xO5 -xbuiltin=%all
 #
 # Override the default -xspace setting
 #
-sparc_SPACEFLAG	= -W0,-Lt
+sparc_SPACEFLAG	= -_cc=-W0,-Lt
 
 #
 #	Default build targets.
