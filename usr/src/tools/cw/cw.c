@@ -794,6 +794,7 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'A':
+		case 'D':
 		case 'h':
 		case 'I':
 		case 'i':
@@ -816,15 +817,6 @@ do_gcc(cw_ictx_t *ctx)
 			} else {
 				newae(ctx->i_ae, arg);
 			}
-			break;
-		case 'D':
-			newae(ctx->i_ae, arg);
-			/*
-			 * XXX	Clearly a hack ... do we need _KADB too?
-			 */
-			if (strcmp(arg, "-D_KERNEL") == 0 ||
-			    strcmp(arg, "-D_BOOT") == 0)
-				newae(ctx->i_ae, "-ffreestanding");
 			break;
 		case 'd':
 			if (arglen == 2) {
