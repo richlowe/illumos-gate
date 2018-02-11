@@ -693,10 +693,6 @@ do_gcc(cw_ictx_t *ctx)
 				pic = 1;
 				continue;
 			}
-			if (strcmp(arg, "-norunpath") == 0) {
-				/* gcc has no corresponding option */
-				continue;
-			}
 			if (strcmp(arg, "-nolib") == 0) {
 				/* -nodefaultlibs is on by default */
 				nolibc = 1;
