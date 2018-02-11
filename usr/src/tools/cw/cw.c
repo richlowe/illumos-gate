@@ -1064,8 +1064,7 @@ do_gcc(cw_ictx_t *ctx)
 				break;
 			case 's':
 				/* XXX: All these can be guards */
-				if (strcmp(arg, "-xspace") == 0 ||
-				    strcmp(arg, "-xstrconst") == 0)
+				if (strcmp(arg, "-xstrconst") == 0)
 					break;
 				error(arg);
 				break;
