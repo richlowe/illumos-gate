@@ -17,7 +17,7 @@ LIBMDIR		= $(SRC)/lib/libm
 
 LIBMSRC		= $(LIBMDIR)/common
 
-CPP_CMD		= $(CC) -E -Xs
+CPP_CMD		= $(CC) -E -_cc=-Xs -_gcc=-traditional -_gcc=-traditional-cpp
 
 ASSUFFIX_sparc	= S
 ASSUFFIX_i386	= s

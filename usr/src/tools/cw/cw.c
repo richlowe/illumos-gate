@@ -519,18 +519,6 @@ Xcmode(struct aelist *h)
 }
 
 static void
-Xsmode(struct aelist *h)
-{
-	static int xsonce;
-
-	if (xsonce++)
-		return;
-
-	newae(h, "-traditional");
-	newae(h, "-traditional-cpp");
-}
-
-static void
 usage()
 {
 	(void) fprintf(stderr,
@@ -870,10 +858,6 @@ do_gcc(cw_ictx_t *ctx)
 		case 'X':
 			if (strcmp(arg, "-Xc") == 0) {
 				Xcmode(ctx->i_ae);
-				break;
-			}
-			if (strcmp(arg, "-Xs") == 0) {
-				Xsmode(ctx->i_ae);
 				break;
 			}
 			error(arg);
