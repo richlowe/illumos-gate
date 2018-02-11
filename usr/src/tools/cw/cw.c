@@ -970,13 +970,6 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'W':
-			if (strncmp(arg, "-Wp,-xc99", 9) == 0) {
-				/*
-				 * gcc's preprocessor will accept c99
-				 * regardless, so accept and ignore.
-				 */
-				break;
-			}
 			if (strncmp(arg, "-Wa,", 4) == 0 ||
 			    strncmp(arg, "-Wp,", 4) == 0 ||
 			    strncmp(arg, "-Wl,", 4) == 0) {
