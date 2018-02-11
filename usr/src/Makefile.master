@@ -466,7 +466,7 @@ CALLSYMS=	-W0,-xdbggen=no%usedonly
 # Default debug format for Sun Studio 11 is dwarf, so force it to
 # generate stabs.
 #
-DEBUGFORMAT=	-xdebugformat=stabs
+DEBUGFORMAT=	-_cc=-xdebugformat=stabs
 
 #
 # Flags used to build in debug mode for ctf generation.  Bugs in the Devpro
