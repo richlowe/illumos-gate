@@ -56,7 +56,7 @@ ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
 LINT_TARGET	= $(MODULE).lint
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
 
-CINLINEFLAGS = -xinline=tcp_set_ws_value
+CINLINEFLAGS = -_cc=-xinline=tcp_set_ws_value
 
 CFLAGS		+= $(CINLINEFLAGS)
 

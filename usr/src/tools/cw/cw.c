@@ -1065,12 +1065,6 @@ do_gcc(cw_ictx_t *ctx)
 					break;
 				error(arg);
 				break;
-			case 'i':
-				if (strncmp(arg, "-xinline", 8) == 0)
-					/* No inlining; ignore */
-					break;
-				error(arg);
-				break;
 #if defined(__x86)
 			case 'm':
 				if (strcmp(arg, "-xmodel=kernel") == 0) {

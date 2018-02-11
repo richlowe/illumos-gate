@@ -59,7 +59,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
 # lint pass one enforcement
 #
 CFLAGS		+= $(CCVERBOSE)
-CFLAGS 		+= -xinline=tcp_set_ws_value
+CFLAGS 		+= -_cc=-xinline=tcp_set_ws_value
 #
 # To get the BPF header files included by ipnet.h
 #

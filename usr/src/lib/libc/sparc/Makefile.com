@@ -1098,7 +1098,7 @@ CFLAGS += $(CCVERBOSE)
 
 # This is necessary to avoid problems with calling _ex_unwind().
 # We probably don't want any inlining anyway.
-CFLAGS += -xinline=
+CFLAGS += -_cc=-xinline=
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-switch
