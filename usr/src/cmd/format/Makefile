@@ -88,7 +88,4 @@ clean:
 
 lint: lint_SRCS
 
-sb: $(SRCS)
-	$(COMPILE.c) -xsbfast $(SRCS)
-
 include ../Makefile.targ

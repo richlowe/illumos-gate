@@ -96,7 +96,3 @@ install:	$(INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/sparc/Makefile.targ
-
-browser:	$(BINARY)
-
-browser		:= CFLAGS += -xsb
