@@ -472,7 +472,7 @@ DEBUGFORMAT=	-xdebugformat=stabs
 # Flags used to build in debug mode for ctf generation.  Bugs in the Devpro
 # compilers currently prevent us from building with cc-emitted DWARF.
 #
-CTF_FLAGS_sparc	= -g -Wc,-Qiselect-T1 $(CSTD) $(CNOGLOBAL) $(CDWARFSTR)
+CTF_FLAGS_sparc	= -g -_cc=-Wc,-Qiselect-T1 $(CSTD) $(CNOGLOBAL) $(CDWARFSTR)
 CTF_FLAGS_i386	= -g $(CSTD) $(CNOGLOBAL) $(CDWARFSTR)
 
 CTF_FLAGS_sparcv9	= $(CTF_FLAGS_sparc)
