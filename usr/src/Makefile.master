@@ -420,7 +420,7 @@ $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-empty-body
 
 #
 # turn warnings into errors (C++)
-CCERRWARN=		-xwe
+CCERRWARN=		-_cc=-xwe -_gcc=-Werror
 
 # C standard.  Keep Studio flags until we get rid of lint.
 CSTD_GNU89=	-xc99=%none

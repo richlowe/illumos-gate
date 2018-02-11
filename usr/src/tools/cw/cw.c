@@ -635,11 +635,6 @@ do_gcc(cw_ictx_t *ctx)
 				ctx->i_oldargv += 2;
 				continue;
 			}
-			if (strcmp(arg, "-xwe") == 0) {
-				/* turn warnings into errors */
-				newae(ctx->i_ae, "-Werror");
-				continue;
-			}
 			if (strcmp(arg, "-nolib") == 0) {
 				/* -nodefaultlibs is on by default */
 				nolibc = 1;
