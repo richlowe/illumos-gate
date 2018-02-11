@@ -448,7 +448,7 @@ COPTFLAG64= $($(MACH64)_COPTFLAG)
 
 # When -g is used, the compiler globalizes static objects
 # (gives them a unique prefix). Disable that.
-CNOGLOBAL= -W0,-noglobal
+CNOGLOBAL= -_cc=-W0,-noglobal
 
 # Direct the Sun Studio compiler to use a static globalization prefix based on the
 # name of the module rather than something unique. Otherwise, objects
@@ -456,7 +456,7 @@ CNOGLOBAL= -W0,-noglobal
 # source will yeild objects that always look different.
 #
 # In the same spirit, this will also remove the date from the N_OPT stab.
-CGLOBALSTATIC= -W0,-xglobalstatic
+CGLOBALSTATIC= -_cc=-W0,-xglobalstatic
 
 # Sometimes we want all symbols and types in debugging information even
 # if they aren't used.
