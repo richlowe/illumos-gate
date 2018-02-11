@@ -70,13 +70,13 @@ LIBSHELLCPPFLAGS = \
 		"[--catalog?libshell]"'
 
 # Default CFLAGS/CFLAGS64 for AST sources
-# (-xstrconst makes string litereals read-only and -xcsi works 
+# (-_cc=-xstrconst makes string litereals read-only and -xcsi works 
 # around compiler issues)
 ASTCFLAGS = \
 	$(CCVERBOSE) \
 	-_cc=-xcsi \
-	-xstrconst
+	-_cc=-xstrconst
 ASTCFLAGS64 = \
 	$(CCVERBOSE) \
 	-_cc=-xcsi \
-	-xstrconst
+	-_cc=-xstrconst

@@ -29,7 +29,7 @@ PROG= isaexec
 
 include ../Makefile.cmd
 
-CFLAGS += -xstrconst
+CFLAGS += -_cc=-xstrconst
 CFLAGS += $(CCVERBOSE)
 
 .KEEP_STATE:

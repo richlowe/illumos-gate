@@ -1062,12 +1062,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 's':
-				/* XXX: All these can be guards */
-				if (strcmp(arg, "-xstrconst") == 0)
-					break;
-				error(arg);
-				break;
 			case 'e':
 			case 'h':
 			case 'l':

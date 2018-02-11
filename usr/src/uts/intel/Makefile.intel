@@ -131,7 +131,7 @@ CFLAGS			+= $(CCMODE)
 CFLAGS			+= $(SPACEFLAG)
 CFLAGS			+= $(CCUNBOUND)
 CFLAGS			+= $(CFLAGS_uts)
-CFLAGS			+= -xstrconst
+CFLAGS			+= -_cc=-xstrconst
 CFLAGS			+= -_gcc=-fstack-protector
 
 ASFLAGS_XARCH_32	= $(i386_ASFLAGS)

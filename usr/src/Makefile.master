@@ -392,7 +392,7 @@ ILDOFF=			-_cc=-xildoff
 #
 XFFLAG=			-_cc=-xF=%all
 XESS=			-_cc=-xs
-XSTRCONST=		-xstrconst
+XSTRCONST=		-_cc=-xstrconst
 
 #
 # turn warnings into errors (C)

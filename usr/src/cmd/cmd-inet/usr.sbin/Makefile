@@ -85,7 +85,7 @@ LINTSUBDIRS=	ilbadm in.rdisc in.routed in.talkd inetadm \
 		kssl/ksslcfg nwamadm nwamcfg ping routeadm sppptun traceroute \
 		wificonfig
 # And as programs are verified not to attempt to write into constants,
-# -xstrconst should be used to ensure they stay that way.
+# -_cc=-xstrconst should be used to ensure they stay that way.
 CONSTCLEAN=
 
 include ../../Makefile.cmd

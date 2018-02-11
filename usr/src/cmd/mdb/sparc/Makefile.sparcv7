@@ -32,7 +32,7 @@ ROOTMOD = $(ROOT)/usr/lib/mdb/$(MDBTGT)
 $$(ROOTMOD)/%: dmod/%
 	$(INS.file)
 
-CFLAGS += $(CTF_FLAGS) $(CCVERBOSE) -xstrconst
+CFLAGS += $(CTF_FLAGS) $(CCVERBOSE) -_cc=-xstrconst
 CTFSTABSCFLAGS = $(CFLAGS) $(CALLSYMS)
 LINTFLAGS += -u -erroff=E_BAD_FORMAT_STR2,E_BAD_FORMAT_ARG_TYPE2
 

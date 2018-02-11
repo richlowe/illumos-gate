@@ -28,7 +28,7 @@
 
 MODULES = example1.so example2.so
 
-CFLAGS += $(CCVERBOSE) -xstrconst -K pic
+CFLAGS += $(CCVERBOSE) -_cc=-xstrconst -K pic
 CPPFLAGS += -D_KERNEL
 LDFLAGS += $(ZTEXT)
 
