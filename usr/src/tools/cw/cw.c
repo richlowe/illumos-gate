@@ -144,7 +144,6 @@
  *		precision
  * -xspace	Do not do optimizations that increase code size
  * -xstrconst	Place string literals into read-only data segment
- * -xtarget=<t>	Specify target system for optimization
  * -xtemp=<dir>	Set directory for temporary files to <dir>
  * -xtime	Report the execution time for each compilation phase
  * -xtransition	Emit warnings for differences between K&R C and ANSI C
@@ -263,7 +262,6 @@
  * -xsfpconst			error
  * -xspace			ignore (-not -Os)
  * -xstrconst			ignore
- * -xtarget=<t>			table
  * -xtemp=<dir>			error
  * -xtime			error
  * -xtransition			-Wtransition
@@ -1099,13 +1097,6 @@ do_gcc(cw_ictx_t *ctx)
 				    strcmp(arg, "-xspace") == 0 ||
 				    strcmp(arg, "-xstrconst") == 0)
 					break;
-				error(arg);
-				break;
-			case 't':
-				if (strncmp(arg, "-xtarget=", 9) == 0) {
-					xlate(ctx->i_ae, arg + 9, xtarget_tbl);
-					break;
-				}
 				error(arg);
 				break;
 			case 'e':

@@ -24,7 +24,7 @@ include ../Makefile.com
 
 CPPFLAGS	+= -D_CMOV_INSN -D_SSE_INSN -D_SSE2_INSN
 MAPFILES	+= mapfile
-CFLAGS		+= -xtarget=pentium_pro -xarch=sse2
+CFLAGS		+= -_cc=-xtarget=pentium_pro -_gcc=-march=pentiumpro -xarch=sse2
 
 ROOTLIBDIR 	= $(ROOTFS_LIBDIR)/libmvec
 

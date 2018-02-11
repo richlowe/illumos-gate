@@ -22,17 +22,13 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# lib/libc/i386_hwcap3/Makefile
-#
 
 LIBCBASE=	../i386
 
 LIBRARY=	libc_hwcap3.a
 
 EXTN_CPPFLAGS=	-D_CMOV_INSN -D_SSE_INSN -D_MMX_INSN
-EXTN_CFLAGS=	-xtarget=pentium_pro
+EXTN_CFLAGS=	-_cc=-xtarget=pentium_pro -_gcc=-march=pentiumpro
 EXTN_DYNFLAGS=	-M mapfile
 
 # Defining this means build targets will first try to use source from this
