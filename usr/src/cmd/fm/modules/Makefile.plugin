@@ -86,7 +86,7 @@ LDFLAGS += $(ZDEFS) $(ZTEXT) $(ZIGNORE)
 MAPFILE-DMOD = $(SRC)/cmd/mdb/common/modules/conf/mapfile-extern
 
 
-$(PROG) := LDFLAGS += -M$(APIMAP) -M$(FMRIMAP)
+$(PROG) := LDFLAGS += -Wl,-M$(APIMAP) -Wl,-M$(FMRIMAP)
 $(PROG) := LDLIBS += -lnvpair -lc
 
 all: $(PROG) $(DMODPROG)
@@ -101,7 +101,7 @@ $(PROG): $(OBJS) $(APIMAP)
 
 $(DMODPROG): $(DMOD_OBJS) $(MAPFILE-DMOD)
 	-@mkdir -p $(@D)
-	$(LINK.c) $(DMOD_OBJS) $(MAPFILE-DMOD:%=-M%) -o $@ $(LDLIBS) -lc
+	$(LINK.c) $(DMOD_OBJS) $(MAPFILE-DMOD:%=-Wl,-M%) -o $@ $(LDLIBS) -lc
 	$(POST_PROCESS)
 
 %.o: %.c

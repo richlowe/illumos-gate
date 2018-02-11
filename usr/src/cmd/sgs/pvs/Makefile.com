@@ -37,7 +37,7 @@ TOOLOBJS =	alist.o
 OBJS=		$(BLTOBJ) $(COMOBJ) $(TOOLOBJS)
 
 MAPFILE=	$(MAPFILE.NGB)
-MAPOPTS=	$(MAPFILE:%=-M%)
+MAPOPTS=	$(MAPFILE:%=-Wl,-M%)
 
 CPPFLAGS +=	-I$(SRCBASE)/lib/libc/inc
 LLDFLAGS =	'-R$$ORIGIN/../lib'

@@ -35,7 +35,7 @@ CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-extra
 
 MAPFILES =	../mapfile-intf $(MAPFILE.NGB)
-LDFLAGS +=	$(MAPFILES:%=-M%)
+LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)
 
 HDDEP = sh.o sh.dir.o sh.dol.o sh.err.o sh.exec.o sh.exp.o sh.file.o \
 	sh.func.o sh.glob.o sh.hist.o sh.init.o sh.lex.o sh.misc.o \

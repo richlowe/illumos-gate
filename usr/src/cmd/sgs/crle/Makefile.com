@@ -37,7 +37,7 @@ TOOLSOBJ=	alist.o
 OBJS=		$(BLTOBJ) $(COMOBJ) $(TOOLSOBJ)
 
 MAPFILE=	$(MAPFILE.NGB)
-MAPOPT=		$(MAPFILE:%=-M%)
+MAPOPT=		$(MAPFILE:%=-Wl,-M%)
 
 CPPFLAGS +=	-I$(SRC)/common/sgsrtcid -I$(SRCBASE)/uts/$(ARCH)/sys \
 		-D__EXTENSIONS__

@@ -71,7 +71,7 @@ $(XPG4STTYOBJ) := CPPFLAGS += -DEUC
 
 LINTFLAGS = -b -x
 CFLAGS += $(CCVERBOSE)
-LDFLAGS += $(MAPFILE.NGB:%=-M%)
+LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-variable

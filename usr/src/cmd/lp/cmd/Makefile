@@ -49,7 +49,7 @@ ROOTSYMLINKS=	$(LIBLINKS:%=$(ROOTLIB)/%)
 
 
 CPPFLAGS =	-I$(LPINC) $(CPPFLAGS.master)
-LDFLAGS +=	$(MAPFILE.NGB:%=-M%)
+LDFLAGS +=	$(MAPFILE.NGB:%=-Wl,-M%)
 
 # conditional assignments
 #

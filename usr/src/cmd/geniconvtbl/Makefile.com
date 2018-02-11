@@ -100,7 +100,7 @@ $(ITM) :=	sparcv9_CFLAGS += -_cc=-xregs=no%appl -_gcc=-mno-app-regs
 LDLIBS += -lgen
 
 MY_NATIVE_CPPFLAGS = -D_FILE_OFFSET_BITS=64 -I. -I..
-MY_NATIVE_LDFLAGS = $(MAPFILE.NES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+MY_NATIVE_LDFLAGS = $(MAPFILE.NES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%)
 MY_NATIVE_LDLIBS = -lgen
 
 #
@@ -124,7 +124,7 @@ $(PROG): $(OBJS)
 	$(POST_PROCESS)
 
 $(ITM): $(SRCI)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -M$(MAPFILE) -o $@ $(SRCI) $(LDLIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -Wl,-M$(MAPFILE) -o $@ $(SRCI) $(LDLIBS)
 	$(POST_PROCESS_SO)
 
 $(YTABC) $(YTABH): $(SRCY)

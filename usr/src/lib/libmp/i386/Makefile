@@ -22,8 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 OLIBRARY =	libmp.so.1
 
@@ -41,8 +39,8 @@ $(ROOTLIBDIR)/$(OLIBRARY) :=	FILEMODE= 755
 
 $(OLIBRARY):	pics/pics_mp.o libmp.so.2 $(OMAPFILE)
 	$(CC) $(CFLAGS) -o $@ $(GSHARED) -h $(OLIBRARY) $(ZTEXT) $(ZDEFS) \
-	    $(BDIRECT) pics/pics_mp.o libmp.so.2 -M$(OMAPFILE) \
-	    $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+	    $(BDIRECT) pics/pics_mp.o libmp.so.2 -Wl,-M$(OMAPFILE) \
+	    $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%)
 	$(POST_PROCESS_SO)
 
 pics/pics_mp.o:

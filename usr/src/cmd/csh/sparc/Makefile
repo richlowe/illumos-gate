@@ -35,7 +35,7 @@ CERRWARN += -_gcc=-Wno-extra
 LDLIBS += -lcurses
 
 MAPFILES =	../mapfile-intf $(MAPFILE.NGB)
-LDFLAGS +=	$(MAPFILES:%=-M%)
+LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)
 
 PFOBJS = sh_policy.o
 

@@ -22,8 +22,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 PROG=		infocmp
 
@@ -36,7 +34,7 @@ XGETFLAGS +=	-a -x infocmp.xcl
 LDLIBS +=	-lcurses
 CPPFLAGS +=	-I../../lib/libcurses/screen
 MAPFILES =	$(MAPFILE.INT) $(MAPFILE.NGB)
-LDFLAGS +=	$(MAPFILES:%=-M%)
+LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)
 
 all:		$(PROG) $(MAPFILES)
 

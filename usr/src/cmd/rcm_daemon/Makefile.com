@@ -125,7 +125,7 @@ CERRWARN += -_gcc=-Wno-uninitialized
 CERRWARN += -_gcc=-Wno-unused-function
 
 MAPFILES = ../common/mapfile-intf $(MAPFILE.NGB)
-rcm_daemon := LDFLAGS += $(MAPFILES:%=-M%)
+rcm_daemon := LDFLAGS += $(MAPFILES:%=-Wl,-M%)
 
 LINTFLAGS += -u -erroff=E_FUNC_ARG_UNUSED
 

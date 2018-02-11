@@ -36,7 +36,7 @@ CPPFLAGS += -DDEBUG -DFCODE_INTERNAL
 CPPFLAGS += -I ../include -I $(ROOT)/usr/platform/sun4u/include
 CERRWARN += -_gcc=-Wno-unused-variable
 CERRWARN += -_gcc=-Wno-uninitialized
-LDFLAGS += -R/usr/lib/efcode/$(MACH64) -M mapfile64
+LDFLAGS += -R/usr/lib/efcode/$(MACH64) -Wl,-M mapfile64
 
 LIBS	= fcode.so fcdriver.so
 $(PROG) := LDLIBS += -L$(ADJUNCT_PROTO)/usr/lib/efcode/$(MACH64) \

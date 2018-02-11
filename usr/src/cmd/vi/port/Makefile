@@ -77,7 +77,7 @@ CPPFLAGS +=  -DUSG -DSTDIO -DVMUNIX -DTABS=8 -DSINGLE -DTAG_STACK
 
 # vi maintains its own versions of various routines from libc and libcurses,
 # so localize all symbols to avoid name space collisions.
-LDFLAGS +=	$(MAPFILE.NGB:%=-M%)
+LDFLAGS +=	$(MAPFILE.NGB:%=-Wl,-M%)
 
 CLOBBERFILES += $(LIBPROGS)
 ex :=		LDLIBS += -lmapmalloc -lcurses -lgen -lcrypt_i

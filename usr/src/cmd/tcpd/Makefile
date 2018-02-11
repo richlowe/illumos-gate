@@ -35,9 +35,9 @@ MAPFILE.INT.D=	$(MAPFILE.NGB) mapfile-intf-tcpdchk
 MAPFILE.INT.M=	$(MAPFILE.NGB) mapfile-intf-tcpdmatch
 MAPFILE.INT.F=	$(MAPFILE.NGB) mapfile-intf-tryfrom
 
-tcpdchk :=	LDFLAGS +=$(MAPFILE.INT.D:%=-M%)
-tcpdmatch :=	LDFLAGS +=$(MAPFILE.INT.M:%=-M%)
-try-from :=	LDFLAGS +=$(MAPFILE.INT.F:%=-M%)
+tcpdchk :=	LDFLAGS +=$(MAPFILE.INT.D:%=-Wl,-M%)
+tcpdmatch :=	LDFLAGS +=$(MAPFILE.INT.M:%=-Wl,-M%)
+try-from :=	LDFLAGS +=$(MAPFILE.INT.F:%=-Wl,-M%)
 
 .KEEP_STATE:
 

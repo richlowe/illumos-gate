@@ -42,7 +42,7 @@ OBJS= alias.o arpadate.o bf.o collect.o conf.o control.o convtime.o daemon.o \
 SRCS=	$(OBJS:%.o=%.c)
 
 MAPFILES =	$(MAPFILE.INT) $(MAPFILE.NGB)
-LDFLAGS +=	$(MAPFILES:%=-M%)
+LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)
 
 LDLIBS += 	../libsmutil/libsmutil.a ../libsm/libsm.a -lresolv -lsocket \
 		-lnsl ../db/libdb.a -lldap -lsldap -lwrap -lumem \

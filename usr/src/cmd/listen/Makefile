@@ -53,7 +53,7 @@ ROOTSAFPROG= $(PROG:%=$(LIBSAFD)/%)
 # If debug is needed, then:  CPPFLAGS += -DDEBUG
 
 LDLIBS += -lnsl
-LDFLAGS += $(MAPFILE.NGB:%=-M%)
+LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
 LINTFLAGS = -b -x
 FILEMODE= 0755
 

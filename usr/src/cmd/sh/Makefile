@@ -46,7 +46,7 @@ CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-extra
 CERRWARN += -_gcc=-Wno-unused-variable
 MAPFILES = $(MAPFILE.INT) $(MAPFILE.NGB)
-LDFLAGS += $(MAPFILES:%=-M%)
+LDFLAGS += $(MAPFILES:%=-Wl,-M%)
 LDLIBS += -lgen
 
 .KEEP_STATE:
