@@ -1174,9 +1174,7 @@ TIL=				\
 	tmem.o			\
 	tsd.o
 
-$(TIL:%=pics/%) := CFLAGS64 += $(LIBCBASE)/threads/amd64.il
-
-# pics/mul64.o := CFLAGS64 += crt/mul64.il
+$(TIL:%=pics/%) := CFLAGS64 += -_cc=$(LIBCBASE)/threads/amd64.il
 
 # large-file-aware components that should be built large
 
@@ -1232,7 +1230,6 @@ $(LINTLIB):= LINTFLAGS64=-nvx -m64
 
 # object files that depend on inline template
 $(TIL:%=pics/%): $(LIBCBASE)/threads/amd64.il
-# pics/mul64.o: crt/mul64.il
 
 # include common libc targets
 include ../Makefile.targ

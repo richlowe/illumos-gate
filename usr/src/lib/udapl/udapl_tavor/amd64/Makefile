@@ -27,7 +27,7 @@
 include ../Makefile.com
 include $(SRC)/lib/Makefile.lib.64
 
-amd64_XARCH += amd64.il
+amd64_XARCH += -_cc=amd64.il
 
 pics/%.o: amd64.il
 

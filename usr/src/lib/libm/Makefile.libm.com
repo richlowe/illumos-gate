@@ -45,8 +45,8 @@ LDBLDIR		= $(LDBLDIR_$(MACH))
 
 LM_IL		= $(LIBMDIR)/$(TARGET_ARCH)/src/locallibm.il
 
-CFLAGS		+= $(C_PICFLAGS) $(XSTRCONST) $(LM_IL)
-CFLAGS64	+= $(C_PICFLAGS) $(XSTRCONST) $(LM_IL)
+CFLAGS		+= $(C_PICFLAGS) $(XSTRCONST) -_cc=$(LM_IL)
+CFLAGS64	+= $(C_PICFLAGS) $(XSTRCONST) -_cc=$(LM_IL)
 sparc_CFLAGS	+= -Wa,-xarch=v8plus
 
 CPPFLAGS	+= -I$(LIBMSRC)/C \

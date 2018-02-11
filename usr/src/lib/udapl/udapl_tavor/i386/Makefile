@@ -26,7 +26,7 @@
 
 include ../Makefile.com
 
-i386_XARCH += i386.il
+i386_XARCH += -_cc=i386.il
 
 pics/%.o: i386.il
 

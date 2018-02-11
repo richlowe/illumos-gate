@@ -34,7 +34,7 @@ pics/%.o: $(SRCDIR)/complex/%.c $(LM_IL)
 	$(POST_PROCESS_O)
 
 pics/%.o: $(SRCDIR)/m9x/%.c $(LM_IL) $(m9x_IL)
-	$(COMPILE.c) $(m9x_IL) -o $@ $<
+	$(COMPILE.c) -_cc=$(m9x_IL) -o $@ $<
 	$(POST_PROCESS_O)
 
 $(ROOTLIBDIR): $(ROOTFS_LIBDIR)

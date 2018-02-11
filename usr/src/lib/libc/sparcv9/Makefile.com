@@ -1195,14 +1195,14 @@ TIL=				\
 	tsd.o			\
 	unwind.o
 
-$(TIL:%=pics/%) := CFLAGS64 += $(LIBCBASE)/threads/sparcv9.il
+$(TIL:%=pics/%) := CFLAGS64 += -_cc=$(LIBCBASE)/threads/sparcv9.il
 
 # Files in fp, port/fp subdirectories that need base.il inline template
 IL=				\
 	__flt_decim.o		\
 	decimal_bin.o
 
-$(IL:%=pics/%) := CFLAGS64 += $(LIBCBASE)/fp/base.il
+$(IL:%=pics/%) := CFLAGS64 += -_cc=$(LIBCBASE)/fp/base.il
 
 # Files in fp subdirectory which need __quad.il inline template
 QIL=				\
@@ -1223,13 +1223,9 @@ QIL=				\
 	_Qp_qtox.o		\
 	_Qp_qtoux.o
 
-$(QIL:%=pics/%) := CFLAGS64 += $(LIBCDIR)/$(MACH)/fp/__quad.il
+$(QIL:%=pics/%) := CFLAGS64 += -_cc=$(LIBCDIR)/$(MACH)/fp/__quad.il
 pics/_Qp%.o := CFLAGS64 += -I$(LIBCDIR)/$(MACH)/fp
 pics/_Q%.o := sparcv9_COPTFLAG = -xO4 -xchip=ultra
-
-# Files in crt subdirectory which need muldiv64.il inline template
-#CIL=	mul64.o divrem64.o
-#$(CIL:%=pics/%) := CFLAGS += $(LIBCBASE)/crt/mul64.il
 
 # large-file-aware components that should be built large
 
@@ -1282,7 +1278,6 @@ $(LINTLIB):= LINTFLAGS64=-nvx -m64
 $(TIL:%=pics/%): $(LIBCBASE)/threads/sparcv9.il
 $(IL:%=pics/%): $(LIBCBASE)/fp/base.il
 $(QIL:%=pics/%): $(LIBCDIR)/$(MACH)/fp/__quad.il
-#$(CIL:%=pics/%): $(LIBCBASE)/crt/muldiv64.il
 
 # include common libc targets
 include $(LIBCDIR)/Makefile.targ

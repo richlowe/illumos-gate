@@ -22,7 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 #	This Makefile defines the build rules for the directory
 #	uts/sun4u/serengeti.
@@ -42,7 +42,7 @@ SBDP_IL=$(OBJS_DIR)/sbdp.il
 
 $(OBJS_DIR)/sbdp_mem.o := CC_XARCH_32 = -xarch=v8plusa
 $(OBJS_DIR)/%.o:		$(UTSBASE)/sun4u/serengeti/io/%.c $(SBDP_IL)
-	$(COMPILE.c) $(SBDP_IL) -o $@ $<
+	$(COMPILE.c) -_cc=$(SBDP_IL) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/sun4u/serengeti/ml/%.s

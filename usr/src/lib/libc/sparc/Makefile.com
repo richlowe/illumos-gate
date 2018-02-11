@@ -1268,7 +1268,7 @@ TIL=				\
 	tsd.o			\
 	unwind.o
 
-$(TIL:%=pics/%) := CFLAGS += $(LIBCBASE)/threads/sparc.il
+$(TIL:%=pics/%) := CFLAGS += -_cc=$(LIBCBASE)/threads/sparc.il
 
 # special kludge for inlines with 'cas':
 pics/rwlock.o pics/synch.o pics/lwp.o pics/door_calls.o := \
@@ -1279,7 +1279,7 @@ IL=				\
 	__flt_decim.o		\
 	decimal_bin.o
 
-$(IL:%=pics/%) := CFLAGS += $(LIBCBASE)/fp/base.il
+$(IL:%=pics/%) := CFLAGS += -_cc=$(LIBCBASE)/fp/base.il
 
 # Files in fp subdirectory which need __quad.il inline template
 QIL=				\
@@ -1298,7 +1298,7 @@ QIL=				\
 	_Q_stoq.o		\
 	_Q_sub.o
 
-$(QIL:%=pics/%) := CFLAGS += $(LIBCDIR)/$(MACH)/fp/__quad.il
+$(QIL:%=pics/%) := CFLAGS += -_cc=$(LIBCDIR)/$(MACH)/fp/__quad.il
 pics/_Q%.o := sparc_COPTFLAG = -xO4 -dalign
 pics/__quad%.o := sparc_COPTFLAG = -xO4 -dalign
 

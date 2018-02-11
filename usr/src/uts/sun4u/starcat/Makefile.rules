@@ -22,7 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 #	This Makefile defines the build rules for the directory
 #	uts/sun4u/starcat and its children.
@@ -43,7 +43,7 @@ DRMACH_IL=$(OBJS_DIR)/drmach.il
 
 $(OBJS_DIR)/drmach.o	:= CC_XARCH_32 = -xarch=v8plusa
 $(OBJS_DIR)/%.o:		$(UTSBASE)/sun4u/starcat/io/%.c $(DRMACH_IL)
-	$(COMPILE.c) $(DRMACH_IL) -o $@ $<
+	$(COMPILE.c) -_cc=$(DRMACH_IL) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/sun4u/starcat/os/%.c

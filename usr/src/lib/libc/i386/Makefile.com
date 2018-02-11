@@ -1239,9 +1239,7 @@ TIL=				\
 	unwind.o
 
 THREADS_INLINES = $(LIBCBASE)/threads/i386.il
-$(TIL:%=pics/%) := CFLAGS += $(THREADS_INLINES)
-
-# pics/mul64.o := CFLAGS += $(LIBCBASE)/crt/mul64.il
+$(TIL:%=pics/%) := CFLAGS += -_cc=$(THREADS_INLINES)
 
 # large-file-aware components that should be built large
 
@@ -1300,7 +1298,6 @@ $(LINTLIB):= LINTFLAGS=-nvx
 
 # object files that depend on inline template
 $(TIL:%=pics/%): $(LIBCBASE)/threads/i386.il
-# pics/mul64.o: $(LIBCBASE)/crt/mul64.il
 
 # include common libc targets
 include $(LIBCDIR)/Makefile.targ
