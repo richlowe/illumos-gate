@@ -1069,10 +1069,6 @@ do_gcc(cw_ictx_t *ctx)
 				if (strncmp(arg, "-xinline", 8) == 0)
 					/* No inlining; ignore */
 					break;
-				if (strcmp(arg, "-xildon") == 0 ||
-				    strcmp(arg, "-xildoff") == 0)
-					/* No incremental linking; ignore */
-					break;
 				error(arg);
 				break;
 #if defined(__x86)
