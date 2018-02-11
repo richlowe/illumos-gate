@@ -1077,13 +1077,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 #endif	/* __x86 */
-			case 'n':
-				if (strcmp(arg, "-xnolib") == 0) {
-					nolibc = 1;
-					break;
-				}
-				error(arg);
-				break;
 			case 'O':
 				if (strncmp(arg, "-xO", 3) == 0) {
 					size_t len = strlen(arg);
