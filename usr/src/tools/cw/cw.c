@@ -676,16 +676,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, "-Werror");
 				continue;
 			}
-			if (strcmp(arg, "-pic") == 0) {
-				newae(ctx->i_ae, "-fpic");
-				pic = 1;
-				continue;
-			}
-			if (strcmp(arg, "-PIC") == 0) {
-				newae(ctx->i_ae, "-fPIC");
-				pic = 1;
-				continue;
-			}
 			if (strcmp(arg, "-nolib") == 0) {
 				/* -nodefaultlibs is on by default */
 				nolibc = 1;
