@@ -1111,10 +1111,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 			case 'p':
-				if (strcmp(arg, "-xpentium") == 0) {
-					newae(ctx->i_ae, "-march=pentium");
-					break;
-				}
 				if (strcmp(arg, "-xpg") == 0) {
 					newae(ctx->i_ae, "-pg");
 					break;
