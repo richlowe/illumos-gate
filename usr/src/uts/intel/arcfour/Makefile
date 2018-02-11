@@ -61,7 +61,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 # Overrides
 #
 CPPFLAGS	+= -I$(COM_DIR)
-CFLAGS		+= -xO4 -xcrossfile
+CFLAGS		+= -xO4 -_cc=-xcrossfile
 CLEANFILES	+= arcfour-x86_64.s
 
 #
