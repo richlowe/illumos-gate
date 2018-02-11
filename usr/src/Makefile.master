@@ -311,14 +311,14 @@ V9ABIWARN=
 # this feature (the v9 default) enabled.
 #
 # REGSYM is separate since the C++ driver syntax is different.
-CCREGSYM=		-Wc,-Qiselect-regsym=0
+CCREGSYM=		-_cc=-Wc,-Qiselect-regsym=0
 CCCREGSYM=		-Qoption cg -Qiselect-regsym=0
 
 # Prevent the removal of static symbols by the SPARC code generator (cg).
 # The x86 code generator (ube) does not remove such symbols and as such
 # using this workaround is not applicable for x86.
 #
-CCSTATICSYM=		-Wc,-Qassembler-ounrefsym=0
+CCSTATICSYM=		-_cc=-Wc,-Qassembler-ounrefsym=0
 #
 # generate 32-bit addresses in the v9 kernel. Saves memory.
 CCABS32=		-Wc,-xcode=abs32

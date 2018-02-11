@@ -1017,20 +1017,6 @@ do_gcc(cw_ictx_t *ctx)
 					pic = 1;
 				break;
 			}
-			if (strncmp(arg, "-Wc,-Qiselect", 13) == 0) {
-				/*
-				 * Prevents insertion of register symbols.
-				 * gcc doesn't do this, so ignore it.
-				 */
-				break;
-			}
-			if (strcmp(arg, "-Wc,-Qassembler-ounrefsym=0") == 0) {
-				/*
-				 * Prevents optimizing away of static variables.
-				 * gcc does not do this, so it's not needed.
-				 */
-				break;
-			}
 #if defined(__x86)
 			if (strcmp(arg, "-Wu,-xmodel=kernel") == 0) {
 				newae(ctx->i_ae, "-ffreestanding");
