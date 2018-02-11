@@ -900,13 +900,6 @@ do_gcc(cw_ictx_t *ctx)
 			op = CW_O_PREPROCESS;
 			nolibc = 1;
 			break;
-		case 's':
-			if (arglen == 1) {
-				newae(ctx->i_ae, "-Wl,-s");
-				break;
-			}
-			error(arg);
-			break;
 		case 't':
 			if (arglen == 1) {
 				newae(ctx->i_ae, "-Wl,-t");
@@ -990,6 +983,12 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 				break;
 			case 'O':
+				/* XXX:
+				 * cc and CC support -O now, bare -O defaults to -O3 though
+				 *
+				 * always pass the optim_disable stuff to gcc as we do with others
+				 * cap at 2 with gcc via, well, just doing that.
+				 */
 				if (strncmp(arg, "-xO", 3) == 0) {
 					size_t len = strlen(arg);
 					char *s = NULL;
