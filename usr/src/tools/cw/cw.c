@@ -856,8 +856,7 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'B':	/* linker options */
-		case 'M':
+		case 'M':	/* linker options */
 			{
 				char *opt;
 				size_t len;
