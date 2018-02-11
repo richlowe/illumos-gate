@@ -460,7 +460,9 @@ CGLOBALSTATIC= -_cc=-W0,-xglobalstatic
 
 # Sometimes we want all symbols and types in debugging information even
 # if they aren't used.
-CALLSYMS=	-W0,-xdbggen=no%usedonly
+CALLSYMS=	-_cc=-W0,-xdbggen=no%usedonly \
+	-_gcc=-fno-eliminate-unused-debug-symbols \
+	-_gcc=-fno-eliminate-unused-debug-types
 
 #
 # Default debug format for Sun Studio 11 is dwarf, so force it to

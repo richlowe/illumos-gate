@@ -818,10 +818,13 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'G':
+			/* XXX: ld supports -shared, cc does.  CC doesn't */
+			/* XXX: many ON components pass it by hand, rather than via $(GSHARED) */
 			newae(ctx->i_ae, "-shared");
 			nolibc = 1;
 			break;
 		case 'K':
+			/* XXX: cc supports -fpic/-fPIC, CC doesn't. */
 			if (arglen == 1) {
 				if ((arg = *++ctx->i_oldargv) == NULL ||
 				    *arg == '\0')
@@ -940,13 +943,6 @@ do_gcc(cw_ictx_t *ctx)
 			    strncmp(arg, "-Wp,", 4) == 0 ||
 			    strncmp(arg, "-Wl,", 4) == 0) {
 				newae(ctx->i_ae, arg);
-				break;
-			}
-			if (strcmp(arg, "-W0,-xdbggen=no%usedonly") == 0) {
-				newae(ctx->i_ae,
-				    "-fno-eliminate-unused-debug-symbols");
-				newae(ctx->i_ae,
-				    "-fno-eliminate-unused-debug-types");
 				break;
 			}
 			if (strncmp(arg, "-Wc,-xcode=", 11) == 0) {
