@@ -403,6 +403,7 @@ static int xtbl_size = sizeof (xtbl) / sizeof (xarch_table_t);
 
 static const char *progname;
 
+/* XXX: i386 side unused, SPARCside only 'ultra' used, could in make */
 static const char *xchip_tbl[] = {
 #if defined(__x86)
 	"386",		"-mtune=i386", NULL,
@@ -413,17 +414,6 @@ static const char *xchip_tbl[] = {
 	"super",	"-mtune=supersparc", NULL,
 	"ultra",	"-mtune=ultrasparc", NULL,
 	"ultra3",	"-mtune=ultrasparc3", NULL,
-#endif
-	NULL,		NULL
-};
-
-static const char *xcode_tbl[] = {
-#if defined(__sparc)
-	"abs32",	"-fno-pic", "-mcmodel=medlow", NULL,
-	"abs44",	"-fno-pic", "-mcmodel=medmid", NULL,
-	"abs64",	"-fno-pic", "-mcmodel=medany", NULL,
-	"pic13",	"-fpic", NULL,
-	"pic32",	"-fPIC", NULL,
 #endif
 	NULL,		NULL
 };
@@ -925,12 +915,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				if (strncmp(arg, "-xchip=", 7) == 0) {
 					xlate(ctx->i_ae, arg + 7, xchip_tbl);
-					break;
-				}
-				if (strncmp(arg, "-xcode=", 7) == 0) {
-					xlate(ctx->i_ae, arg + 7, xcode_tbl);
-					if (strncmp(arg + 7, "pic", 3) == 0)
-						pic = 1;
 					break;
 				}
 				error(arg);
