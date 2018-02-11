@@ -928,6 +928,7 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'P':
+			/* XXX: think this is unused */
 			/*
 			 * We could do '-E -o filename.i', but that's hard,
 			 * and we don't need it for the case that's triggering
@@ -938,13 +939,6 @@ do_gcc(cw_ictx_t *ctx)
 			newae(ctx->i_ae, "-E");
 			op = CW_O_PREPROCESS;
 			nolibc = 1;
-			break;
-		case 'q':
-			if (strcmp(arg, "-qp") == 0) {
-				newae(ctx->i_ae, "-p");
-				break;
-			}
-			error(arg);
 			break;
 		case 's':
 			if (arglen == 1) {
