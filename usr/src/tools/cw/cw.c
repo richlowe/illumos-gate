@@ -507,18 +507,6 @@ optim_disable(struct aelist *h, int level)
 }
 
 static void
-Xcmode(struct aelist *h)
-{
-	static int xconce;
-
-	if (xconce++)
-		return;
-
-	newae(h, "-ansi");
-	newae(h, "-pedantic-errors");
-}
-
-static void
 usage()
 {
 	(void) fprintf(stderr,
@@ -851,13 +839,6 @@ do_gcc(cw_ictx_t *ctx)
 			    strncmp(arg, "-Wp,", 4) == 0 ||
 			    strncmp(arg, "-Wl,", 4) == 0) {
 				newae(ctx->i_ae, arg);
-				break;
-			}
-			error(arg);
-			break;
-		case 'X':
-			if (strcmp(arg, "-Xc") == 0) {
-				Xcmode(ctx->i_ae);
 				break;
 			}
 			error(arg);
