@@ -321,7 +321,7 @@ CCCREGSYM=		-Qoption cg -Qiselect-regsym=0
 CCSTATICSYM=		-_cc=-Wc,-Qassembler-ounrefsym=0
 #
 # generate 32-bit addresses in the v9 kernel. Saves memory.
-CCABS32=		-Wc,-xcode=abs32
+CCABS32=		-xcode=abs32
 #
 # generate v9 code which tolerates callers using the v7 ABI, for the sake of
 # system calls.

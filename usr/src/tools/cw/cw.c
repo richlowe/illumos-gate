@@ -936,12 +936,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 				break;
 			}
-			if (strncmp(arg, "-Wc,-xcode=", 11) == 0) {
-				xlate(ctx->i_ae, arg + 11, xcode_tbl);
-				if (strncmp(arg + 11, "pic", 3) == 0)
-					pic = 1;
-				break;
-			}
 #if defined(__x86)
 			if (strcmp(arg, "-Wu,-save_args") == 0) {
 				newae(ctx->i_ae, "-msave-args");
