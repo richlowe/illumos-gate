@@ -603,7 +603,6 @@ do_gcc(cw_ictx_t *ctx)
 	int pic = 0, nolibc = 0;
 	int in_output = 0, seen_o = 0, c_files = 0;
 	cw_op_t op = CW_O_LINK;
-	char *model = NULL;
 	int	mflag = 0;
 
 	if (ctx->i_flags & CW_F_PROG) {
@@ -712,6 +711,7 @@ do_gcc(cw_ictx_t *ctx)
 		case 'g':
 			/* XXX: use the debugformat option we already have to pass this */
 			/* just accept -g */
+			/* Though note that we use -g a lot by hand, so that needs tidying */
 			newae(ctx->i_ae, "-gdwarf-2");
 			break;
 		case 'E':
@@ -989,18 +989,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-#if defined(__x86)
-			case 'm':
-				if (strcmp(arg, "-xmodel=kernel") == 0) {
-					newae(ctx->i_ae, "-ffreestanding");
-					newae(ctx->i_ae, "-mno-red-zone");
-					model = "-mcmodel=kernel";
-					nolibc = 1;
-					break;
-				}
-				error(arg);
-				break;
-#endif	/* __x86 */
 			case 'O':
 				if (strncmp(arg, "-xO", 3) == 0) {
 					size_t len = strlen(arg);
@@ -1153,8 +1141,6 @@ do_gcc(cw_ictx_t *ctx)
 	if (op == CW_O_LINK && (ctx->i_flags & CW_F_SHADOW))
 		exit(0);
 
-	if (model && !pic)
-		newae(ctx->i_ae, model);
 	if (!nolibc)
 		newae(ctx->i_ae, "-lc");
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {
