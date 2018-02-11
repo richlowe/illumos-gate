@@ -514,8 +514,8 @@ SPACEFLAG64		= $($(MACH64)_SPACEFLAG)
 # wrap arounds and so a flag is needed to use the legacy behaviour
 # (without this flag panics/hangs could be exposed within the source).
 #
-sparc_IROPTFLAG		= -W2,-xwrap_int
-sparcv9_IROPTFLAG	= -W2,-xwrap_int
+sparc_IROPTFLAG		= -_cc=-W2,-xwrap_int
+sparcv9_IROPTFLAG	= -_cc=-W2,-xwrap_int
 i386_IROPTFLAG		=
 amd64_IROPTFLAG		=
 

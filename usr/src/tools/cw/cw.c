@@ -1011,14 +1011,6 @@ do_gcc(cw_ictx_t *ctx)
 				    "-fno-eliminate-unused-debug-types");
 				break;
 			}
-			if (strcmp(arg, "-W2,-xwrap_int") == 0) {
-				/*
-				 * Use the legacy behaviour (pre-SS11)
-				 * for integer wrapping.
-				 * gcc does not need this.
-				 */
-				break;
-			}
 			if (strcmp(arg, "-Wd,-xsafe=unboundsym") == 0) {
 				/*
 				 * Prevents optimizing away checks for
