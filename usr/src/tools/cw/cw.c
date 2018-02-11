@@ -651,16 +651,6 @@ do_gcc(cw_ictx_t *ctx)
 #endif
 
 	/*
-	 * This is needed because 'u' is defined
-	 * under a conditional on 'sun'.  Should
-	 * probably just remove the conditional,
-	 * or make it be dependent on '__sun'.
-	 *
-	 * -Dunix is also missing in enhanced ANSI mode
-	 */
-	newae(ctx->i_ae, "-D__sun");
-
-	/*
 	 * Walk the argument list, translating as we go ..
 	 */
 
