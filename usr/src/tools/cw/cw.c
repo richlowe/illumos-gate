@@ -851,13 +851,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'f':
-			if (strcmp(arg, "-flags") == 0) {
-				newae(ctx->i_ae, "--help");
-				break;
-			}
-			error(arg);
-			break;
 		case 'G':
 			newae(ctx->i_ae, "-shared");
 			nolibc = 1;
