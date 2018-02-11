@@ -1110,13 +1110,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'p':
-				if (strcmp(arg, "-xpg") == 0) {
-					newae(ctx->i_ae, "-pg");
-					break;
-				}
-				error(arg);
-				break;
 			case 'r':
 				if (strncmp(arg, "-xregs=", 7) == 0) {
 					xlate(ctx->i_ae, arg + 7, xregs_tbl);
