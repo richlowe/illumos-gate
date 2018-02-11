@@ -324,7 +324,7 @@ ROOTLIBDIR=     $(ROOT)/usr/4lib
 CPPFLAGS= -Dsparc \
 	-I. -Iinc -I../inc/include -I../inc/include/sys $(CPPFLAGS.master)
 ASFLAGS=  -P -D__STDC__ -DLOCORE -D_SYS_SYS_S -D_ASM $(CPPFLAGS)
-LDLIBS= -t -R/usr/ucblib -L$(ROOT)/usr/ucblib $(LDLIBS.lib) \
+LDLIBS= -Wl,-t -R/usr/ucblib -L$(ROOT)/usr/ucblib $(LDLIBS.lib) \
 	-lucb -lc -lnsl -lsocket
 
 CERRWARN += -_gcc=-Wno-implicit-function-declaration

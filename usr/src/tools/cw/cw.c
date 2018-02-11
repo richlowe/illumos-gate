@@ -900,9 +900,9 @@ do_gcc(cw_ictx_t *ctx)
 			op = CW_O_PREPROCESS;
 			nolibc = 1;
 			break;
-		case 't':
+		case 's':
 			if (arglen == 1) {
-				newae(ctx->i_ae, "-Wl,-t");
+				newae(ctx->i_ae, "-Wl,-s");
 				break;
 			}
 			error(arg);
