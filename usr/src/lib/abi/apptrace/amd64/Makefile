@@ -23,13 +23,6 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-
-# Because we are compiling native, we ask ../Makefile.com to suppress
-# linking with any 64-bit libraries unless the build machine is able
-# to run amd64 64-bit executables:
-SUPPRESS_LIBS:sh= if test -z "`isainfo | grep amd64`"; then echo \\043; fi
 
 include ../Makefile.com
 include ../../../Makefile.lib.64

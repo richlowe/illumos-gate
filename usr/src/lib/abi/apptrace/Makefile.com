@@ -37,12 +37,7 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 # No mapfile here
 MAPFILES =
 
-# Because we are compiling native, amd64/Makefile wants us to suppress
-# linking with any 64-bit libraries unless the build machine is able
-# to run amd64 64-bit executables:
-ZDEFS =
-$(SUPPRESS_LIBS)LDLIBS += -lmapmalloc -lproc -lctf -lc
-$(SUPPRESS_LIBS)ZDEFS = -zdefs
+LDLIBS += -lmapmalloc -lproc -lctf -lc
 
 all:	$(LIBS)
 
