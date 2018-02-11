@@ -676,13 +676,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, "-Werror");
 				continue;
 			}
-			if (strcmp(arg, "-noex") == 0) {
-				/* no exceptions */
-				newae(ctx->i_ae, "-fno-exceptions");
-				/* no run time type descriptor information */
-				newae(ctx->i_ae, "-fno-rtti");
-				continue;
-			}
 			if (strcmp(arg, "-pic") == 0) {
 				newae(ctx->i_ae, "-fpic");
 				pic = 1;
