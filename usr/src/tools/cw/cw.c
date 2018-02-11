@@ -600,7 +600,7 @@ static void
 do_gcc(cw_ictx_t *ctx)
 {
 	int c;
-	int pic = 0, nolibc = 0;
+	int nolibc = 0;
 	int in_output = 0, seen_o = 0, c_files = 0;
 	cw_op_t op = CW_O_LINK;
 	int	mflag = 0;
@@ -708,6 +708,14 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
+		case 'f':
+			if ((strcmp(arg, "-fpic") == 0) ||
+			    (strcmp(arg, "-fPIC") == 0)) {
+				newae(ctx->i_ae, arg);
+				break;
+			}
+			error(arg);
+			break;
 		case 'g':
 			/* XXX: use the debugformat option we already have to pass this */
 			/* just accept -g */
@@ -804,28 +812,6 @@ do_gcc(cw_ictx_t *ctx)
 			/* XXX: many ON components pass it by hand, rather than via $(GSHARED) */
 			newae(ctx->i_ae, "-shared");
 			nolibc = 1;
-			break;
-		case 'K':
-			/* XXX: cc supports -fpic/-fPIC, CC doesn't. */
-			if (arglen == 1) {
-				if ((arg = *++ctx->i_oldargv) == NULL ||
-				    *arg == '\0')
-					error("-K");
-				ctx->i_oldargc--;
-			} else {
-				arg += 2;
-			}
-			if (strcmp(arg, "pic") == 0) {
-				newae(ctx->i_ae, "-fpic");
-				pic = 1;
-				break;
-			}
-			if (strcmp(arg, "PIC") == 0) {
-				newae(ctx->i_ae, "-fPIC");
-				pic = 1;
-				break;
-			}
-			error("-K");
 			break;
 		case 'm':
 			if (strcmp(arg, "-mt") == 0) {

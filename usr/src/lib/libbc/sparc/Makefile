@@ -341,7 +341,7 @@ $(DYNLIB4X) :=	SONAME = $(DYNLIB4X)
 $(DYNLIBS5) :=	SONAME = $(DYNLIBS5)
 
 pics/%.o:= ASFLAGS += -K pic -DPIC
-pics/%.o:= CPPFLAGS += -K pic -DPIC
+pics/%.o:= CPPFLAGS += $(C_PICFLAGS) -DPIC
 s5pics/%.o:= ASFLAGS += -K pic -DPIC
 DYNFLAGS += $(ZINTERPOSE)
 
@@ -381,7 +381,7 @@ CLEANFILES= ../libc/yp/ypupdate_prot.c ../inc/include/rpcsvc/ypupdate_prot.h \
 CLOBBERFILES= ../libc/compat/sys5/mkepoch
 
 # conditional assignments
-s5pics/%.o:= CPPFLAGS = -Dsparc -DS5EMUL -K pic -DPIC -I. -Iinc \
+s5pics/%.o:= CPPFLAGS = -Dsparc -DS5EMUL $(C_PICFLAGS) -DPIC -I. -Iinc \
 	-I../inc/5include -I../inc/include -I../inc/include/sys \
 	$(CPPFLAGS.master)
 
