@@ -691,13 +691,6 @@ do_gcc(cw_ictx_t *ctx)
 			else
 				error(arg);
 			break;
-		case '#':
-			if (arglen == 1) {
-				newae(ctx->i_ae, "-v");
-				break;
-			}
-			error(arg);
-			break;
 		case 'f':
 			if ((strcmp(arg, "-fpic") == 0) ||
 			    (strcmp(arg, "-fPIC") == 0)) {
