@@ -766,16 +766,7 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			break;
 		case 'd':
-			if (arglen == 2) {
-				if (strcmp(arg, "-dy") == 0) {
-					newae(ctx->i_ae, "-Wl,-dy");
-					break;
-				}
-				if (strcmp(arg, "-dn") == 0) {
-					newae(ctx->i_ae, "-Wl,-dn");
-					break;
-				}
-			}
+			/* XXX: easy guarding target, but heavily used */
 			if (strcmp(arg, "-dalign") == 0) {
 				/*
 				 * -dalign forces alignment in some cases;
