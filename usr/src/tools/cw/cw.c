@@ -628,11 +628,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'f':
-			if ((strcmp(arg, "-fpic") == 0) ||
-			    (strcmp(arg, "-fPIC") == 0))
-				newae(ctx->i_ae, arg);
-			break;
 		case 'g':
 			/* XXX: use the debugformat option we already have to pass this */
 			/* just accept -g */
