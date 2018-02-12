@@ -78,7 +78,7 @@ APIMAP = $(SRC)/cmd/fm/fmd/common/fmd_api.map
 FMRIMAP = $(SRC)/cmd/fm/fmd/common/fmd_fmri.map
 
 CFLAGS += $(CTF_FLAGS) $(CCVERBOSE) $(XSTRCONST) $(CC_PICFLAGS)
-CFLAGS += -G $(XREGSFLAG) 
+CFLAGS += $(GSHARED) $(XREGSFLAG) 
 
 CPPFLAGS += -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT
 LDFLAGS += $(ZDEFS) $(ZTEXT) $(ZIGNORE)

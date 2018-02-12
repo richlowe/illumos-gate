@@ -38,7 +38,7 @@ MAPFILES=
 ASFLAGS=	-P -D_ASM	$(CPPFLAGS)
 DYNFLAGS +=	$(BLOCAL) $(ZNOVERSION) $(ZINITFIRST)
 LDLIBS +=	-lc
-BUILD.SO=       $(LD) -o $@ -G $(DYNFLAGS) $(CRTI) $(PICS) $(LDLIBS) $(CRTN)
+BUILD.SO=       $(LD) -o $@ $(GSHARED) $(DYNFLAGS) $(CRTI) $(PICS) $(LDLIBS) $(CRTN)
 BUILD.s=	$(AS) $(ASFLAGS) $< -o $@
 
 SRCS=		$(OBJECTS:%.o=../common/%.c)

@@ -89,7 +89,7 @@ clean.lint:	$(CLEAN_LINT_DEPS)
 install:	$(INSTALL_DEPS)
 
 $(PLATLIB):	$(BINARY)
-	$(LD) -o $(PLATLIB) -G $(BINARY) -h misc/platmod
+	$(LD) -o $(PLATLIB) $(GSHARED) $(BINARY) -h misc/platmod
 
 #
 #	Include common targets.

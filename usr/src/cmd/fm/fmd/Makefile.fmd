@@ -127,7 +127,7 @@ $(PROG) := LDFLAGS += -R/usr/lib/fm
 $(PROG) := LDLIBS += -L$(ROOTLIB)/fm -ltopo -ldiagcode -lsysevent -lsmbios \
 		-luuid -lnvpair -lexacct -lnsl -lumem -ldevinfo -lfmd_msg
 
-$(DMOD) := CFLAGS += $(CC_PICFLAGS) -G $(XREGSFLAG)
+$(DMOD) := CFLAGS += $(CC_PICFLAGS) $(GSHARED) $(XREGSFLAG)
 $(DMOD) := LDFLAGS += $(ZTEXT) $(ZDEFS) $(MAPFILE-DMOD:%=-Wl,-M%)
 
 #

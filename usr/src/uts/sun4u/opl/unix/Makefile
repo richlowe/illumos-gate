@@ -170,7 +170,7 @@ $(KRTLD_O):	$(KRTLD_OBJECTS)
 #	CPU_OBJ is defined to allow for building multiple CPU_OBJ's
 #
 $(CPULIB):	$(CPU_OBJ)
-	$(LD) -o $@ -G -h 'cpu/$$CPU' $(CPU_OBJ)
+	$(LD) -o $@ $(GSHARED) -h 'cpu/$$CPU' $(CPU_OBJ)
 
 #
 #	The global lint target builds the kernel lint library (llib-lunix.ln)

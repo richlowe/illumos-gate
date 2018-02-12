@@ -95,7 +95,7 @@ check:
 LINT_LIB_DIR	= $(SCHUMACHER_LINT_LIB_DIR)
 
 $(PLATLIB):	$(BINARY)
-	${LD} -o $(PLATLIB) -G $(BINARY)
+	${LD} -o $(PLATLIB) $(GSHARED) $(BINARY)
 
 $(SYM_MOD):	$(UNIX_O) $(PLATLIB)
 	@echo "resolving symbols against unix.o"

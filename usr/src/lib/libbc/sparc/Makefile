@@ -399,11 +399,11 @@ $(DYNLIBS5):= DIR = s5pics
 all: $(TXTS) $(LIBS)
 
 $(DYNLIB4X): pics .WAIT $(PICS)
-	$(CC) -o $@ -G $(DYNFLAGS) $(PICS) $(LDLIBS)
+	$(CC) -o $@ $(GSHARED) $(DYNFLAGS) $(PICS) $(LDLIBS)
 	$(POST_PROCESS_SO)
 
 $(DYNLIBS5): s5pics .WAIT $(S5PICOBJS)
-	$(CC) -o $@ -G $(DYNFLAGS) $(S5PICOBJS) $(LDLIBS)
+	$(CC) -o $@ $(GSHARED) $(DYNFLAGS) $(S5PICOBJS) $(LDLIBS)
 	$(POST_PROCESS_SO)
 
 # include common library targets
