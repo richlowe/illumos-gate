@@ -34,7 +34,7 @@ include $(TOPDIR)/lib/Makefile.lib
 include $(TOPDIR)/psm/stand/lib/Makefile.lib
 include $(TOPDIR)/psm/Makefile.psm.64
 
-CFLAGS64	+= -xchip=ultra $(CCABS32)
+CFLAGS64	+= -_cc=-xchip=ultra -_gcc=-mtune=ultrasparc $(CCABS32)
 CERRWARN	+= -_gcc=-Wno-parentheses
 
 PROMDIR =	$(TOPDIR)/psm/promif/ieee1275/common

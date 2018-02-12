@@ -616,7 +616,9 @@ BUILD.po= $(XGETTEXT) $(XGETFLAGS) -d $(<F) $<.i ;\
 #
 POFILE= $(PROG).po
 
-sparc_CCFLAGS=		-cg92 -_cc=-compat=4 \
+sparc_CCFLAGS=		-m32 -_cc=-cg92 -_gcc=-mtune=supersparc \
+			-_gcc=-mcpu=v8 -_gcc=-mno-v8plus \
+			-_cc=-compat=4 \
 			-Qoption ccfe -messages=no%anachronism \
 			$(CCERRWARN)
 sparcv9_CCFLAGS=	$(sparcv9_XARCH) -dalign -_cc=-compat=5 \

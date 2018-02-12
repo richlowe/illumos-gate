@@ -170,7 +170,7 @@ CC_XARCH	= -m64 -xarch=sparcvis
 AS_XARCH	= -xarch=v9v
 COPTIMIZE	= -xO3
 
-CFLAGS		= -xchip=ultra $(CCABS32) $(CCREGSYM)
+CFLAGS		= -_cc=-xchip=ultra -_gcc=-mtune=ultrasparc $(CCABS32) $(CCREGSYM)
 CFLAGS		+= $(CC_XARCH)
 CFLAGS		+= $(COPTIMIZE)
 CFLAGS		+= $(EXTRA_CFLAGS)

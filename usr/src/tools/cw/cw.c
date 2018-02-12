@@ -403,21 +403,6 @@ static int xtbl_size = sizeof (xtbl) / sizeof (xarch_table_t);
 
 static const char *progname;
 
-/* XXX: i386 side unused, SPARCside only 'ultra' used, could in make */
-static const char *xchip_tbl[] = {
-#if defined(__x86)
-	"386",		"-mtune=i386", NULL,
-	"486",		"-mtune=i486", NULL,
-	"pentium",	"-mtune=pentium", NULL,
-	"pentium_pro",  "-mtune=pentiumpro", NULL,
-#elif defined(__sparc)
-	"super",	"-mtune=supersparc", NULL,
-	"ultra",	"-mtune=ultrasparc", NULL,
-	"ultra3",	"-mtune=ultrasparc3", NULL,
-#endif
-	NULL,		NULL
-};
-
 static void
 nomem(void)
 {
@@ -543,26 +528,6 @@ xlate_xtb(struct aelist *h, const char *xarg)
 }
 
 static void
-xlate(struct aelist *h, const char *xarg, const char **table)
-{
-	while (*table != NULL && strcmp(xarg, *table) != 0) {
-		while (*table != NULL)
-			table++;
-		table++;
-	}
-
-	if (*table == NULL)
-		error(xarg);
-
-	table++;
-
-	while (*table != NULL) {
-		newae(h, *table);
-		table++;
-	}
-}
-
-static void
 do_gcc(cw_ictx_t *ctx)
 {
 	int c;
@@ -640,13 +605,6 @@ do_gcc(cw_ictx_t *ctx)
 				nolibc = 1;
 				continue;
 			}
-#if defined(__sparc)
-			if (strcmp(arg, "-cg92") == 0) {
-				mflag |= xlate_xtb(ctx->i_ae, "v8");
-				xlate(ctx->i_ae, "super", xchip_tbl);
-				continue;
-			}
-#endif	/* __sparc */
 		}
 
 		switch ((c = arg[1])) {
@@ -849,10 +807,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				if (strncmp(arg, "-xc99=%none", 11) == 0) {
 					newae(ctx->i_ae, "-std=gnu89");
-					break;
-				}
-				if (strncmp(arg, "-xchip=", 7) == 0) {
-					xlate(ctx->i_ae, arg + 7, xchip_tbl);
 					break;
 				}
 				error(arg);

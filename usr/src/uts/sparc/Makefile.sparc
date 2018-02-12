@@ -123,7 +123,7 @@ COPTIMIZE_64	= -xO3
 COPTIMIZE	= $(COPTIMIZE_$(CLASS))
 
 CFLAGS_32	= -xcg92
-CFLAGS_64	= -xchip=ultra $(CCABS32) $(CCREGSYM)
+CFLAGS_64	= -_cc=-xchip=ultra -_gcc=-mtune=ultrasparc $(CCABS32) $(CCREGSYM)
 CFLAGS		= $(CFLAGS_$(CLASS))
 
 CFLAGS		+= $(XARCH)
