@@ -895,7 +895,7 @@ ZREDLOCSYM=	-Wl,-zredlocsym
 ZTEXT=		-Wl,-ztext
 ZVERBOSE=	-Wl,-zverbose
 
-GSHARED=	-G
+GSHARED=	-shared
 CCMT=		-mt
 
 # Handle different PIC models on different ISAs

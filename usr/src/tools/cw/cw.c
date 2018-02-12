@@ -634,6 +634,13 @@ do_gcc(cw_ictx_t *ctx)
 			/* Though note that we use -g a lot by hand, so that needs tidying */
 			newae(ctx->i_ae, "-gdwarf-2");
 			break;
+		case 's':
+			if (strcmp(arg, "-shared") == 0) {
+			    newae(ctx->i_ae, "-shared");
+			    break;
+			}
+			error(arg);
+			break;
 		case 'E':
 			if (arglen == 1) {
 				newae(ctx->i_ae, "-xc");
@@ -718,12 +725,6 @@ do_gcc(cw_ictx_t *ctx)
 				break;
 			}
 			error(arg);
-			break;
-		case 'G':
-			/* XXX: ld supports -shared, cc does.  CC doesn't */
-			/* XXX: many ON components pass it by hand, rather than via $(GSHARED) */
-			newae(ctx->i_ae, "-shared");
-			nolibc = 1;
 			break;
 		case 'm':
 			if (strcmp(arg, "-mt") == 0) {
