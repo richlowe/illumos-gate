@@ -637,6 +637,7 @@ do_gcc(cw_ictx_t *ctx)
 		case 's':
 			if (strcmp(arg, "-shared") == 0) {
 			    newae(ctx->i_ae, "-shared");
+			    nolibc = 1;
 			    break;
 			}
 			error(arg);
