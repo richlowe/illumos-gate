@@ -24,8 +24,6 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 #
 # ctfstabs requires an object file with CTF data, and a file containing
@@ -109,6 +107,35 @@ sub runit {
 	}
 }
 
+# the same as runit, but argv must no be a list, so perl runs the shell.
+sub redirit {
+	my $argv = join " ", @_;
+	my $prog = $_[0];
+	my $rc;
+
+	if ($Verbose) {
+		print STDERR "+ $argv\n";
+	}
+	if ((my $rc = system($argv)) == -1) {
+		bail("Failed to execute $prog: $!");
+	} elsif (WIFEXITED($rc)) {
+		$_ = WEXITSTATUS($rc);
+		if ($_ == 0) {
+			return;
+		} else {
+			bail("$prog failed with status $_");
+		}
+	} elsif (WSIGNALLED($rc)) {
+		$_ = WTERMSIG($rc);
+		# WCOREDUMP isn't a POSIX macro, do it the non-portable way.
+		if ($rc & 0x80) {
+			bail("$prog failed with signal $_ (core dumped)");
+		} else {
+			bail("$prog failed with signal $_");
+		}
+	}
+}
+
 #
 # Main.
 #
@@ -164,7 +191,7 @@ runit($cc, @cflags, '-c', '-o', $OTmp, $CTmp);
 runit($ctfconvert, '-l', 'ctfstabs', $OTmp);
 
 # Run ctfstabs on the resulting mess.
-runit($cc, @cflags, "-P", "-o", "$GenPPTmp", $GenTmp);
+redirit($cc, @cflags, "-E", $GenTmp, ">", "$GenPPTmp");
 runit($ctfstabs, "-t", "genassym", "-i", $GenPPTmp, $OTmp);
 
 cleanup();

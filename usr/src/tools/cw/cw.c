@@ -670,6 +670,11 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
+		case 'f':
+			if ((strcmp(arg, "-fpic") == 0) ||
+			    (strcmp(arg, "-fPIC") == 0))
+				newae(ctx->i_ae, arg);
+			break;
 		case 'g':
 			/* XXX: use the debugformat option we already have to pass this */
 			/* just accept -g */
@@ -790,26 +795,6 @@ do_gcc(cw_ictx_t *ctx)
 		case 'O':
 			if (arglen == 1) {
 				newae(ctx->i_ae, "-O");
-				break;
-			}
-			error(arg);
-			break;
-		case 'P':
-			/* XXX: think this is unused */
-			/*
-			 * We could do '-E -o filename.i', but that's hard,
-			 * and we don't need it for the case that's triggering
-			 * this addition.  We'll require the user to specify
-			 * -o in the Makefile.  If they don't they'll find out
-			 * in a hurry.
-			 */
-			newae(ctx->i_ae, "-E");
-			op = CW_O_PREPROCESS;
-			nolibc = 1;
-			break;
-		case 's':
-			if (arglen == 1) {
-				newae(ctx->i_ae, "-Wl,-s");
 				break;
 			}
 			error(arg);
@@ -960,7 +945,7 @@ do_gcc(cw_ictx_t *ctx)
 	if (c_files > 1 && (ctx->i_flags & CW_F_SHADOW) &&
 	    op != CW_O_PREPROCESS) {
 		(void) fprintf(stderr, "%s: error: multiple source files are "
-		    "allowed only with -E or -P\n", progname);
+		    "allowed only with -E\n", progname);
 		exit(2);
 	}
 
