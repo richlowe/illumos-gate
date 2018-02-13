@@ -71,7 +71,7 @@ CFLAGS += $(CCDALIGN)
 #
 # For niagara specific optimizations
 #
-COPTIMIZE	= -xO5 -xbuiltin=%all
+COPTIMIZE	= -xO5 -_cc=-xbuiltin=%all -_gcc=-fbuiltin
 
 #
 # Override the default -xspace setting

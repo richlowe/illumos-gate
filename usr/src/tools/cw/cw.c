@@ -762,14 +762,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'b':
-				if (strncmp(arg, "-xbuiltin=", 10) == 0) {
-					if (strcmp(arg + 10, "%all"))
-						newae(ctx->i_ae, "-fbuiltin");
-					break;
-				}
-				error(arg);
-				break;
 			case 'c':
 				if (strncmp(arg, "-xc99=%all", 10) == 0) {
 					newae(ctx->i_ae, "-std=gnu99");
