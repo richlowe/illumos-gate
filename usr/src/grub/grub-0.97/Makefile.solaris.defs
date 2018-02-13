@@ -54,7 +54,7 @@ CCDEPMODE	= depmode=none
 CCAS		= $(CC)
 CCASFLAGS	= $(BASE_CCASFLAGS)
 
-CPP		= $(CC) -E
+CPP		= $(CC) -_gcc=-xc -E
 
 # $(ENVCPPFLAGS4), if defined, should be something like "-Y I,somepath".
 # We want to get rid of the "-Y I," part but make's pattern replacement

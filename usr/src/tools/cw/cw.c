@@ -644,10 +644,9 @@ do_gcc(cw_ictx_t *ctx)
 			break;
 		case 'E':
 			if (arglen == 1) {
-				newae(ctx->i_ae, "-xc");
-				newae(ctx->i_ae, arg);
 				op = CW_O_PREPROCESS;
 				nolibc = 1;
+				newae(ctx->i_ae, arg);
 				break;
 			}
 			error(arg);
