@@ -714,9 +714,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			if (strcmp(arg, "-m64") == 0) {
 				newae(ctx->i_ae, "-m64");
-#if defined(__x86)
-				newae(ctx->i_ae, "-mtune=opteron");
-#endif
 				mflag |= M64;
 				break;
 			}
