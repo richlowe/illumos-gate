@@ -705,10 +705,6 @@ do_gcc(cw_ictx_t *ctx)
 			/* XX64 -- ignore all -erroff= options, for now */
 			if (strncmp(arg, "-erroff=", 8) == 0)
 				break;
-			if (strcmp(arg, "-errtags=yes") == 0) {
-				warnings(ctx->i_ae);
-				break;
-			}
 			error(arg);
 			break;
 		case 'm':

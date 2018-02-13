@@ -400,10 +400,11 @@ XSTRCONST=		-_cc=-xstrconst
 
 #
 # turn warnings into errors (C)
-CERRWARN = -errtags=yes -_cc=-errwarn=%all
+CERRWARN = -_cc=-errtags=yes -_cc=-errwarn=%all
 CERRWARN += -_cc=-erroff=E_EMPTY_TRANSLATION_UNIT
 CERRWARN += -_cc=-erroff=E_STATEMENT_NOT_REACHED
 
+CERRWARN += -_gcc=-Wall -_gcc=-Wextra
 CERRWARN += -_gcc=-Werror
 CERRWARN += -_gcc=-Wno-missing-braces
 CERRWARN += -_gcc=-Wno-sign-compare
