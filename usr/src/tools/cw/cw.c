@@ -418,16 +418,6 @@ error(const char *arg)
 }
 
 static void
-optim_disable(struct aelist *h, int level)
-{
-	if (level >= 2) {
-		newae(h, "-fno-strict-aliasing");
-		newae(h, "-fno-unit-at-a-time");
-		newae(h, "-fno-optimize-sibling-calls");
-	}
-}
-
-static void
 usage()
 {
 	(void) fprintf(stderr,
@@ -634,7 +624,6 @@ do_gcc(cw_ictx_t *ctx)
 				/* XXX:
 				 * cc and CC support -O now, bare -O defaults to -O3 though
 				 *
-				 * always pass the optim_disable stuff to gcc as we do with others
 				 * cap at 2 with gcc via, well, just doing that.
 				 */
 				if (strncmp(arg, "-xO", 3) == 0) {
@@ -650,12 +639,6 @@ do_gcc(cw_ictx_t *ctx)
 					if (level > 5)
 						error(arg);
 					if (level >= 2) {
-						/*
-						 * For gcc-3.4.x at -O2 we
-						 * need to disable optimizations
-						 * that break ON.
-						 */
-						optim_disable(ctx->i_ae, level);
 						/*
 						 * limit -xO3 to -O2 as well.
 						 */

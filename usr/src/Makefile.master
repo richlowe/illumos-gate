@@ -581,6 +581,9 @@ CDEFAULT_FLAGS += -_gcc=-fno-builtin
 CDEFAULT_FLAGS += -_gcc=-fno-asm
 CDEFAULT_FLAGS += -_gcc=-fdiagnostics-show-option
 CDEFAULT_FLAGS += -_gcc=-nodefaultlibs
+CDEFAULT_FLAGS += -_gcc=-fno-strict-aliasing
+CDEFAULT_FLAGS += -_gcc=-fno-unit-at-a-time
+CDEFAULT_FLAGS += -_gcc=-fno-optimize-sibling-calls
 CDEFAULT_FLAGS += $($(MACH)_CDEFAULT_FLAGS)
 
 CFLAGS=         $(CDEFAULT_FLAGS) $(COPTFLAG) $($(MACH)_CFLAGS) $(SPACEFLAG) $(CCMODE) \
