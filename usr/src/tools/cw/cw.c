@@ -709,10 +709,6 @@ do_gcc(cw_ictx_t *ctx)
 				warnings(ctx->i_ae);
 				break;
 			}
-			if (strcmp(arg, "-errwarn=%all") == 0) {
-				newae(ctx->i_ae, "-Werror");
-				break;
-			}
 			error(arg);
 			break;
 		case 'm':

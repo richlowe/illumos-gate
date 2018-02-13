@@ -212,8 +212,8 @@ AS_CPPFLAGS	= $(ALWAYS_DEFS) $(ALL_DEFS) $(CONFIG_DEFS) $(AS_DEFS) \
 #	all kernel implementations.
 #
 
-# Override the default, the kernel is squeaky clean
-CERRWARN = -errtags=yes -errwarn=%all
+# Override the Studio defaults, the kernel is squeaky clean
+CERRWARN = -errtags=yes -_cc=-errwarn=%all
 
 CERRWARN += -_gcc=-Wno-missing-braces
 CERRWARN += -_gcc=-Wno-sign-compare
