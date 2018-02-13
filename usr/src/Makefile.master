@@ -295,11 +295,11 @@ CCMODE=			-_cc=-Xa
 CCMODE64=		-_cc=-Xa
 
 #
-# C compiler verbose mode. This is so we can enable it globally,
-# but turn it off in the lower level makefiles of things we cannot
-# (or aren't going to) fix.
+# This used to be how compilation warnings were selectively enabled.  That
+# happens via CERRWARN now.  The variable is left to help document the many,
+# many Makefiles which reference $(CCVERBOSE)
 #
-CCVERBOSE=		-v
+CCVERBOSE=
 
 # set this to the secret flag "-Wc,-Qiselect-v9abiwarn=1" to get warnings
 # from the compiler about places the -xarch=v9 may differ from -xarch=v9c.
@@ -403,12 +403,11 @@ XSTRCONST=		-_cc=-xstrconst
 
 #
 # turn warnings into errors (C)
-CERRWARN = -_cc=-errtags=yes -_cc=-errwarn=%all
+CERRWARN = -_cc=-v -_cc=-errtags=yes -_cc=-errwarn=%all
 CERRWARN += -_cc=-erroff=E_EMPTY_TRANSLATION_UNIT
 CERRWARN += -_cc=-erroff=E_STATEMENT_NOT_REACHED
 
-CERRWARN += -_gcc=-Wall -_gcc=-Wextra
-CERRWARN += -_gcc=-Werror
+CERRWARN += -_gcc=-Wall -_gcc=-Wextra -_gcc=-Werror
 CERRWARN += -_gcc=-Wno-missing-braces
 CERRWARN += -_gcc=-Wno-sign-compare
 CERRWARN += -_gcc=-Wno-unknown-pragmas
@@ -438,7 +437,7 @@ CCDALIGN=	-_cc=-dalign
 # In most places, assignments to these macros should be appended with +=
 # (CPPFLAGS.first allows values to be prepended to CPPFLAGS).
 sparc_CFLAGS=	$(sparc_XARCH) $(CCSTATICSYM)
-sparcv9_CFLAGS=	$(sparcv9_XARCH) $(CCDALIGN) $(CCVERBOSE) $(V9ABIWARN) $(CCREGSYM) \
+sparcv9_CFLAGS=	$(sparcv9_XARCH) $(CCDALIGN) $(V9ABIWARN) $(CCREGSYM) \
 		$(CCSTATICSYM)
 i386_CFLAGS=	$(i386_XARCH)
 amd64_CFLAGS=	$(amd64_XARCH)

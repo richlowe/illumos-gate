@@ -417,25 +417,6 @@ error(const char *arg)
 	exit(2);
 }
 
-/*
- * Add the current favourite set of warnings to the gcc invocation.
- */
-static void
-warnings(struct aelist *h)
-{
-	static int warningsonce;
-
-	if (warningsonce++)
-		return;
-
-	/*
-	 * Enable as many warnings as exist, then disable those that we never
-	 * ever want.
-	 */
-	newae(h, "-Wall");
-	newae(h, "-Wextra");
-}
-
 static void
 optim_disable(struct aelist *h, int level)
 {
@@ -636,13 +617,6 @@ do_gcc(cw_ictx_t *ctx)
 			if (arglen == 1) {
 				ctx->i_flags &= ~CW_F_ECHO;
 				newae(ctx->i_ae, "--version");
-				break;
-			}
-			error(arg);
-			break;
-		case 'v':
-			if (arglen == 1) {
-				warnings(ctx->i_ae);
 				break;
 			}
 			error(arg);

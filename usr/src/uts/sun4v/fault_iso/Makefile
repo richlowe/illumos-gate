@@ -58,7 +58,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 # lint pass one enforcement
 #
-CFLAGS		+= -v
+CFLAGS		+= $(CCVERBOSE)
 
 #
 # Turn on doubleword alignment for 64 bit registers

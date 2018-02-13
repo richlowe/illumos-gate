@@ -88,6 +88,8 @@ XGE_CFLAGS	= $(HAL_CFLAGS) $(TRACE_CFLAGS) $(CCVERBOSE) \
 CFLAGS		+= $(XGE_CFLAGS) -xO4 -_cc=-xcrossfile
 CFLAGS64	+= $(XGE_CFLAGS) -xO4 -_cc=-xcrossfile
 
+LINTFLAGS	+= -v
+
 #
 #	Driver depends on MAC & IP
 #

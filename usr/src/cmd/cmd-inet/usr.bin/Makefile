@@ -75,7 +75,7 @@ CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-uninitialized
 CERRWARN +=	-_gcc=-Wno-unused-function
 
-# Eventually just plain CFLAGS should be += -v, but not until all in
+# Eventually just plain CFLAGS should be += $(CCVERBOSE), but not until all in
 # PROGS are lint clean.
 $(LINTCLEAN)	:=	CFLAGS += $(CCVERBOSE)
 

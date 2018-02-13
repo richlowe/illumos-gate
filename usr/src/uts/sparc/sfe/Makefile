@@ -78,6 +78,8 @@ CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-uninitialized
 
+LINTFLAGS	+= -v
+
 #
 # Driver depends on MAC & IP
 #

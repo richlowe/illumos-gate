@@ -67,6 +67,7 @@ CPPFLAGS	+= $(VFLAGS) $(AFLAGS) $(DFLAGS) $(CFGFLAGS) $(CCVERBOSE) \
 	-I$(UTSBASE)/common/io/bfe
 
 CFLAGS		+= $(CPPFLAGS)
+LINTFLAGS	+= -v
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-uninitialized

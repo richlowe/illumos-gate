@@ -132,7 +132,7 @@ CPPFLAGS +=	-DSYSV -DBSD_COMP -I$(CMDINETCOMMONDIR) -I
 include $(SRC)/lib/gss_mechs/mech_krb5/Makefile.mech_krb5
 K5LIBS=
 
-# Eventually just plain CFLAGS should be += -v, but not until all in
+# Eventually just plain CFLAGS should be += $(CCVERBOSE), but not until all in
 # PROGS are lint clean.
 $(LINTCLEAN)		:=	CFLAGS += $(CCVERBOSE)
 $(CONSTCLEAN)		:=	CFLAGS += $(XSTRCONST)
