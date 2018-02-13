@@ -229,7 +229,7 @@ $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-empty-body
 
 CSTD = $(CSTD_GNU99)
 
-CFLAGS_uts		=
+CFLAGS_uts		= $(CDEFAULT_FLAGS)
 CFLAGS_uts		+= $(STAND_FLAGS_$(CLASS))
 CFLAGS_uts		+= $(CCVERBOSE)
 CFLAGS_uts		+= $(ILDOFF)

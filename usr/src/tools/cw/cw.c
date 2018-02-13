@@ -468,29 +468,9 @@ do_gcc(cw_ictx_t *ctx)
 		return;
 	}
 
-	newae(ctx->i_ae, "-fident");
-	newae(ctx->i_ae, "-finline");
-	newae(ctx->i_ae, "-fno-inline-functions");
-	newae(ctx->i_ae, "-fno-builtin");
-	newae(ctx->i_ae, "-fno-asm");
-	newae(ctx->i_ae, "-fdiagnostics-show-option");
-	newae(ctx->i_ae, "-nodefaultlibs");
-
-#if defined(__sparc)
-	/*
-	 * The SPARC ldd and std instructions require 8-byte alignment of
-	 * their address operand.  gcc correctly uses them only when the
-	 * ABI requires 8-byte alignment; unfortunately we have a number of
-	 * pieces of buggy code that doesn't conform to the ABI.  This
-	 * flag makes gcc work more like Studio with -xmemalign=4.
-	 */
-	newae(ctx->i_ae, "-mno-integer-ldd-std");
-#endif
-
 	/*
 	 * Walk the argument list, translating as we go ..
 	 */
-
 	while (--ctx->i_oldargc > 0) {
 		char *arg = *++ctx->i_oldargv;
 		size_t arglen = strlen(arg);

@@ -567,11 +567,28 @@ CCSOURCEDEBUGFLAGS	=
 $(SRCDBGBLD)CSOURCEDEBUGFLAGS	= -g $(XESS)
 $(SRCDBGBLD)CCSOURCEDEBUGFLAGS	= -g $(XESS)
 
-CFLAGS=         $(COPTFLAG) $($(MACH)_CFLAGS) $(SPACEFLAG) $(CCMODE) \
+# The SPARC ldd and std instructions require 8-byte alignment of
+# their address operand.  gcc correctly uses them only when the
+# ABI requires 8-byte alignment; unfortunately we have a number of
+# pieces of buggy code that doesn't conform to the ABI.  This
+# flag makes gcc work more like Studio with -xmemalign=4.
+sparc_CDEFAULT_FLAGS= -_gcc=-mno-integer-ldd-std
+i386_CDEFAULT_FLAGS=
+
+CDEFAULT_FLAGS = -_gcc=-fident
+CDEFAULT_FLAGS += -_gcc=-finline
+CDEFAULT_FLAGS += -_gcc=-fno-inline-functions
+CDEFAULT_FLAGS += -_gcc=-fno-builtin
+CDEFAULT_FLAGS += -_gcc=-fno-asm
+CDEFAULT_FLAGS += -_gcc=-fdiagnostics-show-option
+CDEFAULT_FLAGS += -_gcc=-nodefaultlibs
+CDEFAULT_FLAGS += $($(MACH)_CDEFAULT_FLAGS)
+
+CFLAGS=         $(CDEFAULT_FLAGS) $(COPTFLAG) $($(MACH)_CFLAGS) $(SPACEFLAG) $(CCMODE) \
 		$(ILDOFF) $(CERRWARN) $(CSTD) $(CCUNBOUND) $(IROPTFLAG) \
 		$(CGLOBALSTATIC) $(CCNOAUTOINLINE) $(CSOURCEDEBUGFLAGS) \
 		$(CUSERFLAGS)
-CFLAGS64=       $(COPTFLAG64) $($(MACH64)_CFLAGS) $(SPACEFLAG64) $(CCMODE64) \
+CFLAGS64=       $(CDEFAULT_FLAGS) $(COPTFLAG64) $($(MACH64)_CFLAGS) $(SPACEFLAG64) $(CCMODE64) \
 		$(ILDOFF) $(CERRWARN) $(CSTD) $(CCUNBOUND) $(IROPTFLAG64) \
 		$(CGLOBALSTATIC) $(CCNOAUTOINLINE) $(CSOURCEDEBUGFLAGS) \
 		$(CUSERFLAGS64)
@@ -579,7 +596,7 @@ CFLAGS64=       $(COPTFLAG64) $($(MACH64)_CFLAGS) $(SPACEFLAG64) $(CCMODE64) \
 # Flags that are used to build parts of the code that are subsequently
 # run on the build machine (also known as the NATIVE_BUILD).
 #
-NATIVE_CFLAGS=	$(COPTFLAG) $($(NATIVE_MACH)_CFLAGS) $(CCMODE) \
+NATIVE_CFLAGS=	$(CDEFAULT_FLAGS) $(COPTFLAG) $($(NATIVE_MACH)_CFLAGS) $(CCMODE) \
 		$(ILDOFF) $(CERRWARN) $(CSTD) $($(NATIVE_MACH)_CCUNBOUND) \
 		$(IROPTFLAG) $(CGLOBALSTATIC) $(CCNOAUTOINLINE) \
 		$(CSOURCEDEBUGFLAGS) $(CUSERFLAGS)
@@ -647,11 +664,13 @@ sparcv9_CCOPTFLAG=	-O
 i386_CCOPTFLAG=		-O
 amd64_CCOPTFLAG=	-O
 
+CCDEFAULT_FLAGS=		$(CDEFAULT_FLAGS)
+
 CCOPTFLAG=	$($(MACH)_CCOPTFLAG)
 CCOPTFLAG64=	$($(MACH64)_CCOPTFLAG)
-CCFLAGS=	$(CCOPTFLAG) $($(MACH)_CCFLAGS) $(CCSOURCEDEBUGFLAGS) \
+CCFLAGS=	$(CCDEFAULT_FLAGS) $(CCOPTFLAG) $($(MACH)_CCFLAGS) $(CCSOURCEDEBUGFLAGS) \
 		$(CCUSERFLAGS)
-CCFLAGS64=	$(CCOPTFLAG64) $($(MACH64)_CCFLAGS) $(CCSOURCEDEBUGFLAGS) \
+CCFLAGS64=	$(CCDEFAULT_FLAGS) $(CCOPTFLAG64) $($(MACH64)_CCFLAGS) $(CCSOURCEDEBUGFLAGS) \
 		$(CCUSERFLAGS64)
 
 #
