@@ -708,10 +708,6 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'm':
-			if (strcmp(arg, "-mt") == 0) {
-				newae(ctx->i_ae, "-D_REENTRANT");
-				break;
-			}
 			if (strcmp(arg, "-m64") == 0) {
 				newae(ctx->i_ae, "-m64");
 				mflag |= M64;

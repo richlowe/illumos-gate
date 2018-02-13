@@ -37,8 +37,8 @@ CPPFLAGS +=	-I$(SRC)/lib/libfruutils
 CPPFLAGS +=	-I$(SRC)/cmd/picl/plugins/inc
 CPPFLAGS += 	-D_REENTRANT
 CFLAGS +=	$(CCVERBOSE)
-CCFLAGS64 += 	-mt
-CCFLAGS +=	-mt
+CCFLAGS64 += 	-_cc=-mt -D_REENTRANT
+CCFLAGS +=	-_cc=-mt -D_REENTRANT
 LDLIBS +=	-lc
 
 CLEANFILES +=	pics/lex.fru.cc pics/y.tab.cc pics/y.tab.h

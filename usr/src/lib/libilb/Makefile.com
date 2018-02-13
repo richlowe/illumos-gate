@@ -42,7 +42,7 @@ $(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
 
 CSTD =	$(CSTD_GNU99)
 
-CFLAGS +=	-mt $(CCVERBOSE)
+CFLAGS +=	-_cc=-mt -D_REENTRANT $(CCVERBOSE)
 CPPFLAGS +=	$(INCS)
 LDLIBS +=	-lsocket
 

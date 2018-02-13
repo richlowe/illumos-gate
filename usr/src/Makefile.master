@@ -620,7 +620,7 @@ BUILD.po= $(XGETTEXT) $(XGETFLAGS) -d $(<F) $<.i ;\
 #
 POFILE= $(PROG).po
 
-sparc_CCFLAGS=		-m32 -_cc=-cg92 -_gcc=-mtune=supersparc \
+sparc_CCFLAGS=		-m32 -_cc=-cg92 -_gcc=-_cc=-mtune=supersparc \
 			-_gcc=-mcpu=v8 -_gcc=-mno-v8plus \
 			-_cc=-compat=4 \
 			-Qoption ccfe -messages=no%anachronism \
@@ -900,7 +900,7 @@ ZTEXT=		-Wl,-ztext
 ZVERBOSE=	-Wl,-zverbose
 
 GSHARED=	-shared
-CCMT=		-mt
+CCMT=		-_cc=-mt -D_REENTRANT
 
 # Handle different PIC models on different ISAs
 # (May be overridden by lower-level Makefiles)

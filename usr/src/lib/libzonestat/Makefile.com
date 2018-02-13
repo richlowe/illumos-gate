@@ -32,7 +32,7 @@ LIBS =		$(DYNLIB) $(LINTLIB)
 LDLIBS +=	-lcmdutils -lumem -lc
 
 SRCDIR =	../common
-CPPFLAGS +=	-I../common -mt -D_POSIX_PTHREAD_SEMANTICS
+CPPFLAGS +=	-I../common -_cc=-mt -D_REENTRANT -D_POSIX_PTHREAD_SEMANTICS
 $(LINTLIB) := SRCS=	$(SRCDIR)/$(LINTSRC)
 
 CERRWARN +=	-_gcc=-Wno-uninitialized

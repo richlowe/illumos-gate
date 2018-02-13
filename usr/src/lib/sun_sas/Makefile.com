@@ -74,9 +74,9 @@ INCS +=		-I$(SRC)/lib/smhba/common
 INCS +=		-I$(SRC)/lib/hbaapi/common
 INCS +=		-I$(SRC)/lib/libdevid
 
-CFLAGS +=	-mt
+CFLAGS +=	-_cc=-mt -D_REENTRANT
 CFLAGS +=	$(CCVERBOSE)
-CFLAGS64 +=	-mt
+CFLAGS64 +=	-_cc=-mt -D_REENTRANT
 CFLAGS64 +=	$(CCVERBOSE)
 CPPFLAGS +=	$(INCS) -D_POSIX_PTHREAD_SEMANTICS
 CPPFLAGS +=	-DBUILD_TIME='"Wed Feb 4 12:00:00 2009"'
