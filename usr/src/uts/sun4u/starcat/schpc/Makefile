@@ -70,7 +70,7 @@ LDFLAGS += -dy -Nmisc/mboxsc -Nmisc/hpcsvc -Ndrv/iosram
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 .KEEP_STATE:
 

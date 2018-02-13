@@ -63,7 +63,7 @@ CFLAGS += $(CCVERBOSE)
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #
 # Enable Broadcom 5714/5715 workaround code and lint duplicate symbol

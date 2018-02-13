@@ -94,7 +94,7 @@ CFLAGS += $(CCVERBOSE)
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #
 # For now, disable these lint checks; maintainers should endeavor

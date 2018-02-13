@@ -78,7 +78,7 @@ CFLAGS          += $(CCVERBOSE)
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS		+= -dalign
+CFLAGS		+= $(CCDALIGN)
 
 #
 # Driver depends on MAC

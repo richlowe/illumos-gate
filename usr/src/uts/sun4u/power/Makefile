@@ -70,7 +70,7 @@ LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #
 #	Default build targets.

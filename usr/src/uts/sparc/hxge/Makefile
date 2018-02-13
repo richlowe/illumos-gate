@@ -64,7 +64,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS	+= -dalign
+CFLAGS	+= $(CCDALIGN)
 #
 # Include hxge specific header files
 #

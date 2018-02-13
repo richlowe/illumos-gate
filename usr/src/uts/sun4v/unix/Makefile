@@ -105,7 +105,7 @@ CLEANLINTFILES	+= $(LINT_LIB)
 # lint pass one enforcement 
 # Turn on doubleword alignment for 64 bit counter timer registers
 #
-CFLAGS += $(CCVERBOSE) -dalign
+CFLAGS += $(CCVERBOSE) $(CCDALIGN)
 
 #
 # For now, disable these lint checks; maintainers should endeavor

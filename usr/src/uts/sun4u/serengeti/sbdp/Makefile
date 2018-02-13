@@ -77,7 +77,7 @@ CERRWARN += -_gcc=-Wno-unused-variable
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #
 #	Default build targets.

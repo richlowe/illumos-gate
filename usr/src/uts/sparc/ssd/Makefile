@@ -61,7 +61,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #
 # lint pass one enforcement
 #
-CFLAGS += $(CCVERBOSE) -D__fibre -dalign
+CFLAGS += $(CCVERBOSE) -D__fibre $(CCDALIGN)
 LINTFLAGS += -D__fibre
 WLCCFLAGS = -D__fibre
 

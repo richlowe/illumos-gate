@@ -72,7 +72,7 @@ LDFLAGS += -dy -Nmisc/gptwocfg -Nmisc/fcgp2 -Nmisc/fcodem -Nmisc/busra
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #
 #	Default build targets.

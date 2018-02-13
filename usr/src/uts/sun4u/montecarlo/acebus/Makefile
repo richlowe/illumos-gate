@@ -65,7 +65,7 @@ CERRWARN += -_gcc=-Wno-switch
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 # Add our depedencies to LDFLAGS
 #

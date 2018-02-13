@@ -111,7 +111,7 @@ CLEANLINTFILES	+= $(LINT_LIB)
 # lint pass one enforcement 
 # Turn on doubleword alignment for 64 bit counter timer registers
 #
-CFLAGS += $(CCVERBOSE) -dalign
+CFLAGS += $(CCVERBOSE) $(CCDALIGN)
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-uninitialized

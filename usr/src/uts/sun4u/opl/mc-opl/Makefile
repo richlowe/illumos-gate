@@ -71,8 +71,8 @@ CERRWARN += -_gcc=-Wno-type-limits
 # CFLAGS
 # MC_EMULATION   - emulate mac patrol registers
 #
-CFLAGS += -dalign -DMC_EMULATION
-#CFLAGS += -dalign 
+CFLAGS += $(CCDALIGN) -DMC_EMULATION
+#CFLAGS += $(CCDALIGN) 
 
 #
 #	Dependency

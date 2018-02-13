@@ -1299,8 +1299,8 @@ QIL=				\
 	_Q_sub.o
 
 $(QIL:%=pics/%) := CFLAGS += -_cc=$(LIBCDIR)/$(MACH)/fp/__quad.il
-pics/_Q%.o := sparc_COPTFLAG = -xO4 -dalign
-pics/__quad%.o := sparc_COPTFLAG = -xO4 -dalign
+pics/_Q%.o := sparc_COPTFLAG = -xO4 $(CCDALIGN)
+pics/__quad%.o := sparc_COPTFLAG = -xO4 $(CCDALIGN)
 
 # large-file-aware components that should be built large
 

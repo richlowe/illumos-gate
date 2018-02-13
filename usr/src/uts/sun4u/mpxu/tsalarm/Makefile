@@ -71,7 +71,7 @@ CERRWARN += -_gcc=-Wno-parentheses
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 LDFLAGS	+= -dy  -Ndrv/rmclomv
 

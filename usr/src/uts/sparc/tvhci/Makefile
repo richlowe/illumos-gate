@@ -61,7 +61,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 #	Overrides
 #
-CFLAGS		+= $(CCVERBOSE) -dalign
+CFLAGS		+= $(CCVERBOSE) $(CCDALIGN)
 
 #
 # For now, disable these lint checks; maintainers should endeavor

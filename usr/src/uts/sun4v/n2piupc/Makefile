@@ -71,7 +71,7 @@ CERRWARN += -_gcc=-Wno-unused-label
 #
 # Turn on doubleword alignment for 64 bit registers, and pass in module name
 #
-CFLAGS += -dalign -DMODULE_NAME=\"$(MODULE)\"
+CFLAGS += $(CCDALIGN) -DMODULE_NAME=\"$(MODULE)\"
 
 #
 # Lint needs module name too

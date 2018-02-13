@@ -72,7 +72,7 @@ CERRWARN += -_gcc=-Wno-char-subscripts
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #	Dependency
 LDFLAGS += -dy -N misc/i2c_svc -Nmisc/hpcsvc

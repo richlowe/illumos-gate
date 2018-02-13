@@ -60,7 +60,7 @@ LINTTAGS  += -DSOLARIS_S11 -erroff=E_STATIC_UNUSED
 
 INC_PATH  += -I$(UTSBASE)/common/io/myri10ge -I$(UTSBASE)/common/io/myri10ge/firmware
 
-CFLAGS    += -dalign -DSOLARIS_S11
+CFLAGS    += $(CCDALIGN) -DSOLARIS_S11
 
 #
 # Driver depends on MAC

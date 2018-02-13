@@ -692,17 +692,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			}
 			break;
-		case 'd':
-			/* XXX: easy guarding target, but heavily used */
-			if (strcmp(arg, "-dalign") == 0) {
-				/*
-				 * -dalign forces alignment in some cases;
-				 * gcc does not need any flag to do this.
-				 */
-				break;
-			}
-			error(arg);
-			break;
 		case 'e':
 			if (strcmp(arg,
 			    "-erroff=E_EMPTY_TRANSLATION_UNIT") == 0) {

@@ -71,7 +71,7 @@ CFLAGS += -I$(UTSBASE)/sun4u/mpxu
 #
 # Turn on doubleword alignment for 64 bit registers
 #
-CFLAGS += -dalign
+CFLAGS += $(CCDALIGN)
 
 #Need to verify to add glvc driver required 
 LDFLAGS	+= -dy

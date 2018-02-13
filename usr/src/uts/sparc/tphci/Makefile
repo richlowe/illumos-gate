@@ -61,7 +61,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 #	Overrides
 #
-CFLAGS		+= $(CCVERBOSE) -dalign
+CFLAGS		+= $(CCVERBOSE) $(CCDALIGN)
 CERRWARN	+= -_gcc=-Wno-parentheses
 
 #
