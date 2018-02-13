@@ -40,7 +40,6 @@
 #
 SBDP_IL=$(OBJS_DIR)/sbdp.il
 
-$(OBJS_DIR)/sbdp_mem.o := CC_XARCH_32 = -xarch=v8plusa
 $(OBJS_DIR)/%.o:		$(UTSBASE)/sun4u/serengeti/io/%.c $(SBDP_IL)
 	$(COMPILE.c) -_cc=$(SBDP_IL) -o $@ $<
 	$(CTFCONVERT_O)

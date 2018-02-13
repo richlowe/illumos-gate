@@ -351,6 +351,9 @@ sparc_CCUNBOUND	= -_cc=-Wd,-xsafe=unboundsym
 i386_CCUNBOUND	=
 CCUNBOUND	= $($(MACH)_CCUNBOUND)
 
+XARCH_SSE2 =		-_cc=-xarch=sse2 -_gcc=-msse2 -_gcc=-mfpmath=sse
+XARCH_SPARCVIS =	-_cc=-xarch=sparcvis -_gcc=-mcpu=ultrasparc -_gcc=-mvis
+
 #
 # compiler '-xarch' flag. This is here to centralize it and make it
 # overridable for testing.

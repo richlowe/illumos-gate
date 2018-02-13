@@ -356,51 +356,6 @@ typedef struct cw_ictx {
 #define	SS12		0x200	/* Studio 12 */
 
 #define	TRANS_ENTRY	5
-/*
- * Translation table definition for the -xarch= flag. The "x_arg"
- * value is translated into the appropriate gcc flags according
- * to the values in x_trans[n]. The x_flags indicates what compiler
- * is being used and what flags have been set via the use of
- * "x_arg".
- */
-typedef struct xarch_table {
-	char	*x_arg;
-	int	x_flags;
-	char	*x_trans[TRANS_ENTRY];
-} xarch_table_t;
-
-/*
- * The translation table for the -xarch= flag used in the Studio compilers.
- */
-static const xarch_table_t xtbl[] = {
-#if defined(__x86)
-	{ "generic",	SS11 },
-	{ "generic64",	(SS11|M64), { "-m64", "-mtune=opteron" } },
-	{ "amd64",	(SS11|M64), { "-m64", "-mtune=opteron" } },
-	{ "386",	SS11,	{ "-march=i386" } },
-	{ "pentium_pro", SS11,	{ "-march=pentiumpro" } },
-	{ "sse",	SS11, { "-msse", "-mfpmath=sse" } },
-	{ "sse2",	SS11, { "-msse2", "-mfpmath=sse" } },
-#elif defined(__sparc)
-	{ "generic",	(SS11|M32), { "-m32", "-mcpu=v8" } },
-	{ "generic64",	(SS11|M64), { "-m64", "-mcpu=v9" } },
-	{ "v8",		(SS11|M32), { "-m32", "-mcpu=v8", "-mno-v8plus" } },
-	{ "v8plus",	(SS11|M32), { "-m32", "-mcpu=v9", "-mv8plus" } },
-	{ "v8plusa",	(SS11|M32), { "-m32", "-mcpu=ultrasparc", "-mv8plus",
-			"-mvis" } },
-	{ "v8plusb",	(SS11|M32), { "-m32", "-mcpu=ultrasparc3", "-mv8plus",
-			"-mvis" } },
-	{ "v9",		(SS11|M64), { "-m64", "-mcpu=v9" } },
-	{ "v9a",	(SS11|M64), { "-m64", "-mcpu=ultrasparc", "-mvis" } },
-	{ "v9b",	(SS11|M64), { "-m64", "-mcpu=ultrasparc3", "-mvis" } },
-	{ "sparc",	SS12, { "-mcpu=v9", "-mv8plus" } },
-	{ "sparcvis",	SS12, { "-mcpu=ultrasparc", "-mvis" } },
-	{ "sparcvis2",	SS12, { "-mcpu=ultrasparc3", "-mvis" } }
-#endif
-};
-
-static int xtbl_size = sizeof (xtbl) / sizeof (xarch_table_t);
-
 static const char *progname;
 
 static void
@@ -500,33 +455,6 @@ usage()
 	exit(2);
 }
 
-static int
-xlate_xtb(struct aelist *h, const char *xarg)
-{
-	int	i, j;
-
-	for (i = 0; i < xtbl_size; i++) {
-		if (strcmp(xtbl[i].x_arg, xarg) == 0)
-			break;
-	}
-
-	/*
-	 * At the end of the table and so no matching "arg" entry
-	 * found and so this must be a bad -xarch= flag.
-	 */
-	if (i == xtbl_size)
-		error(xarg);
-
-	for (j = 0; j < TRANS_ENTRY; j++) {
-		if (xtbl[i].x_trans[j] != NULL)
-			newae(h, xtbl[i].x_trans[j]);
-		else
-			break;
-	}
-	return (xtbl[i].x_flags);
-
-}
-
 static void
 do_gcc(cw_ictx_t *ctx)
 {
@@ -534,7 +462,6 @@ do_gcc(cw_ictx_t *ctx)
 	int nolibc = 0;
 	int in_output = 0, seen_o = 0, c_files = 0;
 	cw_op_t op = CW_O_LINK;
-	int	mflag = 0;
 
 	if (ctx->i_flags & CW_F_PROG) {
 		newae(ctx->i_ae, "--version");
@@ -710,12 +637,10 @@ do_gcc(cw_ictx_t *ctx)
 		case 'm':
 			if (strcmp(arg, "-m64") == 0) {
 				newae(ctx->i_ae, "-m64");
-				mflag |= M64;
 				break;
 			}
 			if (strcmp(arg, "-m32") == 0) {
 				newae(ctx->i_ae, "-m32");
-				mflag |= M32;
 				break;
 			}
 			error(arg);
@@ -755,13 +680,6 @@ do_gcc(cw_ictx_t *ctx)
 			if (arglen == 1)
 				error(arg);
 			switch (arg[2]) {
-			case 'a':
-				if (strncmp(arg, "-xarch=", 7) == 0) {
-					mflag |= xlate_xtb(ctx->i_ae, arg + 7);
-					break;
-				}
-				error(arg);
-				break;
 			case 'c':
 				if (strncmp(arg, "-xc99=%all", 10) == 0) {
 					newae(ctx->i_ae, "-std=gnu99");
@@ -865,69 +783,6 @@ do_gcc(cw_ictx_t *ctx)
 		exit(2);
 	}
 
-	/*
-	 * Make sure that we do not have any unintended interactions between
-	 * the xarch options passed in and the version of the Studio compiler
-	 * used.
-	 */
-	if ((mflag & (SS11|SS12)) == (SS11|SS12)) {
-		(void) fprintf(stderr,
-		    "Conflicting \"-xarch=\" flags (both Studio 11 and 12)\n");
-		exit(2);
-	}
-
-	switch (mflag) {
-	case 0:
-		/* FALLTHROUGH */
-	case M32:
-#if defined(__sparc)
-		/*
-		 * Only -m32 is defined and so put in the missing xarch
-		 * translation.
-		 */
-		newae(ctx->i_ae, "-mcpu=v8");
-		newae(ctx->i_ae, "-mno-v8plus");
-#endif
-		break;
-	case M64:
-#if defined(__sparc)
-		/*
-		 * Only -m64 is defined and so put in the missing xarch
-		 * translation.
-		 */
-		newae(ctx->i_ae, "-mcpu=v9");
-#endif
-		break;
-	case SS12:
-#if defined(__sparc)
-		/* no -m32/-m64 flag used - this is an error for sparc builds */
-		(void) fprintf(stderr, "No -m32/-m64 flag defined\n");
-		exit(2);
-#endif
-		break;
-	case SS11:
-		/* FALLTHROUGH */
-	case (SS11|M32):
-	case (SS11|M64):
-		break;
-	case (SS12|M32):
-#if defined(__sparc)
-		/*
-		 * Need to add in further 32 bit options because with SS12
-		 * the xarch=sparcvis option can be applied to 32 or 64
-		 * bit, and so the translatation table (xtbl) cannot handle
-		 * that.
-		 */
-		newae(ctx->i_ae, "-mv8plus");
-#endif
-		break;
-	case (SS12|M64):
-		break;
-	default:
-		(void) fprintf(stderr,
-		    "Incompatible -xarch= and/or -m32/-m64 options used.\n");
-		exit(2);
-	}
 	if (op == CW_O_LINK && (ctx->i_flags & CW_F_SHADOW))
 		exit(0);
 

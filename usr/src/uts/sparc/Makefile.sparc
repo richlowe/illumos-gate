@@ -114,19 +114,19 @@ include $(UTSBASE)/Makefile.uts
 #
 #	machine specific optimization, override default in Makefile.master
 #
-XARCH_32	= -xarch=v8
-XARCH_64	= -m64
-XARCH		= $(XARCH_$(CLASS))
+AS_XARCH_64	= -m64
+AS_XARCH	= $(AS_XARCH_$(CLASS))
 
-COPTIMIZE_32	= -xO3
+CC_XARCH_64	= -m64
+CC_XARCH	= $(AS_XARCH_$(CLASS))
+
 COPTIMIZE_64	= -xO3
 COPTIMIZE	= $(COPTIMIZE_$(CLASS))
 
-CFLAGS_32	= -xcg92
 CFLAGS_64	= -_cc=-xchip=ultra -_gcc=-mtune=ultrasparc $(CCABS32) $(CCREGSYM)
 CFLAGS		= $(CFLAGS_$(CLASS))
 
-CFLAGS		+= $(XARCH)
+CFLAGS		+= $(CC_XARCH)
 CFLAGS		+= $(COPTIMIZE)
 CFLAGS		+= $(EXTRA_CFLAGS)
 CFLAGS		+= $(XAOPT)
@@ -147,9 +147,8 @@ CFLAGS		+= -_cc=-xstrconst
 CFLAGS		+= $(CSOURCEDEBUGFLAGS)
 CFLAGS		+= $(CUSERFLAGS)
 
-ASFLAGS		+= $(XARCH)
+ASFLAGS		+= $(AS_XARCH)
 
-LINT_DEFS_32	=
 LINT_DEFS_64	= -m64
 LINT_DEFS	+= $(LINT_DEFS_$(CLASS))
 
