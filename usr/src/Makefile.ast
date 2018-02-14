@@ -28,9 +28,8 @@
 # AST tools (including ksh93).
 CSTD= $(CSTD_GNU99) -D_XOPEN_SOURCE=600 -D__EXTENSIONS__=1
 
-# silence common AST&co. warnings...
-# ... about |#pragma prototyped| ...
-CERRWARN += -erroff=E_UNRECOGNIZED_PRAGMA_IGNORED
+# silence common AST&co. warnings #pragma prototyped
+CERRWARN += -_cc=-erroff=E_UNRECOGNIZED_PRAGMA_IGNORED
 
 # common CPP flags for libshell consumers (ksh, shcomp etc.)
 LIBSHELLCPPFLAGS = \

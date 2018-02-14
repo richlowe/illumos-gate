@@ -70,9 +70,6 @@ CPPFLAGS +=	-I../../../../uts/sparc/krtld -DA_OUT
 CFLAGS +=	-_cc=-xregs=no%appl -_gcc=-mno-app-regs
 ASFLAGS +=	-K pic
 LINTFLAGS +=	-DA_OUT
-ADBGENCFLAGS +=	-erroff=%all
-ADBGENFLAGS +=	-milp32
-ADBSUB=		$(ADBSUB32)
 SONAME=		/lib/ld.so.1
 
 SGSMSGTARG +=	$(SGSMSGSPARC) $(SGSMSGSPARC32) $(SGSMSG32)

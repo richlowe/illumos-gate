@@ -75,7 +75,7 @@ CERRWARN += -_gcc=-Wno-uninitialized
 #
 # compiler failes with not reached statements
 #
-CERRWARN += -erroff=E_STATEMENT_NOT_REACHED
+CERRWARN += -_cc=-erroff=E_STATEMENT_NOT_REACHED
 
 #
 # module dependencies

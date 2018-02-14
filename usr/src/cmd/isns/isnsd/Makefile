@@ -66,8 +66,8 @@ CERRWARN += -_gcc=-Wno-implicit-function-declaration
 
 CLOBBERFILES += $(DTRACE_HEADER)
 
-obj.o := CERRWARN += -erroff=E_CONST_OBJ_SHOULD_HAVE_INITIZR
-obj.o := CERRWARN += -erroff=E_IMPLICIT_DECL_FUNC_RETURN_INT
+obj.o := CERRWARN += -_cc=-erroff=E_CONST_OBJ_SHOULD_HAVE_INITIZR
+obj.o := CERRWARN += -_cc=-erroff=E_IMPLICIT_DECL_FUNC_RETURN_INT
 
 LDLIBS		+= -lsecdb -lsocket -lnsl -lscf -lxml2
 

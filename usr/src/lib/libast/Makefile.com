@@ -739,25 +739,25 @@ CERRWARN += -_gcc=-Wno-type-limits
 CERRWARN += -_gcc=-Wno-address
 
 pics/$(MACH)/src/lib/libast/conftab.o \
-pics/$(MACH64)/src/lib/libast/conftab.o	:= CERRWARN += -erroff=E_INIT_DOES_NOT_FIT
-pics/common/comp/setlocale.o		:= CERRWARN += -erroff=E_INTEGER_OVERFLOW_DETECTED
-pics/common/comp/setlocale.o		:= CERRWARN += -erroff=E_INIT_DOES_NOT_FIT
-pics/common/comp/setlocale.o		:= CERRWARN += -erroff=E_INIT_SIGN_EXTEND
-pics/common/hash/hashlook.o		:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
-pics/common/hash/memhash.o		:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
-pics/common/hash/memsum.o		:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
-pics/common/hash/strhash.o		:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
-pics/common/hash/strsum.o		:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
-pics/common/misc/recstr.o 		:= CERRWARN += -erroff=E_INTEGER_OVERFLOW_DETECTED
-pics/common/misc/translate.o 		:= CERRWARN += -erroff=E_INTEGER_OVERFLOW_DETECTED
-pics/common/path/pathkey.o		:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
-pics/common/port/astconf.o		:= CERRWARN += -erroff=E_CONST_OBJ_SHOULD_HAVE_INITIZR
-pics/common/stdio/fflush.o 		:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
-pics/common/stdio/getline.o 		:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
-pics/common/sfio/sfmove.o 		:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
-pics/common/sfio/sfrd.o 		:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
-pics/common/sfio/sfvscanf.o 		:= CERRWARN += -erroff=E_END_OF_LOOP_CODE_NOT_REACHED
-pics/common/tm/tmxduration.o 		:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
+pics/$(MACH64)/src/lib/libast/conftab.o	:= CERRWARN += -_cc=-erroff=E_INIT_DOES_NOT_FIT
+pics/common/comp/setlocale.o		:= CERRWARN += -_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
+pics/common/comp/setlocale.o		:= CERRWARN += -_cc=-erroff=E_INIT_DOES_NOT_FIT
+pics/common/comp/setlocale.o		:= CERRWARN += -_cc=-erroff=E_INIT_SIGN_EXTEND
+pics/common/hash/hashlook.o		:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/common/hash/memhash.o		:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/common/hash/memsum.o		:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/common/hash/strhash.o		:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/common/hash/strsum.o		:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/common/misc/recstr.o 		:= CERRWARN += -_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
+pics/common/misc/translate.o 		:= CERRWARN += -_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
+pics/common/path/pathkey.o		:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/common/port/astconf.o		:= CERRWARN += -_cc=-erroff=E_CONST_OBJ_SHOULD_HAVE_INITIZR
+pics/common/stdio/fflush.o 		:= CERRWARN += -_cc=-erroff=E_NO_IMPLICIT_DECL_ALLOWED
+pics/common/stdio/getline.o 		:= CERRWARN += -_cc=-erroff=E_NO_IMPLICIT_DECL_ALLOWED
+pics/common/sfio/sfmove.o 		:= CERRWARN += -_cc=-erroff=E_NO_IMPLICIT_DECL_ALLOWED
+pics/common/sfio/sfrd.o 		:= CERRWARN += -_cc=-erroff=E_NO_IMPLICIT_DECL_ALLOWED
+pics/common/sfio/sfvscanf.o 		:= CERRWARN += -_cc=-erroff=E_END_OF_LOOP_CODE_NOT_REACHED
+pics/common/tm/tmxduration.o 		:= CERRWARN += -_cc=-erroff=E_NO_IMPLICIT_DECL_ALLOWED
 
 .KEEP_STATE:
 

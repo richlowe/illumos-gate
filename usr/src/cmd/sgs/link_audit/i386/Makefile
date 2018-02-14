@@ -23,15 +23,15 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 include		../Makefile.com
 
 lint :=		CONV_LIB =	$(CONV_LIB32)
 
 $(ONLIBS) \
-$(CCSLIBS) :=	CFLAGS +=	$(C_PICFLAGS) $(NO_ASM_WARN)
+$(CCSLIBS) :=	CFLAGS +=	$(C_PICFLAGS)
+$(ONLIBS) \
+$(CCSLIBS) :=	CERRWARN +=	$(NO_ASM_WARN)
 
 .KEEP_STATE:
 

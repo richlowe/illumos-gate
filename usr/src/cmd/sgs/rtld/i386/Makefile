@@ -62,10 +62,6 @@ $(__GNUC)MAPFILE-ORDER =	../common/mapfile-order-gcc
 include		$(SRC)/cmd/sgs/rtld/Makefile.com
 
 # Add any machine specific flags.
-
-ADBGENCFLAGS +=	-erroff=%all
-ADBGENFLAGS +=	-milp32
-ADBSUB=		$(ADBSUB32)
 SONAME=		/lib/ld.so.1
 
 SGSMSGTARG +=	$(SGSMSGINTEL) $(SGSMSGINTEL32) $(SGSMSG32)

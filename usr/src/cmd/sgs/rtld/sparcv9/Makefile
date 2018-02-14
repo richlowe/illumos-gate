@@ -69,9 +69,6 @@ include		$(SRC)/lib/Makefile.lib.64
 CPPFLAGS +=	-I../../../../uts/sparc/krtld
 CFLAGS +=	-_cc=-xregs=no%appl -_gcc=-mno-app-regs
 ASFLAGS +=	-s -K pic -D__sparcv9 -D_ELF64 $(sparcv9_XARCH)
-ADBGENFLAGS +=	-mlp64
-ADBGENCFLAGS +=	-erroff=%all
-ADBSUB=		$(ADBSUB64)
 CPPFLAGS +=	-D_ELF64
 LINTFLAGS64 +=	$(VAR_LINTFLAGS64)
 SONAME=		/lib/sparcv9/ld.so.1

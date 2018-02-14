@@ -161,9 +161,9 @@ testfixture := MYCPPFLAGS += -I$(TCLBASE)/include -DTCLSH -DSQLITE_TEST=1
 #
 # work around compiler issues
 #
-testfixture := CFLAGS += \
-	-erroff=E_ARRAY_OF_INCOMPLETE \
-	-erroff=E_ARG_INCOMPATIBLE_WITH_ARG
+testfixture := CERRWARN += \
+	-_cc=-erroff=E_ARRAY_OF_INCOMPLETE \
+	-_cc=-erroff=E_ARG_INCOMPATIBLE_WITH_ARG
 
 testfixture := LDLIBS += -R$(TCLBASE)/lib -L$(TCLBASE)/lib -l$(TCLVERS) -lm -ldl
 

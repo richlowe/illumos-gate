@@ -52,7 +52,7 @@ CFLAGS += $(CCVERBOSE) -DPWRDMN -DACPI_USE_LOCAL_CACHE -DACPI_DEBUG_OUTPUT
 #
 # 3rd party code is not lint clean
 #
-CERRWARN += -erroff=E_STATEMENT_NOT_REACHED
+CERRWARN += -_cc=-erroff=E_STATEMENT_NOT_REACHED
 
 LINTFLAGS += -errchk=%none
 LINTFLAGS += -errhdr=%none

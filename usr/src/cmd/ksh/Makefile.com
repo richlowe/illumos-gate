@@ -60,7 +60,7 @@ CFLAGS64 += \
 
 # Workaround for CR#6628728 ("|memcntl()| prototype not available for C99/XPG6")
 pmain.o	:= CERRWARN += -_gcc=-Wno-implicit-function-declaration
-pmain.o	:= CERRWARN += -erroff=E_NO_IMPLICIT_DECL_ALLOWED
+pmain.o	:= CERRWARN += -_cc=-erroff=E_NO_IMPLICIT_DECL_ALLOWED
 
 .KEEP_STATE:
 

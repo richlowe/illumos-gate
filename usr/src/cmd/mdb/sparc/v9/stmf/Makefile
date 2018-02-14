@@ -35,5 +35,5 @@ include ../../../../Makefile.cmd.64
 include ../../Makefile.sparcv9
 include ../../../Makefile.module
 
-CPPFLAGS += -erroff=E_NON_CONST_INIT
+CERRWARN += -_cc=-erroff=E_NON_CONST_INIT
 CPPFLAGS += -I$(COMSTARBASE)/port/fct -I$(COMSTARBASE)/stmf

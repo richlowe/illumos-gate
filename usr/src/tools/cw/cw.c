@@ -580,21 +580,6 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			}
 			break;
-		case 'e':
-			if (strcmp(arg,
-			    "-erroff=E_EMPTY_TRANSLATION_UNIT") == 0) {
-				/*
-				 * Accept but ignore this -- gcc doesn't
-				 * seem to complain about empty translation
-				 * units
-				 */
-				break;
-			}
-			/* XX64 -- ignore all -erroff= options, for now */
-			if (strncmp(arg, "-erroff=", 8) == 0)
-				break;
-			error(arg);
-			break;
 		case 'm':
 			if (strcmp(arg, "-m64") == 0) {
 				newae(ctx->i_ae, "-m64");

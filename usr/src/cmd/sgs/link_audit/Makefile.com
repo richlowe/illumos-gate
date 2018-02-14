@@ -26,7 +26,7 @@
 include		../../../../lib/Makefile.lib
 include		../../Makefile.com
 
-NO_ASM_WARN=	-erroff=E_ASM_DISABLES_OPTIMIZATION
+NO_ASM_WARN=	-_cc=-erroff=E_ASM_DISABLES_OPTIMIZATION
 
 TRUSSLIB=	truss.so.1
 TRUSSSRC=	truss.c
@@ -49,7 +49,7 @@ ONLIBS=		$(SYMBINDREP) $(PERFLIB) $(BINDLIB)
 
 USRSCRIPTS=	sotruss whocalls
 CCSLIBS=	$(TRUSSLIB) $(WHOLIB)
- 
+
 PICDIR=		pics
 OBJDIR=		objs
 

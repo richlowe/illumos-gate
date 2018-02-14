@@ -62,9 +62,6 @@ $(__GNUC64)MAPFILE-ORDER =	../common/mapfile-order-gcc
 
 # Add any machine specific flags.
 ASFLAGS +=	-D__amd64 -D_ELF64 $(amd64_ASFLAGS)
-ADBGENFLAGS +=	-mlp64
-ADBGENCFLAGS +=	-erroff=%all
-ADBSUB=		$(ADBSUB64)
 CPPFLAGS +=	-D_ELF64
 LINTFLAGS64 +=	$(VAR_LINTFLAGS64)
 SONAME=		/lib/amd64/ld.so.1

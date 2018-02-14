@@ -84,7 +84,7 @@ amd64_COPTFLAG=-_cc=-xO5  -_cc=-xprefetch=auto,explicit
 
 # Suppress this one warning as the fix would break old gcc, which upstream
 # still supports. This needs a better fix (later).
-pics/sumlib.o	:= CERRWARN += -erroff=E_CONST_PROMOTED_UNSIGNED_LONG
+pics/sumlib.o	:= CERRWARN += -_cc=-erroff=E_CONST_PROMOTED_UNSIGNED_LONG
 
 .KEEP_STATE:
 
