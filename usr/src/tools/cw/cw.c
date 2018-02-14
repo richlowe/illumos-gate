@@ -607,17 +607,6 @@ do_gcc(cw_ictx_t *ctx)
 			} else {
 				arg += 2;
 			}
-			/* Just ignore -YS,... for now */
-			if (strncmp(arg, "S,", 2) == 0)
-				break;
-			if (strncmp(arg, "l,", 2) == 0) {
-				char *s = strdup(arg);
-				s[0] = '-';
-				s[1] = 'B';
-				newae(ctx->i_ae, s);
-				free(s);
-				break;
-			}
 			if (strncmp(arg, "I,", 2) == 0) {
 				char *s = strdup(arg);
 				s[0] = '-';
