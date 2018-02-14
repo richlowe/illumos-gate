@@ -470,14 +470,6 @@ do_gcc(cw_ictx_t *ctx)
 		}
 
 		if (ctx->i_flags & CW_F_CXX) {
-			if (strcmp(arg, "-Qoption") == 0) {
-				/* discard -Qoption and its two arguments */
-				if (ctx->i_oldargc < 3)
-					error(arg);
-				ctx->i_oldargc -= 2;
-				ctx->i_oldargv += 2;
-				continue;
-			}
 			if (strcmp(arg, "-nolib") == 0) {
 				/* -nodefaultlibs is on by default */
 				nolibc = 1;

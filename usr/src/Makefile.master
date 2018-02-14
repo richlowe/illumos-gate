@@ -312,7 +312,7 @@ V9ABIWARN=
 #
 # REGSYM is separate since the C++ driver syntax is different.
 CCREGSYM=		-_cc=-Wc,-Qiselect-regsym=0
-CCCREGSYM=		-Qoption cg -Qiselect-regsym=0
+CCCREGSYM=		-_cc=-Qoption -_cc=cg -_cc=-Qiselect-regsym=0
 
 # Prevent the removal of static symbols by the SPARC code generator (cg).
 # The x86 code generator (ube) does not remove such symbols and as such
@@ -646,23 +646,21 @@ BUILD.po= $(XGETTEXT) $(XGETFLAGS) -d $(<F) $<.i ;\
 #
 POFILE= $(PROG).po
 
+CCCNOANACHRONISM=	-_cc=-Qoption -_cc=ccfe -_cc=-messages=no%anachronism
+CCCNOSTRCONST=		-_cc=-Qoption -_cc=ccfe -_cc=-features=no%conststrings
+
 sparc_CCFLAGS=		-m32 -_cc=-cg92 -_gcc=-_cc=-mtune=supersparc \
 			-_gcc=-mcpu=v8 -_gcc=-mno-v8plus \
 			-_cc=-compat=4 \
-			-Qoption ccfe -messages=no%anachronism \
-			$(CCERRWARN)
+			$(CCCNOANACHRONISM) $(CCERRWARN)
 sparcv9_CCFLAGS=	$(sparcv9_XARCH) $(CCDALIGN) -_cc=-compat=5 \
-			-Qoption ccfe -messages=no%anachronism \
-			-Qoption ccfe -features=no%conststrings \
-			$(CCCREGSYM) \
-			$(CCERRWARN)
+			$(CCCNOANACHRONISM) $(CCCNOSTRCONST) \
+			$(CCCREGSYM) $(CCERRWARN)
 i386_CCFLAGS=		-_cc=-compat=4 \
-			-Qoption ccfe -messages=no%anachronism \
-			-Qoption ccfe -features=no%conststrings \
+			$(CCCNOANACHRONISM) $(CCCNOSTRCONST) \
 			$(CCERRWARN)
 amd64_CCFLAGS=		$(amd64_XARCH) -_cc=-compat=5 \
-			-Qoption ccfe -messages=no%anachronism \
-			-Qoption ccfe -features=no%conststrings \
+			$(CCCNOANACHRONISM) $(CCCNOSTRCONST) \
 			$(CCERRWARN)
 
 sparc_CCOPTFLAG=	-O
