@@ -55,7 +55,7 @@ fasttrap/tst.stack.exe := LDLIBS += -ldtrace
 sysevent/tst.post.exe := LDLIBS += -lsysevent
 sysevent/tst.post_chan.exe := LDLIBS += -lsysevent
 
-ustack/tst.bigstack.exe := COPTFLAG += -xO1
+ustack/tst.bigstack.exe := COPTFLAG += -_cc=-xO1 -_gcc=-O1
 
 GCC = $(ONBLD_TOOLS)/bin/$(MACH)/cw -_gcc
 

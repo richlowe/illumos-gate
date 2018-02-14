@@ -191,7 +191,7 @@ IMPLEMENTATIONS		+= lw2plus
 #
 CC_XARCH	= -m64 $(XARCH_SPARCVIS)
 AS_XARCH	= -xarch=v9a
-COPTIMIZE	= -xO3
+COPTIMIZE	= -_cc=-xO3 -_gcc=-O2
 
 CFLAGS		= -_cc=-xchip=ultra -_gcc=-mtune=ultrasparc $(CCABS32) $(CCREGSYM)
 CFLAGS		+= $(CC_XARCH)

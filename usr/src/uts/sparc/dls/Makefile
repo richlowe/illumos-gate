@@ -53,7 +53,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 CFLAGS				+= $(CCVERBOSE)
 $(RELEASE_BUILD)CFLAGS		+= -_cc=-xinline=auto -_cc=-xcrossfile
-$(RELEASE_BUILD)COPTIMIZE	= -xO5
+$(RELEASE_BUILD)COPTIMIZE	= -_cc=-xO5 -_gcc=-O2
 LDFLAGS				+= -dy -N misc/mac
 INC_PATH			+= -I$(UTSBASE)/common/io/bpf
 

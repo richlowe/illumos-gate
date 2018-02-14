@@ -55,8 +55,6 @@ INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
 #
 LINTTAGS  += -DSOLARIS_S11 -erroff=E_STATIC_UNUSED
 
-#COPTIMIZE = -xO4
-
 INC_PATH  += -I$(UTSBASE)/common/io/myri10ge -I$(UTSBASE)/common/io/myri10ge/firmware
 
 CFLAGS    += -DSOLARIS_S11

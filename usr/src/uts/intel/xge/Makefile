@@ -85,8 +85,8 @@ XGE_CFLAGS	= $(HAL_CFLAGS) $(TRACE_CFLAGS) $(CCVERBOSE) \
 		-I$(UTSBASE)/common/io/xge/hal/xgehal \
 		-I$(UTSBASE)/common/io/xge/drv -DSOLARIS
 
-CFLAGS		+= $(XGE_CFLAGS) -xO4 -_cc=-xcrossfile
-CFLAGS64	+= $(XGE_CFLAGS) -xO4 -_cc=-xcrossfile
+CFLAGS		+= $(XGE_CFLAGS) -_cc=-xO4 -_gcc=-O2 -_cc=-xcrossfile
+CFLAGS64	+= $(XGE_CFLAGS) -_cc=-xO4 -_gcc=-O2 -_cc=-xcrossfile
 
 LINTFLAGS	+= -v
 

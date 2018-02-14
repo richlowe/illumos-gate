@@ -1299,8 +1299,8 @@ QIL=				\
 	_Q_sub.o
 
 $(QIL:%=pics/%) := CFLAGS += -_cc=$(LIBCDIR)/$(MACH)/fp/__quad.il
-pics/_Q%.o := sparc_COPTFLAG = -xO4 $(CCDALIGN)
-pics/__quad%.o := sparc_COPTFLAG = -xO4 $(CCDALIGN)
+pics/_Q%.o := sparc_COPTFLAG = -_gcc=-O2 -_cc=-xO4 $(CCDALIGN)
+pics/__quad%.o := sparc_COPTFLAG = -_gcc=-O2 -_cc=-xO4 $(CCDALIGN)
 
 # large-file-aware components that should be built large
 
@@ -1341,7 +1341,7 @@ $(PORTI18N_COND:%=pics/%) := \
 pics/arc4random.o :=	CPPFLAGS += -I$(SRC)/common/crypto/chacha
 
 # Files which need extra optimization
-pics/getenv.o := sparc_COPTFLAG = -xO4
+pics/getenv.o := sparc_COPTFLAG = -_cc=-xO4 -_gcc=-O2
 
 .KEEP_STATE:
 

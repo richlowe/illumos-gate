@@ -620,38 +620,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'O':
-				/* XXX:
-				 * cc and CC support -O now, bare -O defaults to -O3 though
-				 *
-				 * cap at 2 with gcc via, well, just doing that.
-				 */
-				if (strncmp(arg, "-xO", 3) == 0) {
-					size_t len = strlen(arg);
-					char *s = NULL;
-					int c = *(arg + 3);
-					int level;
-
-					if (len != 4 || !isdigit(c))
-						error(arg);
-
-					level = atoi(arg + 3);
-					if (level > 5)
-						error(arg);
-					if (level >= 2) {
-						/*
-						 * limit -xO3 to -O2 as well.
-						 */
-						level = 2;
-					}
-					if (asprintf(&s, "-O%d", level) == -1)
-						nomem();
-					newae(ctx->i_ae, s);
-					free(s);
-					break;
-				}
-				error(arg);
-				break;
 			case 'e':
 			case 'h':
 			case 'l':

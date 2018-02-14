@@ -120,7 +120,7 @@ AS_XARCH	= $(AS_XARCH_$(CLASS))
 CC_XARCH_64	= -m64
 CC_XARCH	= $(AS_XARCH_$(CLASS))
 
-COPTIMIZE_64	= -xO3
+COPTIMIZE_64	= -_cc=-xO3 -_gcc=-O2
 COPTIMIZE	= $(COPTIMIZE_$(CLASS))
 
 CFLAGS_64	= -_cc=-xchip=ultra -_gcc=-mtune=ultrasparc $(CCABS32) $(CCREGSYM)

@@ -65,8 +65,8 @@ LINT_TARGET	= $(MODULE).lint
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
 
 #
-# Inline functions, this probably needs to be changed when compiling with
-# -xO4.
+# Inline functions, this probably needs to be changed if we ever compile
+# with greater optimization.
 #
 CINLINES 	= -_cc=-xinline=tcp_set_ws_value,tcp_fill_header
 

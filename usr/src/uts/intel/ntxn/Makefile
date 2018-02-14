@@ -56,8 +56,8 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 
 INC_PATH	+= -I$(CONF_SRCDIR)
 
-CFLAGS		+=  -DSOLARIS11 -xO4
-CFLAGS64	+=  -DSOLARIS11 -xO -I./
+CFLAGS		+=  -DSOLARIS11 -_cc=-xO4 -_gcc=-O2
+CFLAGS64	+=  -DSOLARIS11 -_cc=-xO -_gcc=-O -I./
 
 #
 #	Driver depends on MAC & IP

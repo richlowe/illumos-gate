@@ -69,7 +69,7 @@ CFLAGS		+= $(CCVERBOSE)
 
 #
 # Inline functions, this probably needs to be changed when compiling with
-# -xO4.
+# greater optimization.
 #
 CFLAGS		+= -_cc=-xinline=tcp_set_ws_value,tcp_fill_header
 

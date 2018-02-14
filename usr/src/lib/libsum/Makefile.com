@@ -77,10 +77,10 @@ CFLAGS64 += \
 CERRWARN	+= -_gcc=-Wno-parentheses
 
 # This codepath is performance-critical
-sparc_COPTFLAG=-xO5 -_cc=-xprefetch=auto,explicit
-sparcv9_COPTFLAG=-xO5 -_cc=-xprefetch=auto,explicit
-i386_COPTFLAG=-_cc=-xO5 -_cc=-xprefetch=auto,explicit
-amd64_COPTFLAG=-_cc=-xO5  -_cc=-xprefetch=auto,explicit
+sparc_COPTFLAG=-_gcc=-O2 -_cc=-xO5 -_cc=-xprefetch=auto,explicit
+sparcv9_COPTFLAG=-_gcc=-O2 -_cc=-xO5 -_cc=-xprefetch=auto,explicit
+i386_COPTFLAG=-_gcc=-O2 -_cc=-xO5 -_cc=-xprefetch=auto,explicit
+amd64_COPTFLAG=-_gcc=-O2 -_cc=-xO5  -_cc=-xprefetch=auto,explicit
 
 # Suppress this one warning as the fix would break old gcc, which upstream
 # still supports. This needs a better fix (later).

@@ -447,11 +447,15 @@ sparcv9_ASFLAGS=$(sparcv9_AS_XARCH)
 i386_ASFLAGS=	$(i386_AS_XARCH)
 amd64_ASFLAGS=	$(amd64_AS_XARCH)
 
-#
-sparc_COPTFLAG=		-xO3
-sparcv9_COPTFLAG=	-xO3
+# Note that optimization levels for a given number do not translate between
+# compilers.  Historically, we have limited GCC to at most -O2, regardless of
+# the Studio values.
+sparc_COPTFLAG=		-_cc=-xO3 -_gcc=-O2
+sparcv9_COPTFLAG=	-_cc=-xO3 -_gcc=-O2
+# This does not actually mean the same thing between Studio and GCC, but is what
+# has historically been done.
 i386_COPTFLAG=		-O
-amd64_COPTFLAG=		-xO3
+amd64_COPTFLAG=		-_cc=-xO3 -_gcc=-O2
 
 COPTFLAG= $($(MACH)_COPTFLAG)
 COPTFLAG64= $($(MACH64)_COPTFLAG)
