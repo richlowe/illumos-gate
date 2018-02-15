@@ -153,8 +153,6 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 CERRWARN +=	-_gcc=-Wno-switch
 
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDAPL_DBG
-debug := COPTFLAG = -g
-debug := COPTFLAG64 = -g
 
 .KEEP_STATE:
 

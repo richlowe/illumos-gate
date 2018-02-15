@@ -139,11 +139,6 @@ roll_log.o:
 	cp $(ROLLOBJS) .
 	pwd
 
-.debug/roll_log.o:
-	cd $(ROLLDIR) ; pwd ; $(MAKE) CFLAGS=-g
-	cp $(ROLLOBJS) .debug
-	pwd
-
 $(ROLLPOFILES): $(ROLLSRCS)
 	cd $(ROLLDIR) ; pwd ; $(MAKE) `echo $(ROLLPOFILES) | sed -e 's@$(ROLLDIR)/@@g'`
 	cp $(ROLLDIR)/*.po .

@@ -41,10 +41,6 @@ XGETFLAGS += -a -x dhcpagent.xcl
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-parentheses
 
-#
-# to compile a debug version, do a `make COPTFLAG="-g -XO0"'
-#
-
 CPPFLAGS  += -D_XOPEN_SOURCE=500 -D__EXTENSIONS__
 LDLIBS    += -lxnet -lnvpair -ldhcpagent -ldhcputil -linetutil -ldevinfo \
 	-ldlpi -lresolv -lsocket -lipadm

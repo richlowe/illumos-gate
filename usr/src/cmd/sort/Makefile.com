@@ -90,10 +90,10 @@ CERRWARN +=	-_gcc=-Wno-unused-function
 
 $(XPG4)	:=	CFLAGS += -DXPG4
 
-debug :=	SORT_DEBUG = -g -DDEBUG $(ILDOFF)
+debug :=	SORT_DEBUG = $(CCGDEBUG) -DDEBUG $(ILDOFF)
 debug :=	COPTFLAG =
 debug :=	COPTFLAG64 =
-stats	:=	SORT_DEBUG = -g -DSTATS -DDEBUG $(ILDOFF)
+stats	:=	SORT_DEBUG = $(CCGDEBUG) -DSTATS -DDEBUG $(ILDOFF)
 stats	:=	COPTFLAG =
 stats	:=	COPTFLAG64 =
 

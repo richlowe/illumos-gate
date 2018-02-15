@@ -94,8 +94,6 @@ LIBSCF		= $(SRC)/lib/libscf
 LIBTECLA	= $(SRC)/lib/libtecla		# just for the header
 LIBUUTIL	= $(SRC)/lib/libuutil
 
-debug := COPTFLAG = -g
-
 lint := LINTFLAGS = -mux
 lint := SVCCFG_EXTRA_LIBS = -lscf -ll -luutil -lumem -lmd5 -lnvpair
 

@@ -50,7 +50,7 @@ lint_SRCS :=	CPPFLAGS += $(INCS)
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(LINK.c) -g -o $@ $(OBJS) $(LDLIBS)
+	$(LINK.c) $(CCGDEBUG) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 $(POFILE): $(POFILES)

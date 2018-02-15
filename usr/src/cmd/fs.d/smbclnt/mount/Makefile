@@ -49,12 +49,6 @@ LDLIBS += -lsmbfs
 
 CPPFLAGS += -I$(SRC)/uts/common -I$(SRC)/lib/libsmbfs 
 
-# uncomment these for dbx debugging
-#COPTFLAG = -g
-#CTF_FLAGS =
-#CTFCONVERT_O=
-#CTFMERGE_LIB=
-
 .KEEP_STATE:
 
 all:	$(ROOTFS_PROG)

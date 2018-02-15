@@ -186,8 +186,8 @@ include ../../../Makefile.lib
 include ../../Makefile.lib
 
 # Force SOURCEDEBUG
-CSOURCEDEBUGFLAGS	= -g
-CCSOURCEDEBUGFLAGS	= -g
+CSOURCEDEBUGFLAGS	= $(CCGDEBUG)
+CCSOURCEDEBUGFLAGS	= $(CCGDEBUG)
 STRIP_STABS 	= :
 
 

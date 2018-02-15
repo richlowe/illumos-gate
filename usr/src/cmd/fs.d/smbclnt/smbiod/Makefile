@@ -49,12 +49,6 @@ CPPFLAGS += -I$(SRC)/lib/libsmbfs \
 # Debugging
 ${NOT_RELEASE_BUILD} CPPFLAGS += -DDEBUG
 
-# uncomment these for dbx debugging
-#COPTFLAG = -g
-#CTF_FLAGS =
-#CTFCONVERT_O=
-#CTFMERGE_LIB=
-
 all:	$(TYPEPROG)
 
 catalog:	$(POFILE)

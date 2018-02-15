@@ -1318,7 +1318,7 @@ $(ASSYMDEP_OBJS:%=pics/%): assym.h
 
 # assym.h build rules
 
-assym.h := CFLAGS64 += -g
+assym.h := CFLAGS64 += $(CCGDEBUG)
 
 GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
 

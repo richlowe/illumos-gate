@@ -54,8 +54,6 @@ $(LINTLIB):=	SRCS = $(SRCDIR)/$(LINTSRC)
 CERRWARN +=	-_gcc=-Wno-type-limits
 
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
-debug := COPTFLAG = -g
-debug := COPTFLAG64 = -g
 
 .KEEP_STATE:
 

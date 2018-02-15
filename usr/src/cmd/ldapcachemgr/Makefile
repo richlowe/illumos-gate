@@ -61,10 +61,6 @@ POFILES=	${OBJS:%.o=%.po}
 
 LINTOUT=        lint.out
 
-# TCOV_FLAG=	-ql
-# GPROF_FLAG=	-xpg
-# DEBUG_FLAG=	-g
-
 LDLIBS += 	-lumem -lsldap
 
 # install macros and rule

@@ -68,10 +68,6 @@ CERRWARN +=	-_gcc=-Wno-type-limits
 # is error-prone, so establish the whole object as an interposer.
 LDFLAGS +=	$(ZINTERPOSE)
 
-# TCOV_FLAG=	-ql
-# GPROF_FLAG=	-xpg
-# DEBUG_FLAG=	-g
-
 PROGLIBS=	$(LDLIBS) -lresolv -lnsl -lsocket -lumem -lscf -lavl
 
 # install macros and rule

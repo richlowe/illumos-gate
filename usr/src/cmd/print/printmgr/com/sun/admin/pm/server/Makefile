@@ -107,7 +107,7 @@ $(JNIHDR_FILES): $(JNICLASSFILES)
 # Build standalone programs for testing
 #
 NS: NS.c
-	$(CC) NS.c -g $(ILDOFF) -o NS -DMAIN=1 $(ENVLDLIBS1) $(ENVLIBS2) \
+	$(CC) NS.c $(CCGDEBUG) $(ILDOFF) -o NS -DMAIN=1 $(ENVLDLIBS1) $(ENVLIBS2) \
 	    -lprint -lnsl -lsocket
 
 lint: $(JNIHDR_FILES) lintcheck

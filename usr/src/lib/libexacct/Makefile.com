@@ -45,8 +45,8 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 CPPFLAGS +=	-D_FILE_OFFSET_BITS=64
 
 debug :=	CPPFLAGS += -DLIBEXACCT_DEBUG
-debug :=	COPTFLAG = -g
-debug :=	COPTFLAG64 = -g
+debug :=	COPTFLAG = $(CCGDEBUG)
+debug :=	COPTFLAG64 = $(CCGDEBUG)
 
 .KEEP_STATE:
 

@@ -63,8 +63,6 @@ YFLAGS=		-d
 LFLAGS=		-v
 # FOR normal makefile, uncomment the next line
 LDLIBS +=	-lgen -ltnfctl -lelf -lc
-# Uncomment the following line for a debug build
-# COPTFLAG =	-g -DDEBUG
 
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-unused-label

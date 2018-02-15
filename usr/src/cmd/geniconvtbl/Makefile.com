@@ -167,10 +167,6 @@ cstyle: $(SRCS)
 clean:
 	$(RM) $(CLEANFILES)
 
-debug:
-	$(MAKE)	all COPTFLAG='' COPTFLAG64='' CFLAGS='-g -DDEBUG'
-
-
 %.o:	%.c 
 	$(COMPILE.c) $<
 
