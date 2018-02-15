@@ -597,29 +597,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'x':
-			if (arglen == 1)
-				error(arg);
-			switch (arg[2]) {
-			case 'c':
-				if (strncmp(arg, "-xc99=%all", 10) == 0) {
-					newae(ctx->i_ae, "-std=gnu99");
-					break;
-				}
-				if (strncmp(arg, "-xc99=%none", 11) == 0) {
-					newae(ctx->i_ae, "-std=gnu89");
-					break;
-				}
-				error(arg);
-				break;
-			case 'e':
-			case 'h':
-			case 'l':
-			default:
-				error(arg);
-				break;
-			}
-			break;
 		case 'Y':
 			if (arglen == 1) {
 				if ((arg = *++ctx->i_oldargv) == NULL ||

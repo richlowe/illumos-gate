@@ -43,7 +43,7 @@ $(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
 
 #add nfs/lib directory as part of the include path
 CFLAGS +=	$(CCVERBOSE)
-CSTD +=	$(CSTD_GNU99)
+CSTD =	$(CSTD_GNU99)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-uninitialized
 CERRWARN +=	-_gcc=-Wno-switch

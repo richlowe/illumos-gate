@@ -426,11 +426,20 @@ $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-empty-body
 # turn warnings into errors (C++)
 CCERRWARN=		-_cc=-xwe -_gcc=-Werror
 
-# C standard.  Keep Studio flags until we get rid of lint.
-CSTD_GNU89=	-xc99=%none
-CSTD_GNU99=	-xc99=%all
+# C standard.
+#
+# The defaulting of C99LMODE, below, requires the entries removed and ignored
+# there to come last here.
+CSTD_GNU89=	-_gcc=-std=gnu89 -_cc=-xc99=%none
+CSTD_GNU99=	-_gcc=-std=gnu99 -_cc=-xc99=%all
 CSTD=		$(CSTD_GNU89)
-C99LMODE=	$(CSTD:-xc99%=-Xc99%)
+
+# Set the lint mode based on CSTD.  Thanks to the arguments containing both =
+# and % doing this with make is ugly and hairy
+C99LMODE_3=	$(CSTD:-_cc%=) # Remove the Sun studio options
+C99LMODE_2=	$(C99LMODE_3:%gnu89=none)	# if  gnu89, be "none" 
+C99LMODE_1=	$(C99LMODE_2:%gnu99=all)	# ... if gnu99 be "all"
+C99LMODE=	-Xc99=%$(C99LMODE_1)		# prepend -Xc99=%
 
 CCDALIGN=	-_cc=-dalign
 

@@ -36,6 +36,7 @@ ASSUFFIX	= $(ASSUFFIX_$(MACH))
 CSTD		=
 CFLAGS		+= -_gcc=-std=gnu89
 CFLAGS64	+= -_gcc=-std=gnu89
+C99LMODE	= -Xc99=%all
 
 M4FLAGS		= -D__STDC__ -DPIC
 
