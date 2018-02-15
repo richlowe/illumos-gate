@@ -498,12 +498,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'g':
-			/* XXX: use the debugformat option we already have to pass this */
-			/* just accept -g */
-			/* Though note that we use -g a lot by hand, so that needs tidying */
-			newae(ctx->i_ae, "-gdwarf-2");
-			break;
 		case 's':
 			if (strcmp(arg, "-shared") == 0) {
 			    newae(ctx->i_ae, "-shared");
@@ -539,6 +533,7 @@ do_gcc(cw_ictx_t *ctx)
 			break;
 		case 'A':
 		case 'D':
+		case 'g':
 		case 'h':
 		case 'I':
 		case 'i':
