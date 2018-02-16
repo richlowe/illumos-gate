@@ -90,8 +90,6 @@ INTEL_BLD=      $(INTEL_BLD_1:i386=)
 # __GNUC64 indicates that the 64bit build should use the GNU C compiler.
 # There is no Sun C analogue.
 #
-# __GNUCNEXT enables options specific to the next version of GCC to be used
-#
 # The following version-specific options are operative regardless of which
 # compiler is primary, and control the versions of the given compilers to be
 # used.  They also allow compiler-version specific Makefile fragments.
@@ -100,7 +98,6 @@ INTEL_BLD=      $(INTEL_BLD_1:i386=)
 __SUNC=			$(POUND_SIGN)
 $(__SUNC)__GNUC=	$(POUND_SIGN)
 __GNUC64=		$(__GNUC)
-__GNUCNEXT=		$(POUND_SIGN)
 
 # Allow build-time "configuration" to enable or disable some things.
 # The default is POUND_SIGN, meaning "not enabled". If the environment
@@ -334,8 +331,8 @@ CCNOAUTOINLINE= -_gcc=-fno-inline-small-functions \
 	-_gcc=-fno-inline-functions-called-once \
 	-_gcc=-fno-ipa-cp
 
-$(__GNUCNEXT)CCNOAUTOINLINE += -_gcc=-fno-ipa-icf 
-$(__GNUCNEXT)CCNOAUTOINLINE += -_gcc=-fno-clone-functions
+CCNOAUTOINLINE += -_gcc7=-fno-ipa-icf 
+CCNOAUTOINLINE += -_gcc7=-fno-clone-functions
 
 # One optimization the compiler might perform is to turn this:
 #	#pragma weak foo
@@ -468,7 +465,7 @@ CALLSYMS=	-W0,-xdbggen=no%usedonly
 # Default debug format for Sun Studio 11 is dwarf, so force it to
 # generate stabs.
 #
-DEBUGFORMAT=	-xdebugformat=stabs
+DEBUGFORMAT=	-xdebugformat=stabs -_gcc7=-gstrict-dwarf
 
 #
 # Flags used to build in debug mode for ctf generation.  Bugs in the Devpro

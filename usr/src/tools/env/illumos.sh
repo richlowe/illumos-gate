@@ -221,6 +221,11 @@ export SPRO_VROOT="$SPRO_ROOT"
 # There can be several space-separated entries in SHADOW_* to run multiple
 # shadow compilers.
 
+export PRIMARY_CC=gcc4,/opt/gcc/4.4.4/bin/gcc,gnu
+export PRIMARY_CCC=gcc4,/opt/gcc/4.4.4/bin/g++,gnu
+export SHADOW_CCS=gcc7,/usr/gcc/7/bin/gcc,gnu
+export SHADOW_CCCS=gcc7,/usr/gcc/7/bin/g++,gnu
+
 # This goes along with lint - it is a series of the form "A [y|n]" which
 # means "go to directory A and run 'make lint'" Then mail me (y) the
 # difference in the lint output. 'y' should only be used if the area you're
