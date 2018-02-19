@@ -39,10 +39,240 @@
 #define	CW_VERSION	"1.31"
 
 /*
- * The compiler wrapper used to do a great deal of command line translation,
- * all that remains is the translation of:
- * -YI,<dir> Change default directory searched for include files
- * which is translated to -nostdinc -I<dir> as a sop to lint(1)
+ * -#		Verbose mode
+ * -###		Show compiler commands built by driver, no compilation
+ * -A<name[(tokens)]>	Preprocessor predicate assertion
+ * -B<[static|dynamic]>	Specify dynamic or static binding
+ * -C		Prevent preprocessor from removing comments
+ * -c		Compile only - produce .o files, suppress linking
+ * -cg92	Alias for -xtarget=ss1000
+ * -D<name[=token]>	Associate name with token as if by #define
+ * -d[y|n]	dynamic [-dy] or static [-dn] option to linker
+ * -E		Compile source through preprocessor only, output to stdout
+ * -erroff=<t>	Suppress warnings specified by tags t(%none, %all, <tag list>)
+ * -errtags=<a>	Display messages with tags a(no, yes)
+ * -errwarn=<t>	Treats warnings specified by tags t(%none, %all, <tag list>)
+ *		as errors
+ * -fast	Optimize using a selection of options
+ * -fd		Report old-style function definitions and declarations
+ * -flags	Show this summary of compiler options
+ * -fnonstd	Initialize floating-point hardware to non-standard preferences
+ * -fns[=<yes|no>] Select non-standard floating point mode
+ * -fprecision=<p> Set FP rounding precision mode p(single, double, extended)
+ * -fround=<r>	Select the IEEE rounding mode in effect at startup
+ * -fsimple[=<n>] Select floating-point optimization preferences <n>
+ * -fsingle	Use single-precision arithmetic (-Xt and -Xs modes only)
+ * -ftrap=<t>	Select floating-point trapping mode in effect at startup
+ * -fstore	force floating pt. values to target precision on assignment
+ * -G		Build a dynamic shared library
+ * -g		Compile for debugging
+ * -H		Print path name of each file included during compilation
+ * -h <name>	Assign <name> to generated dynamic shared library
+ * -I<dir>	Add <dir> to preprocessor #include file search path
+ * -i		Passed to linker to ignore any LD_LIBRARY_PATH setting
+ * -KPIC	Compile position independent code with 32-bit addresses
+ * -Kpic	Compile position independent code
+ * -L<dir>	Pass to linker to add <dir> to the library search path
+ * -l<name>	Link with library lib<name>.a or lib<name>.so
+ * -mc		Remove duplicate strings from .comment section of output files
+ * -mr		Remove all strings from .comment section of output files
+ * -mr,"string"	Remove all strings and append "string" to .comment section
+ * -mt		Specify options needed when compiling multi-threaded code
+ * -native	Find available processor, generate code accordingly
+ * -nofstore	Do not force floating pt. values to target precision
+ *		on assignment
+ * -nolib	Same as -xnolib
+ * -norunpath	Do not build in a runtime path for shared libraries
+ * -O		Use default optimization level (-xO2 or -xO3. Check man page.)
+ * -o <outputfile> Set name of output file to <outputfile>
+ * -P		Compile source through preprocessor only, output to .i  file
+ * -PIC		Alias for -KPIC or -xcode=pic32
+ * -p		Compile for profiling with prof
+ * -pic		Alias for -Kpic or -xcode=pic13
+ * -Q[y|n]	Emit/don't emit identification info to output file
+ * -qp		Compile for profiling with prof
+ * -R<dir[:dir]> Build runtime search path list into executable
+ * -S		Compile and only generate assembly code (.s)
+ * -s		Strip symbol table from the executable file
+ * -t		Turn off duplicate symbol warnings when linking
+ * -U<name>	Delete initial definition of preprocessor symbol <name>
+ * -V		Report version number of each compilation phase
+ * -v		Do stricter semantic checking
+ * -W<c>,<arg>	Pass <arg> to specified component <c> (a,l,m,p,0,2,h,i,u)
+ * -w		Suppress compiler warning messages
+ * -Xc		Compile assuming strict ANSI C conformance
+ * -Xs		Compile assuming (pre-ANSI) K & R C style code
+ * -x386	Generate code for the 80386 processor
+ * -x486	Generate code for the 80486 processor
+ * -xarch=<a>	Specify target architecture instruction set
+ * -xbuiltin[=<b>] When profitable inline, or substitute intrinisic functions
+ *		for system functions, b={%all,%none}
+ * -xCC		Accept C++ style comments
+ * -xchip=<c>	Specify the target processor for use by the optimizer
+ * -xcode=<c>	Generate different code for forming addresses
+ * -xcrossfile[=<n>] Enable optimization and inlining across source files,
+ *		n={0|1}
+ * -xe		Perform only syntax/semantic checking, no code generation
+ * -xF		Compile for later mapfile reordering or unused section
+ *		elimination
+ * -xhelp=<f>	Display on-line help information f(flags, readme, errors)
+ * -xildoff	Cancel -xildon
+ * -xildon	Enable use of the incremental linker, ild
+ * -xinline=[<a>,...,<a>]  Attempt inlining of specified user routines,
+ *		<a>={%auto,func,no%func}
+ * -xlibmieee	Force IEEE 754 return values for math routines in
+ *		exceptional cases
+ * -xlibmil	Inline selected libm math routines for optimization
+ * -xlic_lib=sunperf	Link in the Sun supplied performance libraries
+ * -xlicinfo	Show license server information
+ * -xM		Generate makefile dependencies
+ * -xM1		Generate makefile dependencies, but exclude /usr/include
+ * -xmaxopt=[off,1,2,3,4,5] maximum optimization level allowed on #pragma opt
+ * -xnolib	Do not link with default system libraries
+ * -xnolibmil	Cancel -xlibmil on command line
+ * -xO<n>	Generate optimized code (n={1|2|3|4|5})
+ * -xP		Print prototypes for function definitions
+ * -xpentium	Generate code for the pentium processor
+ * -xpg		Compile for profiling with gprof
+ * -xprofile=<p> Collect data for a profile or use a profile to optimize
+ *		<p>={{collect,use}[:<path>],tcov}
+ * -xregs=<r>	Control register allocation
+ * -xs		Allow debugging without object (.o) files
+ * -xsb		Compile for use with the WorkShop source browser
+ * -xsbfast	Generate only WorkShop source browser info, no compilation
+ * -xsfpconst	Represent unsuffixed floating point constants as single
+ *		precision
+ * -xspace	Do not do optimizations that increase code size
+ * -xstrconst	Place string literals into read-only data segment
+ * -xtemp=<dir>	Set directory for temporary files to <dir>
+ * -xtime	Report the execution time for each compilation phase
+ * -xtransition	Emit warnings for differences between K&R C and ANSI C
+ * -xtrigraphs[=<yes|no>] Enable|disable trigraph translation
+ * -xunroll=n	Enable unrolling loops n times where possible
+ * -Y<c>,<dir>	Specify <dir> for location of component <c> (a,l,m,p,0,h,i,u)
+ * -YA,<dir>	Change default directory searched for components
+ * -YI,<dir>	Change default directory searched for include files
+ * -YP,<dir>	Change default directory for finding libraries files
+ * -YS,<dir>	Change default directory for startup object files
+ */
+
+/*
+ * Translation table:
+ */
+/*
+ * -#				-v
+ * -###				error
+ * -A<name[(tokens)]>		pass-thru
+ * -B<[static|dynamic]>		pass-thru (syntax error for anything else)
+ * -C				pass-thru
+ * -c				pass-thru
+ * -cg92			-m32 -mcpu=v8 -mtune=supersparc (SPARC only)
+ * -D<name[=token]>		pass-thru
+ * -dy or -dn			-Wl,-dy or -Wl,-dn
+ * -E				pass-thru
+ * -erroff=E_EMPTY_TRANSLATION_UNIT ignore
+ * -errtags=%all		-Wall
+ * -errwarn=%all		-Werror else -Wno-error
+ * -fast			error
+ * -fd				error
+ * -flags			--help
+ * -fnonstd			error
+ * -fns[=<yes|no>]		error
+ * -fprecision=<p>		error
+ * -fround=<r>			error
+ * -fsimple[=<n>]		error
+ * -fsingle[=<n>]		error
+ * -ftrap=<t>			error
+ * -fstore			error
+ * -G				pass-thru
+ * -g				pass-thru
+ * -H				pass-thru
+ * -h <name>			pass-thru
+ * -I<dir>			pass-thru
+ * -i				pass-thru
+ * -KPIC			-fPIC
+ * -Kpic			-fpic
+ * -L<dir>			pass-thru
+ * -l<name>			pass-thru
+ * -mc				error
+ * -mr				error
+ * -mr,"string"			error
+ * -mt				-D_REENTRANT
+ * -native			error
+ * -nofstore			error
+ * -nolib			-nodefaultlibs
+ * -norunpath			ignore
+ * -O				-O1 (Check the man page to be certain)
+ * -o <outputfile>		pass-thru
+ * -P				-E -o filename.i (or error)
+ * -PIC				-fPIC (C++ only)
+ * -p				pass-thru
+ * -pic				-fpic (C++ only)
+ * -Q[y|n]			error
+ * -qp				-p
+ * -R<dir[:dir]>		pass-thru
+ * -S				pass-thru
+ * -s				-Wl,-s
+ * -t				-Wl,-t
+ * -U<name>			pass-thru
+ * -V				--version
+ * -v				-Wall
+ * -Wa,<arg>			pass-thru
+ * -Wp,<arg>			pass-thru except -xc99=<a>
+ * -Wl,<arg>			pass-thru
+ * -W{m,0,2,h,i,u>		error/ignore
+ * -xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
+ * -Wu,-save_args		-msave-args
+ * -w				pass-thru
+ * -Xc				-ansi -pedantic
+ * -Xs				-traditional -std=c89
+ * -x386			-march=i386 (x86 only)
+ * -x486			-march=i486 (x86 only)
+ * -xarch=<a>			table
+ * -xbuiltin[=<b>]		-fbuiltin (-fno-builtin otherwise)
+ * -xCC				ignore
+ * -xchip=<c>			table
+ * -xcode=<c>			table
+ * -xdebugformat=<format>	ignore (always use dwarf-2 for gcc)
+ * -xcrossfile[=<n>]		ignore
+ * -xe				error
+ * -xF				error
+ * -xhelp=<f>			error
+ * -xildoff			ignore
+ * -xildon			ignore
+ * -xinline			ignore
+ * -xlibmieee			error
+ * -xlibmil			error
+ * -xlic_lib=sunperf		error
+ * -xM				-M
+ * -xM1				-MM
+ * -xmaxopt=[...]		error
+ * -xnolib			-nodefaultlibs
+ * -xnolibmil			error
+ * -xO<n>			-O<n>
+ * -xP				error
+ * -xpentium			-march=pentium (x86 only)
+ * -xpg				error
+ * -xprofile=<p>		error
+ * -xregs=<r>			table
+ * -xs				error
+ * -xsb				error
+ * -xsbfast			error
+ * -xsfpconst			error
+ * -xspace			ignore (-not -Os)
+ * -xstrconst			ignore
+ * -xtemp=<dir>			error
+ * -xtime			error
+ * -xtransition			-Wtransition
+ * -xtrigraphs=<yes|no>		-trigraphs -notrigraphs
+ * -xunroll=n			error
+ * -W0,-xdbggen=no%usedonly	-fno-eliminate-unused-debug-symbols
+ *				-fno-eliminate-unused-debug-types
+ * -Y<c>,<dir>			error
+ * -YA,<dir>			error
+ * -YI,<dir>			-nostdinc -I<dir>
+ * -YP,<dir>			error
+ * -YS,<dir>			error
  */
 
 #include <stdio.h>
