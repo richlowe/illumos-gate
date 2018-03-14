@@ -456,15 +456,21 @@ sparcv9_ASFLAGS=$(sparcv9_AS_XARCH)
 i386_ASFLAGS=	$(i386_AS_XARCH)
 amd64_ASFLAGS=	$(amd64_AS_XARCH)
 
+# We historically did not pass these on (32bit) i386.  We don't do so now for
+# the sake of comparison.
+O2_OFF += -_gcc=-fno-strict-aliasing
+O2_OFF += -_gcc=-fno-unit-at-a-time
+O2_OFF += -_gcc=-fno-optimize-sibling-calls
+
 # Note that optimization levels for a given number do not translate between
 # compilers.  Historically, we have limited GCC to at most -O2, regardless of
 # the Studio values.
-sparc_COPTFLAG=		-_cc=-xO3 -_gcc=-O2
-sparcv9_COPTFLAG=	-_cc=-xO3 -_gcc=-O2
+sparc_COPTFLAG=		-_cc=-xO3 -_gcc=-O2 $(O2_OFF)
+sparcv9_COPTFLAG=	-_cc=-xO3 -_gcc=-O2 $(O2_OFF)
 # This does not actually mean the same thing between Studio and GCC, but is what
 # has historically been done.
 i386_COPTFLAG=		-O
-amd64_COPTFLAG=		-_cc=-xO3 -_gcc=-O2
+amd64_COPTFLAG=		-_cc=-xO3 -_gcc=-O2 $(O2_OFF)
 
 COPTFLAG= $($(MACH)_COPTFLAG)
 COPTFLAG64= $($(MACH64)_COPTFLAG)
@@ -597,9 +603,6 @@ CDEFAULT_FLAGS += -_gcc=-fno-builtin
 CDEFAULT_FLAGS += -_gcc=-fno-asm
 CDEFAULT_FLAGS += -_gcc=-fdiagnostics-show-option
 CDEFAULT_FLAGS += -_gcc=-nodefaultlibs
-CDEFAULT_FLAGS += -_gcc=-fno-strict-aliasing
-CDEFAULT_FLAGS += -_gcc=-fno-unit-at-a-time
-CDEFAULT_FLAGS += -_gcc=-fno-optimize-sibling-calls
 CDEFAULT_FLAGS += $($(MACH)_CDEFAULT_FLAGS)
 
 CFLAGS=         $(CDEFAULT_FLAGS) $(COPTFLAG) $($(MACH)_CFLAGS) $(SPACEFLAG) $(CCMODE) \
