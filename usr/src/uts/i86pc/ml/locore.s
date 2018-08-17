@@ -23,7 +23,7 @@
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 /*
- * Copyright (c) 2016, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2018 Joyent, Inc.
  */
 
 /*	Copyright (c) 1990, 1991 UNIX System Laboratories, Inc.	*/
@@ -159,7 +159,7 @@ _locore_start(struct boot_syscalls *sysp, ulong_t rsi, struct bootops *bop)
 	 * %rdi = boot services (should die someday)
 	 * %rdx = bootops
 	 * end
-	 */	
+	 */
 
 	leaq	edata(%rip), %rbp	/* reference edata for ksyms */
 	movq	$0, (%rbp)		/* limit stack back trace */
@@ -178,7 +178,7 @@ _locore_start(struct boot_syscalls *sysp, ulong_t rsi, struct bootops *bop)
 #endif
 	/*
 	 * Save call back for special x86 boot services vector
-	 */	
+	 */
 	movq	%rdi, sysp(%rip)
 
 	movq	%rdx, bootops(%rip)		/* save bootops */
@@ -208,7 +208,7 @@ _locore_start(struct boot_syscalls *sysp, ulong_t rsi, struct bootops *bop)
 #endif	/* __xpv */
 
 	/*
-	 * (We just assert this works by virtue of being here) 
+	 * (We just assert this works by virtue of being here)
 	 */
 	bts	$X86FSET_CPUID, x86_featureset(%rip)
 
@@ -239,6 +239,11 @@ __return_from_main:
 __unsupported_cpu:
 	.string	"486 style cpu detected - no longer supported!"
 
+#if defined(DEBUG)
+_no_pending_updates:
+	.string	"locore.s:%d lwp_rtt(lwp %p) but pcb_rupdate != 1"
+#endif
+
 #endif	/* !__lint */
 
 #if !defined(__amd64)
@@ -263,7 +268,7 @@ _locore_start(struct boot_syscalls *sysp, struct bootops *bop)
 	/*
 	 *	%ecx = boot services (should die someday)
 	 *	%ebx = bootops
-	 */	
+	 */
 	mov	$edata, %ebp		/ edata needs to be defined for ksyms
 	movl	$0, (%ebp)		/ limit stack back trace
 
@@ -278,14 +283,14 @@ _locore_start(struct boot_syscalls *sysp, struct bootops *bop)
 	 */
 	mov	%ecx, sysp		/ save call back for boot services
 
- 	mov	%ebx, bootops		/ save bootops
+	mov	%ebx, bootops		/ save bootops
 	movl	$bootops, bootopsp
 
 
 	/*
 	 * Save all registers and flags
 	 */
-	pushal	
+	pushal
 	pushfl
 
 #if !defined(__xpv)
@@ -438,7 +443,7 @@ port_22_free:
 	 * cycle. If the CCR index was not valid for this Cyrix model, we may
 	 * have performed an external I/O cycle as well. In these cases and
 	 * if the motherboard/chipset vendor ignores I/O address line A1,
-	 * then the PIC will have IRQ3 set at the lowest priority as a side	
+	 * then the PIC will have IRQ3 set at the lowest priority as a side
 	 * effect of the above outb. We are reasonalbly confident that there
 	 * is not an unknown device on I/O port 0x22, so there should have been
 	 * no unpredictable side-effect of the above outb.
@@ -887,7 +892,7 @@ likelyM3:
 	 * now we will call anything with a DIR0 of 0x80 or higher an MIII.
 	 * The MIII is supposed to support large pages, but we will believe
 	 * it when we see it. For now we just enable and test for MII features.
-	 */	
+	 */
 	movl	$X86_TYPE_VIA_CYRIX_III, x86_type
 	jmp	likeMII
 
@@ -925,7 +930,7 @@ coma_bug:
  * fixed this bug sometime late in 1997 and no other exploits other than
  * xchgl have been discovered is good indication that this workaround is
  * reasonable.
- */	
+ */
 
 	.set	CYRIX_DBR0, 0x30	/ Debug Register 0
 	.set	CYRIX_DBR1, 0x31	/ Debug Register 1
@@ -934,7 +939,7 @@ coma_bug:
 	.set	CYRIX_DOR, 0x3c		/ Debug Opcode Register
 
 	/*
- 	 * What is known about DBR1, DBR2, DBR3, and DOR is that for normal
+	 * What is known about DBR1, DBR2, DBR3, and DOR is that for normal
 	 * cpu execution DBR1, DBR2, and DBR3 are set to 0. To obtain opcode
 	 * serialization, DBR1, DBR2, and DBR3 are loaded with 0xb8, 0x7f,
 	 * and 0xff. Then, DOR is loaded with the one byte opcode.
@@ -994,7 +999,7 @@ coma_bug:
 	/*
 	 * write DBR1
 	 */
-	movb	$CYRIX_DBR1, %al 
+	movb	$CYRIX_DBR1, %al
 	outb	$CYRIX_CRI
 	movb	$0xf8, %al
 	outb	$CYRIX_CRD
@@ -1186,7 +1191,7 @@ cmntrap()
 	addq	%rax, %r12
 	movq	%r12, REGOFF_RIP(%rbp)
 	INTR_POP
-	IRET
+	jmp	tr_iret_auto
 	/*NOTREACHED*/
 3:
 	leaq	dtrace_badflags(%rip), %rdi
@@ -1196,6 +1201,7 @@ cmntrap()
 	leaq	dtrace_badtrap(%rip), %rdi
 	xorl	%eax, %eax
 	call	panic
+	SET_SIZE(cmntrap_pushed)
 	SET_SIZE(cmntrap)
 	SET_SIZE(_cmntrap)
 
@@ -1505,8 +1511,6 @@ _sys_rtt(void)
 
 #else	/* __lint */
 
-#if defined(__amd64)
-
 	ENTRY_NP(lwp_rtt_initial)
 	movq	%gs:CPU_THREAD, %r15
 	movq	T_STACK(%r15), %rsp	/* switch to the thread stack */
@@ -1549,8 +1553,6 @@ _lwp_rtt:
 	movq	%r14, %rdx
 	xorl	%eax, %eax
 	call	panic
-_no_pending_updates:
-	.string	"locore.s:%d lwp_rtt(lwp %p) but pcb_rupdate != 1"
 1:
 #endif
 
@@ -1569,11 +1571,6 @@ _no_pending_updates:
 	movq	REGOFF_RDX(%rsp), %rsi
 	movq	REGOFF_RAX(%rsp), %rdi
 	call	post_syscall		/* post_syscall(rval1, rval2) */
-
-	/*
-	 * set up to take fault on first use of fp
-	 */
-	STTS(%rdi)
 
 	/*
 	 * XXX - may want a fast path that avoids sys_rtt_common in the
@@ -1599,7 +1596,7 @@ _no_pending_updates:
 	 */
 	ALTENTRY(sys_rtt_syscall32)
 	USER32_POP
-	IRET
+	jmp	tr_iret_user
 	/*NOTREACHED*/
 
 	ALTENTRY(sys_rtt_syscall)
@@ -1608,7 +1605,7 @@ _no_pending_updates:
 	 */
 	USER_POP
 	ALTENTRY(nopop_sys_rtt_syscall)
-	IRET
+	jmp	tr_iret_user
 	/*NOTREACHED*/
 	SET_SIZE(nopop_sys_rtt_syscall)
 
@@ -1623,7 +1620,7 @@ _no_pending_updates:
 	 * Restore regs before doing iretq to kernel mode
 	 */
 	INTR_POP
-	IRET
+	jmp	tr_iret_kernel
 	.globl	_sys_rtt_end
 _sys_rtt_end:
 	/*NOTREACHED*/
@@ -1635,99 +1632,6 @@ _sys_rtt_end:
 	SET_SIZE(_sys_rtt)
 	SET_SIZE(sys_rtt_syscall)
 	SET_SIZE(sys_rtt_syscall32)
-
-#elif defined(__i386)
-
-	ENTRY_NP(lwp_rtt_initial)
-	movl	%gs:CPU_THREAD, %eax
-	movl	T_STACK(%eax), %esp	/* switch to the thread stack */
-	movl	%esp, %ebp
-	call	__dtrace_probe___proc_start
-	jmp	_lwp_rtt
-
-	ENTRY_NP(lwp_rtt)
-	movl	%gs:CPU_THREAD, %eax
-	movl	T_STACK(%eax), %esp	/* switch to the thread stack */
-	movl	%esp, %ebp
-_lwp_rtt:
-	call	__dtrace_probe___proc_lwp__start
-
-        /*
-         * If agent lwp, clear %fs and %gs.
-         */
-        movl    %gs:CPU_LWP, %eax
-        movl    LWP_PROCP(%eax), %edx
-
-        cmpl    %eax, P_AGENTTP(%edx)
-        jne     1f
-        movl    $0, REGOFF_FS(%esp)
-        movl    $0, REGOFF_GS(%esp)
-1:
-	call	dtrace_systrace_rtt
-	movl	REGOFF_EDX(%esp), %edx
-	movl	REGOFF_EAX(%esp), %eax
-	pushl	%edx
-	pushl	%eax
-	call	post_syscall		/* post_syscall(rval1, rval2) */
-	addl	$8, %esp
-
-	/*
-	 * set up to take fault on first use of fp
-	 */
-	STTS(%eax)
-
-	/*
-	 * XXX - may want a fast path that avoids sys_rtt_common in the
-	 * most common case.
-	 */
-	ALTENTRY(_sys_rtt)
-	CLI(%eax)			/* disable interrupts */
-	ALTENTRY(_sys_rtt_ints_disabled)
-	pushl	%esp			/* pass rp to sys_rtt_common */
-	call	sys_rtt_common
-	addl	$4, %esp		/* pop arg */
-	testl	%eax, %eax		/* test for return to user mode */
-	jz	sr_sup
-
-	/*
-	 * Return to User.
-	 */
-	ALTENTRY(sys_rtt_syscall)
-	INTR_POP_USER
-
-	/*
-	 * There can be no instructions between this label and IRET or
-	 * we could end up breaking linux brand support. See label usage
-	 * in lx_brand_int80_callback for an example.
-	 */
-	ALTENTRY(nopop_sys_rtt_syscall)
-	IRET
-	/*NOTREACHED*/
-	SET_SIZE(nopop_sys_rtt_syscall)
-
-	ALTENTRY(_sys_rtt_end)
-
-	/*
-	 * Return to supervisor
-	 */
-	ALTENTRY(sr_sup)
-
-	/*
-	 * Restore regs before doing iret to kernel mode
-	 */
-	INTR_POP_KERNEL
-	IRET
-	/*NOTREACHED*/
-
-	SET_SIZE(sr_sup)
-	SET_SIZE(_sys_rtt_end)
-	SET_SIZE(lwp_rtt)
-	SET_SIZE(lwp_rtt_initial)
-	SET_SIZE(_sys_rtt_ints_disabled)
-	SET_SIZE(_sys_rtt)
-	SET_SIZE(sys_rtt_syscall)
-
-#endif	/* __i386 */
 
 #endif	/* __lint */
 

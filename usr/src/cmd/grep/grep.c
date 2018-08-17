@@ -35,6 +35,7 @@
  */
 
 /*
+ * Copyright 2018 RackTop Systems.
  * Copyright 2018 Nexenta Systems, Inc.
  * Copyright 2013 Damian Bogel. All rights reserved.
  */
@@ -1277,8 +1278,8 @@ L_start_process:
 			goto L_next_line;
 
 		/* Do we have room to add this line to the context buffer? */
-		if ((line_len + 1) > (conbuflen -
-		    (conptrend >= conptr) ? conptrend - conbuf : 0)) {
+		while ((line_len + 1) > (conbuflen -
+		    ((conptrend >= conptr) ? conptrend - conbuf : 0))) {
 			char *oldconbuf = conbuf;
 			char *oldconptr = conptr;
 			long tmp = matchptr - conptr;
@@ -1524,59 +1525,12 @@ out:
 static void
 usage(void)
 {
-	if (egrep || fgrep) {
-		(void) fprintf(stderr, gettext("Usage:\t%s"), cmdname);
-		(void) fprintf(stderr,
-		    gettext(" [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] pattern_list [file ...]\n"));
-
-		(void) fprintf(stderr, "\t%s", cmdname);
-		(void) fprintf(stderr,
-		    gettext(" [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] [-e pattern_list]... "
-		    "[-f pattern_file]... [file...]\n"));
-	} else {
-		(void) fprintf(stderr, gettext("Usage:\t%s"), cmdname);
-		(void) fprintf(stderr,
-		    gettext(" [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] pattern_list [file ...]\n"));
-
-		(void) fprintf(stderr, "\t%s", cmdname);
-		(void) fprintf(stderr,
-		    gettext(" [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] [-e pattern_list]... "
-		    "[-f pattern_file]... [file...]\n"));
-
-		(void) fprintf(stderr, "\t%s", cmdname);
-		(void) fprintf(stderr,
-		    gettext(" -E [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] pattern_list [file ...]\n"));
-
-		(void) fprintf(stderr, "\t%s", cmdname);
-		(void) fprintf(stderr,
-		    gettext(" -E [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] [-e pattern_list]... "
-		    "[-f pattern_file]... [file...]\n"));
-
-		(void) fprintf(stderr, "\t%s", cmdname);
-		(void) fprintf(stderr,
-		    gettext(" -F [-c|-l|-q] [-r|-R] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] pattern_list [file ...]\n"));
-
-		(void) fprintf(stderr, "\t%s", cmdname);
-		(void) fprintf(stderr,
-		    gettext(" -F [-c|-l|-q] "
-		    "[-A num] [-B num] [-C num|-num] "
-		    "[-bhHinsvx] [-e pattern_list]... "
-		    "[-f pattern_file]... [file...]\n"));
-	}
+	(void) fprintf(stderr, gettext("usage: %5s"), cmdname);
+	if (!egrep && !fgrep)
+		(void) fprintf(stderr, gettext(" [-E|-F]"));
+	(void) fprintf(stderr, gettext(" [-bchHilnqrRsvx] [-A num] [-B num] "
+	    "[-C num|-num]\n             [-e pattern_list]... "
+	    "[-f pattern_file]... [pattern_list] [file]...\n"));
 	exit(2);
 	/* NOTREACHED */
 }

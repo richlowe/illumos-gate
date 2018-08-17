@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
- * Copyright 2016 Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
@@ -54,6 +54,24 @@ static int opt_O;
 static int opt_s;
 static int opt_t = -1;
 static int opt_x;
+
+/*PRINTFLIKE2*/
+static void
+smbios_warn(smbios_hdl_t *shp, const char *format, ...)
+{
+	va_list ap;
+
+	va_start(ap, format);
+	(void) vfprintf(stderr, format, ap);
+	va_end(ap);
+
+	if (shp != NULL) {
+		(void) fprintf(stderr, ": %s",
+		    smbios_errmsg(smbios_errno(shp)));
+	}
+
+	(void) fprintf(stderr, "\n");
+}
 
 /*PRINTFLIKE2*/
 static void
@@ -296,7 +314,13 @@ print_bios(smbios_hdl_t *shp, FILE *fp)
 		    b.smbb_biosv.smbv_major, b.smbb_biosv.smbv_minor);
 	}
 
-	if (b.smbb_nxcflags > SMB_BIOSXB_ECFW_MIN) {
+	/*
+	 * If the major and minor versions are 0xff then that indicates that the
+	 * embedded controller does not exist.
+	 */
+	if (b.smbb_nxcflags > SMB_BIOSXB_ECFW_MIN &&
+	    b.smbb_ecfwv.smbv_major != 0xff &&
+	    b.smbb_ecfwv.smbv_minor != 0xff) {
 		oprintf(fp, "  Embedded Ctlr Firmware Version Number: %u.%u\n",
 		    b.smbb_ecfwv.smbv_major, b.smbb_ecfwv.smbv_minor);
 	}
@@ -526,9 +550,9 @@ print_processor(smbios_hdl_t *shp, id_t id, FILE *fp)
 	else
 		oprintf(fp, "  Current Speed: Unknown\n");
 
-	id_printf(fp, "	 L1 Cache: ", p.smbp_l1cache);
-	id_printf(fp, "	 L2 Cache: ", p.smbp_l2cache);
-	id_printf(fp, "	 L3 Cache: ", p.smbp_l3cache);
+	id_printf(fp, "  L1 Cache Handle: ", p.smbp_l1cache);
+	id_printf(fp, "  L2 Cache Handle: ", p.smbp_l2cache);
+	id_printf(fp, "  L3 Cache Handle: ", p.smbp_l3cache);
 }
 
 static void
@@ -768,11 +792,11 @@ print_bytes(const uint8_t *data, size_t size, FILE *fp)
 	char buf[17];
 	uint8_t x;
 
-	oprintf(fp, "\n	 offset:   0 1 2 3  4 5 6 7  8 9 a b  c d e f  "
+	oprintf(fp, "\n  offset:   0 1 2 3  4 5 6 7  8 9 a b  c d e f  "
 	    "0123456789abcdef\n");
 
 	for (row = 0; row < rows; row++) {
-		oprintf(fp, "	 %#4lx: ", (ulong_t)row * 16);
+		oprintf(fp, "  %#6lx: ", (ulong_t)row * 16);
 		cols = MIN(size - row * 16, 16);
 
 		for (col = 0; col < cols; col++) {
@@ -814,7 +838,7 @@ print_memarray(smbios_hdl_t *shp, id_t id, FILE *fp)
 	    fp, "  ECC: %u", ma.smbma_ecc);
 
 	oprintf(fp, "  Number of Slots/Sockets: %u\n", ma.smbma_ndevs);
-	id_printf(fp, "	 Memory Error Data: ", ma.smbma_err);
+	id_printf(fp, "  Memory Error Data: ", ma.smbma_err);
 	oprintf(fp, "  Max Capacity: %llu bytes\n",
 	    (u_longlong_t)ma.smbma_size);
 }
@@ -826,8 +850,8 @@ print_memdevice(smbios_hdl_t *shp, id_t id, FILE *fp)
 
 	(void) smbios_info_memdevice(shp, id, &md);
 
-	id_printf(fp, "	 Physical Memory Array: ", md.smbmd_array);
-	id_printf(fp, "	 Memory Error Data: ", md.smbmd_error);
+	id_printf(fp, "  Physical Memory Array: ", md.smbmd_array);
+	id_printf(fp, "  Memory Error Data: ", md.smbmd_error);
 
 	if (md.smbmd_twidth != -1u)
 		oprintf(fp, "  Total Width: %u bits\n", md.smbmd_twidth);
@@ -916,7 +940,7 @@ print_memarrmap(smbios_hdl_t *shp, id_t id, FILE *fp)
 
 	(void) smbios_info_memarrmap(shp, id, &ma);
 
-	id_printf(fp, "	 Physical Memory Array: ", ma.smbmam_array);
+	id_printf(fp, "  Physical Memory Array: ", ma.smbmam_array);
 	oprintf(fp, "  Devices per Row: %u\n", ma.smbmam_width);
 
 	oprintf(fp, "  Physical Address: 0x%llx\n  Size: %llu bytes\n",
@@ -930,8 +954,8 @@ print_memdevmap(smbios_hdl_t *shp, id_t id, FILE *fp)
 
 	(void) smbios_info_memdevmap(shp, id, &md);
 
-	id_printf(fp, "	 Memory Device: ", md.smbmdm_device);
-	id_printf(fp, "	 Memory Array Mapped Address: ", md.smbmdm_arrmap);
+	id_printf(fp, "  Memory Device: ", md.smbmdm_device);
+	id_printf(fp, "  Memory Array Mapped Address: ", md.smbmdm_arrmap);
 
 	oprintf(fp, "  Physical Address: 0x%llx\n  Size: %llu bytes\n",
 	    (u_longlong_t)md.smbmdm_addr, (u_longlong_t)md.smbmdm_size);
@@ -957,6 +981,227 @@ print_hwsec(smbios_hdl_t *shp, FILE *fp)
 	desc_printf(smbios_hwsec_desc(h.smbh_pan_ps),
 	    fp, "  Front Panel Reset Status: %u", h.smbh_pan_ps);
 }
+
+static void
+print_vprobe(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_vprobe_t vp;
+
+	if (smbios_info_vprobe(shp, id, &vp) != 0) {
+		smbios_warn(shp, "failed to read voltage probe information");
+		return;
+	}
+
+	oprintf(fp, "  Description: %s\n", vp.smbvp_description != NULL ?
+	    vp.smbvp_description : "unknown");
+	desc_printf(smbios_vprobe_loc_desc(vp.smbvp_location),
+	    fp, "  Location: %u", vp.smbvp_location);
+	desc_printf(smbios_vprobe_status_desc(vp.smbvp_status),
+	    fp, "  Status: %u", vp.smbvp_status);
+
+	if (vp.smbvp_maxval != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Maximum Possible Voltage: %u mV\n",
+		    vp.smbvp_maxval);
+	} else {
+		oprintf(fp, "  Maximum Possible Voltage: unknown\n");
+	}
+
+	if (vp.smbvp_minval != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Minimum Possible Voltage: %u mV\n",
+		    vp.smbvp_minval);
+	} else {
+		oprintf(fp, "  Minimum Possible Voltage: unknown\n");
+	}
+
+	if (vp.smbvp_resolution != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Resolution: %u.%u mV\n",
+		    vp.smbvp_resolution / 10,
+		    vp.smbvp_resolution % 10);
+	} else {
+		oprintf(fp, "  Probe Resolution: unknown\n");
+	}
+
+	if (vp.smbvp_tolerance != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Tolerance: +/-%u mV\n",
+		    vp.smbvp_tolerance);
+	} else {
+		oprintf(fp, "  Probe Tolerance: unknown\n");
+	}
+
+	if (vp.smbvp_accuracy != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Accuracy: +/-%u.%02u%%\n",
+		    vp.smbvp_accuracy / 100,
+		    vp.smbvp_accuracy % 100);
+	} else {
+		oprintf(fp, "  Probe Accuracy: unknown\n");
+	}
+
+	oprintf(fp, "  OEM- or BIOS- defined value: 0x%x\n", vp.smbvp_oem);
+
+	if (vp.smbvp_nominal != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Nominal Value: %u mV\n", vp.smbvp_nominal);
+	} else {
+		oprintf(fp, "  Probe Nominal Value: unknown\n");
+	}
+}
+
+static void
+print_cooldev(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_cooldev_t cd;
+
+	if (smbios_info_cooldev(shp, id, &cd) != 0) {
+		smbios_warn(shp, "failed to read cooling device "
+		    "information");
+		return;
+	}
+
+	id_printf(fp, "  Temperature Probe Handle: ", cd.smbcd_tprobe);
+	desc_printf(smbios_cooldev_type_desc(cd.smbcd_type),
+	    fp, "  Device Type: %u", cd.smbcd_type);
+	desc_printf(smbios_cooldev_status_desc(cd.smbcd_status),
+	    fp, "  Status: %u", cd.smbcd_status);
+	oprintf(fp, "  Cooling Unit Group: %u\n", cd.smbcd_group);
+	oprintf(fp, "  OEM- or BIOS- defined data: 0x%x\n", cd.smbcd_oem);
+	if (cd.smbcd_nominal != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Nominal Speed: %u RPM\n", cd.smbcd_nominal);
+	} else {
+		oprintf(fp, "  Nominal Speed: unknown\n");
+	}
+
+	if (cd.smbcd_descr != NULL && cd.smbcd_descr[0] != '\0') {
+		oprintf(fp, "  Description: %s\n", cd.smbcd_descr);
+	}
+}
+
+static void
+print_tprobe(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_tprobe_t tp;
+
+	if (smbios_info_tprobe(shp, id, &tp) != 0) {
+		smbios_warn(shp, "failed to read temperature probe "
+		    "information");
+		return;
+	}
+
+	oprintf(fp, "  Description: %s\n", tp.smbtp_description != NULL ?
+	    tp.smbtp_description : "unknown");
+	desc_printf(smbios_tprobe_loc_desc(tp.smbtp_location),
+	    fp, "  Location: %u", tp.smbtp_location);
+	desc_printf(smbios_tprobe_status_desc(tp.smbtp_status),
+	    fp, "  Status: %u", tp.smbtp_status);
+
+	if (tp.smbtp_maxval != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Maximum Possible Temperature: %u.%u C\n",
+		    tp.smbtp_maxval / 10, tp.smbtp_maxval % 10);
+	} else {
+		oprintf(fp, "  Maximum Possible Temperature: unknown\n");
+	}
+
+	if (tp.smbtp_minval != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Minimum Possible Temperature: %u.%u C\n",
+		    tp.smbtp_minval / 10, tp.smbtp_minval % 10);
+	} else {
+		oprintf(fp, "  Minimum Possible Temperature: unknown\n");
+	}
+
+	if (tp.smbtp_resolution != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Resolution: %u.%03u C\n",
+		    tp.smbtp_resolution / 1000,
+		    tp.smbtp_resolution % 1000);
+	} else {
+		oprintf(fp, "  Probe Resolution: unknown\n");
+	}
+
+	if (tp.smbtp_tolerance != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Tolerance: +/-%u.%u C\n",
+		    tp.smbtp_tolerance / 10, tp.smbtp_tolerance % 10);
+	} else {
+		oprintf(fp, "  Probe Tolerance: unknown\n");
+	}
+
+	if (tp.smbtp_accuracy != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Accuracy: +/-%u.%02u%%\n",
+		    tp.smbtp_accuracy / 100,
+		    tp.smbtp_accuracy % 100);
+	} else {
+		oprintf(fp, "  Probe Accuracy: unknown\n");
+	}
+
+	oprintf(fp, "  OEM- or BIOS- defined value: 0x%x\n", tp.smbtp_oem);
+
+	if (tp.smbtp_nominal != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Nominal Value: %u.%u C\n",
+		    tp.smbtp_nominal / 10, tp.smbtp_nominal % 10);
+	} else {
+		oprintf(fp, "  Probe Nominal Value: unknown\n");
+	}
+}
+
+static void
+print_iprobe(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_iprobe_t ip;
+
+	if (smbios_info_iprobe(shp, id, &ip) != 0) {
+		smbios_warn(shp, "failed to read current probe information");
+		return;
+	}
+
+	oprintf(fp, "  Description: %s\n", ip.smbip_description != NULL ?
+	    ip.smbip_description : "unknown");
+	desc_printf(smbios_iprobe_loc_desc(ip.smbip_location),
+	    fp, "  Location: %u", ip.smbip_location);
+	desc_printf(smbios_iprobe_status_desc(ip.smbip_status),
+	    fp, "  Status: %u", ip.smbip_status);
+
+	if (ip.smbip_maxval != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Maximum Possible Current: %u mA\n",
+		    ip.smbip_maxval);
+	} else {
+		oprintf(fp, "  Maximum Possible Current: unknown\n");
+	}
+
+	if (ip.smbip_minval != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Minimum Possible Current: %u mA\n",
+		    ip.smbip_minval);
+	} else {
+		oprintf(fp, "  Minimum Possible Current: unknown\n");
+	}
+
+	if (ip.smbip_resolution != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Resolution: %u.%u mA\n",
+		    ip.smbip_resolution / 10,
+		    ip.smbip_resolution % 10);
+	} else {
+		oprintf(fp, "  Probe Resolution: unknown\n");
+	}
+
+	if (ip.smbip_tolerance != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Tolerance: +/-%u mA\n",
+		    ip.smbip_tolerance);
+	} else {
+		oprintf(fp, "  Probe Tolerance: unknown\n");
+	}
+
+	if (ip.smbip_accuracy != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Accuracy: +/-%u.%02u%%\n",
+		    ip.smbip_accuracy / 100,
+		    ip.smbip_accuracy % 100);
+	} else {
+		oprintf(fp, "  Probe Accuracy: unknown\n");
+	}
+
+	oprintf(fp, "  OEM- or BIOS- defined value: 0x%x\n", ip.smbip_oem);
+
+	if (ip.smbip_nominal != SMB_PROBE_UNKNOWN_VALUE) {
+		oprintf(fp, "  Probe Nominal Value: %u mA\n", ip.smbip_nominal);
+	} else {
+		oprintf(fp, "  Probe Nominal Value: unknown\n");
+	}
+}
+
 
 static void
 print_boot(smbios_hdl_t *shp, FILE *fp)
@@ -995,6 +1240,47 @@ print_ipmi(smbios_hdl_t *shp, FILE *fp)
 
 	flag_printf(fp, "Flags", i.smbip_flags, sizeof (i.smbip_flags) * NBBY,
 	    smbios_ipmi_flag_name, smbios_ipmi_flag_desc);
+}
+
+static void
+print_powersup(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_powersup_t p;
+
+	if (smbios_info_powersup(shp, id, &p) != 0) {
+		smbios_warn(shp, "failed to read power supply information");
+		return;
+	}
+
+	oprintf(fp, "  Power Supply Group: %u\n", p.smbps_group);
+	if (p.smbps_maxout != 0x8000) {
+		oprintf(fp, "  Maximum Output: %llu mW\n", p.smbps_maxout);
+	} else {
+		oprintf(fp, "  Maximum Output: unknown\n");
+	}
+
+	flag_printf(fp, "Characteristics", p.smbps_flags,
+	    sizeof (p.smbps_flags) * NBBY, smbios_powersup_flag_name,
+	    smbios_powersup_flag_desc);
+
+	desc_printf(smbios_powersup_input_desc(p.smbps_ivrs),
+	    fp, "  Input Voltage Range Switching: %u", p.smbps_ivrs);
+	desc_printf(smbios_powersup_status_desc(p.smbps_status),
+	    fp, "  Status: %u", p.smbps_status);
+	desc_printf(smbios_powersup_type_desc(p.smbps_pstype),
+	    fp, "  Type: %u", p.smbps_pstype);
+
+	if (p.smbps_vprobe != 0xffff) {
+		oprintf(fp, "  Voltage Probe Handle: %lu\n", p.smbps_vprobe);
+	}
+
+	if (p.smbps_cooldev != 0xffff) {
+		oprintf(fp, "  Cooling Device Handle: %lu\n", p.smbps_cooldev);
+	}
+
+	if (p.smbps_iprobe != 0xffff) {
+		oprintf(fp, "  Current Probe Handle: %lu\n", p.smbps_iprobe);
+	}
 }
 
 static void
@@ -1196,6 +1482,22 @@ print_struct(smbios_hdl_t *shp, const smbios_struct_t *sp, void *fp)
 		oprintf(fp, "\n");
 		print_hwsec(shp, fp);
 		break;
+	case SMB_TYPE_VPROBE:
+		oprintf(fp, "\n");
+		print_vprobe(shp, sp->smbstr_id, fp);
+		break;
+	case SMB_TYPE_COOLDEV:
+		oprintf(fp, "\n");
+		print_cooldev(shp, sp->smbstr_id, fp);
+		break;
+	case SMB_TYPE_TPROBE:
+		oprintf(fp, "\n");
+		print_tprobe(shp, sp->smbstr_id, fp);
+		break;
+	case SMB_TYPE_IPROBE:
+		oprintf(fp, "\n");
+		print_iprobe(shp, sp->smbstr_id, fp);
+		break;
 	case SMB_TYPE_BOOT:
 		oprintf(fp, "\n");
 		print_boot(shp, fp);
@@ -1203,6 +1505,10 @@ print_struct(smbios_hdl_t *shp, const smbios_struct_t *sp, void *fp)
 	case SMB_TYPE_IPMIDEV:
 		oprintf(fp, "\n");
 		print_ipmi(shp, fp);
+		break;
+	case SMB_TYPE_POWERSUP:
+		oprintf(fp, "\n");
+		print_powersup(shp, sp->smbstr_id, fp);
 		break;
 	case SMB_TYPE_OBDEVEXT:
 		oprintf(fp, "\n");

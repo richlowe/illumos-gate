@@ -4,7 +4,7 @@
 #
 
 #  Copyright (c) 1988, 1989, 1990, 1991, 1992, 1995, 1996, 1997
-# 	The Regents of the University of California.  All rights reserved.
+#	The Regents of the University of California.  All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that: (1) source code distributions
@@ -22,7 +22,6 @@
 #  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 #  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 #
-# @(#) $Header: Makefile.in,v 1.24 97/04/22 13:31:20 leres Exp $ (LBL)
 
 PROG=		traceroute
 OBJS=		traceroute.o traceroute_aux.o traceroute_aux6.o
@@ -65,7 +64,7 @@ $(PROG): $(OBJS)
 
 install: all $(ROOTUSRSBINPROG)
 
-clean:	
+clean:
 	$(RM) $(OBJS)
 
 lint:	lint_SRCS

@@ -58,9 +58,32 @@ namespace std {
 
 #if !defined(_STRICT_SYMBOLS) || defined(_STDC_C11)
 extern void *aligned_alloc(size_t, size_t);
+#endif /* !_STRICT_SYMBOLS || _STDC_C11 */
+
+#if !defined(_STRICT_SYMBOLS) || defined(_STDC_C11) || __cplusplus >= 201103L
 extern int at_quick_exit(void (*)(void));
 extern _NORETURN_KYWD void quick_exit(int);
-#endif /* !_STRICT_SYMBOLS || _STDC_C11 */
+#endif /* !_STRICT_SYMBOLS || _STDC_C11 || __cplusplus >= 201103L */
+
+#if __EXT1_VISIBLE
+
+#ifndef	_ERRNO_T_DEFINED
+#define	_ERRNO_T_DEFINED
+typedef int errno_t;
+#endif
+
+/* K.3.6 */
+typedef void (*constraint_handler_t)(const char *_RESTRICT_KYWD,
+    void *_RESTRICT_KYWD, errno_t);
+/* K.3.6.1.1 */
+extern constraint_handler_t set_constraint_handler_s(constraint_handler_t);
+/* K.3.6.1.2 */
+extern _NORETURN_KYWD void abort_handler_s(const char *_RESTRICT_KYWD,
+    void *_RESTRICT_KYWD, errno_t);
+/* K3.6.1.3 */
+extern void ignore_handler_s(const char *_RESTRICT_KYWD, void *_RESTRICT_KYWD,
+    errno_t);
+#endif	/* __EXT1_VISIBLE */
 
 #if __cplusplus >= 199711L
 }

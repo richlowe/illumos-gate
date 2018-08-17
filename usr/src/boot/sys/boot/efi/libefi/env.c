@@ -28,6 +28,7 @@
 #include <stand.h>
 #include <string.h>
 #include <efi.h>
+#include <efichar.h>
 #include <efilib.h>
 #include <efigpt.h>	/* Partition GUIDS */
 #include <Guid/MemoryTypeInformation.h>
@@ -46,6 +47,7 @@ static struct efi_uuid_mapping {
 	EFI_GUID efi_guid;
 } efi_uuid_mapping[] = {
 	{ .efi_guid_name = "global", .efi_guid = EFI_GLOBAL_VARIABLE },
+	{ .efi_guid_name = "illumos", .efi_guid = ILLUMOS_BOOT_VAR_GUID },
 	/* EFI Systab entry names. */
 	{ .efi_guid_name = "MPS Table", .efi_guid = MPS_TABLE_GUID },
 	{ .efi_guid_name = "ACPI Table", .efi_guid = ACPI_TABLE_GUID },
@@ -102,12 +104,12 @@ static struct efi_uuid_mapping {
 	{ .efi_guid_name = "loaded image device path",
 	    .efi_guid = EFI_LOADED_IMAGE_DEVICE_PATH_PROTOCOL_GUID },
 	{ .efi_guid_name = "ISA io", .efi_guid = EFI_ISA_IO_PROTOCOL_GUID },
-        { .efi_guid_name = "IDE controller init",
+	{ .efi_guid_name = "IDE controller init",
 	    .efi_guid = EFI_IDE_CONTROLLER_INIT_PROTOCOL_GUID },
-        { .efi_guid_name = "ISA ACPI", .efi_guid = EFI_ISA_ACPI_PROTOCOL_GUID },
-        { .efi_guid_name = "PCI", .efi_guid = EFI_PCI_IO_PROTOCOL_GUID },
-        { .efi_guid_name = "PCI root", .efi_guid = EFI_PCI_ROOT_IO_GUID },
-        { .efi_guid_name = "PCI enumeration",
+	{ .efi_guid_name = "ISA ACPI", .efi_guid = EFI_ISA_ACPI_PROTOCOL_GUID },
+	{ .efi_guid_name = "PCI", .efi_guid = EFI_PCI_IO_PROTOCOL_GUID },
+	{ .efi_guid_name = "PCI root", .efi_guid = EFI_PCI_ROOT_IO_GUID },
+	{ .efi_guid_name = "PCI enumeration",
 	    .efi_guid = EFI_PCI_ENUMERATION_COMPLETE_GUID },
         { .efi_guid_name = "Driver diagnostics",
 	    .efi_guid = EFI_DRIVER_DIAGNOSTICS_PROTOCOL_GUID },
@@ -312,35 +314,6 @@ efi_guid_to_name(EFI_GUID *guid, char **name)
 	return (efi_guid_to_str(guid, name));
 }
 
-/*
- * Simple wrappers to the underlying UEFI functions.
- * See http://wiki.phoenix.com/wiki/index.php/EFI_RUNTIME_SERVICES
- * for details.
- */
-EFI_STATUS
-efi_get_next_variable_name(UINTN *variable_name_size, CHAR16 *variable_name,
-    EFI_GUID *vendor_guid)
-{
-	return (RS->GetNextVariableName(variable_name_size, variable_name,
-	    vendor_guid));
-}
-
-EFI_STATUS
-efi_get_variable(CHAR16 *variable_name, EFI_GUID *vendor_guid,
-    UINT32 *attributes, UINTN *data_size, void *data)
-{
-	return (RS->GetVariable(variable_name, vendor_guid, attributes,
-	    data_size, data));
-}
-
-EFI_STATUS
-efi_set_variable(CHAR16 *variable_name, EFI_GUID *vendor_guid,
-    UINT32 attributes, UINTN data_size, void *data)
-{
-	return (RS->SetVariable(variable_name, vendor_guid, attributes,
-	    data_size, data));
-}
-
 void
 efi_init_environment(void)
 {
@@ -472,24 +445,43 @@ efi_print_mem_type(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
 	return (CMD_OK);
 }
 
+/*
+ * Print illumos variables.
+ * We have LoaderPath and LoaderDev as CHAR16 strings.
+ */
+static int
+efi_print_illumos(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
+{
+	int rv = -1;
+	char *var = NULL;
+
+	if (ucs2_to_utf8(varnamearg, &var) != 0)
+		return (CMD_ERROR);
+
+	if (strcmp("LoaderPath", var) == 0 ||
+	    strcmp("LoaderDev", var) == 0) {
+		printf(" = ");
+		printf("%S", (CHAR16 *)data);
+
+		if (pager_output("\n"))
+			rv = CMD_WARN;
+		else
+			rv = CMD_OK;
+	}
+
+	free(var);
+	return (rv);
+}
+
 /* Print global variables. */
 static int
 efi_print_global(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
 {
-	int len;
 	int rv = -1;
-	char *var;
+	char *var = NULL;
 
-	for (len = 0; varnamearg[len] != 0; len++)
-		;
-
-	if (len == 0)
-		return (CMD_OK);
-	len++;
-
-	if ((var = malloc(len)) == NULL)
+	if (ucs2_to_utf8(varnamearg, &var) != 0)
 		return (CMD_ERROR);
-	cpy16to8(varnamearg, var, len);
 
 	if (strcmp("AuditMode", var) == 0) {
 		printf(" = ");
@@ -665,7 +657,7 @@ efi_print_var(CHAR16 *varnamearg, EFI_GUID *matchguid, int lflag)
 
 	str = NULL;
 	datasz = 0;
-	status = efi_get_variable(varnamearg, matchguid, &attr, &datasz, NULL);
+	status = RS->GetVariable(varnamearg, matchguid, &attr, &datasz, NULL);
 	if (status != EFI_BUFFER_TOO_SMALL) {
 		printf("Can't get the variable: error %#lx\n",
 		    EFI_ERROR_CODE(status));
@@ -677,7 +669,7 @@ efi_print_var(CHAR16 *varnamearg, EFI_GUID *matchguid, int lflag)
 		return (CMD_ERROR);
 	}
 
-	status = efi_get_variable(varnamearg, matchguid, &attr, &datasz, data);
+	status = RS->GetVariable(varnamearg, matchguid, &attr, &datasz, data);
 	if (status != EFI_SUCCESS) {
 		printf("Can't get the variable: error %#lx\n",
 		    EFI_ERROR_CODE(status));
@@ -696,6 +688,8 @@ efi_print_var(CHAR16 *varnamearg, EFI_GUID *matchguid, int lflag)
 	if (lflag == 0) {
 		if (strcmp(str, "global") == 0)
 			rv = efi_print_global(varnamearg, data, datasz);
+		else if (strcmp(str, "illumos") == 0)
+			rv = efi_print_illumos(varnamearg, data, datasz);
 		else if (strcmp(str,
 		    EFI_MEMORY_TYPE_INFORMATION_VARIABLE_NAME) == 0)
 			rv = efi_print_mem_type(varnamearg, data, datasz);
@@ -729,8 +723,8 @@ command_efi_show(int argc, char *argv[])
 	 *	print all the env vars tagged with UUID
 	 * efi-show -v var
 	 *	search all the env vars and print the ones matching var
-	 * eif-show -g UUID -v var
-	 * eif-show UUID var
+	 * efi-show -g UUID -v var
+	 * efi-show UUID var
 	 *	print all the env vars that match UUID and var
 	 */
 	/* NB: We assume EFI_GUID is the same as uuid_t */
@@ -849,7 +843,7 @@ command_efi_show(int argc, char *argv[])
 	varname[0] = 0;
 	while (1) {
 		varsz = varalloc;
-		status = efi_get_next_variable_name(&varsz, varname, &varguid);
+		status = RS->GetNextVariableName(&varsz, varname, &varguid);
 		if (status == EFI_BUFFER_TOO_SMALL) {
 			varalloc = varsz;
 			newnm = realloc(varname, varalloc);
@@ -934,7 +928,7 @@ command_efi_set(int argc, char *argv[])
 	}
 	cpy8to16(var, wvar, nitems(wvar));
 #if 0
-	err = efi_set_variable(wvar, &guid, EFI_VARIABLE_NON_VOLATILE |
+	err = RS->SetVariable(wvar, &guid, EFI_VARIABLE_NON_VOLATILE |
 	    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
 	    strlen(val) + 1, val);
 	if (EFI_ERROR(err)) {
@@ -970,7 +964,7 @@ command_efi_unset(int argc, char *argv[])
 	}
 	cpy8to16(var, wvar, nitems(wvar));
 #if 0
-	err = efi_set_variable(wvar, &guid, 0, 0, NULL);
+	err = RS->SetVariable(wvar, &guid, 0, 0, NULL);
 	if (EFI_ERROR(err)) {
 		printf("Failed to unset variable: error %lu\n",
 		    EFI_ERROR_CODE(err));
@@ -985,14 +979,14 @@ command_efi_unset(int argc, char *argv[])
 /*
  * Loader interaction words and extras
  *
- * 	efi-setenv  ( value n name n guid n attr -- 0 | -1)
- * 	efi-getenv  ( guid n addr n -- addr' n' | -1 )
- * 	efi-unsetenv ( name n guid n'' -- )
+ *	efi-setenv  ( value n name n guid n attr -- 0 | -1)
+ *	efi-getenv  ( guid n addr n -- addr' n' | -1 )
+ *	efi-unsetenv ( name n guid n'' -- )
  */
 
 /*
  * efi-setenv
- * 	efi-setenv  ( value n name n guid n attr -- 0 | -1)
+ *	efi-setenv  ( value n name n guid n attr -- 0 | -1)
  *
  * Set environment variables using the SetVariable EFI runtime service.
  *
@@ -1072,12 +1066,12 @@ ficlEfiSetenv(ficlVm *pVM)
 	}
 	memcpy(value, valuep, values);
 
-	status = efi_set_variable(name, (EFI_GUID *)&u, attr, values, value);
+	status = RS->SetVariable(name, (EFI_GUID *)&u, attr, values, value);
 	if (status == EFI_SUCCESS) {
 		ficlStackPushInteger(pStack, 0);
 	} else {
 		ficlStackPushInteger(pStack, -1);
-		error = "Error: efi_set_variable failed";
+		error = "Error: SetVariable failed";
 	}
 
 out:

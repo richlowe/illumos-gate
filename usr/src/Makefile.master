@@ -27,6 +27,7 @@
 # Copyright 2015 Gary Mills
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -127,7 +128,9 @@ ONBLD_TOOLS=		$(BUILD_TOOLS)/onbld
 JAVA_HOME=	/usr/java
 # define buildtime JAVA_ROOT
 JAVA_ROOT=	/usr/java
-# define to build with JAVA 8
+# Build uses java7 by default.  Pass one the variables below set to empty
+# string in the environment to override.
+BLD_JAVA_6=	$(POUND_SIGN)
 BLD_JAVA_8=	$(POUND_SIGN)
 
 GCC_ROOT=	/opt/gcc/4.4.4
@@ -142,11 +145,19 @@ ELFEXTRACT=	$(ONBLD_TOOLS)/bin/$(MACH)/elfextract
 MBH_PATCH=	$(ONBLD_TOOLS)/bin/$(MACH)/mbh_patch
 BTXLD=		$(ONBLD_TOOLS)/bin/$(MACH)/btxld
 VTFONTCVT=	$(ONBLD_TOOLS)/bin/$(MACH)/vtfontcvt
+# echo(1) and true(1) are specified without absolute paths, so that the shell
+# spawned by make(1) may use the built-in versions.  This is minimally
+# problematic, as the shell spawned by make(1) is known and under control, the
+# only risk being if the shell falls back to $PATH.
+#
+# We specifically want an echo(1) that does interpolation of escape sequences,
+# which ksh93, /bin/sh, and bash will all provide.
 ECHO=		echo
-INS=		install
 TRUE=		true
+INS=		$(ONBLD_TOOLS)/bin/$(MACH)/install
 SYMLINK=	/usr/bin/ln -s
 LN=		/usr/bin/ln
+MKDIR=		/usr/bin/mkdir
 CHMOD=		/usr/bin/chmod
 MV=		/usr/bin/mv -f
 RM=		/usr/bin/rm -f
@@ -169,6 +180,7 @@ LEX=		/usr/ccs/bin/lex
 FLEX=		/usr/bin/flex
 YACC=		/usr/ccs/bin/yacc
 CPP=		/usr/lib/cpp
+ANSI_CPP=	$(GCC_ROOT)/bin/cpp
 JAVAC=		$(JAVA_ROOT)/bin/javac
 JAVAH=		$(JAVA_ROOT)/bin/javah
 JAVADOC=	$(JAVA_ROOT)/bin/javadoc
@@ -204,6 +216,7 @@ MSGFMT=		/usr/bin/msgfmt -s
 LCDEF=		$(ONBLD_TOOLS)/bin/$(MACH)/localedef
 TIC=		$(ONBLD_TOOLS)/bin/$(MACH)/tic
 ZIC=		$(ONBLD_TOOLS)/bin/$(MACH)/zic
+OPENSSL=	/usr/bin/openssl
 
 FILEMODE=	644
 DIRMODE=	755

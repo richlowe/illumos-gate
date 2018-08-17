@@ -26,6 +26,7 @@
 /*
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
@@ -62,7 +63,7 @@ extern struct streamtab pteminfo;
 static struct fmodsw fsw = {
 	"ptem",
 	&pteminfo,
-	D_MTQPAIR | D_MP
+	D_MTQPAIR | D_MP | _D_SINGLE_INSTANCE
 };
 
 static struct modlstrmod modlstrmod = {
@@ -419,6 +420,7 @@ ptemrput(queue_t *q, mblk_t *mp)
 				qenable(WR(q));
 			}
 		}
+		/* FALLTHROUGH */
 	default:
 		putnext(q, mp);
 		break;
@@ -865,6 +867,7 @@ out:
 		}
 		if (ntp->state & OFLOW_CTL)
 			return (0);
+		/* FALLTHROUGH */
 
 	default:
 		putnext(q, mp);

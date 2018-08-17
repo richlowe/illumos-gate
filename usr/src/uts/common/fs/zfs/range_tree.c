@@ -23,7 +23,7 @@
  * Use is subject to license terms.
  */
 /*
- * Copyright (c) 2013, 2015 by Delphix. All rights reserved.
+ * Copyright (c) 2013, 2017 by Delphix. All rights reserved.
  */
 
 #include <sys/zfs_context.h>
@@ -179,7 +179,7 @@ range_tree_add(void *arg, uint64_t start, uint64_t size)
 	}
 
 	/* Make sure we don't overlap with either of our neighbors */
-	VERIFY(rs == NULL);
+	VERIFY3P(rs, ==, NULL);
 
 	rs_before = avl_nearest(&rt->rt_root, where, AVL_BEFORE);
 	rs_after = avl_nearest(&rt->rt_root, where, AVL_AFTER);
@@ -298,7 +298,6 @@ range_tree_remove(void *arg, uint64_t start, uint64_t size)
 static range_seg_t *
 range_tree_find_impl(range_tree_t *rt, uint64_t start, uint64_t size)
 {
-	avl_index_t where;
 	range_seg_t rsearch;
 	uint64_t end = start + size;
 
@@ -306,7 +305,7 @@ range_tree_find_impl(range_tree_t *rt, uint64_t start, uint64_t size)
 
 	rsearch.rs_start = start;
 	rsearch.rs_end = end;
-	return (avl_find(&rt->rt_root, &rsearch, &where));
+	return (avl_find(&rt->rt_root, &rsearch, NULL));
 }
 
 static range_seg_t *
@@ -391,7 +390,6 @@ range_tree_walk(range_tree_t *rt, range_tree_func_t *func, void *arg)
 {
 	range_seg_t *rs;
 
-
 	for (rs = avl_first(&rt->rt_root); rs; rs = AVL_NEXT(&rt->rt_root, rs))
 		func(arg, rs->rs_start, rs->rs_end - rs->rs_start);
 }
@@ -400,4 +398,31 @@ uint64_t
 range_tree_space(range_tree_t *rt)
 {
 	return (rt->rt_space);
+}
+
+boolean_t
+range_tree_is_empty(range_tree_t *rt)
+{
+	ASSERT(rt != NULL);
+	return (range_tree_space(rt) == 0);
+}
+
+uint64_t
+range_tree_min(range_tree_t *rt)
+{
+	range_seg_t *rs = avl_first(&rt->rt_root);
+	return (rs != NULL ? rs->rs_start : 0);
+}
+
+uint64_t
+range_tree_max(range_tree_t *rt)
+{
+	range_seg_t *rs = avl_last(&rt->rt_root);
+	return (rs != NULL ? rs->rs_end : 0);
+}
+
+uint64_t
+range_tree_span(range_tree_t *rt)
+{
+	return (range_tree_max(rt) - range_tree_min(rt));
 }

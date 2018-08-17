@@ -22,6 +22,7 @@
 #
 #
 # Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
+# Copyright (c) 2017, Joyent, Inc.
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
@@ -47,6 +48,7 @@ SMB_CAT_	smbios_cache_ctype_name		uint_t
 SMB_CAF_	smbios_cache_flag_name		uint_t
 SMB_EVFL_	smbios_evlog_flag_name		uint_t
 SMB_IPMI_F_	smbios_ipmi_flag_name		uint_t
+SMB_POWERSUP_F_	smbios_powersup_flag_name	uint_t
 SMB_MDF_	smbios_memdevice_flag_name	uint_t
 SMB_PRC_	smbios_processor_core_flag_name	uint_t
 SMB_TYPE_ 	smbios_type_name		uint_t
@@ -70,12 +72,20 @@ SMB_CAG_	smbios_cache_logical_desc	uint_t
 SMB_CAM_	smbios_cache_mode_desc		uint_t
 SMB_CHST_	smbios_chassis_state_desc	uint_t
 SMB_CHT_	smbios_chassis_type_desc	uint_t
+SMB_COOLDEV_S_	smbios_cooldev_status_desc	uint_t
+SMB_COOLDEV_T_	smbios_cooldev_type_desc	uint_t
 SMB_EVFL_	smbios_evlog_flag_desc		uint_t
 SMB_EVHF_	smbios_evlog_format_desc	uint_t
 SMB_EVM_	smbios_evlog_method_desc	uint_t
 SMB_HWSEC_PS_	smbios_hwsec_desc		uint_t
 SMB_IPMI_F_	smbios_ipmi_flag_desc		uint_t
 SMB_IPMI_T_	smbios_ipmi_type_desc		uint_t
+SMB_IPROBE_L_	smbios_iprobe_loc_desc		uint_t
+SMB_IPROBE_S_	smbios_iprobe_status_desc	uint_t
+SMB_POWERSUP_F_	smbios_powersup_flag_desc	uint_t
+SMB_POWERSUP_I_	smbios_powersup_input_desc	uint_t
+SMB_POWERSUP_S_	smbios_powersup_status_desc	uint_t
+SMB_POWERSUP_T_	smbios_powersup_type_desc	uint_t
 SMB_MAL_	smbios_memarray_loc_desc	uint_t
 SMB_MAU_	smbios_memarray_use_desc	uint_t
 SMB_MAE_	smbios_memarray_ecc_desc	uint_t
@@ -97,7 +107,11 @@ SMB_SLL_	smbios_slot_length_desc		uint_t
 SMB_SLT_	smbios_slot_type_desc		uint_t
 SMB_SLU_	smbios_slot_usage_desc		uint_t
 SMB_SLW_	smbios_slot_width_desc		uint_t
+SMB_TPROBE_L_	smbios_tprobe_loc_desc		uint_t
+SMB_TPROBE_S_	smbios_tprobe_status_desc	uint_t
 SMB_TYPE_ 	smbios_type_desc		uint_t
+SMB_VPROBE_L_	smbios_vprobe_loc_desc		uint_t
+SMB_VPROBE_S_	smbios_vprobe_status_desc	uint_t
 SMB_WAKEUP_	smbios_system_wakeup_desc	uint_t
 '
 

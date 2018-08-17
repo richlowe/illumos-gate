@@ -50,7 +50,6 @@
 #define		ZFS_BE_LAST	8
 
 static int	zfs_open(const char *path, struct open_file *f);
-static int	zfs_write(struct open_file *f, void *buf, size_t size, size_t *resid);
 static int	zfs_close(struct open_file *f);
 static int	zfs_read(struct open_file *f, void *buf, size_t size, size_t *resid);
 static off_t	zfs_seek(struct open_file *f, off_t offset, int where);
@@ -64,7 +63,7 @@ struct fs_ops zfs_fsops = {
 	zfs_open,
 	zfs_close,
 	zfs_read,
-	zfs_write,
+	null_write,
 	zfs_seek,
 	zfs_stat,
 	zfs_readdir
@@ -168,16 +167,6 @@ zfs_read(struct open_file *f, void *start, size_t size, size_t *resid	/* out */)
 		*resid = size - n;
 
 	return (0);
-}
-
-/*
- * Don't be silly - the bootstrap has no business writing anything.
- */
-static int
-zfs_write(struct open_file *f, void *start, size_t size, size_t *resid	/* out */)
-{
-
-	return (EROFS);
 }
 
 static off_t
@@ -497,7 +486,7 @@ zfs_probe_partition(void *arg, const char *partname,
 	case PART_VTOC_SWAP:
 		return (ret);
 	default:
-		break;;
+		break;
 	}
 	ppa = (struct zfs_probe_args *)arg;
 	strncpy(devname, ppa->devname, strlen(ppa->devname) - 1);
@@ -516,7 +505,10 @@ zfs_probe_partition(void *arg, const char *partname,
 		table = ptable_open(&pa, part->end - part->start + 1,
 		    ppa->secsz, zfs_diskread);
 		if (table != NULL) {
-			ptable_iterate(table, &pa, zfs_probe_partition);
+			enum ptable_type pt = ptable_gettype(table);
+
+			if (pt == PTABLE_VTOC8 || pt == PTABLE_VTOC)
+				ptable_iterate(table, &pa, zfs_probe_partition);
 			ptable_close(table);
 		}
 	}
@@ -674,7 +666,7 @@ zfs_parsedev(struct zfs_devdesc *dev, const char *devspec, const char **path)
 	if (*np != ':')
 		return (EINVAL);
 	np++;
-	end = strchr(np, ':');
+	end = strrchr(np, ':');
 	if (end == NULL)
 		return (EINVAL);
 	sep = strchr(np, '/');
@@ -699,8 +691,7 @@ zfs_parsedev(struct zfs_devdesc *dev, const char *devspec, const char **path)
 		return (rv);
 	if (path != NULL)
 		*path = (*end == '\0') ? end : end + 1;
-	dev->d_dev = &zfs_dev;
-	dev->d_type = zfs_dev.dv_type;
+	dev->dd.d_dev = &zfs_dev;
 	return (0);
 }
 
@@ -712,12 +703,10 @@ zfs_bootfs(void *zdev)
 	struct zfs_devdesc	*dev = (struct zfs_devdesc *)zdev;
 	uint64_t		objnum;
 	spa_t			*spa;
-	vdev_t			*vdev;
-	vdev_t			*kid;
 	int			n;
 
 	buf[0] = '\0';
-	if (dev->d_type != DEVT_ZFS)
+	if (dev->dd.d_dev->dv_type != DEVT_ZFS)
 		return (buf);
 
 	spa = spa_find_by_guid(dev->pool_guid);
@@ -734,37 +723,14 @@ zfs_bootfs(void *zdev)
 		return (buf);
 	}
 
-	STAILQ_FOREACH(vdev, &spa->spa_vdevs, v_childlink) {
-		STAILQ_FOREACH(kid, &vdev->v_children, v_childlink) {
-			/* use this kid? */
-			if (kid->v_state == VDEV_STATE_HEALTHY &&
-			    kid->v_phys_path != NULL) {
-				break;
-			}
-		}
-		if (kid != NULL) {
-			vdev = kid;
-			break;
-		}
-		if (vdev->v_state == VDEV_STATE_HEALTHY &&
-		    vdev->v_phys_path != NULL) {
-			break;
-		}
-	}
-
-	/*
-	 * since this pool was used to read in the kernel and boot archive,
-	 * there has to be at least one healthy vdev, therefore vdev
-	 * can not be NULL.
-	 */
 	/* Set the environment. */
 	snprintf(buf, sizeof (buf), "%s/%llu", spa->spa_name,
 	    (unsigned long long)objnum);
 	setenv("zfs-bootfs", buf, 1);
-	if (vdev->v_phys_path != NULL)
-		setenv("bootpath", vdev->v_phys_path, 1);
-	if (vdev->v_devid != NULL)
-		setenv("diskdevid", vdev->v_devid, 1);
+	if (spa->spa_boot_vdev->v_phys_path != NULL)
+		setenv("bootpath", spa->spa_boot_vdev->v_phys_path, 1);
+	if (spa->spa_boot_vdev->v_devid != NULL)
+		setenv("diskdevid", spa->spa_boot_vdev->v_devid, 1);
 
 	/*
 	 * Build the command line string. Once our kernel will read
@@ -774,14 +740,14 @@ zfs_bootfs(void *zdev)
 	snprintf(buf, sizeof(buf), "zfs-bootfs=%s/%llu", spa->spa_name,
 	    (unsigned long long)objnum);
 	n = strlen(buf);
-	if (vdev->v_phys_path != NULL) {
+	if (spa->spa_boot_vdev->v_phys_path != NULL) {
 		snprintf(buf+n, sizeof (buf) - n, ",bootpath=\"%s\"",
-		    vdev->v_phys_path);
+		    spa->spa_boot_vdev->v_phys_path);
 		n = strlen(buf);
 	}
-	if (vdev->v_devid != NULL) {
+	if (spa->spa_boot_vdev->v_devid != NULL) {
 		snprintf(buf+n, sizeof (buf) - n, ",diskdevid=\"%s\"",
-		    vdev->v_devid);
+		    spa->spa_boot_vdev->v_devid);
 	}
 	return (buf);
 }
@@ -795,7 +761,7 @@ zfs_fmtdev(void *vdev)
 	spa_t			*spa;
 
 	buf[0] = '\0';
-	if (dev->d_type != DEVT_ZFS)
+	if (dev->dd.d_dev->dv_type != DEVT_ZFS)
 		return (buf);
 
 	if (dev->pool_guid == 0) {
@@ -817,9 +783,9 @@ zfs_fmtdev(void *vdev)
 	}
 
 	if (rootname[0] == '\0')
-		sprintf(buf, "%s:%s:", dev->d_dev->dv_name, spa->spa_name);
+		sprintf(buf, "%s:%s:", dev->dd.d_dev->dv_name, spa->spa_name);
 	else
-		sprintf(buf, "%s:%s/%s:", dev->d_dev->dv_name, spa->spa_name,
+		sprintf(buf, "%s:%s/%s:", dev->dd.d_dev->dv_name, spa->spa_name,
 		    rootname);
 	return (buf);
 }
@@ -993,7 +959,7 @@ zfs_set_env(void)
 			ctr++;
 			continue;
 		}
-		
+
 		snprintf(envname, sizeof(envname), "bootenvmenu_caption[%d]", zfs_env_index);
 		snprintf(envval, sizeof(envval), "%s", zfs_be->name);
 		rv = setenv(envname, envval, 1);
@@ -1026,7 +992,7 @@ zfs_set_env(void)
 		}
 
 	}
-	
+
 	for (; zfs_env_index <= ZFS_BE_LAST; zfs_env_index++) {
 		snprintf(envname, sizeof(envname), "bootenvmenu_caption[%d]", zfs_env_index);
 		(void)unsetenv(envname);

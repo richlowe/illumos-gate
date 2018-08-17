@@ -58,6 +58,14 @@ typedef	unsigned int	uint;		/* Sys V compatibility */
 #endif
 
 /*
+ * POSIX Extensions
+ */
+typedef	unsigned char	uchar_t;
+typedef	unsigned short	ushort_t;
+typedef	unsigned int	uint_t;
+typedef	unsigned long	ulong_t;
+
+/*
  * XXX POSIX sized integrals that should appear only in <sys/stdint.h>.
  */
 #include <sys/_stdint.h>

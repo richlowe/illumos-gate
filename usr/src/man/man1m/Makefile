@@ -15,7 +15,7 @@
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 # Copyright (c) 2013, 2016 by Delphix. All rights reserved.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
-# Copyright 2017 Nexenta Systems, Inc.
+# Copyright 2018 Nexenta Systems, Inc.
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
@@ -55,7 +55,6 @@ _MANFILES=	6to4relay.1m		\
 		beadm.1m		\
 		boot.1m			\
 		bootadm.1m		\
-		bootconfchk.1m		\
 		busstat.1m		\
 		captoinfo.1m		\
 		catman.1m		\
@@ -113,11 +112,6 @@ _MANFILES=	6to4relay.1m		\
 		dns-sd.1m		\
 		domainname.1m		\
 		drvconfig.1m		\
-		dsbitmap.1m		\
-		dscfg.1m		\
-		dscfgadm.1m		\
-		dscfglockd.1m		\
-		dsstat.1m		\
 		dtrace.1m		\
 		dumpadm.1m		\
 		editmap.1m		\
@@ -174,7 +168,6 @@ _MANFILES=	6to4relay.1m		\
 		halt.1m			\
 		hextoalabel.1m		\
 		hostconfig.1m		\
-		ickey.1m		\
 		id.1m			\
 		idmap.1m		\
 		idmapd.1m		\
@@ -182,9 +175,6 @@ _MANFILES=	6to4relay.1m		\
 		if_mpadm.1m		\
 		ifconfig.1m		\
 		ifparse.1m		\
-		iiadm.1m		\
-		iicpbmp.1m		\
-		iicpshd.1m		\
 		ikeadm.1m		\
 		ikecert.1m		\
 		in.chargend.1m		\
@@ -338,11 +328,11 @@ _MANFILES=	6to4relay.1m		\
 		nfsmapid.1m		\
 		nfsstat.1m		\
 		nlsadmin.1m		\
-		nscadm.1m		\
 		nscd.1m			\
 		nwamd.1m		\
 		passmgmt.1m		\
 		pbind.1m		\
+		pcitool.1m		\
 		picld.1m		\
 		ping.1m			\
 		pkgadd.1m		\
@@ -435,7 +425,6 @@ _MANFILES=	6to4relay.1m		\
 		savecore.1m		\
 		sbdadm.1m		\
 		scadm.1m		\
-		scmadm.1m		\
 		sdpadm.1m		\
 		sendmail.1m		\
 		setuname.1m		\
@@ -453,9 +442,6 @@ _MANFILES=	6to4relay.1m		\
 		smbios.1m		\
 		smbstat.1m		\
 		smrsh.1m		\
-		sndradm.1m		\
-		sndrd.1m		\
-		sndrsyncd.1m		\
 		snoop.1m		\
 		soconfig.1m		\
 		sppptun.1m		\
@@ -469,7 +455,6 @@ _MANFILES=	6to4relay.1m		\
 		sttydefs.1m		\
 		su.1m			\
 		sulogin.1m		\
-		svadm.1m		\
 		svc.configd.1m		\
 		svc.ipfd.1m		\
 		svc.startd.1m		\
@@ -527,10 +512,6 @@ _MANFILES=	6to4relay.1m		\
 		vscanadm.1m		\
 		vscand.1m		\
 		wall.1m			\
-		wanboot_keygen.1m	\
-		wanboot_keymgmt.1m	\
-		wanboot_p12split.1m	\
-		wanbootutil.1m		\
 		whodo.1m		\
 		wificonfig.1m		\
 		wpad.1m			\

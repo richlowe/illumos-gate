@@ -21,7 +21,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc. All rights reserved.
- * Copyright (c) 2011, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2018 by Delphix. All rights reserved.
  * Copyright (c) 2017, Joyent, Inc.  All rights reserved.
  */
 
@@ -178,55 +178,110 @@ mdb_nicenum(uint64_t num, char *buf)
 	}
 }
 
-static int verbose;
-
+/*
+ * <addr>::sm_entries <buffer length in bytes>
+ *
+ * Treat the buffer specified by the given address as a buffer that contains
+ * space map entries. Iterate over the specified number of entries and print
+ * them in both encoded and decoded form.
+ */
+/* ARGSUSED */
 static int
-freelist_walk_init(mdb_walk_state_t *wsp)
+sm_entries(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-	if (wsp->walk_addr == NULL) {
-		mdb_warn("must supply starting address\n");
-		return (WALK_ERR);
-	}
+	uint64_t bufsz = 0;
+	boolean_t preview = B_FALSE;
 
-	wsp->walk_data = 0;  /* Index into the freelist */
-	return (WALK_NEXT);
-}
+	if (!(flags & DCMD_ADDRSPEC))
+		return (DCMD_USAGE);
 
-static int
-freelist_walk_step(mdb_walk_state_t *wsp)
-{
-	uint64_t entry;
-	uintptr_t number = (uintptr_t)wsp->walk_data;
-	char *ddata[] = { "ALLOC", "FREE", "CONDENSE", "INVALID",
-			    "INVALID", "INVALID", "INVALID", "INVALID" };
-	int mapshift = SPA_MINBLOCKSHIFT;
-
-	if (mdb_vread(&entry, sizeof (entry), wsp->walk_addr) == -1) {
-		mdb_warn("failed to read freelist entry %p", wsp->walk_addr);
-		return (WALK_DONE);
-	}
-	wsp->walk_addr += sizeof (entry);
-	wsp->walk_data = (void *)(number + 1);
-
-	if (SM_DEBUG_DECODE(entry)) {
-		mdb_printf("DEBUG: %3u  %10s: txg=%llu  pass=%llu\n",
-		    number,
-		    ddata[SM_DEBUG_ACTION_DECODE(entry)],
-		    SM_DEBUG_TXG_DECODE(entry),
-		    SM_DEBUG_SYNCPASS_DECODE(entry));
+	if (argc < 1) {
+		preview = B_TRUE;
+		bufsz = 2;
+	} else if (argc != 1) {
+		return (DCMD_USAGE);
 	} else {
-		mdb_printf("Entry: %3u  offsets=%08llx-%08llx  type=%c  "
-		    "size=%06llx", number,
-		    SM_OFFSET_DECODE(entry) << mapshift,
-		    (SM_OFFSET_DECODE(entry) + SM_RUN_DECODE(entry)) <<
-		    mapshift,
-		    SM_TYPE_DECODE(entry) == SM_ALLOC ? 'A' : 'F',
-		    SM_RUN_DECODE(entry) << mapshift);
-		if (verbose)
-			mdb_printf("      (raw=%012llx)\n", entry);
-		mdb_printf("\n");
+		switch (argv[0].a_type) {
+		case MDB_TYPE_STRING:
+			bufsz = mdb_strtoull(argv[0].a_un.a_str);
+			break;
+		case MDB_TYPE_IMMEDIATE:
+			bufsz = argv[0].a_un.a_val;
+			break;
+		default:
+			return (DCMD_USAGE);
+		}
 	}
-	return (WALK_NEXT);
+
+	char *actions[] = { "ALLOC", "FREE", "INVALID" };
+	for (uintptr_t bufend = addr + bufsz; addr < bufend;
+	    addr += sizeof (uint64_t)) {
+		uint64_t nwords;
+		uint64_t start_addr = addr;
+
+		uint64_t word = 0;
+		if (mdb_vread(&word, sizeof (word), addr) == -1) {
+			mdb_warn("failed to read space map entry %p", addr);
+			return (DCMD_ERR);
+		}
+
+		if (SM_PREFIX_DECODE(word) == SM_DEBUG_PREFIX) {
+			(void) mdb_printf("\t    [%6llu] %s: txg %llu, "
+			    "pass %llu\n",
+			    (u_longlong_t)(addr),
+			    actions[SM_DEBUG_ACTION_DECODE(word)],
+			    (u_longlong_t)SM_DEBUG_TXG_DECODE(word),
+			    (u_longlong_t)SM_DEBUG_SYNCPASS_DECODE(word));
+			continue;
+		}
+
+		char entry_type;
+		uint64_t raw_offset, raw_run, vdev_id = SM_NO_VDEVID;
+
+		if (SM_PREFIX_DECODE(word) != SM2_PREFIX) {
+			entry_type = (SM_TYPE_DECODE(word) == SM_ALLOC) ?
+			    'A' : 'F';
+			raw_offset = SM_OFFSET_DECODE(word);
+			raw_run = SM_RUN_DECODE(word);
+			nwords = 1;
+		} else {
+			ASSERT3U(SM_PREFIX_DECODE(word), ==, SM2_PREFIX);
+
+			raw_run = SM2_RUN_DECODE(word);
+			vdev_id = SM2_VDEV_DECODE(word);
+
+			/* it is a two-word entry so we read another word */
+			addr += sizeof (uint64_t);
+			if (addr >= bufend) {
+				mdb_warn("buffer ends in the middle of a two "
+				    "word entry\n", addr);
+				return (DCMD_ERR);
+			}
+
+			if (mdb_vread(&word, sizeof (word), addr) == -1) {
+				mdb_warn("failed to read space map entry %p",
+				    addr);
+				return (DCMD_ERR);
+			}
+
+			entry_type = (SM2_TYPE_DECODE(word) == SM_ALLOC) ?
+			    'A' : 'F';
+			raw_offset = SM2_OFFSET_DECODE(word);
+			nwords = 2;
+		}
+
+		(void) mdb_printf("\t    [%6llx]    %c  range:"
+		    " %010llx-%010llx  size: %06llx vdev: %06llu words: %llu\n",
+		    (u_longlong_t)start_addr,
+		    entry_type, (u_longlong_t)raw_offset,
+		    (u_longlong_t)(raw_offset + raw_run),
+		    (u_longlong_t)raw_run,
+		    (u_longlong_t)vdev_id, (u_longlong_t)nwords);
+
+		if (preview)
+			break;
+	}
+	return (DCMD_OK);
 }
 
 static int
@@ -344,63 +399,184 @@ zfs_params(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	 * egrep "^[a-z0-9_]+ [a-z0-9_]+( =.*)?;" *.c | cut -d ' ' -f 2
 	 */
 	static const char *params[] = {
-		"arc_reduce_dnlc_percent",
 		"arc_lotsfree_percent",
-		"zfs_dirty_data_max",
-		"zfs_dirty_data_sync",
-		"zfs_delay_max_ns",
-		"zfs_delay_min_dirty_percent",
-		"zfs_delay_scale",
-		"zfs_vdev_max_active",
-		"zfs_vdev_sync_read_min_active",
-		"zfs_vdev_sync_read_max_active",
-		"zfs_vdev_sync_write_min_active",
-		"zfs_vdev_sync_write_max_active",
-		"zfs_vdev_async_read_min_active",
-		"zfs_vdev_async_read_max_active",
-		"zfs_vdev_async_write_min_active",
-		"zfs_vdev_async_write_max_active",
-		"zfs_vdev_scrub_min_active",
-		"zfs_vdev_scrub_max_active",
-		"zfs_vdev_async_write_active_min_dirty_percent",
-		"zfs_vdev_async_write_active_max_dirty_percent",
-		"spa_asize_inflation",
-		"zfs_arc_max",
-		"zfs_arc_min",
-		"arc_shrink_shift",
-		"zfs_mdcomp_disable",
-		"zfs_prefetch_disable",
-		"zfetch_max_streams",
-		"zfetch_min_sec_reap",
-		"zfetch_block_cap",
-		"zfetch_array_rd_sz",
-		"zfs_default_bs",
-		"zfs_default_ibs",
-		"metaslab_aliquot",
-		"reference_tracking_enable",
-		"reference_history",
-		"spa_max_replication_override",
-		"spa_mode_global",
-		"zfs_flags",
-		"zfs_txg_timeout",
-		"zfs_vdev_cache_max",
-		"zfs_vdev_cache_size",
-		"zfs_vdev_cache_bshift",
-		"vdev_mirror_shift",
-		"zfs_scrub_limit",
-		"zfs_no_scrub_io",
-		"zfs_no_scrub_prefetch",
-		"zfs_vdev_aggregation_limit",
+		"arc_pages_pp_reserve",
+		"arc_reduce_dnlc_percent",
+		"arc_swapfs_reserve",
+		"arc_zio_arena_free_shift",
+		"dbuf_cache_hiwater_pct",
+		"dbuf_cache_lowater_pct",
+		"dbuf_cache_max_bytes",
+		"dbuf_cache_max_shift",
+		"ddt_zap_indirect_blockshift",
+		"ddt_zap_leaf_blockshift",
+		"ditto_same_vdev_distance_shift",
+		"dmu_find_threads",
+		"dmu_rescan_dnode_threshold",
+		"dsl_scan_delay_completion",
 		"fzap_default_block_shift",
-		"zfs_immediate_write_sz",
-		"zfs_read_chunk_size",
-		"zfs_nocacheflush",
-		"zil_replay_disable",
-		"metaslab_gang_bang",
+		"l2arc_feed_again",
+		"l2arc_feed_min_ms",
+		"l2arc_feed_secs",
+		"l2arc_headroom",
+		"l2arc_headroom_boost",
+		"l2arc_noprefetch",
+		"l2arc_norw",
+		"l2arc_write_boost",
+		"l2arc_write_max",
+		"metaslab_aliquot",
+		"metaslab_bias_enabled",
+		"metaslab_debug_load",
+		"metaslab_debug_unload",
 		"metaslab_df_alloc_threshold",
 		"metaslab_df_free_pct",
+		"metaslab_fragmentation_factor_enabled",
+		"metaslab_force_ganging",
+		"metaslab_lba_weighting_enabled",
+		"metaslab_load_pct",
+		"metaslab_min_alloc_size",
+		"metaslab_ndf_clump_shift",
+		"metaslab_preload_enabled",
+		"metaslab_preload_limit",
+		"metaslab_trace_enabled",
+		"metaslab_trace_max_entries",
+		"metaslab_unload_delay",
+		"metaslabs_per_vdev",
+		"reference_history",
+		"reference_tracking_enable",
+		"send_holes_without_birth_time",
+		"spa_asize_inflation",
+		"spa_load_verify_data",
+		"spa_load_verify_maxinflight",
+		"spa_load_verify_metadata",
+		"spa_max_replication_override",
+		"spa_min_slop",
+		"spa_mode_global",
+		"spa_slop_shift",
+		"space_map_blksz",
+		"vdev_mirror_shift",
+		"zfetch_max_distance",
+		"zfs_abd_chunk_size",
+		"zfs_abd_scatter_enabled",
+		"zfs_arc_average_blocksize",
+		"zfs_arc_evict_batch_limit",
+		"zfs_arc_grow_retry",
+		"zfs_arc_max",
+		"zfs_arc_meta_limit",
+		"zfs_arc_meta_min",
+		"zfs_arc_min",
+		"zfs_arc_p_min_shift",
+		"zfs_arc_shrink_shift",
+		"zfs_async_block_max_blocks",
+		"zfs_ccw_retry_interval",
+		"zfs_commit_timeout_pct",
+		"zfs_compressed_arc_enabled",
+		"zfs_condense_indirect_commit_entry_delay_ticks",
+		"zfs_condense_indirect_vdevs_enable",
+		"zfs_condense_max_obsolete_bytes",
+		"zfs_condense_min_mapping_bytes",
+		"zfs_condense_pct",
+		"zfs_dbgmsg_maxsize",
+		"zfs_deadman_checktime_ms",
+		"zfs_deadman_enabled",
+		"zfs_deadman_synctime_ms",
+		"zfs_dedup_prefetch",
+		"zfs_default_bs",
+		"zfs_default_ibs",
+		"zfs_delay_max_ns",
+		"zfs_delay_min_dirty_percent",
+		"zfs_delay_resolution_ns",
+		"zfs_delay_scale",
+		"zfs_dirty_data_max",
+		"zfs_dirty_data_max_max",
+		"zfs_dirty_data_max_percent",
+		"zfs_dirty_data_sync",
+		"zfs_flags",
+		"zfs_free_bpobj_enabled",
+		"zfs_free_leak_on_eio",
+		"zfs_free_min_time_ms",
+		"zfs_fsync_sync_cnt",
+		"zfs_immediate_write_sz",
+		"zfs_indirect_condense_obsolete_pct",
+		"zfs_lua_check_instrlimit_interval",
+		"zfs_lua_max_instrlimit",
+		"zfs_lua_max_memlimit",
+		"zfs_max_recordsize",
+		"zfs_mdcomp_disable",
+		"zfs_metaslab_condense_block_threshold",
+		"zfs_metaslab_fragmentation_threshold",
+		"zfs_metaslab_segment_weight_enabled",
+		"zfs_metaslab_switch_threshold",
+		"zfs_mg_fragmentation_threshold",
+		"zfs_mg_noalloc_threshold",
+		"zfs_multilist_num_sublists",
+		"zfs_no_scrub_io",
+		"zfs_no_scrub_prefetch",
+		"zfs_nocacheflush",
+		"zfs_nopwrite_enabled",
+		"zfs_object_remap_one_indirect_delay_ticks",
+		"zfs_obsolete_min_time_ms",
+		"zfs_pd_bytes_max",
+		"zfs_per_txg_dirty_frees_percent",
+		"zfs_prefetch_disable",
+		"zfs_read_chunk_size",
+		"zfs_recover",
+		"zfs_recv_queue_length",
+		"zfs_redundant_metadata_most_ditto_level",
+		"zfs_remap_blkptr_enable",
+		"zfs_remove_max_copy_bytes",
+		"zfs_remove_max_segment",
+		"zfs_resilver_delay",
+		"zfs_resilver_min_time_ms",
+		"zfs_scan_idle",
+		"zfs_scan_min_time_ms",
+		"zfs_scrub_delay",
+		"zfs_scrub_limit",
+		"zfs_send_corrupt_data",
+		"zfs_send_queue_length",
+		"zfs_send_set_freerecords_bit",
+		"zfs_sync_pass_deferred_free",
+		"zfs_sync_pass_dont_compress",
+		"zfs_sync_pass_rewrite",
+		"zfs_sync_taskq_batch_pct",
+		"zfs_top_maxinflight",
+		"zfs_txg_timeout",
+		"zfs_vdev_aggregation_limit",
+		"zfs_vdev_async_read_max_active",
+		"zfs_vdev_async_read_min_active",
+		"zfs_vdev_async_write_active_max_dirty_percent",
+		"zfs_vdev_async_write_active_min_dirty_percent",
+		"zfs_vdev_async_write_max_active",
+		"zfs_vdev_async_write_min_active",
+		"zfs_vdev_cache_bshift",
+		"zfs_vdev_cache_max",
+		"zfs_vdev_cache_size",
+		"zfs_vdev_max_active",
+		"zfs_vdev_queue_depth_pct",
+		"zfs_vdev_read_gap_limit",
+		"zfs_vdev_removal_max_active",
+		"zfs_vdev_removal_min_active",
+		"zfs_vdev_scrub_max_active",
+		"zfs_vdev_scrub_min_active",
+		"zfs_vdev_sync_read_max_active",
+		"zfs_vdev_sync_read_min_active",
+		"zfs_vdev_sync_write_max_active",
+		"zfs_vdev_sync_write_min_active",
+		"zfs_vdev_write_gap_limit",
+		"zfs_write_implies_delete_child",
+		"zfs_zil_clean_taskq_maxalloc",
+		"zfs_zil_clean_taskq_minalloc",
+		"zfs_zil_clean_taskq_nthr_pct",
+		"zil_replay_disable",
+		"zil_slog_bulk",
+		"zio_buf_debug_limit",
+		"zio_dva_throttle_enabled",
 		"zio_injection_enabled",
 		"zvol_immediate_write_sz",
+		"zvol_maxphys",
+		"zvol_unmap_enabled",
+		"zvol_unmap_sync_enabled",
+		"zfs_max_dataset_nesting",
 	};
 
 	for (int i = 0; i < sizeof (params) / sizeof (params[0]); i++) {
@@ -1316,22 +1492,23 @@ typedef struct mdb_metaslab {
 	int64_t ms_deferspace;
 	uint64_t ms_fragmentation;
 	uint64_t ms_weight;
-	uintptr_t ms_alloctree[TXG_SIZE];
-	uintptr_t ms_freeingtree;
-	uintptr_t ms_freedtree;
-	uintptr_t ms_tree;
+	uintptr_t ms_allocating[TXG_SIZE];
+	uintptr_t ms_checkpointing;
+	uintptr_t ms_freeing;
+	uintptr_t ms_freed;
+	uintptr_t ms_allocatable;
 	uintptr_t ms_sm;
 } mdb_metaslab_t;
 
 typedef struct mdb_space_map_phys_t {
-	uint64_t smp_alloc;
+	int64_t smp_alloc;
 	uint64_t smp_histogram[SPACE_MAP_HISTOGRAM_SIZE];
 } mdb_space_map_phys_t;
 
 typedef struct mdb_space_map {
 	uint64_t sm_size;
 	uint8_t sm_shift;
-	uint64_t sm_alloc;
+	int64_t sm_alloc;
 	uintptr_t sm_phys;
 } mdb_space_map_t;
 
@@ -1569,6 +1746,9 @@ do_print_vdev(uintptr_t addr, int flags, int depth, boolean_t recursive,
 		case VDEV_AUX_SPLIT_POOL:
 			aux = "SPLIT_POOL";
 			break;
+		case VDEV_AUX_CHILDREN_OFFLINE:
+			aux = "CHILDREN_OFFLINE";
+			break;
 		default:
 			aux = "UNKNOWN";
 			break;
@@ -1668,6 +1848,7 @@ typedef struct mdb_metaslab_alloc_trace {
 	uint64_t mat_weight;
 	uint64_t mat_offset;
 	uint32_t mat_dva_id;
+	int mat_allocator;
 } mdb_metaslab_alloc_trace_t;
 
 static void
@@ -1740,8 +1921,9 @@ metaslab_trace(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	}
 
 	if (!(flags & DCMD_PIPE_OUT) && DCMD_HDRSPEC(flags)) {
-		mdb_printf("%<u>%6s %6s %8s %11s %18s %18s%</u>\n",
-		    "MSID", "DVA", "ASIZE", "WEIGHT", "RESULT", "VDEV");
+		mdb_printf("%<u>%6s %6s %8s %11s %11s %18s %18s%</u>\n",
+		    "MSID", "DVA", "ASIZE", "ALLOCATOR", "WEIGHT", "RESULT",
+		    "VDEV");
 	}
 
 	if (mat.mat_msp != NULL) {
@@ -1756,7 +1938,8 @@ metaslab_trace(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		mdb_printf("%6s ", "-");
 	}
 
-	mdb_printf("%6d %8llx ", mat.mat_dva_id, mat.mat_size);
+	mdb_printf("%6d %8llx %11llx ", mat.mat_dva_id, mat.mat_size,
+	    mat.mat_allocator);
 
 	metaslab_print_weight(mat.mat_weight);
 
@@ -1934,10 +2117,11 @@ typedef struct mdb_dsl_dir_phys {
 } mdb_dsl_dir_phys_t;
 
 typedef struct space_data {
-	uint64_t ms_alloctree[TXG_SIZE];
-	uint64_t ms_freeingtree;
-	uint64_t ms_freedtree;
-	uint64_t ms_tree;
+	uint64_t ms_allocating[TXG_SIZE];
+	uint64_t ms_checkpointing;
+	uint64_t ms_freeing;
+	uint64_t ms_freed;
+	uint64_t ms_allocatable;
 	int64_t ms_deferspace;
 	uint64_t avail;
 	uint64_t nowavail;
@@ -1960,27 +2144,32 @@ space_cb(uintptr_t addr, const void *unknown, void *arg)
 
 	for (i = 0; i < TXG_SIZE; i++) {
 		if (mdb_ctf_vread(&rt, "range_tree_t",
-		    "mdb_range_tree_t", ms.ms_alloctree[i], 0) == -1)
+		    "mdb_range_tree_t", ms.ms_allocating[i], 0) == -1)
 			return (WALK_ERR);
 
-		sd->ms_alloctree[i] += rt.rt_space;
+		sd->ms_allocating[i] += rt.rt_space;
 
 	}
 
 	if (mdb_ctf_vread(&rt, "range_tree_t",
-	    "mdb_range_tree_t", ms.ms_freeingtree, 0) == -1)
+	    "mdb_range_tree_t", ms.ms_checkpointing, 0) == -1)
 		return (WALK_ERR);
-	sd->ms_freeingtree += rt.rt_space;
+	sd->ms_checkpointing += rt.rt_space;
 
 	if (mdb_ctf_vread(&rt, "range_tree_t",
-	    "mdb_range_tree_t", ms.ms_freedtree, 0) == -1)
+	    "mdb_range_tree_t", ms.ms_freeing, 0) == -1)
 		return (WALK_ERR);
-	sd->ms_freedtree += rt.rt_space;
+	sd->ms_freeing += rt.rt_space;
 
 	if (mdb_ctf_vread(&rt, "range_tree_t",
-	    "mdb_range_tree_t", ms.ms_tree, 0) == -1)
+	    "mdb_range_tree_t", ms.ms_freed, 0) == -1)
 		return (WALK_ERR);
-	sd->ms_tree += rt.rt_space;
+	sd->ms_freed += rt.rt_space;
+
+	if (mdb_ctf_vread(&rt, "range_tree_t",
+	    "mdb_range_tree_t", ms.ms_allocatable, 0) == -1)
+		return (WALK_ERR);
+	sd->ms_allocatable += rt.rt_space;
 
 	if (ms.ms_sm != NULL &&
 	    mdb_ctf_vread(&sm, "space_map_t",
@@ -2064,16 +2253,18 @@ spa_space(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	}
 
 	mdb_printf("ms_allocmap = %llu%s %llu%s %llu%s %llu%s\n",
-	    sd.ms_alloctree[0] >> shift, suffix,
-	    sd.ms_alloctree[1] >> shift, suffix,
-	    sd.ms_alloctree[2] >> shift, suffix,
-	    sd.ms_alloctree[3] >> shift, suffix);
-	mdb_printf("ms_freeingtree = %llu%s\n",
-	    sd.ms_freeingtree >> shift, suffix);
-	mdb_printf("ms_freedtree = %llu%s\n",
-	    sd.ms_freedtree >> shift, suffix);
-	mdb_printf("ms_tree = %llu%s\n",
-	    sd.ms_tree >> shift, suffix);
+	    sd.ms_allocating[0] >> shift, suffix,
+	    sd.ms_allocating[1] >> shift, suffix,
+	    sd.ms_allocating[2] >> shift, suffix,
+	    sd.ms_allocating[3] >> shift, suffix);
+	mdb_printf("ms_checkpointing = %llu%s\n",
+	    sd.ms_checkpointing >> shift, suffix);
+	mdb_printf("ms_freeing = %llu%s\n",
+	    sd.ms_freeing >> shift, suffix);
+	mdb_printf("ms_freed = %llu%s\n",
+	    sd.ms_freed >> shift, suffix);
+	mdb_printf("ms_allocatable = %llu%s\n",
+	    sd.ms_allocatable >> shift, suffix);
 	mdb_printf("ms_deferspace = %llu%s\n",
 	    sd.ms_deferspace >> shift, suffix);
 	mdb_printf("last synced avail = %llu%s\n",
@@ -3962,6 +4153,9 @@ static const mdb_dcmd_t dcmds[] = {
 	    "\t-M display metaslab group statistic\n"
 	    "\t-h display histogram (requires -m or -M)\n",
 	    "given a spa_t, print vdev summary", spa_vdevs },
+	{ "sm_entries", "<buffer length in bytes>",
+	    "print out space map entries from a buffer decoded",
+	    sm_entries},
 	{ "vdev", ":[-remMh]\n"
 	    "\t-r display recursively\n"
 	    "\t-e display statistics\n"
@@ -4012,8 +4206,6 @@ static const mdb_dcmd_t dcmds[] = {
 };
 
 static const mdb_walker_t walkers[] = {
-	{ "zms_freelist", "walk ZFS metaslab freelist",
-	    freelist_walk_init, freelist_walk_step, NULL },
 	{ "txg_list", "given any txg_list_t *, walk all entries in all txgs",
 	    txg_list_walk_init, txg_list_walk_step, NULL },
 	{ "txg_list0", "given any txg_list_t *, walk all entries in txg 0",

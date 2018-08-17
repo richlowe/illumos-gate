@@ -24,8 +24,22 @@ all:	lib$(LIB).a
 
 install:
 
-SRCS=	delay.c devpath.c efi_console.c efinet.c efipart.c env.c errno.c \
-	handles.c libefi.c time.c wchar.c
+SRCS=	delay.c \
+	devicename.c \
+	devpath.c \
+	efi_console.c \
+	efi_driver_utils.c \
+	efichar.c \
+	efienv.c \
+	efinet.c \
+	efipart.c \
+	efizfs.c \
+	env.c \
+	errno.c \
+	handles.c \
+	libefi.c \
+	time.c \
+	wchar.c
 
 #.if ${MACHINE_CPUARCH} == "amd64" || ${MACHINE_CPUARCH} == "i386"
 #SRCS +=	time.c
@@ -35,7 +49,7 @@ SRCS=	delay.c devpath.c efi_console.c efinet.c efipart.c env.c errno.c \
 
 OBJS=	$(SRCS:%.c=%.o)
 
-CPPFLAGS= -DTERM_EMU -D_STANDALONE
+CPPFLAGS= -D_STANDALONE
 CFLAGS = -O2
 
 #.if ${MACHINE_CPUARCH} == "aarch64"
@@ -50,6 +64,8 @@ CFLAGS += -I$(SRC)/common/ficl -I../../ficl
 CFLAGS += -I../include
 CFLAGS += -I../include/${MACH64}
 CFLAGS += -I../../../../lib/libstand
+CFLAGS += -I./../../zfs
+CFLAGS += -I./../../../cddl/boot/zfs
 
 # Pick up the bootstrap header for some interface items
 CFLAGS += -I../../common
@@ -57,7 +73,7 @@ CFLAGS += -I../../common
 # Handle FreeBSD specific %b and %D printf format specifiers
 # CFLAGS+= ${FORMAT_EXTENSIONS}
 # CFLAGS += -D__printf__=__freebsd_kprintf__
-CFLAGS+= -DTERM_EMU
+CFLAGS += -DTERM_EMU
 
 include ../Makefile.inc
 

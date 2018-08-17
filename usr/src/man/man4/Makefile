@@ -12,7 +12,8 @@
 #
 # Copyright 2011, Richard Lowe
 # Copyright 2015, Joyent, Inc.
-# Copyright 2016 Nexenta Systems, Inc.
+# Copyright 2018 Nexenta Systems, Inc.
+# Copyright 2018 Gary Mills
 #
 
 include		$(SRC)/Makefile.master
@@ -59,7 +60,6 @@ _MANFILES=	Intro.4				\
 		dialups.4			\
 		dir_ufs.4			\
 		driver.conf.4			\
-		ds.log.4			\
 		ethers.4			\
 		exec_attr.4			\
 		fdi.4				\
@@ -100,7 +100,6 @@ _MANFILES=	Intro.4				\
 		ldapfilter.conf.4		\
 		ldapsearchprefs.conf.4		\
 		ldaptemplates.conf.4		\
-		loader.conf.4			\
 		logadm.conf.4			\
 		logindevperm.4			\
 		loginlog.4			\
@@ -157,7 +156,6 @@ _MANFILES=	Intro.4				\
 		publickey.4			\
 		queuedefs.4			\
 		rcmscript.4			\
-		rdc.cf.4			\
 		remote.4			\
 		resolv.conf.4			\
 		rmtab.4				\
@@ -178,7 +176,6 @@ _MANFILES=	Intro.4				\
 		smb.4				\
 		smbautohome.4			\
 		smhba.conf.4			\
-		sndr.4				\
 		sock2path.d.4			\
 		space.4				\
 		sulog.4				\
@@ -197,7 +194,6 @@ _MANFILES=	Intro.4				\
 		utmp.4				\
 		utmpx.4				\
 		vfstab.4			\
-		wanboot.conf.4			\
 		warn.conf.4			\
 		ypfiles.4			\
 		yppasswdd.4			\
@@ -206,7 +202,8 @@ _MANFILES=	Intro.4				\
 
 sparc_MANFILES=	sbus.4
 
-i386_MANFILES=	sysbus.4
+i386_MANFILES=	loader.conf.4			\
+		sysbus.4
 
 _MANLINKS=	addresses.4			\
 		devid_cache.4			\

@@ -42,4 +42,5 @@ __all__ = [
 	'Keywords',
 	'ManLint',
 	'Mapfile',
-	'SpellCheck']
+	'SpellCheck',
+	'WsCheck']

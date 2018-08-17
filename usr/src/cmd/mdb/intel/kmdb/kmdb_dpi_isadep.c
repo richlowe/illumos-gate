@@ -21,9 +21,9 @@
 /*
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2018 Joyent, Inc.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
  * Intel-specific portions of the DPI
@@ -51,6 +51,7 @@ kmdb_dpi_handle_fault(kreg_t trapno, kreg_t pc, kreg_t sp, int cpuid)
 	switch (trapno) {
 	case T_GPFLT:
 		errno = EACCES;
+		break;
 	default:
 		errno = EMDB_NOMAP;
 	}
@@ -141,22 +142,4 @@ kmdb_dpi_reboot(void)
 	 * as we don't plan to ever return.
 	 */
 	longjmp(kmdb_dpi_entry_pcb, KMDB_DPI_CMD_REBOOT);
-}
-
-void
-kmdb_dpi_msr_add(const kdi_msr_t *msrs)
-{
-	mdb.m_dpi->dpo_msr_add(msrs);
-}
-
-uint64_t
-kmdb_dpi_msr_get(uint_t msr)
-{
-	return (mdb.m_dpi->dpo_msr_get(DPI_MASTER_CPUID, msr));
-}
-
-uint64_t
-kmdb_dpi_msr_get_by_cpu(int cpuid, uint_t msr)
-{
-	return (mdb.m_dpi->dpo_msr_get(cpuid, msr));
 }

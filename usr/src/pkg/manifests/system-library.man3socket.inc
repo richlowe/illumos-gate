@@ -11,13 +11,12 @@
 
 #
 # Copyright 2011, Richard Lowe
-# Copyright 2012 Nexenta Systems, Inc. All rights reserved.
+# Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2013, OmniTI Computer Consulting, Inc.
 #
 
 file path=usr/share/man/man3socket/accept.3socket
 file path=usr/share/man/man3socket/bind.3socket
-file path=usr/share/man/man3socket/byteorder.3socket
 file path=usr/share/man/man3socket/connect.3socket
 file path=usr/share/man/man3socket/ethers.3socket
 file path=usr/share/man/man3socket/getaddrinfo.3socket
@@ -32,7 +31,6 @@ file path=usr/share/man/man3socket/getsockopt.3socket
 file path=usr/share/man/man3socket/getsourcefilter.3socket
 file path=usr/share/man/man3socket/icmp6_filter.3socket
 file path=usr/share/man/man3socket/if_nametoindex.3socket
-file path=usr/share/man/man3socket/inet.3socket
 file path=usr/share/man/man3socket/inet6_opt.3socket
 file path=usr/share/man/man3socket/inet6_rth.3socket
 file path=usr/share/man/man3socket/listen.3socket
@@ -111,16 +109,12 @@ link path=usr/share/man/man3socket/getservent.3socket \
     target=getservbyname.3socket
 link path=usr/share/man/man3socket/getservent_r.3socket \
     target=getservbyname.3socket
-link path=usr/share/man/man3socket/htonl.3socket target=byteorder.3socket
-link path=usr/share/man/man3socket/htonll.3socket target=byteorder.3socket
-link path=usr/share/man/man3socket/htons.3socket target=byteorder.3socket
 link path=usr/share/man/man3socket/if_freenameindex.3socket \
     target=if_nametoindex.3socket
 link path=usr/share/man/man3socket/if_indextoname.3socket \
     target=if_nametoindex.3socket
 link path=usr/share/man/man3socket/if_nameindex.3socket \
     target=if_nametoindex.3socket
-link path=usr/share/man/man3socket/inet6.3socket target=inet.3socket
 link path=usr/share/man/man3socket/inet6_opt_append.3socket \
     target=inet6_opt.3socket
 link path=usr/share/man/man3socket/inet6_opt_find.3socket \
@@ -147,18 +141,6 @@ link path=usr/share/man/man3socket/inet6_rth_segments.3socket \
     target=inet6_rth.3socket
 link path=usr/share/man/man3socket/inet6_rth_space.3socket \
     target=inet6_rth.3socket
-link path=usr/share/man/man3socket/inet_addr.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_aton.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_lnaof.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_makeaddr.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_netof.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_network.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_ntoa.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_ntop.3socket target=inet.3socket
-link path=usr/share/man/man3socket/inet_pton.3socket target=inet.3socket
-link path=usr/share/man/man3socket/ntohl.3socket target=byteorder.3socket
-link path=usr/share/man/man3socket/ntohll.3socket target=byteorder.3socket
-link path=usr/share/man/man3socket/ntohs.3socket target=byteorder.3socket
 link path=usr/share/man/man3socket/rcmd_af.3socket target=rcmd.3socket
 link path=usr/share/man/man3socket/recvfrom.3socket target=recv.3socket
 link path=usr/share/man/man3socket/recvmsg.3socket target=recv.3socket

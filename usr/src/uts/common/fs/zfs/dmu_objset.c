@@ -54,6 +54,7 @@
 #include <sys/dsl_destroy.h>
 #include <sys/vdev.h>
 #include <sys/zfeature.h>
+#include "zfs_namecheck.h"
 
 /*
  * Needed to close a window in dnode_move() that allows the objset to be freed
@@ -496,6 +497,14 @@ dmu_objset_open_impl(spa_t *spa, dsl_dataset_t *ds, blkptr_t *bp,
 		os->os_primary_cache = ZFS_CACHE_ALL;
 		os->os_secondary_cache = ZFS_CACHE_ALL;
 	}
+	/*
+	 * These properties will be filled in by the logic in zfs_get_zplprop()
+	 * when they are queried for the first time.
+	 */
+	os->os_version = OBJSET_PROP_UNINITIALIZED;
+	os->os_normalization = OBJSET_PROP_UNINITIALIZED;
+	os->os_utf8only = OBJSET_PROP_UNINITIALIZED;
+	os->os_casesensitivity = OBJSET_PROP_UNINITIALIZED;
 
 	if (ds == NULL || !ds->ds_is_snapshot)
 		os->os_zil_header = os->os_phys->os_zil_header;
@@ -670,23 +679,21 @@ dmu_objset_rele(objset_t *os, void *tag)
  * same name so that it can be partially torn down and reconstructed.
  */
 void
-dmu_objset_refresh_ownership(objset_t *os, void *tag)
+dmu_objset_refresh_ownership(dsl_dataset_t *ds, dsl_dataset_t **newds,
+    void *tag)
 {
 	dsl_pool_t *dp;
-	dsl_dataset_t *ds, *newds;
 	char name[ZFS_MAX_DATASET_NAME_LEN];
 
-	ds = os->os_dsl_dataset;
 	VERIFY3P(ds, !=, NULL);
 	VERIFY3P(ds->ds_owner, ==, tag);
 	VERIFY(dsl_dataset_long_held(ds));
 
 	dsl_dataset_name(ds, name);
-	dp = dmu_objset_pool(os);
+	dp = ds->ds_dir->dd_pool;
 	dsl_pool_config_enter(dp, FTAG);
-	dmu_objset_disown(os, tag);
-	VERIFY0(dsl_dataset_own(dp, name, tag, &newds));
-	VERIFY3P(newds, ==, os->os_dsl_dataset);
+	dsl_dataset_disown(ds, tag);
+	VERIFY0(dsl_dataset_own(dp, name, tag, newds));
 	dsl_pool_config_exit(dp, FTAG);
 }
 
@@ -903,6 +910,9 @@ dmu_objset_create_check(void *arg, dmu_tx_t *tx)
 		return (SET_ERROR(EINVAL));
 
 	if (strlen(doca->doca_name) >= ZFS_MAX_DATASET_NAME_LEN)
+		return (SET_ERROR(ENAMETOOLONG));
+
+	if (dataset_nestcheck(doca->doca_name) != 0)
 		return (SET_ERROR(ENAMETOOLONG));
 
 	error = dsl_dir_hold(dp, doca->doca_name, FTAG, &pdd, &tail);

@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*	Copyright (c) 1990, 1991 UNIX System Laboratories, Inc.	*/
@@ -60,6 +61,7 @@
 #include <sys/cmn_err.h>
 #include <sys/segments.h>
 #include <sys/clock.h>
+#include <vm/hat_i86.h>
 #if defined(__xpv)
 #include <sys/hypervisor.h>
 #include <sys/note.h>
@@ -282,9 +284,12 @@ ssd_to_usd(struct ssd *ssd, user_desc_t *usd)
 	USEGD_SETLIMIT(usd, ssd->ls);
 
 	/*
-	 * set type, dpl and present bits.
+	 * Set type, dpl and present bits.
+	 *
+	 * Force the "accessed" bit to on so that we don't run afoul of
+	 * KPTI.
 	 */
-	usd->usd_type = ssd->acc1;
+	usd->usd_type = ssd->acc1 | SDT_A;
 	usd->usd_dpl = ssd->acc1 >> 5;
 	usd->usd_p = ssd->acc1 >> (5 + 2);
 
@@ -293,7 +298,7 @@ ssd_to_usd(struct ssd *ssd, user_desc_t *usd)
 
 	/*
 	 * 64-bit code selectors are never allowed in the LDT.
-	 * Reserved bit is always 0 on 32-bit sytems.
+	 * Reserved bit is always 0 on 32-bit systems.
 	 */
 #if defined(__amd64)
 	usd->usd_long = 0;
@@ -343,10 +348,21 @@ static void
 ldt_load(void)
 {
 #if defined(__xpv)
-	xen_set_ldt(get_ssd_base(&curproc->p_ldt_desc),
-	    curproc->p_ldtlimit + 1);
+	xen_set_ldt(curproc->p_ldt, curproc->p_ldtlimit + 1);
 #else
-	*((system_desc_t *)&CPU->cpu_gdt[GDT_LDT]) = curproc->p_ldt_desc;
+	size_t len;
+	system_desc_t desc;
+
+	/*
+	 * Before we can use the LDT on this CPU, we must install the LDT in the
+	 * user mapping table.
+	 */
+	len = (curproc->p_ldtlimit + 1) * sizeof (user_desc_t);
+	bcopy(curproc->p_ldt, CPU->cpu_m.mcpu_ldt, len);
+	CPU->cpu_m.mcpu_ldt_len = len;
+	set_syssegd(&desc, CPU->cpu_m.mcpu_ldt, len - 1, SDT_SYSLDT, SEL_KPL);
+	*((system_desc_t *)&CPU->cpu_gdt[GDT_LDT]) = desc;
+
 	wr_ldtr(ULDT_SEL);
 #endif
 }
@@ -363,6 +379,9 @@ ldt_unload(void)
 #else
 	*((system_desc_t *)&CPU->cpu_gdt[GDT_LDT]) = null_sdesc;
 	wr_ldtr(0);
+
+	bzero(CPU->cpu_m.mcpu_ldt, CPU->cpu_m.mcpu_ldt_len);
+	CPU->cpu_m.mcpu_ldt_len = 0;
 #endif
 }
 
@@ -395,7 +414,7 @@ ldt_savectx(proc_t *p)
 #endif
 
 	ldt_unload();
-	cpu_fast_syscall_enable(NULL);
+	cpu_fast_syscall_enable();
 }
 
 static void
@@ -405,30 +424,34 @@ ldt_restorectx(proc_t *p)
 	ASSERT(p == curproc);
 
 	ldt_load();
-	cpu_fast_syscall_disable(NULL);
+	cpu_fast_syscall_disable();
 }
 
 /*
- * When a process with a private LDT execs, fast syscalls must be enabled for
- * the new process image.
+ * At exec time, we need to clear up our LDT context and re-enable fast syscalls
+ * for the new process image.
+ *
+ * The same is true for the other case, where we have:
+ *
+ * proc_exit()
+ *  ->exitpctx()->ldt_savectx()
+ *  ->freepctx()->ldt_freectx()
+ *
+ * Because pre-emption is not prevented between the two callbacks, we could have
+ * come off CPU, and brought back LDT context when coming back on CPU via
+ * ldt_restorectx().
  */
 /* ARGSUSED */
 static void
 ldt_freectx(proc_t *p, int isexec)
 {
-	ASSERT(p->p_ldt);
+	ASSERT(p->p_ldt != NULL);
+	ASSERT(p == curproc);
 
-	if (isexec) {
-		kpreempt_disable();
-		cpu_fast_syscall_enable(NULL);
-		kpreempt_enable();
-	}
-
-	/*
-	 * ldt_free() will free the memory used by the private LDT, reset the
-	 * process's descriptor, and re-program the LDTR.
-	 */
+	kpreempt_disable();
 	ldt_free(p);
+	cpu_fast_syscall_enable();
+	kpreempt_enable();
 }
 
 /*
@@ -480,10 +503,10 @@ ldt_installctx(proc_t *p, proc_t *cp)
 int
 setdscr(struct ssd *ssd)
 {
-	ushort_t seli; 		/* selector index */
+	ushort_t seli;		/* selector index */
 	user_desc_t *ldp;	/* descriptor pointer */
 	user_desc_t ndesc;	/* new descriptor */
-	proc_t	*pp = ttoproc(curthread);
+	proc_t	*pp = curproc;
 	int	rc = 0;
 
 	/*
@@ -524,11 +547,12 @@ setdscr(struct ssd *ssd)
 		 */
 		kpreempt_disable();
 		ldt_installctx(pp, NULL);
-		cpu_fast_syscall_disable(NULL);
+		cpu_fast_syscall_disable();
 		ASSERT(curthread->t_post_sys != 0);
 		kpreempt_enable();
 
 	} else if (seli > pp->p_ldtlimit) {
+		ASSERT(pp->p_pctx != NULL);
 
 		/*
 		 * Increase size of ldt to include seli.
@@ -600,7 +624,7 @@ setdscr(struct ssd *ssd)
 			}
 
 #if defined(__amd64)
-			if (pcb->pcb_rupdate == 1) {
+			if (PCB_NEED_UPDATE_SEGS(pcb)) {
 				if (ssd->sel == pcb->pcb_ds ||
 				    ssd->sel == pcb->pcb_es ||
 				    ssd->sel == pcb->pcb_fs ||
@@ -630,10 +654,14 @@ setdscr(struct ssd *ssd)
 	}
 
 	/*
-	 * If acc1 is zero, clear the descriptor (including the 'present' bit)
+	 * If acc1 is zero, clear the descriptor (including the 'present' bit).
+	 * Make sure we update the CPU-private copy of the LDT.
 	 */
 	if (ssd->acc1 == 0) {
 		rc  = ldt_update_segd(ldp, &null_udesc);
+		kpreempt_disable();
+		ldt_load();
+		kpreempt_enable();
 		mutex_exit(&pp->p_ldtlock);
 		return (rc);
 	}
@@ -647,7 +675,6 @@ setdscr(struct ssd *ssd)
 		return (EINVAL);
 	}
 
-#if defined(__amd64)
 	/*
 	 * Do not allow 32-bit applications to create 64-bit mode code
 	 * segments.
@@ -657,50 +684,34 @@ setdscr(struct ssd *ssd)
 		mutex_exit(&pp->p_ldtlock);
 		return (EINVAL);
 	}
-#endif /* __amd64 */
 
 	/*
-	 * Set up a code or data user segment descriptor.
+	 * Set up a code or data user segment descriptor, making sure to update
+	 * the CPU-private copy of the LDT.
 	 */
 	if (SI86SSD_ISUSEG(ssd)) {
 		ssd_to_usd(ssd, &ndesc);
 		rc = ldt_update_segd(ldp, &ndesc);
+		kpreempt_disable();
+		ldt_load();
+		kpreempt_enable();
 		mutex_exit(&pp->p_ldtlock);
 		return (rc);
 	}
-
-#if defined(__i386)
-	/*
-	 * Allow a call gate only if the destination is in the LDT
-	 * and the system is running in 32-bit legacy mode.
-	 *
-	 * In long mode 32-bit call gates are redefined as 64-bit call
-	 * gates and the hw enforces that the target code selector
-	 * of the call gate must be 64-bit selector. A #gp fault is
-	 * generated if otherwise. Since we do not allow 32-bit processes
-	 * to switch themselves to 64-bits we never allow call gates
-	 * on 64-bit system system.
-	 */
-	if (SI86SSD_TYPE(ssd) == SDT_SYSCGT && SELISLDT(ssd->ls)) {
-
-
-		ssd_to_sgd(ssd, (gate_desc_t *)&ndesc);
-		rc = ldt_update_segd(ldp, &ndesc);
-		mutex_exit(&pp->p_ldtlock);
-		return (rc);
-	}
-#endif	/* __i386 */
 
 	mutex_exit(&pp->p_ldtlock);
 	return (EINVAL);
 }
 
 /*
- * Allocate new LDT for process just large enough to contain seli.
- * Note we allocate and grow LDT in PAGESIZE chunks. We do this
- * to simplify the implementation and because on the hypervisor it's
- * required, since the LDT must live on pages that have PROT_WRITE
- * removed and which are given to the hypervisor.
+ * Allocate new LDT for process just large enough to contain seli.  Note we
+ * allocate and grow LDT in PAGESIZE chunks. We do this to simplify the
+ * implementation and because on the hypervisor it's required, since the LDT
+ * must live on pages that have PROT_WRITE removed and which are given to the
+ * hypervisor.
+ *
+ * Note that we don't actually load the LDT into the current CPU here: it's done
+ * later by our caller.
  */
 static void
 ldt_alloc(proc_t *pp, uint_t seli)
@@ -714,7 +725,8 @@ ldt_alloc(proc_t *pp, uint_t seli)
 	ASSERT(pp->p_ldtlimit == 0);
 
 	/*
-	 * Allocate new LDT just large enough to contain seli.
+	 * Allocate new LDT just large enough to contain seli. The LDT must
+	 * always be allocated in units of pages for KPTI.
 	 */
 	ldtsz = P2ROUNDUP((seli + 1) * sizeof (user_desc_t), PAGESIZE);
 	nsels = ldtsz / sizeof (user_desc_t);
@@ -730,13 +742,6 @@ ldt_alloc(proc_t *pp, uint_t seli)
 
 	pp->p_ldt = ldt;
 	pp->p_ldtlimit = nsels - 1;
-	set_syssegd(&pp->p_ldt_desc, ldt, ldtsz - 1, SDT_SYSLDT, SEL_KPL);
-
-	if (pp == curproc) {
-		kpreempt_disable();
-		ldt_load();
-		kpreempt_enable();
-	}
 }
 
 static void
@@ -755,7 +760,6 @@ ldt_free(proc_t *pp)
 
 	pp->p_ldt = NULL;
 	pp->p_ldtlimit = 0;
-	pp->p_ldt_desc = null_sdesc;
 	mutex_exit(&pp->p_ldtlock);
 
 	if (pp == curproc) {
@@ -820,6 +824,14 @@ ldt_dup(proc_t *pp, proc_t *cp)
 
 }
 
+/*
+ * Note that we don't actually load the LDT into the current CPU here: it's done
+ * later by our caller - unless we take an error.  This works out because
+ * ldt_load() does a copy of ->p_ldt instead of directly loading it into the GDT
+ * (and therefore can't be using the freed old LDT), and by definition if the
+ * new entry didn't pass validation, then the proc shouldn't be referencing an
+ * entry in the extended region.
+ */
 static void
 ldt_grow(proc_t *pp, uint_t seli)
 {
@@ -832,7 +844,8 @@ ldt_grow(proc_t *pp, uint_t seli)
 	ASSERT(pp->p_ldtlimit != 0);
 
 	/*
-	 * Allocate larger LDT just large enough to contain seli.
+	 * Allocate larger LDT just large enough to contain seli. The LDT must
+	 * always be allocated in units of pages for KPTI.
 	 */
 	nldtsz = P2ROUNDUP((seli + 1) * sizeof (user_desc_t), PAGESIZE);
 	nsels = nldtsz / sizeof (user_desc_t);
@@ -868,18 +881,6 @@ ldt_grow(proc_t *pp, uint_t seli)
 
 	pp->p_ldt = nldt;
 	pp->p_ldtlimit = nsels - 1;
-
-	/*
-	 * write new ldt segment descriptor.
-	 */
-	set_syssegd(&pp->p_ldt_desc, nldt, nldtsz - 1, SDT_SYSLDT, SEL_KPL);
-
-	/*
-	 * load the new ldt.
-	 */
-	kpreempt_disable();
-	ldt_load();
-	kpreempt_enable();
 
 	kmem_free(oldt, oldtsz);
 }

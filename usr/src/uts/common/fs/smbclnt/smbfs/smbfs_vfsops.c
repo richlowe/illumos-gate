@@ -34,6 +34,7 @@
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2012 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2013, Joyent, Inc. All rights reserved.
  * Copyright (c) 2016 by Delphix. All rights reserved.
  */
@@ -51,6 +52,7 @@
 #include <sys/statvfs.h>
 #include <sys/errno.h>
 #include <sys/debug.h>
+#include <sys/disp.h>
 #include <sys/cmn_err.h>
 #include <sys/modctl.h>
 #include <sys/policy.h>
@@ -59,6 +61,7 @@
 #include <sys/vfs_opreg.h>
 #include <sys/mntent.h>
 #include <sys/priv.h>
+#include <sys/taskq.h>
 #include <sys/tsol/label.h>
 #include <sys/tsol/tndb.h>
 #include <inet/ip.h>
@@ -72,6 +75,23 @@
 #include <smbfs/smbfs.h>
 #include <smbfs/smbfs_node.h>
 #include <smbfs/smbfs_subr.h>
+
+/*
+ * Should smbfs mount enable "-o acl" by default?  There are good
+ * arguments for both.  The most common use case is individual users
+ * accessing files on some SMB server, for which "noacl" is the more
+ * convenient default.  A less common use case is data migration,
+ * where the "acl" option might be a desirable default.  We'll make
+ * the common use case the default.  This default can be changed via
+ * /etc/system, and/or set per-mount via the "acl" mount option.
+ */
+int smbfs_default_opt_acl = 0;
+
+/*
+ * How many taskq threads per-mount should we use.
+ * Just one is fine (until we do more async work).
+ */
+int smbfs_tq_nthread = 1;
 
 /*
  * Local functions definitions.
@@ -100,7 +120,7 @@ static mntopt_t mntopts[] = {
  */
 	{ MNTOPT_INTR,		intr_cancel,	NULL,	MO_DEFAULT, 0 },
 	{ MNTOPT_NOINTR,	nointr_cancel,	NULL,	0,	0 },
-	{ MNTOPT_ACL,		acl_cancel,	NULL,	MO_DEFAULT, 0 },
+	{ MNTOPT_ACL,		acl_cancel,	NULL,	0,	0 },
 	{ MNTOPT_NOACL,		noacl_cancel,	NULL,	0,	0 },
 	{ MNTOPT_XATTR,		xattr_cancel,	NULL,	MO_DEFAULT, 0 },
 	{ MNTOPT_NOXATTR,	noxattr_cancel, NULL,	0,	0 }
@@ -339,15 +359,15 @@ smbfs_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 {
 	char		*data = uap->dataptr;
 	int		error;
-	smbnode_t 	*rtnp = NULL;	/* root of this fs */
-	smbmntinfo_t 	*smi = NULL;
-	dev_t 		smbfs_dev;
-	int 		version;
-	int 		devfd;
+	smbnode_t	*rtnp = NULL;	/* root of this fs */
+	smbmntinfo_t	*smi = NULL;
+	dev_t		smbfs_dev;
+	int		version;
+	int		devfd;
 	zone_t		*zone = curproc->p_zone;
 	zone_t		*mntzone = NULL;
-	smb_share_t 	*ssp = NULL;
-	smb_cred_t 	scred;
+	smb_share_t	*ssp = NULL;
+	smb_cred_t	scred;
 	int		flags, sec;
 
 	STRUCT_DECL(smbfs_args, args);		/* smbfs mount arguments */
@@ -506,19 +526,23 @@ smbfs_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	 * All "generic" mount options have already been
 	 * handled in vfs.c:domount() - see mntopts stuff.
 	 * Query generic options using vfs_optionisset().
+	 * Give ACL an adjustable system-wide default.
 	 */
+	if (smbfs_default_opt_acl ||
+	    vfs_optionisset(vfsp, MNTOPT_ACL, NULL))
+		smi->smi_flags |= SMI_ACL;
+	if (vfs_optionisset(vfsp, MNTOPT_NOACL, NULL))
+		smi->smi_flags &= ~SMI_ACL;
 	if (vfs_optionisset(vfsp, MNTOPT_INTR, NULL))
 		smi->smi_flags |= SMI_INT;
-	if (vfs_optionisset(vfsp, MNTOPT_ACL, NULL))
-		smi->smi_flags |= SMI_ACL;
 
 	/*
 	 * Get the mount options that come in as smbfs_args,
 	 * starting with args.flags (SMBFS_MF_xxx)
 	 */
 	flags = STRUCT_FGET(args, flags);
-	smi->smi_uid 	= STRUCT_FGET(args, uid);
-	smi->smi_gid 	= STRUCT_FGET(args, gid);
+	smi->smi_uid	= STRUCT_FGET(args, uid);
+	smi->smi_gid	= STRUCT_FGET(args, gid);
 	smi->smi_fmode	= STRUCT_FGET(args, file_mode) & 0777;
 	smi->smi_dmode	= STRUCT_FGET(args, dir_mode) & 0777;
 
@@ -617,6 +641,14 @@ smbfs_mount(vfs_t *vfsp, vnode_t *mvp, struct mounta *uap, cred_t *cr)
 	smi->smi_root = rtnp;
 
 	/*
+	 * Create a taskq for async work (i.e. putpage)
+	 */
+	smi->smi_taskq = taskq_create_proc("smbfs",
+	    smbfs_tq_nthread, minclsyspri,
+	    smbfs_tq_nthread, smbfs_tq_nthread * 2,
+	    zone->zone_zsched, TASKQ_PREPOPULATE);
+
+	/*
 	 * NFS does other stuff here too:
 	 *   async worker threads
 	 *   init kstats
@@ -685,15 +717,6 @@ smbfs_unmount(vfs_t *vfsp, int flag, cred_t *cr)
 	vfsp->vfs_flag |= VFS_UNMOUNTED;
 
 	/*
-	 * Shutdown any outstanding I/O requests on this share,
-	 * and force a tree disconnect.  The share object will
-	 * continue to hang around until smb_share_rele().
-	 * This should also cause most active nodes to be
-	 * released as their operations fail with EIO.
-	 */
-	smb_share_kill(smi->smi_share);
-
-	/*
 	 * If we hold the root VP (and we normally do)
 	 * then it's safe to release it now.
 	 */
@@ -714,6 +737,21 @@ smbfs_unmount(vfs_t *vfsp, int flag, cred_t *cr)
 	 * after their last vn_rele.
 	 */
 	smbfs_destroy_table(vfsp);
+
+	/*
+	 * Shutdown any outstanding I/O requests on this share,
+	 * and force a tree disconnect.  The share object will
+	 * continue to hang around until smb_share_rele().
+	 * This should also cause most active nodes to be
+	 * released as their operations fail with EIO.
+	 */
+	smb_share_kill(smi->smi_share);
+
+	/*
+	 * Any async taskq work should be giving up.
+	 * Wait for those to exit.
+	 */
+	taskq_destroy(smi->smi_taskq);
 
 	/*
 	 * Delete our kstats...
@@ -865,8 +903,6 @@ cache_hit:
 	return (error);
 }
 
-static kmutex_t smbfs_syncbusy;
-
 /*
  * Flush dirty smbfs files for file system vfsp.
  * If vfsp == NULL, all smbfs files are flushed.
@@ -875,14 +911,25 @@ static kmutex_t smbfs_syncbusy;
 static int
 smbfs_sync(vfs_t *vfsp, short flag, cred_t *cr)
 {
+
 	/*
-	 * Cross-zone calls are OK here, since this translates to a
-	 * VOP_PUTPAGE(B_ASYNC), which gets picked up by the right zone.
+	 * SYNC_ATTR is used by fsflush() to force old filesystems like UFS
+	 * to sync metadata, which they would otherwise cache indefinitely.
+	 * Semantically, the only requirement is that the sync be initiated.
+	 * Assume the server-side takes care of attribute sync.
 	 */
-	if (!(flag & SYNC_ATTR) && mutex_tryenter(&smbfs_syncbusy) != 0) {
-		smbfs_rflush(vfsp, cr);
-		mutex_exit(&smbfs_syncbusy);
+	if (flag & SYNC_ATTR)
+		return (0);
+
+	if (vfsp == NULL) {
+		/*
+		 * Flush ALL smbfs mounts in this zone.
+		 */
+		smbfs_flushall(cr);
+		return (0);
 	}
+
+	smbfs_rflush(vfsp, cr);
 
 	return (0);
 }
@@ -893,7 +940,6 @@ smbfs_sync(vfs_t *vfsp, short flag, cred_t *cr)
 int
 smbfs_vfsinit(void)
 {
-	mutex_init(&smbfs_syncbusy, NULL, MUTEX_DEFAULT, NULL);
 	return (0);
 }
 
@@ -903,7 +949,6 @@ smbfs_vfsinit(void)
 void
 smbfs_vfsfini(void)
 {
-	mutex_destroy(&smbfs_syncbusy);
 }
 
 void

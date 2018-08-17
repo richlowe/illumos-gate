@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (C) 2000 Benno Rice.
  * Copyright (C) 2007 Semihalf, Rafal Jaworowski <raj@semihalf.com>
  * All rights reserved.
@@ -23,16 +23,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
-struct uboot_devdesc
-{
-	struct devsw	*d_dev;
-	int		d_type;
-	int		d_unit;
-	void		*d_opendata;
+struct uboot_devdesc {
+	struct devdesc	dd;	/* Must be first. */
 	union {
 		struct {
 			int	slice;

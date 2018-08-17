@@ -693,7 +693,6 @@ t4_intr_rx_work(struct sge_iq *iq)
 uint_t
 t4_intr(caddr_t arg1, caddr_t arg2)
 {
-	/* LINTED: E_BAD_PTR_CAST_ALIGN */
 	struct sge_iq *iq = (struct sge_iq *)arg2;
 	int state;
 
@@ -813,6 +812,7 @@ t4_ring_rx(struct sge_rxq *rxq, int budget)
 				panic("%s: line %d.", __func__,
 				    __LINE__);
 			}
+			/* FALLTHROUGH */
 
 		case X_RSPD_TYPE_CPL:
 			ASSERT(rss->opcode < NUM_CPL_CMDS);
@@ -1271,7 +1271,7 @@ init_eq(struct adapter *sc, struct sge_eq *eq, uint16_t eqtype, uint16_t qsize,
 		    (S_QUEUESPERPAGEPF1 - S_QUEUESPERPAGEPF0) * sc->pf;
 		s->s_qpp = r & M_QUEUESPERPAGEPF0;
 	}
- 
+
 	eq->flags = eqtype & EQ_TYPEMASK;
 	eq->tx_chan = tx_chan;
 	eq->iqid = iqid;
@@ -1687,7 +1687,8 @@ eth_eq_alloc(struct adapter *sc, struct port_info *pi, struct sge_eq *eq)
 	    V_FW_EQ_ETH_CMD_VFN(0));
 	c.alloc_to_len16 = BE_32(F_FW_EQ_ETH_CMD_ALLOC |
 	    F_FW_EQ_ETH_CMD_EQSTART | FW_LEN16(c));
-	c.autoequiqe_to_viid = BE_32(V_FW_EQ_ETH_CMD_VIID(pi->viid));
+	c.autoequiqe_to_viid = BE_32(F_FW_EQ_ETH_CMD_AUTOEQUIQE |
+	    F_FW_EQ_ETH_CMD_AUTOEQUEQE | V_FW_EQ_ETH_CMD_VIID(pi->viid));
 	c.fetchszm_to_iqid =
 	    BE_32(V_FW_EQ_ETH_CMD_HOSTFCMODE(X_HOSTFCMODE_STATUS_PAGE) |
 	    V_FW_EQ_ETH_CMD_PCIECHN(eq->tx_chan) | F_FW_EQ_ETH_CMD_FETCHRO |
@@ -3106,7 +3107,7 @@ ring_tx_db(struct adapter *sc, struct sge_eq *eq)
 			*eq->udb = LE_32(V_QID(eq->udb_qid) | val);
 			break;
 
-		case DOORBELL_WCWR: 
+		case DOORBELL_WCWR:
 			{
 				volatile uint64_t *dst, *src;
 				int i;
@@ -3138,7 +3139,7 @@ ring_tx_db(struct adapter *sc, struct sge_eq *eq)
 			    V_QID(eq->cntxt_id) | val);
 			break;
 	}
- 
+
 	eq->pending = 0;
 }
 
@@ -3346,6 +3347,16 @@ ring_fl_db(struct adapter *sc, struct sge_fl *fl)
 	fl->pending -= ndesc * 8;
 }
 
+static void
+tx_reclaim_task(void *arg)
+{
+	struct sge_txq *txq = arg;
+
+	TXQ_LOCK(txq);
+	reclaim_tx_descs(txq, txq->eq.qsize);
+	TXQ_UNLOCK(txq);
+}
+
 /* ARGSUSED */
 static int
 handle_sge_egr_update(struct sge_iq *iq, const struct rss_header *rss,
@@ -3355,11 +3366,16 @@ handle_sge_egr_update(struct sge_iq *iq, const struct rss_header *rss,
 	unsigned int qid = G_EGR_QID(ntohl(cpl->opcode_qid));
 	struct adapter *sc = iq->adapter;
 	struct sge *s = &sc->sge;
+	struct sge_eq *eq;
 	struct sge_txq *txq;
 
 	txq = (void *)s->eqmap[qid - s->eq_start];
+	eq = &txq->eq;
 	txq->qflush++;
 	t4_mac_tx_update(txq->port, txq);
+
+	ddi_taskq_dispatch(sc->tq[eq->tx_chan], tx_reclaim_task,
+		(void *)txq, DDI_NOSLEEP);
 
 	return (0);
 }

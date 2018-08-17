@@ -24,7 +24,7 @@
 # Copyright 2016 Joyent, Inc.
 # Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2013 Garrett D'Amore <garrett@damore.org>
-# Copyright 2017 Nexenta Systems, Inc.
+# Copyright 2018 Nexenta Systems, Inc.
 #
 
 LIBCDIR=	$(SRC)/lib/libc
@@ -339,6 +339,7 @@ SYSOBJS=			\
 PORTGEN64=			\
 	_xftw64.o		\
 	attropen64.o		\
+	fts64.o			\
 	ftw64.o			\
 	mkstemp64.o		\
 	nftw64.o		\
@@ -503,6 +504,7 @@ PORTGEN=			\
 	malloc.o		\
 	memalign.o		\
 	memmem.o		\
+	memset_s.o		\
 	mkdev.o			\
 	mkdtemp.o		\
 	mkfifo.o		\
@@ -560,6 +562,7 @@ PORTGEN=			\
 	scandir.o		\
 	seekdir.o		\
 	select.o		\
+	set_constraint_handler_s.o \
 	setlabel.o		\
 	setpriority.o		\
 	settimeofday.o		\
@@ -628,6 +631,14 @@ PORTGEN=			\
 	xgetwidth.o		\
 	xpg4.o			\
 	xpg6.o
+
+PORTINET=			\
+	inet_lnaof.o		\
+	inet_makeaddr.o		\
+	inet_network.o		\
+	inet_ntoa.o		\
+	inet_ntop.o		\
+	inet_pton.o
 
 PORTPRINT_W=			\
 	doprnt_w.o
@@ -1001,6 +1012,7 @@ MOSTOBJS=			\
 	$(PORTGEN64)		\
 	$(PORTI18N)		\
 	$(PORTI18N_COND)	\
+	$(PORTINET)		\
 	$(PORTLOCALE)		\
 	$(PORTPRINT)		\
 	$(PORTPRINT_C89)	\
@@ -1158,6 +1170,7 @@ SRCS=							\
 	$(PORTFP:%.o=$(LIBCDIR)/port/fp/%.c)		\
 	$(PORTGEN:%.o=$(LIBCDIR)/port/gen/%.c)		\
 	$(PORTI18N:%.o=$(LIBCDIR)/port/i18n/%.c)	\
+	$(PORTINET:%.o=$(LIBCDIR)/port/inet/%.c)	\
 	$(PORTLOCALE:%.o=$(LIBCDIR)/port/locale/%.c)	\
 	$(PORTPRINT:%.o=$(LIBCDIR)/port/print/%.c)	\
 	$(PORTREGEX:%.o=$(LIBCDIR)/port/regex/%.c)	\

@@ -63,7 +63,6 @@ extern ACPI_TABLE_RSDP *rsdp;
 
 /* MB data heap pointer. */
 static vm_offset_t last_addr;
-extern char bootprog_info[];
 
 static int multiboot2_loadfile(char *, u_int64_t, struct preloaded_file **);
 static int multiboot2_exec(struct preloaded_file *);
@@ -597,7 +596,7 @@ mb_kernel_cmdline(struct preloaded_file *fp, struct devdesc *rootdev,
 	else
 		mb2 = true;
 
-	if (rootdev->d_type == DEVT_ZFS)
+	if (rootdev->d_dev->dv_type == DEVT_ZFS)
 		zfs_root = true;
 
 	/* If we have fstype set in env, reset zfs_root if needed. */

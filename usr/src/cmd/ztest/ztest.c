@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2011, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2017 by Delphix. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2013 Steven Hartland. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
@@ -103,6 +103,7 @@
 #include <sys/zil_impl.h>
 #include <sys/vdev_impl.h>
 #include <sys/vdev_file.h>
+#include <sys/vdev_initialize.h>
 #include <sys/spa_impl.h>
 #include <sys/metaslab_impl.h>
 #include <sys/dsl_prop.h>
@@ -162,7 +163,7 @@ typedef struct ztest_shared_opts {
 	int zo_init;
 	uint64_t zo_time;
 	uint64_t zo_maxloops;
-	uint64_t zo_metaslab_gang_bang;
+	uint64_t zo_metaslab_force_ganging;
 } ztest_shared_opts_t;
 
 static const ztest_shared_opts_t ztest_opts_defaults = {
@@ -184,15 +185,16 @@ static const ztest_shared_opts_t ztest_opts_defaults = {
 	.zo_init = 1,
 	.zo_time = 300,			/* 5 minutes */
 	.zo_maxloops = 50,		/* max loops during spa_freeze() */
-	.zo_metaslab_gang_bang = 32 << 10
+	.zo_metaslab_force_ganging = 32 << 10
 };
 
-extern uint64_t metaslab_gang_bang;
+extern uint64_t metaslab_force_ganging;
 extern uint64_t metaslab_df_alloc_threshold;
 extern uint64_t zfs_deadman_synctime_ms;
 extern int metaslab_preload_limit;
 extern boolean_t zfs_compressed_arc_enabled;
 extern boolean_t zfs_abd_scatter_enabled;
+extern boolean_t zfs_force_some_double_word_sm_entries;
 
 static ztest_shared_opts_t *ztest_shared_opts;
 static ztest_shared_opts_t ztest_opts;
@@ -344,6 +346,8 @@ ztest_func_t ztest_reguid;
 ztest_func_t ztest_spa_upgrade;
 ztest_func_t ztest_device_removal;
 ztest_func_t ztest_remap_blocks;
+ztest_func_t ztest_spa_checkpoint_create_discard;
+ztest_func_t ztest_initialize;
 
 uint64_t zopt_always = 0ULL * NANOSEC;		/* all the time */
 uint64_t zopt_incessant = 1ULL * NANOSEC / 10;	/* every 1/10 second */
@@ -386,7 +390,9 @@ ztest_info_t ztest_info[] = {
 	{ ztest_vdev_aux_add_remove,		1,
 	    &ztest_opts.zo_vdevtime				},
 	{ ztest_device_removal,			1,	&zopt_sometimes	},
-	{ ztest_remap_blocks,			1,	&zopt_sometimes }
+	{ ztest_remap_blocks,			1,	&zopt_sometimes },
+	{ ztest_spa_checkpoint_create_discard,	1,	&zopt_rarely	},
+	{ ztest_initialize,			1,	&zopt_sometimes }
 };
 
 #define	ZTEST_FUNCS	(sizeof (ztest_info) / sizeof (ztest_info_t))
@@ -432,6 +438,8 @@ static spa_t *ztest_spa = NULL;
 static ztest_ds_t *ztest_ds;
 
 static kmutex_t ztest_vdev_lock;
+static kmutex_t ztest_checkpoint_lock;
+static boolean_t ztest_device_removal_active = B_FALSE;
 
 /*
  * The ztest_name_lock protects the pool and dataset namespace used by
@@ -562,12 +570,12 @@ usage(boolean_t requested)
 	const ztest_shared_opts_t *zo = &ztest_opts_defaults;
 
 	char nice_vdev_size[NN_NUMBUF_SZ];
-	char nice_gang_bang[NN_NUMBUF_SZ];
+	char nice_force_ganging[NN_NUMBUF_SZ];
 	FILE *fp = requested ? stdout : stderr;
 
 	nicenum(zo->zo_vdev_size, nice_vdev_size, sizeof (nice_vdev_size));
-	nicenum(zo->zo_metaslab_gang_bang, nice_gang_bang,
-	    sizeof (nice_gang_bang));
+	nicenum(zo->zo_metaslab_force_ganging, nice_force_ganging,
+	    sizeof (nice_force_ganging));
 
 	(void) fprintf(fp, "Usage: %s\n"
 	    "\t[-v vdevs (default: %llu)]\n"
@@ -602,7 +610,7 @@ usage(boolean_t requested)
 	    zo->zo_raidz_parity,			/* -R */
 	    zo->zo_datasets,				/* -d */
 	    zo->zo_threads,				/* -t */
-	    nice_gang_bang,				/* -g */
+	    nice_force_ganging,				/* -g */
 	    zo->zo_init,				/* -i */
 	    (u_longlong_t)zo->zo_killrate,		/* -k */
 	    zo->zo_pool,				/* -p */
@@ -671,8 +679,8 @@ process_options(int argc, char **argv)
 			zo->zo_threads = MAX(1, value);
 			break;
 		case 'g':
-			zo->zo_metaslab_gang_bang = MAX(SPA_MINBLOCKSIZE << 1,
-			    value);
+			zo->zo_metaslab_force_ganging =
+			    MAX(SPA_MINBLOCKSIZE << 1, value);
 			break;
 		case 'i':
 			zo->zo_init = value;
@@ -2476,6 +2484,62 @@ ztest_spa_upgrade(ztest_ds_t *zd, uint64_t id)
 	mutex_exit(&ztest_vdev_lock);
 }
 
+static void
+ztest_spa_checkpoint(spa_t *spa)
+{
+	ASSERT(MUTEX_HELD(&ztest_checkpoint_lock));
+
+	int error = spa_checkpoint(spa->spa_name);
+
+	switch (error) {
+	case 0:
+	case ZFS_ERR_DEVRM_IN_PROGRESS:
+	case ZFS_ERR_DISCARDING_CHECKPOINT:
+	case ZFS_ERR_CHECKPOINT_EXISTS:
+		break;
+	case ENOSPC:
+		ztest_record_enospc(FTAG);
+		break;
+	default:
+		fatal(0, "spa_checkpoint(%s) = %d", spa->spa_name, error);
+	}
+}
+
+static void
+ztest_spa_discard_checkpoint(spa_t *spa)
+{
+	ASSERT(MUTEX_HELD(&ztest_checkpoint_lock));
+
+	int error = spa_checkpoint_discard(spa->spa_name);
+
+	switch (error) {
+	case 0:
+	case ZFS_ERR_DISCARDING_CHECKPOINT:
+	case ZFS_ERR_NO_CHECKPOINT:
+		break;
+	default:
+		fatal(0, "spa_discard_checkpoint(%s) = %d",
+		    spa->spa_name, error);
+	}
+
+}
+
+/* ARGSUSED */
+void
+ztest_spa_checkpoint_create_discard(ztest_ds_t *zd, uint64_t id)
+{
+	spa_t *spa = ztest_spa;
+
+	mutex_enter(&ztest_checkpoint_lock);
+	if (ztest_random(2) == 0) {
+		ztest_spa_checkpoint(spa);
+	} else {
+		ztest_spa_discard_checkpoint(spa);
+	}
+	mutex_exit(&ztest_checkpoint_lock);
+}
+
+
 static vdev_t *
 vdev_lookup_by_path(vdev_t *vd, const char *path)
 {
@@ -2556,8 +2620,15 @@ ztest_vdev_add_remove(ztest_ds_t *zd, uint64_t id)
 		error = spa_vdev_remove(spa, guid, B_FALSE);
 		rw_exit(&ztest_name_lock);
 
-		if (error && error != EEXIST)
+		switch (error) {
+		case 0:
+		case EEXIST:
+		case ZFS_ERR_CHECKPOINT_EXISTS:
+		case ZFS_ERR_DISCARDING_CHECKPOINT:
+			break;
+		default:
 			fatal(0, "spa_vdev_remove() = %d", error);
+		}
 	} else {
 		spa_config_exit(spa, SCL_VDEV, FTAG);
 
@@ -2572,10 +2643,15 @@ ztest_vdev_add_remove(ztest_ds_t *zd, uint64_t id)
 		error = spa_vdev_add(spa, nvroot);
 		nvlist_free(nvroot);
 
-		if (error == ENOSPC)
+		switch (error) {
+		case 0:
+			break;
+		case ENOSPC:
 			ztest_record_enospc("spa_vdev_add");
-		else if (error != 0)
+			break;
+		default:
 			fatal(0, "spa_vdev_add() = %d", error);
+		}
 	}
 
 	mutex_exit(&ztest_vdev_lock);
@@ -2644,8 +2720,13 @@ ztest_vdev_aux_add_remove(ztest_ds_t *zd, uint64_t id)
 		nvlist_t *nvroot = make_vdev_root(NULL, aux, NULL,
 		    (ztest_opts.zo_vdev_size * 5) / 4, 0, 0, 0, 0, 1);
 		error = spa_vdev_add(spa, nvroot);
-		if (error != 0)
+
+		switch (error) {
+		case 0:
+			break;
+		default:
 			fatal(0, "spa_vdev_add(%p) = %d", nvroot, error);
+		}
 		nvlist_free(nvroot);
 	} else {
 		/*
@@ -2657,8 +2738,16 @@ ztest_vdev_aux_add_remove(ztest_ds_t *zd, uint64_t id)
 			(void) vdev_online(spa, guid, 0, NULL);
 
 		error = spa_vdev_remove(spa, guid, B_FALSE);
-		if (error != 0 && error != EBUSY)
+
+		switch (error) {
+		case 0:
+		case EBUSY:
+		case ZFS_ERR_CHECKPOINT_EXISTS:
+		case ZFS_ERR_DISCARDING_CHECKPOINT:
+			break;
+		default:
 			fatal(0, "spa_vdev_remove(%llu) = %d", guid, error);
+		}
 	}
 
 	mutex_exit(&ztest_vdev_lock);
@@ -2757,7 +2846,6 @@ ztest_split_pool(ztest_ds_t *zd, uint64_t id)
 		--zs->zs_mirrors;
 	}
 	mutex_exit(&ztest_vdev_lock);
-
 }
 
 /*
@@ -2796,7 +2884,7 @@ ztest_vdev_attach_detach(ztest_ds_t *zd, uint64_t id)
 	 * value.  Don't bother trying to attach while we are in the middle
 	 * of removal.
 	 */
-	if (spa->spa_vdev_removal != NULL) {
+	if (ztest_device_removal_active) {
 		spa_config_exit(spa, SCL_ALL, FTAG);
 		mutex_exit(&ztest_vdev_lock);
 		return;
@@ -2856,7 +2944,8 @@ ztest_vdev_attach_detach(ztest_ds_t *zd, uint64_t id)
 		spa_config_exit(spa, SCL_ALL, FTAG);
 		error = spa_vdev_detach(spa, oldguid, pguid, B_FALSE);
 		if (error != 0 && error != ENODEV && error != EBUSY &&
-		    error != ENOTSUP)
+		    error != ENOTSUP && error != ZFS_ERR_CHECKPOINT_EXISTS &&
+		    error != ZFS_ERR_DISCARDING_CHECKPOINT)
 			fatal(0, "detach (%s) returned %d", oldpath, error);
 		mutex_exit(&ztest_vdev_lock);
 		return;
@@ -2948,6 +3037,10 @@ ztest_vdev_attach_detach(ztest_ds_t *zd, uint64_t id)
 	if (error == EOVERFLOW || error == EBUSY)
 		expected_error = error;
 
+	if (error == ZFS_ERR_CHECKPOINT_EXISTS ||
+	    error == ZFS_ERR_DISCARDING_CHECKPOINT)
+		expected_error = error;
+
 	/* XXX workaround 6690467 */
 	if (error != expected_error && expected_error != EBUSY) {
 		fatal(0, "attach (%s %llu, %s %llu, %d) "
@@ -2966,16 +3059,49 @@ ztest_device_removal(ztest_ds_t *zd, uint64_t id)
 	spa_t *spa = ztest_spa;
 	vdev_t *vd;
 	uint64_t guid;
+	int error;
 
 	mutex_enter(&ztest_vdev_lock);
 
+	if (ztest_device_removal_active) {
+		mutex_exit(&ztest_vdev_lock);
+		return;
+	}
+
+	/*
+	 * Remove a random top-level vdev and wait for removal to finish.
+	 */
 	spa_config_enter(spa, SCL_VDEV, FTAG, RW_READER);
 	vd = vdev_lookup_top(spa, ztest_random_vdev_top(spa, B_FALSE));
 	guid = vd->vdev_guid;
 	spa_config_exit(spa, SCL_VDEV, FTAG);
 
-	(void) spa_vdev_remove(spa, guid, B_FALSE);
+	error = spa_vdev_remove(spa, guid, B_FALSE);
+	if (error == 0) {
+		ztest_device_removal_active = B_TRUE;
+		mutex_exit(&ztest_vdev_lock);
 
+		while (spa->spa_vdev_removal != NULL)
+			txg_wait_synced(spa_get_dsl(spa), 0);
+	} else {
+		mutex_exit(&ztest_vdev_lock);
+		return;
+	}
+
+	/*
+	 * The pool needs to be scrubbed after completing device removal.
+	 * Failure to do so may result in checksum errors due to the
+	 * strategy employed by ztest_fault_inject() when selecting which
+	 * offset are redundant and can be damaged.
+	 */
+	error = spa_scan(spa, POOL_SCAN_SCRUB);
+	if (error == 0) {
+		while (dsl_scan_scrubbing(spa_get_dsl(spa)))
+			txg_wait_synced(spa_get_dsl(spa), 0);
+	}
+
+	mutex_enter(&ztest_vdev_lock);
+	ztest_device_removal_active = B_FALSE;
 	mutex_exit(&ztest_vdev_lock);
 }
 
@@ -3104,6 +3230,7 @@ ztest_vdev_LUN_growth(ztest_ds_t *zd, uint64_t id)
 	uint64_t top;
 	uint64_t old_class_space, new_class_space, old_ms_count, new_ms_count;
 
+	mutex_enter(&ztest_checkpoint_lock);
 	mutex_enter(&ztest_vdev_lock);
 	spa_config_enter(spa, SCL_STATE, spa, RW_READER);
 
@@ -3113,9 +3240,10 @@ ztest_vdev_LUN_growth(ztest_ds_t *zd, uint64_t id)
 	 * that the metaslab_class space increased (because it decreases
 	 * when the device removal completes).
 	 */
-	if (spa->spa_vdev_removal != NULL) {
-		spa_config_exit(spa, SCL_STATE, FTAG);
+	if (ztest_device_removal_active) {
+		spa_config_exit(spa, SCL_STATE, spa);
 		mutex_exit(&ztest_vdev_lock);
+		mutex_exit(&ztest_checkpoint_lock);
 		return;
 	}
 
@@ -3145,6 +3273,7 @@ ztest_vdev_LUN_growth(ztest_ds_t *zd, uint64_t id)
 	    psize == 0 || psize >= 4 * ztest_opts.zo_vdev_size) {
 		spa_config_exit(spa, SCL_STATE, spa);
 		mutex_exit(&ztest_vdev_lock);
+		mutex_exit(&ztest_checkpoint_lock);
 		return;
 	}
 	ASSERT(psize > 0);
@@ -3170,6 +3299,7 @@ ztest_vdev_LUN_growth(ztest_ds_t *zd, uint64_t id)
 		}
 		spa_config_exit(spa, SCL_STATE, spa);
 		mutex_exit(&ztest_vdev_lock);
+		mutex_exit(&ztest_checkpoint_lock);
 		return;
 	}
 
@@ -3204,6 +3334,7 @@ ztest_vdev_LUN_growth(ztest_ds_t *zd, uint64_t id)
 		}
 		spa_config_exit(spa, SCL_STATE, spa);
 		mutex_exit(&ztest_vdev_lock);
+		mutex_exit(&ztest_checkpoint_lock);
 		return;
 	}
 
@@ -3234,6 +3365,7 @@ ztest_vdev_LUN_growth(ztest_ds_t *zd, uint64_t id)
 
 	spa_config_exit(spa, SCL_STATE, spa);
 	mutex_exit(&ztest_vdev_lock);
+	mutex_exit(&ztest_checkpoint_lock);
 }
 
 /*
@@ -4893,6 +5025,18 @@ ztest_fault_inject(ztest_ds_t *zd, uint64_t id)
 	boolean_t islog = B_FALSE;
 
 	mutex_enter(&ztest_vdev_lock);
+
+	/*
+	 * Device removal is in progress, fault injection must be disabled
+	 * until it completes and the pool is scrubbed.  The fault injection
+	 * strategy for damaging blocks does not take in to account evacuated
+	 * blocks which may have already been damaged.
+	 */
+	if (ztest_device_removal_active) {
+		mutex_exit(&ztest_vdev_lock);
+		return;
+	}
+
 	maxfaults = MAXFAULTS();
 	leaves = MAX(zs->zs_mirrors, 1) * ztest_opts.zo_raidz;
 	mirror_save = zs->zs_mirrors;
@@ -5042,7 +5186,7 @@ ztest_fault_inject(ztest_ds_t *zd, uint64_t id)
 	 */
 	fd = open(pathrand, O_RDWR);
 
-	if (fd == -1)	/* we hit a gap in the device namespace */
+	if (fd == -1) /* we hit a gap in the device namespace */
 		return;
 
 	fsize = lseek(fd, 0, SEEK_END);
@@ -5238,6 +5382,12 @@ ztest_scrub(ztest_ds_t *zd, uint64_t id)
 {
 	spa_t *spa = ztest_spa;
 
+	/*
+	 * Scrub in progress by device removal.
+	 */
+	if (ztest_device_removal_active)
+		return;
+
 	(void) spa_scan(spa, POOL_SCAN_SCRUB);
 	(void) poll(NULL, 0, 100); /* wait a moment, then force a restart */
 	(void) spa_scan(spa, POOL_SCAN_SCRUB);
@@ -5324,6 +5474,97 @@ ztest_spa_rename(ztest_ds_t *zd, uint64_t id)
 	umem_free(newname, strlen(newname) + 1);
 
 	rw_exit(&ztest_name_lock);
+}
+
+static vdev_t *
+ztest_random_concrete_vdev_leaf(vdev_t *vd)
+{
+	if (vd == NULL)
+		return (NULL);
+
+	if (vd->vdev_children == 0)
+		return (vd);
+
+	vdev_t *eligible[vd->vdev_children];
+	int eligible_idx = 0, i;
+	for (i = 0; i < vd->vdev_children; i++) {
+		vdev_t *cvd = vd->vdev_child[i];
+		if (cvd->vdev_top->vdev_removing)
+			continue;
+		if (cvd->vdev_children > 0 ||
+		    (vdev_is_concrete(cvd) && !cvd->vdev_detached)) {
+			eligible[eligible_idx++] = cvd;
+		}
+	}
+	VERIFY(eligible_idx > 0);
+
+	uint64_t child_no = ztest_random(eligible_idx);
+	return (ztest_random_concrete_vdev_leaf(eligible[child_no]));
+}
+
+/* ARGSUSED */
+void
+ztest_initialize(ztest_ds_t *zd, uint64_t id)
+{
+	spa_t *spa = ztest_spa;
+	int error = 0;
+
+	mutex_enter(&ztest_vdev_lock);
+
+	spa_config_enter(spa, SCL_VDEV, FTAG, RW_READER);
+
+	/* Random leaf vdev */
+	vdev_t *rand_vd = ztest_random_concrete_vdev_leaf(spa->spa_root_vdev);
+	if (rand_vd == NULL) {
+		spa_config_exit(spa, SCL_VDEV, FTAG);
+		mutex_exit(&ztest_vdev_lock);
+		return;
+	}
+
+	/*
+	 * The random vdev we've selected may change as soon as we
+	 * drop the spa_config_lock. We create local copies of things
+	 * we're interested in.
+	 */
+	uint64_t guid = rand_vd->vdev_guid;
+	char *path = strdup(rand_vd->vdev_path);
+	boolean_t active = rand_vd->vdev_initialize_thread != NULL;
+
+	zfs_dbgmsg("vd %p, guid %llu", rand_vd, guid);
+	spa_config_exit(spa, SCL_VDEV, FTAG);
+
+	uint64_t cmd = ztest_random(POOL_INITIALIZE_FUNCS);
+	error = spa_vdev_initialize(spa, guid, cmd);
+	switch (cmd) {
+	case POOL_INITIALIZE_CANCEL:
+		if (ztest_opts.zo_verbose >= 4) {
+			(void) printf("Cancel initialize %s", path);
+			if (!active)
+				(void) printf(" failed (no initialize active)");
+			(void) printf("\n");
+		}
+		break;
+	case POOL_INITIALIZE_DO:
+		if (ztest_opts.zo_verbose >= 4) {
+			(void) printf("Start initialize %s", path);
+			if (active && error == 0)
+				(void) printf(" failed (already active)");
+			else if (error != 0)
+				(void) printf(" failed (error %d)", error);
+			(void) printf("\n");
+		}
+		break;
+	case POOL_INITIALIZE_SUSPEND:
+		if (ztest_opts.zo_verbose >= 4) {
+			(void) printf("Suspend initialize %s", path);
+			if (!active)
+				(void) printf(" failed (no initialize active)");
+			(void) printf("\n");
+		}
+		break;
+	}
+	free(path);
+	mutex_exit(&ztest_vdev_lock);
 }
 
 /*
@@ -5751,6 +5992,7 @@ ztest_run(ztest_shared_t *zs)
 	/*
 	 * Initialize parent/child shared state.
 	 */
+	mutex_init(&ztest_checkpoint_lock, NULL, USYNC_THREAD, NULL);
 	mutex_init(&ztest_vdev_lock, NULL, USYNC_THREAD, NULL);
 	rw_init(&ztest_name_lock, NULL, USYNC_THREAD, NULL);
 
@@ -5774,7 +6016,6 @@ ztest_run(ztest_shared_t *zs)
 	 */
 	kernel_init(FREAD | FWRITE);
 	VERIFY0(spa_open(ztest_opts.zo_pool, &spa, FTAG));
-	spa->spa_debug = B_TRUE;
 	metaslab_preload_limit = ztest_random(20) + 1;
 	ztest_spa = spa;
 
@@ -5812,7 +6053,7 @@ ztest_run(ztest_shared_t *zs)
 	    NULL) == 0);
 
 	/*
-	 * Verify that we can safely inquire about about any object,
+	 * Verify that we can safely inquire about any object,
 	 * whether it's allocated or not.  To make it interesting,
 	 * we probe a 5-wide window around each power of two.
 	 * This hits all edge cases, including zero and the max.
@@ -5915,6 +6156,7 @@ ztest_run(ztest_shared_t *zs)
 
 	rw_destroy(&ztest_name_lock);
 	mutex_destroy(&ztest_vdev_lock);
+	mutex_destroy(&ztest_checkpoint_lock);
 }
 
 static void
@@ -5930,7 +6172,6 @@ ztest_freeze(void)
 	kernel_init(FREAD | FWRITE);
 	VERIFY3U(0, ==, spa_open(ztest_opts.zo_pool, &spa, FTAG));
 	VERIFY3U(0, ==, ztest_dataset_open(0));
-	spa->spa_debug = B_TRUE;
 	ztest_spa = spa;
 
 	/*
@@ -6001,7 +6242,6 @@ ztest_freeze(void)
 	VERIFY3U(0, ==, ztest_dataset_open(0));
 	ztest_dataset_close(0);
 
-	spa->spa_debug = B_TRUE;
 	ztest_spa = spa;
 	txg_wait_synced(spa_get_dsl(spa), 0);
 	ztest_reguid(NULL, 0);
@@ -6059,6 +6299,7 @@ ztest_init(ztest_shared_t *zs)
 	nvlist_t *nvroot, *props;
 
 	mutex_init(&ztest_vdev_lock, NULL, USYNC_THREAD, NULL);
+	mutex_init(&ztest_checkpoint_lock, NULL, USYNC_THREAD, NULL);
 	rw_init(&ztest_name_lock, NULL, USYNC_THREAD, NULL);
 
 	kernel_init(FREAD | FWRITE);
@@ -6099,6 +6340,7 @@ ztest_init(ztest_shared_t *zs)
 
 	rw_destroy(&ztest_name_lock);
 	mutex_destroy(&ztest_vdev_lock);
+	mutex_destroy(&ztest_checkpoint_lock);
 }
 
 static void
@@ -6296,6 +6538,12 @@ main(int argc, char **argv)
 
 	dprintf_setup(&argc, argv);
 	zfs_deadman_synctime_ms = 300000;
+	/*
+	 * As two-word space map entries may not come up often (especially
+	 * if pool and vdev sizes are small) we want to force at least some
+	 * of them so the feature get tested.
+	 */
+	zfs_force_some_double_word_sm_entries = B_TRUE;
 
 	ztest_fd_rand = open("/dev/urandom", O_RDONLY);
 	ASSERT3S(ztest_fd_rand, >=, 0);
@@ -6324,7 +6572,7 @@ main(int argc, char **argv)
 	zs = ztest_shared;
 
 	if (fd_data_str) {
-		metaslab_gang_bang = ztest_opts.zo_metaslab_gang_bang;
+		metaslab_force_ganging = ztest_opts.zo_metaslab_force_ganging;
 		metaslab_df_alloc_threshold =
 		    zs->zs_metaslab_df_alloc_threshold;
 

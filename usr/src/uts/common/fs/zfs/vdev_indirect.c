@@ -14,7 +14,7 @@
  */
 
 /*
- * Copyright (c) 2014, 2015 by Delphix. All rights reserved.
+ * Copyright (c) 2014, 2017 by Delphix. All rights reserved.
  */
 
 #include <sys/zfs_context.h>
@@ -23,6 +23,7 @@
 #include <sys/vdev_impl.h>
 #include <sys/fs/zfs.h>
 #include <sys/zio.h>
+#include <sys/zio_checksum.h>
 #include <sys/metaslab.h>
 #include <sys/refcount.h>
 #include <sys/dmu.h>
@@ -30,6 +31,8 @@
 #include <sys/dmu_tx.h>
 #include <sys/dsl_synctask.h>
 #include <sys/zap.h>
+#include <sys/abd.h>
+#include <sys/zthr.h>
 
 /*
  * An indirect vdev corresponds to a vdev that has been removed.  Since
@@ -44,10 +47,11 @@
  * "vdev_remap" operation that executes a callback on each contiguous
  * segment of the new location.  This function is used in multiple ways:
  *
- *  - reads and repair writes to this device use the callback to create
- *    a child io for each mapped segment.
+ *  - i/os to this vdev use the callback to determine where the
+ *    data is now located, and issue child i/os for each segment's new
+ *    location.
  *
- *  - frees and claims to this device use the callback to free or claim
+ *  - frees and claims to this vdev use the callback to free or claim
  *    each mapped segment.  (Note that we don't actually need to claim
  *    log blocks on indirect vdevs, because we don't allocate to
  *    removing vdevs.  However, zdb uses zio_claim() for its leak
@@ -202,14 +206,101 @@ uint64_t zfs_condense_min_mapping_bytes = 128 * 1024;
 int zfs_condense_indirect_commit_entry_delay_ticks = 0;
 
 /*
- * Mark the given offset and size as being obsolete in the given txg.
+ * If a split block contains more than this many segments, consider it too
+ * computationally expensive to check all (2^num_segments) possible
+ * combinations. Instead, try at most 2^_segments_max randomly-selected
+ * combinations.
+ *
+ * This is reasonable if only a few segment copies are damaged and the
+ * majority of segment copies are good. This allows all the segment copies to
+ * participate fairly in the reconstruction and prevents the repeated use of
+ * one bad copy.
+ */
+int zfs_reconstruct_indirect_segments_max = 10;
+
+/*
+ * The indirect_child_t represents the vdev that we will read from, when we
+ * need to read all copies of the data (e.g. for scrub or reconstruction).
+ * For plain (non-mirror) top-level vdevs (i.e. is_vdev is not a mirror),
+ * ic_vdev is the same as is_vdev.  However, for mirror top-level vdevs,
+ * ic_vdev is a child of the mirror.
+ */
+typedef struct indirect_child {
+	abd_t *ic_data;
+	vdev_t *ic_vdev;
+} indirect_child_t;
+
+/*
+ * The indirect_split_t represents one mapped segment of an i/o to the
+ * indirect vdev. For non-split (contiguously-mapped) blocks, there will be
+ * only one indirect_split_t, with is_split_offset==0 and is_size==io_size.
+ * For split blocks, there will be several of these.
+ */
+typedef struct indirect_split {
+	list_node_t is_node; /* link on iv_splits */
+
+	/*
+	 * is_split_offset is the offset into the i/o.
+	 * This is the sum of the previous splits' is_size's.
+	 */
+	uint64_t is_split_offset;
+
+	vdev_t *is_vdev; /* top-level vdev */
+	uint64_t is_target_offset; /* offset on is_vdev */
+	uint64_t is_size;
+	int is_children; /* number of entries in is_child[] */
+
+	/*
+	 * is_good_child is the child that we are currently using to
+	 * attempt reconstruction.
+	 */
+	int is_good_child;
+
+	indirect_child_t is_child[1]; /* variable-length */
+} indirect_split_t;
+
+/*
+ * The indirect_vsd_t is associated with each i/o to the indirect vdev.
+ * It is the "Vdev-Specific Data" in the zio_t's io_vsd.
+ */
+typedef struct indirect_vsd {
+	boolean_t iv_split_block;
+	boolean_t iv_reconstruct;
+
+	list_t iv_splits; /* list of indirect_split_t's */
+} indirect_vsd_t;
+
+static void
+vdev_indirect_map_free(zio_t *zio)
+{
+	indirect_vsd_t *iv = zio->io_vsd;
+
+	indirect_split_t *is;
+	while ((is = list_head(&iv->iv_splits)) != NULL) {
+		for (int c = 0; c < is->is_children; c++) {
+			indirect_child_t *ic = &is->is_child[c];
+			if (ic->ic_data != NULL)
+				abd_free(ic->ic_data);
+		}
+		list_remove(&iv->iv_splits, is);
+		kmem_free(is,
+		    offsetof(indirect_split_t, is_child[is->is_children]));
+	}
+	kmem_free(iv, sizeof (*iv));
+}
+
+static const zio_vsd_ops_t vdev_indirect_vsd_ops = {
+	vdev_indirect_map_free,
+	zio_vsd_default_cksum_report
+};
+/*
+ * Mark the given offset and size as being obsolete.
  */
 void
-vdev_indirect_mark_obsolete(vdev_t *vd, uint64_t offset, uint64_t size,
-    uint64_t txg)
+vdev_indirect_mark_obsolete(vdev_t *vd, uint64_t offset, uint64_t size)
 {
 	spa_t *spa = vd->vdev_spa;
-	ASSERT3U(spa_syncing_txg(spa), ==, txg);
+
 	ASSERT3U(vd->vdev_indirect_config.vic_mapping_object, !=, 0);
 	ASSERT(vd->vdev_removing || vd->vdev_ops == &vdev_indirect_ops);
 	ASSERT(size > 0);
@@ -220,7 +311,7 @@ vdev_indirect_mark_obsolete(vdev_t *vd, uint64_t offset, uint64_t size,
 		mutex_enter(&vd->vdev_obsolete_lock);
 		range_tree_add(vd->vdev_obsolete_segments, offset, size);
 		mutex_exit(&vd->vdev_obsolete_lock);
-		vdev_dirty(vd, 0, NULL, txg);
+		vdev_dirty(vd, 0, NULL, spa_syncing_txg(spa));
 	}
 }
 
@@ -238,7 +329,7 @@ spa_vdev_indirect_mark_obsolete(spa_t *spa, uint64_t vdev_id, uint64_t offset,
 
 	/* The DMU can only remap indirect vdevs. */
 	ASSERT3P(vd->vdev_ops, ==, &vdev_indirect_ops);
-	vdev_indirect_mark_obsolete(vd, offset, size, dmu_tx_get_txg(tx));
+	vdev_indirect_mark_obsolete(vd, offset, size);
 }
 
 static spa_condensing_indirect_t *
@@ -475,7 +566,7 @@ spa_condense_indirect_commit_entry(spa_t *spa,
 
 static void
 spa_condense_indirect_generate_new_mapping(vdev_t *vd,
-    uint32_t *obsolete_counts, uint64_t start_index)
+    uint32_t *obsolete_counts, uint64_t start_index, zthr_t *zthr)
 {
 	spa_t *spa = vd->vdev_spa;
 	uint64_t mapi = start_index;
@@ -490,7 +581,15 @@ spa_condense_indirect_generate_new_mapping(vdev_t *vd,
 	    (u_longlong_t)vd->vdev_id,
 	    (u_longlong_t)mapi);
 
-	while (mapi < old_num_entries && !spa_shutting_down(spa)) {
+	while (mapi < old_num_entries) {
+
+		if (zthr_iscancelled(zthr)) {
+			zfs_dbgmsg("pausing condense of vdev %llu "
+			    "at index %llu", (u_longlong_t)vd->vdev_id,
+			    (u_longlong_t)mapi);
+			break;
+		}
+
 		vdev_indirect_mapping_entry_phys_t *entry =
 		    &old_mapping->vim_entries[mapi];
 		uint64_t entry_size = DVA_GET_ASIZE(&entry->vimep_dst);
@@ -508,18 +607,30 @@ spa_condense_indirect_generate_new_mapping(vdev_t *vd,
 
 		mapi++;
 	}
-	if (spa_shutting_down(spa)) {
-		zfs_dbgmsg("pausing condense of vdev %llu at index %llu",
-		    (u_longlong_t)vd->vdev_id,
-		    (u_longlong_t)mapi);
-	}
 }
 
-static void
-spa_condense_indirect_thread(void *arg)
+/* ARGSUSED */
+static boolean_t
+spa_condense_indirect_thread_check(void *arg, zthr_t *zthr)
 {
-	vdev_t *vd = arg;
-	spa_t *spa = vd->vdev_spa;
+	spa_t *spa = arg;
+
+	return (spa->spa_condensing_indirect != NULL);
+}
+
+/* ARGSUSED */
+static int
+spa_condense_indirect_thread(void *arg, zthr_t *zthr)
+{
+	spa_t *spa = arg;
+	vdev_t *vd;
+
+	ASSERT3P(spa->spa_condensing_indirect, !=, NULL);
+	spa_config_enter(spa, SCL_VDEV, FTAG, RW_READER);
+	vd = vdev_lookup_top(spa, spa->spa_condensing_indirect_phys.scip_vdev);
+	ASSERT3P(vd, !=, NULL);
+	spa_config_exit(spa, SCL_VDEV, FTAG);
+
 	spa_condensing_indirect_t *sci = spa->spa_condensing_indirect;
 	spa_condensing_indirect_phys_t *scip =
 	    &spa->spa_condensing_indirect_phys;
@@ -593,25 +704,25 @@ spa_condense_indirect_thread(void *arg)
 		}
 	}
 
-	spa_condense_indirect_generate_new_mapping(vd, counts, start_index);
+	spa_condense_indirect_generate_new_mapping(vd, counts,
+	    start_index, zthr);
 
 	vdev_indirect_mapping_free_obsolete_counts(old_mapping, counts);
 
 	/*
-	 * We may have bailed early from generate_new_mapping(), if
-	 * the spa is shutting down.  In this case, do not complete
-	 * the condense.
+	 * If the zthr has received a cancellation signal while running
+	 * in generate_new_mapping() or at any point after that, then bail
+	 * early. We don't want to complete the condense if the spa is
+	 * shutting down.
 	 */
-	if (!spa_shutting_down(spa)) {
-		VERIFY0(dsl_sync_task(spa_name(spa), NULL,
-		    spa_condense_indirect_complete_sync, sci, 0,
-		    ZFS_SPACE_CHECK_NONE));
-	}
+	if (zthr_iscancelled(zthr))
+		return (0);
 
-	mutex_enter(&spa->spa_async_lock);
-	spa->spa_condense_thread = NULL;
-	cv_broadcast(&spa->spa_async_cv);
-	mutex_exit(&spa->spa_async_lock);
+	VERIFY0(dsl_sync_task(spa_name(spa), NULL,
+	    spa_condense_indirect_complete_sync, sci, 0,
+	    ZFS_SPACE_CHECK_EXTRA_RESERVED));
+
+	return (0);
 }
 
 /*
@@ -664,9 +775,7 @@ spa_condense_indirect_start_sync(vdev_t *vd, dmu_tx_t *tx)
 	    (u_longlong_t)scip->scip_prev_obsolete_sm_object,
 	    (u_longlong_t)scip->scip_next_mapping_object);
 
-	ASSERT3P(spa->spa_condense_thread, ==, NULL);
-	spa->spa_condense_thread = thread_create(NULL, 0,
-	    spa_condense_indirect_thread, vd, 0, &p0, TS_RUN, minclsyspri);
+	zthr_wakeup(spa->spa_condense_zthr);
 }
 
 /*
@@ -688,7 +797,8 @@ vdev_indirect_sync_obsolete(vdev_t *vd, dmu_tx_t *tx)
 
 	if (vdev_obsolete_sm_object(vd) == 0) {
 		uint64_t obsolete_sm_object =
-		    space_map_alloc(spa->spa_meta_objset, tx);
+		    space_map_alloc(spa->spa_meta_objset,
+		    vdev_standard_sm_blksz, tx);
 
 		ASSERT(vd->vdev_top_zap != 0);
 		VERIFY0(zap_add(vd->vdev_spa->spa_meta_objset, vd->vdev_top_zap,
@@ -708,7 +818,7 @@ vdev_indirect_sync_obsolete(vdev_t *vd, dmu_tx_t *tx)
 	    space_map_object(vd->vdev_obsolete_sm));
 
 	space_map_write(vd->vdev_obsolete_sm,
-	    vd->vdev_obsolete_segments, SM_ALLOC, tx);
+	    vd->vdev_obsolete_segments, SM_ALLOC, SM_NO_VDEVID, tx);
 	space_map_update(vd->vdev_obsolete_sm);
 	range_tree_vacate(vd->vdev_obsolete_segments, NULL, NULL);
 }
@@ -743,24 +853,12 @@ spa_condense_fini(spa_t *spa)
 	}
 }
 
-/*
- * Restart the condense - called when the pool is opened.
- */
 void
-spa_condense_indirect_restart(spa_t *spa)
+spa_start_indirect_condensing_thread(spa_t *spa)
 {
-	vdev_t *vd;
-	ASSERT(spa->spa_condensing_indirect != NULL);
-	spa_config_enter(spa, SCL_VDEV, FTAG, RW_READER);
-	vd = vdev_lookup_top(spa,
-	    spa->spa_condensing_indirect_phys.scip_vdev);
-	ASSERT(vd != NULL);
-	spa_config_exit(spa, SCL_VDEV, FTAG);
-
-	ASSERT3P(spa->spa_condense_thread, ==, NULL);
-	spa->spa_condense_thread = thread_create(NULL, 0,
-	    spa_condense_indirect_thread, vd, 0, &p0, TS_RUN,
-	    minclsyspri);
+	ASSERT3P(spa->spa_condense_zthr, ==, NULL);
+	spa->spa_condense_zthr = zthr_create(spa_condense_indirect_thread_check,
+	    spa_condense_indirect_thread, spa);
 }
 
 /*
@@ -809,12 +907,6 @@ vdev_indirect_close(vdev_t *vd)
 }
 
 /* ARGSUSED */
-static void
-vdev_indirect_io_done(zio_t *zio)
-{
-}
-
-/* ARGSUSED */
 static int
 vdev_indirect_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
     uint64_t *ashift)
@@ -842,6 +934,57 @@ rs_alloc(vdev_t *vd, uint64_t offset, uint64_t asize, uint64_t split_offset)
 	rs->rs_asize = asize;
 	rs->rs_split_offset = split_offset;
 	return (rs);
+}
+
+/*
+ * Given an indirect vdev and an extent on that vdev, it duplicates the
+ * physical entries of the indirect mapping that correspond to the extent
+ * to a new array and returns a pointer to it. In addition, copied_entries
+ * is populated with the number of mapping entries that were duplicated.
+ *
+ * Note that the function assumes that the caller holds vdev_indirect_rwlock.
+ * This ensures that the mapping won't change due to condensing as we
+ * copy over its contents.
+ *
+ * Finally, since we are doing an allocation, it is up to the caller to
+ * free the array allocated in this function.
+ */
+vdev_indirect_mapping_entry_phys_t *
+vdev_indirect_mapping_duplicate_adjacent_entries(vdev_t *vd, uint64_t offset,
+    uint64_t asize, uint64_t *copied_entries)
+{
+	vdev_indirect_mapping_entry_phys_t *duplicate_mappings = NULL;
+	vdev_indirect_mapping_t *vim = vd->vdev_indirect_mapping;
+	uint64_t entries = 0;
+
+	ASSERT(RW_READ_HELD(&vd->vdev_indirect_rwlock));
+
+	vdev_indirect_mapping_entry_phys_t *first_mapping =
+	    vdev_indirect_mapping_entry_for_offset(vim, offset);
+	ASSERT3P(first_mapping, !=, NULL);
+
+	vdev_indirect_mapping_entry_phys_t *m = first_mapping;
+	while (asize > 0) {
+		uint64_t size = DVA_GET_ASIZE(&m->vimep_dst);
+
+		ASSERT3U(offset, >=, DVA_MAPPING_GET_SRC_OFFSET(m));
+		ASSERT3U(offset, <, DVA_MAPPING_GET_SRC_OFFSET(m) + size);
+
+		uint64_t inner_offset = offset - DVA_MAPPING_GET_SRC_OFFSET(m);
+		uint64_t inner_size = MIN(asize, size - inner_offset);
+
+		offset += inner_size;
+		asize -= inner_size;
+		entries++;
+		m++;
+	}
+
+	size_t copy_length = entries * sizeof (*first_mapping);
+	duplicate_mappings = kmem_alloc(copy_length, KM_SLEEP);
+	bcopy(first_mapping, duplicate_mappings, copy_length);
+	*copied_entries = entries;
+
+	return (duplicate_mappings);
 }
 
 /*
@@ -884,24 +1027,42 @@ vdev_indirect_remap(vdev_t *vd, uint64_t offset, uint64_t asize,
 	for (remap_segment_t *rs = rs_alloc(vd, offset, asize, 0);
 	    rs != NULL; rs = list_remove_head(&stack)) {
 		vdev_t *v = rs->rs_vd;
+		uint64_t num_entries = 0;
+
+		ASSERT(spa_config_held(spa, SCL_ALL, RW_READER) != 0);
+		ASSERT(rs->rs_asize > 0);
 
 		/*
-		 * Note: this can be called from open context
-		 * (eg. zio_read()), so we need the rwlock to prevent
-		 * the mapping from being changed by condensing.
+		 * Note: As this function can be called from open context
+		 * (e.g. zio_read()), we need the following rwlock to
+		 * prevent the mapping from being changed by condensing.
+		 *
+		 * So we grab the lock and we make a copy of the entries
+		 * that are relevant to the extent that we are working on.
+		 * Once that is done, we drop the lock and iterate over
+		 * our copy of the mapping. Once we are done with the with
+		 * the remap segment and we free it, we also free our copy
+		 * of the indirect mapping entries that are relevant to it.
+		 *
+		 * This way we don't need to wait until the function is
+		 * finished with a segment, to condense it. In addition, we
+		 * don't need a recursive rwlock for the case that a call to
+		 * vdev_indirect_remap() needs to call itself (through the
+		 * codepath of its callback) for the same vdev in the middle
+		 * of its execution.
 		 */
 		rw_enter(&v->vdev_indirect_rwlock, RW_READER);
 		vdev_indirect_mapping_t *vim = v->vdev_indirect_mapping;
 		ASSERT3P(vim, !=, NULL);
 
-		ASSERT(spa_config_held(spa, SCL_ALL, RW_READER) != 0);
-		ASSERT(rs->rs_asize > 0);
-
 		vdev_indirect_mapping_entry_phys_t *mapping =
-		    vdev_indirect_mapping_entry_for_offset(vim, rs->rs_offset);
+		    vdev_indirect_mapping_duplicate_adjacent_entries(v,
+		    rs->rs_offset, rs->rs_asize, &num_entries);
 		ASSERT3P(mapping, !=, NULL);
+		ASSERT3U(num_entries, >, 0);
+		rw_exit(&v->vdev_indirect_rwlock);
 
-		while (rs->rs_asize > 0) {
+		for (uint64_t i = 0; i < num_entries; i++) {
 			/*
 			 * Note: the vdev_indirect_mapping can not change
 			 * while we are running.  It only changes while the
@@ -910,20 +1071,23 @@ vdev_indirect_remap(vdev_t *vd, uint64_t offset, uint64_t asize,
 			 * function is only called for frees, which also only
 			 * happen from syncing context.
 			 */
+			vdev_indirect_mapping_entry_phys_t *m = &mapping[i];
 
-			uint64_t size = DVA_GET_ASIZE(&mapping->vimep_dst);
-			uint64_t dst_offset =
-			    DVA_GET_OFFSET(&mapping->vimep_dst);
-			uint64_t dst_vdev = DVA_GET_VDEV(&mapping->vimep_dst);
+			ASSERT3P(m, !=, NULL);
+			ASSERT3U(rs->rs_asize, >, 0);
+
+			uint64_t size = DVA_GET_ASIZE(&m->vimep_dst);
+			uint64_t dst_offset = DVA_GET_OFFSET(&m->vimep_dst);
+			uint64_t dst_vdev = DVA_GET_VDEV(&m->vimep_dst);
 
 			ASSERT3U(rs->rs_offset, >=,
-			    DVA_MAPPING_GET_SRC_OFFSET(mapping));
+			    DVA_MAPPING_GET_SRC_OFFSET(m));
 			ASSERT3U(rs->rs_offset, <,
-			    DVA_MAPPING_GET_SRC_OFFSET(mapping) + size);
+			    DVA_MAPPING_GET_SRC_OFFSET(m) + size);
 			ASSERT3U(dst_vdev, !=, v->vdev_id);
 
 			uint64_t inner_offset = rs->rs_offset -
-			    DVA_MAPPING_GET_SRC_OFFSET(mapping);
+			    DVA_MAPPING_GET_SRC_OFFSET(m);
 			uint64_t inner_size =
 			    MIN(rs->rs_asize, size - inner_offset);
 
@@ -964,10 +1128,10 @@ vdev_indirect_remap(vdev_t *vd, uint64_t offset, uint64_t asize,
 			rs->rs_offset += inner_size;
 			rs->rs_asize -= inner_size;
 			rs->rs_split_offset += inner_size;
-			mapping++;
 		}
+		VERIFY0(rs->rs_asize);
 
-		rw_exit(&v->vdev_indirect_rwlock);
+		kmem_free(mapping, num_entries * sizeof (*mapping));
 		kmem_free(rs, sizeof (remap_segment_t));
 	}
 	list_destroy(&stack);
@@ -985,39 +1149,473 @@ vdev_indirect_child_io_done(zio_t *zio)
 	abd_put(zio->io_abd);
 }
 
+/*
+ * This is a callback for vdev_indirect_remap() which allocates an
+ * indirect_split_t for each split segment and adds it to iv_splits.
+ */
 static void
-vdev_indirect_io_start_cb(uint64_t split_offset, vdev_t *vd, uint64_t offset,
+vdev_indirect_gather_splits(uint64_t split_offset, vdev_t *vd, uint64_t offset,
     uint64_t size, void *arg)
 {
 	zio_t *zio = arg;
+	indirect_vsd_t *iv = zio->io_vsd;
 
 	ASSERT3P(vd, !=, NULL);
 
 	if (vd->vdev_ops == &vdev_indirect_ops)
 		return;
 
-	zio_nowait(zio_vdev_child_io(zio, NULL, vd, offset,
-	    abd_get_offset(zio->io_abd, split_offset),
-	    size, zio->io_type, zio->io_priority,
-	    0, vdev_indirect_child_io_done, zio));
+	int n = 1;
+	if (vd->vdev_ops == &vdev_mirror_ops)
+		n = vd->vdev_children;
+
+	indirect_split_t *is =
+	    kmem_zalloc(offsetof(indirect_split_t, is_child[n]), KM_SLEEP);
+
+	is->is_children = n;
+	is->is_size = size;
+	is->is_split_offset = split_offset;
+	is->is_target_offset = offset;
+	is->is_vdev = vd;
+
+	/*
+	 * Note that we only consider multiple copies of the data for
+	 * *mirror* vdevs.  We don't for "replacing" or "spare" vdevs, even
+	 * though they use the same ops as mirror, because there's only one
+	 * "good" copy under the replacing/spare.
+	 */
+	if (vd->vdev_ops == &vdev_mirror_ops) {
+		for (int i = 0; i < n; i++) {
+			is->is_child[i].ic_vdev = vd->vdev_child[i];
+		}
+	} else {
+		is->is_child[0].ic_vdev = vd;
+	}
+
+	list_insert_tail(&iv->iv_splits, is);
+}
+
+static void
+vdev_indirect_read_split_done(zio_t *zio)
+{
+	indirect_child_t *ic = zio->io_private;
+
+	if (zio->io_error != 0) {
+		/*
+		 * Clear ic_data to indicate that we do not have data for this
+		 * child.
+		 */
+		abd_free(ic->ic_data);
+		ic->ic_data = NULL;
+	}
+}
+
+/*
+ * Issue reads for all copies (mirror children) of all splits.
+ */
+static void
+vdev_indirect_read_all(zio_t *zio)
+{
+	indirect_vsd_t *iv = zio->io_vsd;
+
+	for (indirect_split_t *is = list_head(&iv->iv_splits);
+	    is != NULL; is = list_next(&iv->iv_splits, is)) {
+		for (int i = 0; i < is->is_children; i++) {
+			indirect_child_t *ic = &is->is_child[i];
+
+			if (!vdev_readable(ic->ic_vdev))
+				continue;
+
+			/*
+			 * Note, we may read from a child whose DTL
+			 * indicates that the data may not be present here.
+			 * While this might result in a few i/os that will
+			 * likely return incorrect data, it simplifies the
+			 * code since we can treat scrub and resilver
+			 * identically.  (The incorrect data will be
+			 * detected and ignored when we verify the
+			 * checksum.)
+			 */
+
+			ic->ic_data = abd_alloc_sametype(zio->io_abd,
+			    is->is_size);
+
+			zio_nowait(zio_vdev_child_io(zio, NULL,
+			    ic->ic_vdev, is->is_target_offset, ic->ic_data,
+			    is->is_size, zio->io_type, zio->io_priority, 0,
+			    vdev_indirect_read_split_done, ic));
+		}
+	}
+	iv->iv_reconstruct = B_TRUE;
 }
 
 static void
 vdev_indirect_io_start(zio_t *zio)
 {
 	spa_t *spa = zio->io_spa;
+	indirect_vsd_t *iv = kmem_zalloc(sizeof (*iv), KM_SLEEP);
+	list_create(&iv->iv_splits,
+	    sizeof (indirect_split_t), offsetof(indirect_split_t, is_node));
+
+	zio->io_vsd = iv;
+	zio->io_vsd_ops = &vdev_indirect_vsd_ops;
 
 	ASSERT(spa_config_held(spa, SCL_ALL, RW_READER) != 0);
 	if (zio->io_type != ZIO_TYPE_READ) {
 		ASSERT3U(zio->io_type, ==, ZIO_TYPE_WRITE);
-		ASSERT((zio->io_flags &
-		    (ZIO_FLAG_SELF_HEAL | ZIO_FLAG_INDUCE_DAMAGE)) != 0);
+		/*
+		 * Note: this code can handle other kinds of writes,
+		 * but we don't expect them.
+		 */
+		ASSERT((zio->io_flags & (ZIO_FLAG_SELF_HEAL |
+		    ZIO_FLAG_RESILVER | ZIO_FLAG_INDUCE_DAMAGE)) != 0);
 	}
 
 	vdev_indirect_remap(zio->io_vd, zio->io_offset, zio->io_size,
-	    vdev_indirect_io_start_cb, zio);
+	    vdev_indirect_gather_splits, zio);
+
+	indirect_split_t *first = list_head(&iv->iv_splits);
+	if (first->is_size == zio->io_size) {
+		/*
+		 * This is not a split block; we are pointing to the entire
+		 * data, which will checksum the same as the original data.
+		 * Pass the BP down so that the child i/o can verify the
+		 * checksum, and try a different location if available
+		 * (e.g. on a mirror).
+		 *
+		 * While this special case could be handled the same as the
+		 * general (split block) case, doing it this way ensures
+		 * that the vast majority of blocks on indirect vdevs
+		 * (which are not split) are handled identically to blocks
+		 * on non-indirect vdevs.  This allows us to be less strict
+		 * about performance in the general (but rare) case.
+		 */
+		ASSERT0(first->is_split_offset);
+		ASSERT3P(list_next(&iv->iv_splits, first), ==, NULL);
+		zio_nowait(zio_vdev_child_io(zio, zio->io_bp,
+		    first->is_vdev, first->is_target_offset,
+		    abd_get_offset(zio->io_abd, 0),
+		    zio->io_size, zio->io_type, zio->io_priority, 0,
+		    vdev_indirect_child_io_done, zio));
+	} else {
+		iv->iv_split_block = B_TRUE;
+		if (zio->io_flags & (ZIO_FLAG_SCRUB | ZIO_FLAG_RESILVER)) {
+			/*
+			 * Read all copies.  Note that for simplicity,
+			 * we don't bother consulting the DTL in the
+			 * resilver case.
+			 */
+			vdev_indirect_read_all(zio);
+		} else {
+			/*
+			 * Read one copy of each split segment, from the
+			 * top-level vdev.  Since we don't know the
+			 * checksum of each split individually, the child
+			 * zio can't ensure that we get the right data.
+			 * E.g. if it's a mirror, it will just read from a
+			 * random (healthy) leaf vdev.  We have to verify
+			 * the checksum in vdev_indirect_io_done().
+			 */
+			for (indirect_split_t *is = list_head(&iv->iv_splits);
+			    is != NULL; is = list_next(&iv->iv_splits, is)) {
+				zio_nowait(zio_vdev_child_io(zio, NULL,
+				    is->is_vdev, is->is_target_offset,
+				    abd_get_offset(zio->io_abd,
+				    is->is_split_offset),
+				    is->is_size, zio->io_type,
+				    zio->io_priority, 0,
+				    vdev_indirect_child_io_done, zio));
+			}
+		}
+	}
 
 	zio_execute(zio);
+}
+
+/*
+ * Report a checksum error for a child.
+ */
+static void
+vdev_indirect_checksum_error(zio_t *zio,
+    indirect_split_t *is, indirect_child_t *ic)
+{
+	vdev_t *vd = ic->ic_vdev;
+
+	if (zio->io_flags & ZIO_FLAG_SPECULATIVE)
+		return;
+
+	mutex_enter(&vd->vdev_stat_lock);
+	vd->vdev_stat.vs_checksum_errors++;
+	mutex_exit(&vd->vdev_stat_lock);
+
+	zio_bad_cksum_t zbc = { 0 };
+	void *bad_buf = abd_borrow_buf_copy(ic->ic_data, is->is_size);
+	abd_t *good_abd = is->is_child[is->is_good_child].ic_data;
+	void *good_buf = abd_borrow_buf_copy(good_abd, is->is_size);
+	zfs_ereport_post_checksum(zio->io_spa, vd, zio,
+	    is->is_target_offset, is->is_size, good_buf, bad_buf, &zbc);
+	abd_return_buf(ic->ic_data, bad_buf, is->is_size);
+	abd_return_buf(good_abd, good_buf, is->is_size);
+}
+
+/*
+ * Issue repair i/os for any incorrect copies.  We do this by comparing
+ * each split segment's correct data (is_good_child's ic_data) with each
+ * other copy of the data.  If they differ, then we overwrite the bad data
+ * with the good copy.  Note that we do this without regard for the DTL's,
+ * which simplifies this code and also issues the optimal number of writes
+ * (based on which copies actually read bad data, as opposed to which we
+ * think might be wrong).  For the same reason, we always use
+ * ZIO_FLAG_SELF_HEAL, to bypass the DTL check in zio_vdev_io_start().
+ */
+static void
+vdev_indirect_repair(zio_t *zio)
+{
+	indirect_vsd_t *iv = zio->io_vsd;
+
+	enum zio_flag flags = ZIO_FLAG_IO_REPAIR;
+
+	if (!(zio->io_flags & (ZIO_FLAG_SCRUB | ZIO_FLAG_RESILVER)))
+		flags |= ZIO_FLAG_SELF_HEAL;
+
+	if (!spa_writeable(zio->io_spa))
+		return;
+
+	for (indirect_split_t *is = list_head(&iv->iv_splits);
+	    is != NULL; is = list_next(&iv->iv_splits, is)) {
+		indirect_child_t *good_child = &is->is_child[is->is_good_child];
+
+		for (int c = 0; c < is->is_children; c++) {
+			indirect_child_t *ic = &is->is_child[c];
+			if (ic == good_child)
+				continue;
+			if (ic->ic_data == NULL)
+				continue;
+			if (abd_cmp(good_child->ic_data, ic->ic_data,
+			    is->is_size) == 0)
+				continue;
+
+			zio_nowait(zio_vdev_child_io(zio, NULL,
+			    ic->ic_vdev, is->is_target_offset,
+			    good_child->ic_data, is->is_size,
+			    ZIO_TYPE_WRITE, ZIO_PRIORITY_ASYNC_WRITE,
+			    ZIO_FLAG_IO_REPAIR | ZIO_FLAG_SELF_HEAL,
+			    NULL, NULL));
+
+			vdev_indirect_checksum_error(zio, is, ic);
+		}
+	}
+}
+
+/*
+ * Report checksum errors on all children that we read from.
+ */
+static void
+vdev_indirect_all_checksum_errors(zio_t *zio)
+{
+	indirect_vsd_t *iv = zio->io_vsd;
+
+	if (zio->io_flags & ZIO_FLAG_SPECULATIVE)
+		return;
+
+	for (indirect_split_t *is = list_head(&iv->iv_splits);
+	    is != NULL; is = list_next(&iv->iv_splits, is)) {
+		for (int c = 0; c < is->is_children; c++) {
+			indirect_child_t *ic = &is->is_child[c];
+
+			if (ic->ic_data == NULL)
+				continue;
+
+			vdev_t *vd = ic->ic_vdev;
+
+			mutex_enter(&vd->vdev_stat_lock);
+			vd->vdev_stat.vs_checksum_errors++;
+			mutex_exit(&vd->vdev_stat_lock);
+
+			zfs_ereport_post_checksum(zio->io_spa, vd, zio,
+			    is->is_target_offset, is->is_size,
+			    NULL, NULL, NULL);
+		}
+	}
+}
+
+/*
+ * This function is called when we have read all copies of the data and need
+ * to try to find a combination of copies that gives us the right checksum.
+ *
+ * If we pointed to any mirror vdevs, this effectively does the job of the
+ * mirror.  The mirror vdev code can't do its own job because we don't know
+ * the checksum of each split segment individually.  We have to try every
+ * combination of copies of split segments, until we find one that checksums
+ * correctly.  (Or until we have tried all combinations, or have tried
+ * 2^zfs_reconstruct_indirect_segments_max combinations.  In these cases we
+ * set io_error to ECKSUM to propagate the error up to the user.)
+ *
+ * For example, if we have 3 segments in the split,
+ * and each points to a 2-way mirror, we will have the following pieces of
+ * data:
+ *
+ *       |     mirror child
+ * split |     [0]        [1]
+ * ======|=====================
+ *   A   |  data_A_0   data_A_1
+ *   B   |  data_B_0   data_B_1
+ *   C   |  data_C_0   data_C_1
+ *
+ * We will try the following (mirror children)^(number of splits) (2^3=8)
+ * combinations, which is similar to bitwise-little-endian counting in
+ * binary.  In general each "digit" corresponds to a split segment, and the
+ * base of each digit is is_children, which can be different for each
+ * digit.
+ *
+ * "low bit"        "high bit"
+ *        v                 v
+ * data_A_0 data_B_0 data_C_0
+ * data_A_1 data_B_0 data_C_0
+ * data_A_0 data_B_1 data_C_0
+ * data_A_1 data_B_1 data_C_0
+ * data_A_0 data_B_0 data_C_1
+ * data_A_1 data_B_0 data_C_1
+ * data_A_0 data_B_1 data_C_1
+ * data_A_1 data_B_1 data_C_1
+ *
+ * Note that the split segments may be on the same or different top-level
+ * vdevs. In either case, we try lots of combinations (see
+ * zfs_reconstruct_indirect_segments_max).  This ensures that if a mirror has
+ * small silent errors on all of its children, we can still reconstruct the
+ * correct data, as long as those errors are at sufficiently-separated
+ * offsets (specifically, separated by the largest block size - default of
+ * 128KB, but up to 16MB).
+ */
+static void
+vdev_indirect_reconstruct_io_done(zio_t *zio)
+{
+	indirect_vsd_t *iv = zio->io_vsd;
+	uint64_t attempts = 0;
+	uint64_t attempts_max = 1ULL << zfs_reconstruct_indirect_segments_max;
+	int segments = 0;
+
+	for (indirect_split_t *is = list_head(&iv->iv_splits);
+	    is != NULL; is = list_next(&iv->iv_splits, is))
+		segments++;
+
+	for (;;) {
+		/* copy data from splits to main zio */
+		int ret;
+		for (indirect_split_t *is = list_head(&iv->iv_splits);
+		    is != NULL; is = list_next(&iv->iv_splits, is)) {
+
+			/*
+			 * If this child failed, its ic_data will be NULL.
+			 * Skip this combination.
+			 */
+			if (is->is_child[is->is_good_child].ic_data == NULL) {
+				ret = EIO;
+				goto next;
+			}
+
+			abd_copy_off(zio->io_abd,
+			    is->is_child[is->is_good_child].ic_data,
+			    is->is_split_offset, 0, is->is_size);
+		}
+
+		/* See if this checksum matches. */
+		zio_bad_cksum_t zbc;
+		ret = zio_checksum_error(zio, &zbc);
+		if (ret == 0) {
+			/* Found a matching checksum.  Issue repair i/os. */
+			vdev_indirect_repair(zio);
+			zio_checksum_verified(zio);
+			return;
+		}
+
+		/*
+		 * Checksum failed; try a different combination of split
+		 * children.
+		 */
+		boolean_t more;
+next:
+		more = B_FALSE;
+		if (segments <= zfs_reconstruct_indirect_segments_max) {
+			/*
+			 * There are relatively few segments, so
+			 * deterministically check all combinations.  We do
+			 * this by by adding one to the first split's
+			 * good_child.  If it overflows, then "carry over" to
+			 * the next split (like counting in base is_children,
+			 * but each digit can have a different base).
+			 */
+			for (indirect_split_t *is = list_head(&iv->iv_splits);
+			    is != NULL; is = list_next(&iv->iv_splits, is)) {
+				is->is_good_child++;
+				if (is->is_good_child < is->is_children) {
+					more = B_TRUE;
+					break;
+				}
+				is->is_good_child = 0;
+			}
+		} else if (++attempts < attempts_max) {
+			/*
+			 * There are too many combinations to try all of them
+			 * in a reasonable amount of time, so try a fixed
+			 * number of random combinations, after which we'll
+			 * consider the block unrecoverable.
+			 */
+			for (indirect_split_t *is = list_head(&iv->iv_splits);
+			    is != NULL; is = list_next(&iv->iv_splits, is)) {
+				is->is_good_child =
+				    spa_get_random(is->is_children);
+			}
+			more = B_TRUE;
+		}
+		if (!more) {
+			/* All combinations failed. */
+			zio->io_error = ret;
+			vdev_indirect_all_checksum_errors(zio);
+			zio_checksum_verified(zio);
+			return;
+		}
+	}
+}
+
+static void
+vdev_indirect_io_done(zio_t *zio)
+{
+	indirect_vsd_t *iv = zio->io_vsd;
+
+	if (iv->iv_reconstruct) {
+		/*
+		 * We have read all copies of the data (e.g. from mirrors),
+		 * either because this was a scrub/resilver, or because the
+		 * one-copy read didn't checksum correctly.
+		 */
+		vdev_indirect_reconstruct_io_done(zio);
+		return;
+	}
+
+	if (!iv->iv_split_block) {
+		/*
+		 * This was not a split block, so we passed the BP down,
+		 * and the checksum was handled by the (one) child zio.
+		 */
+		return;
+	}
+
+	zio_bad_cksum_t zbc;
+	int ret = zio_checksum_error(zio, &zbc);
+	if (ret == 0) {
+		zio_checksum_verified(zio);
+		return;
+	}
+
+	/*
+	 * The checksum didn't match.  Read all copies of all splits, and
+	 * then we will try to reconstruct.  The next time
+	 * vdev_indirect_io_done() is called, iv_reconstruct will be set.
+	 */
+	vdev_indirect_read_all(zio);
+
+	zio_vdev_io_redone(zio);
 }
 
 vdev_ops_t vdev_indirect_ops = {
@@ -1030,6 +1628,7 @@ vdev_ops_t vdev_indirect_ops = {
 	NULL,
 	NULL,
 	vdev_indirect_remap,
+	NULL,
 	VDEV_TYPE_INDIRECT,	/* name of this vdev type */
 	B_FALSE			/* leaf vdev */
 };

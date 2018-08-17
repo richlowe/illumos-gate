@@ -30,6 +30,8 @@
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2018 RackTop Systems.
  */
 
 #ifndef _PKINIT_CRYPTO_OPENSSL_H
@@ -44,10 +46,16 @@
 #include <openssl/x509v3.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
-#include <openssl/asn1_mac.h>
 #include <openssl/sha.h>
 #include <openssl/asn1.h>
 #include <openssl/pem.h>
+#include <openssl/rsa.h>
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+#include <openssl/asn1_mac.h>
+#else
+#include <openssl/asn1t.h>
+#endif
 
 #include "pkinit.h"
 
@@ -111,7 +119,6 @@ struct _pkinit_plg_crypto_context {
     DH *dh_2048;
     DH *dh_4096;
     ASN1_OBJECT *id_pkinit_authData;
-    ASN1_OBJECT *id_pkinit_authData9;
     ASN1_OBJECT *id_pkinit_DHKeyData;
     ASN1_OBJECT *id_pkinit_rkeyData;
     ASN1_OBJECT *id_pkinit_san;
@@ -162,11 +169,13 @@ static krb5_error_code pkinit_init_pkcs11(pkinit_identity_crypto_context ctx);
 static void pkinit_fini_pkcs11(pkinit_identity_crypto_context ctx);
 
 static krb5_error_code pkinit_encode_dh_params
-	(BIGNUM *, BIGNUM *, BIGNUM *, unsigned char **, unsigned int *);
+	(const BIGNUM *, const BIGNUM *, const BIGNUM *,
+		unsigned char **, unsigned int *);
 static DH *pkinit_decode_dh_params
 	(DH **, unsigned char **, unsigned int );
 static int pkinit_check_dh_params
-	(BIGNUM * p1, BIGNUM * p2, BIGNUM * g1, BIGNUM * q1);
+	(const BIGNUM *p1, const BIGNUM *p2, const BIGNUM *g1,
+		const BIGNUM *q1);
 
 static krb5_error_code pkinit_sign_data
 	(krb5_context context, pkinit_identity_crypto_context cryptoctx,
@@ -275,8 +284,15 @@ wrap_signeddata(unsigned char *data, unsigned int data_len,
 #endif
 
 /* This handy macro borrowed from crypto/x509v3/v3_purp.c */
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 #define ku_reject(x, usage) \
 	(((x)->ex_flags & EXFLAG_KUSAGE) && !((x)->ex_kusage & (usage)))
+#else
+#define ku_reject(x, usage) \
+	((X509_get_extension_flags(x) & EXFLAG_KUSAGE) && \
+	!(X509_get_key_usage(x) & (usage)))
+#endif
 
 static char *
 pkinit_pkcs11_code_to_text(int err);

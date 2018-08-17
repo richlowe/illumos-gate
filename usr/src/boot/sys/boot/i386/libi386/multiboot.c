@@ -49,7 +49,7 @@
 #include <stand.h>
 
 #include "bootstrap.h"
-#include "multiboot.h"
+#include <sys/multiboot.h>
 #include "../zfs/libzfs.h"
 #include "../i386/libi386/libi386.h"
 #include "../i386/btx/lib/btxv86.h"
@@ -67,7 +67,6 @@
 
 /* MB data heap pointer */
 static vm_offset_t last_addr;
-extern char bootprog_info[];
 
 static int multiboot_loadfile(char *, u_int64_t, struct preloaded_file **);
 static int multiboot_exec(struct preloaded_file *);

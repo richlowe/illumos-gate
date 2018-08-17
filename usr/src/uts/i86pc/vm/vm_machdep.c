@@ -24,7 +24,7 @@
 /*
  * Copyright (c) 2010, Intel Corporation.
  * All rights reserved.
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /* Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T */
@@ -364,6 +364,91 @@ static kmutex_t	contig_lock;
 
 #define	PFN_16M		(mmu_btop((uint64_t)0x1000000))
 
+caddr_t
+i86devmap(pfn_t pf, pgcnt_t pgcnt, uint_t prot)
+{
+	caddr_t addr;
+	caddr_t addr1;
+	page_t *pp;
+
+	addr1 = addr = vmem_alloc(heap_arena, mmu_ptob(pgcnt), VM_SLEEP);
+
+	for (; pgcnt != 0; addr += MMU_PAGESIZE, ++pf, --pgcnt) {
+		pp = page_numtopp_nolock(pf);
+		if (pp == NULL) {
+			hat_devload(kas.a_hat, addr, MMU_PAGESIZE, pf,
+			    prot | HAT_NOSYNC, HAT_LOAD_LOCK);
+		} else {
+			hat_memload(kas.a_hat, addr, pp,
+			    prot | HAT_NOSYNC, HAT_LOAD_LOCK);
+		}
+	}
+
+	return (addr1);
+}
+
+/*
+ * This routine is like page_numtopp, but accepts only free pages, which
+ * it allocates (unfrees) and returns with the exclusive lock held.
+ * It is used by machdep.c/dma_init() to find contiguous free pages.
+ */
+page_t *
+page_numtopp_alloc(pfn_t pfnum)
+{
+	page_t *pp;
+
+retry:
+	pp = page_numtopp_nolock(pfnum);
+	if (pp == NULL) {
+		return (NULL);
+	}
+
+	if (!page_trylock(pp, SE_EXCL)) {
+		return (NULL);
+	}
+
+	if (page_pptonum(pp) != pfnum) {
+		page_unlock(pp);
+		goto retry;
+	}
+
+	if (!PP_ISFREE(pp)) {
+		page_unlock(pp);
+		return (NULL);
+	}
+	if (pp->p_szc) {
+		page_demote_free_pages(pp);
+		page_unlock(pp);
+		goto retry;
+	}
+
+	/* If associated with a vnode, destroy mappings */
+
+	if (pp->p_vnode) {
+
+		page_destroy_free(pp);
+
+		if (!page_lock(pp, SE_EXCL, (kmutex_t *)NULL, P_NO_RECLAIM)) {
+			return (NULL);
+		}
+
+		if (page_pptonum(pp) != pfnum) {
+			page_unlock(pp);
+			goto retry;
+		}
+	}
+
+	if (!PP_ISFREE(pp)) {
+		page_unlock(pp);
+		return (NULL);
+	}
+
+	if (!page_reclaim(pp, (kmutex_t *)NULL))
+		return (NULL);
+
+	return (pp);
+}
+
 /*
  * Return the optimum page size for a given mapping
  */
@@ -691,9 +776,6 @@ map_addr_proc(
 
 	base = p->p_brkbase;
 #if defined(__amd64)
-	/*
-	 * XX64 Yes, this needs more work.
-	 */
 	if (p->p_model == DATAMODEL_NATIVE) {
 		if (userlimit < as->a_userlimit) {
 			/*
@@ -713,16 +795,24 @@ map_addr_proc(
 			}
 		} else {
 			/*
-			 * XX64 This layout is probably wrong .. but in
-			 * the event we make the amd64 address space look
-			 * like sparcv9 i.e. with the stack -above- the
-			 * heap, this bit of code might even be correct.
+			 * With the stack positioned at a higher address than
+			 * the heap for 64-bit processes, it is necessary to be
+			 * mindful of its location and potential size.
+			 *
+			 * Unallocated space above the top of the stack (that
+			 * is, at a lower address) but still within the bounds
+			 * of the stack limit should be considered unavailable.
+			 *
+			 * As the 64-bit stack guard is mapped in immediately
+			 * adjacent to the stack limit boundary, this prevents
+			 * new mappings from having accidentally dangerous
+			 * proximity to the stack.
 			 */
 			slen = p->p_usrstack - base -
 			    ((p->p_stk_ctl + PAGEOFFSET) & PAGEMASK);
 		}
 	} else
-#endif
+#endif /* defined(__amd64) */
 		slen = userlimit - base;
 
 	/* Make len be a multiple of PAGESIZE */

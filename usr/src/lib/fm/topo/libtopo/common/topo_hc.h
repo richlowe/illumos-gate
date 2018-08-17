@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 #ifndef _TOPO_HC_H
@@ -101,6 +101,7 @@ extern "C" {
 #define	TOPO_PGROUP_IO		"io"
 #define	TOPO_IO_DEVTYPE		"devtype"
 #define	TOPO_IO_DRIVER		"driver"
+#define	TOPO_IO_INSTANCE	"instance"
 #define	TOPO_IO_MODULE		"module"
 #define	TOPO_IO_DEV		"dev"
 #define	TOPO_IO_DEVID		"devid"
@@ -110,7 +111,10 @@ extern "C" {
 
 #define	TOPO_PGROUP_PCI		"pci"
 #define	TOPO_PCI_VENDID		"vendor-id"
+#define	TOPO_PCI_VENDNM		"vendor-name"
+#define	TOPO_PCI_SUBSYSNM	"subsystem-name"
 #define	TOPO_PCI_DEVID		"device-id"
+#define	TOPO_PCI_DEVNM		"device-name"
 #define	TOPO_PCI_EXCAP		"extended-capabilities"
 #define	TOPO_PCI_BDF		"BDF"
 #define	TOPO_PCI_CLASS		"class-code"

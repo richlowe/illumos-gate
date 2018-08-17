@@ -120,6 +120,7 @@ file path=opt/onbld/bin/wdiff mode=0555
 file path=opt/onbld/bin/webrev mode=0555
 file path=opt/onbld/bin/which_scm mode=0555
 file path=opt/onbld/bin/ws mode=0555
+file path=opt/onbld/bin/wscheck mode=0555
 file path=opt/onbld/bin/wsdiff mode=0555
 file path=opt/onbld/bin/xref mode=0555
 file path=opt/onbld/bin/xref.mk
@@ -185,6 +186,10 @@ file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/Checks/SpellCheck.py \
     mode=0444
 file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/Checks/SpellCheck.pyc \
     mode=0444
+file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/Checks/WsCheck.py \
+    mode=0444
+file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/Checks/WsCheck.pyc \
+    mode=0444
 file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/Checks/__init__.py \
     mode=0444
 file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/Checks/__init__.pyc \
@@ -200,7 +205,7 @@ file path=opt/onbld/lib/python$(PYTHON_VERSION)/onbld/__init__.pyc mode=0444
 file path=opt/onbld/man/man1onbld/Install.1onbld
 file path=opt/onbld/man/man1onbld/bldenv.1onbld
 file path=opt/onbld/man/man1onbld/bringovercheck.1onbld
-file path=opt/onbld/man/man1onbld/btxld.1onbld
+$(i386_ONLY)file path=opt/onbld/man/man1onbld/btxld.1onbld
 file path=opt/onbld/man/man1onbld/cddlchk.1onbld
 file path=opt/onbld/man/man1onbld/check_rtime.1onbld
 file path=opt/onbld/man/man1onbld/checkpaths.1onbld
@@ -236,8 +241,6 @@ license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 license usr/src/tools/ctf/dwarf/THIRDPARTYLICENSE \
     license=usr/src/tools/ctf/dwarf/THIRDPARTYLICENSE
-license usr/src/tools/onbld/THIRDPARTYLICENSE \
-    license=usr/src/tools/onbld/THIRDPARTYLICENSE
 link path=opt/onbld/bin/$(ARCH)/dmake target=make
 link path=opt/onbld/bin/git-nits target=git-pbchk
 link path=opt/onbld/lib/python target=python$(PYTHON_VERSION)

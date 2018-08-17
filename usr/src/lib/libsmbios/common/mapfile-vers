@@ -20,6 +20,7 @@
 #
 #
 # Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
+# Copyright (c) 2017, Joyent, Inc.
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
@@ -67,6 +68,8 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_chassis_state_desc;
 	smbios_chassis_type_desc;
 	smbios_checksum;
+	smbios_cooldev_status_desc;
+	smbios_cooldev_type_desc;
 	smbios_close;
 	smbios_csn;
 	smbios_errmsg;
@@ -82,11 +85,13 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_info_boot;
 	smbios_info_cache;
 	smbios_info_chassis;
+	smbios_info_cooldev;
 	smbios_info_common;
 	smbios_info_contains;
 	smbios_info_eventlog;
 	smbios_info_hwsec;
 	smbios_info_ipmi;
+	smbios_info_iprobe;
 	smbios_info_lang;
 	smbios_info_memarray;
 	smbios_info_extmemarray;
@@ -98,6 +103,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_info_obdevs_ext;
 	smbios_info_port;
 	smbios_info_extport;
+	smbios_info_powersup;
 	smbios_info_processor;
 	smbios_info_extprocessor;
 	smbios_info_slot;
@@ -106,9 +112,13 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_info_strtab;
 	smbios_info_system;
 	smbios_info_pciexrc;
+	smbios_info_tprobe;
+	smbios_info_vprobe;
 	smbios_ipmi_flag_desc;
 	smbios_ipmi_flag_name;
 	smbios_ipmi_type_desc;
+	smbios_iprobe_loc_desc;
+	smbios_iprobe_status_desc;
 	smbios_iter;
 	smbios_lookup_id;
 	smbios_lookup_type;
@@ -124,6 +134,11 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_onboard_type_desc;
 	smbios_port_conn_desc;
 	smbios_port_type_desc;
+	smbios_powersup_flag_desc;
+	smbios_powersup_flag_name;
+	smbios_powersup_input_desc;
+	smbios_powersup_status_desc;
+	smbios_powersup_type_desc;
 	smbios_processor_family_desc;
 	smbios_processor_status_desc;
 	smbios_processor_type_desc;
@@ -140,9 +155,13 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_slot_usage_desc;
 	smbios_slot_width_desc;
 	smbios_system_wakeup_desc;
+	smbios_tprobe_loc_desc;
+	smbios_tprobe_status_desc;
 	smbios_truncated;
 	smbios_type_desc;
 	smbios_type_name;
+	smbios_vprobe_loc_desc;
+	smbios_vprobe_status_desc;
 	smbios_write;
     local:
 	*;

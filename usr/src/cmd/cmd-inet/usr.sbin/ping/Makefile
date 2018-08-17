@@ -62,7 +62,7 @@ $(PROG): $(OBJS)
 
 install: all $(ROOTUSRSBINPROG)
 
-clean:	
+clean:
 	$(RM) $(OBJS)
 
 lint:	lint_SRCS

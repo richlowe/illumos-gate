@@ -23,6 +23,9 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
 
 #include <assert.h>
 #include <alloca.h>
@@ -41,6 +44,7 @@
 #include <did.h>
 #include <did_props.h>
 #include <fm/libtopo.h>
+#include <pcidb.h>
 
 static int ASRU_set(tnode_t *, did_t *,
     const char *, const char *, const char *);
@@ -49,6 +53,8 @@ static int FRU_set(tnode_t *, did_t *,
 static int DEVprop_set(tnode_t *, did_t *,
     const char *, const char *, const char *);
 static int DRIVERprop_set(tnode_t *, did_t *,
+    const char *, const char *, const char *);
+static int INSTprop_set(tnode_t *, did_t *,
     const char *, const char *, const char *);
 static int MODULEprop_set(tnode_t *, did_t *,
     const char *, const char *, const char *);
@@ -65,6 +71,8 @@ static int maybe_di_uint_to_str(tnode_t *, did_t *,
 static int maybe_di_uint_to_dec_str(tnode_t *, did_t *,
     const char *, const char *, const char *);
 static int AADDR_set(tnode_t *, did_t *,
+    const char *, const char *, const char *);
+static int maybe_pcidb_set(tnode_t *, did_t *,
     const char *, const char *, const char *);
 
 /*
@@ -95,6 +103,7 @@ txprop_t Fn_common_props[] = {
 	{ DI_DEVTYPPROP, &io_pgroup, TOPO_IO_DEVTYPE, maybe_di_chars_copy },
 	{ DI_DEVIDPROP, &pci_pgroup, TOPO_PCI_DEVID, maybe_di_uint_to_str },
 	{ NULL, &io_pgroup, TOPO_IO_DRIVER, DRIVERprop_set },
+	{ NULL, &io_pgroup, TOPO_IO_INSTANCE, INSTprop_set },
 	{ NULL, &io_pgroup, TOPO_IO_MODULE, MODULEprop_set },
 	{ "serd_io_device_nonfatal_n", &io_pgroup, "serd_io_device_nonfatal_n",
 	    maybe_di_uint_to_dec_str },
@@ -146,7 +155,15 @@ txprop_t Fn_common_props[] = {
 	{ DI_AADDRPROP, &pci_pgroup, TOPO_PCI_AADDR, AADDR_set },
 	{ NULL, &protocol_pgroup, TOPO_PROP_LABEL, label_set },
 	{ NULL, &protocol_pgroup, TOPO_PROP_FRU, FRU_set },
-	{ NULL, &protocol_pgroup, TOPO_PROP_ASRU, ASRU_set }
+	{ NULL, &protocol_pgroup, TOPO_PROP_ASRU, ASRU_set },
+	/*
+	 * This entry will attempt to set the following three properties via
+	 * lookups in the PCI database:
+	 * - vendor-name
+	 * - device-name
+	 * - subsystem-name
+	 */
+	{ NULL, &pci_pgroup, NULL, maybe_pcidb_set }
 };
 
 txprop_t Dev_common_props[] = {
@@ -158,6 +175,7 @@ txprop_t Dev_common_props[] = {
 txprop_t Bus_common_props[] = {
 	{ DI_DEVTYPPROP, &io_pgroup, TOPO_IO_DEVTYPE, maybe_di_chars_copy },
 	{ NULL, &io_pgroup, TOPO_IO_DRIVER, DRIVERprop_set },
+	{ NULL, &io_pgroup, TOPO_IO_INSTANCE, INSTprop_set },
 	{ NULL, &io_pgroup, TOPO_IO_MODULE, MODULEprop_set },
 	{ NULL, &protocol_pgroup, TOPO_PROP_LABEL, label_set },
 	{ NULL, &protocol_pgroup, TOPO_PROP_FRU, FRU_set },
@@ -168,6 +186,7 @@ txprop_t RC_common_props[] = {
 	{ NULL, &io_pgroup, TOPO_IO_DEV, DEVprop_set },
 	{ DI_DEVTYPPROP, &io_pgroup, TOPO_IO_DEVTYPE, maybe_di_chars_copy },
 	{ NULL, &io_pgroup, TOPO_IO_DRIVER, DRIVERprop_set },
+	{ NULL, &io_pgroup, TOPO_IO_INSTANCE, INSTprop_set },
 	{ NULL, &io_pgroup, TOPO_IO_MODULE, MODULEprop_set },
 	{ NULL, &pci_pgroup, TOPO_PCI_EXCAP, EXCAP_set },
 	{ NULL, &pci_pgroup, TOPO_PCI_BDF, BDF_set },
@@ -199,6 +218,7 @@ txprop_t IOB_common_props[] = {
 txprop_t HB_common_props[] = {
 	{ NULL, &io_pgroup, TOPO_IO_DEV, DEVprop_set },
 	{ NULL, &io_pgroup, TOPO_IO_DRIVER, DRIVERprop_set },
+	{ NULL, &io_pgroup, TOPO_IO_INSTANCE, INSTprop_set },
 	{ NULL, &io_pgroup, TOPO_IO_MODULE, MODULEprop_set },
 	{ NULL, &protocol_pgroup, TOPO_PROP_ASRU, ASRU_set },
 	/*
@@ -764,6 +784,22 @@ DRIVERprop_set(tnode_t *tn, did_t *pd,
 
 /*ARGSUSED*/
 static int
+INSTprop_set(tnode_t *tn, did_t *pd,
+    const char *dpnm, const char *tpgrp, const char *tpnm)
+{
+	int inst, err;
+
+	if ((inst = di_instance(did_dinode(pd))) == -1)
+		return (0);
+	if (topo_prop_set_uint32(tn,
+	    tpgrp, tpnm, TOPO_PROP_IMMUTABLE, inst, &err) < 0)
+		return (topo_mod_seterrno(did_mod(pd), err));
+
+	return (0);
+}
+
+/*ARGSUSED*/
+static int
 MODULEprop_set(tnode_t *tn, did_t *pd,
     const char *dpnm, const char *tpgrp, const char *tpnm)
 {
@@ -908,6 +944,81 @@ BDF_set(tnode_t *tn, did_t *pd, const char *dpnm, const char *tpgrp,
 	if (topo_prop_set_string(tn,
 	    tpgrp, tpnm, TOPO_PROP_IMMUTABLE, str, &e) < 0)
 		return (topo_mod_seterrno(did_mod(pd), e));
+	return (0);
+}
+
+/*ARGSUSED*/
+static int
+maybe_pcidb_set(tnode_t *tn, did_t *pd, const char *dpnm, const char *tpgrp,
+    const char *tpnm)
+{
+	const char *vname, *dname = NULL, *ssname = NULL;
+	uint_t vid, pid, svid, ssid;
+	pcidb_vendor_t *pciv;
+	pcidb_device_t *pcid;
+	pcidb_subvd_t *pcis = NULL;
+	pcidb_hdl_t *pcih;
+	topo_mod_t *mod = did_mod(pd);
+	int err;
+
+	/*
+	 * At a minimum, we need the vid/devid of the device to be able to
+	 * lookup anything in the PCI database.  So if we fail to look either
+	 * of those up, bail out.
+	 */
+	if (di_uintprop_get(did_mod(pd), did_dinode(pd), DI_VENDIDPROP, &vid) <
+	    0 || di_uintprop_get(did_mod(pd), did_dinode(pd), DI_DEVIDPROP,
+	    &pid) < 0) {
+		return (0);
+	}
+	/*
+	 * If we fail to lookup the vendor, by the vid that's also a
+	 * deal-breaker.
+	 */
+	if ((pcih = topo_mod_pcidb(mod)) == NULL ||
+	    (pciv = pcidb_lookup_vendor(pcih, vid)) == NULL) {
+		return (0);
+	}
+
+	/* lookup vendor-name and set the topo property, if found */
+	vname = pcidb_vendor_name(pciv);
+	if (vname != NULL &&
+	    topo_prop_set_string(tn, tpgrp, TOPO_PCI_VENDNM,
+	    TOPO_PROP_IMMUTABLE, vname, &err) != 0) {
+		return (topo_mod_seterrno(mod, err));
+	}
+
+	/* lookup device-name and set the topo property, if found */
+	if ((pcid = pcidb_lookup_device_by_vendor(pciv, pid)) != NULL) {
+		dname = pcidb_device_name(pcid);
+	}
+	if (dname != NULL &&
+	    topo_prop_set_string(tn, tpgrp, TOPO_PCI_DEVNM,
+	    TOPO_PROP_IMMUTABLE, dname, &err) != 0) {
+		return (topo_mod_seterrno(mod, err));
+	}
+
+	/*
+	 * Not all devices will have a subsystem-name that we can lookup,
+	 * but if both subsystem-vendorid and subsystem-id exist in devinfo and
+	 * if we were previously able to find the device by devid then we can
+	 * at least attempt a lookup.  If found, set the topo property.
+	 */
+	if (pcid != NULL &&
+	    di_uintprop_get(did_mod(pd), did_dinode(pd), DI_SUBVENDIDPROP,
+	    &svid) == 0 &&
+	    di_uintprop_get(did_mod(pd), did_dinode(pd), DI_SUBSYSTEMID,
+	    &ssid) == 0) {
+		pcis = pcidb_lookup_subvd_by_device(pcid, svid, ssid);
+	}
+	if (pcis != NULL) {
+		ssname = pcidb_subvd_name(pcis);
+	}
+	if (ssname != NULL && strlen(ssname) > 0 &&
+	    topo_prop_set_string(tn, tpgrp, TOPO_PCI_SUBSYSNM,
+	    TOPO_PROP_IMMUTABLE, ssname, &err) != 0) {
+		return (topo_mod_seterrno(mod, err));
+	}
 	return (0);
 }
 

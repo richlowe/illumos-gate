@@ -5,6 +5,8 @@
  */
 /*
  * Copyright (c) 2012, OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2018 RackTop Systems.
  */
 /*
  * Written by Dr Stephen N Henson (shenson@bigfoot.com) for the OpenSSL
@@ -80,7 +82,6 @@
 #include <openssl/bn.h>
 #include <openssl/asn1.h>
 #include <openssl/err.h>
-#include <openssl/bn.h>
 #include <openssl/x509.h>
 #include <openssl/rsa.h>
 #include <openssl/dsa.h>
@@ -91,6 +92,7 @@
 #include <openssl/ocsp.h>
 #include <openssl/des.h>
 #include <openssl/rand.h>
+#include "compat.h"
 
 #define	PRINT_ANY_EXTENSION (\
 	KMF_X509_EXT_KEY_USAGE |\
@@ -135,9 +137,9 @@ static uchar_t G[] = { 0x00, 0x62, 0x6d, 0x02, 0x78, 0x39, 0xea, 0x0a,
 #define	SET_SYS_ERROR(h, c) h->lasterr.kstype = -1; h->lasterr.errcode = c;
 
 /*
- * Declare some new macros for managing stacks of EVP_PKEYS, similar to
- * what wanboot did.
+ * Declare some new macros for managing stacks of EVP_PKEYS.
  */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 DECLARE_STACK_OF(EVP_PKEY)
 
 #define	sk_EVP_PKEY_new_null() SKM_sk_new_null(EVP_PKEY)
@@ -147,6 +149,11 @@ DECLARE_STACK_OF(EVP_PKEY)
 #define	sk_EVP_PKEY_push(st, val) SKM_sk_push(EVP_PKEY, (st), (val))
 #define	sk_EVP_PKEY_pop_free(st, free_func) SKM_sk_pop_free(EVP_PKEY, (st), \
 	(free_func))
+
+#else
+/* LINTED E_STATIC_UNUSED */
+DEFINE_STACK_OF(EVP_PKEY)
+#endif
 
 mutex_t init_lock = DEFAULTMUTEX;
 static int ssl_initialized = 0;
@@ -294,6 +301,7 @@ KMF_PLUGIN_FUNCLIST openssl_plugin_table =
 	NULL	/* Finalize */
 };
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 static mutex_t *lock_cs;
 static long *lock_count;
 
@@ -314,11 +322,14 @@ thread_id()
 {
 	return ((unsigned long)thr_self());
 }
+#endif /* OPENSSL_VERSION_NUMBER < 0x10100000L || LIBRESSL_VERSION_NUMBER */
 
 KMF_PLUGIN_FUNCLIST *
 KMF_Plugin_Initialize()
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	int i;
+#endif
 
 	(void) mutex_lock(&init_lock);
 	if (!ssl_initialized) {
@@ -336,8 +347,11 @@ KMF_Plugin_Initialize()
 		    "X509v3 Freshest CRL");
 		(void) OBJ_create("2.5.29.54", "inhibitAnyPolicy",
 		    "X509v3 Inhibit Any-Policy");
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 		/*
 		 * Set up for thread-safe operation.
+		 * This is not required for OpenSSL 1.1
 		 */
 		lock_cs = OPENSSL_malloc(CRYPTO_num_locks() * sizeof (mutex_t));
 		if (lock_cs == NULL) {
@@ -361,10 +375,11 @@ KMF_Plugin_Initialize()
 		if (CRYPTO_get_locking_callback() == NULL)
 			CRYPTO_set_locking_callback((void (*)())locking_cb);
 
-		OpenSSL_add_all_algorithms();
+		(void) OpenSSL_add_all_algorithms();
 
 		/* Enable error strings for reporting */
-		ERR_load_crypto_strings();
+		(void) ERR_load_crypto_strings();
+#endif
 
 		ssl_initialized = 1;
 	}
@@ -372,6 +387,7 @@ KMF_Plugin_Initialize()
 
 	return (&openssl_plugin_table);
 }
+
 /*
  * Convert an SSL DN to a KMF DN.
  */
@@ -486,7 +502,7 @@ check_cert(X509 *xcert, char *issuer, char *subject, KMF_BIGINT *serial,
 		if (rv != KMF_OK)
 			return (KMF_ERR_BAD_PARAMETER);
 
-		rv = get_x509_dn(xcert->cert_info->issuer, &certIssuerDN);
+		rv = get_x509_dn(X509_get_issuer_name(xcert), &certIssuerDN);
 		if (rv != KMF_OK) {
 			kmf_free_dn(&issuerDN);
 			return (KMF_ERR_BAD_PARAMETER);
@@ -501,7 +517,7 @@ check_cert(X509 *xcert, char *issuer, char *subject, KMF_BIGINT *serial,
 			goto cleanup;
 		}
 
-		rv = get_x509_dn(xcert->cert_info->subject, &certSubjectDN);
+		rv = get_x509_dn(X509_get_subject_name(xcert), &certSubjectDN);
 		if (rv != KMF_OK) {
 			rv = KMF_ERR_BAD_PARAMETER;
 			goto cleanup;
@@ -515,7 +531,7 @@ check_cert(X509 *xcert, char *issuer, char *subject, KMF_BIGINT *serial,
 		BIGNUM *bn;
 
 		/* Comparing BIGNUMs is a pain! */
-		bn = ASN1_INTEGER_to_BN(xcert->cert_info->serialNumber, NULL);
+		bn = ASN1_INTEGER_to_BN(X509_get_serialNumber(xcert), NULL);
 		if (bn != NULL) {
 			int bnlen = BN_num_bytes(bn);
 
@@ -1421,17 +1437,13 @@ ssl_write_key(KMF_HANDLE *kmfh, KMF_ENCODE_FORMAT format, BIO *out,
 		case KMF_FORMAT_RAWKEY:
 			/* same as ASN.1 */
 		case KMF_FORMAT_ASN1:
-			if (pkey->type == EVP_PKEY_RSA) {
-				rsa = EVP_PKEY_get1_RSA(pkey);
+			if ((rsa = EVP_PKEY_get0_RSA(pkey)) != NULL) {
 				if (private)
 					rv = i2d_RSAPrivateKey_bio(out, rsa);
 				else
 					rv = i2d_RSAPublicKey_bio(out, rsa);
-				RSA_free(rsa);
-			} else if (pkey->type == EVP_PKEY_DSA) {
-				dsa = EVP_PKEY_get1_DSA(pkey);
+			} else if ((dsa = EVP_PKEY_get0_DSA(pkey)) != NULL) {
 				rv = i2d_DSAPrivateKey_bio(out, dsa);
-				DSA_free(dsa);
 			}
 			if (rv == 1) {
 				rv = KMF_OK;
@@ -1440,8 +1452,7 @@ ssl_write_key(KMF_HANDLE *kmfh, KMF_ENCODE_FORMAT format, BIO *out,
 			}
 			break;
 		case KMF_FORMAT_PEM:
-			if (pkey->type == EVP_PKEY_RSA) {
-				rsa = EVP_PKEY_get1_RSA(pkey);
+			if ((rsa = EVP_PKEY_get0_RSA(pkey)) != NULL) {
 				if (private)
 					rv = PEM_write_bio_RSAPrivateKey(out,
 					    rsa, NULL, NULL, 0, NULL,
@@ -1449,13 +1460,10 @@ ssl_write_key(KMF_HANDLE *kmfh, KMF_ENCODE_FORMAT format, BIO *out,
 				else
 					rv = PEM_write_bio_RSAPublicKey(out,
 					    rsa);
-				RSA_free(rsa);
-			} else if (pkey->type == EVP_PKEY_DSA) {
-				dsa = EVP_PKEY_get1_DSA(pkey);
+			} else if ((dsa = EVP_PKEY_get0_DSA(pkey)) != NULL) {
 				rv = PEM_write_bio_DSAPrivateKey(out,
 				    dsa, NULL, NULL, 0, NULL,
 				    (cred != NULL ? cred->cred : NULL));
-				DSA_free(dsa);
 			}
 
 			if (rv == 1) {
@@ -1478,7 +1486,8 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 {
 	KMF_RETURN rv = KMF_OK;
 	KMF_HANDLE *kmfh = (KMF_HANDLE *)handle;
-	uint32_t eValue = 0x010001;
+	uint32_t eValue = RSA_F4;
+	BIGNUM *eValue_bn = NULL;
 	RSA *sslPrivKey = NULL;
 	DSA *sslDSAKey = NULL;
 	EVP_PKEY *eprikey = NULL;
@@ -1489,6 +1498,14 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 	uint32_t keylen_size = sizeof (uint32_t);
 	boolean_t storekey = TRUE;
 	KMF_KEY_ALG keytype = KMF_RSA;
+
+	eValue_bn = BN_new();
+	if (eValue_bn == NULL)
+		return (KMF_ERR_MEMORY);
+	if (BN_set_word(eValue_bn, eValue) == 0) {
+		rv = KMF_ERR_KEYGEN_FAILED;
+		goto cleanup;
+	}
 
 	rv = kmf_get_attr(KMF_STOREKEY_BOOL_ATTR, attrlist, numattr,
 	    &storekey, NULL);
@@ -1504,12 +1521,16 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 		rv = KMF_OK;
 
 	pubkey = kmf_get_attr_ptr(KMF_PUBKEY_HANDLE_ATTR, attrlist, numattr);
-	if (pubkey == NULL)
-		return (KMF_ERR_BAD_PARAMETER);
+	if (pubkey == NULL) {
+		rv = KMF_ERR_BAD_PARAMETER;
+		goto cleanup;
+	}
 
 	privkey = kmf_get_attr_ptr(KMF_PRIVKEY_HANDLE_ATTR, attrlist, numattr);
-	if (privkey == NULL)
-		return (KMF_ERR_BAD_PARAMETER);
+	if (privkey == NULL) {
+		rv = KMF_ERR_BAD_PARAMETER;
+		goto cleanup;
+	}
 
 	(void) memset(pubkey, 0, sizeof (KMF_KEY_HANDLE));
 	(void) memset(privkey, 0, sizeof (KMF_KEY_HANDLE));
@@ -1536,6 +1557,10 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 			    rsaexp->val != NULL) {
 				/* LINTED E_BAD_PTR_CAST_ALIGN */
 				eValue = *(uint32_t *)rsaexp->val;
+				if (BN_set_word(eValue_bn, eValue) == 0) {
+					rv = KMF_ERR_BAD_PARAMETER;
+					goto cleanup;
+				}
 			} else {
 				rv = KMF_ERR_BAD_PARAMETER;
 				goto cleanup;
@@ -1555,8 +1580,10 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 			goto cleanup;
 		}
 
-		sslPrivKey = RSA_generate_key(keylen, eValue, NULL, NULL);
-		if (sslPrivKey == NULL) {
+		sslPrivKey = RSA_new();
+		if (sslPrivKey == NULL ||
+		    RSA_generate_key_ex(sslPrivKey, keylen, eValue_bn, NULL)
+		    == 0) {
 			SET_ERROR(kmfh, ERR_get_error());
 			rv = KMF_ERR_KEYGEN_FAILED;
 		} else {
@@ -1576,27 +1603,27 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 			pubkey->keyp = (void *)epubkey;
 		}
 	} else if (keytype == KMF_DSA) {
-		DSA *dp;
+		BIGNUM *p, *q, *g;
+
 		sslDSAKey = DSA_new();
 		if (sslDSAKey == NULL) {
 			SET_ERROR(kmfh, ERR_get_error());
 			return (KMF_ERR_MEMORY);
 		}
 
-		if ((sslDSAKey->p = BN_bin2bn(P, sizeof (P), sslDSAKey->p)) ==
-		    NULL) {
+		p = BN_bin2bn(P, sizeof (P), NULL);
+		q = BN_bin2bn(Q, sizeof (Q), NULL);
+		g = BN_bin2bn(G, sizeof (G), NULL);
+		if (p == NULL || q == NULL || g == NULL) {
+			BN_free(p);
+			BN_free(q);
+			BN_free(g);
 			SET_ERROR(kmfh, ERR_get_error());
 			rv = KMF_ERR_KEYGEN_FAILED;
 			goto cleanup;
 		}
-		if ((sslDSAKey->q = BN_bin2bn(Q, sizeof (Q), sslDSAKey->q)) ==
-		    NULL) {
-			SET_ERROR(kmfh, ERR_get_error());
-			rv = KMF_ERR_KEYGEN_FAILED;
-			goto cleanup;
-		}
-		if ((sslDSAKey->g = BN_bin2bn(G, sizeof (G), sslDSAKey->g)) ==
-		    NULL) {
+
+		if (DSA_set0_pqg(sslDSAKey, p, q, g) == 0) {
 			SET_ERROR(kmfh, ERR_get_error());
 			rv = KMF_ERR_KEYGEN_FAILED;
 			goto cleanup;
@@ -1619,56 +1646,18 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 			rv = KMF_ERR_KEYGEN_FAILED;
 			goto cleanup;
 		}
-		dp = DSA_new();
-		/* Make a copy for the public key */
-		if (dp != NULL) {
-			if ((dp->p = BN_new()) == NULL) {
-				SET_ERROR(kmfh, ERR_get_error());
-				rv = KMF_ERR_MEMORY;
-				DSA_free(dp);
-				goto cleanup;
-			}
-			if ((dp->q = BN_new()) == NULL) {
-				SET_ERROR(kmfh, ERR_get_error());
-				rv = KMF_ERR_MEMORY;
-				BN_free(dp->p);
-				DSA_free(dp);
-				goto cleanup;
-			}
-			if ((dp->g = BN_new()) == NULL) {
-				SET_ERROR(kmfh, ERR_get_error());
-				rv = KMF_ERR_MEMORY;
-				BN_free(dp->q);
-				BN_free(dp->p);
-				DSA_free(dp);
-				goto cleanup;
-			}
-			if ((dp->pub_key = BN_new()) == NULL) {
-				SET_ERROR(kmfh, ERR_get_error());
-				rv = KMF_ERR_MEMORY;
-				BN_free(dp->q);
-				BN_free(dp->p);
-				BN_free(dp->g);
-				DSA_free(dp);
-				goto cleanup;
-			}
-			(void) BN_copy(dp->p, sslDSAKey->p);
-			(void) BN_copy(dp->q, sslDSAKey->q);
-			(void) BN_copy(dp->g, sslDSAKey->g);
-			(void) BN_copy(dp->pub_key, sslDSAKey->pub_key);
 
-			pubkey->kstype = KMF_KEYSTORE_OPENSSL;
-			pubkey->keyalg = KMF_DSA;
-			pubkey->keyclass = KMF_ASYM_PUB;
-			pubkey->israw = FALSE;
+		pubkey->kstype = KMF_KEYSTORE_OPENSSL;
+		pubkey->keyalg = KMF_DSA;
+		pubkey->keyclass = KMF_ASYM_PUB;
+		pubkey->israw = FALSE;
 
-			if (EVP_PKEY_set1_DSA(epubkey, sslDSAKey)) {
-				pubkey->keyp = (void *)epubkey;
-			} else {
-				SET_ERROR(kmfh, ERR_get_error());
-				rv = KMF_ERR_KEYGEN_FAILED;
-				goto cleanup;
-			}
+		if (EVP_PKEY_set1_DSA(epubkey, sslDSAKey)) {
+			pubkey->keyp = (void *)epubkey;
+		} else {
+			SET_ERROR(kmfh, ERR_get_error());
+			rv = KMF_ERR_KEYGEN_FAILED;
+			goto cleanup;
 		}
 	}
 
@@ -1720,6 +1709,9 @@ OpenSSL_CreateKeypair(KMF_HANDLE_T handle, int numattr,
 	}
 
 cleanup:
+	if (eValue_bn != NULL)
+		BN_free(eValue_bn);
+
 	if (rv != KMF_OK) {
 		if (eprikey != NULL)
 			EVP_PKEY_free(eprikey);
@@ -1760,7 +1752,7 @@ cleanup:
  * all of the bits.
  */
 static int
-fixbnlen(BIGNUM *bn, unsigned char *buf, int len) {
+fixbnlen(const BIGNUM *bn, unsigned char *buf, int len) {
 	int bytes = len - BN_num_bytes(bn);
 
 	/* prepend with leading 0x00 if necessary */
@@ -1782,7 +1774,7 @@ OpenSSL_SignData(KMF_HANDLE_T handle, KMF_KEY_HANDLE *key,
 	KMF_RETURN ret = KMF_OK;
 	KMF_HANDLE *kmfh = (KMF_HANDLE *)handle;
 	KMF_ALGORITHM_INDEX		AlgId;
-	EVP_MD_CTX ctx;
+	EVP_MD_CTX *ctx;
 	const EVP_MD *md;
 
 	if (key == NULL || AlgOID == NULL ||
@@ -1800,20 +1792,36 @@ OpenSSL_SignData(KMF_HANDLE_T handle, KMF_KEY_HANDLE *key,
 		EVP_PKEY *pkey = (EVP_PKEY *)key->keyp;
 		uchar_t *p;
 		int len;
-		if (AlgId == KMF_ALGID_MD5WithRSA)
+		switch (AlgId) {
+#ifndef	OPENSSL_NO_MD5
+		case KMF_ALGID_MD5WithRSA:
 			md = EVP_md5();
-		else if (AlgId == KMF_ALGID_SHA1WithRSA)
+			break;
+#endif
+#ifndef	OPENSSL_NO_SHA
+		case KMF_ALGID_SHA1WithRSA:
 			md = EVP_sha1();
-		else if (AlgId == KMF_ALGID_SHA256WithRSA)
+			break;
+#endif
+#ifndef	OPENSSL_NO_SHA256
+		case KMF_ALGID_SHA256WithRSA:
 			md = EVP_sha256();
-		else if (AlgId == KMF_ALGID_SHA384WithRSA)
+			break;
+#endif
+#ifndef	OPENSSL_NO_SHA512
+		case KMF_ALGID_SHA384WithRSA:
 			md = EVP_sha384();
-		else if (AlgId == KMF_ALGID_SHA512WithRSA)
+			break;
+		case KMF_ALGID_SHA512WithRSA:
 			md = EVP_sha512();
-		else if (AlgId == KMF_ALGID_RSA)
+			break;
+#endif
+		case KMF_ALGID_RSA:
 			md = NULL;
-		else
+			break;
+		default:
 			return (KMF_ERR_BAD_ALGORITHM);
+		}
 
 		if ((md == NULL) && (AlgId == KMF_ALGID_RSA)) {
 			RSA *rsa = EVP_PKEY_get1_RSA((EVP_PKEY *)pkey);
@@ -1827,19 +1835,20 @@ OpenSSL_SignData(KMF_HANDLE_T handle, KMF_KEY_HANDLE *key,
 			}
 			output->Length = len;
 		} else {
-			(void) EVP_MD_CTX_init(&ctx);
-			(void) EVP_SignInit_ex(&ctx, md, NULL);
-			(void) EVP_SignUpdate(&ctx, tobesigned->Data,
+			if ((ctx = EVP_MD_CTX_new()) == NULL)
+				return (KMF_ERR_MEMORY);
+			(void) EVP_SignInit_ex(ctx, md, NULL);
+			(void) EVP_SignUpdate(ctx, tobesigned->Data,
 			    (uint32_t)tobesigned->Length);
 			len = (uint32_t)output->Length;
 			p = output->Data;
-			if (!EVP_SignFinal(&ctx, p, (uint32_t *)&len, pkey)) {
+			if (!EVP_SignFinal(ctx, p, (uint32_t *)&len, pkey)) {
 				SET_ERROR(kmfh, ERR_get_error());
 				len = 0;
 				ret = KMF_ERR_INTERNAL;
 			}
 			output->Length = len;
-			(void) EVP_MD_CTX_cleanup(&ctx);
+			EVP_MD_CTX_free(ctx);
 		}
 	} else if (key->keyalg == KMF_DSA) {
 		DSA *dsa = EVP_PKEY_get1_DSA(key->keyp);
@@ -1864,11 +1873,12 @@ OpenSSL_SignData(KMF_HANDLE_T handle, KMF_KEY_HANDLE *key,
 		 * not all mechanisms return ASN.1 encodings (PKCS#11
 		 * and NSS return raw signature data).
 		 */
-		EVP_MD_CTX_init(&ctx);
-		(void) EVP_DigestInit_ex(&ctx, md, NULL);
-		(void) EVP_DigestUpdate(&ctx, tobesigned->Data,
+		if ((ctx = EVP_MD_CTX_new()) == NULL)
+			return (KMF_ERR_MEMORY);
+		(void) EVP_DigestInit_ex(ctx, md, NULL);
+		(void) EVP_DigestUpdate(ctx, tobesigned->Data,
 		    tobesigned->Length);
-		(void) EVP_DigestFinal_ex(&ctx, hash, &hashlen);
+		(void) EVP_DigestFinal_ex(ctx, hash, &hashlen);
 
 		/* Only sign first 20 bytes for SHA2 */
 		if (AlgId == KMF_ALGID_SHA256WithDSA)
@@ -1876,17 +1886,20 @@ OpenSSL_SignData(KMF_HANDLE_T handle, KMF_KEY_HANDLE *key,
 		dsasig = DSA_do_sign(hash, hashlen, dsa);
 		if (dsasig != NULL) {
 			int i;
-			output->Length = i = fixbnlen(dsasig->r, output->Data,
+			const BIGNUM *r, *s;
+
+			DSA_SIG_get0(dsasig, &r, &s);
+			output->Length = i = fixbnlen(r, output->Data,
 			    hashlen);
 
-			output->Length += fixbnlen(dsasig->s, &output->Data[i],
+			output->Length += fixbnlen(s, &output->Data[i],
 			    hashlen);
 
 			DSA_SIG_free(dsasig);
 		} else {
 			SET_ERROR(kmfh, ERR_get_error());
 		}
-		(void) EVP_MD_CTX_cleanup(&ctx);
+		EVP_MD_CTX_free(ctx);
 	} else {
 		return (KMF_ERR_BAD_PARAMETER);
 	}
@@ -2024,17 +2037,11 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 	X509 *xcert = NULL;
 	unsigned char *outbuf = NULL;
 	unsigned char *outbuf_p;
-	char *tmpstr = NULL;
 	int j;
 	int ext_index, nid, len;
 	BIO *mem = NULL;
-#if OPENSSL_VERSION_NUMBER < 0x10000000L
-	STACK *emlst = NULL;
-#else
 	STACK_OF(OPENSSL_STRING) *emlst = NULL;
-#endif
 	X509_EXTENSION *ex;
-	X509_CINF *ci;
 
 	if (pcert == NULL || pcert->Data == NULL || pcert->Length == 0) {
 		return (KMF_ERR_BAD_PARAMETER);
@@ -2076,9 +2083,8 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 		break;
 
 	case KMF_CERT_VERSION:
-		tmpstr = i2s_ASN1_INTEGER(NULL, xcert->cert_info->version);
-		(void) strncpy(resultStr, tmpstr, KMF_CERT_PRINTABLE_LEN);
-		OPENSSL_free(tmpstr);
+		(void) snprintf(resultStr, KMF_CERT_PRINTABLE_LEN,
+		    "%ld", X509_get_version(xcert));
 		len = strlen(resultStr);
 		break;
 
@@ -2091,17 +2097,20 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 		break;
 
 	case KMF_CERT_NOTBEFORE:
-		(void) ASN1_TIME_print(mem, X509_get_notBefore(xcert));
+		(void) ASN1_TIME_print(mem, X509_getm_notBefore(xcert));
 		len = BIO_gets(mem, resultStr, KMF_CERT_PRINTABLE_LEN);
 		break;
 
 	case KMF_CERT_NOTAFTER:
-		(void) ASN1_TIME_print(mem, X509_get_notAfter(xcert));
+		(void) ASN1_TIME_print(mem, X509_getm_notAfter(xcert));
 		len = BIO_gets(mem, resultStr, KMF_CERT_PRINTABLE_LEN);
 		break;
 
 	case KMF_CERT_PUBKEY_DATA:
 		{
+			RSA *rsa;
+			DSA *dsa;
+
 			EVP_PKEY *pkey = X509_get_pubkey(xcert);
 			if (pkey == NULL) {
 				SET_ERROR(kmfh, ERR_get_error());
@@ -2109,15 +2118,16 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 				goto out;
 			}
 
-			if (pkey->type == EVP_PKEY_RSA) {
+			if ((rsa = EVP_PKEY_get0_RSA(pkey)) != NULL) {
 				(void) BIO_printf(mem,
 				    "RSA Public Key: (%d bit)\n",
-				    BN_num_bits(pkey->pkey.rsa->n));
-				(void) RSA_print(mem, pkey->pkey.rsa, 0);
-			} else if (pkey->type == EVP_PKEY_DSA) {
+				    RSA_bits(rsa));
+				(void) RSA_print(mem, rsa, 0);
+
+			} else if ((dsa = EVP_PKEY_get0_DSA(pkey)) != NULL) {
 				(void) BIO_printf(mem,
 				    "%12sDSA Public Key:\n", "");
-				(void) DSA_print(mem, pkey->pkey.dsa, 0);
+				(void) DSA_print(mem, dsa, 0);
 			} else {
 				(void) BIO_printf(mem,
 				    "%12sUnknown Public Key:\n", "");
@@ -2129,30 +2139,50 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 		break;
 	case KMF_CERT_SIGNATURE_ALG:
 	case KMF_CERT_PUBKEY_ALG:
-		if (flag == KMF_CERT_SIGNATURE_ALG) {
-			len = i2a_ASN1_OBJECT(mem,
-			    xcert->sig_alg->algorithm);
-		} else {
-			len = i2a_ASN1_OBJECT(mem,
-			    xcert->cert_info->key->algor->algorithm);
-		}
+		{
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+			ASN1_OBJECT *alg = NULL;
+#else
+			const ASN1_OBJECT *alg = NULL;
+#endif
 
-		if (len > 0) {
-			len = BIO_read(mem, resultStr,
-			    KMF_CERT_PRINTABLE_LEN);
+			if (flag == KMF_CERT_SIGNATURE_ALG) {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+				alg = xcert->sig_alg->algorithm;
+#else
+				const X509_ALGOR *sig_alg = NULL;
+
+				X509_get0_signature(NULL, &sig_alg, xcert);
+				if (sig_alg != NULL)
+					X509_ALGOR_get0(&alg, NULL, NULL,
+					    sig_alg);
+#endif
+			} else {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+				alg = xcert->cert_info->key->algor->algorithm;
+#else
+				X509_PUBKEY *key = X509_get_X509_PUBKEY(xcert);
+
+				if (key != NULL)
+					(void) X509_PUBKEY_get0_param(
+					    (ASN1_OBJECT **)&alg, NULL, 0,
+					    NULL, key);
+#endif
+			}
+
+			if (alg == NULL)
+				len = -1;
+			else if ((len = i2a_ASN1_OBJECT(mem, alg)) > 0)
+				len = BIO_read(mem, resultStr,
+				    KMF_CERT_PRINTABLE_LEN);
 		}
 		break;
 
 	case KMF_CERT_EMAIL:
 		emlst = X509_get1_email(xcert);
-#if OPENSSL_VERSION_NUMBER < 0x10000000L
-		for (j = 0; j < sk_num(emlst); j++)
-			(void) BIO_printf(mem, "%s\n", sk_value(emlst, j));
-#else
 		for (j = 0; j < sk_OPENSSL_STRING_num(emlst); j++)
 			(void) BIO_printf(mem, "%s\n",
 			    sk_OPENSSL_STRING_value(emlst, j));
-#endif
 
 		len = BIO_gets(mem, resultStr, KMF_CERT_PRINTABLE_LEN);
 		X509_email_free(emlst);
@@ -2177,16 +2207,15 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 			ret = KMF_ERR_EXTENSION_NOT_FOUND;
 			goto out;
 		}
-		ci = xcert->cert_info;
 
-		ext_index = X509v3_get_ext_by_NID(ci->extensions, nid, -1);
+		ext_index = X509_get_ext_by_NID(xcert, nid, -1);
 		if (ext_index == -1) {
 			SET_ERROR(kmfh, ERR_get_error());
 
 			ret = KMF_ERR_EXTENSION_NOT_FOUND;
 			goto out;
 		}
-		ex = X509v3_get_ext(ci->extensions, ext_index);
+		ex = X509_get_ext(xcert, ext_index);
 
 		(void) i2a_ASN1_OBJECT(mem, X509_EXTENSION_get_object(ex));
 
@@ -2198,7 +2227,8 @@ OpenSSL_CertGetPrintable(KMF_HANDLE_T handle, const KMF_DATA *pcert,
 		}
 		if (!X509V3_EXT_print(mem, ex, X509V3_EXT_DUMP_UNKNOWN, 4)) {
 			(void) BIO_printf(mem, "%*s", 4, "");
-			(void) M_ASN1_OCTET_STRING_print(mem, ex->value);
+			(void) ASN1_STRING_print(mem,
+			    X509_EXTENSION_get_data(ex));
 		}
 		if (BIO_write(mem, "\n", 1) <= 0) {
 			SET_ERROR(kmfh, ERR_get_error());
@@ -2479,22 +2509,36 @@ end:
 }
 
 /* ocsp_find_signer_sk() is copied from openssl source */
-static X509 *ocsp_find_signer_sk(STACK_OF(X509) *certs, OCSP_RESPID *id)
+static X509 *ocsp_find_signer_sk(STACK_OF(X509) *certs, OCSP_BASICRESP *bs)
 {
 	int i;
 	unsigned char tmphash[SHA_DIGEST_LENGTH], *keyhash;
+	const ASN1_OCTET_STRING *pid;
 
-	/* Easy if lookup by name */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
+	OCSP_RESPID *id = bs->tbsResponseData->responderId;
+
 	if (id->type == V_OCSP_RESPID_NAME)
 		return (X509_find_by_subject(certs, id->value.byName));
+
+	pid = id->value.byKey;
+#else
+	const X509_NAME *pname;
+
+	if (OCSP_resp_get0_id(bs, &pid, &pname) == 0)
+		return (NULL);
+
+	if (pname != NULL)
+		return (X509_find_by_subject(certs, (X509_NAME *)pname));
+#endif
 
 	/* Lookup by key hash */
 
 	/* If key hash isn't SHA1 length then forget it */
-	if (id->value.byKey->length != SHA_DIGEST_LENGTH)
+	if (pid->length != SHA_DIGEST_LENGTH)
 		return (NULL);
 
-	keyhash = id->value.byKey->data;
+	keyhash = pid->data;
 	/* Calculate hash of each key and compare */
 	for (i = 0; i < sk_X509_num(certs); i++) {
 		/* LINTED E_BAD_PTR_CAST_ALIGN */
@@ -2514,13 +2558,14 @@ ocsp_find_signer(X509 **psigner, OCSP_BASICRESP *bs, STACK_OF(X509) *certs,
     X509_STORE *st, unsigned long flags)
 {
 	X509 *signer;
-	OCSP_RESPID *rid = bs->tbsResponseData->responderId;
-	if ((signer = ocsp_find_signer_sk(certs, rid)))	{
+	if ((signer = ocsp_find_signer_sk(certs, bs)))	{
 		*psigner = signer;
 		return (2);
 	}
+
 	if (!(flags & OCSP_NOINTERN) &&
-	    (signer = ocsp_find_signer_sk(bs->certs, rid))) {
+	    (signer = ocsp_find_signer_sk(
+	    (STACK_OF(X509) *)OCSP_resp_get0_certs(bs), bs))) {
 		*psigner = signer;
 		return (1);
 	}
@@ -2543,9 +2588,12 @@ check_response_signature(KMF_HANDLE_T handle, OCSP_BASICRESP *bs,
 	STACK_OF(X509) *cert_stack = NULL;
 	X509 *signer = NULL;
 	X509 *issuer = NULL;
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	EVP_PKEY *skey = NULL;
+#else
+	STACK_OF(X509) *cert_stack2 = NULL;
+#endif
 	unsigned char *ptmp;
-
 
 	if (bs == NULL || issuer_cert == NULL)
 		return (KMF_ERR_BAD_PARAMETER);
@@ -2600,6 +2648,7 @@ check_response_signature(KMF_HANDLE_T handle, OCSP_BASICRESP *bs,
 	}
 
 	/* Verify the signature of the response */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	skey = X509_get_pubkey(signer);
 	if (skey == NULL) {
 		ret = KMF_ERR_OCSP_BAD_SIGNER;
@@ -2607,6 +2656,25 @@ check_response_signature(KMF_HANDLE_T handle, OCSP_BASICRESP *bs,
 	}
 
 	ret = OCSP_BASICRESP_verify(bs, skey, 0);
+#else
+	/*
+	 * Technique based on
+	 * https://mta.openssl.org/pipermail/openssl-users/
+	 *	2017-October/006814.html
+	 */
+	if ((cert_stack2 = sk_X509_new_null()) == NULL) {
+		ret = KMF_ERR_INTERNAL;
+		goto end;
+	}
+
+	if (sk_X509_push(cert_stack2, signer) == NULL) {
+		ret = KMF_ERR_INTERNAL;
+		goto end;
+	}
+
+	ret = OCSP_basic_verify(bs, cert_stack2, NULL, OCSP_NOVERIFY);
+#endif
+
 	if (ret == 0) {
 		ret = KMF_ERR_OCSP_RESPONSE_SIGNATURE;
 		goto end;
@@ -2621,9 +2689,15 @@ end:
 		X509_free(signer);
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)
 	if (skey != NULL) {
 		EVP_PKEY_free(skey);
 	}
+#else
+	if (cert_stack2 != NULL) {
+		sk_X509_free(cert_stack2);
+	}
+#endif
 
 	if (cert_stack != NULL) {
 		sk_X509_free(cert_stack);
@@ -2631,8 +2705,6 @@ end:
 
 	return (ret);
 }
-
-
 
 KMF_RETURN
 OpenSSL_GetOCSPStatusForCert(KMF_HANDLE_T handle,
@@ -2822,9 +2894,9 @@ fetch_key(KMF_HANDLE_T handle, char *path,
 			return (KMF_ERR_KEY_NOT_FOUND);
 		}
 		if (key != NULL) {
-			if (pkey->type == EVP_PKEY_RSA)
+			if (EVP_PKEY_get0_RSA(pkey) != NULL)
 				key->keyalg = KMF_RSA;
-			else if (pkey->type == EVP_PKEY_DSA)
+			else if (EVP_PKEY_get0_DSA(pkey) != NULL)
 				key->keyalg = KMF_DSA;
 
 			key->kstype = KMF_KEYSTORE_OPENSSL;
@@ -3021,11 +3093,12 @@ OpenSSL_FindKey(KMF_HANDLE_T handle,
 static int
 add_alias_to_bag(PKCS12_SAFEBAG *bag, X509 *xcert)
 {
-	if (xcert != NULL && xcert->aux != NULL &&
-	    xcert->aux->alias != NULL) {
+	unsigned char *alias;
+	int len;
+
+	if (xcert != NULL && (alias = X509_alias_get0(xcert, &len)) != NULL) {
 		if (PKCS12_add_friendlyname_asc(bag,
-		    (const char *)xcert->aux->alias->data,
-		    xcert->aux->alias->length) == 0)
+		    (const char *)alias, len) == 0)
 			return (0);
 	}
 	return (1);
@@ -3044,7 +3117,7 @@ add_cert_to_safe(X509 *sslcert, KMF_CREDENTIAL *cred,
 		return (NULL);
 
 	/* Convert cert from X509 struct to PKCS#12 bag */
-	bag = PKCS12_x5092certbag(sslcert);
+	bag = PKCS12_SAFEBAG_create_cert(sslcert);
 	if (bag == NULL) {
 		goto out;
 	}
@@ -3089,7 +3162,7 @@ add_key_to_safe(EVP_PKEY *pkey, KMF_CREDENTIAL *cred,
 		return (NULL);
 	}
 	/* Put the shrouded key into a PKCS#12 bag. */
-	bag = PKCS12_MAKE_SHKEYBAG(
+	bag = PKCS12_SAFEBAG_create_pkcs8_encrypt(
 	    NID_pbe_WithSHA1And3_Key_TripleDES_CBC,
 	    cred->cred, cred->credlen,
 	    NULL, 0, PKCS12_DEFAULT_ITER, p8);
@@ -3128,55 +3201,71 @@ static EVP_PKEY *
 ImportRawRSAKey(KMF_RAW_RSA_KEY *key)
 {
 	RSA		*rsa = NULL;
-	EVP_PKEY 	*newkey = NULL;
+	EVP_PKEY	*newkey = NULL;
+	BIGNUM		*n = NULL, *e = NULL, *d = NULL,
+			*p = NULL, *q = NULL,
+			*dmp1 = NULL, *dmq1 = NULL, *iqmp = NULL;
 
 	if ((rsa = RSA_new()) == NULL)
-		return (NULL);
+		goto cleanup;
 
-	if ((rsa->n = BN_bin2bn(key->mod.val, key->mod.len, rsa->n)) == NULL)
-		return (NULL);
+	if ((n = BN_bin2bn(key->mod.val, key->mod.len, NULL)) == NULL)
+		goto cleanup;
 
-	if ((rsa->e = BN_bin2bn(key->pubexp.val, key->pubexp.len, rsa->e)) ==
-	    NULL)
-		return (NULL);
+	if ((e = BN_bin2bn(key->pubexp.val, key->pubexp.len, NULL)) == NULL)
+		goto cleanup;
 
-	if (key->priexp.val != NULL)
-		if ((rsa->d = BN_bin2bn(key->priexp.val, key->priexp.len,
-		    rsa->d)) == NULL)
-			return (NULL);
+	if (key->priexp.val != NULL &&
+	    (d = BN_bin2bn(key->priexp.val, key->priexp.len, NULL)) == NULL)
+		goto cleanup;
 
-	if (key->prime1.val != NULL)
-		if ((rsa->p = BN_bin2bn(key->prime1.val, key->prime1.len,
-		    rsa->p)) == NULL)
-			return (NULL);
+	if (key->prime1.val != NULL &&
+	    (p = BN_bin2bn(key->prime1.val, key->prime1.len, NULL)) == NULL)
+		goto cleanup;
 
-	if (key->prime2.val != NULL)
-		if ((rsa->q = BN_bin2bn(key->prime2.val, key->prime2.len,
-		    rsa->q)) == NULL)
-			return (NULL);
+	if (key->prime2.val != NULL &&
+	    (q = BN_bin2bn(key->prime2.val, key->prime2.len, NULL)) == NULL)
+		goto cleanup;
 
-	if (key->exp1.val != NULL)
-		if ((rsa->dmp1 = BN_bin2bn(key->exp1.val, key->exp1.len,
-		    rsa->dmp1)) == NULL)
-			return (NULL);
+	if (key->exp1.val != NULL &&
+	    (dmp1 = BN_bin2bn(key->exp1.val, key->exp1.len, NULL)) == NULL)
+		goto cleanup;
 
-	if (key->exp2.val != NULL)
-		if ((rsa->dmq1 = BN_bin2bn(key->exp2.val, key->exp2.len,
-		    rsa->dmq1)) == NULL)
-			return (NULL);
+	if (key->exp2.val != NULL &&
+	    (dmq1 = BN_bin2bn(key->exp2.val, key->exp2.len, NULL)) == NULL)
+		goto cleanup;
 
-	if (key->coef.val != NULL)
-		if ((rsa->iqmp = BN_bin2bn(key->coef.val, key->coef.len,
-		    rsa->iqmp)) == NULL)
-			return (NULL);
+	if (key->coef.val != NULL &&
+	    (iqmp = BN_bin2bn(key->coef.val, key->coef.len, NULL)) == NULL)
+		goto cleanup;
+
+	if (RSA_set0_key(rsa, n, e, d) == 0)
+		goto cleanup;
+	n = e = d = NULL;
+	if (RSA_set0_factors(rsa, p, q) == 0)
+		goto cleanup;
+	p = q = NULL;
+	if (RSA_set0_crt_params(rsa, dmp1, dmq1, iqmp) == 0)
+		goto cleanup;
+	dmp1 = dmq1 = iqmp = NULL;
 
 	if ((newkey = EVP_PKEY_new()) == NULL)
-		return (NULL);
+		goto cleanup;
 
 	(void) EVP_PKEY_set1_RSA(newkey, rsa);
 
+cleanup:
 	/* The original key must be freed once here or it leaks memory */
-	RSA_free(rsa);
+	if (rsa)
+		RSA_free(rsa);
+	BN_free(n);
+	BN_free(e);
+	BN_free(d);
+	BN_free(p);
+	BN_free(q);
+	BN_free(dmp1);
+	BN_free(dmq1);
+	BN_free(iqmp);
 
 	return (newkey);
 }
@@ -3185,40 +3274,52 @@ static EVP_PKEY *
 ImportRawDSAKey(KMF_RAW_DSA_KEY *key)
 {
 	DSA		*dsa = NULL;
-	EVP_PKEY 	*newkey = NULL;
+	EVP_PKEY	*newkey = NULL;
+	BIGNUM		*p = NULL, *q = NULL, *g = NULL,
+			*priv_key = NULL, *pub_key = NULL;
 
 	if ((dsa = DSA_new()) == NULL)
-		return (NULL);
+		goto cleanup;
 
-	if ((dsa->p = BN_bin2bn(key->prime.val, key->prime.len,
-	    dsa->p)) == NULL)
-		return (NULL);
+	if ((p = BN_bin2bn(key->prime.val, key->prime.len, NULL)) == NULL)
+		goto cleanup;
 
-	if ((dsa->q = BN_bin2bn(key->subprime.val, key->subprime.len,
-	    dsa->q)) == NULL)
-		return (NULL);
+	if ((q = BN_bin2bn(key->subprime.val, key->subprime.len, NULL)) == NULL)
+		goto cleanup;
 
-	if ((dsa->g = BN_bin2bn(key->base.val, key->base.len,
-	    dsa->g)) == NULL)
-		return (NULL);
+	if ((g = BN_bin2bn(key->base.val, key->base.len, NULL)) == NULL)
+		goto cleanup;
 
-	if ((dsa->priv_key = BN_bin2bn(key->value.val, key->value.len,
-	    dsa->priv_key)) == NULL)
-		return (NULL);
+	if ((priv_key = BN_bin2bn(key->value.val, key->value.len,
+	    NULL)) == NULL)
+		goto cleanup;
 
-	if (key->pubvalue.val != NULL) {
-		if ((dsa->pub_key = BN_bin2bn(key->pubvalue.val,
-		    key->pubvalue.len, dsa->pub_key)) == NULL)
-			return (NULL);
-	}
+	if (key->pubvalue.val != NULL && (pub_key =
+	    BN_bin2bn(key->pubvalue.val, key->pubvalue.len, NULL)) == NULL)
+		goto cleanup;
+
+	if (DSA_set0_pqg(dsa, p, q, g) == 0)
+		goto cleanup;
+	p = q = g = NULL;
+	if (DSA_set0_key(dsa, pub_key, priv_key) == 0)
+		goto cleanup;
+	pub_key = priv_key = 0;
 
 	if ((newkey = EVP_PKEY_new()) == NULL)
-		return (NULL);
+		goto cleanup;
 
 	(void) EVP_PKEY_set1_DSA(newkey, dsa);
 
+cleanup:
 	/* The original key must be freed once here or it leaks memory */
-	DSA_free(dsa);
+	if (dsa)
+		DSA_free(dsa);
+	BN_free(p);
+	BN_free(q);
+	BN_free(g);
+	BN_free(priv_key);
+	BN_free(pub_key);
+
 	return (newkey);
 }
 
@@ -3733,7 +3834,7 @@ err:
 }
 
 static KMF_RETURN
-openssl_parse_bags(STACK_OF(PKCS12_SAFEBAG) *bags, char *pin,
+openssl_parse_bags(const STACK_OF(PKCS12_SAFEBAG) *bags, char *pin,
 	STACK_OF(EVP_PKEY) *keys, STACK_OF(X509) *certs)
 {
 	KMF_RETURN ret;
@@ -3760,28 +3861,13 @@ set_pkey_attrib(EVP_PKEY *pkey, ASN1_TYPE *attrib, int nid)
 	if (pkey == NULL || attrib == NULL)
 		return (KMF_ERR_BAD_PARAMETER);
 
-	if (pkey->attributes == NULL) {
-		pkey->attributes = sk_X509_ATTRIBUTE_new_null();
-		if (pkey->attributes == NULL)
-			return (KMF_ERR_MEMORY);
-	}
 	attr = X509_ATTRIBUTE_create(nid, attrib->type, attrib->value.ptr);
 	if (attr != NULL) {
 		int i;
-		X509_ATTRIBUTE *a;
-		for (i = 0;
-		    i < sk_X509_ATTRIBUTE_num(pkey->attributes); i++) {
-			/* LINTED E_BAD_PTR_CASE_ALIGN */
-			a = sk_X509_ATTRIBUTE_value(pkey->attributes, i);
-			if (OBJ_obj2nid(a->object) == nid) {
-				X509_ATTRIBUTE_free(a);
-				/* LINTED E_BAD_PTR_CAST_ALIGN */
-				(void) sk_X509_ATTRIBUTE_set(pkey->attributes,
-				    i, attr);
-				return (KMF_OK);
-			}
-		}
-		if (sk_X509_ATTRIBUTE_push(pkey->attributes, attr) == NULL) {
+
+		if ((i = EVP_PKEY_get_attr_by_NID(pkey, nid, -1)) != -1)
+			(void) EVP_PKEY_delete_attr(pkey, i);
+		if (EVP_PKEY_add1_attr(pkey, attr) == 0) {
 			X509_ATTRIBUTE_free(attr);
 			return (KMF_ERR_MEMORY);
 		}
@@ -3800,18 +3886,19 @@ openssl_parse_bag(PKCS12_SAFEBAG *bag, char *pass, int passlen,
 	PKCS8_PRIV_KEY_INFO *p8 = NULL;
 	EVP_PKEY *pkey = NULL;
 	X509 *xcert = NULL;
-	ASN1_TYPE *keyid = NULL;
-	ASN1_TYPE *fname = NULL;
+	const ASN1_TYPE *keyid = NULL;
+	const ASN1_TYPE *fname = NULL;
 	uchar_t *data = NULL;
 
-	keyid = PKCS12_get_attr(bag, NID_localKeyID);
-	fname = PKCS12_get_attr(bag, NID_friendlyName);
+	keyid = PKCS12_SAFEBAG_get0_attr(bag, NID_localKeyID);
+	fname = PKCS12_SAFEBAG_get0_attr(bag, NID_friendlyName);
 
-	switch (M_PKCS12_bag_type(bag)) {
+	switch (PKCS12_SAFEBAG_get_nid(bag)) {
 		case NID_keyBag:
 			if (keylist == NULL)
 				goto end;
-			pkey = EVP_PKCS82PKEY(bag->value.keybag);
+			pkey = EVP_PKCS82PKEY(
+			    PKCS12_SAFEBAG_get0_p8inf(bag));
 			if (pkey == NULL)
 				ret = KMF_ERR_PKCS12_FORMAT;
 
@@ -3819,7 +3906,7 @@ openssl_parse_bag(PKCS12_SAFEBAG *bag, char *pass, int passlen,
 		case NID_pkcs8ShroudedKeyBag:
 			if (keylist == NULL)
 				goto end;
-			p8 = M_PKCS12_decrypt_skey(bag, pass, passlen);
+			p8 = PKCS12_decrypt_skey(bag, pass, passlen);
 			if (p8 == NULL)
 				return (KMF_ERR_AUTH_FAILED);
 			pkey = EVP_PKCS82PKEY(p8);
@@ -3830,9 +3917,10 @@ openssl_parse_bag(PKCS12_SAFEBAG *bag, char *pass, int passlen,
 		case NID_certBag:
 			if (certlist == NULL)
 				goto end;
-			if (M_PKCS12_cert_bag_type(bag) != NID_x509Certificate)
+			if (PKCS12_SAFEBAG_get_bag_nid(bag) !=
+			    NID_x509Certificate)
 				return (KMF_ERR_PKCS12_FORMAT);
-			xcert = M_PKCS12_certbag2x509(bag);
+			xcert = PKCS12_SAFEBAG_get1_cert(bag);
 			if (xcert == NULL) {
 				ret = KMF_ERR_PKCS12_FORMAT;
 				goto end;
@@ -3866,8 +3954,9 @@ openssl_parse_bag(PKCS12_SAFEBAG *bag, char *pass, int passlen,
 				xcert = NULL;
 			break;
 		case NID_safeContentsBag:
-			return (openssl_parse_bags(bag->value.safes, pass,
-			    keylist, certlist));
+			return (openssl_parse_bags(
+			    PKCS12_SAFEBAG_get0_safes(bag),
+			    pass, keylist, certlist));
 		default:
 			ret = KMF_ERR_PKCS12_FORMAT;
 			break;
@@ -4077,35 +4166,41 @@ exportRawRSAKey(RSA *rsa, KMF_RAW_KEY_DATA *key)
 	KMF_RETURN rv;
 	KMF_RAW_RSA_KEY *kmfkey = &key->rawdata.rsa;
 
+	const BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmpq, *iqmp;
+
+	RSA_get0_key(rsa, &n, &e, &d);
+	RSA_get0_factors(rsa, &p, &q);
+	RSA_get0_crt_params(rsa, &dmp1, &dmpq, &iqmp);
+
 	(void) memset(kmfkey, 0, sizeof (KMF_RAW_RSA_KEY));
-	if ((rv = sslBN2KMFBN(rsa->n, &kmfkey->mod)) != KMF_OK)
+	if ((rv = sslBN2KMFBN((BIGNUM *)n, &kmfkey->mod)) != KMF_OK)
 		goto cleanup;
 
-	if ((rv = sslBN2KMFBN(rsa->e, &kmfkey->pubexp)) != KMF_OK)
+	if ((rv = sslBN2KMFBN((BIGNUM *)e, &kmfkey->pubexp)) != KMF_OK)
 		goto cleanup;
 
-	if (rsa->d != NULL)
-		if ((rv = sslBN2KMFBN(rsa->d, &kmfkey->priexp)) != KMF_OK)
+	if (d != NULL)
+		if ((rv = sslBN2KMFBN((BIGNUM *)d, &kmfkey->priexp)) != KMF_OK)
 			goto cleanup;
 
-	if (rsa->p != NULL)
-		if ((rv = sslBN2KMFBN(rsa->p, &kmfkey->prime1)) != KMF_OK)
+	if (p != NULL)
+		if ((rv = sslBN2KMFBN((BIGNUM *)p, &kmfkey->prime1)) != KMF_OK)
 			goto cleanup;
 
-	if (rsa->q != NULL)
-		if ((rv = sslBN2KMFBN(rsa->q, &kmfkey->prime2)) != KMF_OK)
+	if (q != NULL)
+		if ((rv = sslBN2KMFBN((BIGNUM *)q, &kmfkey->prime2)) != KMF_OK)
 			goto cleanup;
 
-	if (rsa->dmp1 != NULL)
-		if ((rv = sslBN2KMFBN(rsa->dmp1, &kmfkey->exp1)) != KMF_OK)
+	if (dmp1 != NULL)
+		if ((rv = sslBN2KMFBN((BIGNUM *)dmp1, &kmfkey->exp1)) != KMF_OK)
 			goto cleanup;
 
-	if (rsa->dmq1 != NULL)
-		if ((rv = sslBN2KMFBN(rsa->dmq1, &kmfkey->exp2)) != KMF_OK)
+	if (dmpq != NULL)
+		if ((rv = sslBN2KMFBN((BIGNUM *)dmpq, &kmfkey->exp2)) != KMF_OK)
 			goto cleanup;
 
-	if (rsa->iqmp != NULL)
-		if ((rv = sslBN2KMFBN(rsa->iqmp, &kmfkey->coef)) != KMF_OK)
+	if (iqmp != NULL)
+		if ((rv = sslBN2KMFBN((BIGNUM *)iqmp, &kmfkey->coef)) != KMF_OK)
 			goto cleanup;
 cleanup:
 	if (rv != KMF_OK)
@@ -4127,18 +4222,22 @@ exportRawDSAKey(DSA *dsa, KMF_RAW_KEY_DATA *key)
 {
 	KMF_RETURN rv;
 	KMF_RAW_DSA_KEY *kmfkey = &key->rawdata.dsa;
+	const BIGNUM *p, *q, *g, *priv_key;
+
+	DSA_get0_pqg(dsa, &p, &q, &g);
+	DSA_get0_key(dsa, NULL, &priv_key);
 
 	(void) memset(kmfkey, 0, sizeof (KMF_RAW_DSA_KEY));
-	if ((rv = sslBN2KMFBN(dsa->p, &kmfkey->prime)) != KMF_OK)
+	if ((rv = sslBN2KMFBN((BIGNUM *)p, &kmfkey->prime)) != KMF_OK)
 		goto cleanup;
 
-	if ((rv = sslBN2KMFBN(dsa->q, &kmfkey->subprime)) != KMF_OK)
+	if ((rv = sslBN2KMFBN((BIGNUM *)q, &kmfkey->subprime)) != KMF_OK)
 		goto cleanup;
 
-	if ((rv = sslBN2KMFBN(dsa->g, &kmfkey->base)) != KMF_OK)
+	if ((rv = sslBN2KMFBN((BIGNUM *)g, &kmfkey->base)) != KMF_OK)
 		goto cleanup;
 
-	if ((rv = sslBN2KMFBN(dsa->priv_key, &kmfkey->value)) != KMF_OK)
+	if ((rv = sslBN2KMFBN((BIGNUM *)priv_key, &kmfkey->value)) != KMF_OK)
 		goto cleanup;
 
 cleanup:
@@ -4221,68 +4320,44 @@ add_key_to_list(KMF_RAW_KEY_DATA **keylist,
 	return (KMF_OK);
 }
 
-static X509_ATTRIBUTE *
-find_attr(STACK_OF(X509_ATTRIBUTE) *attrs, int nid)
-{
-	X509_ATTRIBUTE *a;
-	int i;
-
-	if (attrs == NULL)
-		return (NULL);
-
-	for (i = 0; i < sk_X509_ATTRIBUTE_num(attrs); i++) {
-		/* LINTED E_BAD_PTR_CAST_ALIGN */
-		a = sk_X509_ATTRIBUTE_value(attrs, i);
-		if (OBJ_obj2nid(a->object) == nid)
-			return (a);
-	}
-	return (NULL);
-}
-
 static KMF_RETURN
 convertToRawKey(EVP_PKEY *pkey, KMF_RAW_KEY_DATA *key)
 {
 	KMF_RETURN rv = KMF_OK;
 	X509_ATTRIBUTE *attr;
+	RSA *rsa;
+	DSA *dsa;
+	int loc;
 
 	if (pkey == NULL || key == NULL)
 		return (KMF_ERR_BAD_PARAMETER);
 	/* Convert SSL key to raw key */
-	switch (pkey->type) {
-		case EVP_PKEY_RSA:
-			rv = exportRawRSAKey(EVP_PKEY_get1_RSA(pkey),
-			    key);
-			if (rv != KMF_OK)
-				return (rv);
-			break;
-		case EVP_PKEY_DSA:
-			rv = exportRawDSAKey(EVP_PKEY_get1_DSA(pkey),
-			    key);
-			if (rv != KMF_OK)
-				return (rv);
-			break;
-		default:
-			return (KMF_ERR_BAD_PARAMETER);
-	}
+	if ((rsa = EVP_PKEY_get1_RSA(pkey)) != NULL) {
+		rv = exportRawRSAKey(rsa, key);
+		if (rv != KMF_OK)
+			return (rv);
+	} else if ((dsa = EVP_PKEY_get1_DSA(pkey)) != NULL) {
+		rv = exportRawDSAKey(dsa, key);
+		if (rv != KMF_OK)
+			return (rv);
+	} else
+		return (KMF_ERR_BAD_PARAMETER);
+
 	/*
 	 * If friendlyName, add it to record.
 	 */
-	attr = find_attr(pkey->attributes, NID_friendlyName);
-	if (attr != NULL) {
+
+	if ((loc = EVP_PKEY_get_attr_by_NID(pkey,
+	    NID_friendlyName, -1)) != -1 &&
+	    (attr = EVP_PKEY_get_attr(pkey, loc))) {
 		ASN1_TYPE *ty = NULL;
-		int numattr = sk_ASN1_TYPE_num(attr->value.set);
-		if (attr->single == 0 && numattr > 0) {
-			/* LINTED E_BAD_PTR_CAST_ALIGN */
-			ty = sk_ASN1_TYPE_value(attr->value.set, 0);
+		int numattr = X509_ATTRIBUTE_count(attr);
+		if (numattr > 0) {
+			ty = X509_ATTRIBUTE_get0_type(attr, 0);
 		}
 		if (ty != NULL) {
-#if OPENSSL_VERSION_NUMBER < 0x10000000L
-			key->label = uni2asc(ty->value.bmpstring->data,
-			    ty->value.bmpstring->length);
-#else
 			key->label = OPENSSL_uni2asc(ty->value.bmpstring->data,
 			    ty->value.bmpstring->length);
-#endif
 		}
 	} else {
 		key->label = NULL;
@@ -4291,14 +4366,13 @@ convertToRawKey(EVP_PKEY *pkey, KMF_RAW_KEY_DATA *key)
 	/*
 	 * If KeyID, add it to record as a KMF_DATA object.
 	 */
-	attr = find_attr(pkey->attributes, NID_localKeyID);
-	if (attr != NULL) {
+	if ((loc = EVP_PKEY_get_attr_by_NID(pkey,
+	    NID_localKeyID, -1)) != -1 &&
+	    (attr = EVP_PKEY_get_attr(pkey, loc)) != NULL) {
 		ASN1_TYPE *ty = NULL;
-		int numattr = sk_ASN1_TYPE_num(attr->value.set);
-		if (attr->single == 0 && numattr > 0) {
-			/* LINTED E_BAD_PTR_CAST_ALIGN */
-			ty = sk_ASN1_TYPE_value(attr->value.set, 0);
-		}
+		int numattr = X509_ATTRIBUTE_count(attr);
+		if (numattr > 0)
+			ty = X509_ATTRIBUTE_get0_type(attr, 0);
 		key->id.Data = (uchar_t *)malloc(
 		    ty->value.octet_string->length);
 		if (key->id.Data == NULL)
@@ -5407,7 +5481,8 @@ OpenSSL_FindCertInCRL(KMF_HANDLE_T handle, int numattr, KMF_ATTRIBUTE *attrlist)
 	}
 
 	/* Check if the certificate and the CRL have same issuer */
-	if (X509_NAME_cmp(xcert->cert_info->issuer, xcrl->crl->issuer) != 0) {
+	if (X509_NAME_cmp(X509_get_issuer_name(xcert),
+	    X509_CRL_get_issuer(xcrl)) != 0) {
 		ret = KMF_ERR_ISSUER;
 		goto end;
 	}
@@ -5424,8 +5499,8 @@ OpenSSL_FindCertInCRL(KMF_HANDLE_T handle, int numattr, KMF_ATTRIBUTE *attrlist)
 	for (i = 0; i < sk_X509_REVOKED_num(revoke_stack); i++) {
 		/* LINTED E_BAD_PTR_CAST_ALIGN */
 		revoke = sk_X509_REVOKED_value(revoke_stack, i);
-		if (ASN1_INTEGER_cmp(xcert->cert_info->serialNumber,
-		    revoke->serialNumber) == 0) {
+		if (ASN1_INTEGER_cmp(X509_get_serialNumber(xcert),
+		    X509_REVOKED_get0_serialNumber(revoke)) == 0) {
 			break;
 		}
 	}
@@ -5568,13 +5643,13 @@ OpenSSL_CheckCRLDate(KMF_HANDLE_T handle, char *crlname)
 		ret = KMF_ERR_BAD_CRLFILE;
 		goto cleanup;
 	}
-	i = X509_cmp_time(X509_CRL_get_lastUpdate(xcrl), NULL);
+	i = X509_cmp_time(X509_CRL_get0_lastUpdate(xcrl), NULL);
 	if (i >= 0) {
 		ret = KMF_ERR_VALIDITY_PERIOD;
 		goto cleanup;
 	}
-	if (X509_CRL_get_nextUpdate(xcrl)) {
-		i = X509_cmp_time(X509_CRL_get_nextUpdate(xcrl), NULL);
+	if (X509_CRL_get0_nextUpdate(xcrl)) {
+		i = X509_cmp_time(X509_CRL_get0_nextUpdate(xcrl), NULL);
 
 		if (i <= 0) {
 			ret = KMF_ERR_VALIDITY_PERIOD;

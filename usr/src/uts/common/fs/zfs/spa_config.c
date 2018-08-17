@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc. All rights reserved.
- * Copyright (c) 2011, 2015 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2018 by Delphix. All rights reserved.
  * Copyright 2017 Joyent, Inc.
  */
 
@@ -339,7 +339,8 @@ void
 spa_config_set(spa_t *spa, nvlist_t *config)
 {
 	mutex_enter(&spa->spa_props_lock);
-	nvlist_free(spa->spa_config);
+	if (spa->spa_config != NULL && spa->spa_config != config)
+		nvlist_free(spa->spa_config);
 	spa->spa_config = config;
 	mutex_exit(&spa->spa_props_lock);
 }
@@ -386,15 +387,8 @@ spa_config_generate(spa_t *spa, vdev_t *vd, uint64_t txg, int getstats)
 		    spa->spa_comment);
 	}
 
-#ifdef	_KERNEL
 	hostid = zone_get_hostid(NULL);
-#else	/* _KERNEL */
-	/*
-	 * We're emulating the system's hostid in userland, so we can't use
-	 * zone_get_hostid().
-	 */
-	(void) ddi_strtoul(hw_serial, NULL, 10, &hostid);
-#endif	/* _KERNEL */
+
 	if (hostid != 0) {
 		fnvlist_add_uint64(config, ZPOOL_CONFIG_HOSTID, hostid);
 	}
@@ -516,6 +510,18 @@ spa_config_update(spa_t *spa, int what)
 		 */
 		for (c = 0; c < rvd->vdev_children; c++) {
 			vdev_t *tvd = rvd->vdev_child[c];
+
+			/*
+			 * Explicitly skip vdevs that are indirect or
+			 * log vdevs that are being removed. The reason
+			 * is that both of those can have vdev_ms_array
+			 * set to 0 and we wouldn't want to change their
+			 * metaslab size nor call vdev_expand() on them.
+			 */
+			if (!vdev_is_concrete(tvd) ||
+			    (tvd->vdev_islog && tvd->vdev_removing))
+				continue;
+
 			if (tvd->vdev_ms_array == 0)
 				vdev_metaslab_set_size(tvd);
 			vdev_expand(tvd, txg);

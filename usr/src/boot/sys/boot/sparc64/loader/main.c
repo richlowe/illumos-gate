@@ -1,4 +1,4 @@
-/*-
+/*
  * Initial implementation:
  * Copyright (c) 2001 Robert Drehmel
  * All rights reserved.
@@ -6,7 +6,7 @@
  * As long as the above copyright statement and this notice remain
  * unchanged, you can do what ever you want with this file.
  */
-/*-
+/*
  * Copyright (c) 2008 - 2012 Marius Strobl <marius@FreeBSD.org>
  * All rights reserved.
  *
@@ -73,8 +73,6 @@
 #include "bootstrap.h"
 #include "libofw.h"
 #include "dev_net.h"
-
-extern char bootprog_info[];
 
 enum {
 	HEAPVA		= 0x800000,
@@ -808,8 +806,7 @@ sparc64_zfs_probe(void)
 	if (guid != 0) {
 		zfs_currdev.pool_guid = guid;
 		zfs_currdev.root_guid = 0;
-		zfs_currdev.d_dev = &zfs_dev;
-		zfs_currdev.d_type = zfs_currdev.d_dev->dv_type;
+		zfs_currdev.dd.d_dev = &zfs_dev;
 	}
 }
 #endif /* LOADER_ZFS_SUPPORT */

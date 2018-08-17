@@ -94,6 +94,7 @@ struct smb_share;
 #define	SMI_NOAC	0x10		/* don't cache attributes */
 #define	SMI_LLOCK	0x80		/* local locking only */
 #define	SMI_ACL		0x2000		/* share supports ACLs */
+#define	SMI_DIRECTIO	0x40000		/* do direct I/O */
 #define	SMI_EXTATTR	0x80000		/* share supports ext. attrs */
 #define	SMI_DEAD	0x200000	/* mount has been terminated */
 
@@ -114,6 +115,7 @@ typedef struct smbmntinfo {
 	struct vfs		*smi_vfsp;	/* mount back pointer to vfs */
 	struct smbnode		*smi_root;	/* the root node */
 	struct smb_share	*smi_share;	/* netsmb SMB share conn data */
+	struct taskq		*smi_taskq;	/* for async work */
 	kmutex_t		smi_lock;	/* mutex for flags, etc. */
 	uint32_t		smi_flags;	/* NFS-derived flag bits */
 	uint32_t		smi_status;	/* status bits for this mount */

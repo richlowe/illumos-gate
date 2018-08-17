@@ -40,12 +40,8 @@ struct fs_ops *file_system[] = {
 
 static const boot_module_t *boot_modules[] =
 {
-#ifdef EFI_ZFS_BOOT
 	&zfs_module,
-#endif
-#ifdef EFI_UFS_BOOT
 	&ufs_module
-#endif
 };
 
 #define NUM_BOOT_MODULES	nitems(boot_modules)
@@ -460,9 +456,11 @@ static EFI_STATUS
 probe_handle(EFI_HANDLE h, EFI_DEVICE_PATH *imgpath, BOOLEAN *preferred)
 {
 	dev_info_t *devinfo;
-	EFI_BLOCK_IO *blkio;
-	EFI_DEVICE_PATH *devpath;
+	EFI_BLOCK_IO *blkio = NULL;
+	EFI_DEVICE_PATH *devpath, *dp;
+	HARDDRIVE_DEVICE_PATH *hd;
 	EFI_STATUS status;
+	extern UINT64 start_sector;	/* from multiboot.S */
 	UINTN i;
 
 	/* Figure out if we're dealing with an actual partition. */
@@ -492,6 +490,23 @@ probe_handle(EFI_HANDLE h, EFI_DEVICE_PATH *imgpath, BOOLEAN *preferred)
 		return (EFI_UNSUPPORTED);
 
 	*preferred = device_paths_match(imgpath, devpath);
+
+	/*
+	 * This is the boot device. Check for the start of the partition.
+	 * If it does not match what is specified in the stage1 loader then
+	 * this is not our preferred device.
+	 */
+	if (*preferred == TRUE && start_sector != 0) {
+		dp = devpath_last(devpath);
+
+		if (dp != NULL &&
+		    dp->Type == MEDIA_DEVICE_PATH &&
+		    dp->SubType == MEDIA_HARDDRIVE_DP) {
+			hd = (HARDDRIVE_DEVICE_PATH *)dp;
+			if (hd->PartitionStart != start_sector)
+				*preferred = FALSE;
+		}
+	}
 
 	/* Run through each module, see if it can load this partition */
 	for (i = 0; i < NUM_BOOT_MODULES; i++) {
@@ -582,10 +597,10 @@ efi_main(EFI_HANDLE Ximage, EFI_SYSTEM_TABLE *Xsystab)
 	conout = ST->ConOut;
 	conout->Reset(conout, TRUE);
 	max_dim = best_mode = 0;
-	for (i = 0; ; i++) {
+	for (i = 0; i < conout->Mode->MaxMode; i++) {
 		status = conout->QueryMode(conout, i, &cols, &rows);
 		if (EFI_ERROR(status))
-			break;
+			continue;
 		if (cols * rows > max_dim) {
 			max_dim = cols * rows;
 			best_mode = i;

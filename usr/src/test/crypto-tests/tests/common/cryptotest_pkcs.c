@@ -11,10 +11,12 @@
 
 /*
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018, Joyent, Inc.
  */
 
 #include <stdio.h>
 #include <cryptoutil.h>
+#include <security/cryptoki.h>
 
 #include "cryptotest.h"
 
@@ -64,7 +66,7 @@ cryptotest_init(cryptotest_t *arg, size_t fg)
 
 	op->mechname = arg->mechname;
 
-	op->hsession = CRYPTO_INVALID_SESSION;
+	op->hsession = CK_INVALID_HANDLE;
 	op->fg = fg;
 
 	if (op->out == NULL)
@@ -87,7 +89,7 @@ int
 cryptotest_close(crypto_op_t *op)
 {
 	(void) C_DestroyObject(op->hsession, op->keyt);
-	if (op->hsession != CRYPTO_INVALID_SESSION)
+	if (op->hsession != CK_INVALID_HANDLE)
 		(void) cryptotest_close_session(op->hsession);
 	free(op);
 	return (C_Finalize(NULL));
@@ -102,7 +104,6 @@ get_mech_info(crypto_op_t *op)
 		cryptotest_error("get_mech_info", rv);
 		(void) fprintf(stderr, "failed to resolve mechanism name %s\n",
 		    op->mechname);
-		(void) cryptotest_close(op);
 		return (CTEST_NAME_RESOLVE_FAILED);
 	}
 	return (rv);
@@ -119,7 +120,6 @@ get_hsession_by_mech(crypto_op_t *op)
 		(void) fprintf(stderr,
 		    "could not find provider for mechanism %lu\n",
 		    op->mech);
-		(void) cryptotest_close(op);
 		return (CTEST_MECH_NO_PROVIDER);
 	}
 	return (rv);
@@ -397,5 +397,58 @@ decrypt_final(crypto_op_t *op, size_t encrlen)
 	rv = C_DecryptFinal(op->hsession, op->out + encrlen, &outlen);
 	if (rv != CKR_OK)
 		cryptotest_error("C_DecryptFinal", rv);
+	return (rv);
+}
+
+/*
+ * DIGEST_ functions
+ */
+int
+digest_init(crypto_op_t *op)
+{
+	CK_MECHANISM mech;
+	CK_RV rv;
+
+	mech.mechanism = op->mech;
+	mech.pParameter = op->param;
+	mech.ulParameterLen = op->paramlen;
+
+	rv = C_DigestInit(op->hsession, &mech);
+	if (rv != CKR_OK)
+		cryptotest_error("C_DigestInit", rv);
+	return (rv);
+}
+
+int
+digest_single(crypto_op_t *op)
+{
+	CK_RV rv;
+
+	rv = C_Digest(op->hsession, op->in, op->inlen,
+	    op->out, (CK_ULONG_PTR)&op->outlen);
+	if (rv != CKR_OK)
+		cryptotest_error("C_Digest", rv);
+	return (rv);
+}
+
+int
+digest_update(crypto_op_t *op, int offset)
+{
+	CK_RV rv;
+
+	rv = C_DigestUpdate(op->hsession, op->in + offset, op->updatelen);
+	if (rv != CKR_OK)
+		cryptotest_error("C_DigestUpdate", rv);
+	return (rv);
+}
+
+int
+digest_final(crypto_op_t *op)
+{
+	CK_RV rv;
+
+	rv = C_DigestFinal(op->hsession, op->out, (CK_ULONG_PTR)&op->outlen);
+	if (rv != CKR_OK)
+		cryptotest_error("C_DigestFinal", rv);
 	return (rv);
 }

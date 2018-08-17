@@ -981,6 +981,7 @@ usr/src/uts/common/io/ixgbe/core/ixgbe_x540.c
 usr/src/uts/common/io/ixgbe/core/ixgbe_x540.h
 usr/src/uts/common/io/ixgbe/core/ixgbe_x550.c
 usr/src/uts/common/io/ixgbe/core/ixgbe_x550.h
+usr/src/uts/common/io/qede/*
 usr/src/uts/common/io/sfxge/common/ef10_ev.c
 usr/src/uts/common/io/sfxge/common/ef10_filter.c
 usr/src/uts/common/io/sfxge/common/ef10_impl.h
@@ -1039,17 +1040,7 @@ usr/src/uts/common/io/sfxge/common/siena_nvram.c
 usr/src/uts/common/io/sfxge/common/siena_phy.c
 usr/src/uts/common/io/sfxge/common/siena_sram.c
 usr/src/uts/common/io/sfxge/common/siena_vpd.c
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_cnfg.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_hbd.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_init.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_ioc.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_ra.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_raid.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_sas.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_targ.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_tool.h
-usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/mpi2_type.h
+usr/src/uts/common/sys/scsi/adapters/mpt_sas/mpi/*
 usr/src/uts/intel/io/acpica/debugger/dbcmds.c
 usr/src/uts/intel/io/acpica/debugger/dbdisply.c
 usr/src/uts/intel/io/acpica/debugger/dbexec.c

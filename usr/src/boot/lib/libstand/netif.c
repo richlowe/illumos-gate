@@ -62,7 +62,7 @@ netif_init(void)
 {
 	struct netif_driver *drv;
 	int d, i;
-    
+
 #ifdef NETIF_DEBUG
 	if (netif_debug)
 		printf("netif_init: called\n");
@@ -84,13 +84,13 @@ netif_match(struct netif *nif, void *machdep_hint)
 		printf("%s%d: netif_match (%d)\n", drv->netif_bname,
 		    nif->nif_unit, nif->nif_sel);
 #endif
-	return drv->netif_match(nif, machdep_hint);
+	return (drv->netif_match(nif, machdep_hint));
 }
 
 struct netif *
 netif_select(void *machdep_hint)
 {
-	int d, u, unit_done, s;
+	int d, u, s;
 	struct netif_driver *drv;
 	struct netif cur_if;
 	static struct netif best_if;
@@ -106,8 +106,6 @@ netif_select(void *machdep_hint)
 
 		for (u = 0; u < drv->netif_nifs; u++) {
 			cur_if.nif_unit = u;
-			unit_done = 0;
-		
 #ifdef NETIF_DEBUG
 			if (netif_debug)
 				printf("\t%s%d:", drv->netif_bname,
@@ -143,7 +141,7 @@ netif_select(void *machdep_hint)
 	}
 
 	if (best_if.nif_driver == NULL)
-		return NULL;
+		return (NULL);
 
 	best_if.nif_driver->
 	    netif_ifs[best_if.nif_unit].dif_used |= (1 << best_if.nif_sel);
@@ -151,10 +149,10 @@ netif_select(void *machdep_hint)
 #ifdef NETIF_DEBUG
 	if (netif_debug)
 		printf("netif_select: %s%d(%d) wins\n",
-			best_if.nif_driver->netif_bname,
-			best_if.nif_unit, best_if.nif_sel);
+		    best_if.nif_driver->netif_bname,
+		    best_if.nif_unit, best_if.nif_sel);
 #endif
-	return &best_if;
+	return (&best_if);
 }
 
 int
@@ -166,7 +164,7 @@ netif_probe(struct netif *nif, void *machdep_hint)
 	if (netif_debug)
 		printf("%s%d: netif_probe\n", drv->netif_bname, nif->nif_unit);
 #endif
-	return drv->netif_probe(nif, machdep_hint);
+	return (drv->netif_probe(nif, machdep_hint));
 }
 
 void
@@ -178,15 +176,15 @@ netif_attach(struct netif *nif, struct iodesc *desc, void *machdep_hint)
 	if (netif_debug)
 		printf("%s%d: netif_attach\n", drv->netif_bname, nif->nif_unit);
 #endif
-	desc->io_netif = nif; 
+	desc->io_netif = nif;
 #ifdef PARANOID
 	if (drv->netif_init == NULL)
 		panic("%s%d: no netif_init support\n", drv->netif_bname,
 		    nif->nif_unit);
 #endif
 	drv->netif_init(desc, machdep_hint);
-	bzero(drv->netif_ifs[nif->nif_unit].dif_stats, 
-	    sizeof(struct netif_stats));
+	bzero(drv->netif_ifs[nif->nif_unit].dif_stats,
+	    sizeof (struct netif_stats));
 }
 
 void
@@ -276,7 +274,7 @@ netif_open(void *machdep_hint)
 	int fd;
 	struct iodesc *s;
 	struct netif *nif;
-	
+
 	/* find a free socket */
 	for (fd = 0, s = sockets; fd < SOPEN_MAX; fd++, s++)
 		if (s->io_netif == (struct netif *)0)
@@ -285,10 +283,10 @@ netif_open(void *machdep_hint)
 	return (-1);
 
 fnd:
-	bzero(s, sizeof(*s));
+	bzero(s, sizeof (*s));
 	netif_init();
 	nif = netif_select(machdep_hint);
-	if (!nif) 
+	if (!nif)
 		panic("netboot: no interfaces left untried");
 	if (netif_probe(nif, machdep_hint)) {
 		printf("netboot: couldn't probe %s%d\n",

@@ -1,14 +1,49 @@
-'\" te
-.\" Copyright (C) 2008, Sun Microsystems, Inc. All Rights Reserved.
-.\" Copyright 1989 AT&T.
-.\" Portions Copyright (c) 1992, X/Open Company Limited. All Rights Reserved
-.\" Sun Microsystems, Inc. gratefully acknowledges The Open Group for permission to reproduce portions of its copyrighted documentation. Original documentation from The Open Group can be obtained online at
+.\"
+.\" Sun Microsystems, Inc. gratefully acknowledges The Open Group for
+.\" permission to reproduce portions of its copyrighted documentation.
+.\" Original documentation from The Open Group can be obtained online at
 .\" http://www.opengroup.org/bookstore/.
-.\" The Institute of Electrical and Electronics Engineers and The Open Group, have given us permission to reprint portions of their documentation. In the following statement, the phrase "this text" refers to portions of the system documentation. Portions of this text are reprinted and reproduced in electronic form in the Sun OS Reference Manual, from IEEE Std 1003.1, 2004 Edition, Standard for Information Technology -- Portable Operating System Interface (POSIX), The Open Group Base Specifications Issue 6, Copyright (C) 2001-2004 by the Institute of Electrical and Electronics Engineers, Inc and The Open Group. In the event of any discrepancy between these versions and the original IEEE and The Open Group Standard, the original IEEE and The Open Group Standard is the referee document. The original Standard can be obtained online at http://www.opengroup.org/unix/online.html.
-.\"  This notice shall appear on any product containing this material.
-.\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License.
-.\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.  See the License for the specific language governing permissions and limitations under the License.
-.\" When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
+.\"
+.\" The Institute of Electrical and Electronics Engineers and The Open
+.\" Group, have given us permission to reprint portions of their
+.\" documentation.
+.\"
+.\" In the following statement, the phrase ``this text'' refers to portions
+.\" of the system documentation.
+.\"
+.\" Portions of this text are reprinted and reproduced in electronic form
+.\" in the SunOS Reference Manual, from IEEE Std 1003.1, 2004 Edition,
+.\" Standard for Information Technology -- Portable Operating System
+.\" Interface (POSIX), The Open Group Base Specifications Issue 6,
+.\" Copyright (C) 2001-2004 by the Institute of Electrical and Electronics
+.\" Engineers, Inc and The Open Group.  In the event of any discrepancy
+.\" between these versions and the original IEEE and The Open Group
+.\" Standard, the original IEEE and The Open Group Standard is the referee
+.\" document.  The original Standard can be obtained online at
+.\" http://www.opengroup.org/unix/online.html.
+.\"
+.\" This notice shall appear on any product containing this material.
+.\"
+.\" The contents of this file are subject to the terms of the
+.\" Common Development and Distribution License (the "License").
+.\" You may not use this file except in compliance with the License.
+.\"
+.\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+.\" or http://www.opensolaris.org/os/licensing.
+.\" See the License for the specific language governing permissions
+.\" and limitations under the License.
+.\"
+.\" When distributing Covered Code, include this CDDL HEADER in each
+.\" file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+.\" If applicable, add the following below this CDDL HEADER, with the
+.\" fields enclosed by brackets "[]" replaced with your own identifying
+.\" information: Portions Copyright [yyyy] [name of copyright owner]
+.\"
+.\"
+.\" Copyright 1989 AT&T
+.\" Portions Copyright (c) 1992, X/Open Company Limited. All Rights Reserved
+.\" Copyright (c) 2008, Sun Microsystems, Inc. All Rights Reserved.
+.\"
 .TH GETHOSTBYNAME 3NSL "Sep 10, 2013"
 .SH NAME
 gethostbyname, gethostbyname_r, gethostbyaddr, gethostbyaddr_r, gethostent,
@@ -64,7 +99,6 @@ gethostent_r, sethostent, endhostent \- get network host entry
 .fi
 
 .SH DESCRIPTION
-.sp
 .LP
 These functions are used to obtain entries describing hosts. An entry can come
 from any of the sources for \fBhosts\fR specified in the
@@ -91,7 +125,7 @@ by \fIaddr\fR.
 .sp
 .LP
 All addresses are returned in network order. In order to interpret the
-addresses, \fBbyteorder\fR(3SOCKET) must be used for byte order conversion.
+addresses, \fBbyteorder\fR(3C) must be used for byte order conversion.
 .sp
 .LP
 The \fBsethostent()\fR, \fBgethostent()\fR, and \fBendhostent()\fR functions
@@ -116,7 +150,6 @@ deallocate resources it was using. It is still allowed, but possibly less
 efficient, for the process to call more host retrieval functions after calling
 \fBendhostent()\fR.
 .SS "Reentrant Interfaces"
-.sp
 .LP
 The \fBgethostbyname()\fR, \fBgethostbyaddr()\fR, and \fBgethostent()\fR
 functions use static storage that is reused in each call, making these
@@ -161,7 +194,6 @@ Like their non-reentrant counterparts, \fBgethostbyname_r()\fR and
 \fBgethostbyaddr_r()\fR leave the enumeration position in an indeterminate
 state.
 .SH RETURN VALUES
-.sp
 .LP
 Host entries are represented by the \fBstruct hostent\fR structure defined in
 \fB<netdb.h>\fR:
@@ -209,7 +241,6 @@ always equal to the \fIresult\fR pointer that was supplied by the caller.
 The \fBsethostent()\fR and \fBendhostent()\fR functions return \fB0\fR on
 success.
 .SH ERRORS
-.sp
 .LP
 The reentrant functions \fBgethostbyname_r()\fR, \fBgethostbyaddr_r()\fR, and
 \fBgethostent_r()\fR will return \fINULL\fR and set \fIerrno\fR to \fBERANGE\fR
@@ -294,7 +325,6 @@ Note that the preceding sample program is unsafe for use in multithreaded
 applications.
 
 .SH FILES
-.sp
 .ne 2
 .na
 \fB\fB/etc/hosts\fR\fR
@@ -323,7 +353,6 @@ configuration file for the name service switch
 .RE
 
 .SH ATTRIBUTES
-.sp
 .LP
 See \fBattributes\fR(5) for descriptions of the following attributes:
 .sp
@@ -341,19 +370,16 @@ T}
 .TE
 
 .SH SEE ALSO
-.sp
 .LP
-\fBIntro\fR(2), \fBIntro\fR(3), \fBbyteorder\fR(3SOCKET), \fBinet\fR(3SOCKET),
+\fBIntro\fR(2), \fBIntro\fR(3), \fBbyteorder\fR(3C), \fBinet\fR(3SOCKET),
 \fBnetdb.h\fR(3HEAD), \fBnetdir\fR(3NSL), \fBhosts\fR(4), \fBnetconfig\fR(4),
 \fBnss\fR(4), \fBnsswitch.conf\fR(4), \fBattributes\fR(5)
 .SH WARNINGS
-.sp
 .LP
 The reentrant interfaces \fBgethostbyname_r()\fR, \fBgethostbyaddr_r()\fR, and
 \fBgethostent_r()\fR are included in this release on an uncommitted basis only
 and are subject to change or removal in future minor releases.
 .SH NOTES
-.sp
 .LP
 To ensure that they all return consistent results, \fBgethostbyname()\fR,
 \fBgethostbyname_r()\fR, and \fBnetdir_getbyname()\fR are implemented in terms

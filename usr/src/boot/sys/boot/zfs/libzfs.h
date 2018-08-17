@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 2012 Andriy Gapon <avg@FreeBSD.org>
  * All rights reserved.
  *
@@ -22,8 +22,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
 #ifndef _BOOT_LIBZFS_H_
@@ -33,16 +31,9 @@
 
 /*
  * ZFS fully-qualified device descriptor.
- * Note, this must match the 'struct devdesc' declaration in bootstrap.h.
- * Arch-specific device descriptors should be binary compatible with this
- * structure if they are to support ZFS.
  */
-struct zfs_devdesc
-{
-    struct devsw	*d_dev;
-    int			d_type;
-    int			d_unit;
-    void		*d_opendata;
+struct zfs_devdesc {
+    struct devdesc	dd;		/* Must be first. */
     uint64_t		pool_guid;
     uint64_t		root_guid;
 };

@@ -131,6 +131,14 @@ typedef enum zfs_error {
 	EZFS_POOLREADONLY,	/* pool is in read-only mode */
 	EZFS_SCRUB_PAUSED,	/* scrub currently paused */
 	EZFS_NO_PENDING,	/* cannot cancel, no operation is pending */
+	EZFS_CHECKPOINT_EXISTS,	/* checkpoint exists */
+	EZFS_DISCARDING_CHECKPOINT,	/* currently discarding a checkpoint */
+	EZFS_NO_CHECKPOINT,	/* pool has no checkpoint */
+	EZFS_DEVRM_IN_PROGRESS,	/* a device is currently being removed */
+	EZFS_VDEV_TOO_BIG,	/* a device is too big to be used */
+	EZFS_TOOMANY,		/* argument list too long */
+	EZFS_INITIALIZING,	/* currently initializing */
+	EZFS_NO_INITIALIZE,	/* no active initialize */
 	EZFS_UNKNOWN
 } zfs_error_t;
 
@@ -255,6 +263,8 @@ typedef struct splitflags {
  * Functions to manipulate pool and vdev state
  */
 extern int zpool_scan(zpool_handle_t *, pool_scan_func_t, pool_scrub_cmd_t);
+extern int zpool_initialize(zpool_handle_t *, pool_initialize_func_t,
+    nvlist_t *);
 extern int zpool_clear(zpool_handle_t *, const char *, nvlist_t *);
 extern int zpool_reguid(zpool_handle_t *);
 extern int zpool_reopen(zpool_handle_t *);
@@ -388,6 +398,7 @@ typedef struct importargs {
 	int can_be_active : 1;	/* can the pool be active?		*/
 	int unique : 1;		/* does 'poolname' already exist?	*/
 	int exists : 1;		/* set on return if pool already exists	*/
+	nvlist_t *policy;	/* load policy (max txg, rewind, etc.)	*/
 } importargs_t;
 
 extern nvlist_t *zpool_search_import(libzfs_handle_t *, importargs_t *);
@@ -416,6 +427,8 @@ extern int zfs_ioctl(libzfs_handle_t *, int, struct zfs_cmd *);
 extern int zpool_get_physpath(zpool_handle_t *, char *, size_t);
 extern void zpool_explain_recover(libzfs_handle_t *, const char *, int,
     nvlist_t *);
+extern int zpool_checkpoint(zpool_handle_t *);
+extern int zpool_discard_checkpoint(zpool_handle_t *);
 
 /*
  * Basic handle manipulations.  These functions do not create or destroy the
@@ -563,12 +576,11 @@ typedef struct get_all_cb {
 	zfs_handle_t	**cb_handles;
 	size_t		cb_alloc;
 	size_t		cb_used;
-	boolean_t	cb_verbose;
-	int		(*cb_getone)(zfs_handle_t *, void *);
 } get_all_cb_t;
 
+void zfs_foreach_mountpoint(libzfs_handle_t *, zfs_handle_t **, size_t,
+    zfs_iter_f, void *, boolean_t);
 void libzfs_add_handle(get_all_cb_t *, zfs_handle_t *);
-int libzfs_dataset_cmp(const void *, const void *);
 
 /*
  * Functions to create and destroy datasets.

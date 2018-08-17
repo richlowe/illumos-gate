@@ -23,7 +23,7 @@
 # Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2011, 2014 by Delphix. All rights reserved.
 # Copyright (c) 2013 by Saso Kiselkov. All rights reserved.
-# Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2016 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2017, Joyent, Inc.
 # Copyright 2016 OmniTI Computer Consulting, Inc.  All rights reserved.
@@ -303,6 +303,7 @@ GENUNIX_OBJS +=	\
 		sctp_crc32.o	\
 		secflags.o	\
 		seg_dev.o	\
+		seg_hole.o	\
 		seg_kp.o	\
 		seg_kpm.o	\
 		seg_map.o	\
@@ -864,72 +865,6 @@ SBP2_OBJS += cfgrom.o sbp2.o
 
 PMODEM_OBJS += pmodem.o pmodem_cis.o cis.o cis_callout.o cis_handlers.o cis_params.o
 
-DSW_OBJS +=	dsw.o dsw_dev.o ii_tree.o
-
-NCALL_OBJS +=	ncall.o \
-		ncall_stub.o
-
-RDC_OBJS +=	rdc.o \
-		rdc_dev.o \
-		rdc_io.o \
-		rdc_clnt.o \
-		rdc_prot_xdr.o \
-		rdc_svc.o \
-		rdc_bitmap.o \
-		rdc_health.o \
-		rdc_subr.o \
-		rdc_diskq.o
-
-RDCSRV_OBJS +=	rdcsrv.o
-
-RDCSTUB_OBJS += rdc_stub.o
-
-SDBC_OBJS +=	sd_bcache.o \
-		sd_bio.o \
-		sd_conf.o \
-		sd_ft.o \
-		sd_hash.o \
-		sd_io.o \
-		sd_misc.o \
-		sd_pcu.o \
-		sd_tdaemon.o \
-		sd_trace.o \
-		sd_iob_impl0.o \
-		sd_iob_impl1.o \
-		sd_iob_impl2.o \
-		sd_iob_impl3.o \
-		sd_iob_impl4.o \
-		sd_iob_impl5.o \
-		sd_iob_impl6.o \
-		sd_iob_impl7.o \
-		safestore.o \
-		safestore_ram.o
-
-NSCTL_OBJS +=	nsctl.o \
-		nsc_cache.o \
-		nsc_disk.o \
-		nsc_dev.o \
-		nsc_freeze.o \
-		nsc_gen.o \
-		nsc_mem.o \
-		nsc_ncallio.o \
-		nsc_power.o \
-		nsc_resv.o \
-		nsc_rmspin.o \
-		nsc_solaris.o \
-		nsc_trap.o \
-		nsc_list.o
-UNISTAT_OBJS +=	spuni.o \
-		spcs_s_k.o
-
-NSKERN_OBJS +=	nsc_ddi.o \
-		nsc_proc.o \
-		nsc_raw.o \
-		nsc_thread.o \
-		nskernd.o
-
-SV_OBJS +=	sv.o
-
 PMCS_OBJS += pmcs_attach.o pmcs_ds.o pmcs_intr.o pmcs_nvram.o pmcs_sata.o \
 		pmcs_scsa.o pmcs_smhba.o pmcs_subr.o pmcs_fwlog.o
 
@@ -1377,12 +1312,14 @@ LUA_OBJS +=			\
 
 ZFS_COMMON_OBJS +=		\
 	abd.o			\
+	aggsum.o		\
 	arc.o			\
 	blkptr.o		\
 	bplist.o		\
 	bpobj.o			\
 	bptree.o		\
 	bqueue.o		\
+	cityhash.o		\
 	dbuf.o			\
 	ddt.o			\
 	ddt_zap.o		\
@@ -1421,6 +1358,7 @@ ZFS_COMMON_OBJS +=		\
 	edonr_zfs.o		\
 	skein_zfs.o		\
 	spa.o			\
+	spa_checkpoint.o	\
 	spa_config.o		\
 	spa_errlog.o		\
 	spa_history.o		\
@@ -1436,6 +1374,7 @@ ZFS_COMMON_OBJS +=		\
 	vdev_indirect.o		\
 	vdev_indirect_births.o	\
 	vdev_indirect_mapping.o	\
+	vdev_initialize.o	\
 	vdev_label.o		\
 	vdev_mirror.o		\
 	vdev_missing.o		\
@@ -1463,7 +1402,8 @@ ZFS_COMMON_OBJS +=		\
 	zio_compress.o		\
 	zio_inject.o		\
 	zle.o			\
-	zrlock.o
+	zrlock.o		\
+	zthr.o
 
 ZFS_SHARED_OBJS +=		\
 	zfeature_common.o	\
@@ -2219,6 +2159,7 @@ BNXE_OBJS +=	bnxe_cfg.o		\
 		bnxe_tx.o		\
 		bnxe_workq.o		\
 		bnxe_clc.o		\
+		bnxe_illumos.o		\
 		ecore_sp_verbs.o	\
 		bnxe_context.o		\
 		57710_init_values.o	\
@@ -2254,3 +2195,15 @@ BNXE_OBJS +=	bnxe_cfg.o		\
 		lm_sp_req_mgr.o		\
 		lm_stats.o		\
 		lm_util.o
+
+#
+# The QEDE_EN_OBJS list are general objects that are shared across
+# multiple different operating systems. QEDE_OBJS are illumos-specific
+# objects.
+#
+QEDE_OBJS += qede_cfg.o qede_dbg.o qede_fp.o qede_gld.o \
+	     qede_kstat.o qede_main.o qede_misc.o qede_osal.o
+QEDE_GEN_OBJS += ecore_hw.o ecore_cxt.o ecore_selftest.o ecore_init_ops.o \
+		  ecore_init_fw_funcs.o ecore_sp_commands.o ecore_dcbx.o \
+		  ecore_dbg_fw_funcs.o ecore_mcp.o ecore_spq.o ecore_phy.o \
+		  ecore_dev.o ecore_l2.o ecore_int.o

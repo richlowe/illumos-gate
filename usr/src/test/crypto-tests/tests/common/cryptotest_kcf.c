@@ -11,6 +11,7 @@
 
 /*
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018, Joyent, Inc.
  */
 
 #include <fcntl.h>
@@ -134,7 +135,6 @@ get_mech_info(crypto_op_t *op)
 	    (uint_t *)&get_number, "get_mech_info") != CRYPTO_SUCCESS) {
 		(void) fprintf(stderr, "failed to resolve mechanism name %s\n",
 		    op->mechname);
-		(void) cryptotest_close(op);
 		return (CTEST_NAME_RESOLVE_FAILED);
 	}
 	op->mech = get_number.pn_internal_number;
@@ -158,7 +158,6 @@ get_hsession_by_mech(crypto_op_t *op)
 		(void) fprintf(stderr,
 		    "could not find provider for mechanism %llu\n",
 		    mech.mech_type);
-		(void) cryptotest_close(op);
 		return (CTEST_MECH_NO_PROVIDER);
 	}
 
@@ -375,4 +374,68 @@ decrypt_final(crypto_op_t *op, size_t encrlen)
 	final.df_databuf = op->out + encrlen;
 
 	return (kcf_do_ioctl(CRYPTO_DECRYPT_FINAL, (uint_t *)&final, "final"));
+}
+
+int
+digest_init(crypto_op_t *op)
+{
+	crypto_digest_init_t init;
+
+	bzero(&init, sizeof (init));
+
+	init.di_session = op->hsession;
+
+	init.di_mech.cm_type = op->mech;
+	init.di_mech.cm_param = NULL;
+	init.di_mech.cm_param_len = 0;
+
+	return (kcf_do_ioctl(CRYPTO_DIGEST_INIT, (uint_t *)&init, "init"));
+}
+
+int
+digest_single(crypto_op_t *op)
+{
+	crypto_digest_t digest;
+
+	bzero(&digest, sizeof (digest));
+
+	digest.cd_session = op->hsession;
+
+	digest.cd_datalen = op->inlen;
+	digest.cd_databuf = op->in;
+	digest.cd_digestlen = op->outlen;
+	digest.cd_digestbuf = op->out;
+
+	return (kcf_do_ioctl(CRYPTO_DIGEST, (uint_t *)&digest, "digest"));
+}
+
+int
+digest_update(crypto_op_t *op, int offset)
+{
+	crypto_digest_update_t update;
+
+	bzero(&update, sizeof (update));
+
+	update.du_session = op->hsession;
+
+	update.du_datalen = op->updatelen;
+	update.du_databuf = op->in + offset;
+
+	return (kcf_do_ioctl(CRYPTO_DIGEST_UPDATE, (uint_t *)&update,
+	    "update"));
+}
+
+int
+digest_final(crypto_op_t *op)
+{
+	crypto_digest_final_t final;
+
+	bzero(&final, sizeof (final));
+
+	final.df_session = op->hsession;
+
+	final.df_digestlen = op->outlen;
+	final.df_digestbuf = op->out;
+
+	return (kcf_do_ioctl(CRYPTO_DIGEST_FINAL, (uint_t *)&final, "final"));
 }

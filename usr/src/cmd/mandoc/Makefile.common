@@ -12,6 +12,7 @@
 #
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2017 Nexenta Systems, Inc.
+# Copyright 2018, Joyent, Inc.
 #
 
 PROG=		mandoc
@@ -75,10 +76,13 @@ OBJS=		att.o		\
 
 OBJS +=		compat_ohash.o
 
-CFLAGS +=	$(CC_VERBOSE)
-CSTD =	$(CSTD_GNU99)
+# XXX gcc 4.4.4 false positive
+roff.o :=	CERRWARN += -_gcc=-Wno-uninitialized
 
-CPPFLAGS +=	-DOSNAME="\"illumos\""
+CFLAGS +=	$(CC_VERBOSE)
+CSTD=		$(CSTD_GNU99)
+
+CPPFLAGS +=	-DOSNAME="\"illumos\"" -D_FILE_OFFSET_BITS=64
 
 LDLIBS +=	-lz
 ADJUNCT_LIBS += libz.so

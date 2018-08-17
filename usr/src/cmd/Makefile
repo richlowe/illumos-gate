@@ -26,7 +26,8 @@
 # Copyright (c) 2013 DEY Storage Systems, Inc. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2016 Toomas Soome <tsoome@me.com>
-# Copyright 2016 Nexenta Systems, Inc.
+# Copyright 2018 Nexenta Systems, Inc.
+# Copyright 2018 Gary Mills
 #
 
 include ../Makefile.master
@@ -67,7 +68,6 @@ COMMON_SUBDIRS=		\
 	audio		\
 	auths		\
 	autopush	\
-	avs		\
 	awk		\
 	awk_xpg4	\
 	backup		\
@@ -108,6 +108,7 @@ COMMON_SUBDIRS=		\
 	ctrun		\
 	ctstat		\
 	ctwatch		\
+	cxgbetool	\
 	datadm		\
 	date		\
 	dc		\
@@ -450,7 +451,6 @@ COMMON_SUBDIRS=		\
 	wracct		\
 	write		\
 	xargs		\
-	xhci		\
 	xstr		\
 	yes		\
 	ypcmd		\
@@ -481,6 +481,7 @@ i386_SUBDIRS=		\
 	nvmeadm		\
 	rtc		\
 	ucodeadm	\
+	xhci		\
 	xvm
 
 sparc_SUBDIRS=		\
@@ -517,7 +518,6 @@ MSGSUBDIRS=		\
 	auditset	\
 	auths		\
 	autopush	\
-	avs		\
 	awk		\
 	awk_xpg4	\
 	backup		\

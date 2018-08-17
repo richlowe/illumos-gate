@@ -21,7 +21,7 @@
 
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright (c) 2011, 2015 by Delphix. All rights reserved.
+# Copyright (c) 2011, 2017 by Delphix. All rights reserved.
 # Copyright 2016 Nexenta Systems, Inc.
 #
 
@@ -50,7 +50,6 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	fletcher_4_incremental_native;
 	fletcher_4_incremental_byteswap;
 	libzfs_add_handle;
-	libzfs_dataset_cmp;
 	libzfs_errno;
 	libzfs_error_action;
 	libzfs_error_description;
@@ -77,6 +76,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	zfs_destroy_snaps;
 	zfs_destroy_snaps_nvl;
 	zfs_expand_proplist;
+	zfs_foreach_mountpoint;
 	zfs_get_handle;
 	zfs_get_holds;
 	zfs_get_hole_count;
@@ -180,12 +180,14 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	zfs_userquota_prop_prefixes;
 	zfs_zpl_version_map;
 	zpool_add;
+	zpool_checkpoint;
 	zpool_clear;
 	zpool_clear_label;
 	zpool_close;
 	zpool_create;
 	zpool_destroy;
 	zpool_disable_datasets;
+	zpool_discard_checkpoint;
 	zpool_dump_ddt;
 	zpool_enable_datasets;
 	zpool_expand_proplist;
@@ -213,6 +215,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	zpool_import_props;
 	zpool_import_status;
 	zpool_in_use;
+	zpool_initialize;
 	zpool_is_bootable;
 	zpool_iter;
 	zpool_label_disk;

@@ -18,10 +18,10 @@
 #
 # CDDL HEADER END
 #
+
+#
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# cmd/cmd-inet/usr.lib/in.ndpd/Makefile
 #
 
 PROG=		in.ndpd

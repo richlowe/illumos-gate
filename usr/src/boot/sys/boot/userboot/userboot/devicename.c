@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 1998 Michael Smith <msmith@freebsd.org>
  * All rights reserved.
  *
@@ -25,7 +25,6 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <stand.h>
 #include <string.h>
@@ -40,7 +39,7 @@ __FBSDID("$FreeBSD$");
 
 static int	userboot_parsedev(struct disk_devdesc **dev, const char *devspec, const char **path);
 
-/* 
+/*
  * Point (dev) at an allocated device specifier for the device matching the
  * path in (devspec). If it contains an explicit device specification,
  * use that.  If not, use the default device.
@@ -50,13 +49,13 @@ userboot_getdev(void **vdev, const char *devspec, const char **path)
 {
     struct disk_devdesc **dev = (struct disk_devdesc **)vdev;
     int				rv;
-    
+
     /*
      * If it looks like this is just a path and no
      * device, go with the current device.
      */
-    if ((devspec == NULL) || 
-	(devspec[0] == '/') || 
+    if ((devspec == NULL) ||
+	(devspec[0] == '/') ||
 	(strchr(devspec, ':') == NULL)) {
 
 	if (((rv = userboot_parsedev(dev, getenv("currdev"), NULL)) == 0) &&
@@ -64,7 +63,7 @@ userboot_getdev(void **vdev, const char *devspec, const char **path)
 		*path = devspec;
 	return(rv);
     }
-    
+
     /*
      * Try to parse the device name off the beginning of the devspec
      */
@@ -83,7 +82,7 @@ userboot_getdev(void **vdev, const char *devspec, const char **path)
  * For disk-type devices, the syntax is:
  *
  * disk<unit>[s<slice>][<partition>]:
- * 
+ *
  */
 static int
 userboot_parsedev(struct disk_devdesc **dev, const char *devspec, const char **path)
@@ -110,7 +109,7 @@ userboot_parsedev(struct disk_devdesc **dev, const char *devspec, const char **p
     idev = malloc(sizeof(struct disk_devdesc));
     err = 0;
     np = (devspec + strlen(dv->dv_name));
-        
+
     switch(dv->dv_type) {
     case DEVT_NONE:			/* XXX what to do here?  Do we care? */
 	break;
@@ -139,7 +138,7 @@ userboot_parsedev(struct disk_devdesc **dev, const char *devspec, const char **p
 	    goto fail;
 	}
 
-	idev->d_unit = unit;
+	idev->dd.d_unit = unit;
 	if (path != NULL)
 	    *path = (*cp == 0) ? cp : cp + 1;
 	break;
@@ -158,8 +157,7 @@ userboot_parsedev(struct disk_devdesc **dev, const char *devspec, const char **p
 	err = EINVAL;
 	goto fail;
     }
-    idev->d_dev = dv;
-    idev->d_type = dv->dv_type;
+    idev->dd.d_dev = dv;
     if (dev == NULL) {
 	free(idev);
     } else {
@@ -179,27 +177,27 @@ userboot_fmtdev(void *vdev)
     struct disk_devdesc	*dev = (struct disk_devdesc *)vdev;
     static char		buf[128];	/* XXX device length constant? */
 
-    switch(dev->d_type) {
+    switch(dev->dd.d_dev->dv_type) {
     case DEVT_NONE:
 	strcpy(buf, "(no device)");
 	break;
 
     case DEVT_CD:
-	sprintf(buf, "%s%d:", dev->d_dev->dv_name, dev->d_unit);
+	sprintf(buf, "%s%d:", dev->dd.d_dev->dv_name, dev->dd.d_unit);
 	break;
 
     case DEVT_DISK:
 	return (disk_fmtdev(vdev));
 
     case DEVT_NET:
-	sprintf(buf, "%s%d:", dev->d_dev->dv_name, dev->d_unit);
+	sprintf(buf, "%s%d:", dev->dd.d_dev->dv_name, dev->dd.d_unit);
 	break;
 
     case DEVT_ZFS:
 #if defined(USERBOOT_ZFS_SUPPORT)
 	return (zfs_fmtdev(vdev));
 #else
-	sprintf(buf, "%s%d:", dev->d_dev->dv_name, dev->d_unit);
+	sprintf(buf, "%s%d:", dev->dd.d_dev->dv_name, dev->dd.d_unit);
 #endif
 	break;
     }
