@@ -43,9 +43,12 @@ $(__GNUC)CFLAGS=	-O -D__sun -Wall -Wno-unknown-pragmas -Werror \
 $(__SUNC)CFLAGS=	-xspace -Xa  -xildoff -errtags=yes -errwarn=%all \
 			-xc99=%none    -W0,-xglobalstatic -v
 
-
 $(__GNUC)LDLIBS +=	-lc
 $(__GNUC)LDFLAGS= 	$(MAPFILE.NES:%=-Wl,-M%)
+$(__GNUC)ZASSERTDEFLIB = -Wl,-zassert-deflib
+$(__GNUC)ZFATALWARNINGS = -Wl,-zfatal-warnings
+$(__GNUC)ZGUIDANCE = -Wl,-zguidance
+LDFLAGS += -Wl,$(ZDIRECT)
 
 CPPFLAGS += -DDEFAULT_CC_DIR='"$(SPRO_VROOT)/bin"'
 CPPFLAGS += -DDEFAULT_GCC_DIR='"$(GNUC_ROOT)/bin"'
