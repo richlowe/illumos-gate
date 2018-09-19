@@ -143,7 +143,7 @@ SUNW_vnic_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
 SUNW_ibpart_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
 SUNW_aggr_rcm.so := LDLIBS_MODULES +=  -ldladm -lnvpair
 SUNW_ip_rcm.so := LDLIBS_MODULES += -linetutil -ldladm -lipmp -lipadm -lnvpair \
-				    -lgen -lsocket -lnsl
+				    -lgen -lsocket
 SUNW_ip_anon_rcm.so := LDLIBS_MODULES +=  -linetutil -lnsl
 SUNW_bridge_rcm.so := LDLIBS_MODULES += -ldladm -lnvpair
 SUNW_mpxio_rcm.so := LDLIBS_MODULES += -ldevinfo
