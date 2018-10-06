@@ -597,11 +597,12 @@ do_gcc(cw_ictx_t *ctx)
 {
 	int c;
 	int pic = 0, nolibc = 0;
-	int in_output = 0, seen_o = 0, c_files = 0;
+	int in_output = 0, seen_o = 0;
 	cw_op_t op = CW_O_LINK;
 	char *model = NULL;
 	char *nameflag;
 	int	mflag = 0;
+	boolean_t seen_sources = B_FALSE;
 
 	if (ctx->i_flags & CW_F_PROG) {
 		newae(ctx->i_ae, "--version");
@@ -658,10 +659,9 @@ do_gcc(cw_ictx_t *ctx)
 				continue;
 
 			if (!in_output && arglen > 2 &&
-			    arg[arglen - 2] == '.' &&
-			    (arg[arglen - 1] == 'S' || arg[arglen - 1] == 's' ||
-			    arg[arglen - 1] == 'c' || arg[arglen - 1] == 'i'))
-				c_files++;
+			    !(arg[arglen - 2] == '.' && arg[arglen - 1] == 'o')) {
+				seen_sources = B_TRUE;
+			}
 
 			/*
 			 * Otherwise, filenames and partial arguments
@@ -1251,12 +1251,6 @@ do_gcc(cw_ictx_t *ctx)
 
 	free(nameflag);
 
-	if (c_files > 1 && (ctx->i_flags & CW_F_SHADOW) &&
-	    op != CW_O_PREPROCESS) {
-		errx(2, "multiple source files are "
-		    "allowed only with -E or -P");
-	}
-
 	/*
 	 * Make sure that we do not have any unintended interactions between
 	 * the xarch options passed in and the version of the Studio compiler
@@ -1320,9 +1314,12 @@ do_gcc(cw_ictx_t *ctx)
 		exit(2);
 	}
 
-	if ((op == CW_O_LINK || op == CW_O_PREPROCESS) &&
-	    (ctx->i_flags & CW_F_SHADOW))
-		exit(0);
+	if (ctx->i_flags & CW_F_SHADOW) {
+		if (op == CW_O_PREPROCESS)
+			exit(0);
+		else if (op == CW_O_LINK && !seen_sources)
+			exit(0);
+	}
 
 	if (model && !pic)
 		newae(ctx->i_ae, model);
@@ -1342,6 +1339,7 @@ do_cc(cw_ictx_t *ctx)
 	int in_output = 0, seen_o = 0;
 	cw_op_t op = CW_O_LINK;
 	char *nameflag;
+	boolean_t seen_sources = B_FALSE;
 
 	if (ctx->i_flags & CW_F_PROG) {
 		newae(ctx->i_ae, "-V");
@@ -1353,6 +1351,7 @@ do_cc(cw_ictx_t *ctx)
 
 	while (--ctx->i_oldargc > 0) {
 		char *arg = *++ctx->i_oldargv;
+		size_t arglen = strlen(arg);
 
 		if (strncmp(arg, "-_CC=", 5) == 0) {
 			newae(ctx->i_ae, strchr(arg, '=') + 1);
@@ -1360,6 +1359,11 @@ do_cc(cw_ictx_t *ctx)
 		}
 
 		if (*arg != '-') {
+			if (!in_output && arglen > 2 &&
+			    !(arg[arglen - 2] == '.' && arg[arglen - 1] == 'o')) {
+				seen_sources = B_TRUE;
+			}
+
 			if (in_output == 0 || !(ctx->i_flags & CW_F_SHADOW)) {
 				newae(ctx->i_ae, arg);
 			} else {
@@ -1415,9 +1419,12 @@ do_cc(cw_ictx_t *ctx)
 
 	free(nameflag);
 
-	if ((op == CW_O_LINK || op == CW_O_PREPROCESS) &&
-	    (ctx->i_flags & CW_F_SHADOW))
-		exit(0);
+	if (ctx->i_flags & CW_F_SHADOW) {
+		if (op == CW_O_PREPROCESS)
+			exit(0);
+		else if (op == CW_O_LINK && !seen_sources)
+			exit(0);
+	}
 
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {
 		newae(ctx->i_ae, "-o");
