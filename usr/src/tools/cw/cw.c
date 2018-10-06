@@ -312,7 +312,7 @@ typedef struct cw_ictx {
 	int		i_oldargc;
 	char		**i_oldargv;
 	pid_t		i_pid;
-	char		i_discard[MAXPATHLEN];
+	char		*i_discard;
 	char		*i_stderr;
 } cw_ictx_t;
 
@@ -563,6 +563,35 @@ xlate(struct aelist *h, const char *xarg, const char **table)
 	}
 }
 
+/*
+ * The compiler wants the output file to end in appropriate extension.  If
+ * we're generating a name from whole cloth (path == NULL), we assume that
+ * extension to be .o, otherwise we match the extension of the caller.
+ */
+static char *
+discard_file_name(const char *path)
+{
+	char *ret, *ext, *file;
+
+	if (path == NULL) {
+		ext = ".o";
+	} else {
+		ext = strrchr(path, '.');
+	}
+
+	if ((ret = calloc(MAXPATHLEN, sizeof (char))) == NULL)
+		nomem();
+
+	if ((file = tempnam(NULL, ".cw")) == NULL)
+		nomem();
+
+	(void) strlcpy(ret, file, MAXPATHLEN);
+	if (ext != NULL)
+		(void) strlcat(ret, ext, MAXPATHLEN);
+	free(file);
+	return (ret);
+}
+
 static void
 do_gcc(cw_ictx_t *ctx)
 {
@@ -640,10 +669,13 @@ do_gcc(cw_ictx_t *ctx)
 			 * output is always discarded for the secondary
 			 * compiler.
 			 */
-			if ((ctx->i_flags & CW_F_SHADOW) && in_output)
+			if ((ctx->i_flags & CW_F_SHADOW) && in_output) {
+				if ((ctx->i_discard = discard_file_name(arg)) == NULL)
+					nomem();
 				newae(ctx->i_ae, ctx->i_discard);
-			else
+			} else {
 				newae(ctx->i_ae, arg);
+			}
 			in_output = 0;
 			continue;
 		}
@@ -751,6 +783,10 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			} else if (ctx->i_flags & CW_F_SHADOW) {
 				newae(ctx->i_ae, "-o");
+
+				if ((ctx->i_discard = discard_file_name(arg)) == NULL)
+					nomem();
+
 				newae(ctx->i_ae, ctx->i_discard);
 			} else {
 				newae(ctx->i_ae, arg);
@@ -1293,6 +1329,8 @@ do_gcc(cw_ictx_t *ctx)
 	if (!nolibc)
 		newae(ctx->i_ae, "-lc");
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {
+		if ((ctx->i_discard = discard_file_name(NULL)) == NULL)
+			nomem();
 		newae(ctx->i_ae, "-o");
 		newae(ctx->i_ae, ctx->i_discard);
 	}
@@ -1326,6 +1364,8 @@ do_cc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			} else {
 				in_output = 0;
+				if ((ctx->i_discard = discard_file_name(arg)) == NULL)
+					nomem();
 				newae(ctx->i_ae, ctx->i_discard);
 			}
 			continue;
@@ -1350,6 +1390,8 @@ do_cc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			} else if (ctx->i_flags & CW_F_SHADOW) {
 				newae(ctx->i_ae, "-o");
+				if ((ctx->i_discard = discard_file_name(arg)) == NULL)
+					nomem();
 				newae(ctx->i_ae, ctx->i_discard);
 			} else {
 				newae(ctx->i_ae, arg);
@@ -1379,6 +1421,8 @@ do_cc(cw_ictx_t *ctx)
 
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {
 		newae(ctx->i_ae, "-o");
+		if ((ctx->i_discard = discard_file_name(NULL)) == NULL)
+			nomem();
 		newae(ctx->i_ae, ctx->i_discard);
 	}
 }
@@ -1488,6 +1532,7 @@ reap(cw_ictx_t *ctx)
 	} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
 	(void) unlink(ctx->i_discard);
+	free(ctx->i_discard);
 
 	if (stat(ctx->i_stderr, &s) < 0) {
 		warn("stat failed on child cleanup");
@@ -1518,20 +1563,6 @@ reap(cw_ictx_t *ctx)
 static int
 exec_ctx(cw_ictx_t *ctx, int block)
 {
-	char *file;
-
-	/*
-	 * To avoid offending cc's sensibilities, the name of its output
-	 * file must end in '.o'.
-	 */
-	if ((file = tempnam(NULL, ".cw")) == NULL) {
-		nomem();
-		return (-1);
-	}
-	(void) strlcpy(ctx->i_discard, file, MAXPATHLEN);
-	(void) strlcat(ctx->i_discard, ".o", MAXPATHLEN);
-	free(file);
-
 	if ((ctx->i_stderr = tempnam(NULL, ".cw")) == NULL) {
 		nomem();
 		return (-1);
