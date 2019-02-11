@@ -197,25 +197,13 @@ typedef struct {
 #define	SGS_REJ_KMOD		19	/* object is a kernel module */
 #define	SGS_REJ_NUM		20
 
+
 #define	FLG_REJ_ALTER		0x01	/* object name is an alternative */
 
-/*
- * For those source files used both inside and outside of the
- * libld source base (tools/common/string_table.c) we can
- * automatically switch between the allocation models
- * based off of the 'cc -DUSE_LIBLD_MALLOC' flag.
- */
-#ifdef	USE_LIBLD_MALLOC
-#define	calloc(x, a)		libld_malloc(((size_t)x) * ((size_t)a))
-#define	free			libld_free
-#define	malloc			libld_malloc
-#define	realloc			libld_realloc
-
-#define	libld_calloc(x, a)	libld_malloc(((size_t)x) * ((size_t)a))
-extern void			libld_free(void *);
-extern void			*libld_malloc(size_t);
-extern void			*libld_realloc(void *, size_t);
-#endif
+#define	libld_free(x)		free(x)
+#define libld_malloc(x)		calloc(1, x)
+#define libld_realloc(x, s)	realloc(x, s)
+#define	libld_calloc(n, s) 	calloc(n, s)
 
 /*
  * Data structures (defined in libld.h).
