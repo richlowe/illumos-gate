@@ -529,7 +529,6 @@ ifl_list_cleanup(APlist *apl)
 void
 ld_ofl_cleanup(Ofl_desc *ofl)
 {
-	Ld_heap		*chp, *php;
 	Ar_desc		*adp;
 	Aliste		idx;
 
@@ -560,14 +559,4 @@ ld_ofl_cleanup(Ofl_desc *ofl)
 
 	(void) elf_end(ofl->ofl_elf);
 	(void) elf_end(ofl->ofl_welf);
-
-	for (chp = ld_heap, php = NULL; chp; php = chp, chp = chp->lh_next) {
-		if (php)
-			(void) munmap((void *)php,
-			    (size_t)php->lh_end - (size_t)php);
-	}
-	if (php)
-		(void) munmap((void *)php, (size_t)php->lh_end - (size_t)php);
-
-	ld_heap = NULL;
 }
