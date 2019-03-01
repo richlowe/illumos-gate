@@ -509,7 +509,7 @@ process_shdr(Elf_Info *EI)
 			Elf_Dyn dyn;
 			FILE_ELF_SIZE_T dsize;
 			FILE_ELF_OFF_T doff;
-			int dynn;
+			uint64_t dynn;
 
 			doff = shdr->sh_offset;
 			dsize = sizeof (Elf_Dyn);
