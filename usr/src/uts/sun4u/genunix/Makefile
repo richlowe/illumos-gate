@@ -152,8 +152,8 @@ install:  	$(INSTALL_DEPS)
 install_h:
 
 
-$(LIBGEN):	$(GENUNIX) $(LIBSTUBS)
-	$(BUILD.SO) $(GENUNIX) $(LIBSTUBS)
+$(LIBGEN):	$(OBJECTS) $(LIBSTUBS)
+	$(BUILD.SO) $(OBJECTS) $(LIBSTUBS)
 
 $(IPCTF_TARGET) ipctf_target: FRC
 	@cd $(IPDRV_DIR); pwd; $(MAKE) ipctf.$(OBJS_DIR)
