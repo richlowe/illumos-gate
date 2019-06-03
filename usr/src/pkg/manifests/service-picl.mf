@@ -38,6 +38,10 @@ dir path=lib/svc/manifest group=sys variant.opensolaris.zone=global
 dir path=usr group=sys
 dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
+dir path=usr/lib/debug/usr/lib/picl group=sys
+dir path=usr/lib/debug/usr/lib/picl/plugins group=sys
+dir path=usr/lib/debug/usr/lib/sysevent
+dir path=usr/lib/debug/usr/lib/sysevent/modules
 dir path=usr/lib/picl group=sys
 dir path=usr/lib/picl/plugins group=sys
 dir path=usr/lib/sysevent
@@ -152,6 +156,15 @@ dir path=usr/share/man/man3picltree
 file path=lib/svc/manifest/system/picl.xml group=sys mode=0444 \
     variant.opensolaris.zone=global
 file path=usr/lib/$(ARCH64)/libpicl.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libpicl.so.1
+file path=usr/lib/debug/usr/lib/libpicl.so.1
+file path=usr/lib/debug/usr/lib/libpicld_pluginutil.so.1
+file path=usr/lib/debug/usr/lib/libpicltree.so.1
+file path=usr/lib/debug/usr/lib/picl/plugins/libpicldevtree.so.1 group=sys
+file path=usr/lib/debug/usr/lib/picl/plugins/libpiclevent.so.1 group=sys
+file path=usr/lib/debug/usr/lib/picl/plugins/libpiclfrutree.so.1 group=sys
+file path=usr/lib/debug/usr/lib/picl/plugins/libpiclmemcfg.so.1 group=sys
+file path=usr/lib/debug/usr/lib/sysevent/modules/picl_slm.so
 file path=usr/lib/libpicl.so.1
 file path=usr/lib/libpicld_pluginutil.so.1
 file path=usr/lib/libpicltree.so.1

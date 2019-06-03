@@ -34,11 +34,11 @@ BLTOBJ=		msg.o
 
 OBJECTS=	$(BLTOBJ)  $(COMOBJS)
 
-
 include		$(SRC)/lib/Makefile.lib
 include		$(SRC)/cmd/sgs/Makefile.com
 
 SRCDIR =	../common
+LIBS =		$(DYNLIB)
 
 LDLIBS +=	$(ZRECORD) -lmapmalloc $(DLLIB) -lc
 
@@ -60,5 +60,3 @@ LIBSRCS=	$(COMOBJS:%.o=../common/%.c)  $(BLTDATA)
 
 CLEANFILES +=	$(BLTFILES)
 CLOBBERFILES +=	$(DYNLIB) $(LIBLINKS)
-
-ROOTDYNLIB=	$(DYNLIB:%=$(ROOTLIBDIR)/%)

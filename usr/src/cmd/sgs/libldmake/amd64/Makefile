@@ -31,7 +31,7 @@ include ../Makefile.com
 .KEEP_STATE:
 
 all:		$(DYNLIB)
-install:	all $(ROOTDYNLIB64)
+install:	all $(ROOTLIBS64)
 
 include ../Makefile.targ
 include ../../Makefile.sub.64

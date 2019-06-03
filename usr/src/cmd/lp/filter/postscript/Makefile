@@ -24,21 +24,20 @@
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/Makefile
-#
 
-include 	../../Makefile.lp
+include		$(SRC)/cmd/Makefile.cmd
+include		../../Makefile.lp
 
 COMMON_SUBDIRS = \
 		common		\
 		postreverse	\
-        	dpost		\
+		dpost		\
 		postio		\
-        	postprint	\
-        	postscript	\
+		postprint	\
+		postscript	\
 		postcomm	\
 		download	\
-        	font		\
+		font		\
 		filtdesc
 
 SUBDIRS= $(COMMON_SUBDIRS)
@@ -49,7 +48,7 @@ TXTS=		README
 
 .KEEP_STATE:
 
-all:  		$(TXTS) $(SUBDIRS)
+all:		$(TXTS) $(SUBDIRS)
 
 install:	$(ROOTDIRS) .WAIT $(SUBDIRS)
 

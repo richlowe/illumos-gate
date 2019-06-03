@@ -97,6 +97,8 @@ NOVERDEF	^usr/lib/picl/plugins$
 NOVERDEF	^usr/sadm/admin/dhcpmgr/dhcpmgr\.so\.1$
 NOVERDEF	^usr/sadm/admin/printmgr/lib/libpmgr\.so\.1$
 
+# Debug objects are immune from all our rules
+PLUGIN		^usr/lib/debug/
 
 # Objects that are allowed to deviate from our standard version
 # names.

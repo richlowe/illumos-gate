@@ -37,6 +37,7 @@ OBJECTS=	$(COMOBJS) $(DUPOBJS)
 include		$(SRC)/lib/Makefile.lib
 include		$(SRC)/cmd/sgs/Makefile.com
 
+LIBS =		$(DYNLIB)
 SRCDIR =	../common
 
 CPPFLAGS +=	-I$(ELFCAP)
@@ -48,4 +49,3 @@ SRCS=		$(COMOBJS:%.o=../common/%.c)
 
 CLOBBERFILES +=	$(DYNLIB)
 
-ROOTDYNLIB=	$(DYNLIB:%=$(ROOTLIBDIR)/%)

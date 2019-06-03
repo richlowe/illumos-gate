@@ -174,7 +174,7 @@ detail_usage()
  */
 void
 dump_hex_bytes(const void *data, size_t n, int indent,
-	int bytes_per_col, int col_per_row)
+    int bytes_per_col, int col_per_row)
 {
 	const uchar_t *ldata = data;
 	int	bytes_per_row = bytes_per_col * col_per_row;
@@ -760,6 +760,9 @@ main(int argc, char **argv, char **envp)
 			break;
 		case 'd':
 			flags |= FLG_SHOW_DYNAMIC;
+			break;
+		case 'D':
+			flags |= FLG_SHOW_DEBUG;
 			break;
 		case 'e':
 			flags |= FLG_SHOW_EHDR;

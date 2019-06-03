@@ -38,6 +38,10 @@ dir path=lib/svc/manifest/application/print group=sys
 dir path=lib/svc/method
 dir path=usr group=sys
 dir path=usr/lib
+dir path=usr/lib/debug/usr/sadm
+dir path=usr/lib/debug/usr/sadm/admin
+dir path=usr/lib/debug/usr/sadm/admin/printmgr
+dir path=usr/lib/debug/usr/sadm/admin/printmgr/lib
 dir path=usr/lib/lp group=lp
 dir path=usr/lib/lp/bin group=lp
 dir path=usr/sadm
@@ -55,6 +59,7 @@ dir path=var/lp/ppd/caches group=lp
 file path=lib/svc/manifest/application/print/ppd-cache-update.xml group=sys \
     mode=0444
 file path=lib/svc/method/ppd-cache-update mode=0555
+file path=usr/lib/debug/usr/sadm/admin/printmgr/lib/libpmgr.so.1
 file path=usr/lib/lp/bin/getmakes group=lp mode=0555
 file path=usr/lib/lp/bin/getmodels group=lp mode=0555
 file path=usr/lib/lp/bin/getppdfile group=lp mode=0555

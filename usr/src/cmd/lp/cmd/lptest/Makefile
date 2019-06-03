@@ -20,25 +20,22 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T
 # All Rights Reserved
 #
-# cmd/lp/cmd/lptest/Makefile
-#
 
-include 	../../Makefile.lp
+include		$(SRC)/cmd/Makefile.cmd
+include		../../Makefile.lp
 
 PROG=		lptest
 
 ROOTUSRUCBSYMLINK=	$(ROOTUSRUCB)/$(PROG)
 ROOTUSRBINPROG=		$(PROG:%=$(ROOTBIN)/%)
 
-SRCS= 		lptest.c
+SRCS=		lptest.c
 
 OBJS=		$(SRCS:.c=.o)
 
@@ -53,7 +50,7 @@ all:		$(PROG)
 
 install:	all .WAIT $(ROOTUSRBINPROG) $(ROOTUSRUCBSYMLINK)
 
-$(ROOTUSRUCBSYMLINK):	
+$(ROOTUSRUCBSYMLINK):
 		$(RM) $@; $(SYMLINK) ../bin/$(PROG) $@
 
 clean:

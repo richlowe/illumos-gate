@@ -44,6 +44,10 @@ dir path=lib/svc/manifest/network/nfs group=sys
 dir path=lib/svc/method
 dir path=usr group=sys
 dir path=usr/lib
+dir path=usr/lib/debug/usr/lib/fs/nfs group=sys
+dir path=usr/lib/debug/usr/lib/fs/nfs/$(ARCH64) group=sys
+dir path=usr/lib/debug/usr/lib/reparse group=bin
+dir path=usr/lib/debug/usr/lib/reparse/$(ARCH64) group=sys
 dir path=usr/lib/fs group=sys
 dir path=usr/lib/fs/nfs group=sys
 dir path=usr/lib/fs/nfs/$(ARCH64) group=sys
@@ -63,6 +67,10 @@ file path=lib/svc/manifest/network/nfs/nfslogd.xml group=sys mode=0444
 file path=lib/svc/manifest/network/nfs/rquota.xml group=sys mode=0444
 file path=lib/svc/manifest/network/nfs/server.xml group=sys mode=0444
 file path=lib/svc/method/nfs-server mode=0555
+file path=usr/lib/debug/usr/lib/fs/nfs/$(ARCH64)/libshare_nfs.so.1
+file path=usr/lib/debug/usr/lib/fs/nfs/libshare_nfs.so.1
+file path=usr/lib/debug/usr/lib/reparse/$(ARCH64)/libnfs_basic.so.1
+file path=usr/lib/debug/usr/lib/reparse/libnfs_basic.so.1
 file path=usr/lib/fs/nfs/$(ARCH64)/libshare_nfs.so.1
 file path=usr/lib/fs/nfs/libshare_nfs.so.1
 file path=usr/lib/nfs/mountd mode=0555

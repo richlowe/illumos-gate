@@ -53,6 +53,10 @@ file path=usr/kernel/drv/$(ARCH64)/tnf group=sys
 file path=usr/kernel/drv/tnf.conf group=sys
 file path=usr/lib/$(ARCH64)/libtnfctl.so.1
 file path=usr/lib/$(ARCH64)/libtnfprobe.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libtnfctl.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libtnfprobe.so.1
+file path=usr/lib/debug/usr/lib/libtnfctl.so.1
+file path=usr/lib/debug/usr/lib/libtnfprobe.so.1
 file path=usr/lib/libtnfctl.so.1
 file path=usr/lib/libtnfprobe.so.1
 file path=usr/share/man/man1/prex.1

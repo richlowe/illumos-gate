@@ -20,14 +20,11 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/postprint/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include         ../../../Makefile.lp
 
 PROG=           postprint
@@ -42,7 +39,7 @@ COMMONOBJS =	$(COMMONDIR)/request.o	\
 		$(COMMONDIR)/glob.o	\
 		$(COMMONDIR)/misc.o
 
-TXTS=		README 
+TXTS=		README
 
 ENCODING =	2
 CPPFLAGS =	-DDFLTENCODING=$(ENCODING)	\

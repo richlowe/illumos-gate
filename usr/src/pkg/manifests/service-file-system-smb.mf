@@ -43,6 +43,10 @@ dir path=usr/kernel/drv/$(ARCH64) group=sys
 dir path=usr/kernel/kmdb group=sys
 dir path=usr/kernel/kmdb/$(ARCH64) group=sys
 dir path=usr/lib
+dir path=usr/lib/debug/usr/lib/fs/smb group=sys
+dir path=usr/lib/debug/usr/lib/fs/smb/$(ARCH64) group=sys
+dir path=usr/lib/debug/usr/lib/reparse
+dir path=usr/lib/debug/usr/lib/smbsrv
 dir path=usr/lib/fs group=sys
 dir path=usr/lib/fs/smb group=sys
 dir path=usr/lib/fs/smb/$(ARCH64) group=sys
@@ -72,6 +76,13 @@ file path=lib/svc/method/svc-smbd mode=0555
 file path=usr/kernel/drv/$(ARCH64)/smbsrv group=sys
 file path=usr/kernel/drv/smbsrv.conf group=sys
 file path=usr/kernel/kmdb/$(ARCH64)/smbsrv group=sys mode=0555
+file path=usr/lib/debug/usr/lib/fs/smb/$(ARCH64)/libshare_smb.so.1
+file path=usr/lib/debug/usr/lib/fs/smb/libshare_smb.so.1
+file path=usr/lib/debug/usr/lib/reparse/libreparse_smb.so.1
+file path=usr/lib/debug/usr/lib/security/pam_smb_passwd.so.1
+file path=usr/lib/debug/usr/lib/smbsrv/libmlsvc.so.1
+file path=usr/lib/debug/usr/lib/smbsrv/libsmb.so.1
+file path=usr/lib/debug/usr/lib/smbsrv/libsmbns.so.1
 file path=usr/lib/fs/smb/$(ARCH64)/libshare_smb.so.1
 file path=usr/lib/fs/smb/libshare_smb.so.1
 file path=usr/lib/mdb/kvm/$(ARCH64)/smbsrv.so group=sys mode=0555

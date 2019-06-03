@@ -39,6 +39,8 @@ file path=etc/ima.conf original_name=SUNWimac:etc/ima.conf preserve=true
 file path=usr/include/ima.h
 file path=usr/include/libsun_ima.h
 file path=usr/lib/$(ARCH64)/libima.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libima.so.1
+file path=usr/lib/debug/usr/lib/libima.so.1
 file path=usr/lib/libima.so.1
 legacy pkg=SUNWimac \
     desc="SNIA iSCSI Managment API common library for iSCSI adapters" \

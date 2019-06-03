@@ -1,0 +1,147 @@
+.\"
+.\" CDDL HEADER START
+.\"
+.\" The contents of this file are subject to the terms of the
+.\" Common Development and Distribution License (the "License").
+.\" You may not use this file except in compliance with the License.
+.\"
+.\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+.\" or http://www.opensolaris.org/os/licensing.
+.\" See the License for the specific language governing permissions
+.\" and limitations under the License.
+.\"
+.\" When distributing Covered Code, include this CDDL HEADER in each
+.\" file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+.\" If applicable, add the following below this CDDL HEADER, with the
+.\" fields enclosed by brackets "[]" replaced with your own identifying
+.\" information: Portions Copyright [yyyy] [name of copyright owner]
+.\"
+.\" CDDL HEADER END
+.\"
+.\"
+.\" Copyright 2019, Richard Lowe.
+.\" Copyright (c) 2001, 2010, Oracle and/or its affiliates. All rights reserved.
+.\"
+.Dd October 12, 2019
+.Dt DEBUGCHECK 1ONBLD
+.Os
+.Sh NAME
+.Nm debugcheck
+.Nd check ELF objects contain appropriate debugging data
+.Sh SYNOPSIS
+.Nm
+.Op Fl e Ar exception-list
+.Fl f Ar file-list
+.Sh DESCRIPTION
+.Nm
+verifies that ELF files delivered by illumos contain appropriate debugging
+information.
+.Bl -bullet
+.It
+All kernel modules and shared objects contain CTF information.
+.Pq see Xr ctf 4
+.It
+All shared objects contain a reference to a debug object containing DWARF
+.It
+All shared objects have an associated debug object
+.El
+.Sh ARGUMENTS
+.Bl -tag -width indent
+.It Fl f Ar file-list
+A list of ELF files that should be checked, commonly produced by
+.Xr find_elf 1ONBLD
+as part of a
+.Xr nightly 1ONBLD
+build.
+.It Fl e Ar exception-list
+An exception file used to exclude objects from certain checks performed by
+.Nm .
+.Pq See Sx EXCEPTION FILE FORMAT
+.El
+.Sh EXCEPTION FILE FORMAT
+Exceptions to the rules enforced by
+.Nm
+are specified using an exception file.
+The
+.Fl -e
+option is used to specify an explicit exception file.
+Otherwise, if used in an activated workspace, the default exception file is
+.Pa $CODEMGR_WS/exception_list/debugcheck
+if that file exists.
+If not used in an activated workspace, or if
+.Pa $CODEMGR_WS/exception_list/debugcheck
+does not exist,
+.Nm
+will use
+.Pa /opt/onbld/etc/exception_list/debugcheck
+as a fallback default exception file.
+.Pp
+To run
+.Nm
+without applying exceptions, specify
+.Fl e
+with a value of
+.Pa /dev/null .
+.Pp
+A
+.Ql #
+character at the beginning of a line, or at any point in
+a line when preceded by whitespace, introduces a comment.
+Empty lines, and lines containing only comments, are ignored by
+.Nm .
+Exceptions are specified as space separated keyword, and
+.Xr perl 1
+regular expression:
+.Pp
+.Dl keyword  perl-regex
+.Pp
+Since whitespace is used as a separator, the regular
+expression cannot itself contain whitespace.
+Use of the
+.Ql \es
+character class to represent whitespace within the regular expression is
+recommended.
+.Pp
+Before the perl regular expression is used, constructs of the form
+.Em MACH(dir)
+are expanded into a regular expression that matches the directory given, as
+well as any 64-bit architecture subdirectory that might be present
+(i.e. amd64, sparcv9). For instance,
+.Em MACH(lib)
+will match any of the following:
+.Bl -tag -width indent
+.It Pa lib
+.It Pa lib/amd64
+.It Pa lib/sparcv9
+.El
+.Pp
+The exceptions understood by
+.Nm
+are:
+.Bl -tag -width indent
+.It NO_CTF
+Object does not contain CTF information (should only be applied to closed
+binaries, and objects built from non-C sources)
+.It NO_DEBUGLINK
+Object does not contain a reference to a debug object under
+.Pa /usr/lib/debug
+(should only be applied to closed binaries and plugin objects)
+.El
+.Sh FILES
+.Bl -tag -width indent
+.It Pa $CODEMGR_WS/exception_list/debugcheck
+.It Pa /opt/onbld/etc/exception_list/debugcheck
+.El
+.Sh EXIT STATUS
+.Bl -tag -width indent
+.It 0
+Success
+.It 1
+One or more objects failed the checks
+.It >1
+A usage error occurred
+.El
+.Sh SEE ALSO
+.Xr perl 1 ,
+.Xr ctf 4 ,
+.Xr filesystem 5

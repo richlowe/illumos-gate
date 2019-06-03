@@ -82,7 +82,10 @@ OBJECTS =	$(BLTOBJ) $(G_MACHOBJS32) $(G_MACHOBJS64) \
 		$(SGSCOMMONOBJ) $(E_COMMONOBJ) $(AVLOBJ) $(ELFCAPOBJ)
 
 include		$(SRC)/lib/Makefile.lib
+include		$(SRC)/lib/Makefile.rootfs
 include		$(SRC)/cmd/sgs/Makefile.com
+
+LIBS =		$(DYNLIB)
 
 SRCDIR =	$(SGSHOME)/libld
 MAPFILEDIR =	$(SRCDIR)/common
@@ -151,5 +154,3 @@ LIBSRCS =	$(SGSCOMMONOBJ:%.o=$(SGSCOMMON)/%.c) \
 
 CLEANFILES +=	$(BLTFILES)
 CLOBBERFILES +=	$(DYNLIB) $(LIBLINKS)
-
-ROOTFS_DYNLIB =	$(DYNLIB:%=$(ROOTFS_LIBDIR)/%)

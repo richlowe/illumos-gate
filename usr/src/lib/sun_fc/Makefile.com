@@ -127,6 +127,7 @@ OBJECTS	=	Lockable.o \
 include ../../Makefile.lib
 
 LIBS =		$(DYNLIBCCC)
+DEBUGLIBS =	$(DEBUGLIBCCC)
 SRCDIR=		../common
 
 INCS +=		-I$(SRCDIR)

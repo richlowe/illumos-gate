@@ -32,7 +32,6 @@
 #
 
 install: $(TYPES:%=install.%)
-
 all: $(TYPES:%=all.%)
 
 $(TYPES:%=all.%):

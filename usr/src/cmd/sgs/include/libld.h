@@ -251,6 +251,7 @@ struct ofl_desc {
 	Ehdr		*ofl_dehdr;	/* default elf header, and new elf */
 	Ehdr		*ofl_nehdr;	/*	header describing this file */
 	Phdr		*ofl_phdr;	/* program header descriptor */
+	size_t		ofl_phdrnum;	/* number of program headers */
 	Phdr		*ofl_tlsphdr;	/* TLS phdr */
 	int		ofl_fd;		/* file descriptor */
 	size_t		ofl_size;	/* image size */
@@ -385,6 +386,7 @@ struct ofl_desc {
 	Os_desc		*ofl_osverdef;	/* .version definition output section */
 	Os_desc		*ofl_osverneed;	/* .version needed output section */
 	Os_desc		*ofl_osversym;	/* .version symbol ndx output section */
+	Os_desc		*ofl_osdebuglink; /* .gnu_debuglink output section */
 	Word		ofl_dtflags_1;	/* DT_FLAGS_1 entries */
 	Word		ofl_dtflags;	/* DT_FLAGS entries */
 	Os_desc		*ofl_ossyminfo;	/* .SUNW_syminfo output section */
@@ -407,6 +409,7 @@ struct ofl_desc {
 	ofl_guideflag_t	ofl_guideflags;	/* -z guide flags */
 	APlist		*ofl_assdeflib;	/* -z assert-deflib exceptions */
 	int		ofl_aslr;	/* -z aslr, -1 disable, 1 enable */
+	const char	*ofl_debuglink; /* debuglink file path */
 };
 
 #define	FLG_OF_DYNAMIC	0x00000001	/* generate dynamic output module */

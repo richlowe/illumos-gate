@@ -29,7 +29,7 @@ include ../Makefile.com
 .KEEP_STATE:
 
 all:		$(DYNLIB)
-install:	all $(ROOTDYNLIB)
+install:	all $(ROOTLIBS)
 
 
 include ../Makefile.targ

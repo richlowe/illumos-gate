@@ -21,17 +21,16 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/model/netpr
-#
+
+include		$(SRC)/cmd/Makefile.cmd
+include		../../Makefile.lp
 
 PROG=		netpr
-
-include		../../Makefile.lp
 
 PURIFYOPTS      = -logfile=/tmp/errs.%p
 PURIFY          = purify $(PURIFYOPTS)
 
-CPPFLAGS =	-I. -I$(LPINC) 	\
+CPPFLAGS =	-I. -I$(LPINC)	\
 		$(CPPFLAGS.master)
 
 HDRS=				\

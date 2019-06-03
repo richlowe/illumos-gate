@@ -22,24 +22,23 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 all:		$(LIBS)
 
 # include global library targets.
 include		$(SRC)/lib/Makefile.targ
 
-
-$(ROOT32DYNLIB) := FILEMODE= 755
-$(ROOT64DYNLIB) := FILEMODE= 755
+$(ROOTLIBS) := FILEMODE = 755
+$(ROOTLIBS64) := FILEMODE = 755
+$(ROODBGS) := FILEMODE = 755
+$(ROOTDBGS64) :=FILEMODE = 755
 
 $(DYNLIB1) :=	CTFMERGE_POST = $(CTFMERGE_LIB)
 
 # DYNLIB1 is used rather than DYNLIB to prevent the automagic expansion and
 # creation of a libXXXX.so$(VERS) target.
 
-$(DYNLIB1):	pics .WAIT $$(PICS)
+$(DYNLIB1):	debugobj pics .WAIT $$(PICS)
 		$(BUILD.SO)
 		$(POST_PROCESS_SO)
 
@@ -49,9 +48,5 @@ objs/%.o pics/%.o: ../common/%.c
 
 lint:
 		$(LINT.c) $(SRCS) $(LDLIBS) > $(LINTOUT) 2>&1
-
-# Leaf target makefiles establish exactly what they will install.  Use of
-# ROOTLIBS will install both the default archive library and DYNLIB1,
-# use of ROOT64DYNLIB creates DYNLIB1 only.
 
 .KEEP_STATE:

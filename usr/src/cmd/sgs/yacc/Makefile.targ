@@ -35,16 +35,30 @@ $(PROG): objs .WAIT $(POBJS)
 # because ROOTLIBDIR may be changed in the including makefile after it has
 # included Makefile.lib.
 #
-$(ROOTLIBDIR)/$(DYNLIB) :=	FILEMODE= 755
-$(ROOTLIBDIR)/$(DYNLIBCCC) :=	FILEMODE= 755
+$(ROOTLIBDIR)/$(DYNLIB) :=		FILEMODE= 755
+$(ROOTFULLDBGDIR)/$(DEBUGLIB) :=	FILEMODE= 755
+$(ROOTLIBDIR)/$(DYNLIBCCC) :=		FILEMODE= 755
 
-$(ROOTLIBDIR64)/$(DYNLIB) :=	FILEMODE= 755
-$(ROOTLIBDIR64)/$(DYNLIBCCC) :=	FILEMODE= 755
+$(ROOTLIBDIR64)/$(DYNLIB) :=		FILEMODE= 755
+$(ROOTFULLDBGDIR64)/$(DEBUGLIB) :=	FILEMODE= 755
+$(ROOTLIBDIR64)/$(DYNLIBCCC) :=		FILEMODE= 755
 
 # library install rules
 $(ROOTLIBDIR)/%: %
 	$(INS.file)
+$(ROOTLIBDBGDIR)/%: %
+	$(INS.file)
+$(ROOTFULLDBGDIR):
+	$(INS.dir)
+$(ROOTFULLDBGDIR64):
+	$(INS.dir)
+$(ROOTFULLDBGDIR)/%: debugobj/% $(ROOTFULLDBGDIR)
+	$(INS.file)
+$(ROOTFULLDBGDIR64)/%: debugobj/% $(ROOTFULLDBGDIR64)
+	$(INS.file)
 $(ROOTLIBDIR64)/%: %
+	$(INS.file)
+$(ROOTLIBDBGDIR64)/%: %
 	$(INS.file)
 
 $(ROOTLIBDIR)/$(LIBLINKS): $(ROOTLIBDIR)/$(LIBLINKS)$(VERS)
@@ -57,14 +71,14 @@ $(ROOTLIBDIR)/$(LIBLINKSCCC): $(ROOTLIBDIR)/$(LIBLINKSCCC)$(VERS)
 $(ROOTLIBDIR64)/$(LIBLINKSCCC): $(ROOTLIBDIR64)/$(LIBLINKSCCC)$(VERS)
 	$(INS.liblinkccc64)
 
-objs pics:
+objs pics debugobj:
 	-@mkdir -p $@
 
-$(DYNLIB): pics .WAIT $$(PICS)
+$(DYNLIB): debugobj pics .WAIT $$(PICS)
 	$(BUILD.SO)
 	$(POST_PROCESS_SO)
 
-$(DYNLIBCCC): pics .WAIT $$(PICS)
+$(DYNLIBCCC): debugobj pics .WAIT $$(PICS)
 	$(BUILDCCC.SO)
 	$(POST_PROCESS_SO)
 

@@ -22,11 +22,11 @@
 #
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 #
-# cmd/lp/filter/postscript/dpost/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include         ../../../Makefile.lp
 
 PROG=           dpost
@@ -42,7 +42,7 @@ COMMONOBJS =	$(COMMONDIR)/glob.o \
 		$(COMMONDIR)/request.o \
 		$(COMMONDIR)/tempnam.o
 
-TXTS=		README 
+TXTS=		README
 
 # dpost uses some floating point arithmetic, so if you're running on a system
 # without floating point hardware add the -f option to the definition of CFLAGS.

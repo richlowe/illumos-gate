@@ -119,6 +119,10 @@ file path=usr/lib/$(ARCH64)/libhal-storage.so.1.0.0
 file path=usr/lib/$(ARCH64)/libhal.so.1.0.0
 file path=usr/lib/$(ARCH64)/pkgconfig/hal-storage.pc
 file path=usr/lib/$(ARCH64)/pkgconfig/hal.pc
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libhal-storage.so.1.0.0
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libhal.so.1.0.0
+file path=usr/lib/debug/usr/lib/libhal-storage.so.1.0.0
+file path=usr/lib/debug/usr/lib/libhal.so.1.0.0
 file path=usr/lib/hal/hal-functions mode=0555
 file path=usr/lib/hal/hal-is-caller-privileged mode=0555
 file path=usr/lib/hal/hal-storage-cleanup-all-mountpoints mode=0555

@@ -29,7 +29,7 @@ SGSMSGTARG +=	$(SGSMSG32)
 
 .KEEP_STATE:
 
-install:	all .WAIT $(ROOTFS_LIBS) $(ROOTFS_LINKS) \
+install:	all .WAIT $(ROOTLIBS) $(ROOTLINKS) \
 		.WAIT $(ROOTDEMODIRS) .WAIT $(ROOTDEMOFILES)
 
 include		../Makefile.targ

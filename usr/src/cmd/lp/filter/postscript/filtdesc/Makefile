@@ -24,9 +24,8 @@
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/filtdesc/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include		../../../Makefile.lp
 
 ROOTETCLPFD=	$(ROOTETCLP)/fd
@@ -43,7 +42,7 @@ FILES=		catv.fd		\
 
 ROOTFILES =	$(FILES:%=$(ROOTETCLPFD)/%)
 
-TXTS =		README 
+TXTS =		README
 
 FILEMODE =	644
 

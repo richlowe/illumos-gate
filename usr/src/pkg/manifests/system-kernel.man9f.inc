@@ -916,14 +916,18 @@ link path=usr/share/man/man9f/ddi_taskq_wait.9f target=taskq.9f
 link path=usr/share/man/man9f/ddi_trigger_softintr.9f \
     target=ddi_add_softintr.9f
 link path=usr/share/man/man9f/ddi_ufm_fini.9f target=ddi_ufm.9f
+link path=usr/share/man/man9f/ddi_ufm_image_set_desc.9f \
+    target=ddi_ufm_image.9f
+link path=usr/share/man/man9f/ddi_ufm_image_set_misc.9f \
+    target=ddi_ufm_image.9f
+link path=usr/share/man/man9f/ddi_ufm_image_set_nslots.9f \
+    target=ddi_ufm_image.9f
 link path=usr/share/man/man9f/ddi_ufm_init.9f target=ddi_ufm.9f
-link path=usr/share/man/man9f/ddi_ufm_update.9f target=ddi_ufm.9f
-link path=usr/share/man/man9f/ddi_ufm_image_set_desc.9f target=ddi_ufm_image.9f
-link path=usr/share/man/man9f/ddi_ufm_image_set_misc.9f target=ddi_ufm_image.9f
-link path=usr/share/man/man9f/ddi_ufm_image_set_nslots.9f target=ddi_ufm_image.9f
 link path=usr/share/man/man9f/ddi_ufm_slot_set_attrs.9f target=ddi_ufm_slot.9f
 link path=usr/share/man/man9f/ddi_ufm_slot_set_misc.9f target=ddi_ufm_slot.9f
-link path=usr/share/man/man9f/ddi_ufm_slot_set_version.9f target=ddi_ufm_slot.9f
+link path=usr/share/man/man9f/ddi_ufm_slot_set_version.9f \
+    target=ddi_ufm_slot.9f
+link path=usr/share/man/man9f/ddi_ufm_update.9f target=ddi_ufm.9f
 link path=usr/share/man/man9f/ddi_umem_free.9f target=ddi_umem_alloc.9f
 link path=usr/share/man/man9f/ddi_umem_unlock.9f target=ddi_umem_lock.9f
 link path=usr/share/man/man9f/ddi_unmap_regs.9f target=ddi_map_regs.9f

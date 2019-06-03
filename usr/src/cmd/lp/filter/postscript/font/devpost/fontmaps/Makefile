@@ -20,11 +20,12 @@
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright 2014 Garrett D'Amore
 #
-# cmd/lp/filter/postscript/font/devpost/fontmaps/Makefile
-#
 
+
+include			$(SRC)/cmd/Makefile.cmd
 include			../../../../../Makefile.lp
 
 FONTMAPS =		post

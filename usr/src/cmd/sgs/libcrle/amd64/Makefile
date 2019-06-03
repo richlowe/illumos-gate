@@ -29,7 +29,6 @@
 include		../Makefile.com
 
 CONVLIBDIR=	$(CONVLIBDIR64)
-ROOTDYNLIB64=	$(DYNLIB:%=$(ROOTLIBDIR64)/%)
 
 CPPFLAGS +=	-D_ELF64
 
@@ -38,7 +37,7 @@ CPPFLAGS +=	-D_ELF64
 all:		$(DYNLIB) $(LIBLINKS)
 
 install \
-package:	all $(ROOTDYNLIB64)
+package:	all $(ROOTLIBS64)
 
 include		../Makefile.targ
 include		../../Makefile.sub.64

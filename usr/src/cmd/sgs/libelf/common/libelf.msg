@@ -21,8 +21,6 @@
 #
 # CDDL HEADER END
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-
 
 @ _START_
 
@@ -71,6 +69,10 @@
 
 @ EFMT_ARSTRNM		"Format error: archive strtab name"
 @ EFMT_ARUNKNM		"Format error: archive special name unknown"
+@ EFMT_NOPHOFF          "Format error: e_phoff overlaps ELF header but program \
+			 headers exist"
+@ EFMT_NOSHOFF          "Format error: e_shoff overlaps ELF header but sections \
+			 exist"
 
 # IO	io	I/O error
 

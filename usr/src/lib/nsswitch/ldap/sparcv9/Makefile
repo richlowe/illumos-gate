@@ -20,12 +20,9 @@
 # CDDL HEADER END
 #
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright (c) 1999,2001 by Sun Microsystems, Inc.
 # All rights reserved.
 #
-# lib/nsswitch/ldap/sparcv9/Makefile
 
 include		../Makefile.com
 include		$(SRC)/lib/Makefile.lib.64
@@ -34,4 +31,4 @@ LIBS =		$(DYNLIB1)
 
 include		../../Makefile.targ
 
-install:	all $(ROOT64DYNLIB)
+install:	all $(ROOTLIBS64)

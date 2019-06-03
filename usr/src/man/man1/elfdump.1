@@ -12,18 +12,16 @@
 .\"  If applicable, add the following below this CDDL HEADER, with the fields
 .\" enclosed by brackets "[]" replaced with your own identifying information:
 .\" Portions Copyright [yyyy] [name of copyright owner]
-.TH ELFDUMP 1 "Dec 19, 2018"
+.TH ELFDUMP 1 "Oct 12, 2019"
 .SH NAME
 elfdump \- dumps selected parts of an object file
 .SH SYNOPSIS
-.LP
 .nf
-\fBelfdump\fR [\fB-cCdegGhHiklmnPrsSuvy\fR] [\fB-p | -w file\fR] [\fB-I\fR \fIindex-expr\fR]
+\fBelfdump\fR [\fB-cCdDegGhHiklmnPrsSuvy\fR] [\fB-p | -w file\fR] [\fB-I\fR \fIindex-expr\fR]
      [\fB-N\fR \fIname\fR] [\fB-O\fR \fIosabi\fR] [\fB-T\fR \fItype\fR] \fIfilename\fR...
 .fi
 
 .SH DESCRIPTION
-.LP
 The \fBelfdump\fR utility symbolically dumps selected parts of the specified
 object file(s). The options allow specific portions of the file to be
 displayed.
@@ -48,6 +46,7 @@ the following types of sections:
 .nf
 Category                        Option       ELF Section Type
 Dynamic                         -d           SHT_DYNAMIC
+Debug                           -D           Special. See below.
 Global Offset Table (GOT)       -G           Special. See below.
 Group                           -g           SHT_GROUP
 Hardware/Software
@@ -93,7 +92,6 @@ displays all available information for each object.
 For a complete description of the displayed information, refer to the \fILinker
 and Libraries Guide\fR.
 .SH OPTIONS
-.LP
 The following options are supported:
 .sp
 .ne 2
@@ -120,6 +118,15 @@ Demangles symbol names.
 .ad
 .RS 18n
 Dumps the contents of the \fB\&.dynamic\fR section.
+.RE
+
+.sp
+.ne 2
+.na
+\fB\fB-D\fR\fR
+.ad
+.RS 18n
+Dumps the contents of the \fB\&.gnu_debuglink\fR section.
 .RE
 
 .sp
@@ -504,7 +511,6 @@ Dumps the contents of the \fB\&.SUNW_syminfo\fR section.
 .RE
 
 .SH OPERANDS
-.LP
 The following operand is supported:
 .sp
 .ne 2
@@ -517,7 +523,6 @@ The name of the specified object file.
 
 .SH USAGE
 .SS "Matching Options"
-.LP
 The options \fB-I\fR, \fB-N\fR, and \fB-T\fR are collectively referred to as
 the \fBmatching options\fR. These options are used to narrow the range of
 program headers or sections to examine, by index, name, or type.
@@ -568,7 +573,6 @@ linker debugging library
 .RE
 
 .SH ATTRIBUTES
-.LP
 See \fBattributes\fR(5) for descriptions of the following attributes:
 .sp
 
@@ -583,7 +587,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-.LP
 \fBar\fR(1), \fBdump\fR(1), \fBnm\fR(1), \fBpvs\fR(1), \fBelf\fR(3ELF),
 \fBcore\fR(4), \fBattributes\fR(5)
 .sp

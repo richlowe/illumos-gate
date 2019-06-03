@@ -222,6 +222,7 @@
 @ MSG_ELF_SCN_GOT	"Global Offset Table Section:  %s"
 @ MSG_ELF_SCN_GRP	"Group Section:  %s"
 @ MSG_ELF_SCN_MOVE	"Move Section:  %s"
+@ MSG_ELF_SCN_DEBUG	"Debug Section: %s"
 @ MSG_ELF_SCN_SYMSORT1	"Symbol Sort Section:  %s (%s)"
 @ MSG_ELF_SCN_SYMSORT2	"Symbol Sort Section:  %s (%s / %s)"
 
@@ -314,6 +315,13 @@
 
 @ MSG_NOTE_BAD_SECFLAGS_VER	"unknown prsecflags_t version: "
 
+#
+# Debug section messages
+#
+@ MSG_DEBUG_FILE	"     File:\t%s"
+@ MSG_DEBUG_CRC		"     CRC:\t%#x"
+@ MSG_DEBUG_BAD_SIZE	"%s: %s: section truncated"
+
 @ _END_
 
 # The following strings represent reserved words, files, pathnames and symbols.
@@ -331,6 +339,7 @@
 @ MSG_ELF_INIT		".init"
 @ MSG_ELF_FINI		".fini"
 @ MSG_ELF_INTERP	".interp"
+@ MSG_ELF_GNU_DEBUGLINK	".gnu_debuglink"
 
 @ MSG_ELF_GETEHDR	"elf_getehdr"
 @ MSG_ELF_GETPHDR	"elf_getphdr"
@@ -351,7 +360,7 @@
 @ MSG_SYM_FINI		"_fini"
 @ MSG_SYM_GOT		"_GLOBAL_OFFSET_TABLE_"
 
-@ MSG_STR_OPTIONS	"CcdeGgHhiI:klmN:nO:PprSsT:uvw:y"
+@ MSG_STR_OPTIONS	"CcdDeGgHhiI:klmN:nO:PprSsT:uvw:y"
 
 @ MSG_STR_8SP		"        "
 @ MSG_STR_EMPTY		""

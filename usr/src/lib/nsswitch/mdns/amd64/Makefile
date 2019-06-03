@@ -21,8 +21,6 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 include		../Makefile.com
 include		$(SRC)/lib/Makefile.lib.64
@@ -31,4 +29,4 @@ LIBS =		$(DYNLIB1)
 
 include		../../Makefile.targ
 
-install:	all $(ROOT64DYNLIB)
+install:	all $(ROOTLIBS64)

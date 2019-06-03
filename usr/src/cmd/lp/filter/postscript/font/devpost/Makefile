@@ -23,9 +23,8 @@
 # Copyright (c) 1989 by Sun Microsystems, Inc.
 # Copyright 2014 Garrett D'Amore
 #
-# cmd/lp/filter/postscript/font/devpost/Makefile
-#
 
+include			$(SRC)/cmd/Makefile.cmd
 include			../../../../Makefile.lp
 
 FONTFILES =		AB AI AR AX BI CB CI CO	\
@@ -33,7 +32,7 @@ FONTFILES =		AB AI AR AX BI CB CI CO	\
 			JR JX KB KI KR KX NB NI	\
 			NR NX PA PB PI PX S1 VB	\
 			VI VR VX ZD ZI B  H  I	\
-			R  S	
+			R  S
 FONTLNK1 =		G HM HK HL
 FONTLNK2 =		GI
 DESCFILE =		DESC
@@ -56,7 +55,7 @@ ROOTFONTNAMES =		$(FONTNAMES:%=$(ROOTDEVPOST)/%)
 ROOTFONTOUTS =		$(FONTOUTS:%=$(ROOTDEVPOST)/%)		\
 			$(FONTLNK1OUTS:%=$(ROOTDEVPOST)/%)	\
 			$(FONTLNK2OUTS:%=$(ROOTDEVPOST)/%)
-		
+
 FILEMODE =		0444
 
 .KEEP_STATE:
@@ -66,13 +65,13 @@ all :			$(FONTOUTS) $(FONTNAMES) $(SUBDIRS)
 install:		$(FONTOUTS) $(FONTNAMES) \
 			$(ROOTDEVPOST) $(ROOTFONTFILES) $(ROOTFONTNAMES) \
 			$(ROOTFONTOUTS) $(SUBDIRS)
-		
+
 $(FONTOUTS) :		$$(@:%.out=%) $(NATIVEMAKEDEV)
 			@$(RM) $@; $(NATIVEMAKEDEV) $(@:%.out=%)
 
 $(ROOTDEVPOST) :
 			$(INS.dir)
-	
+
 $(NATIVEMAKEDEV) :
 			@cd ..; $(MAKE) native/makedev
 

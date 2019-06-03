@@ -27,6 +27,9 @@
 # lib/libfru/Makefile.flag
 #
 
+LIBS= $(DYNLIBCCC)
+DEBUGLIBS= $(DEBUGLIBCCC)
+
 LINTFLAGS =	-uxn
 LINTFLAGS64 =	$(LINTFLAGS) -m64
 LINTOUT=	lint.out

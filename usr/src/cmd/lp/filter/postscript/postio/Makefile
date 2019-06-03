@@ -20,14 +20,11 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/postio/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include         ../../../Makefile.lp
 
 COMMONDIR=      ../common
@@ -38,7 +35,7 @@ SRCS=		postio.c ifdef.c slowsend.c parallel.c
 
 OBJS =		$(SRCS:%.c=%.o)
 
-TXTS=		README 
+TXTS=		README
 
 ENCODING=	2
 CPPFLAGS =	-DDFLTENCODING=$(ENCODING)	\

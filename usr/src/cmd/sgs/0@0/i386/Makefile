@@ -31,5 +31,6 @@ include		$(SRC)/cmd/sgs/0@0/Makefile.com
 
 include		$(SRC)/cmd/sgs/0@0/Makefile.targ
 
-install:	all $(ROOTDYNLIB)
+install:	all $(ROOTLIBS)
+
 

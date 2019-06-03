@@ -23,7 +23,7 @@ LDLIBS64 += -L$(ADJUNCT_PROTO)/usr/lib/$(MACH64)
 MAPFILES = $(SRCDIR)/mapfile-py3
 $(ROOTLIBDIR)/$(DYNLIB) := FILEMODE= 755
 
-$(ROOTLIBS):
+$(ROOTLIBDIR)/$(DYNLIB): $(DYNLIB)
 	$(INS.file) $(DYNLIB)
 
 install: all $(ROOTLIBS)

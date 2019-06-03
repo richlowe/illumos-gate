@@ -22,8 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 OLIBRARY =	libmp.so.1
 
@@ -35,12 +33,14 @@ CLEANFILES +=	pics/pics_mp.o
 CLOBBERFILES += $(OLIBRARY)
 
 # permissions for old library
-$(ROOTLIBDIR)/$(OLIBRARY) :=	FILEMODE= 755
+$(ROOTLIBDIR)/$(OLIBRARY) :=		FILEMODE= 755
+$(ROOTFULLDBGDIR)/$(OLIBRARY) :=	FILEMODE= 755
 
 .KEEP_STATE:
 
-$(OLIBRARY):	pics/pics_mp.o libmp.so.2 $(OMAPFILE)
+$(OLIBRARY):	pics/pics_mp.o libmp.so.2 $(OMAPFILE) debugobj
 	$(CC) $(CFLAGS) -o $@ $(GSHARED) -h $(OLIBRARY) $(ZTEXT) $(ZDEFS) \
+	    -Wl,-zdebuglink=debugobj/libmp.so.1 \
 	    $(BDIRECT) $(ZCOMBRELOC) pics/pics_mp.o libmp.so.2 -M$(OMAPFILE) \
 	    $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
 	$(POST_PROCESS_SO)
@@ -51,4 +51,5 @@ pics/pics_mp.o:
 
 all: $(LIBS) $(OLIBRARY)
 
-install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLIBDIR)/$(OLIBRARY)
+install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLIBDIR)/$(OLIBRARY) \
+	 $(ROOTFULLDBGDIR)/$(OLIBRARY)

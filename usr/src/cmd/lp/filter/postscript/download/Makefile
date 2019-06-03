@@ -20,14 +20,11 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/download/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include		../../../Makefile.lp
 
 PROG=		download
@@ -42,7 +39,7 @@ COMMONOBJS =	$(COMMONDIR)/glob.o	\
 		$(COMMONDIR)/misc.o	\
 		$(COMMONDIR)/tempnam.o
 
-TXTS =		README 
+TXTS =		README
 
 ENCODING =	2
 CPPFLAGS =	-DDFLTENCODING=$(ENCODING)	\
@@ -55,7 +52,7 @@ POFILE =	lp_filter_postscript_download.po
 
 all:		$(TXTS) $(PROG)
 
-install:	all $(ROOTLIBLPPOSTPROG)	
+install:	all $(ROOTLIBLPPOSTPROG)
 
 $(PROG):	$(OBJS) $(COMMONOBJS)
 		$(LINK.c) -o $@ $(OBJS) $(COMMONOBJS) $(LDLIBS)

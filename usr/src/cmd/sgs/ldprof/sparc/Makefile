@@ -30,6 +30,6 @@ include ../Makefile.com
 .KEEP_STATE:
 
 all:		$(BLTDEFS) .WAIT $(DYNLIB)
-install package:	all $(ROOTDYNLIB)
+install package:	all $(ROOTLIBS)
 
 include ../Makefile.targ

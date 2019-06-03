@@ -30,8 +30,6 @@
 # Common makefile definitions (should be) used by all lp makefiles
 #
 
-include		$(SRC)/cmd/Makefile.cmd
-
 LPROOT=		$(SRC)/cmd/lp
 ROOTVAR=	$(ROOT)/var
 ROOTVARSP=	$(ROOT)/var/spool

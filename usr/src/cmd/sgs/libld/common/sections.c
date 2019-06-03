@@ -32,6 +32,8 @@
 
 #define	ELF_TARGET_AMD64
 
+#include	<sys/sysmacros.h>
+
 #include	<string.h>
 #include	<strings.h>
 #include	<stdio.h>
@@ -2567,6 +2569,49 @@ make_verneed(Ofl_desc *ofl)
 }
 
 /*
+ * Generate GNU-style debug link section.
+ */
+static uintptr_t
+make_debuglink(Ofl_desc *ofl)
+{
+	Shdr		*shdr;
+	Elf_Data	*data;
+	Is_desc		*isec;
+	const char	*linkname;
+	size_t		namelen;
+
+	/*
+	 * verneed sections do not have a constant element size, so the
+	 * value of ent_cnt specified here (0) is meaningless.
+	 */
+	if (new_section(ofl, SHT_PROGBITS, MSG_ORIG(MSG_SCN_GNU_DEBUGLINK),
+	    0, &isec, &shdr, &data) == S_ERROR)
+		return (S_ERROR);
+
+	if ((linkname = strrchr(ofl->ofl_debuglink, '/')) != NULL)
+		linkname += 1;
+	else
+		linkname = ofl->ofl_debuglink;
+
+	namelen = strlen(linkname) + 1;
+	data->d_size = roundup(namelen, 4) + 4;
+	data->d_align = 1;
+	if ((data->d_buf = calloc(1, data->d_size)) == NULL)
+		return (S_ERROR);
+	shdr->sh_size = data->d_size;
+	shdr->sh_flags = 0;
+	shdr->sh_addralign = data->d_align;
+
+	memset(data->d_buf, 0, data->d_size);
+	strlcpy(data->d_buf, linkname, data->d_size);
+
+	ofl->ofl_osdebuglink =
+	    ld_place_section(ofl, isec, NULL, ld_targ.t_id.id_note, NULL);
+	return ((uintptr_t)ofl->ofl_osdebuglink);
+
+}
+
+/*
  * Generate a version definition section.
  *
  *  o	the SHT_SUNW_verdef section defines the versions that exist within this
@@ -3247,6 +3292,14 @@ ld_make_sections(Ofl_desc *ofl)
 		if ((ofl->ofl_ossyminfo = make_sym_sec(ofl,
 		    MSG_ORIG(MSG_SCN_SUNWSYMINFO), SHT_SUNW_syminfo,
 		    ld_targ.t_id.id_syminfo)) == (Os_desc *)S_ERROR)
+			return (S_ERROR);
+	}
+
+	/*
+	 * Create a debuglink section if requested
+	 */
+	if (ofl->ofl_debuglink != NULL) {
+		if (make_debuglink(ofl) == S_ERROR)
 			return (S_ERROR);
 	}
 

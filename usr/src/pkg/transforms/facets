@@ -14,3 +14,15 @@
 # Manual pages are documentation, and more specifically 'man' documentation
 <transform dir file link path=usr/share/man/.* -> default facet.doc.man true>
 <transform dir file link path=usr/has/man/.* -> default facet.doc.man true>
+
+# Files in /usr/lib/debug are debug specific and faceted by package such that
+# facet.debug.*=true installs them all, but facet.debug.system/library=true (for
+# eg) installs those for that package alone.
+#
+# NB: The trailing / on the path is intentional, to keep the base
+# /usr/lib/debug directory unfaceted.
+<transform dir file link hardlink path=usr/lib/debug/ -> \
+    default tmp.fmri %{pkg.fmri} >
+<transform dir file link hardlink tmp.fmri=pkg:/(.+)@.*$ -> \
+    default facet.debug.%<1> true >
+<transform dir file link hardlink tmp.fmri=.* -> delete tmp.fmri .* >

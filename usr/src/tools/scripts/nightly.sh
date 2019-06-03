@@ -1777,9 +1777,9 @@ if [ "$U_FLAG" = "y" -a "$build_ok" = "y" ]; then
 fi
 
 #
-# ELF verification: ABI (-A) and runtime (-r) checks
+# ELF verification: ABI (-A), runtime (-r), and debug information checks
 #
-if [[ ($build_ok = y) && (($A_FLAG = y) || ($r_FLAG = y)) ]]; then
+if [[ $build_ok = y ]]; then
 	# Directory ELF-data.$MACH holds the files produced by these tests.
 	elf_ddir=$SRC/ELF-data.$MACH
 
@@ -1878,7 +1878,7 @@ if [[ ($build_ok = y) && (($A_FLAG = y) || ($r_FLAG = y)) ]]; then
 		# other information.
 		echo "\n==== Diff ELF runtime attributes" \
 		    "(since last build) ====\n" | \
-		    tee -a $LOGFILE >> $mail_msg_file >> $mail_msg_file
+		    tee -a $LOGFILE >> $mail_msg_file
 
 		if [[ -f $elf_ddir.ref/runtime.attr ]]; then
 			diff $elf_ddir.ref/runtime.attr \
@@ -1886,6 +1886,14 @@ if [[ ($build_ok = y) && (($A_FLAG = y) || ($r_FLAG = y)) ]]; then
 				>> $mail_msg_file
 		fi
 	fi
+
+        echo "\n==== Check ELF debug information ====\n" |
+            tee -a $LOGFILE >> $mail_msg_file
+        debugcheck -f $elf_ddir/object_list > $TMPDIR/debug_errors 2>&1
+        tee -a $LOGFILE >> $mail_msg_file < $TMPDIR/debug_errors
+        if [[ -s $TMPDIR/debug_errors ]]; then
+		build_extras_ok=n
+        fi
 
 	# If -u set, copy contents of ELF-data.$MACH to the parent workspace.
 	if [[ "$u_FLAG" = "y" ]]; then

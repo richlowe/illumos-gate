@@ -133,7 +133,7 @@ typedef struct {
 		uint_t	n;		/* # items in shxndx.data */
 	} shxndx;
 	VERSYM_STATE	*versym;	/* NULL, or associated VERSYM section */
-	Sym 		*sym;		/* Array of symbols */
+	Sym		*sym;		/* Array of symbols */
 	Word		symn;		/* # of symbols */
 } SYMTBL_STATE;
 
@@ -1572,7 +1572,7 @@ cap_section(const char *file, Cache *cache, Word shnum, Cache *ccache,
 	    ((ehdr->e_type == ET_EXEC) || (ehdr->e_type == ET_DYN))) {
 		Capinfo		*cip;
 		Capchain	*chain;
-		Cache   	*chcache;
+		Cache		*chcache;
 		Shdr		*chshdr;
 		Word		chainnum, inum;
 
@@ -1962,7 +1962,7 @@ syminfo(Cache *cache, Word shnum, Ehdr *ehdr, uchar_t osabi, const char *file)
 	Elf_syminfo_title(0);
 
 	for (ndx = 1, info++; ndx < infonum; ndx++, info++) {
-		Sym 		*sym;
+		Sym		*sym;
 		const char	*needed, *name;
 		Word		expect_dt;
 		Word		boundto = info->si_boundto;
@@ -2132,7 +2132,7 @@ version_def(Verdef *vdf, Word vdf_num, Cache *vcache, Cache *scache,
  *	contain the largest version index seen.
  *
  * note:
- * 	The versym section of an object that follows the original
+ *	The versym section of an object that follows the original
  *	Solaris versioning rules only contains indexes into the verdef
  *	section. Symbols defined in other objects (UNDEF) are given
  *	a version of 0, indicating that they are not defined by
@@ -4496,6 +4496,39 @@ got(Cache *cache, Word shnum, Ehdr *ehdr, const char *file)
 	free(gottable);
 }
 
+static void
+debug(Cache *cache, Word shnum, const char *file)
+{
+	/* Look for debugging sections */
+	for (Word cnt = 1; cnt < shnum; cnt++) {
+		Cache		*_cache = &cache[cnt];
+		const char	*secname = _cache->c_name;
+
+		if (strcmp(secname, MSG_ORIG(MSG_ELF_GNU_DEBUGLINK)) == 0) {
+			if ((_cache->c_data == NULL) ||
+			    (_cache->c_data->d_buf == NULL))
+				break;
+			char *path = _cache->c_data->d_buf;
+			uint32_t *crc;
+
+			dbg_print(0, MSG_ORIG(MSG_STR_EMPTY));
+			dbg_print(0, MSG_INTL(MSG_ELF_SCN_DEBUG),
+			    _cache->c_name);
+			dbg_print(0, MSG_INTL(MSG_DEBUG_FILE), path);
+
+			/* CRC is absent, complain */
+			if (_cache->c_data->d_size < strlen(path) + 4) {
+				fprintf(stderr, MSG_INTL(MSG_DEBUG_BAD_SIZE),
+				    file, secname);
+			}
+
+			crc = (uint32_t *)(_cache->c_data->d_buf +
+			    _cache->c_data->d_size - 4);
+			dbg_print(0, MSG_INTL(MSG_DEBUG_CRC), *crc);
+		}
+	}
+}
+
 void
 checksum(Elf *elf)
 {
@@ -5149,6 +5182,13 @@ regular(const char *file, int fd, Elf *elf, uint_t flags,
 					flags |= FLG_SHOW_GOT;
 					break;
 				}
+
+				if (strcmp(_cache->c_name,
+				    MSG_ORIG(MSG_ELF_GNU_DEBUGLINK)) == 0) {
+					flags |= FLG_SHOW_DEBUG;
+					break;
+				}
+
 				/*
 				 * The GNU compilers, and amd64 ABI, define
 				 * .eh_frame and .eh_frame_hdr. The Sun
@@ -5288,6 +5328,9 @@ regular(const char *file, int fd, Elf *elf, uint_t flags,
 			fake_shdr_cache_free(note_cache, note_shnum);
 		}
 	}
+
+	if (flags & FLG_SHOW_DEBUG)
+		debug(cache, shnum, file);
 
 	if ((flags & FLG_SHOW_MOVE) && (osabi == ELFOSABI_SOLARIS))
 		move(cache, shnum, file, flags);

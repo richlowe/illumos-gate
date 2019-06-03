@@ -51,6 +51,8 @@ dir path=usr/lib/$(ARCH64)
 dir path=usr/lib/brand
 dir path=usr/lib/brand/solaris10 group=sys
 dir path=usr/lib/brand/solaris10/$(ARCH64)
+dir path=usr/lib/debug/usr/lib/brand/solaris10 group=sys
+dir path=usr/lib/debug/usr/lib/brand/solaris10/$(ARCH64)
 file path=etc/brand/solaris10/pkgrm.conf group=sys \
     original_name=SUNWs10brand:etc/brand/solaris10/pkgrm.conf preserve=true
 file path=etc/brand/solaris10/smf_disable.conf group=sys \
@@ -89,6 +91,13 @@ file path=usr/lib/brand/solaris10/smf_disable.lst mode=0444
 file path=usr/lib/brand/solaris10/solaris10_librtld_db.so.1
 file path=usr/lib/brand/solaris10/uninstall mode=0755
 file path=usr/lib/brand/solaris10/version mode=0444
+file path=usr/lib/debug/usr/lib/$(ARCH64)/s10_brand.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/s10_npreload.so.1
+file \
+    path=usr/lib/debug/usr/lib/brand/solaris10/$(ARCH64)/solaris10_librtld_db.so.1
+file path=usr/lib/debug/usr/lib/brand/solaris10/solaris10_librtld_db.so.1
+file path=usr/lib/debug/usr/lib/s10_brand.so.1
+file path=usr/lib/debug/usr/lib/s10_npreload.so.1
 file path=usr/lib/s10_brand.so.1
 file path=usr/lib/s10_npreload.so.1
 legacy pkg=SUNWs10brandr desc="Support for the 'Solaris10' Brand" \
@@ -98,3 +107,4 @@ legacy pkg=SUNWs10brandu desc="Support for the 'solaris10' Brand" \
 license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 link path=usr/lib/brand/solaris10/64 target=$(ARCH64)
+link path=usr/lib/debug/usr/lib/brand/solaris10/64 target=$(ARCH64)

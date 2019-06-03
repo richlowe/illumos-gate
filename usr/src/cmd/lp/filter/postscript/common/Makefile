@@ -20,14 +20,11 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/common/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include		../../../Makefile.lp
 
 SRCS =		glob.c misc.c request.c tempnam.c
@@ -39,7 +36,7 @@ TXTS =		README
 ENCODING=	2
 CPPFLAGS =	-DDFLTENCODING=$(ENCODING)	\
 		-DSYSV				\
-		-I. 				\
+		-I.				\
 		$(CPPFLAGS.master)
 
 POFILE =	lp_filter_postscript_common.po

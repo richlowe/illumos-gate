@@ -48,6 +48,9 @@ ld_exit(Ofl_desc *ofl)
 	if ((ofl->ofl_fd > 0) && ((ofl->ofl_flags1 & FLG_OF1_NONREG) == 0))
 		(void) unlink(ofl->ofl_name);
 
+	if (ofl->ofl_debuglink != NULL)
+		(void) unlink(ofl->ofl_debuglink);
+
 	/*
 	 * Inform any support library that the link-edit has failed.
 	 */

@@ -24,11 +24,8 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/lp/cmd/lpadmin/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include		../../Makefile.lp
 
 CPPFLAGS =	-D_REENTRANT -I. -I$(LPINC) $(CPPFLAGS.master)

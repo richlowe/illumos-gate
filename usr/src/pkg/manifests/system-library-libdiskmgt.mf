@@ -34,6 +34,8 @@ dir path=usr group=sys
 dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
 file path=usr/lib/$(ARCH64)/libdiskmgt.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libdiskmgt.so.1
+file path=usr/lib/debug/usr/lib/libdiskmgt.so.1
 file path=usr/lib/libdiskmgt.so.1
 legacy pkg=SUNWsmapi desc="Software libraries for storage management" \
     name="Storage Management APIs"

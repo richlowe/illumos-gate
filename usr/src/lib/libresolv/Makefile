@@ -64,15 +64,13 @@ CERRWARN += $(CNOWARN_UNINIT)
 # not linted
 SMATCH=off
 
-ROOTDYNLIBS=	$(DYNLIB:%=$(ROOTLIBDIR)/%)
-
 .KEEP_STATE:
 
 LIBS = $(DYNLIB)
 
 all: $(LIBS)
 
-install: all $(ROOTDYNLIBS)
+install: all $(ROOTLIBS)
 
 lint: lintcheck
 

@@ -34,6 +34,7 @@ PYSRCS=		__init__.py util.py dataset.py \
 
 include ../../Makefile.lib
 
+DEBUGLIBS =
 LIBLINKS =
 SRCDIR =	../common
 ROOTLIBDIR=	$(ROOT)/usr/lib/python$(PYVER)/vendor-packages/zfs

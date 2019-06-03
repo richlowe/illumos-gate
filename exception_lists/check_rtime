@@ -47,6 +47,8 @@ SKIP		^usr/lib/libc/			# optimized libc
 SKIP		^usr/lib/rcm/			# 4426119
 SKIP		^usr/perl5/			# alan's taking care of these :-)
 SKIP		^usr/src/			# no objects in source code
+# debug objects are incomplete, and can confuse the checks mightily
+SKIP		^usr/lib/debug/
 
 # Individual files that we don't examine
 SKIP		^boot/grub/bin/grub$

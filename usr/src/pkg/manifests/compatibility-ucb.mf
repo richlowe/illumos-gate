@@ -35,6 +35,8 @@ dir path=etc/mail group=mail
 dir path=usr group=sys
 dir path=usr/bin
 dir path=usr/lib
+dir path=usr/lib/debug/usr/ucblib
+dir path=usr/lib/debug/usr/ucblib/$(ARCH64)
 dir path=usr/share/man
 dir path=usr/share/man/man1b
 dir path=usr/ucb
@@ -44,6 +46,16 @@ dir path=usr/ucblib
 dir path=usr/ucblib/$(ARCH64)
 file path=etc/mail/Mail.rc original_name=SUNWscp:etc/mail/Mail.rc \
     preserve=true
+file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libcurses.so.1
+file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libdbm.so.1
+file path=usr/lib/debug/usr/ucblib/$(ARCH64)/librpcsoc.so.1
+file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libtermcap.so.1
+file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libucb.so.1
+file path=usr/lib/debug/usr/ucblib/libcurses.so.1
+file path=usr/lib/debug/usr/ucblib/libdbm.so.1
+file path=usr/lib/debug/usr/ucblib/librpcsoc.so.1
+file path=usr/lib/debug/usr/ucblib/libtermcap.so.1
+file path=usr/lib/debug/usr/ucblib/libucb.so.1
 file path=usr/share/man/man1b/basename.1b
 file path=usr/share/man/man1b/biff.1b
 file path=usr/share/man/man1b/chown.1b
@@ -168,6 +180,8 @@ link path=etc/pwck target=../usr/sbin/pwck
 link path=etc/termcap target=../usr/share/lib/termcap
 link path=etc/unlink target=../usr/sbin/unlink
 link path=usr/5bin target=./bin
+link path=usr/lib/debug/usr/ucblib/32 target=.
+link path=usr/lib/debug/usr/ucblib/64 target=$(ARCH64)
 link path=usr/share/man/man1b/Mail.1b target=mail.1b
 link path=usr/share/man/man1b/fasthalt.1b target=fastboot.1b
 link path=usr/share/man/man1b/reset.1b target=tset.1b

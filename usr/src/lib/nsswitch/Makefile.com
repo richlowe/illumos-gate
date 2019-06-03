@@ -28,8 +28,7 @@ include		$(SRC)/lib/Makefile.lib
 
 SRCDIR =	../common
 
-ROOT32DYNLIB =	$(ROOTLIBDIR)/$(DYNLIB1)
-ROOT64DYNLIB =	$(ROOTLIBDIR64)/$(DYNLIB1)
+DEBUGLIBS =	$(DYNLIB1)
 
 LINTFLAGS =	-ux
 LINTOUT =	lint.out

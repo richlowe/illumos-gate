@@ -1,0 +1,132 @@
+# pure filter libraries have no debug info
+NO_CTF ^MACH(lib)/libaio.so.1
+NO_DEBUGLINK ^MACH(lib)/libaio.so.1
+NO_CTF ^MACH(lib)/libdl.so.1
+NO_DEBUGLINK ^MACH(lib)/libdl.so.1
+NO_CTF ^MACH(lib)/libdoor.so.1
+NO_DEBUGLINK ^MACH(lib)/libdoor.so.1
+NO_CTF ^MACH(lib)/libintl.so.1
+NO_DEBUGLINK ^MACH(lib)/libintl.so.1
+NO_CTF ^MACH(lib)/libmd5.so.1
+NO_DEBUGLINK ^MACH(lib)/libmd5.so.1
+NO_CTF ^MACH(lib)/libpthread.so.1
+NO_DEBUGLINK ^MACH(lib)/libpthread.so.1
+NO_CTF ^MACH(lib)/librt.so.1
+NO_DEBUGLINK ^MACH(lib)/librt.so.1
+NO_CTF ^MACH(lib)/libtermcap.so.1
+NO_DEBUGLINK ^MACH(lib)/libtermcap.so.1
+NO_CTF ^MACH(lib)/libthread.so.1
+NO_DEBUGLINK ^MACH(lib)/libthread.so.1
+NO_CTF ^MACH(lib)/libw.so.1
+NO_DEBUGLINK ^MACH(lib)/libw.so.1
+NO_CTF ^MACH(lib)/libxnet.so.1
+NO_DEBUGLINK ^MACH(lib)/libxnet.so.1
+NO_CTF ^MACH(lib)/libkcfd.so.1
+NO_DEBUGLINK ^MACH(lib)/libkcfd.so.1
+NO_CTF ^usr/MACH(lib)/libsched.so.1
+NO_DEBUGLINK ^usr/MACH(lib)/libsched.so.1
+# libkrb5 is actually a filter on the GSS mechanism, mech_krb5.so.1
+NO_CTF ^usr/MACH(lib)/libkrb5.so.1
+NO_DEBUGLINK ^usr/MACH(lib)/libkrb5.so.1
+NO_DEBUGLINK ^usr/lib/libsys.so.1
+
+# closed binaries have no debug info
+NO_CTF ^kernel/drv/amd64/acpi_toshiba
+NO_CTF ^kernel/drv/amd64/adpu320
+NO_CTF ^kernel/drv/amd64/atiatom
+NO_CTF ^kernel/drv/amd64/bcm_sata
+NO_CTF ^kernel/drv/amd64/glm
+NO_CTF ^kernel/drv/amd64/intel_nhmex
+NO_CTF ^kernel/drv/amd64/ixgb
+NO_CTF ^kernel/drv/amd64/lsimega
+NO_CTF ^kernel/drv/amd64/marvell88sx
+NO_CTF ^kernel/drv/amd64/mpt
+NO_CTF ^kernel/drv/amd64/sdpib
+NO_CTF ^kernel/drv/amd64/usbser_edge
+NO_CTF ^kernel/kmdb/amd64/mpt
+NO_CTF ^kernel/kmdb/amd64/nfs
+NO_CTF ^kernel/misc/scsi_vhci/amd64/scsi_vhci_f_asym_emc
+NO_CTF ^kernel/misc/scsi_vhci/amd64/scsi_vhci_f_asym_lsi
+NO_CTF ^kernel/misc/scsi_vhci/amd64/scsi_vhci_f_sym_emc
+NO_CTF ^kernel/strmod/amd64/sdpib
+NO_CTF ^usr/lib/fwflash/verify/ses_SUN.so
+NO_CTF ^platform/i86pc/kernel/cpu/amd64/cpu_ms.GenuineIntel.6.46
+NO_CTF ^platform/i86pc/kernel/cpu/amd64/cpu_ms.GenuineIntel.6.47
+NO_DEBUGLINK ^usr/MACH(lib)/libike.so.1
+NO_DEBUGLINK ^usr/lib/MACH(raidcfg)/mpt.so.1
+
+# iconv modules have no CTF or DWARF
+NO_CTF ^usr/lib/iconv
+NO_DEBUGLINK ^usr/lib/iconv
+
+# elfedit modules have no debug info
+NO_CTF ^usr/lib/elfedit
+NO_DEBUGLINK ^usr/lib/elfedit
+
+# fstyp modules have no debug info
+NO_CTF ^usr/lib/fs/.*/fstyp.so.1
+NO_DEBUGLINK ^usr/lib/fs/.*/fstyp.so.1
+
+# dmods have no DWARF
+NO_DEBUGLINK ^usr/lib/mdb
+NO_DEBUGLINK ^usr/platform/i86pc/lib/mdb
+NO_DEBUGLINK ^usr/platform/i86xpv/lib/mdb
+
+# python modules have no DWARF
+NO_DEBUGLINK ^usr/lib/python.*
+
+# rcm modules have no debug info
+NO_CTF ^usr/lib/rcm/modules
+NO_DEBUGLINK ^usr/lib/rcm/modules
+
+# scsi plugins have no dwarf
+NO_DEBUGLINK ^usr/lib/scsi/plugins
+
+# Perl modules have no debug info
+NO_CTF ^usr/perl5/
+NO_DEBUGLINK ^usr/perl5/
+
+# devfsadm linkmods have no debug info
+NO_CTF ^usr/lib/devfsadm/linkmod/
+NO_DEBUGLINK ^usr/lib/devfsadm/linkmod/
+
+# fwflash plugins have no debug info
+NO_CTF ^usr/lib/fwflash/identify/
+NO_CTF ^usr/lib/fwflash/verify/
+NO_DEBUGLINK ^usr/lib/fwflash/identify/
+NO_DEBUGLINK ^usr/lib/fwflash/verify/
+
+# SUNWonld is not delivered and has no debug info
+NO_CTF ^opt/SUNWonld
+NO_DEBUGLINK ^opt/SUNWonld
+
+# sysevent modules have no DWARF
+NO_DEBUGLINK ^usr/lib/sysevent/modules/
+
+# audit libraries have no debug info
+NO_CTF ^usr/lib/dtrace/libdtrace_forceload.so
+NO_CTF ^usr/lib/dtrace/64/libdtrace_forceload.so
+NO_CTF ^usr/lib/MACH(link_audit)
+NO_DEBUGLINK ^usr/lib/dtrace/libdtrace_forceload.so
+NO_DEBUGLINK ^usr/lib/dtrace/64/libdtrace_forceload.so
+NO_DEBUGLINK ^usr/lib/MACH(link_audit)
+
+# fmd modules have no DWARF (XXX)
+NO_DEBUGLINK ^usr/lib/fm/fmd/plugins/
+NO_DEBUGLINK ^usr/lib/fm/fmd/MACH(schemes)/
+NO_DEBUGLINK ^usr/lib/fm/topo/plugins/
+NO_DEBUGLINK ^usr/platform/i86pc/lib/fm/topo/plugins/
+
+# ppp modules have no DWARF
+NO_DEBUGLINK ^usr/lib/inet/ppp
+
+# smedia plugins have no DWARF
+NO_DEBUGLINK ^usr/lib/smedia
+
+# Libraries built from non-C sources have no CTF
+NO_CTF ^usr/MACH(lib)/libfru.so.1
+NO_CTF ^usr/MACH(lib)/libsun_fc.so.1
+NO_CTF ^MACH(lib)/c_synonyms.so.1
+
+# Old libmp has no CTF
+NO_CTF ^lib/libmp.so.1

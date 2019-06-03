@@ -20,8 +20,6 @@
 # CDDL HEADER END
 #
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright (c) 1994 by Sun Microsystems, Inc.
 #
 
@@ -30,6 +28,6 @@ include ../Makefile.com
 .KEEP_STATE:
 
 all:		$(DYNLIB)
-install:	all $(ROOTDYNLIB)
+install:	all $(ROOTLIBS)
 
 include ../Makefile.targ

@@ -70,6 +70,8 @@ OBJECTS=dwarf_abbrev.o		\
 include $(SRC)/lib/Makefile.lib
 include $(SRC)/tools/Makefile.tools
 
+DEBUGLIBS =
+
 FILEMODE =	0755
 SRCDIR =	$(SRC)/lib/libdwarf/common/
 SRCS =		$(PICS:%.o=$(SRCDIR)/%.c)

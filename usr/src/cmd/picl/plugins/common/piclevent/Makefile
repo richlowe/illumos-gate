@@ -33,19 +33,6 @@ include $(SRC)/lib/Makefile.lib
 
 include $(SRC)/cmd/picl/plugins/Makefile.com
 
-MODULES = picl_slm.so
-MOD_SRCS = picl_slm.c
-MOD_OBJS = picl_slm.o
-MOD_LDLIBS = -L$(ROOT)/usr/lib -lsysevent -lnvpair -lc
-
-# sysevent SLM dirs
-SYSEVENT = sysevent
-MODDIR = modules
-ROOTLIBSYSEVENTDIR = $(ROOTLIB)/$(SYSEVENT)
-ROOTLIBSYSEVENTMODDIR = $(ROOTLIBSYSEVENTDIR)/$(MODDIR)
-ROOTLIBSYSEVENTMODULES = $(MODULES:%=$(ROOTLIBSYSEVENTMODDIR)/%)
-ROOTETCSYSEVENTDIR = $(ROOTETC)/$(SYSEVENT)
-
 SRCS=		$(OBJECTS:%.o=%.c)
 
 LIBS =		$(DYNLIB)
@@ -69,7 +56,7 @@ LINTFLAGS +=	-L$(SRC)/lib/libpicltree/$(MACH) -lpicltree
 
 .KEEP_STATE:
 
-SUBDIRS=
+SUBDIRS= slm
 
 POFILE=	piclevent.po
 
@@ -80,13 +67,11 @@ clobber :=	TARGET= clobber
 lint :=		TARGET= lint
 _msg :=		TARGET= _msg
 
+all install clean clobber lint _msg : $(SUBDIRS)
+
 all: $(LIBS) $(LIBLINKS) $(MODULES)
 
-install:	$(ROOTLIBDIR) all $(ROOTLIBS) $(ROOTLINKS) \
-	$(ROOTETCSYSEVENTDIR)		\
-	$(ROOTLIBSYSEVENTDIR)		\
-	$(ROOTLIBSYSEVENTMODDIR)	\
-	$(ROOTLIBSYSEVENTMODULES)
+install:	$(ROOTLIBDIR) all $(ROOTLIBS) $(ROOTLINKS)
 
 _msg:	$(MSGDOMAIN) $(POFILE)
 	$(RM) $(MSGDOMAIN)/$(POFILE)
@@ -114,20 +99,5 @@ lint :
 
 $(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
-
-$(ROOTLIBSYSEVENTDIR):
-	$(INS.dir)
-
-$(ROOTETCSYSEVENTDIR):
-	$(INS.dir)
-
-$(ROOTLIBSYSEVENTDIR)/%: %
-	$(INS.file)
-
-$(ROOTLIBSYSEVENTMODDIR):
-	$(INS.dir)
-
-$(ROOTLIBSYSEVENTMODDIR)/%.so: %.so
-	$(INS.file)
 
 FRC:

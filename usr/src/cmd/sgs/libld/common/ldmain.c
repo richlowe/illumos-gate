@@ -444,6 +444,14 @@ ld_main(int argc, char **argv, Half mach)
 		return (ld_exit(ofl));
 
 	/*
+	 * Create a debug object if requested.
+	 */
+	if (ofl->ofl_debuglink != NULL) {
+		if (ld_create_debugfile(ofl) == S_ERROR)
+			return (ld_exit(ofl));
+	}
+
+	/*
 	 * Finally create the files elf checksum.
 	 */
 	if (ofl->ofl_checksum)

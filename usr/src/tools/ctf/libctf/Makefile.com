@@ -16,6 +16,8 @@
 include $(SRC)/lib/libctf/Makefile.shared.com
 include ../../Makefile.ctf
 
+DEBUGLIBS =
+
 CSTD = $(CSTD_GNU99)
 C99LMODE = -Xc99=%all
 

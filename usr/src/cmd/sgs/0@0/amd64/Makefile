@@ -32,7 +32,7 @@ ASFLAGS +=	-D__amd64 $(amd64_ASFLAGS)
 
 .KEEP_STATE:
 
-install:	all $(ROOTLIBDIR64)/$(DYNLIB)
+install:	all $(ROOTLIBS64)
 
 include		$(SRC)/cmd/sgs/0@0/Makefile.targ
 include		../../Makefile.sub.64

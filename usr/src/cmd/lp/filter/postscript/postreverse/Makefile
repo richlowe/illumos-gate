@@ -23,22 +23,21 @@
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/postreverse/Makefile
-#
 
-include         ../../../Makefile.lp
+include		$(SRC)/cmd/Makefile.cmd
+include		../../../Makefile.lp
 
-PROG =           postreverse
+PROG =		postreverse
 
 SRCS =		postreverse.c
 
 OBJS =		$(SRCS:%.c=%.o)
 
-TXTS=		README 
+TXTS=		README
 
 ENCODING =	2
 CPPFLAGS =	-DDFLTENCODING=$(ENCODING)	\
-		-I. -I$(COMMONDIR) 		\
+		-I. -I$(COMMONDIR)		\
 		$(CPPFLAGS.master)
 
 POFILE =	lp_filter_postscript_postreverse.po
@@ -47,7 +46,7 @@ POFILE =	lp_filter_postscript_postreverse.po
 
 all :		$(TXTS) $(PROG)
 
-$(PROG) : 	$(OBJS)
+$(PROG) :	$(OBJS)
 		$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 		$(POST_PROCESS)
 

@@ -27,7 +27,7 @@ ISASRCDIR=.
 
 include ../Makefile.com
 
-TYPES=library standalone
+TYPES= library standalone
 
 INSTALL_DEPS_library =		$(ROOTLINKS) $(ROOTLINT) $(ROOTLIBS)
 INSTALL_DEPS_standalone =	$(ROOTLIBS)

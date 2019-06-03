@@ -71,88 +71,27 @@ use IO::Dir;
 #	2	VERDEF if object defines versions, NOVERDEF otherwise
 #
 sub GetObjectInfo {
-	my $path = $_[0];
+    my $path = $_[0];
 
-	# If elfedit is available, we use it to obtain the desired information
-	# by executing three commands in order, to produce a 0, 2, or 3
-	# element output array.
-	#
-	#	Command                 Meaning
-	#	-----------------------------------------------
-	#	ehdr:ei_class		ELFCLASS of object
-	#	ehdr:ei_e_type		Type of object
-	#	dyn:tag verdef		Address of verdef items
-	#
-	# We discard stderr, and simply examine the resulting array to
-	# determine the situation:
-	#
-	#	# Array Elements	Meaning
-	#	-----------------------------------------------
-	#	  0			File is not ELF object
-	#	  2			Object with no versions (no VERDEF)
-	#	  3			Object that has versions
-	if ($HaveElfedit) {
-		my $ecmd = "elfedit -r -o simple -e ehdr:ei_class " .
-		    "-e ehdr:e_type -e 'dyn:tag verdef'";
-		my @Elf = split(/\n/, `$ecmd $path 2>/dev/null`);
+    my $ecmd = "/bin/elfedit -r -o simple -e ehdr:ei_class " .
+        "-e ehdr:e_type";
+    my @Elf = split(/\n/, `$ecmd $path 2>/dev/null`);
 
-		my $ElfCnt = scalar @Elf;
+    # Return ET_NONE array if not an ELF object
+    return (0, 'NONE', 'NOVERDEF') if ($#Elf == -1);
 
-		# Return ET_NONE array if not an ELF object
-		return (0, 'NONE', 'NOVERDEF') if ($ElfCnt == 0);
+    # Otherwise, convert the result to standard form
+    $Elf[0] =~ s/^ELFCLASS//;
+    $Elf[1] =~ s/^ET_//;
 
-		# Otherwise, convert the result to standard form
-		$Elf[0] =~ s/^ELFCLASS//;
-		$Elf[1] =~ s/^ET_//;
-		$Elf[2] = ($ElfCnt == 3) ? 'VERDEF' : 'NOVERDEF';
-		return @Elf;
-	}
+    if (($Elf[1] eq 'DYN') || ($Elf[1] eq 'EXEC')) {
+        my $verdef = `/bin/elfedit -r -o simple -e 'dyn:tag verdef' $path 2>/dev/null`;
+        $Elf[2] = $verdef ? 'VERDEF' : 'NOVERDEF';
+    } else {
+        $Elf[2] = 'NOVERDEF';
+    }
 
-	# For older platforms, we use elfdump to get the desired information.
-	my @Elf = split(/\n/, `elfdump -ed $path 2>&1`);
-	my $Header = 'None';
-	my $Verdef = 'NOVERDEF';
-	my ($Class, $Type);
-
-	foreach my $Line (@Elf) {
-		# If we have an invalid file type (which we can tell from the
-		# first line), or we're processing an archive, bail.
-		if ($Header eq 'None') {
-			if (($Line =~ /invalid file/) ||
-			    ($Line =~ /$path(.*):/)) {
-				return (0, 'NONE', 'NOVERDEF');
-			}
-		}
-
-		if ($Line =~ /^ELF Header/) {
-			$Header = 'Ehdr';
-			next;
-		}
-
-		if ($Line =~ /^Dynamic Section/) {
-			$Header = 'Dyn';
-			next;
-		}
-
-		if ($Header eq 'Ehdr') {
-			if ($Line =~ /e_type:\s*ET_([^\s]+)/) {
-				$Type = $1;
-				next;
-			}
-			if ($Line =~ /ei_class:\s+ELFCLASS(\d+)/) {
-				$Class = $1;
-				next;
-			}
-			next;
-		}
-
-		if (($Header eq 'Dyn') &&
-		    ($Line =~ /^\s*\[\d+\]\s+VERDEF\s+/)) {
-			$Verdef = 'VERDEF';
-			next;
-		}
-	}
-	return ($Class, $Type, $Verdef);
+    return @Elf;
 }
 
 
@@ -197,8 +136,8 @@ sub ProcFile {
         # Return quietly if:
 	#	- Not an executable or sharable object
 	#	- An executable, but the -s option was used.
-	if ((($Elf[1] ne 'EXEC') && ($Elf[1] ne 'DYN')) ||
-	    (($Elf[1] eq 'EXEC') && $opt{s})) {
+	if (($Elf[1] eq 'NONE') ||
+            ((($Elf[1] eq 'EXEC') || ($Elf[1] eq 'REL')) && $opt{s})) {
 		return;
 	}
 
@@ -326,14 +265,13 @@ if ((getopts('afrs', \%opt) == 0) || (scalar(@ARGV) != 1)) {
 	print "\t[-a]\texpand symlink aliases\n";
 	print "\t[-f]\tuse file name at mode to speed search\n";
 	print "\t[-r]\treport relative paths\n";
-	print "\t[-s]\tonly remote sharable (ET_DYN) objects\n";
+	print "\t[-s]\tonly report sharable (ET_DYN) objects\n";
 	exit 1;
 }
 
 %Output = ();
 %id_hash = ();
 %alias_hash = ();
-$HaveElfedit = -x '/usr/bin/elfedit';
 
 my $Arg = $ARGV[0];
 my $Error = 0;

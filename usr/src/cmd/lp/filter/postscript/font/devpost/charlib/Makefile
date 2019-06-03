@@ -20,10 +20,8 @@
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# cmd/lp/filter/postscript/font/devpost/charlib/Makefile
-#
 
+include			$(SRC)/cmd/Makefile.cmd
 include			../../../../../Makefile.lp
 
 CHARFILES =		12 14 34 Fi Fl L1 Lb		\

@@ -155,6 +155,8 @@
 			 sections\n"
 @ MSG_ARG_DETAIL_ZNC	"\t[-z nocompstrtab]\n\t\t\tdisable compression of \
 			 string tables\n"
+@ MSG_ARG_DETAIL_ZDEBUGLINK "\t[-z debuglink=path]\n \
+			 \t\t\twrite information for debuggers to path\n"
 @ MSG_ARG_DETAIL_ZDEF	"\t[-z deferred | nodeferred]\n\
 			 \t\t\tenable|disable deferred identification of \
 			 shared object\n\t\t\tdependencies\n"
@@ -662,6 +664,7 @@
 @ MSG_ELF_GETPHDR	"file %s: elf_getphdr"
 @ MSG_ELF_GETSCN	"file %s: elf_getscn: scnndx: %d"
 @ MSG_ELF_GETSHDR	"file %s: elf_getshdr"
+@ MSG_ELF_GETSHDRSTRNDX	"file %s: elf_getshdrstrndx"
 @ MSG_ELF_MEMORY	"file %s: elf_memory"
 @ MSG_ELF_NDXSCN	"file %s: elf_ndxscn"
 @ MSG_ELF_NEWDATA	"file %s: elf_newdata"
@@ -794,8 +797,11 @@
 @ MSG_SCN_EXCL		".excl"
 @ MSG_SCN_FINI		".fini"
 @ MSG_SCN_FINIARRAY	".fini_array"
+@ MSG_SCN_GDB_INDEX	".gdb_index"
 @ MSG_SCN_GOT		".got"
 @ MSG_SCN_GNU_LINKONCE	".gnu.linkonce."
+@ MSG_SCN_GNU_LINKONCE_WI	".gnu.linkonce.wi"
+@ MSG_SCN_GNU_DEBUGLINK	".gnu_debuglink"
 @ MSG_SCN_HASH		".hash"
 @ MSG_SCN_INDEX		".index"
 @ MSG_SCN_INIT		".init"
@@ -831,6 +837,7 @@
 @ MSG_SCN_TBSS		".tbss"
 @ MSG_SCN_TDATA		".tdata"
 @ MSG_SCN_TEXT		".text"
+@ MSG_SCN_ZDEBUG	".zdebug"
 
 @ MSG_SYM_FINIARRAY	"finiarray"
 @ MSG_SYM_INITARRAY	"initarray"
@@ -976,6 +983,8 @@
 @ MSG_MARG_SONAME	"soname option (-h, --soname)"
 @ MSG_MARG_STRIP	"strip option (-s, --strip-all)"
 @ MSG_MARG_TYPE_KMOD	"-z type=kmod"
+@ MSG_MARG_SAMEDEBUGLINK "debuglink name '%s' and output filename '%s' \
+			cannot be the same"
 
 # Entrance criteria messages
 
@@ -1453,6 +1462,7 @@
 @ MSG_ARG_NODEFERRED	"nodeferred"
 @ MSG_ARG_ASSDEFLIB	"assert-deflib"
 @ MSG_ARG_TYPE		"type"
+@ MSG_ARG_DEBUGLINK	"debuglink="
 
 @ MSG_ARG_LCOM		"L,"
 @ MSG_ARG_PCOM		"P,"

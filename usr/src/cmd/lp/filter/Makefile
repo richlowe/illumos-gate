@@ -20,15 +20,12 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/Makefile
-#
 
-include 		../Makefile.lp
+include			$(SRC)/cmd/Makefile.cmd
+include			../Makefile.lp
 
 ROOTLIBLPBIN =		$(ROOTLIBLP)/bin
 

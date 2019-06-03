@@ -21,10 +21,9 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/crontab/Makefile
-#
 
-include 		../Makefile.lp
+include			$(SRC)/cmd/Makefile.cmd
+include			../Makefile.lp
 
 ROOTCRONTABS =		$(ROOT)/var/spool/cron/crontabs
 

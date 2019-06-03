@@ -59,7 +59,6 @@ file path=usr/share/man/man1m/dd.1m
 file path=usr/share/man/man1m/devattr.1m
 file path=usr/share/man/man1m/devfree.1m
 file path=usr/share/man/man1m/devfsadm.1m
-link path=usr/share/man/man1m/audlinks.1m target=devfsadm.1m
 file path=usr/share/man/man1m/devinfo.1m
 file path=usr/share/man/man1m/devlinks.1m
 file path=usr/share/man/man1m/devnm.1m
@@ -282,6 +281,7 @@ file path=usr/share/man/man1m/whodo.1m
 file path=usr/share/man/man1m/wracct.1m
 file path=usr/share/man/man1m/zdump.1m
 file path=usr/share/man/man1m/zic.1m
+link path=usr/share/man/man1m/audlinks.1m target=devfsadm.1m
 link path=usr/share/man/man1m/dcopy.1m target=clri.1m
 link path=usr/share/man/man1m/devfsadmd.1m target=devfsadm.1m
 link path=usr/share/man/man1m/grpck.1m target=pwck.1m

@@ -179,6 +179,12 @@ dir path=usr/lib/class/RT
 dir path=usr/lib/class/SDC
 dir path=usr/lib/class/TS
 dir path=usr/lib/crypto
+dir path=usr/lib/debug/usr/lib/fs group=sys
+dir path=usr/lib/debug/usr/lib/fs/autofs group=sys
+dir path=usr/lib/debug/usr/lib/fs/autofs/$(ARCH64) group=sys
+dir path=usr/lib/debug/usr/lib/pci
+dir path=usr/lib/debug/usr/lib/secure
+dir path=usr/lib/debug/usr/lib/secure/$(ARCH64)
 dir path=usr/lib/devfsadm group=sys
 dir path=usr/lib/devfsadm/linkmod group=sys
 dir path=usr/lib/fs group=sys
@@ -912,6 +918,9 @@ file path=usr/lib/class/SDC/SDCdispadmin mode=0555
 file path=usr/lib/class/SDC/SDCpriocntl mode=0555
 file path=usr/lib/class/TS/TSdispadmin mode=0555
 file path=usr/lib/class/TS/TSpriocntl mode=0555
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libshare.so.1
+file path=usr/lib/debug/usr/lib/libshare.so.1
+file path=usr/lib/debug/usr/lib/pci/pcidr_plugin.so
 file path=usr/lib/devfsadm/linkmod/SUNW_audio_link.so group=sys
 file path=usr/lib/devfsadm/linkmod/SUNW_cfg_link.so group=sys
 file path=usr/lib/devfsadm/linkmod/SUNW_disk_link.so group=sys
@@ -1714,6 +1723,8 @@ link path=usr/has/bin/jsh target=sh
 link path=usr/has/lib/rsh target=../bin/sh
 link path=usr/lib/$(ARCH64)/ld.so.1 target=../../../lib/$(ARCH64)/ld.so.1
 link path=usr/lib/cron target=../../etc/cron.d
+link path=usr/lib/debug/usr/lib/secure/32 target=.
+link path=usr/lib/debug/usr/lib/secure/64 target=$(ARCH64)
 link path=usr/lib/devfsadm/devfsadmd target=../../sbin/devfsadm
 link path=usr/lib/embedded_su target=../bin/su
 link path=usr/lib/fs/dev/mount target=../../../../etc/fs/dev/mount

@@ -25,6 +25,7 @@
 # Copyright (c) 2018, Joyent, Inc.
 
 LIBS =		$(DYNLIB)
+DEBUGLIBS=
 
 CPPFLAGS +=	-I../inc -I$(SRC)/cmd/smserverd/
 LDLIBS +=	-lc $(PLUGIN_SPECIFIC_LIB)

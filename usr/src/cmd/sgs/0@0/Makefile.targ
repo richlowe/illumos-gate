@@ -34,7 +34,7 @@ pics/%.o:	$(CRTSRCS)/%.s
 
 all:		$(DYNLIB)
 
-$(DYNLIB):	pics .WAIT $(CRTS)
+$(DYNLIB):	debugobj pics .WAIT $(CRTS)
 
 include		$(SRC)/lib/Makefile.targ
 

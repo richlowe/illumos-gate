@@ -331,6 +331,24 @@ order as the target. If that link succeeds, then you are looking at
 a bug involving incorrect byte swapping.
 
 -----------------------------------------------------------------------------
+
+An interesting quirk of our use of libelf's byte swapping is that it is done
+all at once, via the private _elf_swap_wrimage() interface.  ELF data is kept
+in native order until this point, and since libelf uses this data to make
+determinations about the object being processed, the ELF header also must
+state a native EI_DATA (if it is swapped by libelf, data will appear in the
+wrong order -- actually, prematurely swapped).
+
+To deal with this libld.so.1 maintains two Elf structures, one of which
+(ofl_elf), set up natively, is written to a memory image via the private
+ELF_C_WRIMAGE command to elf_update(3ELF), the second of which (ofl_welf) then
+opens that image via the also private ELF_C_IMAGE flag to elf_begin(3ELF),
+causing them to share data memory, and then makes any necessary adjustments.
+When byte-swapping is done, it is the native ofl_elf which is passed to
+_elf_swap_wrimage, but ofl_welf with its native header, etc, which is written
+to disk.
+
+-----------------------------------------------------------------------------
    As mentioned above, incorrect byte swapping is a common
 error when developing libld target specific code. In addition to
 trying a build machine with the same byte order as the target, elfdump

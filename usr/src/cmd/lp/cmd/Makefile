@@ -24,7 +24,8 @@
 # Use is subject to license terms.
 #
 
-include 	../Makefile.lp
+include		$(SRC)/cmd/Makefile.cmd
+include		../Makefile.lp
 
 SUBDIRS =	lptest lpadmin lpsched scripts
 
@@ -34,7 +35,7 @@ SBINPROG =	lpfilter lpforms lpusers
 
 LIBLINKS =	$(SBINPROG)
 
-PROG =		$(LOCALPROG) $(SBINPROG) 
+PROG =		$(LOCALPROG) $(SBINPROG)
 
 OBJS=	$(SBINPROG:=.o)
 
@@ -65,7 +66,7 @@ lpusers:=	LDLIBS += $(LIBMSG) $(LIBACC) $(LIBOAM) $(LIBUSR) $(LIBLP)
 all:		$(PROG) $(SUBDIRS)
 
 install:	$(PROG) $(ROOTLIBLPLOCLPROG) $(ROOTSBINPROG) \
-		$(ROOTSYMLINKS) $(SUBDIRS) 
+		$(ROOTSYMLINKS) $(SUBDIRS)
 
 catalog:	$(SUBDIRS) $(POFILE)
 		$(CP) $(POFILE) ..

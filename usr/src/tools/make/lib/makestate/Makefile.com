@@ -22,6 +22,7 @@ include $(SRC)/tools/Makefile.tools
 include ../../../Makefile.com
 
 LIBS = $(DYNLIB)
+DEBUGLIBS =
 SRCDIR = $(SRC)/cmd/make/lib/makestate
 MAPFILES = $(SRCDIR)/mapfile-vers
 LDLIBS += -lc

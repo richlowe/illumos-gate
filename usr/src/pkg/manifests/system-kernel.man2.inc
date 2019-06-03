@@ -205,8 +205,8 @@ link path=usr/share/man/man2/getprojid.2 target=settaskid.2
 link path=usr/share/man/man2/getrctl.2 target=setrctl.2
 link path=usr/share/man/man2/gettaskid.2 target=settaskid.2
 link path=usr/share/man/man2/intro.2 target=Intro.2
-link path=usr/share/man/man2/linkat.2 target=link.2
 link path=usr/share/man/man2/lchown.2 target=chown.2
+link path=usr/share/man/man2/linkat.2 target=link.2
 link path=usr/share/man/man2/lstat.2 target=stat.2
 link path=usr/share/man/man2/mkdirat.2 target=mkdir.2
 link path=usr/share/man/man2/mknodat.2 target=mknod.2

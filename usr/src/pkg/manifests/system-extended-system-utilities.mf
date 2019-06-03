@@ -143,6 +143,10 @@ file path=usr/lib/adb/adbgen1 group=sys mode=0755
 file path=usr/lib/adb/adbgen3 group=sys mode=0755
 file path=usr/lib/adb/adbgen4 group=sys mode=0755
 file path=usr/lib/adb/adbsub.o group=sys
+file path=usr/lib/debug/usr/lib/$(ARCH64)/madv.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/mpss.so.1
+file path=usr/lib/debug/usr/lib/madv.so.1
+file path=usr/lib/debug/usr/lib/mpss.so.1
 file path=usr/lib/diff3prog mode=0555
 file path=usr/lib/fs/pcfs/fsck mode=0555
 file path=usr/lib/fs/pcfs/fstyp.so.1 mode=0555

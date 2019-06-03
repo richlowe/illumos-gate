@@ -38,7 +38,10 @@ OBJECTS=	$(BLTOBJ)  $(MACHOBJS)  $(COMOBJS)
 
 
 include		$(SRC)/lib/Makefile.lib
+include		$(SRC)/lib/Makefile.rootfs
 include		$(SRC)/cmd/sgs/Makefile.com
+
+LIBS =		$(DYNLIB)
 
 SRCDIR =	../common
 CPPFLAGS +=	-I../../rtld/common -I$(SRC)/lib/libc/inc \
@@ -68,5 +71,3 @@ MSGSRCS=	$(MACHOBJS:%.o=%.c)  $(COMOBJS:%.o=../common/%.c) \
 
 CLEANFILES +=	$(BLTFILES)
 CLOBBERFILES +=	$(DYNLIB) $(LIBLINKS)
-
-ROOTFS_DYNLIB=	$(DYNLIB:%=$(ROOTFS_LIBDIR)/%)

@@ -1,3 +1,4 @@
+
 /*
  * CDDL HEADER START
  *
@@ -40,10 +41,13 @@
 #include	<unistd.h>
 #include	<link.h>
 #include	<limits.h>
+#include	<sys/byteorder.h>
 #include	<sys/stat.h>
 #include	<sys/systeminfo.h>
+#include	<sys/types.h>
 #include	<debug.h>
 #include	<msg.h>
+#include	<errno.h>
 #include	<_libld.h>
 
 /*
@@ -1547,6 +1551,13 @@ process_progbits(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 		    MSG_ORIG(MSG_SCN_INDEX)) == 0)
 			is_stab_index = TRUE;
 	}
+
+	/*
+	 * Never include .gnu_debuglink sections from input files in the
+	 * output.
+	 */
+	if (ident && (strcmp(name, MSG_ORIG(MSG_SCN_GNU_DEBUGLINK)) == 0))
+		return (1);
 
 	if ((ofl->ofl_flags & FLG_OF_STRIP) && ident) {
 		if ((strncmp(name, MSG_ORIG(MSG_SCN_DEBUG),
@@ -3736,4 +3747,244 @@ ld_finish_libs(Ofl_desc *ofl)
 	 * requirements have been met.
 	 */
 	return (ld_vers_verify(ofl));
+}
+
+static Boolean __unused
+need_in_debuglink(Ofl_desc *ofl, Shdr *shdr)
+{
+	size_t shstrndx;
+	char *name;
+
+	/* All members of a group need to remain */
+	if ((shdr->sh_flags & (SHF_ALLOC | SHF_GROUP)) ==
+	    (SHF_ALLOC | SHF_GROUP))
+		return (TRUE);
+
+	switch (shdr->sh_type) {
+	case SHT_PROGBITS:
+	case SHT_REL:
+	case SHT_DYNAMIC:
+	/* Note DEBUG, DEBUGSTR, and ANNOTATE are intentionally kept */
+	case SHT_SUNW_capchain:
+	case SHT_SUNW_capinfo:
+	case SHT_SUNW_symsort:
+	case SHT_SUNW_tlssort:
+	case SHT_SUNW_LDYNSYM:
+	case SHT_SUNW_dof:
+	case SHT_SUNW_cap:
+	case SHT_SUNW_SIGNATURE:
+	case SHT_SUNW_move:
+	case SHT_SUNW_COMDAT:
+	case SHT_SUNW_syminfo:
+	case SHT_SUNW_verdef:
+	case SHT_SUNW_verneed:
+	case SHT_SUNW_versym:
+		break;
+	default:
+		return (TRUE);
+	}
+
+	if (elf_getshdrstrndx(ofl->ofl_elf, &shstrndx) != 0) {
+		ld_eprintf(ofl, ERR_WARNING, MSG_INTL(MSG_ELF_GETSHDRSTRNDX),
+		    ofl->ofl_name);
+		return (TRUE);
+	}
+
+	if ((name = elf_strptr(ofl->ofl_elf, shstrndx,
+	    shdr->sh_name)) == NULL) {
+		ld_eprintf(ofl, ERR_WARNING, MSG_INTL(MSG_ELF_STRPTR),
+		    ofl->ofl_name);
+		return (TRUE);
+	}
+
+	if (strncmp(MSG_ORIG(MSG_SCN_DEBUG), name, MSG_SCN_DEBUG_SIZE) == 0)
+		return (TRUE);
+	else if (strncmp(MSG_ORIG(MSG_SCN_LINE), name,
+	    MSG_SCN_LINE_SIZE) == 0)
+		return (TRUE);
+	else if (strncmp(MSG_ORIG(MSG_SCN_STAB), name,
+	    MSG_SCN_STAB_SIZE) == 0)
+		return (TRUE);
+	else if (strncmp(MSG_ORIG(MSG_SCN_ZDEBUG), name,
+	    MSG_SCN_ZDEBUG_SIZE) == 0)
+		return (TRUE);
+	else if (strncmp(MSG_ORIG(MSG_SCN_GNU_LINKONCE_WI), name,
+	    MSG_SCN_GNU_LINKONCE_WI_SIZE) == 0)
+		return (TRUE);
+	else if (strcmp(MSG_ORIG(MSG_SCN_GDB_INDEX), name) == 0)
+		return (TRUE);
+	/*
+	 * Keep .interp, since a PT_INTERP with no file data is conceptually
+	 * invalid
+	 */
+	else if (strcmp(MSG_ORIG(MSG_SCN_INTERP), name) == 0)
+		return (TRUE);
+
+	return (FALSE);
+}
+
+uintptr_t
+ld_create_debugfile(Ofl_desc *ofl)
+{
+	Sg_desc *sgp;
+	Os_desc *osp;
+	Aliste idx1, idx2;
+	Elf *mem, *out;
+	int ofd;
+
+	if ((ofd = open(ofl->ofl_debuglink, O_RDWR | O_CREAT | O_TRUNC,
+	    0777)) < 0) {
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_SYS_OPEN),
+		    ofl->ofl_debuglink, strerror(errno));
+		return (S_ERROR);
+	}
+
+	if ((out = elf_begin(ofd, ELF_C_WRITE, NULL)) == NULL) {
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ELF_BEGIN),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	Ehdr *ehdr;
+	if ((ehdr = elf_newehdr(out)) == NULL) {
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ELF_NEWEHDR),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	/*
+	 * This ELF header needs to represent the host machine, not the target.
+	 * Copy the real one, but let EI_DATA default.
+	 */
+	*ehdr = *ofl->ofl_nehdr;
+	ehdr->e_ident[EI_DATA] = ELFDATANONE;
+
+	if (ofl->ofl_phdrnum > 0) {
+		Phdr *newph;
+		if ((newph = elf_newphdr(out,
+		    ofl->ofl_phdrnum)) == NULL) {
+			ld_eprintf(ofl, ERR_ELF,
+			    MSG_INTL(MSG_ELF_NEWPHDR),
+			    ofl->ofl_debuglink);
+			return (S_ERROR);
+		}
+
+		memcpy(newph, ofl->ofl_phdr,
+		    ofl->ofl_phdrnum * sizeof (Phdr));
+	}
+
+	for (APLIST_TRAVERSE(ofl->ofl_segs, idx1, sgp)) {
+		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
+			Elf_Scn *nscn;
+			Shdr *nsh;
+			Elf_Data *nd;
+
+			if ((nscn = elf_newscn(out)) == NULL) {
+				ld_eprintf(ofl, ERR_ELF,
+				    MSG_INTL(MSG_ELF_NEWSCN),
+				    ofl->ofl_debuglink);
+				return (S_ERROR);
+			}
+
+			if ((nsh = elf_getshdr(nscn)) == NULL) {
+				ld_eprintf(ofl, ERR_ELF,
+				    MSG_INTL(MSG_ELF_GETSHDR),
+				    ofl->ofl_debuglink);
+				return (S_ERROR);
+			}
+
+			if ((nd = elf_newdata(nscn)) == NULL) {
+				ld_eprintf(ofl, ERR_ELF,
+				    MSG_INTL(MSG_ELF_NEWDATA),
+				    ofl->ofl_debuglink);
+				return (S_ERROR);
+			}
+
+			*nsh = *osp->os_shdr;
+			*nd = *osp->os_outdata;
+
+			if ((nsh->sh_type != SHT_NOBITS) &&
+			    need_in_debuglink(ofl, nsh)) {
+
+				/*
+				 * If we're going to re-encode, we
+				 * can't share the data buffer
+				 */
+				if ((ofl->ofl_flags1 &
+				    FLG_OF1_ENCDIFF) != 0) {
+					nd->d_buf = libld_calloc(1,
+					    nd->d_size);
+					if (nd->d_buf == NULL)
+						return (S_ERROR);
+					(void) memcpy(nd->d_buf,
+					    osp->os_outdata->d_buf,
+					    nd->d_size);
+				}
+			} else {
+				nsh->sh_type = SHT_NOBITS;
+			}
+		}
+	}
+
+	if (elf_update(out, ELF_C_WRIMAGE) == -1) {
+		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_UPDATE),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	if ((mem = elf_begin(0, ELF_C_IMAGE, out)) == NULL) {
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ELF_BEGIN),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	if ((ehdr = elf_getehdr(mem)) == NULL) {
+		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_GETEHDR),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	*ehdr = *ofl->ofl_nehdr;
+
+	if (elf_update(mem, ELF_C_NULL) == -1) {
+		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_UPDATE),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	/*
+	 * If this is a cross link to a target with a different byte
+	 * order than the linker, swap the data to the target byte
+	 * order.
+	 */
+	if (((ofl->ofl_flags1 & FLG_OF1_ENCDIFF) != 0) &&
+	    (_elf_swap_wrimage(mem) != 0)) {
+		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_SWAP_WRIMAGE),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	(void) elf_end(mem);
+	if (elf_update(out, ELF_C_WRITE) == -1) {
+		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_UPDATE),
+		    ofl->ofl_debuglink);
+		return (S_ERROR);
+	}
+
+	(void) elf_end(out);
+
+	/*
+	 * The text is calculated when we create the section,
+	 * we just need to fill in the CRC
+	 */
+	uint32_t *crc =
+	    (uint32_t *)(ofl->ofl_osdebuglink->os_outdata->d_buf +
+	    (ofl->ofl_osdebuglink->os_outdata->d_size - 4));
+	*crc = gnu_debuglink_crc32(ofl->ofl_debuglink);
+
+	if ((ofl->ofl_flags1 & FLG_OF1_ENCDIFF) != 0) {
+		*crc = BSWAP_32(*crc);
+	}
+
+	return (0);
 }

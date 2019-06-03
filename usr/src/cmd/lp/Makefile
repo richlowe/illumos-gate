@@ -26,7 +26,8 @@
 # Copyright 2011 Nexenta Systems, Inc. All rights reserved.
 #
 
-include 	./Makefile.lp
+include		$(SRC)/cmd/Makefile.cmd
+include		./Makefile.lp
 
 SUBDIRS =	filter crontab lib cmd model
 
@@ -51,7 +52,7 @@ LPOWNSDIRS =					\
 		$(ROOTVAR)/lp/logs		\
 		$(ROOTVARSP)/lp			\
 		$(ROOTVARSP)/lp/admins		\
-		$(ROOTVARSP)/lp/requests 	\
+		$(ROOTVARSP)/lp/requests	\
 		$(ROOTVARSP)/lp/system
 
 SYMDIR1 =	$(ROOTVARSP)/lp/admins/lp

@@ -78,8 +78,6 @@ ROOTDIRS =	$(ROOT)/usr/sadm/admin \
 
 # override ROOTLIBDIR and ROOTLINKS
 ROOTLIBDIR =	$(ROOT)/usr/sadm/admin/printmgr/lib
-ROOTLIBS=       $(LIBS:%=$(ROOTLIBDIR)/%)
-
 
 # Following variables define where to find header files
 CPPFLAGS +=	-I$(JAVA_ROOT)/include -I$(JAVA_ROOT)/include/solaris -I.
@@ -97,7 +95,7 @@ CLOBBERFILES=	$(JNIHDR_FILES) $(LIBLINKS)
 
 all: $(CLASSFILES) $(JNIHDR_FILES) $(DYNLIB)
 
-install: all $(ROOTDIRS) $(ROOTLINKS)
+install: all $(ROOTLIBS) $(ROOTDIRS) $(ROOTLINKS)
 
 #
 # Build jni header file

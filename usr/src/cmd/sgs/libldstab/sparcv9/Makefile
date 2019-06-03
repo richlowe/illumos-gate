@@ -29,15 +29,12 @@ include ../Makefile.com
 
 .KEEP_STATE:
 
-ROOTLIBDIR=	$(ROOT)/usr/lib/$(MACH64)
-ROOTDYNLIB64=	$(DYNLIB:%=$(ROOTLIBDIR)/%)
-
 CONVLIBDIR=	$(CONVLIBDIR64)
 ELFLIBDIR=	$(ELFLIBDIR64)
 
 all:		$(DYNLIB)
 install \
-package:	all $(ROOTDYNLIB64)
+package:	all $(ROOTLIBS64)
 
 include	../Makefile.targ
 include	../../Makefile.sub.64

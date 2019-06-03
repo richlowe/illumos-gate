@@ -22,18 +22,18 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 FSTYP_VERS=1
 FSTYPE=		pcfs
-LIBPROG=	fstyp.so.${FSTYP_VERS} 
+LIBPROG=	fstyp.so.${FSTYP_VERS}
 
 include ../../../../lib/Makefile.lib
 include ../../Makefile.fstype
 
 # There should be a mapfile here
 MAPFILES =
+
+DEBUGLIBS =
 
 CFLAGS +=	$(C_PICFLAGS)
 DYNLIB=		$(LIBPROG)
@@ -60,7 +60,7 @@ PMAP=
 
 SRCS=	${LIBPROG:%.so.$(FSTYP_VERS)=%.c}
 
-CPPFLAGS += 	-DFSTYP_VERS=${FSTYP_VERS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CPPFLAGS +=	-DFSTYP_VERS=${FSTYP_VERS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
 .KEEP_STATE:
 
@@ -75,7 +75,7 @@ lint: lint_SRCS
 cstyle:
 	$(CSTYLE) $(SRCS)
 
-clean:     
+clean:
 	$(RM) $(LIBPROG)
 
 clobber: clean

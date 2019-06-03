@@ -34,6 +34,8 @@ OBJECTS=	$(COMOBJS) $(BLTOBJ)
 include		../../../../lib/Makefile.lib
 include		../../Makefile.com
 
+LIBS=		$(DYNLIB)
+
 ROOTLIBDIR=	$(ROOT)/usr/lib/link_audit
 
 MAPFILES =	../common/mapfile-vers
@@ -68,4 +70,3 @@ SRCS=		$(COMOBJS:%.o=../common/%.c) $(BLTDATA)
 CLEANFILES +=	$(BLTFILES)
 CLOBBERFILES +=	$(DYNLIB)
 
-ROOTDYNLIB=	$(DYNLIB:%=$(ROOTLIBDIR)/%)

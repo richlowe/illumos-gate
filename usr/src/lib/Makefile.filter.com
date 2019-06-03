@@ -69,10 +69,10 @@
 #   include	   $(SRC)/lib/Makefile.filter.targ
 #
 # 1.  Use Makefile.lib.64 for 64-bit builds.
-# 2.  Customize DYNFLAGS for $MACH if necessary.  
+# 2.  Customize DYNFLAGS for $MACH if necessary.
 #
 
-include	   	$(SRC)/lib/Makefile.lib
+include		$(SRC)/lib/Makefile.lib
 
 # Define common flags, that override or append to Makefile.lib rules.
 
@@ -80,3 +80,6 @@ DYNFLAGS +=	$(ZNODUMP) $(ZNOLDYNSYM)
 LIBS =		$(DYNLIB)
 SRCDIR =	../common
 MAPFILES +=	$(MAPFILE.FLT)
+
+# Since there's no code, don't build a debug object
+DEBUGLIBS =

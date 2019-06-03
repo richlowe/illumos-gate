@@ -44,6 +44,7 @@ file path=usr/include/tnf/com.h
 file path=usr/include/tnf/probe.h
 file path=usr/include/tnf/tnf.h
 file path=usr/include/tnf/writer.h
+file path=usr/lib/debug/usr/lib/libtnf.so.1
 file path=usr/lib/libtnf.so.1
 file path=usr/share/man/man1/tnfdump.1
 file path=usr/share/man/man3tnf/TNF_DECLARE_RECORD.3tnf

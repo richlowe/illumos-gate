@@ -46,6 +46,9 @@ file path=lib/$(ARCH64)/libMPAPI.so.1
 file path=lib/libMPAPI.so.1
 file path=usr/include/mpapi-sun.h
 file path=usr/include/mpapi.h
+file path=usr/lib/debug/lib/$(ARCH64)/libMPAPI.so.1 \
+    variant.opensolaris.zone=global
+file path=usr/lib/debug/lib/libMPAPI.so.1 variant.opensolaris.zone=global
 file path=usr/share/man/man3lib/libMPAPI.3lib
 file path=usr/share/man/man3mpapi/MP_AssignLogicalUnitToTPG.3mpapi
 file path=usr/share/man/man3mpapi/MP_CancelOverridePath.3mpapi

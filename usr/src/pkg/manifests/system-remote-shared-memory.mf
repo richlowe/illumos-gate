@@ -42,6 +42,8 @@ driver name=rsm perms="* 0666 root sys"
 file path=usr/kernel/drv/$(ARCH64)/rsm group=sys
 file path=usr/kernel/drv/rsm.conf group=sys
 file path=usr/lib/$(ARCH64)/librsm.so.2
+file path=usr/lib/debug/usr/lib/$(ARCH64)/librsm.so.2
+file path=usr/lib/debug/usr/lib/librsm.so.2
 file path=usr/lib/librsm.so.2
 file path=usr/share/man/man3lib/librsm.3lib
 file path=usr/share/man/man3rsm/rsm_create_localmemory_handle.3rsm

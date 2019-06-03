@@ -228,7 +228,7 @@ pad_outfile(Ofl_desc *ofl)
 		 */
 		if (oscn && (phdr->p_type == PT_LOAD)) {
 			Elf_Data *	data;
-			size_t 		size;
+			size_t		size;
 
 			size = (size_t)(S_ROUND(offset, phdr->p_align) -
 			    offset);
@@ -732,6 +732,7 @@ ld_create_outfile(Ofl_desc *ofl)
 	/*
 	 * Build an empty PHDR.
 	 */
+	ofl->ofl_phdrnum = nseg;
 	if (nseg) {
 		if ((ofl->ofl_phdr = elf_newphdr(ofl->ofl_welf,
 		    nseg)) == NULL) {

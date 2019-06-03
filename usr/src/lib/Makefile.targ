@@ -32,14 +32,22 @@
 # because ROOTLIBDIR may be changed in the including makefile after it has
 # included Makefile.lib.
 #
-$(ROOTLIBDIR)/$(DYNLIB) :=	FILEMODE= 755
-$(ROOTLIBDIR)/$(DYNLIBCCC) :=	FILEMODE= 755
+$(ROOTLIBDIR)/$(DYNLIB) :=		FILEMODE= 755
+$(ROOTLIBDIR)/$(DYNLIBCCC) :=		FILEMODE= 755
+$(ROOTFULLDBGDIR)/$(DEBUGLIB) :=	FILEMODE= 755
+$(ROOTFULLDBGDIR)/$(DEBUGLIBCCC) :=	FILEMODE= 755
 
-$(ROOTFS_LIBDIR)/$(DYNLIB) :=	FILEMODE= 755
-$(ROOTFS_LIBDIR)/$(DYNLIBCCC) :=	FILEMODE= 755
+$(ROOTFS_LIBDIR)/$(DYNLIB) :=			FILEMODE= 755
+$(ROOTFS_LIBDIR)/$(DYNLIBCCC) :=		FILEMODE= 755
+$(ROOTFS_FULLDBGDIR)/$(DEBUGLIB) :=		FILEMODE= 755
+$(ROOTFS_FULLDBGDIR)/$(DEBUGLIBCCC) :=		FILEMODE= 755
+$(ROOTFS_FULLDBGDIR64)/$(DEBUGLIB) :=		FILEMODE= 755
+$(ROOTFS_FULLDBGDIR64)/$(DEBUGLIBCCC) :=	FILEMODE= 755
 
-$(ROOTLIBDIR64)/$(DYNLIB) :=	FILEMODE= 755
-$(ROOTLIBDIR64)/$(DYNLIBCCC) :=	FILEMODE= 755
+$(ROOTLIBDIR64)/$(DYNLIB) :=		FILEMODE= 755
+$(ROOTLIBDIR64)/$(DYNLIBCCC) :=		FILEMODE= 755
+$(ROOTFULLDBGDIR64)/$(DEBUGLIB) :=	FILEMODE= 755
+$(ROOTFULLDBGDIR64)/$(DEBUGLIBCCC) :=	FILEMODE= 755
 
 # install rules
 $(ROOTHDRDIR)/%: $(HDRDIR)/%
@@ -47,11 +55,23 @@ $(ROOTHDRDIR)/%: $(HDRDIR)/%
 
 $(ROOTLIBDIR)/%: %
 	$(INS.file)
+$(ROOTFULLDBGDIR):
+	$(INS.dir)
+$(ROOTFULLDBGDIR)/%: debugobj/% $(ROOTFULLDBGDIR)
+	$(INS.file)
 $(ROOTLIBDIR64)/%: %
+	$(INS.file)
+$(ROOTFULLDBGDIR64):
+	$(INS.dir)
+$(ROOTFULLDBGDIR64)/%: debugobj/% $(ROOTFULLDBGDIR64)
 	$(INS.file)
 $(ROOTFS_LIBDIR)/%: %
 	$(INS.file)
+$(ROOTFS_FULLDBGDIR)/%: debugobj/% $(ROOTFS_FULLDBGDIR)
+	$(INS.file)
 $(ROOTFS_LIBDIR64)/%: %
+	$(INS.file)
+$(ROOTFS_FULLDBGDIR64)/%: debugobj/% $(ROOTFS_FULLDBGDIR64)
 	$(INS.file)
 
 $(ROOTLIBDIR)/$(LIBLINKS): $(ROOTLIBDIR)/$(LIBLINKS)$(VERS)
@@ -82,7 +102,7 @@ objs/%.o pics/%.o: $(SRCDIR)/%.cc
 	$(COMPILE.cc) -o $@ $<
 	$(POST_PROCESS_CC_O)
 
-objs pics:
+objs pics debugobj:
 	-@mkdir -p $@
 
 $(LIBRARY): objs .WAIT $$(OBJS)
@@ -91,13 +111,17 @@ $(LIBRARY): objs .WAIT $$(OBJS)
 
 $(DYNLIB): $$(MAPFILES)
 
-$(DYNLIB): pics .WAIT $$(PICS) $$(ALTPICS) $$(EXTPICS)
+# We can't use + $(DEBUGLIB) here, because it messes up $@ so instead we act
+# as if we're building it from DYNLIB as input with no actions.
+$(DYNLIB): debugobj pics .WAIT $$(PICS) $$(ALTPICS) $$(EXTPICS)
 	$(BUILD.SO)
 	$(POST_PROCESS_SO)
+debugobj/$(DEBUGLIB): $(DYNLIB)
 
-$(DYNLIBCCC): pics .WAIT $$(PICS) $$(ALTPICS) $$(EXTPICS)
+$(DYNLIBCCC): debugobj pics .WAIT $$(PICS) $$(ALTPICS) $$(EXTPICS)
 	$(BUILDCCC.SO)
 	$(POST_PROCESS_SO)
+debugobj/$(DEBUGLIBCCC): $(DYNLIBCCC)
 
 $(LINTLIB): $$(SRCS)
 	$(LINT.c) -o $(LIBNAME) $(SRCS) > $(LINTOUT) 2>&1

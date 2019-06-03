@@ -32,6 +32,7 @@ include		$(SGSHOME)/libld/Makefile.com
 .KEEP_STATE:
 
 CW_LINKER =
+DEBUGLIBS =
 
 CPPFLAGS = $(NATIVE_CPPFLAGS) -DUSE_LIBLD_MALLOC -I$(SRC)/lib/libc/inc \
 		    -I$(SRC)/uts/common/krtld -I$(SRC)/uts/sparc \

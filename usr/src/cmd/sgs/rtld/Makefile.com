@@ -57,12 +57,6 @@ MAPFILE.NED=
 
 MAPFILES +=	$(MAPFILE-ORDER)
 
-# For the libc/libthread unified world:
-# This library needs to be placed in /lib to allow
-# dlopen() functionality while in single-user mode.
-ROOTFS_DYNLIB=	$(RTLD:%=$(ROOTFS_LIBDIR)/%)
-ROOTFS_DYNLIB64=	$(RTLD:%=$(ROOTFS_LIBDIR64)/%)
-
 # For the libc/libthread separated world:
 # A version of this library needs to be placed in /etc/lib to allow
 # dlopen() functionality while in single-user mode.
@@ -71,6 +65,8 @@ ETCDYNLIB=	$(RTLD:%=$(ETCLIBDIR)/%)
 
 ROOTDYNLIB=	$(RTLD:%=$(ROOTFS_LIBDIR)/%)
 ROOTDYNLIB64=	$(RTLD:%=$(ROOTFS_LIBDIR64)/%)
+ROOTDBG=	$(RTLD:%=$(ROOTFS_FULLDBGDIR)/%)
+ROOTDBG64=	$(RTLD:%=$(ROOTFS_FULLDBGDIR64)/%)
 
 
 FILEMODE =	755

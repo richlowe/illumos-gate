@@ -195,6 +195,7 @@ usage_mesg(Boolean detail)
 	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZAL));
 	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZADLIB));
 	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZC));
+	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZDEBUGLINK));
 	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZDEF));
 	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZDFS));
 	(void) fprintf(stderr, MSG_INTL(MSG_ARG_DETAIL_ZDRS));
@@ -646,6 +647,15 @@ check_flags(Ofl_desc * ofl, int argc)
 	 */
 	if (ofl->ofl_name == NULL)
 		ofl->ofl_name = MSG_ORIG(MSG_STR_AOUT);
+
+	if ((ofl->ofl_debuglink != NULL) &&
+	    strcmp(ofl->ofl_name, ofl->ofl_debuglink) == 0)
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_MARG_SAMEDEBUGLINK),
+		    ofl->ofl_debuglink, ofl->ofl_name);
+
+	if ((ofl->ofl_debuglink != NULL) && (ofl->ofl_flags & FLG_OF_STRIP))
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_MARG_INCOMP),
+		    MSG_INTL(MSG_MARG_STRIP), MSG_ORIG(MSG_ARG_DEBUGLINK));
 
 	/*
 	 * We set the entrance criteria after all input argument processing as
@@ -1582,6 +1592,18 @@ parseopt_pass1(Ofl_desc *ofl, int argc, char **argv, int *usage)
 					    MSG_ORIG(MSG_ARG_Z), optarg);
 					return (S_ERROR);
 				}
+			} else if (strncmp(optarg, MSG_ORIG(MSG_ARG_DEBUGLINK),
+			    MSG_ARG_DEBUGLINK_SIZE) == 0) {
+				char *p = optarg + MSG_ARG_DEBUGLINK_SIZE;
+
+				if (p == NULL) {
+					ld_eprintf(ofl, ERR_FATAL,
+					    MSG_INTL(MSG_ARG_ILLEGAL),
+					    MSG_ORIG(MSG_ARG_Z), optarg);
+					return (S_ERROR);
+				}
+
+				ofl->ofl_debuglink = p;
 			/*
 			 * The following options just need validation as they
 			 * are interpreted on the second pass through the

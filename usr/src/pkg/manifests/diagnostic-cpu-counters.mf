@@ -61,6 +61,10 @@ $(i386_ONLY)file path=usr/kernel/pcbe/$(ARCH64)/pcbe.GenuineIntel.6.15 \
     group=sys mode=0755
 file path=usr/lib/$(ARCH64)/libcpc.so.1
 file path=usr/lib/$(ARCH64)/libpctx.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libcpc.so.1
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libpctx.so.1
+file path=usr/lib/debug/usr/lib/libcpc.so.1
+file path=usr/lib/debug/usr/lib/libpctx.so.1
 file path=usr/lib/libcpc.so.1
 file path=usr/lib/libpctx.so.1
 file path=usr/sbin/cpustat mode=0555

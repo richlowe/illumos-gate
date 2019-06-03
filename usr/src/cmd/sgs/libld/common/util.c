@@ -35,17 +35,20 @@
 /*
  * Utility functions
  */
-#include <unistd.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/types.h>
+#include <sys/crc32.h>
 #include <sys/mman.h>
-#include <errno.h>
-#include <sgs.h>
-#include <libintl.h>
+#include <sys/types.h>
+
 #include <debug.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <libintl.h>
+#include <sgs.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "msg.h"
 #include "_libld.h"
 
@@ -756,7 +759,7 @@ cap_names_match(Alist *alp1, Alist *alp2)
 
 	for (ALIST_TRAVERSE(alp1, idx1, capstr1)) {
 		Capstr		*capstr2;
-		Aliste 		idx2;
+		Aliste		idx2;
 
 		for (ALIST_TRAVERSE(alp2, idx2, capstr2)) {
 			if (strcmp(capstr1->cs_str, capstr2->cs_str))
@@ -771,4 +774,24 @@ cap_names_match(Alist *alp1, Alist *alp2)
 		return (0);
 
 	return (1);
+}
+
+uint32_t
+gnu_debuglink_crc32(const char *path)
+{
+	FILE *f;
+	size_t len;
+	char buf[8192];
+	static uint32_t crc32_table[256];
+	uint32_t crc = ~0;
+
+	CRC32_INIT(crc32_table, 0xedb88320);
+
+	if ((f = fopen(path, "r")) == NULL)
+		assert(0);	/* Yech */
+
+	while ((len = fread(buf, 1, sizeof (buf), f)) > 0)
+		CRC32(crc, buf, len, crc, crc32_table);
+
+	return (~crc);
 }

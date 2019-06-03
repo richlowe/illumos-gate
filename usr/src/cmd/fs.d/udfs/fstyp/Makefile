@@ -25,13 +25,15 @@
 
 FSTYP_VERS=1
 FSTYPE=		udfs
-LIBPROG=	fstyp.so.${FSTYP_VERS} 
+LIBPROG=	fstyp.so.${FSTYP_VERS}
 
 include ../../../../lib/Makefile.lib
 include ../../Makefile.fstype
 
 # There should be a mapfile here
 MAPFILES =
+
+DEBUGLIBS =
 
 CFLAGS +=	$(C_PICFLAGS)
 DYNLIB=		$(LIBPROG)
@@ -56,7 +58,7 @@ OBJS= fstyp.o ud_lib.o
 
 SRCS= $(OBJS:%.o=%.c)
 
-CPPFLAGS += 	-DFSTYP_VERS=${FSTYP_VERS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CPPFLAGS +=	-DFSTYP_VERS=${FSTYP_VERS} -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
 $(LIBPROG): $(OBJS)
 	$(LINK.c) $(CPPFLAGS) $(CFLAGS) $(DYNFLAGS) $(GSHARED) -o $@ $(OBJS) \
@@ -80,5 +82,5 @@ lint: lint_SRCS
 cstyle:
 	$(CSTYLE) $(SRCS)
 
-clean:     
+clean:
 	$(RM) $(OBJS)

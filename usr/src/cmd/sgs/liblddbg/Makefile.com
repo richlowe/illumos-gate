@@ -53,10 +53,13 @@ OBJECTS =	$(BLTOBJ) $(COMOBJS) $(COMOBJS32) $(COMOBJS64) $(SGSCOMMONOBJ)
 
 
 include		$(SRC)/lib/Makefile.lib
+include		$(SRC)/lib/Makefile.rootfs
 include		$(SRC)/cmd/sgs/Makefile.com
 
 SRCDIR =	$(SGSHOME)/liblddbg
 MAPFILEDIR =	$(SRCDIR)/common
+
+LIBS =		$(DYNLIB)
 
 CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	$(CNOWARN_UNINIT)
@@ -84,5 +87,3 @@ LIBSRCS =	$(COMOBJS:%.o=$(SRCDIR)/common/%.c) \
 
 CLEANFILES +=	$(BLTFILES)
 CLOBBERFILES +=	$(DYNLIB) $(LIBLINKS)
-
-ROOTFS_DYNLIB =	$(DYNLIB:%=$(ROOTFS_LIBDIR)/%)

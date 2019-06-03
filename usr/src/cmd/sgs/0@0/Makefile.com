@@ -35,6 +35,8 @@ CRTS=		$(CRTI)		$(CRTN)
 
 include		$(SRC)/lib/Makefile.lib
 
+LIBS=		$(DYNLIB)
+
 MAPFILES=
 ASFLAGS=	-P -D_ASM	$(CPPFLAGS)
 DYNFLAGS +=	$(BLOCAL) $(ZNOVERSION) $(ZINITFIRST)
@@ -47,4 +49,3 @@ SRCS=		$(OBJECTS:%.o=../common/%.c)
 CLEANFILES +=	$(CRTS)
 CLOBBERFILES +=	$(DYNLIB)
 
-ROOTDYNLIB=	$(DYNLIB:%=$(ROOTLIBDIR)/%)

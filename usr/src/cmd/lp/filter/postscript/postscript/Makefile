@@ -23,9 +23,8 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/lp/filter/postscript/postscript/Makefile
-#
 
+include		$(SRC)/cmd/Makefile.cmd
 include         ../../../Makefile.lp
 
 COMMONDIR=      ../common

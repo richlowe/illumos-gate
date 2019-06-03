@@ -48,6 +48,7 @@ SHFILES= \
 
 PERLFILES= \
 	check_rtime \
+	debugcheck \
 	find_elf \
 	interface_check \
 	interface_cmp \
@@ -82,6 +83,7 @@ MAN1ONBLDFILES= \
 	checkpaths.1onbld \
 	check_rtime.1onbld \
 	cstyle.1onbld \
+	debugcheck.1onbld \
 	find_elf.1onbld \
 	flg.flp.1onbld \
 	git-pbchk.1onbld \

@@ -372,11 +372,23 @@ _elf_upd_usr(Elf * elf)
 	 * hi water mark accordingly.
 	 */
 
-	if (eh->e_phnum != 0)
+	if (eh->e_phnum != 0) {
 		/* LINTED */
 		eh->e_phentsize = (Half)elf_fsize(ELF_T_PHDR, 1, ver);
-	else
+
+		/*
+		 * If program headers exist, a phdr offset that does not leave
+		 * room for the ELF header is a definite programming error.
+		 * Fail and report it.
+		 */
+		if (eh->e_phoff < elf_fsize(ELF_T_EHDR, 1, ver)) {
+			_elf_seterr(EFMT_NOPHOFF, 0);
+			return (0);
+		}
+	} else {
 		eh->e_phentsize = 0;
+	}
+
 	if ((sz = eh->e_phoff + eh->e_phentsize * eh->e_phnum) > hi)
 		hi = sz;
 
@@ -440,6 +452,17 @@ _elf_upd_usr(Elf * elf)
 		}
 	} else {
 		eh->e_shentsize = 0;
+	}
+
+	/*
+	 * If section headers exist, a section header offset that does not
+	 * leave room for the ELF header is a definite programming error.
+	 * Fail and report it.
+	 */
+	if ((eh->e_shnum != 0) &&
+	    (eh->e_shoff < elf_fsize(ELF_T_EHDR, 1, ver))) {
+		_elf_seterr(EFMT_NOSHOFF, 0);
+		return (0);
 	}
 
 	if ((sz = eh->e_shoff + eh->e_shentsize * scncnt) > hi)

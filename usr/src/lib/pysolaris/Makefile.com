@@ -31,6 +31,7 @@ PYSRCS=		__init__.py
 
 include ../../Makefile.lib
 
+DEBUGLIBS =
 LIBLINKS =
 SRCDIR =	../common
 ROOTLIBDIR=	$(ROOT)/usr/lib/python$(PYVER)/vendor-packages/solaris

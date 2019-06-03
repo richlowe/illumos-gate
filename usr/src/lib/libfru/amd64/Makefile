@@ -32,7 +32,7 @@ LDLIBS += -lc
 LDLIBS += -L$(SRC)/lib/libfruutils/$(MACH64) -lfruutils
 LDLIBS += -L$(SRC)/lib/libfru/libfrureg/$(MACH64) -lfrureg
 
-install: all $(ROOTLIBDIR64) $(ROOTLINKSCCC64)
+install: all $(ROOTLIBDIR64) $(ROOTLINKSCCC64) $(ROOTDBGS64)
 
 $(ROOTLIBDIR64):
 	$(INS.dir)

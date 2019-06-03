@@ -60,6 +60,13 @@ file path=etc/krb5/kdc.conf group=sys original_name=SUNWkdc:etc/krb5/kdc.conf \
 file path=etc/krb5/kpropd.acl group=sys \
     original_name=SUNWkdc:etc/krb5/kpropd.acl preserve=true
 file path=lib/svc/manifest/network/security/krb5_prop.xml group=sys mode=0444
+file path=usr/lib/debug/usr/lib/krb5/db2.so.1
+file path=usr/lib/debug/usr/lib/krb5/kldap.so.1
+file path=usr/lib/debug/usr/lib/krb5/libdb2.so.1
+file path=usr/lib/debug/usr/lib/krb5/libdyn.so.1
+file path=usr/lib/debug/usr/lib/krb5/libkadm5srv.so.1
+file path=usr/lib/debug/usr/lib/krb5/libkdb.so.1
+file path=usr/lib/debug/usr/lib/krb5/libkdb_ldap.so.1
 file path=usr/lib/krb5/README.db2 mode=0444
 file path=usr/lib/krb5/db2.so.1
 file path=usr/lib/krb5/kadmind mode=0500
