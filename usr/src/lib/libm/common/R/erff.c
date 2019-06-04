@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -36,25 +38,31 @@ extern int __swapRP(int);
 #endif
 
 float
-erff(float x) {
-	int	ix;
+erff(float x)
+{
+	int ix;
 
 	ix = *(int *)&x & ~0x80000000;
-	if (ix > 0x7f800000)	/* x is NaN */
+
+	if (ix > 0x7f800000)		/* x is NaN */
 		return (x * x);
+
 	return ((float)erf((double)x));
 }
 
 float
-erfcf(float x) {
-	float	f;
-	int	ix;
+erfcf(float x)
+{
+	float f;
+	int ix;
+
 #if defined(__i386) && !defined(__amd64)
-	int	rp;
+	int rp;
 #endif
 
 	ix = *(int *)&x & ~0x80000000;
-	if (ix > 0x7f800000)	/* x is NaN */
+
+	if (ix > 0x7f800000)		/* x is NaN */
 		return (x * x);
 
 #if defined(__i386) && !defined(__amd64)

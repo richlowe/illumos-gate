@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -37,20 +38,22 @@
  * See fmaxf.c for a discussion of implementation trade-offs.
  */
 
-#include "libm.h"	/* for islessequal macro */
+#include "libm.h"			/* for islessequal macro */
 
 #include "fenv_inlines.h"
 #include <stdio.h>
 #include <sys/isa_defs.h>
 
 double
-__fmin(double x, double y) {
+__fmin(double x, double y)
+{
 	union {
 		unsigned i[2];
 		double d;
 	} xx, yy;
+
 	unsigned s;
-	
+
 	/* if y is nan, replace it by x */
 	if (y != y)
 		y = x;

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,22 +34,23 @@
 #include <sys/isa_defs.h>
 
 #if defined(_BIG_ENDIAN)
-#define	H0_WORD(x)	((unsigned *) &x)[0]
-#define	H3_WORD(x)	((unsigned *) &x)[3]
-#define	CHOPPED(x)	(long double) ((double) (x))
+#define	H0_WORD(x)		((unsigned *)&x)[0]
+#define	H3_WORD(x)		((unsigned *)&x)[3]
+#define	CHOPPED(x)		(long double)((double)(x))
 #else
-#define	H0_WORD(x)	((((int *) &x)[2] << 16) | \
-			(0x0000ffff & (((unsigned *) &x)[1] >> 15)))
-#define	H3_WORD(x)	((unsigned *) &x)[0]
-#define	CHOPPED(x)	(long double) ((float) (x))
+#define	H0_WORD(x)		((((int *)&x)[2] << 16) | (0x0000ffff & \
+	(((unsigned *)&x)[1] >> 15)))
+#define	H3_WORD(x)		((unsigned *)&x)[0]
+#define	CHOPPED(x)		(long double)((float)(x))
 #endif
 
 struct LDouble {
 	long double h, l;
 };
 
-/* INDENT OFF */
-/* Primary interval GTi() */
+/*
+ * Primary interval GTi()
+ */
 static const long double P1[] = {
 	+0.709086836199777919037185741507610124611513720557L,
 	+4.45754781206489035827915969367354835667391606951e-0001L,
@@ -61,8 +63,9 @@ static const long double P1[] = {
 	+5.68521076168495673844711465407432189190681541547e-0007L,
 	+3.30749673519634895220582062520286565610418952979e-0008L,
 };
+
 static const long double Q1[] = {
-	+1.0+0000L,
+	+1.0 + 0000L,
 	+1.35806511721671070408570853537257079579490650668e+0000L,
 	+2.97567810153429553405327140096063086994072952961e-0001L,
 	-1.52956835982588571502954372821681851681118097870e-0001L,
@@ -72,6 +75,7 @@ static const long double Q1[] = {
 	-3.12653708152290867248931925120380729518332507388e-0004L,
 	+2.36672170850409745237358105667757760527014332458e-0005L,
 };
+
 static const long double P2[] = {
 	+0.428486815855585429730209907810650135255270600668084114L,
 	+2.62768479103809762805691743305424077975230551176e-0001L,
@@ -84,6 +88,7 @@ static const long double P2[] = {
 	+2.13734755837595695602045100675540011352948958453e-0007L,
 	+9.74123440547918230781670266967882492234877125358e-0009L,
 };
+
 static const long double Q2[] = {
 	+1.0L,
 	+9.18284118632506842664645516830761489700556179701e-0001L,
@@ -96,6 +101,7 @@ static const long double Q2[] = {
 	+3.10019017590151598732360097849672925448587547746e-0005L,
 	-1.77260223349332617658921874288026777465782364070e-0006L,
 };
+
 static const long double P3[] = {
 	+0.3824094797345675048502747661075355640070439388902L,
 	+3.42198093076618495415854906335908427159833377774e-0001L,
@@ -108,9 +114,9 @@ static const long double P3[] = {
 	+9.66243228508380420159234853278906717065629721016e-0007L,
 	+2.31858885579177250541163820671121664974334728142e-0008L,
 };
+
 static const long double Q3[] = {
-	+1.0L,
-	+8.25479821168813634632437430090376252512793067339e-0001L,
+	+1.0L, +8.25479821168813634632437430090376252512793067339e-0001L,
 	-1.62251363073937769739639623669295110346015576320e-0002L,
 	-1.10621286905916732758745130629426559691187579852e-0001L,
 	+3.48309693970985612644446415789230015515365291459e-0003L,
@@ -123,41 +129,42 @@ static const long double Q3[] = {
 
 static const long double
 #if defined(__x86)
-GZ1_h 	=  0.938204627909682449364570100414084663498215377L,
-GZ1_l   =  4.518346116624229420055327632718530617227944106e-20L,
-GZ2_h 	=  0.885603194410888700264725126309883762587560340L,
-GZ2_l   =  1.409077427270497062039119290776508217077297169e-20L,
-GZ3_h 	=  0.936781411463652321613537060640553022494714241L,
-GZ3_l   =  5.309836440284827247897772963887219035221996813e-21L,
+	GZ1_h = 0.938204627909682449364570100414084663498215377L,
+	GZ1_l = 4.518346116624229420055327632718530617227944106e-20L,
+	GZ2_h = 0.885603194410888700264725126309883762587560340L,
+	GZ2_l = 1.409077427270497062039119290776508217077297169e-20L,
+	GZ3_h = 0.936781411463652321613537060640553022494714241L,
+	GZ3_l = 5.309836440284827247897772963887219035221996813e-21L,
 #else
-GZ1_h 	=  0.938204627909682449409753561580326910854647031L,
-GZ1_l   =  4.684412162199460089642452580902345976446297037e-35L,
-GZ2_h 	=  0.885603194410888700278815900582588658192658794L,
-GZ2_l   =  7.501529273890253789219935569758713534641074860e-35L,
-GZ3_h 	=  0.936781411463652321618846897080837818855399840L,
-GZ3_l   =  3.088721217404784363585591914529361687403776917e-35L,
+	GZ1_h = 0.938204627909682449409753561580326910854647031L,
+	GZ1_l = 4.684412162199460089642452580902345976446297037e-35L,
+	GZ2_h = 0.885603194410888700278815900582588658192658794L,
+	GZ2_l = 7.501529273890253789219935569758713534641074860e-35L,
+	GZ3_h = 0.936781411463652321618846897080837818855399840L,
+	GZ3_l = 3.088721217404784363585591914529361687403776917e-35L,
 #endif
-TZ1	= -0.3517214357852935791015625L,
-TZ3	=  0.280530631542205810546875L;
-/* INDENT ON */
+	TZ1 = -0.3517214357852935791015625L,
+	TZ3 = 0.280530631542205810546875L;
 
-/* INDENT OFF */
+
 /*
  * compute gamma(y=yh+yl) for y in GT1 = [1.0000, 1.2845]
  * ...assume yh got 53 or 24(i386) significant bits
  */
-/* INDENT ON */
 static struct LDouble
-GT1(long double yh, long double yl) {
+GT1(long double yh, long double yl)
+{
 	long double t3, t4, y;
 	int i;
 	struct LDouble r;
 
 	y = yh + yl;
+
 	for (t4 = Q1[8], t3 = P1[8] + y * P1[9], i = 7; i >= 0; i--) {
 		t4 = t4 * y + Q1[i];
 		t3 = t3 * y + P1[i];
 	}
+
 	t3 = (y * y) * t3 / t4;
 	t3 += (TZ1 * yl + GZ1_l);
 	t4 = TZ1 * yh;
@@ -167,46 +174,50 @@ GT1(long double yh, long double yl) {
 	return (r);
 }
 
-/* INDENT OFF */
+
 /*
  * compute gamma(y=yh+yl) for y in GT2 = [1.2844, 1.6374]
  * ...assume yh got 53 significant bits
  */
-/* INDENT ON */
 static struct LDouble
-GT2(long double yh, long double yl) {
+GT2(long double yh, long double yl)
+{
 	long double t3, t4, y;
 	int i;
 	struct LDouble r;
 
 	y = yh + yl;
+
 	for (t4 = Q2[9], t3 = P2[9], i = 8; i >= 0; i--) {
 		t4 = t4 * y + Q2[i];
 		t3 = t3 * y + P2[i];
 	}
+
 	t3 = GZ2_l + (y * y) * t3 / t4;
 	r.h = CHOPPED((GZ2_h + t3));
 	r.l = t3 - (r.h - GZ2_h);
 	return (r);
 }
 
-/* INDENT OFF */
+
 /*
  * compute gamma(y=yh+yl) for y in GT3 = [1.6373, 2.0000]
  * ...assume yh got 53 significant bits
  */
-/* INDENT ON */
 static struct LDouble
-GT3(long double yh, long double yl) {
+GT3(long double yh, long double yl)
+{
 	long double t3, t4, y;
 	int i;
 	struct LDouble r;
 
 	y = yh + yl;
+
 	for (t4 = Q3[9], t3 = P3[9], i = 8; i >= 0; i--) {
 		t4 = t4 * y + Q3[i];
 		t3 = t3 * y + P3[i];
 	}
+
 	t3 = (y * y) * t3 / t4;
 	t3 += (TZ3 * yl + GZ3_l);
 	t4 = TZ3 * yh;
@@ -216,8 +227,9 @@ GT3(long double yh, long double yl) {
 	return (r);
 }
 
-/* INDENT OFF */
-/* Hex value of GP[0] shoule be 3FB55555 55555555 */
+/*
+ * Hex value of GP[0] shoule be 3FB55555 55555555
+ */
 static const long double GP[] = {
 	+0.083333333333333333333333333333333172839171301L,
 	-2.77777777777777777777777777492501211999399424104e-0003L,
@@ -238,50 +250,51 @@ static const long double GP[] = {
 	+2.09263249637351298563934942349749718491071093210e+0008L,
 	-2.96247483183169219343745316433899599834685703457e+0009L,
 	+2.88984933605896033154727626086506756972327292981e+0010L,
-	-1.40960434146030007732838382416230610302678063984e+0011L,	/* 19 */
+	-1.40960434146030007732838382416230610302678063984e+0011L, /* 19 */
 };
 
 static const long double T3[] = {
-	+0.666666666666666666666666666666666634567834260213L,	/* T3[0] */
-	+0.400000000000000000000000000040853636176634934140L,	/* T3[1] */
-	+0.285714285714285714285696975252753987869020263448L,	/* T3[2] */
-	+0.222222222222222225593221101192317258554772129875L,	/* T3[3] */
-	+0.181818181817850192105847183461778186703779262916L,	/* T3[4] */
-	+0.153846169861348633757101285952333369222567014596L,	/* T3[5] */
-	+0.133033462889260193922261296772841229985047571265L,	/* T3[6] */
+	+0.666666666666666666666666666666666634567834260213L, /* T3[0] */
+	+0.400000000000000000000000000040853636176634934140L, /* T3[1] */
+	+0.285714285714285714285696975252753987869020263448L, /* T3[2] */
+	+0.222222222222222225593221101192317258554772129875L, /* T3[3] */
+	+0.181818181817850192105847183461778186703779262916L, /* T3[4] */
+	+0.153846169861348633757101285952333369222567014596L, /* T3[5] */
+	+0.133033462889260193922261296772841229985047571265L, /* T3[6] */
 };
-
+/* BEGIN CSTYLED */
 static const long double c[] = {
-0.0L,
-1.0L,
-2.0L,
-0.5L,
-1.0e-4930L,							/* tiny */
-4.18937683105468750000e-01L,					/* hln2pim1_h */
-8.50099203991780329736405617639861397473637783412817152e-07L,	/* hln2pim1_l */
-0.418938533204672741780329736405617639861397473637783412817152L, /* hln2pim1 */
-2.16608493865351192653179168701171875e-02L,			/* ln2_32hi */
-5.96317165397058692545083025235937919875797669127130e-12L,	/* ln2_32lo */
-46.16624130844682903551758979206054839765267053289554989233L,	/* invln2_32 */
+	0.0L,
+	1.0L,
+	2.0L,
+	0.5L,
+	1.0e-4930L,		     /* tiny */
+	4.18937683105468750000e-01L, /* hln2pim1_h */
+	8.50099203991780329736405617639861397473637783412817152e-07L, /* hln2pim1_l */
+	0.418938533204672741780329736405617639861397473637783412817152L, /* hln2pim1 */
+	2.16608493865351192653179168701171875e-02L, /* ln2_32hi */
+	5.96317165397058692545083025235937919875797669127130e-12L, /* ln2_32lo */
+	46.16624130844682903551758979206054839765267053289554989233L, /* invln2_32 */
 #if defined(__x86)
-1.7555483429044629170023839037639845628291e+03L,		/* overflow */
+	1.7555483429044629170023839037639845628291e+03L, /* overflow */
 #else
-1.7555483429044629170038892160702032034177e+03L,		/* overflow */
+	1.7555483429044629170038892160702032034177e+03L, /* overflow */
 #endif
 };
+/* END CSTYLED */
 
-#define	zero		c[0]
-#define	one		c[1]
-#define	two		c[2]
-#define	half		c[3]
-#define	tiny		c[4]
-#define	hln2pim1_h	c[5]
-#define	hln2pim1_l	c[6]
-#define	hln2pim1	c[7]
-#define	ln2_32hi	c[8]
-#define	ln2_32lo	c[9]
-#define	invln2_32	c[10]
-#define	overflow	c[11]
+#define	zero			c[0]
+#define	one			c[1]
+#define	two			c[2]
+#define	half			c[3]
+#define	tiny			c[4]
+#define	hln2pim1_h		c[5]
+#define	hln2pim1_l		c[6]
+#define	hln2pim1		c[7]
+#define	ln2_32hi		c[8]
+#define	ln2_32lo		c[9]
+#define	invln2_32		c[10]
+#define	overflow		c[11]
 
 /*
  * |exp(r) - (1+r+Et0*r^2+...+Et10*r^12)| <= 2^(-128.88) for |r|<=ln2/64
@@ -314,10 +327,10 @@ static const long double Et[] = {
  *  (2) Remez error for T3(s) is bounded by 2**(-136.54)
  */
 static const long double T1[] = {
--1.000000000000000000000000000000000000000000e+00L,
+	-1.000000000000000000000000000000000000000000e+00L,
 	+0.000000000000000000000000000000000000000000e+00L,
--3.068528175354003906250000000000000000000000e-01L,
--1.904654299957767878541823431924500011926579e-09L,
+	-3.068528175354003906250000000000000000000000e-01L,
+	-1.904654299957767878541823431924500011926579e-09L,
 	+3.862943053245544433593750000000000000000000e-01L,
 	+5.579533617547508924291635313615100141107647e-08L,
 	+1.079441487789154052734375000000000000000000e+00L,
@@ -544,6 +557,7 @@ static const long double S[] = {
 	+1.95714412417540026901832225162687149e+00L,
 #endif
 };
+
 static const long double S_trail[] = {
 #if defined(__x86)
 	+0.0000000000000000000000000e+00L,
@@ -581,56 +595,55 @@ static const long double S_trail[] = {
 #else
 	+0.00000000000000000000000000000000000e+00L,
 	+1.80506787420330954745573333054573786e-35L,
--9.37452029228042742195756741973083214e-35L,
--1.59696844729275877071290963023149997e-35L,
+	-9.37452029228042742195756741973083214e-35L,
+	-1.59696844729275877071290963023149997e-35L,
 	+9.11249341012502297851168610167248666e-35L,
--6.50422820697854828723037477525938871e-35L,
--8.14846884452585113732569176748815532e-35L,
--5.06621457672180031337233074514290335e-35L,
--1.35983097468881697374987563824591912e-35L,
+	-6.50422820697854828723037477525938871e-35L,
+	-8.14846884452585113732569176748815532e-35L,
+	-5.06621457672180031337233074514290335e-35L,
+	-1.35983097468881697374987563824591912e-35L,
 	+9.49742763556319647030771056643324660e-35L,
--3.28317052317699860161506596533391526e-36L,
--5.01723570938719041029018653045842895e-35L,
--2.39147479768910917162283430160264014e-35L,
--8.35057135763390881529889073794408385e-36L,
+	-3.28317052317699860161506596533391526e-36L,
+	-5.01723570938719041029018653045842895e-35L,
+	-2.39147479768910917162283430160264014e-35L,
+	-8.35057135763390881529889073794408385e-36L,
 	+7.03675688907326504242173719067187644e-35L,
--5.18248485306464645753689301856695619e-35L,
+	-5.18248485306464645753689301856695619e-35L,
 	+9.42224254862183206569211673639406488e-35L,
--3.96750082539886230916730613021641828e-35L,
+	-3.96750082539886230916730613021641828e-35L,
 	+7.14352899156330061452327361509276724e-35L,
 	+1.15987125286798512424651783410044433e-35L,
 	+4.69693347835811549530973921320187447e-35L,
--3.38651317599500471079924198499981917e-35L,
--8.58731877429824706886865593510387445e-35L,
--9.60595154874935050318549936224606909e-35L,
+	-3.38651317599500471079924198499981917e-35L,
+	-8.58731877429824706886865593510387445e-35L,
+	-9.60595154874935050318549936224606909e-35L,
 	+9.60973393212801278450755869714178581e-35L,
 	+6.37839792144002843924476144978084855e-35L,
 	+7.79243078569586424945646112516927770e-35L,
 	+7.36133776758845652413193083663393220e-35L,
--6.47299514791334723003521457561217053e-35L,
+	-6.47299514791334723003521457561217053e-35L,
 	+8.58747441795369869427879806229522962e-35L,
 	+2.37181542282517483569165122830269098e-35L,
--3.02689168209611877300459737342190031e-37L,
+	-3.02689168209611877300459737342190031e-37L,
 #endif
 };
-/* INDENT ON */
 
-/* INDENT OFF */
+
 /*
  * return tgamma(x) scaled by 2**-m for 8<x<=171.62... using Stirling's formula
  *     log(G(x)) ~= (x-.5)*(log(x)-1) + .5(log(2*pi)-1) + (1/x)*P(1/(x*x))
  *                = L1 + L2 + L3,
  */
-/* INDENT ON */
 static struct LDouble
-large_gam(long double x, int *m) {
+large_gam(long double x, int *m)
+{
 	long double z, t1, t2, t3, z2, t5, w, y, u, r, v;
 	long double t24 = 16777216.0L, p24 = 1.0L / 16777216.0L;
 	int n2, j2, k, ix, j, i;
 	struct LDouble zz;
 	long double u2, ss_h, ss_l, r_h, w_h, w_l, t4;
 
-/* INDENT OFF */
+/* BEGIN CSTYLED */
 /*
  * compute ss = ss.h+ss.l = log(x)-1 (see tgamma_log.h for details)
  *
@@ -654,42 +667,44 @@ large_gam(long double x, int *m) {
  *                       -------------------------------------------
  *                          [leading] + [Trailing]
  */
-	/* INDENT ON */
+	/* END CSTYLED */
 	ix = H0_WORD(x);
-	n2 = (ix >> 16) - 0x3fff;	/* exponent of x, range:3-10 */
-	y = scalbnl(x, -n2);	/* y = scale x to [1,2] */
-	n2 += n2;		/* 2n */
-	j = (ix >> 10) & 0x3f;	/* j */
-	z = 1.0078125L + (long double) j * 0.015625L;	/* z[j]=1+j/64+1/128 */
+	n2 = (ix >> 16) - 0x3fff; /* exponent of x, range:3-10 */
+	y = scalbnl(x, -n2);	  /* y = scale x to [1,2] */
+	n2 += n2;		  /* 2n */
+	j = (ix >> 10) & 0x3f;	  /* j */
+	z = 1.0078125L + (long double)j * 0.015625L;	/* z[j]=1+j/64+1/128 */
 	j2 = j + j;
 	t1 = y + z;
 	t2 = y - z;
 	r = one / t1;
-	u = r * t2;		/* u = (y-z)/(y+z) */
+	u = r * t2;			/* u = (y-z)/(y+z) */
 	t1 = CHOPPED(t1);
 	t4 = T2[j2 + 1] + T1[n2 + 1];
 	z2 = u * u;
 	k = H0_WORD(u) & 0x7fffffff;
 	t3 = T2[j2] + T1[n2];
+
 	for (t5 = T3[6], i = 5; i >= 0; i--)
 		t5 = z2 * t5 + T3[i];
+
 	if ((k >> 16) < 0x3fec) {	/* |u|<2**-19 */
 		t2 = t4 + u * (two + z2 * t5);
 	} else {
 		t5 = t4 + (u * z2) * t5;
 		u2 = u + u;
-		v = (long double) ((int) (u2 * t24)) * p24;
+		v = (long double)((int)(u2 * t24)) * p24;
 		t2 = t5 + r * ((two * t2 - v * t1) - v * (y - (t1 - z)));
 		t3 += v;
 	}
+
 	ss_h = CHOPPED((t2 + t3));
 	ss_l = t2 - (ss_h - t3);
-/* INDENT OFF */
+
 /*
  * compute ww = (x-.5)*(log(x)-1) + .5*(log(2pi)-1) + 1/x*(P(1/x^2)))
  * where ss = log(x) - 1 in already in extra precision
  */
-	/* INDENT ON */
 	z = one / x;
 	r = x - half;
 	r_h = CHOPPED((r));
@@ -697,17 +712,19 @@ large_gam(long double x, int *m) {
 	z2 = z * z;
 	w = (r - r_h) * ss_h + r * ss_l;
 	t1 = GP[19];
+
 	for (i = 18; i > 0; i--)
 		t1 = z2 * t1 + GP[i];
+
 	w += hln2pim1_l;
 	w_l = z * (GP[0] + z2 * t1) + w;
-	k = (int) ((w_h + w_l) * invln2_32 + half);
+	k = (int)((w_h + w_l) * invln2_32 + half);
 
 	/* compute the exponential of w_h+w_l */
 
 	j = k & 0x1f;
 	*m = k >> 5;
-	t3 = (long double) k;
+	t3 = (long double)k;
 
 	/* perform w - k*ln2_32 (represent as w_h - w_l) */
 	t1 = w_h - t3 * ln2_32hi;
@@ -718,15 +735,17 @@ large_gam(long double x, int *m) {
 
 	/* compute exp(w_h-w_l) */
 	z = w_h - w_l;
+
 	for (t1 = Et[10], i = 9; i >= 0; i--)
 		t1 = z * t1 + Et[i];
+
 	t3 = w_h - (w_l - (z * z) * t1);	/* t3 = expm1(z) */
 	zz.l = S_trail[j] * (one + t3) + S[j] * t3;
 	zz.h = S[j];
 	return (zz);
 }
 
-/* INDENT OFF */
+
 /*
  * kpsin(x)= sin(pi*x)/pi
  *	           3        5        7        9        11                27
@@ -747,28 +766,30 @@ static const long double ks[] = {
 	+5.50724992262622033449487808306969135431411753047e-0014L,
 	-7.67678132753577998601234393215802221104236979928e-0016L,
 };
-/* INDENT ON */
 
 /*
  * assume x is not tiny and positive
  */
 static struct LDouble
-kpsin(long double x) {
+kpsin(long double x)
+{
 	long double z, t1, t2;
 	struct LDouble xx;
 	int i;
 
 	z = x * x;
 	xx.h = x;
+
 	for (t2 = ks[12], i = 11; i > 0; i--)
 		t2 = z * t2 + ks[i];
+
 	t1 = z * x;
 	t2 *= z * t1;
 	xx.l = t1 * ks[0] + t2;
 	return (xx);
 }
 
-/* INDENT OFF */
+
 /*
  * kpcos(x)= cos(pi*x)/pi
  *                     2        4        6        8        10        12
@@ -799,15 +820,14 @@ kpsin(long double x) {
 
 static const long double
 #if defined(__x86)
-one_pi_h = 0.3183098861481994390487670898437500L,	/* 31 bits */
-one_pi_l = 3.559123248900043690127872406891929148e-11L,
+	one_pi_h = 0.3183098861481994390487670898437500L,	/* 31 bits */
+	one_pi_l = 3.559123248900043690127872406891929148e-11L,
 #else
-one_pi_h = 0.31830988618379052468299050815403461456298828125L,
-one_pi_l = 1.46854777018590994109505931010230912897495334688117e-16L,
+	one_pi_h = 0.31830988618379052468299050815403461456298828125L,
+	one_pi_l = 1.46854777018590994109505931010230912897495334688117e-16L,
 #endif
-npi_2_h = -1.570796310901641845703125000000000L,
-npi_2_l = -1.5893254773528196691639751442098584699687552910e-8L;
-
+	npi_2_h = -1.570796310901641845703125000000000L,
+	npi_2_l = -1.5893254773528196691639751442098584699687552910e-8L;
 static const long double kc[] = {
 	+1.29192819501249250731151312779548918765320728489e+0000L,
 	-4.25027339979557573976029596929319207009444090366e-0001L,
@@ -820,24 +840,26 @@ static const long double kc[] = {
 	+1.14741409212381858820016567664488123478660705759e-0009L,
 	-2.44261236114707374558437500654381006300502749632e-0011L,
 };
-/* INDENT ON */
 
 /*
  * assume x is not tiny and positive
  */
 static struct LDouble
-kpcos(long double x) {
+kpcos(long double x)
+{
 	long double z, t1, t2, t3, t4, x4, x8;
 	int i;
 	struct LDouble xx;
 
 	z = x * x;
 	xx.h = one_pi_h;
-	t1 = (long double) ((float) x);
+	t1 = (long double)((float)x);
 	x4 = z * z;
 	t2 = npi_2_l * z + npi_2_h * (x + t1) * (x - t1);
+
 	for (i = 8, t3 = kc[9]; i >= 0; i--)
 		t3 = z * t3 + kc[i];
+
 	t3 = one_pi_l + x4 * t3;
 	t4 = t1 * t1 * npi_2_h;
 	x8 = t2 + t3;
@@ -845,41 +867,40 @@ kpcos(long double x) {
 	return (xx);
 }
 
-/* INDENT OFF */
 static const long double
-	/* 0.13486180573279076968979393577465291700642511139552429398233 */
+/* 0.13486180573279076968979393577465291700642511139552429398233 */
 #if defined(__x86)
-t0z1   =  0.1348618057327907696779385054997035808810L,
-t0z1_l =  1.1855430274949336125392717150257379614654e-20L,
+	t0z1 = 0.1348618057327907696779385054997035808810L,
+	t0z1_l = 1.1855430274949336125392717150257379614654e-20L,
 #else
-t0z1   =  0.1348618057327907696897939357746529168654L,
-t0z1_l =  1.4102088588676879418739164486159514674310e-37L,
+	t0z1 = 0.1348618057327907696897939357746529168654L,
+	t0z1_l = 1.4102088588676879418739164486159514674310e-37L,
 #endif
-	/* 0.46163214496836234126265954232572132846819620400644635129599 */
+/* 0.46163214496836234126265954232572132846819620400644635129599 */
 #if defined(__x86)
-t0z2   =  0.4616321449683623412538115843295472018326L,
-t0z2_l =  8.84795799617412663558532305039261747030640e-21L,
+	t0z2 = 0.4616321449683623412538115843295472018326L,
+	t0z2_l = 8.84795799617412663558532305039261747030640e-21L,
 #else
-t0z2   =  0.46163214496836234126265954232572132343318L,
-t0z2_l =  5.03501162329616380465302666480916271611101e-36L,
+	t0z2 = 0.46163214496836234126265954232572132343318L,
+	t0z2_l = 5.03501162329616380465302666480916271611101e-36L,
 #endif
-	/* 0.81977310110050060178786870492160699631174407846245179119586 */
+/* 0.81977310110050060178786870492160699631174407846245179119586 */
 #if defined(__x86)
-t0z3   =  0.81977310110050060178773362329351925836817L,
-t0z3_l =  1.350816280877379435658077052534574556256230e-22L
+	t0z3 = 0.81977310110050060178773362329351925836817L,
+	t0z3_l = 1.350816280877379435658077052534574556256230e-22L
 #else
-t0z3   =  0.8197731011005006017878687049216069516957449L,
-t0z3_l =  4.461599916947014419045492615933551648857380e-35L
+	t0z3 = 0.8197731011005006017878687049216069516957449L,
+	t0z3_l = 4.461599916947014419045492615933551648857380e-35L
 #endif
 ;
-/* INDENT ON */
 
 /*
  * gamma(x+i) for 0 <= x < 1
  */
 static struct LDouble
-gam_n(int i, long double x) {
-	struct LDouble rr = {0.0L, 0.0L}, yy;
+gam_n(int i, long double x)
+{
+	struct LDouble rr = { 0.0L, 0.0L }, yy;
 	long double r1, r2, t2, z, xh, xl, yh, yl, zh, z1, z2, zl, x5, wh, wl;
 
 	/* compute yy = gamma(x+1) */
@@ -901,26 +922,27 @@ gam_n(int i, long double x) {
 		t2 = r1 - r2;
 		yy = GT1(r2, t2 - t0z1_l);
 	}
+
 	/* compute gamma(x+i) = (x+i-1)*...*(x+1)*yy, 0<i<8 */
 	switch (i) {
-	case 0:		/* yy/x */
+	case 0:				/* yy/x */
 		r1 = one / x;
 		xh = CHOPPED((x));	/* x is not tiny */
 		rr.h = CHOPPED(((yy.h + yy.l) * r1));
-		rr.l = r1 * (yy.h - rr.h * xh) - ((r1 * rr.h) * (x - xh) -
-			r1 * yy.l);
+		rr.l = r1 * (yy.h - rr.h * xh) - ((r1 * rr.h) * (x - xh) - r1 *
+		    yy.l);
 		break;
-	case 1:		/* yy */
+	case 1:				/* yy */
 		rr.h = yy.h;
 		rr.l = yy.l;
 		break;
-	case 2:		/* (x+1)*yy */
-		z = x + one;	/* may not be exact */
+	case 2:				/* (x+1)*yy */
+		z = x + one;		/* may not be exact */
 		zh = CHOPPED((z));
 		rr.h = zh * yy.h;
 		rr.l = z * yy.l + (x - (zh - one)) * yy.h;
 		break;
-	case 3:		/* (x+2)*(x+1)*yy */
+	case 3:				/* (x+2)*(x+1)*yy */
 		z1 = x + one;
 		z2 = x + 2.0L;
 		z = z1 * z2;
@@ -932,7 +954,7 @@ gam_n(int i, long double x) {
 		rr.l = z * yy.l + xl * yy.h;
 		break;
 
-	case 4:		/* (x+1)*(x+3)*(x+2)*yy */
+	case 4:				/* (x+1)*(x+3)*(x+2)*yy */
 		z1 = x + 2.0L;
 		z2 = (x + one) * (x + 3.0L);
 		zh = CHOPPED(z1);
@@ -948,7 +970,7 @@ gam_n(int i, long double x) {
 		rr.l = z2 * wl + xl * wh;
 
 		break;
-	case 5:		/* ((x+1)*(x+4)*(x+2)*(x+3))*yy */
+	case 5:				/* ((x+1)*(x+4)*(x+2)*(x+3))*yy */
 		z1 = x + 2.0L;
 		z2 = x + 3.0L;
 		z = z1 * z2;
@@ -962,7 +984,7 @@ gam_n(int i, long double x) {
 		rr.h = xh * yy.h;
 		rr.l = z * yy.l + xl * yy.h;
 		break;
-	case 6:		/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5))*yy */
+	case 6:				/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5))*yy */
 		z1 = x + 2.0L;
 		z2 = x + 3.0L;
 		z = z1 * z2;
@@ -976,14 +998,17 @@ gam_n(int i, long double x) {
 		xh = CHOPPED(z);
 		zh += 3.0;
 		xl = yl * (z2 + yh) - (xh - yh * (yh - 2.0L));
-						/* xh+xl=(x+1)*...*(x+4) */
-		/* wh+wl=(x+5)*yy */
+
+		/*
+		 * xh+xl=(x+1)*...*(x+4)
+		 * wh+wl=(x+5)*yy
+		 */
 		wh = CHOPPED((x5 * (yy.h + yy.l)));
 		wl = (z1 * yy.h + x5 * yy.l) - (wh - zh * yy.h);
 		rr.h = wh * xh;
 		rr.l = z * wl + xl * wh;
 		break;
-	case 7:		/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5)*(x+6))*yy */
+	case 7:			/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5)*(x+6))*yy */
 		z1 = x + 3.0L;
 		z2 = x + 4.0L;
 		z = z2 * z1;
@@ -991,23 +1016,28 @@ gam_n(int i, long double x) {
 		yh = CHOPPED((z));	/* yh+yl = (x+3)(x+4) */
 		yl = (x - (zh - 3.0L)) * (z2 + zh) - (yh - (zh * (zh + one)));
 		z1 = x + 6.0L;
-		z2 = z - 2.0L;	/* z2 = (x+2)*(x+5) */
+		z2 = z - 2.0L;		/* z2 = (x+2)*(x+5) */
 		z *= z2;
 		xh = CHOPPED((z));
 		xl = yl * (z2 + yh) - (xh - yh * (yh - 2.0L));
-						/* xh+xl=(x+2)*...*(x+5) */
-		/* wh+wl=(x+1)(x+6)*yy */
-		z2 -= 4.0L;	/* z2 = (x+1)(x+6) */
+
+		/*
+		 * xh+xl=(x+2)*...*(x+5)
+		 * wh+wl=(x+1)(x+6)*yy
+		 */
+		z2 -= 4.0L;		/* z2 = (x+1)(x+6) */
 		wh = CHOPPED((z2 * (yy.h + yy.l)));
 		wl = (z2 * yy.l + yl * yy.h) - (wh - (yh - 6.0L) * yy.h);
 		rr.h = wh * xh;
 		rr.l = z * wl + xl * wh;
 	}
+
 	return (rr);
 }
 
 long double
-tgammal(long double x) {
+tgammal(long double x)
+{
 	struct LDouble ss, ww;
 	long double t, t1, t2, t3, t4, t5, w, y, z, z1, z2, z3, z5;
 	int i, j, m, ix, hx, xk;
@@ -1017,26 +1047,32 @@ tgammal(long double x) {
 	lx = H3_WORD(x);
 	ix = hx & 0x7fffffff;
 	y = x;
-	if (ix < 0x3f8e0000) {	/* x < 2**-113 */
+
+	if (ix < 0x3f8e0000)		/* x < 2**-113 */
 		return (one / x);
-	}
+
 	if (ix >= 0x7fff0000)
-		return (x * ((hx < 0)? zero : x));	/* Inf or NaN */
-	if (x > overflow)	/* overflow threshold */
+		return (x * ((hx < 0) ? zero : x));	/* Inf or NaN */
+
+	if (x > overflow)				/* overflow threshold */
 		return (x * 1.0e4932L);
-	if (hx >= 0x40020000) {	/* x >= 8 */
+
+	if (hx >= 0x40020000) {				/* x >= 8 */
 		ww = large_gam(x, &m);
 		w = ww.h + ww.l;
 		return (scalbnl(w, m));
 	}
 
-	if (hx > 0) {		/* 0 < x < 8 */
-		i = (int) x;
-		ww = gam_n(i, x - (long double) i);
+	if (hx > 0) {			/* 0 < x < 8 */
+		i = (int)x;
+		ww = gam_n(i, x - (long double)i);
 		return (ww.h + ww.l);
 	}
-	/* INDENT OFF */
-	/* negative x */
+
+	/*
+	 * negative x
+	 */
+
 	/*
 	 * compute xk =
 	 *	-2 ... x is an even int (-inf is considered an even #)
@@ -1044,16 +1080,15 @@ tgammal(long double x) {
 	 *	+0 ... x is not an int but chopped to an even int
 	 *	+1 ... x is not an int but chopped to an odd int
 	 */
-	/* INDENT ON */
 	xk = 0;
 #if defined(__x86)
-	if (ix >= 0x403e0000) {	/* x >= 2**63 } */
+	if (ix >= 0x403e0000) {		/* x >= 2**63 } */
 		if (ix >= 0x403f0000)
 			xk = -2;
 		else
 			xk = -2 + (lx & 1);
 #else
-	if (ix >= 0x406f0000) {	/* x >= 2**112 */
+	if (ix >= 0x406f0000) {		/* x >= 2**112 */
 		if (ix >= 0x40700000)
 			xk = -2;
 		else
@@ -1064,6 +1099,7 @@ tgammal(long double x) {
 		t1 = floorl(w);
 		t2 = t1 * half;
 		t3 = floorl(t2);
+
 		if (t1 == w) {
 			if (t2 == t3)
 				xk = -2;
@@ -1079,7 +1115,7 @@ tgammal(long double x) {
 
 	if (xk < 0) {
 		/* return NaN. Ideally gamma(-n)= (-1)**(n+1) * inf */
-		return (x - x) / (x - x);
+		return ((x - x) / (x - x));
 	}
 
 	/*
@@ -1087,30 +1123,35 @@ tgammal(long double x) {
 	 */
 	if (x < -1774.0000000000000000000000000000017749370L) {
 		z = tiny / x;
+
 		if (xk == 1)
 			z = -z;
+
 		return (z * tiny);
 	}
 
-	/* INDENT OFF */
+
 	/*
 	 * now compute gamma(x) by  -1/((sin(pi*y)/pi)*gamma(1+y)), y = -x
 	 */
+
 	/*
 	 * First compute ss = -sin(pi*y)/pi so that
 	 * gamma(x) = 1/(ss*gamma(1+y))
 	 */
-	/* INDENT ON */
 	y = -x;
-	j = (int) y;
-	z = y - (long double) j;
-	if (z > 0.3183098861837906715377675L)
+	j = (int)y;
+	z = y - (long double)j;
+
+	if (z > 0.3183098861837906715377675L) {
 		if (z > 0.6816901138162093284622325L)
 			ss = kpsin(one - z);
 		else
 			ss = kpcos(0.5L - z);
-	else
+	} else {
 		ss = kpsin(z);
+	}
+
 	if (xk == 0) {
 		ss.h = -ss.h;
 		ss.l = -ss.l;
@@ -1118,14 +1159,17 @@ tgammal(long double x) {
 
 	/* Then compute ww = gamma(1+y), note that result scale to 2**m */
 	m = 0;
+
 	if (j < 7) {
 		ww = gam_n(j + 1, z);
 	} else {
 		w = y + one;
+
 		if ((lx & 1) == 0) {	/* y+1 exact (note that y<184) */
 			ww = large_gam(w, &m);
 		} else {
 			t = w - one;
+
 			if (t == y) {	/* y+one exact */
 				ww = large_gam(w, &m);
 			} else {	/* use y*gamma(y) */
@@ -1133,10 +1177,11 @@ tgammal(long double x) {
 					ww = gam_n(j, z);
 				else
 					ww = large_gam(y, &m);
+
 				t4 = ww.h + ww.l;
 				t1 = CHOPPED((y));
 				t2 = CHOPPED((t4));
-						/* t4 will not be too large */
+				/* t4 will not be too large */
 				ww.l = y * (ww.l - (t2 - ww.h)) + (y - t1) * t2;
 				ww.h = t1 * t2;
 			}

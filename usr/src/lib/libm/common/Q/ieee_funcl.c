@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,75 +32,95 @@
 
 #if defined(__sparc)
 int
-isinfl(long double x) {
-	int *px = (int *) &x;
-	return ((px[0] & ~0x80000000) == 0x7fff0000 && px[1] == 0 &&
-		px[2] == 0 && px[3] == 0);
+isinfl(long double x)
+{
+	int *px = (int *)&x;
+
+	return ((px[0] & ~0x80000000) == 0x7fff0000 && px[1] == 0 && px[2] ==
+	    0 && px[3] == 0);
 }
 
 int
-isnormall(long double x) {
-	int *px = (int *) &x;
-	return ((unsigned) ((px[0] & 0x7fff0000) - 0x10000) < 0x7ffe0000);
+isnormall(long double x)
+{
+	int *px = (int *)&x;
+
+	return ((unsigned)((px[0] & 0x7fff0000) - 0x10000) < 0x7ffe0000);
 }
 
 int
-issubnormall(long double x) {
-	int *px = (int *) &x;
+issubnormall(long double x)
+{
+	int *px = (int *)&x;
+
 	px[0] &= ~0x80000000;
 	return (px[0] < 0x00010000 && (px[0] | px[1] | px[2] | px[3]) != 0);
 }
 
 int
-iszerol(long double x) {
-	int *px = (int *) &x;
+iszerol(long double x)
+{
+	int *px = (int *)&x;
+
 	return (((px[0] & ~0x80000000) | px[1] | px[2] | px[3]) == 0);
 }
 
 int
-signbitl(long double x) {
-	unsigned *px = (unsigned *) &x;
+signbitl(long double x)
+{
+	unsigned *px = (unsigned *)&x;
+
 	return (px[0] >> 31);
 }
 #elif defined(__x86)
 int
-isinfl(long double x) {
-	int *px = (int *) &x;
+isinfl(long double x)
+{
+	int *px = (int *)&x;
+
 #if defined(HANDLE_UNSUPPORTED)
-	return ((px[2] & 0x7fff) == 0x7fff &&
-		((px[1] ^ 0x80000000) | px[0]) == 0);
+	return ((px[2] & 0x7fff) == 0x7fff && ((px[1] ^ 0x80000000) | px[0]) ==
+	    0);
 #else
-	return ((px[2] & 0x7fff) == 0x7fff &&
-		((px[1] & ~0x80000000) | px[0]) == 0);
+	return ((px[2] & 0x7fff) == 0x7fff && ((px[1] & ~0x80000000) | px[0]) ==
+	    0);
 #endif
 }
 
 int
-isnormall(long double x) {
-	int *px = (int *) &x;
+isnormall(long double x)
+{
+	int *px = (int *)&x;
+
 #if defined(HANDLE_UNSUPPORTED)
-	return ((unsigned) ((px[2] & 0x7fff) - 1) < 0x7ffe &&
-		(px[1] & 0x80000000) != 0);
+	return ((unsigned)((px[2] & 0x7fff) - 1) < 0x7ffe && (px[1] &
+	    0x80000000) != 0);
 #else
-	return ((unsigned) ((px[2] & 0x7fff) - 1) < 0x7ffe);
+	return ((unsigned)((px[2] & 0x7fff) - 1) < 0x7ffe);
 #endif
 }
 
 int
-issubnormall(long double x) {
-	int *px = (int *) &x;
+issubnormall(long double x)
+{
+	int *px = (int *)&x;
+
 	return ((px[2] & 0x7fff) == 0 && (px[0] | px[1]) != 0);
 }
 
 int
-iszerol(long double x) {
-	int *px = (int *) &x;
+iszerol(long double x)
+{
+	int *px = (int *)&x;
+
 	return (((px[2] & 0x7fff) | px[0] | px[1]) == 0);
 }
 
 int
-signbitl(long double x) {
-	unsigned *px = (unsigned *) &x;
+signbitl(long double x)
+{
+	unsigned *px = (unsigned *)&x;
+
 	return ((px[2] >> 15) & 1);
 }
-#endif	/* defined(__sparc) || defined(__x86) */
+#endif /* defined(__sparc) || defined(__x86) */

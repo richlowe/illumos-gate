@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -34,7 +35,7 @@
 
 #include "libm.h"
 
-const int _TBL_ipio2l_inf[] = { /* by DHBailey MP package */
+const int _TBL_ipio2l_inf[] = {		/* by DHBailey MP package */
 	0xA2F983, 0x6E4E44, 0x1529FC, 0x2757D1, 0xF534DD, 0xC0DB62,
 	0x95993C, 0x439041, 0xFE5163, 0xABDEBB, 0xC561B7, 0x246E3A,
 	0x424DD2, 0xE00649, 0x2EEA09, 0xD1921C, 0xFE1DEB, 0x1CB129,
@@ -346,6 +347,7 @@ const int _TBL_ipio2l_66[] = {
 	0xF129DE, 0x49C2D6, 0x9641D2, 0xC4747C, 0x220804, 0x503F05,
 	0x7E274F, 0xCA83D9, 0x9D6495, 0x0E5039,
 };
+
 const int _TBL_ipio2l_53[] = {
 	0xA2F983, 0x6E4E44, 0x16F3C4, 0xEA69B5, 0xD3E131, 0x60E1D2,
 	0xD7982A, 0xC031F5, 0xD67BCC, 0xFD1375, 0x60919B, 0x3FA0BB,

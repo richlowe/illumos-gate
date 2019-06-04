@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,12 +30,13 @@
 
 #pragma weak __lrintf = lrintf
 
-#include <sys/isa_defs.h>	/* _ILP32 */
+#include <sys/isa_defs.h>		/* _ILP32 */
 #include "libm.h"
 
 #if defined(_ILP32)
 long
-lrintf(float x) {
+lrintf(float x)
+{
 	/*
 	 * Note: The following code works on x86 (in the default rounding
 	 * precision mode), but one should just use the fistpl instruction
@@ -44,11 +46,13 @@ lrintf(float x) {
 		unsigned i;
 		float f;
 	} xx, yy;
+
 	unsigned hx;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
-	if (hx < 0x4b000000) {	/* |x| < 2^23 */
+
+	if (hx < 0x4b000000) {		/* |x| < 2^23 */
 		/* add and subtract a power of two to round x to an integer */
 #if defined(__sparc)
 		yy.i = (xx.i & 0x80000000) | 0x4b000000;
@@ -59,12 +63,12 @@ lrintf(float x) {
 #error Unknown architecture
 #endif
 		x = (x + yy.f) - yy.f;
-		return ((long) x);
+		return ((long)x);
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long) x);
+	return ((long)x);
 }
 #else
 #error Unsupported architecture
-#endif	/* defined(_ILP32) */
+#endif /* defined(_ILP32) */

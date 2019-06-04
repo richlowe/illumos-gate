@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -42,27 +43,27 @@
  *		M = 48		quadruple precision (113 bits)
  */
 
-#define	TINY 	1.0e-20L	/* single: 1e-5, double: 1e-10, quad: 1e-20 */
+#define	TINY	1.0e-20L	/* single: 1e-5, double: 1e-10, quad: 1e-20 */
 #define	LG10OVT	4933.L		/* single:  39, double:  309, quad:  4933 */
 #define	LG10UFT	-4966.L		/* single: -45, double: -323, quad: -4966 */
-#define	M	48
-			/* logt2hi : last 32 bits is zero for quad prec */
-#define	LOGT2HI	0.30102999566398119521373889472420986034688L
-#define	LOGT2LO	2.831664213089468167896664371953e-31L
+#define	M		48
+/* logt2hi : last 32 bits is zero for quad prec */
+#define	LOGT2HI		0.30102999566398119521373889472420986034688L
+#define	LOGT2LO		2.831664213089468167896664371953e-31L
 
-static const long double
-	zero	= 0.0L,
-	tiny	= TINY * TINY,
-	one	= 1.0L,
-	lg10	= 3.321928094887362347870319429489390175865e+0000L,
-	ln10	= 2.302585092994045684017991454684364207601e+0000L,
-	logt2hi	= LOGT2HI,
-	logt2lo	= LOGT2LO,
-	lg10ovt	= LG10OVT,
-	lg10uft	= LG10UFT;
+static const long double zero = 0.0L,
+	tiny = TINY * TINY,
+	one = 1.0L,
+	lg10 = 3.321928094887362347870319429489390175865e+0000L,
+	ln10 = 2.302585092994045684017991454684364207601e+0000L,
+	logt2hi = LOGT2HI,
+	logt2lo = LOGT2LO,
+	lg10ovt = LG10OVT,
+	lg10uft = LG10UFT;
 
 long double
-exp10l(long double x) {
+exp10l(long double x)
+{
 	long double t, tenp;
 	int k;
 
@@ -72,31 +73,43 @@ exp10l(long double x) {
 		else
 			return (zero);
 	}
+
 	if (fabsl(x) < tiny)
 		return (one + x);
-	if (x <= lg10ovt)
+
+	if (x <= lg10ovt) {
 		if (x >= lg10uft) {
-			k = (int) x;
+			k = (int)x;
 			tenp = 10.0L;
-					/* x is a small +integer */
-			if (0 <= k && k <= M && (long double) k == x) {
+
+			/* x is a small +integer */
+			if (0 <= k && k <= M && (long double)k == x) {
 				t = one;
+
 				if (k & 1)
 					t *= tenp;
+
 				k >>= 1;
+
 				while (k) {
 					tenp *= tenp;
+
 					if (k & 1)
 						t *= tenp;
+
 					k >>= 1;
 				}
+
 				return (t);
 			}
+
 			t = anintl(x * lg10);
-			return (scalbnl(expl(ln10 * ((x - t * logt2hi) -
-				t * logt2lo)), (int) t));
-		} else
+			return (scalbnl(expl(ln10 * ((x - t * logt2hi) - t *
+			    logt2lo)), (int)t));
+		} else {
 			return (scalbnl(one, -50000));	/* underflow */
-	else
-			return (scalbnl(one, 50000));	/* overflow  */
+		}
+	} else {
+		return (scalbnl(one, 50000));		/* overflow  */
+	}
 }

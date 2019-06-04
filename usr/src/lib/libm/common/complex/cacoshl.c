@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,11 +30,11 @@
 
 #pragma weak __cacoshl = cacoshl
 
-#include "libm.h"	/* fabsl/isnanl/isinfl/signbitl */
+#include "libm.h"			/* fabsl/isnanl/isinfl/signbitl */
 #include "complex_wrapper.h"
 #include "longdouble.h"
 
-/* INDENT OFF */
+
 /*
  * ldcomplex cacoshl(ldcomplex z);
  *	cacosh z = +-i cacos z .
@@ -42,18 +43,20 @@
  *	cacosh z = sign(Im(z))*i cacos z .
  *
  */
-/* INDENT ON */
 
 ldcomplex
-cacoshl(ldcomplex z) {
+cacoshl(ldcomplex z)
+{
 	ldcomplex w, ans;
 	long double x, y;
 
 	w = cacosl(z);
 	x = LD_RE(z);
 	y = LD_IM(z);
+
 	if (isnanl(y)) {
 		LD_IM(ans) = y + y;
+
 		if (isinfl(x))
 			LD_RE(ans) = fabsl(x);
 		else
@@ -65,5 +68,6 @@ cacoshl(ldcomplex z) {
 		LD_RE(ans) = LD_IM(w);
 		LD_IM(ans) = -LD_RE(w);
 	}
+
 	return (ans);
 }

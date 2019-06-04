@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -34,8 +35,9 @@
 #include <math.h>
 
 double
-fabs(double x) {
-	int *px = (int *) &x;
+fabs(double x)
+{
+	int *px = (int *)&x;
 
 	px[HIWORD] &= ~0x80000000;
 	return (x);

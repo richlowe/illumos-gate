@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -45,9 +46,9 @@
  *     threshold <  x <= INF       :  tanhl(x) := 1.
  *
  * where
- *	single : 	small = 1.e-5		threshold = 11.0
- *	double : 	small = 1.e-10		threshold = 22.0
- *	quad   : 	small = 1.e-20		threshold = 45.0
+ *	single :        small = 1.e-5		threshold = 11.0
+ *	double :        small = 1.e-10		threshold = 22.0
+ *	quad   :        small = 1.e-20		threshold = 45.0
  *
  * Note: threshold was chosen so that
  *		fl(1.0+2/(expm1(2*threshold)+2)) == 1.
@@ -60,41 +61,49 @@
 #include "libm.h"
 #include "longdouble.h"
 
-static const long double small = 1.0e-20L, one = 1.0, two = 2.0,
+static const long double small = 1.0e-20L,
+	one = 1.0,
+	two = 2.0,
 #ifndef lint
 	big = 1.0e+20L,
 #endif
 	threshold = 45.0L;
 
 long double
-tanhl(long double x) {
+tanhl(long double x)
+{
 	long double t, y, z;
 	int signx;
+
 #ifndef lint
 	volatile long double dummy;
 #endif
 
 	if (isnanl(x))
 		return (x + x);		/* x is NaN */
+
 	signx = signbitl(x);
 	t = fabsl(x);
 	z = one;
+
 	if (t <= threshold) {
-		if (t > one)
+		if (t > one) {
 			z = one - two / (expm1l(t + t) + two);
-		else if (t > small) {
+		} else if (t > small) {
 			y = expm1l(-t - t);
 			z = -y / (y + two);
 		} else {
 #ifndef lint
 			dummy = t + big;
-							/* inexact if t != 0 */
+			/* inexact if t != 0 */
 #endif
 			return (x);
 		}
-	} else if (!finitel(t))
+	} else if (!finitel(t)) {
 		return (copysignl(one, x));
-	else
+	} else {
 		return (signx ? -z + small * small : z - small * small);
+	}
+
 	return (signx ? -z : z);
 }

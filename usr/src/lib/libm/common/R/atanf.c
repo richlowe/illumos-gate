@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __atanf = atanf
 
-/* INDENT OFF */
+
 /*
  * float atanf(float x);
  * Table look-up algorithm
@@ -40,9 +41,9 @@
  * The algorithm is based on atan(x)=atan(y)+atan((x-y)/(1+x*y)).
  * We use poly1(x) to approximate atan(x) for x in [0,1/8] with
  * error (relative)
- * 	|(atan(x)-poly1(x))/x|<= 2^-115.94 	long double
- * 	|(atan(x)-poly1(x))/x|<= 2^-58.85	double
- * 	|(atan(x)-poly1(x))/x|<= 2^-25.53 	float
+ *      |(atan(x)-poly1(x))/x|<= 2^-115.94      long double
+ *      |(atan(x)-poly1(x))/x|<= 2^-58.85	double
+ *      |(atan(x)-poly1(x))/x|<= 2^-25.53       float
  * and use poly2(x) to approximate atan(x) for x in [0,1/65] with
  * error (absolute)
  *	|atan(x)-poly2(x)|<= 2^-122.15		long double
@@ -50,7 +51,7 @@
  *	|atan(x)-poly2(x)|<= 2^-35.36		float
  * and use poly3(x) to approximate atan(x) for x in [1/8,7/16] with
  * error (relative, on for single precision)
- * 	|(atan(x)-poly1(x))/x|<= 2^-25.53 	float
+ *      |(atan(x)-poly1(x))/x|<= 2^-25.53       float
  *
  * Here poly1-3 are odd polynomial with the following form:
  *		x + x^3*(a1+x^2*(a2+...))
@@ -86,42 +87,44 @@
 #include "libm.h"
 
 extern const float _TBL_r_atan_hi[], _TBL_r_atan_lo[];
-static const float
-	big	=   1.0e37F,
-	one	=   1.0F,
-	p1	=  -3.333185951111688247225368498733544672172e-0001F,
-	p2	=   1.969352894213455405211341983203180636021e-0001F,
-	q1	=  -3.332921964095646819563419704110132937456e-0001F,
-	a1	=  -3.333323465223893614063523351509338934592e-0001F,
-	a2	=   1.999425625935277805494082274808174062403e-0001F,
-	a3	=  -1.417547090509737780085769846290301788559e-0001F,
-	a4	=   1.016250813871991983097273733227432685084e-0001F,
-	a5	=  -5.137023693688358515753093811791755221805e-0002F,
-	pio2hi	=   1.570796371e+0000F,
-	pio2lo	=  -4.371139000e-0008F;
-/* INDENT ON */
+static const float big = 1.0e37F,
+	one = 1.0F,
+	p1 = -3.333185951111688247225368498733544672172e-0001F,
+	p2 = 1.969352894213455405211341983203180636021e-0001F,
+	q1 = -3.332921964095646819563419704110132937456e-0001F,
+	a1 = -3.333323465223893614063523351509338934592e-0001F,
+	a2 = 1.999425625935277805494082274808174062403e-0001F,
+	a3 = -1.417547090509737780085769846290301788559e-0001F,
+	a4 = 1.016250813871991983097273733227432685084e-0001F,
+	a5 = -5.137023693688358515753093811791755221805e-0002F,
+	pio2hi = 1.570796371e+0000F,
+	pio2lo = -4.371139000e-0008F;
+
 
 float
-atanf(float xx) {
+atanf(float xx)
+{
 	float x, y, z, r, p, s;
 	volatile double dummy __unused;
 	int ix, iy, sign, j;
 
 	x = xx;
-	ix = *(int *) &x;
+	ix = *(int *)&x;
 	sign = ix & 0x80000000;
 	ix ^= sign;
 
 	/* for |x| < 1/8 */
 	if (ix < 0x3e000000) {
-		if (ix < 0x38800000) {	/* if |x| < 2**(-prec/2-2) */
+		if (ix < 0x38800000) {		/* if |x| < 2**(-prec/2-2) */
 			dummy = big + x;	/* get inexact flag if x != 0 */
 #ifdef lint
 			dummy = dummy;
 #endif
 			return (x);
 		}
+
 		z = x * x;
+
 		if (ix < 0x3c000000) {	/* if |x| < 2**(-prec/4-1) */
 			x = x + (x * z) * p1;
 			return (x);
@@ -133,25 +136,26 @@ atanf(float xx) {
 
 	/* for |x| >= 8.0 */
 	if (ix >= 0x41000000) {
-		*(int *) &x = ix;
-		if (ix < 0x42820000) {	/* x <  65 */
+		*(int *)&x = ix;
+
+		if (ix < 0x42820000) {				/* x <  65 */
 			r = one / x;
 			z = r * r;
 			y = r * (one + z * (p1 + z * p2));	/* poly1 */
 			y -= pio2lo;
-		} else if (ix < 0x44800000) {	/* x <  2**(prec/3+2) */
+		} else if (ix < 0x44800000) { /* x <  2**(prec/3+2) */
 			r = one / x;
 			z = r * r;
 			y = r * (one + z * q1);	/* poly2 */
 			y -= pio2lo;
-		} else if (ix < 0x4c800000) {	/* x <  2**(prec+2) */
+		} else if (ix < 0x4c800000) { /* x <  2**(prec+2) */
 			y = one / x - pio2lo;
-		} else if (ix < 0x7f800000) {	/* x <  inf */
+		} else if (ix < 0x7f800000) { /* x <  inf */
 			y = -pio2lo;
-		} else {		/* x is inf or NaN */
-			if (ix > 0x7f800000) {
+		} else {	/* x is inf or NaN */
+			if (ix > 0x7f800000)
 				return (x * x);	/* - -> * for Cheetah */
-			}
+
 			y = -pio2lo;
 		}
 
@@ -159,32 +163,35 @@ atanf(float xx) {
 			x = pio2hi - y;
 		else
 			x = y - pio2hi;
+
 		return (x);
 	}
-
 
 	/* now x is between 1/8 and 8 */
-	if (ix < 0x3f000000) {	/* between 1/8 and 1/2 */
+	if (ix < 0x3f000000) {		/* between 1/8 and 1/2 */
 		z = x * x;
-		x = x + (x * z) * (a1 + z * (a2 + z * (a3 + z * (a4 +
-			z * a5))));
+		x = x + (x * z) * (a1 + z * (a2 + z * (a3 + z * (a4 + z *
+		    a5))));
 		return (x);
 	}
-	*(int *) &x = ix;
+
+	*(int *)&x = ix;
 	iy = (ix + 0x00040000) & 0x7ff80000;
-	*(int *) &y = iy;
+	*(int *)&y = iy;
 	j = (iy - 0x3f000000) >> 19;
 
-	if (ix == iy)
-		p = x - y;	/* p=0.0 */
-	else {
+	if (ix == iy) {
+		p = x - y;		/* p=0.0 */
+	} else {
 		if (sign == 0)
 			s = (x - y) / (one + x * y);
 		else
 			s = (y - x) / (one + x * y);
+
 		z = s * s;
 		p = s * (one + z * q1);
 	}
+
 	if (sign == 0) {
 		r = p + _TBL_r_atan_lo[j];
 		x = r + _TBL_r_atan_hi[j];
@@ -192,5 +199,6 @@ atanf(float xx) {
 		r = p - _TBL_r_atan_lo[j];
 		x = r - _TBL_r_atan_hi[j];
 	}
+
 	return (x);
 }

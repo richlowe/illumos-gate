@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,7 +31,7 @@
 #pragma weak __ilogbf = ilogbf
 
 #include "libm.h"
-#include "xpg6.h"	/* __xpg6 */
+#include "xpg6.h"			/* __xpg6 */
 
 #if defined(__x86)
 static const float two25 = 33554432.0F;
@@ -39,22 +40,27 @@ static const float two25 = 33554432.0F;
  * v: a non-zero subnormal |x|
  */
 static int
-ilogbf_subnormal(unsigned v) {
+ilogbf_subnormal(unsigned v)
+{
 	int r = -126 - 23;
 
 	if (v & 0xffff0000)
 		r += 16, v >>= 16;
+
 	if (v & 0xff00)
 		r += 8, v >>= 8;
+
 	if (v & 0xf0)
 		r += 4, v >>= 4;
+
 	v <<= 1;
 	return (r + ((0xffffaa50 >> v) & 0x3));
 }
-#endif	/* defined(__x86) */
+#endif /* defined(__x86) */
 
 static int
-raise_invalid(int v) {	/* SUSv3 requires ilogbf(0,+/-Inf,NaN) raise invalid */
+raise_invalid(int v)   /* SUSv3 requires ilogbf(0,+/-Inf,NaN) raise invalid */
+{
 #ifndef lint
 	if ((__xpg6 & _C99SUSv3_ilogb_0InfNaN_raises_invalid) != 0) {
 		static const double zero = 0.0;
@@ -67,22 +73,24 @@ raise_invalid(int v) {	/* SUSv3 requires ilogbf(0,+/-Inf,NaN) raise invalid */
 }
 
 int
-ilogbf(float x) {
-	int k = *((int *) &x) & ~0x80000000;
+ilogbf(float x)
+{
+	int k = *((int *)&x) & ~0x80000000;
 
 	if (k < 0x00800000) {
-		if (k == 0)
+		if (k == 0) {
 			return (raise_invalid(0x80000001));
-		else {
+		} else {
 #if defined(__x86)
 			x *= two25;
-			return (((*((int *) &x) & 0x7f800000) >> 23) - 152);
+			return (((*((int *)&x) & 0x7f800000) >> 23) - 152);
 #else
 			return (ilogbf_subnormal(k));
 #endif
 		}
-	} else if (k < 0x7f800000)
+	} else if (k < 0x7f800000) {
 		return ((k >> 23) - 127);
-	else
+	} else {
 		return (raise_invalid(0x7fffffff));
+	}
 }

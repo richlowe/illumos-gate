@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -39,7 +41,7 @@
 
 extern const int _TBL_ipio2_inf[];
 
-/* INDENT OFF */
+
 /*
  * invpio2:  53 bits of 2/pi
  * pio2_1:   first  33 bit of pi/2
@@ -49,22 +51,22 @@ extern const int _TBL_ipio2_inf[];
  * pio2_3:   third  33 bit of pi/2
  * pio2_3t:  pi/2 - pio2_3
  */
-static const double
-	half	= 0.5,
-	invpio2	= 0.636619772367581343075535,	/* 2^ -1  * 1.45F306DC9C883 */
-	pio2_1	= 1.570796326734125614166,	/* 2^  0  * 1.921FB54400000 */
-	pio2_1t	= 6.077100506506192601475e-11,	/* 2^-34  * 1.0B4611A626331 */
-	pio2_2	= 6.077100506303965976596e-11,	/* 2^-34  * 1.0B4611A600000 */
-	pio2_2t	= 2.022266248795950732400e-21,	/* 2^-69  * 1.3198A2E037073 */
-	pio2_3	= 2.022266248711166455796e-21,	/* 2^-69  * 1.3198A2E000000 */
-	pio2_3t	= 8.478427660368899643959e-32;	/* 2^-104 * 1.B839A252049C1 */
-/* INDENT ON */
+static const double half = 0.5,
+	invpio2 = 0.636619772367581343075535,	/* 2^ -1  * 1.45F306DC9C883 */
+	pio2_1 = 1.570796326734125614166,	/* 2^  0  * 1.921FB54400000 */
+	pio2_1t = 6.077100506506192601475e-11,	/* 2^-34  * 1.0B4611A626331 */
+	pio2_2 = 6.077100506303965976596e-11,	/* 2^-34  * 1.0B4611A600000 */
+	pio2_2t = 2.022266248795950732400e-21,	/* 2^-69  * 1.3198A2E037073 */
+	pio2_3 = 2.022266248711166455796e-21,	/* 2^-69  * 1.3198A2E000000 */
+	pio2_3t = 8.478427660368899643959e-32;	/* 2^-104 * 1.B839A252049C1 */
+
 
 int
-__rem_pio2(double x, double *y) {
-	double	w, t, r, fn;
-	double	tx[3];
-	int	e0, i, j, nx, n, ix, hx, lx;
+__rem_pio2(double x, double *y)
+{
+	double w, t, r, fn;
+	double tx[3];
+	int e0, i, j, nx, n, ix, hx, lx;
 
 	hx = ((int *)&x)[HIWORD];
 	ix = hx & 0x7fffffff;
@@ -72,6 +74,7 @@ __rem_pio2(double x, double *y) {
 	if (ix < 0x4002d97c) {
 		/* |x| < 3pi/4, special case with n=1 */
 		t = fabs(x) - pio2_1;
+
 		if (ix != 0x3ff921fb) {	/* 33+53 bit pi is good enough */
 			y[0] = t - pio2_1t;
 			y[1] = (t - y[0]) - pio2_1t;
@@ -80,11 +83,13 @@ __rem_pio2(double x, double *y) {
 			y[0] = t - pio2_2t;
 			y[1] = (t - y[0]) - pio2_2t;
 		}
+
 		if (hx < 0) {
 			y[0] = -y[0];
 			y[1] = -y[1];
 			return (-1);
 		}
+
 		return (1);
 	}
 
@@ -98,7 +103,8 @@ __rem_pio2(double x, double *y) {
 		w = fn * pio2_1t;	/* 1st round good to 85 bit */
 		y[0] = r - w;
 		i = j - ((((int *)y)[HIWORD] >> 20) & 0x7ff);
-		if (i > 16) {	/* 2nd iteration (rare) */
+
+		if (i > 16) {		/* 2nd iteration (rare) */
 			/* 2nd round good to 118 bit */
 			if (i < 35) {
 				t = r;	/* r-fn*pio2_2 may not be exact */
@@ -111,14 +117,15 @@ __rem_pio2(double x, double *y) {
 				w = fn * pio2_2t;
 				y[0] = r - w;
 				i = j - ((((int *)y)[HIWORD] >> 20) & 0x7ff);
+
 				if (i > 49) {
 					/* 3rd iteration (extremely rare) */
 					if (i < 68) {
 						t = r;
 						w = fn * pio2_3;
 						r = t - w;
-						w = fn * pio2_3t -
-						    ((t - r) - w);
+						w = fn * pio2_3t - ((t - r) -
+						    w);
 						y[0] = r - w;
 					} else {
 						/*
@@ -132,16 +139,19 @@ __rem_pio2(double x, double *y) {
 				}
 			}
 		}
+
 		y[1] = (r - y[0]) - w;
+
 		if (hx < 0) {
 			y[0] = -y[0];
 			y[1] = -y[1];
 			return (-n);
 		}
+
 		return (n);
 	}
 
-	e0 = (ix >> 20) - 1046;	/* e0 = ilogb(x)-23; */
+	e0 = (ix >> 20) - 1046;		/* e0 = ilogb(x)-23; */
 
 	/* break x into three 24 bit pieces */
 	lx = ((int *)&x)[LOWORD];
@@ -149,20 +159,25 @@ __rem_pio2(double x, double *y) {
 	tx[2] = (double)i;
 	j = (lx >> 5) & 0xffffff;
 	tx[1] = (double)j;
-	tx[0] = (double)((((ix & 0xfffff) | 0x100000) << 3) |
-	    ((unsigned)lx >> 29));
+	tx[0] = (double)((((ix & 0xfffff) | 0x100000) << 3) | ((unsigned)lx >>
+	    29));
 	nx = 3;
+
 	if (i == 0) {
 		/* skip zero term */
 		nx--;
+
 		if (j == 0)
 			nx--;
 	}
+
 	n = __rem_pio2m(tx, y, e0, nx, 2, _TBL_ipio2_inf);
+
 	if (hx < 0) {
 		y[0] = -y[0];
 		y[1] = -y[1];
 		return (-n);
 	}
+
 	return (n);
 }

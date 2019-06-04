@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,18 +30,18 @@
 
 #pragma weak __casinh = casinh
 
-/* INDENT OFF */
+
 /*
  * dcomplex casinh(dcomplex z);
  * casinh z = -i casin iz .
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "complex_wrapper.h"
 
 dcomplex
-casinh(dcomplex z) {
+casinh(dcomplex z)
+{
 	dcomplex w, r, ans;
 
 	D_RE(w) = -D_IM(z);

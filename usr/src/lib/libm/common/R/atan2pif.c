@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,20 +33,25 @@
 static const double invpi = 0.3183098861837906715377675;
 
 float
-atan2pif(float y, float x) {
-	int	ix, iy, hx, hy;
+atan2pif(float y, float x)
+{
+	int ix, iy, hx, hy;
 
 	ix = *(int *)&x;
 	iy = *(int *)&y;
 	hx = ix & ~0x80000000;
 	hy = iy & ~0x80000000;
-	if (hx > 0x7f800000 || hy > 0x7f800000) /* x or y is nan */
+
+	if (hx > 0x7f800000 || hy > 0x7f800000)	/* x or y is nan */
 		return (x * y);
+
 	if ((hx | hy) == 0) {
 		/* x and y are both zero */
 		if (ix == 0)
 			return (y);
-		return ((iy == 0)? 1.0f : -1.0f);
+
+		return ((iy == 0) ? 1.0f : -1.0f);
 	}
+
 	return ((float)(invpi * atan2((double)y, (double)x)));
 }

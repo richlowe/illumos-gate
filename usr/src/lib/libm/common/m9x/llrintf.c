@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -36,7 +37,8 @@
 #include "libm.h"
 
 long long
-llrintf(float x) {
+llrintf(float x)
+{
 	/*
 	 * Note: The following code works on x86 (in the default rounding
 	 * precision mode), but one should just use the fistpll instruction
@@ -46,12 +48,13 @@ llrintf(float x) {
 		unsigned i;
 		float f;
 	} xx, yy;
+
 	unsigned hx;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
 
-	if (hx < 0x4b000000) { /* |x| < 2^23 */
+	if (hx < 0x4b000000) {		/* |x| < 2^23 */
 		/* add and subtract a power of two to round x to an integer */
 #if defined(__sparc) || defined(__amd64)
 		yy.i = (xx.i & 0x80000000) | 0x4b000000;
@@ -67,9 +70,9 @@ llrintf(float x) {
 		 * on LP32 architectures, we can just convert x to a 32-bit
 		 * integer and sign-extend it
 		 */
-		return ((long) x);
+		return ((long)x);
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long long) x);
+	return ((long long)x);
 }

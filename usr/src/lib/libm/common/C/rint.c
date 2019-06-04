@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -37,37 +39,40 @@
 
 #if defined(__i386) && !defined(__amd64) && (!defined(__FLT_EVAL_METHOD__) || \
 	__FLT_EVAL_METHOD__ != 0)
+
 extern enum fp_precision_type __swapRP(enum fp_precision_type);
-#define	DECLRP(x)	enum fp_precision_type x;
-#define	SWAPRP(new, x)	x = __swapRP(new);
-#define	RESTRP(x)	(void) __swapRP(x);
+
+#define	DECLRP(x)		enum fp_precision_type x;
+#define	SWAPRP(new, x)		x = __swapRP(new);
+#define	RESTRP(x)		(void) __swapRP(x);
 #else
 #define	DECLRP(x)
 #define	SWAPRP(new, x)
 #define	RESTRP(x)
 #endif
 
-static const double
-	two52 = 4503599627370496.0,
-	zero = 0.0,
-	one = 1.0;
+static const double two52 = 4503599627370496.0, zero = 0.0, one = 1.0;
 
 double
-rint(double x) {
+rint(double x)
+{
 	DECLRP(rp)
-	double	t, w;
-	int	ix, hx;
+	double t, w;
+	int ix, hx;
 
 	ix = ((int *)&x)[HIWORD];
 	hx = ix & ~0x80000000;
 
 	if (hx >= 0x43300000)
 		return (x * one);
-	t = (ix < 0)? -two52 : two52;
+
+	t = (ix < 0) ? -two52 : two52;
 	SWAPRP(fp_double, rp)		/* set precision mode to double */
 	w = x + t;			/* x+sign(x)*2**52 rounded */
 	RESTRP(rp)			/* restore precision mode */
+
 	if (w == t)
-		return ((ix < 0)? -zero : zero);
+		return ((ix < 0) ? -zero : zero);
+
 	return (w - t);
 }

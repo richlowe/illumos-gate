@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -64,17 +65,19 @@
 #include "longdouble.h"
 
 long double
-tanl(long double x) {
+tanl(long double x)
+{
 	long double y[2], z = 0.0L;
 	int n, ix;
 
-	ix = *(int *) &x;		/* High word of x */
+	ix = *(int *)&x;		/* High word of x */
 	ix &= 0x7fffffff;
-	if (ix <= 0x3ffe9220)		/* |x| ~< pi/4 */
+
+	if (ix <= 0x3ffe9220) {		/* |x| ~< pi/4 */
 		return (__k_tanl(x, z, 0));
-	else if (ix >= 0x7fff0000)	/* trig(Inf or NaN) is NaN */
+	} else if (ix >= 0x7fff0000) {	/* trig(Inf or NaN) is NaN */
 		return (x - x);
-	else {				/* argument reduction needed */
+	} else {			/* argument reduction needed */
 		n = __rem_pio2l(x, y);
 		return (__k_tanl(y[0], y[1], (n & 1)));
 	}

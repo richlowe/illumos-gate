@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __ctan = ctan
 
-/* INDENT OFF */
+
 /*
  * dcomplex ctan(dcomplex z);
  *
@@ -40,13 +41,13 @@
  *		= i*ctanh(y-ix)
  *		= -Im(ctanh(y-ix))+i*Re(ctanh(y-ix))
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "complex_wrapper.h"
 
 dcomplex
-ctan(dcomplex z) {
+ctan(dcomplex z)
+{
 	double x, y;
 	dcomplex ans, ct;
 

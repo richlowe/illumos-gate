@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,12 +34,12 @@
 #include "complex_wrapper.h"
 #include "longdouble.h"
 
-/* INDENT OFF */
 static const long double four = 4.0L, two = 2.0L, one = 1.0L, zero = 0.0L;
-/* INDENT ON */
+
 
 ldcomplex
-ctanhl(ldcomplex z) {
+ctanhl(ldcomplex z)
+{
 	long double r, u, v, t, x, y, S, C;
 	int hx, ix, hy, iy;
 	ldcomplex ans;
@@ -56,9 +57,9 @@ ctanhl(ldcomplex z) {
 		LD_RE(ans) = tanhl(x);
 		LD_IM(ans) = zero;
 	} else if (iy >= 0x7fff0000) {	/* y is inf or NaN */
-		if (ix < 0x7fff0000)	/* catanh(finite x,inf/nan) is nan */
+		if (ix < 0x7fff0000) {	/* catanh(finite x,inf/nan) is nan */
 			LD_RE(ans) = LD_IM(ans) = y - y;
-		else if (isinfl(x)) {	/* x is inf */
+		} else if (isinfl(x)) {	/* x is inf */
 			LD_RE(ans) = one;
 			LD_IM(ans) = zero;
 		} else {
@@ -66,32 +67,36 @@ ctanhl(ldcomplex z) {
 			LD_IM(ans) = y - y;
 		}
 	} else if (ix >= 0x4004e000) {
-		/* INDENT OFF */
+
 		/*
 		 * |x| > 60 = prec/2 (14,28,34,60)
 		 * ctanh z ~ 1 + i (sin2y)/(exp(2x))
 		 */
-		/* INDENT ON */
 		LD_RE(ans) = one;
-		if (iy < 0x7ffe0000)	/* t = sin(2y) */
+
+		if (iy < 0x7ffe0000) {	/* t = sin(2y) */
 			S = sinl(y + y);
-		else {
+		} else {
 			(void) sincosl(y, &S, &C);
 			S = (S + S) * C;
 		}
-		if (ix >= 0x7ffe0000) {	/* |x| > max/2 */
+
+		if (ix >= 0x7ffe0000) {		/* |x| > max/2 */
 			if (ix >= 0x7fff0000) {	/* |x| is inf or NaN */
 				if (isnanl(x))	/* x is NaN */
 					LD_RE(ans) = LD_IM(ans) = x + y;
 				else
 					LD_IM(ans) = zero * S;	/* x is inf */
-			} else
+			} else {
 				LD_IM(ans) = S * expl(-x);	/* underflow */
-		} else
+			}
+		} else {
 			LD_IM(ans) = (S + S) * expl(-(x + x));
-							/* 2 sin 2y / exp(2x) */
+		}
+
+		/* 2 sin 2y / exp(2x) */
 	} else {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 *                        t*t+2t
 		 *    ctanh z = ---------------------------
@@ -101,7 +106,7 @@ ctanhl(ldcomplex z) {
 		 *              i --------------------------
 		 *                t*t+[4(t+1)(cos y)](cos y)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		sincosl(y, &S, &C);
 		t = expm1l(x + x);
 		r = (four * C) * (t + one);
@@ -110,9 +115,12 @@ ctanhl(ldcomplex z) {
 		LD_RE(ans) = (u + two * t) * v;
 		LD_IM(ans) = (r * S) * v;
 	}
+
 	if (hx < 0)
 		LD_RE(ans) = -LD_RE(ans);
+
 	if (hy < 0)
 		LD_IM(ans) = -LD_IM(ans);
+
 	return (ans);
 }

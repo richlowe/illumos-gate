@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,25 +33,22 @@
 #include "libm.h"
 
 #if defined(__sparc)
-
 static const union {
 	unsigned i[4];
 	long double ld;
 } __nanl_union = { 0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff };
-
 #elif defined(__x86)
-
 static const union {
 	unsigned i[3];
 	long double ld;
 } __nanl_union = { 0xffffffff, 0xffffffff, 0x7fff };
-
 #else
 #error Unknown architecture
 #endif
 
 /* ARGSUSED0 */
 long double
-__nanl(const char *c) {
+__nanl(const char *c)
+{
 	return (__nanl_union.ld);
 }

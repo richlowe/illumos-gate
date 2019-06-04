@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -34,16 +35,17 @@
 #include "fenv_inlines.h"
 
 #if defined(__sparc)
-
 /*
  * fmaf for SPARC: 32-bit single precision, big-endian
  */
 float
-__fmaf(float x, float y, float z) {
+__fmaf(float x, float y, float z)
+{
 	union {
 		unsigned i[2];
 		double d;
 	} xy, zz;
+
 	unsigned u, s;
 	int exy, ez;
 
@@ -52,8 +54,8 @@ __fmaf(float x, float y, float z) {
 	 * and then only if either x*y is of the form Inf*0 or one of x,
 	 * y, or z is a signaling NaN
 	 */
-	xy.d = (double) x * y;
-	zz.d = (double) z;
+	xy.d = (double)x * y;
+	zz.d = (double)z;
 
 	/*
 	 * if the sum xy + z will be exact, just compute it and cast the
@@ -61,10 +63,10 @@ __fmaf(float x, float y, float z) {
 	 */
 	exy = (xy.i[0] >> 20) & 0x7ff;
 	ez = (zz.i[0] >> 20) & 0x7ff;
+
 	if ((ez - exy <= 4 && exy - ez <= 28) || exy == 0x7ff || exy == 0 ||
-		ez == 0x7ff || ez == 0) {
-		return ((float) (xy.d + zz.d));
-	}
+	    ez == 0x7ff || ez == 0)
+		return ((float)(xy.d + zz.d));
 
 	/*
 	 * collapse the tail of the smaller summand into a "sticky bit"
@@ -74,14 +76,18 @@ __fmaf(float x, float y, float z) {
 		if (ez - exy < 31) {
 			u = xy.i[1];
 			s = 2 << (ez - exy);
+
 			if (u & (s - 1))
 				u |= s;
+
 			xy.i[1] = u & ~(s - 1);
 		} else if (ez - exy < 51) {
 			u = xy.i[0];
 			s = 1 << (ez - exy - 31);
+
 			if ((u & (s - 1)) | xy.i[1])
 				u |= s;
+
 			xy.i[0] = u & ~(s - 1);
 			xy.i[1] = 0;
 		} else {
@@ -93,14 +99,18 @@ __fmaf(float x, float y, float z) {
 		if (exy - ez < 31) {
 			u = zz.i[1];
 			s = 2 << (exy - ez);
+
 			if (u & (s - 1))
 				u |= s;
+
 			zz.i[1] = u & ~(s - 1);
 		} else if (exy - ez < 51) {
 			u = zz.i[0];
 			s = 1 << (exy - ez - 31);
+
 			if ((u & (s - 1)) | zz.i[1])
 				u |= s;
+
 			zz.i[0] = u & ~(s - 1);
 			zz.i[1] = 0;
 		} else {
@@ -110,26 +120,26 @@ __fmaf(float x, float y, float z) {
 		}
 	}
 
-	return ((float) (xy.d + zz.d));
+	return ((float)(xy.d + zz.d));
 }
-
 #elif defined(__x86)
-
 #if defined(__amd64)
-#define	NI	4
+#define	NI		4
 #else
-#define	NI	3
+#define	NI		3
 #endif
 
 /*
  * fmaf for x86: 32-bit single precision, little-endian
  */
 float
-__fmaf(float x, float y, float z) {
+__fmaf(float x, float y, float z)
+{
 	union {
 		unsigned i[NI];
 		long double e;
 	} xy, zz;
+
 	unsigned u, s, cwsw, oldcwsw;
 	int exy, ez;
 
@@ -143,8 +153,8 @@ __fmaf(float x, float y, float z) {
 	 * and then only if either x*y is of the form Inf*0 or one of x,
 	 * y, or z is a signaling NaN
 	 */
-	xy.e = (long double) x * y;
-	zz.e = (long double) z;
+	xy.e = (long double)x * y;
+	zz.e = (long double)z;
 
 	/*
 	 * if the sum xy + z will be exact, just compute it and cast the
@@ -152,10 +162,10 @@ __fmaf(float x, float y, float z) {
 	 */
 	exy = xy.i[2] & 0x7fff;
 	ez = zz.i[2] & 0x7fff;
+
 	if ((ez - exy <= 15 && exy - ez <= 39) || exy == 0x7fff || exy == 0 ||
-		ez == 0x7fff || ez == 0) {
+	    ez == 0x7fff || ez == 0)
 		goto cont;
-	}
 
 	/*
 	 * collapse the tail of the smaller summand into a "sticky bit"
@@ -165,14 +175,18 @@ __fmaf(float x, float y, float z) {
 		if (ez - exy < 31) {
 			u = xy.i[0];
 			s = 2 << (ez - exy);
+
 			if (u & (s - 1))
 				u |= s;
+
 			xy.i[0] = u & ~(s - 1);
 		} else if (ez - exy < 62) {
 			u = xy.i[1];
 			s = 1 << (ez - exy - 31);
+
 			if ((u & (s - 1)) | xy.i[0])
 				u |= s;
+
 			xy.i[1] = u & ~(s - 1);
 			xy.i[0] = 0;
 		} else {
@@ -185,8 +199,10 @@ __fmaf(float x, float y, float z) {
 		if (exy - ez < 62) {
 			u = zz.i[1];
 			s = 1 << (exy - ez - 31);
+
 			if ((u & (s - 1)) | zz.i[0])
 				u |= s;
+
 			zz.i[1] = u & ~(s - 1);
 			zz.i[0] = 0;
 		} else {
@@ -205,7 +221,7 @@ cont:
 	cwsw = (cwsw & 0xfcffffff) | (oldcwsw & 0x03000000);
 	__fenv_setcwsw(&cwsw);
 
-	return ((float) xy.e);
+	return ((float)xy.e);
 }
 
 #if 0
@@ -214,7 +230,8 @@ cont:
  * long double (80-bit double extended) precision
  */
 long double
-__fmaf(float x, float y, float z) {
+__fmaf(float x, float y, float z)
+{
 	/*
 	 * Note: This implementation assumes the rounding precision mode
 	 * is set to the default, rounding to 64 bit precision.  If this
@@ -232,10 +249,9 @@ __fmaf(float x, float y, float z) {
 	 * the exception masks or flags, since the product x * y may raise
 	 * an invalid operation exception.
 	 */
-	return ((long double) x * y + z);
+	return ((long double)x * y + z);
 }
 #endif
-
 #else
 #error Unknown architecture
 #endif

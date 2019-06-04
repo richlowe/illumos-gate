@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,7 +33,8 @@
 #include "libm.h"
 
 long double
-significandl(long double x) {
+significandl(long double x)
+{
 	if (ISZEROL(x) || XBIASED_EXP(x) == 0x7fff)	/* 0/+-Inf/NaN */
 		return (x + x);
 	else

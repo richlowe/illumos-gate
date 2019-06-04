@@ -37,7 +37,6 @@
 #define	_LIBM_INLINES_H
 
 #ifdef __GNUC__
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -215,7 +214,5 @@ sqrtf(float f)
 #ifdef __cplusplus
 }
 #endif
-
 #endif  /* __GNUC__ */
-
 #endif /* _LIBM_INLINES_H */

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,25 +32,26 @@
 
 #include "libm.h"
 
-static const long double
-	zero	= 0.0L,
-	ln2	= 6.931471805599453094172321214581765680755e-0001L,
-	one	= 1.0L,
-	big	= 1.e+20L;
+static const long double zero = 0.0L,
+	ln2 = 6.931471805599453094172321214581765680755e-0001L,
+	one = 1.0L,
+	big = 1.e+20L;
 
 long double
-acoshl(long double x) {
+acoshl(long double x)
+{
 	long double t;
 
-	if (isnanl(x))
+	if (isnanl(x)) {
 		return (x + x);
-	else if (x > big)
+	} else if (x > big) {
 		return (logl(x) + ln2);
-	else if (x > one) {
+	} else if (x > one) {
 		t = sqrtl(x - one);
 		return (log1pl(t * (t + sqrtl(x + one))));
-	} else if (x == one)
+	} else if (x == one) {
 		return (zero);
-	else
+	} else {
 		return ((x - x) / (x - x));
+	}
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,6 +33,7 @@
 #include "libm.h"
 
 long double
-ldexpl(long double x, int n) {
+ldexpl(long double x, int n)
+{
 	return (scalbnl(x, n));
 }

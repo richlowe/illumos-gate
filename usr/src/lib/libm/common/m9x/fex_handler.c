@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -37,55 +38,67 @@
 #include <thread.h>
 #include "fex_handler.h"
 
-int fex_get_handling(int e)
+int
+fex_get_handling(int e)
 {
-	struct fex_handler_data	*thr_handlers;
-	int						i;
+	struct fex_handler_data *thr_handlers;
+	int i;
 
 	thr_handlers = __fex_get_thr_handlers();
+
 	for (i = 0; i < FEX_NUM_EXC; i++)
 		if (e & (1 << i))
-			return thr_handlers[i].__mode;
-	return FEX_NOHANDLER;
+			return (thr_handlers[i].__mode);
+
+	return (FEX_NOHANDLER);
 }
 
-int fex_set_handling(int e, int mode, void (*handler)())
+int
+fex_set_handling(int e, int mode, void (*handler)())
 {
-	struct fex_handler_data	*thr_handlers;
-	int						i;
+	struct fex_handler_data *thr_handlers;
+	int i;
 
 	if (e & ~((1 << FEX_NUM_EXC) - 1))
-		return 0;
+		return (0);
+
 	thr_handlers = __fex_get_thr_handlers();
+
 	for (i = 0; i < FEX_NUM_EXC; i++) {
 		if (e & (1 << i)) {
 			thr_handlers[i].__mode = mode;
 			thr_handlers[i].__handler = handler;
 		}
 	}
+
 	__fex_update_te();
-	return 1;
+	return (1);
 }
 
-void fex_getexcepthandler(fex_handler_t *buf, int e)
+void
+fex_getexcepthandler(fex_handler_t *buf, int e)
 {
-	struct fex_handler_data	*thr_handlers;
-	int						i;
+	struct fex_handler_data *thr_handlers;
+	int i;
 
 	thr_handlers = __fex_get_thr_handlers();
+
 	for (i = 0; i < FEX_NUM_EXC; i++)
 		if (e & (1 << i))
 			(*buf)[i] = thr_handlers[i];
 }
 
-void fex_setexcepthandler(const fex_handler_t *buf, int e)
+void
+fex_setexcepthandler(const fex_handler_t *buf, int e)
 {
-	struct fex_handler_data	*thr_handlers;
-	int						i;
+	struct fex_handler_data *thr_handlers;
+	int i;
 
 	thr_handlers = __fex_get_thr_handlers();
+
 	for (i = 0; i < FEX_NUM_EXC; i++)
 		if (e & (1 << i))
 			thr_handlers[i] = (*buf)[i];
+
 	__fex_update_te();
 }

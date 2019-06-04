@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __tan = tan
 
-/* INDENT OFF */
+
 /*
  * tan(x)
  * Table look-up algorithm by K.C. Ng, November, 1989.
@@ -38,25 +39,26 @@
  *	__k_tan		... tangent function on [-pi/4,pi/4]
  *	__rem_pio2	... argument reduction routine
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "libm_protos.h"
 #include <math.h>
 
 double
-tan(double x) {
+tan(double x)
+{
 	double y[2], z = 0.0;
 	int n, ix;
 
 	/* high word of x */
-	ix = ((int *) &x)[HIWORD];
+	ix = ((int *)&x)[HIWORD];
 
 	/* |x| ~< pi/4 */
 	ix &= 0x7fffffff;
-	if (ix <= 0x3fe921fb)
-		return (__k_tan(x, z, 0));
 
+	if (ix <= 0x3fe921fb) {
+		return (__k_tan(x, z, 0));
+	}
 	/* tan(Inf or NaN) is NaN */
 	else if (ix >= 0x7ff00000) {
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
@@ -66,7 +68,6 @@ tan(double x) {
 		return (x - x);				/* NaN */
 #endif
 	}
-
 	/* argument reduction needed */
 	else {
 		n = __rem_pio2(x, y);

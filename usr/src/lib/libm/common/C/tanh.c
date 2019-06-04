@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __tanh = tanh
 
-/* INDENT OFF */
+
 /*
  * TANH(X)
  * RETURN THE HYPERBOLIC TANGENT OF X
@@ -59,12 +60,8 @@
 #include "libm_protos.h"
 #include <math.h>
 
-static const double
-	one = 1.0,
-	two = 2.0,
-	small = 1.0e-10,
-	big = 1.0e10;
-/* INDENT ON */
+static const double one = 1.0, two = 2.0, small = 1.0e-10, big = 1.0e10;
+
 
 double
 tanh(double x)
@@ -74,14 +71,16 @@ tanh(double x)
 	volatile double dummy __unused;
 
 	if (isnan(x))
-		return (x * x);	/* + -> * for Cheetah */
+		return (x * x);		/* + -> * for Cheetah */
+
 	signx = signbit(x);
 	t = fabs(x);
 	z = one;
+
 	if (t <= 22.0) {
-		if (t > one)
+		if (t > one) {
 			z = one - two / (expm1(t + t) + two);
-		else if (t > small) {
+		} else if (t > small) {
 			y = expm1(-t - t);
 			z = -y / (y + two);
 		} else {
@@ -92,10 +91,11 @@ tanh(double x)
 #endif
 			return (x);
 		}
-	} else if (!finite(t))
+	} else if (!finite(t)) {
 		return (copysign(1.0, x));
-	else
+	} else {
 		return ((signx != 0) ? -z + small * small : z - small * small);
+	}
 
 	return ((signx != 0) ? -z : z);
 }

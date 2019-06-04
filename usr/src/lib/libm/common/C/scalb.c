@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,42 +34,50 @@
 #include "libm.h"
 
 double
-scalb(double x, double fn) {
-	int	hn, in, n;
-	double	z;
+scalb(double x, double fn)
+{
+	int hn, in, n;
+	double z;
 
 	if (isnan(x) || isnan(fn))
 		return (x * fn);
 
 	in = ((int *)&fn)[HIWORD];
 	hn = in & ~0x80000000;
-	if (hn == 0x7ff00000)	/* fn is inf */
+
+	if (hn == 0x7ff00000)		/* fn is inf */
 		return (_SVID_libm_err(x, fn, 47));
 
 	/* see if fn is an integer without raising inexact */
 	if (hn >= 0x43300000) {
 		/* |fn| >= 2^52, so it must be an integer */
-		n = (in < 0)? -65000 : 65000;
+		n = (in < 0) ? -65000 : 65000;
 	} else if (hn < 0x3ff00000) {
 		/* |fn| < 1, so it must be zero or non-integer */
-		return ((fn == 0.0)? x : (x - x) / (x - x));
+		return ((fn == 0.0) ? x : (x - x) / (x - x));
 	} else if (hn < 0x41400000) {
 		/* |fn| < 2^21 */
-		if ((hn & ((1 << (0x413 - (hn >> 20))) - 1))
-		    | ((int *)&fn)[LOWORD])
+		if ((hn & ((1 << (0x413 - (hn >> 20))) - 1)) |
+		    ((int *)&fn)[LOWORD])
 			return ((x - x) / (x - x));
+
 		n = (int)fn;
 	} else {
 		if (((int *)&fn)[LOWORD] & ((1 << (0x433 - (hn >> 20))) - 1))
 			return ((x - x) / (x - x));
-		n = (in < 0)? -65000 : 65000;
+
+		n = (in < 0) ? -65000 : 65000;
 	}
+
 	z = scalbn(x, n);
+
 	if (z != x) {
 		if (z == 0.0)
 			return (_SVID_libm_err(x, fn, 33));
+
 		if (!finite(z))
 			return (_SVID_libm_err(x, fn, 32));
 	}
+
 	return (z);
 }

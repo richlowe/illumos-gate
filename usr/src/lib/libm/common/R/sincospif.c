@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,18 +33,19 @@
 extern void sincospi(double, double *, double *);
 
 void
-sincospif(float x, float *s, float *c) {
+sincospif(float x, float *s, float *c)
+{
 	double ds, dc;
 
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
-	if (isnanf(x))
+	if (isnanf(x)) {
 		*s = *c = x * x;
-	else {
+	} else {
 #endif
-	sincospi((double) x, &ds, &dc);
-	*s = (float) ds;
-	*c = (float) dc;
+	sincospi((double)x, &ds, &dc);
+	*s = (float)ds;
+	*c = (float)dc;
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
-	}
+}
 #endif
 }

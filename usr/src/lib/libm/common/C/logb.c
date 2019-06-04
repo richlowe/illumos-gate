@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,7 +32,7 @@
 #pragma weak _logb = logb
 
 #include "libm.h"
-#include "xpg6.h"	/* __xpg6 */
+#include "xpg6.h"			/* __xpg6 */
 #define	_C99SUSv3_logb	_C99SUSv3_logb_subnormal_is_like_ilogb
 
 #if defined(__x86)
@@ -41,43 +42,51 @@ static const double two52 = 4503599627370496.0;
  * v: high part of a non-zero subnormal |x|; w: low part of |x|
  */
 static int
-ilogb_subnormal(unsigned v, unsigned w) {
+ilogb_subnormal(unsigned v, unsigned w)
+{
 	int r = -1022 - 52;
 
 	if (v)
 		r += 32;
 	else
 		v = w;
+
 	if (v & 0xffff0000)
 		r += 16, v >>= 16;
+
 	if (v & 0xff00)
 		r += 8, v >>= 8;
+
 	if (v & 0xf0)
 		r += 4, v >>= 4;
+
 	v <<= 1;
 	return (r + ((0xffffaa50 >> v) & 0x3));
 }
-#endif	/* defined(__x86) */
+#endif /* defined(__x86) */
 
 double
-logb(double x) {
-	int *px = (int *) &x, k = px[HIWORD] & ~0x80000000;
+logb(double x)
+{
+	int *px = (int *)&x, k = px[HIWORD] & ~0x80000000;
 
 	if (k < 0x00100000) {
-		if ((px[LOWORD] | k) == 0)
+		if ((px[LOWORD] | k) == 0) {
 			return (_SVID_libm_err(x, x, 45));
-		else if ((__xpg6 & _C99SUSv3_logb) != 0) {
+		} else if ((__xpg6 & _C99SUSv3_logb) != 0) {
 #if defined(__x86)
 			x *= two52;
-			return ((double) (((px[HIWORD] & 0x7ff00000) >> 20)
-				- 1075));
+			return ((double)(((px[HIWORD] & 0x7ff00000) >> 20) -
+			    1075));
 #else
-			return ((double) ilogb_subnormal(k, px[LOWORD]));
+			return ((double)ilogb_subnormal(k, px[LOWORD]));
 #endif
-		} else
+		} else {
 			return (-1022.0);
-	} else if (k < 0x7ff00000)
-		return ((double) ((k >> 20) - 1023));
-	else
+		}
+	} else if (k < 0x7ff00000) {
+		return ((double)((k >> 20) - 1023));
+	} else {
 		return (x * x);
+	}
 }

@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -36,11 +38,12 @@ extern int __swapRP(int);
 #endif
 
 fcomplex
-clogf(fcomplex z) {
-	fcomplex	ans;
-	float		x, y, ax, ay;
-	double		dx, dy;
-	int		ix, iy, hx, hy;
+clogf(fcomplex z)
+{
+	fcomplex ans;
+	float x, y, ax, ay;
+	double dx, dy;
+	int ix, iy, hx, hy;
 
 	x = F_RE(z);
 	y = F_IM(z);
@@ -51,6 +54,7 @@ clogf(fcomplex z) {
 	ay = fabsf(y);
 	ax = fabsf(x);
 	F_IM(ans) = atan2f(y, x);
+
 	if (ix >= 0x7f800000 || iy >= 0x7f800000) {
 		/* x or y is Inf or NaN */
 		if (iy == 0x7f800000)
@@ -61,10 +65,11 @@ clogf(fcomplex z) {
 			F_RE(ans) = ax + ay;
 	} else {
 #if defined(__i386) && !defined(__amd64)
-		int	rp = __swapRP(fp_extended);
+		int rp = __swapRP(fp_extended);
 #endif
 		dx = (double)ax;
 		dy = (double)ay;
+
 		if (ix == 0x3f800000)
 			F_RE(ans) = (float)(0.5 * log1p(dy * dy));
 		else if (iy == 0x3f800000)
@@ -73,10 +78,12 @@ clogf(fcomplex z) {
 			F_RE(ans) = -1.0f / ax;
 		else
 			F_RE(ans) = (float)(0.5 * log(dx * dx + dy * dy));
+
 #if defined(__i386) && !defined(__amd64)
 		if (rp != fp_extended)
 			(void) __swapRP(rp);
 #endif
 	}
+
 	return (ans);
 }

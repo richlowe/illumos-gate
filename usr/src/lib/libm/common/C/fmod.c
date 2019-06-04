@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -40,10 +42,11 @@ static const double zero = 0.0;
  * 32-bit code, but we have assembly for x86, too.
  */
 double
-fmod(double x, double y) {
-	double		w;
-	long long	hx, ix, iy, iz;
-	int		nd, k, ny;
+fmod(double x, double y)
+{
+	double w;
+	long long hx, ix, iy, iz;
+	int nd, k, ny;
 
 	hx = *(long long *)&x;
 	ix = hx & ~0x8000000000000000ull;
@@ -57,7 +60,7 @@ fmod(double x, double y) {
 		return ((x * y) * zero);
 
 	if (ix <= iy)
-		return ((ix < iy)? x : x * zero);
+		return ((ix < iy) ? x : x *zero);
 
 	/*
 	 * Set:
@@ -68,16 +71,21 @@ fmod(double x, double y) {
 	 */
 	ny = iy >> 52;
 	k = ix >> 52;
+
 	if (ny == 0) {
 		/* y is subnormal, x could be normal or subnormal */
 		ny = 1;
+
 		while (iy < 0x0010000000000000ll) {
 			ny -= 1;
 			iy += iy;
 		}
+
 		nd = k - ny;
+
 		if (k == 0) {
 			nd += 1;
+
 			while (ix < 0x0010000000000000ll) {
 				nd -= 1;
 				ix += ix;
@@ -95,33 +103,41 @@ fmod(double x, double y) {
 	/* perform fixed point mod */
 	while (nd--) {
 		iz = ix - iy;
+
 		if (iz >= 0)
 			ix = iz;
+
 		ix += ix;
 	}
+
 	iz = ix - iy;
+
 	if (iz >= 0)
 		ix = iz;
 
 	/* convert back to floating point and restore the sign */
 	if (ix == 0ll)
 		return (x * zero);
+
 	while (ix < 0x0010000000000000ll) {
 		ix += ix;
 		ny -= 1;
 	}
+
 	while (ix > 0x0020000000000000ll) {	/* XXX can this ever happen? */
 		ny += 1;
 		ix >>= 1;
 	}
+
 	if (ny <= 0) {
 		/* result is subnormal */
 		k = -ny + 1;
 		ix >>= k;
-		*(long long *)&w = (hx & 0x8000000000000000ull) | ix;
+		*(long long *) &w = (hx & 0x8000000000000000ull) | ix;
 		return (w);
 	}
-	*(long long *)&w = (hx & 0x8000000000000000ull) |
-	    ((long long)ny << 52) | (ix & 0x000fffffffffffffll);
+
+	*(long long *) &w = (hx & 0x8000000000000000ull) | ((long long)ny <<
+	    52) | (ix & 0x000fffffffffffffll);
 	return (w);
 }

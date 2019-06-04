@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,6 +34,7 @@
 #include "complex_wrapper.h"
 
 float
-cargf(fcomplex z) {
+cargf(fcomplex z)
+{
 	return (atan2f(F_IM(z), F_RE(z)));
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,8 +30,9 @@
 
 #pragma weak __tanl = tanl
 
-/* INDENT OFF */
-/* cosl(x)
+/* BEGIN CSTYLED */
+/*
+ * cosl(x)
  * Table look-up algorithm by K.C. Ng, November, 1989.
  *
  * kernel function:
@@ -59,7 +61,7 @@
  * Accuracy:
  *	computer TRIG(x) returns trig(x) nearly rounded.
  */
-/* INDENT ON */
+/* END CSTYLED */
 
 #include "libm.h"
 #include "longdouble.h"
@@ -67,32 +69,35 @@
 #include <sys/isa_defs.h>
 
 long double
-tanl(long double x) {
+tanl(long double x)
+{
 	long double y[2], z = 0.0L;
 	int n, ix;
+
 #if defined(__i386) || defined(__amd64)
-	int *px = (int *) &x;
+	int *px = (int *)&x;
 #endif
 
 	/* trig(Inf or NaN) is NaN */
 	if (!finitel(x))
-		return x - x;
+		return (x - x);
 
 	/* High word of x. */
 #if defined(__i386) || defined(__amd64)
 	XTOI(px, ix);
 #else
-	ix = *(int *) &x;
+	ix = *(int *)&x;
 #endif
 
 	/* |x| ~< pi/4 */
 	ix &= 0x7fffffff;
-	if (ix <= 0x3ffe9220)
-		return __k_tanl(x, z, 0);
 
+	if (ix <= 0x3ffe9220) {
+		return (__k_tanl(x, z, 0));
+	}
 	/* argument reduction needed */
 	else {
 		n = __rem_pio2l(x, y);
-		return __k_tanl(y[0], y[1], n & 1);
+		return (__k_tanl(y[0], y[1], n & 1));
 	}
 }

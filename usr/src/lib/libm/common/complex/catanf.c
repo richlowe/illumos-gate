@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -35,19 +37,19 @@
 extern int __swapRP(int);
 #endif
 
-static const float
-	pi_2 = 1.570796326794896558e+00F,
+static const float pi_2 = 1.570796326794896558e+00F,
 	zero = 0.0F,
 	half = 0.5F,
 	two = 2.0F,
 	one = 1.0F;
 
 fcomplex
-catanf(fcomplex z) {
-	fcomplex	ans;
-	float		x, y, ax, ay, t;
-	double		dx, dy, dt;
-	int		hx, hy, ix, iy;
+catanf(fcomplex z)
+{
+	fcomplex ans;
+	float x, y, ax, ay, t;
+	double dx, dy, dt;
+	int hx, hy, ix, iy;
 
 	x = F_RE(z);
 	y = F_IM(z);
@@ -64,6 +66,7 @@ catanf(fcomplex z) {
 			F_IM(ans) = zero;
 		} else {
 			F_RE(ans) = x * x;
+
 			if (iy == 0 || iy == 0x7f800000)
 				F_IM(ans) = zero;
 			else
@@ -78,7 +81,7 @@ catanf(fcomplex z) {
 			F_IM(ans) = y * y;
 		}
 	} else if (ix == 0) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * x = 0
 		 *      1                            1
@@ -89,8 +92,9 @@ catanf(fcomplex z) {
 		 * B = - log [ ----------- ] = - log (1+ ---) or - log(1+ ----)
 		 *     4     [ (y-1)*(y-1) ]   2         y-1     2         1-y
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		t = one - ay;
+
 		if (iy == 0x3f800000) {
 			/* y=1: catan(0,1)=(0,+inf) with 1/0 signal */
 			F_IM(ans) = ay / ax;
@@ -98,12 +102,12 @@ catanf(fcomplex z) {
 		} else if (iy > 0x3f800000) {	/* y>1 */
 			F_IM(ans) = half * log1pf(two / (-t));
 			F_RE(ans) = pi_2;
-		} else {		/* y<1 */
+		} else {			/* y<1 */
 			F_IM(ans) = half * log1pf((ay + ay) / t);
 			F_RE(ans) = zero;
 		}
 	} else {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * use double precision x,y
 		 *      1
@@ -114,25 +118,30 @@ catanf(fcomplex z) {
 		 * B = - log [ --------------- ] = - log (1+ -----------------)
 		 *     4     [ x*x+(y-1)*(y-1) ]   4         x*x + (y-1)*(y-1)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
+
 #if defined(__i386) && !defined(__amd64)
-		int	rp = __swapRP(fp_extended);
+		int rp = __swapRP(fp_extended);
 #endif
 		dx = (double)ax;
 		dy = (double)ay;
-		F_RE(ans) = (float)(0.5 * atan2(dx + dx,
-		    1.0 - dx * dx - dy * dy));
+		F_RE(ans) = (float)(0.5 * atan2(dx + dx, 1.0 - dx * dx - dy *
+		    dy));
 		dt = dy - 1.0;
-		F_IM(ans) = (float)(0.25 * log1p(4.0 * dy /
-		    (dx * dx + dt * dt)));
+		F_IM(ans) = (float)(0.25 * log1p(4.0 * dy / (dx * dx + dt *
+		    dt)));
+
 #if defined(__i386) && !defined(__amd64)
 		if (rp != fp_extended)
 			(void) __swapRP(rp);
 #endif
 	}
+
 	if (hx < 0)
 		F_RE(ans) = -F_RE(ans);
+
 	if (hy < 0)
 		F_IM(ans) = -F_IM(ans);
+
 	return (ans);
 }

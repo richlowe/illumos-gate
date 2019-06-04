@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,24 +34,28 @@
 #include "libm.h"
 
 float
-__modff(float x, float *iptr) {
+__modff(float x, float *iptr)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx, yy;
+
 	unsigned hx, s;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
 
-	if (hx >= 0x4b000000) {	/* x is NaN, infinite, or integral */
+	if (hx >= 0x4b000000) {		/* x is NaN, infinite, or integral */
 		*iptr = x;
+
 		if (hx <= 0x7f800000)
 			xx.i &= 0x80000000;
+
 		return (xx.f);
 	}
 
-	if (hx < 0x3f800000) {	/* |x| < 1 */
+	if (hx < 0x3f800000) {		/* |x| < 1 */
 		xx.i &= 0x80000000;
 		*iptr = xx.f;
 		return (x);
@@ -62,6 +67,6 @@ __modff(float x, float *iptr) {
 	*iptr = yy.f;
 	xx.f -= yy.f;
 	xx.i = (xx.i & ~0x80000000) | s;
-				/* restore sign in case difference is 0 */
+	/* restore sign in case difference is 0 */
 	return (xx.f);
 }

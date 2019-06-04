@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,7 +32,6 @@
 
 #include "libm.h"
 #include "longdouble.h"
-
 
 /*
  * coshl(X)
@@ -64,44 +64,48 @@
  *	only coshl(0)=1 is exact for finite x.
  */
 
-#define	ME	16383
-#define	MEP1	16384
-#define	LNOVFT	1.135652340629414394949193107797076342845e+4L
-		/* last 32 bits of LN2HI is zero */
-#define	LN2HI   6.931471805599453094172319547495844850203e-0001L
-#define	LN2LO   1.667085920830552208890449330400379754169e-0025L
-#define	THR1	0.3465L
-#define	THR2	45.L
+#define	ME		16383
+#define	MEP1		16384
+#define	LNOVFT		1.135652340629414394949193107797076342845e+4L
+/* last 32 bits of LN2HI is zero */
+#define	LN2HI		6.931471805599453094172319547495844850203e-0001L
+#define	LN2LO		1.667085920830552208890449330400379754169e-0025L
+#define	THR1		0.3465L
+#define	THR2		45.L
 
-static const long double
-	half 	= 0.5L,
-	tinyl	= 7.5e-37L,
-	one	= 1.0L,
-	ln2hi   = LN2HI,
-	ln2lo   = LN2LO,
-	lnovftL	= LNOVFT,
-	thr1	= THR1,
-	thr2	= THR2;
+static const long double half = 0.5L,
+	tinyl = 7.5e-37L,
+	one = 1.0L,
+	ln2hi = LN2HI,
+	ln2lo = LN2LO,
+	lnovftL = LNOVFT,
+	thr1 = THR1,
+	thr2 = THR2;
 
 long double
-coshl(long double x) {
+coshl(long double x)
+{
 	long double t, w;
 
 	w = fabsl(x);
+
 	if (!finitel(w))
 		return (w + w);		/* x is INF or NaN */
+
 	if (w < thr1) {
 		t = w < tinyl ? w : expm1l(w);
 		w = one + t;
+
 		if (w != one)
 			w = one + (t * t) / (w + w);
+
 		return (w);
 	} else if (w < thr2) {
 		t = expl(w);
 		return (half * (t + one / t));
-	} else if (w <= lnovftL)
+	} else if (w <= lnovftL) {
 		return (half * expl(w));
-	else {
+	} else {
 		return (scalbnl(expl((w - MEP1 * ln2hi) - MEP1 * ln2lo), ME));
 	}
 }

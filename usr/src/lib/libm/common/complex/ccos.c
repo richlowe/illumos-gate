@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __ccos = ccos
 
-/* INDENT OFF */
+
 /*
  * dcomplex ccos(dcomplex z);
  *
@@ -38,13 +39,13 @@
  *		= ccosh(i*(-z)) = ccosh(i*(-x-yi))
  *		= ccosh(y-ix)
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "complex_wrapper.h"
 
 dcomplex
-ccos(dcomplex z) {
+ccos(dcomplex z)
+{
 	double x, y;
 
 	x = D_RE(z);

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,7 +33,9 @@
 #include "libm.h"
 #include "longdouble.h"
 
-/* SINH(X)
+/* BEGIN CSTYLED */
+/*
+ * SINH(X)
  * RETURN THE HYPERBOLIC SINE OF X
  *
  * Method :
@@ -41,7 +44,7 @@
  *
  *	                                      EXPM1(x) + EXPM1(x)/(EXPM1(x)+1)
  *	    0 <= x <= lnovft     : SINH(x) := --------------------------------
- *			       		                      2
+ *			                                      2
  *
  *     lnovft <= x <  INF	 : SINH(x) := EXP(x-MEP1*ln2)*2**ME
  *
@@ -56,6 +59,7 @@
  *	only SINH(0)=0 is exact for finite argument.
  *
  */
+/* END CSTYLED */
 
 static const long double C[] = {
 	0.5L,
@@ -64,19 +68,21 @@ static const long double C[] = {
 	7.004447686242549087858985e-16L
 };
 
-#define	half	C[0]
-#define	one	C[1]
-#define	lnovft	C[2]
-#define	lnovlo	C[3]
+#define	half		C[0]
+#define	one		C[1]
+#define	lnovft		C[2]
+#define	lnovlo		C[3]
 
 long double
 sinhl(long double x)
 {
-	long double	r, t;
+	long double r, t;
 
 	if (!finitel(x))
-		return (x + x);	/* x is INF or NaN */
+		return (x + x);		/* x is INF or NaN */
+
 	r = fabsl(x);
+
 	if (r < lnovft) {
 		t = expm1l(r);
 		r = copysignl((t + t / (one + t)) * half, x);
@@ -84,5 +90,6 @@ sinhl(long double x)
 		r = copysignl(expl((r - lnovft) - lnovlo), x);
 		r = scalbnl(r, 16383);
 	}
+
 	return (r);
 }

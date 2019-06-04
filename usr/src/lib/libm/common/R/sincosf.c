@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -28,7 +30,7 @@
 
 #pragma weak __sincosf = sincosf
 
-/* INDENT OFF */
+
 /*
  * For |x| < pi/4, let z = x * x, and approximate sin(x) by
  *
@@ -52,12 +54,12 @@
  *
  * with error bounded by |cos(x) - C(x)| < 2**(-34.2).
  */
-/* INDENT ON */
 
 #include "libm.h"
 
 extern const int _TBL_ipio2_inf[];
 extern int __rem_pio2m(double *, double *, int, int, int, const int *);
+
 #if defined(__i386) && !defined(__amd64)
 extern int __swapRP(int);
 #endif
@@ -78,26 +80,26 @@ static const double C[] = {
 	6.077100506506192601475e-11,	/* 2^-34  * 1.0B4611A626331 */
 };
 
-#define	S0	C[0]
-#define	S1	C[1]
-#define	S2	C[2]
-#define	S3	C[3]
-#define	C0	C[4]
-#define	C1	C[5]
-#define	C2	C[6]
-#define	C3	C[7]
-#define	C4	C[8]
-#define	invpio2	C[9]
-#define	half	C[10]
-#define	pio2_1  C[11]
-#define	pio2_t	C[12]
+#define	S0		C[0]
+#define	S1		C[1]
+#define	S2		C[2]
+#define	S3		C[3]
+#define	C0		C[4]
+#define	C1		C[5]
+#define	C2		C[6]
+#define	C3		C[7]
+#define	C4		C[8]
+#define	invpio2		C[9]
+#define	half		C[10]
+#define	pio2_1		C[11]
+#define	pio2_t		C[12]
 
 void
 sincosf(float x, float *s, float *c)
 {
-	double	y, z, w;
-	float	f, g;
-	int	n, ix, hx, hy;
+	double y, z, w;
+	float f, g;
+	int n, ix, hx, hy;
 	volatile int i __unused;
 
 	hx = *((int *)&x);
@@ -105,7 +107,7 @@ sincosf(float x, float *s, float *c)
 
 	y = (double)x;
 
-	if (ix <= 0x4016cbe4) {		/* |x| < 3*pi/4 */
+	if (ix <= 0x4016cbe4) {			/* |x| < 3*pi/4 */
 		if (ix <= 0x3f490fdb) {		/* |x| < pi/4 */
 			if (ix <= 0x39800000) {	/* |x| <= 2**-12 */
 				i = (int)y;
@@ -116,38 +118,40 @@ sincosf(float x, float *s, float *c)
 				*c = 1.0f;
 				return;
 			}
+
 			z = y * y;
-			*s = (float)((y * (S0 + z * S1)) *
-			    (S2 + z * (S3 + z)));
-			*c = (float)(((C0 + z * C1) + (z * z) * C2) *
-			    (C3 + z * (C4 + z)));
+			*s = (float)((y * (S0 + z * S1)) * (S2 + z * (S3 + z)));
+			*c = (float)(((C0 + z * C1) + (z * z) * C2) * (C3 + z *
+			    (C4 + z)));
 		} else if (hx > 0) {
 			y = (y - pio2_1) - pio2_t;
 			z = y * y;
-			*s = (float)(((C0 + z * C1) + (z * z) * C2) *
-			    (C3 + z * (C4 + z)));
-			*c = (float)-((y * (S0 + z * S1)) *
-			    (S2 + z * (S3 + z)));
+			*s = (float)(((C0 + z * C1) + (z * z) * C2) * (C3 + z *
+			    (C4 + z)));
+			*c = (float)-((y * (S0 + z * S1)) * (S2 + z * (S3 +
+			    z)));
 		} else {
 			y = (y + pio2_1) + pio2_t;
 			z = y * y;
-			*s = (float)-(((C0 + z * C1) + (z * z) * C2) *
-			    (C3 + z * (C4 + z)));
-			*c = (float)((y * (S0 + z * S1)) *
-			    (S2 + z * (S3 + z)));
+			*s = (float)-(((C0 + z * C1) + (z * z) * C2) * (C3 + z *
+			    (C4 + z)));
+			*c = (float)((y * (S0 + z * S1)) * (S2 + z * (S3 + z)));
 		}
+
 		return;
 	} else if (ix <= 0x49c90fdb) {	/* |x| < 2^19*pi */
 #if defined(__i386) && !defined(__amd64)
-		int	rp;
+		int rp;
 
 		rp = __swapRP(fp_extended);
 #endif
 		w = y * invpio2;
+
 		if (hx < 0)
 			n = (int)(w - half);
 		else
 			n = (int)(w + half);
+
 		y = (y - n * pio2_1) - n * pio2_t;
 #if defined(__i386) && !defined(__amd64)
 		if (rp != fp_extended)
@@ -158,11 +162,13 @@ sincosf(float x, float *s, float *c)
 			*s = *c = x / x;
 			return;
 		}
+
 		hy = ((int *)&y)[HIWORD];
 		n = ((hy >> 20) & 0x7ff) - 1046;
 		((int *)&w)[HIWORD] = (hy & 0xfffff) | 0x41600000;
 		((int *)&w)[LOWORD] = ((int *)&y)[LOWORD];
 		n = __rem_pio2m(&w, &y, n, 1, 0, _TBL_ipio2_inf);
+
 		if (hy < 0) {
 			y = -y;
 			n = -n;
@@ -171,12 +177,13 @@ sincosf(float x, float *s, float *c)
 
 	z = y * y;
 	f = (float)((y * (S0 + z * S1)) * (S2 + z * (S3 + z)));
-	g = (float)(((C0 + z * C1) + (z * z) * C2) *
-	    (C3 + z * (C4 + z)));
+	g = (float)(((C0 + z * C1) + (z * z) * C2) * (C3 + z * (C4 + z)));
+
 	if (n & 2) {
 		f = -f;
 		g = -g;
 	}
+
 	if (n & 1) {
 		*s = g;
 		*c = -f;

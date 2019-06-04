@@ -69,37 +69,34 @@ extern void __fenv_getfsr(unsigned long *);
 extern void __fenv_setfsr(const unsigned long *);
 
 #if defined(__sparc)
+#define	__fenv_get_rd(X)	((X >> 30) & 0x3)
+#define	__fenv_set_rd(X, Y)	X = (X & ~0xc0000000ul) | ((Y) << 30)
 
-#define __fenv_get_rd(X)	((X>>30)&0x3)
-#define __fenv_set_rd(X,Y)	X=(X&~0xc0000000ul)|((Y)<<30)
+#define	__fenv_get_te(X)	((X >> 23) & 0x1f)
+#define	__fenv_set_te(X, Y)	X = (X & ~0x0f800000ul) | ((Y) << 23)
 
-#define __fenv_get_te(X)	((X>>23)&0x1f)
-#define __fenv_set_te(X,Y)	X=(X&~0x0f800000ul)|((Y)<<23)
-
-#define __fenv_get_ex(X)	((X>>5)&0x1f)
-#define __fenv_set_ex(X,Y)	X=(X&~0x000003e0ul)|((Y)<<5)
-
+#define	__fenv_get_ex(X)	((X >> 5) & 0x1f)
+#define	__fenv_set_ex(X, Y)	X = (X & ~0x000003e0ul) |((Y) << 5)
 #elif defined(__x86)
-
 extern void __fenv_getcwsw(unsigned int *);
 extern void __fenv_setcwsw(const unsigned int *);
 
 extern void __fenv_getmxcsr(unsigned int *);
 extern void __fenv_setmxcsr(const unsigned int *);
 
-#define __fenv_get_rd(X)	((X>>26)&3)
-#define __fenv_set_rd(X,Y)	X=(X&~0x0c000000)|((Y)<<26)
+#define	__fenv_get_rd(X)	((X >> 26) & 3)
+#define	__fenv_set_rd(X, Y)	X = (X & ~0x0c000000) | ((Y) << 26)
 
-#define __fenv_get_rp(X)	((X>>24)&3)
-#define __fenv_set_rp(X,Y)	X=(X&~0x03000000)|((Y)<<24)
+#define	__fenv_get_rp(X)	((X >> 24) & 3)
+#define	__fenv_set_rp(X, Y)	X = (X & ~0x03000000) | ((Y) << 24)
 
-#define __fenv_get_te(X)	((X>>16)&0x3d)
-#define __fenv_set_te(X,Y)	X=(X&~0x003d0000)|((Y)<<16)
+#define	__fenv_get_te(X)	((X >> 16) & 0x3d)
+#define	__fenv_set_te(X, Y)	X = (X & ~0x003d0000) |((Y) << 16)
 
-#define __fenv_get_ex(X)	(X&0x3d)
-#define __fenv_set_ex(X,Y)	X=(X&~0x0000003d)|(Y)
+#define	__fenv_get_ex(X)	(X & 0x3d)
+#define	__fenv_set_ex(X, Y)	X = (X & ~0x0000003d) | (Y)
 
-/* 
+/*
  * These macros define some useful distinctions between various
  * SSE instructions.  In some cases, distinctions are made for
  * the purpose of simplifying the decoding of instructions, while
@@ -107,9 +104,9 @@ extern void __fenv_setmxcsr(const unsigned int *);
  * emulation.  Note that these values serve as bit flags within
  * the enum values in sseinst_t.
  */
-#define DOUBLE		0x100
-#define SIMD		0x080
-#define INTREG		0x040
+#define	DOUBLE		0x100
+#define	SIMD		0x080
+#define	INTREG		0x040
 
 typedef union {
 	double		d[2];
@@ -209,9 +206,7 @@ extern void __fex_st_sse_result(ucontext_t *, sseinst_t *,
 	enum fex_exception, fex_info_t *);
 extern void __fex_st_simd_result(ucontext_t *, sseinst_t *,
 	enum fex_exception *, fex_info_t *);
-
 #else
 #error Unknown architecture
 #endif
-
 #endif	/* _M9X_FEX_HANDLER_H */

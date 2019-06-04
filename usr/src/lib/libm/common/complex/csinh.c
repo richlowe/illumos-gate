@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __csinh = csinh
 
-/* INDENT OFF */
+
 /*
  * dcomplex csinh(dcomplex z);
  *
@@ -73,13 +74,13 @@
  *      csinh(NaN,y) = (NaN,NaN) for non-zero y
  *      csinh(NaN,NaN) = (NaN,NaN)
  */
-/* INDENT ON */
 
-#include "libm.h"		/* cosh/exp/fabs/scalbn/sinh/sincos/__k_cexp */
+#include "libm.h"	/* cosh/exp/fabs/scalbn/sinh/sincos/__k_cexp */
 #include "complex_wrapper.h"
 
 dcomplex
-csinh(dcomplex z) {
+csinh(dcomplex z)
+{
 	double t, x, y, S, C;
 	int hx, ix, lx, hy, iy, ly, n;
 	dcomplex ans;
@@ -96,7 +97,8 @@ csinh(dcomplex z) {
 	y = fabs(y);
 
 	(void) sincos(y, &S, &C);
-	if (ix >= 0x403c0000) {	/* |x| > 28 = prec/2 (14,28,34,60) */
+
+	if (ix >= 0x403c0000) {		/* |x| > 28 = prec/2 (14,28,34,60) */
 		if (ix >= 0x40862E42) {	/* |x| > 709.78... ~ log(2**1024) */
 			if (ix >= 0x7ff00000) {	/* |x| is inf or NaN */
 				if ((iy | ly) == 0) {
@@ -129,9 +131,12 @@ csinh(dcomplex z) {
 			D_IM(ans) = S * cosh(x);
 		}
 	}
+
 	if (hx < 0)
 		D_RE(ans) = -D_RE(ans);
+
 	if (hy < 0)
 		D_IM(ans) = -D_IM(ans);
+
 	return (ans);
 }

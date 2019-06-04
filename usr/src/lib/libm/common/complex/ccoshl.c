@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,12 +33,12 @@
 #include "libm.h"	/* coshl/expl/fabsl/scalbnl/sincosl/sinhl/__k_cexpl */
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
 static const long double zero = 0.0L, half = 0.5L;
-/* INDENT ON */
+
 
 ldcomplex
-ccoshl(ldcomplex z) {
+ccoshl(ldcomplex z)
+{
 	long double t, x, y, S, C;
 	int hx, ix, hy, iy, n;
 	ldcomplex ans;
@@ -52,7 +53,8 @@ ccoshl(ldcomplex z) {
 	y = fabsl(y);
 
 	(void) sincosl(y, &S, &C);
-	if (ix >= 0x4004e000) {	/* |x| > 60 = prec/2 (14,28,34,60) */
+
+	if (ix >= 0x4004e000) {		/* |x| > 60 = prec/2 (14,28,34,60) */
 		if (ix >= 0x400C62E4) {	/* |x| > 11356.52... ~ log(2**16384) */
 			if (ix >= 0x7fff0000) {	/* |x| is inf or NaN */
 				if (y == zero) {
@@ -67,7 +69,7 @@ ccoshl(ldcomplex z) {
 				}
 			} else {
 				t = __k_cexpl(x, &n);
-						/* return exp(x)=t*2**n */
+				/* return exp(x)=t*2**n */
 				LD_RE(ans) = scalbnl(C * t, n - 1);
 				LD_IM(ans) = scalbnl(S * t, n - 1);
 			}
@@ -85,7 +87,9 @@ ccoshl(ldcomplex z) {
 			LD_IM(ans) = S * sinhl(x);
 		}
 	}
+
 	if ((hx ^ hy) < 0)
 		LD_IM(ans) = -LD_IM(ans);
+
 	return (ans);
 }

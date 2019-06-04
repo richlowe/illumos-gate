@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,12 +33,12 @@
 #include "libm.h"
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
 static const float zero = 0.0F;
-/* INDENT ON */
+
 
 fcomplex
-cprojf(fcomplex z) {
+cprojf(fcomplex z)
+{
 	float x, y;
 	int ix, iy, hx, hy;
 
@@ -47,6 +48,7 @@ cprojf(fcomplex z) {
 	hy = THE_WORD(y);
 	ix = hx & 0x7fffffff;
 	iy = hy & 0x7fffffff;
+
 	if (iy == 0x7f800000) {
 		F_RE(z) = fabsf(y);
 		F_IM(z) = hy >= 0 ? zero : -zero;
@@ -54,5 +56,6 @@ cprojf(fcomplex z) {
 		F_RE(z) = fabsf(x);
 		F_IM(z) = hy >= 0 ? zero : -zero;
 	}
+
 	return (z);
 }

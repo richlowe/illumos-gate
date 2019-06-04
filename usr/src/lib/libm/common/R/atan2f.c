@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -237,23 +239,23 @@ static const double TBL[] = {
 };
 
 static const double
-	pio4	=  7.8539816339744827900e-01,
-	pio2	=  1.5707963267948965580e+00,
-	negpi	= -3.1415926535897931160e+00,
-	q1	= -3.3333333333296428046e-01,
-	q2	=  1.9999999186853752618e-01,
-	zero	=  0.0;
-
+	pio4 = 7.8539816339744827900e-01,
+	pio2 = 1.5707963267948965580e+00,
+	negpi = -3.1415926535897931160e+00,
+	q1 = -3.3333333333296428046e-01,
+	q2 = 1.9999999186853752618e-01,
+	zero = 0.0;
 static const float two24 = 16777216.0;
 
 float
 atan2f(float fy, float fx)
 {
-	double	a, t, s, dbase;
-	float	x, y, base;
-	int	i, k, hx, hy, ix, iy, sign;
+	double a, t, s, dbase;
+	float x, y, base;
+	int i, k, hx, hy, ix, iy, sign;
+
 #if defined(__i386) && !defined(__amd64)
-	int	rp;
+	int rp;
 #endif
 
 	iy = *(int *)&fy;
@@ -262,16 +264,19 @@ atan2f(float fy, float fx)
 	hx = ix & ~0x80000000;
 
 	sign = 0;
+
 	if (hy > hx) {
 		x = fy;
 		y = fx;
 		i = hx;
 		hx = hy;
 		hy = i;
+
 		if (iy < 0) {
 			x = -x;
 			sign = 1;
 		}
+
 		if (ix < 0) {
 			y = -y;
 			a = pio2;
@@ -282,10 +287,12 @@ atan2f(float fy, float fx)
 	} else {
 		y = fy;
 		x = fx;
+
 		if (iy < 0) {
 			y = -y;
 			sign = 1;
 		}
+
 		if (ix < 0) {
 			x = -x;
 			a = negpi;
@@ -297,19 +304,21 @@ atan2f(float fy, float fx)
 
 	if (hx >= 0x7f800000 || hx - hy >= 0x0c800000) {
 		if (hx >= 0x7f800000) {
-			if (hx > 0x7f800000) /* nan */
+			if (hx > 0x7f800000)	/* nan */
 				return (x * y);
 			else if (hy >= 0x7f800000)
 				a += pio4;
 		} else if ((int)a == 0) {
 			a = (double)y / x;
 		}
-		return ((float)((sign)? -a : a));
+
+		return ((float)((sign) ? -a : a));
 	}
 
 	if (hy < 0x00800000) {
 		if (hy == 0)
-			return ((float)((sign)? -a : a));
+			return ((float)((sign) ? -a : a));
+
 		/* scale subnormal y */
 		y *= two24;
 		x *= two24;
@@ -321,7 +330,8 @@ atan2f(float fy, float fx)
 	rp = __swapRP(fp_extended);
 #endif
 	k = (hy - hx + 0x3f800000) & 0xfff80000;
-	if (k >= 0x3c800000) {	/* |y/x| >= 1/64 */
+
+	if (k >= 0x3c800000) {		/* |y/x| >= 1/64 */
 		*(int *)&base = k;
 		k = (k - 0x3c800000) >> 19;
 		a += TBL[k];
@@ -332,6 +342,7 @@ atan2f(float fy, float fx)
 		 */
 		*(int *)&base = 0;
 	}
+
 	dbase = (double)base;
 	t = (y - x * dbase) / (x + y * dbase);
 	s = t * t;
@@ -340,5 +351,5 @@ atan2f(float fy, float fx)
 	if (rp != fp_extended)
 		(void) __swapRP(rp);
 #endif
-	return ((float)((sign)? -a : a));
+	return ((float)((sign) ? -a : a));
 }

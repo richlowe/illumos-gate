@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -28,7 +30,7 @@
 
 #pragma weak __sinh = sinh
 
-/* INDENT OFF */
+
 /*
  * sinh(x)
  * Code originated from 4.3bsd.
@@ -48,32 +50,36 @@
  *	only sinh(0)=0 is exact for finite argument.
  *
  */
-/* INDENT ON */
 
 #include "libm.h"
 
-static const double
-	ln2hi = 6.93147180369123816490e-01,
+static const double ln2hi = 6.93147180369123816490e-01,
 	ln2lo = 1.90821492927058770002e-10,
 	lnovft = 7.09782712893383973096e+02;
 
 double
-sinh(double x) {
-	double	ox, r, t;
+sinh(double x)
+{
+	double ox, r, t;
 
 	ox = x;
 	r = fabs(x);
+
 	if (!finite(x))
 		return (x * r);
+
 	if (r < lnovft) {
 		t = expm1(r);
 		r = copysign((t + t / (1.0 + t)) * 0.5, x);
 	} else {
 		if (r < 1000.0)
 			x = copysign(exp((r - 1024 * ln2hi) - 1024 * ln2lo), x);
+
 		r = scalbn(x, 1023);
 	}
+
 	if (!finite(r))
 		r = _SVID_libm_err(ox, ox, 25);
+
 	return (r);
 }

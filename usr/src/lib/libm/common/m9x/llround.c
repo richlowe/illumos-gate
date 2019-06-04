@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -45,22 +46,25 @@
 #include "libm.h"
 
 long long
-llround(double x) {
+llround(double x)
+{
 	union {
 		unsigned i[2];
 		double d;
 	} xx;
+
 	unsigned hx, sx, i;
 
 	xx.d = x;
 	hx = xx.i[HIWORD] & ~0x80000000;
 	sx = xx.i[HIWORD] & 0x80000000;
 
-	if (hx < 0x43300000) { /* |x| < 2^52 */
+	if (hx < 0x43300000) {		/* |x| < 2^52 */
 		/* handle |x| < 1 */
 		if (hx < 0x3ff00000) {
 			if (hx >= 0x3fe00000)
 				return (sx ? -1LL : 1LL);
+
 			return (0LL);
 		}
 
@@ -72,12 +76,14 @@ llround(double x) {
 		} else {
 			i = 1 << (0x432 - (hx >> 20));
 			xx.i[LOWORD] += i;
+
 			if (xx.i[LOWORD] < i)
 				xx.i[HIWORD]++;
+
 			xx.i[LOWORD] &= ~(i | (i - 1));
 		}
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long long) xx.d);
+	return ((long long)xx.d);
 }

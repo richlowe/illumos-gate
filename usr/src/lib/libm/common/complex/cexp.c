@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __cexp = cexp
 
-/* INDENT OFF */
+
 /*
  * dcomplex cexp(dcomplex z);
  *
@@ -56,15 +57,15 @@
  *	2. compute sincos(y,&s,&c)
  *	3. compute t*s+i*(t*c), then scale back to 2**n and return.
  */
-/* INDENT ON */
 
-#include "libm.h"		/* exp/scalbn/sincos/__k_cexp */
+#include "libm.h"			/* exp/scalbn/sincos/__k_cexp */
 #include "complex_wrapper.h"
 
 static const double zero = 0.0;
 
 dcomplex
-cexp(dcomplex z) {
+cexp(dcomplex z)
+{
 	dcomplex ans;
 	double x, y, t, c, s;
 	int n, ix, iy, hx, hy, lx, ly;
@@ -77,7 +78,8 @@ cexp(dcomplex z) {
 	ly = LO_WORD(y);
 	ix = hx & 0x7fffffff;
 	iy = hy & 0x7fffffff;
-	if ((iy | ly) == 0) {	/* y = 0 */
+
+	if ((iy | ly) == 0) {		/* y = 0 */
 		D_RE(ans) = exp(x);
 		D_IM(ans) = y;
 	} else if (ISINF(ix, lx)) {	/* x is +-inf */
@@ -102,6 +104,7 @@ cexp(dcomplex z) {
 		}
 	} else {
 		(void) sincos(y, &s, &c);
+
 		if (ix >= 0x40862E42) {	/* |x| > 709.78... ~ log(2**1024) */
 			t = __k_cexp(x, &n);
 			D_RE(ans) = scalbn(t * c, n);
@@ -112,5 +115,6 @@ cexp(dcomplex z) {
 			D_IM(ans) = t * s;
 		}
 	}
+
 	return (ans);
 }

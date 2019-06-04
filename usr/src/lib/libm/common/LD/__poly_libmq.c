@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,12 +30,16 @@
 
 #include "libm.h"
 
-long double __poly_libmq(x,n,p)
-long double x,p[];
-int n;
+long double
+__poly_libmq(long double x, int n, long double p[])
 {
-	long double t; int i;
-	t = p[n-1];
-	for(i=n-2;i>=0;i--) t = p[i] + x*t;
-	return t;
+	long double t;
+	int i;
+
+	t = p[n - 1];
+
+	for (i = n - 2; i >= 0; i--)
+		t = p[i] + x * t;
+
+	return (t);
 }

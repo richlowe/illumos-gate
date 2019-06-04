@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,11 +34,13 @@
 #include <fenv.h>
 
 float
-__nearbyintf(float x) {
+__nearbyintf(float x)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx;
+
 	unsigned hx, sx, i, frac;
 	int rm;
 
@@ -46,12 +49,14 @@ __nearbyintf(float x) {
 	hx = xx.i & ~0x80000000;
 
 	/* handle trivial cases */
-	if (hx >= 0x4b000000) {	/* x is nan, inf, or already integral */
+	if (hx >= 0x4b000000) {		/* x is nan, inf, or already integral */
 		if (hx > 0x7f800000)	/* x is nan */
 			return (x * x);		/* + -> * for Cheetah */
+
 		return (x);
-	} else if (hx == 0)		/* x is zero */
+	} else if (hx == 0) {			/* x is zero */
 		return (x);
+	}
 
 	/* get the rounding mode */
 	rm = fegetround();
@@ -66,26 +71,29 @@ __nearbyintf(float x) {
 			xx.i = sx | 0x3f800000;
 		else
 			xx.i = sx;
+
 		return (xx.f);
 	}
 
 	/* round x at the integer bit */
 	i = 1 << (0x96 - (hx >> 23));
 	frac = hx & (i - 1);
+
 	if (!frac)
 		return (x);
 
 	hx &= ~(i - 1);
+
 	if (rm == FE_UPWARD || (rm == FE_TONEAREST && (frac > (i >> 1) ||
-		((frac == (i >> 1)) && (hx & i)))))
+	    ((frac == (i >> 1)) && (hx & i)))))
 		xx.i = sx | (hx + i);
 	else
 		xx.i = sx | hx;
+
 	return (xx.f);
 }
 
 #if 0
-
 /*
  * Alternate implementations for SPARC, x86, using fp ops.  These may
  * be faster depending on how expensive saving and restoring the fp
@@ -96,13 +104,14 @@ __nearbyintf(float x) {
 #include "fma.h"
 
 #if defined(__sparc)
-
 float
-__nearbyintf(float x) {
+__nearbyintf(float x)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx, yy;
+
 	float z;
 	unsigned hx, sx, fsr, oldfsr;
 	int rm;
@@ -112,9 +121,9 @@ __nearbyintf(float x) {
 	hx = xx.i & ~0x80000000;
 
 	/* handle trivial cases */
-	if (hx >= 0x4b000000)	/* x is nan, inf, or already integral */
+	if (hx >= 0x4b000000)		/* x is nan, inf, or already integral */
 		return (x + 0.0f);
-	else if (hx == 0)	/* x is zero */
+	else if (hx == 0)		/* x is zero */
 		return (x);
 
 	/* save the fsr */
@@ -124,12 +133,15 @@ __nearbyintf(float x) {
 	if (hx < 0x3f800000) {
 		/* flip the sense of directed roundings if x is negative */
 		rm = oldfsr >> 30;
+
 		if (sx)
 			rm ^= rm >> 1;
+
 		if (rm == FSR_RP || (rm == FSR_RN && hx > 0x3f000000))
 			xx.i = sx | 0x3f800000;
 		else
 			xx.i = sx;
+
 		return (xx.f);
 	}
 
@@ -146,14 +158,13 @@ __nearbyintf(float x) {
 
 	return (z);
 }
-
 #elif defined(__x86)
-
 /* inline template */
 extern long double frndint(long double);
 
 float
-__nearbyintf(float x) {
+__nearbyintf(float x)
+{
 	long double z;
 	unsigned oldcwsw, cwsw;
 
@@ -162,7 +173,7 @@ __nearbyintf(float x) {
 	cwsw = oldcwsw | 0x00200000;
 	__fenv_setcwsw(&cwsw);
 
-	z = frndint((long double) x);
+	z = frndint((long double)x);
 
 	/*
 	 * restore the control and status words, preserving all but the
@@ -175,9 +186,7 @@ __nearbyintf(float x) {
 	/* note: the value of z is representable in single precision */
 	return (z);
 }
-
 #else
 #error Unknown architecture
 #endif
-
 #endif

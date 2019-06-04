@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -35,22 +36,16 @@ static union {
 	unsigned i;
 	float f;
 } C[] = {
-	0x00800000,
-	0x7f000000,
-	0x7fffffff
+	0x00800000, 0x7f000000, 0x7fffffff
 };
 
-#define	tiny	C[0].f
-#define	huge	C[1].f
-#define	qnan	C[2].f
+#define	tiny		C[0].f
+#define	huge		C[1].f
+#define	qnan		C[2].f
 
 #if defined(__sparc)
-
 enum fcc_type {
-	fcc_equal = 0,
-	fcc_less = 1,
-	fcc_greater = 2,
-	fcc_unordered = 3
+	fcc_equal = 0, fcc_less = 1, fcc_greater = 2, fcc_unordered = 3
 };
 
 #ifdef __sparcv9
@@ -60,7 +55,8 @@ enum fcc_type {
 extern enum fcc_type _Q_cmp(const long double *, const long double *);
 
 float
-__nexttowardf(float x, long double y) {
+__nexttowardf(float x, long double y)
+{
 	union {
 		unsigned i;
 		float f;
@@ -69,6 +65,7 @@ __nexttowardf(float x, long double y) {
 		unsigned i[4];
 		long double q;
 	} yy;
+
 	long double lx;
 	unsigned hx;
 	volatile float dummy;
@@ -86,6 +83,7 @@ __nexttowardf(float x, long double y) {
 
 	/* check for each of four possible orderings */
 	rel = _Q_cmp(&lx, &y);
+
 	if (rel == fcc_unordered)
 		return (qnan);
 
@@ -95,20 +93,21 @@ __nexttowardf(float x, long double y) {
 			xx.i = yy.i[0];
 			return (xx.f);
 		}
+
 		return (x);
 	}
 
 	if (rel == fcc_less) {
-		if (hx == 0)	/* x is zero */
+		if (hx == 0)			/* x is zero */
 			xx.i = 0x00000001;
-		else if ((int) xx.i >= 0)	/* x is positive */
+		else if ((int)xx.i >= 0)	/* x is positive */
 			xx.i++;
 		else
 			xx.i--;
 	} else {
-		if (hx == 0)	/* x is zero */
+		if (hx == 0)			/* x is zero */
 			xx.i = 0x80000001;
-		else if ((int) xx.i >= 0)	/* x is positive */
+		else if ((int)xx.i >= 0)	/* x is positive */
 			xx.i--;
 		else
 			xx.i++;
@@ -116,6 +115,7 @@ __nexttowardf(float x, long double y) {
 
 	/* raise exceptions as needed */
 	hx = xx.i & ~0x80000000;
+
 	if (hx == 0x7f800000) {
 		dummy = huge;
 		dummy *= huge;
@@ -126,15 +126,15 @@ __nexttowardf(float x, long double y) {
 
 	return (xx.f);
 }
-
 #elif defined(__x86)
-
 float
-__nexttowardf(float x, long double y) {
+__nexttowardf(float x, long double y)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx;
+
 	unsigned hx;
 	long double lx;
 	volatile float dummy;
@@ -144,22 +144,22 @@ __nexttowardf(float x, long double y) {
 
 	/* check for each of four possible orderings */
 	if (isunordered(lx, y))
-		return ((float) (lx + y));
+		return ((float)(lx + y));
 
 	if (lx == y)
-		return ((float) y);
+		return ((float)y);
 
 	if (lx < y) {
-		if (hx == 0)	/* x is zero */
+		if (hx == 0)			/* x is zero */
 			xx.i = 0x00000001;
-		else if ((int) xx.i >= 0)	/* x is positive */
+		else if ((int)xx.i >= 0)	/* x is positive */
 			xx.i++;
 		else
 			xx.i--;
 	} else {
-		if (hx == 0)	/* x is zero */
+		if (hx == 0)			/* x is zero */
 			xx.i = 0x80000001;
-		else if ((int) xx.i >= 0)	/* x is positive */
+		else if ((int)xx.i >= 0)	/* x is positive */
 			xx.i--;
 		else
 			xx.i++;
@@ -167,6 +167,7 @@ __nexttowardf(float x, long double y) {
 
 	/* raise exceptions as needed */
 	hx = xx.i & ~0x80000000;
+
 	if (hx == 0x7f800000) {
 		dummy = huge;
 		dummy *= huge;
@@ -177,7 +178,6 @@ __nexttowardf(float x, long double y) {
 
 	return (xx.f);
 }
-
 #else
 #error Unknown architecture
 #endif

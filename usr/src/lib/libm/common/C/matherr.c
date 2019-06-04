@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,6 +34,7 @@
 
 /* ARGSUSED0 */
 int
-__matherr(struct exception *x) {
+__matherr(struct exception *x)
+{
 	return (0);
 }

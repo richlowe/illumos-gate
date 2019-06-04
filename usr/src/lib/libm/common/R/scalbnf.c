@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,10 +31,11 @@
 #pragma weak __scalbnf = scalbnf
 
 #include "libm.h"
-#include <float.h>		/* FLT_MAX, FLT_MIN */
-#include <stdlib.h>		/* abs */
+#include <float.h>			/* FLT_MAX, FLT_MIN */
+#include <stdlib.h>			/* abs */
 
 static const float twom25f = 2.98023223876953125e-8F;
+
 #if defined(__x86)
 static const float two23f = 8388608.0F;
 #else
@@ -41,34 +43,42 @@ static const float two23f = 8388608.0F;
  * v: a non-zero subnormal |x|; returns [-22, 0]
  */
 static int
-ilogbf_biased(unsigned v) {
+ilogbf_biased(unsigned v)
+{
 	int r = -22;
 
 	if (v & 0xffff0000)
 		r += 16, v >>= 16;
+
 	if (v & 0xff00)
 		r += 8, v >>= 8;
+
 	if (v & 0xf0)
 		r += 4, v >>= 4;
+
 	v <<= 1;
 	return (r + ((0xffffaa50 >> v) & 0x3));
 }
-#endif	/* defined(__x86) */
+#endif /* defined(__x86) */
 
 float
-scalbnf(float x, int n) {
-	int *px = (int *) &x, ix, k;
+scalbnf(float x, int n)
+{
+	int *px = (int *)&x, ix, k;
 
 	ix = *px & ~0x80000000;
 	k = ix >> 23;
+
 	if (k == 0xff)
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 		return (ix > 0x7f800000 ? x * x : x);
 #else
 		return (x + x);
 #endif
+
 	if (ix == 0 || n == 0)
 		return (x);
+
 	if (k == 0) {
 #if defined(__x86)
 		x *= two23f;
@@ -78,17 +88,23 @@ scalbnf(float x, int n) {
 		*px = (*px & 0x80000000) | (ix << (-k + 1));
 #endif
 	}
-	if ((unsigned) abs(n) >= 131072)	/* cast to unsigned for -2^31 */
+
+	if ((unsigned)abs(n) >= 131072)	/* cast to unsigned for -2^31 */
 		n >>= 1;		/* avoid subsequent integer overflow */
+
 	k += n;
+
 	if (k > 0xfe)
 		return (FLT_MAX * copysignf(FLT_MAX, x));
+
 	if (k <= -25)
 		return (FLT_MIN * copysignf(FLT_MIN, x));
+
 	if (k > 0) {
 		*px = (*px & ~0x7f800000) | (k << 23);
 		return (x);
 	}
+
 	k += 25;
 	*px = (*px & ~0x7f800000) | (k << 23);
 	return (x * twom25f);

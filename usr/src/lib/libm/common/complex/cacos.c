@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __cacos = cacos
 
-/* INDENT OFF */
+
 /*
  * dcomplex cacos(dcomplex z);
  *
@@ -41,7 +42,7 @@
  * The principal value of complex inverse cosine function cacos(z),
  * where z = x+iy, can be defined by
  *
- * 	cacos(z) = acos(B) - i sign(y) log (A + sqrt(A*A-1)),
+ *      cacos(z) = acos(B) - i sign(y) log (A + sqrt(A*A-1)),
  *
  * where the log function is the natural log, and
  *             ____________           ____________
@@ -152,7 +153,7 @@
  *	   A = (sqrt(4+y*y)+y)/2 ~ 1 + y/2 + y^2/8 + ...
  *	and
  *	   B = 1/A = 1 - y/2 + y^2/8 + ...
- * 	Since
+ *      Since
  *         cos(sqrt(y)) ~ 1 - y/2 + ...
  *      we have, for the real part,
  *         acos(B) ~ acos(1 - y/2) ~ sqrt(y)
@@ -165,7 +166,7 @@
  *
  *  case 4. y >= (x+1)/ulp(0.5). In this case, A ~ y and B ~ x/y. Thus
  *	   real part = acos(B) ~ pi/2
- * 	and
+ *      and
  *	   imag part = log(y+sqrt(y*y-one))
  *
  *  case 5. Both x and y are large: x and y > sqrt(M)/8, where M = maximum x
@@ -188,18 +189,15 @@
  *	              = 0.5*log(1+2y(y+sqrt(1+y^2)));
  *	              = 0.5*log1p(2y(y+A));
  *
- * 	cacos(z) = acos(B) - i sign(y) log (A + sqrt(A*A-1)),
+ *      cacos(z) = acos(B) - i sign(y) log (A + sqrt(A*A-1)),
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
-static const double
-	zero = 0.0,
+static const double zero = 0.0,
 	one = 1.0,
-	E = 1.11022302462515654042e-16,			/* 2**-53 */
+	E = 1.11022302462515654042e-16,	/* 2**-53 */
 	ln2 = 6.93147180559945286227e-01,
 	pi = 3.1415926535897931159979634685,
 	pi_l = 1.224646799147353177e-16,
@@ -213,10 +211,11 @@ static const double
 	Acrossover = 1.5,
 	Bcrossover = 0.6417,
 	half = 0.5;
-/* INDENT ON */
+
 
 dcomplex
-cacos(dcomplex z) {
+cacos(dcomplex z)
+{
 	double x, y, t, R, S, A, Am1, B, y2, xm1, xp1, Apx;
 	int ix, iy, hx, hy;
 	unsigned lx, ly;
@@ -244,6 +243,7 @@ cacos(dcomplex z) {
 	if (iy >= 0x7ff00000) {
 		if (ISINF(iy, ly)) {	/* cacos(x + i inf) = pi/2  - i inf */
 			D_IM(ans) = -y;
+
 			if (ix < 0x7ff00000) {
 				D_RE(ans) = pi_2 + pi_2_l;
 			} else if (ISINF(ix, lx)) {
@@ -256,11 +256,13 @@ cacos(dcomplex z) {
 			}
 		} else {		/* cacos(x + i NaN) = NaN  + i NaN */
 			D_RE(ans) = y + x;
+
 			if (ISINF(ix, lx))
 				D_IM(ans) = -fabs(x);
 			else
 				D_IM(ans) = y;
 		}
+
 		return (ans);
 	}
 
@@ -268,71 +270,76 @@ cacos(dcomplex z) {
 	y = fabs(y);
 
 	/* x is inf or NaN */
-	if (ix >= 0x7ff00000) {	/* x is inf or NaN */
+	if (ix >= 0x7ff00000) {		/* x is inf or NaN */
 		if (ISINF(ix, lx)) {	/* x is INF */
 			D_IM(ans) = -x;
+
 			if (iy >= 0x7ff00000) {
 				if (ISINF(iy, ly)) {
-					/* INDENT OFF */
-					/* cacos(inf + i inf) = pi/4 - i inf */
-					/* cacos(-inf+ i inf) =3pi/4 - i inf */
-					/* INDENT ON */
+					/*
+					 * cacos(inf + i inf) = pi/4 - i inf
+					 * cacos(-inf+ i inf) =3pi/4 - i inf
+					 */
 					if (hx >= 0)
 						D_RE(ans) = pi_4 + pi_4_l;
 					else
 						D_RE(ans) = pi3_4 + pi3_4_l;
-				} else
-					/* INDENT OFF */
-					/* cacos(inf + i NaN) = NaN  - i inf  */
-					/* INDENT ON */
+				} else {
+					/*
+					 * cacos(inf + i NaN) = NaN  - i inf
+					 */
 					D_RE(ans) = y + y;
+				}
 			} else
-				/* INDENT OFF */
-				/* cacos(inf + iy ) = 0  - i inf */
-				/* cacos(-inf+ iy  ) = pi - i inf */
-				/* INDENT ON */
-			if (hx >= 0)
+			/*
+			 * cacos(inf + iy ) = 0  - i inf
+			 * cacos(-inf+ iy  ) = pi - i inf
+			 */
+			if (hx >= 0) {
 				D_RE(ans) = zero;
-			else
+			} else {
 				D_RE(ans) = pi + pi_l;
+			}
 		} else {		/* x is NaN */
-			/* INDENT OFF */
+
 			/*
 			 * cacos(NaN + i inf) = NaN  - i inf
 			 * cacos(NaN + i y  ) = NaN  + i NaN
 			 * cacos(NaN + i NaN) = NaN  + i NaN
 			 */
-			/* INDENT ON */
 			D_RE(ans) = x + y;
-			if (iy >= 0x7ff00000) {
+
+			if (iy >= 0x7ff00000)
 				D_IM(ans) = -y;
-			} else {
+			else
 				D_IM(ans) = x;
-			}
 		}
+
 		if (hy < 0)
 			D_IM(ans) = -D_IM(ans);
+
 		return (ans);
 	}
 
-	if ((iy | ly) == 0) {	/* region 1: y=0 */
+	if ((iy | ly) == 0) {		/* region 1: y=0 */
 		if (ix < 0x3ff00000) {	/* |x| < 1 */
 			D_RE(ans) = acos(x);
 			D_IM(ans) = zero;
 		} else {
 			D_RE(ans) = zero;
-			if (ix >= 0x43500000)	/* |x| >= 2**54 */
+
+			if (ix >= 0x43500000) {		/* |x| >= 2**54 */
 				D_IM(ans) = ln2 + log(x);
-			else if (ix >= 0x3ff80000)	/* x > Acrossover */
+			} else if (ix >= 0x3ff80000) {	/* x > Acrossover */
 				D_IM(ans) = log(x + sqrt((x - one) * (x +
-					one)));
-			else {
+				    one)));
+			} else {
 				xm1 = x - one;
 				D_IM(ans) = log1p(xm1 + sqrt(xm1 * (x + one)));
 			}
 		}
 	} else if (y <= E * fabs(x - one)) {	/* region 2: y < tiny*|x-1| */
-		if (ix < 0x3ff00000) {	/* x < 1 */
+		if (ix < 0x3ff00000) {		/* x < 1 */
 			D_RE(ans) = acos(x);
 			D_IM(ans) = y / sqrt((one + x) * (one - x));
 		} else if (ix >= 0x43500000) {	/* |x| >= 2**54 */
@@ -341,6 +348,7 @@ cacos(dcomplex z) {
 		} else {
 			t = sqrt((x - one) * (x + one));
 			D_RE(ans) = y / t;
+
 			if (ix >= 0x3ff80000)	/* x > Acrossover */
 				D_IM(ans) = log(x + t);
 			else
@@ -350,7 +358,7 @@ cacos(dcomplex z) {
 		t = sqrt(y);
 		D_RE(ans) = t;
 		D_IM(ans) = t;
-	} else if (E * y - one >= x) {	/* region 4 */
+	} else if (E * y - one >= x) {				/* region 4 */
 		D_RE(ans) = pi_2;
 		D_IM(ans) = ln2 + log(y);
 	} else if (ix >= 0x5fc00000 || iy >= 0x5fc00000) {	/* x,y>2**509 */
@@ -362,11 +370,12 @@ cacos(dcomplex z) {
 		/* region 6: x is very small, < 4sqrt(min) */
 		D_RE(ans) = pi_2;
 		A = sqrt(one + y * y);
+
 		if (iy >= 0x3ff80000)	/* if y > Acrossover */
 			D_IM(ans) = log(y + A);
 		else
 			D_IM(ans) = half * log1p((y + y) * (y + A));
-	} else {	/* safe region */
+	} else {			/* safe region */
 		y2 = y * y;
 		xp1 = x + one;
 		xm1 = x - one;
@@ -374,31 +383,38 @@ cacos(dcomplex z) {
 		S = sqrt(xm1 * xm1 + y2);
 		A = half * (R + S);
 		B = x / A;
-		if (B <= Bcrossover)
+
+		if (B <= Bcrossover) {
 			D_RE(ans) = acos(B);
-		else {		/* use atan and an accurate approx to a-x */
+		} else {	/* use atan and an accurate approx to a-x */
 			Apx = A + x;
+
 			if (x <= one)
 				D_RE(ans) = atan(sqrt(half * Apx * (y2 / (R +
-					xp1) + (S - xm1))) / x);
+				    xp1) + (S - xm1))) / x);
 			else
 				D_RE(ans) = atan((y * sqrt(half * (Apx / (R +
-					xp1) + Apx / (S + xm1)))) / x);
+				    xp1) + Apx / (S + xm1)))) / x);
 		}
+
 		if (A <= Acrossover) {
 			/* use log1p and an accurate approx to A-1 */
 			if (x < one)
 				Am1 = half * (y2 / (R + xp1) + y2 / (S - xm1));
 			else
 				Am1 = half * (y2 / (R + xp1) + (S + xm1));
+
 			D_IM(ans) = log1p(Am1 + sqrt(Am1 * (A + one)));
 		} else {
 			D_IM(ans) = log(A + sqrt(A * A - one));
 		}
 	}
+
 	if (hx < 0)
 		D_RE(ans) = pi - D_RE(ans);
+
 	if (hy >= 0)
 		D_IM(ans) = -D_IM(ans);
+
 	return (ans);
 }

@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -37,29 +39,31 @@
 
 #include "libm.h"
 
-static const double
-	zero = 0.0,
-	one = 1.0,
-	two52 = 4503599627370496.0;
+static const double zero = 0.0, one = 1.0, two52 = 4503599627370496.0;
 
 double
-ceil(double x) {
-	double	t, w;
-	int	hx, lx, ix;
+ceil(double x)
+{
+	double t, w;
+	int hx, lx, ix;
 
 	hx = ((int *)&x)[HIWORD];
 	lx = ((int *)&x)[LOWORD];
 	ix = hx & ~0x80000000;
+
 	if (ix >= 0x43300000)	/* return x if |x| >= 2^52, or x is NaN */
 		return (x * one);
-	t = (hx >= 0)? two52 : -two52;
+
+	t = (hx >= 0) ? two52 : -two52;
 	w = x + t;
 	t = w - t;
+
 	if (ix < 0x3ff00000) {
 		if ((ix | lx) == 0)
 			return (x);
 		else
-			return ((hx < 0)? -zero : one);
+			return ((hx < 0) ? -zero : one);
 	}
-	return ((t >= x)? t : t + one);
+
+	return ((t >= x) ? t : t + one);
 }

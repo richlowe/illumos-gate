@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __cacosh = cacosh
 
-/* INDENT OFF */
+
 /*
  * dcomplex cacosh(dcomplex z);
  *	cacosh z = +-i cacos z .
@@ -38,23 +39,25 @@
  *	cacosh z = sign(Im(z))*i cacos z .
  *
  */
-/* INDENT ON */
 
-#include "libm.h"	/* fabs/isnan/isinf/signbit */
+#include "libm.h"			/* fabs/isnan/isinf/signbit */
 #include "complex_wrapper.h"
 
 /* need to work on special cases according to spec */
 
 dcomplex
-cacosh(dcomplex z) {
+cacosh(dcomplex z)
+{
 	dcomplex w, ans;
 	double x, y;
 
 	w = cacos(z);
 	x = D_RE(z);
 	y = D_IM(z);
+
 	if (isnan(y)) {
 		D_IM(ans) = y + y;
+
 		if (isinf(x))
 			D_RE(ans) = fabs(x);
 		else
@@ -66,5 +69,6 @@ cacosh(dcomplex z) {
 		D_RE(ans) = D_IM(w);
 		D_IM(ans) = -D_RE(w);
 	}
+
 	return (ans);
 }

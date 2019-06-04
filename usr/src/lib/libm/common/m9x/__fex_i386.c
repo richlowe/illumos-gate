@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -44,63 +45,73 @@
 #include "fenv_inlines.h"
 
 #if defined(__amd64)
-#define test_sse_hw	1
+#define	test_sse_hw		1
 #else
 /*
  * The following variable lives in libc on Solaris 10, where it
  * gets set to a nonzero value at startup time on systems with SSE.
  */
 extern int _sse_hw;
-#define test_sse_hw	_sse_hw
+
+#define	test_sse_hw		_sse_hw
 #endif
 
 static int accrued = 0;
 static thread_key_t accrued_key;
 static mutex_t accrued_key_lock = DEFAULTMUTEX;
-
 int *
 __fex_accrued()
 {
-	int		*p;
+	int *p;
 
-	if (thr_main())
-		return &accrued;
-	else {
+	if (thr_main()) {
+		return (&accrued);
+	} else {
 		p = NULL;
 		mutex_lock(&accrued_key_lock);
+
 		if (thr_getspecific(accrued_key, (void **)&p) != 0 &&
-			thr_keycreate(&accrued_key, free) != 0) {
+		    thr_keycreate(&accrued_key, free) != 0) {
 			mutex_unlock(&accrued_key_lock);
-			return NULL;
+			return (NULL);
 		}
+
 		mutex_unlock(&accrued_key_lock);
+
 		if (!p) {
-			if ((p = (int*) malloc(sizeof(int))) == NULL)
-				return NULL;
+			if ((p = (int *)malloc(sizeof (int))) == NULL)
+				return (NULL);
+
 			if (thr_setspecific(accrued_key, (void *)p) != 0) {
-				(void)free(p);
-				return NULL;
+				(void) free(p);
+				return (NULL);
 			}
+
 			*p = 0;
 		}
-		return p;
+
+		return (p);
 	}
 }
 
 void
 __fenv_getfsr(unsigned long *fsr)
 {
-	unsigned int	cwsw, mxcsr;
+	unsigned int cwsw, mxcsr;
 
 	__fenv_getcwsw(&cwsw);
 	/* clear reserved bits for no particularly good reason */
 	cwsw &= ~0xe0c00000u;
+
 	if (test_sse_hw) {
-		/* pick up exception flags (excluding denormal operand
-		   flag) from mxcsr */
+		/*
+		 * pick up exception flags (excluding denormal operand flag)
+		 * from mxcsr
+		 */
 		__fenv_getmxcsr(&mxcsr);
 		cwsw |= (mxcsr & 0x3d);
 	}
+
 	cwsw |= *__fex_accrued();
 	*fsr = cwsw ^ 0x003f0000u;
 }
@@ -108,47 +119,53 @@ __fenv_getfsr(unsigned long *fsr)
 void
 __fenv_setfsr(const unsigned long *fsr)
 {
-	unsigned int	cwsw, mxcsr;
-	int				te;
+	unsigned int cwsw, mxcsr;
+	int te;
 
 	/* save accrued exception flags corresponding to enabled exceptions */
 	cwsw = (unsigned int)*fsr;
 	te = __fenv_get_te(cwsw);
 	*__fex_accrued() = cwsw & te;
 	cwsw = (cwsw & ~te) ^ 0x003f0000;
+
 	if (test_sse_hw) {
-		/* propagate rounding direction, masks, and exception flags
-		   (excluding denormal operand mask and flag) to mxcsr */
+		/*
+		 * propagate rounding direction, masks, and exception flags
+		 * (excluding denormal operand mask and flag) to mxcsr
+		 */
 		__fenv_getmxcsr(&mxcsr);
-		mxcsr = (mxcsr & ~0x7ebd) | ((cwsw >> 13) & 0x6000) |
-			((cwsw >> 9) & 0x1e80) | (cwsw & 0x3d);
+		mxcsr = (mxcsr & ~0x7ebd) | ((cwsw >> 13) & 0x6000) | ((cwsw >>
+		    9) & 0x1e80) | (cwsw & 0x3d);
 		__fenv_setmxcsr(&mxcsr);
 	}
+
 	__fenv_setcwsw(&cwsw);
 }
 
 /* Offsets into the fp environment save area (assumes 32-bit protected mode) */
-#define CW	0	/* control word */
-#define SW	1	/* status word */
-#define TW	2	/* tag word */
-#define IP	3	/* instruction pointer */
-#define OP	4	/* opcode */
-#define EA	5	/* operand address */
+#define	CW			0	/* control word */
+#define	SW			1	/* status word */
+#define	TW			2	/* tag word */
+#define	IP			3	/* instruction pointer */
+#define	OP			4	/* opcode */
+#define	EA			5	/* operand address */
 
 /* macro for accessing fp registers in the save area */
 #if defined(__amd64)
-#define fpreg(u,x)	*(long double *)(10*(x)+(char*)&(u)->uc_mcontext.fpregs.fp_reg_set.fpchip_state.st)
+#define	fpreg(u, x)		*(long double *)(10 * (x) + \
+	(char *)&(u)->uc_mcontext.fpregs.fp_reg_set.fpchip_state.st)
 #else
-#define fpreg(u,x)	*(long double *)(10*(x)+(char*)&(u)->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[7])
+#define	fpreg(u, x)		*(long double *)(10 * (x) + \
+	(char *)&(u)->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[7])
 #endif
 
 /*
-*  Fix sip->si_code; the Solaris x86 kernel can get it wrong
-*/
+ *  Fix sip->si_code; the Solaris x86 kernel can get it wrong
+ */
 void
 __fex_get_x86_exc(siginfo_t *sip, ucontext_t *uap)
 {
-	unsigned	sw, cw;
+	unsigned sw, cw;
 
 	sw = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.status;
 #if defined(__amd64)
@@ -156,9 +173,10 @@ __fex_get_x86_exc(siginfo_t *sip, ucontext_t *uap)
 #else
 	cw = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[CW];
 #endif
+
 	if ((sw & FE_INVALID) && !(cw & (1 << fp_trap_invalid)))
 		/* store 0 for stack fault, FPE_FLTINV for IEEE invalid op */
-		sip->si_code = ((sw & 0x40)? 0 : FPE_FLTINV);
+		sip->si_code = ((sw & 0x40) ? 0 : FPE_FLTINV);
 	else if ((sw & FE_DIVBYZERO) && !(cw & (1 << fp_trap_division)))
 		sip->si_code = FPE_FLTDIV;
 	else if ((sw & FE_OVERFLOW) && !(cw & (1 << fp_trap_overflow)))
@@ -174,72 +192,78 @@ __fex_get_x86_exc(siginfo_t *sip, ucontext_t *uap)
 static enum fp_class_type
 my_fp_classf(float *x)
 {
-	int		i = *(int*)x & ~0x80000000;
+	int i = *(int *)x & ~0x80000000;
 
 	if (i < 0x7f800000) {
 		if (i < 0x00800000)
-			return ((i == 0)? fp_zero : fp_subnormal);
-		return fp_normal;
+			return ((i == 0) ? fp_zero : fp_subnormal);
+
+		return (fp_normal);
+	} else if (i == 0x7f800000) {
+		return (fp_infinity);
+	} else if (i & 0x400000) {
+		return (fp_quiet);
+	} else {
+		return (fp_signaling);
 	}
-	else if (i == 0x7f800000)
-		return fp_infinity;
-	else if (i & 0x400000)
-		return fp_quiet;
-	else
-		return fp_signaling;
 }
 
 static enum fp_class_type
 my_fp_class(double *x)
 {
-	int		i = *(1+(int*)x) & ~0x80000000;
+	int i = *(1 + (int *)x) & ~0x80000000;
 
 	if (i < 0x7ff00000) {
 		if (i < 0x00100000)
-			return (((i | *(int*)x) == 0)? fp_zero : fp_subnormal);
-		return fp_normal;
+			return (((i | *(int *)x) == 0) ? fp_zero :
+			    fp_subnormal);
+
+		return (fp_normal);
+	} else if (i == 0x7ff00000 && *(int *)x == 0) {
+		return (fp_infinity);
+	} else if (i & 0x80000) {
+		return (fp_quiet);
+	} else {
+		return (fp_signaling);
 	}
-	else if (i == 0x7ff00000 && *(int*)x == 0)
-		return fp_infinity;
-	else if (i & 0x80000)
-		return fp_quiet;
-	else
-		return fp_signaling;
 }
 
 static enum fp_class_type
 my_fp_classl(long double *x)
 {
-	int		i = *(2+(int*)x) & 0x7fff;
+	int i = *(2 + (int *)x) & 0x7fff;
 
 	if (i < 0x7fff) {
 		if (i < 1) {
-			if (*(1+(int*)x) < 0) return fp_normal; /* pseudo-denormal */
-			return (((*(1+(int*)x) | *(int*)x) == 0)?
-				fp_zero : fp_subnormal);
+			if (*(1 + (int *)x) < 0)
+				return (fp_normal);	/* pseudo-denormal */
+
+			return (((*(1 + (int *)x) | *(int *)x) == 0) ? fp_zero :
+			    fp_subnormal);
 		}
-		return ((*(1+(int*)x) < 0)? fp_normal :
-			(enum fp_class_type) -1); /* unsupported format */
+
+		return ((*(1 + (int *)x) < 0) ? fp_normal :
+		    (enum fp_class_type)-1);	/* unsupported format */
+	} else if (*(1 + (int *)x) == 0x80000000 && *(int *)x == 0) {
+		return (fp_infinity);
+	} else if (*(1 + (unsigned *)x) >= 0xc0000000) {
+		return (fp_quiet);
+	} else if (*(1 + (int *)x) < 0) {
+		return (fp_signaling);
+	} else {
+		return ((enum fp_class_type)-1);	/* unsupported format */
 	}
-	else if (*(1+(int*)x) == 0x80000000 && *(int*)x == 0)
-		return fp_infinity;
-	else if (*(1+(unsigned*)x) >= 0xc0000000)
-		return fp_quiet;
-	else if (*(1+(int*)x) < 0)
-		return fp_signaling;
-	else
-		return (enum fp_class_type) -1; /* unsupported format */
 }
 
 /*
-*  Determine which type of invalid operation exception occurred
-*/
+ *  Determine which type of invalid operation exception occurred
+ */
 enum fex_exception
 __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 {
-	unsigned			op;
-	unsigned long			ea;
-	enum fp_class_type	t1, t2;
+	unsigned op;
+	unsigned long ea;
+	enum fp_class_type t1, t2;
 
 	/* get the opcode and data address */
 #if defined(__amd64)
@@ -250,8 +274,10 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	ea = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[EA];
 #endif
 
-	/* if the instruction is fld, the source must be snan (it can't be
-	   an unsupported format, since fldt doesn't raise any exceptions) */
+	/*
+	 * if the instruction is fld, the source must be snan (it can't be
+	 * an unsupported format, since fldt doesn't raise any exceptions)
+	 */
 	switch (op & 0x7f8) {
 	case 0x100:
 	case 0x140:
@@ -259,18 +285,20 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x500:
 	case 0x540:
 	case 0x580:
-		return fex_inv_snan;
+		return (fex_inv_snan);
 	}
 
 	/* otherwise st is one of the operands; see if it's snan */
 	t1 = my_fp_classl(&fpreg(uap, 0));
+
 	if (t1 == fp_signaling)
-		return fex_inv_snan;
-	else if (t1 == (enum fp_class_type) -1)
-		return (enum fex_exception) -1;
+		return (fex_inv_snan);
+	else if (t1 == (enum fp_class_type)-1)
+		return ((enum fex_exception)-1);
 
 	/* determine the class of the second operand if there is one */
 	t2 = fp_normal;
+
 	switch (op & 0x7e0) {
 	case 0x600:
 	case 0x620:
@@ -278,11 +306,14 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x660:
 	case 0x680:
 	case 0x6a0:
+
 		/* short memory operand */
 		if (!ea)
-			return (enum fex_exception) -1;
+			return ((enum fex_exception)-1);
+
 		if (*(short *)ea == 0)
 			t2 = fp_zero;
+
 		break;
 
 	case 0x200:
@@ -291,11 +322,14 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x260:
 	case 0x280:
 	case 0x2a0:
+
 		/* int memory operand */
 		if (!ea)
-			return (enum fex_exception) -1;
+			return ((enum fex_exception)-1);
+
 		if (*(int *)ea == 0)
 			t2 = fp_zero;
+
 		break;
 
 	case 0x000:
@@ -304,9 +338,11 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x060:
 	case 0x080:
 	case 0x0a0:
+
 		/* single precision memory operand */
 		if (!ea)
-			return (enum fex_exception) -1;
+			return ((enum fex_exception)-1);
+
 		t2 = my_fp_classf((float *)ea);
 		break;
 
@@ -316,9 +352,11 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x460:
 	case 0x480:
 	case 0x4a0:
+
 		/* double precision memory operand */
 		if (!ea)
-			return (enum fex_exception) -1;
+			return ((enum fex_exception)-1);
+
 		t2 = my_fp_class((double *)ea);
 		break;
 
@@ -331,6 +369,7 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x6c0:
 	case 0x6e0:
 	case 0x7e0:
+
 		/* register operand determined by opcode */
 		switch (op & 0x7f8) {
 		case 0x3e0:
@@ -345,30 +384,33 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 		default:
 			t2 = my_fp_classl(&fpreg(uap, op & 7));
 		}
+
 		break;
 
 	case 0x1e0:
 	case 0x2e0:
+
 		/* special forms */
 		switch (op) {
-		case 0x1f1: /* fyl2x */
-		case 0x1f3: /* fpatan */
-		case 0x1f5: /* fprem1 */
-		case 0x1f8: /* fprem */
-		case 0x1f9: /* fyl2xp1 */
-		case 0x1fd: /* fscale */
-		case 0x2e9: /* fucompp */
+		case 0x1f1:		/* fyl2x */
+		case 0x1f3:		/* fpatan */
+		case 0x1f5:		/* fprem1 */
+		case 0x1f8:		/* fprem */
+		case 0x1f9:		/* fyl2xp1 */
+		case 0x1fd:		/* fscale */
+		case 0x2e9:		/* fucompp */
 			t2 = my_fp_classl(&fpreg(uap, 1));
 			break;
 		}
+
 		break;
 	}
 
 	/* see if the second op is snan */
 	if (t2 == fp_signaling)
-		return fex_inv_snan;
-	else if (t2 == (enum fp_class_type) -1)
-		return (enum fex_exception) -1;
+		return (fex_inv_snan);
+	else if (t2 == (enum fp_class_type)-1)
+		return ((enum fex_exception)-1);
 
 	/* determine the type of operation */
 	switch (op & 0x7f8) {
@@ -399,9 +441,11 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x6c0:
 	case 0x6e0:
 	case 0x6e8:
+
 		/* fadd, fsub, fsubr */
 		if (t1 == fp_infinity && t2 == fp_infinity)
-			return fex_inv_isi;
+			return (fex_inv_isi);
+
 		break;
 
 	case 0x008:
@@ -419,10 +463,12 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x648:
 	case 0x688:
 	case 0x6c8:
+
 		/* fmul */
 		if ((t1 == fp_zero && t2 == fp_infinity) || (t2 == fp_zero &&
-		  t1 == fp_infinity))
-			return fex_inv_zmi;
+		    t1 == fp_infinity))
+			return (fex_inv_zmi);
+
 		break;
 
 	case 0x030:
@@ -455,17 +501,19 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x6b8:
 	case 0x6f0:
 	case 0x6f8:
+
 		/* fdiv */
 		if (t1 == fp_zero && t2 == fp_zero)
-			return fex_inv_zdz;
+			return (fex_inv_zdz);
 		else if (t1 == fp_infinity && t2 == fp_infinity)
-			return fex_inv_idi;
+			return (fex_inv_idi);
+
 		break;
 
 	case 0x1f0:
 	case 0x1f8:
 		/* fsqrt, other special ops */
-		return fex_inv_sqrt;
+		return (fex_inv_sqrt);
 
 	case 0x010:
 	case 0x018:
@@ -502,15 +550,19 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x6d0:
 	case 0x6d8:
 	case 0x7f0:
+
 		/* fcom */
 		if (t1 == fp_quiet || t2 == fp_quiet)
-			return fex_inv_cmp;
+			return (fex_inv_cmp);
+
 		break;
 
 	case 0x1e0:
+
 		/* ftst */
 		if (op == 0x1e4 && t1 == fp_quiet)
-			return fex_inv_cmp;
+			return (fex_inv_cmp);
+
 		break;
 
 	case 0x310:
@@ -532,18 +584,22 @@ __fex_get_invalid_type(siginfo_t *sip, ucontext_t *uap)
 	case 0x7b0:
 	case 0x7b8:
 		/* fist, fbst */
-		return fex_inv_int;
+		return (fex_inv_int);
 	}
 
-	return (enum fex_exception) -1;
+	return ((enum fex_exception)-1);
 }
 
 /* scale factors for exponent unwrapping */
+/* 2^12288 */
 static const long double
-	two12288 = 1.139165225263043370845938579315932009e+3699l,	/* 2^12288 */
-	twom12288 = 8.778357852076208839765066529179033145e-3700l,	/* 2^-12288 */
-	twom12288mulp = 8.778357852076208839289190796475222545e-3700l;
-		/* (")*(1-2^-64) */
+    two12288 = 1.139165225263043370845938579315932009e+3699l;
+/* 2^-12288 */
+static const long double
+    twom12288 = 8.778357852076208839765066529179033145e-3700l;
+/* (")*(1-2^-64) */
+static const long double
+    twom12288mulp = 8.778357852076208839289190796475222545e-3700l;
 
 /* inline templates */
 extern long double f2xm1(long double);
@@ -562,17 +618,17 @@ extern long double fsin(long double);
 extern long double fcos(long double);
 
 /*
-*  Get the operands, generate the default untrapped result with
-*  exceptions, and set a code indicating the type of operation
-*/
+ *  Get the operands, generate the default untrapped result with
+ *  exceptions, and set a code indicating the type of operation
+ */
 void
 __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 {
-	fex_numeric_t			t;
-	long double			op2v, x;
-	unsigned int			cwsw, ex, sw, op;
-	unsigned long			ea;
-	volatile int			c __unused;
+	fex_numeric_t t;
+	long double op2v, x;
+	unsigned int cwsw, ex, sw, op;
+	unsigned long ea;
+	volatile int c __unused;
 
 	/* get the exception type, status word, opcode, and data address */
 	ex = sip->si_code;
@@ -585,43 +641,52 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	ea = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[EA];
 #endif
 
-	/* initialize res to the default untrapped result and ex to the
-	   corresponding flags (assume trapping is disabled and flags
-	   are clear) */
+	/*
+	 * initialize res to the default untrapped result and ex to the
+	 * corresponding flags (assume trapping is disabled and flags are
+	 * clear)
+	 */
 
 	/* single operand instructions */
 	info->op = fex_cnvt;
 	info->op2.type = fex_nodata;
+
 	switch (op & 0x7f8) {
 	/* load instructions */
 	case 0x100:
 	case 0x140:
 	case 0x180:
+
 		if (!ea) {
 			info->op = fex_other;
-			info->op1.type = info->op2.type = info->res.type = fex_nodata;
+			info->op1.type = info->op2.type = info->res.type =
+			    fex_nodata;
 			info->flags = 0;
 			return;
 		}
+
 		info->op1.type = fex_float;
 		info->op1.val.f = *(float *)ea;
 		info->res.type = fex_ldouble;
-		info->res.val.q = (long double) info->op1.val.f;
+		info->res.val.q = (long double)info->op1.val.f;
 		goto done;
 
 	case 0x500:
 	case 0x540:
 	case 0x580:
+
 		if (!ea) {
 			info->op = fex_other;
-			info->op1.type = info->op2.type = info->res.type = fex_nodata;
+			info->op1.type = info->op2.type = info->res.type =
+			    fex_nodata;
 			info->flags = 0;
 			return;
 		}
+
 		info->op1.type = fex_double;
 		info->op1.val.d = *(double *)ea;
 		info->res.type = fex_ldouble;
-		info->res.val.q = (long double) info->op1.val.d;
+		info->res.val.q = (long double)info->op1.val.d;
 		goto done;
 
 	/* store instructions */
@@ -632,22 +697,26 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x190:
 	case 0x198:
 		info->res.type = fex_float;
+
 		if (ex == FPE_FLTRES && (op & 8) != 0) {
 			/* inexact, stack popped */
 			if (!ea) {
 				info->op = fex_other;
-				info->op1.type = info->op2.type = info->res.type = fex_nodata;
+				info->op1.type = info->op2.type =
+				    info->res.type = fex_nodata;
 				info->flags = 0;
 				return;
 			}
+
 			info->op1.type = fex_nodata;
 			info->res.val.f = *(float *)ea;
 			info->flags = FE_INEXACT;
 			return;
 		}
+
 		info->op1.type = fex_ldouble;
 		info->op1.val.q = fpreg(uap, 0);
-		info->res.val.f = (float) info->op1.val.q;
+		info->res.val.f = (float)info->op1.val.q;
 		goto done;
 
 	case 0x310:
@@ -657,22 +726,26 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x390:
 	case 0x398:
 		info->res.type = fex_int;
+
 		if (ex == FPE_FLTRES && (op & 8) != 0) {
 			/* inexact, stack popped */
 			if (!ea) {
 				info->op = fex_other;
-				info->op1.type = info->op2.type = info->res.type = fex_nodata;
+				info->op1.type = info->op2.type =
+				    info->res.type = fex_nodata;
 				info->flags = 0;
 				return;
 			}
+
 			info->op1.type = fex_nodata;
 			info->res.val.i = *(int *)ea;
 			info->flags = FE_INEXACT;
 			return;
 		}
+
 		info->op1.type = fex_ldouble;
 		info->op1.val.q = fpreg(uap, 0);
-		info->res.val.i = (int) info->op1.val.q;
+		info->res.val.i = (int)info->op1.val.q;
 		goto done;
 
 	case 0x510:
@@ -682,22 +755,26 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x590:
 	case 0x598:
 		info->res.type = fex_double;
+
 		if (ex == FPE_FLTRES && (op & 8) != 0) {
 			/* inexact, stack popped */
 			if (!ea) {
 				info->op = fex_other;
-				info->op1.type = info->op2.type = info->res.type = fex_nodata;
+				info->op1.type = info->op2.type =
+				    info->res.type = fex_nodata;
 				info->flags = 0;
 				return;
 			}
+
 			info->op1.type = fex_nodata;
 			info->res.val.d = *(double *)ea;
 			info->flags = FE_INEXACT;
 			return;
 		}
+
 		info->op1.type = fex_ldouble;
 		info->op1.val.q = fpreg(uap, 0);
-		info->res.val.d = (double) info->op1.val.q;
+		info->res.val.d = (double)info->op1.val.q;
 		goto done;
 
 	case 0x710:
@@ -707,22 +784,26 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x790:
 	case 0x798:
 		info->res.type = fex_int;
+
 		if (ex == FPE_FLTRES && (op & 8) != 0) {
 			/* inexact, stack popped */
 			if (!ea) {
 				info->op = fex_other;
-				info->op1.type = info->op2.type = info->res.type = fex_nodata;
+				info->op1.type = info->op2.type =
+				    info->res.type = fex_nodata;
 				info->flags = 0;
 				return;
 			}
+
 			info->op1.type = fex_nodata;
 			info->res.val.i = *(short *)ea;
 			info->flags = FE_INEXACT;
 			return;
 		}
+
 		info->op1.type = fex_ldouble;
 		info->op1.val.q = fpreg(uap, 0);
-		info->res.val.i = (short) info->op1.val.q;
+		info->res.val.i = (short)info->op1.val.q;
 		goto done;
 
 	case 0x730:
@@ -738,36 +819,43 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x778:
 	case 0x7b8:
 		info->res.type = fex_llong;
+
 		if (ex == FPE_FLTRES) {
 			/* inexact, stack popped */
 			if (!ea) {
 				info->op = fex_other;
-				info->op1.type = info->op2.type = info->res.type = fex_nodata;
+				info->op1.type = info->op2.type =
+				    info->res.type = fex_nodata;
 				info->flags = 0;
 				return;
 			}
+
 			info->op1.type = fex_nodata;
 			info->res.val.l = *(long long *)ea;
 			info->flags = FE_INEXACT;
 			return;
 		}
+
 		info->op1.type = fex_ldouble;
 		info->op1.val.q = fpreg(uap, 0);
-		info->res.val.l = (long long) info->op1.val.q;
+		info->res.val.l = (long long)info->op1.val.q;
 		goto done;
 	}
 
-	/* all other ops (except compares) have destinations on the stack
-	   so overflow, underflow, and inexact will stomp their operands */
+	/*
+	 * all other ops (except compares) have destinations on the stack so
+	 * overflow, underflow, and inexact will stomp their operands
+	 */
 	if (ex == FPE_FLTOVF || ex == FPE_FLTUND || ex == FPE_FLTRES) {
 		/* find the trapped result */
 		info->op1.type = info->op2.type = fex_nodata;
 		info->res.type = fex_ldouble;
+
 		switch (op & 0x7f8) {
 		case 0x1f0:
 			/* fptan pushes 1.0 afterward, so result is in st(1) */
-			info->res.val.q = ((op == 0x1f2)? fpreg(uap, 1) :
-				fpreg(uap, 0));
+			info->res.val.q = ((op == 0x1f2) ? fpreg(uap, 1) :
+			    fpreg(uap, 0));
 			break;
 
 		case 0x4c0:
@@ -797,53 +885,59 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 		if (ex == FPE_FLTOVF) {
 			/* generate an overflow with the sign of the result */
 			x = two12288;
-			*(4+(short*)&x) |= (*(4+(short*)&info->res.val.q) & 0x8000);
+			*(4 + (short *)&x) |= (*(4 +
+			    (short *)&info->res.val.q) & 0x8000);
 			info->res.val.q = x * two12288;
 			info->flags = FE_OVERFLOW | FE_INEXACT;
 			__fenv_getcwsw(&cwsw);
 			cwsw &= ~FE_ALL_EXCEPT;
 			__fenv_setcwsw(&cwsw);
-		}
-		else if (ex == FPE_FLTUND) {
-			/* undo the scaling; we can't distinguish a chopped result
-			   from an exact one without futzing around to trap all in-
-			   exact exceptions so as to keep the flag clear, so we just
-			   punt */
-			if (sw & 0x200) /* result was rounded up */
-				info->res.val.q = (info->res.val.q * twom12288) * twom12288mulp;
+		} else if (ex == FPE_FLTUND) {
+			/*
+			 * undo the scaling; we can't distinguish a chopped
+			 * result from an exact one without futzing around to
+			 * trap all in- exact exceptions so as to keep the
+			 * flag clear, so we just punt
+			 */
+			if (sw & 0x200)	/* result was rounded up */
+				info->res.val.q = (info->res.val.q *
+				    twom12288) * twom12288mulp;
 			else
-				info->res.val.q = (info->res.val.q * twom12288) * twom12288;
+				info->res.val.q = (info->res.val.q *
+				    twom12288) * twom12288;
+
 			__fenv_getcwsw(&cwsw);
 			info->flags = (cwsw & FE_INEXACT) | FE_UNDERFLOW;
 			cwsw &= ~FE_ALL_EXCEPT;
 			__fenv_setcwsw(&cwsw);
-		}
-		else
+		} else {
 			info->flags = FE_INEXACT;
+		}
 
 		/* determine the operation code */
 		switch (op) {
-		case 0x1f0: /* f2xm1 */
-		case 0x1f1: /* fyl2x */
-		case 0x1f2: /* fptan */
-		case 0x1f3: /* fpatan */
-		case 0x1f5: /* fprem1 */
-		case 0x1f8: /* fprem */
-		case 0x1f9: /* fyl2xp1 */
-		case 0x1fb: /* fsincos */
-		case 0x1fc: /* frndint */
-		case 0x1fd: /* fscale */
-		case 0x1fe: /* fsin */
-		case 0x1ff: /* fcos */
+		case 0x1f0:		/* f2xm1 */
+		case 0x1f1:		/* fyl2x */
+		case 0x1f2:		/* fptan */
+		case 0x1f3:		/* fpatan */
+		case 0x1f5:		/* fprem1 */
+		case 0x1f8:		/* fprem */
+		case 0x1f9:		/* fyl2xp1 */
+		case 0x1fb:		/* fsincos */
+		case 0x1fc:		/* frndint */
+		case 0x1fd:		/* fscale */
+		case 0x1fe:		/* fsin */
+		case 0x1ff:		/* fcos */
 			info->op = fex_other;
 			return;
 
-		case 0x1fa: /* fsqrt */
+		case 0x1fa:		/* fsqrt */
 			info->op = fex_sqrt;
 			return;
 		}
 
 		info->op = fex_other;
+
 		switch (op & 0x7c0) {
 		case 0x000:
 		case 0x040:
@@ -860,6 +954,7 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 		case 0x640:
 		case 0x680:
 		case 0x6c0:
+
 			switch (op & 0x38) {
 			case 0x00:
 				info->op = fex_add;
@@ -880,11 +975,14 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 				break;
 			}
 		}
+
 		return;
 	}
 
-	/* for other exceptions, the operands are preserved, so we can
-	   just emulate the operation with traps disabled */
+	/*
+	 * for other exceptions, the operands are preserved, so we can just
+	 * emulate the operation with traps disabled
+	 */
 
 	/* one operand is always in st */
 	info->op1.type = fex_ldouble;
@@ -892,8 +990,9 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 
 	/* oddball instructions */
 	info->op = fex_other;
+
 	switch (op) {
-	case 0x1e4: /* ftst */
+	case 0x1e4:			/* ftst */
 		info->op = fex_cmp;
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = 0.0l;
@@ -901,90 +1000,90 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 		c = (info->op1.val.q < info->op2.val.q);
 		goto done;
 
-	case 0x1f0: /* f2xm1 */
+	case 0x1f0:			/* f2xm1 */
 		info->res.type = fex_ldouble;
 		info->res.val.q = f2xm1(info->op1.val.q);
 		goto done;
 
-	case 0x1f1: /* fyl2x */
+	case 0x1f1:			/* fyl2x */
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
 		info->res.type = fex_ldouble;
 		info->res.val.q = fyl2x(info->op1.val.q, info->op2.val.q);
 		goto done;
 
-	case 0x1f2: /* fptan */
+	case 0x1f2:			/* fptan */
 		info->res.type = fex_ldouble;
 		info->res.val.q = fptan(info->op1.val.q);
 		goto done;
 
-	case 0x1f3: /* fpatan */
+	case 0x1f3:			/* fpatan */
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
 		info->res.type = fex_ldouble;
 		info->res.val.q = fpatan(info->op1.val.q, info->op2.val.q);
 		goto done;
 
-	case 0x1f4: /* fxtract */
+	case 0x1f4:			/* fxtract */
 		info->res.type = fex_ldouble;
 		info->res.val.q = fxtract(info->op1.val.q);
 		goto done;
 
-	case 0x1f5: /* fprem1 */
+	case 0x1f5:			/* fprem1 */
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
 		info->res.type = fex_ldouble;
 		info->res.val.q = fprem1(info->op1.val.q, info->op2.val.q);
 		goto done;
 
-	case 0x1f8: /* fprem */
+	case 0x1f8:			/* fprem */
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
 		info->res.type = fex_ldouble;
 		info->res.val.q = fprem(info->op1.val.q, info->op2.val.q);
 		goto done;
 
-	case 0x1f9: /* fyl2xp1 */
+	case 0x1f9:			/* fyl2xp1 */
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
 		info->res.type = fex_ldouble;
 		info->res.val.q = fyl2xp1(info->op1.val.q, info->op2.val.q);
 		goto done;
 
-	case 0x1fa: /* fsqrt */
+	case 0x1fa:			/* fsqrt */
 		info->op = fex_sqrt;
 		info->res.type = fex_ldouble;
 		info->res.val.q = fsqrt(info->op1.val.q);
 		goto done;
 
-	case 0x1fb: /* fsincos */
+	case 0x1fb:			/* fsincos */
 		info->res.type = fex_ldouble;
 		info->res.val.q = fsincos(info->op1.val.q);
 		goto done;
 
-	case 0x1fc: /* frndint */
+	case 0x1fc:			/* frndint */
 		info->res.type = fex_ldouble;
 		info->res.val.q = frndint(info->op1.val.q);
 		goto done;
 
-	case 0x1fd: /* fscale */
+	case 0x1fd:			/* fscale */
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
 		info->res.type = fex_ldouble;
 		info->res.val.q = fscale(info->op1.val.q, info->op2.val.q);
 		goto done;
 
-	case 0x1fe: /* fsin */
+	case 0x1fe:			/* fsin */
 		info->res.type = fex_ldouble;
 		info->res.val.q = fsin(info->op1.val.q);
 		goto done;
 
-	case 0x1ff: /* fcos */
+	case 0x1ff:			/* fcos */
 		info->res.type = fex_ldouble;
 		info->res.val.q = fcos(info->op1.val.q);
 		goto done;
 
-	case 0x2e9: /* fucompp */
+	case 0x2e9:			/* fucompp */
 		info->op = fex_cmp;
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, 1);
@@ -998,7 +1097,7 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x3e8:
 	case 0x5e0:
 	case 0x5e8:
-	case 0x7e8: /* unordered compares */
+	case 0x7e8:			/* unordered compares */
 		info->op = fex_cmp;
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, op & 7);
@@ -1007,7 +1106,7 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 		goto done;
 
 	case 0x3f0:
-	case 0x7f0: /* ordered compares */
+	case 0x7f0:			/* ordered compares */
 		info->op = fex_cmp;
 		info->op2.type = fex_ldouble;
 		info->op2.val.q = fpreg(uap, op & 7);
@@ -1016,23 +1115,28 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 		goto done;
 	}
 
-	/* all other instructions come in groups of the form
-	   fadd, fmul, fcom, fcomp, fsub, fsubr, fdiv, fdivr */
+	/*
+	 * all other instructions come in groups of the form
+	 * fadd, fmul, fcom, fcomp, fsub, fsubr, fdiv, fdivr
+	 */
 
 	/* get the second operand */
 	switch (op & 0x7c0) {
 	case 0x000:
 	case 0x040:
 	case 0x080:
+
 		if (!ea) {
 			info->op = fex_other;
-			info->op1.type = info->op2.type = info->res.type = fex_nodata;
+			info->op1.type = info->op2.type = info->res.type =
+			    fex_nodata;
 			info->flags = 0;
 			return;
 		}
+
 		info->op2.type = fex_float;
 		info->op2.val.f = *(float *)ea;
-		op2v = (long double) info->op2.val.f;
+		op2v = (long double)info->op2.val.f;
 		break;
 
 	case 0x0c0:
@@ -1043,29 +1147,35 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x200:
 	case 0x240:
 	case 0x280:
+
 		if (!ea) {
 			info->op = fex_other;
-			info->op1.type = info->op2.type = info->res.type = fex_nodata;
+			info->op1.type = info->op2.type = info->res.type =
+			    fex_nodata;
 			info->flags = 0;
 			return;
 		}
+
 		info->op2.type = fex_int;
 		info->op2.val.i = *(int *)ea;
-		op2v = (long double) info->op2.val.i;
+		op2v = (long double)info->op2.val.i;
 		break;
 
 	case 0x400:
 	case 0x440:
 	case 0x480:
+
 		if (!ea) {
 			info->op = fex_other;
-			info->op1.type = info->op2.type = info->res.type = fex_nodata;
+			info->op1.type = info->op2.type = info->res.type =
+			    fex_nodata;
 			info->flags = 0;
 			return;
 		}
+
 		info->op2.type = fex_double;
 		info->op2.val.d = *(double *)ea;
-		op2v = (long double) info->op2.val.d;
+		op2v = (long double)info->op2.val.d;
 		break;
 
 	case 0x4c0:
@@ -1081,15 +1191,18 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x600:
 	case 0x640:
 	case 0x680:
+
 		if (!ea) {
 			info->op = fex_other;
-			info->op1.type = info->op2.type = info->res.type = fex_nodata;
+			info->op1.type = info->op2.type = info->res.type =
+			    fex_nodata;
 			info->flags = 0;
 			return;
 		}
+
 		info->op2.type = fex_int;
 		info->op2.val.i = *(short *)ea;
-		op2v = (long double) info->op2.val.i;
+		op2v = (long double)info->op2.val.i;
 		break;
 
 	default:
@@ -1101,6 +1214,7 @@ __fex_get_op(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 
 	/* distinguish different operations in the group */
 	info->res.type = fex_ldouble;
+
 	switch (op & 0x38) {
 	case 0x00:
 		info->op = fex_add;
@@ -1160,7 +1274,8 @@ done:
 }
 
 /* pop the saved stack */
-static void pop(ucontext_t *uap)
+static void
+pop(ucontext_t *uap)
 {
 	unsigned top;
 
@@ -1172,26 +1287,26 @@ static void pop(ucontext_t *uap)
 	fpreg(uap, 5) = fpreg(uap, 6);
 	fpreg(uap, 6) = fpreg(uap, 7);
 #if defined(__amd64)
-	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw >> 10)
-		& 0xe;
+	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw >> 10) & 0xe;
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.fctw |= (3 << top);
 	top = (top + 2) & 0xe;
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw =
-		(uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw & ~0x3800)
-		| (top << 10);
+	    (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw & ~0x3800) |
+	    (top << 10);
 #else
-	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] >> 10)
-		& 0xe;
+	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] >>
+	    10) & 0xe;
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[TW] |= (3 << top);
 	top = (top + 2) & 0xe;
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] =
-		(uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] & ~0x3800)
-		| (top << 10);
+	    (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] &
+	    ~0x3800) | (top << 10);
 #endif
 }
 
 /* push x onto the saved stack */
-static void push(long double x, ucontext_t *uap)
+static void
+push(long double x, ucontext_t *uap)
 {
 	unsigned top;
 
@@ -1204,54 +1319,54 @@ static void push(long double x, ucontext_t *uap)
 	fpreg(uap, 1) = fpreg(uap, 0);
 	fpreg(uap, 0) = x;
 #if defined(__amd64)
-	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw >> 10)
-		& 0xe;
+	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw >> 10) & 0xe;
 	top = (top - 2) & 0xe;
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.fctw &= ~(3 << top);
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw =
-		(uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw & ~0x3800)
-		| (top << 10);
+	    (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw & ~0x3800) |
+	    (top << 10);
 #else
-	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] >> 10)
-		& 0xe;
+	top = (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] >>
+	    10) & 0xe;
 	top = (top - 2) & 0xe;
-	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[TW] &= ~(3 << top);
+	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[TW] &= ~(3 <<
+	    top);
 	uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] =
-		(uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] & ~0x3800)
-		| (top << 10);
+	    (uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] &
+	    ~0x3800) | (top << 10);
 #endif
 }
 
 /* scale factors for exponent wrapping */
-static const float
-	fun = 7.922816251e+28f,	/* 2^96 */
-	fov = 1.262177448e-29f;	/* 2^-96 */
-static const double
-	dun = 1.552518092300708935e+231,	/* 2^768 */
-	dov = 6.441148769597133308e-232;	/* 2^-768 */
+static const float fun = 7.922816251e+28f,		/* 2^96 */
+	fov = 1.262177448e-29f;				/* 2^-96 */
+static const double dun = 1.552518092300708935e+231,	/* 2^768 */
+	dov = 6.441148769597133308e-232;		/* 2^-768 */
 
 /*
-*  Store the specified result; if no result is given but the exception
-*  is underflow or overflow, use the default trapped result
-*/
+ *  Store the specified result; if no result is given but the exception
+ *  is underflow or overflow, use the default trapped result
+ */
 void
 __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 {
-	fex_numeric_t	r;
-	unsigned long		ex, op, ea, stack;
+	fex_numeric_t r;
+	unsigned long ex, op, ea, stack;
 
 	/* get the exception type, opcode, and data address */
 	ex = sip->si_code;
 #if defined(__amd64)
 	op = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.fop >> 16;
-	ea = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.rdp; /*???*/
+	ea = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.rdp; /* ??? */
 #else
 	op = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[OP] >> 16;
 	ea = uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[EA];
 #endif
 
-	/* if the instruction is a compare, set the condition codes
-	   to unordered and update the stack */
+	/*
+	 * if the instruction is a compare, set the condition codes
+	 * to unordered and update the stack
+	 */
 	switch (op & 0x7f8) {
 	case 0x010:
 	case 0x050:
@@ -1272,7 +1387,8 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 #if defined(__amd64)
 		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw |= 0x4500;
 #else
-		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |= 0x4500;
+		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |=
+		    0x4500;
 #endif
 		return;
 
@@ -1296,7 +1412,8 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 #if defined(__amd64)
 		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw |= 0x4500;
 #else
-		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |= 0x4500;
+		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |=
+		    0x4500;
 #endif
 		pop(uap);
 		return;
@@ -1307,21 +1424,26 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 #if defined(__amd64)
 		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw |= 0x4500;
 #else
-		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |= 0x4500;
+		uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |=
+		    0x4500;
 #endif
 		pop(uap);
 		pop(uap);
 		return;
 
 	case 0x1e0:
-		if (op == 0x1e4) { /* ftst */
+
+		if (op == 0x1e4) {	/* ftst */
 #if defined(__amd64)
-			uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw |= 0x4500;
+			uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.sw |=
+			    0x4500;
 #else
-			uap->uc_mcontext.fpregs.fp_reg_set.fpchip_state.state[SW] |= 0x4500;
+			uap->uc_mcontext.fpregs.fp_reg_set.
+			    fpchip_state.state[SW] |= 0x4500;
 #endif
 			return;
 		}
+
 		break;
 
 	case 0x3e8:
@@ -1346,9 +1468,12 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 		return;
 	}
 
-	/* if there is no result available and the exception is overflow
-	   or underflow, use the wrapped result */
+	/*
+	 * if there is no result available and the exception is overflow
+	 * or underflow, use the wrapped result
+	 */
 	r = info->res;
+
 	if (r.type == fex_nodata) {
 		if (ex == FPE_FLTOVF || ex == FPE_FLTUND) {
 			/* for store instructions, do the scaling and store */
@@ -1359,14 +1484,20 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 			case 0x158:
 			case 0x190:
 			case 0x198:
+
 				if (!ea)
 					return;
+
 				if (ex == FPE_FLTOVF)
-					*(float *)ea = (fpreg(uap, 0) * fov) * fov;
+					*(float *)ea = (fpreg(uap, 0) * fov) *
+					    fov;
 				else
-					*(float *)ea = (fpreg(uap, 0) * fun) * fun;
+					*(float *)ea = (fpreg(uap, 0) * fun) *
+					    fun;
+
 				if ((op & 8) != 0)
 					pop(uap);
+
 				break;
 
 			case 0x510:
@@ -1375,26 +1506,36 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 			case 0x558:
 			case 0x590:
 			case 0x598:
+
 				if (!ea)
 					return;
+
 				if (ex == FPE_FLTOVF)
-					*(double *)ea = (fpreg(uap, 0) * dov) * dov;
+					*(double *)ea = (fpreg(uap, 0) * dov) *
+					    dov;
 				else
-					*(double *)ea = (fpreg(uap, 0) * dun) * dun;
+					*(double *)ea = (fpreg(uap, 0) * dun) *
+					    dun;
+
 				if ((op & 8) != 0)
 					pop(uap);
+
 				break;
 			}
 		}
+
 #ifdef DEBUG
-		else if (ex != FPE_FLTRES)
+		else if (ex != FPE_FLTRES) {
 			printf("No result supplied, stack may be hosed\n");
+		}
 #endif
 		return;
 	}
 
-	/* otherwise convert the supplied result to the correct type,
-	   put it in the destination, and update the stack as need be */
+	/*
+	 * otherwise convert the supplied result to the correct type, put it
+	 * in the destination, and update the stack as need be
+	 */
 
 	/* store instructions */
 	switch (op & 0x7f8) {
@@ -1404,15 +1545,17 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x158:
 	case 0x190:
 	case 0x198:
+
 		if (!ea)
 			return;
+
 		switch (r.type) {
 		case fex_int:
-			*(float *)ea = (float) r.val.i;
+			*(float *)ea = (float)r.val.i;
 			break;
 
 		case fex_llong:
-			*(float *)ea = (float) r.val.l;
+			*(float *)ea = (float)r.val.l;
 			break;
 
 		case fex_float:
@@ -1420,18 +1563,20 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 			break;
 
 		case fex_double:
-			*(float *)ea = (float) r.val.d;
+			*(float *)ea = (float)r.val.d;
 			break;
 
 		case fex_ldouble:
-			*(float *)ea = (float) r.val.q;
+			*(float *)ea = (float)r.val.q;
 			break;
 
 		default:
 			break;
 		}
+
 		if (ex != FPE_FLTRES && (op & 8) != 0)
 			pop(uap);
+
 		return;
 
 	case 0x310:
@@ -1440,34 +1585,38 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x358:
 	case 0x390:
 	case 0x398:
+
 		if (!ea)
 			return;
+
 		switch (r.type) {
 		case fex_int:
 			*(int *)ea = r.val.i;
 			break;
 
 		case fex_llong:
-			*(int *)ea = (int) r.val.l;
+			*(int *)ea = (int)r.val.l;
 			break;
 
 		case fex_float:
-			*(int *)ea = (int) r.val.f;
+			*(int *)ea = (int)r.val.f;
 			break;
 
 		case fex_double:
-			*(int *)ea = (int) r.val.d;
+			*(int *)ea = (int)r.val.d;
 			break;
 
 		case fex_ldouble:
-			*(int *)ea = (int) r.val.q;
+			*(int *)ea = (int)r.val.q;
 			break;
 
 		default:
 			break;
 		}
+
 		if (ex != FPE_FLTRES && (op & 8) != 0)
 			pop(uap);
+
 		return;
 
 	case 0x510:
@@ -1476,19 +1625,21 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x558:
 	case 0x590:
 	case 0x598:
+
 		if (!ea)
 			return;
+
 		switch (r.type) {
 		case fex_int:
-			*(double *)ea = (double) r.val.i;
+			*(double *)ea = (double)r.val.i;
 			break;
 
 		case fex_llong:
-			*(double *)ea = (double) r.val.l;
+			*(double *)ea = (double)r.val.l;
 			break;
 
 		case fex_float:
-			*(double *)ea = (double) r.val.f;
+			*(double *)ea = (double)r.val.f;
 			break;
 
 		case fex_double:
@@ -1496,14 +1647,16 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 			break;
 
 		case fex_ldouble:
-			*(double *)ea = (double) r.val.q;
+			*(double *)ea = (double)r.val.q;
 			break;
 
 		default:
 			break;
 		}
+
 		if (ex != FPE_FLTRES && (op & 8) != 0)
 			pop(uap);
+
 		return;
 
 	case 0x710:
@@ -1512,52 +1665,60 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x758:
 	case 0x790:
 	case 0x798:
+
 		if (!ea)
 			return;
+
 		switch (r.type) {
 		case fex_int:
-			*(short *)ea = (short) r.val.i;
+			*(short *)ea = (short)r.val.i;
 			break;
 
 		case fex_llong:
-			*(short *)ea = (short) r.val.l;
+			*(short *)ea = (short)r.val.l;
 			break;
 
 		case fex_float:
-			*(short *)ea = (short) r.val.f;
+			*(short *)ea = (short)r.val.f;
 			break;
 
 		case fex_double:
-			*(short *)ea = (short) r.val.d;
+			*(short *)ea = (short)r.val.d;
 			break;
 
 		case fex_ldouble:
-			*(short *)ea = (short) r.val.q;
+			*(short *)ea = (short)r.val.q;
 			break;
 
 		default:
 			break;
 		}
+
 		if (ex != FPE_FLTRES && (op & 8) != 0)
 			pop(uap);
+
 		return;
 
 	case 0x730:
 	case 0x770:
 	case 0x7b0:
+
 		/* fbstp; don't bother */
 		if (ea && ex != FPE_FLTRES)
 			pop(uap);
+
 		return;
 
 	case 0x738:
 	case 0x778:
 	case 0x7b8:
+
 		if (!ea)
 			return;
+
 		switch (r.type) {
 		case fex_int:
-			*(long long *)ea = (long long) r.val.i;
+			*(long long *)ea = (long long)r.val.i;
 			break;
 
 		case fex_llong:
@@ -1565,41 +1726,43 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 			break;
 
 		case fex_float:
-			*(long long *)ea = (long long) r.val.f;
+			*(long long *)ea = (long long)r.val.f;
 			break;
 
 		case fex_double:
-			*(long long *)ea = (long long) r.val.d;
+			*(long long *)ea = (long long)r.val.d;
 			break;
 
 		case fex_ldouble:
-			*(long long *)ea = (long long) r.val.q;
+			*(long long *)ea = (long long)r.val.q;
 			break;
 
 		default:
 			break;
 		}
+
 		if (ex != FPE_FLTRES)
 			pop(uap);
+
 		return;
 	}
 
 	/* for all other instructions, the result goes into a register */
 	switch (r.type) {
 	case fex_int:
-		r.val.q = (long double) r.val.i;
+		r.val.q = (long double)r.val.i;
 		break;
 
 	case fex_llong:
-		r.val.q = (long double) r.val.l;
+		r.val.q = (long double)r.val.l;
 		break;
 
 	case fex_float:
-		r.val.q = (long double) r.val.f;
+		r.val.q = (long double)r.val.f;
 		break;
 
 	case fex_double:
-		r.val.q = (long double) r.val.d;
+		r.val.q = (long double)r.val.d;
 		break;
 
 	default:
@@ -1614,45 +1777,57 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x500:
 	case 0x540:
 	case 0x580:
+
 		if (ea)
 			push(r.val.q, uap);
+
 		return;
 	}
 
-	/* for all other instructions, if the exception is overflow,
-	   underflow, or inexact, the stack has already been updated */
+	/*
+	 * for all other instructions, if the exception is overflow,
+	 * underflow, or inexact, the stack has already been updated
+	 */
 	stack = (ex == FPE_FLTOVF || ex == FPE_FLTUND || ex == FPE_FLTRES);
+
 	switch (op & 0x7f8) {
-	case 0x1f0: /* oddballs */
+	case 0x1f0:			/* oddballs */
+
 		switch (op) {
-		case 0x1f1: /* fyl2x */
-		case 0x1f3: /* fpatan */
-		case 0x1f9: /* fyl2xp1 */
+		case 0x1f1:		/* fyl2x */
+		case 0x1f3:		/* fpatan */
+		case 0x1f9:		/* fyl2xp1 */
+
 			/* pop the stack, leaving the result in st */
 			if (!stack)
 				pop(uap);
+
 			fpreg(uap, 0) = r.val.q;
 			return;
 
-		case 0x1f2: /* fpatan */
+		case 0x1f2:		/* fpatan */
+
 			/* fptan pushes 1.0 afterward */
-			if (stack)
+			if (stack) {
 				fpreg(uap, 1) = r.val.q;
-			else {
+			} else {
 				fpreg(uap, 0) = r.val.q;
 				push(1.0L, uap);
 			}
+
 			return;
 
-		case 0x1f4: /* fxtract */
-		case 0x1fb: /* fsincos */
+		case 0x1f4:		/* fxtract */
+		case 0x1fb:		/* fsincos */
+
 			/* leave the supplied result in st */
-			if (stack)
+			if (stack) {
 				fpreg(uap, 0) = r.val.q;
-			else {
-				fpreg(uap, 0) = 0.0; /* punt */
+			} else {
+				fpreg(uap, 0) = 0.0;	/* punt */
 				push(r.val.q, uap);
 			}
+
 			return;
 		}
 
@@ -1675,13 +1850,15 @@ __fex_st_result(siginfo_t *sip, ucontext_t *uap, fex_info_t *info)
 	case 0x6e8:
 	case 0x6f0:
 	case 0x6f8:
+
 		/* stack is popped afterward */
-		if (stack)
+		if (stack) {
 			fpreg(uap, (op - 1) & 7) = r.val.q;
-		else {
+		} else {
 			fpreg(uap, op & 7) = r.val.q;
 			pop(uap);
 		}
+
 		return;
 
 	default:

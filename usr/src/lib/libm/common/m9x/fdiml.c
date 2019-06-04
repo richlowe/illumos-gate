@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,13 +30,15 @@
 
 #pragma weak fdiml = __fdiml
 
-#include "libm.h"	/* for islessequal macro */
+#include "libm.h"			/* for islessequal macro */
 
 long double
-__fdiml(long double x, long double y) {
+__fdiml(long double x, long double y)
+{
 	if (islessequal(x, y)) {
 		x = 0.0l;
 		y = -x;
 	}
+
 	return (x - y);
 }

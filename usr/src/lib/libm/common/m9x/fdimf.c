@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,10 +30,11 @@
 
 #pragma weak fdimf = __fdimf
 
-#include "libm.h"	/* for islessequal macro */
+#include "libm.h"			/* for islessequal macro */
 
 float
-__fdimf(float x, float y) {
+__fdimf(float x, float y)
+{
 	/*
 	 * On SPARC v8plus/v9, this could be implemented as follows
 	 * (assuming %f0 = x, %f1 = y, return value left in %f0):
@@ -49,5 +51,6 @@ __fdimf(float x, float y) {
 		x = 0.0f;
 		y = -x;
 	}
+
 	return (x - y);
 }

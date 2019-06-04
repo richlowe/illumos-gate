@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,15 +30,15 @@
 
 #pragma weak __ctanhf = ctanhf
 
-#include "libm.h"		/* expf/expm1f/fabsf/sincosf/sinf/tanhf */
+#include "libm.h"	/* expf/expm1f/fabsf/sincosf/sinf/tanhf */
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
 static const float four = 4.0F, two = 2.0F, one = 1.0F, zero = 0.0F;
-/* INDENT ON */
+
 
 fcomplex
-ctanhf(fcomplex z) {
+ctanhf(fcomplex z)
+{
 	float r, u, v, t, x, y, S, C;
 	int hx, ix, hy, iy;
 	fcomplex ans;
@@ -54,10 +55,10 @@ ctanhf(fcomplex z) {
 	if (iy == 0) {		/* ctanh(x,0) = (x,0) for x = 0 or NaN */
 		F_RE(ans) = tanhf(x);
 		F_IM(ans) = zero;
-	} else if (iy >= 0x7f800000) {	/* y is inf or NaN */
-		if (ix < 0x7f800000)	/* catanh(finite x,inf/nan) is nan */
+	} else if (iy >= 0x7f800000) { /* y is inf or NaN */
+		if (ix < 0x7f800000) { /* catanh(finite x,inf/nan) is nan */
 			F_RE(ans) = F_IM(ans) = y - y;
-		else if (ix == 0x7f800000) {	/* x is inf */
+		} else if (ix == 0x7f800000) {	/* x is inf */
 			F_RE(ans) = one;
 			F_IM(ans) = zero;
 		} else {
@@ -70,25 +71,30 @@ ctanhf(fcomplex z) {
 		 * ctanh z ~ 1 + i (sin2y)/(exp(2x))
 		 */
 		F_RE(ans) = one;
-		if (iy < 0x7f000000)	/* t = sin(2y) */
+
+		if (iy < 0x7f000000) {	/* t = sin(2y) */
 			S = sinf(y + y);
-		else {
+		} else {
 			(void) sincosf(y, &S, &C);
 			S = (S + S) * C;
 		}
-		if (ix >= 0x7f000000) {	/* |x| > max/2 */
+
+		if (ix >= 0x7f000000) {		/* |x| > max/2 */
 			if (ix >= 0x7f800000) {	/* |x| is inf or NaN */
-				if (ix > 0x7f800000)	/* x is NaN */
+				if (ix > 0x7f800000)		/* x is NaN */
 					F_RE(ans) = F_IM(ans) = x + y;
 				else
 					F_IM(ans) = zero * S;	/* x is inf */
-			} else
+			} else {
 				F_IM(ans) = S * expf(-x);	/* underflow */
-		} else
+			}
+		} else {
 			F_IM(ans) = (S + S) * expf(-(x + x));
-							/* 2 sin 2y / exp(2x) */
+		}
+
+		/* 2 sin 2y / exp(2x) */
 	} else {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 *                        t*t+2t
 		 *    ctanh z = ---------------------------
@@ -98,7 +104,7 @@ ctanhf(fcomplex z) {
 		 *              i --------------------------
 		 *                t*t+[4(t+1)(cos y)](cos y)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		(void) sincosf(y, &S, &C);
 		t = expm1f(x + x);
 		r = (four * C) * (t + one);
@@ -107,9 +113,12 @@ ctanhf(fcomplex z) {
 		F_RE(ans) = (u + two * t) * v;
 		F_IM(ans) = (r * S) * v;
 	}
+
 	if (hx < 0)
 		F_RE(ans) = -F_RE(ans);
+
 	if (hy < 0)
 		F_IM(ans) = -F_IM(ans);
+
 	return (ans);
 }

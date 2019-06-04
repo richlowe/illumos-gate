@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #include "libm.h"
 
-/* INDENT OFF */
+
 /*
  * float __k_cos(double x);
  * kernel (float) cos function on [-pi/4, pi/4], pi/4 ~ 0.785398164
@@ -52,35 +53,38 @@
  * from decimal to binary accurately enough to produce the hexadecimal values
  * shown.
  */
-/* INDENT ON */
 
 static const double q[] = {
-/* C0 = */   1.09349482127188401868272000389539985058873853699e-0003,
-/* C1 = */  -5.03324285989964979398034700054920226866107675091e-0004,
-/* C2 = */   2.43792880266971107750418061559602239831538067410e-0005,
-/* C3 = */   9.14499072605666582228127405245558035523741471271e+0002,
-/* C4 = */  -3.63151270591815439197122504991683846785293207730e+0001,
-};
+/* C0 = */
+	1.09349482127188401868272000389539985058873853699e-0003,
+/* C1 = */ -5.03324285989964979398034700054920226866107675091e-0004,
+/* C2 = */ 2.43792880266971107750418061559602239831538067410e-0005,
+/* C3 = */ 9.14499072605666582228127405245558035523741471271e+0002,
+/* C4 = */ -3.63151270591815439197122504991683846785293207730e+0001, };
 
-#define	C0	q[0]
-#define	C1	q[1]
-#define	C2	q[2]
-#define	C3	q[3]
-#define	C4	q[4]
+#define	C0		q[0]
+#define	C1		q[1]
+#define	C2		q[2]
+#define	C3		q[3]
+#define	C4		q[4]
 
 float
-__k_cosf(double x) {
+__k_cosf(double x)
+{
 	float ft;
 	double z;
 	int hx;
 
-	hx = ((int *) &x)[HIWORD];	/* hx = leading x  */
+	hx = ((int *)&x)[HIWORD];		/* hx = leading x  */
+
 	if ((hx & ~0x80000000) < 0x3f100000) {	/* |x| < 2**-14 */
-		ft = (float) 1;
-		if (((int) x) == 0)	/* raise inexact if x != 0 */
+		ft = (float)1;
+
+		if (((int)x) == 0)		/* raise inexact if x != 0 */
 			return (ft);
 	}
+
 	z = x * x;
-	ft = (float) (((C0 + z * C1) + (z * z) * C2) * (C3 + z * (C4 + z)));
+	ft = (float)(((C0 + z * C1) + (z * z) * C2) * (C3 + z * (C4 + z)));
 	return (ft);
 }

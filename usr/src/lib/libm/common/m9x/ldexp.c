@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,23 +34,27 @@
 #include <errno.h>
 
 double
-ldexp(double x, int n) {
-	int *px = (int *) &x, ix = px[HIWORD] & ~0x80000000;
+ldexp(double x, int n)
+{
+	int *px = (int *)&x, ix = px[HIWORD] & ~0x80000000;
 
 	if (ix >= 0x7ff00000 || (px[LOWORD] | ix) == 0)
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 		return (ix >= 0x7ff80000 ? x : x + x);
-		/* assumes sparc-like QNaN */
+
+	/* assumes sparc-like QNaN */
 #else
 		return (x + x);
 #endif
 	x = scalbn(x, n);
 	ix = px[HIWORD] & ~0x80000000;
+
 	/*
 	 * SVID3 requires both overflow and underflow cases to set errno
 	 * XPG3/XPG4/XPG4.2/SUSv2 requires overflow to set errno
 	 */
 	if (ix >= 0x7ff00000 || (px[LOWORD] | ix) == 0)
 		errno = ERANGE;
+
 	return (x);
 }

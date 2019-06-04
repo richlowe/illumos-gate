@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -61,16 +62,15 @@
 #include "libm.h"
 #include "longdouble.h"
 
-static const long double
-	zero	=  0.0L,
-	tiny	=  1.0e-40L,
-	one	=  1.0L,
-	half	=  0.5L,
-	PI3o4	=  2.356194490192344928846982537459627163148L,
-	PIo4	=  0.785398163397448309615660845819875721049L,
-	PIo2	=  1.570796326794896619231321691639751442099L,
-	PI	=  3.141592653589793238462643383279502884197L,
-	PI_lo	=  8.671810130123781024797044026043351968762e-35L;
+static const long double zero = 0.0L,
+	tiny = 1.0e-40L,
+	one = 1.0L,
+	half = 0.5L,
+	PI3o4 = 2.356194490192344928846982537459627163148L,
+	PIo4 = 0.785398163397448309615660845819875721049L,
+	PIo2 = 1.570796326794896619231321691639751442099L,
+	PI = 3.141592653589793238462643383279502884197L,
+	PI_lo = 8.671810130123781024797044026043351968762e-35L;
 
 long double
 atan2l(long double y, long double x)
@@ -79,26 +79,30 @@ atan2l(long double y, long double x)
 	int k, m, signy, signx;
 
 	if (x != x || y != y)
-		return (x + y);	/* return NaN if x or y is NAN */
+		return (x + y);		/* return NaN if x or y is NAN */
+
 	signy = signbitl(y);
 	signx = signbitl(x);
+
 	if (x == one)
 		return (atanl(y));
+
 	/* Ensure sign indicators are boolean */
 	m = (signy != 0) + (signx != 0) + (signx != 0);
 
 	/* when y = 0 */
-	if (y == zero)
+	if (y == zero) {
 		switch (m) {
 		case 0:
-			return (y);	/* atan(+0,+anything) */
+			return (y);		/* atan(+0,+anything) */
 		case 1:
-			return (y);	/* atan(-0,+anything) */
+			return (y);		/* atan(-0,+anything) */
 		case 2:
 			return (PI + tiny);	/* atan(+0,-anything) */
 		case 3:
 			return (-PI - tiny);	/* atan(-0,-anything) */
 		}
+	}
 
 	/* when x = 0 */
 	if (x == zero)
@@ -120,9 +124,9 @@ atan2l(long double y, long double x)
 		} else {
 			switch (m) {
 			case 0:
-				return (zero);	/* atan(+...,+INF) */
+				return (zero);		/* atan(+...,+INF) */
 			case 1:
-				return (-zero);	/* atan(-...,+INF) */
+				return (-zero);		/* atan(-...,+INF) */
 			case 2:
 				return (PI + tiny);	/* atan(+...,-INF) */
 			case 3:
@@ -130,6 +134,7 @@ atan2l(long double y, long double x)
 			}
 		}
 	}
+
 	/* when y is INF */
 	if (!finitel(y))
 		return (signy != 0 ? -PIo2 - tiny : PIo2 + tiny);
@@ -149,14 +154,15 @@ atan2l(long double y, long double x)
 
 	switch (m) {
 	case 0:
-		return (z);	/* atan(+,+) */
+		return (z);		/* atan(+,+) */
 	case 1:
-		return (-z);	/* atan(-,+) */
+		return (-z);		/* atan(-,+) */
 	case 2:
 		return (PI - (z - t));	/* atan(+,-) */
 	case 3:
 		return ((z - t) - PI);	/* atan(-,-) */
 	}
+
 	/* NOTREACHED */
 	return (0.0L);
 }

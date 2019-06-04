@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,22 +30,22 @@
 
 #include "libm.h"
 
-#define GENERIC	long double
-#define ATAN2PI	atan2pil
-#define ATAN2	atan2l
+#define	GENERIC		long double
+#define	ATAN2PI		atan2pil
+#define	ATAN2		atan2l
 
-/* ATAN2PI(y,x)
+/*
+ * ATAN2PI(y, x)
  *
- *	ATAN2PI(y,x) = ATAN2(y,x)/pi
+ *	ATAN2PI(y, x) = ATAN2(y, x) / pi
  */
 
-extern GENERIC 	ATAN2();
+extern GENERIC ATAN2();
+static GENERIC invpi =
+	(GENERIC)3.183098861837906715377675267450287240689e-0001L;
 
-static GENERIC
-invpi = (GENERIC) 3.183098861837906715377675267450287240689e-0001L;
-
-GENERIC ATAN2PI(y,x)
-GENERIC y,x;
+GENERIC
+ATAN2PI(GENERIC y, GENERIC x)
 {
-	return ATAN2(y,x)*invpi;
+	return (ATAN2(y, x) * invpi);
 }

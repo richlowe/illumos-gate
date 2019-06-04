@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,13 +39,15 @@
  * NaN.  Otherwise, it raises no exceptions.
  */
 
-#include "libm.h"	/* for islessequal macro */
+#include "libm.h"			/* for islessequal macro */
 
 double
-__fdim(double x, double y) {
+__fdim(double x, double y)
+{
 	if (islessequal(x, y)) {
 		x = 0.0;
 		y = -x;
 	}
+
 	return (x - y);
 }

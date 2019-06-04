@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,10 +30,11 @@
 
 #pragma weak fmaxl = __fmaxl
 
-#include "libm.h"	/* for isgreaterequal macro */
+#include "libm.h"			/* for isgreaterequal macro */
 
 long double
-__fmaxl(long double x, long double y) {
+__fmaxl(long double x, long double y)
+{
 	union {
 #if defined(__sparc)
 		unsigned i[4];
@@ -41,8 +43,10 @@ __fmaxl(long double x, long double y) {
 #else
 #error Unknown architecture
 #endif
+
 		long double ld;
 	} xx, yy;
+
 	unsigned s;
 
 	/* if y is nan, replace it by x */

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,7 +31,7 @@
 #pragma weak __ilogb = ilogb
 
 #include "libm.h"
-#include "xpg6.h"	/* __xpg6 */
+#include "xpg6.h"			/* __xpg6 */
 
 #if defined(__x86)
 static const double two52 = 4503599627370496.0;
@@ -39,26 +40,32 @@ static const double two52 = 4503599627370496.0;
  * v: high part of a non-zero subnormal |x|; w: low part of |x|
  */
 static int
-ilogb_subnormal(unsigned v, unsigned w) {
+ilogb_subnormal(unsigned v, unsigned w)
+{
 	int r = -1022 - 52;
 
 	if (v)
 		r += 32;
 	else
 		v = w;
+
 	if (v & 0xffff0000)
 		r += 16, v >>= 16;
+
 	if (v & 0xff00)
 		r += 8, v >>= 8;
+
 	if (v & 0xf0)
 		r += 4, v >>= 4;
+
 	v <<= 1;
 	return (r + ((0xffffaa50 >> v) & 0x3));
 }
-#endif	/* defined(__x86) */
+#endif /* defined(__x86) */
 
 static int
-raise_invalid(int v) {	/* SUSv3 requires ilogb(0,+/-Inf,NaN) raise invalid */
+raise_invalid(int v)	/* SUSv3 requires ilogb(0,+/-Inf,NaN) raise invalid */
+{
 #ifndef lint
 	if ((__xpg6 & _C99SUSv3_ilogb_0InfNaN_raises_invalid) != 0) {
 		static const double zero = 0.0;
@@ -71,13 +78,14 @@ raise_invalid(int v) {	/* SUSv3 requires ilogb(0,+/-Inf,NaN) raise invalid */
 }
 
 int
-ilogb(double x) {
-	int *px = (int *) &x, k = px[HIWORD] & ~0x80000000;
+ilogb(double x)
+{
+	int *px = (int *)&x, k = px[HIWORD] & ~0x80000000;
 
 	if (k < 0x00100000) {
-		if ((px[LOWORD] | k) == 0)
+		if ((px[LOWORD] | k) == 0) {
 			return (raise_invalid(0x80000001));
-		else {
+		} else {
 #if defined(__x86)
 			x *= two52;
 			return (((px[HIWORD] & 0x7ff00000) >> 20) - 1075);
@@ -85,8 +93,9 @@ ilogb(double x) {
 			return (ilogb_subnormal(k, px[LOWORD]));
 #endif
 		}
-	} else if (k < 0x7ff00000)
+	} else if (k < 0x7ff00000) {
 		return ((k >> 20) - 1023);
-	else
+	} else {
 		return (raise_invalid(0x7fffffff));
+	}
 }

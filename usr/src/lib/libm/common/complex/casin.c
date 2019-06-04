@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __casin = casin
 
-/* INDENT OFF */
+
 /*
  * dcomplex casin(dcomplex z);
  *
@@ -41,7 +42,7 @@
  * The principal value of complex inverse sine function casin(z),
  * where z = x+iy, can be defined by
  *
- * 	casin(z) = asin(B) + i sign(y) log (A + sqrt(A*A-1)),
+ *      casin(z) = asin(B) + i sign(y) log (A + sqrt(A*A-1)),
  *
  * where the log function is the natural log, and
  *             ____________           ____________
@@ -150,7 +151,7 @@
  *	   A = (sqrt(4+y*y)+y)/2 ~ 1 + y/2 + y^2/8 + ...
  *	and
  *	   B = 1/A = 1 - y/2 + y^2/8 + ...
- * 	Since
+ *      Since
  *	   asin(x) = pi/2-2*asin(sqrt((1-x)/2))
  *	   asin(x) = x + x^3/6 + x^5*3/40 + x^7*15/336 + ...
  *	we have, for the real part asin(B),
@@ -165,7 +166,7 @@
  *
  *  case 4. y >= (x+1)ulp(0.5). In this case, A ~ y and B ~ x/y. Thus
  *	   real part = asin(B) ~ x/y (be careful, x/y may underflow)
- * 	and
+ *      and
  *	   imag part = log(y+sqrt(y*y-one))
  *
  *
@@ -189,30 +190,28 @@
  *	              = 0.5*log(1+2y(y+sqrt(1+y^2)));
  *	              = 0.5*log1p(2y(y+A));
  *
- * 	casin(z) = asin(B) + i sign(y) log (A + sqrt(A*A-1)),
+ *      casin(z) = asin(B) + i sign(y) log (A + sqrt(A*A-1)),
  */
-/* INDENT ON */
 
-#include "libm.h"		/* asin/atan/fabs/log/log1p/sqrt */
+#include "libm.h"			/* asin/atan/fabs/log/log1p/sqrt */
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
-static const double
-	zero = 0.0,
+static const double zero = 0.0,
 	one = 1.0,
-	E = 1.11022302462515654042e-16,			/* 2**-53 */
+	E = 1.11022302462515654042e-16,	/* 2**-53 */
 	ln2 = 6.93147180559945286227e-01,
 	pi_2 = 1.570796326794896558e+00,
 	pi_2_l = 6.123233995736765886e-17,
 	pi_4 = 7.85398163397448278999e-01,
-	Foursqrtu = 5.96667258496016539463e-154,	/* 2**(-509) */
+	Foursqrtu = 5.96667258496016539463e-154, /* 2**(-509) */
 	Acrossover = 1.5,
 	Bcrossover = 0.6417,
 	half = 0.5;
-/* INDENT ON */
+
 
 dcomplex
-casin(dcomplex z) {
+casin(dcomplex z)
+{
 	double x, y, t, R, S, A, Am1, B, y2, xm1, xp1, Apx;
 	int ix, iy, hx, hy;
 	unsigned lx, ly;
@@ -232,25 +231,26 @@ casin(dcomplex z) {
 	/* special cases */
 
 	/* x is inf or NaN */
-	if (ix >= 0x7ff00000) {	/* x is inf or NaN */
+	if (ix >= 0x7ff00000) {		/* x is inf or NaN */
 		if (ISINF(ix, lx)) {	/* x is INF */
 			D_IM(ans) = x;
+
 			if (iy >= 0x7ff00000) {
 				if (ISINF(iy, ly))
 					/* casin(inf + i inf) = pi/4 + i inf */
 					D_RE(ans) = pi_4;
 				else	/* casin(inf + i NaN) = NaN  + i inf  */
 					D_RE(ans) = y + y;
-			} else	/* casin(inf + iy) = pi/2 + i inf */
+			} else { /* casin(inf + iy) = pi/2 + i inf */
 				D_RE(ans) = pi_2;
+			}
 		} else {		/* x is NaN */
 			if (iy >= 0x7ff00000) {
-				/* INDENT OFF */
+
 				/*
 				 * casin(NaN + i inf) = NaN + i inf
 				 * casin(NaN + i NaN) = NaN + i NaN
 				 */
-				/* INDENT ON */
 				D_IM(ans) = y + y;
 				D_RE(ans) = x + x;
 			} else {
@@ -258,10 +258,13 @@ casin(dcomplex z) {
 				D_IM(ans) = D_RE(ans) = x + y;
 			}
 		}
+
 		if (hx < 0)
 			D_RE(ans) = -D_RE(ans);
+
 		if (hy < 0)
 			D_IM(ans) = -D_IM(ans);
+
 		return (ans);
 	}
 
@@ -269,61 +272,67 @@ casin(dcomplex z) {
 	if ((ix | lx | iy | ly) == 0)
 		return (z);
 
-	if (iy >= 0x7ff00000) {	/* y is inf or NaN */
+	if (iy >= 0x7ff00000) {		/* y is inf or NaN */
 		if (ISINF(iy, ly)) {	/* casin(x + i inf) =  0   + i inf */
 			D_IM(ans) = y;
 			D_RE(ans) = zero;
 		} else {		/* casin(x + i NaN) = NaN  + i NaN */
 			D_IM(ans) = x + y;
+
 			if ((ix | lx) == 0)
 				D_RE(ans) = x;
 			else
 				D_RE(ans) = y;
 		}
+
 		if (hx < 0)
 			D_RE(ans) = -D_RE(ans);
+
 		if (hy < 0)
 			D_IM(ans) = -D_IM(ans);
+
 		return (ans);
 	}
 
-	if ((iy | ly) == 0) {	/* region 1: y=0 */
+	if ((iy | ly) == 0) {		/* region 1: y=0 */
 		if (ix < 0x3ff00000) {	/* |x| < 1 */
 			D_RE(ans) = asin(x);
 			D_IM(ans) = zero;
 		} else {
 			D_RE(ans) = pi_2;
-			if (ix >= 0x43500000)	/* |x| >= 2**54 */
+
+			if (ix >= 0x43500000) {		/* |x| >= 2**54 */
 				D_IM(ans) = ln2 + log(x);
-			else if (ix >= 0x3ff80000)	/* x > Acrossover */
+			} else if (ix >= 0x3ff80000) {	/* x > Acrossover */
 				D_IM(ans) = log(x + sqrt((x - one) * (x +
-					one)));
-			else {
+				    one)));
+			} else {
 				xm1 = x - one;
 				D_IM(ans) = log1p(xm1 + sqrt(xm1 * (x + one)));
 			}
 		}
 	} else if (y <= E * fabs(x - one)) {	/* region 2: y < tiny*|x-1| */
-		if (ix < 0x3ff00000) {	/* x < 1 */
+		if (ix < 0x3ff00000) {		/* x < 1 */
 			D_RE(ans) = asin(x);
 			D_IM(ans) = y / sqrt((one + x) * (one - x));
 		} else {
 			D_RE(ans) = pi_2;
-			if (ix >= 0x43500000) {	/* |x| >= 2**54 */
+
+			if (ix >= 0x43500000)		/* |x| >= 2**54 */
 				D_IM(ans) = ln2 + log(x);
-			} else if (ix >= 0x3ff80000)	/* x > Acrossover */
+			else if (ix >= 0x3ff80000)	/* x > Acrossover */
 				D_IM(ans) = log(x + sqrt((x - one) * (x +
-					one)));
+				    one)));
 			else
 				D_IM(ans) = log1p((x - one) + sqrt((x - one) *
-					(x + one)));
+				    (x + one)));
 		}
 	} else if (y < Foursqrtu) {	/* region 3 */
 		t = sqrt(y);
 		D_RE(ans) = pi_2 - (t - pi_2_l);
 		D_IM(ans) = t;
-	} else if (E * y - one >= x) {	/* region 4 */
-		D_RE(ans) = x / y;	/* need to fix underflow cases */
+	} else if (E * y - one >= x) { /* region 4 */
+		D_RE(ans) = x / y; /* need to fix underflow cases */
 		D_IM(ans) = ln2 + log(y);
 	} else if (ix >= 0x5fc00000 || iy >= 0x5fc00000) {	/* x,y>2**509 */
 		/* region 5: x+1 or y is very large (>= sqrt(max)/8) */
@@ -334,11 +343,12 @@ casin(dcomplex z) {
 		/* region 6: x is very small, < 4sqrt(min) */
 		A = sqrt(one + y * y);
 		D_RE(ans) = x / A;	/* may underflow */
+
 		if (iy >= 0x3ff80000)	/* if y > Acrossover */
 			D_IM(ans) = log(y + A);
 		else
 			D_IM(ans) = half * log1p((y + y) * (y + A));
-	} else {	/* safe region */
+	} else {			/* safe region */
 		y2 = y * y;
 		xp1 = x + one;
 		xm1 = x - one;
@@ -347,23 +357,26 @@ casin(dcomplex z) {
 		A = half * (R + S);
 		B = x / A;
 
-		if (B <= Bcrossover)
+		if (B <= Bcrossover) {
 			D_RE(ans) = asin(B);
-		else {		/* use atan and an accurate approx to a-x */
+		} else {	/* use atan and an accurate approx to a-x */
 			Apx = A + x;
+
 			if (x <= one)
 				D_RE(ans) = atan(x / sqrt(half * Apx * (y2 /
-					(R + xp1) + (S - xm1))));
+				    (R + xp1) + (S - xm1))));
 			else
 				D_RE(ans) = atan(x / (y * sqrt(half * (Apx /
-					(R + xp1) + Apx / (S + xm1)))));
+				    (R + xp1) + Apx / (S + xm1)))));
 		}
+
 		if (A <= Acrossover) {
 			/* use log1p and an accurate approx to A-1 */
 			if (x < one)
 				Am1 = half * (y2 / (R + xp1) + y2 / (S - xm1));
 			else
 				Am1 = half * (y2 / (R + xp1) + (S + xm1));
+
 			D_IM(ans) = log1p(Am1 + sqrt(Am1 * (A + one)));
 		} else {
 			D_IM(ans) = log(A + sqrt(A * A - one));
@@ -372,6 +385,7 @@ casin(dcomplex z) {
 
 	if (hx < 0)
 		D_RE(ans) = -D_RE(ans);
+
 	if (hy < 0)
 		D_IM(ans) = -D_IM(ans);
 

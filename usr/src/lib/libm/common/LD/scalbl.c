@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -39,12 +40,13 @@
 #include <sys/isa_defs.h>
 
 long double
-scalbl(long double x, long double fn) {
-	int *py = (int *) &fn, n;
+scalbl(long double x, long double fn)
+{
+	int *py = (int *)&fn, n;
 	long double z;
 
 	if (isnanl(x) || isnanl(fn))
-		return x * fn;
+		return (x * fn);
 
 	/* fn is +/-Inf */
 #if defined(_BIG_ENDIAN)
@@ -54,19 +56,22 @@ scalbl(long double x, long double fn) {
 	if ((py[2] & 0x7fff) == 0x7fff) {
 		if ((py[2] & 0x8000) != 0)
 #endif
-			return x / (-fn);
+			return (x / (-fn));
 		else
-			return x * fn;
+			return (x * fn);
 	}
+
 	if (rintl(fn) != fn)
-		return (fn - fn) / (fn - fn);
-	if (fn > 65000.0L)
+		return ((fn - fn) / (fn - fn));
+
+	if (fn > 65000.0L) {
 		z = scalbnl(x, 65000);
-	else if (-fn > 65000.0L)
+	} else if (-fn > 65000.0L) {
 		z = scalbnl(x, -65000);
-	else {
-		n = (int) fn;
+	} else {
+		n = (int)fn;
 		z = scalbnl(x, n);
 	}
-	return z;
+
+	return (z);
 }

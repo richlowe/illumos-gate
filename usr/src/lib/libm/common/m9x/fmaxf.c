@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -70,10 +71,11 @@
  *    operation exception.  Otherwise, it raises no exceptions.
  */
 
-#include "libm.h"	/* for isgreaterequal macro */
+#include "libm.h"			/* for isgreaterequal macro */
 
 float
-__fmaxf(float x, float y) {
+__fmaxf(float x, float y)
+{
 	/*
 	 * On SPARC v8plus/v9, this could be implemented as follows
 	 * (assuming %f0 = x, %f1 = y, return value left in %f0):
@@ -115,6 +117,7 @@ __fmaxf(float x, float y) {
 		unsigned i;
 		float f;
 	} xx, yy;
+
 	unsigned s;
 
 	/* if y is nan, replace it by x */

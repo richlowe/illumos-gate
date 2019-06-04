@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,6 +33,7 @@
 #include "libm.h"
 
 float
-ldexpf(float x, int n) {
+ldexpf(float x, int n)
+{
 	return (scalbnf(x, n));
 }

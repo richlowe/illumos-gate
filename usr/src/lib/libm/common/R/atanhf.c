@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,13 +35,17 @@
 static const float zero = 0.0f;
 
 float
-atanhf(float x) {
-	int	ix;
+atanhf(float x)
+{
+	int ix;
 
 	ix = *((int *)&x) & ~0x80000000;
-	if (ix > 0x3f800000)	/* |x| > 1 or x is nan */
+
+	if (ix > 0x3f800000)		/* |x| > 1 or x is nan */
 		return ((x * zero) / zero);
-	if (ix == 0x3f800000)	/* |x| == 1 */
+
+	if (ix == 0x3f800000)		/* |x| == 1 */
 		return (x / zero);
+
 	return ((float)atanh((double)x));
 }

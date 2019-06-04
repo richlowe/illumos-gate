@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,18 +32,22 @@
 
 #if defined(__sparc)
 int
-finitel(long double x) {
-	int *px = (int *) &x;
+finitel(long double x)
+{
+	int *px = (int *)&x;
+
 	return ((px[0] & ~0x80000000) < 0x7fff0000);
 }
 #elif defined(__x86)
 int
-finitel(long double x) {
-	int *px = (int *) &x, t = px[2] & 0x7fff;
+finitel(long double x)
+{
+	int *px = (int *)&x, t = px[2] & 0x7fff;
+
 #if defined(HANDLE_UNSUPPORTED)
 	return (t != 0x7fff && ((px[1] & 0x80000000) != 0 || t == 0));
 #else
 	return (t != 0x7fff);
 #endif
 }
-#endif	/* defined(__sparc) || defined(__x86) */
+#endif /* defined(__sparc) || defined(__x86) */

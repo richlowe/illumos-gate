@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,21 +33,25 @@
 #include "libm.h"
 
 float
-sinhf(float x) {
-	double	s;
-	float	w;
-	int	hx, ix;
+sinhf(float x)
+{
+	double s;
+	float w;
+	int hx, ix;
 
 	hx = *(int *)&x;
 	ix = hx & ~0x80000000;
+
 	if (ix >= 0x7f800000) {
 		/* sinhf(x) is x if x is +-Inf or NaN */
 		return (x * 1.0f);
 	}
-	if (ix >= 0x43000000)	/* sinhf(x) trivially overflows */
-		s = (hx < 0)? -1.0e100 : 1.0e100;
+
+	if (ix >= 0x43000000)		/* sinhf(x) trivially overflows */
+		s = (hx < 0) ? -1.0e100 : 1.0e100;
 	else
 		s = sinh((double)x);
+
 	w = (float)s;
 	return (w);
 }

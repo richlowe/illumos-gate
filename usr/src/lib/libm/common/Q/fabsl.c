@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,8 +33,9 @@
 #include "libm.h"
 
 long double
-fabsl(long double x) {
-	int *px = (int *) &x;
+fabsl(long double x)
+{
+	int *px = (int *)&x;
 
 	px[0] &= 0x7fffffff;
 	return (x);

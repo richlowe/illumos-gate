@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -41,48 +42,57 @@
  *	Based on fmodl() return x-[x/p]chopped*p exactly.
  */
 
-#define	HFMAX	5.948657476786158825428796633140035080982e+4931L
-#define	DBMIN	6.724206286224187012525355634643505205196e-4932L
+#define	HFMAX		5.948657476786158825428796633140035080982e+4931L
+#define	DBMIN		6.724206286224187012525355634643505205196e-4932L
 
-static const long double
-	zero = 0.0L,
+static const long double zero = 0.0L,
 	half = 0.5L,
 	hfmax = HFMAX,	/* half of the maximum number */
 	dbmin = DBMIN;	/* double of the minimum (normal) number */
 
 long double
-remainderl(long double x, long double p) {
+remainderl(long double x, long double p)
+{
 	long double hp;
 	int sx;
 
 	if (isnanl(p))
 		return (x + p);
+
 	if (!finitel(x))
 		return (x - x);
+
 	p = fabsl(p);
+
 	if (p <= hfmax)
 		x = fmodl(x, p + p);
+
 	sx = signbitl(x);
 	x = fabsl(x);
+
 	if (p < dbmin) {
 		if (x + x > p) {
 			if (x == p)
 				x = zero;
 			else
-				x -= p;	/* avoid x-x=-0 in RM mode */
+				x -= p;		/* avoid x-x=-0 in RM mode */
+
 			if (x + x >= p)
 				x -= p;
 		}
 	} else {
 		hp = half * p;
+
 		if (x > hp) {
 			if (x == p)
 				x = zero;
 			else
-				x -= p;	/* avoid x-x=-0 in RM mode */
+				x -= p;		/* avoid x-x=-0 in RM mode */
+
 			if (x >= hp)
 				x -= p;
 		}
 	}
+
 	return (sx == 0 ? x : -x);
 }

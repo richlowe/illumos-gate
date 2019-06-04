@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,37 +30,41 @@
 
 #pragma weak __lroundf = lroundf
 
-#include <sys/isa_defs.h>	/* _ILP32 */
+#include <sys/isa_defs.h>		/* _ILP32 */
 #include "libm.h"
 
 #if defined(_ILP32)
 long
-lroundf(float x) {
+lroundf(float x)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx;
+
 	unsigned hx, sx, i;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
 	sx = xx.i & 0x80000000;
+
 	if (hx < 0x4b000000) {		/* |x| < 2^23 */
-		if (hx < 0x3f800000) {		/* |x| < 1 */
+		if (hx < 0x3f800000) {	/* |x| < 1 */
 			if (hx >= 0x3f000000)
 				return (sx ? -1L : 1L);
+
 			return (0L);
 		}
 
 		/* round x at the integer bit */
 		i = 1 << (0x95 - (hx >> 23));
 		xx.i = (xx.i + i) & ~((i << 1) - 1);
-		return ((long) xx.f);
+		return ((long)xx.f);
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long) x);
+	return ((long)x);
 }
 #else
 #error Unsupported architecture
-#endif	/* defined(_ILP32) */
+#endif /* defined(_ILP32) */

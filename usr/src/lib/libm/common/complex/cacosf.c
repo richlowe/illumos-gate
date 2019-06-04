@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,14 +34,15 @@
 #include "complex_wrapper.h"
 
 fcomplex
-cacosf(fcomplex z) {
+cacosf(fcomplex z)
+{
 	dcomplex dz, dans;
 	fcomplex ans;
 
-	D_RE(dz) = (double) (F_RE(z));
-	D_IM(dz) = (double) (F_IM(z));
+	D_RE(dz) = (double)(F_RE(z));
+	D_IM(dz) = (double)(F_IM(z));
 	dans = cacos(dz);
-	F_RE(ans) = (float) (D_RE(dans));
-	F_IM(ans) = (float) (D_IM(dans));
+	F_RE(ans) = (float)(D_RE(dans));
+	F_IM(ans) = (float)(D_IM(dans));
 	return (ans);
 }

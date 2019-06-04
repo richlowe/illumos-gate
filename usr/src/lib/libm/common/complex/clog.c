@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -28,7 +30,7 @@
 
 #pragma weak clog = __clog
 
-/* INDENT OFF */
+
 /*
  * dcomplex clog(dcomplex z);
  *
@@ -58,21 +60,20 @@
  *    clog(NaN  + i inf)=  inf  + i NaN
  *    clog(NaN  + i NaN)=  NaN  + i NaN
  */
-/* INDENT ON */
 
-#include <math.h>		/* atan2/fabs/log/log1p */
+#include <math.h>			/* atan2/fabs/log/log1p */
 #include "complex_wrapper.h"
-#include "libm_protos.h"	/* __k_clog_r */
-
+#include "libm_protos.h"		/* __k_clog_r */
 
 static const double half = 0.5, one = 1.0;
 
 dcomplex
-__clog(dcomplex z) {
-	dcomplex	ans;
-	double		x, y, t, ax, ay, w;
-	int		n, ix, iy, hx, hy;
-	unsigned	lx, ly;
+__clog(dcomplex z)
+{
+	dcomplex ans;
+	double x, y, t, ax, ay, w;
+	int n, ix, iy, hx, hy;
+	unsigned lx, ly;
 
 	x = D_RE(z);
 	y = D_IM(z);
@@ -85,6 +86,7 @@ __clog(dcomplex z) {
 	ay = fabs(y);
 	ax = fabs(x);
 	D_IM(ans) = carg(z);
+
 	if (ix < iy || (ix == iy && lx < ly)) {
 		/* swap x and y to force ax >= ay */
 		t = ax;
@@ -95,8 +97,10 @@ __clog(dcomplex z) {
 		n = lx, lx = ly;
 		ly = n;
 	}
+
 	n = (ix - iy) >> 20;
-	if (ix >= 0x7ff00000) {	/* x or y is Inf or NaN */
+
+	if (ix >= 0x7ff00000) {		/* x or y is Inf or NaN */
 		if (ISINF(ix, lx))
 			D_RE(ans) = ax;
 		else if (ISINF(iy, ly))
@@ -104,7 +108,7 @@ __clog(dcomplex z) {
 		else
 			D_RE(ans) = ax * ay;
 	} else if ((iy | ly) == 0) {
-		D_RE(ans) = ((ix | lx) == 0)? -one / ax : log(ax);
+		D_RE(ans) = ((ix | lx) == 0) ? -one / ax : log(ax);
 	} else if (((0x3fffffff - ix) ^ (ix - 0x3fe00000)) >= 0) {
 		/* 0.5 <= x < 2 */
 		if (ix >= 0x3ff00000) {
@@ -113,8 +117,8 @@ __clog(dcomplex z) {
 			else if (n >= 60)
 				D_RE(ans) = log(ax);
 			else
-				D_RE(ans) = half * (log1p(ay * ay + (ax -
-				    one) * (ax + one)));
+				D_RE(ans) = half * (log1p(ay * ay + (ax - one) *
+				    (ax + one)));
 		} else if (n >= 60) {
 			D_RE(ans) = log(ax);
 		} else {
@@ -129,5 +133,6 @@ __clog(dcomplex z) {
 		t = ay / ax;
 		D_RE(ans) = log(ax) + half * log1p(t * t);
 	}
+
 	return (ans);
 }

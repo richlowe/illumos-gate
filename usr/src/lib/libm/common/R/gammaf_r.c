@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,6 +33,7 @@
 #include "libm.h"
 
 float
-gammaf_r(float x, int *signgamfp) {
+gammaf_r(float x, int *signgamfp)
+{
 	return (lgammaf_r(x, signgamfp));
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -65,12 +66,11 @@
 #if defined(__x86)
 #define	__swapRD	__swap87RD
 #endif
-extern enum fp_direction_type __swapRD(enum fp_direction_type);
 
-static const long double
-	zero	  = 0.0L,
-	ivln10    = 4.342944819032518276511289189166050822944e-0001L,
-	one	  = 1.0L,
+extern enum fp_direction_type __swapRD(enum fp_direction_type);
+static const long double zero = 0.0L,
+	ivln10 = 4.342944819032518276511289189166050822944e-0001L,
+	one = 1.0L,
 #if defined(__x86)
 	log10_2hi = 3.010299956639803653501985536422580480576e-01L,
 	log10_2lo = 8.298635403410822349787106337291183585413e-16L;
@@ -82,27 +82,33 @@ static const long double
 #endif
 
 long double
-log10l(long double x) {
+log10l(long double x)
+{
 	long double y, z;
 	enum fp_direction_type rd;
 	int n;
 
-	if (!finitel(x))
+	if (!finitel(x)) {
 		return (x + fabsl(x));	/* x is +-INF or NaN */
-	else if (x > zero) {
+	} else if (x > zero) {
 		n = ilogbl(x);
+
 		if (n < 0)
 			n += 1;
+
 		rd = __swapRD(fp_nearest);
 		y = n;
 		x = scalbnl(x, -n);
 		z = y * log10_2lo + ivln10 * logl(x);
 		z += y * log10_2hi;
+
 		if (rd != fp_nearest)
 			(void) __swapRD(rd);
+
 		return (z);
-	} else if (x == zero)	/* -INF */
+	} else if (x == zero) {		/* -INF */
 		return (-one / zero);
-	else			/* x <0, return NaN */
+	} else {			/* x <0, return NaN */
 		return (zero / zero);
+	}
 }

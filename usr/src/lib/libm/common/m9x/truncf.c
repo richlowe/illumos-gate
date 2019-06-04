@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,30 +33,34 @@
 #include "libm.h"
 
 float
-truncf(float x) {
+truncf(float x)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx;
+
 	unsigned hx, sx, i;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
 	sx = xx.i & 0x80000000;
+
 	if (hx < 0x4b000000) {		/* |x| < 2^23 */
-		if (hx < 0x3f800000)		/* |x| < 1 */
+		if (hx < 0x3f800000)	/* |x| < 1 */
 			return (sx ? -0.0F : 0.0F);
 
 		/* chop x at the integer bit */
 		i = 1 << (0x95 - (hx >> 23));
 		xx.i &= ~((i << 1) - 1);
 		return (xx.f);
-	} else if (hx < 0x7f800000)	/* |x| is integral */
+	} else if (hx < 0x7f800000) {	/* |x| is integral */
 		return (x);
-	else
+	} else {
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 		return (hx > 0x7f800000 ? x * x : x + x);
 #else
 		return (x + x);
 #endif
+	}
 }

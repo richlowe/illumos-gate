@@ -34,7 +34,6 @@
 #define	_LIBM_INLINES_H
 
 #ifdef __GNUC__
-
 #include <sys/types.h>
 #include <sys/ieeefp.h>
 
@@ -292,7 +291,5 @@ fabsf(float f)
 #ifdef __cplusplus
 }
 #endif
-
 #endif  /* __GNUC__ */
-
 #endif /* _LIBM_INLINES_H */

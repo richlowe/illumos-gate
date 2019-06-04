@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -45,27 +46,31 @@
 #include "libm.h"
 
 double
-__modf(double x, double *iptr) {
+__modf(double x, double *iptr)
+{
 	union {
 		unsigned i[2];
 		double d;
 	} xx, yy;
+
 	unsigned hx, s;
 
 	xx.d = x;
 	hx = xx.i[HIWORD] & ~0x80000000;
 
-	if (hx >= 0x43300000) {	/* x is NaN, infinite, or integral */
+	if (hx >= 0x43300000) {		/* x is NaN, infinite, or integral */
 		*iptr = x;
-		if (hx < 0x7ff00000 || (hx == 0x7ff00000 &&
-			xx.i[LOWORD] == 0)) {
+
+		if (hx < 0x7ff00000 || (hx == 0x7ff00000 && xx.i[LOWORD] ==
+		    0)) {
 			xx.i[HIWORD] &= 0x80000000;
 			xx.i[LOWORD] = 0;
 		}
+
 		return (xx.d);
 	}
 
-	if (hx < 0x3ff00000) {	/* |x| < 1 */
+	if (hx < 0x3ff00000) {		/* |x| < 1 */
 		xx.i[HIWORD] &= 0x80000000;
 		xx.i[LOWORD] = 0;
 		*iptr = xx.d;
@@ -74,18 +79,20 @@ __modf(double x, double *iptr) {
 
 	/* split x at the binary point */
 	s = xx.i[HIWORD] & 0x80000000;
+
 	if (hx < 0x41400000) {
 		yy.i[HIWORD] = xx.i[HIWORD] & ~((1 << (0x413 - (hx >> 20))) -
-			1);
+		    1);
 		yy.i[LOWORD] = 0;
 	} else {
 		yy.i[HIWORD] = xx.i[HIWORD];
 		yy.i[LOWORD] = xx.i[LOWORD] & ~((1 << (0x433 - (hx >> 20))) -
-			1);
+		    1);
 	}
+
 	*iptr = yy.d;
 	xx.d -= yy.d;
 	xx.i[HIWORD] = (xx.i[HIWORD] & ~0x80000000) | s;
-							/* keep sign of x */
+	/* keep sign of x */
 	return (xx.d);
 }

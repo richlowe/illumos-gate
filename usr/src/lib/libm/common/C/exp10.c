@@ -18,15 +18,17 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
-/* INDENT OFF */
+
 /*
  * exp10(x)
  * Code by K.C. Ng for SUN 4.0 libm.
@@ -37,13 +39,12 @@
  *	If x is an integer < 23 then use repeat multiplication. For
  *	10**22 is the largest representable integer.
  */
-/* INDENT ON */
 
 #include "libm.h"
 
 static const double C[] = {
-	3.3219280948736234787,	/* log(10)/log(2) */
-	2.3025850929940456840,	/* log(10) */
+	3.3219280948736234787,		/* log(10)/log(2) */
+	2.3025850929940456840,		/* log(10) */
 	3.0102999565860955045E-1,	/* log(2)/log(10) high */
 	5.3716447674669983622E-12,	/* log(2)/log(10) low */
 	0.0,
@@ -54,32 +55,35 @@ static const double C[] = {
 	1.0e-300,
 };
 
-#define	lg10	C[0]
-#define	ln10	C[1]
-#define	logt2hi	C[2]
-#define	logt2lo	C[3]
-#define	zero	C[4]
-#define	half	C[5]
-#define	one	C[6]
-#define	ten	C[7]
-#define	huge	C[8]
-#define	tiny	C[9]
+#define	lg10		C[0]
+#define	ln10		C[1]
+#define	logt2hi		C[2]
+#define	logt2lo		C[3]
+#define	zero		C[4]
+#define	half		C[5]
+#define	one		C[6]
+#define	ten		C[7]
+#define	huge		C[8]
+#define	tiny		C[9]
 
 double
-exp10(double x) {
-	double	t, pt;
-	int	ix, hx, k;
+exp10(double x)
+{
+	double t, pt;
+	int ix, hx, k;
 
 	ix = ((int *)&x)[HIWORD];
 	hx = ix & ~0x80000000;
 
-	if (hx >= 0x4074a000) {	/* |x| >= 330 or x is nan */
+	if (hx >= 0x4074a000) {		/* |x| >= 330 or x is nan */
 		if (hx >= 0x7ff00000) {	/* x is inf or nan */
 			if (ix == 0xfff00000 && ((int *)&x)[LOWORD] == 0)
 				return (zero);
+
 			return (x * x);
 		}
-		t = (ix < 0)? tiny : huge;
+
+		t = (ix < 0) ? tiny : huge;
 		return (t * t);
 	}
 
@@ -87,22 +91,30 @@ exp10(double x) {
 		return (one + x);
 
 	k = (int)x;
+
 	if (0 <= k && k < 23 && (double)k == x) {
 		/* x is a small positive integer */
 		t = one;
 		pt = ten;
+
 		if (k & 1)
 			t = ten;
+
 		k >>= 1;
+
 		while (k) {
 			pt *= pt;
+
 			if (k & 1)
 				t *= pt;
+
 			k >>= 1;
 		}
+
 		return (t);
 	}
+
 	t = x * lg10;
-	k = (int)((ix < 0)? t - half : t + half);
+	k = (int)((ix < 0) ? t - half : t + half);
 	return (scalbn(exp(ln10 * ((x - k * logt2hi) - k * logt2lo)), k));
 }

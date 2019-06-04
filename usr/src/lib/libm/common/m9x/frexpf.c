@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,31 +33,34 @@
 #include "libm.h"
 
 float
-__frexpf(float x, int *exp) {
+__frexpf(float x, int *exp)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx;
+
 	unsigned hx;
 	int e;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
 
-	if (hx >= 0x7f800000) { /* x is infinite or NaN */
+	if (hx >= 0x7f800000) {		/* x is infinite or NaN */
 		*exp = 0;
 		return (x);
 	}
 
 	e = 0;
-	if (hx < 0x00800000) { /* x is subnormal or zero */
+
+	if (hx < 0x00800000) {		/* x is subnormal or zero */
 		if (hx == 0) {
 			*exp = 0;
 			return (x);
 		}
 
 		/* normalize x by regarding it as an integer */
-		xx.f = (int) xx.i < 0 ? -(int) hx : (int) hx;
+		xx.f = (int)xx.i < 0 ? -(int)hx : (int)hx;
 		hx = xx.i & ~0x80000000;
 		e = -149;
 	}

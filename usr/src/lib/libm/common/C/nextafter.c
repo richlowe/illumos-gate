@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,13 +32,14 @@
 #pragma weak _nextafter = nextafter
 
 #include "libm.h"
-#include <float.h>		/* DBL_MIN */
+#include <float.h>			/* DBL_MIN */
 
 double
-nextafter(double x, double y) {
-	int		hx, hy, k;
-	double		ans;
-	unsigned	lx;
+nextafter(double x, double y)
+{
+	int hx, hy, k;
+	double ans;
+	unsigned lx;
 	volatile double dummy __unused;
 
 	hx = ((int *)&x)[HIWORD];
@@ -46,8 +49,10 @@ nextafter(double x, double y) {
 
 	if (x == y)
 		return (y);		/* C99 requirement */
+
 	if (x != x || y != y)
 		return (x * y);
+
 	if (k == 0) {			/* x = 0 */
 		k = hy & 0x80000000;
 		((int *)&ans)[HIWORD] = k;
@@ -55,25 +60,27 @@ nextafter(double x, double y) {
 	} else if (hx >= 0) {
 		if (x > y) {
 			((int *)&ans)[LOWORD] = lx - 1;
-			k = (lx == 0)? hx - 1 : hx;
+			k = (lx == 0) ? hx - 1 : hx;
 			((int *)&ans)[HIWORD] = k;
 		} else {
 			((int *)&ans)[LOWORD] = lx + 1;
-			k  = (lx == 0xffffffff)? hx + 1 : hx;
+			k = (lx == 0xffffffff) ? hx + 1 : hx;
 			((int *)&ans)[HIWORD] = k;
 		}
 	} else {
 		if (x < y) {
 			((int *)&ans)[LOWORD] = lx - 1;
-			k = (lx == 0)? hx - 1 : hx;
+			k = (lx == 0) ? hx - 1 : hx;
 			((int *)&ans)[HIWORD] = k;
 		} else {
 			((int *)&ans)[LOWORD] = lx + 1;
-			k  = (lx == 0xffffffff)? hx + 1 : hx;
+			k = (lx == 0xffffffff) ? hx + 1 : hx;
 			((int *)&ans)[HIWORD] = k;
 		}
 	}
+
 	k = (k >> 20) & 0x7ff;
+
 	if (k == 0x7ff) {
 		/* overflow */
 		return (_SVID_libm_err(x, y, 46));
@@ -83,5 +90,6 @@ nextafter(double x, double y) {
 		dummy = DBL_MIN * copysign(DBL_MIN, x);
 #endif
 	}
+
 	return (ans);
 }

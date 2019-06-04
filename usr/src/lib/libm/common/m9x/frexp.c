@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -46,11 +47,13 @@
 #include "libm.h"
 
 double
-__frexp(double x, int *exp) {
+__frexp(double x, int *exp)
+{
 	union {
 		unsigned i[2];
 		double d;
 	} xx, yy;
+
 	double t;
 	unsigned hx;
 	int e;
@@ -58,13 +61,14 @@ __frexp(double x, int *exp) {
 	xx.d = x;
 	hx = xx.i[HIWORD] & ~0x80000000;
 
-	if (hx >= 0x7ff00000) { /* x is infinite or NaN */
+	if (hx >= 0x7ff00000) {		/* x is infinite or NaN */
 		*exp = 0;
 		return (x);
 	}
 
 	e = 0;
-	if (hx < 0x00100000) { /* x is subnormal or zero */
+
+	if (hx < 0x00100000) {		/* x is subnormal or zero */
 		if ((hx | xx.i[LOWORD]) == 0) {
 			*exp = 0;
 			return (x);
@@ -88,8 +92,8 @@ __frexp(double x, int *exp) {
 		t = yy.d;
 		yy.i[HIWORD] = 0x43300000;
 		yy.i[LOWORD] = 0;
-		t -= yy.d; /* t = |x| scaled */
-		xx.d = ((int)xx.i[HIWORD] < 0)? -t : t;
+		t -= yy.d;		/* t = |x| scaled */
+		xx.d = ((int)xx.i[HIWORD] < 0) ? -t : t;
 		hx = xx.i[HIWORD] & ~0x80000000;
 		e = -1074;
 	}

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __cproj = cproj
 
-/* INDENT OFF */
+
 /*
  * dcomplex cproj(dcomplex z);
  *
@@ -38,7 +39,6 @@
  * otherwise,
  *	cproj(z) = z
  */
-/* INDENT ON */
 
 #include "libm.h"			/* fabs */
 #include "complex_wrapper.h"
@@ -46,7 +46,8 @@
 static const double zero = 0.0;
 
 dcomplex
-cproj(dcomplex z) {
+cproj(dcomplex z)
+{
 	double x, y;
 	int ix, iy, hx, hy, lx, ly;
 
@@ -58,6 +59,7 @@ cproj(dcomplex z) {
 	ly = LO_WORD(y);
 	ix = hx & 0x7fffffff;
 	iy = hy & 0x7fffffff;
+
 	if (ISINF(iy, ly)) {
 		D_RE(z) = fabs(y);
 		D_IM(z) = hy >= 0 ? zero : -zero;
@@ -65,5 +67,6 @@ cproj(dcomplex z) {
 		D_RE(z) = fabs(x);
 		D_IM(z) = hy >= 0 ? zero : -zero;
 	}
+
 	return (z);
 }

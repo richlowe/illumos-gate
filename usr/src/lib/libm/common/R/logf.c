@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -105,29 +107,30 @@ static const double C[] = {
 	-5.00000008402474976565e-01
 };
 
-#define	ln2	C[0]
-#define	K3	C[1]
-#define	K2	C[2]
-#define	K1	C[3]
+#define	ln2		C[0]
+#define	K3		C[1]
+#define	K2		C[2]
+#define	K1		C[3]
 
 float
 logf(float x)
 {
-	double	v, t;
-	float	f;
-	int	hx, ix, i, exp, iy;
+	double v, t;
+	float f;
+	int hx, ix, i, exp, iy;
 
 	hx = *(int *)&x;
 	ix = hx & ~0x80000000;
 
-	if (ix >= 0x7f800000)	/* nan or inf */
-		return ((hx < 0)? x * 0.0f : x * x);
+	if (ix >= 0x7f800000)		/* nan or inf */
+		return ((hx < 0) ? x * 0.0f : x *x);
 
 	exp = 0;
-	if (hx < 0x00800000) { /* negative, zero, or subnormal */
+
+	if (hx < 0x00800000) {		/* negative, zero, or subnormal */
 		if (hx <= 0) {
 			f = 0.0f;
-			return ((ix == 0)? -1.0f / f : f / f);
+			return ((ix == 0) ? -1.0f / f : f / f);
 		}
 
 		/* subnormal; scale by 2^149 */

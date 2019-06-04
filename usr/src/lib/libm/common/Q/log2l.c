@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -44,23 +45,28 @@
 #include "libm.h"
 #include "longdouble.h"
 
-static const long double
-	zero 	= 0.0L,
-	half	= 0.5L,
-	one	= 1.0L,
-	invln2	= 1.442695040888963407359924681001892137427e+0000L;
+static const long double zero = 0.0L,
+	half = 0.5L,
+	one = 1.0L,
+	invln2 = 1.442695040888963407359924681001892137427e+0000L;
 
 long double
-log2l(long double x) {
+log2l(long double x)
+{
 	int n;
 
 	if (x == zero || !finitel(x))
 		return (logl(x));
+
 	n = ilogbl(x);
+
 	if (n < 0)
 		n += 1;
+
 	x = scalbnl(x, -n);
+
 	if (x == half)
 		return (n - one);
+
 	return (n + invln2 * logl(x));
 }

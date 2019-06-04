@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,24 +33,29 @@
 #include "libm.h"
 
 float
-nextafterf(float x, float y) {
+nextafterf(float x, float y)
+{
 	float w;
-	int *pw = (int *) &w;
-	int *px = (int *) &x;
-	int *py = (int *) &y;
+	int *pw = (int *)&w;
+	int *px = (int *)&x;
+	int *py = (int *)&y;
 	int ix, iy, iz;
 
 	ix = px[0];
 	iy = py[0];
+
 	if ((ix & ~0x80000000) > 0x7f800000)
 		return (x * y);		/* + -> * for Cheetah */
+
 	if ((iy & ~0x80000000) > 0x7f800000)
 		return (y * x);		/* + -> * for Cheetah */
+
 	if (ix == iy || (ix | iy) == 0x80000000)
 		return (y);		/* C99 requirement */
-	if ((ix & ~0x80000000) == 0)
+
+	if ((ix & ~0x80000000) == 0) {
 		iz = 1 | (iy & 0x80000000);
-	else if (ix > 0) {
+	} else if (ix > 0) {
 		if (ix > iy)
 			iz = ix - 1;
 		else
@@ -60,20 +66,23 @@ nextafterf(float x, float y) {
 		else
 			iz = ix - 1;
 	}
+
 	pw[0] = iz;
 	ix = iz & 0x7f800000;
+
 	if (ix == 0x7f800000) {
 		/* raise overflow */
 		volatile float t;
 
-		*(int *) &t = 0x7f7fffff;
+		*(int *)&t = 0x7f7fffff;
 		t *= t;
 	} else if (ix == 0) {
 		/* raise underflow */
 		volatile float t;
 
-		*(int *) &t = 0x00800000;
+		*(int *)&t = 0x00800000;
 		t *= t;
 	}
+
 	return (w);
 }

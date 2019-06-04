@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -49,9 +50,9 @@
 #include "libm.h"
 
 static const long double zero = 0.0L, one = 1.0L;
-
 long double
-acosl(long double x) {
+acosl(long double x)
+{
 	if (isnanl(x))
 		return (x + x);
 	else if (fabsl(x) < one)
@@ -60,8 +61,8 @@ acosl(long double x) {
 		x = atan2l(one, zero);	/* x <- PI */
 	else if (x == one)
 		x = zero;
-	else {		/* |x| > 1  create invalid signal */
+	else				/* |x| > 1  create invalid signal */
 		return (zero / zero);
-	}
+
 	return (x + x);
 }

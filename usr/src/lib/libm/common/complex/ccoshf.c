@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,11 +40,12 @@ extern int __swapRP(int);
 static const float zero = 0.0F, half = 0.5F;
 
 fcomplex
-ccoshf(fcomplex z) {
-	float		t, x, y, S, C;
-	double		w;
-	int		hx, ix, hy, iy, n;
-	fcomplex	ans;
+ccoshf(fcomplex z)
+{
+	float t, x, y, S, C;
+	double w;
+	int hx, ix, hy, iy, n;
+	fcomplex ans;
 
 	x = F_RE(z);
 	y = F_IM(z);
@@ -54,7 +57,8 @@ ccoshf(fcomplex z) {
 	y = fabsf(y);
 
 	sincosf(y, &S, &C);
-	if (ix >= 0x41600000) {	/* |x| > 14 = prec/2 (14,28,34,60) */
+
+	if (ix >= 0x41600000) {		/* |x| > 14 = prec/2 (14,28,34,60) */
 		if (ix >= 0x42B171AA) {	/* |x| > 88.722... ~ log(2**128) */
 			if (ix >= 0x7f800000) {	/* |x| is inf or NaN */
 				if (iy == 0) {
@@ -69,7 +73,7 @@ ccoshf(fcomplex z) {
 				}
 			} else {
 #if defined(__i386) && !defined(__amd64)
-				int	rp = __swapRP(fp_extended);
+				int rp = __swapRP(fp_extended);
 #endif
 				/* return (C, S) * exp(x) / 2 */
 				w = __k_cexp((double)x, &n);
@@ -86,7 +90,7 @@ ccoshf(fcomplex z) {
 			F_IM(ans) = S * t;
 		}
 	} else {
-		if (ix == 0) {	/* x = 0, return (C,0) */
+		if (ix == 0) {		/* x = 0, return (C,0) */
 			F_RE(ans) = C;
 			F_IM(ans) = zero;
 		} else {
@@ -94,7 +98,9 @@ ccoshf(fcomplex z) {
 			F_IM(ans) = S * sinhf(x);
 		}
 	}
+
 	if ((hx ^ hy) < 0)
 		F_IM(ans) = -F_IM(ans);
+
 	return (ans);
 }

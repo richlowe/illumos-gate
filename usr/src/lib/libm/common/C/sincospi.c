@@ -22,12 +22,12 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
-/* INDENT OFF */
 /*
  * void sincospi(double x, double *s, double *c)
  * *s = sin(pi*x); *c = cos(pi*x);
@@ -77,11 +77,11 @@
 #include <sunmath.h>
 #endif
 
-static const double
-	pi 	= 3.14159265358979323846,	/* 400921FB,54442D18 */
+/* BEGIN CSTYLEd */
+static const double pi = 3.14159265358979323846,	/* 400921FB,54442D18 */
 	sqrth_h = 0.70710678118654757273731092936941422522068023681640625,
 	sqrth_l = -4.8336466567264565185935844299127932213411660131004e-17;
-/* INDENT ON */
+/* END CSTYLED */
 
 void
 sincospi(double x, double *s, double *c)
@@ -93,6 +93,7 @@ sincospi(double x, double *s, double *c)
 
 	ix = hx & ~0x80000000;
 	n = (ix >> 20) - 0x3ff;
+
 	if (n >= 51) {			/* |x| >= 2**51 */
 		if (n >= 1024) {
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
@@ -121,23 +122,24 @@ sincospi(double x, double *s, double *c)
 					*s = 1.0;
 					*c = 0.0;
 				}
+
 				if ((lx & 2) != 0) {
 					*s = -*s;
 					*c = -*c;
 				}
 			}
 		}
-	} else if (n < -2)	/* |x| < 0.25 */
+	} else if (n < -2) {		/* |x| < 0.25 */
 		*s = __k_sincos(pi * fabs(x), 0.0, c);
-	else {
+	} else {
 		/* y = |4x|, z = floor(y), and n = (int)(z mod 8.0) */
-		if (ix < 0x41C00000) {		/* |x| < 2**29 */
+		if (ix < 0x41C00000) {	/* |x| < 2**29 */
 			y = 4.0 * fabs(x);
-			n = (int)y;		/* exact */
+			n = (int)y;	/* exact */
 			z = (double)n;
 			k = z == y;
 			t = (y - z) * 0.25;
-		} else {			/* 2**29 <= |x| < 2**51 */
+		} else {		/* 2**29 <= |x| < 2**51 */
 			y = fabs(x);
 			k = 50 - n;
 			n = lx >> k;
@@ -147,7 +149,8 @@ sincospi(double x, double *s, double *c)
 			k = h == lx;
 			t = y - z;
 		}
-		if (k) {			/* x = N/4 */
+
+		if (k) {		/* x = N/4 */
 			if ((n & 1) != 0) {
 				*s = *c = sqrth_h + sqrth_l;
 			} else {
@@ -159,23 +162,29 @@ sincospi(double x, double *s, double *c)
 					*c = 0.0;
 				}
 			}
+
 			if ((n & 4) != 0)
 				*s = -*s;
+
 			if (((n + 1) & 4) != 0)
 				*c = -*c;
 		} else {
 			if ((n & 1) != 0)
 				t = 0.25 - t;
+
 			if (((n + (n & 1)) & 2) == 0)
 				*s = __k_sincos(pi * t, 0.0, c);
 			else
 				*c = __k_sincos(pi * t, 0.0, s);
+
 			if ((n & 4) != 0)
 				*s = -*s;
+
 			if (((n + 2) & 4) != 0)
 				*c = -*c;
 		}
 	}
+
 	if (hx < 0)
 		*s = -*s;
 }

@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -28,25 +30,28 @@
 
 #pragma weak __carg = carg
 
-#include <math.h>		/* atan2 */
+#include <math.h>			/* atan2 */
 #include "complex_wrapper.h"
 
-static const double
-	pi	= 3.14159265358979311600e+00,
-	pi_lo	= 1.22464679914735320717e-16;
+static const double pi = 3.14159265358979311600e+00,
+	pi_lo = 1.22464679914735320717e-16;
 
 double
-carg(dcomplex z) {
-	int	ix, iy;
+carg(dcomplex z)
+{
+	int ix, iy;
 
 	ix = ((int *)&(D_RE(z)))[HIWORD];
 	iy = ((int *)&(D_IM(z)))[HIWORD];
+
 	if ((((ix | iy) & ~0x80000000) | ((int *)&(D_RE(z)))[LOWORD] |
 	    ((int *)&(D_IM(z)))[LOWORD]) == 0) {
 		/* x and y are both zero */
 		if (ix == 0)
 			return (D_IM(z));
-		return ((iy == 0)? pi + pi_lo : -pi - pi_lo);
+
+		return ((iy == 0) ? pi + pi_lo : -pi - pi_lo);
 	}
+
 	return (atan2(D_IM(z), D_RE(z)));
 }

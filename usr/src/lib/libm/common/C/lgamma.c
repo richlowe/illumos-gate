@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,20 +35,24 @@
 extern int signgam;
 
 double
-lgamma(double x) {
-	double	g;
+lgamma(double x)
+{
+	double g;
 
 	if (!finite(x))
 		return (x * x);
 
 	g = rint(x);
+
 	if (x == g && x <= 0.0) {
 		signgam = 1;
 		return (_SVID_libm_err(x, x, 15));
 	}
 
 	g = __k_lgamma(x, &signgam);
+
 	if (!finite(g))
-	    g = _SVID_libm_err(x, x, 14);
+		g = _SVID_libm_err(x, x, 14);
+
 	return (g);
 }

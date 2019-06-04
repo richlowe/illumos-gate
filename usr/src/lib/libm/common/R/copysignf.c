@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,9 +33,10 @@
 #include "libm.h"
 
 float
-copysignf(float x, float y) {
+copysignf(float x, float y)
+{
 	float w;
 
-	*(int *) &w = (*(int *) &x & ~0x80000000) | (*(int *) &y & 0x80000000);
+	*(int *)&w = (*(int *)&x & ~0x80000000) | (*(int *)&y & 0x80000000);
 	return (w);
 }

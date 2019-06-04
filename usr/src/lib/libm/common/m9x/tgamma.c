@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,14 +30,14 @@
 
 #pragma weak __tgamma = tgamma
 
-/* INDENT OFF */
+/* BEGIN CSTYLED */
 /*
  * True gamma function
  * double tgamma(double x)
  *
  * Error:
  * ------
- *  	Less that one ulp for both positive and negative arguments.
+ *      Less that one ulp for both positive and negative arguments.
  *
  * Algorithm:
  * ---------
@@ -45,7 +46,7 @@
  *		(2) Underflow Threshold
  *		(3) Reduction to gamma(1+x)
  *	B: For x between 1 and 2
- * 	C: For x between 0 and 1
+ *      C: For x between 0 and 1
  *	D: For x between 2 and 8
  *	E: Overflow thresold {see over.c}
  *	F: For overflow_threshold >= x >= 8
@@ -93,9 +94,9 @@
  *	   (II)  t = 0.5-z   when 0.31830...  <= z < 0.681690...
  *	   (III) t = 1-z     when 0.681690... <= z < 1.00000
  *	and correspondingly
- *	   (I)   kpsin(z) = kpsin(t)  	... 0<= z < 0.3184
- *	   (II)  kpsin(z) = kpcos(t) 	... |t|   < 0.182
- *	   (III) kpsin(z) = kpsin(t) 	... 0<= t < 0.3184
+ *	   (I)   kpsin(z) = kpsin(t)    ... 0<= z < 0.3184
+ *	   (II)  kpsin(z) = kpcos(t)    ... |t|   < 0.182
+ *	   (III) kpsin(z) = kpsin(t)    ... 0<= t < 0.3184
  *
  *	Using a special Remez algorithm, we obtain the following polynomial
  *	approximation for kpsin(t) for 0<=t<0.3184:
@@ -144,7 +145,7 @@
  *
  *	Computation note: in simulating higher precision arithmetic, kcpsin
  *	return head = t and tail = kc[0]*t^3 + (...) to maintain extra bits
- *   	precision.
+ *      precision.
  *
  *	And for kpcos(t) for |t|< 0.183:
  *
@@ -192,19 +193,19 @@
  *	For z in (I)
  *                                    k+1
  *			          (-1)
- * 		gamma(-x) = ------------------- ;
+ *              gamma(-x) = ------------------- ;
  *		            kpsin(z)*gamma(1+x)
  *
  *	otherwise, for z in (II),
  *                                      k+1
  *			            (-1)
- * 		gamma(-x) = ----------------------- ;
+ *              gamma(-x) = ----------------------- ;
  *			    kpcos(0.5-z)*gamma(1+x)
  *
  *	otherwise, for z in (III),
  *                                      k+1
  *			            (-1)
- * 		gamma(-x) = --------------------- .
+ *              gamma(-x) = --------------------- .
  *		            kpsin(1-z)*gamma(1+x)
  *
  *	Thus, the computation of gamma(-x) reduced to the computation of
@@ -212,11 +213,11 @@
  *
  * (B) For x between 1 and 2.  We break [1,2] into three parts:
  *	GT1 = [1.0000, 1.2845]
- * 	GT2 = [1.2844, 1.6374]
- * 	GT3 = [1.6373, 2.0000]
+ *      GT2 = [1.2844, 1.6374]
+ *      GT3 = [1.6373, 2.0000]
  *
  *    For x in GTi, i=1,2,3, let
- * 	z1  =  1.134861805732790769689793935774652917006
+ *      z1  =  1.134861805732790769689793935774652917006
  *	gz1 = gamma(z1)  =   0.9382046279096824494097535615803269576988
  *	tz1 = gamma'(z1) =  -0.3517214357852935791015625000000000000000
  *
@@ -320,7 +321,7 @@
  *       p3[4] =   1.76308239242717268530498313416899188157165183405e-0002
  *
  *    Coefficents: Double precision
- * 	i = 1:
+ *      i = 1:
  *       p1[0]   =   0.70908683619977797008004927192814648151397705078125000
  *       p1[1]   =   1.71987061393048558089579513384356441668351720061e-0001
  *       p1[2]   =  -3.19273345791990970293320316122813960527705450671e-0002
@@ -332,7 +333,7 @@
  *       q1[3]   =  -1.19345944932265559769719470515102012246995255372e-0001
  *       q1[4]   =   1.59913445751425002620935120470781382215050284762e-0002
  *	 q1[5]   =   1.12601136853374984566572691306402321911547550783e-0003
- * 	i = 2:
+ *      i = 2:
  *       p2[0]   =   0.42848681585558601181418225678498856723308563232421875
  *       p2[1]   =   6.53596762668970816023718845105667418483122103629e-0002
  *       p2[2]   =  -6.97280829631212931321050770925128264272768936731e-0003
@@ -344,7 +345,7 @@
  *       q2[4]   =   2.43574726993169566475227642128830141304953840502e-0002
  *       q2[5]   =  -5.20390406466942525358645957564897411258667085501e-0003
  *       q2[6]   =   4.79520251383279837635552431988023256031951133885e-0004
- * 	i = 3:
+ *      i = 3:
  *	 p3[0]   =   0.382409479734567459008331979930517263710498809814453125
  *       p3[1]   =   1.42876048697668161599069814043449301572928034140e-0001
  *       p3[2]   =   3.42157571052250536817923866013561760785748899071e-0003
@@ -361,7 +362,7 @@
  *    special Remez Algorithm.
  *
  *    Coefficents: Quad precision
- * 	i = 1:
+ *      i = 1:
  *       p1[0] =   0.709086836199777919037185741507610124611513720557
  *       p1[1] =   4.45754781206489035827915969367354835667391606951e-0001
  *       p1[2] =   3.21049298735832382311662273882632210062918153852e-0002
@@ -382,7 +383,7 @@
  *       q1[7] =  -3.12653708152290867248931925120380729518332507388e-0004
  *       q1[8] =   2.36672170850409745237358105667757760527014332458e-0005
  *
- * 	i = 2:
+ *      i = 2:
  *       p2[0] =   0.428486815855585429730209907810650616737756697477
  *       p2[1] =   2.63622124067885222919192651151581541943362617352e-0001
  *       p2[2] =   3.85520683670028865731877276741390421744971446855e-0002
@@ -443,7 +444,7 @@
  *	  0 <  --- - gamma(x) <= ---  -  ----------- < 0.578
  *              x                 x      x(1+0.578x)
  *                                     1       1                        -P
- * 	The error is thus bounded by --- ulp(---) + 0.578. Since x <= 2   ,
+ *      The error is thus bounded by --- ulp(---) + 0.578. Since x <= 2   ,
  *                                     2       x
  *       1      P       1           P                                      1
  *	--- >= 2 , ulp(---) >= ulp(2  ) >= 2. Thus 0.578=0.289*2<=0.289ulp(-)
@@ -458,7 +459,7 @@
  *                            n                             1
  *	except only when x = 2 , (n<= -53). In such cases, --- is exact
  *                                                          x
- * 	and therefore the error is bounded by
+ *      and therefore the error is bounded by
  *                         1
  *		0.298*ulp(---) = 0.298*2*ulp(gamma(x)) = 0.578ulp(gamma(x)).
  *                         x
@@ -542,10 +543,10 @@
  *    The range of L1,L2, and L3 are as follows:
  *
  *	------------------------------------------------------------------
- *  	Range(L1) =  (single) [8.09..,88.30..]	 =[2** 3.01..,2**  6.46..]
+ *      Range(L1) =  (single) [8.09..,88.30..]	 =[2** 3.01..,2**  6.46..]
  *                   (double) [8.09..,709.3..]   =[2** 3.01..,2**  9.47..]
  *		     (quad)   [8.09..,11356.10..]=[2** 3.01..,2** 13.47..]
- *  	Range(L2) = 0.41893853.....
+ *      Range(L2) = 0.41893853.....
  *	Range(L3) = [0.0104...., 0.00048....]	 =[2**-6.58..,2**-11.02..]
  *	------------------------------------------------------------------
  *
@@ -612,7 +613,7 @@
  *    For T3, let s = --------; then ----- =  ----- and
  *                     y+z(i)         z(i)     1-s
  *                1+s           2   3    2   5
- *    	T3 = log(-----) = 2s + --- s  + --- s  + ....
+ *      T3 = log(-----) = 2s + --- s  + --- s  + ....
  *                1-s           3        5
  *
  *    Suppose the first term 2s is compute in extra precision. The
@@ -674,7 +675,7 @@
  *	    see "tgammal_log"
  *
  *   The computation of 0.5*(ln(2pi)-1):
- *   	0.5*(ln(2pi)-1) =  0.4189385332046727417803297364056176398614...
+ *      0.5*(ln(2pi)-1) =  0.4189385332046727417803297364056176398614...
  *	split 0.5*(ln(2pi)-1) to hln2pi_h + hln2pi_l, where hln2pi_h is the
  *	leading 21 bits of the constant.
  *	    hln2pi_h= 0.4189383983612060546875
@@ -736,7 +737,7 @@
  *	  = z*(GP0+(z4*(GP2+z4*(GP4+z4*GP6))+z2*(GP1+z4*(GP3+z4*(GP5+z4*GP7)))))
  *
  *   Adding everything up:
- *	t = rr.h*ww.h+hln2pi_h      		... exact
+ *	t = rr.h*ww.h+hln2pi_h                  ... exact
  *	w = (hln2pi_l + ((x-0.5)*ww.l+rr.l*ww.h)) + p
  *
  *   Computing exp(t+w):
@@ -747,11 +748,12 @@
  *	Remez error bound:
  *	|exp(r) - (1+r+Et1*r^2+...+Et5*r^6)| <= 2^(-63).
  */
+/* END CSTYLED */
 
 #include "libm.h"
 
-#define	__HI(x)	((int *) &x)[HIWORD]
-#define	__LO(x)	((unsigned *) &x)[LOWORD]
+#define	__HI(x)		((int *)&x)[HIWORD]
+#define	__LO(x)		((unsigned *)&x)[LOWORD]
 
 struct Double {
 	double h;
@@ -764,10 +766,10 @@ static const double c[] = {
 	+2.0,
 	+0.5,
 	+1.0e-300,
-	+6.66666666666666740682e-01,				/* A1=T3[0] */
-	+3.99999999955626478023093908674902212920e-01,		/* A2=T3[1] */
-	+2.85720221533145659809237398709372330980e-01,		/* A3=T3[2] */
-	+0.0833333333333333287074040640618477,			/* GP[0] */
+	+6.66666666666666740682e-01,	/* A1=T3[0] */
+	+3.99999999955626478023093908674902212920e-01,	/* A2=T3[1] */
+	+2.85720221533145659809237398709372330980e-01,	/* A3=T3[2] */
+	+0.0833333333333333287074040640618477,		/* GP[0] */
 	-2.77777777776649355200565611114627670089130772843e-03,
 	+7.93650787486083724805476194170211775784158551509e-04,
 	-5.95236628558314928757811419580281294593903582971e-04,
@@ -788,32 +790,32 @@ static const double c[] = {
 	+1.38889201930843436040204096950052984793587640227e-03,	/* Et5 */
 };
 
-#define	one	  c[0]
-#define	two	  c[1]
-#define	half	  c[2]
-#define	tiny	  c[3]
-#define	A1	  c[4]
-#define	A2	  c[5]
-#define	A3	  c[6]
-#define	GP0	  c[7]
-#define	GP1	  c[8]
-#define	GP2	  c[9]
-#define	GP3	  c[10]
-#define	GP4	  c[11]
-#define	GP5	  c[12]
-#define	GP6	  c[13]
-#define	GP7	  c[14]
-#define	hln2pi_h  c[15]
-#define	hln2pi_l  c[16]
-#define	hln2pi	  c[17]
-#define	ln2_32hi  c[18]
-#define	ln2_32lo  c[19]
-#define	invln2_32 c[20]
-#define	Et1	  c[21]
-#define	Et2	  c[22]
-#define	Et3	  c[23]
-#define	Et4	  c[24]
-#define	Et5	  c[25]
+#define	one		c[0]
+#define	two		c[1]
+#define	half		c[2]
+#define	tiny		c[3]
+#define	A1		c[4]
+#define	A2		c[5]
+#define	A3		c[6]
+#define	GP0		c[7]
+#define	GP1		c[8]
+#define	GP2		c[9]
+#define	GP3		c[10]
+#define	GP4		c[11]
+#define	GP5		c[12]
+#define	GP6		c[13]
+#define	GP7		c[14]
+#define	hln2pi_h	c[15]
+#define	hln2pi_l	c[16]
+#define	hln2pi		c[17]
+#define	ln2_32hi	c[18]
+#define	ln2_32lo	c[19]
+#define	invln2_32	c[20]
+#define	Et1		c[21]
+#define	Et2		c[22]
+#define	Et3		c[23]
+#define	Et4		c[24]
+#define	Et5		c[25]
 
 /*
  * double precision coefficients for computing log(x)-1 in tgamma.
@@ -990,73 +992,73 @@ static const double T2[] = {
 
 /* S[j],S_trail[j] = 2**(j/32.) for the final computation of exp(t+w) */
 static const double S[] = {
-	+1.00000000000000000000e+00,	/* 3FF0000000000000 */
-	+1.02189714865411662714e+00,	/* 3FF059B0D3158574 */
-	+1.04427378242741375480e+00,	/* 3FF0B5586CF9890F */
-	+1.06714040067682369717e+00,	/* 3FF11301D0125B51 */
-	+1.09050773266525768967e+00,	/* 3FF172B83C7D517B */
-	+1.11438674259589243221e+00,	/* 3FF1D4873168B9AA */
-	+1.13878863475669156458e+00,	/* 3FF2387A6E756238 */
-	+1.16372485877757747552e+00,	/* 3FF29E9DF51FDEE1 */
-	+1.18920711500272102690e+00,	/* 3FF306FE0A31B715 */
-	+1.21524735998046895524e+00,	/* 3FF371A7373AA9CB */
-	+1.24185781207348400201e+00,	/* 3FF3DEA64C123422 */
-	+1.26905095719173321989e+00,	/* 3FF44E086061892D */
-	+1.29683955465100964055e+00,	/* 3FF4BFDAD5362A27 */
-	+1.32523664315974132322e+00,	/* 3FF5342B569D4F82 */
-	+1.35425554693689265129e+00,	/* 3FF5AB07DD485429 */
-	+1.38390988196383202258e+00,	/* 3FF6247EB03A5585 */
-	+1.41421356237309514547e+00,	/* 3FF6A09E667F3BCD */
-	+1.44518080697704665027e+00,	/* 3FF71F75E8EC5F74 */
-	+1.47682614593949934623e+00,	/* 3FF7A11473EB0187 */
-	+1.50916442759342284141e+00,	/* 3FF82589994CCE13 */
-	+1.54221082540794074411e+00,	/* 3FF8ACE5422AA0DB */
-	+1.57598084510788649659e+00,	/* 3FF93737B0CDC5E5 */
-	+1.61049033194925428347e+00,	/* 3FF9C49182A3F090 */
-	+1.64575547815396494578e+00,	/* 3FFA5503B23E255D */
-	+1.68179283050742900407e+00,	/* 3FFAE89F995AD3AD */
-	+1.71861929812247793414e+00,	/* 3FFB7F76F2FB5E47 */
-	+1.75625216037329945351e+00,	/* 3FFC199BDD85529C */
-	+1.79470907500310716820e+00,	/* 3FFCB720DCEF9069 */
-	+1.83400808640934243066e+00,	/* 3FFD5818DCFBA487 */
-	+1.87416763411029996256e+00,	/* 3FFDFC97337B9B5F */
-	+1.91520656139714740007e+00,	/* 3FFEA4AFA2A490DA */
-	+1.95714412417540017941e+00,	/* 3FFF50765B6E4540 */
+	+1.00000000000000000000e+00, /* 3FF0000000000000 */
+	+1.02189714865411662714e+00, /* 3FF059B0D3158574 */
+	+1.04427378242741375480e+00, /* 3FF0B5586CF9890F */
+	+1.06714040067682369717e+00, /* 3FF11301D0125B51 */
+	+1.09050773266525768967e+00, /* 3FF172B83C7D517B */
+	+1.11438674259589243221e+00, /* 3FF1D4873168B9AA */
+	+1.13878863475669156458e+00, /* 3FF2387A6E756238 */
+	+1.16372485877757747552e+00, /* 3FF29E9DF51FDEE1 */
+	+1.18920711500272102690e+00, /* 3FF306FE0A31B715 */
+	+1.21524735998046895524e+00, /* 3FF371A7373AA9CB */
+	+1.24185781207348400201e+00, /* 3FF3DEA64C123422 */
+	+1.26905095719173321989e+00, /* 3FF44E086061892D */
+	+1.29683955465100964055e+00, /* 3FF4BFDAD5362A27 */
+	+1.32523664315974132322e+00, /* 3FF5342B569D4F82 */
+	+1.35425554693689265129e+00, /* 3FF5AB07DD485429 */
+	+1.38390988196383202258e+00, /* 3FF6247EB03A5585 */
+	+1.41421356237309514547e+00, /* 3FF6A09E667F3BCD */
+	+1.44518080697704665027e+00, /* 3FF71F75E8EC5F74 */
+	+1.47682614593949934623e+00, /* 3FF7A11473EB0187 */
+	+1.50916442759342284141e+00, /* 3FF82589994CCE13 */
+	+1.54221082540794074411e+00, /* 3FF8ACE5422AA0DB */
+	+1.57598084510788649659e+00, /* 3FF93737B0CDC5E5 */
+	+1.61049033194925428347e+00, /* 3FF9C49182A3F090 */
+	+1.64575547815396494578e+00, /* 3FFA5503B23E255D */
+	+1.68179283050742900407e+00, /* 3FFAE89F995AD3AD */
+	+1.71861929812247793414e+00, /* 3FFB7F76F2FB5E47 */
+	+1.75625216037329945351e+00, /* 3FFC199BDD85529C */
+	+1.79470907500310716820e+00, /* 3FFCB720DCEF9069 */
+	+1.83400808640934243066e+00, /* 3FFD5818DCFBA487 */
+	+1.87416763411029996256e+00, /* 3FFDFC97337B9B5F */
+	+1.91520656139714740007e+00, /* 3FFEA4AFA2A490DA */
+	+1.95714412417540017941e+00, /* 3FFF50765B6E4540 */
 };
 
 static const double S_trail[] = {
 	+0.00000000000000000000e+00,
-	+5.10922502897344389359e-17,	/* 3C8D73E2A475B465 */
-	+8.55188970553796365958e-17,	/* 3C98A62E4ADC610A */
-	-7.89985396684158212226e-17,	/* BC96C51039449B3A */
-	-3.04678207981247114697e-17,	/* BC819041B9D78A76 */
-	+1.04102784568455709549e-16,	/* 3C9E016E00A2643C */
-	+8.91281267602540777782e-17,	/* 3C99B07EB6C70573 */
-	+3.82920483692409349872e-17,	/* 3C8612E8AFAD1255 */
-	+3.98201523146564611098e-17,	/* 3C86F46AD23182E4 */
-	-7.71263069268148813091e-17,	/* BC963AEABF42EAE2 */
-	+4.65802759183693679123e-17,	/* 3C8ADA0911F09EBC */
-	+2.66793213134218609523e-18,	/* 3C489B7A04EF80D0 */
-	+2.53825027948883149593e-17,	/* 3C7D4397AFEC42E2 */
-	-2.85873121003886075697e-17,	/* BC807ABE1DB13CAC */
-	+7.70094837980298946162e-17,	/* 3C96324C054647AD */
-	-6.77051165879478628716e-17,	/* BC9383C17E40B497 */
-	-9.66729331345291345105e-17,	/* BC9BDD3413B26456 */
-	-3.02375813499398731940e-17,	/* BC816E4786887A99 */
-	-3.48399455689279579579e-17,	/* BC841577EE04992F */
-	-1.01645532775429503911e-16,	/* BC9D4C1DD41532D8 */
-	+7.94983480969762085616e-17,	/* 3C96E9F156864B27 */
-	-1.01369164712783039808e-17,	/* BC675FC781B57EBC */
-	+2.47071925697978878522e-17,	/* 3C7C7C46B071F2BE */
-	-1.01256799136747726038e-16,	/* BC9D2F6EDB8D41E1 */
-	+8.19901002058149652013e-17,	/* 3C97A1CD345DCC81 */
-	-1.85138041826311098821e-17,	/* BC75584F7E54AC3B */
-	+2.96014069544887330703e-17,	/* 3C811065895048DD */
-	+1.82274584279120867698e-17,	/* 3C7503CBD1E949DB */
-	+3.28310722424562658722e-17,	/* 3C82ED02D75B3706 */
-	-6.12276341300414256164e-17,	/* BC91A5CD4F184B5C */
-	-1.06199460561959626376e-16,	/* BC9E9C23179C2893 */
-	+8.96076779103666776760e-17,	/* 3C99D3E12DD8A18B */
+	+5.10922502897344389359e-17, /* 3C8D73E2A475B465 */
+	+8.55188970553796365958e-17, /* 3C98A62E4ADC610A */
+	-7.89985396684158212226e-17, /* BC96C51039449B3A */
+	-3.04678207981247114697e-17, /* BC819041B9D78A76 */
+	+1.04102784568455709549e-16, /* 3C9E016E00A2643C */
+	+8.91281267602540777782e-17, /* 3C99B07EB6C70573 */
+	+3.82920483692409349872e-17, /* 3C8612E8AFAD1255 */
+	+3.98201523146564611098e-17, /* 3C86F46AD23182E4 */
+	-7.71263069268148813091e-17, /* BC963AEABF42EAE2 */
+	+4.65802759183693679123e-17, /* 3C8ADA0911F09EBC */
+	+2.66793213134218609523e-18, /* 3C489B7A04EF80D0 */
+	+2.53825027948883149593e-17, /* 3C7D4397AFEC42E2 */
+	-2.85873121003886075697e-17, /* BC807ABE1DB13CAC */
+	+7.70094837980298946162e-17, /* 3C96324C054647AD */
+	-6.77051165879478628716e-17, /* BC9383C17E40B497 */
+	-9.66729331345291345105e-17, /* BC9BDD3413B26456 */
+	-3.02375813499398731940e-17, /* BC816E4786887A99 */
+	-3.48399455689279579579e-17, /* BC841577EE04992F */
+	-1.01645532775429503911e-16, /* BC9D4C1DD41532D8 */
+	+7.94983480969762085616e-17, /* 3C96E9F156864B27 */
+	-1.01369164712783039808e-17, /* BC675FC781B57EBC */
+	+2.47071925697978878522e-17, /* 3C7C7C46B071F2BE */
+	-1.01256799136747726038e-16, /* BC9D2F6EDB8D41E1 */
+	+8.19901002058149652013e-17, /* 3C97A1CD345DCC81 */
+	-1.85138041826311098821e-17, /* BC75584F7E54AC3B */
+	+2.96014069544887330703e-17, /* 3C811065895048DD */
+	+1.82274584279120867698e-17, /* 3C7503CBD1E949DB */
+	+3.28310722424562658722e-17, /* 3C82ED02D75B3706 */
+	-6.12276341300414256164e-17, /* BC91A5CD4F184B5C */
+	-1.06199460561959626376e-16, /* BC9E9C23179C2893 */
+	+8.96076779103666776760e-17, /* 3C99D3E12DD8A18B */
 };
 
 /* Primary interval GTi() */
@@ -1099,42 +1101,41 @@ static const double cr[] = {
 	-2.12950201683609187927899416700094630764182477464e-0003,
 };
 
-#define	P10   cr[0]
-#define	P11   cr[1]
-#define	P12   cr[2]
-#define	P13   cr[3]
-#define	P14   cr[4]
-#define	Q10   cr[5]
-#define	Q11   cr[6]
-#define	Q12   cr[7]
-#define	Q13   cr[8]
-#define	Q14   cr[9]
-#define	Q15   cr[10]
-#define	P20   cr[11]
-#define	P21   cr[12]
-#define	P22   cr[13]
-#define	P23   cr[14]
-#define	Q20   cr[15]
-#define	Q21   cr[16]
-#define	Q22   cr[17]
-#define	Q23   cr[18]
-#define	Q24   cr[19]
-#define	Q25   cr[20]
-#define	Q26   cr[21]
-#define	P30   cr[22]
-#define	P31   cr[23]
-#define	P32   cr[24]
-#define	P33   cr[25]
-#define	P34   cr[26]
-#define	Q30   cr[27]
-#define	Q31   cr[28]
-#define	Q32   cr[29]
-#define	Q33   cr[30]
-#define	Q34   cr[31]
-#define	Q35   cr[32]
+#define	P10		cr[0]
+#define	P11		cr[1]
+#define	P12		cr[2]
+#define	P13		cr[3]
+#define	P14		cr[4]
+#define	Q10		cr[5]
+#define	Q11		cr[6]
+#define	Q12		cr[7]
+#define	Q13		cr[8]
+#define	Q14		cr[9]
+#define	Q15		cr[10]
+#define	P20		cr[11]
+#define	P21		cr[12]
+#define	P22		cr[13]
+#define	P23		cr[14]
+#define	Q20		cr[15]
+#define	Q21		cr[16]
+#define	Q22		cr[17]
+#define	Q23		cr[18]
+#define	Q24		cr[19]
+#define	Q25		cr[20]
+#define	Q26		cr[21]
+#define	P30		cr[22]
+#define	P31		cr[23]
+#define	P32		cr[24]
+#define	P33		cr[25]
+#define	P34		cr[26]
+#define	Q30		cr[27]
+#define	Q31		cr[28]
+#define	Q32		cr[29]
+#define	Q33		cr[30]
+#define	Q34		cr[31]
+#define	Q35		cr[32]
 
-static const double
-	GZ1_h = +0.938204627909682398190,
+static const double GZ1_h = +0.938204627909682398190,
 	GZ1_l = +5.121952600248205157935e-17,
 	GZ2_h = +0.885603194410888749921,
 	GZ2_l = -4.964236872556339810692e-17,
@@ -1142,80 +1143,88 @@ static const double
 	GZ3_l = -2.541923110834479415023e-17,
 	TZ1 = -0.3517214357852935791015625,
 	TZ3 = +0.280530631542205810546875;
-/* INDENT ON */
 
-/* compute gamma(y=yh+yl) for y in GT1 = [1.0000, 1.2845] */
-/* assume yh got 20 significant bits */
+/*
+ * compute gamma(y=yh+yl) for y in GT1 = [1.0000, 1.2845]
+ * assume yh got 20 significant bits
+ */
 static struct Double
-GT1(double yh, double yl) {
+GT1(double yh, double yl)
+{
 	double t3, t4, y, z;
 	struct Double r;
 
 	y = yh + yl;
 	z = y * y;
-	t3 = (z * (P10 + y * ((P11 + y * P12) + z * (P13 + y * P14)))) /
-		(Q10 + y * ((Q11 + y * Q12) + z * ((Q13 + Q14 * y) + z * Q15)));
+	t3 = (z * (P10 + y * ((P11 + y * P12) + z * (P13 + y * P14)))) / (Q10 +
+	    y * ((Q11 + y * Q12) + z * ((Q13 + Q14 * y) + z * Q15)));
 	t3 += (TZ1 * yl + GZ1_l);
 	t4 = TZ1 * yh;
-	r.h = (double) ((float) (t4 + GZ1_h + t3));
+	r.h = (double)((float)(t4 + GZ1_h + t3));
 	t3 += (t4 - (r.h - GZ1_h));
 	r.l = t3;
 	return (r);
 }
 
-/* compute gamma(y=yh+yl) for y in GT2 = [1.2844, 1.6374] */
-/* assume yh got 20 significant bits */
+/*
+ * compute gamma(y=yh+yl) for y in GT2 = [1.2844, 1.6374]
+ * assume yh got 20 significant bits
+ */
 static struct Double
-GT2(double yh, double yl) {
+GT2(double yh, double yl)
+{
 	double t3, y, z;
 	struct Double r;
 
 	y = yh + yl;
 	z = y * y;
-	t3 = (z * (P20 + y * P21 + z * (P22 + y * P23))) /
-		(Q20 + (y * ((Q21 + Q22 * y) + z * Q23) +
-		(z * z) * ((Q24 + Q25 * y) + z * Q26))) + GZ2_l;
-	r.h = (double) ((float) (GZ2_h + t3));
+	t3 = (z * (P20 + y * P21 + z * (P22 + y * P23))) / (Q20 + (y * ((Q21 +
+	    Q22 * y) + z * Q23) + (z * z) * ((Q24 + Q25 * y) + z * Q26))) +
+	    GZ2_l;
+	r.h = (double)((float)(GZ2_h + t3));
 	r.l = t3 - (r.h - GZ2_h);
 	return (r);
 }
 
-/* compute gamma(y=yh+yl) for y in GT3 = [1.6373, 2.0000] */
-/* assume yh got 20 significant bits */
+/*
+ * compute gamma(y=yh+yl) for y in GT3 = [1.6373, 2.0000]
+ * assume yh got 20 significant bits
+ */
 static struct Double
-GT3(double yh, double yl) {
+GT3(double yh, double yl)
+{
 	double t3, t4, y, z;
 	struct Double r;
 
 	y = yh + yl;
 	z = y * y;
-	t3 = (z * (P30 + y * ((P31 + y * P32) + z * (P33 + y * P34)))) /
-		(Q30 + y * ((Q31 + y * Q32) + z * ((Q33 + Q34 * y) + z * Q35)));
+	t3 = (z * (P30 + y * ((P31 + y * P32) + z * (P33 + y * P34)))) / (Q30 +
+	    y * ((Q31 + y * Q32) + z * ((Q33 + Q34 * y) + z * Q35)));
 	t3 += (TZ3 * yl + GZ3_l);
 	t4 = TZ3 * yh;
-	r.h = (double) ((float) (t4 + GZ3_h + t3));
+	r.h = (double)((float)(t4 + GZ3_h + t3));
 	t3 += (t4 - (r.h - GZ3_h));
 	r.l = t3;
 	return (r);
 }
 
-/* INDENT OFF */
+
 /*
  * return tgamma(x) scaled by 2**-m for 8<x<=171.62... using Stirling's formula
  *     log(G(x)) ~= (x-.5)*(log(x)-1) + .5(log(2*pi)-1) + (1/x)*P(1/(x*x))
  *                = L1 + L2 + L3,
  */
-/* INDENT ON */
 static struct Double
-large_gam(double x, int *m) {
-	double z, t1, t2, t3, z2, t5, w, y, u, r, z4, v, t24 = 16777216.0,
-		p24 = 1.0 / 16777216.0;
+large_gam(double x, int *m)
+{
+	double z, t1, t2, t3, z2, t5, w, y, u, r, z4, v, t24 = 16777216.0, p24 =
+	    1.0 / 16777216.0;
 	int n2, j2, k, ix, j;
 	unsigned lx;
 	struct Double zz;
 	double u2, ss_h, ss_l, r_h, w_h, w_l, t4;
 
-/* INDENT OFF */
+
 /*
  * compute ss = ss.h+ss.l = log(x)-1 (see tgamma_log.h for details)
  *
@@ -1239,36 +1248,37 @@ large_gam(double x, int *m) {
  *                       -------------------------------------------
  *                          [leading] + [Trailing]
  */
-/* INDENT ON */
 	ix = __HI(x);
 	lx = __LO(x);
-	n2 = (ix >> 20) - 0x3ff;	/* exponent of x, range:3-7 */
-	n2 += n2;			/* 2n */
+	n2 = (ix >> 20) - 0x3ff;		/* exponent of x, range:3-7 */
+	n2 += n2;				/* 2n */
 	ix = (ix & 0x000fffff) | 0x3ff00000;	/* y = scale x to [1,2] */
 	__HI(y) = ix;
 	__LO(y) = lx;
 	__HI(z) = (ix & 0xffffc000) | 0x2000;	/* z[j]=1+j/64+1/128 */
 	__LO(z) = 0;
-	j2 = (ix >> 13) & 0x7e;	/* 2j */
+	j2 = (ix >> 13) & 0x7e;			/* 2j */
 	t1 = y + z;
 	t2 = y - z;
 	r = one / t1;
-	t1 = (double) ((float) t1);
-	u = r * t2;		/* u = (y-z)/(y+z) */
+	t1 = (double)((float)t1);
+	u = r * t2;			/* u = (y-z)/(y+z) */
 	t4 = T2[j2 + 1] + T1[n2 + 1];
 	z2 = u * u;
 	k = __HI(u) & 0x7fffffff;
 	t3 = T2[j2] + T1[n2];
+
 	if ((k >> 20) < 0x3ec) {	/* |u|<2**-19 */
 		t2 = t4 + u * ((two + z2 * A1) + (z2 * z2) * (A2 + z2 * A3));
 	} else {
 		t5 = t4 + u * (z2 * A1 + (z2 * z2) * (A2 + z2 * A3));
 		u2 = u + u;
-		v = (double) ((int) (u2 * t24)) * p24;
+		v = (double)((int)(u2 * t24)) * p24;
 		t2 = t5 + r * ((two * t2 - v * t1) - v * (y - (t1 - z)));
 		t3 += v;
 	}
-	ss_h = (double) ((float) (t2 + t3));
+
+	ss_h = (double)((float)(t2 + t3));
 	ss_l = t2 - (ss_h - t3);
 
 	/*
@@ -1277,7 +1287,7 @@ large_gam(double x, int *m) {
 	 */
 	z = one / x;
 	r = x - half;
-	r_h = (double) ((float) r);
+	r_h = (double)((float)r);
 	w_h = r_h * ss_h + hln2pi_h;
 	z2 = z * z;
 	w = (r - r_h) * ss_h + r * ss_l;
@@ -1287,12 +1297,12 @@ large_gam(double x, int *m) {
 	t1 += t2;
 	w += hln2pi_l;
 	w_l = z * (GP0 + t1) + w;
-	k = (int) ((w_h + w_l) * invln2_32 + half);
+	k = (int)((w_h + w_l) * invln2_32 + half);
 
 	/* compute the exponential of w_h+w_l */
 	j = k & 0x1f;
 	*m = (k >> 5);
-	t3 = (double) k;
+	t3 = (double)k;
 
 	/* perform w - k*ln2_32 (represent as w_h - w_l) */
 	t1 = w_h - t3 * ln2_32hi;
@@ -1312,7 +1322,7 @@ large_gam(double x, int *m) {
 	return (zz);
 }
 
-/* INDENT OFF */
+
 /*
  * kpsin(x)= sin(pi*x)/pi
  *                 3        5        7        9        11        13        15
@@ -1327,11 +1337,11 @@ static const double ks[] = {
 	+1.48413292290051695897242899977121846763824221705e-0004,
 	-6.87730769637543488108688726777687262485357072242e-0006,
 };
-/* INDENT ON */
 
 /* assume x is not tiny and positive */
 static struct Double
-kpsin(double x) {
+kpsin(double x)
+{
 	double z, t1, t2, t3, t4;
 	struct Double xx;
 
@@ -1340,13 +1350,13 @@ kpsin(double x) {
 	t1 = z * x;
 	t2 = z * z;
 	t4 = t1 * ks[0];
-	t3 = (t1 * z) * ((ks[1] + z * ks[2] + t2 * ks[3]) + (z * t2) *
-		(ks[4] + z * ks[5] + t2 * ks[6]));
+	t3 = (t1 * z) * ((ks[1] + z * ks[2] + t2 * ks[3]) + (z * t2) * (ks[4] +
+	    z * ks[5] + t2 * ks[6]));
 	xx.l = t4 + t3;
 	return (xx);
 }
 
-/* INDENT OFF */
+
 /*
  * kpcos(x)= cos(pi*x)/pi
  *                     2        4        6        8        10        12
@@ -1354,9 +1364,9 @@ kpsin(double x) {
  */
 
 static const double one_pi_h = 0.318309886183790635705292970,
-		one_pi_l = 3.583247455607534006714276420e-17;
+	one_pi_l = 3.583247455607534006714276420e-17;
 static const double npi_2_h = -1.5625,
-		npi_2_l = -0.00829632679489661923132169163975055099555883223;
+	npi_2_l = -0.00829632679489661923132169163975055099555883223;
 static const double kc[] = {
 	-1.57079632679489661923132169163975055099555883223e+0000,
 	+1.29192819501230224953283586722575766189551966008e+0000,
@@ -1365,99 +1375,101 @@ static const double kc[] = {
 	-8.21442040906099210866977352284054849051348692715e-0003,
 	+6.10411356829515414575566564733632532333904115968e-0004,
 };
-/* INDENT ON */
 
 /* assume x is not tiny and positive */
 static struct Double
-kpcos(double x) {
+kpcos(double x)
+{
 	double z, t1, t2, t3, t4, x4, x8;
 	struct Double xx;
 
 	z = x * x;
 	xx.h = one_pi_h;
-	t1 = (double) ((float) x);
+	t1 = (double)((float)x);
 	x4 = z * z;
 	t2 = npi_2_l * z + npi_2_h * (x + t1) * (x - t1);
-	t3 = one_pi_l + x4 * ((kc[1] + z * kc[2]) + x4 * (kc[3] + z *
-		kc[4] + x4 * kc[5]));
-	t4 = t1 * t1;	/* 48 bits mantissa */
+	t3 = one_pi_l + x4 * ((kc[1] + z * kc[2]) + x4 * (kc[3] + z * kc[4] +
+	    x4 * kc[5]));
+	t4 = t1 * t1;		/* 48 bits mantissa */
 	x8 = t2 + t3;
-	t4 *= npi_2_h;	/* npi_2_h is 5 bits const. The product is exact */
-	xx.l = x8 + t4;	/* that will minimized the rounding error in xx.l */
+	t4 *= npi_2_h;	  /* npi_2_h is 5 bits const. The product is exact */
+	xx.l = x8 + t4;	  /* that will minimized the rounding error in xx.l */
 	return (xx);
 }
 
-/* INDENT OFF */
 static const double
-	/* 0.134861805732790769689793935774652917006 */
-	t0z1   =  0.1348618057327907737708,
+/* 0.134861805732790769689793935774652917006 */
+	t0z1 = 0.1348618057327907737708,
 	t0z1_l = -4.0810077708578299022531e-18,
-	/* 0.461632144968362341262659542325721328468 */
-	t0z2   =  0.4616321449683623567850,
+/* 0.461632144968362341262659542325721328468 */
+	t0z2 = 0.4616321449683623567850,
 	t0z2_l = -1.5522348162858676890521e-17,
-	/* 0.819773101100500601787868704921606996312 */
-	t0z3   =  0.8197731011005006118708,
+/* 0.819773101100500601787868704921606996312 */
+	t0z3 = 0.8197731011005006118708,
 	t0z3_l = -1.0082945122487103498325e-17;
-	/* 1.134861805732790769689793935774652917006 */
-/* INDENT ON */
+
+/*
+ * 1.134861805732790769689793935774652917006
+ */
 
 /* gamma(x+i) for 0 <= x < 1  */
 static struct Double
-gam_n(int i, double x) {
-	struct Double rr = {0.0L, 0.0L}, yy;
+gam_n(int i, double x)
+{
+	struct Double rr = { 0.0L, 0.0L }, yy;
 	double r1, r2, t2, z, xh, xl, yh, yl, zh, z1, z2, zl, x5, wh, wl;
 
 	/* compute yy = gamma(x+1) */
 	if (x > 0.2845) {
 		if (x > 0.6374) {
 			r1 = x - t0z3;
-			r2 = (double) ((float) (r1 - t0z3_l));
+			r2 = (double)((float)(r1 - t0z3_l));
 			t2 = r1 - r2;
 			yy = GT3(r2, t2 - t0z3_l);
 		} else {
 			r1 = x - t0z2;
-			r2 = (double) ((float) (r1 - t0z2_l));
+			r2 = (double)((float)(r1 - t0z2_l));
 			t2 = r1 - r2;
 			yy = GT2(r2, t2 - t0z2_l);
 		}
 	} else {
 		r1 = x - t0z1;
-		r2 = (double) ((float) (r1 - t0z1_l));
+		r2 = (double)((float)(r1 - t0z1_l));
 		t2 = r1 - r2;
 		yy = GT1(r2, t2 - t0z1_l);
 	}
 
 	/* compute gamma(x+i) = (x+i-1)*...*(x+1)*yy, 0<i<8 */
 	switch (i) {
-	case 0:		/* yy/x */
+	case 0:					/* yy/x */
 		r1 = one / x;
-		xh = (double) ((float) x);	/* x is not tiny */
-		rr.h = (double) ((float) ((yy.h + yy.l) * r1));
-		rr.l = r1 * (yy.h - rr.h * xh) -
-			((r1 * rr.h) * (x - xh) - r1 * yy.l);
+		xh = (double)((float)x);	/* x is not tiny */
+		rr.h = (double)((float)((yy.h + yy.l) * r1));
+		rr.l = r1 * (yy.h - rr.h * xh) - ((r1 * rr.h) * (x - xh) - r1 *
+		    yy.l);
 		break;
-	case 1:		/* yy */
+	case 1:				/* yy */
 		rr.h = yy.h;
 		rr.l = yy.l;
 		break;
-	case 2:		/* (x+1)*yy */
-		z = x + one;	/* may not be exact */
-		zh = (double) ((float) z);
+	case 2:				/* (x+1)*yy */
+		z = x + one;		/* may not be exact */
+		zh = (double)((float)z);
 		rr.h = zh * yy.h;
 		rr.l = z * yy.l + (x - (zh - one)) * yy.h;
 		break;
-	case 3:		/* (x+2)*(x+1)*yy */
+	case 3:				/* (x+2)*(x+1)*yy */
 		z1 = x + one;
 		z2 = x + 2.0;
 		z = z1 * z2;
-		xh = (double) ((float) z);
-		zh = (double) ((float) z1);
+		xh = (double)((float)z);
+		zh = (double)((float)z1);
 		xl = (x - (zh - one)) * (z2 + zh) - (xh - zh * (zh + one));
 		rr.h = xh * yy.h;
 		rr.l = z * yy.l + xl * yy.h;
 		break;
 
-	case 4:		/* (x+1)*(x+3)*(x+2)*yy */
+	case 4:				/* (x+1)*(x+3)*(x+2)*yy */
 		z1 = x + 2.0;
 		z2 = (x + one) * (x + 3.0);
 		zh = z1;
@@ -1465,71 +1477,79 @@ gam_n(int i, double x) {
 		__HI(zh) &= 0xfffffff8;	/* zh 18 bits mantissa */
 		zl = x - (zh - 2.0);
 		z = z1 * z2;
-		xh = (double) ((float) z);
+		xh = (double)((float)z);
 		xl = zl * (z2 + zh * (z1 + zh)) - (xh - zh * (zh * zh - one));
 		rr.h = xh * yy.h;
 		rr.l = z * yy.l + xl * yy.h;
 		break;
-	case 5:		/* ((x+1)*(x+4)*(x+2)*(x+3))*yy */
+	case 5:				/* ((x+1)*(x+4)*(x+2)*(x+3))*yy */
 		z1 = x + 2.0;
 		z2 = x + 3.0;
 		z = z1 * z2;
-		zh = (double) ((float) z1);
-		yh = (double) ((float) z);
+		zh = (double)((float)z1);
+		yh = (double)((float)z);
 		yl = (x - (zh - 2.0)) * (z2 + zh) - (yh - zh * (zh + one));
 		z2 = z - 2.0;
 		z *= z2;
-		xh = (double) ((float) z);
+		xh = (double)((float)z);
 		xl = yl * (z2 + yh) - (xh - yh * (yh - 2.0));
 		rr.h = xh * yy.h;
 		rr.l = z * yy.l + xl * yy.h;
 		break;
-	case 6:		/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5))*yy */
+	case 6:				/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5))*yy */
 		z1 = x + 2.0;
 		z2 = x + 3.0;
 		z = z1 * z2;
-		zh = (double) ((float) z1);
-		yh = (double) ((float) z);
+		zh = (double)((float)z1);
+		yh = (double)((float)z);
 		z1 = x - (zh - 2.0);
 		yl = z1 * (z2 + zh) - (yh - zh * (zh + one));
 		z2 = z - 2.0;
 		x5 = x + 5.0;
 		z *= z2;
-		xh = (double) ((float) z);
+		xh = (double)((float)z);
 		zh += 3.0;
 		xl = yl * (z2 + yh) - (xh - yh * (yh - 2.0));
-						/* xh+xl=(x+1)*...*(x+4) */
-		/* wh+wl=(x+5)*yy */
-		wh = (double) ((float) (x5 * (yy.h + yy.l)));
+
+		/*
+		 * xh+xl=(x+1)*...*(x+4)
+		 * wh+wl=(x+5)*yy
+		 */
+		wh = (double)((float)(x5 * (yy.h + yy.l)));
 		wl = (z1 * yy.h + x5 * yy.l) - (wh - zh * yy.h);
 		rr.h = wh * xh;
 		rr.l = z * wl + xl * wh;
 		break;
-	case 7:		/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5)*(x+6))*yy */
+	case 7:			/* ((x+1)*(x+2)*(x+3)*(x+4)*(x+5)*(x+6))*yy */
 		z1 = x + 3.0;
 		z2 = x + 4.0;
 		z = z2 * z1;
-		zh = (double) ((float) z1);
-		yh = (double) ((float) z);	/* yh+yl = (x+3)(x+4) */
+		zh = (double)((float)z1);
+		yh = (double)((float)z);	/* yh+yl = (x+3)(x+4) */
 		yl = (x - (zh - 3.0)) * (z2 + zh) - (yh - (zh * (zh + one)));
 		z1 = x + 6.0;
-		z2 = z - 2.0;	/* z2 = (x+2)*(x+5) */
+		z2 = z - 2.0;			/* z2 = (x+2)*(x+5) */
 		z *= z2;
-		xh = (double) ((float) z);
+		xh = (double)((float)z);
 		xl = yl * (z2 + yh) - (xh - yh * (yh - 2.0));
-						/* xh+xl=(x+2)*...*(x+5) */
-		/* wh+wl=(x+1)(x+6)*yy */
-		z2 -= 4.0;	/* z2 = (x+1)(x+6) */
-		wh = (double) ((float) (z2 * (yy.h + yy.l)));
+
+		/*
+		 * xh+xl=(x+2)*...*(x+5)
+		 * wh+wl=(x+1)(x+6)*yy
+		 */
+		z2 -= 4.0;		/* z2 = (x+1)(x+6) */
+		wh = (double)((float)(z2 * (yy.h + yy.l)));
 		wl = (z2 * yy.l + yl * yy.h) - (wh - (yh - 6.0) * yy.h);
 		rr.h = wh * xh;
 		rr.l = z * wl + xl * wh;
 	}
+
 	return (rr);
 }
 
 double
-tgamma(double x) {
+tgamma(double x)
+{
 	struct Double ss, ww;
 	double t, t1, t2, t3, t4, t5, w, y, z, z1, z2, z3, z5;
 	int i, j, k, m, ix, hx, xk;
@@ -1542,28 +1562,34 @@ tgamma(double x) {
 
 	if (ix < 0x3ca00000)
 		return (one / x);	/* |x| < 2**-53 */
+
 	if (ix >= 0x7ff00000)
-			/* +Inf -> +Inf, -Inf or NaN -> NaN */
-		return (x * ((hx < 0)? 0.0 : x));
-	if (hx > 0x406573fa ||	/* x > 171.62... overflow to +inf */
+		/* +Inf -> +Inf, -Inf or NaN -> NaN */
+		return (x * ((hx < 0) ? 0.0 : x));
+
+	if (hx > 0x406573fa ||		/* x > 171.62... overflow to +inf */
 	    (hx == 0x406573fa && lx > 0xE561F647)) {
 		z = x / tiny;
 		return (z * z);
 	}
-	if (hx >= 0x40200000) {	/* x >= 8 */
+
+	if (hx >= 0x40200000) {		/* x >= 8 */
 		ww = large_gam(x, &m);
 		w = ww.h + ww.l;
 		__HI(w) += m << 20;
 		return (w);
 	}
-	if (hx > 0) {		/* 0 < x < 8 */
-		i = (int) x;
-		ww = gam_n(i, x - (double) i);
+
+	if (hx > 0) {			/* 0 < x < 8 */
+		i = (int)x;
+		ww = gam_n(i, x - (double)i);
 		return (ww.h + ww.l);
 	}
 
-	/* negative x */
-	/* INDENT OFF */
+	/*
+	 * negative x
+	 */
+
 	/*
 	 * compute: xk =
 	 *	-2 ... x is an even int (-inf is even)
@@ -1571,8 +1597,8 @@ tgamma(double x) {
 	 *	+0 ... x is not an int but chopped to an even int
 	 *	+1 ... x is not an int but chopped to an odd int
 	 */
-	/* INDENT ON */
 	xk = 0;
+
 	if (ix >= 0x43300000) {
 		if (ix >= 0x43400000)
 			xk = -2;
@@ -1580,31 +1606,36 @@ tgamma(double x) {
 			xk = -2 + (lx & 1);
 	} else if (ix >= 0x3ff00000) {
 		k = (ix >> 20) - 0x3ff;
+
 		if (k > 20) {
 			j = lx >> (52 - k);
+
 			if ((j << (52 - k)) == lx)
 				xk = -2 + (j & 1);
 			else
 				xk = j & 1;
 		} else {
 			j = ix >> (20 - k);
+
 			if ((j << (20 - k)) == ix && lx == 0)
 				xk = -2 + (j & 1);
 			else
 				xk = j & 1;
 		}
 	}
+
 	if (xk < 0)
 		/* ideally gamma(-n)= (-1)**(n+1) * inf, but c99 expect NaN */
-		return ((x - x) / (x - x));		/* 0/0 = NaN */
-
+		return ((x - x) / (x - x));	/* 0/0 = NaN */
 
 	/* negative underflow thresold */
 	if (ix > 0x4066e000 || (ix == 0x4066e000 && lx > 11)) {
 		/* x < -183.0 - 11ulp */
 		z = tiny / x;
+
 		if (xk == 1)
 			z = -z;
+
 		return (z * tiny);
 	}
 
@@ -1615,15 +1646,18 @@ tgamma(double x) {
 	 * gamma(x) = 1/(ss*gamma(1+y))
 	 */
 	y = -x;
-	j = (int) y;
-	z = y - (double) j;
-	if (z > 0.3183098861837906715377675)
+	j = (int)y;
+	z = y - (double)j;
+
+	if (z > 0.3183098861837906715377675) {
 		if (z > 0.6816901138162093284622325)
 			ss = kpsin(one - z);
 		else
 			ss = kpcos(0.5 - z);
-	else
+	} else {
 		ss = kpsin(z);
+	}
+
 	if (xk == 0) {
 		ss.h = -ss.h;
 		ss.l = -ss.l;
@@ -1631,14 +1665,17 @@ tgamma(double x) {
 
 	/* Then compute ww = gamma(1+y), note that result scale to 2**m */
 	m = 0;
+
 	if (j < 7) {
 		ww = gam_n(j + 1, z);
 	} else {
 		w = y + one;
+
 		if ((lx & 1) == 0) {	/* y+1 exact (note that y<184) */
 			ww = large_gam(w, &m);
 		} else {
 			t = w - one;
+
 			if (t == y) {	/* y+one exact */
 				ww = large_gam(w, &m);
 			} else {	/* use y*gamma(y) */
@@ -1646,10 +1683,11 @@ tgamma(double x) {
 					ww = gam_n(j, z);
 				else
 					ww = large_gam(y, &m);
+
 				t4 = ww.h + ww.l;
-				t1 = (double) ((float) y);
-				t2 = (double) ((float) t4);
-						/* t4 will not be too large */
+				t1 = (double)((float)y);
+				t2 = (double)((float)t4);
+				/* t4 will not be too large */
 				ww.l = y * (ww.l - (t2 - ww.h)) + (y - t1) * t2;
 				ww.h = t1 * t2;
 			}
@@ -1659,17 +1697,17 @@ tgamma(double x) {
 	/* compute 1/(ss*ww) */
 	t3 = ss.h + ss.l;
 	t4 = ww.h + ww.l;
-	t1 = (double) ((float) t3);
-	t2 = (double) ((float) t4);
+	t1 = (double)((float)t3);
+	t2 = (double)((float)t4);
 	z1 = ss.l - (t1 - ss.h);	/* (t1,z1) = ss */
 	z2 = ww.l - (t2 - ww.h);	/* (t2,z2) = ww */
 	t3 = t3 * t4;			/* t3 = ss*ww */
 	z3 = one / t3;			/* z3 = 1/(ss*ww) */
 	t5 = t1 * t2;
 	z5 = z1 * t4 + t1 * z2;		/* (t5,z5) = ss*ww */
-	t1 = (double) ((float) t3);	/* (t1,z1) = ss*ww */
+	t1 = (double)((float)t3);	/* (t1,z1) = ss*ww */
 	z1 = z5 - (t1 - t5);
-	t2 = (double) ((float) z3);	/* leading 1/(ss*ww) */
+	t2 = (double)((float)z3);	/* leading 1/(ss*ww) */
 	z2 = z3 * (t2 * z1 - (one - t2 * t1));
 	z = t2 - z2;
 
@@ -1679,6 +1717,7 @@ tgamma(double x) {
 		i = hx & 0x80000000;
 		ix = hx ^ i;
 		j = ix >> 20;
+
 		if (j > m) {
 			ix -= m << 20;
 			__HI(z) = ix ^ i;
@@ -1698,5 +1737,6 @@ tgamma(double x) {
 			z *= t;
 		}
 	}
+
 	return (z);
 }

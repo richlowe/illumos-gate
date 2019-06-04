@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,29 +33,34 @@
 #include "libm.h"
 
 static const long double
-	ln2	= 6.931471805599453094172321214581765680755e-0001L,
-	one	= 1.0L,
-	big	= 1.0e+20L,
-	tiny	= 1.0e-20L;
+	ln2 = 6.931471805599453094172321214581765680755e-0001L,
+	one = 1.0L,
+	big = 1.0e+20L,
+	tiny = 1.0e-20L;
 
 long double
-asinhl(long double x) {
+asinhl(long double x)
+{
 	long double t, w;
+
 #ifndef lint
 	volatile long double dummy;
 #endif
 
 	w = fabsl(x);
+
 	if (isnanl(x))
-		return (x + x);	/* x is NaN */
+		return (x + x);		/* x is NaN */
+
 	if (w < tiny) {
 #ifndef lint
 		dummy = x + big;	/* inexact if x != 0 */
 #endif
-		return (x);	/* tiny x */
+		return (x);		/* tiny x */
 	} else if (w < big) {
 		t = one / w;
 		return (copysignl(log1pl(w + w / (t + sqrtl(one + t * t))), x));
-	} else
+	} else {
 		return (copysignl(logl(w) + ln2, x));
+	}
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,7 +34,8 @@
 #include "complex_wrapper.h"
 
 ldcomplex
-casinhl(ldcomplex z) {
+casinhl(ldcomplex z)
+{
 	ldcomplex w, r, ans;
 
 	LD_RE(w) = -LD_IM(z);

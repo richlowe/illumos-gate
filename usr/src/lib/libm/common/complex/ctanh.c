@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __ctanh = ctanh
 
-/* INDENT OFF */
+
 /*
  * dcomplex ctanh(dcomplex z);
  *
@@ -87,15 +88,15 @@
  *      ctanh(NaN,y) = (NaN,NaN) for non-zero y
  *      ctanh(NaN,NaN) = (NaN,NaN)
  */
-/* INDENT ON */
 
-#include "libm.h"		/* exp/expm1/fabs/sin/tanh/sincos */
+#include "libm.h"			/* exp/expm1/fabs/sin/tanh/sincos */
 #include "complex_wrapper.h"
 
 static const double four = 4.0, two = 2.0, one = 1.0, zero = 0.0;
 
 dcomplex
-ctanh(dcomplex z) {
+ctanh(dcomplex z)
+{
 	double t, r, v, u, x, y, S, C;
 	int hx, ix, lx, hy, iy, ly;
 	dcomplex ans;
@@ -114,10 +115,10 @@ ctanh(dcomplex z) {
 	if ((iy | ly) == 0) {	/* ctanh(x,0) = (x,0) for x = 0 or NaN */
 		D_RE(ans) = tanh(x);
 		D_IM(ans) = zero;
-	} else if (iy >= 0x7ff00000) {	/* y is inf or NaN */
-		if (ix < 0x7ff00000)	/* catanh(finite x,inf/nan) is nan */
+	} else if (iy >= 0x7ff00000) { /* y is inf or NaN */
+		if (ix < 0x7ff00000) { /* catanh(finite x,inf/nan) is nan */
 			D_RE(ans) = D_IM(ans) = y - y;
-		else if (((ix - 0x7ff00000) | lx) == 0) {	/* x is inf */
+		} else if (((ix - 0x7ff00000) | lx) == 0) {	/* x is inf */
 			D_RE(ans) = one;
 			D_IM(ans) = zero;
 		} else {
@@ -130,26 +131,31 @@ ctanh(dcomplex z) {
 		 * ctanh z ~ 1 + i (sin2y)/(exp(2x))
 		 */
 		D_RE(ans) = one;
-		if (iy < 0x7fe00000)	/* t = sin(2y) */
+
+		if (iy < 0x7fe00000) {	/* t = sin(2y) */
 			S = sin(y + y);
-		else {
+		} else {
 			(void) sincos(y, &S, &C);
 			S = (S + S) * C;
 		}
-		if (ix >= 0x7fe00000) {	/* |x| > max/2 */
+
+		if (ix >= 0x7fe00000) {		/* |x| > max/2 */
 			if (ix >= 0x7ff00000) {	/* |x| is inf or NaN */
 				if (((ix - 0x7ff00000) | lx) != 0)
 					D_RE(ans) = D_IM(ans) = x + y;
-								/* x is NaN */
+				/* x is NaN */
 				else
 					D_IM(ans) = zero * S;	/* x is inf */
-			} else
+			} else {
 				D_IM(ans) = S * exp(-x);	/* underflow */
-		} else
+			}
+		} else {
 			D_IM(ans) = (S + S) * exp(-(x + x));
-							/* 2 sin 2y / exp(2x) */
+		}
+
+		/* 2 sin 2y / exp(2x) */
 	} else {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 *                        t*t+2t
 		 *    ctanh z = --------------------------- +
@@ -159,7 +165,7 @@ ctanh(dcomplex z) {
 		 *              i --------------------------
 		 *                t*t+[4(t+1)(cos y)](cos y)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		(void) sincos(y, &S, &C);
 		t = expm1(x + x);
 		r = (four * C) * (t + one);
@@ -168,9 +174,12 @@ ctanh(dcomplex z) {
 		D_RE(ans) = (u + two * t) * v;
 		D_IM(ans) = (r * S) * v;
 	}
+
 	if (hx < 0)
 		D_RE(ans) = -D_RE(ans);
+
 	if (hy < 0)
 		D_IM(ans) = -D_IM(ans);
+
 	return (ans);
 }

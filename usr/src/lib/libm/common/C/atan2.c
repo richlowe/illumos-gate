@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -392,25 +394,27 @@ static const double C[] = {
 	+1.10894981496317081405107718475040168084164825641e-0001,
 };
 
-#define	zero	C[0]
-#define	twom3	C[1]
-#define	two110	C[2]
-#define	pio4	C[3]
-#define	pio2	C[4]
-#define	pio2_lo	C[5]
-#define	mpi	C[6]
-#define	mpi_lo	C[7]
-#define	p1	C[8]
-#define	p2	C[9]
-#define	p3	C[10]
-#define	p4	C[11]
+#define	zero		C[0]
+#define	twom3		C[1]
+#define	two110		C[2]
+#define	pio4		C[3]
+#define	pio2		C[4]
+#define	pio2_lo		C[5]
+#define	mpi		C[6]
+#define	mpi_lo		C[7]
+#define	p1		C[8]
+#define	p2		C[9]
+#define	p3		C[10]
+#define	p4		C[11]
 
 double
-atan2(double oy, double ox) {
-	double	ah, al, t, xh, x, y, z;
-	int	i, k, hx, hy, sx, sy;
+atan2(double oy, double ox)
+{
+	double ah, al, t, xh, x, y, z;
+	int i, k, hx, hy, sx, sy;
+
 #ifndef lint
-	volatile int	inexact __unused;
+	volatile int inexact __unused;
 #endif
 
 	hy = ((int *)&oy)[HIWORD];
@@ -428,6 +432,7 @@ atan2(double oy, double ox) {
 		hy = i;
 		x = fabs(oy);
 		y = fabs(ox);
+
 		if (sx) {
 			ah = pio2;
 			al = pio2_lo;
@@ -439,6 +444,7 @@ atan2(double oy, double ox) {
 	} else {
 		x = fabs(ox);
 		y = fabs(oy);
+
 		if (sx) {
 			ah = mpi;
 			al = mpi_lo;
@@ -452,18 +458,23 @@ atan2(double oy, double ox) {
 		if (hx >= 0x7ff00000) {
 			if (((hx ^ 0x7ff00000) | ((int *)&x)[LOWORD]) != 0)
 				return (ox * oy);
+
 			if (hy >= 0x7ff00000)
 				ah += pio4;
+
 #ifndef lint
 			inexact = (int)ah;	/* inexact if ah != 0 */
 #endif
-			return ((sy)? -ah : ah);
+			return ((sy) ? -ah : ah);
 		}
+
 		if (hx - hy >= 0x03600000) {
 			if ((int)ah == 0)
 				ah = y / x;
-			return ((sy)? -ah : ah);
+
+			return ((sy) ? -ah : ah);
 		}
+
 		y *= twom3;
 		x *= twom3;
 		hy -= 0x00300000;
@@ -472,11 +483,13 @@ atan2(double oy, double ox) {
 		if ((hy | ((int *)&y)[LOWORD]) == 0) {
 			if ((hx | ((int *)&x)[LOWORD]) == 0)
 				return (_SVID_libm_err(ox, oy, 3));
+
 #ifndef lint
 			inexact = (int)ah;	/* inexact if ah != 0 */
 #endif
-			return ((sy)? -ah : ah);
+			return ((sy) ? -ah : ah);
 		}
+
 		y *= two110;
 		x *= two110;
 		hy = ((int *)&y)[HIWORD];
@@ -484,16 +497,18 @@ atan2(double oy, double ox) {
 	}
 
 	k = (((hx - hy) + 0x00004000) >> 13) & ~0x3;
+
 	if (k > 644)
 		k = 644;
+
 	ah += TBL[k];
-	al += TBL[k+1];
-	t = TBL[k+2];
+	al += TBL[k + 1];
+	t = TBL[k + 2];
 
 	xh = x;
 	((int *)&xh)[LOWORD] = 0;
 	z = ((y - t * xh) - t * (x - xh)) / (x + y * t);
 	x = z * z;
 	t = ah + (z + (al + (z * x) * (p1 + x * (p2 + x * (p3 + x * p4)))));
-	return ((sy)? -t : t);
+	return ((sy) ? -t : t);
 }

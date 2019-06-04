@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,20 +35,26 @@
 static const float zero = 0.0f;
 
 float
-log1pf(float x) {
-	int	ix;
+log1pf(float x)
+{
+	int ix;
 
 	ix = *(int *)&x;
+
 	if (ix >= 0x7f800000) {
 		/* x is +inf or nan */
 		return (x * x);
 	}
+
 	if (ix < 0) {
 		ix &= ~0x80000000;
-		if (ix == 0x3f800000) /* x is -1 */
+
+		if (ix == 0x3f800000)	/* x is -1 */
 			return (x / zero);
-		if (ix > 0x3f800000) /* x is < -1 or nan */
+
+		if (ix > 0x3f800000)	/* x is < -1 or nan */
 			return ((x * zero) / zero);
 	}
+
 	return ((float)log1p((double)x));
 }

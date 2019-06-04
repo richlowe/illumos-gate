@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -28,7 +30,7 @@
 
 #pragma weak __expf = expf
 
-/* INDENT OFF */
+
 /*
  * float expf(float x);
  * Code by K.C. Ng for SUN 5.0 libmopt
@@ -100,7 +102,6 @@
  *      defined and the result is subnormal, the error can be as
  *      large as 0.75 ulp.
  */
-/* INDENT ON */
 
 #include "libm.h"
 
@@ -331,38 +332,42 @@ static const float F[] = {
 #endif
 };
 
-#define	zero	F[0]
-#define	one	F[1]
-#define	p1	F[2]
-#define	p2	F[3]
-#define	big	F[4]
-#define	tiny	F[5]
+#define	zero		F[0]
+#define	one		F[1]
+#define	p1		F[2]
+#define	p2		F[3]
+#define	big		F[4]
+#define	tiny		F[5]
 #if defined(FDTOS_TRAPS_INCOMPLETE_IN_FNS_MODE)
-#define	twom60	F[6]
+#define	twom60		F[6]
 #endif
 
 float
-expf(float xf) {
-	double	w, p, q;
-	int	hx, ix, n;
+expf(float xf)
+{
+	double w, p, q;
+	int hx, ix, n;
 
 	hx = *(int *)&xf;
 	ix = hx & ~0x80000000;
 
-	if (ix < 0x3c800000) {	/* |x| < 2**-6 */
+	if (ix < 0x3c800000) {		/* |x| < 2**-6 */
 		if (ix < 0x38800000)	/* |x| < 2**-14 */
 			return (one + xf);
+
 		return (one + (xf + (xf * xf) * (p1 + xf * p2)));
 	}
 
-	n = ix >> 23;		/* biased exponent */
+	n = ix >> 23;				/* biased exponent */
 
-	if (n >= 0x86) {	/* |x| >= 2^7 */
-		if (n >= 0xff) {	/* x is nan of +-inf */
+	if (n >= 0x86) {			/* |x| >= 2^7 */
+		if (n >= 0xff) {		/* x is nan of +-inf */
 			if (hx == 0xff800000)
 				return (zero);	/* exp(-inf)=0 */
+
 			return (xf * xf);	/* exp(nan/inf) is nan or inf */
 		}
+
 		if (hx > 0)
 			return (big * big);	/* overflow */
 		else
@@ -370,30 +375,35 @@ expf(float xf) {
 	}
 
 	ix -= n << 23;
+
 	if (hx > 0)
 		ix += 0x800000;
 	else
 		ix = 0x800000 - ix;
-	if (n >= 0x7f) {	/* n >= 0 */
+
+	if (n >= 0x7f) {		/* n >= 0 */
 		ix <<= n - 0x7f;
 		w = ET[(ix & 0x3f) + 64] * ET[((ix >> 6) & 0x3f) + 128];
-		p = ET[((ix >> 12) & 0x3f) + 192] *
-		    ET[((ix >> 18) & 0x3f) + 256];
+		p = ET[((ix >> 12) & 0x3f) + 192] * ET[((ix >> 18) & 0x3f) +
+		    256];
 		q = ET[((ix >> 24) & 0x3f) + 320];
 	} else {
 		ix <<= n - 0x79;
 		w = ET[ix & 0x3f] * ET[((ix >> 6) & 0x3f) + 64];
-		p = ET[((ix >> 12) & 0x3f) + 128] *
-		    ET[((ix >> 18) & 0x3f) + 192];
+		p = ET[((ix >> 12) & 0x3f) + 128] * ET[((ix >> 18) & 0x3f) +
+		    192];
 		q = ET[((ix >> 24) & 0x3f) + 256];
 	}
+
 	xf = (float)((w * p) * (hx < 0 ? q * EN[n - 0x79] : q));
 #if defined(FDTOS_TRAPS_INCOMPLETE_IN_FNS_MODE)
 	if ((unsigned)hx >= 0xc2800000u) {
-		if ((unsigned)hx >= 0xc2aeac50) { /* force underflow */
-			volatile float	t = tiny;
+		if ((unsigned)hx >= 0xc2aeac50) {	/* force underflow */
+			volatile float t = tiny;
+
 			t *= t;
 		}
+
 		return (xf * twom60);
 	}
 #endif

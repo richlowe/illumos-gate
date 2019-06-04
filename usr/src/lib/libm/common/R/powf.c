@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,17 +31,16 @@
 #pragma weak __powf = powf
 
 #include "libm.h"
-#include "xpg6.h"	/* __xpg6 */
+#include "xpg6.h"			/* __xpg6 */
 #define	_C99SUSv3_pow	_C99SUSv3_pow_treats_Inf_as_an_even_int
 
 #if defined(__i386) && !defined(__amd64)
 extern int __swapRP(int);
 #endif
 
-/* INDENT OFF */
 static const double
-	ln2 = 6.93147180559945286227e-01,	/* 0x3fe62e42, 0xfefa39ef */
-	invln2 = 1.44269504088896338700e+00,	/* 0x3ff71547, 0x652b82fe */
+	ln2 = 6.93147180559945286227e-01,    /* 0x3fe62e42, 0xfefa39ef */
+	invln2 = 1.44269504088896338700e+00, /* 0x3ff71547, 0x652b82fe */
 	dtwo = 2.0,
 	done = 1.0,
 	dhalf = 0.5,
@@ -86,48 +87,33 @@ static const double S[] = {
 };
 
 static const double TBL[] = {
-	0.00000000000000000e+00,
-	3.07716586667536873e-02,
-	6.06246218164348399e-02,
-	8.96121586896871380e-02,
-	1.17783035656383456e-01,
-	1.45182009844497889e-01,
-	1.71850256926659228e-01,
-	1.97825743329919868e-01,
-	2.23143551314209765e-01,
-	2.47836163904581269e-01,
-	2.71933715483641758e-01,
-	2.95464212893835898e-01,
-	3.18453731118534589e-01,
-	3.40926586970593193e-01,
-	3.62905493689368475e-01,
-	3.84411698910332056e-01,
-	4.05465108108164385e-01,
-	4.26084395310900088e-01,
-	4.46287102628419530e-01,
-	4.66089729924599239e-01,
-	4.85507815781700824e-01,
-	5.04556010752395312e-01,
-	5.23248143764547868e-01,
-	5.41597282432744409e-01,
-	5.59615787935422659e-01,
-	5.77315365034823613e-01,
-	5.94707107746692776e-01,
-	6.11801541105992941e-01,
-	6.28608659422374094e-01,
-	6.45137961373584701e-01,
-	6.61398482245365016e-01,
-	6.77398823591806143e-01,
+	0.00000000000000000e+00, 3.07716586667536873e-02,
+	6.06246218164348399e-02, 8.96121586896871380e-02,
+	1.17783035656383456e-01, 1.45182009844497889e-01,
+	1.71850256926659228e-01, 1.97825743329919868e-01,
+	2.23143551314209765e-01, 2.47836163904581269e-01,
+	2.71933715483641758e-01, 2.95464212893835898e-01,
+	3.18453731118534589e-01, 3.40926586970593193e-01,
+	3.62905493689368475e-01, 3.84411698910332056e-01,
+	4.05465108108164385e-01, 4.26084395310900088e-01,
+	4.46287102628419530e-01, 4.66089729924599239e-01,
+	4.85507815781700824e-01, 5.04556010752395312e-01,
+	5.23248143764547868e-01, 5.41597282432744409e-01,
+	5.59615787935422659e-01, 5.77315365034823613e-01,
+	5.94707107746692776e-01, 6.11801541105992941e-01,
+	6.28608659422374094e-01, 6.45137961373584701e-01,
+	6.61398482245365016e-01, 6.77398823591806143e-01,
 };
 
 static const float zero = 0.0F, one = 1.0F, huge = 1.0e25f, tiny = 1.0e-25f;
-/* INDENT ON */
+
 
 float
-powf(float x, float y) {
-	float	fx = x, fy = y;
-	float	fz;
-	int	ix, iy, jx, jy, k, iw, yisint;
+powf(float x, float y)
+{
+	float fx = x, fy = y;
+	float fz;
+	int ix, iy, jx, jy, k, iw, yisint;
 
 	ix = *(int *)&x;
 	iy = *(int *)&y;
@@ -135,27 +121,31 @@ powf(float x, float y) {
 	jy = iy & ~0x80000000;
 
 	if (jy == 0)
-		return (one);	/* x**+-0 = 1 */
+		return (one);		/* x**+-0 = 1 */
 	else if (ix == 0x3f800000 && (__xpg6 & _C99SUSv3_pow) != 0)
-		return (one);	/* C99: 1**anything = 1 */
+		return (one);		/* C99: 1**anything = 1 */
 	else if (((0x7f800000 - jx) | (0x7f800000 - jy)) < 0)
 		return (fx * fy);	/* at least one of x or y is NaN */
-					/* includes Sun: 1**NaN = NaN */
-	/* INDENT OFF */
+
+	/*
+	 * includes Sun: 1**NaN = NaN
+	 */
+
 	/*
 	 * determine if y is an odd int
 	 * yisint = 0 ... y is not an integer
 	 * yisint = 1 ... y is an odd int
 	 * yisint = 2 ... y is an even int
 	 */
-	/* INDENT ON */
 	yisint = 0;
+
 	if (ix < 0) {
 		if (jy >= 0x4b800000) {
-			yisint = 2;	/* |y|>=2**24: y must be even */
+			yisint = 2;		/* |y|>=2**24: y must be even */
 		} else if (jy >= 0x3f800000) {
 			k = (jy >> 23) - 0x7f;	/* exponent */
 			iw = jy >> (23 - k);
+
 			if ((iw << (23 - k)) == jy)
 				yisint = 2 - (iw & 1);
 		}
@@ -163,30 +153,33 @@ powf(float x, float y) {
 
 	/* special value of y */
 	if ((jy & ~0x7f800000) == 0) {
-		if (jy == 0x7f800000) {		/* y is +-inf */
+		if (jy == 0x7f800000) {	/* y is +-inf */
 			if (jx == 0x3f800000) {
 				if ((__xpg6 & _C99SUSv3_pow) != 0)
 					fz = one;
-						/* C99: (-1)**+-inf is 1 */
+				/* C99: (-1)**+-inf is 1 */
 				else
 					fz = fy - fy;
-						/* Sun: (+-1)**+-inf = NaN */
+
+				/* Sun: (+-1)**+-inf = NaN */
 			} else if (jx > 0x3f800000) {
-						/* (|x|>1)**+,-inf = inf,0 */
+				/* (|x|>1)**+,-inf = inf,0 */
 				if (iy > 0)
 					fz = fy;
 				else
 					fz = zero;
-			} else {		/* (|x|<1)**-,+inf = inf,0 */
+			} else {	/* (|x|<1)**-,+inf = inf,0 */
 				if (iy < 0)
 					fz = -fy;
 				else
 					fz = zero;
 			}
+
 			return (fz);
 		} else if (jy == 0x3f800000) {	/* y is +-1 */
 			if (iy < 0)
 				fx = one / fx;	/* y is -1 */
+
 			return (fx);
 		} else if (iy == 0x40000000) {	/* y is 2 */
 			return (fx * fx);
@@ -201,8 +194,10 @@ powf(float x, float y) {
 		if (jx == 0x7f800000 || jx == 0 || jx == 0x3f800000) {
 			/* x is +-0,+-inf,-1; set fz = |x|**y */
 			*(int *)&fz = jx;
+
 			if (iy < 0)
 				fz = one / fz;
+
 			if (ix < 0) {
 				if (jx == 0x3f800000 && yisint == 0) {
 					/* (-1)**non-int is NaN */
@@ -213,6 +208,7 @@ powf(float x, float y) {
 					fz = -fz;
 				}
 			}
+
 			return (fz);
 		}
 	}
@@ -229,10 +225,11 @@ powf(float x, float y) {
 	 * fz = (float) exp(((double) fy) * log((double) fx));
 	 */
 	{
-		double	dx, dy, dz, ds;
-		int	*px = (int *)&dx, *pz = (int *)&dz, i, n, m;
+		double dx, dy, dz, ds;
+		int *px = (int *)&dx, *pz = (int *)&dz, i, n, m;
+
 #if defined(__i386) && !defined(__amd64)
-		int	rp = __swapRP(fp_extended);
+		int rp = __swapRP(fp_extended);
 #endif
 
 		fx = *(float *)&jx;
@@ -247,6 +244,7 @@ powf(float x, float y) {
 		i = (i >> 15) & 0x1f;
 		dz = ds * ds;
 		dy = invln2 * (TBL[i] + ds * (A0 + dz * A1));
+
 		if (n == 0)
 			dz = (double)fy * dy;
 		else
@@ -254,12 +252,15 @@ powf(float x, float y) {
 
 		/* compute exp2(dz=y*ln(x)) */
 		i = pz[HIWORD];
+
 		if ((i & ~0x80000000) >= 0x40640000) {	/* |z| >= 160.0 */
-			fz = (i > 0)? huge : tiny;
+			fz = (i > 0) ? huge : tiny;
+
 			if (ix < 0 && yisint == 1)
 				fz *= -fz;	/* (-ve)**(odd int) */
 			else
 				fz *= fz;
+
 #if defined(__i386) && !defined(__amd64)
 			if (rp != fp_extended)
 				(void) __swapRP(rp);
@@ -272,8 +273,10 @@ powf(float x, float y) {
 		m = n >> 5;
 		dy = ln2 * (dz - d1_32 * (double)n);
 		dx = S[i] * (done - (dtwo * dy) / (dy * (done - dy * t1) - t0));
+
 		if (m != 0)
 			px[HIWORD] += m << 20;
+
 		fz = (float)dx;
 #if defined(__i386) && !defined(__amd64)
 		if (rp != fp_extended)
@@ -283,6 +286,7 @@ powf(float x, float y) {
 
 	/* end of computing exp(y*log(x)) */
 	if (ix < 0 && yisint == 1)
-		fz = -fz;	/* (-ve)**(odd int) */
+		fz = -fz;		/* (-ve)**(odd int) */
+
 	return (fz);
 }

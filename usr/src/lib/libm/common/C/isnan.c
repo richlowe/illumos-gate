@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -40,8 +42,9 @@
  * be better to use 32-bit code, but we have assembly for x86.
  */
 int
-__isnan(double x) {
-	long long	llx;
+__isnan(double x)
+{
+	long long llx;
 
 	llx = *(long long *)&x & ~0x8000000000000000ull;
 	return ((unsigned long long)(0x7ff0000000000000ll - llx) >> 63);

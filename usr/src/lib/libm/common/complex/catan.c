@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __catan = catan
 
-/* INDENT OFF */
+
 /*
  * dcomplex catan(dcomplex z);
  *
@@ -73,23 +74,21 @@
  *    catan( x  , NaN ) =  (NaN  ,  NaN ) with invalid for finite x
  *    catan( inf, NaN ) =  (pi/2 ,  +-0 )
  */
-/* INDENT ON */
 
-#include "libm.h"		/* atan/atan2/fabs/log/log1p */
+#include "libm.h"			/* atan/atan2/fabs/log/log1p */
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
-static const double
-	pi_2 = 1.570796326794896558e+00,
+static const double pi_2 = 1.570796326794896558e+00,
 	zero = 0.0,
 	half = 0.5,
 	two = 2.0,
 	ln2 = 6.931471805599453094172321214581765680755e-0001,
 	one = 1.0;
-/* INDENT ON */
+
 
 dcomplex
-catan(dcomplex z) {
+catan(dcomplex z)
+{
 	dcomplex ans;
 	double x, y, ax, ay, t;
 	int hx, hy, ix, iy;
@@ -113,6 +112,7 @@ catan(dcomplex z) {
 			D_IM(ans) = zero;
 		} else {
 			D_RE(ans) = x + x;
+
 			if ((iy | ly) == 0 || (ISINF(iy, ly)))
 				D_IM(ans) = zero;
 			else
@@ -128,7 +128,7 @@ catan(dcomplex z) {
 			D_IM(ans) = y;
 		}
 	} else if ((ix | lx) == 0) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * x = 0
 		 *      1                            1
@@ -139,8 +139,9 @@ catan(dcomplex z) {
 		 * B = - log [ ------------ ] = - log (1+ ---) or - log(1+ ----)
 		 *     4     [  (y-1)*(y-1) ]   2         y-1     2         1-y
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		t = one - ay;
+
 		if (((iy - 0x3ff00000) | ly) == 0) {
 			/* y=1: catan(0,1)=(0,+inf) with 1/0 signal */
 			D_IM(ans) = ay / ax;
@@ -148,32 +149,33 @@ catan(dcomplex z) {
 		} else if (iy >= 0x3ff00000) {	/* y>1 */
 			D_IM(ans) = half * log1p(two / (-t));
 			D_RE(ans) = pi_2;
-		} else {		/* y<1 */
+		} else {			/* y<1 */
 			D_IM(ans) = half * log1p((ay + ay) / t);
 			D_RE(ans) = zero;
 		}
 	} else if (iy < 0x3e200000 || ((ix - iy) >> 20) >= 30) {
-	/* INDENT OFF */
-	/*
-	 * Tiny y (relative to 1+|x|)
-	 *     |y| < E*(1+|x|)
-	 * where E=2**-29, -35, -60 for double, double extended, quad precision
-	 *
-	 *      1                           [ x<=1:   atan(x)
-	 * A = --- * atan2(2x, 1-x*x-y*y) ~ [       1                 1+x
-	 *      2                           [ x>=1: - atan2(2,(1-x)*(-----))
-	 *                                          2                  x
-	 *
-	 *                               y/x
-	 * B ~ t*(1-2t), where t = ----------------- is tiny
-	 *                         x + (y-1)*(y-1)/x
-	 */
-		/* INDENT ON */
+		/* BEGIN CSTYLED */
+		/*
+		 * Tiny y (relative to 1+|x|)
+		 *     |y| < E*(1+|x|)
+		 * where E=2**-29, -35, -60 for double, double extended, quad precision
+		 *
+		 *      1                           [ x<=1:   atan(x)
+		 * A = --- * atan2(2x, 1-x*x-y*y) ~ [       1                 1+x
+		 *      2                           [ x>=1: - atan2(2,(1-x)*(-----))
+		 *                                          2                  x
+		 *
+		 *                               y/x
+		 * B ~ t*(1-2t), where t = ----------------- is tiny
+		 *                         x + (y-1)*(y-1)/x
+		 */
+		/* END CSTYLED */
 		if (ix < 0x3ff00000)
 			D_RE(ans) = atan(ax);
 		else
-			D_RE(ans) = half * atan2(two, (one - ax) * (one +
-				one / ax));
+			D_RE(ans) = half * atan2(two, (one - ax) * (one + one /
+			    ax));
+
 		if ((iy | ly) == 0) {
 			D_IM(ans) = ay;
 		} else {
@@ -183,10 +185,11 @@ catan(dcomplex z) {
 				t = (ay / ax) / ax;
 			else
 				t = ay / (ax * ax + (ay - one) * (ay - one));
+
 			D_IM(ans) = t * (one - (t + t));
 		}
 	} else if (iy >= 0x41c00000 && ((iy - ix) >> 20) >= 30) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Huge y relative to 1+|x|
 		 *            |y| > Einv*(1+|x|), where Einv~2**(prec/2+3),
@@ -197,12 +200,12 @@ catan(dcomplex z) {
 		 *       B ~ t*(1-2t), where t = --------------- is tiny
 		 *                                (y-1)*(y-1)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		D_RE(ans) = pi_2;
 		t = (ay / (ay - one)) / (ay - one);
 		D_IM(ans) = t * (one - (t + t));
 	} else if (((iy - 0x3ff00000) | ly) == 0) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * y = 1
 		 *      1                       1
@@ -213,16 +216,17 @@ catan(dcomplex z) {
 		 * B = - log [-------] = - log (1+ ---) = [ |x|<E, else 0.25*
 		 *     4     [  x*x  ]   4         x*x    [ log1p((2/x)*(2/x))
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		D_RE(ans) = half * atan2(two, -ax);
-		if (ix < 0x3e200000)
+
+		if (ix < 0x3e200000) {
 			D_IM(ans) = half * (ln2 - log(ax));
-		else {
+		} else {
 			t = two / ax;
 			D_IM(ans) = 0.25 * log1p(t * t);
 		}
 	} else if (ix >= 0x43900000) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Huge x:
 		 * when |x| > 1/E^2,
@@ -233,13 +237,13 @@ catan(dcomplex z) {
 		 * B ~ t*(1-2t), where t = --------------- = (-------------- )/x
 		 *                         x*x+(y-1)*(y-1)     1+((y-1)/x)^2
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		D_RE(ans) = pi_2;
 		t = ((ay / ax) / (one + ((ay - one) / ax) * ((ay - one) /
-			ax))) / ax;
+		    ax))) / ax;
 		D_IM(ans) = t * (one - (t + t));
 	} else if (ix < 0x38b00000) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Tiny x:
 		 * when |x| < E^4,  (note that y != 1)
@@ -251,14 +255,15 @@ catan(dcomplex z) {
 		 * B = - log [-----------] = - log (1+ ---) or - log(1+ ----)
 		 *     4     [(y-1)*(y-1)]   2         y-1     2         1-y
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		D_RE(ans) = half * atan2(ax + ax, (one - ay) * (one + ay));
+
 		if (iy >= 0x3ff00000)
 			D_IM(ans) = half * log1p(two / (ay - one));
 		else
 			D_IM(ans) = half * log1p((ay + ay) / (one - ay));
 	} else {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * normal x,y
 		 *      1
@@ -269,24 +274,30 @@ catan(dcomplex z) {
 		 * B = - log [---------------] = - log (1+ -----------------)
 		 *     4     [x*x+(y-1)*(y-1)]   4         x*x + (y-1)*(y-1)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		t = one - ay;
+
 		if (iy >= 0x3fe00000 && iy < 0x40000000) {
 			/* y close to 1 */
 			D_RE(ans) = half * (atan2((ax + ax), (t * (one + ay) -
-				ax * ax)));
+			    ax * ax)));
 		} else if (ix >= 0x3fe00000 && ix < 0x40000000) {
 			/* x close to 1 */
-			D_RE(ans) = half * atan2((ax + ax), ((one - ax) *
-				(one + ax) - ay * ay));
-		} else
+			D_RE(ans) = half * atan2((ax + ax), ((one - ax) * (one +
+			    ax) - ay * ay));
+		} else {
 			D_RE(ans) = half * atan2((ax + ax), ((one - ax * ax) -
-				ay * ay));
+			    ay * ay));
+		}
+
 		D_IM(ans) = 0.25 * log1p((4.0 * ay) / (ax * ax + t * t));
 	}
+
 	if (hx < 0)
 		D_RE(ans) = -D_RE(ans);
+
 	if (hy < 0)
 		D_IM(ans) = -D_IM(ans);
+
 	return (ans);
 }

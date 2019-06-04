@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,18 +30,18 @@
 
 #pragma weak __cexpl = cexpl
 
-#include "libm.h"		/* expl/isinfl/iszerol/scalbnl/sincosl */
+#include "libm.h"	/* expl/isinfl/iszerol/scalbnl/sincosl */
 #include "complex_wrapper.h"
 
 extern int isinfl(long double);
 extern int iszerol(long double);
 
-/* INDENT OFF */
 static const long double zero = 0.0L;
-/* INDENT ON */
+
 
 ldcomplex
-cexpl(ldcomplex z) {
+cexpl(ldcomplex z)
+{
 	ldcomplex ans;
 	long double x, y, t, c, s;
 	int n, ix, iy, hx, hy;
@@ -51,10 +52,11 @@ cexpl(ldcomplex z) {
 	hy = HI_XWORD(y);
 	ix = hx & 0x7fffffff;
 	iy = hy & 0x7fffffff;
-	if (iszerol(y)) {	/* y = 0 */
+
+	if (iszerol(y)) {		/* y = 0 */
 		LD_RE(ans) = expl(x);
 		LD_IM(ans) = y;
-	} else if (isinfl(x)) {	/* x is +-inf */
+	} else if (isinfl(x)) {		/* x is +-inf */
 		if (hx < 0) {
 			if (iy >= 0x7fff0000) {
 				LD_RE(ans) = zero;
@@ -76,6 +78,7 @@ cexpl(ldcomplex z) {
 		}
 	} else {
 		(void) sincosl(y, &s, &c);
+
 		if (ix >= 0x400C62E4) {	/* |x| > 11356.52... ~ log(2**16384) */
 			t = __k_cexpl(x, &n);
 			LD_RE(ans) = scalbnl(t * c, n);
@@ -86,5 +89,6 @@ cexpl(ldcomplex z) {
 			LD_IM(ans) = t * s;
 		}
 	}
+
 	return (ans);
 }

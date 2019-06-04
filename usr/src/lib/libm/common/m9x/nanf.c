@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,6 +39,7 @@ static const union {
 
 /* ARGSUSED0 */
 float
-__nanf(const char *c) {
+__nanf(const char *c)
+{
 	return (__nanf_union.f);
 }

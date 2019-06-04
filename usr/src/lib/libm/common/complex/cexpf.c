@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,11 +40,12 @@ extern int __swapRP(int);
 static const float zero = 0.0F;
 
 fcomplex
-cexpf(fcomplex z) {
-	fcomplex	ans;
-	float		x, y, c, s;
-	double		t;
-	int		n, ix, iy, hx, hy;
+cexpf(fcomplex z)
+{
+	fcomplex ans;
+	float x, y, c, s;
+	double t;
+	int n, ix, iy, hx, hy;
 
 	x = F_RE(z);
 	y = F_IM(z);
@@ -50,7 +53,8 @@ cexpf(fcomplex z) {
 	hy = THE_WORD(y);
 	ix = hx & 0x7fffffff;
 	iy = hy & 0x7fffffff;
-	if (iy == 0) {		/* y = 0 */
+
+	if (iy == 0) {			/* y = 0 */
 		F_RE(ans) = expf(x);
 		F_IM(ans) = y;
 	} else if (ix == 0x7f800000) {	/* x is +-inf */
@@ -75,9 +79,10 @@ cexpf(fcomplex z) {
 		}
 	} else {
 		sincosf(y, &s, &c);
+
 		if (ix >= 0x42B171AA) {	/* |x| > 88.722... ~ log(2**128) */
 #if defined(__i386) && !defined(__amd64)
-			int	rp = __swapRP(fp_extended);
+			int rp = __swapRP(fp_extended);
 #endif
 			t = __k_cexp(x, &n);
 			F_RE(ans) = (float)scalbn(t * (double)c, n);
@@ -92,5 +97,6 @@ cexpf(fcomplex z) {
 			F_IM(ans) = t * s;
 		}
 	}
+
 	return (ans);
 }

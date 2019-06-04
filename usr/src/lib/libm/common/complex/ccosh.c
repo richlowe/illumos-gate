@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __ccosh = ccosh
 
-/* INDENT OFF */
+
 /*
  * dcomplex ccosh(dcomplex z);
  *
@@ -73,13 +74,13 @@
  *      ccosh(NaN,y) = (NaN,NaN) for non-zero y
  *      ccosh(NaN,NaN) = (NaN,NaN)
  */
-/* INDENT ON */
 
-#include "libm.h"		/* cosh/exp/fabs/scalbn/sinh/sincos/__k_cexp */
+#include "libm.h"	/* cosh/exp/fabs/scalbn/sinh/sincos/__k_cexp */
 #include "complex_wrapper.h"
 
 dcomplex
-ccosh(dcomplex z) {
+ccosh(dcomplex z)
+{
 	double t, x, y, S, C;
 	int hx, ix, lx, hy, iy, ly, n;
 	dcomplex ans;
@@ -96,7 +97,8 @@ ccosh(dcomplex z) {
 	y = fabs(y);
 
 	(void) sincos(y, &S, &C);
-	if (ix >= 0x403c0000) {	/* |x| > 28 = prec/2 (14,28,34,60) */
+
+	if (ix >= 0x403c0000) {		/* |x| > 28 = prec/2 (14,28,34,60) */
 		if (ix >= 0x40862E42) {	/* |x| > 709.78... ~ log(2**1024) */
 			if (ix >= 0x7ff00000) {	/* |x| is inf or NaN */
 				if ((iy | ly) == 0) {
@@ -111,7 +113,7 @@ ccosh(dcomplex z) {
 				}
 			} else {
 				t = __k_cexp(x, &n);
-						/* return exp(x)=t*2**n */
+				/* return exp(x)=t*2**n */
 				D_RE(ans) = scalbn(C * t, n - 1);
 				D_IM(ans) = scalbn(S * t, n - 1);
 			}
@@ -129,7 +131,9 @@ ccosh(dcomplex z) {
 			D_IM(ans) = S * sinh(x);
 		}
 	}
+
 	if ((hx ^ hy) < 0)
 		D_IM(ans) = -D_IM(ans);
+
 	return (ans);
 }

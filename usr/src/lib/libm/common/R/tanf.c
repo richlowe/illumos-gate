@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,6 +34,7 @@
 
 extern const int _TBL_ipio2_inf[];
 extern int __rem_pio2m(double *, double *, int, int, int, const int *);
+
 #if defined(__i386) && !defined(__amd64)
 extern int __swapRP(int);
 #endif
@@ -54,28 +57,28 @@ static const double C[] = {
 	6.077100506506192601475e-11,	/* 2^-34  * 1.0B4611A626331 */
 };
 
-#define	one	C[0]
-#define	P0	C[1]
-#define	P1	C[2]
-#define	P2	C[3]
-#define	P3	C[4]
-#define	P4	C[5]
-#define	P5	C[6]
-#define	P6	C[7]
-#define	P7	C[8]
-#define	T0	C[9]
-#define	T1	C[10]
-#define	invpio2	C[11]
-#define	half	C[12]
-#define	pio2_1  C[13]
-#define	pio2_t	C[14]
+#define	one		C[0]
+#define	P0		C[1]
+#define	P1		C[2]
+#define	P2		C[3]
+#define	P3		C[4]
+#define	P4		C[5]
+#define	P5		C[6]
+#define	P6		C[7]
+#define	P7		C[8]
+#define	T0		C[9]
+#define	T1		C[10]
+#define	invpio2		C[11]
+#define	half		C[12]
+#define	pio2_1		C[13]
+#define	pio2_t		C[14]
 
 float
 tanf(float x)
 {
-	double	y, z, w;
-	float	f;
-	int	n, ix, hx, hy;
+	double y, z, w;
+	float f;
+	int n, ix, hx, hy;
 	volatile int i __unused;
 
 	hx = *((int *)&x);
@@ -83,8 +86,8 @@ tanf(float x)
 
 	y = (double)x;
 
-	if (ix <= 0x4016cbe4) {		/* |x| < 3*pi/4 */
-		if (ix <= 0x3f490fdb) {		/* |x| < pi/4 */
+	if (ix <= 0x4016cbe4) {				/* |x| < 3*pi/4 */
+		if (ix <= 0x3f490fdb) {			/* |x| < pi/4 */
 			if (ix < 0x3c000000) {		/* |x| < 2**-7 */
 				if (ix <= 0x39800000) {	/* |x| < 2**-12 */
 					i = (int)y;
@@ -93,39 +96,47 @@ tanf(float x)
 #endif
 					return (x);
 				}
+
 				return ((float)((y * T0) * (T1 + y * y)));
 			}
+
 			z = y * y;
-			return ((float)(((P0 * y) * (P1 + z * (P2 + z)) *
-			    (P3 + z * (P4 + z))) *
-			    (P5 + z * (P6 + z * (P7 + z)))));
+			return ((float)(((P0 * y) * (P1 + z * (P2 + z)) * (P3 +
+			    z * (P4 + z))) * (P5 + z * (P6 + z *
+			    (P7 + z)))));
 		}
+
 		if (hx > 0)
 			y = (y - pio2_1) - pio2_t;
 		else
 			y = (y + pio2_1) + pio2_t;
+
 		hy = ((int *)&y)[HIWORD] & ~0x80000000;
-		if (hy < 0x3f800000) {		/* |y| < 2**-7 */
+
+		if (hy < 0x3f800000) {	/* |y| < 2**-7 */
 			z = (y * T0) * (T1 + y * y);
 			return ((float)(-one / z));
 		}
+
 		z = y * y;
 		w = ((P0 * y) * (P1 + z * (P2 + z)) * (P3 + z * (P4 + z))) *
 		    (P5 + z * (P6 + z * (P7 + z)));
 		return ((float)(-one / w));
 	}
 
-	if (ix <= 0x49c90fdb) {	/* |x| < 2^19*pi */
+	if (ix <= 0x49c90fdb) {		/* |x| < 2^19*pi */
 #if defined(__i386) && !defined(__amd64)
-		int	rp;
+		int rp;
 
 		rp = __swapRP(fp_extended);
 #endif
 		w = y * invpio2;
+
 		if (hx < 0)
 			n = (int)(w - half);
 		else
 			n = (int)(w + half);
+
 		y = (y - n * pio2_1) - n * pio2_t;
 #if defined(__i386) && !defined(__amd64)
 		if (rp != fp_extended)
@@ -133,12 +144,14 @@ tanf(float x)
 #endif
 	} else {
 		if (ix >= 0x7f800000)
-			return (x / x);	/* sin(Inf or NaN) is NaN */
+			return (x / x);		/* sin(Inf or NaN) is NaN */
+
 		hy = ((int *)&y)[HIWORD];
 		n = ((hy >> 20) & 0x7ff) - 1046;
 		((int *)&w)[HIWORD] = (hy & 0xfffff) | 0x41600000;
 		((int *)&w)[LOWORD] = ((int *)&y)[LOWORD];
 		n = __rem_pio2m(&w, &y, n, 1, 0, _TBL_ipio2_inf);
+
 		if (hy < 0) {
 			y = -y;
 			n = -n;
@@ -146,14 +159,16 @@ tanf(float x)
 	}
 
 	hy = ((int *)&y)[HIWORD] & ~0x80000000;
+
 	if (hy < 0x3f800000) {		/* |y| < 2**-7 */
 		z = (y * T0) * (T1 + y * y);
-		f = ((n & 1) == 0)? (float)z : (float)(-one / z);
+		f = ((n & 1) == 0) ? (float)z : (float)(-one / z);
 		return (f);
 	}
+
 	z = y * y;
-	w = ((P0 * y) * (P1 + z * (P2 + z)) * (P3 + z * (P4 + z))) *
-	    (P5 + z * (P6 + z * (P7 + z)));
-	f = ((n & 1) == 0)? (float)w : (float)(-one / w);
+	w = ((P0 * y) * (P1 + z * (P2 + z)) * (P3 + z * (P4 + z))) * (P5 + z *
+	    (P6 + z * (P7 + z)));
+	f = ((n & 1) == 0) ? (float)w : (float)(-one / w);
 	return (f);
 }

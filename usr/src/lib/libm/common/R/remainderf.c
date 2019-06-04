@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,14 +33,17 @@
 #include "libm.h"
 
 float
-remainderf(float x, float y) {
+remainderf(float x, float y)
+{
 	if (isnanf(x) || isnanf(y))
 		return (x * y);
-	if (y == 0.0f || (*(int *) &x & ~0x80000000) == 0x7f800000) {
+
+	if (y == 0.0f || (*(int *)&x & ~0x80000000) == 0x7f800000) {
 		/* y is 0 or x is infinite; raise invalid and return NaN */
 		y = 0.0f;
-		*(int *) &x = 0x7f800000;
+		*(int *)&x = 0x7f800000;
 		return (x * y);
 	}
-	return ((float) remainder((double) x, (double) y));
+
+	return ((float)remainder((double)x, (double)y));
 }

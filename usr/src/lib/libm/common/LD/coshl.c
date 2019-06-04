@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -71,37 +72,44 @@ static const long double C[] = {
 	45.0L,
 	1.135652340629414394879149e+04L,
 	7.004447686242549087858985e-16L,
-	2.710505431213761085018632e-20L,		/* 2^-65 */
+	2.710505431213761085018632e-20L, /* 2^-65 */
 };
 
-#define	half	C[0]
-#define	one	C[1]
-#define	thr1	C[2]
-#define	thr2	C[3]
-#define	lnovft	C[4]
-#define	lnovlo	C[5]
-#define	tinyl	C[6]
+#define	half		C[0]
+#define	one		C[1]
+#define	thr1		C[2]
+#define	thr2		C[3]
+#define	lnovft		C[4]
+#define	lnovlo		C[5]
+#define	tinyl		C[6]
 
 long double
-coshl(long double x) {
+coshl(long double x)
+{
 	long double w, t;
 
 	w = fabsl(x);
+
 	if (!finitel(w))
-		return (w + w);	/* x is INF or NaN */
+		return (w + w);		/* x is INF or NaN */
+
 	if (w < thr1) {
 		if (w < tinyl)
 			return (one + w);	/* inexact+directed rounding */
+
 		t = expm1l(w);
 		w = one + t;
 		w = one + (t * t) / (w + w);
 		return (w);
 	}
+
 	if (w < thr2) {
 		t = expl(w);
 		return (half * (t + one / t));
 	}
+
 	if (w <= lnovft)
 		return (half * expl(w));
+
 	return (scalbnl(expl((w - lnovft) - lnovlo), 16383));
 }

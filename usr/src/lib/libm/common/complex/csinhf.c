@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,11 +40,12 @@ extern int __swapRP(int);
 static const float zero = 0.0F, half = 0.5F;
 
 fcomplex
-csinhf(fcomplex z) {
-	float		x, y, S, C;
-	double		t;
-	int		hx, ix, hy, iy, n;
-	fcomplex	ans;
+csinhf(fcomplex z)
+{
+	float x, y, S, C;
+	double t;
+	int hx, ix, hy, iy, n;
+	fcomplex ans;
 
 	x = F_RE(z);
 	y = F_IM(z);
@@ -54,7 +57,8 @@ csinhf(fcomplex z) {
 	y = fabsf(y);
 
 	sincosf(y, &S, &C);
-	if (ix >= 0x41600000) {	/* |x| > 14 = prec/2 (14,28,34,60) */
+
+	if (ix >= 0x41600000) {		/* |x| > 14 = prec/2 (14,28,34,60) */
 		if (ix >= 0x42B171AA) {	/* |x| > 88.722... ~ log(2**128) */
 			if (ix >= 0x7f800000) {	/* |x| is inf or NaN */
 				if (iy == 0) {
@@ -69,7 +73,7 @@ csinhf(fcomplex z) {
 				}
 			} else {
 #if defined(__i386) && !defined(__amd64)
-				int	rp = __swapRP(fp_extended);
+				int rp = __swapRP(fp_extended);
 #endif
 				/* return (C, S) * exp(x) / 2 */
 				t = __k_cexp((double)x, &n);
@@ -86,7 +90,7 @@ csinhf(fcomplex z) {
 			F_IM(ans) = S * t;
 		}
 	} else {
-		if (ix == 0) {	/* x = 0, return (0,S) */
+		if (ix == 0) {		/* x = 0, return (0,S) */
 			F_RE(ans) = zero;
 			F_IM(ans) = S;
 		} else {
@@ -94,9 +98,12 @@ csinhf(fcomplex z) {
 			F_IM(ans) = S * coshf(x);
 		}
 	}
+
 	if (hx < 0)
 		F_RE(ans) = -F_RE(ans);
+
 	if (hy < 0)
 		F_IM(ans) = -F_IM(ans);
+
 	return (ans);
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -35,30 +36,34 @@
 #define	n0	0
 
 long double
-cbrtl(long double x) {
+cbrtl(long double x)
+{
 	long double s, t, r, w, y;
 	double dx, dy;
-	int *py = (int *) &dy;
+	int *py = (int *)&dy;
 	int n, m, m3, sx;
 
 	if (!finitel(x))
 		return (x + x);
+
 	if (iszerol(x))
 		return (x);
+
 	sx = signbitl(x);
 	x = fabsl(x);
 	n = ilogbl(x);
 	m = n / 3;
 	m3 = m + m + m;
 	y = scalbnl(x, -m3);
-	dx = (double) y;
+	dx = (double)y;
 	dy = cbrt(dx);
 	py[1 - n0] += 2;
+
 	if (py[1 - n0] == 0)
 		py[n0] += 1;
 
 	/* one step newton iteration to 113 bits with error < 0.667ulps */
-	t = (long double) dy;
+	t = (long double)dy;
 	t = scalbnl(t, m);
 	s = t * t;
 	r = x / s;

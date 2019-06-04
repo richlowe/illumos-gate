@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,11 +32,10 @@
 
 #include "libm.h"
 
-
 extern float __inline_sqrtf(float);
 
 float
-sqrtf(float x) {
+sqrtf(float x)
+{
 	return (__inline_sqrtf(x));
 }
-

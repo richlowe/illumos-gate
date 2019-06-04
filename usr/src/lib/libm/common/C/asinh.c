@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __asinh = asinh
 
-/* INDENT OFF */
+
 /*
  * asinh(x)
  * Method :
@@ -41,39 +42,45 @@
  *		 := sign(x)*log(2|x|+1/(|x|+sqrt(x*x+1))) if|x| > 2, else
  *		 := sign(x)*log1p(|x|+x^2/(1+sqrt(1+x^2)))
  */
-/* INDENT ON */
 
 #include "libm_macros.h"
 #include <math.h>
 
 static const double xxx[] = {
-/* one */	1.00000000000000000000e+00,	/* 3FF00000, 00000000 */
-/* ln2 */	6.93147180559945286227e-01,	/* 3FE62E42, FEFA39EF */
-/* huge */	1.00000000000000000000e+300
+/* one */
+	1.00000000000000000000e+00,	/* 3FF00000, 00000000 */
+/* ln2 */ 6.93147180559945286227e-01,	/* 3FE62E42, FEFA39EF */
+/* huge */ 1.00000000000000000000e+300
 };
-#define	one	xxx[0]
-#define	ln2	xxx[1]
-#define	huge	xxx[2]
+
+#define	one		xxx[0]
+#define	ln2		xxx[1]
+#define	huge		xxx[2]
 
 double
-asinh(double x) {
+asinh(double x)
+{
 	double t, w;
 	int hx, ix;
 
-	hx = ((int *) &x)[HIWORD];
+	hx = ((int *)&x)[HIWORD];
 	ix = hx & 0x7fffffff;
+
 	if (ix >= 0x7ff00000)
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 		return (ix >= 0x7ff80000 ? x : x + x);
-		/* assumes sparc-like QNaN */
+
+	/* assumes sparc-like QNaN */
 #else
-		return (x + x);	/* x is inf or NaN */
+		return (x + x);		/* x is inf or NaN */
 #endif
-	if (ix < 0x3e300000) {	/* |x|<2**-28 */
+
+	if (ix < 0x3e300000) {		/* |x|<2**-28 */
 		if (huge + x > one)
 			return (x);	/* return x inexact except 0 */
 	}
-	if (ix > 0x41b00000) {	/* |x| > 2**28 */
+
+	if (ix > 0x41b00000) {		/* |x| > 2**28 */
 		w = log(fabs(x)) + ln2;
 	} else if (ix > 0x40000000) {
 		/* 2**28 > |x| > 2.0 */
@@ -84,5 +91,6 @@ asinh(double x) {
 		t = x * x;
 		w = log1p(fabs(x) + t / (one + sqrt(one + t)));
 	}
+
 	return (hx > 0 ? w : -w);
 }

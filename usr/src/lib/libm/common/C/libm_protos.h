@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -36,14 +38,14 @@
  *
  * For reasons unknown, these two are global (but private).
  */
-#define	__rem_pio2	__libm__rem_pio2
-#define	__rem_pio2m	__libm__rem_pio2m
+#define	__rem_pio2		__libm__rem_pio2
+#define	__rem_pio2m		__libm__rem_pio2m
 
 #ifndef _ASM
 #ifdef __STDC__
-#define	__P(p)	p
+#define	__P(p)			p
 #else
-#define	__P(p)	()
+#define	__P(p)			()
 #endif
 
 #include <sys/ieeefp.h>
@@ -138,6 +140,5 @@ extern long long int llrintl __P((long double));
 extern long long int llround __P((double));
 extern long long int llroundf __P((float));
 extern long long int llroundl __P((long double));
-#endif	/* _ASM */
-
-#endif	/* _C_LIBM_PROTOS_H */
+#endif /* _ASM */
+#endif /* _C_LIBM_PROTOS_H */

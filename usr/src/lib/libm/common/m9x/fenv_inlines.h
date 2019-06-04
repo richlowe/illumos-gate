@@ -17,7 +17,6 @@
 #define	_FENV_INLINES_H
 
 #ifdef __GNUC__
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,7 +24,6 @@ extern "C" {
 #include <sys/types.h>
 
 #if defined(__x86)
-
 /*
  * Floating point Control Word and Status Word
  * Definition should actually be shared with x86
@@ -68,7 +66,7 @@ __fenv_setcwsw(const unsigned int *value)
 	    : "r" (cwsw.words.cw), "r" (cwsw.words.sw)
 	    /* For practical purposes, we clobber the whole FPU */
 	    : "cc", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)",
-	      "st(6)", "st(7)");
+	    "st(6)", "st(7)");
 }
 
 extern __GNU_INLINE void
@@ -425,7 +423,6 @@ sse_cvtss2siq(float *f1, long long *ll1)
 	    : "=m" (*ll1), "=r" (tmp)
 	    : "m" (*f1));
 }
-
 #endif
 
 extern __GNU_INLINE void
@@ -637,7 +634,6 @@ sse_cvtsd2siq(double *d1, long long *ll1)
 	    : "m" (*d1));
 }
 #endif
-
 #elif defined(__sparc)
 extern __GNU_INLINE void
 __fenv_getfsr(unsigned long *l)
@@ -681,7 +677,5 @@ __fenv_setfsr32(const unsigned int *l)
 #ifdef __cplusplus
 }
 #endif
-
 #endif  /* __GNUC__ */
-
 #endif /* _FENV_INLINES_H */

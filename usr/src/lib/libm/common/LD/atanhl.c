@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,10 +32,12 @@
 
 #include "libm.h"
 
-#define GENERIC	long double
-#define	ATANH 	atanhl
+#define	GENERIC		long double
+#define	ATANH		atanhl
 
-/* ATANH(x)
+/* BEGIN CSTYLED */
+/*
+ * ATANH(x)
  *                  1              2x                          x
  *	ATANH(x) = --- * LOG(1 + -------) = 0.5 * LOG1P(2 * --------)
  *                  2             1 - x                      1 - x
@@ -49,25 +52,26 @@
  *	ATANH(+-1) is +-INF with signal.
  *
  */
+/* END CSTYLED */
 
-#define	FABS 	fabsl
-#define	LOG1P 	log1pl
-#define	COPYSIGN 	copysignl
+#define	FABS		fabsl
+#define	LOG1P		log1pl
+#define	COPYSIGN	copysignl
 
+extern GENERIC FABS(), LOG1P(), COPYSIGN();
 
-extern GENERIC 	FABS(),LOG1P(),COPYSIGN();
+static GENERIC zero = (GENERIC)0.0, half = (GENERIC)0.5, one = (GENERIC)1.0;
 
-static GENERIC
-zero	= (GENERIC) 0.0,
-half 	= (GENERIC) 0.5,
-one	= (GENERIC) 1.0;
-
-GENERIC ATANH(x)
-GENERIC x;
+GENERIC
+ATANH(GENERIC x)
 {
 	GENERIC t;
+
 	t = FABS(x);
-	if (t == one) return x/zero;
-	t = t/(one-t);
-	return COPYSIGN(half,x)*LOG1P(t+t);
+
+	if (t == one)
+		return (x / zero);
+
+	t = t / (one - t);
+	return (COPYSIGN(half, x) * LOG1P(t + t));
 }

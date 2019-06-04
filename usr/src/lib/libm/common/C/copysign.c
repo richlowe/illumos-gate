@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,10 +33,11 @@
 #include "libm.h"
 
 double
-copysign(double x, double y) {
+copysign(double x, double y)
+{
 	int hx, hy;
 
-	hx = ((int *) &x)[HIWORD];
-	hy = ((int *) &y)[HIWORD];
-	return (hx ^ hy) >= 0 ?  (x) : (-x);
+	hx = ((int *)&x)[HIWORD];
+	hy = ((int *)&y)[HIWORD];
+	return ((hx ^ hy) >= 0 ? (x) : (-x));
 }

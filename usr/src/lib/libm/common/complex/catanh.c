@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,20 +30,20 @@
 
 #pragma weak __catanh = catanh
 
-/* INDENT OFF */
+
 /*
  * z := x + iy
  * catanh(z)	= -i catan(iz)
  *		= -i catan(-y+ix)
  *		= (Im(catan(-y+ix)), -Re(catan(-y+ix)))
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "complex_wrapper.h"
 
 dcomplex
-catanh(dcomplex z) {
+catanh(dcomplex z)
+{
 	double x, y;
 	dcomplex ans, ct;
 

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,43 +39,49 @@
 #include "longdouble.h"
 
 extern const int _TBL_ipio2l_inf[];
-
-static const long double
-    two24l = 16777216.0L,
-    pio4   = 0.7853981633974483096156608458198757210495L;
+static const long double two24l = 16777216.0L,
+	pio4 = 0.7853981633974483096156608458198757210495L;
 
 int
 __rem_pio2l(long double x, long double *y)
 {
-	long double	z, w;
-	double		t[3], v[5];
-	int		e0, i, nx, n, sign;
+	long double z, w;
+	double t[3], v[5];
+	int e0, i, nx, n, sign;
 
 	sign = signbitl(x);
 	z = fabsl(x);
+
 	if (z <= pio4) {
 		y[0] = x;
 		y[1] = 0;
 		return (0);
 	}
+
 	e0 = ilogbl(z) - 23;
 	z = scalbnl(z, -e0);
+
 	for (i = 0; i < 3; i++) {
 		t[i] = (double)((int)(z));
 		z = (z - (long double)t[i]) * two24l;
 	}
+
 	nx = 3;
-	while (t[nx-1] == 0.0)
-		nx--;	/* omit trailing zeros */
+
+	while (t[nx - 1] == 0.0)
+		nx--;			/* omit trailing zeros */
+
 	n = __rem_pio2m(t, v, e0, nx, 2, _TBL_ipio2l_inf);
 	z = (long double)v[1];
 	w = (long double)v[0];
 	y[0] = z + w;
 	y[1] = z - (y[0] - w);
+
 	if (sign != 0) {
 		y[0] = -y[0];
 		y[1] = -y[1];
 		return (-n);
 	}
+
 	return (n);
 }

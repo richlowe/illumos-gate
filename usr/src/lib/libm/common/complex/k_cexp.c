@@ -22,12 +22,13 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
-/* INDENT OFF */
+
 /*
  * double __k_cexp(double x, int *n);
  * Returns the exponential of x in the form of 2**n * y, y=__k_cexp(x,&n).
@@ -47,11 +48,11 @@
  *	Write
  *	    R(r**2) = r*(exp(r)+1)/(exp(r)-1) = 2 + r*r/6 - r**4/360 + ...
  *      We use a special Remez algorithm on [0,0.34658] to generate
- * 	a polynomial of degree 5 to approximate R. The maximum error
+ *      a polynomial of degree 5 to approximate R. The maximum error
  *	of this polynomial approximation is bounded by 2**-59. In
  *	other words,
  *	    R(z) ~ 2.0 + P1*z + P2*z**2 + P3*z**3 + P4*z**4 + P5*z**5
- *  	(where z=r*r, and the values of P1 to P5 are listed below)
+ *      (where z=r*r, and the values of P1 to P5 are listed below)
  *	and
  *	    |                  5          |     -59
  *	    | 2.0+P1*z+...+P5*z   -  R(z) | <= 2
@@ -87,87 +88,96 @@
  * compiler will convert from decimal to binary accurately enough
  * to produce the hexadecimal values shown.
  */
-/* INDENT ON */
 
-#include "libm.h"		/* __k_cexp */
-#include "complex_wrapper.h"	/* HI_WORD/LO_WORD */
+#include "libm.h"			/* __k_cexp */
+#include "complex_wrapper.h"		/* HI_WORD/LO_WORD */
 
-/* INDENT OFF */
-static const double
-one = 1.0,
-two128 = 3.40282366920938463463e+38,
-halF[2]	= {
-	0.5, -0.5,
-},
-ln2HI[2] = {
+static const double one = 1.0,
+	two128 = 3.40282366920938463463e+38;
+
+static const double halF[2] = { 0.5, -0.5, };
+
+static const double ln2HI[2] = {
 	6.93147180369123816490e-01,	/* 0x3fe62e42, 0xfee00000 */
 	-6.93147180369123816490e-01,	/* 0xbfe62e42, 0xfee00000 */
-},
-ln2LO[2] = {
+};
+
+static const double ln2LO[2] = {
 	1.90821492927058770002e-10,	/* 0x3dea39ef, 0x35793c76 */
 	-1.90821492927058770002e-10,	/* 0xbdea39ef, 0x35793c76 */
-},
-invln2 = 1.44269504088896338700e+00,	/* 0x3ff71547, 0x652b82fe */
-P1 = 1.66666666666666019037e-01,	/* 0x3FC55555, 0x5555553E */
-P2 = -2.77777777770155933842e-03,	/* 0xBF66C16C, 0x16BEBD93 */
-P3 = 6.61375632143793436117e-05,	/* 0x3F11566A, 0xAF25DE2C */
-P4 = -1.65339022054652515390e-06,	/* 0xBEBBBD41, 0xC5D26BF1 */
-P5 = 4.13813679705723846039e-08;	/* 0x3E663769, 0x72BEA4D0 */
-/* INDENT ON */
+};
+
+static const double
+	invln2 = 1.44269504088896338700e+00,	/* 0x3ff71547, 0x652b82fe */
+	P1 = 1.66666666666666019037e-01,	/* 0x3FC55555, 0x5555553E */
+	P2 = -2.77777777770155933842e-03,	/* 0xBF66C16C, 0x16BEBD93 */
+	P3 = 6.61375632143793436117e-05,	/* 0x3F11566A, 0xAF25DE2C */
+	P4 = -1.65339022054652515390e-06,	/* 0xBEBBBD41, 0xC5D26BF1 */
+	P5 = 4.13813679705723846039e-08;	/* 0x3E663769, 0x72BEA4D0 */
+
 
 double
-__k_cexp(double x, int *n) {
+__k_cexp(double x, int *n)
+{
 	double hi = 0.0L, lo = 0.0L, c, t;
 	int k, xsb;
 	unsigned hx, lx;
 
-	hx = HI_WORD(x);	/* high word of x */
-	lx = LO_WORD(x);	/* low word of x */
-	xsb = (hx >> 31) & 1;	/* sign bit of x */
-	hx &= 0x7fffffff;	/* high word of |x| */
+	hx = HI_WORD(x);		/* high word of x */
+	lx = LO_WORD(x);		/* low word of x */
+	xsb = (hx >> 31) & 1;		/* sign bit of x */
+	hx &= 0x7fffffff;		/* high word of |x| */
 
 	/* filter out non-finite argument */
-	if (hx >= 0x40e86a00) {	/* if |x| > 50000 */
+	if (hx >= 0x40e86a00) {		/* if |x| > 50000 */
 		if (hx >= 0x7ff00000) {
 			*n = 1;
+
 			if (((hx & 0xfffff) | lx) != 0)
-				return (x + x);	/* NaN */
+				return (x + x);		/* NaN */
 			else
 				return ((xsb == 0) ? x : 0.0);
-							/* exp(+-inf)={inf,0} */
+
+			/* exp(+-inf)={inf,0} */
 		}
+
 		*n = (xsb == 0) ? 50000 : -50000;
 		return (one + ln2LO[1] * ln2LO[1]);	/* generate inexact */
 	}
 
 	*n = 0;
+
 	/* argument reduction */
-	if (hx > 0x3fd62e42) {	/* if  |x| > 0.5 ln2 */
+	if (hx > 0x3fd62e42) {		/* if  |x| > 0.5 ln2 */
 		if (hx < 0x3FF0A2B2) {	/* and |x| < 1.5 ln2 */
 			hi = x - ln2HI[xsb];
 			lo = ln2LO[xsb];
 			k = 1 - xsb - xsb;
 		} else {
-			k = (int) (invln2 * x + halF[xsb]);
+			k = (int)(invln2 * x + halF[xsb]);
 			t = k;
 			hi = x - t * ln2HI[0];
-					/* t*ln2HI is exact for t<2**20 */
+			/* t*ln2HI is exact for t<2**20 */
 			lo = t * ln2LO[0];
 		}
+
 		x = hi - lo;
 		*n = k;
 	} else if (hx < 0x3e300000) {	/* when |x|<2**-28 */
 		return (one + x);
-	} else
+	} else {
 		k = 0;
+	}
 
 	/* x is now in primary range */
 	t = x * x;
 	c = x - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
-	if (k == 0)
+
+	if (k == 0) {
 		return (one - ((x * c) / (c - 2.0) - x));
-	else {
+	} else {
 		t = one - ((lo - (x * c) / (2.0 - c)) - hi);
+
 		if (k > 128) {
 			t *= two128;
 			*n = k - 128;
@@ -175,6 +185,7 @@ __k_cexp(double x, int *n) {
 			HI_WORD(t) += (k << 20);
 			*n = 0;
 		}
+
 		return (t);
 	}
 }

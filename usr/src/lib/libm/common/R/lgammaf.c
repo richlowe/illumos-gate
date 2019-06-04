@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,11 +35,13 @@
 extern int signgamf;
 
 float
-lgammaf(float x) {
-	float	 y;
+lgammaf(float x)
+{
+	float y;
 
 	if (isnanf(x))
 		return (x * x);
+
 	y = (float)__k_lgamma((double)x, &signgamf);
 	signgam = signgamf;	/* SUSv3 requires the setting of signgam */
 	return (y);

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,26 +30,27 @@
 
 #pragma weak __cprojl = cprojl
 
-#include "libm.h"		/* fabsl */
+#include "libm.h"			/* fabsl */
 #include "complex_wrapper.h"
 #include "longdouble.h"
 
-/* INDENT OFF */
 static const long double zero = 0.0L;
-/* INDENT ON */
+
 
 ldcomplex
-cprojl(ldcomplex z) {
+cprojl(ldcomplex z)
+{
 	long double x, y;
 	int hy;
 
 	x = LD_RE(z);
 	y = LD_IM(z);
 #if defined(__x86)
-	hy = ((int *) &y)[2] << 16;
+	hy = ((int *)&y)[2] << 16;
 #else
-	hy = ((int *) &y)[0];
+	hy = ((int *)&y)[0];
 #endif
+
 	if (isinfl(y)) {
 		LD_RE(z) = fabsl(y);
 		LD_IM(z) = hy >= 0 ? zero : -zero;
@@ -56,5 +58,6 @@ cprojl(ldcomplex z) {
 		LD_RE(z) = fabsl(x);
 		LD_IM(z) = hy >= 0 ? zero : -zero;
 	}
+
 	return (z);
 }

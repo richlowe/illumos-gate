@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __acosh = acosh
 
-/* INDENT OFF */
+
 /*
  * acosh(x)
  * Method :
@@ -44,29 +45,30 @@
  *	acosh(x) is NaN with signal if x < 1.
  *	acosh(NaN) is NaN without signal.
  */
-/* INDENT ON */
 
-#include "libm_protos.h"	/* _SVID_libm_error */
+#include "libm_protos.h"		/* _SVID_libm_error */
 #include "libm_macros.h"
 #include <math.h>
 
-static const double
-	one = 1.0,
+static const double one = 1.0,
 	ln2 = 6.93147180559945286227e-01;	/* 3FE62E42, FEFA39EF */
 
 double
-acosh(double x) {
+acosh(double x)
+{
 	double t;
 	int hx;
 
-	hx = ((int *) &x)[HIWORD];
-	if (hx < 0x3ff00000) {	/* x < 1 */
+	hx = ((int *)&x)[HIWORD];
+
+	if (hx < 0x3ff00000) {		/* x < 1 */
 		if (isnan(x))
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 			return (hx >= 0xfff80000 ? x : (x - x) / (x - x));
-			/* assumes sparc-like QNaN */
+
+		/* assumes sparc-like QNaN */
 #else
-			return (x - x) / (x - x);
+			return ((x - x) / (x - x));
 #endif
 		else
 			return (_SVID_libm_err(x, x, 29));
@@ -79,10 +81,11 @@ acosh(double x) {
 #else
 			return (x + x);
 #endif
-		} else	/* acosh(huge)=log(2x) */
+		} else { /* acosh(huge)=log(2x) */
 			return (log(x) + ln2);
-	} else if (((hx - 0x3ff00000) | ((int *) &x)[LOWORD]) == 0) {
-		return (0.0);	/* acosh(1) = 0 */
+		}
+	} else if (((hx - 0x3ff00000) | ((int *)&x)[LOWORD]) == 0) {
+		return (0.0);		/* acosh(1) = 0 */
 	} else if (hx > 0x40000000) {
 		/* 2**28 > x > 2 */
 		t = x * x;

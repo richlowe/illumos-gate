@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,15 +30,15 @@
 
 #pragma weak __csqrtf = csqrtf
 
-#include "libm.h"		/* sqrt/fabsf/sqrtf */
+#include "libm.h"			/* sqrt/fabsf/sqrtf */
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
 static const float zero = 0.0F;
-/* INDENT ON */
+
 
 fcomplex
-csqrtf(fcomplex z) {
+csqrtf(fcomplex z)
+{
 	fcomplex ans;
 	double dt, dx, dy;
 	float x, y, t, ax, ay, w;
@@ -51,11 +52,12 @@ csqrtf(fcomplex z) {
 	iy = hy & 0x7fffffff;
 	ay = fabsf(y);
 	ax = fabsf(x);
+
 	if (ix >= 0x7f800000 || iy >= 0x7f800000) {
 		/* x or y is Inf or NaN */
-		if (iy == 0x7f800000)
+		if (iy == 0x7f800000) {
 			F_IM(ans) = F_RE(ans) = ay;
-		else if (ix == 0x7f800000) {
+		} else if (ix == 0x7f800000) {
 			if (hx > 0) {
 				F_RE(ans) = ax;
 				F_IM(ans) = ay * zero;
@@ -63,8 +65,9 @@ csqrtf(fcomplex z) {
 				F_RE(ans) = ay * zero;
 				F_IM(ans) = ax;
 			}
-		} else
+		} else {
 			F_IM(ans) = F_RE(ans) = ax + ay;
+		}
 	} else if (iy == 0) {
 		if (hx >= 0) {
 			F_RE(ans) = sqrtf(ax);
@@ -74,11 +77,12 @@ csqrtf(fcomplex z) {
 			F_RE(ans) = zero;
 		}
 	} else {
-		dx = (double) ax;
-		dy = (double) ay;
+		dx = (double)ax;
+		dy = (double)ay;
 		dt = sqrt(0.5 * (sqrt(dx * dx + dy * dy) + dx));
-		t = (float) dt;
-		w = (float) (dy / (dt + dt));
+		t = (float)dt;
+		w = (float)(dy / (dt + dt));
+
 		if (hx >= 0) {
 			F_RE(ans) = t;
 			F_IM(ans) = w;
@@ -87,7 +91,9 @@ csqrtf(fcomplex z) {
 			F_RE(ans) = w;
 		}
 	}
+
 	if (hy < 0)
 		F_IM(ans) = -F_IM(ans);
+
 	return (ans);
 }

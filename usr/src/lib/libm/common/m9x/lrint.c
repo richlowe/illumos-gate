@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -39,12 +40,13 @@
  * If x is not an integer, the inexact exception is raised.
  */
 
-#include <sys/isa_defs.h>	/* _ILP32 */
+#include <sys/isa_defs.h>		/* _ILP32 */
 #include "libm.h"
 
 #if defined(_ILP32)
 long
-lrint(double x) {
+lrint(double x)
+{
 	/*
 	 * Note: The following code works on x86 (in the default rounding
 	 * precision mode), but one should just use the fistpl instruction
@@ -54,11 +56,13 @@ lrint(double x) {
 		unsigned i[2];
 		double d;
 	} xx, yy;
+
 	unsigned hx;
 
 	xx.d = x;
 	hx = xx.i[HIWORD] & ~0x80000000;
-	if (hx < 0x43300000) { /* |x| < 2^52 */
+
+	if (hx < 0x43300000) {		/* |x| < 2^52 */
 		/* add and subtract a power of two to round x to an integer */
 #if defined(__sparc)
 		yy.i[HIWORD] = (xx.i[HIWORD] & 0x80000000) | 0x43300000;
@@ -72,8 +76,8 @@ lrint(double x) {
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long) x);
+	return ((long)x);
 }
 #else
 #error Unsupported architecture
-#endif	/* defined(_ILP32) */
+#endif /* defined(_ILP32) */

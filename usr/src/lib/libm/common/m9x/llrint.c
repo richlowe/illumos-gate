@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -46,7 +47,8 @@
 #include "libm.h"
 
 long long
-llrint(double x) {
+llrint(double x)
+{
 	/*
 	 * Note: The following code works on x86 (in the default rounding
 	 * precision mode), but one should just use the fistpll instruction
@@ -56,16 +58,17 @@ llrint(double x) {
 		unsigned i[2];
 		double d;
 	} xx, yy;
+
 	unsigned hx;
 
 	xx.d = x;
 	hx = xx.i[HIWORD] & ~0x80000000;
 
-	if (hx < 0x43300000) { /* |x| < 2^52 */
+	if (hx < 0x43300000) {		/* |x| < 2^52 */
 		/* add and subtract a power of two to round x to an integer */
 #if defined(__sparc) || defined(__amd64)
 		yy.i[HIWORD] = (xx.i[HIWORD] & 0x80000000) | 0x43300000;
-#elif defined(__i386)	/* !defined(__amd64) */
+#elif defined(__i386)			/* !defined(__amd64) */
 		yy.i[HIWORD] = (xx.i[HIWORD] & 0x80000000) | 0x43e00000;
 #else
 #error Unknown architecture
@@ -75,5 +78,5 @@ llrint(double x) {
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long long) x);
+	return ((long long)x);
 }

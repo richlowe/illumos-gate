@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -44,35 +45,41 @@
 #include "libm.h"
 
 static const long double zero = 0.0L, small = 1.0e-20L, half = 0.5L, one = 1.0L;
+
 #ifndef lint
 static const long double big = 1.0e+20L;
 #endif
 
 long double
-asinl(long double x) {
+asinl(long double x)
+{
 	long double t, w;
+
 #ifndef lint
 	volatile long double dummy;
 #endif
 
 	w = fabsl(x);
-	if (isnanl(x))
+
+	if (isnanl(x)) {
 		return (x + x);
-	else if (w <= half) {
+	} else if (w <= half) {
 		if (w < small) {
 #ifndef lint
 			dummy = w + big;
-							/* inexact if w != 0 */
+			/* inexact if w != 0 */
 #endif
 			return (x);
-		} else
+		} else {
 			return (atanl(x / sqrtl(one - x * x)));
+		}
 	} else if (w < one) {
 		t = one - w;
 		w = t + t;
 		return (atanl(x / sqrtl(w - t * t)));
-	} else if (w == one)
+	} else if (w == one) {
 		return (atan2l(x, zero));	/* asin(+-1) =  +- PI/2 */
-	else
+	} else {
 		return (zero / zero);		/* |x| > 1: invalid */
+	}
 }

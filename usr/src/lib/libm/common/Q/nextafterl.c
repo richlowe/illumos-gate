@@ -58,9 +58,9 @@
 /*
  * if pseudo-denormal, replace by the equivalent normal
  */
-#define	X86PDNRM1(x)	if (XBIASED_EXP(x) == 0 && (((int *) &x)[1] & \
+#define	X86PDNRM1(x)	if (XBIASED_EXP(x) == 0 && (((int *)&x)[1] & \
 				0x80000000) != 0) \
-				((int *) &x)[2] |= 1
+				((int *)&x)[2] |= 1
 #define	INC(px)	{ \
 			if (++px[n2] == 0) \
 				if ((++px[n1] & ~0x80000000) == 0) \
@@ -75,9 +75,10 @@
 #endif
 
 long double
-nextafterl(long double x, long double y) {
-	int *px = (int *) &x;
-	int *py = (int *) &y;
+nextafterl(long double x, long double y)
+{
+	int *px = (int *)&x;
+	int *py = (int *)&y;
 
 	if (x == y)
 		return (y);		/* C99 requirement */

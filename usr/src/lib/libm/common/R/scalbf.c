@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,8 +33,9 @@
 #include "libm.h"
 
 float
-scalbf(float x, float y) {
-	int	ix, iy, hx, hy, n;
+scalbf(float x, float y)
+{
+	int ix, iy, hx, hy, n;
 
 	ix = *(int *)&x;
 	iy = *(int *)&y;
@@ -41,20 +44,22 @@ scalbf(float x, float y) {
 
 	if (hx > 0x7f800000 || hy >= 0x7f800000) {
 		/* x is nan or y is inf or nan */
-		return ((iy < 0)? x / -y : x * y);
+		return ((iy < 0) ? x / -y : x *y);
 	}
 
 	/* see if y is an integer without raising inexact */
 	if (hy >= 0x4b000000) {
 		/* |y| >= 2^23, so it must be an integer */
-		n = (iy < 0)? -65000 : 65000;
+		n = (iy < 0) ? -65000 : 65000;
 	} else if (hy < 0x3f800000) {
 		/* |y| < 1, so it must be zero or non-integer */
-		return ((hy == 0)? x : (x - x) / (x - x));
+		return ((hy == 0) ? x : (x - x) / (x - x));
 	} else {
 		if (hy & ((1 << (0x96 - (hy >> 23))) - 1))
 			return ((y - y) / (y - y));
+
 		n = (int)y;
 	}
+
 	return (scalbnf(x, n));
 }

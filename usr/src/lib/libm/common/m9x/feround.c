@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -42,40 +43,45 @@
 #include <float.h>
 #endif
 
-int fegetround(void)
+int
+fegetround(void)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
-	return (int)__fenv_get_rd(fsr);
+	return ((int)__fenv_get_rd(fsr));
 }
 
-int fesetround(int r)
+int
+fesetround(int r)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	if (r & ~3)
-		return -1;
+		return (-1);
+
 	__fenv_getfsr(&fsr);
 	__fenv_set_rd(fsr, r);
 	__fenv_setfsr(&fsr);
 #if defined(__i386) && !defined(__amd64)
 	FLT_ROUNDS = (0x2D >> (r << 1)) & 3;	/* 0->1, 1->3, 2->2, 3->0 */
 #endif
-	return 0;
+	return (0);
 }
 
-int fesetround96(int r)
+int
+fesetround96(int r)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	if (r & ~3)
-		return 0;
+		return (0);
+
 	__fenv_getfsr(&fsr);
 	__fenv_set_rd(fsr, r);
 	__fenv_setfsr(&fsr);
 #if defined(__i386) && !defined(__amd64)
 	FLT_ROUNDS = (0x2D >> (r << 1)) & 3;	/* 0->1, 1->3, 2->2, 3->0 */
 #endif
-	return 1;
+	return (1);
 }

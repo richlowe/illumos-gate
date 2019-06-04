@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -46,92 +47,105 @@
 #include "fex_handler.h"
 #include "fenv_inlines.h"
 
-
-int feclearexcept(int e)
+int
+feclearexcept(int e)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
 	__fenv_set_ex(fsr, __fenv_get_ex(fsr) & ~e);
 	__fenv_setfsr(&fsr);
+
 	if (fex_get_log())
 		__fex_update_te();
-	return 0;
+
+	return (0);
 }
 
 /*
-*  note - __fex_hdlr depends on fetestexcept following feraiseexcept
-*/
-int feraiseexcept(int e)
+ *  note - __fex_hdlr depends on fetestexcept following feraiseexcept
+ */
+int
+feraiseexcept(int e)
 {
-	volatile double	t;
-	unsigned long	fsr;
+	volatile double t;
+	unsigned long fsr;
 
 	if (e & FE_INVALID) {
 		t = 0.0;
 		t /= 0.0;
 	}
+
 	if (e & FE_DIVBYZERO) {
 		t = 1.0e300;
 		t /= 0.0;
 	}
+
 	if (e & FE_OVERFLOW) {
 		/* if overflow is not trapped, avoid raising inexact */
 		__fenv_getfsr(&fsr);
+
 		if (!(__fenv_get_te(fsr) & (1 << fp_trap_overflow))) {
 			__fenv_set_ex(fsr, __fenv_get_ex(fsr) | FE_OVERFLOW);
 			__fenv_setfsr(&fsr);
-		}
-		else {
+		} else {
 			t = 1.0e300;
 			t *= 1.0e300;
 		}
 	}
+
 	if (e & FE_UNDERFLOW) {
 		/* if underflow is not trapped, avoid raising inexact */
 		__fenv_getfsr(&fsr);
+
 		if (!(__fenv_get_te(fsr) & (1 << fp_trap_underflow))) {
 			__fenv_set_ex(fsr, __fenv_get_ex(fsr) | FE_UNDERFLOW);
 			__fenv_setfsr(&fsr);
-		}
-		else {
+		} else {
 			t = 1.0e-307;
 			t -= 1.001e-307;
 		}
 	}
+
 	if (e & FE_INEXACT) {
 		t = 1.0e300;
 		t += 1.0e-307;
 	}
-	return 0;
+
+	return (0);
 }
 
-int fetestexcept(int e)
+int
+fetestexcept(int e)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
-	return (int)__fenv_get_ex(fsr) & e;
+	return ((int)__fenv_get_ex(fsr) & e);
 }
 
-int fegetexceptflag(fexcept_t *p, int e)
+int
+fegetexceptflag(fexcept_t *p, int e)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
 	*p = (int)__fenv_get_ex(fsr) & e;
-	return 0;
+	return (0);
 }
 
-int fesetexceptflag(const fexcept_t *p, int e)
+int
+fesetexceptflag(const fexcept_t *p, int e)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
 	__fenv_set_ex(fsr, (((int)__fenv_get_ex(fsr) & ~e) | (*p & e)) &
-		FE_ALL_EXCEPT);
+	    FE_ALL_EXCEPT);
 	__fenv_setfsr(&fsr);
+
 	if (fex_get_log())
 		__fex_update_te();
-	return 0;
+
+	return (0);
 }

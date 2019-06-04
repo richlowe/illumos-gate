@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -37,25 +38,22 @@
 #include <sys/isa_defs.h>
 
 #if defined(__sparc)
-
 static const union {
 	unsigned i[2];
 	double d;
 } __nan_union = { 0x7fffffff, 0xffffffff };
-
 #elif defined(__i386) || defined(__amd64)
-
 static const union {
 	unsigned i[2];
 	double d;
 } __nan_union = { 0xffffffff, 0x7fffffff };
-
 #else
 #error Unknown architecture
 #endif
 
 /* ARGSUSED0 */
 double
-__nan(const char *c) {
+__nan(const char *c)
+{
 	return (__nan_union.d);
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,9 +39,9 @@
 
 extern int signgam;
 extern int signgaml;
-
 long double
-lgammal(long double x) {
+lgammal(long double x)
+{
 	long double y = __k_lgammal(x, &signgaml);
 
 	signgam = signgaml;	/* SUSv3 requires the setting of signgam */

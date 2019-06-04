@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -42,29 +43,34 @@
 #include "longdouble.h"
 
 static const long double qone = 1.0L;
-
 long double
-ceill(long double x) {
+ceill(long double x)
+{
 	long double t;
 
 	if (!finitel(x))
 		return (x + x);
+
 	t = rintl(x);
-	if (t >= x) 			/* already ceil(x) */
+
+	if (t >= x)			/* already ceil(x) */
 		return (t);
 	else				/* t < x case: return t+1  */
 		return (copysignl(t + qone, x));
 }
 
 long double
-floorl(long double x) {
+floorl(long double x)
+{
 	long double t;
 
 	if (!finitel(x))
 		return (x + x);
+
 	t = rintl(x);
+
 	if (t <= x)
 		return (t);		/* already floor(x) */
-	else 				/* x < t case: return t-1  */
-	    return (copysignl(t - qone, x));
+	else				/* x < t case: return t-1  */
+		return (copysignl(t - qone, x));
 }

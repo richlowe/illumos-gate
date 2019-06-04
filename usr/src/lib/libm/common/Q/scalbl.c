@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -38,8 +39,9 @@
 #define	n0	0
 
 long double
-scalbl(long double x, long double fn) {
-	int *py = (int *) &fn, n;
+scalbl(long double x, long double fn)
+{
+	int *py = (int *)&fn, n;
 	long double z;
 
 	if (isnanl(x) || isnanl(fn))
@@ -54,15 +56,18 @@ scalbl(long double x, long double fn) {
 		else
 			return (x * fn);
 	}
+
 	if (rintl(fn) != fn)
 		return ((fn - fn) / (fn - fn));
-	if (fn > 65000.0L)
+
+	if (fn > 65000.0L) {
 		z = scalbnl(x, 65000);
-	else if (-fn > 65000.0L)
+	} else if (-fn > 65000.0L) {
 		z = scalbnl(x, -65000);
-	else {
-		n = (int) fn;
+	} else {
+		n = (int)fn;
 		z = scalbnl(x, n);
 	}
+
 	return (z);
 }

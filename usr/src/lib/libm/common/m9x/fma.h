@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -35,7 +36,6 @@ extern "C" {
 #endif
 
 #ifdef __sparc
-
 /*
  * Common definitions for fma routines (SPARC)
  */
@@ -48,7 +48,7 @@ extern "C" {
 #define	FSR_UFC		0x4
 #define	FSR_OFC		0x8
 #define	FSR_NVC		0x10
-#define	FSR_CEXC	0x1f	/* mask for all cexc bits */
+#define	FSR_CEXC	0x1f		/* mask for all cexc bits */
 
 /* accrued exception bits */
 #define	FSR_NXA		0x20
@@ -73,12 +73,9 @@ extern "C" {
 /* inline templates */
 extern void __fenv_getfsr32(unsigned int *);
 extern void __fenv_setfsr32(const unsigned int *);
-
 #endif /* __sparc */
 
-
 #if defined(__x86)
-
 /*
  * Common definitions for fma routines (x86)
  */
@@ -100,7 +97,7 @@ extern void __fenv_setfsr32(const unsigned int *);
 #define	FCW_OFM		0x00080000
 #define	FCW_UFM		0x00100000
 #define	FCW_NXM		0x00200000
-#define FCW_ALLM	0x003f0000
+#define	FCW_ALLM	0x003f0000
 
 /* rounding directions */
 #define	FCW_RN		0x00000000
@@ -109,18 +106,16 @@ extern void __fenv_setfsr32(const unsigned int *);
 #define	FCW_RZ		0x0c000000
 
 /* rounding precisions */
-#define FCW_P24		0x00000000
-#define FCW_P53		0x02000000
-#define FCW_P64		0x03000000
+#define	FCW_P24		0x00000000
+#define	FCW_P53		0x02000000
+#define	FCW_P64		0x03000000
 
 /* inline templates */
 extern void __fenv_getcwsw(unsigned int *);
 extern void __fenv_setcwsw(const unsigned int *);
-
 #endif /* __x86 */
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif	/* _FMA_H */
+#endif /* _FMA_H */

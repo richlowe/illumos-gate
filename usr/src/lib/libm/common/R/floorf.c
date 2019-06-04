@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,7 +31,7 @@
 #pragma weak __ceilf = ceilf
 #pragma weak __floorf = floorf
 
-/* INDENT OFF */
+
 /*
  * ceilf(x)	return the biggest integral value (in float) below x
  * floorf(x)	return the least integral value (in float) above x
@@ -42,70 +43,81 @@
 #include "libm.h"
 
 static const float xf[] = {
-/* ZEROF */	0.0f,
-/* ONEF */	1.0f,
-/* MONEF */	-1.0f,
-/* HUGEF */	1.0e30f,
-};
+/* ZEROF */
+	0.0f,
+/* ONEF */ 1.0f,
+/* MONEF */ -1.0f,
+/* HUGEF */ 1.0e30f, };
 
-#define	ZEROF	xf[0]
-#define	ONEF	xf[1]
-#define	MONEF	xf[2]
-#define	HUGEF	xf[3]
-/* INDENT ON */
+#define	ZEROF		xf[0]
+#define	ONEF		xf[1]
+#define	MONEF		xf[2]
+#define	HUGEF		xf[3]
 
 float
-ceilf(float x) {
+ceilf(float x)
+{
 	volatile float dummy __unused;
 	int hx, k, j, ix;
 
-	hx = *(int *) &x;
+	hx = *(int *)&x;
 	ix = hx & ~0x80000000;
 	k = ix >> 23;
+
 	if (((k - 127) ^ (k - 150)) < 0) {
 		k = (1 << (150 - k)) - 1;
+
 		if ((k & hx) != 0)
 			dummy = HUGEF + x;	/* raise inexact */
+
 		j = k & (~(hx >> 31));
-		*(int *) &x = (hx + j) & ~k;
+		*(int *)&x = (hx + j) & ~k;
 		return (x);
 	} else if (k <= 126) {
 		dummy = HUGEF + x;
+
 		if (hx > 0)
 			return (ONEF);
 		else if (ix == 0)
 			return (x);
 		else
 			return (-ZEROF);
-	} else
+	} else {
 		/* signal invalid if x is a SNaN */
-		return (x * ONEF);		/* +0 -> *1 for Cheetah */
+		return (x * ONEF);	/* +0 -> *1 for Cheetah */
+	}
 }
 
 float
-floorf(float x) {
+floorf(float x)
+{
 	volatile float dummy __unused;
 	int hx, k, j, ix;
 
-	hx = *(int *) &x;
+	hx = *(int *)&x;
 	ix = hx & ~0x80000000;
 	k = ix >> 23;
+
 	if (((k - 127) ^ (k - 150)) < 0) {
 		k = (1 << (150 - k)) - 1;
+
 		if ((k & hx) != 0)
 			dummy = HUGEF + x;	/* raise inexact */
+
 		j = k & (hx >> 31);
-		*(int *) &x = (hx + j) & ~k;
+		*(int *)&x = (hx + j) & ~k;
 		return (x);
 	} else if (k <= 126) {
 		dummy = HUGEF + x;
+
 		if (hx > 0)
 			return (ZEROF);
 		else if (ix == 0)
 			return (x);
 		else
 			return (MONEF);
-	} else
+	} else {
 		/* signal invalid if x is a SNaN */
-		return (x * ONEF);		/* +0 -> *1 for Cheetah */
+		return (x * ONEF);	/* +0 -> *1 for Cheetah */
+	}
 }

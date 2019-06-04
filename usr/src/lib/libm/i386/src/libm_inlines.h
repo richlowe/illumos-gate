@@ -34,7 +34,6 @@
 #define	_LIBM_INLINES_H
 
 #ifdef __GNUC__
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -261,8 +260,9 @@ isnanf(float f)
 }
 
 extern __GNU_INLINE double
-rint(double a) {
-    return (__inline_rint(a));
+rint(double a)
+{
+	return (__inline_rint(a));
 }
 
 extern __GNU_INLINE double
@@ -345,7 +345,5 @@ isnanl(long double ld)
 #ifdef __cplusplus
 }
 #endif
-
 #endif  /* __GNUC__ */
-
 #endif /* _LIBM_INLINES_H */

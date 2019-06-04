@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -35,22 +36,25 @@
 #include <thread.h>
 #include "fex_handler.h"
 
-int fegetprec(void)
+int
+fegetprec(void)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
-	return __fenv_get_rp(fsr);
+	return (__fenv_get_rp(fsr));
 }
 
-int fesetprec(int r)
+int
+fesetprec(int r)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	if (r != FE_FLTPREC && r != FE_DBLPREC && r != FE_LDBLPREC)
-		return 0;
+		return (0);
+
 	__fenv_getfsr(&fsr);
 	__fenv_set_rp(fsr, r);
 	__fenv_setfsr(&fsr);
-	return 1;
+	return (1);
 }

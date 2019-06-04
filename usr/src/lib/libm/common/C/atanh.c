@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __atanh = atanh
 
-/* INDENT OFF */
+
 /*
  * atanh(x)
  * Code originated from 4.3bsd.
@@ -48,23 +49,27 @@
  *	atanh(NaN) is that NaN with no signal;
  *	atanh(+-1) is +-INF with signal.
  */
-/* INDENT ON */
 
 #include "libm.h"
 #include "libm_protos.h"
 #include <math.h>
 
 double
-atanh(double x) {
+atanh(double x)
+{
 	double t;
 
 	if (isnan(x))
 		return (x * x);		/* switched from x + x for Cheetah */
+
 	t = fabs(x);
+
 	if (t > 1.0)
 		return (_SVID_libm_err(x, x, 30));	/* sNaN */
+
 	if (t == 1.0)
 		return (_SVID_libm_err(x, x, 31));	/* x/0; */
+
 	t = t / (1.0 - t);
 	return (copysign(0.5, x) * log1p(t + t));
 }

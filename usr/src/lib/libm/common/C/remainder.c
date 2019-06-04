@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,7 +35,7 @@
  * Code originated from 4.3bsd.
  * Modified by K.C. Ng for SUN 4.0 libm.
  * Return :
- * 	returns  x REM p  =  x - [x/p]*p as if in infinite precise arithmetic,
+ *      returns  x REM p  =  x - [x/p]*p as if in infinite precise arithmetic,
  *	where [x/p] is the (inifinite bit) integer nearest x/p (in half way
  *	case choose the even one).
  * Method :
@@ -45,9 +47,10 @@
 static const double zero = 0.0, half = 0.5;
 
 double
-remainder(double x, double p) {
-	double	halfp;
-	int	ix, hx, hp;
+remainder(double x, double p)
+{
+	double halfp;
+	int ix, hx, hp;
 
 	ix = ((int *)&x)[HIWORD];
 	hx = ix & ~0x80000000;
@@ -55,6 +58,7 @@ remainder(double x, double p) {
 
 	if (hp > 0x7ff00000 || (hp == 0x7ff00000 && ((int *)&p)[LOWORD] != 0))
 		return (x * p);
+
 	if (hx > 0x7ff00000 || (hx == 0x7ff00000 && ((int *)&x)[LOWORD] != 0))
 		return (x * p);
 
@@ -62,26 +66,35 @@ remainder(double x, double p) {
 		return (_SVID_libm_err(x, p, 28));
 
 	p = fabs(p);
+
 	if (hp < 0x7fe00000)
 		x = fmod(x, p + p);
+
 	x = fabs(x);
+
 	if (hp < 0x00200000) {
 		if (x + x > p) {
 			if (x == p)	/* avoid x-x=-0 in RM mode */
-				return ((ix < 0)? -zero : zero);
+				return ((ix < 0) ? -zero : zero);
+
 			x -= p;
+
 			if (x + x >= p)
 				x -= p;
 		}
 	} else {
 		halfp = half * p;
+
 		if (x > halfp) {
 			if (x == p)	/* avoid x-x=-0 in RM mode */
-				return ((ix < 0)? -zero : zero);
+				return ((ix < 0) ? -zero : zero);
+
 			x -= p;
+
 			if (x >= halfp)
 				x -= p;
 		}
 	}
-	return ((ix < 0)? -x : x);
+
+	return ((ix < 0) ? -x : x);
 }

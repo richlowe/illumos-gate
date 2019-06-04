@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -57,15 +58,15 @@
 
 #include "libm.h"
 #include "longdouble.h"
-#include <float.h>	/* LDBL_MAX */
+#include <float.h>			/* LDBL_MAX */
 
-#define	GENERIC long double
+#define	GENERIC	long double
 
 static const GENERIC
 invsqrtpi = 5.641895835477562869480794515607725858441e-0001L,
-two  = 2.0L,
-zero = 0.0L,
-one  = 1.0L;
+	two = 2.0L,
+	zero = 0.0L,
+	one = 1.0L;
 
 GENERIC
 jnl(int n, GENERIC x)
@@ -81,73 +82,85 @@ jnl(int n, GENERIC x)
 		n = -n;
 		x = -x;
 	}
+
 	if (n == 0)
 		return (j0l(x));
+
 	if (n == 1)
 		return (j1l(x));
+
 	if (x != x)
-		return (x+x);
-	if ((n&1) == 0)
-		sgn = 0;			/* even n */
+		return (x + x);
+
+	if ((n & 1) == 0)
+		sgn = 0;		/* even n */
 	else
 		sgn = signbitl(x);	/* old n  */
+
 	x = fabsl(x);
-	if (x == zero || !finitel(x)) b = zero;
-	else if ((GENERIC)n <= x) {
-			/*
-			 * Safe to use
-			 * J(n+1,x)=2n/x *J(n,x)-J(n-1,x)
-			 */
+
+	if (x == zero || !finitel(x)) {
+		b = zero;
+	} else if ((GENERIC)n <= x) {
+		/*
+		 * Safe to use
+		 * J(n+1,x)=2n/x *J(n,x)-J(n-1,x)
+		 */
 		if (x > 1.0e91L) {
-				/*
-				 * x >> n**2
-				 *  Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
-				 *  Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
-				 *  Let s=sin(x), c=cos(x),
-				 *  xn=x-(2n+1)*pi/4, sqt2 = sqrt(2),then
-				 *
-				 *	   n	sin(xn)*sqt2	cos(xn)*sqt2
-				 *	----------------------------------
-				 *	   0	 s-c		 c+s
-				 *	   1	-s-c		-c+s
-				 *	   2	-s+c		-c-s
-				 *	   3	 s+c		 c-s
-				 */
-			switch (n&3) {
+			/*
+			 * x >> n**2
+			 *  Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
+			 *  Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
+			 *  Let s=sin(x), c=cos(x),
+			 *  xn=x-(2n+1)*pi/4, sqt2 = sqrt(2),then
+			 *
+			 *	   n	sin(xn)*sqt2	cos(xn)*sqt2
+			 *	----------------------------------
+			 *	   0	 s-c		 c+s
+			 *	   1	-s-c		-c+s
+			 *	   2	-s+c		-c-s
+			 *	   3	 s+c		 c-s
+			 */
+			switch (n & 3) {
 			case 0:
-				temp =  cosl(x)+sinl(x);
+				temp = cosl(x) + sinl(x);
 				break;
 			case 1:
-				temp = -cosl(x)+sinl(x);
+				temp = -cosl(x) + sinl(x);
 				break;
 			case 2:
-				temp = -cosl(x)-sinl(x);
+				temp = -cosl(x) - sinl(x);
 				break;
 			case 3:
-				temp =  cosl(x)-sinl(x);
+				temp = cosl(x) - sinl(x);
 				break;
 			}
-			b = invsqrtpi*temp/sqrtl(x);
+
+			b = invsqrtpi * temp / sqrtl(x);
 		} else {
 			a = j0l(x);
 			b = j1l(x);
+
 			for (i = 1; i < n; i++) {
 				temp = b;
 				/* avoid underflow */
-				b = b*((GENERIC)(i+i)/x) - a;
+				b = b * ((GENERIC)(i + i) / x) - a;
 				a = temp;
 			}
 		}
 	} else {
 		if (x < 1e-17L) {	/* use J(n,x) = 1/n!*(x/2)^n */
-			b = powl(0.5L*x, (GENERIC)n);
+			b = powl(0.5L * x, (GENERIC)n);
+
 			if (b != zero) {
 				for (a = one, i = 1; i <= n; i++)
 					a *= (GENERIC)i;
-				b = b/a;
+
+				b = b / a;
 			}
 		} else {
 			/* BEGIN CSTYLED */
+
 			/*
 			 * use backward recurrence
 			 *			x      x^2	x^2
@@ -177,29 +190,38 @@ jnl(int n, GENERIC x)
 			 * When Q(k) > 1e9	good for double
 			 * When Q(k) > 1e17	good for quaduple
 			 */
-			/* END CSTYLED */
-			/* determine k */
+
+			/*
+			 * END CSTYLED
+			 * determine k
+			 */
 			GENERIC t, v;
 			double q0, q1, h, tmp;
 			int k, m;
-			w  = (n+n)/(double)x;
-			h = 2.0/(double)x;
+
+			w = (n + n) / (double)x;
+			h = 2.0 / (double)x;
 			q0 = w;
-			z = w+h;
-			q1 = w*z - 1.0;
+			z = w + h;
+			q1 = w * z - 1.0;
 			k = 1;
+
 			while (q1 < 1.0e17) {
 				k += 1;
 				z += h;
-				tmp = z*q1 - q0;
+				tmp = z * q1 - q0;
 				q0 = q1;
 				q1 = tmp;
 			}
-			m = n+n;
-			for (t = zero, i = 2*(n+k); i >= m; i -= 2)
-				t = one/(i/x-t);
+
+			m = n + n;
+
+			for (t = zero, i = 2 * (n + k); i >= m; i -= 2)
+				t = one / (i / x - t);
+
 			a = t;
 			b = one;
+
 			/*
 			 * Estimate log((2/x)^n*n!) = n*log(2/x)+n*ln(n)
 			 * hence, if n*(log(2n/x)) > ...
@@ -213,29 +235,33 @@ jnl(int n, GENERIC x)
 			 * likely underflow to zero.
 			 */
 			tmp = n;
-			v = two/x;
-			tmp = tmp*logl(fabsl(v*tmp));
+			v = two / x;
+			tmp = tmp * logl(fabsl(v * tmp));
+
 			if (tmp < 1.1356523406294143949491931077970765e+04L) {
-				for (i = n-1; i > 0; i--) {
+				for (i = n - 1; i > 0; i--) {
 					temp = b;
-					b = ((i+i)/x)*b - a;
+					b = ((i + i) / x) * b - a;
 					a = temp;
 				}
 			} else {
-				for (i = n-1; i > 0; i--) {
+				for (i = n - 1; i > 0; i--) {
 					temp = b;
-					b = ((i+i)/x)*b - a;
+					b = ((i + i) / x) * b - a;
 					a = temp;
+
 					if (b > 1e1000L) {
 						a /= b;
 						t /= b;
-						b  = 1.0;
+						b = 1.0;
 					}
 				}
 			}
-			b = (t*j0l(x)/b);
+
+			b = (t * j0l(x) / b);
 		}
 	}
+
 	if (sgn != 0)
 		return (-b);
 	else
@@ -250,71 +276,83 @@ ynl(int n, GENERIC x)
 	GENERIC a, b, temp = 0;
 
 	if (x != x)
-		return (x+x);
+		return (x + x);
+
 	if (x <= zero) {
 		if (x == zero)
-			return (-one/zero);
+			return (-one / zero);
 		else
-			return (zero/zero);
+			return (zero / zero);
 	}
+
 	sign = 1;
+
 	if (n < 0) {
 		n = -n;
-		if ((n&1) == 1)
+
+		if ((n & 1) == 1)
 			sign = -1;
 	}
+
 	if (n == 0)
 		return (y0l(x));
+
 	if (n == 1)
-		return (sign*y1l(x));
+		return (sign * y1l(x));
+
 	if (!finitel(x))
 		return (zero);
 
 	if (x > 1.0e91L) {
-				/*
-				 * x >> n**2
-				 * Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
-				 *   Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
-				 *   Let s=sin(x), c=cos(x),
-				 * xn=x-(2n+1)*pi/4, sqt2 = sqrt(2),then
-				 *
-				 *	   n	sin(xn)*sqt2	cos(xn)*sqt2
-				 *	----------------------------------
-				 *	   0	 s-c		 c+s
-				 *	   1	-s-c		-c+s
-				 *	   2	-s+c		-c-s
-				 *	   3	 s+c		 c-s
-				 */
-		switch (n&3) {
+		/*
+		 * x >> n**2
+		 * Jn(x) = cos(x-(2n+1)*pi/4)*sqrt(2/x*pi)
+		 *   Yn(x) = sin(x-(2n+1)*pi/4)*sqrt(2/x*pi)
+		 *   Let s=sin(x), c=cos(x),
+		 * xn=x-(2n+1)*pi/4, sqt2 = sqrt(2),then
+		 *
+		 *	   n	sin(xn)*sqt2	cos(xn)*sqt2
+		 *	----------------------------------
+		 *	   0	 s-c		 c+s
+		 *	   1	-s-c		-c+s
+		 *	   2	-s+c		-c-s
+		 *	   3	 s+c		 c-s
+		 */
+		switch (n & 3) {
 		case 0:
-			temp =  sinl(x)-cosl(x);
+			temp = sinl(x) - cosl(x);
 			break;
 		case 1:
-			temp = -sinl(x)-cosl(x);
+			temp = -sinl(x) - cosl(x);
 			break;
 		case 2:
-			temp = -sinl(x)+cosl(x);
+			temp = -sinl(x) + cosl(x);
 			break;
 		case 3:
-			temp =  sinl(x)+cosl(x);
+			temp = sinl(x) + cosl(x);
 			break;
 		}
-		b = invsqrtpi*temp/sqrtl(x);
+
+		b = invsqrtpi * temp / sqrtl(x);
 	} else {
 		a = y0l(x);
 		b = y1l(x);
+
 		/*
 		 * fix 1262058 and take care of non-default rounding
 		 */
 		for (i = 1; i < n; i++) {
 			temp = b;
-			b *= (GENERIC) (i + i) / x;
+			b *= (GENERIC)(i + i) / x;
+
 			if (b <= -LDBL_MAX)
 				break;
+
 			b -= a;
 			a = temp;
 		}
 	}
+
 	if (sign > 0)
 		return (b);
 	else

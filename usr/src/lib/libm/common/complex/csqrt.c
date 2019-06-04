@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __csqrt = csqrt
 
-/* INDENT OFF */
+
 /*
  * dcomplex csqrt(dcomplex z);
  *
@@ -100,24 +101,22 @@
  *    csqrt(NaN + i y  ) =  NaN  + i NaN for finite y
  *    csqrt(NaN + i NaN) =  NaN  + i NaN
  */
-/* INDENT ON */
 
-#include "libm.h"		/* fabs/sqrt */
+#include "libm.h"			/* fabs/sqrt */
 #include "complex_wrapper.h"
 
-/* INDENT OFF */
-static const double
-	two300 = 2.03703597633448608627e+90,
+static const double two300 = 2.03703597633448608627e+90,
 	twom300 = 4.90909346529772655310e-91,
 	two599 = 2.07475778444049647926e+180,
 	twom601 = 1.20495993255144205887e-181,
 	two = 2.0,
 	zero = 0.0,
 	half = 0.5;
-/* INDENT ON */
+
 
 dcomplex
-csqrt(dcomplex z) {
+csqrt(dcomplex z)
+{
 	dcomplex ans;
 	double x, y, t, ax, ay;
 	int n, ix, iy, hx, hy, lx, ly;
@@ -132,11 +131,12 @@ csqrt(dcomplex z) {
 	iy = hy & 0x7fffffff;
 	ay = fabs(y);
 	ax = fabs(x);
+
 	if (ix >= 0x7ff00000 || iy >= 0x7ff00000) {
 		/* x or y is Inf or NaN */
-		if (ISINF(iy, ly))
+		if (ISINF(iy, ly)) {
 			D_IM(ans) = D_RE(ans) = ay;
-		else if (ISINF(ix, lx)) {
+		} else if (ISINF(ix, lx)) {
 			if (hx > 0) {
 				D_RE(ans) = ax;
 				D_IM(ans) = ay * zero;
@@ -144,8 +144,9 @@ csqrt(dcomplex z) {
 				D_RE(ans) = ay * zero;
 				D_IM(ans) = ax;
 			}
-		} else
+		} else {
 			D_IM(ans) = D_RE(ans) = ax + ay;
+		}
 	} else if ((iy | ly) == 0) {	/* y = 0 */
 		if (hx >= 0) {
 			D_RE(ans) = sqrt(ax);
@@ -156,7 +157,8 @@ csqrt(dcomplex z) {
 		}
 	} else if (ix >= iy) {
 		n = (ix - iy) >> 20;
-		if (n >= 30) {	/* x >> y or y=0 */
+
+		if (n >= 30) {			/* x >> y or y=0 */
 			t = sqrt(ax);
 		} else if (ix >= 0x5f300000) {	/* x > 2**500 */
 			ax *= twom601;
@@ -166,8 +168,10 @@ csqrt(dcomplex z) {
 			ax *= two599;
 			y *= two599;
 			t = twom300 * sqrt(ax + sqrt(ax * ax + y * y));
-		} else
+		} else {
 			t = sqrt(half * (ax + sqrt(ax * ax + ay * ay)));
+		}
+
 		if (hx >= 0) {
 			D_RE(ans) = t;
 			D_IM(ans) = ay / (t + t);
@@ -177,7 +181,8 @@ csqrt(dcomplex z) {
 		}
 	} else {
 		n = (iy - ix) >> 20;
-		if (n >= 30) {	/* y >> x */
+
+		if (n >= 30) {		/* y >> x */
 			if (n >= 60)
 				t = sqrt(half * ay);
 			else if (iy >= 0x7fe00000)
@@ -194,8 +199,10 @@ csqrt(dcomplex z) {
 			ax *= two599;
 			y *= two599;
 			t = twom300 * sqrt(ax + sqrt(ax * ax + y * y));
-		} else
+		} else {
 			t = sqrt(half * (ax + sqrt(ax * ax + ay * ay)));
+		}
+
 		if (hx >= 0) {
 			D_RE(ans) = t;
 			D_IM(ans) = ay / (t + t);
@@ -204,7 +211,9 @@ csqrt(dcomplex z) {
 			D_RE(ans) = ay / (t + t);
 		}
 	}
+
 	if (hy < 0)
 		D_IM(ans) = -D_IM(ans);
+
 	return (ans);
 }

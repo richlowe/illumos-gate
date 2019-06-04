@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -44,64 +45,60 @@ extern enum fp_direction_type __swapRD(enum fp_direction_type);
  */
 
 #ifdef __LITTLE_ENDIAN
-
 /* array indices used to access words within a double */
-#define	HIWORD	1
-#define	LOWORD	0
+#define	HIWORD		1
+#define	LOWORD		0
 
 /* structure used to access words within a quad */
 union longdouble {
 	struct {
-		unsigned int	frac4;
-		unsigned int	frac3;
-		unsigned int	frac2;
-		unsigned int	msw;
+		unsigned int frac4;
+		unsigned int frac3;
+		unsigned int frac2;
+		unsigned int msw;
 	} l;
-	long double	d;
+	long double d;
 };
 
 /* default NaN returned for sqrt(neg) */
-static const union longdouble
-	qnan = { 0xffffffff, 0xffffffff, 0xffffffff, 0x7fffffff };
+static const union longdouble qnan = {
+	0xffffffff, 0xffffffff, 0xffffffff, 0x7fffffff
+};
 
 /* signalling NaN used to raise invalid */
 static const union {
 	unsigned u[2];
 	double d;
 } snan = { 0, 0x7ff00001 };
-
 #else
-
 /* array indices used to access words within a double */
-#define	HIWORD	0
-#define	LOWORD	1
+#define	HIWORD		0
+#define	LOWORD		1
 
 /* structure used to access words within a quad */
 union longdouble {
 	struct {
-		unsigned int	msw;
-		unsigned int	frac2;
-		unsigned int	frac3;
-		unsigned int	frac4;
+		unsigned int msw;
+		unsigned int frac2;
+		unsigned int frac3;
+		unsigned int frac4;
 	} l;
-	long double	d;
+	long double d;
 };
 
 /* default NaN returned for sqrt(neg) */
-static const union longdouble
-	qnan = { 0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff };
+static const union longdouble qnan = {
+	0x7fffffff, 0xffffffff, 0xffffffff, 0xffffffff
+};
 
 /* signalling NaN used to raise invalid */
 static const union {
 	unsigned u[2];
 	double d;
 } snan = { 0x7ff00001, 0 };
-
 #endif /* __LITTLE_ENDIAN */
 
-
-static const double
-	zero = 0.0,
+static const double zero = 0.0,
 	half = 0.5,
 	one = 1.0,
 	huge = 1.0e300,
@@ -120,64 +117,55 @@ static const double
 	twom113 = 9.62964972193617926528e-35,
 	twom124 = 4.70197740328915003187e-38;
 
-
 /*
-*	Extract the exponent and normalized significand (represented as
-*	an array of five doubles) from a finite, nonzero quad.
-*/
+ *	Extract the exponent and normalized significand (represented as
+ *	an array of five doubles) from a finite, nonzero quad.
+ */
 static int
 __q_unpack(const union longdouble *x, double *s)
 {
 	union {
-		double			d;
-		unsigned int	l[2];
+		double d;
+		unsigned int l[2];
 	} u;
-	double			b;
-	unsigned int	lx, w[3];
-	int				ex;
+
+	double b;
+	unsigned int lx, w[3];
+	int ex;
 
 	/* get the normalized significand and exponent */
-	ex = (int) ((x->l.msw & 0x7fffffff) >> 16);
+	ex = (int)((x->l.msw & 0x7fffffff) >> 16);
 	lx = x->l.msw & 0xffff;
-	if (ex)
-	{
+
+	if (ex) {
 		lx |= 0x10000;
 		w[0] = x->l.frac2;
 		w[1] = x->l.frac3;
 		w[2] = x->l.frac4;
-	}
-	else
-	{
-		if (lx | (x->l.frac2 & 0xfffe0000))
-		{
+	} else {
+		if (lx | (x->l.frac2 & 0xfffe0000)) {
 			w[0] = x->l.frac2;
 			w[1] = x->l.frac3;
 			w[2] = x->l.frac4;
 			ex = 1;
-		}
-		else if (x->l.frac2 | (x->l.frac3 & 0xfffe0000))
-		{
+		} else if (x->l.frac2 | (x->l.frac3 & 0xfffe0000)) {
 			lx = x->l.frac2;
 			w[0] = x->l.frac3;
 			w[1] = x->l.frac4;
 			w[2] = 0;
 			ex = -31;
-		}
-		else if (x->l.frac3 | (x->l.frac4 & 0xfffe0000))
-		{
+		} else if (x->l.frac3 | (x->l.frac4 & 0xfffe0000)) {
 			lx = x->l.frac3;
 			w[0] = x->l.frac4;
 			w[1] = w[2] = 0;
 			ex = -63;
-		}
-		else
-		{
+		} else {
 			lx = x->l.frac4;
 			w[0] = w[1] = w[2] = 0;
 			ex = -95;
 		}
-		while ((lx & 0x10000) == 0)
-		{
+
+		while ((lx & 0x10000) == 0) {
 			lx = (lx << 1) | (w[0] >> 31);
 			w[0] = (w[0] << 1) | (w[1] >> 31);
 			w[1] = (w[1] << 1) | (w[2] >> 31);
@@ -219,25 +207,25 @@ __q_unpack(const union longdouble *x, double *s)
 	u.l[LOWORD] = w[2] & 0xffffff;
 	s[4] = u.d - b;
 
-	return ex - 0x3fff;
+	return (ex - 0x3fff);
 }
 
-
 /*
-*	Pack an exponent and array of three doubles representing a finite,
-*	nonzero number into a quad.  Assume the sign is already there and
-*	the rounding mode has been fudged accordingly.
-*/
+ *	Pack an exponent and array of three doubles representing a finite,
+ *	nonzero number into a quad.  Assume the sign is already there and
+ *	the rounding mode has been fudged accordingly.
+ */
 static void
 __q_pack(const double *z, int exp, enum fp_direction_type rm,
-	union longdouble *x, int *inexact)
+    union longdouble *x, int *inexact)
 {
 	union {
-		double			d;
-		unsigned int	l[2];
+		double d;
+		unsigned int l[2];
 	} u;
-	double			s[3], t, t2;
-	unsigned int	msw, frac2, frac3, frac4;
+
+	double s[3], t, t2;
+	unsigned int msw, frac2, frac3, frac4;
 
 	/* bias exponent and strip off integer bit */
 	exp += 0x3fff;
@@ -282,23 +270,23 @@ __q_pack(const double *z, int exp, enum fp_direction_type rm,
 	t = s[0] + s[1];
 	t2 = (s[0] - t) + s[1];
 
-	if (t != zero)
-	{
+	if (t != zero) {
 		*inexact = 1;
 
 		/* decide whether to round the fraction up */
 		if (rm == fp_positive || (rm == fp_nearest && (t > twom113 ||
-			(t == twom113 && (t2 != zero || frac4 & 1)))))
-		{
+		    (t == twom113 && (t2 != zero || frac4 & 1))))) {
 			/* round up and renormalize if necessary */
-			if (++frac4 == 0)
-				if (++frac3 == 0)
-					if (++frac2 == 0)
-						if (++msw == 0x10000)
-						{
+			if (++frac4 == 0) {
+				if (++frac3 == 0) {
+					if (++frac2 == 0) {
+						if (++msw == 0x10000) {
 							msw = 0;
 							exp++;
 						}
+					}
+				}
+			}
 		}
 	}
 
@@ -309,14 +297,13 @@ __q_pack(const double *z, int exp, enum fp_direction_type rm,
 	x->l.frac4 = frac4;
 }
 
-
 /*
-*	Compute the square root of x and place the TP result in s.
-*/
+ *	Compute the square root of x and place the TP result in s.
+ */
 static void
 __q_tp_sqrt(const double *x, double *s)
 {
-	double	c, rr, r[3], tt[3], t[5];
+	double c, rr, r[3], tt[3], t[5];
 
 	/* approximate the divisor for the Newton iteration */
 	c = sqrt((x[0] + x[1]) + x[2]);
@@ -353,8 +340,8 @@ __q_tp_sqrt(const double *x, double *s)
 	t[4] = (rr * (r[0] + r[1]) + twom66) - twom66;
 
 	/* here we just need to get the sign of the remainder */
-	c = (((((r[0] - tt[0] * t[4]) - tt[1] * t[4]) + r[1])
-		- tt[2] * t[4]) - (t[3] + t[3]) * t[4]) - t[4] * t[4];
+	c = (((((r[0] - tt[0] * t[4]) - tt[1] * t[4]) + r[1]) - tt[2] * t[4]) -
+	    (t[3] + t[3]) * t[4]) - t[4] * t[4];
 
 	/* reduce to three doubles */
 	t[0] += t[1];
@@ -362,8 +349,7 @@ __q_tp_sqrt(const double *x, double *s)
 	t[2] = t[4];
 
 	/* if the third term might lie on a rounding boundary, perturb it */
-	if (c != zero && t[2] == (twom62 + t[2]) - twom62)
-	{
+	if (c != zero && t[2] == (twom62 + t[2]) - twom62) {
 		if (c < zero)
 			t[2] -= twom124;
 		else
@@ -377,30 +363,27 @@ __q_tp_sqrt(const double *x, double *s)
 	c = t[0] + t[1];
 	s[1] = t[1] + (t[0] - c);
 	s[0] = c;
-	if (s[1] == zero)
-	{
+
+	if (s[1] == zero) {
 		c = s[0] + t[2];
 		s[1] = t[2] + (s[0] - c);
 		s[0] = c;
 		s[2] = zero;
-	}
-	else
-	{
+	} else {
 		c = s[1] + t[2];
 		s[2] = t[2] + (s[1] - c);
 		s[1] = c;
 	}
 }
 
-
 long double
 sqrtl(long double ldx)
 {
-	union	longdouble		x;
-	volatile double			t;
-	double					xx[5], zz[3];
-	enum fp_direction_type	rm;
-	int				ex, inexact, exc, traps;
+	union   longdouble x;
+	volatile double t;
+	double xx[5], zz[3];
+	enum fp_direction_type rm;
+	int ex, inexact, exc, traps;
 
 	/* clear cexc */
 	t = zero;
@@ -408,39 +391,38 @@ sqrtl(long double ldx)
 
 	/* check for zero operand */
 	x.d = ldx;
+
 	if (!((x.l.msw & 0x7fffffff) | x.l.frac2 | x.l.frac3 | x.l.frac4))
-		return ldx;
+		return (ldx);
 
 	/* handle nan and inf cases */
-	if ((x.l.msw & 0x7fffffff) >= 0x7fff0000)
-	{
-		if ((x.l.msw & 0xffff) | x.l.frac2 | x.l.frac3 | x.l.frac4)
-		{
-			if (!(x.l.msw & 0x8000))
-			{
+	if ((x.l.msw & 0x7fffffff) >= 0x7fff0000) {
+		if ((x.l.msw & 0xffff) | x.l.frac2 | x.l.frac3 | x.l.frac4) {
+			if (!(x.l.msw & 0x8000)) {
 				/* snan, signal invalid */
 				t += snan.d;
 			}
+
 			x.l.msw |= 0x8000;
-			return x.d;
+			return (x.d);
 		}
-		if (x.l.msw & 0x80000000)
-		{
+
+		if (x.l.msw & 0x80000000) {
 			/* sqrt(-inf), signal invalid */
 			t = -one;
 			t = sqrt(t);
-			return qnan.d;
+			return (qnan.d);
 		}
+
 		/* sqrt(inf), return inf */
-		return x.d;
+		return (x.d);
 	}
 
 	/* handle negative numbers */
-	if (x.l.msw & 0x80000000)
-	{
+	if (x.l.msw & 0x80000000) {
 		t = -one;
 		t = sqrt(t);
-		return qnan.d;
+		return (qnan.d);
 	}
 
 	/* now x is finite, positive */
@@ -450,8 +432,8 @@ sqrtl(long double ldx)
 	rm = __swapRD(fp_nearest);
 
 	ex = __q_unpack(&x, xx);
-	if (ex & 1)
-	{
+
+	if (ex & 1) {
 		/* make exponent even */
 		xx[0] += xx[0];
 		xx[1] += xx[1];
@@ -460,6 +442,7 @@ sqrtl(long double ldx)
 		xx[4] += xx[4];
 		ex--;
 	}
+
 	__q_tp_sqrt(xx, zz);
 
 	/* put everything together */
@@ -470,10 +453,11 @@ sqrtl(long double ldx)
 	(void) __swapRD(rm);
 	(void) __swapEX(exc);
 	(void) __swapTE(traps);
-	if (inexact)
-	{
+
+	if (inexact) {
 		t = huge;
 		t += tiny;
 	}
-	return x.d;
+
+	return (x.d);
 }

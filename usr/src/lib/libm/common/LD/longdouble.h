@@ -22,12 +22,13 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
-#ifndef	_LD_LONGDOUBLE_H
+#ifndef _LD_LONGDOUBLE_H
 #define	_LD_LONGDOUBLE_H
 #include <sys/ieeefp.h>
 
@@ -38,7 +39,6 @@ extern long double __k_sinl(long double, long double);
 extern long double __k_tanl(long double, long double, int);
 extern long double __poly_libmq(long double, int, long double *);
 extern int __rem_pio2l(long double, long double *);
-
 extern long double acosdl(long double);
 extern long double acoshl(long double);
 extern long double acosl(long double);
@@ -133,7 +133,6 @@ extern long double tanpl(long double);
 extern long double y0l(long double);
 extern long double y1l(long double);
 extern long double ynl(int, long double);
-
 extern long double q_copysign_(long double *, long double *);
 extern long double q_fabs_(long double *);
 extern int iq_finite_(long double *);
@@ -156,5 +155,4 @@ extern long double q_remainder_(long double *, long double *);
 extern long double q_scalbn_(long double *, int *);
 extern long double q_signaling_nan_(long *);
 extern int iq_signbit_(long double *);
-
-#endif	/* _LD_LONGDOUBLE_H */
+#endif /* _LD_LONGDOUBLE_H */

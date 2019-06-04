@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -34,19 +35,19 @@
 #include "longdouble.h"
 
 #if defined(__sparc)
-#define	SIGP7	120
-#define	HSIGP7	60
+#define	SIGP7		120
+#define	HSIGP7		60
 #elif defined(__x86)
-#define	SIGP7	70
-#define	HSIGP7	35
+#define	SIGP7		70
+#define	HSIGP7		35
 #endif
 
-/* INDENT OFF */
 static const long double zero = 0.0L, half = 0.5L, one = 1.0L;
-/* INDENT ON */
+
 
 ldcomplex
-clogl(ldcomplex z) {
+clogl(ldcomplex z)
+{
 	ldcomplex ans;
 	long double x, y, t, ax, ay;
 	int n, ix, iy, hx, hy;
@@ -60,26 +61,29 @@ clogl(ldcomplex z) {
 	ay = fabsl(y);
 	ax = fabsl(x);
 	LD_IM(ans) = atan2l(y, x);
+
 	if (ix < iy || (ix == iy && ix < 0x7fff0000 && ax < ay)) {
-			/* swap x and y to force ax>=ay */
+		/* swap x and y to force ax>=ay */
 		t = ax;
 		ax = ay;
 		ay = t;
 		n = ix, ix = iy;
 		iy = n;
 	}
+
 	n = (ix - iy) >> 16;
-	if (ix >= 0x7fff0000) {	/* x or y is Inf or NaN */
+
+	if (ix >= 0x7fff0000) {		/* x or y is Inf or NaN */
 		if (isinfl(ax))
 			LD_RE(ans) = ax;
 		else if (isinfl(ay))
 			LD_RE(ans) = ay;
 		else
 			LD_RE(ans) = ax + ay;
-	} else if (ay == zero)
+	} else if (ay == zero) {
 		LD_RE(ans) = logl(ax);
-	else if (((0x3fffffff - ix) ^ (ix - 0x3ffe0000)) >= 0) {
-							/* 0.5 <= x < 2 */
+	} else if (((0x3fffffff - ix) ^ (ix - 0x3ffe0000)) >= 0) {
+		/* 0.5 <= x < 2 */
 		if (ix >= 0x3fff0000) {
 			if (ax == one)
 				LD_RE(ans) = half * log1pl(ay * ay);
@@ -87,19 +91,21 @@ clogl(ldcomplex z) {
 				LD_RE(ans) = logl(ax);
 			else
 				LD_RE(ans) = half * (log1pl(ay * ay + (ax -
-					one) * (ax + one)));
-		} else if (n >= SIGP7)
+				    one) * (ax + one)));
+		} else if (n >= SIGP7) {
 			LD_RE(ans) = logl(ax);
-		else
+		} else {
 			LD_RE(ans) = __k_clog_rl(x, y, &t);
-	} else if (n >= HSIGP7)
+		}
+	} else if (n >= HSIGP7) {
 		LD_RE(ans) = logl(ax);
-	else if (ix < 0x5f3f0000 && iy >= 0x20bf0000)
+	} else if (ix < 0x5f3f0000 && iy >= 0x20bf0000) {
 		/* 2**-8000 < y < x < 2**8000 */
 		LD_RE(ans) = half * logl(ax * ax + ay * ay);
-	else {
+	} else {
 		t = ay / ax;
 		LD_RE(ans) = logl(ax) + half * log1pl(t * t);
 	}
+
 	return (ans);
 }

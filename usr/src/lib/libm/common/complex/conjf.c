@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,7 +34,8 @@
 #include "complex_wrapper.h"
 
 fcomplex
-conjf(fcomplex z) {
+conjf(fcomplex z)
+{
 	F_IM(z) = -F_IM(z);
 	return (z);
 }

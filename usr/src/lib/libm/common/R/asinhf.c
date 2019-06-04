@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,10 +33,10 @@
 #include "libm.h"
 
 float
-asinhf(float x) {
-	if (isnanf(x)) {
+asinhf(float x)
+{
+	if (isnanf(x))
 		return (x * x);		/* + -> * for Cheetah */
-	} else {
-		return ((float) asinh((double) x));
-	}
+	else
+		return ((float)asinh((double)x));
 }

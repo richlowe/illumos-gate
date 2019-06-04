@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -44,17 +45,17 @@ extern enum fp_precision_type __swapRP(enum fp_precision_type);
 
 static const double one = 1.0;
 static const long double qzero = 0.0L;
-
 long double
-rintl(long double x) {
+rintl(long double x)
+{
 	enum fp_precision_type rp;
 	long double t, w, two112;
-	int *pt = (int *) &two112;
+	int *pt = (int *)&two112;
 
 	if (!finitel(x))
 		return (x + x);
 
-	if (*(int *) &one != 0) {	/* set two112 = 2^112 */
+	if (*(int *)&one != 0) {	/* set two112 = 2^112 */
 		pt[0] = 0x406f0000;
 		pt[1] = pt[2] = pt[3] = 0;
 	} else {
@@ -63,11 +64,13 @@ rintl(long double x) {
 	}
 
 	if (fabsl(x) >= two112)
-		return (x);	/* already an integer */
+		return (x);			/* already an integer */
+
 	t = copysignl(two112, x);
-	rp = __swapRP(fp_extended);	/* make sure precision is long double */
-	w = x + t;			/* x+sign(x)*2^112 rounded to integer */
-	(void) __swapRP(rp);		/* restore precision mode */
+	rp = __swapRP(fp_extended); /* make sure precision is long double */
+	w = x + t;		    /* x+sign(x)*2^112 rounded to integer */
+	(void) __swapRP(rp);	    /* restore precision mode */
+
 	if (w == t)
 		return (copysignl(qzero, x));	/* x rounded to zero */
 	else

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -34,8 +35,8 @@
  */
 
 static const long double invpi = 3.183098861837906715377675267450287240689e-1L;
-
 long double
-atan2pil(long double y, long double x) {
+atan2pil(long double y, long double x)
+{
 	return (atan2l(y, x) * invpi);
 }

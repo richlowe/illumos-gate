@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -46,18 +47,18 @@
 
 const fenv_t __fenv_dfl_env = {
 	{
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
-		{ FEX_NONSTOP, (void(*)())0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
+		{ FEX_NONSTOP, (void (*)()) 0 },
 	},
 #ifdef __x86
 	0x13000000
@@ -66,51 +67,58 @@ const fenv_t __fenv_dfl_env = {
 #endif
 };
 
-int feholdexcept(fenv_t *p)
+int
+feholdexcept(fenv_t *p)
 {
 	(void) fegetenv(p);
 	(void) feclearexcept(FE_ALL_EXCEPT);
-	return !fex_set_handling(FEX_ALL, FEX_NONSTOP, NULL);
+	return (!fex_set_handling(FEX_ALL, FEX_NONSTOP, NULL));
 }
 
-int feholdexcept96(fenv_t *p)
+int
+feholdexcept96(fenv_t *p)
 {
 	(void) fegetenv(p);
 	(void) feclearexcept(FE_ALL_EXCEPT);
-	return fex_set_handling(FEX_ALL, FEX_NONSTOP, NULL);
+	return (fex_set_handling(FEX_ALL, FEX_NONSTOP, NULL));
 }
 
-int feupdateenv(const fenv_t *p)
+int
+feupdateenv(const fenv_t *p)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
 	(void) fesetenv(p);
 	(void) feraiseexcept((int)__fenv_get_ex(fsr));
-	return 0;
+	return (0);
 }
 
-int fegetenv(fenv_t *p)
+int
+fegetenv(fenv_t *p)
 {
 	fex_getexcepthandler(&p->__handlers, FEX_ALL);
 	__fenv_getfsr(&p->__fsr);
-	return 0;
+	return (0);
 }
 
-int fesetenv(const fenv_t *p)
+int
+fesetenv(const fenv_t *p)
 {
 	__fenv_setfsr(&p->__fsr);
 	fex_setexcepthandler(&p->__handlers, FEX_ALL);
-	return 0;
+	return (0);
 }
 
-void fex_merge_flags(const fenv_t *p)
+void
+fex_merge_flags(const fenv_t *p)
 {
-	unsigned long	fsr;
+	unsigned long fsr;
 
 	__fenv_getfsr(&fsr);
 	__fenv_set_ex(fsr, __fenv_get_ex(fsr) | __fenv_get_ex(p->__fsr));
 	__fenv_setfsr(&fsr);
+
 	if (fex_get_log())
 		__fex_update_te();
 }

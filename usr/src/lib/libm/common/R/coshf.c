@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -31,20 +33,24 @@
 #include "libm.h"
 
 float
-coshf(float x) {
-	double	c;
-	float	w;
-	int	ix;
+coshf(float x)
+{
+	double c;
+	float w;
+	int ix;
 
 	ix = *(int *)&x & ~0x80000000;
+
 	if (ix >= 0x7f800000) {
 		/* coshf(x) is |x| if x is +-Inf or NaN */
 		return (x * x);
 	}
-	if (ix >= 0x43000000)	/* coshf(x) trivially overflows */
+
+	if (ix >= 0x43000000)		/* coshf(x) trivially overflows */
 		c = 1.0e100;
 	else
 		c = cosh((double)x);
+
 	w = (float)c;
 	return (w);
 }

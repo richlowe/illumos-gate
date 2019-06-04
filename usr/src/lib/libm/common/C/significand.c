@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,14 +33,16 @@
 #include "libm.h"
 
 double
-significand(double x) {
-	int ix = ((int *) &x)[HIWORD] & ~0x80000000;
+significand(double x)
+{
+	int ix = ((int *)&x)[HIWORD] & ~0x80000000;
 
 	/* weed out 0/+-Inf/NaN because C99 ilogb raises invalid on them */
-	if ((ix | ((int *) &x)[LOWORD]) == 0 || ix >= 0x7ff00000)
+	if ((ix | ((int *)&x)[LOWORD]) == 0 || ix >= 0x7ff00000)
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 		return ((ix & 0x80000) != 0 ? x : x + x);
-		/* assumes sparc-like QNaN */
+
+	/* assumes sparc-like QNaN */
 #else
 		return (x + x);
 #endif

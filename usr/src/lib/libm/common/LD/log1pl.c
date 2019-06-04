@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -39,26 +40,33 @@
 #if defined(__x86)
 #define	__swapRD	__swap87RD
 #endif
+
 extern enum fp_direction_type __swapRD(enum fp_direction_type);
 
 long double
-log1pl(long double x) {
+log1pl(long double x)
+{
 	long double y;
 	enum fp_direction_type rd;
 
 	if (x != x)
 		return (x + x);
+
 	if (x < -1.L)
 		return (logl(x));
+
 	rd = __swapRD(fp_nearest);
 	y = 1.L + x;
+
 	if (y != 1.L) {
 		if (y == x)
 			x = logl(x);
 		else
 			x *= logl(y) / (y - 1.L);
 	}
+
 	if (rd != fp_nearest)
 		(void) __swapRD(rd);
+
 	return (x);
 }

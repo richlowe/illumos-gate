@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -200,6 +201,7 @@ const long double _TBL_expm1lx[] = {
 	-1.2578125000000000000000000000000036593e+00L,
 	-1.2734375000000000000000000000000005778e+00L,
 };
+
 const long double _TBL_expm1l[] = {
 	+7.8430972064479776934535597601230757455e-03L,
 	+2.3714316602357916968850532165767719684e-02L,

@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,11 +35,14 @@
 static const float zero = 0.0f;
 
 float
-acoshf(float x) {
-	int	hx;
+acoshf(float x)
+{
+	int hx;
 
 	hx = *(int *)&x;
+
 	if (hx < 0x3f800000 || hx > 0x7f800000)	/* x < 1 or x is nan */
 		return ((x * zero) / zero);
+
 	return ((float)acosh((double)x));
 }

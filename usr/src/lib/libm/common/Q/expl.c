@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -72,55 +73,60 @@
 #include "libm.h"
 
 extern const long double _TBL_expl_hi[], _TBL_expl_lo[];
-
-static const long double
-one		=  1.0L,
-two		=  2.0L,
-ln2_64		=  1.083042469624914545964425189778400898568e-2L,
-ovflthreshold	=  1.135652340629414394949193107797076342845e+4L,
-unflthreshold	= -1.143346274333629787883724384345262150341e+4L,
-invln2_32	=  4.616624130844682903551758979206054839765e+1L,
-ln2_32hi	=  2.166084939249829091928849858592451515688e-2L,
-ln2_32lo	=  5.209643502595475652782654157501186731779e-27L;
+static const long double one = 1.0L,
+	two = 2.0L,
+	ln2_64 = 1.083042469624914545964425189778400898568e-2L,
+	ovflthreshold = 1.135652340629414394949193107797076342845e+4L,
+	unflthreshold = -1.143346274333629787883724384345262150341e+4L,
+	invln2_32 = 4.616624130844682903551758979206054839765e+1L,
+	ln2_32hi = 2.166084939249829091928849858592451515688e-2L,
+	ln2_32lo = 5.209643502595475652782654157501186731779e-27L;
 
 /* rational approximation coeffs for [-(ln2)/64,(ln2)/64] */
-static const long double
-t1 =   1.666666666666666666666666666660876387437e-1L,
-t2 =  -2.777777777777777777777707812093173478756e-3L,
-t3 =   6.613756613756613482074280932874221202424e-5L,
-t4 =  -1.653439153392139954169609822742235851120e-6L,
-t5 =   4.175314851769539751387852116610973796053e-8L;
+static const long double t1 = 1.666666666666666666666666666660876387437e-1L,
+	t2 = -2.777777777777777777777707812093173478756e-3L,
+	t3 = 6.613756613756613482074280932874221202424e-5L,
+	t4 = -1.653439153392139954169609822742235851120e-6L,
+	t5 = 4.175314851769539751387852116610973796053e-8L;
 
 long double
-expl(long double x) {
-	int *px = (int *) &x, ix, j, k, m;
+expl(long double x)
+{
+	int *px = (int *)&x, ix, j, k, m;
 	long double t, r;
 
-	ix = px[0];				/* high word of x */
+	ix = px[0];			/* high word of x */
+
 	if (ix >= 0x7fff0000)
-		return (x + x);			/* NaN of +inf */
-	if (((unsigned) ix) >= 0xffff0000)
-		return (-one / x);		/* NaN or -inf */
+		return (x + x);		/* NaN of +inf */
+
+	if (((unsigned)ix) >= 0xffff0000)
+		return (-one / x);	/* NaN or -inf */
+
 	if ((ix & 0x7fffffff) < 0x3fc30000) {
-		if ((int) x < 1)
+		if ((int)x < 1)
 			return (one + x);	/* |x|<2^-60 */
 	}
+
 	if (ix > 0) {
 		if (x > ovflthreshold)
 			return (scalbnl(x, 20000));
-		k = (int) (invln2_32 * (x + ln2_64));
+
+		k = (int)(invln2_32 * (x + ln2_64));
 	} else {
 		if (x < unflthreshold)
 			return (scalbnl(-x, -40000));
-		k = (int) (invln2_32 * (x - ln2_64));
+
+		k = (int)(invln2_32 * (x - ln2_64));
 	}
-	j  = k&0x1f;
-	m  = k>>5;
-	t  = (long double) k;
-	x  = (x - t * ln2_32hi) - t * ln2_32lo;
-	t  = x * x;
-	r  = (x - t * (t1 + t * (t2 + t * (t3 + t * (t4 + t * t5))))) - two;
-	x  = _TBL_expl_hi[j] - ((_TBL_expl_hi[j] * (x + x)) / r -
-		_TBL_expl_lo[j]);
+
+	j = k & 0x1f;
+	m = k >> 5;
+	t = (long double)k;
+	x = (x - t * ln2_32hi) - t * ln2_32lo;
+	t = x * x;
+	r = (x - t * (t1 + t * (t2 + t * (t3 + t * (t4 + t * t5))))) - two;
+	x = _TBL_expl_hi[j] - ((_TBL_expl_hi[j] * (x + x)) / r -
+	    _TBL_expl_lo[j]);
 	return (scalbnl(x, m));
 }

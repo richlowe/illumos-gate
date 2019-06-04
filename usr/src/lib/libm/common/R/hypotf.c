@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,33 +33,36 @@
 #include "libm.h"
 
 float
-hypotf(float x, float y) {
+hypotf(float x, float y)
+{
 	double dx, dy;
 	float w;
 	int ix, iy;
 
-	ix = (*(int *) &x) & 0x7fffffff;
-	iy = (*(int *) &y) & 0x7fffffff;
+	ix = (*(int *)&x) & 0x7fffffff;
+	iy = (*(int *)&y) & 0x7fffffff;
+
 	if (ix >= 0x7f800000) {
 		if (ix == 0x7f800000)
-			*(int *) &w = x == y ? iy : ix;	/* w = |x| = inf */
+			*(int *)&w = x == y ? iy : ix; /* w = |x| = inf */
 		else if (iy == 0x7f800000)
-			*(int *) &w = x == y ? ix : iy;	/* w = |y| = inf */
+			*(int *)&w = x == y ? ix : iy; /* w = |y| = inf */
 		else
-			w = fabsf(x) * fabsf(y);	/* + -> * for Cheetah */
+			w = fabsf(x) * fabsf(y); /* + -> * for Cheetah */
 	} else if (iy >= 0x7f800000) {
 		if (iy == 0x7f800000)
-			*(int *) &w = x == y ? ix : iy;	/* w = |y| = inf */
+			*(int *)&w = x == y ? ix : iy;	/* w = |y| = inf */
 		else
-			w = fabsf(x) * fabsf(y);	/* + -> * for Cheetah */
-	} else if (ix == 0)
-		*(int *) &w = iy;	/* w = |y|  */
-	else if (iy == 0)
-		*(int *) &w = ix;	/* w = |x|  */
-	else {
-		dx = (double) x;
-		dy = (double) y;
-		w = (float) sqrt(dx * dx + dy * dy);
+			w = fabsf(x) * fabsf(y); /* + -> * for Cheetah */
+	} else if (ix == 0) {
+		*(int *)&w = iy; /* w = |y|  */
+	} else if (iy == 0) {
+		*(int *)&w = ix; /* w = |x|  */
+	} else {
+		dx = (double)x;
+		dy = (double)y;
+		w = (float)sqrt(dx * dx + dy * dy);
 	}
+
 	return (w);
 }

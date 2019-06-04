@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -29,7 +30,7 @@
 
 #pragma weak __catanl = catanl
 
-/* INDENT OFF */
+
 /*
  * ldcomplex catanl(ldcomplex z);
  *
@@ -58,7 +59,7 @@
  *              1+y-ix    (1+y)**2 + x**2    (1+y)**2 + x**2
  *
  * Comparing the real and imaginary parts of (2) and (3), we have:
- * 	cos(2A) : 1-x*x-y*y = sin(2A) : 2x
+ *      cos(2A) : 1-x*x-y*y = sin(2A) : 2x
  * and hence
  *	tan(2A) = 2x/(1-x*x-y*y), or
  *	A = 0.5 * atan2(2x, 1-x*x-y*y)	                    ... (4)
@@ -99,31 +100,30 @@
  *    catan( x  , NaN ) =  (NaN  ,  NaN ) with invalid for finite x
  *    catan( inf, NaN ) =  (pi/2 ,  +-0 )
  */
-/* INDENT ON */
 
 #include "libm.h"	/* atan2l/atanl/fabsl/isinfl/iszerol/log1pl/logl */
 #include "complex_wrapper.h"
 #include "longdouble.h"
 
-/* INDENT OFF */
-static const long double
-zero = 0.0L,
-one = 1.0L,
-two = 2.0L,
-half = 0.5L,
-ln2 = 6.931471805599453094172321214581765680755e-0001L,
-pi_2 = 1.570796326794896619231321691639751442098584699687552910487472L,
+/* BEGIN CSTYLED */
+static const long double zero = 0.0L,
+	one = 1.0L,
+	two = 2.0L,
+	half = 0.5L,
+	ln2 = 6.931471805599453094172321214581765680755e-0001L,
+	pi_2 = 1.570796326794896619231321691639751442098584699687552910487472L,
 #if defined(__x86)
-E = 2.910383045673370361328125000000000000000e-11L,	/* 2**-35 */
-Einv = 3.435973836800000000000000000000000000000e+10L;	/* 2**+35 */
+	E = 2.910383045673370361328125000000000000000e-11L,		/* 2**-35 */
+	Einv = 3.435973836800000000000000000000000000000e+10L;	/* 2**+35 */
 #else
-E = 8.673617379884035472059622406959533691406e-19L,	/* 2**-60 */
-Einv = 1.152921504606846976000000000000000000000e18L;	/* 2**+60 */
+	E = 8.673617379884035472059622406959533691406e-19L,		/* 2**-60 */
+	Einv = 1.152921504606846976000000000000000000000e18L;		/* 2**+60 */
 #endif
-/* INDENT ON */
+/* END CSTYLED */
 
 ldcomplex
-catanl(ldcomplex z) {
+catanl(ldcomplex z)
+{
 	ldcomplex ans;
 	long double x, y, t1, ax, ay, t;
 	int hx, hy, ix, iy;
@@ -144,6 +144,7 @@ catanl(ldcomplex z) {
 			LD_IM(ans) = zero;
 		} else {
 			LD_RE(ans) = x + x;
+
 			if (iszerol(y) || (isinfl(y)))
 				LD_IM(ans) = zero;
 			else
@@ -159,7 +160,7 @@ catanl(ldcomplex z) {
 			LD_IM(ans) = y;
 		}
 	} else if (iszerol(x)) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * x = 0
 		 *      1                            1
@@ -170,8 +171,9 @@ catanl(ldcomplex z) {
 		 * B = - log [ ----------- ] = - log (1+ ---) or - log(1+ ----)
 		 *     4     [ (y-1)*(y-1) ]   2         y-1     2         1-y
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		t = one - ay;
+
 		if (ay == one) {
 			/* y=1: catan(0,1)=(0,+inf) with 1/0 signal */
 			LD_IM(ans) = ay / ax;
@@ -184,7 +186,7 @@ catanl(ldcomplex z) {
 			LD_RE(ans) = zero;
 		}
 	} else if (ay < E * (one + ax)) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Tiny y (relative to 1+|x|)
 		 *     |y| < E*(1+|x|)
@@ -203,27 +205,29 @@ catanl(ldcomplex z) {
 		 * (when x < 2**-60, t = ----------- )
 		 *                       (y-1)*(y-1)
 		 */
-		/* INDENT ON */
-		if (ay == zero)
+		/* END CSTYLED */
+		if (ay == zero) {
 			LD_IM(ans) = ay;
-		else {
+		} else {
 			t1 = ay - one;
+
 			if (ix < 0x3fc30000)
 				t = ay / (t1 * t1);
 			else if (ix > 0x403b0000)
 				t = (ay / ax) / ax;
 			else
 				t = ay / (ax * ax + t1 * t1);
+
 			LD_IM(ans) = t * (one - two * t);
 		}
+
 		if (ix < 0x3fff0000)
 			LD_RE(ans) = atanl(ax);
 		else
 			LD_RE(ans) = half * atan2l(two, (one - ax) * (one +
-				one / ax));
-
+			    one / ax));
 	} else if (ay > Einv * (one + ax)) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Huge y relative to 1+|x|
 		 *     |y| > Einv*(1+|x|), where Einv~2**(prec/2+3),
@@ -234,12 +238,12 @@ catanl(ldcomplex z) {
 		 * B ~ t*(1-2t), where t = --------------- is tiny
 		 *                          (y-1)*(y-1)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		LD_RE(ans) = pi_2;
 		t = (ay / (ay - one)) / (ay - one);
 		LD_IM(ans) = t * (one - (t + t));
 	} else if (ay == one) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * y=1
 		 *     1                      1
@@ -250,16 +254,17 @@ catanl(ldcomplex z) {
 		 * B = - log [ -----] = - log (1+ ---) = [ |x|<E, else 0.25*
 		 *     4     [  x*x ]   4         x*x    [ log1p((2/x)*(2/x))
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		LD_RE(ans) = half * atan2l(two, -ax);
-		if (ax < E)
+
+		if (ax < E) {
 			LD_IM(ans) = half * (ln2 - logl(ax));
-		else {
+		} else {
 			t = two / ax;
 			LD_IM(ans) = 0.25L * log1pl(t * t);
 		}
 	} else if (ax > Einv * Einv) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Huge x:
 		 * when |x| > 1/E^2,
@@ -270,13 +275,13 @@ catanl(ldcomplex z) {
 		 * B ~ t*(1-2t), where t = --------------- = (-------------- )/x
 		 *                         x*x+(y-1)*(y-1)     1+((y-1)/x)^2
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		LD_RE(ans) = pi_2;
 		t = ((ay / ax) / (one + ((ay - one) / ax) * ((ay - one) /
-			ax))) / ax;
+		    ax))) / ax;
 		LD_IM(ans) = t * (one - (t + t));
 	} else if (ax < E * E * E * E) {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * Tiny x:
 		 * when |x| < E^4,  (note that y != 1)
@@ -288,14 +293,15 @@ catanl(ldcomplex z) {
 		 * B = - log [ ----------- ] = - log (1+ ---) or - log(1+ ----)
 		 *     4     [ (y-1)*(y-1) ]   2         y-1     2         1-y
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		LD_RE(ans) = half * atan2l(ax + ax, (one - ay) * (one + ay));
-		if (ay > one)	/* y>1 */
+
+		if (ay > one)		/* y>1 */
 			LD_IM(ans) = half * log1pl(two / (ay - one));
-		else		/* y<1 */
+		else			/* y<1 */
 			LD_IM(ans) = half * log1pl((ay + ay) / (one - ay));
 	} else {
-		/* INDENT OFF */
+		/* BEGIN CSTYLED */
 		/*
 		 * normal x,y
 		 *      1
@@ -306,24 +312,30 @@ catanl(ldcomplex z) {
 		 * B = - log [ --------------- ] = - log (1+ -----------------)
 		 *     4     [ x*x+(y-1)*(y-1) ]   4         x*x + (y-1)*(y-1)
 		 */
-		/* INDENT ON */
+		/* END CSTYLED */
 		t = one - ay;
+
 		if (iy >= 0x3ffe0000 && iy < 0x40000000) {
 			/* y close to 1 */
-			LD_RE(ans) = half * (atan2l((ax + ax), (t * (one +
-				ay) - ax * ax)));
+			LD_RE(ans) = half * (atan2l((ax + ax), (t * (one + ay) -
+			    ax * ax)));
 		} else if (ix >= 0x3ffe0000 && ix < 0x40000000) {
 			/* x close to 1 */
 			LD_RE(ans) = half * atan2l((ax + ax), ((one - ax) *
-				(one + ax) - ay * ay));
-		} else
-			LD_RE(ans) = half * atan2l((ax + ax), ((one - ax *
-				ax) - ay * ay));
+			    (one + ax) - ay * ay));
+		} else {
+			LD_RE(ans) = half * atan2l((ax + ax), ((one - ax * ax) -
+			    ay * ay));
+		}
+
 		LD_IM(ans) = 0.25L * log1pl((4.0L * ay) / (ax * ax + t * t));
 	}
+
 	if (hx < 0)
 		LD_RE(ans) = -LD_RE(ans);
+
 	if (hy < 0)
 		LD_IM(ans) = -LD_IM(ans);
+
 	return (ans);
 }

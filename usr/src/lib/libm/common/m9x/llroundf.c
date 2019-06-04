@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -36,22 +37,25 @@
 #include "libm.h"
 
 long long
-llroundf(float x) {
+llroundf(float x)
+{
 	union {
 		unsigned i;
 		float f;
 	} xx;
+
 	unsigned hx, sx, i;
 
 	xx.f = x;
 	hx = xx.i & ~0x80000000;
 	sx = xx.i & 0x80000000;
 
-	if (hx < 0x4b000000) { /* |x| < 2^23 */
+	if (hx < 0x4b000000) {		/* |x| < 2^23 */
 		/* handle |x| < 1 */
 		if (hx < 0x3f800000) {
 			if (hx >= 0x3f000000)
 				return (sx ? -1LL : 1LL);
+
 			return (0LL);
 		}
 
@@ -63,9 +67,9 @@ llroundf(float x) {
 		 * on LP32 architectures, we can just convert x to a 32-bit
 		 * integer and sign-extend it
 		 */
-		return ((long) xx.f);
+		return ((long)xx.f);
 	}
 
 	/* now x is nan, inf, or integral */
-	return ((long long) x);
+	return ((long long)x);
 }

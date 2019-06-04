@@ -27,7 +27,7 @@
  */
 
 #ifndef	_LIBM_H
-#define	_LIBM_H
+#define		_LIBM_H
 
 #include <sys/isa_defs.h>
 
@@ -43,21 +43,20 @@
 
 #include <sys/asm_linkage.h>
 
-#define	NAME(x) x
-#define	TEXT	.section	".text"
-#define	DATA	.section	".data"
-#define	RO_DATA	.section	".rodata"
-#define	IDENT(x)	.ident	x
+#define		NAME(x) x
+#define		TEXT	.section	".text"
+#define		DATA	.section	".data"
+#define		RO_DATA	.section	".rodata"
+#define		IDENT(x)	.ident	x
 
 #if defined(__sparc)
-
-#define	LIBM_ANSI_PRAGMA_WEAK(sym,stype) \
+#define		LIBM_ANSI_PRAGMA_WEAK(sym,stype) \
 	.weak __/**/sym;		 \
 	.type __/**/sym,#stype;		 \
 __/**/sym	= sym
 
 #ifndef SET_FILE
-#define	SET_FILE(x) \
+#define		SET_FILE(x) \
 	.file	x
 #endif	/* !defined(SET_FILE) */
 
@@ -65,7 +64,7 @@ __/**/sym	= sym
 /*
  * One should *never* pass o7 to PIC_SETUP.
  */
-#define	PIC_SETUP(via) \
+#define		PIC_SETUP(via) \
 9:	call	8f; \
 	sethi	%hi(NAME(_GLOBAL_OFFSET_TABLE_)-(9b-.)),%via; \
 8:	or	%via,%lo(NAME(_GLOBAL_OFFSET_TABLE_)-(9b-.)),%via; \
@@ -73,7 +72,7 @@ __/**/sym	= sym
 /*
  * Must save/restore %o7 in leaf routines; may *not* use jmpl!
  */
-#define	PIC_LEAF_SETUP(via) \
+#define		PIC_LEAF_SETUP(via) \
 	or	%g0,%o7,%g1; \
 9:	call	8f; \
 	sethi	%hi(NAME(_GLOBAL_OFFSET_TABLE_)-(9b-.)),%via; \
@@ -81,20 +80,20 @@ __/**/sym	= sym
 	add	%via,%o7,%via; \
 	or	%g0,%g1,%o7
 #ifdef __sparcv9
-#define	PIC_SET(via,sym,dst)	ldx	[%via+sym],%dst
+#define		PIC_SET(via,sym,dst)	ldx	[%via+sym],%dst
 #else	/* defined(__sparcv9) */
-#define	PIC_SET(via,sym,dst)	ld	[%via+sym],%dst
+#define		PIC_SET(via,sym,dst)	ld	[%via+sym],%dst
 #endif	/* defined(__sparcv9) */
 #else	/* defined(PIC) */
-#define	PIC_SETUP(via)
-#define	PIC_LEAF_SETUP(via)
+#define		PIC_SETUP(via)
+#define		PIC_LEAF_SETUP(via)
 #ifdef __sparcv9
 /*
  * g1 is used as scratch register in V9 mode
  */
-#define	PIC_SET(via,sym,dst)	setx	sym,%g1,%dst
+#define		PIC_SET(via,sym,dst)	setx	sym,%g1,%dst
 #else	/* defined(__sparcv9) */
-#define	PIC_SET(via,sym,dst)	set	sym,%dst
+#define		PIC_SET(via,sym,dst)	set	sym,%dst
 #endif	/* defined(__sparcv9) */
 #endif	/* defined(PIC) */
 
@@ -102,13 +101,12 @@ __/**/sym	= sym
  * Workaround for 4337025: MCOUNT in asm_linkage.h does not support __sparcv9
  */
 #if defined(PROF) && defined(__sparcv9)
-
 #undef MCOUNT_SIZE
 #undef MCOUNT
 
 #if !defined(PIC)
-#define	MCOUNT_SIZE	(9*4)	/* 9 instructions */
-#define	MCOUNT(x) \
+#define		MCOUNT_SIZE	(9*4)	/* 9 instructions */
+#define		MCOUNT(x) \
 	save	%sp, -SA(MINFRAME), %sp; \
 	sethi	%hh(.L_/**/x/**/1), %o0; \
 	sethi	%lm(.L_/**/x/**/1), %o1; \
@@ -120,8 +118,8 @@ __/**/sym	= sym
 	restore; \
 	.common .L_/**/x/**/1, 8, 8
 #elif defined(PIC32)
-#define	MCOUNT_SIZE	(10*4)	/* 10 instructions */
-#define	MCOUNT(x) \
+#define		MCOUNT_SIZE	(10*4)	/* 10 instructions */
+#define		MCOUNT(x) \
 	save	%sp,-SA(MINFRAME),%sp; \
 1:	call	.+8; \
 	sethi	%hi(_GLOBAL_OFFSET_TABLE_-(1b-.)),%o0; \
@@ -134,8 +132,8 @@ __/**/sym	= sym
 	restore; \
 	.common .L_/**/x/**/1,8,8
 #else	/* PIC13 */
-#define	MCOUNT_SIZE	(8*4)	/* 8 instructions */
-#define	MCOUNT(x) \
+#define		MCOUNT_SIZE	(8*4)	/* 8 instructions */
+#define		MCOUNT(x) \
 	save	%sp,-SA(MINFRAME),%sp; \
 1:	call	.+8; \
 	sethi	%hi(_GLOBAL_OFFSET_TABLE_-(1b-.)),%o0; \
@@ -147,54 +145,50 @@ __/**/sym	= sym
 	.common .L_/**/x/**/1,8,8
 #endif	/* !defined(PIC) */
 #endif /* defined(PROF) && defined(__sparcv9) */
-
 #elif defined(__x86)
-
-#define	LIBM_ANSI_PRAGMA_WEAK(sym,stype) \
+#define		LIBM_ANSI_PRAGMA_WEAK(sym,stype) \
 	.weak __/**/sym;		 \
 	.type __/**/sym,@stype;		 \
 __/**/sym	= sym
 
 #ifdef PIC
 #if defined(__amd64)
-#define	PIC_SETUP(x)
-#define	PIC_WRAPUP
-#define	PIC_F(x)	x@PLT
-#define	PIC_G(x)	x@GOTPCREL(%rip)
-#define	PIC_L(x)	x(%rip)
-#define	PIC_G_LOAD(insn,sym,dst) \
+#define		PIC_SETUP(x)
+#define		PIC_WRAPUP
+#define		PIC_F(x)	x@PLT
+#define		PIC_G(x)	x@GOTPCREL(%rip)
+#define		PIC_L(x)	x(%rip)
+#define		PIC_G_LOAD(insn,sym,dst) \
 	movq	PIC_G(sym),%dst; \
 	insn	(%dst),%dst
 #else
-#define	PIC_SETUP(label) \
+#define		PIC_SETUP(label) \
 	pushl	%ebx; \
 	call	.label; \
 .label:	popl	%ebx; \
 	addl	$_GLOBAL_OFFSET_TABLE_+[.-.label],%ebx
-#define	PIC_WRAPUP	popl	%ebx
-#define	PIC_F(x)	x@PLT
-#define	PIC_G(x)	x@GOT(%ebx)
-#define	PIC_L(x)	x@GOTOFF(%ebx)
-#define	PIC_G_LOAD(insn,sym,dst) \
+#define		PIC_WRAPUP	popl	%ebx
+#define		PIC_F(x)	x@PLT
+#define		PIC_G(x)	x@GOT(%ebx)
+#define		PIC_L(x)	x@GOTOFF(%ebx)
+#define		PIC_G_LOAD(insn,sym,dst) \
 	mov	PIC_G(sym),%dst; \
 	insn	(%dst),%dst
 #endif
 #else	/* defined(PIC) */
-#define	PIC_SETUP(x)
-#define	PIC_WRAPUP
-#define	PIC_F(x)	x
-#define	PIC_G(x)	x
-#define	PIC_L(x)	x
-#define	PIC_G_LOAD(insn,sym,dst)	insn	sym,%dst
+#define		PIC_SETUP(x)
+#define		PIC_WRAPUP
+#define		PIC_F(x)	x
+#define		PIC_G(x)	x
+#define		PIC_L(x)	x
+#define		PIC_G_LOAD(insn,sym,dst)	insn	sym,%dst
 #endif	/* defined(PIC) */
-
 #else
 #error Unknown architecture
 #endif
 
 /* END CSTYLED */
 #else	/* defined(_ASM) */
-
 #include "libm_macros.h"
 #include "libm_protos.h"
 #include "libm_inlines.h"
@@ -202,7 +196,5 @@ __/**/sym	= sym
 #if defined(__SUNPRO_C)
 #include <sunmath.h>
 #endif
-
 #endif	/* defined(_ASM) */
-
 #endif	/* _LIBM_H */

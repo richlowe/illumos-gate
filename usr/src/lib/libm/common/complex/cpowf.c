@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -40,9 +42,10 @@ extern float atan2pif(float, float);
 extern int __swapRP(int);
 #endif
 
-static const double
-	dpi = 3.1415926535897931160E0,	/* Hex 2^ 1 * 1.921FB54442D18 */
-	dhalf = 0.5,
+/* Hex 2^ 1 * 1.921FB54442D18 */
+static const double dpi = 3.1415926535897931160E0;
+
+static const double dhalf = 0.5,
 	dsqrt2 = 1.41421356237309514547,	/* 3FF6A09E 667F3BCD */
 	dinvpi = 0.3183098861837906715377675;
 
@@ -51,11 +54,12 @@ static const float one = 1.0F, zero = 0.0F;
 #define	hiinf	0x7f800000
 
 fcomplex
-cpowf(fcomplex z, fcomplex w) {
-	fcomplex	ans;
-	float		x, y, u, v, t, c, s;
-	double		dx, dy, du, dv, dt, dc, ds, dp, dq, dr;
-	int		ix, iy, hx, hy, hv, hu, iu, iv, j;
+cpowf(fcomplex z, fcomplex w)
+{
+	fcomplex ans;
+	float x, y, u, v, t, c, s;
+	double dx, dy, du, dv, dt, dc, ds, dp, dq, dr;
+	int ix, iy, hx, hy, hv, hu, iu, iv, j;
 
 	x = F_RE(z);
 	y = F_IM(z);
@@ -71,7 +75,8 @@ cpowf(fcomplex z, fcomplex w) {
 	iv = hv & 0x7fffffff;
 
 	j = 0;
-	if (iv == 0) {		/* z**(real) */
+
+	if (iv == 0) {			/* z**(real) */
 		if (hu == 0x3f800000) {	/* (anything) ** 1  is itself */
 			F_RE(ans) = x;
 			F_IM(ans) = y;
@@ -80,12 +85,13 @@ cpowf(fcomplex z, fcomplex w) {
 			F_IM(ans) = zero;
 		} else if (iy == 0) {	/* (real)**(real) */
 			F_IM(ans) = zero;
+
 			if (hx < 0 && ix < hiinf && iu < hiinf) {
 				/* -x ** u  is exp(i*pi*u)*pow(x,u) */
 				t = powf(-x, u);
 				sincospif(u, &s, &c);
-				F_RE(ans) = (c == zero)? c: c * t;
-				F_IM(ans) = (s == zero)? s: s * t;
+				F_RE(ans) = (c == zero) ? c : c *t;
+				F_IM(ans) = (s == zero) ? s : s *t;
 			} else {
 				F_RE(ans) = powf(x, u);
 			}
@@ -94,22 +100,26 @@ cpowf(fcomplex z, fcomplex w) {
 				F_RE(ans) = F_IM(ans) = x + y + u;
 			} else {
 				v = fabsf(y);
+
 				if (ix != 0)
 					v += fabsf(x);
+
 				t = atan2pif(y, x);
 				sincospif(t * u, &s, &c);
-				F_RE(ans) = (c == zero)? c: c * v;
-				F_IM(ans) = (s == zero)? s: s * v;
+				F_RE(ans) = (c == zero) ? c : c *v;
+				F_IM(ans) = (s == zero) ? s : s *v;
 			}
 		} else if (ix == iy) {	/* if |x| == |y| */
 #if defined(__i386) && !defined(__amd64)
-			int	rp = __swapRP(fp_extended);
+			int rp = __swapRP(fp_extended);
 #endif
 			dx = (double)x;
 			du = (double)u;
-			dt = (hx >= 0)? 0.25 : 0.75;
+			dt = (hx >= 0) ? 0.25 : 0.75;
+
 			if (hy < 0)
 				dt = -dt;
+
 			dr = pow(dsqrt2 * dx, du);
 			sincospi(dt * du, &ds, &dc);
 			F_RE(ans) = (float)(dr * dc);
@@ -121,9 +131,11 @@ cpowf(fcomplex z, fcomplex w) {
 		} else {
 			j = 1;
 		}
+
 		if (j == 0)
 			return (ans);
 	}
+
 	if (iu >= hiinf || iv >= hiinf || ix >= hiinf || iy >= hiinf) {
 		/*
 		 * non-zero imaginery part(s) with inf component(s) yields NaN
@@ -132,9 +144,9 @@ cpowf(fcomplex z, fcomplex w) {
 		F_RE(ans) = F_IM(ans) = t - t;
 	} else {
 #if defined(__i386) && !defined(__amd64)
-		int	rp = __swapRP(fp_extended);
+		int rp = __swapRP(fp_extended);
 #endif
-		/* INDENT OFF */
+
 		/*
 		 * r = u*log(hypot(x,y))-v*atan2(y,x),
 		 * q = u*atan2(y,x)+v*log(hypot(x,y))
@@ -143,25 +155,28 @@ cpowf(fcomplex z, fcomplex w) {
 		 * q/pi = u*atan2pi(y,x)+v*log(hypot(x,y))/pi
 		 * ans = exp(r)*(cospi(q/pi)  + i sinpi(q/pi))
 		 */
-		/* INDENT ON */
 		dx = (double)x;
 		dy = (double)y;
 		du = (double)u;
 		dv = (double)v;
+
 		if (ix > 0x3f000000 && ix < 0x40000000)	/* .5 < |x| < 2 */
 			dt = dhalf * log1p((dx - 1.0) * (dx + 1.0) + dy * dy);
 		else if (iy > 0x3f000000 && iy < 0x40000000) /* .5 < |y| < 2 */
 			dt = dhalf * log1p((dy - 1.0) * (dy + 1.0) + dx * dx);
 		else
 			dt = dhalf * log(dx * dx + dy * dy);
+
 		dp = atan2pi(dy, dx);
-		if (iv == 0) {	/* dv = 0 */
+
+		if (iv == 0) {		/* dv = 0 */
 			dr = exp(du * dt);
 			dq = du * dp;
 		} else {
 			dr = exp(du * dt - dv * dp * dpi);
 			dq = du * dp + dv * dt * dinvpi;
 		}
+
 		sincospi(dq, &ds, &dc);
 		F_RE(ans) = (float)(dr * dc);
 		F_IM(ans) = (float)(dr * ds);
@@ -170,5 +185,6 @@ cpowf(fcomplex z, fcomplex w) {
 			(void) __swapRP(rp);
 #endif
 	}
+
 	return (ans);
 }

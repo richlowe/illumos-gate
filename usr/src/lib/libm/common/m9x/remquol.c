@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -33,20 +34,16 @@
 #if defined(__SUNPRO_C)
 #include <sunmath.h>			/* fabsl */
 #endif
-/* INDENT OFF */
-static const int
-	is = -0x7fffffff - 1,
-	im = 0x0000ffff,
-	iu = 0x00010000;
 
+static const int is = -0x7fffffff - 1, im = 0x0000ffff, iu = 0x00010000;
 static const long double zero = 0.0L, one = 1.0L;
-/* INDENT ON */
+
 
 #if defined(__sparc)
-#define	__H0(x)	((int *) &x)[0]
-#define	__H1(x)	((int *) &x)[1]
-#define	__H2(x)	((int *) &x)[2]
-#define	__H3(x)	((int *) &x)[3]
+#define	__H0(x)		((int *)&x)[0]
+#define	__H1(x)		((int *)&x)[1]
+#define	__H2(x)		((int *)&x)[2]
+#define	__H3(x)		((int *)&x)[3]
 #else
 #error Unsupported architecture
 #endif
@@ -55,7 +52,8 @@ static const long double zero = 0.0L, one = 1.0L;
  * On entrance: *quo is initialized to 0, x finite and y non-zero & ordered
  */
 static long double
-fmodquol(long double x, long double y, int *quo) {
+fmodquol(long double x, long double y, int *quo)
+{
 	long double a, b;
 	int n, ix, iy, k, sx, sq, m;
 	int hx;
@@ -78,18 +76,21 @@ fmodquol(long double x, long double y, int *quo) {
 
 	a = fabsl(x);
 	b = fabsl(y);
+
 	if (a <= b) {
-		if (a < b)
+		if (a < b) {
 			return (x);
-		else {
+		} else {
 			*quo = 1 + (sq >> 30);
 			return (zero * x);
 		}
 	}
+
 	/* determine ix = ilogbl(x) */
-	if (x0 < iu) {		/* subnormal x */
+	if (x0 < iu) {			/* subnormal x */
 		ix = 0;
 		ix = -16382;
+
 		while (x0 == 0) {
 			ix -= 16;
 			x0 = x1 >> 16;
@@ -97,6 +98,7 @@ fmodquol(long double x, long double y, int *quo) {
 			x2 = (x2 << 16) | (x3 >> 16);
 			x3 = (x3 << 16);
 		}
+
 		while (x0 < iu) {
 			ix -= 1;
 			x0 = (x0 << 1) | (x1 >> 31);
@@ -110,8 +112,9 @@ fmodquol(long double x, long double y, int *quo) {
 	}
 
 	/* determine iy = ilogbl(y) */
-	if (y0 < iu) {		/* subnormal y */
+	if (y0 < iu) {			/* subnormal y */
 		iy = -16382;
+
 		while (y0 == 0) {
 			iy -= 16;
 			y0 = y1 >> 16;
@@ -119,6 +122,7 @@ fmodquol(long double x, long double y, int *quo) {
 			y2 = (y2 << 16) | (y3 >> 16);
 			y3 = (y3 << 16);
 		}
+
 		while (y0 < iu) {
 			iy -= 1;
 			y0 = (y0 << 1) | (y1 >> 31);
@@ -131,10 +135,10 @@ fmodquol(long double x, long double y, int *quo) {
 		y0 = iu | (y0 & im);
 	}
 
-
 	/* fix point fmod */
 	n = ix - iy;
 	m = 0;
+
 	while (n--) {
 		while (x0 == 0 && n >= 16) {
 			m <<= 16;
@@ -144,6 +148,7 @@ fmodquol(long double x, long double y, int *quo) {
 			x2 = (x2 << 16) | (x3 >> 16);
 			x3 = (x3 << 16);
 		}
+
 		while (x0 < iu && n >= 1) {
 			m += m;
 			n -= 1;
@@ -152,9 +157,11 @@ fmodquol(long double x, long double y, int *quo) {
 			x2 = (x2 << 1) | (x3 >> 31);
 			x3 = (x3 << 1);
 		}
+
 		carry = 0;
 		z3 = x3 - y3;
 		carry = z3 > x3;
+
 		if (carry == 0) {
 			z2 = x2 - y2;
 			carry = z2 > x2;
@@ -162,6 +169,7 @@ fmodquol(long double x, long double y, int *quo) {
 			z2 = x2 - y2 - 1;
 			carry = z2 >= x2;
 		}
+
 		if (carry == 0) {
 			z1 = x1 - y1;
 			carry = z1 > x1;
@@ -169,8 +177,10 @@ fmodquol(long double x, long double y, int *quo) {
 			z1 = x1 - y1 - 1;
 			carry = z1 >= x1;
 		}
+
 		z0 = x0 - y0 - carry;
-		if (z0 < 0) {	/* double x */
+
+		if (z0 < 0) {		/* double x */
 			x0 = x0 + x0 + ((x1 & is) != 0);
 			x1 = x1 + x1 + ((x2 & is) != 0);
 			x2 = x2 + x2 + ((x3 & is) != 0);
@@ -178,6 +188,7 @@ fmodquol(long double x, long double y, int *quo) {
 			m += m;
 		} else {
 			m += 1;
+
 			if (z0 == 0) {
 				if ((z1 | z2 | z3) == 0) {
 					/* 0: we are done */
@@ -185,6 +196,7 @@ fmodquol(long double x, long double y, int *quo) {
 						m <<= (1 + n);
 					else
 						m = 0;
+
 					m &= ~0x80000000;
 					*quo = sq >= 0 ? m : -m;
 					__H0(a) = hx & is;
@@ -192,6 +204,7 @@ fmodquol(long double x, long double y, int *quo) {
 					return (a);
 				}
 			}
+
 			/* x = z << 1 */
 			z0 = z0 + z0 + ((z1 & is) != 0);
 			z1 = z1 + z1 + ((z2 & is) != 0);
@@ -204,9 +217,11 @@ fmodquol(long double x, long double y, int *quo) {
 			m += m;
 		}
 	}
+
 	carry = 0;
 	z3 = x3 - y3;
 	carry = z3 > x3;
+
 	if (carry == 0) {
 		z2 = x2 - y2;
 		carry = z2 > x2;
@@ -214,6 +229,7 @@ fmodquol(long double x, long double y, int *quo) {
 		z2 = x2 - y2 - 1;
 		carry = z2 >= x2;
 	}
+
 	if (carry == 0) {
 		z1 = x1 - y1;
 		carry = z1 > x1;
@@ -221,7 +237,9 @@ fmodquol(long double x, long double y, int *quo) {
 		z1 = x1 - y1 - 1;
 		carry = z1 >= x1;
 	}
+
 	z0 = x0 - y0 - carry;
+
 	if (z0 >= 0) {
 		x0 = z0;
 		x1 = z1;
@@ -229,6 +247,7 @@ fmodquol(long double x, long double y, int *quo) {
 		x3 = z3;
 		m += 1;
 	}
+
 	m &= ~0x80000000;
 	*quo = sq >= 0 ? m : -m;
 
@@ -238,6 +257,7 @@ fmodquol(long double x, long double y, int *quo) {
 		__H1(a) = __H2(a) = __H3(a) = 0;
 		return (a);
 	}
+
 	while (x0 < iu) {
 		if (x0 == 0) {
 			iy -= 16;
@@ -260,9 +280,10 @@ fmodquol(long double x, long double y, int *quo) {
 		__H1(a) = x1;
 		__H2(a) = x2;
 		__H3(a) = x3;
-	} else {		/* subnormal output */
+	} else {			/* subnormal output */
 		n = -16382 - iy;
 		k = n & 31;
+
 		if (k <= 16) {
 			x3 = (x2 << (32 - k)) | (x3 >> k);
 			x2 = (x1 << (32 - k)) | (x2 >> k);
@@ -274,6 +295,7 @@ fmodquol(long double x, long double y, int *quo) {
 			x1 = (x0 << (32 - k)) | (x1 >> k);
 			x0 = 0;
 		}
+
 		while (n >= 32) {
 			n -= 32;
 			x3 = x2;
@@ -281,46 +303,54 @@ fmodquol(long double x, long double y, int *quo) {
 			x1 = x0;
 			x0 = 0;
 		}
+
 		__H0(a) = x0 | sx;
 		__H1(a) = x1;
 		__H2(a) = x2;
 		__H3(a) = x3;
 		a *= one;
 	}
+
 	return (a);
 }
 
 long double
-remquol(long double x, long double y, int *quo) {
+remquol(long double x, long double y, int *quo)
+{
 	int hx, hy, sx, sq;
 	long double v;
 
-	hx = __H0(x);		/* high word of x */
-	hy = __H0(y);		/* high word of y */
-	sx = hx & is;		/* sign of x */
-	sq = (hx ^ hy) & is;	/* sign of x/y */
-	hx ^= sx;		/* |x| */
+	hx = __H0(x);			/* high word of x */
+	hy = __H0(y);			/* high word of y */
+	sx = hx & is;			/* sign of x */
+	sq = (hx ^ hy) & is;		/* sign of x/y */
+	hx ^= sx;			/* |x| */
 	hy &= ~0x80000000;
 
 	/* purge off exception values */
 	*quo = 0;
+
 	/* y=0, y is NaN, x is NaN or inf */
 	if (y == 0.0L || y != y || hx >= 0x7fff0000)
 		return ((x * y) / (x * y));
 
 	y = fabsl(y);
 	x = fabsl(x);
+
 	if (hy <= 0x7ffdffff) {
 		x = fmodquol(x, y + y, quo);
 		*quo = ((*quo) & 0x3fffffff) << 1;
 	}
+
 	if (hy < 0x00020000) {
 		if (x + x > y) {
 			*quo += 1;
+
 			if (x == y)
 				x = zero;
 			else
 				x -= y;
+
 			if (x + x >= y) {
 				x -= y;
 				*quo += 1;
@@ -328,19 +358,24 @@ remquol(long double x, long double y, int *quo) {
 		}
 	} else {
 		v = 0.5L * y;
+
 		if (x > v) {
 			*quo += 1;
+
 			if (x == y)
 				x = zero;
 			else
 				x -= y;
+
 			if (x >= v) {
 				x -= y;
 				*quo += 1;
 			}
 		}
 	}
+
 	if (sq != 0)
 		*quo = -(*quo);
+
 	return (sx == 0 ? x : -x);
 }

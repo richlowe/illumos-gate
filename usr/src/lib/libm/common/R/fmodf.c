@@ -18,9 +18,11 @@
  *
  * CDDL HEADER END
  */
+
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -30,20 +32,18 @@
 
 #include "libm.h"
 
-/* INDENT OFF */
-static const int
-	is = (int)0x80000000,
+static const int is = (int)0x80000000,
 	im = 0x007fffff,
 	ii = 0x7f800000,
 	iu = 0x00800000;
-/* INDENT ON */
 
-static const float zero	= 0.0;
+static const float zero = 0.0;
 
 float
-fmodf(float x, float y) {
-	float	w;
-	int	hx, ix, iy, iz, k, ny, nd;
+fmodf(float x, float y)
+{
+	float w;
+	int hx, ix, iy, iz, k, ny, nd;
 
 	hx = *(int *)&x;
 	ix = hx & 0x7fffffff;
@@ -55,30 +55,33 @@ fmodf(float x, float y) {
 		w = w / w;
 	} else if (ix <= iy) {
 		if (ix < iy)
-			w = x;	/* return x if |x|<|y| */
+			w = x;		/* return x if |x|<|y| */
 		else
 			w = zero * x;	/* return sign(x)*0.0 */
 	} else {
-		/* INDENT OFF */
+
 		/*
 		 * scale x,y to "normal" with
 		 *	ny = exponent of y
 		 *	nd = exponent of x minus exponent of y
 		 */
-		/* INDENT ON */
 		ny = iy >> 23;
 		k = ix >> 23;
 
 		/* special case for subnormal y or x */
 		if (ny == 0) {
 			ny = 1;
+
 			while (iy < iu) {
 				ny -= 1;
 				iy += iy;
 			}
+
 			nd = k - ny;
+
 			if (k == 0) {
 				nd += 1;
+
 				while (ix < iu) {
 					nd -= 1;
 					ix += ix;
@@ -92,11 +95,14 @@ fmodf(float x, float y) {
 			iy = iu | (iy & im);
 		}
 
-		/* fix point fmod for normalized ix and iy */
-		/* INDENT OFF */
+		/*
+		 * fix point fmod for normalized ix and iy
+		 */
+
+		/* BEGIN CSTYLED */
 		/*
 		 * while (nd--) {
-		 * 	iz = ix - iy;
+		 *      iz = ix - iy;
 		 * if (iz < 0)
 		 *	ix = ix + ix;
 		 * else if (iz == 0) {
@@ -107,46 +113,62 @@ fmodf(float x, float y) {
 		 *	ix = iz + iz;
 		 * }
 		 */
-		/* INDENT ON */
-		/* unroll the above loop 4 times to gain performance */
+		/* END CSTYLED */
+
+		/*
+		 * unroll the above loop 4 times to gain performance
+		 */
 		k = nd >> 2;
 		nd -= k << 2;
+
 		while (k--) {
 			iz = ix - iy;
+
 			if (iz >= 0)
 				ix = iz + iz;
 			else
 				ix += ix;
+
 			iz = ix - iy;
+
 			if (iz >= 0)
 				ix = iz + iz;
 			else
 				ix += ix;
+
 			iz = ix - iy;
+
 			if (iz >= 0)
 				ix = iz + iz;
 			else
 				ix += ix;
+
 			iz = ix - iy;
+
 			if (iz >= 0)
 				ix = iz + iz;
 			else
 				ix += ix;
+
 			if (iz == 0) {
 				*(int *)&w = is & hx;
 				return (w);
 			}
 		}
+
 		while (nd--) {
 			iz = ix - iy;
+
 			if (iz >= 0)
 				ix = iz + iz;
 			else
 				ix += ix;
 		}
+
 		/* end of unrolling */
 
 		iz = ix - iy;
+
 		if (iz >= 0)
 			ix = iz;
 
@@ -155,14 +177,17 @@ fmodf(float x, float y) {
 			*(int *)&w = is & hx;
 			return (w);
 		}
+
 		while (ix < iu) {
 			ix += ix;
 			ny -= 1;
 		}
+
 		while (ix > (iu + iu)) {
 			ny += 1;
 			ix >>= 1;
 		}
+
 		if (ny > 0) {
 			*(int *)&w = (is & hx) | (ix & im) | (ny << 23);
 		} else {
@@ -172,5 +197,6 @@ fmodf(float x, float y) {
 			*(int *)&w = (is & hx) | ix;
 		}
 	}
+
 	return (w);
 }

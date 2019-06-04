@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -37,6 +38,7 @@
 #include "longdouble.h"
 
 long double
-gammal_r(long double x, int *signgamlp) {
-	return __k_lgammal(x, signgamlp);
+gammal_r(long double x, int *signgamlp)
+{
+	return (__k_lgammal(x, signgamlp));
 }

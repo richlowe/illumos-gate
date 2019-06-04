@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -32,11 +33,12 @@
 #include "libm.h"
 
 float
-tanhf(float x) {
+tanhf(float x)
+{
 #if defined(FPADD_TRAPS_INCOMPLETE_ON_NAN)
 	if (isnanf(x))
 		return (x * x);
 	else
 #endif
-	return ((float) tanh((double) x));
+	return ((float)tanh((double)x));
 }

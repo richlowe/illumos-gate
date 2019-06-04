@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -48,14 +49,16 @@
  */
 
 static const long double zero = 0.0L, half = 0.5L, one = 1.0L;
-
 long double
-atanhl(long double x) {
+atanhl(long double x)
+{
 	long double t;
 
 	t = fabsl(x);
+
 	if (t == one)
 		return (x / zero);
+
 	t = t / (one - t);
 	return (copysignl(half, x) * log1pl(t + t));
 }

@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -43,7 +44,7 @@
  *	2. if |x| <= 0.0625 = 1/16, use approximation
  *		expm1(x) = x + x*P/(2-P)
  * where
- * 	P = x - z*(P1+z*(P2+z*(P3+z*(P4+z*(P5+z*P6+z*P7))))), z = x*x;
+ *      P = x - z*(P1+z*(P2+z*(P3+z*(P4+z*(P5+z*P6+z*P7))))), z = x*x;
  * (this formula is derived from
  *	2-P+x = R = x*(exp(x)+1)/(exp(x)-1) ~ 2 + x*x/6 - x^4/360 + ...)
  *
@@ -100,18 +101,16 @@
 
 extern const long double _TBL_expl_hi[], _TBL_expl_lo[];
 extern const long double _TBL_expm1lx[], _TBL_expm1l[];
-
-static const long double
-	zero		= +0.0L,
-	one		= +1.0L,
-	two		= +2.0L,
-	ln2_64		= +1.083042469624914545964425189778400898568e-2L,
-	ovflthreshold	= +1.135652340629414394949193107797076342845e+4L,
-	invln2_32	= +4.616624130844682903551758979206054839765e+1L,
-	ln2_32hi	= +2.166084939249829091928849858592451515688e-2L,
-	ln2_32lo	= +5.209643502595475652782654157501186731779e-27L,
-	huge		= +1.0e4000L,
-	tiny		= +1.0e-4000L,
+static const long double zero = +0.0L,
+	one = +1.0L,
+	two = +2.0L,
+	ln2_64 = +1.083042469624914545964425189778400898568e-2L,
+	ovflthreshold = +1.135652340629414394949193107797076342845e+4L,
+	invln2_32 = +4.616624130844682903551758979206054839765e+1L,
+	ln2_32hi = +2.166084939249829091928849858592451515688e-2L,
+	ln2_32lo = +5.209643502595475652782654157501186731779e-27L,
+	huge = +1.0e4000L,
+	tiny = +1.0e-4000L,
 	P1 = +1.66666666666666666666666666666638500528074603030e-0001L,
 	P2 = -2.77777777777777777777777759668391122822266551158e-0003L,
 	P3 = +6.61375661375661375657437408890138814721051293054e-0005L,
@@ -127,35 +126,44 @@ static const long double
 	T5 = +4.175314851769539751387852116610973796053e-8L;
 
 long double
-expm1l(long double x) {
+expm1l(long double x)
+{
 	int hx, ix, j, k, m;
 	long double t, r, s, w;
 
-	hx = ((int *) &x)[HIXWORD];
+	hx = ((int *)&x)[HIXWORD];
 	ix = hx & ~0x80000000;
+
 	if (ix >= 0x7fff0000) {
 		if (x != x)
-			return (x + x);	/* NaN */
+			return (x + x);			/* NaN */
+
 		if (x < zero)
-			return (-one);	/* -inf */
-		return (x);	/* +inf */
+			return (-one);			/* -inf */
+
+		return (x);				/* +inf */
 	}
-	if (ix < 0x3fff4000) {	/* |x| < 1.25 */
-		if (ix < 0x3ffb0000) {	/* |x| < 0.0625 */
+
+	if (ix < 0x3fff4000) {				/* |x| < 1.25 */
+		if (ix < 0x3ffb0000) {			/* |x| < 0.0625 */
 			if (ix < 0x3f8d0000) {
-				if ((int) x == 0)
+				if ((int)x == 0)
 					return (x);	/* |x|<2^-114 */
 			}
+
 			t = x * x;
 			r = (x - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t *
-				(P5 + t * (P6 + t * P7)))))));
+			    (P5 + t * (P6 + t * P7)))))));
 			return (x + (x * r) / (two - r));
 		}
+
 		/* compute i = [64*x] */
 		m = 0x4009 - (ix >> 16);
 		j = ((ix & 0x0000ffff) | 0x10000) >> m;	/* j=4,...,67 */
+
 		if (hx < 0)
 			j += 82;			/* negative */
+
 		s = x - _TBL_expm1lx[j];
 		t = s * s;
 		r = s - t * (T1 + t * (T2 + t * (T3 + t * (T4 + t * T5))));
@@ -163,22 +171,26 @@ expm1l(long double x) {
 		w = _TBL_expm1l[j];
 		return (w + (w + one) * r);
 	}
+
 	if (hx > 0) {
 		if (x > ovflthreshold)
 			return (huge * huge);
-		k = (int) (invln2_32 * (x + ln2_64));
+
+		k = (int)(invln2_32 * (x + ln2_64));
 	} else {
 		if (x < -80.0)
 			return (tiny - x / x);
-		k = (int) (invln2_32 * (x - ln2_64));
+
+		k = (int)(invln2_32 * (x - ln2_64));
 	}
+
 	j = k & 0x1f;
 	m = k >> 5;
-	t = (long double) k;
+	t = (long double)k;
 	x = (x - t * ln2_32hi) - t * ln2_32lo;
 	t = x * x;
 	r = (x - t * (T1 + t * (T2 + t * (T3 + t * (T4 + t * T5))))) - two;
 	x = _TBL_expl_hi[j] - ((_TBL_expl_hi[j] * (x + x)) / r -
-		_TBL_expl_lo[j]);
+	    _TBL_expl_lo[j]);
 	return (scalbnl(x, m) - one);
 }

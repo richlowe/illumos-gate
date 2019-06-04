@@ -22,6 +22,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  */
+
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -58,27 +59,29 @@
  *
  */
 
-#define	ME	16383
-#define	MEP1	16384
-#define	LNOVFT	1.135652340629414394949193107797076342845e+4L
-		/* last 32 bits of LN2HI is zero */
-#define	LN2HI   6.931471805599453094172319547495844850203e-0001L
-#define	LN2LO   1.667085920830552208890449330400379754169e-0025L
+#define	ME		16383
+#define	MEP1		16384
+#define	LNOVFT		1.135652340629414394949193107797076342845e+4L
+/* last 32 bits of LN2HI is zero */
+#define	LN2HI		6.931471805599453094172319547495844850203e-0001L
+#define	LN2LO		1.667085920830552208890449330400379754169e-0025L
 
-static const long double
-	half	= 0.5L,
-	one	= 1.0L,
-	ln2hi	= LN2HI,
-	ln2lo	= LN2LO,
-	lnovftL	= LNOVFT;
+static const long double half = 0.5L,
+	one = 1.0L,
+	ln2hi = LN2HI,
+	ln2lo = LN2LO,
+	lnovftL = LNOVFT;
 
 long double
-sinhl(long double x) {
+sinhl(long double x)
+{
 	long double r, t;
 
 	if (!finitel(x))
-		return (x + x);	/* sinh of NaN or +-INF is itself */
+		return (x + x);		/* sinh of NaN or +-INF is itself */
+
 	r = fabsl(x);
+
 	if (r < lnovftL) {
 		t = expm1l(r);
 		r = copysignl((t + t / (one + t)) * half, x);
@@ -86,5 +89,6 @@ sinhl(long double x) {
 		r = copysignl(expl((r - MEP1 * ln2hi) - MEP1 * ln2lo), x);
 		r = scalbnl(r, ME);
 	}
+
 	return (r);
 }
