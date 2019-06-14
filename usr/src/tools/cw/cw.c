@@ -306,6 +306,7 @@ typedef struct {
 typedef struct cw_ictx {
 	struct cw_ictx	*i_next;
 	cw_compiler_t	*i_compiler;
+	char		*i_linker;
 	struct aelist	*i_ae;
 	uint32_t	i_flags;
 	int		i_oldargc;
@@ -1209,14 +1210,6 @@ do_gcc(cw_ictx_t *ctx)
 			/* Just ignore -YS,... for now */
 			if (strncmp(arg, "S,", 2) == 0)
 				break;
-			if (strncmp(arg, "l,", 2) == 0) {
-				char *s = strdup(arg);
-				s[0] = '-';
-				s[1] = 'B';
-				newae(ctx->i_ae, s);
-				free(s);
-				break;
-			}
 			if (strncmp(arg, "I,", 2) == 0) {
 				char *s = strdup(arg);
 				s[0] = '-';
@@ -1467,6 +1460,9 @@ prepctx(cw_ictx_t *ctx)
 		    "shadow" : "primary", ctx->i_compiler->c_path);
 		(void) fflush(stdout);
 	}
+
+	if (ctx->i_linker != NULL)
+		setenv("LD_ALTEXEC", ctx->i_linker, 1);
 
 	if (!(ctx->i_flags & CW_F_XLATE))
 		return;
@@ -1727,6 +1723,7 @@ main(int argc, char **argv)
 
 	static struct option longopts[] = {
 		{ "compiler", no_argument, NULL, 'c' },
+		{ "linker", required_argument, NULL, 'l' },
 		{ "noecho", no_argument, NULL, 'n' },
 		{ "primary", required_argument, NULL, 'p' },
 		{ "shadow", required_argument, NULL, 's' },
@@ -1745,6 +1742,10 @@ main(int argc, char **argv)
 			break;
 		case 'C':
 			Cflg = B_TRUE;
+			break;
+		case 'l':
+			if ((main_ctx->i_linker = strdup(optarg)) == NULL)
+				nomem();
 			break;
 		case 'n':
 			nflg = B_TRUE;

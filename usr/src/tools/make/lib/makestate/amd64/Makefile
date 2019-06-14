@@ -14,4 +14,7 @@
 include ../Makefile.com
 include $(SRC)/lib/Makefile.lib.64
 
+# Need to unset the alternate link-editor again, as Makefile.lib and
+# Makefile.tools don't interact well.
+
 install: all $(ROOTONBLDLIBMACH64)/libmakestate.so.1

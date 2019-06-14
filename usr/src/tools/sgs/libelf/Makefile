@@ -1,4 +1,3 @@
-# Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 # CDDL HEADER START
 #
@@ -19,26 +18,31 @@
 #
 # CDDL HEADER END
 #
+
 #
-# This required package information file describes characteristics of the
-# package, such as package abbreviation, full package name, package version,
-# and package architecture.
+# Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-PKG="SUNWonld"
-SGSDIR=/opt/SUNWonld/base/
-SGSBACKUPDIR=/var/ld/SUNWonld_backup
-LIBDIR=lib
-NAME="Solaris Link-Editors"
-ARCH="ISA"
-VERSION="2.4.2,REV=0.0.0"
-PRODNAME="SunOS"
-PRODVERS="RELEASE/VERSION"
-SUNW_PKGTYPE="usr"
-MAXINST="1000"
-CATEGORY="internal"
-DESC="OS-Net Static/Dynamic linker package"
-VENDOR="Oracle Corporation"
-HOTLINE="see email"
-EMAIL="Rod.Evans@Oracle.COM Ali.Bahrami@Oracle.COM"
-CLASSES="none"
-BASEDIR=/
+
+include		../Makefile.com
+include		../../Makefile.tools
+include		$(SGSHOME)/libelf/Makefile.com
+
+CONVLIBDIR = -L../libconv
+CPPFLAGS = $(NATIVE_CPPFLAGS)
+CFLAGS = $(NATIVE_CFLAGS)
+SGSMSGTARG +=	$(SGSMSG32)
+CW_LINKER =
+
+.KEEP_STATE:
+
+install:	all $(ROOTONBLDLIBMACH)/$(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+
+$(ROOTONBLDLIBMACH)/$(DYNLIB): $(PICS) $(ROOTONBLDLIBMACH)
+		$(BUILD.SO)
+		$(POST_PROCESS_SO)
+
+$(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
+		@$(RM) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+
+include		$(SGSHOME)/libelf/Makefile.targ

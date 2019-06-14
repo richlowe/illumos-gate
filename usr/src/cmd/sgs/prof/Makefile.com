@@ -48,7 +48,7 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 # not linted
 SMATCH=off
 
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) $(ELFLIBDIR) -lelf
+LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf
 
 %.o:		../common/%.c
 		$(COMPILE.c) $<

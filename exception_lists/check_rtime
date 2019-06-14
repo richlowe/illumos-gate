@@ -251,3 +251,11 @@ FORBIDDEN libxcurses\.so\.1
 # one size fits all approach causes an object to be linked against an
 # unneeded library.
 UNREF_OBJ	lib/(libdevinfo|libcfgadm)\.so\.1; .*\ of\ .*SUNW,Netra-CP2300/lib/libprtdiag_psr\.so\.1
+
+#
+# the SUNWonld directory contains built versions of demos, built only to
+# ensure their correctness.
+#
+EXEC_STACK	^opt/SUNWonld
+EXEC_DATA	^opt/SUNWonld
+NODIRECT	^opt/SUNWonld

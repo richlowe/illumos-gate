@@ -48,4 +48,4 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 
 SMOFF += indenting
 
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) $(ELFLIBDIR) -lelf
+LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf

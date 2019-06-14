@@ -19,32 +19,23 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
-#
-# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
-#
+# Copyright (c) 1996 by Sun Microsystems, Inc.
+# All rights reserved.
 
-MAN1l=		chkmsg.1l \
-		sgsmsg.1l
+include		../Makefile.com
+include		../../Makefile.tools
+include		$(SGSHOME)/ld/Makefile.com
 
-MANS=		$(MAN1l)
+LDLIBS = -L../libconv -L$(ROOTONBLDLIBMACH) -lld -lelf -lconv
+CPPFLAGS = $(NATIVE_CPPFLAGS)
+CFLAGS = $(NATIVE_CFLAGS)
+MAPFILES = $(SRCDIR)/common/mapfile-intf
+CW_LINKER =
+VAR_LD_LLDFLAGS=	'-R$$ORIGIN/../../lib/$(MACH)'
+VAR_LD_LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
 
-include		../../../../Makefile.master
-
-ROOTDIR=	$(ROOT)/opt/SUNWonld/man
-ROOT1lMAN=	$(MAN1l:%=$(ROOTDIR)/man1l/%)
-
-ROOTMANS=	$(ROOT1lMAN)
-
-FILEMODE=	0444
+install: $(ROOTONBLDMACHPROG)
 
 .KEEP_STATE:
-all:		$(MANS)
 
-install:	all $(ROOTMANS)
-
-$(ROOTDIR)/man1l/%:	%
-		$(INS.file)
-
-clobber clean:
+include		$(SGSHOME)/ld/Makefile.targ

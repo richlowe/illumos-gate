@@ -18,31 +18,26 @@
 #
 # CDDL HEADER END
 #
+
 #
-# Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+#
 #
 
-include		$(SRC)/Makefile.master
+include		../Makefile.com
+include		$(SGSHOME)/libconv/Makefile.com
 
-PKGARCHIVE=	.
-DATAFILES=	copyright prototype_com prototype_$(MACH) postinstall \
-		preremove depend checkinstall
-README=		SUNWonld-README
-FILES=		$(DATAFILES) pkginfo
-PACKAGE=	SUNWonld
-ROOTONLD=	$(ROOT)/opt/SUNWonld
-ROOTREADME=	$(README:%=$(ROOTONLD)/%)
+CPPFLAGS = $(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc -I$(ELFCAP) \
+	-I$(SRC)/common/sgsrtcid \
+	-I$(SRC)/lib/libdemangle/common
+CFLAGS = $(NATIVE_CFLAGS)
+CW_LINKER =
 
-CLEANFILES=	$(FILES) awk_pkginfo ../bld_awk_pkginfo
-CLOBBERFILES=	$(PACKAGE)
+.PARALLEL:	$(PICS)
+.KEEP_STATE:
 
-../%:		../common/%.ksh
-		$(RM) $@
-		cp $< $@
-		chmod +x $@
+install all:	$(LIBRARY)
 
-$(ROOTONLD)/%:	../common/%
-		$(RM) $@
-		cp $< $@
-		chmod +x $@
+include		$(SGSHOME)/libconv/Makefile.targ
+

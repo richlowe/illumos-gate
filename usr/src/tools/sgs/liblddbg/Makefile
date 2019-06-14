@@ -18,43 +18,34 @@
 #
 # CDDL HEADER END
 #
+
 #
-# Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
+include		../Makefile.com
+include		../../Makefile.tools
+include		$(SGSHOME)/liblddbg/Makefile.com
 
-#
-# Remove any new files that SUNWonld added to the system
-#
-if [ -f $BASEDIR/${SGSBACKUPDIR}.newfiles ]; then
-	echo "Removing new files added by SUNWonld"
-	cat $BASEDIR/${SGSBACKUPDIR}.newfiles | while read file
-	do
-		if [ -d $BASEDIR/$file ]; then
-			rmdir $BASEDIR/$file
-		else
-			rm $BASEDIR/$file
-		fi
-	done
-	rm $BASEDIR/${SGSBACKUPDIR}.newfiles
-fi
+.KEEP_STATE:
 
+CPPFLAGS = $(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc
+CFLAGS = $(NATIVE_CFLAGS)
+DYNFLAGS += -L../libconv
+CW_LINKER=
+SGSMSGTARG +=	$(SGSMSG32)
 
-#
-# Restore previous SGSTOOLS
-#
-if [ \( -d $BASEDIR/$SGSBACKUPDIR \) -a \
-     \( -f $BASEDIR/${SGSBACKUPDIR}.origfiles \) ]; then
-	prev_bindnow=$LD_BIND_NOW
-	LD_BIND_NOW=1
-	export LD_BIND_NOW
-	echo "Restoring SGSTOOLS from $BASEDIR$SGSBACKUPDIR"
-	cd $BASEDIR/$SGSBACKUPDIR
-	cpio -pdmu $BASEDIR < $BASEDIR/${SGSBACKUPDIR}.origfiles
-	rm -rf *
-	rm $BASEDIR/${SGSBACKUPDIR}.origfiles
-	LD_BIND_NOW=$prev_bindnow
-fi
+all:		$(DYNLIB) $(LIBLINKS)
 
-cd $BASEDIR
+install:	all $(ROOTONBLDLIBMACH)/$(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+
+$(ROOTONBLDLIBMACH)/$(DYNLIB): $(PICS) $(ROOTONBLDLIBMACH)
+		$(BUILD.SO)
+		$(POST_PROCESS_SO)
+
+$(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
+		@$(RM) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+
+include		$(SGSHOME)/liblddbg/Makefile.targ
