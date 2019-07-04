@@ -25,8 +25,8 @@
 #
 # usr/src/lib/libpam/i386/Makefile
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
+
 
 include ../Makefile.com
 
-install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
+install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT) $(ROOTCOMPATLINKS)

@@ -25,11 +25,11 @@
 #
 # lib/libsecdb/sparc/Makefile
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 
 include ../Makefile.com
 
 .KEEP_STATE:
 
-install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
+install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT) $(ROOTCOMPATLINKS)

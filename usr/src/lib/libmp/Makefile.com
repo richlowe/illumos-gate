@@ -22,8 +22,6 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 LIBRARY=	libmp.a
 VERS=		.2
@@ -35,6 +33,9 @@ include ../../Makefile.lib
 
 # install this library in the root filesystem
 include ../../Makefile.rootfs
+
+COMPATLINKS += usr/lib/libmp.so.1
+$(ROOT)/usr/lib/libmp.so.1 := COMPATLINKTARGET=../../lib/libmp.so.1
 
 SRCDIR =	../common
 

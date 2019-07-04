@@ -23,7 +23,7 @@
 # Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 
 include ../Makefile.com
@@ -33,4 +33,4 @@ LIBS = $(DYNLIB) $(LINTLIB)
 
 all: $(LIBS)
 
-install: all $(ROOTLIBS64) $(ROOTLINKS64)
+install: all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTCOMPATLINKS64)

@@ -23,7 +23,7 @@
 # Copyright (c) 1999, 2001 by Sun Microsystems, Inc.
 # All rights reserved.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # libsecdb/i386/Makefile
 
@@ -33,4 +33,4 @@ include	../Makefile.com
 .KEEP_STATE:
 
 
-install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
+install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT) $(ROOTCOMPATLINKS)

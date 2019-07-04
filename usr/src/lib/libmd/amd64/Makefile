@@ -59,7 +59,7 @@ AS_CPPFLAGS += -D_ASM
 
 all:		$(LIBS)
 
-install:	all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTLINT64)
+install:	all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTLINT64) $(ROOTCOMPATLINKS64)
 
 lint:		lintcheck
 

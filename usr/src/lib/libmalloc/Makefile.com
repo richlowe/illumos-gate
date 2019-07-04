@@ -22,13 +22,11 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 LIBRARY=	libmalloc.a
 VERS=		.1
 
-OBJECTS= 	malloc.o
+OBJECTS=	malloc.o
 
 # include library definitions
 include ../../Makefile.lib
@@ -45,6 +43,13 @@ CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-I../../common/inc -D_REENTRANT
 DYNFLAGS +=	$(ZINTERPOSE)
 LDLIBS +=	-lc
+
+COMPATLINKS=	usr/ccs/lib/libmalloc.so
+COMPATLINKS64=	usr/ccs/lib/$(MACH64)/libmalloc.so
+
+$(ROOT)/usr/ccs/lib/libmalloc.so := COMPATLINKTARGET=../../lib/libmalloc.so.1
+$(ROOT)/usr/ccs/lib/$(MACH64)/libmalloc.so:= \
+	COMPATLINKTARGET=../../../lib/$(MACH64)/libmalloc.so.1
 
 .KEEP_STATE:
 

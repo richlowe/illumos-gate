@@ -45,7 +45,7 @@ pics/edonr.o := CERRWARN +=	$(CNOWARN_UNINIT)
 
 all:		$(LIBS)
 
-install:	all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
+install:	all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT) $(ROOTCOMPATLINKS)
 
 lint:		lintcheck
 
