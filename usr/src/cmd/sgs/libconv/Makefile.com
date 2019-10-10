@@ -27,51 +27,86 @@
 
 LIBRARY =	libconv.a
 
-COMOBJS32 =	cap_machelf32.o		dynamic_machelf32.o \
-		globals_machelf32.o	sections_machelf32.o \
-		symbols_machelf32.o	symbols_sparc_machelf32.o
+COMOBJS32 =	cap_machelf32.o		\
+		dynamic_machelf32.o	\
+		globals_machelf32.o	\
+		sections_machelf32.o	\
+		symbols_machelf32.o	\
+		symbols_sparc_machelf32.o
 
-COMOBJS64 =	cap_machelf64.o		dynamic_machelf64.o \
-		globals_machelf64.o	sections_machelf64.o \
-		symbols_machelf64.o	symbols_sparc_machelf64.o
+COMOBJS64 =	cap_machelf64.o		\
+		dynamic_machelf64.o	\
+		globals_machelf64.o	\
+		sections_machelf64.o	\
+		symbols_machelf64.o	\
+		symbols_sparc_machelf64.o
 
-COMOBJS=	arch.o			audit.o \
-		c_literal.o \
-		cap.o			config.o \
-		corenote.o		data.o \
-		deftag.o		demangle.o \
-		dl.o			dwarf.o \
-		dwarf_ehe.o		dynamic.o \
-		elf.o			entry.o \
-		globals.o		group.o \
-		lddstub.o		map.o \
-		phdr.o			relocate.o \
-		relocate_i386.o		relocate_amd64.o \
-		relocate_sparc.o	sections.o \
-		segments.o		strproc.o \
-		symbols.o		syminfo.o \
-		tokens.o		time.o \
+COMOBJS=	arch.o			\
+		audit.o			\
+		c_literal.o		\
+		cap.o			\
+		config.o		\
+		data.o			\
+		deftag.o		\
+		demangle.o		\
+		dl.o			\
+		dwarf.o			\
+		dwarf_ehe.o		\
+		dynamic.o		\
+		elf.o			\
+		entry.o			\
+		globals.o		\
+		group.o			\
+		lddstub.o		\
+		map.o			\
+		note.o			\
+		phdr.o			\
+		relocate.o		\
+		relocate_i386.o		\
+		relocate_amd64.o	\
+		relocate_sparc.o	\
+		sections.o		\
+		segments.o		\
+		strproc.o		\
+		symbols.o		\
+		syminfo.o		\
+		tokens.o		\
+		time.o			\
 		version.o
 
 ELFCAP_OBJS=	elfcap.o
 
 ASOBJS=		vernote.o
 
-BLTOBJS=	arch_msg.o		audit_msg.o \
-		c_literal_msg.o \
-		cap_msg.o		config_msg.o \
-		corenote_msg.o		data_msg.o \
-		deftag_msg.o		demangle_msg.o \
-		dl_msg.o		dwarf_msg.o \
-		dwarf_ehe_msg.o		dynamic_msg.o \
-		elf_msg.o		entry_msg.o \
-		globals_msg.o		group_msg.o \
-		map_msg.o		lddstub_msg.o \
-		phdr_msg.o		relocate_amd64_msg.o \
-		relocate_i386_msg.o	relocate_sparc_msg.o \
-		sections_msg.o		segments_msg.o \
-		symbols_msg.o		symbols_sparc_msg.o \
-		syminfo_msg.o		time_msg.o \
+BLTOBJS=	arch_msg.o		\
+		audit_msg.o		\
+		c_literal_msg.o		\
+		cap_msg.o		\
+		config_msg.o		\
+		data_msg.o		\
+		deftag_msg.o		\
+		demangle_msg.o		\
+		dl_msg.o		\
+		dwarf_ehe_msg.o		\
+		dwarf_msg.o		\
+		dynamic_msg.o		\
+		elf_msg.o		\
+		entry_msg.o		\
+		globals_msg.o		\
+		group_msg.o		\
+		lddstub_msg.o		\
+		map_msg.o		\
+		note_msg.o		\
+		phdr_msg.o		\
+		relocate_amd64_msg.o	\
+		relocate_i386_msg.o	\
+		relocate_sparc_msg.o	\
+		sections_msg.o		\
+		segments_msg.o		\
+		symbols_msg.o		\
+		symbols_sparc_msg.o	\
+		syminfo_msg.o		\
+		time_msg.o		\
 		version_msg.o
 
 

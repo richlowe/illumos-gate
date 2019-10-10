@@ -108,7 +108,7 @@ CPPFLAGS +=	-DUSE_LIBLD_MALLOC -I$(SRC)/lib/libc/inc \
 		    -I$(SRC)/uts/common/krtld -I$(SRC)/uts/sparc \
 		    $(VAR_LIBLD_CPPFLAGS)
 LDLIBS +=	$(CONVLIBDIR) -lconv $(LDDBGLIBDIR) -llddbg \
-		    $(ELFLIBDIR) -lelf $(DLLIB) -lc
+		    $(ELFLIBDIR) -lelf $(DLLIB) -lmd -lc
 
 DYNFLAGS +=	$(VERSREF) '-R$$ORIGIN'
 

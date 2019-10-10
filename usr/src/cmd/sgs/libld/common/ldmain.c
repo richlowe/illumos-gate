@@ -444,6 +444,11 @@ ld_main(int argc, char **argv, Half mach)
 	if (ld_unwind_populate_hdr(ofl) == S_ERROR)
 		return (ld_exit(ofl));
 
+	Build_id_note *build_id =
+	    (Build_id_note *)ofl->ofl_osbuildid->os_outdata->d_buf;
+
+	ld_buildid(ofl, build_id->b_desc, build_id->b_nhdr.n_descsz);
+
 	/*
 	 * Finally create the files elf checksum.
 	 */

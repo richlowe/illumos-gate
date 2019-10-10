@@ -41,7 +41,7 @@
 #include	<sys/secflags.h>
 #include	<string.h>
 #include	<_conv.h>
-#include	<corenote_msg.h>
+#include	<note_msg.h>
 
 const char *
 conv_cnote_type(Word type, Conv_fmt_flags_t fmt_flags,
@@ -69,6 +69,26 @@ conv_cnote_type(Word type, Conv_fmt_flags_t fmt_flags,
 	    CONV_DS_MSG_INIT(NT_PRSTATUS, types) };
 	static const conv_ds_t	*ds[] = { CONV_DS_ADDR(ds_types), NULL };
 
+
+	return (conv_map_ds(ELFOSABI_NONE, EM_NONE, type, ds, fmt_flags,
+	    inv_buf));
+}
+
+const char *
+conv_gnunote_type(Word type, Conv_fmt_flags_t fmt_flags,
+    Conv_inv_buf_t *inv_buf)
+{
+	static const Msg	types[] = {
+		MSG_NT_GNU_ABI_TAG,	MSG_NT_GNU_HWCAP,
+		MSG_NT_GNU_BUILD_ID,	MSG_NT_GNU_GOLD_VERSION,
+		MSG_NT_GNU_PROPERTY_TYPE_0
+	};
+#if NT_GNU_NUM != NT_GNU_PROPERTY_TYPE_0
+#error "NT_GNU_NUM has grown. Update GNU note types[]"
+#endif
+	static const conv_ds_msg_t ds_types = {
+	    CONV_DS_MSG_INIT(NT_GNU_ABI_TAG, types) };
+	static const conv_ds_t	*ds[] = { CONV_DS_ADDR(ds_types), NULL };
 
 	return (conv_map_ds(ELFOSABI_NONE, EM_NONE, type, ds, fmt_flags,
 	    inv_buf));

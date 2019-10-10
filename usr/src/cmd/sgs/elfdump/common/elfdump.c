@@ -133,7 +133,7 @@ typedef struct {
 		uint_t	n;		/* # items in shxndx.data */
 	} shxndx;
 	VERSYM_STATE	*versym;	/* NULL, or associated VERSYM section */
-	Sym 		*sym;		/* Array of symbols */
+	Sym		*sym;		/* Array of symbols */
 	Word		symn;		/* # of symbols */
 } SYMTBL_STATE;
 
@@ -1575,7 +1575,7 @@ cap_section(const char *file, Cache *cache, Word shnum, Cache *ccache,
 	    ((ehdr->e_type == ET_EXEC) || (ehdr->e_type == ET_DYN))) {
 		Capinfo		*cip;
 		Capchain	*chain;
-		Cache   	*chcache;
+		Cache		*chcache;
 		Shdr		*chshdr;
 		Word		chainnum, inum;
 
@@ -1965,7 +1965,7 @@ syminfo(Cache *cache, Word shnum, Ehdr *ehdr, uchar_t osabi, const char *file)
 	Elf_syminfo_title(0);
 
 	for (ndx = 1, info++; ndx < infonum; ndx++, info++) {
-		Sym 		*sym;
+		Sym		*sym;
 		const char	*needed, *name;
 		Word		expect_dt;
 		Word		boundto = info->si_boundto;
@@ -2135,7 +2135,7 @@ version_def(Verdef *vdf, Word vdf_num, Cache *vcache, Cache *scache,
  *	contain the largest version index seen.
  *
  * note:
- * 	The versym section of an object that follows the original
+ *	The versym section of an object that follows the original
  *	Solaris versioning rules only contains indexes into the verdef
  *	section. Symbols defined in other objects (UNDEF) are given
  *	a version of 0, indicating that they are not defined by
@@ -3680,6 +3680,29 @@ c_literal_cb(const void *ptr, size_t size, void *uvalue)
 	(void) fwrite(ptr, size, 1, stdout);
 }
 
+typedef enum {
+	NOTE_TYPE_UNKNOWN = -1,
+	NOTE_TYPE_CORE,
+	NOTE_TYPE_GNU
+} note_type_t;
+
+static note_type_t
+note_type(const Ehdr *ehdr, const char *name, Word namesz)
+{
+	if ((ehdr->e_type == ET_CORE) &&
+	    (namesz == (MSG_STR_CORE_SIZE + 1)) &&
+	    (strncmp(MSG_ORIG(MSG_STR_CORE), name,
+	    MSG_STR_CORE_SIZE + 1) == 0)) {
+		return (NOTE_TYPE_CORE);
+	} else if ((namesz == (MSG_STR_GNU_SIZE + 1)) &&
+	    (strncmp(MSG_ORIG(MSG_STR_GNU), name,
+	    MSG_STR_GNU_SIZE + 1) == 0)) {
+		return (NOTE_TYPE_GNU);
+	} else {
+		return (NOTE_TYPE_UNKNOWN);
+	}
+}
+
 /*
  * Traverse a note section analyzing each note information block.
  * The data buffers size is used to validate references before they are made,
@@ -3689,7 +3712,6 @@ void
 note_entry(Cache *cache, Word *data, size_t size, Ehdr *ehdr, const char *file)
 {
 	int		cnt = 0;
-	int		is_corenote;
 	int		do_swap;
 	Conv_inv_buf_t	inv_buf;
 	parse_note_t	pnstate;
@@ -3704,18 +3726,11 @@ note_entry(Cache *cache, Word *data, size_t size, Ehdr *ehdr, const char *file)
 	 * Print out a single `note' information block.
 	 */
 	while (pnstate.pns_size > 0) {
-
 		if (parse_note_entry(&pnstate) == 0)
 			return;
 
-		/*
-		 * Is this a Solaris core note? Such notes all have
-		 * the name "CORE".
-		 */
-		is_corenote = (ehdr->e_type == ET_CORE) &&
-		    (pnstate.pn_namesz == (MSG_STR_CORE_SIZE + 1)) &&
-		    (strncmp(MSG_ORIG(MSG_STR_CORE), pnstate.pn_name,
-		    MSG_STR_CORE_SIZE + 1) == 0);
+		note_type_t type = note_type(ehdr, pnstate.pn_name,
+		    pnstate.pn_namesz);
 
 		dbg_print(0, MSG_ORIG(MSG_STR_EMPTY));
 		dbg_print(0, MSG_INTL(MSG_FMT_NOTEENTNDX), EC_WORD(cnt));
@@ -3725,9 +3740,12 @@ note_entry(Cache *cache, Word *data, size_t size, Ehdr *ehdr, const char *file)
 		dbg_print(0, MSG_ORIG(MSG_NOTE_DESCSZ),
 		    EC_WORD(pnstate.pn_descsz));
 
-		if (is_corenote)
+		if (type == NOTE_TYPE_CORE)
 			dbg_print(0, MSG_ORIG(MSG_NOTE_TYPE_STR),
 			    conv_cnote_type(pnstate.pn_type, 0, &inv_buf));
+		else if (type == NOTE_TYPE_GNU)
+			dbg_print(0, MSG_ORIG(MSG_NOTE_TYPE_STR),
+			    conv_gnunote_type(pnstate.pn_type, 0, &inv_buf));
 		else
 			dbg_print(0, MSG_ORIG(MSG_NOTE_TYPE),
 			    EC_WORD(pnstate.pn_type));
@@ -3758,7 +3776,7 @@ note_entry(Cache *cache, Word *data, size_t size, Ehdr *ehdr, const char *file)
 			 * If this is a core note, let the corenote()
 			 * function handle it.
 			 */
-			if (is_corenote) {
+			if (type == NOTE_TYPE_CORE) {
 				/* We only issue the bad arch error once */
 				static int	badnote_done = 0;
 				corenote_ret_t	corenote_ret;
@@ -3871,7 +3889,7 @@ note(Cache *cache, Word shnum, Ehdr *ehdr, const char *file)
  * otherwise.
  */
 static int
-has_linux_abi_note(Cache *cache, Word shnum, const char *file)
+has_linux_abi_note(Cache *cache, Word shnum, const char *file, Ehdr *ehdr)
 {
 	Word	cnt;
 
@@ -3902,27 +3920,22 @@ has_linux_abi_note(Cache *cache, Word shnum, const char *file)
 			if (parse_note_entry(&pnstate) == 0)
 				break;
 
-			/*
-			 * The type must be 1, and the name must be "GNU".
-			 * The descsz must be at least 16 bytes.
-			 */
-			if ((pnstate.pn_type != 1) ||
-			    (pnstate.pn_namesz != (MSG_STR_GNU_SIZE + 1)) ||
-			    (strncmp(MSG_ORIG(MSG_STR_GNU), pnstate.pn_name,
-			    MSG_STR_CORE_SIZE + 1) != 0) ||
-			    (pnstate.pn_descsz < 16))
-				continue;
-
-			/*
-			 * desc contains 4 32-bit fields. Field 0 must be 0,
-			 * indicating Linux. The second, third, and fourth
-			 * fields represent the earliest Linux kernel
-			 * version compatible with this object.
-			 */
-			/*LINTED*/
-			w = (Word *) pnstate.pn_desc;
-			if (*w == 0)
-				return (1);
+			if ((note_type(ehdr, pnstate.pn_name,
+			    pnstate.pn_namesz) == NOTE_TYPE_GNU) &&
+			    (pnstate.pn_type == NT_GNU_ABI_TAG) &&
+			    (pnstate.pn_descsz >= 16)) {
+				/*
+				 * desc contains 4 32-bit fields. Field 0 must
+				 * be 0, indicating Linux. The second, third,
+				 * and fourth fields represent the earliest
+				 * Linux kernel version compatible with this
+				 * object.
+				 */
+				/*LINTED*/
+				w = (Word *) pnstate.pn_desc;
+				if (*w == 0)
+					return (1);
+			}
 		}
 	}
 
@@ -5012,7 +5025,8 @@ regular(const char *file, int fd, Elf *elf, uint_t flags,
 				cache_state = CACHE_FAIL;
 			} else {
 				cache_state = CACHE_OK;
-				if (has_linux_abi_note(cache, shnum, file)) {
+				if (has_linux_abi_note(cache, shnum,
+				    file, ehdr)) {
 					Conv_inv_buf_t	ibuf1, ibuf2;
 
 					(void) fprintf(stderr,

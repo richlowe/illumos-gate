@@ -865,6 +865,8 @@ extern	const char	*conv_cnote_filemode(uint32_t, Conv_fmt_flags_t,
 			    char *, size_t);
 extern	const char	*conv_cnote_type(Word, Conv_fmt_flags_t,
 			    Conv_inv_buf_t *);
+extern	const char	*conv_gnunote_type(Word, Conv_fmt_flags_t,
+			    Conv_inv_buf_t *);
 extern	const char	*conv_def_tag(Symref, Conv_inv_buf_t *);
 extern	const char	*conv_demangle_name(const char *);
 extern	const char	*conv_dl_flag(int, Conv_fmt_flags_t,

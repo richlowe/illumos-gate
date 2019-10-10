@@ -761,6 +761,7 @@
 @ MSG_STR_CDIR_ELSE	"$else"
 @ MSG_STR_CDIR_ENDIF	"$endif"
 
+@ MSG_STR_GNU		"GNU"
 @ MSG_STR_GROUP		"GROUP"
 @ MSG_STR_SUNW_COMDAT	"SUNW_COMDAT"
 
@@ -797,6 +798,7 @@
 @ MSG_SCN_FINIARRAY	".fini_array"
 @ MSG_SCN_GOT		".got"
 @ MSG_SCN_GNU_LINKONCE	".gnu.linkonce."
+@ MSG_SCN_GNU_BUILDID	".note.gnu.build-id"
 @ MSG_SCN_HASH		".hash"
 @ MSG_SCN_INDEX		".index"
 @ MSG_SCN_INIT		".init"

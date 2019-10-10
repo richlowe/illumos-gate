@@ -46,6 +46,7 @@
 #include <sgs.h>
 #include <libintl.h>
 #include <debug.h>
+#include <sha1.h>
 #include "msg.h"
 #include "_libld.h"
 
@@ -756,7 +757,7 @@ cap_names_match(Alist *alp1, Alist *alp2)
 
 	for (ALIST_TRAVERSE(alp1, idx1, capstr1)) {
 		Capstr		*capstr2;
-		Aliste 		idx2;
+		Aliste		idx2;
 
 		for (ALIST_TRAVERSE(alp2, idx2, capstr2)) {
 			if (strcmp(capstr1->cs_str, capstr2->cs_str))

@@ -978,6 +978,13 @@ typedef	Elf64_Word	Elf64_Capchain;
 #define	NT_UPANIC	26	/* prupanic_t */
 #define	NT_NUM		26
 
+/* Known values for GNU notes (name == "GNU") */
+#define	NT_GNU_ABI_TAG		1
+#define	NT_GNU_HWCAP		2
+#define	NT_GNU_BUILD_ID		3
+#define	NT_GNU_GOLD_VERSION	4
+#define	NT_GNU_PROPERTY_TYPE_0	5
+#define	NT_GNU_NUM		5
 
 #ifdef _KERNEL
 /*

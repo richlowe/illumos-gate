@@ -385,6 +385,7 @@ struct ofl_desc {
 	Os_desc		*ofl_osverdef;	/* .version definition output section */
 	Os_desc		*ofl_osverneed;	/* .version needed output section */
 	Os_desc		*ofl_osversym;	/* .version symbol ndx output section */
+	Os_desc		*ofl_osbuildid;	  /* .note.gnu.build-id */
 	Word		ofl_dtflags_1;	/* DT_FLAGS_1 entries */
 	Word		ofl_dtflags;	/* DT_FLAGS entries */
 	Os_desc		*ofl_ossyminfo;	/* .SUNW_syminfo output section */

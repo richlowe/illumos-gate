@@ -621,6 +621,10 @@ new_section(Ofl_desc *ofl, Word shtype, const char *shname, Xword entcnt,
 		    sizeof (Versym));
 		break;
 
+	case SHT_NOTE:
+		SET_SEC_INFO_WORD_ALIGN(ELF_T_BYTE, SHF_ALLOC, 0);
+		break;
+
 	default:
 		/* Should not happen: fcn called with unknown section type */
 		assert(0);
@@ -2567,6 +2571,42 @@ make_verneed(Ofl_desc *ofl)
 }
 
 /*
+ * Generate GNU-style .note.gnu.build-id section
+ */
+static uintptr_t __unused
+make_buildid(Ofl_desc *ofl)
+{
+	Shdr		*shdr;
+	Elf_Data	*data;
+	Is_desc		*isec;
+	Build_id_note	*buildid_note;
+
+	if ((buildid_note = calloc(1, sizeof (*buildid_note))) == NULL)
+		return (S_ERROR);
+	bzero(buildid_note, sizeof (*buildid_note));
+	strlcpy(buildid_note->b_name, MSG_ORIG(MSG_STR_GNU),
+	    sizeof (buildid_note->b_name));
+	buildid_note->b_nhdr.n_type = NT_GNU_BUILD_ID;
+	buildid_note->b_nhdr.n_namesz = strlen(buildid_note->b_name) + 1;
+	buildid_note->b_nhdr.n_descsz = sizeof (buildid_note->b_desc);
+
+	if (new_section(ofl, SHT_NOTE, MSG_ORIG(MSG_SCN_GNU_BUILDID),
+	    0, &isec, &shdr, &data) == S_ERROR)
+		return (S_ERROR);
+
+	data->d_buf = buildid_note;
+	data->d_size = sizeof (*buildid_note);
+	data->d_align = 4;
+	shdr->sh_size = data->d_size;
+	shdr->sh_flags = 0;
+	shdr->sh_addralign = data->d_align;
+
+	ofl->ofl_osbuildid =
+	    ld_place_section(ofl, isec, NULL, ld_targ.t_id.id_note, NULL);
+	return ((uintptr_t)ofl->ofl_osbuildid);
+}
+
+/*
  * Generate a version definition section.
  *
  *  o	the SHT_SUNW_verdef section defines the versions that exist within this
@@ -3249,6 +3289,9 @@ ld_make_sections(Ofl_desc *ofl)
 		    ld_targ.t_id.id_syminfo)) == (Os_desc *)S_ERROR)
 			return (S_ERROR);
 	}
+
+	if (make_buildid(ofl) == S_ERROR)
+		return (S_ERROR);
 
 	if (flags & FLG_OF_COMREL) {
 		/*

@@ -165,6 +165,14 @@ process_section(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 {
 	Is_desc	*isp;
 
+
+	/*
+	 * Don't include any .note.gnu.build-id sections from the input in the
+	 * output
+	 */
+	if (ident && (strcmp(name, MSG_ORIG(MSG_SCN_GNU_BUILDID)) == 0))
+		return (1);
+
 	/*
 	 * Create a new input section descriptor.  If this is a NOBITS
 	 * section elf_getdata() will still create a data buffer (the buffer

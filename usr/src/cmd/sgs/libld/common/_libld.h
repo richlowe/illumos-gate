@@ -33,12 +33,13 @@
 #ifndef	_LIBLD_DOT_H
 #define	_LIBLD_DOT_H
 
-#include <libld.h>
 #include <_libelf.h>
-#include <debug.h>
 #include <conv.h>
+#include <debug.h>
+#include <libld.h>
 #include <msg.h>
 #include <reloc_defs.h>
+#include <sha1.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -644,6 +645,12 @@ typedef struct {
 	size_t		ppi_oname_len;	/* strlen(ppi_oname) */
 } Place_path_info;
 
+typedef struct {
+	Nhdr	b_nhdr;
+	char	b_name[MSG_STR_GNU_SIZE + 1]; /* GNU\0 */
+	uint8_t	b_desc[SHA1_DIGEST_LENGTH];
+} Build_id_note;
+
 /*
  * Local data items.
  */
@@ -687,6 +694,7 @@ extern Sdf_desc		*sdf_find(const char *, APlist *);
 #define	ld_assign_got_TLS	ld64_assign_got_TLS
 #define	ld_bswap_Word		ld64_bswap_Word
 #define	ld_bswap_Xword		ld64_bswap_Xword
+#define	ld_buildid		ld64_buildid
 #define	ld_cap_add_family	ld64_cap_add_family
 #define	ld_cap_move_symtoobj	ld64_cap_move_symtoobj
 #define	ld_comdat_validate	ld64_comdat_validate
@@ -786,6 +794,7 @@ extern Sdf_desc		*sdf_find(const char *, APlist *);
 #define	ld_assign_got_TLS	ld32_assign_got_TLS
 #define	ld_bswap_Word		ld32_bswap_Word
 #define	ld_bswap_Xword		ld32_bswap_Xword
+#define	ld_buildid		ld32_buildid
 #define	ld_cap_add_family	ld32_cap_add_family
 #define	ld_cap_move_symtoobj	ld32_cap_move_symtoobj
 #define	ld_comdat_validate	ld32_comdat_validate
@@ -892,6 +901,8 @@ extern uintptr_t	ld_assign_got_TLS(Boolean, Rel_desc *, Ofl_desc *,
 
 extern Word		ld_bswap_Word(Word);
 extern Xword		ld_bswap_Xword(Xword);
+
+extern void		ld_buildid(Ofl_desc *, uint8_t *, size_t);
 
 extern uintptr_t	ld_cap_add_family(Ofl_desc *, Sym_desc *, Sym_desc *,
 			    Cap_group *, APlist **);

@@ -228,7 +228,7 @@ pad_outfile(Ofl_desc *ofl)
 		 */
 		if (oscn && (phdr->p_type == PT_LOAD)) {
 			Elf_Data *	data;
-			size_t 		size;
+			size_t		size;
 
 			size = (size_t)(S_ROUND(offset, phdr->p_align) -
 			    offset);
@@ -875,4 +875,28 @@ ld_create_outfile(Ofl_desc *ofl)
 		}
 	}
 	return (1);
+}
+
+void
+ld_buildid(Ofl_desc *ofl, uint8_t *buf, size_t bufsz)
+{
+	SHA1_CTX ctx;
+	Sg_desc *sgp;
+	Os_desc *osp;
+	Aliste idx1, idx2;
+
+	assert(bufsz == SHA1_DIGEST_LENGTH);
+
+	SHA1Init(&ctx);
+
+	for (APLIST_TRAVERSE(ofl->ofl_segs, idx1, sgp)) {
+		for (APLIST_TRAVERSE(sgp->sg_osdescs, idx2, osp)) {
+			if (osp->os_outdata->d_buf != NULL) {
+				SHA1Update(&ctx, osp->os_outdata->d_buf,
+				    osp->os_outdata->d_size);
+			}
+		}
+	}
+
+	SHA1Final(buf, &ctx);
 }
