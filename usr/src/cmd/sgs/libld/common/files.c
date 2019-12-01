@@ -3823,6 +3823,69 @@ need_in_debuglink(Ofl_desc *ofl, Shdr *shdr)
 	return (FALSE);
 }
 
+/*
+ * Expand the path used for the debugfile, processing special tokens
+ */
+static char *
+expand_debugfile(Ofl_desc *ofl, const char *name)
+{
+	char		_name[PATH_MAX], *nptr;
+	const char	*optr;
+	size_t		nrem = PATH_MAX - 1;
+	boolean_t	expanded = B_FALSE;
+
+	optr = name;
+	nptr = _name;
+
+	if (strstr(name, MSG_ORIG(MSG_STR_OUTPUT)) == NULL)
+		return (strdup(name));
+
+	while (*optr) {
+		if (nrem == 0)
+			return (NULL);
+
+		if (*optr != '$') {
+			*nptr++ = *optr++, nrem--;
+			continue;
+		}
+
+		expanded = B_FALSE;
+		if (strncmp(optr, MSG_ORIG(MSG_STR_OUTPUT),
+		    MSG_STR_OUTPUT_SIZE) == 0) {
+			char *basename;
+			size_t len;
+
+			if ((basename = strrchr(ofl->ofl_name, '/')) == NULL)
+				basename = (char *)ofl->ofl_name;
+
+			len = strlen(basename);
+
+			if (len >= nrem) {
+				errno = ENAMETOOLONG;
+				return (NULL);
+			}
+
+			(void) strlcpy(nptr, basename, nrem);
+			nptr = nptr + len;
+			nrem -= len;
+
+			optr += MSG_STR_OUTPUT_SIZE;
+			expanded = B_TRUE;
+
+		}
+
+		/*
+		 * If no expansion occurred skip the $ and continue.
+		 */
+		if (!expanded)
+			*nptr++ = *optr++, nrem--;
+	}
+
+	*nptr = '\0';
+
+	return (strdup(_name));
+}
+
 uintptr_t
 ld_create_debugfile(Ofl_desc *ofl)
 {
@@ -3831,24 +3894,31 @@ ld_create_debugfile(Ofl_desc *ofl)
 	Aliste idx1, idx2;
 	Elf *mem, *out;
 	int ofd;
+	char *outpath;
 
-	if ((ofd = open(ofl->ofl_debuglink, O_RDWR | O_CREAT | O_TRUNC,
+	if ((outpath = expand_debugfile(ofl, ofl->ofl_debuglink)) == NULL) {
+		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ERR_DEBUG_EXPN),
+		    ofl->ofl_debuglink, strerror(errno));
+		return (S_ERROR);
+	}
+
+	if ((ofd = open(outpath, O_RDWR | O_CREAT | O_TRUNC,
 	    0777)) < 0) {
 		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_SYS_OPEN),
-		    ofl->ofl_debuglink, strerror(errno));
+		    outpath, strerror(errno));
 		return (S_ERROR);
 	}
 
 	if ((out = elf_begin(ofd, ELF_C_WRITE, NULL)) == NULL) {
 		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ELF_BEGIN),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
 	Ehdr *ehdr;
 	if ((ehdr = elf_newehdr(out)) == NULL) {
 		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ELF_NEWEHDR),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
@@ -3865,7 +3935,7 @@ ld_create_debugfile(Ofl_desc *ofl)
 		    ofl->ofl_phdrnum)) == NULL) {
 			ld_eprintf(ofl, ERR_ELF,
 			    MSG_INTL(MSG_ELF_NEWPHDR),
-			    ofl->ofl_debuglink);
+			    outpath);
 			return (S_ERROR);
 		}
 
@@ -3882,21 +3952,21 @@ ld_create_debugfile(Ofl_desc *ofl)
 			if ((nscn = elf_newscn(out)) == NULL) {
 				ld_eprintf(ofl, ERR_ELF,
 				    MSG_INTL(MSG_ELF_NEWSCN),
-				    ofl->ofl_debuglink);
+				    outpath);
 				return (S_ERROR);
 			}
 
 			if ((nsh = elf_getshdr(nscn)) == NULL) {
 				ld_eprintf(ofl, ERR_ELF,
 				    MSG_INTL(MSG_ELF_GETSHDR),
-				    ofl->ofl_debuglink);
+				    outpath);
 				return (S_ERROR);
 			}
 
 			if ((nd = elf_newdata(nscn)) == NULL) {
 				ld_eprintf(ofl, ERR_ELF,
 				    MSG_INTL(MSG_ELF_NEWDATA),
-				    ofl->ofl_debuglink);
+				    outpath);
 				return (S_ERROR);
 			}
 
@@ -3928,19 +3998,19 @@ ld_create_debugfile(Ofl_desc *ofl)
 
 	if (elf_update(out, ELF_C_WRIMAGE) == -1) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_UPDATE),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
 	if ((mem = elf_begin(0, ELF_C_IMAGE, out)) == NULL) {
 		ld_eprintf(ofl, ERR_FATAL, MSG_INTL(MSG_ELF_BEGIN),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
 	if ((ehdr = elf_getehdr(mem)) == NULL) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_GETEHDR),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
@@ -3948,7 +4018,7 @@ ld_create_debugfile(Ofl_desc *ofl)
 
 	if (elf_update(mem, ELF_C_NULL) == -1) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_UPDATE),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
@@ -3960,14 +4030,14 @@ ld_create_debugfile(Ofl_desc *ofl)
 	if (((ofl->ofl_flags1 & FLG_OF1_ENCDIFF) != 0) &&
 	    (_elf_swap_wrimage(mem) != 0)) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_SWAP_WRIMAGE),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
 	(void) elf_end(mem);
 	if (elf_update(out, ELF_C_WRITE) == -1) {
 		ld_eprintf(ofl, ERR_ELF, MSG_INTL(MSG_ELF_UPDATE),
-		    ofl->ofl_debuglink);
+		    outpath);
 		return (S_ERROR);
 	}
 
@@ -3980,7 +4050,7 @@ ld_create_debugfile(Ofl_desc *ofl)
 	uint32_t *crc =
 	    (uint32_t *)(ofl->ofl_osdebuglink->os_outdata->d_buf +
 	    (ofl->ofl_osdebuglink->os_outdata->d_size - 4));
-	*crc = gnu_debuglink_crc32(ofl->ofl_debuglink);
+	*crc = gnu_debuglink_crc32(outpath);
 
 	if ((ofl->ofl_flags1 & FLG_OF1_ENCDIFF) != 0) {
 		*crc = BSWAP_32(*crc);

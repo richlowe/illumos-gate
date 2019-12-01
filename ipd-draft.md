@@ -40,8 +40,8 @@ undesirable in at least some versions).  This mirrors the structure of the
 system, such that the debug object for `/lib/libc.so.1` is
 `/usr/lib/debug/lib/libc.so.1`.  Both 32bit and 64bit debug objects are
 delivered into this same hierarchy, such that the amd64 libc debug object is
-`/usr/lib/debug/lib/amd64/libc.so.1`.  There is no `/usr/lib/debug/amd64` or
-`/usr/lib/amd64/debug`.
+`/usr/debug/lib/amd64/libc.so.1`.  There is no `/usr/debug/amd64`.
+
 
 
 _XXX: Should there be an extra token after `debug` so there's an option beyond
@@ -101,5 +101,6 @@ pass it in via either `LDFLAGS` or `LD_OPTIONS` to create debug objects for
 3rd party software, as opposed to having to make alterations to software or
 take special steps during the build.
 
-_XXX: This is less easy if a project produces multiple shared objects, since we
-provide no good way to name them separately_
+The `-zdebuglink` option supports expansion of a variable token, `$OUTPUT`,
+such that 3rd party builds producing multiple libraries can still use this
+approach to create debug objects, via `-zdebuglink=debug/$OUTPUT`.

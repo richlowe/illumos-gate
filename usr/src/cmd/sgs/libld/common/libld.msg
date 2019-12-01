@@ -741,6 +741,7 @@
 @ MSG_STR_COMMA		","
 @ MSG_STR_DYNAMIC	"(.dynamic)"
 @ MSG_STR_ORIGIN	"$ORIGIN"
+@ MSG_STR_OUTPUT        "$OUTPUT"
 @ MSG_STR_MACHINE	"$MACHINE"
 @ MSG_STR_PLATFORM	"$PLATFORM"
 @ MSG_STR_ISALIST	"$ISALIST"
@@ -1297,6 +1298,8 @@
 @ MSG_ARG_ASSDEFLIB_MALFORMED	"library name malformed: %s"
 @ MSG_ARG_ASSDEFLIB_FOUND	"dynamic library found on default search path \
 				(%s): lib%s.so"
+
+@ MSG_ERR_DEBUG_EXPN            "failed to expand debuglink path: %s: %s"
 
 @ _END_
 
