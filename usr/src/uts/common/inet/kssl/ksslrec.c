@@ -77,16 +77,25 @@ static ssl3CipherSuiteDef cipher_suite_defs[] = {
 static int cipher_suite_defs_nentries =
     sizeof (cipher_suite_defs) / sizeof (cipher_suite_defs[0]);
 
+static void KSSL_SHA1Update(void *, uchar_t *, uint32_t);
+
 static KSSLMACDef mac_defs[] = { /* indexed by SSL3MACAlgorithm */
 	/* macsz padsz HashInit HashUpdate HashFinal */
 
-	{MD5_HASH_LEN, SSL3_MD5_PAD_LEN,
-	    (hashinit_func_t)MD5Init, (hashupdate_func_t)MD5Update,
-	    (hashfinal_func_t)MD5Final},
-
-	{SHA1_HASH_LEN, SSL3_SHA1_PAD_LEN,
-	    (hashinit_func_t)SHA1Init, (hashupdate_func_t)SHA1Update,
-	    (hashfinal_func_t)SHA1Final},
+	{
+		.hashsz = MD5_HASH_LEN,
+		.padsz = SSL3_MD5_PAD_LEN,
+		.HashInit = (hashinit_func_t)MD5Init,
+		.HashUpdate = (hashupdate_func_t)MD5Update,
+		.HashFinal = (hashfinal_func_t)MD5Final
+	},
+	{
+		.hashsz = SHA1_HASH_LEN,
+		.padsz = SSL3_SHA1_PAD_LEN,
+		.HashInit = (hashinit_func_t)SHA1Init,
+		.HashUpdate = KSSL_SHA1Update,
+		.HashFinal = (hashfinal_func_t)SHA1Final
+	}
 };
 
 static uchar_t kssl_pad_1[60] = {
@@ -151,6 +160,17 @@ static void kssl_cke_done(void *, int);
 	mac.cd_raw.iov_base = (char *)d; \
 	mac.cd_length = mac.cd_raw.iov_len = l; \
 	rv = crypto_mac_final(c, &mac, NULL); if (CRYPTO_ERR(rv)) goto end;
+
+/*
+ * Wrapper for SHA1Update to translate arguments. We need this because
+ * the KSSL hash update function expects the size argument to be a
+ * uint32_t, but SHA1Update uses a size_t.
+ */
+static void
+KSSL_SHA1Update(void *ctx, uchar_t *in, uint32_t size)
+{
+	SHA1Update(ctx, in, size);
+}
 
 /*
  * This hack can go away once we have SSL3 MAC support by KCF
@@ -1066,11 +1086,9 @@ kssl_get_hello_random(uchar_t *buf)
 }
 
 static int
-kssl_tls_P_hash(crypto_mechanism_t *mech, crypto_key_t *key,
-	size_t hashlen,
-	uchar_t *label, size_t label_len,
-	uchar_t *seed, size_t seedlen,
-	uchar_t *data, size_t datalen)
+kssl_tls_P_hash(crypto_mechanism_t *mech, crypto_key_t *key, size_t hashlen,
+    uchar_t *label, size_t label_len, uchar_t *seed, size_t seedlen,
+    uchar_t *data, size_t datalen)
 {
 	int rv = 0;
 	uchar_t A1[MAX_HASH_LEN], result[MAX_HASH_LEN];
@@ -1137,11 +1155,9 @@ end:
 
 /* ARGSUSED */
 static int
-kssl_tls_PRF(ssl_t *ssl,
-	uchar_t *secret, size_t secret_len,
-	uchar_t *label, size_t label_len,
-	uchar_t *seed, size_t seed_len,
-	uchar_t *prfresult, size_t prfresult_len)
+kssl_tls_PRF(ssl_t *ssl, uchar_t *secret, size_t secret_len, uchar_t *label,
+    size_t label_len, uchar_t *seed, size_t seed_len, uchar_t *prfresult,
+    size_t prfresult_len)
 {
 	/*
 	 * RFC 2246:
@@ -1310,13 +1326,8 @@ static char *ssl3_key_derive_seeds[9] = {"A", "BB", "CCC", "DDDD", "EEEEE",
 	"FFFFFF", "GGGGGGG", "HHHHHHHH", "IIIIIIIII"};
 
 static void
-kssl_ssl3_key_material_derive_step(
-	ssl_t *ssl,
-	uchar_t *secret,
-	size_t secretlen,
-	int step,
-	uchar_t *dst,
-	int sr_first)
+kssl_ssl3_key_material_derive_step(ssl_t *ssl, uchar_t *secret,
+    size_t secretlen, int step, uchar_t *dst, int sr_first)
 {
 	SHA1_CTX sha1, *sha1ctx;
 	MD5_CTX md5, *md5ctx;
@@ -1697,11 +1708,8 @@ kssl_send_finished(ssl_t *ssl, int update_hsh)
 }
 
 int
-kssl_mac_encrypt_record(ssl_t *ssl,
-	SSL3ContentType ct,
-	uchar_t *versionp,
-	uchar_t *rstart,
-	mblk_t *mp)
+kssl_mac_encrypt_record(ssl_t *ssl, SSL3ContentType ct, uchar_t *versionp,
+    uchar_t *rstart, mblk_t *mp)
 {
 	KSSLCipherSpec *spec;
 	int mac_sz;
@@ -2488,7 +2496,7 @@ kssl_free_context(ssl_t *ssl)
 	 * might submit a new cryto request.
 	 */
 	do {
-		if (ssl->job.kjob != NULL) {
+		if (ssl->job.kjob != 0) {
 			/*
 			 * Drop the lock before canceling the request;
 			 * otherwise we might deadlock if the completion
@@ -2500,7 +2508,7 @@ kssl_free_context(ssl_t *ssl)
 			mutex_enter(&ssl->kssl_lock);
 
 			/* completion callback might have done the cleanup */
-			if (ssl->job.kjob != NULL) {
+			if (ssl->job.kjob != 0) {
 				kmem_free(ssl->job.buf, ssl->job.buflen);
 				ssl->job.kjob = 0;
 				ssl->job.buf = NULL;
@@ -2509,7 +2517,7 @@ kssl_free_context(ssl_t *ssl)
 		}
 		while (ssl->async_ops_pending > 0)
 			cv_wait(&ssl->async_cv, &ssl->kssl_lock);
-	} while (ssl->job.kjob != NULL);
+	} while (ssl->job.kjob != 0);
 
 	kssl_mblksfree(ssl);
 	kssl_specsfree(ssl);

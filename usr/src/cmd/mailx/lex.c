@@ -38,8 +38,6 @@
  * contributors.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include "rcv.h"
 #include <locale.h>
 
@@ -100,7 +98,7 @@ setfile(char *name, int isedit)
 				fprintf(stderr, gettext("No mail.\n"));
 			else
 				fprintf(stderr, gettext("No mail for %s\n"),
-f+1);
+				    f+1);
 		}
 		goto doret;
 	}
@@ -111,7 +109,7 @@ f+1);
 		if (isedit)
 			if (stbuf.st_size == 0L)
 				fprintf(stderr, gettext("%s: empty file\n"),
-name);
+				    name);
 			else
 				fprintf(stderr,
 				    gettext("%s: not a regular file\n"), name);
@@ -120,7 +118,7 @@ name);
 				fprintf(stderr, gettext("No mail.\n"));
 			else
 				fprintf(stderr, gettext("No mail for %s\n"),
-strrchr(name, '/') + 1);
+				    strrchr(name, '/') + 1);
 		}
 		fclose(ibuf);
 		goto doret;
@@ -137,7 +135,7 @@ strrchr(name, '/') + 1);
 		if (exitflg)
 			goto doexit;	/* no mail, return error */
 		fprintf(stderr, gettext("Your mail is being forwarded to %s"),
-fortest+11);
+		    fortest+11);
 		fclose(ibuf);
 		goto doret;
 	}
@@ -199,7 +197,7 @@ fortest+11);
 #endif
 	mailsize = fsize(ibuf);
 	if ((fd = open(tempMesg, O_RDWR|O_CREAT|O_EXCL, 0600)) < 0 ||
-	(otf = fdopen(fd, "w")) == NULL) {
+	    (otf = fdopen(fd, "w")) == NULL) {
 		perror(tempMesg);
 		if (!edit && issysmbox)
 			Verhogen();
@@ -293,7 +291,7 @@ void
 commands(void)
 {
 	int eofloop;
-	register int n;
+	int n;
 	char linebuf[LINESIZE];
 	char line[LINESIZE];
 	struct stat minfo;
@@ -454,8 +452,8 @@ execute(char linebuf[], int contxt)
 	char word[LINESIZE];
 	char *arglist[MAXARGC];
 	const struct cmd *com;
-	register char *cp, *cp2;
-	register int c, e;
+	char *cp, *cp2;
+	int c, e;
 	int muvec[2];
 
 	/*
@@ -518,7 +516,7 @@ execute(char linebuf[], int contxt)
 	 * If we are in a source file, just unstack.
 	 */
 
-	if (com->c_func == (int (*)(void *))edstop) {
+	if ((uintptr_t)com->c_func == (uintptr_t)edstop) {
 		if (sourcing) {
 			if (loading)
 				return (1);
@@ -586,13 +584,13 @@ execute(char linebuf[], int contxt)
 			break;
 		if (c  == 0)
 			if (msgCount == 0)
-				*msgvec = NULL;
+				*msgvec = 0;
 			else {
 				*msgvec = first(com->c_msgflag,
-					com->c_msgmask);
-				msgvec[1] = NULL;
+				    com->c_msgmask);
+				msgvec[1] = 0;
 			}
-		if (*msgvec == NULL) {
+		if (*msgvec == 0) {
 			fprintf(stderr, gettext("No applicable messages\n"));
 			break;
 		}
@@ -630,7 +628,7 @@ execute(char linebuf[], int contxt)
 		 * A vector of strings, in shell style.
 		 */
 		if ((c = getrawlist(cp, arglist,
-				sizeof (arglist) / sizeof (*arglist))) < 0)
+		    sizeof (arglist) / sizeof (*arglist))) < 0)
 			break;
 		if (c < com->c_minargs) {
 			fprintf(stderr,
@@ -668,7 +666,7 @@ execute(char linebuf[], int contxt)
 		return (1);
 	if (e && sourcing)
 		unstack();
-	if (com->c_func == (int (*)(void *))edstop)
+	if ((uintptr_t)com->c_func == (uintptr_t)edstop)
 		return (1);
 	if (value("autoprint") != NOSTR && com->c_argtype & P)
 		if ((dot->m_flag & MDELETED) == 0) {
@@ -686,12 +684,7 @@ execute(char linebuf[], int contxt)
  * When we wake up after ^Z, reprint the prompt.
  */
 static void
-#ifdef	__cplusplus
-contin(int)
-#else
-/* ARGSUSED */
-contin(int s)
-#endif
+contin(int s __unused)
 {
 	if (shudprompt)
 		printf("%s", prompt);
@@ -703,12 +696,7 @@ contin(int s)
  * Branch here on hangup signal and simulate quit.
  */
 void
-#ifdef	__cplusplus
-hangup(int)
-#else
-/* ARGSUSED */
-hangup(int s)
-#endif
+hangup(int s __unused)
 {
 
 	holdsigs();
@@ -756,7 +744,7 @@ setmsize(int sz)
 static const struct cmd *
 lex(char word[])
 {
-	register const struct cmd *cp;
+	const struct cmd *cp;
 
 	for (cp = &cmdtab[0]; cp->c_name != NOSTR; cp++)
 		if (isprefix(word, cp->c_name))
@@ -770,7 +758,7 @@ lex(char word[])
 static int
 isprefix(char *as1, char *as2)
 {
-	register char *s1, *s2;
+	char *s1, *s2;
 
 	s1 = as1;
 	s2 = as2;
@@ -795,7 +783,7 @@ static int	inithdr;		/* am printing startup headers */
 void
 stop(int s)
 {
-	register NODE *head;
+	NODE *head;
 
 	noreset = 0;
 	if (!inithdr)
@@ -867,8 +855,8 @@ announce(void)
 int
 newfileinfo(int start)
 {
-	register struct message *mp;
-	register int u, n, mdot, d, s;
+	struct message *mp;
+	int u, n, mdot, d, s;
 	char fname[BUFSIZ], zname[BUFSIZ], *ename;
 
 	if (Hflag)
@@ -900,7 +888,7 @@ newfileinfo(int start)
 		nstrcat(fname, sizeof (fname), "/");
 		if (strncmp(fname, editfile, strlen(fname)) == 0) {
 			snprintf(zname, sizeof (zname),
-				"+%s", editfile + strlen(fname));
+			    "+%s", editfile + strlen(fname));
 			ename = zname;
 		}
 	}
@@ -928,12 +916,7 @@ newfileinfo(int start)
  */
 
 int
-#ifdef	__cplusplus
-pversion(char *)
-#else
-/* ARGSUSED */
-pversion(char *s)
-#endif
+pversion(char *s __unused)
 {
 	printf("%s\n", version);
 	return (0);
@@ -945,7 +928,7 @@ pversion(char *s)
 void
 load(char *name)
 {
-	register FILE *in, *oldin;
+	FILE *in, *oldin;
 
 	if ((in = fopen(name, "r")) == NULL)
 		return;

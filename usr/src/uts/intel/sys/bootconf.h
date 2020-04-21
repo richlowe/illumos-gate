@@ -23,6 +23,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  * Copyright 2016 Nexenta Systems, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #ifndef	_SYS_BOOTCONF_H
@@ -39,11 +40,14 @@
 #include <sys/dirent.h>			/* for struct dirent */
 #include <sys/memlist.h>
 #include <sys/obpdefs.h>
+#include <sys/varargs.h>
 #include <net/if.h>			/* for IFNAMSIZ */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define	BP_MAX_STRLEN	32
 
 /*
  * Boot property names
@@ -83,7 +87,7 @@ struct bsys_mem {
 	struct memlist	*physavail;	/* amt of physmem avail for use */
 	struct memlist	*virtavail;	/* amt of virtmem avail for use */
 	struct memlist	*pcimem;	/* amt of pcimem avail for use */
-	uint_t		extent; 	/* number of bytes in the space */
+	uint_t		extent;		/* number of bytes in the space */
 };
 
 /*
@@ -103,7 +107,7 @@ typedef struct bootops {
 	/*
 	 * the area containing boot's memlists
 	 */
-	struct 	bsys_mem *boot_mem;
+	struct	bsys_mem *boot_mem;
 
 	/*
 	 * have boot allocate size bytes at virthint
@@ -136,7 +140,7 @@ typedef struct bootops {
 	/*
 	 * print formatted output
 	 */
-	void	(*bsys_printf)(struct bootops *, const char *, ...);
+	void	(*bsys_printf)(void *, const char *, ...);
 
 	/*
 	 * Do a real mode interrupt
@@ -230,17 +234,19 @@ extern char *netdev_path;
 extern void bop_no_more_mem(void);
 
 /*PRINTFLIKE2*/
-extern void bop_printf(struct bootops *, const char *, ...)
+extern void bop_printf(void *, const char *, ...)
     __KPRINTFLIKE(2);
+extern void vbop_printf(void *, const char *, va_list);
 
 /*PRINTFLIKE1*/
 extern void bop_panic(const char *, ...)
     __KPRINTFLIKE(1) __NORETURN;
 #pragma rarely_called(bop_panic)
 
-extern void boot_prop_finish(void);
+extern void read_bootenvrc(void);
 
 extern int bootprop_getval(const char *, u_longlong_t *);
+extern int bootprop_getstr(const char *, char *, size_t);
 
 /*
  * Back door to fakebop.c to get physical memory allocated.
@@ -250,6 +256,7 @@ extern paddr_t do_bop_phys_alloc(uint64_t, uint64_t);
 
 extern int do_bsys_getproplen(bootops_t *, const char *);
 extern int do_bsys_getprop(bootops_t *, const char *, void *);
+extern int do_bsys_getproptype(bootops_t *, const char *);
 
 #endif /* _KERNEL && !_BOOT */
 

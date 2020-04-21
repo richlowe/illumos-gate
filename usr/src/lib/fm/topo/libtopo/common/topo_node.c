@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -129,12 +130,15 @@ static void
 topo_node_destroy(tnode_t *node)
 {
 	int i;
-	tnode_t *pnode = node->tn_parent;
+	tnode_t *pnode;
 	topo_nodehash_t *nhp;
-	topo_mod_t *hmod, *mod = node->tn_enum;
+	topo_mod_t *hmod, *mod;
 
 	if (node == NULL)
 		return;
+
+	pnode = node->tn_parent;
+	mod = node->tn_enum;
 
 	topo_dprintf(mod->tm_hdl, TOPO_DBG_MODSVC, "destroying node %s=%d\n",
 	    topo_node_name(node), topo_node_instance(node));
@@ -189,6 +193,14 @@ topo_node_destroy(tnode_t *node)
 		topo_list_delete(&node->tn_children, nhp);
 		topo_mod_free(hmod, nhp, sizeof (topo_nodehash_t));
 		topo_mod_rele(hmod);
+	}
+
+	/*
+	 * Nodes in a directed graph structure have no children, so the node
+	 * name is still intact. We must free it now.
+	 */
+	if (node->tn_vtx != NULL) {
+		topo_mod_strfree(mod, node->tn_name);
 	}
 
 	/*
@@ -253,6 +265,12 @@ topo_node_parent(tnode_t *node)
 	return (node->tn_parent);
 }
 
+topo_vertex_t *
+topo_node_vertex(tnode_t *node)
+{
+	return (node->tn_vtx);
+}
+
 int
 topo_node_flags(tnode_t *node)
 {
@@ -311,7 +329,7 @@ topo_node_range_create(topo_mod_t *mod, tnode_t *pnode, const char *name,
 			    EMOD_NODE_DUP));
 	}
 
-	if (min < 0 || max < min)
+	if (max < min)
 		return (node_create_seterror(mod, pnode, NULL,
 		    EMOD_NODE_RANGE));
 
@@ -762,9 +780,7 @@ topo_node_unbind(tnode_t *node)
 	topo_node_unlock(node);
 
 	topo_dprintf(node->tn_hdl, TOPO_DBG_MODSVC,
-	    "node unbound %s=%d/%s=%d refs = %d\n",
-	    topo_node_name(node->tn_parent),
-	    topo_node_instance(node->tn_parent), node->tn_name,
+	    "node unbound %s=%d refs = %d\n", node->tn_name,
 	    node->tn_instance, node->tn_refs);
 
 	topo_node_rele(node);
@@ -888,4 +904,21 @@ topo_node_child_walk(topo_hdl_t *thp, tnode_t *pnode, topo_walk_cb_t cb_f,
 out:
 	topo_node_rele(pnode);
 	return (ret);
+}
+
+int
+topo_node_occupied(tnode_t *node, boolean_t *is_occupied)
+{
+	nvlist_t *out;
+	int err;
+
+	if (topo_method_invoke(node, TOPO_METH_OCCUPIED,
+	    TOPO_METH_OCCUPIED_VERSION, NULL, &out, &err) != 0) {
+		return (err);
+	}
+	(void) nvlist_lookup_boolean_value(out, TOPO_METH_OCCUPIED_RET,
+	    is_occupied);
+
+	nvlist_free(out);
+	return (0);
 }

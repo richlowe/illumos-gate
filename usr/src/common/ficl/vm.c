@@ -47,6 +47,10 @@
  * SUCH DAMAGE.
  */
 
+/*
+ * Copyright 2019 Joyent, Inc.
+ */
+
 #include "ficl.h"
 
 #if FICL_ROBUST >= 2
@@ -293,7 +297,7 @@ AGAIN:
 		case ficlInstructionInvalid:
 			ficlVmThrowError(vm,
 			    "Error: NULL instruction executed!");
-		return;
+			break;
 
 		case ficlInstruction1:
 		case ficlInstruction2:
@@ -313,7 +317,7 @@ AGAIN:
 		case ficlInstruction16:
 			CHECK_STACK(0, 1);
 			(++dataTop)->i = instruction;
-		continue;
+			continue;
 
 		case ficlInstruction0:
 		case ficlInstructionNeg1:
@@ -334,7 +338,7 @@ AGAIN:
 		case ficlInstructionNeg16:
 			CHECK_STACK(0, 1);
 			(++dataTop)->i = ficlInstruction0 - instruction;
-		continue;
+			continue;
 
 		/*
 		 * stringlit: Fetch the count from the dictionary, then push
@@ -354,7 +358,7 @@ AGAIN:
 			cp += length + 1;
 			cp = ficlAlignPointer(cp);
 			ip = (void *)cp;
-		continue;
+			continue;
 		}
 
 		case ficlInstructionCStringLiteralParen:
@@ -365,7 +369,7 @@ AGAIN:
 			cp = ficlAlignPointer(cp);
 			ip = (void *)cp;
 			(++dataTop)->p = s;
-		continue;
+			continue;
 
 #if FICL_WANT_OPTIMIZE == FICL_OPTIMIZE_FOR_SIZE
 #if FICL_WANT_FLOAT
@@ -374,16 +378,16 @@ FLOAT_PUSH_CELL_POINTER_DOUBLE_MINIPROC:
 			/* intentional fall-through */
 FLOAT_PUSH_CELL_POINTER_MINIPROC:
 			*++floatTop = cell[0];
-		continue;
+			continue;
 
 FLOAT_POP_CELL_POINTER_MINIPROC:
 			cell[0] = *floatTop--;
-		continue;
+			continue;
 
 FLOAT_POP_CELL_POINTER_DOUBLE_MINIPROC:
 			cell[0] = *floatTop--;
 			cell[1] = *floatTop--;
-		continue;
+			continue;
 
 #define	FLOAT_PUSH_CELL_POINTER_DOUBLE(cp)	\
 	cell = (cp); goto FLOAT_PUSH_CELL_POINTER_DOUBLE_MINIPROC
@@ -404,15 +408,15 @@ PUSH_CELL_POINTER_DOUBLE_MINIPROC:
 			/* intentional fall-through */
 PUSH_CELL_POINTER_MINIPROC:
 			*++dataTop = cell[0];
-		continue;
+			continue;
 
 POP_CELL_POINTER_MINIPROC:
 			cell[0] = *dataTop--;
-		continue;
+			continue;
 POP_CELL_POINTER_DOUBLE_MINIPROC:
 			cell[0] = *dataTop--;
 			cell[1] = *dataTop--;
-		continue;
+			continue;
 
 #define	PUSH_CELL_POINTER_DOUBLE(cp)	\
 	cell = (cp); goto PUSH_CELL_POINTER_DOUBLE_MINIPROC
@@ -425,13 +429,13 @@ POP_CELL_POINTER_DOUBLE_MINIPROC:
 
 BRANCH_MINIPROC:
 			ip += *(ficlInteger *)ip;
-		continue;
+			continue;
 
 #define	BRANCH()	goto BRANCH_MINIPROC
 
 EXIT_FUNCTION_MINIPROC:
 			ip = (ficlInstruction *)((returnTop--)->p);
-				continue;
+			continue;
 
 #define	EXIT_FUNCTION	goto EXIT_FUNCTION_MINIPROC
 
@@ -473,14 +477,14 @@ EXIT_FUNCTION_MINIPROC:
 		case ficlInstructionLiteralParen:
 			CHECK_STACK(0, 1);
 			(++dataTop)->i = *ip++;
-		continue;
+			continue;
 
 		case ficlInstruction2LiteralParen:
 			CHECK_STACK(0, 2);
 			(++dataTop)->i = ip[1];
 			(++dataTop)->i = ip[0];
 			ip += 2;
-		continue;
+			continue;
 
 #if FICL_WANT_LOCALS
 		/*
@@ -496,7 +500,7 @@ EXIT_FUNCTION_MINIPROC:
 			(++returnTop)->p = frame;
 			frame = returnTop + 1;
 			returnTop += nCells;
-		continue;
+			continue;
 		}
 
 		/*
@@ -507,7 +511,7 @@ EXIT_FUNCTION_MINIPROC:
 		case ficlInstructionUnlinkParen:
 			returnTop = frame - 1;
 			frame = (returnTop--)->p;
-		continue;
+			continue;
 
 		/*
 		 * Immediate - cfa of a local while compiling - when executed,
@@ -574,33 +578,33 @@ EXIT_FUNCTION_MINIPROC:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i += i;
-		continue;
+			continue;
 
 		case ficlInstructionMinus:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i -= i;
-		continue;
+			continue;
 
 		case ficlInstruction1Plus:
 			CHECK_STACK(1, 1);
 			dataTop->i++;
-		continue;
+			continue;
 
 		case ficlInstruction1Minus:
 			CHECK_STACK(1, 1);
 			dataTop->i--;
-		continue;
+			continue;
 
 		case ficlInstruction2Plus:
 			CHECK_STACK(1, 1);
 			dataTop->i += 2;
-		continue;
+			continue;
 
 		case ficlInstruction2Minus:
 			CHECK_STACK(1, 1);
 			dataTop->i -= 2;
-		continue;
+			continue;
 
 		case ficlInstructionDup: {
 			ficlInteger i = dataTop->i;
@@ -617,7 +621,7 @@ EXIT_FUNCTION_MINIPROC:
 				dataTop++;
 			}
 
-		continue;
+			continue;
 
 		case ficlInstructionSwap: {
 			ficlCell swap;
@@ -625,38 +629,38 @@ EXIT_FUNCTION_MINIPROC:
 			swap = dataTop[0];
 			dataTop[0] = dataTop[-1];
 			dataTop[-1] = swap;
+			continue;
 		}
-		continue;
 
 		case ficlInstructionDrop:
 			CHECK_STACK(1, 0);
 			dataTop--;
-		continue;
+			continue;
 
 		case ficlInstruction2Drop:
 			CHECK_STACK(2, 0);
 			dataTop -= 2;
-		continue;
+			continue;
 
 		case ficlInstruction2Dup:
 			CHECK_STACK(2, 4);
 			dataTop[1] = dataTop[-1];
 			dataTop[2] = *dataTop;
 			dataTop += 2;
-		continue;
+			continue;
 
 		case ficlInstructionOver:
 			CHECK_STACK(2, 3);
 			dataTop[1] = dataTop[-1];
 			dataTop++;
-		continue;
+			continue;
 
 		case ficlInstruction2Over:
 			CHECK_STACK(4, 6);
 			dataTop[1] = dataTop[-3];
 			dataTop[2] = dataTop[-2];
 			dataTop += 2;
-		continue;
+			continue;
 
 		case ficlInstructionPick:
 			CHECK_STACK(1, 0);
@@ -665,7 +669,7 @@ EXIT_FUNCTION_MINIPROC:
 				continue;
 			CHECK_STACK(i + 2, i + 3);
 			*dataTop = dataTop[-i - 1];
-		continue;
+			continue;
 
 		/*
 		 * Do stack rot.
@@ -673,7 +677,7 @@ EXIT_FUNCTION_MINIPROC:
 		 */
 		case ficlInstructionRot:
 			i = 2;
-		goto ROLL;
+			goto ROLL;
 
 		/*
 		 * Do stack roll.
@@ -692,7 +696,7 @@ ROLL:
 			memmove(dataTop - i, dataTop - (i - 1),
 			    i * sizeof (ficlCell));
 			*dataTop = c;
-		continue;
+			continue;
 
 		/*
 		 * Do stack -rot.
@@ -700,7 +704,7 @@ ROLL:
 		 */
 		case ficlInstructionMinusRot:
 			i = 2;
-		goto MINUSROLL;
+			goto MINUSROLL;
 
 		/*
 		 * Do stack -roll.
@@ -720,7 +724,7 @@ MINUSROLL:
 			    i * sizeof (ficlCell));
 			dataTop[-i] = c;
 
-		continue;
+			continue;
 
 		/*
 		 * Do stack 2swap
@@ -738,7 +742,7 @@ MINUSROLL:
 
 			dataTop[-2] = c;
 			dataTop[-3] = c2;
-		continue;
+			continue;
 		}
 
 		case ficlInstructionPlusStore: {
@@ -746,7 +750,7 @@ MINUSROLL:
 			CHECK_STACK(2, 0);
 			cell = (ficlCell *)(dataTop--)->p;
 			cell->i += (dataTop--)->i;
-		continue;
+			continue;
 		}
 
 		case ficlInstructionQuadFetch: {
@@ -754,7 +758,7 @@ MINUSROLL:
 			CHECK_STACK(1, 1);
 			integer32 = (ficlUnsigned32 *)dataTop->i;
 			dataTop->u = (ficlUnsigned)*integer32;
-		continue;
+			continue;
 		}
 
 		case ficlInstructionQuadStore: {
@@ -762,7 +766,7 @@ MINUSROLL:
 			CHECK_STACK(2, 0);
 			integer32 = (ficlUnsigned32 *)(dataTop--)->p;
 			*integer32 = (ficlUnsigned32)((dataTop--)->u);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionWFetch: {
@@ -770,7 +774,7 @@ MINUSROLL:
 			CHECK_STACK(1, 1);
 			integer16 = (ficlUnsigned16 *)dataTop->p;
 			dataTop->u = ((ficlUnsigned)*integer16);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionWStore: {
@@ -778,7 +782,7 @@ MINUSROLL:
 			CHECK_STACK(2, 0);
 			integer16 = (ficlUnsigned16 *)(dataTop--)->p;
 			*integer16 = (ficlUnsigned16)((dataTop--)->u);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionCFetch: {
@@ -786,7 +790,7 @@ MINUSROLL:
 			CHECK_STACK(1, 1);
 			integer8 = (ficlUnsigned8 *)dataTop->p;
 			dataTop->u = ((ficlUnsigned)*integer8);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionCStore: {
@@ -794,7 +798,7 @@ MINUSROLL:
 			CHECK_STACK(2, 0);
 			integer8 = (ficlUnsigned8 *)(dataTop--)->p;
 			*integer8 = (ficlUnsigned8)((dataTop--)->u);
-		continue;
+			continue;
 		}
 
 
@@ -805,58 +809,58 @@ MINUSROLL:
 		case ficlInstruction0Equals:
 			CHECK_STACK(1, 1);
 			dataTop->i = FICL_BOOL(dataTop->i == 0);
-		continue;
+			continue;
 
 		case ficlInstruction0Less:
 			CHECK_STACK(1, 1);
 			dataTop->i = FICL_BOOL(dataTop->i < 0);
-		continue;
+			continue;
 
 		case ficlInstruction0Greater:
 			CHECK_STACK(1, 1);
 			dataTop->i = FICL_BOOL(dataTop->i > 0);
-		continue;
+			continue;
 
 		case ficlInstructionEquals:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i = FICL_BOOL(dataTop->i == i);
-		continue;
+			continue;
 
 		case ficlInstructionLess:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i = FICL_BOOL(dataTop->i < i);
-		continue;
+			continue;
 
 		case ficlInstructionULess:
 			CHECK_STACK(2, 1);
 			u = (dataTop--)->u;
 			dataTop->i = FICL_BOOL(dataTop->u < u);
-		continue;
+			continue;
 
 		case ficlInstructionAnd:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i = dataTop->i & i;
-		continue;
+			continue;
 
 		case ficlInstructionOr:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i = dataTop->i | i;
-		continue;
+			continue;
 
 		case ficlInstructionXor:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i = dataTop->i ^ i;
-		continue;
+			continue;
 
 		case ficlInstructionInvert:
 			CHECK_STACK(1, 1);
 			dataTop->i = ~dataTop->i;
-		continue;
+			continue;
 
 		/*
 		 * r e t u r n   s t a c k
@@ -865,19 +869,19 @@ MINUSROLL:
 			CHECK_STACK(1, 0);
 			CHECK_RETURN_STACK(0, 1);
 			*++returnTop = *dataTop--;
-		continue;
+			continue;
 
 		case ficlInstructionFromRStack:
 			CHECK_STACK(0, 1);
 			CHECK_RETURN_STACK(1, 0);
 			*++dataTop = *returnTop--;
-		continue;
+			continue;
 
 		case ficlInstructionFetchRStack:
 			CHECK_STACK(0, 1);
 			CHECK_RETURN_STACK(1, 1);
 			*++dataTop = *returnTop;
-		continue;
+			continue;
 
 		case ficlInstruction2ToR:
 			CHECK_STACK(2, 0);
@@ -885,7 +889,7 @@ MINUSROLL:
 			*++returnTop = dataTop[-1];
 			*++returnTop = dataTop[0];
 			dataTop -= 2;
-		continue;
+			continue;
 
 		case ficlInstruction2RFrom:
 			CHECK_STACK(0, 2);
@@ -893,14 +897,14 @@ MINUSROLL:
 			*++dataTop = returnTop[-1];
 			*++dataTop = returnTop[0];
 			returnTop -= 2;
-		continue;
+			continue;
 
 		case ficlInstruction2RFetch:
 			CHECK_STACK(0, 2);
 			CHECK_RETURN_STACK(2, 2);
 			*++dataTop = returnTop[-1];
 			*++dataTop = returnTop[0];
-		continue;
+			continue;
 
 		/*
 		 * f i l l
@@ -921,7 +925,7 @@ MINUSROLL:
 			 * solution.  --lch
 			 */
 			memset(memory, c, u);
-		continue;
+			continue;
 		}
 
 		/*
@@ -948,7 +952,7 @@ MINUSROLL:
 			nBits = (dataTop--)->u;
 			x1 = dataTop->u;
 			dataTop->u = x1 << nBits;
-		continue;
+			continue;
 		}
 
 		case ficlInstructionRShift: {
@@ -974,7 +978,7 @@ MINUSROLL:
 			n1 = dataTop->i;
 
 			dataTop->i = ((n1 > n2) ? n1 : n2);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionMin: {
@@ -983,7 +987,7 @@ MINUSROLL:
 			CHECK_STACK(2, 1);
 
 			n2 = (dataTop--)->i;
-				n1 = dataTop->i;
+			n1 = dataTop->i;
 
 			dataTop->i = ((n1 < n2) ? n1 : n2);
 			continue;
@@ -1019,7 +1023,7 @@ MINUSROLL:
 			 */
 			/* Which ANSI C's memmove() does for you! Yay!  --lch */
 			memmove(addr2, addr1, u);
-		continue;
+			continue;
 		}
 
 		/*
@@ -1036,7 +1040,7 @@ MINUSROLL:
 
 			/* sign extend to 64 bits.. */
 			(++dataTop)->i = (s < 0) ? -1 : 0;
-		continue;
+			continue;
 		}
 
 		/*
@@ -1098,7 +1102,7 @@ COMPARE:
 				n = 1;
 
 			(++dataTop)->i = n;
-		continue;
+			continue;
 		}
 
 		/*
@@ -1123,15 +1127,14 @@ COMPARE:
 			y = (dataTop--)->i;
 			x = dataTop->i;
 			dataTop->i = FICL_BOOL(x > y);
-		continue;
+			continue;
+		}
 
 		case ficlInstructionUGreaterThan:
 			CHECK_STACK(2, 1);
 			u = (dataTop--)->u;
 			dataTop->i = FICL_BOOL(dataTop->u > u);
-		continue;
-
-		}
+			continue;
 
 		/*
 		 * This function simply pops the previous instruction
@@ -1210,7 +1213,7 @@ BRANCH_PAREN:
 				BRANCH();
 			}
 
-		continue;
+			continue;
 		}
 
 		case ficlInstructionDoParen: {
@@ -1226,7 +1229,7 @@ BRANCH_PAREN:
 			*++returnTop = limit;
 			*++returnTop = index;
 
-		continue;
+			continue;
 		}
 
 		case ficlInstructionQDoParen: {
@@ -1248,7 +1251,7 @@ BRANCH_PAREN:
 				*++returnTop = index;
 			}
 
-		continue;
+			continue;
 		}
 
 		case ficlInstructionLoopParen:
@@ -1279,7 +1282,7 @@ BRANCH_PAREN:
 				BRANCH();
 			}
 
-		continue;
+			continue;
 		}
 
 
@@ -1296,19 +1299,19 @@ BRANCH_PAREN:
 
 		case ficlInstructionUnloop:
 			returnTop -= 3;
-		continue;
+			continue;
 
 		case ficlInstructionI:
 			*++dataTop = *returnTop;
-		continue;
+			continue;
 
 		case ficlInstructionJ:
 			*++dataTop = returnTop[-3];
-		continue;
+			continue;
 
 		case ficlInstructionK:
 			*++dataTop = returnTop[-6];
-		continue;
+			continue;
 
 		case ficlInstructionDoesParen: {
 			ficlDictionary *dictionary = ficlVmGetDictionary(vm);
@@ -1316,7 +1319,7 @@ BRANCH_PAREN:
 			    (ficlPrimitive)ficlInstructionDoDoes;
 			dictionary->smudge->param[0].p = ip;
 			ip = (ficlInstruction *)((returnTop--)->p);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionDoDoes: {
@@ -1330,7 +1333,7 @@ BRANCH_PAREN:
 			(++dataTop)->p = (cell + 1);
 			(++returnTop)->p = (void *)ip;
 			ip = (ficlInstruction *)tempIP;
-		continue;
+			continue;
 		}
 
 #if FICL_WANT_FLOAT
@@ -1400,7 +1403,7 @@ BRANCH_PAREN:
 
 			dictionary = ficlVmGetDictionary(vm);
 			ficlDictionaryAppendCell(dictionary, *dataTop--);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionCComma: {
@@ -1411,35 +1414,35 @@ BRANCH_PAREN:
 			dictionary = ficlVmGetDictionary(vm);
 			c = (char)(dataTop--)->i;
 			ficlDictionaryAppendCharacter(dictionary, c);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionCells:
 			CHECK_STACK(1, 1);
 			dataTop->i *= sizeof (ficlCell);
-		continue;
+			continue;
 
 		case ficlInstructionCellPlus:
 			CHECK_STACK(1, 1);
 			dataTop->i += sizeof (ficlCell);
-		continue;
+			continue;
 
 		case ficlInstructionStar:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i *= i;
-		continue;
+			continue;
 
 		case ficlInstructionNegate:
 			CHECK_STACK(1, 1);
 			dataTop->i = - dataTop->i;
-		continue;
+			continue;
 
 		case ficlInstructionSlash:
 			CHECK_STACK(2, 1);
 			i = (dataTop--)->i;
 			dataTop->i /= i;
-		continue;
+			continue;
 
 		/*
 		 * slash-mod	CORE ( n1 n2 -- n3 n4 )
@@ -1464,18 +1467,18 @@ BRANCH_PAREN:
 			qr = ficl2IntegerDivideSymmetric(n1, n2);
 			dataTop[-1].i = qr.remainder;
 			dataTop[0].i = FICL_2UNSIGNED_GET_LOW(qr.quotient);
-		continue;
+			continue;
 		}
 
 		case ficlInstruction2Star:
 			CHECK_STACK(1, 1);
 			dataTop->i <<= 1;
-		continue;
+			continue;
 
 		case ficlInstruction2Slash:
 			CHECK_STACK(1, 1);
 			dataTop->i >>= 1;
-		continue;
+			continue;
 
 		case ficlInstructionStarSlash: {
 			ficlInteger x, y, z;
@@ -1489,7 +1492,7 @@ BRANCH_PAREN:
 			prod = ficl2IntegerMultiply(x, y);
 			dataTop->i = FICL_2UNSIGNED_GET_LOW(
 			    ficl2IntegerDivideSymmetric(prod, z).quotient);
-		continue;
+			continue;
 		}
 
 		case ficlInstructionStarSlashMod: {
@@ -1515,17 +1518,17 @@ BRANCH_PAREN:
 		case ficlInstructionF0:
 			CHECK_FLOAT_STACK(0, 1);
 			(++floatTop)->f = 0.0f;
-		continue;
+			continue;
 
 		case ficlInstructionF1:
 			CHECK_FLOAT_STACK(0, 1);
 			(++floatTop)->f = 1.0f;
-		continue;
+			continue;
 
 		case ficlInstructionFNeg1:
 			CHECK_FLOAT_STACK(0, 1);
 			(++floatTop)->f = -1.0f;
-		continue;
+			continue;
 
 		/*
 		 * Floating point literal execution word.
@@ -1538,7 +1541,7 @@ BRANCH_PAREN:
 			 * but it's really a float.  --lch
 			 */
 			(++floatTop)->i = *ip++;
-				continue;
+			continue;
 
 		/*
 		 * Do float addition r1 + r2.
@@ -1549,7 +1552,7 @@ BRANCH_PAREN:
 
 			f = (floatTop--)->f;
 			floatTop->f += f;
-		continue;
+			continue;
 
 		/*
 		 * Do float subtraction r1 - r2.
@@ -1560,7 +1563,7 @@ BRANCH_PAREN:
 
 			f = (floatTop--)->f;
 			floatTop->f -= f;
-		continue;
+			continue;
 
 		/*
 		 * Do float multiplication r1 * r2.
@@ -1571,7 +1574,7 @@ BRANCH_PAREN:
 
 			f = (floatTop--)->f;
 			floatTop->f *= f;
-		continue;
+			continue;
 
 		/*
 		 * Do float negation.
@@ -1581,7 +1584,7 @@ BRANCH_PAREN:
 			CHECK_FLOAT_STACK(1, 1);
 
 			floatTop->f = -(floatTop->f);
-		continue;
+			continue;
 
 		/*
 		 * Do float division r1 / r2.
@@ -1592,7 +1595,7 @@ BRANCH_PAREN:
 
 			f = (floatTop--)->f;
 			floatTop->f /= f;
-		continue;
+			continue;
 
 		/*
 		 * Do float + integer r + n.
@@ -1604,7 +1607,7 @@ BRANCH_PAREN:
 
 			f = (ficlFloat)(dataTop--)->f;
 			floatTop->f += f;
-		continue;
+			continue;
 
 		/*
 		 * Do float - integer r - n.
@@ -1616,7 +1619,7 @@ BRANCH_PAREN:
 
 			f = (ficlFloat)(dataTop--)->f;
 			floatTop->f -= f;
-		continue;
+			continue;
 
 		/*
 		 * Do float * integer r * n.
@@ -1628,7 +1631,7 @@ BRANCH_PAREN:
 
 			f = (ficlFloat)(dataTop--)->f;
 			floatTop->f *= f;
-		continue;
+			continue;
 
 		/*
 		 * Do float / integer r / n.
@@ -1652,7 +1655,7 @@ BRANCH_PAREN:
 
 			f = (ficlFloat)(dataTop--)->f;
 			floatTop->f = f - floatTop->f;
-		continue;
+			continue;
 
 		/*
 		 * Do integer / float n / r.
@@ -1664,7 +1667,7 @@ BRANCH_PAREN:
 
 			f = (ficlFloat)(dataTop--)->f;
 			floatTop->f = f / floatTop->f;
-		continue;
+			continue;
 
 		/*
 		 * Do integer to float conversion.
@@ -1675,7 +1678,7 @@ BRANCH_PAREN:
 			CHECK_FLOAT_STACK(0, 1);
 
 			(++floatTop)->f = ((dataTop--)->f);
-		continue;
+			continue;
 
 		/*
 		 * Do float to integer conversion.
@@ -1686,7 +1689,7 @@ BRANCH_PAREN:
 			CHECK_FLOAT_STACK(1, 0);
 
 			(++dataTop)->i = ((floatTop--)->i);
-		continue;
+			continue;
 
 		/*
 		 * Add a floating point number to contents of a variable.
@@ -1700,7 +1703,7 @@ BRANCH_PAREN:
 
 			cell = (ficlCell *)(dataTop--)->p;
 			cell->f += (floatTop--)->f;
-		continue;
+			continue;
 		}
 
 		/*
@@ -1710,7 +1713,7 @@ BRANCH_PAREN:
 		case ficlInstructionFDrop:
 			CHECK_FLOAT_STACK(1, 0);
 			floatTop--;
-		continue;
+			continue;
 
 		/*
 		 * Do float stack ?dup.
@@ -1722,7 +1725,7 @@ BRANCH_PAREN:
 			if (floatTop->f != 0)
 				goto FDUP;
 
-		continue;
+			continue;
 
 		/*
 		 * Do float stack dup.
@@ -1746,7 +1749,7 @@ FDUP:
 			c = floatTop[0];
 			floatTop[0] = floatTop[-1];
 			floatTop[-1] = c;
-		continue;
+			continue;
 
 		/*
 		 * Do float stack 2drop.
@@ -1756,7 +1759,7 @@ FDUP:
 			CHECK_FLOAT_STACK(2, 0);
 
 			floatTop -= 2;
-		continue;
+			continue;
 
 		/*
 		 * Do float stack 2dup.
@@ -1768,7 +1771,7 @@ FDUP:
 			floatTop[1] = floatTop[-1];
 			floatTop[2] = *floatTop;
 			floatTop += 2;
-		continue;
+			continue;
 
 		/*
 		 * Do float stack over.
@@ -1779,7 +1782,7 @@ FDUP:
 
 			floatTop[1] = floatTop[-1];
 			floatTop++;
-		continue;
+			continue;
 
 		/*
 		 * Do float stack 2over.
@@ -1791,7 +1794,7 @@ FDUP:
 			floatTop[1] = floatTop[-2];
 			floatTop[2] = floatTop[-1];
 			floatTop += 2;
-		continue;
+			continue;
 
 		/*
 		 * Do float stack pick.
@@ -1803,7 +1806,7 @@ FDUP:
 			CHECK_FLOAT_STACK(c.i+2, c.i+3);
 
 			floatTop[1] = floatTop[- c.i - 1];
-		continue;
+			continue;
 
 		/*
 		 * Do float stack rot.
@@ -1831,7 +1834,7 @@ FROLL:
 			    i * sizeof (ficlCell));
 			*floatTop = c;
 
-		continue;
+			continue;
 
 		/*
 		 * Do float stack -rot.
@@ -1860,7 +1863,7 @@ FMINUSROLL:
 			    i * sizeof (ficlCell));
 			floatTop[-i] = c;
 
-		continue;
+			continue;
 
 		/*
 		 * Do float stack 2swap
@@ -1878,7 +1881,7 @@ FMINUSROLL:
 
 			floatTop[-2] = c;
 			floatTop[-3] = c2;
-		continue;
+			continue;
 		}
 
 		/*
@@ -1890,7 +1893,7 @@ FMINUSROLL:
 			CHECK_STACK(0, 1);
 
 			(++dataTop)->i = FICL_BOOL((floatTop--)->f != 0.0f);
-		continue;
+			continue;
 
 		/*
 		 * Do float 0< comparison r < 0.0.
@@ -1901,7 +1904,7 @@ FMINUSROLL:
 			CHECK_STACK(0, 1);
 
 			(++dataTop)->i = FICL_BOOL((floatTop--)->f < 0.0f);
-		continue;
+			continue;
 
 		/*
 		 * Do float 0> comparison r > 0.0.
@@ -1912,7 +1915,7 @@ FMINUSROLL:
 			CHECK_STACK(0, 1);
 
 			(++dataTop)->i = FICL_BOOL((floatTop--)->f > 0.0f);
-		continue;
+			continue;
 
 		/*
 		 * Do float = comparison r1 = r2.
@@ -1924,7 +1927,7 @@ FMINUSROLL:
 
 			f = (floatTop--)->f;
 			(++dataTop)->i = FICL_BOOL((floatTop--)->f == f);
-		continue;
+			continue;
 
 		/*
 		 * Do float < comparison r1 < r2.
@@ -1936,7 +1939,7 @@ FMINUSROLL:
 
 			f = (floatTop--)->f;
 			(++dataTop)->i = FICL_BOOL((floatTop--)->f < f);
-		continue;
+			continue;
 
 		/*
 		 * Do float > comparison r1 > r2.
@@ -1948,7 +1951,7 @@ FMINUSROLL:
 
 			f = (floatTop--)->f;
 			(++dataTop)->i = FICL_BOOL((floatTop--)->f > f);
-		continue;
+			continue;
 
 
 		/*
@@ -1960,14 +1963,14 @@ FMINUSROLL:
 			CHECK_STACK(0, 1);
 
 			*++dataTop = *floatTop--;
-		continue;
+			continue;
 
 		case ficlInstructionToF:
 			CHECK_FLOAT_STACK(0, 1);
 			CHECK_STACK(1, 0);
 
 			*++floatTop = *dataTop--;
-		continue;
+			continue;
 
 #endif /* FICL_WANT_FLOAT */
 
@@ -1985,17 +1988,17 @@ FMINUSROLL:
 		case ficlInstructionColonParen:
 			(++returnTop)->p = (void *)ip;
 			ip = (ficlInstruction *)(fw->param);
-		continue;
+			continue;
 
 		case ficlInstructionCreateParen:
 			CHECK_STACK(0, 1);
 			(++dataTop)->p = (fw->param + 1);
-		continue;
+			continue;
 
 		case ficlInstructionVariableParen:
 			CHECK_STACK(0, 1);
 			(++dataTop)->p = fw->param;
-		continue;
+			continue;
 
 		/*
 		 * c o n s t a n t P a r e n
@@ -2025,7 +2028,7 @@ FMINUSROLL:
 		case ficlInstructionUserParen: {
 			ficlInteger i = fw->param[0].i;
 			(++dataTop)->p = &vm->user[i];
-		continue;
+			continue;
 		}
 #endif
 
@@ -2049,7 +2052,7 @@ FMINUSROLL:
 			(vm)->runningWord = fw;
 			fw->code(vm);
 			LOCAL_VARIABLE_REFILL;
-		continue;
+			continue;
 		}
 	}
 
@@ -2085,7 +2088,7 @@ ficlVmGetString(ficlVm *vm, ficlCountedString *counted, char delimiter)
 		FICL_STRING_SET_LENGTH(s, FICL_COUNTED_STRING_MAX);
 	}
 
-	strncpy(counted->text, FICL_STRING_GET_POINTER(s),
+	(void) strncpy(counted->text, FICL_STRING_GET_POINTER(s),
 	    FICL_STRING_GET_LENGTH(s));
 	counted->text[FICL_STRING_GET_LENGTH(s)] = '\0';
 	counted->length = (ficlUnsigned8)FICL_STRING_GET_LENGTH(s);
@@ -2166,10 +2169,11 @@ ficlVmGetWordToPad(ficlVm *vm)
 	char *pad = (char *)vm->pad;
 	s = ficlVmGetWord(vm);
 
-	if (FICL_STRING_GET_LENGTH(s) > FICL_PAD_SIZE)
-		FICL_STRING_SET_LENGTH(s, FICL_PAD_SIZE);
+	if (FICL_STRING_GET_LENGTH(s) >= FICL_PAD_SIZE)
+		FICL_STRING_SET_LENGTH(s, FICL_PAD_SIZE - 1);
 
-	strncpy(pad, FICL_STRING_GET_POINTER(s), FICL_STRING_GET_LENGTH(s));
+	(void) strncpy(pad, FICL_STRING_GET_POINTER(s),
+	    FICL_STRING_GET_LENGTH(s));
 	pad[FICL_STRING_GET_LENGTH(s)] = '\0';
 	return ((int)(FICL_STRING_GET_LENGTH(s)));
 }
@@ -2357,9 +2361,9 @@ ficlVmThrowError(ficlVm *vm, char *fmt, ...)
 	va_list list;
 
 	va_start(list, fmt);
-	vsprintf(vm->pad, fmt, list);
+	(void) vsprintf(vm->pad, fmt, list);
 	va_end(list);
-	strcat(vm->pad, "\n");
+	(void) strcat(vm->pad, "\n");
 
 	ficlVmErrorOut(vm, vm->pad);
 	longjmp(*(vm->exceptionHandler), FICL_VM_STATUS_ERROR_EXIT);
@@ -2368,13 +2372,13 @@ ficlVmThrowError(ficlVm *vm, char *fmt, ...)
 void
 ficlVmThrowErrorVararg(ficlVm *vm, char *fmt, va_list list)
 {
-	vsprintf(vm->pad, fmt, list);
+	(void) vsprintf(vm->pad, fmt, list);
 	/*
 	 * well, we can try anyway, we're certainly not
 	 * returning to our caller!
 	 */
 	va_end(list);
-	strcat(vm->pad, "\n");
+	(void) strcat(vm->pad, "\n");
 
 	ficlVmErrorOut(vm, vm->pad);
 	longjmp(*(vm->exceptionHandler), FICL_VM_STATUS_ERROR_EXIT);

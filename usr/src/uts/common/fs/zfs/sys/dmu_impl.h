@@ -162,6 +162,7 @@ extern "C" {
  * 	dn_allocated_txg
  * 	dn_free_txg
  * 	dn_assigned_txg
+ * 	dn_dirty_txg
  * 	dd_assigned_tx
  * 	dn_notxholds
  * 	dn_dirtyctx
@@ -277,6 +278,7 @@ typedef struct dmu_sendarg {
 	objset_t *dsa_os;
 	zio_cksum_t dsa_zc;
 	uint64_t dsa_toguid;
+	uint64_t dsa_fromtxg;
 	int dsa_err;
 	dmu_pendop_t dsa_pending_op;
 	uint64_t dsa_featureflags;

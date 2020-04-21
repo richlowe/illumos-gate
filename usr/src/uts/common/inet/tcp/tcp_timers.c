@@ -23,7 +23,7 @@
  * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2011 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2011 Joyent, Inc.  All rights reserved.
- * Copyright (c) 2014 by Delphix. All rights reserved.
+ * Copyright (c) 2014, 2017 by Delphix. All rights reserved.
  */
 
 #include <sys/types.h>
@@ -50,7 +50,7 @@
  * There are two basic functions dealing with tcp timers:
  *
  *	timeout_id_t	tcp_timeout(connp, func, time)
- * 	clock_t		tcp_timeout_cancel(connp, timeout_id)
+ *	clock_t		tcp_timeout_cancel(connp, timeout_id)
  *	TCP_TIMER_RESTART(tcp, intvl)
  *
  * tcp_timeout() starts a timer for the 'tcp' instance arranging to call 'func'
@@ -68,7 +68,7 @@
  * call-back is called.
  *
  * NOTE: The call-back function 'func' is never called if tcp is in
- * 	the TCPS_CLOSED state.
+ *	the TCPS_CLOSED state.
  *
  * tcp_timeout_cancel() attempts to cancel a pending tcp_timeout()
  * request. locks acquired by the call-back routine should not be held across
@@ -78,7 +78,7 @@
  * Otherwise, it returns an integer value greater than or equal to 0.
  *
  * NOTE: both tcp_timeout() and tcp_timeout_cancel() should always be called
- * 	within squeue context corresponding to the tcp instance. Since the
+ *	within squeue context corresponding to the tcp instance. Since the
  *	call-back is also called via the same squeue, there are no race
  *	conditions described in untimeout(9F) manual page since all calls are
  *	strictly serialized.
@@ -419,7 +419,7 @@ tcp_keepalive_timer(void *arg)
 {
 	mblk_t	*mp;
 	conn_t	*connp = (conn_t *)arg;
-	tcp_t  	*tcp = connp->conn_tcp;
+	tcp_t	*tcp = connp->conn_tcp;
 	int32_t	firetime;
 	int32_t	idletime;
 	int32_t	ka_intrvl;
@@ -594,7 +594,7 @@ tcp_ack_timer(void *arg)
 	mp = tcp_ack_mp(tcp);
 
 	if (mp != NULL) {
-		BUMP_LOCAL(tcp->tcp_obsegs);
+		TCPS_BUMP_MIB(tcps, tcpHCOutSegs);
 		TCPS_BUMP_MIB(tcps, tcpOutAck);
 		TCPS_BUMP_MIB(tcps, tcpOutAckDelayed);
 		tcp_send_data(tcp, mp);
@@ -751,15 +751,14 @@ tcp_timer(void *arg)
 	case TCPS_LAST_ACK:
 		/* If we have data to rexmit */
 		if (tcp->tcp_suna != tcp->tcp_snxt) {
-			clock_t	time_to_wait;
+			clock_t time_to_wait;
 
 			TCPS_BUMP_MIB(tcps, tcpTimRetrans);
 			if (!tcp->tcp_xmit_head)
 				break;
-			time_to_wait = ddi_get_lbolt() -
-			    (clock_t)tcp->tcp_xmit_head->b_prev;
-			time_to_wait = tcp->tcp_rto -
-			    TICK_TO_MSEC(time_to_wait);
+			time_to_wait = NSEC2MSEC(gethrtime() -
+			    (hrtime_t)(intptr_t)tcp->tcp_xmit_head->b_prev);
+			time_to_wait = tcp->tcp_rto - time_to_wait;
 			/*
 			 * If the timer fires too early, 1 clock tick earlier,
 			 * restart the timer.
@@ -785,36 +784,7 @@ tcp_timer(void *arg)
 					    SL_TRACE, "tcp_timer: zero win");
 				}
 			} else {
-				/*
-				 * After retransmission, we need to do
-				 * slow start.  Set the ssthresh to one
-				 * half of current effective window and
-				 * cwnd to one MSS.  Also reset
-				 * tcp_cwnd_cnt.
-				 *
-				 * Note that if tcp_ssthresh is reduced because
-				 * of ECN, do not reduce it again unless it is
-				 * already one window of data away (tcp_cwr
-				 * should then be cleared) or this is a
-				 * timeout for a retransmitted segment.
-				 */
-				uint32_t npkt;
-
-				if (!tcp->tcp_cwr || tcp->tcp_rexmit) {
-					npkt = ((tcp->tcp_timer_backoff ?
-					    tcp->tcp_cwnd_ssthresh :
-					    tcp->tcp_snxt -
-					    tcp->tcp_suna) >> 1) / tcp->tcp_mss;
-					tcp->tcp_cwnd_ssthresh = MAX(npkt, 2) *
-					    tcp->tcp_mss;
-				}
-				tcp->tcp_cwnd = tcp->tcp_mss;
-				tcp->tcp_cwnd_cnt = 0;
-				if (tcp->tcp_ecn_ok) {
-					tcp->tcp_cwr = B_TRUE;
-					tcp->tcp_cwr_snd_max = tcp->tcp_snxt;
-					tcp->tcp_ecn_cwr_sent = B_FALSE;
-				}
+				cc_cong_signal(tcp, 0, CC_RTO);
 			}
 			break;
 		}
@@ -854,6 +824,7 @@ tcp_timer(void *arg)
 				tcp->tcp_swnd++;
 				tcp->tcp_zero_win_probe = B_TRUE;
 				TCPS_BUMP_MIB(tcps, tcpOutWinProbe);
+				tcp->tcp_cs.tcp_out_zwnd_probes++;
 			} else {
 				/*
 				 * Handle timeout from sender SWS avoidance.
@@ -1012,8 +983,8 @@ tcp_timer(void *arg)
 		 * window probe.
 		 */
 		if (tcp->tcp_rtt_sa != 0 && tcp->tcp_zero_win_probe == 0) {
-			tcp->tcp_rtt_sd += (tcp->tcp_rtt_sa >> 3) +
-			    (tcp->tcp_rtt_sa >> 5);
+			tcp->tcp_rtt_sd += tcp->tcp_rtt_sa >> 3 +
+			    tcp->tcp_rtt_sa >> 5;
 			tcp->tcp_rtt_sa = 0;
 			tcp_ip_notify(tcp);
 			tcp->tcp_rtt_update = 0;
@@ -1022,24 +993,14 @@ tcp_timer(void *arg)
 
 timer_rexmit:
 	tcp->tcp_timer_backoff++;
-	if ((ms = (tcp->tcp_rtt_sa >> 3) + tcp->tcp_rtt_sd +
-	    tcps->tcps_rexmit_interval_extra + (tcp->tcp_rtt_sa >> 5)) <
-	    tcp->tcp_rto_min) {
-		/*
-		 * This means the original RTO is tcp_rexmit_interval_min.
-		 * So we will use tcp_rexmit_interval_min as the RTO value
-		 * and do the backoff.
-		 */
-		ms = tcp->tcp_rto_min << tcp->tcp_timer_backoff;
-	} else {
-		ms <<= tcp->tcp_timer_backoff;
-	}
+	/*
+	 * Calculate the backed off retransmission timeout. If the shift brings
+	 * us back over the max, then we repin the value, and decrement the
+	 * backoff to avoid overflow.
+	 */
+	ms = tcp_calculate_rto(tcp, tcps, 0) << tcp->tcp_timer_backoff;
 	if (ms > tcp->tcp_rto_max) {
 		ms = tcp->tcp_rto_max;
-		/*
-		 * ms is at max, decrement tcp_timer_backoff to avoid
-		 * overflow.
-		 */
 		tcp->tcp_timer_backoff--;
 	}
 	tcp->tcp_ms_we_have_waited += ms;
@@ -1059,8 +1020,9 @@ timer_rexmit:
 	if (mss > tcp->tcp_swnd && tcp->tcp_swnd != 0)
 		mss = tcp->tcp_swnd;
 
-	if ((mp = tcp->tcp_xmit_head) != NULL)
-		mp->b_prev = (mblk_t *)ddi_get_lbolt();
+	if ((mp = tcp->tcp_xmit_head) != NULL) {
+		mp->b_prev = (mblk_t *)(intptr_t)gethrtime();
+	}
 	mp = tcp_xmit_mp(tcp, mp, mss, NULL, NULL, tcp->tcp_suna, B_TRUE, &mss,
 	    B_TRUE);
 
@@ -1091,6 +1053,8 @@ timer_rexmit:
 	tcp->tcp_csuna = tcp->tcp_snxt;
 	TCPS_BUMP_MIB(tcps, tcpRetransSegs);
 	TCPS_UPDATE_MIB(tcps, tcpRetransBytes, mss);
+	tcp->tcp_cs.tcp_out_retrans_segs++;
+	tcp->tcp_cs.tcp_out_retrans_bytes += mss;
 	tcp_send_data(tcp, mp);
 
 }
@@ -1103,7 +1067,7 @@ void
 tcp_close_linger_timeout(void *arg)
 {
 	conn_t	*connp = (conn_t *)arg;
-	tcp_t 	*tcp = connp->conn_tcp;
+	tcp_t	*tcp = connp->conn_tcp;
 
 	tcp->tcp_client_errno = ETIMEDOUT;
 	tcp_stop_lingering(tcp);

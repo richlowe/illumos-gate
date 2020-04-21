@@ -21,12 +21,14 @@
 
 #
 # Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2014, Joyent, Inc. All rights reserved.
+# Copyright 2019 Joyent, Inc.
 # Copyright 2013 Garrett D'Amore <garrett@damore.org>
 # Copyright 2013 Saso Kiselkov. All rights reserved.
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2017 Nexenta Systems, Inc.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
+# Copyright 2019 Peter Tribble.
+# Copyright 2015, Joyent, Inc. All rights reserved.
 #
 
 include $(SRC)/uts/Makefile.uts
@@ -42,12 +44,6 @@ FILEMODE=644
 #
 
 i386_HDRS=			\
-	agp/agpamd64gart_io.h	\
-	agp/agpdefs.h		\
-	agp/agpgart_impl.h	\
-	agp/agpmaster_io.h	\
-	agp/agptarget_io.h	\
-	agpgart.h		\
 	asy.h			\
 	fd_debug.h		\
 	fdc.h			\
@@ -58,7 +54,7 @@ i386_HDRS=			\
 	nvme.h			\
 	ucode.h
 
-sparc_HDRS= 			\
+sparc_HDRS=			\
 	mouse.h			\
 	scsi/targets/ssddef.h	\
 	$(MDESCHDRS)
@@ -129,6 +125,7 @@ CHKHDRS=			\
 	vt.h			\
 	vtdaemon.h		\
 	kd.h			\
+	containerof.h		\
 	contract.h		\
 	contract_impl.h		\
 	copyops.h		\
@@ -137,6 +134,7 @@ CHKHDRS=			\
 	cpc_impl.h		\
 	cpc_pcbe.h		\
 	cpr.h			\
+	cpu_uarray.h		\
 	cpupart.h		\
 	cpuvar.h		\
 	crc32.h			\
@@ -168,6 +166,8 @@ CHKHDRS=			\
 	ddi_implfuncs.h		\
 	ddi_obsolete.h		\
 	ddi_periodic.h		\
+	ddi_ufm.h		\
+	ddi_ufm_impl.h		\
 	ddidevmap.h		\
 	ddidmareq.h		\
 	ddimapreq.h		\
@@ -278,7 +278,7 @@ CHKHDRS=			\
 	iapriocntl.h		\
 	ibpart.h		\
 	id32.h			\
-	idmap.h 		\
+	idmap.h			\
 	ieeefp.h		\
 	id_space.h		\
 	instance.h		\
@@ -349,7 +349,9 @@ CHKHDRS=			\
 	lgrp.h			\
 	lgrp_user.h		\
 	libc_kernel.h		\
+	limits.h		\
 	link.h			\
+	linker_set.h		\
 	list.h			\
 	list_impl.h		\
 	llc1.h			\
@@ -509,6 +511,7 @@ CHKHDRS=			\
 	sema_impl.h		\
 	semaphore.h		\
 	sendfile.h		\
+	sensors.h		\
 	ser_sync.h		\
 	session.h		\
 	sha1.h			\
@@ -693,17 +696,13 @@ AUDIOHDRS=			\
 AVHDRS=				\
 	iec61883.h
 
-BSCHDRS=			\
-	bscbus.h		\
-	bscv_impl.h		\
-	lom_ebuscodes.h		\
+LOMHDRS=			\
 	lom_io.h		\
-	lom_priv.h		\
 	lombus.h
 
 MDESCHDRS=			\
 	mdesc.h			\
-	mdesc_impl.h		
+	mdesc_impl.h
 
 CPUDRVHDRS=			\
 	cpudrv.h
@@ -766,8 +765,8 @@ RDMAHDRS=		\
 	ib_user_mad.h	\
 	ib_user_sa.h	\
 	ib_user_verbs.h \
-	ib_verbs.h 	\
-	rdma_cm.h 	\
+	ib_verbs.h	\
+	rdma_cm.h	\
 	rdma_user_cm.h
 
 SOL_UVERBSHDRS=		\
@@ -978,6 +977,7 @@ SATAGENHDRS=		\
 
 SYSEVENTHDRS=		\
 	ap_driver.h     \
+	datalink.h	\
 	dev.h		\
 	domain.h        \
 	dr.h            \
@@ -1025,6 +1025,10 @@ USBWCMHDRS=		\
 
 UGENHDRS=           \
 	usb_ugen.h
+
+USBCCIDHDRS = \
+	ccid.h \
+	uccid.h
 
 HOTPLUGHDRS=	\
 	hpcsvc.h	\
@@ -1127,7 +1131,7 @@ CHECKHDRS=						\
 	$($(MACH)_HDRS:%.h=%.check)			\
 	$(AUDIOHDRS:%.h=audio/%.check)			\
 	$(AVHDRS:%.h=av/%.check)			\
-	$(BSCHDRS:%.h=%.check)				\
+	$(LOMHDRS:%.h=%.check)				\
 	$(CHKHDRS:%.h=%.check)				\
 	$(CPUDRVHDRS:%.h=%.check)			\
 	$(CRYPTOHDRS:%.h=crypto/%.check)		\
@@ -1172,6 +1176,7 @@ CHECKHDRS=						\
 	$(SYSEVENTHDRS:%.h=sysevent/%.check)            \
 	$(CONTRACTHDRS:%.h=contract/%.check)            \
 	$(USBAUDHDRS:%.h=usb/clients/audio/%.check)   \
+	$(USBCCIDHDRS:%.h=usb/clients/ccid/%.check)	\
 	$(USBHUBDHDRS:%.h=usb/hubd/%.check)		\
 	$(USBHIDHDRS:%.h=usb/clients/hid/%.check)	\
 	$(USBMSHDRS:%.h=usb/clients/mass_storage/%.check)	\
@@ -1246,6 +1251,7 @@ CHECKHDRS=						\
 	$(ROOTUSBCDCHDRS)       \
 	$(ROOTUSBVIDHDRS)       \
 	$(ROOTUSBWCMHDRS)	\
+	$(ROOTUSBCCIDHDRS)	\
 	$(ROOTUGENHDRS)		\
 	$(ROOT1394HDRS)         \
 	$(ROOTHOTPLUGHDRS)	\
@@ -1304,6 +1310,7 @@ install_h:			\
 	$(ROOTUWBHDRS)		\
 	$(ROOTUWBAHDRS)		\
 	$(ROOTUSBHDRS)		\
+	$(ROOTUSBCCIDHDRS)	\
 	$(ROOTUSBAUDHDRS)	\
 	$(ROOTUSBHUBDHDRS)	\
 	$(ROOTUSBHIDHDRS)	\

@@ -22,10 +22,15 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 /*
  * Copyright (c) 2010, Intel Corporation.
  * All rights reserved.
+ */
+
+/*
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -42,6 +47,7 @@
 #include <sys/kmem.h>
 #include <sys/modctl.h>
 #include <sys/pghw.h>
+#include <sys/x86_archext.h>
 
 #include "gcpu.h"
 
@@ -52,6 +58,116 @@ int gcpu_disable = 0;
 
 #define	GCPU_MAX_CHIPID		32
 static struct gcpu_chipshared *gcpu_shared[GCPU_MAX_CHIPID];
+#ifdef	DEBUG
+int gcpu_id_disable = 0;
+static const char *gcpu_id_override[GCPU_MAX_CHIPID] = { NULL };
+#endif
+
+#ifndef	__xpv
+
+/*
+ * The purpose of this is to construct a unique identifier for a given processor
+ * that can be used by things like FMA to determine when a FRU has been
+ * replaced. It is supported on Intel Xeon Platforms since Ivy Bridge and AMD
+ * 17h processors since Rome. See cpuid_pass1_ppin() for how we determine if a
+ * CPU is supported.
+ *
+ * The protected processor inventory number (PPIN) can be used to create a
+ * unique identifier when combined with the processor's cpuid signature. We
+ * create a versioned, synthetic ID using the following scheme for the
+ * identifier: iv0-<vendor>-<signature>-<PPIN>. The iv0 is the illumos version
+ * zero of the ID. If we have a new scheme for a new generation of processors,
+ * then that should rev the version field, otherwise for a given processor, this
+ * synthetic ID should not change.
+ *
+ * We use the string "INTC" for Intel and "AMD" for AMD. None of these or the
+ * formatting of the values can change without changing the version string.
+ */
+static char *
+gcpu_init_ident_ppin(cmi_hdl_t hdl)
+{
+	uint_t ppin_ctl_msr, ppin_msr;
+	uint64_t value;
+	const char *vendor;
+
+	/*
+	 * This list should be extended as new Intel Xeon family processors come
+	 * out.
+	 */
+	switch (cmi_hdl_vendor(hdl)) {
+	case X86_VENDOR_Intel:
+		ppin_ctl_msr = MSR_PPIN_CTL_INTC;
+		ppin_msr = MSR_PPIN_INTC;
+		vendor = "INTC";
+		break;
+	case X86_VENDOR_AMD:
+		ppin_ctl_msr = MSR_PPIN_CTL_AMD;
+		ppin_msr = MSR_PPIN_AMD;
+		vendor = "AMD";
+		break;
+	default:
+		return (NULL);
+	}
+
+	if (cmi_hdl_rdmsr(hdl, ppin_ctl_msr, &value) != CMI_SUCCESS) {
+		return (NULL);
+	}
+
+	if ((value & MSR_PPIN_CTL_ENABLED) == 0) {
+		if ((value & MSR_PPIN_CTL_LOCKED) != 0) {
+			return (NULL);
+		}
+
+		if (cmi_hdl_wrmsr(hdl, ppin_ctl_msr, MSR_PPIN_CTL_ENABLED) !=
+		    CMI_SUCCESS) {
+			return (NULL);
+		}
+	}
+
+	if (cmi_hdl_rdmsr(hdl, ppin_msr, &value) != CMI_SUCCESS) {
+		return (NULL);
+	}
+
+	/*
+	 * Now that we've read data, lock the PPIN. Don't worry about success or
+	 * failure of this part, as we will have gotten everything that we need.
+	 * It is possible that it locked open, for example.
+	 */
+	(void) cmi_hdl_wrmsr(hdl, ppin_ctl_msr, MSR_PPIN_CTL_LOCKED);
+
+	return (kmem_asprintf("iv0-%s-%x-%llx", vendor, cmi_hdl_chipsig(hdl),
+	    value));
+}
+#endif	/* __xpv */
+
+static void
+gcpu_init_ident(cmi_hdl_t hdl, struct gcpu_chipshared *sp)
+{
+#ifdef	DEBUG
+	uint_t chipid;
+
+	/*
+	 * On debug, allow a developer to override the string to more
+	 * easily test CPU autoreplace without needing to physically
+	 * replace a CPU.
+	 */
+	if (gcpu_id_disable != 0) {
+		return;
+	}
+
+	chipid = cmi_hdl_chipid(hdl);
+	if (gcpu_id_override[chipid] != NULL) {
+		sp->gcpus_ident = strdup(gcpu_id_override[chipid]);
+		return;
+	}
+#endif
+
+#ifndef __xpv
+	if (is_x86_feature(x86_featureset, X86FSET_PPIN)) {
+		sp->gcpus_ident = gcpu_init_ident_ppin(hdl);
+	}
+#endif	/* __xpv */
+}
 
 /*
  * Our cmi_init entry point, called during startup of each cpu instance.
@@ -90,6 +206,8 @@ gcpu_init(cmi_hdl_t hdl, void **datap)
 			mutex_destroy(&sp->gcpus_poll_lock);
 			kmem_free(sp, sizeof (struct gcpu_chipshared));
 			sp = osp;
+		} else {
+			gcpu_init_ident(hdl, sp);
 		}
 	}
 
@@ -145,6 +263,15 @@ gcpu_post_startup(cmi_hdl_t hdl)
 	 * be run on cpu 0 so we can assure that by starting from here.
 	 */
 	gcpu_mca_poll_start(hdl);
+#else
+	/*
+	 * The boot CPU has a bit of a chicken and egg problem for CMCI. Its MCA
+	 * initialization is run before we have initialized the PSM module that
+	 * we would use for enabling CMCI. Therefore, we use this as a chance to
+	 * enable CMCI for the boot CPU. For all other CPUs, this chicken and
+	 * egg problem will have already been solved.
+	 */
+	gcpu_mca_cmci_enable(hdl);
 #endif
 }
 
@@ -157,12 +284,32 @@ gcpu_post_mpstartup(cmi_hdl_t hdl)
 	cms_post_mpstartup(hdl);
 
 #ifndef __xpv
-		/*
-		 * All cpu handles are initialized only once all cpus
-		 * are started, so we can begin polling post mp startup.
-		 */
-		gcpu_mca_poll_start(hdl);
+	/*
+	 * All cpu handles are initialized only once all cpus are started, so we
+	 * can begin polling post mp startup.
+	 */
+	gcpu_mca_poll_start(hdl);
 #endif
+}
+
+const char *
+gcpu_ident(cmi_hdl_t hdl)
+{
+	uint_t chipid;
+	struct gcpu_chipshared *sp;
+
+	if (gcpu_disable)
+		return (NULL);
+
+	chipid = cmi_hdl_chipid(hdl);
+	if (chipid >= GCPU_MAX_CHIPID)
+		return (NULL);
+
+	if (cmi_hdl_getcmidata(hdl) == NULL)
+		return (NULL);
+
+	sp = gcpu_shared[cmi_hdl_chipid(hdl)];
+	return (sp->gcpus_ident);
 }
 
 #ifdef __xpv
@@ -186,6 +333,7 @@ const cmi_ops_t _cmi_ops = {
 	GCPU_OP(gcpu_hdl_poke, NULL),		/* cmi_hdl_poke */
 	gcpu_fini,				/* cmi_fini */
 	GCPU_OP(NULL, gcpu_xpv_panic_callback),	/* cmi_panic_callback */
+	gcpu_ident				/* cmi_ident */
 };
 
 static struct modlcpu modlcpu = {

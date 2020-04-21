@@ -22,6 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= ed
 XPG4PROG= ed
@@ -41,7 +42,11 @@ CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-unused-variable
 CERRWARN += -_gcc=-Wno-unused-function
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
+
 $(XPG4) := CFLAGS += -DXPG4  
 $(XPG6) := CFLAGS += -DXPG6 -I$(SRC)/lib/libc/inc 
 lint := LDLIBS += -lgen -lcrypt

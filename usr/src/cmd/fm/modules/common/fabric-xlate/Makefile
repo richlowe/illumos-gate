@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 MODULE = fabric-xlate
 CLASS = common
@@ -33,11 +34,14 @@ CPPFLAGS += -I$(ADJUNCT_PROTO)/usr/include/libxml2 -I$(KMFDIR)/include -I.
 CPPFLAGS += -I$(SRC)/uts/sun4v/io/px
 INCDIRS = $(SRC)/uts/common
 CFLAGS += -I$(INCDIRS)
-LINTFLAGS += -I$(INCDIRS)
 
 LDFLAGS += -L$(ROOT)/usr/lib/fm -R/usr/lib/fm
 LDLIBS += -luutil -lxml2 -L$(ROOTLIB)/fm -ltopo
+NATIVE_LIBS += libxml2.so
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off

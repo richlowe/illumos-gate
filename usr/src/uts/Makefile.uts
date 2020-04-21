@@ -22,9 +22,10 @@
 #
 # Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
-# Copyright (c) 2011 by Delphix. All rights reserved.
+# Copyright (c) 2011,2017 by Delphix. All rights reserved.
 # Copyright (c) 2013 Andrew Stormont.  All rights reserved.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -43,7 +44,7 @@ include $(SRC)/Makefile.master
 DTEXTDOM =
 
 #
-# 	Keep references to $(SRC)/common relative.
+#	Keep references to $(SRC)/common relative.
 COMMONBASE=	$(UTSBASE)/../common
 
 #
@@ -183,7 +184,7 @@ LINT_MODULE=	$(MODULE)
 #
 #	Build the compile/assemble lines:
 #
-EXTRA_OPTIONS		= 
+EXTRA_OPTIONS		=
 AS_DEFS			= -D_ASM -D__STDC__=0
 
 ALWAYS_DEFS_32		= -D_KERNEL -D_SYSCALL32 -D_DDI_STRICT
@@ -222,10 +223,42 @@ CERRWARN += -_gcc=-Wno-unknown-pragmas
 CERRWARN += -_gcc=-Wno-unused-parameter
 CERRWARN += -_gcc=-Wno-missing-field-initializers
 
+# gcc4 lacks -Wno-maybe-uninitialized
+CNOWARN_UNINIT = -_gcc4=-Wno-uninitialized \
+    -_gcc7=-Wno-maybe-uninitialized \
+    -_gcc8=-Wno-maybe-uninitialized
+
 # DEBUG v. -nd make for frequent unused variables, empty conditions, etc. in
 # -nd builds
 $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-unused
 $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-empty-body
+
+CERRWARN += -_smatch=-p=illumos_kernel
+include $(SRC)/Makefile.smatch
+
+#
+# Unfortunately, _IOWR() is regularly used with a third argument of 0,
+# so we have to disable all these smatch checks.
+#
+SMOFF += sizeof
+
+#
+# Ensure that the standard function prologue remains at the very start
+# of a function, so DTrace fbt will instrument the right place.
+#
+CFLAGS_uts_i386 += -_gcc7=-fno-shrink-wrap
+CFLAGS_uts_i386 += -_gcc8=-fno-shrink-wrap
+CFLAGS_uts_i386 += -_gcc9=-fno-shrink-wrap
+
+#
+# retpoline support
+#
+CFLAGS_uts_i386 += -_gcc7=-mindirect-branch=thunk-extern
+CFLAGS_uts_i386 += -_gcc7=-mindirect-branch-register
+CFLAGS_uts_i386 += -_gcc8=-mindirect-branch=thunk-extern
+CFLAGS_uts_i386 += -_gcc8=-mindirect-branch-register
+CFLAGS_uts_i386 += -_gcc9=-mindirect-branch=thunk-extern
+CFLAGS_uts_i386 += -_gcc9=-mindirect-branch-register
 
 CSTD = $(CSTD_GNU99)
 
@@ -237,10 +270,13 @@ CFLAGS_uts		+= $(XAOPT)
 CFLAGS_uts		+= $(CTF_FLAGS_$(CLASS))
 CFLAGS_uts		+= $(CERRWARN)
 CFLAGS_uts		+= $(CCNOAUTOINLINE)
+CFLAGS_uts		+= $(CCNOREORDER)
+CFLAGS_uts		+= $(CCNOAGGRESSIVELOOPS)
 CFLAGS_uts		+= $(CGLOBALSTATIC)
 CFLAGS_uts		+= $(EXTRA_CFLAGS)
 CFLAGS_uts		+= $(CSOURCEDEBUGFLAGS)
 CFLAGS_uts		+= $(CUSERFLAGS)
+CFLAGS_uts		+= $(CFLAGS_uts_$(MACH))
 
 #
 #	Declare that $(OBJECTS) and $(LINTS) can be compiled in parallel.
@@ -312,6 +348,17 @@ INS.conffile= \
 	$(RM) $@; $(INS) -s -m $(CFILEMODE) -f $(@D) $(SRC_CONFFILE)
 
 #
+# By default, instead of $VERSION, we use $(UTS_LABEL), which is by
+# default set to $RELEASE aka "5.11".
+#
+# $VERSION changes when the git HEAD changes, leading to annoying merge
+# uniquification conflicts when doing partial builds during development.
+# The information from $VERSION is available via "buildversion" anyway.
+#
+CTFCVTFLAGS = -X -l "$(UTS_LABEL)"
+CTFMRGFLAGS += -l "$(UTS_LABEL)"
+
+#
 # The CTF merge of child kernel modules is performed against one of the genunix
 # modules.  For Intel builds, all modules will be used with a single genunix:
 # the one built in intel/genunix.  For SPARC builds, a given
@@ -325,30 +372,30 @@ CTFMERGE_GUDIR_sparc	= sun4u
 CTFMERGE_GUDIR_i386	= intel
 CTFMERGE_GUDIR		= $(CTFMERGE_GUDIR_$(MACH))
 
-CTFMERGE_GENUNIX 	= \
+CTFMERGE_GENUNIX	= \
 	$(UTSBASE)/$(CTFMERGE_GUDIR)/genunix/$(OBJS_DIR)/genunix
 
 #
-# Used to uniquify a non-genunix module against genunix. $VERSION is used
-# for the label.
+# Used to uniquify a non-genunix module against genunix.
 #
 # For the ease of developers dropping modules onto possibly unrelated systems,
 # you can set NO_GENUNIX_UNIQUIFY= in the environment to skip uniquifying
 # against genunix.
 #
+#
 NO_GENUNIX_UNIQUIFY=$(POUND_SIGN)
 CTFMERGE_GENUNIX_DFLAG=-d $(CTFMERGE_GENUNIX)
-$(NO_GENUNIX_UNIQUIFY)CTF_GENUNIX_DFLAG=
+$(NO_GENUNIX_UNIQUIFY)CTFMERGE_GENUNIX_DFLAG=
 
-CTFMERGE_UNIQUIFY_AGAINST_GENUNIX	= \
-	$(CTFMERGE) $(CTFMRGFLAGS) -L VERSION \
-	$(CTFMERGE_GENUNIX_DFLAG) -o $@ $(OBJECTS) $(CTFEXTRAOBJS)
+CTFMERGE_UNIQUIFY_AGAINST_GENUNIX = \
+	$(CTFMERGE) $(CTFMRGFLAGS) $(CTFMERGE_GENUNIX_DFLAG) \
+	-o $@ $(OBJECTS) $(CTFEXTRAOBJS)
 
 #
 # Used to merge the genunix module.
 #
-CTFMERGE_GENUNIX_MERGE		= \
-	$(CTFMERGE) $(CTFMRGFLAGS) -L VERSION -o $@ \
+CTFMERGE_GENUNIX_MERGE = \
+	$(CTFMERGE) $(CTFMRGFLAGS) -o $@ \
 	$(OBJECTS) $(CTFEXTRAOBJS) $(IPCTF_TARGET)
 
 #
@@ -414,6 +461,7 @@ ROOT_FONT_DIR_32	= $(ROOT_MOD_DIR)/fonts
 ROOT_DACF_DIR_32	= $(ROOT_MOD_DIR)/dacf
 ROOT_CRYPTO_DIR_32	= $(ROOT_MOD_DIR)/crypto
 ROOT_MAC_DIR_32		= $(ROOT_MOD_DIR)/mac
+ROOT_CC_DIR_32		= $(ROOT_MOD_DIR)/cc
 ROOT_KICONV_DIR_32	= $(ROOT_MOD_DIR)/kiconv
 
 ROOT_KERN_DIR_64	= $(ROOT_MOD_DIR)/$(SUBDIR64)
@@ -441,6 +489,7 @@ ROOT_FONT_DIR_64	= $(ROOT_MOD_DIR)/fonts/$(SUBDIR64)
 ROOT_DACF_DIR_64	= $(ROOT_MOD_DIR)/dacf/$(SUBDIR64)
 ROOT_CRYPTO_DIR_64	= $(ROOT_MOD_DIR)/crypto/$(SUBDIR64)
 ROOT_MAC_DIR_64		= $(ROOT_MOD_DIR)/mac/$(SUBDIR64)
+ROOT_CC_DIR_64		= $(ROOT_MOD_DIR)/cc/$(SUBDIR64)
 ROOT_KICONV_DIR_64	= $(ROOT_MOD_DIR)/kiconv/$(SUBDIR64)
 
 ROOT_KERN_DIR		= $(ROOT_KERN_DIR_$(CLASS))
@@ -468,6 +517,7 @@ ROOT_FONT_DIR		= $(ROOT_FONT_DIR_$(CLASS))
 ROOT_DACF_DIR		= $(ROOT_DACF_DIR_$(CLASS))
 ROOT_CRYPTO_DIR		= $(ROOT_CRYPTO_DIR_$(CLASS))
 ROOT_MAC_DIR		= $(ROOT_MAC_DIR_$(CLASS))
+ROOT_CC_DIR		= $(ROOT_CC_DIR_$(CLASS))
 ROOT_KICONV_DIR		= $(ROOT_KICONV_DIR_$(CLASS))
 ROOT_FIRMWARE_DIR	= $(ROOT_MOD_DIR)/firmware
 
@@ -486,6 +536,7 @@ ROOT_MOD_DIRS_32        += $(ROOT_EMLXS_FW_DIR_32)
 ROOT_MOD_DIRS_32	+= $(ROOT_CPU_DIR_32) $(ROOT_FONT_DIR_32)
 ROOT_MOD_DIRS_32	+= $(ROOT_TOD_DIR_32) $(ROOT_DACF_DIR_32)
 ROOT_MOD_DIRS_32	+= $(ROOT_CRYPTO_DIR_32) $(ROOT_MAC_DIR_32)
+ROOT_MOD_DIRS_32	+= $(ROOT_CC_DIR_32)
 ROOT_MOD_DIRS_32	+= $(ROOT_KICONV_DIR_32)
 ROOT_MOD_DIRS_32	+= $(ROOT_FIRMWARE_DIR)
 
@@ -579,7 +630,7 @@ PARALLEL_KMODS = $(DRV_KMODS) $(EXEC_KMODS) $(FS_KMODS) $(SCHED_KMODS) \
 		 $(MMU_KMODS) $(DACF_KMODS) $(EXPORT_KMODS) $(IPP_KMODS) \
 		 $(CRYPTO_KMODS) $(PCBE_KMODS) \
 		 $(DRV_KMODS_$(CLASS)) $(MISC_KMODS_$(CLASS)) $(MAC_KMODS) \
-		 $(BRAND_KMODS) $(KICONV_KMODS) \
+		 $(BRAND_KMODS) $(KICONV_KMODS) $(CC_KMODS) \
 		 $(SOCKET_KMODS)
 
 KMODS = $(GENUNIX_KMODS) $(PARALLEL_KMODS)
@@ -591,7 +642,7 @@ LINT_KMODS = $(DRV_KMODS) $(EXEC_KMODS) $(FS_KMODS) $(SCHED_KMODS) \
 	  $(MACH_KMODS) $(GSS_KMODS) $(DACF_KMODS) $(IPP_KMODS) \
 	  $(CRYPTO_KMODS) $(PCBE_KMODS) \
 	  $(DRV_KMODS_$(CLASS)) $(MISC_KMODS_$(CLASS)) $(MAC_KMODS) \
-	  $(BRAND_KMODS) $(KICONV_KMODS) $(SOCKET_KMODS)
+	  $(BRAND_KMODS) $(KICONV_KMODS) $(CC_KMODS) $(SOCKET_KMODS)
 
 #
 #	Files to be compiled with -xa, to generate basic block execution

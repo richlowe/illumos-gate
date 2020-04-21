@@ -22,6 +22,7 @@
 #
 # Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2015 RackTop Systems.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 FSTYPE=		autofs
@@ -94,9 +95,12 @@ CPPFLAGS=	-I. -I.. -I../nfs/lib $(CPPFLAGS.master) -D_REENTRANT  \
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-unused-function
+
+# not linted
+SMATCH=off
 
 OBJS=		$(AUTOOBJS) $(MOUNTOBJS) $(TYPEOBJS) \
 		$(SHAREOBJS) $(UNSHAREOBJS)

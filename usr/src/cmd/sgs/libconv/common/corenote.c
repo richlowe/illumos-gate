@@ -58,9 +58,10 @@ conv_cnote_type(Word type, Conv_fmt_flags_t fmt_flags,
 		MSG_NT_LWPSINFO,	MSG_NT_PRPRIV,
 		MSG_NT_PRPRIVINFO,	MSG_NT_CONTENT,
 		MSG_NT_ZONENAME,	MSG_NT_FDINFO,
-		MSG_NT_SPYMASTER,	MSG_NT_SECFLAGS
+		MSG_NT_SPYMASTER,	MSG_NT_SECFLAGS,
+		MSG_NT_LWPNAME,
 	};
-#if NT_NUM != NT_SECFLAGS
+#if NT_NUM != NT_LWPNAME
 #error "NT_NUM has grown. Update core note types[]"
 #endif
 	static const conv_ds_msg_t ds_types = {
@@ -111,7 +112,7 @@ conv_cnote_auxv_type(Word type, Conv_fmt_flags_t fmt_flags,
 		MSG_AUXV_AT_SUN_EMULATOR,	MSG_AUXV_AT_SUN_BRANDNAME,
 		MSG_AUXV_AT_SUN_BRAND_AUX1,	MSG_AUXV_AT_SUN_BRAND_AUX2,
 		MSG_AUXV_AT_SUN_BRAND_AUX3,	MSG_AUXV_AT_SUN_HWCAP2,
-		NULL,				NULL,
+		0,				0,
 		MSG_AUXV_AT_SUN_COMMPAGE,	MSG_AUXV_AT_SUN_FPTYPE,
 		MSG_AUXV_AT_SUN_FPSIZE
 	};
@@ -2477,7 +2478,7 @@ conv_cnote_fileflags(uint32_t fileflags, Conv_fmt_flags_t fmt_flags,
 		{ 0x2000,	MSG_PR_O_LARGEFILE },
 		{ 0x20000,	MSG_PR_O_NOFOLLOW },
 		{ 0x40000,	MSG_PR_O_NOLINKS },
-		{ 0, NULL },
+		{ 0, 0 },
 	};
 
 	arg.oflags = arg.rflags = fileflags;
@@ -2529,7 +2530,7 @@ conv_cnote_filemode(uint32_t mode, Conv_fmt_flags_t fmt_flags,
 		{ 0004,		MSG_S_IROTH },
 		{ 0002,		MSG_S_IWOTH },
 		{ 0001,		MSG_S_IXOTH },
-		{ 0, NULL },
+		{ 0, 0 },
 	};
 
 	arg.oflags = arg.rflags = mode & ~(0xf000);
@@ -2568,7 +2569,7 @@ conv_cnote_filemode(uint32_t mode, Conv_fmt_flags_t fmt_flags,
 		s = MSG_S_IFPORT;
 		break;
 	default:
-		s = NULL;
+		s = 0;
 		break;
 	}
 

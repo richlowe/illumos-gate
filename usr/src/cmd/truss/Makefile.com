@@ -23,8 +23,7 @@
 # Copyright (c) 2016 by Delphix. All rights reserved.
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# cmd/truss/Makefile.com
+# Copyright 2019 Joyent, Inc.
 #
 
 PROG=	truss
@@ -39,14 +38,18 @@ include ../../Makefile.cmd
 CFLAGS		+= $(CCVERBOSE)
 CFLAGS64	+= $(CCVERBOSE)
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-switch
+
+# not linted
+SMATCH=off
 
 CSTD=	$(CSTD_GNU99)
 
 LDLIBS	+= -lproc -lrtld_db -lc_db -lnsl -lsocket -ltsol -lnvpair
 CPPFLAGS += -D_REENTRANT -D_LARGEFILE64_SOURCE=1
 CPPFLAGS += -I$(SRC)/uts/common/fs/zfs
+CPPFLAGS += -I$(SRC)/uts/common
 
 LINTFLAGS += -erroff=E_STATIC_UNUSED
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
@@ -66,8 +69,5 @@ $(PROG): $(OBJS)
 
 clean:
 	$(RM) $(OBJS)
-
-lint:
-	$(LINT.c) $(SRCS) $(LDLIBS)
 
 include ../../Makefile.targ

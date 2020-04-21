@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	libcurses.a
 VERS=		.1
@@ -87,7 +88,10 @@ CPPFLAGS = -I$(SRC)/ucbhead -I../../../lib/libc/inc $(CPPFLAGS.master)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

@@ -22,6 +22,7 @@
 # Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2016 RackTop Systems.
 # Copyright 2017 Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 include		$(SRC)/cmd/Makefile.cmd
@@ -92,7 +93,7 @@ POFILES=	$(POSUBDIRS:%=%/%.po)
 MSGSUBDIRS=	ld		ldd		libld		liblddbg \
 		libldstab	librtld		rtld		libelf \
 		ldprof		libcrle		pvs		elfdump	\
-		elfedit		crle		moe 		lari \
+		elfedit		crle		moe		lari \
 		librtld_db	elfwrap		ar
 
 MSGDIR=		messages
@@ -114,7 +115,7 @@ chkmsg :=	TARGET= chkmsg
 
 .PARALLEL:	$(SUBDIRS)
 
-all install:	native-add .WAIT $(SUBDIRS)
+all install:	$(SUBDIRS)
 
 include		$(SRC)/cmd/Makefile.targ
 
@@ -124,8 +125,7 @@ _msg: _msg_gettext _msg_sgsmsg
 
 _msg_gettext: $(MSGDOMAIN)/$(POFILE)
 
-# $(MACH)/sgsmsg must be built before we can descend into $(MSGDIR)
-_msg_sgsmsg: native-add .WAIT $(MSGDIR)
+_msg_sgsmsg: $(MSGDIR)
 
 $(MSGDOMAIN)/$(POFILE): \
 		$(MSGDOMAIN) $(POFILE)
@@ -146,33 +146,12 @@ install_lib:	FRC
 		@ cd lex; pwd; $(MAKE) $@
 		@ cd yacc; pwd; $(MAKE) $@
 
-lint:		$(SUBDIRS)
+lint:
 
-delete \
-clean clobber:	native-clobber .WAIT $(SUBDIRS) $(MSGDIR)
+delete clean clobber: $(SUBDIRS) $(MSGDIR)
 
 $(SUBDIRS):	FRC
 		@ cd $@; pwd; $(MAKE) $(TARGET)
-
-
-# Integration of ld and ld.so.1 in some developement cycles requires that both
-# of these modules be built using the new ld.  This `native' target allows us
-# to build a local ld which will then be used to build the delivered version of
-# itself and ld.so.1.  Once this new functionality appears in the standard ld
-# this target can be disabled.
-
-native-add:	FRC
-		@ cd tools/$(MACH); pwd; $(MAKE) native
-		@ cd libconv/$(MACH); pwd; $(MAKE)
-		@ cd libelf/$(MACH); pwd; $(MAKE) native
-		@ cd liblddbg/$(MACH); pwd; $(MAKE) native
-		@ cd libldstab/$(MACH); pwd; $(MAKE) native
-		@ cd libld/$(MACH); pwd; $(MAKE) native
-		@ cd ld/$(MACH); pwd; $(MAKE) native
-
-native-clobber:
-		@ cd tools; pwd; $(MAKE) $(TARGET)
-		$(RM) -r proto/$(MACH)
 
 FRC:
 
@@ -180,8 +159,8 @@ FRC:
 # Cross-reference customization: ignore the directories named by XRPRUNE,
 # and tweak the file globs slightly.
 #
-XRPRUNE=	rtld.4.x packages abi
-XRADD=		*.msg mapfile* llib-[a-z]*
+XRPRUNE=	rtld.4.x abi
+XRADD=		*.msg mapfile*
 XRDEL=		Makefile* kobj_*
 
 #

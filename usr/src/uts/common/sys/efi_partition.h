@@ -22,12 +22,14 @@
  * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014 Toomas Soome <tsoome@me.com>
+ * Copyright (c) 2019, Joyent, Inc.
  */
 
 #ifndef	_SYS_EFI_PARTITION_H
 #define	_SYS_EFI_PARTITION_H
 
 #include <sys/uuid.h>
+#include <sys/stddef.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -45,6 +47,16 @@ extern "C" {
 			    (1 * (sizeof (struct uuid)))))
 
 #define	EFI_SIGNATURE	0x5452415020494645ULL
+
+/*
+ * Although the EFI spec is clear that sizeof (efi_gpt_t) is a valid value
+ * (512), at least one EFI system (AMI v4.6.4.1) incorrectly expects this to be
+ * exactly the size of the structure defined in the spec, that is, 92.
+ *
+ * As the reserved section is never used, the modified value works fine
+ * everywhere else.
+ */
+#define	EFI_HEADER_SIZE (offsetof(efi_gpt_t, efi_gpt_Reserved2))
 
 /* EFI Guid Partition Table Header -- little endian on-disk format */
 typedef struct efi_gpt {
@@ -131,12 +143,20 @@ typedef struct efi_gpe_Attrs {
 				    { 0x23, 0x8f, 0x2a, 0x3d, 0xf9, 0x28 } }
 #define	EFI_DELL_RESV		{ 0x8da63339, 0x0007, 0x60c0, 0xc4, 0x36, \
 				    { 0x08, 0x3a, 0xc8, 0x23, 0x09, 0x08 } }
+#define	EFI_AAPL_BOOT		{ 0x426F6F74, 0x0000, 0x11aa, 0xaa, 0x11, \
+				{ 0x00, 0x30, 0x65, 0x43, 0xec, 0xac } }
 #define	EFI_AAPL_HFS		{ 0x48465300, 0x0000, 0x11aa, 0xaa, 0x11, \
 				    { 0x00, 0x30, 0x65, 0x43, 0xec, 0xac } }
 #define	EFI_AAPL_UFS		{ 0x55465300, 0x0000, 0x11aa, 0xaa, 0x11, \
 				    { 0x00, 0x30, 0x65, 0x43, 0xec, 0xac } }
+#define	EFI_AAPL_ZFS		{ 0x6a898cc3, 0x1dd2, 0x11b2, 0x99, 0xa6, \
+				    { 0x08, 0x00, 0x20, 0x73, 0x66, 0x31 } }
+#define	EFI_AAPL_APFS		{ 0x7c3457ef, 0x0000, 0x11aa, 0xaa, 0x11, \
+				    { 0x00, 0x30, 0x65, 0x43, 0xec, 0xac } }
 #define	EFI_FREEBSD_BOOT	{ 0x83bd6b9d, 0x7f41, 0x11dc, 0xbe, 0x0b, \
 				    { 0x00, 0x15, 0x60, 0xb8, 0x4f, 0x0f } }
+#define	EFI_FREEBSD_NANDFS	{ 0x74ba7dd9, 0xa689, 0x11e1, 0xbd, 0x04, \
+				    { 0x00, 0xe0, 0x81, 0x28, 0x6a, 0xcf } }
 #define	EFI_FREEBSD_SWAP	{ 0x516e7cb5, 0x6ecf, 0x11d6, 0x8f, 0xf8, \
 				    { 0x00, 0x02, 0x2d, 0x09, 0x71, 0x2b } }
 #define	EFI_FREEBSD_UFS		{ 0x516e7cb6, 0x6ecf, 0x11d6, 0x8f, 0xf8, \
@@ -214,7 +234,7 @@ typedef struct dk_efi {
 	diskaddr_t	 dki_lba;	/* starting block */
 	len_t		 dki_length;	/* length in bytes */
 	union {
-		efi_gpt_t 	*_dki_data;
+		efi_gpt_t	*_dki_data;
 		uint64_t	_dki_data_64;
 	} dki_un;
 #define	dki_data	dki_un._dki_data
@@ -235,6 +255,7 @@ struct partition64 {
 #define	EFI_NUMPAR	9
 
 #ifndef _KERNEL
+extern	uint_t	efi_reserved_sectors(struct dk_gpt *);
 extern	int	efi_alloc_and_init(int, uint32_t, struct dk_gpt **);
 extern	int	efi_alloc_and_read(int, struct dk_gpt **);
 extern	int	efi_write(int, struct dk_gpt *);

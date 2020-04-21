@@ -22,7 +22,7 @@
 #
 # Copyright (c) 1989 by Sun Microsystems, Inc.
 #
-# cmd/sunpc/other/Makefile
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= dos2unix unix2dos
 SRCS= ${PROG:%=%.c}
@@ -30,8 +30,11 @@ SRCS= ${PROG:%=%.c}
 include ../../Makefile.cmd
 
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-unused-variable
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

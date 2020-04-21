@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/types.h>
@@ -435,12 +435,12 @@ segkmem_badop()
 	panic("segkmem_badop");
 }
 
-#define	SEGKMEM_BADOP(t)	(t(*)())segkmem_badop
+#define	SEGKMEM_BADOP(t)	(t(*)())(uintptr_t)segkmem_badop
 
 /*ARGSUSED*/
 static faultcode_t
 segkmem_fault(struct hat *hat, struct seg *seg, caddr_t addr, size_t size,
-	enum fault_type type, enum seg_rw rw)
+    enum fault_type type, enum seg_rw rw)
 {
 	pgcnt_t npages;
 	spgcnt_t pg;
@@ -677,7 +677,7 @@ segkmem_dump(struct seg *seg)
 /*ARGSUSED*/
 static int
 segkmem_pagelock(struct seg *seg, caddr_t addr, size_t len,
-	page_t ***ppp, enum lock_type type, enum seg_rw rw)
+    page_t ***ppp, enum lock_type type, enum seg_rw rw)
 {
 	page_t **pplist, *pp;
 	pgcnt_t npages;
@@ -825,15 +825,14 @@ segkmem_create(struct seg *seg)
 page_t *
 segkmem_page_create(void *addr, size_t size, int vmflag, void *arg)
 {
-	struct seg kseg;
-	int pgflags;
+	struct seg kseg = { 0 };
+	int pgflags = PG_EXCL;
 	struct vnode *vp = arg;
 
 	if (vp == NULL)
 		vp = &kvp;
 
 	kseg.s_as = &kas;
-	pgflags = PG_EXCL;
 
 	if (segkmem_reloc == 0 || (vmflag & VM_NORELOC))
 		pgflags |= PG_NORELOC;
@@ -858,7 +857,7 @@ segkmem_page_create(void *addr, size_t size, int vmflag, void *arg)
  */
 void *
 segkmem_xalloc(vmem_t *vmp, void *inaddr, size_t size, int vmflag, uint_t attr,
-	page_t *(*page_create_func)(void *, size_t, int, void *), void *pcarg)
+    page_t *(*page_create_func)(void *, size_t, int, void *), void *pcarg)
 {
 	page_t *ppl;
 	caddr_t addr = inaddr;
@@ -1222,7 +1221,7 @@ static void
 segkmem_free_one_lp(caddr_t addr, size_t size)
 {
 	page_t		*pp, *rootpp = NULL;
-	pgcnt_t 	pgs_left = btopr(size);
+	pgcnt_t		pgs_left = btopr(size);
 
 	ASSERT(size == segkmem_lpsize);
 
@@ -1422,7 +1421,7 @@ segkmem_free_lpi(vmem_t *vmp, void *inaddr, size_t size)
 	pgcnt_t		nlpages = size >> segkmem_lpshift;
 	size_t		lpsize = segkmem_lpsize;
 	caddr_t		addr = inaddr;
-	pgcnt_t 	npages = btopr(size);
+	pgcnt_t		npages = btopr(size);
 	int		i;
 
 	ASSERT(vmp == heap_lp_arena);

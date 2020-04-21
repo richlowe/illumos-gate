@@ -87,7 +87,7 @@ ibmf_send_wqe_cache_constructor(void *buf, void *cdrarg, int kmflags)
 	send_wqe->send_sg_mem =
 	    (ib_vaddr_t)(uintptr_t)vmem_alloc(cip->ci_wqe_ib_vmem,
 	    IBMF_MEM_PER_WQE, kmflags == KM_SLEEP ? VM_SLEEP : VM_NOSLEEP);
-	if (send_wqe->send_sg_mem == NULL) {
+	if (send_wqe->send_sg_mem == 0) {
 		IBMF_TRACE_1(IBMF_TNF_NODEBUG, DPRINT_L1,
 		    ibmf_send_wqe_cache_constructor_err, IBMF_TNF_ERROR, "",
 		    "ibmf_send_wqe_cache_constructor(): %s\n", tnf_string, msg,
@@ -193,13 +193,13 @@ ibmf_recv_wqe_cache_constructor(void *buf, void *cdrarg, int kmflags)
 	    "ibmf_recv_wqe_cache_constructor() enter, buf = %p, cdarg = %p\n",
 	    tnf_opaque, buf, buf, tnf_opaque, cdrarg, cdrarg);
 
-	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))	
+	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))
 
 	/* initialize recv WQE context */
 	recv_wqe->recv_sg_mem =
 	    (ib_vaddr_t)(uintptr_t)vmem_alloc(cip->ci_wqe_ib_vmem,
 	    IBMF_MEM_PER_WQE, kmflags == KM_SLEEP ? VM_SLEEP : VM_NOSLEEP);
-	if (recv_wqe->recv_sg_mem == NULL) {
+	if (recv_wqe->recv_sg_mem == 0) {
 		IBMF_TRACE_1(IBMF_TNF_NODEBUG, DPRINT_L1,
 		    ibmf_recv_wqe_cache_constructor_err, IBMF_TNF_ERROR, "",
 		    "ibmf_recv_wqe_cache_constructor(): %s\n", tnf_string, msg,
@@ -277,7 +277,7 @@ ibmf_recv_wqe_cache_destructor(void *buf, void *cdrarg)
 	    "ibmf_recv_wqe_cache_destructor() enter, buf = %p, cdarg = %p\n",
 	    tnf_opaque, buf, buf, tnf_opaque, cdrarg, cdrarg);
 
-	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))	
+	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))
 
 	/* Free the vmem allocated for the WQE */
 	vmem_free(cip->ci_wqe_ib_vmem,
@@ -306,13 +306,13 @@ ibmf_altqp_send_wqe_cache_constructor(void *buf, void *cdrarg, int kmflags)
 	    "ibmf_altqp_send_wqe_cache_constructor() enter, buf = %p, "
 	    "cdarg = %p\n", tnf_opaque, buf, buf, tnf_opaque, cdrarg, cdrarg);
 
-	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*send_wqe))	
+	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*send_wqe))
 
 	/* initialize send WQE context */
 	send_wqe->send_sg_mem = (ib_vaddr_t)(uintptr_t)vmem_alloc(
 	    qp_ctx->isq_wqe_ib_vmem, IBMF_MEM_PER_WQE,
 	    kmflags == KM_SLEEP ? VM_SLEEP : VM_NOSLEEP);
-	if (send_wqe->send_sg_mem == NULL) {
+	if (send_wqe->send_sg_mem == 0) {
 		IBMF_TRACE_1(IBMF_TNF_NODEBUG, DPRINT_L1,
 		    ibmf_altqp_send_wqe_cache_constructor_err, IBMF_TNF_ERROR,
 		    "", "ibmf_altqp_send_wqe_cache_constructor(): %s\n",
@@ -390,7 +390,7 @@ ibmf_altqp_send_wqe_cache_destructor(void *buf, void *cdrarg)
 	    "ibmf_altqp_send_wqe_cache_destructor() enter, buf = %p, "
 	    "cdarg = %p\n", tnf_opaque, buf, buf, tnf_opaque, cdrarg, cdrarg);
 
-	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*send_wqe))	
+	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*send_wqe))
 
 	/* Free the vmem allocated for the WQE */
 	vmem_free(qp_ctx->isq_wqe_ib_vmem,
@@ -419,13 +419,13 @@ ibmf_altqp_recv_wqe_cache_constructor(void *buf, void *cdrarg, int kmflags)
 	    "ibmf_altqp_recv_wqe_cache_constructor() enter, buf = %p, "
 	    "cdarg = %p\n", tnf_opaque, buf, buf, tnf_opaque, cdrarg, cdrarg);
 
-	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))	
+	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))
 
 	/* initialize recv WQE context */
 	recv_wqe->recv_sg_mem = (ib_vaddr_t)(uintptr_t)vmem_alloc(
 	    qp_ctx->isq_wqe_ib_vmem, IBMF_MEM_PER_WQE,
 	    kmflags == KM_SLEEP ? VM_SLEEP : VM_NOSLEEP);
-	if (recv_wqe->recv_sg_mem == NULL) {
+	if (recv_wqe->recv_sg_mem == 0) {
 		IBMF_TRACE_1(IBMF_TNF_NODEBUG, DPRINT_L1,
 		    ibmf_altqp_recv_wqe_cache_constructor_err, IBMF_TNF_ERROR,
 		    "", "ibmf_altqp_recv_wqe_cache_constructor(): %s\n",
@@ -502,7 +502,7 @@ ibmf_altqp_recv_wqe_cache_destructor(void *buf, void *cdrarg)
 	    "ibmf_altqp_recv_wqe_cache_destructor() enter, buf = %p, "
 	    "cdarg = %p\n", tnf_opaque, buf, buf, tnf_opaque, cdrarg, cdrarg);
 
-	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))	
+	_NOTE(NOW_INVISIBLE_TO_OTHER_THREADS(*recv_wqe))
 
 	/* Free the vmem allocated for the WQE */
 	vmem_free(qp_ctx->isq_wqe_ib_vmem,
@@ -870,7 +870,7 @@ ibmf_i_init_send_wqe(ibmf_client_t *clientp, ibmf_msg_impl_t *msgimplp,
 	swrp = &wqep->send_wr;
 	/* use send wqe pointer as the WR ID */
 	IBMF_ADDR_TO_SEND_WR_ID(wqep, swrp->wr_id);
-	ASSERT(swrp->wr_id != NULL);
+	ASSERT(swrp->wr_id != 0);
 	swrp->wr_flags = IBT_WR_NO_FLAGS;
 	swrp->wr_opcode = IBT_WRC_SEND;
 	swrp->wr_trans = IBT_UD_SRV;

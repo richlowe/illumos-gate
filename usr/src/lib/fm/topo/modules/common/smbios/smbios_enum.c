@@ -10,13 +10,14 @@
  */
 
 /*
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright (c) 2019, Joyent, Inc.
  */
 
 #include <assert.h>
 #include <fcntl.h>
 #include <fm/libtopo.h>
 #include <fm/topo_mod.h>
+#include <fm/topo_method.h>
 #ifdef	__x86
 #include <sys/mc.h>
 #endif
@@ -33,6 +34,13 @@ typedef struct smb_enum_data {
 	smbios_info_t	*sme_smb_info;
 	char		*sme_slot_form;
 } smb_enum_data_t;
+
+static const topo_method_t slot_methods[] = {
+	{ TOPO_METH_OCCUPIED, TOPO_METH_OCCUPIED_DESC,
+	    TOPO_METH_OCCUPIED_VERSION, TOPO_STABILITY_INTERNAL,
+	    topo_mod_hc_occupied },
+	{ NULL }
+};
 
 /*
  * This function serves two purposes.  It filters out memory devices that
@@ -90,7 +98,7 @@ static boolean_t
 is_valid_string(const char *str)
 {
 	if (strcmp(str, SMB_DEFAULT1) != 0 && strcmp(str, SMB_DEFAULT2) != 0 &&
-	    strlen(str) > 0)
+	    strcmp(str, SMB_DEFAULT3) != 0 && strlen(str) > 0)
 		return (B_TRUE);
 
 	return (B_FALSE);
@@ -121,9 +129,9 @@ smbios_make_slot(smb_enum_data_t *smed, smbios_memdevice_t *smb_md)
 		/* errno set */
 		return (NULL);
 	}
-	nvlist_free(auth);
 	if ((slotnode = topo_node_bind(mod, smed->sme_pnode, SLOT,
 	    smed->sme_slot_inst, fmri)) == NULL) {
+		nvlist_free(auth);
 		nvlist_free(fmri);
 		topo_mod_dprintf(mod, "topo_node_bind() failed: %s",
 		    topo_mod_errmsg(mod));
@@ -133,6 +141,10 @@ smbios_make_slot(smb_enum_data_t *smed, smbios_memdevice_t *smb_md)
 	nvlist_free(fmri);
 	fmri = NULL;
 
+	/* Create authority and system pgroups */
+	topo_pgroup_hcset(slotnode, auth);
+	nvlist_free(auth);
+
 	if (topo_node_label_set(slotnode, (char *)smb_md->smbmd_dloc, &err) !=
 	    0) {
 		topo_mod_dprintf(mod, "failed to set label on %s=%d: %s",
@@ -141,7 +153,7 @@ smbios_make_slot(smb_enum_data_t *smed, smbios_memdevice_t *smb_md)
 		return (NULL);
 	}
 	if (topo_node_fru(smed->sme_pnode, &fmri, NULL, &err) != 0 ||
-	    topo_node_fru_set(slotnode, fmri, NULL, &err) != 0) {
+	    topo_node_fru_set(slotnode, fmri, 0, &err) != 0) {
 		topo_mod_dprintf(mod, "failed to set FRU on %s=%d: %s", SLOT,
 		    smed->sme_slot_inst, topo_strerror(err));
 		nvlist_free(fmri);
@@ -149,6 +161,14 @@ smbios_make_slot(smb_enum_data_t *smed, smbios_memdevice_t *smb_md)
 		return (NULL);
 	}
 	nvlist_free(fmri);
+
+	if (topo_method_register(mod, slotnode, slot_methods) != 0) {
+		topo_mod_dprintf(mod, "topo_method_register() failed on "
+		    "%s=%d: %s", SLOT, smed->sme_slot_inst,
+		    topo_mod_errmsg(mod));
+		/* errno set */
+		return (NULL);
+	}
 
 	pgi.tpi_name = TOPO_PGROUP_SLOT;
 	pgi.tpi_namestab = TOPO_STABILITY_PRIVATE;
@@ -226,11 +246,11 @@ smbios_make_dimm(smb_enum_data_t *smed, smbios_memdevice_t *smb_md)
 		/* errno set */
 		goto err;
 	}
-	nvlist_free(auth);
 
 	if (topo_node_range_create(mod, slotnode, DIMM, 0, 0) < 0 ||
 	    (dimmnode = topo_node_bind(mod, slotnode, DIMM, 0, fmri)) ==
 	    NULL) {
+		nvlist_free(auth);
 		nvlist_free(fmri);
 		topo_mod_dprintf(mod, "failed to bind dimm node: %s",
 		    topo_mod_errmsg(mod));
@@ -238,7 +258,11 @@ smbios_make_dimm(smb_enum_data_t *smed, smbios_memdevice_t *smb_md)
 		goto err;
 	}
 
-	if (topo_node_fru_set(dimmnode, fmri, NULL, &err) != 0) {
+	/* Create authority and system pgroups */
+	topo_pgroup_hcset(dimmnode, auth);
+	nvlist_free(auth);
+
+	if (topo_node_fru_set(dimmnode, fmri, 0, &err) != 0) {
 		topo_mod_dprintf(mod, "failed to set FRU on %s: %s",
 		    DIMM, topo_strerror(err));
 		nvlist_free(fmri);
@@ -387,6 +411,172 @@ smbios_enum_memory(smbios_hdl_t *shp, const smbios_struct_t *sp, void *arg)
 	return (0);
 }
 
+static int
+smbios_enum_motherboard(smbios_hdl_t *shp, smb_enum_data_t *smed)
+{
+	smbios_struct_t sp;
+	smbios_bboard_t smb_mb;
+	smbios_bios_t smb_bios;
+	smbios_info_t smb_info;
+	const char *part = NULL, *rev = NULL, *serial = NULL;
+	char *manuf = NULL, *prod = NULL, *asset = NULL;
+	char *bios_vendor = NULL, *bios_rev = NULL, *bios_reldate = NULL;
+	nvlist_t *auth, *fmri;
+	topo_mod_t *mod = smed->sme_mod;
+	tnode_t *mbnode;
+	topo_pgroup_info_t pgi;
+	int rc = 0, err;
+
+	if (smbios_lookup_type(shp, SMB_TYPE_BASEBOARD, &sp) == 0 &&
+	    smbios_info_bboard(shp, sp.smbstr_id, &smb_mb) == 0 &&
+	    smbios_info_common(shp, sp.smbstr_id, &smb_info) == 0) {
+		if (is_valid_string(smb_info.smbi_part) == B_TRUE)
+			part = smb_info.smbi_part;
+		if (is_valid_string(smb_info.smbi_version) == B_TRUE)
+			rev = smb_info.smbi_version;
+		if (is_valid_string(smb_info.smbi_serial) == B_TRUE)
+			serial = smb_info.smbi_serial;
+		if (is_valid_string(smb_info.smbi_manufacturer) == B_TRUE)
+			manuf = topo_mod_clean_str(mod,
+			    smb_info.smbi_manufacturer);
+		if (is_valid_string(smb_info.smbi_product) == B_TRUE)
+			prod = topo_mod_clean_str(mod, smb_info.smbi_product);
+		if (is_valid_string(smb_info.smbi_asset) == B_TRUE)
+			asset = topo_mod_clean_str(mod, smb_info.smbi_asset);
+	}
+	if (smbios_lookup_type(shp, SMB_TYPE_BIOS, &sp) == 0 &&
+	    smbios_info_bios(shp, &smb_bios) == 0) {
+		if (is_valid_string(smb_bios.smbb_vendor) == B_TRUE)
+			bios_vendor = topo_mod_clean_str(mod,
+			    smb_bios.smbb_vendor);
+		if (is_valid_string(smb_bios.smbb_version) == B_TRUE)
+			bios_rev = topo_mod_clean_str(mod,
+			    smb_bios.smbb_version);
+		if (is_valid_string(smb_bios.smbb_reldate) == B_TRUE)
+			bios_reldate = topo_mod_clean_str(mod,
+			    smb_bios.smbb_reldate);
+	}
+	if ((auth = topo_mod_auth(mod, smed->sme_pnode)) == NULL) {
+		topo_mod_dprintf(mod, "topo_mod_auth() failed: %s",
+		    topo_mod_errmsg(mod));
+		/* errno set */
+		goto err;
+	}
+
+	if ((fmri = topo_mod_hcfmri(mod, NULL, FM_HC_SCHEME_VERSION,
+	    MOTHERBOARD, 0, NULL, auth, part, rev, serial)) ==
+	    NULL) {
+		nvlist_free(auth);
+		topo_mod_dprintf(mod, "topo_mod_hcfmri() failed: %s",
+		    topo_mod_errmsg(mod));
+		/* errno set */
+		goto err;
+	}
+
+	if ((mbnode = topo_node_bind(mod, smed->sme_pnode, MOTHERBOARD, 0,
+	    fmri)) == NULL) {
+		nvlist_free(auth);
+		nvlist_free(fmri);
+		topo_mod_dprintf(mod, "topo_node_bind() failed: %s",
+		    topo_mod_errmsg(mod));
+		/* errno set */
+		goto err;
+	}
+
+	/* Create authority and system pgroups */
+	topo_pgroup_hcset(mbnode, auth);
+	nvlist_free(auth);
+
+	if (topo_node_fru_set(mbnode, fmri, 0, &err) != 0) {
+		topo_mod_dprintf(mod, "failed to set FRU on %s: %s",
+		    MOTHERBOARD, topo_strerror(err));
+		nvlist_free(fmri);
+		(void) topo_mod_seterrno(mod, err);
+		goto err;
+	}
+	nvlist_free(fmri);
+	fmri = NULL;
+
+	if (topo_node_label_set(mbnode, "MB", &err) != 0) {
+		topo_mod_dprintf(mod, "failed to set label on %s: %s",
+		    MOTHERBOARD, topo_strerror(err));
+		(void) topo_mod_seterrno(mod, err);
+		goto err;
+	}
+
+	pgi.tpi_name = TOPO_PGROUP_MOTHERBOARD;
+	pgi.tpi_namestab = TOPO_STABILITY_PRIVATE;
+	pgi.tpi_datastab = TOPO_STABILITY_PRIVATE;
+	pgi.tpi_version = TOPO_VERSION;
+	rc = topo_pgroup_create(mbnode, &pgi, &err);
+
+	if (rc == 0 && manuf != NULL)
+		rc += topo_prop_set_string(mbnode, TOPO_PGROUP_MOTHERBOARD,
+		    TOPO_PROP_MB_MANUFACTURER, TOPO_PROP_IMMUTABLE, manuf,
+		    &err);
+	if (rc == 0 && prod != NULL)
+		rc += topo_prop_set_string(mbnode, TOPO_PGROUP_MOTHERBOARD,
+		    TOPO_PROP_MB_PRODUCT, TOPO_PROP_IMMUTABLE, prod, &err);
+	if (rc == 0 && asset != NULL)
+		rc += topo_prop_set_string(mbnode, TOPO_PGROUP_MOTHERBOARD,
+		    TOPO_PROP_MB_ASSET, TOPO_PROP_IMMUTABLE, asset, &err);
+
+	if (rc != 0) {
+		topo_mod_dprintf(mod, "error setting properties on %s node",
+		    MOTHERBOARD);
+		(void) topo_mod_seterrno(mod, err);
+		goto err;
+	}
+	/*
+	 * If we were able to gleen the BIOS version from SMBIOS, then set
+	 * up a UFM node to capture that information.
+	 */
+	if (bios_rev != NULL) {
+		topo_ufm_slot_info_t slotinfo = { 0 };
+		nvlist_t *extra;
+
+		slotinfo.usi_version = bios_rev;
+		slotinfo.usi_active = B_TRUE;
+		slotinfo.usi_mode = TOPO_UFM_SLOT_MODE_NONE;
+
+		if (bios_vendor != NULL || bios_reldate != NULL) {
+			if (nvlist_alloc(&extra, NV_UNIQUE_NAME, 0) != 0) {
+				goto err;
+			}
+			if (bios_vendor != NULL && nvlist_add_string(extra,
+			    TOPO_PROP_MB_FIRMWARE_VENDOR, bios_vendor) != 0) {
+				nvlist_free(extra);
+				goto err;
+			}
+			if (bios_reldate != NULL && nvlist_add_string(extra,
+			    TOPO_PROP_MB_FIRMWARE_RELDATE, bios_reldate) !=
+			    0) {
+				nvlist_free(extra);
+				goto err;
+			}
+			slotinfo.usi_extra = extra;
+		}
+		if (topo_node_range_create(mod, mbnode, UFM, 0, 0) != 0) {
+			topo_mod_dprintf(mod, "failed to create %s range",
+			    UFM);
+			nvlist_free(extra);
+			goto err;
+		}
+		(void) topo_mod_create_ufm(mod, mbnode, "BIOS", &slotinfo);
+		nvlist_free(extra);
+	}
+
+err:
+	topo_mod_strfree(mod, manuf);
+	topo_mod_strfree(mod, prod);
+	topo_mod_strfree(mod, asset);
+	topo_mod_strfree(mod, bios_vendor);
+	topo_mod_strfree(mod, bios_rev);
+	topo_mod_strfree(mod, bios_reldate);
+
+	return (0);
+}
+
 /*
  * A system with a functional memory controller driver will have one mc device
  * node per chip instance, starting at instance 0.  The driver provides an
@@ -447,6 +637,10 @@ smbios_enum(topo_mod_t *mod, tnode_t *rnode, const char *name,
 		if (has_mc_driver() == B_TRUE)
 			return (0);
 		if (smbios_iter(smbh, smbios_enum_memory, &smed) < 0)
+			/* errno set */
+			return (-1);
+	} else if (strcmp(name, MOTHERBOARD) == 0) {
+		if (smbios_enum_motherboard(smbh, &smed) < 0)
 			/* errno set */
 			return (-1);
 	} else {

@@ -14,6 +14,8 @@
  * Copyright 2016 Tegile Systems, Inc. All rights reserved.
  * Copyright (c) 2016 The MathWorks, Inc.  All rights reserved.
  * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Western Digital Corporation.
+ * Copyright 2020 Racktop Systems.
  */
 
 /*
@@ -56,8 +58,8 @@
  * From the hardware perspective both queues of a queue pair are independent,
  * but they share some driver state: the command array (holding pointers to
  * commands currently being processed by the hardware) and the active command
- * counter. Access to a queue pair and the shared state is protected by
- * nq_mutex.
+ * counter. Access to a submission queue and the shared state is protected by
+ * nq_mutex, completion queue is protected by ncq_mutex.
  *
  * When a command is submitted to a queue pair the active command counter is
  * incremented and a pointer to the command is stored in the command array. The
@@ -161,11 +163,12 @@
  *
  * Locking:
  *
- * Each queue pair has its own nq_mutex, which must be held when accessing the
- * associated queue registers or the shared state of the queue pair. Callers of
- * nvme_unqueue_cmd() must make sure that nq_mutex is held, while
- * nvme_submit_{admin,io}_cmd() and nvme_retrieve_cmd() take care of this
- * themselves.
+ * Each queue pair has a nq_mutex and ncq_mutex. The nq_mutex must be held
+ * when accessing shared state and submission queue registers, ncq_mutex
+ * is held when accessing completion queue state and registers.
+ * Callers of nvme_unqueue_cmd() must make sure that nq_mutex is held, while
+ * nvme_submit_{admin,io}_cmd() and nvme_retrieve_cmd() take care of both
+ * mutexes themselves.
  *
  * Each command also has its own nc_mutex, which is associated with the
  * condition variable nc_cv. It is only used on admin commands which are run
@@ -180,6 +183,14 @@
  * nvme_abort_cmd() to prevent the command from completing while the abort is in
  * progress.
  *
+ * If both nq_mutex and ncq_mutex need to be held, ncq_mutex must be
+ * acquired first. More than one nq_mutex is never held by a single thread.
+ * The ncq_mutex is only held by nvme_retrieve_cmd() and
+ * nvme_process_iocq(). nvme_process_iocq() is only called from the
+ * interrupt thread and nvme_retrieve_cmd() during polled I/O, so the
+ * mutex is non-contentious but is required for implementation completeness
+ * and safety.
+ *
  * Each minor node has its own nm_mutex, which protects the open count nm_ocnt
  * and exclusive-open flag nm_oexcl.
  *
@@ -191,6 +202,14 @@
  * device.
  *
  *
+ * DDI UFM Support
+ *
+ * The driver supports the DDI UFM framework for reporting information about
+ * the device's firmware image and slot configuration. This data can be
+ * queried by userland software via ioctls to the ufm driver. For more
+ * information, see ddi_ufm(9E).
+ *
+ *
  * Driver Configuration:
  *
  * The following driver properties can be changed to control some aspects of the
@@ -200,13 +219,18 @@
  * - ignore-unknown-vendor-status: can be set to 1 to not handle any vendor
  *   specific command status as a fatal error leading device faulting
  * - admin-queue-len: the maximum length of the admin queue (16-4096)
- * - io-queue-len: the maximum length of the I/O queues (16-65536)
+ * - io-squeue-len: the maximum length of the I/O submission queues (16-65536)
+ * - io-cqueue-len: the maximum length of the I/O completion queues (16-65536)
  * - async-event-limit: the maximum number of asynchronous event requests to be
  *   posted by the driver
  * - volatile-write-cache-enable: can be set to 0 to disable the volatile write
  *   cache
  * - min-phys-block-size: the minimum physical block size to report to blkdev,
  *   which is among other things the basis for ZFS vdev ashift
+ * - max-submission-queues: the maximum number of I/O submission queues.
+ * - max-completion-queues: the maximum number of I/O completion queues,
+ *   can be less than max-submission-queues, in which case the completion
+ *   queues are shared.
  *
  *
  * TODO:
@@ -217,7 +241,6 @@
  * - support for media formatting and hard partitioning into namespaces
  * - support for big-endian systems
  * - support for fast reboot
- * - support for firmware updates
  * - support for NVMe Subsystem Reset (1.1)
  * - support for Scatter/Gather lists (1.1)
  * - support for Reservations (1.1)
@@ -233,6 +256,7 @@
 #include <sys/conf.h>
 #include <sys/devops.h>
 #include <sys/ddi.h>
+#include <sys/ddi_ufm.h>
 #include <sys/sunddi.h>
 #include <sys/sunndi.h>
 #include <sys/bitmap.h>
@@ -290,6 +314,9 @@ int nvme_admin_cmd_timeout = 1;
 /* tunable for FORMAT NVM command timeout in seconds, default is 600s */
 int nvme_format_cmd_timeout = 600;
 
+/* tunable for firmware commit with NVME_FWC_SAVE, default is 15s */
+int nvme_commit_save_cmd_timeout = 15;
+
 static int nvme_attach(dev_info_t *, ddi_attach_cmd_t);
 static int nvme_detach(dev_info_t *, ddi_detach_cmd_t);
 static int nvme_quiesce(dev_info_t *);
@@ -324,16 +351,17 @@ static inline int nvme_check_cmd_status(nvme_cmd_t *);
 
 static int nvme_abort_cmd(nvme_cmd_t *, uint_t);
 static void nvme_async_event(nvme_t *);
-static int nvme_format_nvm(nvme_t *, uint32_t, uint8_t, boolean_t, uint8_t,
-    boolean_t, uint8_t);
-static int nvme_get_logpage(nvme_t *, void **, size_t *, uint8_t, ...);
-static int nvme_identify(nvme_t *, uint32_t, void **);
-static int nvme_set_features(nvme_t *, uint32_t, uint8_t, uint32_t,
+static int nvme_format_nvm(nvme_t *, boolean_t, uint32_t, uint8_t, boolean_t,
+    uint8_t, boolean_t, uint8_t);
+static int nvme_get_logpage(nvme_t *, boolean_t, void **, size_t *, uint8_t,
+    ...);
+static int nvme_identify(nvme_t *, boolean_t, uint32_t, void **);
+static int nvme_set_features(nvme_t *, boolean_t, uint32_t, uint8_t, uint32_t,
     uint32_t *);
-static int nvme_get_features(nvme_t *, uint32_t, uint8_t, uint32_t *,
+static int nvme_get_features(nvme_t *, boolean_t, uint32_t, uint8_t, uint32_t *,
     void **, size_t *);
 static int nvme_write_cache_set(nvme_t *, boolean_t);
-static int nvme_set_nqueues(nvme_t *, uint16_t *);
+static int nvme_set_nqueues(nvme_t *);
 
 static void nvme_free_dma(nvme_dma_t *);
 static int nvme_zalloc_dma(nvme_t *, size_t, uint_t, ddi_dma_attr_t *,
@@ -341,7 +369,7 @@ static int nvme_zalloc_dma(nvme_t *, size_t, uint_t, ddi_dma_attr_t *,
 static int nvme_zalloc_queue_dma(nvme_t *, uint32_t, uint16_t, uint_t,
     nvme_dma_t **);
 static void nvme_free_qpair(nvme_qpair_t *);
-static int nvme_alloc_qpair(nvme_t *, uint32_t, nvme_qpair_t **, int);
+static int nvme_alloc_qpair(nvme_t *, uint32_t, nvme_qpair_t **, uint_t);
 static int nvme_create_io_qpair(nvme_t *, nvme_qpair_t *, uint16_t);
 
 static inline void nvme_put64(nvme_t *, uintptr_t, uint64_t);
@@ -368,9 +396,23 @@ static void nvme_prp_dma_destructor(void *, void *);
 
 static void nvme_prepare_devid(nvme_t *, uint32_t);
 
+/* DDI UFM callbacks */
+static int nvme_ufm_fill_image(ddi_ufm_handle_t *, void *, uint_t,
+    ddi_ufm_image_t *);
+static int nvme_ufm_fill_slot(ddi_ufm_handle_t *, void *, uint_t, uint_t,
+    ddi_ufm_slot_t *);
+static int nvme_ufm_getcaps(ddi_ufm_handle_t *, void *, ddi_ufm_cap_t *);
+
 static int nvme_open(dev_t *, int, int, cred_t *);
 static int nvme_close(dev_t, int, int, cred_t *);
 static int nvme_ioctl(dev_t, int, intptr_t, int, cred_t *, int *);
+
+static ddi_ufm_ops_t nvme_ufm_ops = {
+	NULL,
+	nvme_ufm_fill_image,
+	nvme_ufm_fill_slot,
+	nvme_ufm_getcaps
+};
 
 #define	NVME_MINOR_INST_SHIFT	9
 #define	NVME_MINOR(inst, nsid)	(((inst) << NVME_MINOR_INST_SHIFT) | (nsid))
@@ -501,7 +543,7 @@ static struct modlinkage nvme_modlinkage = {
 };
 
 static bd_ops_t nvme_bd_ops = {
-	.o_version	= BD_OPS_VERSION_0,
+	.o_version	= BD_OPS_CURRENT_VERSION,
 	.o_drive_info	= nvme_bd_driveinfo,
 	.o_media_info	= nvme_bd_mediainfo,
 	.o_devid_init	= nvme_bd_devid,
@@ -761,8 +803,6 @@ nvme_zalloc_queue_dma(nvme_t *nvme, uint32_t nentry, uint16_t qe_len,
 
 	len = roundup(len, nvme->n_pagesize);
 
-	q_dma_attr.dma_attr_minxfer = len;
-
 	if (nvme_zalloc_dma(nvme, len, flags, &q_dma_attr, dma)
 	    != DDI_SUCCESS) {
 		dev_err(nvme->n_dip, CE_WARN,
@@ -788,6 +828,20 @@ fail:
 }
 
 static void
+nvme_free_cq(nvme_cq_t *cq)
+{
+	mutex_destroy(&cq->ncq_mutex);
+
+	if (cq->ncq_cmd_taskq != NULL)
+		taskq_destroy(cq->ncq_cmd_taskq);
+
+	if (cq->ncq_dma != NULL)
+		nvme_free_dma(cq->ncq_dma);
+
+	kmem_free(cq, sizeof (*cq));
+}
+
+static void
 nvme_free_qpair(nvme_qpair_t *qp)
 {
 	int i;
@@ -797,8 +851,6 @@ nvme_free_qpair(nvme_qpair_t *qp)
 
 	if (qp->nq_sqdma != NULL)
 		nvme_free_dma(qp->nq_sqdma);
-	if (qp->nq_cqdma != NULL)
-		nvme_free_dma(qp->nq_cqdma);
 
 	if (qp->nq_active_cmds > 0)
 		for (i = 0; i != qp->nq_nentry; i++)
@@ -811,30 +863,139 @@ nvme_free_qpair(nvme_qpair_t *qp)
 	kmem_free(qp, sizeof (nvme_qpair_t));
 }
 
+/*
+ * Destroy the pre-allocated cq array, but only free individual completion
+ * queues from the given starting index.
+ */
+static void
+nvme_destroy_cq_array(nvme_t *nvme, uint_t start)
+{
+	uint_t i;
+
+	for (i = start; i < nvme->n_cq_count; i++)
+		if (nvme->n_cq[i] != NULL)
+			nvme_free_cq(nvme->n_cq[i]);
+
+	kmem_free(nvme->n_cq, sizeof (*nvme->n_cq) * nvme->n_cq_count);
+}
+
+static int
+nvme_alloc_cq(nvme_t *nvme, uint32_t nentry, nvme_cq_t **cqp, uint16_t idx,
+    uint_t nthr)
+{
+	nvme_cq_t *cq = kmem_zalloc(sizeof (*cq), KM_SLEEP);
+	char name[64];		/* large enough for the taskq name */
+
+	mutex_init(&cq->ncq_mutex, NULL, MUTEX_DRIVER,
+	    DDI_INTR_PRI(nvme->n_intr_pri));
+
+	if (nvme_zalloc_queue_dma(nvme, nentry, sizeof (nvme_cqe_t),
+	    DDI_DMA_READ, &cq->ncq_dma) != DDI_SUCCESS)
+		goto fail;
+
+	cq->ncq_cq = (nvme_cqe_t *)cq->ncq_dma->nd_memp;
+	cq->ncq_nentry = nentry;
+	cq->ncq_id = idx;
+	cq->ncq_hdbl = NVME_REG_CQHDBL(nvme, idx);
+
+	/*
+	 * Each completion queue has its own command taskq.
+	 */
+	(void) snprintf(name, sizeof (name), "%s%d_cmd_taskq%u",
+	    ddi_driver_name(nvme->n_dip), ddi_get_instance(nvme->n_dip), idx);
+
+	cq->ncq_cmd_taskq = taskq_create(name, nthr, minclsyspri, 64, INT_MAX,
+	    TASKQ_PREPOPULATE);
+
+	if (cq->ncq_cmd_taskq == NULL) {
+		dev_err(nvme->n_dip, CE_WARN, "!failed to create cmd "
+		    "taskq for cq %u", idx);
+		goto fail;
+	}
+
+	*cqp = cq;
+	return (DDI_SUCCESS);
+
+fail:
+	nvme_free_cq(cq);
+	*cqp = NULL;
+
+	return (DDI_FAILURE);
+}
+
+/*
+ * Create the n_cq array big enough to hold "ncq" completion queues.
+ * If the array already exists it will be re-sized (but only larger).
+ * The admin queue is included in this array, which boosts the
+ * max number of entries to UINT16_MAX + 1.
+ */
+static int
+nvme_create_cq_array(nvme_t *nvme, uint_t ncq, uint32_t nentry, uint_t nthr)
+{
+	nvme_cq_t **cq;
+	uint_t i, cq_count;
+
+	ASSERT3U(ncq, >, nvme->n_cq_count);
+
+	cq = nvme->n_cq;
+	cq_count = nvme->n_cq_count;
+
+	nvme->n_cq = kmem_zalloc(sizeof (*nvme->n_cq) * ncq, KM_SLEEP);
+	nvme->n_cq_count = ncq;
+
+	for (i = 0; i < cq_count; i++)
+		nvme->n_cq[i] = cq[i];
+
+	for (; i < nvme->n_cq_count; i++)
+		if (nvme_alloc_cq(nvme, nentry, &nvme->n_cq[i], i, nthr) !=
+		    DDI_SUCCESS)
+			goto fail;
+
+	if (cq != NULL)
+		kmem_free(cq, sizeof (*cq) * cq_count);
+
+	return (DDI_SUCCESS);
+
+fail:
+	nvme_destroy_cq_array(nvme, cq_count);
+	/*
+	 * Restore the original array
+	 */
+	nvme->n_cq_count = cq_count;
+	nvme->n_cq = cq;
+
+	return (DDI_FAILURE);
+}
+
 static int
 nvme_alloc_qpair(nvme_t *nvme, uint32_t nentry, nvme_qpair_t **nqp,
-    int idx)
+    uint_t idx)
 {
 	nvme_qpair_t *qp = kmem_zalloc(sizeof (*qp), KM_SLEEP);
+	uint_t cq_idx;
 
 	mutex_init(&qp->nq_mutex, NULL, MUTEX_DRIVER,
 	    DDI_INTR_PRI(nvme->n_intr_pri));
-	sema_init(&qp->nq_sema, nentry, NULL, SEMA_DRIVER, NULL);
+
+	/*
+	 * The NVMe spec defines that a full queue has one empty (unused) slot;
+	 * initialize the semaphore accordingly.
+	 */
+	sema_init(&qp->nq_sema, nentry - 1, NULL, SEMA_DRIVER, NULL);
 
 	if (nvme_zalloc_queue_dma(nvme, nentry, sizeof (nvme_sqe_t),
 	    DDI_DMA_WRITE, &qp->nq_sqdma) != DDI_SUCCESS)
 		goto fail;
 
-	if (nvme_zalloc_queue_dma(nvme, nentry, sizeof (nvme_cqe_t),
-	    DDI_DMA_READ, &qp->nq_cqdma) != DDI_SUCCESS)
-		goto fail;
-
+	/*
+	 * idx == 0 is adminq, those above 0 are shared io completion queues.
+	 */
+	cq_idx = idx == 0 ? 0 : 1 + (idx - 1) % (nvme->n_cq_count - 1);
+	qp->nq_cq = nvme->n_cq[cq_idx];
 	qp->nq_sq = (nvme_sqe_t *)qp->nq_sqdma->nd_memp;
-	qp->nq_cq = (nvme_cqe_t *)qp->nq_cqdma->nd_memp;
 	qp->nq_nentry = nentry;
 
 	qp->nq_sqtdbl = NVME_REG_SQTDBL(nvme, idx);
-	qp->nq_cqhdbl = NVME_REG_CQHDBL(nvme, idx);
 
 	qp->nq_cmd = kmem_zalloc(sizeof (nvme_cmd_t *) * nentry, KM_SLEEP);
 	qp->nq_next_cmd = 0;
@@ -961,43 +1122,102 @@ nvme_unqueue_cmd(nvme_t *nvme, nvme_qpair_t *qp, int cid)
 	return (cmd);
 }
 
+/*
+ * Get the command tied to the next completed cqe and bump along completion
+ * queue head counter.
+ */
 static nvme_cmd_t *
-nvme_retrieve_cmd(nvme_t *nvme, nvme_qpair_t *qp)
+nvme_get_completed(nvme_t *nvme, nvme_cq_t *cq)
 {
-	nvme_reg_cqhdbl_t head = { 0 };
-
+	nvme_qpair_t *qp;
 	nvme_cqe_t *cqe;
 	nvme_cmd_t *cmd;
 
-	(void) ddi_dma_sync(qp->nq_cqdma->nd_dmah, 0,
-	    sizeof (nvme_cqe_t) * qp->nq_nentry, DDI_DMA_SYNC_FORKERNEL);
+	ASSERT(mutex_owned(&cq->ncq_mutex));
 
-	mutex_enter(&qp->nq_mutex);
-	cqe = &qp->nq_cq[qp->nq_cqhead];
+	cqe = &cq->ncq_cq[cq->ncq_head];
 
 	/* Check phase tag of CQE. Hardware inverts it for new entries. */
-	if (cqe->cqe_sf.sf_p == qp->nq_phase) {
-		mutex_exit(&qp->nq_mutex);
+	if (cqe->cqe_sf.sf_p == cq->ncq_phase)
 		return (NULL);
-	}
 
-	ASSERT(nvme->n_ioq[cqe->cqe_sqid] == qp);
+	qp = nvme->n_ioq[cqe->cqe_sqid];
 
+	mutex_enter(&qp->nq_mutex);
 	cmd = nvme_unqueue_cmd(nvme, qp, cqe->cqe_cid);
+	mutex_exit(&qp->nq_mutex);
 
 	ASSERT(cmd->nc_sqid == cqe->cqe_sqid);
 	bcopy(cqe, &cmd->nc_cqe, sizeof (nvme_cqe_t));
 
 	qp->nq_sqhead = cqe->cqe_sqhd;
 
-	head.b.cqhdbl_cqh = qp->nq_cqhead = (qp->nq_cqhead + 1) % qp->nq_nentry;
+	cq->ncq_head = (cq->ncq_head + 1) % cq->ncq_nentry;
 
 	/* Toggle phase on wrap-around. */
-	if (qp->nq_cqhead == 0)
-		qp->nq_phase = qp->nq_phase ? 0 : 1;
+	if (cq->ncq_head == 0)
+		cq->ncq_phase = cq->ncq_phase ? 0 : 1;
 
-	nvme_put32(cmd->nc_nvme, qp->nq_cqhdbl, head.r);
-	mutex_exit(&qp->nq_mutex);
+	return (cmd);
+}
+
+/*
+ * Process all completed commands on the io completion queue.
+ */
+static uint_t
+nvme_process_iocq(nvme_t *nvme, nvme_cq_t *cq)
+{
+	nvme_reg_cqhdbl_t head = { 0 };
+	nvme_cmd_t *cmd;
+	uint_t completed = 0;
+
+	if (ddi_dma_sync(cq->ncq_dma->nd_dmah, 0, 0, DDI_DMA_SYNC_FORKERNEL) !=
+	    DDI_SUCCESS)
+		dev_err(nvme->n_dip, CE_WARN, "!ddi_dma_sync() failed in %s",
+		    __func__);
+
+	mutex_enter(&cq->ncq_mutex);
+
+	while ((cmd = nvme_get_completed(nvme, cq)) != NULL) {
+		taskq_dispatch_ent(cq->ncq_cmd_taskq, cmd->nc_callback, cmd,
+		    TQ_NOSLEEP, &cmd->nc_tqent);
+
+		completed++;
+	}
+
+	if (completed > 0) {
+		/*
+		 * Update the completion queue head doorbell.
+		 */
+		head.b.cqhdbl_cqh = cq->ncq_head;
+		nvme_put32(nvme, cq->ncq_hdbl, head.r);
+	}
+
+	mutex_exit(&cq->ncq_mutex);
+
+	return (completed);
+}
+
+static nvme_cmd_t *
+nvme_retrieve_cmd(nvme_t *nvme, nvme_qpair_t *qp)
+{
+	nvme_cq_t *cq = qp->nq_cq;
+	nvme_reg_cqhdbl_t head = { 0 };
+	nvme_cmd_t *cmd;
+
+	if (ddi_dma_sync(cq->ncq_dma->nd_dmah, 0, 0, DDI_DMA_SYNC_FORKERNEL) !=
+	    DDI_SUCCESS)
+		dev_err(nvme->n_dip, CE_WARN, "!ddi_dma_sync() failed in %s",
+		    __func__);
+
+	mutex_enter(&cq->ncq_mutex);
+
+	if ((cmd = nvme_get_completed(nvme, cq)) != NULL) {
+		head.b.cqhdbl_cqh = cq->ncq_head;
+		nvme_put32(nvme, cq->ncq_hdbl, head.r);
+	}
+
+	mutex_exit(&cq->ncq_mutex);
 
 	return (cmd);
 }
@@ -1274,6 +1494,46 @@ nvme_check_specific_cmd_status(nvme_cmd_t *cmd)
 			bd_error(cmd->nc_xfer, BD_ERR_ILLRQ);
 		return (EROFS);
 
+	case NVME_CQE_SC_SPC_INV_FW_SLOT:
+		/* Invalid Firmware Slot */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (EINVAL);
+
+	case NVME_CQE_SC_SPC_INV_FW_IMG:
+		/* Invalid Firmware Image */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (EINVAL);
+
+	case NVME_CQE_SC_SPC_FW_RESET:
+		/* Conventional Reset Required */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (0);
+
+	case NVME_CQE_SC_SPC_FW_NSSR:
+		/* NVMe Subsystem Reset Required */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (0);
+
+	case NVME_CQE_SC_SPC_FW_NEXT_RESET:
+		/* Activation Requires Reset */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (0);
+
+	case NVME_CQE_SC_SPC_FW_MTFA:
+		/* Activation Requires Maximum Time Violation */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (EAGAIN);
+
+	case NVME_CQE_SC_SPC_FW_PROHIBITED:
+		/* Activation Prohibited */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_ACTIVATE);
+		return (EINVAL);
+
+	case NVME_CQE_SC_SPC_FW_OVERLAP:
+		/* Overlapping Firmware Ranges */
+		ASSERT(cmd->nc_sqe.sqe_opc == NVME_OPC_FW_IMAGE_LOAD);
+		return (EINVAL);
+
 	default:
 		return (nvme_check_unknown_cmd_status(cmd));
 	}
@@ -1494,8 +1754,8 @@ nvme_async_event_task(void *arg)
 	switch (event.b.ae_type) {
 	case NVME_ASYNC_TYPE_ERROR:
 		if (event.b.ae_logpage == NVME_LOGPAGE_ERROR) {
-			(void) nvme_get_logpage(nvme, (void **)&error_log,
-			    &logsize, event.b.ae_logpage);
+			(void) nvme_get_logpage(nvme, B_FALSE,
+			    (void **)&error_log, &logsize, event.b.ae_logpage);
 		} else {
 			dev_err(nvme->n_dip, CE_WARN, "!wrong logpage in "
 			    "async event reply: %d", event.b.ae_logpage);
@@ -1545,8 +1805,9 @@ nvme_async_event_task(void *arg)
 
 	case NVME_ASYNC_TYPE_HEALTH:
 		if (event.b.ae_logpage == NVME_LOGPAGE_HEALTH) {
-			(void) nvme_get_logpage(nvme, (void **)&health_log,
-			    &logsize, event.b.ae_logpage, -1);
+			(void) nvme_get_logpage(nvme, B_FALSE,
+			    (void **)&health_log, &logsize, event.b.ae_logpage,
+			    -1);
 		} else {
 			dev_err(nvme->n_dip, CE_WARN, "!wrong logpage in "
 			    "async event reply: %d", event.b.ae_logpage);
@@ -1623,8 +1884,8 @@ nvme_async_event(nvme_t *nvme)
 }
 
 static int
-nvme_format_nvm(nvme_t *nvme, uint32_t nsid, uint8_t lbaf, boolean_t ms,
-    uint8_t pi, boolean_t pil, uint8_t ses)
+nvme_format_nvm(nvme_t *nvme, boolean_t user, uint32_t nsid, uint8_t lbaf,
+    boolean_t ms, uint8_t pi, boolean_t pil, uint8_t ses)
 {
 	nvme_cmd_t *cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
 	nvme_format_nvm_t format_nvm = { 0 };
@@ -1648,6 +1909,12 @@ nvme_format_nvm(nvme_t *nvme, uint32_t nsid, uint8_t lbaf, boolean_t ms,
 	 */
 	if (nsid == (uint32_t)-1)
 		cmd->nc_dontpanic = B_TRUE;
+	/*
+	 * If this format request was initiated by the user, then don't allow a
+	 * programmer error to panic the system.
+	 */
+	if (user)
+		cmd->nc_dontpanic = B_TRUE;
 
 	nvme_admin_cmd(cmd, nvme_format_cmd_timeout);
 
@@ -1662,8 +1929,8 @@ nvme_format_nvm(nvme_t *nvme, uint32_t nsid, uint8_t lbaf, boolean_t ms,
 }
 
 static int
-nvme_get_logpage(nvme_t *nvme, void **buf, size_t *bufsize, uint8_t logpage,
-    ...)
+nvme_get_logpage(nvme_t *nvme, boolean_t user, void **buf, size_t *bufsize,
+    uint8_t logpage, ...)
 {
 	nvme_cmd_t *cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
 	nvme_getlogpage_t getlogpage = { 0 };
@@ -1675,6 +1942,9 @@ nvme_get_logpage(nvme_t *nvme, void **buf, size_t *bufsize, uint8_t logpage,
 	cmd->nc_sqid = 0;
 	cmd->nc_callback = nvme_wakeup_cmd;
 	cmd->nc_sqe.sqe_opc = NVME_OPC_GET_LOG_PAGE;
+
+	if (user)
+		cmd->nc_dontpanic = B_TRUE;
 
 	getlogpage.b.lp_lid = logpage;
 
@@ -1713,7 +1983,7 @@ nvme_get_logpage(nvme_t *nvme, void **buf, size_t *bufsize, uint8_t logpage,
 
 	cmd->nc_sqe.sqe_cdw10 = getlogpage.r;
 
-	if (nvme_zalloc_dma(nvme, getlogpage.b.lp_numd * sizeof (uint32_t),
+	if (nvme_zalloc_dma(nvme, *bufsize,
 	    DDI_DMA_READ, &nvme->n_prp_dma_attr, &cmd->nc_dma) != DDI_SUCCESS) {
 		dev_err(nvme->n_dip, CE_WARN,
 		    "!nvme_zalloc_dma failed for GET LOG PAGE");
@@ -1756,7 +2026,7 @@ fail:
 }
 
 static int
-nvme_identify(nvme_t *nvme, uint32_t nsid, void **buf)
+nvme_identify(nvme_t *nvme, boolean_t user, uint32_t nsid, void **buf)
 {
 	nvme_cmd_t *cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
 	int ret;
@@ -1794,6 +2064,9 @@ nvme_identify(nvme_t *nvme, uint32_t nsid, void **buf)
 		    cmd->nc_dma->nd_cookie.dmac_laddress;
 	}
 
+	if (user)
+		cmd->nc_dontpanic = B_TRUE;
+
 	nvme_admin_cmd(cmd, nvme_admin_cmd_timeout);
 
 	if ((ret = nvme_check_cmd_status(cmd)) != 0) {
@@ -1813,8 +2086,8 @@ fail:
 }
 
 static int
-nvme_set_features(nvme_t *nvme, uint32_t nsid, uint8_t feature, uint32_t val,
-    uint32_t *res)
+nvme_set_features(nvme_t *nvme, boolean_t user, uint32_t nsid, uint8_t feature,
+    uint32_t val, uint32_t *res)
 {
 	_NOTE(ARGUNUSED(nsid));
 	nvme_cmd_t *cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
@@ -1827,6 +2100,9 @@ nvme_set_features(nvme_t *nvme, uint32_t nsid, uint8_t feature, uint32_t val,
 	cmd->nc_sqe.sqe_opc = NVME_OPC_SET_FEATURES;
 	cmd->nc_sqe.sqe_cdw10 = feature;
 	cmd->nc_sqe.sqe_cdw11 = val;
+
+	if (user)
+		cmd->nc_dontpanic = B_TRUE;
 
 	switch (feature) {
 	case NVME_FEAT_WRITE_CACHE:
@@ -1859,8 +2135,8 @@ fail:
 }
 
 static int
-nvme_get_features(nvme_t *nvme, uint32_t nsid, uint8_t feature, uint32_t *res,
-    void **buf, size_t *bufsize)
+nvme_get_features(nvme_t *nvme, boolean_t user, uint32_t nsid, uint8_t feature,
+    uint32_t *res, void **buf, size_t *bufsize)
 {
 	nvme_cmd_t *cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
 	int ret = EINVAL;
@@ -1928,6 +2204,9 @@ nvme_get_features(nvme_t *nvme, uint32_t nsid, uint8_t feature, uint32_t *res,
 	default:
 		goto fail;
 	}
+
+	if (user)
+		cmd->nc_dontpanic = B_TRUE;
 
 	if (bufsize != NULL && *bufsize != 0) {
 		if (nvme_zalloc_dma(nvme, *bufsize, DDI_DMA_READ,
@@ -2011,54 +2290,85 @@ nvme_write_cache_set(nvme_t *nvme, boolean_t enable)
 	if (enable)
 		nwc.b.wc_wce = 1;
 
-	return (nvme_set_features(nvme, 0, NVME_FEAT_WRITE_CACHE, nwc.r,
-	    &nwc.r));
+	return (nvme_set_features(nvme, B_FALSE, 0, NVME_FEAT_WRITE_CACHE,
+	    nwc.r, &nwc.r));
 }
 
 static int
-nvme_set_nqueues(nvme_t *nvme, uint16_t *nqueues)
+nvme_set_nqueues(nvme_t *nvme)
 {
 	nvme_nqueues_t nq = { 0 };
 	int ret;
 
-	nq.b.nq_nsq = nq.b.nq_ncq = *nqueues - 1;
+	/*
+	 * The default is to allocate one completion queue per vector.
+	 */
+	if (nvme->n_completion_queues == -1)
+		nvme->n_completion_queues = nvme->n_intr_cnt;
 
-	ret = nvme_set_features(nvme, 0, NVME_FEAT_NQUEUES, nq.r, &nq.r);
+	/*
+	 * There is no point in having more compeletion queues than
+	 * interrupt vectors.
+	 */
+	nvme->n_completion_queues = MIN(nvme->n_completion_queues,
+	    nvme->n_intr_cnt);
+
+	/*
+	 * The default is to use one submission queue per completion queue.
+	 */
+	if (nvme->n_submission_queues == -1)
+		nvme->n_submission_queues = nvme->n_completion_queues;
+
+	/*
+	 * There is no point in having more compeletion queues than
+	 * submission queues.
+	 */
+	nvme->n_completion_queues = MIN(nvme->n_completion_queues,
+	    nvme->n_submission_queues);
+
+	ASSERT(nvme->n_submission_queues > 0);
+	ASSERT(nvme->n_completion_queues > 0);
+
+	nq.b.nq_nsq = nvme->n_submission_queues - 1;
+	nq.b.nq_ncq = nvme->n_completion_queues - 1;
+
+	ret = nvme_set_features(nvme, B_FALSE, 0, NVME_FEAT_NQUEUES, nq.r,
+	    &nq.r);
 
 	if (ret == 0) {
 		/*
-		 * Always use the same number of submission and completion
-		 * queues, and never use more than the requested number of
-		 * queues.
+		 * Never use more than the requested number of queues.
 		 */
-		*nqueues = MIN(*nqueues, MIN(nq.b.nq_nsq, nq.b.nq_ncq) + 1);
+		nvme->n_submission_queues = MIN(nvme->n_submission_queues,
+		    nq.b.nq_nsq + 1);
+		nvme->n_completion_queues = MIN(nvme->n_completion_queues,
+		    nq.b.nq_ncq + 1);
 	}
 
 	return (ret);
 }
 
 static int
-nvme_create_io_qpair(nvme_t *nvme, nvme_qpair_t *qp, uint16_t idx)
+nvme_create_completion_queue(nvme_t *nvme, nvme_cq_t *cq)
 {
 	nvme_cmd_t *cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
 	nvme_create_queue_dw10_t dw10 = { 0 };
 	nvme_create_cq_dw11_t c_dw11 = { 0 };
-	nvme_create_sq_dw11_t s_dw11 = { 0 };
 	int ret;
 
-	dw10.b.q_qid = idx;
-	dw10.b.q_qsize = qp->nq_nentry - 1;
+	dw10.b.q_qid = cq->ncq_id;
+	dw10.b.q_qsize = cq->ncq_nentry - 1;
 
 	c_dw11.b.cq_pc = 1;
 	c_dw11.b.cq_ien = 1;
-	c_dw11.b.cq_iv = idx % nvme->n_intr_cnt;
+	c_dw11.b.cq_iv = cq->ncq_id % nvme->n_intr_cnt;
 
 	cmd->nc_sqid = 0;
 	cmd->nc_callback = nvme_wakeup_cmd;
 	cmd->nc_sqe.sqe_opc = NVME_OPC_CREATE_CQUEUE;
 	cmd->nc_sqe.sqe_cdw10 = dw10.r;
 	cmd->nc_sqe.sqe_cdw11 = c_dw11.r;
-	cmd->nc_sqe.sqe_dptr.d_prp[0] = qp->nq_cqdma->nd_cookie.dmac_laddress;
+	cmd->nc_sqe.sqe_dptr.d_prp[0] = cq->ncq_dma->nd_cookie.dmac_laddress;
 
 	nvme_admin_cmd(cmd, nvme_admin_cmd_timeout);
 
@@ -2066,13 +2376,36 @@ nvme_create_io_qpair(nvme_t *nvme, nvme_qpair_t *qp, uint16_t idx)
 		dev_err(nvme->n_dip, CE_WARN,
 		    "!CREATE CQUEUE failed with sct = %x, sc = %x",
 		    cmd->nc_cqe.cqe_sf.sf_sct, cmd->nc_cqe.cqe_sf.sf_sc);
-		goto fail;
 	}
 
 	nvme_free_cmd(cmd);
 
+	return (ret);
+}
+
+static int
+nvme_create_io_qpair(nvme_t *nvme, nvme_qpair_t *qp, uint16_t idx)
+{
+	nvme_cq_t *cq = qp->nq_cq;
+	nvme_cmd_t *cmd;
+	nvme_create_queue_dw10_t dw10 = { 0 };
+	nvme_create_sq_dw11_t s_dw11 = { 0 };
+	int ret;
+
+	/*
+	 * It is possible to have more qpairs than completion queues,
+	 * and when the idx > ncq_id, that completion queue is shared
+	 * and has already been created.
+	 */
+	if (idx <= cq->ncq_id &&
+	    nvme_create_completion_queue(nvme, cq) != DDI_SUCCESS)
+		return (DDI_FAILURE);
+
+	dw10.b.q_qid = idx;
+	dw10.b.q_qsize = qp->nq_nentry - 1;
+
 	s_dw11.b.sq_pc = 1;
-	s_dw11.b.sq_cqid = idx;
+	s_dw11.b.sq_cqid = cq->ncq_id;
 
 	cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
 	cmd->nc_sqid = 0;
@@ -2088,10 +2421,8 @@ nvme_create_io_qpair(nvme_t *nvme, nvme_qpair_t *qp, uint16_t idx)
 		dev_err(nvme->n_dip, CE_WARN,
 		    "!CREATE SQUEUE failed with sct = %x, sc = %x",
 		    cmd->nc_cqe.cqe_sf.sf_sct, cmd->nc_cqe.cqe_sf.sf_sc);
-		goto fail;
 	}
 
-fail:
 	nvme_free_cmd(cmd);
 
 	return (ret);
@@ -2184,11 +2515,12 @@ nvme_init_ns(nvme_t *nvme, int nsid)
 {
 	nvme_namespace_t *ns = &nvme->n_ns[nsid - 1];
 	nvme_identify_nsid_t *idns;
+	boolean_t was_ignored;
 	int last_rp;
 
 	ns->ns_nvme = nvme;
 
-	if (nvme_identify(nvme, nsid, (void **)&idns) != 0) {
+	if (nvme_identify(nvme, B_FALSE, nsid, (void **)&idns) != 0) {
 		dev_err(nvme->n_dip, CE_WARN,
 		    "!failed to identify namespace %d", nsid);
 		return (DDI_FAILURE);
@@ -2242,6 +2574,8 @@ nvme_init_ns(nvme_t *nvme, int nsid)
 	if (ns->ns_best_block_size < nvme->n_min_block_size)
 		ns->ns_best_block_size = nvme->n_min_block_size;
 
+	was_ignored = ns->ns_ignore;
+
 	/*
 	 * We currently don't support namespaces that use either:
 	 * - protection information
@@ -2261,6 +2595,25 @@ nvme_init_ns(nvme_t *nvme, int nsid)
 		ns->ns_ignore = B_FALSE;
 	}
 
+	/*
+	 * Keep a count of namespaces which are attachable.
+	 * See comments in nvme_bd_driveinfo() to understand its effect.
+	 */
+	if (was_ignored) {
+		/*
+		 * Previously ignored, but now not. Count it.
+		 */
+		if (!ns->ns_ignore)
+			nvme->n_namespaces_attachable++;
+	} else {
+		/*
+		 * Wasn't ignored previously, but now needs to be.
+		 * Discount it.
+		 */
+		if (ns->ns_ignore)
+			nvme->n_namespaces_attachable--;
+	}
+
 	return (DDI_SUCCESS);
 }
 
@@ -2276,6 +2629,7 @@ nvme_init(nvme_t *nvme)
 	nvme_reg_csts_t csts;
 	int i = 0;
 	uint16_t nqueues;
+	uint_t tq_threads;
 	char model[sizeof (nvme->n_idctl->id_model) + 1];
 	char *vendor, *product;
 
@@ -2344,6 +2698,16 @@ nvme_init(nvme_t *nvme)
 	}
 
 	/*
+	 * Create the cq array with one completion queue to be assigned
+	 * to the admin queue pair and a limited number of taskqs (4).
+	 */
+	if (nvme_create_cq_array(nvme, 1, nvme->n_admin_queue_len, 4) !=
+	    DDI_SUCCESS) {
+		dev_err(nvme->n_dip, CE_WARN,
+		    "!failed to pre-allocate admin completion queue");
+		goto fail;
+	}
+	/*
 	 * Create the admin queue pair.
 	 */
 	if (nvme_alloc_qpair(nvme, nvme->n_admin_queue_len, &nvme->n_adminq, 0)
@@ -2362,7 +2726,7 @@ nvme_init(nvme_t *nvme)
 
 	aqa.b.aqa_asqs = aqa.b.aqa_acqs = nvme->n_admin_queue_len - 1;
 	asq = nvme->n_adminq->nq_sqdma->nd_cookie.dmac_laddress;
-	acq = nvme->n_adminq->nq_cqdma->nd_cookie.dmac_laddress;
+	acq = nvme->n_adminq->nq_cq->ncq_dma->nd_cookie.dmac_laddress;
 
 	ASSERT((asq & (nvme->n_pagesize - 1)) == 0);
 	ASSERT((acq & (nvme->n_pagesize - 1)) == 0);
@@ -2444,7 +2808,7 @@ nvme_init(nvme_t *nvme)
 	/*
 	 * Identify Controller
 	 */
-	if (nvme_identify(nvme, 0, (void **)&nvme->n_idctl) != 0) {
+	if (nvme_identify(nvme, B_FALSE, 0, (void **)&nvme->n_idctl) != 0) {
 		dev_err(nvme->n_dip, CE_WARN,
 		    "!failed to identify controller");
 		goto fail;
@@ -2591,6 +2955,7 @@ nvme_init(nvme_t *nvme)
 	for (i = 0; i != nvme->n_namespace_count; i++) {
 		mutex_init(&nvme->n_ns[i].ns_minor.nm_mutex, NULL, MUTEX_DRIVER,
 		    NULL);
+		nvme->n_ns[i].ns_ignore = B_TRUE;
 		if (nvme_init_ns(nvme, i + 1) != DDI_SUCCESS)
 			goto fail;
 	}
@@ -2614,13 +2979,11 @@ nvme_init(nvme_t *nvme)
 		}
 	}
 
-	nqueues = nvme->n_intr_cnt;
-
 	/*
 	 * Create I/O queue pairs.
 	 */
 
-	if (nvme_set_nqueues(nvme, &nqueues) != 0) {
+	if (nvme_set_nqueues(nvme) != 0) {
 		dev_err(nvme->n_dip, CE_WARN,
 		    "!failed to set number of I/O queues to %d",
 		    nvme->n_intr_cnt);
@@ -2632,20 +2995,68 @@ nvme_init(nvme_t *nvme)
 	 */
 	kmem_free(nvme->n_ioq, sizeof (nvme_qpair_t *));
 	nvme->n_ioq = kmem_zalloc(sizeof (nvme_qpair_t *) *
-	    (nqueues + 1), KM_SLEEP);
+	    (nvme->n_submission_queues + 1), KM_SLEEP);
 	nvme->n_ioq[0] = nvme->n_adminq;
 
-	nvme->n_ioq_count = nqueues;
+	/*
+	 * There should always be at least as many submission queues
+	 * as completion queues.
+	 */
+	ASSERT(nvme->n_submission_queues >= nvme->n_completion_queues);
+
+	nvme->n_ioq_count = nvme->n_submission_queues;
+
+	nvme->n_io_squeue_len =
+	    MIN(nvme->n_io_squeue_len, nvme->n_max_queue_entries);
+
+	(void) ddi_prop_update_int(DDI_DEV_T_NONE, nvme->n_dip, "io-squeue-len",
+	    nvme->n_io_squeue_len);
 
 	/*
-	 * If we got less queues than we asked for we might as well give
+	 * Pre-allocate completion queues.
+	 * When there are the same number of submission and completion
+	 * queues there is no value in having a larger completion
+	 * queue length.
+	 */
+	if (nvme->n_submission_queues == nvme->n_completion_queues)
+		nvme->n_io_cqueue_len = MIN(nvme->n_io_cqueue_len,
+		    nvme->n_io_squeue_len);
+
+	nvme->n_io_cqueue_len = MIN(nvme->n_io_cqueue_len,
+	    nvme->n_max_queue_entries);
+
+	(void) ddi_prop_update_int(DDI_DEV_T_NONE, nvme->n_dip, "io-cqueue-len",
+	    nvme->n_io_cqueue_len);
+
+	/*
+	 * Assign the equal quantity of taskq threads to each completion
+	 * queue, capping the total number of threads to the number
+	 * of CPUs.
+	 */
+	tq_threads = MIN(UINT16_MAX, ncpus) / nvme->n_completion_queues;
+
+	/*
+	 * In case the calculation above is zero, we need at least one
+	 * thread per completion queue.
+	 */
+	tq_threads = MAX(1, tq_threads);
+
+	if (nvme_create_cq_array(nvme, nvme->n_completion_queues + 1,
+	    nvme->n_io_cqueue_len, tq_threads) != DDI_SUCCESS) {
+		dev_err(nvme->n_dip, CE_WARN,
+		    "!failed to pre-allocate completion queues");
+		goto fail;
+	}
+
+	/*
+	 * If we use less completion queues than interrupt vectors return
 	 * some of the interrupt vectors back to the system.
 	 */
-	if (nvme->n_ioq_count < nvme->n_intr_cnt) {
+	if (nvme->n_completion_queues + 1 < nvme->n_intr_cnt) {
 		nvme_release_interrupts(nvme);
 
 		if (nvme_setup_interrupts(nvme, nvme->n_intr_type,
-		    nvme->n_ioq_count) != DDI_SUCCESS) {
+		    nvme->n_completion_queues + 1) != DDI_SUCCESS) {
 			dev_err(nvme->n_dip, CE_WARN,
 			    "!failed to reduce number of interrupts");
 			goto fail;
@@ -2655,13 +3066,9 @@ nvme_init(nvme_t *nvme)
 	/*
 	 * Alloc & register I/O queue pairs
 	 */
-	nvme->n_io_queue_len =
-	    MIN(nvme->n_io_queue_len, nvme->n_max_queue_entries);
-	(void) ddi_prop_update_int(DDI_DEV_T_NONE, nvme->n_dip, "io-queue-len",
-	    nvme->n_io_queue_len);
 
 	for (i = 1; i != nvme->n_ioq_count + 1; i++) {
-		if (nvme_alloc_qpair(nvme, nvme->n_io_queue_len,
+		if (nvme_alloc_qpair(nvme, nvme->n_io_squeue_len,
 		    &nvme->n_ioq[i], i) != DDI_SUCCESS) {
 			dev_err(nvme->n_dip, CE_WARN,
 			    "!unable to allocate I/O qpair %d", i);
@@ -2699,7 +3106,6 @@ nvme_intr(caddr_t arg1, caddr_t arg2)
 	int inum = (int)(uintptr_t)arg2;
 	int ccnt = 0;
 	int qnum;
-	nvme_cmd_t *cmd;
 
 	if (inum >= nvme->n_intr_cnt)
 		return (DDI_INTR_UNCLAIMED);
@@ -2714,13 +3120,9 @@ nvme_intr(caddr_t arg1, caddr_t arg2)
 	 * in steps of n_intr_cnt to process all queues using this vector.
 	 */
 	for (qnum = inum;
-	    qnum < nvme->n_ioq_count + 1 && nvme->n_ioq[qnum] != NULL;
+	    qnum < nvme->n_cq_count && nvme->n_cq[qnum] != NULL;
 	    qnum += nvme->n_intr_cnt) {
-		while ((cmd = nvme_retrieve_cmd(nvme, nvme->n_ioq[qnum]))) {
-			taskq_dispatch_ent((taskq_t *)cmd->nc_nvme->n_cmd_taskq,
-			    cmd->nc_callback, cmd, TQ_NOSLEEP, &cmd->nc_tqent);
-			ccnt++;
-		}
+		ccnt += nvme_process_iocq(nvme, nvme->n_cq[qnum]);
 	}
 
 	return (ccnt > 0 ? DDI_INTR_CLAIMED : DDI_INTR_UNCLAIMED);
@@ -2891,8 +3293,14 @@ nvme_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	    B_TRUE : B_FALSE;
 	nvme->n_admin_queue_len = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, "admin-queue-len", NVME_DEFAULT_ADMIN_QUEUE_LEN);
-	nvme->n_io_queue_len = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
-	    DDI_PROP_DONTPASS, "io-queue-len", NVME_DEFAULT_IO_QUEUE_LEN);
+	nvme->n_io_squeue_len = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "io-squeue-len", NVME_DEFAULT_IO_QUEUE_LEN);
+	/*
+	 * Double up the default for completion queues in case of
+	 * queue sharing.
+	 */
+	nvme->n_io_cqueue_len = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "io-cqueue-len", 2 * NVME_DEFAULT_IO_QUEUE_LEN);
 	nvme->n_async_event_limit = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, "async-event-limit",
 	    NVME_DEFAULT_ASYNC_EVENT_LIMIT);
@@ -2902,6 +3310,10 @@ nvme_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	nvme->n_min_block_size = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, "min-phys-block-size",
 	    NVME_DEFAULT_MIN_BLOCK_SIZE);
+	nvme->n_submission_queues = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "max-submission-queues", -1);
+	nvme->n_completion_queues = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "max-completion-queues", -1);
 
 	if (!ISP2(nvme->n_min_block_size) ||
 	    (nvme->n_min_block_size < NVME_DEFAULT_MIN_BLOCK_SIZE)) {
@@ -2912,13 +3324,33 @@ nvme_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		nvme->n_min_block_size = NVME_DEFAULT_MIN_BLOCK_SIZE;
 	}
 
+	if (nvme->n_submission_queues != -1 &&
+	    (nvme->n_submission_queues < 1 ||
+	    nvme->n_submission_queues > UINT16_MAX)) {
+		dev_err(dip, CE_WARN, "!\"submission-queues\"=%d is not "
+		    "valid. Must be [1..%d]", nvme->n_submission_queues,
+		    UINT16_MAX);
+		nvme->n_submission_queues = -1;
+	}
+
+	if (nvme->n_completion_queues != -1 &&
+	    (nvme->n_completion_queues < 1 ||
+	    nvme->n_completion_queues > UINT16_MAX)) {
+		dev_err(dip, CE_WARN, "!\"completion-queues\"=%d is not "
+		    "valid. Must be [1..%d]", nvme->n_completion_queues,
+		    UINT16_MAX);
+		nvme->n_completion_queues = -1;
+	}
+
 	if (nvme->n_admin_queue_len < NVME_MIN_ADMIN_QUEUE_LEN)
 		nvme->n_admin_queue_len = NVME_MIN_ADMIN_QUEUE_LEN;
 	else if (nvme->n_admin_queue_len > NVME_MAX_ADMIN_QUEUE_LEN)
 		nvme->n_admin_queue_len = NVME_MAX_ADMIN_QUEUE_LEN;
 
-	if (nvme->n_io_queue_len < NVME_MIN_IO_QUEUE_LEN)
-		nvme->n_io_queue_len = NVME_MIN_IO_QUEUE_LEN;
+	if (nvme->n_io_squeue_len < NVME_MIN_IO_QUEUE_LEN)
+		nvme->n_io_squeue_len = NVME_MIN_IO_QUEUE_LEN;
+	if (nvme->n_io_cqueue_len < NVME_MIN_IO_QUEUE_LEN)
+		nvme->n_io_cqueue_len = NVME_MIN_IO_QUEUE_LEN;
 
 	if (nvme->n_async_event_limit < 1)
 		nvme->n_async_event_limit = NVME_DEFAULT_ASYNC_EVENT_LIMIT;
@@ -2977,18 +3409,6 @@ nvme_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	nvme->n_progress |= NVME_REGS_MAPPED;
 
 	/*
-	 * Create taskq for command completion.
-	 */
-	(void) snprintf(name, sizeof (name), "%s%d_cmd_taskq",
-	    ddi_driver_name(dip), ddi_get_instance(dip));
-	nvme->n_cmd_taskq = ddi_taskq_create(dip, name, MIN(UINT16_MAX, ncpus),
-	    TASKQ_DEFAULTPRI, 0);
-	if (nvme->n_cmd_taskq == NULL) {
-		dev_err(dip, CE_WARN, "!failed to create cmd taskq");
-		goto fail;
-	}
-
-	/*
 	 * Create PRP DMA cache
 	 */
 	(void) snprintf(name, sizeof (name), "%s%d_prp_cache",
@@ -2999,6 +3419,18 @@ nvme_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	if (nvme_init(nvme) != DDI_SUCCESS)
 		goto fail;
+
+	/*
+	 * Initialize the driver with the UFM subsystem
+	 */
+	if (ddi_ufm_init(dip, DDI_UFM_CURRENT_VERSION, &nvme_ufm_ops,
+	    &nvme->n_ufmh, nvme) != 0) {
+		dev_err(dip, CE_WARN, "!failed to initialize UFM subsystem");
+		goto fail;
+	}
+	mutex_init(&nvme->n_fwslot_mutex, NULL, MUTEX_DRIVER, NULL);
+	ddi_ufm_update(nvme->n_ufmh);
+	nvme->n_progress |= NVME_UFM_INIT;
 
 	/*
 	 * Attach the blkdev driver for each namespace.
@@ -3093,12 +3525,18 @@ nvme_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 		kmem_free(nvme->n_ns, sizeof (nvme_namespace_t) *
 		    nvme->n_namespace_count);
 	}
+	if (nvme->n_progress & NVME_UFM_INIT) {
+		ddi_ufm_fini(nvme->n_ufmh);
+		mutex_destroy(&nvme->n_fwslot_mutex);
+	}
 
 	if (nvme->n_progress & NVME_INTERRUPTS)
 		nvme_release_interrupts(nvme);
 
-	if (nvme->n_cmd_taskq)
-		ddi_taskq_wait(nvme->n_cmd_taskq);
+	for (i = 0; i < nvme->n_cq_count; i++) {
+		if (nvme->n_cq[i]->ncq_cmd_taskq != NULL)
+			taskq_wait(nvme->n_cq[i]->ncq_cmd_taskq);
+	}
 
 	if (nvme->n_ioq_count > 0) {
 		for (i = 1; i != nvme->n_ioq_count + 1; i++) {
@@ -3121,14 +3559,17 @@ nvme_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 		(void) nvme_reset(nvme, B_FALSE);
 	}
 
-	if (nvme->n_cmd_taskq)
-		ddi_taskq_destroy(nvme->n_cmd_taskq);
-
 	if (nvme->n_progress & NVME_CTRL_LIMITS)
 		sema_destroy(&nvme->n_abort_sema);
 
 	if (nvme->n_progress & NVME_ADMIN_QUEUE)
 		nvme_free_qpair(nvme->n_adminq);
+
+	if (nvme->n_cq_count > 0) {
+		nvme_destroy_cq_array(nvme, 0);
+		nvme->n_cq = NULL;
+		nvme->n_cq_count = 0;
+	}
 
 	if (nvme->n_idctl)
 		kmem_free(nvme->n_idctl, NVME_IDENTIFY_BUFSIZE);
@@ -3189,19 +3630,19 @@ nvme_fill_prp(nvme_cmd_t *cmd, bd_xfer_t *xfer)
 		return (DDI_FAILURE);
 
 	cmd->nc_sqe.sqe_dptr.d_prp[0] = xfer->x_dmac.dmac_laddress;
-	ddi_dma_nextcookie(xfer->x_dmah, &xfer->x_dmac);
 
 	if (xfer->x_ndmac == 1) {
 		cmd->nc_sqe.sqe_dptr.d_prp[1] = 0;
 		return (DDI_SUCCESS);
 	} else if (xfer->x_ndmac == 2) {
+		ddi_dma_nextcookie(xfer->x_dmah, &xfer->x_dmac);
 		cmd->nc_sqe.sqe_dptr.d_prp[1] = xfer->x_dmac.dmac_laddress;
 		return (DDI_SUCCESS);
 	}
 
 	xfer->x_ndmac--;
 
-	nprp_page = nvme->n_pagesize / sizeof (uint64_t) - 1;
+	nprp_page = nvme->n_pagesize / sizeof (uint64_t);
 	ASSERT(nprp_page > 0);
 	nprp = (xfer->x_ndmac + nprp_page - 1) / nprp_page;
 
@@ -3221,8 +3662,8 @@ nvme_fill_prp(nvme_cmd_t *cmd, bd_xfer_t *xfer)
 	for (prp = (uint64_t *)cmd->nc_dma->nd_memp;
 	    xfer->x_ndmac > 0;
 	    prp++, xfer->x_ndmac--) {
-		*prp = xfer->x_dmac.dmac_laddress;
 		ddi_dma_nextcookie(xfer->x_dmah, &xfer->x_dmac);
+		*prp = xfer->x_dmac.dmac_laddress;
 	}
 
 	(void) ddi_dma_sync(cmd->nc_dma->nd_dmah, 0, cmd->nc_dma->nd_len,
@@ -3297,15 +3738,40 @@ nvme_bd_driveinfo(void *arg, bd_drive_t *drive)
 {
 	nvme_namespace_t *ns = arg;
 	nvme_t *nvme = ns->ns_nvme;
+	uint_t ns_count = MAX(1, nvme->n_namespaces_attachable);
 
 	/*
-	 * blkdev maintains one queue size per instance (namespace),
-	 * but all namespace share the I/O queues.
-	 * TODO: need to figure out a sane default, or use per-NS I/O queues,
-	 * or change blkdev to handle EAGAIN
+	 * Set the blkdev qcount to the number of submission queues.
+	 * It will then create one waitq/runq pair for each submission
+	 * queue and spread I/O requests across the queues.
 	 */
-	drive->d_qsize = nvme->n_ioq_count * nvme->n_io_queue_len
-	    / nvme->n_namespace_count;
+	drive->d_qcount = nvme->n_ioq_count;
+
+	/*
+	 * I/O activity to individual namespaces is distributed across
+	 * each of the d_qcount blkdev queues (which has been set to
+	 * the number of nvme submission queues). d_qsize is the number
+	 * of submitted and not completed I/Os within each queue that blkdev
+	 * will allow before it starts holding them in the waitq.
+	 *
+	 * Each namespace will create a child blkdev instance, for each one
+	 * we try and set the d_qsize so that each namespace gets an
+	 * equal portion of the submission queue.
+	 *
+	 * If post instantiation of the nvme drive, n_namespaces_attachable
+	 * changes and a namespace is attached it could calculate a
+	 * different d_qsize. It may even be that the sum of the d_qsizes is
+	 * now beyond the submission queue size. Should that be the case
+	 * and the I/O rate is such that blkdev attempts to submit more
+	 * I/Os than the size of the submission queue, the excess I/Os
+	 * will be held behind the semaphore nq_sema.
+	 */
+	drive->d_qsize = nvme->n_io_squeue_len / ns_count;
+
+	/*
+	 * Don't let the queue size drop below the minimum, though.
+	 */
+	drive->d_qsize = MAX(drive->d_qsize, NVME_MIN_IO_QUEUE_LEN);
 
 	/*
 	 * d_maxxfer is not set, which means the value is taken from the DMA
@@ -3362,7 +3828,7 @@ nvme_bd_cmd(nvme_namespace_t *ns, bd_xfer_t *xfer, uint8_t opc)
 	if (cmd == NULL)
 		return (ENOMEM);
 
-	cmd->nc_sqid = (CPU->cpu_id % nvme->n_ioq_count) + 1;
+	cmd->nc_sqid = xfer->x_qnum + 1;
 	ASSERT(cmd->nc_sqid <= nvme->n_ioq_count);
 	ioq = nvme->n_ioq[cmd->nc_sqid];
 
@@ -3384,7 +3850,7 @@ nvme_bd_cmd(nvme_namespace_t *ns, bd_xfer_t *xfer, uint8_t opc)
 	do {
 		cmd = nvme_retrieve_cmd(nvme, ioq);
 		if (cmd != NULL)
-			nvme_bd_xfer_done(cmd);
+			cmd->nc_callback(cmd);
 		else
 			drv_usecwait(10);
 	} while (ioq->nq_active_cmds != 0);
@@ -3544,7 +4010,7 @@ nvme_ioctl_identify(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc, int mode,
 	if (nioc->n_len < NVME_IDENTIFY_BUFSIZE)
 		return (EINVAL);
 
-	if ((rv = nvme_identify(nvme, nsid, (void **)&idctl)) != 0)
+	if ((rv = nvme_identify(nvme, B_TRUE, nsid, (void **)&idctl)) != 0)
 		return (rv);
 
 	if (ddi_copyout(idctl, (void *)nioc->n_buf, NVME_IDENTIFY_BUFSIZE, mode)
@@ -3552,6 +4018,129 @@ nvme_ioctl_identify(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc, int mode,
 		rv = EFAULT;
 
 	kmem_free(idctl, NVME_IDENTIFY_BUFSIZE);
+
+	return (rv);
+}
+
+/*
+ * Execute commands on behalf of the various ioctls.
+ */
+static int
+nvme_ioc_cmd(nvme_t *nvme, nvme_sqe_t *sqe, boolean_t is_admin, void *data_addr,
+    uint32_t data_len, int rwk, nvme_cqe_t *cqe, uint_t timeout)
+{
+	nvme_cmd_t *cmd;
+	nvme_qpair_t *ioq;
+	int rv = 0;
+
+	cmd = nvme_alloc_cmd(nvme, KM_SLEEP);
+	if (is_admin) {
+		cmd->nc_sqid = 0;
+		ioq = nvme->n_adminq;
+	} else {
+		cmd->nc_sqid = (CPU->cpu_id % nvme->n_ioq_count) + 1;
+		ASSERT(cmd->nc_sqid <= nvme->n_ioq_count);
+		ioq = nvme->n_ioq[cmd->nc_sqid];
+	}
+
+	cmd->nc_callback = nvme_wakeup_cmd;
+	cmd->nc_sqe = *sqe;
+
+	if ((rwk & (FREAD | FWRITE)) != 0) {
+		if (data_addr == NULL) {
+			rv = EINVAL;
+			goto free_cmd;
+		}
+
+		/*
+		 * Because we use PRPs and haven't implemented PRP
+		 * lists here, the maximum data size is restricted to
+		 * 2 pages.
+		 */
+		if (data_len > 2 * nvme->n_pagesize) {
+			dev_err(nvme->n_dip, CE_WARN, "!Data size %u is too "
+			    "large for nvme_ioc_cmd(). Limit is 2 pages "
+			    "(%u bytes)", data_len,  2 * nvme->n_pagesize);
+
+			rv = EINVAL;
+			goto free_cmd;
+		}
+
+		if (nvme_zalloc_dma(nvme, data_len, DDI_DMA_READ,
+		    &nvme->n_prp_dma_attr, &cmd->nc_dma) != DDI_SUCCESS) {
+			dev_err(nvme->n_dip, CE_WARN,
+			    "!nvme_zalloc_dma failed for nvme_ioc_cmd()");
+
+			rv = ENOMEM;
+			goto free_cmd;
+		}
+
+		if (cmd->nc_dma->nd_ncookie > 2) {
+			dev_err(nvme->n_dip, CE_WARN,
+			    "!too many DMA cookies for nvme_ioc_cmd()");
+			atomic_inc_32(&nvme->n_too_many_cookies);
+
+			rv = E2BIG;
+			goto free_cmd;
+		}
+
+		cmd->nc_sqe.sqe_dptr.d_prp[0] =
+		    cmd->nc_dma->nd_cookie.dmac_laddress;
+
+		if (cmd->nc_dma->nd_ncookie > 1) {
+			ddi_dma_nextcookie(cmd->nc_dma->nd_dmah,
+			    &cmd->nc_dma->nd_cookie);
+			cmd->nc_sqe.sqe_dptr.d_prp[1] =
+			    cmd->nc_dma->nd_cookie.dmac_laddress;
+		}
+
+		if ((rwk & FWRITE) != 0) {
+			if (ddi_copyin(data_addr, cmd->nc_dma->nd_memp,
+			    data_len, rwk & FKIOCTL) != 0) {
+				rv = EFAULT;
+				goto free_cmd;
+			}
+		}
+	}
+
+	if (is_admin) {
+		nvme_admin_cmd(cmd, timeout);
+	} else {
+		mutex_enter(&cmd->nc_mutex);
+
+		rv = nvme_submit_io_cmd(ioq, cmd);
+
+		if (rv == EAGAIN) {
+			mutex_exit(&cmd->nc_mutex);
+			dev_err(cmd->nc_nvme->n_dip, CE_WARN,
+			    "!nvme_ioc_cmd() failed, I/O Q full");
+			goto free_cmd;
+		}
+
+		nvme_wait_cmd(cmd, timeout);
+
+		mutex_exit(&cmd->nc_mutex);
+	}
+
+	if (cqe != NULL)
+		*cqe = cmd->nc_cqe;
+
+	if ((rv = nvme_check_cmd_status(cmd)) != 0) {
+		dev_err(nvme->n_dip, CE_WARN,
+		    "!nvme_ioc_cmd() failed with sct = %x, sc = %x",
+		    cmd->nc_cqe.cqe_sf.sf_sct, cmd->nc_cqe.cqe_sf.sf_sc);
+
+		goto free_cmd;
+	}
+
+	if ((rwk & FREAD) != 0) {
+		if (ddi_copyout(cmd->nc_dma->nd_memp,
+		    data_addr, data_len, rwk & FKIOCTL) != 0)
+			rv = EFAULT;
+	}
+
+free_cmd:
+	nvme_free_cmd(cmd);
 
 	return (rv);
 }
@@ -3620,7 +4209,7 @@ nvme_ioctl_get_logpage(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc,
 		return (EINVAL);
 	}
 
-	if (nvme_get_logpage(nvme, &log, &bufsize, nioc->n_arg, nsid)
+	if (nvme_get_logpage(nvme, B_TRUE, &log, &bufsize, nioc->n_arg, nsid)
 	    != DDI_SUCCESS)
 		return (EIO);
 
@@ -3712,7 +4301,8 @@ nvme_ioctl_get_features(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc,
 		return (EINVAL);
 	}
 
-	rv = nvme_get_features(nvme, nsid, feature, &res, &buf, &bufsize);
+	rv = nvme_get_features(nvme, B_TRUE, nsid, feature, &res, &buf,
+	    &bufsize);
 	if (rv != 0)
 		return (rv);
 
@@ -3819,8 +4409,8 @@ nvme_ioctl_format(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc, int mode,
 	if (nsid == 0)
 		nsid = (uint32_t)-1;
 
-	return (nvme_format_nvm(nvme, nsid, frmt.b.fm_lbaf, B_FALSE, 0, B_FALSE,
-	    frmt.b.fm_ses));
+	return (nvme_format_nvm(nvme, B_TRUE, nsid, frmt.b.fm_lbaf, B_FALSE, 0,
+	    B_FALSE, frmt.b.fm_ses));
 }
 
 static int
@@ -3873,6 +4463,133 @@ nvme_ioctl_attach(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc, int mode,
 	return (rv);
 }
 
+static void
+nvme_ufm_update(nvme_t *nvme)
+{
+	mutex_enter(&nvme->n_fwslot_mutex);
+	ddi_ufm_update(nvme->n_ufmh);
+	if (nvme->n_fwslot != NULL) {
+		kmem_free(nvme->n_fwslot, sizeof (nvme_fwslot_log_t));
+		nvme->n_fwslot = NULL;
+	}
+	mutex_exit(&nvme->n_fwslot_mutex);
+}
+
+static int
+nvme_ioctl_firmware_download(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc,
+    int mode, cred_t *cred_p)
+{
+	int rv = 0;
+	size_t len, copylen;
+	offset_t offset;
+	uintptr_t buf;
+	nvme_sqe_t sqe = {
+	    .sqe_opc	= NVME_OPC_FW_IMAGE_LOAD
+	};
+
+	if ((mode & FWRITE) == 0 || secpolicy_sys_config(cred_p, B_FALSE) != 0)
+		return (EPERM);
+
+	if (nsid != 0)
+		return (EINVAL);
+
+	/*
+	 * The offset (in n_len) is restricted to the number of DWORDs in
+	 * 32 bits.
+	 */
+	if (nioc->n_len > NVME_FW_OFFSETB_MAX)
+		return (EINVAL);
+
+	/* Confirm that both offset and length are a multiple of DWORD bytes */
+	if ((nioc->n_len & NVME_DWORD_MASK) != 0 ||
+	    (nioc->n_arg & NVME_DWORD_MASK) != 0)
+		return (EINVAL);
+
+	len = nioc->n_len;
+	offset = nioc->n_arg;
+	buf = (uintptr_t)nioc->n_buf;
+	while (len > 0 && rv == 0) {
+		/*
+		 * nvme_ioc_cmd() does not use SGLs or PRP lists.
+		 * It is limited to 2 PRPs per NVM command, so limit
+		 * the size of the data to 2 pages.
+		 */
+		copylen = MIN(2 * nvme->n_pagesize, len);
+
+		sqe.sqe_cdw10 = (uint32_t)(copylen >> NVME_DWORD_SHIFT) - 1;
+		sqe.sqe_cdw11 = (uint32_t)(offset >> NVME_DWORD_SHIFT);
+
+		rv = nvme_ioc_cmd(nvme, &sqe, B_TRUE, (void *)buf, copylen,
+		    FWRITE, NULL, nvme_admin_cmd_timeout);
+
+		buf += copylen;
+		offset += copylen;
+		len -= copylen;
+	}
+
+	/*
+	 * Let the DDI UFM subsystem know that the firmware information for
+	 * this device has changed.
+	 */
+	nvme_ufm_update(nvme);
+
+	return (rv);
+}
+
+static int
+nvme_ioctl_firmware_commit(nvme_t *nvme, int nsid, nvme_ioctl_t *nioc,
+    int mode, cred_t *cred_p)
+{
+	nvme_firmware_commit_dw10_t fc_dw10 = { 0 };
+	uint32_t slot = nioc->n_arg & 0xffffffff;
+	uint32_t action = nioc->n_arg >> 32;
+	nvme_cqe_t cqe = { 0 };
+	nvme_sqe_t sqe = {
+	    .sqe_opc	= NVME_OPC_FW_ACTIVATE
+	};
+	int timeout;
+	int rv;
+
+	if ((mode & FWRITE) == 0 || secpolicy_sys_config(cred_p, B_FALSE) != 0)
+		return (EPERM);
+
+	if (nsid != 0)
+		return (EINVAL);
+
+	/* Validate slot is in range. */
+	if (slot < NVME_FW_SLOT_MIN || slot > NVME_FW_SLOT_MAX)
+		return (EINVAL);
+
+	switch (action) {
+	case NVME_FWC_SAVE:
+	case NVME_FWC_SAVE_ACTIVATE:
+		timeout = nvme_commit_save_cmd_timeout;
+		break;
+	case NVME_FWC_ACTIVATE:
+	case NVME_FWC_ACTIVATE_IMMED:
+		timeout = nvme_admin_cmd_timeout;
+		break;
+	default:
+		return (EINVAL);
+	}
+
+	fc_dw10.b.fc_slot = slot;
+	fc_dw10.b.fc_action = action;
+	sqe.sqe_cdw10 = fc_dw10.r;
+
+	rv = nvme_ioc_cmd(nvme, &sqe, B_TRUE, NULL, 0, 0, &cqe, timeout);
+
+	nioc->n_arg = ((uint64_t)cqe.cqe_sf.sf_sct << 16) | cqe.cqe_sf.sf_sc;
+
+	/*
+	 * Let the DDI UFM subsystem know that the firmware information for
+	 * this device has changed.
+	 */
+	nvme_ufm_update(nvme);
+
+	return (rv);
+}
+
 static int
 nvme_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *cred_p,
     int *rval_p)
@@ -3897,7 +4614,9 @@ nvme_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *cred_p,
 		nvme_ioctl_version,
 		nvme_ioctl_format,
 		nvme_ioctl_detach,
-		nvme_ioctl_attach
+		nvme_ioctl_attach,
+		nvme_ioctl_firmware_download,
+		nvme_ioctl_firmware_commit
 	};
 
 	if (nvme == NULL)
@@ -3980,4 +4699,91 @@ nvme_ioctl(dev_t dev, int cmd, intptr_t arg, int mode, cred_t *cred_p,
 #endif
 
 	return (rv);
+}
+
+/*
+ * DDI UFM Callbacks
+ */
+static int
+nvme_ufm_fill_image(ddi_ufm_handle_t *ufmh, void *arg, uint_t imgno,
+    ddi_ufm_image_t *img)
+{
+	nvme_t *nvme = arg;
+
+	if (imgno != 0)
+		return (EINVAL);
+
+	ddi_ufm_image_set_desc(img, "Firmware");
+	ddi_ufm_image_set_nslots(img, nvme->n_idctl->id_frmw.fw_nslot);
+
+	return (0);
+}
+
+/*
+ * Fill out firmware slot information for the requested slot.  The firmware
+ * slot information is gathered by requesting the Firmware Slot Information log
+ * page.  The format of the page is described in section 5.10.1.3.
+ *
+ * We lazily cache the log page on the first call and then invalidate the cache
+ * data after a successful firmware download or firmware commit command.
+ * The cached data is protected by a mutex as the state can change
+ * asynchronous to this callback.
+ */
+static int
+nvme_ufm_fill_slot(ddi_ufm_handle_t *ufmh, void *arg, uint_t imgno,
+    uint_t slotno, ddi_ufm_slot_t *slot)
+{
+	nvme_t *nvme = arg;
+	void *log = NULL;
+	size_t bufsize;
+	ddi_ufm_attr_t attr = 0;
+	char fw_ver[NVME_FWVER_SZ + 1];
+	int ret;
+
+	if (imgno > 0 || slotno > (nvme->n_idctl->id_frmw.fw_nslot - 1))
+		return (EINVAL);
+
+	mutex_enter(&nvme->n_fwslot_mutex);
+	if (nvme->n_fwslot == NULL) {
+		ret = nvme_get_logpage(nvme, B_TRUE, &log, &bufsize,
+		    NVME_LOGPAGE_FWSLOT, 0);
+		if (ret != DDI_SUCCESS ||
+		    bufsize != sizeof (nvme_fwslot_log_t)) {
+			if (log != NULL)
+				kmem_free(log, bufsize);
+			mutex_exit(&nvme->n_fwslot_mutex);
+			return (EIO);
+		}
+		nvme->n_fwslot = (nvme_fwslot_log_t *)log;
+	}
+
+	/*
+	 * NVMe numbers firmware slots starting at 1
+	 */
+	if (slotno == (nvme->n_fwslot->fw_afi - 1))
+		attr |= DDI_UFM_ATTR_ACTIVE;
+
+	if (slotno != 0 || nvme->n_idctl->id_frmw.fw_readonly == 0)
+		attr |= DDI_UFM_ATTR_WRITEABLE;
+
+	if (nvme->n_fwslot->fw_frs[slotno][0] == '\0') {
+		attr |= DDI_UFM_ATTR_EMPTY;
+	} else {
+		(void) strncpy(fw_ver, nvme->n_fwslot->fw_frs[slotno],
+		    NVME_FWVER_SZ);
+		fw_ver[NVME_FWVER_SZ] = '\0';
+		ddi_ufm_slot_set_version(slot, fw_ver);
+	}
+	mutex_exit(&nvme->n_fwslot_mutex);
+
+	ddi_ufm_slot_set_attrs(slot, attr);
+
+	return (0);
+}
+
+static int
+nvme_ufm_getcaps(ddi_ufm_handle_t *ufmh, void *arg, ddi_ufm_cap_t *caps)
+{
+	*caps = DDI_UFM_CAP_REPORT;
+	return (0);
 }

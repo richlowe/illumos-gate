@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright (c) 2013 Joyent, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -171,16 +171,16 @@ dls_bind(dld_str_t *dsp, uint32_t sap)
 	/*
 	 * The MAC layer does the VLAN demultiplexing and will only pass up
 	 * untagged packets to non-promiscuous primary MAC clients. In order to
-	 * support the binding to the VLAN SAP which is required by DLPI, dls
+	 * support binding to the VLAN SAP, which is required by DLPI, DLS
 	 * needs to get a copy of all tagged packets when the client binds to
 	 * the VLAN SAP. We do this by registering a separate promiscuous
-	 * callback for each dls client binding to that SAP.
+	 * callback for each DLS client binding to that SAP.
 	 *
 	 * Note: even though there are two promiscuous handles in dld_str_t,
 	 * ds_mph is for the regular promiscuous mode, ds_vlan_mph is the handle
-	 * to receive VLAN pkt when promiscuous mode is not on. Only one of
-	 * them can be non-NULL at the same time, to avoid receiving dup copies
-	 * of pkts.
+	 * to receive VLAN traffic when promiscuous mode is not on. Only one of
+	 * them can be non-NULL at the same time, to avoid receiving duplicate
+	 * copies of packets.
 	 */
 	if (sap == ETHERTYPE_VLAN && dsp->ds_promisc == 0) {
 		int err;
@@ -218,13 +218,15 @@ dls_unbind(dld_str_t *dsp)
 		mac_rx_bypass_enable(dsp->ds_mch);
 
 	/*
-	 * For VLAN SAP, there was a promisc handle registered when dls_bind.
-	 * When unbind this dls link, we need to remove the promisc handle.
-	 * See comments in dls_bind().
+	 * A VLAN SAP does not actually add itself to the STREAM head today.
+	 * While we initially set up a VLAN handle below, it's possible that
+	 * something else will have come in and clobbered it.
 	 */
-	if (dsp->ds_vlan_mph != NULL) {
-		mac_promisc_remove(dsp->ds_vlan_mph);
-		dsp->ds_vlan_mph = NULL;
+	if (dsp->ds_sap == ETHERTYPE_VLAN) {
+		if (dsp->ds_vlan_mph != NULL) {
+			mac_promisc_remove(dsp->ds_vlan_mph);
+			dsp->ds_vlan_mph = NULL;
+		}
 		return;
 	}
 
@@ -650,8 +652,8 @@ dls_mac_active_set(dls_link_t *dlp)
 		/* request the primary MAC address */
 		if ((err = mac_unicast_add(dlp->dl_mch, NULL,
 		    MAC_UNICAST_PRIMARY | MAC_UNICAST_TAG_DISABLE |
-		    MAC_UNICAST_DISABLE_TX_VID_CHECK, &dlp->dl_mah, 0,
-		    &diag)) != 0) {
+		    MAC_UNICAST_DISABLE_TX_VID_CHECK, &dlp->dl_mah,
+		    VLAN_ID_NONE, &diag)) != 0) {
 			return (err);
 		}
 

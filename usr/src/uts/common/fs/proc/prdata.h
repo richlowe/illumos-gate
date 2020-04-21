@@ -27,7 +27,8 @@
 /*	  All Rights Reserved	*/
 
 /*
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #ifndef _SYS_PROC_PRDATA_H
@@ -131,11 +132,14 @@ typedef enum prnodetype {
 	PR_ROOTDIR,		/* /proc/<pid>/root			*/
 	PR_FDDIR,		/* /proc/<pid>/fd			*/
 	PR_FD,			/* /proc/<pid>/fd/nn			*/
+	PR_FDINFODIR,		/* /proc/<pid>/fdinfo			*/
+	PR_FDINFO,		/* /proc/<pid>/fdinfo/nn		*/
 	PR_OBJECTDIR,		/* /proc/<pid>/object			*/
 	PR_OBJECT,		/* /proc/<pid>/object/xxx		*/
 	PR_LWPDIR,		/* /proc/<pid>/lwp			*/
 	PR_LWPIDDIR,		/* /proc/<pid>/lwp/<lwpid>		*/
 	PR_LWPCTL,		/* /proc/<pid>/lwp/<lwpid>/lwpctl	*/
+	PR_LWPNAME,		/* /proc/<pid>/lwp/<lwpid>/lwpname	*/
 	PR_LWPSTATUS,		/* /proc/<pid>/lwp/<lwpid>/lwpstatus	*/
 	PR_LWPSINFO,		/* /proc/<pid>/lwp/<lwpid>/lwpsinfo	*/
 	PR_LWPUSAGE,		/* /proc/<pid>/lwp/<lwpid>/lwpusage	*/
@@ -287,7 +291,7 @@ extern	struct vnodeops	*prvnodeops;
  *
  *	pr_iol_initlist(&listhead, sizeof (*mp), n);
  *	while (whatever) {
- *		mp = pr_iol_newbuf(&listhead, sizeof (*mp);
+ *		mp = pr_iol_newbuf(&listhead, sizeof (*mp));
  *		...
  *		error = ...
  *	}
@@ -312,6 +316,7 @@ extern	void	pr_iol_initlist(list_t *head, size_t itemsize, int nitems);
 extern	void *	pr_iol_newbuf(list_t *head, size_t itemsize);
 extern	int	pr_iol_copyout_and_free(list_t *head, caddr_t *tgt, int errin);
 extern	int	pr_iol_uiomove_and_free(list_t *head, uio_t *uiop, int errin);
+extern	void	pr_iol_freelist(list_t *);
 
 #if defined(_SYSCALL32_IMPL)
 
@@ -346,6 +351,8 @@ extern	void	pr_setentryexit(proc_t *, sysset_t *, int);
 extern	int	pr_set(proc_t *, long);
 extern	int	pr_unset(proc_t *, long);
 extern	void	pr_sethold(prnode_t *, sigset_t *);
+extern	file_t	*pr_getf(proc_t *, uint_t, short *);
+extern	void	pr_releasef(proc_t *, uint_t);
 extern	void	pr_setfault(proc_t *, fltset_t *);
 extern	int	prusrio(proc_t *, enum uio_rw, struct uio *, int);
 extern	int	prwritectl(vnode_t *, struct uio *, cred_t *);
@@ -360,7 +367,7 @@ extern	void	prgetaction(proc_t *, user_t *, uint_t, struct sigaction *);
 extern	void	prgetusage(kthread_t *, struct prhusage *);
 extern	void	praddusage(kthread_t *, struct prhusage *);
 extern	void	prcvtusage(struct prhusage *, prusage_t *);
-extern	void 	prscaleusage(prhusage_t *);
+extern	void	prscaleusage(prhusage_t *);
 extern	kthread_t *prchoose(proc_t *);
 extern	void	allsetrun(proc_t *);
 extern	int	setisempty(uint32_t *, uint_t);
@@ -374,6 +381,7 @@ extern	int	clear_watched_area(proc_t *, struct watched_area *);
 extern	void	pr_free_watchpoints(proc_t *);
 extern	proc_t	*pr_cancel_watch(prnode_t *);
 extern	struct seg *break_seg(proc_t *);
+extern	void	prgethold(kthread_t *, sigset_t *);
 
 /*
  * Machine-dependent routines (defined in prmachdep.c).

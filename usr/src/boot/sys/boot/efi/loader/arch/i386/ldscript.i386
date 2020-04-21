@@ -1,5 +1,4 @@
-/* $FreeBSD$ */
-OUTPUT_FORMAT("elf32-i386-freebsd", "elf32-i386-freebsd", "elf32-i386-freebsd")
+OUTPUT_FORMAT("elf32-i386-sol2", "elf32-i386-sol2", "elf32-i386-sol2")
 OUTPUT_ARCH(i386)
 ENTRY(_start)
 SECTIONS
@@ -10,6 +9,7 @@ SECTIONS
   . = SIZEOF_HEADERS;
   . = ALIGN(4096);
   .text		: {
+    mb_header.o(.text)
     *(.text .stub .text.* .gnu.linkonce.t.*)
     /* .gnu.warning sections are handled specially by elf32.em. */
     *(.gnu.warning)

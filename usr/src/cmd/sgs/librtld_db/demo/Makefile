@@ -19,8 +19,11 @@
 # CDDL HEADER END
 #
 # Copyright (c) 1995, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 include		$(SRC)/Makefile.master
+include		$(SRC)/cmd/sgs/Makefile.sub
 
 MACHDEMOFILES= \
 		i386/regs.c \
@@ -90,7 +93,7 @@ CLEANFILES=	*.demo */*.demo
 .KEEP_STATE:
 .PARALLEL:	$(ROOTDEMOFILES)
 
-all catalog chkmsg lint:
+all catalog chkmsg:
 
 install:	$(ROOTDEMODIRS) .WAIT $(ROOTDEMOFILES)
 

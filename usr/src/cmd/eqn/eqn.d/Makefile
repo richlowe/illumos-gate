@@ -2,6 +2,8 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+#
 
 include		../../Makefile.cmd
 
@@ -33,7 +35,10 @@ LDFLAGS +=	$(MAPFILE.NGB:%=-Wl,-M%)
 
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused-label
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

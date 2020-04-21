@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 #include <sys/sysmacros.h>
@@ -164,7 +165,8 @@ int pcie_disable_scan = 0;		/* Disable fabric scan */
 /* Inform interested parties that error handling is about to begin. */
 /* ARGSUSED */
 void
-pf_eh_enter(pcie_bus_t *bus_p) {
+pf_eh_enter(pcie_bus_t *bus_p)
+{
 }
 
 /* Inform interested parties that error handling has ended. */
@@ -304,7 +306,8 @@ done:
 }
 
 void
-pcie_force_fullscan() {
+pcie_force_fullscan(void)
+{
 	pcie_full_scan = B_TRUE;
 }
 
@@ -917,10 +920,18 @@ pf_default_hdl(dev_info_t *dip, pf_impl_t *impl)
 	}
 
 	/*
-	 * Read vendor/device ID and check with cached data, if it doesn't match
-	 * could very well be a device that isn't responding anymore.  Just
-	 * stop.  Save the basic info in the error q for post mortem debugging
-	 * purposes.
+	 * If this is a device used for PCI passthrough into a virtual machine,
+	 * don't let any error it caused panic the system.
+	 */
+	if (bus_p->bus_fm_flags & PF_FM_IS_PASSTHRU)
+		pfd_p->pe_severity_mask |= PF_ERR_PANIC;
+
+	/*
+	 * Read vendor/device ID and check with cached data; if it doesn't
+	 * match, it could very well mean that the device is no longer
+	 * responding.  In this case, we return PF_SCAN_BAD_RESPONSE; should
+	 * the caller choose to panic in this case, we will have the basic
+	 * info in the error queue for the purposes of postmortem debugging.
 	 */
 	if (PCIE_GET(32, bus_p, PCI_CONF_VENID) != bus_p->bus_dev_ven_id) {
 		char buf[FM_MAX_CLASS];
@@ -931,12 +942,12 @@ pf_default_hdl(dev_info_t *dip, pf_impl_t *impl)
 		    DDI_NOSLEEP, FM_VERSION, DATA_TYPE_UINT8, 0, NULL);
 
 		/*
-		 * For IOV/Hotplug purposes skip gathering info fo this device,
+		 * For IOV/Hotplug purposes skip gathering info for this device,
 		 * but populate affected info and severity.  Clear out any data
 		 * that maybe been saved in the last fabric scan.
 		 */
 		pf_reset_pfd(pfd_p);
-		pfd_p->pe_severity_flags = PF_ERR_PANIC_BAD_RESPONSE;
+		pfd_p->pe_severity_flags = PF_ERR_BAD_RESPONSE;
 		PFD_AFFECTED_DEV(pfd_p)->pe_affected_flags = PF_AFFECTED_SELF;
 
 		/* Add the snapshot to the error q */
@@ -948,6 +959,7 @@ pf_default_hdl(dev_info_t *dip, pf_impl_t *impl)
 
 	pf_pci_regs_gather(pfd_p, bus_p);
 	pf_pci_regs_clear(pfd_p, bus_p);
+
 	if (PCIE_IS_RP(bus_p))
 		pf_pci_find_rp_fault(pfd_p, bus_p);
 
@@ -979,6 +991,22 @@ done:
 
 	pfd_p->pe_valid = B_TRUE;
 	return (scan_flag);
+}
+
+/*
+ * Set the passthru flag on a device bus_p. Called by passthru drivers to
+ * indicate when a device is or is no longer under passthru control.
+ */
+void
+pf_set_passthru(dev_info_t *dip, boolean_t is_passthru)
+{
+	pcie_bus_t *bus_p = PCIE_DIP2BUS(dip);
+
+	if (is_passthru) {
+		atomic_or_uint(&bus_p->bus_fm_flags, PF_FM_IS_PASSTHRU);
+	} else {
+		atomic_and_uint(&bus_p->bus_fm_flags, ~PF_FM_IS_PASSTHRU);
+	}
 }
 
 /*
@@ -1024,7 +1052,7 @@ pf_init(dev_info_t *dip, ddi_iblock_cookie_t ibc, ddi_attach_cmd_t cmd)
 		    DDI_FM_EREPORT_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 		cap &= (DDI_FM_EREPORT_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 
-		bus_p->bus_fm_flags |= PF_FM_IS_NH;
+		atomic_or_uint(&bus_p->bus_fm_flags, PF_FM_IS_NH);
 
 		if (cmd == DDI_ATTACH) {
 			ddi_fm_init(dip, &cap, &ibc);
@@ -1039,7 +1067,7 @@ pf_init(dev_info_t *dip, ddi_iblock_cookie_t ibc, ddi_attach_cmd_t cmd)
 
 	/* If ddi_fm_init fails for any reason RETURN */
 	if (!fmhdl) {
-		bus_p->bus_fm_flags = 0;
+		(void) atomic_swap_uint(&bus_p->bus_fm_flags, 0);
 		return;
 	}
 
@@ -1049,7 +1077,7 @@ pf_init(dev_info_t *dip, ddi_iblock_cookie_t ibc, ddi_attach_cmd_t cmd)
 			ddi_fm_handler_register(dip, pf_dummy_cb, NULL);
 	}
 
-	bus_p->bus_fm_flags |= PF_FM_READY;
+	atomic_or_uint(&bus_p->bus_fm_flags, PF_FM_READY);
 }
 
 /* undo FMA lock, called at predetach */
@@ -1066,7 +1094,7 @@ pf_fini(dev_info_t *dip, ddi_detach_cmd_t cmd)
 		return;
 
 	/* no other code should set the flag to false */
-	bus_p->bus_fm_flags &= ~PF_FM_READY;
+	atomic_and_uint(&bus_p->bus_fm_flags, ~PF_FM_READY);
 
 	/*
 	 * Grab the mutex to make sure device isn't in the middle of
@@ -1080,7 +1108,7 @@ pf_fini(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	/* undo non-hardened drivers */
 	if (bus_p->bus_fm_flags & PF_FM_IS_NH) {
 		if (cmd == DDI_DETACH) {
-			bus_p->bus_fm_flags &= ~PF_FM_IS_NH;
+			atomic_and_uint(&bus_p->bus_fm_flags, ~PF_FM_IS_NH);
 			pci_ereport_teardown(dip);
 			/*
 			 * ddi_fini itself calls ddi_handler_unregister,
@@ -1179,13 +1207,13 @@ const pf_fab_err_tbl_t pcie_pcie_tbl[] = {
 	{PCIE_AER_UCE_MTLP,	pf_panic,
 	    PF_AFFECTED_PARENT, 0},
 
-	{PCIE_AER_UCE_ECRC,	pf_panic,
+	{PCIE_AER_UCE_ECRC,	pf_no_panic,
 	    PF_AFFECTED_SELF, 0},
 
 	{PCIE_AER_UCE_UR,	pf_analyse_ca_ur,
 	    PF_AFFECTED_SELF, 0},
 
-	{NULL, NULL, NULL, NULL}
+	{0, NULL, 0, 0}
 };
 
 const pf_fab_err_tbl_t pcie_rp_tbl[] = {
@@ -1220,13 +1248,13 @@ const pf_fab_err_tbl_t pcie_rp_tbl[] = {
 	    PF_AFFECTED_SELF | PF_AFFECTED_AER,
 	    PF_AFFECTED_SELF | PF_AFFECTED_CHILDREN},
 
-	{PCIE_AER_UCE_ECRC,	pf_panic,
+	{PCIE_AER_UCE_ECRC,	pf_no_panic,
 	    PF_AFFECTED_AER, PF_AFFECTED_CHILDREN},
 
 	{PCIE_AER_UCE_UR,	pf_no_panic,
 	    PF_AFFECTED_AER, PF_AFFECTED_CHILDREN},
 
-	{NULL, NULL, NULL, NULL}
+	{0, NULL, 0, 0}
 };
 
 const pf_fab_err_tbl_t pcie_sw_tbl[] = {
@@ -1261,13 +1289,13 @@ const pf_fab_err_tbl_t pcie_sw_tbl[] = {
 	    PF_AFFECTED_SELF | PF_AFFECTED_AER,
 	    PF_AFFECTED_SELF | PF_AFFECTED_CHILDREN},
 
-	{PCIE_AER_UCE_ECRC,	pf_panic,
+	{PCIE_AER_UCE_ECRC,	pf_no_panic,
 	    PF_AFFECTED_AER, PF_AFFECTED_SELF | PF_AFFECTED_CHILDREN},
 
 	{PCIE_AER_UCE_UR,	pf_analyse_ca_ur,
 	    PF_AFFECTED_AER, PF_AFFECTED_SELF | PF_AFFECTED_CHILDREN},
 
-	{NULL, NULL, NULL, NULL}
+	{0, NULL, 0, 0}
 };
 
 const pf_fab_err_tbl_t pcie_pcie_bdg_tbl[] = {
@@ -1310,7 +1338,7 @@ const pf_fab_err_tbl_t pcie_pcie_bdg_tbl[] = {
 	{PCIE_AER_SUCE_INTERNAL_ERR,	pf_panic,
 	    PF_AFFECTED_SELF | PF_AFFECTED_CHILDREN, 0},
 
-	{NULL, NULL, NULL, NULL}
+	{0, NULL, 0, 0}
 };
 
 const pf_fab_err_tbl_t pcie_pci_bdg_tbl[] = {
@@ -1332,7 +1360,7 @@ const pf_fab_err_tbl_t pcie_pci_bdg_tbl[] = {
 	{PCI_STAT_S_TARG_AB,	pf_analyse_pci,
 	    PF_AFFECTED_SELF, 0},
 
-	{NULL, NULL, NULL, NULL}
+	{0, NULL, 0, 0}
 };
 
 const pf_fab_err_tbl_t pcie_pci_tbl[] = {
@@ -1354,7 +1382,7 @@ const pf_fab_err_tbl_t pcie_pci_tbl[] = {
 	{PCI_STAT_S_TARG_AB,	pf_analyse_pci,
 	    PF_AFFECTED_SELF, 0},
 
-	{NULL, NULL, NULL, NULL}
+	{0, NULL, 0, 0}
 };
 
 #define	PF_MASKED_AER_ERR(pfd_p) \
@@ -1377,7 +1405,7 @@ pf_analyse_error(ddi_fm_error_t *derr, pf_impl_t *impl)
 		sts_flags = 0;
 
 		/* skip analysing error when no error info is gathered */
-		if (pfd_p->pe_severity_flags == PF_ERR_PANIC_BAD_RESPONSE)
+		if (pfd_p->pe_severity_flags == PF_ERR_BAD_RESPONSE)
 			goto done;
 
 		switch (PCIE_PFD2BUS(pfd_p)->bus_dev_type) {
@@ -1455,6 +1483,8 @@ done:
 		/* Have pciev_eh adjust the severity */
 		pfd_p->pe_severity_flags = pciev_eh(pfd_p, impl);
 
+		pfd_p->pe_severity_flags &= ~pfd_p->pe_severity_mask;
+
 		error_flags |= pfd_p->pe_severity_flags;
 	}
 
@@ -1470,7 +1500,7 @@ pf_analyse_error_tbl(ddi_fm_error_t *derr, pf_impl_t *impl,
 	uint16_t flags;
 	uint32_t bit;
 
-	for (row = tbl; err_reg && (row->bit != NULL); row++) {
+	for (row = tbl; err_reg && (row->bit != 0); row++) {
 		bit = row->bit;
 		if (!(err_reg & bit))
 			continue;
@@ -2165,7 +2195,8 @@ pf_matched_in_rc(pf_data_t *dq_head_p, pf_data_t *pfd_p,
  */
 static void
 pf_pci_find_trans_type(pf_data_t *pfd_p, uint64_t *addr, uint32_t *trans_type,
-    pcie_req_id_t *bdf) {
+    pcie_req_id_t *bdf)
+{
 	pf_data_t *rc_pfd_p;
 
 	/* Could be DMA or PIO.  Find out by look at error type. */
@@ -2216,7 +2247,8 @@ pf_pci_find_trans_type(pf_data_t *pfd_p, uint64_t *addr, uint32_t *trans_type,
  */
 /* ARGSUSED */
 int
-pf_pci_decode(pf_data_t *pfd_p, uint16_t *cmd) {
+pf_pci_decode(pf_data_t *pfd_p, uint16_t *cmd)
+{
 	pcix_attr_t	*attr;
 	uint64_t	addr;
 	uint32_t	trans_type;
@@ -2299,7 +2331,7 @@ pf_hdl_lookup(dev_info_t *dip, uint64_t ena, uint32_t flag, uint64_t addr,
 	ddi_fm_error_t		derr;
 
 	/* If we don't know the addr or rid just return with NOTFOUND */
-	if ((addr == NULL) && !PCIE_CHECK_VALID_BDF(bdf))
+	if ((addr == 0) && !PCIE_CHECK_VALID_BDF(bdf))
 		return (PF_HDL_NOTFOUND);
 
 	/*
@@ -2415,7 +2447,8 @@ done:
 
 static int
 pf_hdl_compare(dev_info_t *dip, ddi_fm_error_t *derr, uint32_t flag,
-    uint64_t addr, pcie_req_id_t bdf, ndi_fmc_t *fcp) {
+    uint64_t addr, pcie_req_id_t bdf, ndi_fmc_t *fcp)
+{
 	ndi_fmcentry_t	*fep;
 	int		found = 0;
 	int		status;
@@ -2430,17 +2463,21 @@ pf_hdl_compare(dev_info_t *dip, ddi_fm_error_t *derr, uint32_t flag,
 		 * subsequent error handling, we block
 		 * attempts to free the cache entry.
 		 */
-		compare_func = (flag == ACC_HANDLE) ?
-		    i_ddi_fm_acc_err_cf_get((ddi_acc_handle_t)
-			fep->fce_resource) :
-		    i_ddi_fm_dma_err_cf_get((ddi_dma_handle_t)
-			fep->fce_resource);
+		if (flag == ACC_HANDLE) {
+			compare_func =
+			    i_ddi_fm_acc_err_cf_get((ddi_acc_handle_t)
+			    fep->fce_resource);
+		} else {
+			compare_func =
+			    i_ddi_fm_dma_err_cf_get((ddi_dma_handle_t)
+			    fep->fce_resource);
+		}
 
 		if (compare_func == NULL) /* unbound or not FLAGERR */
 			continue;
 
 		status = compare_func(dip, fep->fce_resource,
-			    (void *)&addr, (void *)&bdf);
+		    (void *)&addr, (void *)&bdf);
 
 		if (status == DDI_FM_NONFATAL) {
 			found++;
@@ -2469,7 +2506,7 @@ pf_hdl_compare(dev_info_t *dip, ddi_fm_error_t *derr, uint32_t flag,
 	 * If a handler isn't found and we know this is the right device mark
 	 * them all failed.
 	 */
-	if ((addr != NULL) && PCIE_CHECK_VALID_BDF(bdf) && (found == 0)) {
+	if ((addr != 0) && PCIE_CHECK_VALID_BDF(bdf) && (found == 0)) {
 		status = pf_hdl_compare(dip, derr, flag, addr, bdf, fcp);
 		if (status == PF_HDL_FOUND)
 			found++;
@@ -2490,7 +2527,7 @@ pf_hdl_compare(dev_info_t *dip, ddi_fm_error_t *derr, uint32_t flag,
 /* ARGSUSED */
 static int
 pf_log_hdl_lookup(dev_info_t *rpdip, ddi_fm_error_t *derr, pf_data_t *pfd_p,
-	boolean_t is_primary)
+    boolean_t is_primary)
 {
 	/*
 	 * Disabling this function temporarily until errors can be handled
@@ -2537,7 +2574,8 @@ pf_log_hdl_lookup(dev_info_t *rpdip, ddi_fm_error_t *derr, pf_data_t *pfd_p,
  * accessed via the bus_p.
  */
 int
-pf_tlp_decode(pcie_bus_t *bus_p, pf_pcie_adv_err_regs_t *adv_reg_p) {
+pf_tlp_decode(pcie_bus_t *bus_p, pf_pcie_adv_err_regs_t *adv_reg_p)
+{
 	pcie_tlp_hdr_t	*tlp_hdr = (pcie_tlp_hdr_t *)adv_reg_p->pcie_ue_hdr;
 	pcie_req_id_t	my_bdf, tlp_bdf, flt_bdf = PCIE_INVALID_BDF;
 	uint64_t	flt_addr = 0;
@@ -2572,7 +2610,7 @@ pf_tlp_decode(pcie_bus_t *bus_p, pf_pcie_adv_err_regs_t *adv_reg_p) {
 			flt_bdf = tlp_bdf;
 		} else if (PCIE_IS_ROOT(bus_p) &&
 		    (PF_FIRST_AER_ERR(PCIE_AER_UCE_PTLP, adv_reg_p) ||
-			(PF_FIRST_AER_ERR(PCIE_AER_UCE_CA, adv_reg_p)))) {
+		    (PF_FIRST_AER_ERR(PCIE_AER_UCE_CA, adv_reg_p)))) {
 			flt_trans_type = PF_ADDR_DMA;
 			flt_bdf = tlp_bdf;
 		} else {
@@ -2591,7 +2629,7 @@ pf_tlp_decode(pcie_bus_t *bus_p, pf_pcie_adv_err_regs_t *adv_reg_p) {
 	{
 		pcie_cpl_t *cpl_tlp = (pcie_cpl_t *)&adv_reg_p->pcie_ue_hdr[1];
 
-		flt_addr = NULL;
+		flt_addr = 0;
 		flt_bdf = (cpl_tlp->rid > cpl_tlp->cid) ? cpl_tlp->rid :
 		    cpl_tlp->cid;
 
@@ -3050,6 +3088,7 @@ pf_reset_pfd(pf_data_t *pfd_p)
 	pcie_bus_t	*bus_p = PCIE_PFD2BUS(pfd_p);
 
 	pfd_p->pe_severity_flags = 0;
+	pfd_p->pe_severity_mask = 0;
 	pfd_p->pe_orig_severity_flags = 0;
 	/* pe_lock and pe_valid were reset in pf_send_ereport */
 
@@ -3220,7 +3259,7 @@ pf_find_busp_by_saer(pf_impl_t *impl, pf_data_t *pfd_p)
 	addr = reg_p->pcie_sue_tgt_addr;
 	bdf = reg_p->pcie_sue_tgt_bdf;
 
-	if (addr != NULL) {
+	if (addr != 0) {
 		temp_bus_p = pf_find_busp_by_addr(impl, addr);
 	} else if (PCIE_CHECK_VALID_BDF(bdf)) {
 		temp_bus_p = pf_find_busp_by_bdf(impl, bdf);

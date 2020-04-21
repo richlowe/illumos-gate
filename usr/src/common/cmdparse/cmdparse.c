@@ -23,6 +23,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2020 Joyent Inc.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -67,7 +71,7 @@ static int getSubcommandProps(char *, subCommandProps_t **);
 static char *getExecBasename(char *);
 static void usage(uint_t);
 static void subUsage(uint_t, subCommandProps_t *);
-static char *getLongOption(int);
+static const char *getLongOption(int);
 static char *getOptionArgDesc(int);
 
 /* global data */
@@ -117,7 +121,7 @@ getSubcommandProps(char *subCommand, subCommandProps_t **subCommandProps)
  *  on success, long option name
  *  on failure, NULL
  */
-static char *
+static const char *
 getLongOption(int shortOption)
 {
 	struct option *op;
@@ -167,7 +171,7 @@ subUsage(uint_t usageType, subCommandProps_t *subcommand)
 {
 	int i;
 	char *optionArgDesc;
-	char *longOpt;
+	const char *longOpt;
 
 	if (usageType == GENERAL_USAGE) {
 		(void) printf("%s:\t%s %s [", gettext("Usage"), commandName,
@@ -608,11 +612,11 @@ cmdParse(int argc, char *argv[], synTables_t synTable, void *callArgs,
 			    subcommand->exclusive &&
 			    strchr(subcommand->exclusive,
 			    cmdOptions[i].optval)) {
-					(void) printf("%s: '-%c': %s\n",
-					    commandName, cmdOptions[i].optval,
-					    gettext("is an exclusive option"));
+				(void) printf("%s: '-%c': %s\n",
+				    commandName, cmdOptions[i].optval,
+				    gettext("is an exclusive option"));
 				subUsage(DETAIL_USAGE, subcommand);
-					return (1);
+				return (1);
 			}
 		}
 	} else { /* no options were input */

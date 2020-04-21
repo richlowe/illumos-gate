@@ -21,6 +21,7 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2018 Toomas Soome <tsoome@me.com>
  */
 
 #include <sys/types.h>
@@ -110,7 +111,7 @@ static rtsparam_t	lcl_param_arr[] = {
 #define	rtss_recv_hiwat		rtss_params[2].rts_param_value
 #define	rtss_max_buf		rtss_params[3].rts_param_value
 
-static void 	rts_err_ack(queue_t *q, mblk_t *mp, t_scalar_t t_error,
+static void	rts_err_ack(queue_t *q, mblk_t *mp, t_scalar_t t_error,
     int sys_error);
 static void	rts_input(void *, mblk_t *, void *, ip_recv_attr_t *);
 static void	rts_icmp_input(void *, mblk_t *, void *, ip_recv_attr_t *);
@@ -119,19 +120,19 @@ static int	rts_param_get(queue_t *q, mblk_t *mp, caddr_t cp, cred_t *cr);
 static boolean_t rts_param_register(IDP *ndp, rtsparam_t *rtspa, int cnt);
 static int	rts_param_set(queue_t *q, mblk_t *mp, char *value, caddr_t cp,
     cred_t *cr);
-static void	rts_rsrv(queue_t *q);
+static int	rts_rsrv(queue_t *q);
 static void	*rts_stack_init(netstackid_t stackid, netstack_t *ns);
 static void	rts_stack_fini(netstackid_t stackid, void *arg);
-static void	rts_wput(queue_t *q, mblk_t *mp);
+static int	rts_wput(queue_t *q, mblk_t *mp);
 static void	rts_wput_iocdata(queue_t *q, mblk_t *mp);
-static void 	rts_wput_other(queue_t *q, mblk_t *mp);
+static void	rts_wput_other(queue_t *q, mblk_t *mp);
 static int	rts_wrw(queue_t *q, struiod_t *dp);
 
 static int	rts_stream_open(queue_t *q, dev_t *devp, int flag, int sflag,
 		    cred_t *credp);
 static conn_t	*rts_open(int flag, cred_t *credp);
 
-static int	rts_stream_close(queue_t *q);
+static int	rts_stream_close(queue_t *, int, cred_t *);
 static int	rts_close(sock_lower_handle_t proto_handle, int flags,
 		    cred_t *cr);
 
@@ -140,13 +141,13 @@ static struct module_info rts_mod_info = {
 };
 
 static struct qinit rtsrinit = {
-	NULL, (pfi_t)rts_rsrv, rts_stream_open, rts_stream_close, NULL,
+	NULL, rts_rsrv, rts_stream_open, rts_stream_close, NULL,
 	&rts_mod_info
 };
 
 static struct qinit rtswinit = {
-	(pfi_t)rts_wput, NULL, NULL, NULL, NULL, &rts_mod_info,
-	NULL, (pfi_t)rts_wrw, NULL, STRUIOT_STANDARD
+	rts_wput, NULL, NULL, NULL, NULL, &rts_mod_info,
+	NULL, rts_wrw, NULL, STRUIOT_STANDARD
 };
 
 struct streamtab rtsinfo = {
@@ -236,8 +237,9 @@ rts_common_close(queue_t *q, conn_t *connp)
 	return (0);
 }
 
+/* ARGSUSED */
 static int
-rts_stream_close(queue_t *q)
+rts_stream_close(queue_t *q, int flags __unused, cred_t *credp __unused)
 {
 	conn_t  *connp = Q_TO_CONN(q);
 
@@ -667,7 +669,7 @@ rts_opt_set(conn_t *connp, uint_t optset_context, int level, int name,
     uint_t inlen, uchar_t *invalp, uint_t *outlenp, uchar_t *outvalp,
     void *thisdg_attrs, cred_t *cr)
 {
-	boolean_t 	checkonly = B_FALSE;
+	boolean_t	checkonly = B_FALSE;
 
 	if (optset_context) {
 		switch (optset_context) {
@@ -676,9 +678,9 @@ rts_opt_set(conn_t *connp, uint_t optset_context, int level, int name,
 			/*
 			 * Note: Implies T_CHECK semantics for T_OPTCOM_REQ
 			 * inlen != 0 implies value supplied and
-			 * 	we have to "pretend" to set it.
+			 *	we have to "pretend" to set it.
 			 * inlen == 0 implies that there is no value part
-			 * 	in T_CHECK request and just validation
+			 *	in T_CHECK request and just validation
 			 * done elsewhere should be enough, we just return here.
 			 */
 			if (inlen == 0) {
@@ -815,9 +817,10 @@ rts_param_set(queue_t *q, mblk_t *mp, char *value, caddr_t cp, cred_t *cr)
  * of a thread in qwait.
  */
 /*ARGSUSED*/
-static void
+static int
 rts_rsrv(queue_t *q)
 {
+	return (0);
 }
 
 /*
@@ -917,7 +920,7 @@ err_ret:
  * a message. The data messages that go down are wrapped in an IOCTL
  * message.
  */
-static void
+static int
 rts_wput(queue_t *q, mblk_t *mp)
 {
 	uchar_t	*rptr = mp->b_rptr;
@@ -936,7 +939,7 @@ rts_wput(queue_t *q, mblk_t *mp)
 				mp1 = mp->b_cont;
 				freeb(mp);
 				if (mp1 == NULL)
-					return;
+					return (0);
 				mp = mp1;
 				break;
 			}
@@ -944,7 +947,7 @@ rts_wput(queue_t *q, mblk_t *mp)
 		/* FALLTHRU */
 	default:
 		rts_wput_other(q, mp);
-		return;
+		return (0);
 	}
 
 
@@ -958,9 +961,10 @@ rts_wput(queue_t *q, mblk_t *mp)
 			rts->rts_error = ENOMEM;
 			rts->rts_flag &= ~RTS_WPUT_PENDING;
 		}
-		return;
+		return (0);
 	}
 	ip_wput_nondata(q, mp1);
+	return (0);
 }
 
 
@@ -1063,6 +1067,7 @@ rts_wput_other(queue_t *q, mblk_t *mp)
 		default:
 			break;
 		}
+		break;
 	case M_IOCDATA:
 		rts_wput_iocdata(q, mp);
 		return;
@@ -1349,7 +1354,7 @@ static int
 rts_getsockopt(sock_lower_handle_t proto_handle, int level, int option_name,
     void *optvalp, socklen_t *optlen, cred_t *cr)
 {
-	conn_t  	*connp = (conn_t *)proto_handle;
+	conn_t		*connp = (conn_t *)proto_handle;
 	rts_t		*rts = connp->conn_rts;
 	int		error;
 	t_uscalar_t	max_optbuf_len;

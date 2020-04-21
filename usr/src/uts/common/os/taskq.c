@@ -160,7 +160,7 @@
  *	the caller is willing to block for memory.  The function returns an
  *	opaque value which is zero iff dispatch fails.  If flags is TQ_NOSLEEP
  *	or TQ_NOALLOC and the task can't be dispatched, taskq_dispatch() fails
- *	and returns (taskqid_t)0.
+ *	and returns TASKQID_INVALID.
  *
  *	ASSUMES: func != NULL.
  *
@@ -700,7 +700,7 @@ uint_t taskq_smtbf = UINT_MAX;    /* mean time between injected failures */
 	taskq_random = (taskq_random * 2416 + 374441) % 1771875;\
 	if ((flag & TQ_NOSLEEP) &&				\
 	    taskq_random < 1771875 / taskq_dmtbf) {		\
-		return (NULL);					\
+		return (TASKQID_INVALID);			\
 	}
 
 #define	TASKQ_S_RANDOM_DISPATCH_FAILURE(tq, flag)		\
@@ -710,7 +710,7 @@ uint_t taskq_smtbf = UINT_MAX;    /* mean time between injected failures */
 	    (tq->tq_nalloc > tq->tq_minalloc)) &&		\
 	    (taskq_random < (1771875 / taskq_smtbf))) {		\
 		mutex_exit(&tq->tq_lock);			\
-		return (NULL);					\
+		return (TASKQID_INVALID);			\
 	}
 #else
 #define	TASKQ_S_RANDOM_DISPATCH_FAILURE(tq, flag)
@@ -1167,7 +1167,7 @@ taskq_dispatch(taskq_t *tq, task_func_t func, void *arg, uint_t flags)
 		if ((tqe = taskq_ent_alloc(tq, flags)) == NULL) {
 			tq->tq_nomem++;
 			mutex_exit(&tq->tq_lock);
-			return (NULL);
+			return ((taskqid_t)tqe);
 		}
 		/* Make sure we start without any flags */
 		tqe->tqent_un.tqent_flags = 0;
@@ -1364,6 +1364,12 @@ taskq_wait(taskq_t *tq)
 			mutex_exit(&b->tqbucket_lock);
 		}
 	}
+}
+
+void
+taskq_wait_id(taskq_t *tq, taskqid_t id __unused)
+{
+	taskq_wait(tq);
 }
 
 /*
@@ -1698,7 +1704,7 @@ taskq_d_thread(taskq_ent_t *tqe)
 	kmutex_t	*lock = &bucket->tqbucket_lock;
 	kcondvar_t	*cv = &tqe->tqent_cv;
 	callb_cpr_t	cprinfo;
-	clock_t		w;
+	clock_t		w = 0;
 
 	CALLB_CPR_INIT(&cprinfo, lock, callb_generic_cpr, tq->tq_name);
 

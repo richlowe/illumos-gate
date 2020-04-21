@@ -22,9 +22,10 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+#
 
-
-BINPROG=	mail 
+BINPROG=	mail
 
 PROG= 	       $(BINPROG)
 
@@ -72,9 +73,12 @@ EDITPATH= \
 CPPFLAGS =	-DSVR4 -I. $(CPPFLAGS.master)
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-clobbered
 CERRWARN +=	-_gcc=-Wno-extra
+
+# missing type declarations for old-style functions
+SMATCH =	off
 
 LDLIBS +=	-lmail -lsocket
 
@@ -104,7 +108,7 @@ $(ROOTINC)/% : %
 
 .PARALLEL: $(MAILOBJS) $(OBJS)
 
-all:		$(PROG) 
+all:		$(PROG)
 
 mail: 		$(MAILOBJS)
 	$(LINK.c) -o $@ $(MAILOBJS) $(LDLIBS)
@@ -117,7 +121,7 @@ install: all .WAIT $(ROOTBINPROG) $(ROOTSYMLINKS)
 $(ROOTBIN)/rmail:
 	$(RM) $@; $(SYMLINK) mail $@
 
-lint: 
+lint:
 	$(LINT.c) $(MAILSRC)
 
 clean:

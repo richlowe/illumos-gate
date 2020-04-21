@@ -23,8 +23,7 @@
 # Use is subject to license terms.
 # Copyright (c) 2013 Andrew Stormont.  All rights reserved.
 #
-# cmd/sa/Makefile
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 MANIFEST =	sar.xml
 SVCMETHOD =	svc-sar
@@ -34,7 +33,9 @@ include ../Makefile.cmd
 ROOTMANIFESTDIR = $(ROOTSVCSYSTEM)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+SMOFF += all_func_returns
 
 GREP=		grep
 

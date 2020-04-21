@@ -21,8 +21,8 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright (c) 2014, Joyent, Inc.  All rights reserved.
- * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright (c) 2018, Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /* Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -416,11 +416,11 @@ _info(struct modinfo *modinfop)
 
 static int	ldtermopen(queue_t *, dev_t *, int, int, cred_t *);
 static int	ldtermclose(queue_t *, int, cred_t *);
-static void	ldtermrput(queue_t *, mblk_t *);
-static void	ldtermrsrv(queue_t *);
+static int	ldtermrput(queue_t *, mblk_t *);
+static int	ldtermrsrv(queue_t *);
 static int	ldtermrmsg(queue_t *, mblk_t *);
-static void	ldtermwput(queue_t *, mblk_t *);
-static void	ldtermwsrv(queue_t *);
+static int	ldtermwput(queue_t *, mblk_t *);
+static int	ldtermwsrv(queue_t *);
 static int	ldtermwmsg(queue_t *, mblk_t *);
 static mblk_t	*ldterm_docanon(unsigned char, mblk_t *, size_t, queue_t *,
 				ldtermstd_state_t *, int *);
@@ -574,8 +574,8 @@ static struct module_info ldtermmiinfo = {
 
 
 static struct qinit ldtermrinit = {
-	(int (*)())ldtermrput,
-	(int (*)())ldtermrsrv,
+	ldtermrput,
+	ldtermrsrv,
 	ldtermopen,
 	ldtermclose,
 	NULL,
@@ -594,8 +594,8 @@ static struct module_info ldtermmoinfo = {
 
 
 static struct qinit ldtermwinit = {
-	(int (*)())ldtermwput,
-	(int (*)())ldtermwsrv,
+	ldtermwput,
+	ldtermwsrv,
 	ldtermopen,
 	ldtermclose,
 	NULL,
@@ -728,11 +728,25 @@ ldtermopen(queue_t *q, dev_t *devp, int oflag, int sflag, cred_t *crp)
 	tp->eucwioc.scrw[0] = 1;
 	tp->t_maxeuc = 1;	/* the max len in bytes of an EUC char */
 	tp->t_eucp = NULL;
-	tp->t_eucp_mp = NULL;
-	tp->t_eucwarn = 0;	/* no bad chars seen yet */
-
-	tp->t_csdata = default_cs_data;
 	tp->t_csmethods = cs_methods[LDTERM_CS_TYPE_EUC];
+	tp->t_csdata = default_cs_data;
+
+	/*
+	 * Try to switch to UTF-8 mode by allocating buffer for multibyte
+	 * chars, keep EUC if allocation fails.
+	 */
+	if ((tp->t_eucp_mp = allocb(_TTY_BUFSIZ, BPRI_HI)) != NULL) {
+		tp->t_eucp = tp->t_eucp_mp->b_rptr;
+		tp->t_state = TS_MEUC;	/* Multibyte mode. */
+		tp->t_maxeuc = 4; /* the max len in bytes of an UTF-8 char */
+		tp->t_csdata.codeset_type = LDTERM_CS_TYPE_UTF8;
+		tp->t_csdata.csinfo_num = 4;
+		/* locale_name needs string length with terminating NUL */
+		tp->t_csdata.locale_name = (char *)kmem_alloc(6, KM_SLEEP);
+		(void) strcpy(tp->t_csdata.locale_name, "UTF-8");
+		tp->t_csmethods = cs_methods[LDTERM_CS_TYPE_UTF8];
+	}
+	tp->t_eucwarn = 0;	/* no bad chars seen yet */
 
 	qprocson(q);
 
@@ -931,7 +945,7 @@ ldtermclose(queue_t *q, int cflag, cred_t *crp)
 /*
  * Put procedure for input from driver end of stream (read queue).
  */
-static void
+static int
 ldtermrput(queue_t *q, mblk_t *mp)
 {
 	ldtermstd_state_t *tp;
@@ -958,7 +972,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 		if (iocp->ioc_id == tp->t_iocid) {
 			tp->t_state &= ~TS_IOCWAIT;
 			freemsg(mp);
-			return;
+			return (0);
 		}
 	}
 
@@ -966,7 +980,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 
 	default:
 		(void) putq(q, mp);
-		return;
+		return (0);
 
 		/*
 		 * Send these up unmolested
@@ -977,12 +991,12 @@ ldtermrput(queue_t *q, mblk_t *mp)
 	case M_IOCNAK:
 
 		putnext(q, mp);
-		return;
+		return (0);
 
 	case M_IOCACK:
 
 		ldterm_ioctl_reply(q, mp);
-		return;
+		return (0);
 
 	case M_BREAK:
 
@@ -1007,7 +1021,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 					if ((mp = allocb(3, BPRI_HI)) == NULL) {
 						cmn_err(CE_WARN,
 						    "ldtermrput: no blocks");
-						return;
+						return (0);
 					}
 					mp->b_datap->db_type = M_DATA;
 					*mp->b_wptr++ = (uchar_t)'\377';
@@ -1022,7 +1036,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 			} else {
 				freemsg(mp);
 			}
-			return;
+			return (0);
 		}
 		/*
 		 * We look at the apparent modes here instead of the
@@ -1046,7 +1060,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 				if ((mp = allocb(3, BPRI_HI)) == NULL) {
 					cmn_err(CE_WARN,
 					    "ldtermrput: no blocks");
-					return;
+					return (0);
 				}
 				mp->b_datap->db_type = M_DATA;
 				*mp->b_wptr++ = (uchar_t)'\377';
@@ -1061,7 +1075,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 				if ((mp = allocb(1, BPRI_HI)) == NULL) {
 					cmn_err(CE_WARN,
 					    "ldtermrput: no blocks");
-					return;
+					return (0);
 				}
 				mp->b_datap->db_type = M_DATA;
 				*mp->b_wptr++ = '\0';
@@ -1070,7 +1084,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 		} else {
 			freemsg(mp);
 		}
-		return;
+		return (0);
 
 	case M_CTL:
 		DEBUG3(("ldtermrput: M_CTL received\n"));
@@ -1084,7 +1098,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 			    "Non standard M_CTL received by ldterm module\n"));
 			/* May be for someone else; pass it on */
 			putnext(q, mp);
-			return;
+			return (0);
 		}
 		qryp = (struct iocblk *)mp->b_rptr;
 
@@ -1151,7 +1165,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 			break;
 		}
 		putnext(q, mp);	/* In case anyone else has to see it */
-		return;
+		return (0);
 
 	case M_FLUSH:
 		/*
@@ -1188,7 +1202,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 			(void) putnextctl(wrq, M_STARTI);
 			DEBUG1(("M_STARTI down\n"));
 		}
-		return;
+		return (0);
 
 	case M_DATA:
 		break;
@@ -1212,7 +1226,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 	 */
 	if (tp->t_state & TS_NOCANON) {
 		(void) putq(q, mp);
-		return;
+		return (0);
 	}
 	bp = mp;
 
@@ -1457,6 +1471,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
 		(void) putnextctl(wrq, M_STOPI);
 		DEBUG1(("M_STOPI down\n"));
 	}
+	return (0);
 }
 
 
@@ -1465,7 +1480,7 @@ ldtermrput(queue_t *q, mblk_t *mp)
  * ('\') processing, gathering into messages, upper/lower case input
  * mapping.
  */
-static void
+static int
 ldtermrsrv(queue_t *q)
 {
 	ldtermstd_state_t *tp;
@@ -1512,6 +1527,7 @@ ldtermrsrv(queue_t *q)
 		tp->t_state &= ~TS_TBLOCK;
 		(void) putctl(WR(q), M_STARTI);
 	}
+	return (0);
 }
 
 /*
@@ -3036,7 +3052,7 @@ ldterm_wenable(void *addr)
  * if there's already something pending or if its downstream neighbor
  * is clogged.
  */
-static void
+static int
 ldtermwput(queue_t *q, mblk_t *mp)
 {
 	ldtermstd_state_t *tp;
@@ -3060,7 +3076,7 @@ ldtermwput(queue_t *q, mblk_t *mp)
 			    (*mp->b_rptr == FLUSHW)) {
 				tp->t_state &= ~TS_FLUSHWAIT;
 				freemsg(mp);
-				return;
+				return (0);
 			}
 			/*
 			 * This is coming from above, so we only
@@ -3196,7 +3212,7 @@ ldtermwput(queue_t *q, mblk_t *mp)
 			putnext(q, mp);
 			break;
 		}
-		return;
+		return (0);
 	}
 	/*
 	 * If our queue is nonempty or there's a traffic jam
@@ -3229,24 +3245,25 @@ ldtermwput(queue_t *q, mblk_t *mp)
 				 */
 			default:
 				(void) ldtermwmsg(q, mp);
-				return;
+				return (0);
 			}
 		}
 		(void) putq(q, mp);
-		return;
+		return (0);
 	}
 	/*
 	 * We can take the fast path through, by simply calling
 	 * ldtermwmsg to dispose of mp.
 	 */
 	(void) ldtermwmsg(q, mp);
+	return (0);
 }
 
 
 /*
  * Line discipline output queue service procedure.
  */
-static void
+static int
 ldtermwsrv(queue_t *q)
 {
 	mblk_t *mp;
@@ -3274,6 +3291,7 @@ ldtermwsrv(queue_t *q)
 			break;
 		}
 	}
+	return (0);
 }
 
 
@@ -4069,7 +4087,8 @@ ldterm_dosig(queue_t *q, int sig, uchar_t c, int mtype, int mode)
 
 	if (c != '\0') {
 		if ((tp->t_echomp = allocb(4, BPRI_HI)) != NULL) {
-			if (ldterm_echo(c, WR(q), 4, tp) > 0)
+			if (ldterm_echo(c, WR(q), 4, tp) > 0 ||
+			    (tp->t_state & TS_ISPTSTTY))
 				putnext(WR(q), tp->t_echomp);
 			else
 				freemsg(tp->t_echomp);
@@ -4585,21 +4604,20 @@ ldterm_do_ioctl(queue_t *q, mblk_t *mp)
 		}
 
 		locale_name_sz = 0;
-		if (csdp->locale_name) {
-			for (i = 0; i < MAXNAMELEN; i++)
-				if (csdp->locale_name[i] == '\0')
-					break;
-			/*
-			 * We cannot have any string that is not NULL byte
-			 * terminated.
-			 */
-			if (i >= MAXNAMELEN) {
-				miocnak(q, mp, 0, ERANGE);
-				return;
-			}
 
-			locale_name_sz = i + 1;
+		for (i = 0; i < MAXNAMELEN; i++)
+			if (csdp->locale_name[i] == '\0')
+				break;
+		/*
+		 * We cannot have any string that is not NULL byte
+		 * terminated.
+		 */
+		if (i >= MAXNAMELEN) {
+			miocnak(q, mp, 0, ERANGE);
+			return;
 		}
+
+		locale_name_sz = i + 1;
 
 		/*
 		 * As the final check, if there was invalid codeset_type

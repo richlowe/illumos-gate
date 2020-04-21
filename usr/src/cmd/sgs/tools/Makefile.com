@@ -18,6 +18,8 @@
 #
 # CDDL HEADER END
 #
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
@@ -27,8 +29,9 @@
 #
 # Makefile to support tools used for linker development:
 #
-#  o	sgsmsg creates message headers/arrays/catalogs (a native tool).
+# piglatin	- generates phone message catalogs for testing
 #
+
 # Note, these tools are not part of the product.
 #
 # cmd/sgs/tools/Makefile.com
@@ -37,32 +40,19 @@ include		$(SRC)/cmd/Makefile.cmd
 
 include		$(SRC)/cmd/sgs/Makefile.com
 
-SGSPROTO=	../../proto/$(MACH)
+OBJECTS=	piglatin.o
+NATIVECC_CFLAGS = -O
+NATIVE_LDFLAGS = $(LDASSERTS) $(ZASSERTDEFLIB)=libc.so $(BDIRECT)
 
-COMOBJS=
-
-NATOBJS=	piglatin.o
-
-OBJECTS=	$(COMOBJS)  $(NATOBJS)
-
-AVLOBJ=		avl.o
-TOOL_OBJS=	sgsmsg.o string_table.o findprime.o assfail.o
-SGSMSG_OBJS=	$(TOOL_OBJS) $(AVLOBJ)
-SGSMSG_SRCS=	$(TOOL_OBJS:%.o=../common/%.c) \
-		$(AVLOBJ:%.o=$(VAR_AVLDIR)/%.c)
-
-$(SGSMSG_OBJS) := NATIVE_CFLAGS += -I../../include $(VAR_TOOLS_CPPFLAGS)
-
-PROGS=		$(COMOBJS:%.o=%)
-NATIVE=		$(NATOBJS:%.o=%) sgsmsg
-SRCS=		$(COMOBJS:%.o=../common/%.c)  $(NATOBJS:%.o=../common/%.c)
+NATIVE=		$(OBJECTS:%.o=%)
+SRCS=		$(OBJECTS:%.o=../common/%.c)
 
 CPPFLAGS +=	$(VAR_TOOLS_CPPFLAGS)
-LDFLAGS +=	$(CC_USE_PROTO)
-CLEANFILES +=	$(LINTOUT) $(SGSMSG_OBJS)
-LINTFLAGS=	-ax
 
 ROOTDIR=	$(ROOT)/opt/SUNWonld
 ROOTPROGS=	$(PROGS:%=$(ROOTDIR)/bin/%)
 
 FILEMODE=	0755
+
+# not linted
+SMATCH=off

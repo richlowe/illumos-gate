@@ -23,6 +23,7 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	talk
 OBJS=	talk.o get_names.o display.o io.o ctl.o init_disp.o \
@@ -38,9 +39,12 @@ POFILE= talk.po
 #
 
 CFLAGS +=	$(CCVERBOSE)
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CPPFLAGS +=	-DSYSV -DSTRNET -DBSD_COMP
 LDLIBS +=	-lcurses -lsocket -lnsl
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

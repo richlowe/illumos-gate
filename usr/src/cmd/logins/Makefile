@@ -21,23 +21,22 @@
 #
 #
 # Copyright (c) 1990 by Sun Microsystems, Inc.
+# Copyright 2019 Peter Tribble.
 #
 
-PROG= 	logins
-PKGINFO= pkginfo
-TXTS= 	$(PKGINFO)
+PROG=	logins
 
 include ../Makefile.cmd
 TEXT_DOMAIN= SUNW_OST_ADMIN
 
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 
 FILEMODE= 0750
 
 .KEEP_STATE:
 
-all: $(PROG) $(TXTS)
+all: $(PROG)
 
 install: all $(ROOTPROG)
 

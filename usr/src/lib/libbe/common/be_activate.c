@@ -26,6 +26,7 @@
 /*
  * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2016 Toomas Soome <tsoome@me.com>
+ * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <assert.h>
@@ -275,7 +276,8 @@ _be_activate(char *be_name)
 		}
 	}
 
-	if ((ret = _be_list(cb.obe_name, &be_nodes)) != BE_SUCCESS) {
+	if ((ret = _be_list(cb.obe_name, &be_nodes, BE_LIST_DEFAULT))
+	    != BE_SUCCESS) {
 		return (ret);
 	}
 
@@ -445,7 +447,7 @@ be_is_active_on_boot(char *be_name)
 		return (B_FALSE);
 	}
 
-	if (_be_list(be_name, &be_node) != BE_SUCCESS) {
+	if (_be_list(be_name, &be_node, BE_LIST_DEFAULT) != BE_SUCCESS) {
 		return (B_FALSE);
 	}
 
@@ -959,9 +961,13 @@ be_do_installboot_helper(zpool_handle_t *zphp, nvlist_t *child, char *stage1,
 			    "%s %s %s %s %s", BE_INSTALL_GRUB, flag,
 			    stage1, stage2, diskname);
 		} else {
+			/*
+			 * With updated installboot, we only need boot
+			 * directory.
+			 */
 			(void) snprintf(install_cmd, sizeof (install_cmd),
-			    "%s %s %s %s %s", BE_INSTALL_BOOT, flag,
-			    stage1, stage2, diskname);
+			    "%s %s -b %s %s", BE_INSTALL_BOOT, flag,
+			    stage1, diskname);
 		}
 	} else if (be_is_isa("sparc")) {
 		if ((flags & BE_INSTALLBOOT_FLAG_FORCE) ==
@@ -1324,9 +1330,8 @@ be_do_installboot(be_transaction_data_t *bt, uint16_t flags)
 			    tmp_mntpt, BE_GRUB_STAGE_2);
 		} else {
 			(void) snprintf(stage1, sizeof (stage1), "%s%s",
-			    tmp_mntpt, BE_LOADER_STAGE_1);
-			(void) snprintf(stage2, sizeof (stage2), "%s%s",
-			    tmp_mntpt, BE_LOADER_STAGE_2);
+			    tmp_mntpt, BE_LOADER_STAGES);
+			/* Skip stage2 */
 		}
 	} else if (be_is_isa("sparc")) {
 		char *platform = be_get_platform();

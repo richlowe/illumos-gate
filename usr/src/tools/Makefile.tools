@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2020 Joyent, Inc.
 #
 # Definitions common to tool source.
 #
@@ -53,9 +54,16 @@ CPPFLAGS=		-D_TS_ERRNO
 ELFSIGN_O=		$(TRUE)
 LDLIBS=
 LDFLAGS=		$(MAPFILE.NES:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
-			    $(MAPFILE.PGA:%=-Wl,-M%)
+			    $(MAPFILE.PGA:%=-Wl,-M%) \
+			    $(ZASSERTDEFLIB)=libc.so \
+			    $(BDIRECT)
+
+# Unset CW_LINKER so we run the default.  We don't set LD here to avoid taking
+# the journey through LD_ALTEXEC unnecessarily.
+CW_LINKER=
 
 ROOTONBLDPROG=		$(PROG:%=$(ROOTONBLDBIN)/%)
+ROOTONBLDSCRIPTS=	$(SCRIPTS:%=$(ROOTONBLDBIN)/%)
 ROOTONBLDMACHPROG=	$(PROG:%=$(ROOTONBLDBINMACH)/%)
 ROOTONBLDSHFILES=	$(SHFILES:%=$(ROOTONBLDBIN)/%)
 ROOTONBLDMAKEFILES=	$(MAKEFILES:%=$(ROOTONBLDBIN)/%)

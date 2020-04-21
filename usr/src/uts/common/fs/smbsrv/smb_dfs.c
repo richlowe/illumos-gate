@@ -22,13 +22,13 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <smbsrv/smb_kproto.h>
 #include <smbsrv/smb_dfs.h>
 #include <smbsrv/smb_door.h>
-#include <smbsrv/winioctl.h>
+#include <smb/winioctl.h>
 
 /*
  * Get Referral response header flags
@@ -84,6 +84,30 @@ static void smb_dfs_referrals_free(dfs_referral_response_t *);
 static uint16_t smb_dfs_referrals_unclen(dfs_info_t *, uint16_t);
 
 /*
+ * Handle device type FILE_DEVICE_DFS
+ * for smb2_ioctl
+ */
+uint32_t
+smb_dfs_fsctl(smb_request_t *sr, smb_fsctl_t *fsctl)
+{
+	uint32_t status;
+
+	if (!STYPE_ISIPC(sr->tid_tree->t_res_type))
+		return (NT_STATUS_INVALID_DEVICE_REQUEST);
+
+	switch (fsctl->CtlCode) {
+	case FSCTL_DFS_GET_REFERRALS:
+		status = smb_dfs_get_referrals(sr, fsctl);
+		break;
+	case FSCTL_DFS_GET_REFERRALS_EX: /* XXX - todo */
+	default:
+		status = NT_STATUS_NOT_SUPPORTED;
+	}
+
+	return (status);
+}
+
+/*
  * Note: SMB1 callers in smb_trans2_dfs.c
  * smb_com_trans2_report_dfs_inconsistency
  * smb_com_trans2_get_dfs_referral
@@ -91,6 +115,7 @@ static uint16_t smb_dfs_referrals_unclen(dfs_info_t *, uint16_t);
 
 /*
  * See [MS-DFSC] for details about this command
+ * Handles FSCTL_DFS_GET_REFERRALS (only)
  */
 uint32_t
 smb_dfs_get_referrals(smb_request_t *sr, smb_fsctl_t *fsctl)
@@ -117,21 +142,14 @@ smb_dfs_get_referrals(smb_request_t *sr, smb_fsctl_t *fsctl)
 	 * allow all this decoding/encoding to happen at user-level.
 	 * (and most of this file would go away. :-)
 	 */
-	switch (fsctl->CtlCode) {
-	case FSCTL_DFS_GET_REFERRALS:
-		/*
-		 * Input data is (w) MaxReferralLevel, (U) path
-		 */
-		rc = smb_mbc_decodef(fsctl->in_mbc, "%wu",
-		    sr, &maxver, &path);
-		if (rc != 0)
-			return (NT_STATUS_INVALID_PARAMETER);
-		break;
 
-	case FSCTL_DFS_GET_REFERRALS_EX: /* XXX - todo */
-	default:
-		return (NT_STATUS_NOT_SUPPORTED);
-	}
+	/*
+	 * Input data is (w) MaxReferralLevel, (U) path
+	 */
+	rc = smb_mbc_decodef(fsctl->in_mbc, "%wu",
+	    sr, &maxver, &path);
+	if (rc != 0)
+		return (NT_STATUS_INVALID_PARAMETER);
 
 	reftype = smb_dfs_get_reftype((const char *)path);
 	switch (reftype) {
@@ -259,7 +277,7 @@ smb_dfs_encode_hdr(mbuf_chain_t *mbc, dfs_info_t *referrals)
 
 static uint32_t
 smb_dfs_encode_refv1(smb_request_t *sr, mbuf_chain_t *mbc,
-	dfs_info_t *referrals)
+    dfs_info_t *referrals)
 {
 	_NOTE(ARGUNUSED(sr))
 	uint16_t entsize, rep_bufsize;
@@ -328,7 +346,7 @@ smb_dfs_encode_refv1(smb_request_t *sr, mbuf_chain_t *mbc,
  */
 static uint32_t
 smb_dfs_encode_refv2(smb_request_t *sr, mbuf_chain_t *mbc,
-	dfs_info_t *referrals)
+    dfs_info_t *referrals)
 {
 	_NOTE(ARGUNUSED(sr))
 	uint16_t entsize, rep_bufsize;
@@ -391,8 +409,7 @@ smb_dfs_encode_refv2(smb_request_t *sr, mbuf_chain_t *mbc,
  */
 static uint32_t
 smb_dfs_encode_refv3x(smb_request_t *sr, mbuf_chain_t *mbc,
-	dfs_info_t *referrals,
-    uint16_t ver)
+    dfs_info_t *referrals, uint16_t ver)
 {
 	_NOTE(ARGUNUSED(sr))
 	uint16_t entsize, rep_bufsize, hdrsize;
@@ -504,7 +521,7 @@ smb_dfs_referrals_get(smb_request_t *sr, char *dfs_path, dfs_reftype_t reftype,
 	    &req, dfs_referral_query_xdr, refrsp, dfs_referral_response_xdr);
 
 	if (rc != 0 || refrsp->rp_status != ERROR_SUCCESS) {
-		return (NT_STATUS_NO_SUCH_DEVICE);
+		return (NT_STATUS_FS_DRIVER_REQUIRED);
 	}
 
 	(void) strsubst(refrsp->rp_referrals.i_uncpath, '/', '\\');

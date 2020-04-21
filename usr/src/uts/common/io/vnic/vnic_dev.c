@@ -20,8 +20,9 @@
  */
 /*
  * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  * Copyright 2016 OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/types.h>
@@ -198,7 +199,7 @@ vnic_unicast_add(vnic_t *vnic, vnic_mac_addr_type_t vnic_addr_type,
     uint8_t *mac_addr_arg, uint16_t flags, vnic_ioc_diag_t *diag,
     uint16_t vid, boolean_t req_hwgrp_flag)
 {
-	mac_diag_t mac_diag;
+	mac_diag_t mac_diag = MAC_DIAG_NONE;
 	uint16_t mac_flags = 0;
 	int err;
 	uint_t addr_len;
@@ -354,7 +355,7 @@ vnic_dev_create(datalink_id_t vnic_id, datalink_id_t linkid,
 
 	rw_enter(&vnic_lock, RW_WRITER);
 
-	/* does a VNIC with the same id already exist? */
+	/* Does a VNIC with the same id already exist? */
 	err = mod_hash_find(vnic_hash, VNIC_HASH_KEY(vnic_id),
 	    (mod_hash_val_t *)&vnic);
 	if (err == 0) {
@@ -370,6 +371,7 @@ vnic_dev_create(datalink_id_t vnic_id, datalink_id_t linkid,
 
 	bzero(vnic, sizeof (*vnic));
 
+	vnic->vn_ls = LINK_STATE_UNKNOWN;
 	vnic->vn_id = vnic_id;
 	vnic->vn_link_id = linkid;
 	vnic->vn_vrid = vrid;
@@ -580,11 +582,12 @@ vnic_dev_create(datalink_id_t vnic_id, datalink_id_t linkid,
 	vnic->vn_enabled = B_TRUE;
 
 	if (is_anchor) {
-		mac_link_update(vnic->vn_mh, LINK_STATE_UP);
+		vnic->vn_ls = LINK_STATE_UP;
 	} else {
-		mac_link_update(vnic->vn_mh,
-		    mac_client_stat_get(vnic->vn_mch, MAC_STAT_LINK_STATE));
+		vnic->vn_ls = mac_client_stat_get(vnic->vn_mch,
+		    MAC_STAT_LINK_STATE);
 	}
+	mac_link_update(vnic->vn_mh, vnic->vn_ls);
 
 	rw_exit(&vnic_lock);
 
@@ -1035,7 +1038,7 @@ static int
 vnic_m_setprop(void *m_driver, const char *pr_name, mac_prop_id_t pr_num,
     uint_t pr_valsize, const void *pr_val)
 {
-	int 		err = 0;
+	int		err = 0;
 	vnic_t		*vn = m_driver;
 
 	switch (pr_num) {
@@ -1092,6 +1095,34 @@ vnic_m_setprop(void *m_driver, const char *pr_name, mac_prop_id_t pr_num,
 		err = vnic_set_secondary_macs(vn, &msa);
 		break;
 	}
+	case MAC_PROP_PRIVATE: {
+		long val, i;
+		const char *v;
+
+		if (vn->vn_link_id != DATALINK_INVALID_LINKID ||
+		    strcmp(pr_name, "_linkstate") != 0) {
+			err = ENOTSUP;
+			break;
+		}
+
+		for (v = pr_val, i = 0; i < pr_valsize; i++, v++) {
+			if (*v == '\0')
+				break;
+		}
+		if (i == pr_valsize) {
+			err = EINVAL;
+			break;
+		}
+
+		(void) ddi_strtol(pr_val, (char **)NULL, 0, &val);
+		if (val != LINK_STATE_UP && val != LINK_STATE_DOWN) {
+			err = EINVAL;
+			break;
+		}
+		vn->vn_ls = val;
+		mac_link_update(vn->vn_mh, vn->vn_ls);
+		break;
+	}
 	default:
 		err = ENOTSUP;
 		break;
@@ -1105,7 +1136,7 @@ vnic_m_getprop(void *arg, const char *pr_name, mac_prop_id_t pr_num,
     uint_t pr_valsize, void *pr_val)
 {
 	vnic_t		*vn = arg;
-	int 		ret = 0;
+	int		ret = 0;
 	boolean_t	out;
 
 	switch (pr_num) {
@@ -1117,6 +1148,18 @@ vnic_m_getprop(void *arg, const char *pr_name, mac_prop_id_t pr_num,
 	case MAC_PROP_SECONDARY_ADDRS:
 		ret = vnic_get_secondary_macs(vn, pr_valsize, pr_val);
 		break;
+	case MAC_PROP_PRIVATE:
+		if (vn->vn_link_id != DATALINK_INVALID_LINKID) {
+			ret = EINVAL;
+			break;
+		}
+
+		if (strcmp(pr_name, "_linkstate") != 0) {
+			ret = EINVAL;
+			break;
+		}
+		(void) snprintf(pr_val, pr_valsize, "%d", vn->vn_ls);
+		break;
 	default:
 		ret = ENOTSUP;
 		break;
@@ -1126,7 +1169,8 @@ vnic_m_getprop(void *arg, const char *pr_name, mac_prop_id_t pr_num,
 }
 
 /* ARGSUSED */
-static void vnic_m_propinfo(void *m_driver, const char *pr_name,
+static void
+vnic_m_propinfo(void *m_driver, const char *pr_name,
     mac_prop_id_t pr_num, mac_prop_info_handle_t prh)
 {
 	vnic_t		*vn = m_driver;
@@ -1167,6 +1211,18 @@ static void vnic_m_propinfo(void *m_driver, const char *pr_name,
 			mac_prop_info_set_range_uint32(prh,
 			    range.mpr_range_uint32[0].mpur_min, max);
 			mac_perim_exit(mph);
+		}
+		break;
+	case MAC_PROP_PRIVATE:
+		if (vn->vn_link_id != DATALINK_INVALID_LINKID)
+			break;
+
+		if (strcmp(pr_name, "_linkstate") == 0) {
+			char buf[16];
+
+			mac_prop_info_set_perm(prh, MAC_PROP_PERM_RW);
+			(void) snprintf(buf, sizeof (buf), "%d", vn->vn_ls);
+			mac_prop_info_set_default_str(prh, buf);
 		}
 		break;
 	}
@@ -1241,8 +1297,9 @@ vnic_notify_cb(void *arg, mac_notify_type_t type)
 		break;
 
 	case MAC_NOTE_LINK:
-		mac_link_update(vnic->vn_mh,
-		    mac_client_stat_get(vnic->vn_mch, MAC_STAT_LINK_STATE));
+		vnic->vn_ls = mac_client_stat_get(vnic->vn_mch,
+		    MAC_STAT_LINK_STATE);
+		mac_link_update(vnic->vn_mh, vnic->vn_ls);
 		break;
 
 	default:

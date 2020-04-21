@@ -25,17 +25,9 @@
  * Copyright (c) 2017, Joyent, Inc. All rights reserved.
  */
 
-#if !defined(lint)
 #include "assym.h"
-#endif /* !lint */
 
 #include <sys/asm_linkage.h>
-
-#if defined(lint)
-
-char stubs_base[1], stubs_end[1];
-
-#else	/* lint */
 
 /*
  * WARNING: there is no check for forgetting to write END_MODULE,
@@ -204,7 +196,7 @@ fcnname/**/_info:							\
 	SET_SIZE(fcnname);						\
 	STUB_DATA(module, fcnname, install_fcn, retfcn, weak)
 
-#define SCALL_UNLOADABLE(module, fcnname, install_fcn, retfcn, weak)	\
+#define SCALL_NO_UNLOADABLE(module, fcnname, install_fcn, retfcn, weak)	\
 	ENTRY_NP(fcnname);						\
 	save	%sp, -SA(MINFRAME), %sp;	/* new window */	\
 	set	fcnname/**/_info, %l5;					\
@@ -527,6 +519,7 @@ stubs_base:
 	NO_UNLOAD_STUB(tlimod, t_kclose,  	nomod_zero);
 	NO_UNLOAD_STUB(tlimod, t_kspoll,  	nomod_zero);
 	NO_UNLOAD_STUB(tlimod, t_kfree,  	nomod_zero);
+	NO_UNLOAD_STUB(tlimod, t_koptmgmt,	nomod_zero);
 	END_MODULE(tlimod);
 #endif
 
@@ -1283,4 +1276,3 @@ stubs_base:
 stubs_end:
 	nop
 
-#endif	/* lint */

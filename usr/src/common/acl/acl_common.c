@@ -781,9 +781,9 @@ acevals_init(acevals_t *vals, uid_t key)
 static void
 ace_list_init(ace_list_t *al, int dfacl_flag)
 {
-	acevals_init(&al->user_obj, NULL);
-	acevals_init(&al->group_obj, NULL);
-	acevals_init(&al->other_obj, NULL);
+	acevals_init(&al->user_obj, 0);
+	acevals_init(&al->group_obj, 0);
+	acevals_init(&al->other_obj, 0);
 	al->numusers = 0;
 	al->numgroups = 0;
 	al->acl_mask = 0;
@@ -1636,7 +1636,7 @@ acl_trivial_access_masks(mode_t mode, boolean_t isdir, trivial_acl_t *masks)
 int
 acl_trivial_create(mode_t mode, boolean_t isdir, ace_t **acl, int *count)
 {
-	int 		index = 0;
+	int		index = 0;
 	int		error;
 	trivial_acl_t	masks;
 
@@ -1695,7 +1695,8 @@ ace_trivial_common(void *acep, int aclcnt,
 	uint16_t type;
 	uint64_t cookie = 0;
 
-	while (cookie = walk(acep, cookie, aclcnt, &flags, &type, &mask)) {
+	while ((cookie = walk(acep, cookie, aclcnt, &flags, &type, &mask))
+	    != 0) {
 		switch (flags & ACE_TYPE_FLAGS) {
 		case ACE_OWNER:
 		case ACE_GROUP|ACE_IDENTIFIER_GROUP:

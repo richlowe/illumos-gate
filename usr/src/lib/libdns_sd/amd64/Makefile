@@ -25,5 +25,4 @@
 include ../Makefile.com
 include ../../Makefile.lib.64
 
-CERRWARN +=       -_cc=-erroff=E_ASSIGNMENT_TYPE_MISMATCH
-install: all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTLINT64)
+install: all $(ROOTLIBS64) $(ROOTLINKS64)

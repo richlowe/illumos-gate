@@ -20,11 +20,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
-#	This makefile drives the production of the pmcs driver kernel module.
-#
-#	intel architecture dependent
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Paths to the base of the uts directory trees
@@ -67,11 +63,13 @@ CPPFLAGS	+= $(PMCS_DRV_FLGS) \
 	-DPMCS_FIRMWARE_VERSION_STRING=\"${PMCS_FW_VERSION_STRING}\"
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-value
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-parentheses
 
+# needs work
+SMATCH=off
 
 #
 #	Default build targets.

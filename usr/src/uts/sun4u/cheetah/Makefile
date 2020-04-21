@@ -97,8 +97,8 @@ clean.lint:	$(CLEAN_LINT_DEPS)
 
 install:	$(INSTALL_DEPS)
 
-$(CPULIB):	$(BINARY)
-	$(BUILD.SO) $(BINARY)
+$(CPULIB):	$(OBJECTS)
+	$(BUILD.SO) $(OBJECTS)
 
 $(SYM_MOD):	$(UNIX_O) $(CPULIB)
 	@echo "resolving symbols against unix.o"
@@ -124,6 +124,6 @@ LINTTAGS	+= -erroff=E_PTRDIFF_OVERFLOW
 LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-clobbered

@@ -21,14 +21,11 @@
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-#	This makefile drives the production of the iscsit pseudo-driver for 
-#	COMSTAR.
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
 #
-
-
 UTSBASE	= ../..
 
 ARCHDIR:sh = cd ..; basename `pwd`
@@ -63,8 +60,12 @@ LDFLAGS		+= -dy -Ndrv/stmf -Nmisc/idm -Nfs/sockfs -Nmisc/md5 -Nmisc/ksocket
 C99LMODE=	-Xc99=%all
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-label
+
+# needs work
+SMOFF += cast_assign,strcpy_overflow
+
 
 #
 #	Default build targets.

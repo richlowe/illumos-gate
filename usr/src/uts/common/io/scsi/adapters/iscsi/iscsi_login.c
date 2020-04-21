@@ -70,6 +70,12 @@ static void iscsi_notice_key_values(iscsi_conn_t *icp);
  * +--------------------------------------------------------------------+
  */
 
+void
+iscsi_login_cb(void *arg)
+{
+	(void) iscsi_login_start(arg);
+}
+
 /*
  * iscsi_login_start - connect and perform iscsi protocol login
  */
@@ -235,7 +241,7 @@ login_retry:
 			goto login_start;
 		} else {
 			if (ddi_taskq_dispatch(isp->sess_login_taskq,
-			    (void(*)())iscsi_login_start, itp, DDI_SLEEP) !=
+			    iscsi_login_cb, itp, DDI_SLEEP) !=
 			    DDI_SUCCESS) {
 				iscsi_login_end(icp,
 				    ISCSI_STATUS_LOGIN_TIMED_OUT, itp);
@@ -2066,6 +2072,7 @@ iscsi_login_failure_str(uchar_t status_class, uchar_t status_detail)
 		default:
 			break;
 		}
+		break;
 	case 0x01:
 		switch (status_detail) {
 		case 0x01:
@@ -2077,6 +2084,7 @@ iscsi_login_failure_str(uchar_t status_class, uchar_t status_detail)
 		default:
 			break;
 		}
+		break;
 	case 0x02:
 		switch (status_detail) {
 		case 0x00:
@@ -2116,6 +2124,7 @@ iscsi_login_failure_str(uchar_t status_class, uchar_t status_detail)
 		default:
 			break;
 		}
+		break;
 	case 0x03:
 		switch (status_detail) {
 		case 0x00:
@@ -2129,6 +2138,7 @@ iscsi_login_failure_str(uchar_t status_class, uchar_t status_detail)
 		default:
 			break;
 		}
+		break;
 	}
 	return ("Unknown login response received.");
 }

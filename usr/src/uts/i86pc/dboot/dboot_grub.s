@@ -24,12 +24,6 @@
  * Use is subject to license terms.
  */
 
-#if defined(__lint)
-
-int silence_lint_warnings = 0;
-
-#else /* __lint */
-
 #include <sys/multiboot.h>
 #include <sys/multiboot2.h>
 #include <sys/asm_linkage.h>
@@ -112,9 +106,9 @@ information_request_tag_start:
 	.long	MULTIBOOT_TAG_TYPE_MODULE
 	.long	MULTIBOOT_TAG_TYPE_BOOTDEV
 	.long	MULTIBOOT_TAG_TYPE_MMAP
+	.long	MULTIBOOT_TAG_TYPE_FRAMEBUFFER
 	.long	MULTIBOOT_TAG_TYPE_BASIC_MEMINFO
 information_request_tag_end:
-	.long	0		/* padding */
 
 #if defined (_BOOT_TARGET_amd64)
 	/*
@@ -155,6 +149,19 @@ console_tag_start:
 	.long	console_tag_end - console_tag_start
 	.long	MULTIBOOT_CONSOLE_FLAGS_EGA_TEXT_SUPPORTED
 console_tag_end:
+	.long	0		/* padding */
+
+	/*
+	 * MB header framebuffer tag
+	 */
+framebuffer_tag_start:
+	.word	MULTIBOOT_HEADER_TAG_FRAMEBUFFER
+	.word	0
+	.long	framebuffer_tag_end - framebuffer_tag_start
+	.long	0		/* width - no preference */
+	.long	0		/* height - no preference */
+	.long	0		/* depth - no preference */
+framebuffer_tag_end:
 	.long	0		/* padding */
 
 	/*
@@ -359,4 +366,3 @@ longmode:
 	.skip 4096
 	.long	0
 
-#endif /* __lint */

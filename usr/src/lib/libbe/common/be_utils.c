@@ -24,6 +24,8 @@
  * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2016 Toomas Soome <tsoome@me.com>
  * Copyright (c) 2015 by Delphix. All rights reserved.
+ * Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 
@@ -140,7 +142,7 @@ be_get_boot_args(char **fbarg, int entry)
 		goto done;
 	}
 
-	ret = _be_list(NULL, &be_nodes);
+	ret = _be_list(NULL, &be_nodes, BE_LIST_DEFAULT);
 	if (ret != BE_SUCCESS)
 		goto done;
 
@@ -269,7 +271,7 @@ be_get_boot_args(char **fbarg, int entry)
 			    "-B zfs-bootfs=%s,bootpath=\"%s\"\n", kernel,
 			    kernel_options, node->be_root_ds, tmp);
 
-		if (fbarg == NULL)
+		if (*fbarg == NULL)
 			ret = BE_ERR_NOMEM;
 		else
 			ret = 0;
@@ -511,6 +513,35 @@ be_make_container_ds(const char *zpool,  char *container_ds,
 			    "dataset is not mounted\n"));
 			return;
 		}
+	}
+}
+
+/*
+ * Function:	be_make_root_container_ds
+ * Description:	Generate string for the BE root container dataset given a pool
+ *              name.
+ * Parameters:
+ *		zpool - pointer zpool name.
+ *		container_ds - pointer to buffer in which to return result
+ *		container_ds_size - size of container_ds
+ * Returns:
+ *		None
+ * Scope:
+ *		Semi-private (library wide use only)
+ */
+void
+be_make_root_container_ds(const char *zpool, char *container_ds,
+    int container_ds_size)
+{
+	char *root;
+
+	be_make_container_ds(zpool, container_ds, container_ds_size);
+
+	/* If the container DS ends with /ROOT, remove it.  */
+
+	if ((root = strrchr(container_ds, '/')) != NULL &&
+	    strcmp(root + 1, BE_CONTAINER_DS_NAME) == 0) {
+		*root = '\0';
 	}
 }
 
@@ -2316,7 +2347,7 @@ be_update_zone_vfstab(zfs_handle_t *zhp, char *be_name, char *old_rc_loc,
 char *
 be_auto_snap_name(void)
 {
-	time_t		utc_tm = NULL;
+	time_t		utc_tm = 0;
 	struct tm	*gmt_tm = NULL;
 	char		gmt_time_str[64];
 	char		*auto_snap_name = NULL;
@@ -2503,7 +2534,7 @@ be_valid_auto_snap_name(char *name)
 	}
 
 	/* Get the next field, which is the reserved field. */
-	if (c[1] == NULL || c[1] == '\0') {
+	if (c[1] == '\0') {
 		free(policy);
 		return (B_FALSE);
 	}
@@ -2522,7 +2553,7 @@ be_valid_auto_snap_name(char *name)
 	}
 
 	/* The remaining string should be the date field */
-	if (c[1] == NULL || c[1] == '\0') {
+	if (c[1] == '\0') {
 		free(policy);
 		return (B_FALSE);
 	}
@@ -2627,7 +2658,7 @@ be_print_err(char *prnt_str, ...)
 /*
  * Function:	be_find_current_be
  * Description:	Find the currently "active" BE. Fill in the
- * 		passed in be_transaction_data_t reference with the
+ *		passed in be_transaction_data_t reference with the
  *		active BE's data.
  * Paramters:
  *		none
@@ -3679,7 +3710,7 @@ be_get_auto_name(char *obe_name, char *be_container_ds, boolean_t zone_be)
 			    "be_get_zone_be_list failed\n"));
 			return (NULL);
 		}
-	} else if (_be_list(NULL, &be_nodes) != BE_SUCCESS) {
+	} else if (_be_list(NULL, &be_nodes, BE_LIST_DEFAULT) != BE_SUCCESS) {
 		be_print_err(gettext("be_get_auto_name: be_list failed\n"));
 		return (NULL);
 	}
@@ -3907,9 +3938,9 @@ be_create_menu(
 	if (mkdirp(menu_path,
 	    S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1 &&
 	    errno != EEXIST) {
-		free(menu_path);
 		be_print_err(gettext("be_create_menu: Failed to create the %s "
 		    "directory: %s\n"), menu_path, strerror(errno));
+		free(menu_path);
 		return (errno_to_be_err(errno));
 	}
 	free(menu_path);
@@ -3971,7 +4002,7 @@ be_create_menu(
 	/*
 	 * Now we need to add all the BE's back into the the file.
 	 */
-	if (_be_list(NULL, &be_nodes) == BE_SUCCESS) {
+	if (_be_list(NULL, &be_nodes, BE_LIST_DEFAULT) == BE_SUCCESS) {
 		while (be_nodes != NULL) {
 			if (strcmp(pool, be_nodes->be_rpool) == 0) {
 				(void) be_append_menu(be_nodes->be_node_name,

@@ -24,7 +24,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 XLATEDIR = $(SRC)/lib/libbsm/common
 
@@ -43,7 +43,9 @@ CPPFLAGS += -D_PRAUDIT -I$(XLATEDIR)
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+SMOFF += signed
 
 LDLIBS += -lbsm -lnsl -lpam -ltsol
 
@@ -54,7 +56,7 @@ all: $(PROG)
 install: all $(ROOTUSRSBINPROG)
 
 $(PROG): $(OBJS)
-	$(CC) -o $(PROG) $(OBJS) $(LDFLAGS) $(LDLIBS)
+	$(LINK.c) -o $(PROG) $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 adt_xlate.o: $(XLATEDIR)/adt_xlate.c

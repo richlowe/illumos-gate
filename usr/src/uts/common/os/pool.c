@@ -566,14 +566,14 @@ pool_status(int status)
 		if (ret != 0)
 			return (ret);
 		pool_state = POOL_ENABLED;
-		pool_event_dispatch(POOL_E_ENABLE, NULL);
+		pool_event_dispatch(POOL_E_ENABLE, 0);
 		break;
 	case POOL_DISABLED:
 		ret = pool_disable();
 		if (ret != 0)
 			return (ret);
 		pool_state = POOL_DISABLED;
-		pool_event_dispatch(POOL_E_DISABLE, NULL);
+		pool_event_dispatch(POOL_E_DISABLE, 0);
 		break;
 	default:
 		ret = EINVAL;
@@ -1354,9 +1354,9 @@ pool_do_bind(pool_t *pool, idtype_t idtype, id_t id, int flags)
 	proc_t **pp, **procs;
 	proc_t *prstart;
 	int procs_count = 0;
-	kproject_t *kpj;
+	kproject_t *kpj = NULL;
 	procset_t set;
-	zone_t *zone;
+	zone_t *zone = NULL;
 	int procs_size;
 	int rv = 0;
 	proc_t *p;

@@ -30,6 +30,7 @@
 #
 # Copyright (c) 2016 by Delphix. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 FSTYPE=		nfs
 TYPEPROG=	statd
@@ -41,7 +42,10 @@ CPPFLAGS +=     -D_REENTRANT -DSUN_THREADS
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 LOCAL=		sm_svc.o sm_proc.o sm_statd.o
 OBJS=		$(LOCAL) selfcheck.o daemon.o smfcfg.o

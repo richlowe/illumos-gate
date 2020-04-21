@@ -22,7 +22,8 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# This makefile drives the production of qlc driver kernel module.
+# Copyright (c) 2018, Joyent, Inc.
+
 #
 # Path to the base of the uts directory tree (usually /usr/src/uts).
 #
@@ -77,9 +78,12 @@ FWIMAGES        += 8100
 FWMODULES        = $(FWIMAGES:%=$(MODULE)_fw_%)
 FWMODULES_SRC    = $(FWIMAGES:%=$(CONF_SRCDIR)/ql_fw_%.c)
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-parentheses
+
+# needs work
+SMATCH=off
 
 #
 #	Default build targets.

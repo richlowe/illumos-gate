@@ -2,6 +2,7 @@
  * Copyright 2017 Gary Mills
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -72,7 +73,7 @@ uint32_t rt2860_dbg_flags = 0x0;
 #define	RWN_DEBUG \
 	rt2860_debug
 #else
-#define	RWN_DEBUG
+#define	RWN_DEBUG(...) (void)(0)
 #endif
 
 static void *rt2860_soft_state_p = NULL;
@@ -900,11 +901,10 @@ rt2860_free_rx_ring(struct rt2860_softc *sc, struct rt2860_rx_ring *ring)
 		rt2860_free_dma_mem(&ring->rxdesc_dma);
 
 	count = RT2860_RX_RING_COUNT;
-	if (ring->data != NULL) {
-		for (i = 0; i < count; i++) {
-			data = &ring->data[i];
-			rt2860_free_dma_mem(&data->rxbuf_dma);
-		}
+
+	for (i = 0; i < count; i++) {
+		data = &ring->data[i];
+		rt2860_free_dma_mem(&data->rxbuf_dma);
 	}
 }
 

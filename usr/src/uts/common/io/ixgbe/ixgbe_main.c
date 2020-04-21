@@ -25,7 +25,7 @@
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright 2012 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2013 Saso Kiselkov. All rights reserved.
  * Copyright (c) 2013 OSN Online Service Nuernberg GmbH. All rights reserved.
@@ -57,8 +57,8 @@ static int ixgbe_alloc_rings(ixgbe_t *);
 static void ixgbe_free_rings(ixgbe_t *);
 static int ixgbe_alloc_rx_data(ixgbe_t *);
 static void ixgbe_free_rx_data(ixgbe_t *);
-static void ixgbe_setup_rings(ixgbe_t *);
-static void ixgbe_setup_rx(ixgbe_t *);
+static int ixgbe_setup_rings(ixgbe_t *);
+static int ixgbe_setup_rx(ixgbe_t *);
 static void ixgbe_setup_tx(ixgbe_t *);
 static void ixgbe_setup_rx_ring(ixgbe_rx_ring_t *);
 static void ixgbe_setup_tx_ring(ixgbe_tx_ring_t *);
@@ -67,6 +67,7 @@ static void ixgbe_setup_vmdq(ixgbe_t *);
 static void ixgbe_setup_vmdq_rss(ixgbe_t *);
 static void ixgbe_setup_rss_table(ixgbe_t *);
 static void ixgbe_init_unicst(ixgbe_t *);
+static int ixgbe_init_vlan(ixgbe_t *);
 static int ixgbe_unicst_find(ixgbe_t *, const uint8_t *);
 static void ixgbe_setup_multicst(ixgbe_t *);
 static void ixgbe_get_hw_state(ixgbe_t *);
@@ -113,6 +114,8 @@ static void ixgbe_intr_other_work(ixgbe_t *, uint32_t);
 static void ixgbe_get_driver_control(struct ixgbe_hw *);
 static int ixgbe_addmac(void *, const uint8_t *);
 static int ixgbe_remmac(void *, const uint8_t *);
+static int ixgbe_addvlan(mac_group_driver_t, uint16_t);
+static int ixgbe_remvlan(mac_group_driver_t, uint16_t);
 static void ixgbe_release_driver_control(struct ixgbe_hw *);
 
 static int ixgbe_attach(dev_info_t *, ddi_attach_cmd_t);
@@ -1010,19 +1013,29 @@ ixgbe_identify_hardware(ixgbe_t *ixgbe)
 
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		IXGBE_DEBUGLOG_0(ixgbe, "identify X550 adapter\n");
 		ixgbe->capab = &ixgbe_X550_cap;
 
-		if (hw->device_id == IXGBE_DEV_ID_X550EM_X_SFP)
+		if (hw->device_id == IXGBE_DEV_ID_X550EM_X_SFP ||
+		    hw->device_id == IXGBE_DEV_ID_X550EM_A_SFP ||
+		    hw->device_id == IXGBE_DEV_ID_X550EM_A_SFP_N ||
+		    hw->device_id == IXGBE_DEV_ID_X550EM_A_QSFP ||
+		    hw->device_id == IXGBE_DEV_ID_X550EM_A_QSFP_N) {
 			ixgbe->capab->flags |= IXGBE_FLAG_SFP_PLUG_CAPABLE;
+		}
 
 		/*
 		 * Link detection on X552 SFP+ and X552/X557-AT
 		 */
 		if (hw->device_id == IXGBE_DEV_ID_X550EM_X_SFP ||
+		    hw->device_id == IXGBE_DEV_ID_X550EM_A_SFP ||
+		    hw->device_id == IXGBE_DEV_ID_X550EM_A_SFP_N ||
 		    hw->device_id == IXGBE_DEV_ID_X550EM_X_10G_T) {
 			ixgbe->capab->other_intr |=
 			    IXGBE_EIMS_GPI_SDP0_BY_MAC(hw);
+		}
+		if (hw->phy.type == ixgbe_phy_x550em_ext_t) {
 			ixgbe->capab->other_gpie |= IXGBE_SDP0_GPIEN_X540;
 		}
 		break;
@@ -1149,6 +1162,8 @@ ixgbe_init_driver_settings(ixgbe_t *ixgbe)
 		rx_group = &ixgbe->rx_groups[i];
 		rx_group->index = i;
 		rx_group->ixgbe = ixgbe;
+		list_create(&rx_group->vlans, sizeof (ixgbe_vlan_t),
+		    offsetof(ixgbe_vlan_t, ixvl_link));
 	}
 
 	for (i = 0; i < ixgbe->num_tx_rings; i++) {
@@ -1264,10 +1279,12 @@ ixgbe_led_init(ixgbe_t *ixgbe)
 	/*
 	 * If we couldn't determine this, we use the default for various MACs
 	 * based on information Intel has inserted into other drivers over the
-	 * years.  Note, when we have support for the X553 which should add the
-	 * ixgbe_x550_em_a mac type, that should be at index 0.
+	 * years.
 	 */
 	switch (hw->mac.type) {
+	case ixgbe_mac_X550EM_a:
+		ixgbe->ixgbe_led_index = 0;
+		break;
 	case ixgbe_mac_X550EM_x:
 		ixgbe->ixgbe_led_index = 1;
 		break;
@@ -1555,9 +1572,7 @@ ixgbe_chip_start(ixgbe_t *ixgbe)
 	 * Due to issues with EEE in e1000g/igb, we disable this by default
 	 * as a precautionary measure.
 	 *
-	 * Currently, the only known adapter which supports EEE in the ixgbe
-	 * line is 8086,15AB (IXGBE_DEV_ID_X550EM_X_KR), and only after the
-	 * first revision of it, as well as any X550 with MAC type 6 (non-EM)
+	 * Currently, this is present on a number of the X550 family parts.
 	 */
 	(void) ixgbe_setup_eee(hw, B_FALSE);
 
@@ -1886,6 +1901,7 @@ ixgbe_start(ixgbe_t *ixgbe, boolean_t alloc_buffer)
 	 * 1Gb link to 10Gb (cable and link partner permitting.)
 	 */
 	if (hw->mac.type == ixgbe_mac_X550 ||
+	    hw->mac.type == ixgbe_mac_X550EM_a ||
 	    hw->mac.type == ixgbe_mac_X550EM_x) {
 		(void) ixgbe_driver_setup_link(ixgbe, B_TRUE);
 		ixgbe_get_hw_state(ixgbe);
@@ -1898,7 +1914,8 @@ ixgbe_start(ixgbe_t *ixgbe, boolean_t alloc_buffer)
 	/*
 	 * Setup the rx/tx rings
 	 */
-	ixgbe_setup_rings(ixgbe);
+	if (ixgbe_setup_rings(ixgbe) != IXGBE_SUCCESS)
+		goto start_failure;
 
 	/*
 	 * ixgbe_start() will be called when resetting, however if reset
@@ -2271,6 +2288,16 @@ ixgbe_free_rings(ixgbe_t *ixgbe)
 		ixgbe->tx_rings = NULL;
 	}
 
+	for (uint_t i = 0; i < ixgbe->num_rx_groups; i++) {
+		ixgbe_vlan_t *vlp;
+		ixgbe_rx_group_t *rx_group = &ixgbe->rx_groups[i];
+
+		while ((vlp = list_remove_head(&rx_group->vlans)) != NULL)
+			kmem_free(vlp, sizeof (ixgbe_vlan_t));
+
+		list_destroy(&rx_group->vlans);
+	}
+
 	if (ixgbe->rx_groups != NULL) {
 		kmem_free(ixgbe->rx_groups,
 		    sizeof (ixgbe_rx_group_t) * ixgbe->num_rx_groups);
@@ -2325,7 +2352,7 @@ ixgbe_free_rx_data(ixgbe_t *ixgbe)
 /*
  * ixgbe_setup_rings - Setup rx/tx rings.
  */
-static void
+static int
 ixgbe_setup_rings(ixgbe_t *ixgbe)
 {
 	/*
@@ -2335,9 +2362,12 @@ ixgbe_setup_rings(ixgbe_t *ixgbe)
 	 * 2. Initialize necessary registers for receive/transmit;
 	 * 3. Initialize software pointers/parameters for receive/transmit;
 	 */
-	ixgbe_setup_rx(ixgbe);
+	if (ixgbe_setup_rx(ixgbe) != IXGBE_SUCCESS)
+		return (IXGBE_FAILURE);
 
 	ixgbe_setup_tx(ixgbe);
+
+	return (IXGBE_SUCCESS);
 }
 
 static void
@@ -2362,7 +2392,7 @@ ixgbe_setup_rx_ring(ixgbe_rx_ring_t *rx_ring)
 		rbd = &rx_data->rbd_ring[i];
 
 		rbd->read.pkt_addr = rcb->rx_buf.dma_address;
-		rbd->read.hdr_addr = NULL;
+		rbd->read.hdr_addr = 0;
 	}
 
 	/*
@@ -2407,7 +2437,8 @@ ixgbe_setup_rx_ring(ixgbe_rx_ring_t *rx_ring)
 	if (hw->mac.type == ixgbe_mac_82599EB ||
 	    hw->mac.type == ixgbe_mac_X540 ||
 	    hw->mac.type == ixgbe_mac_X550 ||
-	    hw->mac.type == ixgbe_mac_X550EM_x) {
+	    hw->mac.type == ixgbe_mac_X550EM_x ||
+	    hw->mac.type == ixgbe_mac_X550EM_a) {
 		reg_val = IXGBE_READ_REG(hw, IXGBE_RDRXCTL);
 		reg_val |= (IXGBE_RDRXCTL_CRCSTRIP | IXGBE_RDRXCTL_AGGDIS);
 		IXGBE_WRITE_REG(hw, IXGBE_RDRXCTL, reg_val);
@@ -2423,14 +2454,13 @@ ixgbe_setup_rx_ring(ixgbe_rx_ring_t *rx_ring)
 	IXGBE_WRITE_REG(hw, IXGBE_SRRCTL(rx_ring->hw_index), reg_val);
 }
 
-static void
+static int
 ixgbe_setup_rx(ixgbe_t *ixgbe)
 {
 	ixgbe_rx_ring_t *rx_ring;
 	struct ixgbe_hw *hw = &ixgbe->hw;
 	uint32_t reg_val;
-	uint32_t ring_mapping;
-	uint32_t i, index;
+	uint32_t i;
 	uint32_t psrtype_rss_bit;
 
 	/*
@@ -2517,6 +2547,15 @@ ixgbe_setup_rx(ixgbe_t *ixgbe)
 	}
 
 	/*
+	 * Initialize VLAN SW and HW state if VLAN filtering is
+	 * enabled.
+	 */
+	if (ixgbe->vlft_enabled) {
+		if (ixgbe_init_vlan(ixgbe) != IXGBE_SUCCESS)
+			return (IXGBE_FAILURE);
+	}
+
+	/*
 	 * Enable the receive unit.  This must be done after filter
 	 * control is set in FCTRL. On 82598, we disable the descriptor monitor.
 	 * 82598 is the only adapter which defines this RXCTRL option.
@@ -2536,14 +2575,23 @@ ixgbe_setup_rx(ixgbe_t *ixgbe)
 	}
 
 	/*
-	 * Setup the per-ring statistics mapping.
+	 * The 82598 controller gives us the RNBC (Receive No Buffer
+	 * Count) register to determine the number of frames dropped
+	 * due to no available descriptors on the destination queue.
+	 * However, this register was removed starting with 82599 and
+	 * it was replaced with the RQSMR/QPRDC registers. The nice
+	 * thing about the new registers is that they allow you to map
+	 * groups of queues to specific stat registers. The bad thing
+	 * is there are only 16 slots in the stat registers, so this
+	 * won't work when we have 32 Rx groups. Instead, we map all
+	 * queues to the zero slot of the stat registers, giving us a
+	 * global counter at QPRDC[0] (with the equivalent semantics
+	 * of RNBC). Perhaps future controllers will have more slots
+	 * and we can implement per-group counters.
 	 */
-	ring_mapping = 0;
 	for (i = 0; i < ixgbe->num_rx_rings; i++) {
-		index = ixgbe->rx_rings[i].hw_index;
-		ring_mapping = IXGBE_READ_REG(hw, IXGBE_RQSMR(index >> 2));
-		ring_mapping |= (i & 0xF) << (8 * (index & 0x3));
-		IXGBE_WRITE_REG(hw, IXGBE_RQSMR(index >> 2), ring_mapping);
+		uint32_t index = ixgbe->rx_rings[i].hw_index;
+		IXGBE_WRITE_REG(hw, IXGBE_RQSMR(index >> 2), 0);
 	}
 
 	/*
@@ -2598,6 +2646,8 @@ ixgbe_setup_rx(ixgbe_t *ixgbe)
 
 		IXGBE_WRITE_REG(hw, IXGBE_RDRXCTL, reg_val);
 	}
+
+	return (IXGBE_SUCCESS);
 }
 
 static void
@@ -2698,7 +2748,6 @@ ixgbe_setup_tx(ixgbe_t *ixgbe)
 	struct ixgbe_hw *hw = &ixgbe->hw;
 	ixgbe_tx_ring_t *tx_ring;
 	uint32_t reg_val;
-	uint32_t ring_mapping;
 	int i;
 
 	for (i = 0; i < ixgbe->num_tx_rings; i++) {
@@ -2707,47 +2756,17 @@ ixgbe_setup_tx(ixgbe_t *ixgbe)
 	}
 
 	/*
-	 * Setup the per-ring statistics mapping.
+	 * Setup the per-ring statistics mapping. We map all Tx queues
+	 * to slot 0 to stay consistent with Rx.
 	 */
-	ring_mapping = 0;
 	for (i = 0; i < ixgbe->num_tx_rings; i++) {
-		ring_mapping |= (i & 0xF) << (8 * (i & 0x3));
-		if ((i & 0x3) == 0x3) {
-			switch (hw->mac.type) {
-			case ixgbe_mac_82598EB:
-				IXGBE_WRITE_REG(hw, IXGBE_TQSMR(i >> 2),
-				    ring_mapping);
-				break;
-
-			case ixgbe_mac_82599EB:
-			case ixgbe_mac_X540:
-			case ixgbe_mac_X550:
-			case ixgbe_mac_X550EM_x:
-				IXGBE_WRITE_REG(hw, IXGBE_TQSM(i >> 2),
-				    ring_mapping);
-				break;
-
-			default:
-				break;
-			}
-
-			ring_mapping = 0;
-		}
-	}
-	if (i & 0x3) {
 		switch (hw->mac.type) {
 		case ixgbe_mac_82598EB:
-			IXGBE_WRITE_REG(hw, IXGBE_TQSMR(i >> 2), ring_mapping);
-			break;
-
-		case ixgbe_mac_82599EB:
-		case ixgbe_mac_X540:
-		case ixgbe_mac_X550:
-		case ixgbe_mac_X550EM_x:
-			IXGBE_WRITE_REG(hw, IXGBE_TQSM(i >> 2), ring_mapping);
+			IXGBE_WRITE_REG(hw, IXGBE_TQSMR(i >> 2), 0);
 			break;
 
 		default:
+			IXGBE_WRITE_REG(hw, IXGBE_TQSM(i >> 2), 0);
 			break;
 		}
 	}
@@ -2765,7 +2784,8 @@ ixgbe_setup_tx(ixgbe_t *ixgbe)
 	if (hw->mac.type == ixgbe_mac_82599EB ||
 	    hw->mac.type == ixgbe_mac_X540 ||
 	    hw->mac.type == ixgbe_mac_X550 ||
-	    hw->mac.type == ixgbe_mac_X550EM_x) {
+	    hw->mac.type == ixgbe_mac_X550EM_x ||
+	    hw->mac.type == ixgbe_mac_X550EM_a) {
 		/* DMATXCTL.TE must be set after all Tx config is complete */
 		reg_val = IXGBE_READ_REG(hw, IXGBE_DMATXCTL);
 		reg_val |= IXGBE_DMATXCTL_TE;
@@ -2829,7 +2849,7 @@ static void
 ixgbe_setup_vmdq(ixgbe_t *ixgbe)
 {
 	struct ixgbe_hw *hw = &ixgbe->hw;
-	uint32_t vmdctl, i, vtctl;
+	uint32_t vmdctl, i, vtctl, vlnctl;
 
 	/*
 	 * Setup the VMDq Control register, enable VMDq based on
@@ -2850,6 +2870,7 @@ ixgbe_setup_vmdq(ixgbe_t *ixgbe)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		/*
 		 * Enable VMDq-only.
 		 */
@@ -2864,8 +2885,18 @@ ixgbe_setup_vmdq(ixgbe_t *ixgbe)
 		/*
 		 * Enable Virtualization and Replication.
 		 */
-		vtctl = IXGBE_VT_CTL_VT_ENABLE | IXGBE_VT_CTL_REPLEN;
+		vtctl = IXGBE_READ_REG(hw, IXGBE_VT_CTL);
+		ixgbe->rx_def_group = vtctl & IXGBE_VT_CTL_POOL_MASK;
+		vtctl |= IXGBE_VT_CTL_VT_ENABLE | IXGBE_VT_CTL_REPLEN;
 		IXGBE_WRITE_REG(hw, IXGBE_VT_CTL, vtctl);
+
+		/*
+		 * Enable VLAN filtering and switching (VFTA and VLVF).
+		 */
+		vlnctl = IXGBE_READ_REG(hw, IXGBE_VLNCTRL);
+		vlnctl |= IXGBE_VLNCTRL_VFE;
+		IXGBE_WRITE_REG(hw, IXGBE_VLNCTRL, vlnctl);
+		ixgbe->vlft_enabled = B_TRUE;
 
 		/*
 		 * Enable receiving packets to all VFs
@@ -2887,7 +2918,7 @@ ixgbe_setup_vmdq_rss(ixgbe_t *ixgbe)
 {
 	struct ixgbe_hw *hw = &ixgbe->hw;
 	uint32_t i, mrqc;
-	uint32_t vtctl, vmdctl;
+	uint32_t vtctl, vmdctl, vlnctl;
 
 	/*
 	 * Initialize RETA/ERETA table
@@ -2927,6 +2958,7 @@ ixgbe_setup_vmdq_rss(ixgbe_t *ixgbe)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		/*
 		 * Enable RSS & Setup RSS Hash functions
 		 */
@@ -2965,12 +2997,24 @@ ixgbe_setup_vmdq_rss(ixgbe_t *ixgbe)
 	if (hw->mac.type == ixgbe_mac_82599EB ||
 	    hw->mac.type == ixgbe_mac_X540 ||
 	    hw->mac.type == ixgbe_mac_X550 ||
-	    hw->mac.type == ixgbe_mac_X550EM_x) {
+	    hw->mac.type == ixgbe_mac_X550EM_x ||
+	    hw->mac.type == ixgbe_mac_X550EM_a) {
 		/*
 		 * Enable Virtualization and Replication.
 		 */
+		vtctl = IXGBE_READ_REG(hw, IXGBE_VT_CTL);
+		ixgbe->rx_def_group = vtctl & IXGBE_VT_CTL_POOL_MASK;
+		vtctl |= IXGBE_VT_CTL_VT_ENABLE | IXGBE_VT_CTL_REPLEN;
 		vtctl = IXGBE_VT_CTL_VT_ENABLE | IXGBE_VT_CTL_REPLEN;
 		IXGBE_WRITE_REG(hw, IXGBE_VT_CTL, vtctl);
+
+		/*
+		 * Enable VLAN filtering and switching (VFTA and VLVF).
+		 */
+		vlnctl = IXGBE_READ_REG(hw, IXGBE_VLNCTRL);
+		vlnctl |= IXGBE_VLNCTRL_VFE;
+		IXGBE_WRITE_REG(hw, IXGBE_VLNCTRL, vlnctl);
+		ixgbe->vlft_enabled = B_TRUE;
 
 		/*
 		 * Enable receiving packets to all VFs
@@ -3011,6 +3055,7 @@ ixgbe_setup_rss_table(ixgbe_t *ixgbe)
 		break;
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		table_size = 512;
 		break;
 	default:
@@ -3102,7 +3147,7 @@ ixgbe_init_unicst(ixgbe_t *ixgbe)
 		for (slot = 0; slot < ixgbe->unicst_total; slot++) {
 			mac_addr = ixgbe->unicst_addr[slot].mac.addr;
 			bzero(mac_addr, ETHERADDRL);
-			(void) ixgbe_set_rar(hw, slot, mac_addr, NULL, NULL);
+			(void) ixgbe_set_rar(hw, slot, mac_addr, 0, 0);
 			ixgbe->unicst_addr[slot].mac.set = 0;
 		}
 		ixgbe->unicst_init = B_TRUE;
@@ -3116,8 +3161,7 @@ ixgbe_init_unicst(ixgbe_t *ixgbe)
 				    IXGBE_RAH_AV);
 			} else {
 				bzero(mac_addr, ETHERADDRL);
-				(void) ixgbe_set_rar(hw, slot, mac_addr,
-				    NULL, NULL);
+				(void) ixgbe_set_rar(hw, slot, mac_addr, 0, 0);
 			}
 		}
 	}
@@ -3140,6 +3184,53 @@ ixgbe_unicst_find(ixgbe_t *ixgbe, const uint8_t *mac_addr)
 	}
 
 	return (-1);
+}
+
+/*
+ * Restore the HW state to match the SW state during restart.
+ */
+static int
+ixgbe_init_vlan(ixgbe_t *ixgbe)
+{
+	/*
+	 * The device is starting for the first time; there is nothing
+	 * to do.
+	 */
+	if (!ixgbe->vlft_init) {
+		ixgbe->vlft_init = B_TRUE;
+		return (IXGBE_SUCCESS);
+	}
+
+	for (uint_t i = 0; i < ixgbe->num_rx_groups; i++) {
+		int			ret;
+		boolean_t		vlvf_bypass;
+		ixgbe_rx_group_t	*rxg = &ixgbe->rx_groups[i];
+		struct ixgbe_hw		*hw = &ixgbe->hw;
+
+		if (rxg->aupe) {
+			uint32_t vml2flt;
+
+			vml2flt = IXGBE_READ_REG(hw, IXGBE_VMOLR(rxg->index));
+			vml2flt |= IXGBE_VMOLR_AUPE;
+			IXGBE_WRITE_REG(hw, IXGBE_VMOLR(rxg->index), vml2flt);
+		}
+
+		vlvf_bypass = (rxg->index == ixgbe->rx_def_group);
+		for (ixgbe_vlan_t *vlp = list_head(&rxg->vlans); vlp != NULL;
+		    vlp = list_next(&rxg->vlans, vlp)) {
+			ret = ixgbe_set_vfta(hw, vlp->ixvl_vid, rxg->index,
+			    B_TRUE, vlvf_bypass);
+
+			if (ret != IXGBE_SUCCESS) {
+				ixgbe_error(ixgbe, "Failed to program VFTA"
+				    " for group %u, VID: %u, ret: %d.",
+				    rxg->index, vlp->ixvl_vid, ret);
+				return (IXGBE_FAILURE);
+			}
+		}
+	}
+
+	return (IXGBE_SUCCESS);
 }
 
 /*
@@ -3273,6 +3364,7 @@ ixgbe_setup_vmdq_rss_conf(ixgbe_t *ixgbe)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		/*
 		 * 82599 supports the following combination:
 		 * vmdq no. x rss no.
@@ -3449,7 +3541,8 @@ ixgbe_get_conf(ixgbe_t *ixgbe)
 	if (hw->mac.type == ixgbe_mac_82599EB ||
 	    hw->mac.type == ixgbe_mac_X540 ||
 	    hw->mac.type == ixgbe_mac_X550 ||
-	    hw->mac.type == ixgbe_mac_X550EM_x) {
+	    hw->mac.type == ixgbe_mac_X550EM_x ||
+	    hw->mac.type == ixgbe_mac_X550EM_a) {
 		ixgbe->tx_head_wb_enable = B_FALSE;
 	}
 
@@ -3508,7 +3601,8 @@ ixgbe_get_conf(ixgbe_t *ixgbe)
 	if (hw->mac.type == ixgbe_mac_82599EB ||
 	    hw->mac.type == ixgbe_mac_X540 ||
 	    hw->mac.type == ixgbe_mac_X550 ||
-	    hw->mac.type == ixgbe_mac_X550EM_x)
+	    hw->mac.type == ixgbe_mac_X550EM_x ||
+	    hw->mac.type == ixgbe_mac_X550EM_a)
 		ixgbe->intr_throttling[0] = ixgbe->intr_throttling[0] & 0xFF8;
 
 	hw->allow_unsupported_sfp = ixgbe_get_prop(ixgbe,
@@ -4307,6 +4401,7 @@ ixgbe_enable_adapter_interrupts(ixgbe_t *ixgbe)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		gpie |= ixgbe->capab->other_gpie;
 
 		/* Enable RSC Delay 8us when LRO enabled  */
@@ -4503,6 +4598,7 @@ ixgbe_set_internal_mac_loopback(ixgbe_t *ixgbe)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		reg = IXGBE_READ_REG(&ixgbe->hw, IXGBE_AUTOC);
 		reg |= (IXGBE_AUTOC_FLU |
 		    IXGBE_AUTOC_10G_KX4);
@@ -4742,6 +4838,7 @@ ixgbe_intr_legacy(void *arg1, void *arg2)
 			case ixgbe_mac_X540:
 			case ixgbe_mac_X550:
 			case ixgbe_mac_X550EM_x:
+			case ixgbe_mac_X550EM_a:
 				ixgbe->eimc = IXGBE_82599_OTHER_INTR;
 				IXGBE_WRITE_REG(hw, IXGBE_EIMC, ixgbe->eimc);
 				break;
@@ -4838,6 +4935,7 @@ ixgbe_intr_msi(void *arg1, void *arg2)
 		case ixgbe_mac_X540:
 		case ixgbe_mac_X550:
 		case ixgbe_mac_X550EM_x:
+		case ixgbe_mac_X550EM_a:
 			ixgbe->eimc = IXGBE_82599_OTHER_INTR;
 			IXGBE_WRITE_REG(hw, IXGBE_EIMC, ixgbe->eimc);
 			break;
@@ -4920,6 +5018,7 @@ ixgbe_intr_msix(void *arg1, void *arg2)
 			case ixgbe_mac_X540:
 			case ixgbe_mac_X550:
 			case ixgbe_mac_X550EM_x:
+			case ixgbe_mac_X550EM_a:
 				ixgbe->eims |= IXGBE_EICR_RTX_QUEUE;
 				ixgbe_intr_other_work(ixgbe, eicr);
 				break;
@@ -5019,8 +5118,10 @@ ixgbe_alloc_intrs(ixgbe_t *ixgbe)
 		 */
 		if (ixgbe->hw.mac.type == ixgbe_mac_X550 ||
 		    ixgbe->hw.mac.type == ixgbe_mac_X550EM_x ||
+		    ixgbe->hw.mac.type == ixgbe_mac_X550EM_a ||
 		    ixgbe->hw.mac.type == ixgbe_mac_X550_vf ||
-		    ixgbe->hw.mac.type == ixgbe_mac_X550EM_x_vf) {
+		    ixgbe->hw.mac.type == ixgbe_mac_X550EM_x_vf ||
+		    ixgbe->hw.mac.type == ixgbe_mac_X550EM_a_vf) {
 			ixgbe_log(ixgbe,
 			    "Legacy interrupts are not supported on this "
 			    "adapter. Please use MSI or MSI-X instead.");
@@ -5340,6 +5441,7 @@ ixgbe_setup_ivar(ixgbe_t *ixgbe, uint16_t intr_alloc_entry, uint8_t msix_vector,
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		if (cause == -1) {
 			/* other causes */
 			msix_vector |= IXGBE_IVAR_ALLOC_VAL;
@@ -5396,6 +5498,7 @@ ixgbe_enable_ivar(ixgbe_t *ixgbe, uint16_t intr_alloc_entry, int8_t cause)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		if (cause == -1) {
 			/* other causes */
 			index = (intr_alloc_entry & 1) * 8;
@@ -5448,6 +5551,7 @@ ixgbe_disable_ivar(ixgbe_t *ixgbe, uint16_t intr_alloc_entry, int8_t cause)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		if (cause == -1) {
 			/* other causes */
 			index = (intr_alloc_entry & 1) * 8;
@@ -5493,6 +5597,7 @@ ixgbe_get_hw_rx_index(ixgbe_t *ixgbe, uint32_t sw_rx_index)
 		case ixgbe_mac_X540:
 		case ixgbe_mac_X550:
 		case ixgbe_mac_X550EM_x:
+		case ixgbe_mac_X550EM_a:
 			return (sw_rx_index * 2);
 
 		default:
@@ -5511,6 +5616,7 @@ ixgbe_get_hw_rx_index(ixgbe_t *ixgbe, uint32_t sw_rx_index)
 		case ixgbe_mac_X540:
 		case ixgbe_mac_X550:
 		case ixgbe_mac_X550EM_x:
+		case ixgbe_mac_X550EM_a:
 			if (ixgbe->num_rx_groups > 32) {
 				hw_rx_index = (sw_rx_index /
 				    rx_ring_per_group) * 2 +
@@ -5618,6 +5724,7 @@ ixgbe_setup_adapter_vector(ixgbe_t *ixgbe)
 	case ixgbe_mac_X540:
 	case ixgbe_mac_X550:
 	case ixgbe_mac_X550EM_x:
+	case ixgbe_mac_X550EM_a:
 		for (v_idx = 0; v_idx < 64; v_idx++)
 			IXGBE_WRITE_REG(hw, IXGBE_IVAR(v_idx), 0);
 		IXGBE_WRITE_REG(hw, IXGBE_IVAR_MISC, 0);
@@ -6152,6 +6259,7 @@ ixgbe_fill_group(void *arg, mac_ring_type_t rtype, const int index,
     mac_group_info_t *infop, mac_group_handle_t gh)
 {
 	ixgbe_t *ixgbe = (ixgbe_t *)arg;
+	struct ixgbe_hw *hw = &ixgbe->hw;
 
 	switch (rtype) {
 	case MAC_RING_TYPE_RX: {
@@ -6165,6 +6273,20 @@ ixgbe_fill_group(void *arg, mac_ring_type_t rtype, const int index,
 		infop->mgi_stop = NULL;
 		infop->mgi_addmac = ixgbe_addmac;
 		infop->mgi_remmac = ixgbe_remmac;
+
+		if ((ixgbe->classify_mode == IXGBE_CLASSIFY_VMDQ ||
+		    ixgbe->classify_mode == IXGBE_CLASSIFY_VMDQ_RSS) &&
+		    (hw->mac.type == ixgbe_mac_82599EB ||
+		    hw->mac.type == ixgbe_mac_X540 ||
+		    hw->mac.type == ixgbe_mac_X550 ||
+		    hw->mac.type == ixgbe_mac_X550EM_x)) {
+			infop->mgi_addvlan = ixgbe_addvlan;
+			infop->mgi_remvlan = ixgbe_remvlan;
+		} else {
+			infop->mgi_addvlan = NULL;
+			infop->mgi_remvlan = NULL;
+		}
+
 		infop->mgi_count = (ixgbe->num_rx_rings / ixgbe->num_rx_groups);
 
 		break;
@@ -6261,6 +6383,232 @@ ixgbe_rx_ring_intr_disable(mac_intr_handle_t intrh)
 
 	mutex_exit(&ixgbe->gen_lock);
 
+	return (0);
+}
+
+static ixgbe_vlan_t *
+ixgbe_find_vlan(ixgbe_rx_group_t *rx_group, uint16_t vid)
+{
+	for (ixgbe_vlan_t *vlp = list_head(&rx_group->vlans); vlp != NULL;
+	    vlp = list_next(&rx_group->vlans, vlp)) {
+		if (vlp->ixvl_vid == vid)
+			return (vlp);
+	}
+
+	return (NULL);
+}
+
+/*
+ * Attempt to use a VLAN HW filter for this group. If the group is
+ * interested in untagged packets then set AUPE only. If the group is
+ * the default then only set the VFTA. Leave the VLVF slots open for
+ * reserved groups to guarantee their use of HW filtering.
+ */
+static int
+ixgbe_addvlan(mac_group_driver_t gdriver, uint16_t vid)
+{
+	ixgbe_rx_group_t	*rx_group = (ixgbe_rx_group_t *)gdriver;
+	ixgbe_t			*ixgbe = rx_group->ixgbe;
+	struct ixgbe_hw		*hw = &ixgbe->hw;
+	ixgbe_vlan_t		*vlp;
+	int			ret;
+	boolean_t		is_def_grp;
+
+	mutex_enter(&ixgbe->gen_lock);
+
+	if (ixgbe->ixgbe_state & IXGBE_SUSPENDED) {
+		mutex_exit(&ixgbe->gen_lock);
+		return (ECANCELED);
+	}
+
+	/*
+	 * Let's be sure VLAN filtering is enabled.
+	 */
+	VERIFY3B(ixgbe->vlft_enabled, ==, B_TRUE);
+	is_def_grp = (rx_group->index == ixgbe->rx_def_group);
+
+	/*
+	 * VLAN filtering is enabled but we want to receive untagged
+	 * traffic on this group -- set the AUPE bit on the group and
+	 * leave the VLAN tables alone.
+	 */
+	if (vid == MAC_VLAN_UNTAGGED) {
+		/*
+		 * We never enable AUPE on the default group; it is
+		 * redundant. Untagged traffic which passes L2
+		 * filtering is delivered to the default group if no
+		 * other group is interested.
+		 */
+		if (!is_def_grp) {
+			uint32_t vml2flt;
+
+			vml2flt = IXGBE_READ_REG(hw,
+			    IXGBE_VMOLR(rx_group->index));
+			vml2flt |= IXGBE_VMOLR_AUPE;
+			IXGBE_WRITE_REG(hw, IXGBE_VMOLR(rx_group->index),
+			    vml2flt);
+			rx_group->aupe = B_TRUE;
+		}
+
+		mutex_exit(&ixgbe->gen_lock);
+		return (0);
+	}
+
+	vlp = ixgbe_find_vlan(rx_group, vid);
+	if (vlp != NULL) {
+		/* Only the default group supports multiple clients. */
+		VERIFY3B(is_def_grp, ==, B_TRUE);
+		vlp->ixvl_refs++;
+		mutex_exit(&ixgbe->gen_lock);
+		return (0);
+	}
+
+	/*
+	 * The default group doesn't require a VLVF entry, only a VFTA
+	 * entry. All traffic passing L2 filtering (MPSAR + VFTA) is
+	 * delivered to the default group if no other group is
+	 * interested. The fourth argument, vlvf_bypass, tells the
+	 * ixgbe common code to avoid using a VLVF slot if one isn't
+	 * already allocated to this VLAN.
+	 *
+	 * This logic is meant to reserve VLVF slots for use by
+	 * reserved groups: guaranteeing their use of HW filtering.
+	 */
+	ret = ixgbe_set_vfta(hw, vid, rx_group->index, B_TRUE, is_def_grp);
+
+	if (ret == IXGBE_SUCCESS) {
+		vlp = kmem_zalloc(sizeof (ixgbe_vlan_t), KM_SLEEP);
+		vlp->ixvl_vid = vid;
+		vlp->ixvl_refs = 1;
+		list_insert_tail(&rx_group->vlans, vlp);
+		mutex_exit(&ixgbe->gen_lock);
+		return (0);
+	}
+
+	/*
+	 * We should actually never return ENOSPC because we've set
+	 * things up so that every reserved group is guaranteed to
+	 * have a VLVF slot.
+	 */
+	if (ret == IXGBE_ERR_PARAM)
+		ret = EINVAL;
+	else if (ret == IXGBE_ERR_NO_SPACE)
+		ret = ENOSPC;
+	else
+		ret = EIO;
+
+	mutex_exit(&ixgbe->gen_lock);
+	return (ret);
+}
+
+/*
+ * Attempt to remove the VLAN HW filter associated with this group. If
+ * we are removing a HW filter for the default group then we know only
+ * the VFTA was set (VLVF is reserved for non-default/reserved
+ * groups). If the group wishes to stop receiving untagged traffic
+ * then clear the AUPE but leave the VLAN filters alone.
+ */
+static int
+ixgbe_remvlan(mac_group_driver_t gdriver, uint16_t vid)
+{
+	ixgbe_rx_group_t	*rx_group = (ixgbe_rx_group_t *)gdriver;
+	ixgbe_t			*ixgbe = rx_group->ixgbe;
+	struct ixgbe_hw		*hw = &ixgbe->hw;
+	int			ret;
+	ixgbe_vlan_t		*vlp;
+	boolean_t		is_def_grp;
+
+	mutex_enter(&ixgbe->gen_lock);
+
+	if (ixgbe->ixgbe_state & IXGBE_SUSPENDED) {
+		mutex_exit(&ixgbe->gen_lock);
+		return (ECANCELED);
+	}
+
+	is_def_grp = (rx_group->index == ixgbe->rx_def_group);
+
+	/* See the AUPE comment in ixgbe_addvlan(). */
+	if (vid == MAC_VLAN_UNTAGGED) {
+		if (!is_def_grp) {
+			uint32_t vml2flt;
+
+			vml2flt = IXGBE_READ_REG(hw,
+			    IXGBE_VMOLR(rx_group->index));
+			vml2flt &= ~IXGBE_VMOLR_AUPE;
+			IXGBE_WRITE_REG(hw,
+			    IXGBE_VMOLR(rx_group->index), vml2flt);
+			rx_group->aupe = B_FALSE;
+		}
+		mutex_exit(&ixgbe->gen_lock);
+		return (0);
+	}
+
+	vlp = ixgbe_find_vlan(rx_group, vid);
+	if (vlp == NULL) {
+		mutex_exit(&ixgbe->gen_lock);
+		return (ENOENT);
+	}
+
+	/*
+	 * See the comment in ixgbe_addvlan() about is_def_grp and
+	 * vlvf_bypass.
+	 */
+	if (vlp->ixvl_refs == 1) {
+		ret = ixgbe_set_vfta(hw, vid, rx_group->index, B_FALSE,
+		    is_def_grp);
+	} else {
+		/*
+		 * Only the default group can have multiple clients.
+		 * If there is more than one client, leave the
+		 * VFTA[vid] bit alone.
+		 */
+		VERIFY3B(is_def_grp, ==, B_TRUE);
+		VERIFY3U(vlp->ixvl_refs, >, 1);
+		vlp->ixvl_refs--;
+		mutex_exit(&ixgbe->gen_lock);
+		return (0);
+	}
+
+	if (ret != IXGBE_SUCCESS) {
+		mutex_exit(&ixgbe->gen_lock);
+		/* IXGBE_ERR_PARAM should be the only possible error here. */
+		if (ret == IXGBE_ERR_PARAM)
+			return (EINVAL);
+		else
+			return (EIO);
+	}
+
+	VERIFY3U(vlp->ixvl_refs, ==, 1);
+	vlp->ixvl_refs = 0;
+	list_remove(&rx_group->vlans, vlp);
+	kmem_free(vlp, sizeof (ixgbe_vlan_t));
+
+	/*
+	 * Calling ixgbe_set_vfta() on a non-default group may have
+	 * cleared the VFTA[vid] bit even though the default group
+	 * still has clients using the vid. This happens because the
+	 * ixgbe common code doesn't ref count the use of VLANs. Check
+	 * for any use of vid on the default group and make sure the
+	 * VFTA[vid] bit is set. This operation is idempotent: setting
+	 * VFTA[vid] to true if already true won't hurt anything.
+	 */
+	if (!is_def_grp) {
+		ixgbe_rx_group_t *defgrp;
+
+		defgrp = &ixgbe->rx_groups[ixgbe->rx_def_group];
+		vlp = ixgbe_find_vlan(defgrp, vid);
+		if (vlp != NULL) {
+			/* This shouldn't fail, but if it does return EIO. */
+			ret = ixgbe_set_vfta(hw, vid, rx_group->index, B_TRUE,
+			    B_TRUE);
+			if (ret != IXGBE_SUCCESS) {
+				mutex_exit(&ixgbe->gen_lock);
+				return (EIO);
+			}
+		}
+	}
+
+	mutex_exit(&ixgbe->gen_lock);
 	return (0);
 }
 

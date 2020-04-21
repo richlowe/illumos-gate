@@ -22,6 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	This makefile drives the production of the object file system
@@ -70,7 +71,10 @@ LINTTAGS	+= -erroff=E_STATIC_UNUSED
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+$(OBJS_DIR)/objfs_vfs.o := SMOFF += signed_integer_overflow_check
 
 #
 #	Default build targets.

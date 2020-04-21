@@ -20,28 +20,30 @@
 #
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= libsmb.a
 VERS= .1
 
-OBJS_SHARED = 			\
-	smb_door_legacy.o 	\
+OBJS_SHARED =			\
+	smb_cfg_util.o		\
+	smb_door_legacy.o	\
 	smb_inet.o		\
 	smb_msgbuf.o		\
 	smb_native.o		\
 	smb_oem.o		\
 	smb_sid.o		\
-	smb_string.o 		\
+	smb_string.o		\
 	smb_token.o		\
 	smb_token_xdr.o		\
 	smb_utf8.o		\
 	smb_xdr.o
 
-OBJS_COMMON = 			\
+OBJS_COMMON =			\
 	smb_acl.o		\
-	smb_auth.o 		\
+	smb_auth.o		\
 	smb_cache.o		\
 	smb_cfg.o		\
 	smb_crypt.o		\
@@ -81,12 +83,15 @@ LDLIBS +=	$(MACH_LDLIBS)
 # perfer to keep libs ordered by dependence
 LDLIBS +=	-lscf -lmd -luuid -lpkcs11 -lcryptoutil
 LDLIBS +=	-lsec -lidmap -lreparse -lcmdutils -lavl
-LDLIBS +=	-lnvpair -lresolv -lsocket -lnsl -lc
+LDLIBS +=	-lnvpair -lresolv -lsocket -lnsl -lzfs -lc
 CPPFLAGS +=	$(INCS) -D_REENTRANT
 CPPFLAGS +=	-Dsyslog=smb_syslog
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-switch
+
+# not linted
+SMATCH=off
 
 SRCS=   $(OBJS_COMMON:%.o=$(SRCDIR)/%.c)	\
 	$(OBJS_SHARED:%.o=$(SRC)/common/smbsrv/%.c)

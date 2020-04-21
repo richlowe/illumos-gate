@@ -23,6 +23,9 @@
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2012 Nexenta Systems, Inc. All rights reserved.
 # Copyright 2014 Gary Mills
+# Copyright 2020 Peter Tribble.
+# Copyright 2019 Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -45,14 +48,6 @@ $(sparc_ONLY)dir path=platform/SUNW,A70/kernel/crypto/$(ARCH64) group=sys
 $(sparc_ONLY)dir path=platform/SUNW,A70/kernel/drv group=sys
 $(sparc_ONLY)dir path=platform/SUNW,A70/kernel/misc group=sys
 $(sparc_ONLY)dir path=platform/SUNW,A70/kernel/misc/$(ARCH64) group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Netra-CP2300 group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Netra-CP2300/kernel group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Netra-CP2300/kernel/misc group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Netra-CP2300/kernel/misc/$(ARCH64) \
-    group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Netra-CP2300/kernel/tod group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Netra-CP2300/kernel/tod/$(ARCH64) \
-    group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Netra-CP3010 group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Netra-CP3010/kernel group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Netra-CP3010/kernel/crypto group=sys
@@ -94,14 +89,6 @@ $(sparc_ONLY)dir path=platform/SUNW,SPARC-Enterprise/kernel/drv/$(ARCH64) \
 $(sparc_ONLY)dir path=platform/SUNW,SPARC-Enterprise/kernel/misc group=sys
 $(sparc_ONLY)dir path=platform/SUNW,SPARC-Enterprise/kernel/misc/$(ARCH64) \
     group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Serverblade1 group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Serverblade1/kernel group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Serverblade1/kernel/drv group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Serverblade1/kernel/drv/$(ARCH64) \
-    group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Serverblade1/kernel/misc group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Serverblade1/kernel/misc/$(ARCH64) \
-    group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Blade-100 group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Blade-100/kernel group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Blade-100/kernel/drv group=sys
@@ -140,21 +127,6 @@ $(sparc_ONLY)dir path=platform/SUNW,Sun-Blade-2500/kernel/misc group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Blade-2500/kernel/misc/$(ARCH64) \
     group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Fire group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000 group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/$(ARCH64) group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/cpu group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/cpu/$(ARCH64) \
-    group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/crypto group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/crypto/$(ARCH64) \
-    group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/drv group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/drv/$(ARCH64) \
-    group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/misc group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-15000/kernel/misc/$(ARCH64) \
-    group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-280R group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-280R/kernel group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Sun-Fire-280R/kernel/crypto group=sys
@@ -268,22 +240,6 @@ $(sparc_ONLY)dir path=platform/SUNW,Ultra-80/kernel group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Ultra-80/kernel/misc group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Ultra-80/kernel/misc/$(ARCH64) group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise-10000 group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise-10000/kernel group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise-10000/kernel/$(ARCH64) \
-    group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise-10000/kernel/cpu \
-    group=sys
-$(sparc_ONLY)dir \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/cpu/$(ARCH64) group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise-10000/kernel/drv \
-    group=sys
-$(sparc_ONLY)dir \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/drv/$(ARCH64) group=sys
-$(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise-10000/kernel/misc \
-    group=sys
-$(sparc_ONLY)dir \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/misc/$(ARCH64) group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise/kernel group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise/kernel/drv group=sys
 $(sparc_ONLY)dir path=platform/SUNW,Ultra-Enterprise/kernel/drv/$(ARCH64) \
@@ -367,12 +323,10 @@ $(sparc_ONLY)driver name=adm1031 alias=i2c-adm1031
 $(i386_ONLY)driver name=amd_iommu perms="* 0644 root sys" \
     alias=pci1002,5a23 \
     alias=pci1022,11ff
-$(sparc_ONLY)driver name=axq alias=SUNW,axq
 $(i386_ONLY)driver name=balloon perms="* 0444 root sys"
 $(sparc_ONLY)driver name=bbc_beep alias=SUNW,bbc-beep
 $(sparc_ONLY)driver name=central
 $(i386_ONLY)driver name=cpudrv alias=cpu
-$(sparc_ONLY)driver name=ctsmc alias=nct-ds80ch11-smc
 $(sparc_ONLY)driver name=db21554 \
     alias=pci108e,6300 \
     alias=pci108e,6301 \
@@ -395,7 +349,6 @@ $(sparc_ONLY)driver name=db21554 \
     alias=pci108e,6722 \
     alias=pciclass,060940 \
     alias=pciclass,060980
-$(sparc_ONLY)driver name=dman perms="* 0600 root sys"
 $(i386_ONLY)driver name=domcaps perms="* 0444 root sys"
 $(sparc_ONLY)driver name=dr
 $(sparc_ONLY)driver name=ebus class=ebus \
@@ -423,9 +376,7 @@ $(sparc_ONLY)driver name=grppm alias=SUNW,smbus-ppm
 $(sparc_ONLY)driver name=hpc3130 perms="* 0644 root sys" \
     alias=FJSV,hpc3130 \
     alias=i2c-hpc3130
-$(sparc_ONLY)driver name=i2bsc alias=SUNW,i2bsc
 $(sparc_ONLY)driver name=ics951601 alias=i2c-ics951601
-$(sparc_ONLY)driver name=iosram
 $(i386_ONLY)driver name=isa alias=pciclass,060100 class=sysbus
 $(sparc_ONLY)driver name=isadma
 $(sparc_ONLY)driver name=jbusppm alias=jbus-ppm
@@ -502,7 +453,6 @@ $(sparc_ONLY)driver name=sbbc alias=pci108e,c416
 $(sparc_ONLY)driver name=sbus class=sbus
 $(sparc_ONLY)driver name=sbusmem
 $(sparc_ONLY)driver name=scfd alias=FJSV,scfc
-$(sparc_ONLY)driver name=schpc
 $(sparc_ONLY)driver name=schppm alias=gp2-ppm
 $(sparc_ONLY)driver name=seeprom \
     alias=i2c-at24c64 \
@@ -558,12 +508,6 @@ $(sparc_ONLY)file path=platform/SUNW,A70/kernel/drv/ppm.conf group=sys
 $(sparc_ONLY)file path=platform/SUNW,A70/kernel/misc/$(ARCH64)/platmod \
     group=sys mode=0755
 $(sparc_ONLY)file \
-    path=platform/SUNW,Netra-CP2300/kernel/misc/$(ARCH64)/platmod group=sys \
-    mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Netra-CP2300/kernel/tod/$(ARCH64)/todds1307 group=sys \
-    mode=0755
-$(sparc_ONLY)file \
     path=platform/SUNW,Netra-CP3010/kernel/misc/$(ARCH64)/platmod group=sys \
     mode=0755
 $(sparc_ONLY)file path=platform/SUNW,Netra-T12/kernel/drv/$(ARCH64)/lw8 \
@@ -617,19 +561,6 @@ $(sparc_ONLY)file \
 $(sparc_ONLY)file \
     path=platform/SUNW,SPARC-Enterprise/kernel/misc/$(ARCH64)/platmod \
     group=sys mode=0755
-$(sparc_ONLY)file path=platform/SUNW,Serverblade1/kernel/drv/$(ARCH64)/bscbus \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Serverblade1/kernel/drv/$(ARCH64)/bscv \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Serverblade1/kernel/drv/bscbus.conf \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Serverblade1/kernel/drv/bscv.conf \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Serverblade1/kernel/drv/options.conf \
-    group=sys
-$(sparc_ONLY)file \
-    path=platform/SUNW,Serverblade1/kernel/misc/$(ARCH64)/platmod group=sys \
-    mode=0755
 $(sparc_ONLY)file path=platform/SUNW,Sun-Blade-100/kernel/drv/$(ARCH64)/grfans \
     group=sys
 $(sparc_ONLY)file path=platform/SUNW,Sun-Blade-100/kernel/drv/$(ARCH64)/grppm \
@@ -659,35 +590,6 @@ $(sparc_ONLY)file path=platform/SUNW,Sun-Blade-2500/kernel/drv/ppm.conf \
     group=sys
 $(sparc_ONLY)file \
     path=platform/SUNW,Sun-Blade-2500/kernel/misc/$(ARCH64)/platmod group=sys \
-    mode=0755
-$(sparc_ONLY)file path=platform/SUNW,Sun-Fire-15000/kernel/$(ARCH64)/unix \
-    group=sys mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Sun-Fire-15000/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-III \
-    group=sys mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Sun-Fire-15000/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-III+ \
-    group=sys mode=0755
-$(sparc_ONLY)file path=platform/SUNW,Sun-Fire-15000/kernel/drv/$(ARCH64)/axq \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Sun-Fire-15000/kernel/drv/$(ARCH64)/dman \
-    group=sys
-$(sparc_ONLY)file \
-    path=platform/SUNW,Sun-Fire-15000/kernel/drv/$(ARCH64)/iosram group=sys
-$(sparc_ONLY)file path=platform/SUNW,Sun-Fire-15000/kernel/drv/$(ARCH64)/schpc \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Sun-Fire-15000/kernel/drv/dman.conf \
-    group=sys
-$(sparc_ONLY)file path=platform/SUNW,Sun-Fire-15000/kernel/drv/schpc.conf \
-    group=sys
-$(sparc_ONLY)file \
-    path=platform/SUNW,Sun-Fire-15000/kernel/misc/$(ARCH64)/mboxsc group=sys \
-    mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Sun-Fire-15000/kernel/misc/$(ARCH64)/platmod group=sys \
-    mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Sun-Fire-15000/kernel/misc/$(ARCH64)/scosmb group=sys \
     mode=0755
 $(sparc_ONLY)file \
     path=platform/SUNW,Sun-Fire-280R/kernel/drv/$(ARCH64)/pcf8574 group=sys
@@ -764,24 +666,6 @@ $(sparc_ONLY)file path=platform/SUNW,Ultra-4/kernel/misc/$(ARCH64)/platmod \
     group=sys mode=0755
 $(sparc_ONLY)file path=platform/SUNW,Ultra-5_10/kernel/misc/$(ARCH64)/platmod \
     group=sys mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/$(ARCH64)/unix group=sys \
-    mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-II \
-    group=sys mode=0755
-$(sparc_ONLY)file \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/drv/$(ARCH64)/pcipsy \
-    group=sys
-$(sparc_ONLY)file \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/drv/$(ARCH64)/rootnex \
-    group=sys
-$(sparc_ONLY)file \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/drv/$(ARCH64)/sbus \
-    group=sys
-$(sparc_ONLY)file \
-    path=platform/SUNW,Ultra-Enterprise-10000/kernel/misc/$(ARCH64)/platmod \
-    group=sys mode=0755
 $(sparc_ONLY)file path=platform/SUNW,Ultra-Enterprise/kernel/drv/$(ARCH64)/ac \
     group=sys
 $(sparc_ONLY)file \
@@ -847,12 +731,6 @@ $(i386_ONLY)file path=platform/i86pc/kernel/misc/$(ARCH64)/acpidev group=sys \
     mode=0755
 $(i386_ONLY)file path=platform/i86pc/kernel/misc/$(ARCH64)/gfx_private \
     group=sys mode=0755
-$(i386_ONLY)file path=platform/i86pc/ucode/amd-ucode.bin group=sys mode=0444 \
-    original_name=SUNWcakr:platform/i86pc/ucode/amd-ucode.bin preserve=true \
-    reboot-needed=true
-$(i386_ONLY)file path=platform/i86pc/ucode/intel-ucode.txt group=sys mode=0444 \
-    original_name=SUNWcakr:platform/i86pc/ucode/intel-ucode.txt preserve=true \
-    reboot-needed=true
 $(i386_ONLY)file path=platform/i86xpv/kernel/$(ARCH64)/unix group=sys \
     mode=0755
 $(i386_ONLY)file path=platform/i86xpv/kernel/cpu/$(ARCH64)/cpu.generic \
@@ -932,7 +810,6 @@ $(sparc_ONLY)file path=platform/sun4u/kernel/crypto/$(ARCH64)/sha1 group=sys \
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/adm1026 group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/adm1031 group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/bbc_beep group=sys
-$(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/ctsmc group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/db21554 group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/ebus group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/epic group=sys
@@ -940,7 +817,6 @@ $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/fd group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/gpio_87317 \
     group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/grbeep group=sys
-$(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/i2bsc group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/ics951601 group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/isadma group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/jbusppm group=sys
@@ -986,7 +862,6 @@ $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/trapstat group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/upa64s group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/zs group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/$(ARCH64)/zsh group=sys
-$(sparc_ONLY)file path=platform/sun4u/kernel/drv/i2bsc.conf group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/mem_cache.conf group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/rmc_comm.conf group=sys
 $(sparc_ONLY)file path=platform/sun4u/kernel/drv/rmcadm.conf group=sys
@@ -1016,8 +891,6 @@ $(sparc_ONLY)file path=platform/sun4u/kernel/misc/$(ARCH64)/sbd group=sys \
     mode=0755
 $(sparc_ONLY)file path=platform/sun4u/kernel/misc/$(ARCH64)/vis group=sys \
     mode=0755
-$(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todblade group=sys \
-    mode=0755
 $(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todbq4802 group=sys \
     mode=0755
 $(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todds1287 group=sys \
@@ -1036,10 +909,6 @@ $(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todopl group=sys \
     mode=0755
 $(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todsg group=sys \
     mode=0755
-$(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todstarcat \
-    group=sys mode=0755
-$(sparc_ONLY)file path=platform/sun4u/kernel/tod/$(ARCH64)/todstarfire \
-    group=sys mode=0755
 $(sparc_ONLY)file path=platform/sun4v/bootlst group=sys reboot-needed=true
 $(sparc_ONLY)file path=platform/sun4v/kernel/$(ARCH64)/genunix group=sys \
     mode=0755
@@ -1087,14 +956,12 @@ $(sparc_ONLY)file path=platform/sun4v/kernel/misc/$(ARCH64)/vis group=sys \
 $(sparc_ONLY)file path=usr/share/man/man4/sbus.4
 $(i386_ONLY)file path=usr/share/man/man4/sysbus.4
 $(sparc_ONLY)file path=usr/share/man/man7d/bbc_beep.7d
-$(sparc_ONLY)file path=usr/share/man/man7d/ctsmc.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/dr.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/fd.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/gpio_87317.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/grbeep.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/mc-opl.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/n2rng.7d
-$(sparc_ONLY)file path=usr/share/man/man7d/ncp.7d
 $(i386_ONLY)file path=usr/share/man/man7d/npe.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/ntwdt.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/oplmsu.7d
@@ -1102,7 +969,6 @@ $(sparc_ONLY)file path=usr/share/man/man7d/oplpanel.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/pcicmu.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/pcipsy.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/pcisch.7d
-$(sparc_ONLY)file path=usr/share/man/man7d/schpc.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/smbus.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/su.7d
 $(sparc_ONLY)file path=usr/share/man/man7d/todopl.7d
@@ -1185,15 +1051,6 @@ $(sparc_ONLY)link \
 $(sparc_ONLY)link \
     path=platform/SUNW,Sun-Blade-2500/kernel/crypto/$(ARCH64)/aes \
     target=../../../../sun4u-us3/kernel/crypto/$(ARCH64)/aes
-$(sparc_ONLY)link \
-    path=platform/SUNW,Sun-Fire-15000/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-IV \
-    target=SUNW,UltraSPARC-III+
-$(sparc_ONLY)link \
-    path=platform/SUNW,Sun-Fire-15000/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-IV+ \
-    target=SUNW,UltraSPARC-III+
-$(sparc_ONLY)link \
-    path=platform/SUNW,Sun-Fire-15000/kernel/crypto/$(ARCH64)/aes \
-    target=../../../../sun4u-us3/kernel/crypto/$(ARCH64)/aes
 $(sparc_ONLY)link path=platform/SUNW,Sun-Fire-280R/kernel/crypto/$(ARCH64)/aes \
     target=../../../../sun4u-us3/kernel/crypto/$(ARCH64)/aes
 $(sparc_ONLY)link path=platform/SUNW,Sun-Fire-480R/kernel/crypto/$(ARCH64)/aes \
@@ -1229,8 +1086,6 @@ $(sparc_ONLY)link path=platform/SUNW,Sun-Fire/kernel/crypto/$(ARCH64)/aes \
     target=../../../../sun4u-us3/kernel/crypto/$(ARCH64)/aes
 $(sparc_ONLY)link path=platform/SUNW,Ultra-80/kernel/misc/$(ARCH64)/platmod \
     target=../../../../SUNW,Ultra-5_10/kernel/misc/$(ARCH64)/platmod
-$(sparc_ONLY)link path=platform/SUNW,Ultra-Enterprise-10000/kernel/unix \
-    target=$(ARCH64)/unix
 $(sparc_ONLY)link path=platform/sun4u/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-IIi \
     target=SUNW,UltraSPARC-II
 $(sparc_ONLY)link path=platform/sun4u/kernel/cpu/$(ARCH64)/SUNW,UltraSPARC-IV \
@@ -1246,5 +1101,5 @@ $(sparc_ONLY)link path=platform/sun4v/kernel/unix target=$(ARCH64)/unix
 $(i386_ONLY)link path=usr/share/man/man4/isa.4 target=sysbus.4
 $(sparc_ONLY)link path=usr/share/man/man7d/drmach.7d target=dr.7d
 link path=usr/share/man/man7d/fdc.7d target=fd.7d
-$(sparc_ONLY)link path=usr/share/man/man7d/ngdr.7d target=dr.7d
-$(sparc_ONLY)link path=usr/share/man/man7d/ngdrmach.7d target=dr.7d
+$(i386_ONLY)depend fmri=system/microcode/amd type=require
+$(i386_ONLY)depend fmri=system/microcode/intel type=require

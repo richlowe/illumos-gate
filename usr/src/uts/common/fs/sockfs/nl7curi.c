@@ -926,7 +926,7 @@ add:
 	ruri->hit = 0;
 	ruri->expire = -1;
 	ruri->response.sz = 0;
-	ruri->proc = (struct sonode *)~NULL;
+	ruri->proc = (struct sonode *)~0;
 	cv_init(&ruri->waiting, NULL, CV_DEFAULT, NULL);
 	mutex_init(&ruri->proclock, NULL, MUTEX_DEFAULT, NULL);
 	uri_add(ruri, RW_READER, nonblocking);
@@ -1140,10 +1140,6 @@ nl7c_data(struct sonode *so, uio_t *uio)
 
 	alloc = kmem_alloc(sz, KM_SLEEP);
 	URI_RD_ADD(uri, rdp, sz, -1);
-	if (rdp == NULL) {
-		error = ENOMEM;
-		goto fail;
-	}
 
 	if (uri->hash != URI_TEMP && uri->count > nca_max_cache_size) {
 		uri_delete(uri);
@@ -1276,7 +1272,7 @@ nl7c_readfile(file_t *fp, u_offset_t *off, int *len, int max, int *ret)
 
 int
 nl7c_sendfilev(struct sonode *so, u_offset_t *fileoff, sendfilevec_t *sfvp,
-	int sfvc, ssize_t *xfer)
+    int sfvc, ssize_t *xfer)
 {
 	sotpi_info_t	*sti = SOTOTPI(so);
 	uri_desc_t	*uri = (uri_desc_t *)sti->sti_nl7c_uri;
@@ -1376,10 +1372,6 @@ nl7c_sendfilev(struct sonode *so, u_offset_t *fileoff, sendfilevec_t *sfvp,
 			fp = NULL;
 		}
 		URI_RD_ADD(uri, rdp, cnt, -1);
-		if (rdp == NULL) {
-			error = ENOMEM;
-			goto fail;
-		}
 		data = alloc;
 		alloc = NULL;
 		rdp->data.kmem = data;
@@ -1405,10 +1397,6 @@ nl7c_sendfilev(struct sonode *so, u_offset_t *fileoff, sendfilevec_t *sfvp,
 			if (len > cnt) {
 				/* More file data so add it */
 				URI_RD_ADD(uri, rdp, len - cnt, off);
-				if (rdp == NULL) {
-					error = ENOMEM;
-					goto fail;
-				}
 				rdp->data.vnode = vp;
 
 				/* Send vnode data out the connection */
@@ -1480,7 +1468,7 @@ void
 nl7c_close(struct sonode *so)
 {
 	sotpi_info_t	*sti = SOTOTPI(so);
-	uri_desc_t 	*uri = (uri_desc_t *)sti->sti_nl7c_uri;
+	uri_desc_t	*uri = (uri_desc_t *)sti->sti_nl7c_uri;
 
 	if (uri == NULL) {
 		/*
@@ -1585,15 +1573,8 @@ uri_segmap_map(uri_rd_t *rdp, int bytes)
  */
 
 static mblk_t *
-uri_desb_chop(
-	char 		**data,
-	size_t		*sz,
-	int 		*bytes,
-	uri_desb_t 	*temp,
-	int		max_mblk,
-	char		*eoh,
-	mblk_t		*persist
-)
+uri_desb_chop(char **data, size_t *sz, int *bytes, uri_desb_t *temp,
+    int max_mblk, char *eoh, mblk_t *persist)
 {
 	char		*ldata = *data;
 	size_t		lsz = *sz;

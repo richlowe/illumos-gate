@@ -170,14 +170,9 @@ bi_load32(char *args, int *howtop, int *bootdevp, vm_offset_t *bip, vm_offset_t 
 
     switch(rootdev->dd.d_dev->dv_type) {
     case DEVT_CD:
-	    /* Pass in BIOS device number. */
-	    bi.bi_bios_dev = bc_unit2bios(rootdev->dd.d_unit);
-	    bootdevnr = bc_getdev(rootdev);
-	    break;
-
     case DEVT_DISK:
 	/* pass in the BIOS device number of the current disk */
-	bi.bi_bios_dev = bd_unit2bios(rootdev->dd.d_unit);
+	bi.bi_bios_dev = bd_unit2bios(rootdev);
 	bootdevnr = bd_getdev(rootdev);
 	break;
 
@@ -238,10 +233,10 @@ bi_load32(char *args, int *howtop, int *bootdevp, vm_offset_t *bip, vm_offset_t 
     ssym = esym = 0;
     md = file_findmetadata(kfp, MODINFOMD_SSYM);
     if (md != NULL)
-	ssym = *((vm_offset_t *)&(md->md_data));
+	bcopy(&md->md_data, &ssym, sizeof (vm_offset_t));
     md = file_findmetadata(kfp, MODINFOMD_ESYM);
     if (md != NULL)
-	esym = *((vm_offset_t *)&(md->md_data));
+	bcopy(&md->md_data, &esym, sizeof (vm_offset_t));
     if (ssym == 0 || esym == 0)
 	ssym = esym = 0;		/* sanity */
 

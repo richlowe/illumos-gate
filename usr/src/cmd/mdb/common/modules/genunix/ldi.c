@@ -24,7 +24,9 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright 2019 Joyent, Inc.
+ */
 
 #include <sys/types.h>
 #include <sys/sysmacros.h>
@@ -44,9 +46,9 @@
  * ldi handle walker structure
  */
 typedef struct lh_walk {
-	struct ldi_handle	**hash;	/* current bucket pointer 	*/
+	struct ldi_handle	**hash;	/* current bucket pointer	*/
 	struct ldi_handle	*lhp;	/* ldi handle pointer		*/
-	size_t 			index;	/* hash table index		*/
+	size_t			index;	/* hash table index		*/
 	struct ldi_handle	buf;	/* buffer used for handle reads */
 } lh_walk_t;
 
@@ -54,9 +56,9 @@ typedef struct lh_walk {
  * ldi identifier walker structure
  */
 typedef struct li_walk {
-	struct ldi_ident	**hash;	/* current bucket pointer 	*/
+	struct ldi_ident	**hash;	/* current bucket pointer	*/
 	struct ldi_ident	*lip;	/* ldi handle pointer		*/
-	size_t 			index;	/* hash table index		*/
+	size_t			index;	/* hash table index		*/
 	struct ldi_ident	buf;	/* buffer used for ident reads */
 } li_walk_t;
 
@@ -100,11 +102,11 @@ ldi_handle_walk_init(mdb_walk_state_t *wsp)
 int
 ldi_handle_walk_step(mdb_walk_state_t *wsp)
 {
-	lh_walk_t 	*lhwp = (lh_walk_t *)wsp->walk_data;
+	lh_walk_t	*lhwp = (lh_walk_t *)wsp->walk_data;
 	int		status;
 
 	/* check if we need to go to the next hash bucket */
-	while (wsp->walk_addr == NULL) {
+	while (wsp->walk_addr == 0) {
 
 		/* advance to the next bucket */
 		if (++(lhwp->index) >= LH_HASH_SZ)
@@ -168,11 +170,11 @@ ldi_ident_walk_init(mdb_walk_state_t *wsp)
 int
 ldi_ident_walk_step(mdb_walk_state_t *wsp)
 {
-	li_walk_t 	*liwp = (li_walk_t *)wsp->walk_data;
+	li_walk_t	*liwp = (li_walk_t *)wsp->walk_data;
 	int		status;
 
 	/* check if we need to go to the next hash bucket */
-	while (wsp->walk_addr == NULL) {
+	while (wsp->walk_addr == 0) {
 
 		/* advance to the next bucket */
 		if (++(liwp->index) >= LI_HASH_SZ)
@@ -288,7 +290,8 @@ ldi_ident(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 }
 
 static void
-ldi_handle_header(int refs, int ident) {
+ldi_handle_header(int refs, int ident)
+{
 	mdb_printf("%-?s ", "HANDLE");
 
 	if (refs)
@@ -367,7 +370,7 @@ ldi_handle(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	int			refs = 1;
 
 	if (mdb_getopts(argc, argv,
-	    'i', MDB_OPT_SETBITS, TRUE, &ident) != argc)
+	    'i', MDB_OPT_SETBITS, TRUE, &ident, NULL) != argc)
 		return (DCMD_USAGE);
 
 	if (ident)
@@ -379,7 +382,8 @@ ldi_handle(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		    argc, argv) == -1) {
 			mdb_warn("can't walk ldi handles");
 			return (DCMD_ERR);
-		} return (DCMD_OK);
+		}
+		return (DCMD_OK);
 	}
 
 	/* display the header line */

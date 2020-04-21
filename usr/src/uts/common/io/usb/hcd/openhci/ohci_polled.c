@@ -22,6 +22,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  * Copyright (c) 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -95,7 +96,7 @@ static void	ohci_polled_finish_interrupt(
 				uint_t			intr);
 static void	ohci_polled_insert_bulk_td(
 				ohci_polled_t		*ohci_polledp);
-static int 	ohci_polled_create_tw(
+static int	ohci_polled_create_tw(
 				ohci_state_t		*ohcip,
 				usba_pipe_handle_data_t	*ph,
 				usb_flags_t		usb_flags);
@@ -1080,8 +1081,8 @@ ohci_polled_save_state(ohci_polled_t	*ohci_polledp)
 		/*
 		 * Reset the HCCA done head and ohci done head register.
 		 */
-		Set_HCCA(ohcip->ohci_hccap->HccaDoneHead, NULL);
-		Set_OpReg(hcr_done_head, (uint32_t)0x0);
+		Set_HCCA(ohcip->ohci_hccap->HccaDoneHead, 0);
+		Set_OpReg(hcr_done_head, 0);
 
 		/*
 		 * Clear the  WriteDoneHead interrupt bit in the ohci interrupt
@@ -1351,7 +1352,8 @@ ohci_polled_restore_state(ohci_polled_t	*ohci_polledp)
 
 		while (td) {
 
-		next_td = ohci_td_iommu_to_cpu(ohcip, Get_TD(td->hctd_next_td));
+			next_td = ohci_td_iommu_to_cpu(ohcip,
+			    Get_TD(td->hctd_next_td));
 
 			/*
 			 * Insert valid interrupt TD back into ED's
@@ -1385,7 +1387,7 @@ ohci_polled_restore_state(ohci_polled_t	*ohci_polledp)
 			td = next_td;
 		}
 		/* Reset the HCCA done head list to NULL */
-		Set_HCCA(ohcip->ohci_hccap->HccaDoneHead, NULL);
+		Set_HCCA(ohcip->ohci_hccap->HccaDoneHead, 0);
 
 		/*
 		 * Replace the hcr_done_head register field with the saved copy
@@ -1539,7 +1541,7 @@ ohci_polled_check_done_list(ohci_polled_t	*ohci_polledp)
 		}
 	} else {
 		/* Reset the done head to NULL */
-		Set_HCCA(ohcip->ohci_hccap->HccaDoneHead, NULL);
+		Set_HCCA(ohcip->ohci_hccap->HccaDoneHead, 0);
 	}
 
 	/* Sync ED and TD pool */
@@ -1708,7 +1710,7 @@ ohci_polled_process_input_list(ohci_polled_t	*ohci_polledp)
 	uint_t			num_characters;
 	ohci_trans_wrapper_t	*tw;
 	ohci_pipe_private_t	*pp;
-	int 			pipe_dir;
+	int			pipe_dir;
 
 	/*
 	 * Get the first TD on the input done head.
@@ -2021,7 +2023,7 @@ ohci_polled_insert_td_on_tw(
 		Set_TD(dummy->hctd_tw_next_td, ohci_td_cpu_to_iommu(ohcip, td));
 		tw->tw_hctd_tail = td;
 
-		ASSERT(Get_TD(td->hctd_tw_next_td) == NULL);
+		ASSERT(Get_TD(td->hctd_tw_next_td) == 0);
 	}
 }
 
@@ -2074,7 +2076,7 @@ ohci_polled_finish_interrupt(
 
 /*
  * ohci_polled_buikin_start:
- * 	Insert bulkin td into endpoint's td list.
+ *	Insert bulkin td into endpoint's td list.
  */
 static void
 ohci_polled_insert_bulk_td(
@@ -2213,7 +2215,7 @@ ohci_polled_create_tw(
 	/* Get and Store 32bit ID */
 	tw->tw_id = OHCI_GET_ID((void *)tw);
 
-	ASSERT(tw->tw_id != NULL);
+	ASSERT(tw->tw_id != 0);
 
 	pipe_dir = ph->p_ep.bEndpointAddress & USB_EP_DIR_MASK;
 	tw->tw_direction = (pipe_dir == USB_EP_DIR_IN) ? HC_TD_IN : HC_TD_OUT;

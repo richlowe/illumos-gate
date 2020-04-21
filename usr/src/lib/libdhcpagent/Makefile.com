@@ -22,6 +22,8 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 
 LIBRARY	=	libdhcpagent.a
 VERS =		.1
@@ -32,20 +34,20 @@ include ../../Makefile.lib
 # install this library in the root filesystem
 include ../../Makefile.rootfs
 
-LIBS =		$(DYNLIB) $(LINTLIB)
+LIBS =		$(DYNLIB)
 
 LDLIBS +=	-lc -lsocket -ldhcputil -luuid -ldlpi -lcontract
 
 SRCDIR =	../common
-$(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
 
-CFLAGS += 	$(CCVERBOSE) 
+CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-type-limits
+
+# needs work
+SMOFF += allocating_enough_data
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: lintcheck
 
 include ../../Makefile.targ

@@ -22,6 +22,7 @@
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libsoftcrypto.a
 VERS =		.1
@@ -32,7 +33,10 @@ include		$(SRC)/lib/Makefile.lib
 
 CERRWARN +=	-_gcc=-Wno-type-limits
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 # Sources need to be redefined after Makefile.lib inclusion.
 SRCS =		$(AES_SRC) $(ARCFOUR_SRC) $(BIGNUM_SRC) $(BLOWFISH_SRC) \

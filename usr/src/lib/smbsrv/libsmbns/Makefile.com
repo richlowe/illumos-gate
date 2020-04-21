@@ -20,7 +20,8 @@
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
-# 
+#
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= libsmbns.a
 VERS= .1
@@ -54,7 +55,10 @@ LDLIBS +=	-lsmb -lads -lgss -lcmdutils -lldap \
 CPPFLAGS +=	-D_REENTRANT
 CPPFLAGS +=	-Dsyslog=smb_syslog
 CERRWARN +=	-_gcc=-Wno-unused-function
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 # DYNLIB libraries do not have lint libs and are not linted
 $(DYNLIB) :=	LDLIBS += -lkrb5

@@ -11,14 +11,17 @@
 .\"
 .\" Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 .\" Copyright 2017 Nexenta Systems, Inc.
+.\" Copyright 2018 Joyent, Inc.
 .\"
-.Dd June 1, 2017
+.Dd February 13, 2019
 .Dt OFMT 3OFMT
 .Os
 .Sh NAME
 .Nm ofmt_open ,
 .Nm ofmt_print ,
+.Nm ofmt_print_header ,
 .Nm ofmt_update_winsize ,
+.Nm ofmt_set_fs ,
 .Nm ofmt_strerror ,
 .Nm ofmt_close
 .Nd data structures and routines for printing output
@@ -40,8 +43,17 @@
 .Fa "void *cbarg"
 .Fc
 .Ft void
+.Fo ofmt_print_header
+.Fa "ofmt_handle_t ofmt"
+.Fc
+.Ft void
 .Fo ofmt_update_winsize
 .Fa "ofmt_handle_t ofmt"
+.Fc
+.Ft void
+.Fo ofmt_set_fs
+.Fa "ofmt_handle_t ofmt"
+.Fa "char fs"
 .Fc
 .Ft "char *"
 .Fo ofmt_strerror
@@ -158,8 +170,20 @@ as follows:
 is the application-specified callback function with the following prototype that
 provides a string representation of the value to be printed for the field:
 .Bd -literal -offset indent
-(*of_cb)(ofmt_arg_t *ofmt_arg, char *buf, uint_t bufsize)
+boolean_t (*of_cb)(ofmt_arg_t *ofmt_arg, char *buf, uint_t bufsize)
 .Ed
+.Pp
+The callback must not write beyond
+.Fa bufsize
+bytes of the string form into
+.Fa buf .
+If the function successfully translates the field into its string
+representation and places it into
+.Fa buf ,
+then the callback function should return
+.Dv B_TRUE .
+Otherwise, the callback function should return
+.Dv B_FALSE .
 .Pp
 The interpretation of the
 .Va of_id
@@ -199,6 +223,9 @@ will result in
 .Dv OFMT_EPARSEMULTI .
 .It Dv OFMT_RIGHTJUST
 Right justified output.
+.It Dv OFMT_NOHEADER
+Skip printing the header when calling
+.Fn ofmt_print .
 .El
 .Pp
 The non-zero
@@ -228,6 +255,15 @@ The callback function should fill
 .Fa buf
 with the string to be printed for the field using the data in
 .Fa cbarg .
+.Ss Fn ofmt_print_header
+The
+.Fn ofmt_print_header
+function prints the output header.
+This is usually done as part of calling
+.Fn ofmt_print ,
+but is skipped when using
+.Dv OFMT_NOHEADER .
+This function allows you to insert it when and where desired.
 .Ss Fn ofmt_update_winsize
 The
 .Fn ofmt_update_winsize
@@ -238,6 +274,10 @@ in the
 If the
 .Dv TIOCGWINSZ
 ioctl fails, the window size is set to 80x24.
+.Ss Fn ofmt_set_fs
+The
+.Fn ofmt_set_fs
+function sets the output field separator for parsable output.
 .Ss Fn ofmt_strerror
 The
 .Fn ofmt_strerror

@@ -23,6 +23,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	This file makes the atheros driver for an intel system
@@ -66,8 +67,11 @@ LDFLAGS		+= -dy -Nmisc/mac -Nmac/mac_wifi -Ndrv/ip
 LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
+
+# needs work
+SMATCH=off
 
 #
 #	Default build targets.

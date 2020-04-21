@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libdhcputil.a
 VERS =		.1
@@ -35,24 +36,24 @@ include ../../Makefile.lib
 # install this library in the root filesystem
 include ../../Makefile.rootfs
 
-LIBS =		$(DYNLIB) $(LINTLIB)
+LIBS =		$(DYNLIB)
 
 LDLIBS +=	-lc -lgen -linetutil -ldlpi
 
 SRCDIR =	../common
 SRCS =		$(LOCOBJS:%.o=$(SRCDIR)/%.c) $(COMOBJS:%.o=$(COMDIR)/%.c)
-$(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
 
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CPPFLAGS +=	-I$(COMDIR)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: lintcheck
 
 pics/%.o: $(COMDIR)/%.c
 	$(COMPILE.c) -o $@ $<

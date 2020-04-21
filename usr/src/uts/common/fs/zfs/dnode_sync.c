@@ -31,6 +31,7 @@
 #include <sys/dmu.h>
 #include <sys/dmu_tx.h>
 #include <sys/dmu_objset.h>
+#include <sys/dmu_recv.h>
 #include <sys/dsl_dataset.h>
 #include <sys/spa.h>
 #include <sys/range_tree.h>
@@ -383,7 +384,21 @@ dnode_sync_free_range_impl(dnode_t *dn, uint64_t blkid, uint64_t nblks,
 		}
 	}
 
-	if (trunc) {
+	/*
+	 * Do not truncate the maxblkid if we are performing a raw
+	 * receive. The raw receive sets the maxblkid manually and
+	 * must not be overridden. Usually, the last DRR_FREE record
+	 * will be at the maxblkid, because the source system sets
+	 * the maxblkid when truncating. However, if the last block
+	 * was freed by overwriting with zeros and being compressed
+	 * away to a hole, the source system will generate a DRR_FREE
+	 * record while leaving the maxblkid after the end of that
+	 * record. In this case we need to leave the maxblkid as
+	 * indicated in the DRR_OBJECT record, so that it matches the
+	 * source system, ensuring that the cryptographic hashes will
+	 * match.
+	 */
+	if (trunc && !dn->dn_objset->os_raw_receive) {
 		dn->dn_phys->dn_maxblkid = blkid == 0 ? 0 : blkid - 1;
 
 		uint64_t off = (dn->dn_phys->dn_maxblkid + 1) *
@@ -432,7 +447,7 @@ dnode_evict_dbufs(dnode_t *dn)
 
 		mutex_enter(&db->db_mtx);
 		if (db->db_state != DB_EVICTING &&
-		    refcount_is_zero(&db->db_holds)) {
+		    zfs_refcount_is_zero(&db->db_holds)) {
 			db_marker.db_level = db->db_level;
 			db_marker.db_blkid = db->db_blkid;
 			db_marker.db_state = DB_SEARCH;
@@ -472,7 +487,7 @@ dnode_evict_bonus(dnode_t *dn)
 {
 	rw_enter(&dn->dn_struct_rwlock, RW_WRITER);
 	if (dn->dn_bonus != NULL) {
-		if (refcount_is_zero(&dn->dn_bonus->db_holds)) {
+		if (zfs_refcount_is_zero(&dn->dn_bonus->db_holds)) {
 			mutex_enter(&dn->dn_bonus->db_mtx);
 			dbuf_destroy(dn->dn_bonus);
 			dn->dn_bonus = NULL;
@@ -538,13 +553,14 @@ dnode_sync_free(dnode_t *dn, dmu_tx_t *tx)
 	 * zfs_obj_to_path() also depends on this being
 	 * commented out.
 	 *
-	 * ASSERT3U(refcount_count(&dn->dn_holds), ==, 1);
+	 * ASSERT3U(zfs_refcount_count(&dn->dn_holds), ==, 1);
 	 */
 
 	/* Undirty next bits */
 	dn->dn_next_nlevels[txgoff] = 0;
 	dn->dn_next_indblkshift[txgoff] = 0;
 	dn->dn_next_blksz[txgoff] = 0;
+	dn->dn_next_maxblkid[txgoff] = 0;
 
 	/* ASSERT(blkptrs are zero); */
 	ASSERT(dn->dn_phys->dn_type != DMU_OT_NONE);
@@ -553,7 +569,8 @@ dnode_sync_free(dnode_t *dn, dmu_tx_t *tx)
 	ASSERT(dn->dn_free_txg > 0);
 	if (dn->dn_allocated_txg != dn->dn_free_txg)
 		dmu_buf_will_dirty(&dn->dn_dbuf->db, tx);
-	bzero(dn->dn_phys, sizeof (dnode_phys_t));
+	bzero(dn->dn_phys, sizeof (dnode_phys_t) * dn->dn_num_slots);
+	dnode_free_interior_slots(dn);
 
 	mutex_enter(&dn->dn_mtx);
 	dn->dn_type = DMU_OT_NONE;
@@ -561,6 +578,7 @@ dnode_sync_free(dnode_t *dn, dmu_tx_t *tx)
 	dn->dn_allocated_txg = 0;
 	dn->dn_free_txg = 0;
 	dn->dn_have_spill = B_FALSE;
+	dn->dn_num_slots = 1;
 	mutex_exit(&dn->dn_mtx);
 
 	ASSERT(dn->dn_object != DMU_META_DNODE_OBJECT);
@@ -568,7 +586,7 @@ dnode_sync_free(dnode_t *dn, dmu_tx_t *tx)
 	dnode_rele(dn, (void *)(uintptr_t)tx->tx_txg);
 	/*
 	 * Now that we've released our hold, the dnode may
-	 * be evicted, so we musn't access it.
+	 * be evicted, so we mustn't access it.
 	 */
 }
 
@@ -578,6 +596,7 @@ dnode_sync_free(dnode_t *dn, dmu_tx_t *tx)
 void
 dnode_sync(dnode_t *dn, dmu_tx_t *tx)
 {
+	objset_t *os = dn->dn_objset;
 	dnode_phys_t *dnp = dn->dn_phys;
 	int txgoff = tx->tx_txg & TXG_MASK;
 	list_t *list = &dn->dn_dirty_records[txgoff];
@@ -587,23 +606,33 @@ dnode_sync(dnode_t *dn, dmu_tx_t *tx)
 	ASSERT(dmu_tx_is_syncing(tx));
 	ASSERT(dnp->dn_type != DMU_OT_NONE || dn->dn_allocated_txg);
 	ASSERT(dnp->dn_type != DMU_OT_NONE ||
-	    bcmp(dnp, &zerodn, DNODE_SIZE) == 0);
+	    bcmp(dnp, &zerodn, DNODE_MIN_SIZE) == 0);
 	DNODE_VERIFY(dn);
 
 	ASSERT(dn->dn_dbuf == NULL || arc_released(dn->dn_dbuf->db_buf));
 
-	if (dmu_objset_userused_enabled(dn->dn_objset) &&
-	    !DMU_OBJECT_IS_SPECIAL(dn->dn_object)) {
+	/*
+	 * Do user accounting if it is enabled and this is not
+	 * an encrypted receive.
+	 */
+	if (dmu_objset_userused_enabled(os) &&
+	    !DMU_OBJECT_IS_SPECIAL(dn->dn_object) &&
+	    (!os->os_encrypted || !dmu_objset_is_receiving(os))) {
 		mutex_enter(&dn->dn_mtx);
 		dn->dn_oldused = DN_USED_BYTES(dn->dn_phys);
 		dn->dn_oldflags = dn->dn_phys->dn_flags;
 		dn->dn_phys->dn_flags |= DNODE_FLAG_USERUSED_ACCOUNTED;
+		if (dmu_objset_userobjused_enabled(dn->dn_objset))
+			dn->dn_phys->dn_flags |=
+			    DNODE_FLAG_USEROBJUSED_ACCOUNTED;
 		mutex_exit(&dn->dn_mtx);
 		dmu_objset_userquota_get_ids(dn, B_FALSE, tx);
 	} else {
-		/* Once we account for it, we should always account for it. */
+		/* Once we account for it, we should always account for it */
 		ASSERT(!(dn->dn_phys->dn_flags &
 		    DNODE_FLAG_USERUSED_ACCOUNTED));
+		ASSERT(!(dn->dn_phys->dn_flags &
+		    DNODE_FLAG_USEROBJUSED_ACCOUNTED));
 	}
 
 	mutex_enter(&dn->dn_mtx);
@@ -619,6 +648,9 @@ dnode_sync(dnode_t *dn, dmu_tx_t *tx)
 		dnp->dn_bonustype = dn->dn_bonustype;
 		dnp->dn_bonuslen = dn->dn_bonuslen;
 	}
+
+	dnp->dn_extra_slots = dn->dn_num_slots - 1;
+
 	ASSERT(dnp->dn_nlevels > 1 ||
 	    BP_IS_HOLE(&dnp->dn_blkptr[0]) ||
 	    BP_IS_EMBEDDED(&dnp->dn_blkptr[0]) ||
@@ -651,7 +683,8 @@ dnode_sync(dnode_t *dn, dmu_tx_t *tx)
 			dnp->dn_bonuslen = 0;
 		else
 			dnp->dn_bonuslen = dn->dn_next_bonuslen[txgoff];
-		ASSERT(dnp->dn_bonuslen <= DN_MAX_BONUSLEN);
+		ASSERT(dnp->dn_bonuslen <=
+		    DN_SLOTS_TO_BONUSLEN(dnp->dn_extra_slots + 1));
 		dn->dn_next_bonuslen[txgoff] = 0;
 	}
 
@@ -691,7 +724,7 @@ dnode_sync(dnode_t *dn, dmu_tx_t *tx)
 	mutex_exit(&dn->dn_mtx);
 
 	if (kill_spill) {
-		free_blocks(dn, &dn->dn_phys->dn_spill, 1, tx);
+		free_blocks(dn, DN_SPILL_BLKPTR(dn->dn_phys), 1, tx);
 		mutex_enter(&dn->dn_mtx);
 		dnp->dn_flags &= ~DNODE_FLAG_SPILL_BLKPTR;
 		mutex_exit(&dn->dn_mtx);
@@ -721,9 +754,30 @@ dnode_sync(dnode_t *dn, dmu_tx_t *tx)
 		return;
 	}
 
+	if (dn->dn_num_slots > DNODE_MIN_SLOTS) {
+		dsl_dataset_t *ds = dn->dn_objset->os_dsl_dataset;
+		mutex_enter(&ds->ds_lock);
+		ds->ds_feature_activation_needed[SPA_FEATURE_LARGE_DNODE] =
+		    B_TRUE;
+		mutex_exit(&ds->ds_lock);
+	}
+
 	if (dn->dn_next_nlevels[txgoff]) {
 		dnode_increase_indirection(dn, tx);
 		dn->dn_next_nlevels[txgoff] = 0;
+	}
+
+	/*
+	 * This must be done after dnode_sync_free_range()
+	 * and dnode_increase_indirection(). See dnode_new_blkid()
+	 * for an explanation of the high bit being set.
+	 */
+	if (dn->dn_next_maxblkid[txgoff]) {
+		mutex_enter(&dn->dn_mtx);
+		dnp->dn_maxblkid =
+		    dn->dn_next_maxblkid[txgoff] & ~DMU_NEXT_MAXBLKID_SET;
+		dn->dn_next_maxblkid[txgoff] = 0;
+		mutex_exit(&dn->dn_mtx);
 	}
 
 	if (dn->dn_next_nblkptr[txgoff]) {

@@ -20,7 +20,7 @@
 #
 #
 # Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
@@ -43,6 +43,7 @@ $mapfile_version 2
 SYMBOL_VERSION SUNWprivate_1.1 {
     global:
 	_smb_debug;
+	smbios_battery_chem_desc;
 	smbios_bboard_flag_desc;
 	smbios_bboard_flag_name;
 	smbios_bboard_type_desc;
@@ -80,6 +81,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_evlog_method_desc;
 	smbios_fdopen;
 	smbios_hwsec_desc;
+	smbios_info_battery;
 	smbios_info_bboard;
 	smbios_info_bios;
 	smbios_info_boot;
@@ -101,12 +103,17 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_info_memdevmap;
 	smbios_info_obdevs;
 	smbios_info_obdevs_ext;
+	smbios_info_pointdev;
 	smbios_info_port;
 	smbios_info_extport;
 	smbios_info_powersup;
 	smbios_info_processor;
+	smbios_info_processor_info;
+	smbios_info_processor_riscv;
 	smbios_info_extprocessor;
 	smbios_info_slot;
+	smbios_info_slot_peers;
+	smbios_info_slot_peers_free;
 	smbios_info_smbios;
 	smbios_info_smbios_version;
 	smbios_info_strtab;
@@ -125,13 +132,18 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_memarray_ecc_desc;
 	smbios_memarray_loc_desc;
 	smbios_memarray_use_desc;
+	smbios_memdevice_op_capab_desc;
+	smbios_memdevice_op_capab_name;
 	smbios_memdevice_flag_desc;
 	smbios_memdevice_flag_name;
 	smbios_memdevice_form_desc;
+	smbios_memdevice_memtech_desc;
 	smbios_memdevice_type_desc;
 	smbios_memdevice_rank_desc;
 	smbios_open;
 	smbios_onboard_type_desc;
+	smbios_pointdev_iface_desc;
+	smbios_pointdev_type_desc;
 	smbios_port_conn_desc;
 	smbios_port_type_desc;
 	smbios_powersup_flag_desc;
@@ -145,7 +157,13 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	smbios_processor_upgrade_desc;
 	smbios_processor_core_flag_desc;
 	smbios_processor_core_flag_name;
+	smbios_processor_info_type_desc;
 	smbios_psn;
+	smbios_riscv_isa_desc;
+	smbios_riscv_isa_name;
+	smbios_riscv_priv_desc;
+	smbios_riscv_priv_name;
+	smbios_riscv_width_desc;
 	smbios_slot_ch1_desc;
 	smbios_slot_ch1_name;
 	smbios_slot_ch2_desc;

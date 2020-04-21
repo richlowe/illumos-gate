@@ -19,13 +19,13 @@
  * CDDL HEADER END
  */
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2017 Joyent, Inc.
- * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/types.h>
@@ -78,6 +78,8 @@
 #include <sys/policy.h>
 #include <sys/dld.h>
 #include <sys/zone.h>
+#include <sys/ptms.h>
+#include <sys/limits.h>
 #include <c2/audit.h>
 
 /*
@@ -227,6 +229,50 @@ push_mod(queue_t *qp, dev_t *devp, struct stdata *stp, const char *name,
 		stp->sd_anchorzone = anchor_zoneid;
 	}
 	mutex_exit(&stp->sd_lock);
+
+	return (0);
+}
+
+static int
+xpg4_fixup(queue_t *qp, dev_t *devp, struct stdata *stp, cred_t *crp)
+{
+	static const char *ptsmods[] = {
+	    "ptem", "ldterm", "ttcompat"
+	};
+	dev_t dummydev = *devp;
+	struct strioctl strioc;
+	zoneid_t zoneid;
+	int32_t rval;
+	uint_t i;
+
+	/*
+	 * Push modules required for the slave PTY to have terminal
+	 * semantics out of the box; this is required by XPG4v2.
+	 * These three modules are flagged as single-instance so that
+	 * the system will never end up with duplicate copies pushed
+	 * onto a stream.
+	 */
+
+	zoneid = crgetzoneid(crp);
+	for (i = 0; i < ARRAY_SIZE(ptsmods); i++) {
+		int error;
+
+		error = push_mod(qp, &dummydev, stp, ptsmods[i], 0,
+		    crp, zoneid);
+		if (error != 0)
+			return (error);
+	}
+
+	/*
+	 * Send PTSSTTY down the stream
+	 */
+
+	strioc.ic_cmd = PTSSTTY;
+	strioc.ic_timout = 0;
+	strioc.ic_len = 0;
+	strioc.ic_dp = NULL;
+
+	(void) strdoioctl(stp, &strioc, FNATIVE, K_TO_K, crp, &rval);
 
 	return (0);
 }
@@ -384,6 +430,7 @@ ckreturn:
 	stp->sd_sidp = NULL;
 	stp->sd_pgidp = NULL;
 	stp->sd_vnode = vp;
+	stp->sd_pvnode = NULL;
 	stp->sd_rerror = 0;
 	stp->sd_werror = 0;
 	stp->sd_wroff = 0;
@@ -548,10 +595,15 @@ retryap:
 
 opendone:
 
+	if (error == 0 &&
+	    (stp->sd_flag & (STRISTTY|STRXPG4TTY)) == (STRISTTY|STRXPG4TTY)) {
+		error = xpg4_fixup(qp, devp, stp, crp);
+	}
+
 	/*
 	 * let specfs know that open failed part way through
 	 */
-	if (error) {
+	if (error != 0) {
 		mutex_enter(&stp->sd_lock);
 		stp->sd_flag |= STREOPENFAIL;
 		mutex_exit(&stp->sd_lock);
@@ -803,7 +855,7 @@ strclose(struct vnode *vp, int flag, cred_t *crp)
 		}
 		stp->sd_iocblk = NULL;
 	}
-	stp->sd_vnode = NULL;
+	stp->sd_vnode = stp->sd_pvnode = NULL;
 	vp->v_stream = NULL;
 	mutex_exit(&vp->v_lock);
 	mutex_enter(&stp->sd_lock);
@@ -986,12 +1038,20 @@ strget(struct stdata *stp, queue_t *q, struct uio *uiop, int first,
 		 * (registered in sd_wakeq).
 		 */
 		struiod_t uiod;
+		struct iovec buf[IOV_MAX_STACK];
+		int iovlen = 0;
 
 		if (first)
 			stp->sd_wakeq &= ~RSLEEP;
 
-		(void) uiodup(uiop, &uiod.d_uio, uiod.d_iov,
-		    sizeof (uiod.d_iov) / sizeof (*uiod.d_iov));
+		if (uiop->uio_iovcnt > IOV_MAX_STACK) {
+			iovlen = uiop->uio_iovcnt * sizeof (iovec_t);
+			uiod.d_iov = kmem_alloc(iovlen, KM_SLEEP);
+		} else {
+			uiod.d_iov = buf;
+		}
+
+		(void) uiodup(uiop, &uiod.d_uio, uiod.d_iov, uiop->uio_iovcnt);
 		uiod.d_mp = 0;
 		/*
 		 * Mark that a thread is in rwnext on the read side
@@ -1030,6 +1090,8 @@ strget(struct stdata *stp, queue_t *q, struct uio *uiop, int first,
 			if ((bp = uiod.d_mp) != NULL) {
 				*errorp = 0;
 				ASSERT(MUTEX_HELD(&stp->sd_lock));
+				if (iovlen != 0)
+					kmem_free(uiod.d_iov, iovlen);
 				return (bp);
 			}
 			error = 0;
@@ -1049,8 +1111,14 @@ strget(struct stdata *stp, queue_t *q, struct uio *uiop, int first,
 		} else {
 			*errorp = error;
 			ASSERT(MUTEX_HELD(&stp->sd_lock));
+			if (iovlen != 0)
+				kmem_free(uiod.d_iov, iovlen);
 			return (NULL);
 		}
+
+		if (iovlen != 0)
+			kmem_free(uiod.d_iov, iovlen);
+
 		/*
 		 * Try a getq in case a rwnext() generated mblk
 		 * has bubbled up via strrput().
@@ -2060,11 +2128,11 @@ strrput_nondata(queue_t *q, mblk_t *bp)
 					 * messages after it has done a
 					 * qprocsoff.
 					 */
-				if (_OTHERQ(q)->q_next == NULL)
-					freemsg(bp);
-				else
-					qreply(q, bp);
-				return (0);
+					if (_OTHERQ(q)->q_next == NULL)
+						freemsg(bp);
+					else
+						qreply(q, bp);
+					return (0);
 				}
 		}
 		freemsg(bp);
@@ -2545,6 +2613,8 @@ strput(struct stdata *stp, mblk_t *mctl, struct uio *uiop, ssize_t *iosize,
     int b_flag, int pri, int flags)
 {
 	struiod_t uiod;
+	struct iovec buf[IOV_MAX_STACK];
+	int iovlen = 0;
 	mblk_t *mp;
 	queue_t *wqp = stp->sd_wrq;
 	int error = 0;
@@ -2636,13 +2706,21 @@ strput(struct stdata *stp, mblk_t *mctl, struct uio *uiop, ssize_t *iosize,
 	mp->b_flag |= b_flag;
 	mp->b_band = (uchar_t)pri;
 
-	(void) uiodup(uiop, &uiod.d_uio, uiod.d_iov,
-	    sizeof (uiod.d_iov) / sizeof (*uiod.d_iov));
+	if (uiop->uio_iovcnt > IOV_MAX_STACK) {
+		iovlen = uiop->uio_iovcnt * sizeof (iovec_t);
+		uiod.d_iov = (struct iovec *)kmem_alloc(iovlen, KM_SLEEP);
+	} else {
+		uiod.d_iov = buf;
+	}
+
+	(void) uiodup(uiop, &uiod.d_uio, uiod.d_iov, uiop->uio_iovcnt);
 	uiod.d_uio.uio_offset = 0;
 	uiod.d_mp = mp;
 	error = rwnext(wqp, &uiod);
 	if (! uiod.d_mp) {
 		uioskip(uiop, *iosize);
+		if (iovlen != 0)
+			kmem_free(uiod.d_iov, iovlen);
 		return (error);
 	}
 	ASSERT(mp == uiod.d_mp);
@@ -2660,17 +2738,23 @@ strput(struct stdata *stp, mblk_t *mctl, struct uio *uiop, ssize_t *iosize,
 		error = 0;
 	} else {
 		freemsg(mp);
+		if (iovlen != 0)
+			kmem_free(uiod.d_iov, iovlen);
 		return (error);
 	}
 	/* Have to check canput before consuming data from the uio */
 	if (pri == 0) {
 		if (!canputnext(wqp) && !(flags & MSG_IGNFLOW)) {
 			freemsg(mp);
+			if (iovlen != 0)
+				kmem_free(uiod.d_iov, iovlen);
 			return (EWOULDBLOCK);
 		}
 	} else {
 		if (!bcanputnext(wqp, pri) && !(flags & MSG_IGNFLOW)) {
 			freemsg(mp);
+			if (iovlen != 0)
+				kmem_free(uiod.d_iov, iovlen);
 			return (EWOULDBLOCK);
 		}
 	}
@@ -2678,6 +2762,8 @@ strput(struct stdata *stp, mblk_t *mctl, struct uio *uiop, ssize_t *iosize,
 	/* Copyin data from the uio */
 	if ((error = struioget(wqp, mp, &uiod, 0)) != 0) {
 		freemsg(mp);
+		if (iovlen != 0)
+			kmem_free(uiod.d_iov, iovlen);
 		return (error);
 	}
 	uioskip(uiop, *iosize);
@@ -2694,6 +2780,8 @@ strput(struct stdata *stp, mblk_t *mctl, struct uio *uiop, ssize_t *iosize,
 		putnext(wqp, mp);
 		stream_runservice(stp);
 	}
+	if (iovlen != 0)
+		kmem_free(uiod.d_iov, iovlen);
 	return (0);
 }
 
@@ -3419,6 +3507,7 @@ strioctl(struct vnode *vp, int cmd, intptr_t arg, int flag, int copyflag,
 			case KIOCSDIRECT:
 			case KIOCSCOMPAT:
 			case KIOCSKABORTEN:
+			case KIOCSRPTCOUNT:
 			case KIOCSRPTDELAY:
 			case KIOCSRPTRATE:
 			case VUIDSFORMAT:
@@ -3488,6 +3577,7 @@ strioctl(struct vnode *vp, int cmd, intptr_t arg, int flag, int copyflag,
 			case TCGETS:
 			case LDGETT:
 			case TIOCGETP:
+			case KIOCGRPTCOUNT:
 			case KIOCGRPTDELAY:
 			case KIOCGRPTRATE:
 				strioc.ic_len = 0;
@@ -3572,29 +3662,39 @@ strioctl(struct vnode *vp, int cmd, intptr_t arg, int flag, int copyflag,
 		if (stp->sd_flag & STRHUP)
 			return (ENXIO);
 
-		if ((scp = kmem_alloc(sizeof (strcmd_t), KM_NOSLEEP)) == NULL)
-			return (ENOMEM);
+		if (copyflag == U_TO_K) {
+			if ((scp = kmem_alloc(sizeof (strcmd_t),
+			    KM_NOSLEEP)) == NULL) {
+				return (ENOMEM);
+			}
 
-		if (copyin((void *)arg, scp, sizeof (strcmd_t))) {
-			kmem_free(scp, sizeof (strcmd_t));
-			return (EFAULT);
+			if (copyin((void *)arg, scp, sizeof (strcmd_t))) {
+				kmem_free(scp, sizeof (strcmd_t));
+				return (EFAULT);
+			}
+		} else {
+			scp = (strcmd_t *)arg;
 		}
 
 		access = job_control_type(scp->sc_cmd);
 		mutex_enter(&stp->sd_lock);
 		if (access != -1 && (error = i_straccess(stp, access)) != 0) {
 			mutex_exit(&stp->sd_lock);
-			kmem_free(scp, sizeof (strcmd_t));
+			if (copyflag == U_TO_K)
+				kmem_free(scp, sizeof (strcmd_t));
 			return (error);
 		}
 		mutex_exit(&stp->sd_lock);
 
 		*rvalp = 0;
 		if ((error = strdocmd(stp, scp, crp)) == 0) {
-			if (copyout(scp, (void *)arg, sizeof (strcmd_t)))
+			if (copyflag == U_TO_K &&
+			    copyout(scp, (void *)arg, sizeof (strcmd_t))) {
 				error = EFAULT;
+			}
 		}
-		kmem_free(scp, sizeof (strcmd_t));
+		if (copyflag == U_TO_K)
+			kmem_free(scp, sizeof (strcmd_t));
 		return (error);
 
 	case I_NREAD:
@@ -5422,7 +5522,7 @@ strioctl(struct vnode *vp, int cmd, intptr_t arg, int flag, int copyflag,
 		/*
 		 * Set/clear the write options. arg is a bit
 		 * mask with any of the following bits set...
-		 * 	SNDZERO - send zero length message
+		 *	SNDZERO - send zero length message
 		 *	SNDPIPE - send sigpipe to process if
 		 *		sd_werror is set and process is
 		 *		doing a write or putmsg.
@@ -5469,7 +5569,7 @@ strioctl(struct vnode *vp, int cmd, intptr_t arg, int flag, int copyflag,
 		struct str_mlist *mlist;
 		STRUCT_DECL(str_list, strlist);
 
-		if (arg == NULL) { /* Return number of modules plus driver */
+		if (arg == 0) { /* Return number of modules plus driver */
 			if (stp->sd_vnode->v_type == VFIFO)
 				*rvalp = stp->sd_pushcnt;
 			else
@@ -5883,7 +5983,7 @@ out:
  *	ic_timout is not INFTIM).  Non-stream head errors may be returned if
  *	the ioc_error indicates that the driver/module had problems,
  *	an EFAULT was found when accessing user data, a lack of
- * 	resources, etc.
+ *	resources, etc.
  */
 int
 strdoioctl(
@@ -6537,7 +6637,7 @@ strgetmsg(
 	mblk_t *savemp = NULL;
 	mblk_t *savemptail = NULL;
 	uint_t old_sd_flag;
-	int flg;
+	int flg = MSG_BAND;
 	int more = 0;
 	int error = 0;
 	char first = 1;
@@ -7103,7 +7203,7 @@ kstrgetmsg(
 	mblk_t *savemptail = NULL;
 	int flags;
 	uint_t old_sd_flag;
-	int flg;
+	int flg = MSG_BAND;
 	int more = 0;
 	int error = 0;
 	char first = 1;

@@ -22,6 +22,8 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, 2018 by Delphix. All rights reserved.
+ * Copyright (c) 2017, Intel Corporation.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -183,8 +185,9 @@ static void
 vdev_label_read(zio_t *zio, vdev_t *vd, int l, abd_t *buf, uint64_t offset,
     uint64_t size, zio_done_func_t *done, void *private, int flags)
 {
-	ASSERT(spa_config_held(zio->io_spa, SCL_STATE_ALL, RW_WRITER) ==
-	    SCL_STATE_ALL);
+	ASSERT(
+	    spa_config_held(zio->io_spa, SCL_STATE, RW_READER) == SCL_STATE ||
+	    spa_config_held(zio->io_spa, SCL_STATE, RW_WRITER) == SCL_STATE);
 	ASSERT(flags & ZIO_FLAG_CONFIG_WRITER);
 
 	zio_nowait(zio_read_phys(zio, vd,
@@ -193,20 +196,182 @@ vdev_label_read(zio_t *zio, vdev_t *vd, int l, abd_t *buf, uint64_t offset,
 	    ZIO_PRIORITY_SYNC_READ, flags, B_TRUE));
 }
 
-static void
+void
 vdev_label_write(zio_t *zio, vdev_t *vd, int l, abd_t *buf, uint64_t offset,
     uint64_t size, zio_done_func_t *done, void *private, int flags)
 {
-	ASSERT(spa_config_held(zio->io_spa, SCL_ALL, RW_WRITER) == SCL_ALL ||
-	    (spa_config_held(zio->io_spa, SCL_CONFIG | SCL_STATE, RW_READER) ==
-	    (SCL_CONFIG | SCL_STATE) &&
-	    dsl_pool_sync_context(spa_get_dsl(zio->io_spa))));
+	ASSERT(
+	    spa_config_held(zio->io_spa, SCL_STATE, RW_READER) == SCL_STATE ||
+	    spa_config_held(zio->io_spa, SCL_STATE, RW_WRITER) == SCL_STATE);
 	ASSERT(flags & ZIO_FLAG_CONFIG_WRITER);
 
 	zio_nowait(zio_write_phys(zio, vd,
 	    vdev_label_offset(vd->vdev_psize, l, offset),
 	    size, buf, ZIO_CHECKSUM_LABEL, done, private,
 	    ZIO_PRIORITY_SYNC_WRITE, flags, B_TRUE));
+}
+
+/*
+ * Generate the nvlist representing this vdev's stats
+ */
+void
+vdev_config_generate_stats(vdev_t *vd, nvlist_t *nv)
+{
+	nvlist_t *nvx;
+	vdev_stat_t *vs;
+	vdev_stat_ex_t *vsx;
+
+	vs = kmem_alloc(sizeof (*vs), KM_SLEEP);
+	vsx = kmem_alloc(sizeof (*vsx), KM_SLEEP);
+
+	vdev_get_stats_ex(vd, vs, vsx);
+	fnvlist_add_uint64_array(nv, ZPOOL_CONFIG_VDEV_STATS,
+	    (uint64_t *)vs, sizeof (*vs) / sizeof (uint64_t));
+
+	/*
+	 * Add extended stats into a special extended stats nvlist.  This keeps
+	 * all the extended stats nicely grouped together.  The extended stats
+	 * nvlist is then added to the main nvlist.
+	 */
+	nvx = fnvlist_alloc();
+
+	/* ZIOs in flight to disk */
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SYNC_R_ACTIVE_QUEUE,
+	    vsx->vsx_active_queue[ZIO_PRIORITY_SYNC_READ]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SYNC_W_ACTIVE_QUEUE,
+	    vsx->vsx_active_queue[ZIO_PRIORITY_SYNC_WRITE]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_ASYNC_R_ACTIVE_QUEUE,
+	    vsx->vsx_active_queue[ZIO_PRIORITY_ASYNC_READ]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_ASYNC_W_ACTIVE_QUEUE,
+	    vsx->vsx_active_queue[ZIO_PRIORITY_ASYNC_WRITE]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SCRUB_ACTIVE_QUEUE,
+	    vsx->vsx_active_queue[ZIO_PRIORITY_SCRUB]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_TRIM_ACTIVE_QUEUE,
+	    vsx->vsx_active_queue[ZIO_PRIORITY_TRIM]);
+
+	/* ZIOs pending */
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SYNC_R_PEND_QUEUE,
+	    vsx->vsx_pend_queue[ZIO_PRIORITY_SYNC_READ]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SYNC_W_PEND_QUEUE,
+	    vsx->vsx_pend_queue[ZIO_PRIORITY_SYNC_WRITE]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_ASYNC_R_PEND_QUEUE,
+	    vsx->vsx_pend_queue[ZIO_PRIORITY_ASYNC_READ]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_ASYNC_W_PEND_QUEUE,
+	    vsx->vsx_pend_queue[ZIO_PRIORITY_ASYNC_WRITE]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SCRUB_PEND_QUEUE,
+	    vsx->vsx_pend_queue[ZIO_PRIORITY_SCRUB]);
+
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_TRIM_PEND_QUEUE,
+	    vsx->vsx_pend_queue[ZIO_PRIORITY_TRIM]);
+
+	/* Histograms */
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_TOT_R_LAT_HISTO,
+	    vsx->vsx_total_histo[ZIO_TYPE_READ],
+	    ARRAY_SIZE(vsx->vsx_total_histo[ZIO_TYPE_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_TOT_W_LAT_HISTO,
+	    vsx->vsx_total_histo[ZIO_TYPE_WRITE],
+	    ARRAY_SIZE(vsx->vsx_total_histo[ZIO_TYPE_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_DISK_R_LAT_HISTO,
+	    vsx->vsx_disk_histo[ZIO_TYPE_READ],
+	    ARRAY_SIZE(vsx->vsx_disk_histo[ZIO_TYPE_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_DISK_W_LAT_HISTO,
+	    vsx->vsx_disk_histo[ZIO_TYPE_WRITE],
+	    ARRAY_SIZE(vsx->vsx_disk_histo[ZIO_TYPE_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SYNC_R_LAT_HISTO,
+	    vsx->vsx_queue_histo[ZIO_PRIORITY_SYNC_READ],
+	    ARRAY_SIZE(vsx->vsx_queue_histo[ZIO_PRIORITY_SYNC_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SYNC_W_LAT_HISTO,
+	    vsx->vsx_queue_histo[ZIO_PRIORITY_SYNC_WRITE],
+	    ARRAY_SIZE(vsx->vsx_queue_histo[ZIO_PRIORITY_SYNC_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_ASYNC_R_LAT_HISTO,
+	    vsx->vsx_queue_histo[ZIO_PRIORITY_ASYNC_READ],
+	    ARRAY_SIZE(vsx->vsx_queue_histo[ZIO_PRIORITY_ASYNC_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_ASYNC_W_LAT_HISTO,
+	    vsx->vsx_queue_histo[ZIO_PRIORITY_ASYNC_WRITE],
+	    ARRAY_SIZE(vsx->vsx_queue_histo[ZIO_PRIORITY_ASYNC_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SCRUB_LAT_HISTO,
+	    vsx->vsx_queue_histo[ZIO_PRIORITY_SCRUB],
+	    ARRAY_SIZE(vsx->vsx_queue_histo[ZIO_PRIORITY_SCRUB]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_TRIM_LAT_HISTO,
+	    vsx->vsx_queue_histo[ZIO_PRIORITY_TRIM],
+	    ARRAY_SIZE(vsx->vsx_queue_histo[ZIO_PRIORITY_TRIM]));
+
+	/* Request sizes */
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SYNC_IND_R_HISTO,
+	    vsx->vsx_ind_histo[ZIO_PRIORITY_SYNC_READ],
+	    ARRAY_SIZE(vsx->vsx_ind_histo[ZIO_PRIORITY_SYNC_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SYNC_IND_W_HISTO,
+	    vsx->vsx_ind_histo[ZIO_PRIORITY_SYNC_WRITE],
+	    ARRAY_SIZE(vsx->vsx_ind_histo[ZIO_PRIORITY_SYNC_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_ASYNC_IND_R_HISTO,
+	    vsx->vsx_ind_histo[ZIO_PRIORITY_ASYNC_READ],
+	    ARRAY_SIZE(vsx->vsx_ind_histo[ZIO_PRIORITY_ASYNC_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_ASYNC_IND_W_HISTO,
+	    vsx->vsx_ind_histo[ZIO_PRIORITY_ASYNC_WRITE],
+	    ARRAY_SIZE(vsx->vsx_ind_histo[ZIO_PRIORITY_ASYNC_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_IND_SCRUB_HISTO,
+	    vsx->vsx_ind_histo[ZIO_PRIORITY_SCRUB],
+	    ARRAY_SIZE(vsx->vsx_ind_histo[ZIO_PRIORITY_SCRUB]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_IND_TRIM_HISTO,
+	    vsx->vsx_ind_histo[ZIO_PRIORITY_TRIM],
+	    ARRAY_SIZE(vsx->vsx_ind_histo[ZIO_PRIORITY_TRIM]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SYNC_AGG_R_HISTO,
+	    vsx->vsx_agg_histo[ZIO_PRIORITY_SYNC_READ],
+	    ARRAY_SIZE(vsx->vsx_agg_histo[ZIO_PRIORITY_SYNC_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_SYNC_AGG_W_HISTO,
+	    vsx->vsx_agg_histo[ZIO_PRIORITY_SYNC_WRITE],
+	    ARRAY_SIZE(vsx->vsx_agg_histo[ZIO_PRIORITY_SYNC_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_ASYNC_AGG_R_HISTO,
+	    vsx->vsx_agg_histo[ZIO_PRIORITY_ASYNC_READ],
+	    ARRAY_SIZE(vsx->vsx_agg_histo[ZIO_PRIORITY_ASYNC_READ]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_ASYNC_AGG_W_HISTO,
+	    vsx->vsx_agg_histo[ZIO_PRIORITY_ASYNC_WRITE],
+	    ARRAY_SIZE(vsx->vsx_agg_histo[ZIO_PRIORITY_ASYNC_WRITE]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_AGG_SCRUB_HISTO,
+	    vsx->vsx_agg_histo[ZIO_PRIORITY_SCRUB],
+	    ARRAY_SIZE(vsx->vsx_agg_histo[ZIO_PRIORITY_SCRUB]));
+
+	fnvlist_add_uint64_array(nvx, ZPOOL_CONFIG_VDEV_AGG_TRIM_HISTO,
+	    vsx->vsx_agg_histo[ZIO_PRIORITY_TRIM],
+	    ARRAY_SIZE(vsx->vsx_agg_histo[ZIO_PRIORITY_TRIM]));
+
+	/* IO delays */
+	fnvlist_add_uint64(nvx, ZPOOL_CONFIG_VDEV_SLOW_IOS, vs->vs_slow_ios);
+
+	/* Add extended stats nvlist to main nvlist */
+	fnvlist_add_nvlist(nv, ZPOOL_CONFIG_VDEV_STATS_EX, nvx);
+
+	nvlist_free(nvx);
+	kmem_free(vs, sizeof (*vs));
+	kmem_free(vsx, sizeof (*vsx));
 }
 
 static void
@@ -316,6 +481,28 @@ vdev_config_generate(spa_t *spa, vdev_t *vd, boolean_t getstats,
 			fnvlist_add_uint64(nv, ZPOOL_CONFIG_REMOVING,
 			    vd->vdev_removing);
 		}
+
+		/* zpool command expects alloc class data */
+		if (getstats && vd->vdev_alloc_bias != VDEV_BIAS_NONE) {
+			const char *bias = NULL;
+
+			switch (vd->vdev_alloc_bias) {
+			case VDEV_BIAS_LOG:
+				bias = VDEV_ALLOC_BIAS_LOG;
+				break;
+			case VDEV_BIAS_SPECIAL:
+				bias = VDEV_ALLOC_BIAS_SPECIAL;
+				break;
+			case VDEV_BIAS_DEDUP:
+				bias = VDEV_ALLOC_BIAS_DEDUP;
+				break;
+			default:
+				ASSERT3U(vd->vdev_alloc_bias, ==,
+				    VDEV_BIAS_NONE);
+			}
+			fnvlist_add_string(nv, ZPOOL_CONFIG_ALLOCATION_BIAS,
+			    bias);
+		}
 	}
 
 	if (vd->vdev_dtl_sm != NULL) {
@@ -353,14 +540,16 @@ vdev_config_generate(spa_t *spa, vdev_t *vd, boolean_t getstats,
 			fnvlist_add_uint64(nv, ZPOOL_CONFIG_VDEV_TOP_ZAP,
 			    vd->vdev_top_zap);
 		}
+
+		if (vd->vdev_resilver_deferred) {
+			ASSERT(vd->vdev_ops->vdev_op_leaf);
+			ASSERT(spa->spa_resilver_deferred);
+			fnvlist_add_boolean(nv, ZPOOL_CONFIG_RESILVER_DEFER);
+		}
 	}
 
 	if (getstats) {
-		vdev_stat_t vs;
-
-		vdev_get_stats(vd, &vs);
-		fnvlist_add_uint64_array(nv, ZPOOL_CONFIG_VDEV_STATS,
-		    (uint64_t *)&vs, sizeof (vs) / sizeof (uint64_t));
+		vdev_config_generate_stats(vd, nv);
 
 		root_vdev_actions_getprogress(vd, nv);
 
@@ -989,19 +1178,38 @@ retry:
  * among uberblocks with equal txg, choose the one with the latest timestamp.
  */
 static int
-vdev_uberblock_compare(uberblock_t *ub1, uberblock_t *ub2)
+vdev_uberblock_compare(const uberblock_t *ub1, const uberblock_t *ub2)
 {
-	if (ub1->ub_txg < ub2->ub_txg)
-		return (-1);
-	if (ub1->ub_txg > ub2->ub_txg)
-		return (1);
+	int cmp = TREE_CMP(ub1->ub_txg, ub2->ub_txg);
 
-	if (ub1->ub_timestamp < ub2->ub_timestamp)
-		return (-1);
-	if (ub1->ub_timestamp > ub2->ub_timestamp)
-		return (1);
+	if (likely(cmp))
+		return (cmp);
 
-	return (0);
+	cmp = TREE_CMP(ub1->ub_timestamp, ub2->ub_timestamp);
+	if (likely(cmp))
+		return (cmp);
+
+	/*
+	 * If MMP_VALID(ub) && MMP_SEQ_VALID(ub) then the host has an MMP-aware
+	 * ZFS, e.g. zfsonlinux >= 0.7.
+	 *
+	 * If one ub has MMP and the other does not, they were written by
+	 * different hosts, which matters for MMP.  So we treat no MMP/no SEQ as
+	 * a 0 value.
+	 *
+	 * Since timestamp and txg are the same if we get this far, either is
+	 * acceptable for importing the pool.
+	 */
+	unsigned int seq1 = 0;
+	unsigned int seq2 = 0;
+
+	if (MMP_VALID(ub1) && MMP_SEQ_VALID(ub1))
+		seq1 = MMP_SEQ(ub1);
+
+	if (MMP_VALID(ub2) && MMP_SEQ_VALID(ub2))
+		seq2 = MMP_SEQ(ub2);
+
+	return (TREE_CMP(seq1, seq2));
 }
 
 struct ubl_cbdata {
@@ -1142,7 +1350,8 @@ vdev_uberblock_sync(zio_t *zio, uint64_t *good_writes,
 	if (!vdev_writeable(vd))
 		return;
 
-	int n = ub->ub_txg & (VDEV_UBERBLOCK_COUNT(vd) - 1);
+	int m = spa_multihost(vd->vdev_spa) ? MMP_BLOCKS_PER_LABEL : 0;
+	int n = ub->ub_txg % (VDEV_UBERBLOCK_COUNT(vd) - m);
 
 	/* Copy the uberblock_t into the ABD */
 	abd_t *ub_abd = abd_alloc_for_io(VDEV_UBERBLOCK_SIZE(vd), B_TRUE);
@@ -1360,10 +1569,13 @@ retry:
 	 * and the vdev configuration hasn't changed,
 	 * then there's nothing to do.
 	 */
-	if (ub->ub_txg < txg &&
-	    uberblock_update(ub, spa->spa_root_vdev, txg) == B_FALSE &&
-	    list_is_empty(&spa->spa_config_dirty_list))
-		return (0);
+	if (ub->ub_txg < txg) {
+		boolean_t changed = uberblock_update(ub, spa->spa_root_vdev,
+		    txg, spa->spa_mmp.mmp_delay);
+
+		if (!changed && list_is_empty(&spa->spa_config_dirty_list))
+			return (0);
+	}
 
 	if (txg > spa_freeze_txg(spa))
 		return (0);
@@ -1425,6 +1637,9 @@ retry:
 		}
 		goto retry;
 	}
+
+	if (spa_multihost(spa))
+		mmp_update_uberblock(spa, ub);
 
 	/*
 	 * Sync out odd labels for every dirty vdev.  If the system dies

@@ -24,6 +24,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2020 Joyent, Inc.
+ */
+
 #ifndef	_SYS_BOOTINFO_H
 #define	_SYS_BOOTINFO_H
 
@@ -62,7 +66,8 @@ typedef enum boot_module_type {
 	BMT_ROOTFS,
 	BMT_FILE,
 	BMT_HASH,
-	BMT_ENV
+	BMT_ENV,
+	BMT_FONT
 } boot_module_type_t;
 
 struct boot_memlist {
@@ -117,6 +122,7 @@ struct xboot_info {
 	native_ptr_t	bi_mb_info;		/* multiboot 1 or 2 info */
 	int		bi_mb_version;		/* multiboot version */
 	native_ptr_t	bi_acpi_rsdp;
+	native_ptr_t	bi_acpi_rsdp_copy;
 	native_ptr_t	bi_smbios;
 	native_ptr_t	bi_uefi_systab;
 	uefi_arch_type_t bi_uefi_arch;

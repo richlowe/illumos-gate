@@ -11,38 +11,38 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
-# Copyright 2016 RackTop Systems.
+# Copyright 2019 Joyent, Inc.
 #
 
 include $(SRC)/Makefile.master
+include $(SRC)/boot/sys/boot/Makefile.inc
 
-AS=	$(GNU_ROOT)/bin/gas
-LD=	$(GNU_ROOT)/bin/gld
-CC=	$(GNUC_ROOT)/bin/gcc
-
-LIBRARY=	libstand.a
-
-all install: $(LIBRARY)
-
-LIB_BASE=	$(SRC)/boot/lib
-LIBSTAND_SRC=	$(LIB_BASE)/libstand
-
-CPPFLAGS =	-nostdinc -I../../../../include -I${LIBSTAND_SRC} -I../../..
-CPPFLAGS +=	-I../../../sys -I. -I$(SRC)/common/bzip2
-CPPFLAGS +=	-D_STANDALONE
-
-CFLAGS =	-O2 -ffreestanding -Wformat
-CFLAGS +=	-mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -msoft-float
-CFLAGS +=	-Wall -Werror
-
-include ${LIBSTAND_SRC}/Makefile.inc
+CPPFLAGS +=	-I../../../../include -I$(SASRC)
+CPPFLAGS +=	-I../../.. -I. -I$(SRC)/common/bzip2
 
 $(LIBRARY): $(SRCS) $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
 
+include $(SASRC)/Makefile.inc
+include $(ZFSSRC)/Makefile.inc
+
+LIBCSRC=	$(SRC)/lib/libc
+OBJS +=		explicit_bzero.o
+
+CPPFLAGS +=	-I$(SRC)/uts/common
+
+# needs work
+printf.o := SMOFF += 64bit_shift
+
+# too hairy
+_inflate.o := SMATCH=off
+
+# 64-bit smatch false positive :/
+SMOFF += uninitialized
+
 clean: clobber
 clobber:
-	$(RM) $(CLEANFILES) $(OBJS) machine x86 libstand.a
+	$(RM) $(CLEANFILES) $(OBJS) machine $(LIBRARY)
 
 machine:
 	$(RM) machine
@@ -52,19 +52,23 @@ x86:
 	$(RM) x86
 	$(SYMLINK) ../../../x86/include x86
 
-$(OBJS): machine x86
-
-%.o:	$(LIBSTAND_SRC)/%.c
+%.o:	$(SASRC)/%.c
 	$(COMPILE.c) $<
 
-%.o:	$(LIB_BASE)/libc/net/%.c
+%.o:	$(LIBSRC)/libc/net/%.c
 	$(COMPILE.c) $<
 
-%.o:	$(LIB_BASE)/libc/string/%.c
+%.o:	$(LIBSRC)/libc/string/%.c
 	$(COMPILE.c) $<
 
-%.o:	$(LIB_BASE)/libc/uuid/%.c
+%.o:	$(LIBSRC)/libc/uuid/%.c
 	$(COMPILE.c) $<
 
-%.o:	$(LIB_BASE)/libz/%.c
+%.o:	$(ZLIB)/%.c
+	$(COMPILE.c) $<
+
+%.o:	$(LZ4)/%.c
+	$(COMPILE.c) $<
+
+%.o:	$(LIBCSRC)/port/gen/%.c
 	$(COMPILE.c) $<

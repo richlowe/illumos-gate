@@ -29,6 +29,7 @@
 #
 # Copyright (c) 2016 by Delphix. All rights reserved.
 #
+# Copyright 2019 Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -71,6 +72,7 @@ INC_PATH	+= -I$(UTSBASE)/common/fs/zfs
 INC_PATH	+= -I$(UTSBASE)/common/fs/zfs/lua
 INC_PATH	+= -I$(SRC)/common
 INC_PATH	+= -I$(COMMONBASE)/zfs
+INC_PATH	+= -I$(UTSBASE)/i86pc
 
 C99LMODE=	-Xc99=%all
 
@@ -92,6 +94,17 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-unused-label
+
+# needs work
+SMOFF += all_func_returns,indenting
+$(OBJS_DIR)/llex.o := SMOFF += index_overflow
+$(OBJS_DIR)/metaslab.o := SMOFF += no_if_block
+$(OBJS_DIR)/zfs_vnops.o := SMOFF += signed
+# needs work
+$(OBJS_DIR)/zvol.o := SMOFF += deref_check,signed
+
+# false positive
+$(OBJS_DIR)/zfs_ctldir.o := SMOFF += strcpy_overflow
 
 #
 #	Default build targets.

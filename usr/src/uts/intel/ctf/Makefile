@@ -22,6 +22,8 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2018 Joyent, Inc.
+#
 
 UTSBASE	= ../..
 
@@ -36,6 +38,8 @@ ALL_TARGET	= $(BINARY)
 LINT_TARGET	= $(MODULE).lint
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
+C99LMODE=	-Xc99=%all
+
 CPPFLAGS	+= -I$(SRC)/common/ctf -DCTF_OLD_VERSIONS
 LDFLAGS		+= $(BREDUCE) -M$(UTSBASE)/common/ctf/mapfile -dy
 
@@ -48,7 +52,7 @@ LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 LINTTAGS	+= -erroff=E_PTRDIFF_OVERFLOW
 LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 
 .KEEP_STATE:
 

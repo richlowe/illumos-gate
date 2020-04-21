@@ -22,6 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 # The mech_dummy shared object contains all the functionality needed to
@@ -41,7 +42,10 @@ CPPFLAGS +=	-I../../libgss -I$(SRC)/uts/common/gssapi/include \
 	    	-I$(ROOT)/usr/include/gssapi
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# needs work
+SMATCH=off
 
 SRCDIR =	../mech
 LIBS =		$(DYNLIB)

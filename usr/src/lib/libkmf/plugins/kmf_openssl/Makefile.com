@@ -21,8 +21,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Makefile for KMF Plugins
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	kmf_openssl.a
 VERS=		.1
@@ -40,31 +39,25 @@ BERLIB64=	$(BERLIB)
 OPENSSLLIBS=	$(BERLIB) -lcrypto -lcryptoutil -lc
 OPENSSLLIBS64=	$(BERLIB64) -lcrypto -lcryptoutil -lc
 
-LINTSSLLIBS	= $(BERLIB) -lcrypto -lcryptoutil -lc
-LINTSSLLIBS64	= $(BERLIB64) -lcrypto -lcryptoutil -lc
-
-# Because of varying openssl implementations, we need to not have lint
-# complain if we're being liberal in our suppression directives.
-LINTFLAGS	+=	-erroff=E_SUPPRESSION_DIRECTIVE_UNUSED
-LINTFLAGS64	+=	-erroff=E_SUPPRESSION_DIRECTIVE_UNUSED
+NATIVE_LIBS +=	libcrypto.so
 
 SRCDIR=		../common
 INCDIR=		../../include
 
-CFLAGS		+=	$(CCVERBOSE) 
+CFLAGS		+=	$(CCVERBOSE)
 CPPFLAGS	+=	-D_REENTRANT $(KMFINC) \
 			-I$(INCDIR) -I$(ADJUNCT_PROTO)/usr/include/libxml2
 
 CERRWARN	+=	-_gcc=-Wno-unused-label
 CERRWARN	+=	-_gcc=-Wno-unused-value
-CERRWARN	+=	-_gcc=-Wno-uninitialized
+CERRWARN	+=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 PICS=	$(OBJECTS:%=pics/%)
 
-lint:=	OPENSSLLIBS=	$(LINTSSLLIBS)
-lint:=	OPENSSLLIBS64=	$(LINTSSLLIBS64)
-
-LDLIBS32 	+=	$(OPENSSLLIBS)
+LDLIBS32	+=	$(OPENSSLLIBS)
 
 ROOTLIBDIR=	$(ROOTFS_LIBDIR)/crypto
 ROOTLIBDIR64=	$(ROOTFS_LIBDIR)/crypto/$(MACH64)
@@ -72,9 +65,7 @@ ROOTLIBDIR64=	$(ROOTFS_LIBDIR)/crypto/$(MACH64)
 .KEEP_STATE:
 
 LIBS	=	$(DYNLIB)
-all:	$(DYNLIB) $(LINTLIB)
-
-lint: lintcheck
+all:	$(DYNLIB)
 
 FRC:
 

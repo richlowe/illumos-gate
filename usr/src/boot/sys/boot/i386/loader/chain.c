@@ -27,6 +27,7 @@
 #include <sys/diskmbr.h>
 
 #include "bootstrap.h"
+#include "libi386/vbe.h"
 #include "libi386/libi386.h"
 #include "btxv86.h"
 
@@ -96,11 +97,12 @@ command_chain(int argc, char *argv[])
 		return (CMD_ERROR);
 	}
 
+	bios_set_text_mode(3);
 	relocater_data[0].src = mem;
 	relocater_data[0].dest = 0x7C00;
 	relocater_data[0].size = size;
 
-	relocator_edx = bd_unit2bios(rootdev->dd.d_unit);
+	relocator_edx = bd_unit2bios(rootdev);
 	relocator_esi = relocater_size;
 	relocator_ds = 0;
 	relocator_es = 0;

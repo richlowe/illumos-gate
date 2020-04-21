@@ -21,7 +21,8 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2019, Joyent, Inc.
+ * Copyright 2019 Joshua M. Clulow <josh@sysmgr.org>
  */
 
 #ifndef _SYS_USB_SCSA2USB_H
@@ -183,7 +184,7 @@ extern "C" {
  * SCSA2USB_ATTRS_NO_MEDIA_CHECK: AMI Virtual Floppy devices need to
  *		check if media is ready before issuing READ CAPACITY.
  * SCSA2USB_ATTRS_NO_CAP_ADJUST: Some devices return total logical block number
- * 		instead of highest logical block address on READ_CAPACITY cmd.
+ *		instead of highest logical block address on READ_CAPACITY cmd.
  *
  * NOTE: If a device simply STALLs the GET_MAX_LUN BO class-specific command
  * and recovers then it will not be added to the scsa2usb_blacklist[] table
@@ -280,7 +281,7 @@ typedef struct scsa2usb_ov {
 typedef struct scsa2usb_state {
 	int			scsa2usb_instance;	/* Instance number    */
 	int			scsa2usb_dev_state;	/* USB device state   */
-	int			scsa2usb_flags; 	/* Per instance flags */
+	int			scsa2usb_flags;		/* Per instance flags */
 	int			scsa2usb_intfc_num;	/* Interface number   */
 	dev_info_t		*scsa2usb_dip;		/* Per device. info   */
 	scsa2usb_power_t	*scsa2usb_pm;		/* PM state info */
@@ -539,14 +540,14 @@ typedef struct scsa2usb_cmd {
 	int			cmd_timeout;		/* copy of pkt_time */
 	uchar_t			cmd_cdb[SCSI_CDB_SIZE];	/* CDB */
 	uchar_t			cmd_dir;		/* direction */
-	uchar_t			cmd_actual_len; 	/* cdb len */
+	uchar_t			cmd_actual_len;		/* cdb len */
 	uchar_t			cmd_cdblen;		/* requested  cdb len */
 	struct scsi_arq_status	cmd_scb;		/* status, w/ arq */
 
 	/* used in multiple xfers */
 	size_t			cmd_total_xfercount;	/* total xfer val */
 	size_t			cmd_offset;		/* offset into buf */
-	int			cmd_lba;		/* current xfer lba */
+	uint64_t		cmd_lba;		/* current xfer lba */
 	int			cmd_done;		/* command done? */
 	int			cmd_blksize;		/* block size */
 	usba_list_entry_t	cmd_waitQ;		/* waitQ element */
@@ -567,7 +568,9 @@ _NOTE(SCHEME_PROTECTS_DATA("stable data", scsi_device scsi_address))
 #define	SCSA2USB_LEN_0		7		/* LEN[0] field */
 #define	SCSA2USB_LEN_1		8		/* LEN[1] field */
 
-/* macros to calculate LBA for 6/10/12-byte commands */
+/*
+ * Extract LBA and length from 6, 10, 12, and 16-byte commands:
+ */
 #define	SCSA2USB_LBA_6BYTE(pkt) \
 	(((pkt)->pkt_cdbp[1] & 0x1f) << 16) + \
 	((pkt)->pkt_cdbp[2] << 8) + (pkt)->pkt_cdbp[3]
@@ -586,9 +589,22 @@ _NOTE(SCHEME_PROTECTS_DATA("stable data", scsi_device scsi_address))
 	((pkt)->pkt_cdbp[2] << 24) + ((pkt)->pkt_cdbp[3] << 16) + \
 	    ((pkt)->pkt_cdbp[4] << 8) +  (pkt)->pkt_cdbp[5]
 
+#define	SCSA2USB_LEN_16BYTE(pkt) \
+	(((pkt)->pkt_cdbp[10] << 24) + ((pkt)->pkt_cdbp[11] << 16) + \
+	    ((pkt)->pkt_cdbp[12] << 8) + (pkt)->pkt_cdbp[13])
+#define	SCSA2USB_LBA_16BYTE(pkt) ((uint64_t)( \
+	((uint64_t)(pkt)->pkt_cdbp[2] << 56) + \
+	((uint64_t)(pkt)->pkt_cdbp[3] << 48) + \
+	((uint64_t)(pkt)->pkt_cdbp[4] << 40) + \
+	((uint64_t)(pkt)->pkt_cdbp[5] << 32) + \
+	((uint64_t)(pkt)->pkt_cdbp[6] << 24) + \
+	((uint64_t)(pkt)->pkt_cdbp[7] << 16) + \
+	((uint64_t)(pkt)->pkt_cdbp[8] << 8) + \
+	((uint64_t)(pkt)->pkt_cdbp[9])))
+
 /* macros to convert a pkt to cmd and vice-versa */
 #define	PKT2CMD(pkt)		((scsa2usb_cmd_t *)(pkt)->pkt_ha_private)
-#define	CMD2PKT(sp)		((sp)->cmd_pkt
+#define	CMD2PKT(sp)		((sp)->cmd_pkt)
 
 /* bulk pipe default timeout value - how long the command to be tried? */
 #define	SCSA2USB_BULK_PIPE_TIMEOUT	(2 * USB_PIPE_TIMEOUT)
@@ -655,7 +671,7 @@ typedef struct scsa2usb_read_cap {
 #ifdef	DEBUG
 #define	SCSA2USB_PRINT_CDB	scsa2usb_print_cdb
 #else
-#define	SCSA2USB_PRINT_CDB	0 &&
+#define	SCSA2USB_PRINT_CDB(...)	(void)(0)
 #endif
 
 /* ugen support */

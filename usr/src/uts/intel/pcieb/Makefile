@@ -24,9 +24,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#	This makefile drives the production of the pcieb driver kernel
-#	module.
-#
+# Copyright 2019 Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -66,18 +64,6 @@ MODSTUBS_DIR	 = $(OBJS_DIR)
 CLEANFILES	+= $(MODSTUBS_O)
 
 #
-# For now, disable these lint checks; maintainers should endeavor
-# to investigate and remove these for maximum lint coverage.
-# Please do not carry these forward to new Makefiles.
-#
-LINTTAGS	+= -erroff=E_SUSPICIOUS_COMPARISON
-LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
-LINTTAGS	+= -erroff=E_PTRDIFF_OVERFLOW
-LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
-
-CERRWARN	+= -_gcc=-Wno-unused-value
-
-#
 #	Default build targets.
 #
 .KEEP_STATE:
@@ -102,4 +88,3 @@ install:	$(INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/intel/Makefile.targ
-

@@ -22,6 +22,8 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  * Copyright 2012 Milan Jurik. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Nexenta Systems, Inc.
  */
 
 #include <stdlib.h>
@@ -87,7 +89,9 @@ static thread_key_t	server_key;
 static void *
 server_tsd_bind(void *arg)
 {
-	static void *value = 0;
+	static void *value = "NON-NULL TSD";
+
+	(void) thr_setname(thr_self(), "server_tsd_bind");
 
 	/* disable cancellation to avoid hangs if server threads disappear */
 	(void) pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
@@ -126,13 +130,15 @@ server_destroy(void *arg)
 	(void) mutex_lock(&create_lock);
 	num_servers--;
 	(void) mutex_unlock(&create_lock);
+	(void) thr_setspecific(server_key, NULL);
 }
 
 /*
  * get clearance
  */
 int
-_nscd_get_clearance(sema_t *sema) {
+_nscd_get_clearance(sema_t *sema)
+{
 	if (sema_trywait(&common_sema) == 0) {
 		(void) thr_setspecific(lookup_state_key, NULL);
 		return (0);
@@ -151,7 +157,8 @@ _nscd_get_clearance(sema_t *sema) {
  * release clearance
  */
 int
-_nscd_release_clearance(sema_t *sema) {
+_nscd_release_clearance(sema_t *sema)
+{
 	int	which;
 
 	(void) thr_getspecific(lookup_state_key, (void**)&which);
@@ -197,7 +204,7 @@ _nscd_restart_if_cfgfile_changed()
 	static timestruc_t	last_nsswitch_modified = { 0 };
 	static timestruc_t	last_resolv_modified = { -1, 0 };
 	static mutex_t		restarting_lock = DEFAULTMUTEX;
-	static int 		restarting = 0;
+	static int		restarting = 0;
 	int			restart = 0;
 	time_t			now = time(NULL);
 	char			*me = "_nscd_restart_if_cfgfile_changed";
@@ -854,7 +861,7 @@ need_per_user_door(void *buf, int whoami, uid_t uid, char **dblist)
 
 static void
 if_selfcred_return_per_user_door(char *argp, size_t arg_size,
-	door_desc_t *dp, int whoami)
+    door_desc_t *dp, int whoami)
 {
 	nss_pheader_t	*phdr = (nss_pheader_t *)((void *)argp);
 	char		*dblist;
@@ -1245,7 +1252,7 @@ _nscd_setup_server(char *execname, char **argv)
 	/*
 	 * kick off routing socket monitor thread
 	 */
-	if (thr_create(NULL, NULL,
+	if (thr_create(NULL, 0,
 	    (void *(*)(void *))rts_mon, 0, 0, NULL) != 0) {
 		errnum = errno;
 		_NSCD_LOG(NSCD_LOG_FRONT_END, NSCD_LOG_LEVEL_ERROR)
@@ -1311,7 +1318,7 @@ _nscd_setup_child_server(int did)
 	/*
 	 * kick off routing socket monitor thread
 	 */
-	if (thr_create(NULL, NULL,
+	if (thr_create(NULL, 0,
 	    (void *(*)(void *))rts_mon, 0, 0, NULL) != 0) {
 		errnum = errno;
 		_NSCD_LOG(NSCD_LOG_FRONT_END, NSCD_LOG_LEVEL_ERROR)
@@ -1476,6 +1483,8 @@ rts_mon(void)
 	} mbuf;
 	struct ifa_msghdr *ifam = &mbuf.ifam;
 	char	*me = "rts_mon";
+
+	(void) thr_setname(thr_self(), me);
 
 	rt_sock = socket(PF_ROUTE, SOCK_RAW, 0);
 	if (rt_sock < 0) {

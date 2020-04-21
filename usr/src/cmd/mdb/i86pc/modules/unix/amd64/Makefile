@@ -22,12 +22,12 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2016 Joyent, Inc.
+# Copyright 2018 Joyent, Inc.
 
 MODULE = unix.so
 MDBTGT = kvm
 
-MODSRCS = unix.c i86mmu.c
+MODSRCS = unix.c i86mmu.c xcall.c
 MODASMSRCS = unix_sup.s
 
 include ../../../../../Makefile.cmd
@@ -44,6 +44,6 @@ CPPFLAGS += -I$(SRC)/uts/intel
 CERRWARN += -_gcc=-Wno-char-subscripts
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-unused-label
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 
 CERRWARN += -_gcc=-Wno-unused-function

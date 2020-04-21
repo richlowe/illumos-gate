@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017 Joyent, Inc.
  */
 
 /*
@@ -415,6 +416,7 @@ modctl_modinfo(modid_t id, struct modinfo *umodi)
 	struct modinfo32 modi32;
 #endif
 
+	nobase = 0;
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyin(umodi, &modi, sizeof (struct modinfo)) != 0)
 			return (EFAULT);
@@ -501,6 +503,7 @@ modctl_update_driver_aliases(int add, int *data)
 		int	alias_resid;
 	} *aliases, *aip;
 
+	aliases = NULL;
 	bzero(&mc, sizeof (struct modconfig));
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyin(data, &mc, sizeof (struct modconfig)) != 0)
@@ -1234,7 +1237,7 @@ modctl_get_devid(dev_t dev, uint_t len, ddi_devid_t udevid)
 /*ARGSUSED*/
 static int
 modctl_devid2paths(ddi_devid_t udevid, char *uminor_name, uint_t flag,
-	size_t *ulensp, char *upaths)
+    size_t *ulensp, char *upaths)
 {
 	ddi_devid_t	devid = NULL;
 	int		devid_len;
@@ -2300,17 +2303,17 @@ modctl_hp(int subcmd, const char *path, char *cn_name, uintptr_t arg,
 	switch (subcmd) {
 	case MODHPOPS_CHANGE_STATE:
 		error = ddihp_modctl(DDI_HPOP_CN_CHANGE_STATE, devpath,
-		    cn_name_str, arg, NULL);
+		    cn_name_str, arg, 0);
 		break;
 	case MODHPOPS_CREATE_PORT:
 		/* Create an empty PORT */
 		error = ddihp_modctl(DDI_HPOP_CN_CREATE_PORT, devpath,
-		    cn_name_str, NULL, NULL);
+		    cn_name_str, 0, 0);
 		break;
 	case MODHPOPS_REMOVE_PORT:
 		/* Remove an empty PORT */
 		error = ddihp_modctl(DDI_HPOP_CN_REMOVE_PORT, devpath,
-		    cn_name_str, NULL, NULL);
+		    cn_name_str, 0, 0);
 		break;
 	case MODHPOPS_BUS_GET:
 		error = ddihp_modctl(DDI_HPOP_CN_GET_PROPERTY, devpath,
@@ -2800,6 +2803,7 @@ modloadonly(const char *subdir, const char *filename)
 		fullname = (char *)filename;
 	}
 
+	id = -1;
 	modp = mod_hold_loaded_mod(NULL, fullname, &retval);
 	if (modp) {
 		id = modp->mod_id;
@@ -3351,7 +3355,7 @@ mod_askparams()
 	if ((fd = kobj_open(systemfile)) != -1L)
 		kobj_close(fd);
 	else
-		systemfile = NULL;
+		systemfile = self_assembly = NULL;
 
 	/*CONSTANTCONDITION*/
 	while (1) {
@@ -3363,12 +3367,13 @@ mod_askparams()
 		if (s0[0] == '\0')
 			break;
 		else if (strcmp(s0, "/dev/null") == 0) {
-			systemfile = NULL;
+			systemfile = self_assembly = NULL;
 			break;
 		} else {
 			if ((fd = kobj_open(s0)) != -1L) {
 				kobj_close(fd);
 				systemfile = s0;
+				self_assembly = NULL;
 				break;
 			}
 		}
@@ -3467,6 +3472,11 @@ mod_load(struct modctl *mp, int usepath)
 		kmem_free(modinfop, sizeof (struct modinfo));
 		(void) mod_sysctl(SYS_SET_MVAR, (void *)mp);
 		retval = install_stubs_by_name(mp, mp->mod_modname);
+
+		/*
+		 * Perform hotinlines before module is started.
+		 */
+		do_hotinlines(mp->mod_mp);
 
 		/*
 		 * Now that the module is loaded, we need to give DTrace

@@ -23,6 +23,8 @@
 #
 # Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
 #
+# Copyright 2019 Joyent, Inc.
+#
 
 COBJS =		brand_util.o
 ASOBJS =	crt.o handler.o runexe.o
@@ -53,6 +55,9 @@ CPPFLAGS +=	-D_REENTRANT -U_ASM -I. -I../sys
 CFLAGS +=	$(CCVERBOSE)
 ASFLAGS =	-P $(ASFLAGS_$(CURTYPE)) -D_ASM -I. -I../sys
 
+# intentional code after abort()
+SMOFF += unreachable
+
 .KEEP_STATE:
 
 #
@@ -65,8 +70,6 @@ ASFLAGS =	-P $(ASFLAGS_$(CURTYPE)) -D_ASM -I. -I../sys
 #
 all: pics .WAIT $$(PICS)
 
-lint: lintcheck
-
 $(OBJECTS:%=pics/%): $(OFFSETS_H)
 
 $(OFFSETS_H): $(OFFSETS_SRC)
@@ -74,6 +77,6 @@ $(OFFSETS_H): $(OFFSETS_SRC)
 
 pics/%.o: $(ISASRCDIR)/%.s
 	$(COMPILE.s) -o $@ $<
-	$(POST_PROCESS_O)
+	$(POST_PROCESS_S_O)
 
 include $(SRC)/lib/Makefile.targ

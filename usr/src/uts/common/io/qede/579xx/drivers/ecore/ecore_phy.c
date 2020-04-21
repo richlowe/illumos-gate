@@ -33,6 +33,10 @@
 * limitations under the License.
 */
 
+/*
+ * Copyright 2018 Joyent, Inc.
+ */
+
 #include "bcm_osal.h"
 #include "ecore.h"
 #include "reg_addr.h"
@@ -626,7 +630,7 @@ static int ecore_ah_e5_phy_mac_stat(struct ecore_hwfn *p_hwfn,
 				    struct ecore_ptt *p_ptt, u32 port,
 				    char *p_phy_result_buf)
 {
-	u32 length, reg_id, addr, data_hi, data_lo;
+	u32 length, reg_id, addr, data_hi __unused, data_lo;
 
 	length = OSAL_SPRINTF(p_phy_result_buf,
 			       "MAC stats for port %d (only non-zero)\n", port);
@@ -1332,7 +1336,7 @@ int ecore_phy_sfp_get_inserted(struct ecore_hwfn *p_hwfn,
 
 	transceiver_state = ecore_rd(p_hwfn, p_ptt,
 				     port_addr +
-				     OFFSETOF(struct public_port,
+				     offsetof(struct public_port,
 					      transceiver_data));
 
 	transceiver_state = GET_FIELD(transceiver_state, ETH_TRANSCEIVER_STATE);
@@ -1452,10 +1456,10 @@ int ecore_phy_sfp_set_txdisable(struct ecore_hwfn *p_hwfn,
 			nvm_cfg1_offset = ecore_rd(p_hwfn, p_ptt,
 						   nvm_cfg_addr + 4);
 			port_cfg_addr = MCP_REG_SCRATCH + nvm_cfg1_offset +
-					OFFSETOF(struct nvm_cfg1, port[port]);
+					offsetof(struct nvm_cfg1, port[port]);
 			gpio = (u16)ecore_rd(p_hwfn, p_ptt,
 					     port_cfg_addr +
-					     OFFSETOF(struct nvm_cfg1_port,
+					     offsetof(struct nvm_cfg1_port,
 						      transceiver_00));
 			gpio &= NVM_CFG1_PORT_TRANS_MODULE_ABS_MASK;
 			rc = ecore_phy_gpio_write(p_hwfn, p_ptt, gpio,

@@ -1303,6 +1303,23 @@ pt_regstatus(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	return (pt_regs(addr, flags, argc, argv));
 }
 
+static void
+pt_thread_name(mdb_tgt_t *t, mdb_tgt_tid_t tid, char *buf, size_t bufsize)
+{
+	char name[THREAD_NAME_MAX];
+
+	buf[0] = '\0';
+
+	if (t->t_pshandle == NULL ||
+	    Plwp_getname(t->t_pshandle, tid, name, sizeof (name)) != 0 ||
+	    name[0] == '\0') {
+		(void) mdb_snprintf(buf, bufsize, "%lu", tid);
+		return;
+	}
+
+	(void) mdb_snprintf(buf, bufsize, "%lu [%s]", tid, name);
+}
+
 static int
 pt_findstack(uintptr_t tid, uint_t flags, int argc, const mdb_arg_t *argv)
 {
@@ -1311,6 +1328,7 @@ pt_findstack(uintptr_t tid, uint_t flags, int argc, const mdb_arg_t *argv)
 	int showargs = 0;
 	int count;
 	uintptr_t pc, sp;
+	char name[128];
 
 	if (!(flags & DCMD_ADDRSPEC))
 		return (DCMD_USAGE);
@@ -1334,7 +1352,10 @@ pt_findstack(uintptr_t tid, uint_t flags, int argc, const mdb_arg_t *argv)
 #else
 	sp = gregs.gregs[R_SP];
 #endif
-	mdb_printf("stack pointer for thread %p: %p\n", tid, sp);
+
+	pt_thread_name(t, tid, name, sizeof (name));
+
+	mdb_printf("stack pointer for thread %s: %p\n", name, sp);
 	if (pc != 0)
 		mdb_printf("[ %0?lr %a() ]\n", sp, pc);
 
@@ -1969,8 +1990,7 @@ pt_env_set(pt_data_t *pt, const char *nameval)
 	(void) mdb_nv_insert(&pt->p_env, name, NULL, (uintptr_t)val,
 	    MDB_NV_EXTNAME);
 
-	if (equals)
-		*equals = '=';
+	*equals = '=';
 }
 
 /*
@@ -3150,7 +3170,7 @@ pt_object_iter(mdb_tgt_t *t, mdb_tgt_map_f *func, void *private)
 		(void) strncpy(mp->map_name, s, MDB_TGT_MAPSZ);
 		mp->map_name[MDB_TGT_MAPSZ - 1] = '\0';
 		mp->map_flags = MDB_TGT_MAP_R | MDB_TGT_MAP_X;
-		mp->map_base = NULL;
+		mp->map_base = 0;
 		mp->map_size = 0;
 
 		if (func(private, mp, s) != 0)
@@ -3963,7 +3983,7 @@ pt_brkpt_ctor(mdb_tgt_t *t, mdb_sespec_t *sep, void *args)
 
 	ptb = mdb_alloc(sizeof (pt_brkpt_t), UM_SLEEP);
 	ptb->ptb_addr = pta->pta_addr;
-	ptb->ptb_instr = NULL;
+	ptb->ptb_instr = 0;
 	sep->se_data = ptb;
 
 	return (0);
@@ -3981,7 +4001,7 @@ static char *
 pt_brkpt_info(mdb_tgt_t *t, mdb_sespec_t *sep, mdb_vespec_t *vep,
     mdb_tgt_spec_desc_t *sp, char *buf, size_t nbytes)
 {
-	uintptr_t addr = NULL;
+	uintptr_t addr = 0;
 
 	if (vep != NULL) {
 		pt_bparg_t *pta = vep->ve_args;
@@ -4365,7 +4385,7 @@ pt_add_sbrkpt(mdb_tgt_t *t, const char *sym,
 
 	pta = mdb_alloc(sizeof (pt_bparg_t), UM_SLEEP);
 	pta->pta_symbol = strdup(sym);
-	pta->pta_addr = NULL;
+	pta->pta_addr = 0;
 
 	return (mdb_tgt_vespec_insert(t, &proc_brkpt_ops, spec_flags,
 	    func, data, pta, pt_bparg_dtor));
@@ -4661,7 +4681,7 @@ pt_auxv(mdb_tgt_t *t, const auxv_t **auxvp)
 
 static const mdb_tgt_ops_t proc_ops = {
 	pt_setflags,				/* t_setflags */
-	(int (*)()) mdb_tgt_notsup,		/* t_setcontext */
+	(int (*)())(uintptr_t) mdb_tgt_notsup,	/* t_setcontext */
 	pt_activate,				/* t_activate */
 	pt_deactivate,				/* t_deactivate */
 	pt_periodic,				/* t_periodic */
@@ -4681,7 +4701,7 @@ static const mdb_tgt_ops_t proc_ops = {
 	pt_fwrite,				/* t_fwrite */
 	(ssize_t (*)()) mdb_tgt_notsup,		/* t_ioread */
 	(ssize_t (*)()) mdb_tgt_notsup,		/* t_iowrite */
-	(int (*)()) mdb_tgt_notsup,		/* t_vtop */
+	(int (*)())(uintptr_t) mdb_tgt_notsup,	/* t_vtop */
 	pt_lookup_by_name,			/* t_lookup_by_name */
 	pt_lookup_by_addr,			/* t_lookup_by_addr */
 	pt_symbol_iter,				/* t_symbol_iter */
@@ -4700,9 +4720,9 @@ static const mdb_tgt_ops_t proc_ops = {
 	pt_signal,				/* t_signal */
 	pt_add_vbrkpt,				/* t_add_vbrkpt */
 	pt_add_sbrkpt,				/* t_add_sbrkpt */
-	(int (*)()) mdb_tgt_null,		/* t_add_pwapt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_pwapt */
 	pt_add_vwapt,				/* t_add_vwapt */
-	(int (*)()) mdb_tgt_null,		/* t_add_iowapt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_iowapt */
 	pt_add_sysenter,			/* t_add_sysenter */
 	pt_add_sysexit,				/* t_add_sysexit */
 	pt_add_signal,				/* t_add_signal */
@@ -4828,8 +4848,8 @@ pt_lwp_setfpregs(mdb_tgt_t *t, void *tap, mdb_tgt_tid_t tid,
 }
 
 static const pt_ptl_ops_t proc_lwp_ops = {
-	(int (*)()) mdb_tgt_nop,
-	(void (*)()) mdb_tgt_nop,
+	(int (*)())(uintptr_t) mdb_tgt_nop,
+	(void (*)())(uintptr_t) mdb_tgt_nop,
 	pt_lwp_tid,
 	pt_lwp_iter,
 	pt_lwp_getregs,
@@ -5078,7 +5098,7 @@ pt_xd_auxv(mdb_tgt_t *t, void *buf, size_t nbytes)
 
 	if (P != NULL && (auxv = Pgetauxvec(P)) != NULL &&
 	    auxv->a_type != AT_NULL) {
-		for (auxp = auxv, auxn = 1; auxp->a_type != NULL; auxp++)
+		for (auxp = auxv, auxn = 1; auxp->a_type != 0; auxp++)
 			auxn++;
 	}
 

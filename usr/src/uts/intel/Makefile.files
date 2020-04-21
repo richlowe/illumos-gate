@@ -21,8 +21,9 @@
 
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright (c) 2013, Joyent, Inc. All rights reserved.
+# Copyright 2019 Joyent, Inc.
 # Copyright 2018 Nexenta Systems, Inc.
+# Copyright 2019 Peter Tribble.
 #
 
 #
@@ -53,18 +54,14 @@ CORE_OBJS +=		\
 	lock_prim.o	\
 	ovbcopy.o	\
 	polled_io.o	\
+	retpoline.o	\
 	sseblk.o	\
 	sundep.o	\
 	swtch.o		\
 	sysi86.o
 
-#
-# 64-bit multiply/divide compiler helper routines
-# used only for ia32
-#
-
-SPECIAL_OBJS_32 +=	\
-	muldiv.o
+DBOOT_OBJS +=		\
+	retpoline.o
 
 #
 #	Generic-unix Module
@@ -121,15 +118,10 @@ CORE_OBJS += ucode_utils.o
 #
 #	Driver modules
 #
-AGPGART_OBJS +=	agpgart.o agp_kstat.o
-AGPTARGET_OBJS += agptarget.o
-AMD64GART_OBJS += amd64_gart.o
 ARCMSR_OBJS += arcmsr.o
 ATA_OBJS += $(GHD_OBJS) ata_blacklist.o ata_common.o ata_disk.o \
 	ata_dma.o atapi.o atapi_fsm.o ata_debug.o \
 	sil3xxx.o
-BSCBUS_OBJS += bscbus.o
-BSCV_OBJS += bscv.o
 CMDK_OBJS += cmdk.o
 CMLB_OBJS += cmlb.o
 CPUNEX_OBJS += cpunex.o
@@ -156,7 +148,7 @@ SD_OBJS += sd.o sd_xbuf.o
 
 STRATEGY_OBJS += strategy.o
 UCODE_OBJS += ucode_drv.o
-VGATEXT_OBJS += vgatext.o vgasubr.o
+VGATEXT_OBJS += vgatext.o
 
 #
 #	Kernel linker
@@ -185,6 +177,7 @@ ACPICA_OBJS	+= \
 		   dsargs.o dscontrol.o dsdebug.o dsfield.o dsinit.o \
 		   dsmethod.o dsmthdat.o dsobject.o dsopcode.o dsutils.o \
 		   dswexec.o dswload.o dswload2.o dswscope.o dswstate.o \
+		   dspkginit.o \
 		   \
 		   evevent.o evglock.o evgpe.o evgpeblk.o evgpeinit.o \
 		   evgpeutil.o evhandler.o evmisc.o evregion.o evrgnini.o \
@@ -219,15 +212,15 @@ ACPICA_OBJS	+= \
 		   utclib.o utcopy.o utdebug.o utdecode.o utdelete.o \
 		   uterror.o uteval.o utexcep.o utglobal.o uthex.o utids.o \
 		   utinit.o utlock.o utmath.o utmisc.o utmutex.o utnonansi.o \
-		   utobject.o utosi.o utownerid.o utpredef.o utprint.o \
-		   utresrc.o utstate.o utstring.o uttrack.o utuuid.o utxface.o \
-		   utxferror.o utxfinit.o utxfmutex.o \
+		   utobject.o utosi.o utownerid.o utpredef.o utresrc.o \
+		   utstate.o utstring.o uttrack.o utuuid.o utxface.o \
+		   utxferror.o utxfinit.o utxfmutex.o utresdecode.o \
+		   utstrsuppt.o utstrtoul64.o \
 		   \
 		   acpi_enum.o acpica_ec.o acpica.o ahids.o master_ops.o \
 		   osl_ml.o osl.o
 
 
-AGP_OBJS += agpmaster.o
 FBT_OBJS += fbt.o
 SDT_OBJS += sdt.o
 
@@ -329,3 +322,23 @@ VMXNET3S_OBJS =	vmxnet3_main.o \
 # VMware PVSCSI SCSI Controller
 #
 PVSCSI_OBJS =	pvscsi.o
+
+#
+# Intel Temperature Module
+#
+CORETEMP_OBJS =	coretemp.o
+
+#
+# AMD Family 17 northbridge driver
+#
+AMDF17NBDF_OBJS = amdf17nbdf.o
+
+#
+# Intel Platform Controller Hub Temperature Module
+#
+PCHTEMP_OBJS = pchtemp.o
+
+#
+# AMD Family 10h-16h temperature driver
+#
+AMDNBTEMP_OBJS = amdnbtemp.o

@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/param.h>
@@ -136,7 +137,7 @@ static struct sysent sysent_err =  {
 
 /*
  * Called from syscall() when a non-trivial 32-bit system call occurs.
- * 	Sets up the args and returns a pointer to the handler.
+ *	Sets up the args and returns a pointer to the handler.
  */
 struct sysent *
 syscall_entry(kthread_t *t, long *argp)
@@ -219,8 +220,9 @@ syscall_exit(kthread_t *t, long rval1, long rval2)
 		rp->r_r0 = rval1;
 		rp->r_r1 = rval2;
 		lwp->lwp_state = LWP_USER;
-	} else
+	} else {
 		post_syscall(rval1, rval2);
+	}
 	t->t_sysnum = 0;		/* invalidate args */
 }
 
@@ -392,9 +394,9 @@ pre_syscall()
 		(void) save_syscall_args();
 		mutex_enter(&systrace_lock);
 		printf("%d: ", p->p_pid);
-		if (code >= NSYSCALL)
+		if (code >= NSYSCALL) {
 			printf("0x%x", code);
-		else {
+		} else {
 			sysname = mod_getsysname(code);
 			printf("%s[0x%x/0x%p]", sysname == NULL ? "NULL" :
 			    sysname, code, callp->sy_callc);
@@ -623,7 +625,7 @@ sig_check:
 		 *	Note we will still take the lock and check the binding
 		 *	if the condition was true without the lock held.  This
 		 *	prevents lock contention among threads owned by the
-		 * 	same proc.
+		 *	same proc.
 		 */
 
 		if (curthread->t_proc_flag & TP_CHANGEBIND) {
@@ -861,10 +863,16 @@ deferred_singlestep_trap(caddr_t pc)
  * flag error if lwp won't see signal immediately
  */
 int64_t
-nosys()
+nosys(void)
 {
 	tsignal(curthread, SIGSYS);
 	return (set_errno(ENOSYS));
+}
+
+int
+nosys32(void)
+{
+	return (nosys());
 }
 
 /*
@@ -1187,7 +1195,6 @@ loadable_syscall(
 	struct sysent *se = LWP_GETSYSENT(lwp);
 	krwlock_t *module_lock;
 	int code, error = 0;
-	int64_t (*sy_call)();
 
 	code = curthread->t_sysnum;
 	callp = se + code;
@@ -1196,7 +1203,6 @@ loadable_syscall(
 	 * Try to autoload the system call if necessary
 	 */
 	module_lock = lock_syscall(se, code);
-	THREAD_KPRI_RELEASE();	/* drop priority given by rw_enter */
 
 	/*
 	 * we've locked either the loaded syscall or nosys
@@ -1205,10 +1211,11 @@ loadable_syscall(
 	if (lwp_getdatamodel(lwp) == DATAMODEL_NATIVE) {
 #if defined(_LP64)
 		if (callp->sy_flags & SE_ARGC) {
-			sy_call = (int64_t (*)())callp->sy_call;
-			rval = (*sy_call)(a0, a1, a2, a3, a4, a5);
-		} else
+			rval = (int64_t)(*callp->sy_call)(a0, a1, a2, a3,
+			    a4, a5);
+		} else {
 			rval = syscall_ap();
+		}
 	} else {
 #endif
 		/*
@@ -1219,15 +1226,14 @@ loadable_syscall(
 		if (error) {
 			rval = set_errno(error);
 		} else if (callp->sy_flags & SE_ARGC) {
-			sy_call = (int64_t (*)())callp->sy_call;
-			rval = (*sy_call)(lwp->lwp_ap[0], lwp->lwp_ap[1],
-			    lwp->lwp_ap[2], lwp->lwp_ap[3], lwp->lwp_ap[4],
-			    lwp->lwp_ap[5]);
-		} else
+			rval = (int64_t)(*callp->sy_call)(lwp->lwp_ap[0],
+			    lwp->lwp_ap[1], lwp->lwp_ap[2], lwp->lwp_ap[3],
+			    lwp->lwp_ap[4], lwp->lwp_ap[5]);
+		} else {
 			rval = syscall_ap();
+		}
 	}
 
-	THREAD_KPRI_REQUEST();	/* regain priority from read lock */
 	rw_exit(module_lock);
 	return (rval);
 }

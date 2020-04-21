@@ -22,13 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# uts/intel/e1000g/Makefile
-#
-#	This makefile drives the production of the iprb
-#	network driver kernel module.
-#
-#	intel architecture dependent
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Paths to the base of the uts directory trees
@@ -64,12 +58,14 @@ CFLAGS_CPP_COMMENTS = -_cc=-xCC
 
 CFLAGS += $(CFLAGS_CPP_COMMENTS)
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_cc=-erroff=E_STATEMENT_NOT_REACHED
+
+SMOFF += all_func_returns,indenting,shift_to_zero
 
 LINTTAGS	+= -erroff=E_CONSTANT_CONDITION
 
@@ -84,6 +80,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 # Driver depends on MAC
 #
 LDFLAGS		+= -dy -N misc/mac
+MAPFILES	+= ddi mac
 
 #
 #	Default build targets.
@@ -110,4 +107,5 @@ install:	$(INSTALL_DEPS)
 #
 #	Include common targets.
 #
+include $(UTSBASE)/Makefile.mapfile
 include $(UTSBASE)/intel/Makefile.targ

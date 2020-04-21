@@ -66,6 +66,10 @@ extern "C" {
 #define	SIGNOF(a)	((a) < 0 ? -1 : (a) > 0)
 #endif
 
+#ifndef	__DECONST
+#define	__DECONST(type, var)	((type)(uintptr_t)(const void *)(var))
+#endif
+
 #ifdef _KERNEL
 
 /*
@@ -372,6 +376,19 @@ extern unsigned char bcd_to_byte[256];
 #if !defined(ARRAY_SIZE)
 #define	ARRAY_SIZE(x)	(sizeof (x) / sizeof (x[0]))
 #endif
+
+/*
+ * Add a value to a uint64_t that saturates at UINT64_MAX instead of wrapping
+ * around.
+ */
+#define	UINT64_OVERFLOW_ADD(val, add) \
+	((val) > ((val) + (add)) ? (UINT64_MAX) : ((val) + (add)))
+
+/*
+ * Convert to an int64, saturating at INT64_MAX.
+ */
+#define	UINT64_OVERFLOW_TO_INT64(uval) \
+	(((uval) > INT64_MAX) ? INT64_MAX : (int64_t)(uval))
 
 #ifdef	__cplusplus
 }

@@ -23,8 +23,10 @@
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright 2019 Peter Tribble.
+ * Copyright 2019 Joyent, Inc.
+ */
 
 /*
  * CPU support routines for DR
@@ -514,9 +516,6 @@ sbd_pre_attach_cpu(sbd_handle_t *hp, sbd_devlist_t *devlist, int devnum)
 			 */
 			PR_CPU("%s: unmapping sigblk for cpu %d\n",
 				f, cpuid);
-
-			/* platform specific release of sigblk */
-			CPU_SGN_MAPOUT(cpuid);
 		}
 
 	}
@@ -595,7 +594,7 @@ sbd_post_attach_cpu(sbd_handle_t *hp, sbd_devlist_t *devlist, int devnum)
 		if (cpu_is_offline(cp)) {
 			PR_CPU("%s: onlining cpu %d...\n", f, cpuid);
 
-			if (cpu_online(cp) != 0) {
+			if (cpu_online(cp, 0) != 0) {
 				SBD_SET_ERR(ep, ESBD_ONLINE);
 				SBD_SET_ERRSTR(ep, sbp->sb_cpupath[i]);
 				cmn_err(CE_WARN,
@@ -888,7 +887,7 @@ sbd_cancel_cpu(sbd_handle_t *hp, int unit)
 		if (cpu_flagged_offline(cp->sbc_cpu_flags)) {
 			PR_CPU("%s: leaving cpu %d OFFLINE\n",
 			    f, cp->sbc_cpu_id);
-		} else if (cpu_online(cpup)) {
+		} else if (cpu_online(cpup, 0)) {
 			cmn_err(CE_WARN,
 			    "sbd:%s: failed to online cpu %d",
 			    f, cp->sbc_cpu_id);

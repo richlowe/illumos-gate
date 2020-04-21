@@ -23,6 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= lofiadm
 OBJS= main.o utils.o
@@ -30,7 +31,7 @@ LZMAOBJS= LzmaEnc.o LzFind.o
 
 SRCS= $(OBJS:%.o=%.c)
 
-POFILES= $(OBJS:%.o=%.po) 
+POFILES= $(OBJS:%.o=%.po)
 
 include ../Makefile.cmd
 
@@ -38,7 +39,10 @@ CPPFLAGS += -I $(SRC)/common/crypto -I $(SRC)/common/lzma
 LDLIBS += -ldevinfo -lpkcs11 -lcryptoutil
 
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 

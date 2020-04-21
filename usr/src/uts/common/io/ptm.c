@@ -22,9 +22,11 @@
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
-
+/*
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
+ */
 
 /*
  * Pseudo Terminal Master Driver.
@@ -146,9 +148,9 @@ int ptm_debug = 0;
 
 static int ptmopen(queue_t *, dev_t *, int, int, cred_t *);
 static int ptmclose(queue_t *, int, cred_t *);
-static void ptmwput(queue_t *, mblk_t *);
-static void ptmrsrv(queue_t *);
-static void ptmwsrv(queue_t *);
+static int ptmwput(queue_t *, mblk_t *);
+static int ptmrsrv(queue_t *);
+static int ptmwsrv(queue_t *);
 
 /*
  * Master Stream Pseudo Terminal Module: stream data structure definitions
@@ -165,7 +167,7 @@ static struct module_info ptm_info = {
 
 static struct qinit ptmrint = {
 	NULL,
-	(int (*)()) ptmrsrv,
+	ptmrsrv,
 	ptmopen,
 	ptmclose,
 	NULL,
@@ -174,8 +176,8 @@ static struct qinit ptmrint = {
 };
 
 static struct qinit ptmwint = {
-	(int (*)()) ptmwput,
-	(int (*)()) ptmwsrv,
+	ptmwput,
+	ptmwsrv,
 	NULL,
 	NULL,
 	NULL,
@@ -247,7 +249,7 @@ ptm_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 
 	if (ddi_create_minor_node(devi, "ptmajor", S_IFCHR,
-	    0, DDI_PSEUDO, NULL) == DDI_FAILURE) {
+	    0, DDI_PSEUDO, 0) == DDI_FAILURE) {
 		ddi_remove_minor_node(devi, NULL);
 		return (DDI_FAILURE);
 	}
@@ -450,7 +452,7 @@ ptmclose(queue_t *rqp, int flag, cred_t *credp)
 /*
  * The wput procedure will only handle ioctl and flush messages.
  */
-static void
+static int
 ptmwput(queue_t *qp, mblk_t *mp)
 {
 	struct pt_ttys	*ptmp;
@@ -508,7 +510,7 @@ ptmwput(queue_t *qp, mblk_t *mp)
 				DBG(("got M_IOCTL but no slave\n"));
 				miocnak(qp, mp, 0, EINVAL);
 				PT_EXIT_READ(ptmp);
-				return;
+				return (0);
 			}
 			(void) putq(qp, mp);
 			break;
@@ -519,6 +521,13 @@ ptmwput(queue_t *qp, mblk_t *mp)
 			/*FALLTHROUGH*/
 		case ISPTM:
 			DBG(("ack the UNLKPT/ISPTM\n"));
+			miocack(qp, mp, 0, 0);
+			break;
+		case PTSSTTY:
+			mutex_enter(&ptmp->pt_lock);
+			ptmp->pt_state |= PTSTTY;
+			mutex_exit(&ptmp->pt_lock);
+			DBG(("ack PTSSTTY\n"));
 			miocack(qp, mp, 0, 0);
 			break;
 		case ZONEPT:
@@ -595,7 +604,7 @@ ptmwput(queue_t *qp, mblk_t *mp)
 				qreply(qp, mp);
 			}
 			PT_EXIT_READ(ptmp);
-			return;
+			return (0);
 		}
 		DBG(("put msg on master's write queue\n"));
 		(void) putq(qp, mp);
@@ -603,6 +612,7 @@ ptmwput(queue_t *qp, mblk_t *mp)
 	}
 	DBG(("return from ptmwput()\n"));
 	PT_EXIT_READ(ptmp);
+	return (0);
 }
 
 
@@ -611,7 +621,7 @@ ptmwput(queue_t *qp, mblk_t *mp)
  * slave to send any messages queued on its write side to
  * the read side of this master.
  */
-static void
+static int
 ptmrsrv(queue_t *qp)
 {
 	struct pt_ttys	*ptmp;
@@ -626,6 +636,7 @@ ptmrsrv(queue_t *qp)
 	}
 	PT_EXIT_READ(ptmp);
 	DBG(("leaving ptmrsrv\n"));
+	return (0);
 }
 
 
@@ -635,11 +646,11 @@ ptmrsrv(queue_t *qp)
  * cannot be sent, leave them on this queue. If priority
  * messages on this queue, send them to slave no matter what.
  */
-static void
+static int
 ptmwsrv(queue_t *qp)
 {
 	struct pt_ttys	*ptmp;
-	mblk_t 		*mp;
+	mblk_t		*mp;
 
 	DBG(("entering ptmwsrv\n"));
 	ASSERT(qp->q_ptr);
@@ -649,7 +660,7 @@ ptmwsrv(queue_t *qp)
 	if ((mp = getq(qp)) == NULL) {
 		/* If there are no messages there's nothing to do. */
 		DBG(("leaving ptmwsrv (no messages)\n"));
-		return;
+		return (0);
 	}
 
 	PT_ENTER_READ(ptmp);
@@ -676,7 +687,7 @@ ptmwsrv(queue_t *qp)
 			qreply(qp, mp);
 		}
 		PT_EXIT_READ(ptmp);
-		return;
+		return (0);
 	}
 	/*
 	 * while there are messages on this write queue...
@@ -701,4 +712,5 @@ ptmwsrv(queue_t *qp)
 	} while ((mp = getq(qp)) != NULL);
 	DBG(("leaving ptmwsrv\n"));
 	PT_EXIT_READ(ptmp);
+	return (0);
 }

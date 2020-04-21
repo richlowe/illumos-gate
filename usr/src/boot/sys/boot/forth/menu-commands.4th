@@ -23,6 +23,8 @@
 \ SUCH DAMAGE.
 \
 \ Copyright 2015 Toomas Soome <tsoome@me.com>
+\ Copyright 2019 Joyent, Inc.
+\ Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 
 marker task-menu-commands.4th
 
@@ -32,16 +34,10 @@ only forth definitions
 
 variable osconsole_state
 variable acpi_state
-variable kernel_state
-variable root_state
 variable kmdb_state
-variable debug_state
-0 kmdb_state !
-0 debug_state !
 0 osconsole_state !
 0 acpi_state !
-0 kernel_state !
-0 root_state !
+0 kmdb_state !
 
 also menu-namespace also menu-command-helpers
 
@@ -184,101 +180,6 @@ also menu-namespace also menu-command-helpers
 ;
 
 \
-\ kmdb
-\
-
-: kmdb_enabled? ( -- flag )
-	s" boot_kmdb" getenv -1 <> dup if
-		swap drop ( c-addr flag -- flag )
-	then
-;
-
-: kmdb_enable ( -- )
-	s" set boot_kmdb=YES" evaluate
-;
-
-: kmdb_disable ( -- )
-	s" boot_kmdb" unsetenv
-	s" boot_debug" unsetenv
-;
-
-: init_kmdb ( N -- N )
-	dup kmdb_state !		\ store entry number for kmdb+debug
-	kmdb_enabled? if
-		toggle_menuitem ( n -- n )
-	then
-;
-
-: toggle_kmdb ( N -- N TRUE )
-	toggle_menuitem
-	dup toggle_stateN @ 0= if ( kmdb is not set )
-		debug_state @ if ( debug is set? )
-			debug_state @ toggle_stateN @ if ( debug is enabled? )
-				debug_state @ toggle_menuitem drop
-			then
-		then
-	then
-	menu-redraw
-
-	\ Now we're going to make the change effective
-
-	dup toggle_stateN @ 0= if
-		kmdb_disable
-	else
-		kmdb_enable
-	then
-
-	TRUE \ loop menu again
-;
-
-\
-\ kmdb + debug
-\
-
-: debug_disable ( -- )
-	s" boot_debug" unsetenv
-;
-
-: debug_enabled? ( -- flag )
-	\ -d is only allowed with -k
-	s" boot_debug" getenv -1 <> kmdb_enabled? and dup if
-		swap drop ( c-addr flag -- flag )
-	else
-		debug_disable		\ make sure env is not set
-	then
-;
-
-: debug_enable ( -- )
-	kmdb_enable
-	s" set boot_debug=YES" evaluate
-;
-
-: init_debug ( N -- N )
-	dup debug_state !		\ store entry number for kmdb
-	kmdb_enabled? debug_enabled? and if
-		toggle_menuitem ( n -- n )
-	then
-;
-
-: toggle_debug ( N -- N TRUE )
-	toggle_menuitem
-	kmdb_enabled? 0= if
-		kmdb_state @ toggle_menuitem drop
-	then
-	menu-redraw
-
-	\ Now we're going to make the change effective
-
-	dup toggle_stateN @ 0= if
-		debug_disable
-	else
-		debug_enable
-	then
-
-	TRUE \ loop menu again
-;
-
-\
 \ Reconfiguration boot
 \
 
@@ -318,6 +219,33 @@ also menu-namespace also menu-command-helpers
 ;
 
 \
+\ Framebuffer
+\
+
+: init_framebuffer ( N -- N )
+	framebuffer? if
+		toggle_menuitem ( n -- n )
+	then
+;
+
+: toggle_framebuffer ( N -- N TRUE )
+	toggle_menuitem
+
+	dup toggle_stateN @ 0= if
+		s" off"
+	else
+		s" on"
+	then 1 framebuffer
+
+	draw-beastie
+	draw-brand
+	menu-init		\ needed to reset menu position
+	menu-redraw
+
+	TRUE \ loop menu again
+;
+
+\
 \ Escape to Prompt
 \
 
@@ -334,7 +262,7 @@ also menu-namespace also menu-command-helpers
 ;
 
 \
-\ Cyclestate (used by osconsole/acpi/kernel/root below)
+\ Cyclestate (used by osconsole/acpi/kmdb below)
 \
 
 : init_cyclestate ( N K -- N )
@@ -449,53 +377,70 @@ also menu-namespace also menu-command-helpers
 ;
 
 \
-\ Kernel
+\ kmdb
 \
 
-: init_kernel ( N -- N )
-	kernel_state @  ( n -- n k )
-	init_cyclestate ( n k -- n )
+: kmdb_disable
+	s" boot_kmdb" unsetenv
+	s" boot_drop_into_kmdb" unsetenv
 ;
 
-: activate_kernel ( N -- N )
+: init_kmdb ( N -- N )
+	\ Retrieve the contents of "nmi" or default to "panic"
+	( N -- N c-addr/u )
+	s" nmi" getenv dup -1 <> if else drop s" panic" then
+	\ Store the string in "nmi_initial" if not already set
+	\ (to support re-entering the menu from the loader prompt)
+	s" nmi_initial" getenv? if else
+		2dup s" nmi_initial" setenv
+	then
+	( N caddr/u -- N flag )
+	s" kmdb" compare if false else true then
+
+	s" boot_kmdb" getenv -1 <> if
+		drop
+		s" boot_drop_into_kmdb" getenv -1 <> if
+			drop
+			if 4 else 3 then
+		else
+			if 2 else 1 then
+		then
+	else
+		drop	\ drop flag
+		0
+	then
+	kmdb_state !
+;
+
+: activate_kmdb ( N -- N )
 	dup cycle_stateN @	( n -- n n2 )
-	dup kernel_state !	( n n2 -- n n2 )  \ copy for re-initialization
-	48 +			( n n2 -- n n2' ) \ kernel_state to ASCII num
+	dup kmdb_state !	( n n2 -- n n2 )
 
-	s" set kernel=${kernel_prefix}${kernel[N]}${kernel_suffix}"
-	36 +c!		( n n2 c-addr/u -- n c-addr/u ) \ 'N' to ASCII num
-	evaluate	( n c-addr/u -- n ) \ sets $kernel to full kernel-path
+	\ Reset "nmi" to its initial value
+	s" nmi_initial" getenv s" nmi" setenv
+
+	case 4 of		\ drop + nmi=kmdb
+		s" set boot_kmdb=YES" evaluate
+		s" set boot_drop_into_kmdb=YES" evaluate
+		s" set nmi=kmdb" evaluate
+	endof 3 of		\ drop
+		s" set boot_kmdb=YES" evaluate
+		s" set boot_drop_into_kmdb=YES" evaluate
+	endof 2 of		\ load + nmi=kmdb
+		s" set boot_kmdb=YES" evaluate
+		s" boot_drop_into_kmdb" unsetenv
+		s" set nmi=kmdb" evaluate
+	endof 1 of		\ load
+		s" set boot_kmdb=YES" evaluate
+		s" boot_drop_into_kmdb" unsetenv
+	endof
+		kmdb_disable
+	endcase
 ;
 
-: cycle_kernel ( N -- N TRUE )
+: cycle_kmdb ( N -- N TRUE )
 	cycle_menuitem	\ cycle cycle_stateN to next value
-	activate_kernel \ apply current cycle_stateN
-	menu-redraw	\ redraw menu
-	TRUE		\ loop menu again
-;
-
-\
-\ Root
-\
-
-: init_root ( N -- N )
-	root_state @    ( n -- n k )
-	init_cyclestate ( n k -- n )
-;
-
-: activate_root ( N -- N )
-	dup cycle_stateN @	( n -- n n2 )
-	dup root_state !	( n n2 -- n n2 )  \ copy for re-initialization
-	48 +			( n n2 -- n n2' ) \ root_state to ASCII num
-
-	s" set root=${root_prefix}${root[N]}${root_suffix}"
-	30 +c!		( n n2 c-addr/u -- n c-addr/u ) \ 'N' to ASCII num
-	evaluate	( n c-addr/u -- n ) \ sets $root to full kernel-path
-;
-
-: cycle_root ( N -- N TRUE )
-	cycle_menuitem	\ cycle cycle_stateN to next value
-	activate_root	\ apply current cycle_stateN
+	activate_kmdb	\ apply current cycle_stateN
 	menu-redraw	\ redraw menu
 	TRUE		\ loop menu again
 ;
@@ -522,7 +467,7 @@ also menu-namespace also menu-command-helpers
 	s" boot_ask" unsetenv
 	singleuser_disable
 	verbose_disable
-	kmdb_disable		\ disables debug as well
+	kmdb_disable		\ disables drop_into_kmdb as well
 	reconfigure_disable
 ;
 
@@ -608,21 +553,13 @@ also menu-namespace also menu-command-helpers
 	s" zfs_be_currpage" getenv dup -1 = if
 		drop s" 1"
 	else
-		0 s>d 2swap
-		>number		( ud caddr/u -- ud' caddr'/u' )
-		2drop
-		1 um/mod	( ud u1 -- u2 u3 )
-		swap drop	( ud2 u3 -- u3 )
+		s2n
 		1+		\ increment the page number
 		dup
 		s" zfs_be_pages" getenv
-		0 s>d 2swap
-		>number		( ud caddr/u -- ud' caddr'/u' )
-		2drop
-		1 um/mod	( ud u1 -- u2 u3 )
-		swap drop	( ud2 u3 -- u3 )
+		s2n
 		> if drop 1 then
-		s>d <# #s #>	\ convert back to a string
+		n2s
 	then
 
 	s" zfs_be_currpage" setenv

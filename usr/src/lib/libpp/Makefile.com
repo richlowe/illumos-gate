@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2019, Joyent, Inc.
 
 SHELL=/usr/bin/ksh93
 
@@ -99,10 +100,13 @@ CFLAGS64 += \
 	$(ASTCFLAGS64)
 
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-char-subscripts
 CERRWARN	+= -_gcc=-Wno-empty-body
 CERRWARN	+= -_gcc=-Wno-unused-value
+
+# "pplex() parse error: turning off implications after 60 seconds"
+SMATCH		= off
 
 pics/ppcall.o 		:= CERRWARN += -_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED
 pics/ppcontrol.o 	:= CERRWARN += -_cc=-erroff=E_INTEGER_OVERFLOW_DETECTED

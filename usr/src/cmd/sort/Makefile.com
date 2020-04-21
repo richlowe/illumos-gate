@@ -23,6 +23,7 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 # Debugging targets
@@ -74,7 +75,7 @@ CLEANFILES = $(OBJS) $(XPG4OBJS) $(LNTS)
 include ../../Makefile.cmd
 
 SED =		sed
-DCFILE = 	$(PROG).dc
+DCFILE =	$(PROG).dc
 
 SPACEFLAG =
 SPACEFLAG64 =
@@ -85,8 +86,11 @@ CPPFLAGS +=	-D_FILE_OFFSET_BITS=64
 LINTFLAGS +=	-U_FILE_OFFSET_BITS
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-function
+
+# not linted
+SMATCH=off
 
 $(XPG4)	:=	CFLAGS += -DXPG4
 

@@ -21,6 +21,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= nlsadmin
 
@@ -29,7 +30,10 @@ include ../Makefile.cmd
 FILEMODE= 0755
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += -_gcc=-Wno-unused-variable
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

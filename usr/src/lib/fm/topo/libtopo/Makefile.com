@@ -20,7 +20,7 @@
 #
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 LIBRARY = libtopo.a
@@ -43,6 +43,8 @@ LIBSRCS = \
 	topo_2xml.c \
 	topo_alloc.c \
 	topo_builtin.c \
+	topo_digraph.c \
+	topo_digraph_xml.c \
 	topo_error.c \
 	topo_file.c \
 	topo_fmri.c \
@@ -69,37 +71,29 @@ include ../../../../Makefile.lib
 include ../../../Makefile.lib
 
 SRCS = $(BUILTINSRCS:%.c=../common/%.c) $(LIBSRCS:%.c=../common/%.c)
-LIBS = $(DYNLIB) $(LINTLIB)
+LIBS = $(DYNLIB)
 
 SRCDIR =	../common
 
 CLEANFILES += $(SRCDIR)/topo_error.c $(SRCDIR)/topo_tables.c
 
 CPPFLAGS += -I../common -I$(ADJUNCT_PROTO)/usr/include/libxml2 -I.
+CSTD = $(CSTD_GNU99)
 CFLAGS += $(CCVERBOSE) $(C_BIGPICFLAGS)
 CFLAGS += -D_POSIX_PTHREAD_SEMANTICS
 CFLAGS64 += $(CCVERBOSE) $(C_BIGPICFLAGS)
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-parentheses
-
-LINTFLAGS = -msux
-LINTFLAGS64 = -msux -m64
 
 $(DYNLIB)  := LDLIBS += \
 	-lnvpair -lelf -lumem -lxml2 -lkstat -luuid -ldevinfo \
 	-lsmbios -lc -ldevid -lipmi -lscf -lpcidb
-
-$(LINTLIB) := SRCS = $(SRCDIR)/$(LINTSRC)
-$(LINTLIB) := LINTFLAGS = -nsvx
-$(LINTLIB) := LINTFLAGS64 = -nsvx -m64
-$(LINTLIB) := LDLIBS += -lnvpair -lumem -lc
+NATIVE_LIBS +=	libxml2.so
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: $(LINTLIB) lintcheck
 
 pics/%.o: ../$(MACH)/%.c
 	$(COMPILE.c) -o $@ $<

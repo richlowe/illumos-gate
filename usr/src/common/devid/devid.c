@@ -23,7 +23,10 @@
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
 
 #include <sys/types.h>
 #include <sys/stropts.h>
@@ -321,6 +324,7 @@ devid_str_decode_id(char *devidstr, ddi_devid_t *devidp,
 	int		slen, devid_len, ascii, i, n, c, pre_alloc = FALSE;
 	unsigned short	id_len, type;		/* for hibyte/lobyte */
 
+	devid_len = 0;
 	if (devidp != NULL)
 		*devidp = NULL;
 	if (minor_namep != NULL)
@@ -387,7 +391,7 @@ devid_str_decode_id(char *devidstr, ddi_devid_t *devidp,
 		if (pre_alloc == FALSE) {
 			if ((id = (impl_devid_t *)DEVID_MALLOC(
 			    devid_len)) == NULL)
-			return (DEVID_FAILURE);
+				return (DEVID_FAILURE);
 		}
 
 		/* decode header portion of the string into the binary devid */

@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+# Copyright 2020 Joyent, Inc.
 #
 
 PROG    = dhcpagent
@@ -41,9 +42,11 @@ XGETFLAGS += -a -x dhcpagent.xcl
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-parentheses
 
+# not linted
+SMATCH=off
 CPPFLAGS  += -D_XOPEN_SOURCE=500 -D__EXTENSIONS__
 LDLIBS    += -lxnet -lnvpair -ldhcpagent -ldhcputil -linetutil -ldevinfo \
-	-ldlpi -lresolv -lsocket -lipadm
+	-ldlpi -lresolv -lipadm
 
 # Disable warnings that affect all XPG applications.
 LINTFLAGS += -erroff=E_INCONS_ARG_DECL2 -erroff=E_INCONS_VAL_TYPE_DECL2

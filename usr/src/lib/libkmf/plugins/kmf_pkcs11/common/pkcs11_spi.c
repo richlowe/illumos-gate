@@ -194,7 +194,7 @@ pk11_authenticate(KMF_HANDLE_T handle,
 	CK_RV ck_rv = CKR_OK;
 	CK_SESSION_HANDLE hSession = (CK_SESSION_HANDLE)handle->pk11handle;
 
-	if (hSession == NULL)
+	if (hSession == 0)
 		return (KMF_ERR_NO_TOKEN_SELECTED);
 
 	if (cred == NULL || cred->cred == NULL) {
@@ -1104,7 +1104,7 @@ CreateCertObject(KMF_HANDLE_T handle, char *label, KMF_DATA *pcert)
 	CK_CERTIFICATE_TYPE certtype = CKC_X_509;
 	CK_OBJECT_CLASS certClass = CKO_CERTIFICATE;
 	CK_ATTRIBUTE x509templ[11];
-	CK_OBJECT_HANDLE hCert = NULL;
+	CK_OBJECT_HANDLE hCert = 0;
 	int i;
 
 	if (kmfh == NULL)
@@ -3245,8 +3245,9 @@ store_raw_key(KMF_HANDLE_T handle,
 	SETATTR(templ, i, CKA_KEY_TYPE, &keytype, sizeof (keytype)); i++;
 	SETATTR(templ, i, CKA_TOKEN, &cktrue, sizeof (cktrue)); i++;
 	SETATTR(templ, i, CKA_PRIVATE, &cktrue, sizeof (cktrue)); i++;
-	if (keytype != CKK_EC)
+	if (keytype != CKK_EC) {
 		SETATTR(templ, i, CKA_DECRYPT, &cktrue, sizeof (cktrue)); i++;
+	}
 
 	cert = kmf_get_attr_ptr(KMF_CERT_DATA_ATTR, attrlist, numattr);
 	if (cert != NULL) {
@@ -3741,7 +3742,7 @@ KMFPK11_SetTokenPin(KMF_HANDLE_T handle,
 	KMF_RETURN	ret = KMF_OK;
 	CK_RV		rv = CKR_OK;
 	KMF_HANDLE	*kmfh = (KMF_HANDLE *)handle;
-	CK_SESSION_HANDLE	session = NULL;
+	CK_SESSION_HANDLE	session = 0;
 	KMF_CREDENTIAL	*oldcred;
 	KMF_CREDENTIAL	*newcred;
 	CK_SLOT_ID	slotid;
@@ -3818,7 +3819,7 @@ KMFPK11_SetTokenPin(KMF_HANDLE_T handle,
 			ret = KMF_ERR_INTERNAL;
 	}
 end:
-	if (session != NULL)
+	if (session != 0)
 		(void) C_CloseSession(session);
 	return (ret);
 }

@@ -13,11 +13,13 @@
 # Copyright 2011, Richard Lowe
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2020 Joyent, Inc.
 #
 
 include		$(SRC)/Makefile.master
 
-MANSECT= 	1
+MANSECT=	1
 
 MANFILES=	acctcom.1			\
 		adb.1				\
@@ -84,6 +86,8 @@ MANFILES=	acctcom.1			\
 		csh.1				\
 		csplit.1			\
 		ctags.1				\
+		ctfdiff.1			\
+		ctfdump.1			\
 		ctrun.1				\
 		ctstat.1			\
 		ctwatch.1			\
@@ -91,6 +95,7 @@ MANFILES=	acctcom.1			\
 		date.1				\
 		dc.1				\
 		deallocate.1			\
+		demangle.1			\
 		deroff.1			\
 		dhcpinfo.1			\
 		diff.1				\
@@ -120,6 +125,7 @@ MANFILES=	acctcom.1			\
 		enhance.1			\
 		env.1				\
 		eqn.1				\
+		etdump.1			\
 		exec.1				\
 		exit.1				\
 		expand.1			\
@@ -416,7 +422,8 @@ MANFILES=	acctcom.1			\
 		yppasswd.1			\
 		ypwhich.1			\
 		zlogin.1			\
-		zonename.1
+		zonename.1			\
+		zonestat.1
 
 MANLINKS=	batch.1		\
 		bg.1		\
@@ -476,8 +483,10 @@ MANLINKS=	batch.1		\
 		notify.1	\
 		onintr.1	\
 		page.1		\
+		pauxv.1		\
 		pcat.1		\
 		pcred.1		\
+		penv.1		\
 		pfcsh.1		\
 		pfiles.1	\
 		pfksh.1		\
@@ -656,6 +665,9 @@ snca.1		:= LINKSRC = nca.1
 
 pcat.1		:= LINKSRC = pack.1
 unpack.1	:= LINKSRC = pack.1
+
+pauxv.1		:= LINKSRC = pargs.1
+penv.1		:= LINKSRC = pargs.1
 
 pfcsh.1		:= LINKSRC = pfexec.1
 pfksh.1		:= LINKSRC = pfexec.1

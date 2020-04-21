@@ -23,6 +23,8 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 PROG=		elfedit
 
@@ -42,19 +44,17 @@ OBJS=		$(BLTOBJ) $(COMOBJ) $(COMOBJ32) $(COMOBJ64)
 MAPFILE=	../common/mapfile-vers
 
 CPPFLAGS=	-I. -I../common -I../../include -I../../include/$(MACH) \
-		-I$(SRCBASE)/lib/libc/inc -I$(SRCBASE)/uts/$(ARCH)/sys \
+		-I$(SRC)/lib/libc/inc -I$(SRC)/uts/$(ARCH)/sys \
 		$(CPPFLAGS.master) -I$(ELFCAP)
 LLDFLAGS =	$(VAR_ELFEDIT_LLDFLAGS)
 LLDFLAGS64 =	$(VAR_ELFEDIT_LLDFLAGS64)
-LDFLAGS +=	$(VERSREF) $(CC_USE_PROTO) -Wl,-M$(MAPFILE) $(LLDFLAGS)
-LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) $(LDDBG_LIB) \
-		    $(CONVLIBDIR) $(CONV_LIB) -ltecla
-
-LINTFLAGS +=	-x
-LINTFLAGS64 +=	-x
+LDFLAGS +=	$(VERSREF) -Wl,-M$(MAPFILE) $(LLDFLAGS)
+LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) -llddbg \
+		    $(CONVLIBDIR) -lconv -ltecla
+NATIVE_LIBS +=	libtecla.so
 
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 
 BLTDEFS =	msg.h
 BLTDATA =	msg.c
@@ -70,6 +70,5 @@ SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n elfedit_msg
 SRCS =		$(COMOBJ:%.o=../common/%.c) \
 		$(COMOBJ32:%32.o=../common/%.c) \
 		$(BLTDATA)
-LINTSRCS =	$(SRCS) ../common/lintsup.c
 
-CLEANFILES +=	$(LINTOUTS) $(BLTFILES)
+CLEANFILES +=	$(BLTFILES)

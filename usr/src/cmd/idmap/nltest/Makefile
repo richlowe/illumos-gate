@@ -27,13 +27,13 @@ PROG =		nltest
 CLIENTOBJS =	nltest.o
 
 CLIENTSRCS =	$(CLIENTOBJS:%.o=%.c)
-POFILES = 	$(CLIENTOBJS:.o=.po)
+POFILES =	$(CLIENTOBJS:.o=.po)
 OBJS =		$(CLIENTOBJS)
 SRCS =		$(CLIENTSRCS)
 
 include ../../Makefile.cmd
 
-POFILE = 	$(PROG)_all.po
+POFILE =	$(PROG)_all.po
 LDLIBS +=	-lads -luuid
 FILEMODE =	0555
 

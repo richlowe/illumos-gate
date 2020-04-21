@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2018 <contributor>
+ * Copyright 2020 <contributor>
  */
 
 	.file	"prototype.s"

@@ -22,6 +22,8 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2019, Joyent, Inc.
+#
 
 FSTYPE=		ufs
 LIBPROG=	mkfs
@@ -30,6 +32,8 @@ ATTMK=		$(LIBPROG)
 include		../../Makefile.fstype
 include		../Makefile.roll
 
+CPPFLAGS +=	-I../../
+
 OBJS=		$(LIBPROG).o $(ROLLOBJS) $(FSLIB)
 SRCS=		$(LIBPROG).c $(ROLLSRCS) $(FSLIBSRC)
 MKFSOBJS=	mkfs.o
@@ -37,7 +41,10 @@ MKFSOBJS=	mkfs.o
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-empty-body
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# can't hack main() !
+SMATCH =	off
 
 # for messaging catalog
 #

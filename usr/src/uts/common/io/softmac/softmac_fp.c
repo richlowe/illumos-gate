@@ -24,6 +24,10 @@
  */
 
 /*
+ * Copyright 2019, Joyent, Inc.
+ */
+
+/*
  * Softmac data-path switching:
  *
  * - Fast-path model
@@ -764,7 +768,7 @@ softmac_wput_single_nondata(softmac_upper_t *sup, mblk_t *mp)
 	 * operation is is serialized by softmac_wput_nondata_task().
 	 */
 	if (sup->su_mode != SOFTMAC_FASTPATH) {
-		dld_wput(sup->su_wq, mp);
+		(void) dld_wput(sup->su_wq, mp);
 		return;
 	}
 
@@ -852,7 +856,8 @@ softmac_taskq_dispatch(void)
 			sup->su_taskq_scheduled = B_FALSE;
 			mutex_exit(&softmac_taskq_lock);
 			VERIFY(taskq_dispatch(system_taskq,
-			    softmac_wput_nondata_task, sup, TQ_SLEEP) != NULL);
+			    softmac_wput_nondata_task, sup, TQ_SLEEP) !=
+			    TASKQID_INVALID);
 			mutex_enter(&softmac_taskq_lock);
 			sup = list_head(&softmac_taskq_list);
 		}
@@ -893,7 +898,7 @@ softmac_wput_nondata(softmac_upper_t *sup, mblk_t *mp)
 	mutex_exit(&sup->su_disp_mutex);
 
 	if (taskq_dispatch(system_taskq, softmac_wput_nondata_task,
-	    sup, TQ_NOSLEEP) != NULL) {
+	    sup, TQ_NOSLEEP) != TASKQID_INVALID) {
 		return;
 	}
 
@@ -985,9 +990,9 @@ softmac_wput_data(softmac_upper_t *sup, mblk_t *mp)
 	 * process of switching.
 	 */
 	if (sup->su_mode != SOFTMAC_FASTPATH)
-		dld_wput(sup->su_wq, mp);
+		(void) dld_wput(sup->su_wq, mp);
 	else
-		(void) softmac_fastpath_wput_data(sup, mp, NULL, 0);
+		(void) softmac_fastpath_wput_data(sup, mp, (uintptr_t)NULL, 0);
 }
 
 /*ARGSUSED*/
@@ -1018,7 +1023,7 @@ softmac_fastpath_wput_data(softmac_upper_t *sup, mblk_t *mp, uintptr_t f_hint,
 	 */
 	if (SOFTMAC_CANPUTNEXT(wq)) {
 		putnext(wq, mp);
-		return (NULL);
+		return ((mac_tx_cookie_t)NULL);
 	}
 
 	if (sup->su_tx_busy) {

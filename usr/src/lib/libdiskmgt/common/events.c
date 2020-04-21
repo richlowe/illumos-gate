@@ -23,8 +23,9 @@
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright 2019 Joyent, Inc.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,10 +42,15 @@
 #include "libdiskmgt.h"
 #include "disks_private.h"
 
+#pragma fini(libdiskmgt_fini)
+
 struct event_list {
 	struct event_list	*next;
 	nvlist_t		*event;
 };
+
+static mutex_t			shp_lock = ERRORCHECKMUTEX;
+static sysevent_handle_t	*shp = NULL;
 
 static struct event_list	*events = NULL;
 static int			event_error = 0;
@@ -74,20 +80,47 @@ static sema_t			semaphore;
 #define	WALK_RUNNING		2
 #define	WALK_WAIT_TIME		60	/* wait 60 seconds */
 
-static mutex_t			walker_lock;
+static mutex_t			walker_lock = ERRORCHECKMUTEX;
+static cond_t			walker_cv = DEFAULTCV;
 static int			walker_state = WALK_NONE;
+
 static int			events_pending = 0;
 
 static int			sendevents = 0;
 
 static void		add_event_to_queue(nvlist_t *event);
-static void		cb_watch_events();
+static void		*cb_watch_events(void *);
 static void		event_handler(sysevent_t *ev);
 static void		print_nvlist(char *prefix, nvlist_t *list);
-static void		walk_devtree();
-static void		walker(void *arg);
+static void		walk_devtree(void);
+static void		*walker(void *arg);
 
 static void(*callback)(nvlist_t *, int) = NULL;
+
+static boolean_t		shutting_down = B_FALSE;
+
+static void
+libdiskmgt_fini(void)
+{
+	mutex_enter(&shp_lock);
+	if (shp != NULL) {
+		sysevent_unsubscribe_event(shp, EC_ALL);
+		sysevent_unbind_handle(shp);
+		shp = NULL;
+	}
+	/*
+	 * At this point a new invocation of walker() can't occur.  However,
+	 * if one was already running then we need to wait for it to finish
+	 * because if we allow ourselves to be unloaded out from underneath
+	 * it, then bad things will happen.
+	 */
+	mutex_enter(&walker_lock);
+	shutting_down = B_TRUE;
+	while (walker_state != WALK_NONE)
+		(void) cond_wait(&walker_cv, &walker_lock);
+
+	mutex_exit(&walker_lock);
+}
 
 nvlist_t *
 dm_get_event(int *errp)
@@ -151,9 +184,8 @@ dm_init_event_queue(void (*cb)(nvlist_t *, int), int *errp)
 		    /* installing a cb; we didn't have one before */
 		    thread_t watch_thread;
 
-		    *errp = thr_create(NULL, NULL,
-			(void *(*)(void *))cb_watch_events, NULL, THR_DAEMON,
-			&watch_thread);
+		    *errp = thr_create(NULL, 0, cb_watch_events, NULL,
+			THR_DAEMON, &watch_thread);
 		}
 	    }
 
@@ -171,8 +203,7 @@ dm_init_event_queue(void (*cb)(nvlist_t *, int), int *errp)
 
 		callback = cb;
 
-		*errp = thr_create(NULL, NULL,
-		    (void *(*)(void *))cb_watch_events, NULL, THR_DAEMON,
+		*errp = thr_create(NULL, 0, cb_watch_events, NULL, THR_DAEMON,
 		    &watch_thread);
 	    }
 	}
@@ -225,40 +256,44 @@ events_new_slice_event(char *dev, char *type)
 int
 events_start_event_watcher()
 {
-	sysevent_handle_t *shp;
 	const char *subclass_list[1];
+	int ret = -1;
+
+	mutex_enter(&shp_lock);
+	if (shp != NULL) {
+		ret = 0;
+		goto out;
+	}
 
 	/* Bind event handler and create subscriber handle */
 	shp = sysevent_bind_handle(event_handler);
 	if (shp == NULL) {
-	    if (dm_debug) {
-		/* keep going when we're debugging */
-		(void) fprintf(stderr, "ERROR: bind failed %d\n", errno);
-		return (0);
-	    }
-	    return (errno);
+		if (dm_debug) {
+			(void) fprintf(stderr, "ERROR: sysevent bind failed: "
+			    "%d\n", errno);
+		}
+		goto out;
 	}
 
 	subclass_list[0] = ESC_DISK;
-	if (sysevent_subscribe_event(shp, EC_DEV_ADD, subclass_list, 1) != 0) {
-	    if (dm_debug) {
-		/* keep going when we're debugging */
-		(void) fprintf(stderr, "ERROR: subscribe failed\n");
-		return (0);
-	    }
-	    return (errno);
-	}
-	if (sysevent_subscribe_event(shp, EC_DEV_REMOVE, subclass_list, 1)
-	    != 0) {
-	    if (dm_debug) {
-		/* keep going when we're debugging */
-		(void) fprintf(stderr, "ERROR: subscribe failed\n");
-		return (0);
-	    }
-	    return (errno);
-	}
+	if (sysevent_subscribe_event(shp, EC_DEV_ADD, subclass_list, 1) != 0 ||
+	    sysevent_subscribe_event(shp, EC_DEV_REMOVE, subclass_list, 1) !=
+	    0) {
 
-	return (0);
+		sysevent_unsubscribe_event(shp, EC_ALL);
+		sysevent_unbind_handle(shp);
+		shp = NULL;
+
+		if (dm_debug) {
+			(void) fprintf(stderr, "ERROR: sysevent subscribe "
+			    "failed: %d\n", errno);
+		}
+		goto out;
+	}
+	ret = 0;
+out:
+	mutex_exit(&shp_lock);
+	return (ret);
 }
 
 static void
@@ -307,8 +342,8 @@ add_event_to_queue(nvlist_t *event)
 	(void) sema_post(&semaphore);
 }
 
-static void
-cb_watch_events()
+static void *
+cb_watch_events(void *arg __unused)
 {
 	nvlist_t	*event;
 	int		error;
@@ -318,7 +353,7 @@ cb_watch_events()
 	    event = dm_get_event(&error);
 	    if (callback == NULL) {
 		/* end the thread */
-		return;
+		return (NULL);
 	    }
 	    callback(event, error);
 	}
@@ -437,15 +472,15 @@ print_nvlist(char *prefix, nvlist_t *list)
  * drive.
  */
 static void
-walk_devtree()
+walk_devtree(void)
 {
 	thread_t	walk_thread;
 
-	(void) mutex_lock(&walker_lock);
+	mutex_enter(&walker_lock);
 
 	switch (walker_state) {
 	case WALK_NONE:
-	    if (thr_create(NULL, NULL, (void *(*)(void *))walker, NULL,
+	    if (thr_create(NULL, 0, walker, NULL,
 		THR_DAEMON, &walk_thread) == 0) {
 		walker_state = WALK_WAITING;
 	    }
@@ -460,26 +495,37 @@ walk_devtree()
 	    break;
 	}
 
-	(void) mutex_unlock(&walker_lock);
+	mutex_exit(&walker_lock);
 }
 
-/*ARGSUSED*/
-static void
-walker(void *arg)
+static void *
+walker(void *arg __unused)
 {
 	int	walk_again = 0;
 
 	do {
-	    /* start by wating for a few seconds to absorb extra events */
+	    /* start by waiting for a few seconds to absorb extra events */
 	    (void) sleep(WALK_WAIT_TIME);
 
-	    (void) mutex_lock(&walker_lock);
+	    mutex_enter(&walker_lock);
+	    if (shutting_down) {
+		walker_state = WALK_NONE;
+		(void) cond_broadcast(&walker_cv);
+		mutex_exit(&walker_lock);
+		return (NULL);
+	    }
 	    walker_state = WALK_RUNNING;
-	    (void) mutex_unlock(&walker_lock);
+	    mutex_exit(&walker_lock);
 
 	    cache_update(DM_EV_DISK_ADD, NULL);
 
-	    (void) mutex_lock(&walker_lock);
+	    mutex_enter(&walker_lock);
+	    if (shutting_down) {
+		walker_state = WALK_NONE;
+		(void) cond_broadcast(&walker_cv);
+		mutex_exit(&walker_lock);
+		return (NULL);
+	    }
 
 	    if (events_pending) {
 		events_pending = 0;
@@ -490,7 +536,8 @@ walker(void *arg)
 		walk_again = 0;
 	    }
 
-	    (void) mutex_unlock(&walker_lock);
+	    mutex_exit(&walker_lock);
 
 	} while (walk_again);
+	return (NULL);
 }

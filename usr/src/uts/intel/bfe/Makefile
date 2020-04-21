@@ -70,7 +70,7 @@ CFLAGS		+= $(CPPFLAGS)
 LINTFLAGS	+= -v
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 
 #
 # Driver depends on MAC & IP

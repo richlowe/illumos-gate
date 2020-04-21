@@ -22,6 +22,10 @@
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 
+/*
+ * Copyright (c) 2019, Joyent, Inc.
+ */
+
 #include <sys/types.h>
 #include <sys/stream.h>
 #include <sys/stropts.h>
@@ -107,7 +111,7 @@
  */
 
 static	void	nce_cleanup_list(ncec_t *ncec);
-static	void 	nce_set_ll(ncec_t *ncec, uchar_t *ll_addr);
+static	void	nce_set_ll(ncec_t *ncec, uchar_t *ll_addr);
 static	ncec_t	*ncec_lookup_illgrp(ill_t *, const in6_addr_t *,
     ncec_t *);
 static	nce_t	*nce_lookup_addr(ill_t *, const in6_addr_t *);
@@ -123,10 +127,10 @@ static boolean_t ill_defend_rate_limit(ill_t *, ncec_t *);
 static	void	nce_queue_mp_common(ncec_t *, mblk_t *, boolean_t);
 static	int	nce_add_common(ill_t *, uchar_t *, uint_t, const in6_addr_t *,
     uint16_t, uint16_t, nce_t **);
-static nce_t *nce_add_impl(ill_t *, ncec_t *, nce_t *, mblk_t *);
-static nce_t *nce_add(ill_t *, ncec_t *);
+static nce_t *nce_add_impl(ill_t *, ncec_t *, nce_t *, mblk_t *, list_t *);
+static nce_t *nce_add(ill_t *, ncec_t *, list_t *);
 static void nce_inactive(nce_t *);
-extern nce_t 	*nce_lookup(ill_t *, const in6_addr_t *);
+extern nce_t	*nce_lookup(ill_t *, const in6_addr_t *);
 static nce_t *nce_ill_lookup_then_add(ill_t *, ncec_t *);
 static int	nce_add_v6(ill_t *, uchar_t *, uint_t, const in6_addr_t *,
     uint16_t, uint16_t, nce_t **);
@@ -596,9 +600,9 @@ ncec_inactive(ncec_t *ncec)
  * that is going away.  Always called as a writer.
  */
 void
-ncec_delete_per_ill(ncec_t *ncec, uchar_t *arg)
+ncec_delete_per_ill(ncec_t *ncec, void *arg)
 {
-	if ((ncec != NULL) && ncec->ncec_ill == (ill_t *)arg) {
+	if ((ncec != NULL) && ncec->ncec_ill == arg) {
 		ncec_delete(ncec);
 	}
 }
@@ -934,13 +938,13 @@ nce_process(ncec_t *ncec, uchar_t *hw_addr, uint32_t flag, boolean_t is_adv)
 }
 
 /*
- * Pass arg1 to the pfi supplied, along with each ncec in existence.
+ * Pass arg1 to the cbf supplied, along with each ncec in existence.
  * ncec_walk() places a REFHOLD on the ncec and drops the lock when
  * walking the hash list.
  */
 void
-ncec_walk_common(ndp_g_t *ndp, ill_t *ill, pfi_t pfi, void *arg1,
-    boolean_t trace)
+ncec_walk_common(ndp_g_t *ndp, ill_t *ill, ncec_walk_cb_t cbf,
+    void *arg1, boolean_t trace)
 {
 	ncec_t	*ncec;
 	ncec_t	*ncec1;
@@ -958,11 +962,11 @@ ncec_walk_common(ndp_g_t *ndp, ill_t *ill, pfi_t pfi, void *arg1,
 			if (ill == NULL || ncec->ncec_ill == ill) {
 				if (trace) {
 					ncec_refhold(ncec);
-					(*pfi)(ncec, arg1);
+					(*cbf)(ncec, arg1);
 					ncec_refrele(ncec);
 				} else {
 					ncec_refhold_notr(ncec);
-					(*pfi)(ncec, arg1);
+					(*cbf)(ncec, arg1);
 					ncec_refrele_notr(ncec);
 				}
 			}
@@ -994,10 +998,240 @@ ncec_walk_common(ndp_g_t *ndp, ill_t *ill, pfi_t pfi, void *arg1,
  * Note that ill can be NULL hence can't derive the ipst from it.
  */
 void
-ncec_walk(ill_t *ill, pfi_t pfi, void *arg1, ip_stack_t *ipst)
+ncec_walk(ill_t *ill, ncec_walk_cb_t cbf, void *arg1, ip_stack_t *ipst)
 {
-	ncec_walk_common(ipst->ips_ndp4, ill, pfi, arg1, B_TRUE);
-	ncec_walk_common(ipst->ips_ndp6, ill, pfi, arg1, B_TRUE);
+	ncec_walk_common(ipst->ips_ndp4, ill, cbf, arg1, B_TRUE);
+	ncec_walk_common(ipst->ips_ndp6, ill, cbf, arg1, B_TRUE);
+}
+
+/*
+ * Cheesy globals (i.e. all netstacks) for both a limit on per-ill multicast
+ * NCEs, and the number to reclaim if we hit the limit.  Used by
+ * nce_set_multicast_v[46]() to limit the linked-list length of ill_nce. Until
+ * we solve the multicast-mappings-shouldn't-be-NCEs problem, use this.
+ */
+
+/* Maximum number of multicast NCEs on an ill. */
+uint_t ip_max_ill_mcast_nces = 16384;
+/*
+ * Number of NCEs to delete if we hit the maximum above.  0 means *don't* and
+ * return an error.  Non-zero means delete so many, and if the number is >=
+ * the max above, that means delete them all.
+ */
+uint_t ip_ill_mcast_reclaim = 256;
+
+/*
+ * Encapsulate multicast ill capping in a function, for easier DTrace
+ * detections.  Return a list of refheld NCEs to destroy-via-refrele.  That
+ * list can be NULL, but can only be non-NULL if we successfully reclaimed.
+ *
+ * NOTE:  This function must be called while holding the ill_lock AND
+ * JUST PRIOR to making the insertion into the ill_nce list.
+ *
+ * We can't release the ones we delete ourselves because the ill_lock is held
+ * by the caller. They are, instead, passed back in a list_t for deletion
+ * outside of the ill_lock hold. nce_graveyard_free() actually frees them.
+ *
+ * While this covers nce_t, ncec_t gets done even further down the road.  See
+ * nce_graveyard_free() for why.
+ */
+static boolean_t
+nce_too_many_mcast(ill_t *ill, list_t *graveyard)
+{
+	uint_t reclaim_count, max_count, reclaimed = 0;
+	boolean_t too_many;
+	nce_t *nce, *deadman;
+
+	ASSERT(graveyard != NULL);
+	ASSERT(list_is_empty(graveyard));
+	ASSERT(MUTEX_HELD(&ill->ill_lock));
+
+	/*
+	 * NOTE: Some grinning weirdo may have lowered the global max beyond
+	 * what this ill currently has.  The behavior in this case will be
+	 * trim-back just by the reclaim amount for any new ones.
+	 */
+	max_count = ip_max_ill_mcast_nces;
+	reclaim_count = min(ip_ill_mcast_reclaim, max_count);
+
+	/* All good? */
+	if (ill->ill_mcast_nces < max_count)
+		return (B_FALSE);	/* Yes, all good. */
+
+	if (reclaim_count == 0)
+		return (B_TRUE);	/* Don't bother - we're stuck. */
+
+	/* We need to reclaim now.  Exploit our held ill_lock. */
+
+	/*
+	 * Start at the tail and work backwards, new nces are head-inserted,
+	 * so we'll be reaping the oldest entries.
+	 */
+	nce = list_tail(&ill->ill_nce);
+	while (reclaimed < reclaim_count) {
+		/* Skip ahead to a multicast NCE. */
+		while (nce != NULL &&
+		    (nce->nce_common->ncec_flags & NCE_F_MCAST) == 0) {
+			nce = list_prev(&ill->ill_nce, nce);
+		}
+		if (nce == NULL)
+			break;
+
+		/*
+		 * NOTE: For now, we just delete the first one(s) we find.
+		 * This is not optimal, and may require some inspection of nce
+		 * & its ncec to be better.
+		 */
+		deadman = nce;
+		nce = list_prev(&ill->ill_nce, nce);
+
+		/* nce_delete() requires caller holds... */
+		nce_refhold(deadman);
+		nce_delete(deadman);	/* Bumps down ill_mcast_nces. */
+
+		/* Link the dead ones singly, still refheld... */
+		list_insert_tail(graveyard, deadman);
+		reclaimed++;
+	}
+
+	if (reclaimed != reclaim_count) {
+		/* We didn't have enough to reach reclaim_count. Why?!? */
+		DTRACE_PROBE3(ill__mcast__nce__reclaim__mismatch, ill_t *, ill,
+		    uint_t, reclaimed, uint_t, reclaim_count);
+
+		/* In case for some REALLY weird reason we found none! */
+		too_many = (reclaimed == 0);
+	} else {
+		too_many = B_FALSE;
+	}
+
+	return (too_many);
+}
+
+static void
+ncec_mcast_reap_one(ncec_t *ncec, void *arg)
+{
+	boolean_t reapit;
+	ill_t *ill = (ill_t *)arg;
+
+	/* Obvious no-lock-needed checks... */
+	if (ncec == NULL || ncec->ncec_ill != ill ||
+	    (ncec->ncec_flags & NCE_F_MCAST) == 0)
+		return;
+
+	mutex_enter(&ncec->ncec_lock);
+	/*
+	 * It's refheld by the walk infrastructure. It has one reference for
+	 * being in the ndp_g_hash, and if an nce_t exists, that's one more.
+	 * We want ones without an nce_t, so 2 is the magic number.  If it's
+	 * LESS than 2, we have much bigger problems anyway.
+	 */
+	ASSERT(ncec->ncec_refcnt >= 2);
+	reapit = (ncec->ncec_refcnt == 2);
+	mutex_exit(&ncec->ncec_lock);
+
+	if (reapit) {
+		IP_STAT(ill->ill_ipst, ip_nce_mcast_reclaim_deleted);
+		ncec_delete(ncec);
+	}
+}
+
+/*
+ * Attempt to reap stray multicast ncec_t structures left in the wake of
+ * nce_graveyard_free(). This is a taskq servicing routine, as it's well
+ * outside any netstack-global locks being held - ndp_g_lock in this case.  We
+ * have a reference hold on the ill, which will prevent any unplumbing races.
+ */
+static void
+ncec_mcast_reap(void *arg)
+{
+	ill_t *ill = (ill_t *)arg;
+
+	IP_STAT(ill->ill_ipst, ip_nce_mcast_reclaim_calls);
+	ncec_walk(ill, ncec_mcast_reap_one, ill, ill->ill_ipst);
+	mutex_enter(&ill->ill_lock);
+	ill->ill_mcast_ncec_cleanup = B_FALSE;
+	/*
+	 * Inline a _notr() version of ill_refrele. See nce_graveyard_free()
+	 * below for why.
+	 */
+	ill->ill_refcnt--;
+	if (ill->ill_refcnt == 0)
+		ipif_ill_refrele_tail(ill);	/* Drops ill_lock. */
+	else
+		mutex_exit(&ill->ill_lock);
+}
+
+/*
+ * Free a list (including handling an empty list or NULL list) of
+ * reference-held NCEs that were reaped from a nce_too_many_mcast()
+ * call. Separate because the caller must have dropped ndp_g_lock first.
+ *
+ * This also schedules a taskq task to unlink underlying NCECs from the
+ * ndp_g_hash, which are protected by ndp_g_lock.
+ */
+static void
+nce_graveyard_free(list_t *graveyard)
+{
+	nce_t *deadman, *current;
+	ill_t *ill;
+	boolean_t doit;
+
+	if (graveyard == NULL)
+		return;
+
+	current = list_head(graveyard);
+	if (current == NULL) {
+		list_destroy(graveyard);
+		return;
+	}
+
+	ill = current->nce_ill;
+	/*
+	 * Normally one should ill_refhold(ill) here.  There's no _notr()
+	 * variant like there is for ire_t, dce_t, or even ncec_t, but this is
+	 * the ONLY case that'll break the mh_trace that IP debugging uses for
+	 * reference counts (i.e. they assume same thread releases as
+	 * holds). Instead, we inline ill_refhold() here.  We must do the same
+	 * in the release done by the ncec_mcast_reap() above.
+	 */
+	mutex_enter(&ill->ill_lock);
+	ill->ill_refcnt++;
+	mutex_exit(&ill->ill_lock);
+
+	while (current != NULL) {
+		ASSERT3P(ill, ==, current->nce_ill);
+		deadman = current;
+		current = list_next(graveyard, deadman);
+		list_remove(graveyard, deadman);
+		ASSERT3U((deadman->nce_common->ncec_flags & NCE_F_MCAST), !=,
+		    0);
+		nce_refrele(deadman);
+	}
+	list_destroy(graveyard);
+
+	mutex_enter(&ill->ill_lock);
+	if (ill->ill_mcast_ncec_cleanup)
+		doit = B_FALSE;
+	else {
+		ill->ill_mcast_ncec_cleanup = B_TRUE;
+		doit = B_TRUE;
+	}
+	mutex_exit(&ill->ill_lock);
+	if (!doit || taskq_dispatch(system_taskq, ncec_mcast_reap,
+	    ill, TQ_NOSLEEP) == TASKQID_INVALID) {
+		mutex_enter(&ill->ill_lock);
+		if (doit) {
+			IP_STAT(ill->ill_ipst, ip_nce_mcast_reclaim_tqfail);
+			ill->ill_mcast_ncec_cleanup = B_FALSE;
+		}
+		/* There's no _notr() for ill_refrele(), so inline it here. */
+		ill->ill_refcnt--;
+		if (ill->ill_refcnt == 0)
+			ipif_ill_refrele_tail(ill);	/* Drops ill_lock */
+		else
+			mutex_exit(&ill->ill_lock);
+	}
 }
 
 /*
@@ -1046,7 +1280,7 @@ nce_set_multicast_v6(ill_t *ill, const in6_addr_t *dst,
 	    ND_UNCHANGED, &nce);
 	mutex_exit(&ipst->ips_ndp6->ndp_g_lock);
 	if (err == 0)
-		err = nce_add_v6_postprocess(nce);
+		err = (nce != NULL) ? nce_add_v6_postprocess(nce) : ENOMEM;
 	if (hw_addr != NULL)
 		kmem_free(hw_addr, ill->ill_nd_lla_len);
 	if (err != 0) {
@@ -2124,7 +2358,7 @@ ndp_xmit(ill_t *ill, uint32_t operation, uint8_t *hw_addr, uint_t hw_addr_len,
     const in6_addr_t *sender, const in6_addr_t *target, int flag)
 {
 	uint32_t	len;
-	icmp6_t 	*icmp6;
+	icmp6_t		*icmp6;
 	mblk_t		*mp;
 	ip6_t		*ip6h;
 	nd_opt_hdr_t	*opt;
@@ -2709,6 +2943,8 @@ nce_update(ncec_t *ncec, uint16_t new_state, uchar_t *new_ll_addr)
 		ASSERT(ncec->ncec_lladdr != NULL || new_state == ND_INITIAL ||
 		    new_state == ND_INCOMPLETE);
 	}
+
+	tid = 0;
 	if (need_stop_timer || (ncec->ncec_flags & NCE_F_STATIC)) {
 		tid = ncec->ncec_timeout_id;
 		ncec->ncec_timeout_id = 0;
@@ -3096,7 +3332,7 @@ nce_fastpath_create(ill_t *ill, ncec_t *ncec)
  * method. All other callers (that pass in NULL ncec_nce) will have to do a
  * nce_refrele of the returned nce (when it is non-null).
  */
-nce_t *
+static nce_t *
 nce_fastpath(ncec_t *ncec, boolean_t trigger_fp_req, nce_t *ncec_nce)
 {
 	nce_t *nce;
@@ -3154,7 +3390,7 @@ nce_fastpath_trigger(nce_t *nce)
  * Add ncec to the nce fastpath list on ill.
  */
 static nce_t *
-nce_ill_lookup_then_add_locked(ill_t *ill, ncec_t *ncec)
+nce_ill_lookup_then_add_locked(ill_t *ill, ncec_t *ncec, list_t *graveyard)
 {
 	nce_t *nce = NULL;
 
@@ -3174,21 +3410,24 @@ nce_ill_lookup_then_add_locked(ill_t *ill, ncec_t *ncec)
 		nce = nce_lookup(ill, &ncec->ncec_addr);
 		if (nce != NULL)
 			goto done;
-		nce = nce_add(ill, ncec);
+		nce = nce_add(ill, ncec, graveyard);
 	}
 done:
 	mutex_exit(&ncec->ncec_lock);
 	return (nce);
 }
 
-nce_t *
+static nce_t *
 nce_ill_lookup_then_add(ill_t *ill, ncec_t *ncec)
 {
 	nce_t *nce;
+	list_t graveyard;
 
+	list_create(&graveyard, sizeof (nce_t), offsetof(nce_t, nce_node));
 	mutex_enter(&ill->ill_lock);
-	nce = nce_ill_lookup_then_add_locked(ill, ncec);
+	nce = nce_ill_lookup_then_add_locked(ill, ncec, &graveyard);
 	mutex_exit(&ill->ill_lock);
+	nce_graveyard_free(&graveyard);
 	return (nce);
 }
 
@@ -3239,7 +3478,9 @@ nce_delete_then_add(nce_t *nce)
 {
 	ill_t		*ill = nce->nce_ill;
 	nce_t		*newnce = NULL;
+	list_t		graveyard;
 
+	list_create(&graveyard, sizeof (nce_t), offsetof(nce_t, nce_node));
 	ip0dbg(("nce_delete_then_add nce %p ill %s\n",
 	    (void *)nce, ill->ill_name));
 	mutex_enter(&ill->ill_lock);
@@ -3251,9 +3492,10 @@ nce_delete_then_add(nce_t *nce)
 	 * ipmp_ncec_delete_nce()
 	 */
 	if (!NCE_ISCONDEMNED(nce->nce_common))
-		newnce = nce_add(ill, nce->nce_common);
+		newnce = nce_add(ill, nce->nce_common, &graveyard);
 	mutex_exit(&nce->nce_common->ncec_lock);
 	mutex_exit(&ill->ill_lock);
+	nce_graveyard_free(&graveyard);
 	nce_refrele(nce);
 	return (newnce); /* could be null if nomem */
 }
@@ -3405,7 +3647,7 @@ ndp_verify_optlen(nd_opt_hdr_t *opt, int optlen)
  * order of ncec_last and/or maintain state)
  */
 static void
-ncec_cache_reclaim(ncec_t *ncec, char *arg)
+ncec_cache_reclaim(ncec_t *ncec, void *arg)
 {
 	ip_stack_t	*ipst = ncec->ncec_ipst;
 	uint_t		fraction = *(uint_t *)arg;
@@ -3436,7 +3678,7 @@ ip_nce_reclaim_stack(ip_stack_t *ipst)
 
 	IP_STAT(ipst, ip_nce_reclaim_calls);
 
-	ncec_walk(NULL, (pfi_t)ncec_cache_reclaim, (uchar_t *)&fraction, ipst);
+	ncec_walk(NULL, ncec_cache_reclaim, &fraction, ipst);
 
 	/*
 	 * Walk all CONNs that can have a reference on an ire, ncec or dce.
@@ -3968,7 +4210,7 @@ nce_set_multicast_v4(ill_t *ill, const in_addr_t *dst,
 	    ND_UNCHANGED, &nce);
 	mutex_exit(&ipst->ips_ndp4->ndp_g_lock);
 	if (err == 0)
-		err = nce_add_v4_postprocess(nce);
+		err = (nce != NULL) ? nce_add_v4_postprocess(nce) : ENOMEM;
 	if (hw_addr != NULL)
 		kmem_free(hw_addr, ill->ill_phys_addr_length);
 	if (err != 0) {
@@ -4193,6 +4435,7 @@ nce_resolve_src(ncec_t *ncec, in6_addr_t *src)
 
 	ASSERT(src != NULL);
 	ASSERT(IN6_IS_ADDR_UNSPECIFIED(src));
+	src4 = 0;
 	src6 = *src;
 	if (is_myaddr) {
 		src6 = ncec->ncec_addr;
@@ -4363,7 +4606,7 @@ ip_nce_lookup_and_update(ipaddr_t *addr, ipif_t *ipif, ip_stack_t *ipst,
 		hwm.hwm_flags = flags;
 
 		ncec_walk_common(ipst->ips_ndp4, NULL,
-		    (pfi_t)nce_update_hw_changed, (uchar_t *)&hwm, B_TRUE);
+		    nce_update_hw_changed, &hwm, B_TRUE);
 	}
 }
 
@@ -4392,6 +4635,7 @@ nce_add_common(ill_t *ill, uchar_t *hw_addr, uint_t hw_addr_len,
 	boolean_t		fastprobe = B_FALSE;
 	struct ndp_g_s		*ndp;
 	nce_t			*nce = NULL;
+	list_t			graveyard;
 	mblk_t			*dlur_mp = NULL;
 
 	if (ill->ill_isv6)
@@ -4400,6 +4644,7 @@ nce_add_common(ill_t *ill, uchar_t *hw_addr, uint_t hw_addr_len,
 		ndp = ill->ill_ipst->ips_ndp4;
 
 	*retnce = NULL;
+	state = 0;
 
 	ASSERT(MUTEX_HELD(&ndp->ndp_g_lock));
 
@@ -4682,9 +4927,11 @@ nce_add_common(ill_t *ill, uchar_t *hw_addr, uint_t hw_addr_len,
 	 * Since we hold the ncec_lock at this time, the ncec cannot be
 	 * condemned, and we can safely add the nce.
 	 */
-	*retnce = nce_add_impl(ill, ncec, nce, dlur_mp);
+	list_create(&graveyard, sizeof (nce_t), offsetof(nce_t, nce_node));
+	*retnce = nce_add_impl(ill, ncec, nce, dlur_mp, &graveyard);
 	mutex_exit(&ncec->ncec_lock);
 	mutex_exit(&ill->ill_lock);
+	nce_graveyard_free(&graveyard);
 
 	/* caller must trigger fastpath on *retnce */
 	return (0);
@@ -4770,10 +5017,25 @@ nce_inactive(nce_t *nce)
 
 /*
  * Add an nce to the ill_nce list.
+ *
+ * Adding multicast NCEs is subject to a per-ill limit. This function returns
+ * NULL if that's the case, and it may reap a number of multicast nces.
+ * Callers (and upstack) must be able to cope with NULL returns.
  */
 static nce_t *
-nce_add_impl(ill_t *ill, ncec_t *ncec, nce_t *nce, mblk_t *dlur_mp)
+nce_add_impl(ill_t *ill, ncec_t *ncec, nce_t *nce, mblk_t *dlur_mp,
+    list_t *graveyard)
 {
+	ASSERT(MUTEX_HELD(&ill->ill_lock));
+
+	if ((ncec->ncec_flags & NCE_F_MCAST) != 0) {
+		if (nce_too_many_mcast(ill, graveyard)) {
+			kmem_cache_free(nce_cache, nce);
+			return (NULL);
+		}
+		ill->ill_mcast_nces++;
+	}
+
 	bzero(nce, sizeof (*nce));
 	mutex_init(&nce->nce_lock, NULL, MUTEX_DEFAULT, NULL);
 	nce->nce_common = ncec;
@@ -4794,7 +5056,7 @@ nce_add_impl(ill_t *ill, ncec_t *ncec, nce_t *nce, mblk_t *dlur_mp)
 }
 
 static nce_t *
-nce_add(ill_t *ill, ncec_t *ncec)
+nce_add(ill_t *ill, ncec_t *ncec, list_t *graveyard)
 {
 	nce_t	*nce;
 	mblk_t	*dlur_mp = NULL;
@@ -4815,7 +5077,11 @@ nce_add(ill_t *ill, ncec_t *ncec)
 			return (NULL);
 		}
 	}
-	return (nce_add_impl(ill, ncec, nce, dlur_mp));
+	/*
+	 * If nce_add_impl() returns NULL due to on multicast limiting, caller
+	 * will (correctly) assume ENOMEM.
+	 */
+	return (nce_add_impl(ill, ncec, nce, dlur_mp, graveyard));
 }
 
 /*
@@ -4838,6 +5104,10 @@ nce_delete(nce_t *nce)
 	}
 	nce->nce_is_condemned = B_TRUE;
 	mutex_exit(&nce->nce_lock);
+
+	/* Update the count of multicast NCEs. */
+	if ((nce->nce_common->ncec_flags & NCE_F_MCAST) == NCE_F_MCAST)
+		ill->ill_mcast_nces--;
 
 	list_remove(&ill->ill_nce, nce);
 	/*
@@ -4955,7 +5225,7 @@ nce_fuzz_interval(clock_t intv, boolean_t initial_time)
 			frac = 2;
 		/* Set intv randomly in the range [intv-frac .. intv+frac] */
 		if ((intv = intv - frac + rnd % (2 * frac + 1)) <= 0)
-		intv = 1;
+			intv = 1;
 	}
 	return (intv);
 }

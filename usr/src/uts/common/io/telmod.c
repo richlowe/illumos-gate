@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * This module implements the "fast path" processing for the telnet protocol.
  * Since it only knows a very small number of the telnet protocol options,
@@ -127,10 +125,10 @@ _info(struct modinfo *modinfop)
 
 static int	telmodopen(queue_t *, dev_t *, int, int, cred_t *);
 static int	telmodclose(queue_t *, int, cred_t *);
-static void	telmodrput(queue_t *, mblk_t *);
-static void	telmodrsrv(queue_t *);
-static void	telmodwput(queue_t *, mblk_t *);
-static void	telmodwsrv(queue_t *);
+static int	telmodrput(queue_t *, mblk_t *);
+static int	telmodrsrv(queue_t *);
+static int	telmodwput(queue_t *, mblk_t *);
+static int	telmodwsrv(queue_t *);
 static int	rcv_parse(queue_t *q, mblk_t *mp);
 static int	snd_parse(queue_t *q, mblk_t *mp);
 static void	telmod_timer(void *);
@@ -147,8 +145,8 @@ static struct module_info telmodoinfo = {
 };
 
 static struct qinit telmodrinit = {
-	(int (*)())telmodrput,
-	(int (*)())telmodrsrv,
+	telmodrput,
+	telmodrsrv,
 	telmodopen,
 	telmodclose,
 	nulldev,
@@ -157,8 +155,8 @@ static struct qinit telmodrinit = {
 };
 
 static struct qinit telmodwinit = {
-	(int (*)())telmodwput,
-	(int (*)())telmodwsrv,
+	telmodwput,
+	telmodwsrv,
 	NULL,
 	NULL,
 	nulldev,
@@ -352,7 +350,7 @@ telmodclose(queue_t *q, int flag, cred_t *credp)
  * telnet protocol processing to M_DATA.  Take notice of TLI messages
  * indicating connection tear-down, and change them into M_HANGUP's.
  */
-static void
+static int
 telmodrput(queue_t *q, mblk_t *mp)
 {
 	mblk_t	*newmp;
@@ -363,7 +361,7 @@ telmodrput(queue_t *q, mblk_t *mp)
 	    ((q->q_first) || ((tmip->flags & TEL_STOPPED) &&
 	    !(tmip->flags & TEL_GETBLK)) || !canputnext(q))) {
 		(void) putq(q, mp);
-		return;
+		return (0);
 	}
 
 	switch (mp->b_datap->db_type) {
@@ -378,7 +376,7 @@ is_mdata:
 		if (tmip->flags & TEL_GETBLK) {
 			if ((newmp = allocb(sizeof (char), BPRI_MED)) == NULL) {
 				recover(q, mp, msgdsize(mp));
-				return;
+				return (0);
 			}
 			newmp->b_datap->db_type = M_CTL;
 			newmp->b_wptr = newmp->b_rptr + 1;
@@ -500,6 +498,7 @@ is_mdata:
 #endif
 		freemsg(mp);
 	}
+	return (0);
 }
 
 /*
@@ -507,7 +506,7 @@ is_mdata:
  * Mostly we end up here because of M_DATA processing delayed due to flow
  * control or lack of memory.  XXX.sparker: TLI primitives here?
  */
-static void
+static int
 telmodrsrv(queue_t *q)
 {
 	mblk_t	*mp, *newmp;
@@ -518,7 +517,7 @@ telmodrsrv(queue_t *q)
 		if (((tmip->flags & TEL_STOPPED) &&
 		    !(tmip->flags & TEL_GETBLK)) || !canputnext(q)) {
 			(void) putbq(q, mp);
-			return;
+			return (0);
 		}
 		switch (mp->b_datap->db_type) {
 
@@ -528,7 +527,7 @@ is_mdata:
 				if ((newmp = allocb(sizeof (char),
 				    BPRI_MED)) == NULL) {
 					recover(q, mp, msgdsize(mp));
-					return;
+					return (0);
 				}
 				newmp->b_datap->db_type = M_CTL;
 				newmp->b_wptr = newmp->b_rptr + 1;
@@ -543,7 +542,7 @@ is_mdata:
 				break;
 			}
 			if (!rcv_parse(q, mp)) {
-				return;
+				return (0);
 			}
 			break;
 
@@ -632,6 +631,7 @@ is_mdata:
 			freemsg(mp);
 		}
 	}
+	return (0);
 }
 
 /*
@@ -647,7 +647,7 @@ is_mdata:
  * can be running either daemon<->TCP or application<->telmod.  We must
  * carefully deal with this.
  */
-static void
+static int
 telmodwput(
 	queue_t *q,	/* Pointer to the read queue */
 	mblk_t *mp)	/* Pointer to current message block */
@@ -663,7 +663,7 @@ telmodwput(
 	switch (mp->b_datap->db_type) {
 	case M_DATA:
 		if (!canputnext(q) || (tmip->flags & TEL_STOPPED) ||
-			(q->q_first)) {
+		    (q->q_first)) {
 			noenable(q);
 			(void) putq(q, mp);
 			break;
@@ -679,7 +679,7 @@ telmodwput(
 
 	case M_CTL:
 		if (((mp->b_wptr - mp->b_rptr) == 1) &&
-			(*(mp->b_rptr) == M_CTL_MAGIC_NUMBER)) {
+		    (*(mp->b_rptr) == M_CTL_MAGIC_NUMBER)) {
 			savemp = mp->b_cont;
 			freeb(mp);
 			mp = savemp;
@@ -785,8 +785,8 @@ telmodwput(
 			} else {
 #ifdef DEBUG
 				cmn_err(CE_NOTE,
-				"telmodwput: unexpected ioctl type 0x%x",
-					ioc->ioc_cmd);
+				    "telmodwput: unexpected ioctl type 0x%x",
+				    ioc->ioc_cmd);
 #endif
 				miocnak(q, mp, 0, EINVAL);
 			}
@@ -850,12 +850,13 @@ telmodwput(
 		freemsg(mp);
 		break;
 	}
+	return (0);
 }
 
 /*
  * telmodwsrv - module write service procedure
  */
-static void
+static int
 telmodwsrv(queue_t *q)
 {
 	mblk_t	*mp, *savemp;
@@ -866,27 +867,27 @@ telmodwsrv(queue_t *q)
 		if (!canputnext(q)) {
 			ASSERT(mp->b_datap->db_type < QPCTL);
 			(void) putbq(q, mp);
-			return;
+			return (0);
 		}
 		switch (mp->b_datap->db_type) {
 
 		case M_DATA:
 			if (tmip->flags & TEL_STOPPED) {
 				(void) putbq(q, mp);
-				return;
+				return (0);
 			}
 			/*
 			 * Insert a null character if carraige return
 			 * is not followed by line feed
 			 */
 			if (!snd_parse(q, mp)) {
-				return;
+				return (0);
 			}
 			break;
 
 		case M_CTL:
 			if (((mp->b_wptr - mp->b_rptr) == 1) &&
-				(*(mp->b_rptr) == M_CTL_MAGIC_NUMBER)) {
+			    (*(mp->b_rptr) == M_CTL_MAGIC_NUMBER)) {
 				savemp = mp->b_cont;
 				freeb(mp);
 				mp = savemp;
@@ -908,6 +909,7 @@ telmodwsrv(queue_t *q)
 		}
 
 	}
+	return (0);
 }
 
 /*
@@ -965,7 +967,7 @@ rcv_parse(queue_t *q, mblk_t *mp)
 		 */
 		if (!(tmip->flags & TEL_BINARY_IN) &&
 		    (tmip->flags & TEL_CRRCV)) {
-			if ((*mp->b_rptr == '\n') || (*mp->b_rptr == NULL)) {
+			if ((*mp->b_rptr == '\n') || (*mp->b_rptr == '\0')) {
 				if (mp->b_wptr == (mp->b_rptr + 1)) {
 					tmip->flags &= ~TEL_CRRCV;
 					if (prevmp) {
@@ -1046,7 +1048,7 @@ rcv_parse(queue_t *q, mblk_t *mp)
 				 */
 
 				if ((newmp = allocb(sizeof (char),
-					BPRI_MED)) == NULL) {
+				    BPRI_MED)) == NULL) {
 					/*
 					 * Save the dup'ed mp containing
 					 * the protocol information which
@@ -1072,7 +1074,7 @@ rcv_parse(queue_t *q, mblk_t *mp)
 				 * Set TEL_CRRCV flag if last character is CR
 				 */
 				if ((tmp == (mp->b_wptr - 1)) &&
-					(tmp[0] == '\r')) {
+				    (tmp[0] == '\r')) {
 					tmip->flags |= TEL_CRRCV;
 					break;
 				}
@@ -1082,7 +1084,7 @@ rcv_parse(queue_t *q, mblk_t *mp)
 				 * LF/NULL and realign the message block.
 				 */
 				if ((tmp[0] == '\r') && ((tmp[1] == '\n') ||
-				    (tmp[1] == NULL))) {
+				    (tmp[1] == '\0'))) {
 					/*
 					 * If CR is in the middle of a block,
 					 * we need to get rid of LF and join
@@ -1152,9 +1154,9 @@ snd_parse(queue_t *q, mblk_t *mp)
 	tmp1 = newmp->b_rptr;
 	while (mp) {
 		if (!(tmip->flags & TEL_BINARY_OUT) &&
-			(tmip->flags & TEL_CRSND)) {
+		    (tmip->flags & TEL_CRSND)) {
 			if (*(mp->b_rptr) != '\n')
-				*tmp1++ = NULL;
+				*tmp1++ = '\0';
 			tmip->flags &= ~TEL_CRSND;
 		}
 		tmp = mp->b_rptr;
@@ -1162,7 +1164,7 @@ snd_parse(queue_t *q, mblk_t *mp)
 			if (!(tmip->flags & TEL_BINARY_OUT)) {
 				*tmp1++ = *tmp;
 				if ((tmp == (mp->b_wptr - 1)) &&
-					(tmp[0] == '\r')) {
+				    (tmp[0] == '\r')) {
 						tmip->flags |= TEL_CRSND;
 						break;
 				}
@@ -1173,7 +1175,7 @@ snd_parse(queue_t *q, mblk_t *mp)
 					break;
 				}
 				if ((tmp[0] == '\r') && (tmp[1] != '\n')) {
-					*tmp1++ = NULL;
+					*tmp1++ = '\0';
 				}
 			} else
 				*tmp1++ = *tmp;

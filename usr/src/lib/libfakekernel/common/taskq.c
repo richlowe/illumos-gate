@@ -100,7 +100,7 @@ again:	if ((t = tq->tq_freelist) != NULL && tq->tq_nalloc >= tq->tq_minalloc) {
 		tq->tq_freelist = t->tqent_next;
 	} else {
 		if (tq->tq_nalloc >= tq->tq_maxalloc) {
-			if (!(tqflags & KM_SLEEP))
+			if (tqflags & KM_NOSLEEP)
 				return (NULL);
 
 			/*
@@ -162,7 +162,7 @@ taskq_dispatch(taskq_t *tq, task_func_t func, void *arg, uint_t tqflags)
 	ASSERT(tq->tq_flags & TASKQ_ACTIVE);
 	if ((t = task_alloc(tq, tqflags)) == NULL) {
 		mutex_exit(&tq->tq_lock);
-		return (0);
+		return (TASKQID_INVALID);
 	}
 	if (tqflags & TQ_FRONT) {
 		t->tqent_next = tq->tq_task.tqent_next;
@@ -232,6 +232,12 @@ taskq_wait(taskq_t *tq)
 	while (tq->tq_task.tqent_next != &tq->tq_task || tq->tq_active != 0)
 		cv_wait(&tq->tq_wait_cv, &tq->tq_lock);
 	mutex_exit(&tq->tq_lock);
+}
+
+void
+taskq_wait_id(taskq_t *tq, taskqid_t id __unused)
+{
+	taskq_wait(tq);
 }
 
 static void *

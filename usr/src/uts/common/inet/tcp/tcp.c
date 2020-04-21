@@ -21,9 +21,9 @@
 
 /*
  * Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2011, Joyent Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2011 Nexenta Systems, Inc. All rights reserved.
- * Copyright (c) 2013,2014 by Delphix. All rights reserved.
+ * Copyright (c) 2013, 2017 by Delphix. All rights reserved.
  * Copyright 2014, OmniTI Computer Consulting, Inc. All rights reserved.
  */
 /* Copyright (c) 1990 Mentat Inc. */
@@ -74,6 +74,7 @@
 #include <inet/ipsec_impl.h>
 
 #include <inet/common.h>
+#include <inet/cc.h>
 #include <inet/ip.h>
 #include <inet/ip_impl.h>
 #include <inet/ip6.h>
@@ -266,8 +267,6 @@ typedef struct tcpt_s {
 /*
  * Functions called directly via squeue having a prototype of edesc_t.
  */
-void		tcp_input_listener(void *arg, mblk_t *mp, void *arg2,
-    ip_recv_attr_t *ira);
 void		tcp_input_data(void *arg, mblk_t *mp, void *arg2,
     ip_recv_attr_t *ira);
 static void	tcp_linger_interrupted(void *arg, mblk_t *mp, void *arg2,
@@ -286,7 +285,7 @@ static void	tcp_iss_init(tcp_t *tcp);
 static void	tcp_reinit(tcp_t *tcp);
 static void	tcp_reinit_values(tcp_t *tcp);
 
-static void	tcp_wsrv(queue_t *q);
+static int	tcp_wsrv(queue_t *q);
 static void	tcp_update_lso(tcp_t *tcp, ip_xmit_attr_t *ixa);
 static void	tcp_update_zcopy(tcp_t *tcp);
 static void	tcp_notify(void *, ip_xmit_attr_t *, ixa_notify_type_t,
@@ -316,25 +315,25 @@ static struct module_info tcp_winfo =  {
  * We have separate open functions for the /dev/tcp and /dev/tcp6 devices.
  */
 struct qinit tcp_rinitv4 = {
-	NULL, (pfi_t)tcp_rsrv, tcp_openv4, tcp_tpi_close, NULL, &tcp_rinfo
+	NULL, tcp_rsrv, tcp_openv4, tcp_tpi_close, NULL, &tcp_rinfo
 };
 
 struct qinit tcp_rinitv6 = {
-	NULL, (pfi_t)tcp_rsrv, tcp_openv6, tcp_tpi_close, NULL, &tcp_rinfo
+	NULL, tcp_rsrv, tcp_openv6, tcp_tpi_close, NULL, &tcp_rinfo
 };
 
 struct qinit tcp_winit = {
-	(pfi_t)tcp_wput, (pfi_t)tcp_wsrv, NULL, NULL, NULL, &tcp_winfo
+	tcp_wput, tcp_wsrv, NULL, NULL, NULL, &tcp_winfo
 };
 
 /* Initial entry point for TCP in socket mode. */
 struct qinit tcp_sock_winit = {
-	(pfi_t)tcp_wput_sock, (pfi_t)tcp_wsrv, NULL, NULL, NULL, &tcp_winfo
+	tcp_wput_sock, tcp_wsrv, NULL, NULL, NULL, &tcp_winfo
 };
 
 /* TCP entry point during fallback */
 struct qinit tcp_fallback_sock_winit = {
-	(pfi_t)tcp_wput_fallback, NULL, NULL, NULL, NULL, &tcp_winfo
+	tcp_wput_fallback, NULL, NULL, NULL, NULL, &tcp_winfo
 };
 
 /*
@@ -343,11 +342,11 @@ struct qinit tcp_fallback_sock_winit = {
  * been created.
  */
 struct qinit tcp_acceptor_rinit = {
-	NULL, (pfi_t)tcp_rsrv, NULL, tcp_tpi_close_accept, NULL, &tcp_winfo
+	NULL, tcp_rsrv, NULL, tcp_tpi_close_accept, NULL, &tcp_winfo
 };
 
 struct qinit tcp_acceptor_winit = {
-	(pfi_t)tcp_tpi_accept, NULL, NULL, NULL, NULL, &tcp_winfo
+	tcp_tpi_accept, NULL, NULL, NULL, NULL, &tcp_winfo
 };
 
 /* For AF_INET aka /dev/tcp */
@@ -640,15 +639,9 @@ tcp_set_destination(tcp_t *tcp)
 	tcp->tcp_localnet = uinfo.iulp_localnet;
 
 	if (uinfo.iulp_rtt != 0) {
-		clock_t	rto;
-
-		tcp->tcp_rtt_sa = uinfo.iulp_rtt;
-		tcp->tcp_rtt_sd = uinfo.iulp_rtt_sd;
-		rto = (tcp->tcp_rtt_sa >> 3) + tcp->tcp_rtt_sd +
-		    tcps->tcps_rexmit_interval_extra +
-		    (tcp->tcp_rtt_sa >> 5);
-
-		TCP_SET_RTO(tcp, rto);
+		tcp->tcp_rtt_sa = MSEC2NSEC(uinfo.iulp_rtt);
+		tcp->tcp_rtt_sd = MSEC2NSEC(uinfo.iulp_rtt_sd);
+		tcp->tcp_rto = tcp_calculate_rto(tcp, tcps, 0);
 	}
 	if (uinfo.iulp_ssthresh != 0)
 		tcp->tcp_cwnd_ssthresh = uinfo.iulp_ssthresh;
@@ -1037,7 +1030,7 @@ void
 tcp_close_common(conn_t *connp, int flags)
 {
 	tcp_t		*tcp = connp->conn_tcp;
-	mblk_t 		*mp = &tcp->tcp_closemp;
+	mblk_t		*mp = &tcp->tcp_closemp;
 	boolean_t	conn_ioctl_cleanup_reqd = B_FALSE;
 	mblk_t		*bp;
 
@@ -1239,11 +1232,6 @@ tcp_closei_local(tcp_t *tcp)
 	if (!TCP_IS_SOCKET(tcp))
 		tcp_acceptor_hash_remove(tcp);
 
-	TCPS_UPDATE_MIB(tcps, tcpHCInSegs, tcp->tcp_ibsegs);
-	tcp->tcp_ibsegs = 0;
-	TCPS_UPDATE_MIB(tcps, tcpHCOutSegs, tcp->tcp_obsegs);
-	tcp->tcp_obsegs = 0;
-
 	/*
 	 * This can be called via tcp_time_wait_processing() if TCP gets a
 	 * SYN with sequence number outside the TIME-WAIT connection's
@@ -1422,6 +1410,10 @@ tcp_free(tcp_t *tcp)
 	 */
 	tcp_close_mpp(&tcp->tcp_conn.tcp_eager_conn_ind);
 
+	/* Allow the CC algorithm to clean up after itself. */
+	if (tcp->tcp_cc_algo != NULL && tcp->tcp_cc_algo->cb_destroy != NULL)
+		tcp->tcp_cc_algo->cb_destroy(&tcp->tcp_ccv);
+
 	/*
 	 * If this is a non-STREAM socket still holding on to an upper
 	 * handle, release it. As a result of fallback we might also see
@@ -1468,13 +1460,13 @@ tcp_free(tcp_t *tcp)
  * collector will free up the freelist is the connection ends up sitting
  * there for too long.
  */
-void *
+conn_t *
 tcp_get_conn(void *arg, tcp_stack_t *tcps)
 {
 	tcp_t			*tcp = NULL;
 	conn_t			*connp = NULL;
 	squeue_t		*sqp = (squeue_t *)arg;
-	tcp_squeue_priv_t 	*tcp_time_wait;
+	tcp_squeue_priv_t	*tcp_time_wait;
 	netstack_t		*ns;
 	mblk_t			*tcp_rsrv_mp = NULL;
 
@@ -1507,7 +1499,7 @@ tcp_get_conn(void *arg, tcp_stack_t *tcps)
 		connp->conn_recv = tcp_input_data;
 		ASSERT(connp->conn_recvicmp == tcp_icmp_input);
 		ASSERT(connp->conn_verifyicmp == tcp_verifyicmp);
-		return ((void *)connp);
+		return (connp);
 	}
 	mutex_exit(&tcp_time_wait->tcp_time_wait_lock);
 	/*
@@ -1542,7 +1534,7 @@ tcp_get_conn(void *arg, tcp_stack_t *tcps)
 	connp->conn_ixa->ixa_notify = tcp_notify;
 	connp->conn_ixa->ixa_notify_cookie = tcp;
 
-	return ((void *)connp);
+	return (connp);
 }
 
 /*
@@ -1554,8 +1546,8 @@ static int
 tcp_connect_ipv4(tcp_t *tcp, ipaddr_t *dstaddrp, in_port_t dstport,
     uint_t srcid)
 {
-	ipaddr_t 	dstaddr = *dstaddrp;
-	uint16_t 	lport;
+	ipaddr_t	dstaddr = *dstaddrp;
+	uint16_t	lport;
 	conn_t		*connp = tcp->tcp_connp;
 	tcp_stack_t	*tcps = tcp->tcp_tcps;
 	int		error;
@@ -1643,7 +1635,7 @@ static int
 tcp_connect_ipv6(tcp_t *tcp, in6_addr_t *dstaddrp, in_port_t dstport,
     uint32_t flowinfo, uint_t srcid, uint32_t scope_id)
 {
-	uint16_t 	lport;
+	uint16_t	lport;
 	conn_t		*connp = tcp->tcp_connp;
 	tcp_stack_t	*tcps = tcp->tcp_tcps;
 	int		error;
@@ -1912,15 +1904,6 @@ tcp_reinit(tcp_t *tcp)
 	/* Cancel outstanding timers */
 	tcp_timers_stop(tcp);
 
-	/*
-	 * Reset everything in the state vector, after updating global
-	 * MIB data from instance counters.
-	 */
-	TCPS_UPDATE_MIB(tcps, tcpHCInSegs, tcp->tcp_ibsegs);
-	tcp->tcp_ibsegs = 0;
-	TCPS_UPDATE_MIB(tcps, tcpHCOutSegs, tcp->tcp_obsegs);
-	tcp->tcp_obsegs = 0;
-
 	tcp_close_mpp(&tcp->tcp_xmit_head);
 	if (tcp->tcp_snd_zcopy_aware)
 		tcp_zcopy_notify(tcp);
@@ -2054,8 +2037,7 @@ tcp_reinit(tcp_t *tcp)
  * structure!
  */
 static void
-tcp_reinit_values(tcp)
-	tcp_t *tcp;
+tcp_reinit_values(tcp_t *tcp)
 {
 	tcp_stack_t	*tcps = tcp->tcp_tcps;
 	conn_t		*connp = tcp->tcp_connp;
@@ -2092,9 +2074,6 @@ tcp_reinit_values(tcp)
 	tcp->tcp_suna = 0;			/* Displayed in mib */
 	tcp->tcp_swnd = 0;
 	DONTCARE(tcp->tcp_cwnd);	/* Init in tcp_process_options */
-
-	ASSERT(tcp->tcp_ibsegs == 0);
-	ASSERT(tcp->tcp_obsegs == 0);
 
 	if (connp->conn_ht_iphc != NULL) {
 		kmem_free(connp->conn_ht_iphc, connp->conn_ht_iphc_allocated);
@@ -2187,6 +2166,8 @@ tcp_reinit_values(tcp)
 	DONTCARE(tcp->tcp_rtt_sa);		/* Init in tcp_init_values */
 	DONTCARE(tcp->tcp_rtt_sd);		/* Init in tcp_init_values */
 	tcp->tcp_rtt_update = 0;
+	tcp->tcp_rtt_sum = 0;
+	tcp->tcp_rtt_cnt = 0;
 
 	DONTCARE(tcp->tcp_swl1); /* Init in case TCPS_LISTEN/TCPS_SYN_SENT */
 	DONTCARE(tcp->tcp_swl2); /* Init in case TCPS_LISTEN/TCPS_SYN_SENT */
@@ -2322,6 +2303,11 @@ tcp_reinit_values(tcp)
 	ASSERT(tcp->tcp_listen_cnt == NULL);
 	ASSERT(tcp->tcp_reass_tid == 0);
 
+	/* Allow the CC algorithm to clean up after itself. */
+	if (tcp->tcp_cc_algo->cb_destroy != NULL)
+		tcp->tcp_cc_algo->cb_destroy(&tcp->tcp_ccv);
+	tcp->tcp_cc_algo = NULL;
+
 #undef	DONTCARE
 #undef	PRESERVE
 }
@@ -2335,7 +2321,6 @@ tcp_init_values(tcp_t *tcp, tcp_t *parent)
 {
 	tcp_stack_t	*tcps = tcp->tcp_tcps;
 	conn_t		*connp = tcp->tcp_connp;
-	clock_t		rto;
 
 	ASSERT((connp->conn_family == AF_INET &&
 	    connp->conn_ipversion == IPV4_VERSION) ||
@@ -2343,7 +2328,12 @@ tcp_init_values(tcp_t *tcp, tcp_t *parent)
 	    (connp->conn_ipversion == IPV4_VERSION ||
 	    connp->conn_ipversion == IPV6_VERSION)));
 
+	tcp->tcp_ccv.type = IPPROTO_TCP;
+	tcp->tcp_ccv.ccvc.tcp = tcp;
+
 	if (parent == NULL) {
+		tcp->tcp_cc_algo = tcps->tcps_default_cc_algo;
+
 		tcp->tcp_naglim = tcps->tcps_naglim_def;
 
 		tcp->tcp_rto_initial = tcps->tcps_rexmit_interval_initial;
@@ -2371,6 +2361,8 @@ tcp_init_values(tcp_t *tcp, tcp_t *parent)
 		 */
 	} else {
 		/* Inherit various TCP parameters from the parent. */
+		tcp->tcp_cc_algo = parent->tcp_cc_algo;
+
 		tcp->tcp_naglim = parent->tcp_naglim;
 
 		tcp->tcp_rto_initial = parent->tcp_rto_initial;
@@ -2397,6 +2389,9 @@ tcp_init_values(tcp_t *tcp, tcp_t *parent)
 		tcp->tcp_init_cwnd = parent->tcp_init_cwnd;
 	}
 
+	if (tcp->tcp_cc_algo->cb_init != NULL)
+		VERIFY(tcp->tcp_cc_algo->cb_init(&tcp->tcp_ccv) == 0);
+
 	/*
 	 * Initialize tcp_rtt_sa and tcp_rtt_sd so that the calculated RTO
 	 * will be close to tcp_rexmit_interval_initial.  By doing this, we
@@ -2404,12 +2399,10 @@ tcp_init_values(tcp_t *tcp, tcp_t *parent)
 	 * during first few transmissions of a connection as seen in slow
 	 * links.
 	 */
-	tcp->tcp_rtt_sa = tcp->tcp_rto_initial << 2;
-	tcp->tcp_rtt_sd = tcp->tcp_rto_initial >> 1;
-	rto = (tcp->tcp_rtt_sa >> 3) + tcp->tcp_rtt_sd +
-	    tcps->tcps_rexmit_interval_extra + (tcp->tcp_rtt_sa >> 5) +
-	    tcps->tcps_conn_grace_period;
-	TCP_SET_RTO(tcp, rto);
+	tcp->tcp_rtt_sa = MSEC2NSEC(tcp->tcp_rto_initial) << 2;
+	tcp->tcp_rtt_sd = MSEC2NSEC(tcp->tcp_rto_initial) >> 1;
+	tcp->tcp_rto = tcp_calculate_rto(tcp, tcps,
+	    tcps->tcps_conn_grace_period);
 
 	tcp->tcp_timer_backoff = 0;
 	tcp->tcp_ms_we_have_waited = 0;
@@ -2643,7 +2636,7 @@ tcp_create_common(cred_t *credp, boolean_t isv6, boolean_t issocket,
 	}
 
 	sqp = IP_SQUEUE_GET((uint_t)gethrtime());
-	connp = (conn_t *)tcp_get_conn(sqp, tcps);
+	connp = tcp_get_conn(sqp, tcps);
 	/*
 	 * Both tcp_get_conn and netstack_find_by_cred incremented refcnt,
 	 * so we drop it by one.
@@ -3322,9 +3315,11 @@ tcp_update_lso(tcp_t *tcp, ip_xmit_attr_t *ixa)
 	 */
 	if (ixa->ixa_flags & IXAF_LSO_CAPAB) {
 		ill_lso_capab_t	*lsoc = &ixa->ixa_lso_capab;
+		uint_t lso_max = (ixa->ixa_flags & IXAF_IS_IPV4) ?
+		    lsoc->ill_lso_max_tcpv4 : lsoc->ill_lso_max_tcpv6;
 
-		ASSERT(lsoc->ill_lso_max > 0);
-		tcp->tcp_lso_max = MIN(TCP_MAX_LSO_LENGTH, lsoc->ill_lso_max);
+		ASSERT3U(lso_max, >, 0);
+		tcp->tcp_lso_max = MIN(TCP_MAX_LSO_LENGTH, lso_max);
 
 		DTRACE_PROBE3(tcp_update_lso, boolean_t, tcp->tcp_lso,
 		    boolean_t, B_TRUE, uint32_t, tcp->tcp_lso_max);
@@ -3415,12 +3410,13 @@ tcp_notify(void *arg, ip_xmit_attr_t *ixa, ixa_notify_type_t ntype,
  * The TCP write service routine should never be called...
  */
 /* ARGSUSED */
-static void
+static int
 tcp_wsrv(queue_t *q)
 {
 	tcp_stack_t	*tcps = Q_TO_TCP(q)->tcp_tcps;
 
 	TCP_STAT(tcps, tcp_wsrv_called);
+	return (0);
 }
 
 /*
@@ -3832,6 +3828,9 @@ tcp_stack_init(netstackid_t stackid, netstack_t *ns)
 	mutex_init(&tcps->tcps_listener_conf_lock, NULL, MUTEX_DEFAULT, NULL);
 	list_create(&tcps->tcps_listener_conf, sizeof (tcp_listener_t),
 	    offsetof(tcp_listener_t, tl_link));
+
+	tcps->tcps_default_cc_algo = cc_load_algo(CC_DEFAULT_ALGO_NAME);
+	VERIFY3P(tcps->tcps_default_cc_algo, !=, NULL);
 
 	return (tcps);
 }
@@ -4337,11 +4336,11 @@ tcp_do_listen(conn_t *connp, struct sockaddr *sa, socklen_t len,
 		}
 		return (-TOUTSTATE);
 	} else {
-		if (sa == NULL) {
-			sin6_t	addr;
-			sin_t *sin;
-			sin6_t *sin6;
+		sin6_t	addr;
+		sin_t *sin;
+		sin6_t *sin6;
 
+		if (sa == NULL) {
 			ASSERT(IPCL_IS_NONSTR(connp));
 			/* Do an implicit bind: Request for a generic port. */
 			if (connp->conn_family == AF_INET) {

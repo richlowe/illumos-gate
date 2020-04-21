@@ -22,7 +22,8 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright 2016 Nexenta Systems, Inc.
+ * Copyright 2017 Nexenta Systems, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/types.h>
@@ -64,7 +65,13 @@ static char class_file[] = CLASSFILE;
 static char dafile[] = DAFILE;
 static char dacffile[] = DACFFILE;
 
+char *self_assembly = "/etc/system.d/.self-assembly";
 char *systemfile = "/etc/system";	/* name of ascii system file */
+
+#define	BUILDVERSION_LEN (4096)
+
+char *versionfile = "/etc/versions/build";
+char buildversion[BUILDVERSION_LEN];
 
 static struct sysparam *sysparam_hd;	/* head of parameters list */
 static struct sysparam *sysparam_tl;	/* tail of parameters list */
@@ -751,13 +758,66 @@ bad:
 	return (NULL);
 }
 
-void
-mod_read_system_file(int ask)
+static void
+read_system_file(char *name)
 {
 	register struct sysparam *sp;
 	register struct _buf *file;
 	register token_t token, last_tok;
 	char tokval[MAXLINESIZE];
+
+	if ((file = kobj_open_file(name)) ==
+	    (struct _buf *)-1) {
+		if (strcmp(name, systemfile) == 0)
+			cmn_err(CE_WARN, "cannot open system file: %s",
+			    name);
+	} else {
+		if (sysparam_tl == NULL)
+			sysparam_tl = (struct sysparam *)&sysparam_hd;
+
+		last_tok = NEWLINE;
+		while ((token = kobj_lex(file, tokval,
+		    sizeof (tokval))) != EOF) {
+			switch (token) {
+			case STAR:
+			case POUND:
+				/*
+				 * Skip comments.
+				 */
+				kobj_find_eol(file);
+				break;
+			case NEWLINE:
+				kobj_newline(file);
+				last_tok = NEWLINE;
+				break;
+			case NAME:
+				if (last_tok != NEWLINE) {
+					kobj_file_err(CE_WARN, file,
+					    extra_err, tokval);
+					kobj_find_eol(file);
+				} else if ((sp = do_sysfile_cmd(file,
+				    tokval)) != NULL) {
+					sp->sys_next = NULL;
+					sysparam_tl->sys_next = sp;
+					sysparam_tl = sp;
+				}
+				last_tok = NAME;
+				break;
+			default:
+				kobj_file_err(CE_WARN,
+				    file, tok_err, tokval);
+				kobj_find_eol(file);
+				break;
+			}
+		}
+		kobj_close_file(file);
+	}
+}
+
+void
+mod_read_system_file(int ask)
+{
+	struct _buf *file;
 
 	mod_sysfile_arena = vmem_create("mod_sysfile", NULL, 0, 8,
 	    segkmem_alloc, segkmem_free, heap_arena, 0, VM_SLEEP);
@@ -765,53 +825,15 @@ mod_read_system_file(int ask)
 	if (ask)
 		mod_askparams();
 
-	if (systemfile != NULL) {
+	/*
+	 * Read the user self-assembly file first
+	 * to preserve existing system settings.
+	 */
+	if (self_assembly != NULL)
+		read_system_file(self_assembly);
 
-		if ((file = kobj_open_file(systemfile)) ==
-		    (struct _buf *)-1) {
-			cmn_err(CE_WARN, "cannot open system file: %s",
-			    systemfile);
-		} else {
-			sysparam_tl = (struct sysparam *)&sysparam_hd;
-
-			last_tok = NEWLINE;
-			while ((token = kobj_lex(file, tokval,
-			    sizeof (tokval))) != EOF) {
-				switch (token) {
-				case STAR:
-				case POUND:
-					/*
-					 * Skip comments.
-					 */
-					kobj_find_eol(file);
-					break;
-				case NEWLINE:
-					kobj_newline(file);
-					last_tok = NEWLINE;
-					break;
-				case NAME:
-					if (last_tok != NEWLINE) {
-						kobj_file_err(CE_WARN, file,
-						    extra_err, tokval);
-						kobj_find_eol(file);
-					} else if ((sp = do_sysfile_cmd(file,
-					    tokval)) != NULL) {
-						sp->sys_next = NULL;
-						sysparam_tl->sys_next = sp;
-						sysparam_tl = sp;
-					}
-					last_tok = NAME;
-					break;
-				default:
-					kobj_file_err(CE_WARN,
-					    file, tok_err, tokval);
-					kobj_find_eol(file);
-					break;
-				}
-			}
-			kobj_close_file(file);
-		}
-	}
+	if (systemfile != NULL)
+		read_system_file(systemfile);
 
 	/*
 	 * Sanity check of /etc/system.
@@ -824,6 +846,18 @@ mod_read_system_file(int ask)
 
 	if (ask == 0)
 		setparams();
+
+	/*
+	 * A convenient place to read in our build version string.
+	 */
+
+	if ((file = kobj_open_file(versionfile)) != (struct _buf *)-1) {
+		if (kobj_read_file(file, buildversion,
+		    sizeof (buildversion) - 1, 0) == -1) {
+			cmn_err(CE_WARN, "failed to read %s\n", versionfile);
+		}
+		kobj_close_file(file);
+	}
 }
 
 /*
@@ -1187,7 +1221,7 @@ sys_set_var(int fcn, struct sysparam *sysp, void *p)
 	} else
 		return;
 
-	if (symaddr != NULL) {
+	if (symaddr != (uintptr_t)NULL) {
 		switch (size) {
 		case 1:
 			set_int8_var(symaddr, sysp);
@@ -2384,16 +2418,16 @@ read_binding_file(char *bindfile, struct bind **hashtab,
 
 /*
  * read_dacf_binding_file()
- * 	Read the /etc/dacf.conf file and build the dacf_rule_t database from it.
+ *	Read the /etc/dacf.conf file and build the dacf_rule_t database from it.
  *
  * The syntax of a line in the dacf.conf file is:
- *   dev-spec 	[module:]op-set	operation options 	[config-args];
+ *   dev-spec	[module:]op-set	operation options	[config-args];
  *
  * Where:
- *   	1. dev-spec is of the format: name="data"
- *   	2. operation is the operation that this rule matches. (i.e. pre-detach)
- *   	3. options is a comma delimited list of options (i.e. debug,foobar)
- *   	4. config-data is a whitespace delimited list of the format: name="data"
+ *	1. dev-spec is of the format: name="data"
+ *	2. operation is the operation that this rule matches. (i.e. pre-detach)
+ *	3. options is a comma delimited list of options (i.e. debug,foobar)
+ *	4. config-data is a whitespace delimited list of the format: name="data"
  */
 int
 read_dacf_binding_file(char *filename)
@@ -3108,12 +3142,14 @@ process_rtc_config_file(void)
 static void
 append(struct hwc_spec *spec, struct par_list *par)
 {
-	struct hwc_spec *hwc, *last;
+	struct hwc_spec *hwc, *last = NULL;
 
 	ASSERT(par->par_specs);
 	for (hwc = par->par_specs; hwc; hwc = hwc->hwc_next)
 		last = hwc;
-	last->hwc_next = spec;
+
+	if (last != NULL)
+		last->hwc_next = spec;
 }
 
 /*

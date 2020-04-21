@@ -14,6 +14,7 @@
 # Copyright 2011 EveryCity Ltd. All rights reserved.
 # Copyright 2013 DEY Storage Systems, Inc.
 # Copyright 2016 Joyent, Inc.
+# Copyright 2019 Garrett D'Amore <garrett@damore.org>
 #
 
 include		$(SRC)/data/Makefile.data
@@ -128,6 +129,14 @@ locale/%.UTF-8/stamp: data/%.UTF-8.src data/UTF-8.cm data/common.UTF-8.src
 		$(LCDEF) -U -w data/widths.txt -f data/UTF-8.cm $(@D)
 		$(TOUCH) $@
 
+# Special handling for zz_AA test locale
+locale/zz_AA.UTF-8/stamp: data/en_US.UTF-8.src data/UTF-8.cm data/common.UTF-8.src
+		$(SED) \
+		-e '/^LC_CTYPE/,/^END LC_CTYPE/d' \
+		-e '$$r data/common.UTF-8.src' data/en_US.UTF-8.src | \
+		$(LCDEF) -U -w data/widths.txt -f data/UTF-8.cm $(@D)
+		$(TOUCH) $@
+
 locale/%/$(DCOLL): locale/%/stamp
 locale/%/$(DCTYPE): locale/%/stamp
 locale/%/$(DMSGS): locale/%/stamp
@@ -137,8 +146,8 @@ locale/%/$(DTIME): locale/%/stamp
 
 $(ROOTDATA):	$(ROOTLOCDIRS) $(ROOTCATDIRS) $(DATA)
 		$(RM) $@
-		$(CP) $(@:$(ROOTLIB)/%=%) $@
-		$(CHMOD) 0444 $@
+		-$(CP) $(@:$(ROOTLIB)/%=%) $@
+		$(CHMOD) -f 0444 $@
 
 %.mo:		%.po
 		$(MSGFMT) -o $@ $<

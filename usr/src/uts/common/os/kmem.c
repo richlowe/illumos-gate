@@ -1011,12 +1011,21 @@ size_t kmem_transaction_log_size; /* transaction log size [2% of memory] */
 size_t kmem_content_log_size;	/* content log size [2% of memory] */
 size_t kmem_failure_log_size;	/* failure log [4 pages per CPU] */
 size_t kmem_slab_log_size;	/* slab create log [4 pages per CPU] */
+size_t kmem_zerosized_log_size;	/* zero-sized log [4 pages per CPU] */
 size_t kmem_content_maxsave = 256; /* KMF_CONTENTS max bytes to log */
 size_t kmem_lite_minsize = 0;	/* minimum buffer size for KMF_LITE */
 size_t kmem_lite_maxalign = 1024; /* maximum buffer alignment for KMF_LITE */
 int kmem_lite_pcs = 4;		/* number of PCs to store in KMF_LITE mode */
 size_t kmem_maxverify;		/* maximum bytes to inspect in debug routines */
 size_t kmem_minfirewall;	/* hardware-enforced redzone threshold */
+
+#ifdef DEBUG
+int kmem_warn_zerosized = 1;	/* whether to warn on zero-sized KM_SLEEP */
+#else
+int kmem_warn_zerosized = 0;	/* whether to warn on zero-sized KM_SLEEP */
+#endif
+
+int kmem_panic_zerosized = 0;	/* whether to panic on zero-sized KM_SLEEP */
 
 #ifdef _LP64
 size_t	kmem_max_cached = KMEM_BIG_MAXBUF;	/* maximum kmem_alloc cache */
@@ -1050,6 +1059,8 @@ static vmem_t		*kmem_va_arena;
 static vmem_t		*kmem_default_arena;
 static vmem_t		*kmem_firewall_va_arena;
 static vmem_t		*kmem_firewall_arena;
+
+static int		kmem_zerosized;		/* # of zero-sized allocs */
 
 /*
  * kmem slab consolidator thresholds (tunables)
@@ -1098,6 +1109,7 @@ kmem_log_header_t	*kmem_transaction_log;
 kmem_log_header_t	*kmem_content_log;
 kmem_log_header_t	*kmem_failure_log;
 kmem_log_header_t	*kmem_slab_log;
+kmem_log_header_t	*kmem_zerosized_log;
 
 static int		kmem_lite_count; /* # of PCs in kmem_buftag_lite_t */
 
@@ -1425,10 +1437,12 @@ static void *
 kmem_log_enter(kmem_log_header_t *lhp, void *data, size_t size)
 {
 	void *logspace;
-	kmem_cpu_log_header_t *clhp = &lhp->lh_cpu[CPU->cpu_seqid];
+	kmem_cpu_log_header_t *clhp;
 
 	if (lhp == NULL || kmem_logging == 0 || panicstr)
 		return (NULL);
+
+	clhp = &lhp->lh_cpu[CPU->cpu_seqid];
 
 	mutex_enter(&clhp->clh_lock);
 	clhp->clh_hits++;
@@ -2851,8 +2865,33 @@ kmem_alloc(size_t size, int kmflag)
 		/* fall through to kmem_cache_alloc() */
 
 	} else {
-		if (size == 0)
+		if (size == 0) {
+			if (kmflag != KM_SLEEP && !(kmflag & KM_PANIC))
+				return (NULL);
+
+			/*
+			 * If this is a sleeping allocation or one that has
+			 * been specified to panic on allocation failure, we
+			 * consider it to be deprecated behavior to allocate
+			 * 0 bytes.  If we have been configured to panic under
+			 * this condition, we panic; if to warn, we warn -- and
+			 * regardless, we log to the kmem_zerosized_log that
+			 * that this condition has occurred (which gives us
+			 * enough information to be able to debug it).
+			 */
+			if (kmem_panic && kmem_panic_zerosized)
+				panic("attempted to kmem_alloc() size of 0");
+
+			if (kmem_warn_zerosized) {
+				cmn_err(CE_WARN, "kmem_alloc(): sleeping "
+				    "allocation with size of 0; "
+				    "see kmem_zerosized_log for details");
+			}
+
+			kmem_log_event(kmem_zerosized_log, NULL, NULL, NULL);
+
 			return (NULL);
+		}
 
 		buf = vmem_alloc(kmem_oversize_arena, size,
 		    kmflag & KM_VMFLAGS);
@@ -3082,7 +3121,8 @@ kmem_reap_start(void *flag)
 	 * we won't reap again until the current reap completes *and*
 	 * at least kmem_reap_interval ticks have elapsed.
 	 */
-	if (!taskq_dispatch(kmem_taskq, kmem_reap_done, flag, TQ_NOSLEEP))
+	if (taskq_dispatch(kmem_taskq, kmem_reap_done, flag, TQ_NOSLEEP) ==
+	    TASKQID_INVALID)
 		kmem_reap_done(flag);
 }
 
@@ -3101,7 +3141,8 @@ kmem_reap_common(void *flag_arg)
 	 * start the reap going with a TQ_NOALLOC dispatch.  If the dispatch
 	 * fails, we reset the flag, and the next reap will try again.
 	 */
-	if (!taskq_dispatch(kmem_taskq, kmem_reap_start, flag, TQ_NOALLOC))
+	if (taskq_dispatch(kmem_taskq, kmem_reap_start, flag, TQ_NOALLOC) ==
+	    TASKQID_INVALID)
 		*flag = 0;
 }
 
@@ -3376,7 +3417,8 @@ kmem_update(void *dummy)
 	 * kmem_update() becomes self-throttling: it won't schedule
 	 * new tasks until all previous tasks have completed.
 	 */
-	if (!taskq_dispatch(kmem_taskq, kmem_update_timeout, dummy, TQ_NOSLEEP))
+	if (taskq_dispatch(kmem_taskq, kmem_update_timeout, dummy, TQ_NOSLEEP)
+	    == TASKQID_INVALID)
 		kmem_update_timeout(NULL);
 }
 
@@ -3831,6 +3873,7 @@ kmem_cache_create(
 		size_t chunks, bestfit, waste, slabsize;
 		size_t minwaste = LONG_MAX;
 
+		bestfit = 0;
 		for (chunks = 1; chunks <= KMEM_VOID_FRACTION; chunks++) {
 			slabsize = P2ROUNDUP(chunksize * chunks,
 			    vmp->vm_quantum);
@@ -4392,8 +4435,8 @@ kmem_init(void)
 	}
 
 	kmem_failure_log = kmem_log_init(kmem_failure_log_size);
-
 	kmem_slab_log = kmem_log_init(kmem_slab_log_size);
+	kmem_zerosized_log = kmem_log_init(kmem_zerosized_log_size);
 
 	/*
 	 * Initialize STREAMS message caches so allocb() is available.
@@ -4855,8 +4898,8 @@ kmem_move_begin(kmem_cache_t *cp, kmem_slab_t *sp, void *buf, int flags)
 
 	mutex_exit(&cp->cache_lock);
 
-	if (!taskq_dispatch(kmem_move_taskq, (task_func_t *)kmem_move_buffer,
-	    callback, TQ_NOSLEEP)) {
+	if (taskq_dispatch(kmem_move_taskq, (task_func_t *)kmem_move_buffer,
+	    callback, TQ_NOSLEEP) == TASKQID_INVALID) {
 		mutex_enter(&cp->cache_lock);
 		avl_remove(&cp->cache_defrag->kmd_moves_pending, callback);
 		mutex_exit(&cp->cache_lock);
@@ -5203,9 +5246,9 @@ kmem_cache_move_notify(kmem_cache_t *cp, void *buf)
 	if (args != NULL) {
 		args->kmna_cache = cp;
 		args->kmna_buf = buf;
-		if (!taskq_dispatch(kmem_taskq,
+		if (taskq_dispatch(kmem_taskq,
 		    (task_func_t *)kmem_cache_move_notify_task, args,
-		    TQ_NOSLEEP))
+		    TQ_NOSLEEP) == TASKQID_INVALID)
 			kmem_free(args, sizeof (kmem_move_notify_args_t));
 	}
 }

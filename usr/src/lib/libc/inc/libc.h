@@ -50,6 +50,7 @@
 #include <wchar.h>
 #include <wctype.h>
 #include <libnvpair.h>
+#include <setjmp.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -61,6 +62,7 @@ extern long _sysconfig(int);
 extern int kill(pid_t pid, int sig);
 
 extern int primary_link_map;
+extern void _thr_exit(void *) __NORETURN;
 extern int thr_main(void);
 extern int thr_kill(thread_t tid, int sig);
 extern thread_t thr_self(void);
@@ -195,6 +197,11 @@ extern char *getusershell(void);
 extern int __sigaction(int, const struct sigaction *, struct sigaction *);
 
 /*
+ * defined in siglongjmp.c
+ */
+extern void _siglongjmp(sigjmp_buf, int) __NORETURN;
+
+/*
  * defined in _getsp.s
  */
 extern greg_t _getsp(void);
@@ -325,6 +332,14 @@ extern void __throw_constraint_handler_s(const char *_RESTRICT_KYWD, int);
  * defined in assfail.c.
  */
 extern void common_panic(const char *, const char *);
+
+/*
+ * defined in mbrtowc.c.
+ */
+extern size_t mbrtowc_nz_l(wchar_t *_RESTRICT_KYWD, const char *_RESTRICT_KYWD,
+    size_t, mbstate_t *_RESTRICT_KYWD, locale_t);
+extern size_t mbrtowc_nz(wchar_t *_RESTRICT_KYWD, const char *_RESTRICT_KYWD,
+    size_t, mbstate_t *_RESTRICT_KYWD);
 
 #ifdef	__cplusplus
 }

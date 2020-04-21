@@ -24,6 +24,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	This makefile drives the production of the vuidm3p streams kernel
@@ -62,7 +63,10 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 ALL_DEFS	+= -DVUIDM3P
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMOFF += deref_check
 
 #
 #	Default build targets.

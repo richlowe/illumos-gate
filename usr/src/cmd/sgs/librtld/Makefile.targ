@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2016 RackTop Systems.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 pics/%.o:	../common/%.c
@@ -35,20 +36,8 @@ $(LIBLINKS):
 delete:
 		$(RM) $(DYNLIB)
 
-# Special target for native builds (ie. when we need to build a version of ld
-# to build a version of ld :-).
-
-native:		$(SGSLIBDIR)/$(LIBLINKS)
-
 $(PICS):	pics
 
-$(SGSLIBDIR)/$(DYNLIB): $(PICS) $(SGSLIBDIR)
-		$(BUILD.SO)
-		$(POST_PROCESS_SO)
-
-$(SGSLIBDIR)/$(LIBLINKS): $(SGSLIBDIR)/$(DYNLIB)
-		-@$(RM) $(SGSLIBDIR)/$(LIBLINKS)
-		$(SYMLINK) $(DYNLIB) $(SGSLIBDIR)/$(LIBLINKS)
 
 include		$(SRC)/lib/Makefile.targ
 include		$(SRC)/cmd/sgs/Makefile.targ
@@ -58,8 +47,8 @@ include		$(SRC)/cmd/sgs/Makefile.targ
 
 catalog:	$(BLTMESG)
 
-chkmsg:		$(LINTSRCS)
-		sh $(CHKMSG) $(CHKMSGFLAGS) $(LINTSRCS)
+chkmsg:		$(MSGSRCS)
+		sh $(CHKMSG) $(CHKMSGFLAGS) $(MSGSRCS)
 
 $(BLTDEFS) + \
 $(BLTDATA) + \

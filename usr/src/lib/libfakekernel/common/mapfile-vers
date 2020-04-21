@@ -10,9 +10,9 @@
 #
 
 #
-# Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2017 RackTop Systems.
-# Copyright 2018, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -42,7 +42,9 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	aok		{ FLAGS = NODIRECT };
 	boot_time;
 	cmn_err;
+	copyin;
 	copyinstr;
+	copyout;
 	copystr;
 
 	cyclic_add;
@@ -50,11 +52,14 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	cyclic_reprogram;
 
 	crfree;
+	crgetsid;
 	crgetuid;
 	crgetruid;
 	crgetgid;
 	crgetngroups;
 	crgetgroups;
+	crgetzone;
+	crgetzoneid;
 	crhold;
 
 	cv_broadcast;
@@ -65,16 +70,21 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	cv_signal;
 	cv_timedwait;
 	cv_timedwait_sig;
+	cv_timedwait_sig_hrtime;
 	cv_timedwait_hires;
 	cv_wait;
 	cv_wait_sig;
 
+	ddi_copyin;
+	ddi_copyout;
+	ddi_get_cred;
 	ddi_get_lbolt64;
 	ddi_get_lbolt;
 	ddi_get_pid;
 	ddi_strtoul;
 	ddi_strtoull;
 
+	debug_enter;
 	delay;
 
 	fm_panic;
@@ -87,9 +97,10 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	gethrestime_sec;
 	gethrtime_unscaled;
 
-	hz;
-
+	highbit;
 	highbit64;
+	hrt2ts;
+	hz;
 
 	issig;
 
@@ -112,9 +123,9 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	kmem_zalloc;
 
 	kmutex_destroy;
-	kmutex_init;
 	kmutex_enter;
 	kmutex_exit;
+	kmutex_init;
 
 	ksema_destroy;
 	ksema_init;
@@ -196,7 +207,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	strfree;
 
 	system_taskq;
-	system_taskq_fini;	
+	system_taskq_fini;
 	system_taskq_init;
 	taskq_create;
 	taskq_create_proc;
@@ -207,6 +218,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	taskq_empty;
 	taskq_member;
 	taskq_wait;
+	taskq_wait_id;
 
 	thread_create;
 	thread_join;
@@ -218,15 +230,20 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	tsd_destroy;
 
 	tick_per_msec;
+	timeout;
+	ts2hrt;
 	tsignal;
 	uiomove;
 	uioskip;
+	untimeout;
 	usec_per_tick;
 	vcmn_err;
 	vmem_qcache_reap;
 	vpanic;
+	vzprintf;
 	zone0;
 	zone_kcred;
+	zprintf;
 	zthread_create;
 	zthread_exit;
 

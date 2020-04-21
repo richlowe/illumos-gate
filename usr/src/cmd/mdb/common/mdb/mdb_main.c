@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/types.h>
@@ -490,8 +490,10 @@ main(int argc, char *argv[], char *envp[])
 	(void) mdb_signal_sethandler(SIGBUS, flt_handler, NULL);
 	(void) mdb_signal_sethandler(SIGSEGV, flt_handler, NULL);
 
-	(void) mdb_signal_sethandler(SIGHUP, (mdb_signal_f *)terminate, NULL);
-	(void) mdb_signal_sethandler(SIGTERM, (mdb_signal_f *)terminate, NULL);
+	(void) mdb_signal_sethandler(SIGHUP,
+	    (mdb_signal_f *)(uintptr_t)terminate, NULL);
+	(void) mdb_signal_sethandler(SIGTERM,
+	    (mdb_signal_f *)(uintptr_t)terminate, NULL);
 
 	for (mdb.m_rdvers = RD_VERSION; mdb.m_rdvers > 0; mdb.m_rdvers--) {
 		if (rd_init(mdb.m_rdvers) == RD_OK)
@@ -1098,7 +1100,6 @@ tcreate:
 	terminate((status == MDB_ERR_QUIT || status == 0) ?
 	    (eflag != NULL && mdb.m_lastret != 0 ? 1 : 0) : 1);
 	/*NOTREACHED*/
-	return (0);
 
 reexec:
 	if ((p = strrchr(execname, '/')) == NULL)

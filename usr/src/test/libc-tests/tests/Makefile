@@ -12,7 +12,7 @@
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2015 Garrett D'Amore <garrett@damore.org>
-# Copyright 2016 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 SUBDIRS = \
@@ -24,6 +24,7 @@ SUBDIRS = \
 	random \
 	regex \
 	select \
+	stdio \
 	strerror \
 	symbols \
 	threads \
@@ -39,6 +40,7 @@ PROGS = \
 	env-7076 \
 	fnmatch \
 	memset_s \
+	posix_memalign \
 	printf-9511 \
 	psignal-5097 \
 	quick_exit_order \
@@ -63,6 +65,8 @@ PROGS64 = \
 
 aligned_alloc.32 :=	LDLIBS += -lproc
 aligned_alloc.64 :=	LDLIBS64 += -lproc
+posix_memalign.32 :=	LDLIBS += -lproc
+posix_memalign.64 :=	LDLIBS64 += -lproc
 
 memset_s.32 :=	CPPFLAGS += -D__STDC_WANT_LIB_EXT1__=1
 memset_s.64 :=	CPPFLAGS += -D__STDC_WANT_LIB_EXT1__=1

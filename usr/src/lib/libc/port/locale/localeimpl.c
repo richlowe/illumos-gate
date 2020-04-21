@@ -128,6 +128,20 @@ __global_locale(void)
 }
 
 /*
+ * Locale data for hybrid C.UTF-8 locale having all the characteristics of
+ * default C/POSIX locale, except for LC_CTYPE data which is retrieved from
+ * cache/file as for other UTF-8 locales.
+ */
+static struct locdata cutf_locdata[LC_ALL] = {
+	{ "C.UTF-8", NULL }, /* unused */
+	{ "C.UTF-8", &lc_numeric_posix },
+	{ "C.UTF-8", &lc_time_posix },
+	{ "C.UTF-8", &lc_collate_posix },
+	{ "C.UTF-8", &lc_monetary_posix },
+	{ "C.UTF-8", &lc_messages_posix },
+};
+
+/*
  * Category names for getenv()  Note that this was modified
  * for Solaris.  See <iso/locale_iso.h>.
  */
@@ -274,6 +288,19 @@ locdata_get_cache(int category, const char *locname)
 	return (loc);
 }
 
+/* Charmap aliases, mostly found in Linux */
+static const struct {
+	const char *alias;
+	const char *name;
+} cmalias[] = {
+	{ "utf8", "UTF-8" },
+	{ "iso88591", "ISO8859-1" },
+	{ "iso885915", "ISO8859-15" },
+	{ "gb18030", "GB18030" },
+	{ "koi8r", "KOI8-R" },
+	{ NULL, NULL }
+};
+
 /*
  * Routine to get the locdata for a given category and locale.
  * This includes retrieving it from cache, retrieving it from
@@ -283,9 +310,11 @@ static struct locdata *
 locdata_get(int category, const char *locname)
 {
 	char scratch[ENCODING_LEN + 1];
-	char *slash;
+	char scratch2[ENCODING_LEN + 1];
+	char *slash, *cm;
 	int cnt;
 	int len;
+	int i;
 
 	if (locname == NULL || *locname == 0) {
 		locname = get_locale_env(category);
@@ -314,6 +343,24 @@ locdata_get(int category, const char *locname)
 
 	if ((strcmp(locname, "C") == 0) || (strcmp(locname, "POSIX") == 0))
 		return (posix_locale.locdata[category]);
+
+	/* Handle charmap aliases */
+	for (i = 0; cmalias[i].alias != NULL; i++) {
+		if ((cm = strstr(locname, cmalias[i].alias)) != NULL &&
+		    strlen(cm) == strlen(cmalias[i].alias)) {
+			len = cm - locname + 1;
+			if (len + strlen(cmalias[i].name) >= sizeof (scratch2))
+				break;
+			(void) strlcpy(scratch2, locname, len);
+			(void) strlcat(scratch2, cmalias[i].name,
+			    sizeof (scratch2));
+			locname = scratch2;
+			break;
+		}
+	}
+
+	if ((strcmp(locname, "C.UTF-8") == 0) && (category != LC_CTYPE))
+		return (&cutf_locdata[category]);
 
 	return (locdata_get_cache(category, locname));
 }

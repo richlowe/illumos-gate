@@ -69,7 +69,7 @@ CPPFLAGS=	-I$(LOCAL) -I$(GENERAL) -I$(GLOBAL) -DPARTIAL \
 		-D_LARGEFILE64_SOURCE=1
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-clobbered
 CERRWARN +=	-_gcc=-Wno-extra
 LIBDUMP=	../lib/libdump.a
@@ -88,7 +88,7 @@ FILEMODE=	04555
 
 .KEEP_STATE:
 
-all:		$(PRODUCT) 
+all:		$(PRODUCT)
 
 $(PROG):	$(OBJECTS) $$(LIBDUMP)
 	$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)

@@ -22,8 +22,9 @@ information: Portions Copyright [yyyy] [name of copyright owner]
 CDDL HEADER END
 
 Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
-Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
 Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
+Copyright 2019 RackTop Systems.
 
 NOTE:  This service manifest is not editable; its contents will
 be overwritten by package or patch operations, including
@@ -38,7 +39,7 @@ file.
 <service
     name='network/smb/server'
     type='service'
-    version='1'>
+    version='2'>
 
 	<!-- 2. Create default service instance. -->
 	<create_default_instance enabled='false' />
@@ -157,6 +158,8 @@ file.
 			value='true' override='true'/>
 		<propval name='autohome_map' type='astring'
 			value='/etc' override='true'/>
+		<propval name='bypass_traverse_checking' type='boolean'
+			value='true' override='true'/>
 		<propval name='debug' type='integer'
 			value='0' override='true'/>
 		<propval name='domain_sid' type='astring'
@@ -184,15 +187,13 @@ file.
 		<propval name='max_connections' type='integer'
 			value='100000' override='true'/>
 		<propval name='keep_alive' type='integer'
-			value='5400' override='true'/>
+			value='0' override='true'/>
 		<propval name='restrict_anonymous' type='boolean'
 			value='false' override='true'/>
 		<propval name='signing_enabled' type='boolean'
 			value='true' override='true'/>
 		<propval name='signing_required' type='boolean'
-			value='false' override='true'/>
-		<propval name='signing_check' type='boolean'
-			value='false' override='true'/>
+			value='true' override='true'/>
 		<propval name='sync_enable' type='boolean'
 			value='false' override='true'/>
 		<propval name='security' type='astring'
@@ -220,7 +221,7 @@ file.
 		<propval name='ipv6_enable' type='boolean'
 			value='false' override='true'/>
 		<propval name='sv_version' type='astring'
-			value='5.0' override='true'/>
+			value='6.1' override='true'/>
 		<propval name='dfs_stdroot_num' type='integer'
 			value='0' override='true'/>
 		<propval name='print_enable' type='boolean'
@@ -229,6 +230,10 @@ file.
 			value='true' override='true'/>
 		<propval name='max_protocol' type='astring'
 			value='' override='true'/>
+		<propval name='min_protocol' type='astring'
+			value='' override='true'/>
+		<propval name='encrypt' type='astring'
+			value='disabled' override='true'/>
 		<propval name='initial_credits' type='integer'
 			value='20' override='true'/>
 		<propval name='maximum_credits' type='integer'

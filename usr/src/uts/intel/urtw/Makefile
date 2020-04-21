@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 # This makefile drives the production of the urtw driver kernel module.
@@ -62,7 +63,10 @@ LDFLAGS		+= -dy -Nmisc/mac -Nmisc/net80211 -Nmisc/usba
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-char-subscripts
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMOFF += deref_check,no_if_block,all_func_returns
 
 #
 #	Default build targets.

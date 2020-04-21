@@ -12,12 +12,13 @@
 #
 # Copyright 2011, Richard Lowe
 # Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
-# Copyright 2015 Joyent, Inc.
-#
+# Copyright 2018 Joyent, Inc.
+# Copyright 2019, Carlos Neira <cneirabustos@gmail.com>
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 
 include		$(SRC)/Makefile.master
 
-MANSECT= 	3proc
+MANSECT=	3proc
 
 MANFILES=					\
 		Lctlfd.3proc			\
@@ -64,6 +65,7 @@ MANFILES=					\
 		Plookup_by_addr.3proc		\
 		Plwp_getasrs.3proc		\
 		Plwp_getgwindows.3proc		\
+		Plwp_getname.3proc		\
 		Plwp_getpsinfo.3proc		\
 		Plwp_getregs.3proc		\
 		Plwp_getspymaster.3proc		\
@@ -121,10 +123,14 @@ MANFILES=					\
 		proc_arg_grab.3proc		\
 		proc_arg_psinfo.3proc		\
 		proc_content2str.3proc		\
+		proc_fdinfo_misc.3proc		\
+		proc_fdinfowalk.3proc		\
+		proc_fdwalk.3proc		\
 		proc_fltname.3proc		\
 		proc_fltset2str.3proc		\
 		proc_get_auxv.3proc		\
 		proc_get_cred.3proc		\
+		proc_get_fdinfo.3proc		\
 		proc_get_priv.3proc		\
 		proc_get_psinfo.3proc		\
 		proc_get_status.3proc		\
@@ -160,10 +166,10 @@ MANFILES=					\
 		Pwrite.3proc			\
 		Pxecbkpt.3proc			\
 		Pzonename.3proc			\
-	 	ps_lgetregs.3proc		\
-	 	ps_pglobal_lookup.3proc		\
-	 	ps_pread.3proc			\
-	 	ps_pstop.3proc
+		ps_lgetregs.3proc		\
+		ps_pglobal_lookup.3proc		\
+		ps_pread.3proc			\
+		ps_pstop.3proc
 
 
 MANLINKS=					\
@@ -219,6 +225,8 @@ MANLINKS=					\
 		Pread_string.3proc		\
 		proc_arg_xgrab.3proc		\
 		proc_arg_xpsinfo.3proc		\
+		proc_dmodelname.3proc		\
+		proc_fdinfo_free.3proc		\
 		proc_finistdio.3proc		\
 		proc_flushstdio.3proc		\
 		proc_free_priv.3proc		\
@@ -265,7 +273,7 @@ MANLINKS=					\
 		Pxlookup_by_name.3proc		\
 		Pxsymbol_iter.3proc		\
 		Pzonepath.3proc			\
-		Pzoneroot.3proc			
+		Pzoneroot.3proc
 
 
 ps_lgetfpregs.3proc		:= LINKSRC = ps_lgetregs.3proc
@@ -391,9 +399,12 @@ proc_arg_xpsinfo.3proc		:= LINKSRC = proc_arg_psinfo.3proc
 
 proc_str2content.3proc		:= LINKSRC = proc_content2str.3proc
 
+proc_fdinfo_free.3proc		:= LINKSRC = proc_get_fdinfo.3proc
+
 proc_flushstdio.3proc		:= LINKSRC = proc_initstdio.3proc
 proc_finistdio.3proc		:= LINKSRC = proc_initstdio.3proc
 
+proc_dmodelname.3proc		:= LINKSRC = proc_fltname.3proc
 proc_signame.3proc		:= LINKSRC = proc_fltname.3proc
 proc_sysname.3proc		:= LINKSRC = proc_fltname.3proc
 

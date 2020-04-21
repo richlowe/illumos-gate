@@ -23,6 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= init 
 ROOTFS_PROG= $(PROG)
@@ -31,11 +32,15 @@ DEFAULTFILES= init.dfl
 
 include ../Makefile.cmd
 
+CSTD = $(CSTD_GNU99)
 LDLIBS += -lpam -lbsm -lcontract -lscf
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 CLOBBERFILES= $(STATIC)
+
+# needs work
+SMATCH=off
 
 .KEEP_STATE:
 

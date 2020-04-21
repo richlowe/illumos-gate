@@ -23,6 +23,7 @@
  * Copyright 2016 Toomas Soome <tsoome@me.com>
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019, Joyent, Inc.
  */
 
 /*
@@ -377,7 +378,7 @@ main(int argc, char *argv[])
 			detachfromtty();
 			(void) cond_init(&cv, USYNC_THREAD, 0);
 			(void) mutex_init(&count_lock, USYNC_THREAD, 0);
-			if (thr_create(NULL, NULL,
+			if (thr_create(NULL, 0,
 			    (void *(*)(void *))instance_flush_thread,
 			    NULL, THR_DETACHED, NULL) != 0) {
 				err_print(CANT_CREATE_THREAD, "daemon",
@@ -389,8 +390,7 @@ main(int argc, char *argv[])
 			/* start the minor_fini_thread */
 			(void) mutex_init(&minor_fini_mutex, USYNC_THREAD, 0);
 			(void) cond_init(&minor_fini_cv, USYNC_THREAD, 0);
-			if (thr_create(NULL, NULL,
-			    (void *(*)(void *))minor_fini_thread,
+			if (thr_create(NULL, 0, minor_fini_thread,
 			    NULL, THR_DETACHED, NULL)) {
 				err_print(CANT_CREATE_THREAD, "minor_fini",
 				    strerror(errno));
@@ -704,7 +704,7 @@ parse_args(int argc, char *argv[])
 		}
 
 		if (bind == TRUE) {
-			if ((mc.major == -1) || (mc.drvname[0] == NULL)) {
+			if ((mc.major == -1) || (mc.drvname[0] == '\0')) {
 				err_print(MAJOR_AND_B_FLAG);
 				devfsadm_exit(1);
 				/*NOTREACHED*/
@@ -2073,6 +2073,16 @@ class_ok(char *class)
 		return (DEVFSADM_SUCCESS);
 	}
 
+	/*
+	 * Some create tabs operate on multiple classes of devices because the
+	 * kernel doesn't have a good way for a driver to indicate that a
+	 * particular minor's class is different from that of the dev_info_t
+	 * it belongs to. As such, we'll always fail to match those here.
+	 */
+	if (class == NULL) {
+		return (DEVFSADM_FAILURE);
+	}
+
 	for (i = 0; i < num_classes; i++) {
 		if (strcmp(class, classes[i]) == 0) {
 			return (DEVFSADM_SUCCESS);
@@ -2398,9 +2408,8 @@ load_module(char *mname, char *cdir)
  * within 'timeout' secs the minor_fini_thread needs to do a SYNC_STATE
  * so that we still call the minor_fini routines.
  */
-/*ARGSUSED*/
-static void
-minor_fini_thread(void *arg)
+static void *
+minor_fini_thread(void *arg __unused)
 {
 	timestruc_t	abstime;
 
@@ -2433,6 +2442,7 @@ minor_fini_thread(void *arg)
 
 		(void) mutex_lock(&minor_fini_mutex);
 	}
+	return (NULL);
 }
 
 
@@ -3717,10 +3727,10 @@ do_inst_sync(char *filename, char *instfilename)
  * safely, the database is flushed to a temporary file, then moved into place.
  *
  * The following files are used during this process:
- * 	/etc/path_to_inst:	The path_to_inst file
- * 	/etc/path_to_inst.<pid>: Contains data flushed from the kernel
- * 	/etc/path_to_inst.old:  The backup file
- * 	/etc/path_to_inst.old.<pid>: Temp file for creating backup
+ *	/etc/path_to_inst:	The path_to_inst file
+ *	/etc/path_to_inst.<pid>: Contains data flushed from the kernel
+ *	/etc/path_to_inst.old:  The backup file
+ *	/etc/path_to_inst.old.<pid>: Temp file for creating backup
  *
  */
 static void
@@ -4308,11 +4318,11 @@ hot_cleanup(char *node_path, char *minor_name, char *ev_subclass,
 				(void) snprintf(rmlink, sizeof (rmlink),
 				    "%s", link->devlink);
 				if (rm->remove->flags & RM_NOINTERPOSE) {
-					((void (*)(char *))
-					    (rm->remove->callback_fcn))(rmlink);
+					(void)
+					    (rm->remove->callback_fcn)(rmlink);
 				} else {
-					ret = ((int (*)(char *))
-					    (rm->remove->callback_fcn))(rmlink);
+					ret =
+					    (rm->remove->callback_fcn)(rmlink);
 					if (ret == DEVFSADM_TERMINATE)
 						nfphash_insert(rmlink);
 				}
@@ -4452,11 +4462,11 @@ matching_dev(char *devpath, void *data)
 
 		vprint(RECURSEDEV_MID, "%scalling callback %s\n", fcn, devpath);
 		if (cleanup_data->rm->remove->flags & RM_NOINTERPOSE)
-			((void (*)(char *))
-			    (cleanup_data->rm->remove->callback_fcn))(devpath);
+			(void)
+			    (cleanup_data->rm->remove->callback_fcn)(devpath);
 		else {
-			ret = ((int (*)(char *))
-			    (cleanup_data->rm->remove->callback_fcn))(devpath);
+			ret =
+			    (cleanup_data->rm->remove->callback_fcn)(devpath);
 			if (ret == DEVFSADM_TERMINATE) {
 				/*
 				 * We want no further remove processing for
@@ -6343,7 +6353,7 @@ create_selector_list(char *selector)
 	selector_list_t *selector_list;
 
 	/* parse_devfs_spec splits the next field into keyword & value */
-	while ((*selector != NULL) && (error == FALSE)) {
+	while ((*selector != '\0') && (error == FALSE)) {
 		if (parse_selector(&selector, &key, &val) == DEVFSADM_FAILURE) {
 			error = TRUE;
 			break;
@@ -7546,7 +7556,7 @@ getnexttoken(char *next, char **nextp, char **tokenpp, char *tchar)
 			;
 		if (*cp1 == '=' || *cp1 == ':' || *cp1 == '&' || *cp1 == '|' ||
 		    *cp1 == ';' || *cp1 == '\n' || *cp1 == '\0') {
-			*cp = NULL;	/* terminate token */
+			*cp = '\0';	/* terminate token */
 			cp = cp1;
 		}
 	}
@@ -7803,7 +7813,7 @@ add_verbose_id(char *mid)
  * returns DEVFSADM_TRUE if contents is a minor node in /devices.
  * If mn_root is not NULL, mn_root is set to:
  *	if contents is a /dev node, mn_root = contents
- * 			OR
+ *			OR
  *	if contents is a /devices node, mn_root set to the '/'
  *	following /devices.
  */

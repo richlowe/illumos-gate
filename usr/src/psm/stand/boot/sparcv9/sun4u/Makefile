@@ -21,6 +21,7 @@
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2019 Peter Tribble.
 #
 
 TOPDIR =	../../../../..
@@ -33,10 +34,6 @@ PLATLINKS	= SUNW,Ultra-2
 PLATLINKS	+= SUNW,Ultra-250
 PLATLINKS	+= SUNW,Ultra-4
 PLATLINKS	+= SUNW,Ultra-Enterprise
-PLATLINKS	+= SUNW,Ultra-Enterprise-10000
-PLATLINKS	+= SUNW,UltraSPARC-IIi-Netract
-PLATLINKS	+= SUNW,UltraSPARC-IIe-NetraCT-40
-PLATLINKS	+= SUNW,UltraSPARC-IIe-NetraCT-60
 PLATLINKS	+= SUNW,Sun-Blade-100
 PLATLINKS	+= SUNW,Sun-Blade-1000
 PLATLINKS	+= SUNW,Sun-Blade-1500
@@ -49,15 +46,12 @@ PLATLINKS	+= SUNW,Sun-Fire-V240
 PLATLINKS	+= SUNW,Sun-Fire-V250
 PLATLINKS	+= SUNW,Sun-Fire-V440
 PLATLINKS	+= SUNW,Sun-Fire-280R
-PLATLINKS	+= SUNW,Sun-Fire-15000
 PLATLINKS	+= SUNW,Sun-Fire-880
 PLATLINKS	+= SUNW,Sun-Fire-480R
 PLATLINKS	+= SUNW,Sun-Fire-V890
 PLATLINKS	+= SUNW,Sun-Fire-V490
-PLATLINKS	+= SUNW,Serverblade1
 PLATLINKS	+= SUNW,Netra-T12
 PLATLINKS	+= SUNW,Netra-T4
-PLATLINKS	+= SUNW,Netra-CP2300
 PLATLINKS	+= SUNW,Netra-CP3010
 PLATLINKS	+= SUNW,SPARC-Enterprise
 
@@ -86,7 +80,7 @@ FRC:
 
 .KEEP_STATE:
 
-all: 
+all:
 
 install: all $(LINKED_DIRS) $(LINKED_LIB_DIRS) $(LINKED_LIB_FS_DIRS)
 

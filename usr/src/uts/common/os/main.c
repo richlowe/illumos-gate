@@ -27,7 +27,7 @@
 /*	  All Rights Reserved		*/
 
 /*
- * Copyright 2018, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/types.h>
@@ -74,6 +74,7 @@
 #include <sys/stack.h>
 #include <sys/brand.h>
 #include <sys/mmapobj.h>
+#include <sys/smt.h>
 
 #include <vm/as.h>
 #include <vm/seg_kmem.h>
@@ -277,7 +278,7 @@ exec_init(const char *initpath, const char *args)
 	lwp->lwp_ap = lwp->lwp_arg;
 	lwp->lwp_arg[0] = exec_fnamep;
 	lwp->lwp_arg[1] = uap;
-	lwp->lwp_arg[2] = NULL;
+	lwp->lwp_arg[2] = 0;
 	curthread->t_post_sys = 1;
 	curthread->t_sysnum = SYS_execve;
 
@@ -518,6 +519,14 @@ main(void)
 	audit_init();
 
 	/*
+	 * Start the periodic hash rescale for all vmem arenas before we load
+	 * protocol modules and drivers via strplumb() below.  Some drivers
+	 * might rely on heavy vmem operations that could hurt performance
+	 * without the rescale.
+	 */
+	vmem_update(NULL);
+
+	/*
 	 * Plumb the protocol modules and drivers only if we are not
 	 * networked booted, in this case we already did it in rootconf().
 	 */
@@ -604,7 +613,6 @@ main(void)
 	 * Any per cpu initialization is done here.
 	 */
 	kmem_mp_init();
-	vmem_update(NULL);
 
 	clock_tick_init_post();
 
@@ -617,6 +625,8 @@ main(void)
 	pm_cfb_setup_intr();
 #if defined(__x86)
 	fastboot_post_startup();
+
+	smt_late_init();
 #endif
 
 	/*

@@ -13,6 +13,7 @@
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2014, OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2015 Garrett D'Amore <garrett@damore.org>
+# Copyright 2018 Joyent, Inc.
 #
 
 set name=pkg.fmri value=pkg:/system/test/libctest@$(PKGVERS)
@@ -31,6 +32,7 @@ dir path=opt/libc-tests/tests/random
 dir path=opt/libc-tests/tests/regex
 dir path=opt/libc-tests/tests/regex/data
 dir path=opt/libc-tests/tests/select
+dir path=opt/libc-tests/tests/stdio
 dir path=opt/libc-tests/tests/symbols
 dir path=usr group=sys
 dir path=usr/lib
@@ -99,6 +101,8 @@ file path=opt/libc-tests/tests/newlocale_test.$(ARCH64) mode=0555
 file path=opt/libc-tests/tests/nl_langinfo_test mode=0555
 file path=opt/libc-tests/tests/nl_langinfo_test.$(ARCH) mode=0555
 file path=opt/libc-tests/tests/nl_langinfo_test.$(ARCH64) mode=0555
+file path=opt/libc-tests/tests/posix_memalign.32 mode=0555
+file path=opt/libc-tests/tests/posix_memalign.64 mode=0555
 file path=opt/libc-tests/tests/printf-6961.64 mode=0555
 file path=opt/libc-tests/tests/printf-9511.32 mode=0555
 file path=opt/libc-tests/tests/printf-9511.64 mode=0555
@@ -152,12 +156,29 @@ file path=opt/libc-tests/tests/select/select.sh mode=0555
 file path=opt/libc-tests/tests/select/select_test mode=0555
 file path=opt/libc-tests/tests/set_constraint_handler_s.32 mode=0555
 file path=opt/libc-tests/tests/set_constraint_handler_s.64 mode=0555
+file path=opt/libc-tests/tests/stdio/fileno.32 mode=0555
+file path=opt/libc-tests/tests/stdio/fileno.64 mode=0555
+file path=opt/libc-tests/tests/stdio/fmemopentest.32 mode=0555
+file path=opt/libc-tests/tests/stdio/fmemopentest.64 mode=0555
+file path=opt/libc-tests/tests/stdio/ftell_ungetc.32 mode=0555
+file path=opt/libc-tests/tests/stdio/ftell_ungetc.64 mode=0555
+file path=opt/libc-tests/tests/stdio/memstream.32 mode=0555
+file path=opt/libc-tests/tests/stdio/memstream.64 mode=0555
+file path=opt/libc-tests/tests/stdio/memstream_reopen.32 mode=0555
+file path=opt/libc-tests/tests/stdio/memstream_reopen.64 mode=0555
+file path=opt/libc-tests/tests/stdio/open_memstreamtest.32 mode=0555
+file path=opt/libc-tests/tests/stdio/open_memstreamtest.64 mode=0555
+file path=opt/libc-tests/tests/stdio/orientation_test.32 mode=0555
+file path=opt/libc-tests/tests/stdio/orientation_test.64 mode=0555
+file path=opt/libc-tests/tests/stdio/test_mbrtowc.32 mode=0555
+file path=opt/libc-tests/tests/stdio/test_mbrtowc.64 mode=0555
 file path=opt/libc-tests/tests/strcoll-strxfrm-6907.32 mode=0555
 file path=opt/libc-tests/tests/strcoll-strxfrm-6907.64 mode=0555
 file path=opt/libc-tests/tests/strerror mode=0555
 file path=opt/libc-tests/tests/symbols/setup mode=0555
 file path=opt/libc-tests/tests/symbols/symbols_test.$(ARCH) mode=0555
 file path=opt/libc-tests/tests/symbols/symbols_test.$(ARCH64) mode=0555
+file path=opt/libc-tests/tests/thread_name mode=0555
 file path=opt/libc-tests/tests/timespec_get.32 mode=0555
 file path=opt/libc-tests/tests/timespec_get.64 mode=0555
 file path=opt/libc-tests/tests/wcsncasecmp-7344.32 mode=0555

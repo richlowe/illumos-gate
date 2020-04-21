@@ -22,7 +22,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #ifndef _SMBSRV_SMB_FSOPS_H
@@ -73,13 +73,17 @@ int smb_fsop_rename(smb_request_t *, cred_t *,
     smb_node_t *, char *, smb_node_t *,	char *);
 
 int smb_fsop_setattr(smb_request_t *, cred_t *, smb_node_t *, smb_attr_t *);
-int smb_fsop_set_data_length(smb_request_t *sr, cred_t *cr, smb_node_t *,
-    offset_t);
 
-int smb_fsop_read(smb_request_t *, cred_t *, smb_node_t *, uio_t *);
+int smb_fsop_freesp(smb_request_t *sr, cred_t *cr, smb_ofile_t *,
+		    off64_t, off64_t);
 
-int smb_fsop_write(smb_request_t *, cred_t *, smb_node_t *, uio_t *,
-    uint32_t *, int);
+int smb_fsop_read(smb_request_t *, cred_t *, smb_node_t *, smb_ofile_t *,
+    uio_t *, int);
+
+int smb_fsop_write(smb_request_t *, cred_t *, smb_node_t *, smb_ofile_t *,
+    uio_t *, uint32_t *, int);
+
+int smb_fsop_next_alloc_range(cred_t *, smb_node_t *, off64_t *, off64_t *);
 
 int smb_fsop_statfs(cred_t *, smb_node_t *, struct statvfs64 *);
 
@@ -123,6 +127,7 @@ int smb_fsop_frlock(smb_node_t *, smb_lock_t *, boolean_t, cred_t *);
 #define	SMB_CATIA		0x00000004
 #define	SMB_ABE			0x00000008
 #define	SMB_CASE_SENSITIVE	0x00000010
+#define	SMB_EDIRENT		0x00000020
 
 /*
  * Increased MAXPATHLEN for SMB.  Essentially, we want to allow a

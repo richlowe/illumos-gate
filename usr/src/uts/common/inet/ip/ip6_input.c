@@ -23,6 +23,7 @@
  * Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved
  *
  * Copyright 2011 Nexenta Systems, Inc. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 /* Copyright (c) 1990 Mentat Inc. */
 
@@ -143,11 +144,9 @@ static void	ip_input_multicast_v6(ire_t *, mblk_t *, ip6_t *,
  * The ill will always be valid if this function is called directly from
  * the driver.
  *
- * If ip_input_v6() is called from GLDv3:
- *
- *   - This must be a non-VLAN IP stream.
- *   - 'mp' is either an untagged or a special priority-tagged packet.
- *   - Any VLAN tag that was in the MAC header has been stripped.
+ * If this chain is part of a VLAN stream, then the VLAN tag is
+ * stripped from the MAC header before being delivered to this
+ * function.
  *
  * If the IP header in packet is not 32-bit aligned, every message in the
  * chain will be aligned before further operations. This is required on SPARC
@@ -199,7 +198,7 @@ ip_input_common_v6(ill_t *ill, ill_rx_ring_t *ip_ring, mblk_t *mp_chain,
 	ip_recv_attr_t	iras;	/* Receive attributes */
 	rtc_t		rtc;
 	iaflags_t	chain_flags = 0;	/* Fixed for chain */
-	mblk_t 		*ahead = NULL;	/* Accepted head */
+	mblk_t		*ahead = NULL;	/* Accepted head */
 	mblk_t		*atail = NULL;	/* Accepted tail */
 	uint_t		acnt = 0;	/* Accepted count */
 
@@ -349,7 +348,7 @@ ip_input_common_v6(ill_t *ill, ill_rx_ring_t *ip_ring, mblk_t *mp_chain,
 
 		/*
 		 * Call one of:
-		 * 	ill_input_full_v6
+		 *	ill_input_full_v6
 		 *	ill_input_short_v6
 		 * The former is used in the case of TX. See ill_set_inputfn().
 		 */
@@ -518,7 +517,7 @@ ill_input_short_v6(mblk_t *mp, void *iph_arg, void *nexthop_arg,
 	ill_t		*ill = ira->ira_ill;
 	ip_stack_t	*ipst = ill->ill_ipst;
 	uint_t		pkt_len;
-	ssize_t 	len;
+	ssize_t		len;
 	ip6_t		*ip6h = (ip6_t *)iph_arg;
 	in6_addr_t	nexthop = *(in6_addr_t *)nexthop_arg;
 	ilb_stack_t	*ilbs = ipst->ips_netstack->netstack_ilb;
@@ -2021,8 +2020,8 @@ repeat:
 	 */
 	if (IPP_ENABLED(IPP_LOCAL_IN, ipst) &&
 	    !(iraflags & IRAF_LOOPBACK) &&
-	    (protocol != IPPROTO_ESP || protocol != IPPROTO_AH ||
-	    protocol != IPPROTO_DSTOPTS || protocol != IPPROTO_ROUTING ||
+	    (protocol != IPPROTO_ESP && protocol != IPPROTO_AH &&
+	    protocol != IPPROTO_DSTOPTS && protocol != IPPROTO_ROUTING &&
 	    protocol != IPPROTO_FRAGMENT)) {
 		/*
 		 * Use the interface on which the packet arrived - not where

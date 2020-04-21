@@ -23,7 +23,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2013 Joyent, Inc.  All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 
@@ -36,10 +36,18 @@
 #include <sys/multiboot2.h>
 #include <sys/multiboot2_impl.h>
 #include <sys/sysmacros.h>
+#include <sys/framebuffer.h>
 #include <sys/sha1.h>
 #include <util/string.h>
 #include <util/strtolctype.h>
 #include <sys/efi.h>
+
+/*
+ * Compile time debug knob. We do not have any early mechanism to control it
+ * as the boot is the earliest mechanism we have, and we do not want to have
+ * it being switched on by default.
+ */
+int dboot_debug = 0;
 
 #if defined(__xpv)
 
@@ -75,7 +83,7 @@ extern int have_cpuid(void);
  *
  * The code executes as:
  *	- 32 bits under GRUB (for 32 or 64 bit Solaris)
- * 	- a 32 bit program for the 32-bit PV hypervisor
+ *	- a 32 bit program for the 32-bit PV hypervisor
  *	- a 64 bit program for the 64-bit PV hypervisor (at least for now)
  *
  * Under the PV hypervisor, we must create mappings for any memory beyond the
@@ -137,6 +145,8 @@ multiboot_tag_mmap_t *mb2_mmap_tagp;
 int num_entries;			/* mmap entry count */
 boolean_t num_entries_set;		/* is mmap entry count set */
 uintptr_t load_addr;
+static boot_framebuffer_t framebuffer __aligned(16);
+static boot_framebuffer_t *fb;
 
 /* can not be automatic variables because of alignment */
 static efi_guid_t smbios3 = SMBIOS3_TABLE_GUID;
@@ -148,7 +158,7 @@ static efi_guid_t acpi1 = ACPI_10_TABLE_GUID;
 /*
  * This contains information passed to the kernel
  */
-struct xboot_info boot_info[2];	/* extra space to fix alignement for amd64 */
+struct xboot_info boot_info __aligned(16);
 struct xboot_info *bi;
 
 /*
@@ -164,6 +174,7 @@ int largepage_support = 0;
 int pae_support = 0;
 int pge_support = 0;
 int NX_support = 0;
+int PAT_support = 0;
 
 /*
  * Low 32 bits of kernel entry address passed back to assembler.
@@ -672,17 +683,19 @@ dboot_loader_mmap_entries(void)
 		DBG(mb_info->flags);
 		if (mb_info->flags & 0x40) {
 			mb_memory_map_t *mmap;
+			caddr32_t mmap_addr;
 
 			DBG(mb_info->mmap_addr);
 			DBG(mb_info->mmap_length);
 			check_higher(mb_info->mmap_addr + mb_info->mmap_length);
 
-			for (mmap = (mb_memory_map_t *)mb_info->mmap_addr;
-			    (uint32_t)mmap < mb_info->mmap_addr +
+			for (mmap_addr = mb_info->mmap_addr;
+			    mmap_addr < mb_info->mmap_addr +
 			    mb_info->mmap_length;
-			    mmap = (mb_memory_map_t *)((uint32_t)mmap +
-			    mmap->size + sizeof (mmap->size)))
+			    mmap_addr += mmap->size + sizeof (mmap->size)) {
+				mmap = (mb_memory_map_t *)(uintptr_t)mmap_addr;
 				++num_entries;
+			}
 
 			num_entries_set = B_TRUE;
 		}
@@ -708,16 +721,17 @@ dboot_loader_mmap_get_type(int index)
 {
 #if !defined(__xpv)
 	mb_memory_map_t *mp, *mpend;
+	caddr32_t mmap_addr;
 	int i;
 
 	switch (multiboot_version) {
 	case 1:
-		mp = (mb_memory_map_t *)mb_info->mmap_addr;
-		mpend = (mb_memory_map_t *)
+		mp = (mb_memory_map_t *)(uintptr_t)mb_info->mmap_addr;
+		mpend = (mb_memory_map_t *)(uintptr_t)
 		    (mb_info->mmap_addr + mb_info->mmap_length);
 
 		for (i = 0; mp < mpend && i != index; i++)
-			mp = (mb_memory_map_t *)((uint32_t)mp + mp->size +
+			mp = (mb_memory_map_t *)((uintptr_t)mp + mp->size +
 			    sizeof (mp->size));
 		if (mp >= mpend) {
 			dboot_panic("dboot_loader_mmap_get_type(): index "
@@ -754,7 +768,7 @@ dboot_loader_mmap_get_base(int index)
 		    (mb_info->mmap_addr + mb_info->mmap_length);
 
 		for (i = 0; mp < mpend && i != index; i++)
-			mp = (mb_memory_map_t *)((uint32_t)mp + mp->size +
+			mp = (mb_memory_map_t *)((uintptr_t)mp + mp->size +
 			    sizeof (mp->size));
 		if (mp >= mpend) {
 			dboot_panic("dboot_loader_mmap_get_base(): index "
@@ -793,7 +807,7 @@ dboot_loader_mmap_get_length(int index)
 		    (mb_info->mmap_addr + mb_info->mmap_length);
 
 		for (i = 0; mp < mpend && i != index; i++)
-			mp = (mb_memory_map_t *)((uint32_t)mp + mp->size +
+			mp = (mb_memory_map_t *)((uintptr_t)mp + mp->size +
 			    sizeof (mp->size));
 		if (mp >= mpend) {
 			dboot_panic("dboot_loader_mmap_get_length(): index "
@@ -973,16 +987,16 @@ init_mem_alloc(void)
 static void
 dboot_multiboot1_xboot_consinfo(void)
 {
-	bi->bi_framebuffer = NULL;
+	fb->framebuffer = 0;
 }
 
 static void
 dboot_multiboot2_xboot_consinfo(void)
 {
-	multiboot_tag_framebuffer_t *fb;
-	fb = dboot_multiboot2_find_tag(mb2_info,
+	multiboot_tag_framebuffer_t *fbtag;
+	fbtag = dboot_multiboot2_find_tag(mb2_info,
 	    MULTIBOOT_TAG_TYPE_FRAMEBUFFER);
-	bi->bi_framebuffer = (native_ptr_t)(uintptr_t)fb;
+	fb->framebuffer = (uint64_t)(uintptr_t)fbtag;
 }
 
 static int
@@ -1059,42 +1073,48 @@ dboot_multiboot_modcmdline(int index)
 }
 
 /*
- * Find the environment module for console setup.
+ * Find the modules used by console setup.
  * Since we need the console to print early boot messages, the console is set up
- * before anything else and therefore we need to pick up the environment module
- * early too.
+ * before anything else and therefore we need to pick up the needed modules.
  *
- * Note, we just will search for and if found, will pass the env
- * module to console setup, the proper module list processing will happen later.
+ * Note, we just will search for and if found, will pass the modules
+ * to console setup, the proper module list processing will happen later.
+ * Currently used modules are boot environment and console font.
  */
 static void
-dboot_find_env(void)
+dboot_find_console_modules(void)
 {
 	int i, modcount;
 	uint32_t mod_start, mod_end;
 	char *cmdline;
 
 	modcount = dboot_multiboot_modcount();
-
+	bi->bi_module_cnt = 0;
 	for (i = 0; i < modcount; ++i) {
 		cmdline = dboot_multiboot_modcmdline(i);
 		if (cmdline == NULL)
 			continue;
 
-		if (strstr(cmdline, "type=environment") == NULL)
+		if (strstr(cmdline, "type=console-font") != NULL)
+			modules[bi->bi_module_cnt].bm_type = BMT_FONT;
+		else if (strstr(cmdline, "type=environment") != NULL)
+			modules[bi->bi_module_cnt].bm_type = BMT_ENV;
+		else
 			continue;
 
 		mod_start = dboot_multiboot_modstart(i);
 		mod_end = dboot_multiboot_modend(i);
-		modules[0].bm_addr = (native_ptr_t)(uintptr_t)mod_start;
-		modules[0].bm_size = mod_end - mod_start;
-		modules[0].bm_name = (native_ptr_t)(uintptr_t)NULL;
-		modules[0].bm_hash = (native_ptr_t)(uintptr_t)NULL;
-		modules[0].bm_type = BMT_ENV;
-		bi->bi_modules = (native_ptr_t)(uintptr_t)modules;
-		bi->bi_module_cnt = 1;
-		return;
+		modules[bi->bi_module_cnt].bm_addr =
+		    (native_ptr_t)(uintptr_t)mod_start;
+		modules[bi->bi_module_cnt].bm_size = mod_end - mod_start;
+		modules[bi->bi_module_cnt].bm_name =
+		    (native_ptr_t)(uintptr_t)NULL;
+		modules[bi->bi_module_cnt].bm_hash =
+		    (native_ptr_t)(uintptr_t)NULL;
+		bi->bi_module_cnt++;
 	}
+	if (bi->bi_module_cnt != 0)
+		bi->bi_modules = (native_ptr_t)(uintptr_t)modules;
 }
 
 static boolean_t
@@ -1195,6 +1215,8 @@ type_to_str(boot_module_type_t type)
 		return ("hash");
 	case BMT_ENV:
 		return ("environment");
+	case BMT_FONT:
+		return ("console-font");
 	default:
 		return ("unknown");
 	}
@@ -1315,9 +1337,11 @@ process_module(int midx)
 				modules[midx].bm_type = BMT_HASH;
 			} else if (strcmp(q, "environment") == 0) {
 				modules[midx].bm_type = BMT_ENV;
+			} else if (strcmp(q, "console-font") == 0) {
+				modules[midx].bm_type = BMT_FONT;
 			} else if (strcmp(q, "file") != 0) {
 				dboot_printf("\tmodule #%d: unknown module "
-				    "type '%s'; defaulting to 'file'",
+				    "type '%s'; defaulting to 'file'\n",
 				    midx, q);
 			}
 			continue;
@@ -1633,6 +1657,7 @@ process_efi32(EFI_SYSTEM_TABLE32 *efi)
 {
 	uint32_t entries;
 	EFI_CONFIGURATION_TABLE32 *config;
+	efi_guid_t VendorGuid;
 	int i;
 
 	entries = efi->NumberOfTableEntries;
@@ -1640,21 +1665,23 @@ process_efi32(EFI_SYSTEM_TABLE32 *efi)
 	    efi->ConfigurationTable;
 
 	for (i = 0; i < entries; i++) {
-		if (dboot_same_guids(&config[i].VendorGuid, &smbios3)) {
+		(void) memcpy(&VendorGuid, &config[i].VendorGuid,
+		    sizeof (VendorGuid));
+		if (dboot_same_guids(&VendorGuid, &smbios3)) {
 			bi->bi_smbios = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
-		if (bi->bi_smbios == NULL &&
-		    dboot_same_guids(&config[i].VendorGuid, &smbios)) {
+		if (bi->bi_smbios == 0 &&
+		    dboot_same_guids(&VendorGuid, &smbios)) {
 			bi->bi_smbios = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
-		if (dboot_same_guids(&config[i].VendorGuid, &acpi2)) {
+		if (dboot_same_guids(&VendorGuid, &acpi2)) {
 			bi->bi_acpi_rsdp = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
-		if (bi->bi_acpi_rsdp == NULL &&
-		    dboot_same_guids(&config[i].VendorGuid, &acpi1)) {
+		if (bi->bi_acpi_rsdp == 0 &&
+		    dboot_same_guids(&VendorGuid, &acpi1)) {
 			bi->bi_acpi_rsdp = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
@@ -1666,6 +1693,7 @@ process_efi64(EFI_SYSTEM_TABLE64 *efi)
 {
 	uint64_t entries;
 	EFI_CONFIGURATION_TABLE64 *config;
+	efi_guid_t VendorGuid;
 	int i;
 
 	entries = efi->NumberOfTableEntries;
@@ -1673,22 +1701,24 @@ process_efi64(EFI_SYSTEM_TABLE64 *efi)
 	    efi->ConfigurationTable;
 
 	for (i = 0; i < entries; i++) {
-		if (dboot_same_guids(&config[i].VendorGuid, &smbios3)) {
+		(void) memcpy(&VendorGuid, &config[i].VendorGuid,
+		    sizeof (VendorGuid));
+		if (dboot_same_guids(&VendorGuid, &smbios3)) {
 			bi->bi_smbios = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
-		if (bi->bi_smbios == NULL &&
-		    dboot_same_guids(&config[i].VendorGuid, &smbios)) {
+		if (bi->bi_smbios == 0 &&
+		    dboot_same_guids(&VendorGuid, &smbios)) {
 			bi->bi_smbios = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
 		/* Prefer acpi v2+ over v1. */
-		if (dboot_same_guids(&config[i].VendorGuid, &acpi2)) {
+		if (dboot_same_guids(&VendorGuid, &acpi2)) {
 			bi->bi_acpi_rsdp = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
-		if (bi->bi_acpi_rsdp == NULL &&
-		    dboot_same_guids(&config[i].VendorGuid, &acpi1)) {
+		if (bi->bi_acpi_rsdp == 0 &&
+		    dboot_same_guids(&VendorGuid, &acpi1)) {
 			bi->bi_acpi_rsdp = (native_ptr_t)(uintptr_t)
 			    config[i].VendorTable;
 		}
@@ -1729,22 +1759,19 @@ dboot_multiboot_get_fwtables(void)
 	}
 
 	/*
-	 * The ACPI RSDP can be found by scanning the BIOS memory areas or
-	 * from the EFI system table. The boot loader may pass in the address
-	 * it found the ACPI tables at.
+	 * The multiboot2 info contains a copy of the RSDP; stash a pointer to
+	 * it (see find_rsdp() in fakebop).
 	 */
 	nacpitagp = (multiboot_tag_new_acpi_t *)
-	    dboot_multiboot2_find_tag(mb2_info,
-	    MULTIBOOT_TAG_TYPE_ACPI_NEW);
+	    dboot_multiboot2_find_tag(mb2_info, MULTIBOOT_TAG_TYPE_ACPI_NEW);
 	oacpitagp = (multiboot_tag_old_acpi_t *)
-	    dboot_multiboot2_find_tag(mb2_info,
-	    MULTIBOOT_TAG_TYPE_ACPI_OLD);
+	    dboot_multiboot2_find_tag(mb2_info, MULTIBOOT_TAG_TYPE_ACPI_OLD);
 
 	if (nacpitagp != NULL) {
-		bi->bi_acpi_rsdp = (native_ptr_t)(uintptr_t)
+		bi->bi_acpi_rsdp_copy = (native_ptr_t)(uintptr_t)
 		    &nacpitagp->mb_rsdp[0];
 	} else if (oacpitagp != NULL) {
-		bi->bi_acpi_rsdp = (native_ptr_t)(uintptr_t)
+		bi->bi_acpi_rsdp_copy = (native_ptr_t)(uintptr_t)
 		    &oacpitagp->mb_rsdp[0];
 	}
 }
@@ -1820,7 +1847,7 @@ print_efi64(EFI_SYSTEM_TABLE64 *efi)
 		dboot_printf("%c", (char)data[i]);
 	dboot_printf("\nEFI firmware revision: ");
 	dboot_print_efi_version(efi->FirmwareRevision);
-	dboot_printf("EFI system table number of entries: %lld\n",
+	dboot_printf("EFI system table number of entries: %" PRIu64 "\n",
 	    efi->NumberOfTableEntries);
 	conf = (EFI_CONFIGURATION_TABLE64 *)(uintptr_t)
 	    efi->ConfigurationTable;
@@ -2022,21 +2049,29 @@ build_page_tables(void)
 	 * Map framebuffer memory as PT_NOCACHE as this is memory from a
 	 * device and therefore must not be cached.
 	 */
-	if (bi->bi_framebuffer != NULL) {
-		multiboot_tag_framebuffer_t *fb;
-		fb = (multiboot_tag_framebuffer_t *)(uintptr_t)
-		    bi->bi_framebuffer;
+	if (fb != NULL && fb->framebuffer != 0) {
+		multiboot_tag_framebuffer_t *fb_tagp;
+		fb_tagp = (multiboot_tag_framebuffer_t *)(uintptr_t)
+		    fb->framebuffer;
 
-		start = fb->framebuffer_common.framebuffer_addr;
-		end = start + fb->framebuffer_common.framebuffer_height *
-		    fb->framebuffer_common.framebuffer_pitch;
+		start = fb_tagp->framebuffer_common.framebuffer_addr;
+		end = start + fb_tagp->framebuffer_common.framebuffer_height *
+		    fb_tagp->framebuffer_common.framebuffer_pitch;
 
+		if (map_debug)
+			dboot_printf("FB 1:1 map pa=%" PRIx64 "..%" PRIx64 "\n",
+			    start, end);
 		pte_bits |= PT_NOCACHE;
+		if (PAT_support != 0)
+			pte_bits |= PT_PAT_4K;
+
 		while (start < end) {
 			map_pa_at_va(start, start, 0);
 			start += MMU_PAGESIZE;
 		}
 		pte_bits &= ~PT_NOCACHE;
+		if (PAT_support != 0)
+			pte_bits &= ~PT_PAT_4K;
 	}
 #endif /* !__xpv */
 
@@ -2053,15 +2088,12 @@ See http://illumos.org/msg/SUNOS-8000-AK for details.\n"
 static void
 dboot_init_xboot_consinfo(void)
 {
-	uintptr_t addr;
-	/*
-	 * boot info must be 16 byte aligned for 64 bit kernel ABI
-	 */
-	addr = (uintptr_t)boot_info;
-	addr = (addr + 0xf) & ~0xf;
-	bi = (struct xboot_info *)addr;
+	bi = &boot_info;
 
 #if !defined(__xpv)
+	fb = &framebuffer;
+	bi->bi_framebuffer = (native_ptr_t)(uintptr_t)fb;
+
 	switch (multiboot_version) {
 	case 1:
 		dboot_multiboot1_xboot_consinfo();
@@ -2074,11 +2106,7 @@ dboot_init_xboot_consinfo(void)
 		    multiboot_version);
 		break;
 	}
-	/*
-	 * Lookup environment module for the console. Complete module list
-	 * will be built after console setup.
-	 */
-	dboot_find_env();
+	dboot_find_console_modules();
 #endif
 }
 
@@ -2169,7 +2197,7 @@ dboot_loader_name(void)
 
 	switch (multiboot_version) {
 	case 1:
-		return ((char *)mb_info->boot_loader_name);
+		return ((char *)(uintptr_t)mb_info->boot_loader_name);
 
 	case 2:
 		tag = dboot_multiboot2_find_tag(mb2_info,
@@ -2202,6 +2230,8 @@ startup_kernel(void)
 	physdev_set_iopl_t set_iopl;
 #endif /* __xpv */
 
+	if (dboot_debug == 1)
+		bcons_init(NULL);	/* Set very early console to ttya. */
 	dboot_loader_init();
 	/*
 	 * At this point we are executing in a 32 bit real mode.
@@ -2223,7 +2253,7 @@ startup_kernel(void)
 
 	dboot_init_xboot_consinfo();
 	bi->bi_cmdline = (native_ptr_t)(uintptr_t)cmdline;
-	bcons_init(bi);
+	bcons_init(bi);		/* Now we can set the real console. */
 
 	prom_debug = (find_boot_prop("prom_debug") != NULL);
 	map_debug = (find_boot_prop("map_debug") != NULL);
@@ -2254,6 +2284,7 @@ startup_kernel(void)
 	if (mb2_info != NULL)
 		DBG(mb2_info->mbi_total_size);
 	DBG(bi->bi_acpi_rsdp);
+	DBG(bi->bi_acpi_rsdp_copy);
 	DBG(bi->bi_smbios);
 	DBG(bi->bi_uefi_arch);
 	DBG(bi->bi_uefi_systab);
@@ -2349,6 +2380,16 @@ startup_kernel(void)
 		}
 	}
 
+	/*
+	 * check for PAT support
+	 */
+	{
+		uint32_t eax = 1;
+		uint32_t edx = get_cpuid_edx(&eax);
+
+		if (edx & CPUID_INTC_EDX_PAT)
+			PAT_support = 1;
+	}
 #if !defined(_BOOT_TARGET_amd64)
 
 	/*
@@ -2390,6 +2431,8 @@ startup_kernel(void)
 			pge_support = 1;
 		if (edx & CPUID_INTC_EDX_PAE)
 			pae_support = 1;
+		if (edx & CPUID_INTC_EDX_PAT)
+			PAT_support = 1;
 
 		eax = 0x80000000;
 		edx = get_cpuid_edx(&eax);
@@ -2459,6 +2502,7 @@ startup_kernel(void)
 		top_level = 1;
 	}
 
+	DBG(PAT_support);
 	DBG(pge_support);
 	DBG(NX_support);
 	DBG(largepage_support);
@@ -2559,4 +2603,13 @@ startup_kernel(void)
 #endif
 
 	DBG_MSG("\n\n*** DBOOT DONE -- back to asm to jump to kernel\n\n");
+
+#ifndef __xpv
+	/* Update boot info with FB data */
+	fb->cursor.origin.x = fb_info.cursor.origin.x;
+	fb->cursor.origin.y = fb_info.cursor.origin.y;
+	fb->cursor.pos.x = fb_info.cursor.pos.x;
+	fb->cursor.pos.y = fb_info.cursor.pos.y;
+	fb->cursor.visible = fb_info.cursor.visible;
+#endif
 }

@@ -22,6 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= libsec.a
 VERS= .1
@@ -47,9 +48,12 @@ CPPFLAGS +=	-I$(SRCDIR) -I. -I../../../common/acl
 LDLIBS += -lc -lavl -lidmap
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-unused-variable
+
+# not linted
+SMATCH=off
 
 CLOBBERFILES += acl.output
 

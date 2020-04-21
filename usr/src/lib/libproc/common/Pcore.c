@@ -24,9 +24,10 @@
  */
 /*
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
- * Copyright (c) 2014, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2018, Joyent, Inc. All rights reserved.
  * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright 2015 Gary Mills
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/types.h>
@@ -50,6 +51,7 @@
 #include "Pcontrol.h"
 #include "P32ton.h"
 #include "Putil.h"
+#include "proc_fd.h"
 #ifdef __x86
 #include "Pcore_linux.h"
 #endif
@@ -726,9 +728,35 @@ err:
 }
 
 static int
+note_lwpname(struct ps_prochandle *P, size_t nbytes)
+{
+	prlwpname_t name;
+	lwp_info_t *lwp;
+
+	if (nbytes != sizeof (name) ||
+	    read(P->asfd, &name, sizeof (name)) != sizeof (name))
+		goto err;
+
+	if ((lwp = lwpid2info(P, name.pr_lwpid)) == NULL)
+		goto err;
+
+	if (strlcpy(lwp->lwp_name, name.pr_lwpname,
+	    sizeof (lwp->lwp_name)) >= sizeof (lwp->lwp_name)) {
+		errno = ENAMETOOLONG;
+		goto err;
+	}
+
+	return (0);
+
+err:
+	dprintf("Pgrab_core: failed to read NT_LWPNAME\n");
+	return (-1);
+}
+
+static int
 note_fdinfo(struct ps_prochandle *P, size_t nbytes)
 {
-	prfdinfo_t prfd;
+	prfdinfo_core_t prfd;
 	fd_info_t *fip;
 
 	if ((nbytes < sizeof (prfd)) ||
@@ -741,7 +769,13 @@ note_fdinfo(struct ps_prochandle *P, size_t nbytes)
 		dprintf("Pgrab_core: failed to add NT_FDINFO\n");
 		return (-1);
 	}
-	(void) memcpy(&fip->fd_info, &prfd, sizeof (prfd));
+	if (fip->fd_info == NULL) {
+		if (proc_fdinfo_from_core(&prfd, &fip->fd_info) != 0) {
+			dprintf("Pgrab_core: failed to convert NT_FDINFO\n");
+			return (-1);
+		}
+	}
+
 	return (0);
 }
 
@@ -1231,6 +1265,7 @@ static int (*nhdlrs[])(struct ps_prochandle *, size_t) = {
 	note_fdinfo,		/* 22	NT_FDINFO		*/
 	note_spymaster,		/* 23	NT_SPYMASTER		*/
 	note_secflags,		/* 24	NT_SECFLAGS		*/
+	note_lwpname,		/* 25	NT_LWPNAME		*/
 };
 
 static void
@@ -1907,7 +1942,7 @@ core_find_data(struct ps_prochandle *P, Elf *elf, rd_loadobj_t *rlp)
 	uint_t i, pagemask;
 	size_t nphdrs;
 
-	rlp->rl_data_base = NULL;
+	rlp->rl_data_base = (uintptr_t)NULL;
 
 	/*
 	 * Find the first loadable, writeable Phdr and compute rl_data_base
@@ -1931,7 +1966,7 @@ core_find_data(struct ps_prochandle *P, Elf *elf, rd_loadobj_t *rlp)
 	 * If we didn't find an appropriate phdr or if the address we
 	 * computed has no mapping, return NULL.
 	 */
-	if (rlp->rl_data_base == NULL ||
+	if (rlp->rl_data_base == (uintptr_t)NULL ||
 	    (mp = Paddr2mptr(P, rlp->rl_data_base)) == NULL)
 		return (NULL);
 
@@ -2750,6 +2785,7 @@ Pfgrab_core(int core_fd, const char *aout_path, int *perr)
 
 			fp->file_ref = 1;
 			fp->file_fd = -1;
+			fp->file_dbgfile = -1;
 
 			fp->file_lo = malloc(sizeof (rd_loadobj_t));
 			fp->file_lname = strdup(execname);

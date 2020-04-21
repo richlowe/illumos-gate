@@ -23,6 +23,10 @@
  */
 
 /*
+ * Copyright (c) 2019, Joyent, Inc.
+ */
+
+/*
  * auditconfig - set and display audit parameters
  */
 
@@ -106,8 +110,8 @@ enum	commands {
 	AC_ARG_SET_TEMPORARY
 };
 
-#define	AC_KERN_EVENT 		0
-#define	AC_USER_EVENT 		1
+#define	AC_KERN_EVENT		0
+#define	AC_USER_EVENT		1
 
 #define	NONE(s) (!strlen(s) ? gettext("none") : s)
 
@@ -857,8 +861,8 @@ do_args(char **argv, au_mask_t *mask)
 			{
 				char		*plugin_str = NULL;
 				boolean_t	plugin_state = B_FALSE;
-				char 		*plugin_att = NULL;
-				int 		plugin_qsize = -1;
+				char		*plugin_att = NULL;
+				int		plugin_qsize = -1;
 
 				plugin_str = *++argv;
 				if (strcmp(*++argv, "active") == 0) {
@@ -1077,7 +1081,7 @@ static void
 do_chkaconf(void)
 {
 	char		*namask_cfg;
-	au_mask_t 	pmask, kmask;
+	au_mask_t	pmask, kmask;
 
 	if (!do_getnaflags_scf(&namask_cfg) || namask_cfg == NULL) {
 		exit_error(gettext("Could not get configured value."));
@@ -1112,7 +1116,7 @@ do_chkaconf(void)
 static void
 do_aconf(void)
 {
-	au_mask_t 	namask;
+	au_mask_t	namask;
 	char		*namask_cfg;
 
 	if (!do_getnaflags_scf(&namask_cfg) || namask_cfg == NULL) {
@@ -1400,7 +1404,7 @@ do_getnaflags(void)
 static void
 do_getpolicy(void)
 {
-	char 			policy_str[1024];
+	char			policy_str[1024];
 	uint32_t		policy;
 
 	if (!temporary_set) {
@@ -2434,7 +2438,7 @@ cond2str(void)
 }
 
 /*
- * 	exit = 0, success
+ *	exit = 0, success
  *	       1, error
  *	       2, bad zone
  */
@@ -2572,14 +2576,15 @@ strisnum(char *s)
 	if (s == NULL || !*s)
 		return (0);
 
-	for (; *s == '-' || *s == '+'; s++)
+	for (; *s == '-' || *s == '+'; s++) {
+		if (!*s)
+			return (0);
+	}
 
-	if (!*s)
-		return (0);
-
-	for (; *s; s++)
+	for (; *s; s++) {
 		if (!isdigit(*s))
 			return (0);
+	}
 
 	return (1);
 }
@@ -2775,7 +2780,7 @@ print_mask(char *desc, au_mask_t *pmp)
 {
 	char auflags[512];
 
-	if (getauditflagschar(auflags, pmp, NULL) < 0)
+	if (getauditflagschar(auflags, pmp, 0) < 0)
 		(void) strlcpy(auflags, gettext("unknown"), sizeof (auflags));
 
 	(void) printf("%s = %s(0x%x,0x%x)\n",

@@ -22,7 +22,8 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 RackTop Systems.
  */
 
 #include <strings.h>
@@ -91,7 +92,7 @@ static smb_lwka_t *smb_lwka_lookup_sid(smb_sid_t *);
  *
  *   NT_STATUS_NOT_FOUND	This is not a local account
  *   NT_STATUS_NONE_MAPPED	It's a local account but cannot be
- *   				translated.
+ *				translated.
  *   other error status codes.
  */
 uint32_t
@@ -201,7 +202,7 @@ smb_sam_lookup_name(char *domain, char *name, uint16_t type,
  *
  *   NT_STATUS_NOT_FOUND	This is not a local account
  *   NT_STATUS_NONE_MAPPED	It's a local account but cannot be
- *   				translated.
+ *				translated.
  *   other error status codes.
  */
 uint32_t
@@ -259,6 +260,7 @@ smb_sam_lookup_sid(smb_sid_t *sid, smb_account_t *account)
 				return (NT_STATUS_NO_SUCH_USER);
 
 			account->a_name = strdup(smbpw.pw_name);
+			account->a_flags = smbpw.pw_flags;
 			break;
 
 		case SMB_IDMAP_GROUP:
@@ -477,6 +479,7 @@ smb_sam_grp_ismember(const char *gname, smb_sid_t *sid)
 
 /*
  * Frees memories allocated for the passed account fields.
+ * Initializes @account after all.
  */
 void
 smb_account_free(smb_account_t *account)
@@ -485,6 +488,8 @@ smb_account_free(smb_account_t *account)
 	free(account->a_domain);
 	smb_sid_free(account->a_sid);
 	smb_sid_free(account->a_domsid);
+
+	bzero(account, sizeof (smb_account_t));
 }
 
 /*

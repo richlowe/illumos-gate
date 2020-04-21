@@ -26,7 +26,7 @@
 # Copyright 2012 Marcel Telka <marcel@telka.sk>
 # Copyright 2014 Bart Coddens <bart.coddens@gmail.com>
 # Copyright 2017 Nexenta Systems, Inc.
-# Copyright 2016 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 # Copyright 2016 RackTop Systems.
 #
 
@@ -148,11 +148,16 @@ span.new {
 '
 
 # CSS for the HTML version of the man pages.
-# Current version is from mandoc 1.14.4.
+# Current version is from mandoc 1.14.5.
 MANCSS='
-/* $Id: mandoc.css,v 1.36 2018/07/23 22:51:26 schwarze Exp $ */
+/* $Id: mandoc.css,v 1.45 2019/03/01 10:57:18 schwarze Exp $ */
 /*
  * Standard style sheet for mandoc(1) -Thtml and man.cgi(8).
+ *
+ * Written by Ingo Schwarze <schwarze@openbsd.org>.
+ * I place this file into the public domain.
+ * Permission to use, copy, modify, and distribute it for any purpose
+ * with or without fee is hereby granted, without any conditions.
  */
 
 /* Global defaults. */
@@ -160,8 +165,16 @@ MANCSS='
 html {		max-width: 65em; }
 body {		font-family: Helvetica,Arial,sans-serif; }
 table {		margin-top: 0em;
-		margin-bottom: 0em; }
-td {		vertical-align: top; }
+		margin-bottom: 0em;
+		border-collapse: collapse; }
+/* Some browsers set border-color in a browser style for tbody,
+ * but not for table, resulting in inconsistent border styling. */
+tbody {		border-color: inherit; }
+tr {		border-color: inherit; }
+td {		vertical-align: top;
+		padding-left: 0.2em;
+		padding-right: 0.2em;
+		border-color: inherit; }
 ul, ol, dl {	margin-top: 0em;
 		margin-bottom: 0em; }
 li, dt {	margin-top: 1em; }
@@ -204,12 +217,14 @@ td.foot-os {	text-align: right; }
 
 .manual-text {
 		margin-left: 3.8em; }
-.Nd {		display: inline; }
-.Sh {		margin-top: 1.2em;
+.Nd { }
+section.Sh { }
+h1.Sh {		margin-top: 1.2em;
 		margin-bottom: 0.6em;
 		margin-left: -3.2em;
 		font-size: 110%; }
-.Ss {		margin-top: 1.2em;
+section.Ss { }
+h2.Ss {		margin-top: 1.2em;
 		margin-bottom: 0.6em;
 		margin-left: -1.2em;
 		font-size: 105%; }
@@ -258,20 +273,25 @@ td.foot-os {	text-align: right; }
 .Bl-ohang > dt { }
 .Bl-ohang > dd {
 		margin-left: 0em; }
-.Bl-tag {	margin-left: 5.5em; }
+.Bl-tag {	margin-top: 0.6em;
+		margin-left: 5.5em; }
 .Bl-tag > dt {
 		float: left;
 		margin-top: 0em;
 		margin-left: -5.5em;
-		padding-right: 1.2em;
+		padding-right: 0.5em;
 		vertical-align: top; }
 .Bl-tag > dd {
 		clear: right;
 		width: 100%;
 		margin-top: 0em;
 		margin-left: 0em;
+		margin-bottom: 0.6em;
 		vertical-align: top;
 		overflow: auto; }
+.Bl-compact {	margin-top: 0em; }
+.Bl-compact > dd {
+		margin-bottom: 0em; }
 .Bl-compact > dt {
 		margin-top: 0em; }
 
@@ -303,7 +323,7 @@ td.foot-os {	text-align: right; }
 .RsV { }
 
 .eqn { }
-.tbl { }
+.tbl td {	vertical-align: middle; }
 
 .HP {		margin-left: 3.8em;
 		text-indent: -3.8em; }
@@ -388,12 +408,86 @@ a.In { }
 		font-weight: normal;
 		font-family: monospace; }
 
+/* Tooltip support. */
+
+h1.Sh, h2.Ss {	position: relative; }
+.An, .Ar, .Cd, .Cm, .Dv, .Em, .Er, .Ev, .Fa, .Fd, .Fl, .Fn, .Ft,
+.Ic, code.In, .Lb, .Lk, .Ms, .Mt, .Nd, code.Nm, .Pa, .Rs,
+.St, .Sx, .Sy, .Va, .Vt, .Xr {
+		display: inline-block;
+		position: relative; }
+
+.An::before {	content: "An"; }
+.Ar::before {	content: "Ar"; }
+.Cd::before {	content: "Cd"; }
+.Cm::before {	content: "Cm"; }
+.Dv::before {	content: "Dv"; }
+.Em::before {	content: "Em"; }
+.Er::before {	content: "Er"; }
+.Ev::before {	content: "Ev"; }
+.Fa::before {	content: "Fa"; }
+.Fd::before {	content: "Fd"; }
+.Fl::before {	content: "Fl"; }
+.Fn::before {	content: "Fn"; }
+.Ft::before {	content: "Ft"; }
+.Ic::before {	content: "Ic"; }
+code.In::before { content: "In"; }
+.Lb::before {	content: "Lb"; }
+.Lk::before {	content: "Lk"; }
+.Ms::before {	content: "Ms"; }
+.Mt::before {	content: "Mt"; }
+.Nd::before {	content: "Nd"; }
+code.Nm::before { content: "Nm"; }
+.Pa::before {	content: "Pa"; }
+.Rs::before {	content: "Rs"; }
+h1.Sh::before {	content: "Sh"; }
+h2.Ss::before {	content: "Ss"; }
+.St::before {	content: "St"; }
+.Sx::before {	content: "Sx"; }
+.Sy::before {	content: "Sy"; }
+.Va::before {	content: "Va"; }
+.Vt::before {	content: "Vt"; }
+.Xr::before {	content: "Xr"; }
+
+.An::before, .Ar::before, .Cd::before, .Cm::before,
+.Dv::before, .Em::before, .Er::before, .Ev::before,
+.Fa::before, .Fd::before, .Fl::before, .Fn::before, .Ft::before,
+.Ic::before, code.In::before, .Lb::before, .Lk::before,
+.Ms::before, .Mt::before, .Nd::before, code.Nm::before,
+.Pa::before, .Rs::before,
+h1.Sh::before, h2.Ss::before, .St::before, .Sx::before, .Sy::before,
+.Va::before, .Vt::before, .Xr::before {
+		opacity: 0;
+		transition: .15s ease opacity;
+		pointer-events: none;
+		position: absolute;
+		bottom: 100%;
+		box-shadow: 0 0 .35em #000;
+		padding: .15em .25em;
+		white-space: nowrap;
+		font-family: Helvetica,Arial,sans-serif;
+		font-style: normal;
+		font-weight: bold;
+		color: black;
+		background: #fff; }
+.An:hover::before, .Ar:hover::before, .Cd:hover::before, .Cm:hover::before,
+.Dv:hover::before, .Em:hover::before, .Er:hover::before, .Ev:hover::before,
+.Fa:hover::before, .Fd:hover::before, .Fl:hover::before, .Fn:hover::before,
+.Ft:hover::before, .Ic:hover::before, code.In:hover::before,
+.Lb:hover::before, .Lk:hover::before, .Ms:hover::before, .Mt:hover::before,
+.Nd:hover::before, code.Nm:hover::before, .Pa:hover::before,
+.Rs:hover::before, h1.Sh:hover::before, h2.Ss:hover::before, .St:hover::before,
+.Sx:hover::before, .Sy:hover::before, .Va:hover::before, .Vt:hover::before,
+.Xr:hover::before {
+		opacity: 1;
+		pointer-events: inherit; }
+
 /* Overrides to avoid excessive margins on small devices. */
 
 @media (max-width: 37.5em) {
 .manual-text {
 		margin-left: 0.5em; }
-.Sh, .Ss {	margin-left: 0em; }
+h1.Sh, h2.Ss {	margin-left: 0em; }
 .Bd-indent {	margin-left: 2em; }
 .Bl-hang > dd {
 		margin-left: 2em; }
@@ -779,7 +873,7 @@ html_quote()
 	$SED -e "s/&/\&amp;/g" -e "s/</\&lt;/g" -e "s/>/\&gt;/g" "$@" | expand
 }
 
-# 
+#
 # Trim a digest-style revision to a conventionally readable yet useful length
 #
 trim_digest()
@@ -1182,67 +1276,6 @@ function framed_sdiff
 	  </frameset>
 	</html>
 	EOF
-}
-
-
-#
-# fix_postscript
-#
-# Merge codereview output files to a single conforming postscript file, by:
-#	- removing all extraneous headers/trailers
-#	- making the page numbers right
-#	- removing pages devoid of contents which confuse some
-#	  postscript readers.
-#
-# From Casper.
-#
-function fix_postscript
-{
-	infile=$1
-
-	cat > /tmp/$$.crmerge.pl << \EOF
-
-	print scalar(<>);		# %!PS-Adobe---
-	print "%%Orientation: Landscape\n";
-
-	$pno = 0;
-	$doprint = 1;
-
-	$page = "";
-
-	while (<>) {
-		next if (/^%%Pages:\s*\d+/);
-
-		if (/^%%Page:/) {
-			if ($pno == 0 || $page =~ /\)S/) {
-				# Header or single page containing text
-				print "%%Page: ? $pno\n" if ($pno > 0);
-				print $page;
-				$pno++;
-			} else {
-				# Empty page, skip it.
-			}
-			$page = "";
-			$doprint = 1;
-			next;
-		}
-
-		# Skip from %%Trailer of one document to Endprolog
-		# %%Page of the next
-		$doprint = 0 if (/^%%Trailer/);
-		$page .= $_ if ($doprint);
-	}
-
-	if ($page =~ /\)S/) {
-		print "%%Page: ? $pno\n";
-		print $page;
-	} else {
-		$pno--;
-	}
-	print "%%Trailer\n%%Pages: $pno\n";
-EOF
-
-	$PERL /tmp/$$.crmerge.pl < $infile
 }
 
 
@@ -1981,7 +2014,7 @@ function git_wxfile
 	    }
 	}
 	close(F);
-	 
+
 	for (sort keys %files) {
 	    if ($realfiles{$_} ne $_) {
 		print "$_ $realfiles{$_}\n$files{$_}\n\n";
@@ -2263,8 +2296,6 @@ PATH=$(/bin/dirname "$(whence $0)"):$PATH
 [[ -z $WX ]] && WX=`look_for_prog wx`
 [[ -z $GIT ]] && GIT=`look_for_prog git`
 [[ -z $WHICH_SCM ]] && WHICH_SCM=`look_for_prog which_scm`
-[[ -z $CODEREVIEW ]] && CODEREVIEW=`look_for_prog codereview`
-[[ -z $PS2PDF ]] && PS2PDF=`look_for_prog ps2pdf`
 [[ -z $PERL ]] && PERL=`look_for_prog perl`
 [[ -z $RSYNC ]] && RSYNC=`look_for_prog rsync`
 [[ -z $SCCS ]] && SCCS=`look_for_prog sccs`
@@ -2295,13 +2326,6 @@ if [[ ! -x $WHICH_SCM ]]; then
 	exit 1
 fi
 
-#
-# These aren't fatal, but we want to note them to the user.
-# We don't warn on the absence of 'wx' until later when we've
-# determined that we actually need to try to invoke it.
-#
-[[ ! -x $CODEREVIEW ]] && print -u2 "WARNING: codereview(1) not found."
-[[ ! -x $PS2PDF ]] && print -u2 "WARNING: ps2pdf(1) not found."
 [[ ! -x $WDIFF ]] && print -u2 "WARNING: wdiff not found."
 
 # Declare global total counters.
@@ -2969,8 +2993,6 @@ print "      Output to: $WDIR"
 [[ ! $FLIST -ef $WDIR/file.list ]] && cp $FLIST $WDIR/file.list
 
 rm -f $WDIR/$WNAME.patch
-rm -f $WDIR/$WNAME.ps
-rm -f $WDIR/$WNAME.pdf
 
 touch $WDIR/$WNAME.patch
 
@@ -3210,31 +3232,6 @@ do
 		rm -f $WDIR/$DIR/$F.man.cdiff $WDIR/$DIR/$F.man.udiff
 	fi
 
-	#
-	# Now we generate the postscript for this file.  We generate diffs
-	# only in the event that there is delta, or the file is new (it seems
-	# tree-killing to print out the contents of deleted files).
-	#
-	if [[ -f $nfile ]]; then
-		ocr=$ofile
-		[[ ! -f $ofile ]] && ocr=/dev/null
-
-		if [[ -z $mv_but_nodiff ]]; then
-			textcomm=`getcomments text $P $PP`
-			if [[ -x $CODEREVIEW ]]; then
-				$CODEREVIEW -y "$textcomm" \
-				    -e $ocr $nfile \
-				    > /tmp/$$.psfile 2>/dev/null &&
-				    cat /tmp/$$.psfile >> $WDIR/$WNAME.ps
-				if [[ $? -eq 0 ]]; then
-					print " ps\c"
-				else
-					print " ps[fail]\c"
-				fi
-			fi
-		fi
-	fi
-
 	if [[ -f $ofile ]]; then
 		source_to_html Old $PP < $ofile > $WDIR/$DIR/$F-.html
 		print " old\c"
@@ -3252,16 +3249,6 @@ done
 
 frame_nav_js > $WDIR/ancnav.js
 frame_navigation > $WDIR/ancnav.html
-
-if [[ ! -f $WDIR/$WNAME.ps ]]; then
-	print " Generating PDF: Skipped: no output available"
-elif [[ -x $CODEREVIEW && -x $PS2PDF ]]; then
-	print " Generating PDF: \c"
-	fix_postscript $WDIR/$WNAME.ps | $PS2PDF - > $WDIR/$WNAME.pdf
-	print "Done."
-else
-	print " Generating PDF: Skipped: missing 'ps2pdf' or 'codereview'"
-fi
 
 # If we're in OpenSolaris mode and there's a closed dir under $WDIR,
 # delete it - prevent accidental publishing of closed source
@@ -3342,11 +3329,6 @@ if [[ -f $WDIR/$WNAME.patch ]]; then
 	wpatch_url="$(print $WNAME.patch | url_encode)"
 	print "<tr><th>Patch of changes:</th><td>"
 	print "<a href=\"$wpatch_url\">$WNAME.patch</a></td></tr>"
-fi
-if [[ -f $WDIR/$WNAME.pdf ]]; then
-	wpdf_url="$(print $WNAME.pdf | url_encode)"
-	print "<tr><th>Printable review:</th><td>"
-	print "<a href=\"$wpdf_url\">$WNAME.pdf</a></td></tr>"
 fi
 
 if [[ -n "$iflag" ]]; then

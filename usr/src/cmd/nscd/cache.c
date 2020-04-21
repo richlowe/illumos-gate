@@ -22,6 +22,7 @@
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Milan Jurik. All rights reserved.
  * Copyright (c) 2016 by Delphix. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*
@@ -84,7 +85,7 @@ static void queue_dump(nsc_db_t *, time_t);
 #endif	/* NSCD_DEBUG */
 
 static int launch_update(nsc_lookup_args_t *);
-static void do_update(nsc_lookup_args_t *);
+static void *do_update(void *);
 static void getxy_keepalive(nsc_ctx_t *, nsc_db_t *, int, int);
 
 static void ctx_info(nsc_ctx_t *);
@@ -106,11 +107,12 @@ static uint_t nsc_db_int_key_gethash(nss_XbyY_key_t *, int);
 static umem_cache_t	*nsc_entry_cache;
 
 static nsc_ctx_t *init_cache_ctx(int);
-static void reaper(nsc_ctx_t *);
-static void revalidate(nsc_ctx_t *);
+static void *reaper(void *);
+static void *revalidate(void *);
 
 static nss_status_t
-dup_packed_buffer(void *src, void *dst) {
+dup_packed_buffer(void *src, void *dst)
+{
 	nsc_lookup_args_t	*s = (nsc_lookup_args_t *)src;
 	nsc_entry_t		*d = (nsc_entry_t *)dst;
 	nss_pheader_t		*sphdr = (nss_pheader_t *)s->buffer;
@@ -208,7 +210,8 @@ static nscd_cfg_global_cache_t	global_cfg;
  * Given database name 'dbname' find cache index
  */
 int
-get_cache_idx(char *dbname) {
+get_cache_idx(char *dbname)
+{
 	int	i;
 	char	*nsc_name;
 
@@ -225,7 +228,8 @@ get_cache_idx(char *dbname) {
  * if not created yet, allocate and initialize it.
  */
 static nscd_rc_t
-get_cache_ctx(char *dbname, nsc_ctx_t **ctx) {
+get_cache_ctx(char *dbname, nsc_ctx_t **ctx)
+{
 	int	i;
 
 	*ctx = NULL;
@@ -247,21 +251,24 @@ get_cache_ctx(char *dbname, nsc_ctx_t **ctx) {
  */
 static void
 nsc_db_str_key_getlogstr(char *name, char *whoami, size_t len,
-		nss_XbyY_args_t *argp) {
+    nss_XbyY_args_t *argp)
+{
 	(void) snprintf(whoami, len, "%s [key=%s]", name, argp->key.name);
 }
 
 
 static void
 nsc_db_int_key_getlogstr(char *name, char *whoami, size_t len,
-		nss_XbyY_args_t *argp) {
+    nss_XbyY_args_t *argp)
+{
 	(void) snprintf(whoami, len, "%s [key=%d]", name, argp->key.number);
 }
 
 /*ARGSUSED*/
 static void
 nsc_db_any_key_getlogstr(char *name, char *whoami, size_t len,
-		nss_XbyY_args_t *argp) {
+    nss_XbyY_args_t *argp)
+{
 	(void) snprintf(whoami, len, "%s", name);
 }
 
@@ -270,7 +277,8 @@ nsc_db_any_key_getlogstr(char *name, char *whoami, size_t len,
  * Returns cache based on dbop
  */
 static nsc_db_t *
-nsc_get_db(nsc_ctx_t *ctx, int dbop) {
+nsc_get_db(nsc_ctx_t *ctx, int dbop)
+{
 	int	i;
 
 	for (i = 0; i < ctx->db_count; i++) {
@@ -285,7 +293,8 @@ nsc_get_db(nsc_ctx_t *ctx, int dbop) {
  * integer compare routine for _NSC_DB_INT_KEY
  */
 static int
-nsc_db_int_key_compar(const void *n1, const void *n2) {
+nsc_db_int_key_compar(const void *n1, const void *n2)
+{
 	nsc_entry_t	*e1, *e2;
 
 	e1 = (nsc_entry_t *)n1;
@@ -298,7 +307,8 @@ nsc_db_int_key_compar(const void *n1, const void *n2) {
  * case sensitive name compare routine for _NSC_DB_CES_KEY
  */
 static int
-nsc_db_ces_key_compar(const void *n1, const void *n2) {
+nsc_db_ces_key_compar(const void *n1, const void *n2)
+{
 	nsc_entry_t	*e1, *e2;
 	int		res, l1, l2;
 
@@ -315,7 +325,8 @@ nsc_db_ces_key_compar(const void *n1, const void *n2) {
  * case insensitive name compare routine _NSC_DB_CIS_KEY
  */
 static int
-nsc_db_cis_key_compar(const void *n1, const void *n2) {
+nsc_db_cis_key_compar(const void *n1, const void *n2)
+{
 	nsc_entry_t	*e1, *e2;
 	int		res, l1, l2;
 
@@ -346,7 +357,8 @@ nsc_db_cis_key_compar(const void *n1, const void *n2) {
  * cis hash function
  */
 uint_t
-cis_gethash(const char *key, int htsize) {
+cis_gethash(const char *key, int htsize)
+{
 	uint_t	hval;
 	if (key == NULL)
 		return (0);
@@ -359,7 +371,8 @@ cis_gethash(const char *key, int htsize) {
  * ces hash function
  */
 uint_t
-ces_gethash(const char *key, int htsize) {
+ces_gethash(const char *key, int htsize)
+{
 	uint_t	hval;
 	if (key == NULL)
 		return (0);
@@ -372,7 +385,8 @@ ces_gethash(const char *key, int htsize) {
  * one-at-a-time hash function
  */
 uint_t
-db_gethash(const void *key, int len, int htsize) {
+db_gethash(const void *key, int len, int htsize)
+{
 	uint_t	hval, i;
 	const char *str = key;
 
@@ -395,7 +409,8 @@ db_gethash(const void *key, int len, int htsize) {
  * case insensitive name gethash routine _NSC_DB_CIS_KEY
  */
 static uint_t
-nsc_db_cis_key_gethash(nss_XbyY_key_t *key, int htsize) {
+nsc_db_cis_key_gethash(nss_XbyY_key_t *key, int htsize)
+{
 	return (cis_gethash(key->name, htsize));
 }
 
@@ -404,7 +419,8 @@ nsc_db_cis_key_gethash(nss_XbyY_key_t *key, int htsize) {
  * case sensitive name gethash routine _NSC_DB_CES_KEY
  */
 static uint_t
-nsc_db_ces_key_gethash(nss_XbyY_key_t *key, int htsize) {
+nsc_db_ces_key_gethash(nss_XbyY_key_t *key, int htsize)
+{
 	return (ces_gethash(key->name, htsize));
 }
 
@@ -413,7 +429,8 @@ nsc_db_ces_key_gethash(nss_XbyY_key_t *key, int htsize) {
  * integer gethash routine _NSC_DB_INT_KEY
  */
 static uint_t
-nsc_db_int_key_gethash(nss_XbyY_key_t *key, int htsize) {
+nsc_db_int_key_gethash(nss_XbyY_key_t *key, int htsize)
+{
 	return (db_gethash(&key->number, sizeof (key->number), htsize));
 }
 
@@ -428,7 +445,8 @@ nsc_db_int_key_gethash(nss_XbyY_key_t *key, int htsize) {
  */
 static nsc_entry_t *
 hash_find(nsc_db_t *nscdb, nsc_entry_t *entry, uint_t *hash,
-			nscd_bool_t cmp) {
+    nscd_bool_t cmp)
+{
 
 	nsc_entry_t	*hashentry;
 
@@ -464,7 +482,8 @@ hash_find(nsc_db_t *nscdb, nsc_entry_t *entry, uint_t *hash,
 
 #ifdef	NSCD_DEBUG
 static void
-print_entry(nsc_db_t *nscdb, time_t now, nsc_entry_t *entry) {
+print_entry(nsc_db_t *nscdb, time_t now, nsc_entry_t *entry)
+{
 	nss_XbyY_args_t args;
 	char		whoami[512];
 
@@ -484,12 +503,12 @@ print_entry(nsc_db_t *nscdb, time_t now, nsc_entry_t *entry) {
 	default:
 		if (entry->stats.timestamp < now)
 			(void) fprintf(stdout,
-			gettext("\t status: expired (%d seconds ago)\n"),
-			now - entry->stats.timestamp);
+			    gettext("\t status: expired (%d seconds ago)\n"),
+			    now - entry->stats.timestamp);
 		else
-			(void) fprintf(stdout,
-			gettext("\t status: valid (expiry in %d seconds)\n"),
-			entry->stats.timestamp - now);
+			(void) fprintf(stdout, gettext(
+			    "\t status: valid (expiry in %d seconds)\n"),
+			    entry->stats.timestamp - now);
 		break;
 	}
 	(void) fprintf(stdout, gettext("\t hits: %u\n"), entry->stats.hits);
@@ -500,62 +519,64 @@ print_entry(nsc_db_t *nscdb, time_t now, nsc_entry_t *entry) {
 #endif	/* NSCD_DEBUG */
 
 static void
-print_stats(nscd_cfg_stat_cache_t *statsp) {
+print_stats(nscd_cfg_stat_cache_t *statsp)
+{
 
 	(void) fprintf(stdout, gettext("\n\t STATISTICS:\n"));
 	(void) fprintf(stdout, gettext("\t positive hits: %lu\n"),
-			statsp->pos_hits);
+	    statsp->pos_hits);
 	(void) fprintf(stdout, gettext("\t negative hits: %lu\n"),
-			statsp->neg_hits);
+	    statsp->neg_hits);
 	(void) fprintf(stdout, gettext("\t positive misses: %lu\n"),
-			statsp->pos_misses);
+	    statsp->pos_misses);
 	(void) fprintf(stdout, gettext("\t negative misses: %lu\n"),
-			statsp->neg_misses);
+	    statsp->neg_misses);
 	(void) fprintf(stdout, gettext("\t total entries: %lu\n"),
-			statsp->entries);
+	    statsp->entries);
 	(void) fprintf(stdout, gettext("\t queries queued: %lu\n"),
-			statsp->wait_count);
+	    statsp->wait_count);
 	(void) fprintf(stdout, gettext("\t queries dropped: %lu\n"),
-			statsp->drop_count);
+	    statsp->drop_count);
 	(void) fprintf(stdout, gettext("\t cache invalidations: %lu\n"),
-			statsp->invalidate_count);
+	    statsp->invalidate_count);
 
 	_NSC_GET_HITRATE(statsp);
 	(void) fprintf(stdout, gettext("\t cache hit rate: %10.1f\n"),
-			statsp->hitrate);
+	    statsp->hitrate);
 }
 
 
 static void
-print_cfg(nscd_cfg_cache_t *cfgp) {
+print_cfg(nscd_cfg_cache_t *cfgp)
+{
 	(void) fprintf(stdout, gettext("\n\t CONFIG:\n"));
 	(void) fprintf(stdout, gettext("\t enabled: %s\n"),
-			yes_no(cfgp->enable));
+	    yes_no(cfgp->enable));
 	(void) fprintf(stdout, gettext("\t per user cache: %s\n"),
-			yes_no(cfgp->per_user));
+	    yes_no(cfgp->per_user));
 	(void) fprintf(stdout, gettext("\t avoid name service: %s\n"),
-			yes_no(cfgp->avoid_ns));
+	    yes_no(cfgp->avoid_ns));
 	(void) fprintf(stdout, gettext("\t check file: %s\n"),
-			yes_no(cfgp->check_files));
+	    yes_no(cfgp->check_files));
 	(void) fprintf(stdout, gettext("\t check file interval: %d\n"),
-			cfgp->check_interval);
+	    cfgp->check_interval);
 	(void) fprintf(stdout, gettext("\t positive ttl: %d\n"),
-			cfgp->pos_ttl);
+	    cfgp->pos_ttl);
 	(void) fprintf(stdout, gettext("\t negative ttl: %d\n"),
-			cfgp->neg_ttl);
+	    cfgp->neg_ttl);
 	(void) fprintf(stdout, gettext("\t keep hot count: %d\n"),
-			cfgp->keephot);
+	    cfgp->keephot);
 	(void) fprintf(stdout, gettext("\t hint size: %d\n"),
-			cfgp->hint_size);
+	    cfgp->hint_size);
 	(void) fprintf(stdout, gettext("\t max entries: %lu%s"),
-			cfgp->maxentries,
-			cfgp->maxentries?"\n":" (unlimited)\n");
+	    cfgp->maxentries, cfgp->maxentries?"\n":" (unlimited)\n");
 }
 
 
 #ifdef	NSCD_DEBUG
 static void
-hash_dump(nsc_db_t *nscdb, time_t now) {
+hash_dump(nsc_db_t *nscdb, time_t now)
+{
 	nsc_entry_t	*entry;
 	int		i;
 
@@ -572,13 +593,14 @@ hash_dump(nsc_db_t *nscdb, time_t now) {
 
 #ifdef	NSCD_DEBUG
 static void
-avl_dump(nsc_db_t *nscdb, time_t now) {
+avl_dump(nsc_db_t *nscdb, time_t now)
+{
 	nsc_entry_t	*entry;
 	int		i;
 
 	(void) fprintf(stdout, gettext("\n\nAVL TREE:\n"));
 	for (entry = avl_first(&nscdb->tree), i = 0; entry != NULL;
-			entry = avl_walk(&nscdb->tree, entry, AVL_AFTER)) {
+	    entry = avl_walk(&nscdb->tree, entry, AVL_AFTER)) {
 		(void) fprintf(stdout, "avl node[%d]:\n", i++);
 		print_entry(nscdb, now, entry);
 	}
@@ -588,16 +610,17 @@ avl_dump(nsc_db_t *nscdb, time_t now) {
 
 #ifdef	NSCD_DEBUG
 static void
-queue_dump(nsc_db_t *nscdb, time_t now) {
+queue_dump(nsc_db_t *nscdb, time_t now)
+{
 	nsc_entry_t	*entry;
 	int		i;
 
 	(void) fprintf(stdout,
-		gettext("\n\nCACHE [name=%s, nodes=%lu]:\n"),
-		nscdb->name, avl_numnodes(&nscdb->tree));
+	    gettext("\n\nCACHE [name=%s, nodes=%lu]:\n"),
+	    nscdb->name, avl_numnodes(&nscdb->tree));
 
 	(void) fprintf(stdout,
-		gettext("Starting with the most recently accessed:\n"));
+	    gettext("Starting with the most recently accessed:\n"));
 
 	for (entry = nscdb->qtail, i = 0; entry; entry = entry->qnext) {
 		(void) fprintf(stdout, "entry[%d]:\n", i++);
@@ -607,7 +630,8 @@ queue_dump(nsc_db_t *nscdb, time_t now) {
 #endif	/* NSCD_DEBUG */
 
 static void
-queue_remove(nsc_db_t *nscdb, nsc_entry_t *entry) {
+queue_remove(nsc_db_t *nscdb, nsc_entry_t *entry)
+{
 
 	if (nscdb->qtail == entry)
 		nscdb->qtail = entry->qnext;
@@ -626,17 +650,18 @@ queue_remove(nsc_db_t *nscdb, nsc_entry_t *entry) {
 
 
 static void
-queue_adjust(nsc_db_t *nscdb, nsc_entry_t *entry) {
+queue_adjust(nsc_db_t *nscdb, nsc_entry_t *entry)
+{
 
 #ifdef NSCD_DEBUG
 	assert(nscdb->qtail || entry->qnext == NULL &&
-			entry->qprev == NULL);
+	    entry->qprev == NULL);
 
 	assert(nscdb->qtail && nscdb->qhead ||
-		nscdb->qtail == NULL && nscdb->qhead == NULL);
+	    nscdb->qtail == NULL && nscdb->qhead == NULL);
 
 	assert(entry->qprev || entry->qnext == NULL ||
-		nscdb->qtail == entry);
+	    nscdb->qtail == entry);
 #endif /* NSCD_DEBUG */
 
 	/* already in the desired position */
@@ -676,13 +701,13 @@ queue_adjust(nsc_db_t *nscdb, nsc_entry_t *entry) {
  * Init cache
  */
 nscd_rc_t
-init_cache(int debug_level) {
+init_cache(int debug_level)
+{
 	int cflags;
 
 	cflags = (debug_level > 0)?0:UMC_NODEBUG;
 	nsc_entry_cache = umem_cache_create("nsc_entry_cache",
-				sizeof (nsc_entry_t), 0, NULL, NULL, NULL,
-				NULL, NULL, cflags);
+	    sizeof (nsc_entry_t), 0, NULL, NULL, NULL, NULL, NULL, cflags);
 	if (nsc_entry_cache == NULL)
 		return (NSCD_NO_MEMORY);
 	return (NSCD_SUCCESS);
@@ -1001,7 +1026,8 @@ nsc_info(nsc_ctx_t *ctx, char *dbname, nscd_cfg_cache_t cfg[],
 }
 
 static void
-ctx_info_nolock(nsc_ctx_t *ctx) {
+ctx_info_nolock(nsc_ctx_t *ctx)
+{
 	nscd_cfg_cache_t	cfg;
 	nscd_cfg_stat_cache_t	stats;
 
@@ -1017,7 +1043,8 @@ ctx_info_nolock(nsc_ctx_t *ctx) {
 }
 
 static void
-ctx_info(nsc_ctx_t *ctx) {
+ctx_info(nsc_ctx_t *ctx)
+{
 	nscd_cfg_cache_t	cfg;
 	nscd_cfg_stat_cache_t	stats;
 
@@ -1133,8 +1160,7 @@ start_threads(nsc_ctx_t *ctx)
 	 *  kick off the revalidate thread (if necessary)
 	 */
 	if (ctx->revalidate_on != nscd_true) {
-		if (thr_create(NULL, NULL, (void *(*)(void *))revalidate,
-		    ctx, 0, NULL) != 0) {
+		if (thr_create(NULL, 0, revalidate, ctx, 0, NULL) != 0) {
 			errnum = errno;
 			_NSCD_LOG(NSCD_LOG_CACHE, NSCD_LOG_LEVEL_ERROR)
 			(me, "thr_create (revalidate thread for %s): %s\n",
@@ -1148,8 +1174,7 @@ start_threads(nsc_ctx_t *ctx)
 	 *  kick off the reaper thread (if necessary)
 	 */
 	if (ctx->reaper_on != nscd_true) {
-		if (thr_create(NULL, NULL, (void *(*)(void *))reaper,
-		    ctx, 0, NULL) != 0) {
+		if (thr_create(NULL, 0, reaper, ctx, 0, NULL) != 0) {
 			errnum = errno;
 			_NSCD_LOG(NSCD_LOG_CACHE, NSCD_LOG_LEVEL_ERROR)
 			(me, "thr_create (reaper thread for %s): %s\n",
@@ -1757,7 +1782,8 @@ lookup_int(nsc_lookup_args_t *largs, int flag)
  */
 /*ARGSUSED*/
 void
-nsc_lookup(nsc_lookup_args_t *largs, int flag) {
+nsc_lookup(nsc_lookup_args_t *largs, int flag)
+{
 
 	nss_pheader_t	*phdr = (nss_pheader_t *)largs->buffer;
 	int		rc;
@@ -1795,7 +1821,8 @@ nsc_lookup(nsc_lookup_args_t *largs, int flag) {
 
 
 static nsc_ctx_t *
-init_cache_ctx(int i) {
+init_cache_ctx(int i)
+{
 	nsc_ctx_t	*ctx;
 
 	ctx = calloc(1, sizeof (nsc_ctx_t));
@@ -1814,11 +1841,15 @@ init_cache_ctx(int i) {
 }
 
 
-static void
-revalidate(nsc_ctx_t *ctx)
+static void *
+revalidate(void *arg)
 {
+	nsc_ctx_t *ctx = arg;
+
+	(void) thr_setname(thr_self(), "revalidate");
+
 	for (;;) {
-		int 		i, slp, interval, count;
+		int i, slp, interval, count;
 
 		(void) rw_rdlock(&ctx->cfg_rwlp);
 		slp = ctx->cfg.pos_ttl;
@@ -1840,6 +1871,7 @@ revalidate(nsc_ctx_t *ctx)
 			(void) sleep(slp);
 		}
 	}
+	return (NULL);
 }
 
 
@@ -1945,8 +1977,7 @@ launch_update(nsc_lookup_args_t *in)
 	char	*me = "launch_update";
 	int	errnum;
 
-	errnum = thr_create(NULL, NULL, (void *(*)(void*))do_update,
-	    in, 0|THR_DETACHED, NULL);
+	errnum = thr_create(NULL, 0, do_update, in, 0|THR_DETACHED, NULL);
 	if (errnum != 0) {
 		_NSCD_LOG(NSCD_LOG_CACHE, NSCD_LOG_LEVEL_ERROR)
 		(me, "%s: thread creation failure (%d)\n",
@@ -1957,9 +1988,13 @@ launch_update(nsc_lookup_args_t *in)
 }
 
 
-static void
-do_update(nsc_lookup_args_t *in) {
+static void *
+do_update(void *arg)
+{
+	nsc_lookup_args_t *in = arg;
 	nss_pheader_t	*phdr = (nss_pheader_t *)in->buffer;
+
+	(void) thr_setname(thr_self(), "do_update");
 
 	/* update the length of the data buffer */
 	phdr->data_len = phdr->pbufsiz - phdr->data_off;
@@ -1968,6 +2003,7 @@ do_update(nsc_lookup_args_t *in) {
 	if (in->buffer)
 		free(in->buffer);
 	free(in);
+	return (NULL);
 }
 
 
@@ -2017,7 +2053,7 @@ nsc_invalidate(nsc_ctx_t *ctx, char *dbname, nsc_ctx_t **ctxs)
 static void
 ctx_invalidate(nsc_ctx_t *ctx)
 {
-	int 		i;
+	int		i;
 	nsc_entry_t	*entry;
 	char		*me = "ctx_invalidate";
 
@@ -2051,7 +2087,8 @@ ctx_invalidate(nsc_ctx_t *ctx)
  * nscdb->db_mutex lock must be held before calling this function
  */
 static void
-delete_entry(nsc_db_t *nscdb, nsc_ctx_t *ctx, nsc_entry_t *entry) {
+delete_entry(nsc_db_t *nscdb, nsc_ctx_t *ctx, nsc_entry_t *entry)
+{
 	uint_t		hash;
 
 	avl_remove(&nscdb->tree, entry);
@@ -2182,13 +2219,16 @@ lookup_cache(nsc_lookup_args_t *largs, nscd_cfg_cache_t *cfgp,
 	return (NSCD_SUCCESS);
 }
 
-static void
-reaper(nsc_ctx_t *ctx)
+static void *
+reaper(void *arg)
 {
+	nsc_ctx_t	*ctx = arg;
 	uint_t		ttl, extra_sleep, total_sleep, intervals;
 	uint_t		nodes_per_interval, seconds_per_interval;
 	ulong_t		nsc_entries;
 	char		*me = "reaper";
+
+	(void) thr_setname(thr_self(), me);
 
 	for (;;) {
 		(void) mutex_lock(&ctx->stats_mutex);
@@ -2245,6 +2285,7 @@ reaper(nsc_ctx_t *ctx)
 		if (extra_sleep > 0)
 			(void) sleep(extra_sleep);
 	}
+	return (NULL);
 }
 
 

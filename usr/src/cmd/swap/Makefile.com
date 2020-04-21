@@ -22,7 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/swap/Makefile.com
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	swap
 OBJS=	$(PROG).o
@@ -33,7 +33,10 @@ include ../../Makefile.cmd
 CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-D_LARGEFILE64_SOURCE
 CFLAGS64 +=	$(CCVERBOSE)
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 FILEMODE=02555
 

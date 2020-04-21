@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -84,7 +84,8 @@ static int hostname_validator(int, char *);
 static int path_validator(int, char *);
 static int cmd_validator(int, char *);
 static int disposition_validator(int, char *);
-static int max_protocol_validator(int, char *);
+static int protocol_validator(int, char *);
+static int require_validator(int, char *);
 
 static int smb_enable_resource(sa_resource_t);
 static int smb_disable_resource(sa_resource_t);
@@ -98,7 +99,7 @@ static sa_group_t smb_get_defaultgrp(sa_handle_t);
 static int interface_validator(int, char *);
 static int smb_update_optionset_props(sa_handle_t, sa_resource_t, nvlist_t *);
 
-static boolean_t smb_saprop_getbool(sa_optionset_t, char *);
+static boolean_t smb_saprop_getbool(sa_optionset_t, char *, boolean_t);
 static boolean_t smb_saprop_getstr(sa_optionset_t, char *, char *, size_t);
 
 static struct {
@@ -178,7 +179,11 @@ struct option_defs optdefs[] = {
 	{ SHOPT_GUEST,		OPT_TYPE_BOOLEAN },
 	{ SHOPT_DFSROOT,	OPT_TYPE_BOOLEAN },
 	{ SHOPT_DESCRIPTION,	OPT_TYPE_STRING },
-	{ NULL, NULL }
+	{ SHOPT_CA,		OPT_TYPE_BOOLEAN },
+	{ SHOPT_FSO,		OPT_TYPE_BOOLEAN },
+	{ SHOPT_QUOTAS,		OPT_TYPE_BOOLEAN },
+	{ SHOPT_ENCRYPT,	OPT_TYPE_STRING },
+	{ NULL, 0 }
 };
 
 /*
@@ -386,9 +391,7 @@ smb_enable_share(sa_share_t share)
 	smb_share_t si;
 	sa_resource_t resource;
 	boolean_t iszfs;
-	boolean_t privileged;
 	int err = SA_OK;
-	priv_set_t *priv_effective;
 	boolean_t online;
 
 	/*
@@ -399,11 +402,6 @@ smb_enable_share(sa_share_t share)
 		    "SMB: service not supported with Trusted Extensions\n"));
 		return (SA_NOT_SUPPORTED);
 	}
-
-	priv_effective = priv_allocset();
-	(void) getppriv(PRIV_EFFECTIVE, priv_effective);
-	privileged = (priv_isfullset(priv_effective) == B_TRUE);
-	priv_freeset(priv_effective);
 
 	/* get the path since it is important in several places */
 	path = sa_get_share_attr(share, "path");
@@ -419,29 +417,7 @@ smb_enable_share(sa_share_t share)
 
 	iszfs = sa_path_is_zfs(path);
 
-	if (iszfs) {
-
-		if (privileged == B_FALSE && !online) {
-
-			if (!online) {
-				(void) printf(dgettext(TEXT_DOMAIN,
-				    "SMB: Cannot share remove "
-				    "file system: %s\n"), path);
-				(void) printf(dgettext(TEXT_DOMAIN,
-				    "SMB: Service needs to be enabled "
-				    "by a privileged user\n"));
-				err = SA_NO_PERMISSION;
-				errno = EPERM;
-			}
-			if (err) {
-				sa_free_attr_string(path);
-				return (err);
-			}
-
-		}
-	}
-
-	if (privileged == B_TRUE && !online) {
+	if (!online) {
 		err = smb_enable_service();
 		if (err != SA_OK) {
 			(void) printf(dgettext(TEXT_DOMAIN,
@@ -914,12 +890,38 @@ struct smb_proto_option_defs {
 	    SMB_REFRESH_REFRESH },
 	{ SMB_CI_DISPOSITION, 0, MAX_VALUE_BUFLEN,
 	    disposition_validator, SMB_REFRESH_REFRESH },
-	{ SMB_CI_MAX_PROTOCOL, 0, MAX_VALUE_BUFLEN, max_protocol_validator,
+	{ SMB_CI_MAX_PROTOCOL, 0, MAX_VALUE_BUFLEN, protocol_validator,
+	    SMB_REFRESH_REFRESH },
+	{ SMB_CI_ENCRYPT, 0, MAX_VALUE_BUFLEN, require_validator,
+	    SMB_REFRESH_REFRESH },
+	{ SMB_CI_MIN_PROTOCOL, 0, MAX_VALUE_BUFLEN, protocol_validator,
+	    SMB_REFRESH_REFRESH },
+	{ SMB_CI_BYPASS_TRAVERSE_CHECKING, 0, 0, true_false_validator,
+	    SMB_REFRESH_REFRESH },
+	{ SMB_CI_OPLOCK_ENABLE, 0, 0, true_false_validator,
 	    SMB_REFRESH_REFRESH },
 };
 
 #define	SMB_OPT_NUM \
 	(sizeof (smb_proto_options) / sizeof (smb_proto_options[0]))
+
+static int
+require_validator(int index, char *value)
+{
+	if (string_length_check_validator(index, value) != SA_OK)
+		return (SA_BAD_VALUE);
+
+	if (strcmp(value, "required") == 0)
+		return (SA_OK);
+
+	if (strcmp(value, "disabled") == 0)
+		return (SA_OK);
+
+	if (strcmp(value, "enabled") == 0)
+		return (SA_OK);
+
+	return (SA_BAD_VALUE);
+}
 
 /*
  * Check the range of value as int range.
@@ -1534,7 +1536,11 @@ smb_set_proto_prop(sa_property_t prop)
 				opt = &smb_proto_options[index];
 
 				/* Save to SMF */
-				(void) smb_config_set(opt->smb_index, value);
+				if (smb_config_set(opt->smb_index,
+				    value) != 0) {
+					ret = SA_BAD_VALUE;
+					goto out;
+				}
 				/*
 				 * Specialized refresh mechanisms can
 				 * be flagged in the proto_options and
@@ -1550,6 +1556,7 @@ smb_set_proto_prop(sa_property_t prop)
 		}
 	}
 
+out:
 	if (name != NULL)
 		sa_free_attr_string(name);
 	if (value != NULL)
@@ -1937,7 +1944,7 @@ smb_parse_optstring(sa_group_t group, char *options)
 
 static void
 smb_sprint_option(char **rbuff, size_t *rbuffsize, size_t incr,
-			sa_property_t prop, int sep)
+    sa_property_t prop, int sep)
 {
 	char *name;
 	char *value;
@@ -2115,6 +2122,7 @@ smb_build_shareinfo(sa_share_t share, sa_resource_t resource, smb_share_t *si)
 	char *rname;
 	char *val = NULL;
 	char csc_value[SMB_CSC_BUFSZ];
+	char strbuf[sizeof ("required")];
 
 	bzero(si, sizeof (smb_share_t));
 
@@ -2147,17 +2155,30 @@ smb_build_shareinfo(sa_share_t share, sa_resource_t resource, smb_share_t *si)
 	if (opts == NULL)
 		return (SA_OK);
 
-	if (smb_saprop_getbool(opts, SHOPT_CATIA))
+	if (smb_saprop_getbool(opts, SHOPT_CATIA, B_FALSE))
 		si->shr_flags |= SMB_SHRF_CATIA;
 
-	if (smb_saprop_getbool(opts, SHOPT_ABE))
+	if (smb_saprop_getbool(opts, SHOPT_ABE, B_FALSE))
 		si->shr_flags |= SMB_SHRF_ABE;
 
-	if (smb_saprop_getbool(opts, SHOPT_GUEST))
+	if (smb_saprop_getbool(opts, SHOPT_GUEST, B_FALSE))
 		si->shr_flags |= SMB_SHRF_GUEST_OK;
 
-	if (smb_saprop_getbool(opts, SHOPT_DFSROOT))
+	if (smb_saprop_getbool(opts, SHOPT_DFSROOT, B_FALSE))
 		si->shr_flags |= SMB_SHRF_DFSROOT;
+
+	if (smb_saprop_getbool(opts, SHOPT_CA, B_FALSE))
+		si->shr_flags |= SMB_SHRF_CA;
+
+	if (smb_saprop_getbool(opts, SHOPT_FSO, B_FALSE))
+		si->shr_flags |= SMB_SHRF_FSO;
+
+	/* Quotas are enabled by default. */
+	if (smb_saprop_getbool(opts, SHOPT_QUOTAS, B_TRUE))
+		si->shr_flags |= SMB_SHRF_QUOTAS;
+
+	if (smb_saprop_getstr(opts, SHOPT_ENCRYPT, strbuf, sizeof (strbuf)))
+		smb_cfg_set_require(strbuf, &si->shr_encrypt);
 
 	(void) smb_saprop_getstr(opts, SHOPT_AD_CONTAINER, si->shr_container,
 	    sizeof (si->shr_container));
@@ -2347,7 +2368,7 @@ disposition_validator(int index, char *value)
 
 /*ARGSUSED*/
 static int
-max_protocol_validator(int index, char *value)
+protocol_validator(int index, char *value)
 {
 	if (value == NULL)
 		return (SA_BAD_VALUE);
@@ -2423,20 +2444,29 @@ smb_update_optionset_props(sa_handle_t handle, sa_resource_t resource,
 }
 
 static boolean_t
-smb_saprop_getbool(sa_optionset_t opts, char *propname)
+smb_saprop_getbool(sa_optionset_t opts, char *propname, boolean_t def)
 {
 	sa_property_t prop;
 	char *val;
-	boolean_t propval = B_FALSE;
+	boolean_t ret = def;
 
 	prop = sa_get_property(opts, propname);
 	if ((val = sa_get_property_attr(prop, "value")) != NULL) {
-		if ((strcasecmp(val, "true") == 0) || (strcmp(val, "1") == 0))
-			propval = B_TRUE;
+		if (def) {
+			/* Default is true, ret false if... */
+			if ((strcasecmp(val, "false") == 0) ||
+			    (strcmp(val, "0") == 0))
+				ret = B_FALSE;
+		} else {
+			/* Default is false, ret true if... */
+			if ((strcasecmp(val, "true") == 0) ||
+			    (strcmp(val, "1") == 0))
+				ret = B_TRUE;
+		}
 		free(val);
 	}
 
-	return (propval);
+	return (ret);
 }
 
 static boolean_t

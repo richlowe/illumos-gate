@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * SPARC relocation code.
  */
@@ -146,14 +144,8 @@ sdt_reloc_resolve(struct module *mp, char *symname, uint32_t *instr, long roff)
 }
 
 int
-/* ARGSUSED2 */
-do_relocate(
-	struct module *mp,
-	char *reltbl,
-	Word relshtype,
-	int nreloc,
-	int relocsize,
-	Addr baseaddr)
+do_relocate(struct module *mp, char *reltbl, int nreloc, int relocsize,
+    Addr baseaddr)
 {
 	Word stndx;
 	long off, roff;
@@ -215,7 +207,7 @@ do_relocate(
 		if ((rtype > R_SPARC_NUM) || IS_TLS_INS(rtype)) {
 			_kobj_printf(ops, "krtld: invalid relocation type %d",
 			    rtype);
-			_kobj_printf(ops, " at 0x%llx:", off);
+			_kobj_printf(ops, " at 0x%llx:", (u_longlong_t)off);
 			_kobj_printf(ops, " file=%s\n", mp->filename);
 			err = 1;
 			continue;
@@ -231,8 +223,8 @@ do_relocate(
 			    (mp->symtbl+(stndx * mp->symhdr->sh_entsize));
 			_kobj_printf(ops, "krtld:\t%s",
 			    conv_reloc_SPARC_type(rtype));
-			_kobj_printf(ops, "\t0x%8llx", off);
-			_kobj_printf(ops, " 0x%8llx", addend);
+			_kobj_printf(ops, "\t0x%8llx", (u_longlong_t)off);
+			_kobj_printf(ops, " 0x%8llx", (u_longlong_t)addend);
 			_kobj_printf(ops, "  %s\n",
 			    (const char *)mp->strings + symp->st_name);
 		}
@@ -317,8 +309,9 @@ do_relocate(
 
 #ifdef	KOBJ_DEBUG
 		if (kobj_debug & D_RELOCATIONS) {
-			_kobj_printf(ops, "krtld:\t\t\t\t0x%8llx", off);
-			_kobj_printf(ops, " 0x%8llx\n", value);
+			_kobj_printf(ops, "krtld:\t\t\t\t0x%8llx",
+			    (u_longlong_t)off);
+			_kobj_printf(ops, " 0x%8llx\n", (u_longlong_t)value);
 		}
 #endif
 		if (do_reloc_krtld(rtype, (unsigned char *)off, (Xword *)&value,
@@ -361,7 +354,7 @@ do_relocations(struct module *mp)
 		}
 		if (rshp->sh_info >= mp->hdr.e_shnum) {
 			_kobj_printf(ops, "do_relocations: %s ", mp->filename);
-			_kobj_printf(ops, " sh_info out of range %lld\n", shn);
+			_kobj_printf(ops, " sh_info out of range %d\n", shn);
 			goto bad;
 		}
 		nreloc = rshp->sh_size / rshp->sh_entsize;
@@ -382,8 +375,8 @@ do_relocations(struct module *mp)
 			_kobj_printf(ops, " section=%d\n", shn);
 		}
 #endif
-		if (do_relocate(mp, (char *)rshp->sh_addr, rshp->sh_type,
-		    nreloc, rshp->sh_entsize, shp->sh_addr) < 0) {
+		if (do_relocate(mp, (char *)rshp->sh_addr, nreloc,
+		    rshp->sh_entsize, shp->sh_addr) < 0) {
 			_kobj_printf(ops,
 			    "do_relocations: %s do_relocate failed\n",
 			    mp->filename);

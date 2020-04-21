@@ -22,6 +22,7 @@
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Milan Jurik. All rights reserved.
+ * Copyright 2018 Joyent Inc.
  */
 
 #include <stdio.h>
@@ -424,6 +425,8 @@ forker_monitor(
 	pid_t		fpid;
 	char		*fmri;
 	char		*me = "forker_monitor";
+
+	(void) thr_setname(thr_self(), me);
 
 	/* wait until forker exits */
 	fpid = forker_pid;
@@ -1416,7 +1419,7 @@ check_uid(char *pid_name)
 	static uid_t	uid = 0;
 	static uid_t	euid = 0;
 	int		pfd; /* file descriptor for /proc/<pid>/psinfo */
-	psinfo_t 	info;  /* process information from /proc */
+	psinfo_t	info;  /* process information from /proc */
 
 	if (uid == 0)  {
 		pid = getpid();
@@ -1466,6 +1469,8 @@ check_user_process(void *arg)
 	int		found;
 	char		*me = "check_user_process";
 
+	(void) thr_setname(thr_self(), me);
+
 	for (;;) {
 		(void) sleep(60);
 
@@ -1504,7 +1509,8 @@ check_user_process(void *arg)
 }
 
 static nscd_rc_t
-init_user_proc_monitor() {
+init_user_proc_monitor(void)
+{
 
 	int	errnum;
 	char	*me = "init_user_proc_monitor";
@@ -1516,8 +1522,8 @@ init_user_proc_monitor() {
 	 * start a thread to make sure there is at least a process
 	 * running as the PUN user. If not, terminate this PUN.
 	 */
-	if (thr_create(NULL, NULL, check_user_process,
-		NULL, THR_DETACHED, NULL) != 0) {
+	if (thr_create(NULL, 0, check_user_process,
+	    NULL, THR_DETACHED, NULL) != 0) {
 		errnum = errno;
 		_NSCD_LOG(NSCD_LOG_SELF_CRED, NSCD_LOG_LEVEL_ERROR)
 		(me, "thr_create: %s\n", strerror(errnum));

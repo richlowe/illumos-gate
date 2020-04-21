@@ -21,6 +21,7 @@
 /*
  * Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012 by Delphix. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -58,6 +59,7 @@
 #include <sys/time.h>
 #include <sys/archsystm.h>
 #include <sys/sdt.h>
+#include <sys/smt.h>
 #if defined(__x86) || defined(__amd64)
 #include <sys/x86_archext.h>
 #endif
@@ -108,6 +110,7 @@ kmutex_t	cpu_lock;
 cpu_t		*cpu_list;		/* list of all CPUs */
 cpu_t		*clock_cpu_list;	/* used by clock to walk CPUs */
 cpu_t		*cpu_active;		/* list of active CPUs */
+cpuset_t	cpu_active_set;		/* cached set of active CPUs */
 static cpuset_t	cpu_available;		/* set of available CPUs */
 cpuset_t	cpu_seqid_inuse;	/* which cpu_seqids are in use */
 
@@ -142,6 +145,7 @@ processorid_t max_cpu_seqid_ever = 0;
 
 int ncpus = 1;
 int ncpus_online = 1;
+int ncpus_intr_enabled = 1;
 
 /*
  * CPU that we're trying to offline.  Protected by cpu_lock.
@@ -386,36 +390,56 @@ force_thread_migrate(kthread_id_t tp)
 
 /*
  * Set affinity for a specified CPU.
- * A reference count is incremented and the affinity is held until the
- * reference count is decremented to zero by thread_affinity_clear().
- * This is so regions of code requiring affinity can be nested.
- * Caller needs to ensure that cpu_id remains valid, which can be
- * done by holding cpu_lock across this call, unless the caller
- * specifies CPU_CURRENT in which case the cpu_lock will be acquired
- * by thread_affinity_set and CPU->cpu_id will be the target CPU.
+ *
+ * Specifying a cpu_id of CPU_CURRENT, allowed _only_ when setting affinity for
+ * curthread, will set affinity to the CPU on which the thread is currently
+ * running.  For other cpu_id values, the caller must ensure that the
+ * referenced CPU remains valid, which can be done by holding cpu_lock across
+ * this call.
+ *
+ * CPU affinity is guaranteed after return of thread_affinity_set().  If a
+ * caller setting affinity to CPU_CURRENT requires that its thread not migrate
+ * CPUs prior to a successful return, it should take extra precautions (such as
+ * their own call to kpreempt_disable) to ensure that safety.
+ *
+ * CPU_BEST can be used to pick a "best" CPU to migrate to, including
+ * potentially the current CPU.
+ *
+ * A CPU affinity reference count is maintained by thread_affinity_set and
+ * thread_affinity_clear (incrementing and decrementing it, respectively),
+ * maintaining CPU affinity while the count is non-zero, and allowing regions
+ * of code which require affinity to be nested.
  */
 void
 thread_affinity_set(kthread_id_t t, int cpu_id)
 {
-	cpu_t		*cp;
-	int		c;
+	cpu_t *cp;
 
 	ASSERT(!(t == curthread && t->t_weakbound_cpu != NULL));
 
-	if ((c = cpu_id) == CPU_CURRENT) {
-		mutex_enter(&cpu_lock);
-		cpu_id = CPU->cpu_id;
+	if (cpu_id == CPU_CURRENT) {
+		VERIFY3P(t, ==, curthread);
+		kpreempt_disable();
+		cp = CPU;
+	} else if (cpu_id == CPU_BEST) {
+		VERIFY3P(t, ==, curthread);
+		kpreempt_disable();
+		cp = disp_choose_best_cpu();
+	} else {
+		/*
+		 * We should be asserting that cpu_lock is held here, but
+		 * the NCA code doesn't acquire it.  The following assert
+		 * should be uncommented when the NCA code is fixed.
+		 *
+		 * ASSERT(MUTEX_HELD(&cpu_lock));
+		 */
+		VERIFY((cpu_id >= 0) && (cpu_id < NCPU));
+		cp = cpu[cpu_id];
+
+		/* user must provide a good cpu_id */
+		VERIFY(cp != NULL);
 	}
-	/*
-	 * We should be asserting that cpu_lock is held here, but
-	 * the NCA code doesn't acquire it.  The following assert
-	 * should be uncommented when the NCA code is fixed.
-	 *
-	 * ASSERT(MUTEX_HELD(&cpu_lock));
-	 */
-	ASSERT((cpu_id >= 0) && (cpu_id < NCPU));
-	cp = cpu[cpu_id];
-	ASSERT(cp != NULL);		/* user must provide a good cpu_id */
+
 	/*
 	 * If there is already a hard affinity requested, and this affinity
 	 * conflicts with that, panic.
@@ -432,13 +456,14 @@ thread_affinity_set(kthread_id_t t, int cpu_id)
 	 * Make sure we're running on the right CPU.
 	 */
 	if (cp != t->t_cpu || t != curthread) {
+		ASSERT(cpu_id != CPU_CURRENT);
 		force_thread_migrate(t);	/* drops thread lock */
 	} else {
 		thread_unlock(t);
 	}
 
-	if (c == CPU_CURRENT)
-		mutex_exit(&cpu_lock);
+	if (cpu_id == CPU_CURRENT || cpu_id == CPU_BEST)
+		kpreempt_enable();
 }
 
 /*
@@ -1186,7 +1211,7 @@ cpu_flagged_active(cpu_flag_t cpu_flags)
  * Bring the indicated CPU online.
  */
 int
-cpu_online(cpu_t *cp)
+cpu_online(cpu_t *cp, int flags)
 {
 	int	error = 0;
 
@@ -1194,11 +1219,14 @@ cpu_online(cpu_t *cp)
 	 * Handle on-line request.
 	 *	This code must put the new CPU on the active list before
 	 *	starting it because it will not be paused, and will start
-	 * 	using the active list immediately.  The real start occurs
+	 *	using the active list immediately.  The real start occurs
 	 *	when the CPU_QUIESCED flag is turned off.
 	 */
 
 	ASSERT(MUTEX_HELD(&cpu_lock));
+
+	if ((cp->cpu_flags & CPU_DISABLED) && !smt_can_enable(cp, flags))
+		return (EINVAL);
 
 	/*
 	 * Put all the cpus into a known safe place.
@@ -1213,8 +1241,12 @@ cpu_online(cpu_t *cp)
 			cp->cpu_flags &= ~CPU_FAULTED;
 			mp_cpu_faulted_exit(cp);
 		}
+
+		if (cp->cpu_flags & CPU_DISABLED)
+			smt_force_enabled();
+
 		cp->cpu_flags &= ~(CPU_QUIESCED | CPU_OFFLINE | CPU_FROZEN |
-		    CPU_SPARE);
+		    CPU_SPARE | CPU_DISABLED);
 		CPU_NEW_GENERATION(cp);
 		start_cpus();
 		cpu_stats_kstat_create(cp);
@@ -1255,9 +1287,12 @@ cpu_offline(cpu_t *cp, int flags)
 	lpl_t	*cpu_lpl;
 	proc_t	*p;
 	int	lgrp_diff_lpl;
-	boolean_t unbind_all_threads = (flags & CPU_FORCED) != 0;
+	boolean_t forced = (flags & CPU_FORCED) != 0;
 
 	ASSERT(MUTEX_HELD(&cpu_lock));
+
+	if (cp->cpu_flags & CPU_DISABLED)
+		return (EINVAL);
 
 	/*
 	 * If we're going from faulted or spare to offline, just
@@ -1286,7 +1321,7 @@ cpu_offline(cpu_t *cp, int flags)
 	 * Unbind all soft-bound threads bound to our CPU and hard bound threads
 	 * if we were asked to.
 	 */
-	error = cpu_unbind(cp->cpu_id, unbind_all_threads);
+	error = cpu_unbind(cp->cpu_id, forced);
 	if (error != 0)
 		return (error);
 	/*
@@ -1473,8 +1508,8 @@ again:	for (loop_count = 0; (*bound_func)(cp, 0); loop_count++) {
 				 * Update CPU last ran on if it was this CPU
 				 */
 				if (t->t_cpu == cp && t->t_bound_cpu != cp)
-					t->t_cpu = disp_lowpri_cpu(ncp,
-					    t->t_lpl, t->t_pri, NULL);
+					t->t_cpu = disp_lowpri_cpu(ncp, t,
+					    t->t_pri);
 				ASSERT(t->t_cpu != cp || t->t_bound_cpu == cp ||
 				    t->t_weakbound_cpu == cp);
 
@@ -1516,10 +1551,9 @@ again:	for (loop_count = 0; (*bound_func)(cp, 0); loop_count++) {
 			 * Update CPU last ran on if it was this CPU
 			 */
 
-			if (t->t_cpu == cp && t->t_bound_cpu != cp) {
-				t->t_cpu = disp_lowpri_cpu(ncp,
-				    t->t_lpl, t->t_pri, NULL);
-			}
+			if (t->t_cpu == cp && t->t_bound_cpu != cp)
+				t->t_cpu = disp_lowpri_cpu(ncp, t, t->t_pri);
+
 			ASSERT(t->t_cpu != cp || t->t_bound_cpu == cp ||
 			    t->t_weakbound_cpu == cp);
 			t = t->t_next;
@@ -1592,6 +1626,9 @@ cpu_faulted(cpu_t *cp, int flags)
 	ASSERT(MUTEX_HELD(&cpu_lock));
 	ASSERT(!cpu_is_poweredoff(cp));
 
+	if (cp->cpu_flags & CPU_DISABLED)
+		return (EINVAL);
+
 	if (cpu_is_offline(cp)) {
 		cp->cpu_flags &= ~CPU_SPARE;
 		cp->cpu_flags |= CPU_FAULTED;
@@ -1619,6 +1656,9 @@ cpu_spare(cpu_t *cp, int flags)
 
 	ASSERT(MUTEX_HELD(&cpu_lock));
 	ASSERT(!cpu_is_poweredoff(cp));
+
+	if (cp->cpu_flags & CPU_DISABLED)
+		return (EINVAL);
 
 	if (cpu_is_offline(cp)) {
 		if (cp->cpu_flags & CPU_FAULTED) {
@@ -1724,6 +1764,7 @@ cpu_list_init(cpu_t *cp)
 	cp->cpu_part = &cp_default;
 
 	CPUSET_ADD(cpu_available, cp->cpu_id);
+	CPUSET_ADD(cpu_active_set, cp->cpu_id);
 }
 
 /*
@@ -1895,6 +1936,7 @@ cpu_add_active_internal(cpu_t *cp)
 	cp->cpu_prev_onln = cpu_active->cpu_prev_onln;
 	cpu_active->cpu_prev_onln->cpu_next_onln = cp;
 	cpu_active->cpu_prev_onln = cp;
+	CPUSET_ADD(cpu_active_set, cp->cpu_id);
 
 	if (pp->cp_cpulist) {
 		cp->cpu_next_part = pp->cp_cpulist;
@@ -1965,6 +2007,7 @@ cpu_remove_active(cpu_t *cp)
 	}
 	cp->cpu_next_onln = cp;
 	cp->cpu_prev_onln = cp;
+	CPUSET_DEL(cpu_active_set, cp->cpu_id);
 
 	cp->cpu_prev_part->cpu_next_part = cp->cpu_next_part;
 	cp->cpu_next_part->cpu_prev_part = cp->cpu_prev_part;
@@ -2242,28 +2285,9 @@ cpu_info_kstat_update(kstat_t *ksp, int rw)
 	if (cpuid_checkpass(cp, 1) == 0)
 		return (ENXIO);
 #endif
-	switch (cp->cpu_type_info.pi_state) {
-	case P_ONLINE:
-		pi_state = PS_ONLINE;
-		break;
-	case P_POWEROFF:
-		pi_state = PS_POWEROFF;
-		break;
-	case P_NOINTR:
-		pi_state = PS_NOINTR;
-		break;
-	case P_FAULTED:
-		pi_state = PS_FAULTED;
-		break;
-	case P_SPARE:
-		pi_state = PS_SPARE;
-		break;
-	case P_OFFLINE:
-		pi_state = PS_OFFLINE;
-		break;
-	default:
-		pi_state = "unknown";
-	}
+
+	pi_state = cpu_get_state_str(cp->cpu_flags);
+
 	(void) strcpy(cpu_info_template.ci_state.value.c, pi_state);
 	cpu_info_template.ci_state_begin.value.l = cp->cpu_state_begin;
 	(void) strncpy(cpu_info_template.ci_cpu_type.value.c,
@@ -2704,13 +2728,18 @@ cpu_bind_thread(kthread_id_t tp, processorid_t bind, processorid_t *obind,
 	return (0);
 }
 
-#if CPUSET_WORDS > 1
 
-/*
- * Functions for implementing cpuset operations when a cpuset is more
- * than one word.  On platforms where a cpuset is a single word these
- * are implemented as macros in cpuvar.h.
- */
+cpuset_t *
+cpuset_alloc(int kmflags)
+{
+	return (kmem_alloc(sizeof (cpuset_t), kmflags));
+}
+
+void
+cpuset_free(cpuset_t *s)
+{
+	kmem_free(s, sizeof (cpuset_t));
+}
 
 void
 cpuset_all(cpuset_t *s)
@@ -2722,43 +2751,66 @@ cpuset_all(cpuset_t *s)
 }
 
 void
-cpuset_all_but(cpuset_t *s, uint_t cpu)
+cpuset_all_but(cpuset_t *s, const uint_t cpu)
 {
 	cpuset_all(s);
 	CPUSET_DEL(*s, cpu);
 }
 
 void
-cpuset_only(cpuset_t *s, uint_t cpu)
+cpuset_only(cpuset_t *s, const uint_t cpu)
 {
 	CPUSET_ZERO(*s);
 	CPUSET_ADD(*s, cpu);
 }
 
+long
+cpu_in_set(const cpuset_t *s, const uint_t cpu)
+{
+	VERIFY(cpu < NCPU);
+	return (BT_TEST(s->cpub, cpu));
+}
+
+void
+cpuset_add(cpuset_t *s, const uint_t cpu)
+{
+	VERIFY(cpu < NCPU);
+	BT_SET(s->cpub, cpu);
+}
+
+void
+cpuset_del(cpuset_t *s, const uint_t cpu)
+{
+	VERIFY(cpu < NCPU);
+	BT_CLEAR(s->cpub, cpu);
+}
+
 int
-cpuset_isnull(cpuset_t *s)
+cpuset_isnull(const cpuset_t *s)
 {
 	int i;
 
-	for (i = 0; i < CPUSET_WORDS; i++)
+	for (i = 0; i < CPUSET_WORDS; i++) {
 		if (s->cpub[i] != 0)
 			return (0);
+	}
 	return (1);
 }
 
 int
-cpuset_cmp(cpuset_t *s1, cpuset_t *s2)
+cpuset_isequal(const cpuset_t *s1, const cpuset_t *s2)
 {
 	int i;
 
-	for (i = 0; i < CPUSET_WORDS; i++)
+	for (i = 0; i < CPUSET_WORDS; i++) {
 		if (s1->cpub[i] != s2->cpub[i])
 			return (0);
+	}
 	return (1);
 }
 
 uint_t
-cpuset_find(cpuset_t *s)
+cpuset_find(const cpuset_t *s)
 {
 
 	uint_t	i;
@@ -2778,7 +2830,7 @@ cpuset_find(cpuset_t *s)
 }
 
 void
-cpuset_bounds(cpuset_t *s, uint_t *smallestid, uint_t *largestid)
+cpuset_bounds(const cpuset_t *s, uint_t *smallestid, uint_t *largestid)
 {
 	int	i, j;
 	uint_t	bit;
@@ -2822,7 +2874,72 @@ cpuset_bounds(cpuset_t *s, uint_t *smallestid, uint_t *largestid)
 	*smallestid = *largestid = CPUSET_NOTINSET;
 }
 
-#endif	/* CPUSET_WORDS */
+void
+cpuset_atomic_del(cpuset_t *s, const uint_t cpu)
+{
+	VERIFY(cpu < NCPU);
+	BT_ATOMIC_CLEAR(s->cpub, (cpu))
+}
+
+void
+cpuset_atomic_add(cpuset_t *s, const uint_t cpu)
+{
+	VERIFY(cpu < NCPU);
+	BT_ATOMIC_SET(s->cpub, (cpu))
+}
+
+long
+cpuset_atomic_xadd(cpuset_t *s, const uint_t cpu)
+{
+	long res;
+
+	VERIFY(cpu < NCPU);
+	BT_ATOMIC_SET_EXCL(s->cpub, cpu, res);
+	return (res);
+}
+
+long
+cpuset_atomic_xdel(cpuset_t *s, const uint_t cpu)
+{
+	long res;
+
+	VERIFY(cpu < NCPU);
+	BT_ATOMIC_CLEAR_EXCL(s->cpub, cpu, res);
+	return (res);
+}
+
+void
+cpuset_or(cpuset_t *dst, cpuset_t *src)
+{
+	for (int i = 0; i < CPUSET_WORDS; i++) {
+		dst->cpub[i] |= src->cpub[i];
+	}
+}
+
+void
+cpuset_xor(cpuset_t *dst, cpuset_t *src)
+{
+	for (int i = 0; i < CPUSET_WORDS; i++) {
+		dst->cpub[i] ^= src->cpub[i];
+	}
+}
+
+void
+cpuset_and(cpuset_t *dst, cpuset_t *src)
+{
+	for (int i = 0; i < CPUSET_WORDS; i++) {
+		dst->cpub[i] &= src->cpub[i];
+	}
+}
+
+void
+cpuset_zero(cpuset_t *dst)
+{
+	for (int i = 0; i < CPUSET_WORDS; i++) {
+		dst->cpub[i] = 0;
+	}
+}
+
 
 /*
  * Unbind threads bound to specified CPU.
@@ -3052,33 +3169,41 @@ cpu_set_state(cpu_t *cpu)
  * communication with user applications; cpu_flags provides the in-kernel
  * interface.
  */
+static int
+cpu_flags_to_state(cpu_flag_t flags)
+{
+	if (flags & CPU_DISABLED)
+		return (P_DISABLED);
+	else if (flags & CPU_POWEROFF)
+		return (P_POWEROFF);
+	else if (flags & CPU_FAULTED)
+		return (P_FAULTED);
+	else if (flags & CPU_SPARE)
+		return (P_SPARE);
+	else if ((flags & (CPU_READY | CPU_OFFLINE)) != CPU_READY)
+		return (P_OFFLINE);
+	else if (flags & CPU_ENABLE)
+		return (P_ONLINE);
+	else
+		return (P_NOINTR);
+}
+
 int
 cpu_get_state(cpu_t *cpu)
 {
 	ASSERT(MUTEX_HELD(&cpu_lock));
-	if (cpu->cpu_flags & CPU_POWEROFF)
-		return (P_POWEROFF);
-	else if (cpu->cpu_flags & CPU_FAULTED)
-		return (P_FAULTED);
-	else if (cpu->cpu_flags & CPU_SPARE)
-		return (P_SPARE);
-	else if ((cpu->cpu_flags & (CPU_READY | CPU_OFFLINE)) != CPU_READY)
-		return (P_OFFLINE);
-	else if (cpu->cpu_flags & CPU_ENABLE)
-		return (P_ONLINE);
-	else
-		return (P_NOINTR);
+	return (cpu_flags_to_state(cpu->cpu_flags));
 }
 
 /*
  * Return processor_info(2) state as a string.
  */
 const char *
-cpu_get_state_str(cpu_t *cpu)
+cpu_get_state_str(cpu_flag_t flags)
 {
 	const char *string;
 
-	switch (cpu_get_state(cpu)) {
+	switch (cpu_flags_to_state(flags)) {
 	case P_ONLINE:
 		string = PS_ONLINE;
 		break;
@@ -3097,6 +3222,9 @@ cpu_get_state_str(cpu_t *cpu)
 	case P_OFFLINE:
 		string = PS_OFFLINE;
 		break;
+	case P_DISABLED:
+		string = PS_DISABLED;
+		break;
 	default:
 		string = "unknown";
 		break;
@@ -3112,9 +3240,9 @@ cpu_get_state_str(cpu_t *cpu)
 static void
 cpu_stats_kstat_create(cpu_t *cp)
 {
-	int 	instance = cp->cpu_id;
-	char 	*module = "cpu";
-	char 	*class = "misc";
+	int	instance = cp->cpu_id;
+	char	*module = "cpu";
+	char	*class = "misc";
 	kstat_t	*ksp;
 	zoneid_t zoneid;
 
@@ -3350,18 +3478,18 @@ cpu_stat_ks_update(kstat_t *ksp, int rw)
 		cso->cpu_sysinfo.cpu[CPU_USER] = msnsecs[CMS_USER];
 	if (cso->cpu_sysinfo.cpu[CPU_KERNEL] < msnsecs[CMS_SYSTEM])
 		cso->cpu_sysinfo.cpu[CPU_KERNEL] = msnsecs[CMS_SYSTEM];
-	cso->cpu_sysinfo.cpu[CPU_WAIT] 	= 0;
-	cso->cpu_sysinfo.wait[W_IO] 	= 0;
+	cso->cpu_sysinfo.cpu[CPU_WAIT]	= 0;
+	cso->cpu_sysinfo.wait[W_IO]	= 0;
 	cso->cpu_sysinfo.wait[W_SWAP]	= 0;
 	cso->cpu_sysinfo.wait[W_PIO]	= 0;
-	cso->cpu_sysinfo.bread 		= CPU_STATS(cp, sys.bread);
-	cso->cpu_sysinfo.bwrite 	= CPU_STATS(cp, sys.bwrite);
-	cso->cpu_sysinfo.lread 		= CPU_STATS(cp, sys.lread);
-	cso->cpu_sysinfo.lwrite 	= CPU_STATS(cp, sys.lwrite);
-	cso->cpu_sysinfo.phread 	= CPU_STATS(cp, sys.phread);
-	cso->cpu_sysinfo.phwrite 	= CPU_STATS(cp, sys.phwrite);
-	cso->cpu_sysinfo.pswitch 	= CPU_STATS(cp, sys.pswitch);
-	cso->cpu_sysinfo.trap 		= CPU_STATS(cp, sys.trap);
+	cso->cpu_sysinfo.bread		= CPU_STATS(cp, sys.bread);
+	cso->cpu_sysinfo.bwrite		= CPU_STATS(cp, sys.bwrite);
+	cso->cpu_sysinfo.lread		= CPU_STATS(cp, sys.lread);
+	cso->cpu_sysinfo.lwrite		= CPU_STATS(cp, sys.lwrite);
+	cso->cpu_sysinfo.phread		= CPU_STATS(cp, sys.phread);
+	cso->cpu_sysinfo.phwrite	= CPU_STATS(cp, sys.phwrite);
+	cso->cpu_sysinfo.pswitch	= CPU_STATS(cp, sys.pswitch);
+	cso->cpu_sysinfo.trap		= CPU_STATS(cp, sys.trap);
 	cso->cpu_sysinfo.intr		= 0;
 	for (i = 0; i < PIL_MAX; i++)
 		cso->cpu_sysinfo.intr += CPU_STATS(cp, sys.intr[i]);

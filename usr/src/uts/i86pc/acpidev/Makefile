@@ -24,7 +24,8 @@
 # Copyright (c) 2009, Intel Corporation.
 # All rights reserved.
 #
-# Copyright 2016, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 #	This makefile drives the production of the ACPI device configuration
 #	kernel module.
@@ -42,7 +43,6 @@ UTSBASE	= ../..
 #
 MODULE		= acpidev
 OBJECTS		= $(ACPIDEV_OBJS:%=$(OBJS_DIR)/%)
-LINTS		= $(ACPIDEV_OBJS:%.o=$(LINTS_DIR)/%.ln)
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 
 #
@@ -54,7 +54,6 @@ include $(UTSBASE)/i86pc/Makefile.i86pc
 #	Define targets
 #
 ALL_TARGET	= $(BINARY)
-LINT_TARGET	= $(MODULE).lint
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 #
@@ -62,9 +61,12 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #
 LDFLAGS		+= -dy -N misc/acpica
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-type-limits
+
+# needs work
+SMOFF += deref_check
 
 #
 #	Default build targets.
@@ -78,12 +80,6 @@ all:		$(ALL_DEPS)
 clean:		$(CLEAN_DEPS)
 
 clobber:	$(CLOBBER_DEPS)
-
-lint:		$(LINT_DEPS)
-
-modlintlib:	$(MODLINTLIB_DEPS)
-
-clean.lint:	$(CLEAN_LINT_DEPS)
 
 install:	$(INSTALL_DEPS)
 

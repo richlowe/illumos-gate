@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= libkadm5clnt.a
 VERS= .1
@@ -84,7 +85,9 @@ CFLAGS +=	$(CCVERBOSE) -I..
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+SMOFF += all_func_returns,indenting,no_if_block
 
 LDLIBS +=	-lc
 

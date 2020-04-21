@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2016 Joyent, Inc.
+ * Copyright (c) 2019, Joyent, Inc.
  * Copyright 2016 Toomas Soome <tsoome@me.com>
  * Copyright (c) 2016, 2017 by Delphix. All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.
@@ -29,7 +29,7 @@
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * University Copyright- Copyright (c) 1982, 1986, 1988
@@ -348,8 +348,9 @@ fs_copyfsops(const fs_operation_def_t *template, vfsops_t *actual,
 			fs_nosys, fs_nosys,
 
 		VFSNAME_FREEVFS, offsetof(vfsops_t, vfs_freevfs),
-			(fs_generic_func_p)fs_freevfs,
-			(fs_generic_func_p)fs_freevfs,	/* Shouldn't fail */
+			(fs_generic_func_p)(uintptr_t)fs_freevfs,
+			/* Shouldn't fail */
+			(fs_generic_func_p)(uintptr_t)fs_freevfs,
 
 		VFSNAME_VNSTATE, offsetof(vfsops_t, vfs_vnstate),
 			(fs_generic_func_p)fs_nosys,
@@ -1031,7 +1032,7 @@ out:
 static void
 lofi_remove(struct vfs *vfsp)
 {
-	struct lofi_ioctl *li = NULL;
+	struct lofi_ioctl *li;
 	ldi_ident_t ldi_id;
 	ldi_handle_t ldi_hdl;
 	int err;
@@ -1061,8 +1062,7 @@ lofi_remove(struct vfs *vfsp)
 
 out:
 	ldi_ident_release(ldi_id);
-	if (li != NULL)
-		kmem_free(li, sizeof (*li));
+	kmem_free(li, sizeof (*li));
 }
 
 /*
@@ -1097,7 +1097,7 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 	mntopts_t	mnt_mntopts;
 	int		error = 0;
 	int		copyout_error = 0;
-	int		ovflags;
+	int		ovflags = 0;
 	char		*opts = uap->optptr;
 	char		*inargs = opts;
 	int		optlen = uap->optlen;
@@ -1487,8 +1487,6 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 	 */
 	if (!remount) {
 		if (error = vfs_lock(vfsp)) {
-			vfsp->vfs_flag = ovflags;
-
 			lofi_remove(vfsp);
 
 			if (splice)
@@ -1580,7 +1578,7 @@ domount(char *fsname, struct mounta *uap, vnode_t *vp, struct cred *credp,
 	/*
 	 * Serialize with zone state transitions.
 	 * See vfs_list_add; zone mounted into is:
-	 * 	zone_find_by_path(refstr_value(vfsp->vfs_mntpt))
+	 *	zone_find_by_path(refstr_value(vfsp->vfs_mntpt))
 	 * not the zone doing the mount (curproc->p_zone), but if we're already
 	 * inside a NGZ, then we know what zone we are.
 	 */
@@ -2813,8 +2811,8 @@ vfs_mnttabvp_setup(void)
 	vnode_t *tvp;
 	vnodeops_t *vfs_mntdummyvnops;
 	const fs_operation_def_t mnt_dummyvnodeops_template[] = {
-		VOPNAME_READ, 		{ .vop_read = vfs_mntdummyread },
-		VOPNAME_WRITE, 		{ .vop_write = vfs_mntdummywrite },
+		VOPNAME_READ,		{ .vop_read = vfs_mntdummyread },
+		VOPNAME_WRITE,		{ .vop_write = vfs_mntdummywrite },
 		VOPNAME_GETATTR,	{ .vop_getattr = vfs_mntdummygetattr },
 		VOPNAME_VNEVENT,	{ .vop_vnevent = fs_vnevent_support },
 		NULL,			NULL
@@ -4174,7 +4172,7 @@ vfsinit(void)
 		VFSNAME_UNMOUNT,	{ .error = vfs_EIO },
 		VFSNAME_ROOT,		{ .error = vfs_EIO },
 		VFSNAME_STATVFS,	{ .error = vfs_EIO },
-		VFSNAME_SYNC, 		{ .vfs_sync = vfs_EIO_sync },
+		VFSNAME_SYNC,		{ .vfs_sync = vfs_EIO_sync },
 		VFSNAME_VGET,		{ .error = vfs_EIO },
 		VFSNAME_MOUNTROOT,	{ .error = vfs_EIO },
 		VFSNAME_FREEVFS,	{ .error = vfs_EIO },
@@ -4187,7 +4185,7 @@ vfsinit(void)
 		VFSNAME_UNMOUNT,	{ .error = vfsstray },
 		VFSNAME_ROOT,		{ .error = vfsstray },
 		VFSNAME_STATVFS,	{ .error = vfsstray },
-		VFSNAME_SYNC, 		{ .vfs_sync = vfsstray_sync },
+		VFSNAME_SYNC,		{ .vfs_sync = vfsstray_sync },
 		VFSNAME_VGET,		{ .error = vfsstray },
 		VFSNAME_MOUNTROOT,	{ .error = vfsstray },
 		VFSNAME_FREEVFS,	{ .error = vfsstray },
@@ -4232,7 +4230,7 @@ vfsinit(void)
 	for (vswp = &vfssw[1]; vswp < &vfssw[nfstype]; vswp++) {
 		RLOCK_VFSSW();
 		if (vswp->vsw_init != NULL)
-			(*vswp->vsw_init)(vswp - vfssw, vswp->vsw_name);
+			(void) (*vswp->vsw_init)(vswp - vfssw, vswp->vsw_name);
 		RUNLOCK_VFSSW();
 	}
 

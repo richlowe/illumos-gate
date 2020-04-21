@@ -24,6 +24,7 @@
  * Copyright 2012 Garrett D'Amore <garrett@damore.org>.  All rights reserved.
  * Copyright (c) 2012 by Delphix. All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_SYS_SUNDDI_H
@@ -202,13 +203,13 @@ extern "C" {
 
 #define	DDI_NT_KEYBOARD	"ddi_keyboard"		/* keyboard device */
 
-#define	DDI_NT_PARALLEL "ddi_parallel"		/* parallel port */
+#define	DDI_NT_PARALLEL	"ddi_parallel"		/* parallel port */
 
 #define	DDI_NT_PRINTER	"ddi_printer"		/* printer device */
 
 #define	DDI_NT_UGEN	"ddi_generic:usb"	/* USB generic drv */
 
-#define	DDI_NT_SMP	"ddi_sas_smp" 		/* smp devcies */
+#define	DDI_NT_SMP	"ddi_sas_smp"		/* smp devcies */
 
 #define	DDI_NT_NEXUS	"ddi_ctl:devctl"	/* nexus drivers */
 
@@ -246,6 +247,8 @@ extern "C" {
 						/* Fabric Devices */
 #define	DDI_NT_IB_ATTACHMENT_POINT	"ddi_ctl:attachment_point:ib"
 						/* IB devices */
+#define	DDI_NT_CCID_ATTACHMENT_POINT	"ddi_ctl:attachment_point:ccid"
+						/* CCID devices */
 
 #define	DDI_NT_AV_ASYNC "ddi_av:async"		/* asynchronous AV device */
 #define	DDI_NT_AV_ISOCH "ddi_av:isoch"		/* isochronous AV device */
@@ -258,6 +261,12 @@ extern "C" {
 
 #define	DDI_NT_REGACC		"ddi_tool_reg"	/* tool register access */
 #define	DDI_NT_INTRCTL		"ddi_tool_intr"	/* tool intr access */
+
+/*
+ * Various device types used for sensors.
+ */
+#define	DDI_NT_SENSOR_TEMP_CPU	"ddi_sensor:temperature:cpu"
+#define	DDI_NT_SENSOR_TEMP_PCH	"ddi_sensor:temperature:pch"
 
 /*
  * DDI event definitions
@@ -839,7 +848,7 @@ ddi_prop_op_nblocks_blksize(dev_t dev, dev_info_t *dip, ddi_prop_op_t prop_op,
  *		allocated by property provider via kmem_alloc. Requester
  *		is responsible for freeing returned property via kmem_free.
  *
- * 	Arguments:
+ *	Arguments:
  *
  *	dev:	Input:	dev_t of property.
  *	dip:	Input:	dev_info_t pointer of child.
@@ -850,7 +859,7 @@ ddi_prop_op_nblocks_blksize(dev_t dev, dev_info_t *dip, ddi_prop_op_t prop_op,
  *	valuep:	Output:	Addr of callers buffer pointer.
  *	lengthp:Output:	*lengthp will contain prop length on exit.
  *
- * 	Possible Returns:
+ *	Possible Returns:
  *
  *		DDI_PROP_SUCCESS:	Prop found and returned.
  *		DDI_PROP_NOT_FOUND:	Prop not found
@@ -1361,6 +1370,10 @@ ddi_dma_unbind_handle(ddi_dma_handle_t handle);
 
 /*
  * get next DMA cookie
+ *
+ * This function has been deprecated because it is unsafe. Please use
+ * ddi_dma_cookie_iter(), ddi_dma_cookie_get(), or ddi_dma_cookie_one() instead.
+ * For more information on the problems, please see the manual page.
  */
 
 void
@@ -1842,6 +1855,16 @@ extern int ddi_check_dma_handle(ddi_dma_handle_t);
 extern void ddi_dev_report_fault(dev_info_t *, ddi_fault_impact_t,
     ddi_fault_location_t, const char *);
 extern ddi_devstate_t ddi_get_devstate(dev_info_t *);
+
+/*
+ * Replacement DMA cookie functions for ddi_dma_nextcookie().
+ */
+extern int ddi_dma_ncookies(ddi_dma_handle_t);
+extern const ddi_dma_cookie_t *ddi_dma_cookie_iter(ddi_dma_handle_t,
+    const ddi_dma_cookie_t *);
+extern const ddi_dma_cookie_t *ddi_dma_cookie_get(ddi_dma_handle_t, uint_t);
+extern const ddi_dma_cookie_t *ddi_dma_cookie_one(ddi_dma_handle_t);
+
 
 /*
  * Miscellaneous redefines

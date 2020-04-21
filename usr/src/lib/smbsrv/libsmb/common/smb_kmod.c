@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2017 Joyent, Inc.
  */
 
@@ -89,11 +89,13 @@ smb_kmod_setcfg(smb_kmod_cfg_t *cfg)
 	ioc.print_enable = cfg->skc_print_enable;
 	ioc.traverse_mounts = cfg->skc_traverse_mounts;
 	ioc.max_protocol = cfg->skc_max_protocol;
+	ioc.min_protocol = cfg->skc_min_protocol;
 	ioc.exec_flags = cfg->skc_execflags;
 	ioc.negtok_len = cfg->skc_negtok_len;
 	ioc.version = cfg->skc_version;
 	ioc.initial_credits = cfg->skc_initial_credits;
 	ioc.maximum_credits = cfg->skc_maximum_credits;
+	ioc.encrypt = cfg->skc_encrypt;
 
 	(void) memcpy(ioc.machine_uuid, cfg->skc_machine_uuid, sizeof (uuid_t));
 	(void) memcpy(ioc.negtok, cfg->skc_negtok, sizeof (ioc.negtok));

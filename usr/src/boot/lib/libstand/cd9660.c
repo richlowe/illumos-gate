@@ -41,9 +41,10 @@
  */
 #include <sys/param.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/dirent.h>
-#include <isofs/cd9660/iso.h>
-#include <isofs/cd9660/cd9660_rrip.h>
+#include <fs/cd9660/iso.h>
+#include <fs/cd9660/cd9660_rrip.h>
 
 #include "stand.h"
 
@@ -226,8 +227,8 @@ static int
 dirmatch(struct open_file *f, const char *path, struct iso_directory_record *dp,
     int use_rrip, int lenskip)
 {
-	size_t len;
-	char *cp;
+	size_t len, plen;
+	char *cp, *sep;
 	int i, icase;
 
 	if (use_rrip)
@@ -240,6 +241,17 @@ dirmatch(struct open_file *f, const char *path, struct iso_directory_record *dp,
 		icase = 1;
 	} else
 		icase = 0;
+
+	sep = strchr(path, '/');
+	if (sep != NULL) {
+		plen = sep - path;
+	} else {
+		plen = strlen(path);
+	}
+
+	if (plen != len)
+		return (0);
+
 	for (i = len; --i >= 0; path++, cp++) {
 		if (!*path || *path == '/')
 			break;
@@ -251,6 +263,7 @@ dirmatch(struct open_file *f, const char *path, struct iso_directory_record *dp,
 	}
 	if (*path && *path != '/')
 		return (0);
+
 	/*
 	 * Allow stripping of trailing dots and the version number.
 	 * Note that this will find the first instead of the last version
@@ -273,14 +286,16 @@ cd9660_open(const char *path, struct open_file *f)
 	struct file *fp = NULL;
 	void *buf;
 	struct iso_primary_descriptor *vd;
-	size_t buf_size, read, dsize, off;
+	size_t read, dsize, off;
 	daddr_t bno, boff;
 	struct iso_directory_record rec;
 	struct iso_directory_record *dp = NULL;
 	int rc, first, use_rrip, lenskip;
+	bool isdir = false;
 
 	/* First find the volume descriptor */
-	buf = malloc(buf_size = ISO_DEFAULT_BLOCK_SIZE);
+	buf = malloc(MAX(ISO_DEFAULT_BLOCK_SIZE,
+	    sizeof (struct iso_primary_descriptor)));
 	vd = buf;
 	for (bno = 16; ; bno++) {
 		twiddle(1);
@@ -308,6 +323,7 @@ cd9660_open(const char *path, struct open_file *f)
 
 	first = 1;
 	use_rrip = 0;
+	lenskip = 0;
 	while (*path) {
 		bno = isonum_733(rec.extent) + isonum_711(rec.ext_attr_length);
 		dsize = isonum_733(rec.size);
@@ -344,8 +360,9 @@ cd9660_open(const char *path, struct open_file *f)
 			    first ? 0 : lenskip)) {
 				first = 0;
 				break;
-			} else
+			} else {
 				first = 0;
+			}
 
 			dp = (struct iso_directory_record *)
 			    ((char *)dp + isonum_711(dp->length));
@@ -365,7 +382,24 @@ cd9660_open(const char *path, struct open_file *f)
 		rec = *dp;
 		while (*path && *path != '/') /* look for next component */
 			path++;
-		if (*path) path++; /* skip '/' */
+
+		if (*path)	/* this component was directory */
+			isdir = true;
+
+		while (*path == '/')
+			path++; /* skip '/' */
+
+		if (*path)	/* We do have next component. */
+			isdir = false;
+	}
+
+	/*
+	 * if the path had trailing / but the path does point to file,
+	 * report the error ENOTDIR.
+	 */
+	if (isdir == true && (isonum_711(rec.flags) & 2) == 0) {
+		rc = ENOTDIR;
+		goto out;
 	}
 
 	/* allocate file system specific data structure */
@@ -405,8 +439,7 @@ cd9660_open(const char *path, struct open_file *f)
 	return (0);
 
 out:
-	if (fp)
-		free(fp);
+	free(fp);
 	free(buf);
 
 	return (rc);

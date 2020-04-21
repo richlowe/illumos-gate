@@ -630,9 +630,9 @@ static char *prm_dbg_str[] = {
 
 int prom_debug;
 
-#define	PRM_DEBUG(q)	if (prom_debug) 	\
+#define	PRM_DEBUG(q)	if (prom_debug)		\
 	prom_printf(prm_dbg_str[sizeof (q) >> 3], "startup.c", __LINE__, #q, q);
-#define	PRM_POINT(q)	if (prom_debug) 	\
+#define	PRM_POINT(q)	if (prom_debug)		\
 	prom_printf("%s:%d: %s\n", "startup.c", __LINE__, q);
 
 /*
@@ -650,13 +650,13 @@ size_t valloc_sz = 0;
 uintptr_t valloc_base;
 
 #define	ADD_TO_ALLOCATIONS(ptr, size) {					\
-		size = ROUND_UP_PAGE(size);		 		\
+		size = ROUND_UP_PAGE(size);				\
 		if (num_allocations == NUM_ALLOCATIONS)			\
 			panic("too many ADD_TO_ALLOCATIONS()");		\
 		allocations[num_allocations].al_ptr = (void**)&ptr;	\
 		allocations[num_allocations].al_size = size;		\
 		valloc_sz += size;					\
-		++num_allocations;				 	\
+		++num_allocations;					\
 	}
 
 /*
@@ -697,6 +697,7 @@ startup_smap(void)
 	uint32_t inst;
 	uint8_t *instp;
 	char sym[128];
+	struct modctl *modp;
 
 	extern int _smap_enable_patch_count;
 	extern int _smap_disable_patch_count;
@@ -730,8 +731,15 @@ startup_smap(void)
 		hot_patch_kernel_text((caddr_t)instp, inst, 4);
 	}
 
-	hot_patch_kernel_text((caddr_t)smap_enable, SMAP_CLAC_INSTR, 4);
-	hot_patch_kernel_text((caddr_t)smap_disable, SMAP_STAC_INSTR, 4);
+	/*
+	 * Hotinline calls to smap_enable and smap_disable within
+	 * unix module. Hotinlines in other modules are done on
+	 * mod_load().
+	 */
+	modp = mod_hold_by_name("unix");
+	do_hotinlines(modp->mod_mp);
+	mod_release_mod(modp);
+
 	setcr4(getcr4() | CR4_SMAP);
 	smap_enable();
 }
@@ -2360,7 +2368,7 @@ startup_end(void)
 	 */
 	for (i = DDI_IPL_1; i <= DDI_IPL_10; i++) {
 		(void) add_avsoftintr((void *)&softlevel_hdl[i-1], i,
-		    (avfunc)ddi_periodic_softintr, "ddi_periodic",
+		    (avfunc)(uintptr_t)ddi_periodic_softintr, "ddi_periodic",
 		    (caddr_t)(uintptr_t)i, NULL);
 	}
 
@@ -2610,9 +2618,7 @@ add_physmem_cb(page_t *pp, pfn_t pnum)
  * kphysm_init() initializes physical memory.
  */
 static pgcnt_t
-kphysm_init(
-	page_t *pp,
-	pgcnt_t npages)
+kphysm_init(page_t *pp, pgcnt_t npages)
 {
 	struct memlist	*pmem;
 	struct memseg	*cur_memseg;
@@ -2686,9 +2692,8 @@ kphysm_init(
 		 * of these large pages, configure the memsegs based on the
 		 * memory node ranges which had been made non-contiguous.
 		 */
+		end_pfn = base_pfn + num - 1;
 		if (mnode_xwa > 1) {
-
-			end_pfn = base_pfn + num - 1;
 			ms = PFN_2_MEM_NODE(base_pfn);
 			me = PFN_2_MEM_NODE(end_pfn);
 
@@ -2747,8 +2752,14 @@ kphysm_init(
 			/* process next memory node range */
 			ms++;
 			base_pfn = mem_node_config[ms].physbase;
-			num = MIN(mem_node_config[ms].physmax,
-			    end_pfn) - base_pfn + 1;
+
+			if (mnode_xwa > 1) {
+				num = MIN(mem_node_config[ms].physmax,
+				    end_pfn) - base_pfn + 1;
+			} else {
+				num = mem_node_config[ms].physmax -
+				    base_pfn + 1;
+			}
 		}
 	}
 
@@ -3113,7 +3124,7 @@ get_system_configuration(void)
 	if (BOP_GETPROPLEN(bootops, "kernelbase") > sizeof (prop) ||
 	    BOP_GETPROP(bootops, "kernelbase", prop) < 0 ||
 	    kobj_getvalue(prop, &lvalue) == -1)
-		eprom_kernelbase = NULL;
+		eprom_kernelbase = 0;
 	else
 		eprom_kernelbase = (uintptr_t)lvalue;
 

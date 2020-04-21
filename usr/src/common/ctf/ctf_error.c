@@ -24,7 +24,7 @@
  * Use is subject to license terms.
  */
 /*
- * Copyright (c) 2012, Joyent, Inc.
+ * Copyright (c) 2019, Joyent, Inc.
  */
 
 #include <ctf_impl.h>
@@ -75,7 +75,15 @@ static const char *const _ctf_errlist[] = {
 	"Duplicate member name definition",		 /* ECTF_DUPMEMBER */
 	"Conflicting type is already defined",		 /* ECTF_CONFLICT */
 	"Type has outstanding references",		 /* ECTF_REFERENCED */
-	"Type is not a dynamic type"			 /* ECTF_NOTDYN */
+	"Type is not a dynamic type",			 /* ECTF_NOTDYN */
+	"Elf library failure",				 /* ECTF_ELF */
+	"Cannot merge child container",			 /* ECTF_MCHILD */
+	"Label already exists",				 /* ECTF_LABEL */
+	"Merged labels conflict",			 /* ECTF_LCONFLICT */
+	"Zlib library failure",				 /* ECTF_ZLIB */
+	"CTF conversion backend error",			 /* ECTF_CONVBKERR */
+	"No C source to convert from",			 /* ECTF_CONVNOCSRC */
+	"No debug info found to convert from"		 /* ECTF_CONVNODEBUG */
 };
 
 static const int _ctf_nerr = sizeof (_ctf_errlist) / sizeof (_ctf_errlist[0]);

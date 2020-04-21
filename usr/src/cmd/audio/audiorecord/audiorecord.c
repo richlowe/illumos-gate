@@ -23,6 +23,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
+
 /* Command-line audio record utility */
 
 #include <stdio.h>
@@ -69,7 +73,7 @@ static char	*Stdout;
 /* XXX - the input buffer size should depend on sample_rate */
 #define	AUDIO_BUFSIZ (1024 * 64)
 static unsigned char	buf[AUDIO_BUFSIZ];
-static char 		swapBuf[AUDIO_BUFSIZ];	/* for byte swapping */
+static char		swapBuf[AUDIO_BUFSIZ];	/* for byte swapping */
 
 
 #define	MAX_GAIN		(100)	/* maximum gain */
@@ -179,7 +183,7 @@ main(int argc, char **argv)
 	int		err;
 	int		file_type;
 	int		ofd;
-	int 		swapBytes = FALSE;
+	int		swapBytes = FALSE;
 	double		vol;
 	struct stat	st;
 	struct pollfd	pfd;
@@ -770,10 +774,10 @@ parse_sample_rate(char *s, unsigned *rate)
 		 */
 		for (cp = s; *cp && (isdigit(*cp) || (*cp == '.')); cp++)
 			/* NOP */;
-		if (*cp != NULL) {
+		if (*cp != '\0') {
 			if ((*cp == 'k') || (*cp == 'K')) {
 				drate *= 1000.0;
-			} else if ((*cp != 'h') || (*cp != 'H')) {
+			} else if ((*cp != 'h') && (*cp != 'H')) {
 				/* bogus! */
 				Error(stderr,
 				    MGET("invalid sample rate: %s\n"), s);

@@ -22,6 +22,7 @@
 #
 # Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2016 RackTop Systems.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 LIBRARY =	liblddbg.a
@@ -46,29 +47,24 @@ COMOBJS64 =	bindings64.o	cap64.o		dlfcns64.o	dynamic64.o \
 
 BLTOBJ =	msg.o
 
-TOOLOBJ =	alist.o
+SGSCOMMONOBJ =	alist.o
 
-OBJECTS =	$(BLTOBJ) $(COMOBJS) $(COMOBJS32) $(COMOBJS64) $(TOOLOBJ)
+OBJECTS =	$(BLTOBJ) $(COMOBJS) $(COMOBJS32) $(COMOBJS64) $(SGSCOMMONOBJ)
 
 
 include		$(SRC)/lib/Makefile.lib
 include		$(SRC)/cmd/sgs/Makefile.com
 
-SRCDIR =	../common
-
-LINTFLAGS +=	-u -D_REENTRANT
-LINTFLAGS64 +=	-u -D_REENTRANT
+SRCDIR =	$(SGSHOME)/liblddbg
+MAPFILEDIR =	$(SRCDIR)/common
 
 CERRWARN +=	-_gcc=-Wno-unused-value
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses
 
-CPPFLAGS +=	-I$(SRCBASE)/lib/libc/inc
-DYNFLAGS +=	$(VERSREF) $(CC_USE_PROTO) '-R$$ORIGIN'
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) -lc
-
-native :=	DYNFLAGS	+= $(CONVLIBDIR)
-native :=	CPPFLAGS	+= -DNATIVE_BUILD
+CPPFLAGS +=	-I$(SRC)/lib/libc/inc
+DYNFLAGS +=	$(VERSREF) '-R$$ORIGIN'
+LDLIBS +=	$(CONVLIBDIR) -lconv -lc
 
 BLTDEFS =	msg.h
 BLTDATA =	msg.c
@@ -76,22 +72,17 @@ BLTMESG =	$(SGSMSGDIR)/liblddbg
 
 BLTFILES =	$(BLTDEFS) $(BLTDATA) $(BLTMESG)
 
-SGSMSGCOM =	../common/liblddbg.msg
+SGSMSGCOM =	$(SRCDIR)/common/liblddbg.msg
 SGSMSGALL =	$(SGSMSGCOM)
 SGSMSGTARG =	$(SGSMSGCOM)
 SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n liblddbg_msg
 
-CHKSRCS =	$(COMOBJS32:%32.o=../common/%.c)
+CHKSRCS =	$(COMOBJS32:%32.o=$(SRCDIR)/common/%.c)
 
-SRCS =		../common/llib-llddbg
-LIBSRCS =	$(COMOBJS:%.o=../common/%.c) \
-		$(TOOLOBJ:%.o=$(SGSTOOLS)/common/%.c) $(BLTDATA)
+LIBSRCS =	$(COMOBJS:%.o=$(SRCDIR)/common/%.c) \
+		$(SGSCOMMONOBJ:%.o=$(SGSCOMMON)/%.c) $(BLTDATA)
 
-LINTSRCS =	$(LIBSRCS) ../common/lintsup.c
-LINTSRCS32 =	$(COMOBJS32:%32.o=../common/%.c)
-LINTSRCS64 =	$(COMOBJS64:%64.o=../common/%.c)
-
-CLEANFILES +=	$(LINTOUTS) $(BLTFILES)
-CLOBBERFILES +=	$(DYNLIB) $(LINTLIBS) $(LIBLINKS)
+CLEANFILES +=	$(BLTFILES)
+CLOBBERFILES +=	$(DYNLIB) $(LIBLINKS)
 
 ROOTFS_DYNLIB =	$(DYNLIB:%=$(ROOTFS_LIBDIR)/%)

@@ -27,7 +27,7 @@
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2013 Saso Kiselkov. All rights reserved.
  * Copyright 2016 OmniTI Computer Consulting, Inc. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_IXGBE_SW_H
@@ -89,8 +89,10 @@ extern "C" {
 #define	IXGBE_INTR_ADJUST		0x40
 #define	IXGBE_ERROR			0x80
 
-#define	MAX_NUM_UNICAST_ADDRESSES 	0x80
-#define	MAX_NUM_MULTICAST_ADDRESSES 	0x1000
+#define	MAX_NUM_UNICAST_ADDRESSES	0x80
+#define	MAX_NUM_MULTICAST_ADDRESSES	0x1000
+#define	MAX_NUM_VLAN_FILTERS		0x40
+
 #define	IXGBE_INTR_NONE			0
 #define	IXGBE_INTR_MSIX			1
 #define	IXGBE_INTR_MSI			2
@@ -304,7 +306,7 @@ typedef struct adapter_info {
 
 enum ioc_reply {
 	IOC_INVAL = -1,	/* bad, NAK with EINVAL */
-	IOC_DONE, 	/* OK, reply sent */
+	IOC_DONE,	/* OK, reply sent */
 	IOC_ACK,	/* OK, just send ACK */
 	IOC_REPLY	/* OK, just send reply */
 };
@@ -386,6 +388,15 @@ typedef union ixgbe_ether_addr {
 		uint8_t		addr[ETHERADDRL];
 	} mac;
 } ixgbe_ether_addr_t;
+
+/*
+ * The list of VLANs an Rx group will accept.
+ */
+typedef struct ixgbe_vlan {
+	list_node_t		ixvl_link;
+	uint16_t		ixvl_vid;   /* The VLAN ID */
+	uint_t			ixvl_refs;  /* Number of users of this VLAN */
+} ixgbe_vlan_t;
 
 typedef enum {
 	USE_NONE,
@@ -589,6 +600,7 @@ typedef struct ixgbe_rx_ring {
 
 	struct ixgbe		*ixgbe;		/* Pointer to ixgbe struct */
 } ixgbe_rx_ring_t;
+
 /*
  * Software Receive Ring Group
  */
@@ -596,6 +608,8 @@ typedef struct ixgbe_rx_group {
 	uint32_t		index;		/* Group index */
 	mac_group_handle_t	group_handle;   /* call back group handle */
 	struct ixgbe		*ixgbe;		/* Pointer to ixgbe struct */
+	boolean_t		aupe;		/* AUPE bit */
+	list_t			vlans;		/* list of VLANs to allow */
 } ixgbe_rx_group_t;
 
 /*
@@ -615,7 +629,7 @@ typedef struct ixgbe_intr_vector {
  * Software adapter state
  */
 typedef struct ixgbe {
-	int 			instance;
+	int			instance;
 	mac_handle_t		mac_hdl;
 	dev_info_t		*dip;
 	struct ixgbe_hw		hw;
@@ -662,6 +676,7 @@ typedef struct ixgbe {
 	 */
 	ixgbe_rx_group_t	*rx_groups;	/* Array of rx groups */
 	uint32_t		num_rx_groups;	/* Number of rx groups in use */
+	uint32_t		rx_def_group;	/* Default Rx group index */
 
 	/*
 	 * Transmit Rings
@@ -674,8 +689,8 @@ typedef struct ixgbe {
 	boolean_t		tx_ring_init;
 	boolean_t		tx_head_wb_enable; /* Tx head wrtie-back */
 	boolean_t		tx_hcksum_enable; /* Tx h/w cksum offload */
-	boolean_t 		lso_enable; 	/* Large Segment Offload */
-	boolean_t 		mr_enable; 	/* Multiple Tx and Rx Ring */
+	boolean_t		lso_enable;	/* Large Segment Offload */
+	boolean_t		mr_enable;	/* Multiple Tx and Rx Ring */
 	boolean_t		relax_order_enable; /* Relax Order */
 	uint32_t		classify_mode;	/* Classification mode */
 	uint32_t		tx_copy_thresh;	/* Tx copy threshold */
@@ -714,6 +729,9 @@ typedef struct ixgbe {
 	ixgbe_ether_addr_t	unicst_addr[MAX_NUM_UNICAST_ADDRESSES];
 	uint32_t		mcast_count;
 	struct ether_addr	mcast_table[MAX_NUM_MULTICAST_ADDRESSES];
+
+	boolean_t		vlft_enabled; /* VLAN filtering enabled? */
+	boolean_t		vlft_init;    /* VLAN filtering initialized? */
 
 	ulong_t			sys_page_size;
 
@@ -784,6 +802,10 @@ typedef struct ixgbe_stat {
 	kstat_named_t gptc;	/* Good Packets Xmitted Count */
 	kstat_named_t gor;	/* Good Octets Received Count */
 	kstat_named_t got;	/* Good Octets Xmitd Count */
+	kstat_named_t qor;	/* Queue Octets Received */
+	kstat_named_t qot;	/* Queue Octets Transmitted */
+	kstat_named_t qpr;	/* Queue Packets Received */
+	kstat_named_t qpt;	/* Queue Packets Transmitted */
 	kstat_named_t prc64;	/* Packets Received - 64b */
 	kstat_named_t prc127;	/* Packets Received - 65-127b */
 	kstat_named_t prc255;	/* Packets Received - 127-255b */
@@ -796,10 +818,6 @@ typedef struct ixgbe_stat {
 	kstat_named_t ptc511;	/* Packets Xmitted (255-511b) */
 	kstat_named_t ptc1023;	/* Packets Xmitted (512-1023b) */
 	kstat_named_t ptc1522;	/* Packets Xmitted (1024-1522b */
-	kstat_named_t qprc[16];	/* Queue Packets Received Count */
-	kstat_named_t qptc[16];	/* Queue Packets Transmitted Count */
-	kstat_named_t qbrc[16];	/* Queue Bytes Received Count */
-	kstat_named_t qbtc[16];	/* Queue Bytes Transmitted Count */
 
 	kstat_named_t crcerrs;	/* CRC Error Count */
 	kstat_named_t illerrc;	/* Illegal Byte Error Count */

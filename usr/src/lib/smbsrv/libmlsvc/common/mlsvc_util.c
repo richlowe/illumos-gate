@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -41,7 +41,7 @@
 #include <smbsrv/libsmb.h>
 #include <smbsrv/libsmbns.h>
 #include <smbsrv/libmlsvc.h>
-#include <smbsrv/ntaccess.h>
+#include <smb/ntaccess.h>
 #include <smbsrv/smbinfo.h>
 #include <smbsrv/netrauth.h>
 #include <libsmbrdr.h>
@@ -57,22 +57,16 @@ static DWORD
 mlsvc_join_noauth(smb_domainex_t *dxi,
 	char *machine_name, char *machine_pw);
 
-
+/*
+ * This is called by smbd_dc_update just after we've learned about a
+ * new domain controller.  Make sure we can authenticate with this DC.
+ */
 DWORD
 mlsvc_netlogon(char *server, char *domain)
 {
-	mlsvc_handle_t netr_handle;
 	DWORD status;
 
-	status = netr_open(server, domain, &netr_handle);
-	if (status != 0) {
-		syslog(LOG_NOTICE, "Failed to connect to %s "
-		    "for domain %s (%s)", server, domain,
-		    xlate_nt_status(status));
-		return (status);
-	}
-
-	status = netlogon_auth(server, &netr_handle, NETR_FLG_INIT);
+	status = smb_netlogon_check(server, domain);
 	if (status != NT_STATUS_SUCCESS) {
 		syslog(LOG_NOTICE, "Failed to establish NETLOGON "
 		    "credential chain with DC: %s (%s)", server,
@@ -81,7 +75,6 @@ mlsvc_netlogon(char *server, char *domain)
 		    "domain controller does not match the local storage.");
 		syslog(LOG_NOTICE, "To correct this, use 'smbadm join'");
 	}
-	(void) netr_close(&netr_handle);
 
 	return (status);
 }

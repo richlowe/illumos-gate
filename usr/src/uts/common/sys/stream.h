@@ -22,6 +22,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2015 Joyent, Inc.  All rights reserved.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -35,7 +36,7 @@
  * For source compatibility
  */
 #include <sys/isa_defs.h>
-#ifdef _KERNEL
+#if defined(_KERNEL) || defined(_FAKE_KERNEL)
 #include <sys/kmem.h>
 #include <sys/uio.h>
 #endif
@@ -125,8 +126,8 @@ typedef struct queue {
 	size_t		q_lowat;	/* Q9S: Q low water mark	*/
 	struct qband	*q_bandp;	/* QLK: band flow information	*/
 	kmutex_t	q_lock;		/* NOLK: structure lock		*/
-	struct stdata 	*q_stream;	/* NOLK: stream backpointer	*/
-	struct syncq	*q_syncq;	/* NOLK: associated syncq 	*/
+	struct stdata	*q_stream;	/* NOLK: stream backpointer	*/
+	struct syncq	*q_syncq;	/* NOLK: associated syncq	*/
 	unsigned char	q_nband;	/* QLK: number of bands		*/
 	kcondvar_t	q_wait;		/* NOLK: read/write sleep CV	*/
 	struct queue	*q_nfsrv;	/* STR: next Q with svc routine */
@@ -142,9 +143,9 @@ typedef struct queue {
 	 * Syncq scheduling
 	 */
 	struct msgb	*q_sqhead;	/* QLK: first syncq message	*/
-	struct msgb	*q_sqtail;	/* QLK: last syncq message 	*/
+	struct msgb	*q_sqtail;	/* QLK: last syncq message	*/
 	struct queue	*q_sqnext;	/* SQLK: next Q on syncq list	*/
-	struct queue	*q_sqprev;	/* SQLK: prev Q on syncq list 	*/
+	struct queue	*q_sqprev;	/* SQLK: prev Q on syncq list	*/
 	uint_t		q_sqflags;	/* SQLK: syncq flags		*/
 	clock_t		q_sqtstamp;	/* SQLK: when Q was scheduled for sq */
 
@@ -168,9 +169,9 @@ typedef struct queue {
 #define	QWANTRMQSYNC	0x00000080	/* Want to remove sync stream Q */
 #define	QBACK		0x00000100	/* queue has been back-enabled	*/
 /*	UNUSED		0x00000200	   was QHLIST			*/
-/* 	UNUSED 		0x00000400	   was QUNSAFE			*/
+/*	UNUSED		0x00000400	   was QUNSAFE			*/
 #define	QPAIR		0x00000800	/* per queue-pair syncq		*/
-#define	QPERQ 		0x00001000	/* per queue-instance syncq	*/
+#define	QPERQ		0x00001000	/* per queue-instance syncq	*/
 #define	QPERMOD		0x00002000	/* per module syncq		*/
 #define	QMTSAFE		0x00004000	/* stream module is MT-safe	*/
 #define	QMTOUTPERIM	0x00008000	/* Has outer perimeter		*/
@@ -184,7 +185,7 @@ typedef struct queue {
 #define	QISDRV		0x00200000	/* the Queue is attached to a driver */
 /*	UNUSED		0x00400000	   was QHOT			*/
 /*	UNUSED		0x00800000	   was QNEXTHOT			*/
-/* 	UNUSED		0x01000000	   was _QNEXTLESS		*/
+/*	UNUSED		0x01000000	   was _QNEXTLESS		*/
 #define	_QINSERTING	0x04000000	/* Private, module is being inserted */
 #define	_QREMOVING	0x08000000	/* Private, module is being removed */
 #define	_QASSOCIATED	0x10000000	/* queue is associated with a device */
@@ -248,27 +249,40 @@ typedef enum qfields {
  */
 struct module_info {
 	ushort_t mi_idnum;		/* module id number */
-	char 	*mi_idname;		/* module name */
+	char	*mi_idname;		/* module name */
 	ssize_t	mi_minpsz;		/* min packet size accepted */
 	ssize_t	mi_maxpsz;		/* max packet size accepted */
 	size_t	mi_hiwat;		/* hi-water mark */
-	size_t 	mi_lowat;		/* lo-water mark */
+	size_t	mi_lowat;		/* lo-water mark */
 };
 
 /*
  * queue information structure (with Synchronous STREAMS extensions)
  */
+
+typedef struct msgb mblk_t;
+typedef struct struiod struiod_t;
+typedef struct infod infod_t;
+
+typedef	int (*qi_putp_t)(queue_t *, mblk_t *);
+typedef	int (*qi_srvp_t)(queue_t *);
+typedef	int (*qi_qopen_t)(queue_t *, dev_t *, int, int, cred_t *);
+typedef	int (*qi_qclose_t)(queue_t *, int, cred_t *);
+typedef	int (*qi_qadmin_t)(void);
+typedef	int (*qi_rwp_t)(queue_t *, struiod_t *);
+typedef	int (*qi_infop_t)(queue_t *, infod_t *);
+
 struct	qinit {
-	int	(*qi_putp)();		/* put procedure */
-	int	(*qi_srvp)();		/* service procedure */
-	int	(*qi_qopen)();		/* called on startup */
-	int	(*qi_qclose)();		/* called on finish */
-	int	(*qi_qadmin)();		/* for future use */
+	qi_putp_t	qi_putp;	/* put procedure */
+	qi_srvp_t	qi_srvp;	/* service procedure */
+	qi_qopen_t	qi_qopen;	/* called on startup */
+	qi_qclose_t	qi_qclose;	/* called on finish */
+	qi_qadmin_t	qi_qadmin;	/* for future use */
 	struct module_info *qi_minfo;	/* module information structure */
 	struct module_stat *qi_mstat;	/* module statistics structure */
-	int	(*qi_rwp)();		/* r/w procedure */
-	int	(*qi_infop)();		/* information procedure */
-	int	qi_struiot;		/* stream uio type for struio() */
+	qi_rwp_t	qi_rwp;		/* r/w procedure */
+	qi_infop_t	qi_infop;	/* information procedure */
+	int		qi_struiot;	/* stream uio type for struio() */
 };
 
 /*
@@ -367,18 +381,18 @@ typedef struct datab {
 /*
  * Message block descriptor
  */
-typedef struct	msgb {
+struct	msgb {
 	struct	msgb	*b_next;
 	struct  msgb	*b_prev;
 	struct	msgb	*b_cont;
 	unsigned char	*b_rptr;
 	unsigned char	*b_wptr;
-	struct datab 	*b_datap;
+	struct datab	*b_datap;
 	unsigned char	b_band;
 	unsigned char	b_tag;
 	unsigned short	b_flag;
 	queue_t		*b_queue;	/* for sync queues */
-} mblk_t;
+};
 
 /*
  * bcache descriptor
@@ -479,7 +493,7 @@ typedef	struct	bcache {
  */
 #if	defined(_LP64)
 struct iocblk {
-	int 	ioc_cmd;		/* ioctl command type */
+	int	ioc_cmd;		/* ioctl command type */
 	cred_t	*ioc_cr;		/* full credentials */
 	uint_t	ioc_id;			/* ioctl id */
 	uint_t	ioc_flag;		/* see below */
@@ -489,7 +503,7 @@ struct iocblk {
 };
 #else
 struct iocblk {
-	int 	ioc_cmd;		/* ioctl command type */
+	int	ioc_cmd;		/* ioctl command type */
 	cred_t	*ioc_cr;		/* full credentials */
 	uint_t	ioc_id;			/* ioctl id */
 	size_t	ioc_count;		/* count of bytes in data field */
@@ -554,7 +568,7 @@ struct copyresp {
 	uint_t	cp_flag;		/* datamodel IOC_ flags; see above */
 	mblk_t *cp_private;		/* private state information */
 	caddr_t	cp_rval;		/* status of request: 0 -> success */
-					/* 		non-zero -> failure */
+					/*		non-zero -> failure */
 };
 #else
 struct copyresp {
@@ -562,7 +576,7 @@ struct copyresp {
 	cred_t	*cp_cr;			/* full credentials */
 	uint_t	cp_id;			/* ioctl id (from ioc_id) */
 	caddr_t	cp_rval;		/* status of request: 0 -> success */
-					/* 		non-zero -> failure */
+					/*		non-zero -> failure */
 	size_t	cp_pad1;
 	uint_t	cp_pad2;
 	mblk_t *cp_private;		/* private state information */
@@ -627,32 +641,27 @@ struct stroptions {
 #define	SO_MAXBLK	0x100000	/* set maximum message block size */
 #define	SO_TAIL		0x200000	/* set the extra allocated space */
 
-#ifdef _KERNEL
+#if defined(_KERNEL) || defined(_FAKE_KERNEL)
 /*
  * Structure for rw (read/write) procedure calls. A pointer
  * to a struiod_t is passed as a parameter to the rwnext() call.
- *
- * Note: DEF_IOV_MAX is defined and used as it is in "fs/vncalls.c"
- *	 as there isn't a formal definition of IOV_MAX ???
  */
-#define	DEF_IOV_MAX	16
-
-typedef struct struiod {
+struct struiod {
 	mblk_t		*d_mp;		/* pointer to mblk (chain) */
 	uio_t		d_uio;		/* uio info */
-	iovec_t d_iov[DEF_IOV_MAX];	/* iov referenced by uio */
-} struiod_t;
+	iovec_t		*d_iov;		/* iov referenced by uio */
+};
 
 /*
  * Structure for information procedure calls.
  */
-typedef struct infod {
+struct infod {
 	unsigned char	d_cmd;		/* info info request command */
 	unsigned char	d_res;		/* info info command results */
 	int		d_bytes;	/* mblk(s) byte count */
 	int		d_count;	/* count of mblk(s) */
 	uio_t		*d_uiop;	/* pointer to uio struct */
-} infod_t;
+};
 /*
  * Values for d_cmd & d_res.
  */
@@ -681,7 +690,7 @@ typedef struct cmdblk {
  * Values for stream flag in open to indicate module open, clone open,
  * and the return value for failure.
  */
-#define	MODOPEN 	0x1		/* open as a module */
+#define	MODOPEN		0x1		/* open as a module */
 #define	CLONEOPEN	0x2		/* clone open; pick own minor dev */
 #define	OPENFAIL	-1		/* returned for open failure */
 
@@ -755,7 +764,7 @@ typedef struct cmdblk {
  */
 #define	bpsize(bp) ((unsigned int)(bp->b_datap->db_lim - bp->b_datap->db_base))
 
-#ifdef _KERNEL
+#if defined(_KERNEL) || defined(_FAKE_KERNEL)
 
 /*
  * For two-byte M_ERROR messages: indication that a side does not have an error

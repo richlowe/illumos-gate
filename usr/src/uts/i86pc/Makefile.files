@@ -24,6 +24,7 @@
 #
 # Copyright (c) 2010, Intel Corporation.
 # Copyright 2018 Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 #	This Makefile defines file modules in the directory uts/i86pc
 #	and its children. These are the source files which are i86pc
@@ -83,6 +84,7 @@ CORE_OBJS +=			\
 	mach_kdi.o		\
 	mach_sysconfig.o	\
 	machdep.o		\
+	md_clear.o		\
 	mem_config.o		\
 	mem_config_stubs.o	\
 	mem_config_arch.o	\
@@ -111,6 +113,7 @@ CORE_OBJS +=			\
 	pmem.o			\
 	ppage.o			\
 	pwrnow.o		\
+	smt.o			\
 	speedstep.o		\
 	ssp.o			\
 	startup.o		\
@@ -138,6 +141,7 @@ BOOT_DRIVER_OBJS =		\
 	boot_keyboard.o		\
 	boot_keyboard_table.o	\
 	boot_vga.o		\
+	boot_fb.o		\
 	boot_mmu.o		\
 	dboot_multiboot2.o	\
 	$(FONT_OBJS)
@@ -148,20 +152,12 @@ CORE_OBJS += $(BOOT_DRIVER_OBJS)
 #	locore.o is special. It must be the first file relocated so that it
 #	it is relocated just where its name implies.
 #
-SPECIAL_OBJS_32 +=		\
-	locore.o		\
-	fast_trap_asm.o		\
-	interrupt.o		\
-	syscall_asm.o
-
-SPECIAL_OBJS_64 +=		\
+SPECIAL_OBJS +=			\
 	locore.o		\
 	fast_trap_asm.o		\
 	interrupt.o		\
 	syscall_asm_amd64.o	\
 	kpti_trampolines.o
-
-SPECIAL_OBJS += $(SPECIAL_OBJS_$(CLASS))
 
 #
 # Objects that get compiled into the identity mapped PT_LOAD section of unix
@@ -188,7 +184,8 @@ DBOOT_OBJS +=			\
 #			driver and misc modules
 #
 GFX_PRIVATE_OBJS	+= gfx_private.o gfxp_pci.o gfxp_segmap.o \
-			   gfxp_devmap.o gfxp_vgatext.o gfxp_vm.o vgasubr.o
+			   gfxp_devmap.o gfxp_vgatext.o gfxp_vm.o vgasubr.o \
+			   gfxp_fb.o gfxp_bitmap.o
 FIPE_OBJS += fipe_drv.o fipe_pm.o
 IOAT_OBJS += ioat.o ioat_rs.o ioat_ioctl.o ioat_chan.o
 ISANEXUS_OBJS += isa.o dma_engine.o i8237A.o
@@ -222,6 +219,7 @@ ACPIDEV_OBJS += acpidev_drv.o \
 	acpidev_memory.o \
 	acpidev_pci.o \
 	acpidev_resource.o \
+	acpidev_usbport.o \
 	acpidev_util.o
 
 DRMACH_ACPI_OBJS += drmach_acpi.o dr_util.o drmach_err.o
@@ -247,12 +245,10 @@ INC_PATH	+= -I$(UTSBASE)/i86xpv -I$(UTSBASE)/common/xen
 #
 # Since the assym files are derived, the dependencies must be explicit for
 # all files including this file. (This is only actually required in the
-# instance when the .nse_depinfo file does not exist.) It may seem that
-# the lint targets should also have a similar dependency, but they don't
-# since only C headers are included when #defined(__lint) is true.
+# instance when the .nse_depinfo file does not exist.)
 #
 
-ASSYM_DEPS      += 		\
+ASSYM_DEPS      +=		\
 	copy.o			\
 	desctbls_asm.o		\
 	ddi_i86_asm.o		\
@@ -266,7 +262,6 @@ ASSYM_DEPS      += 		\
 	mpcore.o		\
 	sseblk.o		\
 	swtch.o			\
-	syscall_asm.o		\
 	syscall_asm_amd64.o	\
 	kpti_trampolines.o	\
 	cpr_wakecode.o
@@ -274,3 +269,10 @@ ASSYM_DEPS      += 		\
 CPR_IMPL_OBJS	= cpr_impl.o	cpr_wakecode.o
 
 $(KDI_ASSYM_DEPS:%=$(OBJS_DIR)/%):	$(DSF_DIR)/$(OBJS_DIR)/kdi_assym.h
+
+#
+# Intel Integrated Memory Controller
+# (Sandy Bridge - Cascade Lake)
+#
+IMC_OBJS =	imc.o imc_decode.o imc_dump.o
+IMCSTUB_OBJS =	imcstub.o

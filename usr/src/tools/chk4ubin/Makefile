@@ -28,17 +28,15 @@ include	../Makefile.tools
 
 PROG	= chk4ubin
 
+DYNFLAGS += '-R$$ORIGIN/../../lib/$(MACH)'
 LDLIBS += -lelf
-
-LINTFLAGS += -ux
+NATIVE_LIBS += libelf.so
 
 .KEEP_STATE:
 
 all: $(PROG)
 
 install: all .WAIT $(ROOTONBLDMACHPROG)
-
-lint:	lint_PROG
 
 clean:
 	$(RM) $(PROG)

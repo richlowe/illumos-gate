@@ -22,6 +22,7 @@
 /*
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2011 Bayard G. Bell. All rights reserved.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -194,7 +195,7 @@ static void	aus_socket(struct t_audit_data *);
 struct audit_s2e audit_s2e[] =
 {
 /*
- * ----------	---------- 	----------	----------
+ * ----------	----------	----------	----------
  * INITIAL	AUDIT		START		SYSTEM
  * PROCESSING	EVENT		PROCESSING	CALL
  * ----------	----------	----------	-----------
@@ -865,7 +866,7 @@ aui_fchownat(au_event_t e)
 		long	flags;
 	} *uap = (struct a *)clwp->lwp_ap;
 
-	if (uap->fname == NULL)
+	if (uap->fname == 0)
 		e = AUE_FCHOWN;
 	else if (uap->flags & AT_SYMLINK_NOFOLLOW)
 		e = AUE_LCHOWN;
@@ -968,7 +969,7 @@ aui_fchmodat(au_event_t e)
 		long	flag;
 	} *uap = (struct a *)clwp->lwp_ap;
 
-	if (uap->fname == NULL)
+	if (uap->fname == 0)
 		e = AUE_FCHMOD;
 	else
 		e = AUE_CHMOD;
@@ -999,7 +1000,7 @@ aus_fchmodat(struct t_audit_data *tad)
 
 	au_uwrite(au_to_arg32(2, "new file mode", fmode&07777));
 
-	if (fd == AT_FDCWD || uap->fname != NULL)	/* same as chmod() */
+	if (fd == AT_FDCWD || uap->fname != 0)	/* same as chmod() */
 		return;
 
 	/*
@@ -1199,7 +1200,7 @@ aui_fstatat(au_event_t e)
 		long	flags;
 	} *uap = (struct a *)clwp->lwp_ap;
 
-	if (uap->fnamep == NULL)
+	if (uap->fnamep == 0)
 		e = AUE_FSTAT;
 	else if (uap->flags & AT_SYMLINK_NOFOLLOW)
 		e = AUE_LSTAT;
@@ -1713,7 +1714,8 @@ auf_mknodat(struct t_audit_data *tad, int error, rval_t *rval)
 /*ARGSUSED*/
 static void
 aus_mount(struct t_audit_data *tad)
-{	/* AUS_START */
+{
+	/* AUS_START */
 	klwp_t *clwp = ttolwp(curthread);
 	uint32_t flags;
 	uintptr_t u_fstype, dataptr;
@@ -1746,21 +1748,19 @@ aus_mount(struct t_audit_data *tad)
 		STRUCT_INIT(nfsargs, get_udatamodel());
 		bzero(STRUCT_BUF(nfsargs), STRUCT_SIZE(nfsargs));
 
-		if (copyin((caddr_t)dataptr,
-				STRUCT_BUF(nfsargs),
-				MIN(uap->datalen, STRUCT_SIZE(nfsargs)))) {
+		if (copyin((caddr_t)dataptr, STRUCT_BUF(nfsargs),
+		    MIN(uap->datalen, STRUCT_SIZE(nfsargs)))) {
 			/* DEBUG debug_enter((char *)NULL); */
 			goto mount_free_fstype;
 		}
 		hostname = kmem_alloc(MAXNAMELEN, KM_SLEEP);
 		if (copyinstr(STRUCT_FGETP(nfsargs, hostname),
-				(caddr_t)hostname,
-				MAXNAMELEN, &len)) {
+		    (caddr_t)hostname, MAXNAMELEN, &len)) {
 			goto mount_free_hostname;
 		}
 		au_uwrite(au_to_text(hostname));
 		au_uwrite(au_to_arg32(3, "internal flags",
-			(uint_t)STRUCT_FGET(nfsargs, flags)));
+		    (uint_t)STRUCT_FGET(nfsargs, flags)));
 
 mount_free_hostname:
 		kmem_free(hostname, MAXNAMELEN);
@@ -2079,7 +2079,7 @@ aui_setpgrp(au_event_t e)
 
 	case 0: /* getpgrp()	- not security relevant */
 	case 2: /* getsid()	- not security relevant */
-	case 4: /* getpgid() 	- not security relevant */
+	case 4: /* getpgid()	- not security relevant */
 		e = AUE_NULL;
 		break;
 
@@ -2340,9 +2340,9 @@ aus_ioctl(struct t_audit_data *tad)
 		au_uwrite(au_to_arg32(1, "fd", fd));
 		au_uwrite(au_to_arg32(2, "cmd", cmd));
 #ifndef _LP64
-			au_uwrite(au_to_arg32(3, "arg", (uint32_t)cmarg));
+		au_uwrite(au_to_arg32(3, "arg", (uint32_t)cmarg));
 #else
-			au_uwrite(au_to_arg64(3, "arg", (uint64_t)cmarg));
+		au_uwrite(au_to_arg64(3, "arg", (uint64_t)cmarg));
 #endif
 		return;
 	}
@@ -2363,9 +2363,9 @@ aus_ioctl(struct t_audit_data *tad)
 
 	au_uwrite(au_to_arg32(2, "cmd", cmd));
 #ifndef _LP64
-		au_uwrite(au_to_arg32(3, "arg", (uint32_t)cmarg));
+	au_uwrite(au_to_arg32(3, "arg", (uint32_t)cmarg));
 #else
-		au_uwrite(au_to_arg64(3, "arg", (uint64_t)cmarg));
+	au_uwrite(au_to_arg64(3, "arg", (uint64_t)cmarg));
 #endif
 }
 
@@ -3039,8 +3039,21 @@ aui_auditsys(au_event_t e)
 		case A_SETCLASS:
 			e = AUE_AUDITON_SETCLASS;
 			break;
+		case A_GETPINFO:
+		case A_GETPINFO_ADDR:
+			e = AUE_AUDITON_GETPINFO;
+			break;
+		case A_SETPMASK:
+			e = AUE_AUDITON_SETPMASK;
+			break;
+		case A_GETKAUDIT:
+			e = AUE_AUDITON_GETKAUDIT;
+			break;
+		case A_SETKAUDIT:
+			e = AUE_AUDITON_SETKAUDIT;
+			break;
 		default:
-			e = AUE_NULL;
+			e = AUE_AUDITON_OTHER;
 			break;
 		}
 		break;
@@ -3061,6 +3074,7 @@ aus_auditsys(struct t_audit_data *tad)
 	uintptr_t a1, a2;
 	STRUCT_DECL(auditinfo, ainfo);
 	STRUCT_DECL(auditinfo_addr, ainfo_addr);
+	STRUCT_DECL(auditpinfo, apinfo);
 	au_evclass_map_t event;
 	au_mask_t mask;
 	int auditstate, policy;
@@ -3238,6 +3252,53 @@ aus_auditsys(struct t_audit_data *tad)
 		au_uwrite(au_to_arg32(
 		    3, "setclass:ec_class", (uint32_t)event.ec_class));
 		break;
+	case AUE_AUDITON_SETPMASK:
+		STRUCT_INIT(apinfo, get_udatamodel());
+		if (copyin((caddr_t)uap->a2, STRUCT_BUF(apinfo),
+		    STRUCT_SIZE(apinfo))) {
+			return;
+		}
+		au_uwrite(au_to_arg32(3, "setpmask:pid",
+		    (uint32_t)STRUCT_FGET(apinfo, ap_pid)));
+		au_uwrite(au_to_arg32(3, "setpmask:as_success",
+		    (uint32_t)STRUCT_FGET(apinfo, ap_mask.as_success)));
+		au_uwrite(au_to_arg32(3, "setpmask:as_failure",
+		    (uint32_t)STRUCT_FGET(apinfo, ap_mask.as_failure)));
+		break;
+	case AUE_AUDITON_SETKAUDIT:
+		STRUCT_INIT(ainfo_addr, get_udatamodel());
+		if (copyin((caddr_t)a1, STRUCT_BUF(ainfo_addr),
+		    STRUCT_SIZE(ainfo_addr))) {
+				return;
+		}
+		au_uwrite(au_to_arg32((char)1, "auid",
+		    (uint32_t)STRUCT_FGET(ainfo_addr, ai_auid)));
+#ifdef _LP64
+		au_uwrite(au_to_arg64((char)1, "port",
+		    (uint64_t)STRUCT_FGET(ainfo_addr, ai_termid.at_port)));
+#else
+		au_uwrite(au_to_arg32((char)1, "port",
+		    (uint32_t)STRUCT_FGET(ainfo_addr, ai_termid.at_port)));
+#endif
+		au_uwrite(au_to_arg32((char)1, "type",
+		    (uint32_t)STRUCT_FGET(ainfo_addr, ai_termid.at_type)));
+		if ((uint32_t)STRUCT_FGET(ainfo_addr, ai_termid.at_type) ==
+		    AU_IPv4) {
+			au_uwrite(au_to_in_addr(
+			    (struct in_addr *)STRUCT_FGETP(ainfo_addr,
+			    ai_termid.at_addr)));
+		} else {
+			au_uwrite(au_to_in_addr_ex(
+			    (int32_t *)STRUCT_FGETP(ainfo_addr,
+			    ai_termid.at_addr)));
+		}
+		au_uwrite(au_to_arg32((char)1, "as_success",
+		    (uint32_t)STRUCT_FGET(ainfo_addr, ai_mask.as_success)));
+		au_uwrite(au_to_arg32((char)1, "as_failure",
+		    (uint32_t)STRUCT_FGET(ainfo_addr, ai_mask.as_failure)));
+		au_uwrite(au_to_arg32((char)1, "asid",
+		    (uint32_t)STRUCT_FGET(ainfo_addr, ai_asid)));
+		break;
 	case AUE_GETAUID:
 	case AUE_GETAUDIT:
 	case AUE_GETAUDIT_ADDR:
@@ -3252,6 +3313,9 @@ aus_auditsys(struct t_audit_data *tad)
 	case AUE_AUDITON_SETSTAT:
 	case AUE_AUDITON_GETCOND:
 	case AUE_AUDITON_GETCLASS:
+	case AUE_AUDITON_GETPINFO:
+	case AUE_AUDITON_GETKAUDIT:
+	case AUE_AUDITON_OTHER:
 		break;
 	default:
 		break;
@@ -3747,7 +3811,7 @@ auf_connect(struct t_audit_data *tad, int error, rval_t *rval)
 		(void) socket_getsockname(so, (struct sockaddr *)so_laddr,
 		    &len, CRED());
 		if (error) {
-			if (uap->addr == NULL)
+			if (uap->addr == 0)
 				break;
 			if (uap->len <= 0)
 				break;
@@ -3997,8 +4061,7 @@ auf_setsockopt(struct t_audit_data *tad, int error, rval_t *rval)
 
 /*ARGSUSED*/
 static void
-aus_sockconfig(tad)
-	struct t_audit_data *tad;
+aus_sockconfig(struct t_audit_data *tad)
 {
 	struct a {
 		long	cmd;
@@ -4341,7 +4404,7 @@ auf_recvfrom(
 			bzero((void *)so_faddr, sizeof (so_faddr));
 
 			/* sanity check */
-			if (uap->from == NULL)
+			if (uap->from == 0)
 				break;
 
 			/* sanity checks */
@@ -4729,7 +4792,7 @@ auf_sendto(struct t_audit_data *tad, int error, rval_t *rval)
 			/* get peer address */
 
 			/* sanity check */
-			if (uap->to == NULL)
+			if (uap->to == 0)
 				break;
 
 			/* sanity checks */
@@ -5426,10 +5489,7 @@ aus_facl(struct t_audit_data *tad)
 
 /*ARGSUSED*/
 static void
-auf_read(tad, error, rval)
-	struct t_audit_data *tad;
-	int error;
-	rval_t *rval;
+auf_read(struct t_audit_data *tad, int error, rval_t *rval)
 {
 	struct file *fp;
 	struct f_audit_data *fad;
@@ -5483,10 +5543,7 @@ auf_read(tad, error, rval)
 
 /*ARGSUSED*/
 static void
-auf_write(tad, error, rval)
-	struct t_audit_data *tad;
-	int error;
-	rval_t *rval;
+auf_write(struct t_audit_data *tad, int error, rval_t *rval)
 {
 	struct file *fp;
 	struct f_audit_data *fad;
@@ -5540,10 +5597,7 @@ auf_write(tad, error, rval)
 
 /*ARGSUSED*/
 static void
-auf_recv(tad, error, rval)
-	struct t_audit_data *tad;
-	int error;
-	rval_t *rval;
+auf_recv(struct t_audit_data *tad, int error, rval_t *rval)
 {
 	struct sonode *so;
 	char so_laddr[sizeof (struct sockaddr_in6)];
@@ -5674,10 +5728,7 @@ auf_recv(tad, error, rval)
 
 /*ARGSUSED*/
 static void
-auf_send(tad, error, rval)
-	struct t_audit_data *tad;
-	int error;
-	rval_t *rval;
+auf_send(struct t_audit_data *tad, int error, rval_t *rval)
 {
 	struct sonode *so;
 	char so_laddr[sizeof (struct sockaddr_in6)];

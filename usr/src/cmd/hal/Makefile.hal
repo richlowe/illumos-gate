@@ -22,6 +22,9 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 # Definitions common for HAL code and consumers
 #
 
@@ -59,7 +62,7 @@ HAL_DBUS_CPPFLAGS =	-DDBUS_API_SUBJECT_TO_CHANGE \
 			-I$(ADJUNCT_PROTO)/usr/include/dbus-1.0 \
 			-I$(ADJUNCT_PROTO)/usr/lib/dbus-1.0/include
 
-HAL_GLIB_CPPFLAGS = 	-I$(ADJUNCT_PROTO)/usr/include/glib-2.0 \
+HAL_GLIB_CPPFLAGS =	-I$(ADJUNCT_PROTO)/usr/include/glib-2.0 \
 			-I$(ADJUNCT_PROTO)/usr/lib/glib-2.0/include
 
 HAL_GETTEXT_PACKAGE =	$(TEXT_DOMAIN)
@@ -71,3 +74,12 @@ CERRWARN +=		-_gcc=-Wno-extra
 CERRWARN +=		-_gcc=-Wno-parentheses
 CERRWARN +=		-_gcc=-Wno-address
 CERRWARN +=		-_gcc=-Wno-unused-function
+
+# glib2 >= 2.62 suppresses warnings about deprecated declarations in header
+# files using pragma "GCC diagnostic ignored \"-Wdeprecated-declarations\""
+# This is not supported before GCC 4.6 so just globally suppress these
+# warnings under the shadow compiler
+CERRWARN +=		-_gcc4=-Wno-deprecated-declarations
+
+# not linted
+SMATCH=off

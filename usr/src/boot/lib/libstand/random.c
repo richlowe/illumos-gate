@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -10,7 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 4. Neither the name of the University nor the names of its contributors
+ * 3. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
@@ -30,15 +30,13 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <sys/types.h>
 
-static u_long randseed = 1;
+static ulong_t randseed = 1;
 
 void
-srandom(seed)
-	u_long seed;
+srandom(ulong_t seed)
 {
 	randseed = seed;
 }
@@ -48,8 +46,8 @@ srandom(seed)
  * and whatever else we might use it for.  The result is uniform on
  * [0, 2^31 - 1].
  */
-u_long
-random()
+ulong_t
+random(void)
 {
 	long x, hi, lo, t;
 

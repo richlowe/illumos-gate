@@ -24,6 +24,7 @@
  *	  All Rights Reserved
  *
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2018, Joyent, Inc.
  */
 
 /* Get definitions for the relocation types supported. */
@@ -477,28 +478,32 @@ static char *
 demangled_name(char *s)
 {
 	static char	*buf = NULL;
-	const char	*dn;
+	size_t		buflen = 0;
+	char		*dn;
 	size_t		len;
 
-	dn = conv_demangle_name(s);
+	dn = (char *)conv_demangle_name(s);
 
 	/*
 	 * If not demangled, just return the symbol name
 	 */
-	if (strcmp(s, dn) == 0)
+	if (dn == s)
 		return (s);
+
+	len = strlen(dn) + strlen(s) + 4;
+
+	if (buflen < len) {
+		free(buf);
+		if ((buf = malloc(len)) == NULL)
+			return (s);
+		buflen = len;
+	}
 
 	/*
 	 * Demangled. Format it
 	 */
-	if (buf != NULL)
-		free(buf);
-
-	len = strlen(dn) + strlen(s) + 4;
-	if ((buf = malloc(len)) == NULL)
-		return (s);
-
-	(void) snprintf(buf, len, "%s\t[%s]", dn, s);
+	(void) snprintf(buf, buflen, "%s\t[%s]", dn, s);
+	free(dn);
 	return (buf);
 }
 
@@ -526,7 +531,7 @@ print_symtab(Elf *elf_file, SCNTAB *p_symtab, Elf_Data *sym_data,
 		adj = 8;
 
 	while (range > 0) {
-		char		*sym_name = (char *)0;
+		char		*sym_name = NULL;
 		int		type, bind;
 		int		specsec;
 		unsigned int	shndx;
@@ -827,12 +832,6 @@ dump_reloc_table(Elf *elf_file, GElf_Ehdr *p_ehdr,
 		return;
 	}
 	sym_size = sym_data->d_size;
-
-	if (p_scns == NULL) {
-		(void) fprintf(stderr,
-		"%s: %s: no section table data\n", prog_name, filename);
-		return;
-	}
 
 	if (p_scns->p_shdr.sh_type == SHT_RELA) {
 		if (!n_flag && r_flag)
@@ -1226,6 +1225,7 @@ dump_dynamic(Elf *elf_file, SCNTAB *p_scns, int num_scns, char *filename)
 			case DT_SUNW_CAPCHAINENT:
 			case DT_SUNW_CAPCHAINSZ:
 			case DT_SUNW_ASLR:
+			case DT_SUNW_KMOD:
 				(void) printf(pdyn_Fmtptr,
 				    EC_XWORD(p_dyn.d_un.d_val));
 				break;

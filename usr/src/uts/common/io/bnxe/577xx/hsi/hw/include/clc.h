@@ -82,10 +82,6 @@ extern void elink_cb_notify_link_changed(struct elink_dev *cb);
 #define ELINK_EVENT_ID_SFP_UNQUALIFIED_MODULE 	1
 #define ELINK_EVENT_ID_SFP_POWER_FAULT 		2
 
-#ifdef ELINK_AUX_POWER
-#define elink_cb_event_log(cb, level, ...)
-#define elink_cb_get_friendly_name(cb) ''
-#endif /*ELINK_AUX_POWER */
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 #endif
@@ -238,15 +234,15 @@ struct elink_vars;
 struct elink_params;
 struct elink_phy;
 
-typedef u8 (*config_init_t)(struct elink_phy *phy, struct elink_params *params,
-			    struct elink_vars *vars);
-typedef u8 (*read_status_t)(struct elink_phy *phy, struct elink_params *params,
-			    struct elink_vars *vars);
+typedef elink_status_t (*config_init_t)(struct elink_phy *phy,
+    struct elink_params *params, struct elink_vars *vars);
+typedef elink_status_t (*read_status_t)(struct elink_phy *phy,
+    struct elink_params *params, struct elink_vars *vars);
 typedef void (*link_reset_t)(struct elink_phy *phy,
 			     struct elink_params *params);
 typedef void (*config_loopback_t)(struct elink_phy *phy,
 				  struct elink_params *params);
-typedef u8 (*format_fw_ver_t)(u32 raw, u8 *str, u16 *len);
+typedef elink_status_t (*format_fw_ver_t)(u32 raw, u8 *str, u16 *len);
 typedef void (*hw_reset_t)(struct elink_phy *phy, struct elink_params *params);
 typedef void (*set_link_led_t)(struct elink_phy *phy,
 			       struct elink_params *params, u8 mode);

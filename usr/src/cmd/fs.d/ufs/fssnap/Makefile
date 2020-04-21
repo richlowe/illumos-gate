@@ -21,8 +21,9 @@
 #
 #
 # Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms. 
+# Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 FSTYPE=		ufs
 LIBPROG=	fssnap
@@ -42,7 +43,11 @@ CPPFLAGS +=     -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
 CERRWARN +=	-_gcc=-Wno-type-limits
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
+
 LDLIBS +=	-lkstat -ldevinfo
 
 # message catalog

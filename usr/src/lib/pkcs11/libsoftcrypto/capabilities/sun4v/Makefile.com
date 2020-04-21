@@ -37,7 +37,7 @@ ASFLAGS +=	$(AS_PICFLAGS) -P
 CFLAGS +=	$(CCVERBOSE) -_cc=-xO5 -_gcc=-O2 \
 		-_cc=-xbuiltin=%all -_gcc=-fbuiltin $(CCDALIGN)
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-function
 CPPFLAGS +=	-D$(PLATFORM) -I$(CRYPTODIR) -I$(UTSDIR) \

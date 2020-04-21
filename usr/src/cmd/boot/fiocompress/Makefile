@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= fiocompress
 
@@ -35,9 +36,11 @@ include ../Makefile.com
 .KEEP_STATE:
 
 LDLIBS +=	-lz
+NATIVE_LIBS +=	libz.so
 
 CFLAGS +=	-I../../../uts/common
-LINTFLAGS +=	-I../../../uts/common
+
+SMOFF +=	leaks
 
 all: $(PROG)
 
@@ -51,7 +54,5 @@ clean:
 	-$(RM) $(OBJS)
 
 _msg:
-
-lint:	lint_SRCS
 
 include ../Makefile.targ

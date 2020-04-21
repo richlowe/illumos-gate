@@ -31,7 +31,7 @@ include ../Makefile.ucbcmd
 # For messaging
 XGETFLAGS += -a -x mkstr.xcl
 
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 
 .KEEP_STATE:
 
@@ -40,7 +40,5 @@ all: $(PROG)
 install: all $(ROOTPROG)
 
 clean:
-
-lint:	lint_PROG
 
 include ../Makefile.ucbtarg

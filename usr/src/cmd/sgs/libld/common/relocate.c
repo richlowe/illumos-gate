@@ -76,12 +76,12 @@
  */
 typedef struct copy_rel {
 	Sym_desc	*c_sdp;		/* symbol descriptor to be copied */
-	Addr 		c_val;		/* original symbol value */
+	Addr		c_val;		/* original symbol value */
 } Copy_rel;
 
 /*
  * For each copy relocation symbol, determine if the symbol is:
- * 	1) to be *disp* relocated at runtime
+ *	1) to be *disp* relocated at runtime
  *	2) a reference symbol for *disp* relocation
  *	3) possibly *disp* relocated at ld time.
  *
@@ -923,7 +923,7 @@ ld_reloc_GOT_relative(Boolean local, Rel_desc *rsp, Ofl_desc *ofl)
 	/*
 	 * Perform relocation to GOT table entry.
 	 */
-	return (ld_add_actrel(NULL, rsp, ofl));
+	return (ld_add_actrel(0, rsp, ofl));
 }
 
 /*
@@ -1002,7 +1002,7 @@ ld_reloc_plt(Rel_desc *rsp, Ofl_desc *ofl)
 		rsp->rel_rtype = ortype;
 		return (1);
 	} else
-		return (ld_add_actrel(NULL, rsp, ofl));
+		return (ld_add_actrel(0, rsp, ofl));
 }
 
 /*
@@ -1043,14 +1043,14 @@ reloc_exec(Rel_desc *rsp, Ofl_desc *ofl)
 	 */
 	if ((sdp->sd_flags & FLG_SY_SPECSEC) && (sym->st_shndx == SHN_ABS)) {
 		if ((ofl->ofl_flags1 & FLG_OF1_ABSEXEC) == 0)
-			return ((*ld_targ.t_mr.mr_add_outrel)(NULL, rsp, ofl));
+			return ((*ld_targ.t_mr.mr_add_outrel)(0, rsp, ofl));
 
 		/*
 		 * If -zabsexec is set then promote the ABSOLUTE symbol to
 		 * current the current object and perform the relocation now.
 		 */
 		sdp->sd_ref = REF_REL_NEED;
-		return (ld_add_actrel(NULL, rsp, ofl));
+		return (ld_add_actrel(0, rsp, ofl));
 	}
 
 	/*
@@ -1064,9 +1064,9 @@ reloc_exec(Rel_desc *rsp, Ofl_desc *ofl)
 	if ((ELF_ST_TYPE(sym->st_info) == STT_OBJECT) &&
 	    (RELAUX_GET_OSDESC(rsp)->os_shdr->sh_flags & SHF_WRITE)) {
 		if (sdp->sd_flags & FLG_SY_MVTOCOMM)
-			return (ld_add_actrel(NULL, rsp, ofl));
+			return (ld_add_actrel(0, rsp, ofl));
 		else
-			return ((*ld_targ.t_mr.mr_add_outrel)(NULL, rsp, ofl));
+			return ((*ld_targ.t_mr.mr_add_outrel)(0, rsp, ofl));
 	}
 
 	/*
@@ -1083,7 +1083,7 @@ reloc_exec(Rel_desc *rsp, Ofl_desc *ofl)
 		    ELF_ST_TYPE(sym->st_info), 0, &inv_buf),
 		    rsp->rel_isdesc->is_file->ifl_name,
 		    ld_reloc_sym_name(rsp), sdp->sd_file->ifl_name);
-		return ((*ld_targ.t_mr.mr_add_outrel)(NULL, rsp, ofl));
+		return ((*ld_targ.t_mr.mr_add_outrel)(0, rsp, ofl));
 	}
 
 	/*
@@ -1279,7 +1279,7 @@ reloc_exec(Rel_desc *rsp, Ofl_desc *ofl)
 		DBG_CALL(Dbg_syms_copy_reloc(ofl, _sdp,
 		    _sdp->sd_sym->st_value));
 	}
-	return (ld_add_actrel(NULL, rsp, ofl));
+	return (ld_add_actrel(0, rsp, ofl));
 }
 
 /*
@@ -1302,12 +1302,12 @@ reloc_generic(Rel_desc *rsp, Ofl_desc *ofl)
 	 * until runtime.
 	 */
 	if (ofl->ofl_flags & FLG_OF_SHAROBJ)
-		return ((*ld_targ.t_mr.mr_add_outrel)(NULL, rsp, ofl));
+		return ((*ld_targ.t_mr.mr_add_outrel)(0, rsp, ofl));
 
 	/*
 	 * Otherwise process relocation now.
 	 */
-	return (ld_add_actrel(NULL, rsp, ofl));
+	return (ld_add_actrel(0, rsp, ofl));
 }
 
 /*
@@ -1321,7 +1321,7 @@ reloc_relobj(Boolean local, Rel_desc *rsp, Ofl_desc *ofl)
 	Word		rtype = rsp->rel_rtype;
 	Sym_desc	*sdp = rsp->rel_sym;
 	Is_desc		*isp = rsp->rel_isdesc;
-	Word		oflags = NULL;
+	Word		oflags = 0;
 
 	/*
 	 * Determine if we can do any relocations at this point.  We can if:
@@ -1334,7 +1334,7 @@ reloc_relobj(Boolean local, Rel_desc *rsp, Ofl_desc *ofl)
 	    !IS_GOT_BASED(rtype) && !IS_GOT_PC(rtype) &&
 	    IS_PC_RELATIVE(rtype) &&
 	    ((sdp->sd_isc) && (sdp->sd_isc->is_osdesc == isp->is_osdesc)))
-		return (ld_add_actrel(NULL, rsp, ofl));
+		return (ld_add_actrel(0, rsp, ofl));
 
 	/*
 	 * If -zredlocsym is in effect, translate all local symbol relocations
@@ -1382,7 +1382,7 @@ reloc_relobj(Boolean local, Rel_desc *rsp, Ofl_desc *ofl)
 		 */
 		if ((ELF_ST_TYPE(sdp->sd_sym->st_info) == STT_SECTION) ||
 		    (oflags == FLG_REL_SCNNDX))
-			if (ld_add_actrel(NULL, rsp, ofl) == S_ERROR)
+			if (ld_add_actrel(0, rsp, ofl) == S_ERROR)
 				return (S_ERROR);
 	}
 	return ((*ld_targ.t_mr.mr_add_outrel)(oflags, rsp, ofl));
@@ -1673,7 +1673,7 @@ ld_process_sym_reloc(Ofl_desc *ofl, Rel_desc *reld, Rel *reloc, Is_desc *isp,
 	if ((sdp->sd_ref == REF_REL_NEED) ||
 	    (flags & FLG_OF_BFLAG) || (flags & FLG_OF_SHAROBJ) ||
 	    (ELF_ST_TYPE(sdp->sd_sym->st_info) == STT_NOTYPE))
-		return ((*ld_targ.t_mr.mr_add_outrel)(NULL, reld, ofl));
+		return ((*ld_targ.t_mr.mr_add_outrel)(0, reld, ofl));
 
 	if (sdp->sd_ref == REF_DYN_NEED)
 		return (reloc_exec(reld, ofl));
@@ -2264,7 +2264,7 @@ get_move_entry(Is_desc *rsect, Xword roffset)
 	Shdr		*rshdr = rsect->is_shdr;
 	Is_desc		*misp;
 	Shdr		*mshdr;
-	Xword 		midx;
+	Xword		midx;
 	Move		*mvp;
 
 	/*
@@ -2296,8 +2296,8 @@ process_movereloc(Ofl_desc *ofl, Is_desc *rsect)
 {
 	Ifl_desc	*file = rsect->is_file;
 	Rel		*rend, *reloc;
-	Xword 		rsize, entsize;
-	Rel_desc 	reld;
+	Xword		rsize, entsize;
+	Rel_desc	reld;
 	Rel_aux	rel_aux;
 
 	rsize = rsect->is_shdr->sh_size;
@@ -2961,7 +2961,7 @@ Sym_desc *
 ld_am_I_partial(Rel_desc *reld, Xword val)
 {
 	Ifl_desc	*ifile = reld->rel_sym->sd_isc->is_file;
-	int 		nlocs = ifile->ifl_locscnt, i;
+	int		nlocs = ifile->ifl_locscnt, i;
 
 	for (i = 1; i < nlocs; i++) {
 		Sym		*osym;

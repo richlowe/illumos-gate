@@ -21,7 +21,7 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
-#
+# Copyright 2019 Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -63,6 +63,12 @@ LINTTAGS	+= -erroff=E_CONST_TRUNCATED_BY_ASSIGN
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-label
+
+# really broken
+SMOFF += logical_instead_of_bitwise,or_vs_and
+
+# false positive
+SMOFF += signed
 
 #
 #	Default build targets.

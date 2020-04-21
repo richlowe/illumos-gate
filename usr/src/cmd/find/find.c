@@ -22,16 +22,17 @@
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2013 Andrew Stormont.  All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 
 /*	Parts of this product may be derived from		*/
 /*	Mortice Kern Systems Inc. and Berkeley 4.3 BSD systems.	*/
-/*	licensed from  Mortice Kern Systems Inc. and 		*/
+/*	licensed from  Mortice Kern Systems Inc. and		*/
 /*	the University of California.				*/
 
 /*
@@ -158,7 +159,7 @@ static struct Args commands[] =
 	"-useracl",	F_USERACL,	Num,
 	"-xattr",	XATTR,		Unary,
 	"-xdev",	MOUNT,		Unary,
-	NULL,		0,		0
+	0,		0,		0
 };
 
 union Item
@@ -202,24 +203,26 @@ struct Arglist
 };
 
 
-static int		compile();
-static int		execute();
-static int		doexec(char *, char **, int *);
-static int		dodelete(char *, struct stat *, struct FTW *);
-static struct Args	*lookup();
-static int		ok();
+static int		compile(char **, struct Node *, int *);
+static int		execute(const char *, const struct stat *, int,
+    struct FTW *);
+static int		doexec(const char *, char **, int *);
+static int		dodelete(const char *, const struct stat *,
+    struct FTW *);
+static struct Args	*lookup(char *);
+static int		ok(const char *, char *[]);
 static void		usage(void)	__NORETURN;
-static struct Arglist	*varargs();
-static int		list();
-static char		*getgroup();
-static FILE		*cmdopen();
-static int		cmdclose();
-static char		*getshell();
-static void 		init_remote_fs();
-static char		*getname();
-static int		readmode();
-static mode_t		getmode();
-static char		*gettail();
+static struct Arglist	*varargs(char **);
+static int		list(const char *, const struct stat *);
+static char		*getgroup(gid_t);
+static FILE		*cmdopen(char *, char **, char *, FILE *);
+static int		cmdclose(FILE *);
+static char		*getshell(void);
+static void		init_remote_fs(void);
+static char		*getname(uid_t);
+static int		readmode(const char *);
+static mode_t		getmode(mode_t);
+static const char	*gettail(const char *);
 
 
 static int walkflags = FTW_CHDIR|FTW_PHYS|FTW_ANYERR|FTW_NOLOOP;
@@ -400,7 +403,7 @@ main(int argc, char **argv)
 	while (lastlist) {
 		if (lastlist->end != lastlist->nextstr) {
 			*lastlist->nextvar = 0;
-			(void) doexec((char *)0, lastlist->arglist,
+			(void) doexec(NULL, lastlist->arglist,
 			    &exec_exitcode);
 		}
 		lastlist = lastlist->next;
@@ -415,10 +418,7 @@ main(int argc, char **argv)
  */
 
 static int
-compile(argv, np, actionp)
-char **argv;
-struct Node *np;
-int *actionp;
+compile(char **argv, struct Node *np, int *actionp)
 {
 	char *b;
 	char **av;
@@ -442,8 +442,8 @@ int *actionp;
 		if (argp->type == Op) {
 			if (wasop == NOT || (wasop && np->action != NOT)) {
 				(void) fprintf(stderr,
-				gettext("%s: operand follows operand\n"),
-						cmdname);
+				    gettext("%s: operand follows operand\n"),
+				    cmdname);
 				exit(1);
 			}
 			if (np->action != NOT && oldnp == 0)
@@ -453,9 +453,9 @@ int *actionp;
 			wasop = PRINT;
 			if (argp->type != Unary) {
 				if (!(b = *++av)) {
-					(void) fprintf(stderr,
-					gettext("%s: incomplete statement\n"),
-							cmdname);
+					(void) fprintf(stderr, gettext(
+					    "%s: incomplete statement\n"),
+					    cmdname);
 					exit(1);
 				}
 				if (argp->type == Num) {
@@ -463,8 +463,9 @@ int *actionp;
 					    (argp->action == MINDEPTH)) &&
 					    ((int)strtol(b, (char **)NULL,
 					    10) < 0))
-						errx(1,
-					gettext("%s: value must be positive"),
+						errx(1, gettext(
+						    "%s: value must be "
+						    "positive"),
 						    (argp->action == MAXDEPTH) ?
 						    "maxdepth" : "mindepth");
 					if ((argp->action != PERM) ||
@@ -592,7 +593,7 @@ int *actionp;
 				if (errno != 0 || q == b || *q != '\0') {
 					(void) fprintf(stderr, gettext(
 					    "%s: cannot find %s name\n"),
-						cmdname, *av);
+					    cmdname, *av);
 					exit(1);
 				}
 			}
@@ -607,9 +608,9 @@ int *actionp;
 			(*actionp)++;
 			for (;;) {
 				if ((b = *av) == 0) {
-					(void) fprintf(stderr,
-					gettext("%s: incomplete statement\n"),
-						cmdname);
+					(void) fprintf(stderr, gettext(
+					    "%s: incomplete statement\n"),
+					    cmdname);
 					exit(1);
 				}
 				if (strcmp(b, ";") == 0) {
@@ -618,8 +619,7 @@ int *actionp;
 				} else if (strcmp(b, "{}") == 0)
 					*av = dummyarg;
 				else if (strcmp(b, "+") == 0 &&
-					av[-1] == dummyarg &&
-					np->action == EXEC) {
+				    av[-1] == dummyarg && np->action == EXEC) {
 					av[-1] = 0;
 					np->first.vp = varargs(np->first.ap);
 					np->action = VARARGS;
@@ -661,7 +661,7 @@ int *actionp;
 			if (*b == '-')
 				++b;
 
-			if (readmode(b) != NULL) {
+			if (readmode(b) != 0) {
 				(void) fprintf(stderr, gettext(
 				    "find: -perm: Bad permission string\n"));
 				usage();
@@ -708,8 +708,8 @@ int *actionp;
 			/* set up cpio */
 			if ((fd = fopen(b, "w")) == NULL) {
 				(void) fprintf(stderr,
-					gettext("%s: cannot create %s\n"),
-					cmdname, b);
+				    gettext("%s: cannot create %s\n"),
+				    cmdname, b);
 				exit(1);
 			}
 
@@ -728,8 +728,8 @@ int *actionp;
 			struct stat statb;
 			if (stat(b, &statb) < 0) {
 				(void) fprintf(stderr,
-					gettext("%s: cannot access %s\n"),
-					cmdname, b);
+				    gettext("%s: cannot access %s\n"),
+				    cmdname, b);
 				exit(1);
 			}
 			np->first.l = statb.st_mtime;
@@ -752,10 +752,10 @@ int *actionp;
 		case ACL:
 			break;
 		case MAXDEPTH:
-			maxdepth = (int)strtol(b, (char **)NULL, 10);
+			maxdepth = (int)strtol(b, NULL, 10);
 			break;
 		case MINDEPTH:
-			mindepth = (int)strtol(b, (char **)NULL, 10);
+			mindepth = (int)strtol(b, NULL, 10);
 			break;
 		}
 
@@ -767,8 +767,7 @@ int *actionp;
 		goto err;
 
 	if (paren_cnt != 0) {
-		(void) fprintf(stderr, gettext("%s: unmatched '('\n"),
-		cmdname);
+		(void) fprintf(stderr, gettext("%s: unmatched '('\n"), cmdname);
 		exit(1);
 	}
 
@@ -803,11 +802,7 @@ usage(void)
  */
 
 static int
-execute(name, statb, type, state)
-char *name;
-struct stat *statb;
-int type;
-struct FTW *state;
+execute(const char *name, const struct stat *statb, int type, struct FTW *state)
 {
 	struct Node *np = topnode;
 	int val;
@@ -815,26 +810,26 @@ struct FTW *state;
 	long l;
 	long long ll;
 	int not = 1;
-	char *filename;
+	const char *filename;
 	int cnpreg = 0;
 
 	if (type == FTW_NS) {
 		(void) fprintf(stderr, gettext("%s: stat() error %s: %s\n"),
-			cmdname, name, strerror(errno));
+		    cmdname, name, strerror(errno));
 		error = 1;
 		return (0);
 	} else if (type == FTW_DNR) {
 		(void) fprintf(stderr, gettext("%s: cannot read dir %s: %s\n"),
-			cmdname, name, strerror(errno));
+		    cmdname, name, strerror(errno));
 		error = 1;
 	} else if (type == FTW_SLN && lflag == 1) {
 		(void) fprintf(stderr,
-			gettext("%s: cannot follow symbolic link %s: %s\n"),
-			cmdname, name, strerror(errno));
+		    gettext("%s: cannot follow symbolic link %s: %s\n"),
+		    cmdname, name, strerror(errno));
 		error = 1;
 	} else if (type == FTW_DL) {
 		(void) fprintf(stderr, gettext("%s: cycle detected for %s\n"),
-			cmdname, name);
+		    cmdname, name);
 		error = 1;
 		return (0);
 	}
@@ -888,7 +883,7 @@ struct FTW *state;
 			 */
 			for (nremfs = 0; nremfs < fstype_index; nremfs++) {
 				if (strcmp(remote_fstypes[nremfs],
-						statb->st_fstype) == 0) {
+				    statb->st_fstype) == 0) {
 					val = 0;
 					break;
 				}
@@ -990,10 +985,10 @@ struct FTW *state;
 				ap->nextstr = cp;
 			} else {
 				/* no more room, exec command */
-				*ap->nextvar++ = name;
+				*ap->nextvar++ = (char *)name;
 				*ap->nextvar = 0;
 				val = 1;
-				(void) doexec((char *)0, ap->arglist,
+				(void) doexec(NULL, ap->arglist,
 				    &exec_exitcode);
 				ap->nextstr = ap->end;
 				ap->nextvar = ap->firstvar;
@@ -1033,14 +1028,17 @@ struct FTW *state;
 			 * /usr/bin/find  will not pattern match a leading
 			 * '.' in a filename, unless '.' is explicitly
 			 * specified.
+			 *
+			 * The legacy behavior makes no sense for PATH.
 			 */
 #ifndef XPG4
-			fnmflags |= FNM_PERIOD;
+			if (np->action == NAME || np->action == INAME)
+				fnmflags |= FNM_PERIOD;
 #endif
 
 			val = !fnmatch(np->first.cp,
-			    (np->action == NAME || np->action == INAME)
-				? basename(path) : path, fnmflags);
+			    (np->action == NAME || np->action == INAME) ?
+			    basename(path) : path, fnmflags);
 			free(path);
 			break;
 		}
@@ -1076,7 +1074,7 @@ struct FTW *state;
 			break;
 		case XATTR:
 			filename = (walkflags & FTW_CHDIR) ?
-				gettail(name) : name;
+			    gettail(name) : name;
 			val = (pathconf(filename, _PC_XATTR_EXISTS) == 1);
 			break;
 		case ACL:
@@ -1086,7 +1084,7 @@ struct FTW *state;
 			 * nftw()) of the file
 			 */
 			filename = (walkflags & FTW_CHDIR) ?
-				gettail(name) : name;
+			    gettail(name) : name;
 			val = acl_trivial(filename);
 			break;
 		case F_USERACL:
@@ -1130,7 +1128,7 @@ struct FTW *state;
 			regmatch_t pmatch;
 
 			val = 0;
-			if (regexec(&preg[cnpreg], name, 1, &pmatch, NULL) == 0)
+			if (regexec(&preg[cnpreg], name, 1, &pmatch, 0) == 0)
 				val = ((pmatch.rm_so == 0) &&
 				    (pmatch.rm_eo == strlen(name)));
 			cnpreg++;
@@ -1152,7 +1150,7 @@ struct FTW *state;
 		 * 'Lastval' saves the last result (fail or pass) when
 		 * returning back to the calling routine.
 		 */
-		if (val^not) {
+		if (val ^ not) {
 			lastval = 0;
 			return (0);
 		}
@@ -1168,15 +1166,13 @@ struct FTW *state;
  */
 
 static int
-ok(name, argv)
-char *name;
-char *argv[];
+ok(const char *name, char *argv[])
 {
 	int  c;
 	int i = 0;
 	char resp[LINE_MAX + 1];
 
-	(void) fflush(stdout); 	/* to flush possible `-print' */
+	(void) fflush(stdout);	/* to flush possible `-print' */
 
 	if ((*argv != dummyarg) && (strcmp(*argv, name)))
 		(void) fprintf(stderr, "< %s ... %s >?   ", *argv, name);
@@ -1210,7 +1206,7 @@ char *argv[];
  */
 
 static int
-doexec(char *name, char *argv[], int *exitcode)
+doexec(const char *name, char *argv[], int *exitcode)
 {
 	char *cp;
 	char **av = argv;
@@ -1225,7 +1221,7 @@ doexec(char *name, char *argv[], int *exitcode)
 		while (cp = *av++) {
 			if (cp == dummyarg) {
 				dummyseen = 1;
-				av[-1] = name;
+				av[-1] = (char *)name;
 			}
 
 		}
@@ -1329,9 +1325,9 @@ doexec(char *name, char *argv[], int *exitcode)
 }
 
 static int
-dodelete(char *name, struct stat *statb, struct FTW *state)
+dodelete(const char *name, const struct stat *statb, struct FTW *state)
 {
-	char *fn;
+	const char *fn;
 	int rc = 0;
 
 	/* restrict symlinks */
@@ -1376,8 +1372,7 @@ dodelete(char *name, struct stat *statb, struct FTW *state)
  *  Table lookup routine
  */
 static struct Args *
-lookup(word)
-char *word;
+lookup(char *word)
 {
 	struct Args *argp = commands;
 	int second;
@@ -1398,8 +1393,7 @@ char *word;
  */
 
 static struct Arglist *
-varargs(com)
-char **com;
+varargs(char **com)
 {
 	struct Arglist *ap;
 	int n;
@@ -1414,7 +1408,8 @@ char **com;
 	ap->end = (char *)ap + varsize;
 	ap->nextstr = ap->end;
 	ap->nextvar = ap->arglist;
-	while (*ap->nextvar++ = *com++);
+	while (*ap->nextvar++ = *com++)
+		;
 	ap->nextvar--;
 	ap->firstvar = ap->nextvar;
 	ap->next = lastlist;
@@ -1440,11 +1435,7 @@ static struct			/* info for each cmdopen()		*/
 } cmdproc[MAXCMDS];
 
 static FILE *
-cmdopen(cmd, argv, mode, fp)
-char	*cmd;
-char	**argv;
-char	*mode;
-FILE	*fp;
+cmdopen(char *cmd, char **argv, char *mode, FILE *fp)
 {
 	int	proc;
 	int	cmdfd;
@@ -1498,13 +1489,15 @@ FILE	*fp;
 			 */
 
 			p = argv;
-			while (*p++);
-			if (v = (char **)malloc((p - argv + 1) *
-					sizeof (char **))) {
+			while (*p++)
+				;
+			if (v = malloc((p - argv + 1) * sizeof (char **))) {
 				p = v;
 				*p++ = cmd;
-				if (*argv) argv++;
-				while (*p++ = *argv++);
+				if (*argv)
+					argv++;
+				while (*p++ = *argv++)
+					;
 				(void) execv(getshell(), v);
 			}
 		}
@@ -1523,8 +1516,7 @@ FILE	*fp;
  */
 
 static int
-cmdclose(fp)
-FILE	*fp;
+cmdclose(FILE *fp)
 {
 	int	i;
 	pid_t	p, pid;
@@ -1537,7 +1529,8 @@ FILE	*fp;
 	(void) fclose(fp);
 	cmdproc[i].fp = 0;
 	pid = cmdproc[i].pid;
-	while ((p = wait(&status)) != pid && p != (pid_t)-1);
+	while ((p = wait(&status)) != pid && p != (pid_t)-1)
+		;
 	if (p == pid) {
 		status = (status >> 8) & CMDERR;
 		if (status == CMDERR)
@@ -1560,7 +1553,7 @@ FILE	*fp;
  */
 
 char *
-getshell()
+getshell(void)
 {
 	char	*s;
 	char	*sh;
@@ -1658,9 +1651,7 @@ getgroup(gid_t gid)
 #define	kbytes(bytes)		(((bytes) + 1023) / 1024)
 
 static int
-list(file, stp)
-	char *file;
-	struct stat *stp;
+list(const char *file, const struct stat *stp)
 {
 	char pmode[32], uname[32], gname[32], fsize[32], ftime[32];
 	int trivial;
@@ -1681,7 +1672,7 @@ list(file, stp)
 #endif
 	int who;
 	char *cp;
-	char *tailname;
+	const char *tailname;
 	time_t now;
 	long long ksize;
 
@@ -1753,7 +1744,7 @@ list(file, stp)
 
 		if (stp->st_mode & special[who * 3])
 			pmode[permoffset(who) + 3] =
-				special[who * 3 + 1 + is_exec];
+			    special[who * 3 + 1 + is_exec];
 		else if (is_exec)
 			pmode[permoffset(who) + 3] = 'x';
 		else
@@ -1796,14 +1787,12 @@ list(file, stp)
 
 	if (pmode[0] == 'b' || pmode[0] == 'c')
 		(void) sprintf(fsize, "%3ld,%4ld",
-			major(stp->st_rdev), minor(stp->st_rdev));
+		    major(stp->st_rdev), minor(stp->st_rdev));
 	else {
 		(void) sprintf(fsize, (stp->st_size < 100000000) ?
-			"%8lld" : "%lld", stp->st_size);
+		    "%8lld" : "%lld", stp->st_size);
 #ifdef	S_IFLNK
 		if (pmode[0] == 'l') {
-
-
 			who = readlink(tailname, flink, sizeof (flink) - 1);
 
 			if (who >= 0)
@@ -1821,29 +1810,34 @@ list(file, stp)
 		(void) sprintf(ftime, "%-12.12s", cp + 4);
 
 	(void) printf((stp->st_ino < 100000) ? "%5llu " :
-		"%llu ", stp->st_ino);  /* inode #	*/
+	    "%llu ", stp->st_ino);  /* inode #	*/
 #ifdef	S_IFSOCK
 	ksize = (long long) kbytes(ldbtob(stp->st_blocks)); /* kbytes */
 #else
 	ksize = (long long) kbytes(stp->st_size); /* kbytes */
 #endif
 	(void) printf((ksize < 10000) ? "%4lld " : "%lld ", ksize);
-	(void) printf("%s %2ld %s%s%s %s %s%s%s\n",
-		pmode,					/* protection	*/
-		stp->st_nlink,				/* # of links	*/
-		uname,					/* owner	*/
-		gname,					/* group	*/
-		fsize,					/* # of bytes	*/
-		ftime,					/* modify time	*/
-		file,					/* name		*/
 #ifdef	S_IFLNK
-		(pmode[0] == 'l') ? " -> " : "",
-		(pmode[0] == 'l') ? flink  : ""		/* symlink	*/
+	(void) printf("%s %2ld %s%s%s %s %s%s%s\n",
+	    pmode,					/* protection	*/
+	    stp->st_nlink,				/* # of links	*/
+	    uname,					/* owner	*/
+	    gname,					/* group	*/
+	    fsize,					/* # of bytes	*/
+	    ftime,					/* modify time	*/
+	    file,					/* name		*/
+	    (pmode[0] == 'l') ? " -> " : "",
+	    (pmode[0] == 'l') ? flink  : "");		/* symlink	*/
 #else
-		"",
-		""
+	(void) printf("%s %2ld %s%s%s %s %s\n",
+	    pmode,					/* protection	*/
+	    stp->st_nlink,				/* # of links	*/
+	    uname,					/* owner	*/
+	    gname,					/* group	*/
+	    fsize,					/* # of bytes	*/
+	    ftime,					/* modify time	*/
+	    file);					/* name		*/
 #endif
-);
 
 	return (0);
 }
@@ -1865,7 +1859,7 @@ new_string(char *s)
  * remote_fstypes array.
  */
 static void
-init_remote_fs()
+init_remote_fs(void)
 {
 	FILE    *fp;
 	char    line_buf[LINEBUF_SIZE];
@@ -1932,8 +1926,7 @@ static	uint_t	nowho;			/* No who for this mode (DOS kludge) */
  * is NULL if everything is OK, otherwise it is -1.
  */
 static int
-readmode(ascmode)
-const char *ascmode;
+readmode(const char *ascmode)
 {
 	const char *amode = ascmode;
 	PERMST *pp;
@@ -2070,7 +2063,7 @@ const char *ascmode;
 		break;
 	}
 	endp = pp;
-	return (NULL);
+	return (0);
 }
 
 /*
@@ -2078,8 +2071,7 @@ const char *ascmode;
  * value as who (user designation) mask or 0 if this isn't valid.
  */
 static int
-iswho(c)
-int c;
+iswho(int c)
 {
 	switch (c) {
 	case 'a':
@@ -2105,8 +2097,7 @@ int c;
  * in a symbolic mode.
  */
 static int
-isop(c)
-int c;
+isop(int c)
 {
 	switch (c) {
 	case '+':
@@ -2126,9 +2117,7 @@ int c;
  * 'o' are used, and sets pp->p_special to the one used.
  */
 static int
-isperm(pp, c)
-PERMST *pp;
-int c;
+isperm(PERMST *pp, int c)
 {
 	switch (c) {
 	case 'u':
@@ -2266,10 +2255,10 @@ getmode(mode_t startmode)
  * Returns the last component of a path name, unless it is
  * an absolute path, in which case it returns the whole path
  */
-static char
-*gettail(char *fname)
+static const char *
+gettail(const char *fname)
 {
-	char	*base = fname;
+	const char *base = fname;
 
 	if (*fname != '/') {
 		if ((base = strrchr(fname, '/')) != NULL)

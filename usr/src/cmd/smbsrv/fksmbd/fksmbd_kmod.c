@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -68,6 +68,16 @@ fksmbd_adjust_config(smb_ioc_header_t *ioc_hdr)
 	ioc->maxworkers = 20;
 	smbd_report("maxconnections=%d, maxworkers=%d",
 	    ioc->maxconnections, ioc->maxworkers);
+
+	if ((s = getenv("SMB_MAX_PROTOCOL")) != NULL) {
+		ioc->max_protocol = strtol(s, NULL, 16);
+		smbd_report("max_protocol=0x%x", ioc->max_protocol);
+	}
+
+	if ((s = getenv("SMB_MIN_PROTOCOL")) != NULL) {
+		ioc->min_protocol = strtol(s, NULL, 16);
+		smbd_report("min_protocol=0x%x", ioc->min_protocol);
+	}
 
 	if ((s = getenv("SMB_SIGNING")) != NULL) {
 		ioc->signing_enable = 0;

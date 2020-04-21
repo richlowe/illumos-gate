@@ -1,8 +1,9 @@
 \ Copyright (c) 2003 Scott Long <scottl@FreeBSD.org>
 \ Copyright (c) 2003 Aleksander Fafula <alex@fafula.com>
 \ Copyright (c) 2006-2015 Devin Teske <dteske@FreeBSD.org>
+\ Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 \ All rights reserved.
-\ 
+\
 \ Redistribution and use in source and binary forms, with or without
 \ modification, are permitted provided that the following conditions
 \ are met:
@@ -11,7 +12,7 @@
 \ 2. Redistributions in binary form must reproduce the above copyright
 \    notice, this list of conditions and the following disclaimer in the
 \    documentation and/or other materials provided with the distribution.
-\ 
+\
 \ THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
 \ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 \ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -23,8 +24,6 @@
 \ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 \ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 \ SUCH DAMAGE.
-\ 
-\ $FreeBSD$
 
 marker task-menu.4th
 
@@ -66,22 +65,12 @@ variable menuY     \ Menu Y offset (rows)
 \ Menu-item elements
 variable menurebootadded
 
-\ Parsing of kernels into menu-items
-variable kernidx
-variable kernlen
-variable kernmenuidx
-
 \ Menu timer [count-down] variables
 variable menu_timeout_enabled \ timeout state (internal use only)
 variable menu_time            \ variable for tracking the passage of time
 variable menu_timeout         \ determined configurable delay duration
 variable menu_timeout_x       \ column position of timeout message
 variable menu_timeout_y       \ row position of timeout message
-
-\ Containers for parsing kernels into menu-items
-create kerncapbuf 64 allot
-create kerndefault 64 allot
-create kernelsbuf 256 allot
 
 only forth also menu-namespace definitions
 
@@ -97,8 +86,8 @@ variable menukey8
 variable menureboot
 variable menuacpi
 variable menuosconsole
+variable menukmdb
 variable menuoptions
-variable menukernel
 
 \ Menu initialization status variables
 variable init_state1
@@ -186,7 +175,6 @@ only forth also menu-namespace definitions
 : init_textN    ( N -- C-ADDR ) s" init_textN"     9 namespace ;
 
 \ Environment variables
-: kernel[x]          ( N -- C-ADDR/U )   s" kernel[x]"           7 +c! ;
 : menu_init[x]       ( N -- C-ADDR/U )   s" menu_init[x]"       10 +c! ;
 : menu_command[x]    ( N -- C-ADDR/U )   s" menu_command[x]"    13 +c! ;
 : menu_caption[x]    ( N -- C-ADDR/U )   s" menu_caption[x]"    13 +c! ;
@@ -204,7 +192,7 @@ also menu-infrastructure definitions
 \ increments the cursor position to the next row for the creation of the next
 \ menu item. This function is called by the menu-create function. You need not
 \ call it directly.
-\ 
+\
 : printmenuitem ( menu_item_str -- ascii_keycode )
 
 	loader_color? if [char] ^ escc! then
@@ -252,189 +240,7 @@ also menu-infrastructure definitions
 	swap drop		( c bool -- bool )	\ return boolean
 ;
 
-\ This function parses $kernels into variables that are used by the menu to
-\ display which kernel to boot when the [overloaded] `boot' word is interpreted.
-\ Used internally by menu-create, you need not (nor should you) call this
-\ directly.
-\ 
-: parse-kernels ( N -- ) \ kernidx
-	kernidx ! ( n -- )	\ store provided `x' value
-	[char] 0 kernmenuidx !	\ initialize `y' value for menu_caption[x][y]
-
-	\ Attempt to get a list of kernels, fall back to sensible default
-	s" kernels" getenv dup -1 = if
-		drop ( cruft )
-		s" kernel kernel.old"
-	then ( -- c-addr/u )
-
-	\ Check to see if the user has altered $kernel by comparing it against
-	\ $kernel[N] where N is kernel_state (the actively displayed kernel).
-	s" kernel_state" evaluate @ 48 + s" kernel[N]" 7 +c! getenv
-	dup -1 <> if
-		s" kernel" getenv dup -1 = if
-			drop ( cruft ) s" "
-		then
-		2swap 2over compare 0= if
-			2drop FALSE ( skip below conditional )
-		else \ User has changed $kernel
-			TRUE ( slurp in new value )
-		then
-	else \ We haven't yet parsed $kernels into $kernel[N]
-		drop ( getenv cruft )
-		s" kernel" getenv dup -1 = if
-			drop ( cruft ) s" "
-		then
-		TRUE ( slurp in initial value )
-	then ( c-addr/u -- c-addr/u c-addr/u,-1 | 0 )
-	if \ slurp new value into kerndefault
-		kerndefault 1+ 0 2swap strcat swap 1- c!
-	then
-
-	\ Clear out existing parsed-kernels
-	kernidx @ [char] 0
-	begin
-		dup kernel[x] unsetenv
-		2dup menu_caption[x][y] unsetenv
-		2dup ansi_caption[x][y] unsetenv
-		1+ dup [char] 8 >
-	until
-	2drop
-
-	\ Step through the string until we find the end
-	begin
-		0 kernlen ! \ initialize length of value
-
-		\ Skip leading whitespace and/or comma delimiters
-		begin
-			dup 0<> if
-				over c@ delim? ( c-addr/u -- c-addr/u bool )
-			else
-				false ( c-addr/u -- c-addr/u bool )
-			then
-		while
-			1- swap 1+ swap ( c-addr/u -- c-addr'/u' )
-		repeat
-		( c-addr/u -- c-addr'/u' )
-
-		dup 0= if \ end of string while eating whitespace
-			2drop ( c-addr/u -- )
-			kernmenuidx @ [char] 0 <> if \ found at least one
-				exit \ all done
-			then
-
-			\ No entries in $kernels; use $kernel instead
-			s" kernel" getenv dup -1 = if
-				drop ( cruft ) s" "
-			then ( -- c-addr/u )
-			dup kernlen ! \ store entire value length as kernlen
-		else
-			\ We're still within $kernels parsing toward the end;
-			\ find delimiter/end to determine kernlen
-			2dup ( c-addr/u -- c-addr/u c-addr/u )
-			begin dup 0<> while
-				over c@ delim? if
-					drop 0 ( break ) \ found delimiter
-				else
-					kernlen @ 1+ kernlen ! \ incrememnt
-					1- swap 1+ swap \ c-addr++ u--
-				then
-			repeat
-			2drop ( c-addr/u c-addr'/u' -- c-addr/u )
-
-			\ If this is the first entry, compare it to $kernel
-			\ If different, then insert $kernel beforehand
-			kernmenuidx @ [char] 0 = if
-				over kernlen @ kerndefault count compare if
-					kernelsbuf 0 kerndefault count strcat
-					s" ," strcat 2swap strcat
-					kerndefault count swap drop kernlen !
-				then
-			then
-		then
-		( c-addr/u -- c-addr'/u' )
-
-		\ At this point, we should have something on the stack to store
-		\ as the next kernel menu option; start assembling variables
-
-		over kernlen @ ( c-addr/u -- c-addr/u c-addr/u2 )
-
-		\ Assign first to kernel[x]
-		2dup kernmenuidx @ kernel[x] setenv
-
-		\ Assign second to menu_caption[x][y]
-		kerncapbuf 0 s" [K]ernel: " strcat
-		2over strcat
-		kernidx @ kernmenuidx @ menu_caption[x][y]
-		setenv
-
-		\ Assign third to ansi_caption[x][y]
-		kerncapbuf 0 s" @[1mK@[37mernel: " [char] @ escc! strcat
-		kernmenuidx @ [char] 0 = if
-			s" default/@[32m"
-		else
-			s" @[34;1m"
-		then
-		[char] @ escc! strcat
-		2over strcat
-		s" @[37m" [char] @ escc! strcat
-		kernidx @ kernmenuidx @ ansi_caption[x][y]
-		setenv
-
-		2drop ( c-addr/u c-addr/u2 -- c-addr/u )
-
-		kernmenuidx @ 1+ dup kernmenuidx ! [char] 8 > if
-			2drop ( c-addr/u -- ) exit
-		then
-
-		kernlen @ - swap kernlen @ + swap ( c-addr/u -- c-addr'/u' )
-	again
-;
-
-\ This function goes through the kernels that were discovered by the
-\ parse-kernels function [above], adding " (# of #)" text to the end of each
-\ caption.
-\ 
-: tag-kernels ( -- )
-	kernidx @ ( -- x ) dup 0= if exit then
-	[char] 0 s"  (Y of Z)" ( x -- x y c-addr/u )
-	kernmenuidx @ -rot 7 +c! \ Replace 'Z' with number of kernels parsed
-	begin
-		2 pick 1+ -rot 2 +c! \ Replace 'Y' with current ASCII num
-
-		2over menu_caption[x][y] getenv dup -1 <> if
-			2dup + 1- c@ [char] ) = if
-				2drop \ Already tagged
-			else
-				kerncapbuf 0 2swap strcat
-				2over strcat
-				5 pick 5 pick menu_caption[x][y] setenv
-			then
-		else
-			drop ( getenv cruft )
-		then
-
-		2over ansi_caption[x][y] getenv dup -1 <> if
-			2dup + 1- c@ [char] ) = if
-				2drop \ Already tagged
-			else
-				kerncapbuf 0 2swap strcat
-				2over strcat
-				5 pick 5 pick ansi_caption[x][y] setenv
-			then
-		else
-			drop ( getenv cruft )
-		then
-
-		rot 1+ dup [char] 8 > if
-			-rot 2drop TRUE ( break )
-		else
-			-rot FALSE
-		then
-	until
-	2drop ( x y -- )
-;
-
-\ Illumos kernel acpi-user-options has following values:
+\ illumos kernel acpi-user-options has following values:
 \ default:	0 - system will enable acpi based on bios date
 \ on:		1 - acpi is set on
 \ off:		2 - acpi is set off
@@ -443,46 +249,85 @@ also menu-infrastructure definitions
 
 : acpi-captions ( N -- )
   \ first entry
-  dup s" [A]CPI.... default" rot 48 menu_caption[x][y] setenv
-  dup s" ^[1mA^[mCPI.... ^[32;7mdefault^[m" rot 48 ansi_caption[x][y] setenv
+  dup s" [A]CPI................ default" rot 48 menu_caption[x][y] setenv
+  dup s" ^[1mA^[mCPI.............. ^[32;7mdefault^[m" rot 48 ansi_caption[x][y] setenv
 
-  dup s" [A]CPI........ On" rot 49 menu_caption[x][y] setenv
-  dup s" ^[1mA^[mCPI........ ^[34;1mOn^[m" rot 49 ansi_caption[x][y] setenv
+  dup s" [A]CPI................ On" rot 49 menu_caption[x][y] setenv
+  dup s" ^[1mA^[mCPI.............. ^[34;1mOn^[m" rot 49 ansi_caption[x][y] setenv
 
-  dup s" [A]CPI........ Off" rot 50 menu_caption[x][y] setenv
-  dup s" ^[1mA^[mCPI........ ^[34;1mOff^[m" rot 50 ansi_caption[x][y] setenv
+  dup s" [A]CPI................ Off" rot 50 menu_caption[x][y] setenv
+  dup s" ^[1mA^[mCPI.............. ^[34;1mOff^[m" rot 50 ansi_caption[x][y] setenv
 
-  dup s" [A]CPI....... MADT" rot 51 menu_caption[x][y] setenv
-  dup s" ^[1mA^[mCPI....... ^[34;1mMADT^[m" rot 51 ansi_caption[x][y] setenv
+  dup s" [A]CPI................ MADT" rot 51 menu_caption[x][y] setenv
+  dup s" ^[1mA^[mCPI.............. ^[34;1mMADT^[m" rot 51 ansi_caption[x][y] setenv
 
-  dup s" [A]CPI..... Legacy" rot 52 menu_caption[x][y] setenv
-  s" ^[1mA^[mCPI..... ^[34;1mLegacy^[m" rot 52 ansi_caption[x][y] setenv
+  dup s" [A]CPI................ Legacy" rot 52 menu_caption[x][y] setenv
+  s" ^[1mA^[mCPI.............. ^[34;1mLegacy^[m" rot 52 ansi_caption[x][y] setenv
 ;
 
-\ Illumos console has following values:
+\ illumos console has following values:
 \ text, ttya, ttyb, ttyc, ttyd
 
 : osconsole-captions ( N -- )
   \ first entry
-  dup s" Os[C]onsole.. text" rot 48 menu_caption[x][y] setenv
-  dup s" Os^[1mC^[monsole.. ^[32;7mtext^[m" rot 48 ansi_caption[x][y] setenv
+  dup s" Os[C]onsole........... text" rot 48 menu_caption[x][y] setenv
+  dup s" Os^[1mC^[monsole............ ^[32;7mtext^[m" rot 48 ansi_caption[x][y] setenv
 
-  dup s" Os[C]onsole.. ttya" rot 49 menu_caption[x][y] setenv
-  dup s" Os^[1mC^[monsole.. ^[34;1mttya^[m" rot 49 ansi_caption[x][y] setenv
+  dup s" Os[C]onsole........... ttya" rot 49 menu_caption[x][y] setenv
+  dup s" Os^[1mC^[monsole............ ^[34;1mttya^[m" rot 49 ansi_caption[x][y] setenv
 
-  dup s" Os[C]onsole.. ttyb" rot 50 menu_caption[x][y] setenv
-  dup s" Os^[1mC^[monsole.. ^[34;1mttyb^[m" rot 50 ansi_caption[x][y] setenv
+  dup s" Os[C]onsole........... ttyb" rot 50 menu_caption[x][y] setenv
+  dup s" Os^[1mC^[monsole............ ^[34;1mttyb^[m" rot 50 ansi_caption[x][y] setenv
 
-  dup s" Os[C]onsole.. ttyc" rot 51 menu_caption[x][y] setenv
-  dup s" Os^[1mC^[monsole.. ^[34;1mttyc^[m" rot 51 ansi_caption[x][y] setenv
+  dup s" Os[C]onsole........... ttyc" rot 51 menu_caption[x][y] setenv
+  dup s" Os^[1mC^[monsole............ ^[34;1mttyc^[m" rot 51 ansi_caption[x][y] setenv
 
-  dup s" Os[C]onsole.. ttyd" rot 52 menu_caption[x][y] setenv
-  s" Os^[1mC^[monsole.. ^[34;1mttyd^[m" rot 52 ansi_caption[x][y] setenv
+  dup s" Os[C]onsole........... ttyd" rot 52 menu_caption[x][y] setenv
+  s" Os^[1mC^[monsole............ ^[34;1mttyd^[m" rot 52 ansi_caption[x][y] setenv
+;
+
+\ kmdb options are as follows
+\ default:	0 - disabled
+\		1 - boot with -k option
+\		2 - as 1 + configure NMI to drop to kmdb
+\		3 - boot with -k and -d options
+\		4 - as 3 + configure NMI to drop to kmdb
+
+: kmdb-captions ( N -- )
+  \ first entry
+  dup s" [k]mdb Mode........... Off" rot 48 menu_caption[x][y] setenv
+  dup s" ^[1mk^[mmdb Mode............. ^[34;1mOff^[m" rot 48 ansi_caption[x][y] setenv
+
+  dup s" [k]mdb Mode........... Loaded" rot 49 menu_caption[x][y] setenv
+  dup s" ^[1mk^[mmdb Mode............. ^[32;7mLoaded^[m" rot 49 ansi_caption[x][y] setenv
+
+  dup s" [k]mdb Mode........... On NMI" rot 50 menu_caption[x][y] setenv
+  dup s" ^[1mk^[mmdb Mode............. ^[32;7mOn NMI^[m" rot 50 ansi_caption[x][y] setenv
+
+  dup s" [k]mdb Mode........... On Boot" rot 51 menu_caption[x][y] setenv
+  dup s" ^[1mk^[mmdb Mode............. ^[32;7mOn Boot^[m" rot 51 ansi_caption[x][y] setenv
+
+  dup s" [k]mdb Mode........... On Boot/NMI" rot 52 menu_caption[x][y] setenv
+  s" ^[1mk^[mmdb Mode............. ^[32;7mOn Boot/NMI^[m" rot 52 ansi_caption[x][y] setenv
+;
+
+: set-captions ( x y - x y )
+	\ Set the current non-ANSI caption
+	2dup swap dup ( x y -- x y y x x )
+	s" set menu_caption[x]=$menu_caption[x][y]"
+	17 +c! 34 +c! 37 +c! evaluate
+	( x y y x x c-addr/u -- x y  )
+
+	\ Set the current ANSI caption
+	2dup swap dup ( x y -- x y y x x )
+	s" set ansi_caption[x]=$ansi_caption[x][y]"
+	17 +c! 34 +c! 37 +c! evaluate
+	( x y y x x c-addr/u -- x y )
 ;
 
 \ This function creates the list of menu items. This function is called by the
 \ menu-display function. You need not call it directly.
-\ 
+\
 : menu-create ( -- )
 
 	\ Print the frame caption at (x,y)
@@ -506,12 +351,12 @@ also menu-infrastructure definitions
 	if ( use default center alignement? )
 		menuX @ 19 + over 2 / - menuY @ 1-
 	then
-	at-xy type 
+	at-xy type
 
 	\ If $menu_init is set, evaluate it (allowing for whole menus to be
 	\ constructed dynamically -- as this function could conceivably set
 	\ the remaining environment variables to construct the menu entirely).
-	\ 
+	\
 	s" menu_init" getenv dup -1 <> if
 		evaluate
 	else
@@ -529,13 +374,13 @@ also menu-infrastructure definitions
 	\ and the key required to activate that menu item will be the decimal
 	\ ASCII of 48 plus the menu item (ie. 58 for the tenth item, aka. `:')
 	\ which is misleading and not desirable.
-	\ 
+	\
 	\ Thus, we do not allow more than 8 configurable items on the menu
 	\ (with "Reboot" as the optional ninth and highest numbered item).
 
-	\ 
+	\
 	\ Initialize the OsConsole option status.
-	\ 
+	\
 	0 menuosconsole !
 	s" menu_osconsole" getenv -1 <> if
 		c@ dup 48 > over 57 < and if ( '1' <= c1 <= '8' )
@@ -547,17 +392,7 @@ also menu-infrastructure definitions
 			\ Get the current cycle state (entry to use)
 			s" osconsole_state" evaluate @ 48 + ( n -- n y )
 
-			\ Set the current non-ANSI caption
-			2dup swap dup ( n y -- n y y n n )
-			s" set menu_caption[x]=$menu_caption[x][y]"
-			17 +c! 34 +c! 37 +c! evaluate
-			( n y y n n c-addr/u -- n y  )
-
-			\ Set the current ANSI caption
-			2dup swap dup ( n y -- n y y n n )
-			s" set ansi_caption[x]=$ansi_caption[x][y]"
-			17 +c! 34 +c! 37 +c! evaluate
-			( n y y n n c-addr/u -- n y )
+			set-captions
 
 			\ Initialize cycle state from stored value
 			48 - ( n y -- n k )
@@ -569,9 +404,9 @@ also menu-infrastructure definitions
 		drop
 	then
 
-	\ 
+	\
 	\ Initialize the ACPI option status.
-	\ 
+	\
 	0 menuacpi !
 	s" menu_acpi" getenv -1 <> if
 		c@ dup 48 > over 57 < and if ( '1' <= c1 <= '8' )
@@ -583,17 +418,7 @@ also menu-infrastructure definitions
 			\ Get the current cycle state (entry to use)
 			s" acpi_state" evaluate @ 48 + ( n -- n y )
 
-			\ Set the current non-ANSI caption
-			2dup swap dup ( n y -- n y y n n )
-			s" set menu_caption[x]=$menu_caption[x][y]"
-			17 +c! 34 +c! 37 +c! evaluate
-			( n y y n n c-addr/u -- n y  )
-
-			\ Set the current ANSI caption
-			2dup swap dup ( n y -- n y y n n )
-			s" set ansi_caption[x]=$ansi_caption[x][y]"
-			17 +c! 34 +c! 37 +c! evaluate
-			( n y y n n c-addr/u -- n y )
+			set-captions
 
 			\ Initialize cycle state from stored value
 			48 - ( n y -- n k )
@@ -605,50 +430,35 @@ also menu-infrastructure definitions
 		drop
 	then
 
-	\ 
-	\ Initialize kernel captions after parsing $kernels
-	\ 
-	0 menukernel !
-	s" menu_kernel" getenv -1 <> if
+	\
+	\ Initialize the kmdb option status.
+	\
+	0 menukmdb !
+	s" menu_kmdb" getenv -1 <> if
 		c@ dup 48 > over 57 < and if ( '1' <= c1 <= '8' )
-			dup menukernel !
-			dup parse-kernels tag-kernels
+			dup menukmdb !
+			dup kmdb-captions
+
+			s" init_kmdb" evaluate
 
 			\ Get the current cycle state (entry to use)
-			s" kernel_state" evaluate @ 48 + ( n -- n y )
+			s" kmdb_state" evaluate @ 48 + ( n -- n y )
 
-			\ If state is invalid, reset
-			dup kernmenuidx @ 1- > if
-				drop [char] 0 ( n y -- n 48 )
-				0 s" kernel_state" evaluate !
-				over s" init_kernel" evaluate drop
-			then
-
-			\ Set the current non-ANSI caption
-			2dup swap dup ( n y -- n y y n n )
-			s" set menu_caption[x]=$menu_caption[x][y]"
-			17 +c! 34 +c! 37 +c! evaluate
-			( n y y n n c-addr/u -- n y  )
-
-			\ Set the current ANSI caption
-			2dup swap dup ( n y -- n y y n n )
-			s" set ansi_caption[x]=$ansi_caption[x][y]"
-			17 +c! 34 +c! 37 +c! evaluate
-			( n y y n n c-addr/u -- n y )
+			set-captions
 
 			\ Initialize cycle state from stored value
 			48 - ( n y -- n k )
 			s" init_cyclestate" evaluate ( n k -- n )
 
-			\ Set $kernel to $kernel[y]
-			s" activate_kernel" evaluate ( n -- n )
+			\ Activate the current option
+			s" activate_kmdb" evaluate ( n -- n )
 		then
 		drop
 	then
 
-	\ 
+	\
 	\ Initialize the menu_options visual separator.
-	\ 
+	\
 	0 menuoptions !
 	s" menu_options" getenv -1 <> if
 		c@ dup 48 > over 57 < and if ( '1' <= c1 <= '8' )
@@ -742,7 +552,7 @@ also menu-infrastructure definitions
 \ Takes a single integer on the stack and updates the timeout display. The
 \ integer must be between 0 and 9 (we will only update a single digit in the
 \ source message).
-\ 
+\
 : menu-timeout-update ( N -- )
 
 	\ Enforce minimum/maximum
@@ -763,7 +573,7 @@ also menu-infrastructure definitions
 		2drop ( n c-addr -- )
 	then
 
-	0 25 at-xy ( position cursor back at bottom-left )
+	at-bl
 ;
 
 \ This function blocks program flow (loops forever) until a key is pressed.
@@ -772,7 +582,7 @@ also menu-infrastructure definitions
 \ function. You need not call it directly.
 \ note, the esc sequences will be dropped, this needs to be changed if
 \ menu is built based on arrow keys.
-\ 
+\
 : getkey ( -- ascii_keycode )
 
 	begin \ loop forever
@@ -903,7 +713,7 @@ also menu-command-helpers definitions
 			ansi_caption[x]
 		else
 			menu_caption[x]
-		then	
+		then
 		getenv dup -1 <> if
 
 			2 pick ( n c-addr/u -- n c-addr/u n )
@@ -1033,13 +843,13 @@ also menu-command-helpers definitions
 
 	\ At this point, we should have the following on the stack (in order,
 	\ from bottom to top):
-	\ 
+	\
 	\    n        - Ascii numeral representing the menu choice (inherited)
 	\    addr     - address of our internal cycle_stateN variable
 	\    k        - zero-based number we intend to store to the above
 	\    c-addr/u - string value we intend to store to menu_caption[x]
 	\               (or ansi_caption[x] with loader_color enabled)
-	\ 
+	\
 	\ Let's perform what we need to with the above.
 
 	\ Assign array value text to menu caption
@@ -1058,15 +868,32 @@ only forth definitions also menu-infrastructure
 
 \ Erase and redraw the menu. Useful if you change a caption and want to
 \ update the menu to reflect the new value.
-\ 
+\
 : menu-redraw ( -- )
 	menu-erase
 	menu-create
 ;
 
+: menu-box ( -- )
+	\ Interpret a custom frame type for the menu
+	TRUE ( draw a box? default yes, but might be altered below )
+	s" loader_menu_frame" getenv dup -1 = if ( 1 )
+		drop \ no custom frame type
+	else ( 1 )  2dup s" single" compare-insensitive 0= if ( 2 )
+		f_single ( see frames.4th )
+	else ( 2 )  2dup s" double" compare-insensitive 0= if ( 3 )
+		f_double ( see frames.4th )
+	else ( 3 ) s" none" compare-insensitive 0= if ( 4 )
+		drop FALSE \ don't draw a box
+	( 4 ) then ( 3 ) then ( 2 )  then ( 1 ) then
+	if
+		42 13 menuX @ 3 - menuY @ 1- box \ Draw frame (w,h,x,y)
+	then
+;
+
 \ This function initializes the menu. Call this from your `loader.rc' file
 \ before calling any other menu-related functions.
-\ 
+\
 : menu-init ( -- )
 	menu_start
 	1- menuidx !    \ Initialize the starting index for the menu
@@ -1094,28 +921,14 @@ only forth definitions also menu-infrastructure
 	then
 	menuX !
 
-	\ Interpret a custom frame type for the menu
-	TRUE ( draw a box? default yes, but might be altered below )
-	s" loader_menu_frame" getenv dup -1 = if ( 1 )
-		drop \ no custom frame type
-	else ( 1 )  2dup s" single" compare-insensitive 0= if ( 2 )
-		f_single ( see frames.4th )
-	else ( 2 )  2dup s" double" compare-insensitive 0= if ( 3 )
-		f_double ( see frames.4th )
-	else ( 3 ) s" none" compare-insensitive 0= if ( 4 )
-		drop FALSE \ don't draw a box
-	( 4 ) then ( 3 ) then ( 2 )  then ( 1 ) then
-	if
-		42 13 menuX @ 3 - menuY @ 1- box \ Draw frame (w,h,x,y)
-	then
-
-	0 25 at-xy \ Move cursor to the bottom for output
+	menu-box
+	at-bl
 ;
 
 also menu-namespace
 
 \ Main function. Call this from your `loader.rc' file.
-\ 
+\
 : menu-display ( -- )
 
 	0 menu_timeout_enabled ! \ start with automatic timeout disabled
@@ -1148,7 +961,7 @@ also menu-namespace
 				dup 0< if
 					drop
 					menu-create
-					0 25 at-xy
+					at-bl
 					0 boot
 				then
 			then
@@ -1167,7 +980,7 @@ also menu-namespace
 				then
 			then
 			menu_timeout_x ! ( store value on stack from above )
-        
+
 			\ read custom row position (if set)
 			s" loader_menu_timeout_y" getenv dup -1 = if
 				drop \ no custom row position
@@ -1186,7 +999,7 @@ also menu-namespace
 
 	begin \ Loop forever
 
-		0 25 at-xy \ Move cursor to the bottom for output
+		at-bl
 		getkey     \ Block here, waiting for a key to be pressed
 
 		dup -1 = if
@@ -1212,13 +1025,13 @@ also menu-namespace
 			rot tuck = if
 
 				\ Adjust for missing ACPI menuitem on non-i386
-\ 				arch-i386? true <> menuacpi @ 0<> and if
-\ 					menuacpi @ over 2dup < -rot = or
-\ 					over 58 < and if
-\ 					( key >= menuacpi && key < 58: N -- N )
-\ 						1+
-\ 					then
-\ 				then
+\				arch-i386? true <> menuacpi @ 0<> and if
+\					menuacpi @ over 2dup < -rot = or
+\					over 58 < and if
+\					( key >= menuacpi && key < 58: N -- N )
+\						1+
+\					then
+\				then
 
 				\ Test for the environment variable
 				dup menu_command[x]
@@ -1253,9 +1066,9 @@ also menu-namespace
 				swap \ need iterator on top
 			then
 
-			\ 
+			\
 			\ Check for menu keycode shortcut(s)
-			\ 
+			\
 			dup menu_keycode[x]
 			getenv dup -1 = if
 				drop
@@ -1290,7 +1103,7 @@ also menu-namespace
 
 \ This function unsets all the possible environment variables associated with
 \ creating the interactive menu.
-\ 
+\
 : menu-unset ( -- )
 
 	49 \ Iterator start (loop range 49 to 56; ASCII '1' to '8')
@@ -1325,14 +1138,15 @@ also menu-namespace
 	s" menu_timeout_command" unsetenv	\ menu timeout command
 	s" menu_reboot"          unsetenv	\ Reboot menu option flag
 	s" menu_acpi"            unsetenv	\ ACPI menu option flag
+	s" menu_kmdb"            unsetenv	\ kmdb menu option flag
 	s" menu_osconsole"       unsetenv	\ osconsole menu option flag
-	s" menu_kernel"          unsetenv	\ Kernel menu option flag
 	s" menu_options"         unsetenv	\ Options separator flag
 	s" menu_optionstext"     unsetenv	\ separator display text
 	s" menu_init"            unsetenv	\ menu initializer
 
 	0 menureboot !
 	0 menuacpi !
+	0 menukmdb !
 	0 menuosconsole !
 	0 menuoptions !
 ;
@@ -1341,7 +1155,7 @@ only forth definitions also menu-infrastructure
 
 \ This function both unsets menu variables and visually erases the menu area
 \ in-preparation for another menu.
-\ 
+\
 : menu-clear ( -- )
 	menu-unset
 	menu-erase

@@ -410,7 +410,7 @@ soft_conf_walk_init(mdb_walk_state_t *wsp)
 	}
 	wsp->walk_addr = (uintptr_t)soft;
 	wsp->walk_data = mdb_alloc(sizeof (kcf_soft_conf_entry_t), UM_SLEEP);
-	wsp->walk_callback = (mdb_walk_cb_t)prt_soft_conf_entry;
+	wsp->walk_callback = (mdb_walk_cb_t)(uintptr_t)prt_soft_conf_entry;
 	return (WALK_NEXT);
 }
 
@@ -424,7 +424,7 @@ soft_conf_walk_step(mdb_walk_state_t *wsp)
 {
 	int status;
 
-	if (wsp->walk_addr == NULL)	/* then we're done */
+	if (wsp->walk_addr == 0)	/* then we're done */
 		return (WALK_DONE);
 #ifdef DEBUG
 	else
@@ -468,7 +468,7 @@ kcf_soft_conf_entry(uintptr_t addr, uint_t flags, int argc,
 	kcf_soft_conf_entry_t *ptr;
 
 	if ((flags & DCMD_ADDRSPEC) == DCMD_ADDRSPEC) {
-		if (addr == NULL) 	/* not allowed with DCMD_ADDRSPEC */
+		if (addr == 0)	/* not allowed with DCMD_ADDRSPEC */
 			return (DCMD_USAGE);
 		else
 			ptr = (kcf_soft_conf_entry_t *)addr;

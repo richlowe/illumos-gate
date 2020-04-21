@@ -25,8 +25,10 @@
  *
  * Portions Copyright 2007 Chad Mynhier
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
- * Copyright 2015, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright 2019, Carlos Neira <cneirabustos@gmail.com>
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
@@ -436,6 +438,7 @@ extern	int	Pldt(struct ps_prochandle *, struct ssd *, int);
 extern	int	proc_get_ldt(pid_t, struct ssd *, int);
 #endif	/* __i386 || __amd64 */
 
+extern int Plwp_getname(struct ps_prochandle *, lwpid_t, char *, size_t);
 extern int Plwp_getpsinfo(struct ps_prochandle *, lwpid_t, lwpsinfo_t *);
 extern int Plwp_getspymaster(struct ps_prochandle *, lwpid_t, psinfo_t *);
 
@@ -461,8 +464,21 @@ extern int Plwp_iter_all(struct ps_prochandle *, proc_lwp_all_f *, void *);
 typedef int proc_walk_f(psinfo_t *, lwpsinfo_t *, void *);
 extern int proc_walk(proc_walk_f *, void *, int);
 
-#define	PR_WALK_PROC	0		/* walk processes only */
-#define	PR_WALK_LWP	1		/* walk all lwps */
+#define	PR_WALK_PROC		0		/* walk processes only */
+#define	PR_WALK_LWP		1		/* walk all lwps */
+#define	PR_WALK_INCLUDE_SYS	0x80000000	/* include SSYS processes */
+
+/*
+ * File descriptor iteration.
+ */
+typedef int proc_fdwalk_f(const prfdinfo_t *, void *);
+extern int proc_fdwalk(pid_t, proc_fdwalk_f *, void *);
+
+/*
+ * fdinfo iteration.
+ */
+typedef int proc_fdinfowalk_f(uint_t, const void *, size_t, void *);
+extern int proc_fdinfowalk(const prfdinfo_t *, proc_fdinfowalk_f *, void *);
 
 /*
  * Determine if an lwp is in a set as returned from proc_arg_xgrab().
@@ -702,6 +718,9 @@ extern void proc_free_priv(prpriv_t *);
 extern int proc_get_psinfo(pid_t, psinfo_t *);
 extern int proc_get_status(pid_t, pstatus_t *);
 extern int proc_get_secflags(pid_t, prsecflags_t **);
+extern prfdinfo_t *proc_get_fdinfo(pid_t, int);
+extern const void *proc_fdinfo_misc(const prfdinfo_t *, uint_t, size_t *);
+extern void proc_fdinfo_free(prfdinfo_t *);
 
 /*
  * Utility functions for debugging tools to convert numeric fault,
@@ -709,10 +728,12 @@ extern int proc_get_secflags(pid_t, prsecflags_t **);
  */
 #define	FLT2STR_MAX 32	/* max. string length of faults (like SIG2STR_MAX) */
 #define	SYS2STR_MAX 32	/* max. string length of syscalls (like SIG2STR_MAX) */
+#define	DMODELSTR_MAX 32 /* max. string length of data model names */
 
 extern char *proc_fltname(int, char *, size_t);
 extern char *proc_signame(int, char *, size_t);
 extern char *proc_sysname(int, char *, size_t);
+extern char *proc_dmodelname(int, char *, size_t);
 
 /*
  * Utility functions for debugging tools to convert fault, signal, and system
@@ -768,7 +789,7 @@ extern int proc_finistdio(void);
 /*
  * Iterate over all open files.
  */
-typedef int proc_fdinfo_f(void *, prfdinfo_t *);
+typedef int proc_fdinfo_f(void *, const prfdinfo_t *);
 extern int Pfdinfo_iter(struct ps_prochandle *, proc_fdinfo_f *, void *);
 
 #ifdef	__cplusplus

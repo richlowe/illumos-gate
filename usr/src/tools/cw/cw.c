@@ -26,6 +26,8 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -37,7 +39,7 @@
  */
 
 /* If you modify this file, you must increment CW_VERSION */
-#define	CW_VERSION	"2.0"
+#define	CW_VERSION	"5.0"
 
 /*
  * -#		Verbose mode
@@ -56,7 +58,6 @@
  *		as errors
  * -fast	Optimize using a selection of options
  * -fd		Report old-style function definitions and declarations
- * -flags	Show this summary of compiler options
  * -fnonstd	Initialize floating-point hardware to non-standard preferences
  * -fns[=<yes|no>] Select non-standard floating point mode
  * -fprecision=<p> Set FP rounding precision mode p(single, double, extended)
@@ -71,8 +72,7 @@
  * -h <name>	Assign <name> to generated dynamic shared library
  * -I<dir>	Add <dir> to preprocessor #include file search path
  * -i		Passed to linker to ignore any LD_LIBRARY_PATH setting
- * -KPIC	Compile position independent code with 32-bit addresses
- * -Kpic	Compile position independent code
+ * -keeptmp	Keep temporary files created during compilation
  * -L<dir>	Pass to linker to add <dir> to the library search path
  * -l<name>	Link with library lib<name>.a or lib<name>.so
  * -mc		Remove duplicate strings from .comment section of output files
@@ -82,16 +82,12 @@
  * -native	Find available processor, generate code accordingly
  * -nofstore	Do not force floating pt. values to target precision
  *		on assignment
- * -nolib	Same as -xnolib
  * -norunpath	Do not build in a runtime path for shared libraries
  * -O		Use default optimization level (-xO2 or -xO3. Check man page.)
  * -o <outputfile> Set name of output file to <outputfile>
  * -P		Compile source through preprocessor only, output to .i  file
- * -PIC		Alias for -KPIC or -xcode=pic32
  * -p		Compile for profiling with prof
- * -pic		Alias for -Kpic or -xcode=pic13
  * -Q[y|n]	Emit/don't emit identification info to output file
- * -qp		Compile for profiling with prof
  * -R<dir[:dir]> Build runtime search path list into executable
  * -S		Compile and only generate assembly code (.s)
  * -s		Strip symbol table from the executable file
@@ -101,10 +97,10 @@
  * -v		Do stricter semantic checking
  * -W<c>,<arg>	Pass <arg> to specified component <c> (a,l,m,p,0,2,h,i,u)
  * -w		Suppress compiler warning messages
- * -Xc		Compile assuming strict ANSI C conformance
+ * -Xa		Compile assuming ANSI C conformance, allow K & R extensions
+ *		(default mode)
  * -Xs		Compile assuming (pre-ANSI) K & R C style code
- * -x386	Generate code for the 80386 processor
- * -x486	Generate code for the 80486 processor
+ * -Xt		Compile assuming K & R conformance, allow ANSI C
  * -xarch=<a>	Specify target architecture instruction set
  * -xbuiltin[=<b>] When profitable inline, or substitute intrinisic functions
  *		for system functions, b={%all,%none}
@@ -126,15 +122,9 @@
  * -xlibmil	Inline selected libm math routines for optimization
  * -xlic_lib=sunperf	Link in the Sun supplied performance libraries
  * -xlicinfo	Show license server information
- * -xM		Generate makefile dependencies
- * -xM1		Generate makefile dependencies, but exclude /usr/include
  * -xmaxopt=[off,1,2,3,4,5] maximum optimization level allowed on #pragma opt
- * -xnolib	Do not link with default system libraries
- * -xnolibmil	Cancel -xlibmil on command line
  * -xO<n>	Generate optimized code (n={1|2|3|4|5})
  * -xP		Print prototypes for function definitions
- * -xpentium	Generate code for the pentium processor
- * -xpg		Compile for profiling with gprof
  * -xprofile=<p> Collect data for a profile or use a profile to optimize
  *		<p>={{collect,use}[:<path>],tcov}
  * -xregs=<r>	Control register allocation
@@ -147,8 +137,6 @@
  * -xstrconst	Place string literals into read-only data segment
  * -xtemp=<dir>	Set directory for temporary files to <dir>
  * -xtime	Report the execution time for each compilation phase
- * -xtransition	Emit warnings for differences between K&R C and ANSI C
- * -xtrigraphs[=<yes|no>] Enable|disable trigraph translation
  * -xunroll=n	Enable unrolling loops n times where possible
  * -Y<c>,<dir>	Specify <dir> for location of component <c> (a,l,m,p,0,h,i,u)
  * -YA,<dir>	Change default directory searched for components
@@ -176,7 +164,6 @@
  * -errwarn=%all		-Werror else -Wno-error
  * -fast			error
  * -fd				error
- * -flags			--help
  * -fnonstd			error
  * -fns[=<yes|no>]		error
  * -fprecision=<p>		error
@@ -191,8 +178,7 @@
  * -h <name>			pass-thru
  * -I<dir>			pass-thru
  * -i				pass-thru
- * -KPIC			-fPIC
- * -Kpic			-fpic
+ * -keeptmp			-save-temps
  * -L<dir>			pass-thru
  * -l<name>			pass-thru
  * -mc				error
@@ -206,11 +192,8 @@
  * -O				-O1 (Check the man page to be certain)
  * -o <outputfile>		pass-thru
  * -P				-E -o filename.i (or error)
- * -PIC				-fPIC (C++ only)
  * -p				pass-thru
- * -pic				-fpic (C++ only)
  * -Q[y|n]			error
- * -qp				-p
  * -R<dir[:dir]>		pass-thru
  * -S				pass-thru
  * -s				-Wl,-s
@@ -225,16 +208,14 @@
  * -xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
  * -Wu,-save_args		-msave-args
  * -w				pass-thru
- * -Xc				-ansi -pedantic
+ * -Xa				-std=iso9899:199409 or -ansi
+ * -Xt				error
  * -Xs				-traditional -std=c89
- * -x386			-march=i386 (x86 only)
- * -x486			-march=i486 (x86 only)
  * -xarch=<a>			table
  * -xbuiltin[=<b>]		-fbuiltin (-fno-builtin otherwise)
  * -xCC				ignore
  * -xchip=<c>			table
  * -xcode=<c>			table
- * -xdebugformat=<format>	ignore (always use dwarf-2 for gcc)
  * -xcrossfile[=<n>]		ignore
  * -xe				error
  * -xF				error
@@ -245,15 +226,9 @@
  * -xlibmieee			error
  * -xlibmil			error
  * -xlic_lib=sunperf		error
- * -xM				-M
- * -xM1				-MM
  * -xmaxopt=[...]		error
- * -xnolib			-nodefaultlibs
- * -xnolibmil			error
  * -xO<n>			-O<n>
  * -xP				error
- * -xpentium			-march=pentium (x86 only)
- * -xpg				error
  * -xprofile=<p>		error
  * -xregs=<r>			table
  * -xs				error
@@ -265,7 +240,6 @@
  * -xtemp=<dir>			error
  * -xtime			error
  * -xtransition			-Wtransition
- * -xtrigraphs=<yes|no>		-trigraphs -notrigraphs
  * -xunroll=n			error
  * -W0,-xdbggen=no%usedonly	-fno-eliminate-unused-debug-symbols
  *				-fno-eliminate-unused-debug-types
@@ -285,6 +259,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #include <sys/param.h>
 #include <sys/stat.h>
@@ -316,7 +291,8 @@ struct aelist {
 
 typedef enum {
 	GNU,
-	SUN
+	SUN,
+	SMATCH
 } compiler_style_t;
 
 typedef struct {
@@ -328,12 +304,13 @@ typedef struct {
 typedef struct cw_ictx {
 	struct cw_ictx	*i_next;
 	cw_compiler_t	*i_compiler;
+	char		*i_linker;
 	struct aelist	*i_ae;
 	uint32_t	i_flags;
 	int		i_oldargc;
 	char		**i_oldargv;
 	pid_t		i_pid;
-	char		i_discard[MAXPATHLEN];
+	char		*i_tmpdir;
 	char		*i_stderr;
 } cw_ictx_t;
 
@@ -347,7 +324,6 @@ typedef struct cw_ictx {
 #define	SS12		0x200	/* Studio 12 */
 
 #define	TRANS_ENTRY	5
-static const char *progname;
 
 static void
 nomem(void)
@@ -360,7 +336,7 @@ newae(struct aelist *ael, const char *arg)
 {
 	struct ae *ae;
 
-	if ((ae = calloc(sizeof (*ae), 1)) == NULL)
+	if ((ae = calloc(1, sizeof (*ae))) == NULL)
 		nomem();
 	ae->ae_arg = strdup(arg);
 	if (ael->ael_tail == NULL)
@@ -374,9 +350,9 @@ newae(struct aelist *ael, const char *arg)
 static cw_ictx_t *
 newictx(void)
 {
-	cw_ictx_t *ctx = calloc(sizeof (cw_ictx_t), 1);
+	cw_ictx_t *ctx = calloc(1, sizeof (cw_ictx_t));
 	if (ctx)
-		if ((ctx->i_ae = calloc(sizeof (struct aelist), 1)) == NULL) {
+		if ((ctx->i_ae = calloc(1, sizeof (struct aelist))) == NULL) {
 			free(ctx);
 			return (NULL);
 		}
@@ -391,7 +367,7 @@ error(const char *arg)
 }
 
 static void
-usage()
+usage(void)
 {
 	extern char *__progname;
 	(void) fprintf(stderr,
@@ -403,6 +379,64 @@ usage()
 	    " - path: path to the compiler binary\n"
 	    " - style: the style of flags expected: either sun or gnu\n");
 	exit(2);
+}
+
+/*
+ * The compiler wants the output file to end in appropriate extension.  If
+ * we're generating a name from whole cloth (path == NULL), we assume that
+ * extension to be .o, otherwise we match the extension of the caller.
+ */
+static char *
+discard_file_name(cw_ictx_t *ctx, const char *path)
+{
+	char *ret, *ext;
+	char tmpl[] = "cwXXXXXX";
+
+	if (path == NULL) {
+		ext = ".o";
+	} else {
+		ext = strrchr(path, '.');
+	}
+
+	/*
+	 * We need absolute control over where the temporary file goes, since
+	 * we rely on it for cleanup so tempnam(3C) and tmpnam(3C) are
+	 * inappropriate (they use TMPDIR, preferentially).
+	 *
+	 * mkstemp(3C) doesn't actually help us, since the temporary file
+	 * isn't used by us, only its name.
+	 */
+	if (mktemp(tmpl) == NULL)
+		nomem();
+
+	(void) asprintf(&ret, "%s/%s%s", ctx->i_tmpdir, tmpl,
+	    (ext != NULL) ? ext : "");
+
+	if (ret == NULL)
+		nomem();
+
+	return (ret);
+}
+
+static boolean_t
+is_source_file(const char *path)
+{
+	char *ext = strrchr(path, '.');
+
+	if ((ext == NULL) || (*(ext + 1) == '\0'))
+		return (B_FALSE);
+
+	ext += 1;
+
+	if ((strcasecmp(ext, "c") == 0) ||
+	    (strcmp(ext, "cc") == 0) ||
+	    (strcmp(ext, "i") == 0) ||
+	    (strcasecmp(ext, "s") == 0) ||
+	    (strcmp(ext, "cpp") == 0)) {
+		return (B_TRUE);
+	}
+
+	return (B_FALSE);
 }
 
 static void
@@ -432,10 +466,14 @@ do_gcc(cw_ictx_t *ctx)
 		if (*arg == '-') {
 			arglen--;
 		} else {
-			if (!in_output && arglen > 2 &&
-			    arg[arglen - 2] == '.' &&
-			    (arg[arglen - 1] == 'S' || arg[arglen - 1] == 's' ||
-			    arg[arglen - 1] == 'c' || arg[arglen - 1] == 'i'))
+			/*
+			 * Discard inline files that gcc doesn't grok
+			 */
+			if (!in_output && arglen > 3 &&
+			    strcmp(arg + arglen - 3, ".il") == 0)
+				continue;
+
+			if (!in_output && is_source_file(arg))
 				c_files++;
 
 			/*
@@ -444,10 +482,11 @@ do_gcc(cw_ictx_t *ctx)
 			 * output is always discarded for the secondary
 			 * compiler.
 			 */
-			if ((ctx->i_flags & CW_F_SHADOW) && in_output)
-				newae(ctx->i_ae, ctx->i_discard);
-			else
+			if ((ctx->i_flags & CW_F_SHADOW) && in_output) {
+				newae(ctx->i_ae, discard_file_name(ctx, arg));
+			} else {
 				newae(ctx->i_ae, arg);
+			}
 			in_output = 0;
 			continue;
 		}
@@ -473,14 +512,6 @@ do_gcc(cw_ictx_t *ctx)
 			    (strcmp(arg, "-fPIC") == 0)) {
 				newae(ctx->i_ae, arg);
 				break;
-			}
-			error(arg);
-			break;
-		case 's':
-			if (strcmp(arg, "-shared") == 0) {
-			    newae(ctx->i_ae, "-shared");
-			    nolibc = 1;
-			    break;
 			}
 			error(arg);
 			break;
@@ -523,6 +554,18 @@ do_gcc(cw_ictx_t *ctx)
 		case 'w':
 			newae(ctx->i_ae, arg);
 			break;
+		case 's':
+			if (strcmp(arg, "-shared") == 0) {
+			    newae(ctx->i_ae, "-shared");
+			    nolibc = 1;
+			    break;
+			}
+			error(arg);
+			break;
+		case 'G':
+			newae(ctx->i_ae, "-shared");
+			nolibc = 1;
+			break;
 		case 'o':
 			seen_o = 1;
 			if (arglen == 1) {
@@ -530,7 +573,7 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			} else if (ctx->i_flags & CW_F_SHADOW) {
 				newae(ctx->i_ae, "-o");
-				newae(ctx->i_ae, ctx->i_discard);
+				newae(ctx->i_ae, discard_file_name(ctx, arg));
 			} else {
 				newae(ctx->i_ae, arg);
 			}
@@ -580,6 +623,9 @@ do_gcc(cw_ictx_t *ctx)
 			} else {
 				arg += 2;
 			}
+			/* Just ignore -YS,... for now */
+			if (strncmp(arg, "S,", 2) == 0)
+				break;
 			if (strncmp(arg, "I,", 2) == 0) {
 				char *s = strdup(arg);
 				s[0] = '-';
@@ -599,28 +645,65 @@ do_gcc(cw_ictx_t *ctx)
 
 	free(nameflag);
 
-	if (c_files > 1 && (ctx->i_flags & CW_F_SHADOW) &&
-	    op != CW_O_PREPROCESS) {
-		(void) fprintf(stderr, "%s: error: multiple source files are "
-		    "allowed only with -E\n", progname);
-		exit(2);
+	/*
+	 * When compiling multiple source files in a single invocation some
+	 * compilers output objects into the current directory with
+	 * predictable and conventional names.
+	 *
+	 * We prevent any attempt to compile multiple files at once so that
+	 * any such objects created by a shadow can't escape into a later
+	 * link-edit.
+	 */
+	if (c_files > 1 && op != CW_O_PREPROCESS) {
+		errx(2, "multiple source files are "
+		    "allowed only with -E or -P");
 	}
 
-	if (op == CW_O_LINK && (ctx->i_flags & CW_F_SHADOW))
-		exit(0);
+	if (ctx->i_flags & CW_F_SHADOW) {
+		if (op == CW_O_PREPROCESS)
+			exit(0);
+		else if (op == CW_O_LINK && c_files == 0)
+			exit(0);
+	}
 
 	if (!nolibc)
 		newae(ctx->i_ae, "-lc");
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {
 		newae(ctx->i_ae, "-o");
-		newae(ctx->i_ae, ctx->i_discard);
+		newae(ctx->i_ae, discard_file_name(ctx, NULL));
 	}
+}
+
+static void
+do_smatch(cw_ictx_t *ctx)
+{
+	if (ctx->i_flags & CW_F_PROG) {
+		newae(ctx->i_ae, "--version");
+		return;
+	}
+
+	/*
+	 * Some sources shouldn't run smatch at all.
+	 */
+	for (int i = 0; i < ctx->i_oldargc; i++) {
+		char *arg = ctx->i_oldargv[i];
+
+		if (strcmp(arg, "-_smatch=off") == 0) {
+			ctx->i_flags &= ~ (CW_F_EXEC | CW_F_ECHO);
+			return;
+		}
+	}
+
+	/*
+	 * smatch can handle gcc's options.
+	 */
+	do_gcc(ctx);
 }
 
 static void
 do_cc(cw_ictx_t *ctx)
 {
-	int in_output = 0, seen_o = 0;
+	int in_output = 0, seen_o = 0, c_files = 0;
 	cw_op_t op = CW_O_LINK;
 	char *nameflag;
 
@@ -641,11 +724,14 @@ do_cc(cw_ictx_t *ctx)
 		}
 
 		if (*arg != '-') {
+			if (!in_output && is_source_file(arg))
+				c_files++;
+
 			if (in_output == 0 || !(ctx->i_flags & CW_F_SHADOW)) {
 				newae(ctx->i_ae, arg);
 			} else {
 				in_output = 0;
-				newae(ctx->i_ae, ctx->i_discard);
+				newae(ctx->i_ae, discard_file_name(ctx, arg));
 			}
 			continue;
 		}
@@ -669,7 +755,7 @@ do_cc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, arg);
 			} else if (ctx->i_flags & CW_F_SHADOW) {
 				newae(ctx->i_ae, "-o");
-				newae(ctx->i_ae, ctx->i_discard);
+				newae(ctx->i_ae, discard_file_name(ctx, arg));
 			} else {
 				newae(ctx->i_ae, arg);
 			}
@@ -692,13 +778,22 @@ do_cc(cw_ictx_t *ctx)
 
 	free(nameflag);
 
-	if ((op == CW_O_LINK || op == CW_O_PREPROCESS) &&
-	    (ctx->i_flags & CW_F_SHADOW))
-		exit(0);
+	/* See the comment on this same code in do_gcc() */
+	if (c_files > 1 && op != CW_O_PREPROCESS) {
+		errx(2, "multiple source files are "
+		    "allowed only with -E or -P");
+	}
+
+	if (ctx->i_flags & CW_F_SHADOW) {
+		if (op == CW_O_PREPROCESS)
+			exit(0);
+		else if (op == CW_O_LINK && c_files == 0)
+			exit(0);
+	}
 
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {
 		newae(ctx->i_ae, "-o");
-		newae(ctx->i_ae, ctx->i_discard);
+		newae(ctx->i_ae, discard_file_name(ctx, NULL));
 	}
 }
 
@@ -713,6 +808,14 @@ prepctx(cw_ictx_t *ctx)
 		(void) fflush(stdout);
 	}
 
+	/*
+	 * If LD_ALTEXEC is already set, the expectation would be that that
+	 * link-editor is run, as such we need to leave it the environment
+	 * alone and let that happen.
+	 */
+	if ((ctx->i_linker != NULL) && (getenv("LD_ALTEXEC") == NULL))
+		setenv("LD_ALTEXEC", ctx->i_linker, 1);
+
 	if (!(ctx->i_flags & CW_F_XLATE))
 		return;
 
@@ -722,6 +825,9 @@ prepctx(cw_ictx_t *ctx)
 		break;
 	case GNU:
 		do_gcc(ctx);
+		break;
+	case SMATCH:
+		do_smatch(ctx);
 		break;
 	}
 }
@@ -806,8 +912,6 @@ reap(cw_ictx_t *ctx)
 		}
 	} while (!WIFEXITED(status) && !WIFSIGNALED(status));
 
-	(void) unlink(ctx->i_discard);
-
 	if (stat(ctx->i_stderr, &s) < 0) {
 		warn("stat failed on child cleanup");
 		return (-1);
@@ -837,21 +941,7 @@ reap(cw_ictx_t *ctx)
 static int
 exec_ctx(cw_ictx_t *ctx, int block)
 {
-	char *file;
-
-	/*
-	 * To avoid offending cc's sensibilities, the name of its output
-	 * file must end in '.o'.
-	 */
-	if ((file = tempnam(NULL, ".cw")) == NULL) {
-		nomem();
-		return (-1);
-	}
-	(void) strlcpy(ctx->i_discard, file, MAXPATHLEN);
-	(void) strlcat(ctx->i_discard, ".o", MAXPATHLEN);
-	free(file);
-
-	if ((ctx->i_stderr = tempnam(NULL, ".cw")) == NULL) {
+	if ((ctx->i_stderr = tempnam(ctx->i_tmpdir, "cw")) == NULL) {
 		nomem();
 		return (-1);
 	}
@@ -907,16 +997,62 @@ parse_compiler(const char *spec, cw_compiler_t *compiler)
 		errx(1, "Compiler is missing a style: %s", spec);
 
 	if ((strcasecmp(token, "gnu") == 0) ||
-	    (strcasecmp(token, "gcc") == 0))
+	    (strcasecmp(token, "gcc") == 0)) {
 		compiler->c_style = GNU;
-	else if ((strcasecmp(token, "sun") == 0) ||
-	    (strcasecmp(token, "cc") == 0))
+	} else if ((strcasecmp(token, "sun") == 0) ||
+	    (strcasecmp(token, "cc") == 0)) {
 		compiler->c_style = SUN;
-	else
+	} else if ((strcasecmp(token, "smatch") == 0)) {
+		compiler->c_style = SMATCH;
+	} else {
 		errx(1, "unknown compiler style: %s", token);
+	}
 
 	if (tspec != NULL)
 		errx(1, "Excess tokens in compiler: %s", spec);
+}
+
+static void
+cleanup(cw_ictx_t *ctx)
+{
+	DIR *dirp;
+	struct dirent *dp;
+	char buf[MAXPATHLEN];
+
+	if ((dirp = opendir(ctx->i_tmpdir)) == NULL) {
+		if (errno != ENOENT) {
+			err(1, "couldn't open temp directory: %s",
+			    ctx->i_tmpdir);
+		} else {
+			return;
+		}
+	}
+
+	errno = 0;
+	while ((dp = readdir(dirp)) != NULL) {
+		(void) snprintf(buf, MAXPATHLEN, "%s/%s", ctx->i_tmpdir,
+		    dp->d_name);
+
+		if (strcmp(dp->d_name, ".") == 0 ||
+		    strcmp(dp->d_name, "..") == 0) {
+			continue;
+		}
+
+		if (unlink(buf) == -1)
+			err(1, "failed to unlink temp file: %s", dp->d_name);
+		errno = 0;
+	}
+
+	if (errno != 0) {
+		err(1, "failed to read temporary directory: %s",
+		    ctx->i_tmpdir);
+	}
+
+	(void) closedir(dirp);
+	if (rmdir(ctx->i_tmpdir) != 0) {
+		err(1, "failed to unlink temporary directory: %s",
+		    ctx->i_tmpdir);
+	}
 }
 
 int
@@ -933,11 +1069,13 @@ main(int argc, char **argv)
 	boolean_t Cflg = B_FALSE;
 	boolean_t cflg = B_FALSE;
 	boolean_t nflg = B_FALSE;
+	char *tmpdir;
 
 	cw_ictx_t *main_ctx;
 
 	static struct option longopts[] = {
 		{ "compiler", no_argument, NULL, 'c' },
+		{ "linker", required_argument, NULL, 'l' },
 		{ "noecho", no_argument, NULL, 'n' },
 		{ "primary", required_argument, NULL, 'p' },
 		{ "shadow", required_argument, NULL, 's' },
@@ -956,6 +1094,10 @@ main(int argc, char **argv)
 			break;
 		case 'C':
 			Cflg = B_TRUE;
+			break;
+		case 'l':
+			if ((main_ctx->i_linker = strdup(optarg)) == NULL)
+				nomem();
 			break;
 		case 'n':
 			nflg = B_TRUE;
@@ -1020,6 +1162,16 @@ main(int argc, char **argv)
 		do_serial = 1;
 	}
 
+	tmpdir = getenv("TMPDIR");
+	if (tmpdir == NULL)
+		tmpdir = "/tmp";
+
+	if (asprintf(&main_ctx->i_tmpdir, "%s/cw.XXXXXX", tmpdir) == -1)
+		nomem();
+
+	if ((main_ctx->i_tmpdir = mkdtemp(main_ctx->i_tmpdir)) == NULL)
+		errx(1, "failed to create temporary directory");
+
 	ret |= exec_ctx(main_ctx, do_serial);
 
 	for (int i = 0; i < nshadows; i++) {
@@ -1029,7 +1181,7 @@ main(int argc, char **argv)
 		if ((shadow_ctx = newictx()) == NULL)
 			nomem();
 
-		memcpy(shadow_ctx, main_ctx, sizeof (cw_ictx_t));
+		(void) memcpy(shadow_ctx, main_ctx, sizeof (cw_ictx_t));
 
 		shadow_ctx->i_flags |= CW_F_SHADOW;
 		shadow_ctx->i_compiler = &shadows[i];
@@ -1051,5 +1203,6 @@ main(int argc, char **argv)
 		}
 	}
 
+	cleanup(main_ctx);
 	return (ret);
 }

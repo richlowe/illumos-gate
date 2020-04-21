@@ -23,10 +23,12 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 Joyent, Inc.
+#
 
 include ../Makefile.tools
 
-SUBDIRS = cvt dump stabs ctfstrip
+SUBDIRS = stabs ctfstrip libctf ctfdiff ctfdump ctfmerge ctfconvert
 
 .PARALLEL: $(SUBDIRS)
 
@@ -37,6 +39,11 @@ clobber	:= TARGET= clobber
 lint	:= TARGET= lint
 
 .KEEP_STATE:
+
+ctfmerge: libctf
+ctfdiff: libctf
+ctfdump: libctf
+ctfconvert: libctf
 
 all clean clobber install lint: dwarf .WAIT $(SUBDIRS)
 

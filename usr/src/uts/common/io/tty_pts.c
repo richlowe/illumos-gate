@@ -76,7 +76,7 @@ static int ptslrserv(queue_t *);
  * from this function, it is defined as void here. Kind of icky, but...
  */
 
-static void ptslwput(queue_t *q, mblk_t *mp);
+static int ptslwput(queue_t *q, mblk_t *mp);
 
 static struct module_info ptslm_info = {
 	0,
@@ -98,7 +98,7 @@ static struct qinit ptslrinit = {
 };
 
 static struct qinit ptslwinit = {
-	(int (*)())ptslwput,
+	ptslwput,
 	NULL,
 	NULL,
 	NULL,
@@ -184,7 +184,7 @@ ptsl_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	for (tty_num = 0; tty_num < npty; tty_num++) {
 		(void) sprintf(name, "tty%c%c", *tty_bank, *tty_digit);
 		if (ddi_create_minor_node(devi, name, S_IFCHR,
-		    tty_num, DDI_PSEUDO, NULL) == DDI_FAILURE) {
+		    tty_num, DDI_PSEUDO, 0) == DDI_FAILURE) {
 			ddi_remove_minor_node(devi, NULL);
 			return (-1);
 		}
@@ -384,7 +384,7 @@ ptslclose(queue_t *q, int flag, cred_t *cred)
  * queue up M_DATA messages for processing by the controller "read"
  * routine; discard everything else.
  */
-static void
+static int
 ptslwput(queue_t *q, mblk_t *mp)
 {
 	struct pty *pty;
@@ -449,7 +449,7 @@ ptslwput(queue_t *q, mblk_t *mp)
 			flushq(RD(q), FLUSHDATA);
 			mutex_exit(&pty->ptc_lock);
 			qreply(q, mp);	/* give the read queues a crack at it */
-			return;
+			return (0);
 		} else
 			freemsg(mp);
 		break;
@@ -466,7 +466,8 @@ ptslwput(queue_t *q, mblk_t *mp)
 				freeb(bp);
 				if (mp == NULL) {
 					mutex_exit(&pty->ptc_lock);
-					return;	/* damp squib of a message */
+					/* damp squib of a message */
+					return (0);
 				}
 				bp = mp;
 			}
@@ -499,6 +500,7 @@ ptslwput(queue_t *q, mblk_t *mp)
 		break;
 	}
 	mutex_exit(&pty->ptc_lock);
+	return (0);
 }
 
 /*

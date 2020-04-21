@@ -42,6 +42,24 @@
 #include "bootstrap.h"
 #include "ficl.h"
 
+/*
+ * About ENABLE_UPDATES
+ *
+ * The UEFI variables are identified only by GUID and name, there is no
+ * way to (auto)detect the type for the value, so we need to process the
+ * variables case by case, as we do learn about them.
+ *
+ * While showing the variable name and the value is safe, we must not store
+ * random values nor allow removing (random) variables.
+ *
+ * Since we do have stub code to set/unset the variables, I do want to keep
+ * it to make the future development a bit easier, but the updates are disabled
+ * by default till:
+ *	a) the validation and data translation to values is properly implemented
+ *	b) We have established which variables we do allow to be updated.
+ * Therefore the set/unset code is included only for developers aid.
+ */
+
 static struct efi_uuid_mapping {
 	const char *efi_guid_name;
 	EFI_GUID efi_guid;
@@ -374,7 +392,8 @@ efi_print_other_value(uint8_t *data, UINTN datasz)
 
 /* This appears to be some sort of UEFI shell alias table. */
 static int
-efi_print_shell_str(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
+efi_print_shell_str(const CHAR16 *varnamearg __unused, uint8_t *data,
+    UINTN datasz __unused)
 {
 	printf(" = %S", (CHAR16 *)data);
 	if (pager_output("\n"))
@@ -427,7 +446,8 @@ efi_memory_type(EFI_MEMORY_TYPE type)
 
 /* Print memory type table. */
 static int
-efi_print_mem_type(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
+efi_print_mem_type(const CHAR16 *varnamearg __unused, uint8_t *data,
+    UINTN datasz)
 {
 	int i, n;
 	EFI_MEMORY_TYPE_INFORMATION *ti;
@@ -452,7 +472,8 @@ efi_print_mem_type(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
  * We have LoaderPath and LoaderDev as CHAR16 strings.
  */
 static int
-efi_print_illumos(const CHAR16 *varnamearg, uint8_t *data, UINTN datasz)
+efi_print_illumos(const CHAR16 *varnamearg, uint8_t *data,
+    UINTN datasz __unused)
 {
 	int rv = -1;
 	char *var = NULL;
@@ -652,7 +673,8 @@ efi_print_var(CHAR16 *varnamearg, EFI_GUID *matchguid, int lflag)
 	UINTN		datasz;
 	EFI_STATUS	status;
 	UINT32		attr;
-	char		*str, *data;
+	char		*str;
+	uint8_t		*data;
 	int		rv = CMD_OK;
 
 	str = NULL;
@@ -762,7 +784,7 @@ command_efi_show(int argc, char *argv[])
 		case 'v':
 			vflag = 1;
 			if (strlen(optarg) >= nitems(varnamearg)) {
-				printf("Variable %s is longer than %zd "
+				printf("Variable %s is longer than %zu "
 				    "characters\n", optarg, nitems(varnamearg));
 				return (CMD_ERROR);
 			}
@@ -801,7 +823,7 @@ command_efi_show(int argc, char *argv[])
 	if (argc == 2) {
 		optarg = argv[0];
 		if (strlen(optarg) >= nitems(varnamearg)) {
-			printf("Variable %s is longer than %zd characters\n",
+			printf("Variable %s is longer than %zu characters\n",
 			    optarg, nitems(varnamearg));
 			pager_close();
 			return (CMD_ERROR);
@@ -913,7 +935,9 @@ command_efi_set(int argc, char *argv[])
 	char *uuid, *var, *val;
 	CHAR16 wvar[128];
 	EFI_GUID guid;
+#if defined(ENABLE_UPDATES)
 	EFI_STATUS err;
+#endif
 
 	if (argc != 4) {
 		printf("efi-set uuid var new-value\n");
@@ -927,7 +951,7 @@ command_efi_set(int argc, char *argv[])
 		return (CMD_ERROR);
 	}
 	cpy8to16(var, wvar, nitems(wvar));
-#if 0
+#if defined(ENABLE_UPDATES)
 	err = RS->SetVariable(wvar, &guid, EFI_VARIABLE_NON_VOLATILE |
 	    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
 	    strlen(val) + 1, val);
@@ -950,7 +974,9 @@ command_efi_unset(int argc, char *argv[])
 	char *uuid, *var;
 	CHAR16 wvar[128];
 	EFI_GUID guid;
+#if defined(ENABLE_UPDATES)
 	EFI_STATUS err;
+#endif
 
 	if (argc != 3) {
 		printf("efi-unset uuid var\n");
@@ -963,7 +989,7 @@ command_efi_unset(int argc, char *argv[])
 		return (CMD_ERROR);
 	}
 	cpy8to16(var, wvar, nitems(wvar));
-#if 0
+#if defined(ENABLE_UPDATES)
 	err = RS->SetVariable(wvar, &guid, 0, 0, NULL);
 	if (EFI_ERROR(err)) {
 		printf("Failed to unset variable: error %lu\n",

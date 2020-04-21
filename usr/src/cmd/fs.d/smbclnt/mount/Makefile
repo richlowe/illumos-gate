@@ -22,6 +22,8 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 Nexenta by DDN, Inc. All rights reserved.
+#
 
 #
 # cmd/fs.d/smbclnt/mount/Makefile
@@ -38,7 +40,7 @@ SRCS=	$(LIBPROG).c
 POFILE=	$(LIBPROG).po
 CLOBBERFILES	+= $(LIBPROG)
 
-$(ROOTLIBFSTYPE)/mount := FILEMODE= 04555
+$(ROOTLIBFSTYPE)/mount := FILEMODE= 0555
 
 CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-parentheses
@@ -47,7 +49,7 @@ CSTD= $(CSTD_GNU99)
 
 LDLIBS += -lsmbfs
 
-CPPFLAGS += -I$(SRC)/uts/common -I$(SRC)/lib/libsmbfs 
+CPPFLAGS += -I$(SRC)/uts/common -I$(SRC)/lib/libsmbfs
 
 .KEEP_STATE:
 
@@ -61,5 +63,5 @@ install:	$(ROOTLIBFSTYPEPROG)
 
 lint:	lint_SRCS
 
-clean:     
+clean:
 	$(RM) $(OBJS) $(POFILE)

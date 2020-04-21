@@ -20,10 +20,11 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <smbsrv/smb_kproto.h>
+#include <smbsrv/smb_fsops.h>
 #include <smbsrv/smb_vops.h>
 
 int smb_open_dsize_check = 0;
@@ -226,8 +227,7 @@ smb_pre_open(smb_request_t *sr)
 	if (rc == 0)
 		rc = smbsr_decode_data(sr, "%S", sr, &op->fqi.fq_path.pn_path);
 
-	DTRACE_SMB_2(op__Open__start, smb_request_t *, sr,
-	    struct open_param *, op);
+	DTRACE_SMB_START(op__Open, smb_request_t *, sr); /* arg.open */
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -235,7 +235,7 @@ smb_pre_open(smb_request_t *sr)
 void
 smb_post_open(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__Open__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__Open, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -243,7 +243,7 @@ smb_com_open(smb_request_t *sr)
 {
 	struct open_param *op = &sr->arg.open;
 	smb_ofile_t *of;
-	smb_attr_t attr;
+	uint32_t mtime_sec;
 	uint32_t status;
 	uint16_t file_attr;
 	int rc;
@@ -265,17 +265,24 @@ smb_com_open(smb_request_t *sr)
 	} else {
 		op->op_oplock_level = SMB_OPLOCK_NONE;
 	}
-	op->op_oplock_levelII = B_FALSE;
 
 	if (smb_open_dsize_check && op->dsize > UINT_MAX) {
 		smbsr_error(sr, 0, ERRDOS, ERRbadaccess);
 		return (SDRC_ERROR);
 	}
 
+	/*
+	 * The real open call.   Note: this gets attributes into
+	 * op->fqi.fq_fattr (SMB_AT_ALL).  We need those below.
+	 */
 	status = smb_common_open(sr);
 	if (status != NT_STATUS_SUCCESS) {
 		smbsr_status(sr, status, 0, 0);
 		return (SDRC_ERROR);
+	}
+	if (op->op_oplock_level != SMB_OPLOCK_NONE) {
+		/* Oplock req. in op->op_oplock_level etc. */
+		smb1_oplock_acquire(sr, B_FALSE);
 	}
 
 	/*
@@ -291,19 +298,14 @@ smb_com_open(smb_request_t *sr)
 	}
 
 	file_attr = op->dattr & FILE_ATTRIBUTE_MASK;
-	bzero(&attr, sizeof (attr));
-	attr.sa_mask = SMB_AT_MTIME;
-	rc = smb_node_getattr(sr, of->f_node, of->f_cr, of, &attr);
-	if (rc != 0) {
-		smbsr_errno(sr, rc);
-		goto errout;
-	}
+	mtime_sec = smb_time_gmt_to_local(sr,
+	    op->fqi.fq_fattr.sa_vattr.va_mtime.tv_sec);
 
 	rc = smbsr_encode_result(sr, 7, 0, "bwwllww",
 	    7,
 	    sr->smb_fid,
 	    file_attr,
-	    smb_time_gmt_to_local(sr, attr.sa_vattr.va_mtime.tv_sec),
+	    mtime_sec,
 	    (uint32_t)op->dsize,
 	    op->omode,
 	    (uint16_t)0);	/* bcc */
@@ -311,10 +313,11 @@ smb_com_open(smb_request_t *sr)
 	if (rc == 0)
 		return (SDRC_SUCCESS);
 
-errout:
 	smb_ofile_close(of, 0);
 	return (SDRC_ERROR);
 }
+
+int smb_openx_enable_extended_response = 1;
 
 /*
  * smb_pre_open_andx
@@ -325,7 +328,7 @@ smb_sdrc_t
 smb_pre_open_andx(smb_request_t *sr)
 {
 	struct open_param *op = &sr->arg.open;
-	uint16_t flags;
+	uint16_t openx_flags;
 	uint32_t alloc_size;
 	uint32_t creation_time;
 	uint16_t file_attr, sattr;
@@ -334,7 +337,7 @@ smb_pre_open_andx(smb_request_t *sr)
 	bzero(op, sizeof (sr->arg.open));
 
 	rc = smbsr_decode_vwv(sr, "b.wwwwwlwll4.", &sr->andx_com,
-	    &sr->andx_off, &flags, &op->omode, &sattr,
+	    &sr->andx_off, &openx_flags, &op->omode, &sattr,
 	    &file_attr, &creation_time, &op->ofun, &alloc_size, &op->timeo);
 
 	if (rc == 0) {
@@ -343,12 +346,18 @@ smb_pre_open_andx(smb_request_t *sr)
 		op->dattr = file_attr;
 		op->dsize = alloc_size;
 
-		if (flags & 2)
-			op->op_oplock_level = SMB_OPLOCK_EXCLUSIVE;
-		else if (flags & 4)
+		/*
+		 * The openx_flags use some "extended" flags that
+		 * happen to match some of the NtCreateX flags.
+		 */
+		if (openx_flags & NT_CREATE_FLAG_REQUEST_OPBATCH)
 			op->op_oplock_level = SMB_OPLOCK_BATCH;
+		else if (openx_flags & NT_CREATE_FLAG_REQUEST_OPLOCK)
+			op->op_oplock_level = SMB_OPLOCK_EXCLUSIVE;
 		else
 			op->op_oplock_level = SMB_OPLOCK_NONE;
+		if (openx_flags & NT_CREATE_FLAG_EXTENDED_RESPONSE)
+			op->nt_flags |= NT_CREATE_FLAG_EXTENDED_RESPONSE;
 
 		if ((creation_time != 0) && (creation_time != UINT_MAX))
 			op->crtime.tv_sec =
@@ -358,8 +367,7 @@ smb_pre_open_andx(smb_request_t *sr)
 		op->create_disposition = smb_ofun_to_crdisposition(op->ofun);
 	}
 
-	DTRACE_SMB_2(op__OpenX__start, smb_request_t *, sr,
-	    struct open_param *, op);
+	DTRACE_SMB_START(op__OpenX, smb_request_t *, sr); /* arg.open */
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -367,17 +375,18 @@ smb_pre_open_andx(smb_request_t *sr)
 void
 smb_post_open_andx(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__OpenX__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__OpenX, smb_request_t *, sr);
 }
 
 smb_sdrc_t
 smb_com_open_andx(smb_request_t *sr)
 {
 	struct open_param	*op = &sr->arg.open;
+	smb_attr_t		*ap = &op->fqi.fq_fattr;
 	smb_ofile_t		*of;
 	uint32_t		status;
+	uint32_t		mtime_sec;
 	uint16_t		file_attr;
-	smb_attr_t		attr;
 	int rc;
 
 	op->desired_access = smb_omode_to_amask(op->omode);
@@ -393,8 +402,6 @@ smb_com_open_andx(smb_request_t *sr)
 	if (op->omode & SMB_DA_WRITE_THROUGH)
 		op->create_options |= FILE_WRITE_THROUGH;
 
-	op->op_oplock_levelII = B_FALSE;
-
 	if (smb_open_dsize_check && op->dsize > UINT_MAX) {
 		smbsr_error(sr, 0, ERRDOS, ERRbadaccess);
 		return (SDRC_ERROR);
@@ -405,6 +412,10 @@ smb_com_open_andx(smb_request_t *sr)
 		smbsr_status(sr, status, 0, 0);
 		return (SDRC_ERROR);
 	}
+	if (op->op_oplock_level != SMB_OPLOCK_NONE) {
+		/* Oplock req. in op->op_oplock_level etc. */
+		smb1_oplock_acquire(sr, B_FALSE);
+	}
 
 	/*
 	 * NB: after the above smb_common_open() success,
@@ -414,56 +425,72 @@ smb_com_open_andx(smb_request_t *sr)
 	of = sr->fid_ofile;
 
 	if (op->op_oplock_level != SMB_OPLOCK_NONE)
-		op->action_taken |= SMB_OACT_LOCK;
+		op->action_taken |= SMB_OACT_OPLOCK;
 	else
-		op->action_taken &= ~SMB_OACT_LOCK;
+		op->action_taken &= ~SMB_OACT_OPLOCK;
 
 	file_attr = op->dattr & FILE_ATTRIBUTE_MASK;
-	bzero(&attr, sizeof (attr));
+	mtime_sec = smb_time_gmt_to_local(sr, ap->sa_vattr.va_mtime.tv_sec);
 
 	switch (sr->tid_tree->t_res_type & STYPE_MASK) {
 	case STYPE_DISKTREE:
 	case STYPE_PRINTQ:
-		attr.sa_mask = SMB_AT_MTIME;
-		rc = smb_node_getattr(sr, of->f_node, of->f_cr, of, &attr);
-		if (rc != 0) {
-			smbsr_errno(sr, rc);
-			goto errout;
-		}
-
-		rc = smbsr_encode_result(sr, 15, 0,
-		    "bb.wwwllwwwwl2.w",
-		    15,
-		    sr->andx_com, VAR_BCC,
-		    sr->smb_fid,
-		    file_attr,
-		    smb_time_gmt_to_local(sr, attr.sa_vattr.va_mtime.tv_sec),
-		    (uint32_t)op->dsize,
-		    op->omode, op->ftype,
-		    op->devstate,
-		    op->action_taken, op->fileid,
-		    0);
 		break;
 
 	case STYPE_IPC:
-		rc = smbsr_encode_result(sr, 15, 0,
-		    "bb.wwwllwwwwl2.w",
-		    15,
-		    sr->andx_com, VAR_BCC,
-		    sr->smb_fid,
-		    file_attr,
-		    0L,
-		    0L,
-		    op->omode, op->ftype,
-		    op->devstate,
-		    op->action_taken, op->fileid,
-		    0);
+		mtime_sec = 0;
 		break;
 
 	default:
 		smbsr_error(sr, NT_STATUS_INVALID_DEVICE_REQUEST,
 		    ERRDOS, ERROR_INVALID_FUNCTION);
 		goto errout;
+	}
+
+	if ((op->nt_flags & NT_CREATE_FLAG_EXTENDED_RESPONSE) != 0 &&
+	    smb_openx_enable_extended_response != 0) {
+		uint32_t MaxAccess = 0;
+		if (of->f_node != NULL) {
+			smb_fsop_eaccess(sr, of->f_cr, of->f_node, &MaxAccess);
+		}
+		MaxAccess |= of->f_granted_access;
+
+		rc = smbsr_encode_result(
+		    sr, 19, 0, "bb.wwwllwwwwl2.llw",
+		    19,		/* word count	   (b) */
+		    sr->andx_com,		/* (b.) */
+		    VAR_BCC,	/* andx offset	   (w) */
+		    sr->smb_fid,		/* (w) */
+		    file_attr,			/* (w) */
+		    mtime_sec,			/* (l) */
+		    (uint32_t)op->dsize,	/* (l) */
+		    op->omode,			/* (w) */
+		    op->ftype,			/* (w) */
+		    op->devstate,		/* (w) */
+		    op->action_taken,		/* (w) */
+		    0,		/* legacy fileid   (l) */
+		    /* reserved			  (2.) */
+		    MaxAccess,			/* (l) */
+		    0,		/* guest access	   (l) */
+		    0);		/* byte count	   (w) */
+
+	} else {
+		rc = smbsr_encode_result(
+		    sr, 15, 0, "bb.wwwllwwwwl2.w",
+		    15,		/* word count	   (b) */
+		    sr->andx_com,		/* (b.) */
+		    VAR_BCC,	/* andx offset	   (w) */
+		    sr->smb_fid,		/* (w) */
+		    file_attr,			/* (w) */
+		    mtime_sec,			/* (l) */
+		    (uint32_t)op->dsize,	/* (l) */
+		    op->omode,			/* (w) */
+		    op->ftype,			/* (w) */
+		    op->devstate,		/* (w) */
+		    op->action_taken,		/* (w) */
+		    0,		/* legacy fileid   (l) */
+		    /* reserved			  (2.) */
+		    0);		/* byte count	   (w) */
 	}
 
 	if (rc == 0)
@@ -480,6 +507,7 @@ smb_com_trans2_open2(smb_request_t *sr, smb_xa_t *xa)
 	struct open_param *op = &sr->arg.open;
 	uint32_t	creation_time;
 	uint32_t	alloc_size;
+	uint32_t	ea_list_size;
 	uint16_t	flags;
 	uint16_t	file_attr;
 	uint32_t	status;
@@ -492,6 +520,24 @@ smb_com_trans2_open2(smb_request_t *sr, smb_xa_t *xa)
 	    &creation_time, &op->ofun, &alloc_size, &op->fqi.fq_path.pn_path);
 	if (rc != 0)
 		return (SDRC_ERROR);
+
+	/*
+	 * The data part of this transaction may contain an EA list.
+	 * See: SMB_FEA_LIST ExtendedAttributeList
+	 *
+	 * If we find a non-empty EA list payload, return the special
+	 * error that tells the caller this FS does not suport EAs.
+	 *
+	 * Note: the first word is the size of the whole data segment,
+	 * INCLUDING the size of that length word.  That means if
+	 * the length word specifies a size less than four, it's
+	 * invalid (and probably a client trying something fishy).
+	 */
+	rc = smb_mbc_decodef(&xa->req_data_mb, "l", &ea_list_size);
+	if (rc == 0 && ea_list_size > 4) {
+		smbsr_status(sr, NT_STATUS_EAS_NOT_SUPPORTED, 0, 0);
+		return (SDRC_ERROR);
+	}
 
 	if ((creation_time != 0) && (creation_time != UINT_MAX))
 		op->crtime.tv_sec = smb_time_local_to_gmt(sr, creation_time);
@@ -520,18 +566,21 @@ smb_com_trans2_open2(smb_request_t *sr, smb_xa_t *xa)
 	} else {
 		op->op_oplock_level = SMB_OPLOCK_NONE;
 	}
-	op->op_oplock_levelII = B_FALSE;
 
 	status = smb_common_open(sr);
 	if (status != NT_STATUS_SUCCESS) {
 		smbsr_status(sr, status, 0, 0);
 		return (SDRC_ERROR);
 	}
+	if (op->op_oplock_level != SMB_OPLOCK_NONE) {
+		/* Oplock req. in op->op_oplock_level etc. */
+		smb1_oplock_acquire(sr, B_FALSE);
+	}
 
 	if (op->op_oplock_level != SMB_OPLOCK_NONE)
-		op->action_taken |= SMB_OACT_LOCK;
+		op->action_taken |= SMB_OACT_OPLOCK;
 	else
-		op->action_taken &= ~SMB_OACT_LOCK;
+		op->action_taken &= ~SMB_OACT_OPLOCK;
 
 	file_attr = op->dattr & FILE_ATTRIBUTE_MASK;
 

@@ -22,6 +22,7 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY = libsmp.a
 VERS = .1
@@ -42,7 +43,9 @@ $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 CFLAGS += $(CCVERBOSE)
 
 CERRWARN += -_gcc=-Wno-type-limits
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+SMOFF += all_func_returns
 
 LDLIBS += \
 	-lumem \

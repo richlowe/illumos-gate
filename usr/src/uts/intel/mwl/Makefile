@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 # This makefile drives the production of the rwd driver kernel module.
@@ -64,8 +65,11 @@ LDFLAGS		+= -dy -Nmisc/mac -Nmisc/net80211
 #
 LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-value
+
+# needs work
+SMOFF += return_cast
 
 #
 #	Default build targets.

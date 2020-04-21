@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2017 RackTop Systems.
  */
 
@@ -19,20 +19,23 @@
 #include <sys/thread.h>
 #include <sys/proc.h>
 #include <sys/zone.h>
-
 #include <sys/poll.h>
 
 #include <time.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 #include <fakekernel.h>
 
 pri_t minclsyspri = 60;
+extern zone_t zone0;
 
 /* Some kernel code takes the address of this. */
-proc_t p0;
+proc_t p0 = {
+	.p_zone = &zone0, 0
+};
 
 proc_t *
 _curproc(void)
@@ -92,6 +95,7 @@ highbit64(uint64_t i)
 int
 ddi_strtoul(const char *str, char **endp, int base, unsigned long *res)
 {
+	errno = 0;
 	*res = strtoul(str, endp, base);
 	if (*res == 0)
 		return (errno);
@@ -99,11 +103,10 @@ ddi_strtoul(const char *str, char **endp, int base, unsigned long *res)
 }
 
 int
-ddi_strtoull(const char *str, char **nptr, int base, u_longlong_t *res)
+ddi_strtoull(const char *str, char **endp, int base, u_longlong_t *res)
 {
-	char *end;
-
-	*res = strtoull(str, &end, base);
+	errno = 0;
+	*res = strtoull(str, endp, base);
 	if (*res == 0)
 		return (errno);
 	return (0);
@@ -116,6 +119,13 @@ delay(clock_t ticks)
 	(void) poll(0, 0, msec);
 }
 
+int
+highbit(ulong_t i)
+{
+	return (fls(i));
+}
+
+/* ARGSUSED */
 int
 issig(int why)
 {

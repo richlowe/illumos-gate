@@ -17,6 +17,8 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
+export PATH="${PATH}:/opt/onbld/bin/$(uname -p)"
+export LC_ALL="C"
 export MY_TESTS="/opt/util-tests"
 runner="/opt/test-runner/bin/run"
 
@@ -35,8 +37,10 @@ function find_runfile
 		distro=openindiana
 	elif [[ 0 -ne $(grep -c OmniOS /etc/release 2>/dev/null) ]]; then
 		distro=omnios
-	elif [[ -f $MY_TESTS/runfiles/default.run ]]; then
-		# optional catch-all
+	fi
+
+	if [[ ! -f $MY_TESTS/runfiles/$distro.run ]] && \
+	   [[ -f $MY_TESTS/runfiles/default.run ]]; then
 		distro=default
 	fi
 

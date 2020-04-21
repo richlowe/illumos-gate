@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -62,18 +62,6 @@ typedef struct disk_cbdata {
 } disk_cbdata_t;
 
 /*
- * Given a /devices path for a whole disk, appending this extension gives the
- * path to a raw device that can be opened.
- */
-#if defined(__i386) || defined(__amd64)
-#define	PHYS_EXTN	":q,raw"
-#elif defined(__sparc) || defined(__sparcv9)
-#define	PHYS_EXTN	":c,raw"
-#else
-#error	Unknown architecture
-#endif
-
-/*
  * Methods for disks. This is used by the disk-transport module to
  * generate ereports based off SCSI disk status.
  */
@@ -101,27 +89,6 @@ static const topo_method_t disk_fac_methods[] = {
 	{ NULL }
 };
 
-static const topo_pgroup_info_t io_pgroup = {
-	TOPO_PGROUP_IO,
-	TOPO_STABILITY_PRIVATE,
-	TOPO_STABILITY_PRIVATE,
-	1
-};
-
-static const topo_pgroup_info_t disk_auth_pgroup = {
-	FM_FMRI_AUTHORITY,
-	TOPO_STABILITY_PRIVATE,
-	TOPO_STABILITY_PRIVATE,
-	1
-};
-
-static const topo_pgroup_info_t storage_pgroup = {
-	TOPO_PGROUP_STORAGE,
-	TOPO_STABILITY_PRIVATE,
-	TOPO_STABILITY_PRIVATE,
-	1
-};
-
 /*
  * Set the properties of the disk node, from dev_di_node_t data.
  * Properties include:
@@ -143,17 +110,19 @@ disk_set_props(topo_mod_t *mod, tnode_t *parent,
 	nvlist_t	*asru = NULL, *drive_attrs;
 	char		*label = NULL;
 	nvlist_t	*fmri = NULL;
-	dm_descriptor_t drive_descr = NULL;
+	dm_descriptor_t drive_descr = 0;
 	uint32_t	rpm;
 	int		err;
 
 	/* pull the label property down from our parent 'bay' node */
 	if (topo_node_label(parent, &label, &err) != 0) {
-		topo_mod_dprintf(mod, "disk_set_props: "
-		    "label error %s\n", topo_strerror(err));
-		goto error;
-	}
-	if (topo_node_label_set(dtn, label, &err) != 0) {
+		if (err != ETOPO_PROP_NOENT) {
+			topo_mod_dprintf(mod, "disk_set_props: "
+			    "label error %s\n", topo_strerror(err));
+			goto error;
+		}
+	} else if (topo_prop_set_string(dtn, TOPO_PGROUP_PROTOCOL,
+	    TOPO_PROP_LABEL, TOPO_PROP_MUTABLE, label, &err) != 0) {
 		topo_mod_dprintf(mod, "disk_set_props: "
 		    "label_set error %s\n", topo_strerror(err));
 		goto error;
@@ -285,7 +254,7 @@ disk_set_props(topo_mod_t *mod, tnode_t *parent,
 
 	if (dnode->ddn_devid == NULL ||
 	    (drive_descr = dm_get_descriptor_by_name(DM_DRIVE,
-	    dnode->ddn_devid, &err)) == NULL ||
+	    dnode->ddn_devid, &err)) == 0 ||
 	    (drive_attrs = dm_get_attributes(drive_descr, &err)) == NULL)
 		goto out;
 
@@ -302,8 +271,28 @@ disk_set_props(topo_mod_t *mod, tnode_t *parent,
 	}
 	err = 0;
 
+	/*
+	 * Create UFM node to capture the drive firmware version
+	 */
+	if (dnode->ddn_firm != NULL) {
+		topo_ufm_slot_info_t slotinfo = { 0 };
+
+		slotinfo.usi_version = dnode->ddn_firm;
+		slotinfo.usi_active = B_TRUE;
+		if (strcmp(topo_node_name(parent), USB_DEVICE) == 0)
+			slotinfo.usi_mode = TOPO_UFM_SLOT_MODE_NONE;
+		else
+			slotinfo.usi_mode = TOPO_UFM_SLOT_MODE_WO;
+		if (topo_node_range_create(mod, dtn, UFM, 0, 0) != 0 ||
+		    topo_mod_create_ufm(mod, dtn, "drive firmware",
+		    &slotinfo) == NULL) {
+			topo_mod_dprintf(mod, "failed to create %s node", UFM);
+			goto out;
+		}
+	}
+
 out:
-	if (drive_descr != NULL)
+	if (drive_descr != 0)
 		dm_free_descriptor(drive_descr);
 	nvlist_free(fmri);
 	if (label)
@@ -351,7 +340,7 @@ disk_temp_reading(topo_mod_t *mod, tnode_t *node, topo_version_t vers,
 {
 	char *devid;
 	uint32_t temp;
-	dm_descriptor_t drive_descr = NULL;
+	dm_descriptor_t drive_descr = 0;
 	nvlist_t *drive_stats, *pargs, *nvl;
 	int err;
 
@@ -366,7 +355,7 @@ disk_temp_reading(topo_mod_t *mod, tnode_t *node, topo_version_t vers,
 	}
 
 	if ((drive_descr = dm_get_descriptor_by_name(DM_DRIVE, devid,
-	    &err)) == NULL) {
+	    &err)) == 0) {
 		topo_mod_dprintf(mod, "failed to get drive decriptor for %s",
 		    devid);
 		return (topo_mod_seterrno(mod, EMOD_UNKNOWN));
@@ -550,7 +539,7 @@ disk_tnode_create(topo_mod_t *mod, tnode_t *parent,
 		return (-1);
 	}
 
-	if (dnode->ddn_devid != NULL &&
+	if (dnode != NULL && dnode->ddn_devid != NULL &&
 	    disk_add_temp_sensor(mod, dtn, dnode->ddn_devid) != 0) {
 		topo_mod_dprintf(mod, "disk_tnode_create: failed to create "
 		    "temperature sensor node on bay=%d/disk=0",
@@ -771,8 +760,8 @@ dev_di_node_add(di_node_t node, char *devid, disk_cbdata_t *cbp)
 	char		*s;
 	int64_t		*nblocksp;
 	uint64_t	nblocks;
-	int		*dblksizep;
-	uint_t		dblksize;
+	int		*blksizep;
+	uint_t		blksize;
 	char		lentry[MAXPATHLEN];
 	int		pathcount;
 	int		*inq_dtype, itype;
@@ -1006,21 +995,39 @@ dev_di_node_add(di_node_t node, char *devid, disk_cbdata_t *cbp)
 	    INQUIRY_SERIAL_NO, &s) > 0) {
 		if ((dnode->ddn_serial = disk_trim_whitespace(mod, s)) == NULL)
 			goto error;
+	} else {
+		/*
+		 * Many USB disk devices don't emulate serial inquiry number
+		 * because their serial number can be longer than the standard
+		 * SCSI length. If we didn't get an inquiry serial number, fill
+		 * one in this way.
+		 */
+		di_node_t parent;
+
+		if ((parent = di_parent_node(node)) != DI_NODE_NIL &&
+		    di_prop_lookup_strings(DDI_DEV_T_ANY, parent,
+		    "usb-serialno", &s) > 0) {
+			if ((dnode->ddn_serial = disk_trim_whitespace(mod,
+			    s)) == NULL) {
+				goto error;
+			}
+		}
 	}
+
 	if (di_prop_lookup_int64(DDI_DEV_T_ANY, node,
 	    "device-nblocks", &nblocksp) > 0) {
 		nblocks = (uint64_t)*nblocksp;
 		/*
 		 * To save kernel memory, the driver may not define
-		 * "device-dblksize" when its value is default DEV_BSIZE.
+		 * "device-blksize" when its value is default DEV_BSIZE.
 		 */
 		if (di_prop_lookup_ints(DDI_DEV_T_ANY, node,
-		    "device-dblksize", &dblksizep) > 0)
-			dblksize = (uint_t)*dblksizep;
+		    "device-blksize", &blksizep) > 0)
+			blksize = (uint_t)*blksizep;
 		else
-			dblksize = DEV_BSIZE;		/* default value */
+			blksize = DEV_BSIZE;		/* default value */
 		(void) snprintf(lentry, sizeof (lentry),
-		    "%" PRIu64, nblocks * dblksize);
+		    "%" PRIu64, nblocks * blksize);
 		if ((dnode->ddn_cap = topo_mod_strdup(mod, lentry)) == NULL)
 			goto error;
 	}

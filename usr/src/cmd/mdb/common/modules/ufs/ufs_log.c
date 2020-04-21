@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <mdb/mdb_modapi.h>
 
 #include <sys/types.h>
@@ -50,7 +48,7 @@ ufslogmap_walk_init(mdb_walk_state_t *wsp)
 {
 	ufslogmap_walk_data_t *uw;
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		mdb_warn("must specify an address\n");
 		return (WALK_ERR);
 	}
@@ -216,7 +214,8 @@ mapstats_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	msp = mdb_zalloc(sizeof (mapstats_t), UM_SLEEP | UM_GC);
 	msp->transdiff = FALSE;
 
-	if (mdb_pwalk("ufslogmap", (mdb_walk_cb_t)mapadd, msp, addr) == -1) {
+	if (mdb_pwalk("ufslogmap", (mdb_walk_cb_t)(uintptr_t)mapadd,
+	    msp, addr) == -1) {
 		mdb_warn("can't walk ufslogmap for stats");
 		return (DCMD_ERR);
 	}

@@ -21,6 +21,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= mkmsgs
 
@@ -28,11 +29,14 @@ include ../Makefile.cmd
 
 LDLIBS += -lgen
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 
-all: $(PROG) 
+all: $(PROG)
 
 install: all $(ROOTPROG)
 

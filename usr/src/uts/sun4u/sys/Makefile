@@ -20,8 +20,9 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2019 Peter Tribble.
 #
-# uts/sun4u/sys/Makefile
+# Copyright 2018 Joyent, Inc.
 #
 UTSBASE	= ../..
 
@@ -40,7 +41,7 @@ SUN4_HDRS=			\
 	clock.h			\
 	cmp.h			\
 	cpc_ultra.h		\
-	cpu_sgnblk_defs.h 	\
+	cpu_sgnblk_defs.h	\
 	ddi_subrdefs.h		\
 	dvma.h			\
 	eeprom.h		\
@@ -51,11 +52,12 @@ SUN4_HDRS=			\
 	intr.h			\
 	intreg.h		\
 	ivintr.h		\
-	memlist_plat.h  	\
+	memlist_plat.h		\
 	memnode.h		\
 	nexusdebug.h		\
 	prom_debug.h		\
 	scb.h			\
+	smt.h			\
 	sun4asi.h		\
 	tod.h			\
 	trapstat.h		\
@@ -90,7 +92,6 @@ HDRS=	\
 	pte.h			\
 	sbd_ioctl.h		\
 	spitregs.h		\
-	starfire.h		\
 	sysioerr.h		\
 	sysiosbus.h		\
 	todmostek.h		\

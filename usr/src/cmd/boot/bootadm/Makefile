@@ -25,7 +25,7 @@
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 Nexenta Systems, Inc.
 # Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= bootadm
 
@@ -45,12 +45,15 @@ POFILE= bootadm_cmd.po
 LDLIBS_i386= -lfdisk
 LDLIBS += -lficl-sys -lmd -lcryptoutil -lnvpair -lgen -ladm -lefi
 LDLIBS += -lscf -lz -lbe -lzfs -lofmt $(LDLIBS_$(MACH))
+NATIVE_LIBS += libz.so
 
 # Writing into string literals is incorrect.  We need to match gcc's
 # behavior, which causes us to take SIGSEGV on such a write.
 CFLAGS +=	$(XSTRCONST)
 CPPFLAGS +=	-D_FILE_OFFSET_BITS=64
 CPPFLAGS +=	-I$(SRC)/uts/common -I$(SRC)/common -I$(SRC)/common/ficl
+
+SMOFF +=	all_func_returns
 
 CSTD=	$(CSTD_GNU99)
 

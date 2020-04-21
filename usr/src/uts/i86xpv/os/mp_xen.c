@@ -25,6 +25,10 @@
  */
 
 /*
+ * Copyright 2019 Joyent, Inc.
+ */
+
+/*
  * Virtual CPU management.
  *
  * VCPUs can be controlled in one of two ways; through the domain itself
@@ -554,12 +558,15 @@ mach_cpu_pause(volatile char *safe)
 	}
 }
 
-void
-mach_cpu_halt(char *msg)
+int
+mach_cpu_halt(xc_arg_t arg1, xc_arg_t arg2 __unused, xc_arg_t arg3 __unused)
 {
+	char *msg = (char *)arg1;
+
 	if (msg)
 		prom_printf("%s\n", msg);
 	(void) xen_vcpu_down(CPU->cpu_id);
+	return (0);
 }
 
 /*ARGSUSED*/
@@ -680,6 +687,9 @@ poweroff_vcpu(struct cpu *cp)
 		ASSERT(cpu_phase[cp->cpu_id] == CPU_PHASE_SAFE);
 
 		CPUSET_DEL(cpu_ready_set, cp->cpu_id);
+
+		if (cp->cpu_flags & CPU_ENABLE)
+			ncpus_intr_enabled--;
 
 		cp->cpu_flags |= CPU_POWEROFF | CPU_OFFLINE;
 		cp->cpu_flags &=
@@ -836,6 +846,7 @@ vcpu_config_report(processorid_t id, uint_t newstate, int error)
 	size_t len;
 	char *ps;
 
+	ps = NULL;
 	switch (newstate) {
 	case P_ONLINE:
 		ps = PS_ONLINE;

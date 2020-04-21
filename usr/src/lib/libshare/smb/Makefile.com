@@ -22,8 +22,9 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libshare_smb.a
 VERS =		.1
@@ -32,7 +33,7 @@ SMBBASE_DIR	= $(SRC)/lib/smbsrv/libsmb/common
 SMBCOMMON_DIR	= $(SRC)/common/smbsrv
 
 LIBOBJS =	libshare_smb.o smb_share_doorclnt.o
-SMBCOMMON_OBJ =	smb_door_legacy.o
+SMBCOMMON_OBJ =	smb_door_legacy.o smb_cfg_util.o
 SMBBASE_OBJ =	smb_cfg.o smb_scfutil.o
 OBJECTS =	$(LIBOBJS) $(SMBCOMMON_OBJ) $(SMBBASE_OBJ)
 
@@ -42,16 +43,20 @@ ROOTLIBDIR =	$(ROOT)/usr/lib/fs/smb
 ROOTLIBDIR64 =	$(ROOT)/usr/lib/fs/smb/$(MACH64)
 
 LIBSRCS = $(LIBOBJS:%.o=$(SRCDIR)/%.c)
-lintcheck := SRCS = $(LIBSRCS)
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lshare -lscf -luuid -ldlpi -lnsl -lnvpair -lxml2 -lumem -lc
+NATIVE_LIBS +=	libxml2.so
 
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-switch
+
+# not linted
+SMATCH=off
+
 CPPFLAGS +=	-D_REENTRANT -I$(ADJUNCT_PROTO)/usr/include/libxml2 \
-  		-I$(SRCDIR)/../common
+		-I$(SRCDIR)/../common
 $(ENABLE_SMB_PRINTING) CPPFLAGS += -DHAVE_CUPS
 
 .KEEP_STATE:
@@ -60,14 +65,16 @@ all: $(LIBS)
 
 install: all
 
-lint: lintcheck
-
 pics/smb_door_client.o:       $(SMBBASE_DIR)/smb_door_client.c
 	$(COMPILE.c) -o $@ $(SMBBASE_DIR)/smb_door_client.c
 	$(POST_PROCESS_O)
 
 pics/smb_door_legacy.o:       $(SMBCOMMON_DIR)/smb_door_legacy.c
 	$(COMPILE.c) -o $@ $(SMBCOMMON_DIR)/smb_door_legacy.c
+	$(POST_PROCESS_O)
+
+pics/smb_cfg_util.o:       $(SMBCOMMON_DIR)/smb_cfg_util.c
+	$(COMPILE.c) -o $@ $(SMBCOMMON_DIR)/smb_cfg_util.c
 	$(POST_PROCESS_O)
 
 pics/smb_cfg.o:       $(SMBBASE_DIR)/smb_cfg.c

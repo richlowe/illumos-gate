@@ -10,11 +10,12 @@
  */
 
 /*
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <sys/systm.h>
 #include <sys/t_lock.h>
 #include <sys/errno.h>
 #include <sys/cred.h>
@@ -27,9 +28,11 @@
 #include <sys/stat.h>
 #include <sys/mode.h>
 #include <sys/kmem.h>
+#include <sys/cmn_err.h>
 #include <sys/debug.h>
 #include <sys/atomic.h>
 #include <sys/acl.h>
+#include <sys/filio.h>
 #include <sys/flock.h>
 #include <sys/nbmlock.h>
 #include <sys/fcntl.h>
@@ -50,6 +53,7 @@ int stat_to_vattr(const struct stat *, vattr_t *);
 int fop__getxvattr(vnode_t *, xvattr_t *);
 int fop__setxvattr(vnode_t *, xvattr_t *);
 
+static void fake_inactive_xattrdir(vnode_t *);
 
 /* ARGSUSED */
 int
@@ -214,7 +218,29 @@ fop_ioctl(
 	int *rvalp,
 	caller_context_t *ct)
 {
-	return (ENOSYS);
+	off64_t off;
+	int rv, whence;
+
+	switch (cmd) {
+	case _FIO_SEEK_DATA:
+	case _FIO_SEEK_HOLE:
+		whence = (cmd == _FIO_SEEK_DATA) ? SEEK_DATA : SEEK_HOLE;
+		bcopy((void *)arg, &off, sizeof (off));
+		off = lseek(vp->v_fd, off, whence);
+		if (off == (off64_t)-1) {
+			rv = errno;
+		} else {
+			bcopy(&off, (void *)arg, sizeof (off));
+			rv = 0;
+		}
+		break;
+
+	default:
+		rv = ENOTTY;
+		break;
+	}
+
+	return (rv);
 }
 
 /* ARGSUSED */
@@ -262,10 +288,15 @@ fop_setattr(
 	caller_context_t *ct)
 {
 	timespec_t times[2];
+	int err;
 
 	if (vap->va_mask & AT_SIZE) {
-		if (ftruncate(vp->v_fd, vap->va_size) == -1)
-			return (errno);
+		if (ftruncate(vp->v_fd, vap->va_size) == -1) {
+			err = errno;
+			if (err == EBADF)
+				err = EACCES;
+			return (err);
+		}
 	}
 
 	/* AT_MODE or anything else? */
@@ -305,6 +336,75 @@ fop_access(
 	return (0);
 }
 
+/*
+ * Conceptually like xattr_dir_lookup()
+ */
+static int
+fake_lookup_xattrdir(
+	vnode_t *dvp,
+	vnode_t **vpp)
+{
+	int len, fd;
+	int omode = O_RDWR | O_NOFOLLOW;
+	vnode_t *vp;
+
+	*vpp = NULL;
+
+	if (dvp->v_type != VDIR && dvp->v_type != VREG)
+		return (EINVAL);
+
+	/*
+	 * If we're already in sysattr space, don't allow creation
+	 * of another level of sysattrs.
+	 */
+	if (dvp->v_flag & V_SYSATTR)
+		return (EINVAL);
+
+	mutex_enter(&dvp->v_lock);
+	if (dvp->v_xattrdir != NULL) {
+		*vpp = dvp->v_xattrdir;
+		VN_HOLD(*vpp);
+		mutex_exit(&dvp->v_lock);
+		return (0);
+	}
+	mutex_exit(&dvp->v_lock);
+
+	omode = O_RDONLY|O_XATTR;
+	fd = openat(dvp->v_fd, ".", omode);
+	if (fd < 0)
+		return (errno);
+
+	vp = vn_alloc(KM_SLEEP);
+	vp->v_fd = fd;
+	vp->v_flag = V_XATTRDIR|V_SYSATTR;
+	vp->v_type = VDIR;
+	vp->v_vfsp = dvp->v_vfsp;
+
+	/* Set v_path to parent path + "/@" (like NFS) */
+	len = strlen(dvp->v_path) + 3;
+	vp->v_path = kmem_alloc(len, KM_SLEEP);
+	(void) snprintf(vp->v_path, len, "%s/@", dvp->v_path);
+
+	/*
+	 * Keep a pointer to the parent and a hold on it.
+	 * Both are cleaned up in fake_inactive_xattrdir
+	 */
+	vp->v_data = dvp;
+	vn_hold(dvp);
+
+	mutex_enter(&dvp->v_lock);
+	if (dvp->v_xattrdir == NULL) {
+		*vpp = dvp->v_xattrdir = vp;
+		mutex_exit(&dvp->v_lock);
+	} else {
+		*vpp = dvp->v_xattrdir;
+		mutex_exit(&dvp->v_lock);
+		fake_inactive_xattrdir(vp);
+	}
+
+	return (0);
+}
+
 /* ARGSUSED */
 int
 fop_lookup(
@@ -325,7 +425,7 @@ fop_lookup(
 	struct stat st;
 
 	if (flags & LOOKUP_XATTR)
-		return (ENOENT);
+		return (fake_lookup_xattrdir(dvp, vpp));
 
 	/*
 	 * If lookup is for "", just return dvp.
@@ -681,7 +781,43 @@ fop_inactive(
 	cred_t *cr,
 	caller_context_t *ct)
 {
-	vncache_inactive(vp);
+	if (vp->v_flag & V_XATTRDIR) {
+		fake_inactive_xattrdir(vp);
+	} else {
+		vncache_inactive(vp);
+	}
+}
+
+/*
+ * The special xattr directories are not in the vncache AVL, but
+ * hang off the parent's v_xattrdir field.  When vn_rele finds
+ * an xattr dir at v_count == 1 it calls here, but until we
+ * take locks on both the parent and the xattrdir, we don't
+ * know if we're really at the last reference.  So in here we
+ * take both locks, re-check the count, and either bail out
+ * or proceed with "inactive" vnode cleanup.  Part of that
+ * cleanup includes releasing the hold on the parent and
+ * clearing the parent's v_xattrdir field, which were
+ * setup in fake_lookup_xattrdir()
+ */
+static void
+fake_inactive_xattrdir(vnode_t *vp)
+{
+	vnode_t *dvp = vp->v_data; /* parent */
+	mutex_enter(&dvp->v_lock);
+	mutex_enter(&vp->v_lock);
+	if (vp->v_count > 1) {
+		/* new ref. via v_xattrdir */
+		mutex_exit(&vp->v_lock);
+		mutex_exit(&dvp->v_lock);
+		return;
+	}
+	ASSERT(dvp->v_xattrdir == vp);
+	dvp->v_xattrdir = NULL;
+	mutex_exit(&vp->v_lock);
+	mutex_exit(&dvp->v_lock);
+	vn_rele(dvp);
+	vn_free(vp);
 }
 
 /* ARGSUSED */
@@ -749,6 +885,18 @@ fop_frlock(
 	cred_t *cr,
 	caller_context_t *ct)
 {
+#if defined(_LP64)
+	offset_t maxoffset = INT64_MAX;
+#elif defined(_ILP32)
+	/*
+	 * Sadly, the fcntl API enforces 32-bit offsets,
+	 * even though we have _FILE_OFFSET_BITS=64
+	 */
+	offset_t maxoffset = INT32_MAX;
+#else
+#error "unsupported env."
+#endif
+
 	/* See fs_frlock */
 
 	switch (cmd) {
@@ -760,6 +908,30 @@ fop_frlock(
 	default:
 		return (EINVAL);
 	}
+
+	/* We only get SEEK_SET ranges here. */
+	if (bfp->l_whence != 0)
+		return (EINVAL);
+
+	/*
+	 * One limitation of using fcntl(2) F_SETLK etc is that
+	 * the real kernel limits the offsets we can use.
+	 * (Maybe the fcntl API should loosen that up?)
+	 * See syscall/fcntl.c:flock_check()
+	 *
+	 * Here in libfksmbsrv we can just ignore such locks,
+	 * or ignore the part that extends beyond maxoffset.
+	 * The SMB layer still keeps track of such locks for
+	 * conflict detection, so not reflecting such locks
+	 * into the real FS layer is OK.  Note: this may
+	 * modify the pased bfp->l_len.
+	 */
+	if (bfp->l_start < 0 || bfp->l_start > maxoffset)
+		return (0);
+	if (bfp->l_len < 0 || bfp->l_len > maxoffset)
+		return (0);
+	if (bfp->l_len > (maxoffset - bfp->l_start + 1))
+		bfp->l_len = (maxoffset - bfp->l_start + 1);
 
 	if (fcntl(vp->v_fd, cmd, bfp) == -1)
 		return (errno);
@@ -983,7 +1155,7 @@ fop_pathconf(
 		break;
 
 	case _PC_ACL_ENABLED:
-		val = 0;
+		val = _ACL_ACE_ENABLED;
 		break;
 
 	case _PC_CASE_BEHAVIOR:
@@ -1267,7 +1439,7 @@ vn_rele(vnode_t *vp)
 	mutex_enter(&vp->v_lock);
 	if (vp->v_count == 1) {
 		mutex_exit(&vp->v_lock);
-		vncache_inactive(vp);
+		fop_inactive(vp, NULL, NULL);
 	} else {
 		vp->v_count--;
 		mutex_exit(&vp->v_lock);

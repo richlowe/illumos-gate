@@ -26,8 +26,6 @@
 #ifndef _SYS_SHA1_H
 #define	_SYS_SHA1_H
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/types.h>		/* for uint_* */
 
 #ifdef	__cplusplus
@@ -41,15 +39,16 @@ extern "C" {
  * must be in a field declared as uint32_t state[5].
  */
 /* SHA-1 context. */
-typedef struct 	{
+typedef struct {
 	uint32_t state[5];	/* state (ABCDE) */
 	uint32_t count[2];	/* number of bits, modulo 2^64 (msb first) */
-	union 	{
+	union {
 		uint8_t		buf8[64];	/* undigested input */
 		uint32_t	buf32[16];	/* realigned input */
 	} buf_un;
 } SHA1_CTX;
 
+#define	SHA1_BLOCK_LENGTH 64
 #define	SHA1_DIGEST_LENGTH 20
 
 void SHA1Init(SHA1_CTX *);

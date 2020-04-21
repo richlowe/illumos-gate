@@ -22,11 +22,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#	This makefile drives the production of the Kernel Cryptographic
-#	Framework core module.
-#
-#	Intel implementation architecture dependent
-#
+# Copyright (c) 2019, Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -70,9 +66,12 @@ AS_CPPFLAGS	+= -I../../$(PLATFORM)
 LINTTAGS	+= -I$(COM_DIR)
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
+
+# needs work
+SMOFF += all_func_returns,signed_integer_overflow_check
 
 #
 #	Default build targets.
@@ -102,7 +101,6 @@ include $(UTSBASE)/intel/Makefile.targ
 
 $(OBJS_DIR)/%.o: $(COM_DIR)/modes/amd64/%.s
 	$(COMPILE.s) -o $@ $(COM_DIR)/modes/amd64/${@F:.o=.s}
-	$(POST_PROCESS_O)
 
 $(OBJS_DIR)/%.ln: $(COM_DIR)/modes/amd64/%.s
 	@($(LHEAD) $(LINT.s) $(COM_DIR)/modes/amd64/${@F:.ln=.s} $(LTAIL))

@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	passwdutil.a
 VERS=		.1
@@ -43,7 +44,7 @@ OBJECTS=	$(OBJ)
 include	../../Makefile.lib
 
 #
-# Since our name doesn't start with "lib", Makefile.lib incorrectly 
+# Since our name doesn't start with "lib", Makefile.lib incorrectly
 # calculates LIBNAME. Therefore, we set it here.
 #
 LIBNAME=	passwdutil
@@ -57,8 +58,11 @@ CPPFLAGS	+= -DENABLE_SUNOS_AGING -D_REENTRANT \
 CFLAGS		+= $(CCVERBOSE)
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-label
+
+# not linted
+SMATCH=off
 
 lint	:=	SRCS= $(OBJ:%.o=$(SRCDIR)/%.c)
 

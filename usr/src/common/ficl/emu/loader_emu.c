@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 1998 Michael Smith <msmith@freebsd.org>
+ * Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,25 +38,12 @@
 #include <dirent.h>
 #include <macros.h>
 #include <sys/systeminfo.h>
+#include <sys/linker_set.h>
 #include <sys/queue.h>
 #include <sys/mnttab.h>
+#include "loader_emu.h"
+#include "gfx_fb.h"
 #include "ficl.h"
-
-/* Commands and return values; nonzero return sets command_errmsg != NULL */
-typedef int (bootblk_cmd_t)(int argc, char *argv[]);
-#define	CMD_OK		0
-#define	CMD_ERROR	1
-
-/*
- * Support for commands
- */
-struct bootblk_command
-{
-	const char *c_name;
-	const char *c_desc;
-	bootblk_cmd_t *c_fn;
-	STAILQ_ENTRY(bootblk_command) next;
-};
 
 #define	MDIR_REMOVED	0x0001
 #define	MDIR_NOHINTS	0x0002
@@ -102,13 +90,14 @@ static int command_boot(int argc, char *argv[]);
 static int command_unload(int argc, char *argv[]);
 static int command_load(int argc, char *argv[]);
 static int command_reboot(int argc, char *argv[]);
+static int command_sifting(int argc, char *argv[]);
+static int command_framebuffer(int argc, char *argv[]);
 
 #define	BF_PARSE	100
 #define	BF_DICTSIZE	30000
 
 /* update when loader version will change */
 static const char bootprog_rev[] = "1.1";
-STAILQ_HEAD(cmdh, bootblk_command) commands;
 
 /*
  * BootForth   Interface to Ficl Forth interpreter.
@@ -417,14 +406,15 @@ parse(int *argc, char ***argv, char *str)
 			} else {
 				q = p;
 				while (*q && !isspace(*q))
-				++q;
+					++q;
 			}
 			tmp = *q;
 			*q = '\0';
 			if ((val = getenv(p)) != NULL) {
 				size_t len = strlen(val);
 
-				strncpy(buf + i, val, PARSE_BUFSIZE - (i + 1));
+				(void) strncpy(buf + i, val,
+				    PARSE_BUFSIZE - (i + 1));
 				i += min(len, PARSE_BUFSIZE - 1);
 			}
 			*q = tmp;	/* restore value */
@@ -500,7 +490,7 @@ bf_command(ficlVm *vm)
 {
 	char *name, *line, *tail, *cp;
 	size_t len;
-	struct bootblk_command *cmdp;
+	struct bootblk_command **cmdp;
 	bootblk_cmd_t *cmd;
 	int nstrings, i;
 	int argc, result;
@@ -511,9 +501,10 @@ bf_command(ficlVm *vm)
 
 	/* Find our command structure */
 	cmd = NULL;
-	STAILQ_FOREACH(cmdp, &commands, next) {
-		if ((cmdp->c_name != NULL) && strcmp(name, cmdp->c_name) == 0)
-			cmd = cmdp->c_fn;
+	SET_FOREACH(cmdp, Xcommand_set) {
+		if (((*cmdp)->c_name != NULL) &&
+		    strcmp(name, (*cmdp)->c_name) == 0)
+			cmd = (*cmdp)->c_fn;
 	}
 	if (cmd == NULL)
 		printf("callout for unknown command '%s'\n", name);
@@ -529,9 +520,10 @@ bf_command(ficlVm *vm)
 		 */
 		nstrings = ficlStackPopInteger(ficlVmGetDataStack(vm));
 		for (i = 0, len = 0; i < nstrings; i++)
-		len += ficlStackFetch(ficlVmGetDataStack(vm), i * 2).i + 1;
+			len += ficlStackFetch(ficlVmGetDataStack(vm),
+			    i * 2).i + 1;
 		line = malloc(strlen(name) + len + 1);
-		strcpy(line, name);
+		(void) strcpy(line, name);
 
 		if (nstrings)
 			for (i = 0; i < nstrings; i++) {
@@ -539,8 +531,8 @@ bf_command(ficlVm *vm)
 				    ficlVmGetDataStack(vm));
 				cp = ficlStackPopPointer(
 				    ficlVmGetDataStack(vm));
-				strcat(line, " ");
-				strncat(line, cp, len);
+				(void) strcat(line, " ");
+				(void) strncat(line, cp, len);
 			}
 	} else {
 		/* Get remainder of invocation */
@@ -550,10 +542,10 @@ bf_command(ficlVm *vm)
 			;
 
 		line = malloc(strlen(name) + len + 2);
-		strcpy(line, name);
+		(void) strcpy(line, name);
 		if (len > 0) {
-			strcat(line, " ");
-			strncat(line, tail, len);
+			(void) strcat(line, " ");
+			(void) strncat(line, tail, len);
 			ficlVmUpdateTib(vm, tail + len);
 		}
 	}
@@ -692,11 +684,6 @@ get_currdev(void)
 "then ; "
 
 extern int ficlExecFD(ficlVm *, int);
-#define	COMMAND_SET(ptr, name, desc, fn)		\
-	ptr = malloc(sizeof (struct bootblk_command));	\
-	ptr->c_name = (name);				\
-	ptr->c_desc = (desc);				\
-	ptr->c_fn = (fn);
 
 /*
  * Initialise the Forth interpreter, create all our commands as words.
@@ -704,52 +691,13 @@ extern int ficlExecFD(ficlVm *, int);
 ficlVm *
 bf_init(const char *rc, ficlOutputFunction out)
 {
-	struct bootblk_command *cmdp;
+	struct bootblk_command **cmdp;
 	char create_buf[41];	/* 31 characters-long builtins */
 	char *buf;
 	int fd, rv;
 	ficlSystemInformation *fsi;
 	ficlDictionary *dict;
 	ficlDictionary *env;
-
-	/* set up commands list */
-	STAILQ_INIT(&commands);
-	COMMAND_SET(cmdp, "help", "detailed help", command_help);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "?", "list commands", command_commandlist);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "show", "show variable(s)", command_show);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "printenv", "show variable(s)", command_show);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "set", "set a variable", command_set);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "setprop", "set a variable", command_setprop);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "unset", "unset a variable", command_unset);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "echo", "echo arguments", command_echo);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "read", "read input from the terminal", command_read);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "more", "show contents of a file", command_more);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "ls", "list files", command_ls);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "include", "read commands from a file",
-	    command_include);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "boot", "boot a file or loaded kernel", command_boot);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "autoboot", "boot automatically after a delay",
-	    command_autoboot);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "load", "load a kernel or module", command_load);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "unload", "unload all modules", command_unload);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
-	COMMAND_SET(cmdp, "reboot", "reboot the system", command_reboot);
-	STAILQ_INSERT_TAIL(&commands, cmdp, next);
 
 	fsi = malloc(sizeof (ficlSystemInformation));
 	ficlSystemInformationInitialize(fsi);
@@ -791,16 +739,17 @@ bf_init(const char *rc, ficlOutputFunction out)
 	/* make all commands appear as Forth words */
 	dict = ficlSystemGetDictionary(bf_sys);
 	cmdp = NULL;
-	STAILQ_FOREACH(cmdp, &commands, next) {
-		ficlDictionaryAppendPrimitive(dict, (char *)cmdp->c_name,
-		    bf_command, FICL_WORD_DEFAULT);
+
+	SET_FOREACH(cmdp, Xcommand_set) {
+		(void) ficlDictionaryAppendPrimitive(dict,
+		    (char *)(*cmdp)->c_name, bf_command, FICL_WORD_DEFAULT);
 		rv = ficlVmEvaluate(bf_vm, "forth definitions builtins");
 		if (rv != FICL_VM_STATUS_OUT_OF_TEXT) {
 			printf("error interpreting forth: %d\n", rv);
 			exit(1);
 		}
-		snprintf(create_buf, sizeof (create_buf), "builtin: %s",
-		    cmdp->c_name);
+		(void) snprintf(create_buf, sizeof (create_buf), "builtin: %s",
+		    (*cmdp)->c_name);
 		rv = ficlVmEvaluate(bf_vm, create_buf);
 		if (rv != FICL_VM_STATUS_OUT_OF_TEXT) {
 			printf("error interpreting forth: %d\n", rv);
@@ -823,7 +772,7 @@ bf_init(const char *rc, ficlOutputFunction out)
 	 * loader/host version
 	 */
 	env = ficlSystemGetEnvironment(bf_sys);
-	ficlDictionarySetConstant(env, "loader_version",
+	(void) ficlDictionarySetConstant(env, "loader_version",
 	    (bootprog_rev[0] - '0') * 10 + (bootprog_rev[2] - '0'));
 
 	/* try to load and run init file if present */
@@ -833,10 +782,11 @@ bf_init(const char *rc, ficlOutputFunction out)
 		fd = open(rc, O_RDONLY);
 		if (fd != -1) {
 			(void) ficlExecFD(bf_vm, fd);
-			close(fd);
+			(void) close(fd);
 		}
 	}
 
+	gfx_framework_init();
 	return (bf_vm);
 }
 
@@ -844,6 +794,7 @@ void
 bf_fini(void)
 {
 	ficlSystemDestroy(bf_sys);
+	gfx_framework_fini();
 }
 
 /*
@@ -879,7 +830,7 @@ bf_run(char *line)
 		}
 	}
 
-	setenv("interpret", bf_vm->state ? "" : "ok", 1);
+	(void) setenv("interpret", bf_vm->state ? "" : "ok", 1);
 
 	return (result);
 }
@@ -961,34 +912,34 @@ ngets(char *buf, int n)
 		case '\n':
 		case '\r':
 			*lp = '\0';
-			putchar('\n');
-		return;
+			(void) putchar('\n');
+			return;
 		case '\b':
 		case '\177':
 			if (lp > buf) {
 				lp--;
-				putchar('\b');
-				putchar(' ');
-				putchar('\b');
+				(void) putchar('\b');
+				(void) putchar(' ');
+				(void) putchar('\b');
 			}
-		break;
+			break;
 		case 'r'&037: {
 			char *p;
 
-			putchar('\n');
+			(void) putchar('\n');
 			for (p = buf; p < lp; ++p)
-				putchar(*p);
-		break;
+				(void) putchar(*p);
+			break;
 		}
 		case 'u'&037:
 		case 'w'&037:
 			lp = buf;
-			putchar('\n');
-		break;
+			(void) putchar('\n');
+			break;
 		default:
 			if ((n < 1) || ((lp - buf) < n - 1)) {
 				*lp++ = c;
-				putchar(c);
+				(void) putchar(c);
 			}
 		}
 	/*NOTREACHED*/
@@ -1038,9 +989,9 @@ unargv(int argc, char *argv[])
 	cp = malloc(hlong);
 	cp[0] = 0;
 	for (i = 0; i < argc; i++) {
-		strcat(cp, argv[i]);
+		(void) strcat(cp, argv[i]);
 		if (i < (argc - 1))
-			strcat(cp, " ");
+			(void) strcat(cp, " ");
 	}
 
 	return (cp);
@@ -1109,22 +1060,24 @@ help_emitsummary(char *topic, char *subtopic, char *desc)
 {
 	int i;
 
-	pager_output("    ");
-	pager_output(topic);
+	(void) pager_output("    ");
+	(void) pager_output(topic);
 	i = strlen(topic);
 	if (subtopic != NULL) {
-		pager_output(" ");
-		pager_output(subtopic);
+		(void) pager_output(" ");
+		(void) pager_output(subtopic);
 		i += strlen(subtopic) + 1;
 	}
 	if (desc != NULL) {
 		do {
-			pager_output(" ");
+			(void) pager_output(" ");
 		} while (i++ < 30);
-		pager_output(desc);
+		(void) pager_output(desc);
 	}
 	return (pager_output("\n"));
 }
+
+COMMAND_SET(help, "help", "detailed help", command_help);
 
 static int
 command_help(int argc, char *argv[])
@@ -1134,7 +1087,7 @@ command_help(int argc, char *argv[])
 	char *topic, *subtopic, *t, *s, *d;
 
 	/* page the help text from our load path */
-	snprintf(buf, sizeof (buf), "/boot/loader.help");
+	(void) snprintf(buf, sizeof (buf), "/boot/loader.help");
 	if ((hfd = open(buf, O_RDONLY)) < 0) {
 		printf("Verbose help not available, "
 		    "use '?' to list commands\n");
@@ -1155,7 +1108,7 @@ command_help(int argc, char *argv[])
 	break;
 	default:
 		command_errmsg = "usage is 'help <topic> [<subtopic>]";
-		close(hfd);
+		(void) close(hfd);
 		return (CMD_ERROR);
 	}
 
@@ -1204,9 +1157,9 @@ command_help(int argc, char *argv[])
 	free(s);
 	free(d);
 	pager_close();
-	close(hfd);
+	(void) close(hfd);
 	if (!matched) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "no help available for '%s'", topic);
 		free(topic);
 		free(subtopic);
@@ -1217,25 +1170,26 @@ command_help(int argc, char *argv[])
 	return (CMD_OK);
 }
 
+COMMAND_SET(commandlist, "?", "list commands", command_commandlist);
+
 static int
 command_commandlist(int argc __unused, char *argv[] __unused)
 {
-	struct bootblk_command *cmdp;
+	struct bootblk_command **cmdp;
 	int res;
 	char name[20];
 
 	res = 0;
 	pager_open();
 	res = pager_output("Available commands:\n");
-	cmdp = NULL;
-	STAILQ_FOREACH(cmdp, &commands, next) {
+	SET_FOREACH(cmdp, Xcommand_set) {
 		if (res)
 			break;
-		if (cmdp->c_name != NULL && cmdp->c_desc != NULL) {
-			snprintf(name, sizeof (name), "  %-15s  ",
-			    cmdp->c_name);
-			pager_output(name);
-			pager_output(cmdp->c_desc);
+		if ((*cmdp)->c_name != NULL && (*cmdp)->c_desc != NULL) {
+			(void) snprintf(name, sizeof (name), "  %-15s  ",
+			    (*cmdp)->c_name);
+			(void) pager_output(name);
+			(void) pager_output((*cmdp)->c_desc);
 			res = pager_output("\n");
 		}
 	}
@@ -1247,6 +1201,9 @@ command_commandlist(int argc __unused, char *argv[] __unused)
  * XXX set/show should become set/echo if we have variable
  * substitution happening.
  */
+COMMAND_SET(show, "show", "show variable(s)", command_show);
+COMMAND_SET(printenv, "printenv", "show variable(s)", command_show);
+
 static int
 command_show(int argc, char *argv[])
 {
@@ -1259,11 +1216,11 @@ command_show(int argc, char *argv[])
 		 */
 		pager_open();
 		for (ev = _environ; *ev != NULL; ev++) {
-			pager_output(*ev);
+			(void) pager_output(*ev);
 			cp = getenv(*ev);
 			if (cp != NULL) {
-				pager_output("=");
-				pager_output(cp);
+				(void) pager_output("=");
+				(void) pager_output(cp);
 			}
 			if (pager_output("\n"))
 				break;
@@ -1273,7 +1230,7 @@ command_show(int argc, char *argv[])
 		if ((cp = getenv(argv[1])) != NULL) {
 			printf("%s\n", cp);
 		} else {
-			snprintf(command_errbuf, sizeof (command_errbuf),
+			(void) snprintf(command_errbuf, sizeof (command_errbuf),
 			    "variable '%s' not found", argv[1]);
 			return (CMD_ERROR);
 		}
@@ -1281,6 +1238,7 @@ command_show(int argc, char *argv[])
 	return (CMD_OK);
 }
 
+COMMAND_SET(set, "set", "set a variable", command_set);
 static int
 command_set(int argc, char *argv[])
 {
@@ -1310,6 +1268,7 @@ command_set(int argc, char *argv[])
 	return (CMD_OK);
 }
 
+COMMAND_SET(setprop, "setprop", "set a variable", command_setprop);
 static int
 command_setprop(int argc, char *argv[])
 {
@@ -1327,6 +1286,7 @@ command_setprop(int argc, char *argv[])
 	return (CMD_OK);
 }
 
+COMMAND_SET(unset, "unset", "unset a variable", command_unset);
 static int
 command_unset(int argc, char *argv[])
 {
@@ -1344,6 +1304,7 @@ command_unset(int argc, char *argv[])
 	return (CMD_OK);
 }
 
+COMMAND_SET(echo, "echo", "echo arguments", command_echo);
 static int
 command_echo(int argc, char *argv[])
 {
@@ -1386,6 +1347,7 @@ ischar(void)
 	return (1);
 }
 
+COMMAND_SET(read, "read", "read input from the terminal", command_read);
 static int
 command_read(int argc, char *argv[])
 {
@@ -1409,7 +1371,7 @@ command_read(int argc, char *argv[])
 		case 't':
 			timeout = strtol(optarg, &cp, 0);
 			if (cp == optarg) {
-				snprintf(command_errbuf,
+				(void) snprintf(command_errbuf,
 				    sizeof (command_errbuf),
 				    "bad timeout '%s'", optarg);
 				return (CMD_ERROR);
@@ -1436,13 +1398,14 @@ command_read(int argc, char *argv[])
 	ngets(buf, sizeof (buf));
 
 	if (name != NULL)
-		setenv(name, buf, 1);
+		(void) setenv(name, buf, 1);
 	return (CMD_OK);
 }
 
 /*
  * File pager
  */
+COMMAND_SET(more, "more", "show contents of a file", command_more);
 static int
 command_more(int argc, char *argv[])
 {
@@ -1454,7 +1417,7 @@ command_more(int argc, char *argv[])
 	res = 0;
 	pager_open();
 	for (i = 1; (i < argc) && (res == 0); i++) {
-		snprintf(line, sizeof (line), "*** FILE %s BEGIN ***\n",
+		(void) snprintf(line, sizeof (line), "*** FILE %s BEGIN ***\n",
 		    argv[i]);
 		if (pager_output(line))
 			break;
@@ -1462,8 +1425,8 @@ command_more(int argc, char *argv[])
 		res = page_file(name);
 		free(name);
 		if (!res) {
-			snprintf(line, sizeof (line), "*** FILE %s END ***\n",
-			    argv[i]);
+			(void) snprintf(line, sizeof (line),
+			    "*** FILE %s END ***\n", argv[i]);
 			res = pager_output(line);
 		}
 	}
@@ -1482,13 +1445,14 @@ page_file(char *filename)
 	result = pager_file(filename);
 
 	if (result == -1) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "error showing %s", filename);
 	}
 
 	return (result);
 }
 
+COMMAND_SET(ls, "ls", "list files", command_ls);
 static int
 command_ls(int argc, char *argv[])
 {
@@ -1533,31 +1497,33 @@ command_ls(int argc, char *argv[])
 	}
 	dir = fdopendir(fd);
 	pager_open();
-	pager_output(path);
-	pager_output("\n");
+	(void) pager_output(path);
+	(void) pager_output("\n");
 
 	while ((d = readdir(dir)) != NULL) {
 		if (strcmp(d->d_name, ".") && strcmp(d->d_name, "..")) {
 			/* stat the file, if possible */
-			sb.st_size = 0;
-			sb.st_mode = 0;
-			buf = malloc(strlen(path) + strlen(d->d_name) + 2);
 			if (path[0] == '\0') {
-				snprintf(buf, sizeof (buf), "%s", d->d_name);
+				(void) asprintf(&buf, "%s", d->d_name);
 			} else {
-				snprintf(buf, sizeof (buf), "%s/%s", path,
-				    d->d_name);
+				(void) asprintf(&buf, "%s/%s", path, d->d_name);
 			}
-			/* ignore return, could be symlink, etc. */
-			if (stat(buf, &sb))
-				sb.st_size = 0;
-			free(buf);
+			if (buf != NULL) {
+				/* ignore return, could be symlink, etc. */
+				if (stat(buf, &sb)) {
+					sb.st_size = 0;
+					sb.st_mode = 0;
+				}
+				free(buf);
+			}
 			if (verbose) {
-				snprintf(lbuf, sizeof (lbuf), " %c %8d %s\n",
+				(void) snprintf(lbuf, sizeof (lbuf),
+				    " %c %8d %s\n",
 				    typestr[sb.st_mode >> 12],
 				    (int)sb.st_size, d->d_name);
 			} else {
-				snprintf(lbuf, sizeof (lbuf), " %c  %s\n",
+				(void) snprintf(lbuf, sizeof (lbuf),
+				    " %c  %s\n",
 				    typestr[sb.st_mode >> 12], d->d_name);
 			}
 			if (pager_output(lbuf))
@@ -1567,7 +1533,7 @@ command_ls(int argc, char *argv[])
 out:
 	pager_close();
 	if (fd != -1)
-		closedir(dir);
+		(void) closedir(dir);
 	if (path != NULL)
 		free(path);
 	return (result);
@@ -1588,32 +1554,32 @@ ls_getdir(char **pathp)
 
 	/* one extra byte for a possible trailing slash required */
 	path = malloc(strlen(*pathp) + 2);
-	strcpy(path, *pathp);
+	(void) strcpy(path, *pathp);
 
 	/* Make sure the path is respectable to begin with */
 	if ((cp = get_dev(path)) == NULL) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "bad path '%s'", path);
 		goto out;
 	}
 
 	/* If there's no path on the device, assume '/' */
 	if (*cp == 0)
-		strcat(path, "/");
+		(void) strcat(path, "/");
 
 	fd = open(cp, O_RDONLY);
 	if (fd < 0) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "open '%s' failed: %s", path, strerror(errno));
 		goto out;
 	}
 	if (fstat(fd, &sb) < 0) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "stat failed: %s", strerror(errno));
 		goto out;
 	}
 	if (!S_ISDIR(sb.st_mode)) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "%s: %s", path, strerror(ENOTDIR));
 		goto out;
 	}
@@ -1627,10 +1593,11 @@ out:
 	free(path);
 	*pathp = NULL;
 	if (fd != -1)
-		close(fd);
+		(void) close(fd);
 	return (-1);
 }
 
+COMMAND_SET(include, "include", "read commands from a file", command_include);
 static int
 command_include(int argc, char *argv[])
 {
@@ -1679,7 +1646,7 @@ include(const char *filename)
 
 	path = get_dev(filename);
 	if (((fd = open(path, O_RDONLY)) == -1)) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "can't open '%s': %s", filename,
 		    strerror(errno));
 		free(path);
@@ -1713,12 +1680,12 @@ include(const char *filename)
 				script = script->next;
 				free(se);
 			}
-			snprintf(command_errbuf, sizeof (command_errbuf),
+			(void) snprintf(command_errbuf, sizeof (command_errbuf),
 			    "file '%s' line %d: memory allocation "
 			    "failure - aborting", filename, line);
 			return (CMD_ERROR);
 		}
-		strcpy(sp->text, cp);
+		(void) strcpy(sp->text, cp);
 		sp->line = line;
 		sp->next = NULL;
 
@@ -1729,7 +1696,7 @@ include(const char *filename)
 		}
 		se = sp;
 	}
-	close(fd);
+	(void) close(fd);
 
 	/*
 	 * Execute the script
@@ -1743,7 +1710,7 @@ include(const char *filename)
 	for (sp = script; sp != NULL; sp = sp->next) {
 		res = bf_run(sp->text);
 		if (res != FICL_VM_STATUS_OUT_OF_TEXT) {
-			snprintf(command_errbuf, sizeof (command_errbuf),
+			(void) snprintf(command_errbuf, sizeof (command_errbuf),
 			    "Error while including %s, in the line %d:\n%s",
 			    filename, sp->line, sp->text);
 			res = CMD_ERROR;
@@ -1765,12 +1732,15 @@ include(const char *filename)
 	return (res);
 }
 
+COMMAND_SET(boot, "boot", "boot a file or loaded kernel", command_boot);
 static int
 command_boot(int argc, char *argv[])
 {
 	return (CMD_OK);
 }
 
+COMMAND_SET(autoboot, "autoboot", "boot automatically after a delay",
+    command_autoboot);
 static int
 command_autoboot(int argc, char *argv[])
 {
@@ -1913,6 +1883,7 @@ file_search(const char *name)
 	return (result);
 }
 
+COMMAND_SET(load, "load", "load a kernel or module", command_load);
 static int
 command_load(int argc, char *argv[])
 {
@@ -1956,25 +1927,72 @@ command_load(int argc, char *argv[])
 
 	filename = file_search(argv[1]);
 	if (filename == NULL) {
-		snprintf(command_errbuf, sizeof (command_errbuf),
+		(void) snprintf(command_errbuf, sizeof (command_errbuf),
 		    "can't find '%s'", argv[1]);
 		return (CMD_ERROR);
 	}
-	setenv("kernelname", filename, 1);
+	(void) setenv("kernelname", filename, 1);
 
 	return (CMD_OK);
 }
 
+COMMAND_SET(unload, "unload", "unload all modules", command_unload);
 static int
 command_unload(int argc, char *argv[])
 {
-	unsetenv("kernelname");
+	(void) unsetenv("kernelname");
 	return (CMD_OK);
 }
 
+COMMAND_SET(reboot, "reboot", "reboot the system", command_reboot);
 static int
 command_reboot(int argc, char *argv[])
 {
 	exit(0);
 	return (CMD_OK);
+}
+
+COMMAND_SET(sifting, "sifting", "find words", command_sifting);
+static int
+command_sifting(int argc, char *argv[])
+{
+	if (argc != 2) {
+		command_errmsg = "wrong number of arguments";
+		return (CMD_ERROR);
+	}
+	ficlPrimitiveSiftingImpl(bf_vm, argv[1]);
+	return (CMD_OK);
+}
+
+/* Only implement get and list. Ignore arguments on, off and set. */
+COMMAND_SET(framebuffer, "framebuffer", "framebuffer mode management",
+    command_framebuffer);
+static int
+command_framebuffer(int argc, char *argv[])
+{
+	if (fb.fd < 0) {
+		printf("Framebuffer is not available.\n");
+		return (CMD_OK);
+	}
+
+	if (argc == 2 && strcmp(argv[1], "get") == 0) {
+		printf("\nSystem frame buffer: %s\n", fb.ident.name);
+		printf("%dx%dx%d, stride=%d\n", fb.fb_width, fb.fb_height,
+		    fb.fb_depth, (fb.fb_pitch << 3) / fb.fb_depth);
+		return (CMD_OK);
+	}
+	if (argc == 2 && strcmp(argv[1], "list") == 0) {
+		printf("0: %dx%dx%d\n", fb.fb_width, fb.fb_height, fb.fb_depth);
+		return (CMD_OK);
+	}
+	if (argc == 3 && strcmp(argv[1], "set") == 0)
+		return (CMD_OK);
+	if (argc == 2 && strcmp(argv[1], "on") == 0)
+		return (CMD_OK);
+	if (argc == 2 && strcmp(argv[1], "off") == 0)
+		return (CMD_OK);
+
+	(void) snprintf(command_errbuf, sizeof (command_errbuf),
+	    "usage: %s get | list", argv[0]);
+	return (CMD_ERROR);
 }

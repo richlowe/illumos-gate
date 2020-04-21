@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 2014 Roger Pau Monné <royger@FreeBSD.org>
  * All rights reserved.
  *
@@ -50,9 +50,10 @@
 
 #include "bootstrap.h"
 #include <sys/multiboot.h>
-#include "../zfs/libzfs.h"
-#include "../i386/libi386/libi386.h"
-#include "../i386/btx/lib/btxv86.h"
+#include "vbe.h"
+#include "libzfs.h"
+#include "libi386.h"
+#include "../btx/lib/btxv86.h"
 
 #define	SUPPORT_DHCP
 #include <bootp.h>
@@ -429,6 +430,9 @@ multiboot_exec(struct preloaded_file *fp)
 	free(cmdline);
 	cmdline = NULL;
 
+	/* make sure we have text mode */
+	bios_set_text_mode(VGA_TEXT_MODE);
+
 	dev_cleanup();
 	__exec((void *)VTOP(multiboot_tramp), MULTIBOOT_BOOTLOADER_MAGIC,
 	    (void *)entry, (void *)VTOP(mb_info));
@@ -523,7 +527,7 @@ multiboot_obj_loadfile(char *filename, u_int64_t dest,
 }
 
 static int
-multiboot_obj_exec(struct preloaded_file *fp)
+multiboot_obj_exec(struct preloaded_file *fp __unused)
 {
 
 	return (EFTYPE);

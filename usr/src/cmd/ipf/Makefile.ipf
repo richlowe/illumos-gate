@@ -22,8 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#cmd/ipf/Makefile.ipf
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 
 LIBIPF=		../../lib/$(MACH)/libipf.a
@@ -36,8 +35,12 @@ CPPFLAGS	+= -I$(COMMONIPF) -I$(KERNELIPF) -DSUNDDI -DUSE_INET6 \
 		   -DSOLARIS2=$(RELEASE_MINOR)
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-type-limits
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-empty-body
+
+# not linted
+SMATCH=off
+

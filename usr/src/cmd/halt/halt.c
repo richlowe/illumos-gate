@@ -645,6 +645,19 @@ validate_disk(char *arg, char *mountpoint)
 	if (rc != 0)
 		return (rc);
 
+	/*
+	 * Check for the usual case: 64-bit kernel
+	 */
+	(void) snprintf(kernpath, MAXPATHLEN,
+	    "%s/platform/i86pc/kernel/amd64/unix", mountpoint);
+	if (stat64(kernpath, &statbuf) == 0)
+		return (0);
+
+	/*
+	 * We no longer build 32-bit kernel but in a case we are trying to boot
+	 * some ancient filesystem with 32-bit only kernel we should be able to
+	 * proceed too
+	 */
 	(void) snprintf(kernpath, MAXPATHLEN, "%s/platform/i86pc/kernel/unix",
 	    mountpoint);
 
@@ -1150,7 +1163,7 @@ parse_fastboot_args(char *bootargs_buf, size_t buf_size,
 	} else if (mplen != 0) {
 		/*
 		 * No unix argument, but mountpoint is not empty, use
-		 * /platform/i86pc/$ISADIR/kernel/unix as default.
+		 * /platform/i86pc/kernel/$ISADIR/unix as default.
 		 */
 		char isa[20];
 
@@ -1263,7 +1276,7 @@ main(int argc, char *argv[])
 	int qflag = 0, needlog = 1, nosync = 0;
 	int fast_reboot = 0;
 	int prom_reboot = 0;
-	uintptr_t mdep = NULL;
+	uintptr_t mdep = 0;
 	int cmd, fcn, c, aval, r;
 	const char *usage;
 	const char *optstring;
@@ -1608,7 +1621,7 @@ main(int argc, char *argv[])
 	}
 
 	if (cmd == A_DUMP && nosync != 0)
-		(void) uadmin(A_DUMP, AD_NOSYNC, NULL);
+		(void) uadmin(A_DUMP, AD_NOSYNC, 0);
 
 	if (fast_reboot)
 		fcn = AD_FASTREBOOT;

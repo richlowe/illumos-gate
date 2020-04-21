@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <sys/types.h>
@@ -250,12 +250,12 @@ smb_vop_other_opens(vnode_t *vp, int mode)
  */
 
 int
-smb_vop_read(vnode_t *vp, uio_t *uiop, cred_t *cr)
+smb_vop_read(vnode_t *vp, uio_t *uiop, int ioflag, cred_t *cr)
 {
 	int error;
 
 	(void) VOP_RWLOCK(vp, V_WRITELOCK_FALSE, &smb_ct);
-	error = VOP_READ(vp, uiop, 0, cr, &smb_ct);
+	error = VOP_READ(vp, uiop, ioflag, cr, &smb_ct);
 	VOP_RWUNLOCK(vp, V_WRITELOCK_FALSE, &smb_ct);
 	return (error);
 }
@@ -277,6 +277,23 @@ smb_vop_write(vnode_t *vp, uio_t *uiop, int ioflag, uint32_t *lcount,
 	*lcount -= uiop->uio_resid;
 
 	return (error);
+}
+
+int
+smb_vop_ioctl(vnode_t *vp, int cmd, void *arg, cred_t *cr)
+{
+	int error, rval = 0;
+	uint_t flags = 0;
+
+#ifdef	FKIOCTL
+	flags |= FKIOCTL;
+#endif
+	error = VOP_IOCTL(vp, cmd, (intptr_t)arg, (int)flags, cr,
+	    &rval, &smb_ct);
+	if (error != 0)
+		rval = error;
+
+	return (rval);
 }
 
 /*
@@ -501,7 +518,7 @@ smb_vop_setattr(vnode_t *vp, vnode_t *unnamed_vp, smb_attr_t *attr,
 
 int
 smb_vop_space(vnode_t *vp, int cmd, flock64_t *bfp, int flags,
-	offset_t offset, cred_t *cr)
+    offset_t offset, cred_t *cr)
 {
 	int error;
 
@@ -529,19 +546,32 @@ smb_vop_access(vnode_t *vp, int mode, int flags, vnode_t *dir_vp, cred_t *cr)
 	if (mode == 0)
 		return (0);
 
-	if ((flags == V_ACE_MASK) && (mode & ACE_DELETE)) {
-		if (dir_vp) {
-			error = VOP_ACCESS(dir_vp, ACE_DELETE_CHILD, flags,
-			    cr, NULL);
+	error = VOP_ACCESS(vp, mode, flags, cr, NULL);
 
-			if (error == 0)
-				mode &= ~ACE_DELETE;
-		}
+	if (error == 0)
+		return (0);
+
+	if ((mode & (ACE_DELETE|ACE_READ_ATTRIBUTES)) == 0 ||
+	    flags != V_ACE_MASK || dir_vp == NULL)
+		return (error);
+
+	if ((mode & ACE_DELETE) != 0) {
+		error = VOP_ACCESS(dir_vp, ACE_DELETE_CHILD, flags,
+		    cr, NULL);
+
+		if (error == 0)
+			mode &= ~ACE_DELETE;
+	}
+	if ((mode & ACE_READ_ATTRIBUTES) != 0) {
+		error = VOP_ACCESS(dir_vp, ACE_LIST_DIRECTORY, flags,
+		    cr, NULL);
+
+		if (error == 0)
+			mode &= ~ACE_READ_ATTRIBUTES;
 	}
 
-	if (mode) {
+	if (mode != 0)
 		error = VOP_ACCESS(vp, mode, flags, cr, NULL);
-	}
 
 	return (error);
 }
@@ -554,7 +584,7 @@ smb_vop_access(vnode_t *vp, int mode, int flags, vnode_t *dir_vp, cred_t *cr)
  * vpp:		looked-up vnode (out)
  * od_name:	on-disk name of file (out).
  *		This parameter is optional.  If a pointer is passed in, it
- * 		must be allocated with MAXNAMELEN bytes
+ *		must be allocated with MAXNAMELEN bytes
  * rootvp:	vnode of the tree root (in)
  *		This parameter is always passed in non-NULL except at the time
  *		of share set up.
@@ -578,8 +608,14 @@ smb_vop_lookup(
 	char *np = name;
 	char namebuf[MAXNAMELEN];
 
-	if (*name == '\0')
-		return (EINVAL);
+	if (*name == '\0') {
+		/*
+		 * This happens creating named streams at the share root.
+		 */
+		VN_HOLD(dvp);
+		*vpp = dvp;
+		return (0);
+	}
 
 	ASSERT(vpp);
 	*vpp = NULL;
@@ -620,14 +656,23 @@ smb_vop_lookup(
 
 	pn_alloc(&rpn);
 
+	/*
+	 * Easier to not have junk in rpn, as not every FS type
+	 * will necessarily fill that in for us.
+	 */
+	bzero(rpn.pn_buf, rpn.pn_bufsize);
+
 	error = VOP_LOOKUP(dvp, np, vpp, NULL, option_flags, NULL, cr,
 	    &smb_ct, direntflags, &rpn);
 
 	if (error == 0) {
 		if (od_name) {
 			bzero(od_name, MAXNAMELEN);
-			np = (option_flags == FIGNORECASE) ? rpn.pn_buf : name;
-
+			if ((option_flags & FIGNORECASE) != 0 &&
+			    rpn.pn_buf[0] != '\0')
+				np = rpn.pn_buf;
+			else
+				np = name;
 			if (flags & SMB_CATIA)
 				smb_vop_catia_v4tov5(np, od_name, MAXNAMELEN);
 			else
@@ -677,6 +722,20 @@ smb_vop_create(vnode_t *dvp, char *name, smb_attr_t *attr, vnode_t **vpp,
 
 	error = VOP_CREATE(dvp, np, vap, EXCL, attr->sa_vattr.va_mode,
 	    vpp, cr, option_flags, &smb_ct, vsap);
+
+	/*
+	 * One could argue that filesystems should obey the size
+	 * if specified in the create attributes.  Unfortunately,
+	 * they only appear to let you truncate the size to zero.
+	 * SMB needs to set a non-zero size, so work-around.
+	 */
+	if (error == 0 && *vpp != NULL &&
+	    (vap->va_mask & AT_SIZE) != 0 &&
+	    vap->va_size > 0) {
+		vattr_t ta = *vap;
+		ta.va_mask = AT_SIZE;
+		(void) VOP_SETATTR(*vpp, &ta, 0, cr, &smb_ct);
+	}
 
 	return (error);
 }
@@ -970,7 +1029,8 @@ smb_vop_readdir(vnode_t *vp, uint32_t offset,
 	if (vp->v_type != VDIR)
 		return (ENOTDIR);
 
-	if (vfs_has_feature(vp->v_vfsp, VFSFT_DIRENTFLAGS)) {
+	if ((rddir_flag & SMB_EDIRENT) != 0 &&
+	    vfs_has_feature(vp->v_vfsp, VFSFT_DIRENTFLAGS)) {
 		flags |= V_RDDIR_ENTFLAGS;
 		rdirent_size = sizeof (edirent_t);
 	} else {
@@ -1218,7 +1278,7 @@ smb_vop_acl_read(vnode_t *vp, acl_t **aclp, int flags, acl_type_t acl_type,
 		return (EINVAL);
 	}
 
-	if (error = VOP_GETSECATTR(vp, &vsecattr, flags, cr, &smb_ct))
+	if ((error = VOP_GETSECATTR(vp, &vsecattr, flags, cr, &smb_ct)) != 0)
 		return (error);
 
 	*aclp = smb_fsacl_from_vsa(&vsecattr, acl_type);
@@ -1448,11 +1508,31 @@ smb_vop_unshrlock(vnode_t *vp, uint32_t uniq_fid, cred_t *cr)
 	return (VOP_SHRLOCK(vp, F_UNSHARE, &shr, 0, cr, NULL));
 }
 
+/*
+ * Note about mandatory vs advisory locks:
+ *
+ * The SMB server really should always request mandatory locks, and
+ * if the file system does not support them, the SMB server should
+ * just tell the client it could not get the lock. If we were to
+ * tell the SMB client "you got the lock" when what they really
+ * got was only an advisory lock, we would be lying to the client
+ * about their having exclusive access to the locked range, which
+ * could easily lead to data corruption.  If someone really wants
+ * the (dangerous) behavior they can set: smb_allow_advisory_locks
+ */
 int
 smb_vop_frlock(vnode_t *vp, cred_t *cr, int flag, flock64_t *bf)
 {
-	int cmd = nbl_need_check(vp) ? F_SETLK_NBMAND : F_SETLK;
 	flk_callback_t flk_cb;
+	int cmd = F_SETLK_NBMAND;
+
+	if (smb_allow_advisory_locks != 0 && !nbl_need_check(vp)) {
+		/*
+		 * The file system does not support nbmand, and
+		 * smb_allow_advisory_locks is enabled. (danger!)
+		 */
+		cmd = F_SETLK;
+	}
 
 	flk_init_callback(&flk_cb, smb_lock_frlock_callback, NULL);
 
@@ -1531,7 +1611,7 @@ smb_vop_catia_v5tov4(char *name, char *buf, int buflen)
 {
 	int v4_idx, numbytes, inc;
 	int space_left = buflen - 1; /* one byte reserved for null */
-	smb_wchar_t wc;
+	uint32_t wc;
 	char mbstring[MTS_MB_CHAR_MAX];
 	char *p, *src = name, *dst = buf;
 
@@ -1588,7 +1668,7 @@ smb_vop_catia_v4tov5(char *name, char *buf, int buflen)
 {
 	int v5_idx, numbytes;
 	int space_left = buflen - 1; /* one byte reserved for null */
-	smb_wchar_t wc;
+	uint32_t wc;
 	char mbstring[MTS_MB_CHAR_MAX];
 	char *src = name, *dst = buf;
 

@@ -23,6 +23,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
+
 #include <sys/types.h>
 #include <sys/conf.h>
 #include <sys/modctl.h>
@@ -232,8 +236,9 @@ rds_open(queue_t *q, dev_t *devp, int flag, int sflag, cred_t *credp)
 	return (0);
 }
 
+/* ARGSUSED */
 static int
-rds_close(queue_t *q)
+rds_close(queue_t *q, int flags __unused, cred_t *credp __unused)
 {
 	rds_t *rdsp = (rds_t *)q->q_ptr;
 
@@ -838,7 +843,7 @@ rds_wrw(queue_t *q, struiod_t *dp)
 			/* Detect valid T_UNITDATA_REQ here */
 			if (((union T_primitives *)(uintptr_t)rptr)->type
 			    == T_UNITDATA_REQ)
-			break;
+				break;
 		}
 		/* FALLTHRU */
 	default:
@@ -863,7 +868,7 @@ done:
 	return (error);
 }
 
-static void
+static int
 rds_rsrv(queue_t *q)
 {
 	rds_t	*rds = (rds_t *)q->q_ptr;
@@ -879,6 +884,7 @@ rds_rsrv(queue_t *q)
 
 	/* No more messages in the q, unstall the socket */
 	rds_transport_ops->rds_transport_resume_port(ntohs(rds->rds_port));
+	return (0);
 }
 
 int
@@ -944,11 +950,11 @@ static struct module_info info = {
 };
 
 static struct qinit rinit = {
-	NULL, (pfi_t)rds_rsrv, rds_open, rds_close, NULL, &info
+	NULL, rds_rsrv, rds_open, rds_close, NULL, &info
 };
 
 static struct qinit winit = {
-	(pfi_t)rds_wput, NULL, rds_open, rds_close, NULL, &info,
+	rds_wput, NULL, rds_open, rds_close, NULL, &info,
 	NULL, rds_wrw, NULL, STRUIOT_STANDARD
 };
 

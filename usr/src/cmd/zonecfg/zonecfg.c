@@ -23,6 +23,7 @@
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014 Gary Mills
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -1822,14 +1823,16 @@ quoteit(char *instr)
 static void
 export_prop(FILE *of, int prop_num, char *prop_id)
 {
-	char *quote_str;
-
 	if (strlen(prop_id) == 0)
 		return;
-	quote_str = quoteit(prop_id);
-	(void) fprintf(of, "%s %s=%s\n", cmd_to_str(CMD_SET),
-	    pt_to_str(prop_num), quote_str);
-	free(quote_str);
+	/*
+	 * We're going to explicitly quote all strings on export.
+	 * This should be fine since it seems that no amount of escaping
+	 * will coerce zonecfg to properly parse a double quote as
+	 * part of the string value.
+	 */
+	(void) fprintf(of, "%s %s=\"%s\"\n", cmd_to_str(CMD_SET),
+	    pt_to_str(prop_num), prop_id);
 }
 
 void
@@ -5933,7 +5936,7 @@ brand_verify(zone_dochandle_t handle)
 	 * Dump the current config information for this zone to a file.
 	 */
 	strcpy(xml_file, "/tmp/zonecfg_verify.XXXXXX");
-	if (mkstemp(xml_file) == NULL)
+	if (mkstemp(xml_file) == -1)
 		return (Z_TEMP_FILE);
 	if ((err = zonecfg_verify_save(handle, xml_file)) != Z_OK) {
 		(void) unlink(xml_file);

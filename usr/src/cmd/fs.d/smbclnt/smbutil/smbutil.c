@@ -34,7 +34,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Nexenta Systems, Inc.
  */
 
 #include <sys/param.h>
@@ -70,6 +70,7 @@ static struct commands {
 	int		flags;
 } commands[] = {
 	{"crypt",	cmd_crypt,	NULL, CMDFL_NO_KMOD},
+	{"discon",	cmd_discon,	discon_usage, 0},
 	{"help",	cmd_help,	help_usage, CMDFL_NO_KMOD},
 	{"info",	cmd_info,	info_usage, 0},
 	{"login",	cmd_login,	login_usage, 0},
@@ -184,27 +185,28 @@ main(int argc, char *argv[])
 }
 
 static void
-help(void) {
+help(void)
+{
 	printf("\n");
 	printf(gettext("usage: %s [-hv] subcommand [args]\n"), __progname);
 	printf(gettext("where subcommands are:\n"
-	" crypt		slightly obscure password\n"
-	" help		display help on specified subcommand\n"
-	/* " lc		display active connections\n" */
-	" info		display server type and version\n"
-	" login		login to specified host\n"
-	" logout	logout from specified host\n"
-	" logoutall	logout all users (requires privilege)\n"
-	" lookup	resolve NetBIOS name to IP address\n"
-	" print		print file to the specified remote printer\n"
-	" status	resolve IP address or DNS name to NetBIOS names\n"
-	" view		list resources on specified host\n"
+	" crypt          slightly obscure password\n"
+	" help           display help on specified subcommand\n"
+	" info           display server type and version\n"
+	" login          login to specified host\n"
+	" logout         logout from specified host\n"
+	" logoutall      logout all users (requires privilege)\n"
+	" lookup         resolve NetBIOS name to IP address\n"
+	" print          print file to the specified remote printer\n"
+	" status         resolve IP address or DNS name to NetBIOS names\n"
+	" view           list resources on specified host\n"
 	"\n"));
 	exit(1);
 }
 
 void
-help_usage(void) {
+help_usage(void)
+{
 	printf(gettext("usage: smbutil help command\n"));
 	exit(1);
 }

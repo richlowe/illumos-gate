@@ -4,6 +4,7 @@
 #
 # Copyright 2011 Nexenta Systems, Inc. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=		safe_finger tcpd tcpdchk tcpdmatch try-from
 
@@ -24,10 +25,13 @@ CERRWARN +=	-_cc=-erroff=E_FUNC_HAS_NO_RETURN_STMT
 CERRWARN +=	-_cc=-erroff=E_IMPLICIT_DECL_FUNC_RETURN_INT
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-return-type
 CERRWARN +=	-_gcc=-Wno-clobbered
+
+# not linted
+SMATCH=off
 
 # Various components must export interfaces, but also contain name-space
 # clashes with system libraries.

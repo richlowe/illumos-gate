@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= lockstat
 OBJS= lockstat.o sym.o
@@ -32,7 +33,10 @@ include ../../Makefile.cmd
 LDLIBS += -lelf -lkstat -ldtrace
 CFLAGS += $(CCVERBOSE)
 CFLAGS64 += $(CCVERBOSE)
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+SMOFF += index_overflow
+
 LINTFLAGS += -xerroff=E_SEC_SPRINTF_UNBOUNDED_COPY
 LINTFLAGS64 += -xerroff=E_SEC_SPRINTF_UNBOUNDED_COPY
 

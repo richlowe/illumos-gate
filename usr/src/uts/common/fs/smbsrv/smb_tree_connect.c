@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
+ * Copyright 2019 Nexenta by DDN, Inc. All rights reserved.
  */
 
 #include <smbsrv/smb_kproto.h>
@@ -100,8 +100,7 @@ smb_pre_tree_connect(smb_request_t *sr)
 	tcon->flags = 0;
 	tcon->optional_support = 0;
 
-	DTRACE_SMB_2(op__TreeConnect__start, smb_request_t *, sr,
-	    smb_arg_tcon_t *, tcon);
+	DTRACE_SMB_START(op__TreeConnect, smb_request_t *, sr);
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -109,7 +108,7 @@ smb_pre_tree_connect(smb_request_t *sr)
 void
 smb_post_tree_connect(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__TreeConnect__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__TreeConnect, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -291,8 +290,7 @@ smb_pre_tree_connect_andx(smb_request_t *sr)
 
 	tcon->optional_support = 0;
 
-	DTRACE_SMB_2(op__TreeConnectX__start, smb_request_t *, sr,
-	    smb_arg_tcon_t *, tcon);
+	DTRACE_SMB_START(op__TreeConnectX, smb_request_t *, sr);
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -300,24 +298,35 @@ smb_pre_tree_connect_andx(smb_request_t *sr)
 void
 smb_post_tree_connect_andx(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__TreeConnectX__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__TreeConnectX, smb_request_t *, sr);
 }
 
 smb_sdrc_t
 smb_com_tree_connect_andx(smb_request_t *sr)
 {
 	smb_arg_tcon_t	*tcon = &sr->sr_tcon;
+	smb_tree_t	*tree;
 	char		*service;
 	uint32_t	status;
 	int		rc;
+
+	if (tcon->flags & SMB_TCONX_DISCONECT_TID) {
+		tree = smb_session_lookup_tree(sr->session, sr->smb_tid);
+		if (tree != NULL) {
+			smb_tree_disconnect(tree, B_TRUE);
+			smb_session_cancel_requests(sr->session, tree, sr);
+			smb_tree_release(tree);
+		}
+	}
 
 	status = smb_tree_connect(sr);
 	if (status) {
 		smb_tcon_puterror(sr, status);
 		return (SDRC_ERROR);
 	}
+	tree = sr->tid_tree;
 
-	switch (sr->tid_tree->t_res_type & STYPE_MASK) {
+	switch (tree->t_res_type & STYPE_MASK) {
 	case STYPE_IPC:
 		service = "IPC";
 		break;
@@ -330,23 +339,37 @@ smb_com_tree_connect_andx(smb_request_t *sr)
 	}
 
 	if (sr->session->dialect < NT_LM_0_12) {
-		rc = smbsr_encode_result(sr, 2, VAR_BCC, "bb.wwss",
+		rc = smbsr_encode_result(sr, 2, VAR_BCC, "bb.ww%ss",
 		    (char)2,		/* wct */
 		    sr->andx_com,
 		    VAR_BCC,
 		    VAR_BCC,
+		    sr,
 		    service,
-		    sr->tid_tree->t_typename);
-	} else {
-		rc = smbsr_encode_result(sr, 3, VAR_BCC, "bb.wwws%u",
+		    tree->t_typename);
+	} else if ((tcon->flags & SMB_TCONX_EXTENDED_RESPONSE) == 0) {
+		rc = smbsr_encode_result(sr, 3, VAR_BCC, "bb.www%su",
 		    (char)3,		/* wct */
 		    sr->andx_com,
 		    (short)64,
 		    tcon->optional_support,
 		    VAR_BCC,
-		    service,
 		    sr,
-		    sr->tid_tree->t_typename);
+		    service,
+		    tree->t_typename);
+
+	} else {
+		rc = smbsr_encode_result(sr, 7, VAR_BCC, "bb.wwllw%su",
+		    (char)7,		/* wct (b) */
+		    sr->andx_com,	/* AndXcmd (b) */
+		    (short)72,		/* AndXoff (w) */
+		    tcon->optional_support,	/* (w) */
+		    tree->t_access,		/* (l) */
+		    0,		/*    guest_access (l) */
+		    VAR_BCC,		/* (w) */
+		    sr,			/* (%) */
+		    service,		/* (s) */
+		    tree->t_typename);	/* (u) */
 	}
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
@@ -392,14 +415,14 @@ smb_pre_tree_disconnect(smb_request_t *sr)
 	sr->uid_user = smb_session_lookup_uid(sr->session, sr->smb_uid);
 	sr->tid_tree = smb_session_lookup_tree(sr->session, sr->smb_tid);
 
-	DTRACE_SMB_1(op__TreeDisconnect__start, smb_request_t *, sr);
+	DTRACE_SMB_START(op__TreeDisconnect, smb_request_t *, sr);
 	return (SDRC_SUCCESS);
 }
 
 void
 smb_post_tree_disconnect(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__TreeDisconnect__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__TreeDisconnect, smb_request_t *, sr);
 }
 
 /*
@@ -423,8 +446,8 @@ smb_com_tree_disconnect(smb_request_t *sr)
 
 	sr->user_cr = smb_user_getcred(sr->uid_user);
 
-	smb_session_cancel_requests(sr->session, sr->tid_tree, sr);
 	smb_tree_disconnect(sr->tid_tree, B_TRUE);
+	smb_session_cancel_requests(sr->session, sr->tid_tree, sr);
 
 	if (smbsr_encode_empty_result(sr))
 		return (SDRC_ERROR);

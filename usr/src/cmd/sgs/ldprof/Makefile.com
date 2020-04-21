@@ -21,6 +21,8 @@
 
 #
 # Copyright (c) 1995, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2020 Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 LIBRARY=	ldprof.a
@@ -36,22 +38,21 @@ ROOTLIBDIR=	$(ROOT)/usr/lib/link_audit
 
 MAPFILES =	../common/mapfile-vers
 
-DYNFLAGS +=	$(CC_USE_PROTO)
 CPPFLAGS=	-I. -I../common -I../../include \
 		-I../../rtld/common \
 		-I../../include/$(MACH) \
-		-I$(SRCBASE)/lib/libc/inc \
-		-I$(SRCBASE)/uts/common/krtld \
+		-I$(SRC)/lib/libc/inc \
+		-I$(SRC)/uts/common/krtld \
 		-I$(SRC)/common/sgsrtcid \
-		-I$(SRCBASE)/uts/$(ARCH)/sys \
+		-I$(SRC)/uts/$(ARCH)/sys \
 		$(CPPFLAGS.master) -I$(ELFCAP)
 CFLAGS +=	$(C_PICFLAGS)
 
-lint :=		ZRECORD =
-LDLIBS +=	$(ZRECORD) -lmapmalloc -lc $(DLLIB)
+SMOFF += indenting
 
-LINTFLAGS +=	-u -erroff=E_NAME_DECL_NOT_USED_DEF2
-LINTFLAGS64 +=	-u -erroff=E_NAME_DECL_NOT_USED_DEF2
+ZGUIDANCE =	-Wl,-zguidance=nounused
+
+LDLIBS +=	$(ZRECORD) -lmapmalloc -lc $(DLLIB)
 
 BLTDEFS=	msg.h
 BLTDATA=	msg.c
@@ -65,9 +66,8 @@ SGSMSGALL=	$(SGSMSGCOM)
 SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n ldprof_msg
 
 SRCS=		$(COMOBJS:%.o=../common/%.c) $(BLTDATA)
-LINTSRCS=	$(SRCS) ../common/lintsup.c
 
-CLEANFILES +=	$(LINTOUTS) $(BLTFILES)
-CLOBBERFILES +=	$(DYNLIB) $(LINTLIB)
+CLEANFILES +=	$(BLTFILES)
+CLOBBERFILES +=	$(DYNLIB)
 
 ROOTDYNLIB=	$(DYNLIB:%=$(ROOTLIBDIR)/%)

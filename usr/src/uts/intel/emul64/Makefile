@@ -21,6 +21,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
 #
 #	This makefile drives the production of the emul64 kernel
 #	driver to testing hotplugging operations
@@ -68,7 +69,10 @@ CFLAGS += $(CCVERBOSE)
 LINTTAGS	+= -erroff=E_BAD_PTR_CAST_ALIGN
 
 CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMOFF += indenting,shift_to_zero
 
 #
 # Depends on scsi

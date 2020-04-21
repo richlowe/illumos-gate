@@ -24,7 +24,7 @@
  * Copyright (c) 1990 Mentat Inc.
  * Copyright (c) 2017 OmniTI Computer Consulting, Inc. All rights reserved.
  * Copyright (c) 2016 by Delphix. All rights reserved.
- * Copyright (c) 2018 Joyent, Inc. All rights reserved.
+ * Copyright (c) 2019 Joyent, Inc. All rights reserved.
  */
 
 #include <sys/types.h>
@@ -95,6 +95,7 @@
 #include <netinet/igmp.h>
 #include <netinet/ip_mroute.h>
 #include <inet/ipp_common.h>
+#include <inet/cc.h>
 
 #include <net/pfkeyv2.h>
 #include <inet/sadb.h>
@@ -666,12 +667,11 @@ static void	icmp_send_reply_v4(mblk_t *, ipha_t *, icmph_t *,
 mblk_t		*ip_dlpi_alloc(size_t, t_uscalar_t);
 char		*ip_dot_addr(ipaddr_t, char *);
 mblk_t		*ip_carve_mp(mblk_t **, ssize_t);
-int		ip_close(queue_t *, int);
 static char	*ip_dot_saddr(uchar_t *, char *);
-static void	ip_lrput(queue_t *, mblk_t *);
+static int	ip_lrput(queue_t *, mblk_t *);
 ipaddr_t	ip_net_mask(ipaddr_t);
 char		*ip_nv_lookup(nv_t *, int);
-void	ip_rput(queue_t *, mblk_t *);
+int		ip_rput(queue_t *, mblk_t *);
 static void	ip_rput_dlpi_writer(ipsq_t *dummy_sq, queue_t *q, mblk_t *mp,
 		    void *dummy_arg);
 int		ip_snmp_get(queue_t *, mblk_t *, int, boolean_t);
@@ -707,8 +707,8 @@ static mblk_t	*ip_snmp_get_mib2_ip6_route_media(queue_t *, mblk_t *, int,
 		    ip_stack_t *ipst);
 static void	ip_snmp_get2_v4(ire_t *, iproutedata_t *);
 static void	ip_snmp_get2_v6_route(ire_t *, iproutedata_t *);
-static int	ip_snmp_get2_v4_media(ncec_t *, iproutedata_t *);
-static int	ip_snmp_get2_v6_media(ncec_t *, iproutedata_t *);
+static void	ip_snmp_get2_v4_media(ncec_t *, void *);
+static void	ip_snmp_get2_v6_media(ncec_t *, void *);
 int		ip_snmp_set(queue_t *, int, int, uchar_t *, int);
 
 static mblk_t	*ip_fragment_copyhdr(uchar_t *, int, int, ip_stack_t *,
@@ -1185,28 +1185,23 @@ struct module_info ip_mod_info = {
  * We have separate open functions for the /dev/ip and /dev/ip6 devices.
  */
 static struct qinit iprinitv4 = {
-	(pfi_t)ip_rput, NULL, ip_openv4, ip_close, NULL,
-	&ip_mod_info
+	ip_rput, NULL, ip_openv4, ip_close, NULL, &ip_mod_info
 };
 
 struct qinit iprinitv6 = {
-	(pfi_t)ip_rput_v6, NULL, ip_openv6, ip_close, NULL,
-	&ip_mod_info
+	ip_rput_v6, NULL, ip_openv6, ip_close, NULL, &ip_mod_info
 };
 
 static struct qinit ipwinit = {
-	(pfi_t)ip_wput_nondata, (pfi_t)ip_wsrv, NULL, NULL, NULL,
-	&ip_mod_info
+	ip_wput_nondata, ip_wsrv, NULL, NULL, NULL, &ip_mod_info
 };
 
 static struct qinit iplrinit = {
-	(pfi_t)ip_lrput, NULL, ip_openv4, ip_close, NULL,
-	&ip_mod_info
+	ip_lrput, NULL, ip_openv4, ip_close, NULL, &ip_mod_info
 };
 
 static struct qinit iplwinit = {
-	(pfi_t)ip_lwput, NULL, NULL, NULL, NULL,
-	&ip_mod_info
+	ip_lwput, NULL, NULL, NULL, NULL, &ip_mod_info
 };
 
 /* For AF_INET aka /dev/ip */
@@ -1289,9 +1284,9 @@ icmp_frag_needed(mblk_t *mp, int mtu, ip_recv_attr_t *ira)
  *    while affecting the values in IP and while delivering up to TCP
  *    should be the same.
  *
- * 	There are two cases.
+ *	There are two cases.
  *
- * 	a) If we reject data at the IP layer (ipsec_check_global_policy()
+ *	a) If we reject data at the IP layer (ipsec_check_global_policy()
  *	   failed), we will not deliver it to the ULP, even though they
  *	   are *willing* to accept in *clear*. This is fine as our global
  *	   disposition to icmp messages asks us reject the datagram.
@@ -2409,6 +2404,7 @@ ipoptp_next(ipoptp_t *optp)
 	 * its there, and make sure it points to either something
 	 * inside this option, or the end of the option.
 	 */
+	pointer = IPOPT_EOL;
 	switch (opt) {
 	case IPOPT_RR:
 	case IPOPT_TS:
@@ -2629,7 +2625,7 @@ icmp_redirect_v4(mblk_t *mp, ipha_t *ipha, icmph_t *icmph, ip_recv_attr_t *ira)
 {
 	ire_t		*ire, *nire;
 	ire_t		*prev_ire;
-	ipaddr_t  	src, dst, gateway;
+	ipaddr_t	src, dst, gateway;
 	ip_stack_t	*ipst = ira->ira_ill->ill_ipst;
 	ipha_t		*inner_ipha;	/* Inner IP header */
 
@@ -4236,7 +4232,7 @@ ip_quiesce_conn(conn_t *connp)
 
 /* ARGSUSED */
 int
-ip_close(queue_t *q, int flags)
+ip_close(queue_t *q, int flags, cred_t *credp __unused)
 {
 	conn_t		*connp;
 
@@ -4653,7 +4649,7 @@ ip_stack_init(netstackid_t stackid, netstack_t *ns)
 	ipst->ips_ill_index = 1;
 
 	ipst->ips_saved_ip_forwarding = -1;
-	ipst->ips_reg_vif_num = ALL_VIFS; 	/* Index to Register vif */
+	ipst->ips_reg_vif_num = ALL_VIFS;	/* Index to Register vif */
 
 	arrsz = ip_propinfo_count * sizeof (mod_prop_info_t);
 	ipst->ips_propinfo_tbl = (mod_prop_info_t *)kmem_alloc(arrsz, KM_SLEEP);
@@ -5674,7 +5670,7 @@ ip_type_v6(const in6_addr_t *addr, ip_stack_t *ipst)
  * Nobody should be sending
  * packets up this stream
  */
-static void
+static int
 ip_lrput(queue_t *q, mblk_t *mp)
 {
 	switch (mp->b_datap->db_type) {
@@ -5683,19 +5679,21 @@ ip_lrput(queue_t *q, mblk_t *mp)
 		if (*mp->b_rptr & FLUSHW) {
 			*mp->b_rptr &= ~FLUSHR;
 			qreply(q, mp);
-			return;
+			return (0);
 		}
 		break;
 	}
 	freemsg(mp);
+	return (0);
 }
 
 /* Nobody should be sending packets down this stream */
 /* ARGSUSED */
-void
+int
 ip_lwput(queue_t *q, mblk_t *mp)
 {
 	freemsg(mp);
+	return (0);
 }
 
 /*
@@ -5938,7 +5936,7 @@ ip_modopen(queue_t *q, dev_t *devp, int flag, int sflag, cred_t *credp)
 	mutex_exit(&ipst->ips_ip_mi_lock);
 fail:
 	if (err) {
-		(void) ip_close(q, 0);
+		(void) ip_close(q, 0, credp);
 		return (err);
 	}
 	return (0);
@@ -5963,7 +5961,7 @@ int
 ip_open(queue_t *q, dev_t *devp, int flag, int sflag, cred_t *credp,
     boolean_t isv6)
 {
-	conn_t 		*connp;
+	conn_t		*connp;
 	major_t		maj;
 	zoneid_t	zoneid;
 	netstack_t	*ns;
@@ -6341,6 +6339,9 @@ ip_opt_set_multicast_group(conn_t *connp, t_scalar_t name,
 		optfn = ip_opt_delete_group;
 		break;
 	default:
+		/* Should not be reached. */
+		fmode = MODE_IS_INCLUDE;
+		optfn = NULL;
 		ASSERT(0);
 	}
 
@@ -6470,6 +6471,9 @@ ip_opt_set_multicast_sources(conn_t *connp, t_scalar_t name,
 		optfn = ip_opt_delete_group;
 		break;
 	default:
+		/* Should not be reached. */
+		optfn = NULL;
+		fmode = 0;
 		ASSERT(0);
 	}
 
@@ -7998,7 +8002,7 @@ ip_rput_notdata(ill_t *ill, mblk_t *mp)
 }
 
 /* Read side put procedure.  Packets coming from the wire arrive here. */
-void
+int
 ip_rput(queue_t *q, mblk_t *mp)
 {
 	ill_t	*ill;
@@ -8017,7 +8021,7 @@ ip_rput(queue_t *q, mblk_t *mp)
 		if (DB_TYPE(mp) != M_PCPROTO ||
 		    dl->dl_primitive == DL_UNITDATA_IND) {
 			inet_freemsg(mp);
-			return;
+			return (0);
 		}
 	}
 	if (DB_TYPE(mp) == M_DATA) {
@@ -8028,6 +8032,7 @@ ip_rput(queue_t *q, mblk_t *mp)
 	} else {
 		ip_rput_notdata(ill, mp);
 	}
+	return (0);
 }
 
 /*
@@ -8995,6 +9000,8 @@ ip_forward_options(mblk_t *mp, ipha_t *ipha, ill_t *dst_ill,
 
 	ip2dbg(("ip_forward_options\n"));
 	dst = ipha->ipha_dst;
+	opt = NULL;
+
 	for (optval = ipoptp_first(&opts, ipha);
 	    optval != IPOPT_EOL;
 	    optval = ipoptp_next(&opts)) {
@@ -9081,6 +9088,7 @@ ip_forward_options(mblk_t *mp, ipha_t *ipha, ill_t *dst_ill,
 			opt[IPOPT_OFFSET] += IP_ADDR_LEN;
 			break;
 		case IPOPT_TS:
+			off = 0;
 			/* Insert timestamp if there is room */
 			switch (opt[IPOPT_POS_OV_FLG] & 0x0F) {
 			case IPOPT_TS_TSONLY:
@@ -9106,7 +9114,6 @@ ip_forward_options(mblk_t *mp, ipha_t *ipha, ill_t *dst_ill,
 				 */
 				cmn_err(CE_PANIC, "ip_forward_options: "
 				    "unknown IT - bug in ip_input_options?\n");
-				return (B_TRUE);	/* Keep "lint" happy */
 			}
 			if (opt[IPOPT_OFFSET] - 1 + off > optlen) {
 				/* Increase overflow counter */
@@ -9246,6 +9253,7 @@ ip_input_local_options(mblk_t *mp, ipha_t *ipha, ip_recv_attr_t *ira)
 	ip_stack_t	*ipst = ill->ill_ipst;
 
 	ip2dbg(("ip_input_local_options\n"));
+	opt = NULL;
 
 	for (optval = ipoptp_first(&opts, ipha);
 	    optval != IPOPT_EOL;
@@ -9308,6 +9316,7 @@ ip_input_local_options(mblk_t *mp, ipha_t *ipha, ip_recv_attr_t *ira)
 			opt[IPOPT_OFFSET] += IP_ADDR_LEN;
 			break;
 		case IPOPT_TS:
+			off = 0;
 			/* Insert timestamp if there is romm */
 			switch (opt[IPOPT_POS_OV_FLG] & 0x0F) {
 			case IPOPT_TS_TSONLY:
@@ -9333,7 +9342,6 @@ ip_input_local_options(mblk_t *mp, ipha_t *ipha, ip_recv_attr_t *ira)
 				 */
 				cmn_err(CE_PANIC, "ip_input_local_options: "
 				    "unknown IT - bug in ip_input_options?\n");
-				return (B_TRUE);	/* Keep "lint" happy */
 			}
 			if (opt[IPOPT_OFFSET] - 1 + off > optlen) {
 				/* Increase overflow counter */
@@ -9402,6 +9410,7 @@ ip_input_options(ipha_t *ipha, ipaddr_t dst, mblk_t *mp,
 	ire_t		*ire;
 
 	ip2dbg(("ip_input_options\n"));
+	opt = NULL;
 	*errorp = 0;
 	for (optval = ipoptp_first(&opts, ipha);
 	    optval != IPOPT_EOL;
@@ -9638,11 +9647,17 @@ ip_snmp_get(queue_t *q, mblk_t *mpctl, int level, boolean_t legacy_req)
 		if ((mpctl = udp_snmp_get(q, mpctl, legacy_req)) == NULL) {
 			return (1);
 		}
+		if (level == MIB2_UDP) {
+			goto done;
+		}
 	}
 
 	if (level != MIB2_UDP) {
 		if ((mpctl = tcp_snmp_get(q, mpctl, legacy_req)) == NULL) {
 			return (1);
+		}
+		if (level == MIB2_TCP) {
+			goto done;
 		}
 	}
 
@@ -9720,6 +9735,7 @@ ip_snmp_get(queue_t *q, mblk_t *mpctl, int level, boolean_t legacy_req)
 	if ((mpctl = ip_snmp_get_mib2_ip_dce(q, mpctl, ipst)) == NULL) {
 		return (1);
 	}
+done:
 	freemsg(mpctl);
 	return (1);
 }
@@ -11158,16 +11174,17 @@ ip_snmp_get2_v6_route(ire_t *ire, iproutedata_t *ird)
 /*
  * ncec_walk routine to create ipv6NetToMediaEntryTable
  */
-static int
-ip_snmp_get2_v6_media(ncec_t *ncec, iproutedata_t *ird)
+static void
+ip_snmp_get2_v6_media(ncec_t *ncec, void *ptr)
 {
+	iproutedata_t *ird		= ptr;
 	ill_t				*ill;
 	mib2_ipv6NetToMediaEntry_t	ntme;
 
 	ill = ncec->ncec_ill;
 	/* skip arpce entries, and loopback ncec entries */
 	if (ill->ill_isv6 == B_FALSE || ill->ill_net_type == IRE_LOOPBACK)
-		return (0);
+		return;
 	/*
 	 * Neighbor cache entry attached to IRE with on-link
 	 * destination.
@@ -11206,7 +11223,6 @@ ip_snmp_get2_v6_media(ncec_t *ncec, iproutedata_t *ird)
 		ip1dbg(("ip_snmp_get2_v6_media: failed to allocate %u bytes\n",
 		    (uint_t)sizeof (ntme)));
 	}
-	return (0);
 }
 
 int
@@ -11236,9 +11252,10 @@ nce2ace(ncec_t *ncec)
 /*
  * ncec_walk routine to create ipNetToMediaEntryTable
  */
-static int
-ip_snmp_get2_v4_media(ncec_t *ncec, iproutedata_t *ird)
+static void
+ip_snmp_get2_v4_media(ncec_t *ncec, void *ptr)
 {
+	iproutedata_t *ird		= ptr;
 	ill_t				*ill;
 	mib2_ipNetToMediaEntry_t	ntme;
 	const char			*name = "unknown";
@@ -11247,7 +11264,7 @@ ip_snmp_get2_v4_media(ncec_t *ncec, iproutedata_t *ird)
 	ill = ncec->ncec_ill;
 	if (ill->ill_isv6 || (ncec->ncec_flags & NCE_F_BCAST) ||
 	    ill->ill_net_type == IRE_LOOPBACK)
-		return (0);
+		return;
 
 	/* We report all IPMP groups on ncec_ill which is normally the upper. */
 	name = ill->ill_name;
@@ -11293,7 +11310,6 @@ ip_snmp_get2_v4_media(ncec_t *ncec, iproutedata_t *ird)
 		ip1dbg(("ip_snmp_get2_v4_media: failed to allocate %u bytes\n",
 		    (uint_t)sizeof (ntme)));
 	}
-	return (0);
 }
 
 /*
@@ -11943,6 +11959,7 @@ ip_output_local_options(ipha_t *ipha, ip_stack_t *ipst)
 	ipaddr_t	dst;
 	uint32_t	ts;
 	timestruc_t	now;
+	uint32_t	off = 0;
 
 	for (optval = ipoptp_first(&opts, ipha);
 	    optval != IPOPT_EOL;
@@ -11951,7 +11968,6 @@ ip_output_local_options(ipha_t *ipha, ip_stack_t *ipst)
 		optlen = opts.ipoptp_len;
 		ASSERT((opts.ipoptp_flags & IPOPTP_ERROR) == 0);
 		switch (optval) {
-			uint32_t off;
 		case IPOPT_SSRR:
 		case IPOPT_LSRR:
 			off = opt[IPOPT_OFFSET];
@@ -12021,7 +12037,6 @@ ip_output_local_options(ipha_t *ipha, ip_stack_t *ipst)
 				 */
 				cmn_err(CE_PANIC, "ip_output_local_options: "
 				    "unknown IT - bug in ip_output_options?\n");
-				return;	/* Keep "lint" happy */
 			}
 			if (opt[IPOPT_OFFSET] - 1 + off > optlen) {
 				/* Increase overflow counter */
@@ -12599,6 +12614,7 @@ ip_process_ioctl(ipsq_t *ipsq, queue_t *q, mblk_t *mp, void *arg)
 	}
 
 	ci.ci_ipif = NULL;
+	extract_funcp = NULL;
 	switch (ipip->ipi_cmd_type) {
 	case MISC_CMD:
 	case MSFILT_CMD:
@@ -12760,7 +12776,7 @@ ip_ioctl_finish(queue_t *q, mblk_t *mp, int err, int mode, ipsq_t *ipsq)
 }
 
 /* Handles all non data messages */
-void
+int
 ip_wput_nondata(queue_t *q, mblk_t *mp)
 {
 	mblk_t		*mp1;
@@ -12775,6 +12791,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 	else
 		connp = NULL;
 
+	iocp = NULL;
 	switch (DB_TYPE(mp)) {
 	case M_IOCTL:
 		/*
@@ -12782,7 +12799,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 		 * will arrange to copy in associated control structures.
 		 */
 		ip_sioctl_copyin_setup(q, mp);
-		return;
+		return (0);
 	case M_IOCDATA:
 		/*
 		 * Ensure that this is associated with one of our trans-
@@ -12797,7 +12814,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 			} else {
 				putnext(q, mp);
 			}
-			return;
+			return (0);
 		}
 		if ((q->q_next != NULL) && !(ipip->ipi_flags & IPI_MODOK)) {
 			/*
@@ -12813,7 +12830,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 			 * The copy operation failed.  mi_copy_state already
 			 * cleaned up, so we're out of here.
 			 */
-			return;
+			return (0);
 		}
 		/*
 		 * If we just completed a copy in, we become writer and
@@ -12824,7 +12841,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 		if (MI_COPY_DIRECTION(mp) == MI_COPY_IN) {
 			if (!(mp1 = mp->b_cont) || !(mp1 = mp1->b_cont)) {
 				mi_copy_done(q, mp, EPROTO);
-				return;
+				return (0);
 			}
 			/*
 			 * Check for cases that need more copying.  A return
@@ -12835,7 +12852,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 			if (ipip->ipi_cmd_type == MSFILT_CMD &&
 			    MI_COPY_COUNT(mp) == 1) {
 				if (ip_copyin_msfilter(q, mp) == 0)
-					return;
+					return (0);
 			}
 			/*
 			 * Refhold the conn, till the ioctl completes. This is
@@ -12856,7 +12873,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 			} else {
 				if (!(ipip->ipi_flags & IPI_MODOK)) {
 					mi_copy_done(q, mp, EINVAL);
-					return;
+					return (0);
 				}
 			}
 
@@ -12865,7 +12882,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 		} else {
 			mi_copyout(q, mp);
 		}
-		return;
+		return (0);
 
 	case M_IOCNAK:
 		/*
@@ -12876,7 +12893,7 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 		    "ip_wput_nondata: unexpected M_IOCNAK, ioc_cmd 0x%x",
 		    ((struct iocblk *)mp->b_rptr)->ioc_cmd);
 		freemsg(mp);
-		return;
+		return (0);
 	case M_IOCACK:
 		/* /dev/ip shouldn't see this */
 		goto nak;
@@ -12885,15 +12902,15 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 			flushq(q, FLUSHALL);
 		if (q->q_next) {
 			putnext(q, mp);
-			return;
+			return (0);
 		}
 		if (*mp->b_rptr & FLUSHR) {
 			*mp->b_rptr &= ~FLUSHW;
 			qreply(q, mp);
-			return;
+			return (0);
 		}
 		freemsg(mp);
-		return;
+		return (0);
 	case M_CTL:
 		break;
 	case M_PROTO:
@@ -12925,19 +12942,19 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 				mp = mi_tpi_err_ack_alloc(mp, TSYSERR, EINVAL);
 				if (mp != NULL)
 					qreply(q, mp);
-				return;
+				return (0);
 			}
 
 			if (!snmpcom_req(q, mp, ip_snmp_set, ip_snmp_get, cr)) {
 				proto_str = "Bad SNMPCOM request?";
 				goto protonak;
 			}
-			return;
+			return (0);
 		default:
 			ip1dbg(("ip_wput_nondata: dropping M_PROTO prim %u\n",
 			    (int)*(uint_t *)mp->b_rptr));
 			freemsg(mp);
-			return;
+			return (0);
 		}
 	default:
 		break;
@@ -12946,19 +12963,20 @@ ip_wput_nondata(queue_t *q, mblk_t *mp)
 		putnext(q, mp);
 	} else
 		freemsg(mp);
-	return;
+	return (0);
 
 nak:
 	iocp->ioc_error = EINVAL;
 	mp->b_datap->db_type = M_IOCNAK;
 	iocp->ioc_count = 0;
 	qreply(q, mp);
-	return;
+	return (0);
 
 protonak:
 	cmn_err(CE_NOTE, "IP doesn't process %s as a module", proto_str);
 	if ((mp = mi_tpi_err_ack_alloc(mp, TPROTO, EINVAL)) != NULL)
 		qreply(q, mp);
+	return (0);
 }
 
 /*
@@ -12984,6 +13002,7 @@ ip_output_options(mblk_t *mp, ipha_t *ipha, ip_xmit_attr_t *ixa, ill_t *ill)
 
 	ip2dbg(("ip_output_options\n"));
 
+	opt = NULL;
 	dst = ipha->ipha_dst;
 	for (optval = ipoptp_first(&opts, ipha);
 	    optval != IPOPT_EOL;
@@ -13344,7 +13363,7 @@ conn_drain(conn_t *connp, boolean_t closing)
  * has backenabled the ill_wq. Send sockfs notification about flow-control on
  * each waiting conn.
  */
-void
+int
 ip_wsrv(queue_t *q)
 {
 	ill_t	*ill;
@@ -13364,6 +13383,7 @@ ip_wsrv(queue_t *q)
 		conn_walk_drain(ipst, &ipst->ips_idl_tx_list[0]);
 		enableok(ill->ill_wq);
 	}
+	return (0);
 }
 
 /*
@@ -13921,9 +13941,9 @@ ip_kstat2_init(netstackid_t stackid, ip_stat_t *ip_statisticsp)
 	kstat_t *ksp;
 
 	ip_stat_t template = {
-		{ "ip_udp_fannorm", 		KSTAT_DATA_UINT64 },
-		{ "ip_udp_fanmb", 		KSTAT_DATA_UINT64 },
-		{ "ip_recv_pullup", 		KSTAT_DATA_UINT64 },
+		{ "ip_udp_fannorm",		KSTAT_DATA_UINT64 },
+		{ "ip_udp_fanmb",		KSTAT_DATA_UINT64 },
+		{ "ip_recv_pullup",		KSTAT_DATA_UINT64 },
 		{ "ip_db_ref",			KSTAT_DATA_UINT64 },
 		{ "ip_notaligned",		KSTAT_DATA_UINT64 },
 		{ "ip_multimblk",		KSTAT_DATA_UINT64 },
@@ -13938,6 +13958,9 @@ ip_kstat2_init(netstackid_t stackid, ip_stat_t *ip_statisticsp)
 		{ "ip_ire_reclaim_deleted",	KSTAT_DATA_UINT64 },
 		{ "ip_nce_reclaim_calls",	KSTAT_DATA_UINT64 },
 		{ "ip_nce_reclaim_deleted",	KSTAT_DATA_UINT64 },
+		{ "ip_nce_mcast_reclaim_calls",	KSTAT_DATA_UINT64 },
+		{ "ip_nce_mcast_reclaim_deleted",	KSTAT_DATA_UINT64 },
+		{ "ip_nce_mcast_reclaim_tqfail",	KSTAT_DATA_UINT64 },
 		{ "ip_dce_reclaim_calls",	KSTAT_DATA_UINT64 },
 		{ "ip_dce_reclaim_deleted",	KSTAT_DATA_UINT64 },
 		{ "ip_tcp_in_full_hw_cksum_err",	KSTAT_DATA_UINT64 },
@@ -14076,7 +14099,7 @@ ip_kstat_update(kstat_t *kp, int rw)
 	netstack_t	*ns;
 	ip_stack_t	*ipst;
 
-	if (kp == NULL || kp->ks_data == NULL)
+	if (kp->ks_data == NULL)
 		return (EIO);
 
 	if (rw == KSTAT_WRITE)
@@ -14213,7 +14236,7 @@ icmp_kstat_update(kstat_t *kp, int rw)
 	netstack_t	*ns;
 	ip_stack_t	*ipst;
 
-	if ((kp == NULL) || (kp->ks_data == NULL))
+	if (kp->ks_data == NULL)
 		return (EIO);
 
 	if (rw == KSTAT_WRITE)
@@ -15105,7 +15128,7 @@ ip_get_zoneid_v4(ipaddr_t addr, mblk_t *mp, ip_recv_attr_t *ira,
 
 	if (lookup_zoneid != ALL_ZONES)
 		ire_flags |= MATCH_IRE_ZONEONLY;
-	ire = ire_ftable_lookup_v4(addr, NULL, NULL, IRE_LOCAL | IRE_LOOPBACK,
+	ire = ire_ftable_lookup_v4(addr, 0, 0, IRE_LOCAL | IRE_LOOPBACK,
 	    NULL, lookup_zoneid, NULL, ire_flags, 0, ipst, NULL);
 	if (ire != NULL) {
 		zoneid = IP_REAL_ZONEID(ire->ire_zoneid, ipst);

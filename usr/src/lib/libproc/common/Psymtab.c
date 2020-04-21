@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/sysmacros.h>
+#include <sys/crc32.h>
 
 #include "libproc.h"
 #include "Pcontrol.h"
@@ -61,6 +62,7 @@ static int read_ehdr32(struct ps_prochandle *, Elf32_Ehdr *, uint_t *,
 static int read_ehdr64(struct ps_prochandle *, Elf64_Ehdr *, uint_t *,
     uintptr_t);
 #endif
+static uint32_t psym_crc32[] = { CRC32_TABLE };
 
 #define	DATA_TYPES	\
 	((1 << STT_OBJECT) | (1 << STT_FUNC) | \
@@ -68,6 +70,22 @@ static int read_ehdr64(struct ps_prochandle *, Elf64_Ehdr *, uint_t *,
 #define	IS_DATA_TYPE(tp)	(((1 << (tp)) & DATA_TYPES) != 0)
 
 #define	MA_RWX	(MA_READ | MA_WRITE | MA_EXEC)
+
+/*
+ * Minimum and maximum length of a build-id that we'll accept. Generally it's a
+ * 20 byte SHA1 and it's expected that the first byte (which is two ascii
+ * characters) indicates a directory and the remaining bytes become the file
+ * name. Therefore, our minimum length is at least 2 bytes (one for the
+ * directory and one for the name) and the max is a bit over the minimum -- 64,
+ * just in case folks do something odd. The string length is three times the max
+ * length. This accounts for the fact that each byte is two characters, a null
+ * terminator, and the directory '/' character.
+ */
+#define	MINBUILDID	2
+#define	MAXBUILDID	64
+#define	BUILDID_STRLEN	(3*MAXBUILDID)
+#define	BUILDID_NAME	".note.gnu.build-id"
+#define	DBGLINK_NAME	".gnu_debuglink"
 
 typedef enum {
 	PRO_NATURAL,
@@ -184,6 +202,7 @@ file_info_new(struct ps_prochandle *P, map_info_t *mptr)
 	mptr->map_file = fptr;
 	fptr->file_ref = 1;
 	fptr->file_fd = -1;
+	fptr->file_dbgfile = -1;
 	P->num_files++;
 
 	/*
@@ -274,6 +293,10 @@ file_info_free(struct ps_prochandle *P, file_info_t *fptr)
 			free(fptr->file_elfmem);
 		if (fptr->file_fd >= 0)
 			(void) close(fptr->file_fd);
+		if (fptr->file_dbgelf)
+			(void) elf_end(fptr->file_dbgelf);
+		if (fptr->file_dbgfile >= 0)
+			(void) close(fptr->file_dbgfile);
 		if (fptr->file_ctfp) {
 			ctf_close(fptr->file_ctfp);
 			free(fptr->file_ctf_buf);
@@ -624,7 +647,7 @@ Paddr_to_text_map(struct ps_prochandle *P, uintptr_t addr)
 		 * section.
 		 */
 		if (fptr != NULL && fptr->file_lo != NULL &&
-		    (fptr->file_lo->rl_data_base == NULL ||
+		    (fptr->file_lo->rl_data_base == (uintptr_t)NULL ||
 		    pmp->pr_vaddr + pmp->pr_size <=
 		    fptr->file_lo->rl_data_base))
 			return (pmp);
@@ -1581,6 +1604,225 @@ build_fake_elf(struct ps_prochandle *P, file_info_t *fptr, GElf_Ehdr *ehdr,
 }
 
 /*
+ * Try and find the file described by path in the file system and validate that
+ * it matches our CRC before we try and process it for symbol information. If we
+ * instead have an ELF data section, then that means we're checking a build-id
+ * section instead. In that case we just need to find and bcmp the corresponding
+ * section.
+ *
+ * Before we validate if it's a valid CRC or data section, we check to ensure
+ * that it's a normal file and not anything else.
+ */
+static boolean_t
+build_alt_debug(file_info_t *fptr, const char *path, uint32_t crc,
+    Elf_Data *data)
+{
+	int fd;
+	struct stat st;
+	Elf *elf;
+	Elf_Scn *scn;
+	GElf_Shdr symshdr, strshdr;
+	Elf_Data *symdata, *strdata;
+	boolean_t valid;
+	uint32_t c = -1U;
+
+	if ((fd = open(path, O_RDONLY)) < 0)
+		return (B_FALSE);
+
+	if (fstat(fd, &st) != 0) {
+		(void) close(fd);
+		return (B_FALSE);
+	}
+
+	if (S_ISREG(st.st_mode) == 0) {
+		(void) close(fd);
+		return (B_FALSE);
+	}
+
+	/*
+	 * Only check the CRC if we've come here through a GNU debug link
+	 * section as opposed to the build id. This is indicated by having the
+	 * value of data be NULL.
+	 */
+	if (data == NULL) {
+		for (;;) {
+			char buf[4096];
+			ssize_t ret = read(fd, buf, sizeof (buf));
+			if (ret == -1) {
+				if (ret == EINTR)
+					continue;
+				(void) close(fd);
+				return (B_FALSE);
+			}
+			if (ret == 0) {
+				c = ~c;
+				if (c != crc) {
+					dprintf("crc mismatch, found: 0x%x "
+					    "expected 0x%x\n", c, crc);
+					(void) close(fd);
+					return (B_FALSE);
+				}
+				break;
+			}
+			CRC32(c, buf, ret, c, psym_crc32);
+		}
+	}
+
+	elf = elf_begin(fd, ELF_C_READ, NULL);
+	if (elf == NULL) {
+		(void) close(fd);
+		return (B_FALSE);
+	}
+
+	if (elf_kind(elf) != ELF_K_ELF) {
+		goto fail;
+	}
+
+	/*
+	 * If we have a data section, that indicates we have a build-id which
+	 * means we need to find the corresponding build-id section and compare
+	 * it.
+	 */
+	scn = NULL;
+	valid = B_FALSE;
+	for (scn = elf_nextscn(elf, scn); data != NULL && scn != NULL;
+	    scn = elf_nextscn(elf, scn)) {
+		GElf_Shdr hdr;
+		Elf_Data *ntdata;
+
+		if (gelf_getshdr(scn, &hdr) == NULL)
+			goto fail;
+
+		if (hdr.sh_type != SHT_NOTE)
+			continue;
+
+		if ((ntdata = elf_getdata(scn, NULL)) == NULL)
+			goto fail;
+
+		/*
+		 * First verify the data section sizes are equal, then the
+		 * section name. If that's all true, then we can just do a bcmp.
+		 */
+		if (data->d_size != ntdata->d_size)
+			continue;
+
+		dprintf("found corresponding section in alternate file\n");
+		if (bcmp(ntdata->d_buf, data->d_buf, data->d_size) != 0)
+			goto fail;
+
+		valid = B_TRUE;
+		break;
+	}
+	if (data != NULL && valid == B_FALSE) {
+		dprintf("failed to find a matching %s section in %s\n",
+		    BUILDID_NAME, path);
+		goto fail;
+	}
+
+
+	/*
+	 * Do two passes, first see if we have a symbol header, then see if we
+	 * can find the corresponding linked string table.
+	 */
+	scn = NULL;
+	for (scn = elf_nextscn(elf, scn); scn != NULL;
+	    scn = elf_nextscn(elf, scn)) {
+
+		if (gelf_getshdr(scn, &symshdr) == NULL)
+			goto fail;
+
+		if (symshdr.sh_type != SHT_SYMTAB)
+			continue;
+
+		if ((symdata = elf_getdata(scn, NULL)) == NULL)
+			goto fail;
+
+		break;
+	}
+	if (scn == NULL)
+		goto fail;
+
+	if ((scn = elf_getscn(elf, symshdr.sh_link)) == NULL)
+		goto fail;
+
+	if (gelf_getshdr(scn, &strshdr) == NULL)
+		goto fail;
+
+	if ((strdata = elf_getdata(scn, NULL)) == NULL)
+		goto fail;
+
+	fptr->file_symtab.sym_data_pri = symdata;
+	fptr->file_symtab.sym_symn += symshdr.sh_size / symshdr.sh_entsize;
+	fptr->file_symtab.sym_strs = strdata->d_buf;
+	fptr->file_symtab.sym_strsz = strdata->d_size;
+	fptr->file_symtab.sym_hdr_pri = symshdr;
+	fptr->file_symtab.sym_strhdr = strshdr;
+
+	dprintf("successfully loaded additional debug symbols for %s from %s\n",
+	    fptr->file_rname, path);
+
+	fptr->file_dbgfile = fd;
+	fptr->file_dbgelf = elf;
+	return (B_TRUE);
+fail:
+	(void) elf_end(elf);
+	(void) close(fd);
+	return (B_FALSE);
+}
+
+/*
+ * We're here because the object in question has no symbol information, that's a
+ * bit unfortunate. However, we've found that there's a .gnu_debuglink sitting
+ * around. By convention that means that given the current location of the
+ * object on disk, and the debug name that we found in the binary we need to
+ * search the following locations for a matching file.
+ *
+ * <dirname>/.debug/<debug-name>
+ * /usr/lib/debug/<dirname>/<debug-name>
+ *
+ * In the future, we should consider supporting looking in the prefix's
+ * lib/debug directory for a matching object or supporting an arbitrary user
+ * defined set of places to look.
+ */
+static void
+find_alt_debuglink(file_info_t *fptr, const char *name, uint32_t crc)
+{
+	boolean_t r;
+	char *dup = NULL, *path = NULL, *dname;
+
+	dprintf("find_alt_debug: looking for %s, crc 0x%x\n", name, crc);
+	if (fptr->file_rname == NULL) {
+		dprintf("find_alt_debug: encountered null file_rname\n");
+		return;
+	}
+
+	dup = strdup(fptr->file_rname);
+	if (dup == NULL)
+		return;
+
+	dname = dirname(dup);
+	if (asprintf(&path, "%s/.debug/%s", dname, name) != -1) {
+		dprintf("attempting to load alternate debug information "
+		    "from %s\n", path);
+		r = build_alt_debug(fptr, path, crc, NULL);
+		free(path);
+		if (r == B_TRUE)
+			goto out;
+	}
+
+	if (asprintf(&path, "/usr/lib/debug/%s/%s", dname, name) != -1) {
+		dprintf("attempting to load alternate debug information "
+		    "from %s\n", path);
+		r = build_alt_debug(fptr, path, crc, NULL);
+		free(path);
+		if (r == B_TRUE)
+			goto out;
+	}
+out:
+	free(dup);
+}
+
+/*
  * Build the symbol table for the given mapped file.
  */
 void
@@ -1601,7 +1843,8 @@ Pbuild_file_symtab(struct ps_prochandle *P, file_info_t *fptr)
 		GElf_Shdr c_shdr;
 		Elf_Data *c_data;
 		const char *c_name;
-	} *cp, *cache = NULL, *dyn = NULL, *plt = NULL, *ctf = NULL;
+	} *cp, *cache = NULL, *dyn = NULL, *plt = NULL, *ctf = NULL,
+	*dbglink = NULL, *buildid = NULL;
 
 	if (fptr->file_init)
 		return;	/* We've already processed this file */
@@ -1827,7 +2070,150 @@ Pbuild_file_symtab(struct ps_prochandle *P, file_info_t *fptr)
 				continue;
 			}
 			ctf = cp;
+		} else if (strcmp(cp->c_name, BUILDID_NAME) == 0) {
+			dprintf("Found a %s section for %s\n", BUILDID_NAME,
+			    fptr->file_rname);
+			/* The ElfXX_Nhdr is 32/64-bit neutral */
+			if (cp->c_shdr.sh_type == SHT_NOTE &&
+			    cp->c_data->d_buf != NULL &&
+			    cp->c_data->d_size >= sizeof (Elf32_Nhdr)) {
+				Elf32_Nhdr *hdr = cp->c_data->d_buf;
+				if (hdr->n_type != 3)
+					continue;
+				if (hdr->n_namesz != 4)
+					continue;
+				if (hdr->n_descsz < MINBUILDID)
+					continue;
+				/* Set a reasonable upper bound */
+				if (hdr->n_descsz > MAXBUILDID) {
+					dprintf("Skipped %s as too large "
+					    "(%ld)\n", BUILDID_NAME,
+					    (unsigned long)hdr->n_descsz);
+					continue;
+				}
+
+				if (cp->c_data->d_size < sizeof (hdr) +
+				    hdr->n_namesz + hdr->n_descsz)
+					continue;
+				buildid = cp;
+			}
+		} else if (strcmp(cp->c_name, DBGLINK_NAME) == 0) {
+			dprintf("found %s section for %s\n", DBGLINK_NAME,
+			    fptr->file_rname);
+			/*
+			 * Let's make sure of a few things before we do this.
+			 */
+			if (cp->c_shdr.sh_type == SHT_PROGBITS &&
+			    cp->c_data->d_buf != NULL &&
+			    cp->c_data->d_size) {
+				dbglink = cp;
+			}
 		}
+	}
+
+	/*
+	 * If we haven't found any symbol table information and we have found
+	 * either a .note.gnu.build-id or a .gnu_debuglink, it's time to try and
+	 * figure out where we might find this. Originally, GNU used the
+	 * .gnu_debuglink solely, but then they added a .note.gnu.build-id. The
+	 * build-id is some size, usually 16 or 20 bytes, often a SHA1 sum of
+	 * parts of the original file. This is maintained across all versions of
+	 * the subsequent file.
+	 *
+	 * For the .note.gnu.build-id, we're going to check a few things before
+	 * using it, first that the name is 4 bytes, and is GNU and that the
+	 * type is 3, which they say is the build-id identifier.
+	 *
+	 * To verify that the elf data for the .gnu_debuglink seems somewhat
+	 * sane, eg. the elf data should be a string, so we want to verify we
+	 * have a null-terminator.
+	 */
+	if (fptr->file_symtab.sym_data_pri == NULL && buildid != NULL) {
+		int i, bo;
+		uint8_t *dp;
+		char buf[BUILDID_STRLEN], *path;
+		Elf32_Nhdr *hdr = buildid->c_data->d_buf;
+
+		/*
+		 * This was checked for validity when assigning the buildid
+		 * variable.
+		 */
+		bzero(buf, sizeof (buf));
+		dp = (uint8_t *)((uintptr_t)hdr + sizeof (*hdr) +
+		    hdr->n_namesz);
+		for (i = 0, bo = 0; i < hdr->n_descsz; i++, bo += 2, dp++) {
+			assert(sizeof (buf) - bo > 0);
+
+			/*
+			 * Recall that the build-id is structured as a series of
+			 * bytes. However, the first two characters are supposed
+			 * to represent a directory. Hence, once we reach offset
+			 * two, we insert a '/' character.
+			 */
+			if (bo == 2) {
+				buf[bo] = '/';
+				bo++;
+			}
+			(void) snprintf(buf + bo, sizeof (buf) - bo, "%2x",
+			    *dp);
+		}
+
+		if (asprintf(&path, "/usr/lib/debug/.build-id/%s.debug",
+		    buf) != -1) {
+			boolean_t r;
+			dprintf("attempting to find build id alternate debug "
+			    "file at %s\n", path);
+			r = build_alt_debug(fptr, path, 0, buildid->c_data);
+			dprintf("attempt %s\n", r == B_TRUE ?
+			    "succeeded" : "failed");
+			free(path);
+		} else {
+			dprintf("failed to construct build id path: %s\n",
+			    strerror(errno));
+		}
+	}
+
+	if (fptr->file_symtab.sym_data_pri == NULL && dbglink != NULL) {
+		char *c = dbglink->c_data->d_buf;
+		size_t i;
+		boolean_t found = B_FALSE;
+		Elf_Data *ed = dbglink->c_data;
+		uint32_t crc;
+
+		for (i = 0; i < ed->d_size; i++) {
+			if (c[i] == '\0') {
+				uintptr_t off;
+				dprintf("got .gnu_debuglink terminator at "
+				    "offset %lu\n", (unsigned long)i);
+				/*
+				 * After the null terminator, there should be
+				 * padding, followed by a 4 byte CRC of the
+				 * file. If we don't see this, we're going to
+				 * assume this is bogus.
+				 */
+				if ((i % sizeof (uint32_t)) == 0) {
+					i += 4;
+				} else {
+					i += sizeof (uint32_t) -
+					    (i % sizeof (uint32_t));
+				}
+				if (i + sizeof (uint32_t) ==
+				    dbglink->c_data->d_size) {
+					found = B_TRUE;
+					off = (uintptr_t)ed->d_buf + i;
+					crc = *(uint32_t *)off;
+				} else {
+					dprintf(".gnu_debuglink size mismatch, "
+					    "expected: %lu, found: %lu\n",
+					    (unsigned long)i,
+					    (unsigned long)ed->d_size);
+				}
+				break;
+			}
+		}
+
+		if (found == B_TRUE)
+			find_alt_debuglink(fptr, dbglink->c_data->d_buf, crc);
 	}
 
 	/*
@@ -1957,7 +2343,13 @@ bad:
 		fptr->file_elfmem = NULL;
 	}
 	(void) close(fptr->file_fd);
+	if (fptr->file_dbgelf != NULL)
+		(void) elf_end(fptr->file_dbgelf);
+	fptr->file_dbgelf = NULL;
+	if (fptr->file_dbgfile >= 0)
+		(void) close(fptr->file_dbgfile);
 	fptr->file_fd = -1;
+	fptr->file_dbgfile = -1;
 }
 
 /*
@@ -2909,7 +3301,7 @@ Psymbol_iter_by_lmid(struct ps_prochandle *P, Lmid_t lmid,
     const char *object_name, int which, int mask, proc_sym_f *func, void *cd)
 {
 	return (Psymbol_iter_com(P, lmid, object_name, which, mask,
-	    PRO_NATURAL, (proc_xsym_f *)func, cd));
+	    PRO_NATURAL, (proc_xsym_f *)(uintptr_t)func, cd));
 }
 
 int
@@ -2917,7 +3309,7 @@ Psymbol_iter(struct ps_prochandle *P,
     const char *object_name, int which, int mask, proc_sym_f *func, void *cd)
 {
 	return (Psymbol_iter_com(P, PR_LMID_EVERY, object_name, which, mask,
-	    PRO_NATURAL, (proc_xsym_f *)func, cd));
+	    PRO_NATURAL, (proc_xsym_f *)(uintptr_t)func, cd));
 }
 
 int
@@ -2925,7 +3317,7 @@ Psymbol_iter_by_addr(struct ps_prochandle *P,
     const char *object_name, int which, int mask, proc_sym_f *func, void *cd)
 {
 	return (Psymbol_iter_com(P, PR_LMID_EVERY, object_name, which, mask,
-	    PRO_BYADDR, (proc_xsym_f *)func, cd));
+	    PRO_BYADDR, (proc_xsym_f *)(uintptr_t)func, cd));
 }
 
 int
@@ -2933,7 +3325,7 @@ Psymbol_iter_by_name(struct ps_prochandle *P,
     const char *object_name, int which, int mask, proc_sym_f *func, void *cd)
 {
 	return (Psymbol_iter_com(P, PR_LMID_EVERY, object_name, which, mask,
-	    PRO_BYNAME, (proc_xsym_f *)func, cd));
+	    PRO_BYNAME, (proc_xsym_f *)(uintptr_t)func, cd));
 }
 
 /*
@@ -3128,7 +3520,7 @@ Penv_iter(struct ps_prochandle *P, proc_env_f *func, void *data)
 			nenv = 0;
 		}
 
-		if ((envoff = envp[nenv++]) == NULL)
+		if ((envoff = envp[nenv++]) == (uintptr_t)NULL)
 			break;
 
 		/*

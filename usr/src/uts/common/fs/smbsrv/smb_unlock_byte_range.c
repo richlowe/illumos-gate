@@ -21,6 +21,7 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -56,14 +57,14 @@
 smb_sdrc_t
 smb_pre_unlock_byte_range(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__UnlockByteRange__start, smb_request_t *, sr);
+	DTRACE_SMB_START(op__UnlockByteRange, smb_request_t *, sr);
 	return (SDRC_SUCCESS);
 }
 
 void
 smb_post_unlock_byte_range(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__UnlockByteRange__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__UnlockByteRange, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -71,6 +72,7 @@ smb_com_unlock_byte_range(smb_request_t *sr)
 {
 	uint32_t	Length;
 	uint32_t	Offset;
+	uint32_t	lk_pid;
 	DWORD		result;
 
 	if (smbsr_decode_vwv(sr, "wll", &sr->smb_fid, &Length, &Offset) != 0)
@@ -82,8 +84,11 @@ smb_com_unlock_byte_range(smb_request_t *sr)
 		return (SDRC_ERROR);
 	}
 
-	result = smb_unlock_range(sr, sr->fid_ofile->f_node,
-	    (u_offset_t)Offset, (uint64_t)Length);
+	/* Note: SMB1 locking uses 16-bit PIDs. */
+	lk_pid = sr->smb_pid & 0xFFFF;
+
+	result = smb_unlock_range(sr, (uint64_t)Offset, (uint64_t)Length,
+	    lk_pid);
 	if (result != NT_STATUS_SUCCESS) {
 		smbsr_error(sr, NT_STATUS_RANGE_NOT_LOCKED,
 		    ERRDOS, ERROR_NOT_LOCKED);

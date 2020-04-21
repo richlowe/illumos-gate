@@ -22,9 +22,8 @@
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-#	This makefile drives the production of the Sun
-#	10G hxge Ethernet leaf driver kernel module.
-#
+# Copyright (c) 2018, Joyent, Inc.
+
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
 #
@@ -84,8 +83,10 @@ LINTTAGS	+= -erroff=E_FALSE_LOGICAL_EXPR
 
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
+
+SMOFF += deref_check,logical_instead_of_bitwise
 
 #
 #	Driver depends on mac & IP

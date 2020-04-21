@@ -17,7 +17,8 @@
 
 PROG=		mandoc
 
-OBJS=		att.o		\
+OBJS=		arch.o		\
+		att.o		\
 		chars.o		\
 		dba.o		\
 		dba_array.o	\
@@ -39,6 +40,7 @@ OBJS=		att.o		\
 		man_validate.o	\
 		mandoc.o	\
 		mandoc_aux.o	\
+		mandoc_msg.o	\
 		mandoc_ohash.o	\
 		mandoc_xr.o	\
 		mandocdb.o	\
@@ -77,7 +79,10 @@ OBJS=		att.o		\
 OBJS +=		compat_ohash.o
 
 # XXX gcc 4.4.4 false positive
-roff.o :=	CERRWARN += -_gcc=-Wno-uninitialized
+roff.o :=	CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 CFLAGS +=	$(CC_VERBOSE)
 CSTD=		$(CSTD_GNU99)
@@ -85,3 +90,4 @@ CSTD=		$(CSTD_GNU99)
 CPPFLAGS +=	-DOSNAME="\"illumos\"" -D_FILE_OFFSET_BITS=64
 
 LDLIBS +=	-lz
+NATIVE_LIBS +=	libz.so

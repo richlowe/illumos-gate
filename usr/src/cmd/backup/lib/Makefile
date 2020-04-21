@@ -120,4 +120,4 @@ check:	$(HDRS)
 # include library targets
 include ../../../lib/Makefile.targ
 
-_msg: 		$(POFILE)
+_msg:		$(POFILE)

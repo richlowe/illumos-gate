@@ -60,7 +60,7 @@ i_mac_share_alloc(mac_client_impl_t *mcip)
 
 	i_mac_perim_enter(mip);
 
-	ASSERT(mcip->mci_share == NULL);
+	ASSERT(mcip->mci_share == 0);
 
 	if (mac_share_capable((mac_handle_t)mcip->mci_mip) == 0) {
 		DTRACE_PROBE1(i__mac__share__alloc__not__sup,
@@ -94,7 +94,7 @@ i_mac_share_free(mac_client_impl_t *mcip)
 	/* MAC clients are required to unbind they shares before freeing them */
 	ASSERT((mcip->mci_state_flags & MCIS_SHARE_BOUND) == 0);
 
-	if (mcip->mci_share == NULL) {
+	if (mcip->mci_share == 0) {
 		i_mac_perim_exit(mip);
 		return;
 	}
@@ -118,7 +118,7 @@ mac_share_bind(mac_client_handle_t mch, uint64_t cookie, uint64_t *rcookie)
 
 	i_mac_perim_enter(mip);
 
-	if (mcip->mci_share == NULL) {
+	if (mcip->mci_share == 0) {
 		i_mac_perim_exit(mip);
 		return (ENOTSUP);
 	}
@@ -168,7 +168,7 @@ mac_share_unbind(mac_client_handle_t mch)
 
 	i_mac_perim_enter(mip);
 
-	if (mcip->mci_share == NULL) {
+	if (mcip->mci_share == 0) {
 		i_mac_perim_exit(mip);
 		return;
 	}

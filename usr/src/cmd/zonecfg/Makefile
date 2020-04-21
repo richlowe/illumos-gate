@@ -22,6 +22,8 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 Joyent, Inc.
+#
 
 PROG=	zonecfg
 OBJS=	zonecfg.o zonecfg_lex.o zonecfg_grammar.tab.o
@@ -41,10 +43,15 @@ CPPFLAGS +=	-I.
 LDFLAGS +=	$(MAPOPTS)
 CLEANFILES +=	zonecfg_lex.c zonecfg_grammar.tab.c zonecfg_grammar.tab.h
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
+
+SMOFF += all_func_returns
+
+# false positive
+zonecfg_lex.o := SMOFF += free
 
 CLOBBERFILES += $(PROG).ln
 

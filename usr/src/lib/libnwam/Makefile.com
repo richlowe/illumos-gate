@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 # Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	libnwam.a
 VERS=		.1
@@ -54,7 +55,10 @@ CFLAGS +=       $(CCVERBOSE)
 CPPFLAGS +=	-I$(SRCDIR) -D_REENTRANT
 
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

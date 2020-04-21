@@ -23,6 +23,9 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2019, Joyent, Inc.
+ */
 
 #include <sys/types.h>
 #include <inet/common.h>
@@ -44,19 +47,19 @@ static int softmac_cmn_open(queue_t *, dev_t *, int, int, cred_t *);
  * The following softmac_mod_xxx() functions are (9E) entry point functions for
  * the softmac module.
  */
-static int softmac_mod_close(queue_t *);
-static void softmac_mod_rput(queue_t *, mblk_t *);
-static void softmac_mod_wput(queue_t *, mblk_t *);
-static void softmac_mod_wsrv(queue_t *);
+static int softmac_mod_close(queue_t *, int, cred_t *);
+static int softmac_mod_rput(queue_t *, mblk_t *);
+static int softmac_mod_wput(queue_t *, mblk_t *);
+static int softmac_mod_wsrv(queue_t *);
 
 /*
  * The following softmac_drv_xxx() functions are (9E) entry point functions for
  * the softmac driver.
  */
 static int softmac_drv_open(queue_t *, dev_t *, int, int, cred_t *);
-static int softmac_drv_close(queue_t *);
-static void softmac_drv_wput(queue_t *, mblk_t *);
-static void softmac_drv_wsrv(queue_t *);
+static int softmac_drv_close(queue_t *, int, cred_t *);
+static int softmac_drv_wput(queue_t *, mblk_t *);
+static int softmac_drv_wsrv(queue_t *);
 
 static int softmac_attach(dev_info_t *, ddi_attach_cmd_t);
 static int softmac_detach(dev_info_t *, ddi_detach_cmd_t);
@@ -85,8 +88,8 @@ static struct module_info softmac_dld_modinfo = {
 };
 
 static struct qinit softmac_urinit = {
-	(pfi_t)softmac_mod_rput,	/* qi_putp */
-	(pfi_t)NULL,			/* qi_srvp */
+	softmac_mod_rput,		/* qi_putp */
+	NULL,				/* qi_srvp */
 	softmac_cmn_open,		/* qi_qopen */
 	softmac_mod_close,		/* qi_qclose */
 	NULL,				/* qi_qadmin */
@@ -94,8 +97,8 @@ static struct qinit softmac_urinit = {
 };
 
 static struct qinit softmac_uwinit = {
-	(pfi_t)softmac_mod_wput,	/* qi_putp */
-	(pfi_t)softmac_mod_wsrv,	/* qi_srvp */
+	softmac_mod_wput,		/* qi_putp */
+	softmac_mod_wsrv,		/* qi_srvp */
 	NULL,				/* qi_qopen */
 	NULL,				/* qi_qclose */
 	NULL,				/* qi_qadmin */
@@ -117,7 +120,7 @@ static struct qinit softmac_dld_r_qinit = {
 };
 
 static struct qinit softmac_dld_w_qinit = {
-	(pfi_t)softmac_drv_wput, (pfi_t)softmac_drv_wsrv, NULL, NULL, NULL,
+	softmac_drv_wput, softmac_drv_wsrv, NULL, NULL, NULL,
 	&softmac_dld_modinfo
 };
 
@@ -276,8 +279,9 @@ softmac_cmn_open(queue_t *rq, dev_t *devp, int flag, int sflag, cred_t *credp)
 	return (softmac_drv_open(rq, devp, flag, sflag, credp));
 }
 
+/* ARGSUSED */
 static int
-softmac_mod_close(queue_t *rq)
+softmac_mod_close(queue_t *rq, int flags __unused, cred_t *credp __unused)
 {
 	softmac_lower_t	*slp = rq->q_ptr;
 
@@ -303,7 +307,7 @@ softmac_mod_close(queue_t *rq)
 	return (0);
 }
 
-static void
+static int
 softmac_mod_rput(queue_t *rq, mblk_t *mp)
 {
 	softmac_lower_t		*slp = rq->q_ptr;
@@ -335,7 +339,7 @@ softmac_mod_rput(queue_t *rq, mblk_t *mp)
 		 */
 		if (slp->sl_softmac == NULL) {
 			freemsg(mp);
-			return;
+			return (0);
 		}
 
 		/*
@@ -345,7 +349,7 @@ softmac_mod_rput(queue_t *rq, mblk_t *mp)
 		 */
 		if (mp->b_flag & MSGNOLOOP) {
 			freemsg(mp);
-			return;
+			return (0);
 		}
 
 		/*
@@ -354,7 +358,7 @@ softmac_mod_rput(queue_t *rq, mblk_t *mp)
 		if (DB_REF(mp) == 1) {
 			ASSERT(slp->sl_softmac != NULL);
 			mac_rx(slp->sl_softmac->smac_mh, NULL, mp);
-			return;
+			return (0);
 		} else {
 			softmac_rput_process_data(slp, mp);
 		}
@@ -385,9 +389,10 @@ softmac_mod_rput(queue_t *rq, mblk_t *mp)
 		softmac_rput_process_notdata(rq, slp->sl_sup, mp);
 		break;
 	}
+	return (0);
 }
 
-static void
+static int
 softmac_mod_wput(queue_t *wq, mblk_t *mp)
 {
 	/*
@@ -429,9 +434,10 @@ softmac_mod_wput(queue_t *wq, mblk_t *mp)
 		freemsg(mp);
 		break;
 	}
+	return (0);
 }
 
-static void
+static int
 softmac_mod_wsrv(queue_t *wq)
 {
 	softmac_lower_t *slp = wq->q_ptr;
@@ -449,6 +455,7 @@ softmac_mod_wsrv(queue_t *wq)
 		qenable(slp->sl_sup->su_wq);
 	else if (slp->sl_softmac != NULL)
 		mac_tx_update(slp->sl_softmac->smac_mh);
+	return (0);
 }
 
 static int
@@ -562,8 +569,9 @@ fail:
 	return (err);
 }
 
+/* ARGSUSED */
 static int
-softmac_drv_close(queue_t *rq)
+softmac_drv_close(queue_t *rq, int flags __unused, cred_t *credp __unused)
 {
 	softmac_upper_t	*sup = dld_str_private(rq);
 	softmac_t	*softmac = sup->su_softmac;
@@ -607,7 +615,7 @@ softmac_drv_close(queue_t *rq)
 	return (dld_str_close(rq));
 }
 
-static void
+static int
 softmac_drv_wput(queue_t *wq, mblk_t *mp)
 {
 	softmac_upper_t	*sup = dld_str_private(wq);
@@ -625,13 +633,13 @@ softmac_drv_wput(queue_t *wq, mblk_t *mp)
 
 		if (MBLKL(mp) < sizeof (t_uscalar_t)) {
 			freemsg(mp);
-			return;
+			return (0);
 		}
 
 		prim = ((union DL_primitives *)mp->b_rptr)->dl_primitive;
 		if (prim == DL_UNITDATA_REQ) {
 			softmac_wput_data(sup, mp);
-			return;
+			return (0);
 		}
 
 		softmac_wput_nondata(sup, mp);
@@ -640,9 +648,10 @@ softmac_drv_wput(queue_t *wq, mblk_t *mp)
 		softmac_wput_nondata(sup, mp);
 		break;
 	}
+	return (0);
 }
 
-static void
+static int
 softmac_drv_wsrv(queue_t *wq)
 {
 	softmac_upper_t	*sup = dld_str_private(wq);
@@ -656,7 +665,7 @@ softmac_drv_wsrv(queue_t *wq)
 		 */
 		sup->su_tx_inprocess++;
 		mutex_exit(&sup->su_mutex);
-		dld_wsrv(wq);
+		(void) dld_wsrv(wq);
 		mutex_enter(&sup->su_mutex);
 		if (--sup->su_tx_inprocess == 0)
 			cv_signal(&sup->su_cv);
@@ -682,4 +691,5 @@ softmac_drv_wsrv(queue_t *wq)
 		sup->su_tx_busy = B_FALSE;
 	}
 	mutex_exit(&sup->su_mutex);
+	return (0);
 }

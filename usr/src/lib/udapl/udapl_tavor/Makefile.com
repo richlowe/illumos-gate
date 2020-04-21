@@ -22,9 +22,10 @@
 #
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright 2019, Joyent, Inc.
 
-LIBRARY=       	udapl_tavor.a 
-VERS=          	.1 
+LIBRARY=	udapl_tavor.a
+VERS=		.1
 
 LOCOBJS =	\
 	dapl_cno_create.o \
@@ -139,7 +140,7 @@ TAVORSRCDIR =	../tavor
 
 SRCS = $(LOCOBJS:%.o=$(SRCDIR)/%.c) $(TAVOROBJS:%.o=$(TAVORSRCDIR)/%.c)
 
-CPPFLAGS +=	-I$(SRC)/lib/udapl/udapl_tavor/include 
+CPPFLAGS +=	-I$(SRC)/lib/udapl/udapl_tavor/include
 CPPFLAGS +=	-I$(SRC)/lib/udapl/udapl_tavor/tavor
 CPPFLAGS +=	-I$(SRC)/uts/common/sys/ib/clients/daplt
 CPPFLAGS +=	-I$(SRC)/uts/common
@@ -149,10 +150,14 @@ LINTFLAGS +=	-DDAPL_DBG
 LINTFLAGS64 +=	-DDAPL_DBG
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-switch
 
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDAPL_DBG
+$(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-unused
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

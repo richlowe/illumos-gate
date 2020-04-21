@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 MODULE = disk-monitor
 CLASS = common
@@ -34,4 +35,7 @@ LINTFLAGS += -I. -I$(SRC)/lib/fm/topo/modules/common/disk -L$(ROOT)/usr/lib/fm
 CFLAGS += -I. -I$(SRC)/lib/fm/topo/modules/common/disk
 LDLIBS += -lsysevent -lnvpair -lsmbios -lcfgadm -ltopo -luutil -lipmi
 LDFLAGS += -L$(ROOT)/usr/lib/fm -R/usr/lib/fm
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off

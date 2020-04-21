@@ -24,6 +24,7 @@
 /*
  * Copyright 2011 cyril.galibern@opensvc.com
  * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_SYS_SCSI_TARGETS_SDDEF_H
@@ -798,17 +799,6 @@ _NOTE(MUTEX_PROTECTS_DATA(sd_lun::un_fi_mutex,
 #define	SD_IS_LSI(un)	((un)->un_f_cfg_is_lsi == TRUE)
 
 /*
- * Macros to check if the lun is a Sun T3 or a T4
- */
-#define	SD_IS_T3(un) \
-	((bcmp(SD_INQUIRY(un)->inq_vid, "SUN", 3) == 0) && \
-	(bcmp(SD_INQUIRY(un)->inq_pid, "T3", 2) == 0))
-
-#define	SD_IS_T4(un) \
-	((bcmp(SD_INQUIRY(un)->inq_vid, "SUN", 3) == 0) && \
-	(bcmp(SD_INQUIRY(un)->inq_pid, "T4", 2) == 0))
-
-/*
  * Macros for non-512 byte writes to removable devices.
  */
 #define	NOT_DEVBSIZE(un)	\
@@ -1164,10 +1154,10 @@ struct sd_fi_arq {
 #else
 
 #undef	SDDEBUG
-#define	SD_ERROR	{ if (0) sd_log_err; }
-#define	SD_TRACE	{ if (0) sd_log_trace; }
-#define	SD_INFO		{ if (0) sd_log_info; }
-#define	SD_DUMP_MEMORY	{ if (0) sd_dump_memory; }
+#define	SD_ERROR(...)		(void)(0)
+#define	SD_TRACE(...)		(void)(0)
+#define	SD_INFO(...)		(void)(0)
+#define	SD_DUMP_MEMORY(...)	(void)(0)
 #endif
 
 

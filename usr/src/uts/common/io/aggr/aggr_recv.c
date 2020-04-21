@@ -21,6 +21,8 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2012 OmniTI Computer Consulting, Inc  All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*
@@ -55,7 +57,7 @@ aggr_recv_lacp(aggr_port_t *port, mac_resource_handle_t mrh, mblk_t *mp)
 {
 	aggr_grp_t *grp = port->lp_grp;
 
-	/* in promiscuous mode, send copy of packet up */
+	/* In promiscuous mode, pass copy of packet up. */
 	if (grp->lg_promisc) {
 		mblk_t *nmp = copymsg(mp);
 
@@ -68,11 +70,11 @@ aggr_recv_lacp(aggr_port_t *port, mac_resource_handle_t mrh, mblk_t *mp)
 
 /*
  * Callback function invoked by MAC service module when packets are
- * made available by a MAC port.
+ * made available by a MAC port, both in promisc_on mode and not.
  */
 /* ARGSUSED */
-void
-aggr_recv_cb(void *arg, mac_resource_handle_t mrh, mblk_t *mp,
+static void
+aggr_recv_path_cb(void *arg, mac_resource_handle_t mrh, mblk_t *mp,
     boolean_t loopback)
 {
 	aggr_port_t *port = (aggr_port_t *)arg;
@@ -160,4 +162,11 @@ aggr_recv_cb(void *arg, mac_resource_handle_t mrh, mblk_t *mp,
 				freemsgchain(head);
 		}
 	}
+}
+
+void
+aggr_recv_cb(void *arg, mac_resource_handle_t mrh, mblk_t *mp,
+    boolean_t loopback)
+{
+	aggr_recv_path_cb(arg, mrh, mp, loopback);
 }

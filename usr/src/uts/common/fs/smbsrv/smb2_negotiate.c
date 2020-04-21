@@ -10,7 +10,8 @@
  */
 
 /*
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 RackTop Systems.
  */
 
 /*
@@ -20,11 +21,26 @@
 #include <smbsrv/smb2_kproto.h>
 #include <smbsrv/smb2.h>
 
+/*
+ * Note from [MS-SMB2] Sec. 2.2.3:  Windows servers return
+ * invalid parameter if the dialect count is greater than 64
+ * This is here (and not in smb2.h) because this is technically
+ * an implementation detail, not protocol specification.
+ */
+#define	SMB2_NEGOTIATE_MAX_DIALECTS	64
+
 static int smb2_negotiate_common(smb_request_t *, uint16_t);
 
+/* List of supported capabilities.  Can be patched for testing. */
 uint32_t smb2srv_capabilities =
 	SMB2_CAP_DFS |
-	SMB2_CAP_LARGE_MTU;
+	SMB2_CAP_LEASING |
+	SMB2_CAP_LARGE_MTU |
+	SMB2_CAP_PERSISTENT_HANDLES |
+	SMB2_CAP_ENCRYPTION;
+
+/* These are the only capabilities defined for SMB2.X */
+#define	SMB_2X_CAPS (SMB2_CAP_DFS | SMB2_CAP_LEASING | SMB2_CAP_LARGE_MTU)
 
 /*
  * These are not intended as customer tunables, but dev. & test folks
@@ -39,14 +55,15 @@ uint32_t smb2srv_capabilities =
  *
  * smb2_max_rwsize is what we put in the SMB2 negotiate response to tell
  * the client the largest read and write request size we'll support.
- * One megabyte is a compromise between efficiency on fast networks
- * and memory consumption (for the buffers) on the server side.
+ * For now, we're using contiguous allocations, so keep this at 64KB
+ * so that (even with message overhead) allocations stay below 128KB,
+ * avoiding kmem_alloc -> page_create_va thrashing.
  *
  * smb2_max_trans is the largest "transact" send or receive, which is
  * used for directory listings and info set/get operations.
  */
 uint32_t smb2_tcp_bufsize = (1<<22);	/* 4MB */
-uint32_t smb2_max_rwsize = (1<<20);	/* 1MB */
+uint32_t smb2_max_rwsize = (1<<16);	/* 64KB */
 uint32_t smb2_max_trans  = (1<<16);	/* 64KB */
 
 /*
@@ -60,12 +77,14 @@ uint32_t smb2_old_rwsize = (1<<16);	/* 64KB */
 
 /*
  * List of all SMB2 versions we implement.  Note that the
- * highest version we support may be limited by the
- * _cfg.skc_max_protocol setting.
+ * versions we support may be limited by the
+ * _cfg.skc_max_protocol and min_protocol settings.
  */
 static uint16_t smb2_versions[] = {
 	0x202,	/* SMB 2.002 */
 	0x210,	/* SMB 2.1 */
+	0x300,	/* SMB 3.0 */
+	0x302,	/* SMB 3.02 */
 };
 static uint16_t smb2_nversions =
     sizeof (smb2_versions) / sizeof (smb2_versions[0]);
@@ -75,7 +94,8 @@ smb2_supported_version(smb_session_t *s, uint16_t version)
 {
 	int i;
 
-	if (version > s->s_cfg.skc_max_protocol)
+	if (version > s->s_cfg.skc_max_protocol ||
+	    version < s->s_cfg.skc_min_protocol)
 		return (B_FALSE);
 	for (i = 0; i < smb2_nversions; i++)
 		if (version == smb2_versions[i])
@@ -102,8 +122,6 @@ smb1_negotiate_smb2(smb_request_t *sr)
 	smb_session_t *s = sr->session;
 	smb_arg_negotiate_t *negprot = sr->sr_negprot;
 	uint16_t smb2_version;
-	uint16_t secmode2;
-	int rc;
 
 	/*
 	 * Note: In the SMB1 negotiate command handler, we
@@ -116,32 +134,18 @@ smb1_negotiate_smb2(smb_request_t *sr)
 	 */
 	switch (negprot->ni_dialect) {
 	case DIALECT_SMB2002:	/* SMB 2.002 (a.k.a. SMB2.0) */
-		smb2_version = 0x202;
+		smb2_version = SMB_VERS_2_002;
 		s->dialect = smb2_version;
 		s->s_state = SMB_SESSION_STATE_NEGOTIATED;
 		/* Allow normal SMB2 requests now. */
 		s->newrq_func = smb2sr_newrq;
-
-		/*
-		 * Translate SMB1 sec. mode to SMB2.
-		 */
-		secmode2 = 0;
-		if (s->secmode & NEGOTIATE_SECURITY_SIGNATURES_ENABLED)
-			secmode2 |= SMB2_NEGOTIATE_SIGNING_ENABLED;
-		if (s->secmode & NEGOTIATE_SECURITY_SIGNATURES_REQUIRED)
-			secmode2 |= SMB2_NEGOTIATE_SIGNING_REQUIRED;
-		s->secmode = secmode2;
 		break;
 	case DIALECT_SMB2XXX:	/* SMB 2.??? (wildcard vers) */
 		/*
 		 * Expecting an SMB2 negotiate next, so keep the
-		 * initial s->newrq_func.  Note that secmode is
-		 * fiction good enough to pass the signing check
-		 * in smb2_negotiate_common().  We'll check the
-		 * real secmode when the 2nd negotiate comes.
+		 * initial s->newrq_func.
 		 */
 		smb2_version = 0x2FF;
-		s->secmode = SMB2_NEGOTIATE_SIGNING_ENABLED;
 		break;
 	default:
 		return (SDRC_DROP_VC);
@@ -156,12 +160,37 @@ smb1_negotiate_smb2(smb_request_t *sr)
 	 */
 	sr->smb2_reply_hdr = sr->reply.chain_offset = 0;
 	sr->smb2_cmd_code = SMB2_NEGOTIATE;
+	sr->smb2_hdr_flags = SMB2_FLAGS_SERVER_TO_REDIR;
 
-	rc = smb2_negotiate_common(sr, smb2_version);
-	if (rc != 0)
-		return (SDRC_DROP_VC);
+	(void) smb2_encode_header(sr, B_FALSE);
+	if (smb2_negotiate_common(sr, smb2_version) != 0)
+		sr->smb2_status = NT_STATUS_INTERNAL_ERROR;
+	if (sr->smb2_status != 0)
+		smb2sr_put_error(sr, sr->smb2_status);
+	(void) smb2_encode_header(sr, B_TRUE);
 
+	smb2_send_reply(sr);
+
+	/*
+	 * We sent the reply, so tell the SMB1 dispatch
+	 * it should NOT (also) send a reply.
+	 */
 	return (SDRC_NO_REPLY);
+}
+
+static uint16_t
+smb2_find_best_dialect(smb_session_t *s, uint16_t cl_versions[],
+    uint16_t version_cnt)
+{
+	uint16_t best_version = 0;
+	int i;
+
+	for (i = 0; i < version_cnt; i++)
+		if (smb2_supported_version(s, cl_versions[i]) &&
+		    best_version < cl_versions[i])
+			best_version = cl_versions[i];
+
+	return (best_version);
 }
 
 /*
@@ -177,80 +206,138 @@ smb1_negotiate_smb2(smb_request_t *sr)
  * result of bypassing the normal dispatch mechanism.
  *
  * The caller always frees this request.
+ *
+ * Return value is 0 for success, and anything else will
+ * terminate the reader thread (drop the connection).
  */
 int
 smb2_newrq_negotiate(smb_request_t *sr)
 {
 	smb_session_t *s = sr->session;
-	int i, rc;
+	int rc;
+	uint32_t status = 0;
 	uint16_t struct_size;
 	uint16_t best_version;
 	uint16_t version_cnt;
-	uint16_t cl_versions[8];
+	uint16_t cl_versions[SMB2_NEGOTIATE_MAX_DIALECTS];
 
 	sr->smb2_cmd_hdr = sr->command.chain_offset;
 	rc = smb2_decode_header(sr);
 	if (rc != 0)
 		return (rc);
 
+	if (sr->smb2_hdr_flags & SMB2_FLAGS_SERVER_TO_REDIR)
+		return (-1);
+
 	if ((sr->smb2_cmd_code != SMB2_NEGOTIATE) ||
 	    (sr->smb2_next_command != 0))
-		return (SDRC_DROP_VC);
+		return (-1);
 
 	/*
 	 * Decode SMB2 Negotiate (fixed-size part)
 	 */
 	rc = smb_mbc_decodef(
-	    &sr->command, "www..l16.8.",
+	    &sr->command, "www..l16c8.",
 	    &struct_size,	/* w */
 	    &version_cnt,	/* w */
-	    &s->secmode,	/* w */
-	    /* reserved 	(..) */
-	    &s->capabilities);	/* l */
-	    /* clnt_uuid	 16. */
+	    &s->cli_secmode,	/* w */
+	    /* reserved		(..) */
+	    &s->capabilities,	/* l */
+	    s->clnt_uuid);	/* 16c */
 	    /* start_time	  8. */
 	if (rc != 0)
 		return (rc);
-	if (struct_size != 36 || version_cnt > 8)
-		return (SDRC_DROP_VC);
+	if (struct_size != 36)
+		return (-1);
 
 	/*
 	 * Decode SMB2 Negotiate (variable part)
+	 *
+	 * Be somewhat tolerant while decoding the variable part
+	 * so we can return errors instead of dropping the client.
+	 * Will limit decoding to the size of cl_versions here,
+	 * and do the error checks on version_cnt after the
+	 * dtrace start probe.
 	 */
-	rc = smb_mbc_decodef(&sr->command,
-	    "#w", version_cnt, cl_versions);
-	if (rc != 0)
-		return (SDRC_DROP_VC);
+	if (version_cnt > 0 &&
+	    version_cnt <= SMB2_NEGOTIATE_MAX_DIALECTS &&
+	    smb_mbc_decodef(&sr->command, "#w", version_cnt,
+	    cl_versions) != 0) {
+	    /* decode error; force an error below */
+	    version_cnt = 0;
+	}
+
+	DTRACE_SMB2_START(op__Negotiate, smb_request_t *, sr);
+
+	sr->smb2_hdr_flags |= SMB2_FLAGS_SERVER_TO_REDIR;
+	(void) smb2_encode_header(sr, B_FALSE);
+
+	/*
+	 * [MS-SMB2] 3.3.5.2.4 Verifying the Signature
+	 * "If the SMB2 header of the SMB2 NEGOTIATE request has the
+	 * SMB2_FLAGS_SIGNED bit set in the Flags field, the server
+	 * MUST fail the request with STATUS_INVALID_PARAMETER."
+	 */
+	if ((sr->smb2_hdr_flags & SMB2_FLAGS_SIGNED) != 0) {
+		sr->smb2_hdr_flags &= ~SMB2_FLAGS_SIGNED;
+		status = NT_STATUS_INVALID_PARAMETER;
+		goto errout;
+	}
+
+	/*
+	 * [MS-SMB2] 3.3.5.4 Receiving an SMB2 NEGOTIATE Request
+	 * "If the DialectCount of the SMB2 NEGOTIATE Request is 0, the
+	 * server MUST fail the request with STATUS_INVALID_PARAMETER."
+	 */
+	if (version_cnt == 0 ||
+	    version_cnt > SMB2_NEGOTIATE_MAX_DIALECTS) {
+		status = NT_STATUS_INVALID_PARAMETER;
+		goto errout;
+	}
 
 	/*
 	 * The client offers an array of protocol versions it
 	 * supports, which we have decoded into cl_versions[].
 	 * We walk the array and pick the highest supported.
+	 *
+	 * [MS-SMB2] 3.3.5.4 Receiving an SMB2 NEGOTIATE Request
+	 * "If a common dialect is not found, the server MUST fail
+	 * the request with STATUS_NOT_SUPPORTED."
 	 */
-	best_version = 0;
-	for (i = 0; i < version_cnt; i++)
-		if (smb2_supported_version(s, cl_versions[i]) &&
-		    best_version < cl_versions[i])
-			best_version = cl_versions[i];
-	if (best_version == 0)
-		return (SDRC_DROP_VC);
+	best_version = smb2_find_best_dialect(s, cl_versions, version_cnt);
+	if (best_version == 0) {
+		status = NT_STATUS_NOT_SUPPORTED;
+		goto errout;
+	}
 	s->dialect = best_version;
 
 	/* Allow normal SMB2 requests now. */
 	s->s_state = SMB_SESSION_STATE_NEGOTIATED;
 	s->newrq_func = smb2sr_newrq;
 
-	rc = smb2_negotiate_common(sr, best_version);
-	if (rc != 0)
-		return (SDRC_DROP_VC);
+	if (smb2_negotiate_common(sr, best_version) != 0)
+		status = NT_STATUS_INTERNAL_ERROR;
 
-	return (0);
+errout:
+	sr->smb2_status = status;
+	DTRACE_SMB2_DONE(op__Negotiate, smb_request_t *, sr);
+
+	if (sr->smb2_status != 0)
+		smb2sr_put_error(sr, sr->smb2_status);
+	(void) smb2_encode_header(sr, B_TRUE);
+
+	smb2_send_reply(sr);
+
+	return (rc);
 }
 
 /*
  * Common parts of SMB2 Negotiate, used for both the
  * SMB1-to-SMB2 style, and straight SMB2 style.
- * Do negotiation decisions, encode, send the reply.
+ * Do negotiation decisions and encode the reply.
+ * The caller does the network send.
+ *
+ * Return value is 0 for success, else error.
  */
 static int
 smb2_negotiate_common(smb_request_t *sr, uint16_t version)
@@ -261,23 +348,13 @@ smb2_negotiate_common(smb_request_t *sr, uint16_t version)
 	uint32_t max_rwsize;
 	uint16_t secmode;
 
-	sr->smb2_status = 0;
-
 	/*
 	 * Negotiation itself.  First the Security Mode.
-	 * The caller stashed the client's secmode in s->secmode,
-	 * which we validate, and then replace with the server's
-	 * secmode, which is all we care about after this.
 	 */
 	secmode = SMB2_NEGOTIATE_SIGNING_ENABLED;
-	if (sr->sr_cfg->skc_signing_required) {
+	if (sr->sr_cfg->skc_signing_required)
 		secmode |= SMB2_NEGOTIATE_SIGNING_REQUIRED;
-		/* Make sure client at least enables signing. */
-		if ((s->secmode & secmode) == 0) {
-			sr->smb2_status = NT_STATUS_INVALID_PARAMETER;
-		}
-	}
-	s->secmode = secmode;
+	s->srv_secmode = secmode;
 
 	s->cmd_max_bytes = smb2_tcp_bufsize;
 	s->reply_max_bytes = smb2_tcp_bufsize;
@@ -297,14 +374,37 @@ smb2_negotiate_common(smb_request_t *sr, uint16_t version)
 	now_tv.tv_nsec = 0;
 
 	/*
-	 * SMB2 negotiate reply
+	 * If the version is 0x2FF, we haven't completed negotiate.
+	 * Don't initialize until we have our final request.
 	 */
-	sr->smb2_hdr_flags = SMB2_FLAGS_SERVER_TO_REDIR;
-	(void) smb2_encode_header(sr, B_FALSE);
-	if (sr->smb2_status != 0) {
-		smb2sr_put_error(sr, sr->smb2_status);
-		smb2_send_reply(sr);
-		return (-1); /* will drop */
+	if (version != 0x2FF)
+		smb2_sign_init_mech(s);
+
+	/*
+	 * [MS-SMB2] 3.3.5.4 Receiving an SMB2 NEGOTIATE Request
+	 *
+	 * The SMB2.x capabilities are returned without regard for
+	 * what capabilities the client provided in the request.
+	 * The SMB3.x capabilities returned are the traditional
+	 * logical AND of server and client capabilities.
+	 *
+	 * One additional check: If KCF is missing something we
+	 * require for encryption, turn off that capability.
+	 */
+	if (s->dialect < SMB_VERS_2_1) {
+		/* SMB 2.002 */
+		s->srv_cap = smb2srv_capabilities & SMB2_CAP_DFS;
+	} else if (s->dialect < SMB_VERS_3_0) {
+		/* SMB 2.x */
+		s->srv_cap = smb2srv_capabilities & SMB_2X_CAPS;
+	} else {
+		/* SMB 3.0 or later */
+		s->srv_cap = smb2srv_capabilities &
+		    (SMB_2X_CAPS | s->capabilities);
+		if ((s->srv_cap & SMB2_CAP_ENCRYPTION) != 0 &&
+		    smb3_encrypt_init_mech(s) != 0) {
+			s->srv_cap &= ~SMB2_CAP_ENCRYPTION;
+		}
 	}
 
 	/*
@@ -319,12 +419,12 @@ smb2_negotiate_common(smb_request_t *sr, uint16_t version)
 	    &sr->reply,
 	    "wwww#cllllTTwwl#c",
 	    65,	/* StructSize */	/* w */
-	    s->secmode,			/* w */
+	    s->srv_secmode,		/* w */
 	    version,			/* w */
 	    0, /* reserved */		/* w */
 	    UUID_LEN,			/* # */
 	    &s->s_cfg.skc_machine_uuid, /* c */
-	    smb2srv_capabilities,	/* l */
+	    s->srv_cap,			/* l */
 	    smb2_max_trans,		/* l */
 	    max_rwsize,			/* l */
 	    max_rwsize,			/* l */
@@ -336,7 +436,7 @@ smb2_negotiate_common(smb_request_t *sr, uint16_t version)
 	    sr->sr_cfg->skc_negtok_len,	/* # */
 	    sr->sr_cfg->skc_negtok);	/* c */
 
-	smb2_send_reply(sr);
+	/* smb2_send_reply(sr); in caller */
 
 	(void) ksocket_setsockopt(s->sock, SOL_SOCKET,
 	    SO_SNDBUF, (const void *)&smb2_tcp_bufsize,
@@ -364,7 +464,7 @@ smb2_negotiate(smb_request_t *sr)
  * VALIDATE_NEGOTIATE_INFO [MS-SMB2] 2.2.32.6
  */
 uint32_t
-smb2_fsctl_vneginfo(smb_request_t *sr, smb_fsctl_t *fsctl)
+smb2_nego_validate(smb_request_t *sr, smb_fsctl_t *fsctl)
 {
 	smb_session_t *s = sr->session;
 	int rc;
@@ -372,8 +472,7 @@ smb2_fsctl_vneginfo(smb_request_t *sr, smb_fsctl_t *fsctl)
 	/*
 	 * The spec. says to parse the VALIDATE_NEGOTIATE_INFO here
 	 * and verify that the original negotiate was not modified.
-	 * The only tampering we need worry about is secmode, and
-	 * we're not taking that from the client, so don't bother.
+	 * The request MUST be signed, and we MUST validate the signature.
 	 *
 	 * One interesting requirement here is that we MUST reply
 	 * with exactly the same information as we returned in our
@@ -381,15 +480,53 @@ smb2_fsctl_vneginfo(smb_request_t *sr, smb_fsctl_t *fsctl)
 	 * If we don't the client closes the connection.
 	 */
 
+	/* dialects[8] taken from cl_versions[8] in smb2_newrq_negotiate */
+	uint32_t capabilities;
+	uint16_t secmode, num_dialects, dialects[8];
+	uint8_t clnt_guid[16];
+
+	if ((sr->smb2_hdr_flags & SMB2_FLAGS_SIGNED) == 0)
+		goto drop;
+
+	if (fsctl->InputCount < 24)
+		goto drop;
+
+	(void) smb_mbc_decodef(fsctl->in_mbc, "l16cww",
+	    &capabilities, /* l */
+	    &clnt_guid, /* 16c */
+	    &secmode, /* w */
+	    &num_dialects); /* w */
+
+	if (num_dialects == 0 || num_dialects > 8)
+		goto drop;
+	if (secmode != s->cli_secmode)
+		goto drop;
+	if (capabilities != s->capabilities)
+		goto drop;
+	if (memcmp(clnt_guid, s->clnt_uuid, sizeof (clnt_guid)) != 0)
+		goto drop;
+
+	if (fsctl->InputCount < (24 + num_dialects * sizeof (*dialects)))
+		goto drop;
+
+	rc = smb_mbc_decodef(fsctl->in_mbc, "#w", num_dialects, dialects);
+	if (rc != 0)
+		goto drop;
+
+	if (smb2_find_best_dialect(s, dialects, num_dialects) != s->dialect)
+		goto drop;
+
 	rc = smb_mbc_encodef(
 	    fsctl->out_mbc, "l#cww",
-	    smb2srv_capabilities,	/* l */
+	    s->srv_cap,			/* l */
 	    UUID_LEN,			/* # */
 	    &s->s_cfg.skc_machine_uuid, /* c */
-	    s->secmode,			/* w */
+	    s->srv_secmode,		/* w */
 	    s->dialect);		/* w */
-	if (rc)
-		return (NT_STATUS_INTERNAL_ERROR);
+	if (rc == 0)
+		return (rc);
 
-	return (0);
+drop:
+	smb_session_disconnect(s);
+	return (NT_STATUS_ACCESS_DENIED);
 }

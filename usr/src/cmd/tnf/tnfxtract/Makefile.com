@@ -23,6 +23,7 @@
 # Copyright 1994, 2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=		tnfxtract
 
@@ -36,7 +37,10 @@ include	../../../Makefile.cmd
 
 LFLAGS=		-v
 LDLIBS +=	-lkvm
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

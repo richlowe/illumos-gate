@@ -22,6 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2019, Joyent, Inc.
 
 LIBRARY=	libtnfctl.a
 VERS=		.1
@@ -65,7 +66,7 @@ HDRS=		tnfctl.h
 ROOTHDRDIR=	$(ROOT)/usr/include/tnf
 ROOTHDRS=	$(HDRS:%=$(ROOTHDRDIR)/%)
 CHECKHDRS=	$(HDRS:%.h=%.check)
-$(ROOTHDRS) := 	FILEMODE = 0644
+$(ROOTHDRS) :=	FILEMODE = 0644
 CHECKHDRS =	$(HDRS:%.h=%.check)
 
 LDLIBS +=	-lc -lelf
@@ -74,9 +75,12 @@ CPPFLAGS +=	-I$(SRC)/lib/libtnfprobe -D_REENTRANT -I$(SRC)/cmd/sgs/include
 
 LINTFLAGS +=	-y
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-parentheses
+
+# not linted
+SMATCH=off
 
 ASFLAGS +=	-P
 
@@ -103,7 +107,7 @@ BUILD.s=	$(AS) $< -o $@
 
 objs/%.o pics/%.o: ../%.s
 	$(COMPILE.s) -o $@ $<
-	$(POST_PROCESS_O)
+	$(POST_PROCESS_S_O)
 
 objs/%.o pics/%.o: ../%.c
 	$(COMPILE.c) -o $@ $<

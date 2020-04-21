@@ -23,7 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright 2016 Nexenta Systems, Inc.
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libdiskmgt.a
 VERS =		.1
@@ -62,8 +62,11 @@ $(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CPPFLAGS +=	-D_REENTRANT -I$(SRC)/lib/libdiskmgt/common
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

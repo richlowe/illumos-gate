@@ -21,11 +21,11 @@
 
 /*
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2015, Joyent, Inc. All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /* Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved. */
 
@@ -1490,7 +1490,7 @@ print_pck(private_t *pri, int raw, long val)
 		return;
 	}
 
-	if (pri->sys_args[3] == NULL) {
+	if (pri->sys_args[3] == 0) {
 		if (val == PC_KY_CLNAME) {
 			s = "PC_KY_CLNAME";
 			outstring(pri, s);
@@ -1506,20 +1506,20 @@ print_pck(private_t *pri, int raw, long val)
 
 	if (strcmp(clname, "TS") == 0) {
 		switch (val) {
-		case TS_KY_UPRILIM: 	s = "TS_KY_UPRILIM";	break;
+		case TS_KY_UPRILIM:	s = "TS_KY_UPRILIM";	break;
 		case TS_KY_UPRI:	s = "TS_KY_UPRI";	break;
 		default:					break;
 		}
 	} else if (strcmp(clname, "IA") == 0) {
 		switch (val) {
-		case IA_KY_UPRILIM: 	s = "IA_KY_UPRILIM";	break;
+		case IA_KY_UPRILIM:	s = "IA_KY_UPRILIM";	break;
 		case IA_KY_UPRI:	s = "IA_KY_UPRI";	break;
 		case IA_KY_MODE:	s = "IA_KY_MODE";	break;
 		default:					break;
 		}
 	} else if (strcmp(clname, "RT") == 0) {
 		switch (val) {
-		case RT_KY_PRI: 	s = "RT_KY_PRI";	break;
+		case RT_KY_PRI:		s = "RT_KY_PRI";	break;
 		case RT_KY_TQSECS:	s = "RT_KY_TQSECS";	break;
 		case RT_KY_TQNSECS:	s = "RT_KY_TQNSECS";	break;
 		case RT_KY_TQSIG:	s = "RT_KY_TQSIG";	break;
@@ -1527,13 +1527,13 @@ print_pck(private_t *pri, int raw, long val)
 		}
 	} else if (strcmp(clname, "FSS") == 0) {
 		switch (val) {
-		case FSS_KY_UPRILIM: 	s = "FSS_KY_UPRILIM";	break;
+		case FSS_KY_UPRILIM:	s = "FSS_KY_UPRILIM";	break;
 		case FSS_KY_UPRI:	s = "FSS_KY_UPRI";	break;
 		default:					break;
 		}
 	} else if (strcmp(clname, "FX") == 0) {
 		switch (val) {
-		case FX_KY_UPRILIM: 	s = "FX_KY_UPRILIM";	break;
+		case FX_KY_UPRILIM:	s = "FX_KY_UPRILIM";	break;
 		case FX_KY_UPRI:	s = "FX_KY_UPRI";	break;
 		case FX_KY_TQSECS:	s = "FX_KY_TQSECS";	break;
 		case FX_KY_TQNSECS:	s = "FX_KY_TQNSECS";	break;
@@ -1605,6 +1605,8 @@ prt_pc5(private_t *pri, int raw, long val)
 void
 prt_psflags(private_t *pri, secflagset_t val)
 {
+	size_t len;
+	char *ptr;
 	char str[1024];
 
 	if (val == 0) {
@@ -1628,8 +1630,11 @@ prt_psflags(private_t *pri, secflagset_t val)
 		secflag_clear(&val, PROC_SEC_NOEXECSTACK);
 	}
 
-	if (val != 0)
-		(void) snprintf(str, sizeof (str), "%s|%#x", str, val);
+	if (val != 0) {
+		len = strlen(str);
+		ptr = str + len;
+		(void) snprintf(ptr, sizeof (str) - len, "|%#x", val);
+	}
 
 	outstring(pri, str + 1);
 }
@@ -2039,6 +2044,7 @@ tcp_optname(private_t *pri, long val)
 	case TCP_KEEPIDLE:		return ("TCP_KEEPIDLE");
 	case TCP_KEEPCNT:		return ("TCP_KEEPCNT");
 	case TCP_KEEPINTVL:		return ("TCP_KEEPINTVL");
+	case TCP_CONGESTION:		return ("TCP_CONGESTION");
 
 	default:			(void) snprintf(pri->code_buf,
 					    sizeof (pri->code_buf),

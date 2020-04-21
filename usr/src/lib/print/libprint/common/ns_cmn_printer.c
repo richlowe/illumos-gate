@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*LINTLIBRARY*/
 
 #include <stdio.h>
@@ -37,8 +35,6 @@
 
 #include <ns.h>
 #include <list.h>
-
-extern void ns_kvp_destroy(ns_kvp_t *);
 
 /*
  *	Commonly Used routines...
@@ -64,7 +60,7 @@ extern void ns_kvp_destroy(ns_kvp_t *);
  */
 ns_printer_t *
 ns_printer_create(char *name, char **aliases, char *source,
-			ns_kvp_t **attributes)
+    ns_kvp_t **attributes)
 {
 	ns_printer_t *printer;
 
@@ -106,24 +102,26 @@ ns_printer_match_name(ns_printer_t *printer, const char *name)
 
 	if ((strcmp(printer->name, name) == 0) ||
 	    (list_locate((void **)printer->aliases,
-			(COMP_T)ns_strcmp, (void *)name) != NULL))
+	    (COMP_T)ns_strcmp, (void *)name) != NULL))
 		return (0);
 
 	return (-1);
 }
 
 
-static void
-_ns_append_printer_name(const char *name, va_list ap)
+static int
+_ns_append_printer_name(void *arg, va_list ap)
 {
+	const char *name = arg;
 	char *buf = va_arg(ap, char *);
 	int bufsize = va_arg(ap, int);
 
 	if (name == NULL)
-		return;
+		return (0);
 
 	(void) strlcat(buf, name, bufsize);
 	(void) strlcat(buf, "|", bufsize);
+	return (0);
 }
 
 /*
@@ -149,9 +147,9 @@ ns_printer_name_list(const ns_printer_t *printer)
 	}
 
 	list_iterate((void **)printer->aliases,
-		(VFUNC_T)_ns_append_printer_name, buf, sizeof (buf));
+	    _ns_append_printer_name, buf, sizeof (buf));
 
-	buf[strlen(buf) - 1] = (char)NULL;
+	buf[strlen(buf) - 1] = '\0';
 
 	return (strdup(buf));
 }

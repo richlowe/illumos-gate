@@ -22,6 +22,7 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2012 Nexenta Systems, Inc. All rights reserved.
+# Copyright 2016 RackTop Systems.
 #
 
 set name=pkg.fmri value=pkg:/system/extended-system-utilities@$(PKGVERS)
@@ -107,6 +108,7 @@ file path=usr/bin/diff mode=0555
 file path=usr/bin/diff3 mode=0555
 file path=usr/bin/dircmp mode=0555
 file path=usr/bin/dos2unix mode=0555
+file path=usr/bin/etdump mode=0555
 file path=usr/bin/expand mode=0555
 file path=usr/bin/factor mode=0555
 file path=usr/bin/kstat mode=0555
@@ -215,9 +217,17 @@ file path=usr/share/man/man1m/mount_pcfs.1m
 file path=usr/share/man/man1m/projadd.1m
 file path=usr/share/man/man1m/projdel.1m
 file path=usr/share/man/man1m/projmod.1m
+$(i386_ONLY)hardlink path=usr/bin/$(ARCH32)/pauxv \
+    target=../../../usr/bin/$(ARCH32)/pargs
+$(i386_ONLY)hardlink path=usr/bin/$(ARCH32)/penv \
+    target=../../../usr/bin/$(ARCH32)/pargs
+hardlink path=usr/bin/$(ARCH64)/pauxv target=../../../usr/bin/$(ARCH64)/pargs
+hardlink path=usr/bin/$(ARCH64)/penv target=../../../usr/bin/$(ARCH64)/pargs
 hardlink path=usr/bin/oawk target=../../usr/bin/awk
 hardlink path=usr/bin/pargs target=../../usr/lib/isaexec
+hardlink path=usr/bin/pauxv target=../../usr/lib/isaexec
 hardlink path=usr/bin/pcred target=../../usr/lib/isaexec
+hardlink path=usr/bin/penv target=../../usr/lib/isaexec
 hardlink path=usr/bin/pfiles target=../../usr/lib/isaexec
 hardlink path=usr/bin/pflags target=../../usr/lib/isaexec
 hardlink path=usr/bin/pldd target=../../usr/lib/isaexec
@@ -247,6 +257,8 @@ license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 license usr/src/cmd/compress/THIRDPARTYLICENSE \
     license=usr/src/cmd/compress/THIRDPARTYLICENSE
+license usr/src/cmd/etdump/THIRDPARTYLICENSE \
+    license=usr/src/cmd/etdump/THIRDPARTYLICENSE
 license usr/src/cmd/lastcomm/THIRDPARTYLICENSE \
     license=usr/src/cmd/lastcomm/THIRDPARTYLICENSE
 license usr/src/cmd/look/THIRDPARTYLICENSE \
@@ -272,10 +284,13 @@ link path=usr/proc/bin/pwait target=../../bin/pwait
 link path=usr/proc/bin/pwdx target=../../bin/pwdx
 link path=usr/share/man/man1/hashcheck.1 target=spell.1
 link path=usr/share/man/man1/hashmake.1 target=spell.1
+link path=usr/share/man/man1/pauxv.1 target=pargs.1
 link path=usr/share/man/man1/pcat.1 target=pack.1
+link path=usr/share/man/man1/penv.1 target=pargs.1
 link path=usr/share/man/man1/spellin.1 target=spell.1
 link path=usr/share/man/man1/uncompress.1 target=compress.1
 link path=usr/share/man/man1/unexpand.1 target=expand.1
 link path=usr/share/man/man1/unpack.1 target=pack.1
 link path=usr/share/man/man1/zcat.1 target=compress.1
 depend fmri=runtime/perl$(PERL_PKGVERS) type=require
+depend fmri=runtime/perl$(PERL_PKGVERS)/module/sun-solaris type=require

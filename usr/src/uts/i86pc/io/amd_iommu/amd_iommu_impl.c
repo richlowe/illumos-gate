@@ -22,6 +22,7 @@
 /*
  * Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Garrett D'Amore <garrett@damore.org>.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/sunddi.h>
@@ -1211,13 +1212,13 @@ amd_iommu_fini(amd_iommu_t *iommu, int type)
 	if (type == AMD_IOMMU_QUIESCE)
 		return (DDI_SUCCESS);
 
-	if (iommu->aiomt_va != NULL) {
+	if (iommu->aiomt_va != 0) {
 		hat_unload(kas.a_hat, (void *)(uintptr_t)iommu->aiomt_va,
 		    iommu->aiomt_reg_size, HAT_UNLOAD_UNLOCK);
 		device_arena_free((void *)(uintptr_t)iommu->aiomt_va,
 		    ptob(iommu->aiomt_reg_pages));
-		iommu->aiomt_va = NULL;
-		iommu->aiomt_reg_va = NULL;
+		iommu->aiomt_va = 0;
+		iommu->aiomt_reg_va = 0;
 	}
 	mutex_destroy(&iommu->aiomt_eventlock);
 	mutex_destroy(&iommu->aiomt_cmdlock);
@@ -1392,16 +1393,14 @@ amd_iommu_pci_dip(dev_info_t *rdip, const char *path)
 		}
 	}
 
-	cmn_err(
 #ifdef	DEBUG
-	    CE_PANIC,
-#else
-	    CE_WARN,
-#endif	/* DEBUG */
-	    "%s: %s%d dip = %p has no PCI parent, path = %s",
+	cmn_err(CE_PANIC, "%s: %s%d dip = %p has no PCI parent, path = %s",
 	    f, driver, instance, (void *)rdip, path);
-
+#else
+	cmn_err(CE_WARN, "%s: %s%d dip = %p has no PCI parent, path = %s",
+	    f, driver, instance, (void *)rdip, path);
 	ndi_rele_devi(rdip);
+#endif	/* DEBUG */
 
 	return (NULL);
 }

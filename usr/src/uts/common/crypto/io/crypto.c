@@ -21,6 +21,7 @@
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018, Joyent, Inc.
  */
 
 
@@ -157,7 +158,7 @@ size_t crypto_pre_approved_limit = CRYPTO_PRE_APPROVED_LIMIT;
 
 #define	INIT_RAW_CRYPTO_DATA(data, len)				\
 	(data).cd_format = CRYPTO_DATA_RAW;			\
-	(data).cd_raw.iov_base = kmem_alloc(len, KM_SLEEP);	\
+	(data).cd_raw.iov_base = (len > 0) ? kmem_alloc(len, KM_SLEEP) : NULL; \
 	(data).cd_raw.iov_len = len;				\
 	(data).cd_offset = 0;					\
 	(data).cd_length = len;
@@ -251,7 +252,7 @@ static kcf_lock_withpad_t *crypto_locks;
  * as they are called after doing a get_session_ptr() which
  * sets the CRYPTO_SESSION_IS_BUSY flag.
  */
-#define	CRYPTO_DECREMENT_RCTL_SESSION(sp, val, rctl_chk) 	\
+#define	CRYPTO_DECREMENT_RCTL_SESSION(sp, val, rctl_chk)	\
 	if (((val) != 0) && ((sp) != NULL)) {			\
 		ASSERT(((sp)->sd_flags & CRYPTO_SESSION_IS_BUSY) != 0);	\
 		if (rctl_chk) {				\
@@ -1104,6 +1105,7 @@ get_all_mechanism_info(dev_t dev, caddr_t arg, int mode, int *rval)
 	int error = 0;
 	int rv;
 
+	req_count = 0;
 	STRUCT_INIT(get_all_mech, mode);
 	STRUCT_INIT(mi, mode);
 
@@ -2789,6 +2791,7 @@ cipher(dev_t dev, caddr_t arg, int mode,
 	int rv;
 	boolean_t rctl_chk = B_FALSE;
 
+	do_inplace = B_FALSE;
 	STRUCT_INIT(encrypt, mode);
 
 	if ((cm = crypto_hold_minor(getminor(dev))) == NULL) {
@@ -2948,6 +2951,7 @@ cipher_update(dev_t dev, caddr_t arg, int mode,
 	int rv;
 	boolean_t rctl_chk = B_FALSE;
 
+	do_inplace = B_FALSE;
 	STRUCT_INIT(encrypt_update, mode);
 
 	if ((cm = crypto_hold_minor(getminor(dev))) == NULL) {
@@ -5537,6 +5541,7 @@ nostore_generate_key(dev_t dev, caddr_t arg, int mode, int *rval)
 	boolean_t allocated_by_crypto_module = B_FALSE;
 	caddr_t u_attrs = NULL;
 
+	out_count = 0;
 	STRUCT_INIT(generate_key, mode);
 	STRUCT_INIT(oa, mode);
 
@@ -5843,6 +5848,8 @@ nostore_generate_key_pair(dev_t dev, caddr_t arg, int mode, int *rval)
 	caddr_t u_pub_attrs = NULL;
 	caddr_t u_pri_attrs = NULL;
 
+	out_pub_count = 0;
+	out_pri_count = 0;
 	STRUCT_INIT(generate_key_pair, mode);
 	STRUCT_INIT(oa, mode);
 
@@ -6504,6 +6511,7 @@ nostore_derive_key(dev_t dev, caddr_t arg, int mode, int *rval)
 	boolean_t allocated_by_crypto_module = B_FALSE;
 	caddr_t u_attrs = NULL;
 
+	out_count = 0;
 	STRUCT_INIT(derive_key, mode);
 	STRUCT_INIT(oa, mode);
 

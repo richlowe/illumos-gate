@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_SYS_PCIE_IMPL_H
@@ -31,6 +32,7 @@ extern "C" {
 
 #include <sys/pcie.h>
 #include <sys/pciev.h>
+#include <sys/taskq_impl.h>
 
 #define	PCI_GET_BDF(dip)	\
 	PCIE_DIP2BUS(dip)->bus_bdf
@@ -115,19 +117,19 @@ extern "C" {
 #define	PCIE_PUT(sz, bus_p, off, val) \
 	pci_config_put ## sz(bus_p->bus_cfg_hdl, off, val)
 #define	PCIE_CAP_GET(sz, bus_p, off) \
-	PCI_CAP_GET ## sz(bus_p->bus_cfg_hdl, NULL, bus_p->bus_pcie_off, off)
+	PCI_CAP_GET ## sz(bus_p->bus_cfg_hdl, 0, bus_p->bus_pcie_off, off)
 #define	PCIE_CAP_PUT(sz, bus_p, off, val) \
-	PCI_CAP_PUT ## sz(bus_p->bus_cfg_hdl, NULL, bus_p->bus_pcie_off, off, \
+	PCI_CAP_PUT ## sz(bus_p->bus_cfg_hdl, 0, bus_p->bus_pcie_off, off, \
 	    val)
 #define	PCIE_AER_GET(sz, bus_p, off) \
-	PCI_XCAP_GET ## sz(bus_p->bus_cfg_hdl, NULL, bus_p->bus_aer_off, off)
+	PCI_XCAP_GET ## sz(bus_p->bus_cfg_hdl, 0, bus_p->bus_aer_off, off)
 #define	PCIE_AER_PUT(sz, bus_p, off, val) \
-	PCI_XCAP_PUT ## sz(bus_p->bus_cfg_hdl, NULL, bus_p->bus_aer_off, off, \
+	PCI_XCAP_PUT ## sz(bus_p->bus_cfg_hdl, 0, bus_p->bus_aer_off, off, \
 	    val)
 #define	PCIX_CAP_GET(sz, bus_p, off) \
-	PCI_CAP_GET ## sz(bus_p->bus_cfg_hdl, NULL, bus_p->bus_pcix_off, off)
+	PCI_CAP_GET ## sz(bus_p->bus_cfg_hdl, 0, bus_p->bus_pcix_off, off)
 #define	PCIX_CAP_PUT(sz, bus_p, off, val) \
-	PCI_CAP_PUT ## sz(bus_p->bus_cfg_hdl, NULL, bus_p->bus_pcix_off, off, \
+	PCI_CAP_PUT ## sz(bus_p->bus_cfg_hdl, 0, bus_p->bus_pcix_off, off, \
 	    val)
 
 /* Translate PF error return values to DDI_FM values */
@@ -281,6 +283,39 @@ typedef struct pf_root_fault {
 
 typedef struct pf_data pf_data_t;
 
+typedef enum pcie_link_width {
+	PCIE_LINK_WIDTH_UNKNOWN,
+	PCIE_LINK_WIDTH_X1,
+	PCIE_LINK_WIDTH_X2,
+	PCIE_LINK_WIDTH_X4,
+	PCIE_LINK_WIDTH_X8,
+	PCIE_LINK_WIDTH_X12,
+	PCIE_LINK_WIDTH_X16,
+	PCIE_LINK_WIDTH_X32
+} pcie_link_width_t;
+
+/*
+ * Note, this member should always be treated as a bit field, as a device may
+ * support multiple speeds.
+ */
+typedef enum pcie_link_speed {
+	PCIE_LINK_SPEED_UNKNOWN = 0x00,
+	PCIE_LINK_SPEED_2_5	= 1 << 0,
+	PCIE_LINK_SPEED_5	= 1 << 1,
+	PCIE_LINK_SPEED_8	= 1 << 2,
+	PCIE_LINK_SPEED_16	= 1 << 3
+} pcie_link_speed_t;
+
+typedef enum pcie_link_flags {
+	PCIE_LINK_F_ADMIN_TARGET	= 1 << 1
+} pcie_link_flags_t;
+
+typedef enum {
+	PCIE_LBW_S_ENABLED	= 1 << 0,
+	PCIE_LBW_S_DISPATCHED	= 1 << 1,
+	PCIE_LBW_S_RUNNING	= 1 << 2
+} pcie_lbw_state_t;
+
 /*
  * For hot plugged device, these data are init'ed during during probe
  * For non-hotplugged device, these data are init'ed in pci_autoconfig (on x86),
@@ -335,6 +370,29 @@ typedef struct pcie_bus {
 
 	/* workaround for PCI/PCI-X devs behind PCIe2PCI Bridge */
 	pcie_req_id_t   bus_pcie2pci_secbus;
+
+	/*
+	 * Link speed specific fields.
+	 */
+	kmutex_t		bus_speed_mutex;
+	pcie_link_flags_t	bus_speed_flags;
+	pcie_link_width_t	bus_max_width;
+	pcie_link_width_t	bus_cur_width;
+	pcie_link_speed_t	bus_sup_speed;
+	pcie_link_speed_t	bus_max_speed;
+	pcie_link_speed_t	bus_cur_speed;
+	pcie_link_speed_t	bus_target_speed;
+
+	/*
+	 * Link Bandwidth Monitoring
+	 */
+	kmutex_t		bus_lbw_mutex;
+	kcondvar_t		bus_lbw_cv;
+	pcie_lbw_state_t	bus_lbw_state;
+	taskq_ent_t		bus_lbw_ent;
+	uint64_t		bus_lbw_nevents;
+	char			*bus_lbw_pbuf;
+	char			*bus_lbw_cbuf;
 } pcie_bus_t;
 
 /*
@@ -361,6 +419,7 @@ struct pf_data {
 	boolean_t		pe_lock;
 	boolean_t		pe_valid;
 	uint32_t		pe_severity_flags;	/* Severity of error */
+	uint32_t		pe_severity_mask;
 	uint32_t		pe_orig_severity_flags; /* Original severity */
 	pf_affected_dev_t	*pe_affected_dev;
 	pcie_bus_t		*pe_bus_p;
@@ -389,6 +448,7 @@ typedef struct pf_impl {
 /* bus_fm_flags field */
 #define	PF_FM_READY		(1 << 0)	/* bus_fm_lock initialized */
 #define	PF_FM_IS_NH		(1 << 1)	/* known as non-hardened */
+#define	PF_FM_IS_PASSTHRU	(1 << 2)	/* device is controlled by VM */
 
 /*
  * PCIe fabric handle lookup address flags.  Used to define what type of
@@ -417,11 +477,10 @@ typedef struct pf_impl {
 #define	PF_ERR_MATCHED_PARENT	(1 << 5) /* Error Handled By Parent */
 #define	PF_ERR_PANIC		(1 << 6) /* Error should panic system */
 #define	PF_ERR_PANIC_DEADLOCK	(1 << 7) /* deadlock detected */
-#define	PF_ERR_PANIC_BAD_RESPONSE (1 << 8) /* Device no response */
+#define	PF_ERR_BAD_RESPONSE	(1 << 8) /* Device bad/no response */
 #define	PF_ERR_MATCH_DOM	(1 << 9) /* Error Handled By IO domain */
 
-#define	PF_ERR_FATAL_FLAGS		\
-	(PF_ERR_PANIC | PF_ERR_PANIC_DEADLOCK | PF_ERR_PANIC_BAD_RESPONSE)
+#define	PF_ERR_FATAL_FLAGS		(PF_ERR_PANIC | PF_ERR_PANIC_DEADLOCK)
 
 #define	PF_HDL_FOUND		1
 #define	PF_HDL_NOTFOUND		2
@@ -491,11 +550,11 @@ typedef struct {
 
 #else	/* DEBUG */
 
-#define	PCIE_DBG_CFG 0 &&
-#define	PCIE_DBG 0 &&
-#define	PCIE_ARI_DBG 0 &&
-#define	PCIE_DBG_CAP 0 &&
-#define	PCIE_DBG_AER 0 &&
+#define	PCIE_DBG_CFG(...)	(void)(0)
+#define	PCIE_DBG(...)		(void)(0)
+#define	PCIE_ARI_DBG(...)	(void)(0)
+#define	PCIE_DBG_CAP(...)	(void)(0)
+#define	PCIE_DBG_AER(...)	(void)(0)
 
 #endif	/* DEBUG */
 
@@ -525,6 +584,7 @@ extern void pcie_enable_errors(dev_info_t *dip);
 extern void pcie_disable_errors(dev_info_t *dip);
 extern int pcie_enable_ce(dev_info_t *dip);
 extern boolean_t pcie_bridge_is_link_disabled(dev_info_t *);
+extern boolean_t pcie_is_pci_device(dev_info_t *dip);
 
 extern pcie_bus_t *pcie_init_bus(dev_info_t *dip, pcie_req_id_t bdf,
     uint8_t flags);
@@ -583,6 +643,7 @@ extern void pf_eh_enter(pcie_bus_t *bus_p);
 extern void pf_eh_exit(pcie_bus_t *bus_p);
 extern int pf_scan_fabric(dev_info_t *rpdip, ddi_fm_error_t *derr,
     pf_data_t *root_pfd_p);
+extern void pf_set_passthru(dev_info_t *, boolean_t);
 extern void pf_init(dev_info_t *, ddi_iblock_cookie_t, ddi_attach_cmd_t);
 extern void pf_fini(dev_info_t *, ddi_detach_cmd_t);
 extern int pf_hdl_lookup(dev_info_t *, uint64_t, uint32_t, uint64_t,
@@ -611,6 +672,15 @@ extern pcie_bus_t *pciev_get_affected_dev(pf_impl_t *, pf_data_t *,
     uint16_t, uint16_t);
 extern void pciev_eh_exit(pf_data_t *, uint_t);
 extern boolean_t pcie_in_domain(pcie_bus_t *, uint_t);
+
+/* Link Bandwidth Monitoring */
+extern boolean_t pcie_link_bw_supported(dev_info_t *);
+extern int pcie_link_bw_enable(dev_info_t *);
+extern int pcie_link_bw_disable(dev_info_t *);
+
+/* Link Management */
+extern int pcie_link_set_target(dev_info_t *, pcie_link_speed_t);
+extern int pcie_link_retrain(dev_info_t *);
 
 #define	PCIE_ZALLOC(data) kmem_zalloc(sizeof (data), KM_SLEEP)
 

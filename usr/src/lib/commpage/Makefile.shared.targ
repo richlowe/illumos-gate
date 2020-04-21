@@ -10,7 +10,7 @@
 #
 
 #
-# Copyright 2016 Joyent, Inc.
+# Copyright (c) 2019, Joyent, Inc.
 #
 
 #
@@ -23,7 +23,7 @@ pics/%.o: $(SRC)/lib/commpage/common/%.c
 
 pics/%.o: $(SRC)/lib/commpage/$(TARGET_ARCH)/%.s $(COMMPAGE_OFFSETS_H)
 	$(COMPILE.s) -o $@ $<
-	$(POST_PROCESS_O)
+	$(POST_PROCESS_S_O)
 
 $(COMMPAGE_OFFSETS_H): $(COMMPAGE_OFFSETS_SRC)
 	$(OFFSETS_CREATE) <$(COMMPAGE_OFFSETS_SRC) >$@

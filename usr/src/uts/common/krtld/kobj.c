@@ -25,6 +25,7 @@
 /*
  * Copyright 2011 Bayard G. Bell <buffer.g.overflow@gmail.com>.
  * All rights reserved. Use is subject to license terms.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -297,14 +298,15 @@ int standalone = 1;			/* an unwholey kernel? */
 int use_iflush;				/* iflush after relocations */
 
 /*
- * _kobj_printf()
+ * _kobj_printf() and _vkobj_printf()
  *
  * Common printf function pointer. Can handle only one conversion
  * specification in the format string. Some of the functions invoked
  * through this function pointer cannot handle more that one conversion
  * specification in the format string.
  */
-void (*_kobj_printf)(void *, const char *, ...);	/* printf routine */
+void (*_kobj_printf)(void *, const char *, ...) __KPRINTFLIKE(2);
+void (*_vkobj_printf)(void *, const char *, va_list) __KVPRINTFLIKE(2);
 
 /*
  * Standalone function pointers for use within krtld.
@@ -421,7 +423,7 @@ kobj_init(
 		 * Now that the ramdisk is mounted, finish boot property
 		 * initialization.
 		 */
-		boot_prop_finish();
+		read_bootenvrc();
 	}
 
 #if !defined(_UNIX_KRTLD)
@@ -509,7 +511,7 @@ kobj_init(
 #ifdef	KOBJ_DEBUG
 	if (kobj_debug & D_DEBUG)
 		_kobj_printf(ops,
-		    "krtld: transferring control to: 0x%p\n", entry);
+		    "krtld: transferring control to: 0x%lx\n", entry);
 #endif
 
 	/*
@@ -530,7 +532,7 @@ kobj_init(
 #ifdef	KOBJ_DEBUG
 	if (kobj_debug & D_DEBUG)
 		_kobj_printf(ops,
-		    "krtld: really transferring control to: 0x%p\n", entry);
+		    "krtld: really transferring control to: 0x%lx\n", entry);
 #endif
 
 	/* restore printf/bcopy/bzero vectors before returning */
@@ -855,9 +857,9 @@ load_exec(val_t *bootaux, char *filename)
 	if (kobj_debug & D_LOADING) {
 		_kobj_printf(ops, "krtld: file=%s\n", mp->filename);
 		_kobj_printf(ops, "\ttext: 0x%p", mp->text);
-		_kobj_printf(ops, " size: 0x%x\n", mp->text_size);
+		_kobj_printf(ops, " size: 0x%lx\n", mp->text_size);
 		_kobj_printf(ops, "\tdata: 0x%p", mp->data);
-		_kobj_printf(ops, " dsize: 0x%x\n", mp->data_size);
+		_kobj_printf(ops, " dsize: 0x%lx\n", mp->data_size);
 	}
 #endif /* KOBJ_DEBUG */
 
@@ -966,9 +968,9 @@ load_linker(val_t *bootaux)
 	if (kobj_debug & D_LOADING) {
 		_kobj_printf(ops, "krtld: file=%s\n", mp->filename);
 		_kobj_printf(ops, "\ttext:0x%p", mp->text);
-		_kobj_printf(ops, " size: 0x%x\n", mp->text_size);
+		_kobj_printf(ops, " size: 0x%lx\n", mp->text_size);
 		_kobj_printf(ops, "\tdata:0x%p", mp->data);
-		_kobj_printf(ops, " dsize: 0x%x\n", mp->data_size);
+		_kobj_printf(ops, " dsize: 0x%lx\n", mp->data_size);
 	}
 #endif /* KOBJ_DEBUG */
 
@@ -1174,7 +1176,6 @@ bind_primary(val_t *bootaux, int lmid)
 		if (mp->flags & KOBJ_EXEC) {
 			Dyn *dyn;
 			Word relasz = 0, relaent = 0;
-			Word shtype;
 			char *rela = NULL;
 
 			for (dyn = (Dyn *)bootaux[BA_DYNAMIC].ba_ptr;
@@ -1189,11 +1190,9 @@ bind_primary(val_t *bootaux, int lmid)
 					relaent = dyn->d_un.d_val;
 					break;
 				case DT_RELA:
-					shtype = SHT_RELA;
 					rela = (char *)dyn->d_un.d_ptr;
 					break;
 				case DT_REL:
-					shtype = SHT_REL;
 					rela = (char *)dyn->d_un.d_ptr;
 					break;
 				}
@@ -1210,8 +1209,8 @@ bind_primary(val_t *bootaux, int lmid)
 				_kobj_printf(ops, "krtld: relocating: file=%s "
 				    "KOBJ_EXEC\n", mp->filename);
 #endif
-			if (do_relocate(mp, rela, shtype, relasz/relaent,
-			    relaent, (Addr)mp->text) < 0)
+			if (do_relocate(mp, rela, relasz/relaent, relaent,
+			    (Addr)mp->text) < 0)
 				return (-1);
 		} else {
 			if (do_relocations(mp) < 0)
@@ -2011,9 +2010,9 @@ kobj_load_module(struct modctl *modp, int use_path)
 	if (kobj_debug & D_LOADING) {
 		_kobj_printf(ops, "krtld: file=%s\n", mp->filename);
 		_kobj_printf(ops, "\ttext:0x%p", mp->text);
-		_kobj_printf(ops, " size: 0x%x\n", mp->text_size);
+		_kobj_printf(ops, " size: 0x%lx\n", mp->text_size);
 		_kobj_printf(ops, "\tdata:0x%p", mp->data);
-		_kobj_printf(ops, " dsize: 0x%x\n", mp->data_size);
+		_kobj_printf(ops, " dsize: 0x%lx\n", mp->data_size);
 	}
 #endif /* KOBJ_DEBUG */
 
@@ -2101,6 +2100,7 @@ kobj_load_primary_module(struct modctl *modp)
 	if (kobj_load_module(modp, 0) != 0)
 		return (-1);
 
+	dep = NULL;
 	mp = modp->mod_mp;
 	mp->flags |= KOBJ_PRIM;
 
@@ -2116,7 +2116,8 @@ kobj_load_primary_module(struct modctl *modp)
 		return (-1);
 	}
 
-	add_dependent(mp, dep->mod_mp);
+	if (dep != NULL)
+		add_dependent(mp, dep->mod_mp);
 
 	/*
 	 * Relocate it.  This module may not be part of a link map, so we
@@ -2178,6 +2179,7 @@ static void
 free_module_data(struct module *mp)
 {
 	struct module_list *lp, *tmp;
+	hotinline_desc_t *hid, *next;
 	int ksyms_exported = 0;
 
 	lp = mp->head;
@@ -2185,6 +2187,15 @@ free_module_data(struct module *mp)
 		tmp = lp;
 		lp = lp->next;
 		kobj_free((char *)tmp, sizeof (*tmp));
+	}
+
+	/* release hotinlines */
+	hid = mp->hi_calls;
+	while (hid != NULL) {
+		next = hid->hid_next;
+		kobj_free(hid->hid_symname, strlen(hid->hid_symname) + 1);
+		kobj_free(hid, sizeof (hotinline_desc_t));
+		hid = next;
 	}
 
 	rw_enter(&ksyms_lock, RW_WRITER);
@@ -2713,10 +2724,10 @@ crypto_es_hash(struct module *mp, char *hash, char *shstrtab)
 		if (kobj_debug & D_DEBUG)
 			_kobj_printf(ops,
 			    "krtld: crypto_es_hash: updating hash with"
-			    " %s data size=%d\n", shstrtab + shp->sh_name,
-			    shp->sh_size);
+			    " %s data size=%lx\n", shstrtab + shp->sh_name,
+			    (size_t)shp->sh_size);
 #endif
-		ASSERT(shp->sh_addr != NULL);
+		ASSERT(shp->sh_addr != 0);
 		SHA1Update(&ctx, (const uint8_t *)shp->sh_addr, shp->sh_size);
 	}
 
@@ -2867,7 +2878,7 @@ do_dependents(struct modctl *modp, char *modname, size_t modnamelen)
 
 			_kobj_printf(ops, "%s: dependency ", modp->mod_modname);
 			_kobj_printf(ops, "'%s' too long ", dep);
-			_kobj_printf(ops, "(max %d chars)\n", modnamelen);
+			_kobj_printf(ops, "(max %d chars)\n", (int)modnamelen);
 
 			kobj_free(dep, p - d + 1);
 
@@ -3032,8 +3043,18 @@ do_symbols(struct module *mp, Elf64_Addr bss_base)
 		if (sp->st_shndx == SHN_UNDEF) {
 			resolved = 0;
 
+			/*
+			 * Skip over sdt probes and smap calls,
+			 * they're relocated later.
+			 */
 			if (strncmp(name, sdt_prefix, strlen(sdt_prefix)) == 0)
 				continue;
+#if defined(__x86)
+			if (strcmp(name, "smap_enable") == 0 ||
+			    strcmp(name, "smap_disable") == 0)
+				continue;
+#endif /* defined(__x86) */
+
 
 			/*
 			 * If it's not a weak reference and it's
@@ -3080,7 +3101,7 @@ do_symbols(struct module *mp, Elf64_Addr bss_base)
 	}
 	if (err)
 		return (err);
-	if (assign == 0 && mp->bss == NULL) {
+	if (assign == 0 && mp->bss == 0) {
 		mp->bss_align = bss_align;
 		mp->bss_size = bss_ptr;
 	} else if (resolved) {
@@ -3371,26 +3392,26 @@ sym_insert(struct module *mp, char *name, symid_t index)
 	symid_t *ip;
 
 #ifdef KOBJ_DEBUG
-		if (kobj_debug & D_SYMBOLS) {
-			static struct module *lastmp = NULL;
-			Sym *sp;
-			if (lastmp != mp) {
-				_kobj_printf(ops,
-				    "krtld: symbol entry: file=%s\n",
-				    mp->filename);
-				_kobj_printf(ops,
-				    "krtld:\tsymndx\tvalue\t\t"
-				    "symbol name\n");
-				lastmp = mp;
-			}
-			sp = (Sym *)(mp->symtbl +
-			    index * mp->symhdr->sh_entsize);
-			_kobj_printf(ops, "krtld:\t[%3d]", index);
-			_kobj_printf(ops, "\t0x%lx", sp->st_value);
-			_kobj_printf(ops, "\t%s\n", name);
+	if (kobj_debug & D_SYMBOLS) {
+		static struct module *lastmp = NULL;
+		Sym *sp;
+		if (lastmp != mp) {
+			_kobj_printf(ops,
+			    "krtld: symbol entry: file=%s\n",
+			    mp->filename);
+			_kobj_printf(ops,
+			    "krtld:\tsymndx\tvalue\t\t"
+			    "symbol name\n");
+			lastmp = mp;
 		}
-
+		sp = (Sym *)(mp->symtbl +
+		    index * mp->symhdr->sh_entsize);
+		_kobj_printf(ops, "krtld:\t[%3d]", index);
+		_kobj_printf(ops, "\t0x%lx", sp->st_value);
+		_kobj_printf(ops, "\t%s\n", name);
+	}
 #endif
+
 	for (ip = &mp->buckets[kobj_hash_name(name) % mp->hashsize]; *ip;
 	    ip = &mp->chains[*ip]) {
 		;
@@ -3819,7 +3840,7 @@ kobj_read_file(struct _buf *file, char *buf, uint_t size, uint_t off)
 	if (_moddebug & MODDEBUG_ERRMSG) {
 		_kobj_printf(ops, "kobj_read_file: size=%x,", size);
 		_kobj_printf(ops, " offset=%x at", off);
-		_kobj_printf(ops, " buf=%x\n", buf);
+		_kobj_printf(ops, " buf=%lx\n", (uintptr_t)buf);
 	}
 
 	/*
@@ -3862,7 +3883,7 @@ kobj_read_file(struct _buf *file, char *buf, uint_t size, uint_t off)
 
 		if (dlen != size) {
 			_kobj_printf(ops, "kobj_read_file: z_uncompress "
-			    "failed to uncompress (size returned 0x%x , "
+			    "failed to uncompress (size returned 0x%lx , "
 			    "expected size: 0x%x)\n", dlen, size);
 			return (-1);
 		}
@@ -4133,7 +4154,7 @@ kobj_segbrk(caddr_t *spp, size_t size, size_t align, caddr_t limit)
 		npva = (uintptr_t)BOP_ALLOC(ops, (caddr_t)pva,
 		    alloc_size, alloc_align);
 
-		if (npva == NULL) {
+		if (npva == 0) {
 			_kobj_printf(ops, "BOP_ALLOC failed, 0x%lx bytes",
 			    alloc_size);
 			_kobj_printf(ops, " aligned %lx", alloc_align);

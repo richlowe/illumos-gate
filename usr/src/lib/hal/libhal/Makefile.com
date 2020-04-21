@@ -25,6 +25,7 @@
 #
 # usr/src/lib/hal/libhal/Makefile.com
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libhal.a
 VERS =		.1.0.0
@@ -34,15 +35,17 @@ LIBPCSRC =	hal.pc
 
 include ../../Makefile.com
 
-LIBS =		$(DYNLIB) $(LINTLIB)
+LIBS =		$(DYNLIB)
 LDLIBS +=	-lc -ldbus-1
-$(LINTLIB) := 	SRCS = $(SRCDIR)/$(LINTSRC)
+NATIVE_LIBS +=	libdbus-1.so
 
 SRCDIR =	../common
 
 CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	$(HAL_CONFIG_CPPFLAGS)
 CPPFLAGS +=	-DGETTEXT_PACKAGE=\"$(HAL_GETTEXT_PACKAGE)\" -DENABLE_NLS
+
+SMOFF += all_func_returns,leaks
 
 ROOTMAJLINK =	$(ROOTLIBDIR)/$(LIBRARY:.a=.so)$(VERS_MAJ)
 ROOTMAJLINK64 =	$(ROOTLIBDIR64)/$(LIBRARY:.a=.so)$(VERS_MAJ)

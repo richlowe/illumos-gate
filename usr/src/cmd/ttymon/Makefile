@@ -23,6 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= stty ttymon ttyadm sttydefs
 XPG4PROG= stty
@@ -75,8 +76,11 @@ LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-extra
+
+# not linted
+SMATCH=off
 
 #
 # Message catalog

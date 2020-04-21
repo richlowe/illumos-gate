@@ -24,6 +24,7 @@
 #
 # Copyright (c) 2016 by Delphix. All rights reserved.
 # Copyright 2017 RackTop Systems.
+# Copyright 2020 Joyent, Inc.
 #
 
 PROG:sh=	cd ..; basename `pwd`
@@ -36,7 +37,7 @@ INCS +=	-I../../../lib/libzpool/common
 INCS +=	-I../../../uts/common/fs/zfs
 INCS +=	-I../../../uts/common/fs/zfs/lua
 
-LDLIBS += -lzpool -lzfs -lnvpair
+LDLIBS += -lzfs -lnvpair
 
 CSTD=	$(CSTD_GNU99)
 C99LMODE=	-Xc99=%all
@@ -44,7 +45,7 @@ C99LMODE=	-Xc99=%all
 CPPFLAGS.first = -I$(SRC)/lib/libfakekernel/common -D_FAKE_KERNEL
 CPPFLAGS += -D_LARGEFILE64_SOURCE=1 -D_REENTRANT $(INCS)
 
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-switch
 
 LINTFLAGS += -erroff=E_STATIC_UNUSED

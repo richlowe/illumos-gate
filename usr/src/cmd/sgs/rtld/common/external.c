@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2014 Garrett D'Amore <garrett@damore.org>
- * Copyright 2016 Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /*
@@ -202,7 +202,7 @@
  *	call during process execution.
  *
  *   -	_ld_libc() can also be called by libc during process execution to
- * 	re-establish interfaces such as the locale.
+ *	re-establish interfaces such as the locale.
  */
 static void
 get_lcinterface(Rt_map *lmp, Lc_interface *funcs)
@@ -368,9 +368,9 @@ get_lcinterface(Rt_map *lmp, Lc_interface *funcs)
 		 * If a version of libc gives us only a subset of the TLS
 		 * interfaces, it's confused and we discard the whole lot.
 		 */
-		if ((lcp[CI_TLS_MODADD].lc_un.lc_func &&
-		    lcp[CI_TLS_MODREM].lc_un.lc_func &&
-		    lcp[CI_TLS_STATMOD].lc_un.lc_func) == NULL) {
+		if (((lcp[CI_TLS_MODADD].lc_un.lc_func != NULL) &&
+		    (lcp[CI_TLS_MODREM].lc_un.lc_func != NULL) &&
+		    (lcp[CI_TLS_STATMOD].lc_un.lc_func != NULL)) == 0) {
 			lcp[CI_TLS_MODADD].lc_un.lc_func = NULL;
 			lcp[CI_TLS_MODREM].lc_un.lc_func = NULL;
 			lcp[CI_TLS_STATMOD].lc_un.lc_func = NULL;
@@ -475,14 +475,13 @@ rt_bind_clear(int flags)
 void
 rt_thr_init(Lm_list *lml)
 {
-	void	(*fptr)(void);
+	int	(*fptr)(void);
 
-	if ((fptr =
-	    (void (*)())lml->lm_lcs[CI_THRINIT].lc_un.lc_func) != NULL) {
+	if ((fptr = lml->lm_lcs[CI_THRINIT].lc_un.lc_func) != NULL) {
 		lml->lm_lcs[CI_THRINIT].lc_un.lc_func = NULL;
 
 		leave(lml, thr_flg_reenter);
-		(*fptr)();
+		(void) (*fptr)();
 		(void) enter(thr_flg_reenter);
 
 		/*
@@ -723,9 +722,9 @@ isalnum(int c)
 
 #if defined(__i386) || defined(__amd64)
 /*
- * Instead of utilizing the comm page for clock_gettime, rtld uses the raw
- * syscall instead.  Doing so decreases the surface of symbols needed from libc
- * for a modest performance cost.
+ * Instead of utilizing the comm page for clock_gettime and gettimeofday, rtld
+ * uses the raw syscall instead.  Doing so decreases the surface of symbols
+ * needed from libc for a modest performance cost.
  */
 extern int __clock_gettime_sys(clockid_t, struct timespec *);
 
@@ -733,6 +732,22 @@ int
 __clock_gettime(clockid_t clock_id, struct timespec *tp)
 {
 	return (__clock_gettime_sys(clock_id, tp));
+}
+
+int
+gettimeofday(struct timeval *tv, void *tz)
+{
+	if (tv != NULL) {
+		/*
+		 * Perform the same logic as the libc gettimeofday() when it
+		 * lacks comm page support: Make the clock_gettime syscall and
+		 * divide out the tv_usec field as required.
+		 */
+		__clock_gettime_sys(CLOCK_REALTIME, (timespec_t *)tv);
+		tv->tv_usec /= 1000;
+	}
+
+	return (0);
 }
 #endif /* defined(__i386) || defined(__amd64) */
 

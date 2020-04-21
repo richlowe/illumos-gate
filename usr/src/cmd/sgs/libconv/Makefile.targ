@@ -23,8 +23,10 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
-pics/%.o:	../common/%.c
+pics/%.o:	$(SRCDIR)/common/%.c
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
@@ -32,11 +34,11 @@ pics/%.o:	%.s
 		$(COMPILE.s) -o $@ $<
 		$(POST_PROCESS_O)
 
-pics/%32.o:	../common/%.c
+pics/%32.o:	$(SRCDIR)/common/%.c
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
-pics/%64.o:	../common/%.c
+pics/%64.o:	$(SRCDIR)/common/%.c
 		$(COMPILE.c) -D_ELF64 -o $@ $<
 		$(POST_PROCESS_O)
 
@@ -53,27 +55,23 @@ pics/elfcap.o:	$(ELFCAP)/elfcap.c
 #
 # We make this depend on Makefile.targ, because a change to Makefile.targ
 # can change the limit, in which case we want to force everything to rebuild.
-report_bufsize.h:	../Makefile.targ
-		perl ../../tools/libconv_mk_report_bufsize.pl 8000
+report_bufsize.h:	$(SRCDIR)/Makefile.targ
+		perl $(SRC)/cmd/sgs/tools/libconv_mk_report_bufsize.pl 8000
 
-../common/%.c ../common/%_machelf.c:	%_msg.h
+$(SRCDIR)/common/%.c $(SRCDIR)/common/%_machelf.c:	%_msg.h
 
-%_msg.h %_msg.c: $(SGSMSG) ../common/%.msg report_bufsize.h
+%_msg.h + %_msg.c: $(SGSMSG) $(SRCDIR)/common/%.msg report_bufsize.h
 		$(SGSMSG) $(SGSMSGFLAGS) -h $*_msg.h -d $*_msg.c \
 			-n sgs_msg_libconv_$* $<
-
-$(SGSMSG):	FRC
-		@ cd $(SGSTOOLS)/$(MACH); pwd; $(MAKE) catalog
-		@ pwd
 
 vernote.s:	bld_vernote $(README_REVISION) $(ONLDREADME)
 		./bld_vernote \
 			-R `perl $(README_REVISION) $(ONLDREADME)` \
 			-r "$(RELEASE)" -o $@
 
-bld_vernote:	../common/bld_vernote.ksh
+bld_vernote:	$(SRCDIR)/common/bld_vernote.ksh
 		$(RM) -f $@
-		cp ../common/bld_vernote.ksh $@
+		cp $(SRCDIR)/common/bld_vernote.ksh $@
 		chmod a+x $@
 
 $(LIBRARY):	pics $$(PICS)
@@ -81,18 +79,13 @@ $(LIBRARY):	pics $$(PICS)
 		$(AR) $(ARFLAGS) $@ $(PICS)
 		$(POST_PROCESS_A)
 
-chkmsg:		$(LINTSRCS)
-		sh $(CHKMSG) $(CHKMSGFLAGS) $(LINTSRCS)
-
-.PARALLEL:	$(LINTOUT32) $(LINTOUT64) $(LINTLIB32) $(LINTLIB64)
-
-lint:		$(LINTLIB32) $(LINTOUT32) $(LINTLIB64) $(LINTOUT64) \
-		    .WAIT $(SGSLINTOUT)
+chkmsg:		$(MSGSRCS)
+		sh $(CHKMSG) $(CHKMSGFLAGS) $(MSGSRCS)
 
 catalog:
 
 pics:
-		-@mkdir -p $@
+		$(MKDIR) -p $@
 
 clobber:	clean
 		-$(RM) $(LIBRARY) $(CLOBBERFILES)

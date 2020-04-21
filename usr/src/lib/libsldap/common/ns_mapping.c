@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2001, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <stdlib.h>
@@ -201,7 +202,7 @@ __s_api_add_map2hash(ns_config_t *config, ns_hashtype_t type,
  * Assume space is the only legal whitespace.
  * attributeMap syntax:
  * attributeMap      = serviceId ":" origAttribute "="
- * 			attributes
+ *			attributes
  * origAttribute     = attribute
  * attributes        = wattribute *( space wattribute )
  * wattribute        = whsp newAttribute whsp
@@ -210,7 +211,7 @@ __s_api_add_map2hash(ns_config_t *config, ns_hashtype_t type,
  *
  * objectclassMap syntax:
  * objectclassMap    = serviceId ":" origObjectclass "="
- * 			objectclass
+ *			objectclass
  * origObjectclass   = objectclass
  * objectclass       = keystring
  */
@@ -295,7 +296,7 @@ __s_api_parse_map(char *cp, char **sid, char **origA, char ***mapA)
 }
 
 
-static void
+void
 __ns_ldap_freeASearchDesc(ns_ldap_search_desc_t *ptr)
 {
 	if (ptr == NULL)
@@ -662,7 +663,7 @@ int __ns_ldap_getSearchDescriptors(
 	int			cnt, max;
 	int			vers;
 	ns_config_t		*cfg;
-	ns_ldap_search_desc_t 	*ret;
+	ns_ldap_search_desc_t	*ret;
 
 	if ((desc == NULL) || (errorp == NULL))
 		return (NS_LDAP_INVALID_PARAM);
@@ -686,7 +687,7 @@ int __ns_ldap_getSearchDescriptors(
 		(void) snprintf(errstr, sizeof (errstr),
 		    gettext("No configuration information available."));
 		MKERROR(LOG_ERR, *errorp, NS_CONFIG_NOTLOADED, strdup(errstr),
-		    NULL);
+		    NS_LDAP_MEMORY);
 		return (NS_LDAP_CONFIG);
 	}
 
@@ -763,7 +764,7 @@ int __ns_ldap_getSearchDescriptors(
 		if (*srv != COLONTOK)
 			continue;
 		srv++;
-		while (srv != NULL && *srv != NULL) {
+		while (srv != NULL && *srv != '\0') {
 			/* Process 1 */
 			rc = __s_api_parseASearchDesc(service, &srv, &ret);
 			if (rc != NS_LDAP_SUCCESS) {
@@ -774,7 +775,7 @@ int __ns_ldap_getSearchDescriptors(
 				(void) __ns_ldap_freeParam(&param);
 				param = NULL;
 				MKERROR(LOG_ERR, *errorp, NS_CONFIG_SYNTAX,
-				    strdup(errstr), NULL);
+				    strdup(errstr), NS_LDAP_MEMORY);
 				return (rc);
 			}
 			if (ret != NULL) {

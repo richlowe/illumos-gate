@@ -49,12 +49,11 @@
 #include <sys/zfeature.h>
 #include <sys/dmu_tx.h>
 #undef verify
-#include <libzfs.h>
+#include <libzutil.h>
 
 extern boolean_t zfeature_checks_disable;
 
 const char cmdname[] = "zhack";
-libzfs_handle_t *g_zfs;
 static importargs_t g_importargs;
 static char *g_pool;
 static boolean_t g_readonly;
@@ -105,7 +104,7 @@ fatal(spa_t *spa, void *tag, const char *fmt, ...)
 /* ARGSUSED */
 static int
 space_delta_cb(dmu_object_type_t bonustype, void *data,
-    uint64_t *userp, uint64_t *groupp)
+    uint64_t *userp, uint64_t *groupp, uint64_t *projectp)
 {
 	/*
 	 * Is it a valid type of object to track?
@@ -121,86 +120,50 @@ space_delta_cb(dmu_object_type_t bonustype, void *data,
  * Target is the dataset whose pool we want to open.
  */
 static void
-import_pool(const char *target, boolean_t readonly)
+zhack_import(char *target, boolean_t readonly)
 {
 	nvlist_t *config;
-	nvlist_t *pools;
-	int error;
-	char *sepp;
-	spa_t *spa;
-	nvpair_t *elem;
 	nvlist_t *props;
-	const char *name;
+	int error;
 
 	kernel_init(readonly ? FREAD : (FREAD | FWRITE));
-	g_zfs = libzfs_init();
-	ASSERT(g_zfs != NULL);
 
 	dmu_objset_register_type(DMU_OST_ZFS, space_delta_cb);
 
 	g_readonly = readonly;
-
-	/*
-	 * If we only want readonly access, it's OK if we find
-	 * a potentially-active (ie, imported into the kernel) pool from the
-	 * default cachefile.
-	 */
-	if (readonly && spa_open(target, &spa, FTAG) == 0) {
-		spa_close(spa, FTAG);
-		return;
-	}
-
-	g_importargs.unique = B_TRUE;
 	g_importargs.can_be_active = readonly;
 	g_pool = strdup(target);
-	if ((sepp = strpbrk(g_pool, "/@")) != NULL)
-		*sepp = '\0';
-	g_importargs.poolname = g_pool;
-	pools = zpool_search_import(g_zfs, &g_importargs);
 
-	if (nvlist_empty(pools)) {
-		if (!g_importargs.can_be_active) {
-			g_importargs.can_be_active = B_TRUE;
-			if (zpool_search_import(g_zfs, &g_importargs) != NULL ||
-			    spa_open(target, &spa, FTAG) == 0) {
-				fatal(spa, FTAG, "cannot import '%s': pool is "
-				    "active; run " "\"zpool export %s\" "
-				    "first\n", g_pool, g_pool);
-			}
-		}
-
-		fatal(NULL, FTAG, "cannot import '%s': no such pool "
-		    "available\n", g_pool);
-	}
-
-	elem = nvlist_next_nvpair(pools, NULL);
-	name = nvpair_name(elem);
-	verify(nvpair_value_nvlist(elem, &config) == 0);
+	error = zpool_find_config(NULL, target, &config, &g_importargs,
+	    &libzpool_config_ops);
+	if (error)
+		fatal(NULL, FTAG, "cannot import '%s'", target);
 
 	props = NULL;
 	if (readonly) {
-		verify(nvlist_alloc(&props, NV_UNIQUE_NAME, 0) == 0);
-		verify(nvlist_add_uint64(props,
+		VERIFY(nvlist_alloc(&props, NV_UNIQUE_NAME, 0) == 0);
+		VERIFY(nvlist_add_uint64(props,
 		    zpool_prop_to_name(ZPOOL_PROP_READONLY), 1) == 0);
 	}
 
 	zfeature_checks_disable = B_TRUE;
-	error = spa_import(name, config, props, ZFS_IMPORT_NORMAL);
+	error = spa_import(target, config, props,
+	    (readonly ?  ZFS_IMPORT_SKIP_MMP : ZFS_IMPORT_NORMAL));
 	zfeature_checks_disable = B_FALSE;
 	if (error == EEXIST)
 		error = 0;
 
 	if (error)
-		fatal(NULL, FTAG, "can't import '%s': %s", name,
+		fatal(NULL, FTAG, "can't import '%s': %s", target,
 		    strerror(error));
 }
 
 static void
-zhack_spa_open(const char *target, boolean_t readonly, void *tag, spa_t **spa)
+zhack_spa_open(char *target, boolean_t readonly, void *tag, spa_t **spa)
 {
 	int err;
 
-	import_pool(target, readonly);
+	zhack_import(target, readonly);
 
 	zfeature_checks_disable = B_TRUE;
 	err = spa_open(target, spa, tag);
@@ -561,7 +524,6 @@ main(int argc, char **argv)
 		    "changes may not be committed to disk\n");
 	}
 
-	libzfs_fini(g_zfs);
 	kernel_fini();
 
 	return (rv);

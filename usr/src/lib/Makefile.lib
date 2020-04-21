@@ -18,9 +18,12 @@
 #
 # CDDL HEADER END
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2015 Gary Mills
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
+# Copyright 2016 RackTop Systems.
 # Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2019, Joyent, Inc.
 #
 #
 # Definitions common to libraries.
@@ -69,9 +72,9 @@ HDRDIR=		/__nonexistent_directory__
 # If a component of the build needs to build an archive library
 # for its own internal purposes, it can define LIBS for itself
 # after including Makefile.lib, like this:
-# 	LIBS = $(LIBRARY)
+#	LIBS = $(LIBRARY)
 # or:
-# 	LIBS = $(LIBRARYCCC)
+#	LIBS = $(LIBRARYCCC)
 # Archive libraries must not be installed in the proto area.
 #
 LIBS=
@@ -90,9 +93,6 @@ ROOTLIBDIR=	$(ROOT)/usr/lib
 ROOTLIBDIR64=	$(ROOT)/usr/lib/$(MACH64)
 ROOTFS_LIBDIR=	$(ROOT)/lib
 ROOTFS_LIBDIR64=	$(ROOT)/lib/$(MACH64)
-ROOTLINTDIR=	$(ROOTLIBDIR)
-ROOTFS_LINTDIR=	$(ROOTFS_LIBDIR)
-ROOTFS_LINTDIR64=	$(ROOTFS_LIBDIR64)
 ROOTHDRS=	$(HDRS:%=$(ROOTHDRDIR)/%)
 HDRSRCS=	$(HDRS:%=$(HDRDIR)/%)
 CHECKHDRS=	$(HDRSRCS:%.h=%.check)
@@ -108,9 +108,6 @@ ROOTLINKSCCC=	$(ROOTLIBDIR)/$(LIBLINKSCCC)
 ROOTLINKSCCC64=	$(ROOTLIBDIR64)/$(LIBLINKSCCC)
 ROOTFS_LINKSCCC=	$(ROOTFS_LIBDIR)/$(LIBLINKSCCC)
 ROOTFS_LINKSCCC64=	$(ROOTFS_LIBDIR64)/$(LIBLINKSCCC)
-ROOTLINT=	$(LINTSRC:%=$(ROOTLINTDIR)/%)
-ROOTFS_LINT=	$(LINTSRC:%=$(ROOTFS_LINTDIR)/%)
-ROOTFS_LINT64=	$(LINTSRC:%=$(ROOTFS_LINTDIR64)/%)
 
 # Demo rules
 DEMOFILES=
@@ -120,11 +117,6 @@ ROOTDEMODIRS=
 ROOTDEMOFILES=	$(DEMOFILES:%=$(ROOTDEMODIRBASE)/%)
 $(ROOTDEMODIRS) :=	DIRMODE =	755
 
-LINTLIB=	llib-l$(LIBNAME).ln
-LINTFLAGS=	-uaxm
-LINTFLAGS64=	-uaxm -m64
-LINTSRC=	$(LINTLIB:%.ln=%)
-LINTOUT=	lint.out
 ARFLAGS=	r
 SONAME=		$(DYNLIB)
 # For most libraries, we should be able to resolve all symbols at link time,
@@ -135,7 +127,8 @@ SONAME=		$(DYNLIB)
 
 HSONAME=	-h$(SONAME)
 DYNFLAGS=	$(HSONAME) $(ZTEXT) $(ZDEFS) $(BDIRECT) \
-		$(MAPFILES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%)
+		$(MAPFILES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
+		$(LDCHECKS)
 
 LDLIBS=		$(LDLIBS.lib)
 
@@ -155,8 +148,12 @@ SRCS=		$(OBJECTS:%.o=$(SRCDIR)/%.c)
 BUILD.AR=	$(AR) $(ARFLAGS) $@ $(AROBJS)
 BUILD.SO=	$(CC) $(CFLAGS) -o $@ $(GSHARED) $(DYNFLAGS) \
 		$(PICS) $(EXTPICS) $(LDLIBS)
+BUILD64.SO=	$(CC64) $(CFLAGS64) -o $@ $(GSHARED) $(DYNFLAGS) \
+		$(PICS) $(EXTPICS) -L $(ROOTLIBDIR64) $(LDLIBS)
 BUILDCCC.SO=	$(CCC) $(CCFLAGS) -o $@ $(GSHARED) $(DYNFLAGS) \
 		$(PICS) $(EXTPICS) $(LDLIBS)
+BUILDCCC64.SO=	$(CCC64) $(CCFLAGS64) -o $@ $(GSHARED) $(DYNFLAGS) \
+		$(PICS) $(EXTPICS) $(LDLIBS) $(CCNEEDED64)
 
 # default dynamic library symlink
 INS.liblink=	-$(RM) $@; $(SYMLINK) $(LIBLINKPATH)$(LIBLINKS)$(VERS) $@
@@ -199,7 +196,6 @@ $(PICS)	 :=	CFLAGS64 += $(CTF_FLAGS)
 $(PICS)  :=	CTFCONVERT_POST = $(CTFCONVERT_O)
 $(DYNLIB) :=	CTFMERGE_POST = $(CTFMERGE_LIB)
 
-$(LINTLIB):=	LOG = -DLOGGING
 $(LIBRARY):=	AROBJS = $(OBJS)
 $(LIBRARY):=	DIR = objs
 $(DYNLIB):=	DIR = pics
@@ -215,28 +211,19 @@ $(DYNLIBCCC):=	DYNFLAGS = $(HSONAMECCC) $(ZTEXT) $(ZDEFS) \
 		$(BDIRECT) $(NORUNPATH)
 
 
-# build rule for "portable" source 
+# build rule for "portable" source
 objs/%.o pics/%.o: %.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
 
 objs/%.o pics/%.o: %.cc
 	$(COMPILE.cc) -o $@ $<
-	$(POST_PROCESS_O)
+	$(POST_PROCESS_CC_O)
 
 .PRECIOUS: $(LIBS)
 
 # Define the majority text domain in this directory.
 TEXT_DOMAIN= SUNW_OST_OSLIB
-
-#
-# For library source code, we expect that some symbols may not be used or
-# may *appear* to be able to rescoped to static; shut lint up.  Never add
-# a flag here unless you're *sure* that all libraries need to be linted
-# with it.
-#
-LINTCHECKFLAGS = -m -erroff=E_NAME_DEF_NOT_USED2
-LINTCHECKFLAGS += -erroff=E_NAME_DECL_NOT_USED_DEF2 
 
 #
 # Target Architecture
@@ -248,3 +235,15 @@ TARGETMACH=	$(MACH)
 # shouldn't override this - they should override $(CLOBBERFILES) instead.
 #
 CLOBBERTARGFILES= $(LIBS) $(DYNLIB) $(CLOBBERFILES)
+
+#
+# Define the default ctfdiff invocation used to check a list of types
+# supplied by a user of a library. The goal is to validate that a given
+# series of types is the same in both a 32-bit and 64-bit artifact. This
+# is only defined if we have a 64-bit build to do.
+#
+TYPECHECK_LIB32 =		$(TYPECHECK_LIB:%=$(MACH)/%)
+TYPECHECK_LIB64 =		$(TYPECHECK_LIB:%=$(MACH64)/%)
+TYPECHECK_LIST=			$(TYPELIST:%=-T %)
+$(BUILD64)TYPECHECK.lib =	$(CTFDIFF) -t -I $(TYPECHECK_LIST) $(TYPECHECK_LIB32) $(TYPECHECK_LIB64)
+TYPECHECK =			$(TYPECHECK_LIB:%=%.typecheck)

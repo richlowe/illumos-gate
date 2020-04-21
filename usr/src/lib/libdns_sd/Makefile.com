@@ -22,6 +22,7 @@
 # Use is subject to license terms.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libdns_sd.a
 VERS =		.1
@@ -29,24 +30,28 @@ OBJECTS =	dnssd_clientlib.o dnssd_clientstub.o dnssd_ipc.o
 
 include ../../Makefile.lib
 
-LIBS =		$(DYNLIB) $(LINTLIB)
-$(LINTLIB):=    SRCS = $(SRCDIR)/$(LINTSRC)
-
-SRCDIR =	../common
+MAPFILEDIR=	../common
+SRCDIR=		$(SRC)/contrib/mDNSResponder/mDNSShared
+LIBS =		$(DYNLIB)
 
 LDLIBS +=	-lsocket -lnsl -lc
 
 CSTD =	$(CSTD_GNU99)
 CPPFLAGS +=	-I$(SRCDIR) -DNOT_HAVE_SA_LEN -D_XPG4_2 -D__EXTENSIONS__
-CPPFLAGS +=	-DMDNS_VERSIONSTR_NODTS
+CPPFLAGS +=	-DMDNS_VERSIONSTR_NODTS -DmDNSResponderVersion=878.1.1
 
 pics/dnssd_clientstub.o := CERRWARN +=	-_gcc=-Wno-unused-but-set-variable
+
+# not linted
+SMATCH=off
 
 .PARALLEL =     $(OBJECTS)
 .KEEP_STATE:
 
-lint: lintcheck
-
 all: $(LIBS)
+
+pics/%.o:	$(SRCDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
 
 include ../../Makefile.targ

@@ -22,7 +22,7 @@
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 /*
- * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <strings.h>
@@ -53,7 +53,7 @@ disk_declare_driver(topo_mod_t *mod, tnode_t *baynode, topo_list_t *dlistp,
 {
 	int err;
 
-	if (strcmp("mpt_sas", driver) == 0) {
+	if (strcmp(MPTSAS_DRV, driver) == 0) {
 		char *sas_address = NULL;
 		tnode_t *child = NULL;
 
@@ -66,6 +66,11 @@ disk_declare_driver(topo_mod_t *mod, tnode_t *baynode, topo_list_t *dlistp,
 		topo_mod_strfree(mod, sas_address);
 
 		return (err);
+	} else if (strcmp(NVME_DRV, driver) == 0) {
+		if (disk_nvme_enum_disk(mod, baynode) != 0)
+			return (-1);
+
+		return (0);
 	}
 
 	topo_mod_dprintf(mod, "unknown disk driver '%s'\n", driver);
@@ -78,30 +83,45 @@ disk_enum(topo_mod_t *mod, tnode_t *baynode,
     const char *name, topo_instance_t min, topo_instance_t max,
     void *arg, void *notused)
 {
-	char		*device, *driver;
+	char		*device, *driver, *pname;
 	int		err;
-	nvlist_t	*fmri;
 	topo_list_t	*dlistp = topo_mod_getspecific(mod);
 
-	if (strcmp(name, DISK) != 0) {
-		topo_mod_dprintf(mod, "disk_enum: "
-		    "only know how to enumerate %s components.\n", DISK);
+	if (strcmp(name, DISK) != 0 && strcmp(name, NVME) != 0) {
+		topo_mod_dprintf(mod, "disk_enum: can't enumerate %s nodes - "
+		    "only know how to enumerate %s and %s nodes.", name,
+		    DISK, NVME);
 		return (-1);
 	}
 
-	/* set the parent fru */
-	if (topo_node_resource(baynode, &fmri, &err) != 0) {
-		topo_mod_dprintf(mod, "disk_enum: "
-		    "topo_node_resource error %s\n", topo_strerror(err));
-		return (-1);
-	}
-	if (topo_node_fru_set(baynode, fmri, 0, &err) != 0) {
-		topo_mod_dprintf(mod, "disk_enum: "
-		    "topo_node_fru error %s\n", topo_strerror(err));
+	/*
+	 * Historically we've always set the parent FRU on nodes; however, it's
+	 * not clear why. Certain node types like USB don't want this, so we
+	 * only do this if the parent is actually a bay.
+	 */
+	pname = topo_node_name(baynode);
+	if (strcmp(pname, BAY) == 0) {
+		nvlist_t	*fmri;
+		if (topo_node_resource(baynode, &fmri, &err) != 0) {
+			topo_mod_dprintf(mod, "disk_enum: "
+			    "topo_node_resource error %s\n",
+			    topo_strerror(err));
+			return (-1);
+		}
+		/*
+		 * If the disk enumerator module has been run from an XML map
+		 * and the parent bay node was already created by an enumerator
+		 * module (e.g. ses), then the FRU will already be set.
+		 */
+		if (topo_node_fru_set(baynode, fmri, 0, &err) != 0 &&
+		    err != ETOPO_PROP_DEFD) {
+			topo_mod_dprintf(mod, "disk_enum: "
+			    "topo_node_fru error %s\n", topo_strerror(err));
+			nvlist_free(fmri);
+			return (-1);
+		}
 		nvlist_free(fmri);
-		return (-1);
 	}
-	nvlist_free(fmri);
 
 	/*
 	 * For internal storage, first check to see if we need to
@@ -126,7 +146,8 @@ disk_enum(topo_mod_t *mod, tnode_t *baynode,
 	if (topo_prop_get_string(baynode, TOPO_PGROUP_BINDING,
 	    TOPO_BINDING_OCCUPANT, &device, &err) != 0) {
 		topo_mod_dprintf(mod, "disk_enum: "
-		    "binding error %s\n", topo_strerror(err));
+		    "failed to lookup prop %s/%s: %s\n", TOPO_PGROUP_BINDING,
+		    TOPO_BINDING_OCCUPANT, topo_strerror(err));
 		return (-1);
 	}
 

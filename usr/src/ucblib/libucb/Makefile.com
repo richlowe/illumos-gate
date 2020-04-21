@@ -21,6 +21,9 @@
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright 2019 Joyent, Inc.
+# Copyright 2019 Peter Tribble.
+#
 
 LIBRARY=	libucb.a
 VERS=		.1
@@ -98,6 +101,9 @@ CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-uninitialized
 
+# not linted
+SMATCH=off
+
 ASFLAGS= -P -D__STDC__ -DLOCORE -D_SYS_SYS_S -D_ASM $(CPPFLAGS)
 
 pics/%.o:= ASFLAGS += $(AS_PICFLAGS)
@@ -129,7 +135,7 @@ pics/%.o: sys/%.c
 
 pics/%.o: ../$(MACH)/sys/%.s
 	$(BUILD.s)
-	$(POST_PROCESS_O)
+	$(POST_PROCESS_S_O)
 
 #
 # Include library targets

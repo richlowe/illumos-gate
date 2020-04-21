@@ -23,6 +23,10 @@
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
+
 #include <sys/types.h>
 #include <sys/stream.h>
 #define	_SUN_TPI_VERSION 2
@@ -1053,7 +1057,10 @@ sctp_set_opt(sctp_t *sctp, int level, int name, const void *invalp,
 	/* In all cases, the size of the option must be bigger than int */
 	if (inlen >= sizeof (int32_t)) {
 		onoff = ONOFF(*i1);
+	} else {
+		return (EINVAL);
 	}
+
 	retval = 0;
 
 	RUN_SCTP(sctp);
@@ -1493,7 +1500,6 @@ sctp_getpeeraddrs(sctp_t *sctp, void *paddrs, int *addrcnt)
 			sin6->sin6_family = AF_INET6;
 			sin6->sin6_flowinfo = connp->conn_flowinfo;
 			if (IN6_IS_ADDR_LINKSCOPE(&addr) &&
-			    sctp->sctp_primary != NULL &&
 			    (sctp->sctp_primary->sf_ixa->ixa_flags &
 			    IXAF_SCOPEID_SET)) {
 				sin6->sin6_scope_id =

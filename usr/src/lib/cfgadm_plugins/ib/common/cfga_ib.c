@@ -21,6 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include "cfga_ib.h"
@@ -73,7 +74,7 @@ void			cfga_msg(struct cfga_msg *, const char *);
 cfga_err_t		cfga_help(struct cfga_msg *, const char *,
 			    cfga_flags_t);
 static int		ib_confirm(struct cfga_confirm *, char *);
-static char 		*ib_get_devicepath(const char *);
+static char		*ib_get_devicepath(const char *);
 
 
 /* External function prototypes */
@@ -194,7 +195,7 @@ static char		*ib_service_subopts[] = {
 /* Communication Service name : "port" or "vppa" or "hca-svc" */
 static char		*comm_name = NULL;
 
-char 			*service_name = NULL;	/* service name */
+char			*service_name = NULL;	/* service name */
 ib_service_type_t	service_type = IB_NONE;	/* service type */
 
 
@@ -619,7 +620,7 @@ ib_setup_for_devctl_cmd(char *ap_id, boolean_t use_static_ap_id,
 	char	*apid = (use_static_ap_id == B_TRUE) ? IB_STATIC_APID : ap_id;
 
 	/* Get a handle to the ap */
-	if ((*devctl_hdl = devctl_ap_acquire(apid, NULL)) == NULL) {
+	if ((*devctl_hdl = devctl_ap_acquire(apid, 0)) == NULL) {
 		DPRINTF("ib_setup_for_devctl_cmd: devctl_ap_acquire "
 		    "errno: %d\n", errno);
 		ib_cleanup_after_devctl_cmd(*devctl_hdl, *user_nvlistp);
@@ -627,7 +628,7 @@ ib_setup_for_devctl_cmd(char *ap_id, boolean_t use_static_ap_id,
 	}
 
 	/* Set up to pass dynamic ap_id down to driver */
-	if (nvlist_alloc(user_nvlistp, NV_UNIQUE_NAME_TYPE, NULL) != 0) {
+	if (nvlist_alloc(user_nvlistp, NV_UNIQUE_NAME_TYPE, 0) != 0) {
 		DPRINTF("ib_setup_for_devctl: nvlist_alloc errno: %d\n", errno);
 		*user_nvlistp = NULL;	/* Prevent possible incorrect free in */
 					/* ib_cleanup_after_devctl_cmd */
@@ -1654,14 +1655,12 @@ cfga_list_ext(const char *ap_id, cfga_list_data_t **ap_id_list, int *nlistp,
 	cfga_list_data_t	*clp = NULL;
 
 	if ((rv = ib_verify_params(ap_id, options, errstring)) != CFGA_IB_OK) {
-		(void) cfga_help(NULL, options, flags);
 		return (ib_err_msg(errstring, rv, ap_id, errno));
 	}
 
 	/* make sure we have a valid ap_id_list */
 	if (ap_id_list == NULL || nlistp == NULL) {
 		DPRINTF("cfga_list_ext: list = NULL or nlistp = NULL\n");
-		(void) cfga_help(NULL, options, flags);
 		return (ib_err_msg(errstring, CFGA_IB_INVAL_ARG_ERR,
 		    ap_id, errno));
 	}
@@ -1717,7 +1716,7 @@ cfga_list_ext(const char *ap_id, cfga_list_data_t **ap_id_list, int *nlistp,
 	/*
 	 * *nlistp contains to how many APIDs to show w/ cfgadm -l.
 	 * If ap_id is "fabric" then
-	 * 	*nlistp is all Dynamic Apids + One more for "fabric"
+	 *	*nlistp is all Dynamic Apids + One more for "fabric"
 	 * If ap_id is "HCA" ap_id then
 	 *	*nlistp is 1
 	 * Note that each HCA is a static APID, so nlistp will be 1 always

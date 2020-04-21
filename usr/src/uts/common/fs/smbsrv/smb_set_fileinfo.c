@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Nexenta by DDN, Inc. All rights reserved.
  */
 
 /*
@@ -127,14 +127,14 @@ smb_com_trans2_set_path_information(smb_request_t *sr, smb_xa_t *xa)
 smb_sdrc_t
 smb_pre_set_information(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__SetInformation__start, smb_request_t *, sr);
+	DTRACE_SMB_START(op__SetInformation, smb_request_t *, sr);
 	return (SDRC_SUCCESS);
 }
 
 void
 smb_post_set_information(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__SetInformation__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__SetInformation, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -167,14 +167,14 @@ smb_com_set_information(smb_request_t *sr)
 smb_sdrc_t
 smb_pre_set_information2(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__SetInformation2__start, smb_request_t *, sr);
+	DTRACE_SMB_START(op__SetInformation2, smb_request_t *, sr);
 	return (SDRC_SUCCESS);
 }
 
 void
 smb_post_set_information2(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__SetInformation2__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__SetInformation2, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -277,6 +277,9 @@ smb_set_by_path(smb_request_t *sr, smb_xa_t *xa, uint16_t infolev)
 		return (-1);
 	}
 
+	if (STYPE_ISIPC(sr->tid_tree->t_res_type))
+		return (0);
+
 	pn = &sr->arg.dirop.fqi.fq_path;
 	smb_pathname_init(sr, pn, pn->pn_path);
 	if (!smb_pathname_validate(sr, pn))
@@ -293,12 +296,7 @@ smb_set_by_path(smb_request_t *sr, smb_xa_t *xa, uint16_t infolev)
 	kmem_free(name, MAXNAMELEN);
 
 	if (rc != 0) {
-		if (rc == ENOENT) {
-			smbsr_error(sr, NT_STATUS_OBJECT_NAME_NOT_FOUND,
-			    ERRDOS, ERROR_FILE_NOT_FOUND);
-		} else {
-			smbsr_errno(sr, rc);
-		}
+		smbsr_errno(sr, rc);
 		return (-1);
 	}
 
@@ -341,8 +339,7 @@ smb_set_fileinfo(smb_request_t *sr, smb_setinfo_t *sinfo, int infolev)
 		break;
 
 	case SMB_INFO_SET_EAS:
-		/* EAs not supported */
-		status = 0;
+		status = NT_STATUS_EAS_NOT_SUPPORTED;
 		break;
 
 	case SMB_SET_FILE_BASIC_INFO:

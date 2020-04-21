@@ -21,6 +21,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2011, 2018 by Delphix. All rights reserved.
+ * Copyright (c) 2017, Intel Corporation.
  */
 
 #ifndef _SYS_METASLAB_H
@@ -48,21 +49,35 @@ int metaslab_init(metaslab_group_t *, uint64_t, uint64_t, uint64_t,
     metaslab_t **);
 void metaslab_fini(metaslab_t *);
 
-void metaslab_load_wait(metaslab_t *);
+void metaslab_set_unflushed_txg(metaslab_t *, uint64_t, dmu_tx_t *);
+void metaslab_set_estimated_condensed_size(metaslab_t *, uint64_t, dmu_tx_t *);
+uint64_t metaslab_unflushed_txg(metaslab_t *);
+uint64_t metaslab_estimated_condensed_size(metaslab_t *);
+int metaslab_sort_by_flushed(const void *, const void *);
+uint64_t metaslab_unflushed_changes_memused(metaslab_t *);
+
 int metaslab_load(metaslab_t *);
 void metaslab_unload(metaslab_t *);
+boolean_t metaslab_flush(metaslab_t *, dmu_tx_t *);
+
+uint64_t metaslab_allocated_space(metaslab_t *);
 
 void metaslab_sync(metaslab_t *, uint64_t);
 void metaslab_sync_done(metaslab_t *, uint64_t);
 void metaslab_sync_reassess(metaslab_group_t *);
-uint64_t metaslab_block_maxsize(metaslab_t *);
+uint64_t metaslab_largest_allocatable(metaslab_t *);
 
+/*
+ * metaslab alloc flags
+ */
 #define	METASLAB_HINTBP_FAVOR		0x0
 #define	METASLAB_HINTBP_AVOID		0x1
 #define	METASLAB_GANG_HEADER		0x2
 #define	METASLAB_GANG_CHILD		0x4
 #define	METASLAB_ASYNC_ALLOC		0x8
 #define	METASLAB_DONT_THROTTLE		0x10
+#define	METASLAB_MUST_RESERVE		0x20
+#define	METASLAB_FASTWRITE		0x40
 
 int metaslab_alloc(spa_t *, metaslab_class_t *, uint64_t,
     blkptr_t *, int, uint64_t, blkptr_t *, int, zio_alloc_list_t *, zio_t *,
@@ -78,8 +93,8 @@ int metaslab_claim(spa_t *, const blkptr_t *, uint64_t);
 int metaslab_claim_impl(vdev_t *, uint64_t, uint64_t, uint64_t);
 void metaslab_check_free(spa_t *, const blkptr_t *);
 
-void metaslab_alloc_trace_init(void);
-void metaslab_alloc_trace_fini(void);
+void metaslab_stat_init(void);
+void metaslab_stat_fini(void);
 void metaslab_trace_init(zio_alloc_list_t *);
 void metaslab_trace_fini(zio_alloc_list_t *);
 
@@ -92,13 +107,14 @@ uint64_t metaslab_class_expandable_space(metaslab_class_t *);
 boolean_t metaslab_class_throttle_reserve(metaslab_class_t *, int, int,
     zio_t *, int);
 void metaslab_class_throttle_unreserve(metaslab_class_t *, int, int, zio_t *);
-
-void metaslab_class_space_update(metaslab_class_t *, int64_t, int64_t,
-    int64_t, int64_t);
+void metaslab_class_evict_old(metaslab_class_t *, uint64_t);
 uint64_t metaslab_class_get_alloc(metaslab_class_t *);
 uint64_t metaslab_class_get_space(metaslab_class_t *);
 uint64_t metaslab_class_get_dspace(metaslab_class_t *);
 uint64_t metaslab_class_get_deferred(metaslab_class_t *);
+
+void metaslab_space_update(vdev_t *, metaslab_class_t *,
+    int64_t, int64_t, int64_t);
 
 metaslab_group_t *metaslab_group_create(metaslab_class_t *, vdev_t *, int);
 void metaslab_group_destroy(metaslab_group_t *);
@@ -112,6 +128,12 @@ void metaslab_group_histogram_remove(metaslab_group_t *, metaslab_t *);
 void metaslab_group_alloc_decrement(spa_t *, uint64_t, void *, int, int,
     boolean_t);
 void metaslab_group_alloc_verify(spa_t *, const blkptr_t *, void *, int);
+void metaslab_recalculate_weight_and_sort(metaslab_t *);
+void metaslab_disable(metaslab_t *);
+void metaslab_enable(metaslab_t *, boolean_t, boolean_t);
+void metaslab_set_selected_txg(metaslab_t *, uint64_t);
+
+extern int metaslab_debug_load;
 
 #ifdef	__cplusplus
 }

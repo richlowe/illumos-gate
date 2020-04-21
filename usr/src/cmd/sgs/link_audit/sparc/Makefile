@@ -23,10 +23,10 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 include		../Makefile.com
-
-lint :=		CONV_LIB =	$(CONV_LIB32)
 
 $(ONLIBS) \
 $(CCSLIBS) :=	CFLAGS +=	$(C_PICFLAGS)
@@ -39,8 +39,7 @@ $(CCSLIBS) :=	CERRWARN +=	$(NO_ASM_WARN)
 all:		$(OBJDIR) $(PICDIR) .WAIT $(CCSLIBS) $(CCSSCRIPTS) \
 		$(ONSCRIPTS) $(ONPROGS) $(ONLIBS)
 
-install:	all $(ROOTCCSLIB) .WAIT $(ROOTUSRBINS) $(ROOTCCSLIBS)
-
-package:	install .WAIT $(ROOTONLDLIBS) $(ROOTONLDBINPROG)
+install:	all $(ROOTCCSLIB) .WAIT $(ROOTUSRBINS) $(ROOTCCSLIBS) \
+		.WAIT $(ROOTONLDLIBS) $(ROOTONLDBINPROG)
 
 include		../Makefile.targ

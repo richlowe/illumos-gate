@@ -23,6 +23,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_COMMON_CRYPTO_MODES_H
@@ -49,6 +50,9 @@ extern "C" {
 #define	GCM_MODE			0x00000020
 #define	GMAC_MODE			0x00000040
 #define	CMAC_MODE			0x00000080
+
+/* Private flag for pkcs11_softtoken */
+#define	P11_DECRYPTED			0x80000000
 
 /*
  * cc_keysched:		Pointer to key schedule.
@@ -129,7 +133,8 @@ typedef struct ctr_ctx {
 	struct common_ctx ctr_common;
 	uint64_t ctr_lower_mask;
 	uint64_t ctr_upper_mask;
-	uint32_t ctr_tmp[4];
+	size_t ctr_offset;
+	uint32_t ctr_keystream[4];
 } ctr_ctx_t;
 
 /*
@@ -241,15 +246,14 @@ typedef struct aes_ctx {
 		ecb_ctx_t acu_ecb;
 		cbc_ctx_t acu_cbc;
 		ctr_ctx_t acu_ctr;
-#ifdef _KERNEL
 		ccm_ctx_t acu_ccm;
 		gcm_ctx_t acu_gcm;
-#endif
 	} acu;
 } aes_ctx_t;
 
 #define	ac_flags		acu.acu_ecb.ecb_common.cc_flags
 #define	ac_remainder_len	acu.acu_ecb.ecb_common.cc_remainder_len
+#define	ac_remainder		acu.acu_ecb.ecb_common.cc_remainder
 #define	ac_keysched		acu.acu_ecb.ecb_common.cc_keysched
 #define	ac_keysched_len		acu.acu_ecb.ecb_common.cc_keysched_len
 #define	ac_iv			acu.acu_ecb.ecb_common.cc_iv
@@ -307,8 +311,7 @@ extern int cbc_decrypt_contiguous_blocks(cbc_ctx_t *, char *, size_t,
 
 extern int ctr_mode_contiguous_blocks(ctr_ctx_t *, char *, size_t,
     crypto_data_t *, size_t,
-    int (*cipher)(const void *, const uint8_t *, uint8_t *),
-    void (*xor_block)(uint8_t *, uint8_t *));
+    int (*cipher)(const void *, const uint8_t *, uint8_t *));
 
 extern int ccm_mode_encrypt_contiguous_blocks(ccm_ctx_t *, char *, size_t,
     crypto_data_t *, size_t,
@@ -356,15 +359,13 @@ extern int cmac_mode_final(cbc_ctx_t *, crypto_data_t *,
     int (*encrypt_block)(const void *, const uint8_t *, uint8_t *),
     void (*xor_block)(uint8_t *, uint8_t *));
 
-extern int ctr_mode_final(ctr_ctx_t *, crypto_data_t *,
-    int (*encrypt_block)(const void *, const uint8_t *, uint8_t *));
-
 extern int cbc_init_ctx(cbc_ctx_t *, char *, size_t, size_t,
     void (*copy_block)(uint8_t *, uint64_t *));
 
 extern int cmac_init_ctx(cbc_ctx_t *, size_t);
 
 extern int ctr_init_ctx(ctr_ctx_t *, ulong_t, uint8_t *,
+    int (*encrypt_block)(const void *, const uint8_t *, uint8_t *),
     void (*copy_block)(uint8_t *, uint8_t *));
 
 extern int ccm_init_ctx(ccm_ctx_t *, char *, int, boolean_t, size_t,

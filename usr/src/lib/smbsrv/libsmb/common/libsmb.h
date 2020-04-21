@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #ifndef	_LIBSMB_H
@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 #include <sys/types.h>
+#include <sys/inttypes.h>
 #include <sys/list.h>
 #include <sys/avl.h>
 #include <arpa/inet.h>
@@ -156,6 +157,9 @@ typedef enum {
 	SMB_CI_INITIAL_CREDITS,
 	SMB_CI_MAXIMUM_CREDITS,
 	SMB_CI_MAX_PROTOCOL,
+	SMB_CI_ENCRYPT,
+	SMB_CI_MIN_PROTOCOL,
+	SMB_CI_BYPASS_TRAVERSE_CHECKING,
 
 	SMB_CI_MAX
 } smb_cfg_id_t;
@@ -182,7 +186,8 @@ extern int smb_smf_restart_service(void);
 extern int smb_smf_maintenance_mode(void);
 
 /* ZFS interface */
-int smb_getdataset(const char *, char *, size_t);
+struct libzfs_handle;
+int smb_getdataset(struct libzfs_handle *, const char *, char *, size_t);
 
 /* Configuration management functions  */
 extern int smb_config_get(smb_cfg_id_t, char *, int);
@@ -214,7 +219,10 @@ extern void smb_config_get_negtok(uchar_t *, uint32_t *);
 
 extern int smb_config_check_protocol(char *);
 extern uint32_t smb_config_get_max_protocol(void);
+extern uint32_t smb_config_get_min_protocol(void);
 extern void smb_config_upgrade(void);
+
+extern smb_cfg_val_t smb_config_get_require(smb_cfg_id_t);
 
 extern void smb_load_kconfig(smb_kmod_cfg_t *kcfg);
 extern uint32_t smb_crc_gen(uint8_t *, size_t);
@@ -347,10 +355,10 @@ void libsmb_redirect_syslog(__FILE_TAG *fp, int priority);
  * 0x0004 The name is a W2K Domain name (a DNS name).
  */
 #define	SMBAUTH_NAME_TYPE_LIST_END		0x0000
-#define	SMBAUTH_NAME_TYPE_SERVER_NETBIOS 	0x0001
-#define	SMBAUTH_NAME_TYPE_DOMAIN_NETBIOS 	0x0002
+#define	SMBAUTH_NAME_TYPE_SERVER_NETBIOS	0x0001
+#define	SMBAUTH_NAME_TYPE_DOMAIN_NETBIOS	0x0002
 #define	SMBAUTH_NAME_TYPE_SERVER_DNS		0x0003
-#define	SMBAUTH_NAME_TYPE_DOMAIN_DNS 		0x0004
+#define	SMBAUTH_NAME_TYPE_DOMAIN_DNS		0x0004
 
 /*
  * smb_auth_name_entry_t
@@ -450,6 +458,7 @@ typedef struct smb_passwd {
 #define	SMB_PWC_DISABLE	0x01
 #define	SMB_PWC_ENABLE	0x02
 #define	SMB_PWC_NOLM	0x04
+#define	SMB_PWC_DELETE	0x08
 
 #define	SMB_PWE_SUCCESS		0
 #define	SMB_PWE_USER_UNKNOWN	1
@@ -662,6 +671,7 @@ void smb_domain_set_dns_info(char *, char *, char *, char *, char *,
 void smb_domain_set_trust_info(char *, char *, char *,
     uint32_t, uint32_t, uint32_t, smb_domain_t *);
 void smb_domain_current_dc(smb_dcinfo_t *);
+void smb_domain_bad_dc(void);
 
 typedef struct smb_gsid {
 	smb_sid_t *gs_sid;
@@ -712,7 +722,9 @@ boolean_t smb_lgrp_itererror(smb_giter_t *);
 int smb_lgrp_iterate(smb_giter_t *, smb_group_t *);
 
 int smb_lookup_sid(const char *, lsa_account_t *);
+int smb_lookup_lsid(const char *, lsa_account_t *);
 int smb_lookup_name(const char *, sid_type_t, lsa_account_t *);
+int smb_lookup_lname(const char *, sid_type_t, lsa_account_t *);
 
 #define	SMB_LGRP_SUCCESS		0
 #define	SMB_LGRP_INVALID_ARG		1
@@ -859,6 +871,7 @@ typedef struct smb_account {
 	smb_sid_t	*a_sid;
 	smb_sid_t	*a_domsid;
 	uint32_t	a_rid;
+	uint32_t	a_flags;
 } smb_account_t;
 
 uint32_t smb_sam_lookup_name(char *, char *, uint16_t, smb_account_t *);

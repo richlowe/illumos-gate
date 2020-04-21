@@ -22,7 +22,7 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -32,6 +32,14 @@
  */
 
 #include <smbsrv/smb2_kproto.h>
+#include <smbsrv/smb2_aapl.h>
+
+/*
+ * Internally defined info. level for MacOS support.
+ * Make sure this does not conflict with real values in
+ * FILE_INFORMATION_CLASS, and that it fits in 8-bits.
+ */
+#define	FileIdMacOsDirectoryInformation (FileMaximumInformation + 10)
 
 /*
  * Args (and other state) that we carry around among the
@@ -46,12 +54,17 @@ typedef struct smb2_find_args {
 	uint16_t fa_fixedsize;	/* size of fixed part of a returned entry */
 	uint32_t fa_lastkey;	/* Last resume key */
 	int fa_last_entry;	/* offset of last entry */
+
+	/* Normal info, per dir. entry */
+	smb_fileinfo_t fa_fi;
+
+	/* MacOS AAPL extension stuff. */
+	smb_macinfo_t fa_mi;
 } smb2_find_args_t;
 
 static uint32_t smb2_find_entries(smb_request_t *,
     smb_odir_t *, smb2_find_args_t *);
-static uint32_t smb2_find_mbc_encode(smb_request_t *,
-    smb_fileinfo_t *, smb2_find_args_t *);
+static uint32_t smb2_find_mbc_encode(smb_request_t *, smb2_find_args_t *);
 
 /*
  * Tunable parameter to limit the maximum
@@ -62,8 +75,8 @@ uint16_t smb2_find_max = 128;
 smb_sdrc_t
 smb2_query_dir(smb_request_t *sr)
 {
-	smb2_find_args_t		args;
-	smb_odir_resume_t	odir_resume;
+	smb2_find_args_t args;
+	smb_odir_resume_t odir_resume;
 	smb_ofile_t *of = NULL;
 	smb_odir_t *od = NULL;
 	char *pattern = NULL;
@@ -99,9 +112,12 @@ smb2_query_dir(smb_request_t *sr)
 		return (SDRC_ERROR);
 
 	status = smb2sr_lookup_fid(sr, &smb2fid);
+	of = sr->fid_ofile;
+
+	DTRACE_SMB2_START(op__QueryDirectory, smb_request_t *, sr);
+
 	if (status)
 		goto errout;
-	of = sr->fid_ofile;
 
 	/*
 	 * If there's an input buffer (search pattern), decode it.
@@ -142,10 +158,8 @@ smb2_query_dir(smb_request_t *sr)
 	sr->raw_data.max_bytes = args.fa_maxdata;
 
 	/*
-	 * Get the mininum size of entries we will return, which
+	 * Get the fixed size of entries we will return, which
 	 * lets us estimate the number of entries we'll need.
-	 * This should be the size with a one character name.
-	 * Compare w/ smb2_find_get_maxdata().
 	 *
 	 * Also use this opportunity to validate fa_infoclass.
 	 */
@@ -172,6 +186,19 @@ smb2_query_dir(smb_request_t *sr)
 	default:
 		status = NT_STATUS_INVALID_INFO_CLASS;
 		goto errout;
+	}
+
+	/*
+	 * MacOS, when using the AAPL CreateContext extensions
+	 * and the "read dir attr" feature, uses a non-standard
+	 * information format for directory entries.  Internally
+	 * we'll use a fake info level to represent this case.
+	 * (Wish they had just defined a new info level.)
+	 */
+	if ((sr->session->s_flags & SMB_SSN_AAPL_READDIR) != 0 &&
+	    args.fa_infoclass == FileIdBothDirectoryInformation) {
+		args.fa_infoclass = FileIdMacOsDirectoryInformation;
+		args.fa_fixedsize = 96; /* yes, same size */
 	}
 
 	args.fa_maxcount = args.fa_maxdata / (args.fa_fixedsize + 4);
@@ -226,24 +253,28 @@ smb2_query_dir(smb_request_t *sr)
 
 	of->f_seek_pos = od->d_offset;
 
-	if (status == NT_STATUS_NO_MORE_FILES) {
-		if (args.fa_fflags & SMB2_QDIR_FLAG_SINGLE) {
-			status = NT_STATUS_NO_SUCH_FILE;
-			goto errout;
-		}
-		/*
-		 * This is not an error, but a warning that can be
-		 * used to tell the client that this data return
-		 * is the last of the enumeration.  Returning this
-		 * warning now (with the data) saves the client a
-		 * round trip that would otherwise be needed to
-		 * find out it's at the end.
-		 */
-		sr->smb2_status = status;
-		status = 0;
+	if ((args.fa_fflags & SMB2_QDIR_FLAG_SINGLE) &&
+	    status == NT_STATUS_NO_MORE_FILES) {
+		status = NT_STATUS_NO_SUCH_FILE;
 	}
-	if (status)
-		goto errout;
+
+errout:
+	sr->smb2_status = status;
+	DTRACE_SMB2_DONE(op__QueryDirectory, smb_request_t *, sr);
+
+	/*
+	 * Note: NT_STATUS_NO_MORE_FILES is a warning
+	 * used to tell the client that this data return
+	 * is the last of the enumeration.  Returning this
+	 * warning now (with the data) saves the client a
+	 * round trip that would otherwise be needed to
+	 * find out it's at the end.
+	 */
+	if (status != 0 &&
+	    status != NT_STATUS_NO_MORE_FILES) {
+		smb2sr_put_error(sr, status);
+		return (SDRC_SUCCESS);
+	}
 
 	/*
 	 * SMB2 Query Directory reply
@@ -259,12 +290,10 @@ smb2_query_dir(smb_request_t *sr)
 	    &sr->raw_data);	/* C */
 	if (DataLen == 0)
 		(void) smb_mbc_encodef(&sr->reply, ".");
-	if (rc == 0)
-		return (SDRC_SUCCESS);
-	status = NT_STATUS_UNSUCCESSFUL;
 
-errout:
-	smb2sr_put_error(sr, status);
+	if (rc)
+		sr->smb2_status = NT_STATUS_INTERNAL_ERROR;
+
 	return (SDRC_SUCCESS);
 }
 
@@ -279,8 +308,9 @@ errout:
 static uint32_t
 smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
 {
-	smb_fileinfo_t	fileinfo;
 	smb_odir_resume_t odir_resume;
+	char		*tbuf = NULL;
+	size_t		tbuflen = 0;
 	uint16_t	count;
 	uint16_t	minsize;
 	uint32_t	status = 0;
@@ -293,6 +323,16 @@ smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
 	 */
 	minsize = args->fa_fixedsize + 2;
 
+	/*
+	 * FileIdMacOsDirectoryInformation needs some buffer space
+	 * for composing directory entry + stream name for lookup.
+	 * Get the buffer now to avoid alloc/free per entry.
+	 */
+	if (args->fa_infoclass == FileIdMacOsDirectoryInformation) {
+		tbuflen = 2 * MAXNAMELEN;
+		tbuf = kmem_alloc(tbuflen, KM_SLEEP);
+	}
+
 	count = 0;
 	while (count < args->fa_maxcount) {
 
@@ -301,7 +341,8 @@ smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
 			break;
 		}
 
-		rc = smb_odir_read_fileinfo(sr, od, &fileinfo, &args->fa_eos);
+		rc = smb_odir_read_fileinfo(sr, od,
+		    &args->fa_fi, &args->fa_eos);
 		if (rc == ENOENT) {
 			status = NT_STATUS_NO_MORE_FILES;
 			break;
@@ -316,7 +357,15 @@ smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
 			break;
 		}
 
-		status = smb2_find_mbc_encode(sr, &fileinfo, args);
+		if (args->fa_infoclass == FileIdMacOsDirectoryInformation)
+			(void) smb2_aapl_get_macinfo(sr, od,
+			    &args->fa_fi, &args->fa_mi, tbuf, tbuflen);
+
+		if (smb2_aapl_use_file_ids == 0 &&
+		    (sr->session->s_flags & SMB_SSN_AAPL_CCEXT) != 0)
+			args->fa_fi.fi_nodeid = 0;
+
+		status = smb2_find_mbc_encode(sr, args);
 		if (status) {
 			/*
 			 * We read a directory entry but failed to
@@ -335,7 +384,7 @@ smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
 		 * Save the offset of the next entry we'll read.
 		 * If we fail copying, we'll need this offset.
 		 */
-		args->fa_lastkey = fileinfo.fi_cookie;
+		args->fa_lastkey = args->fa_fi.fi_cookie;
 		++count;
 	}
 
@@ -354,6 +403,9 @@ smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
 		    args->fa_last_entry, "l", 0);
 		status = 0;
 	}
+
+	if (tbuf != NULL)
+		kmem_free(tbuf, tbuflen);
 
 	return (status);
 }
@@ -379,12 +431,13 @@ smb2_find_entries(smb_request_t *sr, smb_odir_t *od, smb2_find_args_t *args)
  *      NT status
  */
 static uint32_t
-smb2_find_mbc_encode(smb_request_t *sr, smb_fileinfo_t *fileinfo,
-	smb2_find_args_t *args)
+smb2_find_mbc_encode(smb_request_t *sr, smb2_find_args_t *args)
 {
+	smb_fileinfo_t	*fileinfo = &args->fa_fi;
+	smb_macinfo_t	*macinfo = &args->fa_mi;
 	uint8_t		buf83[26];
 	smb_msgbuf_t	mb;
-	int		namelen, padsz;
+	int		namelen;
 	int		shortlen = 0;
 	int		rc, starting_offset;
 	uint32_t	next_entry_offset;
@@ -524,6 +577,47 @@ smb2_find_mbc_encode(smb_request_t *sr, smb_fileinfo_t *fileinfo,
 		smb_msgbuf_term(&mb);
 		break;
 
+	/*
+	 * MacOS, when using the AAPL extensions (see smb2_create)
+	 * uses modified directory listing responses where the
+	 * "EA size" field is replaced with "maximum access".
+	 * This avoids the need for MacOS Finder to come back
+	 * N times to get the maximum access for every file.
+	 */
+	case FileIdMacOsDirectoryInformation:
+		rc = smb_mbc_encodef(
+		    &sr->raw_data, "llTTTTqqll",
+		    0,	/* NextEntryOffset (set later) */
+		    resume_key,		/* a.k.a. file index */
+		    &fileinfo->fi_crtime,
+		    &fileinfo->fi_atime,
+		    &fileinfo->fi_mtime,
+		    &fileinfo->fi_ctime,
+		    fileinfo->fi_size,		/* q */
+		    fileinfo->fi_alloc_size,	/* q */
+		    fileinfo->fi_dosattr,	/* l */
+		    namelen);			/* l */
+		if (rc != 0)
+			break;
+		/*
+		 * This where FileIdMacOsDirectoryInformation
+		 * differs from FileIdBothDirectoryInformation
+		 * Instead of: EaSize, ShortNameLen, ShortName;
+		 * MacOS wants: MaxAccess, ResourceForkSize, and
+		 * 16 bytes of "compressed finder info".
+		 * mi_rforksize + mi_finderinfo falls where
+		 * the 24 byte shortname would normally be.
+		 */
+		rc = smb_mbc_encodef(
+		    &sr->raw_data, "l..q16cwq",
+		    macinfo->mi_maxaccess,	/* l */
+		    /* short_name_len, reserved  (..) */
+		    macinfo->mi_rforksize,	/* q */
+		    macinfo->mi_finderinfo,	/* 16c */
+		    macinfo->mi_unixmode,	/* w */
+		    fileinfo->fi_nodeid);	/* q */
+		break;
+
 	/* See also: SMB_FIND_FILE_NAMES_INFO */
 	case FileNamesInformation:		/* 12 */
 		rc = smb_mbc_encodef(
@@ -553,11 +647,8 @@ smb2_find_mbc_encode(smb_request_t *sr, smb_fileinfo_t *fileinfo,
 		return (NT_STATUS_BUFFER_OVERFLOW);
 
 	/* Next entry needs to be 8-byte aligned. */
-	padsz = sr->raw_data.chain_offset & 7;
-	if (padsz) {
-		padsz = 8 - padsz;
-		(void) smb_mbc_encodef(&sr->raw_data, "#.", padsz);
-	}
+	(void) smb_mbc_put_align(&sr->raw_data, 8);
+
 	next_entry_offset = sr->raw_data.chain_offset -	starting_offset;
 	(void) smb_mbc_poke(&sr->raw_data, starting_offset, "l",
 	    next_entry_offset);

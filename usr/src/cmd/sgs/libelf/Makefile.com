@@ -21,6 +21,8 @@
 #
 # Copyright 2015 Gary Mills
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 LIBRARY=	libelf.a
@@ -50,31 +52,27 @@ OBJECTS=	$(BLTOBJS)  $(MACHOBJS)  $(COMOBJS)  $(CLASSOBJS) $(MISCOBJS)
 
 include $(SRC)/lib/Makefile.lib
 
+SRCDIR=	$(SRC)/cmd/sgs/libelf
+
 # Use the value of M4 set in Makefile.master via Makefile.lib
 
 DEMOFILES=	Makefile	00README	acom.c		dcom.c \
 		pcom.c		tpcom.c		dispsyms.c
-DEMOFILESRCDIR=	../demo
+DEMOFILESRCDIR=	$(SRCDIR)/demo
 ROOTDEMODIRBASE=$(ROOT)/usr/demo/ELF
 ROOTDEMODIRS=   $(ROOTDEMODIRBASE)
 
 include $(SRC)/cmd/sgs/Makefile.com
 
-MAPFILES =	../common/mapfile-vers
+MAPFILES =	$(SRCDIR)/common/mapfile-vers
 
 DYNFLAGS +=	$(VERSREF)
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) -lc
-
-LINTFLAGS +=	-u -erroff=E_BAD_PTR_CAST_ALIGN
-LINTFLAGS64 +=	-u -erroff=E_CAST_INT_TO_SMALL_INT
+LDLIBS +=	$(CONVLIBDIR) -lconv -lc
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 
-BUILD.AR=	$(RM) $@ ; \
-		$(AR) q $@ `$(LORDER) $(OBJECTS:%=$(DIR)/%)| $(TSORT)`
-		$(POST_PROCESS_A)
-
+SMOFF += indenting
 
 BLTDEFS=	msg.h
 BLTDATA=	msg.c
@@ -82,8 +80,8 @@ BLTMESG=	$(SGSMSGDIR)/libelf
 
 BLTFILES=	$(BLTDEFS) $(BLTDATA) $(BLTMESG)
 
-SGSMSGCOM=	../common/libelf.msg
-SGSMSG32=	../common/libelf.32.msg
+SGSMSGCOM=	$(SRCDIR)/common/libelf.msg
+SGSMSG32=	$(SRCDIR)/common/libelf.32.msg
 SGSMSGTARG=	$(SGSMSGCOM)
 SGSMSGALL=	$(SGSMSGCOM) $(SGSMSG32)
 
@@ -91,22 +89,18 @@ SGSMSGFLAGS1=	$(SGSMSGFLAGS) -m $(BLTMESG)
 SGSMSGFLAGS2=	$(SGSMSGFLAGS) -h $(BLTDEFS) -d $(BLTDATA) -n libelf_msg
 
 BLTSRCS=	$(BLTOBJS:%.o=%.c)
-LIBSRCS=	$(COMOBJS:%.o=../common/%.c)  $(MISCOBJS:%.o=../misc/%.c) \
+LIBSRCS=	$(COMOBJS:%.o=$(SRCDIR)/common/%.c)  $(MISCOBJS:%.o=$(SRCDIR)/misc/%.c) \
 		$(MACHOBJS:%.o=%.c)  $(BLTSRCS)
-SRCS=		../common/llib-lelf
-LINTSRCS=	$(LIBSRCS) ../common/lintsup.c
 
 ROOTFS_DYNLIB=		$(DYNLIB:%=$(ROOTFS_LIBDIR)/%)
-ROOTFS_LINTLIB=		$(LINTLIB:%=$(ROOTFS_LIBDIR)/%)
 
 ROOTFS_DYNLIB64=	$(DYNLIB:%=$(ROOTFS_LIBDIR64)/%)
-ROOTFS_LINTLIB64=	$(LINTLIB:%=$(ROOTFS_LIBDIR64)/%)
 
 $(ROOTFS_DYNLIB) :=	FILEMODE= 755
 $(ROOTFS_DYNLIB64) :=	FILEMODE= 755
 
-LIBS =		$(DYNLIB) $(LINTLIB)
+LIBS =		$(DYNLIB)
 
-CLEANFILES +=	$(LINTOUTS) $(BLTSRCS) $(BLTFILES)
+CLEANFILES +=	$(BLTSRCS) $(BLTFILES)
 
 .PARALLEL:	$(LIBS)

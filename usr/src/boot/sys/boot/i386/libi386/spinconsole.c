@@ -1,10 +1,10 @@
-/*-
+/*
  * spinconsole.c
  *
  * Author: Maksym Sobolyev <sobomax@sippysoft.com>
  * Copyright (c) 2009 Sippy Software, Inc.
  * All rights reserved.
- * 
+ *
  * Subject to the following obligations and disclaimer of warranty, use and
  * redistribution of this software, in source or object code forms, with or
  * without modifications are expressly permitted by Whistle Communications;
@@ -15,7 +15,7 @@
  *    Communications, Inc. trademarks, including the mark "WHISTLE
  *    COMMUNICATIONS" on advertising, endorsements, or otherwise except as
  *    such appears in the above copyright notice or in the software.
- * 
+ *
  * THIS SOFTWARE IS BEING PROVIDED BY WHISTLE COMMUNICATIONS "AS IS", AND
  * TO THE MAXIMUM EXTENT PERMITTED BY LAW, WHISTLE COMMUNICATIONS MAKES NO
  * REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, REGARDING THIS SOFTWARE,
@@ -40,19 +40,13 @@
 #include <stand.h>
 #include <bootstrap.h>
 
-extern void get_pos(int *x, int *y);
-extern void curs_move(int *_x, int *_y, int x, int y);
-#if defined(EFI)
-extern void efi_cons_efiputchar(int c);
-#else
-extern void vidc_biosputchar(int c);
-#endif
 
 static void	spinc_probe(struct console *cp);
 static int	spinc_init(struct console *cp, int arg);
 static void	spinc_putchar(struct console *cp, int c);
 static int	spinc_getchar(struct console *cp);
 static int	spinc_ischar(struct console *cp);
+static void	spinc_devinfo(struct console *cp);
 
 struct console spinconsole = {
 	.c_name = "spin",
@@ -63,58 +57,78 @@ struct console spinconsole = {
 	.c_out = spinc_putchar,
 	.c_in = spinc_getchar,
 	.c_ready = spinc_ischar,
+	.c_ioctl = NULL,
+	.c_devinfo = spinc_devinfo,
 	.c_private = NULL
 };
 
 static void
-spinc_probe(struct console *cp)
+spinc_devinfo(struct console *cp __unused)
 {
-	cp->c_flags |= (C_PRESENTIN | C_PRESENTOUT);
-}
-
-static int
-spinc_init(struct console *cp __attribute((unused)),
-    int arg __attribute((unused)))
-{
-	return(0);
+	printf("\tsoftware device");
 }
 
 static void
-spinc_putchar(struct console *cp __attribute((unused)),
-    int c __attribute((unused)))
+spinc_probe(struct console *cp)
 {
-#ifdef TERM_EMU
-	static int curx, cury;
-#endif
+	int i;
+	struct console *parent;
+
+	if (cp->c_private == NULL) {
+		for (i = 0; consoles[i] != NULL; i++)
+			if (strcmp(consoles[i]->c_name, "text") == 0)
+				break;
+		cp->c_private = consoles[i];
+	}
+
+	parent = cp->c_private;
+	if (parent != NULL)
+		parent->c_probe(cp);
+}
+
+static int
+spinc_init(struct console *cp, int arg)
+{
+	struct console *parent;
+
+	parent = cp->c_private;
+	if (parent != NULL)
+		return (parent->c_init(cp, arg));
+	else
+		return (0);
+}
+
+static void
+spinc_putchar(struct console *cp, int c __unused)
+{
 	static unsigned tw_chars = 0x5C2D2F7C;    /* "\-/|" */
-	static time_t lasttime;
+	static time_t lasttime = 0;
+	struct console *parent;
 	time_t now;
 
 	now = time(NULL);
 	if (now < (lasttime + 1))
 		return;
 	lasttime = now;
-#ifdef TERM_EMU
-	get_pos(&curx, &cury);
-	if (curx > 0)
-		curs_move(&curx, &cury, curx - 1, cury);
-#endif
-#if defined(EFI)
-	efi_cons_efiputchar((char)tw_chars);
-#else
-	vidc_biosputchar((char)tw_chars);
-#endif
+	parent = cp->c_private;
+	if (parent == NULL)
+		return;
+
+	parent->c_out(parent, (char)tw_chars);
+	parent->c_out(parent, '\b');
 	tw_chars = (tw_chars >> 8) | ((tw_chars & (unsigned long)0xFF) << 24);
 }
 
 static int
-spinc_getchar(struct console *cp __attribute((unused)))
+spinc_getchar(struct console *cp __unused)
 {
-	return(-1);
+
+	return (-1);
 }
 
 static int
-spinc_ischar(struct console *cp __attribute((unused)))
+spinc_ischar(struct console *cp __unused)
 {
-	return(0);
+
+	return (0);
 }

@@ -23,31 +23,34 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 PROG=		crle
 
 include		$(SRC)/cmd/Makefile.cmd
 include		$(SRC)/cmd/sgs/Makefile.com
 
-COMOBJ=		config.o	crle.o 		depend.o	dump.o \
+COMOBJ=		config.o	crle.o		depend.o	dump.o \
 		inspect.o	hash.o		print.o		util.o
 BLTOBJ=		msg.o
-TOOLSOBJ=	alist.o
+SGSCOMMONOBJ=	alist.o
 
-OBJS=		$(BLTOBJ) $(COMOBJ) $(TOOLSOBJ)
+OBJS=		$(BLTOBJ) $(COMOBJ) $(SGSCOMMONOBJ)
 
 MAPFILE=	$(MAPFILE.NGB)
 MAPOPT=		$(MAPFILE:%=-Wl,-M%)
 
-CPPFLAGS +=	-I$(SRC)/common/sgsrtcid -I$(SRCBASE)/uts/$(ARCH)/sys \
+# not linted
+SMATCH=off
+
+CPPFLAGS +=	-I$(SRC)/common/sgsrtcid -I$(SRC)/uts/$(ARCH)/sys \
 		-D__EXTENSIONS__
 LLDFLAGS =	'-R$$ORIGIN/../lib'
 LLDFLAGS64 =	'-R$$ORIGIN/../../lib/$(MACH64)'
-LDFLAGS +=	$(VERSREF) $(CC_USE_PROTO) $(MAPOPT) \
-			$(LLDFLAGS) $(ZNOLAZYLOAD)
-LDLIBS +=	-lelf $(CONVLIBDIR) $(CONV_LIB) $(DLLIB)
-LINTFLAGS +=	-x
-LINTFLAGS64 +=	-x
+LDFLAGS +=	$(VERSREF) $(MAPOPT) $(LLDFLAGS) $(ZNOLAZYLOAD)
+LDLIBS +=	-lelf $(CONVLIBDIR) -lconv
 
 BLTDEFS=        msg.h
 BLTDATA=        msg.c
@@ -62,7 +65,6 @@ SGSMSGALL=	$(SGSMSGCOM)
 SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n crle_msg
 
 SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA) \
-		$(TOOLSOBJ:%.o=$(SGSTOOLS)/common/%.c)
-LINTSRCS=	$(SRCS) ../common/lintsup.c
+		$(COMMON:%.o=$(SGSCOMMON)/%.c)
 
-CLEANFILES +=	$(SGSLINTOUT) $(BLTFILES)
+CLEANFILES +=	$(BLTFILES)

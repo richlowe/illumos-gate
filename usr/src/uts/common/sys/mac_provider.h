@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 #ifndef	_SYS_MAC_PROVIDER_H
@@ -119,10 +119,15 @@ typedef struct lso_basic_tcp_ipv4_s {
 	t_uscalar_t	lso_max;		/* maximum payload */
 } lso_basic_tcp_ipv4_t;
 
+typedef struct lso_basic_tcp_ipv6_s {
+	t_uscalar_t	lso_max;		/* maximum payload */
+} lso_basic_tcp_ipv6_t;
+
 /*
  * Currently supported flags for LSO.
  */
-#define	LSO_TX_BASIC_TCP_IPV4	0x01		/* TCP LSO capability */
+#define	LSO_TX_BASIC_TCP_IPV4	0x01		/* TCPv4 LSO capability */
+#define	LSO_TX_BASIC_TCP_IPV6	0x02		/* TCPv6 LSO capability */
 
 /*
  * Future LSO capabilities can be added at the end of the mac_capab_lso_t.
@@ -135,6 +140,7 @@ typedef struct lso_basic_tcp_ipv4_s {
 typedef	struct mac_capab_lso_s {
 	t_uscalar_t		lso_flags;
 	lso_basic_tcp_ipv4_t	lso_basic_tcp_ipv4;
+	lso_basic_tcp_ipv6_t	lso_basic_tcp_ipv6;
 	/* Add future lso capabilities here */
 } mac_capab_lso_t;
 
@@ -242,16 +248,59 @@ typedef struct mac_callbacks_s {
 /*
  * Virtualization Capabilities
  */
+
 /*
- * The ordering of entries below is important. MAC_HW_CLASSIFIER
- * is the cutoff below which are entries which don't depend on
- * H/W. MAC_HW_CLASSIFIER and entries after that are cases where
- * H/W has been updated through add/modify/delete APIs.
+ * The type of ring classification. This is used by MAC to determine
+ * what, if any, processing it has to do upon receiving traffic on a
+ * particular Rx ring.
+ *
+ * MAC_NO_CLASSIFIER
+ *
+ *	No classification has been set. No traffic should cross an Rx
+ *	ring in this state.
+ *
+ * MAC_SW_CLASSIFIER
+ *
+ *	The driver delivers traffic for multiple clients to this ring.
+ *	All traffic must be software classified by MAC to guarantee
+ *	delivery to the correct client. This classification type may
+ *	be chosen for several reasons.
+ *
+ *	o The driver provides only one group and there are multiple
+ *	  clients using the MAC.
+ *
+ *	o The driver provides some hardware filtering but not enough
+ *	  to fully classify the traffic. E.g., a VLAN VNIC requires L2
+ *	  unicast address filtering as well as VLAN filtering, but
+ *	  some drivers may only support the former.
+ *
+ *	o The ring belongs to the default group. The default group
+ *	  acts as a spillover for all clients that can't reserve an
+ *	  exclusive group. It also handles multicast traffic for all
+ *	  clients. For these reasons, the default group's rings are
+ *	  always software classified.
+ *
+ * MAC_HW_CLASSIFIER
+ *
+ *	The driver delivers traffic for a single MAC client across
+ *	this ring. With this guarantee, MAC can simply pass the
+ *	traffic up the stack or even allow polling of the ring.
+ *
+ * MAC_PASSTHRU_CLASSIFIER
+ *
+ *	The ring is in "passthru" mode. In this mode we bypass all of
+ *	the typical MAC processing and pass the traffic directly to
+ *	the mr_pt_fn callback, see mac_rx_common(). This is used in
+ *	cases where there is another module acting as MAC provider on
+ *	behalf of the driver. E.g., link aggregations use this mode to
+ *	take full control of the port's rings; allowing it to enforce
+ *	LACP protocols and aggregate rings across discrete drivers.
  */
 typedef enum {
 	MAC_NO_CLASSIFIER = 0,
 	MAC_SW_CLASSIFIER,
-	MAC_HW_CLASSIFIER
+	MAC_HW_CLASSIFIER,
+	MAC_PASSTHRU_CLASSIFIER
 } mac_classify_type_t;
 
 typedef	void	(*mac_rx_func_t)(void *, mac_resource_handle_t, mblk_t *,
@@ -279,6 +328,28 @@ typedef enum {
 	MAC_RING_TYPE_RX = 1,	/* Receive ring */
 	MAC_RING_TYPE_TX	/* Transmit ring */
 } mac_ring_type_t;
+
+/*
+ * The value VLAN_ID_NONE (VID 0) means a client does not have
+ * membership to any VLAN. However, this statement is true for both
+ * untagged packets and priority tagged packets leading to confusion
+ * over what semantic is intended. To the provider, VID 0 is a valid
+ * VID when priority tagging is in play. To MAC and everything above
+ * VLAN_ID_NONE almost universally implies untagged traffic. Thus, we
+ * convert VLAN_ID_NONE to a sentinel value (MAC_VLAN_UNTAGGED) at the
+ * border between MAC and MAC provider. This informs the provider that
+ * the client is interested in untagged traffic and the provider
+ * should set any relevant bits to receive such traffic.
+ *
+ * Currently, the API between MAC and the provider passes the VID as a
+ * unit16_t. In the future this could actually be the entire TCI mask
+ * (PCP, DEI, and VID). This current scheme is safe in that potential
+ * future world as well; as 0xFFFF is not a valid TCI (the 0xFFF VID
+ * is reserved and never transmitted across networks).
+ */
+#define	MAC_VLAN_UNTAGGED		UINT16_MAX
+#define	MAC_VLAN_UNTAGGED_VID(vid)	\
+	(((vid) == VLAN_ID_NONE) ? MAC_VLAN_UNTAGGED : (vid))
 
 /*
  * Grouping type of a ring group
@@ -342,6 +413,7 @@ typedef struct mac_ring_info_s {
 		mac_ring_poll_t	poll;
 	} mrfunion;
 	mac_ring_stat_t		mri_stat;
+
 	/*
 	 * mri_flags will have some bits set to indicate some special
 	 * property/feature of a ring like serialization needed for a
@@ -358,6 +430,8 @@ typedef struct mac_ring_info_s {
  * #defines for mri_flags. The flags are temporary flags that are provided
  * only to workaround issues in specific drivers, and they will be
  * removed in the future.
+ *
+ * These are consumed only by sun4v and neptune (nxge).
  */
 #define	MAC_RING_TX_SERIALIZE		0x1
 #define	MAC_RING_RX_ENQUEUE		0x2
@@ -366,6 +440,8 @@ typedef	int	(*mac_group_start_t)(mac_group_driver_t);
 typedef	void	(*mac_group_stop_t)(mac_group_driver_t);
 typedef	int	(*mac_add_mac_addr_t)(void *, const uint8_t *);
 typedef	int	(*mac_rem_mac_addr_t)(void *, const uint8_t *);
+typedef int	(*mac_add_vlan_filter_t)(mac_group_driver_t, uint16_t);
+typedef int	(*mac_rem_vlan_filter_t)(mac_group_driver_t, uint16_t);
 
 struct mac_group_info_s {
 	mac_group_driver_t	mgi_driver;	/* Driver reference */
@@ -374,9 +450,11 @@ struct mac_group_info_s {
 	uint_t			mgi_count;	/* Count of rings */
 	mac_intr_t		mgi_intr;	/* Optional per-group intr */
 
-	/* Only used for rx groups */
+	/* Only used for Rx groups */
 	mac_add_mac_addr_t	mgi_addmac;	/* Add a MAC address */
 	mac_rem_mac_addr_t	mgi_remmac;	/* Remove a MAC address */
+	mac_add_vlan_filter_t	mgi_addvlan;	/* Add a VLAN filter */
+	mac_rem_vlan_filter_t	mgi_remvlan;	/* Remove a VLAN filter */
 };
 
 /*
@@ -494,14 +572,14 @@ extern void			mac_free(mac_register_t *);
 extern int			mac_register(mac_register_t *, mac_handle_t *);
 extern int			mac_disable_nowait(mac_handle_t);
 extern int			mac_disable(mac_handle_t);
-extern int  			mac_unregister(mac_handle_t);
-extern void 			mac_rx(mac_handle_t, mac_resource_handle_t,
+extern int			mac_unregister(mac_handle_t);
+extern void			mac_rx(mac_handle_t, mac_resource_handle_t,
 				    mblk_t *);
-extern void 			mac_rx_ring(mac_handle_t, mac_ring_handle_t,
+extern void			mac_rx_ring(mac_handle_t, mac_ring_handle_t,
 				    mblk_t *, uint64_t);
-extern void 			mac_link_update(mac_handle_t, link_state_t);
-extern void 			mac_link_redo(mac_handle_t, link_state_t);
-extern void 			mac_unicst_update(mac_handle_t,
+extern void			mac_link_update(mac_handle_t, link_state_t);
+extern void			mac_link_redo(mac_handle_t, link_state_t);
+extern void			mac_unicst_update(mac_handle_t,
 				    const uint8_t *);
 extern void			mac_dst_update(mac_handle_t, const uint8_t *);
 extern void			mac_tx_update(mac_handle_t);
@@ -572,6 +650,31 @@ extern void			mac_transceiver_info_set_present(
 extern void			mac_transceiver_info_set_usable(
 				    mac_transceiver_info_t *,
 				    boolean_t);
+
+/*
+ * This represents a provisional set of currently illumos-private APIs to get
+ * information about a mblk_t chain's type. This is an evolving interface.
+ */
+typedef enum mac_ether_offload_flags {
+	MEOI_L2INFO_SET		= 1 << 0,
+	MEOI_VLAN_TAGGED	= 1 << 1,
+	MEOI_L3INFO_SET		= 1 << 2,
+	MEOI_L4INFO_SET		= 1 << 3
+} mac_ether_offload_flags_t;
+
+typedef struct mac_ether_offload_info {
+	mac_ether_offload_flags_t	meoi_flags;	/* What's valid? */
+	size_t		meoi_len;	/* Total message length */
+	uint8_t		meoi_l2hlen;	/* How long is the Ethernet header? */
+	uint16_t	meoi_l3proto;	/* What's the Ethertype */
+	uint8_t		meoi_l3hlen;	/* How long is the header? */
+	uint8_t		meoi_l4proto;	/* What is the payload type? */
+	uint8_t		meoi_l4hlen;	/* How long is the L4 header */
+} mac_ether_offload_info_t;
+
+extern int			mac_ether_offload_info(mblk_t *,
+				    mac_ether_offload_info_t *);
+
 
 #endif	/* _KERNEL */
 

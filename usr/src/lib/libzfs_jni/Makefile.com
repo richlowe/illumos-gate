@@ -22,9 +22,9 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-
-#
 # Copyright (c) 2015 by Delphix. All rights reserved.
+#
+# Copyright 2020 Joyent, Inc.
 #
 
 LIBRARY= libzfs_jni.a
@@ -40,23 +40,23 @@ OBJECTS=	libzfs_jni_dataset.o \
 
 include ../../Makefile.lib
 
-LIBS=	$(DYNLIB) $(LINTLIB)
+LIBS=	$(DYNLIB)
 
 INCS += -I$(JAVA_ROOT)/include \
-	-I$(JAVA_ROOT)/include/solaris
+	-I$(JAVA_ROOT)/include/solaris \
+	-I../../libzutil/common
 
-LDLIBS +=	-lc -lnvpair -ldiskmgt -lzfs
+LDLIBS +=	-lc -lnvpair -ldiskmgt -lzfs -lzutil
 CPPFLAGS +=	$(INCS)
 $(NOT_RELEASE_BUILD) CPPFLAGS += -DDEBUG
 CERRWARN +=	-_gcc=-Wno-switch
 
+SMOFF += all_func_returns
+
 SRCDIR =	../common
-$(LINTLIB) := SRCS=	$(SRCDIR)/$(LINTSRC)
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: lintcheck
 
 include ../../Makefile.targ

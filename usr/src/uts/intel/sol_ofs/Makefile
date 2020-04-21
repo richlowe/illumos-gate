@@ -21,7 +21,9 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright 2019 Joyent, Inc.
 #
+
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -59,10 +61,16 @@ LINTTAGS	+= -erroff=E_PTRDIFF_OVERFLOW
 LINTTAGS	+= -erroff=E_STATIC_UNUSED
 LINTTAGS	+= -erroff=E_CONST_TRUNCATED_BY_ASSIGN
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-unused-variable
+
+# needs work
+$(OBJS_DIR)/sol_cma.o := SMOFF += deref_check
+
+# false positive
+SMOFF += signed
 
 #
 #	Default build targets.

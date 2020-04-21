@@ -23,7 +23,7 @@
  * Use is subject to license terms.
  */
 /*
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_SYS_MACHCPUVAR_H
@@ -134,6 +134,15 @@ struct kpti_frame {
 	uint64_t	kf_upper_redzone;
 };
 
+typedef struct cpu_smt {
+	lock_t cs_lock;
+	char cs_pad[56];
+	struct cpu *cs_sib;
+	volatile uint64_t cs_intr_depth;
+	volatile uint64_t cs_state;
+	volatile uint64_t cs_sibstate;
+} cpu_smt_t;
+
 /*
  * This first value, MACHCPU_SIZE is the size of all the members in the cpu_t
  * AND struct machcpu, before we get to the mcpu_pad and the kpti area.
@@ -141,9 +150,9 @@ struct kpti_frame {
  * page-tables, and hence must be page-aligned and page-sized. See
  * hat_pcp_setup().
  *
- * There is a CTASSERT in os/intr.c that checks these numbers.
+ * There are CTASSERTs in os/intr.c that verify this all works out.
  */
-#define	MACHCPU_SIZE	(572 + 1584)
+#define	MACHCPU_SIZE	(1568 + 696)
 #define	MACHCPU_PAD	(MMU_PAGESIZE - MACHCPU_SIZE)
 #define	MACHCPU_PAD2	(MMU_PAGESIZE - 16 - 3 * sizeof (struct kpti_frame))
 
@@ -152,6 +161,7 @@ struct	machcpu {
 	 * x_call fields - used for interprocessor cross calls
 	 */
 	struct xc_msg	*xc_msgbox;
+	struct xc_msg	*xc_curmsg;
 	struct xc_msg	*xc_free;
 	xc_data_t	xc_data;
 	uint32_t	xc_wait_cnt;
@@ -218,6 +228,8 @@ struct	machcpu {
 	 * The low order bits will be incremented on every interrupt.
 	 */
 	volatile uint32_t	mcpu_istamp;
+
+	cpu_smt_t		mcpu_smt;
 
 	char			mcpu_pad[MACHCPU_PAD];
 

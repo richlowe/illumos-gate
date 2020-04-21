@@ -23,6 +23,9 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
 
 /*
  * Floppy Disk driver
@@ -490,7 +493,7 @@ fd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		sig_minor = drive_num << 3;
 		for (dmdp = fd_minor; dmdp->name != NULL; dmdp++) {
 			if (ddi_create_minor_node(dip, dmdp->name, dmdp->type,
-			    sig_minor | dmdp->minor, DDI_NT_FD, NULL)
+			    sig_minor | dmdp->minor, DDI_NT_FD, 0)
 			    == DDI_FAILURE) {
 				ddi_remove_minor_node(dip, NULL);
 				goto no_attach;
@@ -807,6 +810,7 @@ fdgetlabel(struct fcu_obj *fjp, int unit)
 	nexttype = fdp->d_deffdtype;
 	try_this = 1;		/* always try the current characteristics */
 
+	rval = ENXIO;
 	for (tries = nfdtypes; tries; tries--) {
 		if (try_this) {
 			fjp->fj_flags &= ~FUNIT_CHAROK;
@@ -1769,7 +1773,7 @@ get_geom:
 		if (rval != 0)
 			break;
 
-	if (fc.fdc_cmd == FDCMD_READ || fc.fdc_cmd == FDCMD_WRITE) {
+		if (fc.fdc_cmd == FDCMD_READ || fc.fdc_cmd == FDCMD_WRITE) {
 			auto struct iovec aiov;
 			auto struct uio auio;
 			struct uio *uio = &auio;
@@ -2171,7 +2175,7 @@ fd_prop_op(dev_t dev, dev_info_t *dip, ddi_prop_op_t prop_op, int mod_flags,
 	 * request is passed to ddi_prop_op.
 	 */
 	if (dev == DDI_DEV_T_ANY) {
-pass:  		return (ddi_prop_op(dev, dip, prop_op, mod_flags,
+pass:		return (ddi_prop_op(dev, dip, prop_op, mod_flags,
 		    name, valuep, lengthp));
 	} else {
 		/*
@@ -2305,7 +2309,7 @@ fd_check_media(dev_t dev, enum dkio_state state)
 
 /*
  * fd_get_media_info :
- * 	Collects medium information for
+ *	Collects medium information for
  *	DKIOCGMEDIAINFO ioctl.
  */
 

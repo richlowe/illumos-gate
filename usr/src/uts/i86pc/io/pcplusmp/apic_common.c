@@ -23,8 +23,9 @@
  * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
  */
 /*
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2019, Joyent, Inc.
  * Copyright (c) 2016, 2017 by Delphix. All rights reserved.
+ * Copyright 2019 Joshua M. Clulow <josh@sysmgr.org>
  */
 
 /*
@@ -122,11 +123,7 @@ int apic_enable_cpcovf_intr = 1;
 
 /* vector at which CMCI interrupts come in */
 int apic_cmci_vect;
-extern int cmi_enable_cmci;
 extern void cmi_cmci_trap(void);
-
-kmutex_t cmci_cpu_setup_lock;	/* protects cmci_cpu_setup_registered */
-int cmci_cpu_setup_registered;
 
 lock_t apic_mode_switch_lock;
 
@@ -366,46 +363,36 @@ apic_cpcovf_mask_clear(void)
 	    (apic_reg_ops->apic_read(APIC_PCINT_VECT) & ~APIC_LVT_MASK));
 }
 
-/*ARGSUSED*/
 static int
-apic_cmci_enable(xc_arg_t arg1, xc_arg_t arg2, xc_arg_t arg3)
+apic_cmci_enable(xc_arg_t arg1 __unused, xc_arg_t arg2 __unused,
+    xc_arg_t arg3 __unused)
 {
 	apic_reg_ops->apic_write(APIC_CMCI_VECT, apic_cmci_vect);
 	return (0);
 }
 
-/*ARGSUSED*/
 static int
-apic_cmci_disable(xc_arg_t arg1, xc_arg_t arg2, xc_arg_t arg3)
+apic_cmci_disable(xc_arg_t arg1 __unused, xc_arg_t arg2 __unused,
+    xc_arg_t arg3 __unused)
 {
 	apic_reg_ops->apic_write(APIC_CMCI_VECT, apic_cmci_vect | AV_MASK);
 	return (0);
 }
 
-/*ARGSUSED*/
-int
-cmci_cpu_setup(cpu_setup_t what, int cpuid, void *arg)
+void
+apic_cmci_setup(processorid_t cpuid, boolean_t enable)
 {
 	cpuset_t	cpu_set;
 
 	CPUSET_ONLY(cpu_set, cpuid);
 
-	switch (what) {
-		case CPU_ON:
-			xc_call(NULL, NULL, NULL, CPUSET2BV(cpu_set),
-			    (xc_func_t)apic_cmci_enable);
-			break;
-
-		case CPU_OFF:
-			xc_call(NULL, NULL, NULL, CPUSET2BV(cpu_set),
-			    (xc_func_t)apic_cmci_disable);
-			break;
-
-		default:
-			break;
+	if (enable) {
+		xc_call(0, 0, 0, CPUSET2BV(cpu_set),
+		    (xc_func_t)apic_cmci_enable);
+	} else {
+		xc_call(0, 0, 0, CPUSET2BV(cpu_set),
+		    (xc_func_t)apic_cmci_disable);
 	}
-
-	return (0);
 }
 
 static void
@@ -510,7 +497,7 @@ apic_cpu_send_SIPI(processorid_t cpun, boolean_t start)
 
 /*ARGSUSED1*/
 int
-apic_cpu_start(processorid_t cpun, caddr_t arg)
+apic_cpu_start(processorid_t cpun, caddr_t arg __unused)
 {
 	ASSERT(MUTEX_HELD(&cpu_lock));
 
@@ -536,7 +523,7 @@ apic_cpu_start(processorid_t cpun, caddr_t arg)
  */
 /*ARGSUSED1*/
 int
-apic_cpu_stop(processorid_t cpun, caddr_t arg)
+apic_cpu_stop(processorid_t cpun, caddr_t arg __unused)
 {
 	int		rc;
 	cpu_t		*cp;
@@ -657,15 +644,13 @@ apic_get_pir_ipivect(void)
 	return (apic_pir_vect);
 }
 
-/*ARGSUSED*/
 void
-apic_set_idlecpu(processorid_t cpun)
+apic_set_idlecpu(processorid_t cpun __unused)
 {
 }
 
-/*ARGSUSED*/
 void
-apic_unset_idlecpu(processorid_t cpun)
+apic_unset_idlecpu(processorid_t cpun __unused)
 {
 }
 
@@ -818,36 +803,61 @@ gethrtime_again:
 }
 
 /* apic NMI handler */
-/*ARGSUSED*/
-void
-apic_nmi_intr(caddr_t arg, struct regs *rp)
+uint_t
+apic_nmi_intr(caddr_t arg __unused, caddr_t arg1 __unused)
 {
+	nmi_action_t action = nmi_action;
+
 	if (apic_shutdown_processors) {
 		apic_disable_local_apic();
-		return;
+		return (DDI_INTR_CLAIMED);
 	}
 
 	apic_error |= APIC_ERR_NMI;
 
 	if (!lock_try(&apic_nmi_lock))
-		return;
+		return (DDI_INTR_CLAIMED);
 	apic_num_nmis++;
 
-	if (apic_kmdb_on_nmi && psm_debugger()) {
-		debug_enter("NMI received: entering kmdb\n");
-	} else if (apic_panic_on_nmi) {
-		/* Keep panic from entering kmdb. */
-		nopanicdebug = 1;
-		panic("NMI received\n");
-	} else {
+	/*
+	 * "nmi_action" always over-rides the older way of doing this, unless we
+	 * can't actually drop into kmdb when requested.
+	 */
+	if (action == NMI_ACTION_KMDB && !psm_debugger())
+		action = NMI_ACTION_UNSET;
+
+	if (action == NMI_ACTION_UNSET) {
+		if (apic_kmdb_on_nmi && psm_debugger())
+			action = NMI_ACTION_KMDB;
+		else if (apic_panic_on_nmi)
+			action = NMI_ACTION_PANIC;
+		else
+			action = NMI_ACTION_IGNORE;
+	}
+
+	switch (action) {
+	case NMI_ACTION_IGNORE:
 		/*
 		 * prom_printf is the best shot we have of something which is
 		 * problem free from high level/NMI type of interrupts
 		 */
 		prom_printf("NMI received\n");
+		break;
+
+	case NMI_ACTION_PANIC:
+		/* Keep panic from entering kmdb. */
+		nopanicdebug = 1;
+		panic("NMI received\n");
+		break;
+
+	case NMI_ACTION_KMDB:
+	default:
+		debug_enter("NMI received: entering kmdb\n");
+		break;
 	}
 
 	lock_clear(&apic_nmi_lock);
+	return (DDI_INTR_CLAIMED);
 }
 
 processorid_t
@@ -1103,6 +1113,18 @@ apic_calibrate_impl()
 
 	iflag = intr_clear();
 
+	/*
+	 * Put the PIT in mode 0, "Interrupt On Terminal Count":
+	 */
+	outb(PITCTL_PORT, PIT_C0 | PIT_LOADMODE | PIT_ENDSIGMODE);
+
+	/*
+	 * The PIT counts down and then the counter value wraps around.  Load
+	 * the maximum counter value:
+	 */
+	outb(PITCTR0_PORT, 0xFF);
+	outb(PITCTR0_PORT, 0xFF);
+
 	do {
 		pit_tick_lo = inb(PITCTR0_PORT);
 		pit_tick = (inb(PITCTR0_PORT) << 8) | pit_tick_lo;
@@ -1261,7 +1283,7 @@ apic_clkinit(int hertz)
  * after filesystems are all unmounted.
  */
 void
-apic_preshutdown(int cmd, int fcn)
+apic_preshutdown(int cmd __unused, int fcn __unused)
 {
 	APIC_VERBOSE_POWEROFF(("apic_preshutdown(%d,%d); m=%d a=%d\n",
 	    cmd, fcn, apic_poweroff_method, apic_enable_acpi));
@@ -1615,16 +1637,14 @@ apic_intrmap_init(int apic_mode)
 	}
 }
 
-/*ARGSUSED*/
 static void
-apic_record_ioapic_rdt(void *intrmap_private, ioapic_rdt_t *irdt)
+apic_record_ioapic_rdt(void *intrmap_private __unused, ioapic_rdt_t *irdt)
 {
 	irdt->ir_hi <<= APIC_ID_BIT_OFFSET;
 }
 
-/*ARGSUSED*/
 static void
-apic_record_msi(void *intrmap_private, msi_regs_t *mregs)
+apic_record_msi(void *intrmap_private __unused, msi_regs_t *mregs)
 {
 	mregs->mr_addr = MSI_ADDR_HDR |
 	    (MSI_ADDR_RH_FIXED << MSI_ADDR_RH_SHIFT) |

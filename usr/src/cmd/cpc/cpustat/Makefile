@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG =		cpustat
 OBJS =		$(PROG).o caps.o time.o setgrp.o strtoset.o
@@ -36,9 +37,12 @@ STAT_COMMON_SRCS = $(STAT_COMMON_OBJS:%.o=$(STATCOMMONDIR)/%.c)
 SRCS += $(STAT_COMMON_SRCS)
 
 CFLAGS		+= $(CCVERBOSE) $(CTF_FLAGS)
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CPPFLAGS	+= -D_REENTRANT -I$(SRC)/lib/libcpc/common -I$(STATCOMMONDIR)
 LDLIBS +=	-lcpc -lkstat
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

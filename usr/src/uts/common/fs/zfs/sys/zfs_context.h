@@ -26,6 +26,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2013 by Delphix. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef _SYS_ZFS_CONTEXT_H
@@ -73,7 +74,26 @@ extern "C" {
 #include <sys/disp.h>
 #include <sys/callo.h>
 
+#if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
+#define	_zfs_expect(expr, value)    (__builtin_expect((expr), (value)))
+#else
+#define	_zfs_expect(expr, value)    (expr)
+#endif
+
+#define	likely(x)	_zfs_expect((x) != 0, 1)
+#define	unlikely(x)	_zfs_expect((x) != 0, 0)
+
 #define	CPU_SEQID	(CPU->cpu_seqid)
+
+/*
+ * In ZoL the following defines were added to their sys/avl.h header, but
+ * we want to limit these to the ZFS code on illumos.
+ */
+#define	TREE_ISIGN(a)	(((a) > 0) - ((a) < 0))
+#define	TREE_CMP(a, b)	(((a) > (b)) - ((a) < (b)))
+#define	TREE_PCMP(a, b)	\
+	(((uintptr_t)(a) > (uintptr_t)(b)) - ((uintptr_t)(a) < (uintptr_t)(b)))
+
 
 #ifdef	__cplusplus
 }

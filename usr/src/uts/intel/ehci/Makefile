@@ -22,9 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
-#	This makefile drives the production of the ehci driver kernel module.
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -45,8 +43,11 @@ CONF_SRCDIR	= $(UTSBASE)/common/io/usb/hcd/ehci
 #
 include $(UTSBASE)/intel/Makefile.intel
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-switch
+
+# needs work
+SMOFF += deref_check,shift_to_zero
 
 #
 # depends on misc/usba

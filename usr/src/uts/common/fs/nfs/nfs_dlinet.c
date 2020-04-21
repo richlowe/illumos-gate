@@ -23,6 +23,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
+
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/systm.h>
@@ -1143,7 +1147,7 @@ dhcpinit(void)
 						    "dhcp: couldn't add route "
 						    "to %s: %m.\n",
 						    inet_ntoa(defr));
-							continue;
+						continue;
 					}
 					if (dldebug) {
 						printf("dhcp: added route %s\n",
@@ -1972,7 +1976,7 @@ pmap_kgetport(struct knetconfig *knconf, struct netbuf *call_addr,
 		}
 
 		if (stat == RPC_SUCCESS) {
-			if ((ua != NULL) && (ua[0] != NULL)) {
+			if ((ua != NULL) && (ua[0] != '\0')) {
 				port = rpc_uaddr2port(AF_INET, ua);
 			} else {
 				/* Address unknown */

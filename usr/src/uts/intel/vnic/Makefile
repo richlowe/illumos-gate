@@ -22,6 +22,8 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+
 #
 # Path to the base of the uts directory tree (usually /usr/src/uts).
 #
@@ -55,7 +57,10 @@ CFLAGS		+= $(CCVERBOSE)
 LDFLAGS		+= -dy -Ndrv/dld -Nmisc/mac -Nmisc/dls
 
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMOFF += deref_check
 
 #
 #	Default build targets.

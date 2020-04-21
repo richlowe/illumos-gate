@@ -49,6 +49,7 @@
 #include <sys/dditypes.h>
 #include <sys/list_impl.h>
 #include <sys/byteorder.h>
+#include <sys/containerof.h>
 
 #include "qede_types.h"
 #include "qede_list.h"
@@ -373,10 +374,6 @@ void qede_osal_link_update(struct ecore_hwfn *hwfn);
  * and general Link list API's
  * for driver
  */
-#ifndef container_of
-#define	container_of(ptr, type, member) \
-	(type *)((char *)(ptr) - OFFSETOF(type, member))
-#endif
 
 typedef u64 osal_size_t; 
 typedef u64 osal_int_ptr_t;       
@@ -389,7 +386,7 @@ typedef u64 osal_int_ptr_t;
 	QEDE_LIST_ADD_TAIL(_entry_at_end_, _head_)
 
 #define	qede_list_entry(_entry_ptr_, _type_, _member_) \
-	container_of(_entry_ptr_, _type_, _member_)
+	__containerof(_entry_ptr_, _type_, _member_)
 
 #define	qede_list_first_entry(_head_, _type_, _member_) \
 	qede_list_entry((_head_)->next, _type_, _member_)
@@ -536,20 +533,6 @@ u32 LOG2(u32);
 #define	OSAL_NUM_ACTIVE_CPU()			(0)
 #define	DIV_ROUND_UP(n, d)		(((n) + (d) - 1) / (d))
 #define	ROUNDUP(x, y)			((((x) + ((y) - 1)) / (y)) * (y))
-
-
-/*
- * @VB: Don't want to include sys/sysmacros.h just
- * for the offsetof macro
- */
-#ifndef	OFFSETOF
-#define	OFFSETOF(type, member)		((size_t) (&(((type *)0)->member)))
-/*#define offsetof(type, member)          ((size_t) (&(((type *)0)->member)))*/
-#endif
-
-#ifndef offsetof
-#define offsetof(type, member)          ((size_t) (&(((type *)0)->member)))
-#endif
 
 void qede_print(char *format, ...);
 void qede_print_err(char *format, ...);

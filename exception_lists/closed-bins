@@ -18,6 +18,8 @@
 ./kernel/drv/atiatom
 ./kernel/drv/bcm_sata
 ./kernel/drv/bnx
+./kernel/drv/bnx.conf
+./kernel/drv/amd64/bnx
 ./kernel/drv/bnxe
 ./kernel/drv/bnxe.conf
 ./kernel/drv/amd64/bnxe
@@ -56,11 +58,13 @@
 ./lib/sparcv9/libc_i18n.a
 ./platform/i86pc/kernel/cpu/cpu_ms.GenuineIntel.6.46
 ./platform/i86pc/kernel/cpu/cpu_ms.GenuineIntel.6.47
+./platform/sun4u/kernel/drv/sparcv9/ctsmc
 ./platform/sun4v/kernel/drv/ncp.conf
 ./platform/sun4v/kernel/drv/n2cp.conf
 ./usr/has
 ./usr/has/bin
 ./usr/has/bin/patch
+./usr/include/sys/agp
 ./usr/include/sys/lvm
 ./usr/include/sys/pcmcia
 ./usr/include/sys/usb/clients/hwarc

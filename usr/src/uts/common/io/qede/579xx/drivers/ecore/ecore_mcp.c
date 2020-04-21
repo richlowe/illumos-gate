@@ -33,6 +33,10 @@
 * limitations under the License.
 */
 
+/*
+ * Copyright 2018 Joyent, Inc.
+ */
+
 #include "bcm_osal.h"
 #include "ecore.h"
 #include "ecore_status.h"
@@ -66,11 +70,11 @@
 
 #define DRV_MB_WR(_p_hwfn, _p_ptt, _field, _val) \
 	DRV_INNER_WR(p_hwfn, _p_ptt, drv_mb_addr, \
-		     OFFSETOF(struct public_drv_mb, _field), _val)
+		     offsetof(struct public_drv_mb, _field), _val)
 
 #define DRV_MB_RD(_p_hwfn, _p_ptt, _field) \
 	DRV_INNER_RD(_p_hwfn, _p_ptt, drv_mb_addr, \
-		     OFFSETOF(struct public_drv_mb, _field))
+		     offsetof(struct public_drv_mb, _field))
 
 #define PDA_COMP (((FW_MAJOR_VERSION) + (FW_MINOR_VERSION << 8)) << \
 	DRV_ID_PDA_COMP_VER_SHIFT)
@@ -362,7 +366,7 @@ static enum _ecore_status_t ecore_do_mcp_cmd(struct ecore_hwfn *p_hwfn,
 {
 	u32 delay = CHIP_MCP_RESP_ITER_US;
 	u32 max_retries = ECORE_DRV_MB_MAX_RETRIES;
-	u32 seq, cnt = 1, actual_mb_seq;
+	u32 seq, cnt = 1, actual_mb_seq __unused;
 	enum _ecore_status_t rc = ECORE_SUCCESS;
 
 #ifndef ASIC_ONLY
@@ -452,7 +456,7 @@ static enum _ecore_status_t ecore_mcp_cmd_and_union(struct ecore_hwfn *p_hwfn,
 	}
 
 	union_data_addr = p_hwfn->mcp_info->drv_mb_addr +
-			  OFFSETOF(struct public_drv_mb, union_data);
+			  offsetof(struct public_drv_mb, union_data);
 
 	/* Ensure that only a single thread is accessing the mailbox at a
 	 * certain time.
@@ -1062,7 +1066,7 @@ static void ecore_mcp_handle_vf_flr(struct ecore_hwfn *p_hwfn,
 	for (i = 0; i < (VF_MAX_STATIC / 32); i++) {
 		disabled_vfs[i] = ecore_rd(p_hwfn, p_ptt,
 					   path_addr +
-					   OFFSETOF(struct public_path,
+					   offsetof(struct public_path,
 						    mcp_vf_disabled) +
 					   sizeof(u32) * i);
 		DP_VERBOSE(p_hwfn, (ECORE_MSG_SP | ECORE_MSG_IOV),
@@ -1107,7 +1111,7 @@ enum _ecore_status_t ecore_mcp_ack_vf_flr(struct ecore_hwfn *p_hwfn,
 	for (i = 0; i < (VF_MAX_STATIC / 32); i++)
 		ecore_wr(p_hwfn, p_ptt,
 			 func_addr +
-			 OFFSETOF(struct public_func, drv_ack_vf_disabled) +
+			 offsetof(struct public_func, drv_ack_vf_disabled) +
 			 i * sizeof(u32), 0);
 
 	return rc;
@@ -1120,13 +1124,13 @@ static void ecore_mcp_handle_transceiver_change(struct ecore_hwfn *p_hwfn,
 
 	transceiver_state = ecore_rd(p_hwfn, p_ptt,
 				     p_hwfn->mcp_info->port_addr +
-				     OFFSETOF(struct public_port,
+				     offsetof(struct public_port,
 					      transceiver_data));
 
 	DP_VERBOSE(p_hwfn, (ECORE_MSG_HW | ECORE_MSG_SP),
 		   "Received transceiver state update [0x%08x] from mfw [Addr 0x%x]\n",
 		   transceiver_state, (u32)(p_hwfn->mcp_info->port_addr +
-					    OFFSETOF(struct public_port,
+					    offsetof(struct public_port,
 						     transceiver_data)));
 
 	transceiver_state = GET_FIELD(transceiver_state, ETH_TRANSCEIVER_STATE);
@@ -1146,7 +1150,7 @@ static void ecore_mcp_read_eee_config(struct ecore_hwfn *p_hwfn,
 	p_link->eee_adv_caps = 0;
 	p_link->eee_lp_adv_caps = 0;
 	eee_status = ecore_rd(p_hwfn, p_ptt, p_hwfn->mcp_info->port_addr +
-				     OFFSETOF(struct public_port, eee_status));
+				     offsetof(struct public_port, eee_status));
 	p_link->eee_active = !!(eee_status & EEE_ACTIVE_BIT);
 	val = (eee_status & EEE_LD_ADV_STATUS_MASK) >> EEE_LD_ADV_STATUS_SHIFT;
 	if (val & EEE_1G_ADV)
@@ -1176,11 +1180,11 @@ static void ecore_mcp_handle_link_change(struct ecore_hwfn *p_hwfn,
 	if (!b_reset) {
 		status = ecore_rd(p_hwfn, p_ptt,
 				  p_hwfn->mcp_info->port_addr +
-				  OFFSETOF(struct public_port, link_status));
+				  offsetof(struct public_port, link_status));
 		DP_VERBOSE(p_hwfn, (ECORE_MSG_LINK | ECORE_MSG_SP),
 			   "Received link update [0x%08x] from mfw [Addr 0x%x]\n",
 			   status, (u32)(p_hwfn->mcp_info->port_addr +
-			   OFFSETOF(struct public_port, link_status)));
+			   offsetof(struct public_port, link_status)));
 	} else {
 		DP_VERBOSE(p_hwfn, ECORE_MSG_LINK,
 			   "Resetting link indications\n");
@@ -1390,7 +1394,7 @@ u32 ecore_get_process_kill_counter(struct ecore_hwfn *p_hwfn,
 
 	proc_kill_cnt = ecore_rd(p_hwfn, p_ptt,
 				 path_addr +
-				 OFFSETOF(struct public_path, process_kill)) &
+				 offsetof(struct public_path, process_kill)) &
 			PROCESS_KILL_COUNTER_MASK;
 
 	return proc_kill_cnt;
@@ -1433,7 +1437,7 @@ static void ecore_mcp_send_protocol_stats(struct ecore_hwfn *p_hwfn,
 					  struct ecore_ptt *p_ptt,
 					  enum MFW_DRV_MSG_TYPE type)
 {
-	enum ecore_mcp_protocol_type stats_type;
+	enum ecore_mcp_protocol_type stats_type __unused;
 	union ecore_mcp_protocol_stats stats;
 	struct ecore_mcp_mb_params mb_params;
 	u32 hsi_param;
@@ -1746,7 +1750,7 @@ ecore_mcp_mdump_get_info(struct ecore_hwfn *p_hwfn, struct ecore_ptt *p_ptt,
 	global_addr = SECTION_ADDR(global_offsize, 0);
 	p_mdump_info->reason = ecore_rd(p_hwfn, p_ptt,
 					global_addr +
-					OFFSETOF(struct public_global,
+					offsetof(struct public_global,
 						 mdump_reason));
 
 	if (p_mdump_info->reason) {
@@ -1994,12 +1998,12 @@ enum _ecore_status_t ecore_mcp_get_mfw_ver(struct ecore_hwfn *p_hwfn,
 					       PUBLIC_GLOBAL));
 	*p_mfw_ver = ecore_rd(p_hwfn, p_ptt,
 			SECTION_ADDR(global_offsize, 0) +
-			OFFSETOF(struct public_global, mfw_ver));
+			offsetof(struct public_global, mfw_ver));
 
 	if (p_running_bundle_id != OSAL_NULL) {
 		*p_running_bundle_id = ecore_rd(p_hwfn, p_ptt,
 				SECTION_ADDR(global_offsize, 0) +
-				OFFSETOF(struct public_global,
+				offsetof(struct public_global,
 					 running_bundle_id));
 	}
 
@@ -2033,8 +2037,8 @@ enum _ecore_status_t ecore_mcp_get_mbi_ver(struct ecore_hwfn *p_hwfn,
 	nvm_cfg1_offset = ecore_rd(p_hwfn, p_ptt, nvm_cfg_addr + 4);
 
 	mbi_ver_addr = MCP_REG_SCRATCH + nvm_cfg1_offset +
-		       OFFSETOF(struct nvm_cfg1, glob) +
-		       OFFSETOF(struct nvm_cfg1_glob, mbi_version);
+		       offsetof(struct nvm_cfg1, glob) +
+		       offsetof(struct nvm_cfg1_glob, mbi_version);
 	*p_mbi_ver = ecore_rd(p_hwfn, p_ptt, mbi_ver_addr) &
 		     (NVM_CFG1_GLOB_MBI_VERSION_0_MASK |
 		      NVM_CFG1_GLOB_MBI_VERSION_1_MASK |
@@ -2065,7 +2069,7 @@ enum _ecore_status_t ecore_mcp_get_media_type(struct ecore_dev *p_dev,
 		return ECORE_BUSY;
 
 	*p_media_type = ecore_rd(p_hwfn, p_ptt, p_hwfn->mcp_info->port_addr +
-				 OFFSETOF(struct public_port, media_type));
+				 offsetof(struct public_port, media_type));
 
 	ecore_ptt_release(p_hwfn, p_ptt);
 
@@ -2650,14 +2654,14 @@ ecore_mcp_ov_get_fc_npiv(struct ecore_hwfn *p_hwfn, struct ecore_ptt *p_ptt,
 	p_table->num_wwpn = 0;
 	p_table->num_wwnn = 0;
 	addr = ecore_rd(p_hwfn, p_ptt, p_hwfn->mcp_info->port_addr +
-			OFFSETOF(struct public_port, fc_npiv_nvram_tbl_addr));
+			offsetof(struct public_port, fc_npiv_nvram_tbl_addr));
 	if (addr == NPIV_TBL_INVALID_ADDR) {
 		DP_VERBOSE(p_hwfn, ECORE_MSG_SP, "NPIV table doesn't exist\n");
 		return rc;
 	}
 
 	size = ecore_rd(p_hwfn, p_ptt, p_hwfn->mcp_info->port_addr +
-			OFFSETOF(struct public_port, fc_npiv_nvram_tbl_size));
+			offsetof(struct public_port, fc_npiv_nvram_tbl_size));
 	if (!size) {
 		DP_VERBOSE(p_hwfn, ECORE_MSG_SP, "NPIV table is empty\n");
 		return rc;
@@ -3128,7 +3132,6 @@ enum _ecore_status_t ecore_mcp_phy_sfp_read(struct ecore_hwfn *p_hwfn,
 					    u32 len, u8 *p_buf)
 {
 	struct ecore_mcp_nvm_params params;
-	enum _ecore_status_t rc;
 	u32 bytes_left, bytes_to_copy, buf_size;
 
 	OSAL_MEMSET(&params, 0, sizeof(struct ecore_mcp_nvm_params));
@@ -3153,7 +3156,7 @@ enum _ecore_status_t ecore_mcp_phy_sfp_read(struct ecore_hwfn *p_hwfn,
 			 DRV_MB_PARAM_TRANSCEIVER_OFFSET_SHIFT);
 		params.nvm_common.offset |=
 			(bytes_to_copy << DRV_MB_PARAM_TRANSCEIVER_SIZE_SHIFT);
-		rc = ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
+		(void) ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
 		if ((params.nvm_common.resp & FW_MSG_CODE_MASK) ==
 		    FW_MSG_CODE_TRANSCEIVER_NOT_PRESENT) {
 			return ECORE_NODEV;
@@ -3174,7 +3177,6 @@ enum _ecore_status_t ecore_mcp_phy_sfp_write(struct ecore_hwfn *p_hwfn,
 					     u32 len, u8 *p_buf)
 {
 	struct ecore_mcp_nvm_params params;
-	enum _ecore_status_t rc;
 	u32 buf_idx, buf_size;
 
 	OSAL_MEMSET(&params, 0, sizeof(struct ecore_mcp_nvm_params));
@@ -3197,7 +3199,7 @@ enum _ecore_status_t ecore_mcp_phy_sfp_write(struct ecore_hwfn *p_hwfn,
 			(buf_size << DRV_MB_PARAM_TRANSCEIVER_SIZE_SHIFT);
 		params.nvm_wr.buf_size = buf_size;
 		params.nvm_wr.buf = (u32 *)&p_buf[buf_idx];
-		rc = ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
+		(void) ecore_mcp_nvm_command(p_hwfn, p_ptt, &params);
 		if ((params.nvm_common.resp & FW_MSG_CODE_MASK) ==
 		    FW_MSG_CODE_TRANSCEIVER_NOT_PRESENT) {
 			return ECORE_NODEV;

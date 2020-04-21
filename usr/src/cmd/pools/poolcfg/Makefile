@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG =		poolcfg
 OBJS =		poolcfg_lex.o poolcfg_grammar.o
@@ -45,6 +46,9 @@ LDFLAGS +=	$(MAPOPTS)
 LDLIBS +=	-lpool -ll
 XGETFLAGS =	-a
 CLOBBERFILES +=	poolcfg_lex.c poolcfg_grammar.c poolcfg_grammar.h
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

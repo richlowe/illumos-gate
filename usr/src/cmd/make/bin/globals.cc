@@ -21,6 +21,8 @@
 /*
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2019, Joyent, Inc.
  */
 
 /*
@@ -58,7 +60,7 @@
 	Boolean		sdot_target;	/* used to identify s.m(/M)akefile */
 	Boolean		all_parallel;
 	Boolean		assign_done;
-	int foo;	
+	int foo;
 	Boolean		build_failed_seen;
 	Name		built_last_make_run;
 	Name		c_at;
@@ -130,7 +132,7 @@
         Name		primary_makefile;
 	Boolean		quest;				/* `-q' */
 	short		read_trace_level;
-        Boolean 	reading_dependencies = false;
+        Boolean		reading_dependencies = false;
 	Name		recursive_name;
 	int		recursion_level;
 	short		report_dependencies_level = 0;	/* -P */
@@ -174,6 +176,8 @@
 	wchar_t		*wcs_ptr;
 	wchar_t		*wcs_ptr2;
 	long int	hostid;
+	Boolean		path_reset = false;
+	Boolean		rebuild_arg0 = false;
 
 /*
  * File table of contents

@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2016 RackTop Systems.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 pics/%.o:	../common/%.c
@@ -33,21 +34,10 @@ pics/%64.o:	../common/%.c
 		$(COMPILE.c) -o $@ -D_ELF64 $<
 		$(POST_PROCESS_O)
 
-lint:		$(LINTOUT32) $(SGSLINTOUT)
-
 delete:
 		-$(RM) $(DYNLIB)
 
-# Special target for native builds (ie. when we need to build a version of ld
-# to build a version of ld :-).
-
-native:		$(SGSLIBDIR)/$(DYNLIB)
-
 $(PICS):	pics
-
-$(SGSLIBDIR)/$(DYNLIB): $(PICS) $(SGSLIBDIR)
-		$(BUILD.SO)
-		$(POST_PROCESS_SO)
 
 include		$(SRC)/lib/Makefile.targ
 include		$(SRC)/cmd/sgs/Makefile.targ

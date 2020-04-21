@@ -22,6 +22,7 @@
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2018 Nexenta Systems, Inc. All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 LIBRARY= libnsl.a
@@ -196,12 +197,15 @@ CCFLAGS64 +=	-_CC=-features=conststrings
 
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-clobbered
+
+# not linted
+SMATCH=off
 
 LIBMP =		-lmp
 lint :=		LIBMP =

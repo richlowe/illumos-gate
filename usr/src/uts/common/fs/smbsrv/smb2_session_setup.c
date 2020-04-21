@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -37,7 +37,7 @@ smb2_session_setup(smb_request_t *sr)
 	uint32_t Channel;
 	uint16_t SecBufOffset;
 	uint16_t SecBufLength;
-	uint64_t PrevSessionId;
+	uint64_t PrevSsnId;
 	uint16_t SessionFlags;
 	uint32_t status;
 	int skip;
@@ -55,7 +55,7 @@ smb2_session_setup(smb_request_t *sr)
 	    &Channel,		/* l */
 	    &SecBufOffset,	/* w */
 	    &SecBufLength,	/* w */
-	    &PrevSessionId);	/* q */
+	    &PrevSsnId);	/* q */
 	if (rc)
 		return (SDRC_ERROR);
 
@@ -81,6 +81,43 @@ smb2_session_setup(smb_request_t *sr)
 		return (SDRC_ERROR);
 
 	/*
+	 * Decoded everything.  Dtrace probe,
+	 * then no more early returns.
+	 */
+	DTRACE_SMB2_START(op__SessionSetup, smb_request_t *, sr);
+
+	/*
+	 * [MS-SMB2] 3.3.5.5 Receiving an SMB2 SESSION_SETUP Request
+	 *
+	 * If we support 3.x, RejectUnencryptedAccess is TRUE,
+	 * global EncryptData is TRUE, but we're not talking
+	 * 3.x or the client doesn't support encryption,
+	 * return ACCESS_DENIED.
+	 *
+	 * If RejectUnencryptedAccess is TRUE, we force max_protocol
+	 * to at least 3.0.
+	 */
+	if (sr->sr_server->sv_cfg.skc_encrypt == SMB_CONFIG_REQUIRED &&
+	    (sr->session->dialect < SMB_VERS_3_0 ||
+	    !SMB3_CLIENT_ENCRYPTS(sr))) {
+		status = NT_STATUS_ACCESS_DENIED;
+		goto errout;
+	}
+
+	/*
+	 * SMB3 multi-channel features are not supported.
+	 * Once they are, this will check the dialect and
+	 * whether multi-channel was negotiated, i.e.
+	 *	if (sr->session->dialect < SMB_VERS_3_0 ||
+	 *	    s->IsMultiChannelCapable == False)
+	 *		return (error...)
+	 */
+	if (Flags & SMB2_SESSION_FLAG_BINDING) {
+		status = NT_STATUS_REQUEST_NOT_ACCEPTED;
+		goto errout;
+	}
+
+	/*
 	 * The real auth. work happens in here.
 	 */
 	status = smb_authenticate_ext(sr);
@@ -92,11 +129,26 @@ smb2_session_setup(smb_request_t *sr)
 	switch (status) {
 
 	case NT_STATUS_SUCCESS:	/* Authenticated */
-		if (sr->uid_user->u_flags & SMB_USER_FLAG_GUEST)
+		if ((sr->uid_user->u_flags & SMB_USER_FLAG_GUEST) != 0)
 			SessionFlags |= SMB2_SESSION_FLAG_IS_GUEST;
-		if (sr->uid_user->u_flags & SMB_USER_FLAG_ANON)
+		if ((sr->uid_user->u_flags & SMB_USER_FLAG_ANON) != 0)
 			SessionFlags |= SMB2_SESSION_FLAG_IS_NULL;
+		if (sr->uid_user->u_encrypt != SMB_CONFIG_DISABLED)
+			SessionFlags |= SMB2_SESSION_FLAG_ENCRYPT_DATA;
 		smb2_ss_adjust_credits(sr);
+
+		/*
+		 * PrevSsnId is a session that the client is reporting as
+		 * having gone away, and for which we might not yet have seen
+		 * a disconnect. We need to log off the previous session so
+		 * any durable handles in that session will become orphans
+		 * that can be reclaimed in this new session.  Note that
+		 * either zero or the _current_ session ID means there is
+		 * no previous session to logoff.
+		 */
+		if (PrevSsnId != 0 &&
+		    PrevSsnId != sr->smb2_ssnid)
+			smb_server_logoff_ssnid(sr, PrevSsnId);
 		break;
 
 	/*
@@ -109,10 +161,14 @@ smb2_session_setup(smb_request_t *sr)
 		break;
 
 	default:
+errout:
 		SecBufLength = 0;
 		sr->smb2_status = status;
 		break;
 	}
+
+	/* sr->smb2_status set above */
+	DTRACE_SMB2_DONE(op__SessionSetup, smb_request_t *, sr);
 
 	/*
 	 * SMB2 Session Setup reply
@@ -128,7 +184,7 @@ smb2_session_setup(smb_request_t *sr)
 	    SecBufLength,		/* # */
 	    sinfo->ssi_osecblob);	/* c */
 	if (rc)
-		return (SDRC_ERROR);
+		sr->smb2_status = NT_STATUS_INTERNAL_ERROR;
 
 	return (SDRC_SUCCESS);
 }

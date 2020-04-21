@@ -252,10 +252,12 @@ bpf_attachd(struct bpf_d *d, const char *ifname, int dlt)
 	int hdrlen;
 	int error;
 
-	ASSERT(d->bd_bif == NULL);
-	ASSERT(d->bd_mcip == NULL);
+	ASSERT(d->bd_bif == (uintptr_t)NULL);
+	ASSERT(d->bd_mcip == (uintptr_t)NULL);
 	zone = d->bd_zone;
 	zonematch = B_TRUE;
+	error = 0;
+	bpr = NULL;
 again:
 	mh = 0;
 	mcip = 0;
@@ -294,7 +296,7 @@ next:
 			MBPF_CLIENT_CLOSE(bpr, mcip);
 			mcip = 0;
 		}
-		if (mh != NULL) {
+		if (mh != 0) {
 			MBPF_CLOSE(bpr, mh);
 			mh = 0;
 		}
@@ -311,6 +313,10 @@ next:
 		}
 		return (error);
 	}
+
+	/* No providers? */
+	if (bpr == NULL)
+		return (ENOENT);
 
 	d->bd_mac = *bpr;
 	d->bd_mcip = mcip;
@@ -1386,7 +1392,7 @@ bpf_ifname(struct bpf_d *d, char *buffer, int bufsize)
 {
 
 	mutex_enter(&d->bd_lock);
-	if (d->bd_bif == NULL) {
+	if (d->bd_bif == 0) {
 		mutex_exit(&d->bd_lock);
 		return (EINVAL);
 	}

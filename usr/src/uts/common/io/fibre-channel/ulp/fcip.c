@@ -145,7 +145,7 @@ static void fcip_proto(queue_t *, mblk_t *);
 static void fcip_ioctl(queue_t *, mblk_t *);
 static int fcip_open(queue_t *wq, dev_t *devp, int flag,
 		int sflag, cred_t *credp);
-static int fcip_close(queue_t *rq, int flag, int otyp, cred_t *credp);
+static int fcip_close(queue_t *rq, int flag, cred_t *credp);
 static int fcip_start(queue_t *wq, mblk_t *mp, struct fcip *fptr,
     struct fcip_dest *fdestp, int flags);
 static void fcip_sendup(struct fcip *fptr, mblk_t *mp,
@@ -3571,7 +3571,7 @@ done:
  */
 /* ARGSUSED */
 static int
-fcip_close(queue_t *rq, int flag, int otyp, cred_t *credp)
+fcip_close(queue_t *rq, int flag, cred_t *credp)
 {
 	struct fcipstr *slp;
 	struct fcipstr **prevslp;
@@ -4583,7 +4583,7 @@ fcip_handle_topology(struct fcip *fptr)
 		if (!(fptr->fcip_flags & FCIP_REG_INPROGRESS)) {
 			fptr->fcip_flags |= FCIP_REG_INPROGRESS;
 			if (taskq_dispatch(fptr->fcip_tq, fcip_port_ns,
-			    fptr, KM_NOSLEEP) == 0) {
+			    fptr, KM_NOSLEEP) == TASKQID_INVALID) {
 				fptr->fcip_flags &= ~FCIP_REG_INPROGRESS;
 			}
 		}
@@ -5248,8 +5248,8 @@ fcip_udreq(queue_t *wq, mblk_t *mp)
 
 	if (fdestp == NULL) {
 		FCIP_DEBUG(FCIP_DEBUG_DLPI, (CE_NOTE,
-		    "udreq - couldn't find dest struct for remote port");
-		dluderrorind(wq, mp, (mp->b_rptr + off), len, DL_BADDATA, 0));
+		    "udreq - couldn't find dest struct for remote port"));
+		dluderrorind(wq, mp, (mp->b_rptr + off), len, DL_BADDATA, 0);
 		return;
 	}
 
@@ -7258,7 +7258,7 @@ fcip_timeout(void *arg)
 
 					if (taskq_dispatch(fptr->fcip_tq,
 					    fcip_rte_remove_deferred, fptr,
-					    KM_NOSLEEP) == 0) {
+					    KM_NOSLEEP) == TASKQID_INVALID) {
 						/*
 						 * failed - so mark the entry
 						 * as invalid again.
@@ -7302,7 +7302,7 @@ fcip_timeout(void *arg)
 					mutex_exit(&fdestp->fcipd_mutex);
 					if (taskq_dispatch(fptr->fcip_tq,
 					    fcip_pkt_timeout, fcip_pkt,
-					    KM_NOSLEEP) == 0) {
+					    KM_NOSLEEP) == TASKQID_INVALID) {
 						/*
 						 * timeout immediately
 						 */

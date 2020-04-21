@@ -21,6 +21,7 @@
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libgen.a
 VERS =		.1
@@ -44,7 +45,10 @@ CPPFLAGS +=	-D_REENTRANT -D_LARGEFILE64_SOURCE -I../inc -I../../common/inc
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-char-subscripts
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

@@ -21,9 +21,12 @@
 #
 # Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2013 Andrew Stormont.  All rights reserved.
-# Copyright 2016 Joyent, Inc.
+# Copyright (c) 2014 by Delphix. All rights reserved.
+# Copyright 2019 Joyent, Inc.
 # Copyright 2016 Garrett D'Amore <garrett@damore.org>
 # Copyright 2018 Nexenta Systems, Inc.
+# Copyright 2019 RackTop Systems
+# Copyright 2019 Peter Tribble.
 #
 
 #
@@ -106,13 +109,6 @@ DEF_BUILDS		= $(DEF_BUILDS64)
 ALL_BUILDS		= $(ALL_BUILDS64)
 
 #
-#	x86 or amd64 inline templates
-#
-INLINES_32		= $(UTSBASE)/intel/ia32/ml/ia32.il
-INLINES_64		= $(UTSBASE)/intel/amd64/ml/amd64.il
-INLINES			+= $(INLINES_$(CLASS))
-
-#
 #	kernel-specific optimizations; override default in Makefile.master
 #
 
@@ -126,13 +122,43 @@ COPTIMIZE		= $(COPTFLAG_$(CLASS))
 
 CFLAGS			= $(CFLAGS_XARCH)
 CFLAGS			+= $(COPTIMIZE)
-CFLAGS			+= $(INLINES:%=-_cc=%) -D_ASM_INLINES
+CFLAGS			+= -D_ASM_INLINES
 CFLAGS			+= $(CCMODE)
 CFLAGS			+= $(SPACEFLAG)
 CFLAGS			+= $(CCUNBOUND)
 CFLAGS			+= $(CFLAGS_uts)
 CFLAGS			+= -_cc=-xstrconst
-CFLAGS			+= -_gcc=-fstack-protector
+
+#
+# Options to control which version of stack-protector we enable. This
+# gives us a bit of flexibility and is unfortunately necessary as some
+# modules do not function correctly with our defaults (qede).
+#
+#  o STACKPROTECT_		Sets the appropriate version for the compiler
+#  o STACKPROTECT_strong	Sets us to use strong on all of the
+#				compilers it supports. This is the same
+#				as the default.
+#
+#  o STACKPROTECT_none		Disables the stack protector.
+#
+#  o STACKPROTECT_all		Enables it for everything.
+#
+#  o STACKPROTECT_basic		Enables the basic stack protector.
+#
+# -fstack-protector-strong is not available in our gcc4 which is why we
+# have per-compiler versions below.
+#
+STACKPROTECT_		= -_gcc4=-fstack-protector
+STACKPROTECT_		+= -_gcc7=-fstack-protector-strong
+STACKPROTECT_		+= -_gcc8=-fstack-protector-strong
+STACKPROTECT_		+= -_gcc9=-fstack-protector-strong
+
+STACKPROTECT_strong	= $(STACKPROTECT_)
+STACKPROTECT_none	= -_gcc=-fstack-protector-none
+STACKPROTECT_all	= -_gcc=-fstack-protector-all
+STACKPROTECT_basic	= -_gcc=-fstack-protector
+
+CFLAGS			+= $(STACKPROTECT_$(STACKPROTECT))
 
 ASFLAGS_XARCH_32	= $(i386_ASFLAGS)
 ASFLAGS_XARCH_64	= $(amd64_ASFLAGS)
@@ -173,6 +199,12 @@ $(IF_DEBUG_OBJ)clock.o		:=	DEBUG_DEFS	+= -DKSLICE=1
 ALL_DEFS	 = $(DEBUG_DEFS) $(OPTION_DEFS)
 
 #
+#	TCP congestion control modules (/kernel/cc)
+#
+MISC_KMODS	+= cc
+CC_KMODS	+= cc_newreno cc_cubic cc_sunreno
+
+#
 #	The kernels modules which are "implementation architecture"
 #	specific for this machine are enumerated below. Note that most
 #	of these modules must exist (in one form or another) for each
@@ -186,11 +218,8 @@ ALL_DEFS	 = $(DEBUG_DEFS) $(OPTION_DEFS)
 DRV_KMODS	+= aac
 DRV_KMODS	+= aggr
 DRV_KMODS	+= ahci
-DRV_KMODS	+= amd64_gart
 DRV_KMODS	+= amr
-DRV_KMODS	+= agpgart
 DRV_KMODS	+= srn
-DRV_KMODS	+= agptarget
 DRV_KMODS       += arn
 DRV_KMODS	+= arp
 DRV_KMODS	+= asy
@@ -212,14 +241,12 @@ DRV_KMODS	+= audiopci
 DRV_KMODS	+= audiosolo
 DRV_KMODS	+= audiots
 DRV_KMODS	+= audiovia823x
-DRV_KMODS	+= bl 
+DRV_KMODS	+= bl
 DRV_KMODS	+= blkdev
 DRV_KMODS	+= bge
 DRV_KMODS	+= bofi
 DRV_KMODS	+= bpf
 DRV_KMODS	+= bridge
-DRV_KMODS	+= bscbus
-DRV_KMODS	+= bscv
 DRV_KMODS	+= chxge
 DRV_KMODS	+= cxgbe
 DRV_KMODS	+= ntxn
@@ -249,7 +276,6 @@ DRV_KMODS	+= fm
 DRV_KMODS	+= fssnap
 DRV_KMODS	+= hxge
 DRV_KMODS	+= i8042
-DRV_KMODS	+= i915
 DRV_KMODS	+= icmp
 DRV_KMODS	+= icmp6
 DRV_KMODS	+= intel_nb5000
@@ -281,6 +307,7 @@ DRV_KMODS	+= log
 DRV_KMODS	+= logindmux
 DRV_KMODS	+= mega_sas
 DRV_KMODS	+= mc-amd
+DRV_KMODS	+= mlxcx
 DRV_KMODS	+= mm
 DRV_KMODS	+= mouse8042
 DRV_KMODS	+= mpt_sas
@@ -309,7 +336,6 @@ DRV_KMODS	+= ptm
 DRV_KMODS	+= pts
 DRV_KMODS	+= ptsl
 DRV_KMODS	+= qlge
-DRV_KMODS	+= radeon
 DRV_KMODS	+= ral
 DRV_KMODS	+= ramdisk
 DRV_KMODS	+= random
@@ -351,6 +377,8 @@ DRV_KMODS	+= trill
 DRV_KMODS	+= udp
 DRV_KMODS	+= udp6
 DRV_KMODS	+= ucode
+DRV_KMODS	+= ufm
+DRV_KMODS	+= ufmtest
 DRV_KMODS	+= ural
 DRV_KMODS	+= uath
 DRV_KMODS	+= urtw
@@ -385,6 +413,7 @@ DRV_KMODS	+= pvscsi
 DRV_KMODS	+= afe
 DRV_KMODS	+= atge
 DRV_KMODS	+= bfe
+DRV_KMODS	+= bnx
 DRV_KMODS	+= bnxe
 DRV_KMODS	+= dmfe
 DRV_KMODS	+= e1000g
@@ -469,6 +498,7 @@ DRV_KMODS	+= ses
 #
 #	USB specific modules
 #
+DRV_KMODS	+= ccid
 DRV_KMODS	+= hid
 DRV_KMODS	+= hubd
 DRV_KMODS	+= uhci
@@ -496,9 +526,9 @@ DRV_KMODS	+= xhci
 #
 DRV_KMODS	+= usbgem
 DRV_KMODS	+= axf
-DRV_KMODS	+= udmf 
+DRV_KMODS	+= udmf
 DRV_KMODS	+= upf
-DRV_KMODS	+= urf 
+DRV_KMODS	+= urf
 
 #
 #	1394 modules
@@ -512,7 +542,7 @@ DRV_KMODS	+= dcam1394
 #	InfiniBand pseudo drivers
 #
 DRV_KMODS	+= ib ibp eibnx eoib rdsib sdp iser daplt hermon tavor sol_ucma sol_uverbs
-DRV_KMODS	+= sol_umad 
+DRV_KMODS	+= sol_umad
 
 #
 #	Brand modules
@@ -581,7 +611,6 @@ SYS_KMODS	+= acctctl
 #
 MISC_KMODS	+= ac97
 MISC_KMODS	+= acpica
-MISC_KMODS	+= agpmaster
 MISC_KMODS	+= bignum
 MISC_KMODS	+= bootdev
 MISC_KMODS	+= busra
@@ -591,7 +620,6 @@ MISC_KMODS	+= ctf
 MISC_KMODS	+= dadk
 MISC_KMODS	+= dcopy
 MISC_KMODS	+= dls
-MISC_KMODS	+= drm
 MISC_KMODS	+= fssnap_if
 MISC_KMODS	+= gda
 MISC_KMODS	+= gld
@@ -639,7 +667,6 @@ MISC_KMODS	+= usba usba10 usbs49_fw
 MISC_KMODS	+= scsi_vhci_f_sym_hds
 MISC_KMODS	+= scsi_vhci_f_sym
 MISC_KMODS	+= scsi_vhci_f_tpgs
-MISC_KMODS	+= scsi_vhci_f_asym_sun
 MISC_KMODS	+= scsi_vhci_f_tape
 MISC_KMODS	+= scsi_vhci_f_tpgs_tape
 MISC_KMODS	+= fctl
@@ -734,3 +761,11 @@ DACF_KMODS	+= net_dacf
 # global cross check.
 #
 LINTFLAGS	+= -D_MACHDEP -I$(UTSBASE)/i86pc
+
+#
+#	Sensor related drivers
+#
+DRV_KMODS	+= amdf17nbdf
+DRV_KMODS	+= coretemp
+DRV_KMODS	+= pchtemp
+DRV_KMODS	+= amdnbtemp

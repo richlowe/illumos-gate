@@ -81,7 +81,7 @@ ASFLAGS +=  -DCHEETAH -DCHEETAH_PLUS -DCPU_IMP_L1_CACHE_PARITY \
 	    -DCPU_IMP_ECACHE_ASSOC -DCPU_IMP_DUAL_PAGESIZE -DCPU_IMP_AFSR_EXT
 
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-clobbered
@@ -116,8 +116,8 @@ clean.lint:	$(CLEAN_LINT_DEPS)
 
 install:	$(INSTALL_DEPS)
 
-$(CPULIB):	$(BINARY)
-	$(BUILD.SO) $(BINARY)
+$(CPULIB):	$(OBJECTS)
+	$(BUILD.SO) $(OBJECTS)
 
 $(SYM_MOD):	$(UNIX_O) $(CPULIB)
 	@echo "resolving symbols against unix.o"

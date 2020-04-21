@@ -80,8 +80,9 @@ nca_open(queue_t *q, dev_t *devp, int flag, int sflag, cred_t *credp)
 	return (0);
 }
 
+/* ARGSUSED */
 static int
-nca_close(queue_t *q)
+nca_close(queue_t *q, int flags __unused, cred_t *credp __unused)
 {
 	qprocsoff(q);
 	RD(q)->q_ptr = NULL;
@@ -89,14 +90,15 @@ nca_close(queue_t *q)
 	return (0);
 }
 
-static void
+static int
 nca_rput(queue_t *q, mblk_t *mp)
 {
 	/* Passthrough */
 	putnext(q, mp);
+	return (0);
 }
 
-static void
+static int
 nca_wput(queue_t *q, mblk_t *mp)
 {
 	struct iocblk	*iocp;
@@ -105,11 +107,11 @@ nca_wput(queue_t *q, mblk_t *mp)
 		iocp = (struct iocblk *)mp->b_rptr;
 		if (DB_TYPE(mp) == M_IOCTL && iocp->ioc_cmd == NCA_SET_IF) {
 			miocnak(q, mp, 0, ENOTSUP);
-			return;
+			return (0);
 		}
 		/* Module, passthrough */
 		putnext(q, mp);
-		return;
+		return (0);
 	}
 
 	switch (DB_TYPE(mp)) {
@@ -120,7 +122,7 @@ nca_wput(queue_t *q, mblk_t *mp)
 		case ND_GET:
 			if (! nd_getset(q, nca_g_nd, mp)) {
 				miocnak(q, mp, 0, ENOENT);
-				return;
+				return (0);
 			}
 			qreply(q, mp);
 			break;
@@ -133,6 +135,7 @@ nca_wput(queue_t *q, mblk_t *mp)
 		freemsg(mp);
 		break;
 	}
+	return (0);
 }
 
 static struct module_info info = {
@@ -140,11 +143,11 @@ static struct module_info info = {
 };
 
 static struct qinit rinit = {
-	(pfi_t)nca_rput, NULL, nca_open, nca_close, NULL, &info
+	nca_rput, NULL, nca_open, nca_close, NULL, &info
 };
 
 static struct qinit winit = {
-	(pfi_t)nca_wput, NULL, nca_open, nca_close, NULL, &info
+	nca_wput, NULL, nca_open, nca_close, NULL, &info
 };
 
 struct streamtab ncainfo = {

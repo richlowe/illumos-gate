@@ -11,15 +11,17 @@
 
 #
 # Copyright 2011, Richard Lowe
-# Copyright 2016 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 # Copyright (c) 2013, 2016 by Delphix. All rights reserved.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
+# Copyright 2020 Peter Tribble
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-include		$(SRC)//Makefile.master
+include		$(SRC)/Makefile.master
 
 MANSECT=	1m
 
@@ -58,8 +60,8 @@ _MANFILES=	6to4relay.1m		\
 		busstat.1m		\
 		captoinfo.1m		\
 		catman.1m		\
+		ccidadm.1m		\
 		cfgadm.1m		\
-		cfgadm_ac.1m		\
 		cfgadm_cardbus.1m	\
 		cfgadm_fp.1m		\
 		cfgadm_ib.1m		\
@@ -67,7 +69,6 @@ _MANFILES=	6to4relay.1m		\
 		cfgadm_sata.1m		\
 		cfgadm_sbd.1m		\
 		cfgadm_scsi.1m		\
-		cfgadm_sysctrl.1m	\
 		cfgadm_usb.1m		\
 		chat.1m			\
 		check-hostname.1m	\
@@ -76,6 +77,7 @@ _MANFILES=	6to4relay.1m		\
 		clear_locks.1m		\
 		clinfo.1m		\
 		clri.1m			\
+		connstat.1m		\
 		consadm.1m		\
 		conv_lp.1m		\
 		conv_lpd.1m		\
@@ -168,6 +170,7 @@ _MANFILES=	6to4relay.1m		\
 		halt.1m			\
 		hextoalabel.1m		\
 		hostconfig.1m		\
+		hotplug.1m		\
 		id.1m			\
 		idmap.1m		\
 		idmapd.1m		\
@@ -488,6 +491,7 @@ _MANFILES=	6to4relay.1m		\
 		ttymon.1m		\
 		tunefs.1m		\
 		txzonemgr.1m		\
+		tzreload.1m		\
 		tzselect.1m		\
 		uadmin.1m		\
 		ucodeadm.1m		\
@@ -534,16 +538,18 @@ _MANFILES=	6to4relay.1m		\
 		zoneadm.1m		\
 		zoneadmd.1m		\
 		zonecfg.1m		\
+		zonestatd.1m		\
 		zpool.1m		\
-		zstreamdump.1m
+		zstreamdump.1m		\
+		ztest.1m
 
 i386_MANFILES=				\
 		acpidump.1m		\
 		acpixtract.1m		\
-		nvmeadm.1m
+		nvmeadm.1m		\
+		rdmsr.1m
 
-sparc_MANFILES=	cvcd.1m			\
-		dcs.1m			\
+sparc_MANFILES=	dcs.1m			\
 		drd.1m			\
 		efdaemon.1m		\
 		ldmad.1m		\

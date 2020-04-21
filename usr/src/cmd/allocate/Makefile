@@ -22,15 +22,19 @@
 #
 # Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 ETCTSOLFILES =	devalloc_defaults
 
 include		../Makefile.cmd
 
 CERRWARN +=	-_gcc=-Wno-unused-value
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-clobbered
+
+# not linted
+SMATCH=off
 
 ROOTSEC =	$(ROOTETC)/security
 ROOTSECDEV =	$(ROOTSEC)/dev

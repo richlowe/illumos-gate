@@ -24,6 +24,10 @@
  */
 
 /*
+ * Copyright 2019 Joyent, Inc.
+ */
+
+/*
  * Reparsed daemon
  */
 
@@ -183,7 +187,7 @@ main(int argc, char *argv[])
 	return (start_reparsed_svcs());
 }
 
-static void
+__NORETURN static void
 reparsed_door_call_error(int error, int buflen)
 {
 	reparsed_door_res_t rpd_res;
@@ -191,10 +195,11 @@ reparsed_door_call_error(int error, int buflen)
 	memset(&rpd_res, 0, sizeof (reparsed_door_res_t));
 	rpd_res.res_status = error;
 	rpd_res.res_len = buflen;
-	door_return((char *)&rpd_res, sizeof (reparsed_door_res_t), NULL, 0);
+	(void) door_return((char *)&rpd_res,
+	    sizeof (reparsed_door_res_t), NULL, 0);
 
 	(void) door_return(NULL, 0, NULL, 0);
-	/* NOTREACHED */
+	abort();
 }
 
 /*
@@ -349,10 +354,6 @@ start_reparsed_svcs()
 	/*
 	 * Wait for incoming calls
 	 */
-	/*CONSTCOND*/
 	while (1)
 		(void) pause();
-
-	syslog(LOG_ERR, "Door server exited");
-	return (10);
 }

@@ -22,6 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree.
@@ -70,9 +71,12 @@ LINTTAGS	+= -erroff=E_STATIC_UNUSED
 LINTTAGS	+= -erroff=E_PTRDIFF_OVERFLOW
 LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-type-limits
+
+# needs work
+$(OBJS_DIR)/av1394_isoch.o := SMOFF += signed
 
 #
 # depends on misc/s1394

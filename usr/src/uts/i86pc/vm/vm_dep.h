@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 /*
  * Copyright (c) 2010, Intel Corporation.
@@ -126,7 +127,7 @@ extern page_t ****page_freelists;
  */
 extern page_t ***page_cachelists;
 
-#define	PAGE_CACHELISTS(mnode, color, mtype) 		\
+#define	PAGE_CACHELISTS(mnode, color, mtype)		\
 	(*(page_cachelists[mtype] + (color)))
 
 /*
@@ -153,7 +154,7 @@ extern page_t *page_get_mnode_cachelist(uint_t, uint_t, int, int);
  * simply return the limits of the given mnode, which then
  * determines the length of hpm_counters array for the mnode.
  */
-#define	HPM_COUNTERS_LIMITS(mnode, physbase, physmax, first) 	\
+#define	HPM_COUNTERS_LIMITS(mnode, physbase, physmax, first)	\
 	{							\
 		(physbase) = mem_node_config[(mnode)].physbase;	\
 		(physmax) = mem_node_config[(mnode)].physmax;	\
@@ -182,6 +183,7 @@ extern page_t *page_get_mnode_cachelist(uint_t, uint_t, int, int);
 	pgcnt_t _np;							       \
 	pfn_t _pfn = (pfn);						       \
 	pfn_t _endpfn = _pfn + _cnt;					       \
+	rv = 0;								       \
 	while (_pfn < _endpfn) {					       \
 		_mn = PFN_2_MEM_NODE(_pfn);				       \
 		_np = MIN(_endpfn, mem_node_config[_mn].physmax + 1) - _pfn;   \
@@ -305,9 +307,9 @@ extern int mtype_init(vnode_t *, caddr_t, uint_t *, size_t);
 	}								\
 }
 
-extern int mtype_pgr_init(int *, page_t *, int, pgcnt_t);
-#define	MTYPE_PGR_INIT(mtype, flags, pp, mnode, pgcnt)			\
-	(mtype = mtype_pgr_init(&flags, pp, mnode, pgcnt))
+extern int mtype_pgr_init(int *, page_t *, pgcnt_t);
+#define	MTYPE_PGR_INIT(mtype, flags, pp, pgcnt)				\
+	(mtype = mtype_pgr_init(&flags, pp, pgcnt))
 
 #define	MNODE_PGCNT(mnode)		mnode_pgcnt(mnode)
 

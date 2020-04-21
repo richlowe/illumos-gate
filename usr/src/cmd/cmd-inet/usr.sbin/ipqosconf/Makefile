@@ -22,9 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-
-#
-# cmd/cmd-inet/usr.sbin/ipqosconf/Makefile
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=		ipqosconf
 OBJS=		ipqosconf.o
@@ -53,7 +51,10 @@ $(ROOTLIBIPQOSCONFTYPES)	:=	FILEMODE= 0444
 CPPFLAGS +=	-D__EXTENSIONS__
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 LDLIBS +=	-lsocket -lnsl -lnvpair -lipp
 

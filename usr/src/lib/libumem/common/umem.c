@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright (c) 2014 Joyent, Inc.  All rights reserved.
+ * Copyright (c) 2019 Joyent, Inc.
  * Copyright (c) 2015 by Delphix. All rights reserved.
  */
 
@@ -395,8 +395,8 @@
  * umem_t that looks like:
  *
  * typedef struct {
- * 	size_t	tm_size;
- * 	void	*tm_roots[NTMEMBASE];  (Currently 16)
+ *	size_t	tm_size;
+ *	void	*tm_roots[NTMEMBASE];  (Currently 16)
  * } tmem_t;
  *
  * Each of the roots is treated as the head of a linked list. Each entry in the
@@ -560,10 +560,10 @@
  *
  *	o. _tmem_get_base(void)
  *
- * 	Returns the offset from the ulwp_t (curthread) to the tmem_t structure.
- * 	This is a constant for all threads and is effectively a way to to do
- * 	::offsetof ulwp_t ul_tmem without having to know the specifics of the
- * 	structure outside of libc.
+ *	Returns the offset from the ulwp_t (curthread) to the tmem_t structure.
+ *	This is a constant for all threads and is effectively a way to to do
+ *	::offsetof ulwp_t ul_tmem without having to know the specifics of the
+ *	structure outside of libc.
  *
  *	o. _tmem_get_nentries(void)
  *
@@ -1338,11 +1338,12 @@ static void *
 umem_log_enter(umem_log_header_t *lhp, void *data, size_t size)
 {
 	void *logspace;
-	umem_cpu_log_header_t *clhp =
-	    &lhp->lh_cpu[CPU(umem_cpu_mask)->cpu_number];
+	umem_cpu_log_header_t *clhp;
 
 	if (lhp == NULL || umem_logging == 0)
 		return (NULL);
+
+	clhp = &lhp->lh_cpu[CPU(umem_cpu_mask)->cpu_number];
 
 	(void) mutex_lock(&clhp->clh_lock);
 	clhp->clh_hits++;
@@ -2843,8 +2844,9 @@ umem_cache_create(
 		}
 		ASSERT(!(cp->cache_flags & UMF_AUDIT));
 	} else {
-		size_t chunks, bestfit, waste, slabsize;
+		size_t chunks, waste, slabsize;
 		size_t minwaste = LONG_MAX;
+		size_t bestfit = SIZE_MAX;
 
 		for (chunks = 1; chunks <= UMEM_VOID_FRACTION; chunks++) {
 			slabsize = P2ROUNDUP(chunksize * chunks,
@@ -2865,6 +2867,10 @@ umem_cache_create(
 		}
 		if (cflags & UMC_QCACHE)
 			bestfit = MAX(1 << highbit(3 * vmp->vm_qcache_max), 64);
+		if (bestfit == SIZE_MAX) {
+			errno = ENOMEM;
+			goto fail;
+		}
 		cp->cache_slabsize = bestfit;
 		cp->cache_mincolor = 0;
 		cp->cache_maxcolor = bestfit % chunksize;
@@ -3215,12 +3221,16 @@ umem_cache_init(void)
 	umem_tmem_off = _tmem_get_base();
 	_tmem_set_cleanup(umem_cache_tmem_cleanup);
 
+#ifndef	UMEM_STANDALONE
 	if (umem_genasm_supported && !(umem_flags & UMF_DEBUG) &&
 	    !(umem_flags & UMF_NOMAGAZINE) &&
 	    umem_ptc_size > 0) {
 		umem_ptc_enabled = umem_genasm(umem_alloc_sizes,
-		    umem_alloc_caches, i) == 0 ? 1 : 0;
+		    umem_alloc_caches, i) ? 1 : 0;
 	}
+#else
+	umem_ptc_enabled = 0;
+#endif
 
 	/*
 	 * Initialization cannot fail at this point.  Make the caches
@@ -3549,4 +3559,10 @@ fail:
 	(void) cond_broadcast(&umem_init_cv);
 	(void) mutex_unlock(&umem_init_lock);
 	return (0);
+}
+
+void
+umem_setmtbf(uint32_t mtbf)
+{
+	umem_mtbf = mtbf;
 }

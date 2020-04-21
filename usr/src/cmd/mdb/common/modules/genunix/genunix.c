@@ -21,7 +21,7 @@
 /*
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
@@ -61,6 +61,7 @@
 #include <sys/panic.h>
 #include <regex.h>
 #include <sys/port_impl.h>
+#include <sys/contract/process_impl.h>
 
 #include "avl.h"
 #include "bio.h"
@@ -95,6 +96,7 @@
 #include "net.h"
 #include "netstack.h"
 #include "nvpair.h"
+#include "pci.h"
 #include "pg.h"
 #include "rctl.h"
 #include "sobj.h"
@@ -143,6 +145,7 @@ pstat2ch(uchar_t state)
 #define	PS_TASKS	0x8
 #define	PS_PROJECTS	0x10
 #define	PS_ZONES	0x20
+#define	PS_SERVICES	0x40
 
 static int
 ps_threadprint(uintptr_t addr, const void *data, void *private)
@@ -164,14 +167,19 @@ ps_threadprint(uintptr_t addr, const void *data, void *private)
 	if (prt_flags & PS_PRTTHREADS)
 		mdb_printf("\tT  %?a <%b>\n", addr, t->t_state, t_state_bits);
 
-	if (prt_flags & PS_PRTLWPS)
-		mdb_printf("\tL  %?a ID: %u\n", t->t_lwp, t->t_tid);
+	if (prt_flags & PS_PRTLWPS) {
+		char desc[128] = "";
+
+		(void) thread_getdesc(addr, B_FALSE, desc, sizeof (desc));
+
+		mdb_printf("\tL  %?a ID: %s\n", t->t_lwp, desc);
+	}
 
 	return (WALK_NEXT);
 }
 
 typedef struct mdb_pflags_proc {
-	struct pid 	*p_pidp;
+	struct pid	*p_pidp;
 	ushort_t	p_pidflag;
 	uint_t		p_proc_flag;
 	uint_t		p_flag;
@@ -261,12 +269,13 @@ pflags(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 typedef struct mdb_ps_proc {
 	char		p_stat;
-	struct pid 	*p_pidp;
-	struct pid 	*p_pgidp;
+	struct pid	*p_pidp;
+	struct pid	*p_pgidp;
 	struct cred	*p_cred;
 	struct sess	*p_sessp;
 	struct task	*p_task;
 	struct zone	*p_zone;
+	struct cont_process *p_ct_process;
 	pid_t		p_ppid;
 	uint_t		p_flag;
 	struct {
@@ -274,6 +283,12 @@ typedef struct mdb_ps_proc {
 		char		u_psargs[PSARGSZ];
 	} p_user;
 } mdb_ps_proc_t;
+
+/*
+ * A reasonable enough limit. Note that we purposefully let this column over-run
+ * if needed.
+ */
+#define	FMRI_LEN (128)
 
 int
 ps(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
@@ -286,6 +301,8 @@ ps(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	task_t tk;
 	kproject_t pj;
 	zone_t zn;
+	struct cont_process cp;
+	char fmri[FMRI_LEN] = "";
 
 	if (!(flags & DCMD_ADDRSPEC)) {
 		if (mdb_walk_dcmd("proc", "ps", argc, argv) == -1) {
@@ -298,6 +315,7 @@ ps(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	if (mdb_getopts(argc, argv,
 	    'f', MDB_OPT_SETBITS, PS_PSARGS, &prt_flags,
 	    'l', MDB_OPT_SETBITS, PS_PRTLWPS, &prt_flags,
+	    's', MDB_OPT_SETBITS, PS_SERVICES, &prt_flags,
 	    'T', MDB_OPT_SETBITS, PS_TASKS, &prt_flags,
 	    'P', MDB_OPT_SETBITS, PS_PROJECTS, &prt_flags,
 	    'z', MDB_OPT_SETBITS, PS_ZONES, &prt_flags,
@@ -305,15 +323,17 @@ ps(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		return (DCMD_USAGE);
 
 	if (DCMD_HDRSPEC(flags)) {
-		mdb_printf("%<u>%1s %6s %6s %6s %6s ",
+		mdb_printf("%<u>%-1s %-6s %-6s %-6s %-6s ",
 		    "S", "PID", "PPID", "PGID", "SID");
 		if (prt_flags & PS_TASKS)
-			mdb_printf("%5s ", "TASK");
+			mdb_printf("%-5s ", "TASK");
 		if (prt_flags & PS_PROJECTS)
-			mdb_printf("%5s ", "PROJ");
+			mdb_printf("%-5s ", "PROJ");
 		if (prt_flags & PS_ZONES)
-			mdb_printf("%5s ", "ZONE");
-		mdb_printf("%6s %10s %?s %s%</u>\n",
+			mdb_printf("%-5s ", "ZONE");
+		if (prt_flags & PS_SERVICES)
+			mdb_printf("%-40s ", "SERVICE");
+		mdb_printf("%-6s %-10s %-?s %-s%</u>\n",
 		    "UID", "FLAGS", "ADDR", "NAME");
 	}
 
@@ -331,17 +351,39 @@ ps(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		mdb_vread(&pj, sizeof (pj), (uintptr_t)tk.tk_proj);
 	if (prt_flags & PS_ZONES)
 		mdb_vread(&zn, sizeof (zn), (uintptr_t)pr.p_zone);
+	if ((prt_flags & PS_SERVICES) && pr.p_ct_process != NULL) {
+		mdb_vread(&cp, sizeof (cp), (uintptr_t)pr.p_ct_process);
 
-	mdb_printf("%c %6d %6d %6d %6d ",
+		if (mdb_read_refstr((uintptr_t)cp.conp_svc_fmri, fmri,
+		    sizeof (fmri)) <= 0)
+			(void) strlcpy(fmri, "?", sizeof (fmri));
+
+		/* Strip any standard prefix and suffix. */
+		if (strncmp(fmri, "svc:/", sizeof ("svc:/") - 1) == 0) {
+			char *i = fmri;
+			char *j = fmri + sizeof ("svc:/") - 1;
+			for (; *j != '\0'; i++, j++) {
+				if (strcmp(j, ":default") == 0)
+					break;
+				*i = *j;
+			}
+
+			*i = '\0';
+		}
+	}
+
+	mdb_printf("%-c %-6d %-6d %-6d %-6d ",
 	    pstat2ch(pr.p_stat), pid.pid_id, pr.p_ppid, pgid.pid_id,
 	    sid.pid_id);
 	if (prt_flags & PS_TASKS)
-		mdb_printf("%5d ", tk.tk_tkid);
+		mdb_printf("%-5d ", tk.tk_tkid);
 	if (prt_flags & PS_PROJECTS)
-		mdb_printf("%5d ", pj.kpj_id);
+		mdb_printf("%-5d ", pj.kpj_id);
 	if (prt_flags & PS_ZONES)
-		mdb_printf("%5d ", zn.zone_id);
-	mdb_printf("%6d 0x%08x %0?p %s\n",
+		mdb_printf("%-5d ", zn.zone_id);
+	if (prt_flags & PS_SERVICES)
+		mdb_printf("%-40s ", fmri);
+	mdb_printf("%-6d 0x%08x %0?p %-s\n",
 	    cred.cr_uid, pr.p_flag, addr,
 	    (prt_flags & PS_PSARGS) ? pr.p_user.u_psargs : pr.p_user.u_comm);
 
@@ -349,6 +391,49 @@ ps(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		(void) mdb_pwalk("thread", ps_threadprint, &prt_flags, addr);
 
 	return (DCMD_OK);
+}
+
+static void
+ps_help(void)
+{
+	mdb_printf("Display processes.\n\n"
+	    "Options:\n"
+	    "    -f\tDisplay command arguments\n"
+	    "    -l\tDisplay LWPs\n"
+	    "    -T\tDisplay tasks\n"
+	    "    -P\tDisplay projects\n"
+	    "    -s\tDisplay SMF FMRI\n"
+	    "    -z\tDisplay zones\n"
+	    "    -t\tDisplay threads\n\n");
+
+	mdb_printf("The resulting output is a table of the processes on the "
+	    "system.  The\n"
+	    "columns in the output consist of a combination of the "
+	    "following fields:\n\n");
+	mdb_printf("S\tProcess state.  Possible states are:\n"
+	    "\tS\tSleeping (SSLEEP)\n"
+	    "\tR\tRunnable (SRUN)\n"
+	    "\tZ\tZombie (SZOMB)\n"
+	    "\tI\tIdle (SIDL)\n"
+	    "\tO\tOn Cpu (SONPROC)\n"
+	    "\tT\tStopped (SSTOP)\n"
+	    "\tW\tWaiting (SWAIT)\n");
+
+	mdb_printf("PID\tProcess id.\n");
+	mdb_printf("PPID\tParent process id.\n");
+	mdb_printf("PGID\tProcess group id.\n");
+	mdb_printf("SID\tProcess id of the session leader.\n");
+	mdb_printf("TASK\tThe task id of the process.\n");
+	mdb_printf("PROJ\tThe project id of the process.\n");
+	mdb_printf("ZONE\tThe zone id of the process.\n");
+	mdb_printf("SERVICE The SMF service FMRI of the process.\n");
+	mdb_printf("UID\tThe user id of the process.\n");
+	mdb_printf("FLAGS\tThe process flags (see ::pflags).\n");
+	mdb_printf("ADDR\tThe kernel address of the proc_t structure of the "
+	    "process\n");
+	mdb_printf("NAME\tThe name (p_user.u_comm field) of the process.  If "
+	    "the -f flag\n"
+	    "\tis specified, the arguments of the process are displayed.\n");
 }
 
 #define	PG_NEWEST	0x0001
@@ -412,12 +497,12 @@ pgrep_cb(uintptr_t addr, const void *ignored, void *data)
 		    p.p_user.u_start.tv_nsec;
 
 		if (pgp->pg_flags & PG_NEWEST) {
-			if (pgp->pg_xaddr == NULL || start > pgp->pg_xstart) {
+			if (pgp->pg_xaddr == 0 || start > pgp->pg_xstart) {
 				pgp->pg_xaddr = addr;
 				pgp->pg_xstart = start;
 			}
 		} else {
-			if (pgp->pg_xaddr == NULL || start < pgp->pg_xstart) {
+			if (pgp->pg_xaddr == 0 || start < pgp->pg_xstart) {
 				pgp->pg_xaddr = addr;
 				pgp->pg_xstart = start;
 			}
@@ -577,7 +662,7 @@ project(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 int
 callout_walk_init(mdb_walk_state_t *wsp)
 {
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		mdb_warn("callout doesn't support global walk");
 		return (WALK_ERR);
 	}
@@ -594,7 +679,7 @@ callout_walk_step(mdb_walk_state_t *wsp)
 {
 	int retval;
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		return (WALK_DONE);
 	}
 	if (mdb_vread(wsp->walk_data, sizeof (callout_t),
@@ -629,7 +714,7 @@ callout_walk_fini(mdb_walk_state_t *wsp)
 int
 callout_list_walk_init(mdb_walk_state_t *wsp)
 {
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		mdb_warn("callout list doesn't support global walk");
 		return (WALK_ERR);
 	}
@@ -642,7 +727,7 @@ callout_list_walk_step(mdb_walk_state_t *wsp)
 {
 	int retval;
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		return (WALK_DONE);
 	}
 	if (mdb_vread(wsp->walk_data, sizeof (callout_list_t),
@@ -684,7 +769,7 @@ callout_table_walk_init(mdb_walk_state_t *wsp)
 
 	cot_walk_data = mdb_alloc(sizeof (cot_data_t), UM_SLEEP);
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		if (mdb_readvar(&cot_walk_data->ct0, "callout_table") == -1) {
 			mdb_warn("failed to read 'callout_table'");
 			return (WALK_ERR);
@@ -1200,7 +1285,7 @@ callout_t_cb(uintptr_t addr, const void *data, void *priv)
 	}
 
 	if (!(coargs->flags & COF_EMPTY) && (
-	    (ct->ct_heap == NULL) || (ct->ct_cyclic == NULL))) {
+	    (ct->ct_heap == NULL) || (ct->ct_cyclic == 0))) {
 		return (WALK_NEXT);
 	}
 
@@ -1540,9 +1625,9 @@ callout(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 	if (!(flags & DCMD_ADDRSPEC)) {
 		/* don't pass "dot" if no addr. */
-		addr = NULL;
+		addr = 0;
 	}
-	if (addr != NULL) {
+	if (addr != 0) {
 		/*
 		 * a callout table was specified. Ignore -r|n option
 		 * to avoid null output.
@@ -1976,16 +2061,28 @@ lminfo(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		mdb_printf("%<u>%-?s %2s %4s %6s %-16s %-?s %s%</u>\n",
 		    "ADDR", "TP", "FLAG", "PID", "COMM", "VNODE", "PATH");
 
-	return (mdb_pwalk("lock_graph", lminfo_cb, NULL, NULL));
+	return (mdb_pwalk("lock_graph", lminfo_cb, NULL, 0));
 }
+
+typedef struct mdb_whereopen {
+	uint_t mwo_flags;
+	uintptr_t mwo_target;
+	boolean_t mwo_found;
+} mdb_whereopen_t;
 
 /*ARGSUSED*/
 int
-whereopen_fwalk(uintptr_t addr, struct file *f, uintptr_t *target)
+whereopen_fwalk(uintptr_t addr, const void *farg, void *arg)
 {
-	if ((uintptr_t)f->f_vnode == *target) {
-		mdb_printf("file %p\n", addr);
-		*target = NULL;
+	const struct file *f = farg;
+	mdb_whereopen_t *mwo = arg;
+
+	if ((uintptr_t)f->f_vnode == mwo->mwo_target) {
+		if ((mwo->mwo_flags & DCMD_PIPE_OUT) == 0 &&
+		    !mwo->mwo_found) {
+			mdb_printf("file %p\n", addr);
+		}
+		mwo->mwo_found = B_TRUE;
 	}
 
 	return (WALK_NEXT);
@@ -1993,17 +2090,19 @@ whereopen_fwalk(uintptr_t addr, struct file *f, uintptr_t *target)
 
 /*ARGSUSED*/
 int
-whereopen_pwalk(uintptr_t addr, void *ignored, uintptr_t *target)
+whereopen_pwalk(uintptr_t addr, const void *ignored, void *arg)
 {
-	uintptr_t t = *target;
+	mdb_whereopen_t *mwo = arg;
 
-	if (mdb_pwalk("file", (mdb_walk_cb_t)whereopen_fwalk, &t, addr) == -1) {
+	mwo->mwo_found = B_FALSE;
+	if (mdb_pwalk("file", whereopen_fwalk, mwo, addr) == -1) {
 		mdb_warn("couldn't file walk proc %p", addr);
 		return (WALK_ERR);
 	}
 
-	if (t == NULL)
+	if (mwo->mwo_found) {
 		mdb_printf("%p\n", addr);
+	}
 
 	return (WALK_NEXT);
 }
@@ -2012,12 +2111,16 @@ whereopen_pwalk(uintptr_t addr, void *ignored, uintptr_t *target)
 int
 whereopen(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-	uintptr_t target = addr;
+	mdb_whereopen_t mwo;
 
-	if (!(flags & DCMD_ADDRSPEC) || addr == NULL)
+	if (!(flags & DCMD_ADDRSPEC) || addr == 0)
 		return (DCMD_USAGE);
 
-	if (mdb_walk("proc", (mdb_walk_cb_t)whereopen_pwalk, &target) == -1) {
+	mwo.mwo_flags = flags;
+	mwo.mwo_target = addr;
+	mwo.mwo_found = B_FALSE;
+
+	if (mdb_walk("proc", whereopen_pwalk, &mwo) == -1) {
 		mdb_warn("can't proc walk");
 		return (DCMD_ERR);
 	}
@@ -2194,7 +2297,7 @@ kmastat_vmem(uintptr_t addr, const vmem_t *v, const uint_t *shiftp)
 	vmem_t parent;
 	int ident = 0;
 
-	for (paddr = (uintptr_t)v->vm_source; paddr != NULL; ident += 4) {
+	for (paddr = (uintptr_t)v->vm_source; paddr != 0; ident += 4) {
 		if (mdb_vread(&parent, sizeof (parent), paddr) == -1) {
 			mdb_warn("couldn't trace %p's ancestry", addr);
 			ident = 0;
@@ -2477,7 +2580,7 @@ file_walk_init(mdb_walk_state_t *wsp)
 	file_walk_data_t *fw;
 	mdb_file_proc_t p;
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		mdb_warn("file walk doesn't support global walks\n");
 		return (WALK_ERR);
 	}
@@ -2526,7 +2629,7 @@ again:
 	if (fw->fw_ndx == fw->fw_nofiles)
 		return (WALK_DONE);
 
-	if ((fp = (uintptr_t)fw->fw_flist[fw->fw_ndx++].uf_file) == NULL)
+	if ((fp = (uintptr_t)fw->fw_flist[fw->fw_ndx++].uf_file) == 0)
 		goto again;
 
 	(void) mdb_vread(&file, sizeof (file), (uintptr_t)fp);
@@ -2543,7 +2646,7 @@ allfile_walk_step(mdb_walk_state_t *wsp)
 	if (fw->fw_ndx == fw->fw_nofiles)
 		return (WALK_DONE);
 
-	if ((fp = (uintptr_t)fw->fw_flist[fw->fw_ndx++].uf_file) != NULL)
+	if ((fp = (uintptr_t)fw->fw_flist[fw->fw_ndx++].uf_file) != 0)
 		(void) mdb_vread(&file, sizeof (file), (uintptr_t)fp);
 	else
 		bzero(&file, sizeof (file));
@@ -2563,7 +2666,7 @@ file_walk_fini(mdb_walk_state_t *wsp)
 int
 port_walk_init(mdb_walk_state_t *wsp)
 {
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		mdb_warn("port walk doesn't support global walks\n");
 		return (WALK_ERR);
 	}
@@ -2614,7 +2717,7 @@ portev_walk_init(mdb_walk_state_t *wsp)
 	struct list	*list;
 	uintptr_t	vp;
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		mdb_warn("portev walk doesn't support global walks\n");
 		return (WALK_ERR);
 	}
@@ -2697,7 +2800,7 @@ proc_walk_init(mdb_walk_state_t *wsp)
 	GElf_Sym sym;
 	proc_walk_data_t *pw;
 
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		if (mdb_lookup_by_name("p0", &sym) == -1) {
 			mdb_warn("failed to read 'practive'");
 			return (WALK_ERR);
@@ -2758,7 +2861,7 @@ proc_walk_step(mdb_walk_state_t *wsp)
 	if (status != WALK_NEXT)
 		return (status);
 
-	if ((wsp->walk_addr = cld) != NULL) {
+	if ((wsp->walk_addr = cld) != 0) {
 		if (mdb_ctf_vread(&pr, "proc_t", "mdb_walk_proc_t",
 		    cld, 0) == -1) {
 			mdb_warn("proc %p has invalid p_child %p; skipping\n",
@@ -2784,14 +2887,14 @@ sib:
 	if (pw->pw_depth == 0)
 		return (WALK_DONE);
 
-	if (sib != NULL && mdb_ctf_vread(&pr, "proc_t", "mdb_walk_proc_t",
+	if (sib != 0 && mdb_ctf_vread(&pr, "proc_t", "mdb_walk_proc_t",
 	    sib, 0) == -1) {
 		mdb_warn("proc %p has invalid p_sibling %p; skipping\n",
 		    addr, sib);
-		sib = NULL;
+		sib = 0;
 	}
 
-	if ((wsp->walk_addr = sib) == NULL) {
+	if ((wsp->walk_addr = sib) == 0) {
 		if (pw->pw_depth > 0) {
 			wsp->walk_addr = pw->pw_stack[pw->pw_depth - 1];
 			return (WALK_NEXT);
@@ -2853,7 +2956,7 @@ task_walk_step(mdb_walk_state_t *wsp)
 int
 project_walk_init(mdb_walk_state_t *wsp)
 {
-	if (wsp->walk_addr == NULL) {
+	if (wsp->walk_addr == 0) {
 		if (mdb_readvar(&wsp->walk_addr, "proj0p") == -1) {
 			mdb_warn("failed to read 'proj0p'");
 			return (WALK_ERR);
@@ -2936,7 +3039,7 @@ cpu_walk_init(mdb_walk_state_t *wsp)
 		return (WALK_ERR);
 	}
 
-	if (panicstr != NULL) {
+	if (panicstr != 0) {
 		if (mdb_lookup_by_name("panic_cpu", &sym) == -1) {
 			mdb_warn("failed to find 'panic_cpu'");
 			return (WALK_ERR);
@@ -2971,7 +3074,7 @@ cpu_walk_init(mdb_walk_state_t *wsp)
 			return (WALK_ERR);
 		}
 
-		if (panicstr != NULL && panic_cpu.cpu_id == cpu.cpu_id) {
+		if (panicstr != 0 && panic_cpu.cpu_id == cpu.cpu_id) {
 			cw->cw_array[i++] = addr;
 		} else {
 			cw->cw_array[i++] = current;
@@ -2991,7 +3094,7 @@ cpu_walk_step(mdb_walk_state_t *wsp)
 	cpu_t cpu;
 	uintptr_t addr = cw->cw_array[cw->cw_ndx++];
 
-	if (addr == NULL)
+	if (addr == 0)
 		return (WALK_DONE);
 
 	if (mdb_vread(&cpu, sizeof (cpu), addr) == -1) {
@@ -3040,7 +3143,7 @@ cpuinfo_walk_ithread(uintptr_t addr, const kthread_t *thr, cpuinfo_data_t *cid)
 		return (WALK_NEXT);
 	}
 
-	if (cid->cid_ithr[id][pil] != NULL) {
+	if (cid->cid_ithr[id][pil] != 0) {
 		mdb_warn("CPU %d has multiple threads at pil %d (at least "
 		    "%p and %p)\n", id, pil, addr, cid->cid_ithr[id][pil]);
 		return (WALK_NEXT);
@@ -3093,7 +3196,7 @@ cpuinfo_walk_cpu(uintptr_t addr, const cpu_t *cpu, cpuinfo_data_t *cid)
 	const char *flags[] = {
 	    "RUNNING", "READY", "QUIESCED", "EXISTS",
 	    "ENABLE", "OFFLINE", "POWEROFF", "FROZEN",
-	    "SPARE", "FAULTED", NULL
+	    "SPARE", "FAULTED", "DISABLED", NULL
 	};
 
 	if (cid->cid_cpu != -1) {
@@ -3201,7 +3304,7 @@ cpuinfo_walk_cpu(uintptr_t addr, const cpu_t *cpu, cpuinfo_data_t *cid)
 		for (i = NINTR - 1; i >= 0; i--) {
 			uintptr_t iaddr = cid->cid_ithr[cpu->cpu_id][i];
 
-			if (iaddr == NULL)
+			if (iaddr == 0)
 				continue;
 
 			if (!found_one) {
@@ -3231,7 +3334,7 @@ cpuinfo_walk_cpu(uintptr_t addr, const cpu_t *cpu, cpuinfo_data_t *cid)
 			pinned = (uintptr_t)t.t_intr;
 		}
 
-		if (found_one && pinned != NULL) {
+		if (found_one && pinned != 0) {
 			cid->cid_print_head = TRUE;
 			(void) strcpy(p.p_user.u_comm, "?");
 
@@ -3280,7 +3383,7 @@ cpuinfo_walk_cpu(uintptr_t addr, const cpu_t *cpu, cpuinfo_data_t *cid)
 		for (i = npri - 1; i >= 0; i--) {
 			uintptr_t taddr = (uintptr_t)dq[i].dq_first;
 
-			while (taddr != NULL) {
+			while (taddr != 0) {
 				if (mdb_vread(&t, sizeof (t), taddr) == -1) {
 					mdb_warn("failed to read kthread_t "
 					    "at %p", taddr);
@@ -3450,7 +3553,7 @@ ptree_walk(uintptr_t addr, const void *ignored, void *data)
 
 	mdb_ctf_vread(&proc, "proc_t", "mdb_ptree_proc_t", addr, 0);
 
-	for (paddr = (uintptr_t)proc.p_parent; paddr != NULL; ident += 5) {
+	for (paddr = (uintptr_t)proc.p_parent; paddr != 0; ident += 5) {
 		mdb_ctf_vread(&parent, "proc_t", "mdb_ptree_proc_t", paddr, 0);
 		paddr = (uintptr_t)parent.p_parent;
 	}
@@ -3484,7 +3587,7 @@ int
 ptree(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
 	if (!(flags & DCMD_ADDRSPEC))
-		addr = NULL;
+		addr = 0;
 	else
 		ptree_ancestors(addr, addr);
 
@@ -3700,7 +3803,7 @@ did2thread(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 static int
 errorq_walk_init(mdb_walk_state_t *wsp)
 {
-	if (wsp->walk_addr == NULL &&
+	if (wsp->walk_addr == 0 &&
 	    mdb_readvar(&wsp->walk_addr, "errorq_list") == -1) {
 		mdb_warn("failed to read errorq_list");
 		return (WALK_ERR);
@@ -3715,7 +3818,7 @@ errorq_walk_step(mdb_walk_state_t *wsp)
 	uintptr_t addr = wsp->walk_addr;
 	errorq_t eq;
 
-	if (addr == NULL)
+	if (addr == 0)
 		return (WALK_DONE);
 
 	if (mdb_vread(&eq, sizeof (eq), addr) == -1) {
@@ -3747,7 +3850,7 @@ eqd_push_list(eqd_walk_data_t *eqdp, uintptr_t addr)
 {
 	errorq_elem_t eqe;
 
-	while (addr != NULL) {
+	while (addr != 0) {
 		if (mdb_vread(&eqe, sizeof (eqe), addr) != sizeof (eqe)) {
 			mdb_warn("failed to read errorq element at %p", addr);
 			break;
@@ -4035,6 +4138,8 @@ time_help(void)
 	    "  -x   report times in hexadecimal\n");
 }
 
+extern int cmd_refstr(uintptr_t, uint_t, int, const mdb_arg_t *);
+
 static const mdb_dcmd_t dcmds[] = {
 
 	/* from genunix.c */
@@ -4059,11 +4164,13 @@ static const mdb_dcmd_t dcmds[] = {
 	{ "panicinfo", NULL, "print panic information", panicinfo },
 	{ "pid2proc", "?", "convert PID to proc_t address", pid2proc },
 	{ "project", NULL, "display kernel project(s)", project },
-	{ "ps", "[-fltzTP]", "list processes (and associated thr,lwp)", ps },
+	{ "ps", "[-fltzTP]", "list processes (and associated thr,lwp)", ps,
+	    ps_help },
 	{ "pflags", NULL, "display various proc_t flags", pflags },
 	{ "pgrep", "[-x] [-n | -o] pattern",
 		"pattern match against all processes", pgrep },
 	{ "ptree", NULL, "print process tree", ptree },
+	{ "refstr", NULL, "print string from a refstr_t", cmd_refstr, NULL },
 	{ "sysevent", "?[-sv]", "print sysevent pending or sent queue",
 		sysevent},
 	{ "sysevent_channel", "?", "print sysevent channel database",
@@ -4116,8 +4223,8 @@ static const mdb_dcmd_t dcmds[] = {
 	{ "devbindings", "?[-qs] [device-name | major-num]",
 	    "print devinfo nodes bound to device-name or major-num",
 	    devbindings, devinfo_help },
-	{ "devinfo", ":[-qs]", "detailed devinfo of one node", devinfo,
-	    devinfo_help },
+	{ "devinfo", ":[-qsd] [-b bus]", "detailed devinfo of one node",
+	    devinfo, devinfo_help },
 	{ "devinfo_audit", ":[-v]", "devinfo configuration audit record",
 	    devinfo_audit },
 	{ "devinfo_audit_log", "?[-v]", "system wide devinfo configuration log",
@@ -4141,8 +4248,8 @@ static const mdb_dcmd_t dcmds[] = {
 	    modctl2devinfo },
 	{ "name2major", "<dev-name>", "convert dev name to major number",
 	    name2major },
-	{ "prtconf", "?[-vpc] [-d driver]", "print devinfo tree", prtconf,
-	    prtconf_help },
+	{ "prtconf", "?[-vpc] [-d driver] [-i inst]", "print devinfo tree",
+	    prtconf, prtconf_help },
 	{ "softstate", ":<instance>", "retrieve soft-state pointer",
 	    softstate },
 	{ "devinfo_fm", ":", "devinfo fault managment configuration",
@@ -4186,8 +4293,9 @@ static const mdb_dcmd_t dcmds[] = {
 	{ "bufctl", ":[-vh] [-a addr] [-c caller] [-e earliest] [-l latest] "
 		"[-t thd]", "print or filter a bufctl", bufctl, bufctl_help },
 	{ "freedby", ":", "given a thread, print its freed buffers", freedby },
-	{ "kmalog", "?[ fail | slab ]",
-	    "display kmem transaction log and stack traces", kmalog },
+	{ "kmalog", "?[ fail | slab | zerosized ]",
+	    "display kmem transaction log and stack traces for specified type",
+	    kmalog },
 	{ "kmastat", "[-kmg]", "kernel memory allocator stats",
 	    kmastat },
 	{ "kmausers", "?[-ef] [cache ...]", "current medium and large users "
@@ -4702,6 +4810,10 @@ static const mdb_walker_t walkers[] = {
 	/* from nvpair.c */
 	{ NVPAIR_WALKER_NAME, NVPAIR_WALKER_DESCR,
 		nvpair_walk_init, nvpair_walk_step, NULL },
+
+	/* from pci.c */
+	{ "pcie_bus", "walk all pcie_bus_t's", pcie_bus_walk_init,
+		pcie_bus_walk_step, NULL },
 
 	/* from rctl.c */
 	{ "rctl_dict_list", "walk all rctl_dict_entry_t's from rctl_lists",

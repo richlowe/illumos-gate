@@ -23,7 +23,7 @@
  */
 
 /*
- * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -51,6 +51,7 @@
 #include <sys/panic.h>
 #include <sys/dumphdr.h>
 #include <sys/dumpadm.h>
+#include <sys/uuid.h>
 
 #include <dlfcn.h>
 #include <libctf.h>
@@ -68,6 +69,7 @@
 #include <mdb/mdb_kvm.h>
 #include <mdb/mdb_module.h>
 #include <mdb/mdb_kb.h>
+#include <mdb/mdb_ks.h>
 #include <mdb/mdb.h>
 
 #define	KT_RELOC_BUF(buf, obase, nbase) \
@@ -93,6 +95,8 @@ typedef struct kt_maparg {
 
 static const char KT_MODULE[] = "mdb_ks";
 static const char KT_CTFPARENT[] = "genunix";
+
+static void (*print_buildversion)(void);
 
 static void
 kt_load_module(kt_data_t *kt, mdb_tgt_t *t, kt_module_t *km)
@@ -140,7 +144,7 @@ kt_load_modules(kt_data_t *kt, mdb_tgt_t *t)
 	addr = head = (uintptr_t)sym.st_value;
 
 	do {
-		if (addr == NULL)
+		if (addr == 0)
 			break; /* Avoid spurious NULL pointers in list */
 
 		if (mdb_tgt_vread(t, &ctl, sizeof (ctl), addr) == -1) {
@@ -485,6 +489,9 @@ kt_status_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	mdb_printf("operating system: %s %s (%s)\n",
 	    uts.release, uts.version, uts.machine);
 
+	if (print_buildversion != NULL)
+		print_buildversion();
+
 	if (kt->k_dumphdr) {
 		dumphdr_t *dh = kt->k_dumphdr;
 
@@ -494,11 +501,13 @@ kt_status_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 		kt->k_dump_print_content(dh, kt->k_dumpcontent);
 	} else {
-		char uuid[37];
+		char uuid[UUID_PRINTABLE_STRING_LENGTH];
 
-		if (mdb_readsym(uuid, 37, "dump_osimage_uuid") == 37 &&
-		    uuid[36] == '\0') {
-			mdb_printf("image uuid: %s\n", uuid);
+		if (mdb_readsym(uuid, sizeof (uuid),
+		    "dump_osimage_uuid") == sizeof (uuid) &&
+		    uuid[sizeof (uuid) - 1] == '\0') {
+			mdb_printf("image uuid: %s\n", uuid[0] != '\0' ?
+			    uuid : "(not set)");
 		}
 	}
 
@@ -581,6 +590,9 @@ kt_activate(mdb_tgt_t *t)
 			warn("failed to load kernel support module -- "
 			    "some modules may not load\n");
 		}
+
+		print_buildversion = (void (*)(void))dlsym(RTLD_NEXT,
+		    "mdb_print_buildversion");
 
 		if (mdb_prop_postmortem && kt->k_dumphdr != NULL) {
 			sym = dlsym(RTLD_NEXT, "mdb_dump_print_content");
@@ -1190,7 +1202,7 @@ kt_load_ctfdata(mdb_tgt_t *t, kt_module_t *km)
 	if (km->km_ctfp != NULL)
 		return (km->km_ctfp);
 
-	if (km->km_ctf_va == NULL) {
+	if (km->km_ctf_va == 0) {
 		(void) set_errno(EMDB_NOCTF);
 		return (NULL);
 	}
@@ -1482,7 +1494,7 @@ mdb_kvm_tgt_create(mdb_tgt_t *t, int argc, const char *argv[])
 		goto err;
 	}
 
-	kt->k_dump_print_content = (void (*)())kt_data_stub;
+	kt->k_dump_print_content = (void (*)())(uintptr_t)kt_data_stub;
 	kt->k_dump_find_curproc = kt_data_stub;
 
 	/*

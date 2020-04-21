@@ -21,6 +21,7 @@
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY = libgss.a
 VERS = .1
@@ -107,9 +108,12 @@ CPPFLAGS += 	-I$(GSSCRED_DIR) -I$(SRC)/uts/common/gssapi/include \
 		-DHAVE_STDLIB_H
 
 CERRWARN +=	-_gcc=-Wno-unused-function
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-empty-body
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

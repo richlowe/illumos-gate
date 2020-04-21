@@ -22,6 +22,8 @@
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright 2019 Joyent, Inc.
+
 
 #
 # uts/intel/sda/Makefile
@@ -65,16 +67,17 @@ DEBUG_DEFS	+= $(DEBUG_FLGS)
 
 #
 # lint pass one enforcement
-#  
+#
 CFLAGS += $(CCVERBOSE)
 
 #
 # dependency on blkdev module, scope limiting mapfile
-# Note that we have to allow CTFMERGE to use fuzzy matching
 #
 MAPFILE		= $(UTSBASE)/common/io/sdcard/impl/mapfile
 LDFLAGS		+= -dy -Ndrv/blkdev -B reduce -M $(MAPFILE)
-CTFMRGFLAGS	+= -f
+
+# needs work
+SMOFF += all_func_returns
 
 #
 #	Default build targets.

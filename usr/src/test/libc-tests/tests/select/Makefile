@@ -10,6 +10,7 @@
 #
 
 # Copyright 2016, Richard Lowe.
+# Copyright (c) 2018, Joyent, Inc.
 
 include $(SRC)/Makefile.master
 include $(SRC)/Makefile.master.64

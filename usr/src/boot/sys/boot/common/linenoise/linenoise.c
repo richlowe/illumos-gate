@@ -187,7 +187,7 @@ void linenoiseClearScreen(void) {
 static int
 getColumns(void)
 {
-	char *columns = getenv("COLUMNS");
+	char *columns = getenv("screen-#cols");
 	if (columns == NULL)
 		return (80);
 	return (strtol(columns, NULL, 0));
@@ -650,6 +650,7 @@ static int linenoiseEdit(char *buf, size_t buflen, const char *prompt)
             buf[0] = '\0';
             l.pos = l.len = 0;
             refreshLine(&l);
+	    break;
         case BACKSPACE:   /* backspace */
         case 8:     /* ctrl-h */
             linenoiseEditBackspace(&l);

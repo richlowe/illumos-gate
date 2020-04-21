@@ -21,6 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -90,6 +91,7 @@
 #include <sys/pg.h>
 #include <sys/promif.h>
 #include <sys/sdt.h>
+#include <sys/smt.h>
 
 lgrp_gen_t	lgrp_gen = 0;		/* generation of lgroup hierarchy */
 lgrp_t *lgrp_table[NLGRPS_MAX]; /* table of all initialized lgrp_t structs */
@@ -520,6 +522,8 @@ lgrp_main_mp_init(void)
 {
 	klgrpset_t changed;
 
+	smt_init();
+
 	/*
 	 * Update lgroup topology (if necessary)
 	 */
@@ -844,6 +848,7 @@ lgrp_create(void)
 	int		i;
 
 	ASSERT(!lgrp_initialized || MUTEX_HELD(&cpu_lock));
+	lgrpid = 0;
 
 	/*
 	 * Find an open slot in the lgroup table and recycle unused lgroup
@@ -1342,6 +1347,10 @@ lgrp_mem_init(int mnode, lgrp_handle_t hand, boolean_t is_copy_rename)
 			klgrpset_add(changed, lgrp->lgrp_id);
 			count++;
 		}
+	} else {
+		if (drop_lock)
+			mutex_exit(&cpu_lock);
+		return;
 	}
 
 	/*
@@ -3566,6 +3575,8 @@ lgrp_shm_policy_get(struct anon_map *amp, ulong_t anon_index, vnode_t *vp,
 	avl_tree_t		*tree;
 	avl_index_t		where;
 
+	shm_locality = NULL;
+	tree = NULL;
 	/*
 	 * Get policy segment tree from anon_map or vnode and use specified
 	 * anon index or vnode offset as offset

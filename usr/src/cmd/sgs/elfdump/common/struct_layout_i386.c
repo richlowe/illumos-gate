@@ -25,6 +25,8 @@
  */
 /*
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <struct_layout.h>
@@ -359,7 +361,7 @@ static const sl_utsname_layout_t utsname_layout = {
 
 
 static const sl_prfdinfo_layout_t prfdinfo_layout = {
-	{ 0,	1088,	0,	0 },		/* sizeof (prfdinfo_t) */
+	{ 0,	1088,	0,	0 },		/* sizeof (prfdinfo_core_t) */
 	{ 0,	4,	0,	0 },		/* pr_fd */
 	{ 4,	4,	0,	0 },		/* pr_mode */
 	{ 8,	4,	0,	0 },		/* pr_uid */
@@ -387,6 +389,13 @@ static const sl_prsecflags_layout_t prsecflags_layout = {
 };
 
 
+static const sl_prlwpname_layout_t prlwpname_layout = {
+	{ 0,	40,	0,	0 },		/* sizeof (prlwpname_t) */
+	{ 0,	8,	0,	0 },		/* pr_lwpid */
+	{ 8,	1,	32,	0 },		/* pr_lwpname[] */
+};
+
+
 
 
 static const sl_arch_layout_t layout_i386 = {
@@ -411,6 +420,7 @@ static const sl_arch_layout_t layout_i386 = {
 	&utsname_layout,
 	&prfdinfo_layout,
 	&prsecflags_layout,
+	&prlwpname_layout,
 };
 
 

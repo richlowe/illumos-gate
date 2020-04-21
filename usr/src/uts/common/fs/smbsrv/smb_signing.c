@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 /*
  * These routines provide the SMB MAC signing for the SMB server.
@@ -40,7 +40,7 @@
 
 #include <sys/uio.h>
 #include <smbsrv/smb_kproto.h>
-#include <smbsrv/smb_signing.h>
+#include <smbsrv/smb_kcrypt.h>
 #include <sys/isa_defs.h>
 #include <sys/byteorder.h>
 
@@ -104,7 +104,7 @@ found:
 static void
 smb_sign_fini(smb_session_t *s)
 {
-	smb_sign_mech_t *mech;
+	smb_crypto_mech_t *mech;
 
 	if ((mech = s->sign_mech) != NULL) {
 		kmem_free(mech, sizeof (*mech));
@@ -119,13 +119,13 @@ smb_sign_fini(smb_session_t *s)
  * NTLM response and store it in the signing structure.
  * This is what begins SMB signing.
  */
-int
+void
 smb_sign_begin(smb_request_t *sr, smb_token_t *token)
 {
 	smb_arg_sessionsetup_t *sinfo = sr->sr_ssetup;
 	smb_session_t *session = sr->session;
 	struct smb_sign *sign = &session->signing;
-	smb_sign_mech_t *mech;
+	smb_crypto_mech_t *mech;
 	int rc;
 
 	/*
@@ -135,7 +135,7 @@ smb_sign_begin(smb_request_t *sr, smb_token_t *token)
 	 * session key, in which case: just don't sign.
 	 */
 	if (token->tkn_ssnkey.val == NULL || token->tkn_ssnkey.len == 0)
-		return (0);
+		return;
 
 	/*
 	 * Session-level initialization (once per session)
@@ -148,7 +148,7 @@ smb_sign_begin(smb_request_t *sr, smb_token_t *token)
 	 */
 	if (sign->mackey != NULL) {
 		smb_rwx_rwexit(&session->s_lock);
-		return (0);
+		return;
 	}
 
 	/*
@@ -160,7 +160,7 @@ smb_sign_begin(smb_request_t *sr, smb_token_t *token)
 		if (rc != 0) {
 			kmem_free(mech, sizeof (*mech));
 			smb_rwx_rwexit(&session->s_lock);
-			return (rc);
+			return;
 		}
 		session->sign_mech = mech;
 		session->sign_fini = smb_sign_fini;
@@ -187,14 +187,14 @@ smb_sign_begin(smb_request_t *sr, smb_token_t *token)
 	sr->reply_seqnum = 1;
 	sign->flags = 0;
 
-	if (session->secmode & NEGOTIATE_SECURITY_SIGNATURES_ENABLED) {
+	if (session->srv_secmode & NEGOTIATE_SECURITY_SIGNATURES_ENABLED) {
 		sign->flags |= SMB_SIGNING_ENABLED;
-		if (session->secmode & NEGOTIATE_SECURITY_SIGNATURES_REQUIRED)
+		if (session->srv_secmode &
+		    NEGOTIATE_SECURITY_SIGNATURES_REQUIRED)
 			sign->flags |= SMB_SIGNING_CHECK;
 	}
 
 	smb_rwx_rwexit(&session->s_lock);
-	return (0);
 }
 
 /*

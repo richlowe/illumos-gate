@@ -26,7 +26,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All rights reserved.  	*/
+/*	  All rights reserved.	*/
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -136,24 +136,12 @@ prctioctl(prnode_t *pnp, int cmd, intptr_t arg, int flag, cred_t *cr)
 /*ARGSUSED*/
 #ifdef _SYSCALL32_IMPL
 static int
-prioctl64(
-	struct vnode *vp,
-	int cmd,
-	intptr_t arg,
-	int flag,
-	cred_t *cr,
-	int *rvalp,
-	caller_context_t *ct)
+prioctl64(struct vnode *vp, int cmd, intptr_t arg, int flag, cred_t *cr,
+    int *rvalp, caller_context_t *ct)
 #else
 int
-prioctl(
-	struct vnode *vp,
-	int cmd,
-	intptr_t arg,
-	int flag,
-	cred_t *cr,
-	int *rvalp,
-	caller_context_t *ct)
+prioctl(struct vnode *vp, int cmd, intptr_t arg, int flag, cred_t *cr,
+    int *rvalp, caller_context_t *ct)
 #endif	/* _SYSCALL32_IMPL */
 {
 	int nsig = PROC_IS_BRANDED(curproc)? BROP(curproc)->b_nsig : NSIG;
@@ -942,8 +930,7 @@ startover:
 	}
 
 	case PIOCGHOLD:		/* get signal-hold mask */
-		schedctl_finish_sigblock(t);
-		sigktou(&t->t_hold, &un.holdmask);
+		prgethold(t, &un.holdmask);
 		prunlock(pnp);
 		if (copyout(&un.holdmask, cmaddr, sizeof (un.holdmask)))
 			error = EFAULT;
@@ -1407,8 +1394,7 @@ oprgetstatus32(kthread_t *t, prstatus32_t *sp, zone_t *zp)
 	sp->pr_cursig  = lwp->lwp_cursig;
 	prassignset(&sp->pr_sigpend, &p->p_sig);
 	prassignset(&sp->pr_lwppend, &t->t_sig);
-	schedctl_finish_sigblock(t);
-	prassignset(&sp->pr_sighold, &t->t_hold);
+	prgethold(t, &sp->pr_sighold);
 	sp->pr_altstack.ss_sp =
 	    (caddr32_t)(uintptr_t)lwp->lwp_sigaltstack.ss_sp;
 	sp->pr_altstack.ss_size = (size32_t)lwp->lwp_sigaltstack.ss_size;
@@ -1685,14 +1671,8 @@ oprgetpsinfo32(proc_t *p, prpsinfo32_t *psp, kthread_t *tp)
 
 /*ARGSUSED*/
 static int
-prioctl32(
-	struct vnode *vp,
-	int cmd,
-	intptr_t arg,
-	int flag,
-	cred_t *cr,
-	int *rvalp,
-	caller_context_t *ct)
+prioctl32(struct vnode *vp, int cmd, intptr_t arg, int flag, cred_t *cr,
+    int *rvalp, caller_context_t *ct)
 {
 	int nsig = PROC_IS_BRANDED(curproc)? BROP(curproc)->b_nsig : NSIG;
 	caddr_t cmaddr = (caddr_t)arg;
@@ -1864,7 +1844,7 @@ prioctl32(
 
 	case PIOCOPENM:		/* open mapped object for reading */
 		if (cmaddr == NULL)
-			un32.va = NULL;
+			un32.va = (caddr32_t)(uintptr_t)NULL;
 		else if (copyin(cmaddr, &un32.va, sizeof (un32.va)))
 			error = EFAULT;
 		break;
@@ -2569,8 +2549,7 @@ startover:
 	}
 
 	case PIOCGHOLD:		/* get signal-hold mask */
-		schedctl_finish_sigblock(t);
-		sigktou(&t->t_hold, &un32.holdmask);
+		prgethold(t, &un32.holdmask);
 		prunlock(pnp);
 		if (copyout(&un32.holdmask, cmaddr, sizeof (un32.holdmask)))
 			error = EFAULT;
@@ -3247,8 +3226,7 @@ oprgetstatus(kthread_t *t, prstatus_t *sp, zone_t *zp)
 	sp->pr_cursig  = lwp->lwp_cursig;
 	prassignset(&sp->pr_sigpend, &p->p_sig);
 	prassignset(&sp->pr_lwppend, &t->t_sig);
-	schedctl_finish_sigblock(t);
-	prassignset(&sp->pr_sighold, &t->t_hold);
+	prgethold(t, &sp->pr_sighold);
 	sp->pr_altstack = lwp->lwp_sigaltstack;
 	prgetaction(p, up, lwp->lwp_cursig, &sp->pr_action);
 	sp->pr_pid   = p->p_pid;

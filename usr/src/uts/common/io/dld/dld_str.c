@@ -379,8 +379,9 @@ dld_open(queue_t *rq, dev_t *devp, int flag, int sflag, cred_t *credp)
 /*
  * qi_qclose: close(9e)
  */
+/* ARGSUSED */
 int
-dld_close(queue_t *rq)
+dld_close(queue_t *rq, int flags __unused, cred_t *credp __unused)
 {
 	/*
 	 * Disable the queue srv(9e) routine.
@@ -393,7 +394,7 @@ dld_close(queue_t *rq)
 /*
  * qi_qputp: put(9e)
  */
-void
+int
 dld_wput(queue_t *wq, mblk_t *mp)
 {
 	dld_str_t *dsp = (dld_str_t *)wq->q_ptr;
@@ -462,17 +463,19 @@ dld_wput(queue_t *wq, mblk_t *mp)
 		freemsg(mp);
 		break;
 	}
+	return (0);
 }
 
 /*
  * qi_srvp: srv(9e)
  */
-void
+int
 dld_wsrv(queue_t *wq)
 {
 	dld_str_t	*dsp = wq->q_ptr;
 
 	DLD_CLRQFULL(dsp);
+	return (0);
 }
 
 void
@@ -881,7 +884,7 @@ str_mdata_fastpath_put(dld_str_t *dsp, mblk_t *mp, uintptr_t f_hint,
 		}
 	}
 
-	if ((cookie = DLD_TX(dsp, mp, f_hint, flag)) != NULL) {
+	if ((cookie = DLD_TX(dsp, mp, f_hint, flag)) != 0) {
 		DLD_SETQFULL(dsp);
 	}
 	return (cookie);
@@ -889,7 +892,7 @@ str_mdata_fastpath_put(dld_str_t *dsp, mblk_t *mp, uintptr_t f_hint,
 discard:
 	/* TODO: bump kstat? */
 	freemsg(mp);
-	return (NULL);
+	return (0);
 }
 
 /*
@@ -982,7 +985,7 @@ str_mdata_raw_put(dld_str_t *dsp, mblk_t *mp)
 		}
 	}
 
-	if (DLD_TX(dsp, mp, 0, 0) != NULL) {
+	if (DLD_TX(dsp, mp, 0, 0) != 0) {
 		/* Turn on flow-control for dld */
 		DLD_SETQFULL(dsp);
 	}
@@ -1954,7 +1957,7 @@ dld_taskq_dispatch(void)
 			list_remove(&dld_taskq_list, dsp);
 			mutex_exit(&dld_taskq_lock);
 			VERIFY(taskq_dispatch(dld_taskq, dld_wput_nondata_task,
-			    dsp, TQ_SLEEP) != 0);
+			    dsp, TQ_SLEEP) != TASKQID_INVALID);
 			mutex_enter(&dld_taskq_lock);
 			dsp = list_head(&dld_taskq_list);
 		}
@@ -2021,7 +2024,7 @@ dld_wput_nondata(dld_str_t *dsp, mblk_t *mp)
 	mutex_exit(&dsp->ds_lock);
 
 	if (taskq_dispatch(dld_taskq, dld_wput_nondata_task, dsp,
-	    TQ_NOSLEEP) != 0)
+	    TQ_NOSLEEP) != TASKQID_INVALID)
 		return;
 
 	mutex_enter(&dld_taskq_lock);

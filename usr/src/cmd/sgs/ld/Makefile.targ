@@ -24,14 +24,12 @@
 # Use is subject to license terms.
 #
 # Copyright 2016 RackTop Systems.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 all:		$(PROG)
 
-package \
-install:	all $(VAR_SGSBINPROG) $(VAR_SGSCCSLINK)
-
-%.o:		../common/%.c
+%.o:		$(SRCDIR)/common/%.c
 		$(COMPILE.c) $<
 		$(POST_PROCESS_O)
 
@@ -45,19 +43,8 @@ clean:
 delete:
 		$(RM) $(PROG)
 
-lint:		$(LINTOUT32) $(SGSLINTOUT)
-
 include		$(SRC)/cmd/Makefile.targ
 include		$(SRC)/cmd/sgs/Makefile.targ
-
-# Special target for native builds (ie. when we need to build a version of ld
-# to build a version of ld :-).
-
-native:		$(SGSBINDIR)/$(PROG)
-
-$(SGSBINDIR)/$(PROG):	$(OBJS) $(SGSBINDIR)
-		$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
-		$(POST_PROCESS)
 
 # Derived source and header files (messaging).
 

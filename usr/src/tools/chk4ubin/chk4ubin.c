@@ -24,6 +24,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2019 Peter Tribble.
+ */
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/param.h>
@@ -95,8 +99,6 @@ static uint_t	pagemask	= 0x1fff;
 
 static char *sun4u_bootables[] = {
 	"platform/sun4u/kernel/sparcv9/unix",
-	"platform/SUNW,Ultra-Enterprise-10000/kernel/sparcv9/unix",
-	"platform/SUNW,Sun-Fire-15000/kernel/sparcv9/unix",
 	"platform/sun4u/cprboot",
 	"platform/sun4u/bootlst"
 };
@@ -123,7 +125,7 @@ static char *detailed_error_msg =
 static int
 chk4ubin(char *root, char *binary)
 {
-	int  		fd;
+	int		fd;
 	Elf		*elf;
 	Elf_Scn		*symscn;
 	Elf_Scn		*strscn;
@@ -150,19 +152,29 @@ chk4ubin(char *root, char *binary)
 		return (1);
 	}
 
-	elf_version(EV_CURRENT);
+	if (elf_version(EV_CURRENT) == EV_NONE) {
+		(void) printf("%s: unsupported version.\n", whoami);
+		(void) close(fd);
+		return (1);
+	}
+
 	elf = elf_begin(fd, ELF_C_READ, NULL);
+	if (elf == NULL) {
+		(void) printf("%s: elf_begin() failed.\n", whoami);
+		(void) close(fd);
+		return (1);
+	}
 
 	symscn = NULL;
 	while ((symscn = elf_nextscn(elf, symscn)) != NULL) {
-		gelf_getshdr(symscn, &symhdr);
+		(void) gelf_getshdr(symscn, &symhdr);
 		switch (symhdr.sh_type) {
 		case SHT_SYMTAB:
 			found_symtab = 1;
 			symtab_size = symhdr.sh_size;
 			strscn = elf_getscn(elf, symhdr.sh_link);
 			if (strscn != NULL) {
-				gelf_getshdr(strscn, &strhdr);
+				(void) gelf_getshdr(strscn, &strhdr);
 				strtab_size = strhdr.sh_size;
 				found_strtab = 1;
 			}
@@ -172,7 +184,7 @@ chk4ubin(char *root, char *binary)
 			break;
 	}
 
-	elf_end(elf);
+	(void) elf_end(elf);
 	(void) close(fd);
 
 	if (found_symtab && found_strtab) {

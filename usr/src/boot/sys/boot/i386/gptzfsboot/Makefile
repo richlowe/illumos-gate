@@ -18,11 +18,7 @@
 
 include $(SRC)/Makefile.master
 include $(SRC)/boot/Makefile.version
-
-AS=	$(GNU_ROOT)/bin/gas
-LD=	$(GNU_ROOT)/bin/gld
-CC=	$(GNUC_ROOT)/bin/gcc
-OBJCOPY=	$(GNU_ROOT)/bin/gobjcopy
+include $(SRC)/boot/sys/boot/Makefile.inc
 
 PROG=		gptzfsboot
 MAN=		gptzfsboot.8
@@ -36,35 +32,27 @@ REL1=	0x700
 ORG1=	0x7c00
 ORG2=	0x0
 
-CPPFLAGS=
-CFLAGS=	-nostdinc -DBOOTPROG=\"gptzfsboot\" \
-	-O1 \
+CPPFLAGS += -DBOOTPROG=\"gptzfsboot\" \
 	-DGPT -DBOOT2 \
 	-DLOADER_MBR_SUPPORT -DLOADER_GPT_SUPPORT \
-	-DSIOPRT=${BOOT_COMCONSOLE_PORT} \
-	-DSIOFMT=${B2SIOFMT} \
-	-DSIOSPD=${BOOT_COMCONSOLE_SPEED} \
+	-DSIOPRT=$(BOOT_COMCONSOLE_PORT) \
+	-DSIOFMT=$(B2SIOFMT) \
+	-DSIOSPD=$(BOOT_COMCONSOLE_SPEED) \
 	-I../../../../include \
 	-I../../../../lib/libstand \
 	-I../../common \
 	-I../common \
-	-I../../zfs \
+	-I$(ZFSSRC) \
 	-I../../../cddl/boot/zfs \
 	-I../btx/lib -I. \
 	-I../../.. \
-	-I../libi386 \
-	-Wall -Waggregate-return -Wbad-function-cast -Wcast-align \
-	-Wmissing-declarations -Wmissing-prototypes -Wnested-externs \
-	-Wpointer-arith -Wshadow -Wwrite-strings \
-	-Winline -Wno-unknown-pragmas
+	-I../libi386
 
-CFLAGS +=	--param max-inline-insns-single=100
-CFLAGS +=	-fno-reorder-functions
-
-LD_FLAGS=-static -N --gc-sections
-CCASFLAGS=-Wa,--divide
-LIBSTAND=	../../libstand/i386/libstand.a
-LIBZFSBOOT=	../../zfs/i386/libzfsboot.a
+LDSCRIPT=	../boot.ldscript
+LD_FLAGS=	-static -N --gc-sections
+LIBI386=	../libi386/libi386.a
+LIBSTAND=	../../libstand/$(MACH)/libstand.a
+LIBS=		$(LIBI386) $(LIBSTAND)
 
 include ../Makefile.inc
 
@@ -74,32 +62,35 @@ all: $(PROG)
 
 install: all $(ROOTBOOTPROG)
 
-OBJS =	multiboot.o zfsboot.o sio.o cons.o panic.o devopen.o \
-	part.o biosmem.o smbios.o biosdisk.o devicename.o disk.o bcache.o \
-	time.o crc32.o
+OBJS =	mb_header.o zfsboot.o sio.o cons.o devopen.o \
+	part.o disk.o bcache.o zfs_cmd.o
+
+part.o := CPPFLAGS += -I$(ZLIB)
+smbios.o := CPPFLAGS += -DSMBIOS_SERIAL_NUMBERS
+smbios.o := CPPFLAGS += -DSMBIOS_LITTLE_ENDIAN_UUID
+gptldr.out := LD_FLAGS += -m elf_i386_sol2
 
 CLEANFILES=	gptzfsboot $(OBJS)
 
-gptzfsboot: gptldr.bin gptzfsboot.bin ${BTXKERN}
-	$(BTXLD) -E ${ORG2} -f bin -b ${BTXKERN} -V ${BOOT_VERSION} -l \
+gptzfsboot: gptldr.bin gptzfsboot.bin $(BTXKERN)
+	$(BTXLD) -E $(ORG2) -f bin -b $(BTXKERN) -V $(BOOT_VERSION) -l \
 		gptldr.bin -o $@ gptzfsboot.bin
 
 CLEANFILES +=	gptldr.bin gptldr.out gptldr.o
 
 gptldr.bin: gptldr.out
-	${OBJCOPY} -S -O binary gptldr.out $@
+	$(OBJCOPY) -S -O binary gptldr.out $@
 
 gptldr.out: gptldr.o
-	${LD} ${LD_FLAGS} -e start -Ttext ${ORG1} -o $@ gptldr.o
+	$(LD) $(LD_FLAGS) -e start -Ttext $(ORG1) -o $@ gptldr.o
 
 CLEANFILES +=	gptzfsboot.bin gptzfsboot.out
 
 gptzfsboot.bin: gptzfsboot.out
-	${OBJCOPY} -S -O binary gptzfsboot.out $@
+	$(OBJCOPY) -S -O binary gptzfsboot.out $@
 
-gptzfsboot.out: ${BTXCRT} ${OBJS} ${LIBZFSBOOT} ${LIBSTAND}
-	${LD} ${LD_FLAGS} -Ttext ${ORG2} -o $@ ${BTXCRT} ${OBJS} \
-		${LIBZFSBOOT} ${LIBSTAND}
+gptzfsboot.out: $(BTXCRT) $(OBJS) $(LIBSTAND)
+	$(LD) $(LD_FLAGS) -T $(LDSCRIPT) -o $@ $(BTXCRT) $(OBJS) $(LIBS)
 
 machine:
 	$(RM) machine
@@ -112,33 +103,13 @@ x86:
 $(OBJS): machine x86
 
 %.o:	../common/%.c
-	$(COMPILE.c) -o $@ $<
+	$(COMPILE.c) $<
 
 %.o:	../../common/%.c
-	$(COMPILE.c) -o $@ $<
+	$(COMPILE.c) $<
 
-biosdisk.o: ../libi386/biosdisk.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -Dalloca=__builtin_alloca -c -o $@ ../libi386/$*.c
-
-biosmem.o: ../libi386/biosmem.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ ../libi386/$*.c
-
-smbios.o: ../libi386/smbios.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) \
-		-DSMBIOS_SERIAL_NUMBERS -DSMBIOS_LITTLE_ENDIAN_UUID \
-		-c -o $@ ../libi386/$*.c
-
-devicename.o: ../libi386/devicename.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ ../libi386/$*.c
-
-time.o: ../libi386/time.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ ../libi386/$*.c
-
-multiboot.o: ../../common/multiboot.S
-	$(CC) $(CFLAGS) $(CCASFLAGS) -c -o $@ ../../common/$*.S
-
-.S.o:
-	$(CC) $(CFLAGS) $(CCASFLAGS) -c -o $@ $<
+%.o: ../../common/%.S
+	$(COMPILE.S) $<
 
 clobber: clean
 

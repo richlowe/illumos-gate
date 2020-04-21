@@ -3,6 +3,7 @@
  */
 
 /*
+ * Copyright (c) 2018, Joyent, Inc.
  * Copyright 2005-08 Adaptec, Inc.
  * Copyright (c) 2005-08 Adaptec Inc., Achim Leubner
  * Copyright (c) 2000 Michael Smith
@@ -254,8 +255,8 @@ static int aac_add_intrs(struct aac_softstate *);
 static void aac_remove_intrs(struct aac_softstate *);
 static int aac_enable_intrs(struct aac_softstate *);
 static int aac_disable_intrs(struct aac_softstate *);
-static uint_t aac_intr_old(caddr_t);
-static uint_t aac_intr_new(caddr_t);
+static uint_t aac_intr_old(caddr_t, caddr_t);
+static uint_t aac_intr_new(caddr_t, caddr_t);
 static uint_t aac_softintr(caddr_t);
 
 /*
@@ -1415,7 +1416,7 @@ aac_process_intr_new(struct aac_softstate *softs)
 }
 
 static uint_t
-aac_intr_new(caddr_t arg)
+aac_intr_new(caddr_t arg, caddr_t arg1 __unused)
 {
 	struct aac_softstate *softs = (void *)arg;
 	uint_t rval;
@@ -1554,7 +1555,7 @@ aac_process_intr_old(struct aac_softstate *softs)
 }
 
 static uint_t
-aac_intr_old(caddr_t arg)
+aac_intr_old(caddr_t arg, caddr_t arg1 __unused)
 {
 	struct aac_softstate *softs = (void *)arg;
 	int rval;
@@ -1673,7 +1674,7 @@ aac_add_intrs(struct aac_softstate *softs)
 	ddi_intr_handler_t *aac_intr;
 
 	actual = softs->intr_cnt;
-	aac_intr = (ddi_intr_handler_t *)((softs->flags & AAC_FLAGS_NEW_COMM) ?
+	aac_intr = ((softs->flags & AAC_FLAGS_NEW_COMM) ?
 	    aac_intr_new : aac_intr_old);
 
 	/* Call ddi_intr_add_handler() */
@@ -2295,6 +2296,10 @@ aac_check_firmware(struct aac_softstate *softs)
 	uint32_t sg_tablesize;
 	uint32_t max_sectors;
 	uint32_t status;
+
+	max_fibs = 0;
+	max_sectors = 0;
+	sg_tablesize = 0;
 
 	/* Get supported options */
 	if ((aac_sync_mbcommand(softs, AAC_MONKER_GETINFO, 0, 0, 0, 0,
@@ -3661,7 +3666,7 @@ aac_free_comm_space(struct aac_softstate *softs)
 	softs->comm_space_acc_handle = NULL;
 	ddi_dma_free_handle(&softs->comm_space_dma_handle);
 	softs->comm_space_dma_handle = NULL;
-	softs->comm_space_phyaddr = NULL;
+	softs->comm_space_phyaddr = 0;
 }
 
 /*
@@ -5135,7 +5140,7 @@ aac_cmd_dma_alloc(struct aac_softstate *softs, struct aac_cmd *acp,
 {
 	int kf = (cb == SLEEP_FUNC) ? KM_SLEEP : KM_NOSLEEP;
 	uint_t oldcookiec;
-	int bioerr;
+	int bioerr = 0;
 	int rval;
 
 	oldcookiec = acp->left_cookien;
@@ -7312,7 +7317,7 @@ aac_config_tgt(struct aac_softstate *softs, int tgt)
 		if (bp == NULL) {
 			if ((bp = scsi_alloc_consistent_buf(&ap, NULL,
 			    buf_len, B_READ, NULL_FUNC, NULL)) == NULL)
-			return (AACERR);
+				return (AACERR);
 		}
 		if ((pkt = scsi_init_pkt(&ap, NULL, bp, CDB_GROUP5,
 		    sizeof (struct scsi_arq_status), 0, PKT_CONSISTENT,
@@ -7412,7 +7417,7 @@ aac_tran_bus_config(dev_info_t *parent, uint_t flags, ddi_bus_config_op_t op,
 {
 	struct aac_softstate *softs;
 	int circ = 0;
-	int rval;
+	int rval = NDI_FAILURE;
 
 	if ((softs = ddi_get_soft_state(aac_softstatep,
 	    ddi_get_instance(parent))) == NULL)
@@ -7422,7 +7427,7 @@ aac_tran_bus_config(dev_info_t *parent, uint_t flags, ddi_bus_config_op_t op,
 	mutex_enter(&softs->io_lock);
 	if (softs->state & AAC_STATE_QUIESCED) {
 		AACDB_PRINT(softs, CE_NOTE,
-		    "bus_config abroted because bus is quiesced");
+		    "bus_config aborted because bus is quiesced");
 		mutex_exit(&softs->io_lock);
 		return (NDI_FAILURE);
 	}

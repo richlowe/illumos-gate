@@ -11,6 +11,8 @@
 
 /*
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
@@ -56,5 +58,6 @@ stack_t stack;
 sysset_t sysset;
 timestruc_t ts;
 struct utsname uts;
-prfdinfo_t ptfd;
+prfdinfo_core_t ptfd;
 prsecflags_t psf;
+prlwpname_t psn;

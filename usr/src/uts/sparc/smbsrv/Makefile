@@ -22,7 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 #
 
 #
@@ -70,7 +70,6 @@ CLEANFILES	+= $(MODSTUBS_O)
 
 INC_PATH	+= -I$(SRC)/common
 
-CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 
 #

@@ -21,6 +21,7 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2019 Peter Tribble.
  */
 
 /*
@@ -221,7 +222,7 @@ opattach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		opdip = dip;
 
 		if (ddi_create_minor_node(dip, "openprom", S_IFCHR,
-		    0, DDI_PSEUDO, NULL) == DDI_FAILURE) {
+		    0, DDI_PSEUDO, 0) == DDI_FAILURE) {
 			return (DDI_FAILURE);
 		}
 
@@ -362,7 +363,7 @@ opromioctl_cb(void *avp, int has_changed)
 	char *valbuf;
 	int error = 0;
 	uint_t userbufsize;
-	pnode_t node_id;
+	pnode_t node_id = OBP_NONODE;
 	char propname[OBP_MAXPROPNAME];
 
 	st = argp->st;
@@ -490,7 +491,6 @@ opromioctl_cb(void *avp, int has_changed)
 #if !defined(__i386) && !defined(__amd64)
 	case OPROMGETFBNAME:
 	case OPROMDEV2PROMNAME:
-	case OPROMREADY64:
 #endif	/* !__i386 && !__amd64 */
 		if ((mode & FREAD) == 0) {
 			return (EPERM);
@@ -977,38 +977,6 @@ opromioctl_cb(void *avp, int has_changed)
 
 		break;
 	}
-
-	case OPROMREADY64: {
-		struct openprom_opr64 *opr =
-		    (struct openprom_opr64 *)opp->oprom_array;
-		int i;
-		pnode_t id;
-
-		if (userbufsize < sizeof (*opr)) {
-			error = EINVAL;
-			break;
-		}
-
-		valsize = userbufsize -
-		    offsetof(struct openprom_opr64, message);
-
-		i = prom_version_check(opr->message, valsize, &id);
-		opr->return_code = i;
-		opr->nodeid = (int)id;
-
-		valsize = offsetof(struct openprom_opr64, message);
-		valsize += strlen(opr->message) + 1;
-
-		/*
-		 * copyout only the part of the user buffer we need to.
-		 */
-		if (copyout(opp, (void *)arg,
-		    (size_t)(min((uint_t)valsize, userbufsize) +
-		    sizeof (uint_t))) != 0)
-			error = EFAULT;
-		break;
-
-	}	/* case OPROMREADY64 */
 #endif	/* !__i386 && !__amd64 */
 	}	/* switch (cmd)	*/
 

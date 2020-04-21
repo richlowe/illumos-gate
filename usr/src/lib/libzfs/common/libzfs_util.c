@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2018 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright (c) 2011, 2017 by Delphix. All rights reserved.
  * Copyright 2016 Igor Kozhukhov <ikozhukhov@gmail.com>
  * Copyright (c) 2017 Datto Inc.
@@ -31,6 +31,7 @@
  * Internal utility routines for the ZFS library.
  */
 
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <libintl.h>
@@ -38,8 +39,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
-#include <unistd.h>
-#include <ctype.h>
 #include <math.h>
 #include <sys/filio.h>
 #include <sys/mnttab.h>
@@ -52,7 +51,9 @@
 
 #include "libzfs_impl.h"
 #include "zfs_prop.h"
+#include "zfs_comutil.h"
 #include "zfeature_common.h"
+#include <libzutil.h>
 
 int
 libzfs_errno(libzfs_handle_t *hdl)
@@ -249,6 +250,11 @@ libzfs_error_description(libzfs_handle_t *hdl)
 		return (dgettext(TEXT_DOMAIN, "device removal in progress"));
 	case EZFS_VDEV_TOO_BIG:
 		return (dgettext(TEXT_DOMAIN, "device exceeds supported size"));
+	case EZFS_ACTIVE_POOL:
+		return (dgettext(TEXT_DOMAIN, "pool is imported on a "
+		    "different host"));
+	case EZFS_CRYPTOFAILED:
+		return (dgettext(TEXT_DOMAIN, "encryption failure"));
 	case EZFS_TOOMANY:
 		return (dgettext(TEXT_DOMAIN, "argument list too long"));
 	case EZFS_INITIALIZING:
@@ -256,6 +262,18 @@ libzfs_error_description(libzfs_handle_t *hdl)
 	case EZFS_NO_INITIALIZE:
 		return (dgettext(TEXT_DOMAIN, "there is no active "
 		    "initialization"));
+	case EZFS_WRONG_PARENT:
+		return (dgettext(TEXT_DOMAIN, "invalid parent dataset"));
+	case EZFS_TRIMMING:
+		return (dgettext(TEXT_DOMAIN, "currently trimming"));
+	case EZFS_NO_TRIM:
+		return (dgettext(TEXT_DOMAIN, "there is no active trim"));
+	case EZFS_TRIM_NOTSUP:
+		return (dgettext(TEXT_DOMAIN, "trim operations are not "
+		    "supported by this device"));
+	case EZFS_NO_RESILVER_DEFER:
+		return (dgettext(TEXT_DOMAIN, "this action requires the "
+		    "resilver_defer feature"));
 	case EZFS_UNKNOWN:
 		return (dgettext(TEXT_DOMAIN, "unknown error"));
 	default:
@@ -418,6 +436,9 @@ zfs_standard_error_fmt(libzfs_handle_t *hdl, int error, const char *fmt, ...)
 		    "pool I/O is currently suspended"));
 		zfs_verror(hdl, EZFS_POOLUNAVAIL, fmt, ap);
 		break;
+	case EREMOTEIO:
+		zfs_verror(hdl, EZFS_ACTIVE_POOL, fmt, ap);
+		break;
 	default:
 		zfs_error_aux(hdl, strerror(error));
 		zfs_verror(hdl, EZFS_UNKNOWN, fmt, ap);
@@ -504,6 +525,9 @@ zpool_standard_error_fmt(libzfs_handle_t *hdl, int error, const char *fmt, ...)
 	/* There is no pending operation to cancel */
 	case ENOTACTIVE:
 		zfs_verror(hdl, EZFS_NO_PENDING, fmt, ap);
+		break;
+	case EREMOTEIO:
+		zfs_verror(hdl, EZFS_ACTIVE_POOL, fmt, ap);
 		break;
 	case ZFS_ERR_CHECKPOINT_EXISTS:
 		zfs_verror(hdl, EZFS_CHECKPOINT_EXISTS, fmt, ap);
@@ -606,15 +630,6 @@ zfs_strdup(libzfs_handle_t *hdl, const char *str)
 	return (ret);
 }
 
-/*
- * Convert a number to an appropriately human-readable output.
- */
-void
-zfs_nicenum(uint64_t num, char *buf, size_t buflen)
-{
-	nicenum(num, buf, buflen);
-}
-
 void
 libzfs_print_on_error(libzfs_handle_t *hdl, boolean_t printerr)
 {
@@ -667,10 +682,12 @@ void
 libzfs_fini(libzfs_handle_t *hdl)
 {
 	(void) close(hdl->libzfs_fd);
-	if (hdl->libzfs_mnttab)
+	if (hdl->libzfs_mnttab != NULL)
 		(void) fclose(hdl->libzfs_mnttab);
-	if (hdl->libzfs_sharetab)
+	if (hdl->libzfs_sharetab != NULL)
 		(void) fclose(hdl->libzfs_sharetab);
+	if (hdl->libzfs_devlink != NULL)
+		(void) di_devlink_fini(&hdl->libzfs_devlink);
 	zfs_uninit_libshare(hdl);
 	zpool_free_handles(hdl);
 	libzfs_fru_clear(hdl, B_TRUE);
@@ -787,9 +804,9 @@ zcmd_free_nvlists(zfs_cmd_t *zc)
 	free((void *)(uintptr_t)zc->zc_nvlist_conf);
 	free((void *)(uintptr_t)zc->zc_nvlist_src);
 	free((void *)(uintptr_t)zc->zc_nvlist_dst);
-	zc->zc_nvlist_conf = NULL;
-	zc->zc_nvlist_src = NULL;
-	zc->zc_nvlist_dst = NULL;
+	zc->zc_nvlist_conf = 0;
+	zc->zc_nvlist_src = 0;
+	zc->zc_nvlist_dst = 0;
 }
 
 static int

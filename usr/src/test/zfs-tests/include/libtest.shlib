@@ -23,11 +23,28 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright (c) 2012, 2017 by Delphix. All rights reserved.
-# Copyright 2016 Nexenta Systems, Inc.
+# Copyright (c) 2017 by Tim Chase. All rights reserved.
+# Copyright (c) 2017 by Nexenta Systems, Inc. All rights reserved.
 # Copyright (c) 2017 Datto Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 . ${STF_TOOLS}/contrib/include/logapi.shlib
+. ${STF_SUITE}/include/math.shlib
+. ${STF_SUITE}/include/blkdev.shlib
+
+# Determine if this is a Linux test system
+#
+# Return 0 if platform Linux, 1 if otherwise
+
+function is_linux
+{
+	if [[ $(uname -o) == "GNU/Linux" ]]; then
+		return 0
+	else
+		return 1
+	fi
+}
 
 # Determine whether a dataset is mounted
 #
@@ -302,6 +319,13 @@ function create_recv_clone
 function default_mirror_setup
 {
 	default_mirror_setup_noexit $1 $2 $3
+
+	log_pass
+}
+
+function default_mirror_2way_setup
+{
+	default_mirror_setup_noexit $1 $2
 
 	log_pass
 }
@@ -838,14 +862,14 @@ function fill_fs # destdir dirnum filenum bytes num_writes data
 	typeset -i filenum=${3:-50}
 	typeset -i bytes=${4:-8192}
 	typeset -i num_writes=${5:-10240}
-	typeset -i data=${6:-0}
+	typeset data=${6:-0}
 
 	typeset -i odirnum=1
 	typeset -i idirnum=0
 	typeset -i fn=0
 	typeset -i retval=0
 
-	log_must mkdir -p $destdir/$idirnum
+	mkdir -p $destdir/$idirnum
 	while (($odirnum > 0)); do
 		if ((dirnum >= 0 && idirnum >= dirnum)); then
 			odirnum=0
@@ -861,7 +885,7 @@ function fill_fs # destdir dirnum filenum bytes num_writes data
 		if (($fn >= $filenum)); then
 			fn=0
 			((idirnum = idirnum + 1))
-			log_must mkdir -p $destdir/$idirnum
+			mkdir -p $destdir/$idirnum
 		else
 			((fn = fn + 1))
 		fi
@@ -1456,6 +1480,29 @@ function snapshot_mountpoint
 }
 
 #
+# Given a device and 'ashift' value verify it's correctly set on every label
+#
+function verify_ashift # device ashift
+{
+	typeset device="$1"
+	typeset ashift="$2"
+
+	zdb -e -lll $device | nawk -v ashift=$ashift '/ashift: / {
+	    if (ashift != $2)
+	        exit 1;
+	    else
+	        count++;
+	    } END {
+	    if (count != 4)
+	        exit 1;
+	    else
+	        exit 0;
+	    }'
+
+	return $?
+}
+
+#
 # Given a pool and file system, this function will verify the file system
 # using the zdb internal tool. Note that the pool is exported and imported
 # to ensure it has consistent state.
@@ -1495,6 +1542,24 @@ function verify_filesys # pool filesystem dir
 }
 
 #
+# Given a pool issue a scrub and verify that no checksum errors are reported.
+#
+function verify_pool
+{
+	typeset pool=${1:-$TESTPOOL}
+
+	log_must zpool scrub $pool
+	log_must wait_scrubbed $pool
+
+	cksum=$(zpool status $pool | \
+	    awk '{if ($5 == "CKSUM"){L=1; next} if (L) {print $NF;L=0}}')
+	if [[ $cksum != 0 ]]; then
+		log_must zpool status -v
+	        log_fail "Unexpected CKSUM errors found on $pool ($cksum)"
+	fi
+}
+
+#
 # Given a pool, and this function list all disks in the pool
 #
 function get_disklist # pool
@@ -1503,7 +1568,7 @@ function get_disklist # pool
 
 	disklist=$(zpool iostat -v $1 | nawk '(NR >4) {print $1}' | \
 	    grep -v "\-\-\-\-\-" | \
-	    egrep -v -e "^(mirror|raidz1|raidz2|spare|log|cache)$")
+	    egrep -v -e "^(mirror|raidz[1-3]|spare|log|cache|special|dedup)$")
 
 	echo $disklist
 }
@@ -1744,6 +1809,24 @@ function wait_for_degraded
 	done
 
 	return 0
+}
+
+#
+# Wait for a pool to be scrubbed
+#
+# $1 pool name
+# $2 number of seconds to wait (optional)
+#
+# Returns true when pool has been scrubbed, or false if there's a timeout or if
+# no scrub was done.
+#
+function wait_scrubbed
+{
+	typeset pool=${1:-$TESTPOOL}
+	while true ; do
+		is_pool_scrubbed $pool && break
+		log_must sleep 1
+	done
 }
 
 #
@@ -2624,6 +2707,26 @@ function get_objnum
 }
 
 #
+# Sync data to the pool
+#
+# $1 pool name
+# $2 boolean to force uberblock (and config including zpool cache file) update
+#
+function sync_pool #pool <force>
+{
+	typeset pool=${1:-$TESTPOOL}
+	typeset force=${2:-false}
+
+	if [[ $force == true ]]; then
+		log_must zpool sync -f $pool
+	else
+		log_must zpool sync $pool
+	fi
+
+	return 0
+}
+
+#
 # Prints the current time in seconds since UNIX Epoch.
 #
 function current_epoch
@@ -2647,6 +2750,21 @@ function mdb_get_uint32
 
 	echo $value
 	return 0
+}
+
+#
+# Wait for every device replace operation to complete
+#
+# $1 pool name
+#
+function wait_replacing #pool
+{
+	typeset pool=${1:-$TESTPOOL}
+	while true; do
+		[[ "" == "$(zpool status $pool |
+		    awk '/replacing-[0-9]+/ {print $1}')" ]] && break
+		log_must sleep 1
+	done
 }
 
 #
@@ -2681,5 +2799,110 @@ function mdb_ctf_set_int
 		return 1
 	fi
 
+	return 0
+}
+
+#
+# Set a global system tunable (64-bit value)
+#
+# $1 tunable name
+# $2 tunable values
+#
+function set_tunable64
+{
+	set_tunable_impl "$1" "$2" Z
+}
+
+#
+# Set a global system tunable (32-bit value)
+#
+# $1 tunable name
+# $2 tunable values
+#
+function set_tunable32
+{
+	set_tunable_impl "$1" "$2" W
+}
+
+function set_tunable_impl
+{
+	typeset tunable="$1"
+	typeset value="$2"
+	typeset mdb_cmd="$3"
+	typeset module="${4:-zfs}"
+
+	[[ -z "$tunable" ]] && return 1
+	[[ -z "$value" ]] && return 1
+	[[ -z "$mdb_cmd" ]] && return 1
+
+	case "$(uname)" in
+	Linux)
+		typeset zfs_tunables="/sys/module/$module/parameters"
+		[[ -w "$zfs_tunables/$tunable" ]] || return 1
+		cat >"$zfs_tunables/$tunable" <<<"$value"
+		return $?
+		;;
+	SunOS)
+		[[ "$module" -eq "zfs" ]] || return 1
+		echo "${tunable}/${mdb_cmd}0t${value}" | mdb -kw
+		return $?
+		;;
+	esac
+}
+
+#
+# Get a global system tunable
+#
+# $1 tunable name
+#
+function get_tunable
+{
+	get_tunable_impl "$1"
+}
+
+function get_tunable_impl
+{
+	typeset tunable="$1"
+	typeset module="${2:-zfs}"
+
+	[[ -z "$tunable" ]] && return 1
+
+	case "$(uname)" in
+	Linux)
+		typeset zfs_tunables="/sys/module/$module/parameters"
+		[[ -f "$zfs_tunables/$tunable" ]] || return 1
+		cat $zfs_tunables/$tunable
+		return $?
+		;;
+	SunOS)
+		typeset value=$(mdb -k -e "$tunable/X | ::eval .=U")
+		if [[ $? -ne 0 ]]; then
+			log_fail "Failed to get value of '$tunable' from mdb."
+			return 1
+		fi
+		echo $value
+		return 0
+		;;
+	esac
+
+	return 1
+}
+
+#
+# Compute SHA256 digest for given file or stdin if no file given.
+# Note: file path must not contain spaces
+#
+function sha256digest
+{
+        typeset file=$1
+
+	if [ -x /usr/bin/digest ]; then
+		/usr/bin/digest -a sha256 $file
+	elif [ -x /usr/bin/sha256sum ]; then
+		/usr/bin/sha256sum -b $file | awk '{ print $1 }'
+	else
+		echo "Cannot calculate SHA256 digest"
+		return 1
+	fi
 	return 0
 }

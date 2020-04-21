@@ -16,8 +16,8 @@ include ../Makefile.com
 OBJS +=		getresponse.o
 SRCS +=		$(SRC)/common/util/getresponse.c
 
-CPPFLAGS +=	-I$(SRC)/common/util
-LDLIBS +=	-lfdisk -lefi -lfstyp -luuid
+CPPFLAGS +=	-I../../common -I$(SRC)/common/util
+LDLIBS +=	-ladm -lfdisk -lefi -lfstyp -luuid -lumem
 
 # getresponse.c and libfdisk.c need this
 LINTFLAGS += \

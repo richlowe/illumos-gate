@@ -21,6 +21,9 @@
 /*
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2019, Joyent, Inc.
+ * Copyright 2019 RackTop Systems.
  */
 
 #ifndef _MK_DEFS_H
@@ -293,6 +296,8 @@ extern	wchar_t		wcs_buffer2[];
 extern	wchar_t		*wcs_ptr;
 extern	wchar_t		*wcs_ptr2;
 extern	long int	hostid;
+extern	Boolean		path_reset;
+extern	Boolean		rebuild_arg0;
 
 /*
  * Declarations of system defined variables
@@ -359,7 +364,7 @@ extern	Doname		execute_parallel(Property line, Boolean waitflg,
 extern	Doname		execute_serial(Property line);
 extern	timestruc_t&	exists(Name target);
 extern	void		fatal(const char *, ...) __NORETURN;
-extern	void		fatal_reader(char *, ...);
+extern	void		fatal_reader(char *, ...) __NORETURN;
 extern	Doname		find_ar_suffix_rule(Name target, Name true_target,
 	Property *command, Boolean rechecking);
 extern	Doname		find_double_suffix_rule(Name target, Property *command,

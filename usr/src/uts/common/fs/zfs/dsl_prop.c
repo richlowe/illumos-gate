@@ -22,7 +22,7 @@
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, 2015 by Delphix. All rights reserved.
  * Copyright (c) 2013 Martin Matuska. All rights reserved.
- * Copyright 2015, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/zfs_context.h>
@@ -802,13 +802,7 @@ dsl_prop_inherit(const char *dsname, const char *propname,
 	return (error);
 }
 
-typedef struct dsl_props_set_arg {
-	const char *dpsa_dsname;
-	zprop_source_t dpsa_source;
-	nvlist_t *dpsa_props;
-} dsl_props_set_arg_t;
-
-static int
+int
 dsl_props_set_check(void *arg, dmu_tx_t *tx)
 {
 	dsl_props_set_arg_t *dpsa = arg;
@@ -886,7 +880,7 @@ dsl_props_set_sync_impl(dsl_dataset_t *ds, zprop_source_t source,
 	}
 }
 
-static void
+void
 dsl_props_set_sync(void *arg, dmu_tx_t *tx)
 {
 	dsl_props_set_arg_t *dpsa = arg;
@@ -926,7 +920,7 @@ typedef enum dsl_prop_getflags {
 	DSL_PROP_GET_INHERITING = 0x1,	/* searching parent of target ds */
 	DSL_PROP_GET_SNAPSHOT = 0x2,	/* snapshot dataset */
 	DSL_PROP_GET_LOCAL = 0x4,	/* local properties */
-	DSL_PROP_GET_RECEIVED = 0x8	/* received properties */
+	DSL_PROP_GET_RECEIVED = 0x8,	/* received properties */
 } dsl_prop_getflags_t;
 
 static int
@@ -1093,6 +1087,7 @@ dsl_prop_get_all_ds(dsl_dataset_t *ds, nvlist_t **nvp,
 		if (err)
 			break;
 	}
+
 out:
 	return (err);
 }

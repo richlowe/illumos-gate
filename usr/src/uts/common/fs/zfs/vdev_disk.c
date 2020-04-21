@@ -20,22 +20,36 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2012, 2018 by Delphix. All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
- * Copyright (c) 2013 Joyent, Inc.  All rights reserved.
+ * Copyright 2020 Joyent, Inc.
+ * Copyright 2020 Joshua M. Clulow <josh@sysmgr.org>
  */
 
 #include <sys/zfs_context.h>
 #include <sys/spa_impl.h>
 #include <sys/refcount.h>
-#include <sys/vdev_disk.h>
 #include <sys/vdev_impl.h>
+#include <sys/vdev_trim.h>
 #include <sys/abd.h>
 #include <sys/fs/zfs.h>
 #include <sys/zio.h>
 #include <sys/sunldi.h>
 #include <sys/efi_partition.h>
 #include <sys/fm/fs/zfs.h>
+#include <sys/ddi.h>
+
+/*
+ * Tunable to disable TRIM in case we're using a problematic SSD.
+ */
+uint_t zfs_no_trim = 0;
+
+/*
+ * Tunable parameter for debugging or performance analysis. Setting this
+ * will cause pool corruption on power loss if a volatile out-of-order
+ * write cache is enabled.
+ */
+boolean_t zfs_nocacheflush = B_FALSE;
 
 /*
  * Virtual device vector for disks.
@@ -45,10 +59,38 @@ extern ldi_ident_t zfs_li;
 
 static void vdev_disk_close(vdev_t *);
 
+typedef struct vdev_disk {
+	ddi_devid_t	vd_devid;
+	char		*vd_minor;
+	ldi_handle_t	vd_lh;
+	list_t		vd_ldi_cbs;
+	boolean_t	vd_ldi_offline;
+} vdev_disk_t;
+
+typedef struct vdev_disk_buf {
+	buf_t	vdb_buf;
+	zio_t	*vdb_io;
+} vdev_disk_buf_t;
+
 typedef struct vdev_disk_ldi_cb {
 	list_node_t		lcb_next;
 	ldi_callback_id_t	lcb_id;
 } vdev_disk_ldi_cb_t;
+
+/*
+ * Bypass the devid when opening a disk vdev.
+ * There have been issues where the devids of several devices were shuffled,
+ * causing pool open failures. Note, that this flag is intended to be used
+ * for pool recovery only.
+ *
+ * Note that if a pool is imported with the devids bypassed, all its vdevs will
+ * cease storing devid information permanently. In practice, the devid is rarely
+ * useful as vdev paths do not tend to change unless the hardware is
+ * reconfigured. That said, if the paths do change and a pool fails to open
+ * automatically at boot, a simple zpool import should re-scan the paths and fix
+ * the issue.
+ */
+boolean_t vdev_disk_bypass_devid = B_FALSE;
 
 static void
 vdev_disk_alloc(vdev_t *vd)
@@ -86,10 +128,9 @@ vdev_disk_free(vdev_t *vd)
 	vd->vdev_tsd = NULL;
 }
 
-/* ARGSUSED */
 static int
-vdev_disk_off_notify(ldi_handle_t lh, ldi_ev_cookie_t ecookie, void *arg,
-    void *ev_data)
+vdev_disk_off_notify(ldi_handle_t lh __unused, ldi_ev_cookie_t ecookie,
+    void *arg, void *ev_data __unused)
 {
 	vdev_t *vd = (vdev_t *)arg;
 	vdev_disk_t *dvd = vd->vdev_tsd;
@@ -101,19 +142,15 @@ vdev_disk_off_notify(ldi_handle_t lh, ldi_ev_cookie_t ecookie, void *arg,
 		return (LDI_EV_SUCCESS);
 
 	/*
-	 * All LDI handles must be closed for the state change to succeed, so
-	 * call on vdev_disk_close() to do this.
-	 *
-	 * We inform vdev_disk_close that it is being called from offline
-	 * notify context so it will defer cleanup of LDI event callbacks and
-	 * freeing of vd->vdev_tsd to the offline finalize or a reopen.
+	 * Tell any new threads that stumble upon this vdev that they should not
+	 * try to do I/O.
 	 */
 	dvd->vd_ldi_offline = B_TRUE;
-	vdev_disk_close(vd);
 
 	/*
-	 * Now that the device is closed, request that the spa_async_thread
-	 * mark the device as REMOVED and notify FMA of the removal.
+	 * Request that the spa_async_thread mark the device as REMOVED and
+	 * notify FMA of the removal.  This should also trigger a vdev_close()
+	 * in the async thread.
 	 */
 	zfs_post_remove(vd->vdev_spa, vd);
 	vd->vdev_remove_wanted = B_TRUE;
@@ -122,10 +159,9 @@ vdev_disk_off_notify(ldi_handle_t lh, ldi_ev_cookie_t ecookie, void *arg,
 	return (LDI_EV_SUCCESS);
 }
 
-/* ARGSUSED */
 static void
-vdev_disk_off_finalize(ldi_handle_t lh, ldi_ev_cookie_t ecookie,
-    int ldi_result, void *arg, void *ev_data)
+vdev_disk_off_finalize(ldi_handle_t lh __unused, ldi_ev_cookie_t ecookie,
+    int ldi_result, void *arg, void *ev_data __unused)
 {
 	vdev_t *vd = (vdev_t *)arg;
 
@@ -134,12 +170,6 @@ vdev_disk_off_finalize(ldi_handle_t lh, ldi_ev_cookie_t ecookie,
 	 */
 	if (strcmp(ldi_ev_get_type(ecookie), LDI_EV_OFFLINE) != 0)
 		return;
-
-	/*
-	 * We have already closed the LDI handle in notify.
-	 * Clean up the LDI event callbacks and free vd->vdev_tsd.
-	 */
-	vdev_disk_free(vd);
 
 	/*
 	 * Request that the vdev be reopened if the offline state change was
@@ -157,10 +187,9 @@ static ldi_ev_callback_t vdev_disk_off_callb = {
 	.cb_finalize = vdev_disk_off_finalize
 };
 
-/* ARGSUSED */
 static void
-vdev_disk_dgrd_finalize(ldi_handle_t lh, ldi_ev_cookie_t ecookie,
-    int ldi_result, void *arg, void *ev_data)
+vdev_disk_dgrd_finalize(ldi_handle_t lh __unused, ldi_ev_cookie_t ecookie,
+    int ldi_result, void *arg, void *ev_data __unused)
 {
 	vdev_t *vd = (vdev_t *)arg;
 
@@ -266,11 +295,10 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	} dks;
 	struct dk_minfo_ext *dkmext = &dks.ude;
 	struct dk_minfo *dkm = &dks.ud;
-	int error;
+	int error, can_free;
 	dev_t dev;
 	int otyp;
 	boolean_t validate_devid = B_FALSE;
-	ddi_devid_t devid;
 	uint64_t capacity = 0, blksz = 0, pbsize;
 
 	/*
@@ -286,17 +314,8 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	 * just update the physical size of the device.
 	 */
 	if (dvd != NULL) {
-		if (dvd->vd_ldi_offline && dvd->vd_lh == NULL) {
-			/*
-			 * If we are opening a device in its offline notify
-			 * context, the LDI handle was just closed. Clean
-			 * up the LDI event callbacks and free vd->vdev_tsd.
-			 */
-			vdev_disk_free(vd);
-		} else {
-			ASSERT(vd->vdev_reopening);
-			goto skip_open;
-		}
+		ASSERT(vd->vdev_reopening);
+		goto skip_open;
 	}
 
 	/*
@@ -304,6 +323,16 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	 */
 	vdev_disk_alloc(vd);
 	dvd = vd->vdev_tsd;
+
+	/*
+	 * Allow bypassing the devid.
+	 */
+	if (vd->vdev_devid != NULL && vdev_disk_bypass_devid) {
+		vdev_dbgmsg(vd, "vdev_disk_open, devid %s bypassed",
+		    vd->vdev_devid);
+		spa_strfree(vd->vdev_devid);
+		vd->vdev_devid = NULL;
+	}
 
 	/*
 	 * When opening a disk device, we want to preserve the user's original
@@ -334,7 +363,6 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	error = EINVAL;		/* presume failure */
 
 	if (vd->vdev_path != NULL) {
-
 		if (vd->vdev_wholedisk == -1ULL) {
 			size_t len = strlen(vd->vdev_path) + 3;
 			char *buf = kmem_alloc(len, KM_SLEEP);
@@ -364,15 +392,42 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 		/*
 		 * Compare the devid to the stored value.
 		 */
-		if (error == 0 && vd->vdev_devid != NULL &&
-		    ldi_get_devid(dvd->vd_lh, &devid) == 0) {
-			if (ddi_devid_compare(devid, dvd->vd_devid) != 0) {
+		if (error == 0 && vd->vdev_devid != NULL) {
+			ddi_devid_t devid = NULL;
+
+			if (ldi_get_devid(dvd->vd_lh, &devid) != 0) {
+				/*
+				 * We expected a devid on this device but it no
+				 * longer appears to have one.  The validation
+				 * step may need to remove it from the
+				 * configuration.
+				 */
+				validate_devid = B_TRUE;
+
+			} else if (ddi_devid_compare(devid, dvd->vd_devid) !=
+			    0) {
+				/*
+				 * A mismatch here is unexpected, log it.
+				 */
+				char *devid_str = ddi_devid_str_encode(devid,
+				    dvd->vd_minor);
+				vdev_dbgmsg(vd, "vdev_disk_open: devid "
+				    "mismatch: %s != %s", vd->vdev_devid,
+				    devid_str);
+				cmn_err(CE_NOTE, "vdev_disk_open %s: devid "
+				    "mismatch: %s != %s", vd->vdev_path,
+				    vd->vdev_devid, devid_str);
+				ddi_devid_str_free(devid_str);
+
 				error = SET_ERROR(EINVAL);
 				(void) ldi_close(dvd->vd_lh, spa_mode(spa),
 				    kcred);
 				dvd->vd_lh = NULL;
 			}
-			ddi_devid_free(devid);
+
+			if (devid != NULL) {
+				ddi_devid_free(devid);
+			}
 		}
 
 		/*
@@ -390,6 +445,10 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	if (error != 0 && vd->vdev_devid != NULL) {
 		error = ldi_open_by_devid(dvd->vd_devid, dvd->vd_minor,
 		    spa_mode(spa), kcred, &dvd->vd_lh, zfs_li);
+		if (error != 0) {
+			vdev_dbgmsg(vd, "Failed to open by devid (%s)",
+			    vd->vdev_devid);
+		}
 	}
 
 	/*
@@ -398,26 +457,49 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	 * as reliable as the devid, this will give us something, and the higher
 	 * level vdev validation will prevent us from opening the wrong device.
 	 */
-	if (error) {
-		if (vd->vdev_devid != NULL)
-			validate_devid = B_TRUE;
+	if (error != 0) {
+		validate_devid = B_TRUE;
 
 		if (vd->vdev_physpath != NULL &&
-		    (dev = ddi_pathname_to_dev_t(vd->vdev_physpath)) != NODEV)
+		    (dev = ddi_pathname_to_dev_t(vd->vdev_physpath)) != NODEV) {
 			error = ldi_open_by_dev(&dev, OTYP_BLK, spa_mode(spa),
 			    kcred, &dvd->vd_lh, zfs_li);
+		}
 
 		/*
 		 * Note that we don't support the legacy auto-wholedisk support
 		 * as above.  This hasn't been used in a very long time and we
 		 * don't need to propagate its oddities to this edge condition.
 		 */
-		if (error && vd->vdev_path != NULL)
+		if (error != 0 && vd->vdev_path != NULL) {
 			error = ldi_open_by_name(vd->vdev_path, spa_mode(spa),
 			    kcred, &dvd->vd_lh, zfs_li);
+		}
 	}
 
-	if (error) {
+	/*
+	 * If this is early in boot, a sweep of available block devices may
+	 * locate an alternative path that we can try.
+	 */
+	if (error != 0) {
+		const char *altdevpath = vdev_disk_preroot_lookup(
+		    spa_guid(spa), vd->vdev_guid);
+
+		if (altdevpath != NULL) {
+			vdev_dbgmsg(vd, "Trying alternate preroot path (%s)",
+			    altdevpath);
+
+			validate_devid = B_TRUE;
+
+			if ((error = ldi_open_by_name((char *)altdevpath,
+			    spa_mode(spa), kcred, &dvd->vd_lh, zfs_li)) != 0) {
+				vdev_dbgmsg(vd, "Failed to open by preroot "
+				    "path (%s)", altdevpath);
+			}
+		}
+	}
+
+	if (error != 0) {
 		vd->vdev_stat.vs_aux = VDEV_AUX_OPEN_FAILED;
 		vdev_dbgmsg(vd, "vdev_disk_open: failed to open [error=%d]",
 		    error);
@@ -428,19 +510,100 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 	 * Now that the device has been successfully opened, update the devid
 	 * if necessary.
 	 */
-	if (validate_devid && spa_writeable(spa) &&
-	    ldi_get_devid(dvd->vd_lh, &devid) == 0) {
-		if (ddi_devid_compare(devid, dvd->vd_devid) != 0) {
-			char *vd_devid;
+	if (validate_devid) {
+		ddi_devid_t devid = NULL;
+		char *minorname = NULL;
+		char *vd_devid = NULL;
+		boolean_t remove = B_FALSE, update = B_FALSE;
 
-			vd_devid = ddi_devid_str_encode(devid, dvd->vd_minor);
-			vdev_dbgmsg(vd, "vdev_disk_open: update devid from "
-			    "'%s' to '%s'", vd->vdev_devid, vd_devid);
-			spa_strfree(vd->vdev_devid);
-			vd->vdev_devid = spa_strdup(vd_devid);
-			ddi_devid_str_free(vd_devid);
+		/*
+		 * Get the current devid and minor name for the device we
+		 * opened.
+		 */
+		if (ldi_get_devid(dvd->vd_lh, &devid) != 0 ||
+		    ldi_get_minor_name(dvd->vd_lh, &minorname) != 0) {
+			/*
+			 * If we are unable to get the devid or the minor name
+			 * for the device, we need to remove them from the
+			 * configuration to prevent potential inconsistencies.
+			 */
+			if (dvd->vd_minor != NULL || dvd->vd_devid != NULL ||
+			    vd->vdev_devid != NULL) {
+				/*
+				 * We only need to remove the devid if one
+				 * exists.
+				 */
+				remove = B_TRUE;
+			}
+
+		} else if (dvd->vd_devid == NULL || dvd->vd_minor == NULL) {
+			/*
+			 * There was previously no devid at all so we need to
+			 * add one.
+			 */
+			update = B_TRUE;
+
+		} else if (ddi_devid_compare(devid, dvd->vd_devid) != 0 ||
+		    strcmp(minorname, dvd->vd_minor) != 0) {
+			/*
+			 * The devid or minor name on file does not match the
+			 * one from the opened device.
+			 */
+			update = B_TRUE;
 		}
-		ddi_devid_free(devid);
+
+		if (update) {
+			/*
+			 * Render the new devid and minor name as a string for
+			 * logging and to store in the vdev configuration.
+			 */
+			vd_devid = ddi_devid_str_encode(devid, minorname);
+		}
+
+		if (update || remove) {
+			vdev_dbgmsg(vd, "vdev_disk_open: update devid from "
+			    "'%s' to '%s'",
+			    vd->vdev_devid != NULL ? vd->vdev_devid : "<none>",
+			    vd_devid != NULL ? vd_devid : "<none>");
+			cmn_err(CE_NOTE, "vdev_disk_open %s: update devid "
+			    "from '%s' to '%s'",
+			    vd->vdev_path != NULL ? vd->vdev_path : "?",
+			    vd->vdev_devid != NULL ? vd->vdev_devid : "<none>",
+			    vd_devid != NULL ? vd_devid : "<none>");
+
+			/*
+			 * Remove and free any existing values.
+			 */
+			if (dvd->vd_minor != NULL) {
+				ddi_devid_str_free(dvd->vd_minor);
+				dvd->vd_minor = NULL;
+			}
+			if (dvd->vd_devid != NULL) {
+				ddi_devid_free(dvd->vd_devid);
+				dvd->vd_devid = NULL;
+			}
+			if (vd->vdev_devid != NULL) {
+				spa_strfree(vd->vdev_devid);
+				vd->vdev_devid = NULL;
+			}
+		}
+
+		if (update) {
+			/*
+			 * Install the new values.
+			 */
+			vd->vdev_devid = vd_devid;
+			dvd->vd_minor = minorname;
+			dvd->vd_devid = devid;
+
+		} else {
+			if (devid != NULL) {
+				ddi_devid_free(devid);
+			}
+			if (minorname != NULL) {
+				kmem_free(minorname, strlen(minorname) + 1);
+			}
+		}
 	}
 
 	/*
@@ -489,6 +652,7 @@ vdev_disk_open(vdev_t *vd, uint64_t *psize, uint64_t *max_psize,
 		(void) ldi_ev_register_callbacks(dvd->vd_lh, ecookie,
 		    &vdev_disk_dgrd_callb, (void *) vd, &lcb->lcb_id);
 	}
+
 skip_open:
 	/*
 	 * Determine the actual size of the device.
@@ -554,6 +718,29 @@ skip_open:
 	 */
 	vd->vdev_nowritecache = B_FALSE;
 
+	if (ldi_ioctl(dvd->vd_lh, DKIOC_CANFREE, (intptr_t)&can_free, FKIOCTL,
+	    kcred, NULL) == 0 && can_free == 1) {
+		vd->vdev_has_trim = B_TRUE;
+	} else {
+		vd->vdev_has_trim = B_FALSE;
+	}
+
+	if (zfs_no_trim == 1)
+		vd->vdev_has_trim = B_FALSE;
+
+	/* Currently only supported for ZoL. */
+	vd->vdev_has_securetrim = B_FALSE;
+
+	/* Inform the ZIO pipeline that we are non-rotational */
+	vd->vdev_nonrot = B_FALSE;
+	if (ldi_prop_exists(dvd->vd_lh, DDI_PROP_DONTPASS | DDI_PROP_NOTPROM,
+	    "device-solid-state")) {
+		if (ldi_prop_get_int(dvd->vd_lh,
+		    LDI_DEV_T_ANY | DDI_PROP_DONTPASS | DDI_PROP_NOTPROM,
+		    "device-solid-state", B_FALSE) != 0)
+			vd->vdev_nonrot = B_TRUE;
+	}
+
 	return (0);
 }
 
@@ -581,46 +768,10 @@ vdev_disk_close(vdev_t *vd)
 	}
 
 	vd->vdev_delayed_close = B_FALSE;
-	/*
-	 * If we closed the LDI handle due to an offline notify from LDI,
-	 * don't free vd->vdev_tsd or unregister the callbacks here;
-	 * the offline finalize callback or a reopen will take care of it.
-	 */
-	if (dvd->vd_ldi_offline)
-		return;
-
 	vdev_disk_free(vd);
 }
 
-int
-vdev_disk_physio(vdev_t *vd, caddr_t data,
-    size_t size, uint64_t offset, int flags, boolean_t isdump)
-{
-	vdev_disk_t *dvd = vd->vdev_tsd;
-
-	/*
-	 * If the vdev is closed, it's likely in the REMOVED or FAULTED state.
-	 * Nothing to be done here but return failure.
-	 */
-	if (dvd == NULL || (dvd->vd_ldi_offline && dvd->vd_lh == NULL))
-		return (EIO);
-
-	ASSERT(vd->vdev_ops == &vdev_disk_ops);
-
-	/*
-	 * If in the context of an active crash dump, use the ldi_dump(9F)
-	 * call instead of ldi_strategy(9F) as usual.
-	 */
-	if (isdump) {
-		ASSERT3P(dvd, !=, NULL);
-		return (ldi_dump(dvd->vd_lh, data, lbtodb(offset),
-		    lbtodb(size)));
-	}
-
-	return (vdev_disk_ldi_physio(dvd->vd_lh, data, size, offset, flags));
-}
-
-int
+static int
 vdev_disk_ldi_physio(ldi_handle_t vd_lh, caddr_t data,
     size_t size, uint64_t offset, int flags)
 {
@@ -648,7 +799,40 @@ vdev_disk_ldi_physio(ldi_handle_t vd_lh, caddr_t data,
 	return (error);
 }
 
-static void
+static int
+vdev_disk_dumpio(vdev_t *vd, caddr_t data, size_t size,
+    uint64_t offset, uint64_t origoffset __unused, boolean_t doread,
+    boolean_t isdump)
+{
+	vdev_disk_t *dvd = vd->vdev_tsd;
+	int flags = doread ? B_READ : B_WRITE;
+
+	/*
+	 * If the vdev is closed, it's likely in the REMOVED or FAULTED state.
+	 * Nothing to be done here but return failure.
+	 */
+	if (dvd == NULL || dvd->vd_ldi_offline) {
+		return (SET_ERROR(ENXIO));
+	}
+
+	ASSERT(vd->vdev_ops == &vdev_disk_ops);
+
+	offset += VDEV_LABEL_START_SIZE;
+
+	/*
+	 * If in the context of an active crash dump, use the ldi_dump(9F)
+	 * call instead of ldi_strategy(9F) as usual.
+	 */
+	if (isdump) {
+		ASSERT3P(dvd, !=, NULL);
+		return (ldi_dump(dvd->vd_lh, data, lbtodb(offset),
+		    lbtodb(size)));
+	}
+
+	return (vdev_disk_ldi_physio(dvd->vd_lh, data, size, offset, flags));
+}
+
+static int
 vdev_disk_io_intr(buf_t *bp)
 {
 	vdev_buf_t *vb = (vdev_buf_t *)bp;
@@ -673,6 +857,7 @@ vdev_disk_io_intr(buf_t *bp)
 	kmem_free(vb, sizeof (vdev_buf_t));
 
 	zio_delay_interrupt(zio);
+	return (0);
 }
 
 static void
@@ -701,6 +886,7 @@ vdev_disk_io_start(zio_t *zio)
 {
 	vdev_t *vd = zio->io_vd;
 	vdev_disk_t *dvd = vd->vdev_tsd;
+	unsigned long trim_flags = 0;
 	vdev_buf_t *vb;
 	struct dk_callback *dkc;
 	buf_t *bp;
@@ -710,13 +896,14 @@ vdev_disk_io_start(zio_t *zio)
 	 * If the vdev is closed, it's likely in the REMOVED or FAULTED state.
 	 * Nothing to be done here but return failure.
 	 */
-	if (dvd == NULL || (dvd->vd_ldi_offline && dvd->vd_lh == NULL)) {
+	if (dvd == NULL || dvd->vd_ldi_offline) {
 		zio->io_error = ENXIO;
 		zio_interrupt(zio);
 		return;
 	}
 
-	if (zio->io_type == ZIO_TYPE_IOCTL) {
+	switch (zio->io_type) {
+	case ZIO_TYPE_IOCTL:
 		/* XXPOLICY */
 		if (!vdev_readable(vd)) {
 			zio->io_error = SET_ERROR(ENXIO);
@@ -765,6 +952,37 @@ vdev_disk_io_start(zio_t *zio)
 
 		zio_execute(zio);
 		return;
+
+	case ZIO_TYPE_TRIM:
+		if (zfs_no_trim == 1 || !vd->vdev_has_trim) {
+			zio->io_error = SET_ERROR(ENOTSUP);
+			zio_execute(zio);
+			return;
+		}
+		/* Currently only supported on ZoL. */
+		ASSERT0(zio->io_trim_flags & ZIO_TRIM_SECURE);
+
+		/* dkioc_free_list_t is already declared to hold one entry */
+		dkioc_free_list_t dfl;
+		dfl.dfl_flags = 0;
+		dfl.dfl_num_exts = 1;
+		dfl.dfl_offset = 0;
+		dfl.dfl_exts[0].dfle_start = zio->io_offset;
+		dfl.dfl_exts[0].dfle_length = zio->io_size;
+
+		zio->io_error = ldi_ioctl(dvd->vd_lh, DKIOCFREE,
+		    (uintptr_t)&dfl, FKIOCTL, kcred, NULL);
+
+		if (zio->io_error == ENOTSUP || zio->io_error == ENOTTY) {
+			/*
+			 * The device must have changed and now TRIM is
+			 * no longer supported.
+			 */
+			vd->vdev_has_trim = B_FALSE;
+		}
+
+		zio_interrupt(zio);
+		return;
 	}
 
 	ASSERT(zio->io_type == ZIO_TYPE_READ || zio->io_type == ZIO_TYPE_WRITE);
@@ -792,10 +1010,17 @@ vdev_disk_io_start(zio_t *zio)
 
 	bp->b_lblkno = lbtodb(zio->io_offset);
 	bp->b_bufsize = zio->io_size;
-	bp->b_iodone = (int (*)())vdev_disk_io_intr;
+	bp->b_iodone = vdev_disk_io_intr;
 
-	/* ldi_strategy() will return non-zero only on programming errors */
-	VERIFY(ldi_strategy(dvd->vd_lh, bp) == 0);
+	/*
+	 * In general we would expect ldi_strategy() to return non-zero only
+	 * because of programming errors, but we've also seen this fail shortly
+	 * after a disk dies.
+	 */
+	if (ldi_strategy(dvd->vd_lh, bp) != 0) {
+		zio->io_error = ENXIO;
+		zio_interrupt(zio);
+	}
 }
 
 static void
@@ -831,18 +1056,20 @@ vdev_disk_io_done(zio_t *zio)
 }
 
 vdev_ops_t vdev_disk_ops = {
-	vdev_disk_open,
-	vdev_disk_close,
-	vdev_default_asize,
-	vdev_disk_io_start,
-	vdev_disk_io_done,
-	NULL,
-	vdev_disk_hold,
-	vdev_disk_rele,
-	NULL,
-	vdev_default_xlate,
-	VDEV_TYPE_DISK,		/* name of this vdev type */
-	B_TRUE			/* leaf vdev */
+	.vdev_op_open = vdev_disk_open,
+	.vdev_op_close = vdev_disk_close,
+	.vdev_op_asize = vdev_default_asize,
+	.vdev_op_io_start = vdev_disk_io_start,
+	.vdev_op_io_done = vdev_disk_io_done,
+	.vdev_op_state_change = NULL,
+	.vdev_op_need_resilver = NULL,
+	.vdev_op_hold = vdev_disk_hold,
+	.vdev_op_rele = vdev_disk_rele,
+	.vdev_op_remap = NULL,
+	.vdev_op_xlate = vdev_default_xlate,
+	.vdev_op_dumpio = vdev_disk_dumpio,
+	.vdev_op_type = VDEV_TYPE_DISK,		/* name of this vdev type */
+	.vdev_op_leaf = B_TRUE			/* leaf vdev */
 };
 
 /*
@@ -850,7 +1077,8 @@ vdev_ops_t vdev_disk_ops = {
  * the device, and construct a configuration nvlist.
  */
 int
-vdev_disk_read_rootlabel(char *devpath, char *devid, nvlist_t **config)
+vdev_disk_read_rootlabel(const char *devpath, const char *devid,
+    nvlist_t **config)
 {
 	ldi_handle_t vd_lh;
 	vdev_label_t *label;
@@ -863,7 +1091,7 @@ vdev_disk_read_rootlabel(char *devpath, char *devid, nvlist_t **config)
 	/*
 	 * Read the device label and build the nvlist.
 	 */
-	if (devid != NULL && ddi_devid_str_decode(devid, &tmpdevid,
+	if (devid != NULL && ddi_devid_str_decode((char *)devid, &tmpdevid,
 	    &minor_name) == 0) {
 		error = ldi_open_by_devid(tmpdevid, minor_name,
 		    FREAD, kcred, &vd_lh, zfs_li);
@@ -871,9 +1099,10 @@ vdev_disk_read_rootlabel(char *devpath, char *devid, nvlist_t **config)
 		ddi_devid_str_free(minor_name);
 	}
 
-	if (error && (error = ldi_open_by_name(devpath, FREAD, kcred, &vd_lh,
-	    zfs_li)))
+	if (error != 0 && (error = ldi_open_by_name((char *)devpath, FREAD,
+	    kcred, &vd_lh, zfs_li)) != 0) {
 		return (error);
+	}
 
 	if (ldi_get_size(vd_lh, &s)) {
 		(void) ldi_close(vd_lh, FREAD, kcred);
@@ -922,4 +1151,151 @@ vdev_disk_read_rootlabel(char *devpath, char *devid, nvlist_t **config)
 		error = SET_ERROR(EIDRM);
 
 	return (error);
+}
+
+struct veb {
+	list_t veb_ents;
+	boolean_t veb_scanned;
+};
+
+struct veb_ent {
+	uint64_t vebe_pool_guid;
+	uint64_t vebe_vdev_guid;
+
+	char *vebe_devpath;
+
+	list_node_t vebe_link;
+};
+
+static kmutex_t veb_lock;
+static struct veb *veb;
+
+static int
+vdev_disk_preroot_scan_walk(const char *devpath, void *arg)
+{
+	int r;
+	nvlist_t *cfg = NULL;
+	uint64_t pguid = 0, vguid = 0;
+
+	/*
+	 * Attempt to read the label from this block device.
+	 */
+	if ((r = vdev_disk_read_rootlabel(devpath, NULL, &cfg)) != 0) {
+		/*
+		 * Many of the available block devices will represent slices or
+		 * partitions of disks, or may represent disks that are not at
+		 * all initialised with ZFS.  As this is a best effort
+		 * mechanism to locate an alternate path to a particular vdev,
+		 * we will ignore any failures and keep scanning.
+		 */
+		return (PREROOT_WALK_BLOCK_DEVICES_NEXT);
+	}
+
+	/*
+	 * Determine the pool and vdev GUID read from the label for this
+	 * device.  Both values must be present and have a non-zero value.
+	 */
+	if (nvlist_lookup_uint64(cfg, ZPOOL_CONFIG_POOL_GUID, &pguid) != 0 ||
+	    nvlist_lookup_uint64(cfg, ZPOOL_CONFIG_GUID, &vguid) != 0 ||
+	    pguid == 0 || vguid == 0) {
+		/*
+		 * This label was not complete.
+		 */
+		goto out;
+	}
+
+	/*
+	 * Keep track of all of the GUID-to-devpath mappings we find so that
+	 * vdev_disk_preroot_lookup() can search them.
+	 */
+	struct veb_ent *vebe = kmem_zalloc(sizeof (*vebe), KM_SLEEP);
+	vebe->vebe_pool_guid = pguid;
+	vebe->vebe_vdev_guid = vguid;
+	vebe->vebe_devpath = spa_strdup(devpath);
+
+	list_insert_tail(&veb->veb_ents, vebe);
+
+out:
+	nvlist_free(cfg);
+	return (PREROOT_WALK_BLOCK_DEVICES_NEXT);
+}
+
+const char *
+vdev_disk_preroot_lookup(uint64_t pool_guid, uint64_t vdev_guid)
+{
+	if (pool_guid == 0 || vdev_guid == 0) {
+		/*
+		 * If we aren't provided both a pool and a vdev GUID, we cannot
+		 * perform a lookup.
+		 */
+		return (NULL);
+	}
+
+	mutex_enter(&veb_lock);
+	if (veb == NULL) {
+		/*
+		 * If vdev_disk_preroot_fini() has been called already, there
+		 * is nothing we can do.
+		 */
+		mutex_exit(&veb_lock);
+		return (NULL);
+	}
+
+	/*
+	 * We want to perform at most one scan of all block devices per boot.
+	 */
+	if (!veb->veb_scanned) {
+		cmn_err(CE_NOTE, "Performing full ZFS device scan!");
+
+		preroot_walk_block_devices(vdev_disk_preroot_scan_walk, NULL);
+
+		veb->veb_scanned = B_TRUE;
+	}
+
+	const char *path = NULL;
+	for (struct veb_ent *vebe = list_head(&veb->veb_ents); vebe != NULL;
+	    vebe = list_next(&veb->veb_ents, vebe)) {
+		if (vebe->vebe_pool_guid == pool_guid &&
+		    vebe->vebe_vdev_guid == vdev_guid) {
+			path = vebe->vebe_devpath;
+			break;
+		}
+	}
+
+	mutex_exit(&veb_lock);
+
+	return (path);
+}
+
+void
+vdev_disk_preroot_init(void)
+{
+	mutex_init(&veb_lock, NULL, MUTEX_DEFAULT, NULL);
+
+	VERIFY3P(veb, ==, NULL);
+	veb = kmem_zalloc(sizeof (*veb), KM_SLEEP);
+	list_create(&veb->veb_ents, sizeof (struct veb_ent),
+	    offsetof(struct veb_ent, vebe_link));
+	veb->veb_scanned = B_FALSE;
+}
+
+void
+vdev_disk_preroot_fini(void)
+{
+	mutex_enter(&veb_lock);
+
+	if (veb != NULL) {
+		while (!list_is_empty(&veb->veb_ents)) {
+			struct veb_ent *vebe = list_remove_head(&veb->veb_ents);
+
+			spa_strfree(vebe->vebe_devpath);
+
+			kmem_free(vebe, sizeof (*vebe));
+		}
+
+		kmem_free(veb, sizeof (*veb));
+		veb = NULL;
+	}
+
+	mutex_exit(&veb_lock);
 }

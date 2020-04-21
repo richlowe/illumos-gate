@@ -21,6 +21,7 @@
 # Use is subject to license terms.
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 # Intel 5000/5100/5400/7300 chipset memory controller hub (MCH) module
@@ -61,7 +62,10 @@ INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 LDFLAGS         += -dy -N drv/smbios
 
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMATCH=off
 
 #
 #       Default build targets.

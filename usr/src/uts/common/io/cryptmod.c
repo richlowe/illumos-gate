@@ -2,6 +2,8 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
+ * Copyright (c) 2018, Joyent, Inc.
+ *
  * STREAMS Crypto Module
  *
  * This module is used to facilitate Kerberos encryption
@@ -65,9 +67,9 @@
  * Function prototypes.
  */
 static	int	cryptmodopen(queue_t *, dev_t *, int, int, cred_t *);
-static  void	cryptmodrput(queue_t *, mblk_t *);
-static  void	cryptmodwput(queue_t *, mblk_t *);
-static	int	cryptmodclose(queue_t *);
+static  int	cryptmodrput(queue_t *, mblk_t *);
+static  int	cryptmodwput(queue_t *, mblk_t *);
+static	int	cryptmodclose(queue_t *, int, cred_t *);
 static	int	cryptmodwsrv(queue_t *);
 static	int	cryptmodrsrv(queue_t *);
 
@@ -90,7 +92,7 @@ static struct module_info	cryptmod_minfo = {
 };
 
 static struct qinit	cryptmod_rinit = {
-	(int (*)())cryptmodrput,	/* qi_putp */
+	cryptmodrput,	/* qi_putp */
 	cryptmodrsrv,	/* qi_svc */
 	cryptmodopen,	/* qi_qopen */
 	cryptmodclose,	/* qi_qclose */
@@ -100,7 +102,7 @@ static struct qinit	cryptmod_rinit = {
 };
 
 static struct qinit	cryptmod_winit = {
-	(int (*)())cryptmodwput,	/* qi_putp */
+	cryptmodwput,	/* qi_putp */
 	cryptmodwsrv,	/* qi_srvp */
 	NULL,		/* qi_qopen */
 	NULL,		/* qi_qclose */
@@ -300,8 +302,9 @@ cryptmodopen(queue_t *rq, dev_t *dev, int oflag, int sflag, cred_t *crp)
 	return (0);
 }
 
+/* ARGSUSED */
 static int
-cryptmodclose(queue_t *rq)
+cryptmodclose(queue_t *rq, int flags __unused, cred_t *credp __unused)
 {
 	struct tmodinfo *tmi = (struct tmodinfo *)rq->q_ptr;
 	ASSERT(tmi);
@@ -3002,7 +3005,7 @@ encrypt_block(queue_t *q, struct tmodinfo *tmi, mblk_t *mp, size_t plainlen)
 		if (cbp == NULL) {
 			cmn_err(CE_WARN,
 				"allocb (%d bytes) failed", sz);
-				return (NULL);
+			return (NULL);
 		}
 
 		cbp->b_cont = mp->b_cont;
@@ -3251,7 +3254,7 @@ start_stream(queue_t *wq, mblk_t *mp, uchar_t dir)
  * Write-side put procedure.  Its main task is to detect ioctls and
  * FLUSH operations.  Other message types are passed on through.
  */
-static void
+static int
 cryptmodwput(queue_t *wq, mblk_t *mp)
 {
 	struct iocblk *iocp;
@@ -3264,7 +3267,7 @@ cryptmodwput(queue_t *wq, mblk_t *mp)
 		    (tmi->ready & CRYPT_WRITE_READY) &&
 		    tmi->enc_data.method == CRYPT_METHOD_NONE) {
 			putnext(wq, mp);
-			return;
+			return (0);
 		}
 		/* else, put it in the service queue */
 		if (!putq(wq, mp)) {
@@ -3342,7 +3345,7 @@ cryptmodwput(queue_t *wq, mblk_t *mp)
 				stopdir = (uint32_t *)mp->b_cont->b_rptr;
 				if (!CR_DIRECTION_OK(*stopdir)) {
 					miocnak(wq, mp, 0, EINVAL);
-					return;
+					return (0);
 				}
 
 				/* disable the queues until further notice */
@@ -3384,12 +3387,13 @@ cryptmodwput(queue_t *wq, mblk_t *mp)
 			if (wq->q_first != NULL || !canputnext(wq)) {
 				if (!putq(wq, mp))
 					freemsg(mp);
-				return;
+				return (0);
 			}
 		}
 		putnext(wq, mp);
 		break;
 	}
+	return (0);
 }
 
 /*
@@ -3789,7 +3793,7 @@ cryptmodrsrv(queue_t *q)
 /*
  * Read-side put procedure.
  */
-static void
+static int
 cryptmodrput(queue_t *rq, mblk_t *mp)
 {
 	switch (mp->b_datap->db_type) {
@@ -3809,10 +3813,11 @@ cryptmodrput(queue_t *rq, mblk_t *mp)
 			if (rq->q_first != NULL || !canputnext(rq)) {
 				if (!putq(rq, mp))
 					freemsg(mp);
-				return;
+				return (0);
 			}
 		}
 		putnext(rq, mp);
 		break;
 	}
+	return (0);
 }

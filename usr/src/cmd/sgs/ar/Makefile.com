@@ -20,6 +20,8 @@
 #
 #
 # Copyright (c) 1996, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 PROG=		ar
@@ -41,10 +43,11 @@ CPPFLAGS=	-I. -I../../include $(CPPFLAGS.master) -I$(ELFCAP)
 CFLAGS +=	$(CCVERBOSE)
 CSTD=	$(CSTD_GNU99)
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
-LDLIBS +=	-lelf $(CONVLIBDIR) $(CONV_LIB) -lsendfile
-LINTFLAGS=	-x
-LINTFLAGS64=	-x
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+SMOFF += signed
+
+LDLIBS +=	-lelf $(CONVLIBDIR) -lconv -lsendfile
 
 $(XPG4) :=	CPPFLAGS += -DXPG4
 
@@ -60,7 +63,6 @@ SGSMSGALL =	$(SGSMSGCOM)
 
 SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n ar_msg
 
-SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA:%.o=$(SGSTOOLS)/common/%.c)
-LINTSRCS=	$(SRCS) ../common/lintsup.c
+SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA:%.o=$(SGSCOMMON)/%.c)
 
-CLEANFILES +=	$(LINTOUTS) $(BLTFILES)
+CLEANFILES +=	$(BLTFILES)

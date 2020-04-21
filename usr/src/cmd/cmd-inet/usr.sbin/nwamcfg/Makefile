@@ -24,7 +24,7 @@
 # Use is subject to license terms.
 # Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
-# cmd/cmd-inet/usr.sbin/nwamcfg/Makefile
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	nwamcfg
 OBJS=	nwamcfg.o nwamcfg_lex.o nwamcfg_grammar.tab.o
@@ -39,14 +39,16 @@ CLEANFILES +=	nwamcfg_lex.c nwamcfg_grammar.tab.c nwamcfg_grammar.tab.h
 CLEANFILES +=	$(PROG).ln
 
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 
+SMOFF += all_func_returns
+
 .KEEP_STATE:
 
-all: $(PROG) 
+all: $(PROG)
 
 $(PROG): $(OBJS)
 	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)

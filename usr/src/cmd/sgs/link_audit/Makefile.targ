@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2015 RackTop Systems.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 %:	../common/%.ksh
@@ -79,13 +80,13 @@ $(ROOTCCSLIB)/%: %
 $(ROOTCCSLIB64)/%: %
 		$(INS.file)
 
-$(ROOTONLDBIN)/%: %
+$(ROOTONLDBIN)/%: % $(ROOTONLDBIN)
 		$(INS.file)
 
-$(ROOTONLDLIB)/%: %
+$(ROOTONLDLIB)/%: % $(ROOTONLDLIB)
 		$(INS.file)
 
-$(ROOTONLDLIB64)/%: %
+$(ROOTONLDLIB64)/%: % $(ROOTONLDLIB64)
 		$(INS.file)
 
 $(ROOTCCSLIB):
@@ -94,32 +95,13 @@ $(ROOTCCSLIB):
 $(ROOTCCSLIB64):
 	$(INS.dir)
 
-LINT_HDR=	perl ../../tools/lint_hdr.pl
+$(ROOTONLDBIN):
+	$(INS.dir)
 
-lint:
-		$(LINT_HDR) link_audit			 > $(LINTOUT)
-		$(LINT_HDR) -s truss.so.1		>> $(LINTOUT)
-		$(LINT.c) ../common/truss.c \
-			../common/env.c 		2>&1 | tee -a $(LINTOUT)
+$(ROOTONLDLIB):
+	$(INS.dir)
 
-		$(LINT_HDR) -s symbindrep.so.1		>> $(LINTOUT)
-		$(LINT.c) ../common/symbindrep.c \
-			../common/env.c			2>&1 | tee -a $(LINTOUT)
-
-		$(LINT_HDR) -s perfcnt.so.1		>> $(LINTOUT)
-		$(LINT.c) ../common/perfcnt.c \
-			../common/hash.c \
-			../common/env.c			2>&1 | tee -a $(LINTOUT)
-
-		$(LINT_HDR) -s who.so.1			>> $(LINTOUT)
-		$(LINT.c) ../common/who.c \
-			../common/env.c			2>&1 | tee -a $(LINTOUT)
-
-		$(LINT_HDR) -s dumpbind			>> $(LINTOUT)
-		$(LINT.c) ../common/dumpbind.c		2>&1 | tee -a $(LINTOUT)
-
-		$(LINT_HDR) -s bindings.so.1		>> $(LINTOUT)
-		$(LINT.c) ../common/bindings.c \
-			../common/env.c			2>&1 | tee -a $(LINTOUT)
+$(ROOTONLDLIB64):
+	$(INS.dir)
 
 include		../../../../lib/Makefile.targ

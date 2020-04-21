@@ -24,7 +24,7 @@
  * Copyright 2012 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2014 OmniTI Computer Consulting, Inc. All rights reserved.
  * Copyright (c) 2014, Tegile Systems Inc. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2019, Joyent, Inc.
  */
 
 /*
@@ -281,7 +281,7 @@ mptsas_start_config_page_access(mptsas_t *mpt, mptsas_cmd_t *cmd)
 	    DDI_DMA_SYNC_FORDEV);
 	request_desc = (cmd->cmd_slot << 16) +
 	    MPI2_REQ_DESCRIPT_FLAGS_DEFAULT_TYPE;
-	cmd->cmd_rfm = NULL;
+	cmd->cmd_rfm = 0;
 	MPTSAS_START_CMD(mpt, request_desc);
 	if ((mptsas_check_dma_handle(mpt->m_dma_req_frame_hdl) !=
 	    DDI_SUCCESS) ||
@@ -378,6 +378,7 @@ mptsas_access_config_page(mptsas_t *mpt, uint8_t action, uint8_t page_type,
 	 * Check if the header request completed without timing out
 	 */
 	if (cmd->cmd_flags & CFLAG_TIMEOUT) {
+		config_flags |= MPTSAS_CMD_TIMEOUT;
 		mptsas_log(mpt, CE_WARN, "config header request timeout");
 		rval = DDI_FAILURE;
 		goto page_done;
@@ -520,6 +521,7 @@ mptsas_access_config_page(mptsas_t *mpt, uint8_t action, uint8_t page_type,
 	 * Check if the request completed without timing out
 	 */
 	if (cmd->cmd_flags & CFLAG_TIMEOUT) {
+		config_flags |= MPTSAS_CMD_TIMEOUT;
 		mptsas_log(mpt, CE_WARN, "config page request timeout");
 		rval = DDI_FAILURE;
 		goto page_done;
@@ -1399,7 +1401,7 @@ mptsas_update_flash(mptsas_t *mpt, caddr_t ptrbuffer, uint32_t size,
 	    DDI_DMA_SYNC_FORDEV);
 	request_desc = (cmd->cmd_slot << 16) +
 	    MPI2_REQ_DESCRIPT_FLAGS_DEFAULT_TYPE;
-	cmd->cmd_rfm = NULL;
+	cmd->cmd_rfm = 0;
 	MPTSAS_START_CMD(mpt, request_desc);
 
 	rvalue = 0;
@@ -2864,7 +2866,7 @@ mptsas_enclosurepage_0_cb(mptsas_t *mpt, caddr_t page_memp,
     ddi_acc_handle_t accessp, uint16_t iocstatus, uint32_t iocloginfo,
     va_list ap)
 {
-	uint32_t 			page_address;
+	uint32_t			page_address;
 	pMpi2SasEnclosurePage0_t	encpage, encout;
 
 	if ((iocstatus != MPI2_IOCSTATUS_SUCCESS) &&

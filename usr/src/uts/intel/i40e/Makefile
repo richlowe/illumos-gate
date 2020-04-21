@@ -10,7 +10,7 @@
 #
 
 #
-# Copyright 2017 Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 UTSBASE = ../..
@@ -43,7 +43,12 @@ LINTTAGS	+= -erroff=E_ENUM_VAL_OVERFLOWS_INT_MAX
 #
 CERRWARN   += -_cc=-erroff=E_ENUM_VAL_OVERFLOWS_INT_MAX
 
+# 3rd party code
+SMOFF += all_func_returns
+
 LDFLAGS		+= -dy -N misc/mac
+
+MAPFILES	+= ddi mac random
 
 .KEEP_STATE:
 
@@ -63,4 +68,5 @@ clean.lint:	$(CLEAN_LINT_DEPS)
 
 install:	$(INSTALL_DEPS)
 
+include $(UTSBASE)/Makefile.mapfile
 include $(UTSBASE)/intel/Makefile.targ

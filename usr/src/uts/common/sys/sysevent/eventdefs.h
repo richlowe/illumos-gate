@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_SYS_SYSEVENT_EVENTDEFS_H
@@ -55,6 +55,7 @@ extern "C" {
 #define	EC_ZFS		"EC_zfs"	/* ZFS event */
 #define	EC_DATALINK	"EC_datalink"	/* datalink event */
 #define	EC_VRRP		"EC_vrrp"	/* VRRP event */
+#define	EC_PCIE		"EC_pcie"	/* PCIe event */
 
 /*
  * The following event class is reserved for exclusive use
@@ -210,17 +211,30 @@ extern "C" {
 #define	ESC_ZFS_BOOTFS_VDEV_ATTACH	"ESC_ZFS_bootfs_vdev_attach"
 #define	ESC_ZFS_POOL_REGUID		"ESC_ZFS_pool_reguid"
 #define	ESC_ZFS_HISTORY_EVENT		"ESC_ZFS_history_event"
+#define	ESC_ZFS_TRIM_START		"ESC_ZFS_trim_start"
+#define	ESC_ZFS_TRIM_FINISH		"ESC_ZFS_trim_finish"
+#define	ESC_ZFS_TRIM_CANCEL		"ESC_ZFS_trim_cancel"
+#define	ESC_ZFS_TRIM_RESUME		"ESC_ZFS_trim_resume"
+#define	ESC_ZFS_TRIM_SUSPEND		"ESC_ZFS_trim_suspend"
 
 /*
- * datalink subclass definitions.
+ * datalink subclass definitions. Supporting attributes for datalink state found
+ * in sys/sysevent/datalink.h.
  */
 #define	ESC_DATALINK_PHYS_ADD	"ESC_datalink_phys_add"	/* new physical link */
+#define	ESC_DATALINK_LINK_STATE	"ESC_datalink_link_state"	/* link state */
 
 /*
  * VRRP subclass definitions. Supporting attributes (name/value paris) are
  * found in sys/sysevent/vrrp.h
  */
 #define	ESC_VRRP_STATE_CHANGE	"ESC_vrrp_state_change"
+
+/*
+ * PCIe subclass definitions. Supporting attributes for PCIe state found in
+ * sys/sysevent/pcie.h.
+ */
+#define	ESC_PCIE_LINK_STATE	"ESC_pcie_link_state"
 
 #ifdef	__cplusplus
 }

@@ -21,6 +21,8 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -215,7 +217,7 @@ undo_phymem_tree(void)
 		/*
 		 * Delete nodes and properties of memory-module-group(s)
 		 */
-		if (mmghdl->mmgh == NULL)
+		if (mmghdl->mmgh == 0)
 			continue;
 
 		(void) ptree_delete_node(mmghdl->mmgh);
@@ -225,7 +227,7 @@ undo_phymem_tree(void)
 		 * Clear out the saved node handle of memory module group
 		 * so that logic memory tree won't link to it.
 		 */
-		mmghdl->mch = mmghdl->mmgh = NULL;
+		mmghdl->mch = mmghdl->mmgh = 0;
 		mmghdl = mmghdl->next;
 	}
 }
@@ -422,9 +424,9 @@ create_logical_tree(picl_nodehdl_t memh, int fd)
 		/*
 		 * Add property, Size to memory-segment node
 		 */
-		if ((ptree_init_propinfo(&propinfo, PTREE_PROPINFO_VERSION,
+		err = ptree_init_propinfo(&propinfo, PTREE_PROPINFO_VERSION,
 		    PICL_PTYPE_UNSIGNED_INT, PICL_READ, sizeof (mcseg->size),
-		    PICL_PROP_SIZE, NULL, NULL)) != PICL_SUCCESS)
+		    PICL_PROP_SIZE, NULL, NULL);
 		if (err != PICL_SUCCESS)
 			break;
 
@@ -558,8 +560,8 @@ create_physical_tree(picl_nodehdl_t mch, void *args)
 	mmodgrp_info_t		*mmghdl;
 	picl_nodehdl_t		mmodgrph;
 	ptree_propinfo_t	propinfo;
-	struct mc_control 	*mccontrol;
-	struct mc_devgrp 	mcdevgrp;
+	struct mc_control	*mccontrol;
+	struct mc_devgrp	mcdevgrp;
 	int			fd;
 
 	fd = (int)args;
@@ -703,7 +705,7 @@ init_mc(void)
 	DIR			*dirp;
 	struct dirent		*retp;
 	char			path[PATH_MAX];
-	int 			found = 0;
+	int			found = 0;
 	int			valid_entry = 0;
 
 	/* open the directory */
@@ -897,8 +899,8 @@ piclmemcfg_evhandler(const char *ename, const void *earg, size_t size,
 	int		old_nsegs;
 	nvlist_t	*nvlp;
 
-	memh = NULL;
-	if (nvlist_unpack((char *)earg, size, &nvlp, NULL))
+	memh = 0;
+	if (nvlist_unpack((char *)earg, size, &nvlp, 0))
 		return;
 
 	if (nvlist_lookup_uint64(nvlp, PICLEVENTARG_NODEHANDLE, &nodeh)) {

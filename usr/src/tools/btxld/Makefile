@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 include ../Makefile.tools
 
@@ -27,8 +28,12 @@ MAN1ONBLDFILES=	btxld.1onbld
 SRCS=		btxld.c elfh.c version.c $(UTILS_SRC) $(EINFO_SRC) $(EXTRA_SRC)
 OBJS=		btxld.o elfh.o version.o bblk_einfo.o mboot_extra.o boot_utils.o
 LDLIBS +=	-lmd5
+NATIVE_LIBS +=	libmd5.so
 CSTD=	$(CSTD_GNU99)
 CPPFLAGS +=	-I$(SRC)/uts/common -I$(COMMON_SRC)
+
+# not linted
+SMATCH=off
 
 $(ROOTONBLDMAN1ONBLDFILES)	:= FILEMODE=	644
 

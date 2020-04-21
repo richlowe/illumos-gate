@@ -24,7 +24,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
+# Copyright 2019 Joyent, Inc.
 
 TABLEDIR = ../praudit
 
@@ -41,8 +41,11 @@ MSGFILES = $(SRCS)
 CPPFLAGS += -I$(TABLEDIR) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 LDLIBS += -lnsl -lbsm -lscf -ltsol
 
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-parentheses
+
+# false positive
+SMOFF += strcpy_overflow
 
 .KEEP_STATE:
 
@@ -51,7 +54,7 @@ all: $(PROG)
 install: all $(ROOTUSRSBINPROG)
 
 $(PROG): $(OBJS)
-	$(CC) -o $(PROG) $(OBJS) $(LDFLAGS) $(LDLIBS)
+	$(LINK.c) -o $(PROG) $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 toktable.o:	$(TABLEDIR)/toktable.c

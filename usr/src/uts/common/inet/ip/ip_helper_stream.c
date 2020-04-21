@@ -40,9 +40,9 @@
 #include <sys/vmem.h>
 #include <sys/disp.h>
 
-void ip_helper_wput(queue_t *q, mblk_t *mp);
+int ip_helper_wput(queue_t *q, mblk_t *mp);
 
-static int ip_helper_stream_close(queue_t *, int);
+static int ip_helper_stream_close(queue_t *, int, cred_t *);
 
 static struct module_info ip_helper_stream_info =  {
 	0, "iphelper", IP_MOD_MINPSZ, IP_MOD_MAXPSZ, IP_MOD_HIWAT, IP_MOD_LOWAT
@@ -54,7 +54,7 @@ static struct qinit ip_helper_stream_rinit = {
 };
 
 static struct qinit ip_helper_stream_winit = {
-	(pfi_t)ip_helper_wput, (pfi_t)ip_wsrv, NULL, NULL, NULL,
+	ip_helper_wput, ip_wsrv, NULL, NULL, NULL,
 	&ip_helper_stream_info, NULL, NULL, NULL, STRUIOT_NONE
 };
 
@@ -84,7 +84,7 @@ ip_helper_share_conn(queue_t *q, mblk_t *mp, cred_t *crp)
 	miocack(q, mp, 0, 0);
 }
 
-void
+int
 ip_helper_wput(queue_t *q, mblk_t *mp)
 {
 	struct iocblk *iocp = (struct iocblk *)mp->b_rptr;
@@ -96,6 +96,7 @@ ip_helper_wput(queue_t *q, mblk_t *mp)
 		ASSERT(DB_TYPE(mp) != M_DATA);
 		ip_wput_nondata(q, mp);
 	}
+	return (0);
 }
 
 /* ARGSUSED3 */
@@ -153,9 +154,9 @@ ip_helper_stream_setup(queue_t *q, dev_t *devp, int flag, int sflag,
 	return (0);
 }
 
-/* ARGSUSED1 */
+/* ARGSUSED */
 static int
-ip_helper_stream_close(queue_t *q, int flag)
+ip_helper_stream_close(queue_t *q, int flag __unused, cred_t *credp __unused)
 {
 	ip_helper_minfo_t *ip_minfop;
 

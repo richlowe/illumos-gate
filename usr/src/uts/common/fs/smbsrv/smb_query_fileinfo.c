@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <smbsrv/smb_kproto.h>
@@ -149,8 +149,7 @@ smb_pre_query_information(smb_request_t *sr)
 
 	rc = smbsr_decode_data(sr, "%S", sr, &fqi->fq_path.pn_path);
 
-	DTRACE_SMB_2(op__QueryInformation__start, smb_request_t *, sr,
-	    smb_fqi_t *, fqi);
+	DTRACE_SMB_START(op__QueryInformation, smb_request_t *, sr);
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -158,7 +157,7 @@ smb_pre_query_information(smb_request_t *sr)
 void
 smb_post_query_information(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__QueryInformation__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__QueryInformation, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -187,7 +186,7 @@ smb_pre_query_information2(smb_request_t *sr)
 	int rc;
 	rc = smbsr_decode_vwv(sr, "w", &sr->smb_fid);
 
-	DTRACE_SMB_1(op__QueryInformation2__start, smb_request_t *, sr);
+	DTRACE_SMB_START(op__QueryInformation2, smb_request_t *, sr);
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -195,7 +194,7 @@ smb_pre_query_information2(smb_request_t *sr)
 void
 smb_post_query_information2(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__QueryInformation2__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__QueryInformation2, smb_request_t *, sr);
 }
 
 smb_sdrc_t
@@ -330,11 +329,7 @@ smb_query_by_path(smb_request_t *sr, smb_xa_t *xa, uint16_t infolev)
 	}
 
 	if (rc != 0) {
-		if (rc == ENOENT)
-			smbsr_error(sr, NT_STATUS_OBJECT_NAME_NOT_FOUND,
-			    ERRDOS, ERROR_FILE_NOT_FOUND);
-		else
-			smbsr_errno(sr, rc);
+		smbsr_errno(sr, rc);
 
 		kmem_free(qinfo, sizeof (smb_queryinfo_t));
 		return (-1);
@@ -655,9 +650,11 @@ smb_query_stream_info(smb_request_t *sr, mbuf_chain_t *mbc,
 	switch (status) {
 	case 0:
 		break;
+	case NT_STATUS_OBJECT_NAME_NOT_FOUND:
 	case NT_STATUS_NO_SUCH_FILE:
 	case NT_STATUS_NOT_SUPPORTED:
 		/* No streams. */
+		status = 0;
 		done = B_TRUE;
 		break;
 	default:

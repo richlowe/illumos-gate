@@ -40,10 +40,11 @@ MYCPPFLAGS = -I../../../../lib/libfsmgt/common \
 		-I../..
 CPPFLAGS += $(MYCPPFLAGS)
 LDLIBS += -lshare -lscf -lsecdb -lumem
-all install := LDLIBS += -lxml2
-LINTFLAGS	+= -u
+NATIVE_LIBS += libxml2.so
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+all install := LDLIBS += -lxml2
+
+CERRWARN	+= $(CNOWARN_UNINIT)
 
 POFILES = $(SRCS:.c=.po)
 POFILE  = sharemgr.po
@@ -63,8 +64,6 @@ $(PROG): $(OBJS)
 install: all
 
 $(SHAREMGRNO64)install: $(ROOTUSRSBINPROG)
-
-lint:	lint_SRCS
 
 clean:
 	$(RM) $(OBJS)

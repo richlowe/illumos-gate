@@ -23,6 +23,7 @@
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2011 Pawel Jakub Dawidek. All rights reserved.
  * Copyright (c) 2011, 2017 by Delphix. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_LIBZFS_IMPL_H
@@ -39,6 +40,7 @@
 #include <libzfs.h>
 #include <libshare.h>
 #include <libzfs_core.h>
+#include <libdevinfo.h>
 
 #include <fm/libtopo.h>
 
@@ -88,6 +90,7 @@ struct libzfs_handle {
 	libzfs_fru_t *libzfs_fru_list;
 	char libzfs_chassis_id[256];
 	boolean_t libzfs_prop_debug;
+	di_devlink_handle_t libzfs_devlink;
 };
 
 struct zfs_handle {
@@ -139,7 +142,7 @@ typedef enum {
 	SHARED_SMB = 0x4
 } zfs_share_type_t;
 
-#define	CONFIG_BUF_MINSIZE	65536
+#define	CONFIG_BUF_MINSIZE	262144
 
 int zfs_error(libzfs_handle_t *, int, const char *);
 int zfs_error_fmt(libzfs_handle_t *, int, const char *, ...);

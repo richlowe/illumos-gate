@@ -76,7 +76,7 @@ CLEANLINTFILES	+= $(LINT32_FILES)
 #
 CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-unused-variable
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 
 #
 #	Default build targets.
@@ -101,10 +101,10 @@ install:	$(INSTALL_DEPS)
 
 check:
 
-LINT_LIB_DIR	=$(SERENGETI_LINT_LIB_DIR)
+LINT_LIB_DIR	= $(SERENGETI_LINT_LIB_DIR)
 
-$(PLATLIB):	$(BINARY)
-	$(BUILD.SO) $(BINARY)
+$(PLATLIB):	$(OBJECTS)
+	$(BUILD.SO) $(OBJECTS)
 
 $(SYM_MOD):	$(UNIX_O) $(PLATLIB)
 	@echo "resolving symbols against unix.o"

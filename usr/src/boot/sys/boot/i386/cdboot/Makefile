@@ -11,31 +11,23 @@
 
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 include $(SRC)/Makefile.master
+include $(SRC)/boot/sys/boot/Makefile.inc
+include ../Makefile.inc
 
-ROOT_BOOT = $(ROOT)/boot
-
-LD=	$(GNU_ROOT)/bin/gld
-CC=	$(GNUC_ROOT)/bin/gcc
-
-CFLAGS =	-O2 -I../common -march=i386 -ffreestanding -mno-mmx -mno-3dnow
-CFLAGS +=	-mno-sse -mno-sse2 -mno-sse3 -msoft-float -std=gnu99 -m32
-CPPFLAGS=
-CCASFLAGS=	-Wa,--divide
+CPPFLAGS +=	-I../common
 
 PROG=	cdboot
-STRIP=
 FILEMODE=0444
-MAN=
 SRCS=	${PROG}.S
 OBJS=	$(SRCS:%.S=%.o)
 
-
 ORG=	0x7c00
 
-LDFLAGS=-e start -Ttext ${ORG} -N -S --oformat binary
+LDFLAGS=-e start -Ttext $(ORG) -N -S --oformat binary $(GLDTARGET)
 
 all:	${PROG}
 
@@ -47,9 +39,6 @@ ${PROG}: ${OBJS}
 clobber: clean
 clean:
 	$(RM) $(PROG) $(OBJS)
-
-.S.o:
-	$(CC) $(CFLAGS) $(CCASFLAGS) -c -o $@ $<
 
 $(ROOT_BOOT)/%: %
 	$(INS.file)

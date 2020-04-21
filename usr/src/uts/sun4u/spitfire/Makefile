@@ -86,7 +86,7 @@ LINTTAGS	+= -erroff=E_PTRDIFF_OVERFLOW
 LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 LINTTAGS	+= -erroff=E_BAD_FORMAT_STR2
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 
 #
 #	Default build targets.
@@ -109,8 +109,8 @@ clean.lint:	$(CLEAN_LINT_DEPS)
 
 install:	$(INSTALL_DEPS)
 
-$(CPULIB):	$(BINARY)
-	$(BUILD.SO) $(BINARY)
+$(CPULIB):	$(OBJECTS)
+	$(BUILD.SO) $(OBJECTS)
 
 $(SYM_MOD):	$(UNIX_O) $(CPULIB)
 	@echo "resolving symbols against unix.o"

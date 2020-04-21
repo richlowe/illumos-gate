@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #ifndef	_LIBMLSVC_H
@@ -50,12 +50,24 @@
 #include <smbsrv/smb_dfs.h>
 #include <smbsrv/libsmb.h>
 
+/*
+ * XXX: Some temporary left-overs from the old ntstatus.h
+ * Should eliminate uses of these macros when convenient.
+ */
+/* This used to OR in the severity bits. */
+#define	NT_SC_ERROR(S)		(S)
+/* This used to mask off the severity bits. */
+#define	NT_SC_VALUE(S)		(S)
+/* XXX end of temporary left-overs. */
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
 uint32_t lsa_lookup_name(char *, uint16_t, smb_account_t *);
+uint32_t lsa_lookup_lname(char *, uint16_t, smb_account_t *);
 uint32_t lsa_lookup_sid(smb_sid_t *, smb_account_t *);
+uint32_t lsa_lookup_lsid(smb_sid_t *, smb_account_t *);
 
 /*
  * SMB domain API to discover a domain controller and obtain domain
@@ -66,7 +78,6 @@ extern boolean_t smb_locate_dc(char *, smb_domainex_t *);
 uint32_t smb_ddiscover_dns(char *, smb_domainex_t *);
 extern void smb_ddiscover_bad_dc(char *);
 extern void smb_ddiscover_refresh(void);
-extern int smb_ddiscover_wait(void);
 
 extern int dssetup_check_service(void);
 extern void dssetup_clear_domain_info(void);

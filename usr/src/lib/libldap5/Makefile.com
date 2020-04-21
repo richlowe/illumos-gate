@@ -22,6 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= libldap.a
 VERS= .5
@@ -113,12 +114,15 @@ CFLAGS +=	$(CCVERBOSE) $(LOCFLAGS)
 CFLAGS64 +=	$(LOCFLAGS)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-type-limits
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-address
+
+# not linted
+SMATCH=off
 
 LDLIBS +=	-lsasl -lsocket -lnsl -lmd -lc
 

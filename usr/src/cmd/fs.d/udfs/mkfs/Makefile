@@ -23,6 +23,7 @@
 # Copyright (c) 1999,2001 by Sun Microsystems, Inc.
 # All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 FSTYPE=		udfs
 LIBPROG=	mkfs
@@ -46,7 +47,10 @@ UDFSDIR=	../../../../uts/common/fs/ufs
 UDFSOBJS=
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 OBJS=		$(MKFSOBJS) $(UDFSOBJS)
 SRCS=		$(OBJS:%.o=%.c)

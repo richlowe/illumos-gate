@@ -22,8 +22,6 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Makefile to support tools used for linker development.  GEXECS are those
 # tools that the installed for distribution in the SUNWonld package.
 #
@@ -33,60 +31,28 @@
 #
 #  o	proto: creates a proto directory structure suitable for sgs make
 #	installs (basically a subset of Targetdirs).
+
 #
-# cmd/sgs/tools/Makefile
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 include		$(SRC)/Makefile.master
 
-LSSRCS=		info.sh	\
-		proto.sh
-
-SRCS=		$(LSSRCS)
-
-LEXECS=		$(LSSRCS:%.sh=%)
-
-ROOTDIR =	$(ROOT)/opt/SUNWonld/bin
-ROOTPROGS =	$(GEXECS:%=$(ROOTDIR)/%)
-ROOTPROGS +=	$(PSRCS:%=$(ROOTDIR)/%)
-
-$(ROOTPROGS) :=	FILEMODE=755
-
-SUBDIRS=	$(MACH) man
+SUBDIRS=	$(MACH)
 
 all:=		TARGET= all
 install:=	TARGET= install
 clean:=		TARGET= clean
 clobber:=	TARGET= clobber
-lint:=		TARGET= lint
 
 
 .KEEP_STATE:
 
-all:		$(EXECS) $(SUBDIRS)
-
-install:	all $(ROOTPROGS) $(SUBDIRS)
-
-clean clobber:	$(SUBDIRS)
-		$(RM) $(RMFLAGS) $(EXECS)
+all install clean clobberall: $(SUBDIRS)
 
 delete:
-
-lint:		$(SUBDIRS)
-
-%:		%.ksh
-		$(RM) $@
-		cat $< > $@
-		chmod +x $@
 
 $(SUBDIRS):	FRC
 		@cd $@; pwd; $(MAKE) $(TARGET)
 
-$(ROOTDIR)/%:	%
-		$(INS.file)
-
-$(ROOTDIR)/%:	scoping/%
-		$(INS.file)
-
 FRC:
-
-execs:		$(EXECS)

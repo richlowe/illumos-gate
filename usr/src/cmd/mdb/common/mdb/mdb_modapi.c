@@ -23,6 +23,7 @@
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <mdb/mdb_modapi.h>
@@ -57,6 +58,51 @@ int mdb_prop_datamodel = 0;		/* Data model (see mdb_target_impl.h) */
 static int
 call_idcmd(mdb_idcmd_t *idcp, uintmax_t addr, uintmax_t count,
     uint_t flags, mdb_argvec_t *argv);
+
+int
+mdb_snprintfrac(char *buf, int len,
+    uint64_t numerator, uint64_t denom, int frac_digits)
+{
+	int mul = 1;
+	int whole, frac, i;
+
+	for (i = frac_digits; i; i--)
+		mul *= 10;
+	whole = numerator / denom;
+	frac = mul * numerator / denom - mul * whole;
+	return (mdb_snprintf(buf, len, "%u.%0*u", whole, frac_digits, frac));
+}
+
+void
+mdb_nicenum(uint64_t num, char *buf)
+{
+	uint64_t n = num;
+	int index = 0;
+	char *u;
+
+	while (n >= 1024) {
+		n = (n + (1024 / 2)) / 1024; /* Round up or down */
+		index++;
+	}
+
+	u = &" \0K\0M\0G\0T\0P\0E\0"[index*2];
+
+	if (index == 0) {
+		(void) mdb_snprintf(buf, MDB_NICENUM_BUFLEN, "%llu",
+		    (u_longlong_t)n);
+	} else if (n < 10 && (num & (num - 1)) != 0) {
+		(void) mdb_snprintfrac(buf, MDB_NICENUM_BUFLEN,
+		    num, 1ULL << 10 * index, 2);
+		(void) strcat(buf, u);
+	} else if (n < 100 && (num & (num - 1)) != 0) {
+		(void) mdb_snprintfrac(buf, MDB_NICENUM_BUFLEN,
+		    num, 1ULL << 10 * index, 1);
+		(void) strcat(buf, u);
+	} else {
+		(void) mdb_snprintf(buf, MDB_NICENUM_BUFLEN, "%llu%s",
+		    (u_longlong_t)n, u);
+	}
+}
 
 ssize_t
 mdb_vread(void *buf, size_t nbytes, uintptr_t addr)
@@ -578,7 +624,7 @@ mdb_pwalk(const char *name, mdb_walk_cb_t func, void *private, uintptr_t addr)
 int
 mdb_walk(const char *name, mdb_walk_cb_t func, void *data)
 {
-	return (mdb_pwalk(name, func, data, NULL));
+	return (mdb_pwalk(name, func, data, 0));
 }
 
 /*ARGSUSED*/
@@ -638,7 +684,7 @@ int
 mdb_walk_dcmd(const char *wname, const char *dcname,
     int argc, const mdb_arg_t *argv)
 {
-	return (mdb_pwalk_dcmd(wname, dcname, argc, argv, NULL));
+	return (mdb_pwalk_dcmd(wname, dcname, argc, argv, 0));
 }
 
 /*ARGSUSED*/
@@ -974,6 +1020,13 @@ mdb_dump_aux_partial(void *buf, size_t nbyte, uint64_t offset, void *arg)
 	return (result);
 }
 
+/* Default callback for mdb_dumpptr() is calling mdb_vread(). */
+static ssize_t
+mdb_dumpptr_cb(void *buf, size_t nbytes, uintptr_t addr, void *arg __unused)
+{
+	return (mdb_vread(buf, nbytes, addr));
+}
+
 int
 mdb_dumpptr(uintptr_t addr, size_t len, uint_t flags, mdb_dumpptr_cb_t fp,
     void *arg)
@@ -981,7 +1034,10 @@ mdb_dumpptr(uintptr_t addr, size_t len, uint_t flags, mdb_dumpptr_cb_t fp,
 	dptrdat_t dat;
 	d64dat_t dat64;
 
-	dat.func = fp;
+	if (fp == NULL)
+		dat.func = mdb_dumpptr_cb;
+	else
+		dat.func = fp;
 	dat.arg = arg;
 	dat64.func = mdb_dump_aux_ptr;
 	dat64.arg = &dat;

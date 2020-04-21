@@ -22,7 +22,8 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Western Digital Corporation
  */
 /*
  * Copyright (c) 2009-2010, Intel Corporation.
@@ -230,10 +231,10 @@ AcpiOsGetRootPointer()
 	 * in the acpi-root-tab property.
 	 */
 	Address = ddi_prop_get_int64(DDI_DEV_T_ANY, ddi_root_node(),
-	    DDI_PROP_DONTPASS, "acpi-root-tab", NULL);
+	    DDI_PROP_DONTPASS, "acpi-root-tab", 0);
 
-	if ((Address == NULL) && ACPI_FAILURE(AcpiFindRootPointer(&Address)))
-		Address = NULL;
+	if ((Address == 0) && ACPI_FAILURE(AcpiFindRootPointer(&Address)))
+		Address = 0;
 
 	return (Address);
 }
@@ -634,7 +635,7 @@ ACPI_OSD_HANDLER acpi_isr;
 void *acpi_isr_context;
 
 uint_t
-acpi_wrapper_isr(char *arg)
+acpi_wrapper_isr(char *arg, char *arg1 __unused)
 {
 	_NOTE(ARGUNUSED(arg))
 
@@ -676,7 +677,7 @@ AcpiOsInstallInterruptHandler(UINT32 InterruptNumber,
 	cmn_err(CE_NOTE, "!acpica: attaching SCI %d", sci_vect);
 #endif
 
-	retval = add_avintr(NULL, SCI_IPL, (avfunc)acpi_wrapper_isr,
+	retval = add_avintr(NULL, SCI_IPL, acpi_wrapper_isr,
 	    "ACPI SCI", sci_vect, NULL, NULL, NULL, NULL);
 	if (retval) {
 		acpi_intr_hooked = 1;
@@ -695,7 +696,7 @@ AcpiOsRemoveInterruptHandler(UINT32 InterruptNumber,
 	cmn_err(CE_NOTE, "!acpica: detaching SCI %d", InterruptNumber);
 #endif
 	if (acpi_intr_hooked) {
-		rem_avintr(NULL, LOCK_LEVEL - 1, (avfunc)acpi_wrapper_isr,
+		rem_avintr(NULL, LOCK_LEVEL - 1, acpi_wrapper_isr,
 		    InterruptNumber);
 		acpi_intr_hooked = 0;
 	}
@@ -1152,6 +1153,13 @@ AcpiOsPrintf(const char *Format, ...)
 	va_end(ap);
 }
 
+/*ARGSUSED*/
+ACPI_STATUS
+AcpiOsEnterSleep(UINT8 SleepState, UINT32 Rega, UINT32 Regb)
+{
+	return (AE_OK);
+}
+
 /*
  * When != 0, sends output to console
  * Patchable with kmdb or /etc/system.
@@ -1252,6 +1260,73 @@ AcpiOsGetLine(char *Buffer, UINT32 len, UINT32 *BytesRead)
 	return (0);
 }
 
+static ACPI_STATUS
+acpica_crs_cb(ACPI_RESOURCE *rp, void *context)
+{
+	int	*busno = context;
+
+	if (rp->Data.Address.ProducerConsumer == 1)
+		return (AE_OK);
+
+	switch (rp->Type) {
+	case ACPI_RESOURCE_TYPE_ADDRESS16:
+		if (rp->Data.Address16.Address.AddressLength == 0)
+			break;
+		if (rp->Data.Address16.ResourceType != ACPI_BUS_NUMBER_RANGE)
+			break;
+
+		*busno = rp->Data.Address16.Address.Minimum;
+		break;
+
+	case ACPI_RESOURCE_TYPE_ADDRESS32:
+		if (rp->Data.Address32.Address.AddressLength == 0)
+			break;
+		if (rp->Data.Address32.ResourceType != ACPI_BUS_NUMBER_RANGE)
+			break;
+
+		*busno = rp->Data.Address32.Address.Minimum;
+		break;
+
+	case ACPI_RESOURCE_TYPE_ADDRESS64:
+		if (rp->Data.Address64.Address.AddressLength == 0)
+			break;
+		if (rp->Data.Address64.ResourceType != ACPI_BUS_NUMBER_RANGE)
+			break;
+
+		*busno = (int)rp->Data.Address64.Address.Minimum;
+		break;
+
+	default:
+		break;
+	}
+
+	return (AE_OK);
+}
+
+/*
+ * Retrieve the bus number for a root bus.
+ *
+ * _CRS (Current Resource Setting) holds the bus number as set in
+ * PCI configuration, this may differ from _BBN and is a more reliable
+ * indicator of what the bus number is.
+ */
+ACPI_STATUS
+acpica_get_busno(ACPI_HANDLE hdl, int *busno)
+{
+	ACPI_STATUS	rv;
+	int		bus = -1;
+	int		bbn;
+
+	if (ACPI_FAILURE(rv = acpica_eval_int(hdl, "_BBN", &bbn)))
+		return (rv);
+
+	(void) AcpiWalkResources(hdl, "_CRS", acpica_crs_cb, &bus);
+
+	*busno = bus == -1 ? bbn : bus;
+
+	return (AE_OK);
+}
+
 /*
  * Device tree binding
  */
@@ -1297,7 +1372,7 @@ acpica_find_pcibus_walker(ACPI_HANDLE hdl, UINT32 lvl, void *ctxp, void **rvpp)
 			*hdlp = hdl;
 			return (AE_CTRL_TERMINATE);
 		}
-	} else if (ACPI_SUCCESS(acpica_eval_int(hdl, "_BBN", &bbn))) {
+	} else if (ACPI_SUCCESS(acpica_get_busno(hdl, &bbn))) {
 		if (bbn == busno) {
 			*hdlp = hdl;
 			return (AE_CTRL_TERMINATE);
@@ -2370,4 +2445,44 @@ acpi_strtoul(const char *str, char **ep, int base)
 	}
 
 	return ((uint32_t)v);
+}
+
+/*
+ * In prior versions of ACPI, the AcpiGetObjectInfo() function would provide
+ * information about the status of the object via the _STA method. This has been
+ * removed and this function is used to replace.
+ *
+ * Not every ACPI object has a _STA method. In cases where it is not found, then
+ * the OSPM (aka us) is supposed to interpret that as though it indicates that
+ * the device is present, enabled, shown in the UI, and functioning. This is the
+ * value 0xF.
+ */
+ACPI_STATUS
+acpica_get_object_status(ACPI_HANDLE obj, int *statusp)
+{
+	ACPI_STATUS status;
+	int ival;
+
+	status = acpica_eval_int(obj, METHOD_NAME__STA, &ival);
+	if (ACPI_FAILURE(status)) {
+		if (status == AE_NOT_FOUND) {
+			*statusp = 0xf;
+			return (AE_OK);
+		}
+
+		return (status);
+	}
+
+	/*
+	 * This should not be a negative value. However, firmware is often the
+	 * enemy. If it does, complain and treat that as a hard failure.
+	 */
+	if (ival < 0) {
+		cmn_err(CE_WARN, "!acpica_get_object_status: encountered "
+		    "negative _STA value on obj %p", obj);
+		return (AE_ERROR);
+	}
+
+	*statusp = ival;
+	return (AE_OK);
 }

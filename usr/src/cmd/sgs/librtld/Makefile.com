@@ -23,6 +23,8 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 LIBRARY=	librtld.a
 VERS=		.1
@@ -39,19 +41,16 @@ include		$(SRC)/lib/Makefile.lib
 include		$(SRC)/cmd/sgs/Makefile.com
 
 SRCDIR =	../common
-CPPFLAGS +=	-I../../rtld/common -I$(SRCBASE)/lib/libc/inc \
-		-I$(SRCBASE)/uts/common/krtld -I$(SRC)/common/sgsrtcid \
-		-I$(SRCBASE)/uts/sparc
-DYNFLAGS +=	$(VERSREF) $(CC_USE_PROTO)  '-R$$ORIGIN'
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) $(ELFLIBDIR) -lelf -lc
+CPPFLAGS +=	-I../../rtld/common -I$(SRC)/lib/libc/inc \
+		-I$(SRC)/uts/common/krtld -I$(SRC)/common/sgsrtcid \
+		-I$(SRC)/uts/sparc
+DYNFLAGS +=	$(VERSREF) '-R$$ORIGIN'
+LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf -lc
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-type-limits
-CERRWARN +=	-_gcc=-Wno-uninitialized
-
-LINTFLAGS +=	-u -erroff=E_NAME_DECL_NOT_USED_DEF2
-LINTFLAGS64 +=	-u -erroff=E_NAME_DECL_NOT_USED_DEF2
+CERRWARN +=	$(CNOWARN_UNINIT)
 
 BLTDEFS=	msg.h
 BLTDATA=	msg.c
@@ -64,11 +63,10 @@ SGSMSGALL=	$(SGSMSGCOM)
 SGSMSGTARG=	$(SGSMSGCOM)
 SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n librtld_msg
 
-SRCS=		../common/llib-lrtld
-LINTSRCS=	$(MACHOBJS:%.o=%.c)  $(COMOBJS:%.o=../common/%.c) \
+MSGSRCS=	$(MACHOBJS:%.o=%.c)  $(COMOBJS:%.o=../common/%.c) \
 		$(BLTDATA)
 
-CLEANFILES +=	$(BLTFILES) $(LINTOUTS)
-CLOBBERFILES +=	$(DYNLIB) $(LINTLIB) $(LIBLINKS)
+CLEANFILES +=	$(BLTFILES)
+CLOBBERFILES +=	$(DYNLIB) $(LIBLINKS)
 
 ROOTFS_DYNLIB=	$(DYNLIB:%=$(ROOTFS_LIBDIR)/%)

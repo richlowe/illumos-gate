@@ -23,6 +23,7 @@
 # Copyright (c) 1999 by Sun Microsystems, Inc.
 # All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 FSTYPE=		udfs
 LIBPROG=	fsck
@@ -37,8 +38,11 @@ UDFSDIR=	../mkfs
 UDFSOBJS=	udfslib.o
 #UDFSSRCS=	$(UDFSOBJS:%.o=%.c)
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses
+
+# not linted
+SMATCH=off
 
 OBJS=		$(FSCKOBJS) $(UDFSOBJS)
 SRCS=		$(FSCKSRCS) $(UDFSSRCS) ../mkfs/udfslib.c

@@ -22,7 +22,7 @@
 #
 # Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2012 by Delphix. All rights reserved.
-# Copyright (c) 2012, Joyent, Inc. All rights reserved.
+# Copyright 2020 Joyent, Inc.
 # Copyright (c) 2013 Gary Mills
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2015 Gary Mills
@@ -30,6 +30,8 @@
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 # Copyright 2017 RackTop Systems.
+# Copyirght 2018 Jason King
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 include ../Makefile.master
@@ -82,6 +84,7 @@ SUBDIRS +=				\
 	gss_mechs/mech_spnego	\
 	hal		\
 	hbaapi		\
+	iconv_modules	\
 	krb5		\
 	libadm		\
 	libads		\
@@ -106,6 +109,7 @@ SUBDIRS +=				\
 	libctf		\
 	libcurses	\
 	libcustr	\
+	libdemangle	\
 	libdevice	\
 	libdevid	\
 	libdevinfo	\
@@ -120,6 +124,7 @@ SUBDIRS +=				\
 	libdoor		\
 	libdtrace	\
 	libdtrace_jni	\
+	libdwarf	\
 	libefi		\
 	libelfsign	\
 	libeti		\
@@ -150,6 +155,7 @@ SUBDIRS +=				\
 	libipp		\
 	libipsecutil	\
 	libiscsit	\
+	libjedec	\
 	libkmf		\
 	libkrb5		\
 	libkstat	\
@@ -173,6 +179,7 @@ SUBDIRS +=				\
 	libofmt		\
 	libpam		\
 	libpcidb	\
+	libpcsc		\
 	libpctx		\
 	libpicl		\
 	libpicltree	\
@@ -242,6 +249,7 @@ SUBDIRS +=				\
 	libzoneinfo	\
 	libzonestat	\
 	libzpool	\
+	libzutil	\
 	madv		\
 	mpapi		\
 	mpss		\
@@ -260,6 +268,7 @@ SUBDIRS +=				\
 	rpcsec_gss	\
 	sasl_plugins	\
 	scsi		\
+	smbclnt		\
 	smbsrv		\
 	smhba		\
 	sun_fc		\
@@ -379,6 +388,7 @@ HDRSUBDIRS=				\
 	libctf		\
 	libcurses	\
 	libcustr	\
+	libdemangle	\
 	libdevice	\
 	libdevid	\
 	libdevinfo	\
@@ -428,6 +438,7 @@ HDRSUBDIRS=				\
 	libofmt		\
 	libpam		\
 	libpcidb	\
+	libpcsc		\
 	libpctx		\
 	libpicl		\
 	libpicltree	\
@@ -506,7 +517,6 @@ clean :=	TARGET= clean
 clobber :=	TARGET= clobber
 install :=	TARGET= install
 install_h :=	TARGET= install_h
-lint :=		TARGET= lint
 _dc :=		TARGET= _dc
 _msg :=		TARGET= _msg
 
@@ -515,12 +525,12 @@ _msg :=		TARGET= _msg
 #
 # For the all and install targets, we clearly must respect library
 # dependencies so that the libraries link correctly.  However, for
-# the remaining targets (check, clean, clobber, install_h, lint, _dc
+# the remaining targets (check, clean, clobber, install_h, _dc
 # and _msg), libraries do not have any dependencies on one another
 # and thus respecting dependencies just slows down the build.
 # As such, for these rules, we use pattern replacement to explicitly
-# avoid triggering the dependency information.  Note that for clean,
-# clobber and lint, we must use $(NOWAIT_SUBDIRS) rather than
+# avoid triggering the dependency information.  Note that for clean and
+# clobber, we must use $(NOWAIT_SUBDIRS) rather than
 # $(SUBDIRS), to prevent `.WAIT' from expanding to `.WAIT-nodepend'.
 #
 
@@ -533,7 +543,9 @@ install_extra:
 	@cd ../cmd/sgs; pwd; $(MAKE) install_lib
 	@pwd
 
-clean clobber lint:	$(NOWAIT_SUBDIRS:%=%-nodepend)
+clean clobber:		$(NOWAIT_SUBDIRS:%=%-nodepend)
+
+lint:
 
 install_h check:	$(HDRSUBDIRS:%=%-nodepend)
 
@@ -563,13 +575,14 @@ dbusdeps:	libsecdb libtsol libinetutil libscf libuutil libgen libsmbios
 # The following dependencies don't need to be listed below as they are built
 # before everything else:
 # libc libm libmd libmp libnsl libnvpair libsocket
+../cmd/sendmail/libmilter:	libsocket libnsl
 abi:		libctf libmapmalloc libproc
 auditd_plugins: libbsm libsecdb libgss libmtmalloc
 brand:		libzonecfg libmapmalloc
 cfgadm_plugins:	libdevice libdevinfo libhotplug librcm hbaapi libkstat libscf
 fm:		libexacct libipmi libzfs scsi libdevinfo libdevid libcfgadm \
 		libcontract libsysevent ../cmd/sgs/libelf libdladm libsff \
-		libpcidb
+		libpcidb libdiskmgt
 $(SPARC_BLD)fm:	libpri
 gss_mechs/mech_dh: libgss
 gss_mechs/mech_dummy: libgss
@@ -577,15 +590,20 @@ gss_mechs/mech_krb5: libgss libresolv2 pkcs11 libkstat
 gss_mechs/mech_spnego: gss_mechs/mech_krb5
 hal:		dbusdeps
 krb5:		gss_mechs/mech_krb5 libtecla libldap5
+libads:		libnsl
 libadt_jni:	libbsm
 libadutils:	libldap5 libresolv2
 libbe:		libzfs libinstzones libuuid libgen libdevinfo libefi libficl
 libbsm:		libinetutil libscf libsecdb libtsol
 libcfgadm:	libdevinfo
+libcontract:	libnvpair
 libcmd:		libsum libast
-libcmdutils:	libavl
+libcmdutils:	libavl libnvpair
 libcpc:		libpctx
 libcrypt:	libgen
+libctf:		libdwarf
+libdemangle:	libcustr
+libdevice:	libnvpair
 libdevid:	libdevinfo
 libdevinfo:	libsec libgen
 libdhcpagent:	libdhcputil libuuid libdlpi libcontract
@@ -599,6 +617,7 @@ libdlpi:	libinetutil libdladm
 libds:		libsysevent
 libdtrace:	libproc libgen libctf libmapmalloc
 libdtrace_jni:	libuutil libdtrace
+libdwarf:	../cmd/sgs/libelf
 libefi:		libuuid libsmbios
 libelfsign:	libcryptoutil libkmf ../cmd/sgs/libelf
 libeti:		libcurses
@@ -612,11 +631,14 @@ libgrubmgmt:	libdevinfo libzfs libfstyp libefi
 $(INTEL_BLD)libgrubmgmt: libfdisk
 libidmap:	libavl libuutil
 libinetsvc:	libscf
+libinetutil:	libsocket
 libinstzones:	libzonecfg libcontract
 libipadm:	libinetutil libdlpi libdhcpagent libdladm libsecdb libdhcputil
+libipmi:	libm libnvpair libsocket libnsl
 libipmp:	libinetutil
 libipsecutil:	libtecla libtsol libkmf
 libiscsit:	libstmf libuuid
+libhotplug:	libnvpair
 libkmf:		libcryptoutil pkcs11 libcustr
 libkvm:		../cmd/sgs/libelf
 libldap5:	libsasl
@@ -633,14 +655,16 @@ libpp:		libast
 libproc:	../cmd/sgs/librtld_db ../cmd/sgs/libelf libctf
 $(INTEL_BLD)libproc: libsaveargs
 libproject:	libpool libproc libsecdb
-libprtdiag:	libkstat
+libprtdiag:	libkstat libdevinfo
 libprtdiag_psr:	libprtdiag
 libraidcfg:	libdevinfo
+librcm:		libnvpair
 librestart:	libuutil libscf libpool libproject libsecdb libsysevent
 libsasl:	libgss pkcs11
 libsaveargs:	libdisasm
-libscf:		libuutil libgen libsmbios
+libscf:		libuutil libgen libnsl libnvpair libsmbios
 libsec:		libavl libidmap
+libsecdb:	libnsl
 libsff:		libnvpair
 libshare:	libscf libzfs libuuid libfsmgt libsecdb libumem libsmbfs
 libshell:	libast libcmd libdll libsecdb
@@ -665,13 +689,15 @@ libv12n:	libds libuuid
 libvolmgt:	libadm
 libvrrpadm:	libdladm libscf
 libvscan:	libscf libsecdb
-libzfs:		libdevid libgen libuutil libadm libavl libefi libidmap \
-		libumem libtsol libzfs_core
-libzfs_jni:	libdiskmgt libzfs
+libzfs:		libdevid libgen libuutil libavl libefi libidmap \
+		libumem libtsol libzfs_core libcryptoutil pkcs11 libmd libzutil
+libzfs_core:	libnvpair
+libzfs_jni:	libdiskmgt libzfs libzutil
 libzonecfg:	libuuid libsysevent libsec libbrand libpool libscf libproc \
 		libuutil libbsm libsecdb
 libzonestat:	libcmdutils libumem
-libzpool:	libavl libumem libcmdutils libsysevent libfakekernel
+libzpool:	libavl libumem libcmdutils libsysevent libfakekernel libzutil
+libzutil:	libadm libavl libdevid libefi
 madv:		libgen
 mpapi:		libpthread libdevinfo libsysevent
 mpss:		libgen
@@ -688,6 +714,7 @@ raidcfg_plugins: libraidcfg librcm libcfgadm libpicl libpicltree
 rpcsec_gss:	libgss
 sasl_plugins:	pkcs11 libgss libsasl
 scsi:		libfru libumem libdevid libdevinfo
+smbclnt:	libfakekernel pkcs11
 smbsrv:		libxnet libpthread librt libshare libidmap pkcs11 libsqlite \
 		libcryptoutil libreparse libcmdutils libresolv2 libsmbfs \
 		libuuid libfakekernel libads libgss libldap5 krb5 libmlrpc

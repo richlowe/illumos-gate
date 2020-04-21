@@ -21,12 +21,13 @@
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG =		idmap
 CLIENTOBJS =	idmap.o idmap_engine.o namemaps.o
 # idmap_clnt.o
 CLIENTSRCS =	$(CLIENTOBJS:%.o=%.c)
-POFILES = 	$(CLIENTOBJS:.o=.po)
+POFILES =	$(CLIENTOBJS:.o=.po)
 OBJS =		$(CLIENTOBJS)
 SRCS =		$(CLIENTSRCS)
 IDMAP_PROT_DIR =        $(SRC)/head/rpcsvc
@@ -38,10 +39,13 @@ CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-unused-function
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-address
 
-POFILE = 	$(PROG)_all.po
+# not linted
+SMATCH=off
+
+POFILE =	$(PROG)_all.po
 LDLIBS +=	-lidmap -ladutils -lsldap -lldap
 FILEMODE =	0555
 

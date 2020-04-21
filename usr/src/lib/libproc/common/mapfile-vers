@@ -21,8 +21,10 @@
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
-# Copyright (c) 2013, Joyent, Inc. All rights reserved.
+# Copyright 2018 Joyent, Inc.
 # Copyright (c) 2013 by Delphix. All rights reserved.
+# Copyright (c) 2019 Carlos Neira <cneirabustos@gmail.com>
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -136,6 +138,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	Plookup_by_name;
 	Plwp_alt_stack;
 	Plwp_getfpregs;
+	Plwp_getname;
 	Plwp_getpsinfo;
 	Plwp_getregs;
 	Plwp_getspymaster;
@@ -203,6 +206,11 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	proc_arg_xgrab;
 	proc_arg_xpsinfo;
 	proc_content2str;
+	proc_dmodelname;
+	proc_fdinfo_free;
+	proc_fdinfo_misc;
+	proc_fdinfowalk;
+	proc_fdwalk;
 	proc_finistdio;
 	proc_fltname;
 	proc_fltset2str;
@@ -210,6 +218,7 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	proc_free_priv;
 	proc_get_auxv;
 	proc_get_cred;
+	proc_get_fdinfo;
 	proc_get_priv;
 	proc_get_psinfo;
         proc_get_secflags;

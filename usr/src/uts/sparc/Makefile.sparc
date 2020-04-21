@@ -22,9 +22,12 @@
 #
 # Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2013 Andrew Stormont.  All rights reserved.
-# Copyright (c) 2015, Joyent, Inc. All rights reserved.
+# Copyright (c) 2015, 2017 by Delphix. All rights reserved.
+# Copyright 2019 Joyent, Inc.
 # Copyright 2016 Gary Mills
 # Copyright 2016 Nexenta Systems, Inc.
+# Copyright 2019 Peter Tribble.
+# Copyright 2019 RackTop Systems
 #
 
 #
@@ -198,6 +201,13 @@ $(IF_DEBUG_OBJ)clock.o		:=	DEBUG_DEFS	+= -DKSLICE=1
 #	files.
 #
 ALL_DEFS	 = $(MACHINE_DEFS) $(DEBUG_DEFS) $(OPTION_DEFS)
+
+#
+#	TCP congestion control modules (/kernel/cc)
+#
+MISC_KMODS	+= cc
+CC_KMODS	+= cc_newreno cc_cubic cc_sunreno
+
 #
 #
 #	The kernels modules which are "implementation architecture"
@@ -217,7 +227,7 @@ DRV_KMODS	+= log logindmux kssl mm nca physmem pm poll pool
 DRV_KMODS	+= pseudo ptc ptm pts ptsl ramdisk random rsm rts sad
 DRV_KMODS	+= simnet softmac sppp sppptun sy sysevent sysmsg
 DRV_KMODS	+= spdsock
-DRV_KMODS	+= tcp tcp6 timerfd tl tnf ttymux udp udp6 wc winlock zcons
+DRV_KMODS	+= tcp tcp6 timerfd tl tnf udp udp6 wc winlock zcons
 DRV_KMODS	+= ippctl
 DRV_KMODS	+= dld
 DRV_KMODS	+= ipd
@@ -239,6 +249,8 @@ DRV_KMODS	+= bpf
 DRV_KMODS	+= dca
 DRV_KMODS	+= eventfd
 DRV_KMODS	+= signalfd
+DRV_KMODS	+= ufm
+DRV_KMODS	+= ufmtest
 
 #
 #       Hardware Drivers in common space
@@ -383,6 +395,7 @@ MISC_KMODS	+= hidparser kbtrans usba usba10 usbs49_fw
 MISC_KMODS	+= s1394
 MISC_KMODS	+= hpcsvc pcihp
 MISC_KMODS	+= rsmops
+MISC_KMODS	+= sata
 MISC_KMODS	+= kcf
 MISC_KMODS	+= ksocket
 MISC_KMODS	+= ibcm
@@ -400,7 +413,7 @@ MISC_KMODS	+= mac dls
 MISC_KMODS	+= cmlb
 MISC_KMODS	+= tem
 MISC_KMODS	+= pcicfg fcodem fcpci
-MISC_KMODS	+= scsi_vhci_f_sym scsi_vhci_f_tpgs scsi_vhci_f_asym_sun
+MISC_KMODS	+= scsi_vhci_f_sym scsi_vhci_f_tpgs
 MISC_KMODS	+= scsi_vhci_f_sym_hds
 MISC_KMODS	+= scsi_vhci_f_tape scsi_vhci_f_tpgs_tape
 MISC_KMODS	+= fctl

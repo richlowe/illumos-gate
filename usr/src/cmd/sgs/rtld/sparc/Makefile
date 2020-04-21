@@ -21,6 +21,7 @@
 
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 # Object lists are organized into primary (most frequently used code) and
@@ -52,7 +53,7 @@ CRTI=		pics/crti.o
 CRTN=		pics/crtn.o
 CRTS=		$(CRTI)		$(CRTN)
 
-CHKSRCS=	$(SRCBASE)/uts/common/krtld/reloc.h
+CHKSRCS=	$(SRC)/uts/common/krtld/reloc.h
 
 BASEPLAT =	sparc
 
@@ -68,8 +69,10 @@ include		$(SRC)/cmd/sgs/rtld/Makefile.com
 
 CPPFLAGS +=	-I../../../../uts/sparc/krtld -DA_OUT
 CFLAGS +=	-_cc=-xregs=no%appl -_gcc=-mno-app-regs
-ASFLAGS +=	-K pic
-LINTFLAGS +=	-DA_OUT
+ASFLAGS +=	$(AS_PICFLAGS)
+ADBGENCFLAGS +=	-erroff=%all
+ADBGENFLAGS +=	-milp32
+ADBSUB=		$(ADBSUB32)
 SONAME=		/lib/ld.so.1
 
 SGSMSGTARG +=	$(SGSMSGSPARC) $(SGSMSGSPARC32) $(SGSMSG32)
@@ -79,8 +82,6 @@ SGSMSGTARG +=	$(SGSMSGSPARC) $(SGSMSGSPARC32) $(SGSMSG32)
 all:		$(RTLD)
 
 install:	all $(ROOTDYNLIB)
-
-lint:		$(LINTOUT32)
 
 adbmacros:	adb .WAIT $(ADBSCRIPTS)
 

@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2011, Joyent, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2015, 2016 by Delphix. All rights reserved.
  */
 
@@ -71,8 +71,8 @@
 #include <libscf_priv.h>
 #include <libuutil.h>
 #include <libnvpair.h>
+#include <libproc.h>
 #include <locale.h>
-#include <procfs.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -91,6 +91,13 @@
 #define	EMPTY_OK	0x01
 #define	MULTI_OK	0x02
 
+/*
+ * Per proc(4) when pr_nlwp, pr_nzomb, and pr_lwp.pr_lwpid are all 0,
+ * the process is a zombie.
+ */
+#define	IS_ZOMBIE(_psip) \
+	((_psip)->pr_nlwp == 0 && (_psip)->pr_nzomb == 0 && \
+	(_psip)->pr_lwp.pr_lwpid == 0)
 
 /*
  * An AVL-storable node for output lines and the keys to sort them by.
@@ -554,7 +561,7 @@ get_restarter_time_prop(scf_instance_t *inst, const char *pname,
 	int r;
 
 	r = inst_get_single_val(inst, SCF_PG_RESTARTER, pname, SCF_TYPE_TIME,
-	    tvp, NULL, ok_if_empty ? EMPTY_OK : 0, 0, 1);
+	    tvp, 0, ok_if_empty ? EMPTY_OK : 0, 0, 1);
 
 	return (r == 0 ? 0 : -1);
 }
@@ -938,28 +945,6 @@ instance_processes(scf_instance_t *inst, const char *fmri,
 
 	return (ret);
 }
-
-static int
-get_psinfo(pid_t pid, psinfo_t *psip)
-{
-	char path[100];
-	int fd;
-
-	(void) snprintf(path, sizeof (path), "/proc/%lu/psinfo", pid);
-
-	fd = open64(path, O_RDONLY);
-	if (fd < 0)
-		return (-1);
-
-	if (read(fd, psip, sizeof (*psip)) < 0)
-		uu_die(gettext("Could not read info for process %lu"), pid);
-
-	(void) close(fd);
-
-	return (0);
-}
-
-
 
 /*
  * Column sprint and sortkey functions
@@ -1651,7 +1636,7 @@ sprint_stime(char **buf, scf_walkinfo_t *wip)
 		    SCF_PROPERTY_STATE_TIMESTAMP, &tv, 0);
 	} else {
 		r = pg_get_single_val(wip->pg, SCF_PROPERTY_STATE_TIMESTAMP,
-		    SCF_TYPE_TIME, &tv, NULL, 0);
+		    SCF_TYPE_TIME, &tv, 0, 0);
 	}
 
 	if (r != 0) {
@@ -1703,7 +1688,7 @@ sortkey_stime(char *buf, int reverse, scf_walkinfo_t *wip)
 		    SCF_PROPERTY_STATE_TIMESTAMP, &tv, 0);
 	else
 		r = pg_get_single_val(wip->pg, SCF_PROPERTY_STATE_TIMESTAMP,
-		    SCF_TYPE_TIME, &tv, NULL, 0);
+		    SCF_TYPE_TIME, &tv, 0, 0);
 
 	if (r == 0) {
 		int64_t sec;
@@ -2057,7 +2042,7 @@ detailed_list_processes(scf_walkinfo_t *wip)
 		(void) printf("%-*s%lu", DETAILED_WIDTH, gettext("process"),
 		    pids[i]);
 
-		if (get_psinfo(pids[i], &psi) == 0)
+		if (proc_get_psinfo(pids[i], &psi) == 0 && !IS_ZOMBIE(&psi))
 			(void) printf(" %.*s", PRARGSZ, psi.pr_psargs);
 
 		(void) putchar('\n');
@@ -2517,7 +2502,7 @@ print_detailed(void *unused, scf_walkinfo_t *wip)
 			    gettext("next_state"), buf);
 
 		if (pg_get_single_val(rpg, SCF_PROPERTY_STATE_TIMESTAMP,
-		    SCF_TYPE_TIME, &tv, NULL, 0) == 0) {
+		    SCF_TYPE_TIME, &tv, 0, 0) == 0) {
 			stime = tv.tv_sec;
 			tmp = localtime(&stime);
 			for (tbsz = 50; ; tbsz *= 2) {
@@ -2644,9 +2629,8 @@ restarter_common:
 	return (0);
 }
 
-/* ARGSUSED */
 static int
-print_log(void *unused, scf_walkinfo_t *wip)
+print_log(void *unused __unused, scf_walkinfo_t *wip)
 {
 	scf_propertygroup_t *rpg;
 	char buf[MAXPATHLEN];
@@ -2662,6 +2646,9 @@ print_log(void *unused, scf_walkinfo_t *wip)
 	}
 
 	if (pg_get_single_val(rpg, SCF_PROPERTY_LOGFILE,
+	    SCF_TYPE_ASTRING, buf, sizeof (buf), 0) == 0) {
+		(void) printf("%s\n", buf);
+	} else if (pg_get_single_val(rpg, SCF_PROPERTY_ALT_LOGFILE,
 	    SCF_TYPE_ASTRING, buf, sizeof (buf), 0) == 0) {
 		(void) printf("%s\n", buf);
 	}
@@ -2930,10 +2917,10 @@ add_processes(scf_walkinfo_t *wip, char *line, scf_propertygroup_t *lpg)
 	for (i = 0; i < n; ++i) {
 		char *cp, stime[9];
 		psinfo_t psi;
-		struct tm *tm;
+		const char *name = NULL;
 		int len = 1 + 15 + 8 + 3 + 6 + 1 + PRFNSZ;
 
-		if (get_psinfo(pids[i], &psi) != 0)
+		if (proc_get_psinfo(pids[i], &psi) != 0)
 			continue;
 
 		line = realloc(line, strlen(line) + len);
@@ -2942,25 +2929,40 @@ add_processes(scf_walkinfo_t *wip, char *line, scf_propertygroup_t *lpg)
 
 		cp = strchr(line, '\0');
 
-		tm = localtime(&psi.pr_start.tv_sec);
+		if (!IS_ZOMBIE(&psi)) {
+#define	DAY (24 * 60 * 60)
+#define	YEAR (12 * 30 * 24 * 60 * 60)
 
-		/*
-		 * Print time if started within the past 24 hours, print date
-		 * if within the past 12 months, print year if started greater
-		 * than 12 months ago.
-		 */
-		if (now - psi.pr_start.tv_sec < 24 * 60 * 60)
-			(void) strftime(stime, sizeof (stime),
-			    gettext(FORMAT_TIME), tm);
-		else if (now - psi.pr_start.tv_sec < 12 * 30 * 24 * 60 * 60)
-			(void) strftime(stime, sizeof (stime),
-			    gettext(FORMAT_DATE), tm);
-		else
-			(void) strftime(stime, sizeof (stime),
-			    gettext(FORMAT_YEAR), tm);
+			struct tm *tm;
+
+			tm = localtime(&psi.pr_start.tv_sec);
+
+			/*
+			 * Print time if started within the past 24 hours,
+			 * print date if within the past 12 months, print year
+			 * if started greater than 12 months ago.
+			 */
+			if (now - psi.pr_start.tv_sec < DAY) {
+				(void) strftime(stime, sizeof (stime),
+				    gettext(FORMAT_TIME), tm);
+			} else if (now - psi.pr_start.tv_sec < YEAR) {
+				(void) strftime(stime, sizeof (stime),
+				    gettext(FORMAT_DATE), tm);
+			} else {
+				(void) strftime(stime, sizeof (stime),
+				    gettext(FORMAT_YEAR), tm);
+			}
+
+			name = psi.pr_fname;
+#undef DAY
+#undef YEAR
+		} else {
+			(void) snprintf(stime, sizeof (stime), "-");
+			name = "<defunct>";
+		}
 
 		(void) snprintf(cp, len, "\n               %-8s   %6ld %.*s",
-		    stime, pids[i], PRFNSZ, psi.pr_fname);
+		    stime, pids[i], PRFNSZ, name);
 	}
 
 	free(pids);

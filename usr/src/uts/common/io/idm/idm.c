@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc. All rights reserved.
  */
 
 #include <sys/cpuvar.h>
@@ -61,7 +62,7 @@ static void idm_buf_bind_in_locked(idm_task_t *idt, idm_buf_t *buf);
 static void idm_buf_bind_out_locked(idm_task_t *idt, idm_buf_t *buf);
 static void idm_buf_unbind_in_locked(idm_task_t *idt, idm_buf_t *buf);
 static void idm_buf_unbind_out_locked(idm_task_t *idt, idm_buf_t *buf);
-static void idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt,
+static stmf_status_t idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt,
     idm_abort_type_t abort_type);
 static void idm_task_aborted(idm_task_t *idt, idm_status_t status);
 static idm_pdu_t *idm_pdu_alloc_common(uint_t hdrlen, uint_t datalen,
@@ -256,7 +257,7 @@ idm_ini_conn_destroy(idm_conn_t *ic)
 	mutex_exit(&idm.idm_global_mutex);
 
 	if (taskq_dispatch(idm.idm_global_taskq,
-	    &idm_ini_conn_destroy_task, ic, TQ_SLEEP) == NULL) {
+	    &idm_ini_conn_destroy_task, ic, TQ_SLEEP) == TASKQID_INVALID) {
 		cmn_err(CE_WARN,
 		    "idm_ini_conn_destroy: Couldn't dispatch task");
 	}
@@ -293,7 +294,7 @@ idm_ini_conn_connect(idm_conn_t *ic)
 	idm_conn_hold(ic);
 
 	/* Kick state machine */
-	idm_conn_event(ic, CE_CONNECT_REQ, NULL);
+	idm_conn_event(ic, CE_CONNECT_REQ, (uintptr_t)NULL);
 
 	/* Wait for login flag */
 	mutex_enter(&ic->ic_state_mutex);
@@ -332,7 +333,7 @@ idm_ini_conn_connect(idm_conn_t *ic)
 void
 idm_ini_conn_disconnect(idm_conn_t *ic)
 {
-	idm_conn_event(ic, CE_TRANSPORT_FAIL, NULL);
+	idm_conn_event(ic, CE_TRANSPORT_FAIL, (uintptr_t)NULL);
 }
 
 /*
@@ -351,7 +352,8 @@ idm_ini_conn_disconnect_sync(idm_conn_t *ic)
 	mutex_enter(&ic->ic_state_mutex);
 	if ((ic->ic_state != CS_S9_INIT_ERROR) &&
 	    (ic->ic_state != CS_S11_COMPLETE)) {
-		idm_conn_event_locked(ic, CE_TRANSPORT_FAIL, NULL, CT_NONE);
+		idm_conn_event_locked(ic, CE_TRANSPORT_FAIL, (uintptr_t)NULL,
+		    CT_NONE);
 		while ((ic->ic_state != CS_S9_INIT_ERROR) &&
 		    (ic->ic_state != CS_S11_COMPLETE))
 			cv_wait(&ic->ic_state_cv, &ic->ic_state_mutex);
@@ -995,7 +997,7 @@ idm_buf_alloc(idm_conn_t *ic, void *bufptr, uint64_t buflen)
 	buf->idb_buflen		= buflen;
 	buf->idb_exp_offset	= 0;
 	buf->idb_bufoffset	= 0;
-	buf->idb_xfer_len 	= 0;
+	buf->idb_xfer_len	= 0;
 	buf->idb_magic		= IDM_BUF_MAGIC;
 	buf->idb_in_transport	= B_FALSE;
 	buf->idb_bufbcopy	= B_FALSE;
@@ -1280,7 +1282,7 @@ idm_task_alloc(idm_conn_t *ic)
 
 	idt->idt_state		= TASK_IDLE;
 	idt->idt_ic		= ic;
-	idt->idt_private 	= NULL;
+	idt->idt_private	= NULL;
 	idt->idt_exp_datasn	= 0;
 	idt->idt_exp_rttsn	= 0;
 	idt->idt_flags		= 0;
@@ -1522,11 +1524,12 @@ idm_task_rele(idm_task_t *idt)
 	idm_refcnt_rele(&idt->idt_refcnt);
 }
 
-void
+stmf_status_t
 idm_task_abort(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 {
 	idm_task_t	*task;
 	int		idx;
+	stmf_status_t	s = STMF_SUCCESS;
 
 	/*
 	 * Passing NULL as the task indicates that all tasks
@@ -1548,7 +1551,7 @@ idm_task_abort(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 			    (task->idt_state != TASK_COMPLETE) &&
 			    (task->idt_ic == ic)) {
 				rw_exit(&idm.idm_taskid_table_lock);
-				idm_task_abort_one(ic, task, abort_type);
+				s = idm_task_abort_one(ic, task, abort_type);
 				rw_enter(&idm.idm_taskid_table_lock, RW_READER);
 			} else
 				mutex_exit(&task->idt_mutex);
@@ -1556,8 +1559,9 @@ idm_task_abort(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 		rw_exit(&idm.idm_taskid_table_lock);
 	} else {
 		mutex_enter(&idt->idt_mutex);
-		idm_task_abort_one(ic, idt, abort_type);
+		s = idm_task_abort_one(ic, idt, abort_type);
 	}
+	return (s);
 }
 
 static void
@@ -1588,9 +1592,11 @@ idm_task_abort_unref_cb(void *ref)
  * Abort the idm task.
  *    Caller must hold the task mutex, which will be released before return
  */
-static void
+static stmf_status_t
 idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 {
+	stmf_status_t	s = STMF_SUCCESS;
+
 	/* Caller must hold connection mutex */
 	ASSERT(mutex_owned(&idt->idt_mutex));
 	switch (idt->idt_state) {
@@ -1609,7 +1615,7 @@ idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 			 */
 			idm_refcnt_async_wait_ref(&idt->idt_refcnt,
 			    &idm_task_abort_unref_cb);
-			return;
+			return (s);
 		case AT_INTERNAL_ABORT:
 		case AT_TASK_MGMT_ABORT:
 			idt->idt_state = TASK_ABORTING;
@@ -1623,7 +1629,7 @@ idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 			 */
 			idm_refcnt_async_wait_ref(&idt->idt_refcnt,
 			    &idm_task_abort_unref_cb);
-			return;
+			return (s);
 		default:
 			ASSERT(0);
 		}
@@ -1663,7 +1669,7 @@ idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 			 */
 			idm_refcnt_async_wait_ref(&idt->idt_refcnt,
 			    &idm_task_abort_unref_cb);
-			return;
+			return (s);
 		default:
 			ASSERT(0);
 		}
@@ -1682,17 +1688,15 @@ idm_task_abort_one(idm_conn_t *ic, idm_task_t *idt, idm_abort_type_t abort_type)
 		}
 		break;
 	case TASK_COMPLETE:
-		/*
-		 * In this case, let it go.  The status has already been
-		 * sent (which may or may not get successfully transmitted)
-		 * and we don't want to end up in a race between completing
-		 * the status PDU and marking the task suspended.
-		 */
+		idm_refcnt_wait_ref(&idt->idt_refcnt);
+		s = STMF_ABORT_SUCCESS;
 		break;
 	default:
 		ASSERT(0);
 	}
 	mutex_exit(&idt->idt_mutex);
+
+	return (s);
 }
 
 static void
@@ -2180,7 +2184,8 @@ idm_refcnt_rele(idm_refcnt_t *refcnt)
 	if (refcnt->ir_refcnt == 0) {
 		if (refcnt->ir_waiting == REF_WAIT_ASYNC) {
 			if (taskq_dispatch(idm.idm_global_taskq,
-			    &idm_refcnt_unref_task, refcnt, TQ_SLEEP) == NULL) {
+			    &idm_refcnt_unref_task, refcnt, TQ_SLEEP) ==
+			    TASKQID_INVALID) {
 				cmn_err(CE_WARN,
 				    "idm_refcnt_rele: Couldn't dispatch task");
 			}
@@ -2208,7 +2213,8 @@ idm_refcnt_rele_and_destroy(idm_refcnt_t *refcnt, idm_refcnt_cb_t *cb_func)
 		refcnt->ir_cb = cb_func;
 		refcnt->ir_waiting = REF_WAIT_ASYNC;
 		if (taskq_dispatch(idm.idm_global_taskq,
-		    &idm_refcnt_unref_task, refcnt, TQ_SLEEP) == NULL) {
+		    &idm_refcnt_unref_task, refcnt, TQ_SLEEP) ==
+		    TASKQID_INVALID) {
 			cmn_err(CE_WARN,
 			    "idm_refcnt_rele: Couldn't dispatch task");
 		}
@@ -2241,7 +2247,8 @@ idm_refcnt_async_wait_ref(idm_refcnt_t *refcnt, idm_refcnt_cb_t *cb_func)
 	 */
 	if (refcnt->ir_refcnt == 0) {
 		if (taskq_dispatch(idm.idm_global_taskq,
-		    &idm_refcnt_unref_task, refcnt, TQ_SLEEP) == NULL) {
+		    &idm_refcnt_unref_task, refcnt, TQ_SLEEP) ==
+		    TASKQID_INVALID) {
 			cmn_err(CE_WARN,
 			    "idm_refcnt_async_wait_ref: "
 			    "Couldn't dispatch task");
@@ -2261,6 +2268,29 @@ idm_refcnt_destroy_unref_obj(idm_refcnt_t *refcnt,
 		return;
 	}
 	mutex_exit(&refcnt->ir_mutex);
+}
+
+/*
+ * used to determine the status of the refcnt.
+ *
+ * if refcnt is 0 return is 0
+ * if refcnt is negative return is -1
+ * if refcnt > 0 and no waiters return is 1
+ * if refcnt > 0 and waiters return is 2
+ */
+int
+idm_refcnt_is_held(idm_refcnt_t *refcnt)
+{
+	if (refcnt->ir_refcnt < 0)
+		return (-1);
+
+	if (refcnt->ir_refcnt == 0)
+		return (0);
+
+	if (refcnt->ir_waiting == REF_NOWAIT && refcnt->ir_refcnt > 0)
+		return (1);
+
+	return (2);
 }
 
 void

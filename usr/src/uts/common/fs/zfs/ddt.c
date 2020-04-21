@@ -253,6 +253,10 @@ ddt_bp_fill(const ddt_phys_t *ddp, blkptr_t *bp, uint64_t txg)
 	BP_SET_BIRTH(bp, txg, ddp->ddp_phys_birth);
 }
 
+/*
+ * The bp created via this function may be used for repairs and scrub, but it
+ * will be missing the salt / IV required to do a full decrypting read.
+ */
 void
 ddt_bp_create(enum zio_checksum checksum,
     const ddt_key_t *ddk, const ddt_phys_t *ddp, blkptr_t *bp)
@@ -263,11 +267,12 @@ ddt_bp_create(enum zio_checksum checksum,
 		ddt_bp_fill(ddp, bp, ddp->ddp_phys_birth);
 
 	bp->blk_cksum = ddk->ddk_cksum;
-	bp->blk_fill = 1;
 
 	BP_SET_LSIZE(bp, DDK_GET_LSIZE(ddk));
 	BP_SET_PSIZE(bp, DDK_GET_PSIZE(ddk));
 	BP_SET_COMPRESS(bp, DDK_GET_COMPRESS(ddk));
+	BP_SET_CRYPT(bp, DDK_GET_CRYPT(ddk));
+	BP_SET_FILL(bp, 1);
 	BP_SET_CHECKSUM(bp, checksum);
 	BP_SET_TYPE(bp, DMU_OT_DEDUP);
 	BP_SET_LEVEL(bp, 0);
@@ -281,9 +286,12 @@ ddt_key_fill(ddt_key_t *ddk, const blkptr_t *bp)
 	ddk->ddk_cksum = bp->blk_cksum;
 	ddk->ddk_prop = 0;
 
+	ASSERT(BP_IS_ENCRYPTED(bp) || !BP_USES_CRYPT(bp));
+
 	DDK_SET_LSIZE(ddk, BP_GET_LSIZE(bp));
 	DDK_SET_PSIZE(ddk, BP_GET_PSIZE(bp));
 	DDK_SET_COMPRESS(ddk, BP_GET_COMPRESS(bp));
+	DDK_SET_CRYPT(ddk, BP_USES_CRYPT(bp));
 }
 
 void
@@ -367,7 +375,7 @@ ddt_stat_generate(ddt_t *ddt, ddt_entry_t *dde, ddt_stat_t *dds)
 		if (ddp->ddp_phys_birth == 0)
 			continue;
 
-		for (int d = 0; d < SPA_DVAS_PER_BP; d++)
+		for (int d = 0; d < DDE_GET_NDVAS(dde); d++)
 			dsize += dva_get_dsize_sync(spa, &ddp->ddp_dva[d]);
 
 		dds->dds_blocks += 1;
@@ -521,6 +529,7 @@ ddt_ditto_copies_needed(ddt_t *ddt, ddt_entry_t *dde, ddt_phys_t *ddp_willref)
 	uint64_t ditto = spa->spa_dedup_ditto;
 	int total_copies = 0;
 	int desired_copies = 0;
+	int copies_needed = 0;
 
 	for (int p = DDT_PHYS_SINGLE; p <= DDT_PHYS_TRIPLE; p++) {
 		ddt_phys_t *ddp = &dde->dde_phys[p];
@@ -546,7 +555,13 @@ ddt_ditto_copies_needed(ddt_t *ddt, ddt_entry_t *dde, ddt_phys_t *ddp_willref)
 	if (total_refcnt >= ditto * ditto)
 		desired_copies++;
 
-	return (MAX(desired_copies, total_copies) - total_copies);
+	copies_needed = MAX(desired_copies, total_copies) - total_copies;
+
+	/* encrypted blocks store their IV in DVA[2] */
+	if (DDK_GET_CRYPT(&dde->dde_key))
+		copies_needed = MIN(copies_needed, SPA_DVAS_PER_BP - 1);
+
+	return (copies_needed);
 }
 
 int
@@ -556,7 +571,7 @@ ddt_ditto_copies_present(ddt_entry_t *dde)
 	dva_t *dva = ddp->ddp_dva;
 	int copies = 0 - DVA_GET_GANG(dva);
 
-	for (int d = 0; d < SPA_DVAS_PER_BP; d++, dva++)
+	for (int d = 0; d < DDE_GET_NDVAS(dde); d++, dva++)
 		if (DVA_IS_VALID(dva))
 			copies++;
 
@@ -755,22 +770,31 @@ ddt_prefetch(spa_t *spa, const blkptr_t *bp)
 	}
 }
 
+/*
+ * Opaque struct used for ddt_key comparison
+ */
+#define	DDT_KEY_CMP_LEN	(sizeof (ddt_key_t) / sizeof (uint16_t))
+
+typedef struct ddt_key_cmp {
+	uint16_t	u16[DDT_KEY_CMP_LEN];
+} ddt_key_cmp_t;
+
 int
 ddt_entry_compare(const void *x1, const void *x2)
 {
 	const ddt_entry_t *dde1 = x1;
 	const ddt_entry_t *dde2 = x2;
-	const uint64_t *u1 = (const uint64_t *)&dde1->dde_key;
-	const uint64_t *u2 = (const uint64_t *)&dde2->dde_key;
+	const ddt_key_cmp_t *k1 = (const ddt_key_cmp_t *)&dde1->dde_key;
+	const ddt_key_cmp_t *k2 = (const ddt_key_cmp_t *)&dde2->dde_key;
+	int32_t cmp = 0;
 
-	for (int i = 0; i < DDT_KEY_WORDS; i++) {
-		if (u1[i] < u2[i])
-			return (-1);
-		if (u1[i] > u2[i])
-			return (1);
+	for (int i = 0; i < DDT_KEY_CMP_LEN; i++) {
+		cmp = (int32_t)k1->u16[i] - (int32_t)k2->u16[i];
+		if (likely(cmp))
+			break;
 	}
 
-	return (0);
+	return (TREE_ISIGN(cmp));
 }
 
 static ddt_t *
@@ -1097,13 +1121,25 @@ ddt_sync_table(ddt_t *ddt, dmu_tx_t *tx, uint64_t txg)
 void
 ddt_sync(spa_t *spa, uint64_t txg)
 {
+	dsl_scan_t *scn = spa->spa_dsl_pool->dp_scan;
 	dmu_tx_t *tx;
-	zio_t *rio = zio_root(spa, NULL, NULL,
-	    ZIO_FLAG_CANFAIL | ZIO_FLAG_SPECULATIVE | ZIO_FLAG_SELF_HEAL);
+	zio_t *rio;
 
 	ASSERT(spa_syncing_txg(spa) == txg);
 
 	tx = dmu_tx_create_assigned(spa->spa_dsl_pool, txg);
+
+	rio = zio_root(spa, NULL, NULL,
+	    ZIO_FLAG_CANFAIL | ZIO_FLAG_SPECULATIVE | ZIO_FLAG_SELF_HEAL);
+
+	/*
+	 * This function may cause an immediate scan of ddt blocks (see
+	 * the comment above dsl_scan_ddt() for details). We set the
+	 * scan's root zio here so that we can wait for any scan IOs in
+	 * addition to the regular ddt IOs.
+	 */
+	ASSERT3P(scn->scn_zio_root, ==, NULL);
+	scn->scn_zio_root = rio;
 
 	for (enum zio_checksum c = 0; c < ZIO_CHECKSUM_FUNCTIONS; c++) {
 		ddt_t *ddt = spa->spa_ddt[c];
@@ -1114,6 +1150,7 @@ ddt_sync(spa_t *spa, uint64_t txg)
 	}
 
 	(void) zio_wait(rio);
+	scn->scn_zio_root = NULL;
 
 	dmu_tx_commit(tx);
 }

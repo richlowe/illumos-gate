@@ -22,7 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright (c) 2012, Joyent, Inc.  All rights reserved.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -51,11 +51,15 @@ OBJECTS_library = \
 	umem_agent_support.o \
 	umem_fail.o \
 	umem_fork.o \
+	umem_genasm.o \
 	umem_update_thread.o \
 	vmem_mmap.o \
 	vmem_sbrk.o
 
-SRCS_library = $(OBJECTS_library:%.o=../common/%.c)
+SRCS_common_library = \
+	$(ISASRCDIR)/umem_genasm.c
+
+SRCS_library = $(OBJECTS_library:%.o=../common/%.c) $(SRC_common_library)
 
 # Files specific to the standalone version of libumem
 OBJECTS_standalone = \
@@ -67,12 +71,10 @@ SRCS_standalone = $(OBJECTS_standalone:%.o=../common/%.c)
 
 # Architecture-dependent files common to both versions of libumem
 OBJECTS_common_isadep = \
-	asm_subr.o \
-	umem_genasm.o	
+	asm_subr.o
 
 SRCS_common_isadep = \
-	$(ISASRCDIR)/asm_subr.s \
-	$(ISASRCDIR)/umem_genasm.c
+	$(ISASRCDIR)/asm_subr.s
 
 # Architecture-independent files common to both versions  of libumem
 OBJECTS_common_common = \
@@ -96,7 +98,6 @@ include ../../Makefile.rootfs
 
 SRCS = \
 	$(SRCS_$(CURTYPE)) \
-	$(SRCS_common_isadep) \
 	$(SRCS_common_common)
 
 SRCDIR = ../common
@@ -111,7 +112,7 @@ CLOBBERFILES_standalone = $(LINKTEST_OBJ)
 CLOBBERFILES += $(CLOBBERFILES_$(CURTYPE))
 
 LIBS_standalone = $(STANDLIBRARY)
-LIBS_library = $(DYNLIB) $(LINTLIB)
+LIBS_library = $(DYNLIB)
 LIBS =	$(LIBS_$(CURTYPE))
 
 MAPFILE_SUPPLEMENTAL_standalone = ../common/stand_mapfile
@@ -126,11 +127,6 @@ LDFLAGS = $(LDFLAGS_$(CURTYPE))
 ASFLAGS_standalone = -DUMEM_STANDALONE
 ASFLAGS_library =
 ASFLAGS += -P $(ASFLAGS_$(CURTYPE)) -D_ASM
-
-CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-uninitialized
-
-$(LINTLIB) := SRCS = ../common/$(LINTSRC)
 
 # We want the thread-specific errno in the library, but we don't want it in
 # the standalone.  $(DTS_ERRNO) is designed to add -D_TS_ERRNO to $(CPPFLAGS),
@@ -159,13 +155,11 @@ CFLAGS += $(CFLAGS_$(CURTYPE)) $(CFLAGS_common)
 CFLAGS64_standalone = $(STAND_FLAGS_64)
 CFLAGS64 += $(CCVERBOSE) $(CFLAGS64_$(CURTYPE)) $(CFLAGS64_common)
 
-INSTALL_DEPS_library =		$(ROOTLINKS) $(ROOTLINT) $(ROOTLIBS)
+# false positive for umem_alloc_sizes_add()
+pics/umem.o := SMOFF += index_overflow
+objs/umem.o := SMOFF += index_overflow
 
-#
-# turn off ptr-cast warnings, since we do them all the time
-#
-LINTFLAGS +=	-erroff=E_BAD_PTR_CAST_ALIGN
-LINTFLAGS64 +=	-erroff=E_BAD_PTR_CAST_ALIGN
+INSTALL_DEPS_library =		$(ROOTLINKS) $(ROOTLIBS)
 
 DYNFLAGS +=     $(ZINTERPOSE)
 

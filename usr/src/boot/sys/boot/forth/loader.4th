@@ -43,7 +43,7 @@ include /boot/forth/support.4th
 include /boot/forth/color.4th
 include /boot/forth/delay.4th
 include /boot/forth/check-password.4th
-s" efi-version" getenv? [if]
+efi? [if]
 	include /boot/forth/efi.4th
 [then]
 
@@ -124,7 +124,7 @@ only forth also support-functions also builtins definitions
         swap -
         to len				( addr len )
         to blen				( addr )
-        baddr addr len move 		( addr )
+        baddr addr len move		( addr )
         to baddr			\ baddr points now to first option
       then
     then
@@ -156,7 +156,7 @@ only forth also support-functions also builtins definitions
   else
     drop
   then
-  s" boot_debug" getenv dup -1 <> if
+  s" boot_drop_into_kmdb" getenv dup -1 <> if
      s" YES" compare-insensitive 0= if
        [char] d addr len + c! len 1+ to len
      then
@@ -280,20 +280,20 @@ builtin: boot-conf
 
 only forth definitions also support-functions
 
-\ 
+\
 \ in case the boot-args is set, parse it and extract following options:
 \ -a to boot_ask=YES
 \ -s to boot_single=YES
 \ -v to boot_verbose=YES
 \ -k to boot_kmdb=YES
-\ -d to boot_debug=YES
+\ -d to boot_drop_into_kmdb=YES
 \ -r to boot_reconfigure=YES
 \ -B acpi-user-options=X to acpi-user-options=X
-\ 
+\
 \ This is needed so that the menu can manage these options. Unfortunately, this
 \ also means that boot-args will override previously set options, but we have no
 \ way to control the processing order here. boot-args will be rebuilt at boot.
-\ 
+\
 \ NOTE: The best way to address the order is to *not* set any above options
 \ in boot-args.
 
@@ -382,7 +382,7 @@ only forth definitions also support-functions
 	    1+ swap 1- swap
 	  repeat
 				( addr len len' addr' len" addr" )
-	  >r >r 		( addr len len' addr' R: addr" len" )
+	  >r >r			( addr len len' addr' R: addr" len" )
 	  over r@ -		( addr len len' addr' proplen R: addr" len" )
 	  dup 5 +		( addr len len' addr' proplen proplen+5 )
 	  allocate abort" out of memory"
@@ -455,7 +455,7 @@ only forth definitions also support-functions
 	else dup c@ [char] k = if
 	  s" set boot_kmdb=YES" evaluate TRUE
 	else dup c@ [char] d = if
-	  s" set boot_debug=YES" evaluate TRUE
+	  s" set boot_drop_into_kmdb=YES" evaluate TRUE
 	else dup c@ [char] r = if
 	  s" set boot_reconfigure=YES" evaluate TRUE
 	else dup c@ [char] a = if
@@ -589,6 +589,12 @@ only forth definitions also support-functions
 \	Show loading information about a module.
 
 : show-module ( <module> -- ) find-module ?dup if show-one-module then ;
+
+: set-module-path ( addr len <module> -- )
+  find-module ?dup if
+    module.loadname string=
+  then
+;
 
 \ Words to be used inside configuration files
 

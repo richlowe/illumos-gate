@@ -21,10 +21,11 @@
 
 /*
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -166,7 +167,8 @@ pid_allocate(proc_t *prp, pid_t pid, int flags)
 	pidp = kmem_zalloc(sizeof (struct pid), KM_SLEEP);
 
 	mutex_enter(&pidlinklock);
-	if ((flags & PID_ALLOC_PROC) && (pep = procentfree) == NULL) {
+	pep = procentfree;
+	if ((flags & PID_ALLOC_PROC) && pep == NULL) {
 		/*
 		 * ran out of /proc directory entries
 		 */
@@ -417,7 +419,6 @@ sprtrylock_proc(proc_t *p)
 		return (1);
 
 	p->p_proc_flag |= P_PR_LOCK;
-	THREAD_KPRI_REQUEST();
 
 	return (0);
 }
@@ -502,7 +503,6 @@ sprlock_proc(proc_t *p)
 	}
 
 	p->p_proc_flag |= P_PR_LOCK;
-	THREAD_KPRI_REQUEST();
 }
 
 void
@@ -519,7 +519,6 @@ sprunlock(proc_t *p)
 	cv_signal(&pr_pid_cv[p->p_slot]);
 	p->p_proc_flag &= ~P_PR_LOCK;
 	mutex_exit(&p->p_lock);
-	THREAD_KPRI_RELEASE();
 }
 
 void

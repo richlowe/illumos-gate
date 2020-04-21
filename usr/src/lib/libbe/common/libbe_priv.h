@@ -24,6 +24,7 @@
  * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2016 Toomas Soome <tsoome@me.com>
  * Copyright (c) 2015 by Delphix. All rights reserved.
+ * Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #ifndef	_LIBBE_PRIV_H
@@ -62,8 +63,7 @@ extern "C" {
 #define	BE_GRUB_STAGE_1		"/boot/grub/stage1"
 #define	BE_GRUB_STAGE_2		"/boot/grub/stage2"
 #define	BE_INSTALL_BOOT		"/usr/sbin/installboot"
-#define	BE_LOADER_STAGE_1	"/boot/pmbr"
-#define	BE_LOADER_STAGE_2	"/boot/gptzfsboot"
+#define	BE_LOADER_STAGES	"/boot"
 #define	BE_SPARC_BOOTBLK	"/lib/fs/zfs/bootblk"
 
 #define	ZFS_CLOSE(_zhp) \
@@ -89,7 +89,7 @@ typedef struct be_transaction_data {
 	char		*obe_zpool;	/* Original BE pool */
 	char		*obe_snap_name;	/* Original BE snapshot name */
 	char		*obe_altroot;	/* Original BE altroot */
-	char 		*nbe_name;	/* New BE name */
+	char		*nbe_name;	/* New BE name */
 	char		*nbe_root_ds;	/* New BE root dataset */
 	char		*nbe_zpool;	/* New BE pool */
 	char		*nbe_desc;	/* New BE description */
@@ -151,7 +151,7 @@ int be_set_uuid(char *);
 int be_get_uuid(const char *, uuid_t *);
 
 /* be_list.c */
-int _be_list(char *, be_node_list_t **);
+int _be_list(char *, be_node_list_t **, uint64_t);
 int be_get_zone_be_list(char *, char *, be_node_list_t **);
 
 /* be_mount.c */
@@ -175,6 +175,7 @@ boolean_t be_zfs_init(void);
 void be_zfs_fini(void);
 void be_make_root_ds(const char *, const char *, char *, int);
 void be_make_container_ds(const char *, char *, int);
+void be_make_root_container_ds(const char *, char *, int);
 char *be_make_name_from_ds(const char *, char *);
 int be_append_menu(char *, char *, char *, char *, char *);
 int be_remove_menu(char *, char *, char *);

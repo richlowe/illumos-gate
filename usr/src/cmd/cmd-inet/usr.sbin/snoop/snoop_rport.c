@@ -164,7 +164,7 @@ reservedport(int proto, int port)
 	switch (proto) {
 	case IPPROTO_TCP: pt = pt_tcp; break;
 	case IPPROTO_UDP: pt = pt_udp; break;
-	default: return (NULL);
+	default: return (0);
 	}
 	for (p = pt; p->pt_num; p++) {
 		if (port == p->pt_num)
@@ -179,13 +179,10 @@ reservedport(int proto, int port)
  * See TFTP interpreter.
  */
 #define	MAXTRANS 64
-static struct ttable {
-	int t_port;
-	int (*t_proc)(int, char *, int);
-} transients [MAXTRANS];
+static struct ttable transients [MAXTRANS];
 
 int
-add_transient(int port, int (*proc)(int, char *, int))
+add_transient(int port, int (*proc)(int, void *, int))
 {
 	static struct ttable *next = transients;
 
@@ -198,7 +195,7 @@ add_transient(int port, int (*proc)(int, char *, int))
 	return (1);
 }
 
-static struct ttable *
+struct ttable *
 is_transient(int port)
 {
 	struct ttable *p;

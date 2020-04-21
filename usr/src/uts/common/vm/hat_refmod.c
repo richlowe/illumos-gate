@@ -180,6 +180,7 @@ hat_setstat(struct as *as, caddr_t addr, size_t len, uint_t rmbits)
 	 */
 	if (vbits != as->a_vbits) {
 		newbits = (vbits ^ as->a_vbits) & as->a_vbits;
+		nb = 0;
 		while (newbits) {
 			if (ffs(newbits))
 				nb = 1 << (ffs(newbits)-1);
@@ -230,7 +231,7 @@ hat_freestat(struct as *as, int id)
 	mutex_enter(&hat_statlock);
 
 	for (prev_ahrm = NULL; hrm; hrm = hrm->hrm_anext) {
-		if ((id == hrm->hrm_id) || (id == NULL)) {
+		if ((id == hrm->hrm_id) || (id == 0)) {
 
 			hrm_hashout(hrm);
 			hrm->hrm_hnext = hrm_blist;

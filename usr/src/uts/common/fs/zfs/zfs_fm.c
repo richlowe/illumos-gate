@@ -44,11 +44,11 @@
  * ereports.  The payload is dependent on the class, and which arguments are
  * supplied to the function:
  *
- * 	EREPORT			POOL	VDEV	IO
- * 	block			X	X	X
- * 	data			X		X
- * 	device			X	X
- * 	pool			X
+ *	EREPORT			POOL	VDEV	IO
+ *	block			X	X	X
+ *	data			X		X
+ *	device			X	X
+ *	pool			X
  *
  * If we are in a loading state, all errors are chained together by the same
  * SPA-wide ENA (Error Numeric Association).
@@ -60,18 +60,18 @@
  * layered diagram:
  *
  *      +---------------+
- * 	| Aggregate I/O |	No associated logical data or device
- * 	+---------------+
+ *	| Aggregate I/O |	No associated logical data or device
+ *	+---------------+
  *              |
  *              V
- * 	+---------------+	Reads associated with a piece of logical data.
- * 	|   Read I/O    |	This includes reads on behalf of RAID-Z,
- * 	+---------------+       mirrors, gang blocks, retries, etc.
+ *	+---------------+	Reads associated with a piece of logical data.
+ *	|   Read I/O    |	This includes reads on behalf of RAID-Z,
+ *	+---------------+       mirrors, gang blocks, retries, etc.
  *              |
  *              V
- * 	+---------------+	Reads associated with a particular device, but
- * 	| Physical I/O  |	no logical data.  Issued as part of vdev caching
- * 	+---------------+	and I/O aggregation.
+ *	+---------------+	Reads associated with a particular device, but
+ *	| Physical I/O  |	no logical data.  Issued as part of vdev caching
+ *	+---------------+	and I/O aggregation.
  *
  * Note that 'physical I/O' here is not the same terminology as used in the rest
  * of ZIO.  Typically, 'physical I/O' simply means that there is no attached
@@ -102,98 +102,29 @@
  * ereport with information about the differences.
  */
 #ifdef _KERNEL
-static void
+
+/*
+ * Return B_TRUE if the event actually posted, B_FALSE if not.
+ */
+static boolean_t
 zfs_ereport_start(nvlist_t **ereport_out, nvlist_t **detector_out,
-    const char *subclass, spa_t *spa, vdev_t *vd, zio_t *zio,
-    uint64_t stateoroffset, uint64_t size)
+    const char *subclass, spa_t *spa, vdev_t *vd, const zbookmark_phys_t *zb,
+    zio_t *zio, uint64_t stateoroffset, uint64_t size)
 {
 	nvlist_t *ereport, *detector;
 
 	uint64_t ena;
 	char class[64];
 
-	/*
-	 * If we are doing a spa_tryimport() or in recovery mode,
-	 * ignore errors.
-	 */
-	if (spa_load_state(spa) == SPA_LOAD_TRYIMPORT ||
-	    spa_load_state(spa) == SPA_LOAD_RECOVER)
-		return;
-
-	/*
-	 * If we are in the middle of opening a pool, and the previous attempt
-	 * failed, don't bother logging any new ereports - we're just going to
-	 * get the same diagnosis anyway.
-	 */
-	if (spa_load_state(spa) != SPA_LOAD_NONE &&
-	    spa->spa_last_open_failed)
-		return;
-
-	if (zio != NULL) {
-		/*
-		 * If this is not a read or write zio, ignore the error.  This
-		 * can occur if the DKIOCFLUSHWRITECACHE ioctl fails.
-		 */
-		if (zio->io_type != ZIO_TYPE_READ &&
-		    zio->io_type != ZIO_TYPE_WRITE)
-			return;
-
-		/*
-		 * Ignore any errors from speculative I/Os, as failure is an
-		 * expected result.
-		 */
-		if (zio->io_flags & ZIO_FLAG_SPECULATIVE)
-			return;
-
-		/*
-		 * If this I/O is not a retry I/O, don't post an ereport.
-		 * Otherwise, we risk making bad diagnoses based on B_FAILFAST
-		 * I/Os.
-		 */
-		if (zio->io_error == EIO &&
-		    !(zio->io_flags & ZIO_FLAG_IO_RETRY))
-			return;
-
-		if (vd != NULL) {
-			/*
-			 * If the vdev has already been marked as failing due
-			 * to a failed probe, then ignore any subsequent I/O
-			 * errors, as the DE will automatically fault the vdev
-			 * on the first such failure.  This also catches cases
-			 * where vdev_remove_wanted is set and the device has
-			 * not yet been asynchronously placed into the REMOVED
-			 * state.
-			 */
-			if (zio->io_vd == vd && !vdev_accessible(vd, zio))
-				return;
-
-			/*
-			 * Ignore checksum errors for reads from DTL regions of
-			 * leaf vdevs.
-			 */
-			if (zio->io_type == ZIO_TYPE_READ &&
-			    zio->io_error == ECKSUM &&
-			    vd->vdev_ops->vdev_op_leaf &&
-			    vdev_dtl_contains(vd, DTL_MISSING, zio->io_txg, 1))
-				return;
-		}
-	}
-
-	/*
-	 * For probe failure, we want to avoid posting ereports if we've
-	 * already removed the device in the meantime.
-	 */
-	if (vd != NULL &&
-	    strcmp(subclass, FM_EREPORT_ZFS_PROBE_FAILURE) == 0 &&
-	    (vd->vdev_remove_wanted || vd->vdev_state == VDEV_STATE_REMOVED))
-		return;
+	if (!zfs_ereport_is_valid(subclass, spa, vd, zio))
+		return (B_FALSE);
 
 	if ((ereport = fm_nvlist_create(NULL)) == NULL)
-		return;
+		return (B_FALSE);
 
 	if ((detector = fm_nvlist_create(NULL)) == NULL) {
 		fm_nvlist_destroy(ereport, FM_NVA_FREE);
-		return;
+		return (B_FALSE);
 	}
 
 	/*
@@ -273,6 +204,10 @@ zfs_ereport_start(nvlist_t **ereport_out, nvlist_t **detector_out,
 			fm_payload_set(ereport,
 			    FM_EREPORT_PAYLOAD_ZFS_VDEV_FRU,
 			    DATA_TYPE_STRING, vd->vdev_fru, NULL);
+		if (vd->vdev_ashift)
+			fm_payload_set(ereport,
+			    FM_EREPORT_PAYLOAD_ZFS_VDEV_ASHIFT,
+			    DATA_TYPE_UINT64, vd->vdev_ashift, NULL);
 
 		if (pvd != NULL) {
 			fm_payload_set(ereport,
@@ -318,24 +253,6 @@ zfs_ereport_start(nvlist_t **ereport_out, nvlist_t **detector_out,
 				    FM_EREPORT_PAYLOAD_ZFS_ZIO_SIZE,
 				    DATA_TYPE_UINT64, zio->io_size, NULL);
 		}
-
-		/*
-		 * Payload for I/Os with corresponding logical information.
-		 */
-		if (zio->io_logical != NULL)
-			fm_payload_set(ereport,
-			    FM_EREPORT_PAYLOAD_ZFS_ZIO_OBJSET,
-			    DATA_TYPE_UINT64,
-			    zio->io_logical->io_bookmark.zb_objset,
-			    FM_EREPORT_PAYLOAD_ZFS_ZIO_OBJECT,
-			    DATA_TYPE_UINT64,
-			    zio->io_logical->io_bookmark.zb_object,
-			    FM_EREPORT_PAYLOAD_ZFS_ZIO_LEVEL,
-			    DATA_TYPE_INT64,
-			    zio->io_logical->io_bookmark.zb_level,
-			    FM_EREPORT_PAYLOAD_ZFS_ZIO_BLKID,
-			    DATA_TYPE_UINT64,
-			    zio->io_logical->io_bookmark.zb_blkid, NULL);
 	} else if (vd != NULL) {
 		/*
 		 * If we have a vdev but no zio, this is a device fault, and the
@@ -347,10 +264,26 @@ zfs_ereport_start(nvlist_t **ereport_out, nvlist_t **detector_out,
 		    DATA_TYPE_UINT64, stateoroffset, NULL);
 	}
 
+	/*
+	 * Payload for I/Os with corresponding logical information.
+	 */
+	if (zb != NULL && (zio == NULL || zio->io_logical != NULL)) {
+		fm_payload_set(ereport,
+		    FM_EREPORT_PAYLOAD_ZFS_ZIO_OBJSET,
+		    DATA_TYPE_UINT64, zb->zb_objset,
+		    FM_EREPORT_PAYLOAD_ZFS_ZIO_OBJECT,
+		    DATA_TYPE_UINT64, zb->zb_object,
+		    FM_EREPORT_PAYLOAD_ZFS_ZIO_LEVEL,
+		    DATA_TYPE_INT64, zb->zb_level,
+		    FM_EREPORT_PAYLOAD_ZFS_ZIO_BLKID,
+		    DATA_TYPE_UINT64, zb->zb_blkid, NULL);
+	}
+
 	mutex_exit(&spa->spa_errlist_lock);
 
 	*ereport_out = ereport;
 	*detector_out = detector;
+	return (B_TRUE);
 }
 
 /* if it's <= 128 bytes, save the corruption directly */
@@ -501,11 +434,11 @@ range_total_size(zfs_ecksum_info_t *eip)
 
 static zfs_ecksum_info_t *
 annotate_ecksum(nvlist_t *ereport, zio_bad_cksum_t *info,
-    const uint8_t *goodbuf, const uint8_t *badbuf, size_t size,
+    const abd_t *goodabd, const abd_t *badabd, size_t size,
     boolean_t drop_if_identical)
 {
-	const uint64_t *good = (const uint64_t *)goodbuf;
-	const uint64_t *bad = (const uint64_t *)badbuf;
+	const uint64_t *good;
+	const uint64_t *bad;
 
 	uint64_t allset = 0;
 	uint64_t allcleared = 0;
@@ -549,13 +482,16 @@ annotate_ecksum(nvlist_t *ereport, zio_bad_cksum_t *info,
 		}
 	}
 
-	if (badbuf == NULL || goodbuf == NULL)
+	if (badabd == NULL || goodabd == NULL)
 		return (eip);
 
 	ASSERT3U(nui64s, <=, UINT32_MAX);
 	ASSERT3U(size, ==, nui64s * sizeof (uint64_t));
 	ASSERT3U(size, <=, SPA_MAXBLOCKSIZE);
 	ASSERT3U(size, <=, UINT32_MAX);
+
+	good = (const uint64_t *) abd_borrow_buf_copy((abd_t *)goodabd, size);
+	bad = (const uint64_t *) abd_borrow_buf_copy((abd_t *)badabd, size);
 
 	/* build up the range list by comparing the two buffers. */
 	for (idx = 0; idx < nui64s; idx++) {
@@ -586,6 +522,8 @@ annotate_ecksum(nvlist_t *ereport, zio_bad_cksum_t *info,
 	 */
 	if (inline_size == 0 && drop_if_identical) {
 		kmem_free(eip, sizeof (*eip));
+		abd_return_buf((abd_t *)goodabd, (void *)good, size);
+		abd_return_buf((abd_t *)badabd, (void *)bad, size);
 		return (NULL);
 	}
 
@@ -626,6 +564,10 @@ annotate_ecksum(nvlist_t *ereport, zio_bad_cksum_t *info,
 		eip->zei_ranges[range].zr_start	*= sizeof (uint64_t);
 		eip->zei_ranges[range].zr_end	*= sizeof (uint64_t);
 	}
+
+	abd_return_buf((abd_t *)goodabd, (void *)good, size);
+	abd_return_buf((abd_t *)badabd, (void *)bad, size);
+
 	eip->zei_allowed_mingap	*= sizeof (uint64_t);
 	inline_size		*= sizeof (uint64_t);
 
@@ -665,29 +607,114 @@ annotate_ecksum(nvlist_t *ereport, zio_bad_cksum_t *info,
 }
 #endif
 
-void
-zfs_ereport_post(const char *subclass, spa_t *spa, vdev_t *vd, zio_t *zio,
-    uint64_t stateoroffset, uint64_t size)
+/*
+ * Make sure our event is still valid for the given zio/vdev/pool.  For example,
+ * we don't want to keep logging events for a faulted or missing vdev.
+ */
+boolean_t
+zfs_ereport_is_valid(const char *subclass, spa_t *spa, vdev_t *vd, zio_t *zio)
 {
+#ifdef _KERNEL
+	/*
+	 * If we are doing a spa_tryimport() or in recovery mode,
+	 * ignore errors.
+	 */
+	if (spa_load_state(spa) == SPA_LOAD_TRYIMPORT ||
+	    spa_load_state(spa) == SPA_LOAD_RECOVER)
+		return (B_FALSE);
+
+	/*
+	 * If we are in the middle of opening a pool, and the previous attempt
+	 * failed, don't bother logging any new ereports - we're just going to
+	 * get the same diagnosis anyway.
+	 */
+	if (spa_load_state(spa) != SPA_LOAD_NONE &&
+	    spa->spa_last_open_failed)
+		return (B_FALSE);
+
+	if (zio != NULL) {
+		/*
+		 * If this is not a read or write zio, ignore the error.  This
+		 * can occur if the DKIOCFLUSHWRITECACHE ioctl fails.
+		 */
+		if (zio->io_type != ZIO_TYPE_READ &&
+		    zio->io_type != ZIO_TYPE_WRITE)
+			return (B_FALSE);
+
+		if (vd != NULL) {
+			/*
+			 * If the vdev has already been marked as failing due
+			 * to a failed probe, then ignore any subsequent I/O
+			 * errors, as the DE will automatically fault the vdev
+			 * on the first such failure.  This also catches cases
+			 * where vdev_remove_wanted is set and the device has
+			 * not yet been asynchronously placed into the REMOVED
+			 * state.
+			 */
+			if (zio->io_vd == vd && !vdev_accessible(vd, zio))
+				return (B_FALSE);
+
+			/*
+			 * Ignore checksum errors for reads from DTL regions of
+			 * leaf vdevs.
+			 */
+			if (zio->io_type == ZIO_TYPE_READ &&
+			    zio->io_error == ECKSUM &&
+			    vd->vdev_ops->vdev_op_leaf &&
+			    vdev_dtl_contains(vd, DTL_MISSING, zio->io_txg, 1))
+				return (B_FALSE);
+		}
+	}
+
+	/*
+	 * For probe failure, we want to avoid posting ereports if we've
+	 * already removed the device in the meantime.
+	 */
+	if (vd != NULL &&
+	    strcmp(subclass, FM_EREPORT_ZFS_PROBE_FAILURE) == 0 &&
+	    (vd->vdev_remove_wanted || vd->vdev_state == VDEV_STATE_REMOVED))
+		return (B_FALSE);
+
+	/* Ignore bogus delay events (like from ioctls or unqueued IOs) */
+	if ((strcmp(subclass, FM_EREPORT_ZFS_DELAY) == 0) &&
+	    (zio != NULL) && (!zio->io_timestamp)) {
+		return (B_FALSE);
+	}
+#endif
+	return (B_TRUE);
+}
+
+/*
+ * Return 0 if event was posted, EINVAL if there was a problem posting it or
+ * EBUSY if the event was rate limited.
+ */
+int
+zfs_ereport_post(const char *subclass, spa_t *spa, vdev_t *vd,
+    const struct zbookmark_phys *zb, zio_t *zio, uint64_t stateoroffset,
+    uint64_t size)
+{
+	int rc = 0;
 #ifdef _KERNEL
 	nvlist_t *ereport = NULL;
 	nvlist_t *detector = NULL;
 
-	zfs_ereport_start(&ereport, &detector,
-	    subclass, spa, vd, zio, stateoroffset, size);
+	if (!zfs_ereport_start(&ereport, &detector, subclass, spa, vd,
+	    zb, zio, stateoroffset, size))
+		return (SET_ERROR(EINVAL));	/* couldn't post event */
 
 	if (ereport == NULL)
-		return;
+		return (SET_ERROR(EINVAL));
 
 	fm_ereport_post(ereport, EVCH_SLEEP);
 
 	fm_nvlist_destroy(ereport, FM_NVA_FREE);
 	fm_nvlist_destroy(detector, FM_NVA_FREE);
 #endif
+	return (rc);
 }
 
 void
-zfs_ereport_start_checksum(spa_t *spa, vdev_t *vd,
+zfs_ereport_start_checksum(spa_t *spa, vdev_t *vd, const zbookmark_phys_t *zb,
     struct zio *zio, uint64_t offset, uint64_t length, void *arg,
     zio_bad_cksum_t *info)
 {
@@ -709,7 +736,7 @@ zfs_ereport_start_checksum(spa_t *spa, vdev_t *vd,
 
 #ifdef _KERNEL
 	zfs_ereport_start(&report->zcr_ereport, &report->zcr_detector,
-	    FM_EREPORT_ZFS_CHECKSUM, spa, vd, zio, offset, length);
+	    FM_EREPORT_ZFS_CHECKSUM, spa, vd, zb, zio, offset, length);
 
 	if (report->zcr_ereport == NULL) {
 		report->zcr_free(report->zcr_cbdata, report->zcr_cbinfo);
@@ -729,8 +756,8 @@ zfs_ereport_start_checksum(spa_t *spa, vdev_t *vd,
 }
 
 void
-zfs_ereport_finish_checksum(zio_cksum_report_t *report,
-    const void *good_data, const void *bad_data, boolean_t drop_if_identical)
+zfs_ereport_finish_checksum(zio_cksum_report_t *report, const abd_t *good_data,
+    const abd_t *bad_data, boolean_t drop_if_identical)
 {
 #ifdef _KERNEL
 	zfs_ecksum_info_t *info = NULL;
@@ -776,21 +803,21 @@ zfs_ereport_send_interim_checksum(zio_cksum_report_t *report)
 #endif
 }
 
-void
-zfs_ereport_post_checksum(spa_t *spa, vdev_t *vd,
+int
+zfs_ereport_post_checksum(spa_t *spa, vdev_t *vd, const zbookmark_phys_t *zb,
     struct zio *zio, uint64_t offset, uint64_t length,
-    const void *good_data, const void *bad_data, zio_bad_cksum_t *zbc)
+    const abd_t *good_data, const abd_t *bad_data, zio_bad_cksum_t *zbc)
 {
+	int rc = 0;
 #ifdef _KERNEL
 	nvlist_t *ereport = NULL;
 	nvlist_t *detector = NULL;
 	zfs_ecksum_info_t *info;
 
-	zfs_ereport_start(&ereport, &detector,
-	    FM_EREPORT_ZFS_CHECKSUM, spa, vd, zio, offset, length);
-
-	if (ereport == NULL)
-		return;
+	if (!zfs_ereport_start(&ereport, &detector, FM_EREPORT_ZFS_CHECKSUM,
+	    spa, vd, zb, zio, offset, length) || (ereport == NULL)) {
+		return (SET_ERROR(EINVAL));
+	}
 
 	info = annotate_ecksum(ereport, zbc, good_data, bad_data, length,
 	    B_FALSE);
@@ -804,6 +831,7 @@ zfs_ereport_post_checksum(spa_t *spa, vdev_t *vd,
 	if (info != NULL)
 		kmem_free(info, sizeof (*info));
 #endif
+	return (rc);
 }
 
 static void

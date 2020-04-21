@@ -22,6 +22,8 @@
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright 2019 Joyent, Inc.
+#
 
 SRCS = $(OBJECTS:%.o=../common/%.c)
 CSTD = $(CSTD_GNU99)
@@ -30,8 +32,9 @@ $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 CFLAGS += $(CCVERBOSE)
 
 CERRWARN += -_gcc=-Wno-type-limits
-CERRWARN += -_gcc=-Wno-uninitialized
-CERRWARN += -_gcc=-Wno-unused-label
+CERRWARN += $(CNOWARN_UNINIT)
+
+SMOFF += all_func_returns
 
 ROOTLIBDIR = $(ROOTSCSILIBDIR)
 ROOTLIBDIR64 = $(ROOTSCSILIBDIR)/$(MACH64)

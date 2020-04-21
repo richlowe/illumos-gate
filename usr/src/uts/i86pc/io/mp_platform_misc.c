@@ -28,6 +28,10 @@
  */
 
 /*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
+
+/*
  * PSMI 1.1 extensions are supported only in 2.6 and later versions.
  * PSMI 1.2 extensions are supported only in 2.7 and later versions.
  * PSMI 1.3 and 1.4 extensions are supported in Solaris 10.
@@ -237,7 +241,7 @@ apic_init_common(void)
 	iptr = (int *)&apic_irq_table[0];
 	for (i = 0; i <= APIC_MAX_VECTOR; i++) {
 		apic_level_intr[i] = 0;
-		*iptr++ = NULL;
+		*iptr++ = 0;
 		apic_vector_to_irq[i] = APIC_RESV_IRQ;
 
 		/* These *must* be initted to B_TRUE! */
@@ -1897,8 +1901,8 @@ apic_check_stuck_interrupt(apic_irq_t *irq_ptr, int old_bind_cpu,
 	    (reps < apic_max_reps_clear_pending));
 
 #ifdef DEBUG
-		if (rdt_entry & AV_PENDING)
-			apic_intr_deliver_timeouts++;
+	if (rdt_entry & AV_PENDING)
+		apic_intr_deliver_timeouts++;
 #endif
 
 	/*

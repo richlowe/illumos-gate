@@ -16,6 +16,7 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2018 Jason King
 # Copyright 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 file path=usr/share/man/man3c/__fbufsize.3c
@@ -135,6 +136,7 @@ file path=usr/share/man/man3c/fgetwc.3c
 file path=usr/share/man/man3c/floating_to_decimal.3c
 file path=usr/share/man/man3c/flock.3c
 file path=usr/share/man/man3c/flockfile.3c
+file path=usr/share/man/man3c/fmemopen.3c
 file path=usr/share/man/man3c/fmtmsg.3c
 file path=usr/share/man/man3c/fnmatch.3c
 file path=usr/share/man/man3c/fopen.3c
@@ -263,6 +265,7 @@ file path=usr/share/man/man3c/ndbm.3c
 file path=usr/share/man/man3c/newlocale.3c
 file path=usr/share/man/man3c/nl_langinfo.3c
 file path=usr/share/man/man3c/offsetof.3c
+file path=usr/share/man/man3c/open_memstream.3c
 file path=usr/share/man/man3c/opendir.3c
 file path=usr/share/man/man3c/perror.3c
 file path=usr/share/man/man3c/pfmt.3c
@@ -303,6 +306,7 @@ file path=usr/share/man/man3c/pthread_attr_get_np.3c
 file path=usr/share/man/man3c/pthread_attr_getdetachstate.3c
 file path=usr/share/man/man3c/pthread_attr_getguardsize.3c
 file path=usr/share/man/man3c/pthread_attr_getinheritsched.3c
+file path=usr/share/man/man3c/pthread_attr_getname_np.3c
 file path=usr/share/man/man3c/pthread_attr_getschedparam.3c
 file path=usr/share/man/man3c/pthread_attr_getschedpolicy.3c
 file path=usr/share/man/man3c/pthread_attr_getscope.3c
@@ -328,6 +332,7 @@ file path=usr/share/man/man3c/pthread_detach.3c
 file path=usr/share/man/man3c/pthread_equal.3c
 file path=usr/share/man/man3c/pthread_exit.3c
 file path=usr/share/man/man3c/pthread_getconcurrency.3c
+file path=usr/share/man/man3c/pthread_getname_np.3c
 file path=usr/share/man/man3c/pthread_getschedparam.3c
 file path=usr/share/man/man3c/pthread_getspecific.3c
 file path=usr/share/man/man3c/pthread_join.3c
@@ -472,6 +477,7 @@ file path=usr/share/man/man3c/termios.3c
 file path=usr/share/man/man3c/thr_create.3c
 file path=usr/share/man/man3c/thr_exit.3c
 file path=usr/share/man/man3c/thr_getconcurrency.3c
+file path=usr/share/man/man3c/thr_getname.3c
 file path=usr/share/man/man3c/thr_getprio.3c
 file path=usr/share/man/man3c/thr_join.3c
 file path=usr/share/man/man3c/thr_keycreate.3c
@@ -1050,6 +1056,7 @@ link path=usr/share/man/man3c/nrand48.3c target=drand48.3c
 link path=usr/share/man/man3c/ntohl.3c target=byteorder.3c
 link path=usr/share/man/man3c/ntohll.3c target=byteorder.3c
 link path=usr/share/man/man3c/ntohs.3c target=byteorder.3c
+link path=usr/share/man/man3c/open_wmemstream.3c target=open_memstream.3c
 link path=usr/share/man/man3c/openlog.3c target=syslog.3c
 link path=usr/share/man/man3c/pclose.3c target=popen.3c
 link path=usr/share/man/man3c/port_dissociate.3c target=port_associate.3c
@@ -1109,6 +1116,8 @@ link path=usr/share/man/man3c/pthread_attr_setguardsize.3c \
     target=pthread_attr_getguardsize.3c
 link path=usr/share/man/man3c/pthread_attr_setinheritsched.3c \
     target=pthread_attr_getinheritsched.3c
+link path=usr/share/man/man3c/pthread_attr_setname_np.3c \
+    target=pthread_attr_getname_np.3c
 link path=usr/share/man/man3c/pthread_attr_setschedparam.3c \
     target=pthread_attr_getschedparam.3c
 link path=usr/share/man/man3c/pthread_attr_setschedpolicy.3c \
@@ -1181,6 +1190,8 @@ link path=usr/share/man/man3c/pthread_rwlockattr_setpshared.3c \
     target=pthread_rwlockattr_getpshared.3c
 link path=usr/share/man/man3c/pthread_setconcurrency.3c \
     target=pthread_getconcurrency.3c
+link path=usr/share/man/man3c/pthread_setname_np.3c \
+    target=pthread_getname_np.3c
 link path=usr/share/man/man3c/pthread_setschedparam.3c \
     target=pthread_getschedparam.3c
 link path=usr/share/man/man3c/pthread_setspecific.3c \
@@ -1235,6 +1246,7 @@ link path=usr/share/man/man3c/re_exec.3c target=re_comp.3c
 link path=usr/share/man/man3c/readdir_r.3c target=readdir.3c
 link path=usr/share/man/man3c/realloc.3c target=malloc.3c
 link path=usr/share/man/man3c/reallocarray.3c target=malloc.3c
+link path=usr/share/man/man3c/reallocf.3c target=malloc.3c
 link path=usr/share/man/man3c/recallocarray.3c target=malloc.3c
 link path=usr/share/man/man3c/regerror.3c target=regcomp.3c
 link path=usr/share/man/man3c/regex.3c target=regcmp.3c
@@ -1365,6 +1377,7 @@ link path=usr/share/man/man3c/thr_getspecific.3c target=thr_keycreate.3c
 link path=usr/share/man/man3c/thr_keycreate_once.3c target=thr_keycreate.3c
 link path=usr/share/man/man3c/thr_setconcurrency.3c \
     target=thr_getconcurrency.3c
+link path=usr/share/man/man3c/thr_setname.3c target=thr_getname.3c
 link path=usr/share/man/man3c/thr_setprio.3c target=thr_getprio.3c
 link path=usr/share/man/man3c/thr_setspecific.3c target=thr_keycreate.3c
 link path=usr/share/man/man3c/thrd_sleep.3c target=nanosleep.3c

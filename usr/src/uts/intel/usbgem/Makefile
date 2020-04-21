@@ -10,7 +10,7 @@
 #
 
 #
-# Copyright (c) 2014 Joyent, Inc.  All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 #
@@ -42,12 +42,15 @@ CPPFLAGS	+= \
 		-DUSBGEM_CONFIG_MAC_PROP \
 		-DVERSION=\"1.6\"
 
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-unused-function
+
+# needs work
+SMOFF += all_func_returns
 
 LINTTAGS	+= -erroff=E_FUNC_VAR_UNUSED
 LINTTAGS	+= -erroff=E_FUNC_ARG_UNUSED

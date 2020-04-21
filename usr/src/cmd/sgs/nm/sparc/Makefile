@@ -22,7 +22,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/sgs/nm/sparc/Makefile
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 PROG=		nm
@@ -30,8 +30,8 @@ XPG4PROG=	nm
 
 ARFORMAT=	PORTAR
 
-include 	../../../Makefile.cmd
-include 	../../Makefile.com
+include		../../../Makefile.cmd
+include		../../Makefile.com
 
 COMOBJS=	nm.o
 
@@ -42,14 +42,10 @@ SRCS=		$(COMOBJS:%.o=../common/%.c)
 
 LLDFLAGS=	'-R$$ORIGIN/../../lib'
 INCLIST=	-I../../include -I../../include/sparc \
-		-I$(SRCBASE)/uts/$(ARCH)/sys
+		-I$(SRC)/uts/$(ARCH)/sys
 DEFLIST=	-DTARGET=SPARC -DSPARC=1 -D$(ARFORMAT) -DELF
 CPPFLAGS=	$(INCLIST) $(DEFLIST) $(CPPFLAGS.master)  -I$(ELFCAP)
-CERRWARN +=	-_gcc=-Wno-uninitialized
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) $(ELFLIBDIR) -lelf
-LINTFLAGS=	-x $(LDLIBS)
-LINTSRCS=	$(SRCS)
-CLEANFILES +=	$(LINTOUTS)
+LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf
 objs.xpg4/%.o := CPPFLAGS += -DXPG4
 
 
@@ -88,8 +84,6 @@ install:	all $(VAR_SGSBINPROG) $(ROOTXPG4PROG) $(VAR_SGSCCSLINK)
 
 clean:
 		$(RM) $(OBJS) $(XPG4OBJS) $(CLEANFILES)
-
-lint:		 $(LINTOUT32) $(SGSLINTOUT)
 
 include		../../../Makefile.targ
 include		../../Makefile.targ

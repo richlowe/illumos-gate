@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <sys/types.h>
@@ -189,8 +189,7 @@ done:
 		    sr->session->ip_addr_str);
 	}
 
-	DTRACE_SMB_2(op__SessionSetupX__start, smb_request_t *, sr,
-	    smb_arg_sessionsetup_t, sinfo);
+	DTRACE_SMB_START(op__SessionSetupX, smb_request_t *, sr);
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
 
@@ -199,8 +198,7 @@ smb_post_session_setup_andx(smb_request_t *sr)
 {
 	smb_arg_sessionsetup_t	*sinfo = sr->sr_ssetup;
 
-	DTRACE_SMB_2(op__SessionSetupX__done, smb_request_t *, sr,
-	    smb_arg_sessionsetup_t, sinfo);
+	DTRACE_SMB_DONE(op__SessionSetupX, smb_request_t *, sr);
 
 	if (sinfo->ssi_lmpwd != NULL)
 		bzero(sinfo->ssi_lmpwd, sinfo->ssi_lmpwlen);
@@ -237,12 +235,15 @@ smb_com_session_setup_andx(smb_request_t *sr)
 		sr->session->smb_msg_size = sinfo->ssi_maxbufsize;
 		sr->session->smb_max_mpx = sinfo->ssi_maxmpxcount;
 		sr->session->capabilities = sinfo->ssi_capabilities;
-
-		if (!smb_oplock_levelII)
-			sr->session->capabilities &= ~CAP_LEVEL_II_OPLOCKS;
-
 		sr->session->native_os = sinfo->ssi_native_os;
 		sr->session->native_lm = sinfo->ssi_native_lm;
+	}
+
+	/* RejectUnencryptedAccess precludes SMB1 access */
+	if (sr->sr_server->sv_cfg.skc_encrypt == SMB_CONFIG_REQUIRED) {
+		smbsr_error(sr, NT_STATUS_ACCESS_DENIED,
+		    ERRDOS, ERROR_ACCESS_DENIED);
+		return (SDRC_ERROR);
 	}
 
 	/*

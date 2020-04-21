@@ -21,6 +21,7 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 MANIFEST =	zonestat.xml
 SVCMETHOD =	svc-zonestat
@@ -34,13 +35,13 @@ ROOTMANIFESTDIR =	$(ROOTSVCSYSTEM)
 SRCS =	zonestatd.c
 
 CPPFLAGS	+= -I$(ADJUNCT_PROTO)/usr/include/libxml2
-LDLIBS 		+= -lkstat -lpool -lexacct -lscf \
+LDLIBS		+= -lkstat -lpool -lexacct -lscf \
 		    -lcontract -lcmdutils -lumem
 
 LINTFLAGS	+= -u
-CERRWARN 	+= -_gcc=-Wno-parentheses
-CERRWARN 	+= -_gcc=-Wno-unused-label
-CERRWARN 	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= -_gcc=-Wno-parentheses
+CERRWARN	+= -_gcc=-Wno-unused-label
+CERRWARN	+= $(CNOWARN_UNINIT)
 
 OBJS =		$(SRCS:%.c=%.o)
 

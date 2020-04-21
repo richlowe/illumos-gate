@@ -22,6 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	bart
 SRCS=	rules.c create.c compare.c main.c lutbl.c
@@ -32,7 +33,9 @@ include ../Makefile.cmd
 
 LDLIBS +=	-lsec -lmd
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+SMOFF +=	indenting
 
 #
 # for messaging catalog
@@ -46,10 +49,10 @@ ROOTLIBDIFFH=	$(DIFFH:%=$(ROOTLIB)/%)
 
 .KEEP_STATE:
 
-all:	$(PROG) 
+all:	$(PROG)
 
 $(PROG):	$(OBJS)
-	$(CC) -o $(PROG) $(OBJS) $(LDFLAGS) $(LDLIBS)
+	$(LINK.c) -o $(PROG) $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 clean:

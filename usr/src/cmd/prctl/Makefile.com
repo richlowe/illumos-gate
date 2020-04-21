@@ -23,6 +23,7 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	prctl
 
@@ -34,7 +35,10 @@ include ../../Makefile.cmd
 
 CFLAGS	+= $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 LDLIBS	+= -lproc -lproject
 

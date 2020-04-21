@@ -2,6 +2,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG1=kprop
 PROG2=kpropd
@@ -59,9 +60,12 @@ CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-address
+
+# not linted
+SMATCH=off
 
 LDFLAGS +=	$(KRUNPATH) $(KERBRUNPATH)
 LDLIBS +=	-lmech_krb5 -lsocket

@@ -245,6 +245,7 @@ uftdi_attach(ds_attach_info_t *aip)
 		case USB_PRODUCT_FTDI_EMCU2D:
 		case USB_PRODUCT_FTDI_PCMSFU:
 		case USB_PRODUCT_FTDI_EMCU2H:
+		case USB_PRODUCT_FTDI_232EX:
 			break;
 		default:
 			recognized = B_FALSE;
@@ -290,7 +291,7 @@ uftdi_attach(ds_attach_info_t *aip)
 		break;
 	case USB_VENDOR_MARVELL:
 		switch (dd->idProduct) {
-		case USB_PRODUCT_MARVELL_SHEEVAPLUG_JTAG:
+		case USB_PRODUCT_MARVELL_SHEEVAPLUG:
 			break;
 		default:
 			recognized = B_FALSE;

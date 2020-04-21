@@ -21,6 +21,7 @@
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	libadm.a
 VERS=		.1
@@ -44,8 +45,11 @@ SRCDIR=		../common
 CPPFLAGS +=	-I ../inc
 
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-char-subscripts
+
+# not linted
+SMATCH=off
 
 $(LINTLIB) :=	SRCS=$(SRCDIR)/$(LINTSRC)
 LDLIBS +=	-lc

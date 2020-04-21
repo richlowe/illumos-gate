@@ -24,7 +24,7 @@
  * Use is subject to license terms.
  */
 /*
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 #include "lint.h"
@@ -128,7 +128,7 @@ pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 	flag = ap->scope | ap->detachstate | ap->daemonstate | THR_SUSPENDED;
 	error = _thrp_create(ap->stkaddr, ap->stksize, start_routine, arg,
-	    flag, &tid, ap->guardsize);
+	    flag, &tid, ap->guardsize, ap->name);
 	if (error == 0) {
 		/*
 		 * Record the original inheritence value for
@@ -177,6 +177,14 @@ pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 	return (error);
 }
 
+static void
+_mutex_unlock_wrap(void *ptr)
+{
+	mutex_t *mp = ptr;
+
+	(void) mutex_unlock(mp);
+}
+
 /*
  * pthread_once: calls given function only once.
  * it synchronizes via mutex in pthread_once_t structure
@@ -192,7 +200,7 @@ pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
 	if (once->once_flag == PTHREAD_ONCE_NOTDONE) {
 		(void) mutex_lock(&once->mlock);
 		if (once->once_flag == PTHREAD_ONCE_NOTDONE) {
-			pthread_cleanup_push(mutex_unlock, &once->mlock);
+			pthread_cleanup_push(_mutex_unlock_wrap, &once->mlock);
 			(*init_routine)();
 			pthread_cleanup_pop(0);
 			membar_producer();

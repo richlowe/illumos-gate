@@ -22,6 +22,8 @@
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
+# Copyright 2018 Joyent, Inc.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 @ _START_
@@ -36,7 +38,7 @@
 			 [-N name] [-O osabi] [-T type] [-p | -w outfile] \
 			 file...\n"
 @ MSG_USAGE_DETAIL1	"\t[-c]\t\tdump section header information\n"
-@ MSG_USAGE_DETAIL2	"\t[-C]\t\tdemangle C++ symbol names\n"
+@ MSG_USAGE_DETAIL2	"\t[-C]\t\tdemangle symbol names\n"
 @ MSG_USAGE_DETAIL3	"\t[-d]\t\tdump the contents of the .dynamic section\n"
 @ MSG_USAGE_DETAIL4	"\t[-e]\t\tdump the elf header\n"
 @ MSG_USAGE_DETAIL5	"\t[-g]\t\tdump the contents of the .group sections\n"
@@ -467,8 +469,9 @@
 @ MSG_CNOTE_DESC_PSINFO_T		"desc: (psinfo_t)"
 @ MSG_CNOTE_DESC_PSTATUS_T		"desc: (pstatus_t)"
 @ MSG_CNOTE_DESC_STRUCT_UTSNAME		"desc: (struct utsname)"
-@ MSG_CNOTE_DESC_PRFDINFO_T		"desc: (prfdinfo_t)"
+@ MSG_CNOTE_DESC_PRFDINFO_T		"desc: (prfdinfo_core_t)"
 @ MSG_CNOTE_DESC_PRSECFLAGS_T		"desc: (prsecflags_t)"
+@ MSG_CNOTE_DESC_PRLWPNAME_T		"desc: (prlwpname_t)"
 
 @ MSG_CNOTE_FMT_LINE		"%*s%-*s%s"
 @ MSG_CNOTE_FMT_LINE_2UP	"%*s%-*s%-*s%-*s%s"
@@ -535,6 +538,7 @@
 @ MSG_CNOTE_T_PR_LWP			"pr_lwp:"
 @ MSG_CNOTE_T_PR_LWPHOLD		"pr_lwphold:"
 @ MSG_CNOTE_T_PR_LWPID			"pr_lwpid:"
+@ MSG_CNOTE_T_PR_LWPNAME		"pr_lwpname:"
 @ MSG_CNOTE_T_PR_LWPPEND		"pr_lwppend:"
 @ MSG_CNOTE_T_PR_NAME			"pr_name:"
 @ MSG_CNOTE_T_PR_NGROUPS		"pr_ngroups:"

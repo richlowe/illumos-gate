@@ -21,6 +21,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG =	pktool
 
@@ -52,10 +53,13 @@ CPPFLAGS += -I. -I$(KMFDIR)/include -I$(ADJUNCT_PROTO)/usr/include/libxml2 \
 	-I$(KMFDIR)/ber_der/inc
 
 CFLAGS += $(CCVERBOSE) -DDEBUG
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-unused-label
 
-LDLIBS +=  -lkmf -lpkcs11 -lcryptoutil 
+# not linted, too much mess, but it should be
+SMATCH=off
+
+LDLIBS +=  -lkmf -lpkcs11 -lcryptoutil
 
 .KEEP_STATE:
 

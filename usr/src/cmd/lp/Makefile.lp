@@ -23,6 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 # cmd/lp/Makefile.lp
@@ -87,7 +88,7 @@ LINTUSR	=	$(LPLIB)/users/llib-llpusr.ln
 CERRWARN +=	-_gcc=-Wno-sequence-point
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-unused-label
@@ -96,6 +97,9 @@ CERRWARN +=	-_gcc=-Wno-clobbered
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-extra
 CERRWARN +=	-_gcc=-Wno-address
+
+# not linted
+SMATCH=off
 
 all:=		TARGET= all
 install:=	TARGET= install

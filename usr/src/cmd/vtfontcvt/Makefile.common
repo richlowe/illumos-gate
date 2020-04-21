@@ -12,17 +12,22 @@
 #
 # Copyright 2017 Toomas Soome <tsoome@me.com>
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	vtfontcvt
 OBJS=	vtfontcvt.o
 
-LZ4COMMONDIR= $(SRC)/common/ficl/softcore
+LZ4=	$(SRC)/common/lz4
+CPPFLAGS +=	-I$(LZ4)
 LZ4_OBJS=	lz4.o
 OBJS	+=	$(LZ4_OBJS)
 
 LDLIBS += -lumem
 
-%.o:	$(LZ4COMMONDIR)/%.c
+# not linted
+SMATCH=off
+
+%.o:	$(LZ4)/%.c
 	$(COMPILE.c) $<
 	$(POST_PROCESS_O)
 

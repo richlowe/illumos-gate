@@ -26,7 +26,10 @@
  * Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 
-/* Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved. */
+/*
+ * Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
+ */
 
 /*	Copyright (c) 1988 AT&T	*/
 /*	  All Rights Reserved	*/
@@ -247,6 +250,19 @@ extern int setenv(const char *, const char *, int);
 extern int unsetenv(const char *);
 #endif
 
+/*
+ * In strict XPG4v2 mode, slave pseudo terminal devices behave differently.
+ * See the block comment in usr/src/lib/libc/port/gen/pt.c
+ */
+#if defined(_STRICT_SYMBOLS) && defined(_XPG4_2)
+#ifdef	__PRAGMA_REDEFINE_EXTNAME
+#pragma redefine_extname unlockpt __unlockpt_xpg4
+#else
+extern int __unlockpt_xpg4(int);
+#define	unlockpt __unlockpt_xpg4
+#endif
+#endif	/* defined(_STRICT_SYMBOLS) && defined(_XPG4_2) */
+
 #if defined(__EXTENSIONS__) || \
 	(!defined(_STRICT_STDC) && !defined(__XOPEN_OR_POSIX))
 extern char *canonicalize_file_name(const char *);
@@ -306,6 +322,7 @@ extern void freezero(void *, size_t);
 extern void *reallocarray(void *, size_t, size_t);
 extern void *recallocarray(void *, size_t, size_t, size_t);
 extern long long strtonum(const char *, long long, long long, const char **);
+extern void *reallocf(void *, size_t);
 
 #endif	/* !_STRICT_SYBMOLS */
 

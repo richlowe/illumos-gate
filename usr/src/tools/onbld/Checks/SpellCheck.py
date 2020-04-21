@@ -21,12 +21,14 @@
 
 #
 # Copyright 2016 Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 import re, sys
 
-spellMsg = '%s: Line %d contains "%s", a common misspelling of "%s"\n'
-altMsg = '%s: Line %d contains "%s"; please use "%s" instead for consistency with other documentation\n'
+spellMsg = 'contains "{}", a common misspelling of "{}"'
+altMsg = 'contains "{}"; please use "{}" instead for consistency with other documentation'
+caseMsg = 'contains "{}"; please use "{}" instead'
 
 misspellings = {
 	'absense': 'absence',
@@ -156,6 +158,9 @@ misspellings = {
 	'ommision': 'omission',
 	'orginal': 'original',
 	'orginally': 'originally',
+	'ouput': 'output',
+	'overriden': 'overridden',
+	'particuliar': 'particular',
 	'pavillion': 'pavilion',
 	'peice': 'piece',
 	'persistant': 'persistent',
@@ -249,25 +254,41 @@ alternates = {
 	'writeable': 'writable'
 }
 
+case = {
+	'Illumos': 'illumos'
+}
+
 misspellingREs = []
 alternateREs = []
+caseREs = []
 
-for misspelling, correct in misspellings.iteritems():
+for misspelling, correct in misspellings.items():
 	regex = re.compile(r'\b%s\b' % (misspelling), re.IGNORECASE)
 	entry = (regex, misspelling, correct)
 	misspellingREs.append(entry)
 
-for alternate, correct in alternates.iteritems():
+for alternate, correct in alternates.items():
 	regex = re.compile(r'\b%s\b' % (alternate), re.IGNORECASE)
 	entry = (regex, alternate, correct)
 	alternateREs.append(entry)
 
-def check(errmsg, output, filename, line, lineno, entry):
-	if entry[0].search(line):
-		output.write(errmsg % (filename, lineno, entry[1], entry[2]))
-		return 1
-	else:
-		return 0
+for alternate, correct in case.items():
+	regex = re.compile(r'\b%s\b' % (alternate))
+	entry = (regex, alternate, correct)
+	caseREs.append(entry)
+
+def spellcheck_line(line):
+	errs = []
+	for entry in misspellingREs:
+		if entry[0].search(line):
+			errs.append(spellMsg.format(entry[1], entry[2]))
+	for entry in alternateREs:
+		if entry[0].search(line):
+			errs.append(altMsg.format(entry[1], entry[2]))
+	for entry in caseREs:
+		if entry[0].search(line):
+			errs.append(caseMsg.format(entry[1], entry[2]))
+	return errs
 
 def spellcheck(fh, filename=None, output=sys.stderr, **opts):
 	lineno = 1
@@ -278,12 +299,11 @@ def spellcheck(fh, filename=None, output=sys.stderr, **opts):
 
 	fh.seek(0)
 	for line in fh:
-		for entry in misspellingREs:
-			ret |= check(spellMsg, output, filename, line,
-			    lineno, entry)
-		for entry in alternateREs:
-			ret |= check(altMsg, output, filename, line,
-			    lineno, entry)
+		line = line.decode(errors='replace')
+		for err in spellcheck_line(line):
+			output.write('{}: Line {} {}\n'.format(
+			    filename, lineno, err))
+			ret = 1
 		lineno += 1
 
 	return ret

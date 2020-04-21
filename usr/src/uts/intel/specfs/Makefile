@@ -24,6 +24,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	This makefile drives the production of the specfs file system
@@ -73,7 +74,10 @@ LDFLAGS 	+= -dy -Nfs/fifofs
 LINTTAGS	+= -erroff=E_SUSPICIOUS_COMPARISON
 
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+$(OBJS_DIR)/specvnops.o := SMOFF += signed
 
 #
 #	Default build targets.

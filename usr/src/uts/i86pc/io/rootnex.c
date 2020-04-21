@@ -1142,6 +1142,8 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 		case DDI_STORECACHING_OK_ACC:
 			hat_acc_flags = HAT_STORECACHING_OK;
 			break;
+		default:
+			return (DDI_ME_INVAL);
 		}
 		ap = (ddi_acc_impl_t *)hp->ah_platform_private;
 		ap->ahi_acc_attr |= DDI_ACCATTR_CPU_VADDR;
@@ -2186,6 +2188,8 @@ fast:
 		*ccountp = sinfo->si_sgl_size;
 		hp->dmai_cookie++;
 		hp->dmai_rflags &= ~DDI_DMA_PARTIAL;
+		hp->dmai_ncookies = *ccountp;
+		hp->dmai_curcookie = 1;
 		ROOTNEX_DPROF_INC(&rootnex_cnt[ROOTNEX_CNT_ACTIVE_BINDS]);
 		ROOTNEX_DPROBE4(rootnex__bind__fast, dev_info_t *, rdip,
 		    uint64_t, rootnex_cnt[ROOTNEX_CNT_ACTIVE_BINDS],
@@ -2259,6 +2263,8 @@ fast:
 	}
 	*cookiep = dma->dp_cookies[0];
 	hp->dmai_cookie++;
+	hp->dmai_ncookies = *ccountp;
+	hp->dmai_curcookie = 1;
 
 	ROOTNEX_DPROF_INC(&rootnex_cnt[ROOTNEX_CNT_ACTIVE_BINDS]);
 	ROOTNEX_DPROBE4(rootnex__bind__slow, dev_info_t *, rdip, uint64_t,
@@ -2411,6 +2417,7 @@ rootnex_coredma_reset_cookies(dev_info_t *dip, ddi_dma_handle_t handle)
 		hp->dmai_cookie = dma->dp_cookies;
 	}
 	hp->dmai_cookie++;
+	hp->dmai_curcookie = 1;
 }
 
 /*ARGSUSED*/
@@ -2671,6 +2678,10 @@ rootnex_clean_dmahdl(ddi_dma_impl_t *hp)
 	hp->dmai_error.err_status = DDI_FM_OK;
 	hp->dmai_error.err_expected = DDI_FM_ERR_UNEXPECTED;
 	hp->dmai_error.err_ontrap = NULL;
+
+	/* Cookie tracking */
+	hp->dmai_ncookies = 0;
+	hp->dmai_curcookie = 0;
 }
 
 
@@ -2753,7 +2764,7 @@ rootnex_need_bounce_seg(ddi_dma_obj_t *dmar_object, rootnex_sglinfo_t *sglinfo)
 	uint_t pcnt;
 	page_t *pp;
 
-
+	pp = NULL;
 	/* shortcuts */
 	pplist = dmar_object->dmao_obj.virt_obj.v_priv;
 	vaddr = dmar_object->dmao_obj.virt_obj.v_addr;
@@ -2882,7 +2893,7 @@ rootnex_get_sgl(ddi_dma_obj_t *dmar_object, ddi_dma_cookie_t *sgl,
 	page_t *pp;
 	uint_t cnt;
 
-
+	pp = NULL;
 	/* shortcuts */
 	pplist = dmar_object->dmao_obj.virt_obj.v_priv;
 	vaddr = dmar_object->dmao_obj.virt_obj.v_addr;
@@ -4217,7 +4228,7 @@ rootnex_copybuf_window_boundary(ddi_dma_impl_t *hp, rootnex_dma_t *dma,
 	uint_t pidx;
 	off_t poff;
 
-
+	pidx = 0;
 	sinfo = &dma->dp_sglinfo;
 
 	/*
@@ -4770,6 +4781,8 @@ rootnex_coredma_win(dev_info_t *dip, dev_info_t *rdip, ddi_dma_handle_t handle,
 		*ccountp = dma->dp_sglinfo.si_sgl_size;
 		*cookiep = hp->dmai_cookie[0];
 		hp->dmai_cookie++;
+		hp->dmai_ncookies = *ccountp;
+		hp->dmai_curcookie = 1;
 		return (DDI_SUCCESS);
 	}
 
@@ -4865,6 +4878,8 @@ rootnex_coredma_win(dev_info_t *dip, dev_info_t *rdip, ddi_dma_handle_t handle,
 	*lenp = window->wd_size;
 	*ccountp = window->wd_cookie_cnt;
 	*cookiep = hp->dmai_cookie[0];
+	hp->dmai_ncookies = *ccountp;
+	hp->dmai_curcookie = 1;
 	hp->dmai_cookie++;
 
 #if !defined(__amd64)

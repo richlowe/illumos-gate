@@ -14,6 +14,7 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2016 Nexenta Systems, Inc.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
+# Copyright 2019 Joyent, Inc.
 #
 
 file path=usr/share/man/man9f/ASSERT.9f
@@ -149,11 +150,11 @@ file path=usr/share/man/man9f/ddi_dma_addr_bind_handle.9f
 file path=usr/share/man/man9f/ddi_dma_alloc_handle.9f
 file path=usr/share/man/man9f/ddi_dma_buf_bind_handle.9f
 file path=usr/share/man/man9f/ddi_dma_burstsizes.9f
+file path=usr/share/man/man9f/ddi_dma_cookie_iter.9f
 file path=usr/share/man/man9f/ddi_dma_free_handle.9f
 file path=usr/share/man/man9f/ddi_dma_getwin.9f
 file path=usr/share/man/man9f/ddi_dma_mem_alloc.9f
 file path=usr/share/man/man9f/ddi_dma_mem_free.9f
-file path=usr/share/man/man9f/ddi_dma_nextcookie.9f
 file path=usr/share/man/man9f/ddi_dma_numwin.9f
 file path=usr/share/man/man9f/ddi_dma_set_sbus64.9f
 file path=usr/share/man/man9f/ddi_dma_sync.9f
@@ -237,6 +238,9 @@ file path=usr/share/man/man9f/ddi_soft_state.9f
 file path=usr/share/man/man9f/ddi_strtol.9f
 file path=usr/share/man/man9f/ddi_strtoll.9f
 file path=usr/share/man/man9f/ddi_strtoul.9f
+file path=usr/share/man/man9f/ddi_ufm.9f
+file path=usr/share/man/man9f/ddi_ufm_image.9f
+file path=usr/share/man/man9f/ddi_ufm_slot.9f
 file path=usr/share/man/man9f/ddi_umem_alloc.9f
 file path=usr/share/man/man9f/ddi_umem_iosetup.9f
 file path=usr/share/man/man9f/ddi_umem_lock.9f
@@ -715,6 +719,10 @@ link path=usr/share/man/man9f/ddi_devid_unregister.9f \
     target=ddi_devid_compare.9f
 link path=usr/share/man/man9f/ddi_devid_valid.9f target=ddi_devid_compare.9f
 link path=usr/share/man/man9f/ddi_devmap_segmap.9f target=devmap_setup.9f
+link path=usr/share/man/man9f/ddi_dma_cookie_get.9f target=ddi_dma_cookie_iter.9f
+link path=usr/share/man/man9f/ddi_dma_cookie_one.9f target=ddi_dma_cookie_iter.9f
+link path=usr/share/man/man9f/ddi_dma_ncookies.9f target=ddi_dma_cookie_iter.9f
+link path=usr/share/man/man9f/ddi_dma_nextcookie.9f target=ddi_dma_cookie_iter.9f
 link path=usr/share/man/man9f/ddi_dmae_1stparty.9f target=ddi_dmae.9f
 link path=usr/share/man/man9f/ddi_dmae_alloc.9f target=ddi_dmae.9f
 link path=usr/share/man/man9f/ddi_dmae_disable.9f target=ddi_dmae.9f
@@ -911,6 +919,15 @@ link path=usr/share/man/man9f/ddi_taskq_suspend.9f target=taskq.9f
 link path=usr/share/man/man9f/ddi_taskq_wait.9f target=taskq.9f
 link path=usr/share/man/man9f/ddi_trigger_softintr.9f \
     target=ddi_add_softintr.9f
+link path=usr/share/man/man9f/ddi_ufm_fini.9f target=ddi_ufm.9f
+link path=usr/share/man/man9f/ddi_ufm_init.9f target=ddi_ufm.9f
+link path=usr/share/man/man9f/ddi_ufm_update.9f target=ddi_ufm.9f
+link path=usr/share/man/man9f/ddi_ufm_image_set_desc.9f target=ddi_ufm_image.9f
+link path=usr/share/man/man9f/ddi_ufm_image_set_misc.9f target=ddi_ufm_image.9f
+link path=usr/share/man/man9f/ddi_ufm_image_set_nslots.9f target=ddi_ufm_image.9f
+link path=usr/share/man/man9f/ddi_ufm_slot_set_attrs.9f target=ddi_ufm_slot.9f
+link path=usr/share/man/man9f/ddi_ufm_slot_set_misc.9f target=ddi_ufm_slot.9f
+link path=usr/share/man/man9f/ddi_ufm_slot_set_version.9f target=ddi_ufm_slot.9f
 link path=usr/share/man/man9f/ddi_umem_free.9f target=ddi_umem_alloc.9f
 link path=usr/share/man/man9f/ddi_umem_unlock.9f target=ddi_umem_lock.9f
 link path=usr/share/man/man9f/ddi_unmap_regs.9f target=ddi_map_regs.9f
@@ -1306,6 +1323,8 @@ link path=usr/share/man/man9f/scsi_hba_iportmap_iport_remove.9f \
     target=scsi_hba_iportmap_create.9f
 link path=usr/share/man/man9f/scsi_hba_pkt_free.9f \
     target=scsi_hba_pkt_alloc.9f
+link path=usr/share/man/man9f/scsi_hba_tgtmap_destroy.9f \
+    target=scsi_hba_tgtmap_create.9f
 link path=usr/share/man/man9f/scsi_hba_tgtmap_set_add.9f \
     target=scsi_hba_tgtmap_create.9f
 link path=usr/share/man/man9f/scsi_hba_tgtmap_set_begin.9f \

@@ -21,10 +21,11 @@
 
 #
 # Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2016 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 # Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2013 Garrett D'Amore <garrett@damore.org>
 # Copyright 2018 Nexenta Systems, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 LIBCDIR=	$(SRC)/lib/libc
@@ -552,6 +553,7 @@ PORTGEN=			\
 	readdir.o		\
 	readdir_r.o		\
 	reallocarray.o		\
+	reallocf.o		\
 	recallocarray.o		\
 	realpath.o		\
 	reboot.o		\
@@ -684,6 +686,7 @@ PORTSTDIO=			\
 	_filbuf.o		\
 	_findbuf.o		\
 	_flsbuf.o		\
+	_stdio_flags.o		\
 	_wrtchk.o		\
 	clearerr.o		\
 	ctermid.o		\
@@ -699,6 +702,7 @@ PORTSTDIO=			\
 	fileno.o		\
 	flockf.o		\
 	flush.o			\
+	fmemopen.o		\
 	fopen.o			\
 	fpos.o			\
 	fputc.o			\
@@ -716,6 +720,8 @@ PORTSTDIO=			\
 	gets.o			\
 	getw.o			\
 	mse.o			\
+	open_memstream.o	\
+	open_wmemstream.o	\
 	popen.o			\
 	putc.o			\
 	putchar.o		\
@@ -1074,7 +1080,7 @@ CFLAGS += $(XINLINE)
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-unused-value
 CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-unused-variable
@@ -1083,6 +1089,11 @@ CERRWARN += -_gcc=-Wno-char-subscripts
 CERRWARN += -_gcc=-Wno-clobbered
 CERRWARN += -_gcc=-Wno-unused-function
 CERRWARN += -_gcc=-Wno-address
+
+$(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-unused
+
+# not linted
+SMATCH=off
 
 # Setting THREAD_DEBUG = -DTHREAD_DEBUG (make THREAD_DEBUG=-DTHREAD_DEBUG ...)
 # enables ASSERT() checking in the threads portion of the library.
@@ -1160,39 +1171,6 @@ CLEANFILES +=			\
 	$(ALTPICS)
 
 CLOBBERFILES +=	$(LIB_PIC)
-
-# list of C source for lint
-SRCS=							\
-	$(ATOMICOBJS:%.o=$(SRC)/common/atomic/%.c)	\
-	$(XATTROBJS:%.o=$(SRC)/common/xattr/%.c)	\
-	$(COMOBJS:%.o=$(SRC)/common/util/%.c)		\
-	$(DTRACEOBJS:%.o=$(SRC)/common/dtrace/%.c)	\
-	$(PORTFP:%.o=$(LIBCDIR)/port/fp/%.c)		\
-	$(PORTGEN:%.o=$(LIBCDIR)/port/gen/%.c)		\
-	$(PORTI18N:%.o=$(LIBCDIR)/port/i18n/%.c)	\
-	$(PORTINET:%.o=$(LIBCDIR)/port/inet/%.c)	\
-	$(PORTLOCALE:%.o=$(LIBCDIR)/port/locale/%.c)	\
-	$(PORTPRINT:%.o=$(LIBCDIR)/port/print/%.c)	\
-	$(PORTREGEX:%.o=$(LIBCDIR)/port/regex/%.c)	\
-	$(PORTSTDIO:%.o=$(LIBCDIR)/port/stdio/%.c)	\
-	$(PORTSYS:%.o=$(LIBCDIR)/port/sys/%.c)		\
-	$(AIOOBJS:%.o=$(LIBCDIR)/port/aio/%.c)		\
-	$(RTOBJS:%.o=$(LIBCDIR)/port/rt/%.c)		\
-	$(SECFLAGSOBJS:%.o=$(SRC)/common/secflags/%.c)	\
-	$(TPOOLOBJS:%.o=$(LIBCDIR)/port/tpool/%.c)	\
-	$(THREADSOBJS:%.o=$(LIBCDIR)/port/threads/%.c)	\
-	$(THREADSMACHOBJS:%.o=$(LIBCDIR)/$(MACH)/threads/%.c) \
-	$(UNICODEOBJS:%.o=$(SRC)/common/unicode/%.c)	\
-	$(UNWINDMACHOBJS:%.o=$(LIBCDIR)/port/unwind/%.c) \
-	$(FPOBJS:%.o=$(LIBCDIR)/$(MACH)/fp/%.c)		\
-	$(LIBCBASE)/gen/ecvt.c				\
-	$(LIBCBASE)/gen/makectxt.c			\
-	$(LIBCBASE)/gen/siginfolst.c			\
-	$(LIBCBASE)/gen/siglongjmp.c			\
-	$(LIBCBASE)/gen/strcmp.c			\
-	$(LIBCBASE)/gen/sync_instruction_memory.c	\
-	$(LIBCBASE)/sys/ptrace.c			\
-	$(LIBCBASE)/sys/uadmin.c
 
 # conditional assignments
 $(DYNLIB) := CRTI = crti.o
@@ -1279,22 +1257,11 @@ $(PORTI18N_COND:%=pics/%) := \
 pics/arc4random.o :=	CPPFLAGS += -I$(SRC)/common/crypto/chacha
 
 pics/__clock_gettime.o := CPPFLAGS += $(COMMPAGE_CPPFLAGS)
+pics/gettimeofday.o := CPPFLAGS += $(COMMPAGE_CPPFLAGS)
 
 .KEEP_STATE:
 
 all: $(LIBS) $(LIB_PIC)
-
-lint	:=	CPPFLAGS += -I$(LIBCDIR)/$(MACH)/fp
-lint	:=	CPPFLAGS += -D_MSE_INT_H -D_LCONV_C99
-lint	:=	LINTFLAGS += -mn -erroff=E_SUPPRESSION_DIRECTIVE_UNUSED
-
-lint:
-	@echo $(LINT.c) ...
-	@$(LINT.c) $(SRCS) $(LDLIBS)
-
-$(LINTLIB):= SRCS=$(LIBCDIR)/port/llib-lc
-$(LINTLIB):= CPPFLAGS += -D_MSE_INT_H
-$(LINTLIB):= LINTFLAGS=-nvx
 
 # object files that depend on inline template
 $(TIL:%=pics/%): $(LIBCBASE)/threads/i386.il
@@ -1312,8 +1279,8 @@ $(LIB_PIC): pics $$(PICS)
 	$(POST_PROCESS_A)
 
 $(LIBCBASE)/crt/_rtbootld.s: $(LIBCBASE)/crt/_rtboot.s $(LIBCBASE)/crt/_rtld.c
-	$(CC) $(CPPFLAGS) $(CTF_FLAGS) -O -S $(C_PICFLAGS) \
-	    $(LIBCBASE)/crt/_rtld.c -o $(LIBCBASE)/crt/_rtld.s
+	$(CC) $($(MACH)_XARCH) $(CPPFLAGS) -_smatch=off $(CTF_FLAGS) -O -S \
+	    $(C_PICFLAGS) $(LIBCBASE)/crt/_rtld.c -o $(LIBCBASE)/crt/_rtld.s
 	$(CAT) $(LIBCBASE)/crt/_rtboot.s $(LIBCBASE)/crt/_rtld.s > $@
 	$(RM) $(LIBCBASE)/crt/_rtld.s
 
@@ -1337,10 +1304,12 @@ $(ASSYMDEP_OBJS:%=pics/%): assym.h
 # assym.h build rules
 
 GENASSYM_C = $(LIBCDIR)/$(MACH)/genassym.c
+LDFLAGS.native = $(LDASSERTS) $(ZASSERTDEFLIB)=libc.so $(BDIRECT)
 
 genassym: $(GENASSYM_C)
 	$(NATIVECC) $(NATIVE_CFLAGS) -I$(LIBCBASE)/inc -I$(LIBCDIR)/inc	\
-		-D__EXTENSIONS__ $(CPPFLAGS.native) -o $@ $(GENASSYM_C)
+		-D__EXTENSIONS__ $(CPPFLAGS.native) $(LDFLAGS.native) \
+		-o $@ $(GENASSYM_C)
 
 OFFSETS = $(LIBCDIR)/$(MACH)/offsets.in
 

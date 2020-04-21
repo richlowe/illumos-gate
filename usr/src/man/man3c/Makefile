@@ -16,6 +16,7 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2018 Joyent, Inc.
 # Copyright 2018 Jason King
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 include		$(SRC)/Makefile.master
@@ -139,6 +140,7 @@ MANFILES=	__fbufsize.3c					\
 		floating_to_decimal.3c				\
 		flock.3c					\
 		flockfile.3c					\
+		fmemopen.3c					\
 		fmtmsg.3c					\
 		fnmatch.3c					\
 		fopen.3c					\
@@ -267,6 +269,7 @@ MANFILES=	__fbufsize.3c					\
 		newlocale.3c					\
 		nl_langinfo.3c					\
 		offsetof.3c					\
+		open_memstream.3c				\
 		opendir.3c					\
 		perror.3c					\
 		pfmt.3c						\
@@ -307,6 +310,7 @@ MANFILES=	__fbufsize.3c					\
 		pthread_attr_getdetachstate.3c			\
 		pthread_attr_getguardsize.3c			\
 		pthread_attr_getinheritsched.3c			\
+		pthread_attr_getname_np.3c			\
 		pthread_attr_getschedparam.3c			\
 		pthread_attr_getschedpolicy.3c			\
 		pthread_attr_getscope.3c			\
@@ -332,6 +336,7 @@ MANFILES=	__fbufsize.3c					\
 		pthread_equal.3c				\
 		pthread_exit.3c					\
 		pthread_getconcurrency.3c			\
+		pthread_getname_np.3c				\
 		pthread_getschedparam.3c			\
 		pthread_getspecific.3c				\
 		pthread_join.3c					\
@@ -475,6 +480,7 @@ MANFILES=	__fbufsize.3c					\
 		termios.3c					\
 		thr_create.3c					\
 		thr_exit.3c					\
+		thr_getname.3c					\
 		thr_getconcurrency.3c				\
 		thr_getprio.3c					\
 		thr_join.3c					\
@@ -1047,6 +1053,7 @@ MANLINKS=	FD_CLR.3c				\
 		ntohl.3c				\
 		ntohll.3c				\
 		ntohs.3c				\
+		open_wmemstream.3c			\
 		openlog.3c				\
 		pclose.3c				\
 		port_dissociate.3c			\
@@ -1092,6 +1099,7 @@ MANLINKS=	FD_CLR.3c				\
 		pthread_attr_setdetachstate.3c		\
 		pthread_attr_setguardsize.3c		\
 		pthread_attr_setinheritsched.3c		\
+		pthread_attr_setname_np.3c		\
 		pthread_attr_setschedparam.3c		\
 		pthread_attr_setschedpolicy.3c		\
 		pthread_attr_setscope.3c		\
@@ -1128,6 +1136,7 @@ MANLINKS=	FD_CLR.3c				\
 		pthread_rwlockattr_destroy.3c		\
 		pthread_rwlockattr_setpshared.3c	\
 		pthread_setconcurrency.3c		\
+		pthread_setname_np.3c			\
 		pthread_setschedparam.3c		\
 		pthread_setspecific.3c			\
 		pthread_spin_init.3c			\
@@ -1164,6 +1173,7 @@ MANLINKS=	FD_CLR.3c				\
 		re_exec.3c				\
 		readdir_r.3c				\
 		realloc.3c				\
+		reallocf.3c				\
 		reallocarray.3c				\
 		recallocarray.3c			\
 		regerror.3c				\
@@ -1291,6 +1301,7 @@ MANLINKS=	FD_CLR.3c				\
 		thr_continue.3c				\
 		thr_getspecific.3c			\
 		thr_keycreate_once.3c			\
+		thr_setname.3c				\
 		thr_setconcurrency.3c			\
 		thr_setprio.3c				\
 		thr_setspecific.3c			\
@@ -1989,6 +2000,7 @@ free.3c					:= LINKSRC = malloc.3c
 freezero.3c				:= LINKSRC = malloc.3c
 memalign.3c				:= LINKSRC = malloc.3c
 realloc.3c				:= LINKSRC = malloc.3c
+reallocf.3c				:= LINKSRC = malloc.3c
 reallocarray.3c				:= LINKSRC = malloc.3c
 recallocarray.3c			:= LINKSRC = malloc.3c
 valloc.3c				:= LINKSRC = malloc.3c
@@ -2069,6 +2081,8 @@ freelocale.3c				:= LINKSRC = newlocale.3c
 
 nl_langinfo_l.3c			:= LINKSRC = nl_langinfo.3c
 
+open_wmemstream.3c			:= LINKSRC = open_memstream.3c
+
 fdopendir.3c				:= LINKSRC = opendir.3c
 
 errno.3c				:= LINKSRC = perror.3c
@@ -2140,6 +2154,8 @@ pthread_attr_setguardsize.3c		:= LINKSRC = pthread_attr_getguardsize.3c
 
 pthread_attr_setinheritsched.3c		:= LINKSRC = pthread_attr_getinheritsched.3c
 
+pthread_attr_setname_np.3c		:= LINKSRC = pthread_attr_getname_np.3c
+
 pthread_attr_setschedparam.3c		:= LINKSRC = pthread_attr_getschedparam.3c
 
 pthread_attr_setschedpolicy.3c		:= LINKSRC = pthread_attr_getschedpolicy.3c
@@ -2173,6 +2189,8 @@ pthread_condattr_setpshared.3c		:= LINKSRC = pthread_condattr_getpshared.3c
 pthread_condattr_destroy.3c		:= LINKSRC = pthread_condattr_init.3c
 
 pthread_setconcurrency.3c		:= LINKSRC = pthread_getconcurrency.3c
+
+pthread_setname_np.3c			:= LINKSRC = pthread_getname_np.3c
 
 pthread_setschedparam.3c		:= LINKSRC = pthread_getschedparam.3c
 
@@ -2407,6 +2425,8 @@ thr_keycreate_once.3c			:= LINKSRC = thr_keycreate.3c
 thr_setspecific.3c			:= LINKSRC = thr_keycreate.3c
 
 thr_continue.3c				:= LINKSRC = thr_suspend.3c
+
+thr_setname.3c				:= LINKSRC = thr_getname.3c
 
 timegm.3c				:= LINKSRC = mktime.3c
 

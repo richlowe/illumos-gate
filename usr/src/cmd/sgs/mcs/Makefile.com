@@ -23,6 +23,8 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 PROG=		mcs
 STRIPFILE=	strip
@@ -37,22 +39,18 @@ MCS =		/usr/ccs/bin/mcs
 
 COMOBJS =	main.o		file.o		utils.o		global.o \
 		message.o
-TOOLSOBJS =	alist.o
+SGSCOMMONOBJ =	alist.o
 
-OBJS =		$(COMOBJS) $(TOOLSOBJS)
+OBJS =		$(COMOBJS) $(SGSCOMMONOBJ)
 
 LLDFLAGS =	'-R$$ORIGIN/../../lib'
 LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
 LDFLAGS +=	$(VERSREF) $(LLDFLAGS)
-LDLIBS +=	$(CONVLIBDIR) $(CONV_LIB) $(ELFLIBDIR) -lelf
+LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf
 
-LINTFLAGS +=	-x
-LINTFLAGS64 +=	-x
-
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 
 SRCS =		$(COMOBJS:%.o=../common/%.c) \
-		$(TOOLSOBJS:%.o=$(SGSTOOLS)/common/%.c)
-LINTSRCS =	$(SRCS) ../common/lintsup.c
+		$(SGSCOMMONOBJ:%.o=$(SGSCOMMON)/%.c)
 
-CLEANFILES +=	$(OBJS) $(LINTOUTS)
+CLEANFILES +=	$(OBJS)

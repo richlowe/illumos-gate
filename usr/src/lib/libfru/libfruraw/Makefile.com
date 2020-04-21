@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	libfruraw.a
 VERS=		.1
@@ -52,7 +53,10 @@ CPPFLAGS +=	-I.. \
 CPPFLAGS += 	-D_REENTRANT
 CFLAGS +=	$(CCVERBOSE)
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 $(LINTLIB) :=	LINTFLAGS = -nvx -I..
 $(LINTLIB) :=	LINTFLAGS64 = -nvx -m64 -I..

@@ -20,23 +20,32 @@
  */
 /*
  * Copyright (c) 2012 Gary Mills
+ * Copyright 2020 Joyent, Inc.
  *
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
+/*
+ * Boot console support.  Most of the file is shared between dboot, and the
+ * early kernel / fakebop.
+ */
+
 #include <sys/types.h>
 #include <sys/systm.h>
 #include <sys/archsystm.h>
+#include <sys/framebuffer.h>
 #include <sys/boot_console.h>
 #include <sys/panic.h>
 #include <sys/ctype.h>
+#include <sys/ascii.h>
+#include <sys/vgareg.h>
 #if defined(__xpv)
 #include <sys/hypervisor.h>
 #endif /* __xpv */
 
+#include "boot_console_impl.h"
 #include "boot_serial.h"
-#include "boot_vga.h"
 
 #if defined(_BOOT)
 #include <dboot/dboot_asm.h>
@@ -57,8 +66,10 @@ extern int bcons_getchar_xen(void);
 extern int bcons_ischar_xen(void);
 #endif /* __xpv */
 
-static int cons_color = CONS_COLOR;
+fb_info_t fb_info;
+static bcons_dev_t bcons_dev;				/* Device callbacks */
 static int console = CONS_SCREEN_TEXT;
+static int diag = CONS_INVALID;
 static int tty_num = 0;
 static int tty_addr[] = {0x3f8, 0x2f8, 0x3e8, 0x2e8};
 static char *boot_line;
@@ -67,14 +78,39 @@ static struct boot_env {
 	size_t	be_size;	/* size of the environment, including nul */
 } boot_env;
 
+/*
+ * Simple console terminal emulator for early boot.
+ * We need this to support kmdb, all other console output is supposed
+ * to be simple text output.
+ */
+typedef enum btem_state_type {
+	A_STATE_START,
+	A_STATE_ESC,
+	A_STATE_CSI,
+	A_STATE_CSI_QMARK,
+	A_STATE_CSI_EQUAL
+} btem_state_type_t;
+
+#define	BTEM_MAXPARAMS	5
+typedef struct btem_state {
+	btem_state_type_t btem_state;
+	boolean_t btem_gotparam;
+	int btem_curparam;
+	int btem_paramval;
+	int btem_params[BTEM_MAXPARAMS];
+} btem_state_t;
+
+static btem_state_t boot_tem;
+
 static int serial_ischar(void);
 static int serial_getchar(void);
 static void serial_putchar(int);
 static void serial_adjust_prop(void);
 
+static void defcons_putchar(int);
+
 #if !defined(_BOOT)
-/* Set if the console or mode are expressed in the boot line */
-static int console_set, console_mode_set;
+static boolean_t bootprop_set_tty_mode;
 #endif
 
 #if defined(__xpv)
@@ -91,67 +127,6 @@ console_hypervisor_dev_type(int *tnum)
 	return (console_hypervisor_device);
 }
 #endif /* __xpv */
-
-/* Clear the screen and initialize VIDEO, XPOS and YPOS. */
-void
-clear_screen(void)
-{
-	/*
-	 * XXX should set vga mode so we don't depend on the
-	 * state left by the boot loader.  Note that we have to
-	 * enable the cursor before clearing the screen since
-	 * the cursor position is dependant upon the cursor
-	 * skew, which is initialized by vga_cursor_display()
-	 */
-	vga_cursor_display();
-	vga_clear(cons_color);
-	vga_setpos(0, 0);
-}
-
-/* Put the character C on the screen. */
-static void
-screen_putchar(int c)
-{
-	int row, col;
-
-	vga_getpos(&row, &col);
-	switch (c) {
-	case '\t':
-		col += 8 - (col % 8);
-		if (col == VGA_TEXT_COLS)
-			col = 79;
-		vga_setpos(row, col);
-		break;
-
-	case '\r':
-		vga_setpos(row, 0);
-		break;
-
-	case '\b':
-		if (col > 0)
-			vga_setpos(row, col - 1);
-		break;
-
-	case '\n':
-		if (row < VGA_TEXT_ROWS - 1)
-			vga_setpos(row + 1, col);
-		else
-			vga_scroll(cons_color);
-		break;
-
-	default:
-		vga_drawc(c, cons_color);
-		if (col < VGA_TEXT_COLS -1)
-			vga_setpos(row, col + 1);
-		else if (row < VGA_TEXT_ROWS - 1)
-			vga_setpos(row + 1, 0);
-		else {
-			vga_setpos(row, 0);
-			vga_scroll(cons_color);
-		}
-		break;
-	}
-}
 
 static int port;
 
@@ -201,15 +176,6 @@ serial_init(void)
 
 	/* adjust setting based on tty properties */
 	serial_adjust_prop();
-
-#if defined(_BOOT)
-	/*
-	 * Do a full reset to match console behavior.
-	 * 0x1B + c - reset everything
-	 */
-	serial_putchar(0x1B);
-	serial_putchar('c');
-#endif
 }
 
 /* Advance str pointer past white space */
@@ -451,12 +417,12 @@ serial_adjust_prop(void)
 	(void) strcpy(propname, "ttyX-mode");
 	propname[3] = 'a' + tty_num;
 	propval = get_mode_value(propname);
+#if !defined(_BOOT)
+	if (propval != NULL)
+		bootprop_set_tty_mode = B_TRUE;
+#endif
 	if (propval == NULL)
 		propval = "9600,8,n,1,-";
-#if !defined(_BOOT)
-	else
-		console_mode_set = 1;
-#endif
 
 	/* property is of the form: "9600,8,n,1,-" */
 	p = propval;
@@ -607,25 +573,188 @@ bcons_init_env(struct xboot_info *xbi)
 	boot_env.be_size = modules[i].bm_size;
 }
 
+int
+boot_fb(struct xboot_info *xbi, int console)
+{
+	if (xbi_fb_init(xbi, &bcons_dev) == B_FALSE)
+		return (console);
+
+	/* FB address is not set, fall back to serial terminal. */
+	if (fb_info.paddr == 0)
+		return (CONS_TTY);
+
+	fb_info.terminal.x = VGA_TEXT_COLS;
+	fb_info.terminal.y = VGA_TEXT_ROWS;
+	boot_fb_init(CONS_FRAMEBUFFER);
+
+	if (console == CONS_SCREEN_TEXT)
+		return (CONS_FRAMEBUFFER);
+	return (console);
+}
+
+/*
+ * TODO.
+ * quick and dirty local atoi. Perhaps should build with strtol, but
+ * dboot & early boot mix does overcomplicate things much.
+ * Stolen from libc anyhow.
+ */
+static int
+atoi(const char *p)
+{
+	int n, c, neg = 0;
+	unsigned char *up = (unsigned char *)p;
+
+	if (!isdigit(c = *up)) {
+		while (isspace(c))
+			c = *++up;
+		switch (c) {
+		case '-':
+			neg++;
+			/* FALLTHROUGH */
+		case '+':
+			c = *++up;
+		}
+		if (!isdigit(c))
+			return (0);
+	}
+	for (n = '0' - c; isdigit(c = *++up); ) {
+		n *= 10; /* two steps to avoid unnecessary overflow */
+		n += '0' - c; /* accum neg to avoid surprises at MAX */
+	}
+	return (neg ? n : -n);
+}
+
+static void
+bcons_init_fb(void)
+{
+	const char *propval;
+	int intval;
+
+	/* initialize with explicit default values */
+	fb_info.fg_color = CONS_COLOR;
+	fb_info.bg_color = 0;
+	fb_info.inverse = B_FALSE;
+	fb_info.inverse_screen = B_FALSE;
+
+	/* color values are 0 - 255 */
+	propval = find_boot_prop("tem.fg_color");
+	if (propval != NULL) {
+		intval = atoi(propval);
+		if (intval >= 0 && intval <= 255)
+			fb_info.fg_color = intval;
+	}
+
+	/* color values are 0 - 255 */
+	propval = find_boot_prop("tem.bg_color");
+	if (propval != NULL && ISDIGIT(*propval)) {
+		intval = atoi(propval);
+		if (intval >= 0 && intval <= 255)
+			fb_info.bg_color = intval;
+	}
+
+	/* get inverses. allow 0, 1, true, false */
+	propval = find_boot_prop("tem.inverse");
+	if (propval != NULL) {
+		if (*propval == '1' || MATCHES(propval, "true"))
+			fb_info.inverse = B_TRUE;
+	}
+
+	propval = find_boot_prop("tem.inverse-screen");
+	if (propval != NULL) {
+		if (*propval == '1' || MATCHES(propval, "true"))
+			fb_info.inverse_screen = B_TRUE;
+	}
+
+#if defined(_BOOT)
+	/*
+	 * Load cursor position from bootloader only in dboot,
+	 * dboot will pass cursor position to kernel via xboot info.
+	 */
+	propval = find_boot_prop("tem.cursor.row");
+	if (propval != NULL) {
+		intval = atoi(propval);
+		if (intval >= 0 && intval <= 0xFFFF)
+			fb_info.cursor.pos.y = intval;
+	}
+
+	propval = find_boot_prop("tem.cursor.col");
+	if (propval != NULL) {
+		intval = atoi(propval);
+		if (intval >= 0 && intval <= 0xFFFF)
+			fb_info.cursor.pos.x = intval;
+	}
+#endif
+}
+
+/*
+ * Go through the known console device names trying to match the string we were
+ * given.  The string on the command line must end with a comma or white space.
+ *
+ * For convenience, we provide the caller with an integer index for the CONS_TTY
+ * case.
+ */
+static int
+lookup_console_device(const char *cons_str, int *indexp)
+{
+	int n, cons;
+	size_t len, cons_len;
+	console_value_t *consolep;
+
+	cons = CONS_INVALID;
+	if (cons_str != NULL) {
+
+		cons_len = strlen(cons_str);
+		for (n = 0; console_devices[n].name != NULL; n++) {
+			consolep = &console_devices[n];
+			len = strlen(consolep->name);
+			if ((len <= cons_len) && ((cons_str[len] == '\0') ||
+			    (cons_str[len] == ',') || (cons_str[len] == '\'') ||
+			    (cons_str[len] == '"') || ISSPACE(cons_str[len])) &&
+			    (strncmp(cons_str, consolep->name, len) == 0)) {
+				cons = consolep->value;
+				if (cons == CONS_TTY)
+					*indexp = n;
+				break;
+			}
+		}
+	}
+	return (cons);
+}
+
 void
 bcons_init(struct xboot_info *xbi)
 {
-	console_value_t *consolep;
-	size_t len, cons_len;
 	const char *cons_str;
 #if !defined(_BOOT)
 	static char console_text[] = "text";
 	extern int post_fastreboot;
 #endif
 
+	if (xbi == NULL) {
+		/* This is very early dboot console, set up ttya. */
+		console = CONS_TTY;
+		serial_init();
+		return;
+	}
+
 	/* Set up data to fetch properties from commad line and boot env. */
 	boot_line = (char *)(uintptr_t)xbi->bi_cmdline;
 	bcons_init_env(xbi);
 	console = CONS_INVALID;
 
+	/* set up initial fb_info */
+	bcons_init_fb();
+
 #if defined(__xpv)
 	bcons_init_xen(boot_line);
 #endif /* __xpv */
+
+	/*
+	 * First check for diag-device.
+	 */
+	cons_str = find_boot_prop("diag-device");
+	if (cons_str != NULL)
+		diag = lookup_console_device(cons_str, &tty_num);
 
 	cons_str = find_boot_prop("console");
 	if (cons_str == NULL)
@@ -636,29 +765,8 @@ bcons_init(struct xboot_info *xbi)
 		cons_str = console_text;
 #endif
 
-	/*
-	 * Go through the console_devices array trying to match the string
-	 * we were given.  The string on the command line must end with
-	 * a comma or white space.
-	 */
-	if (cons_str != NULL) {
-		int n;
-
-		cons_len = strlen(cons_str);
-		for (n = 0; console_devices[n].name != NULL; n++) {
-			consolep = &console_devices[n];
-			len = strlen(consolep->name);
-			if ((len <= cons_len) && ((cons_str[len] == '\0') ||
-			    (cons_str[len] == ',') || (cons_str[len] == '\'') ||
-			    (cons_str[len] == '"') || ISSPACE(cons_str[len])) &&
-			    (strncmp(cons_str, consolep->name, len) == 0)) {
-				console = consolep->value;
-				if (console == CONS_TTY)
-					tty_num = n;
-				break;
-			}
-		}
-	}
+	if (cons_str != NULL)
+		console = lookup_console_device(cons_str, &tty_num);
 
 #if defined(__xpv)
 	/*
@@ -671,16 +779,8 @@ bcons_init(struct xboot_info *xbi)
 	}
 #endif /* __xpv */
 
-	/*
-	 * If no console device specified, default to text.
-	 * Remember what was specified for second phase.
-	 */
 	if (console == CONS_INVALID)
 		console = CONS_SCREEN_TEXT;
-#if !defined(_BOOT)
-	else
-		console_set = 1;
-#endif
 
 #if defined(__xpv)
 	if (DOMAIN_IS_INITDOMAIN(xen_info)) {
@@ -717,6 +817,8 @@ bcons_init(struct xboot_info *xbi)
 	}
 #endif /* __xpv */
 
+	/* make sure the FB is set up if present */
+	console = boot_fb(xbi, console);
 	switch (console) {
 	case CONS_TTY:
 		serial_init();
@@ -737,138 +839,31 @@ bcons_init(struct xboot_info *xbi)
 		kb_init();
 		break;
 	case CONS_SCREEN_TEXT:
+		boot_vga_init(&bcons_dev);
+		/* Fall through */
 	default:
-#if defined(_BOOT)
-		clear_screen();	/* clears the grub or xen screen */
-#endif /* _BOOT */
 		kb_init();
 		break;
 	}
-}
-
-#if !defined(_BOOT)
-/*
- * 2nd part of console initialization.
- * In the kernel (ie. fakebop), this can be used only to switch to
- * using a serial port instead of screen based on the contents
- * of the bootenv.rc file.
- */
-/*ARGSUSED*/
-void
-bcons_init2(char *inputdev, char *outputdev, char *consoledev)
-{
-	int cons = CONS_INVALID;
-	int ttyn;
-	char *devnames[] = { consoledev, outputdev, inputdev, NULL };
-	console_value_t *consolep;
-	int i;
-	extern int post_fastreboot;
-
-	if (post_fastreboot && console == CONS_SCREEN_GRAPHICS)
-		console = CONS_SCREEN_TEXT;
-
-	if (console != CONS_USBSER && console != CONS_SCREEN_GRAPHICS) {
-		if (console_set) {
-			/*
-			 * If the console was set on the command line,
-			 * but the ttyX-mode was not, we only need to
-			 * check bootenv.rc for that setting.
-			 */
-			if ((!console_mode_set) && (console == CONS_TTY))
-				serial_init();
-			return;
-		}
-
-		for (i = 0; devnames[i] != NULL; i++) {
-			int n;
-
-			for (n = 0; console_devices[n].name != NULL; n++) {
-				consolep = &console_devices[n];
-				if (strcmp(devnames[i], consolep->name) == 0) {
-					cons = consolep->value;
-					if (cons == CONS_TTY)
-						ttyn = n;
-				}
-			}
-			if (cons != CONS_INVALID)
-				break;
-		}
-
-#if defined(__xpv)
-		/*
-		 * if the hypervisor is using the currently selected console
-		 * device then default to using the hypervisor as the console
-		 * device.
-		 */
-		if (cons == console_hypervisor_device) {
-			cons = CONS_HYPERVISOR;
-			console_hypervisor_redirect = B_TRUE;
-		}
-#endif /* __xpv */
-
-		if ((cons == CONS_INVALID) || (cons == console)) {
-			/*
-			 * we're sticking with whatever the current setting is
-			 */
-			return;
-		}
-
-		console = cons;
-		if (cons == CONS_TTY) {
-			tty_num = ttyn;
-			serial_init();
-			return;
-		}
-	} else {
-		/*
-		 * USB serial and GRAPHICS console
-		 * we just collect data into a buffer
-		 */
-		extern void *defcons_init(size_t);
-		defcons_buf = defcons_cur = defcons_init(MMU_PAGESIZE);
-	}
-}
-
-#if defined(__xpv)
-boolean_t
-bcons_hypervisor_redirect(void)
-{
-	return (console_hypervisor_redirect);
-}
-
-void
-bcons_device_change(int new_console)
-{
-	if (new_console < CONS_MIN || new_console > CONS_MAX)
-		return;
 
 	/*
-	 * If we are asked to switch the console to the hypervisor, that
-	 * really means to switch the console to whichever device the
-	 * hypervisor is/was using.
+	 * Initialize diag device unless already done.
 	 */
-	if (new_console == CONS_HYPERVISOR)
-		new_console = console_hypervisor_device;
-
-	console = new_console;
-
-	if (new_console == CONS_TTY) {
-		tty_num = console_hypervisor_tty_num;
-		serial_init();
+	switch (diag) {
+	case CONS_TTY:
+		if (console != CONS_TTY)
+			serial_init();
+		break;
+	case CONS_SCREEN_GRAPHICS:
+	case CONS_SCREEN_TEXT:
+		if (console != CONS_SCREEN_GRAPHICS &&
+		    console != CONS_SCREEN_TEXT)
+			kb_init();
+		break;
+	default:
+		break;
 	}
 }
-#endif /* __xpv */
-
-static void
-defcons_putchar(int c)
-{
-	if (defcons_buf != NULL &&
-	    defcons_cur + 1 - defcons_buf < MMU_PAGESIZE) {
-		*defcons_cur++ = c;
-		*defcons_cur = 0;
-	}
-}
-#endif	/* _BOOT */
 
 static void
 serial_putchar(int c)
@@ -909,20 +904,200 @@ serial_ischar(void)
 }
 
 static void
-_doputchar(int c)
+btem_control(btem_state_t *btem, int c)
 {
-	switch (console) {
+	int y, rows, cols;
+
+	rows = fb_info.cursor.pos.y;
+	cols = fb_info.cursor.pos.x;
+
+	btem->btem_state = A_STATE_START;
+	switch (c) {
+	case A_BS:
+		bcons_dev.bd_setpos(rows, cols - 1);
+		break;
+
+	case A_HT:
+		cols += 8 - (cols % 8);
+		if (cols >= fb_info.terminal.x)
+			cols = fb_info.terminal.x - 1;
+		bcons_dev.bd_setpos(rows, cols);
+		break;
+
+	case A_CR:
+		bcons_dev.bd_setpos(rows, 0);
+		break;
+
+	case A_FF:
+		for (y = 0; y < fb_info.terminal.y; y++) {
+			bcons_dev.bd_setpos(y, 0);
+			bcons_dev.bd_eraseline();
+		}
+		bcons_dev.bd_setpos(0, 0);
+		break;
+
+	case A_ESC:
+		btem->btem_state = A_STATE_ESC;
+		break;
+
+	default:
+		bcons_dev.bd_putchar(c);
+		break;
+	}
+}
+
+/*
+ * if parameters [0..count - 1] are not set, set them to the value
+ * of newparam.
+ */
+static void
+btem_setparam(btem_state_t *btem, int count, int newparam)
+{
+	int i;
+
+	for (i = 0; i < count; i++) {
+		if (btem->btem_params[i] == -1)
+			btem->btem_params[i] = newparam;
+	}
+}
+
+static void
+btem_chkparam(btem_state_t *btem, int c)
+{
+	int rows, cols;
+
+	rows = fb_info.cursor.pos.y;
+	cols = fb_info.cursor.pos.x;
+	switch (c) {
+	case '@':			/* insert char */
+		btem_setparam(btem, 1, 1);
+		bcons_dev.bd_shift(btem->btem_params[0]);
+		break;
+
+	case 'A':			/* cursor up */
+		btem_setparam(btem, 1, 1);
+		bcons_dev.bd_setpos(rows - btem->btem_params[0], cols);
+		break;
+
+	case 'B':			/* cursor down */
+		btem_setparam(btem, 1, 1);
+		bcons_dev.bd_setpos(rows + btem->btem_params[0], cols);
+		break;
+
+	case 'C':			/* cursor right */
+		btem_setparam(btem, 1, 1);
+		bcons_dev.bd_setpos(rows, cols + btem->btem_params[0]);
+		break;
+
+	case 'D':			/* cursor left */
+		btem_setparam(btem, 1, 1);
+		bcons_dev.bd_setpos(rows, cols - btem->btem_params[0]);
+		break;
+
+	case 'K':
+		bcons_dev.bd_eraseline();
+		break;
+	default:
+		/* bcons_dev.bd_putchar(c); */
+		break;
+	}
+	btem->btem_state = A_STATE_START;
+}
+
+static void
+btem_getparams(btem_state_t *btem, int c)
+{
+	if (isdigit(c)) {
+		btem->btem_paramval = btem->btem_paramval * 10 + c - '0';
+		btem->btem_gotparam = B_TRUE;
+		return;
+	}
+
+	if (btem->btem_curparam < BTEM_MAXPARAMS) {
+		if (btem->btem_gotparam == B_TRUE) {
+			btem->btem_params[btem->btem_curparam] =
+			    btem->btem_paramval;
+		}
+		btem->btem_curparam++;
+	}
+
+	if (c == ';') {
+		/* Restart parameter search */
+		btem->btem_gotparam = B_FALSE;
+		btem->btem_paramval = 0;
+	} else {
+		btem_chkparam(btem, c);
+	}
+}
+
+/* Simple boot terminal parser. */
+static void
+btem_parse(btem_state_t *btem, int c)
+{
+	int i;
+
+	/* Normal state? */
+	if (btem->btem_state == A_STATE_START) {
+		if (c == A_CSI || c < ' ')
+			btem_control(btem, c);
+		else
+			bcons_dev.bd_putchar(c);
+		return;
+	}
+
+	/* In <ESC> sequence */
+	if (btem->btem_state != A_STATE_ESC) {
+		btem_getparams(btem, c);
+		return;
+	}
+
+	/* Previous char was <ESC> */
+	switch (c) {
+	case '[':
+		btem->btem_curparam = 0;
+		btem->btem_paramval = 0;
+		btem->btem_gotparam = B_FALSE;
+		/* clear the parameters */
+		for (i = 0; i < BTEM_MAXPARAMS; i++)
+			btem->btem_params[i] = -1;
+		btem->btem_state = A_STATE_CSI;
+		return;
+
+	case 'Q':	/* <ESC>Q */
+	case 'C':	/* <ESC>C */
+		btem->btem_state = A_STATE_START;
+		return;
+
+	default:
+		btem->btem_state = A_STATE_START;
+		break;
+	}
+
+	if (c < ' ')
+		btem_control(btem, c);
+	else
+		bcons_dev.bd_putchar(c);
+}
+
+static void
+_doputchar(int device, int c)
+{
+	switch (device) {
 	case CONS_TTY:
 		serial_putchar(c);
 		return;
 	case CONS_SCREEN_TEXT:
-		screen_putchar(c);
+	case CONS_FRAMEBUFFER:
+		bcons_dev.bd_cursor(B_FALSE);
+		btem_parse(&boot_tem, c);
+		bcons_dev.bd_cursor(B_TRUE);
 		return;
 	case CONS_SCREEN_GRAPHICS:
 #if !defined(_BOOT)
 	case CONS_USBSER:
 		defcons_putchar(c);
 #endif /* _BOOT */
+	default:
 		return;
 	}
 }
@@ -930,8 +1105,6 @@ _doputchar(int c)
 void
 bcons_putchar(int c)
 {
-	static int bhcharpos = 0;
-
 #if defined(__xpv)
 	if (!DOMAIN_IS_INITDOMAIN(xen_info) ||
 	    console == CONS_HYPERVISOR) {
@@ -940,25 +1113,14 @@ bcons_putchar(int c)
 	}
 #endif /* __xpv */
 
-	if (c == '\t') {
-		do {
-			_doputchar(' ');
-		} while (++bhcharpos % 8);
-		return;
-	} else  if (c == '\n' || c == '\r') {
-		bhcharpos = 0;
-		_doputchar('\r');
-		_doputchar(c);
-		return;
-	} else if (c == '\b') {
-		if (bhcharpos)
-			bhcharpos--;
-		_doputchar(c);
-		return;
+	if (c == '\n') {
+		_doputchar(console, '\r');
+		if (diag != console)
+			_doputchar(diag, '\r');
 	}
-
-	bhcharpos++;
-	_doputchar(c);
+	_doputchar(console, c);
+	if (diag != console)
+		_doputchar(diag, c);
 }
 
 /*
@@ -973,19 +1135,27 @@ bcons_getchar(void)
 		return (bcons_getchar_xen());
 #endif /* __xpv */
 
-	switch (console) {
-	case CONS_TTY:
-		return (serial_getchar());
-	default:
-		return (kb_getchar());
+	for (;;) {
+		if (console == CONS_TTY || diag == CONS_TTY) {
+			if (serial_ischar())
+				return (serial_getchar());
+		}
+		if (console != CONS_INVALID || diag != CONS_INVALID) {
+			if (kb_ischar())
+				return (kb_getchar());
+		}
 	}
 }
 
+/*
+ * Nothing below is used by dboot.
+ */
 #if !defined(_BOOT)
 
 int
 bcons_ischar(void)
 {
+	int c = 0;
 
 #if defined(__xpv)
 	if (!DOMAIN_IS_INITDOMAIN(xen_info) ||
@@ -995,9 +1165,133 @@ bcons_ischar(void)
 
 	switch (console) {
 	case CONS_TTY:
-		return (serial_ischar());
+		c = serial_ischar();
+		break;
+
+	case CONS_INVALID:
+		break;
+
 	default:
-		return (kb_ischar());
+		c = kb_ischar();
+	}
+	if (c != 0)
+		return (c);
+
+	switch (diag) {
+	case CONS_TTY:
+		c = serial_ischar();
+		break;
+
+	case CONS_INVALID:
+		break;
+
+	default:
+		c = kb_ischar();
+	}
+
+	return (c);
+}
+
+/*
+ * 2nd part of console initialization: we've now processed bootenv.rc; update
+ * console settings as appropriate. This only really processes serial console
+ * modifications.
+ */
+void
+bcons_post_bootenvrc(char *inputdev, char *outputdev, char *consoledev)
+{
+	int cons = CONS_INVALID;
+	int ttyn;
+	char *devnames[] = { consoledev, outputdev, inputdev, NULL };
+	console_value_t *consolep;
+	int i;
+	extern int post_fastreboot;
+
+	ttyn = 0;
+	if (post_fastreboot && console == CONS_SCREEN_GRAPHICS)
+		console = CONS_SCREEN_TEXT;
+
+	/*
+	 * USB serial and GRAPHICS console: we just collect data into a buffer.
+	 */
+	if (console == CONS_USBSER || console == CONS_SCREEN_GRAPHICS) {
+		extern void *defcons_init(size_t);
+		defcons_buf = defcons_cur = defcons_init(MMU_PAGESIZE);
+		return;
+	}
+
+	for (i = 0; devnames[i] != NULL; i++) {
+		cons = lookup_console_device(devnames[i], &ttyn);
+		if (cons != CONS_INVALID)
+			break;
+	}
+
+	if (cons == CONS_INVALID) {
+		/*
+		 * No console change, but let's see if bootenv.rc had a mode
+		 * setting we should apply.
+		 */
+		if (console == CONS_TTY && !bootprop_set_tty_mode)
+			serial_init();
+		return;
+	}
+
+#if defined(__xpv)
+	/*
+	 * if the hypervisor is using the currently selected console device then
+	 * default to using the hypervisor as the console device.
+	 */
+	if (cons == console_hypervisor_device) {
+		cons = CONS_HYPERVISOR;
+		console_hypervisor_redirect = B_TRUE;
+	}
+#endif /* __xpv */
+
+	console = cons;
+
+	if (console == CONS_TTY) {
+		tty_num = ttyn;
+		serial_init();
+	}
+}
+
+#if defined(__xpv)
+boolean_t
+bcons_hypervisor_redirect(void)
+{
+	return (console_hypervisor_redirect);
+}
+
+void
+bcons_device_change(int new_console)
+{
+	if (new_console < CONS_MIN || new_console > CONS_MAX)
+		return;
+
+	/*
+	 * If we are asked to switch the console to the hypervisor, that
+	 * really means to switch the console to whichever device the
+	 * hypervisor is/was using.
+	 */
+	if (new_console == CONS_HYPERVISOR)
+		new_console = console_hypervisor_device;
+
+	console = new_console;
+
+	if (new_console == CONS_TTY) {
+		tty_num = console_hypervisor_tty_num;
+		serial_init();
+	}
+}
+#endif /* __xpv */
+
+static void
+defcons_putchar(int c)
+{
+	if (defcons_buf != NULL &&
+	    defcons_cur + 1 - defcons_buf < MMU_PAGESIZE) {
+		*defcons_cur++ = c;
+		*defcons_cur = 0;
 	}
 }
 

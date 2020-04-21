@@ -27,6 +27,7 @@
 
 #include "linux.h"
 #include "bootstrap.h"
+#include "vbe.h"
 #include "libi386.h"
 #include "btxv86.h"
 
@@ -87,7 +88,8 @@ find_real_addr(struct preloaded_file *fp)
 }
 
 static int
-linux_loadkernel(char *filename, uint64_t dest, struct preloaded_file **result)
+linux_loadkernel(char *filename, uint64_t dest __unused,
+    struct preloaded_file **result)
 {
 	struct linux_kernel_header lh;
 	struct preloaded_file *fp;
@@ -292,7 +294,7 @@ linux_exec(struct preloaded_file *fp)
 
 	i386_getdev((void **)(&rootdev), fp->f_name, NULL);
 	if (rootdev != NULL)
-		relocator_edx = bd_unit2bios(rootdev->dd.d_unit);
+		relocator_edx = bd_unit2bios(rootdev);
 
 	/*
 	 * command line
@@ -395,6 +397,8 @@ linux_exec(struct preloaded_file *fp)
 	relocator_a20_enabled = 1;
 	i386_copyin(relocater, 0x600, relocater_size);
 
+	/* Set VGA text mode */
+	bios_set_text_mode(3);
 	dev_cleanup();
 
 	__exec((void *)0x600);
@@ -405,7 +409,8 @@ linux_exec(struct preloaded_file *fp)
 }
 
 static int
-linux_loadinitrd(char *filename, uint64_t dest, struct preloaded_file **result)
+linux_loadinitrd(char *filename, uint64_t dest __unused,
+    struct preloaded_file **result)
 {
 	struct preloaded_file *mfp;
 
@@ -426,7 +431,7 @@ linux_loadinitrd(char *filename, uint64_t dest, struct preloaded_file **result)
 	return (0);
 }
 
-static int linux_execinitrd(struct preloaded_file *pf)
+static int linux_execinitrd(struct preloaded_file *pf __unused)
 {
 	return (EFTYPE);
 }

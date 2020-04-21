@@ -21,7 +21,7 @@
 
 #
 # Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2017 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 MYPROG =	svccfg
@@ -47,7 +47,7 @@ MYOBJS =	$(SRCS:%.c=%.o) \
 		notify_params.o
 OBJS =		$(MYOBJS)
 
-POFILES = 	$(SRCS:%.c=%.po) \
+POFILES =	$(SRCS:%.c=%.po) \
 		svccfg_grammar.po \
 		svccfg_lex.po \
 		../common/manifest_find.po \
@@ -77,9 +77,12 @@ LDFLAGS +=	$(MAPOPTS)
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
+
+# not linted
+SMATCH=off
 
 LFLAGS = -t
 YFLAGS = -d
@@ -89,6 +92,11 @@ CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h \
 
 SVCCFG_EXTRA_LIBS = -lxml2 -lscf -ll -luutil -lumem -lmd5 -lnvpair
 $(NOT_NATIVE)SVCCFG_EXTRA_LIBS += -ltecla
+#
+# If no adjunct, then we'll already find /usr/lib via LDLIBS below.
+#
+$(NO_ADJUNCT_PROTO)NATIVE_LIBS += libxml2.so libl.so libumem.so \
+    libmd5.so libnvpair.so libc.so
 
 LIBSCF		= $(SRC)/lib/libscf
 LIBTECLA	= $(SRC)/lib/libtecla		# just for the header
@@ -108,7 +116,7 @@ $(NATIVE_BUILD)CPPFLAGS = \
 	-I$(LIBSCF)/inc \
 	-I$(LIBTECLA) \
 	-I$(LIBUUTIL)/common
-$(NATIVE_BUILD)LDFLAGS =
+$(NATIVE_BUILD)LDFLAGS = $(BDIRECT)
 $(NATIVE_BUILD)LDLIBS = \
 	-L$(LIBUUTIL)/native -R $(LIBUUTIL)/native \
 	-L$(LIBSCF)/native -R $(LIBSCF)/native \

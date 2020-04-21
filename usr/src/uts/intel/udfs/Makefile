@@ -23,11 +23,7 @@
 # Use is subject to license terms.
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
-#	This makefile drives the production of the udfs file system
-#	kernel module.
-#
-#	intel implementation architecture dependent
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -80,8 +76,11 @@ LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-type-limits
+
+# needs work
+SMATCH=off
 
 #
 #	Default build targets.

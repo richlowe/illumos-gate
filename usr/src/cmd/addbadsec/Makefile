@@ -23,8 +23,9 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
-PROG= 		addbadsec
+PROG=		addbadsec
 OBJECTS=	addbadsec.o ix_altsctr.o
 SRCS=		$(OBJECTS:.o=.c)
 
@@ -32,14 +33,17 @@ include ../Makefile.cmd
 
 CPPFLAGS += -D_EXTVTOC
 
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 
 all: $(PROG)
 
 $(PROG):        $(OBJECTS)
-	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LDLIBS)
+	$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)
 	$(POST_PROCESS)
 
 install: all $(ROOTPROG)

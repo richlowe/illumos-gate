@@ -23,6 +23,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright (c) 2017, Joyent, Inc.
+ */
+
 #include <sys/types.h>
 #include <sys/ddi.h>
 #include <sys/dditypes.h>
@@ -124,8 +128,8 @@ pcie_bdf_list_remove(pcie_req_id_t bdf, pcie_req_id_list_t **rlist_p)
 void
 pcie_cache_domain_info(pcie_bus_t *bus_p)
 {
-	boolean_t 	assigned = PCIE_IS_ASSIGNED(bus_p);
-	boolean_t 	fma_dom = PCIE_ASSIGNED_TO_FMA_DOM(bus_p);
+	boolean_t	assigned = PCIE_IS_ASSIGNED(bus_p);
+	boolean_t	fma_dom = PCIE_ASSIGNED_TO_FMA_DOM(bus_p);
 	uint_t		domain_id = PCIE_DOMAIN_ID_GET(bus_p);
 	pcie_req_id_t	bdf = bus_p->bus_bdf;
 	dev_info_t	*pdip;
@@ -163,8 +167,8 @@ pcie_cache_domain_info(pcie_bus_t *bus_p)
 void
 pcie_uncache_domain_info(pcie_bus_t *bus_p)
 {
-	boolean_t 	assigned = PCIE_IS_ASSIGNED(bus_p);
-	boolean_t 	fma_dom = PCIE_ASSIGNED_TO_FMA_DOM(bus_p);
+	boolean_t	assigned = PCIE_IS_ASSIGNED(bus_p);
+	boolean_t	fma_dom = PCIE_ASSIGNED_TO_FMA_DOM(bus_p);
 	uint_t		domain_id = PCIE_DOMAIN_ID_GET(bus_p);
 	pcie_domain_t	*dom_p = PCIE_BUS2DOM(bus_p), *pdom_p;
 	pcie_bus_t	*pbus_p;
@@ -176,7 +180,7 @@ pcie_uncache_domain_info(pcie_bus_t *bus_p)
 
 	/* Clear the domain information */
 	if (domain_id) {
-		PCIE_DOMAIN_ID_SET(bus_p, NULL);
+		PCIE_DOMAIN_ID_SET(bus_p, 0);
 		PCIE_DOMAIN_ID_DECR_REF_COUNT(bus_p);
 	}
 
@@ -302,7 +306,7 @@ pciev_eh(pf_data_t *pfd_p, pf_impl_t *impl)
 		pcie_faulty_all = B_TRUE;
 
 	} else if (severity & (PF_ERR_NO_PANIC | PF_ERR_MATCHED_DEVICE |
-	    PF_ERR_PANIC | PF_ERR_PANIC_BAD_RESPONSE)) {
+	    PF_ERR_PANIC | PF_ERR_BAD_RESPONSE)) {
 
 		uint16_t affected_flag, dev_affected_flags;
 		uint_t is_panic = 0, is_aff_dev_found = 0;

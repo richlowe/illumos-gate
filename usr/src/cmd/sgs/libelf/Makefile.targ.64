@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 objs/%.o \
@@ -43,14 +44,6 @@ pics/%.o:	../common/%.c
 		$(POST_PROCESS_O)
 
 all:		$(BLTSRCS) .WAIT $(LIBS) $(LIBLINKS)
-
-install:	all .WAIT $(ROOTFS_LIBS64) $(ROOTFS_LINKS64) \
-		$(ROOTFS_LINTLIB64)
-
-lint:		$(LINTLIB) $(LINTOUT32) $(LINTOUT64) $(SGSLINTOUT)
-
-.PARALLEL:	$(LINTOUT32) $(LINTOUT64)
-
 
 delete:
 		$(RM) $(DYNLIB)
@@ -94,15 +87,11 @@ chkmsg:		$(LIBSRCS)
 		sh $(CHKMSG) $(CHKMSGFLAGS) $(LIBSRCS)
 
 $(BLTDEFS) + \
-$(BLTDATA):	$(SGSMSG) $(SGSMSGTARG)
+$(BLTDATA):	$(SGSMSGTARG)
 		$(SGSMSG) $(SGSMSGFLAGS2) $(SGSMSGTARG)
 
-$(BLTMESG):	$(SGSMSG) $(SGSMSGALL) xlate.c xlate64.c
+$(BLTMESG):	$(SGSMSGALL) xlate.c xlate64.c
 		$(SGSMSG) $(SGSMSGFLAGS1) $(SGSMSGALL)
-
-$(SGSMSG):	FRC
-		@ cd $(SGSTOOLS)/$(MACH); pwd; $(MAKE) catalog
-		@ pwd
 
 #
 # 64-bit overrides

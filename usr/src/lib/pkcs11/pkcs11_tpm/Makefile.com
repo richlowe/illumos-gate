@@ -23,6 +23,8 @@
 #
 # Copyright 2018 Jason King
 #
+# Copyright (c) 2018, Joyent, Inc.
+
 LIBRARY =	pkcs11_tpm.a
 VERS =		.1
 
@@ -96,7 +98,10 @@ CSTD=        $(CSTD_GNU99)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-label
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 LINTSRC= $(OBJECTS:%.o=$(SRCDIR)/%.c)
 

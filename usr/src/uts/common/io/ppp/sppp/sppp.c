@@ -4,6 +4,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  * Copyright (c) 2016 by Delphix. All rights reserved.
+ * Copyright 2019, Joyent, Inc.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation is hereby granted, provided that the above copyright
@@ -98,7 +99,7 @@ static void	sppp_recv_nondata(queue_t *, mblk_t *, spppstr_t *);
 static queue_t	*sppp_outpkt(queue_t *, mblk_t **, int, spppstr_t *);
 static spppstr_t *sppp_inpkt(queue_t *, mblk_t *, spppstr_t *);
 static int	sppp_kstat_update(kstat_t *, int);
-static void 	sppp_release_pkts(sppa_t *, uint16_t);
+static void	sppp_release_pkts(sppa_t *, uint16_t);
 
 /*
  * sps_list contains the list of active per-stream instance state structures
@@ -319,8 +320,9 @@ sppp_create_ppa(uint32_t ppa_id, zoneid_t zoneid)
  * Description:
  *    Common close procedure for module.
  */
+/* ARGSUSED */
 int
-sppp_close(queue_t *q)
+sppp_close(queue_t *q, int flags __unused, cred_t *credp __unused)
 {
 	spppstr_t	*sps;
 	spppstr_t	**nextmn;
@@ -696,7 +698,7 @@ sppp_ioctl(struct queue *q, mblk_t *mp)
  * Description:
  *    Upper write-side put procedure. Messages from above arrive here.
  */
-void
+int
 sppp_uwput(queue_t *q, mblk_t *mp)
 {
 	queue_t		*nextq;
@@ -738,7 +740,7 @@ sppp_uwput(queue_t *q, mblk_t *mp)
 			}
 		} else {
 			(void) sppp_mproto(q, mp, sps);
-			return;
+			return (0);
 		}
 		break;
 	case M_DATA:
@@ -761,12 +763,12 @@ sppp_uwput(queue_t *q, mblk_t *mp)
 		case PPPIO_BLOCKNP:
 		case PPPIO_UNBLOCKNP:
 			qwriter(q, mp, sppp_inner_ioctl, PERIM_INNER);
-			return;
+			return (0);
 		case I_LINK:
 		case I_UNLINK:
 		case PPPIO_NEWPPA:
 			qwriter(q, mp, sppp_outer_ioctl, PERIM_OUTER);
-			return;
+			return (0);
 		case PPPIO_NPMODE:
 		case PPPIO_GIDLE:
 		case PPPIO_GTYPE:
@@ -778,7 +780,7 @@ sppp_uwput(queue_t *q, mblk_t *mp)
 			 * they're moved off to a separate function.
 			 */
 			sppp_ioctl(q, mp);
-			return;
+			return (0);
 		case PPPIO_GETSTAT:
 			break;			/* 32 bit interface gone */
 		default:
@@ -801,7 +803,7 @@ sppp_uwput(queue_t *q, mblk_t *mp)
 					error = EAGAIN;
 					break;
 				}
-				return;
+				return (0);
 			} else {
 				ppa->ppa_ioctlsfwd++;
 				/*
@@ -814,7 +816,7 @@ sppp_uwput(queue_t *q, mblk_t *mp)
 				mutex_exit(&ppa->ppa_sta_lock);
 			}
 			putnext(ppa->ppa_lower_wq, mp);
-			return;		/* don't ack or nak the request */
+			return (0);	/* don't ack or nak the request */
 		}
 		/* Failure; send error back upstream. */
 		miocnak(q, mp, 0, error);
@@ -834,6 +836,7 @@ sppp_uwput(queue_t *q, mblk_t *mp)
 		freemsg(mp);
 		break;
 	}
+	return (0);
 }
 
 /*
@@ -850,7 +853,7 @@ sppp_uwput(queue_t *q, mblk_t *mp)
  *    the write-side queue. Therefore, this procedure gets called when
  *    the lower write service procedure qenable() the upper write stream queue.
  */
-void
+int
 sppp_uwsrv(queue_t *q)
 {
 	spppstr_t	*sps;
@@ -899,6 +902,7 @@ sppp_uwsrv(queue_t *q)
 			putnext(nextq, mp);
 		}
 	}
+	return (0);
 }
 
 void
@@ -1758,7 +1762,7 @@ sppp_outpkt(queue_t *q, mblk_t **mpp, int msize, spppstr_t *sps)
  *    the write queue here, this just back-enables all upper write side
  *    service procedures.
  */
-void
+int
 sppp_lwsrv(queue_t *q)
 {
 	sppa_t		*ppa;
@@ -1779,6 +1783,7 @@ sppp_lwsrv(queue_t *q)
 		}
 	}
 	rw_exit(&ppa->ppa_sib_lock);
+	return (0);
 }
 
 /*
@@ -1798,7 +1803,7 @@ sppp_lwsrv(queue_t *q)
  *    In this case, the only thing above us is passthru, and we might as well
  *    discard.
  */
-void
+int
 sppp_lrput(queue_t *q, mblk_t *mp)
 {
 	sppa_t		*ppa;
@@ -1806,7 +1811,7 @@ sppp_lrput(queue_t *q, mblk_t *mp)
 
 	if ((ppa = q->q_ptr) == NULL) {
 		freemsg(mp);
-		return;
+		return (0);
 	}
 
 	sps = ppa->ppa_ctl;
@@ -1818,6 +1823,7 @@ sppp_lrput(queue_t *q, mblk_t *mp)
 	} else if ((q = sppp_recv(q, &mp, sps)) != NULL) {
 		putnext(q, mp);
 	}
+	return (0);
 }
 
 /*
@@ -1831,13 +1837,14 @@ sppp_lrput(queue_t *q, mblk_t *mp)
  *    occurs in order to clean up any packets that came in while we were
  *    transferring in the lower stream.  Otherwise, it's not used.
  */
-void
+int
 sppp_lrsrv(queue_t *q)
 {
 	mblk_t *mp;
 
 	while ((mp = getq(q)) != NULL)
-		sppp_lrput(q, mp);
+		(void) sppp_lrput(q, mp);
+	return (0);
 }
 
 /*

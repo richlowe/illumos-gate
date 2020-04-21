@@ -22,6 +22,7 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef _SYS_CPU_MODULE_H
@@ -66,7 +67,8 @@ typedef enum cmi_errno {
 	CMIERR_MC_RSRCNOTPRESENT,	/* Resource not present in system */
 	CMIERR_MC_ADDRBITS,		/* Too few valid addr bits */
 	CMIERR_MC_INVALUNUM,		/* Invalid input unum */
-	CMIERR_MC_PARTIALUNUMTOPA	/* unum to pa reflected physaddr */
+	CMIERR_MC_PARTIALUNUMTOPA,	/* unum to pa reflected physaddr */
+	CMIERR_MC_NOTDIMMADDR		/* Address not backed by DRAM */
 } cmi_errno_t;
 
 /*
@@ -163,6 +165,8 @@ extern id_t cmi_hdl_logical_id(cmi_hdl_t);
 extern uint16_t cmi_hdl_smbiosid(cmi_hdl_t);
 extern uint_t cmi_hdl_smb_chipid(cmi_hdl_t);
 extern nvlist_t *cmi_hdl_smb_bboard(cmi_hdl_t);
+extern uint_t cmi_hdl_chipsig(cmi_hdl_t);
+extern const char *cmi_hdl_chipident(cmi_hdl_t);
 
 extern int cmi_hdl_online(cmi_hdl_t, int, int *);
 

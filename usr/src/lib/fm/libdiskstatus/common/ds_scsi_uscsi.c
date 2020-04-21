@@ -22,9 +22,8 @@
 /*
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright (c) 2019, Joyent, Inc.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
  * This file contains routines for sending and receiving SCSI commands.  The
@@ -99,7 +98,7 @@ static slist_t mode_select_strings[] = {
 };
 
 static slist_t sensekey_strings[] = {
-	{ "No sense error", 	KEY_NO_SENSE		},
+	{ "No sense error",	KEY_NO_SENSE		},
 	{ "Recoverable error",	KEY_RECOVERABLE_ERROR	},
 	{ "Not ready error",	KEY_NOT_READY		},
 	{ "Medium error",	KEY_MEDIUM_ERROR	},
@@ -1244,6 +1243,19 @@ uscsi_mode_sense(int fd, int page_code, int page_control, caddr_t page_data,
 	 */
 	hdr = (struct mode_header *)mode_sense_buf;
 	(void) memset((caddr_t)header, 0, sizeof (struct scsi_ms_header));
+
+	/*
+	 * Check to see if we have a valid header length. We've occasionally
+	 * seen hardware return zero here, even though they filled in the media
+	 * type.
+	 */
+	if (hdr->length == 0) {
+		dprintf("\nMode sense page 0x%x: has header length for zero\n",
+		    page_code);
+		ddump("Mode sense:", mode_sense_buf, nbytes);
+		return (-1);
+	}
+
 	if (hdr->bdesc_length != sizeof (struct block_descriptor) &&
 	    hdr->bdesc_length != 0) {
 		dprintf("\nMode sense page 0x%x: block descriptor "
@@ -1258,6 +1270,13 @@ uscsi_mode_sense(int fd, int page_code, int page_control, caddr_t page_data,
 
 	if (page_code == MODEPAGE_ALLPAGES) {
 		/* special case */
+
+		if ((hdr->length + sizeof (header->ms_header.length)) <
+		    (MODE_HEADER_LENGTH + hdr->bdesc_length)) {
+			dprintf("\nHeader length would spiral into a "
+			    "negative bcopy\n");
+			return (-1);
+		}
 
 		(void) memcpy(page_data, (caddr_t)pg,
 		    (hdr->length + sizeof (header->ms_header.length)) -
@@ -1596,12 +1615,13 @@ uscsi_log_sense(int fd, int page_code, int page_control, caddr_t page_data,
 	if (page_size < sizeof (scsi_log_header_t))
 		return (-1);
 
-	log_sense_buf = alloca((uint_t)page_size);
+	log_sense_buf = calloc(1, page_size);
+	if (log_sense_buf == NULL)
+		return (-1);
 
 	/*
 	 * Build and execute the uscsi ioctl
 	 */
-	(void) memset(log_sense_buf, 0, page_size);
 	(void) memset((char *)&ucmd, 0, sizeof (ucmd));
 	(void) memset((char *)&cdb, 0, sizeof (union scsi_cdb));
 	cdb.scc_cmd = SCMD_LOG_SENSE_G1;
@@ -1614,6 +1634,7 @@ uscsi_log_sense(int fd, int page_code, int page_control, caddr_t page_data,
 	status = uscsi_cmd(fd, &ucmd, rqbuf, rqblen);
 	if (status) {
 		dprintf("Log sense page 0x%x failed\n", page_code);
+		free(log_sense_buf);
 		return (-1);
 	}
 
@@ -1632,6 +1653,7 @@ uscsi_log_sense(int fd, int page_code, int page_control, caddr_t page_data,
 		dprintf("\nLog sense page 0x%x: incorrect page code 0x%x\n",
 		    page_code, hdr->lh_code);
 		ddump("Log sense:", log_sense_buf, page_size);
+		free(log_sense_buf);
 		return (-1);
 	}
 
@@ -1653,6 +1675,7 @@ uscsi_log_sense(int fd, int page_code, int page_control, caddr_t page_data,
 	    sizeof (scsi_log_header_t));
 	ddump("data:", (caddr_t)hdr +
 	    sizeof (scsi_log_header_t), len);
+	free(log_sense_buf);
 
 	return (0);
 }

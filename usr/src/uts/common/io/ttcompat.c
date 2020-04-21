@@ -25,7 +25,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * University Copyright- Copyright (c) 1982, 1986, 1988
@@ -111,8 +111,8 @@ _info(struct modinfo *modinfop)
 
 static int ttcompatopen(queue_t *, dev_t *, int, int, cred_t *);
 static int ttcompatclose(queue_t *, int, cred_t *);
-static void ttcompatrput(queue_t *, mblk_t *);
-static void ttcompatwput(queue_t *, mblk_t *);
+static int ttcompatrput(queue_t *, mblk_t *);
+static int ttcompatwput(queue_t *, mblk_t *);
 
 static struct module_info ttycompatmiinfo = {
 	0,
@@ -124,7 +124,7 @@ static struct module_info ttycompatmiinfo = {
 };
 
 static struct qinit ttycompatrinit = {
-	(int (*)())ttcompatrput,
+	ttcompatrput,
 	NULL,
 	ttcompatopen,
 	ttcompatclose,
@@ -142,7 +142,7 @@ static struct module_info ttycompatmoinfo = {
 };
 
 static struct qinit ttycompatwinit = {
-	(int (*)())ttcompatwput,
+	ttcompatwput,
 	NULL,
 	ttcompatopen,
 	ttcompatclose,
@@ -156,21 +156,6 @@ static struct streamtab ttcoinfo = {
 	NULL,
 	NULL
 };
-
-/*
- * This is the termios structure that is used to reset terminal settings
- * when the underlying device is an instance of zcons.  It came from
- * cmd/init/init.c and should be kept in-sync with dflt_termios found therein.
- */
-static const struct termios base_termios = {
-	BRKINT|ICRNL|IXON|IMAXBEL,				/* iflag */
-	OPOST|ONLCR|TAB3,					/* oflag */
-	CS8|CREAD|B9600,					/* cflag */
-	ISIG|ICANON|ECHO|ECHOE|ECHOK|ECHOCTL|ECHOKE|IEXTEN,	/* lflag */
-	CINTR, CQUIT, CERASE, CKILL, CEOF, 0, 0, 0, 0, 0, 0, 0,	/* c_cc vals */
-	0, 0, 0, 0, 0, 0, 0
-};
-
 
 static void ttcompat_do_ioctl(ttcompat_state_t *, queue_t *, mblk_t *);
 static void ttcompat_ioctl_ack(queue_t *, mblk_t *);
@@ -187,10 +172,6 @@ static int
 ttcompatopen(queue_t *q, dev_t *devp, int oflag, int sflag, cred_t *crp)
 {
 	ttcompat_state_t *tp;
-	mblk_t *mp;
-	mblk_t *datamp;
-	struct iocblk *iocb;
-	int error;
 
 	if (q->q_ptr != NULL)  {
 		tp = (ttcompat_state_t *)q->q_ptr;
@@ -202,93 +183,11 @@ ttcompatopen(queue_t *q, dev_t *devp, int oflag, int sflag, cred_t *crp)
 		return (0);		/* already attached */
 	}
 	tp = kmem_zalloc(sizeof (ttcompat_state_t), KM_SLEEP);
-	tp->t_iocpending = NULL;
-	tp->t_state = 0;
-	tp->t_iocid = 0;
-	tp->t_ioccmd = 0;
-	tp->t_new_lflags = 0;
-	tp->t_curstate.t_flags = 0;
-	tp->t_curstate.t_ispeed = B0;
-	tp->t_curstate.t_ospeed = B0;
-	tp->t_curstate.t_erase = '\0';
-	tp->t_curstate.t_kill = '\0';
-	tp->t_curstate.t_intrc = '\0';
-	tp->t_curstate.t_quitc = '\0';
-	tp->t_curstate.t_startc = '\0';
-	tp->t_curstate.t_stopc = '\0';
-	tp->t_curstate.t_eofc = '\0';
-	tp->t_curstate.t_brkc = '\0';
-	tp->t_curstate.t_suspc = '\0';
-	tp->t_curstate.t_dsuspc = '\0';
-	tp->t_curstate.t_rprntc = '\0';
-	tp->t_curstate.t_flushc = '\0';
-	tp->t_curstate.t_werasc = '\0';
-	tp->t_curstate.t_lnextc = '\0';
-	tp->t_curstate.t_xflags = 0;
-	tp->t_bufcallid = 0;
-	tp->t_arg = 0;
-
 	q->q_ptr = tp;
 	WR(q)->q_ptr = tp;
 	qprocson(q);
 
-	/*
-	 * Determine if the underlying device is a zcons instance.  If so,
-	 * then issue a termios ioctl to reset the terminal settings.
-	 */
-	if (getmajor(q->q_stream->sd_vnode->v_rdev) !=
-	    ddi_name_to_major("zcons"))
-		return (0);
-
-	/*
-	 * Create the ioctl message.
-	 */
-	if ((mp = mkiocb(TCSETSF)) == NULL) {
-		error = ENOMEM;
-		goto common_error;
-	}
-	if ((datamp = allocb(sizeof (struct termios), BPRI_HI)) == NULL) {
-		freemsg(mp);
-		error = ENOMEM;
-		goto common_error;
-	}
-	iocb = (struct iocblk *)mp->b_rptr;
-	iocb->ioc_count = sizeof (struct termios);
-	bcopy(&base_termios, datamp->b_rptr, sizeof (struct termios));
-	datamp->b_wptr += sizeof (struct termios);
-	mp->b_cont = datamp;
-
-	/*
-	 * Send the ioctl message on its merry way toward the driver.
-	 * Set some state beforehand so we can properly wait for
-	 * an acknowledgement.
-	 */
-	tp->t_state |= TS_IOCWAIT | TS_TIOCNAK;
-	tp->t_iocid = iocb->ioc_id;
-	tp->t_ioccmd = TCSETSF;
-	putnext(WR(q), mp);
-
-	/*
-	 * Wait for an acknowledgement.  A NAK is treated as an error.
-	 * The presence of the TS_TIOCNAK flag indicates that a NAK was
-	 * received.
-	 */
-	while (tp->t_state & TS_IOCWAIT) {
-		if (qwait_sig(q) == 0) {
-			error = EINTR;
-			goto common_error;
-		}
-	}
-	if (!(tp->t_state & TS_TIOCNAK))
-		return (0);
-	error = ENOTTY;
-
-common_error:
-	qprocsoff(q);
-	kmem_free(tp, sizeof (ttcompat_state_t));
-	q->q_ptr = NULL;
-	WR(q)->q_ptr = NULL;
-	return (error);
+	return (0);
 }
 
 /* ARGSUSED1 */
@@ -318,7 +217,7 @@ ttcompatclose(queue_t *q, int flag, cred_t *crp)
  * "ioctl" replies, and if it's an "ioctl" whose reply we plan to do
  * something with, we do it.
  */
-static void
+static int
 ttcompatrput(queue_t *q, mblk_t *mp)
 {
 	switch (mp->b_datap->db_type) {
@@ -335,13 +234,14 @@ ttcompatrput(queue_t *q, mblk_t *mp)
 		putnext(q, mp);
 		break;
 	}
+	return (0);
 }
 
 /*
  * Line discipline output queue put procedure: speeds M_IOCTL
  * messages.
  */
-static void
+static int
 ttcompatwput(queue_t *q, mblk_t *mp)
 {
 	ttcompat_state_t *tp;
@@ -358,7 +258,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 
 	default:
 		putnext(q, mp);
-		return;
+		return (0);
 
 	case M_IOCTL:
 		iocbp = (struct iocblk *)mp->b_rptr;
@@ -369,7 +269,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 	/* these are ioctls with no arguments or are known to stream head */
 	/* process them right away */
 			ttcompat_do_ioctl(tp, q, mp);
-			return;
+			return (0);
 		case TIOCSETN:
 		case TIOCSLTC:
 		case TIOCSETC:
@@ -379,7 +279,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 		case TIOCFLUSH:
 			if (iocbp->ioc_count != TRANSPARENT) {
 				putnext(q, mp);
-				return;
+				return (0);
 			}
 
 			mp->b_datap->db_type = M_COPYIN;
@@ -412,7 +312,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 			tp->t_ioccmd = iocbp->ioc_cmd;
 			tp->t_state |= TS_W_IN;
 			qreply(q, mp);
-			return;
+			return (0);
 
 		} /* switch ioc_cmd */
 	case M_IOCDATA:
@@ -422,7 +322,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 
 		default:
 			putnext(q, mp);
-			return;
+			return (0);
 
 		case TIOCSETN:
 		case TIOCSLTC:
@@ -434,7 +334,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 			tp->t_state &= ~TS_W_IN;
 			if (csp->cp_rval != 0) {	/* failure */
 				freemsg(mp);
-				return;
+				return (0);
 			}
 
 			/* make it look like an ioctl */
@@ -445,7 +345,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 			iocbp->ioc_error = 0;
 			iocbp->ioc_rval = 0;
 			ttcompat_do_ioctl(tp, q, mp);
-			return;
+			return (0);
 
 		case TIOCGLTC:
 		case TIOCLGET:
@@ -453,7 +353,7 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 			tp->t_state &= ~TS_W_OUT;
 			if (csp->cp_rval != 0) {	/* failure */
 				freemsg(mp);
-				return;
+				return (0);
 			}
 
 			iocbp = (struct iocblk *)mp->b_rptr;
@@ -462,10 +362,11 @@ ttcompatwput(queue_t *q, mblk_t *mp)
 			iocbp->ioc_rval = 0;
 			mp->b_datap->db_type = M_IOCACK;
 			qreply(q, mp);
-			return;
+			return (0);
 
 		} /* switch cp_cmd */
 	} /* end message switch */
+	return (0);
 }
 
 /*
@@ -798,7 +699,7 @@ allocfailure:
  * If this wasn't the response we were waiting for, just pass it up.
  */
 static void
-ttcompat_ioctl_ack(queue_t *q, 	mblk_t *mp)
+ttcompat_ioctl_ack(queue_t *q, mblk_t *mp)
 {
 	ttcompat_state_t *tp;
 	struct iocblk *iocp;

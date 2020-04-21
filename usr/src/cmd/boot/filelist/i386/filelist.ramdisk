@@ -16,7 +16,9 @@ etc/name_to_sysnum
 etc/path_to_inst
 etc/rtc_config
 etc/system
+etc/system.d
 etc/hostid
+etc/versions
 kernel
 platform/i86hvm/kernel
 platform/i86pc/kernel

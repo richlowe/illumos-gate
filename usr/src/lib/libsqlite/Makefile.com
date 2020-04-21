@@ -3,6 +3,8 @@
 # Use is subject to license terms.
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
+# Copyright (c) 2019, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 # Make the SO name unlikely to conflict with any other
@@ -95,9 +97,12 @@ MYCPPFLAGS = -D_REENTRANT -DTHREADSAFE=1 -DHAVE_USLEEP=1 -I. -I.. -I$(SRCDIR)
 CPPFLAGS += $(MYCPPFLAGS)
 
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-unused-function
 CERRWARN += -_gcc=-Wno-unused-label
+
+# not linted
+SMATCH=off
 
 MAPFILES = ../mapfile-sqlite
 
@@ -129,7 +134,7 @@ TESTSRC = \
 	$(SRCDIR)/test1.c	\
 	$(SRCDIR)/test2.c	\
 	$(SRCDIR)/test3.c	\
-	$(SRCDIR)/md5.c	
+	$(SRCDIR)/md5.c
 
 TESTOBJS = $(TESTSRC:$(SRCDIR)/%.c=%.o)
 
@@ -153,6 +158,8 @@ $(NATIVETARGETS) :=	LDLIBS = -lc
 
 $(OBJS) :=		CFLAGS += $(CTF_FLAGS)
 $(OBJS) :=		CTFCONVERT_POST = $(CTFCONVERT_O)
+$(NATIVEOBJS) :=	CFLAGS += $(CTF_FLAGS)
+$(NATIVEOBJS) :=	CTFCONVERT_POST = $(CTFCONVERT_O)
 
 TCLBASE = /usr/sfw
 TCLVERS = tcl8.3
@@ -194,7 +201,6 @@ ENCODING  = ISO8859
 all:		$(LIBS)
 install:	all \
 		$(ROOTLIBDIR)/$(DYNLIB) \
-		$(ROOTLIBDIR)/$(LINTLIB) \
 		$(ROOTLIBDIR)/$(NATIVERELOC)
 
 lint:

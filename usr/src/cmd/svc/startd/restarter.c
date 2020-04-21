@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -994,6 +994,8 @@ restarter_post_fsminimal_thread(void *unused)
 	scf_handle_t *h;
 	int r;
 
+	(void) pthread_setname_np(pthread_self(), "restarter_post_fsmin");
+
 	h = libscf_handle_create_bound_loop();
 
 	for (;;) {
@@ -1736,7 +1738,7 @@ rep_retry:
 		info->sf_id = rip->ri_id;
 		info->sf_method_type = METHOD_REFRESH;
 		info->sf_event_type = RERR_REFRESH;
-		info->sf_reason = NULL;
+		info->sf_reason = 0;
 
 		assert(rip->ri_method_thread == 0);
 		rip->ri_method_thread =
@@ -1770,6 +1772,8 @@ restarter_process_events(void *arg)
 	restarter_inst_t *rip;
 	char *fmri = (char *)arg;
 	struct timespec to;
+
+	(void) pthread_setname_np(pthread_self(), "restarter_process_events");
 
 	assert(fmri != NULL);
 
@@ -1939,8 +1943,8 @@ out:
 }
 
 static int
-is_admin_event(restarter_event_type_t t) {
-
+is_admin_event(restarter_event_type_t t)
+{
 	switch (t) {
 	case RESTARTER_EVENT_TYPE_ADMIN_MAINT_ON:
 	case RESTARTER_EVENT_TYPE_ADMIN_MAINT_ON_IMMEDIATE:
@@ -1984,6 +1988,8 @@ static void *
 restarter_event_thread(void *unused)
 {
 	scf_handle_t *h;
+
+	(void) pthread_setname_np(pthread_self(), "restarter_event");
 
 	/*
 	 * This is a new thread, and thus, gets its own handle
@@ -2084,14 +2090,6 @@ nolookup:
 			MUTEX_LOCK(&ru->restarter_update_lock);
 		}
 	}
-
-	/*
-	 * Unreachable for now -- there's currently no graceful cleanup
-	 * called on exit().
-	 */
-	(void) scf_handle_unbind(h);
-	scf_handle_destroy(h);
-	return (NULL);
 }
 
 static restarter_inst_t *
@@ -2195,6 +2193,8 @@ restarter_contracts_event_thread(void *unused)
 {
 	int fd, err;
 	scf_handle_t *local_handle;
+
+	(void) pthread_setname_np(pthread_self(), "restarter_contracts_event");
 
 	/*
 	 * Await graph load completion.  That is, stop here, until we've scanned
@@ -2544,6 +2544,8 @@ restarter_timeouts_event_thread(void *unused)
 	 * the necessary processing every second, as long as the queue
 	 * is not empty.
 	 */
+
+	(void) pthread_setname_np(pthread_self(), "restarter_timeouts_event");
 
 	/*CONSTCOND*/
 	while (1) {

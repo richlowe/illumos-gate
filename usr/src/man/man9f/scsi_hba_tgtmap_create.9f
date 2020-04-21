@@ -9,9 +9,9 @@
 .\" http://www.illumos.org/license/CDDL.
 .\"
 .\"
-.\" Copyright (c) 2017, Joyent, Inc.
+.\" Copyright 2019, Joyent, Inc.
 .\"
-.Dd Apr 18, 2017
+.Dd June 03, 2019
 .Dt SCSI_HBA_TGTMAP_CREATE 9F
 .Os
 .Sh NAME
@@ -35,7 +35,7 @@
 .Fa "void *tgtmap_priv"
 .Fa "scsi_tgt_activate_cb_t activate_cb"
 .Fa "scsi_tgt_deactivate_cb_t deactivate_cb"
-.Fa "scsi_hba_tgtmap_t *tgtmapout"
+.Fa "scsi_hba_tgtmap_t **tgtmapout"
 .Fc
 .Ft void
 .Fo scsi_hba_tgtmap_destroy
@@ -58,7 +58,7 @@
 .Fc
 .Ft int
 .Fo scsi_hba_tgtmap_set_begin
-.Fa "scsi_hba_tgtmap_t *map"
+.Fa "scsi_hba_tgtmap_t *tgtmap"
 .Fc
 .Ft int
 .Fo scsi_hba_tgtmap_set_add
@@ -69,11 +69,12 @@
 .Fc
 .Ft int
 .Fo scsi_hba_tgtmap_set_end
-.Fa "scsi_hba_tgtmap_t *map"
+.Fa "scsi_hba_tgtmap_t *tgtmap"
+.Fa "uint_t flags"
 .Fc
 .Ft int
 .Fo scsi_hba_tgtmap_set_flush
-.Fa "scsi_hba_tgtmap_t *map"
+.Fa "scsi_hba_tgtmap_t *tgtmap"
 .Fc
 .Ft int
 .Fo scsi_hba_tgtmap_tgt_add
@@ -120,9 +121,13 @@ added to the system.
 An optional callback that will be called when an existing devices is
 removed from the system.
 .It Fa tgtmapout
-Pointer where the target map is stored.
+Pointer where the target map handle is stored.
 .It Fa tgtmap
 Pointer to an allocated target map.
+.It Fa flags
+Flags that modify the behavior of the function.
+Currently reserved and should be passed as
+.Sy 0 .
 .It Fa tgt_addr
 The address of the target map entry the callback is acting upon.
 .It Fa type

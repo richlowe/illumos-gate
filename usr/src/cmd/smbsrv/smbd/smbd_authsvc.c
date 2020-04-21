@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -103,7 +103,7 @@ int smbd_authsvc_slowdown = 0;
  * But note: it's really the _client's_ preference that matters.
  * See &pref in the spnegoIsMechTypeAvailable() calls below.
  * Careful with this table; the code below knows its format and
- * may skip the fist two entries to ommit Kerberos.
+ * may skip the fist two entries to omit Kerberos.
  */
 static const spnego_mech_handler_t
 mech_table[] = {
@@ -276,7 +276,7 @@ smbd_authsvc_listen(void *arg)
 			smbd_authsvc_thrcnt--;
 			(void) mutex_unlock(&smbd_authsvc_mutex);
 			(void) close(ns);
-			goto out;
+			continue;
 		}
 		ctx->ctx_socket = ns;
 
@@ -287,9 +287,8 @@ smbd_authsvc_listen(void *arg)
 			smbd_authsvc_thrcnt--;
 			(void) mutex_unlock(&smbd_authsvc_mutex);
 			smbd_authctx_destroy(ctx);
-			goto out;
 		}
-		ctx = NULL; /* given to the new thread */
+		ctx = NULL; /* given to the new thread or destroyed */
 	}
 
 out:
@@ -549,8 +548,12 @@ smbd_authsvc_oldreq(authsvc_context_t *ctx)
 
 	token = smbd_user_auth_logon(&user_info);
 	xdr_free(smb_logon_xdr, (char *)&user_info);
-	if (token == NULL)
-		return (NT_STATUS_ACCESS_DENIED);
+	if (token == NULL) {
+		rc = user_info.lg_status;
+		if (rc == 0) /* should not happen */
+			rc = NT_STATUS_INTERNAL_ERROR;
+		return (rc);
+	}
 
 	ctx->ctx_token = token;
 
@@ -781,7 +784,7 @@ smbd_authsvc_escmn(authsvc_context_t *ctx)
 		/* tell the client the selected mech. */
 		oid = ctx->ctx_mech_oid;
 	} else {
-		/* Ommit the "supported mech." field. */
+		/* Omit the "supported mech." field. */
 		oid = spnego_mech_oid_NotUsed;
 	}
 
@@ -915,7 +918,7 @@ smbd_authsvc_gettoken(authsvc_context_t *ctx)
 /*
  * Initialization time code to figure out what mechanisms we support.
  * Careful with this table; the code below knows its format and may
- * skip the fist two entries to ommit Kerberos.
+ * skip the fist two entries to omit Kerberos.
  */
 static SPNEGO_MECH_OID MechTypeList[] = {
 	spnego_mech_oid_Kerberos_V5,

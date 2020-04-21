@@ -20,6 +20,7 @@
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2016 by Delphix. All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
 #
 LIBRARY =	libshare.a
 VERS =		.1
@@ -34,27 +35,27 @@ include ../../Makefile.lib
 SRCDIR =	../common
 
 LIBSRCS =	$(LIBOBJS:%.o=$(SRCDIR)/%.c)
-# we don't want to lint the sharetab and nfs_sec files
-lintcheck := SRCS = $(LIBSRCS)
 
-LIBS =		$(DYNLIB) $(LINTLIB)
+LIBS =		$(DYNLIB)
 LDLIBS +=	-lc -lnsl -lscf -lzfs -luuid -lxml2 -lnvpair
-$(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
+NATIVE_LIBS +=	libxml2.so
 
 #add nfs/lib directory as part of the include path
 CFLAGS +=	$(CCVERBOSE)
 CSTD =	$(CSTD_GNU99)
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-switch
+
+# not linted
+SMATCH=off
+
 CPPFLAGS +=	-D_REENTRANT -I$(NFSLIB_DIR) \
 		-I$(ADJUNCT_PROTO)/usr/include/libxml2
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: lintcheck
 
 pics/%.o:	$(NFSLIB_DIR)/%.c
 	$(COMPILE.c) -o $@ $<

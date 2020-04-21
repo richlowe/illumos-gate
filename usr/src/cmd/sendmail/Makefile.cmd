@@ -23,18 +23,23 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2019, Joyent, Inc.
+#
 
 CPPFLAGS.sm=	$(CPPFLAGS.master) -DSOLARIS=2$(RELEASE_MINOR)00 \
 		-D_FILE_OFFSET_BITS=64
 CERRWARN +=	-_gcc=-Wno-clobbered
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-but-set-parameter
 CERRWARN +=	-_gcc=-Wno-unused-but-set-variable
 DBMDEF=		-DNDBM -DNEWDB -DNIS -DUSERDB -DMAP_REGEX -DLDAPMAP
+
+# smatch can't handle main()
+SMATCH =	off
 
 ROOTLIBSMTPSM = $(ROOTLIB)/smtp/sendmail
 

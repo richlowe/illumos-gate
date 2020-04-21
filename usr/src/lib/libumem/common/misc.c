@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <unistd.h>
 #include <dlfcn.h>
 #include <signal.h>
@@ -51,9 +49,9 @@
 
 static mutex_t umem_error_lock = DEFAULTMUTEX;
 
-static char umem_error_buffer[ERR_SIZE] = "";
-static uint_t umem_error_begin = 0;
-static uint_t umem_error_end = 0;
+char umem_error_buffer[ERR_SIZE] = "";
+uint_t umem_error_begin = 0;
+uint_t umem_error_end = 0;
 
 #define	WRITE_AND_INC(var, value) { \
 	umem_error_buffer[(var)++] = (value); \
@@ -244,7 +242,7 @@ print_sym(void *pointer)
 	int result;
 	Dl_info sym_info;
 
-	uintptr_t end = NULL;
+	uintptr_t end = (uintptr_t)NULL;
 
 	Sym *ext_info = NULL;
 

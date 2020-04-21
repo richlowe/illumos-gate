@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019, Joyent, Inc.
  */
 
 
@@ -115,8 +116,8 @@ usba_usbai_destroy()
  */
 usb_log_handle_t
 usb_alloc_log_hdl(dev_info_t *dip, char *name,
-	uint_t *errlevel, uint_t *mask, uint_t *instance_filter,
-	usb_flags_t flags)
+    uint_t *errlevel, uint_t *mask, uint_t *instance_filter,
+    usb_flags_t flags)
 {
 	usba_log_handle_impl_t	*hdl;
 
@@ -147,8 +148,8 @@ usb_alloc_log_hdl(dev_info_t *dip, char *name,
 /*ARGSUSED*/
 usb_log_handle_t
 usb_alloc_log_handle(dev_info_t *dip, char *name,
-	uint_t *errlevel, uint_t *mask, uint_t *instance_filter,
-	uint_t reserved, usb_flags_t flags)
+    uint_t *errlevel, uint_t *mask, uint_t *instance_filter,
+    uint_t reserved, usb_flags_t flags)
 {
 	return (usb_alloc_log_hdl(dip, name, errlevel, mask,
 	    instance_filter, flags));
@@ -215,7 +216,7 @@ static void
 usb_vprintf(dev_info_t *dip, int level, char *label, char *fmt, va_list ap)
 {
 	size_t len;
-	int instance;
+	int instance = 0;
 	char driver_name[USBA_DRVNAME_LEN];
 	char *msg_ptr;
 
@@ -383,7 +384,7 @@ usb_vprintf(dev_info_t *dip, int level, char *label, char *fmt, va_list ap)
 
 int
 usba_vlog(usb_log_handle_t, uint_t, uint_t, char *, va_list)
-	__KVPRINTFLIKE(4);
+    __KVPRINTFLIKE(4);
 
 /* When usba10_calls.c goes away, this function can be made static again. */
 int
@@ -579,7 +580,7 @@ usba_async_req_raise_power(void *arg)
 /* usb function to perform async pm_request_power_change */
 int
 usb_req_raise_power(dev_info_t *dip, int comp, int level,
-	void (*callback)(void *, int), void *arg, usb_flags_t flags)
+    void (*callback)(void *, int), void *arg, usb_flags_t flags)
 {
 	usba_pm_req_t *pmrq;
 
@@ -633,7 +634,7 @@ usba_async_req_lower_power(void *arg)
 /* usb function to perform async pm_request_power_change */
 int
 usb_req_lower_power(dev_info_t *dip, int comp, int level,
-	void (*callback)(void *, int), void *arg, usb_flags_t flags)
+    void (*callback)(void *, int), void *arg, usb_flags_t flags)
 {
 	usba_pm_req_t *pmrq;
 
@@ -1039,7 +1040,7 @@ usb_register_hotplug_cbs(dev_info_t *dip,
 		}
 	}
 	if (ddi_add_event_handler(dip, usba_device->rm_cookie,
-	    (peh_t)disconnect_event_handler,
+	    (peh_t)(uintptr_t)disconnect_event_handler,
 	    NULL, &evdata->ev_rm_cb_id) != DDI_SUCCESS) {
 		USB_DPRINTF_L2(DPRINT_MASK_USBAI, usbai_log_handle,
 		    "usb_register_hotplug_cbs: add disconnect handler failed");
@@ -1057,7 +1058,7 @@ usb_register_hotplug_cbs(dev_info_t *dip,
 		}
 	}
 	if (ddi_add_event_handler(dip, usba_device->ins_cookie,
-	    (peh_t)reconnect_event_handler,
+	    (peh_t)(uintptr_t)reconnect_event_handler,
 	    NULL, &evdata->ev_ins_cb_id) != DDI_SUCCESS) {
 		USB_DPRINTF_L2(DPRINT_MASK_USBAI, usbai_log_handle,
 		    "usb_register_hotplug_cbs: add reconnect handler failed");
@@ -1100,7 +1101,7 @@ usb_unregister_hotplug_cbs(dev_info_t *dip)
 /*ARGSUSED*/
 int
 usb_register_event_cbs(dev_info_t *dip, usb_event_t *usb_evdata,
-	usb_flags_t flags)
+    usb_flags_t flags)
 {
 	usba_device_t		*usba_device;
 	usba_evdata_t		*evdata;
@@ -1128,7 +1129,7 @@ usb_register_event_cbs(dev_info_t *dip, usb_event_t *usb_evdata,
 			}
 		}
 		if (ddi_add_event_handler(dip, usba_device->rm_cookie,
-		    (peh_t)usb_evdata->disconnect_event_handler,
+		    (peh_t)(uintptr_t)usb_evdata->disconnect_event_handler,
 		    NULL, &evdata->ev_rm_cb_id) != DDI_SUCCESS) {
 
 			goto fail;
@@ -1143,7 +1144,7 @@ usb_register_event_cbs(dev_info_t *dip, usb_event_t *usb_evdata,
 			}
 		}
 		if (ddi_add_event_handler(dip, usba_device->ins_cookie,
-		    (peh_t)usb_evdata->reconnect_event_handler,
+		    (peh_t)(uintptr_t)usb_evdata->reconnect_event_handler,
 		    NULL, &evdata->ev_ins_cb_id) != DDI_SUCCESS) {
 
 			goto fail;
@@ -1158,7 +1159,7 @@ usb_register_event_cbs(dev_info_t *dip, usb_event_t *usb_evdata,
 			}
 		}
 		if (ddi_add_event_handler(dip, usba_device->resume_cookie,
-		    (peh_t)usb_evdata->post_resume_event_handler,
+		    (peh_t)(uintptr_t)usb_evdata->post_resume_event_handler,
 		    NULL, &evdata->ev_resume_cb_id) != DDI_SUCCESS) {
 
 			goto fail;
@@ -1173,7 +1174,7 @@ usb_register_event_cbs(dev_info_t *dip, usb_event_t *usb_evdata,
 			}
 		}
 		if (ddi_add_event_handler(dip, usba_device->suspend_cookie,
-		    (peh_t)usb_evdata->pre_suspend_event_handler,
+		    (peh_t)(uintptr_t)usb_evdata->pre_suspend_event_handler,
 		    NULL, &evdata->ev_suspend_cb_id) != DDI_SUCCESS) {
 
 			goto fail;

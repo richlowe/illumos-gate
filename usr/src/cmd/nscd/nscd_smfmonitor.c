@@ -21,6 +21,8 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2018 Joyent, Inc.
  */
 
 #include <stdlib.h>
@@ -107,6 +109,8 @@ set_smf_state(void *arg)
 	int	i;
 	int	st;
 
+	(void) thr_setname(thr_self(), "set_smf_state");
+
 	/*
 	 * the forker nscd needs not monitor the state
 	 * of the client services
@@ -131,7 +135,8 @@ set_smf_state(void *arg)
 }
 
 nscd_rc_t
-_nscd_init_smf_monitor() {
+_nscd_init_smf_monitor(void)
+{
 
 	int	errnum;
 	char	*me = "_nscd_init_smf_monitor";
@@ -142,8 +147,8 @@ _nscd_init_smf_monitor() {
 	/*
 	 * start a thread to check the state of the client services
 	 */
-	if (thr_create(NULL, NULL, set_smf_state,
-		NULL, THR_DETACHED, NULL) != 0) {
+	if (thr_create(NULL, 0, set_smf_state,
+	    NULL, THR_DETACHED, NULL) != 0) {
 		errnum = errno;
 		_NSCD_LOG(NSCD_LOG_SMF_MONITOR, NSCD_LOG_LEVEL_ERROR)
 		(me, "thr_create: %s\n", strerror(errnum));

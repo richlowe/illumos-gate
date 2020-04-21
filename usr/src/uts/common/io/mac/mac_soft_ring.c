@@ -21,7 +21,7 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*
@@ -152,8 +152,8 @@ mac_soft_ring_create(int id, clock_t wait, uint16_t type,
     processorid_t cpuid, mac_direct_rx_t rx_func, void *x_arg1,
     mac_resource_handle_t x_arg2)
 {
-	mac_soft_ring_t 	*ringp;
-	char 			name[S_RING_NAMELEN];
+	mac_soft_ring_t		*ringp;
+	char			name[S_RING_NAMELEN];
 
 	bzero(name, 64);
 	ringp = kmem_cache_alloc(mac_soft_ring_cache, KM_SLEEP);
@@ -207,7 +207,7 @@ mac_soft_ring_create(int id, clock_t wait, uint16_t type,
 		ringp->s_ring_tx_hiwat =
 		    (mac_tx_soft_ring_hiwat > mac_tx_soft_ring_max_q_cnt) ?
 		    mac_tx_soft_ring_max_q_cnt : mac_tx_soft_ring_hiwat;
-		if (mcip->mci_state_flags & MCIS_IS_AGGR) {
+		if (mcip->mci_state_flags & MCIS_IS_AGGR_CLIENT) {
 			mac_srs_tx_t *tx = &mac_srs->srs_tx;
 
 			ASSERT(tx->st_soft_rings[
@@ -339,22 +339,21 @@ mac_soft_ring_fire(void *arg)
 }
 
 /*
- * mac_rx_soft_ring_drain
+ * Drain the soft ring pointed to by ringp.
  *
- * Called when worker thread model (ST_RING_WORKER_ONLY) of processing
- * incoming packets is used. s_ring_first contain the queued packets.
- * s_ring_rx_func contains the upper level (client) routine where the
- * packets are destined and s_ring_rx_arg1/s_ring_rx_arg2 are the
- * cookie meant for the client.
+ *    o s_ring_first: pointer to the queued packet chain.
+ *
+ *    o s_ring_rx_func: pointer to to the client's Rx routine.
+ *
+ *    o s_ring_rx_{arg1,arg2}: opaque values specific to the client.
  */
-/* ARGSUSED */
 static void
 mac_rx_soft_ring_drain(mac_soft_ring_t *ringp)
 {
 	mblk_t		*mp;
 	void		*arg1;
 	mac_resource_handle_t arg2;
-	timeout_id_t 	tid;
+	timeout_id_t	tid;
 	mac_direct_rx_t	proc;
 	size_t		sz;
 	int		cnt;
@@ -392,13 +391,12 @@ mac_rx_soft_ring_drain(mac_soft_ring_t *ringp)
 		(*proc)(arg1, arg2, mp, NULL);
 
 		/*
-		 * If we have a soft ring set which is doing
-		 * bandwidth control, we need to decrement its
-		 * srs_size so it can have a accurate idea of
-		 * what is the real data queued between SRS and
-		 * its soft rings. We decrement the size for a
-		 * packet only when it gets processed by both
-		 * SRS and the soft ring.
+		 * If we have an SRS performing bandwidth control, then
+		 * we need to decrement the size and count so the SRS
+		 * has an accurate measure of the data queued between
+		 * the SRS and its soft rings. We decrement the
+		 * counters only when the packet is processed by both
+		 * the SRS and the soft ring.
 		 */
 		mutex_enter(&mac_srs->srs_lock);
 		MAC_UPDATE_SRS_COUNT_LOCKED(mac_srs, cnt);
@@ -414,12 +412,10 @@ mac_rx_soft_ring_drain(mac_soft_ring_t *ringp)
 }
 
 /*
- * mac_soft_ring_worker
- *
  * The soft ring worker routine to process any queued packets. In
- * normal case, the worker thread is bound to a CPU. It the soft
- * ring is dealing with TCP packets, then the worker thread will
- * be bound to the same CPU as the TCP squeue.
+ * normal case, the worker thread is bound to a CPU. If the soft ring
+ * handles TCP packets then the worker thread is bound to the same CPU
+ * as the TCP squeue.
  */
 static void
 mac_soft_ring_worker(mac_soft_ring_t *ringp)
@@ -498,7 +494,7 @@ done:
  * Enabling is allow the processing thread to send packets to the
  * client while disabling does the opposite.
  */
-void
+int
 mac_soft_ring_intr_enable(void *arg)
 {
 	mac_soft_ring_t *ringp = (mac_soft_ring_t *)arg;
@@ -507,6 +503,7 @@ mac_soft_ring_intr_enable(void *arg)
 	if (ringp->s_ring_first != NULL)
 		mac_soft_ring_worker_wakeup(ringp);
 	mutex_exit(&ringp->s_ring_lock);
+	return (0);
 }
 
 boolean_t
@@ -536,7 +533,7 @@ mac_soft_ring_intr_disable(void *arg)
  * setup.
  */
 mblk_t *
-mac_soft_ring_poll(mac_soft_ring_t *ringp, int bytes_to_pickup)
+mac_soft_ring_poll(mac_soft_ring_t *ringp, size_t bytes_to_pickup)
 {
 	mblk_t	*head, *tail;
 	mblk_t	*mp;
@@ -604,7 +601,7 @@ mac_soft_ring_dls_bypass(void *arg, mac_direct_rx_t rx_func, void *rx_arg1)
 	mac_soft_ring_t		*softring = arg;
 	mac_soft_ring_set_t	*srs;
 
-	ASSERT(rx_func != NULL);
+	VERIFY3P(rx_func, !=, NULL);
 
 	mutex_enter(&softring->s_ring_lock);
 	softring->s_ring_rx_func = rx_func;
@@ -648,10 +645,10 @@ mac_soft_ring_signal(mac_soft_ring_t *softring, uint_t sr_flag)
 static void
 mac_tx_soft_ring_drain(mac_soft_ring_t *ringp)
 {
-	mblk_t 			*mp;
-	void 			*arg1;
-	void 			*arg2;
-	mblk_t 			*tail;
+	mblk_t			*mp;
+	void			*arg1;
+	void			*arg2;
+	mblk_t			*tail;
 	uint_t			saved_pkt_count, saved_size;
 	mac_tx_stats_t		stats;
 	mac_soft_ring_set_t	*mac_srs = ringp->s_ring_set;

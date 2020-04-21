@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
@@ -201,8 +201,8 @@ typedef struct smb_cache {
 #define	SMB_CACHE_SIZE(s)	(((s) & 0x8000) ? \
 	((uint32_t)((s) & 0x7FFF) * 64 * 1024) : ((uint32_t)(s) * 1024))
 
-#define	SMB_CACHE_EXT_SIZE(s)	(((s) & 0x80000000U) ? 	\
-	((uint64_t)((s) & 0x7FFFFFFFULL) * 64ULL * 1024ULL) : 	\
+#define	SMB_CACHE_EXT_SIZE(s)	(((s) & 0x80000000U) ?	\
+	((uint64_t)((s) & 0x7FFFFFFFULL) * 64ULL * 1024ULL) :	\
 	((uint64_t)(s) * 1024ULL))
 
 #define	SMB_CACHE_CFG_MODE(c)		(((c) >> 8) & 3)
@@ -226,6 +226,13 @@ typedef struct smb_port {
 /*
  * SMBIOS implementation structure for SMB_TYPE_SLOT.
  */
+typedef struct smb_slot_peer {
+	uint16_t smbspb_group_no;	/* segment group number */
+	uint8_t smbspb_bus;		/* bus number */
+	uint8_t smbspb_df;		/* device/function number */
+	uint8_t smbspb_width;		/* electrical width */
+} smb_slot_peer_t;
+
 typedef struct smb_slot {
 	smb_header_t smbsl_hdr;		/* structure header */
 	uint8_t smbsl_name;		/* reference designation */
@@ -239,6 +246,10 @@ typedef struct smb_slot {
 	uint16_t smbsl_sg;		/* segment group number */
 	uint8_t smbsl_bus;		/* bus number */
 	uint8_t smbsl_df;		/* device/function number */
+	/* Added in SMBIOS 3.2+ */
+	uint8_t	smbsl_dbw;		/* Data bus width */
+	uint8_t	smbsl_npeers;		/* Peer bdf groups */
+	smb_slot_peer_t smbsl_peers[];	/* bifurcation peers */
 } smb_slot_t;
 
 /*
@@ -343,6 +354,21 @@ typedef struct smb_memdevice {
 	uint16_t smbmdev_minvolt;	/* minimum voltage */
 	uint16_t smbmdev_maxvolt;	/* maximum voltage */
 	uint16_t smbmdev_confvolt;	/* configured voltage */
+	/* Added in SMBIOS 3.2 */
+	uint8_t smbmdev_memtech;	/* memory technology */
+	uint16_t smbmdev_opmode;	/* memory operating mode capability */
+	uint8_t smbmdev_fwver;		/* firmware version */
+	uint16_t smbmdev_modulemfgid;	/* module manufacturer ID */
+	uint16_t smbmdev_moduleprodid;	/* module product ID */
+	uint16_t smbmdev_memsysmfgid;	/* memory controller manufacturer id */
+	uint16_t smbmdev_memsysprodid;	/* memory controller product id */
+	uint64_t smbmdev_nvsize;	/* non-volatile memory size */
+	uint64_t smbmdev_volsize;	/* volatile memory size */
+	uint64_t smbmdev_cachesize;	/* cache size */
+	uint64_t smbmdev_logicalsize;	/* logical size */
+	/* Added in SMBIOS 3.3 */
+	uint32_t smbmdev_extspeed;	/* Extended device speed */
+	uint32_t smbmdev_extclkspeed;	/* Extended clock speed */
 } smb_memdevice_t;
 
 #define	SMB_MDS_KBYTES		0x8000	/* size in specified in kilobytes */
@@ -362,6 +388,13 @@ typedef struct smb_memdevmap {
 	uint64_t smbdmap_extstart;	/* extended starting address */
 	uint64_t smbdmap_extend;	/* extended ending address */
 } smb_memdevmap_t;
+
+typedef struct smb_pointdev {
+	smb_header_t smbpdev_hdr;	/* structure header */
+	uint8_t smbpdev_type;		/* device type */
+	uint8_t smbpdev_iface;		/* device interface */
+	uint8_t smbpdev_nbuttons;	/* number of buttons */
+} smb_pointdev_t;
 
 /*
  * SMBIOS implementation structure for SMB_TYPE_BATTERY.
@@ -569,6 +602,36 @@ typedef struct smb_obdev_ext {
 } smb_obdev_ext_t;
 
 /*
+ * SMBIOS implementation structure for SMB_TYPE_PROCESSOR_INFO
+ */
+typedef struct smb_processor_info {
+	smb_header_t smbpai_hdr;	/* structure handle */
+	uint16_t smbpai_proc;		/* processor handle */
+	uint8_t smbpai_len;		/* length of processor specific data */
+	uint8_t smbpai_type;		/* processor type */
+	uint8_t smbpai_data[];		/* processor-specific block */
+} smb_processor_info_t;
+
+typedef struct smb_processor_info_riscv {
+	uint16_t smbpairv_vers;		/* structure revision */
+	uint8_t smbpairv_len;		/* length of structure */
+	uint8_t smbpairv_hartid[16];	/* id of the hart */
+	uint8_t smbpairv_boot;		/* boot hart */
+	uint8_t smbpairv_vendid[16];	/* machine vendor id */
+	uint8_t smbpairv_archid[16];	/* arch vendor id */
+	uint8_t smbpairv_machid[16];	/* machine impl id */
+	uint32_t smbpairv_isa;		/* supported ISA */
+	uint8_t smbpairv_privlvl;		/* supported privilege levels */
+	uint8_t smbpairv_metdi[16];	/* Machine exception trap delegation */
+	uint8_t smbpairv_mitdi[16];	/* Machine interrupt trap delegation */
+	uint8_t smbpairv_xlen;		/* Register width */
+	uint8_t smbpairv_mxlen;		/* Machine register width */
+	uint8_t smbpairv_rsvd;		/* Reserved */
+	uint8_t smbpairv_sxlen;		/* Supervisor register width */
+	uint8_t smbpairv_uxlen;		/* User register width */
+} smb_processor_info_riscv_t;
+
+/*
  * SMBIOS implementation structure for SUN_OEM_EXT_PROCESSOR.
  */
 typedef struct smb_processor_ext {
@@ -627,7 +690,7 @@ typedef struct smb_struct {
 	const smb_header_t *smbst_hdr;	/* address of raw structure data */
 	const uchar_t *smbst_str;	/* address of string data (if any) */
 	const uchar_t *smbst_end;	/* address of 0x0000 ending tag */
-	struct smb_struct *smbst_next; 	/* next structure in hash chain */
+	struct smb_struct *smbst_next;	/* next structure in hash chain */
 	uint16_t *smbst_strtab;		/* string index -> offset table */
 	uint_t smbst_strtablen;		/* length of smbst_strtab */
 } smb_struct_t;
@@ -787,6 +850,20 @@ typedef struct smb_base_cache {
 	uint8_t smbba_location;		/* cache location (SMB_CAL_*) */
 	uint8_t smbba_flags;		/* cache flags (SMB_CAF_*) */
 } smb_base_cache_t;
+
+typedef struct smb_base_slot {
+	const char *smbbl_name;		/* reference designation */
+	uint8_t smbbl_type;		/* slot type */
+	uint8_t smbbl_width;		/* slot data bus width */
+	uint8_t smbbl_usage;		/* current usage */
+	uint8_t smbbl_length;		/* slot length */
+	uint16_t smbbl_id;		/* slot ID */
+	uint8_t smbbl_ch1;		/* slot characteristics 1 */
+	uint8_t smbbl_ch2;		/* slot characteristics 2 */
+	uint16_t smbbl_sg;		/* segment group number */
+	uint8_t smbbl_bus;		/* bus number */
+	uint8_t smbbl_df;		/* device/function number */
+} smb_base_slot_t;
 
 #ifdef	__cplusplus
 }

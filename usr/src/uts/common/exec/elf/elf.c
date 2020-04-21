@@ -24,9 +24,9 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	   All Rights Reserved	*/
 /*
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright (c) 2019, Joyent, Inc.
  */
 
 #include <sys/types.h>
@@ -229,7 +229,7 @@ mapexec_brand(vnode_t *vp, uarg_t *args, Ehdr *ehdr, Addr *uphdr_vaddr,
 	intptr_t	minaddr;
 
 	if (lddatap != NULL)
-		*lddatap = NULL;
+		*lddatap = 0;
 
 	if (error = execpermissions(vp, &vat, args)) {
 		uprintf("%s: Cannot execute %s\n", exec_file, args->pathname);
@@ -305,16 +305,16 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 	Phdr		*uphdr = NULL;
 	Phdr		*junk = NULL;
 	size_t		len;
+	size_t		i;
 	ssize_t		phdrsize;
 	int		postfixsize = 0;
-	int		i, hsize;
+	int		hsize;
 	Phdr		*phdrp;
 	Phdr		*dataphdrp = NULL;
 	Phdr		*dtrphdr;
 	Phdr		*capphdr = NULL;
 	Cap		*cap = NULL;
 	ssize_t		capsize;
-	Dyn		*dyn = NULL;
 	int		hasu = 0;
 	int		hasauxv = 0;
 	int		hasintp = 0;
@@ -541,24 +541,30 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 	}
 
 	/* If the binary has an explicit ASLR flag, it must be honoured */
-	if ((dynamicphdr != NULL) &&
-	    (dynamicphdr->p_filesz > 0)) {
-		Dyn *dp;
-		off_t i = 0;
+	if ((dynamicphdr != NULL) && (dynamicphdr->p_filesz > 0)) {
+		const size_t dynfilesz = dynamicphdr->p_filesz;
+		const size_t dynoffset = dynamicphdr->p_offset;
+		Dyn *dyn, *dp;
+
+		if (dynoffset > MAXOFFSET_T ||
+		    dynfilesz > MAXOFFSET_T ||
+		    dynoffset + dynfilesz > MAXOFFSET_T) {
+			uprintf("%s: cannot read full .dynamic section\n",
+			    exec_file);
+			error = EINVAL;
+			goto out;
+		}
 
 #define	DYN_STRIDE	100
-		for (i = 0; i < dynamicphdr->p_filesz;
-		    i += sizeof (*dyn) * DYN_STRIDE) {
-			int ndyns = (dynamicphdr->p_filesz - i) / sizeof (*dyn);
-			size_t dynsize;
-
-			ndyns = MIN(DYN_STRIDE, ndyns);
-			dynsize = ndyns * sizeof (*dyn);
+		for (i = 0; i < dynfilesz; i += sizeof (*dyn) * DYN_STRIDE) {
+			const size_t remdyns = (dynfilesz - i) / sizeof (*dyn);
+			const size_t ndyns = MIN(DYN_STRIDE, remdyns);
+			const size_t dynsize = ndyns * sizeof (*dyn);
 
 			dyn = kmem_alloc(dynsize, KM_SLEEP);
 
 			if ((error = vn_rdwr(UIO_READ, vp, (caddr_t)dyn,
-			    dynsize, (offset_t)(dynamicphdr->p_offset + i),
+			    (ssize_t)dynsize, (offset_t)(dynoffset + i),
 			    UIO_SYSSPACE, 0, (rlim64_t)0,
 			    CRED(), &resid)) != 0) {
 				uprintf("%s: cannot read .dynamic section\n",
@@ -837,8 +843,10 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 
 	if (hasauxv) {
 		int auxf = AF_SUN_HWCAPVERIFY;
+#if defined(__amd64)
 		size_t fpsize;
 		int fptype;
+#endif /* defined(__amd64) */
 
 		/*
 		 * Note: AT_SUN_PLATFORM and AT_SUN_EXECNAME were filled in via
@@ -920,8 +928,9 @@ elfexec(vnode_t *vp, execa_t *uap, uarg_t *args, intpdata_t *idatap,
 		 * take care of the FPU entries.
 		 */
 #if defined(__amd64)
-		if (args->commpage != NULL ||
-		    (args->commpage = (uintptr_t)comm_page_mapin()) != NULL) {
+		if (args->commpage != (uintptr_t)NULL ||
+		    (args->commpage = (uintptr_t)comm_page_mapin()) !=
+		    (uintptr_t)NULL) {
 			ADDAUX(aux, AT_SUN_COMMPAGE, args->commpage)
 		} else {
 			/*
@@ -1948,7 +1957,7 @@ top:
 	 */
 	nshdrs = 0;
 	if (content & (CC_CONTENT_CTF | CC_CONTENT_SYMTAB)) {
-		(void) process_scns(content, p, credp, NULL, NULL, NULL, 0,
+		(void) process_scns(content, p, credp, NULL, NULL, 0, 0,
 		    NULL, &nshdrs);
 	}
 	AS_LOCK_EXIT(as);

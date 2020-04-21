@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG = vmstat
 OBJS = vmstat.o
@@ -33,8 +34,11 @@ include $(SRC)/cmd/stat/Makefile.stat
 LDLIBS += -ldevinfo -lkstat -lavl
 CFLAGS += $(CCVERBOSE) -I${STATCOMMONDIR}
 CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-parentheses
+
+SMOFF += signed
+
 FILEMODE= 0555
 
 lint := LINTFLAGS = -muxs -I$(STATCOMMONDIR)

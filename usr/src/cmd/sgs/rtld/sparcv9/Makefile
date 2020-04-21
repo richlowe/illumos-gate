@@ -21,6 +21,7 @@
 
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 # Object lists are organized into primary (most frequently used code) and
@@ -40,18 +41,18 @@ P_MACHOBJS=	sparc_elf.o	_setup.o
 
 CP_MACHOBJS=	common_sparc.o
 
-S_MACHOBJS=	
+S_MACHOBJS=
 
 P_ASOBJS=	boot.o		boot_elf.o	caller.o
 
-S_ASOBJS=	
+S_ASOBJS=
 
 CRTSRCS=	../../../../lib/crt/sparc
 CRTI=		pics/crti.o
 CRTN=		pics/crtn.o
 CRTS=		$(CRTI)		$(CRTN)
 
-CHKSRCS=	$(SRCBASE)/uts/common/krtld/reloc.h
+CHKSRCS=	$(SRC)/uts/common/krtld/reloc.h
 
 BASEPLAT =	sparc
 
@@ -68,9 +69,11 @@ include		$(SRC)/lib/Makefile.lib.64
 
 CPPFLAGS +=	-I../../../../uts/sparc/krtld
 CFLAGS +=	-_cc=-xregs=no%appl -_gcc=-mno-app-regs
-ASFLAGS +=	-s -K pic -D__sparcv9 -D_ELF64 $(sparcv9_XARCH)
+ASFLAGS +=	-s $(AS_PICFLAGS) -D__sparcv9 -D_ELF64 $(sparcv9_XARCH)
+ADBGENFLAGS +=	-mlp64
+ADBGENCFLAGS +=	-erroff=%all
+ADBSUB=		$(ADBSUB64)
 CPPFLAGS +=	-D_ELF64
-LINTFLAGS64 +=	$(VAR_LINTFLAGS64)
 SONAME=		/lib/sparcv9/ld.so.1
 
 SGSMSGTARG +=	$(SGSMSGSPARC) $(SGSMSGSPARC64) $(SGSMSG64)
@@ -88,8 +91,6 @@ CONVLIBDIR =	$(CONVLIBDIR64)
 all:		$(RTLD)
 
 install:	all $(ROOTDYNLIB64)
-
-lint:		$(LINTOUT64)
 
 adbmacros:	adb .WAIT $(ADBSCRIPTS)
 

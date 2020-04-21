@@ -15,41 +15,93 @@
 #
 
 include $(SRC)/Makefile.master
+include $(SRC)/boot/sys/boot/Makefile.inc
 
-CFLAGS= -O2 -I../../../../include -I../../..
-CPPFLAGS= -D_STANDALONE -DLOADER_ZFS_SUPPORT
+CPPFLAGS += -I../../../../include -I../../..
+CPPFLAGS += -I$(ZFSSRC)
 
-all: libi386.a
+all install: libi386.a
 
 clean: clobber
 clobber:
 	$(RM) machine x86 $(OBJS) libi386.a
 
-AS=	$(GNU_ROOT)/bin/gas
-CC=	$(GNUC_ROOT)/bin/gcc
-OBJCOPY= $(GNU_ROOT)/bin/gobjcopy
-AS_FLAGS=--32
-ASFLAGS=-m32
-AS_CPPFLAGS=
-COMPILE.s  = $(AS) $(AS_FLAGS)
+SRCS=	\
+	amd64_tramp.S \
+	bio.c \
+	biosacpi.c \
+	biosdisk.c \
+	biosmem.c \
+	biospci.c \
+	biospnp.c \
+	biossmap.c \
+	bootinfo.c \
+	bootinfo32.c \
+	bootinfo64.c \
+	comconsole.c \
+	cpuid.c \
+	devicename.c \
+	elf32_freebsd.c \
+	elf64_freebsd.c \
+	i386_copy.c \
+	i386_module.c \
+	linux.c \
+	multiboot.c \
+	multiboot_tramp.S \
+	nullconsole.c \
+	pxe.c \
+	pxetramp.s \
+	relocater_tramp.S \
+	smbios.c \
+	spinconsole.c \
+	time.c \
+	vbe.c \
+	vgasubr.c \
+	vidconsole.c
 
-SRCS=	biosacpi.c bioscd.c biosdisk.c biosmem.c biospnp.c \
-	biospci.c biossmap.c bootinfo.c bootinfo32.c bootinfo64.c \
-	comconsole.c devicename.c elf32_freebsd.c \
-	elf64_freebsd.c multiboot.c multiboot_tramp.S \
-	i386_copy.c i386_module.c nullconsole.c pxe.c pxetramp.s \
-	smbios.c time.c vidconsole.c amd64_tramp.S spinconsole.c linux.c \
-	relocater_tramp.S
-OBJS=	biosacpi.o bioscd.o biosdisk.o biosmem.o biospnp.o \
-	biospci.o biossmap.o bootinfo.o bootinfo32.o bootinfo64.o \
-	comconsole.o devicename.o elf32_freebsd.o \
-	elf64_freebsd.o multiboot.o multiboot_tramp.o \
-	i386_copy.o i386_module.o nullconsole.o pxe.o pxetramp.o \
-	smbios.o time.o vidconsole.o amd64_tramp.o spinconsole.o linux.o \
-	relocater_tramp.o
+OBJS=	\
+	amd64_tramp.o \
+	bio.o \
+	biosacpi.o \
+	biosdisk.o \
+	biosmem.o \
+	biospci.o \
+	biospnp.o \
+	biossmap.o \
+	bootinfo.o \
+	bootinfo32.o \
+	bootinfo64.o \
+	comconsole.o \
+	cpuid.o \
+	devicename.o \
+	elf32_freebsd.o \
+	elf64_freebsd.o \
+	i386_copy.o \
+	i386_module.o \
+	linux.o \
+	multiboot.o \
+	multiboot_tramp.o \
+	nullconsole.o \
+	pxe.o \
+	pxetramp.o \
+	relocater_tramp.o \
+	smbios.o \
+	spinconsole.o \
+	time.o \
+	vbe.o \
+	vgasubr.o \
+	vidconsole.o
 
-LIBZFS=  ../../zfs
-SRCS +=	$(LIBZFS)/devicename_stubs.c
+COMMON=  ../../common
+VGASUBR=$(SRC)/common/vga
+CPPFLAGS += -I$(PNGLITE)
+SRCS +=	$(COMMON)/gfx_fb.c $(PNGLITE)/pnglite.c
+OBJS +=	gfx_fb.o pnglite.o
+
+gfx_fb.o := CPPFLAGS += $(DEFAULT_CONSOLE_COLOR)
+pnglite.o := CPPFLAGS += -I$(ZLIB)
+
+SRCS +=	$(ZFSSRC)/devicename_stubs.c
 OBJS +=	devicename_stubs.o
 
 BOOT_COMCONSOLE_PORT= 0x3f8
@@ -62,19 +114,16 @@ CFLAGS +=	-DCOMSPEED=${BOOT_COMCONSOLE_SPEED}
 # CFLAGS+= -DDISK_DEBUG
 
 # Export serial numbers, UUID, and asset tag from loader.
-CFLAGS += -DSMBIOS_SERIAL_NUMBERS
+smbios.o := CFLAGS += -DSMBIOS_SERIAL_NUMBERS
 # Use little-endian UUID format as defined in SMBIOS 2.6.
-CFLAGS += -DSMBIOS_LITTLE_ENDIAN_UUID
+smbios.o := CFLAGS += -DSMBIOS_LITTLE_ENDIAN_UUID
 # Use network-endian UUID format for backward compatibility.
 #CFLAGS += -DSMBIOS_NETWORK_ENDIAN_UUID
-
-# Include simple terminal emulation (cons25-compatible)
-CFLAGS += -DTERM_EMU
 
 # XXX: make alloca() useable
 CFLAGS += -Dalloca=__builtin_alloca
 
-CFLAGS +=	-I$(SRC)/common/ficl -I../../ficl \
+CFLAGS +=	-I$(SRC)/common/ficl -I../../libficl \
 		-I../../common -I../common \
 		-I../btx/lib \
 		-I$(SRC)/uts/intel/sys/acpi \
@@ -111,5 +160,14 @@ $(OBJS): machine x86
 libi386.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
 
-%.o:	$(LIBZFS)/%.c
+%.o:	$(ZFSSRC)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(COMMON)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(PNGLITE)/%.c
+	$(COMPILE.c) -o $@ $<
+
+%.o:	$(VGASUBR)/%.c
 	$(COMPILE.c) -o $@ $<

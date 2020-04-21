@@ -27,7 +27,7 @@
  * All rights reserved.
  */
 /*
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright 2012 Jens Elkner <jel+illumos@cs.uni-magdeburg.de>
  * Copyright 2012 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
  * Copyright 2014 Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
@@ -160,6 +160,10 @@ extern "C" {
 #define	CPUID_AMD_EDX_3DNowx	0x40000000	/* AMD: extensions to 3DNow! */
 #define	CPUID_AMD_EDX_3DNow	0x80000000	/* AMD: 3DNow! instructions */
 
+/*
+ * AMD extended function 0x80000001 %ecx
+ */
+
 #define	CPUID_AMD_ECX_AHF64	0x00000001	/* LAHF and SAHF in long mode */
 #define	CPUID_AMD_ECX_CMP_LGCY	0x00000002	/* AMD: multicore chip */
 #define	CPUID_AMD_ECX_SVM	0x00000004	/* AMD: secure VM */
@@ -171,7 +175,7 @@ extern "C" {
 #define	CPUID_AMD_ECX_3DNP	0x00000100	/* AMD: 3DNowPrefectch */
 #define	CPUID_AMD_ECX_OSVW	0x00000200	/* AMD: OSVW */
 #define	CPUID_AMD_ECX_IBS	0x00000400	/* AMD: IBS */
-#define	CPUID_AMD_ECX_SSE5	0x00000800	/* AMD: Extended AVX */
+#define	CPUID_AMD_ECX_XOP	0x00000800	/* AMD: Extended Operation */
 #define	CPUID_AMD_ECX_SKINIT	0x00001000	/* AMD: SKINIT */
 #define	CPUID_AMD_ECX_WDT	0x00002000	/* AMD: WDT */
 				/* 0x00004000 - reserved */
@@ -183,10 +187,21 @@ extern "C" {
 				/* 0x00100000 - reserved */
 #define	CPUID_AMD_ECX_TBM	0x00200000	/* AMD: trailing bit manips. */
 #define	CPUID_AMD_ECX_TOPOEXT	0x00400000	/* AMD: Topology Extensions */
+#define	CPUID_AMD_ECX_PCEC	0x00800000	/* AMD: Core ext perf counter */
+#define	CUPID_AMD_ECX_PCENB	0x01000000	/* AMD: NB ext perf counter */
+				/* 0x02000000 - reserved */
+#define	CPUID_AMD_ECX_DBKP	0x40000000	/* AMD: Data breakpoint */
+#define	CPUID_AMD_ECX_PERFTSC	0x08000000	/* AMD: TSC Perf Counter */
+#define	CPUID_AMD_ECX_PERFL3	0x10000000	/* AMD: L3 Perf Counter */
+#define	CPUID_AMD_ECX_MONITORX	0x20000000	/* AMD: clzero */
+				/* 0x40000000 - reserved */
+				/* 0x80000000 - reserved */
 
 /*
  * AMD uses %ebx for some of their features (extended function 0x80000008).
  */
+#define	CPUID_AMD_EBX_CLZERO		0x000000001 /* AMD: CLZERO instr */
+#define	CPUID_AMD_EBX_IRCMSR		0x000000002 /* AMD: Ret. instrs MSR */
 #define	CPUID_AMD_EBX_ERR_PTR_ZERO	0x000000004 /* AMD: FP Err. Ptr. Zero */
 #define	CPUID_AMD_EBX_IBPB		0x000001000 /* AMD: IBPB */
 #define	CPUID_AMD_EBX_IBRS		0x000004000 /* AMD: IBRS */
@@ -194,6 +209,7 @@ extern "C" {
 #define	CPUID_AMD_EBX_IBRS_ALL		0x000010000 /* AMD: Enhanced IBRS */
 #define	CPUID_AMD_EBX_STIBP_ALL		0x000020000 /* AMD: STIBP ALL */
 #define	CPUID_AMD_EBX_PREFER_IBRS	0x000040000 /* AMD: Don't retpoline */
+#define	CPUID_AMD_EBX_PPIN		0x000800000 /* AMD: PPIN Support */
 #define	CPUID_AMD_EBX_SSBD		0x001000000 /* AMD: SSBD */
 #define	CPUID_AMD_EBX_VIRT_SSBD		0x002000000 /* AMD: VIRT SSBD */
 #define	CPUID_AMD_EBX_SSB_NO		0x004000000 /* AMD: SSB Fixed */
@@ -208,26 +224,70 @@ extern "C" {
 #define	CPUID_INTC_ECX_AHF64	0x00100000	/* LAHF and SAHF in long mode */
 
 /*
+ * Intel uses cpuid leaf 6 to cover various thermal and power control
+ * operations.
+ */
+#define	CPUID_INTC_EAX_DTS	0x00000001	/* Digital Thermal Sensor */
+#define	CPUID_INTC_EAX_TURBO	0x00000002	/* Turboboost */
+#define	CPUID_INTC_EAX_ARAT	0x00000004	/* APIC-Timer-Always-Running */
+/* bit 3 is reserved */
+#define	CPUID_INTC_EAX_PLN	0x00000010	/* Power limit notification */
+#define	CPUID_INTC_EAX_ECMD	0x00000020	/* Clock mod. duty cycle */
+#define	CPUID_INTC_EAX_PTM	0x00000040	/* Package thermal management */
+#define	CPUID_INTC_EAX_HWP	0x00000080	/* HWP base registers */
+#define	CPUID_INTC_EAX_HWP_NOT	0x00000100	/* HWP Notification */
+#define	CPUID_INTC_EAX_HWP_ACT	0x00000200	/* HWP Activity Window */
+#define	CPUID_INTC_EAX_HWP_EPR	0x00000400	/* HWP Energy Perf. Pref. */
+#define	CPUID_INTC_EAX_HWP_PLR	0x00000800	/* HWP Package Level Request */
+/* bit 12 is reserved */
+#define	CPUID_INTC_EAX_HDC	0x00002000	/* HDC */
+#define	CPUID_INTC_EAX_TURBO3	0x00004000	/* Turbo Boost Max Tech 3.0 */
+#define	CPUID_INTC_EAX_HWP_CAP	0x00008000	/* HWP Capabilities */
+#define	CPUID_INTC_EAX_HWP_PECI	0x00010000	/* HWP PECI override */
+#define	CPUID_INTC_EAX_HWP_FLEX	0x00020000	/* Flexible HWP */
+#define	CPUID_INTC_EAX_HWP_FAST	0x00040000	/* Fast IA32_HWP_REQUEST */
+/* bit 19 is reserved */
+#define	CPUID_INTC_EAX_HWP_IDLE	0x00100000	/* Ignore Idle Logical HWP */
+
+#define	CPUID_INTC_EBX_DTS_NTRESH(x)	((x) & 0xf)
+
+#define	CPUID_INTC_ECX_MAPERF	0x00000001	/* IA32_MPERF / IA32_APERF */
+/* bits 1-2 are reserved */
+#define	CPUID_INTC_ECX_PERFBIAS	0x00000008	/* IA32_ENERGY_PERF_BIAS */
+
+/*
  * Intel also uses cpuid leaf 7 to have additional instructions and features.
  * Like some other leaves, but unlike the current ones we care about, it
  * requires us to specify both a leaf in %eax and a sub-leaf in %ecx. To deal
  * with the potential use of additional sub-leaves in the future, we now
  * specifically label the EBX features with their leaf and sub-leaf.
  */
+#define	CPUID_INTC_EBX_7_0_FSGSBASE	0x00000001	/* FSGSBASE */
+#define	CPUID_INTC_EBX_7_0_TSC_ADJ	0x00000002	/* TSC adjust MSR */
+#define	CPUID_INTC_EBX_7_0_SGX		0x00000004	/* SGX */
 #define	CPUID_INTC_EBX_7_0_BMI1		0x00000008	/* BMI1 instrs */
 #define	CPUID_INTC_EBX_7_0_HLE		0x00000010	/* HLE */
 #define	CPUID_INTC_EBX_7_0_AVX2		0x00000020	/* AVX2 supported */
+/* Bit 6 is reserved */
 #define	CPUID_INTC_EBX_7_0_SMEP		0x00000080	/* SMEP in CR4 */
 #define	CPUID_INTC_EBX_7_0_BMI2		0x00000100	/* BMI2 instrs */
+#define	CPUID_INTC_EBX_7_0_ENH_REP_MOV	0x00000200	/* Enhanced REP MOVSB */
 #define	CPUID_INTC_EBX_7_0_INVPCID	0x00000400	/* invpcid instr */
+#define	CPUID_INTC_EBX_7_0_RTM		0x00000800	/* RTM instrs */
+#define	CPUID_INTC_EBX_7_0_PQM		0x00001000	/* QoS Monitoring */
+#define	CPUID_INTC_EBX_7_0_DEP_CSDS	0x00002000	/* Deprecates CS/DS */
 #define	CPUID_INTC_EBX_7_0_MPX		0x00004000	/* Mem. Prot. Ext. */
+#define	CPUID_INTC_EBX_7_0_PQE		0x00080000	/* QoS Enforcement */
 #define	CPUID_INTC_EBX_7_0_AVX512F	0x00010000	/* AVX512 foundation */
 #define	CPUID_INTC_EBX_7_0_AVX512DQ	0x00020000	/* AVX512DQ */
 #define	CPUID_INTC_EBX_7_0_RDSEED	0x00040000	/* RDSEED instr */
 #define	CPUID_INTC_EBX_7_0_ADX		0x00080000	/* ADX instrs */
 #define	CPUID_INTC_EBX_7_0_SMAP		0x00100000	/* SMAP in CR 4 */
 #define	CPUID_INTC_EBX_7_0_AVX512IFMA	0x00200000	/* AVX512IFMA */
+/* Bit 22 is reserved */
+#define	CPUID_INTC_EBX_7_0_CLFLUSHOPT	0x00800000	/* CLFLUSOPT */
 #define	CPUID_INTC_EBX_7_0_CLWB		0x01000000	/* CLWB */
+#define	CPUID_INTC_EBX_7_0_PTRACE	0x02000000	/* Processor Trace */
 #define	CPUID_INTC_EBX_7_0_AVX512PF	0x04000000	/* AVX512PF */
 #define	CPUID_INTC_EBX_7_0_AVX512ER	0x08000000	/* AVX512ER */
 #define	CPUID_INTC_EBX_7_0_AVX512CD	0x10000000	/* AVX512CD */
@@ -241,19 +301,55 @@ extern "C" {
 	CPUID_INTC_EBX_7_0_AVX512ER | CPUID_INTC_EBX_7_0_AVX512CD | \
 	CPUID_INTC_EBX_7_0_AVX512BW | CPUID_INTC_EBX_7_0_AVX512VL)
 
+#define	CPUID_INTC_ECX_7_0_PREFETCHWT1	0x00000001	/* PREFETCHWT1 */
 #define	CPUID_INTC_ECX_7_0_AVX512VBMI	0x00000002	/* AVX512VBMI */
 #define	CPUID_INTC_ECX_7_0_UMIP		0x00000004	/* UMIP */
 #define	CPUID_INTC_ECX_7_0_PKU		0x00000008	/* umode prot. keys */
 #define	CPUID_INTC_ECX_7_0_OSPKE	0x00000010	/* OSPKE */
+#define	CPUID_INTC_ECX_7_0_WAITPKG	0x00000020	/* WAITPKG */
+#define	CPUID_INTC_ECX_7_0_AVX512VBMI2	0x00000040	/* AVX512 VBMI2 */
+/* bit 7 is reserved */
+#define	CPUID_INTC_ECX_7_0_GFNI		0x00000100	/* GFNI */
+#define	CPUID_INTC_ECX_7_0_VAES		0x00000200	/* VAES */
+#define	CPUID_INTC_ECX_7_0_VPCLMULQDQ	0x00000400	/* VPCLMULQDQ */
+#define	CPUID_INTC_ECX_7_0_AVX512VNNI	0x00000800	/* AVX512 VNNI */
+#define	CPUID_INTC_ECX_7_0_AVX512BITALG	0x00001000	/* AVX512 BITALG */
+/* bit 13 is reserved */
 #define	CPUID_INTC_ECX_7_0_AVX512VPOPCDQ 0x00004000	/* AVX512 VPOPCNTDQ */
+/* bits 15-16 are reserved */
+/* bits 17-21 are the value of MAWAU */
+#define	CPUID_INTC_ECX_7_0_RDPID	0x00400000	/* RPID, IA32_TSC_AUX */
+/* bits 23-24 are reserved */
+#define	CPUID_INTC_ECX_7_0_CLDEMOTE	0x02000000	/* Cache line demote */
+/* bit 26 is resrved */
+#define	CPUID_INTC_ECX_7_0_MOVDIRI	0x08000000	/* MOVDIRI insn */
+#define	CPUID_INTC_ECX_7_0_MOVDIR64B	0x10000000	/* MOVDIR64B insn */
+/* bit 29 is reserved */
+#define	CPUID_INTC_ECX_7_0_SGXLC	0x40000000	/* SGX Launch config */
+/* bit 31 is reserved */
 
+/*
+ * While CPUID_INTC_ECX_7_0_GFNI, CPUID_INTC_ECX_7_0_VAES, and
+ * CPUID_INTC_ECX_7_0_VPCLMULQDQ all have AVX512 components, they are still
+ * valid when AVX512 is not. However, the following flags all are only valid
+ * when AVX512 is present.
+ */
 #define	CPUID_INTC_ECX_7_0_ALL_AVX512 \
-	(CPUID_INTC_ECX_7_0_AVX512VBMI | CPUID_INTC_ECX_7_0_AVX512VPOPCDQ)
+	(CPUID_INTC_ECX_7_0_AVX512VBMI | CPUID_INTC_ECX_7_0_AVX512VNNI | \
+	CPUID_INTC_ECX_7_0_AVX512BITALG | CPUID_INTC_ECX_7_0_AVX512VPOPCDQ)
 
+/* bits 0-1 are reserved */
 #define	CPUID_INTC_EDX_7_0_AVX5124NNIW	0x00000004	/* AVX512 4NNIW */
 #define	CPUID_INTC_EDX_7_0_AVX5124FMAPS	0x00000008	/* AVX512 4FMAPS */
+#define	CPUID_INTC_EDX_7_0_FSREPMOV	0x00000010	/* fast short rep mov */
+/* bits 5-9 are reserved */
+#define	CPUID_INTC_EDX_7_0_MD_CLEAR	0x00000400	/* MB VERW */
+/* bits 11-17 are reserved */
+#define	CPUID_INTC_EDX_7_0_PCONFIG	0x00040000	/* PCONFIG */
+/* bits 19-26 are reserved */
 #define	CPUID_INTC_EDX_7_0_SPEC_CTRL	0x04000000	/* Spec, IBPB, IBRS */
 #define	CPUID_INTC_EDX_7_0_STIBP	0x08000000	/* STIBP */
+#define	CPUID_INTC_EDX_7_0_FLUSH_CMD	0x10000000	/* IA32_FLUSH_CMD */
 #define	CPUID_INTC_EDX_7_0_ARCH_CAPS	0x20000000	/* IA32_ARCH_CAPS */
 #define	CPUID_INTC_EDX_7_0_SSBD		0x80000000	/* SSBD */
 
@@ -348,13 +444,38 @@ extern "C" {
 #define	MSR_PRP4_LBSTK_TO_15	0x6cf
 
 /*
+ * PPIN definitions for Intel and AMD. Unfortunately, Intel and AMD use
+ * different MSRS for this and different MSRS to control whether or not it
+ * should be readable.
+ */
+#define	MSR_PPIN_CTL_INTC	0x04e
+#define	MSR_PPIN_INTC		0x04f
+#define	MSR_PLATFORM_INFO	0x0ce
+#define	MSR_PLATFORM_INFO_PPIN	(1 << 23)
+
+#define	MSR_PPIN_CTL_AMD	0xC00102F0
+#define	MSR_PPIN_AMD		0xC00102F1
+
+/*
+ * These values are currently the same between Intel and AMD.
+ */
+#define	MSR_PPIN_CTL_MASK	0x03
+#define	MSR_PPIN_CTL_LOCKED	0x01
+#define	MSR_PPIN_CTL_ENABLED	0x02
+
+/*
  * Intel IA32_ARCH_CAPABILITIES MSR.
  */
-#define	MSR_IA32_ARCH_CAPABILITIES	0x10a
-#define	IA32_ARCH_CAP_RDCL_NO		0x0001
-#define	IA32_ARCH_CAP_IBRS_ALL		0x0002
-#define	IA32_ARCH_CAP_RSBA		0x0004
-#define	IA32_ARCH_CAP_SSB_NO		0x0010
+#define	MSR_IA32_ARCH_CAPABILITIES		0x10a
+#define	IA32_ARCH_CAP_RDCL_NO			0x0001
+#define	IA32_ARCH_CAP_IBRS_ALL			0x0002
+#define	IA32_ARCH_CAP_RSBA			0x0004
+#define	IA32_ARCH_CAP_SKIP_L1DFL_VMENTRY	0x0008
+#define	IA32_ARCH_CAP_SSB_NO			0x0010
+#define	IA32_ARCH_CAP_MDS_NO			0x0020
+#define	IA32_ARCH_CAP_IF_PSCHANGE_MC_NO		0x0040
+#define	IA32_ARCH_CAP_TSX_CTRL			0x0080
+#define	IA32_ARCH_CAP_TAA_NO			0x0100
 
 /*
  * Intel Speculation related MSRs
@@ -366,6 +487,92 @@ extern "C" {
 
 #define	MSR_IA32_PRED_CMD	0x49
 #define	IA32_PRED_CMD_IBPB	0x01
+
+#define	MSR_IA32_FLUSH_CMD	0x10b
+#define	IA32_FLUSH_CMD_L1D	0x01
+
+/*
+ * Intel TSX Control MSRs
+ */
+#define	MSR_IA32_TSX_CTRL		0x122
+#define	IA32_TSX_CTRL_RTM_DISABLE	0x01
+#define	IA32_TSX_CTRL_CPUID_CLEAR	0x02
+
+/*
+ * Intel Thermal MSRs
+ */
+#define	MSR_IA32_THERM_INTERRUPT	0x19b
+#define	IA32_THERM_INTERRUPT_HIGH_IE	0x00000001
+#define	IA32_THERM_INTERRUPT_LOW_IE	0x00000002
+#define	IA32_THERM_INTERRUPT_PROCHOT_IE	0x00000004
+#define	IA32_THERM_INTERRUPT_FORCEPR_IE	0x00000008
+#define	IA32_THERM_INTERRUPT_CRIT_IE	0x00000010
+#define	IA32_THERM_INTERRUPT_TR1_VAL(x)	(((x) >> 8) & 0x7f)
+#define	IA32_THERM_INTTERUPT_TR1_IE	0x00008000
+#define	IA32_THERM_INTTERUPT_TR2_VAL(x)	(((x) >> 16) & 0x7f)
+#define	IA32_THERM_INTERRUPT_TR2_IE	0x00800000
+#define	IA32_THERM_INTERRUPT_PL_NE	0x01000000
+
+#define	MSR_IA32_THERM_STATUS		0x19c
+#define	IA32_THERM_STATUS_STATUS		0x00000001
+#define	IA32_THERM_STATUS_STATUS_LOG		0x00000002
+#define	IA32_THERM_STATUS_PROCHOT		0x00000004
+#define	IA32_THERM_STATUS_PROCHOT_LOG		0x00000008
+#define	IA32_THERM_STATUS_CRIT_STATUS		0x00000010
+#define	IA32_THERM_STATUS_CRIT_LOG		0x00000020
+#define	IA32_THERM_STATUS_TR1_STATUS		0x00000040
+#define	IA32_THERM_STATUS_TR1_LOG		0x00000080
+#define	IA32_THERM_STATUS_TR2_STATUS		0x00000100
+#define	IA32_THERM_STATUS_TR2_LOG		0x00000200
+#define	IA32_THERM_STATUS_POWER_LIMIT_STATUS	0x00000400
+#define	IA32_THERM_STATUS_POWER_LIMIT_LOG	0x00000800
+#define	IA32_THERM_STATUS_CURRENT_STATUS	0x00001000
+#define	IA32_THERM_STATUS_CURRENT_LOG		0x00002000
+#define	IA32_THERM_STATUS_CROSS_DOMAIN_STATUS	0x00004000
+#define	IA32_THERM_STATUS_CROSS_DOMAIN_LOG	0x00008000
+#define	IA32_THERM_STATUS_READING(x)		(((x) >> 16) & 0x7f)
+#define	IA32_THERM_STATUS_RESOLUTION(x)		(((x) >> 27) & 0x0f)
+#define	IA32_THERM_STATUS_READ_VALID		0x80000000
+
+#define	MSR_TEMPERATURE_TARGET		0x1a2
+#define	MSR_TEMPERATURE_TARGET_TARGET(x)	(((x) >> 16) & 0xff)
+/*
+ * Not all models support the offset. Refer to the Intel SDM Volume 4 for a list
+ * of which models have support for which bits.
+ */
+#define	MSR_TEMPERATURE_TARGET_OFFSET(x)	(((x) >> 24) & 0x0f)
+
+#define	MSR_IA32_PACKAGE_THERM_STATUS		0x1b1
+#define	IA32_PKG_THERM_STATUS_STATUS		0x00000001
+#define	IA32_PKG_THERM_STATUS_STATUS_LOG	0x00000002
+#define	IA32_PKG_THERM_STATUS_PROCHOT		0x00000004
+#define	IA32_PKG_THERM_STATUS_PROCHOT_LOG	0x00000008
+#define	IA32_PKG_THERM_STATUS_CRIT_STATUS	0x00000010
+#define	IA32_PKG_THERM_STATUS_CRIT_LOG		0x00000020
+#define	IA32_PKG_THERM_STATUS_TR1_STATUS	0x00000040
+#define	IA32_PKG_THERM_STATUS_TR1_LOG		0x00000080
+#define	IA32_PKG_THERM_STATUS_TR2_STATUS	0x00000100
+#define	IA32_PKG_THERM_STATUS_TR2_LOG		0x00000200
+#define	IA32_PKG_THERM_STATUS_READING(x)	(((x) >> 16) & 0x7f)
+
+#define	MSR_IA32_PACKAGE_THERM_INTERRUPT	0x1b2
+#define	IA32_PKG_THERM_INTERRUPT_HIGH_IE	0x00000001
+#define	IA32_PKG_THERM_INTERRUPT_LOW_IE		0x00000002
+#define	IA32_PKG_THERM_INTERRUPT_PROCHOT_IE	0x00000004
+#define	IA32_PKG_THERM_INTERRUPT_OVERHEAT_IE	0x00000010
+#define	IA32_PKG_THERM_INTERRUPT_TR1_VAL(x)	(((x) >> 8) & 0x7f)
+#define	IA32_PKG_THERM_INTTERUPT_TR1_IE		0x00008000
+#define	IA32_PKG_THERM_INTTERUPT_TR2_VAL(x)	(((x) >> 16) & 0x7f)
+#define	IA32_PKG_THERM_INTERRUPT_TR2_IE		0x00800000
+#define	IA32_PKG_THERM_INTERRUPT_PL_NE		0x01000000
+
+/*
+ * This MSR exists on families, 10h, 12h+ for AMD. This controls instruction
+ * decoding. Most notably, for the AMD variant of retpolines, we must improve
+ * the serializability of lfence for the lfence based method to work.
+ */
+#define	MSR_AMD_DECODE_CONFIG			0xc0011029
+#define	AMD_DECODE_CONFIG_LFENCE_DISPATCH	0x02
 
 #define	MCI_CTL_VALUE		0xffffffff
 
@@ -479,21 +686,30 @@ extern "C" {
 #define	X86FSET_RSBA		78
 #define	X86FSET_SSB_NO		79
 #define	X86FSET_STIBP_ALL	80
+#define	X86FSET_FLUSH_CMD	81
+#define	X86FSET_L1D_VM_NO	82
+#define	X86FSET_FSGSBASE	83
+#define	X86FSET_CLFLUSHOPT	84
+#define	X86FSET_CLWB		85
+#define	X86FSET_MONITORX	86
+#define	X86FSET_CLZERO		87
+#define	X86FSET_XOP		88
+#define	X86FSET_FMA4		89
+#define	X86FSET_TBM		90
+#define	X86FSET_AVX512VNNI	91
+#define	X86FSET_AMD_PCEC	92
+#define	X86FSET_MD_CLEAR	93
+#define	X86FSET_MDS_NO		94
+#define	X86FSET_CORE_THERMAL	95
+#define	X86FSET_PKG_THERMAL	96
+#define	X86FSET_TSX_CTRL	97
+#define	X86FSET_TAA_NO		98
+#define	X86FSET_PPIN		99
 
 /*
  * Intel Deep C-State invariant TSC in leaf 0x80000007.
  */
 #define	CPUID_TSC_CSTATE_INVARIANCE	(0x100)
-
-/*
- * Intel Deep C-state always-running local APIC timer
- */
-#define	CPUID_CSTATE_ARAT	(0x4)
-
-/*
- * Intel ENERGY_PERF_BIAS MSR indicated by feature bit CPUID.6.ECX[3].
- */
-#define	CPUID_EPB_SUPPORT	(1 << 3)
 
 /*
  * Intel TSC deadline timer
@@ -667,6 +883,55 @@ extern "C" {
 #define	X86_CHIPREV_AMD_15TN_REV_A1 \
 	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x15, 0x0002)
 
+#define	X86_CHIPREV_AMD_150R_REV_C0 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x15, 0x0003)
+
+#define	X86_CHIPREV_AMD_15KV_REV_A1 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x15, 0x0004)
+
+#define	X86_CHIPREV_AMD_15F60 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x15, 0x0005)
+
+#define	X86_CHIPREV_AMD_15ST_REV_A0 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x15, 0x0006)
+
+/*
+ * Definitions for AMD Family 0x16
+ */
+#define	X86_CHIPREV_AMD_16_KB_A1 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x16, 0x0001)
+
+#define	X86_CHIPREV_AMD_16_ML_A1 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x16, 0x0002)
+
+/*
+ * Definitions for AMD Family 0x17
+ */
+
+#define	X86_CHIPREV_AMD_17_ZP_B1 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0001)
+
+#define	X86_CHIPREV_AMD_17_ZP_B2 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0002)
+
+#define	X86_CHIPREV_AMD_17_PiR_B2 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0003)
+
+#define	X86_CHIPREV_AMD_17_RV_B0 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0004)
+
+#define	X86_CHIPREV_AMD_17_RV_B1 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0005)
+
+#define	X86_CHIPREV_AMD_17_PCO_B1 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0006)
+
+#define	X86_CHIPREV_AMD_17_SSP_A0 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0007)
+
+#define	X86_CHIPREV_AMD_17_SSP_B0 \
+	_X86_CHIPREV_MKREV(X86_VENDOR_AMD, 0x17, 0x0008)
+
 /*
  * Various socket/package types, extended as the need to distinguish
  * a new type arises.  The top 8 byte identfies the vendor and the
@@ -689,28 +954,97 @@ extern "C" {
 	/*
 	 * AMD socket types
 	 */
-#define	X86_SOCKET_754		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000001)
-#define	X86_SOCKET_939		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000002)
-#define	X86_SOCKET_940		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000004)
-#define	X86_SOCKET_S1g1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000008)
-#define	X86_SOCKET_AM2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000010)
-#define	X86_SOCKET_F1207	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000020)
-#define	X86_SOCKET_S1g2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000040)
-#define	X86_SOCKET_S1g3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000080)
-#define	X86_SOCKET_AM		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000100)
-#define	X86_SOCKET_AM2R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000200)
-#define	X86_SOCKET_AM3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000400)
-#define	X86_SOCKET_G34		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x000800)
-#define	X86_SOCKET_ASB2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x001000)
-#define	X86_SOCKET_C32		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x002000)
-#define	X86_SOCKET_S1g4		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x004000)
-#define	X86_SOCKET_FT1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x008000)
-#define	X86_SOCKET_FM1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x010000)
-#define	X86_SOCKET_FS1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x020000)
-#define	X86_SOCKET_AM3R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x040000)
-#define	X86_SOCKET_FP2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x080000)
-#define	X86_SOCKET_FS1R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x100000)
-#define	X86_SOCKET_FM2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x200000)
+#define	X86_SOCKET_754		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x01)
+#define	X86_SOCKET_939		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x02)
+#define	X86_SOCKET_940		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x03)
+#define	X86_SOCKET_S1g1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x04)
+#define	X86_SOCKET_AM2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x05)
+#define	X86_SOCKET_F1207	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x06)
+#define	X86_SOCKET_S1g2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x07)
+#define	X86_SOCKET_S1g3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x08)
+#define	X86_SOCKET_AM		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x09)
+#define	X86_SOCKET_AM2R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x0a)
+#define	X86_SOCKET_AM3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x0b)
+#define	X86_SOCKET_G34		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x0c)
+#define	X86_SOCKET_ASB2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x0d)
+#define	X86_SOCKET_C32		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x0e)
+#define	X86_SOCKET_S1g4		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x0f)
+#define	X86_SOCKET_FT1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x10)
+#define	X86_SOCKET_FM1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x11)
+#define	X86_SOCKET_FS1		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x12)
+#define	X86_SOCKET_AM3R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x13)
+#define	X86_SOCKET_FP2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x14)
+#define	X86_SOCKET_FS1R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x15)
+#define	X86_SOCKET_FM2		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x16)
+#define	X86_SOCKET_FP3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x17)
+#define	X86_SOCKET_FM2R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x18)
+#define	X86_SOCKET_FP4		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x19)
+#define	X86_SOCKET_AM4		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x1a)
+#define	X86_SOCKET_FT3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x1b)
+#define	X86_SOCKET_FT4		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x1c)
+#define	X86_SOCKET_FS1B		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x1d)
+#define	X86_SOCKET_FT3B		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x1e)
+#define	X86_SOCKET_SP3		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x1f)
+#define	X86_SOCKET_SP3R2	_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x20)
+#define	X86_SOCKET_FP5		_X86_SOCKET_MKVAL(X86_VENDOR_AMD, 0x21)
+#define	X86_NUM_SOCKETS_AMD	0x22
+
+
+/*
+ * Definitions for Intel processor models. These are all for Family 6
+ * processors. This list and the Atom set below it are not exhuastive.
+ */
+#define	INTC_MODEL_YONAH		0x0e
+#define	INTC_MODEL_MEROM		0x0f
+#define	INTC_MODEL_MEROM_L		0x16
+#define	INTC_MODEL_PENRYN		0x17
+#define	INTC_MODEL_DUNNINGTON		0x1d
+
+#define	INTC_MODEL_NEHALEM		0x1e
+#define	INTC_MODEL_NEHALEM2		0x1f
+#define	INTC_MODEL_NEHALEM_EP		0x1a
+#define	INTC_MODEL_NEHALEM_EX		0x2e
+
+#define	INTC_MODEL_WESTMERE		0x25
+#define	INTC_MODEL_WESTMERE_EP		0x2c
+#define	INTC_MODEL_WESTMERE_EX		0x2f
+
+#define	INTC_MODEL_SANDYBRIDGE		0x2a
+#define	INTC_MODEL_SANDYBRIDGE_XEON	0x2d
+#define	INTC_MODEL_IVYBRIDGE		0x3a
+#define	INTC_MODEL_IVYBRIDGE_XEON	0x3e
+
+#define	INTC_MODEL_HASWELL		0x3c
+#define	INTC_MODEL_HASWELL_ULT		0x45
+#define	INTC_MODEL_HASWELL_GT3E		0x46
+#define	INTC_MODEL_HASWELL_XEON		0x3f
+
+#define	INTC_MODEL_BROADWELL		0x3d
+#define	INTC_MODEL_BROADELL_2		0x47
+#define	INTC_MODEL_BROADWELL_XEON	0x4f
+#define	INTC_MODEL_BROADWELL_XEON_D	0x56
+
+#define	INTC_MODEL_SKYLAKE_MOBILE	0x4e
+#define	INTC_MODEL_SKYLAKE_XEON		0x55
+#define	INTC_MODEL_SKYLAKE_DESKTOP	0x5e
+
+#define	INTC_MODEL_KABYLAKE_MOBILE	0x8e
+#define	INTC_MODEL_KABYLAKE_DESKTOP	0x9e
+
+/*
+ * Atom Processors
+ */
+#define	INTC_MODEL_SILVERTHORNE		0x1c
+#define	INTC_MODEL_LINCROFT		0x26
+#define	INTC_MODEL_PENWELL		0x27
+#define	INTC_MODEL_CLOVERVIEW		0x35
+#define	INTC_MODEL_CEDARVIEW		0x36
+#define	INTC_MODEL_BAY_TRAIL		0x37
+#define	INTC_MODEL_AVATON		0x4d
+#define	INTC_MODEL_AIRMONT		0x4c
+#define	INTC_MODEL_GOLDMONT		0x5c
+#define	INTC_MODEL_DENVERTON		0x5f
+#define	INTC_MODEL_GEMINI_LAKE		0x7a
 
 /*
  * xgetbv/xsetbv support
@@ -748,7 +1082,7 @@ extern "C" {
 
 #if defined(_KERNEL) || defined(_KMEMUSER)
 
-#define	NUM_X86_FEATURES	81
+#define	NUM_X86_FEATURES	100
 extern uchar_t x86_featureset[];
 
 extern void free_x86_featureset(void *featureset);
@@ -766,6 +1100,14 @@ extern uint_t x86_clflush_size;
 extern uint_t pentiumpro_bug4046376;
 
 extern const char CyrixInstead[];
+
+/*
+ * These functions are all used to perform various side-channel mitigations.
+ * Please see uts/i86pc/os/cpuid.c for more information.
+ */
+extern void (*spec_uarch_flush)(void);
+extern void x86_rsb_stuff(void);
+extern void x86_md_clear(void);
 
 #endif
 

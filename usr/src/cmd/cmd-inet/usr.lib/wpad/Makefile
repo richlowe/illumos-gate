@@ -21,21 +21,23 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG =		wpad
 MANIFEST =	wpa.xml
 OBJS =		wpa_supplicant.o wpa.o wpa_enc.o eloop.o \
 		driver_wifi.o l2_packet.o
-SRCS = 		$(OBJS:%.o=%.c)
+SRCS =		$(OBJS:%.o=%.c)
 
 include	../../../Makefile.cmd
 
 ROOTMANIFESTDIR = $(ROOTSVCNETWORK)
 
-LDLIBS    += 	-ldladm -ldlpi
+LDLIBS +=	-ldladm -ldlpi
+NATIVE_LIBS +=	libcrypto.so
 all install := LDLIBS += -lcrypto
 
-LINTFLAGS += 	-u
+SMOFF += all_func_returns
 
 .KEEP_STATE:
 
@@ -53,7 +55,5 @@ check:		$(CHKMANIFEST)
 
 clean:
 		$(RM) $(OBJS)
-
-lint:		lint_SRCS
 
 include ../../../Makefile.targ

@@ -20,11 +20,12 @@
  */
 
 /*
- * Copyright (c) 2011, 2017 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2018 by Delphix. All rights reserved.
  * Copyright (c) 2013 by Saso Kiselkov. All rights reserved.
  * Copyright (c) 2013, Joyent, Inc. All rights reserved.
  * Copyright (c) 2014, Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
+ * Copyright (c) 2017, Intel Corporation.
  */
 
 #ifdef _KERNEL
@@ -260,6 +261,29 @@ zpool_feature_init(void)
 	    "Support for blocks larger than 128KB.",
 	    ZFEATURE_FLAG_PER_DATASET, large_blocks_deps);
 
+	{
+	static const spa_feature_t bookmark_v2_deps[] = {
+		SPA_FEATURE_EXTENSIBLE_DATASET,
+		SPA_FEATURE_BOOKMARKS,
+		SPA_FEATURE_NONE
+	};
+	zfeature_register(SPA_FEATURE_BOOKMARK_V2,
+	    "com.datto:bookmark_v2", "bookmark_v2",
+	    "Support for larger bookmarks",
+	    ZFEATURE_FLAG_PER_DATASET, bookmark_v2_deps);
+	}
+
+	{
+	static const spa_feature_t large_dnode_deps[] = {
+		SPA_FEATURE_EXTENSIBLE_DATASET,
+		SPA_FEATURE_NONE
+	};
+	zfeature_register(SPA_FEATURE_LARGE_DNODE,
+	    "org.zfsonlinux:large_dnode", "large_dnode",
+	    "Variable on-disk size of dnodes.",
+	    ZFEATURE_FLAG_PER_DATASET, large_dnode_deps);
+	}
+
 	static const spa_feature_t sha512_deps[] = {
 		SPA_FEATURE_EXTENSIBLE_DATASET,
 		SPA_FEATURE_NONE
@@ -302,4 +326,55 @@ zpool_feature_init(void)
 	    "Reduce memory used by removed devices when their blocks are "
 	    "freed or remapped.",
 	    ZFEATURE_FLAG_READONLY_COMPAT, obsolete_counts_deps);
+
+	zfeature_register(SPA_FEATURE_ALLOCATION_CLASSES,
+	    "org.zfsonlinux:allocation_classes", "allocation_classes",
+	    "Support for separate allocation classes.",
+	    ZFEATURE_FLAG_READONLY_COMPAT, NULL);
+
+	zfeature_register(SPA_FEATURE_RESILVER_DEFER,
+	    "com.datto:resilver_defer", "resilver_defer",
+	    "Support for defering new resilvers when one is already running.",
+	    ZFEATURE_FLAG_READONLY_COMPAT, NULL);
+
+	static const spa_feature_t encryption_deps[] = {
+		SPA_FEATURE_EXTENSIBLE_DATASET,
+		SPA_FEATURE_BOOKMARK_V2,
+		SPA_FEATURE_NONE
+	};
+	zfeature_register(SPA_FEATURE_ENCRYPTION,
+	    "com.datto:encryption", "encryption",
+	    "Support for dataset level encryption",
+	    ZFEATURE_FLAG_PER_DATASET, encryption_deps);
+
+	static const spa_feature_t userobj_accounting_deps[] = {
+		SPA_FEATURE_EXTENSIBLE_DATASET,
+		SPA_FEATURE_NONE
+	};
+	zfeature_register(SPA_FEATURE_USEROBJ_ACCOUNTING,
+	    "org.zfsonlinux:userobj_accounting", "userobj_accounting",
+	    "User/Group object accounting.",
+	    ZFEATURE_FLAG_READONLY_COMPAT | ZFEATURE_FLAG_PER_DATASET,
+	    userobj_accounting_deps);
+
+	static const spa_feature_t project_quota_deps[] = {
+		SPA_FEATURE_EXTENSIBLE_DATASET,
+		SPA_FEATURE_NONE
+	};
+	zfeature_register(SPA_FEATURE_PROJECT_QUOTA,
+	    "org.zfsonlinux:project_quota", "project_quota",
+	    "space/object accounting based on project ID.",
+	    ZFEATURE_FLAG_READONLY_COMPAT | ZFEATURE_FLAG_PER_DATASET,
+	    project_quota_deps);
+
+	static const spa_feature_t log_spacemap_deps[] = {
+		SPA_FEATURE_SPACEMAP_V2,
+		SPA_FEATURE_NONE
+	};
+	zfeature_register(SPA_FEATURE_LOG_SPACEMAP,
+	    "com.delphix:log_spacemap", "log_spacemap",
+	    "Log metaslab changes on a single spacemap and "
+	    "flush them periodically.",
+	    ZFEATURE_FLAG_READONLY_COMPAT,
+	    log_spacemap_deps);
 }

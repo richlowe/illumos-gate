@@ -22,9 +22,9 @@
 /*
  * Copyright (c) 1990 Mentat Inc.
  * Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2012, Joyent, Inc. All rights reserved.
  * Copyright 2017 Nexenta Systems, Inc.
  * Copyright 2017 OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2019, Joyent, Inc.
  */
 
 #ifndef	_INET_IP_H
@@ -784,7 +784,7 @@ typedef	struct ipsec_selector {
  */
 #define	CONN_INBOUND_POLICY_PRESENT(connp, ipss)	\
 	((connp)->conn_in_enforce_policy ||		\
-	(!((connp)->conn_policy_cached) && 		\
+	(!((connp)->conn_policy_cached) &&		\
 	(ipss)->ipsec_inbound_v4_policy_present))
 
 #define	CONN_INBOUND_POLICY_PRESENT_V6(connp, ipss)	\
@@ -1114,15 +1114,15 @@ typedef enum { IPVL_UNICAST_UP, IPVL_UNICAST_DOWN, IPVL_MCAST, IPVL_BCAST,
  *	ipsq_xop_switch_mp	ipsq_lock		ipsq_lock
  *	ipsq_phyint		write once		write once
  *	ipsq_next		RW_READER ill_g_lock	RW_WRITER ill_g_lock
- *	ipsq_xop 		ipsq_lock or ipsq	ipsq_lock + ipsq
+ *	ipsq_xop		ipsq_lock or ipsq	ipsq_lock + ipsq
  *	ipsq_swxop		ipsq			ipsq
- * 	ipsq_ownxop		see ipxop_t		see ipxop_t
+ *	ipsq_ownxop		see ipxop_t		see ipxop_t
  *	ipsq_ipst		write once		write once
  *
  * ipxop_t synchronization:     read			write
  *
- *	ipx_writer  		ipx_lock		ipx_lock
- *	ipx_xop_queued		ipx_lock 		ipx_lock
+ *	ipx_writer		ipx_lock		ipx_lock
+ *	ipx_xop_queued		ipx_lock		ipx_lock
  *	ipx_mphead		ipx_lock		ipx_lock
  *	ipx_mptail		ipx_lock		ipx_lock
  *	ipx_ipsq		write once		write once
@@ -1140,7 +1140,7 @@ typedef enum { IPVL_UNICAST_UP, IPVL_UNICAST_DOWN, IPVL_MCAST, IPVL_BCAST,
  */
 typedef struct ipxop_s {
 	kmutex_t	ipx_lock;	/* see above */
-	kthread_t	*ipx_writer;  	/* current owner */
+	kthread_t	*ipx_writer;	/* current owner */
 	mblk_t		*ipx_mphead;	/* messages tied to this op */
 	mblk_t		*ipx_mptail;
 	struct ipsq_s	*ipx_ipsq;	/* associated ipsq */
@@ -1151,8 +1151,8 @@ typedef struct ipxop_s {
 	int		ipx_current_ioctl; /* current ioctl, or 0 if no ioctl */
 	ipif_t		*ipx_current_ipif; /* ipif for current op */
 	ipif_t		*ipx_pending_ipif; /* ipif for ipx_pending_mp */
-	mblk_t 		*ipx_pending_mp;   /* current ioctl mp while waiting */
-	boolean_t	ipx_forced; 			/* debugging aid */
+	mblk_t		*ipx_pending_mp; /* current ioctl mp while waiting */
+	boolean_t	ipx_forced;			/* debugging aid */
 #ifdef DEBUG
 	int		ipx_depth;			/* debugging aid */
 #define	IPX_STACK_DEPTH	15
@@ -1345,7 +1345,7 @@ typedef int (*pfirepostfrag_t)(mblk_t *, nce_t *, iaflags_t, uint_t, uint32_t,
 /*
  * unpadded ill_if structure
  */
-struct 	_ill_if_s_ {
+struct	_ill_if_s_ {
 	union ill_if_u	*illif_next;
 	union ill_if_u	*illif_prev;
 	avl_tree_t	illif_avl_by_ppa;	/* AVL tree sorted on ppa */
@@ -1357,9 +1357,9 @@ struct 	_ill_if_s_ {
 };
 
 /* cache aligned ill_if structure */
-typedef union 	ill_if_u {
-	struct  _ill_if_s_ ill_if_s;
-	char 	illif_filler[CACHE_ALIGN(_ill_if_s_)];
+typedef union	ill_if_u {
+	struct	_ill_if_s_ ill_if_s;
+	char	illif_filler[CACHE_ALIGN(_ill_if_s_)];
 } ill_if_t;
 
 #define	illif_next		ill_if_s.illif_next
@@ -1512,7 +1512,7 @@ typedef struct ill_lso_capab_s ill_lso_capab_t;
  *	ig_mc_mtu		ipsq			ipsq
  */
 typedef struct ipmp_illgrp_s {
-	list_t		ig_if; 		/* list of all interfaces */
+	list_t		ig_if;		/* list of all interfaces */
 	list_t		ig_actif;	/* list of active interfaces */
 	uint_t		ig_nactif;	/* number of active interfaces */
 	struct ill_s	*ig_next_ill;	/* next active interface to use */
@@ -1552,13 +1552,13 @@ typedef struct ipmp_grp_s {
 	t_uscalar_t	gr_mactype;	/* DLPI mactype of group */
 	phyint_t	*gr_phyint;	/* IPMP group phyint */
 	uint_t		gr_nif;		/* number of interfaces in group */
-	uint_t		gr_nactif; 	/* number of active interfaces */
+	uint_t		gr_nactif;	/* number of active interfaces */
 	ipmp_illgrp_t	*gr_v4;		/* V4 group information */
 	ipmp_illgrp_t	*gr_v6;		/* V6 group information */
 	uint_t		gr_nv4;		/* number of ills in V4 group */
 	uint_t		gr_nv6;		/* number of ills in V6 group */
-	uint_t		gr_pendv4; 	/* number of pending ills in V4 group */
-	uint_t		gr_pendv6; 	/* number of pending ills in V6 group */
+	uint_t		gr_pendv4;	/* number of pending ills in V4 group */
+	uint_t		gr_pendv6;	/* number of pending ills in V6 group */
 	mblk_t		*gr_linkdownmp;	/* message used to bring link down */
 	kstat_t		*gr_ksp;	/* group kstat pointer */
 	uint64_t	gr_kstats0[IPMP_KSTAT_MAX]; /* baseline group kstats */
@@ -1569,10 +1569,10 @@ typedef struct ipmp_grp_s {
  * ARP up-to-date as the active set of interfaces in the group changes.
  */
 typedef struct ipmp_arpent_s {
-	ipaddr_t	ia_ipaddr; 	/* IP address for this entry */
-	boolean_t	ia_proxyarp; 	/* proxy ARP entry? */
-	boolean_t	ia_notified; 	/* ARP notified about this entry? */
-	list_node_t	ia_node; 	/* next ARP entry in list */
+	ipaddr_t	ia_ipaddr;	/* IP address for this entry */
+	boolean_t	ia_proxyarp;	/* proxy ARP entry? */
+	boolean_t	ia_notified;	/* ARP notified about this entry? */
+	list_node_t	ia_node;	/* next ARP entry in list */
 	uint16_t	ia_flags;	/* nce_flags for the address */
 	size_t		ia_lladdr_len;
 	uchar_t		*ia_lladdr;
@@ -1595,7 +1595,8 @@ struct ill_zerocopy_capab_s {
 
 struct ill_lso_capab_s {
 	uint_t	ill_lso_flags;		/* capabilities */
-	uint_t	ill_lso_max;		/* maximum size of payload */
+	uint_t	ill_lso_max_tcpv4;	/* maximum size of payload */
+	uint_t	ill_lso_max_tcpv6;	/* maximum size of payload */
 };
 
 /*
@@ -1708,7 +1709,8 @@ typedef struct ill_s {
 
 		ill_manual_dst_linklocal : 1, /* same for pt-pt dst linklocal */
 
-		ill_pad_bit_31 : 27;
+		ill_mcast_ncec_cleanup : 1,	/* Reaping mcast ncecs. */
+		ill_pad_bit_31 : 26;
 
 	/*
 	 * Used in SIOCSIFMUXID and SIOCGIFMUXID for 'ifconfig unplumb'.
@@ -1770,6 +1772,7 @@ typedef struct ill_s {
 	 */
 	uint_t		ill_ifname_pending_err;
 	avl_node_t	ill_avl_byppa; /* avl node based on ppa */
+	uint_t		ill_mcast_nces;	/* Number of NCEs that are multicast. */
 	list_t		ill_nce; /* pointer to nce_s list */
 	uint_t		ill_refcnt;	/* active refcnt by threads */
 	uint_t		ill_ire_cnt;	/* ires associated with this ill */
@@ -1810,7 +1813,7 @@ typedef struct ill_s {
 	 * IPMP fields.
 	 */
 	ipmp_illgrp_t	*ill_grp;	/* IPMP group information */
-	list_node_t	ill_actnode; 	/* next active ill in group */
+	list_node_t	ill_actnode;	/* next active ill in group */
 	list_node_t	ill_grpnode;	/* next ill in group */
 	ipif_t		*ill_src_ipif;	/* source address selection rotor */
 	ipif_t		*ill_move_ipif;	/* ipif awaiting move to new ill */
@@ -1940,6 +1943,7 @@ typedef struct ill_s {
  * ill_refcnt			ill_lock		ill_lock
  * ill_ire_cnt			ill_lock		ill_lock
  * ill_cv			ill_lock		ill_lock
+ * ill_mcast_nces		ill_lock		ill_lock
  * ill_ncec_cnt			ill_lock		ill_lock
  * ill_nce_cnt			ill_lock		ill_lock
  * ill_ilm_cnt			ill_lock		ill_lock
@@ -2147,9 +2151,9 @@ struct ip_xmit_attr_s {
 	 * IXAF_IPSEC_SECURE is set. Otherwise they contain garbage.
 	 */
 	ipsec_latch_t	*ixa_ipsec_latch;	/* Just the ids */
-	struct ipsa_s 	*ixa_ipsec_ah_sa;	/* Hard reference SA for AH */
-	struct ipsa_s 	*ixa_ipsec_esp_sa;	/* Hard reference SA for ESP */
-	struct ipsec_policy_s 	*ixa_ipsec_policy; /* why are we here? */
+	struct ipsa_s	*ixa_ipsec_ah_sa;	/* Hard reference SA for AH */
+	struct ipsa_s	*ixa_ipsec_esp_sa;	/* Hard reference SA for ESP */
+	struct ipsec_policy_s	*ixa_ipsec_policy; /* why are we here? */
 	struct ipsec_action_s	*ixa_ipsec_action; /* For reflected packets */
 	ipsa_ref_t	ixa_ipsec_ref[2];	/* Soft reference to SA */
 						/* 0: ESP, 1: AH */
@@ -2352,8 +2356,8 @@ struct ip_recv_attr_s {
 	 * IRAF_IPSEC_SECURE is set. Otherwise they contain garbage.
 	 */
 	struct ipsec_action_s *ira_ipsec_action; /* how we made it in.. */
-	struct ipsa_s 	*ira_ipsec_ah_sa;	/* SA for AH */
-	struct ipsa_s 	*ira_ipsec_esp_sa;	/* SA for ESP */
+	struct ipsa_s	*ira_ipsec_ah_sa;	/* SA for AH */
+	struct ipsa_s	*ira_ipsec_esp_sa;	/* SA for ESP */
 
 	ipaddr_t	ira_mroute_tunnel;	/* IRAF_MROUTE_TUNNEL_SET */
 
@@ -3006,7 +3010,7 @@ extern vmem_t *ip_minor_arena_la;
 /* Misc IP configuration knobs */
 #define	ips_ip_policy_mask		ips_propinfo_tbl[44].prop_cur_uval
 #define	ips_ip_ecmp_behavior		ips_propinfo_tbl[45].prop_cur_uval
-#define	ips_ip_multirt_ttl  		ips_propinfo_tbl[46].prop_cur_uval
+#define	ips_ip_multirt_ttl		ips_propinfo_tbl[46].prop_cur_uval
 #define	ips_ip_ire_badcnt_lifetime	ips_propinfo_tbl[47].prop_cur_uval
 #define	ips_ip_max_temp_idle		ips_propinfo_tbl[48].prop_cur_uval
 #define	ips_ip_max_temp_defend		ips_propinfo_tbl[49].prop_cur_uval
@@ -3210,7 +3214,7 @@ extern mblk_t	*ip_dlnotify_alloc(uint_t, uint_t);
 extern mblk_t	*ip_dlnotify_alloc2(uint_t, uint_t, uint_t);
 extern char	*ip_dot_addr(ipaddr_t, char *);
 extern const char *mac_colon_addr(const uint8_t *, size_t, char *, size_t);
-extern void	ip_lwput(queue_t *, mblk_t *);
+extern int	ip_lwput(queue_t *, mblk_t *);
 extern boolean_t icmp_err_rate_limit(ip_stack_t *);
 extern void	icmp_frag_needed(mblk_t *, int, ip_recv_attr_t *);
 extern mblk_t	*icmp_inbound_v4(mblk_t *, ip_recv_attr_t *);
@@ -3226,7 +3230,7 @@ extern mblk_t	*ip_check_optlen(mblk_t *, ipha_t *, uint_t, uint_t,
     ip_recv_attr_t *);
 extern mblk_t	*ip_fix_dbref(mblk_t *, ip_recv_attr_t *);
 extern uint_t	ip_cksum(mblk_t *, int, uint32_t);
-extern int	ip_close(queue_t *, int);
+extern int	ip_close(queue_t *, int, cred_t *);
 extern uint16_t	ip_csum_hdr(ipha_t *);
 extern void	ip_forward_xmit_v4(nce_t *, ill_t *, mblk_t *, ipha_t *,
     ip_recv_attr_t *, uint32_t, uint32_t);
@@ -3247,7 +3251,7 @@ extern int	ip_openv6(queue_t *q, dev_t *devp, int flag, int sflag,
 		    cred_t *credp);
 extern int	ip_reassemble(mblk_t *, ipf_t *, uint_t, boolean_t, ill_t *,
     size_t);
-extern void	ip_rput(queue_t *, mblk_t *);
+extern int	ip_rput(queue_t *, mblk_t *);
 extern void	ip_input(ill_t *, ill_rx_ring_t *, mblk_t *,
     struct mac_header_info_s *);
 extern void	ip_input_v6(ill_t *, ill_rx_ring_t *, mblk_t *,
@@ -3368,8 +3372,8 @@ extern boolean_t conn_wantpacket(conn_t *, ip_recv_attr_t *, ipha_t *);
 extern uint_t	ip_type_v4(ipaddr_t, ip_stack_t *);
 extern uint_t	ip_type_v6(const in6_addr_t *, ip_stack_t *);
 
-extern void	ip_wput_nondata(queue_t *, mblk_t *);
-extern void	ip_wsrv(queue_t *);
+extern int	ip_wput_nondata(queue_t *, mblk_t *);
+extern int	ip_wsrv(queue_t *);
 extern char	*ip_nv_lookup(nv_t *, int);
 extern boolean_t ip_local_addr_ok_v6(const in6_addr_t *, const in6_addr_t *);
 extern boolean_t ip_remote_addr_ok_v6(const in6_addr_t *, const in6_addr_t *);
@@ -3568,7 +3572,7 @@ typedef enum {
  * include mac/dls header files here.
  */
 typedef boolean_t		(*ip_mac_intr_disable_t)(void *);
-typedef void			(*ip_mac_intr_enable_t)(void *);
+typedef int			(*ip_mac_intr_enable_t)(void *);
 typedef ip_mac_tx_cookie_t	(*ip_dld_tx_t)(void *, mblk_t *,
     uint64_t, uint16_t);
 typedef	void			(*ip_flow_enable_t)(void *, ip_mac_tx_cookie_t);
@@ -3643,7 +3647,7 @@ struct ill_dld_capab_s {
 /*
  * IP squeues exports
  */
-extern boolean_t 	ip_squeue_fanout;
+extern boolean_t	ip_squeue_fanout;
 
 #define	IP_SQUEUE_GET(hint) ip_squeue_random(hint)
 
@@ -3660,7 +3664,7 @@ extern void ip_squeue_restart_ring(ill_t *, ill_rx_ring_t *);
 extern void ip_squeue_clean_all(ill_t *);
 extern boolean_t	ip_source_routed(ipha_t *, ip_stack_t *);
 
-extern void tcp_wput(queue_t *, mblk_t *);
+extern int tcp_wput(queue_t *, mblk_t *);
 
 extern int	ip_fill_mtuinfo(conn_t *, ip_xmit_attr_t *,
     struct ip6_mtuinfo *);

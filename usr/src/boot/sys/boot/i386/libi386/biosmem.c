@@ -224,9 +224,8 @@ bios_getmem(void)
 	}
 }
 
-#ifndef	BOOT2
 static int
-command_biosmem(int argc, char *argv[])
+command_biosmem(int argc __unused, char *argv[] __unused)
 {
 	int bq = bios_getquirks();
 
@@ -256,4 +255,3 @@ command_biosmem(int argc, char *argv[])
 }
 
 COMMAND_SET(biosmem, "biosmem", "show BIOS memory setup", command_biosmem);
-#endif

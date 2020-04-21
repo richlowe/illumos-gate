@@ -26,7 +26,7 @@
  * Copyright (c) 2010, Intel Corporation.
  * All rights reserved.
  *
- * Copyright 2018 Joyent, Inc.  All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -50,6 +50,7 @@
 #include <sys/machsystm.h>
 #include <sys/archsystm.h>
 #include <sys/boot_console.h>
+#include <sys/framebuffer.h>
 #include <sys/cmn_err.h>
 #include <sys/systm.h>
 #include <sys/promif.h>
@@ -72,6 +73,7 @@
 #include <sys/fastboot_impl.h>
 #include <sys/acpi/acconfig.h>
 #include <sys/acpi/acpi.h>
+#include <sys/ddipropdefs.h>	/* For DDI prop types */
 
 static int have_console = 0;	/* set once primitive console is initialized */
 static char *boot_args = "";
@@ -91,12 +93,15 @@ static uint_t kbm_debug = 0;
 		bcons_putchar(*cp);		\
 	}
 
+/* callback to boot_fb to set shadow frame buffer */
+extern void boot_fb_shadow_init(bootops_t *);
+
 bootops_t bootop;	/* simple bootops we'll pass on to kernel */
 struct bsys_mem bm;
 
 /*
  * Boot info from "glue" code in low memory. xbootp is used by:
- *	do_bop_phys_alloc(), do_bsys_alloc() and boot_prop_finish().
+ *	do_bop_phys_alloc(), do_bsys_alloc() and read_bootenvrc().
  */
 static struct xboot_info *xbootp;
 static uintptr_t next_virt;	/* next available virtual address */
@@ -115,7 +120,8 @@ static char buffer[BUFFERSIZE];
 typedef struct bootprop {
 	struct bootprop *bp_next;
 	char *bp_name;
-	uint_t bp_vlen;
+	int bp_flags;			/* DDI prop type */
+	uint_t bp_vlen;			/* 0 for boolean */
 	char *bp_value;
 } bootprop_t;
 
@@ -352,7 +358,7 @@ do_bsys_ealloc(bootops_t *bop, caddr_t virthint, size_t size,
 
 
 static void
-bsetprop(char *name, int nlen, void *value, int vlen)
+bsetprop(int flags, char *name, int nlen, void *value, int vlen)
 {
 	uint_t size;
 	uint_t need_size;
@@ -388,6 +394,11 @@ bsetprop(char *name, int nlen, void *value, int vlen)
 	curr_space -= nlen + 1;
 
 	/*
+	 * set the property type
+	 */
+	b->bp_flags = flags & DDI_PROP_TYPE_MASK;
+
+	/*
 	 * copy in value, but no ending zero byte
 	 */
 	b->bp_value = curr_page;
@@ -410,13 +421,22 @@ bsetprop(char *name, int nlen, void *value, int vlen)
 static void
 bsetprops(char *name, char *value)
 {
-	bsetprop(name, strlen(name), value, strlen(value) + 1);
+	bsetprop(DDI_PROP_TYPE_STRING, name, strlen(name),
+	    value, strlen(value) + 1);
+}
+
+static void
+bsetprop32(char *name, uint32_t value)
+{
+	bsetprop(DDI_PROP_TYPE_INT, name, strlen(name),
+	    (void *)&value, sizeof (value));
 }
 
 static void
 bsetprop64(char *name, uint64_t value)
 {
-	bsetprop(name, strlen(name), (void *)&value, sizeof (value));
+	bsetprop(DDI_PROP_TYPE_INT64, name, strlen(name),
+	    (void *)&value, sizeof (value));
 }
 
 static void
@@ -426,6 +446,23 @@ bsetpropsi(char *name, int value)
 
 	(void) snprintf(prop_val, sizeof (prop_val), "%d", value);
 	bsetprops(name, prop_val);
+}
+
+/*
+ * to find the type of the value associated with this name
+ */
+/*ARGSUSED*/
+int
+do_bsys_getproptype(bootops_t *bop, const char *name)
+{
+	bootprop_t *b;
+
+	for (b = bprops; b != NULL; b = b->bp_next) {
+		if (strcmp(name, b->bp_name) != 0)
+			continue;
+		return (b->bp_flags);
+	}
+	return (-1);
 }
 
 /*
@@ -568,7 +605,8 @@ static void
 boot_prop_display(char *buffer)
 {
 	char *name = "";
-	int i, len;
+	int i, len, flags, *buf32;
+	int64_t *buf64;
 
 	bop_printf(NULL, "\nBoot properties:\n");
 
@@ -576,16 +614,43 @@ boot_prop_display(char *buffer)
 		bop_printf(NULL, "\t0x%p %s = ", (void *)name, name);
 		(void) do_bsys_getprop(NULL, name, buffer);
 		len = do_bsys_getproplen(NULL, name);
+		flags = do_bsys_getproptype(NULL, name);
 		bop_printf(NULL, "len=%d ", len);
-		if (!unprintable(buffer, len)) {
-			buffer[len] = 0;
-			bop_printf(NULL, "%s\n", buffer);
-			continue;
-		}
-		for (i = 0; i < len; i++) {
-			bop_printf(NULL, "%02x", buffer[i] & 0xff);
-			if (i < len - 1)
-				bop_printf(NULL, ".");
+
+		switch (flags) {
+		case DDI_PROP_TYPE_INT:
+			len = len / sizeof (int);
+			buf32 = (int *)buffer;
+			for (i = 0; i < len; i++) {
+				bop_printf(NULL, "%08x", buf32[i]);
+				if (i < len - 1)
+					bop_printf(NULL, ".");
+			}
+			break;
+		case DDI_PROP_TYPE_STRING:
+			bop_printf(NULL, "%s", buffer);
+			break;
+		case DDI_PROP_TYPE_INT64:
+			len = len / sizeof (int64_t);
+			buf64 = (int64_t *)buffer;
+			for (i = 0; i < len; i++) {
+				bop_printf(NULL, "%016" PRIx64, buf64[i]);
+				if (i < len - 1)
+					bop_printf(NULL, ".");
+			}
+			break;
+		default:
+			if (!unprintable(buffer, len)) {
+				buffer[len] = 0;
+				bop_printf(NULL, "%s", buffer);
+				break;
+			}
+			for (i = 0; i < len; i++) {
+				bop_printf(NULL, "%02x", buffer[i] & 0xff);
+				if (i < len - 1)
+					bop_printf(NULL, ".");
+			}
+			break;
 		}
 		bop_printf(NULL, "\n");
 	}
@@ -605,7 +670,7 @@ boot_prop_display(char *buffer)
  * we do single character I/O since this is really just looking at memory
  */
 void
-boot_prop_finish(void)
+read_bootenvrc(void)
 {
 	int fd;
 	char *line;
@@ -713,16 +778,31 @@ boot_prop_finish(void)
 
 		/*
 		 * If a property was explicitly set on the command line
-		 * it will override a setting in bootenv.rc
+		 * it will override a setting in bootenv.rc. We make an
+		 * exception for a property from the bootloader such as:
+		 *
+		 * console="text,ttya,ttyb,ttyc,ttyd"
+		 *
+		 * In such a case, picking the first value here (as
+		 * lookup_console_devices() does) is at best a guess; if
+		 * bootenv.rc has a value, it's probably better.
 		 */
-		if (do_bsys_getproplen(NULL, name) > 0)
-			continue;
+		if (strcmp(name, "console") == 0) {
+			char propval[BP_MAX_STRLEN] = "";
 
-		bsetprop(name, n_len, value, v_len + 1);
+			if (do_bsys_getprop(NULL, name, propval) == -1 ||
+			    strchr(propval, ',') != NULL)
+				bsetprops(name, value);
+			continue;
+		}
+
+		if (do_bsys_getproplen(NULL, name) == -1)
+			bsetprops(name, value);
 	}
 done:
 	if (fd >= 0)
 		(void) BRD_CLOSE(bfs_ops, fd);
+
 
 	/*
 	 * Check if we have to limit the boot time allocator
@@ -778,7 +858,7 @@ done:
 			v_len = 0;
 		}
 		consoledev[v_len] = 0;
-		bcons_init2(inputdev, outputdev, consoledev);
+		bcons_post_bootenvrc(inputdev, outputdev, consoledev);
 	} else {
 		/*
 		 * Ensure console property exists
@@ -788,7 +868,7 @@ done:
 		if (v_len < 0)
 			bsetprops("console", "hypervisor");
 		inputdev = outputdev = consoledev = "hypervisor";
-		bcons_init2(inputdev, outputdev, consoledev);
+		bcons_post_bootenvrc(inputdev, outputdev, consoledev);
 	}
 
 	if (find_boot_prop("prom_debug") || kbm_debug)
@@ -798,20 +878,26 @@ done:
 /*
  * print formatted output
  */
-/*PRINTFLIKE2*/
 /*ARGSUSED*/
 void
-bop_printf(bootops_t *bop, const char *fmt, ...)
+vbop_printf(void *ptr, const char *fmt, va_list ap)
 {
-	va_list	ap;
-
 	if (have_console == 0)
 		return;
 
-	va_start(ap, fmt);
 	(void) vsnprintf(buffer, BUFFERSIZE, fmt, ap);
-	va_end(ap);
 	PUT_STRING(buffer);
+}
+
+/*PRINTFLIKE2*/
+void
+bop_printf(void *bop, const char *fmt, ...)
+{
+	va_list	ap;
+
+	va_start(ap, fmt);
+	vbop_printf(bop, fmt, ap);
+	va_end(ap);
 }
 
 /*
@@ -922,11 +1008,11 @@ xen_parse_props(char *s, char *prop_map[], int n_prop)
 
 	do {
 		scp = cp;
-		while ((*cp != NULL) && (*cp != ':'))
+		while ((*cp != '\0') && (*cp != ':'))
 			cp++;
 
 		if ((scp != cp) && (*prop_name != NULL)) {
-			*cp = NULL;
+			*cp = '\0';
 			bsetprops(*prop_name, scp);
 		}
 
@@ -953,6 +1039,7 @@ xen_vbdroot_props(char *s)
 	short minor;
 	long addr = 0;
 
+	mi = '\0';
 	pnp = vbdpath + strlen(vbdpath);
 	prop_p = s + strlen(lnamefix);
 	while ((*prop_p != '\0') && (*prop_p != 's') && (*prop_p != 'p'))
@@ -1004,7 +1091,7 @@ xen_nfsroot_props(char *s)
 	};
 	int n_prop = sizeof (prop_map) / sizeof (prop_map[0]);
 
-	bsetprop("fstype", 6, "nfs", 4);
+	bsetprops("fstype", "nfs");
 
 	xen_parse_props(s, prop_map, n_prop);
 
@@ -1188,7 +1275,7 @@ save_boot_info(struct xboot_info *xbi)
 		}
 	} else {
 		saved_mbi.drives_length = 0;
-		saved_mbi.drives_addr = NULL;
+		saved_mbi.drives_addr = 0;
 	}
 
 	/*
@@ -1217,6 +1304,10 @@ save_boot_info(struct xboot_info *xbi)
  * using a structured layout.
  *
  * We will not overwrite already set properties.
+ *
+ * Note that the menu items in particular can contain characters not
+ * well-handled as bootparams, such as spaces, brackets, and the like, so that's
+ * another reason.
  */
 static struct bop_blacklist {
 	const char *bl_name;
@@ -1224,7 +1315,6 @@ static struct bop_blacklist {
 } bop_prop_blacklist[] = {
 	{ "ISADIR", sizeof ("ISADIR") },
 	{ "acpi", sizeof ("acpi") },
-	{ "autoboot_delay", sizeof ("autoboot_delay") },
 	{ "autoboot_delay", sizeof ("autoboot_delay") },
 	{ "beansi_", sizeof ("beansi_") },
 	{ "beastie", sizeof ("beastie") },
@@ -1237,8 +1327,16 @@ static struct bop_blacklist {
 	{ "kernel", sizeof ("kernel") },
 	{ "loaddev", sizeof ("loaddev") },
 	{ "loader_", sizeof ("loader_") },
+	{ "mainansi_", sizeof ("mainansi_") },
+	{ "mainmenu_", sizeof ("mainmenu_") },
+	{ "maintoggled_", sizeof ("maintoggled_") },
+	{ "menu_timeout_command", sizeof ("menu_timeout_command") },
+	{ "menuset_", sizeof ("menuset_") },
 	{ "module_path", sizeof ("module_path") },
 	{ "nfs.", sizeof ("nfs.") },
+	{ "optionsansi_", sizeof ("optionsansi_") },
+	{ "optionsmenu_", sizeof ("optionsmenu_") },
+	{ "optionstoggled_", sizeof ("optionstoggled_") },
 	{ "pcibios", sizeof ("pcibios") },
 	{ "prompt", sizeof ("prompt") },
 	{ "smbios", sizeof ("smbios") },
@@ -1406,7 +1504,9 @@ build_boot_properties(struct xboot_info *xbp)
 				rdbm = &bm[i];
 				continue;
 			}
-			if (bm[i].bm_type == BMT_HASH || bm[i].bm_name == NULL)
+			if (bm[i].bm_type == BMT_HASH ||
+			    bm[i].bm_type == BMT_FONT ||
+			    bm[i].bm_name == NULL)
 				continue;
 
 			if (bm[i].bm_type == BMT_ENV) {
@@ -1621,7 +1721,8 @@ build_boot_properties(struct xboot_info *xbp)
 			}
 
 			if (value_len == 0) {
-				bsetprop(name, name_len, "true", 5);
+				bsetprop(DDI_PROP_TYPE_ANY, name, name_len,
+				    NULL, 0);
 			} else {
 				char *v = value;
 				int l = value_len;
@@ -1632,8 +1733,8 @@ build_boot_properties(struct xboot_info *xbp)
 				}
 				bcopy(v, propbuf, l);
 				propbuf[l] = '\0';
-				bsetprop(name, name_len, propbuf,
-				    l + 1);
+				bsetprop(DDI_PROP_TYPE_STRING, name, name_len,
+				    propbuf, l + 1);
 			}
 			name = value + value_len;
 			while (*name == ',')
@@ -1692,7 +1793,8 @@ build_boot_properties(struct xboot_info *xbp)
 		if (netboot && mbi->drives_length != 0) {
 			sip = (struct sol_netinfo *)(uintptr_t)mbi->drives_addr;
 			if (sip->sn_infotype == SN_TYPE_BOOTP)
-				bsetprop("bootp-response",
+				bsetprop(DDI_PROP_TYPE_BYTE,
+				    "bootp-response",
 				    sizeof ("bootp-response"),
 				    (void *)(uintptr_t)mbi->drives_addr,
 				    mbi->drives_length);
@@ -1719,15 +1821,15 @@ build_boot_properties(struct xboot_info *xbp)
 			bsetprops("bios-boot-device", str);
 		}
 		if (netdev != NULL) {
-			bsetprop("bootp-response", sizeof ("bootp-response"),
+			bsetprop(DDI_PROP_TYPE_BYTE,
+			    "bootp-response", sizeof ("bootp-response"),
 			    (void *)(uintptr_t)netdev->mb_dhcpack,
 			    netdev->mb_size -
 			    sizeof (multiboot_tag_network_t));
 		}
 	}
 
-	bsetprop("stdout", strlen("stdout"),
-	    &stdout_val, sizeof (stdout_val));
+	bsetprop32("stdout", stdout_val);
 #endif /* __xpv */
 
 	/*
@@ -1931,6 +2033,7 @@ bop_trap(ulong_t *tfp)
 	bop_printf(NULL, "flags register       0x%lx\n", tf->flags_reg);
 	bop_printf(NULL, "return %%rsp          0x%lx\n", tf->stk_ptr);
 	bop_printf(NULL, "return %%ss           0x%lx\n", tf->stk_seg & 0xffff);
+	bop_printf(NULL, "%%cr2			0x%lx\n", getcr2());
 
 	/* grab %[er]bp pushed by our code from the stack */
 	fakeframe.old_frame = (bop_frame_t *)*(tfp - 3);
@@ -2078,6 +2181,8 @@ _start(struct xboot_info *xbp)
 	 */
 	bop_idt_init();
 #endif
+	/* Set up the shadow fb for framebuffer console */
+	boot_fb_shadow_init(bops);
 
 	/*
 	 * Start building the boot properties from the command line
@@ -2182,18 +2287,22 @@ valid_rsdp(ACPI_TABLE_RSDP *rp)
  * see ACPI 3.0 Spec, 5.2.5.1
  */
 static ACPI_TABLE_RSDP *
-scan_rsdp(paddr_t start, paddr_t end)
+scan_rsdp(paddr_t *paddrp, size_t len)
 {
-	ssize_t len  = end - start;
+	paddr_t paddr = *paddrp;
 	caddr_t ptr;
 
-	ptr = vmap_phys(len, start);
+	ptr = vmap_phys(len, paddr);
+
 	while (len > 0) {
 		if (strncmp(ptr, ACPI_SIG_RSDP, strlen(ACPI_SIG_RSDP)) == 0 &&
-		    valid_rsdp((ACPI_TABLE_RSDP *)ptr))
+		    valid_rsdp((ACPI_TABLE_RSDP *)ptr)) {
+			*paddrp = paddr;
 			return ((ACPI_TABLE_RSDP *)ptr);
+		}
 
 		ptr += ACPI_RSDP_SCAN_STEP;
+		paddr += ACPI_RSDP_SCAN_STEP;
 		len -= ACPI_RSDP_SCAN_STEP;
 	}
 
@@ -2201,43 +2310,67 @@ scan_rsdp(paddr_t start, paddr_t end)
 }
 
 /*
- * Refer to ACPI 3.0 Spec, section 5.2.5.1 to understand this function
+ * Locate the ACPI RSDP.  We search in a particular order:
+ *
+ * - If the bootloader told us the location of the RSDP (via the EFI system
+ *   table), try that first.
+ * - Otherwise, look in the EBDA and BIOS memory as per ACPI 5.2.5.1 (legacy
+ *   case).
+ * - Finally, our bootloader may have a copy of the RSDP in its info: this might
+ *   get freed after boot, so we always prefer to find the original RSDP first.
+ *
+ * Once found, we set acpi-root-tab property (a physical address) for the
+ * benefit of acpica, acpidump etc.
  */
-static ACPI_TABLE_RSDP *
-find_rsdp()
-{
-	ACPI_TABLE_RSDP *rsdp;
-	uint64_t rsdp_val = 0;
-	uint16_t *ebda_seg;
-	paddr_t  ebda_addr;
 
-	/* check for "acpi-root-tab" property */
+static ACPI_TABLE_RSDP *
+find_rsdp(struct xboot_info *xbp)
+{
+	ACPI_TABLE_RSDP *rsdp = NULL;
+	paddr_t paddr = 0;
+
 	if (do_bsys_getproplen(NULL, "acpi-root-tab") == sizeof (uint64_t)) {
-		(void) do_bsys_getprop(NULL, "acpi-root-tab", &rsdp_val);
-		if (rsdp_val != 0) {
-			rsdp = scan_rsdp(rsdp_val, rsdp_val + sizeof (*rsdp));
-			if (rsdp != NULL) {
-				if (kbm_debug) {
-					bop_printf(NULL,
-					    "Using RSDP from bootloader: "
-					    "0x%p\n", (void *)rsdp);
-				}
-				return (rsdp);
-			}
-		}
+		(void) do_bsys_getprop(NULL, "acpi-root-tab", &paddr);
+		rsdp = scan_rsdp(&paddr, sizeof (*rsdp));
 	}
 
-	/*
-	 * Get the EBDA segment and scan the first 1K
-	 */
-	ebda_seg = (uint16_t *)vmap_phys(sizeof (uint16_t),
-	    ACPI_EBDA_PTR_LOCATION);
-	ebda_addr = *ebda_seg << 4;
-	rsdp = scan_rsdp(ebda_addr, ebda_addr + ACPI_EBDA_WINDOW_SIZE);
-	if (rsdp == NULL)
-		/* if EBDA doesn't contain RSDP, look in BIOS memory */
-		rsdp = scan_rsdp(ACPI_HI_RSDP_WINDOW_BASE,
-		    ACPI_HI_RSDP_WINDOW_BASE + ACPI_HI_RSDP_WINDOW_SIZE);
+#ifndef __xpv
+	if (rsdp == NULL && xbp->bi_acpi_rsdp != NULL) {
+		paddr = (uintptr_t)xbp->bi_acpi_rsdp;
+		rsdp = scan_rsdp(&paddr, sizeof (*rsdp));
+	}
+#endif
+
+	if (rsdp == NULL) {
+		uint16_t *ebda_seg = (uint16_t *)vmap_phys(sizeof (uint16_t),
+		    ACPI_EBDA_PTR_LOCATION);
+		paddr = *ebda_seg << 4;
+		rsdp = scan_rsdp(&paddr, ACPI_EBDA_WINDOW_SIZE);
+	}
+
+	if (rsdp == NULL) {
+		paddr = ACPI_HI_RSDP_WINDOW_BASE;
+		rsdp = scan_rsdp(&paddr, ACPI_HI_RSDP_WINDOW_SIZE);
+	}
+
+#ifndef __xpv
+	if (rsdp == NULL && xbp->bi_acpi_rsdp_copy != NULL) {
+		paddr = (uintptr_t)xbp->bi_acpi_rsdp_copy;
+		rsdp = scan_rsdp(&paddr, sizeof (*rsdp));
+	}
+#endif
+
+	if (rsdp == NULL) {
+		bop_printf(NULL, "no RSDP found!\n");
+		return (NULL);
+	}
+
+	if (kbm_debug)
+		bop_printf(NULL, "RSDP found at physical 0x%lx\n", paddr);
+
+	if (do_bsys_getproplen(NULL, "acpi-root-tab") != sizeof (uint64_t))
+		bsetprop64("acpi-root-tab", paddr);
+
 	return (rsdp);
 }
 
@@ -2257,13 +2390,12 @@ map_fw_table(paddr_t table_addr)
 }
 
 static ACPI_TABLE_HEADER *
-find_fw_table(char *signature)
+find_fw_table(ACPI_TABLE_RSDP *rsdp, char *signature)
 {
 	static int revision = 0;
 	static ACPI_TABLE_XSDT *xsdt;
 	static int len;
 	paddr_t xsdt_addr;
-	ACPI_TABLE_RSDP *rsdp;
 	ACPI_TABLE_HEADER *tp;
 	paddr_t table_addr;
 	int	n;
@@ -2280,41 +2412,44 @@ find_fw_table(char *signature)
 	 * use the XSDT.  If the XSDT address is 0, though, fall back to
 	 * revision 1 and use the RSDT.
 	 */
+	xsdt_addr = 0;
 	if (revision == 0) {
-		if ((rsdp = find_rsdp()) != NULL) {
-			revision = rsdp->Revision;
+		if (rsdp == NULL)
+			return (NULL);
+
+		revision = rsdp->Revision;
+		/*
+		 * ACPI 6.0 states that current revision is 2
+		 * from acpi_table_rsdp definition:
+		 * Must be (0) for ACPI 1.0 or (2) for ACPI 2.0+
+		 */
+		if (revision > 2)
+			revision = 2;
+		switch (revision) {
+		case 2:
 			/*
-			 * ACPI 6.0 states that current revision is 2
-			 * from acpi_table_rsdp definition:
-			 * Must be (0) for ACPI 1.0 or (2) for ACPI 2.0+
+			 * Use the XSDT unless BIOS is buggy and
+			 * claims to be rev 2 but has a null XSDT
+			 * address
 			 */
-			if (revision > 2)
-				revision = 2;
-			switch (revision) {
-			case 2:
-				/*
-				 * Use the XSDT unless BIOS is buggy and
-				 * claims to be rev 2 but has a null XSDT
-				 * address
-				 */
-				xsdt_addr = rsdp->XsdtPhysicalAddress;
-				if (xsdt_addr != 0)
-					break;
-				/* FALLTHROUGH */
-			case 0:
-				/* treat RSDP rev 0 as revision 1 internally */
-				revision = 1;
-				/* FALLTHROUGH */
-			case 1:
-				/* use the RSDT for rev 0/1 */
-				xsdt_addr = rsdp->RsdtPhysicalAddress;
+			xsdt_addr = rsdp->XsdtPhysicalAddress;
+			if (xsdt_addr != 0)
 				break;
-			default:
-				/* unknown revision */
-				revision = 0;
-				break;
-			}
+			/* FALLTHROUGH */
+		case 0:
+			/* treat RSDP rev 0 as revision 1 internally */
+			revision = 1;
+			/* FALLTHROUGH */
+		case 1:
+			/* use the RSDT for rev 0/1 */
+			xsdt_addr = rsdp->RsdtPhysicalAddress;
+			break;
+		default:
+			/* unknown revision */
+			revision = 0;
+			break;
 		}
+
 		if (revision == 0)
 			return (NULL);
 
@@ -2357,7 +2492,8 @@ process_mcfg(ACPI_TABLE_MCFG *tp)
 			ecfginfo[1] = cfg_baap->PciSegment;
 			ecfginfo[2] = cfg_baap->StartBusNumber;
 			ecfginfo[3] = cfg_baap->EndBusNumber;
-			bsetprop(MCFG_PROPNAME, strlen(MCFG_PROPNAME),
+			bsetprop(DDI_PROP_TYPE_INT64,
+			    MCFG_PROPNAME, strlen(MCFG_PROPNAME),
 			    ecfginfo, sizeof (ecfginfo));
 			break;
 		}
@@ -2445,7 +2581,8 @@ process_madt(ACPI_TABLE_MADT *tp)
 		 * Make boot property for array of "final" APIC IDs for each
 		 * CPU
 		 */
-		bsetprop(BP_CPU_APICID_ARRAY, strlen(BP_CPU_APICID_ARRAY),
+		bsetprop(DDI_PROP_TYPE_INT,
+		    BP_CPU_APICID_ARRAY, strlen(BP_CPU_APICID_ARRAY),
 		    cpu_apicid_array, cpu_count * sizeof (*cpu_apicid_array));
 	}
 
@@ -2538,7 +2675,8 @@ process_srat(ACPI_TABLE_SRAT *tp)
 			processor.sapic_id = cpu->LocalSapicEid;
 			(void) snprintf(prop_name, 30, "acpi-srat-processor-%d",
 			    proc_num);
-			bsetprop(prop_name, strlen(prop_name), &processor,
+			bsetprop(DDI_PROP_TYPE_INT,
+			    prop_name, strlen(prop_name), &processor,
 			    sizeof (processor));
 			proc_num++;
 			break;
@@ -2555,7 +2693,8 @@ process_srat(ACPI_TABLE_SRAT *tp)
 			memory.flags = mem->Flags;
 			(void) snprintf(prop_name, 30, "acpi-srat-memory-%d",
 			    mem_num);
-			bsetprop(prop_name, strlen(prop_name), &memory,
+			bsetprop(DDI_PROP_TYPE_INT,
+			    prop_name, strlen(prop_name), &memory,
 			    sizeof (memory));
 			if ((mem->Flags & ACPI_SRAT_MEM_HOT_PLUGGABLE) &&
 			    (memory.addr + memory.length > maxmem)) {
@@ -2574,7 +2713,8 @@ process_srat(ACPI_TABLE_SRAT *tp)
 			x2apic.x2apic_id = x2cpu->ApicId;
 			(void) snprintf(prop_name, 30, "acpi-srat-processor-%d",
 			    proc_num);
-			bsetprop(prop_name, strlen(prop_name), &x2apic,
+			bsetprop(DDI_PROP_TYPE_INT,
+			    prop_name, strlen(prop_name), &x2apic,
 			    sizeof (x2apic));
 			proc_num++;
 			break;
@@ -2615,9 +2755,9 @@ process_slit(ACPI_TABLE_SLIT *tp)
 	if (tp->LocalityCount >= SLIT_LOCALITIES_MAX)
 		return;
 
-	bsetprop(SLIT_NUM_PROPNAME, strlen(SLIT_NUM_PROPNAME),
-	    &tp->LocalityCount, sizeof (tp->LocalityCount));
-	bsetprop(SLIT_PROPNAME, strlen(SLIT_PROPNAME), &tp->Entry,
+	bsetprop64(SLIT_NUM_PROPNAME, tp->LocalityCount);
+	bsetprop(DDI_PROP_TYPE_BYTE,
+	    SLIT_PROPNAME, strlen(SLIT_PROPNAME), &tp->Entry,
 	    tp->LocalityCount * tp->LocalityCount);
 }
 
@@ -2746,6 +2886,7 @@ static void
 build_firmware_properties(struct xboot_info *xbp)
 {
 	ACPI_TABLE_HEADER *tp = NULL;
+	ACPI_TABLE_RSDP *rsdp;
 
 #ifndef __xpv
 	if (xbp->bi_uefi_arch == XBI_UEFI_ARCH_64) {
@@ -2762,36 +2903,35 @@ build_firmware_properties(struct xboot_info *xbp)
 			bop_printf(NULL, "32-bit UEFI detected.\n");
 	}
 
-	if (xbp->bi_acpi_rsdp != NULL) {
-		bsetprop64("acpi-root-tab",
-		    (uint64_t)(uintptr_t)xbp->bi_acpi_rsdp);
-	}
-
 	if (xbp->bi_smbios != NULL) {
 		bsetprop64("smbios-address",
 		    (uint64_t)(uintptr_t)xbp->bi_smbios);
 	}
 
-	if ((tp = find_fw_table(ACPI_SIG_MSCT)) != NULL)
+	rsdp = find_rsdp(xbp);
+
+	if ((tp = find_fw_table(rsdp, ACPI_SIG_MSCT)) != NULL)
 		msct_ptr = process_msct((ACPI_TABLE_MSCT *)tp);
 	else
 		msct_ptr = NULL;
 
-	if ((tp = find_fw_table(ACPI_SIG_MADT)) != NULL)
+	if ((tp = find_fw_table(rsdp, ACPI_SIG_MADT)) != NULL)
 		process_madt((ACPI_TABLE_MADT *)tp);
 
 	if ((srat_ptr = (ACPI_TABLE_SRAT *)
-	    find_fw_table(ACPI_SIG_SRAT)) != NULL)
+	    find_fw_table(rsdp, ACPI_SIG_SRAT)) != NULL)
 		process_srat(srat_ptr);
 
-	if (slit_ptr = (ACPI_TABLE_SLIT *)find_fw_table(ACPI_SIG_SLIT))
+	if (slit_ptr = (ACPI_TABLE_SLIT *)find_fw_table(rsdp, ACPI_SIG_SLIT))
 		process_slit(slit_ptr);
 
-	tp = find_fw_table(ACPI_SIG_MCFG);
+	tp = find_fw_table(rsdp, ACPI_SIG_MCFG);
 #else /* __xpv */
 	enumerate_xen_cpus();
-	if (DOMAIN_IS_INITDOMAIN(xen_info))
-		tp = find_fw_table(ACPI_SIG_MCFG);
+	if (DOMAIN_IS_INITDOMAIN(xen_info)) {
+		rsdp = find_rsdp(xbp);
+		tp = find_fw_table(rsdp, ACPI_SIG_MCFG);
+	}
 #endif /* __xpv */
 	if (tp != NULL)
 		process_mcfg((ACPI_TABLE_MCFG *)tp);
@@ -2809,8 +2949,7 @@ defcons_init(size_t size)
 
 	p = do_bsys_alloc(NULL, NULL, size, MMU_PAGESIZE);
 	*p = 0;
-	bsetprop("deferred-console-buf", strlen("deferred-console-buf") + 1,
-	    &p, sizeof (p));
+	bsetprop32("deferred-console-buf", (uint32_t)((uintptr_t)&p));
 	return (p);
 }
 
@@ -2823,10 +2962,8 @@ boot_compinfo(int fd, struct compinfo *cbp)
 	return (0);
 }
 
-#define	BP_MAX_STRLEN	32
-
 /*
- * Get value for given boot property
+ * Get an integer value for given boot property
  */
 int
 bootprop_getval(const char *prop_name, u_longlong_t *prop_value)
@@ -2836,13 +2973,25 @@ bootprop_getval(const char *prop_name, u_longlong_t *prop_value)
 	u_longlong_t	value;
 
 	boot_prop_len = BOP_GETPROPLEN(bootops, prop_name);
-	if (boot_prop_len < 0 || boot_prop_len > sizeof (str) ||
+	if (boot_prop_len < 0 || boot_prop_len >= sizeof (str) ||
 	    BOP_GETPROP(bootops, prop_name, str) < 0 ||
 	    kobj_getvalue(str, &value) == -1)
 		return (-1);
 
 	if (prop_value)
 		*prop_value = value;
+
+	return (0);
+}
+
+int
+bootprop_getstr(const char *prop_name, char *buf, size_t buflen)
+{
+	int boot_prop_len = BOP_GETPROPLEN(bootops, prop_name);
+
+	if (boot_prop_len < 0 || boot_prop_len >= buflen ||
+	    BOP_GETPROP(bootops, prop_name, buf) < 0)
+		return (-1);
 
 	return (0);
 }

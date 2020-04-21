@@ -22,6 +22,8 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
+
 
 #
 #	This makefile drives the production of NS/SiS
@@ -76,7 +78,10 @@ CFLAGS		+= $(CPPFLAGS)
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMOFF += all_func_returns
 
 LINTFLAGS	+= -v
 

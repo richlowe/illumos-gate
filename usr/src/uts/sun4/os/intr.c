@@ -23,7 +23,10 @@
  * Use is subject to license terms.
  */
 /*
- * Copyright (c) 2013, Joyent, Inc.  All rights reserved.
+ * Copyright 2019 Joyent, Inc.
+ */
+/*
+ * Copyright 2019 Peter Tribble.
  */
 
 #include <sys/sysmacros.h>
@@ -115,7 +118,6 @@ intr_init(cpu_t *cp)
 	extern uint_t softlevel1();
 
 	init_ivintr();
-	REGISTER_BBUS_INTR();
 
 	/*
 	 * Register these software interrupts for ddi timer.
@@ -324,7 +326,7 @@ siron_cpu_setup(cpu_setup_t what, int id, void *arg)
 
 /*
  * no_ivintr()
- * 	called by setvecint_tl1() through sys_trap()
+ *	called by setvecint_tl1() through sys_trap()
  *	vector interrupt received but not valid or not
  *	registered in intr_vec_table
  *	considered as a spurious mondo interrupt
@@ -418,6 +420,7 @@ cpu_disable_intr(struct cpu *cp)
 	 * function, since it checks for this in the cpu flags.
 	 */
 	cp->cpu_flags &= ~CPU_ENABLE;
+	ncpus_intr_enabled--;
 
 	intr_redist_all_cpus();
 
@@ -436,6 +439,7 @@ cpu_enable_intr(struct cpu *cp)
 	ASSERT(MUTEX_HELD(&cpu_lock));
 
 	cp->cpu_flags |= CPU_ENABLE;
+	ncpus_intr_enabled++;
 
 	intr_redist_all_cpus();
 }

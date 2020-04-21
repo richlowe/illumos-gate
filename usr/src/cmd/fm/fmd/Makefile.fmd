@@ -21,6 +21,7 @@
 #
 # Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2015 RackTop Systems.
+# Copyright 2019, Joyent, Inc.
 #
 
 .KEEP_STATE:
@@ -119,9 +120,13 @@ CFLAGS += $(CTF_FLAGS) $(CCVERBOSE) $(XSTRCONST)
 LINTFLAGS += -mu
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
-CERRWARN += -_gcc=-Wno-unused-variable
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-clobbered
+$(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-unused-but-set-variable
+CERRWARN += -_gcc=-Wno-unused-variable
+
+# not linted
+SMATCH=off
 
 $(PROG) := LDFLAGS += -R/usr/lib/fm
 $(PROG) := LDLIBS += -L$(ROOTLIB)/fm -ltopo -ldiagcode -lsysevent -lsmbios \
@@ -182,11 +187,11 @@ $(DMOD): $(DMOD_OBJS)
 ../common/fmd_rpc_%.h: ../common/fmd_rpc_%.x
 	$(RPCGEN) -CMN -h -o $@ $<
 
-fmd_svc_%.c: ../common/fmd_rpc_%.h
-	$(RPCGEN) -CMN -m -o $@ `echo $< | sed 's/h$$/x/'`
+fmd_svc_%.c: ../common/fmd_rpc_%.x
+	$(RPCGEN) -CMN -m -o $@ $<
 
-fmd_xdr_%.c: ../common/fmd_rpc_%.h
-	$(RPCGEN) -CMN -c -o $@ `echo $< | sed 's/h$$/x/'`
+fmd_xdr_%.c: ../common/fmd_rpc_%.x
+	$(RPCGEN) -CMN -c -o $@ $<
 
 clean:
 	$(RM) $(OBJS) $(DMOD_OBJS) $(LINTFILES) $(DMOD_LINT)

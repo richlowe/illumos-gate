@@ -24,10 +24,11 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG= cscope-fast
 
-OBJS= 	main.o dir.o crossref.o scanner.o lookup.o command.o display.o \
+OBJS=	main.o dir.o crossref.o scanner.o lookup.o command.o display.o \
 	find.o edit.o exec.o help.o history.o input.o menu.o alloc.o \
 	cgrep.o compath.o invlib.o logdir.o \
 	mouse.o mygetenv.o mygetwd.o mypopen.o \
@@ -48,10 +49,14 @@ CFLAGS +=	-DPATLEN=$(PATLEN) -DSTMTMAX=$(STMTMAX) -DYYLMAX=$(YYLMAX)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 CFLAGS +=	$(CCVERBOSE)
 LDLIBS +=	-lcurses -ll
+NATIVE_LIBS +=	libcurses.so libl.so
 
 .KEEP_STATE:
 

@@ -125,14 +125,25 @@ zfs_replay_xvattr(lr_attr_t *lrattr, xvattr_t *xvap)
 		    ((*attrs & XAT0_AV_QUARANTINED) != 0);
 	if (XVA_ISSET_REQ(xvap, XAT_CREATETIME))
 		ZFS_TIME_DECODE(&xoap->xoa_createtime, crtime);
-	if (XVA_ISSET_REQ(xvap, XAT_AV_SCANSTAMP))
+	if (XVA_ISSET_REQ(xvap, XAT_AV_SCANSTAMP)) {
+		ASSERT(!XVA_ISSET_REQ(xvap, XAT_PROJID));
+
 		bcopy(scanstamp, xoap->xoa_av_scanstamp, AV_SCANSTAMP_SZ);
+	} else if (XVA_ISSET_REQ(xvap, XAT_PROJID)) {
+		/*
+		 * XAT_PROJID and XAT_AV_SCANSTAMP will never be valid
+		 * at the same time, so we can share the same space.
+		 */
+		bcopy(scanstamp, &xoap->xoa_projid, sizeof (uint64_t));
+	}
 	if (XVA_ISSET_REQ(xvap, XAT_REPARSE))
 		xoap->xoa_reparse = ((*attrs & XAT0_REPARSE) != 0);
 	if (XVA_ISSET_REQ(xvap, XAT_OFFLINE))
 		xoap->xoa_offline = ((*attrs & XAT0_OFFLINE) != 0);
 	if (XVA_ISSET_REQ(xvap, XAT_SPARSE))
 		xoap->xoa_sparse = ((*attrs & XAT0_SPARSE) != 0);
+	if (XVA_ISSET_REQ(xvap, XAT_PROJINHERIT))
+		xoap->xoa_projinherit = ((*attrs & XAT0_PROJINHERIT) != 0);
 }
 
 static int
@@ -278,6 +289,8 @@ zfs_replay_create_acl(void *arg1, void *arg2, boolean_t byteswap)
 	void *fuidstart;
 	size_t xvatlen = 0;
 	uint64_t txtype;
+	uint64_t objid;
+	uint64_t dnodesize;
 	int error;
 
 	txtype = (lr->lr_common.lrc_txtype & ~TX_CI);
@@ -303,22 +316,27 @@ zfs_replay_create_acl(void *arg1, void *arg2, boolean_t byteswap)
 	if ((error = zfs_zget(zfsvfs, lr->lr_doid, &dzp)) != 0)
 		return (error);
 
+	objid = LR_FOID_GET_OBJ(lr->lr_foid);
+	dnodesize = LR_FOID_GET_SLOTS(lr->lr_foid) << DNODE_SHIFT;
+
 	xva_init(&xva);
 	zfs_init_vattr(&xva.xva_vattr, AT_TYPE | AT_MODE | AT_UID | AT_GID,
-	    lr->lr_mode, lr->lr_uid, lr->lr_gid, lr->lr_rdev, lr->lr_foid);
+	    lr->lr_mode, lr->lr_uid, lr->lr_gid, lr->lr_rdev, objid);
 
 	/*
 	 * All forms of zfs create (create, mkdir, mkxattrdir, symlink)
 	 * eventually end up in zfs_mknode(), which assigns the object's
-	 * creation time and generation number.  The generic VOP_CREATE()
-	 * doesn't have either concept, so we smuggle the values inside
-	 * the vattr's otherwise unused va_ctime and va_nblocks fields.
+	 * creation time, generation number, and dnode size. The generic
+	 * zfs_create() has no concept of these attributes, so we smuggle
+	 * the values inside the vattr's otherwise unused va_ctime,
+	 * va_nblocks, and va_fsid fields.
 	 */
 	ZFS_TIME_DECODE(&xva.xva_vattr.va_ctime, lr->lr_crtime);
 	xva.xva_vattr.va_nblocks = lr->lr_gen;
+	xva.xva_vattr.va_fsid = dnodesize;
 
-	error = dmu_object_info(zfsvfs->z_os, lr->lr_foid, NULL);
-	if (error != ENOENT)
+	error = dnode_try_claim(zfsvfs->z_os, objid, dnodesize >> DNODE_SHIFT);
+	if (error)
 		goto bail;
 
 	if (lr->lr_common.lrc_txtype & TX_CI)
@@ -432,22 +450,27 @@ zfs_replay_create(void *arg1, void *arg2, boolean_t byteswap)
 	if ((error = zfs_zget(zfsvfs, lr->lr_doid, &dzp)) != 0)
 		return (error);
 
+	uint64_t objid = LR_FOID_GET_OBJ(lr->lr_foid);
+	int dnodesize = LR_FOID_GET_SLOTS(lr->lr_foid) << DNODE_SHIFT;
+
 	xva_init(&xva);
 	zfs_init_vattr(&xva.xva_vattr, AT_TYPE | AT_MODE | AT_UID | AT_GID,
-	    lr->lr_mode, lr->lr_uid, lr->lr_gid, lr->lr_rdev, lr->lr_foid);
+	    lr->lr_mode, lr->lr_uid, lr->lr_gid, lr->lr_rdev, objid);
 
 	/*
 	 * All forms of zfs create (create, mkdir, mkxattrdir, symlink)
 	 * eventually end up in zfs_mknode(), which assigns the object's
-	 * creation time and generation number.  The generic VOP_CREATE()
-	 * doesn't have either concept, so we smuggle the values inside
-	 * the vattr's otherwise unused va_ctime and va_nblocks fields.
+	 * creation time, generation number, and dnode slot count. The
+	 * generic zfs_create() has no concept of these attributes, so
+	 * we smuggle the values inside the vattr's otherwise unused
+	 * va_ctime, va_nblocks and va_fsid fields.
 	 */
 	ZFS_TIME_DECODE(&xva.xva_vattr.va_ctime, lr->lr_crtime);
 	xva.xva_vattr.va_nblocks = lr->lr_gen;
+	xva.xva_vattr.va_fsid = dnodesize;
 
-	error = dmu_object_info(zfsvfs->z_os, lr->lr_foid, NULL);
-	if (error != ENOENT)
+	error = dnode_try_claim(zfsvfs->z_os, objid, dnodesize >> DNODE_SHIFT);
+	if (error)
 		goto out;
 
 	if (lr->lr_common.lrc_txtype & TX_CI)

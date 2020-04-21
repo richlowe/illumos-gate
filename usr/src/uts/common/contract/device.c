@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/mutex.h>
@@ -508,6 +509,7 @@ ctmpl_device_set(struct ct_template *tmpl, ct_kparam_t *kparam,
 
 	ASSERT(MUTEX_HELD(&tmpl->ctmpl_lock));
 
+	param_value = SAFE_EV;
 	if (param->ctpm_id == CTDP_MINOR) {
 		str_value = (char *)kparam->ctpm_kbuf;
 		str_value[param->ctpm_size - 1] = '\0';
@@ -2045,6 +2047,7 @@ contract_device_negotiate(dev_info_t *dip, dev_t dev, int spec_type,
 	ASSERT(dev != DDI_DEV_T_NONE);
 	ASSERT(spec_type == S_IFBLK || spec_type == S_IFCHR);
 
+	result = CT_NACK;
 	switch (evtype) {
 	case CT_DEV_EV_OFFLINE:
 		result = contract_device_offline(dip, dev, spec_type);
@@ -2053,7 +2056,6 @@ contract_device_negotiate(dev_info_t *dip, dev_t dev, int spec_type,
 		cmn_err(CE_PANIC, "contract_device_negotiate(): Negotiation "
 		    "not supported: event (%d) for dev_t (%lu) and spec (%d), "
 		    "dip (%p)", evtype, dev, spec_type, (void *)dip);
-		result = CT_NACK;
 		break;
 	}
 

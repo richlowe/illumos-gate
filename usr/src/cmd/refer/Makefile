@@ -23,6 +23,7 @@
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 include		../Makefile.cmd
 
@@ -48,7 +49,10 @@ POFILE= refer.po
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-unused-variable
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 CLOBBERFILES += $(PROG3)
 

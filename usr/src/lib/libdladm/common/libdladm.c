@@ -22,6 +22,14 @@
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 
+/*
+ * Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+ */
+
+/*
+ * Copyright 2020 Peter Tribble.
+ */
+
 #include <unistd.h>
 #include <errno.h>
 #include <ctype.h>
@@ -62,23 +70,23 @@ static media_type_t media_type_table[] =  {
 	{ DL_HDLC,	"HDLC" },
 	{ DL_CHAR,	"SyncCharacter" },
 	{ DL_CTCA,	"CTCA" },
-	{ DL_FDDI, 	"FDDI" },
-	{ DL_FC, 	"FiberChannel" },
-	{ DL_ATM, 	"ATM" },
-	{ DL_IPATM, 	"ATM(ClassicIP)" },
-	{ DL_X25, 	"X.25" },
-	{ DL_IPX25, 	"X.25(ClassicIP)" },
-	{ DL_ISDN, 	"ISDN" },
-	{ DL_HIPPI, 	"HIPPI" },
-	{ DL_100VG, 	"100BaseVGEthernet" },
-	{ DL_100VGTPR, 	"100BaseVGTokenRing" },
-	{ DL_ETH_CSMA, 	"IEEE802.3" },
-	{ DL_100BT, 	"100BaseT" },
-	{ DL_FRAME, 	"FrameRelay" },
-	{ DL_MPFRAME, 	"MPFrameRelay" },
-	{ DL_ASYNC, 	"AsyncCharacter" },
-	{ DL_IPNET, 	"IPNET" },
-	{ DL_OTHER, 	"Other" }
+	{ DL_FDDI,	"FDDI" },
+	{ DL_FC,	"FiberChannel" },
+	{ DL_ATM,	"ATM" },
+	{ DL_IPATM,	"ATM(ClassicIP)" },
+	{ DL_X25,	"X.25" },
+	{ DL_IPX25,	"X.25(ClassicIP)" },
+	{ DL_ISDN,	"ISDN" },
+	{ DL_HIPPI,	"HIPPI" },
+	{ DL_100VG,	"100BaseVGEthernet" },
+	{ DL_100VGTPR,	"100BaseVGTokenRing" },
+	{ DL_ETH_CSMA,	"IEEE802.3" },
+	{ DL_100BT,	"100BaseT" },
+	{ DL_FRAME,	"FrameRelay" },
+	{ DL_MPFRAME,	"MPFrameRelay" },
+	{ DL_ASYNC,	"AsyncCharacter" },
+	{ DL_IPNET,	"IPNET" },
+	{ DL_OTHER,	"Other" }
 };
 #define	MEDIATYPECOUNT	(sizeof (media_type_table) / sizeof (media_type_t))
 
@@ -121,6 +129,7 @@ dladm_open(dladm_handle_t *handle)
 
 	(*handle)->dld_fd = dld_fd;
 	(*handle)->door_fd = -1;
+	(*handle)->dld_kcp = NULL;
 
 	return (DLADM_STATUS_OK);
 }
@@ -132,6 +141,8 @@ dladm_close(dladm_handle_t handle)
 		(void) close(handle->dld_fd);
 		if (handle->door_fd != -1)
 			(void) close(handle->door_fd);
+		if (handle->dld_kcp != NULL)
+			(void) kstat_close(handle->dld_kcp);
 		free(handle);
 	}
 }
@@ -140,6 +151,14 @@ int
 dladm_dld_fd(dladm_handle_t handle)
 {
 	return (handle->dld_fd);
+}
+
+kstat_ctl_t *
+dladm_dld_kcp(dladm_handle_t handle)
+{
+	if (handle->dld_kcp == NULL)
+		handle->dld_kcp = kstat_open();
+	return (handle->dld_kcp);
 }
 
 /*
@@ -418,6 +437,9 @@ dladm_status2str(dladm_status_t status, char *buf)
 	case DLADM_STATUS_INVALID_MTU:
 		s = "MTU check failed, MTU outside of device's supported range";
 		break;
+	case DLADM_STATUS_PERSIST_ON_TEMP:
+		s = "can't create persistent object on top of temporary object";
+		break;
 	default:
 		s = "<unknown error>";
 		break;
@@ -560,11 +582,7 @@ dladm_bw2str(int64_t bw, char *buf)
 	kbps = (bw%1000000)/1000;
 	mbps = bw/1000000;
 	if (kbps != 0) {
-		if (mbps == 0)
-			(void) snprintf(buf, DLADM_STRSIZE, "0.%03u", kbps);
-		else
-			(void) snprintf(buf, DLADM_STRSIZE, "%5u.%03u", mbps,
-			    kbps);
+		(void) snprintf(buf, DLADM_STRSIZE, "%5u.%03u", mbps, kbps);
 	} else {
 		(void) snprintf(buf, DLADM_STRSIZE, "%5u", mbps);
 	}

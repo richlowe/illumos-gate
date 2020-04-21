@@ -22,7 +22,8 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2019 Nexenta by DDN, Inc.  All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 PROG=	smbadm
@@ -36,7 +37,7 @@ LDFLAGS += -R/usr/lib/smbsrv
 
 .KEEP_STATE:
 
-CERRWARN += -_gcc=-Wno-uninitialized
+SMOFF += free
 
 all:		$(PROG)
 

@@ -26,16 +26,19 @@
 #
 
 # Copyright 2007, 2010 Richard Lowe
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 
 #
 # Check delta comments:
-# 	- Have the correct form.
-# 	- Have a synopsis matching that of the bug
-# 	- Appear only once.
+#	- Have the correct form.
+#	- Have a synopsis matching that of the bug
+#	- Appear only once.
+#	- Do not contain common spelling errors.
 #
 
 import re, sys
 from onbld.Checks.DbLookups import BugDB
+from onbld.Checks.SpellCheck import spellcheck_line
 
 
 bugre = re.compile(r'^(\d{2,7}) (.*)$')
@@ -70,12 +73,16 @@ def comchk(comments, check_db=True, output=sys.stderr):
 		   'mutant': [],
 		   'dup': [],
 		   'nomatch': [],
-		   'nonexistent': [] }
+		   'nonexistent': [],
+		   'spelling': [] }
 	bugs = {}
 	ret = 0
 	blanks = False
 
+	lineno = 0
 	for com in comments:
+		lineno += 1
+
 		# Our input must be newline-free, comments are line-wise.
 		if com.find('\n') != -1:
 			raise ValueError("newline in comment '%s'" % com)
@@ -87,6 +94,10 @@ def comchk(comments, check_db=True, output=sys.stderr):
 		if not com or com.isspace():
 			blanks = True
 			continue
+
+		for err in spellcheck_line(com):
+			errors['spelling'].append(
+			    'comment line {} - {}'.format(lineno, err))
 
 		match = bugre.search(com)
 		if match:
@@ -113,9 +124,9 @@ def comchk(comments, check_db=True, output=sys.stderr):
 
 	if len(bugs) > 0 and check_db:
 		bugdb = BugDB()
-		results = bugdb.lookup(bugs.keys())
+		results = bugdb.lookup(list(bugs.keys()))
 
-	for crid, insts in bugs.iteritems():
+	for crid, insts in bugs.items():
 		if len(insts) > 1:
 			errors['dup'].append(crid)
 
@@ -177,5 +188,11 @@ def comchk(comments, check_db=True, output=sys.stderr):
 			output.write("Synopsis of %s is wrong:\n" % err[0])
 			output.write("  should be: '%s'\n" % err[1])
 			output.write("         is: '%s'\n" % err[2])
+
+	if errors['spelling']:
+		ret = 1
+		output.write("Spellcheck:\n")
+		for err in errors['spelling']:
+			output.write('{}\n'.format(err))
 
 	return ret

@@ -166,8 +166,17 @@ zfs_log_xvattr(lr_attr_t *lrattr, xvattr_t *xvap)
 		    XAT0_AV_MODIFIED;
 	if (XVA_ISSET_REQ(xvap, XAT_CREATETIME))
 		ZFS_TIME_ENCODE(&xoap->xoa_createtime, crtime);
-	if (XVA_ISSET_REQ(xvap, XAT_AV_SCANSTAMP))
+	if (XVA_ISSET_REQ(xvap, XAT_AV_SCANSTAMP)) {
+		ASSERT(!XVA_ISSET_REQ(xvap, XAT_PROJID));
+
 		bcopy(xoap->xoa_av_scanstamp, scanstamp, AV_SCANSTAMP_SZ);
+	} else if (XVA_ISSET_REQ(xvap, XAT_PROJID)) {
+		/*
+		 * XAT_PROJID and XAT_AV_SCANSTAMP will never be valid
+		 * at the same time, so we can share the same space.
+		 */
+		bcopy(&xoap->xoa_projid, scanstamp, sizeof (uint64_t));
+	}
 	if (XVA_ISSET_REQ(xvap, XAT_REPARSE))
 		*attrs |= (xoap->xoa_reparse == 0) ? 0 :
 		    XAT0_REPARSE;
@@ -177,6 +186,9 @@ zfs_log_xvattr(lr_attr_t *lrattr, xvattr_t *xvap)
 	if (XVA_ISSET_REQ(xvap, XAT_SPARSE))
 		*attrs |= (xoap->xoa_sparse == 0) ? 0 :
 		    XAT0_SPARSE;
+	if (XVA_ISSET_REQ(xvap, XAT_PROJINHERIT))
+		*attrs |= (xoap->xoa_projinherit == 0) ? 0 :
+		    XAT0_PROJINHERIT;
 }
 
 static void *
@@ -280,6 +292,8 @@ zfs_log_create(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
 	lr = (lr_create_t *)&itx->itx_lr;
 	lr->lr_doid = dzp->z_id;
 	lr->lr_foid = zp->z_id;
+	/* Store dnode slot count in 8 bits above object id. */
+	LR_FOID_SET_SLOTS(lr->lr_foid, zp->z_dnodesize >> DNODE_SHIFT);
 	lr->lr_mode = zp->z_mode;
 	if (!IS_EPHEMERAL(zp->z_uid)) {
 		lr->lr_uid = (uint64_t)zp->z_uid;
@@ -340,12 +354,14 @@ zfs_log_create(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
 	zil_itx_assign(zilog, itx, tx);
 }
 
+void zil_remove_async(zilog_t *zilog, uint64_t oid);
+
 /*
  * Handles both TX_REMOVE and TX_RMDIR transactions.
  */
 void
 zfs_log_remove(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
-    znode_t *dzp, char *name, uint64_t foid)
+    znode_t *dzp, char *name, uint64_t foid, boolean_t unlinked)
 {
 	itx_t *itx;
 	lr_remove_t *lr;
@@ -361,6 +377,17 @@ zfs_log_remove(zilog_t *zilog, dmu_tx_t *tx, uint64_t txtype,
 
 	itx->itx_oid = foid;
 
+	/*
+	 * Object ids can be re-instantiated in the next txg so
+	 * remove any async transactions to avoid future leaks.
+	 * This can happen if a fsync occurs on the re-instantiated
+	 * object for a WR_INDIRECT or WR_NEED_COPY write, which gets
+	 * the new file data and flushes a write record for the old object.
+	 */
+	if (unlinked) {
+		ASSERT((txtype & ~TX_CI) == TX_REMOVE);
+		zil_remove_async(zilog, foid);
+	}
 	zil_itx_assign(zilog, itx, tx);
 }
 

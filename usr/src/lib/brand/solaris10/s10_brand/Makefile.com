@@ -21,6 +21,7 @@
 #
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2016 by Delphix. All rights reserved.
+# Copyright 2020 Joyent, Inc.
 #
 
 LIBRARY =	s10_brand.a
@@ -82,18 +83,16 @@ CSTD=	$(CSTD_GNU99)
 C99LMODE=	-Xc99=%all
 DYNFLAGS +=	$(DYNFLAGS_$(CLASS))
 DYNFLAGS +=	$(BLOCAL) $(ZNOVERSION) -Wl,-e_start
-LDLIBS +=	-lc -lmapmalloc
+LDLIBS +=	-lmapmalloc -lc
 LINTFLAGS +=	-erroff=E_STATIC_UNUSED
 LINTFLAGS64 +=	-erroff=E_STATIC_UNUSED
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 
 $(LIBS):= PICS += $(SHAREDOBJS)
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: lintcheck
 
 include $(SRC)/lib/Makefile.targ

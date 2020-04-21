@@ -20,7 +20,7 @@
 #
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
@@ -43,6 +43,14 @@ SYMBOL_VERSION SUNWprivate {
     global:
 	topo_close;
 	topo_debug_set;
+	topo_digraph_deserialize;
+	topo_digraph_destroy;
+	topo_digraph_get;
+	topo_digraph_new;
+	topo_digraph_paths;
+	topo_digraph_serialize;
+	topo_edge_iter;
+	topo_edge_new;
 	topo_fmri_asru;
 	topo_fmri_compare;
 	topo_fmri_contains;
@@ -77,10 +85,12 @@ SYMBOL_VERSION SUNWprivate {
 	topo_hdl_prominfo;
 	topo_hdl_strdup;
 	topo_hdl_strfree;
+	topo_hdl_strfreev;
 	topo_hdl_zalloc;
 	topo_led_state_name;
 	topo_led_type_name;
 	topo_list_append;
+	topo_list_deepcopy;
 	topo_list_delete;
 	topo_method_invoke;
 	topo_method_register;
@@ -93,6 +103,8 @@ SYMBOL_VERSION SUNWprivate {
 	topo_mod_clean_str;
 	topo_mod_clrdebug;
 	topo_mod_cpufmri;
+	topo_mod_create_ufm;
+	topo_mod_create_ufm_slot;
 	topo_mod_devfmri;
 	topo_mod_devinfo;
 	topo_mod_dprintf;
@@ -100,9 +112,11 @@ SYMBOL_VERSION SUNWprivate {
 	topo_mod_enummap;
 	topo_mod_errmsg;
 	topo_mod_errno;
+	topo_mod_file_search;
 	topo_mod_free;
 	topo_mod_getspecific;
 	topo_mod_hcfmri;
+	topo_mod_hc_occupied;
 	topo_mod_ipmi_hold;
 	topo_mod_ipmi_rele;
 	topo_mod_load;
@@ -113,6 +127,7 @@ SYMBOL_VERSION SUNWprivate {
 	topo_mod_nvl2str;
 	topo_mod_pcidb;
 	topo_mod_pkgfmri;
+	topo_mod_product;
 	topo_mod_prominfo;
 	topo_mod_register;
 	topo_mod_setdebug;
@@ -121,6 +136,7 @@ SYMBOL_VERSION SUNWprivate {
 	topo_mod_str2nvl;
 	topo_mod_strdup;
 	topo_mod_strfree;
+	topo_mod_strfreev;
 	topo_mod_unload;
 	topo_mod_unregister;
 	topo_mod_walk_init;
@@ -141,16 +157,20 @@ SYMBOL_VERSION SUNWprivate {
 	topo_node_label_set;
 	topo_node_lookup;
 	topo_node_name;
+	topo_node_occupied;
 	topo_node_parent;
 	topo_node_range_create;
 	topo_node_range_destroy;
 	topo_node_resource;
 	topo_node_setspecific;
 	topo_node_unbind;
+	topo_node_vertex;
 	topo_open;
+	topo_path_destroy;
 	topo_pgroup_create;
 	topo_pgroup_destroy;
 	topo_pgroup_info;
+	topo_pgroup_hcset;
 	topo_prop_get_fmri;
 	topo_prop_get_int32;
 	topo_prop_get_int64;
@@ -194,6 +214,10 @@ SYMBOL_VERSION SUNWprivate {
 	topo_snap_hold;
 	topo_snap_release;
 	topo_strerror;
+	topo_vertex_destroy;
+	topo_vertex_iter;
+	topo_vertex_node;
+	topo_vertex_new;
 	topo_walk_fini;
 	topo_walk_init;
 	topo_walk_step;

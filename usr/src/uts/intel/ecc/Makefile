@@ -24,11 +24,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
-#	This makefile drives the production of the ECc kef provider.
-#
-#	intel implementation architecture dependent
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
@@ -70,11 +66,17 @@ LINTFLAGS	+= -I$(COM1_DIR) -I$(COM2_DIR)
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-empty-body
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-parentheses
+
+# false positive
+$(OBJS_DIR)/ecdecode.o := SMOFF += assign_vs_compare
+$(OBJS_DIR)/ec.o := SMOFF += assign_vs_compare
+
+SMOFF += indenting,all_func_returns
 
 #
 #	Default build targets.

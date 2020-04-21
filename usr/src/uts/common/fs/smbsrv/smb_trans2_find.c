@@ -22,7 +22,7 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 
@@ -213,7 +213,7 @@
  * various functions involved in FindFirst, FindNext.
  */
 typedef struct smb_find_args {
-	uint32_t fa_maxdata;
+	uint32_t fa_fixedsize;
 	uint16_t fa_infolev;
 	uint16_t fa_maxcount;
 	uint16_t fa_fflag;
@@ -225,7 +225,7 @@ typedef struct smb_find_args {
 
 static int smb_trans2_find_entries(smb_request_t *, smb_xa_t *,
     smb_odir_t *, smb_find_args_t *);
-static int smb_trans2_find_get_maxdata(smb_request_t *, uint16_t, uint16_t);
+static int smb_trans2_find_get_fixedsize(smb_request_t *, uint16_t, uint16_t);
 static int smb_trans2_find_mbc_encode(smb_request_t *, smb_xa_t *,
     smb_fileinfo_t *, smb_find_args_t *);
 
@@ -320,9 +320,9 @@ smb_com_trans2_find_first2(smb_request_t *sr, smb_xa_t *xa)
 		odir_flags = SMB_ODIR_OPENF_BACKUP_INTENT;
 	}
 
-	args.fa_maxdata =
-	    smb_trans2_find_get_maxdata(sr, args.fa_infolev, args.fa_fflag);
-	if (args.fa_maxdata == 0)
+	args.fa_fixedsize =
+	    smb_trans2_find_get_fixedsize(sr, args.fa_infolev, args.fa_fflag);
+	if (args.fa_fixedsize == 0)
 		return (SDRC_ERROR);
 
 	status = smb_odir_openpath(sr, pn->pn_path, sattr, odir_flags, &od);
@@ -344,7 +344,8 @@ smb_com_trans2_find_first2(smb_request_t *sr, smb_xa_t *xa)
 	if (count == 0) {
 		smb_odir_close(od);
 		smb_odir_release(od);
-		smbsr_errno(sr, ENOENT);
+		smbsr_status(sr, NT_STATUS_NO_SUCH_FILE,
+		    ERRDOS, ERROR_FILE_NOT_FOUND);
 		return (SDRC_ERROR);
 	}
 
@@ -455,9 +456,9 @@ smb_com_trans2_find_next2(smb_request_t *sr, smb_xa_t *xa)
 	if (args.fa_fflag & SMB_FIND_WITH_BACKUP_INTENT)
 		sr->user_cr = smb_user_getprivcred(sr->uid_user);
 
-	args.fa_maxdata =
-	    smb_trans2_find_get_maxdata(sr, args.fa_infolev, args.fa_fflag);
-	if (args.fa_maxdata == 0)
+	args.fa_fixedsize =
+	    smb_trans2_find_get_fixedsize(sr, args.fa_infolev, args.fa_fflag);
+	if (args.fa_fixedsize == 0)
 		return (SDRC_ERROR);
 
 	od = smb_tree_lookup_odir(sr, odid);
@@ -536,7 +537,23 @@ smb_trans2_find_entries(smb_request_t *sr, smb_xa_t *xa, smb_odir_t *od,
 	smb_odir_resume_t odir_resume;
 	uint16_t	count, maxcount;
 	int		rc = -1;
+	int		LastEntryOffset = 0;
 	boolean_t	need_rewind = B_FALSE;
+
+	/*
+	 * EAs are not current supported, so a search for level
+	 * SMB_INFO_QUERY_EAS_FROM_LIST should always return an
+	 * empty list.  Returning zero for this case gives the
+	 * client an empty response, which is better than an
+	 * NT_STATUS_INVALID_LEVEL return (and test failures).
+	 *
+	 * If and when we do support EAs, this level will modify
+	 * the search here, and then return results just like
+	 * SMB_INFO_QUERY_EA_SIZE, but only including files
+	 * that have an EA in the provided list.
+	 */
+	if (args->fa_infolev == SMB_INFO_QUERY_EAS_FROM_LIST)
+		return (0);
 
 	if ((maxcount = args->fa_maxcount) == 0)
 		maxcount = 1;
@@ -550,6 +567,7 @@ smb_trans2_find_entries(smb_request_t *sr, smb_xa_t *xa, smb_odir_t *od,
 		if (rc != 0 || args->fa_eos != 0)
 			break;
 
+		LastEntryOffset = xa->rep_data_mb.chain_offset;
 		rc = smb_trans2_find_mbc_encode(sr, xa, &fileinfo, args);
 		if (rc == -1)
 			return (-1); /* fatal encoding error */
@@ -568,6 +586,15 @@ smb_trans2_find_entries(smb_request_t *sr, smb_xa_t *xa, smb_odir_t *od,
 	}
 	if (args->fa_eos != 0 && rc == ENOENT)
 		rc = 0;
+
+	/*
+	 * All but the ancient info levels start with NextEntryOffset.
+	 * That's supposed to be zero in the last entry returned.
+	 */
+	if (args->fa_infolev >= SMB_FIND_FILE_DIRECTORY_INFO) {
+		(void) smb_mbc_poke(&xa->rep_data_mb,
+		    LastEntryOffset, "l", 0);
+	}
 
 	/* save the last cookie returned to client */
 	if (count != 0)
@@ -606,20 +633,19 @@ smb_trans2_find_entries(smb_request_t *sr, smb_xa_t *xa, smb_odir_t *od,
 }
 
 /*
- * smb_trans2_find_get_maxdata
+ * smb_trans2_find_get_fixedsize
  *
- * Calculate the minimum response space required for the specified
- * information level.
+ * Calculate the sizeof the fixed part of the response for the
+ * specified information level.
  *
- * A non-zero return value provides the minimum space required.
+ * A non-zero return value provides the fixed size.
  * A return value of zero indicates an unknown information level.
  */
 static int
-smb_trans2_find_get_maxdata(smb_request_t *sr, uint16_t infolev, uint16_t fflag)
+smb_trans2_find_get_fixedsize(smb_request_t *sr, uint16_t infolev,
+	uint16_t fflag)
 {
-	int maxdata;
-
-	maxdata = smb_ascii_or_unicode_null_len(sr);
+	int maxdata = 0;
 
 	switch (infolev) {
 	case SMB_INFO_STANDARD :
@@ -629,6 +655,7 @@ smb_trans2_find_get_maxdata(smb_request_t *sr, uint16_t infolev, uint16_t fflag)
 		break;
 
 	case SMB_INFO_QUERY_EA_SIZE:
+	case SMB_INFO_QUERY_EAS_FROM_LIST:
 		if (fflag & SMB_FIND_RETURN_RESUME_KEYS)
 			maxdata += sizeof (int32_t);
 		maxdata += 2 + 2 + 2 + 4 + 4 + 2 + 4 + 1;
@@ -720,26 +747,52 @@ smb_trans2_find_mbc_encode(smb_request_t *sr, smb_xa_t *xa,
 	uint32_t	resume_key;
 	char		buf83[26];
 	smb_msgbuf_t	mb;
+	int		pad = 0;
 
 	namelen = smb_ascii_or_unicode_strlen(sr, fileinfo->fi_name);
 	if (namelen == -1)
 		return (-1);
 
-	/*
-	 * If ascii the filename length returned to the client should
-	 * include the null terminator for levels except STANDARD and
-	 * EASIZE.
-	 */
-	if (!(sr->smb_flg2 & SMB_FLAGS2_UNICODE)) {
-		if ((args->fa_infolev != SMB_INFO_STANDARD) &&
-		    (args->fa_infolev != SMB_INFO_QUERY_EA_SIZE))
+	if (args->fa_infolev < SMB_FIND_FILE_DIRECTORY_INFO) {
+		/*
+		 * Ancient info levels don't have a NextEntryOffset
+		 * field, so there's no padding for alignment.
+		 * The client expects a null after the file name,
+		 * and then the next entry.  The namelength field
+		 * never includes the null for these old levels.
+		 * Using the pad value to write the null because
+		 * we don't want to add that to namelen.
+		 * [MS-CIFS] sec. 2.8.1.{1-3}
+		 */
+		if ((sr->smb_flg2 & SMB_FLAGS2_UNICODE) != 0)
+			pad = 2; /* Unicode null */
+		else
+			pad = 1; /* ascii null */
+		next_entry_offset = args->fa_fixedsize + namelen + pad;
+		if (!MBC_ROOM_FOR(&xa->rep_data_mb, next_entry_offset))
+			return (1);
+	} else {
+		/*
+		 * Later info levels: The file name is written WITH
+		 * null termination, and the size of that null _is_
+		 * included in the namelen field.  There may also
+		 * be padding, and we pad to align(4) like Windows.
+		 * Don't include the padding in the "room for" test
+		 * because we want to ignore any error writing the
+		 * pad bytes after the last element.
+		 */
+		if ((sr->smb_flg2 & SMB_FLAGS2_UNICODE) != 0)
+			namelen += 2;
+		else
 			namelen += 1;
+		next_entry_offset = args->fa_fixedsize + namelen;
+		if (!MBC_ROOM_FOR(&xa->rep_data_mb, next_entry_offset))
+			return (1);
+		if ((next_entry_offset & 3) != 0) {
+			pad = 4 - (next_entry_offset & 3);
+			next_entry_offset += pad;
+		}
 	}
-
-	next_entry_offset = args->fa_maxdata + namelen;
-
-	if (MBC_ROOM_FOR(&xa->rep_data_mb, (args->fa_maxdata + namelen)) == 0)
-		return (1);
 
 	mb_flags = (sr->smb_flg2 & SMB_FLAGS2_UNICODE) ? SMB_MSGBUF_UNICODE : 0;
 	dsize32 = (fileinfo->fi_size > UINT_MAX) ?
@@ -774,6 +827,7 @@ smb_trans2_find_mbc_encode(smb_request_t *sr, smb_xa_t *xa,
 		break;
 
 	case SMB_INFO_QUERY_EA_SIZE:
+	case SMB_INFO_QUERY_EAS_FROM_LIST:
 		if (args->fa_fflag & SMB_FIND_RETURN_RESUME_KEYS)
 			(void) smb_mbc_encodef(&xa->rep_data_mb, "l",
 			    resume_key);
@@ -921,8 +975,11 @@ smb_trans2_find_mbc_encode(smb_request_t *sr, smb_xa_t *xa,
 	    (args->fa_lno & 1) != 0)
 		args->fa_lno++;
 
-	(void) smb_mbc_encodef(&xa->rep_data_mb, "%u", sr,
-	    fileinfo->fi_name);
+	(void) smb_mbc_encodef(&xa->rep_data_mb, "%#u", sr,
+	    namelen, fileinfo->fi_name);
+
+	if (pad)
+		(void) smb_mbc_encodef(&xa->rep_data_mb, "#.", pad);
 
 	return (0);
 }
@@ -933,14 +990,14 @@ smb_trans2_find_mbc_encode(smb_request_t *sr, smb_xa_t *xa,
 smb_sdrc_t
 smb_pre_find_close2(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__FindClose2__start, smb_request_t *, sr);
+	DTRACE_SMB_START(op__FindClose2, smb_request_t *, sr);
 	return (SDRC_SUCCESS);
 }
 
 void
 smb_post_find_close2(smb_request_t *sr)
 {
-	DTRACE_SMB_1(op__FindClose2__done, smb_request_t *, sr);
+	DTRACE_SMB_DONE(op__FindClose2, smb_request_t *, sr);
 }
 
 smb_sdrc_t

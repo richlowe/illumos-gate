@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Nexenta by DDN, Inc. All rights reserved.
  */
 
 /*
@@ -65,7 +65,8 @@ typedef enum {
 	HELP_SET,
 	HELP_SHOW,
 	HELP_USER_DISABLE,
-	HELP_USER_ENABLE
+	HELP_USER_ENABLE,
+	HELP_USER_DELETE
 } smbadm_help_t;
 
 #define	SMBADM_CMDF_NONE	0x00
@@ -118,37 +119,41 @@ static int smbadm_group_addmember(int, char **);
 static int smbadm_group_delmember(int, char **);
 static int smbadm_group_add_del_member(char *, char *, smbadm_grp_action_t);
 
+static int smbadm_user_delete(int, char **);
 static int smbadm_user_disable(int, char **);
 static int smbadm_user_enable(int, char **);
 
+/* Please keep the order consistent with smbadm(1M) man page */
 static smbadm_cmdinfo_t smbadm_cmdtable[] =
 {
-	{ "add-member",		smbadm_group_addmember,	HELP_ADD_MEMBER,
-		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
 	{ "create",		smbadm_group_create,	HELP_CREATE,
 		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
 	{ "delete",		smbadm_group_delete,	HELP_DELETE,
 		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "rename",		smbadm_group_rename,	HELP_RENAME,
+		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "show",		smbadm_group_show,	HELP_SHOW,
+		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "get",		smbadm_group_getprop,	HELP_GET,
+		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "set",		smbadm_group_setprop,	HELP_SET,
+		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "add-member",		smbadm_group_addmember,	HELP_ADD_MEMBER,
+		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "remove-member",	smbadm_group_delmember,	HELP_DEL_MEMBER,
+		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
+	{ "delete-user",	smbadm_user_delete,	HELP_USER_DELETE,
+		SMBADM_CMDF_USER,	SMBADM_ACTION_AUTH },
 	{ "disable-user",	smbadm_user_disable,	HELP_USER_DISABLE,
 		SMBADM_CMDF_USER,	SMBADM_ACTION_AUTH },
 	{ "enable-user",	smbadm_user_enable,	HELP_USER_ENABLE,
 		SMBADM_CMDF_USER,	SMBADM_ACTION_AUTH },
-	{ "get",		smbadm_group_getprop,	HELP_GET,
-		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
 	{ "join",		smbadm_join,		HELP_JOIN,
 		SMBADM_CMDF_NONE,	SMBADM_VALUE_AUTH },
 	{ "list",		smbadm_list,		HELP_LIST,
 		SMBADM_CMDF_NONE,	SMBADM_BASIC_AUTH },
 	{ "lookup",		smbadm_lookup,		HELP_LOOKUP,
 		SMBADM_CMDF_NONE,	SMBADM_BASIC_AUTH },
-	{ "remove-member",	smbadm_group_delmember,	HELP_DEL_MEMBER,
-		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
-	{ "rename",		smbadm_group_rename,	HELP_RENAME,
-		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
-	{ "set",		smbadm_group_setprop,	HELP_SET,
-		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
-	{ "show",		smbadm_group_show,	HELP_SHOW,
-		SMBADM_CMDF_GROUP,	SMBADM_ACTION_AUTH },
 };
 
 #define	SMBADM_NCMD	(sizeof (smbadm_cmdtable) / sizeof (smbadm_cmdtable[0]))
@@ -173,6 +178,10 @@ static smbadm_prop_handle_t *smbadm_prop_gethandle(char *pname);
 static boolean_t smbadm_chkprop_priv(smbadm_prop_t *prop);
 static int smbadm_setprop_tkowner(char *gname, smbadm_prop_t *prop);
 static int smbadm_getprop_tkowner(char *gname, smbadm_prop_t *prop);
+static int smbadm_setprop_readfile(char *gname, smbadm_prop_t *prop);
+static int smbadm_getprop_readfile(char *gname, smbadm_prop_t *prop);
+static int smbadm_setprop_writefile(char *gname, smbadm_prop_t *prop);
+static int smbadm_getprop_writefile(char *gname, smbadm_prop_t *prop);
 static int smbadm_setprop_backup(char *gname, smbadm_prop_t *prop);
 static int smbadm_getprop_backup(char *gname, smbadm_prop_t *prop);
 static int smbadm_setprop_restore(char *gname, smbadm_prop_t *prop);
@@ -181,12 +190,16 @@ static int smbadm_setprop_desc(char *gname, smbadm_prop_t *prop);
 static int smbadm_getprop_desc(char *gname, smbadm_prop_t *prop);
 
 static smbadm_prop_handle_t smbadm_ptable[] = {
-	{"backup",	"on | off", 	smbadm_setprop_backup,
-	smbadm_getprop_backup,	smbadm_chkprop_priv 	},
-	{"restore",	"on | off",	smbadm_setprop_restore,
+	{"backup",	"on|off",	smbadm_setprop_backup,
+	smbadm_getprop_backup,	smbadm_chkprop_priv	},
+	{"restore",	"on|off",	smbadm_setprop_restore,
 	smbadm_getprop_restore,	smbadm_chkprop_priv	},
-	{"take-ownership", "on | off",	smbadm_setprop_tkowner,
+	{"take-ownership", "on|off",	smbadm_setprop_tkowner,
 	smbadm_getprop_tkowner,	smbadm_chkprop_priv	},
+	{"bypass-read", "on|off",	smbadm_setprop_readfile,
+	smbadm_getprop_readfile,	smbadm_chkprop_priv	},
+	{"bypass-write", "on|off",	smbadm_setprop_writefile,
+	smbadm_getprop_writefile,	smbadm_chkprop_priv	},
 	{"description",	"<string>",	smbadm_setprop_desc,
 	smbadm_getprop_desc,	NULL			},
 };
@@ -206,74 +219,70 @@ smbadm_cmdusage(FILE *fp, smbadm_cmdinfo_t *cmd)
 	switch (cmd->usage) {
 	case HELP_ADD_MEMBER:
 		(void) fprintf(fp,
-		    gettext("\t%s -m member [[-m member] ...] group\n"),
+		    gettext("\t%s -m <member> [-m <member>]... <group>\n"),
 		    cmd->name);
 		return;
 
 	case HELP_CREATE:
-		(void) fprintf(fp, gettext("\t%s [-d description] group\n"),
+		(void) fprintf(fp, gettext("\t%s [-d <description>] <group>\n"),
 		    cmd->name);
 		return;
 
 	case HELP_DELETE:
-		(void) fprintf(fp, gettext("\t%s group\n"), cmd->name);
+		(void) fprintf(fp, gettext("\t%s <group>\n"), cmd->name);
 		return;
 
+	case HELP_USER_DELETE:
 	case HELP_USER_DISABLE:
 	case HELP_USER_ENABLE:
-		(void) fprintf(fp, gettext("\t%s user\n"), cmd->name);
+		(void) fprintf(fp, gettext("\t%s <username>\n"), cmd->name);
 		return;
 
 	case HELP_GET:
-		(void) fprintf(fp, gettext("\t%s [[-p property] ...] group\n"),
+		(void) fprintf(fp, gettext("\t%s [-p <property>]... <group>\n"),
 		    cmd->name);
 		return;
 
 	case HELP_JOIN:
-#if 0	/* Don't document "-p" yet, still needs work (NX 11960) */
-		(void) fprintf(fp, gettext("\t%s [-y] -p domain\n"
-		    "\t%s [-y] -u username domain\n\t%s [-y] -w workgroup\n"),
+#if 0	/* Don't document "-p" yet, still needs work (NEX-11960) */
+		(void) fprintf(fp, gettext("\t%s [-y] -p <domain>\n"
+		    "\t%s [-y] -u <username domain>\n"
+		    "\t%s [-y] -w <workgroup>\n"),
 		    cmd->name, cmd->name, cmd->name);
 #else
-		(void) fprintf(fp, gettext("\t%s [-y] -u username domain\n"
-		    "\t%s [-y] -w workgroup\n"), cmd->name, cmd->name);
+		(void) fprintf(fp, gettext("\t%s [-y] -u <username> <domain>\n"
+		    "\t%s [-y] -w <workgroup>\n"), cmd->name, cmd->name);
 #endif
 		return;
 
 	case HELP_LIST:
 		(void) fprintf(fp, gettext("\t%s\n"), cmd->name);
-		(void) fprintf(fp,
-		    gettext("\t\t[*] primary domain\n"));
-		(void) fprintf(fp, gettext("\t\t[.] local domain\n"));
-		(void) fprintf(fp, gettext("\t\t[-] other domains\n"));
-		(void) fprintf(fp,
-		    gettext("\t\t[+] selected domain controller\n"));
 		return;
 
 	case HELP_LOOKUP:
 		(void) fprintf(fp,
-		    gettext("\t%s user-or-group-name\n"),
+		    gettext("\t%s <account-name>\n"),
 		    cmd->name);
 		return;
 
 	case HELP_DEL_MEMBER:
 		(void) fprintf(fp,
-		    gettext("\t%s -m member [[-m member] ...] group\n"),
+		    gettext("\t%s -m <member> [-m <member>]... <group>\n"),
 		    cmd->name);
 		return;
 
 	case HELP_RENAME:
-		(void) fprintf(fp, gettext("\t%s group new-group\n"),
+		(void) fprintf(fp, gettext("\t%s <group> <new-group>\n"),
 		    cmd->name);
 		return;
 
 	case HELP_SET:
-		(void) fprintf(fp, gettext("\t%s -p property=value "
-		    "[[-p property=value] ...] group\n"), cmd->name);
+		(void) fprintf(fp, gettext("\t%s -p <property>=<value> "
+		    "[-p <property>=<value>]... <group>\n"), cmd->name);
 		return;
 
 	case HELP_SHOW:
-		(void) fprintf(fp, gettext("\t%s [-m] [-p] [group]\n"),
+		(void) fprintf(fp, gettext("\t%s [-mp] [<group>]\n"),
 		    cmd->name);
 		return;
 
@@ -294,10 +303,8 @@ smbadm_usage(boolean_t requested)
 
 	if (curcmd == NULL) {
 		(void) fprintf(fp,
-		    gettext("usage: %s [-h | <command> [options]]\n"),
+		    gettext("usage: %s <subcommand> <args> ...\n"),
 		    progname);
-		(void) fprintf(fp,
-		    gettext("where 'command' is one of the following:\n\n"));
 
 		for (i = 0; i < SMBADM_NCMD; i++)
 			smbadm_cmdusage(fp, &smbadm_cmdtable[i]);
@@ -1165,7 +1172,7 @@ smbadm_group_setprop(int argc, char **argv)
 	smbadm_prop_handle_t *phandle;
 	char option;
 	int pcnt = 0;
-	int ret;
+	int ret = 0;
 	int p;
 
 	bzero(props, SMBADM_NPROP * sizeof (smbadm_prop_t));
@@ -1225,7 +1232,7 @@ smbadm_group_getprop(int argc, char **argv)
 	smbadm_prop_handle_t *phandle;
 	char option;
 	int pcnt = 0;
-	int ret;
+	int ret = 0;
 	int p;
 
 	bzero(props, SMBADM_NPROP * sizeof (smbadm_prop_t));
@@ -1394,25 +1401,26 @@ smbadm_group_delmember(int argc, char **argv)
 
 static int
 smbadm_group_add_del_member(char *gname, char *mname,
-	smbadm_grp_action_t act)
+    smbadm_grp_action_t act)
 {
 	lsa_account_t	acct;
 	smb_gsid_t msid;
 	char *sidstr;
-	char *act_str;
+	char *act_str = NULL;
 	int rc;
 
 	if (strncmp(mname, "S-1-", 4) == 0) {
 		/*
 		 * We are given a SID.  Just use it.
 		 *
-		 * We'e like the real account type if we can get it,
+		 * We'd like the real account type if we can get it,
 		 * but don't want to error out if we can't get it.
+		 * Lacking other info, assume it's a group.
 		 */
 		sidstr = mname;
 		rc = smb_lookup_sid(sidstr, &acct);
 		if ((rc != 0) || (acct.a_status != NT_STATUS_SUCCESS))
-			acct.a_sidtype = SidTypeUnknown;
+			acct.a_sidtype = SidTypeGroup;
 	} else {
 		rc = smb_lookup_name(mname, SidTypeUnknown, &acct);
 		if ((rc != 0) || (acct.a_status != NT_STATUS_SUCCESS)) {
@@ -1455,6 +1463,27 @@ smbadm_group_add_del_member(char *gname, char *mname,
 		return (1);
 	}
 	return (0);
+}
+
+static int
+smbadm_user_delete(int argc, char **argv)
+{
+	int error;
+	char *user = NULL;
+
+	user = argv[optind];
+	if (optind >= argc || user == NULL || *user == '\0') {
+		(void) fprintf(stderr, gettext("missing user name\n"));
+		smbadm_usage(B_FALSE);
+	}
+
+	error = smb_pwd_setcntl(user, SMB_PWC_DELETE);
+	if (error == SMB_PWE_SUCCESS)
+		(void) printf(gettext("%s has been deleted.\n"), user);
+	else
+		(void) fprintf(stderr, "%s\n", smbadm_pwd_strerror(error));
+
+	return (error);
 }
 
 static int
@@ -1783,6 +1812,30 @@ static int
 smbadm_getprop_tkowner(char *gname, smbadm_prop_t *prop)
 {
 	return (smbadm_group_getpriv(gname, SE_TAKE_OWNERSHIP_LUID, prop));
+}
+
+static int
+smbadm_setprop_readfile(char *gname, smbadm_prop_t *prop)
+{
+	return (smbadm_group_setpriv(gname, SE_READ_FILE_LUID, prop));
+}
+
+static int
+smbadm_getprop_readfile(char *gname, smbadm_prop_t *prop)
+{
+	return (smbadm_group_getpriv(gname, SE_READ_FILE_LUID, prop));
+}
+
+static int
+smbadm_setprop_writefile(char *gname, smbadm_prop_t *prop)
+{
+	return (smbadm_group_setpriv(gname, SE_WRITE_FILE_LUID, prop));
+}
+
+static int
+smbadm_getprop_writefile(char *gname, smbadm_prop_t *prop)
+{
+	return (smbadm_group_getpriv(gname, SE_WRITE_FILE_LUID, prop));
 }
 
 static int

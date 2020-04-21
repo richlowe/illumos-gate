@@ -21,6 +21,8 @@
 /*
  * Copyright 2005 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2019, Joyent, Inc.
  */
 
 /*
@@ -88,7 +90,7 @@ static	void		print_target_n_deps(register Name target);
  *
  *	Global variables used:
  */
-void 
+void
 free_chain(Name_vector ptr)
 {
 	if (ptr != NULL) {
@@ -250,15 +252,23 @@ char *
 get_current_path(void)
 {
 	char			pwd[(MAXPATHLEN * MB_LEN_MAX)];
-	static char		*current_path;
+	static char		*current_path = NULL;
 
-	if (current_path == NULL) {
+	/*
+	 * When we hit this with path_reset to true, we do not free the older
+	 * version of current_path at this time, as we don't have confidence
+	 * that we've properly caught all users of it and they haven't cached
+	 * the pointer somewhere. As such, since this is only currently set with
+	 * the -C option is passed in, it seems OK to just let that bit go.
+	 */
+	if (current_path == NULL || path_reset == true) {
 		getcwd(pwd, sizeof(pwd));
 		if (pwd[0] == (int) nul_char) {
 			pwd[0] = (int) slash_char;
 			pwd[1] = (int) nul_char;
 		}
 		current_path = strdup(pwd);
+		path_reset = false;
 	}
 	return current_path;
 }
@@ -279,7 +289,7 @@ get_current_path(void)
  *	Parameters:
  *
  *	Global variables used:
- *		svr4 			Was ".SVR4" seen in makefile?
+ *		svr4			Was ".SVR4" seen in makefile?
  *		svr4_name		The Name ".SVR4", printed
  *		posix			Was ".POSIX" seen in makefile?
  *		posix_name		The Name ".POSIX", printed
@@ -378,13 +388,13 @@ dump_make_state(void)
 	     percent = percent->next) {
 		(void) printf("%s:",
 			      percent->name->string_mb);
-		
+
 		for (percent_depe = percent->dependencies;
 		     percent_depe != NULL;
 		     percent_depe = percent_depe->next) {
 			(void) printf(" %s", percent_depe->name->string_mb);
 		}
-		
+
 		(void) printf("\n");
 
 		for (rule = percent->command_template;
@@ -705,8 +715,8 @@ load_cached_names(void)
 	}
 }
 
-/* 
- * iterate on list of conditional macros in np, and place them in 
+/*
+ * iterate on list of conditional macros in np, and place them in
  * a String_rec starting with, and separated by the '$' character.
  */
 void
@@ -714,18 +724,18 @@ cond_macros_into_string(Name np, String_rec *buffer)
 {
 	Macro_list	macro_list;
 
-	/* 
+	/*
 	 * Put the version number at the start of the string
 	 */
 	MBSTOWCS(wcs_buffer, DEPINFO_FMT_VERSION);
 	append_string(wcs_buffer, buffer, FIND_LENGTH);
-	/* 
+	/*
 	 * Add the rest of the conditional macros to the buffer
 	 */
 	if (np->depends_on_conditional){
-		for (macro_list = np->conditional_macro_list; 
+		for (macro_list = np->conditional_macro_list;
 		     macro_list != NULL; macro_list = macro_list->next){
-			append_string(macro_list->macro_name, buffer, 
+			append_string(macro_list->macro_name, buffer,
 				FIND_LENGTH);
 			append_char((int) equal_char, buffer);
 			append_string(macro_list->value, buffer, FIND_LENGTH);

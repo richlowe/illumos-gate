@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/zfs_context.h>
 #include <sys/avl.h>
 #include <sys/unique.h>
@@ -42,14 +40,10 @@ typedef struct unique {
 static int
 unique_compare(const void *a, const void *b)
 {
-	const unique_t *una = a;
-	const unique_t *unb = b;
+	const unique_t *una = (const unique_t *)a;
+	const unique_t *unb = (const unique_t *)b;
 
-	if (una->un_value < unb->un_value)
-		return (-1);
-	if (una->un_value > unb->un_value)
-		return (+1);
-	return (0);
+	return (TREE_CMP(una->un_value, unb->un_value));
 }
 
 void

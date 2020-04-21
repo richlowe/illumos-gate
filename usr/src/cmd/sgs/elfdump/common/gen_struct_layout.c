@@ -24,11 +24,13 @@
  * Use is subject to license terms.
  *
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
  * This program is used to generate the contents of the
- * struct_layout_XXX.c files that contain per-archtecture
+ * struct_layout_XXX.c files that contain per-architecture
  * structure layout information.
  *
  * Although not part of elfdump, it is built by the makefile
@@ -567,22 +569,22 @@ gen_utsname(void)
 static void
 gen_prfdinfo(void)
 {
-	START(prfdinfo, prfdinfo_t);
+	START(prfdinfo, prfdinfo_core_t);
 
-	SCALAR_FIELD(prfdinfo_t,	pr_fd,		0);
-	SCALAR_FIELD(prfdinfo_t,	pr_mode,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_uid,		0);
-	SCALAR_FIELD(prfdinfo_t,	pr_gid,		0);
-	SCALAR_FIELD(prfdinfo_t,	pr_major,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_minor,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_rmajor,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_rminor,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_ino,		0);
-	SCALAR_FIELD(prfdinfo_t,	pr_offset,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_size,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_fileflags,	0);
-	SCALAR_FIELD(prfdinfo_t,	pr_fdflags,	0);
-	ARRAY_FIELD(prfdinfo_t,		pr_path,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_fd,		0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_mode,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_uid,		0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_gid,		0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_major,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_minor,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_rmajor,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_rminor,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_ino,		0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_offset,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_size,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_fileflags,	0);
+	SCALAR_FIELD(prfdinfo_core_t,	pr_fdflags,	0);
+	ARRAY_FIELD(prfdinfo_core_t,	pr_path,	0);
 
 	END;
 }
@@ -596,6 +598,15 @@ gen_prsecflags(void)
 	SCALAR_FIELD(prsecflags_t, pr_inherit, 0);
 	SCALAR_FIELD(prsecflags_t, pr_lower, 0);
 	SCALAR_FIELD(prsecflags_t, pr_upper, 0);
+	END;
+}
+
+static void
+gen_prlwpname(void)
+{
+	START(prlwpname, prlwpname_t);
+	SCALAR_FIELD(prlwpname_t, pr_lwpid, 0);
+	ARRAY_FIELD(prlwpname_t, pr_lwpname, 0);
 	END;
 }
 
@@ -640,6 +651,7 @@ main(int argc, char *argv[])
 	gen_utsname();
 	gen_prfdinfo();
 	gen_prsecflags();
+	gen_prlwpname();
 
 	/*
 	 * Generate the full arch_layout description
@@ -668,6 +680,7 @@ main(int argc, char *argv[])
 	(void) printf(fmt, "utsname");
 	(void) printf(fmt, "prfdinfo");
 	(void) printf(fmt, "prsecflags");
+	(void) printf(fmt, "prlwpname");
 	(void) printf("};\n");
 
 	/*

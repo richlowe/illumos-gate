@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 1998 Michael Smith.
  * All rights reserved.
  *
@@ -25,7 +25,6 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
 
 #include <assert.h>
 
@@ -35,10 +34,9 @@ void
 __assert(const char *func, const char *file, int line, const char *expression)
 {
 	if (func == NULL)
-		panic("Assertion failed: (%s), file %s, line %d.\n",
+		panic("Assertion failed: (%s), file %s, line %d.",
 		    expression, file, line);
 	else
-		panic(
-		    "Assertion failed: (%s), function %s, file %s, line %d.\n",
+		panic("Assertion failed: (%s), function %s, file %s, line %d.",
 		    expression, func, file, line);
 }

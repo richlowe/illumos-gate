@@ -488,6 +488,9 @@ trap(struct regs *rp, caddr_t addr, processorid_t cpuid)
 
 	ASSERT_STACK_ALIGNED();
 
+	errcode = 0;
+	mstate = 0;
+	rw = S_OTHER;
 	type = rp->r_trapno;
 	CPU_STATS_ADDQ(CPU, sys, trap, 1);
 	ASSERT(ct->t_schedflag & TS_DONT_SWAP);
@@ -2088,7 +2091,7 @@ dump_ttrace(void)
 
 	for (i = 0; i < n; i++) {
 		ttc = &trap_trace_ctl[i];
-		if (ttc->ttc_first == NULL)
+		if (ttc->ttc_first == (uintptr_t)NULL)
 			continue;
 
 		current = ttc->ttc_next - sizeof (trap_trace_rec_t);
@@ -2104,7 +2107,7 @@ dump_ttrace(void)
 				current =
 				    ttc->ttc_limit - sizeof (trap_trace_rec_t);
 
-			if (current == NULL)
+			if (current == (uintptr_t)NULL)
 				continue;
 
 			rec = (trap_trace_rec_t *)current;

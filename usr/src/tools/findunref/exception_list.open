@@ -23,6 +23,7 @@
 #
 # Copyright (c) 2001, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
+# Copyright 2020 Joyent, Inc.
 #
 #
 # open-tree exception list
@@ -143,7 +144,6 @@
 # Ignore internal packages, scripts, and tools that are intentionally not
 # built or used during a nightly.
 #
-./usr/src/cmd/sgs/packages
 ./usr/src/cmd/sgs/rtld.4.x
 ./usr/src/prototypes
 ./usr/src/cmd/pools/poold/com/sun/solaris/*/*/package.html
@@ -209,13 +209,6 @@
 ./usr/src/common/bignum/mont_mulf.c
 
 #
-# Ignore uttrack.c.  It is provided as part of the standard
-# ACPI CA source code but provides optional resource tracking
-# functionality which is not used.
-#
-./usr/src/uts/intel/io/acpica/utilities/uttrack.c
-
-#
 # Ignore any files that get used during a gcc build only.
 #
 ./usr/src/cmd/sgs/rtld/common/mapfile-order-gcc
@@ -247,4 +240,3 @@
 # ld tests which are not currently delivered
 #
 ./usr/src/cmd/sgs/test
-./usr/src/cmd/mdb/test

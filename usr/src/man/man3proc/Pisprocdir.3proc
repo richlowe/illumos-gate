@@ -11,21 +11,22 @@
 .\"
 .\" Copyright 2015 Joyent, Inc.
 .\"
-.Dd May 11, 2016
+.Dd Aug 27, 2019
 .Dt PISPROCIDR 3PROC
 .Os
 .Sh NAME
 .Nm Pisprocdir
 .Nd determine if a directory is the /proc directory
-.Sh SYNOPSIS
+.Sh LIBRARY
 .Lb libproc
+.Sh SYNOPSIS
 .In libproc.h
 .Ft int
 .Fo Pisprocdir
 .Fa "struct ps_prochandle *P"
 .Fa "const char *dir"
 .Fc
-.Sh DESECRIPTION
+.Sh DESCRIPTION
 The
 .Fn Pisprocdir
 function determines whether or not the directory

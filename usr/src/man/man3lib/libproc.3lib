@@ -9,9 +9,11 @@
 .\" http://www.illumos.org/license/CDDL.
 .\"
 .\"
-.\" Copyright 2015 Joyent, Inc.
+.\" Copyright 2018 Joyent, Inc.
+.\" Copyright (c) 2019 Carlos Neira <cneirabustos@gmail.com>
+.\" Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 .\"
-.Dd June 06, 2016
+.Dd February 22, 2019
 .Dt LIBPROC 3LIB
 .Os
 .Sh NAME
@@ -58,7 +60,7 @@ ones.
 To manipulate an existing process first
 .Em grab
 it with the
-.Em Pgrab
+.Fn Pgrab
 function.
 A process is generally stopped as a side effect of grabbing it.
 Callers must exercise caution, as if they do not use the library correctly, or
@@ -66,7 +68,7 @@ they terminate unexpectedly, a process may remain stopped.
 .Pp
 Unprivileged users may only grab their own processes.
 Users with the privilege
-.Sy PRIV_PROC_OWNER
+.Brq Sy PRIV_PROC_OWNER
 may manipulate processes that they do not own; however, additional
 restrictions as described in
 .Xr privileges 5
@@ -114,9 +116,9 @@ sections.
 Many of the operations in the library rely on debug information being
 present in a process and its associated libraries.
 The library leverages symbol table information, CTF data
-.Pf ( Xr CTF 4 )
+.Pq Xr ctf 4
 sections, and frame unwinding information based on the use of an ABI
-defined frame pointer, eg.
+defined frame pointer, e\&.g\&.
 .Sy %ebp
 and
 .Sy %rbp
@@ -217,34 +219,34 @@ manipulation of the process itself.
 .It Sy Plmid_to_loadobj Ta Sy Plmid_to_map
 .It Sy Plookup_by_addr Ta Sy Plookup_by_name
 .It Sy Plwp_alt_stack Ta Sy Plwp_getfpregs
-.It Sy Plwp_getpsinfo Ta Sy Plwp_getregs
-.It Sy Plwp_getspymaster Ta Sy Plwp_main_stack
-.It Sy Plwp_setfpregs Ta Sy Plwp_setregs
-.It Sy Plwp_stack Ta Sy Pname_to_ctf
-.It Sy Pname_to_loadobj Ta Sy Pname_to_map
-.It Sy Pobjname Ta Sy Pobjname_resolved
-.It Sy Pplatform Ta Sy Ppltdest
-.It Sy Ppriv Ta Sy Ppsinfo
-.It Sy Pputareg Ta Sy Prd_agent
-.It Sy Pread Ta Sy Pread_string
-.It Sy Preset_maps Ta Sy Psetbkpt
-.It Sy Psecflags Ta Sy Psetcred
-.It Sy Psetfault Ta Sy Psetflags
-.It Sy Psetpriv Ta Sy Psetrun
-.It Sy Psetsignal Ta Sy Psetsysentry
-.It Sy Psetsysexit Ta Sy Psetwapt
-.It Sy Psetzoneid Ta Sy Psignal
-.It Sy Pstate Ta Sy Pstatus
-.It Sy Pstop Ta Sy Pstopstatus
-.It Sy Psync Ta Sy Psysentry
-.It Sy Psysexit Ta Sy Puname
-.It Sy Punsetflags Ta Sy Pupdate_maps
-.It Sy Pupdate_syms Ta Sy Pwait
-.It Sy Pwrite Ta Sy Pxecbkpt
-.It Sy Pxecwapt Ta Sy Pxlookup_by_addr
-.It Sy Pxlookup_by_addr_resolved Ta Sy Pxlookup_by_name
-.It Sy Pzonename Ta Sy Pzonepath
-.It Sy Pzoneroot Ta
+.It Sy Plwp_getname Ta Sy Plwp_getpsinfo
+.It Sy Plwp_getregs Ta Sy Plwp_getspymaster
+.It Sy Plwp_main_stack Ta Sy Plwp_setfpregs
+.It Sy Plwp_setregs Ta Sy Plwp_stack
+.It Sy Pname_to_ctf Ta Sy Pname_to_loadobj
+.It Sy Pname_to_map Ta Sy Pobjname
+.It Sy Pobjname_resolved Ta Sy Pplatform
+.It Sy Ppltdest Ta Sy Ppriv
+.It Sy Ppsinfo Ta Sy Pputareg
+.It Sy Prd_agent Ta Sy Pread
+.It Sy Pread_string Ta Sy Preset_maps
+.It Sy Psetbkpt Ta Sy Psecflags
+.It Sy Psetcred Ta Sy Psetfault
+.It Sy Psetflags Ta Sy Psetpriv
+.It Sy Psetrun Ta Sy Psetsignal
+.It Sy Psetsysentry Ta Sy Psetsysexit
+.It Sy Psetwapt Ta Sy Psetzoneid
+.It Sy Psignal Ta Sy Pstate
+.It Sy Pstatus Ta Sy Pstop
+.It Sy Pstopstatus Ta Sy Psync
+.It Sy Psysentry Ta Sy Psysexit
+.It Sy Puname Ta Sy Punsetflags
+.It Sy Pupdate_maps Ta Sy Pupdate_syms
+.It Sy Pwait Ta Sy Pwrite
+.It Sy Pxecbkpt Ta Sy Pxecwapt
+.It Sy Pxlookup_by_addr Ta Sy Pxlookup_by_addr_resolved
+.It Sy Pxlookup_by_name Ta Sy Pzonename
+.It Sy Pzonepath Ta Sy Pzoneroot Ta
 .El
 .Ss Thread interrogation and manipulation
 The following routines obtain information about a thread and allow
@@ -306,19 +308,20 @@ library.
 .It Sy Perror_printf Ta Sy proc_arg_grab
 .It Sy proc_arg_psinfo Ta Sy proc_arg_xgrab
 .It Sy proc_arg_xpsinfo Ta Sy proc_content2str
-.It Sy proc_finistdio Ta Sy proc_fltname
-.It Sy proc_fltset2str Ta Sy proc_flushstdio
-.It Sy proc_get_auxv Ta Sy proc_get_cred
-.It Sy proc_get_priv Ta Sy proc_get_psinfo
-.It Sy proc_get_status Ta Sy proc_initstdio
-.It Sy proc_lwp_in_set Ta Sy proc_lwp_range_valid
-.It Sy proc_signame Ta Sy proc_sigset2str
-.It Sy proc_str2content Ta Sy proc_str2flt
-.It Sy proc_str2fltset Ta Sy proc_str2sig
-.It Sy proc_str2sigset Ta Sy proc_str2sys
-.It Sy proc_str2sysset Ta Sy proc_sysname
-.It Sy proc_sysset2str Ta Sy proc_unctrl_psinfo
-.It Sy proc_walk Ta ""
+.It Sy proc_dmodelname Ta Sy proc_finistdio
+.It Sy proc_fltname Ta Sy proc_fltset2str
+.It Sy proc_flushstdio Ta Sy proc_proc_get_auxv
+.It Sy proc_fdinfo_misc Ta Sy proc_get_cred
+.It Sy proc_get_fdinfo Ta Sy proc_get_priv
+.It Sy proc_get_psinfo Ta Sy proc_get_status
+.It Sy proc_get_initstdio Ta Sy proc_lwp_in_set
+.It Sy proc_lwp_range_valid Ta Sy proc_signame
+.It Sy proc_sigset2str Ta Sy proc_str2content
+.It Sy proc_str2flt Ta Sy proc_str2fltset
+.It Sy proc_str2sig Ta Sy proc_str2sigset
+.It Sy proc_str2sys Ta Sy proc_str2sysset
+.It Sy proc_sysname Ta Sy proc_sysset2str
+.It Sy proc_unctrl_psinfo Ta ""
 .El
 .Ss x86 Specific Routines
 The following routines are specific to the x86, 32-bit and 64-bit,
@@ -371,7 +374,7 @@ A process may stop for many reasons such as an explicit stop request (through
 for example) or if a tracing event is hit.
 .Pp
 The reason a process is stopped may be obtained through the thread's
-.Sy lwpstatus_t
+.Vt lwpstatus_t
 structure read directly from /proc or obtained through the
 .Xr Lstatus 3PROC
 function.
@@ -383,12 +386,12 @@ To resume control call
 .Xr Preopen 3PROC .
 For more information on losing control of a process, see
 .Xr proc 4 .
-.It DV PS_UNDEAD
+.It Dv PS_UNDEAD
 A zombie process.
 It has terminated, but it has not been cleaned up yet by its parent.
 For more on the conditions of becoming a zombie, see
 .Xr exec 2 .
-.It DV_PS_DEAD
+.It Dv PS_DEAD
 Processes in this state are always core files.
 See the earlier section
 .Sx Core Files
@@ -414,21 +417,21 @@ and
 .Dv PS_STOP .
 Process handles in the other states have no notion of settable tracing
 flags, though core files
-.Pf ( type Dv PS_DEAD )
+.Pq type Dv PS_DEAD
 may have a read-only snapshot of their tracing settings available.
 .Sh TYPES
 The
 .Nm
 library uses many types that come from the /proc file system
-.Pf ( Xr proc 4 )
+.Pq Xr proc 4
 and the ELF format
-.Pf ( Xr elf 3ELF ) .
+.Pq Xr elf 3ELF .
 However, it also defines the following types:
 .Pp
-.Sy struct ps_prochandle
+.Vt struct ps_prochandle
 .Pp
 The
-.Sy struct ps_prochandle
+.Vt struct ps_prochandle
 is an opaque handle to the library and the core element of control for a
 process.
 Consumers obtain pointers to a handle through the use of the
@@ -442,12 +445,12 @@ and
 functions to relinquish the handle, release associated resources, and
 potentially set the process to run again.
 .Pp
-.Sy struct ps_lwphandle
+.Vt struct ps_lwphandle
 .Pp
 The
-.Sy struct ps_lwphandle
+.Vt struct ps_lwphandle
 is analogous to the
-.Sy struct ps_prochandle ,
+.Vt struct ps_prochandle ,
 but it represents the control of an individual thread, rather than a
 process.
 Consumers obtain pointers to a handle through the
@@ -456,10 +459,10 @@ function and relinquish it with the
 .Fn Lfree
 function.
 .Pp
-.Sy core_content_t
+.Vt core_content_t
 .Pp
 The
-.Sy core_content_t
+.Vt core_content_t
 is a value which describes the various content types of core files.
 These are used in functions such as
 .Xr Pcontent 3PROC
@@ -546,39 +549,53 @@ The content includes the following set of default values:
 .Dv CC_CONTENT_ANON ,
 .Dv CC_CONTENT_CTF ,
 and
-.Dv CC_CONTENT_SYMTAB.
+.Dv CC_CONTENT_SYMTAB .
 Note that the default may change.
 Comparisons with CC_CONTENT_DEFAULT should validate that all of the expected
 bits are set with an expression such as
-.Li (c\ &\ CC_CONTENT_DEFAULT)\ ==\ CC_CONTENT_DEFAULT.
+.Li (c\ &\ CC_CONTENT_DEFAULT)\ ==\ CC_CONTENT_DEFAULT .
 .It Dv CC_CONTENT_INVALID
 This indicates that the contents are invalid.
 .El
 .Pp
-.Sy prfdinfo_t
+.Vt prfdinfo_t
 .Pp
 The
-.Sy prfdinfo_t
+.Vt prfdinfo_t
 structure is used with the
-.Fn Pfdinfo_iter
-function which describes information about a file descriptor.
+.Fn Pfdinfo_iter ,
+.Fn proc_fdwalk ,
+.Fn proc_fdinfowalk
+and
+.Fn proc_get_fdinfo
+functions and describes information about a file descriptor.
 The structure is defined as follows:
 .Bd -literal
 typedef struct prfdinfo {
-	int		pr_fd;
-	mode_t		pr_mode;
-	uid_t		pr_uid;
-	gid_t		pr_gid;
-	major_t		pr_major;	/* think stat.st_dev */
-	minor_t		pr_minor;
-	major_t		pr_rmajor;	/* think stat.st_rdev */
-	minor_t		pr_rminor;
-	ino64_t		pr_ino;
-	off64_t		pr_offset;
-	off64_t		pr_size;
-	int		pr_fileflags;	/* fcntl(F_GETXFL), etc */
-	int		pr_fdflags;	/* fcntl(F_GETFD), etc. */
-	char		pr_path[MAXPATHLEN];
+    int		pr_fd;		/* file descriptor number */
+    mode_t	pr_mode;	/* (see st_mode in stat(2)) */
+    ino64_t	pr_ino;		/* inode number */
+    off64_t	pr_size;	/* file size */
+    off64_t	pr_offset;	/* current offset */
+    uid_t	pr_uid;		/* owner's user id */
+    gid_t	pr_gid;		/* owner's group id */
+    major_t	pr_major;	/* major number of device */
+    minor_t	pr_minor;	/* minor number of device */
+    major_t	pr_rmajor;	/* major number (if special file) */
+    minor_t	pr_rminor;	/* minor number (if special file) */
+    int		pr_fileflags;	/* (see F_GETXFL in fcntl(2)) */
+    int		pr_fdflags;	/* (see F_GETFD in fcntl(2)) */
+    short	pr_locktype;	/* (see F_GETLK in fcntl(2)) */
+    pid_t	pr_lockpid;	/* process holding file lock */
+    int		pr_locksysid;	/* sysid of locking process */
+    pid_t	pr_peerpid;	/* peer process (socket, door) */
+    int		pr_filler[25];	/* reserved for future use */
+    char	pr_peername[PRFNSZ];	/* peer process name */
+#if    __STDC_VERSION__ >= 199901L
+    uint8_t	pr_misc[];	/* self describing structures */
+else
+    uint8_t	pr_misc[1];	/* self describing structures */
+#endif
 } prfdinfo_t;
 .Ed
 .Pp
@@ -591,55 +608,55 @@ The member
 .Sy pr_fd
 contains the number of the file descriptor of the file.
 The members
-.Sy pr_mode ,
-.Sy pr_uid ,
-.Sy pr_gid ,
-.Sy pr_ino ,
+.Fa pr_mode ,
+.Fa pr_uid ,
+.Fa pr_gid ,
+.Fa pr_ino ,
 and
-.Sy pr_size
+.Fa pr_size
 are the same as the members
-.Sy st_mode ,
-.Sy st_uid ,
-.Sy st_gid ,
-.Sy st_ino ,
+.Fa st_mode ,
+.Fa st_uid ,
+.Fa st_gid ,
+.Fa st_ino ,
 and
-.Sy st_size
+.Fa st_size
 in the
-.Sy stat
+.Fa stat
 structure.
 .Pp
 The
-.Sy pr_major
+.Fa pr_major
 and
-.Sy pr_minor
+.Fa pr_minor
 members contain the major and minor numbers of the device containing the
 directory for this file.
 This is similar to the
-.Sy st_dev
+.Fa st_dev
 member of the
-.Sy stat
+.Vt stat
 structure, except that it is broken out into its major and minor components.
 The
-.Sy pr_rmajor
+.Fa pr_rmajor
 and
-.Sy pr_rminor
+.Fa pr_rminor
 members are similar in spirit to
-.Sy pr_major
+.Fa pr_major
 and
-.Sy pr_minor ;
+.Fa pr_minor ;
 however, they are equivalent to the
-.Sy st_rdev
+.Fa st_rdev
 member of the
-.Sy stat
+.Vt stat
 structure and thus have meaning for special character and block files.
 .Pp
 The
-.Sy pr_offset
+.Fa pr_offset
 member contains the current seek offset of the file descriptor.
 The
-.Sy pr_fileflags
+.Fa pr_fileflags
 and
-.Sy pr_fdflags
+.Fa pr_fdflags
 members contain the flags that would have been returned by a call to
 .Xr fcntl 2
 with the arguments
@@ -648,10 +665,35 @@ and
 .Dv F_GETFD
 respectively.
 .Pp
-.Sy prsyminfo_t
+The
+.Fa pr_locktype ,
+.Fa pr_lockpid ,
+and
+.Fa pr_locksysid
+contain the information that would have been returned by a call to
+.Xr fcntl 2
+with an argument of
+.Dv F_GETLK .
 .Pp
 The
-.Sy prsyminfo_t
+.Fa pr_peerpid
+and
+.Fa pr_peername
+members contain the process ID and name of any peer endpoint of a
+connection-oriented socket or stream fd.
+This information is the same as that which would be returned by a call to
+.Xr getpeerucred 3C
+.Pp
+The
+.Fa pr_misc
+member contains miscellaneous additional data relating to the file descriptor.
+The format of these data is described in
+.Xr proc 4 .
+.Pp
+.Vt prsyminfo_t
+.Pp
+The
+.Vt prsyminfo_t
 structure is used with the various symbol look up functions
 .Fn Pxlookup_by_name ,
 .Fn Pxlookup_by_addr ,
@@ -670,29 +712,29 @@ typedef struct prsyminfo {
 .Ed
 .Pp
 The member
-.Sy prs_object
+.Fa prs_object
 points to a string that contains the name of the object file, if known,
 that the symbol comes from.
 The member
-.Sy prs_name
+.Fa prs_name
 points to the name of the symbol, if known.
 This may be unknown due to a stripped binary that contains no symbol table.
 The member
-.Sy prs_lmid
+.Fa prs_lmid
 indicates the link map identifier that the symbol was found on.
 For more information on link map identifiers refer to the
-.Em Linker and Libraries Guide
+.%B Linker and Libraries Guide
 and
 .Xr dlopen 3C .
 .Pp
 The members
-.Sy prs_id
+.Fa prs_id
 and
-.Sy prs_table
+.Fa prs_table
 can be used to determine both the symbol table that the entry came from
 and which entry in the table it corresponds to.
 If the value of
-.Sy prs_table
+.Fa prs_table
 is
 .Dv PR_SYMTAB
 then it came from the ELF standard symbol table.
@@ -700,10 +742,10 @@ However, if it is instead
 .Dv PR_DYNSYM ,
 then that indicates that it comes from the process's dynamic section.
 .Pp
-.Sy proc_lwp_f
+.Vt proc_lwp_f
 .Pp
 The
-.Sy proc_lwp_f
+.Vt proc_lwp_f
 is a function pointer type that is used with the
 .Fn Plwp_iter
 function.
@@ -720,10 +762,10 @@ while the second has the thread's status information and is defined in
 For additional information on using this type, see
 .Xr Plwp_iter 3PROC .
 .Pp
-.Sy proc_lwp_all_f
+.Vt proc_lwp_all_f
 .Pp
 The
-.Sy proc_lwp_all_f
+.Vt proc_lwp_all_f
 is a function pointer type that is used with the
 .Fn Plwp_iter_all
 function.
@@ -745,10 +787,58 @@ Both structures are defined in
 For additional information on using this type, see
 .Xr Plwp_iter_all 3PROC .
 .Pp
-.Sy proc_walk_f
+.Vt proc_fdinfowalk_f
 .Pp
 The
-.Sy proc_walk_f
+.Vt proc_fdinfowalk_f
+is a function pointer type that is used with the
+.Fn proc_fdinfowalk
+function to walk the miscellaneous data items contained within a
+.Vt prfdinfo_t
+structure.
+It is defined as
+.Sy typedef
+.Ft int
+.Fo proc_fdinfowalk_f
+.Fa "uint_t"
+.Fa "const void *"
+.Fa "size_t"
+.Fa "void *"
+.Fc .
+The first argument contains the type of the miscellaneous information being
+presented, the second and third provide a pointer to the associated data and
+the length of that data.
+The final argument is a pointer to an argument that the user specifies.
+For more information on using this, see
+.Xr proc_fdinfowalk 3PROC .
+.Pp
+.Vt proc_fdwalk_f
+.Pp
+The
+.Vt proc_fdwalk_f
+is a function pointer type that is used with the
+.Fn proc_fdwalk
+function.
+It is defined as
+.Sy typedef
+.Ft int
+.Fo proc_fdwalk_f
+.Fa "const prfdinfo_t *"
+.Fa "void *"
+.Fc .
+The first argument contains the file descriptor information.
+The
+.Sy prfdinfo_t
+structure is defined in
+.Xr proc 4 .
+The final argument is a pointer to an argument that the user specifies.
+For more information on using this, see
+.Xr proc_fdwalk 3PROC .
+.Pp
+.Vt proc_walk_f
+.Pp
+The
+.Vt proc_walk_f
 is a function pointer type that is used with the
 .Fn proc_walk
 function.
@@ -771,10 +861,10 @@ The final argument is a pointer to an argument that the user specifies.
 For more information on using this, see
 .Xr proc_walk 3PROC .
 .Pp
-.Sy proc_map_f
+.Vt proc_map_f
 .Pp
 The
-.Sy proc_map_f
+.Vt proc_map_f
 is a function pointer type that is used with the
 .Fn Pmapping_iter ,
 .Fn Pmapping_iter_resolved ,
@@ -799,10 +889,10 @@ question.
 For additional information on using this type, see
 .Xr Pmapping_iter 3PROC .
 .Pp
-.Sy proc_env_f
+.Vt proc_env_f
 .Pp
 The
-.Sy proc_env_f
+.Vt proc_env_f
 is a function pointer type that is used with the
 .Fn Penv_iter
 function.
@@ -817,7 +907,7 @@ It is defined as
 .Fc .
 The first argument is a pointer to an argument that the user specifies.
 The second argument is a pointer to the
-.Sy struct ps_prochandle
+.Vt struct ps_prochandle
 that the callback was passed to.
 The third argument is the address of the environment variable in the process.
 The fourth argument is the environment variable.
@@ -830,10 +920,10 @@ and
 For additional information on using this type, see
 .Xr Penv_iter 3PROC .
 .Pp
-.Sy proc_sym_f
+.Vt proc_sym_f
 .Pp
 The
-.Sy proc_sym_f
+.Vt proc_sym_f
 is a function pointer type that is used with the
 .Fn Psmbol_iter ,
 .Fn Psymbol_iter_by_addr ,
@@ -865,10 +955,10 @@ For additional information on using this type, see
 and
 .Xr Psymbol_iter_by_lmid 3PROC .
 .Pp
-.Sy proc_xsym_f
+.Vt proc_xsym_f
 .Pp
 The
-.Sy proc_xsym_f
+.Vt proc_xsym_f
 is a function pointer type that is used with the
 .Fn Pxsymbol_iter
 function.
@@ -882,19 +972,19 @@ It is defined as
 .Fa "const prsyminfo_t *"
 .Fc .
 The first three arguments are identical to those of
-.Sy proc_sym_f .
+.Vt proc_sym_f .
 The final argument contains additional information about the symbol
 itself.
 The members of the
-.Sy prsyminfo_t
+.Vt prsyminfo_t
 are defined earlier in this section.
 For additional information on using this type, see
 .Xr Pxsymbol_iter 3PROC .
 .Pp
-.Sy proc_stack_f
+.Vt proc_stack_f
 .Pp
 The
-.Sy proc_stack_f
+.Vt proc_stack_f
 is a function pointer type that is used with the
 .Fn Pstack_iter
 function.
@@ -912,7 +1002,7 @@ The second argument's contents are platform specific.
 The registers that contain stack information, usually the stack pointer and
 frame pointer, will be filled in to point to an entry.
 The
-.Sy prgregset_t
+.Vt prgregset_t
 is defined in
 .Xr proc 4 .
 .Pp
@@ -924,10 +1014,10 @@ argument.
 For additional information on using this type, see
 .Xr Pstack_iter 3PROC .
 .Pp
-.Sy proc_fdinfo_f
+.Vt proc_fdinfo_f
 .Pp
 The
-.Sy proc_fdinfo_f
+.Vt proc_fdinfo_f
 is a function pointer type that is used with the
 .Fn Pfdinfo_iter
 function.
@@ -941,7 +1031,7 @@ It is defined as
 The first argument is a pointer to an argument that the user specifies.
 The second argument contains information about an open file descriptor.
 The members of the
-.Sy prfdinfo_t
+.Vt prfdinfo_t
 are defined earlier in this section.
 For additional information on using this type, see
 .Xr Pfdinfo_iter 3PROC .
@@ -973,7 +1063,7 @@ Setting the environment variable
 .Ev LIBPROC_DEBUG
 to some value will print information to standard error.
 For example,
-.Ev LIBPROC_DEUBG Ns = Ns Em please .
+.Ev LIBPROC_DEBUG Ns = Ns Em please .
 .Sh LOCKING
 Most functions operate on a handle to a process in the form of a
 .Vt "struct ps_prochandle *" .
@@ -1218,12 +1308,14 @@ changes may occur which break both source and binary compatibility.
 .Xr proc_arg_xgrab 3PROC ,
 .Xr proc_arg_xpsinfo 3PROC ,
 .Xr proc_content2str 3PROC ,
+.Xr proc_dmodelname 3PROC ,
 .Xr proc_finistdio 3PROC ,
 .Xr proc_fltname 3PROC ,
 .Xr proc_fltset2str 3PROC ,
 .Xr proc_flushstdio 3PROC ,
 .Xr proc_get_auxv 3PROC ,
 .Xr proc_get_cred 3PROC ,
+.Xr proc_get_fdinfo 3PROC ,
 .Xr proc_get_priv 3PROC ,
 .Xr proc_get_psinfo 3PROC ,
 .Xr proc_get_status 3PROC ,
@@ -1242,6 +1334,8 @@ changes may occur which break both source and binary compatibility.
 .Xr proc_sysname 3PROC ,
 .Xr proc_sysset2str 3PROC ,
 .Xr proc_unctrl_psinfo 3PROC ,
+.Xr proc_fdinfowalk 3PROC ,
+.Xr proc_fdwalk 3PROC ,
 .Xr proc_walk 3PROC
 .Pp
 .Xr Pldt 3PROC ,

@@ -11,7 +11,7 @@
 
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
-# Copyright 2018 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 [DEFAULT]
@@ -25,6 +25,9 @@ outputdir = /var/tmp/test_results
 [/opt/os-tests/tests/poll_test]
 user = root
 tests = ['poll_test', 'epoll_test']
+
+[/opt/os-tests/tests/odirectory.32]
+[/opt/os-tests/tests/odirectory.64]
 
 [/opt/os-tests/tests/secflags]
 user = root
@@ -61,9 +64,33 @@ tests = ['conn', 'dgram', 'drop_priv', 'nosignal', 'sockpair']
 
 [/opt/os-tests/tests/pf_key]
 user = root
-tests = ['acquire-compare', 'acquire-spray']
+timeout = 180
+tests = ['acquire-compare', 'kmc-update']
+
+[/opt/os-tests/tests/ddi_ufm]
+user = root
+tests = ['ufm-test-setup', 'ufm-test', 'ufm-test-cleanup']
 
 [/opt/os-tests/tests/i386]
 user = root
 arch = i86pc
+timeout = 300
 tests = ['ldt', 'badseg']
+
+[/opt/os-tests/tests/writev.32]
+[/opt/os-tests/tests/writev.64]
+
+[/opt/os-tests/tests/imc_test]
+arch = i86pc
+
+#
+# Except atrparse all tests require special hardware (CCID YubiKey) to run,
+# hence they aren't included in the default runfile.
+#
+[/opt/os-tests/tests/uccid]
+arch = i86pc
+tests = ['atrparse']
+
+[/opt/os-tests/tests/libtopo]
+user = root
+tests = ['digraph-test']

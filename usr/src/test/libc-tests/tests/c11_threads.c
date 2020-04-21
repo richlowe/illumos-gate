@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -51,10 +51,10 @@ static int
 cthr_test_sleep_thr(void *arg)
 {
 	for (;;) {
-		sleep(1000);
+		(void) sleep(1000);
 	}
 
-	abort();
+	return (0);
 }
 
 static void
@@ -172,7 +172,6 @@ static int
 cthr_test_detach_thr0(void *arg)
 {
 	thrd_exit(23);
-	abort();
 }
 
 static int

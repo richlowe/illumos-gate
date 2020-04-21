@@ -22,6 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 SHELL=/usr/bin/ksh93
 
@@ -49,7 +50,10 @@ CFLAGS += \
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-empty-body
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 LDLIBS += -last
 msgcpp   := LDLIBS += -lpp

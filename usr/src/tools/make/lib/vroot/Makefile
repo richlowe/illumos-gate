@@ -10,6 +10,7 @@
 #
 
 # Copyright 2015, Richard Lowe.
+# Copyright 2019 RackTop Systems.
 
 LIBRARY =	libvroot.a
 VERS =		.1
@@ -44,10 +45,17 @@ SRCDIR = $(SRC)/cmd/make/lib/vroot
 MAPFILES=
 CPPFLAGS += -D_FILE_OFFSET_BITS=64
 
+CCERRWARN += -_gcc=-Wno-unused-variable
+CCERRWARN += -_gcc=-Wno-parentheses
+
 all: $(LIBS)
 
 install: all
 
 lint:
+
+# We can't create CTF in the tools build because of a bootstrap bug with the new CTF
+$(DYNLIB) := CTFMERGE_POST= :
+CTFCONVERT_O= :
 
 include $(SRC)/lib/Makefile.targ

@@ -107,7 +107,7 @@ const mdb_tgt_ops_t kt_ia32_ops = {
 	kt_setcontext,				/* t_setcontext */
 	kt_activate,				/* t_activate */
 	kt_deactivate,				/* t_deactivate */
-	(void (*)()) mdb_tgt_nop,		/* t_periodic */
+	(void (*)())(uintptr_t) mdb_tgt_nop,	/* t_periodic */
 	kt_destroy,				/* t_destroy */
 	kt_name,				/* t_name */
 	(const char *(*)()) mdb_conf_isa,	/* t_isa */
@@ -141,15 +141,15 @@ const mdb_tgt_ops_t kt_ia32_ops = {
 	(int (*)()) mdb_tgt_notsup,		/* t_next */
 	(int (*)()) mdb_tgt_notsup,		/* t_cont */
 	(int (*)()) mdb_tgt_notsup,		/* t_signal */
-	(int (*)()) mdb_tgt_null,		/* t_add_vbrkpt */
-	(int (*)()) mdb_tgt_null,		/* t_add_sbrkpt */
-	(int (*)()) mdb_tgt_null,		/* t_add_pwapt */
-	(int (*)()) mdb_tgt_null,		/* t_add_vwapt */
-	(int (*)()) mdb_tgt_null,		/* t_add_iowapt */
-	(int (*)()) mdb_tgt_null,		/* t_add_sysenter */
-	(int (*)()) mdb_tgt_null,		/* t_add_sysexit */
-	(int (*)()) mdb_tgt_null,		/* t_add_signal */
-	(int (*)()) mdb_tgt_null,		/* t_add_fault */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_vbrkpt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_sbrkpt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_pwapt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_vwapt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_iowapt */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_sysenter */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_sysexit */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_signal */
+	(int (*)())(uintptr_t) mdb_tgt_null,	/* t_add_fault */
 	kt_getareg,				/* t_getareg */
 	kt_putareg,				/* t_putareg */
 	mdb_ia32_kvm_stack_iter,		/* t_stack_iter */
@@ -267,7 +267,7 @@ kt_ia32_init(mdb_tgt_t *t)
 	}
 
 	if (mdb_tgt_readsym(t, MDB_TGT_AS_VIRT, &addr, sizeof (addr),
-	    MDB_TGT_OBJ_EXEC, "panic_reg") == sizeof (addr) && addr != NULL &&
+	    MDB_TGT_OBJ_EXEC, "panic_reg") == sizeof (addr) && addr != 0 &&
 	    mdb_tgt_vread(t, &regs, sizeof (regs), addr) == sizeof (regs)) {
 		kt_regs_to_kregs(&regs, kt->k_regs);
 		return;

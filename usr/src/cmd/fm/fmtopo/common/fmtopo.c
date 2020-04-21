@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright (c) 2019, Joyent, Inc. All rights reserved.
  */
 
 
@@ -42,7 +42,6 @@
 #define	FMTOPO_EXIT_USAGE	2
 
 #define	STDERR	"stderr"
-#define	DOTS	"..."
 #define	ALL	"all"
 
 static const char *g_pname;
@@ -90,7 +89,7 @@ usage(FILE *fp)
 	    "\t-p  display of FMRI protocol properties\n"
 	    "\t-R  set root directory for libtopo plug-ins and other files\n"
 	    "\t-s  display topology for the specified FMRI scheme\n"
-	    "\t-S  display FMRI status (present/usable)\n"
+	    "\t-S  display FMRI status (present/usable/occupied)\n"
 	    "\t-V  set verbose mode\n"
 	    "\t-x  display a xml formatted topology\n");
 
@@ -128,6 +127,7 @@ static void
 print_node(topo_hdl_t *thp, tnode_t *node, nvlist_t *nvl, const char *fmri)
 {
 	int err, ret;
+	boolean_t is_occupied;
 
 	(void) printf("%s\n", (char *)fmri);
 
@@ -175,6 +175,13 @@ print_node(topo_hdl_t *thp, tnode_t *node, nvlist_t *nvl, const char *fmri)
 		else
 			(void) printf("\tUnusable: %s\n",
 			    ret ? "true" : "false");
+
+		ret = topo_node_occupied(node, &is_occupied);
+		if (ret == 0)
+			(void) printf("\tOccupied: %s\n",
+			    is_occupied ? "true" : "false");
+		else if (ret != ETOPO_METHOD_NOTSUP)
+			(void) printf("\tOccupied: -\n");
 	}
 }
 
@@ -240,7 +247,7 @@ print_prop_nameval(topo_hdl_t *thp, tnode_t *node, nvlist_t *nvl)
 {
 	int err;
 	topo_type_t type;
-	char *tstr, *propn, buf[48], *factype;
+	char *tstr, *propn, *factype;
 	nvpair_t *pv_nvp;
 	int i;
 	uint_t nelem;
@@ -389,12 +396,7 @@ uint32_def:
 		case DATA_TYPE_STRING: {
 			char *val;
 			(void) nvpair_value_string(pv_nvp, &val);
-			if (!opt_V && strlen(val) > 48) {
-				(void) snprintf(buf, 48, "%s...", val);
-				(void) printf(" %s", buf);
-			} else {
-				(void) printf(" %s", val);
-			}
+			(void) printf(" %s", val);
 			break;
 		}
 		case DATA_TYPE_NVLIST: {
@@ -402,19 +404,13 @@ uint32_def:
 			char *fmri;
 			(void) nvpair_value_nvlist(pv_nvp, &val);
 			if (topo_fmri_nvl2str(thp, val, &fmri, &err) != 0) {
-				if (opt_V)
-					nvlist_print(stdout, nvl);
+				(void) fprintf(stderr, "failed to convert "
+				    "FMRI to string: (%s)\n",
+				    topo_strerror(err));
+				nvlist_print(stdout, nvl);
 				break;
 			}
-
-			if (!opt_V && strlen(fmri) > 48) {
-				(void) snprintf(buf, 48, "%s", fmri);
-				(void) snprintf(&buf[45], 4, "%s", DOTS);
-				(void) printf(" %s", buf);
-			} else {
-				(void) printf(" %s", fmri);
-			}
-
+			(void) printf(" %s", fmri);
 			topo_hdl_strfree(thp, fmri);
 			break;
 		}
@@ -468,6 +464,29 @@ uint32_def:
 			(void) printf("]");
 			break;
 		}
+		case DATA_TYPE_NVLIST_ARRAY: {
+			nvlist_t **val;
+			char *fmri;
+			int ret;
+
+			(void) nvpair_value_nvlist_array(pv_nvp, &val, &nelem);
+			(void) printf(" [ ");
+			for (i = 0; i < nelem; i++) {
+				ret = topo_fmri_nvl2str(thp, val[i], &fmri,
+				    &err);
+				if (ret != 0) {
+					(void) fprintf(stderr, "failed to "
+					    "convert FMRI to string (%s)\n",
+					    topo_strerror(err));
+					nvlist_print(stdout, val[i]);
+					break;
+				}
+				(void) printf("\"%s\" ", fmri);
+				topo_hdl_strfree(thp, fmri);
+			}
+			(void) printf("]");
+			break;
+		}
 		default:
 			(void) fprintf(stderr, " unknown data type (%d)",
 			    nvpair_type(pv_nvp));
@@ -481,7 +500,6 @@ print_pgroup(topo_hdl_t *thp, tnode_t *node, const char *pgn, char *dstab,
     char *nstab, int32_t version)
 {
 	int err;
-	char buf[30];
 	topo_pgroup_info_t *pgi = NULL;
 
 	if (pgn == NULL)
@@ -498,11 +516,6 @@ print_pgroup(topo_hdl_t *thp, tnode_t *node, const char *pgn, char *dstab,
 	if (dstab == NULL || nstab == NULL || version == -1) {
 		(void) printf("  group: %-30s version: - stability: -/-\n",
 		    pgn);
-	} else if (!opt_V && strlen(pgn) > 30) {
-		(void) snprintf(buf, 26, "%s", pgn);
-		(void) snprintf(&buf[27], 4, "%s", DOTS);
-		(void) printf("  group: %-30s version: %-3d stability: %s/%s\n",
-		    buf, version, nstab, dstab);
 	} else {
 		(void) printf("  group: %-30s version: %-3d stability: %s/%s\n",
 		    pgn, version, nstab, dstab);

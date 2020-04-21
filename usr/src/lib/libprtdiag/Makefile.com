@@ -21,6 +21,7 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2020 Peter Tribble.
 #
 
 #
@@ -39,13 +40,12 @@ include $(SRC)/Makefile.psm
 LIBS		= $(DYNLIB) $(LINTLIB)
 IFLAGS		= -I ../../inc -I $(USR_PSM_INCL_DIR)
 IFLAGS		+= -I $(SRC)/cmd/picl/plugins/inc
-IFLAGS		+= -I $(UTSBASE)/sun4u 
-IFLAGS		+= -I $(UTSBASE)/sun4u/sunfire
+IFLAGS		+= -I $(UTSBASE)/sun4u
 IFLAGS		+= -I $(UTSBASE)/sun4u/serengeti
 CPPFLAGS	= $(IFLAGS) $(CPPFLAGS.master)
 CFLAGS		+= $(CCVERBOSE)
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-unused-value
 CERRWARN	+= -_gcc=-Wno-unused-label

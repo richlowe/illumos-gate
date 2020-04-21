@@ -26,7 +26,7 @@
 # Copyright 2015 OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2018 Joyent, Inc.
-# Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -193,16 +193,24 @@ sgs: rootdirs .WAIT sysheaders userheaders .WAIT \
 #
 setup: closedbins bldtools sgs mapfiles
 
+#
+# Always build tools as non-DEBUG.
+# When nightly launches a build it first builds non-DEBUG tools and then
+# configures the environment so that these tools are used for building
+# subsequently. If a recursive build from usr/src then builds DEBUG tools,
+# the tools will be rebuilt using themselves resulting in a race condition
+# that can cause the build to fail - see https://www.illumos.org/issues/10462
+# for more details.
+# A manual build in usr/src/tools in a DEBUG bldenv will still do a DEBUG
+# tools build.
+#
 bldtools:
-	@cd tools; pwd; $(MAKE) install
+	@cd tools; pwd; $(MAKE) RELEASE_BUILD= install
 
 # /var/mail/:saved is a special case because of the colon in the name.
 #
 rootdirs: $(ROOTDIRS)
 	$(INS) -d -m 775 $(ROOT)/var/mail/:saved
-
-lint: FRC
-	$(MAKE) -f Makefile.lint
 
 _msgdirs:       $(MSGDIRS)
 

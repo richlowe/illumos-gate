@@ -23,6 +23,7 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=	audioplay
 
@@ -38,7 +39,9 @@ LDFLAGS += -L../utilities
 
 CFLAGS += $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+SMOFF += indenting
 
 LINTFLAGS += -m -v -u $(LDFLAGS)
 

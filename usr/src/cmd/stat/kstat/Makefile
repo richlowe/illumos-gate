@@ -22,6 +22,8 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2020 Peter tribble.
+#
 
 PROG = kstat
 OBJS = kstat.o
@@ -32,12 +34,11 @@ include $(SRC)/cmd/stat/Makefile.stat
 
 LDLIBS += -lavl -lcmdutils -ldevinfo -lgen -lkstat
 CFLAGS += $(CCVERBOSE) -I${STATCOMMONDIR}
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-parentheses
 
 CPPFLAGS_sparc += -I$(SRC)/uts/sfmmu
-CPPFLAGS_sparc += -I$(SRC)/uts/sun4u/sunfire
 CPPFLAGS += $(CPPFLAGS_$(MACH))
 
 FILEMODE= 0555

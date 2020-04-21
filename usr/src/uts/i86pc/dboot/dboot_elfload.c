@@ -24,6 +24,9 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2020 Joyent, Inc.
+ */
 
 #include <sys/types.h>
 #include <sys/inttypes.h>
@@ -81,6 +84,7 @@ dboot_elfload64(uintptr_t file_image)
 	paddr_t dst;
 	paddr_t next_addr;
 
+	next_addr = 0;
 	elf_file = (caddr_t)file_image;
 
 	allphdrs = NULL;
@@ -182,10 +186,11 @@ dboot_elfload64(uintptr_t file_image)
 		/* zero out bss */
 		if (shdr->sh_type == SHT_NOBITS) {
 			if (prom_debug)
-				dboot_printf("zeroing BSS %ld bytes from "
-				    "physaddr 0x%llx (end=0x%llx)\n",
+				dboot_printf("zeroing BSS %lu bytes from "
+				    "physaddr 0x%" PRIx64
+				    " (end=0x%" PRIx64 ")\n",
 				    (ulong_t)shdr->sh_size,
-				    (long long unsigned)next_addr,
+				    next_addr,
 				    next_addr + shdr->sh_size);
 			(void) memset((void *)(uintptr_t)next_addr, 0,
 			    shdr->sh_size);

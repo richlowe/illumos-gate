@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
@@ -63,9 +61,6 @@ static int v2_finish(struct slpv2_hdr *, int);
 
 /* V2 auth blocks */
 static int slpv2_authblock(int);
-
-/* From snoop_rport: */
-extern int add_transient(int, int (*)());
 
 /*
  * Functions for parsing each protocol message
@@ -163,9 +158,12 @@ static char *slpv1_charset(unsigned short);
  * The only external entry point to the SLP interpreter. This function
  * simply dispatches the packet based on the version.
  */
-void interpret_slp(int flags, char *slp, int fraglen) {
+int
+interpret_slp(int flags, void *slp, int fraglen)
+{
 	extern int dst_port, curr_proto;
 	struct tcp_cont *tce = NULL;
+	char *s;
 
 	msglength = fraglen;
 	retlength = 0;
@@ -173,21 +171,22 @@ void interpret_slp(int flags, char *slp, int fraglen) {
 
 	/* check if this is a TCP continuation */
 	if (flags & F_DTAIL && curr_proto == IPPROTO_TCP) {
-	    tce = find_tcp_cont(dst_port);
-	    if (tce) {
-		if (add_tcp_cont(tce, slp, fraglen)) {
-		    slp = tce->msg;
-		    fraglen = tce->curr_offset;
-		    tcp_continuation = B_TRUE;
+		tce = find_tcp_cont(dst_port);
+		if (tce) {
+			if (add_tcp_cont(tce, slp, fraglen)) {
+				slp = tce->msg;
+				fraglen = tce->curr_offset;
+				tcp_continuation = B_TRUE;
+			}
 		}
-	    }
 	}
-	if (*slp == 2 || tce)
-	    interpret_slp_v2(flags, (void *)slp, fraglen);
+	if (*(char *)slp == 2 || tce)
+		interpret_slp_v2(flags, slp, fraglen);
 	else
-	    interpret_slp_v1(flags, (void *)slp, fraglen);
+		interpret_slp_v1(flags, slp, fraglen);
 
 	tcp_continuation = B_FALSE;
+	return (0);
 }
 
 /*
@@ -701,7 +700,7 @@ static int interpret_slp_v2(int flags, struct slpv2_hdr *slp, int fraglen) {
 	if (curr_proto == IPPROTO_UDP &&
 	    dst_port == 427 &&
 	    src_port != 427) {
-	    add_transient(src_port, (int (*)())interpret_slp);
+	    add_transient(src_port, interpret_slp);
 	}
 
 	/* parse the header */
@@ -1422,7 +1421,7 @@ static int interpret_slp_v1(int flags, struct slpv1_hdr *slp, int fraglen) {
 	if (curr_proto == IPPROTO_UDP &&
 	    dst_port == 427 &&
 	    src_port != 427)
-		add_transient(src_port, (int (*)())interpret_slp);
+		add_transient(src_port, interpret_slp);
 
 	/* parse the header */
 	if (v1_header(flags, slp, fraglen)) {

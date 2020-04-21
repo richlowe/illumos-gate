@@ -23,6 +23,10 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
+# Copyright (c) 2019, Joyent, Inc.
+#
 
 # Don't generate separate sections for this module
 pics/debugdata.o :=	XFFLAG=
@@ -32,11 +36,11 @@ $(RTLD) :=	CTFMERGE_POST = $(CTFMERGE_LIB)
 
 pics/%.o:	%.s
 		$(BUILD.s)
-		$(POST_PROCESS_O)
+		$(POST_PROCESS_S_O)
 
 pics/%.o:	$(CRTSRCS)/%.s
 		$(BUILD.s)
-		$(POST_PROCESS_O)
+		$(POST_PROCESS_S_O)
 
 pics/%.o:	%.c
 		$(COMPILE.c) -o $@ $<
@@ -54,11 +58,11 @@ pics/%.o:	$(VAR_DTRDIR)/%.c
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
-pics/%.o:	$(SGSTOOLS)/common/%.c
+pics/%.o:	$(SGSCOMMON)/%.c
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
-pics/%.o:	$(SRCBASE)/uts/$(PLAT)/krtld/%.c
+pics/%.o:	$(SRC)/uts/$(PLAT)/krtld/%.c
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
@@ -67,17 +71,12 @@ pics/elfcap.o:	$(ELFCAP)/elfcap.c
 		$(POST_PROCESS_O)
 
 $(RTLD):	pics $(PICS) $(CRTS)
-		$(LD_USE_PROTO)ld -o $@ -dy $(GSHARED) $(DYNFLAGS) $(CRTI) $(PICS) \
+		$(LD_USE_PROTO)ld -o $@ -dy -G $(DYNFLAGS) $(CRTI) $(PICS) \
 		    $(LDLIBS) $(CRTN)
 		$(POST_PROCESS_SO)
 
 delete:
 		-$(RM) $(RTLD)
-
-lint:		$(SGSLINTOUT)
-
-lint :=		CPICLIB=
-lint :=		CLIB=-lc
 
 $(ROOTFS_LIBDIR)/%:	%
 		$(INS.file)

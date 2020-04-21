@@ -20,13 +20,15 @@
  */
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2011, 2018 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2019 by Delphix. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2014 Spectra Logic Corporation, All rights reserved.
  * Copyright 2013 Saso Kiselkov. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2017 Datto Inc.
+ * Copyright (c) 2017, Intel Corporation.
+ * Copyright 2020 Joshua M. Clulow <josh@sysmgr.org>
  */
 
 #ifndef _SYS_SPA_H
@@ -40,6 +42,8 @@
 #include <sys/types.h>
 #include <sys/fs/zfs.h>
 #include <sys/dmu.h>
+#include <sys/space_map.h>
+#include <sys/bitops.h>
 
 #ifdef	__cplusplus
 extern "C" {
@@ -60,45 +64,7 @@ typedef struct ddt ddt_t;
 typedef struct ddt_entry ddt_entry_t;
 struct dsl_pool;
 struct dsl_dataset;
-
-/*
- * General-purpose 32-bit and 64-bit bitfield encodings.
- */
-#define	BF32_DECODE(x, low, len)	P2PHASE((x) >> (low), 1U << (len))
-#define	BF64_DECODE(x, low, len)	P2PHASE((x) >> (low), 1ULL << (len))
-#define	BF32_ENCODE(x, low, len)	(P2PHASE((x), 1U << (len)) << (low))
-#define	BF64_ENCODE(x, low, len)	(P2PHASE((x), 1ULL << (len)) << (low))
-
-#define	BF32_GET(x, low, len)		BF32_DECODE(x, low, len)
-#define	BF64_GET(x, low, len)		BF64_DECODE(x, low, len)
-
-#define	BF32_SET(x, low, len, val) do { \
-	ASSERT3U(val, <, 1U << (len)); \
-	ASSERT3U(low + len, <=, 32); \
-	(x) ^= BF32_ENCODE((x >> low) ^ (val), low, len); \
-_NOTE(CONSTCOND) } while (0)
-
-#define	BF64_SET(x, low, len, val) do { \
-	ASSERT3U(val, <, 1ULL << (len)); \
-	ASSERT3U(low + len, <=, 64); \
-	((x) ^= BF64_ENCODE((x >> low) ^ (val), low, len)); \
-_NOTE(CONSTCOND) } while (0)
-
-#define	BF32_GET_SB(x, low, len, shift, bias)	\
-	((BF32_GET(x, low, len) + (bias)) << (shift))
-#define	BF64_GET_SB(x, low, len, shift, bias)	\
-	((BF64_GET(x, low, len) + (bias)) << (shift))
-
-#define	BF32_SET_SB(x, low, len, shift, bias, val) do { \
-	ASSERT(IS_P2ALIGNED(val, 1U << shift)); \
-	ASSERT3S((val) >> (shift), >=, bias); \
-	BF32_SET(x, low, len, ((val) >> (shift)) - (bias)); \
-_NOTE(CONSTCOND) } while (0)
-#define	BF64_SET_SB(x, low, len, shift, bias, val) do { \
-	ASSERT(IS_P2ALIGNED(val, 1ULL << shift)); \
-	ASSERT3S((val) >> (shift), >=, bias); \
-	BF64_SET(x, low, len, ((val) >> (shift)) - (bias)); \
-_NOTE(CONSTCOND) } while (0)
+struct dsl_crypto_params;
 
 /*
  * We currently support block sizes from 512 bytes to 16MB.
@@ -120,6 +86,17 @@ _NOTE(CONSTCOND) } while (0)
 #define	SPA_MINBLOCKSIZE	(1ULL << SPA_MINBLOCKSHIFT)
 #define	SPA_OLD_MAXBLOCKSIZE	(1ULL << SPA_OLD_MAXBLOCKSHIFT)
 #define	SPA_MAXBLOCKSIZE	(1ULL << SPA_MAXBLOCKSHIFT)
+
+/*
+ * Alignment Shift (ashift) is an immutable, internal top-level vdev property
+ * which can only be set at vdev creation time. Physical writes are always done
+ * according to it, which makes 2^ashift the smallest possible IO on a vdev.
+ *
+ * We currently allow values ranging from 512 bytes (2^9 = 512) to 64 KiB
+ * (2^16 = 65,536).
+ */
+#define	ASHIFT_MIN		9
+#define	ASHIFT_MAX		16
 
 /*
  * Size of block to hold the configuration data (a packed nvlist)
@@ -215,7 +192,7 @@ typedef struct zio_cksum_salt {
  * G		gang block indicator
  * B		byteorder (endianness)
  * D		dedup
- * X		encryption (on version 30, which is not supported)
+ * X		encryption
  * E		blkptr_t contains embedded data (see below)
  * lvl		level of indirection
  * type		DMU object type
@@ -226,6 +203,83 @@ typedef struct zio_cksum_salt {
  * log. birth	transaction group in which the block was logically born
  * fill count	number of non-zero blocks under this bp
  * checksum[4]	256-bit checksum of the data this bp describes
+ */
+
+/*
+ * The blkptr_t's of encrypted blocks also need to store the encryption
+ * parameters so that the block can be decrypted. This layout is as follows:
+ *
+ *	64	56	48	40	32	24	16	8	0
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 0	|		vdev1		| GRID  |	  ASIZE		|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 1	|G|			 offset1				|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 2	|		vdev2		| GRID  |	  ASIZE		|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 3	|G|			 offset2				|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 4	|			salt					|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 5	|			IV1					|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 6	|BDX|lvl| type	| cksum |E| comp|    PSIZE	|     LSIZE	|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 7	|			padding					|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 8	|			padding					|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * 9	|			physical birth txg			|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * a	|			logical birth txg			|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * b	|		IV2		|	    fill count		|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * c	|			checksum[0]				|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * d	|			checksum[1]				|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * e	|			MAC[0]					|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ * f	|			MAC[1]					|
+ *	+-------+-------+-------+-------+-------+-------+-------+-------+
+ *
+ * Legend:
+ *
+ * salt		Salt for generating encryption keys
+ * IV1		First 64 bits of encryption IV
+ * X		Block requires encryption handling (set to 1)
+ * E		blkptr_t contains embedded data (set to 0, see below)
+ * fill count	number of non-zero blocks under this bp (truncated to 32 bits)
+ * IV2		Last 32 bits of encryption IV
+ * checksum[2]	128-bit checksum of the data this bp describes
+ * MAC[2]	128-bit message authentication code for this data
+ *
+ * The X bit being set indicates that this block is one of 3 types. If this is
+ * a level 0 block with an encrypted object type, the block is encrypted
+ * (see BP_IS_ENCRYPTED()). If this is a level 0 block with an unencrypted
+ * object type, this block is authenticated with an HMAC (see
+ * BP_IS_AUTHENTICATED()). Otherwise (if level > 0), this bp will use the MAC
+ * words to store a checksum-of-MACs from the level below (see
+ * BP_HAS_INDIRECT_MAC_CKSUM()). For convenience in the code, BP_IS_PROTECTED()
+ * refers to both encrypted and authenticated blocks and BP_USES_CRYPT()
+ * refers to any of these 3 kinds of blocks.
+ *
+ * The additional encryption parameters are the salt, IV, and MAC which are
+ * explained in greater detail in the block comment at the top of zio_crypt.c.
+ * The MAC occupies half of the checksum space since it serves a very similar
+ * purpose: to prevent data corruption on disk. The only functional difference
+ * is that the checksum is used to detect on-disk corruption whether or not the
+ * encryption key is loaded and the MAC provides additional protection against
+ * malicious disk tampering. We use the 3rd DVA to store the salt and first
+ * 64 bits of the IV. As a result encrypted blocks can only have 2 copies
+ * maximum instead of the normal 3. The last 32 bits of the IV are stored in
+ * the upper bits of what is usually the fill count. Note that only blocks at
+ * level 0 or -2 are ever encrypted, which allows us to guarantee that these
+ * 32 bits are not trampled over by other code (see zio_crypt.c for details).
+ * The salt and IV are not used for authenticated bps or bps with an indirect
+ * MAC checksum, so these blocks can utilize all 3 DVAs and the full 64 bits
+ * for the fill count.
  */
 
 /*
@@ -283,7 +337,9 @@ typedef struct zio_cksum_salt {
  * BP's so the BP_SET_* macros can be used with them.  etype, PSIZE, LSIZE must
  * be set with the BPE_SET_* macros.  BP_SET_EMBEDDED() should be called before
  * other macros, as they assert that they are only used on BP's of the correct
- * "embedded-ness".
+ * "embedded-ness". Encrypted blkptr_t's cannot be embedded because they use
+ * the payload space for encryption parameters (see the comment above on
+ * how encryption parameters are stored).
  */
 
 #define	BPE_GET_ETYPE(bp)	\
@@ -307,7 +363,7 @@ _NOTE(CONSTCOND) } while (0)
 	BF64_GET_SB((bp)->blk_prop, 25, 7, 0, 1))
 #define	BPE_SET_PSIZE(bp, x)	do { \
 	ASSERT(BP_IS_EMBEDDED(bp)); \
-	BF64_SET_SB((bp)->blk_prop, 25, 7, 0, 1, x); \
+	BF64_SET_SB((bp)->blk_prop, 25, 7, 0, 1, x);	\
 _NOTE(CONSTCOND) } while (0)
 
 typedef enum bp_embedded_type {
@@ -409,6 +465,26 @@ _NOTE(CONSTCOND) } while (0)
 #define	BP_GET_LEVEL(bp)		BF64_GET((bp)->blk_prop, 56, 5)
 #define	BP_SET_LEVEL(bp, x)		BF64_SET((bp)->blk_prop, 56, 5, x)
 
+/* encrypted, authenticated, and MAC cksum bps use the same bit */
+#define	BP_USES_CRYPT(bp)		BF64_GET((bp)->blk_prop, 61, 1)
+#define	BP_SET_CRYPT(bp, x)		BF64_SET((bp)->blk_prop, 61, 1, x)
+
+#define	BP_IS_ENCRYPTED(bp)			\
+	(BP_USES_CRYPT(bp) &&			\
+	BP_GET_LEVEL(bp) == 0 &&		\
+	DMU_OT_IS_ENCRYPTED(BP_GET_TYPE(bp)))
+
+#define	BP_IS_AUTHENTICATED(bp)			\
+	(BP_USES_CRYPT(bp) &&			\
+	BP_GET_LEVEL(bp) == 0 &&		\
+	!DMU_OT_IS_ENCRYPTED(BP_GET_TYPE(bp)))
+
+#define	BP_HAS_INDIRECT_MAC_CKSUM(bp)		\
+	(BP_USES_CRYPT(bp) && BP_GET_LEVEL(bp) > 0)
+
+#define	BP_IS_PROTECTED(bp)			\
+	(BP_IS_ENCRYPTED(bp) || BP_IS_AUTHENTICATED(bp))
+
 #define	BP_GET_DEDUP(bp)		BF64_GET((bp)->blk_prop, 62, 1)
 #define	BP_SET_DEDUP(bp, x)		BF64_SET((bp)->blk_prop, 62, 1, x)
 
@@ -426,7 +502,26 @@ _NOTE(CONSTCOND) } while (0)
 	(bp)->blk_phys_birth = ((logical) == (physical) ? 0 : (physical)); \
 }
 
-#define	BP_GET_FILL(bp) (BP_IS_EMBEDDED(bp) ? 1 : (bp)->blk_fill)
+#define	BP_GET_FILL(bp)				\
+	((BP_IS_ENCRYPTED(bp)) ? BF64_GET((bp)->blk_fill, 0, 32) : \
+	((BP_IS_EMBEDDED(bp)) ? 1 : (bp)->blk_fill))
+
+#define	BP_SET_FILL(bp, fill)			\
+{						\
+	if (BP_IS_ENCRYPTED(bp))			\
+		BF64_SET((bp)->blk_fill, 0, 32, fill); \
+	else					\
+		(bp)->blk_fill = fill;		\
+}
+
+#define	BP_GET_IV2(bp)				\
+	(ASSERT(BP_IS_ENCRYPTED(bp)),		\
+	BF64_GET((bp)->blk_fill, 32, 32))
+#define	BP_SET_IV2(bp, iv2)			\
+{						\
+	ASSERT(BP_IS_ENCRYPTED(bp));		\
+	BF64_SET((bp)->blk_fill, 32, 32, iv2);	\
+}
 
 #define	BP_IS_METADATA(bp)	\
 	(BP_GET_LEVEL(bp) > 0 || DMU_OT_IS_METADATA(BP_GET_TYPE(bp)))
@@ -435,7 +530,7 @@ _NOTE(CONSTCOND) } while (0)
 	(BP_IS_EMBEDDED(bp) ? 0 : \
 	DVA_GET_ASIZE(&(bp)->blk_dva[0]) + \
 	DVA_GET_ASIZE(&(bp)->blk_dva[1]) + \
-	DVA_GET_ASIZE(&(bp)->blk_dva[2]))
+	(DVA_GET_ASIZE(&(bp)->blk_dva[2]) * !BP_IS_ENCRYPTED(bp)))
 
 #define	BP_GET_UCSIZE(bp)	\
 	(BP_IS_METADATA(bp) ? BP_GET_PSIZE(bp) : BP_GET_LSIZE(bp))
@@ -444,13 +539,13 @@ _NOTE(CONSTCOND) } while (0)
 	(BP_IS_EMBEDDED(bp) ? 0 : \
 	!!DVA_GET_ASIZE(&(bp)->blk_dva[0]) + \
 	!!DVA_GET_ASIZE(&(bp)->blk_dva[1]) + \
-	!!DVA_GET_ASIZE(&(bp)->blk_dva[2]))
+	(!!DVA_GET_ASIZE(&(bp)->blk_dva[2]) * !BP_IS_ENCRYPTED(bp)))
 
 #define	BP_COUNT_GANG(bp)	\
 	(BP_IS_EMBEDDED(bp) ? 0 : \
 	(DVA_GET_GANG(&(bp)->blk_dva[0]) + \
 	DVA_GET_GANG(&(bp)->blk_dva[1]) + \
-	DVA_GET_GANG(&(bp)->blk_dva[2])))
+	(DVA_GET_GANG(&(bp)->blk_dva[2]) * !BP_IS_ENCRYPTED(bp))))
 
 #define	DVA_EQUAL(dva1, dva2)	\
 	((dva1)->dva_word[1] == (dva2)->dva_word[1] && \
@@ -468,6 +563,10 @@ _NOTE(CONSTCOND) } while (0)
 	((zc1).zc_word[1] - (zc2).zc_word[1]) | \
 	((zc1).zc_word[2] - (zc2).zc_word[2]) | \
 	((zc1).zc_word[3] - (zc2).zc_word[3])))
+
+#define	ZIO_CHECKSUM_MAC_EQUAL(zc1, zc2) \
+	(0 == (((zc1).zc_word[0] - (zc2).zc_word[0]) | \
+	((zc1).zc_word[1] - (zc2).zc_word[1])))
 
 #define	ZIO_CHECKSUM_IS_ZERO(zc) \
 	(0 == ((zc)->zc_word[0] | (zc)->zc_word[1] | \
@@ -529,7 +628,7 @@ _NOTE(CONSTCOND) } while (0)
 
 #define	BP_SHOULD_BYTESWAP(bp)	(BP_GET_BYTEORDER(bp) != ZFS_HOST_BYTEORDER)
 
-#define	BP_SPRINTF_LEN	320
+#define	BP_SPRINTF_LEN	400
 
 /*
  * This macro allows code sharing between zfs, libzpool, and mdb.
@@ -542,7 +641,18 @@ _NOTE(CONSTCOND) } while (0)
 	    { "zero", "single", "double", "triple" };			\
 	int len = 0;							\
 	int copies = 0;							\
-									\
+	const char *crypt_type;						\
+	if (bp != NULL) {						\
+		if (BP_IS_ENCRYPTED(bp)) {				\
+			crypt_type = "encrypted";			\
+		} else if (BP_IS_AUTHENTICATED(bp)) {			\
+			crypt_type = "authenticated";			\
+		} else if (BP_HAS_INDIRECT_MAC_CKSUM(bp)) {		\
+			crypt_type = "indirect-MAC";			\
+		} else {						\
+			crypt_type = "unencrypted";			\
+		}							\
+	}								\
 	if (bp == NULL) {						\
 		len += func(buf + len, size - len, "<NULL>");		\
 	} else if (BP_IS_HOLE(bp)) {					\
@@ -576,18 +686,27 @@ _NOTE(CONSTCOND) } while (0)
 			    (u_longlong_t)DVA_GET_ASIZE(dva),		\
 			    ws);					\
 		}							\
+		if (BP_IS_ENCRYPTED(bp)) {				\
+			len += func(buf + len, size - len,		\
+			    "salt=%llx iv=%llx:%llx%c",			\
+			    (u_longlong_t)bp->blk_dva[2].dva_word[0],	\
+			    (u_longlong_t)bp->blk_dva[2].dva_word[1],	\
+			    (u_longlong_t)BP_GET_IV2(bp),		\
+			    ws);					\
+		}							\
 		if (BP_IS_GANG(bp) &&					\
 		    DVA_GET_ASIZE(&bp->blk_dva[2]) <=			\
 		    DVA_GET_ASIZE(&bp->blk_dva[1]) / 2)			\
 			copies--;					\
 		len += func(buf + len, size - len,			\
-		    "[L%llu %s] %s %s %s %s %s %s%c"			\
+		    "[L%llu %s] %s %s %s %s %s %s %s%c"			\
 		    "size=%llxL/%llxP birth=%lluL/%lluP fill=%llu%c"	\
 		    "cksum=%llx:%llx:%llx:%llx",			\
 		    (u_longlong_t)BP_GET_LEVEL(bp),			\
 		    type,						\
 		    checksum,						\
 		    compress,						\
+		    crypt_type,						\
 		    BP_GET_BYTEORDER(bp) == 0 ? "BE" : "LE",		\
 		    BP_IS_GANG(bp) ? "gang" : "contiguous",		\
 		    BP_GET_DEDUP(bp) ? "dedup" : "unique",		\
@@ -615,15 +734,34 @@ typedef enum spa_import_type {
 	SPA_IMPORT_ASSEMBLE
 } spa_import_type_t;
 
+/*
+ * Send TRIM commands in-line during normal pool operation while deleting.
+ *	OFF: no
+ *	ON: yes
+ */
+typedef enum {
+	SPA_AUTOTRIM_OFF = 0,	/* default */
+	SPA_AUTOTRIM_ON
+} spa_autotrim_t;
+
+/*
+ * Reason TRIM command was issued, used internally for accounting purposes.
+ */
+typedef enum trim_type {
+	TRIM_TYPE_MANUAL = 0,
+	TRIM_TYPE_AUTO = 1,
+} trim_type_t;
+
 /* state manipulation functions */
 extern int spa_open(const char *pool, spa_t **, void *tag);
 extern int spa_open_rewind(const char *pool, spa_t **, void *tag,
     nvlist_t *policy, nvlist_t **config);
 extern int spa_get_stats(const char *pool, nvlist_t **config, char *altroot,
     size_t buflen);
-extern int spa_create(const char *pool, nvlist_t *config, nvlist_t *props,
-    nvlist_t *zplprops);
-extern int spa_import_rootpool(char *devpath, char *devid);
+extern int spa_create(const char *pool, nvlist_t *nvroot, nvlist_t *props,
+    nvlist_t *zplprops, struct dsl_crypto_params *dcp);
+extern int spa_import_rootpool(char *devpath, char *devid, uint64_t pool_guid,
+    uint64_t vdev_guid);
 extern int spa_import(const char *pool, nvlist_t *config, nvlist_t *props,
     uint64_t flags);
 extern nvlist_t *spa_tryimport(nvlist_t *tryconfig);
@@ -642,15 +780,17 @@ extern void spa_inject_delref(spa_t *spa);
 extern void spa_scan_stat_init(spa_t *spa);
 extern int spa_scan_get_stats(spa_t *spa, pool_scan_stat_t *ps);
 
-#define	SPA_ASYNC_CONFIG_UPDATE	0x01
-#define	SPA_ASYNC_REMOVE	0x02
-#define	SPA_ASYNC_PROBE		0x04
-#define	SPA_ASYNC_RESILVER_DONE	0x08
-#define	SPA_ASYNC_RESILVER	0x10
-#define	SPA_ASYNC_AUTOEXPAND	0x20
-#define	SPA_ASYNC_REMOVE_DONE	0x40
-#define	SPA_ASYNC_REMOVE_STOP	0x80
-#define	SPA_ASYNC_INITIALIZE_RESTART	0x100
+#define	SPA_ASYNC_CONFIG_UPDATE			0x01
+#define	SPA_ASYNC_REMOVE			0x02
+#define	SPA_ASYNC_PROBE				0x04
+#define	SPA_ASYNC_RESILVER_DONE			0x08
+#define	SPA_ASYNC_RESILVER			0x10
+#define	SPA_ASYNC_AUTOEXPAND			0x20
+#define	SPA_ASYNC_REMOVE_DONE			0x40
+#define	SPA_ASYNC_REMOVE_STOP			0x80
+#define	SPA_ASYNC_INITIALIZE_RESTART		0x100
+#define	SPA_ASYNC_TRIM_RESTART			0x200
+#define	SPA_ASYNC_AUTOTRIM_RESTART		0x400
 
 /*
  * Controls the behavior of spa_vdev_remove().
@@ -666,7 +806,10 @@ extern int spa_vdev_detach(spa_t *spa, uint64_t guid, uint64_t pguid,
     int replace_done);
 extern int spa_vdev_remove(spa_t *spa, uint64_t guid, boolean_t unspare);
 extern boolean_t spa_vdev_remove_active(spa_t *spa);
-extern int spa_vdev_initialize(spa_t *spa, uint64_t guid, uint64_t cmd_type);
+extern int spa_vdev_initialize(spa_t *spa, nvlist_t *nv, uint64_t cmd_type,
+    nvlist_t *vdev_errlist);
+extern int spa_vdev_trim(spa_t *spa, nvlist_t *nv, uint64_t cmd_type,
+    uint64_t rate, boolean_t partial, boolean_t secure, nvlist_t *vdev_errlist);
 extern int spa_vdev_setpath(spa_t *spa, uint64_t guid, const char *newpath);
 extern int spa_vdev_setfru(spa_t *spa, uint64_t guid, const char *newfru);
 extern int spa_vdev_split_mirror(spa_t *spa, char *newname, nvlist_t *config,
@@ -677,6 +820,9 @@ extern void spa_spare_add(vdev_t *vd);
 extern void spa_spare_remove(vdev_t *vd);
 extern boolean_t spa_spare_exists(uint64_t guid, uint64_t *pool, int *refcnt);
 extern void spa_spare_activate(vdev_t *vd);
+
+/* spare polling */
+extern void spa_spare_poll(spa_t *spa);
 
 /* L2ARC state (which is global across all pools) */
 extern void spa_l2cache_add(vdev_t *vd);
@@ -740,6 +886,28 @@ extern boolean_t spa_refcount_zero(spa_t *spa);
 #define	SCL_ALL		((1 << SCL_LOCKS) - 1)
 #define	SCL_STATE_ALL	(SCL_STATE | SCL_L2ARC | SCL_ZIO)
 
+/* Assorted pool IO kstats */
+typedef struct spa_iostats {
+	kstat_named_t	trim_extents_written;
+	kstat_named_t	trim_bytes_written;
+	kstat_named_t	trim_extents_skipped;
+	kstat_named_t	trim_bytes_skipped;
+	kstat_named_t	trim_extents_failed;
+	kstat_named_t	trim_bytes_failed;
+	kstat_named_t	autotrim_extents_written;
+	kstat_named_t	autotrim_bytes_written;
+	kstat_named_t	autotrim_extents_skipped;
+	kstat_named_t	autotrim_bytes_skipped;
+	kstat_named_t	autotrim_extents_failed;
+	kstat_named_t	autotrim_bytes_failed;
+} spa_iostats_t;
+
+extern int spa_import_progress_set_state(spa_t *, spa_load_state_t);
+extern int spa_import_progress_set_max_txg(spa_t *, uint64_t);
+extern int spa_import_progress_set_mmp_check(spa_t *, uint64_t);
+extern void spa_import_progress_add(spa_t *);
+extern void spa_import_progress_remove(spa_t *);
+
 /* Pool configuration locks */
 extern int spa_config_tryenter(spa_t *spa, int locks, void *tag, krw_t rw);
 extern void spa_config_enter(spa_t *spa, int locks, void *tag, krw_t rw);
@@ -801,6 +969,11 @@ extern uint64_t spa_version(spa_t *spa);
 extern boolean_t spa_deflate(spa_t *spa);
 extern metaslab_class_t *spa_normal_class(spa_t *spa);
 extern metaslab_class_t *spa_log_class(spa_t *spa);
+extern metaslab_class_t *spa_special_class(spa_t *spa);
+extern metaslab_class_t *spa_dedup_class(spa_t *spa);
+extern metaslab_class_t *spa_preferred_class(spa_t *spa, uint64_t size,
+    dmu_object_type_t objtype, uint_t level, uint_t special_smallblk);
+
 extern void spa_evicting_os_register(spa_t *, objset_t *os);
 extern void spa_evicting_os_deregister(spa_t *, objset_t *os);
 extern void spa_evicting_os_wait(spa_t *spa);
@@ -812,8 +985,10 @@ extern boolean_t spa_suspended(spa_t *spa);
 extern uint64_t spa_bootfs(spa_t *spa);
 extern uint64_t spa_delegation(spa_t *spa);
 extern objset_t *spa_meta_objset(spa_t *spa);
+extern space_map_t *spa_syncing_log_sm(spa_t *spa);
 extern uint64_t spa_deadman_synctime(spa_t *spa);
 extern uint64_t spa_dirty_data(spa_t *spa);
+extern spa_autotrim_t spa_get_autotrim(spa_t *spa);
 
 /* Miscellaneous support routines */
 extern void spa_load_failed(spa_t *spa, const char *fmt, ...);
@@ -821,7 +996,6 @@ extern void spa_load_note(spa_t *spa, const char *fmt, ...);
 extern void spa_activate_mos_feature(spa_t *spa, const char *feature,
     dmu_tx_t *tx);
 extern void spa_deactivate_mos_feature(spa_t *spa, const char *feature);
-extern int spa_rename(const char *oldname, const char *newname);
 extern spa_t *spa_by_guid(uint64_t pool_guid, uint64_t device_guid);
 extern boolean_t spa_guid_exists(uint64_t pool_guid, uint64_t device_guid);
 extern char *spa_strdup(const char *);
@@ -844,6 +1018,9 @@ extern boolean_t spa_is_root(spa_t *spa);
 extern boolean_t spa_writeable(spa_t *spa);
 extern boolean_t spa_has_pending_synctask(spa_t *spa);
 extern int spa_maxblocksize(spa_t *spa);
+extern int spa_maxdnodesize(spa_t *spa);
+extern boolean_t spa_multihost(spa_t *spa);
+extern unsigned long spa_get_hostid(void);
 extern boolean_t spa_has_checkpoint(spa_t *spa);
 extern boolean_t spa_importing_readonly_checkpoint(spa_t *spa);
 extern boolean_t spa_suspend_async_destroy(spa_t *spa);
@@ -860,6 +1037,8 @@ extern boolean_t spa_trust_config(spa_t *spa);
 extern uint64_t spa_missing_tvds_allowed(spa_t *spa);
 extern void spa_set_missing_tvds(spa_t *spa, uint64_t missing);
 extern boolean_t spa_top_vdevs_spacemap_addressable(spa_t *spa);
+extern uint64_t spa_total_metaslabs(spa_t *spa);
+extern void spa_activate_allocation_classes(spa_t *, dmu_tx_t *);
 
 extern int spa_mode(spa_t *spa);
 extern uint64_t zfs_strtonum(const char *str, char **nptr);
@@ -881,9 +1060,12 @@ extern void spa_history_log_internal_dd(dsl_dir_t *dd, const char *operation,
 
 /* error handling */
 struct zbookmark_phys;
-extern void spa_log_error(spa_t *spa, zio_t *zio);
-extern void zfs_ereport_post(const char *class, spa_t *spa, vdev_t *vd,
-    zio_t *zio, uint64_t stateoroffset, uint64_t length);
+extern void spa_log_error(spa_t *spa, const struct zbookmark_phys *zb);
+extern int zfs_ereport_post(const char *class, spa_t *spa, vdev_t *vd,
+    const struct zbookmark_phys *zb, struct zio *zio, uint64_t stateoroffset,
+    uint64_t length);
+extern boolean_t zfs_ereport_is_valid(const char *class, spa_t *spa, vdev_t *vd,
+    zio_t *zio);
 extern void zfs_post_remove(spa_t *spa, vdev_t *vd);
 extern void zfs_post_state_change(spa_t *spa, vdev_t *vd);
 extern void zfs_post_autoreplace(spa_t *spa, vdev_t *vd);
@@ -897,6 +1079,10 @@ extern void spa_get_errlists(spa_t *spa, avl_tree_t *last, avl_tree_t *scrub);
 /* vdev cache */
 extern void vdev_cache_stat_init(void);
 extern void vdev_cache_stat_fini(void);
+
+/* vdev mirror */
+extern void vdev_mirror_stat_init(void);
+extern void vdev_mirror_stat_fini(void);
 
 /* Initialization and termination */
 extern void spa_init(int flags);

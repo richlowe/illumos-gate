@@ -24,6 +24,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 #
 #	This makefile drives the production of the scsi kernel module.
@@ -73,7 +74,10 @@ LINTTAGS	+= -erroff=E_ASSIGN_NARROW_CONV
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-uninitialized
+CERRWARN	+= $(CNOWARN_UNINIT)
+
+# needs work
+SMATCH=off
 
 #
 #	Default build targets.

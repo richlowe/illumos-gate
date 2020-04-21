@@ -33,13 +33,14 @@
 
 #include <kmfapi.h>
 
-#define	SET_VALUE(f, s) \
-	kmfrv = f; \
-	if (kmfrv != KMF_OK) { \
-		cryptoerror(LOG_STDERR, \
-			gettext("Failed to set %s: 0x%02x\n"), \
-			s, kmfrv); \
-		goto cleanup; \
+#define	SET_VALUE(f, s) { \
+		kmfrv = f; \
+		if (kmfrv != KMF_OK) { \
+			cryptoerror(LOG_STDERR, \
+				gettext("Failed to set %s: 0x%02x\n"), \
+				s, kmfrv); \
+			goto cleanup; \
+		} \
 	}
 
 static int
@@ -108,7 +109,7 @@ gencert_pkcs11(KMF_HANDLE_T kmfhandle,
 	SET_VALUE(kmf_set_cert_serial(&signedCert, serial),
 	    "serial number");
 
-	SET_VALUE(kmf_set_cert_validity(&signedCert, NULL, ltime),
+	SET_VALUE(kmf_set_cert_validity(&signedCert, 0, ltime),
 	    "validity time");
 
 	SET_VALUE(kmf_set_cert_sig_alg(&signedCert, sigAlg),
@@ -314,7 +315,7 @@ gencert_file(KMF_HANDLE_T kmfhandle,
 	SET_VALUE(kmf_set_cert_serial(&signedCert, serial),
 	    "serial number");
 
-	SET_VALUE(kmf_set_cert_validity(&signedCert, NULL, ltime),
+	SET_VALUE(kmf_set_cert_validity(&signedCert, 0, ltime),
 	    "validity time");
 
 	SET_VALUE(kmf_set_cert_sig_alg(&signedCert, sigAlg),
@@ -466,7 +467,7 @@ gencert_nss(KMF_HANDLE_T kmfhandle,
 	SET_VALUE(kmf_set_cert_serial(&signedCert, serial),
 	    "serial number");
 
-	SET_VALUE(kmf_set_cert_validity(&signedCert, NULL, ltime),
+	SET_VALUE(kmf_set_cert_validity(&signedCert, 0, ltime),
 	    "validity time");
 
 	SET_VALUE(kmf_set_cert_sig_alg(&signedCert, sigAlg),

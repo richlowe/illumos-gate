@@ -22,7 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY=	libima.a
 VERS=		.1
@@ -51,6 +51,9 @@ CFLAGS64 +=       -_cc=-xCC
 CFLAGS64 +=       -DSOLARIS
 
 CERRWARN +=	-_gcc=-Wno-unused-variable
+
+# not linted
+SMATCH=off
 
 LINTFLAGS += -DSOLARIS
 LINTFLAGS64 += -DSOLARIS

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2000 Daniel Capo Sobral
+ * Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,8 +23,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- *	$FreeBSD$
  */
 
 /*
@@ -43,6 +42,7 @@
 #include <termios.h>
 #else
 #include <stand.h>
+#include <gfx_fb.h>
 #include "bootstrap.h"
 #endif
 #ifdef _STANDALONE
@@ -51,6 +51,7 @@
 #include <uuid/uuid.h>
 #endif
 #include <string.h>
+#include <gfx_fb.h>
 #include "ficl.h"
 
 /*
@@ -69,6 +70,114 @@
  *		.#	    ( value -- )
  */
 
+/* ( flags x1 y1 x2 y2 -- flag ) */
+void
+ficl_fb_putimage(ficlVm *pVM)
+{
+	char *namep, *name;
+	ficlUnsigned names;
+	ficlInteger ret = FICL_FALSE;
+	uint32_t x1, y1, x2, y2, f;
+	png_t png;
+
+	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 7, 1);
+
+	names = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	namep = (char *)ficlStackPopPointer(ficlVmGetDataStack(pVM));
+	y2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	f = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+
+	name = ficlMalloc(names + 1);
+	if (!name)
+		ficlVmThrowError(pVM, "Error: out of memory");
+	(void) strncpy(name, namep, names);
+	name[names] = '\0';
+
+	if (png_open(&png, name) == PNG_NO_ERROR) {
+		if (gfx_fb_putimage(&png, x1, y1, x2, y2, f) == 0)
+			ret = FICL_TRUE;	/* success */
+		(void) png_close(&png);
+	}
+	ficlFree(name);
+	ficlStackPushInteger(ficlVmGetDataStack(pVM), ret);
+}
+
+void
+ficl_fb_setpixel(ficlVm *pVM)
+{
+	ficlUnsigned x, y;
+
+	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 2, 0);
+
+	y = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	gfx_fb_setpixel(x, y);
+}
+
+void
+ficl_fb_line(ficlVm *pVM)
+{
+	ficlUnsigned x0, y0, x1, y1, wd;
+
+	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 5, 0);
+
+	wd = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y0 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x0 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	gfx_fb_line(x0, y0, x1, y1, wd);
+}
+
+void
+ficl_fb_bezier(ficlVm *pVM)
+{
+	ficlUnsigned x0, y0, x1, y1, x2, y2, width;
+
+	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 7, 0);
+
+	width = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y0 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x0 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	gfx_fb_bezier(x0, y0, x1, y1, x2, y2, width);
+}
+
+void
+ficl_fb_drawrect(ficlVm *pVM)
+{
+	ficlUnsigned x1, x2, y1, y2, fill;
+
+	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 5, 0);
+
+	fill = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	gfx_fb_drawrect(x1, y1, x2, y2, fill);
+}
+
+void
+ficl_term_drawrect(ficlVm *pVM)
+{
+	ficlUnsigned x1, x2, y1, y2;
+
+	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 4, 0);
+
+	y2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x2 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	y1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	x1 = ficlStackPopUnsigned(ficlVmGetDataStack(pVM));
+	gfx_term_drawrect(x1, y1, x2, y2);
+}
+
 void
 ficlSetenv(ficlVm *pVM)
 {
@@ -86,15 +195,15 @@ ficlSetenv(ficlVm *pVM)
 	name = (char *)ficlMalloc(names+1);
 	if (!name)
 		ficlVmThrowError(pVM, "Error: out of memory");
-	strncpy(name, namep, names);
+	(void) strncpy(name, namep, names);
 	name[names] = '\0';
 	value = (char *)ficlMalloc(values+1);
 	if (!value)
 		ficlVmThrowError(pVM, "Error: out of memory");
-	strncpy(value, valuep, values);
+	(void) strncpy(value, valuep, values);
 	value[values] = '\0';
 
-	setenv(name, value, 1);
+	(void) setenv(name, value, 1);
 	ficlFree(name);
 	ficlFree(value);
 }
@@ -116,16 +225,16 @@ ficlSetenvq(ficlVm *pVM)
 
 	name = (char *)ficlMalloc(names+1);
 	if (!name)
-		ficlVmThrowError(pVM, "Error: out of memory");
-	strncpy(name, namep, names);
+		(void) ficlVmThrowError(pVM, "Error: out of memory");
+	(void) strncpy(name, namep, names);
 	name[names] = '\0';
 	value = (char *)ficlMalloc(values+1);
 	if (!value)
 		ficlVmThrowError(pVM, "Error: out of memory");
-	strncpy(value, valuep, values);
+	(void) strncpy(value, valuep, values);
 	value[values] = '\0';
 
-	setenv(name, value, overwrite);
+	(void) setenv(name, value, overwrite);
 	ficlFree(name);
 	ficlFree(value);
 }
@@ -145,7 +254,7 @@ ficlGetenv(ficlVm *pVM)
 	name = (char *)ficlMalloc(names+1);
 	if (!name)
 		ficlVmThrowError(pVM, "Error: out of memory");
-	strncpy(name, namep, names);
+	(void) strncpy(name, namep, names);
 	name[names] = '\0';
 
 	value = getenv(name);
@@ -173,10 +282,10 @@ ficlUnsetenv(ficlVm *pVM)
 	name = (char *)ficlMalloc(names+1);
 	if (!name)
 		ficlVmThrowError(pVM, "Error: out of memory");
-	strncpy(name, namep, names);
+	(void) strncpy(name, namep, names);
 	name[names] = '\0';
 
-	unsetenv(name);
+	(void) unsetenv(name);
 	ficlFree(name);
 }
 
@@ -429,7 +538,7 @@ static void displayCellNoPad(ficlVm *pVM)
 	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 1, 0);
 
 	c = ficlStackPop(ficlVmGetDataStack(pVM));
-	ficlLtoa((c).i, pVM->pad, pVM->base);
+	(void) ficlLtoa((c).i, pVM->pad, pVM->base);
 	ficlVmTextOut(pVM, pVM->pad);
 }
 
@@ -517,7 +626,7 @@ pfclose(ficlVm *pVM)
 
 	fd = ficlStackPopInteger(ficlVmGetDataStack(pVM)); /* get fd */
 	if (fd != -1)
-		close(fd);
+		(void) close(fd);
 }
 
 /*
@@ -556,7 +665,7 @@ static void pfopendir(ficlVm *pVM)
 	struct stat sb;
 	int fd;
 #endif
-	int count;
+	ficlInteger count;
 	char *ptr, *name;
 	ficlInteger flag = FICL_FALSE;
 
@@ -566,17 +675,31 @@ static void pfopendir(ficlVm *pVM)
 	ptr = ficlStackPopPointer(ficlVmGetDataStack(pVM));	/* get ptr */
 
 	if ((count < 0) || (ptr == NULL)) {
-		ficlStackPushInteger(ficlVmGetDataStack(pVM), -1);
+		ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
 		return;
 	}
 	/* ensure that the string is null terminated */
-	name = (char *)malloc(count+1);
+	if ((name = malloc(count + 1)) == NULL) {
+		ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
+		return;
+	}
+
 	bcopy(ptr, name, count);
 	name[count] = 0;
 #ifndef _STANDALONE
 	tmp = get_dev(name);
 	free(name);
 	name = tmp;
+
+	dir = opendir(name);
+	if (dir == NULL) {
+		ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
+		return;
+	} else
+		flag = FICL_TRUE;
+
+	ficlStackPushPointer(ficlVmGetDataStack(pVM), dir);
+	ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
 #else
 	fd = open(name, O_RDONLY);
 	free(name);
@@ -596,18 +719,6 @@ static void pfopendir(ficlVm *pVM)
 	if (fd >= 0)
 		close(fd);
 
-	ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
-		return;
-#endif
-#ifndef _STANDALONE
-	dir = opendir(name);
-	if (dir == NULL) {
-		ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
-		return;
-	} else
-		flag = FICL_TRUE;
-
-	ficlStackPushPointer(ficlVmGetDataStack(pVM), dir);
 	ficlStackPushInteger(ficlVmGetDataStack(pVM), flag);
 #endif
 }
@@ -683,11 +794,11 @@ pfclosedir(ficlVm *pVM)
 #ifndef _STANDALONE
 	dir = ficlStackPopPointer(ficlVmGetDataStack(pVM)); /* get dir */
 	if (dir != NULL)
-		closedir(dir);
+		(void) closedir(dir);
 #else
 	fd = ficlStackPopInteger(ficlVmGetDataStack(pVM)); /* get fd */
 	if (fd != -1)
-		close(fd);
+		(void) close(fd);
 #endif
 }
 
@@ -704,7 +815,7 @@ static void pfload(ficlVm *pVM)
 
 	fd = ficlStackPopInteger(ficlVmGetDataStack(pVM)); /* get fd */
 	if (fd != -1)
-		ficlExecFD(pVM, fd);
+		(void) ficlExecFD(pVM, fd);
 }
 
 /*
@@ -777,14 +888,14 @@ keyQuestion(ficlVm *pVM)
 	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 0, 1);
 
 #ifndef _STANDALONE
-	tcgetattr(STDIN_FILENO, &oldt);
+	(void) tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
 	newt.c_lflag &= ~(ICANON | ECHO);
 	newt.c_cc[VMIN] = 0;
 	newt.c_cc[VTIME] = 0;
-	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	(void) tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 	ch = getchar();
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	(void) tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
 	if (ch != -1)
 		(void) ungetc(ch, stdin);
@@ -826,7 +937,7 @@ ms(ficlVm *pVM)
 	FICL_STACK_CHECK(ficlVmGetDataStack(pVM), 1, 0);
 
 #ifndef _STANDALONE
-	usleep(ficlStackPopUnsigned(ficlVmGetDataStack(pVM)) * 1000);
+	(void) usleep(ficlStackPopUnsigned(ficlVmGetDataStack(pVM)) * 1000);
 #else
 	delay(ficlStackPopUnsigned(ficlVmGetDataStack(pVM)) * 1000);
 #endif
@@ -875,45 +986,71 @@ ficlSystemCompilePlatform(ficlSystem *pSys)
 	FICL_SYSTEM_ASSERT(pSys, dp);
 	FICL_SYSTEM_ASSERT(pSys, env);
 
-	ficlDictionarySetPrimitive(dp, ".#", displayCellNoPad,
+	(void) ficlDictionarySetPrimitive(dp, ".#", displayCellNoPad,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "isdir?", isdirQuestion,
+	(void) ficlDictionarySetPrimitive(dp, "isdir?", isdirQuestion,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fopen", pfopen, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fclose", pfclose, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fread", pfread, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fopendir", pfopendir,
+	(void) ficlDictionarySetPrimitive(dp, "fopen", pfopen,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "freaddir", pfreaddir,
+	(void) ficlDictionarySetPrimitive(dp, "fclose", pfclose,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fclosedir", pfclosedir,
+	(void) ficlDictionarySetPrimitive(dp, "fread", pfread,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fload", pfload, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fkey", fkey, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fseek", pfseek, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "fwrite", pfwrite, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "key", key, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "key?", keyQuestion, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "ms", ms, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "seconds", pseconds, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "heap?", freeHeap, FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fopendir", pfopendir,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "freaddir", pfreaddir,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fclosedir", pfclosedir,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fload", pfload,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fkey", fkey,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fseek", pfseek,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fwrite", pfwrite,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "key", key, FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "key?", keyQuestion,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "ms", ms, FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "seconds", pseconds,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "heap?", freeHeap,
+	    FICL_WORD_DEFAULT);
 
-	ficlDictionarySetPrimitive(dp, "setenv", ficlSetenv, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "setenv?", ficlSetenvq,
+	(void) ficlDictionarySetPrimitive(dp, "setenv", ficlSetenv,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "getenv", ficlGetenv, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "unsetenv", ficlUnsetenv,
+	(void) ficlDictionarySetPrimitive(dp, "setenv?", ficlSetenvq,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "copyin", ficlCopyin, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "copyout", ficlCopyout,
+	(void) ficlDictionarySetPrimitive(dp, "getenv", ficlGetenv,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "findfile", ficlFindfile,
+	(void) ficlDictionarySetPrimitive(dp, "unsetenv", ficlUnsetenv,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "ccall", ficlCcall, FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "uuid-from-string", ficlUuidFromString,
+	(void) ficlDictionarySetPrimitive(dp, "copyin", ficlCopyin,
 	    FICL_WORD_DEFAULT);
-	ficlDictionarySetPrimitive(dp, "uuid-to-string", ficlUuidToString,
+	(void) ficlDictionarySetPrimitive(dp, "copyout", ficlCopyout,
 	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "findfile", ficlFindfile,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "ccall", ficlCcall,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "uuid-from-string",
+	    ficlUuidFromString, FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "uuid-to-string",
+	    ficlUuidToString, FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fb-setpixel", ficl_fb_setpixel,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fb-line", ficl_fb_line,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fb-bezier", ficl_fb_bezier,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fb-drawrect", ficl_fb_drawrect,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "fb-putimage", ficl_fb_putimage,
+	    FICL_WORD_DEFAULT);
+	(void) ficlDictionarySetPrimitive(dp, "term-drawrect",
+	    ficl_term_drawrect, FICL_WORD_DEFAULT);
 #ifdef _STANDALONE
 	/* Register words from linker set. */
 	SET_FOREACH(fnpp, Xficl_compile_set)
@@ -921,11 +1058,11 @@ ficlSystemCompilePlatform(ficlSystem *pSys)
 #endif
 
 #if defined(__i386__) || defined(__amd64__)
-	ficlDictionarySetConstant(env, "arch-i386", FICL_TRUE);
-	ficlDictionarySetConstant(env, "arch-sparc", FICL_FALSE);
+	(void) ficlDictionarySetConstant(env, "arch-i386", FICL_TRUE);
+	(void) ficlDictionarySetConstant(env, "arch-sparc", FICL_FALSE);
 #endif
 #ifdef __sparc
-	ficlDictionarySetConstant(env, "arch-i386", FICL_FALSE);
-	ficlDictionarySetConstant(env, "arch-sparc", FICL_TRUE);
+	(void) ficlDictionarySetConstant(env, "arch-i386", FICL_FALSE);
+	(void) ficlDictionarySetConstant(env, "arch-sparc", FICL_TRUE);
 #endif
 }

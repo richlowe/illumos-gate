@@ -22,6 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= rpcsec.a
 VERS = .1
@@ -37,8 +38,11 @@ CPPFLAGS +=     -D_REENTRANT -I$(SRC)/uts/common/gssapi/include  \
 CFLAGS +=	$(XFFLAG)
 CFLAGS64 +=	$(XFFLAG)
 
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses
+
+# not linted
+SMATCH=off
 
 DYNFLAGS +=	$(ZIGNORE)
 

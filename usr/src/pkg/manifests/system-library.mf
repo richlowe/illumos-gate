@@ -26,6 +26,7 @@
 # Copyright 2017 Nexenta Systems, Inc.
 # Copyright 2017 RackTop Systems.
 # Copyright 2018, Joyent, Inc.
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
 <include system-library.man3.inc>
@@ -106,9 +107,6 @@ dir path=usr/lib/iconv/$(ARCH64)
 $(i386_ONLY)dir path=usr/lib/libc
 dir path=usr/lib/lwp
 dir path=usr/lib/lwp/$(ARCH64)
-dir path=usr/lib/python$(PYTHON_VERSION)
-dir path=usr/lib/python$(PYTHON_VERSION)/vendor-packages
-dir path=usr/lib/python$(PYTHON_VERSION)/vendor-packages/solaris
 dir path=usr/lib/raidcfg
 dir path=usr/lib/raidcfg/$(ARCH64)
 dir path=usr/lib/scsi
@@ -198,11 +196,13 @@ file path=lib/$(ARCH64)/libcustr.so.1
 file path=lib/$(ARCH64)/libdevice.so.1
 file path=lib/$(ARCH64)/libdevid.so.1
 file path=lib/$(ARCH64)/libdevinfo.so.1
+file path=lib/$(ARCH64)/libdhcpagent.so.1
 file path=lib/$(ARCH64)/libdhcputil.so.1
 file path=lib/$(ARCH64)/libdl.so.1
 file path=lib/$(ARCH64)/libdladm.so.1
 file path=lib/$(ARCH64)/libdlpi.so.1
 file path=lib/$(ARCH64)/libdoor.so.1
+file path=lib/$(ARCH64)/libdwarf.so.1
 file path=lib/$(ARCH64)/libefi.so.1
 file path=lib/$(ARCH64)/libelf.so.1
 file path=lib/$(ARCH64)/libfakekernel.so.1
@@ -282,6 +282,7 @@ file path=lib/libdl.so.1
 file path=lib/libdladm.so.1
 file path=lib/libdlpi.so.1
 file path=lib/libdoor.so.1
+file path=lib/libdwarf.so.1
 file path=lib/libefi.so.1
 file path=lib/libelf.so.1
 file path=lib/libelfsign.so.1
@@ -361,6 +362,7 @@ file path=usr/lib/$(ARCH64)/libike.so.1
 file path=usr/lib/$(ARCH64)/libipmi.so.1
 file path=usr/lib/$(ARCH64)/libipp.so.1
 file path=usr/lib/$(ARCH64)/libipsecutil.so.1
+file path=usr/lib/$(ARCH64)/libjedec.so.1
 file path=usr/lib/$(ARCH64)/libkvm.so.1
 file path=usr/lib/$(ARCH64)/libl.so.1
 file path=usr/lib/$(ARCH64)/libldap.so.5
@@ -438,6 +440,7 @@ file path=usr/lib/libinetsvc.so.1
 file path=usr/lib/libipmi.so.1
 file path=usr/lib/libipp.so.1
 file path=usr/lib/libipsecutil.so.1
+file path=usr/lib/libjedec.so.1
 file path=usr/lib/libkvm.so.1
 file path=usr/lib/libl.so.1
 file path=usr/lib/libldap.so.5
@@ -473,9 +476,6 @@ file path=usr/lib/libzoneinfo.so.1
 file path=usr/lib/nss_ad.so.1
 file path=usr/lib/nss_ldap.so.1
 file path=usr/lib/passwdutil.so.1
-file path=usr/lib/python$(PYTHON_VERSION)/vendor-packages/solaris/__init__.py
-file path=usr/lib/python$(PYTHON_VERSION)/vendor-packages/solaris/__init__.pyc
-file path=usr/lib/python$(PYTHON_VERSION)/vendor-packages/solaris/misc.so
 file path=usr/lib/raidcfg/$(ARCH64)/mpt.so.1
 file path=usr/lib/raidcfg/mpt.so.1
 file path=usr/lib/scsi/$(ARCH64)/libscsi.so.1
@@ -581,6 +581,10 @@ license usr/src/common/crypto/ecc/THIRDPARTYLICENSE \
     license=usr/src/common/crypto/ecc/THIRDPARTYLICENSE
 license usr/src/common/crypto/md5/amd64/THIRDPARTYLICENSE \
     license=usr/src/common/crypto/md5/amd64/THIRDPARTYLICENSE
+license usr/src/common/crypto/sha1/amd64/THIRDPARTYLICENSE.sha1-ni \
+    license=usr/src/common/crypto/sha1/amd64/THIRDPARTYLICENSE.sha1-ni
+license usr/src/common/crypto/sha2/amd64/THIRDPARTYLICENSE.sha256-ni \
+    license=usr/src/common/crypto/sha2/amd64/THIRDPARTYLICENSE.sha256-ni
 license usr/src/common/mpi/THIRDPARTYLICENSE \
     license=usr/src/common/mpi/THIRDPARTYLICENSE
 license usr/src/lib/libast/THIRDPARTYLICENSE \
@@ -593,6 +597,8 @@ license usr/src/lib/libcmd/THIRDPARTYLICENSE \
     license=usr/src/lib/libcmd/THIRDPARTYLICENSE
 license usr/src/lib/libdll/THIRDPARTYLICENSE \
     license=usr/src/lib/libdll/THIRDPARTYLICENSE
+license usr/src/lib/libdwarf/THIRDPARTYLICENSE \
+    license=usr/src/lib/libdwarf/THIRDPARTYLICENSE
 license usr/src/lib/libinetutil/common/THIRDPARTYLICENSE \
     license=usr/src/lib/libinetutil/common/THIRDPARTYLICENSE
 license usr/src/lib/libkmf/THIRDPARTYLICENSE \
@@ -838,6 +844,8 @@ link path=usr/lib/$(ARCH64)/libdevinfo.so \
     target=../../../lib/$(ARCH64)/libdevinfo.so.1
 link path=usr/lib/$(ARCH64)/libdevinfo.so.1 \
     target=../../../lib/$(ARCH64)/libdevinfo.so.1
+link path=usr/lib/$(ARCH64)/libdhcpagent.so.1 \
+    target=../../../lib/$(ARCH64)/libdhcpagent.so.1
 link path=usr/lib/$(ARCH64)/libdhcputil.so.1 \
     target=../../../lib/$(ARCH64)/libdhcputil.so.1
 link path=usr/lib/$(ARCH64)/libdisasm.so target=libdisasm.so.1
@@ -852,6 +860,8 @@ link path=usr/lib/$(ARCH64)/libdoor.so \
     target=../../../lib/$(ARCH64)/libdoor.so.1
 link path=usr/lib/$(ARCH64)/libdoor.so.1 \
     target=../../../lib/$(ARCH64)/libdoor.so.1
+link path=usr/lib/$(ARCH64)/libdwarf.so.1 \
+    target=../../../lib/$(ARCH64)/libdwarf.so.1
 link path=usr/lib/$(ARCH64)/libefi.so \
     target=../../../lib/$(ARCH64)/libefi.so.1
 link path=usr/lib/$(ARCH64)/libefi.so.1 \
@@ -1111,6 +1121,7 @@ link path=usr/lib/libdlpi.so target=../../lib/libdlpi.so.1
 link path=usr/lib/libdlpi.so.1 target=../../lib/libdlpi.so.1
 link path=usr/lib/libdoor.so target=../../lib/libdoor.so.1
 link path=usr/lib/libdoor.so.1 target=../../lib/libdoor.so.1
+link path=usr/lib/libdwarf.so.1 target=../../lib/libdwarf.so.1
 link path=usr/lib/libefi.so target=../../lib/libefi.so.1
 link path=usr/lib/libefi.so.1 target=../../lib/libefi.so.1
 link path=usr/lib/libelf.so target=../../lib/libelf.so.1
@@ -1327,6 +1338,10 @@ link path=usr/lib/straddr.so target=./straddr.so.2
 link path=usr/xpg4/lib/$(ARCH64)/libcurses.so target=libcurses.so.2
 link path=usr/xpg4/lib/64 target=$(ARCH64)
 link path=usr/xpg4/lib/libcurses.so target=./libcurses.so.2
+$(python3_ONLY)depend fmri=system/library/python/solaris$(PYTHON3_PKGVERS) \
+    predicate=runtime/python$(PYTHON3_PKGVERS) type=conditional
+$(python2_ONLY)depend fmri=system/library/python/solaris$(PYTHON_PKGVERS) \
+    predicate=runtime/python$(PYTHON_PKGVERS) type=conditional
 #
 # libses.so needs to dlopen(3C) plugins from usr/lib/scsi/plugins/ses/vendor/,
 # a dependency which cannot be automatically derived

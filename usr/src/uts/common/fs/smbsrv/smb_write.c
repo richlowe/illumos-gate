@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 #include <sys/sdt.h>
@@ -61,8 +61,7 @@ smb_pre_write(smb_request_t *sr)
 	param->rw_offset = (uint64_t)off;
 	param->rw_vdb.vdb_uio.uio_loffset = (offset_t)param->rw_offset;
 
-	DTRACE_SMB_2(op__Write__start, smb_request_t *, sr,
-	    smb_rw_param_t *, param);
+	DTRACE_SMB_START(op__Write, smb_request_t *, sr); /* arg.rw */
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -70,8 +69,7 @@ smb_pre_write(smb_request_t *sr)
 void
 smb_post_write(smb_request_t *sr)
 {
-	DTRACE_SMB_2(op__Write__done, smb_request_t *, sr,
-	    smb_rw_param_t *, sr->arg.rw);
+	DTRACE_SMB_DONE(op__Write, smb_request_t *, sr); /* arg.rw */
 
 	kmem_free(sr->arg.rw, sizeof (smb_rw_param_t));
 }
@@ -151,8 +149,7 @@ smb_pre_write_and_close(smb_request_t *sr)
 	param->rw_count = (uint32_t)count;
 	param->rw_offset = (uint64_t)off;
 
-	DTRACE_SMB_2(op__WriteAndClose__start, smb_request_t *, sr,
-	    smb_rw_param_t *, param);
+	DTRACE_SMB_START(op__WriteAndClose, smb_request_t *, sr); /* arg.rw */
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -160,8 +157,7 @@ smb_pre_write_and_close(smb_request_t *sr)
 void
 smb_post_write_and_close(smb_request_t *sr)
 {
-	DTRACE_SMB_2(op__WriteAndClose__done, smb_request_t *, sr,
-	    smb_rw_param_t *, sr->arg.rw);
+	DTRACE_SMB_DONE(op__WriteAndClose, smb_request_t *, sr); /* arg.rw */
 
 	kmem_free(sr->arg.rw, sizeof (smb_rw_param_t));
 }
@@ -249,8 +245,7 @@ smb_pre_write_and_unlock(smb_request_t *sr)
 	param->rw_count = (uint32_t)count;
 	param->rw_offset = (uint64_t)off;
 
-	DTRACE_SMB_2(op__WriteAndUnlock__start, smb_request_t *, sr,
-	    smb_rw_param_t *, param);
+	DTRACE_SMB_START(op__WriteAndUnlock, smb_request_t *, sr); /* arg.rw */
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -258,8 +253,7 @@ smb_pre_write_and_unlock(smb_request_t *sr)
 void
 smb_post_write_and_unlock(smb_request_t *sr)
 {
-	DTRACE_SMB_2(op__WriteAndUnlock__done, smb_request_t *, sr,
-	    smb_rw_param_t *, sr->arg.rw);
+	DTRACE_SMB_DONE(op__WriteAndUnlock, smb_request_t *, sr); /* arg.rw */
 
 	kmem_free(sr->arg.rw, sizeof (smb_rw_param_t));
 }
@@ -268,6 +262,7 @@ smb_sdrc_t
 smb_com_write_and_unlock(smb_request_t *sr)
 {
 	smb_rw_param_t *param = sr->arg.rw;
+	uint32_t lk_pid;
 	uint32_t status;
 	int rc = 0;
 
@@ -306,8 +301,12 @@ smb_com_write_and_unlock(smb_request_t *sr)
 		return (SDRC_ERROR);
 	}
 
-	status = smb_unlock_range(sr, sr->fid_ofile->f_node, param->rw_offset,
-	    (uint64_t)param->rw_count);
+
+	/* Note: SMB1 locking uses 16-bit PIDs. */
+	lk_pid = sr->smb_pid & 0xFFFF;
+
+	status = smb_unlock_range(sr, param->rw_offset,
+	    (uint64_t)param->rw_count, lk_pid);
 	if (status != NT_STATUS_SUCCESS) {
 		smbsr_error(sr, NT_STATUS_RANGE_NOT_LOCKED,
 		    ERRDOS, ERROR_NOT_LOCKED);
@@ -317,6 +316,35 @@ smb_com_write_and_unlock(smb_request_t *sr)
 	rc = smbsr_encode_result(sr, 1, 0, "bww", 1,
 	    (uint16_t)param->rw_count, 0);
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
+}
+
+/*
+ * The SMB_COM_WRITE_RAW protocol was a negotiated option introduced in
+ * SMB Core Plus to maximize performance when writing a large block
+ * of data to a server.  It's obsolete and no longer supported.
+ *
+ * We keep a handler for it so the dtrace provider can see if
+ * the client tried to use this command.
+ */
+smb_sdrc_t
+smb_pre_write_raw(smb_request_t *sr)
+{
+	DTRACE_SMB_START(op__WriteRaw, smb_request_t *, sr);
+	return (SDRC_SUCCESS);
+}
+
+void
+smb_post_write_raw(smb_request_t *sr)
+{
+	DTRACE_SMB_DONE(op__WriteRaw, smb_request_t *, sr);
+}
+
+smb_sdrc_t
+smb_com_write_raw(struct smb_request *sr)
+{
+	smbsr_error(sr, NT_STATUS_NOT_SUPPORTED, ERRDOS,
+	    ERROR_NOT_SUPPORTED);
+	return (SDRC_ERROR);
 }
 
 /*
@@ -382,8 +410,7 @@ smb_pre_write_andx(smb_request_t *sr)
 	    (sr->smb_data.max_bytes > (sr->smb_data.chain_offset + 0xFFFF)))
 		param->rw_count |= ((uint32_t)datalen_high << 16);
 
-	DTRACE_SMB_2(op__WriteX__start, smb_request_t *, sr,
-	    smb_rw_param_t *, param);
+	DTRACE_SMB_START(op__WriteX, smb_request_t *, sr); /* arg.rw */
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -391,8 +418,7 @@ smb_pre_write_andx(smb_request_t *sr)
 void
 smb_post_write_andx(smb_request_t *sr)
 {
-	DTRACE_SMB_2(op__WriteX__done, smb_request_t *, sr,
-	    smb_rw_param_t *, sr->arg.rw);
+	DTRACE_SMB_DONE(op__WriteX, smb_request_t *, sr); /* arg.rw */
 
 	kmem_free(sr->arg.rw, sizeof (smb_rw_param_t));
 }
@@ -485,7 +511,7 @@ smb_common_write(smb_request_t *sr, smb_rw_param_t *param)
 			stability = FSYNC;
 		}
 
-		rc = smb_fsop_write(sr, sr->user_cr, node,
+		rc = smb_fsop_write(sr, sr->user_cr, node, ofile,
 		    &param->rw_vdb.vdb_uio, &lcount, stability);
 
 		if (rc)
@@ -502,8 +528,8 @@ smb_common_write(smb_request_t *sr, smb_rw_param_t *param)
 		 */
 		ofile->f_written = B_TRUE;
 
-		if (!smb_node_is_dir(node))
-			smb_oplock_break_levelII(node);
+		/* This revokes read cache delegations. */
+		(void) smb_oplock_break_WRITE(node, ofile);
 
 		param->rw_count = lcount;
 		break;

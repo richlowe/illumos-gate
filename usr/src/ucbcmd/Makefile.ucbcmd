@@ -23,6 +23,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 #
 # ucbcmd/Makefile.ucbcmd
 #
@@ -58,13 +59,17 @@ ROOTPROG32=	$(PROG:%=$(ROOTBIN32)/%)
 
 ISAEXEC=	$(ROOT)/usr/lib/isaexec
 
+# don't lint any of ucbcmd
+SMATCH=off
+
 # storing LDLIBS in two macros allows reordering of options
 LDLIBS.cmd =    $(ENVLDLIBS1)  $(ENVLDLIBS2)  $(ENVLDLIBS3)
 LDLIBS =        $(LDLIBS.cmd)
 
 LDFLAGS.cmd = \
 	$(ENVLDFLAGS1) $(ENVLDFLAGS2) $(ENVLDFLAGS3) \
-	$(MAPFILE.NES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%)
+	$(MAPFILE.NES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
+	$(BDIRECT)
 
 LDFLAGS =       $(LDFLAGS.cmd)
 

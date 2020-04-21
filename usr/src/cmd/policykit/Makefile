@@ -22,6 +22,8 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
 PROG =	polkit-is-privileged
 
@@ -31,6 +33,7 @@ include ../Makefile.cmd
 include $(SRC)/lib/policykit/Makefile.policykit
 
 LDLIBS +=	-lpolkit $(POLICYKIT_GLIB_LDLIBS)
+LDFLAGS +=	$(POLICYKIT_GLIB_LDFLAGS)
 
 CPPFLAGS +=	-I$(ROOT)/usr/include/libpolkit
 CPPFLAGS +=	$(POLICYKIT_DBUS_CPPFLAGS) $(POLICYKIT_GLIB_CPPFLAGS)
@@ -39,6 +42,15 @@ CSTD =	$(CSTD_GNU99)
 
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-unused-function
+
+# glib2 >= 2.62 suppresses warnings about deprecated declarations in header
+# files using pragma "GCC diagnostic ignored \"-Wdeprecated-declarations\""
+# This is not supported before GCC 4.6 so just globally suppress these
+# warnings under the shadow compiler
+CERRWARN +=	-_gcc4=-Wno-deprecated-declarations
+
+# smatch has problems parsing the glib header files
+SMATCH=off
 
 ROOTUSRSBINPROG =	$(PROG:%=$(ROOTUSRSBIN)/%)
 

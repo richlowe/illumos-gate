@@ -22,6 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG =		volrmmount
 LOCAL_OBJS =	volrmmount.o
@@ -35,6 +36,7 @@ include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/cmd/hal/Makefile.hal
 
 LDLIBS +=	-ldbus-1 -ldbus-glib-1 -lglib-2.0 -lhal -lhal-storage -lcontract
+NATIVE_LIBS +=	libdbus-1.so libdbus-glib-1.so libglib-2.0.so
 
 CPPFLAGS +=	$(HAL_DBUS_CPPFLAGS) $(HAL_GLIB_CPPFLAGS)
 CPPFLAGS +=	-I$(ROOT)/usr/include/hal
@@ -44,8 +46,11 @@ CSTD =	$(CSTD_GNU99)
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-unused-function
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

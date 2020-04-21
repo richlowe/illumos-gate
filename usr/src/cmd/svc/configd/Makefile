@@ -24,6 +24,8 @@
 #
 # Copyright 2015 RackTop Systems.
 #
+# Copyright 2020 Joyent, Inc.
+#
 
 MYPROG = svc.configd
 MYOBJS = \
@@ -59,10 +61,13 @@ CERRWARN += -_gcc=-Wno-type-limits
 CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-unused-variable
 CERRWARN += -_gcc=-Wno-unused-function
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# strange false positive
+SMOFF += free
+
 MYLDLIBS = -lumem -luutil
 LDLIBS	+= -lsecdb -lbsm $(MYLDLIBS)
-LINTFLAGS += -errtags -erroff=E_BAD_FORMAT_ARG_TYPE2 -erroff=E_NAME_DEF_NOT_USED2
 
 CLOBBERFILES +=	$(MYPROG:%=%-native)
 
@@ -73,14 +78,15 @@ SCRIPTFILE	= restore_repository
 ROOTSCRIPTFILE	= $(ROOTCMDDIR)/$(SCRIPTFILE)
 
 #
-# Native variant (used in ../seed)
+# Native variant (used in ../seed).
 #
+$(NATIVE_BUILD)NATIVE_LIBS += libumem.so libc.so
 $(NATIVE_BUILD)CC =	$(NATIVECC)
 $(NATIVE_BUILD)LD =	$(NATIVELD)
 $(NATIVE_BUILD)CFLAGS =	$(NATIVE_CFLAGS)
 $(NATIVE_BUILD)CPPFLAGS = $(MYCPPFLAGS) -I$(LIBUUTIL)/common -I$(LIBSCF)/inc
 $(NATIVE_BUILD)CPPFLAGS += -DNATIVE_BUILD
-$(NATIVE_BUILD)LDFLAGS =
+$(NATIVE_BUILD)LDFLAGS = $(BDIRECT)
 $(NATIVE_BUILD)LDLIBS = -L$(ADJUNCT_PROTO)/usr/lib -R$(ADJUNCT_PROTO)/usr/lib \
 			-L$(LIBUUTIL)/native -R $(LIBUUTIL)/native $(MYLDLIBS)
 
@@ -124,10 +130,6 @@ clean: FRC
 	$(RM) $(MYOBJS) $(MYOBJS:%.o=%-native.o)
 
 clobber:
-
-lint:   lint_SRCS
-
-lint_SRCS:
 
 include ../../Makefile.targ
 

@@ -23,9 +23,9 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-
-#
 # Copyright 2010 Nexenta Systems, Inc.  All rights reserved.
+#
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 PROG= alias
@@ -49,7 +49,6 @@ ALIASPROG= \
 	print \
 	read \
 	rev \
-	sleep \
 	sum \
 	tee \
 	test \
@@ -92,6 +91,9 @@ $(SPARC_BLD)include ../../Makefile.cmd.64
 
 FILEMODE= 555
 CERRWARN += -_gcc=-Wno-parentheses
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 

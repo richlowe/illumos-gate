@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2016 by Delphix. All rights reserved.
  */
 
@@ -30,14 +30,6 @@
 #include <sys/privregs.h>
 #include <sys/psw.h>
 #include <sys/machbrand.h>
-
-#if defined(__lint)
-
-#include <sys/types.h>
-#include <sys/thread.h>
-#include <sys/systm.h>
-
-#else	/* __lint */
 
 #include <sys/segments.h>
 #include <sys/pcb.h>
@@ -53,8 +45,6 @@
 #endif
 
 #include "assym.h"
-
-#endif	/* __lint */
 
 /*
  * We implement five flavours of system call entry points
@@ -199,7 +189,8 @@
 	je	1f							   ;\
 	movq	%r15, 16(%rsp)		/* save the callback pointer	*/ ;\
 	push_userland_ret		/* push the return address	*/ ;\
-	call	*24(%rsp)		/* call callback		*/ ;\
+	movq	24(%rsp), %r15		/* load callback pointer	*/ ;\
+	INDIRECT_CALL_REG(r15)		/* call callback		*/ ;\
 1:	movq	%gs:CPU_RTMP_R15, %r15	/* restore %r15			*/ ;\
 	movq	%gs:CPU_RTMP_RSP, %rsp	/* restore the stack pointer	*/
 
@@ -285,8 +276,6 @@
 
 #if defined(DEBUG)
 
-#if !defined(__lint)
-
 __lwptoregs_msg:
 	.string	"syscall_asm_amd64.s:%d lwptoregs(%p) [%p] != rp [%p]"
 
@@ -297,9 +286,7 @@ __no_rupdate_msg:
 	.string	"syscall_asm_amd64.s:%d lwp %p, pcb_rupdate != 0"
 
 __bad_ts_msg:
-	.string "sysscall_asm_amd64.s:%d CR0.TS set on user return"
-
-#endif	/* !__lint */
+	.string "syscall_asm_amd64.s:%d CR0.TS set on user return"
 
 #define	ASSERT_LWPTOREGS(lwp, rp)			\
 	movq	LWP_REGS(lwp), %r11;			\
@@ -432,21 +419,6 @@ __bad_ts_msg:
 #define	XPV_SYSCALL_PROD /* nothing */
 #endif
 
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-sys_syscall()
-{}
-
-void
-_allsyscalls()
-{}
-
-size_t _allsyscalls_size;
-
-#else	/* __lint */
-
 	ENTRY_NP2(brand_sys_syscall,_allsyscalls)
 	SWAPGS				/* kernel gsbase */
 	XPV_SYSCALL_PROD
@@ -575,7 +547,8 @@ _syscall_invoke:
 	shll	$SYSENT_SIZE_SHIFT, %eax
 	leaq	sysent(%rax), %rbx
 
-	call	*SY_CALLC(%rbx)
+	movq	SY_CALLC(%rbx), %rax
+	INDIRECT_CALL_REG(rax)
 
 	movq	%rax, %r12
 	movq	%rdx, %r13
@@ -642,6 +615,16 @@ _syscall_invoke:
 	 * Clobber %r11 as we check CR0.TS.
 	 */
 	ASSERT_CR0TS_ZERO(%r11)
+
+	/*
+	 * Unlike other cases, because we need to restore the user stack pointer
+	 * before exiting the kernel we must clear the microarch state before
+	 * getting here. This should be safe because it means that the only
+	 * values on the bus after this are based on the user's registers and
+	 * potentially the addresses where we stored them. Given the constraints
+	 * of sysret, that's how it has to be.
+	 */
+	call	x86_md_clear
 
 	/*
 	 * To get back to userland, we need the return %rip in %rcx and
@@ -752,17 +735,6 @@ _syscall_post_call:
 	jmp	_sys_rtt
 	SET_SIZE(sys_syscall)
 	SET_SIZE(brand_sys_syscall)
-
-#endif	/* __lint */
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-sys_syscall32()
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(brand_sys_syscall32)
 	SWAPGS				/* kernel gsbase */
@@ -892,7 +864,8 @@ _syscall32_save:
 	movl	0x20(%rsp), %r8d
 	movl	0x28(%rsp), %r9d
 
-	call	*SY_CALLC(%rbx)
+	movq	SY_CALLC(%rbx), %rax
+	INDIRECT_CALL_REG(rax)
 
 	movq	%rbp, %rsp	/* pop the args */
 
@@ -930,6 +903,16 @@ _syscall32_save:
 	 * Clobber %r11 as we check CR0.TS.
 	 */
 	ASSERT_CR0TS_ZERO(%r11)
+
+	/*
+	 * Unlike other cases, because we need to restore the user stack pointer
+	 * before exiting the kernel we must clear the microarch state before
+	 * getting here. This should be safe because it means that the only
+	 * values on the bus after this are based on the user's registers and
+	 * potentially the addresses where we stored them. Given the constraints
+	 * of sysret, that's how it has to be.
+	 */
+	call	x86_md_clear
 
 	/*
 	 * To get back to userland, we need to put the return %rip in %rcx and
@@ -971,8 +954,6 @@ _full_syscall_postsys32:
 	SET_SIZE(sys_syscall32)
 	SET_SIZE(brand_sys_syscall32)
 
-#endif	/* __lint */
-
 /*
  * System call handler via the sysenter instruction
  * Used only for 32-bit system calls on the 64-bit kernel.
@@ -1013,13 +994,6 @@ _full_syscall_postsys32:
  * one mentioned above.  To avoid this situation, we simply add a jump over the
  * instruction at sys_sysenter to make it impossible to single-step to it.
  */
-#if defined(__lint)
-
-void
-sys_sysenter()
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(brand_sys_sysenter)
 	SWAPGS				/* kernel gsbase */
@@ -1169,7 +1143,8 @@ sys_sysenter()
 	movl	0x20(%rsp), %r8d
 	movl	0x28(%rsp), %r9d
 
-	call	*SY_CALLC(%rbx)
+	movq	SY_CALLC(%rbx), %rax
+	INDIRECT_CALL_REG(rax)
 
 	movq	%rbp, %rsp	/* pop the args */
 
@@ -1237,27 +1212,18 @@ sys_sysenter()
 	popfq
 	movl	REGOFF_RSP(%rsp), %ecx	/* sysexit: %ecx -> %esp */
         ALTENTRY(sys_sysenter_swapgs_sysexit)
+	call	x86_md_clear
 	jmp	tr_sysexit
 	SET_SIZE(sys_sysenter_swapgs_sysexit)
 	SET_SIZE(sys_sysenter)
 	SET_SIZE(_sys_sysenter_post_swapgs)
 	SET_SIZE(brand_sys_sysenter)
 
-#endif	/* __lint */
-
 /*
  * This is the destination of the "int $T_SYSCALLINT" interrupt gate, used by
  * the generic i386 libc to do system calls. We do a small amount of setup
  * before jumping into the existing sys_syscall32 path.
  */
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-sys_syscall_int()
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(brand_sys_syscall_int)
 	SWAPGS				/* kernel gsbase */
@@ -1293,14 +1259,13 @@ nopop_syscall_int:
 	 * tr_iret_user are done on the user gsbase.
 	 */
 	ALTENTRY(sys_sysint_swapgs_iret)
+	call	x86_md_clear
 	SWAPGS
 	jmp	tr_iret_user
 	/*NOTREACHED*/
 	SET_SIZE(sys_sysint_swapgs_iret)
 	SET_SIZE(sys_syscall_int)
 	SET_SIZE(brand_sys_syscall_int)
-
-#endif	/* __lint */
 
 /*
  * Legacy 32-bit applications and old libc implementations do lcalls;
@@ -1315,15 +1280,6 @@ nopop_syscall_int:
  * this problem, and end up depending explicitly on the first
  * instruction of this handler being either swapgs or cli.
  */
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-sys_lcall32()
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(sys_lcall32)
 	SWAPGS				/* kernel gsbase */
@@ -1349,25 +1305,9 @@ _allsyscalls_size:
 	.NWORD	. - _allsyscalls
 	SET_SIZE(_allsyscalls_size)
 
-#endif	/* __lint */
-
 /*
  * These are the thread context handlers for lwps using sysenter/sysexit.
  */
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-sep_save(void *ksp)
-{}
-
-/*ARGSUSED*/
-void
-sep_restore(void *ksp)
-{}
-
-#else	/* __lint */
 
 	/*
 	 * setting this value to zero as we switch away causes the
@@ -1395,4 +1335,3 @@ sep_restore(void *ksp)
 	ret
 	SET_SIZE(sep_restore)
 
-#endif	/* __lint */

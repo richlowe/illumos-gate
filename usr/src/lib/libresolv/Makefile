@@ -23,6 +23,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY= libresolv.a
 VERS= .1
@@ -58,7 +59,10 @@ LDLIBS += -lsocket -lnsl -lc
 CFLAGS += $(CCVERBOSE)
 
 CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 ROOTDYNLIBS=	$(DYNLIB:%=$(ROOTLIBDIR)/%)
 

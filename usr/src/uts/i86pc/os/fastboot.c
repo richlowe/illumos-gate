@@ -497,7 +497,7 @@ fastboot_build_mbi(char *mdep, fastboot_info_t *nk)
 	if (nk->fi_mbi_size == 0) {
 		if ((nk->fi_new_mbi_va =
 		    (uintptr_t)contig_alloc(size, &fastboot_below_1G_dma_attr,
-		    PAGESIZE, 0)) == NULL) {
+		    PAGESIZE, 0)) == 0) {
 			cmn_err(CE_NOTE, fastboot_enomem_msg,
 			    (uint64_t)size, "1G");
 			return (-1);
@@ -705,7 +705,7 @@ fastboot_reserve_mem(fastboot_info_t *nk)
 	 */
 	if ((nk->fi_pagetable_va =
 	    (uintptr_t)contig_alloc(fastboot_pagetable_size,
-	    &fastboot_below_1G_dma_attr, PAGESIZE, 0)) == NULL) {
+	    &fastboot_below_1G_dma_attr, PAGESIZE, 0)) == 0) {
 		return;
 	}
 	nk->fi_pagetable_size = fastboot_pagetable_size;
@@ -714,7 +714,7 @@ fastboot_reserve_mem(fastboot_info_t *nk)
 	 * Reserve memory under PA 1G for multiboot structure.
 	 */
 	if ((nk->fi_new_mbi_va = (uintptr_t)contig_alloc(fastboot_mbi_size,
-	    &fastboot_below_1G_dma_attr, PAGESIZE, 0)) == NULL) {
+	    &fastboot_below_1G_dma_attr, PAGESIZE, 0)) == 0) {
 		return;
 	}
 	nk->fi_mbi_size = fastboot_mbi_size;
@@ -745,7 +745,7 @@ fastboot_free_file(fastboot_file_t *fb)
 	fsize_roundup = P2ROUNDUP_TYPED(fb->fb_size, PAGESIZE, size_t);
 	if (fsize_roundup) {
 		contig_free((void *)fb->fb_va, fsize_roundup);
-		fb->fb_va = NULL;
+		fb->fb_va = 0;
 		fb->fb_size = 0;
 	}
 }
@@ -1243,7 +1243,7 @@ load_kernel_retry:
 		if (newkernel.fi_pagetable_size == 0) {
 			if ((newkernel.fi_pagetable_va = (uintptr_t)
 			    contig_alloc(size, &fastboot_below_1G_dma_attr,
-			    MMU_PAGESIZE, 0)) == NULL) {
+			    MMU_PAGESIZE, 0)) == 0) {
 				cmn_err(CE_NOTE, fastboot_enomem_msg,
 				    (uint64_t)size, "1G");
 				goto err_out;
@@ -1293,8 +1293,9 @@ err_out:
 
 /* ARGSUSED */
 static int
-fastboot_xc_func(fastboot_info_t *nk, xc_arg_t unused2, xc_arg_t unused3)
+fastboot_xc_func(xc_arg_t arg1, xc_arg_t arg2 __unused, xc_arg_t arg3 __unused)
 {
+	fastboot_info_t *nk = (fastboot_info_t *)arg1;
 	void (*fastboot_func)(fastboot_info_t *);
 	fastboot_file_t	*fb = &nk->fi_files[FASTBOOT_SWTCH];
 	fastboot_func = (void (*)())(fb->fb_va);
@@ -1372,11 +1373,11 @@ fast_reboot()
 		CPUSET_ZERO(cpuset);
 		CPUSET_ADD(cpuset, bootcpuid);
 		xc_priority((xc_arg_t)&newkernel, 0, 0, CPUSET2BV(cpuset),
-		    (xc_func_t)fastboot_xc_func);
+		    fastboot_xc_func);
 
 		panic_idle();
 	} else
-		(void) fastboot_xc_func(&newkernel, 0, 0);
+		(void) fastboot_xc_func((xc_arg_t)&newkernel, 0, 0);
 }
 
 

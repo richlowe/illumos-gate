@@ -23,7 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright (c) 2012 by Delphix. All rights reserved.
-# Copyright 2017 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 # Copyright 2017 RackTop Systems.
 #
 
@@ -37,8 +37,9 @@ include ../../Makefile.ctf
 INCS += -I../../../lib/libzpool/common
 INCS +=	-I../../../uts/common/fs/zfs
 INCS +=	-I../../../common/zfs
+INCS += -I../../../lib/libzutil/common
 
-LDLIBS += -lzpool -lumem -lnvpair -lzfs -lavl -lcmdutils -lfakekernel
+LDLIBS += -lzpool -lumem -lnvpair -lzutil -lavl -lfakekernel
 
 CSTD=	$(CSTD_GNU99)
 C99LMODE=	-Xc99=%all
@@ -52,7 +53,8 @@ CPPFLAGS += -D_LARGEFILE64_SOURCE=1 -D_REENTRANT $(INCS) -DDEBUG
 # in Makefile.master
 CERRWARN += -_gcc=-Wmissing-braces
 CERRWARN += -_gcc=-Wsign-compare
-CERRWARN += -_gcc=-Wmissing-field-initializers
+
+SMOFF += 64bit_shift,all_func_returns
 
 # lint complains about unused _umem_* functions
 LINTFLAGS += -xerroff=E_NAME_DEF_NOT_USED2
@@ -63,6 +65,9 @@ LINTFLAGS64 += -xerroff=E_NAME_DEF_NOT_USED2
 # implementations and usage in libzpool.
 LINTFLAGS += -erroff=E_STATIC_UNUSED
 LINTFLAGS64 += -erroff=E_STATIC_UNUSED
+
+LINTFLAGS += -erroff=E_BAD_PTR_CAST_ALIGN
+LINTFLAGS64 += -erroff=E_BAD_PTR_CAST_ALIGN
 
 .KEEP_STATE:
 

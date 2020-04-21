@@ -22,7 +22,7 @@
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
- * Copyright (c) 2012, Joyent, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  * Copyright 2017 RackTop Systems.
  */
 
@@ -252,6 +252,7 @@ extern int fop_getattr(vnode_t *vp, vattr_t *vap);
 #define	VOP_CLOSE(vp, f, c, o, cr, ct)	0
 #define	VOP_PUTPAGE(vp, of, sz, fl, cr, ct)	0
 #define	VOP_GETATTR(vp, vap, fl, cr, ct)  fop_getattr((vp), (vap));
+#define	VOP_SPACE(vp, cmd, a, f, o, cr, ct)  0
 
 #define	VOP_FSYNC(vp, f, cr, ct)	fsync((vp)->v_fd)
 
@@ -284,6 +285,14 @@ extern vnode_t *rootdir;
 
 #define	minclsyspri	60
 #define	maxclsyspri	99
+
+#if (GCC_VERSION >= 302) || (__INTEL_COMPILER >= 800) || defined(__clang__)
+#define	_zfs_expect(expr, value)    (__builtin_expect((expr), (value)))
+#else
+#define	_zfs_expect(expr, value)    (expr)
+#endif
+
+#define	likely(x)	_zfs_expect((x) != 0, 1)
 
 #define	CPU_SEQID	(thr_self() & (max_ncpus - 1))
 
@@ -318,6 +327,15 @@ typedef struct callb_cpr {
 #define	zone_dataset_visible(x, y)	(1)
 #define	INGLOBALZONE(z)			(1)
 extern uint32_t zone_get_hostid(void *zonep);
+
+/*
+ * In ZoL the following defines were added to their sys/avl.h header, but
+ * we want to limit these to the ZFS code on illumos.
+ */
+#define	TREE_ISIGN(a)	(((a) > 0) - ((a) < 0))
+#define	TREE_CMP(a, b)	(((a) > (b)) - ((a) < (b)))
+#define	TREE_PCMP(a, b)	\
+	(((uintptr_t)(a) > (uintptr_t)(b)) - ((uintptr_t)(a) < (uintptr_t)(b)))
 
 extern int zfs_secpolicy_snapshot_perms(const char *name, cred_t *cr);
 extern int zfs_secpolicy_rename_perms(const char *from, const char *to,

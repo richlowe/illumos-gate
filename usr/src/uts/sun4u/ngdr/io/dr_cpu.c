@@ -25,6 +25,11 @@
  */
 
 /*
+ * Copyright 2019 Peter Tribble.
+ * Copyright 2019 Joyent, Inc.
+ */
+
+/*
  * CPU support routines for DR
  */
 
@@ -70,13 +75,8 @@
 #include <sys/dr.h>
 #include <sys/dr_util.h>
 
-#ifdef _STARFIRE
-#include <sys/starfire.h>
-extern struct cpu	*SIGBCPU;
-#else
 /* for the DR*INTERNAL_ERROR macros.  see sys/dr.h. */
 static char *dr_ie_fmt = "dr_cpu.c %d";
-#endif /* _STARFIRE */
 
 int
 dr_cpu_unit_is_sane(dr_board_t *bp, dr_cpu_unit_t *cp)
@@ -145,14 +145,7 @@ dr_cpu_set_prop(dr_cpu_unit_t *cp)
 	}
 
 	if (dip == NULL) {
-#ifndef _STARFIRE
-		/*
-		 * Do not report an error on Starfire since
-		 * the dip will not be created until after
-		 * the CPU has been configured.
-		 */
 		DR_DEV_INTERNAL_ERROR(&cp->sbc_cm);
-#endif /* !_STARFIRE */
 		return;
 	}
 
@@ -309,8 +302,6 @@ dr_pre_attach_cpu(dr_handle_t *hp, dr_common_unit_t **devlist, int devnum)
 			 */
 			PR_CPU("%s: unmapping sigblk for cpu %d\n", f,
 			    up->sbc_cpu_id);
-
-			CPU_SGN_MAPOUT(up->sbc_cpu_id);
 		}
 	}
 
@@ -395,7 +386,7 @@ dr_post_attach_cpu(dr_handle_t *hp, dr_common_unit_t **devlist, int devnum)
 		if (cpu_is_offline(cp)) {
 			PR_CPU("%s: onlining cpu %d...\n", f, up->sbc_cpu_id);
 
-			if (cpu_online(cp) != 0) {
+			if (cpu_online(cp, 0) != 0) {
 				dr_dev_err(CE_WARN, &up->sbc_cm, ESBD_ONLINE);
 				errflag = 1;
 			}
@@ -671,10 +662,6 @@ dr_fill_cpu_stat(dr_cpu_unit_t *cp, drmach_status_t *pstat, sbd_cpu_stat_t *csp)
 	/* CPU specific status data */
 	csp->cs_cpuid = cp->sbc_cpu_id;
 
-#ifdef _STARFIRE
-	csp->cs_isbootproc = (SIGBCPU->cpu_id == cp->sbc_cpu_id) ? 1 : 0;
-#endif /* _STARFIRE */
-
 	/*
 	 * If the speed and ecache properties have not been
 	 * cached yet, read them in from the device tree.
@@ -896,7 +883,7 @@ dr_cancel_cpu(dr_cpu_unit_t *up)
 		}
 
 		if (cpu_is_offline(cp)) {
-			if (cpu_online(cp)) {
+			if (cpu_online(cp, 0)) {
 				cmn_err(CE_WARN, "%s: failed to online cpu %d",
 				    f, up->sbc_cpu_id);
 				rv = -1;

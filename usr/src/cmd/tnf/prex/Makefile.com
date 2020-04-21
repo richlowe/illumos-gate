@@ -24,8 +24,7 @@
 # Copyright 1989,2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/tnf/prex/Makefile.com
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 PROG=		prex
 
@@ -68,7 +67,10 @@ CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 
@@ -108,7 +110,7 @@ $(POFILE):      $(POFILES)
 clean:
 	$(RM) $(OBJS) $(CLEANFILES)
 
-lint: $(OBJS) 
+lint: $(OBJS)
 	$(LINT.c) $(SRCS)
 
 include	../../../Makefile.targ

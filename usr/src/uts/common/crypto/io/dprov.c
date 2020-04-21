@@ -22,6 +22,7 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2018, Joyent, Inc.
  */
 
 
@@ -220,6 +221,8 @@ typedef enum dprov_mech_type {
 	SHA512_HMAC_MECH_INFO_TYPE,	/* SUN_CKM_SHA512_HMAC */
 	SHA512_HMAC_GEN_MECH_INFO_TYPE,	/* SUN_CKM_SHA512_HMAC_GENERAL */
 	SHA512_MECH_INFO_TYPE,		/* SUN_CKM_SHA512 */
+	SHA512_224_MECH_INFO_TYPE,	/* SUN_CKM_SHA512_224 */
+	SHA512_256_MECH_INFO_TYPE,	/* SUN_CKM_SHA512_256 */
 
 	DES_CBC_MECH_INFO_TYPE,		/* SUN_CKM_DES_CBC */
 	DES3_CBC_MECH_INFO_TYPE,	/* SUN_CKM_DES3_CBC */
@@ -429,6 +432,14 @@ static crypto_mech_info_t dprov_mech_info_tab[] = {
 	    CRYPTO_FG_ENCRYPT_MAC_ATOMIC | CRYPTO_FG_MAC_DECRYPT_ATOMIC,
 	    SHA2_HMAC_MIN_KEY_LEN, SHA2_HMAC_MAX_KEY_LEN,
 	    CRYPTO_KEYSIZE_UNIT_IN_BYTES},
+	/* SHA512_224 */
+	{SUN_CKM_SHA512_224, SHA512_224_MECH_INFO_TYPE,
+	    CRYPTO_FG_DIGEST | CRYPTO_FG_DIGEST_ATOMIC, 0, 0,
+	    CRYPTO_KEYSIZE_UNIT_IN_BITS},
+	/* SHA512_256 */
+	{SUN_CKM_SHA512_256, SHA512_256_MECH_INFO_TYPE,
+	    CRYPTO_FG_DIGEST | CRYPTO_FG_DIGEST_ATOMIC, 0, 0,
+	    CRYPTO_KEYSIZE_UNIT_IN_BITS},
 	/* DES-CBC */
 	{SUN_CKM_DES_CBC, DES_CBC_MECH_INFO_TYPE,
 	    CRYPTO_FG_ENCRYPT | CRYPTO_FG_DECRYPT | CRYPTO_FG_ENCRYPT_MAC |
@@ -1778,7 +1789,7 @@ dprov_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	softc = ddi_get_soft_state(statep, instance);
 	mutex_init(&softc->ds_lock, NULL, MUTEX_DRIVER, NULL);
 	softc->ds_dip = dip;
-	softc->ds_prov_handle = NULL;
+	softc->ds_prov_handle = 0;
 
 	/* create minor node */
 	(void) sprintf(devname, "dprov%d", instance);
@@ -1875,7 +1886,7 @@ dprov_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 		return (DDI_FAILURE);
 
 	/* unregister from the crypto framework */
-	if (softc->ds_prov_handle != NULL)
+	if (softc->ds_prov_handle != 0)
 		if ((ret = crypto_unregister_provider(
 		    softc->ds_prov_handle)) != CRYPTO_SUCCESS) {
 			cmn_err(CE_WARN, "dprov_detach: "
@@ -1947,7 +1958,9 @@ dprov_digest_init(crypto_ctx_t *ctx, crypto_mechanism_t *mechanism,
 	    mechanism->cm_type != SHA1_MECH_INFO_TYPE &&
 	    mechanism->cm_type != SHA256_MECH_INFO_TYPE &&
 	    mechanism->cm_type != SHA384_MECH_INFO_TYPE &&
-	    mechanism->cm_type != SHA512_MECH_INFO_TYPE) {
+	    mechanism->cm_type != SHA512_MECH_INFO_TYPE &&
+	    mechanism->cm_type != SHA512_224_MECH_INFO_TYPE &&
+	    mechanism->cm_type != SHA512_256_MECH_INFO_TYPE) {
 		cmn_err(CE_WARN, "dprov_digest_init: unexpected mech type "
 		    "0x%llx\n", (unsigned long long)mechanism->cm_type);
 		return (CRYPTO_MECHANISM_INVALID);
@@ -2656,7 +2669,8 @@ dprov_valid_sign_verif_mech(crypto_mech_type_t mech_type)
 	    mech_type == SHA384_RSA_PKCS_MECH_INFO_TYPE ||
 	    mech_type == SHA512_RSA_PKCS_MECH_INFO_TYPE ||
 	    mech_type == ECDSA_SHA1_MECH_INFO_TYPE ||
-	    mech_type == ECDSA_MECH_INFO_TYPE);
+	    mech_type == ECDSA_MECH_INFO_TYPE ||
+	    mech_type == AES_CMAC_MECH_INFO_TYPE);
 }
 
 static int
@@ -5038,7 +5052,7 @@ dprov_taskq_dispatch(dprov_state_t *softc, dprov_req_t *taskq_req,
     task_func_t *func, int kmflag)
 {
 	if (taskq_dispatch(softc->ds_taskq, func, taskq_req,
-	    kmflag == KM_NOSLEEP ? TQ_NOSLEEP : TQ_SLEEP) == (taskqid_t)0) {
+	    kmflag == KM_NOSLEEP ? TQ_NOSLEEP : TQ_SLEEP) == TASKQID_INVALID) {
 		kmem_free(taskq_req, sizeof (dprov_req_t));
 		return (CRYPTO_HOST_MEMORY);
 	} else

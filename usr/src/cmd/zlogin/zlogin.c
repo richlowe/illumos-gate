@@ -23,6 +23,8 @@
  * Copyright 2013 DEY Storage Systems, Inc.
  * Copyright (c) 2014 Gary Mills
  * Copyright 2015 Nexenta Systems, Inc. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
@@ -612,7 +614,6 @@ process_user_input(int outfd, int infd)
 	char ibuf[ZLOGIN_BUFSIZ];
 	int nbytes;
 	char *buf = ibuf;
-	char c = *buf;
 
 	nbytes = read(STDIN_FILENO, ibuf, ZLOGIN_RDBUFSIZ);
 	if (nbytes == -1 && (errno != EINTR || dead))
@@ -625,7 +626,7 @@ process_user_input(int outfd, int infd)
 	if (nbytes == 0)
 		return (1);
 
-	for (c = *buf; nbytes > 0; c = *buf, --nbytes) {
+	for (char c = *buf; nbytes > 0; c = *buf, --nbytes) {
 		buf++;
 		if (beginning_of_line && !nocmdchar) {
 			beginning_of_line = B_FALSE;
@@ -767,8 +768,8 @@ process_output(int in_fd, int out_fd)
 	cc = read(in_fd, ibuf, ZLOGIN_BUFSIZ);
 	if (cc == -1 && (errno != EINTR || dead))
 		return (-1);
-	if (cc == 0)	/* EOF */
-		return (-1);
+	if (cc == 0)
+		return (-1);	/* EOF */
 	if (cc == -1)	/* The read was interrupted. */
 		return (0);
 
@@ -788,10 +789,10 @@ process_output(int in_fd, int out_fd)
 /*
  * This is the main I/O loop, and is shared across all zlogin modes.
  * Parameters:
- * 	stdin_fd:  The fd representing 'stdin' for the slave side; input to
+ *	stdin_fd:  The fd representing 'stdin' for the slave side; input to
  *		   the zone will be written here.
  *
- * 	appin_fd:  The fd representing the other end of the 'stdin' pipe (when
+ *	appin_fd:  The fd representing the other end of the 'stdin' pipe (when
  *		   we're running non-interactive); used in process_raw_input
  *		   to ensure we don't fill up the application's stdin pipe.
  *

@@ -22,7 +22,7 @@
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-# Copyright 2018 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #	This Makefile defines file modules in the directory uts/i86xpv
@@ -74,6 +74,7 @@ CORE_OBJS +=			\
 	mach_kdi.o		\
 	mach_sysconfig.o	\
 	machdep.o		\
+	md_clear.o		\
 	mem_config_stubs.o	\
 	memnode.o		\
 	microcode.o		\
@@ -94,6 +95,7 @@ CORE_OBJS +=			\
 	pci_orion.o		\
 	pmem.o			\
 	ppage.o			\
+	smt.o			\
 	startup.o		\
 	ssp.o			\
 	xpv_timestamp.o		\
@@ -110,7 +112,7 @@ CORE_OBJS += $(SMBIOS_OBJS)
 
 #
 # These get compiled twice:
-# - once in the dboot (direct boot) identity mapped code 
+# - once in the dboot (direct boot) identity mapped code
 # - once for use during early startup in unix
 #
 BOOT_DRIVER_OBJS =		\
@@ -119,6 +121,7 @@ BOOT_DRIVER_OBJS =		\
 	boot_keyboard_table.o	\
 	boot_mmu.o		\
 	boot_vga.o		\
+	boot_fb.o		\
 	boot_xconsole.o		\
 	dboot_multiboot2.o	\
 	$(FONT_OBJS)
@@ -151,20 +154,12 @@ CORE_OBJS +=			\
 #	locore.o is special. It must be the first file relocated so that it
 #	it is relocated just where its name implies.
 #
-SPECIAL_OBJS_32 +=		\
+SPECIAL_OBJS +=			\
 	locore.o		\
 	fast_trap_asm.o		\
 	interrupt.o		\
-	syscall_asm.o
-
-SPECIAL_OBJS_64 +=		\
-	locore.o		\
-	fast_trap_asm.o		\
-	interrupt.o		\
-	syscall_asm_amd64.o 	\
+	syscall_asm_amd64.o	\
 	kpti_trampolines.o
-
-SPECIAL_OBJS += $(SPECIAL_OBJS_$(CLASS))
 
 #
 # object files used to boot into full kernel
@@ -193,7 +188,8 @@ BALLOON_OBJS += balloon_drv.o
 DOMCAPS_OBJS += domcaps.o
 EVTCHN_OBJS += evtchn_dev.o
 GFX_PRIVATE_OBJS += gfx_private.o gfxp_pci.o gfxp_segmap.o \
-		    gfxp_devmap.o gfxp_vgatext.o gfxp_vm.o vgasubr.o
+		    gfxp_devmap.o gfxp_vgatext.o gfxp_vm.o vgasubr.o \
+		    gfxp_fb.o gfxp_bitmap.o
 IOAT_OBJS += ioat.o ioat_rs.o ioat_ioctl.o ioat_chan.o
 ISANEXUS_OBJS += isa.o dma_engine.o i8237A.o
 PCI_E_NEXUS_OBJS += npe.o npe_misc.o
@@ -234,7 +230,7 @@ INC_PATH	+= -I$(UTSBASE)/i86xpv -I$(UTSBASE)/i86pc -I$(SRC)/common \
 # since only C headers are included when #defined(__lint) is true.
 #
 
-ASSYM_DEPS      += 		\
+ASSYM_DEPS      +=		\
 	copy.o			\
 	desctbls_asm.o		\
 	ddi_i86_asm.o		\
@@ -250,7 +246,6 @@ ASSYM_DEPS      += 		\
 	panic_asm.o		\
 	sseblk.o		\
 	swtch.o			\
-	syscall_asm.o		\
 	syscall_asm_amd64.o
 
 $(KDI_ASSYM_DEPS:%=$(OBJS_DIR)/%):	$(DSF_DIR)/$(OBJS_DIR)/kdi_assym.h

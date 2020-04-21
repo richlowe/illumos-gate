@@ -23,6 +23,10 @@
  */
 
 /*
+ * Copyright (c) 2018, Joyent, Inc.
+ */
+
+/*
  * This file contains the source of the general purpose event channel extension
  * to the sysevent framework. This implementation is made up mainly of four
  * layers of functionality: the event queues (evch_evq_*()), the handling of
@@ -559,7 +563,7 @@ evch_evq_destroy(evch_eventq_t *eqp)
 
 	ASSERT(evch_dl_getnum(&eqp->eq_subscr) == 0);
 	/* Kill delivery thread */
-	if (eqp->eq_thrid != NULL) {
+	if (eqp->eq_thrid != 0) {
 		mutex_enter(&eqp->eq_queuemx);
 		eqp->eq_tabortflag = 1;
 		eqp->eq_holdmode = 0;
@@ -1651,6 +1655,8 @@ evch_chrdevent_init(evch_chan_t *chp, char *subid)
 	pmqstat = evch_evq_status(chp->ch_queue);
 	if (pmqstat == 0)
 		evch_evq_stop(chp->ch_queue);
+
+	psqstat = 0;
 	if (sdp != NULL) {
 		psqstat = evch_evq_status(sdp->sd_queue);
 		if (psqstat == 0)
@@ -1976,7 +1982,7 @@ int
 sysevent_evc_control(evchan_t *scp, int cmd, ...)
 {
 	va_list		ap;
-	evch_chan_t	*chp = ((evch_bind_t *)scp)->bd_channel;
+	evch_chan_t	*chp;
 	uint32_t	*chlenp;
 	uint32_t	chlen;
 	uint32_t	ochlen;
@@ -1985,6 +1991,8 @@ sysevent_evc_control(evchan_t *scp, int cmd, ...)
 	if (scp == NULL) {
 		return (EINVAL);
 	}
+
+	chp = ((evch_bind_t *)scp)->bd_channel;
 
 	va_start(ap, cmd);
 	mutex_enter(&chp->ch_mutex);

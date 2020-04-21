@@ -22,6 +22,7 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libpool.a
 VERS =		.1
@@ -40,12 +41,12 @@ include ../../Makefile.lib
 # Adding -lxml2 to LDLIBS would cause lint to complain as there is no .ln file
 # for libxml2, so add it to DYNFLAGS
 DYNFLAGS +=	-lxml2
+NATIVE_LIBS +=	libxml2.so
 
-LIBS =		$(DYNLIB) $(LINTLIB)
+LIBS =		$(DYNLIB)
 LDLIBS +=	-lscf -lnvpair -lexacct -lc
 
 SRCDIR =	../common
-$(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
 
 CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-D_REENTRANT -D_FILE_OFFSET_BITS=64 \
@@ -53,12 +54,13 @@ CPPFLAGS +=	-D_REENTRANT -D_FILE_OFFSET_BITS=64 \
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 .KEEP_STATE:
 
 all: $(LIBS)
-
-lint: lintcheck
 
 include ../../Makefile.targ

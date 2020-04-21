@@ -21,7 +21,7 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
-#
+# Copyright (c) 2018, Joyent, Inc.
 
 LIBRARY =	libshare_autofs.a
 VERS =		.1
@@ -37,21 +37,23 @@ ROOTLIBDIR =	$(ROOT)/usr/lib/fs/autofs
 ROOTLIBDIR64 =	$(ROOT)/usr/lib/fs/autofs/$(MACH64)
 
 LIBSRCS = $(LIBOBJS:%.o=$(SRCDIR)/%.c)
-# we don't want to lint the sources for OTHOBJS since they are pre-existing files
-# that are not lint free.
-lintcheck := SRCS = $(LIBSRCS)
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lshare -lscf -lumem -lc -lxml2
+NATIVE_LIBS +=	libxml2.so
 
 #add nfs/lib directory as part of the include path
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
+
 CPPFLAGS +=	-D_REENTRANT -I$(AUTOFSSMFLIB_DIR) \
 			-I$(ADJUNCT_PROTO)/usr/include/libxml2 \
-  			-I$(SRCDIR)../common
+			-I$(SRCDIR)../common
 
 .KEEP_STATE:
 
@@ -59,15 +61,13 @@ all: $(LIBS)
 
 install: $(ROOTLIBDIR) $(ROOTLIBDIR64) all
 
-lint: lintcheck
-
 pics/%.o:       $(AUTOFSSMFLIB_DIR)/%.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
 
 $(ROOTLIBDIR):
 	$(INS.dir)
- 
+
 $(ROOTLIBDIR64):
 	$(INS.dir)
 

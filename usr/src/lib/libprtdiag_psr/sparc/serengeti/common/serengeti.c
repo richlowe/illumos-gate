@@ -21,12 +21,11 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2020 Peter Tribble.
  *
  * Serengeti Platform specific functions.
  *
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -128,8 +127,8 @@ Prop	*find_prop(Prom_node *pnode, char *name);
 char	*get_node_name(Prom_node *pnode);
 char	*get_node_type(Prom_node *pnode);
 void	add_node(Sys_tree *, Prom_node *);
-void 	display_pci(Board_node *);
-void 	display_ffb(Board_node *, int);
+void	display_pci(Board_node *);
+void	display_ffb(Board_node *, int);
 void	display_io_cards(struct io_card *list);
 void	display_cpu_devices(Sys_tree *tree);
 void	display_cpus(Board_node *board);
@@ -138,7 +137,7 @@ void	display_diaginfo(int flag, Prom_node *root, Sys_tree *tree,
 void	display_hp_fail_fault(Sys_tree *tree, struct system_kstat_data *kstats);
 void	get_failed_parts(void);
 int	display_failed_parts(Sys_tree *tree);
-void	display_memoryconf(Sys_tree *tree, struct grp_info *grps);
+void	display_memoryconf(Sys_tree *tree);
 void	print_us3_memory_line(int portid, int bank_id, uint64_t bank_size,
 	    char *bank_status, uint64_t dimm_size, uint32_t intlv, int seg_id);
 
@@ -706,7 +705,7 @@ serengeti_display_board_info(int state)
 	char tmp_info[DISPLAY_INFO + 1];
 	const char listops[] = "class=sbd";
 	struct cfga_list_data dat;
-	cfga_flags_t flags = NULL;
+	cfga_flags_t flags = 0;
 
 	ret = config_list_ext(0, NULL, &board_cfg, &nlist,
 	    NULL, listops,
@@ -1177,7 +1176,7 @@ display_cpus(Board_node *board)
 /*ARGSUSED3*/
 void
 display_diaginfo(int flag, Prom_node *root, Sys_tree *tree,
-	struct system_kstat_data *kstats)
+    struct system_kstat_data *kstats)
 {
 	log_printf("\n", 0);
 	log_printf("=========================", 0);
@@ -1285,7 +1284,7 @@ display_schizo_revisions(Board_node *bdlist, int mode)
 	char		*status_a, *status_b;
 	char		status[MAX_STATUS_LEN];
 	int		version;
-	int 		node_id;
+	int		node_id;
 #ifdef DEBUG
 	uint32_t	a_notes, b_notes;
 #endif
@@ -1467,7 +1466,7 @@ display_sgsbbc_revisions(Board_node *bdlist)
 	char		*model;
 	char		*status;
 	int		revision;
-	int 		node_id;
+	int		node_id;
 	Board_node	*bnode;
 
 #ifdef DEBUG
@@ -1768,9 +1767,8 @@ display_failed_parts(Sys_tree *tree)
  * This routine displays the memory configuration for all boards in the
  * system.
  */
-/*ARGSUSED0*/
 void
-display_memoryconf(Sys_tree *tree, struct grp_info *grps)
+display_memoryconf(Sys_tree *tree)
 {
 	Board_node	*bnode = tree->bd_list;
 
@@ -1805,14 +1803,14 @@ display_memoryconf(Sys_tree *tree, struct grp_info *grps)
  */
 void
 print_us3_memory_line(int portid, int bank_id, uint64_t bank_size,
-	char *bank_status, uint64_t dimm_size, uint32_t intlv, int seg_id)
+    char *bank_status, uint64_t dimm_size, uint32_t intlv, int seg_id)
 {
 	int		nodeid, board, mcid;
 	char		fru_name[MAX_FRU_NAME_LEN] = "";
 
-	mcid 		= SG_PORTID_TO_SAFARI_ID(portid);
-	nodeid 		= SG_PORTID_TO_NODEID(portid);
-	board 		= SG_PORTID_TO_BOARD_NUM(portid);
+	mcid		= SG_PORTID_TO_SAFARI_ID(portid);
+	nodeid		= SG_PORTID_TO_NODEID(portid);
+	board		= SG_PORTID_TO_BOARD_NUM(portid);
 
 	SG_SET_FRU_NAME_NODE(fru_name, nodeid);
 	SG_SET_FRU_NAME_CPU_BOARD(fru_name, board);

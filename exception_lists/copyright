@@ -24,6 +24,7 @@
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2011 by Delphix. All rights reserved.
 # Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 syntax: glob
@@ -56,11 +57,6 @@ usr/src/cmd/acpi/common/utmath.c
 usr/src/cmd/acpi/common/utnonansi.c
 usr/src/cmd/acpi/common/utprint.c
 usr/src/cmd/acpi/common/utxferror.c
-usr/src/cmd/cmd-inet/usr.bin/dns-sd/ClientCommon.c
-usr/src/cmd/cmd-inet/usr.bin/dns-sd/ClientCommon.h
-usr/src/cmd/cmd-inet/usr.bin/dns-sd/dns-sd.c
-usr/src/cmd/cmd-inet/usr.lib/mdnsd/THIRDPARTYLICENSE
-usr/src/cmd/cmd-inet/usr.lib/mdnsd/*.[ch]
 usr/src/cmd/dtrace/test/tst/common/*/*.out
 usr/src/cmd/krb5/kadmin/cli/kadmin_ct.c
 usr/src/cmd/krb5/kadmin/cli/kadmin.h
@@ -86,6 +82,7 @@ usr/src/cmd/krb5/ldap_util/kdb5_ldap_realm.h
 usr/src/cmd/krb5/ldap_util/kdb5_ldap_services.h
 usr/src/cmd/localedef/data/manual-input.UTF-8
 usr/src/cmd/smbsrv/smbd/eventlog.dll
+usr/src/cmd/smbsrv/testoplock/case*
 usr/src/cmd/terminfo/termcap.src
 usr/src/cmd/terminfo/terminfo.src
 usr/src/common/bzip2/LICENSE
@@ -100,8 +97,13 @@ usr/src/common/bzip2/decompress.c
 usr/src/common/bzip2/bzlib_private.h
 usr/src/common/bzip2/huffman.c
 usr/src/common/ficl/*
+usr/src/contrib/*
+usr/src/data/amdpmc/*
 usr/src/data/hwdata/THIRDPARTYLICENSE.efifixes.descrip
 usr/src/data/hwdata/THIRDPARTYLICENSE.efifixes.tmpl
+usr/src/data/hwdata/pci.ids
+usr/src/data/hwdata/usb.ids
+usr/src/data/perfmon/*
 usr/src/grub/grub-0.97/stage2/Makefile.am
 usr/src/grub/grub-0.97/stage2/builtins.c
 usr/src/grub/grub-0.97/stage2/disk_io.c
@@ -373,13 +375,10 @@ usr/src/lib/krb5/ss/mit-sipb-copyright.h
 usr/src/lib/krb5/ss/options.c
 usr/src/lib/krb5/ss/std_rqs.c
 usr/src/lib/krb5/ss/utils.c
-usr/src/lib/libdns_sd/THIRDPARTYLICENSE
-usr/src/lib/libdns_sd/common/*.[ch]
-usr/src/lib/libdns_sd/java/common/JNISupport.c
-usr/src/lib/libdns_sd/java/com/apple/dnssd/*.java
-usr/src/lib/libdns_sd/java/com/apple/dnssd/docs/examples/src/*
+usr/src/lib/libast/common/tm/tvsleep.c
 usr/src/lib/librstp/common/*.[ch]
 usr/src/lib/librstp/common/[CRT]*
+usr/src/lib/libshell/common/bltins/sleep.c
 # these have copyrights that the nit checker doesn't grok
 usr/src/lib/libsmbfs/netsmb/spnego.h
 usr/src/lib/libsmbfs/smb/derparse.[ch]
@@ -397,6 +396,7 @@ usr/src/tools/btxld/btxld.c
 usr/src/tools/btxld/elfh.c
 usr/src/tools/btxld/elfh.h
 usr/src/tools/btxld/imgact_aout.h
+usr/src/tools/smatch/src/*
 usr/src/uts/intel/nsmb/ioc_check.ref
 usr/src/uts/intel/os/splashimage.xpm
 usr/src/uts/common/gssapi/mechs/krb5/crypto/block_size.c
@@ -425,6 +425,7 @@ usr/src/uts/common/gssapi/mechs/krb5/mech/util_seed.c
 usr/src/uts/common/gssapi/mechs/krb5/mech/util_seqnum.c
 usr/src/uts/common/gssapi/mechs/krb5/mech/val_cred.c
 usr/src/uts/common/io/cxgbe/*
+usr/src/uts/common/io/i40e/core/*
 usr/src/uts/common/io/iwn/THIRDPARTYLICENSE
 usr/src/uts/common/io/iwn/THIRDPARTYLICENSE.descrip
 usr/src/uts/common/io/iwn/fw-iw/THIRDPARTYLICENSE

@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 1994, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2018, Joyent, Inc.
 #
 # Makefile for name service cache daemon
 #
@@ -59,9 +60,12 @@ LINTFLAGS +=	-erroff=E_NAME_USED_NOT_DEF2
 LINTFLAGS +=	-erroff=E_NAME_DEF_NOT_USED2
 
 CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-type-limits
+
+# not linted
+SMATCH=off
 
 # nscd interposes on many symbols, and must export others for its own dlsym()
 # use, and dlsym() calls from libc.  Itemizing the interfaces within a mapfile
@@ -86,7 +90,7 @@ lint:
 	$(LINT.c) ${SRCS} ${PROGLIBS}
 
 cstyle:
-	${CSTYLE} ${SRCS} 
+	${CSTYLE} ${SRCS}
 
 install: all $(ROOTPROG) $(ROOTMANIFEST) $(ROOTSVCMETHOD)
 

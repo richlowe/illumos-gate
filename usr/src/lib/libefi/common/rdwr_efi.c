@@ -24,6 +24,7 @@
  * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014 Toomas Soome <tsoome@me.com>
  * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <stdio.h>
@@ -44,39 +45,48 @@
 #include <sys/byteorder.h>
 #include <sys/ddi.h>
 
+/*
+ * The original conversion array used simple array index, but since
+ * we do need to take account of VTOC tag numbers from other systems,
+ * we need to provide tag values too, or the array will grow too large.
+ *
+ * Still we will fabricate the missing p_tag values.
+ */
 static struct uuid_to_ptag {
 	struct uuid	uuid;
+	ushort_t	p_tag;
 } conversion_array[] = {
-	{ EFI_UNUSED },
-	{ EFI_BOOT },
-	{ EFI_ROOT },
-	{ EFI_SWAP },
-	{ EFI_USR },
-	{ EFI_BACKUP },
-	{ 0 },			/* STAND is never used */
-	{ EFI_VAR },
-	{ EFI_HOME },
-	{ EFI_ALTSCTR },
-	{ 0 },			/* CACHE is never used */
-	{ EFI_RESERVED },
-	{ EFI_SYSTEM },
-	{ EFI_LEGACY_MBR },
-	{ EFI_SYMC_PUB },
-	{ EFI_SYMC_CDS },
-	{ EFI_MSFT_RESV },
-	{ EFI_DELL_BASIC },
-	{ EFI_DELL_RAID },
-	{ EFI_DELL_SWAP },
-	{ EFI_DELL_LVM },
-	{ EFI_DELL_RESV },
-	{ EFI_AAPL_HFS },
-	{ EFI_AAPL_UFS },
-	{ EFI_BIOS_BOOT },
-	{ EFI_FREEBSD_BOOT },
-	{ EFI_FREEBSD_SWAP },
-	{ EFI_FREEBSD_UFS },
-	{ EFI_FREEBSD_VINUM },
-	{ EFI_FREEBSD_ZFS }
+	{ EFI_UNUSED, V_UNASSIGNED },
+	{ EFI_BOOT, V_BOOT },
+	{ EFI_ROOT, V_ROOT },
+	{ EFI_SWAP, V_SWAP },
+	{ EFI_USR, V_USR },
+	{ EFI_BACKUP, V_BACKUP },
+	{ EFI_VAR, V_VAR },
+	{ EFI_HOME, V_HOME },
+	{ EFI_ALTSCTR, V_ALTSCTR },
+	{ EFI_RESERVED, V_RESERVED },
+	{ EFI_SYSTEM, V_SYSTEM },		/* V_SYSTEM is 0xc */
+	{ EFI_LEGACY_MBR, 0x10 },
+	{ EFI_SYMC_PUB, 0x11 },
+	{ EFI_SYMC_CDS, 0x12 },
+	{ EFI_MSFT_RESV, 0x13 },
+	{ EFI_DELL_BASIC, 0x14 },
+	{ EFI_DELL_RAID, 0x15 },
+	{ EFI_DELL_SWAP, 0x16 },
+	{ EFI_DELL_LVM, 0x17 },
+	{ EFI_DELL_RESV, 0x19 },
+	{ EFI_AAPL_HFS, 0x1a },
+	{ EFI_AAPL_UFS, 0x1b },
+	{ EFI_AAPL_ZFS, 0x1c },
+	{ EFI_AAPL_APFS, 0x1d },
+	{ EFI_BIOS_BOOT, V_BIOS_BOOT },		/* V_BIOS_BOOT is 0x18 */
+	{ EFI_FREEBSD_BOOT,  V_FREEBSD_BOOT },
+	{ EFI_FREEBSD_SWAP, V_FREEBSD_SWAP },
+	{ EFI_FREEBSD_UFS, V_FREEBSD_UFS },
+	{ EFI_FREEBSD_VINUM, V_FREEBSD_VINUM },
+	{ EFI_FREEBSD_ZFS, V_FREEBSD_ZFS },
+	{ EFI_FREEBSD_NANDFS, V_FREEBSD_NANDFS }
 };
 
 /*
@@ -144,6 +154,19 @@ read_disk_info(int fd, diskaddr_t *capacity, uint_t *lbsize)
 #define	MAX_PARTS	((4294967295UL - sizeof (struct dk_gpt)) / \
 			    sizeof (struct dk_part))
 
+/*
+ * The EFI reserved partition size is 8 MiB. This calculates the number of
+ * sectors required to store 8 MiB, taking into account the device's sector
+ * size.
+ */
+uint_t
+efi_reserved_sectors(dk_gpt_t *efi)
+{
+	/* roundup to sector size */
+	return ((EFI_MIN_RESV_SIZE * DEV_BSIZE + efi->efi_lbasize - 1) /
+	    efi->efi_lbasize);
+}
+
 int
 efi_alloc_and_init(int fd, uint32_t nparts, struct dk_gpt **vtoc)
 {
@@ -179,7 +202,7 @@ efi_alloc_and_init(int fd, uint32_t nparts, struct dk_gpt **vtoc)
 	length = sizeof (struct dk_gpt) +
 	    sizeof (struct dk_part) * (nparts - 1);
 
-	if ((*vtoc = calloc(length, 1)) == NULL)
+	if ((*vtoc = calloc(1, length)) == NULL)
 		return (-1);
 
 	vptr = *vtoc;
@@ -220,7 +243,7 @@ efi_alloc_and_read(int fd, struct dk_gpt **vtoc)
 	if (read_disk_info(fd, &capacity, &lbsize) != 0)
 		return (VT_ERROR);
 
-	if ((mbr = calloc(lbsize, 1)) == NULL)
+	if ((mbr = calloc(1, lbsize)) == NULL)
 		return (VT_ERROR);
 
 	if ((ioctl(fd, DKIOCGMBOOT, (caddr_t)mbr)) == -1) {
@@ -247,7 +270,7 @@ efi_alloc_and_read(int fd, struct dk_gpt **vtoc)
 	nparts = EFI_MIN_ARRAY_SIZE / sizeof (efi_gpe_t);
 	length = (int) sizeof (struct dk_gpt) +
 	    (int) sizeof (struct dk_part) * (nparts - 1);
-	if ((*vtoc = calloc(length, 1)) == NULL)
+	if ((*vtoc = calloc(1, length)) == NULL)
 		return (VT_ERROR);
 
 	(*vtoc)->efi_nparts = nparts;
@@ -331,9 +354,8 @@ check_label(int fd, dk_efi_t *dk_ioc)
 		if (efi_debug)
 			(void) fprintf(stderr,
 			    "Bad EFI CRC: 0x%x != 0x%x\n",
-			    crc,
-			    LE_32(efi_crc32((unsigned char *)efi,
-			    sizeof (struct efi_gpt))));
+			    crc, LE_32(efi_crc32((unsigned char *)efi,
+			    LE_32(efi->efi_gpt_HeaderSize))));
 		return (VT_EINVAL);
 	}
 
@@ -414,7 +436,7 @@ efi_read(int fd, struct dk_gpt *vtoc)
 		}
 	}
 
-	if ((dk_ioc.dki_data = calloc(label_len, 1)) == NULL)
+	if ((dk_ioc.dki_data = calloc(1, label_len)) == NULL)
 		return (VT_ERROR);
 
 	dk_ioc.dki_length = disk_info.dki_lbsize;
@@ -563,7 +585,8 @@ efi_read(int fd, struct dk_gpt *vtoc)
 			if (bcmp(&vtoc->efi_parts[i].p_guid,
 			    &conversion_array[j].uuid,
 			    sizeof (struct uuid)) == 0) {
-				vtoc->efi_parts[i].p_tag = j;
+				vtoc->efi_parts[i].p_tag =
+				    conversion_array[j].p_tag;
 				break;
 			}
 		}
@@ -704,7 +727,7 @@ write_pmbr(int fd, struct dk_gpt *vtoc)
 	hardware_workarounds(&slot, &active);
 
 	len = (vtoc->efi_lbasize == 0) ? sizeof (mb) : vtoc->efi_lbasize;
-	buf = calloc(len, 1);
+	buf = calloc(1, len);
 
 	/*
 	 * Preserve any boot code and disk signature if the first block is
@@ -730,10 +753,10 @@ write_pmbr(int fd, struct dk_gpt *vtoc)
 	cp = (uchar_t *)&mb.parts[slot * sizeof (struct ipart)];
 	/* bootable or not */
 	*cp++ = active ? ACTIVE : NOTACTIVE;
-	/* beginning CHS; 0xffffff if not representable */
-	*cp++ = 0xff;
-	*cp++ = 0xff;
-	*cp++ = 0xff;
+	/* beginning CHS; same as starting LBA (but one-based) */
+	*cp++ = 0x0;
+	*cp++ = 0x2;
+	*cp++ = 0x0;
 	/* OS type */
 	*cp++ = EFI_PMBR;
 	/* ending CHS; 0xffffff if not representable */
@@ -929,7 +952,7 @@ efi_use_whole_disk(int fd)
 	 * physically non-zero partition.
 	 */
 	if (pl_start + pl_size - 1 == efi_label->efi_last_u_lba -
-	    EFI_MIN_RESV_SIZE) {
+	    efi_reserved_sectors(efi_label)) {
 		efi_label->efi_parts[phy_last_slice].p_size +=
 		    efi_label->efi_last_lba - efi_label->efi_altern_lba;
 	}
@@ -1010,7 +1033,7 @@ efi_write(int fd, struct dk_gpt *vtoc)
 	 * for backup GPT header.
 	 */
 	lba_backup_gpt_hdr = vtoc->efi_last_u_lba + 1 + nblocks;
-	if ((dk_ioc.dki_data = calloc(dk_ioc.dki_length, 1)) == NULL)
+	if ((dk_ioc.dki_data = calloc(1, dk_ioc.dki_length)) == NULL)
 		return (VT_ERROR);
 
 	efi = dk_ioc.dki_data;
@@ -1018,7 +1041,7 @@ efi_write(int fd, struct dk_gpt *vtoc)
 	/* stuff user's input into EFI struct */
 	efi->efi_gpt_Signature = LE_64(EFI_SIGNATURE);
 	efi->efi_gpt_Revision = LE_32(vtoc->efi_version); /* 0x02000100 */
-	efi->efi_gpt_HeaderSize = LE_32(sizeof (struct efi_gpt));
+	efi->efi_gpt_HeaderSize = LE_32(EFI_HEADER_SIZE);
 	efi->efi_gpt_Reserved1 = 0;
 	efi->efi_gpt_MyLBA = LE_64(1ULL);
 	efi->efi_gpt_AlternateLBA = LE_64(lba_backup_gpt_hdr);
@@ -1037,7 +1060,8 @@ efi_write(int fd, struct dk_gpt *vtoc)
 		    j < sizeof (conversion_array) /
 		    sizeof (struct uuid_to_ptag); j++) {
 
-			if (vtoc->efi_parts[i].p_tag == j) {
+			if (vtoc->efi_parts[i].p_tag ==
+			    conversion_array[j].p_tag) {
 				UUID_LE_CONVERT(
 				    efi_parts[i].efi_gpe_PartitionTypeGUID,
 				    conversion_array[j].uuid);
@@ -1082,8 +1106,8 @@ efi_write(int fd, struct dk_gpt *vtoc)
 	efi->efi_gpt_PartitionEntryArrayCRC32 =
 	    LE_32(efi_crc32((unsigned char *)efi_parts,
 	    vtoc->efi_nparts * (int)sizeof (struct efi_gpe)));
-	efi->efi_gpt_HeaderCRC32 =
-	    LE_32(efi_crc32((unsigned char *)efi, sizeof (struct efi_gpt)));
+	efi->efi_gpt_HeaderCRC32 = LE_32(efi_crc32((unsigned char *)efi,
+	    EFI_HEADER_SIZE));
 
 	if (efi_ioctl(fd, DKIOCSETEFI, &dk_ioc) == -1) {
 		free(dk_ioc.dki_data);
@@ -1130,8 +1154,7 @@ efi_write(int fd, struct dk_gpt *vtoc)
 	efi->efi_gpt_PartitionEntryLBA = LE_64(vtoc->efi_last_u_lba + 1);
 	efi->efi_gpt_HeaderCRC32 = 0;
 	efi->efi_gpt_HeaderCRC32 =
-	    LE_32(efi_crc32((unsigned char *)dk_ioc.dki_data,
-	    sizeof (struct efi_gpt)));
+	    LE_32(efi_crc32((unsigned char *)dk_ioc.dki_data, EFI_HEADER_SIZE));
 
 	if (efi_ioctl(fd, DKIOCSETEFI, &dk_ioc) == -1) {
 		if (efi_debug) {
@@ -1184,10 +1207,12 @@ efi_err_check(struct dk_gpt *vtoc)
 	int			i, j;
 	diskaddr_t		istart, jstart, isize, jsize, endsect;
 	int			overlap = 0;
+	uint_t			reserved;
 
 	/*
 	 * make sure no partitions overlap
 	 */
+	reserved = efi_reserved_sectors(vtoc);
 	for (i = 0; i < vtoc->efi_nparts; i++) {
 		/* It can't be unassigned and have an actual size */
 		if ((vtoc->efi_parts[i].p_tag == V_UNASSIGNED) &&
@@ -1206,10 +1231,10 @@ efi_err_check(struct dk_gpt *vtoc)
 				    "%d\n", i);
 			}
 			resv_part = i;
-			if (vtoc->efi_parts[i].p_size != EFI_MIN_RESV_SIZE)
+			if (vtoc->efi_parts[i].p_size != reserved)
 				(void) fprintf(stderr,
 				    "Warning: reserved partition size must "
-				    "be %d sectors\n", EFI_MIN_RESV_SIZE);
+				    "be %u sectors\n", reserved);
 		}
 		if ((vtoc->efi_parts[i].p_start < vtoc->efi_first_u_lba) ||
 		    (vtoc->efi_parts[i].p_start > vtoc->efi_last_u_lba)) {

@@ -6,7 +6,8 @@
 # Copyright (c) 1980 Regents of the University of California.
 # All rights reserved.  The Berkeley Software License Agreement
 # specifies the terms and conditions for redistribution.
-
+#
+# Copyright (c) 2018, Joyent, Inc.
 #
 # C Shell with process control; VM/UNIX VAX Makefile
 # Bill Joy UC Berkeley; Jim Kulp IIASA, Austria
@@ -25,7 +26,7 @@ CPPFLAGS += -D_FILE_OFFSET_BITS=64
 LDLIBS += -lcurses
 
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-implicit-int
 CERRWARN += -_gcc=-Wno-unused-function
@@ -33,6 +34,9 @@ CERRWARN += -_gcc=-Wno-unused-variable
 CERRWARN += -_gcc=-Wno-clobbered
 CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-extra
+
+# "missing type for func"
+SMATCH=off
 
 MAPFILES =	../mapfile-intf $(MAPFILE.NGB)
 LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)

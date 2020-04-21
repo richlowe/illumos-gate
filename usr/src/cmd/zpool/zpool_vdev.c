@@ -21,7 +21,8 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013, 2015 by Delphix. All rights reserved.
+ * Copyright (c) 2013, 2018 by Delphix. All rights reserved.
+ * Copyright (c) 2016, 2017 Intel Corporation.
  * Copyright 2016 Igor Kozhukhov <ikozhukhov@gmail.com>.
  */
 
@@ -29,15 +30,15 @@
  * Functions to convert between a list of vdevs and an nvlist representing the
  * configuration.  Each entry in the list can be one of:
  *
- * 	Device vdevs
- * 		disk=(path=..., devid=...)
- * 		file=(path=...)
+ *	Device vdevs
+ *		disk=(path=..., devid=...)
+ *		file=(path=...)
  *
- * 	Group vdevs
- * 		raidz[1|2]=(...)
- * 		mirror=(...)
+ *	Group vdevs
+ *		raidz[1|2]=(...)
+ *		mirror=(...)
  *
- * 	Hot spares
+ *	Hot spares
  *
  * While the underlying implementation supports it, group vdevs cannot contain
  * other group vdevs.  All userland verification of devices is contained within
@@ -50,15 +51,15 @@
  * The only function exported by this file is 'make_root_vdev'.  The
  * function performs several passes:
  *
- * 	1. Construct the vdev specification.  Performs syntax validation and
+ *	1. Construct the vdev specification.  Performs syntax validation and
  *         makes sure each device is valid.
- * 	2. Check for devices in use.  Using libdiskmgt, makes sure that no
+ *	2. Check for devices in use.  Using libdiskmgt, makes sure that no
  *         devices are also in use.  Some can be overridden using the 'force'
  *         flag, others cannot.
- * 	3. Check for replication errors if the 'force' flag is not specified.
+ *	3. Check for replication errors if the 'force' flag is not specified.
  *         validates that the replication level is consistent across the
  *         entire pool.
- * 	4. Call libzfs to label any whole disks with an EFI label.
+ *	4. Call libzfs to label any whole disks with an EFI label.
  */
 
 #include <assert.h>
@@ -68,7 +69,9 @@
 #include <libdiskmgt.h>
 #include <libintl.h>
 #include <libnvpair.h>
+#include <libzutil.h>
 #include <limits.h>
+#include <sys/spa.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -193,7 +196,7 @@ check_disk(const char *name, dm_descriptor_t disk, int force, int isspare)
 	 * because we already have an alias handle open for the device.
 	 */
 	if ((drive = dm_get_associated_descriptors(disk, DM_DRIVE,
-	    &err)) == NULL || *drive == NULL) {
+	    &err)) == NULL || *drive == 0) {
 		if (err)
 			libdiskmgt_error(err);
 		return (0);
@@ -213,7 +216,7 @@ check_disk(const char *name, dm_descriptor_t disk, int force, int isspare)
 	 * It is possible that the user has specified a removable media drive,
 	 * and the media is not present.
 	 */
-	if (*media == NULL) {
+	if (*media == 0) {
 		dm_free_descriptors(media);
 		vdev_error(gettext("'%s' has no media in drive\n"), name);
 		return (-1);
@@ -235,7 +238,7 @@ check_disk(const char *name, dm_descriptor_t disk, int force, int isspare)
 	 * Iterate over all slices and report any errors.  We don't care about
 	 * overlapping slices because we are using the whole disk.
 	 */
-	for (i = 0; slice[i] != NULL; i++) {
+	for (i = 0; slice[i] != 0; i++) {
 		char *name = dm_get_name(slice[i], &err);
 
 		if (check_slice(name, force, B_TRUE, isspare) != 0)
@@ -264,7 +267,7 @@ check_device(const char *path, boolean_t force, boolean_t isspare)
 	dev = strrchr(path, '/');
 	assert(dev != NULL);
 	dev++;
-	if ((desc = dm_get_descriptor_by_name(DM_ALIAS, dev, &err)) != NULL) {
+	if ((desc = dm_get_descriptor_by_name(DM_ALIAS, dev, &err)) != 0) {
 		err = check_disk(path, desc, force, isspare);
 		dm_free_descriptor(desc);
 		return (err);
@@ -382,18 +385,19 @@ is_whole_disk(const char *arg)
  * device, fill in the device id to make a complete nvlist.  Valid forms for a
  * leaf vdev are:
  *
- * 	/dev/dsk/xxx	Complete disk path
- * 	/xxx		Full path to file
- * 	xxx		Shorthand for /dev/dsk/xxx
+ *	/dev/dsk/xxx	Complete disk path
+ *	/xxx		Full path to file
+ *	xxx		Shorthand for /dev/dsk/xxx
  */
 static nvlist_t *
-make_leaf_vdev(const char *arg, uint64_t is_log)
+make_leaf_vdev(nvlist_t *props, const char *arg, uint64_t is_log)
 {
 	char path[MAXPATHLEN];
 	struct stat64 statbuf;
 	nvlist_t *vdev = NULL;
 	char *type = NULL;
 	boolean_t wholedisk = B_FALSE;
+	uint64_t ashift = 0;
 
 	/*
 	 * Determine what type of vdev this is, and put the full path into
@@ -471,9 +475,34 @@ make_leaf_vdev(const char *arg, uint64_t is_log)
 	verify(nvlist_add_string(vdev, ZPOOL_CONFIG_PATH, path) == 0);
 	verify(nvlist_add_string(vdev, ZPOOL_CONFIG_TYPE, type) == 0);
 	verify(nvlist_add_uint64(vdev, ZPOOL_CONFIG_IS_LOG, is_log) == 0);
+	if (is_log)
+		verify(nvlist_add_string(vdev, ZPOOL_CONFIG_ALLOCATION_BIAS,
+		    VDEV_ALLOC_BIAS_LOG) == 0);
 	if (strcmp(type, VDEV_TYPE_DISK) == 0)
 		verify(nvlist_add_uint64(vdev, ZPOOL_CONFIG_WHOLE_DISK,
 		    (uint64_t)wholedisk) == 0);
+
+	if (props != NULL) {
+		char *value = NULL;
+
+		if (nvlist_lookup_string(props,
+		    zpool_prop_to_name(ZPOOL_PROP_ASHIFT), &value) == 0) {
+			if (zfs_nicestrtonum(NULL, value, &ashift) != 0) {
+				(void) fprintf(stderr,
+				    gettext("ashift must be a number.\n"));
+				return (NULL);
+			}
+			if (ashift != 0 &&
+			    (ashift < ASHIFT_MIN || ashift > ASHIFT_MAX)) {
+				(void) fprintf(stderr,
+				    gettext("invalid 'ashift=%" PRIu64 "' "
+				    "property: only values between %" PRId32 " "
+				    "and %" PRId32 " are allowed.\n"),
+				    ashift, ASHIFT_MIN, ASHIFT_MAX);
+				return (NULL);
+			}
+		}
+	}
 
 	/*
 	 * For a whole disk, defer getting its devid until after labeling it.
@@ -510,6 +539,9 @@ make_leaf_vdev(const char *arg, uint64_t is_log)
 		(void) close(fd);
 	}
 
+	if (ashift > 0)
+		(void) nvlist_add_uint64(vdev, ZPOOL_CONFIG_ASHIFT, ashift);
+
 	return (vdev);
 }
 
@@ -517,14 +549,17 @@ make_leaf_vdev(const char *arg, uint64_t is_log)
  * Go through and verify the replication level of the pool is consistent.
  * Performs the following checks:
  *
- * 	For the new spec, verifies that devices in mirrors and raidz are the
- * 	same size.
+ *	For the new spec, verifies that devices in mirrors and raidz are the
+ *	same size.
  *
- * 	If the current configuration already has inconsistent replication
- * 	levels, ignore any other potential problems in the new spec.
+ *	If the current configuration already has inconsistent replication
+ *	levels, ignore any other potential problems in the new spec.
  *
- * 	Otherwise, make sure that the current spec (if there is one) and the new
- * 	spec have consistent replication levels.
+ *	Otherwise, make sure that the current spec (if there is one) and the new
+ *	spec have consistent replication levels.
+ *
+ *	If there is no current spec (create), make sure new spec has at least
+ *	one general purpose vdev.
  */
 typedef struct replication_level {
 	char *zprl_type;
@@ -533,6 +568,19 @@ typedef struct replication_level {
 } replication_level_t;
 
 #define	ZPOOL_FUZZ	(16 * 1024 * 1024)
+
+static boolean_t
+is_raidz_mirror(replication_level_t *a, replication_level_t *b,
+    replication_level_t **raidz, replication_level_t **mirror)
+{
+	if (strcmp(a->zprl_type, "raidz") == 0 &&
+	    strcmp(b->zprl_type, "mirror") == 0) {
+		*raidz = a;
+		*mirror = b;
+		return (B_TRUE);
+	}
+	return (B_FALSE);
+}
 
 /*
  * Given a list of toplevel vdevs, return the current replication level.  If
@@ -551,6 +599,7 @@ get_replication(nvlist_t *nvroot, boolean_t fatal)
 	replication_level_t lastrep = {0};
 	replication_level_t rep;
 	replication_level_t *ret;
+	replication_level_t *raidz, *mirror;
 	boolean_t dontreport;
 
 	ret = safe_malloc(sizeof (replication_level_t));
@@ -731,11 +780,39 @@ get_replication(nvlist_t *nvroot, boolean_t fatal)
 
 		/*
 		 * At this point, we have the replication of the last toplevel
-		 * vdev in 'rep'.  Compare it to 'lastrep' to see if its
+		 * vdev in 'rep'.  Compare it to 'lastrep' to see if it is
 		 * different.
 		 */
 		if (lastrep.zprl_type != NULL) {
-			if (strcmp(lastrep.zprl_type, rep.zprl_type) != 0) {
+			if (is_raidz_mirror(&lastrep, &rep, &raidz, &mirror) ||
+			    is_raidz_mirror(&rep, &lastrep, &raidz, &mirror)) {
+				/*
+				 * Accepted raidz and mirror when they can
+				 * handle the same number of disk failures.
+				 */
+				if (raidz->zprl_parity !=
+				    mirror->zprl_children - 1) {
+					if (ret != NULL)
+						free(ret);
+					ret = NULL;
+					if (fatal)
+						vdev_error(gettext(
+						    "mismatched replication "
+						    "level: "
+						    "%s and %s vdevs with "
+						    "different redundancy, "
+						    "%llu vs. %llu (%llu-way) "
+						    "are present\n"),
+						    raidz->zprl_type,
+						    mirror->zprl_type,
+						    raidz->zprl_parity,
+						    mirror->zprl_children - 1,
+						    mirror->zprl_children);
+					else
+						return (NULL);
+				}
+			} else if (strcmp(lastrep.zprl_type, rep.zprl_type) !=
+			    0) {
 				if (ret != NULL)
 					free(ret);
 				ret = NULL;
@@ -798,6 +875,7 @@ check_replication(nvlist_t *config, nvlist_t *newroot)
 	nvlist_t **child;
 	uint_t	children;
 	replication_level_t *current = NULL, *new;
+	replication_level_t *raidz, *mirror;
 	int ret;
 
 	/*
@@ -845,7 +923,21 @@ check_replication(nvlist_t *config, nvlist_t *newroot)
 	 */
 	ret = 0;
 	if (current != NULL) {
-		if (strcmp(current->zprl_type, new->zprl_type) != 0) {
+		if (is_raidz_mirror(current, new, &raidz, &mirror) ||
+		    is_raidz_mirror(new, current, &raidz, &mirror)) {
+			if (raidz->zprl_parity != mirror->zprl_children - 1) {
+				vdev_error(gettext(
+				    "mismatched replication level: pool and "
+				    "new vdev with different redundancy, %s "
+				    "and %s vdevs, %llu vs. %llu (%llu-way)\n"),
+				    raidz->zprl_type,
+				    mirror->zprl_type,
+				    raidz->zprl_parity,
+				    mirror->zprl_children - 1,
+				    mirror->zprl_children);
+				ret = -1;
+			}
+		} else if (strcmp(current->zprl_type, new->zprl_type) != 0) {
 			vdev_error(gettext(
 			    "mismatched replication level: pool uses %s "
 			    "and new vdev is %s\n"),
@@ -1033,7 +1125,7 @@ is_spare(nvlist_t *config, const char *path)
 	if (zpool_in_use(g_zfs, fd, &state, &name, &inuse) != 0 ||
 	    !inuse ||
 	    state != POOL_STATE_SPARE ||
-	    zpool_read_label(fd, &label) != 0) {
+	    zpool_read_label(fd, &label, NULL) != 0) {
 		free(name);
 		(void) close(fd);
 		return (B_FALSE);
@@ -1177,6 +1269,13 @@ is_grouping(const char *type, int *mindev, int *maxdev)
 		return (VDEV_TYPE_LOG);
 	}
 
+	if (strcmp(type, VDEV_ALLOC_BIAS_SPECIAL) == 0 ||
+	    strcmp(type, VDEV_ALLOC_BIAS_DEDUP) == 0) {
+		if (mindev != NULL)
+			*mindev = 1;
+		return (type);
+	}
+
 	if (strcmp(type, "cache") == 0) {
 		if (mindev != NULL)
 			*mindev = 1;
@@ -1193,12 +1292,12 @@ is_grouping(const char *type, int *mindev, int *maxdev)
  * because the program is just going to exit anyway.
  */
 nvlist_t *
-construct_spec(int argc, char **argv)
+construct_spec(nvlist_t *props, int argc, char **argv)
 {
 	nvlist_t *nvroot, *nv, **top, **spares, **l2cache;
 	int t, toplevels, mindev, maxdev, nspares, nlogs, nl2cache;
 	const char *type;
-	uint64_t is_log;
+	uint64_t is_log, is_special, is_dedup;
 	boolean_t seen_logs;
 
 	top = NULL;
@@ -1208,7 +1307,7 @@ construct_spec(int argc, char **argv)
 	nspares = 0;
 	nlogs = 0;
 	nl2cache = 0;
-	is_log = B_FALSE;
+	is_log = is_special = is_dedup = B_FALSE;
 	seen_logs = B_FALSE;
 
 	while (argc > 0) {
@@ -1230,7 +1329,7 @@ construct_spec(int argc, char **argv)
 					    "specified only once\n"));
 					return (NULL);
 				}
-				is_log = B_FALSE;
+				is_log = is_special = is_dedup = B_FALSE;
 			}
 
 			if (strcmp(type, VDEV_TYPE_LOG) == 0) {
@@ -1243,12 +1342,32 @@ construct_spec(int argc, char **argv)
 				}
 				seen_logs = B_TRUE;
 				is_log = B_TRUE;
+				is_special = B_FALSE;
+				is_dedup = B_FALSE;
 				argc--;
 				argv++;
 				/*
 				 * A log is not a real grouping device.
 				 * We just set is_log and continue.
 				 */
+				continue;
+			}
+
+			if (strcmp(type, VDEV_ALLOC_BIAS_SPECIAL) == 0) {
+				is_special = B_TRUE;
+				is_log = B_FALSE;
+				is_dedup = B_FALSE;
+				argc--;
+				argv++;
+				continue;
+			}
+
+			if (strcmp(type, VDEV_ALLOC_BIAS_DEDUP) == 0) {
+				is_dedup = B_TRUE;
+				is_log = B_FALSE;
+				is_special = B_FALSE;
+				argc--;
+				argv++;
 				continue;
 			}
 
@@ -1260,15 +1379,16 @@ construct_spec(int argc, char **argv)
 					    "specified only once\n"));
 					return (NULL);
 				}
-				is_log = B_FALSE;
+				is_log = is_special = is_dedup = B_FALSE;
 			}
 
-			if (is_log) {
+			if (is_log || is_special || is_dedup) {
 				if (strcmp(type, VDEV_TYPE_MIRROR) != 0) {
 					(void) fprintf(stderr,
 					    gettext("invalid vdev "
-					    "specification: unsupported 'log' "
-					    "device: %s\n"), type);
+					    "specification: unsupported '%s' "
+					    "device: %s\n"), is_log ? "log" :
+					    "special", type);
 					return (NULL);
 				}
 				nlogs++;
@@ -1282,8 +1402,8 @@ construct_spec(int argc, char **argv)
 				    children * sizeof (nvlist_t *));
 				if (child == NULL)
 					zpool_no_memory();
-				if ((nv = make_leaf_vdev(argv[c], B_FALSE))
-				    == NULL)
+				if ((nv = make_leaf_vdev(props, argv[c],
+				    B_FALSE)) == NULL)
 					return (NULL);
 				child[children - 1] = nv;
 			}
@@ -1314,12 +1434,27 @@ construct_spec(int argc, char **argv)
 				nl2cache = children;
 				continue;
 			} else {
+				/* create a top-level vdev with children */
 				verify(nvlist_alloc(&nv, NV_UNIQUE_NAME,
 				    0) == 0);
 				verify(nvlist_add_string(nv, ZPOOL_CONFIG_TYPE,
 				    type) == 0);
 				verify(nvlist_add_uint64(nv,
 				    ZPOOL_CONFIG_IS_LOG, is_log) == 0);
+				if (is_log)
+					verify(nvlist_add_string(nv,
+					    ZPOOL_CONFIG_ALLOCATION_BIAS,
+					    VDEV_ALLOC_BIAS_LOG) == 0);
+				if (is_special) {
+					verify(nvlist_add_string(nv,
+					    ZPOOL_CONFIG_ALLOCATION_BIAS,
+					    VDEV_ALLOC_BIAS_SPECIAL) == 0);
+				}
+				if (is_dedup) {
+					verify(nvlist_add_string(nv,
+					    ZPOOL_CONFIG_ALLOCATION_BIAS,
+					    VDEV_ALLOC_BIAS_DEDUP) == 0);
+				}
 				if (strcmp(type, VDEV_TYPE_RAIDZ) == 0) {
 					verify(nvlist_add_uint64(nv,
 					    ZPOOL_CONFIG_NPARITY,
@@ -1338,10 +1473,21 @@ construct_spec(int argc, char **argv)
 			 * We have a device.  Pass off to make_leaf_vdev() to
 			 * construct the appropriate nvlist describing the vdev.
 			 */
-			if ((nv = make_leaf_vdev(argv[0], is_log)) == NULL)
+			if ((nv = make_leaf_vdev(props, argv[0], is_log))
+			    == NULL)
 				return (NULL);
 			if (is_log)
 				nlogs++;
+			if (is_special) {
+				verify(nvlist_add_string(nv,
+				    ZPOOL_CONFIG_ALLOCATION_BIAS,
+				    VDEV_ALLOC_BIAS_SPECIAL) == 0);
+			}
+			if (is_dedup) {
+				verify(nvlist_add_string(nv,
+				    ZPOOL_CONFIG_ALLOCATION_BIAS,
+				    VDEV_ALLOC_BIAS_DEDUP) == 0);
+			}
 			argc--;
 			argv++;
 		}
@@ -1405,7 +1551,7 @@ split_mirror_vdev(zpool_handle_t *zhp, char *newname, nvlist_t *props,
 	zpool_boot_label_t boot_type;
 
 	if (argc > 0) {
-		if ((newroot = construct_spec(argc, argv)) == NULL) {
+		if ((newroot = construct_spec(props, argc, argv)) == NULL) {
 			(void) fprintf(stderr, gettext("Unable to build a "
 			    "pool from the specified devices\n"));
 			return (NULL);
@@ -1449,6 +1595,30 @@ split_mirror_vdev(zpool_handle_t *zhp, char *newname, nvlist_t *props,
 	return (newroot);
 }
 
+static int
+num_normal_vdevs(nvlist_t *nvroot)
+{
+	nvlist_t **top;
+	uint_t t, toplevels, normal = 0;
+
+	verify(nvlist_lookup_nvlist_array(nvroot, ZPOOL_CONFIG_CHILDREN,
+	    &top, &toplevels) == 0);
+
+	for (t = 0; t < toplevels; t++) {
+		uint64_t log = B_FALSE;
+
+		(void) nvlist_lookup_uint64(top[t], ZPOOL_CONFIG_IS_LOG, &log);
+		if (log)
+			continue;
+		if (nvlist_exists(top[t], ZPOOL_CONFIG_ALLOCATION_BIAS))
+			continue;
+
+		normal++;
+	}
+
+	return (normal);
+}
+
 /*
  * Get and validate the contents of the given vdev specification.  This ensures
  * that the nvlist returned is well-formed, that all the devices exist, and that
@@ -1460,7 +1630,7 @@ split_mirror_vdev(zpool_handle_t *zhp, char *newname, nvlist_t *props,
  * added, even if they appear in use.
  */
 nvlist_t *
-make_root_vdev(zpool_handle_t *zhp, int force, int check_rep,
+make_root_vdev(zpool_handle_t *zhp, nvlist_t *props, int force, int check_rep,
     boolean_t replacing, boolean_t dryrun, zpool_boot_label_t boot_type,
     uint64_t boot_size, int argc, char **argv)
 {
@@ -1473,7 +1643,7 @@ make_root_vdev(zpool_handle_t *zhp, int force, int check_rep,
 	 * that we have a valid specification, and that all devices can be
 	 * opened.
 	 */
-	if ((newroot = construct_spec(argc, argv)) == NULL)
+	if ((newroot = construct_spec(props, argc, argv)) == NULL)
 		return (NULL);
 
 	if (zhp && ((poolconfig = zpool_get_config(zhp, NULL)) == NULL))
@@ -1496,6 +1666,16 @@ make_root_vdev(zpool_handle_t *zhp, int force, int check_rep,
 	 * catch changes against the existing replication level.
 	 */
 	if (check_rep && check_replication(poolconfig, newroot) != 0) {
+		nvlist_free(newroot);
+		return (NULL);
+	}
+
+	/*
+	 * On pool create the new vdev spec must have one normal vdev.
+	 */
+	if (poolconfig == NULL && num_normal_vdevs(newroot) == 0) {
+		vdev_error(gettext("at least one general top-level vdev must "
+		    "be specified\n"));
 		nvlist_free(newroot);
 		return (NULL);
 	}

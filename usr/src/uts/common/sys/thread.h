@@ -24,6 +24,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2019 Joyent, Inc.
+ */
+
 #ifndef	_SYS_THREAD_H
 #define	_SYS_THREAD_H
 
@@ -67,7 +71,10 @@ typedef struct ctxop {
 	void	(*exit_op)(void *);	/* invoked during {thread,lwp}_exit() */
 	void	(*free_op)(void *, int); /* function which frees the context */
 	void	*arg;		/* argument to above functions, ctx pointer */
-	struct ctxop *next;	/* next context ops */
+	struct ctxop *next;		/* next context ops */
+	struct ctxop *prev;		/* previous context ops */
+	hrtime_t save_ts;		/* timestamp of last save */
+	hrtime_t restore_ts;		/* timestamp of last restore */
 } ctxop_t;
 
 /*
@@ -194,16 +201,15 @@ typedef struct _kthread {
 	 * it should be grabbed only by thread_lock().
 	 */
 	disp_lock_t	*t_lockp;	/* pointer to the dispatcher lock */
-	ushort_t 	t_oldspl;	/* spl level before dispatcher locked */
+	ushort_t	t_oldspl;	/* spl level before dispatcher locked */
 	volatile char	t_pre_sys;	/* pre-syscall work needed */
 	lock_t		t_lock_flush;	/* for lock_mutex_flush() impl */
 	struct _disp	*t_disp_queue;	/* run queue for chosen CPU */
 	clock_t		t_disp_time;	/* last time this thread was running */
-	uint_t		t_kpri_req;	/* kernel priority required */
 
 	/*
 	 * Post-syscall / post-trap flags.
-	 * 	No lock is required to set these.
+	 *	No lock is required to set these.
 	 *	These must be cleared only by the thread itself.
 	 *
 	 *	t_astflag indicates that some post-trap processing is required,
@@ -212,7 +218,7 @@ typedef struct _kthread {
 	 *	t_post_sys indicates that some unusualy post-system call
 	 *		handling is required, such as an error or tracing.
 	 *	t_sig_check indicates that some condition in ISSIG() must be
-	 * 		checked, but doesn't prevent returning to user.
+	 *		checked, but doesn't prevent returning to user.
 	 *	t_post_sys_ast is a way of checking whether any of these three
 	 *		flags are set.
 	 */
@@ -345,12 +351,16 @@ typedef struct _kthread {
 	kmutex_t	t_ctx_lock;	/* protects t_ctx in removectx() */
 	struct waitq	*t_waitq;	/* wait queue */
 	kmutex_t	t_wait_mutex;	/* used in CV wait functions */
+
+	char		*t_name;	/* thread name */
+
+	uint64_t	t_unsafe;	/* unsafe to run with SMT VCPU thread */
 } kthread_t;
 
 /*
  * Thread flag (t_flag) definitions.
  *	These flags must be changed only for the current thread,
- * 	and not during preemption code, since the code being
+ *	and not during preemption code, since the code being
  *	preempted could be modifying the flags.
  *
  *	For the most part these flags do not need locking.
@@ -407,6 +417,7 @@ typedef struct _kthread {
 #define	TS_SIGNALLED	0x0010	/* thread was awakened by cv_signal() */
 #define	TS_PROJWAITQ	0x0020	/* thread is on its project's waitq */
 #define	TS_ZONEWAITQ	0x0040	/* thread is on its zone's waitq */
+#define	TS_VCPU		0x0080	/* thread will enter guest context */
 #define	TS_CSTART	0x0100	/* setrun() by continuelwps() */
 #define	TS_UNPAUSE	0x0200	/* setrun() by unpauselwps() */
 #define	TS_XSTART	0x0400	/* setrun() by SIGCONT */
@@ -502,10 +513,10 @@ typedef struct _kthread {
  *	convert a thread pointer to its proc pointer.
  *
  * ttoproj(x)
- * 	convert a thread pointer to its project pointer.
+ *	convert a thread pointer to its project pointer.
  *
  * ttozone(x)
- * 	convert a thread pointer to its zone pointer.
+ *	convert a thread pointer to its zone pointer.
  *
  * lwptot(x)
  *	convert a lwp pointer to its thread pointer.
@@ -589,23 +600,14 @@ extern disp_lock_t stop_lock;		/* lock protecting stopped threads */
 
 caddr_t	thread_stk_init(caddr_t);	/* init thread stack */
 
+int thread_setname(kthread_t *, const char *);
+int thread_vsetname(kthread_t *, const char *, ...);
+
 extern int default_binding_mode;
 
 #endif	/* _KERNEL */
 
-/*
- * Macros to indicate that the thread holds resources that could be critical
- * to other kernel threads, so this thread needs to have kernel priority
- * if it blocks or is preempted.  Note that this is not necessary if the
- * resource is a mutex or a writer lock because of priority inheritance.
- *
- * The only way one thread may legally manipulate another thread's t_kpri_req
- * is to hold the target thread's thread lock while that thread is asleep.
- * (The rwlock code does this to implement direct handoff to waiting readers.)
- */
-#define	THREAD_KPRI_REQUEST()	(curthread->t_kpri_req++)
-#define	THREAD_KPRI_RELEASE()	(curthread->t_kpri_req--)
-#define	THREAD_KPRI_RELEASE_N(n) (curthread->t_kpri_req -= (n))
+#define	THREAD_NAME_MAX	32	/* includes terminating NUL */
 
 /*
  * Macro to change a thread's priority.
@@ -634,12 +636,12 @@ extern int default_binding_mode;
  * Point it at the transition lock, which is always held.
  * The previosly held lock is dropped.
  */
-#define	THREAD_TRANSITION(tp) 	thread_transition(tp);
+#define	THREAD_TRANSITION(tp)	thread_transition(tp);
 /*
  * Set the thread's lock to be the transition lock, without dropping
  * previosly held lock.
  */
-#define	THREAD_TRANSITION_NOLOCK(tp) 	((tp)->t_lockp = &transition_lock)
+#define	THREAD_TRANSITION_NOLOCK(tp)	((tp)->t_lockp = &transition_lock)
 
 /*
  * Put thread in run state, and set the lock pointer to the dispatcher queue

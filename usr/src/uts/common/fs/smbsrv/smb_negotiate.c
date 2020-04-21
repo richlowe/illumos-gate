@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -280,6 +280,9 @@ uint32_t smb1srv_capabilities =
  * result of bypassing the normal dispatch mechanism.
  *
  * The caller always frees this request.
+ *
+ * Return value is 0 for success, and anything else will
+ * terminate the reader thread (drop the connection).
  */
 int
 smb1_newrq_negotiate(smb_request_t *sr)
@@ -376,14 +379,24 @@ smb_pre_negotiate(smb_request_t *sr)
 		    skc->skc_max_protocol < SMB_VERS_2_BASE)
 			continue;
 
+		/*
+		 * We may not support SMB1; skip those dialects if true.
+		 */
+		if (dialect < DIALECT_SMB2002 &&
+		    skc->skc_min_protocol > SMB_VERS_1)
+			continue;
+
+		if (dialect == DIALECT_SMB2002 &&
+		    skc->skc_min_protocol > SMB_VERS_2_002)
+			continue;
+
 		if (negprot->ni_dialect < dialect) {
 			negprot->ni_dialect = dialect;
 			negprot->ni_index = pos;
 		}
 	}
 
-	DTRACE_SMB_2(op__Negotiate__start, smb_request_t *, sr,
-	    smb_arg_negotiate_t, negprot);
+	DTRACE_SMB_START(op__Negotiate, smb_request_t *, sr);
 
 	return ((rc == 0) ? SDRC_SUCCESS : SDRC_ERROR);
 }
@@ -393,8 +406,7 @@ smb_post_negotiate(smb_request_t *sr)
 {
 	smb_arg_negotiate_t	*negprot = sr->sr_negprot;
 
-	DTRACE_SMB_2(op__Negotiate__done, smb_request_t *, sr,
-	    smb_arg_negotiate_t, negprot);
+	DTRACE_SMB_DONE(op__Negotiate, smb_request_t *, sr);
 
 	bzero(negprot, sizeof (smb_arg_negotiate_t));
 }
@@ -402,7 +414,7 @@ smb_post_negotiate(smb_request_t *sr)
 smb_sdrc_t
 smb_com_negotiate(smb_request_t *sr)
 {
-	smb_session_t 		*session = sr->session;
+	smb_session_t		*session = sr->session;
 	smb_arg_negotiate_t	*negprot = sr->sr_negprot;
 	uint16_t		secmode;
 	uint32_t		sesskey;
@@ -416,6 +428,13 @@ smb_com_negotiate(smb_request_t *sr)
 		/* The protocol has already been negotiated. */
 		smbsr_error(sr, 0, ERRSRV, ERRerror);
 		return (SDRC_ERROR);
+	}
+
+	if (negprot->ni_index < 0) {
+		cmn_err(CE_NOTE, "clnt %s no supported dialect",
+		    sr->session->ip_addr_str);
+		smbsr_error(sr, 0, ERRSRV, ERRerror);
+		return (SDRC_DROP_VC);
 	}
 
 	/*
@@ -436,9 +455,9 @@ smb_com_negotiate(smb_request_t *sr)
 		return (rc);
 	}
 
-	session->secmode = NEGOTIATE_ENCRYPT_PASSWORDS |
+	session->srv_secmode = NEGOTIATE_ENCRYPT_PASSWORDS |
 	    NEGOTIATE_USER_SECURITY;
-	secmode = session->secmode;
+	secmode = session->srv_secmode;
 	sesskey = session->sesskey;
 
 	negprot->ni_servertime.tv_sec = gethrestime_sec();
@@ -531,7 +550,7 @@ smb_com_negotiate(smb_request_t *sr)
 				secmode |=
 				    NEGOTIATE_SECURITY_SIGNATURES_REQUIRED;
 
-			session->secmode = secmode;
+			session->srv_secmode = secmode;
 		}
 
 		/*

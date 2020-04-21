@@ -22,6 +22,7 @@
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2012 OmniTI Computer Consulting, Inc.  All rights reserved.
+# Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 #
 
 LIBRARY =	libbe_py.a
@@ -30,12 +31,11 @@ OBJECTS =	libbe_py.o
 
 include ../../Makefile.lib
 
-LIBLINKS = 
+LIBLINKS =
 SRCDIR =	../common
-ROOTLIBDIR=	$(ROOT)/usr/lib/python$(PYTHON_VERSION)/vendor-packages
-ROOTLIBDIR64=	$(ROOT)/usr/lib/python$(PYTHON_VERSION)/vendor-packages/64
-PYOBJS=		$(PYSRCS:%.py=$(SRCDIR)/%.pyc)
-PYFILES=	$(PYSRCS) $(PYSRCS:%.py=%.pyc)
+ROOTLIBDIR=	$(ROOT)/usr/lib/python$(PYVER)/vendor-packages
+ROOTLIBDIR64=	$(ROOT)/usr/lib/python$(PYVER)/vendor-packages/64
+PYFILES=	$(PYSRCS)
 ROOTPYBEFILES=  $(PYFILES:%=$(ROOTLIBDIR)/%)
 
 CSTD=        $(CSTD_GNU99)
@@ -43,20 +43,16 @@ CSTD=        $(CSTD_GNU99)
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lbe -lnvpair -lc
 CFLAGS +=	$(CCVERBOSE)
-CPPFLAGS +=	-I$(ADJUNCT_PROTO)/usr/include/python$(PYTHON_VERSION) \
-		-D_FILE_OFFSET_BITS=64 -I../../libbe/common
+CPPFLAGS +=	-D_FILE_OFFSET_BITS=64 -I../../libbe/common \
+	-I$(ADJUNCT_PROTO)/usr/include/python$(PYVER)$(PYSUFFIX)
+NATIVE_LIBS +=	libpython$(PYVER)$(PYSUFFIX).so
 
 .KEEP_STATE:
 
-all install := LDLIBS += -lpython$(PYTHON_VERSION)
+all install := LDLIBS += -lpython$(PYVER)$(PYSUFFIX)
 
 all: $(PYOBJS) $(LIBS)
 
 install: all $(ROOTPYBEFILES)
-
-$(ROOTLIBDIR)/%: %
-	$(INS.pyfile)
-
-lint: lintcheck
 
 include ../../Makefile.targ

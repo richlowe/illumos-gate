@@ -22,6 +22,9 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
+/*
+ * Copyright 2019 Joyent, Inc.
+ */
 
 #ifndef _ASM_CPU_H
 #define	_ASM_CPU_H
@@ -63,7 +66,7 @@ prefetch_read_many(void *addr)
 }
 
 extern __GNU_INLINE void
-refetch_read_once(void *addr)
+prefetch_read_once(void *addr)
 {
 #if defined(__amd64)
 	__asm__(
@@ -114,6 +117,12 @@ sti(void)
 	    "sti");
 }
 
+/*
+ * Any newer callers of halt need to make sure that they consider calling
+ * x86_md_clear() before calling this to deal with any potential issues with
+ * MDS. Because this version of hlt is also used in panic context, we do not
+ * unconditionally call x86_md_clear() here and require callers to do so.
+ */
 extern __GNU_INLINE void
 i86_halt(void)
 {
@@ -162,17 +171,6 @@ __set_gs(selector_t value)
 	    : /* no output */
 	    : "r" (value));
 }
-
-#if !defined(__xpv)
-
-extern __GNU_INLINE void
-__swapgs(void)
-{
-	__asm__ __volatile__(
-	    "mfence; swapgs");
-}
-
-#endif /* !__xpv */
 
 #endif	/* __amd64 */
 

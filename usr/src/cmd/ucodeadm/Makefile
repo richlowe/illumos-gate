@@ -39,16 +39,9 @@ include	../Makefile.cmd
 POFILE = ucodeadm_all.po
 POFILES = $(PROG_OBJS:%.o=%.po)
 
-INTEL_UCODE_FILE = intel-ucode.txt
-AMD_UCODE_FILE = amd-ucode.bin
-
-ROOTUCODEPATH = $(ROOT)/platform/i86pc/ucode
-ROOTINTELUCODE = $(INTEL_UCODE_FILE:%=$(ROOTUCODEPATH)/%)
-ROOTAMDUCODE = $(AMD_UCODE_FILE:%=$(ROOTUCODEPATH)/%)
-
 CPPFLAGS = -I../../common -I../../uts/common
 CFLAGS	+= $(CCVERBOSE)
-CERRWARN += -_gcc=-Wno-uninitialized
+CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-type-limits
 LINTFLAGS += -errtags -erroff=E_NAME_DEF_NOT_USED2
 LINTFLAGS += -erroff=E_INCONS_ARG_DECL2,E_INCONS_VAL_TYPE_DECL2
@@ -56,9 +49,6 @@ LDLIBS += -lgen
 
 DIRMODE = 0755
 FILEMODE = 0555
-
-$(ROOTINTELUCODE) := FILEMODE = 0444
-$(ROOTAMDUCODE) := FILEMODE = 0444
 
 install := TARGET = install
 clobber := TARGET = clobber
@@ -69,7 +59,7 @@ CLEANFILES += $(PROG) $(OBJS) ucode_errno.c $(POFILES) $(POFILE)
 
 all: $(PROG)
 
-install: all $(ROOTUSRSBINPROG) $(ROOTUCODEPATH) $(ROOTINTELUCODE) $(ROOTAMDUCODE)
+install: all $(ROOTUSRSBINPROG)
 
 _msg: ucodeadm_all.po
 
@@ -80,12 +70,6 @@ _msg: ucodeadm_all.po
 $(PROG): $(OBJS) ucode_errno.c
 	$(LINK.c) -o $(PROG) $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
-
-$(ROOTUCODEPATH):
-	$(INS.dir)
-
-$(ROOTUCODEPATH)/%: %
-	$(INS.file)
 
 clean:
 	-$(RM) $(CLEANFILES)

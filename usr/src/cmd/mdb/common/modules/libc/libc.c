@@ -22,7 +22,9 @@
 /*
  * Copyright (c) 2001, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012 by Delphix. All rights reserved.
- * Copyright 2017, Joyent, Inc.
+ * Copyright (c) 2019 Carlos Neira <cneirabustos@gmail.com>
+ * Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #include <sys/mdb_modapi.h>
@@ -36,6 +38,7 @@
 #include <string.h>
 #include <thr_uberdata.h>
 #include "findstack.h"
+#include <libproc.h>
 
 static const char *
 stack_flags(const stack_t *sp)
@@ -324,7 +327,7 @@ uc_walk_step(mdb_walk_state_t *wsp)
 	uintptr_t addr = wsp->walk_addr;
 	ucontext_t uc;
 
-	if (addr == NULL)
+	if (addr == 0)
 		return (WALK_DONE);
 
 	if (mdb_vread(&uc, sizeof (uc), addr) != sizeof (uc)) {
@@ -346,7 +349,7 @@ oldc_walk_init(mdb_walk_state_t *wsp)
 		return (WALK_ERR);
 	}
 
-	if (wsp->walk_addr != NULL) {
+	if (wsp->walk_addr != 0) {
 		mdb_warn("walker only supports global walk\n");
 		return (WALK_ERR);
 	}
@@ -378,7 +381,7 @@ oldc_walk_step(mdb_walk_state_t *wsp)
 		uintptr_t addr = lsp->pr_oldcontext;
 		ucontext_t uc;
 
-		if (addr == NULL)
+		if (addr == 0)
 			return (WALK_NEXT);
 
 		if (mdb_vread(&uc, sizeof (uc), addr) != sizeof (uc)) {
@@ -718,17 +721,17 @@ uberdata_addr(void)
 
 	if (mdb_lookup_by_obj("libc.so.1", "_tdb_bootstrap", &sym) != 0) {
 		mdb_warn("cannot find libc.so.1`_tdb_bootstrap");
-		return (NULL);
+		return (0);
 	}
 	if (mdb_vread(&addr, sizeof (addr), sym.st_value) == sizeof (addr) &&
-	    addr != NULL &&
+	    addr != 0 &&
 	    mdb_vread(&uaddr, sizeof (uaddr), addr) == sizeof (uaddr) &&
-	    uaddr != NULL) {
+	    uaddr != 0) {
 		return (uaddr);
 	}
 	if (mdb_lookup_by_obj("libc.so.1", "_uberdata", &sym) != 0) {
 		mdb_warn("cannot find libc.so.1`_uberdata");
-		return (NULL);
+		return (0);
 	}
 	return ((uintptr_t)sym.st_value);
 }
@@ -745,7 +748,7 @@ d_uberdata(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 
 	if (argc != 0)
 		return (DCMD_USAGE);
-	if (!(flags & DCMD_ADDRSPEC) && (addr = uberdata_addr()) == NULL)
+	if (!(flags & DCMD_ADDRSPEC) && (addr = uberdata_addr()) == 0)
 		return (DCMD_ERR);
 
 	if (mdb_vread(&uberdata, sizeof (uberdata), addr) !=
@@ -922,14 +925,14 @@ ulwp_walk_init(mdb_walk_state_t *wsp)
 		    "platform's offset for uberdata.all_lwps");
 	}
 
-	if (addr == NULL &&
-	    ((uber_addr = uberdata_addr()) == NULL ||
+	if (addr == 0 &&
+	    ((uber_addr = uberdata_addr()) == 0 ||
 	    mdb_vread(&addr, sizeof (addr), uber_addr + offset)
 	    != sizeof (addr))) {
 		mdb_warn("cannot find 'uberdata.all_lwps'");
 		return (WALK_ERR);
 	}
-	if (addr == NULL)
+	if (addr == 0)
 		return (WALK_DONE);
 	wsp->walk_addr = addr;
 	wsp->walk_data = (void *)addr;
@@ -942,7 +945,7 @@ ulwp_walk_step(mdb_walk_state_t *wsp)
 	uintptr_t addr = wsp->walk_addr;
 	ulwp_t ulwp;
 
-	if (addr == NULL)
+	if (addr == 0)
 		return (WALK_DONE);
 	if (mdb_vread(&ulwp, sizeof (ulwp), addr) != sizeof (ulwp) &&
 	    (bzero(&ulwp, sizeof (ulwp)),
@@ -956,7 +959,7 @@ ulwp_walk_step(mdb_walk_state_t *wsp)
 	 */
 	if ((wsp->walk_addr = (uintptr_t)ulwp.ul_forw)
 	    == (uintptr_t)wsp->walk_data)
-		wsp->walk_addr = NULL;
+		wsp->walk_addr = 0;
 	return (wsp->walk_callback(addr, &ulwp, wsp->walk_cbdata));
 }
 
@@ -1094,9 +1097,14 @@ tid2ulwp(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	return (error);
 }
 
+/*
+ * This is used by both d_tsd and d_errno, and contains the sum of all
+ * members used by both commands.
+ */
 typedef struct mdb_libc_ulwp {
 	void *ul_ftsd[TSD_NFAST];
 	tsd_t *ul_stsd;
+	int *ul_errnop;
 } mdb_libc_ulwp_t;
 
 /*
@@ -1107,13 +1115,13 @@ d_tsd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
 	mdb_libc_ulwp_t u;
 	uintptr_t ulwp_addr;
-	uintptr_t key = NULL;
+	uintptr_t key = 0;
 	void *element = NULL;
 
 	if (mdb_getopts(argc, argv, 'k', MDB_OPT_UINTPTR, &key, NULL) != argc)
 		return (DCMD_USAGE);
 
-	if (!(flags & DCMD_ADDRSPEC) || key == NULL)
+	if (!(flags & DCMD_ADDRSPEC) || key == 0)
 		return (DCMD_USAGE);
 
 	if (tid2ulwp_impl(addr, &ulwp_addr) != DCMD_OK)
@@ -1149,7 +1157,261 @@ d_tsd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	return (DCMD_OK);
 }
 
+/*
+ * Print percent from 16-bit binary fraction [0 .. 1]
+ * Round up .01 to .1 to indicate some small percentage (the 0x7000 below).
+ *
+ * Note: This routine was copied from elfdump/common/corenote.c	and modified.
+ *
+ */
+static uint_t
+pct_value(ushort_t pct)
+{
+	uint_t value = pct;
+
+	value = ((value * 1000) + 0x7000) >> 15;	/* [0 .. 1000] */
+	if (value >= 1000)
+		value = 999;
+
+	return (value);
+}
+
+static void
+psinfo_raw(psinfo_t psinfo)
+{
+	const int minspaces = 2;
+	const int spbcols = 20;
+	char sysname[SYS2STR_MAX];
+	uint_t cpu, mem;
+	char buff[32];
+	int bufflen;
+
+	mdb_printf("[ NT_PRPSINFO ]\n");
+
+	mdb_printf("\tpr_state:   %d\t\t\tpr_sname:   %c\n",
+	    psinfo.pr_lwp.pr_state, psinfo.pr_lwp.pr_sname);
+
+	mdb_printf("\tpr_zomb:    %d\t\t\tpr_nice:    %d\n",
+	    psinfo.pr_nzomb, psinfo.pr_lwp.pr_nice);
+
+	mdb_printf("\tpr_uid:     %u\t\t\tpr_gid:     %u\n",
+	    psinfo.pr_uid, psinfo.pr_gid);
+
+	mdb_snprintf(buff, sizeof (buff),
+	    "%d", psinfo.pr_pid);
+
+	bufflen = strlen(buff);
+	mdb_printf("\tpr_pid:     %s%*spr_ppid:    %d\n",
+	    buff, strlen(buff) > spbcols ? minspaces : (spbcols - bufflen), " ",
+	    psinfo.pr_ppid);
+
+	mdb_printf("\tpr_pgid:    %u\t\t\tpr_sid:     %d\n",
+	    psinfo.pr_gid, psinfo.pr_sid);
+
+	mdb_snprintf(buff, sizeof (buff),
+	    "0x%lx", (ulong_t)psinfo.pr_addr);
+
+	bufflen = strlen(buff);
+
+	mdb_printf("\tpr_addr:    %s%*spr_size:    %#x\n",
+	    buff, strlen(buff) > spbcols ? minspaces : (spbcols - bufflen), " ",
+	    (ulong_t)psinfo.pr_size);
+
+	mdb_printf("\tpr_rssize:  %#lx\t\tpr_wchan:   %#lx\n",
+	    (ulong_t)psinfo.pr_rssize, (ulong_t)psinfo.pr_lwp.pr_wchan);
+
+	mdb_printf("\tpr_start:\n\t    tv_sec: %ld\t\ttv_nsec:    %ld\n",
+	    psinfo.pr_start.tv_sec, psinfo.pr_start.tv_nsec);
+
+	mdb_printf("\tpr_time:\n\t    tv_sec: %ld\t\t\ttv_nsec:    %ld\n",
+	    psinfo.pr_time.tv_sec, psinfo.pr_time.tv_nsec);
+
+	mdb_printf("\tpr_pri:     %d\t\t\tpr_oldpri:  %d\n",
+	    psinfo.pr_lwp.pr_pri, psinfo.pr_lwp.pr_oldpri);
+
+	mdb_printf("\tpr_cpu:     %d\n", psinfo.pr_lwp.pr_cpu);
+
+	mdb_printf("\tpr_clname:  %s\n", psinfo.pr_lwp.pr_clname);
+
+	mdb_printf("\tpr_fname:   %s\n", psinfo.pr_fname);
+
+	mdb_printf("\tpr_psargs:  %s\n", psinfo.pr_psargs);
+
+
+	mdb_printf("\tpr_syscall: [ %s ]\n",
+	    proc_sysname(psinfo.pr_lwp.pr_syscall, sysname,
+	    sizeof (sysname)));
+
+	mdb_printf("\tpr_ctime:\n\t    tv_sec: %ld\t\t\ttv_nsec:    %ld\n",
+	    psinfo.pr_ctime.tv_sec, psinfo.pr_ctime.tv_nsec);
+
+	mdb_printf("\tpr_argc:    %d\t\t\tpr_argv:    0x%lx\n",
+	    psinfo.pr_argc, (ulong_t)psinfo.pr_argv);
+
+	mdb_snprintf(buff, sizeof (buff), "0x%lx", (ulong_t)psinfo.pr_envp);
+
+	bufflen = strlen(buff);
+
+	mdb_printf("\tpr_envp:    %s%*spr_wstat:   %d\n",
+	    buff, strlen(buff) > spbcols ? minspaces : (spbcols - bufflen), " ",
+	    psinfo.pr_wstat);
+
+	cpu = pct_value(psinfo.pr_pctcpu);
+	mem = pct_value(psinfo.pr_pctmem);
+
+	mdb_printf("\tpr_pctcpu:  %u.%u%%\t\tpr_pctmem:  %u.%u%%\n",
+	    cpu / 10, cpu % 10, mem / 10, mem % 10);
+
+	mdb_printf("\tpr_euid:    %u\t\t\tpr_egid:    %u\n",
+	    psinfo.pr_euid, psinfo.pr_egid);
+
+	mdb_printf("\tpr_dmodel:  [%s]\n",
+	    proc_dmodelname(psinfo.pr_dmodel, buff, sizeof (buff)));
+}
+
+static void
+psinfo_sum(psinfo_t psinfo)
+{
+	const int minspaces = 2;
+	const int spbcols = 23;
+	char buff[64];
+	int bufflen;
+	int ms;
+
+	mdb_printf("PID:    %6d  (process id)\t\t"
+	    "UID:     %4u  (real user id)\n",
+	    psinfo.pr_pid, psinfo.pr_uid);
+
+	mdb_printf("PPID:   %6d  (parent process id)\tEUID:    %4d"
+	    "  (effective user id)\n", psinfo.pr_ppid, psinfo.pr_euid);
+
+	mdb_printf("PGID:   %6d  (process group id)\tGID:     %4u"
+	    "  (real group id)\n", psinfo.pr_pgid, psinfo.pr_gid);
+
+	mdb_printf("SID:    %6d  (session id)\t\tEGID:    %4u"
+	    "  (effective group id)\n",
+	    psinfo.pr_sid, psinfo.pr_egid);
+
+	mdb_printf("ZONEID: %6d\t\t\t\tCONTRACT:%4d\n",
+	    psinfo.pr_zoneid, psinfo.pr_contract);
+
+	mdb_printf("PROJECT:%6d \t\t\t\tTASK:    %4d\n\n",
+	    psinfo.pr_projid, psinfo.pr_taskid);
+
+	mdb_printf("START: %Y   (wall timestamp when the process started)\n",
+	    psinfo.pr_start);
+
+	ms = NSEC2MSEC(psinfo.pr_time.tv_nsec);
+
+	mdb_snprintf(buff, sizeof (buff), "%ld.%d seconds",
+	    psinfo.pr_time.tv_sec, ms);
+
+	bufflen = strlen(buff);
+
+	mdb_printf("TIME:  %s%*s"
+	    "(CPU time used by this process)\n",
+	    buff, bufflen > spbcols ? minspaces : (spbcols - bufflen), " ");
+
+	ms = NSEC2MSEC(psinfo.pr_ctime.tv_nsec);
+
+	mdb_snprintf(buff, sizeof (buff), "%ld.%d seconds",
+	    psinfo.pr_ctime.tv_sec, ms);
+
+	mdb_printf("CTIME: %s%*s"
+	    "(CPU time used by child processes)\n",
+	    buff, bufflen > spbcols ? minspaces : (spbcols - bufflen), " ");
+
+	mdb_snprintf(buff, sizeof (buff), "%s", psinfo.pr_fname);
+	bufflen = strlen(buff);
+
+	mdb_printf("FNAME: %s%*s(name of the program executed)\n",
+	    buff, bufflen > spbcols ? minspaces : (spbcols - bufflen), " ");
+
+	mdb_printf("PSARGS: \"%s\"\n", psinfo.pr_psargs);
+}
+
+void
+d_psinfo_dcmd_help(void)
+{
+	mdb_printf(
+	    "Prints relevant fields from psinfo_t data and\n"
+	    "most fields from NT_PRPSINFO note section\n\n"
+	    "Usage:  ::psinfo [-v]\n"
+	    "Options:\n"
+	    "   -v   verbose output\n");
+}
+
+static int
+d_psinfo(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
+{
+	psinfo_t psinfo;
+	uint_t opt_v = FALSE;
+	ssize_t nbytes;
+
+	if (mdb_getopts(argc, argv, 'v',
+	    MDB_OPT_SETBITS, TRUE, &opt_v, NULL) != argc)
+		return (DCMD_USAGE);
+
+	nbytes = mdb_get_xdata("psinfo", NULL, 0);
+
+	if (nbytes <= 0) {
+		mdb_warn("information not available for analysis");
+		return (DCMD_ERR);
+	}
+
+	if (mdb_get_xdata("psinfo", &psinfo, nbytes) != nbytes) {
+		mdb_warn("failed to read psinfo information");
+		return (DCMD_ERR);
+	}
+
+	if (opt_v) {
+		psinfo_raw(psinfo);
+	} else {
+		psinfo_sum(psinfo);
+	}
+
+	return (DCMD_OK);
+}
+
+static int
+d_errno(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
+{
+	mdb_libc_ulwp_t u;
+	uintptr_t ulwp_addr;
+	int error, errval;
+
+	if (argc != 0 || (flags & DCMD_ADDRSPEC) == 0)
+		return (DCMD_USAGE);
+
+	error = tid2ulwp_impl(addr, &ulwp_addr);
+	if (error != DCMD_OK)
+		return (error);
+
+	/*
+	 * For historical compatibility, thread 1's errno value is stored in
+	 * a libc global variable 'errno', while each additional thread's
+	 * errno value is stored in ulwp_t->ul_errno.  In addition,
+	 * ulwp_t->ul_errnop is set to the address of the thread's errno value,
+	 * (i.e. for tid 1, curthead->ul_errnop = &errno, for tid > 1,
+	 * curthread->ul_errnop = &curthread->ul_errno).
+	 *
+	 * Since errno itself uses *curthread->ul_errnop (see ___errno()) to
+	 * return the thread's current errno value, we do the same.
+	 */
+	if (mdb_ctf_vread(&u, "ulwp_t", "mdb_libc_ulwp_t", ulwp_addr, 0) == -1)
+		return (DCMD_ERR);
+
+	if (mdb_vread(&errval, sizeof (errval), (uintptr_t)u.ul_errnop) == -1) {
+		mdb_warn("cannot read error value at 0x%p", u.ul_errnop);
+		return (DCMD_ERR);
+	}
+
+	mdb_printf("%d\n", errval);
+	return (DCMD_OK);
+}
+
 static const mdb_dcmd_t dcmds[] = {
+	{ "errno", "?", "print errno of a given TID", d_errno, NULL },
 	{ "jmp_buf", ":", "print jmp_buf contents", d_jmp_buf, NULL },
 	{ "sigjmp_buf", ":", "print sigjmp_buf contents", d_sigjmp_buf, NULL },
 	{ "siginfo", ":", "print siginfo_t structure", d_siginfo, NULL },
@@ -1160,6 +1422,8 @@ static const mdb_dcmd_t dcmds[] = {
 	{ "ulwp", ":", "print ulwp_t structure", d_ulwp, NULL },
 	{ "uberdata", ":", "print uberdata_t structure", d_uberdata, NULL },
 	{ "tsd", ":-k key", "print tsd for this thread", d_tsd, NULL },
+	{ "psinfo", "[-v]", "prints relevant psinfo_t data", d_psinfo,
+	    d_psinfo_dcmd_help },
 	{ NULL }
 };
 

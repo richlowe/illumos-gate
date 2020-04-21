@@ -21,6 +21,7 @@
 #
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 #
+# Copyright (c) 2019, Joyent, Inc.
 
 LIBRARY=	libtnfprobe.a
 VERS=		.1
@@ -53,7 +54,7 @@ HDRS=		com.h writer.h probe.h
 ROOTHDRDIR=	$(ROOT)/usr/include/tnf
 ROOTHDRS=	$(HDRS:%=$(ROOTHDRDIR)/%)
 CHECKHDRS=	$(HDRS:%.h=%.check)
-$(ROOTHDRS) := 	FILEMODE = 0644
+$(ROOTHDRS) :=	FILEMODE = 0644
 CHECKHDRS =	$(HDRS:%.h=%.check)
 
 # Include .. first to pick up tnf_trace.h in current dir, Include UFSDIR to
@@ -64,7 +65,10 @@ LINTFLAGS +=	-y
 
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	-_gcc=-Wno-uninitialized
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
 
 $(ROOTHDRS) :=	FILEMODE = 644
 
@@ -87,13 +91,13 @@ $(ROOTLIBDIR) $(ROOTHDRDIR):
 $(ROOTHDRDIR)/% : %
 	$(INS.file)
 
-#ASFLAGS=	-K pic -P -D_SYS_SYS_S -D_LOCORE -D_ASM -DPIC -DLOCORE $(CPPFLAGS)
+#ASFLAGS=	$(AS_PICFLAGS) -P -D_SYS_SYS_S -D_LOCORE -D_ASM -DPIC -DLOCORE $(CPPFLAGS)
 ASFLAGS=	-P -D_SYS_SYS_S -D_LOCORE -D_ASM -DPIC -DLOCORE $(CPPFLAGS)
 BUILD.s=	$(AS) $(ASFLAGS) $< -o $@
 
 objs/%.o pics/%.o: ../%.s
 		$(COMPILE.s) -o $@ $<
-		$(POST_PROCESS_O)
+		$(POST_PROCESS_S_O)
 
 pics/%.o objs/%.o: ../%.c
 		$(COMPILE.c) -o $@ $<

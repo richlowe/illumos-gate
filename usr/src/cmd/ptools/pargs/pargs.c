@@ -73,6 +73,13 @@
 #include <wctype.h>
 #include <widec.h>
 #include <elfcap.h>
+#include <libgen.h>
+
+typedef enum pargs_cmd {
+	PARGS_ARGV,
+	PARGS_ENV,
+	PARGS_AUXV
+} pargs_cmd_t;
 
 typedef struct pargs_data {
 	struct ps_prochandle *pd_proc;	/* target proc handle */
@@ -1170,7 +1177,7 @@ print_args(pargs_data_t *datap)
 
 	for (i = 0; i < datap->pd_argc; i++) {
 		(void) printf("argv[%d]: ", i);
-		if (datap->pd_argv[i] == NULL) {
+		if (datap->pd_argv[i] == (uintptr_t)NULL) {
 			(void) printf("<NULL>\n");
 		} else if (datap->pd_argv_strs[i] == NULL) {
 			(void) printf("<0x%0*lx>\n",
@@ -1216,7 +1223,8 @@ print_cmdline(pargs_data_t *datap)
 	 * an error message and bail.
 	 */
 	for (i = 0; i < datap->pd_argc; i++) {
-		if (datap->pd_argv == NULL || datap->pd_argv[i] == NULL ||
+		if (datap->pd_argv == NULL ||
+		    datap->pd_argv[i] == (uintptr_t)NULL ||
 		    datap->pd_argv_strs[i] == NULL) {
 			(void) fprintf(stderr, "%s: target has corrupted "
 			    "argument list\n", command);
@@ -1288,19 +1296,24 @@ main(int argc, char *argv[])
 	int opt;
 	int error = 1;
 	core_content_t content = 0;
+	pargs_cmd_t cmd = PARGS_ARGV;
 
 	(void) setlocale(LC_ALL, "");
 
-	if ((command = strrchr(argv[0], '/')) != NULL)
-		command++;
-	else
-		command = argv[0];
+	command = basename(argv[0]);
+
+	if (strcmp(command, "penv") == 0)
+		cmd = PARGS_ENV;
+	else if (strcmp(command, "pauxv") == 0)
+		cmd = PARGS_AUXV;
 
 	while ((opt = getopt(argc, argv, "acelxF")) != EOF) {
 		switch (opt) {
 		case 'a':		/* show process arguments */
 			content |= CC_CONTENT_STACK;
 			aflag++;
+			if (cmd != PARGS_ARGV)
+				errflg++;
 			break;
 		case 'c':		/* force 7-bit ascii */
 			cflag++;
@@ -1308,13 +1321,19 @@ main(int argc, char *argv[])
 		case 'e':		/* show environment variables */
 			content |= CC_CONTENT_STACK;
 			eflag++;
+			if (cmd != PARGS_ARGV)
+				errflg++;
 			break;
 		case 'l':
 			lflag++;
 			aflag++;	/* -l implies -a */
+			if (cmd != PARGS_ARGV)
+				errflg++;
 			break;
 		case 'x':		/* show aux vector entries */
 			xflag++;
+			if (cmd != PARGS_ARGV)
+				errflg++;
 			break;
 		case 'F':
 			/*
@@ -1331,8 +1350,19 @@ main(int argc, char *argv[])
 
 	/* -a is the default if no options are specified */
 	if ((aflag + eflag + xflag + lflag) == 0) {
-		aflag++;
-		content |= CC_CONTENT_STACK;
+		switch (cmd) {
+		case PARGS_ARGV:
+			aflag++;
+			content |= CC_CONTENT_STACK;
+			break;
+		case PARGS_ENV:
+			content |= CC_CONTENT_STACK;
+			eflag++;
+			break;
+		case PARGS_AUXV:
+			xflag++;
+			break;
+		}
 	}
 
 	/* -l cannot be used with the -x or -e flags */

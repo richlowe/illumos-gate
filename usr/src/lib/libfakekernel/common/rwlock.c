@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
  */
 
 /*
@@ -23,7 +23,6 @@
 #include <sys/errno.h>
 #include <sys/debug.h>
 #include <sys/param.h>
-#include <sys/synch32.h>
 #include <sys/thread.h>
 
 /* avoiding synch.h */
@@ -72,6 +71,8 @@ rw_exit(krwlock_t *rwlp)
 	if (_rw_write_held(&rwlp->rw_lock)) {
 		ASSERT(rwlp->rw_owner == _curthread());
 		rwlp->rw_owner = _KTHREAD_INVALID;
+	} else {
+		ASSERT(_rw_read_held(&rwlp->rw_lock));
 	}
 	(void) rw_unlock(&rwlp->rw_lock);
 }

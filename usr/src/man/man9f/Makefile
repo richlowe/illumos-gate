@@ -12,14 +12,14 @@
 #
 # Copyright 2017, Richard Lowe
 # Copyright 2014 Garrett D'Amore <garrett@damore>
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 # Copyright 2016 Nexenta Systems, Inc.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
 #
 
 include		$(SRC)/Makefile.master
 
-MANSECT= 	9f
+MANSECT=	9f
 
 MANFILES=	ASSERT.9f				\
 		Intro.9f				\
@@ -154,11 +154,11 @@ MANFILES=	ASSERT.9f				\
 		ddi_dma_alloc_handle.9f			\
 		ddi_dma_buf_bind_handle.9f		\
 		ddi_dma_burstsizes.9f			\
+		ddi_dma_cookie_iter.9f			\
 		ddi_dma_free_handle.9f			\
 		ddi_dma_getwin.9f			\
 		ddi_dma_mem_alloc.9f			\
 		ddi_dma_mem_free.9f			\
-		ddi_dma_nextcookie.9f			\
 		ddi_dma_numwin.9f			\
 		ddi_dma_set_sbus64.9f			\
 		ddi_dma_sync.9f				\
@@ -242,6 +242,9 @@ MANFILES=	ASSERT.9f				\
 		ddi_strtol.9f				\
 		ddi_strtoll.9f				\
 		ddi_strtoul.9f				\
+		ddi_ufm.9f				\
+		ddi_ufm_image.9f			\
+		ddi_ufm_slot.9f				\
 		ddi_umem_alloc.9f			\
 		ddi_umem_iosetup.9f			\
 		ddi_umem_lock.9f			\
@@ -745,6 +748,10 @@ MANLINKS=	AVL_NEXT.9f					\
 		ddi_devid_unregister.9f				\
 		ddi_devid_valid.9f				\
 		ddi_devmap_segmap.9f				\
+		ddi_dma_cookie_get.9f				\
+		ddi_dma_cookie_one.9f				\
+		ddi_dma_ncookies.9f				\
+		ddi_dma_nextcookie.9f				\
 		ddi_dmae_1stparty.9f				\
 		ddi_dmae_alloc.9f				\
 		ddi_dmae_disable.9f				\
@@ -913,6 +920,15 @@ MANLINKS=	AVL_NEXT.9f					\
 		ddi_taskq_suspend.9f				\
 		ddi_taskq_wait.9f				\
 		ddi_trigger_softintr.9f				\
+		ddi_ufm_fini.9f					\
+		ddi_ufm_image_set_desc.9f			\
+		ddi_ufm_image_set_misc.9f			\
+		ddi_ufm_image_set_nslots.9f			\
+		ddi_ufm_init.9f					\
+		ddi_ufm_slot_set_attrs.9f			\
+		ddi_ufm_slot_set_misc.9f			\
+		ddi_ufm_slot_set_version.9f			\
+		ddi_ufm_update.9f				\
 		ddi_umem_free.9f				\
 		ddi_umem_unlock.9f				\
 		ddi_unmap_regs.9f				\
@@ -1197,12 +1213,13 @@ MANLINKS=	AVL_NEXT.9f					\
 		scsi_hba_iportmap_iport_add.9f			\
 		scsi_hba_iportmap_iport_remove.9f		\
 		scsi_hba_pkt_free.9f				\
-		scsi_hba_tgtmap_set_begin.9f 			\
-		scsi_hba_tgtmap_set_add.9f 			\
-		scsi_hba_tgtmap_set_end.9f 			\
-		scsi_hba_tgtmap_set_flush.9f 			\
-		scsi_hba_tgtmap_tgt_add.9f 			\
-		scsi_hba_tgtmap_tgt_remove.9f 			\
+		scsi_hba_tgtmap_destroy.9f			\
+		scsi_hba_tgtmap_set_begin.9f			\
+		scsi_hba_tgtmap_set_add.9f			\
+		scsi_hba_tgtmap_set_end.9f			\
+		scsi_hba_tgtmap_set_flush.9f			\
+		scsi_hba_tgtmap_tgt_add.9f			\
+		scsi_hba_tgtmap_tgt_remove.9f			\
 		scsi_hba_tran_free.9f				\
 		scsi_ifsetcap.9f				\
 		scsi_mname.9f					\
@@ -1436,7 +1453,7 @@ avl_add.9f				:= LINKSRC = avl.9f
 avl_create.9f				:= LINKSRC = avl.9f
 avl_destroy.9f				:= LINKSRC = avl.9f
 avl_destroy_nodes.9f			:= LINKSRC = avl.9f
-avl_find.9f 				:= LINKSRC = avl.9f
+avl_find.9f				:= LINKSRC = avl.9f
 avl_first.9f				:= LINKSRC = avl.9f
 avl_insert.9f				:= LINKSRC = avl.9f
 avl_insert_here.9f			:= LINKSRC = avl.9f
@@ -1543,6 +1560,11 @@ ddi_devid_str_encode.9f			:= LINKSRC = ddi_devid_compare.9f
 ddi_devid_str_free.9f			:= LINKSRC = ddi_devid_compare.9f
 ddi_devid_unregister.9f			:= LINKSRC = ddi_devid_compare.9f
 ddi_devid_valid.9f			:= LINKSRC = ddi_devid_compare.9f
+
+ddi_dma_cookie_get.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
+ddi_dma_cookie_one.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
+ddi_dma_ncookies.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
+ddi_dma_nextcookie.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
 
 ddi_dmae_1stparty.9f			:= LINKSRC = ddi_dmae.9f
 ddi_dmae_alloc.9f			:= LINKSRC = ddi_dmae.9f
@@ -1749,6 +1771,16 @@ devmap_umem_setup.9f			:= LINKSRC = devmap_devmem_setup.9f
 ddi_devmap_segmap.9f			:= LINKSRC = devmap_setup.9f
 
 devmap_load.9f				:= LINKSRC = devmap_unload.9f
+
+ddi_ufm_fini.9f				:= LINKSRC = ddi_ufm.9f
+ddi_ufm_image_set_desc.9f		:= LINKSRC = ddi_ufm_image.9f
+ddi_ufm_image_set_misc.9f		:= LINKSRC = ddi_ufm_image.9f
+ddi_ufm_image_set_nslots.9f		:= LINKSRC = ddi_ufm_image.9f
+ddi_ufm_init.9f				:= LINKSRC = ddi_ufm.9f
+ddi_ufm_slot_set_attrs.9f		:= LINKSRC = ddi_ufm_slot.9f
+ddi_ufm_slot_set_misc.9f		:= LINKSRC = ddi_ufm_slot.9f
+ddi_ufm_slot_set_version.9f		:= LINKSRC = ddi_ufm_slot.9f
+ddi_ufm_update.9f			:= LINKSRC = ddi_ufm.9f
 
 dlerrorack.9f				:= LINKSRC = dlbindack.9f
 dlokack.9f				:= LINKSRC = dlbindack.9f
@@ -2094,7 +2126,8 @@ scsi_hba_iport_find.9f			:= LINKSRC = scsi_hba_iport_exist.9f
 
 scsi_hba_pkt_free.9f			:= LINKSRC = scsi_hba_pkt_alloc.9f
 
-scsi_hba_tgtmap_set_begin.9f 		:= LINKSRC = scsi_hba_tgtmap_create.9f
+scsi_hba_tgtmap_destroy.9f		:= LINKSRC = scsi_hba_tgtmap_create.9f
+scsi_hba_tgtmap_set_begin.9f		:= LINKSRC = scsi_hba_tgtmap_create.9f
 scsi_hba_tgtmap_set_add.9f		:= LINKSRC = scsi_hba_tgtmap_create.9f
 scsi_hba_tgtmap_set_end.9f		:= LINKSRC = scsi_hba_tgtmap_create.9f
 scsi_hba_tgtmap_set_flush.9f		:= LINKSRC = scsi_hba_tgtmap_create.9f

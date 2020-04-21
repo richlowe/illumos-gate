@@ -23,6 +23,10 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2019 Joyent, Inc.
+ */
+
 #ifndef	_INET_IP_NDP_H
 #define	_INET_IP_NDP_H
 
@@ -67,7 +71,7 @@ typedef struct ncec_cb_s {
 struct ncec_s {
 	struct	ncec_s	*ncec_next;	/* Hash chain next pointer */
 	struct	ncec_s	**ncec_ptpn;	/* Pointer to previous next */
-	struct 	ill_s	*ncec_ill;	/* Associated ill */
+	struct	ill_s	*ncec_ill;	/* Associated ill */
 	uint16_t	ncec_flags;	/* See below */
 	uint16_t	ncec_state;	/* See reachability states in if.h */
 	int16_t		ncec_pcnt;	/* Probe counter */
@@ -83,7 +87,7 @@ struct ncec_s {
 	timeout_id_t	ncec_timeout_id;
 	uchar_t		ncec_ipversion;	/* IPv4(ARP)/IPv6(NDP) version */
 	uint_t		ncec_defense_count;	/* number of NDP conflicts */
-	uint_t		ncec_last_time_defended; /* last time defended (secs) */
+	clock_t		ncec_last_time_defended; /* defended last (ticks) */
 	uint64_t	ncec_init_time; /* time when it was set to ND_INITIAL */
 	boolean_t	ncec_trace_disable;	/* True when alloc fails */
 	/*
@@ -273,9 +277,11 @@ typedef struct {
 /* NDP Cache Entry Hash Table */
 #define	NCE_TABLE_SIZE	256
 
+typedef void (*ncec_walk_cb_t)(ncec_t *, void *);
+
 extern	void	ip_nce_reclaim(void *);
 extern	void	ncec_delete(ncec_t *);
-extern	void	ncec_delete_per_ill(ncec_t *, uchar_t *);
+extern	void	ncec_delete_per_ill(ncec_t *, void *);
 extern	void	nce_fastpath_update(ill_t *, mblk_t  *);
 extern	nd_opt_hdr_t *ndp_get_option(nd_opt_hdr_t *, int, int);
 extern	void	ncec_inactive(ncec_t *);
@@ -293,8 +299,8 @@ extern	int	ndp_query(ill_t *, lif_nd_req_t *);
 extern	int	ndp_sioc_update(ill_t *, lif_nd_req_t *);
 extern	boolean_t	ndp_verify_optlen(nd_opt_hdr_t *, int);
 extern	void	nce_timer(void *);
-extern	void	ncec_walk(ill_t *, pfi_t, void *, ip_stack_t *);
-extern	void	ncec_walk_common(ndp_g_t *, ill_t *, pfi_t,
+extern	void	ncec_walk(ill_t *, ncec_walk_cb_t, void *, ip_stack_t *);
+extern	void	ncec_walk_common(ndp_g_t *, ill_t *, ncec_walk_cb_t,
     void *, boolean_t);
 extern	boolean_t	nce_restart_dad(ncec_t *);
 extern	void	ndp_resolv_failed(ncec_t *);
