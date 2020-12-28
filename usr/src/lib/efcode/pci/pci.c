@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -43,7 +41,7 @@ mem_map_in(fcode_env_t *env, fstack_t hi, fstack_t mid, fstack_t lo,
 	int error;
 	fc_cell_t requested_virt, adjusted_virt;
 	char *service = "map-in";
-	fstack_t mcookie = NULL;
+	fstack_t mcookie = 0;
 	int pa_offset = 0, va_offset = 0;
 	fstack_t adjusted_len = 0;
 
@@ -83,7 +81,7 @@ mem_map_in(fcode_env_t *env, fstack_t hi, fstack_t mid, fstack_t lo,
 	mcookie = mapping_to_mcookie(requested_virt, requested_len,
 	    adjusted_virt, adjusted_len);
 
-	if (mcookie == NULL)
+	if (mcookie == 0)
 		throw_from_fclib(env, 1, "pci-mapin-> pci:%s:"
 		    " mapping_to_mcookie failed\n", service);
 	/*
@@ -243,9 +241,9 @@ do_encode_unit(fcode_env_t *env)
 	dev = ((hi >> 11) & 0x1f);
 
 	if (fn) {
-		sprintf(enc_buf, "%x,%x", dev, fn);
+		(void) sprintf(enc_buf, "%x,%x", dev, fn);
 	} else {
-		sprintf(enc_buf, "%x", dev);
+		(void) sprintf(enc_buf, "%x", dev);
 	}
 	debug_msg(DEBUG_REG_ACCESS, "pci:encode-unit ( %x ) -> %s\n",
 	    hi, enc_buf);
@@ -289,7 +287,7 @@ do_device_id(fcode_env_t *env)
 	PUSH(DS, cfgadd + PCI_CONF_DEVID);
 	config_wfetch(env);
 	dev_id = POP(DS);
-	sprintf(buf, "pci%x,%x", ven_id, dev_id);
+	(void) sprintf(buf, "pci%x,%x", ven_id, dev_id);
 	push_a_string(env, STRDUP(buf));
 }
 
@@ -313,7 +311,8 @@ do_class_id(fcode_env_t *env)
 	PUSH(DS, cfgadd + PCI_CONF_PROGCLASS);
 	config_bfetch(env);
 	progclass = POP(DS);
-	sprintf(buf, "pciclass%02x%02x%02x", basclass, subclass, progclass);
+	(void) sprintf(buf, "pciclass%02x%02x%02x", basclass, subclass,
+	    progclass);
 	push_a_string(env, STRDUP(buf));
 }
 

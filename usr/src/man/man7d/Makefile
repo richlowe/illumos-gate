@@ -15,7 +15,7 @@
 # Copyright 2019 Joyent, Inc.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
 # Copyright 2018 Nexenta Systems, Inc.
-# Copyright 2019 Peter Tribble
+# Copyright 2020 Peter Tribble
 #
 
 include		$(SRC)/Makefile.master
@@ -35,7 +35,7 @@ _MANFILES=	aac.7d		\
 		bge.7d		\
 		blkdev.7d	\
 		bnxe.7d		\
-		bscv.7d		\
+		ccid.7d		\
 		chxge.7d	\
 		console.7d	\
 		cpuid.7d	\
@@ -44,6 +44,7 @@ _MANFILES=	aac.7d		\
 		devinfo.7d	\
 		dmfe.7d		\
 		dtrace.7d	\
+		e1000g.7d	\
 		ehci.7d		\
 		fasttrap.7d	\
 		fbt.7d		\
@@ -77,6 +78,7 @@ _MANFILES=	aac.7d		\
 		ixgbe.7d	\
 		kmdb.7d		\
 		kstat.7d	\
+		ksensor.7d	\
 		ksyms.7d	\
 		llc1.7d		\
 		lockstat.7d	\
@@ -159,7 +161,6 @@ sparc_MANFILES=	audiocs.7d	\
 		grbeep.7d	\
 		mc-opl.7d	\
 		n2rng.7d	\
-		ncp.7d		\
 		ntwdt.7d	\
 		oplkmdrv.7d	\
 		oplmsu.7d	\
@@ -179,7 +180,8 @@ sparc_MANFILES=	audiocs.7d	\
 
 i386_MANFILES=	ahci.7d		\
 		amd8111s.7d	\
-		amdf17nbdf.7d	\
+		amdnbtemp.7d	\
+		amdzen.7d	\
 		amr.7d		\
 		arcmsr.7d	\
 		arn.7d		\
@@ -205,6 +207,8 @@ i386_MANFILES=	ahci.7d		\
 		ecpp.7d		\
 		elxl.7d		\
 		i40e.7d		\
+		imc.7d		\
+		imcstub.7d	\
 		ipmi.7d		\
 		iprb.7d		\
 		ipw.7d		\
@@ -212,6 +216,7 @@ i386_MANFILES=	ahci.7d		\
 		iwi.7d		\
 		iwn.7d		\
 		mega_sas.7d	\
+		mlxcx.7d	\
 		npe.7d		\
 		ntxn.7d		\
 		nv_sata.7d	\
@@ -230,19 +235,23 @@ i386_MANFILES=	ahci.7d		\
 		si3124.7d	\
 		skd.7d		\
 		smbios.7d	\
+		smntemp.7d	\
 		uath.7d		\
 		ural.7d		\
 		urtw.7d		\
+		usmn.7d		\
+		vioblk.7d	\
+		vioif.7d	\
+		virtio.7d	\
 		wpi.7d		\
 		xhci.7d		\
+		zen_udf.7d	\
 		zyd.7d
 
 _MANLINKS=	1394.7d		\
 		allkmem.7d	\
-		bscbus.7d	\
 		fdc.7d		\
 		firewire.7d	\
-		i2bsc.7d	\
 		kmem.7d		\
 		lo0.7d		\
 		ticots.7d	\
@@ -252,11 +261,12 @@ _MANLINKS=	1394.7d		\
 
 sparc_MANLINKS=	drmach.7d
 
+i386_MANLINKS=	amdzen_stub.7d
+
 MANFILES =	$(_MANFILES) $($(MACH)_MANFILES)
 MANLINKS =	$(_MANLINKS) $($(MACH)_MANLINKS)
 
-bscbus.7d	:= LINKSRC = bscv.7d
-i2bsc.7d	:= LINKSRC = bscv.7d
+amdzen_stub.7d	:= LINKSRC = amdzen.7d
 
 drmach.7d	:= LINKSRC = dr.7d
 

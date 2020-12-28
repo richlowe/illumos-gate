@@ -31,6 +31,8 @@ static int get_absolute_rl_internal(struct expression *expr, struct range_list *
 static sval_t zero  = {.type = &int_ctype, {.value = 0} };
 static sval_t one   = {.type = &int_ctype, {.value = 1} };
 
+static int fast_math_only;
+
 struct range_list *rl_zero(void)
 {
 	static struct range_list *zero_perm;
@@ -333,6 +335,27 @@ static int handle_offset_subtraction(struct expression *expr)
 	return left_offset - right_offset;
 }
 
+static bool max_is_unknown_max(struct range_list *rl)
+{
+	/*
+	 * The issue with this code is that we had:
+	 * if (foo > 1) return 1 - foo;
+	 * Ideally we would say that returns s32min-(-1) but what Smatch
+	 * was saying was that the lowest possible value was "1 - INT_MAX"
+	 *
+	 * My solution is to ignore max values for int or larger.  I keep
+	 * the max for shorts etc, because those might be worthwhile.
+	 *
+	 * The problem with just returning 1 - INT_MAX is that that is
+	 * treated as useful information but s32min is treated as basically
+	 * unknown.
+	 */
+
+	if (type_bits(rl_type(rl)) < 31)
+		return false;
+	return sval_is_max(rl_max(rl));
+}
+
 static bool handle_subtract_rl(struct expression *expr, int implied, int *recurse_cnt, struct range_list **res)
 {
 	struct symbol *type;
@@ -407,7 +430,8 @@ static bool handle_subtract_rl(struct expression *expr, int implied, int *recurs
 		return true;
 	}
 
-	if (!sval_binop_overflows(rl_min(left_rl), '-', rl_max(right_rl))) {
+	if (!max_is_unknown_max(right_rl) &&
+	    !sval_binop_overflows(rl_min(left_rl), '-', rl_max(right_rl))) {
 		tmp = sval_binop(rl_min(left_rl), '-', rl_max(right_rl));
 		if (sval_cmp(tmp, min) > 0)
 			min = tmp;
@@ -856,7 +880,7 @@ static bool handle_conditional_rl(struct expression *expr, int implied, int *rec
 		return get_rl_sval(expr->cond_false, implied, recurse_cnt, res, res_sval);
 
 	/* this becomes a problem with deeply nested conditional statements */
-	if (low_on_memory())
+	if (fast_math_only || low_on_memory())
 		return false;
 
 	type = get_type(expr);
@@ -947,8 +971,6 @@ struct range_list *var_to_absolute_rl(struct expression *expr)
 		state = get_real_absolute_state(expr);
 		if (state && state->data && !estate_is_whole(state))
 			return clone_rl(estate_rl(state));
-		if (get_local_rl(expr, &rl) && !is_whole_rl(rl))
-			return rl;
 		if (get_mtag_rl(expr, &rl))
 			return rl;
 		if (get_db_type_rl(expr, &rl) && !is_whole_rl(rl))
@@ -1008,8 +1030,6 @@ static bool handle_variable(struct expression *expr, int implied, int *recurse_c
 		if (!state) {
 			if (implied == RL_HARD)
 				return false;
-			if (get_local_rl(expr, res))
-				return true;
 			if (get_mtag_rl(expr, res))
 				return true;
 			if (get_db_type_rl(expr, res))
@@ -1060,8 +1080,6 @@ static bool handle_variable(struct expression *expr, int implied, int *recurse_c
 			return true;
 		}
 
-		if (get_local_rl(expr, res))
-			return true;
 		if (get_mtag_rl(expr, res))
 			return true;
 		if (get_db_type_rl(expr, res))
@@ -1219,7 +1237,7 @@ static bool handle_call_rl(struct expression *expr, int implied, int *recurse_cn
 	if (sym_name_is("strlen", expr->fn))
 		return handle_strlen(expr, implied, recurse_cnt, res, res_sval);
 
-	if (implied == RL_EXACT || implied == RL_HARD || implied == RL_FUZZY)
+	if (implied == RL_EXACT || implied == RL_HARD)
 		return false;
 
 	if (custom_handle_variable) {
@@ -1402,6 +1420,9 @@ static bool get_rl_sval(struct expression *expr, int implied, int *recurse_cnt, 
 	case EXPR_VALUE:
 		sval = sval_from_val(expr, expr->value);
 		break;
+	case EXPR_FVALUE:
+		sval = sval_from_fval(expr, expr->fvalue);
+		break;
 	case EXPR_PREOP:
 		handle_preop_rl(expr, implied, recurse_cnt, &rl, &sval);
 		break;
@@ -1516,6 +1537,16 @@ void clear_math_cache(void)
 	memset(cached_results, 0, sizeof(cached_results));
 }
 
+void set_fast_math_only(void)
+{
+	fast_math_only++;
+}
+
+void clear_fast_math_only(void)
+{
+	fast_math_only--;
+}
+
 /*
  * Don't cache EXPR_VALUE because values are fast already.
  *
@@ -1595,6 +1626,26 @@ int get_implied_value(struct expression *expr, sval_t *sval)
 	    !rl_to_sval(rl, sval))
 		return 0;
 	return 1;
+}
+
+int get_implied_value_fast(struct expression *expr, sval_t *sval)
+{
+	struct range_list *rl;
+	static int recurse;
+	int ret = 0;
+
+	if (recurse)
+		return 0;
+
+	recurse = 1;
+	set_fast_math_only();
+	if (get_rl_helper(expr, RL_IMPLIED, &rl) &&
+	    rl_to_sval(rl, sval))
+		ret = 1;
+	clear_fast_math_only();
+	recurse = 0;
+
+	return ret;
 }
 
 int get_implied_min(struct expression *expr, sval_t *sval)
@@ -1760,6 +1811,12 @@ int known_condition_true(struct expression *expr)
 	if (!expr)
 		return 0;
 
+	if (__inline_fn && get_param_num(expr) >= 0) {
+		if (get_implied_value(expr, &tmp) && tmp.value)
+			return 1;
+		return 0;
+	}
+
 	if (get_value(expr, &tmp) && tmp.value)
 		return 1;
 
@@ -1768,10 +1825,18 @@ int known_condition_true(struct expression *expr)
 
 int known_condition_false(struct expression *expr)
 {
+	sval_t tmp;
+
 	if (!expr)
 		return 0;
 
-	if (is_zero(expr))
+	if (__inline_fn && get_param_num(expr) >= 0) {
+		if (get_implied_value(expr, &tmp) && tmp.value == 0)
+			return 1;
+		return 0;
+	}
+
+	if (expr_is_zero(expr))
 		return 1;
 
 	return 0;

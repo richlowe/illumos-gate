@@ -24,6 +24,7 @@
  * Copyright 2012 Garrett D'Amore <garrett@damore.org>
  * Copyright 2014 Pluribus Networks, Inc.
  * Copyright 2016 Nexenta Systems, Inc.
+ * Copyright 2018 Joyent, Inc.
  */
 
 /*
@@ -1010,10 +1011,10 @@ page_create_io_wrapper(void *addr, size_t len, int vmflag, void *arg)
 
 #ifdef __xpv
 static void
-segkmem_free_io(vmem_t *vmp, void * ptr, size_t size)
+segkmem_free_io(vmem_t *vmp, void *ptr, size_t size)
 {
 	extern void page_destroy_io(page_t *);
-	segkmem_xfree(vmp, ptr, size, page_destroy_io);
+	segkmem_xfree(vmp, ptr, size, &kvp, page_destroy_io);
 }
 #endif
 
@@ -1414,7 +1415,7 @@ kalloca(size_t size, size_t align, int cansleep, int physcontig,
 	size_t *addr, *raddr, rsize;
 	size_t hdrsize = 4 * sizeof (size_t);	/* must be power of 2 */
 	int a, i, c;
-	vmem_t *vmp;
+	vmem_t *vmp = NULL;
 	kmem_cache_t *cp = NULL;
 
 	if (attr->dma_attr_addr_lo > mmu_ptob((uint64_t)ddiphysmin))

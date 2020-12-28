@@ -56,6 +56,11 @@ include		$(SRC)/lib/Makefile.lib
 include		$(SRC)/lib/Makefile.rootfs
 include		$(SRC)/cmd/sgs/Makefile.com
 
+LIBS =		$(DYNLIB)
+
+COMPATLINKS =	usr/lib/$(DYNLIB)
+COMPATLINKS64 =	usr/lib/$(MACH64)/$(DYNLIB)
+
 SRCDIR =	$(SGSHOME)/liblddbg
 MAPFILEDIR =	$(SRCDIR)/common
 

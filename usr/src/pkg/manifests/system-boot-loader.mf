@@ -32,8 +32,8 @@
 <include global_zone_only_component>
 set name=pkg.fmri \
     value=pkg:/system/boot/loader@1.1,$(PKGVERS_BUILTON)-$(PKGVERS_BRANCH)
-$(i386_ONLY)set name=pkg.description value="Boot Loader"
-$(i386_ONLY)set name=pkg.summary value="BootForth Boot Loader"
+set name=pkg.description value="Boot Loader"
+set name=pkg.summary value="BootForth Boot Loader"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
 set name=variant.arch value=$(ARCH)
 $(i386_ONLY)dir path=boot group=sys
@@ -72,7 +72,8 @@ $(i386_ONLY)file path=boot/forth/shortcuts.4th group=sys mode=0444
 $(i386_ONLY)file path=boot/forth/support.4th group=sys mode=0444
 $(i386_ONLY)file path=boot/forth/version.4th group=sys mode=0444
 $(i386_ONLY)file path=boot/gptzfsboot group=sys mode=0444
-$(i386_ONLY)file path=boot/illumos.png group=sys mode=0444
+$(i386_ONLY)file path=boot/illumos-brand.png group=sys mode=0444
+$(i386_ONLY)file path=boot/illumos-logo.png group=sys mode=0444
 $(i386_ONLY)file path=boot/isoboot group=sys mode=0444
 $(i386_ONLY)file path=boot/loader group=sys mode=0444
 $(i386_ONLY)file path=boot/loader.help group=sys mode=0444

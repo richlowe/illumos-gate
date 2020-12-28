@@ -28,8 +28,10 @@
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
-# Copyright 2019, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 # Copyright 2019 RackTop Systems.
+# Copyright 2020 Oxide Computer Company
+# Copyright 2020 Peter Tribble
 #
 
 #
@@ -42,11 +44,25 @@ ROOT=		/proto
 # and libraries.
 #
 ADJUNCT_PROTO=
+# HAVE_ADJUNCT_PROTO - ADJUNCT_PROTO is set to a non-default value
+# NO_ADJUNCT_PROTO - ADJUNCT_PROTO is unset
+#
+# This works by replacing any value in ADJUNCT_PROTO with POUND_SIGN, which
+# only happens if it has some value, and then setting HAVE_ADJUNCT_PROTO
+# oppositely.
+NO_ADJUNCT_PROTO=$(ADJUNCT_PROTO:%=$(POUND_SIGN))
+$(NO_ADJUNCT_PROTO)HAVE_ADJUNCT_PROTO=$(POUND_SIGN)
 
 #
 # Adjunct for building things that run on the build machine.
 #
 NATIVE_ADJUNCT=	/usr
+
+#
+# Compatibility code for FreeBSD etc.
+#
+COMPAT=	$(SRC)/compat
+CONTRIB= $(SRC)/contrib
 
 #
 # RELEASE_BUILD should be cleared for final release builds.
@@ -122,10 +138,9 @@ ONBLD_TOOLS=		$(BUILD_TOOLS)/onbld
 JAVA_HOME=	/usr/java
 # define buildtime JAVA_ROOT
 JAVA_ROOT=	/usr/java
-# Build uses java7 by default.  Pass one the variables below set to empty
+# Build uses java8 by default.  Pass the variable below set to empty
 # string in the environment to override.
-BLD_JAVA_6=	$(POUND_SIGN)
-BLD_JAVA_8=	$(POUND_SIGN)
+BLD_JAVA_11=	$(POUND_SIGN)
 
 GNUC_ROOT=	/usr/gcc/7
 GCCLIBDIR=	$(GNUC_ROOT)/lib
@@ -133,7 +148,7 @@ GCCLIBDIR64=	$(GNUC_ROOT)/lib/$(MACH64)
 
 DOCBOOK_XSL_ROOT=	/usr/share/sgml/docbook/xsl-stylesheets
 
-RPCGEN=		/usr/bin/rpcgen
+RPCGEN=		$(ONBLD_TOOLS)/bin/$(MACH)/rpcgen
 STABS=		$(ONBLD_TOOLS)/bin/$(MACH)/stabs
 ELFEXTRACT=	$(ONBLD_TOOLS)/bin/$(MACH)/elfextract
 MBH_PATCH=	$(ONBLD_TOOLS)/bin/$(MACH)/mbh_patch
@@ -178,9 +193,7 @@ BISON=		/usr/bin/bison
 CPP=		/usr/lib/cpp
 ANSI_CPP=	$(GNUC_ROOT)/bin/cpp
 JAVAC=		$(JAVA_ROOT)/bin/javac
-JAVAH=		$(JAVA_ROOT)/bin/javah
 JAVADOC=	$(JAVA_ROOT)/bin/javadoc
-RMIC=		$(JAVA_ROOT)/bin/rmic
 JAR=		$(JAVA_ROOT)/bin/jar
 CTFCONVERT=	$(ONBLD_TOOLS)/bin/$(MACH)/ctfconvert
 CTFDIFF=	$(ONBLD_TOOLS)/bin/$(MACH)/ctfdiff
@@ -282,6 +295,8 @@ INS.symlink=	$(RM) $@; $(SYMLINK) $(INSLINKTARGET) $@
 # python scripts to the proto area. This is overridden by makefiles to
 # select to the correct version.
 PYSHEBANG=	$(PYTHON)
+$(BUILDPY3)PYSHEBANG=	$(PYTHON3)
+$(BUILDPY2)PYSHEBANG=	$(PYTHON)
 
 #
 # Python bakes the mtime of the .py file into the compiled .pyc and
@@ -394,6 +409,45 @@ CCNOAGGRESSIVELOOPS= \
 	-_gcc7=-fno-aggressive-loop-optimizations \
 	-_gcc8=-fno-aggressive-loop-optimizations \
 	-_gcc9=-fno-aggressive-loop-optimizations
+
+#
+# Options to control which version of stack-protector we enable. This
+# gives us a bit of flexibility and is unfortunately necessary as some
+# modules do not function correctly with our defaults (qede).
+#
+#  o STACKPROTECT_              Sets the appropriate version for the compiler
+#  o STACKPROTECT_strong        Sets us to use strong on all of the
+#                               compilers it supports. This is the same
+#                               as the default.
+#
+#  o STACKPROTECT_none          Disables the stack protector.
+#
+#  o STACKPROTECT_all           Enables it for everything.
+#
+#  o STACKPROTECT_basic         Enables the basic stack protector.
+#
+# -fstack-protector-strong is not available in gcc4 which is why we
+# have per-compiler versions below. These are not added to the default
+# global CFLAGS at this time as it's being incrementally enabled
+# throughout the build.
+#
+STACKPROTECT_           = -_gcc4=-fstack-protector
+STACKPROTECT_           += -_gcc7=-fstack-protector-strong
+STACKPROTECT_           += -_gcc8=-fstack-protector-strong
+STACKPROTECT_           += -_gcc9=-fstack-protector-strong
+
+STACKPROTECT_strong     = $(STACKPROTECT_)
+STACKPROTECT_none       =
+STACKPROTECT_all        = -_gcc=-fstack-protector-all
+STACKPROTECT_basic      = -_gcc=-fstack-protector
+
+STACKPROTECT_LD_	= -lssp_ns
+STACKPROTECT_LD_none	=
+STACKPROTECT_LD_all	= $(STACKPROTECT_LD_)
+STACKPROTECT_LD_basic	= $(STACKPROTECT_LD_)
+
+CCSTACKPROTECT= $(STACKPROTECT_$(STACKPROTECT))
+LDSTACKPROTECT= $(STACKPROTECT_LD_$(STACKPROTECT))
 
 # One optimization the compiler might perform is to turn this:
 #	#pragma weak foo
@@ -662,7 +716,8 @@ CPPFLAGS.native=$(ENVCPPFLAGS1) $(ENVCPPFLAGS2) $(ENVCPPFLAGS3) \
 		$(ENVCPPFLAGS4) -I$(NATIVE_ADJUNCT)/include
 CPPFLAGS=	$(CPPFLAGS.first) $(CPPFLAGS.master)
 AS_CPPFLAGS=	$(CPPFLAGS.first) $(CPPFLAGS.master)
-JAVAFLAGS=	-source 1.6 -target 1.6 -Xlint:deprecation,-options
+JAVAFLAGS=	-source 7 -target 7 -Xlint:deprecation,-options
+$(BLD_JAVA_11)JAVAFLAGS=	-source 7 -target 7 -Xlint:-options
 
 #
 # For source message catalogue
@@ -803,21 +858,31 @@ COMPILE.java=	$(JAVAC) $(JAVAFLAGS) -classpath $(CLASSPATH)
 #
 CCNEEDED		= -lC
 CCEXTNEEDED		= -lCrun -lCstd
+NATIVECCNEEDED		= -lC
 $(__GNUC)CCNEEDED	= -L$(GCCLIBDIR) -lstdc++ -lgcc_s
 $(__GNUC)CCEXTNEEDED	= $(CCNEEDED)
+$(__GNUC)NATIVECCNEEDED	= -R$(GCCLIBDIR) -L$(GCCLIBDIR) -lstdc++ -lgcc_s
 
 CCNEEDED64		= -lCrun
 CCEXTNEEDED64		= -lCrun -lCstd
+NATIVECCNEEDED64	= -lCrun
 $(__GNUC64)CCNEEDED64	= -L$(GCCLIBDIR) -lstdc++ -lgcc_s
+$(__GNUC64)NATIVECCNEEDED64 = -R$(GCCLIBDIR) -L$(GCCLIBDIR) -lstdc++ -lgcc_s
 $(__GNUC64)CCEXTNEEDED	= $(CCNEEDED64)
 
-LINK.c=		$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS)
-LINK64.c=	$(CC) $(CFLAGS64) $(CPPFLAGS) $(LDFLAGS)
-NORUNPATH=	-norunpath -nolib
-LINK.cc=	$(CCC) $(CCFLAGS) $(CPPFLAGS) $(NORUNPATH) \
-		$(LDFLAGS) $(CCNEEDED)
-LINK64.cc=	$(CCC) $(CCFLAGS64) $(CPPFLAGS) $(NORUNPATH) \
-		$(LDFLAGS) $(CCNEEDED64)
+# Libraries we expect to use natively on the build machine
+NATIVE_LIBS=
+
+LDCHECKS		= $(ZASSERTDEFLIB) $(ZGUIDANCE) $(ZFATALWARNINGS)
+LDCHECKS		+= $(NATIVE_LIBS:%=$(ZASSERTDEFLIB)=%)
+
+LINK.c=			$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDCHECKS)
+LINK64.c=		$(CC) $(CFLAGS64) $(CPPFLAGS) $(LDFLAGS) $(LDCHECKS)
+NORUNPATH=		-norunpath -nolib
+LINK.cc=		$(CCC) $(CCFLAGS) $(CPPFLAGS) $(NORUNPATH) \
+			$(LDFLAGS) $(CCNEEDED) $(LDCHECKS)
+LINK64.cc=		$(CCC) $(CCFLAGS64) $(CPPFLAGS) $(NORUNPATH) \
+			$(LDFLAGS) $(CCNEEDED64) $(LDCHECKS)
 
 #
 # lint macros
@@ -952,36 +1017,40 @@ LINT64=			$(NATIVELINT64)
 # Pass -Y flag to cpp (method of which is release-dependent)
 CCYFLAG=		-Y I,
 
-BDIRECT=	-Bdirect
-BDYNAMIC=	-Bdynamic
-BLOCAL=		-Blocal
-BNODIRECT=	-Bnodirect
-BREDUCE=	-Breduce
-BSTATIC=	-Bstatic
+BDIRECT=	-Wl,-Bdirect
+BDYNAMIC=	-Wl,-Bdynamic
+BLOCAL=		-Wl,-Blocal
+BNODIRECT=	-Wl,-Bnodirect
+BREDUCE=	-Wl,-Breduce
+BSTATIC=	-Wl,-Bstatic
+BSYMBOLIC=	-Wl,-Bsymbolic
 
-ZDEFS=		-zdefs
-ZDIRECT=	-zdirect
-ZIGNORE=	-zignore
-ZINITFIRST=	-zinitfirst
-ZINTERPOSE=	-zinterpose
-ZLAZYLOAD=	-zlazyload
-ZLOADFLTR=	-zloadfltr
-ZMULDEFS=	-zmuldefs
-ZNODEFAULTLIB=	-znodefaultlib
-ZNODEFS=	-znodefs
-ZNODELETE=	-znodelete
-ZNODLOPEN=	-znodlopen
-ZNODUMP=	-znodump
-ZNOLAZYLOAD=	-znolazyload
-ZNOLDYNSYM=	-znoldynsym
-ZNORELOC=	-znoreloc
-ZNOVERSION=	-znoversion
-ZRECORD=	-zrecord
-ZREDLOCSYM=	-zredlocsym
-ZTEXT=		-ztext
-ZVERBOSE=	-zverbose
+ZDEFS=		-Wl,-zdefs
+ZDIRECT=	-Wl,-zdirect
+ZIGNORE=	-Wl,-zignore
+ZINITFIRST=	-Wl,-zinitfirst
+ZINTERPOSE=	-Wl,-zinterpose
+ZLAZYLOAD=	-Wl,-zlazyload
+ZLOADFLTR=	-Wl,-zloadfltr
+ZMULDEFS=	-Wl,-zmuldefs
+ZNODEFAULTLIB=	-Wl,-znodefaultlib
+ZNODEFS=	-Wl,-znodefs
+ZNODELETE=	-Wl,-znodelete
+ZNODLOPEN=	-Wl,-znodlopen
+ZNODUMP=	-Wl,-znodump
+ZNOLAZYLOAD=	-Wl,-znolazyload
+ZNOLDYNSYM=	-Wl,-znoldynsym
+ZNORELOC=	-Wl,-znoreloc
+ZNOVERSION=	-Wl,-znoversion
+ZRECORD=	-Wl,-zrecord
+ZREDLOCSYM=	-Wl,-zredlocsym
+ZTEXT=		-Wl,-ztext
+ZVERBOSE=	-Wl,-zverbose
+ZASSERTDEFLIB=	-Wl,-zassert-deflib
+ZGUIDANCE=	-Wl,-zguidance
+ZFATALWARNINGS=	-Wl,-zfatal-warnings
 
-GSHARED=	-G
+GSHARED=	-shared
 CCMT=		-mt
 
 # Handle different PIC models on different ISAs
@@ -1079,9 +1148,23 @@ VERSION=	SunOS Development
 PATCHID=	$(VERSION)
 RELEASE_DATE=	release date not set
 PATCH_DATE=	$(RELEASE_DATE)
-RELEASE_CM=	"@($(POUND_SIGN))SunOS $(RELEASE) $(PATCHID) $(PATCH_DATE)"
-DEV_CM=		"@($(POUND_SIGN))SunOS Internal Development: non-nightly build"
+RELEASE_CM=	"@($(POUND_SIGN))illumos $(PATCHID) $(PATCH_DATE)"
+DEV_CM_TAIL=	development build: $(LOGNAME)
+DEV_CM=		"@($(POUND_SIGN))illumos $(DEV_CM_TAIL)"
 UTS_LABEL=	$(RELEASE)
+
+#
+# The boot banner may be overridden by distributions.  Up to five lines can be
+# specified by overriding the BOOTBANNER macros, and any line that expands to
+# an empty string will not be printed.  See comments in
+# bootbanner_expand_template() for more details about the template string
+# format.
+#
+BOOTBANNER1=	^o Version ^v ^w-bit
+BOOTBANNER2=
+BOOTBANNER3=
+BOOTBANNER4=
+BOOTBANNER5=
 
 PROCESS_COMMENT=  @?${MCS} -d -a $(RELEASE_CM) -a $(DEV_CM)
 $(RELEASE_BUILD)PROCESS_COMMENT=   @?${MCS} -d -a $(RELEASE_CM)

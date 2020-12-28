@@ -35,7 +35,7 @@ $(ROOTFS_DYNLIB64) :=	FILEMODE= 755
 all:		$(DYNLIB) $(LIBLINKS)
 
 install \
-package:	all $(ROOTLIBS64)
+package:	all $(ROOTLIBS64) $(ROOTCOMPATLINKS64)
 
 include		../Makefile.targ
 include		../../Makefile.sub.64

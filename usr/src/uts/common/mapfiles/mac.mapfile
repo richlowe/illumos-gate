@@ -11,6 +11,7 @@
 
 #
 # Copyright (c) 2017, Joyent, Inc.
+# Copyright 2020 RackTop Systems, Inc.
 #
 
 #
@@ -32,6 +33,7 @@ $mapfile_version 2
 SYMBOL_SCOPE {
     global:
 	mac_alloc				{ FLAGS = EXTERN };
+	mac_ether_offload_info			{ FLAGS = EXTERN };
 	mac_fini_ops				{ FLAGS = EXTERN };
 	mac_free				{ FLAGS = EXTERN };
 	mac_hcksum_get				{ FLAGS = EXTERN };
@@ -41,6 +43,7 @@ SYMBOL_SCOPE {
 	mac_lso_get				{ FLAGS = EXTERN };
 	mac_maxsdu_update			{ FLAGS = EXTERN };
 	mac_prop_info_set_default_link_flowctrl	{ FLAGS = EXTERN };
+	mac_prop_info_set_default_fec		{ FLAGS = EXTERN };
 	mac_prop_info_set_default_str		{ FLAGS = EXTERN };
 	mac_prop_info_set_default_uint8		{ FLAGS = EXTERN };
 	mac_prop_info_set_perm			{ FLAGS = EXTERN };

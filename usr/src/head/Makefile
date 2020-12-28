@@ -198,10 +198,12 @@ HDRS=   $($(MACH)_HDRS)	\
 	time.h		\
 	tiuser.h	\
 	tzfile.h	\
+	uchar.h		\
 	ucontext.h	\
 	ucred.h		\
 	ulimit.h	\
 	unistd.h	\
+	upanic.h	\
 	userdefs.h	\
 	ustat.h		\
 	utime.h		\
@@ -227,7 +229,7 @@ ISOHDRS = \
 	locale_iso.h	\
 	math_c99.h	\
 	math_iso.h	\
-	setjmp_iso.h  	\
+	setjmp_iso.h	\
 	signal_iso.h	\
 	stdarg_c99.h	\
 	stdarg_iso.h	\
@@ -243,7 +245,7 @@ ISOHDRS = \
 	wchar_iso.h	\
 	wctype_iso.h
 
-ARPAHDRS = 		\
+ARPAHDRS =		\
 	ftp.h		\
 	inet.h		\
 	nameser.h	\
@@ -410,7 +412,7 @@ $(ROOT)/usr/include/%: %
 
 .PARALLEL:	$(ROOTHDRS) $(CHECKHDRS)
 
-install_h: 	$(ROOTDIRS) .WAIT $(ROOTHDRS) $(SYMHDRASSERT) $(SYMHDRERRNO) \
+install_h:	$(ROOTDIRS) .WAIT $(ROOTHDRS) $(SYMHDRASSERT) $(SYMHDRERRNO) \
 		$(SYMHDRFLOAT) $(SYMHDRISO646)
 
 check:	$(CHECKHDRS)

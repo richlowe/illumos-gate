@@ -14,10 +14,12 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2014 Nexenta Systems, Inc. All rights reserved.
 # Copyright 2017 Jason King
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 SUBDIRS = date dis dladm iconv libnvpair_json libsff printf xargs grep_xpg4
-SUBDIRS += demangle mergeq workq chown ctf smbios libjedec awk
+SUBDIRS += demangle mergeq workq chown ctf smbios libjedec awk make sleep
+SUBDIRS += libcustr find mdb sed head
 
 include $(SRC)/test/Makefile.com

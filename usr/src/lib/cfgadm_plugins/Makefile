@@ -20,13 +20,14 @@
 #
 #
 # Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2019 Joyent, Inc.
 #
 # lib/cfgadm_plugins/Makefile
 #
 
 include $(SRC)/Makefile.master
 
-COMMON_SUBDIRS= scsi pci usb ib fp shp sbd
+COMMON_SUBDIRS= scsi pci usb ib fp shp sbd ccid
 sparc_SUBDIRS=	ac sysctrl
 
 i386_SUBDIRS= sata
@@ -37,16 +38,16 @@ ALL_SUBDIRS= $(COMMON_SUBDIRS) $(sparc_SUBDIRS) $(i386_SUBDIRS)
 
 MSGSUBDIRS= $(ALL_SUBDIRS)
 
-all:= 		TARGET= all
+all:=		TARGET= all
 install:=	TARGET= install
 clean:=		TARGET= clean
 clobber:=	TARGET= clobber
-lint:=		TARGET= lint
 _msg:=		TARGET= _msg
 
 .KEEP_STATE:
 
-all clean lint: $(SUBDIRS)
+all clean: $(SUBDIRS)
+
 
 install: all $(SUBDIRS)
 

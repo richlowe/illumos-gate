@@ -24,6 +24,8 @@
  * Copyright (c) 2014 Integros [integros.com]
  * Copyright 2016 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joshua M. Clulow <josh@sysmgr.org>
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /* Portions Copyright 2010 Robert Milkowski */
@@ -63,10 +65,12 @@
 #include <sys/zfs_ctldir.h>
 #include <sys/zfs_fuid.h>
 #include <sys/bootconf.h>
+#include <sys/ddi.h>
 #include <sys/sunddi.h>
 #include <sys/dnlc.h>
 #include <sys/dmu_objset.h>
 #include <sys/spa_boot.h>
+#include <sys/vdev_impl.h>
 #include "zfs_comutil.h"
 
 int zfsfstype;
@@ -920,8 +924,13 @@ zfs_id_overobjquota(zfsvfs_t *zfsvfs, uint64_t usedobj, uint64_t id)
 	int err;
 
 	if (!dmu_objset_userobjspace_present(zfsvfs->z_os)) {
-		if (dmu_objset_userobjspace_upgradable(zfsvfs->z_os))
+		if (dmu_objset_userobjspace_upgradable(zfsvfs->z_os)) {
+			dsl_pool_config_enter(
+			    dmu_objset_pool(zfsvfs->z_os), FTAG);
 			dmu_objset_id_quota_upgrade(zfsvfs->z_os);
+			dsl_pool_config_exit(
+			    dmu_objset_pool(zfsvfs->z_os), FTAG);
+		}
 		return (B_FALSE);
 	}
 
@@ -1200,6 +1209,10 @@ zfsvfs_create_impl(zfsvfs_t **zfvp, zfsvfs_t *zfsvfs, objset_t *os)
 		return (error);
 	}
 
+	zfsvfs->z_drain_task = TASKQID_INVALID;
+	zfsvfs->z_draining = B_FALSE;
+	zfsvfs->z_drain_cancel = B_TRUE;
+
 	*zfvp = zfsvfs;
 	return (0);
 }
@@ -1228,10 +1241,11 @@ zfsvfs_setup(zfsvfs_t *zfsvfs, boolean_t mounting)
 		 * allow replays to succeed.
 		 */
 		readonly = zfsvfs->z_vfs->vfs_flag & VFS_RDONLY;
-		if (readonly != 0)
+		if (readonly != 0) {
 			zfsvfs->z_vfs->vfs_flag &= ~VFS_RDONLY;
-		else
+		} else {
 			zfs_unlinked_drain(zfsvfs);
+		}
 
 		/*
 		 * Parse and replay the intent log.
@@ -1705,6 +1719,36 @@ zfs_mount_label_policy(vfs_t *vfsp, char *osname)
 	return (retv);
 }
 
+/*
+ * Load a string-valued boot property and attempt to convert it to a 64-bit
+ * unsigned integer.  If the value is not present, or the conversion fails,
+ * return the provided default value.
+ */
+static uint64_t
+spa_get_bootprop_uint64(const char *name, uint64_t defval)
+{
+	char *propval;
+	u_longlong_t r;
+	int e;
+
+	if ((propval = spa_get_bootprop(name)) == NULL) {
+		/*
+		 * The property does not exist.
+		 */
+		return (defval);
+	}
+
+	e = ddi_strtoull(propval, NULL, 10, &r);
+
+	spa_free_bootprop(propval);
+
+	/*
+	 * If the conversion succeeded, return the value.  If there was any
+	 * kind of failure, just return the default value.
+	 */
+	return (e == 0 ? r : defval);
+}
+
 static int
 zfs_mountroot(vfs_t *vfsp, enum whymountroot why)
 {
@@ -1715,6 +1759,8 @@ zfs_mountroot(vfs_t *vfsp, enum whymountroot why)
 	vnode_t *vp = NULL;
 	char *zfs_bootfs;
 	char *zfs_devid;
+	uint64_t zfs_bootpool;
+	uint64_t zfs_bootvdev;
 
 	ASSERT(vfsp);
 
@@ -1726,6 +1772,7 @@ zfs_mountroot(vfs_t *vfsp, enum whymountroot why)
 	if (why == ROOT_INIT) {
 		if (zfsrootdone++)
 			return (SET_ERROR(EBUSY));
+
 		/*
 		 * the process of doing a spa_load will require the
 		 * clock to be set before we could (for example) do
@@ -1740,23 +1787,47 @@ zfs_mountroot(vfs_t *vfsp, enum whymountroot why)
 			return (SET_ERROR(EINVAL));
 		}
 		zfs_devid = spa_get_bootprop("diskdevid");
-		error = spa_import_rootpool(rootfs.bo_name, zfs_devid);
-		if (zfs_devid)
-			spa_free_bootprop(zfs_devid);
-		if (error) {
+
+		/*
+		 * The boot loader may also provide us with the GUID for both
+		 * the pool and the nominated boot vdev.  A GUID value of 0 is
+		 * explicitly invalid (see "spa_change_guid()"), so we use this
+		 * as a sentinel value when no GUID is present.
+		 */
+		zfs_bootpool = spa_get_bootprop_uint64("zfs-bootpool", 0);
+		zfs_bootvdev = spa_get_bootprop_uint64("zfs-bootvdev", 0);
+
+		/*
+		 * Initialise the early boot device rescan mechanism.  A scan
+		 * will not actually be performed unless we need to do so in
+		 * order to find the correct /devices path for a relocated
+		 * device.
+		 */
+		vdev_disk_preroot_init();
+
+		error = spa_import_rootpool(rootfs.bo_name, zfs_devid,
+		    zfs_bootpool, zfs_bootvdev);
+
+		spa_free_bootprop(zfs_devid);
+
+		if (error != 0) {
 			spa_free_bootprop(zfs_bootfs);
+			vdev_disk_preroot_fini();
 			cmn_err(CE_NOTE, "spa_import_rootpool: error %d",
 			    error);
 			return (error);
 		}
+
 		if (error = zfs_parse_bootfs(zfs_bootfs, rootfs.bo_name)) {
 			spa_free_bootprop(zfs_bootfs);
+			vdev_disk_preroot_fini();
 			cmn_err(CE_NOTE, "zfs_parse_bootfs: error %d",
 			    error);
 			return (error);
 		}
 
 		spa_free_bootprop(zfs_bootfs);
+		vdev_disk_preroot_fini();
 
 		if (error = vfs_lock(vfsp))
 			return (error);
@@ -2038,6 +2109,8 @@ zfsvfs_teardown(zfsvfs_t *zfsvfs, boolean_t unmounting)
 {
 	znode_t	*zp;
 
+	zfs_unlinked_drain_stop_wait(zfsvfs);
+
 	rrm_enter(&zfsvfs->z_teardown_lock, RW_WRITER, FTAG);
 
 	if (!unmounting) {
@@ -2161,18 +2234,34 @@ zfs_umount(vfs_t *vfsp, int fflag, cred_t *cr)
 		 * Our count is maintained in the vfs structure, but the
 		 * number is off by 1 to indicate a hold on the vfs
 		 * structure itself.
-		 *
-		 * The '.zfs' directory maintains a reference of its
-		 * own, and any active references underneath are
-		 * reflected in the vnode count.
 		 */
-		if (zfsvfs->z_ctldir == NULL) {
-			if (vfsp->vfs_count > 1)
-				return (SET_ERROR(EBUSY));
-		} else {
-			if (vfsp->vfs_count > 2 ||
-			    zfsvfs->z_ctldir->v_count > 1)
-				return (SET_ERROR(EBUSY));
+		boolean_t draining;
+		uint_t thresh = 1;
+
+		/*
+		 * The '.zfs' directory maintains a reference of its own, and
+		 * any active references underneath are reflected in the vnode
+		 * count. Allow one additional reference for it.
+		 */
+		if (zfsvfs->z_ctldir != NULL)
+			thresh++;
+
+		/*
+		 * If it's running, the asynchronous unlinked drain task needs
+		 * to be stopped before the number of active vnodes can be
+		 * reliably checked.
+		 */
+		draining = zfsvfs->z_draining;
+		if (draining)
+			zfs_unlinked_drain_stop_wait(zfsvfs);
+
+		if (vfsp->vfs_count > thresh || (zfsvfs->z_ctldir != NULL &&
+		    zfsvfs->z_ctldir->v_count > 1)) {
+			if (draining) {
+				/* If it was draining, restart the task */
+				zfs_unlinked_drain(zfsvfs);
+			}
+			return (SET_ERROR(EBUSY));
 		}
 	}
 
@@ -2358,6 +2447,16 @@ zfs_resume_fs(zfsvfs_t *zfsvfs, dsl_dataset_t *ds)
 		(void) zfs_rezget(zp);
 	}
 	mutex_exit(&zfsvfs->z_znodes_lock);
+
+	if (((zfsvfs->z_vfs->vfs_flag & VFS_RDONLY) == 0) &&
+	    !zfsvfs->z_unmounted) {
+		/*
+		 * zfs_suspend_fs() could have interrupted freeing
+		 * of dnodes. We need to restart this freeing so
+		 * that we don't "leak" the space.
+		 */
+		zfs_unlinked_drain(zfsvfs);
+	}
 
 bail:
 	/* release the VOPs */

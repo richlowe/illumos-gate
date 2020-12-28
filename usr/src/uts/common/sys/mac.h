@@ -21,8 +21,9 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2018 Joyent, Inc.
  * Copyright (c) 2015 Garrett D'Amore <garrett@damore.org>
+ * Copyright 2020 RackTop Systems, Inc.
  */
 
 #ifndef	_SYS_MAC_H
@@ -86,6 +87,13 @@ typedef enum {
 	LINK_FLOWCTRL_TX,
 	LINK_FLOWCTRL_BI
 } link_flowctrl_t;
+
+typedef enum {
+	LINK_FEC_NONE		= 1 << 0,
+	LINK_FEC_AUTO		= 1 << 1,
+	LINK_FEC_RS		= 1 << 2,
+	LINK_FEC_BASE_R		= 1 << 3
+} link_fec_t;
 
 typedef enum {
 	LINK_TAGMODE_VLANONLY = 0,
@@ -154,6 +162,7 @@ typedef enum {
  * Please append properties to the end of this list. Do not reorder the list.
  */
 typedef enum {
+	MAC_PROP_PRIVATE = -1,
 	MAC_PROP_DUPLEX = 0x00000001,
 	MAC_PROP_SPEED,
 	MAC_PROP_STATUS,
@@ -230,7 +239,8 @@ typedef enum {
 	MAC_PROP_EN_25GFDX_CAP,
 	MAC_PROP_ADV_50GFDX_CAP,
 	MAC_PROP_EN_50GFDX_CAP,
-	MAC_PROP_PRIVATE = -1
+	MAC_PROP_EN_FEC_CAP,
+	MAC_PROP_ADV_FEC_CAP
 } mac_prop_id_t;
 
 /*
@@ -612,6 +622,38 @@ typedef struct mactype_register_s {
 	mac_ndd_mapping_t *mtr_mapping;
 	size_t		mtr_mappingcount;
 } mactype_register_t;
+
+/*
+ * Flags to describe the hardware emulation desired from a client when
+ * calling mac_hw_emul().
+ *
+ * MAC_HWCKSUM_EMUL
+ *
+ *	If an mblk is marked with HCK_* flags, then calculate those
+ *	checksums and update the checksum flags.
+ *
+ * MAC_IPCKSUM_EMUL
+ *
+ *	Like MAC_HWCKSUM_EMUL, except only calculate the IPv4 header
+ *	checksum. We still update both the IPv4 and ULP checksum
+ *	flags.
+ *
+ * MAC_LSO_EMUL
+ *
+ *	If an mblk is marked with HW_LSO, then segment the LSO mblk
+ *	into a new chain of mblks which reference the original data
+ *	block. This flag DOES NOT imply MAC_HWCKSUM_EMUL. If the
+ *	caller needs both then it must set both.
+ */
+typedef enum mac_emul {
+	MAC_HWCKSUM_EMUL = (1 << 0),
+	MAC_IPCKSUM_EMUL = (1 << 1),
+	MAC_LSO_EMUL = (1 << 2)
+} mac_emul_t;
+
+#define	MAC_HWCKSUM_EMULS	(MAC_HWCKSUM_EMUL | MAC_IPCKSUM_EMUL)
+#define	MAC_ALL_EMULS		(MAC_HWCKSUM_EMUL | MAC_IPCKSUM_EMUL | \
+				MAC_LSO_EMUL)
 
 /*
  * Driver interface functions.

@@ -12,14 +12,15 @@
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
-# Copyright 2018 Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 [DEFAULT]
 pre =
 verbose = False
 quiet = False
-timeout = 60
+timeout = 120
 post =
 outputdir = /var/tmp/test_results
 
@@ -38,12 +39,19 @@ outputdir = /var/tmp/test_results
 [/opt/libc-tests/tests/wcsncasecmp-7350.32]
 [/opt/libc-tests/tests/wcsncasecmp-7350.64]
 
+[/opt/libc-tests/tests/i18n/bindtextdomain_test]
+[/opt/libc-tests/tests/qsort/qsort_test]
+
 [/opt/libc-tests/tests/random/getrandom]
 [/opt/libc-tests/tests/random/getentropy]
 [/opt/libc-tests/tests/random/chacha]
 [/opt/libc-tests/tests/random/inz_child]
 [/opt/libc-tests/tests/random/inz_inval]
+#
+# root privs required for mlock privileges
+#
 [/opt/libc-tests/tests/random/inz_mlock]
+user = root
 [/opt/libc-tests/tests/random/inz_region]
 [/opt/libc-tests/tests/random/inz_split]
 [/opt/libc-tests/tests/random/inz_split_vpp]
@@ -55,12 +63,35 @@ outputdir = /var/tmp/test_results
 [/opt/libc-tests/tests/random/arc4random_preforkall]
 [/opt/libc-tests/tests/random/arc4random_forksig]
 [/opt/libc-tests/tests/random/arc4random_preforksig]
+#
+# root privs required for DTrace
+#
 [/opt/libc-tests/tests/random/arc4key.ksh]
+user = root
 
 [/opt/libc-tests/tests/regex/regex_test]
 
 [/opt/libc-tests/tests/select/select.sh]
 timeout = 600
+
+[/opt/libc-tests/tests/stdio/fileno.32]
+[/opt/libc-tests/tests/stdio/fileno.64]
+[/opt/libc-tests/tests/stdio/fmemopentest.32]
+[/opt/libc-tests/tests/stdio/fmemopentest.64]
+[/opt/libc-tests/tests/stdio/ftell_ungetc.32]
+[/opt/libc-tests/tests/stdio/ftell_ungetc.64]
+[/opt/libc-tests/tests/stdio/ftello_12768.lfs]
+[/opt/libc-tests/tests/stdio/ftello_12768.64]
+[/opt/libc-tests/tests/stdio/memstream.32]
+[/opt/libc-tests/tests/stdio/memstream.64]
+[/opt/libc-tests/tests/stdio/memstream_reopen.32]
+[/opt/libc-tests/tests/stdio/memstream_reopen.64]
+[/opt/libc-tests/tests/stdio/open_memstreamtest.32]
+[/opt/libc-tests/tests/stdio/open_memstreamtest.64]
+[/opt/libc-tests/tests/stdio/orientation_test.32]
+[/opt/libc-tests/tests/stdio/orientation_test.64]
+[/opt/libc-tests/tests/stdio/test_mbrtowc.32]
+[/opt/libc-tests/tests/stdio/test_mbrtowc.64]
 
 [/opt/libc-tests/tests/aligned_alloc.32]
 [/opt/libc-tests/tests/aligned_alloc.64]
@@ -93,8 +124,16 @@ timeout = 600
 [/opt/libc-tests/tests/thread_name]
 [/opt/libc-tests/tests/timespec_get.32]
 [/opt/libc-tests/tests/timespec_get.64]
+[/opt/libc-tests/tests/uchar.32]
+[/opt/libc-tests/tests/uchar.64]
+[/opt/libc-tests/tests/utimes.32]
+[/opt/libc-tests/tests/utimes.64]
 
+#
+# root privs required for priority changes
+#
 [/opt/libc-tests/tests/pthread_attr_get_np]
+user=root
 
 [/opt/libc-tests/tests/symbols]
 pre = setup

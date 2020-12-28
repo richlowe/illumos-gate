@@ -26,6 +26,7 @@
  * Copyright 2013 Saso Kiselkov. All rights reserved.
  * Copyright (c) 2017 Datto Inc.
  * Copyright (c) 2017, Intel Corporation.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef _SYS_SPA_IMPL_H
@@ -254,6 +255,7 @@ struct spa {
 
 	spa_aux_vdev_t	spa_spares;		/* hot spares */
 	spa_aux_vdev_t	spa_l2cache;		/* L2ARC cache devices */
+	hrtime_t	spa_spares_last_polled;	/* time spares last polled */
 	nvlist_t	*spa_label_features;	/* Features for reading MOS */
 	uint64_t	spa_config_object;	/* MOS object for pool config */
 	uint64_t	spa_config_generation;	/* config generation number */
@@ -396,6 +398,14 @@ struct spa {
 		int spa_active;
 		int spa_queued;
 	} spa_queue_stats[ZIO_PRIORITY_NUM_QUEUEABLE];
+
+	/*
+	 * The following two members diverge from OpenZFS. Upstream import
+	 * status is built around the Linux /proc fs. On illumos we use a kstat
+	 * to track import status. spa_imp_kstat_lock protects spa_imp_kstat.
+	 */
+	kmutex_t	spa_imp_kstat_lock;
+	struct kstat	*spa_imp_kstat;		/* kstat for import status */
 
 	/* arc_memory_throttle() parameters during low memory condition */
 	uint64_t	spa_lowmem_page_load;	/* memory load during txg */

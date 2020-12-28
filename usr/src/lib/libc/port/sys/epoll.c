@@ -10,7 +10,8 @@
  */
 
 /*
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2017 Joyent, Inc.
+ * Copyright 2020 Oxide Computer Company
  */
 
 #include <sys/types.h>
@@ -56,13 +57,22 @@
  * Events that we ignore entirely.  They can be set in events, but they will
  * never be returned.
  */
-#define	EPOLLIGNORED 	(EPOLLMSG | EPOLLWAKEUP)
+#define	EPOLLIGNORED	(EPOLLMSG | EPOLLWAKEUP | EPOLLEXCLUSIVE)
 
 /*
  * Events that we swizzle into other bit positions.
  */
 #define	EPOLLSWIZZLED	\
 	(EPOLLRDHUP | EPOLLONESHOT | EPOLLET | EPOLLWRBAND | EPOLLWRNORM)
+
+/*
+ * The defined behavior for epoll_wait/epoll_pwait when using a timeout less
+ * than 0 is to wait for events until they arrive (or interrupted by a signal).
+ * While poll(7d) operates in this manner for a timeout of -1, using other
+ * negative values results in an immediate timeout, as if it had been set to 0.
+ * For that reason, negative values are clamped to -1.
+ */
+#define	EPOLL_TIMEOUT_CLAMP(t)	(((t) < -1) ? -1 : (t))
 
 int
 epoll_create(int size)
@@ -131,6 +141,11 @@ epoll_ctl(int epfd, int op, int fd, struct epoll_event *event)
 		break;
 
 	case EPOLL_CTL_MOD:
+		/* EPOLLEXCLUSIVE is prohibited for modify operations */
+		if ((event->events & EPOLLEXCLUSIVE) != 0) {
+			errno = EINVAL;
+			return (-1);
+		}
 		/*
 		 * In the modify case, we pass down two events:  one to
 		 * remove the event and another to add it back.
@@ -209,7 +224,7 @@ epoll_wait(int epfd, struct epoll_event *events,
 	}
 
 	arg.dp_nfds = maxevents;
-	arg.dp_timeout = timeout;
+	arg.dp_timeout = EPOLL_TIMEOUT_CLAMP(timeout);
 	arg.dp_fds = (pollfd_t *)events;
 
 	return (ioctl(epfd, DP_POLL, &arg));
@@ -227,7 +242,7 @@ epoll_pwait(int epfd, struct epoll_event *events,
 	}
 
 	arg.dp_nfds = maxevents;
-	arg.dp_timeout = timeout;
+	arg.dp_timeout = EPOLL_TIMEOUT_CLAMP(timeout);
 	arg.dp_fds = (pollfd_t *)events;
 	arg.dp_setp = (sigset_t *)sigmask;
 

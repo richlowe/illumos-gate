@@ -21,6 +21,7 @@
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, 2015 by Delphix. All rights reserved.
+ * Copyright (c) 2017, Intel Corporation.
  */
 
 /*
@@ -45,9 +46,10 @@
 #include <sys/zfs_ioctl.h>
 #include <sys/vdev_impl.h>
 #include <sys/dmu_objset.h>
+#include <sys/dsl_dataset.h>
 #include <sys/fs/zfs.h>
 
-uint32_t zio_injection_enabled;
+uint32_t zio_injection_enabled = 0;
 
 /*
  * Data describing each zinject handler registered on the system, and
@@ -99,6 +101,26 @@ static kmutex_t inject_delay_mtx;
 static int inject_next_id = 1;
 
 /*
+ * Test if the requested frequency was triggered
+ */
+static boolean_t
+freq_triggered(uint32_t frequency)
+{
+	/*
+	 * zero implies always (100%)
+	 */
+	if (frequency == 0)
+		return (B_TRUE);
+
+	/*
+	 * Note: we still handle legacy (unscaled) frequecy values
+	 */
+	uint32_t maximum = (frequency <= 100) ? 100 : ZI_PERCENTAGE_MAX;
+
+	return (spa_get_random(maximum) < frequency);
+}
+
+/*
  * Returns true if the given record matches the I/O in progress.
  */
 static boolean_t
@@ -113,8 +135,7 @@ zio_match_handler(zbookmark_phys_t *zb, uint64_t type, int dva,
 	    record->zi_object == DMU_META_DNODE_OBJECT) {
 		if (record->zi_type == DMU_OT_NONE ||
 		    type == record->zi_type)
-			return (record->zi_freq == 0 ||
-			    spa_get_random(100) < record->zi_freq);
+			return (freq_triggered(record->zi_freq));
 		else
 			return (B_FALSE);
 	}
@@ -129,8 +150,7 @@ zio_match_handler(zbookmark_phys_t *zb, uint64_t type, int dva,
 	    zb->zb_blkid <= record->zi_end &&
 	    (record->zi_dvas == 0 || (record->zi_dvas & (1ULL << dva))) &&
 	    error == record->zi_error) {
-		return (record->zi_freq == 0 ||
-		    spa_get_random(100) < record->zi_freq);
+		return (freq_triggered(record->zi_freq));
 	}
 
 	return (B_FALSE);
@@ -359,6 +379,12 @@ zio_handle_device_injection(vdev_t *vd, zio_t *zio, int error)
 
 			if (handler->zi_record.zi_error == error) {
 				/*
+				 * limit error injection if requested
+				 */
+				if (!freq_triggered(handler->zi_record.zi_freq))
+					continue;
+
+				/*
 				 * For a failed open, pretend like the device
 				 * has gone away.
 				 */
@@ -526,6 +552,9 @@ zio_handle_io_delay(zio_t *zio)
 		if (handler->zi_record.zi_cmd != ZINJECT_DELAY_IO)
 			continue;
 
+		if (!freq_triggered(handler->zi_record.zi_freq))
+			continue;
+
 		if (vd->vdev_guid != handler->zi_record.zi_guid)
 			continue;
 
@@ -623,6 +652,63 @@ zio_handle_io_delay(zio_t *zio)
 	return (min_target);
 }
 
+static int
+zio_calculate_range(const char *pool, zinject_record_t *record)
+{
+	dsl_pool_t *dp;
+	dsl_dataset_t *ds;
+	objset_t *os = NULL;
+	dnode_t *dn = NULL;
+	int error;
+
+	/*
+	 * Obtain the dnode for object using pool, objset, and object
+	 */
+	error = dsl_pool_hold(pool, FTAG, &dp);
+	if (error)
+		return (error);
+
+	error = dsl_dataset_hold_obj(dp, record->zi_objset, FTAG, &ds);
+	dsl_pool_rele(dp, FTAG);
+	if (error)
+		return (error);
+
+	error = dmu_objset_from_ds(ds, &os);
+	dsl_dataset_rele(ds, FTAG);
+	if (error)
+		return (error);
+
+	error = dnode_hold(os, record->zi_object, FTAG, &dn);
+	if (error)
+		return (error);
+
+	/*
+	 * Translate the range into block IDs
+	 */
+	if (record->zi_start != 0 || record->zi_end != -1ULL) {
+		record->zi_start >>= dn->dn_datablkshift;
+		record->zi_end >>= dn->dn_datablkshift;
+	}
+	if (record->zi_level > 0) {
+		if (record->zi_level >= dn->dn_nlevels) {
+			dnode_rele(dn, FTAG);
+			return (SET_ERROR(EDOM));
+		}
+
+		if (record->zi_start != 0 || record->zi_end != 0) {
+			int shift = dn->dn_indblkshift - SPA_BLKPTRSHIFT;
+
+			for (int level = record->zi_level; level > 0; level--) {
+				record->zi_start >>= shift;
+				record->zi_end >>= shift;
+			}
+		}
+	}
+
+	dnode_rele(dn, FTAG);
+	return (0);
+}
+
 /*
  * Create a new handler for the given record.  We add it to the list, adding
  * a reference to the spa_t in the process.  We increment zio_injection_enabled,
@@ -660,6 +746,15 @@ zio_inject_fault(char *name, int flags, int *id, zinject_record_t *record)
 		 */
 		if (record->zi_nlanes >= UINT16_MAX)
 			return (SET_ERROR(EINVAL));
+	}
+
+	/*
+	 * If the supplied range was in bytes -- calculate the actual blkid
+	 */
+	if (flags & ZINJECT_CALC_RANGE) {
+		error = zio_calculate_range(name, record);
+		if (error != 0)
+			return (error);
 	}
 
 	if (!(flags & ZINJECT_NULL)) {

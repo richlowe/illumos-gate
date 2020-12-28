@@ -13,7 +13,7 @@
 # Copyright 2017, Richard Lowe
 # Copyright 2014 Garrett D'Amore <garrett@damore>
 # Copyright 2019 Joyent, Inc.
-# Copyright 2016 Nexenta Systems, Inc.
+# Copyright 2020 Nexenta by DDN, Inc. All rights reserved.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
 #
 
@@ -70,6 +70,7 @@ MANFILES=	ASSERT.9f				\
 		copyin.9f				\
 		copymsg.9f				\
 		copyout.9f				\
+		credentials.9f				\
 		csx_AccessConfigurationRegister.9f	\
 		csx_CS_DDI_Info.9f			\
 		csx_ConvertSize.9f			\
@@ -154,11 +155,11 @@ MANFILES=	ASSERT.9f				\
 		ddi_dma_alloc_handle.9f			\
 		ddi_dma_buf_bind_handle.9f		\
 		ddi_dma_burstsizes.9f			\
+		ddi_dma_cookie_iter.9f			\
 		ddi_dma_free_handle.9f			\
 		ddi_dma_getwin.9f			\
 		ddi_dma_mem_alloc.9f			\
 		ddi_dma_mem_free.9f			\
-		ddi_dma_nextcookie.9f			\
 		ddi_dma_numwin.9f			\
 		ddi_dma_set_sbus64.9f			\
 		ddi_dma_sync.9f				\
@@ -556,6 +557,7 @@ MANFILES=	ASSERT.9f				\
 
 MANLINKS=	AVL_NEXT.9f					\
 		AVL_PREV.9f					\
+		CRED.9f						\
 		SIZEOF_PTR.9f					\
 		SIZEOF_STRUCT.9f				\
 		STRUCT_BUF.9f					\
@@ -690,6 +692,9 @@ MANLINKS=	AVL_NEXT.9f					\
 		avl_remove.9f					\
 		avl_swap.9f					\
 		bcanputnext.9f					\
+		crdup.9f					\
+		crfree.9f					\
+		crget.9f					\
 		crgetgid.9f					\
 		crgetgroups.9f					\
 		crgetngroups.9f					\
@@ -699,6 +704,7 @@ MANLINKS=	AVL_NEXT.9f					\
 		crgetsuid.9f					\
 		crgetuid.9f					\
 		crgetzoneid.9f					\
+		crhold.9f					\
 		csx_Get16.9f					\
 		csx_Get32.9f					\
 		csx_Get64.9f					\
@@ -748,6 +754,10 @@ MANLINKS=	AVL_NEXT.9f					\
 		ddi_devid_unregister.9f				\
 		ddi_devid_valid.9f				\
 		ddi_devmap_segmap.9f				\
+		ddi_dma_cookie_get.9f				\
+		ddi_dma_cookie_one.9f				\
+		ddi_dma_ncookies.9f				\
+		ddi_dma_nextcookie.9f				\
 		ddi_dmae_1stparty.9f				\
 		ddi_dmae_alloc.9f				\
 		ddi_dmae_disable.9f				\
@@ -922,6 +932,7 @@ MANLINKS=	AVL_NEXT.9f					\
 		ddi_ufm_image_set_nslots.9f			\
 		ddi_ufm_init.9f					\
 		ddi_ufm_slot_set_attrs.9f			\
+		ddi_ufm_slot_set_imgsize.9f			\
 		ddi_ufm_slot_set_misc.9f			\
 		ddi_ufm_slot_set_version.9f			\
 		ddi_ufm_update.9f				\
@@ -964,6 +975,7 @@ MANLINKS=	AVL_NEXT.9f					\
 		inl.9f						\
 		intro.9f					\
 		inw.9f						\
+		kcred.9f					\
 		kmem_cache_alloc.9f				\
 		kmem_cache_destroy.9f				\
 		kmem_cache_free.9f				\
@@ -1305,7 +1317,8 @@ MANLINKS=	AVL_NEXT.9f					\
 		vsprintf.9f					\
 		vzcmn_err.9f					\
 		wr.9f						\
-		zcmn_err.9f
+		zcmn_err.9f					\
+		zone_kcred.9f
 
 assert.9f				:= LINKSRC = ASSERT.9f
 
@@ -1478,6 +1491,14 @@ cv_timedwait_sig.9f			:= LINKSRC = condvar.9f
 cv_wait.9f				:= LINKSRC = condvar.9f
 cv_wait_sig.9f				:= LINKSRC = condvar.9f
 
+CRED.9f					:= LINKSRC = credentials.9f
+crdup.9f				:= LINKSRC = credentials.9f
+crfree.9f				:= LINKSRC = credentials.9f
+crget.9f				:= LINKSRC = credentials.9f
+crhold.9f				:= LINKSRC = credentials.9f
+kcred.9f				:= LINKSRC = credentials.9f
+zone_kcred.9f				:= LINKSRC = credentials.9f
+
 csx_Get16.9f				:= LINKSRC = csx_Get8.9f
 csx_Get32.9f				:= LINKSRC = csx_Get8.9f
 csx_Get64.9f				:= LINKSRC = csx_Get8.9f
@@ -1556,6 +1577,11 @@ ddi_devid_str_encode.9f			:= LINKSRC = ddi_devid_compare.9f
 ddi_devid_str_free.9f			:= LINKSRC = ddi_devid_compare.9f
 ddi_devid_unregister.9f			:= LINKSRC = ddi_devid_compare.9f
 ddi_devid_valid.9f			:= LINKSRC = ddi_devid_compare.9f
+
+ddi_dma_cookie_get.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
+ddi_dma_cookie_one.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
+ddi_dma_ncookies.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
+ddi_dma_nextcookie.9f			:= LINKSRC = ddi_dma_cookie_iter.9f
 
 ddi_dmae_1stparty.9f			:= LINKSRC = ddi_dmae.9f
 ddi_dmae_alloc.9f			:= LINKSRC = ddi_dmae.9f
@@ -1769,6 +1795,7 @@ ddi_ufm_image_set_misc.9f		:= LINKSRC = ddi_ufm_image.9f
 ddi_ufm_image_set_nslots.9f		:= LINKSRC = ddi_ufm_image.9f
 ddi_ufm_init.9f				:= LINKSRC = ddi_ufm.9f
 ddi_ufm_slot_set_attrs.9f		:= LINKSRC = ddi_ufm_slot.9f
+ddi_ufm_slot_set_imgsize.9f		:= LINKSRC = ddi_ufm_slot.9f
 ddi_ufm_slot_set_misc.9f		:= LINKSRC = ddi_ufm_slot.9f
 ddi_ufm_slot_set_version.9f		:= LINKSRC = ddi_ufm_slot.9f
 ddi_ufm_update.9f			:= LINKSRC = ddi_ufm.9f

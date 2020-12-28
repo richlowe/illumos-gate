@@ -22,12 +22,12 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2016 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 
 #include <sys/mdb_modapi.h>
-
+#include <sys/sysmacros.h>
 
 #include <sys/usb/usba.h>
 #include <sys/usb/usba/usba_types.h>
@@ -484,6 +484,32 @@ static usb_descr_item_t usb_vs_format_dv_descr[] = {
 };
 static uint_t usb_vs_format_dv_item = 6;
 
+static usb_descr_item_t usb_ccid_descr[] = {
+	{1, "bLength"},
+	{1, "bDescriptorType"},
+	{2, "bcdCCID"},
+	{1, "bMaxSlotIndex"},
+	{1, "bVoltageSupport"},
+	{4, "dwProtocols"},
+	{4, "dwDefaultClock"},
+	{4, "dwMaximumClock"},
+	{1, "bNumClockSupported"},
+	{4, "dwDataRate"},
+	{4, "dwMaxDataRate"},
+	{1, "bNumDataRatesSupported"},
+	{4, "dwMaxIFSD"},
+	{4, "dwSyncProtocols"},
+	{4, "dwMechanical"},
+	{4, "dwFeatures"},
+	{4, "dwMaxCCIDMessageLength"},
+	{1, "bClassGetResponse"},
+	{1, "bClassEnvelope"},
+	{2, "wLcdLayout"},
+	{1, "bPinSupport"},
+	{1, "bMaxCCIDBusySlots"}
+};
+static uint_t usb_ccid_item = ARRAY_SIZE(usb_ccid_descr);
+
 
 /* ****************************************************************** */
 
@@ -648,7 +674,7 @@ prtusb(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	/* tree, print usb device tree info */
 	if (usb_flag & OPT_TREE) {
 
-		mdb_printf("\nusba_device: 0x%x\n", addr);
+		mdb_printf("\nusba_device: 0x%lx\n", addr);
 
 		mdb_printf("mfg_prod_sn: ");
 		if (mdb_readstr(strbuf, STRLEN,
@@ -800,12 +826,12 @@ prt_usb_tree_node(uintptr_t paddr)
 	mdb_printf("  %s\n", strbuf);
 
 	/* dip addr */
-	mdb_printf("  dip: 0x%x\n", paddr);
+	mdb_printf("  dip: 0x%lx\n", paddr);
 
 	/* softe_sate */
 	mdb_snprintf(strbuf, STRLEN, "%s_statep", driver_name);
 	if (mdb_devinfo2statep(paddr, strbuf, &statep) != -1) {
-		mdb_printf("  %s: 0x%x\n", strbuf, statep);
+		mdb_printf("  %s: 0x%lx\n", strbuf, statep);
 	}
 
 	/* error level */
@@ -1131,6 +1157,11 @@ prt_usb_desc(uintptr_t usb_cfg, uint_t cfg_len)
 				mdb_printf("WA Descriptor\n");
 				print_descr(paddr, nlen, usb_wa_descr,
 				    usb_wa_item);
+			} else if (usb_if.bInterfaceClass == USB_CLASS_CCID &&
+			    usb_if.bInterfaceSubClass == 0x0) {
+				mdb_printf("CCID Descriptor\n");
+				print_descr(paddr, nlen, usb_ccid_descr,
+				    usb_ccid_item);
 			} else {
 				mdb_printf("HID Descriptor\n");
 				print_descr(paddr, nlen, usb_hid_descr,

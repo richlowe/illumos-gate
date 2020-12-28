@@ -26,6 +26,7 @@
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
  * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #ifndef	_PCONTROL_H
@@ -98,6 +99,7 @@ typedef struct file_info {	/* symbol information for a mapped file */
 	struct map_info *file_map;	/* primary (text) mapping */
 	int	file_ref;	/* references from map_info_t structures */
 	int	file_fd;	/* file descriptor for the mapped file */
+	int	file_dbgfile;	/* file descriptor for the debug file */
 	int	file_init;	/* 0: initialization yet to be performed */
 	GElf_Half file_etype;	/* ELF e_type from ehdr */
 	GElf_Half file_class;	/* ELF e_ident[EI_CLASS] from ehdr */
@@ -107,6 +109,7 @@ typedef struct file_info {	/* symbol information for a mapped file */
 	char	*file_rname;	/* resolved on-disk object pathname */
 	char	*file_rbase;	/* pointer to basename of file_rname */
 	Elf	*file_elf;	/* ELF handle so we can close */
+	Elf	*file_dbgelf;	/* Debug ELF handle so we can close */
 	void	*file_elfmem;	/* data for faked-up ELF handle */
 	sym_tbl_t file_symtab;	/* symbol table */
 	sym_tbl_t file_dynsym;	/* dynamic symbol table */
@@ -147,7 +150,7 @@ typedef struct lwp_info {	/* per-lwp information from core file */
 
 typedef struct fd_info {
 	plist_t	fd_list;	/* linked list */
-	prfdinfo_t fd_info;	/* fd info */
+	prfdinfo_t *fd_info;	/* fd info */
 } fd_info_t;
 
 typedef struct core_info {	/* information specific to core files */
@@ -168,6 +171,7 @@ typedef struct core_info {	/* information specific to core files */
 	priv_impl_info_t *core_ppii;	/* NOTE entry for core_privinfo */
 	char *core_zonename;	/* zone name from core file */
 	prsecflags_t *core_secflags; /* secflags from core file */
+	prupanic_t *core_upanic; /* upanic from core file */
 #if defined(__i386) || defined(__amd64)
 	struct ssd *core_ldt;	/* LDT entries from core file */
 	uint_t core_nldt;	/* number of LDT entries in core file */

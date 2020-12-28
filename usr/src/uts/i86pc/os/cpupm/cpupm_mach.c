@@ -613,7 +613,7 @@ cpupm_state_change(cpu_t *cp, int level, int state)
 	cpupm_mach_state_t	*mach_state =
 	    (cpupm_mach_state_t *)(cp->cpu_m.mcpu_pm_mach_state);
 	cpupm_state_ops_t	*state_ops;
-	cpupm_state_domains_t  	*state_domain;
+	cpupm_state_domains_t	*state_domain;
 	cpuset_t		set;
 
 	DTRACE_PROBE2(cpupm__state__change, cpu_t *, cp, int, level);
@@ -632,7 +632,7 @@ cpupm_state_change(cpu_t *cp, int level, int state)
 		state_domain = mach_state->ms_tstate.cma_domain;
 		break;
 	default:
-		break;
+		return;
 	}
 
 	switch (state_domain->pm_type) {
@@ -695,12 +695,11 @@ cpupm_plat_domain_id(cpu_t *cp, cpupm_dtype_t type)
 	return (CPUPM_NO_DOMAIN);
 }
 
-/*ARGSUSED*/
 uint_t
 cpupm_plat_state_enumerate(cpu_t *cp, cpupm_dtype_t type,
     cpupm_state_t *states)
 {
-	int	*speeds;
+	int	*speeds = NULL;
 	uint_t	nspeeds, i;
 
 	/*
@@ -872,9 +871,9 @@ int
 cpupm_get_top_speed(cpu_t *cp)
 {
 #ifndef __xpv
-	cpupm_mach_state_t 	*mach_state;
-	cpu_acpi_handle_t 	handle;
-	int 			plat_level;
+	cpupm_mach_state_t	*mach_state;
+	cpu_acpi_handle_t	handle;
+	int			plat_level;
 	uint_t			nspeeds;
 	int			max_level;
 

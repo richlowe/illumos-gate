@@ -120,8 +120,8 @@ MAPFILE_SUPPLEMENTAL = $(MAPFILE_SUPPLEMENTAL_$(CURTYPE))
 
 LDLIBS +=	-lc
 
-LDFLAGS_standalone = $(ZNOVERSION) $(BREDUCE) -M../common/mapfile-vers \
-	-M$(MAPFILE_SUPPLEMENTAL) -dy -r
+LDFLAGS_standalone = $(ZNOVERSION) $(BREDUCE) -Wl,-M../common/mapfile-vers \
+	-Wl,-M$(MAPFILE_SUPPLEMENTAL) -dy -r
 LDFLAGS = $(LDFLAGS_$(CURTYPE))
 
 ASFLAGS_standalone = -DUMEM_STANDALONE
@@ -155,11 +155,17 @@ CFLAGS += $(CFLAGS_$(CURTYPE)) $(CFLAGS_common)
 CFLAGS64_standalone = $(STAND_FLAGS_64)
 CFLAGS64 += $(CCVERBOSE) $(CFLAGS64_$(CURTYPE)) $(CFLAGS64_common)
 
+#
+# For the standalone environment, disable the stack protector for the
+# time being.
+#
+$(STANDLIBRARY) := STACKPROTECT = none
+
 # false positive for umem_alloc_sizes_add()
 pics/umem.o := SMOFF += index_overflow
 objs/umem.o := SMOFF += index_overflow
 
-INSTALL_DEPS_library =		$(ROOTLINKS) $(ROOTLIBS)
+INSTALL_DEPS_library =	$(ROOTLINKS) $(ROOTLIBS) $(ROOTCOMPATLINKS)
 
 DYNFLAGS +=     $(ZINTERPOSE)
 

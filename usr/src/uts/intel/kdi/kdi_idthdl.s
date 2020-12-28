@@ -23,6 +23,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
@@ -32,10 +33,6 @@
  * Each trap and interrupt has its own handler because each one pushes a
  * different number.
  */
-
-#if defined(__lint)
-#include <sys/types.h>
-#else
 
 #include <sys/asm_linkage.h>
 #include <sys/asm_misc.h>
@@ -75,7 +72,7 @@
 	pushq	%r14;				\
 	subq	$KPTI_R14, %rsp;		\
 	/* Check for clobbering */		\
-	cmp	$0, KPTI_FLAG(%rsp);		\
+	cmpq	$0, KPTI_FLAG(%rsp);		\
 	je	1f;				\
 	/* Don't worry, this totally works */	\
 	int	$8;				\
@@ -325,4 +322,3 @@ kdi_isr_end:
 	nop
 #endif
 
-#endif /* !__lint */

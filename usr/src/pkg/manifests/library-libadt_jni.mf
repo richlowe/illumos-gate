@@ -37,8 +37,11 @@ dir path=usr/lib/$(ARCH64)
 dir path=usr/lib/audit
 file path=usr/lib/$(ARCH64)/libadt_jni.so.1
 file path=usr/lib/audit/Audit.jar
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libadt_jni.so.1
-file path=usr/lib/debug/usr/lib/libadt_jni.so.1
+# Generated variants will contain underscores
+file path=usr/lib/debug/usr/lib/$(ARCH64)/libadt_jni.so.1 \
+    pkg.linted.pkglint.action001.1=True
+file path=usr/lib/debug/usr/lib/libadt_jni.so.1 \
+    pkg.linted.pkglint.action001.1=True
 file path=usr/lib/libadt_jni.so.1
 legacy pkg=SUNWaudit \
     desc="Java Solaris Auditing interface / AuditService Implementation" \

@@ -64,15 +64,15 @@ CERRWARN += $(CNOWARN_UNINIT)
 # not linted
 SMATCH=off
 
+COMPATLINKS=	usr/lib/$(DYNLIB)
+
 .KEEP_STATE:
 
 LIBS = $(DYNLIB)
 
 all: $(LIBS)
 
-install: all $(ROOTLIBS)
-
-lint: lintcheck
+install: all $(ROOTLIBS) $(ROOTCOMPATLINKS)
 
 # include library targets
 include ../Makefile.targ

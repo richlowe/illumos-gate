@@ -59,14 +59,15 @@ _fgetwc_unlocked_l(FILE *fp, locale_t loc)
 		/* Fast path for single-byte encodings. */
 		return ((wint_t)c);
 	}
-	if ((statep = _getmbstate(fp)) == NULL) {
+	statep = _getmbstate(fp);
+	if (statep == NULL) {
 		fp->_flag = _IOERR;
 		errno = EBADF;
 		return (WEOF);
 	}
 	do {
 		char	x = (char)c;
-		nconv = lct->lc_mbrtowc(&wc, &x, 1, statep);
+		nconv = lct->lc_mbrtowc(&wc, &x, 1, statep, B_FALSE);
 		if (nconv == (size_t)-1) {
 			break;
 		} else if (nconv == (size_t)-2) {

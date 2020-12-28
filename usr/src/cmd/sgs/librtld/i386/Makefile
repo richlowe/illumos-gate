@@ -32,6 +32,6 @@ CPPFLAGS +=	-I../../../../uts/intel/ia32/krtld
 
 all:		$(DYNLIB) $(LIBLINKS)
 
-install:	all $(ROOTLIBS)
+install:	all $(ROOTLIBS) $(ROOTCOMPATLINKS)
 
 include		$(SRC)/cmd/sgs/librtld/Makefile.targ

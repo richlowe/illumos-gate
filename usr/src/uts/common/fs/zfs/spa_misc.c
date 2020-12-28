@@ -26,7 +26,9 @@
  * Copyright 2013 Saso Kiselkov. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
  * Copyright (c) 2017 Datto Inc.
+ * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2017, Intel Corporation.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <sys/zfs_context.h>
@@ -42,6 +44,7 @@
 #include <sys/vdev_impl.h>
 #include <sys/vdev_initialize.h>
 #include <sys/vdev_trim.h>
+#include <sys/vdev_raidz.h>
 #include <sys/metaslab.h>
 #include <sys/uberblock_impl.h>
 #include <sys/txg.h>
@@ -56,6 +59,7 @@
 #include <sys/arc.h>
 #include <sys/ddt.h>
 #include "zfs_prop.h"
+#include <sys/btree.h>
 #include <sys/zfeature.h>
 
 /*
@@ -600,7 +604,7 @@ spa_log_sm_sort_by_txg(const void *va, const void *vb)
 	const spa_log_sm_t *a = va;
 	const spa_log_sm_t *b = vb;
 
-	return (AVL_CMP(a->sls_txg, b->sls_txg));
+	return (TREE_CMP(a->sls_txg, b->sls_txg));
 }
 
 /*
@@ -633,6 +637,7 @@ spa_add(const char *name, nvlist_t *config, const char *altroot)
 	mutex_init(&spa->spa_vdev_top_lock, NULL, MUTEX_DEFAULT, NULL);
 	mutex_init(&spa->spa_iokstat_lock, NULL, MUTEX_DEFAULT, NULL);
 	mutex_init(&spa->spa_flushed_ms_lock, NULL, MUTEX_DEFAULT, NULL);
+	mutex_init(&spa->spa_imp_kstat_lock, NULL, MUTEX_DEFAULT, NULL);
 
 	cv_init(&spa->spa_async_cv, NULL, CV_DEFAULT, NULL);
 	cv_init(&spa->spa_evicting_os_cv, NULL, CV_DEFAULT, NULL);
@@ -842,6 +847,7 @@ spa_remove(spa_t *spa)
 	mutex_destroy(&spa->spa_suspend_lock);
 	mutex_destroy(&spa->spa_vdev_top_lock);
 	mutex_destroy(&spa->spa_iokstat_lock);
+	mutex_destroy(&spa->spa_imp_kstat_lock);
 
 	kmem_free(spa, sizeof (spa_t));
 }
@@ -942,7 +948,7 @@ spa_aux_compare(const void *a, const void *b)
 	const spa_aux_t *sa = (const spa_aux_t *)a;
 	const spa_aux_t *sb = (const spa_aux_t *)b;
 
-	return (AVL_CMP(sa->aux_guid, sb->aux_guid));
+	return (TREE_CMP(sa->aux_guid, sb->aux_guid));
 }
 
 void
@@ -1043,6 +1049,41 @@ spa_aux_activate(vdev_t *vd, avl_tree_t *avl)
  * separate spare lock exists for the status query path, which does not need to
  * be completely consistent with respect to other vdev configuration changes.
  */
+
+/*
+ * Poll the spare vdevs to make sure they are not faulty.
+ *
+ * The probe operation will raise an ENXIO error and create an FM ereport if the
+ * probe fails.
+ */
+void
+spa_spare_poll(spa_t *spa)
+{
+	boolean_t async_request = B_FALSE;
+	spa_config_enter(spa, SCL_STATE, FTAG, RW_READER);
+	for (int i = 0; i < spa->spa_spares.sav_count; i++) {
+		spa_aux_t search, *found;
+		vdev_t *vd = spa->spa_spares.sav_vdevs[i];
+
+		search.aux_guid = vd->vdev_guid;
+
+		mutex_enter(&spa_spare_lock);
+		found = avl_find(&spa_spare_avl, &search, NULL);
+		/* This spare is in use by a pool. */
+		if (found != NULL && found->aux_pool != 0) {
+			mutex_exit(&spa_spare_lock);
+			continue;
+		}
+		mutex_exit(&spa_spare_lock);
+
+		vd->vdev_probe_wanted = B_TRUE;
+		async_request = B_TRUE;
+	}
+	if (async_request)
+		spa_async_request(spa, SPA_ASYNC_PROBE);
+
+	spa_config_exit(spa, SCL_STATE, FTAG);
+}
 
 static int
 spa_spare_compare(const void *a, const void *b)
@@ -2009,6 +2050,140 @@ spa_dirty_data(spa_t *spa)
 
 /*
  * ==========================================================================
+ * SPA Import Progress Routines
+ * The illumos implementation of these are different from OpenZFS. OpenZFS
+ * uses the Linux /proc fs, whereas we use a kstat on the spa.
+ * ==========================================================================
+ */
+
+typedef struct spa_import_progress {
+	kstat_named_t sip_load_state;
+	kstat_named_t sip_mmp_sec_remaining;	/* MMP activity check */
+	kstat_named_t sip_load_max_txg;		/* rewind txg */
+} spa_import_progress_t;
+
+static void
+spa_import_progress_init(void)
+{
+}
+
+static void
+spa_import_progress_destroy(void)
+{
+}
+
+void spa_import_progress_add(spa_t *);
+
+int
+spa_import_progress_set_state(spa_t *spa, spa_load_state_t load_state)
+{
+	if (spa->spa_imp_kstat == NULL)
+		spa_import_progress_add(spa);
+
+	mutex_enter(&spa->spa_imp_kstat_lock);
+	if (spa->spa_imp_kstat != NULL) {
+		spa_import_progress_t *sip = spa->spa_imp_kstat->ks_data;
+		if (sip != NULL)
+			sip->sip_load_state.value.ui64 = (uint64_t)load_state;
+	}
+	mutex_exit(&spa->spa_imp_kstat_lock);
+
+	return (0);
+}
+
+int
+spa_import_progress_set_max_txg(spa_t *spa, uint64_t load_max_txg)
+{
+	if (spa->spa_imp_kstat == NULL)
+		spa_import_progress_add(spa);
+
+	mutex_enter(&spa->spa_imp_kstat_lock);
+	if (spa->spa_imp_kstat != NULL) {
+		spa_import_progress_t *sip = spa->spa_imp_kstat->ks_data;
+		if (sip != NULL)
+			sip->sip_load_max_txg.value.ui64 = load_max_txg;
+	}
+	mutex_exit(&spa->spa_imp_kstat_lock);
+
+	return (0);
+}
+
+int
+spa_import_progress_set_mmp_check(spa_t *spa, uint64_t mmp_sec_remaining)
+{
+	if (spa->spa_imp_kstat == NULL)
+		spa_import_progress_add(spa);
+
+	mutex_enter(&spa->spa_imp_kstat_lock);
+	if (spa->spa_imp_kstat != NULL) {
+		spa_import_progress_t *sip = spa->spa_imp_kstat->ks_data;
+		if (sip != NULL)
+			sip->sip_mmp_sec_remaining.value.ui64 =
+			    mmp_sec_remaining;
+	}
+	mutex_exit(&spa->spa_imp_kstat_lock);
+
+	return (0);
+}
+
+/*
+ * A new import is in progress. Add an entry.
+ */
+void
+spa_import_progress_add(spa_t *spa)
+{
+	char *poolname = NULL;
+	spa_import_progress_t *sip;
+
+	mutex_enter(&spa->spa_imp_kstat_lock);
+	if (spa->spa_imp_kstat != NULL) {
+		sip = spa->spa_imp_kstat->ks_data;
+		sip->sip_load_state.value.ui64 = (uint64_t)spa_load_state(spa);
+		mutex_exit(&spa->spa_imp_kstat_lock);
+		return;
+	}
+
+	(void) nvlist_lookup_string(spa->spa_config, ZPOOL_CONFIG_POOL_NAME,
+	    &poolname);
+	if (poolname == NULL)
+		poolname = spa_name(spa);
+
+	spa->spa_imp_kstat = kstat_create("zfs_import", 0, poolname,
+	    "zfs_misc", KSTAT_TYPE_NAMED,
+	    sizeof (spa_import_progress_t) / sizeof (kstat_named_t),
+	    KSTAT_FLAG_VIRTUAL);
+	if (spa->spa_imp_kstat != NULL) {
+		sip = kmem_alloc(sizeof (spa_import_progress_t), KM_SLEEP);
+		spa->spa_imp_kstat->ks_data = sip;
+
+		sip->sip_load_state.value.ui64 = (uint64_t)spa_load_state(spa);
+
+		kstat_named_init(&sip->sip_load_state,
+		    "spa_load_state", KSTAT_DATA_UINT64);
+		kstat_named_init(&sip->sip_mmp_sec_remaining,
+		    "mmp_sec_remaining", KSTAT_DATA_UINT64);
+		kstat_named_init(&sip->sip_load_max_txg,
+		    "spa_load_max_txg", KSTAT_DATA_UINT64);
+		spa->spa_imp_kstat->ks_lock = &spa->spa_imp_kstat_lock;
+		kstat_install(spa->spa_imp_kstat);
+	}
+	mutex_exit(&spa->spa_imp_kstat_lock);
+}
+
+void
+spa_import_progress_remove(spa_t *spa)
+{
+	if (spa->spa_imp_kstat != NULL) {
+		void *data = spa->spa_imp_kstat->ks_data;
+
+		kstat_delete(spa->spa_imp_kstat);
+		spa->spa_imp_kstat = NULL;
+		kmem_free(data, sizeof (spa_import_progress_t));
+	}
+}
+
+/*
+ * ==========================================================================
  * Initialization and Termination
  * ==========================================================================
  */
@@ -2022,7 +2197,7 @@ spa_name_compare(const void *a1, const void *a2)
 
 	s = strcmp(s1->spa_name, s2->spa_name);
 
-	return (AVL_ISIGN(s));
+	return (TREE_ISIGN(s));
 }
 
 int
@@ -2072,19 +2247,21 @@ spa_init(int mode)
 
 	zfs_refcount_init();
 	unique_init();
-	range_tree_init();
-	metaslab_alloc_trace_init();
+	zfs_btree_init();
+	metaslab_stat_init();
 	zio_init();
 	dmu_init();
 	zil_init();
 	vdev_cache_stat_init();
 	vdev_mirror_stat_init();
+	vdev_raidz_math_init();
 	zfs_prop_init();
 	zpool_prop_init();
 	zpool_feature_init();
 	spa_config_load();
 	l2arc_start();
 	scan_init();
+	spa_import_progress_init();
 }
 
 void
@@ -2096,14 +2273,16 @@ spa_fini(void)
 
 	vdev_cache_stat_fini();
 	vdev_mirror_stat_fini();
+	vdev_raidz_math_fini();
 	zil_fini();
 	dmu_fini();
 	zio_fini();
-	metaslab_alloc_trace_fini();
-	range_tree_fini();
+	metaslab_stat_fini();
+	zfs_btree_fini();
 	unique_fini();
 	zfs_refcount_fini();
 	scan_fini();
+	spa_import_progress_destroy();
 
 	avl_destroy(&spa_namespace_avl);
 	avl_destroy(&spa_spare_avl);

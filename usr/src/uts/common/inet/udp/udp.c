@@ -22,6 +22,7 @@
  * Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014, OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 /* Copyright (c) 1990 Mentat Inc. */
 
@@ -2347,8 +2348,8 @@ udp_input(void *arg1, mblk_t *mp, void *arg2, ip_recv_attr_t *ira)
 		*(uint32_t *)&sin->sin_zero[4] = 0;
 
 		/*
-		 * Add options if IP_RECVDSTADDR, IP_RECVIF, IP_RECVSLLA or
-		 * IP_RECVTTL has been set.
+		 * Add options if IP_RECVDSTADDR, IP_RECVIF, IP_RECVSLLA,
+		 * IP_RECVTTL or IP_RECVTOS has been set.
 		 */
 		if (udi_size != 0) {
 			conn_recvancillary_add(connp, recv_ancillary, ira,
@@ -4837,6 +4838,8 @@ udp_do_bind(conn_t *connp, struct sockaddr *sa, socklen_t len, cred_t *cr,
 	mlp_type_t	addrtype, mlptype;
 	udp_stack_t	*us = udp->udp_us;
 
+	sin = NULL;
+	sin6 = NULL;
 	switch (len) {
 	case sizeof (sin_t):	/* Complete IPv4 address */
 		sin = (sin_t *)sa;
@@ -5550,6 +5553,10 @@ udp_do_connect(conn_t *connp, const struct sockaddr *sa, socklen_t len,
 
 	udp = connp->conn_udp;
 	us = udp->udp_us;
+	sin = NULL;
+	sin6 = NULL;
+	v4dst = INADDR_ANY;
+	flowinfo = 0;
 
 	/*
 	 * Address has been verified by the caller
@@ -6405,7 +6412,7 @@ udp_ioctl(sock_lower_handle_t proto_handle, int cmd, intptr_t arg,
 		 */
 		error = ip_create_helper_stream(connp, us->us_ldi_ident);
 		if (error != 0) {
-			ip0dbg(("tcp_ioctl: create of IP helper stream "
+			ip0dbg(("udp_ioctl: create of IP helper stream "
 			    "failed %d\n", error));
 			return (error);
 		}

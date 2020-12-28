@@ -11,6 +11,7 @@
 
 #
 # Copyright 2019 Joyent, Inc.
+# Copyright 2020 RackTop Systems, Inc.
 #
 
 #
@@ -68,8 +69,11 @@ SYMBOL_SCOPE {
 	cv_destroy			{ FLAGS = EXTERN };
 	cv_init				{ FLAGS = EXTERN };
 	cv_reltimedwait			{ FLAGS = EXTERN };
+	cv_signal			{ FLAGS = EXTERN };
+	cv_wait				{ FLAGS = EXTERN };
 	ddi_cb_register			{ FLAGS = EXTERN };
 	ddi_cb_unregister		{ FLAGS = EXTERN };
+	ddi_create_minor_node		{ FLAGS = EXTERN };
 	ddi_dev_regsize			{ FLAGS = EXTERN };
 	ddi_dma_addr_bind_handle	{ FLAGS = EXTERN };
 	ddi_dma_alloc_handle		{ FLAGS = EXTERN };
@@ -139,6 +143,7 @@ SYMBOL_SCOPE {
 	ddi_ufm_image_set_nslots	{ FLAGS = EXTERN };
 	ddi_ufm_init			{ FLAGS = EXTERN };
 	ddi_ufm_slot_set_attrs		{ FLAGS = EXTERN };
+	ddi_ufm_slot_set_imgsize	{ FLAGS = EXTERN };
 	ddi_ufm_slot_set_misc		{ FLAGS = EXTERN };
 	ddi_ufm_slot_set_version	{ FLAGS = EXTERN };
 	ddi_ufm_update			{ FLAGS = EXTERN };
@@ -165,6 +170,7 @@ SYMBOL_SCOPE {
 	list_insert_tail		{ FLAGS = EXTERN };
 	list_next			{ FLAGS = EXTERN };
 	list_remove			{ FLAGS = EXTERN };
+	list_remove_head		{ FLAGS = EXTERN };
 	memcpy				{ FLAGS = EXTERN };
 	memset				{ FLAGS = EXTERN };
 	miocack				{ FLAGS = EXTERN };

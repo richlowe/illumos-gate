@@ -289,6 +289,12 @@ struct dev_info  {
 	/* detach event data */
 	char	*devi_ev_path;
 	int	devi_ev_instance;
+
+	/*
+	 * Unbind callback data.
+	 */
+	kmutex_t	devi_unbind_lock;
+	list_t		devi_unbind_cbs;
 };
 
 #define	DEVI(dev_info_type)	((struct dev_info *)(dev_info_type))
@@ -623,7 +629,7 @@ struct dev_info  {
 #define	DEVI_SET_PCI(dip)	(DEVI(dip)->devi_flags |= (DEVI_PCI_DEVICE))
 
 char	*i_ddi_devi_class(dev_info_t *);
-int	i_ddi_set_devi_class(dev_info_t *, char *, int);
+int	i_ddi_set_devi_class(dev_info_t *, const char *, int);
 
 /*
  * This structure represents one piece of bus space occupied by a given
@@ -709,7 +715,7 @@ struct ddi_minor {
 	dev_t		dev;		/* device number */
 	int		spec_type;	/* block or char */
 	int		flags;		/* access flags */
-	char		*node_type;	/* block, byte, serial, network */
+	const char	*node_type;	/* block, byte, serial, network */
 	struct devplcy	*node_priv;	/* privilege for this minor */
 	mode_t		priv_mode;	/* default apparent privilege mode */
 };
@@ -877,6 +883,8 @@ typedef struct ddi_dma_impl {
 	uint_t		dmai_inuse;	/* active handle? */
 	uint_t		dmai_nwin;
 	uint_t		dmai_winsize;
+	uint_t		dmai_ncookies;
+	uint_t		dmai_curcookie;
 	caddr_t		dmai_nexus_private;
 	void		*dmai_iopte;
 	uint_t		*dmai_sbi;
@@ -901,6 +909,8 @@ typedef struct ddi_dma_impl {
  */
 typedef struct ddi_dma_impl {
 	ddi_dma_cookie_t *dmai_cookie; /* array of DMA cookies */
+	uint_t		dmai_ncookies;
+	uint_t		dmai_curcookie;
 	void		*dmai_private;
 
 	/*

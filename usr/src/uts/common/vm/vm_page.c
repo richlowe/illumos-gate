@@ -22,10 +22,11 @@
  * Copyright (c) 1986, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2015, Josef 'Jeff' Sipek <jeffpc@josefsipek.net>
  * Copyright (c) 2015, 2016 by Delphix. All rights reserved.
+ * Copyright 2018 Joyent, Inc.
  */
 
-/*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989  AT&T	*/
-/*	  All Rights Reserved  	*/
+/* Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989  AT&T */
+/* All Rights Reserved */
 
 /*
  * University Copyright- Copyright (c) 1982, 1986, 1988
@@ -172,8 +173,8 @@ struct pcf {
 	kmutex_t	pcf_lock;	/* protects the structure */
 	uint_t		pcf_count;	/* page count */
 	uint_t		pcf_wait;	/* number of waiters */
-	uint_t		pcf_block; 	/* pcgs flag to page_free() */
-	uint_t		pcf_reserve; 	/* pages freed after pcf_block set */
+	uint_t		pcf_block;	/* pcgs flag to page_free() */
+	uint_t		pcf_reserve;	/* pages freed after pcf_block set */
 	uint_t		pcf_fill[10];	/* to line up on the caches */
 };
 
@@ -440,10 +441,26 @@ init_pages_pp_maximum()
 	}
 }
 
+/*
+ * In the past, we limited the maximum pages that could be gotten to essentially
+ * 1/2 of the total pages on the system. However, this is too conservative for
+ * some cases. For example, if we want to host a large virtual machine which
+ * needs to use a significant portion of the system's memory. In practice,
+ * allowing more than 1/2 of the total pages is fine, but becomes problematic
+ * as we approach or exceed 75% of the pages on the system. Thus, we limit the
+ * maximum to 23/32 of the total pages, which is ~72%.
+ */
 void
 set_max_page_get(pgcnt_t target_total_pages)
 {
-	max_page_get = target_total_pages / 2;
+	max_page_get = (target_total_pages >> 5) * 23;
+	ASSERT3U(max_page_get, >, 0);
+}
+
+pgcnt_t
+get_max_page_get()
+{
+	return (max_page_get);
 }
 
 static pgcnt_t pending_delete;
@@ -1336,7 +1353,7 @@ wakeup_pcgs(void)
  * clock() on each TICK.
  */
 void
-set_freemem()
+set_freemem(void)
 {
 	struct pcf	*p;
 	ulong_t		t;
@@ -3903,8 +3920,8 @@ page_pp_unlock(
 
 /*
  * This routine reserves availrmem for npages;
- * 	flags: KM_NOSLEEP or KM_SLEEP
- * 	returns 1 on success or 0 on failure
+ *	flags: KM_NOSLEEP or KM_SLEEP
+ *	returns 1 on success or 0 on failure
  */
 int
 page_resv(pgcnt_t npages, uint_t flags)
@@ -3961,7 +3978,7 @@ void
 page_pp_useclaim(
 	page_t *opp,		/* original page frame losing lock */
 	page_t *npp,		/* new page frame gaining lock */
-	uint_t	write_perm) 	/* set if vpage has PROT_WRITE */
+	uint_t write_perm)	/* set if vpage has PROT_WRITE */
 {
 	int payback = 0;
 	int nidx, oidx;
@@ -4715,7 +4732,7 @@ group_page_unlock(page_t *pp)
 
 /*
  * returns
- * 0 		: on success and *nrelocp is number of relocated PAGESIZE pages
+ * 0		: on success and *nrelocp is number of relocated PAGESIZE pages
  * ERANGE	: this is not a base page
  * EBUSY	: failure to get locks on the page/pages
  * ENOMEM	: failure to obtain replacement pages

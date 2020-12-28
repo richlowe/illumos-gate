@@ -46,7 +46,7 @@
 
 static size_t	_MSKanji_mbrtowc(wchar_t *_RESTRICT_KYWD,
 		    const char *_RESTRICT_KYWD,
-		    size_t, mbstate_t *_RESTRICT_KYWD);
+		    size_t, mbstate_t *_RESTRICT_KYWD, boolean_t);
 static int	_MSKanji_mbsinit(const mbstate_t *);
 static size_t	_MSKanji_wcrtomb(char *_RESTRICT_KYWD, wchar_t,
 		    mbstate_t *_RESTRICT_KYWD);
@@ -56,10 +56,6 @@ static size_t	_MSKanji_mbsnrtowcs(wchar_t *_RESTRICT_KYWD,
 static size_t	_MSKanji_wcsnrtombs(char *_RESTRICT_KYWD,
 		    const wchar_t **_RESTRICT_KYWD, size_t, size_t,
 		    mbstate_t *_RESTRICT_KYWD);
-
-typedef struct {
-	wchar_t	ch;
-} _MSKanjiState;
 
 void
 _MSKanji_init(struct lc_ctype *lct)
@@ -83,7 +79,7 @@ _MSKanji_mbsinit(const mbstate_t *ps)
 
 static size_t
 _MSKanji_mbrtowc(wchar_t *_RESTRICT_KYWD pwc, const char *_RESTRICT_KYWD s,
-    size_t n, mbstate_t *_RESTRICT_KYWD ps)
+    size_t n, mbstate_t *_RESTRICT_KYWD ps, boolean_t zero)
 {
 	_MSKanjiState *ms;
 	wchar_t wc;
@@ -135,7 +131,11 @@ _MSKanji_mbrtowc(wchar_t *_RESTRICT_KYWD pwc, const char *_RESTRICT_KYWD s,
 	} else {
 		if (pwc != NULL)
 			*pwc = wc;
-		return (wc == L'\0' ? 0 : 1);
+		if (zero || wc != L'\0') {
+			return (1);
+		} else {
+			return (0);
+		}
 	}
 }
 

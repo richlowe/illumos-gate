@@ -42,10 +42,9 @@ MAPFILES =
 # to run amd64 64-bit executables:
 ZDEFS =
 $(SUPPRESS_LIBS)LDLIBS += -lmapmalloc -lproc -lctf -lc
-$(SUPPRESS_LIBS)ZDEFS = -zdefs
+$(SUPPRESS_LIBS)ZDEFS = -Wl,-zdefs
 
 all:	$(LIBS)
 
-lint:	lintcheck
 
 include	../../../Makefile.targ

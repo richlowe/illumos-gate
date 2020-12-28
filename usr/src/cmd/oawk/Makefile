@@ -23,12 +23,11 @@
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 
 include		../Makefile.cmd
 
 PROG =		oawk
-LINKPROG =	awk
 
 SRCS =		b.c lib.c main.c parse.c run.c tran.c
 
@@ -51,18 +50,16 @@ NATIVEOBJS =	$(NATIVEDIR)/makeprctab.o $(NATIVEDIR)/tmptoken.o
 $(MAKEPRCTAB) :=	CC = $(NATIVECC)
 $(MAKEPRCTAB) :=	POST_PROCESS=
 $(MAKEPRCTAB) :=	POST_PROCESS_O=
+$(MAKEPRCTAB) :=	NATIVE_LIBS += libm.so libc.so
 
 CLEANFILES =	proctab.c y.tab.h y.tab.c awk.h awk.g.c		\
 		tmptoken.c awk.lx.c $(NATIVEOBJS) $(MAKEPRCTAB)	\
 		temp
 
 YFLAGS =	-d
-XLDLIBS5CC +=	-lm 
-LDLIBS +=	-lm
+LDLIBS += -lm
 CPPFLAGS =      -I. $(CPPFLAGS.master)
 CPPFLAGS +=	-D_FILE_OFFSET_BITS=64
-
-ROOTLINK =	$(LINKPROG:%=$(ROOTBIN)/%)
 
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-unused-label
@@ -78,12 +75,12 @@ SMATCH =	off
 all :		$(PROG) $(TXTS)
 
 $(PROG) :	$(OBJS)
-		$(LINK.c) $(OBJS)  -o $@  $(LDLIBS)
+		$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
 		$(POST_PROCESS)
 
 $(POFILE):      $(POFILES)
 		$(RM)	$@
-		$(CAT) 	$(POFILES)      > $@
+		$(CAT)	$(POFILES) > $@
 
 awk.g.c + awk.h :	awk.g.y
 		$(RM) awk.g.c awk.h
@@ -105,16 +102,13 @@ proctab.c :	$(MAKEPRCTAB)
 $(MAKEPRCTAB) :	$(NATIVEDIR) $(NATIVEOBJS)
 		$(LINK.c) $(NATIVEOBJS) -o $@ $(XLDLIBS5CC)
 
-install : 	all $(ROOTPROG) $(ROOTLINK)
+install :	all $(ROOTPROG)
 
 $(NATIVEDIR) :
 		-@mkdir -p $(NATIVEDIR)
 
 $(NATIVEDIR)/%.o :	%.c
 		$(COMPILE.c) -o $@ $<
-
-$(ROOTLINK) :	$(ROOTPROG)
-		$(RM) $@; $(LN) $(ROOTPROG) $@
 
 clean:
 		$(RM) $(OBJS) $(CLEANFILES)

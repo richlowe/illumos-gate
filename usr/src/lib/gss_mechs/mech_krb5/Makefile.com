@@ -316,7 +316,7 @@ LDLIBS += -lgss -lsocket -lresolv -lc -lpkcs11 -lnsl -lkstat
 DYNFLAGS += $(ZIGNORE)
 
 # mech lib needs special initialization at load time
-DYNFLAGS += -zinitarray=krb5_ld_init
+DYNFLAGS += -Wl,-zinitarray=krb5_ld_init
 
 objs/%.o pics/%.o: $(SRC)/uts/common/gssapi/%.c
 	$(COMPILE.c)  -o $@ $<
@@ -572,9 +572,3 @@ kwarnd_handle.c: $(SRC)/cmd/krb5/kwarn/kwarnd_handle.c
 
 CLOBBERFILES += kwarnd.h \
 	kwarnd_clnt.c kwarnd_clnt_stubs.c kwarnd_handle.c kwarnd_xdr.c
-
-# So lint.out won't be needlessly recreated
-lint: $(LINTOUT)
-
-$(LINTOUT): $(SOURCES)
-	$(LINT.c) -o $(LIBNAME) $(SOURCES) > $(LINTOUT) 2>&1

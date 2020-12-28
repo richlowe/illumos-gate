@@ -21,7 +21,7 @@
 #
 # Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2013, 2016 by Delphix. All rights reserved.
-# Copyright 2019, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 LIBRARY= libzpool.a
@@ -48,7 +48,7 @@ SRCDIR=		../common
 # There should be a mapfile here
 MAPFILES =
 
-LIBS +=		$(DYNLIB) $(LINTLIB)
+LIBS +=		$(DYNLIB)
 
 INCS += -I../common
 INCS += -I../../../uts/common/fs/zfs
@@ -56,26 +56,24 @@ INCS += -I../../../uts/common/fs/zfs/lua
 INCS += -I../../../common/zfs
 INCS += -I../../../common/lz4
 INCS += -I../../../common
+INCS += -I../../libzutil/common
+
 
 CLEANFILES += ../common/zfs.h
 CLEANFILES += $(EXTPICS)
 
-$(LINTLIB) := SRCS=	$(SRCDIR)/$(LINTSRC)
-$(LINTLIB): ../common/zfs.h
 $(LIBS): ../common/zfs.h
 
 CSTD=	$(CSTD_GNU99)
-C99LMODE=	-Xc99=%all
 
 CFLAGS +=	$(CCGDEBUG) $(CCVERBOSE) $(CNOGLOBAL)
 CFLAGS64 +=	$(CCGDEBUG) $(CCVERBOSE) $(CNOGLOBAL)
 LDLIBS +=	-lcmdutils -lumem -lavl -lnvpair -lz -lc -lsysevent -lmd \
-		-lfakekernel -lzfs
+		-lfakekernel -lzutil
+NATIVE_LIBS +=	libz.so
 CPPFLAGS.first =	-I$(SRC)/lib/libfakekernel/common
 CPPFLAGS +=	$(INCS)	-DDEBUG -D_FAKE_KERNEL
 
-LINTFLAGS +=	-erroff=E_STATIC_UNUSED $(INCS)
-LINTFLAGS64 +=	-erroff=E_STATIC_UNUSED $(INCS)
 
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-switch
@@ -92,7 +90,6 @@ SMATCH=off
 
 all: $(LIBS)
 
-lint: $(LINTLIB)
 
 include ../../Makefile.targ
 

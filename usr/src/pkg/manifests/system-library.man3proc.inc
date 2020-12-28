@@ -12,7 +12,7 @@
 #
 # Copyright 2018 Joyent, Inc.
 # Copyright (c) 2019 Carlos Neira <cneirabustos@gmail.com>
-# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 file path=usr/share/man/man3proc/Lctlfd.3proc
@@ -97,6 +97,7 @@ file path=usr/share/man/man3proc/Psymbol_iter.3proc
 file path=usr/share/man/man3proc/Psync.3proc
 file path=usr/share/man/man3proc/Psysentry.3proc
 file path=usr/share/man/man3proc/Puname.3proc
+file path=usr/share/man/man3proc/Pupanic.3proc
 file path=usr/share/man/man3proc/Pupdate_maps.3proc
 file path=usr/share/man/man3proc/Pupdate_syms.3proc
 file path=usr/share/man/man3proc/Pwrite.3proc
@@ -142,10 +143,14 @@ file path=usr/share/man/man3proc/pr_waitid.3proc
 file path=usr/share/man/man3proc/proc_arg_grab.3proc
 file path=usr/share/man/man3proc/proc_arg_psinfo.3proc
 file path=usr/share/man/man3proc/proc_content2str.3proc
+file path=usr/share/man/man3proc/proc_fdinfo_misc.3proc
+file path=usr/share/man/man3proc/proc_fdinfowalk.3proc
+file path=usr/share/man/man3proc/proc_fdwalk.3proc
 file path=usr/share/man/man3proc/proc_fltname.3proc
 file path=usr/share/man/man3proc/proc_fltset2str.3proc
 file path=usr/share/man/man3proc/proc_get_auxv.3proc
 file path=usr/share/man/man3proc/proc_get_cred.3proc
+file path=usr/share/man/man3proc/proc_get_fdinfo.3proc
 file path=usr/share/man/man3proc/proc_get_priv.3proc
 file path=usr/share/man/man3proc/proc_get_psinfo.3proc
 file path=usr/share/man/man3proc/proc_get_status.3proc
@@ -212,6 +217,7 @@ link path=usr/share/man/man3proc/Pobjname_resolved.3proc target=Pobjname.3proc
 link path=usr/share/man/man3proc/Ppriv_free.3proc target=Ppriv.3proc
 link path=usr/share/man/man3proc/Pputareg.3proc target=Pgetareg.3proc
 link path=usr/share/man/man3proc/Pread_string.3proc target=Pread.3proc
+link path=usr/share/man/man3proc/Psecflags_free.3proc target=Psecflags.3proc
 link path=usr/share/man/man3proc/Psetsysexit.3proc target=Psetsysentry.3proc
 link path=usr/share/man/man3proc/Pstop.3proc target=Pstopstatus.3proc
 link path=usr/share/man/man3proc/Psymbol_iter_by_addr.3proc \
@@ -222,6 +228,7 @@ link path=usr/share/man/man3proc/Psymbol_iter_by_name.3proc \
     target=Psymbol_iter.3proc
 link path=usr/share/man/man3proc/Psysexit.3proc target=Psysentry.3proc
 link path=usr/share/man/man3proc/Punsetflags.3proc target=Psetflags.3proc
+link path=usr/share/man/man3proc/Pupanic_free.3proc target=Pupanic.3proc
 link path=usr/share/man/man3proc/Pwait.3proc target=Pstopstatus.3proc
 link path=usr/share/man/man3proc/Pxcreate.3proc target=Pcreate.3proc
 link path=usr/share/man/man3proc/Pxecwapt.3proc target=Pxecbkpt.3proc
@@ -249,6 +256,8 @@ link path=usr/share/man/man3proc/proc_arg_xpsinfo.3proc \
     target=proc_arg_psinfo.3proc
 link path=usr/share/man/man3proc/proc_dmodelname.3proc \
     target=proc_fltname.3proc
+link path=usr/share/man/man3proc/proc_fdinfo_free.3proc \
+    target=proc_get_fdinfo.3proc
 link path=usr/share/man/man3proc/proc_finistdio.3proc \
     target=proc_initstdio.3proc
 link path=usr/share/man/man3proc/proc_flushstdio.3proc \

@@ -54,27 +54,10 @@ GENLIB_DIR	 = $(UTSBASE)/sun4u/genunix
 IPDRV_DIR	 = $(UTSBASE)/sparc/ip
 MODSTUBS_DIR	 = $(UNIX_DIR)
 DSF_DIR		 = $(UNIX_DIR)
-LINTS_DIR	 = $(OBJS_DIR)
-LINT_LIB_DIR	 = $(UTSBASE)/sparc/lint-libs/$(OBJS_DIR)
 
 UNIX_O		 = $(UNIX_DIR)/$(OBJS_DIR)/unix.o
 MODSTUBS_O	 = $(MODSTUBS_DIR)/$(OBJS_DIR)/modstubs.o
-GENLIB		 = $(UTSBASE)/sun4u/lint-libs/$(OBJS_DIR)/libgenunix.so
-
-LINT_LIB_32	 = $(UTSBASE)/sun4u/lint-libs/$(OBJS_DIR)/llib-lunix.ln
-GEN_LINT_LIB_32	 = $(UTSBASE)/sun4u/lint-libs/$(OBJS_DIR)/llib-lgenunix.ln
-
-LINT_LIB_64	 = $(UTSBASE)/sun4u/lint-libs/$(OBJS_DIR)/llib-lunix.ln
-GEN_LINT_LIB_64	 = $(UTSBASE)/sun4u/lint-libs/$(OBJS_DIR)/llib-lgenunix.ln
-
-LINT_LIB	 = $(LINT_LIB_$(CLASS))
-GEN_LINT_LIB	 = $(GEN_LINT_LIB_$(CLASS))
-
-LINT32_DIRS	 = $(LINT32_BUILDS:%=$(UTSBASE)/sparc/lint-libs/%)
-LINT32_FILES	 = $(LINT32_DIRS:%=%/llib-l$(MODULE).ln)
-
-LINT64_DIRS	 = $(LINT64_BUILDS:%=$(UTSBASE)/sparc/lint-libs/%)
-LINT64_FILES	 = $(LINT64_DIRS:%=%/llib-l$(MODULE).ln)
+GENLIB		 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
 
 #
 #	Include the makefiles which define build rule templates, the
@@ -154,9 +137,6 @@ CFLAGS		+= $(CUSERFLAGS)
 
 ASFLAGS		+= $(XARCH)
 
-LINT_DEFS_32	=
-LINT_DEFS_64	= -m64
-LINT_DEFS	+= $(LINT_DEFS_$(CLASS))
 
 #
 #	The following must be defined for all implementations:
@@ -289,13 +269,32 @@ DRV_KMODS	+= bge dmfe eri fas hme qfe
 DRV_KMODS	+= openeepr options sd ses st
 DRV_KMODS	+= ssd
 DRV_KMODS	+= ecpp
-DRV_KMODS	+= hid hubd ehci ohci uhci usb_mid usb_ia scsa2usb usbprn ugen
-DRV_KMODS	+= usbser usbsacm usbsksp usbsprl
-DRV_KMODS	+= usb_as usb_ac
+
+#
+#	USB specific modules
+#
+DRV_KMODS	+= ccid
+DRV_KMODS	+= hid
+DRV_KMODS	+= hubd
+DRV_KMODS	+= ehci
+DRV_KMODS	+= ohci
+DRV_KMODS	+= uhci
+DRV_KMODS	+= usb_mid
+DRV_KMODS	+= usb_ia
+DRV_KMODS	+= scsa2usb
+DRV_KMODS	+= usbprn
+DRV_KMODS	+= ugen
+DRV_KMODS	+= usbser
+DRV_KMODS	+= usbsacm
+DRV_KMODS	+= usbsksp
+DRV_KMODS	+= usbsprl
+DRV_KMODS	+= usb_as
+DRV_KMODS	+= usb_ac
 DRV_KMODS	+= usbskel
 DRV_KMODS	+= usbvc
 DRV_KMODS	+= usbftdi
 DRV_KMODS	+= usbecm
+
 DRV_KMODS	+= hci1394 av1394 scsa1394 dcam1394
 DRV_KMODS	+= sbp2
 DRV_KMODS	+= ib ibp eibnx eoib rdsib sdp iser daplt hermon tavor sol_ucma sol_uverbs
@@ -506,9 +505,6 @@ SOCKET_KMODS	+= ksslf
 KICONV_KMODS	+= kiconv_emea kiconv_ja kiconv_ko kiconv_sc kiconv_tc
 
 #
-# Ensure that the variable member of the cpu_t (cpu_m) is defined
-# for the lint builds so as not to cause lint errors during the
-# global cross check.
+#	Sensor related drivers
 #
-$(LINTFLAGSUPPRESS)LINTFLAGS	+= -D_MACHDEP -I$(UTSBASE)/sun4 \
-				   -I$(UTSBASE)/sun4u -I$(UTSBASE)/sfmmu
+DRV_KMODS	+= ksensor ksensor_test

@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2011, 2017 by Delphix. All rights reserved.
  */
@@ -51,6 +51,7 @@
 #include <sys/vfs.h>
 #include <sys/vfs_opreg.h>
 #include <sys/vnode.h>
+#include <sys/filio.h>
 #include <sys/rwstlock.h>
 #include <sys/fem.h>
 #include <sys/stat.h>
@@ -967,6 +968,7 @@ vn_openat(
 	int estale_retry = 0;
 	struct shrlock shr;
 	struct shr_locowner shr_own;
+	boolean_t create;
 
 	mode = 0;
 	accessflags = 0;
@@ -986,8 +988,31 @@ vn_openat(
 	if (filemode & FAPPEND)
 		accessflags |= V_APPEND;
 
+	/*
+	 * We need to handle the case of FCREAT | FDIRECTORY and the case of
+	 * FEXCL. If all three are specified, then we always fail because we
+	 * cannot create a directory through this interface and FEXCL says we
+	 * need to fail the request if we can't create it. If, however, only
+	 * FCREAT | FDIRECTORY are specified, then we can treat this as the case
+	 * of opening a file that already exists. If it exists, we can do
+	 * something and if not, we fail. Effectively FCREAT | FDIRECTORY is
+	 * treated as FDIRECTORY.
+	 */
+	if ((filemode & (FCREAT | FDIRECTORY | FEXCL)) ==
+	    (FCREAT | FDIRECTORY | FEXCL)) {
+		return (EINVAL);
+	}
+
+	if ((filemode & (FCREAT | FDIRECTORY)) == (FCREAT | FDIRECTORY)) {
+		create = B_FALSE;
+	} else if ((filemode & FCREAT) != 0) {
+		create = B_TRUE;
+	} else {
+		create = B_FALSE;
+	}
+
 top:
-	if (filemode & FCREAT) {
+	if (create) {
 		enum vcexcl excl;
 
 		/*
@@ -1084,11 +1109,13 @@ top:
 		 */
 		if (error = VOP_ACCESS(vp, mode, accessflags, CRED(), NULL))
 			goto out;
+
 		/*
-		 * Require FSEARCH to return a directory.
-		 * Require FEXEC to return a regular file.
+		 * Require FSEARCH and FDIRECTORY to return a directory. Require
+		 * FEXEC to return a regular file.
 		 */
-		if ((filemode & FSEARCH) && vp->v_type != VDIR) {
+		if ((filemode & (FSEARCH|FDIRECTORY)) != 0 &&
+		    vp->v_type != VDIR) {
 			error = ENOTDIR;
 			goto out;
 		}
@@ -1191,6 +1218,22 @@ top:
 		vattr.va_mask = AT_SIZE;
 		if ((error = VOP_SETATTR(vp, &vattr, 0, CRED(), NULL)) != 0)
 			goto out;
+	}
+
+	/*
+	 * Turn on directio, if requested.
+	 */
+	if (filemode & FDIRECT) {
+		if ((error = VOP_IOCTL(vp, _FIODIRECTIO, DIRECTIO_ON, 0,
+		    CRED(), NULL, NULL)) != 0) {
+			/*
+			 * On Linux, O_DIRECT returns EINVAL when the file
+			 * system does not support directio, so we'll do the
+			 * same.
+			 */
+			error = EINVAL;
+			goto out;
+		}
 	}
 out:
 	ASSERT(vp->v_count > 0);
@@ -2094,13 +2137,13 @@ vn_vfslocks_rele(vn_vfslocks_entry_t *vepent)
 	if ((int32_t)vepent->ve_refcnt < 0)
 		cmn_err(CE_PANIC, "vn_vfslocks_rele: refcount negative");
 
+	pvep = NULL;
 	if (vepent->ve_refcnt == 0) {
 		for (vep = bp->vb_list; vep != NULL; vep = vep->ve_next) {
 			if (vep->ve_vpvfs == vepent->ve_vpvfs) {
-				if (bp->vb_list == vep)
+				if (pvep == NULL)
 					bp->vb_list = vep->ve_next;
 				else {
-					/* LINTED */
 					pvep->ve_next = vep->ve_next;
 				}
 				mutex_exit(&bp->vb_lock);

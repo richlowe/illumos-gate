@@ -23,17 +23,13 @@
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2018 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
  * Debugger entry and exit for both master and slave CPUs. kdi_idthdl.s contains
  * the IDT stubs that drop into here (mainly via kdi_cmnint).
  */
-
-#if defined(__lint)
-#include <sys/types.h>
-#else
 
 #include <sys/segments.h>
 #include <sys/asm_linkage.h>
@@ -271,6 +267,9 @@
 	 * KDI_SAVE_REGS macro to prevent a usermode process's GSBASE from being
 	 * blown away.  On the hypervisor, we don't need to do this, since it's
 	 * ensured we're on our requested kernel GSBASE already.
+	 *
+	 * No need to worry about swapgs speculation here as it's unconditional
+	 * and via wrmsr anyway.
 	 */
 	subq	$10, %rsp
 	sgdt	(%rsp)
@@ -713,4 +712,3 @@ kdi_pass_invaltrap:
 	SETDREG(kdi_setdr6, %dr6)
 	SETDREG(kdi_setdr7, %dr7)
 
-#endif /* !__lint */

@@ -1432,6 +1432,7 @@ ahci_tran_probe_port(dev_info_t *dip, sata_device_t *sd)
 	uint8_t port;
 	int rval = SATA_SUCCESS, rval_init;
 
+	port_state = 0;
 	ahci_ctlp = ddi_get_soft_state(ahci_statep, ddi_get_instance(dip));
 	port = ahci_ctlp->ahcictl_cport_to_port[cport];
 
@@ -1996,6 +1997,7 @@ ahci_claim_free_slot(ahci_ctl_t *ahci_ctlp, ahci_port_t *ahci_portp,
 	    ahci_portp->ahciport_pending_tags,
 	    ahci_portp->ahciport_pending_ncq_tags);
 
+	free_slots = 0;
 	/*
 	 * According to the AHCI spec, system software is responsible to
 	 * ensure that queued and non-queued commands are not mixed in
@@ -9837,6 +9839,8 @@ ahci_watchdog_handler(ahci_ctl_t *ahci_ctlp)
 	AHCIDBG(AHCIDBG_ENTRY, ahci_ctlp,
 	    "ahci_watchdog_handler entered", NULL);
 
+	current_slot = 0;
+	current_tags = 0;
 	for (port = 0; port < ahci_ctlp->ahcictl_num_ports; port++) {
 		if (!AHCI_PORT_IMPLEMENTED(ahci_ctlp, port)) {
 			continue;
@@ -10663,8 +10667,6 @@ ahci_em_init(ahci_ctl_t *ahci_ctlp)
 		return (B_TRUE);
 	}
 
-	ahci_ctlp->ahcictl_em_flags |= AHCI_EM_PRESENT;
-
 	ahci_ctlp->ahcictl_em_tx_off = ((ahci_ctlp->ahcictl_em_loc &
 	    AHCI_HBA_EM_LOC_OFST_MASK) >> AHCI_HBA_EM_LOC_OFST_SHIFT) * 4;
 	ahci_ctlp->ahcictl_em_tx_off += ahci_ctlp->ahcictl_ahci_addr;
@@ -10683,7 +10685,7 @@ ahci_em_init(ahci_ctl_t *ahci_ctlp)
 	}
 
 	mutex_enter(&ahci_ctlp->ahcictl_mutex);
-	ahci_ctlp->ahcictl_em_flags |= AHCI_EM_RESETTING;
+	ahci_ctlp->ahcictl_em_flags |= AHCI_EM_PRESENT | AHCI_EM_RESETTING;
 	mutex_exit(&ahci_ctlp->ahcictl_mutex);
 	(void) ddi_taskq_dispatch(ahci_ctlp->ahcictl_em_taskq, ahci_em_reset,
 	    ahci_ctlp, DDI_SLEEP);
@@ -10696,6 +10698,10 @@ ahci_em_ioctl_get(ahci_ctl_t *ahci_ctlp, intptr_t arg)
 {
 	int i;
 	ahci_ioc_em_get_t get;
+
+	if ((ahci_ctlp->ahcictl_em_flags & AHCI_EM_PRESENT) == 0) {
+		return (ENOTSUP);
+	}
 
 	bzero(&get, sizeof (get));
 	get.aiemg_nports = ahci_ctlp->ahcictl_ports_implemented;
@@ -10749,6 +10755,10 @@ ahci_em_ioctl_set(ahci_ctl_t *ahci_ctlp, intptr_t arg)
 		break;
 	default:
 		return (EINVAL);
+	}
+
+	if ((ahci_ctlp->ahcictl_em_flags & AHCI_EM_PRESENT) == 0) {
+		return (ENOTSUP);
 	}
 
 	if ((set.aiems_leds & AHCI_EM_LED_ACTIVITY_DISABLE) != 0 &&
@@ -10837,9 +10847,11 @@ ahci_em_ioctl(dev_info_t *dip, int cmd, intptr_t arg)
 static void
 ahci_em_quiesce(ahci_ctl_t *ahci_ctlp)
 {
-	ASSERT(ahci_ctlp->ahcictl_em_flags & AHCI_EM_PRESENT);
-
 	mutex_enter(&ahci_ctlp->ahcictl_mutex);
+	if ((ahci_ctlp->ahcictl_em_flags & AHCI_EM_PRESENT) == 0) {
+		mutex_exit(&ahci_ctlp->ahcictl_mutex);
+		return;
+	}
 	ahci_ctlp->ahcictl_em_flags |= AHCI_EM_QUIESCE;
 	mutex_exit(&ahci_ctlp->ahcictl_mutex);
 
@@ -10860,6 +10872,10 @@ static void
 ahci_em_resume(ahci_ctl_t *ahci_ctlp)
 {
 	mutex_enter(&ahci_ctlp->ahcictl_mutex);
+	if ((ahci_ctlp->ahcictl_em_flags & AHCI_EM_PRESENT) == 0) {
+		mutex_exit(&ahci_ctlp->ahcictl_mutex);
+		return;
+	}
 	ahci_ctlp->ahcictl_em_flags |= AHCI_EM_RESETTING;
 	mutex_exit(&ahci_ctlp->ahcictl_mutex);
 

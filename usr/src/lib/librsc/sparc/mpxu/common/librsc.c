@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * ENXS platform-specific functions
  */
@@ -110,9 +108,9 @@ static const int rr_table_cnt = sizeof (rr_table) / sizeof (rr_table[0]);
 
 static req_resp_table_t rr_bp_table[] = {
 
-	{ BP_OBP_BOOTINIT,	NULL,	sizeof (bp_msg_t),
+	{ BP_OBP_BOOTINIT,	0,	sizeof (bp_msg_t),
 	    RR_BOOT_INIT_TIMEOUT },
-	{ BP_OBP_RESET,		NULL,	sizeof (bp_msg_t),
+	{ BP_OBP_RESET,		0,	sizeof (bp_msg_t),
 	    RR_BOOT_RESET_TIMEOUT }
 };
 
@@ -151,7 +149,7 @@ rscp_init(void)
 	/*
 	 * 'erase' the rx buffer
 	 */
-	(void) memset(rsc_rx_buffer, 0, sizeof (RSC_MAX_RX_BUFFER));
+	(void) memset(rsc_rx_buffer, 0, sizeof (rsc_rx_buffer));
 	rsc_rx_resp_len = 0;
 	rsc_rx_error = 0;
 	rsc_rx_resp_type = DP_NULL_MSG;

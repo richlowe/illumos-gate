@@ -12,6 +12,7 @@
 /*
  * Copyright 2015 OmniTI Computer Consulting, Inc. All rights reserved.
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 RackTop Systems, Inc.
  */
 
 #include "i40e_sw.h"
@@ -1043,75 +1044,65 @@ cleanup:
 }
 
 /*
- * Free all memory associated with all of the rings on this i40e instance. Note,
- * this is done as part of the GLDv3 stop routine.
+ * Free all memory associated with a ring. Note, this is done as part of
+ * the GLDv3 ring stop routine.
  */
 void
-i40e_free_ring_mem(i40e_t *i40e, boolean_t failed_init)
+i40e_free_ring_mem(i40e_trqpair_t *itrq, boolean_t failed_init)
 {
-	int i;
+	i40e_t *i40e = itrq->itrq_i40e;
+	i40e_rx_data_t *rxd = itrq->itrq_rxdata;
 
-	for (i = 0; i < i40e->i40e_num_trqpairs; i++) {
-		i40e_rx_data_t *rxd = i40e->i40e_trqpairs[i].itrq_rxdata;
+	/*
+	 * In some cases i40e_alloc_rx_data() may have failed
+	 * and in that case there is no rxd to free.
+	 */
+	if (rxd == NULL)
+		return;
 
-		/*
-		 * In some cases i40e_alloc_rx_data() may have failed
-		 * and in that case there is no rxd to free.
-		 */
-		if (rxd == NULL)
-			continue;
+	/*
+	 * Clean up our RX data. We have to free DMA resources first and
+	 * then if we have no more pending RCB's, then we'll go ahead
+	 * and clean things up. Note, we can't set the stopped flag on
+	 * the RX data until after we've done the first pass of the
+	 * pending resources. Otherwise we might race with
+	 * i40e_rx_recycle on determining who should free the
+	 * i40e_rx_data_t above.
+	 */
+	i40e_free_rx_dma(rxd, failed_init);
 
-		/*
-		 * Clean up our RX data. We have to free DMA resources first and
-		 * then if we have no more pending RCB's, then we'll go ahead
-		 * and clean things up. Note, we can't set the stopped flag on
-		 * the RX data until after we've done the first pass of the
-		 * pending resources. Otherwise we might race with
-		 * i40e_rx_recycle on determining who should free the
-		 * i40e_rx_data_t above.
-		 */
-		i40e_free_rx_dma(rxd, failed_init);
-
-		mutex_enter(&i40e->i40e_rx_pending_lock);
-		rxd->rxd_shutdown = B_TRUE;
-		if (rxd->rxd_rcb_pending == 0) {
-			i40e_free_rx_data(rxd);
-			i40e->i40e_trqpairs[i].itrq_rxdata = NULL;
-		}
-		mutex_exit(&i40e->i40e_rx_pending_lock);
-
-		i40e_free_tx_dma(&i40e->i40e_trqpairs[i]);
+	mutex_enter(&i40e->i40e_rx_pending_lock);
+	rxd->rxd_shutdown = B_TRUE;
+	if (rxd->rxd_rcb_pending == 0) {
+		i40e_free_rx_data(rxd);
+		itrq->itrq_rxdata = NULL;
 	}
+	mutex_exit(&i40e->i40e_rx_pending_lock);
+
+	i40e_free_tx_dma(itrq);
 }
 
 /*
- * Allocate all of the resources associated with all of the rings on this i40e
- * instance. Note this is done as part of the GLDv3 start routine and thus we
- * should not use blocking allocations. This takes care of both DMA and non-DMA
- * related resources.
+ * Allocate all of the resources associated with a ring.
+ * Note this is done as part of the GLDv3 ring start routine.
+ * This takes care of both DMA and non-DMA related resources.
  */
 boolean_t
-i40e_alloc_ring_mem(i40e_t *i40e)
+i40e_alloc_ring_mem(i40e_trqpair_t *itrq)
 {
-	int i;
+	if (!i40e_alloc_rx_data(itrq->itrq_i40e, itrq))
+		goto free;
 
-	for (i = 0; i < i40e->i40e_num_trqpairs; i++) {
-		if (i40e_alloc_rx_data(i40e, &i40e->i40e_trqpairs[i]) ==
-		    B_FALSE)
-			goto unwind;
+	if (!i40e_alloc_rx_dma(itrq->itrq_rxdata))
+		goto free;
 
-		if (i40e_alloc_rx_dma(i40e->i40e_trqpairs[i].itrq_rxdata) ==
-		    B_FALSE)
-			goto unwind;
-
-		if (i40e_alloc_tx_dma(&i40e->i40e_trqpairs[i]) == B_FALSE)
-			goto unwind;
-	}
+	if (!i40e_alloc_tx_dma(itrq))
+		goto free;
 
 	return (B_TRUE);
 
-unwind:
-	i40e_free_ring_mem(i40e, B_TRUE);
+free:
+	i40e_free_ring_mem(itrq, B_TRUE);
 	return (B_FALSE);
 }
 
@@ -1663,186 +1654,6 @@ i40e_ring_rx_poll(void *arg, int poll_bytes)
 }
 
 /*
- * This is a structure I wish someone would fill out for me for dorking with the
- * checksums. When we get some more experience with this, we should go ahead and
- * consider adding this to MAC.
- */
-typedef enum mac_ether_offload_flags {
-	MEOI_L2INFO_SET		= 0x01,
-	MEOI_VLAN_TAGGED	= 0x02,
-	MEOI_L3INFO_SET		= 0x04,
-	MEOI_L3CKSUM_SET	= 0x08,
-	MEOI_L4INFO_SET		= 0x10,
-	MEOI_L4CKSUM_SET	= 0x20
-} mac_ether_offload_flags_t;
-
-typedef struct mac_ether_offload_info {
-	mac_ether_offload_flags_t	meoi_flags;
-	uint8_t		meoi_l2hlen;	/* How long is the Ethernet header? */
-	uint16_t	meoi_l3proto;	/* What's the Ethertype */
-	uint8_t		meoi_l3hlen;	/* How long is the header? */
-	uint8_t		meoi_l4proto;	/* What is the payload type? */
-	uint8_t		meoi_l4hlen;	/* How long is the L4 header */
-	mblk_t		*meoi_l3ckmp;	/* Which mblk has the l3 checksum */
-	off_t		meoi_l3ckoff;	/* What's the offset to it */
-	mblk_t		*meoi_l4ckmp;	/* Which mblk has the L4 checksum */
-	off_t		meoi_l4off;	/* What is the offset to it? */
-} mac_ether_offload_info_t;
-
-/*
- * This is something that we'd like to make a general MAC function. Before we do
- * that, we should add support for TSO.
- *
- * We should really keep track of our offset and not walk everything every
- * time. I can't imagine that this will be kind to us at high packet rates;
- * however, for the moment, let's leave that.
- *
- * This walks a message block chain without pulling up to fill in the context
- * information. Note that the data we care about could be hidden across more
- * than one mblk_t.
- */
-static int
-i40e_meoi_get_uint8(mblk_t *mp, off_t off, uint8_t *out)
-{
-	size_t mpsize;
-	uint8_t *bp;
-
-	mpsize = msgsize(mp);
-	/* Check for overflow */
-	if (off + sizeof (uint16_t) > mpsize)
-		return (-1);
-
-	mpsize = MBLKL(mp);
-	while (off >= mpsize) {
-		mp = mp->b_cont;
-		off -= mpsize;
-		mpsize = MBLKL(mp);
-	}
-
-	bp = mp->b_rptr + off;
-	*out = *bp;
-	return (0);
-
-}
-
-static int
-i40e_meoi_get_uint16(mblk_t *mp, off_t off, uint16_t *out)
-{
-	size_t mpsize;
-	uint8_t *bp;
-
-	mpsize = msgsize(mp);
-	/* Check for overflow */
-	if (off + sizeof (uint16_t) > mpsize)
-		return (-1);
-
-	mpsize = MBLKL(mp);
-	while (off >= mpsize) {
-		mp = mp->b_cont;
-		off -= mpsize;
-		mpsize = MBLKL(mp);
-	}
-
-	/*
-	 * Data is in network order. Note the second byte of data might be in
-	 * the next mp.
-	 */
-	bp = mp->b_rptr + off;
-	*out = *bp << 8;
-	if (off + 1 == mpsize) {
-		mp = mp->b_cont;
-		bp = mp->b_rptr;
-	} else {
-		bp++;
-	}
-
-	*out |= *bp;
-	return (0);
-
-}
-
-static int
-mac_ether_offload_info(mblk_t *mp, mac_ether_offload_info_t *meoi)
-{
-	size_t off;
-	uint16_t ether;
-	uint8_t ipproto, iplen, l4len, maclen;
-
-	bzero(meoi, sizeof (mac_ether_offload_info_t));
-
-	off = offsetof(struct ether_header, ether_type);
-	if (i40e_meoi_get_uint16(mp, off, &ether) != 0)
-		return (-1);
-
-	if (ether == ETHERTYPE_VLAN) {
-		off = offsetof(struct ether_vlan_header, ether_type);
-		if (i40e_meoi_get_uint16(mp, off, &ether) != 0)
-			return (-1);
-		meoi->meoi_flags |= MEOI_VLAN_TAGGED;
-		maclen = sizeof (struct ether_vlan_header);
-	} else {
-		maclen = sizeof (struct ether_header);
-	}
-	meoi->meoi_flags |= MEOI_L2INFO_SET;
-	meoi->meoi_l2hlen = maclen;
-	meoi->meoi_l3proto = ether;
-
-	switch (ether) {
-	case ETHERTYPE_IP:
-		/*
-		 * For IPv4 we need to get the length of the header, as it can
-		 * be variable.
-		 */
-		off = offsetof(ipha_t, ipha_version_and_hdr_length) + maclen;
-		if (i40e_meoi_get_uint8(mp, off, &iplen) != 0)
-			return (-1);
-		iplen &= 0x0f;
-		if (iplen < 5 || iplen > 0x0f)
-			return (-1);
-		iplen *= 4;
-		off = offsetof(ipha_t, ipha_protocol) + maclen;
-		if (i40e_meoi_get_uint8(mp, off, &ipproto) == -1)
-			return (-1);
-		break;
-	case ETHERTYPE_IPV6:
-		iplen = 40;
-		off = offsetof(ip6_t, ip6_nxt) + maclen;
-		if (i40e_meoi_get_uint8(mp, off, &ipproto) == -1)
-			return (-1);
-		break;
-	default:
-		return (0);
-	}
-	meoi->meoi_l3hlen = iplen;
-	meoi->meoi_l4proto = ipproto;
-	meoi->meoi_flags |= MEOI_L3INFO_SET;
-
-	switch (ipproto) {
-	case IPPROTO_TCP:
-		off = offsetof(tcph_t, th_offset_and_rsrvd) + maclen + iplen;
-		if (i40e_meoi_get_uint8(mp, off, &l4len) == -1)
-			return (-1);
-		l4len = (l4len & 0xf0) >> 4;
-		if (l4len < 5 || l4len > 0xf)
-			return (-1);
-		l4len *= 4;
-		break;
-	case IPPROTO_UDP:
-		l4len = sizeof (struct udphdr);
-		break;
-	case IPPROTO_SCTP:
-		l4len = sizeof (sctp_hdr_t);
-		break;
-	default:
-		return (0);
-	}
-
-	meoi->meoi_l4hlen = l4len;
-	meoi->meoi_flags |= MEOI_L4INFO_SET;
-	return (0);
-}
-
-/*
  * Attempt to put togther the information we'll need to feed into a descriptor
  * to properly program the hardware for checksum offload as well as the
  * generally required flags.
@@ -1962,7 +1773,8 @@ i40e_tx_context(i40e_t *i40e, i40e_trqpair_t *itrq, mblk_t *mp,
 		 * LSO requires that checksum offloads are enabled.  If for
 		 * some reason they're not we bail out with an error.
 		 */
-		if ((chkflags & HCK_IPV4_HDRCKSUM) == 0 ||
+		if ((meo->meoi_l3proto == ETHERTYPE_IP &&
+		    (chkflags & HCK_IPV4_HDRCKSUM) == 0) ||
 		    (chkflags & HCK_PARTIALCKSUM) == 0) {
 			txs->itxs_lso_nohck.value.ui64++;
 			return (-1);
@@ -2808,6 +2620,77 @@ fail:
 }
 
 /*
+ * Keep track of activity through the transmit data path.
+ *
+ * We need to ensure we don't try and transmit when a trqpair has been
+ * stopped, nor do we want to stop a trqpair whilst transmitting.
+ */
+static boolean_t
+i40e_ring_tx_enter(i40e_trqpair_t *itrq)
+{
+	boolean_t allow;
+
+	mutex_enter(&itrq->itrq_tx_lock);
+	allow = !itrq->itrq_tx_quiesce;
+	if (allow)
+		itrq->itrq_tx_active++;
+	mutex_exit(&itrq->itrq_tx_lock);
+
+	return (allow);
+}
+
+static void
+i40e_ring_tx_exit_nolock(i40e_trqpair_t *itrq)
+{
+	ASSERT(MUTEX_HELD(&itrq->itrq_tx_lock));
+
+	itrq->itrq_tx_active--;
+	if (itrq->itrq_tx_quiesce)
+		cv_signal(&itrq->itrq_tx_cv);
+}
+
+static void
+i40e_ring_tx_exit(i40e_trqpair_t *itrq)
+{
+	mutex_enter(&itrq->itrq_tx_lock);
+	i40e_ring_tx_exit_nolock(itrq);
+	mutex_exit(&itrq->itrq_tx_lock);
+}
+
+
+/*
+ * Tell the transmit path to quiesce and wait until there is no
+ * more activity.
+ * Will return B_TRUE if the transmit path is already quiesced, B_FALSE
+ * otherwise.
+ */
+boolean_t
+i40e_ring_tx_quiesce(i40e_trqpair_t *itrq)
+{
+	mutex_enter(&itrq->itrq_tx_lock);
+	if (itrq->itrq_tx_quiesce) {
+		/*
+		 * When itrq_tx_quiesce is set, then the ring has already
+		 * been shutdown.
+		 */
+		mutex_exit(&itrq->itrq_tx_lock);
+		return (B_TRUE);
+	}
+
+	/*
+	 * Tell any threads in transmit path this trqpair is quiesced and
+	 * wait until they've all exited the critical code path.
+	 */
+	itrq->itrq_tx_quiesce = B_TRUE;
+	while (itrq->itrq_tx_active > 0)
+		cv_wait(&itrq->itrq_tx_cv, &itrq->itrq_tx_lock);
+
+	mutex_exit(&itrq->itrq_tx_lock);
+
+	return (B_FALSE);
+}
+
+/*
  * We've been asked to send a message block on the wire. We'll only have a
  * single chain. There will not be any b_next pointers; however, there may be
  * multiple b_cont blocks. The number of b_cont blocks may exceed the
@@ -2846,7 +2729,8 @@ i40e_ring_tx(void *arg, mblk_t *mp)
 	    (i40e->i40e_state & I40E_OVERTEMP) ||
 	    (i40e->i40e_state & I40E_SUSPENDED) ||
 	    (i40e->i40e_state & I40E_ERROR) ||
-	    (i40e->i40e_link_state != LINK_STATE_UP)) {
+	    (i40e->i40e_link_state != LINK_STATE_UP) ||
+	    !i40e_ring_tx_enter(itrq)) {
 		freemsg(mp);
 		return (NULL);
 	}
@@ -2854,6 +2738,7 @@ i40e_ring_tx(void *arg, mblk_t *mp)
 	if (mac_ether_offload_info(mp, &meo) != 0) {
 		freemsg(mp);
 		itrq->itrq_txstat.itxs_hck_meoifail.value.ui64++;
+		i40e_ring_tx_exit(itrq);
 		return (NULL);
 	}
 
@@ -2865,6 +2750,7 @@ i40e_ring_tx(void *arg, mblk_t *mp)
 	if (i40e_tx_context(i40e, itrq, mp, &meo, &tctx) < 0) {
 		freemsg(mp);
 		itrq->itrq_txstat.itxs_err_context.value.ui64++;
+		i40e_ring_tx_exit(itrq);
 		return (NULL);
 	}
 	if (tctx.itc_ctx_cmdflags & I40E_TX_CTX_DESC_TSO) {
@@ -3006,6 +2892,8 @@ i40e_ring_tx(void *arg, mblk_t *mp)
 	txs->itxs_packets.value.ui64++;
 	txs->itxs_descriptors.value.ui64 += needed_desc;
 
+	i40e_ring_tx_exit_nolock(itrq);
+
 	mutex_exit(&itrq->itrq_tx_lock);
 
 	return (NULL);
@@ -3037,6 +2925,7 @@ txfail:
 	}
 
 	mutex_enter(&itrq->itrq_tx_lock);
+	i40e_ring_tx_exit_nolock(itrq);
 	itrq->itrq_tx_blocked = B_TRUE;
 	mutex_exit(&itrq->itrq_tx_lock);
 

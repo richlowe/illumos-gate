@@ -24,6 +24,7 @@
  * Copyright (c) 2011 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
  * Copyright (c) 2017, Intel Corporation.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <sys/sysmacros.h>
@@ -42,6 +43,7 @@
 #include <sys/ddt.h>
 #include <sys/blkptr.h>
 #include <sys/zfeature.h>
+#include <sys/time.h>
 #include <sys/dsl_scan.h>
 #include <sys/metaslab_impl.h>
 #include <sys/abd.h>
@@ -76,6 +78,9 @@ extern vmem_t *zio_alloc_arena;
 
 #define	ZIO_PIPELINE_CONTINUE		0x100
 #define	ZIO_PIPELINE_STOP		0x101
+
+/* Mark IOs as "slow" if they take longer than 30 seconds */
+int zio_slow_io_ms = (30 * MILLISEC);
 
 #define	BP_SPANB(indblkshift, level) \
 	(((uint64_t)1) << ((level) * ((indblkshift) - SPA_BLKPTRSHIFT)))
@@ -475,7 +480,7 @@ error:
 		zio->io_error = SET_ERROR(EIO);
 		if ((zio->io_flags & ZIO_FLAG_SPECULATIVE) == 0) {
 			spa_log_error(spa, &zio->io_bookmark);
-			zfs_ereport_post(FM_EREPORT_ZFS_AUTHENTICATION,
+			(void) zfs_ereport_post(FM_EREPORT_ZFS_AUTHENTICATION,
 			    spa, NULL, &zio->io_bookmark, zio, 0, 0);
 		}
 	} else {
@@ -1980,7 +1985,11 @@ zio_suspend(spa_t *spa, zio_t *zio, zio_suspend_reason_t reason)
 		    "failure and the failure mode property for this pool "
 		    "is set to panic.", spa_name(spa));
 
-	zfs_ereport_post(FM_EREPORT_ZFS_IO_FAILURE, spa, NULL,
+	cmn_err(CE_WARN, "Pool '%s' has encountered an uncorrectable I/O "
+	    "failure and has been suspended; `zpool clear` will be required "
+	    "before the pool can be written to.", spa_name(spa));
+
+	(void) zfs_ereport_post(FM_EREPORT_ZFS_IO_FAILURE, spa, NULL,
 	    NULL, NULL, 0, 0);
 
 	mutex_enter(&spa->spa_suspend_lock);
@@ -3388,6 +3397,8 @@ zio_vdev_io_start(zio_t *zio)
 	uint64_t align;
 	spa_t *spa = zio->io_spa;
 
+	zio->io_delay = 0;
+
 	ASSERT(zio->io_error == 0);
 	ASSERT(zio->io_child_error[ZIO_CHILD_VDEV] == 0);
 
@@ -3505,6 +3516,7 @@ zio_vdev_io_start(zio_t *zio)
 			zio_interrupt(zio);
 			return (ZIO_PIPELINE_STOP);
 		}
+		zio->io_delay = gethrtime();
 	}
 
 	vd->vdev_ops->vdev_op_io_start(zio);
@@ -3524,6 +3536,9 @@ zio_vdev_io_done(zio_t *zio)
 
 	ASSERT(zio->io_type == ZIO_TYPE_READ ||
 	    zio->io_type == ZIO_TYPE_WRITE || zio->io_type == ZIO_TYPE_TRIM);
+
+	if (zio->io_delay)
+		zio->io_delay = gethrtime() - zio->io_delay;
 
 	if (vd != NULL && vd->vdev_ops->vdev_op_leaf) {
 
@@ -4228,6 +4243,29 @@ zio_done(zio_t *zio)
 
 	vdev_stat_update(zio, psize);
 
+	if (zio->io_delay >= MSEC2NSEC(zio_slow_io_ms)) {
+		if (zio->io_vd != NULL && !vdev_is_dead(zio->io_vd)) {
+			/*
+			 * We want to only increment our slow IO counters if
+			 * the IO is valid (i.e. not if the drive is removed).
+			 *
+			 * zfs_ereport_post() will also do these checks, but
+			 * it can also have other failures, so we need to
+			 * increment the slow_io counters independent of it.
+			 */
+			if (zfs_ereport_is_valid(FM_EREPORT_ZFS_DELAY,
+			    zio->io_spa, zio->io_vd, zio)) {
+				mutex_enter(&zio->io_vd->vdev_stat_lock);
+				zio->io_vd->vdev_stat.vs_slow_ios++;
+				mutex_exit(&zio->io_vd->vdev_stat_lock);
+
+				(void) zfs_ereport_post(FM_EREPORT_ZFS_DELAY,
+				    zio->io_spa, zio->io_vd, &zio->io_bookmark,
+				    zio, 0, 0);
+			}
+		}
+	}
+
 	if (zio->io_error) {
 		/*
 		 * If this I/O is attached to a particular vdev,
@@ -4236,7 +4274,7 @@ zio_done(zio_t *zio)
 		 * device is currently unavailable.
 		 */
 		if (zio->io_error != ECKSUM && vd != NULL && !vdev_is_dead(vd))
-			zfs_ereport_post(FM_EREPORT_ZFS_IO, spa, vd,
+			(void) zfs_ereport_post(FM_EREPORT_ZFS_IO, spa, vd,
 			    &zio->io_bookmark, zio, 0, 0);
 
 		if ((zio->io_error == EIO || !(zio->io_flags &
@@ -4247,7 +4285,7 @@ zio_done(zio_t *zio)
 			 * error and generate a logical data ereport.
 			 */
 			spa_log_error(spa, &zio->io_bookmark);
-			zfs_ereport_post(FM_EREPORT_ZFS_DATA, spa, NULL,
+			(void) zfs_ereport_post(FM_EREPORT_ZFS_DATA, spa, NULL,
 			    &zio->io_bookmark, zio, 0, 0);
 		}
 	}

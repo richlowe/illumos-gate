@@ -23,8 +23,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/sysmacros.h>
@@ -70,7 +68,7 @@ mdhdr(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		else
 			mdb_printf("%p\n", mdp);
 
-	} while ((mdp = (uintptr_t)md.next) != NULL);
+	} while ((mdp = (uintptr_t)md.next) != (uintptr_t)NULL);
 
 	return (DCMD_OK);
 }
@@ -221,8 +219,7 @@ mdformat(uintptr_t addr, int size, int indent)
 	mdb_inc_indent(indent);
 	if (mdb_dumpptr((uintptr_t)addr, size,
 	    MDB_DUMP_RELATIVE | MDB_DUMP_TRIM | MDB_DUMP_ASCII |
-	    MDB_DUMP_HEADER | MDB_DUMP_GROUP(4),
-	    (mdb_dumpptr_cb_t)mdb_vread, NULL)) {
+	    MDB_DUMP_HEADER | MDB_DUMP_GROUP(4), NULL, NULL)) {
 		mdb_dec_indent(indent);
 		return (DCMD_ERR);
 	}

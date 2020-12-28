@@ -54,6 +54,7 @@
 #include "loader_efi.h"
 
 static void (*trampoline)(uint32_t, struct relocator *, uint64_t);
+static UINTN efi_map_size;		/* size of efi memory map */
 #endif
 
 #include "platform/acfreebsd.h"
@@ -270,7 +271,8 @@ multiboot2_loadfile(char *filename, uint64_t dest,
 		fp->f_size = archsw.arch_readin(fd, fp->f_addr, st.st_size);
 
 		if (fp->f_size != st.st_size) {
-			printf("error reading: %s", strerror(errno));
+			printf("error reading %s: %s\n", filename,
+			    strerror(errno));
 			file_discard(fp);
 			error = EIO;
 			goto out;
@@ -681,6 +683,8 @@ module_size(struct preloaded_file *fp)
 /*
  * Calculate size for UEFI memory map tag.
  */
+#define	EFI_EXTRA_PAGES	3
+
 static int
 efimemmap_size(void)
 {
@@ -707,8 +711,9 @@ efimemmap_size(void)
 	}
 
 	/* EFI MMAP will grow when we allocate MBI, set some buffer. */
-	size += (3 << EFI_PAGE_SHIFT);
-	size = roundup(size, desc_size);
+	size += (EFI_EXTRA_PAGES << EFI_PAGE_SHIFT);
+	size = roundup2(size, EFI_PAGE_SIZE);
+	efi_map_size = size;	/* Record the calculated size. */
 	return (sizeof (multiboot_tag_efi_mmap_t) + size);
 }
 #endif
@@ -769,8 +774,7 @@ mbi_size(struct preloaded_file *fp, char *cmdline)
 	if (gfx_fb.framebuffer_common.framebuffer_type ==
 	    MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED) {
 		size += sizeof (struct multiboot_tag_framebuffer_common);
-		size += gfx_fb.u.fb1.framebuffer_palette_num_colors *
-		    sizeof (multiboot_color_t);
+		size += CMAP_SIZE * sizeof (multiboot_color_t);
 	} else {
 		size += sizeof (multiboot_tag_framebuffer_t);
 	}
@@ -1172,9 +1176,10 @@ multiboot2_exec(struct preloaded_file *fp)
 
 		if (gfx_fb.framebuffer_common.framebuffer_type ==
 		    MULTIBOOT_FRAMEBUFFER_TYPE_INDEXED) {
+			gfx_fb.u.fb1.framebuffer_palette_num_colors = CMAP_SIZE;
+
 			memcpy(tag->u.fb1.framebuffer_palette, cmap,
-			    sizeof (multiboot_color_t) *
-			    gfx_fb.u.fb1.framebuffer_palette_num_colors);
+			    sizeof (multiboot_color_t) * CMAP_SIZE);
 		}
 #endif /* EFI */
 	}
@@ -1197,27 +1202,41 @@ multiboot2_exec(struct preloaded_file *fp)
 			error = EINVAL;
 			goto error;
 		}
-		status = BS->GetMemoryMap(&map_size,
-		    (EFI_MEMORY_DESCRIPTOR *)tag->mb_efi_mmap, &key,
-		    &desc_size, &tag->mb_descr_vers);
-		if (EFI_ERROR(status)) {
+		map_size = roundup2(map_size, EFI_PAGE_SIZE);
+
+		i = 2;	/* Attempts to ExitBootServices() */
+		while (map_size <= efi_map_size && i > 0) {
+			status = BS->GetMemoryMap(&map_size,
+			    (EFI_MEMORY_DESCRIPTOR *)tag->mb_efi_mmap, &key,
+			    &desc_size, &tag->mb_descr_vers);
+			if (status == EFI_BUFFER_TOO_SMALL) {
+				/* Still too small? */
+				map_size += EFI_PAGE_SIZE;
+				continue;
+			}
+			if (EFI_ERROR(status)) {
+				error = EINVAL;
+				goto error;
+			}
+
+			if (keep_bs != 0)
+				break;
+
+			status = BS->ExitBootServices(IH, key);
+			if (status == EFI_SUCCESS)
+				break;
+			i--;
+		}
+		if (status != EFI_SUCCESS) {
 			error = EINVAL;
 			goto error;
 		}
+
 		tag->mb_type = MULTIBOOT_TAG_TYPE_EFI_MMAP;
 		tag->mb_size = sizeof (*tag) + map_size;
 		tag->mb_descr_size = (uint32_t)desc_size;
 
 		map = (EFI_MEMORY_DESCRIPTOR *)tag->mb_efi_mmap;
-
-		if (keep_bs == 0) {
-			status = BS->ExitBootServices(IH, key);
-			if (EFI_ERROR(status)) {
-				printf("Call to ExitBootServices failed\n");
-				error = EINVAL;
-				goto error;
-			}
-		}
 
 		last_addr += map_size;
 		last_addr = roundup2(last_addr, MULTIBOOT_TAG_ALIGN);

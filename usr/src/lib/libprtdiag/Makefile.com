@@ -21,6 +21,7 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2020 Peter Tribble.
 #
 
 #
@@ -28,7 +29,7 @@
 #	confuse make
 #
 CLASS		= 32
-UTSBASE 	= $(SRC)/uts
+UTSBASE		= $(SRC)/uts
 
 LIBRARY		= libprtdiag.a
 VERS		= .1
@@ -36,11 +37,10 @@ VERS		= .1
 include $(SRC)/lib/Makefile.lib
 include $(SRC)/Makefile.psm
 
-LIBS		= $(DYNLIB) $(LINTLIB)
+LIBS		= $(DYNLIB)
 IFLAGS		= -I ../../inc -I $(USR_PSM_INCL_DIR)
 IFLAGS		+= -I $(SRC)/cmd/picl/plugins/inc
-IFLAGS		+= -I $(UTSBASE)/sun4u 
-IFLAGS		+= -I $(UTSBASE)/sun4u/sunfire
+IFLAGS		+= -I $(UTSBASE)/sun4u
 IFLAGS		+= -I $(UTSBASE)/sun4u/serengeti
 CPPFLAGS	= $(IFLAGS) $(CPPFLAGS.master)
 CFLAGS		+= $(CCVERBOSE)
@@ -56,8 +56,6 @@ DYNFLAGS	+= -Wl,-f/usr/platform/\$$PLATFORM/lib/$(DYNLIBPSR)
 MAPFILES =
 
 SRCDIR		= ../../common
-$(LINTLIB)	:= SRCS = $(SRCDIR)/$(LINTSRC)
-USR_PSMLINT=	$(LINTSRC:%=$(USR_PSM_LIB_DIR)/%)
 
 #
 # install rule

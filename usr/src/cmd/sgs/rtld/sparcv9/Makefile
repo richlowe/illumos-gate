@@ -90,7 +90,7 @@ CONVLIBDIR =	$(CONVLIBDIR64)
 
 all:		$(RTLD)
 
-install:	all $(ROOTDYNLIB64) $(ROOTDBG64)
+install:	all $(ROOTDYNLIB64) $(ROOTDBG64) $(ROOTCOMPATLINKS64)
 
 adbmacros:	adb .WAIT $(ADBSCRIPTS)
 

@@ -3,6 +3,7 @@ ECDSA_VerifyDigest
 dtrace_disx86
 elf32exec
 elfexec
+emlxs_sli4_process_unsol_rcv
 iscsi_ioctl
 lm_idle_chk
 ld64_sym_validate
@@ -11,3 +12,4 @@ nostore_generate_key_pair
 sadb_common_add
 segvn_fault_vnodepages
 tcp_input_data
+zfs_setattr

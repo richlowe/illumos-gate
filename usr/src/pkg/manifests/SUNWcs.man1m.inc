@@ -15,9 +15,10 @@
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 # Copyright (c) 2016 by Delphix. All rights reserved.
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
+$(i386_ONLY) file path=usr/share/man/man1m/rdmsr.1m variant.opensolaris.zone=global
 file path=usr/share/man/man1m/6to4relay.1m
 file path=usr/share/man/man1m/Intro.1m
 file path=usr/share/man/man1m/acctadm.1m
@@ -36,7 +37,6 @@ file path=usr/share/man/man1m/bootadm.1m
 file path=usr/share/man/man1m/busstat.1m
 file path=usr/share/man/man1m/captoinfo.1m
 file path=usr/share/man/man1m/cfgadm.1m
-file path=usr/share/man/man1m/cfgadm_ac.1m
 file path=usr/share/man/man1m/cfgadm_cardbus.1m
 file path=usr/share/man/man1m/cfgadm_fp.1m
 file path=usr/share/man/man1m/cfgadm_ib.1m
@@ -44,7 +44,6 @@ file path=usr/share/man/man1m/cfgadm_pci.1m
 file path=usr/share/man/man1m/cfgadm_sata.1m
 file path=usr/share/man/man1m/cfgadm_sbd.1m
 file path=usr/share/man/man1m/cfgadm_scsi.1m
-file path=usr/share/man/man1m/cfgadm_sysctrl.1m
 file path=usr/share/man/man1m/cfgadm_usb.1m
 file path=usr/share/man/man1m/chroot.1m
 file path=usr/share/man/man1m/clear_locks.1m
@@ -111,6 +110,7 @@ file path=usr/share/man/man1m/groupmod.1m
 file path=usr/share/man/man1m/growfs.1m
 file path=usr/share/man/man1m/halt.1m
 file path=usr/share/man/man1m/hostconfig.1m
+file path=usr/share/man/man1m/hotplug.1m
 file path=usr/share/man/man1m/id.1m
 file path=usr/share/man/man1m/idmap.1m
 file path=usr/share/man/man1m/idmapd.1m
@@ -204,7 +204,6 @@ file path=usr/share/man/man1m/quotaon.1m
 file path=usr/share/man/man1m/raidctl.1m
 file path=usr/share/man/man1m/ramdiskadm.1m
 file path=usr/share/man/man1m/rctladm.1m
-$(i386_ONLY) file path=usr/share/man/man1m/rdmsr.1m variant.opensolaris.zone=global
 file path=usr/share/man/man1m/reboot.1m
 file path=usr/share/man/man1m/rem_drv.1m
 file path=usr/share/man/man1m/repquota.1m
@@ -261,6 +260,7 @@ file path=usr/share/man/man1m/trapstat.1m
 file path=usr/share/man/man1m/ttyadm.1m
 file path=usr/share/man/man1m/ttymon.1m
 file path=usr/share/man/man1m/tunefs.1m
+file path=usr/share/man/man1m/tzreload.1m
 file path=usr/share/man/man1m/tzselect.1m
 file path=usr/share/man/man1m/uadmin.1m
 file path=usr/share/man/man1m/ucodeadm.1m

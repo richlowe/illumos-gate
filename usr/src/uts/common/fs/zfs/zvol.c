@@ -24,7 +24,7 @@
  * Portions Copyright 2010 Robert Milkowski
  *
  * Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
- * Copyright (c) 2012, 2017 by Delphix. All rights reserved.
+ * Copyright (c) 2012, 2020 by Delphix. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
  * Copyright 2019 Joyent, Inc.
  */
@@ -78,9 +78,7 @@
 #include <sys/refcount.h>
 #include <sys/zfs_znode.h>
 #include <sys/zfs_rlock.h>
-#include <sys/vdev_disk.h>
 #include <sys/vdev_impl.h>
-#include <sys/vdev_raidz.h>
 #include <sys/zvol.h>
 #include <sys/dumphdr.h>
 #include <sys/zil_impl.h>
@@ -1129,53 +1127,15 @@ static int
 zvol_dumpio_vdev(vdev_t *vd, void *addr, uint64_t offset, uint64_t origoffset,
     uint64_t size, boolean_t doread, boolean_t isdump)
 {
-	vdev_disk_t *dvd;
-	int c;
-	int numerrors = 0;
-
-	if (vd->vdev_ops == &vdev_mirror_ops ||
-	    vd->vdev_ops == &vdev_replacing_ops ||
-	    vd->vdev_ops == &vdev_spare_ops) {
-		for (c = 0; c < vd->vdev_children; c++) {
-			int err = zvol_dumpio_vdev(vd->vdev_child[c],
-			    addr, offset, origoffset, size, doread, isdump);
-			if (err != 0) {
-				numerrors++;
-			} else if (doread) {
-				break;
-			}
-		}
-	}
-
-	if (!vd->vdev_ops->vdev_op_leaf && vd->vdev_ops != &vdev_raidz_ops)
-		return (numerrors < vd->vdev_children ? 0 : EIO);
-
 	if (doread && !vdev_readable(vd))
 		return (SET_ERROR(EIO));
-	else if (!doread && !vdev_writeable(vd))
+	if (!doread && !vdev_writeable(vd))
+		return (SET_ERROR(EIO));
+	if (vd->vdev_ops->vdev_op_dumpio == NULL)
 		return (SET_ERROR(EIO));
 
-	if (vd->vdev_ops == &vdev_raidz_ops) {
-		return (vdev_raidz_physio(vd,
-		    addr, size, offset, origoffset, doread, isdump));
-	}
-
-	offset += VDEV_LABEL_START_SIZE;
-
-	if (ddi_in_panic() || isdump) {
-		ASSERT(!doread);
-		if (doread)
-			return (SET_ERROR(EIO));
-		dvd = vd->vdev_tsd;
-		ASSERT3P(dvd, !=, NULL);
-		return (ldi_dump(dvd->vd_lh, addr, lbtodb(offset),
-		    lbtodb(size)));
-	} else {
-		dvd = vd->vdev_tsd;
-		ASSERT3P(dvd, !=, NULL);
-		return (vdev_disk_ldi_physio(dvd->vd_lh, addr, size,
-		    offset, doread ? B_READ : B_WRITE));
-	}
+	return (vd->vdev_ops->vdev_op_dumpio(vd, addr, size,
+	    offset, origoffset, doread, isdump));
 }
 
 static int
@@ -1195,10 +1155,10 @@ zvol_dumpio(zvol_state_t *zv, void *addr, uint64_t offset, uint64_t size,
 	ASSERT(size <= zv->zv_volblocksize);
 
 	/* Locate the extent this belongs to */
-	ze = list_head(&zv->zv_extents);
-	while (offset >= ze->ze_nblks * zv->zv_volblocksize) {
+	for (ze = list_head(&zv->zv_extents);
+	    ze != NULL && offset >= ze->ze_nblks * zv->zv_volblocksize;
+	    ze = list_next(&zv->zv_extents, ze)) {
 		offset -= ze->ze_nblks * zv->zv_volblocksize;
-		ze = list_next(&zv->zv_extents, ze);
 	}
 
 	if (ze == NULL)
@@ -1228,7 +1188,7 @@ zvol_strategy(buf_t *bp)
 	char *addr;
 	objset_t *os;
 	int error = 0;
-	boolean_t doread = bp->b_flags & B_READ;
+	boolean_t doread = !!(bp->b_flags & B_READ);
 	boolean_t is_dumpified;
 	boolean_t sync;
 
@@ -1266,7 +1226,7 @@ zvol_strategy(buf_t *bp)
 	addr = bp->b_un.b_addr;
 	resid = bp->b_bcount;
 
-	if (resid > 0 && (off < 0 || off >= volsize)) {
+	if (resid > 0 && off >= volsize) {
 		bioerror(bp, EIO);
 		biodone(bp);
 		return (0);
@@ -1472,7 +1432,7 @@ zvol_write(dev_t dev, uio_t *uio, cred_t *cr)
 		if (bytes > volsize - off)	/* don't write past the end */
 			bytes = volsize - off;
 
-		dmu_tx_hold_write(tx, ZVOL_OBJ, off, bytes);
+		dmu_tx_hold_write_by_dnode(tx, zv->zv_dn, off, bytes);
 		error = dmu_tx_assign(tx, TXG_WAIT);
 		if (error) {
 			dmu_tx_abort(tx);
@@ -1708,6 +1668,7 @@ zvol_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *cr, int *rvalp)
 	case DKIOCGMEDIAINFOEXT:
 	{
 		struct dk_minfo_ext dkmext;
+		size_t len;
 
 		bzero(&dkmext, sizeof (dkmext));
 		dkmext.dki_lbsize = 1U << zv->zv_min_bs;
@@ -1715,7 +1676,17 @@ zvol_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *cr, int *rvalp)
 		dkmext.dki_capacity = zv->zv_volsize >> zv->zv_min_bs;
 		dkmext.dki_media_type = DK_UNKNOWN;
 		mutex_exit(&zfsdev_state_lock);
-		if (ddi_copyout(&dkmext, (void *)arg, sizeof (dkmext), flag))
+
+		switch (ddi_model_convert_from(flag & FMODELS)) {
+		case DDI_MODEL_ILP32:
+			len = sizeof (struct dk_minfo_ext32);
+			break;
+		default:
+			len = sizeof (struct dk_minfo_ext);
+			break;
+		}
+
+		if (ddi_copyout(&dkmext, (void *)arg, len, flag))
 			error = SET_ERROR(EFAULT);
 		return (error);
 	}

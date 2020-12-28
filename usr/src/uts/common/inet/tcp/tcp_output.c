@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2014, 2017 by Delphix. All rights reserved.
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /* This file contains all TCP output processing functions. */
@@ -1677,11 +1677,23 @@ finish:
 
 		/* non-STREAM socket, release the upper handle */
 		if (IPCL_IS_NONSTR(connp)) {
-			ASSERT(connp->conn_upper_handle != NULL);
-			(*connp->conn_upcalls->su_closed)
-			    (connp->conn_upper_handle);
+			sock_upcalls_t *upcalls = connp->conn_upcalls;
+			sock_upper_handle_t handle = connp->conn_upper_handle;
+
+			ASSERT(upcalls != NULL);
+			ASSERT(upcalls->su_closed != NULL);
+			ASSERT(handle != NULL);
+			/*
+			 * Set these to NULL first because closed() will free
+			 * upper structures.  Acquire conn_lock because an
+			 * external caller like conn_get_socket_info() will
+			 * upcall if these are non-NULL.
+			 */
+			mutex_enter(&connp->conn_lock);
 			connp->conn_upper_handle = NULL;
 			connp->conn_upcalls = NULL;
+			mutex_exit(&connp->conn_lock);
+			upcalls->su_closed(handle);
 		}
 	}
 
@@ -1787,7 +1799,7 @@ tcp_send(tcp_t *tcp, const int mss, const int total_hdr_len,
     uint32_t *snxt, int *tail_unsent, mblk_t **xmit_tail, mblk_t *local_time)
 {
 	int		num_lso_seg = 1;
-	uint_t		lso_usable;
+	uint_t		lso_usable = 0;
 	boolean_t	do_lso_send = B_FALSE;
 	tcp_stack_t	*tcps = tcp->tcp_tcps;
 	conn_t		*connp = tcp->tcp_connp;

@@ -11,7 +11,7 @@
 .\"
 .\" Copyright 2019 Joyent, Inc.
 .\"
-.Dd April 26, 2019
+.Dd September 30, 2020
 .Dt PCHTEMP 7D
 .Os
 .Sh NAME
@@ -24,7 +24,7 @@ The
 .Nm
 driver provides the system the ability to read the digital temperature
 sensor found on several Intel platform controller hub (PCH) chipsets.
-The following chipsets are supported which cover most Intel Core familiy
+The following chipsets are supported which cover most Intel Core family
 (non-Atom) CPUs starting with the Haswell generation:
 .Bl -dash
 .It
@@ -44,6 +44,8 @@ Intel 7th/8th Generation Processor Family U/Y Platforms
 .It
 Intel 300 Series and Intel C240 Series Chipset Family Platform
 Controller Hub
+.It
+Intel 400 Series Chipset Family On-Package Platform Controller Hub
 .El
 .Pp
 Temperature information is available to the system via the fault

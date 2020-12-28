@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2019, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -141,6 +141,12 @@ ctftest_check_numbers(ctf_file_t *fp, const check_number_t *tests)
 	for (i = 0; tests[i].cn_tname != NULL; i++) {
 		ctf_id_t id;
 		ctf_encoding_t enc;
+
+		if (ctftest_skip(tests[i].cn_skips)) {
+			warnx("skipping check numbers test %s due to known "
+			    "compiler issue", tests[i].cn_tname);
+			continue;
+		}
 
 		id = ctftest_lookup_type(fp, tests[i].cn_tname);
 		if (id == CTF_ERR) {
@@ -738,6 +744,25 @@ ctftest_check_fptr(const char *type, ctf_file_t *fp, const char *rtype,
 	return (ret);
 }
 
+boolean_t
+ctftest_check_size(const char *type, ctf_file_t *fp, size_t size)
+{
+	ctf_id_t base;
+
+	if ((base = ctftest_lookup_type(fp, type)) == CTF_ERR) {
+		warnx("Failed to look up type %s", type);
+		return (B_FALSE);
+	}
+
+	if (size != ctf_type_size(fp, base)) {
+		warnx("%s has bad size, expected %lu, found %lu",
+		    type, size, ctf_type_size(fp, base));
+		return (B_FALSE);
+	}
+
+	return (B_TRUE);
+}
+
 typedef struct ctftest_duplicates {
 	ctf_file_t *ctd_fp;
 	char **ctd_names;
@@ -822,4 +847,24 @@ ctftest_duplicates(ctf_file_t *fp)
 	free(d.ctd_names);
 
 	return (d.ctd_ret);
+}
+
+boolean_t
+ctftest_skip(check_skip_t skip)
+{
+	const char *compiler;
+
+	if (skip == 0) {
+		return (B_FALSE);
+	}
+
+	compiler = getenv("ctf_cc_type");
+	if (compiler == NULL) {
+		return (B_FALSE);
+	}
+
+	if ((skip & SKIP_CLANG) != 0 && strcmp(compiler, "clang") == 0)
+		return (B_TRUE);
+
+	return (B_FALSE);
 }

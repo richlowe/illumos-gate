@@ -12,7 +12,7 @@
 #
 # Copyright (c) 2013, 2017 by Delphix. All rights reserved.
 # Copyright 2016, OmniTI Computer Consulting, Inc. All rights reserved.
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 # Copyright 2019 RackTop Systems.
 #
 
@@ -74,7 +74,7 @@ tests = ['bootfs_001_pos', 'bootfs_002_neg', 'bootfs_003_pos',
 [/opt/zfs-tests/tests/functional/cache]
 tests = ['cache_001_pos', 'cache_002_pos', 'cache_003_pos', 'cache_004_neg',
     'cache_005_neg', 'cache_006_pos', 'cache_007_neg', 'cache_008_neg',
-    'cache_009_pos', 'cache_010_neg', 'cache_011_pos']
+    'cache_009_pos', 'cache_010_neg', 'cache_011_pos', 'cache_012_pos']
 
 [/opt/zfs-tests/tests/functional/cachefile]
 tests = ['cachefile_001_pos', 'cachefile_002_pos', 'cachefile_003_pos',
@@ -107,7 +107,8 @@ tests = [ 'clean_mirror_001_pos', 'clean_mirror_002_pos',
     'clean_mirror_003_pos', 'clean_mirror_004_pos']
 
 [/opt/zfs-tests/tests/functional/cli_root/zdb]
-tests = ['zdb_001_neg', 'zdb_002_pos']
+tests = ['zdb_001_neg', 'zdb_002_pos', 'zdb_003_pos', 'zdb_004_pos',
+    'zdb_005_pos']
 pre =
 post =
 
@@ -143,6 +144,11 @@ tests = ['zfs_destroy_001_pos', 'zfs_destroy_002_pos', 'zfs_destroy_003_pos',
     'zfs_destroy_010_pos', 'zfs_destroy_011_pos', 'zfs_destroy_012_pos',
     'zfs_destroy_013_neg', 'zfs_destroy_014_pos', 'zfs_destroy_015_pos',
     'zfs_destroy_016_pos']
+
+[/opt/zfs-tests/tests/functional/cli_root/zfs_diff]
+tests = ['zfs_diff_changes', 'zfs_diff_cliargs', 'zfs_diff_timestamp',
+    'zfs_diff_types', 'zfs_diff_encrypted']
+tags = ['functional', 'cli_root', 'zfs_diff']
 
 [/opt/zfs-tests/tests/functional/cli_root/zfs_get]
 tests = ['zfs_get_001_pos', 'zfs_get_002_pos', 'zfs_get_003_pos',
@@ -198,6 +204,10 @@ tests = ['zfs_rename_001_pos', 'zfs_rename_002_pos', 'zfs_rename_003_pos',
 
 [/opt/zfs-tests/tests/functional/cli_root/zfs_reservation]
 tests = ['zfs_reservation_001_pos', 'zfs_reservation_002_pos']
+
+[/opt/zfs-tests/tests/functional/resilver]
+tests = ['resilver_restart_001', 'resilver_restart_002']
+tags = ['functional', 'resilver']
 
 [/opt/zfs-tests/tests/functional/cli_root/zfs_rollback]
 tests = ['zfs_rollback_001_pos', 'zfs_rollback_002_pos',
@@ -280,7 +290,7 @@ tests = ['zpool_create_001_pos', 'zpool_create_002_pos',
     'zpool_create_encrypted', 'zpool_create_crypt_combos',
     'zpool_create_features_001_pos', 'zpool_create_features_002_pos',
     'zpool_create_features_003_pos', 'zpool_create_features_004_neg',
-    'zpool_create_tempname', 'create-o_ashift']
+    'zpool_create_features_005_pos', 'zpool_create_tempname', 'create-o_ashift']
 
 [/opt/zfs-tests/tests/functional/cli_root/zpool_destroy]
 tests = ['zpool_destroy_001_pos', 'zpool_destroy_002_pos',
@@ -329,7 +339,8 @@ tests = ['zpool_import_001_pos', 'zpool_import_002_pos',
     'zpool_import_encrypted', 'zpool_import_encrypted_load']
 
 [/opt/zfs-tests/tests/functional/cli_root/zpool_labelclear]
-tests = ['zpool_labelclear_active', 'zpool_labelclear_exported']
+tests = ['zpool_labelclear_active', 'zpool_labelclear_exported',
+    'zpool_labelclear_removed', 'zpool_labelclear_valid']
 pre =
 post =
 
@@ -358,7 +369,8 @@ tests = ['zpool_remove_001_neg', 'zpool_remove_002_pos',
     'zpool_remove_003_pos']
 
 [/opt/zfs-tests/tests/functional/cli_root/zpool_replace]
-tests = ['zpool_replace_001_neg', 'replace-o_ashift', 'replace_prop_ashift']
+tests = ['zpool_replace_001_neg', 'zpool_replace_002_neg', 'replace-o_ashift',
+    'replace_prop_ashift']
 
 [/opt/zfs-tests/tests/functional/cli_root/zpool_resilver]
 tests = ['zpool_resilver_bad_args', 'zpool_resilver_restart']
@@ -423,7 +435,7 @@ user =
 
 [/opt/zfs-tests/tests/functional/cli_user/zpool_iostat]
 tests = ['zpool_iostat_001_neg', 'zpool_iostat_002_pos',
-    'zpool_iostat_003_neg']
+    'zpool_iostat_003_neg', 'zpool_iostat_004_pos']
 user =
 
 [/opt/zfs-tests/tests/functional/cli_user/zpool_list]
@@ -451,6 +463,9 @@ tests = ['devices_001_pos', 'devices_002_neg', 'devices_003_pos']
 
 [/opt/zfs-tests/tests/functional/exec]
 tests = ['exec_001_pos', 'exec_002_neg']
+
+[/opt/zfs-tests/tests/functional/fault]
+tests = ['zpool_status_-s']
 
 [/opt/zfs-tests/tests/functional/features/async_destroy]
 tests = ['async_destroy_001_pos']
@@ -515,7 +530,7 @@ tests = ['mmp_on_thread', 'mmp_on_uberblocks', 'mmp_on_off', 'mmp_interval',
     'mmp_on_zdb']
 
 [/opt/zfs-tests/tests/functional/mount]
-tests = ['umount_001', 'umountall_001']
+tests = ['umount_001', 'umount_002', 'umountall_001']
 
 [/opt/zfs-tests/tests/functional/mv_files]
 tests = ['mv_files_001_pos', 'mv_files_002_pos']
@@ -567,6 +582,9 @@ tests = ['projectid_001_pos', 'projectid_002_pos', 'projectid_003_pos',
 [/opt/zfs-tests/tests/functional/quota]
 tests = ['quota_001_pos', 'quota_002_pos', 'quota_003_pos', 'quota_004_pos',
     'quota_005_pos', 'quota_006_neg']
+
+[/opt/zfs-tests/tests/functional/raidz]
+tests = ['raidz_001_neg', 'raidz_002_pos']
 
 [/opt/zfs-tests/tests/functional/redundancy]
 tests = ['redundancy_001_pos', 'redundancy_002_pos', 'redundancy_003_pos',
@@ -640,7 +658,7 @@ tests = ['scrub_mirror_001_pos', 'scrub_mirror_002_pos',
 tests = ['slog_001_pos', 'slog_002_pos', 'slog_003_pos', 'slog_004_pos',
     'slog_005_pos', 'slog_006_pos', 'slog_007_pos', 'slog_008_neg',
     'slog_009_neg', 'slog_010_neg', 'slog_011_neg', 'slog_012_neg',
-    'slog_013_pos', 'slog_014_pos']
+    'slog_013_pos', 'slog_014_pos', 'slog_replay_fs_001', 'slog_replay_fs_002']
 
 [/opt/zfs-tests/tests/functional/snapshot]
 tests = ['clone_001_pos', 'rollback_001_pos', 'rollback_002_pos',
@@ -684,6 +702,12 @@ tests = [
     'userspace_001_pos', 'userspace_002_pos', 'userspace_003_pos',
     'groupspace_001_pos', 'groupspace_002_pos', 'groupspace_003_pos' ]
 
+[/opt/zfs-tests/tests/functional/persist_l2arc]
+tests = ['persist_l2arc_001_pos', 'persist_l2arc_002_pos',
+    'persist_l2arc_003_neg', 'persist_l2arc_004_pos', 'persist_l2arc_005_pos',
+    'persist_l2arc_006_pos', 'persist_l2arc_007_pos', 'persist_l2arc_008_pos']
+tags = ['functional', 'persist_l2arc']
+
 [/opt/zfs-tests/tests/functional/utils_test]
 tests = ['utils_test_001_pos', 'utils_test_002_pos', 'utils_test_003_pos',
     'utils_test_004_pos', 'utils_test_005_pos', 'utils_test_006_pos',
@@ -723,9 +747,7 @@ tests = ['zvol_swap_001_pos', 'zvol_swap_002_pos', 'zvol_swap_003_pos',
     'zvol_swap_004_pos', 'zvol_swap_005_pos', 'zvol_swap_006_pos']
 
 [/opt/zfs-tests/tests/functional/libzfs]
-tests = ['many_fds']
-pre =
-post =
+tests = ['many_fds', 'libzfs_input']
 
 [/opt/zfs-tests/tests/functional/log_spacemap]
 tests = ['log_spacemap_import_logs']

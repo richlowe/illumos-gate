@@ -43,7 +43,7 @@ OBJECTS=	\
 
 include ../../Makefile.lib
 
-LIBS=		$(DYNLIB) $(LINTLIB)
+LIBS=		$(DYNLIB)
 
 SRCDIR=		../common
 
@@ -52,17 +52,14 @@ INCS += -I$(SRCDIR) -I$(SRC)/cmd/boot/common -I$(SRC)/common/ficl
 CSTD=	$(CSTD_GNU99)
 
 LDLIBS +=	-lficl-sys -lzfs -linstzones -luuid -lnvpair -lc -lgen
-LDLIBS +=	-ldevinfo -lefi
+LDLIBS +=	-ldevinfo -lefi -lzfsbootenv
 CPPFLAGS +=	$(INCS)
 
 CLOBBERFILES += $(LIBRARY)
-
-$(LINTLIB) := SRCS=	$(SRCDIR)/$(LINTSRC)
 
 .KEEP_STATE:
 
 all: $(LIBS) $(LIBRARY)
 
-lint: lintcheck
 
 include ../../Makefile.targ

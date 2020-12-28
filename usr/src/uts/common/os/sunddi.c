@@ -1222,7 +1222,7 @@ ddi_prop_search_common(dev_t dev, dev_info_t *dip, ddi_prop_op_t prop_op,
 {
 	ddi_prop_t	*propp;
 	int		i;
-	caddr_t		buffer;
+	caddr_t		buffer = NULL;
 	caddr_t		prealloc = NULL;
 	int		plength = 0;
 	dev_info_t	*pdip;
@@ -1370,7 +1370,8 @@ ddi_prop_search_common(dev_t dev, dev_info_t *dip, ddi_prop_op_t prop_op,
 			/*
 			 * Do the copy.
 			 */
-			bcopy(propp->prop_val, buffer, propp->prop_len);
+			if (buffer != NULL)
+				bcopy(propp->prop_val, buffer, propp->prop_len);
 			mutex_exit(&(DEVI(dip)->devi_lock));
 			return (DDI_PROP_SUCCESS);
 		}
@@ -4302,7 +4303,7 @@ impl_ddi_bus_prop_op(dev_t dev, dev_info_t *dip, dev_info_t *ch_dip,
     char *name, caddr_t valuep, int *lengthp)
 {
 	int	len;
-	caddr_t buffer;
+	caddr_t buffer = NULL;
 
 	/*
 	 * If requested dev is DDI_DEV_T_NONE or DDI_DEV_T_ANY, then
@@ -5613,7 +5614,7 @@ fail:
  * devfs event subclass names as device class names.
  */
 static int
-derive_devi_class(dev_info_t *dip, char *node_type, int flag)
+derive_devi_class(dev_info_t *dip, const char *node_type, int flag)
 {
 	int rv = DDI_SUCCESS;
 
@@ -5658,10 +5659,10 @@ derive_devi_class(dev_info_t *dip, char *node_type, int flag)
  * exceed IFNAMSIZ (16) characters in length.
  */
 static boolean_t
-verify_name(char *name)
+verify_name(const char *name)
 {
-	size_t	len = strlen(name);
-	char	*cp;
+	size_t len = strlen(name);
+	const char *cp;
 
 	if (len == 0 || len > IFNAMSIZ)
 		return (B_FALSE);
@@ -5679,9 +5680,9 @@ verify_name(char *name)
  *				attach it to the given devinfo node.
  */
 
-int
-ddi_create_minor_common(dev_info_t *dip, char *name, int spec_type,
-    minor_t minor_num, char *node_type, int flag, ddi_minor_type mtype,
+static int
+ddi_create_minor_common(dev_info_t *dip, const char *name, int spec_type,
+    minor_t minor_num, const char *node_type, int flag, ddi_minor_type mtype,
     const char *read_priv, const char *write_priv, mode_t priv_mode)
 {
 	struct ddi_minor_data *dmdp;
@@ -5792,7 +5793,7 @@ ddi_create_minor_common(dev_info_t *dip, char *name, int spec_type,
 	 */
 	if (!(DEVI_IS_ATTACHING(dip) || DEVI_IS_DETACHING(dip)) &&
 	    mtype != DDM_INTERNAL_PATH) {
-		(void) i_log_devfs_minor_create(dip, name);
+		(void) i_log_devfs_minor_create(dip, dmdp->ddm_name);
 	}
 
 	/*
@@ -5803,16 +5804,16 @@ ddi_create_minor_common(dev_info_t *dip, char *name, int spec_type,
 }
 
 int
-ddi_create_minor_node(dev_info_t *dip, char *name, int spec_type,
-    minor_t minor_num, char *node_type, int flag)
+ddi_create_minor_node(dev_info_t *dip, const char *name, int spec_type,
+    minor_t minor_num, const char *node_type, int flag)
 {
 	return (ddi_create_minor_common(dip, name, spec_type, minor_num,
 	    node_type, flag, DDM_MINOR, NULL, NULL, 0));
 }
 
 int
-ddi_create_priv_minor_node(dev_info_t *dip, char *name, int spec_type,
-    minor_t minor_num, char *node_type, int flag,
+ddi_create_priv_minor_node(dev_info_t *dip, const char *name, int spec_type,
+    minor_t minor_num, const char *node_type, int flag,
     const char *rdpriv, const char *wrpriv, mode_t priv_mode)
 {
 	return (ddi_create_minor_common(dip, name, spec_type, minor_num,
@@ -5820,8 +5821,8 @@ ddi_create_priv_minor_node(dev_info_t *dip, char *name, int spec_type,
 }
 
 int
-ddi_create_default_minor_node(dev_info_t *dip, char *name, int spec_type,
-    minor_t minor_num, char *node_type, int flag)
+ddi_create_default_minor_node(dev_info_t *dip, const char *name, int spec_type,
+    minor_t minor_num, const char *node_type, int flag)
 {
 	return (ddi_create_minor_common(dip, name, spec_type, minor_num,
 	    node_type, flag, DDM_DEFAULT, NULL, NULL, 0));
@@ -5841,7 +5842,7 @@ ddi_create_internal_pathname(dev_info_t *dip, char *name, int spec_type,
 }
 
 void
-ddi_remove_minor_node(dev_info_t *dip, char *name)
+ddi_remove_minor_node(dev_info_t *dip, const char *name)
 {
 	int			circ;
 	struct ddi_minor_data	*dmdp, *dmdp1;
@@ -7073,6 +7074,14 @@ ddi_dma_buf_bind_handle(ddi_dma_handle_t handle, struct buf *bp,
 	dev_info_t *dip, *rdip;
 	struct ddi_dma_req dmareq;
 	int (*funcp)();
+	ddi_dma_cookie_t cookie;
+	uint_t count;
+
+	if (cookiep == NULL)
+		cookiep = &cookie;
+
+	if (ccountp == NULL)
+		ccountp = &count;
 
 	dmareq.dmar_flags = flags;
 	dmareq.dmar_fp = waitfp;
@@ -7129,10 +7138,19 @@ ddi_dma_addr_bind_handle(ddi_dma_handle_t handle, struct as *as,
 	dev_info_t *dip, *rdip;
 	struct ddi_dma_req dmareq;
 	int (*funcp)();
+	ddi_dma_cookie_t cookie;
+	uint_t count;
 
 	if (len == (uint_t)0) {
 		return (DDI_DMA_NOMAPPING);
 	}
+
+	if (cookiep == NULL)
+		cookiep = &cookie;
+
+	if (ccountp == NULL)
+		ccountp = &count;
+
 	dmareq.dmar_flags = flags;
 	dmareq.dmar_fp = waitfp;
 	dmareq.dmar_arg = arg;
@@ -7155,6 +7173,11 @@ ddi_dma_nextcookie(ddi_dma_handle_t handle, ddi_dma_cookie_t *cookiep)
 	ddi_dma_impl_t *hp = (ddi_dma_impl_t *)handle;
 	ddi_dma_cookie_t *cp;
 
+	if (hp->dmai_curcookie >= hp->dmai_ncookies) {
+		panic("ddi_dma_nextcookie() called too many times on handle %p",
+		    hp);
+	}
+
 	cp = hp->dmai_cookie;
 	ASSERT(cp);
 
@@ -7163,6 +7186,74 @@ ddi_dma_nextcookie(ddi_dma_handle_t handle, ddi_dma_cookie_t *cookiep)
 	cookiep->dmac_address = cp->dmac_address;
 	cookiep->dmac_size = cp->dmac_size;
 	hp->dmai_cookie++;
+	hp->dmai_curcookie++;
+}
+
+int
+ddi_dma_ncookies(ddi_dma_handle_t handle)
+{
+	ddi_dma_impl_t *hp = (ddi_dma_impl_t *)handle;
+
+	return (hp->dmai_ncookies);
+}
+
+const ddi_dma_cookie_t *
+ddi_dma_cookie_iter(ddi_dma_handle_t handle, const ddi_dma_cookie_t *iter)
+{
+	ddi_dma_impl_t *hp = (ddi_dma_impl_t *)handle;
+	const ddi_dma_cookie_t *base, *end;
+
+	if (hp->dmai_ncookies == 0) {
+		return (NULL);
+	}
+
+	base = hp->dmai_cookie - hp->dmai_curcookie;
+	end = base + hp->dmai_ncookies;
+	if (iter == NULL) {
+		return (base);
+	}
+
+	if ((uintptr_t)iter < (uintptr_t)base ||
+	    (uintptr_t)iter >= (uintptr_t)end) {
+		return (NULL);
+	}
+
+	iter++;
+	if (iter == end) {
+		return (NULL);
+	}
+
+	return (iter);
+}
+
+const ddi_dma_cookie_t *
+ddi_dma_cookie_get(ddi_dma_handle_t handle, uint_t index)
+{
+	ddi_dma_impl_t *hp = (ddi_dma_impl_t *)handle;
+	const ddi_dma_cookie_t *base;
+
+	if (index >= hp->dmai_ncookies) {
+		return (NULL);
+	}
+
+	base = hp->dmai_cookie - hp->dmai_curcookie;
+	return (base + index);
+}
+
+const ddi_dma_cookie_t *
+ddi_dma_cookie_one(ddi_dma_handle_t handle)
+{
+	ddi_dma_impl_t *hp = (ddi_dma_impl_t *)handle;
+	const ddi_dma_cookie_t *base;
+
+	if (hp->dmai_ncookies != 1) {
+		panic("ddi_dma_cookie_one() called with improper handle %p",
+		    hp);
+	}
+	ASSERT3P(hp->dmai_cookie, !=, NULL);
+
+	base = hp->dmai_cookie - hp->dmai_curcookie;
+	return (base);
 }
 
 int
@@ -7183,10 +7274,18 @@ ddi_dma_getwin(ddi_dma_handle_t h, uint_t win, off_t *offp,
 {
 	int (*funcp)() = ddi_dma_win;
 	struct bus_ops *bop;
+	ddi_dma_cookie_t cookie;
+	uint_t count;
 
 	bop = DEVI(HD)->devi_ops->devo_bus_ops;
 	if (bop && bop->bus_dma_win)
 		funcp = bop->bus_dma_win;
+
+	if (cookiep == NULL)
+		cookiep = &cookie;
+
+	if (ccountp == NULL)
+		ccountp = &count;
 
 	return ((*funcp)(HD, HD, h, win, offp, lenp, cookiep, ccountp));
 }
@@ -8839,7 +8938,7 @@ i_ddi_devi_class(dev_info_t *dip)
 }
 
 int
-i_ddi_set_devi_class(dev_info_t *dip, char *devi_class, int flag)
+i_ddi_set_devi_class(dev_info_t *dip, const char *devi_class, int flag)
 {
 	struct dev_info *devi = DEVI(dip);
 

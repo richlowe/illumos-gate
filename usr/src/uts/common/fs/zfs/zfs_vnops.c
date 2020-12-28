@@ -23,7 +23,7 @@
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, 2017 by Delphix. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright 2017 Nexenta Systems, Inc.
  */
 
@@ -374,6 +374,46 @@ zfs_ioctl(vnode_t *vp, int com, intptr_t data, int flag, cred_t *cred,
 	case _FIOGDIO:
 	case _FIOSDIO:
 	{
+		return (0);
+	}
+
+	case _FIODIRECTIO:
+	{
+		/*
+		 * ZFS inherently provides the basic semantics for directio.
+		 * This is the summary from the ZFS on Linux support for
+		 * O_DIRECT, which is the common form of directio, and required
+		 * no changes to ZFS.
+		 *
+		 * 1. Minimize cache effects of the I/O.
+		 *
+		 *    By design the ARC is already scan-resistant, which helps
+		 *    mitigate the need for special O_DIRECT handling.
+		 *
+		 * 2. O_DIRECT _MAY_ impose restrictions on IO alignment and
+		 *    length.
+		 *
+		 *    No additional alignment or length restrictions are
+		 *    imposed by ZFS.
+		 *
+		 * 3. O_DIRECT _MAY_ perform unbuffered IO operations directly
+		 *    between user memory and block device.
+		 *
+		 *    No unbuffered IO operations are currently supported. In
+		 *    order to support features such as compression, encryption,
+		 *    and checksumming a copy must be made to transform the
+		 *    data.
+		 *
+		 * 4. O_DIRECT _MAY_ imply O_DSYNC (XFS).
+		 *
+		 *    O_DIRECT does not imply O_DSYNC for ZFS.
+		 *
+		 * 5. O_DIRECT _MAY_ disable file locking that serializes IO
+		 *    operations.
+		 *
+		 *    All I/O in ZFS is locked for correctness and this locking
+		 *    is not disabled by O_DIRECT.
+		 */
 		return (0);
 	}
 
@@ -1918,7 +1958,7 @@ top:
 	txtype = TX_REMOVE;
 	if (flags & FIGNORECASE)
 		txtype |= TX_CI;
-	zfs_log_remove(zilog, tx, txtype, dzp, name, obj);
+	zfs_log_remove(zilog, tx, txtype, dzp, name, obj, unlinked);
 
 	dmu_tx_commit(tx);
 out:
@@ -2234,7 +2274,8 @@ top:
 		uint64_t txtype = TX_RMDIR;
 		if (flags & FIGNORECASE)
 			txtype |= TX_CI;
-		zfs_log_remove(zilog, tx, txtype, dzp, name, ZFS_NO_OBJECT);
+		zfs_log_remove(zilog, tx, txtype, dzp, name, ZFS_NO_OBJECT,
+		    B_FALSE);
 	}
 
 	dmu_tx_commit(tx);
@@ -4800,7 +4841,7 @@ zfs_seek(vnode_t *vp, offset_t ooff, offset_t *noffp,
 {
 	if (vp->v_type == VDIR)
 		return (0);
-	return ((*noffp < 0 || *noffp > MAXOFFSET_T) ? EINVAL : 0);
+	return ((*noffp < 0) ? EINVAL : 0);
 }
 
 /*
@@ -5108,27 +5149,6 @@ zfs_addmap(vnode_t *vp, offset_t off, struct as *as, caddr_t addr,
 	return (0);
 }
 
-/*
- * The reason we push dirty pages as part of zfs_delmap() is so that we get a
- * more accurate mtime for the associated file.  Since we don't have a way of
- * detecting when the data was actually modified, we have to resort to
- * heuristics.  If an explicit msync() is done, then we mark the mtime when the
- * last page is pushed.  The problem occurs when the msync() call is omitted,
- * which by far the most common case:
- *
- *	open()
- *	mmap()
- *	<modify memory>
- *	munmap()
- *	close()
- *	<time lapse>
- *	putpage() via fsflush
- *
- * If we wait until fsflush to come along, we can have a modification time that
- * is some arbitrary point in the future.  In order to prevent this in the
- * common case, we flush pages whenever a (MAP_SHARED, PROT_WRITE) mapping is
- * torn down.
- */
 /* ARGSUSED */
 static int
 zfs_delmap(vnode_t *vp, offset_t off, struct as *as, caddr_t addr,
@@ -5139,10 +5159,6 @@ zfs_delmap(vnode_t *vp, offset_t off, struct as *as, caddr_t addr,
 
 	ASSERT3U(VTOZ(vp)->z_mapcnt, >=, pages);
 	atomic_add_64(&VTOZ(vp)->z_mapcnt, -pages);
-
-	if ((flags & MAP_SHARED) && (prot & PROT_WRITE) &&
-	    vn_has_cached_data(vp))
-		(void) VOP_PUTPAGE(vp, off, len, B_ASYNC, cr, ct);
 
 	return (0);
 }

@@ -24,6 +24,8 @@
  * Copyright 2012 Alexey Zaytsev <alexey.zaytsev@gmail.com> All rights reserved.
  * Copyright 2016 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2017 The MathWorks, Inc.  All rights reserved.
+ * Copyright 2019 Western Digital Corporation.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <sys/types.h>
@@ -43,6 +45,7 @@
 #include <sys/list.h>
 #include <sys/sysmacros.h>
 #include <sys/dkio.h>
+#include <sys/dkioc_free_util.h>
 #include <sys/vtoc.h>
 #include <sys/scsi/scsi.h>	/* for DTYPE_DIRECT */
 #include <sys/kstat.h>
@@ -53,19 +56,95 @@
 #include <sys/blkdev.h>
 #include <sys/scsi/impl/inquiry.h>
 
+/*
+ * blkdev is a driver which provides a lot of the common functionality
+ * a block device driver may need and helps by removing code which
+ * is frequently duplicated in block device drivers.
+ *
+ * Within this driver all the struct cb_ops functions required for a
+ * block device driver are written with appropriate call back functions
+ * to be provided by the parent driver.
+ *
+ * To use blkdev, a driver needs to:
+ *	1. Create a bd_ops_t structure which has the call back operations
+ *	   blkdev will use.
+ *	2. Create a handle by calling bd_alloc_handle(). One of the
+ *	   arguments to this function is the bd_ops_t.
+ *	3. Call bd_attach_handle(). This will instantiate a blkdev device
+ *	   as a child device node of the calling driver.
+ *
+ * A parent driver is not restricted to just allocating and attaching a
+ * single instance, it may attach as many as it wishes. For each handle
+ * attached, appropriate entries in /dev/[r]dsk are created.
+ *
+ * The bd_ops_t routines that a parent of blkdev need to provide are:
+ *
+ * o_drive_info: Provide information to blkdev such as how many I/O queues
+ *		 to create and the size of those queues. Also some device
+ *		 specifics such as EUI, vendor, product, model, serial
+ *		 number ....
+ *
+ * o_media_info: Provide information about the media. Eg size and block size.
+ *
+ * o_devid_init: Creates and initializes the device id. Typically calls
+ *		 ddi_devid_init().
+ *
+ * o_sync_cache: Issues a device appropriate command to flush any write
+ *		 caches.
+ *
+ * o_read:	 Read data as described by bd_xfer_t argument.
+ *
+ * o_write:	 Write data as described by bd_xfer_t argument.
+ *
+ * o_free_space: Free the space described by bd_xfer_t argument (optional).
+ *
+ * Queues
+ * ------
+ * Part of the drive_info data is a queue count. blkdev will create
+ * "queue count" number of waitq/runq pairs. Each waitq/runq pair
+ * operates independently. As an I/O is scheduled up to the parent
+ * driver via o_read or o_write its queue number is given. If the
+ * parent driver supports multiple hardware queues it can then select
+ * where to submit the I/O request.
+ *
+ * Currently blkdev uses a simplistic round-robin queue selection method.
+ * It has the advantage that it is lockless. In the future it will be
+ * worthwhile reviewing this strategy for something which prioritizes queues
+ * depending on how busy they are.
+ *
+ * Each waitq/runq pair is protected by its mutex (q_iomutex). Incoming
+ * I/O requests are initially added to the waitq. They are taken off the
+ * waitq, added to the runq and submitted, providing the runq is less
+ * than the qsize as specified in the drive_info. As an I/O request
+ * completes, the parent driver is required to call bd_xfer_done(), which
+ * will remove the I/O request from the runq and pass I/O completion
+ * status up the stack.
+ *
+ * Locks
+ * -----
+ * There are 4 instance global locks d_ocmutex, d_ksmutex, d_errmutex and
+ * d_statemutex. As well a q_iomutex per waitq/runq pair.
+ *
+ * Lock Hierarchy
+ * --------------
+ * The only two locks which may be held simultaneously are q_iomutex and
+ * d_ksmutex. In all cases q_iomutex must be acquired before d_ksmutex.
+ */
+
 #define	BD_MAXPART	64
 #define	BDINST(dev)	(getminor(dev) / BD_MAXPART)
 #define	BDPART(dev)	(getminor(dev) % BD_MAXPART)
 
 typedef struct bd bd_t;
 typedef struct bd_xfer_impl bd_xfer_impl_t;
+typedef struct bd_queue bd_queue_t;
 
 struct bd {
 	void		*d_private;
 	dev_info_t	*d_dip;
 	kmutex_t	d_ocmutex;
-	kmutex_t	d_iomutex;
-	kmutex_t	*d_errmutex;
+	kmutex_t	d_ksmutex;
+	kmutex_t	d_errmutex;
 	kmutex_t	d_statemutex;
 	kcondvar_t	d_statecv;
 	enum dkio_state	d_state;
@@ -73,8 +152,9 @@ struct bd {
 	unsigned	d_open_lyr[BD_MAXPART];	/* open count */
 	uint64_t	d_open_excl;	/* bit mask indexed by partition */
 	uint64_t	d_open_reg[OTYPCNT];		/* bit mask */
+	uint64_t	d_io_counter;
 
-	uint32_t	d_qsize;
+	uint32_t	d_qcount;
 	uint32_t	d_qactive;
 	uint32_t	d_maxxfer;
 	uint32_t	d_blkshift;
@@ -82,9 +162,13 @@ struct bd {
 	uint64_t	d_numblks;
 	ddi_devid_t	d_devid;
 
+	uint64_t	d_max_free_seg;
+	uint64_t	d_max_free_blks;
+	uint64_t	d_max_free_seg_blks;
+	uint64_t	d_free_align;
+
 	kmem_cache_t	*d_cache;
-	list_t		d_runq;
-	list_t		d_waitq;
+	bd_queue_t	*d_queues;
 	kstat_t		*d_ksp;
 	kstat_io_t	*d_kiop;
 	kstat_t		*d_errstats;
@@ -117,6 +201,7 @@ struct bd_xfer_impl {
 	list_node_t	i_linkage;
 	bd_t		*i_bd;
 	buf_t		*i_bp;
+	bd_queue_t	*i_bq;
 	uint_t		i_num_win;
 	uint_t		i_cur_win;
 	off_t		i_offset;
@@ -126,6 +211,14 @@ struct bd_xfer_impl {
 	size_t		i_resid;
 };
 
+struct bd_queue {
+	kmutex_t	q_iomutex;
+	uint32_t	q_qsize;
+	uint32_t	q_qactive;
+	list_t		q_runq;
+	list_t		q_waitq;
+};
+
 #define	i_dmah		i_public.x_dmah
 #define	i_dmac		i_public.x_dmac
 #define	i_ndmac		i_public.x_ndmac
@@ -133,7 +226,11 @@ struct bd_xfer_impl {
 #define	i_nblks		i_public.x_nblks
 #define	i_blkno		i_public.x_blkno
 #define	i_flags		i_public.x_flags
+#define	i_qnum		i_public.x_qnum
+#define	i_dfl		i_public.x_dfl
 
+#define	CAN_FREESPACE(bd) \
+	(((bd)->d_ops.o_free_space == NULL) ? B_FALSE : B_TRUE)
 
 /*
  * Private prototypes.
@@ -142,8 +239,10 @@ struct bd_xfer_impl {
 static void bd_prop_update_inqstring(dev_info_t *, char *, char *, size_t);
 static void bd_create_inquiry_props(dev_info_t *, bd_drive_t *);
 static void bd_create_errstats(bd_t *, int, bd_drive_t *);
+static void bd_destroy_errstats(bd_t *);
 static void bd_errstats_setstr(kstat_named_t *, char *, size_t, char *);
 static void bd_init_errstats(bd_t *, bd_drive_t *);
+static void bd_fini_errstats(bd_t *);
 
 static int bd_getinfo(dev_info_t *, ddi_info_cmd_t, void *, void **);
 static int bd_attach(dev_info_t *, ddi_attach_cmd_t);
@@ -166,13 +265,14 @@ static int bd_tg_rdwr(dev_info_t *, uchar_t, void *, diskaddr_t, size_t,
 static int bd_tg_getinfo(dev_info_t *, int, void *, void *);
 static int bd_xfer_ctor(void *, void *, int);
 static void bd_xfer_dtor(void *, void *);
-static void bd_sched(bd_t *);
+static void bd_sched(bd_t *, bd_queue_t *);
 static void bd_submit(bd_t *, bd_xfer_impl_t *);
 static void bd_runq_exit(bd_xfer_impl_t *, int);
 static void bd_update_state(bd_t *);
 static int bd_check_state(bd_t *, enum dkio_state *);
 static int bd_flush_write_cache(bd_t *, struct dk_callback *);
 static int bd_check_uio(dev_t, struct uio *);
+static int bd_free_space(dev_t, bd_t *, dkioc_free_list_t *);
 
 struct cmlb_tg_ops bd_tg_ops = {
 	TG_DK_OPS_VERSION_1,
@@ -181,20 +281,20 @@ struct cmlb_tg_ops bd_tg_ops = {
 };
 
 static struct cb_ops bd_cb_ops = {
-	bd_open, 		/* open */
-	bd_close, 		/* close */
-	bd_strategy, 		/* strategy */
-	nodev, 			/* print */
+	bd_open,		/* open */
+	bd_close,		/* close */
+	bd_strategy,		/* strategy */
+	nodev,			/* print */
 	bd_dump,		/* dump */
-	bd_read, 		/* read */
-	bd_write, 		/* write */
-	bd_ioctl, 		/* ioctl */
-	nodev, 			/* devmap */
-	nodev, 			/* mmap */
-	nodev, 			/* segmap */
-	nochpoll, 		/* poll */
-	bd_prop_op, 		/* cb_prop_op */
-	0, 			/* streamtab  */
+	bd_read,		/* read */
+	bd_write,		/* write */
+	bd_ioctl,		/* ioctl */
+	nodev,			/* devmap */
+	nodev,			/* mmap */
+	nodev,			/* segmap */
+	nochpoll,		/* poll */
+	bd_prop_op,		/* cb_prop_op */
+	0,			/* streamtab  */
 	D_64BIT | D_MP,		/* Driver comaptibility flag */
 	CB_REV,			/* cb_rev */
 	bd_aread,		/* async read */
@@ -202,15 +302,15 @@ static struct cb_ops bd_cb_ops = {
 };
 
 struct dev_ops bd_dev_ops = {
-	DEVO_REV, 		/* devo_rev, */
-	0, 			/* refcnt  */
+	DEVO_REV,		/* devo_rev, */
+	0,			/* refcnt  */
 	bd_getinfo,		/* getinfo */
-	nulldev, 		/* identify */
-	nulldev, 		/* probe */
-	bd_attach, 		/* attach */
+	nulldev,		/* identify */
+	nulldev,		/* probe */
+	bd_attach,		/* attach */
 	bd_detach,		/* detach */
-	nodev, 			/* reset */
-	&bd_cb_ops, 		/* driver operations */
+	nodev,			/* reset */
+	&bd_cb_ops,		/* driver operations */
 	NULL,			/* bus operations */
 	NULL,			/* power */
 	ddi_quiesce_not_needed,	/* quiesce */
@@ -350,6 +450,7 @@ bd_create_errstats(bd_t *bd, int inst, bd_drive_t *drive)
 	bd->d_errstats = kstat_create(ks_module, inst, ks_name, "device_error",
 	    KSTAT_TYPE_NAMED, ndata, KSTAT_FLAG_PERSISTENT);
 
+	mutex_init(&bd->d_errmutex, NULL, MUTEX_DRIVER, NULL);
 	if (bd->d_errstats == NULL) {
 		/*
 		 * Even if we cannot create the kstat, we create a
@@ -359,17 +460,8 @@ bd_create_errstats(bd_t *bd, int inst, bd_drive_t *drive)
 		 */
 		bd->d_kerr = kmem_zalloc(sizeof (struct bd_errstats),
 		    KM_SLEEP);
-		bd->d_errmutex = kmem_zalloc(sizeof (kmutex_t), KM_SLEEP);
-		mutex_init(bd->d_errmutex, NULL, MUTEX_DRIVER, NULL);
 	} else {
-		if (bd->d_errstats->ks_lock == NULL) {
-			bd->d_errstats->ks_lock = kmem_zalloc(sizeof (kmutex_t),
-			    KM_SLEEP);
-			mutex_init(bd->d_errstats->ks_lock, NULL, MUTEX_DRIVER,
-			    NULL);
-		}
-
-		bd->d_errmutex = bd->d_errstats->ks_lock;
+		bd->d_errstats->ks_lock = &bd->d_errmutex;
 		bd->d_kerr = (struct bd_errstats *)bd->d_errstats->ks_data;
 	}
 
@@ -412,23 +504,53 @@ bd_create_errstats(bd_t *bd, int inst, bd_drive_t *drive)
 	bd->d_errstats->ks_private = bd;
 
 	kstat_install(bd->d_errstats);
+	bd_init_errstats(bd, drive);
+}
+
+static void
+bd_destroy_errstats(bd_t *bd)
+{
+	if (bd->d_errstats != NULL) {
+		bd_fini_errstats(bd);
+		kstat_delete(bd->d_errstats);
+		bd->d_errstats = NULL;
+	} else {
+		kmem_free(bd->d_kerr, sizeof (struct bd_errstats));
+		bd->d_kerr = NULL;
+		mutex_destroy(&bd->d_errmutex);
+	}
 }
 
 static void
 bd_errstats_setstr(kstat_named_t *k, char *str, size_t len, char *alt)
 {
 	char	*tmp;
+	size_t	km_len;
 
 	if (KSTAT_NAMED_STR_PTR(k) == NULL) {
-		if (len > 0) {
-			tmp = kmem_alloc(len + 1, KM_SLEEP);
-			(void) strlcpy(tmp, str, len + 1);
-		} else {
-			tmp = alt;
-		}
+		if (len > 0)
+			km_len = strnlen(str, len);
+		else if (alt != NULL)
+			km_len = strlen(alt);
+		else
+			return;
+
+		tmp = kmem_alloc(km_len + 1, KM_SLEEP);
+		bcopy(len > 0 ? str : alt, tmp, km_len);
+		tmp[km_len] = '\0';
 
 		kstat_named_setstr(k, tmp);
 	}
+}
+
+static void
+bd_errstats_clrstr(kstat_named_t *k)
+{
+	if (KSTAT_NAMED_STR_PTR(k) == NULL)
+		return;
+
+	kmem_free(KSTAT_NAMED_STR_PTR(k), KSTAT_NAMED_STR_BUFLEN(k));
+	kstat_named_setstr(k, NULL);
 }
 
 static void
@@ -436,7 +558,7 @@ bd_init_errstats(bd_t *bd, bd_drive_t *drive)
 {
 	struct bd_errstats	*est = bd->d_kerr;
 
-	mutex_enter(bd->d_errmutex);
+	mutex_enter(&bd->d_errmutex);
 
 	if (drive->d_model_len > 0 &&
 	    KSTAT_NAMED_STR_PTR(&est->bd_model) == NULL) {
@@ -454,7 +576,39 @@ bd_init_errstats(bd_t *bd, bd_drive_t *drive)
 	bd_errstats_setstr(&est->bd_serial, drive->d_serial,
 	    drive->d_serial_len, "0               ");
 
-	mutex_exit(bd->d_errmutex);
+	mutex_exit(&bd->d_errmutex);
+}
+
+static void
+bd_fini_errstats(bd_t *bd)
+{
+	struct bd_errstats	*est = bd->d_kerr;
+
+	mutex_enter(&bd->d_errmutex);
+
+	bd_errstats_clrstr(&est->bd_model);
+	bd_errstats_clrstr(&est->bd_vid);
+	bd_errstats_clrstr(&est->bd_pid);
+	bd_errstats_clrstr(&est->bd_revision);
+	bd_errstats_clrstr(&est->bd_serial);
+
+	mutex_exit(&bd->d_errmutex);
+}
+
+static void
+bd_queues_free(bd_t *bd)
+{
+	uint32_t i;
+
+	for (i = 0; i < bd->d_qcount; i++) {
+		bd_queue_t *bq = &bd->d_queues[i];
+
+		mutex_destroy(&bq->q_iomutex);
+		list_destroy(&bq->q_waitq);
+		list_destroy(&bq->q_runq);
+	}
+
+	kmem_free(bd->d_queues, sizeof (*bd->d_queues) * bd->d_qcount);
 }
 
 static int
@@ -464,6 +618,7 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	bd_handle_t	hdl;
 	bd_t		*bd;
 	bd_drive_t	drive;
+	uint32_t	i;
 	int		rv;
 	char		name[16];
 	char		kcache[32];
@@ -520,7 +675,7 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	}
 	bd->d_ops = hdl->h_ops;
 	bd->d_private = hdl->h_private;
-	bd->d_blkshift = 9;	/* 512 bytes, to start */
+	bd->d_blkshift = DEV_BSHIFT;	/* 512 bytes, to start */
 
 	if (bd->d_maxxfer % DEV_BSIZE) {
 		cmn_err(CE_WARN, "%s: maximum transfer misaligned!", name);
@@ -537,15 +692,10 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	hdl->h_bd = bd;
 	ddi_set_driver_private(dip, bd);
 
-	mutex_init(&bd->d_iomutex, NULL, MUTEX_DRIVER, NULL);
+	mutex_init(&bd->d_ksmutex, NULL, MUTEX_DRIVER, NULL);
 	mutex_init(&bd->d_ocmutex, NULL, MUTEX_DRIVER, NULL);
 	mutex_init(&bd->d_statemutex, NULL, MUTEX_DRIVER, NULL);
 	cv_init(&bd->d_statecv, NULL, CV_DRIVER, NULL);
-
-	list_create(&bd->d_waitq, sizeof (bd_xfer_impl_t),
-	    offsetof(struct bd_xfer_impl, i_linkage));
-	list_create(&bd->d_runq, sizeof (bd_xfer_impl_t),
-	    offsetof(struct bd_xfer_impl, i_linkage));
 
 	bd->d_cache = kmem_cache_create(kcache, sizeof (bd_xfer_impl_t), 8,
 	    bd_xfer_ctor, bd_xfer_dtor, NULL, bd, NULL, 0);
@@ -553,7 +703,7 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	bd->d_ksp = kstat_create(ddi_driver_name(dip), inst, NULL, "disk",
 	    KSTAT_TYPE_IO, 1, KSTAT_FLAG_PERSISTENT);
 	if (bd->d_ksp != NULL) {
-		bd->d_ksp->ks_lock = &bd->d_iomutex;
+		bd->d_ksp->ks_lock = &bd->d_ksmutex;
 		kstat_install(bd->d_ksp);
 		bd->d_kiop = bd->d_ksp->ks_data;
 	} else {
@@ -571,19 +721,77 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	bd->d_state = DKIO_NONE;
 
 	bzero(&drive, sizeof (drive));
+	/*
+	 * Default to one queue, and no restrictions on free space requests
+	 * (if driver provides method) parent driver can override.
+	 */
+	drive.d_qcount = 1;
+	drive.d_free_align = 1;
 	bd->d_ops.o_drive_info(bd->d_private, &drive);
-	bd->d_qsize = drive.d_qsize;
+
+	/*
+	 * Several checks to make sure o_drive_info() didn't return bad
+	 * values:
+	 *
+	 * There must be at least one queue
+	 */
+	if (drive.d_qcount == 0)
+		goto fail_drive_info;
+
+	/* FREE/UNMAP/TRIM alignment needs to be at least 1 block */
+	if (drive.d_free_align == 0)
+		goto fail_drive_info;
+
+	/*
+	 * If d_max_free_blks is not unlimited (not 0), then we cannot allow
+	 * an unlimited segment size. It is however permissible to not impose
+	 * a limit on the total number of blocks freed while limiting the
+	 * amount allowed in an individual segment.
+	 */
+	if ((drive.d_max_free_blks > 0 && drive.d_max_free_seg_blks == 0))
+		goto fail_drive_info;
+
+	/*
+	 * If a limit is set on d_max_free_blks (by the above check, we know
+	 * if there's a limit on d_max_free_blks, d_max_free_seg_blks cannot
+	 * be unlimited), it cannot be smaller than the limit on an individual
+	 * segment.
+	 */
+	if ((drive.d_max_free_blks > 0 &&
+	    drive.d_max_free_seg_blks > drive.d_max_free_blks)) {
+		goto fail_drive_info;
+	}
+
+	bd->d_qcount = drive.d_qcount;
 	bd->d_removable = drive.d_removable;
 	bd->d_hotpluggable = drive.d_hotpluggable;
 
 	if (drive.d_maxxfer && drive.d_maxxfer < bd->d_maxxfer)
 		bd->d_maxxfer = drive.d_maxxfer;
 
-	bd_create_inquiry_props(dip, &drive);
+	bd->d_free_align = drive.d_free_align;
+	bd->d_max_free_seg = drive.d_max_free_seg;
+	bd->d_max_free_blks = drive.d_max_free_blks;
+	bd->d_max_free_seg_blks = drive.d_max_free_seg_blks;
 
+	bd_create_inquiry_props(dip, &drive);
 	bd_create_errstats(bd, inst, &drive);
-	bd_init_errstats(bd, &drive);
 	bd_update_state(bd);
+
+	bd->d_queues = kmem_alloc(sizeof (*bd->d_queues) * bd->d_qcount,
+	    KM_SLEEP);
+	for (i = 0; i < bd->d_qcount; i++) {
+		bd_queue_t *bq = &bd->d_queues[i];
+
+		bq->q_qsize = drive.d_qsize;
+		bq->q_qactive = 0;
+		mutex_init(&bq->q_iomutex, NULL, MUTEX_DRIVER, NULL);
+
+		list_create(&bq->q_waitq, sizeof (bd_xfer_impl_t),
+		    offsetof(struct bd_xfer_impl, i_linkage));
+		list_create(&bq->q_runq, sizeof (bd_xfer_impl_t),
+		    offsetof(struct bd_xfer_impl, i_linkage));
+	}
 
 	rv = cmlb_attach(dip, &bd_tg_ops, DTYPE_DIRECT,
 	    bd->d_removable, bd->d_hotpluggable,
@@ -592,22 +800,7 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	    drive.d_lun >= 0 ? DDI_NT_BLOCK_CHAN : DDI_NT_BLOCK,
 	    CMLB_FAKE_LABEL_ONE_PARTITION, bd->d_cmlbh, 0);
 	if (rv != 0) {
-		cmlb_free_handle(&bd->d_cmlbh);
-		kmem_cache_destroy(bd->d_cache);
-		mutex_destroy(&bd->d_iomutex);
-		mutex_destroy(&bd->d_ocmutex);
-		mutex_destroy(&bd->d_statemutex);
-		cv_destroy(&bd->d_statecv);
-		list_destroy(&bd->d_waitq);
-		list_destroy(&bd->d_runq);
-		if (bd->d_ksp != NULL) {
-			kstat_delete(bd->d_ksp);
-			bd->d_ksp = NULL;
-		} else {
-			kmem_free(bd->d_kiop, sizeof (kstat_io_t));
-		}
-		ddi_soft_state_free(bd_state, inst);
-		return (DDI_FAILURE);
+		goto fail_cmlb_attach;
 	}
 
 	if (bd->d_ops.o_devid_init != NULL) {
@@ -640,6 +833,28 @@ bd_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	ddi_report_dev(dip);
 
 	return (DDI_SUCCESS);
+
+fail_cmlb_attach:
+	bd_queues_free(bd);
+	bd_destroy_errstats(bd);
+
+fail_drive_info:
+	cmlb_free_handle(&bd->d_cmlbh);
+
+	if (bd->d_ksp != NULL) {
+		kstat_delete(bd->d_ksp);
+		bd->d_ksp = NULL;
+	} else {
+		kmem_free(bd->d_kiop, sizeof (kstat_io_t));
+	}
+
+	kmem_cache_destroy(bd->d_cache);
+	cv_destroy(&bd->d_statecv);
+	mutex_destroy(&bd->d_statemutex);
+	mutex_destroy(&bd->d_ocmutex);
+	mutex_destroy(&bd->d_ksmutex);
+	ddi_soft_state_free(bd_state, inst);
+	return (DDI_FAILURE);
 }
 
 static int
@@ -658,6 +873,7 @@ bd_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	default:
 		return (DDI_FAILURE);
 	}
+
 	if (bd->d_ksp != NULL) {
 		kstat_delete(bd->d_ksp);
 		bd->d_ksp = NULL;
@@ -665,25 +881,17 @@ bd_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 		kmem_free(bd->d_kiop, sizeof (kstat_io_t));
 	}
 
-	if (bd->d_errstats != NULL) {
-		kstat_delete(bd->d_errstats);
-		bd->d_errstats = NULL;
-	} else {
-		kmem_free(bd->d_kerr, sizeof (struct bd_errstats));
-		mutex_destroy(bd->d_errmutex);
-	}
-
+	bd_destroy_errstats(bd);
 	cmlb_detach(bd->d_cmlbh, 0);
 	cmlb_free_handle(&bd->d_cmlbh);
 	if (bd->d_devid)
 		ddi_devid_free(bd->d_devid);
 	kmem_cache_destroy(bd->d_cache);
-	mutex_destroy(&bd->d_iomutex);
+	mutex_destroy(&bd->d_ksmutex);
 	mutex_destroy(&bd->d_ocmutex);
 	mutex_destroy(&bd->d_statemutex);
 	cv_destroy(&bd->d_statecv);
-	list_destroy(&bd->d_waitq);
-	list_destroy(&bd->d_runq);
+	bd_queues_free(bd);
 	ddi_soft_state_free(bd_state, ddi_get_instance(dip));
 	return (DDI_SUCCESS);
 }
@@ -859,6 +1067,10 @@ bd_xfer_free(bd_xfer_impl_t *xi)
 {
 	if (xi->i_dmah) {
 		(void) ddi_dma_unbind_handle(xi->i_dmah);
+	}
+	if (xi->i_dfl != NULL) {
+		dfl_free((dkioc_free_list_t *)xi->i_dfl);
+		xi->i_dfl = NULL;
 	}
 	kmem_cache_free(xi->i_bd->d_cache, xi);
 }
@@ -1195,7 +1407,7 @@ bd_strategy(struct buf *bp)
 	bd_xfer_impl_t	*xi;
 	uint32_t	shift;
 	int		(*func)(void *, bd_xfer_t *);
-	diskaddr_t 	lblkno;
+	diskaddr_t	lblkno;
 
 	part = BDPART(bp->b_edev);
 	inst = BDINST(bp->b_edev);
@@ -1298,6 +1510,7 @@ bd_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *credp, int *rvalp)
 	}
 	case DKIOCGMEDIAINFOEXT: {
 		struct dk_minfo_ext miext;
+		size_t len;
 
 		/* make sure our state information is current */
 		bd_update_state(bd);
@@ -1306,7 +1519,17 @@ bd_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *credp, int *rvalp)
 		miext.dki_lbsize = (1U << bd->d_blkshift);
 		miext.dki_pbsize = (1U << bd->d_pblkshift);
 		miext.dki_capacity = bd->d_numblks;
-		if (ddi_copyout(&miext, ptr, sizeof (miext), flag)) {
+
+		switch (ddi_model_convert_from(flag & FMODELS)) {
+		case DDI_MODEL_ILP32:
+			len = sizeof (struct dk_minfo_ext32);
+			break;
+		default:
+			len = sizeof (struct dk_minfo_ext);
+			break;
+		}
+
+		if (ddi_copyout(&miext, ptr, len, flag)) {
 			return (EFAULT);
 		}
 		return (0);
@@ -1387,6 +1610,48 @@ bd_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *credp, int *rvalp)
 
 		rv = bd_flush_write_cache(bd, dkc);
 		return (rv);
+	}
+	case DKIOCFREE: {
+		dkioc_free_list_t *dfl = NULL;
+
+		/*
+		 * Check free space support early to avoid copyin/allocation
+		 * when unnecessary.
+		 */
+		if (!CAN_FREESPACE(bd))
+			return (ENOTSUP);
+
+		rv = dfl_copyin(ptr, &dfl, flag, KM_SLEEP);
+		if (rv != 0)
+			return (rv);
+
+		/*
+		 * bd_free_space() consumes 'dfl'. bd_free_space() will
+		 * call dfl_iter() which will normally try to pass dfl through
+		 * to bd_free_space_cb() which attaches dfl to the bd_xfer_t
+		 * that is then queued for the underlying driver. Once the
+		 * driver processes the request, the bd_xfer_t instance is
+		 * disposed of, including any attached dkioc_free_list_t.
+		 *
+		 * If dfl cannot be processed by the underlying driver due to
+		 * size or alignment requirements of the driver, dfl_iter()
+		 * will replace dfl with one or more new dkioc_free_list_t
+		 * instances with the correct alignment and sizes for the driver
+		 * (and free the original dkioc_free_list_t).
+		 */
+		rv = bd_free_space(dev, bd, dfl);
+		return (rv);
+	}
+
+	case DKIOC_CANFREE: {
+		boolean_t supported = CAN_FREESPACE(bd);
+
+		if (ddi_copyout(&supported, (void *)arg, sizeof (supported),
+		    flag) != 0) {
+			return (EFAULT);
+		}
+
+		return (0);
 	}
 
 	default:
@@ -1520,19 +1785,22 @@ bd_tg_getinfo(dev_info_t *dip, int cmd, void *arg, void *tg_cookie)
 
 
 static void
-bd_sched(bd_t *bd)
+bd_sched(bd_t *bd, bd_queue_t *bq)
 {
 	bd_xfer_impl_t	*xi;
 	struct buf	*bp;
 	int		rv;
 
-	mutex_enter(&bd->d_iomutex);
+	mutex_enter(&bq->q_iomutex);
 
-	while ((bd->d_qactive < bd->d_qsize) &&
-	    ((xi = list_remove_head(&bd->d_waitq)) != NULL)) {
-		bd->d_qactive++;
+	while ((bq->q_qactive < bq->q_qsize) &&
+	    ((xi = list_remove_head(&bq->q_waitq)) != NULL)) {
+		mutex_enter(&bd->d_ksmutex);
 		kstat_waitq_to_runq(bd->d_kiop);
-		list_insert_tail(&bd->d_runq, xi);
+		mutex_exit(&bd->d_ksmutex);
+
+		bq->q_qactive++;
+		list_insert_tail(&bq->q_runq, xi);
 
 		/*
 		 * Submit the job to the driver.  We drop the I/O mutex
@@ -1540,7 +1808,7 @@ bd_sched(bd_t *bd)
 		 * completion routine calls back into us synchronously.
 		 */
 
-		mutex_exit(&bd->d_iomutex);
+		mutex_exit(&bq->q_iomutex);
 
 		rv = xi->i_func(bd->d_private, &xi->i_public);
 		if (rv != 0) {
@@ -1550,52 +1818,75 @@ bd_sched(bd_t *bd)
 
 			atomic_inc_32(&bd->d_kerr->bd_transerrs.value.ui32);
 
-			mutex_enter(&bd->d_iomutex);
-			bd->d_qactive--;
+			mutex_enter(&bq->q_iomutex);
+
+			mutex_enter(&bd->d_ksmutex);
 			kstat_runq_exit(bd->d_kiop);
-			list_remove(&bd->d_runq, xi);
+			mutex_exit(&bd->d_ksmutex);
+
+			bq->q_qactive--;
+			list_remove(&bq->q_runq, xi);
 			bd_xfer_free(xi);
 		} else {
-			mutex_enter(&bd->d_iomutex);
+			mutex_enter(&bq->q_iomutex);
 		}
 	}
 
-	mutex_exit(&bd->d_iomutex);
+	mutex_exit(&bq->q_iomutex);
 }
 
 static void
 bd_submit(bd_t *bd, bd_xfer_impl_t *xi)
 {
-	mutex_enter(&bd->d_iomutex);
-	list_insert_tail(&bd->d_waitq, xi);
-	kstat_waitq_enter(bd->d_kiop);
-	mutex_exit(&bd->d_iomutex);
+	uint64_t	nv = atomic_inc_64_nv(&bd->d_io_counter);
+	unsigned	q = nv % bd->d_qcount;
+	bd_queue_t	*bq = &bd->d_queues[q];
 
-	bd_sched(bd);
+	xi->i_bq = bq;
+	xi->i_qnum = q;
+
+	mutex_enter(&bq->q_iomutex);
+
+	list_insert_tail(&bq->q_waitq, xi);
+
+	mutex_enter(&bd->d_ksmutex);
+	kstat_waitq_enter(bd->d_kiop);
+	mutex_exit(&bd->d_ksmutex);
+
+	mutex_exit(&bq->q_iomutex);
+
+	bd_sched(bd, bq);
 }
 
 static void
 bd_runq_exit(bd_xfer_impl_t *xi, int err)
 {
-	bd_t	*bd = xi->i_bd;
-	buf_t	*bp = xi->i_bp;
+	bd_t		*bd = xi->i_bd;
+	buf_t		*bp = xi->i_bp;
+	bd_queue_t	*bq = xi->i_bq;
 
-	mutex_enter(&bd->d_iomutex);
-	bd->d_qactive--;
+	mutex_enter(&bq->q_iomutex);
+	bq->q_qactive--;
+
+	mutex_enter(&bd->d_ksmutex);
 	kstat_runq_exit(bd->d_kiop);
-	list_remove(&bd->d_runq, xi);
-	mutex_exit(&bd->d_iomutex);
+	mutex_exit(&bd->d_ksmutex);
+
+	list_remove(&bq->q_runq, xi);
+	mutex_exit(&bq->q_iomutex);
 
 	if (err == 0) {
 		if (bp->b_flags & B_READ) {
-			bd->d_kiop->reads++;
-			bd->d_kiop->nread += (bp->b_bcount - xi->i_resid);
+			atomic_inc_uint(&bd->d_kiop->reads);
+			atomic_add_64((uint64_t *)&bd->d_kiop->nread,
+			    bp->b_bcount - xi->i_resid);
 		} else {
-			bd->d_kiop->writes++;
-			bd->d_kiop->nwritten += (bp->b_bcount - xi->i_resid);
+			atomic_inc_uint(&bd->d_kiop->writes);
+			atomic_add_64((uint64_t *)&bd->d_kiop->nwritten,
+			    bp->b_bcount - xi->i_resid);
 		}
 	}
-	bd_sched(bd);
+	bd_sched(bd, bq);
 }
 
 static void
@@ -1755,6 +2046,84 @@ bd_flush_write_cache(bd_t *bd, struct dk_callback *dkc)
 	return (rv);
 }
 
+static int
+bd_free_space_done(struct buf *bp)
+{
+	freerbuf(bp);
+	return (0);
+}
+
+static int
+bd_free_space_cb(dkioc_free_list_t *dfl, void *arg, int kmflag)
+{
+	bd_t		*bd = arg;
+	buf_t		*bp = NULL;
+	bd_xfer_impl_t	*xi = NULL;
+	boolean_t	sync = DFL_ISSYNC(dfl) ?  B_TRUE : B_FALSE;
+	int		rv = 0;
+
+	bp = getrbuf(KM_SLEEP);
+	bp->b_resid = 0;
+	bp->b_bcount = 0;
+	bp->b_lblkno = 0;
+
+	xi = bd_xfer_alloc(bd, bp, bd->d_ops.o_free_space, kmflag);
+	xi->i_dfl = dfl;
+
+	if (!sync) {
+		bp->b_iodone = bd_free_space_done;
+		bd_submit(bd, xi);
+		return (0);
+	}
+
+	xi->i_flags |= BD_XFER_POLL;
+	bd_submit(bd, xi);
+
+	(void) biowait(bp);
+	rv = geterror(bp);
+	freerbuf(bp);
+
+	return (rv);
+}
+
+static int
+bd_free_space(dev_t dev, bd_t *bd, dkioc_free_list_t *dfl)
+{
+	diskaddr_t p_len, p_offset;
+	uint64_t offset_bytes, len_bytes;
+	minor_t part = BDPART(dev);
+	const uint_t bshift = bd->d_blkshift;
+	dkioc_free_info_t dfi = {
+		.dfi_bshift = bshift,
+		.dfi_align = bd->d_free_align << bshift,
+		.dfi_max_bytes = bd->d_max_free_blks << bshift,
+		.dfi_max_ext = bd->d_max_free_seg,
+		.dfi_max_ext_bytes = bd->d_max_free_seg_blks << bshift,
+	};
+
+	if (cmlb_partinfo(bd->d_cmlbh, part, &p_len, &p_offset, NULL,
+	    NULL, 0) != 0) {
+		dfl_free(dfl);
+		return (ENXIO);
+	}
+
+	/*
+	 * bd_ioctl created our own copy of dfl, so we can modify as
+	 * necessary
+	 */
+	offset_bytes = (uint64_t)p_offset << bshift;
+	len_bytes = (uint64_t)p_len << bshift;
+
+	dfl->dfl_offset += offset_bytes;
+	if (dfl->dfl_offset < offset_bytes) {
+		dfl_free(dfl);
+		return (EOVERFLOW);
+	}
+
+	return (dfl_iter(dfl, &dfi, offset_bytes + len_bytes, bd_free_space_cb,
+	    bd, KM_SLEEP));
+}
+
 /*
  * Nexus support.
  */
@@ -1797,12 +2166,39 @@ bd_alloc_handle(void *private, bd_ops_t *ops, ddi_dma_attr_t *dma, int kmflag)
 {
 	bd_handle_t	hdl;
 
-	hdl = kmem_zalloc(sizeof (*hdl), kmflag);
-	if (hdl != NULL) {
-		hdl->h_ops = *ops;
-		hdl->h_dma = dma;
-		hdl->h_private = private;
+	switch (ops->o_version) {
+	case BD_OPS_VERSION_0:
+	case BD_OPS_VERSION_1:
+	case BD_OPS_VERSION_2:
+		break;
+
+	default:
+		/* Unsupported version */
+		return (NULL);
 	}
+
+	hdl = kmem_zalloc(sizeof (*hdl), kmflag);
+	if (hdl == NULL) {
+		return (NULL);
+	}
+
+	switch (ops->o_version) {
+	case BD_OPS_VERSION_2:
+		hdl->h_ops.o_free_space = ops->o_free_space;
+		/*FALLTHRU*/
+	case BD_OPS_VERSION_1:
+	case BD_OPS_VERSION_0:
+		hdl->h_ops.o_drive_info = ops->o_drive_info;
+		hdl->h_ops.o_media_info = ops->o_media_info;
+		hdl->h_ops.o_devid_init = ops->o_devid_init;
+		hdl->h_ops.o_sync_cache = ops->o_sync_cache;
+		hdl->h_ops.o_read = ops->o_read;
+		hdl->h_ops.o_write = ops->o_write;
+		break;
+	}
+
+	hdl->h_dma = dma;
+	hdl->h_private = private;
 
 	return (hdl);
 }
@@ -1874,11 +2270,12 @@ bd_attach_handle(dev_info_t *dip, bd_handle_t hdl)
 	ddi_set_parent_data(child, hdl);
 	hdl->h_child = child;
 
-	if (ndi_devi_online(child, 0) == NDI_FAILURE) {
+	if (ndi_devi_online(child, 0) != NDI_SUCCESS) {
 		cmn_err(CE_WARN, "%s%d: failed bringing node %s@%s online",
 		    ddi_driver_name(dip), ddi_get_instance(dip),
 		    hdl->h_name, hdl->h_addr);
 		(void) ndi_devi_free(child);
+		hdl->h_child = NULL;
 		return (DDI_FAILURE);
 	}
 

@@ -86,8 +86,8 @@ extern "C" {
 
 /* CR3 Register */
 
-#define	CR3_PCD	0x00000010		/* cache disable 		*/
-#define	CR3_PWT 0x00000008		/* write through 		*/
+#define	CR3_PCD	0x00000010		/* cache disable		*/
+#define	CR3_PWT 0x00000008		/* write through		*/
 #if defined(_ASM)
 #define	CR3_NOINVL_BIT	0x8000000000000000
 #else
@@ -110,18 +110,22 @@ extern "C" {
 #define	CR4_PCE		0x0100		/* perf-monitoring counter enable */
 #define	CR4_OSFXSR	0x0200		/* OS fxsave/fxrstor support	*/
 #define	CR4_OSXMMEXCPT	0x0400		/* OS unmasked exception support */
-					/* 0x0800 reserved */
+#define	CR4_UMIP	0x0800		/* user-mode instruction prevention */
 					/* 0x1000 reserved */
-#define	CR4_VMXE	0x2000
-#define	CR4_SMXE	0x4000
+#define	CR4_VMXE	0x2000		/* VMX enable */
+#define	CR4_SMXE	0x4000		/* SMX enable */
+					/* 0x8000 reserved */
+#define	CR4_FSGSBASE	0x10000		/* FSGSBASE enable */
 #define	CR4_PCIDE	0x20000		/* PCID enable */
 #define	CR4_OSXSAVE	0x40000		/* OS xsave/xrestore support	*/
 #define	CR4_SMEP	0x100000	/* NX for user pages in kernel */
 #define	CR4_SMAP	0x200000	/* kernel can't access user pages */
+#define	CR4_PKE		0x400000	/* protection key enable */
 
 #define	FMT_CR4						\
-	"\20\26smap\25smep\23osxsav\22pcide"		\
-	"\17smxe\16vmxe\13xmme\12fxsr\11pce\10pge"	\
+	"\20\27pke\26smap\25smep\23osxsav"		\
+	"\22pcide\20fsgsbase\17smxe\16vmxe"		\
+	"\14umip\13xmme\12fxsr\11pce\10pge"		\
 	"\7mce\6pae\5pse\4de\3tsd\2pvi\1vme"
 
 /*
@@ -158,7 +162,9 @@ extern "C" {
 
 #define	MSR_AMD_EFER	0xc0000080	/* extended feature enable MSR */
 
+#define	AMD_EFER_TCE	0x8000		/* translation cache extension */
 #define	AMD_EFER_FFXSR	0x4000		/* fast fxsave/fxrstor		*/
+#define	AMD_EFER_LMSLE	0x2000		/* long mode segment limit enable */
 #define	AMD_EFER_SVME	0x1000		/* svm enable			*/
 #define	AMD_EFER_NXE	0x0800		/* no-execute enable		*/
 #define	AMD_EFER_LMA	0x0400		/* long mode active (read-only)	*/
@@ -166,7 +172,7 @@ extern "C" {
 #define	AMD_EFER_SCE	0x0001		/* system call extensions	*/
 
 #define	FMT_AMD_EFER \
-	"\20\17ffxsr\15svme\14nxe\13lma\11lme\1sce"
+	"\20\20tce\17ffxsr\16lmsle\15svme\14nxe\13lma\11lme\1sce"
 
 /* AMD's SYSCFG register */
 
@@ -194,6 +200,18 @@ extern "C" {
 #define	MSR_AMD_KGSBASE	0xc0000102	/* swapgs swaps this with gsbase */
 #define	MSR_AMD_TSCAUX	0xc0000103	/* %ecx value on rdtscp insn */
 
+
+/* AMD's SVM MSRs */
+
+#define	MSR_AMD_VM_CR		0xc0010114 /* SVM global control */
+#define	MSR_AMD_VM_HSAVE_PA	0xc0010117 /* SVM host save area address */
+
+#define	AMD_VM_CR_DPD		(1 << 0)
+#define	AMD_VM_CR_R_INIT	(1 << 1)
+#define	AMD_VM_CR_DIS_A20M	(1 << 2)
+#define	AMD_VM_CR_LOCK		(1 << 3)
+#define	AMD_VM_CR_SVMDIS	(1 << 4)
+
 /* AMD's configuration MSRs, weakly documented in the revision guide */
 
 #define	MSR_AMD_DC_CFG	0xc0011022
@@ -220,9 +238,15 @@ extern "C" {
 
 #define	AMD_BU_CFG_E298			(UINT64_C(1) << 1)
 
+/*
+ * This MSR exists on families, 10h, 12h+ for AMD. This controls instruction
+ * decoding. Most notably, for the AMD variant of retpolines, we must improve
+ * the serializability of lfence for the lfence based method to work.
+ */
 #define	MSR_AMD_DE_CFG	0xc0011029
 
-#define	AMD_DE_CFG_E721			(UINT64_C(1))
+#define	AMD_DE_CFG_E721			(1UL << 0)
+#define	AMD_DE_CFG_LFENCE_DISPATCH	(1UL << 1)
 
 /* AMD's osvw MSRs */
 #define	MSR_AMD_OSVW_ID_LEN		0xc0010140

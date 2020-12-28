@@ -37,6 +37,6 @@ SGSMSGTARG +=	$(SGSMSGINTEL)
 
 all:		$(DYNLIB)
 
-install:	all $(ROOTLIBS) $(ROOTLINKS)
+install:	all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)
 
 include		../Makefile.targ

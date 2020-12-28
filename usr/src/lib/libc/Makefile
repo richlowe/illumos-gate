@@ -40,6 +40,7 @@ ROOTVARIANTDIR64=	$(ROOT)/usr/lib/$(MACH64)/libc
 
 # include common library definitions
 include ../Makefile.lib
+include ../Makefile.rootfs
 
 #
 # on some architectures, we build multiple libc variants
@@ -171,7 +172,9 @@ $($(MACH)_COMP): FRC
 install:	all			\
 		etc			\
 		inslib32		\
-		$(BUILD64) inslib64
+		$(ROOTCOMPATLINKS)
+
+$(BUILD64)install: inslib64 $(ROOTCOMPATLINKS64)
 
 $(ROOTFS_DBGS): $(ROOTFS_FULLDBGDIR)
 $(ROOTFS_DBGS64): $(ROOTFS_FULLDBGDIR64)
@@ -198,15 +201,6 @@ $(ROOTFS_FULLDBGDIR)/%: $(MACH)/debugobj/%
 
 $(ROOTFS_FULLDBGDIR64)/%: $(MACH64)/debugobj/%
 	$(INS.file)
-
-$(ROOTFS_LIBDIR)/%: $(MACH)/%
-	$(INS.file)
-$(ROOTFS_LIBDIR)/$(LIBLINKS): $(ROOTFS_LIBDIR)/$(LIBLINKS)$(VERS)
-	$(INS.liblink)
-$(ROOTFS_LIBDIR64)/%: $(MACH64)/%
-	$(INS.file)
-$(ROOTFS_LIBDIR64)/$(LIBLINKS): $(ROOTFS_LIBDIR64)/$(LIBLINKS)$(VERS)
-	$(INS.liblink)
 
 $(ROOTVARIANTDIR): $(ROOTLIBDIR)
 	$(INS.dir)
@@ -243,7 +237,6 @@ all	:=	TARGET= all
 install	:=	TARGET= install
 clean	:=	TARGET= clean
 clobber	:=	TARGET= clobber
-lint	:=	TARGET= lint
 
 .PARALLEL:	$(SUBDIRS)
 
@@ -255,7 +248,6 @@ clobber: $(SUBDIRS) etc clobber_local
 clobber_local:
 	$(RM) $(CLOBBERFILES)
 
-lint:
 
 _msg:	$(MSGDOMAIN) catalog
 
@@ -269,5 +261,6 @@ cscope.out tags: FRC
 	$(XREF) -x $@
 
 FRC:
+
 # include MACH-specific library targets
 include ../Makefile.mach

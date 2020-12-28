@@ -16,28 +16,27 @@
 
 include		$(SRC)/Makefile.master
 
-MANSECT= 	3ext
+MANSECT=	3ext
 
-MANFILES= 	NOTE.3ext			\
-	 	SUNW_C_GetMechSession.3ext	\
-	 	auto_ef.3ext			\
-	 	crypt.3ext			\
-	 	demangle.3ext			\
-	 	ecb_crypt.3ext			\
-	 	efi_alloc_and_init.3ext		\
-	 	ld_support.3ext			\
-	 	md4.3ext			\
-	 	md5.3ext			\
-	 	read_vtoc.3ext			\
-	 	rtld_audit.3ext			\
-	 	rtld_db.3ext			\
-	 	sendfile.3ext			\
-	 	sendfilev.3ext			\
-	 	sha1.3ext			\
-	 	sha2.3ext			\
-	 	stdarg.3ext			\
-	 	tsalarm_get.3ext		\
-	 	varargs.3ext
+MANFILES=	NOTE.3ext			\
+		SUNW_C_GetMechSession.3ext	\
+		crypt.3ext			\
+		demangle.3ext			\
+		ecb_crypt.3ext			\
+		efi_alloc_and_init.3ext		\
+		ld_support.3ext			\
+		md4.3ext			\
+		md5.3ext			\
+		read_vtoc.3ext			\
+		rtld_audit.3ext			\
+		rtld_db.3ext			\
+		sendfile.3ext			\
+		sendfilev.3ext			\
+		sha1.3ext			\
+		sha2.3ext			\
+		stdarg.3ext			\
+		tsalarm_get.3ext		\
+		varargs.3ext
 
 MANLINKS=	DES_FAILED.3ext			\
 		MD4Final.3ext			\
@@ -63,11 +62,6 @@ MANLINKS=	DES_FAILED.3ext			\
 		SHA512Update.3ext		\
 		SUNW_C_KeyToObject.3ext		\
 		_NOTE.3ext			\
-		auto_ef_file.3ext		\
-		auto_ef_free.3ext		\
-		auto_ef_get_encoding.3ext	\
-		auto_ef_get_score.3ext		\
-		auto_ef_str.3ext		\
 		cbc_crypt.3ext			\
 		cplus_demangle.3ext		\
 		crypt_close.3ext		\
@@ -77,6 +71,7 @@ MANLINKS=	DES_FAILED.3ext			\
 		des_setparity.3ext		\
 		efi_alloc_and_read.3ext		\
 		efi_free.3ext			\
+		efi_reserved_sectors.3ext	\
 		efi_use_whole_disk.3ext		\
 		efi_write.3ext			\
 		encrypt.3ext			\
@@ -131,12 +126,6 @@ _NOTE.3ext			:= LINKSRC = NOTE.3ext
 
 SUNW_C_KeyToObject.3ext		:= LINKSRC = SUNW_C_GetMechSession.3ext
 
-auto_ef_file.3ext		:= LINKSRC = auto_ef.3ext
-auto_ef_free.3ext		:= LINKSRC = auto_ef.3ext
-auto_ef_get_encoding.3ext	:= LINKSRC = auto_ef.3ext
-auto_ef_get_score.3ext		:= LINKSRC = auto_ef.3ext
-auto_ef_str.3ext		:= LINKSRC = auto_ef.3ext
-
 crypt_close.3ext		:= LINKSRC = crypt.3ext
 des_crypt.3ext			:= LINKSRC = crypt.3ext
 des_encrypt.3ext		:= LINKSRC = crypt.3ext
@@ -154,6 +143,7 @@ des_setparity.3ext		:= LINKSRC = ecb_crypt.3ext
 
 efi_alloc_and_read.3ext		:= LINKSRC = efi_alloc_and_init.3ext
 efi_free.3ext			:= LINKSRC = efi_alloc_and_init.3ext
+efi_reserved_sectors.3ext	:= LINKSRC = efi_alloc_and_init.3ext
 efi_use_whole_disk.3ext		:= LINKSRC = efi_alloc_and_init.3ext
 efi_write.3ext			:= LINKSRC = efi_alloc_and_init.3ext
 

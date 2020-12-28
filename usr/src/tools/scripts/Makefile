@@ -23,13 +23,17 @@
 #
 # Copyright 2010, Richard Lowe
 #
-# Copyright 2018 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 
 SHELL=/usr/bin/ksh93
 
+SCRIPTS= \
+	bldenv \
+	nightly
+
 SHFILES= \
 	Install \
-	bldenv \
 	build_cscope \
 	bringovercheck \
 	checkpaths \
@@ -37,7 +41,6 @@ SHFILES= \
 	elfcmp \
 	flg.flp \
 	genoffsets \
-	nightly \
 	onu \
 	protocmp.terse \
 	sccscheck \
@@ -82,6 +85,7 @@ MAN1ONBLDFILES= \
 	cddlchk.1onbld \
 	checkpaths.1onbld \
 	check_rtime.1onbld \
+	ctfconvert.1onbld \
 	cstyle.1onbld \
 	debugcheck.1onbld \
 	find_elf.1onbld \
@@ -132,7 +136,7 @@ $(ROOTONBLDMAN1ONBLDFILES)	:= FILEMODE=	644
 .KEEP_STATE:
 
 all:	$(SHFILES) $(PERLFILES) $(PERLMODULES) $(PYFILES) \
-	$(MAN1ONBLDFILES) $(MAKEFILES)
+	$(MAN1ONBLDFILES) $(MAKEFILES) $(SCRIPTS)
 
 onu.sh:	onu.sh.in
 	$(SED) -e "s:@PYTHON_VERSION@:$(PYTHON_VERSION):g" < onu.sh.in > $@
@@ -149,19 +153,11 @@ install: all .WAIT $(ROOTONBLDSHFILES) $(ROOTONBLDPERLFILES)		\
 		$(ROOTONBLDPERLMODULES) $(ROOTONBLDPYFILES)		\
 		$(ROOTONBLDSCRIPTLINKS) $(ROOTONBLDMAN1ONBLDFILES)	\
 		$(ROOTONBLDMAKEFILES) $(ROOTONBLDETCFILES)		\
-		$(ROOTONBLDEXCEPTFILES) $(ROOTONBLDMAN1ONBLDLINKS)
+		$(ROOTONBLDEXCEPTFILES) $(ROOTONBLDMAN1ONBLDLINKS)	\
+		$(ROOTONBLDSCRIPTS)
 
 clean:
 	$(RM) $(CLEANFILES)
-
-bldenv: bldenv.sh stdenv.sh
-	$(RM) "$@"
-	sed -e '/# STDENV_START/ r stdenv.sh' bldenv.sh > "$@"
-	# Check for shell lint and fail if we hit warnings
-	shlintout="$$( /usr/bin/ksh93 -n "$@" 2>&1 )" ; \
-		[[ "$${shlintout}" != "" ]] && \
-		{ print -r -- "$${shlintout}" ;	false ; } || true
-	$(CHMOD) +x "$@"
 
 bldenv.1onbld: bldenv
 	$(RM) "$@"
@@ -170,11 +166,6 @@ bldenv.1onbld: bldenv
 	-e 's/\.TH BLDENV 1/.TH BLDENV 1ONBLD "September 4, 2018"/' \
 	-e 's/.OP \([a-z]\) - flag -/.OP \\-\1/g' \
 	-e 's/(1)/(1ONBLD)/' > "$@"
-
-nightly: nightly.sh stdenv.sh
-	$(RM) "$@"
-	sed -e '/# STDENV_START/ r stdenv.sh' nightly.sh > nightly
-	$(CHMOD) +x "$@"
 
 #
 # Not run by default: bootstrap...

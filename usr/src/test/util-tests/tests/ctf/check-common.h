@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2019, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #ifndef _CHECK_COMMON_H
@@ -31,12 +31,23 @@
 extern "C" {
 #endif
 
+/*
+ * A set of bits that can be set on tests to indicate that the test should be
+ * skipped when dealing with a certain compiler. These should be added as
+ * needed. Right now this is here because of the clang bitfield bug that is
+ * triggered by check-sou.c.
+ */
+typedef enum {
+	SKIP_CLANG	= 1 << 0
+} check_skip_t;
+
 typedef struct check_number {
 	const char *cn_tname;
 	uint_t cn_kind;
 	uint_t cn_flags;
 	uint_t cn_offset;
 	uint_t cn_size;
+	check_skip_t cn_skips;
 } check_number_t;
 
 typedef struct check_symbol {
@@ -77,6 +88,7 @@ typedef struct check_member_test {
 	int cmt_kind;
 	size_t cmt_size;
 	const check_member_t *cmt_members;
+	check_skip_t cmt_skips;
 } check_member_test_t;
 
 typedef struct check_function_test {
@@ -86,6 +98,11 @@ typedef struct check_function_test {
 	uint_t cft_flags;
 	const char **cft_args;
 } check_function_test_t;
+
+typedef struct check_size_test {
+	const char *cst_name;
+	size_t cst_size;
+} check_size_test_t;
 
 /*
  * Looks up each type and verifies that it matches the expected type.
@@ -130,9 +147,19 @@ extern boolean_t ctftest_check_fptr(const char *, ctf_file_t *,
     const char *, uint_t, uint_t, const char **);
 
 /*
+ * Check size of types.
+ */
+extern boolean_t ctftest_check_size(const char *, ctf_file_t *, size_t);
+
+/*
  * Determine whether or not we have a duplicate type or not based on its name.
  */
 extern boolean_t ctftest_duplicates(ctf_file_t *);
+
+/*
+ * Determine whether or not we should skip a given test.
+ */
+extern boolean_t ctftest_skip(check_skip_t);
 
 #ifdef __cplusplus
 }

@@ -129,9 +129,12 @@ static void	tem_safe_copy_area(struct tem_vt_state *tem,
 			screen_pos_t e_col, screen_pos_t e_row,
 			screen_pos_t t_col, screen_pos_t t_row,
 			cred_t *credp, enum called_from called_from);
+#if 0
+/* Currently unused */
 static void	tem_safe_image_display(struct tem_vt_state *, uchar_t *,
 			int, int, screen_pos_t, screen_pos_t,
 			cred_t *, enum called_from);
+#endif
 static void	tem_safe_bell(struct tem_vt_state *tem,
 			enum called_from called_from);
 static void	tem_safe_pix_clear_prom_output(struct tem_vt_state *tem,
@@ -515,33 +518,41 @@ tem_safe_setparam(struct tem_vt_state *tem, int count, int newparam)
 	}
 }
 
-
+/*
+ * For colors 0-15 the tem is using color code translation
+ * from sun colors to vga (dim_xlate and brt_xlate tables, see tem_get_color).
+ * Colors 16-255 are used without translation.
+ */
 static void
 tem_select_color(struct tem_vt_state *tem, text_color_t color, boolean_t fg)
 {
-	if (tems.ts_pdepth >= 24 ||
-	    (color < 8 && tems.ts_pdepth < 24)) {
-		if (fg == B_TRUE) {
-			tem->tvs_fg_color = color;
+	if (fg == B_TRUE)
+		tem->tvs_fg_color = color;
+	else
+		tem->tvs_bg_color = color;
+
+	/*
+	 * For colors 0-7, make sure the BRIGHT attribute is not set.
+	 */
+	if (color < 8) {
+		if (fg == B_TRUE)
 			tem->tvs_flags &= ~TEM_ATTR_BRIGHT_FG;
-		} else {
-			tem->tvs_bg_color = color;
+		else
 			tem->tvs_flags &= ~TEM_ATTR_BRIGHT_BG;
-		}
 		return;
 	}
 
-	if (color > 15)
-		return;
-
-	/* Bright color and depth < 24 */
-	color -= 8;
-	if (fg == B_TRUE) {
-		tem->tvs_fg_color = color;
-		tem->tvs_flags |= TEM_ATTR_BRIGHT_FG;
-	} else {
-		tem->tvs_bg_color = color;
-		tem->tvs_flags |= TEM_ATTR_BRIGHT_BG;
+	/*
+	 * For colors 8-15, we use color codes 0-7 and set BRIGHT attribute.
+	 */
+	if (color < 16) {
+		if (fg == B_TRUE) {
+			tem->tvs_fg_color -= 8;
+			tem->tvs_flags |= TEM_ATTR_BRIGHT_FG;
+		} else {
+			tem->tvs_bg_color -= 8;
+			tem->tvs_flags |= TEM_ATTR_BRIGHT_BG;
+		}
 	}
 }
 
@@ -1568,6 +1579,7 @@ tem_safe_text_display(struct tem_vt_state *tem, term_char_t *string,
 	}
 }
 
+#if 0
 /*
  * This function is used to blit a rectangular color image,
  * unperturbed on the underlying framebuffer, to render
@@ -1600,6 +1612,7 @@ tem_safe_image_display(struct tem_vt_state *tem, uchar_t *image,
 	mutex_exit(&tem->tvs_lock);
 	mutex_exit(&tems.ts_lock);
 }
+#endif
 
 /*ARGSUSED*/
 void
@@ -2213,9 +2226,17 @@ tem_safe_pix_cursor(struct tem_vt_state *tem, short action,
 
 	switch (tems.ts_pdepth) {
 	case 4:
-	case 8:
 		ca.fg_color.mono = fg;
 		ca.bg_color.mono = bg;
+		break;
+	case 8:
+#ifdef _HAVE_TEM_FIRMWARE
+		ca.fg_color.mono = fg;
+		ca.bg_color.mono = bg;
+#else
+		ca.fg_color.mono = tems.ts_color_map(fg);
+		ca.bg_color.mono = tems.ts_color_map(bg);
+#endif
 		break;
 	case 15:
 	case 16:
@@ -2256,8 +2277,8 @@ tem_safe_pix_cursor(struct tem_vt_state *tem, short action,
 		ca.bg_color.twentyfour[0] = (color >> 16) & 0xFF;
 		ca.bg_color.twentyfour[1] = (color >> 8) & 0xFF;
 		ca.bg_color.twentyfour[2] = color & 0xFF;
-		break;
 #endif
+		break;
 	}
 
 	ca.action = action;
@@ -2292,6 +2313,11 @@ bit_to_pix8(struct tem_vt_state *tem, tem_char_t c, text_color_t fg_color,
     text_color_t bg_color)
 {
 	uint8_t *dest = (uint8_t *)tem->tvs_pix_data;
+
+#ifndef _HAVE_TEM_FIRMWARE
+	fg_color = (text_color_t)tems.ts_color_map(fg_color);
+	bg_color = (text_color_t)tems.ts_color_map(bg_color);
+#endif
 	font_bit_to_pix8(&tems.ts_font, dest, c, fg_color, bg_color);
 }
 
@@ -2372,18 +2398,28 @@ tem_safe_get_attr(struct tem_vt_state *tem, text_color_t *fg,
 static void
 tem_safe_get_color(text_color_t *fg, text_color_t *bg, term_char_t c)
 {
+	boolean_t bold_font;
+
 	*fg = c.tc_fg_color;
 	*bg = c.tc_bg_color;
 
-	if (c.tc_fg_color < 16) {
-		if (TEM_ATTR_ISSET(c.tc_char,
-		    TEM_ATTR_BRIGHT_FG | TEM_ATTR_BOLD))
+	bold_font = tems.ts_font.vf_map_count[VFNT_MAP_BOLD] != 0;
+
+	/*
+	 * If we have both normal and bold font components,
+	 * we use bold font for TEM_ATTR_BOLD.
+	 * The bright color is traditionally used with TEM_ATTR_BOLD,
+	 * in case there is no bold font.
+	 */
+	if (c.tc_fg_color < XLATE_NCOLORS) {
+		if (TEM_ATTR_ISSET(c.tc_char, TEM_ATTR_BRIGHT_FG) ||
+		    (TEM_ATTR_ISSET(c.tc_char, TEM_ATTR_BOLD) && !bold_font))
 			*fg = brt_xlate[c.tc_fg_color];
 		else
 			*fg = dim_xlate[c.tc_fg_color];
 	}
 
-	if (c.tc_bg_color < 16) {
+	if (c.tc_bg_color < XLATE_NCOLORS) {
 		if (TEM_ATTR_ISSET(c.tc_char, TEM_ATTR_BRIGHT_BG))
 			*bg = brt_xlate[c.tc_bg_color];
 		else

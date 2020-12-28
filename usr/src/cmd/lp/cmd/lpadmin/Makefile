@@ -63,8 +63,8 @@ LPLIBS=		$(LIBACC)	\
 
 SYSLIBS=	-lcurses
 
-LDLIBS +=	-lsecdb $(LPLIBS) $(SYSLIBS) $(I18N)
-LDFLAGS +=	$(MAPFILE.NGB:%=-M%)
+LDLIBS +=	-lsecdb $(LPLIBS) $(SYSLIBS) $(I18N) $(LDSTACKPROTECT)
+LDFLAGS +=	$(MAPFILE.NGB:%=-Wl,-M%)
 
 PROG=		lpadmin
 
@@ -91,11 +91,5 @@ clean:
 
 clobber: clean
 		-$(RM) $(PROG) $(CLOBBERFILES)
-
-strip:
-		$(STRIP) $(PROG)
-
-lint:
-		$(LINT.c) $(SRCS) $(LDLIBS)
 
 include		../Makefile.msg

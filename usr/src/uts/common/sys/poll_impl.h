@@ -25,7 +25,7 @@
  */
 
 /*
- * Copyright 2015, Joyent, Inc.
+ * Copyright 2017 Joyent, Inc.
  */
 
 #ifndef _SYS_POLL_IMPL_H
@@ -225,6 +225,7 @@ struct polldat {
 	int		pd_nsets;	/* num of xref sets, used by poll(2) */
 	xref_t		*pd_ref;	/* ptr to xref info, 1 for each set */
 	port_kevent_t	*pd_portev;	/* associated port event struct */
+	uf_entry_gen_t	pd_gen;		/* fd generation at cache time */
 	uint64_t	pd_epolldata;	/* epoll data, if any */
 };
 
@@ -256,6 +257,7 @@ struct pollcache {
 
 /* pc_flag */
 #define	PC_POLLWAKE	0x02	/* pollwakeup() occurred */
+#define	PC_EPOLL	0x04	/* pollcache is epoll-enabled */
 
 #if defined(_KERNEL)
 /*

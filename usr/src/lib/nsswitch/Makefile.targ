@@ -46,7 +46,5 @@ objs/%.o pics/%.o: ../common/%.c
 		$(COMPILE.c) -o $@ $<
 		$(POST_PROCESS_O)
 
-lint:
-		$(LINT.c) $(SRCS) $(LDLIBS) > $(LINTOUT) 2>&1
 
 .KEEP_STATE:

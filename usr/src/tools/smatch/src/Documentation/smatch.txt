@@ -1,9 +1,13 @@
 Smatch
 
+0.  Introduction
 1.  Building Smatch
 2.  Using Smatch
 3.  Smatch vs Sparse
 
+Section 0: Introduction
+
+The Smatch mailing list is <smatch@vger.kernel.org>.
 
 Section 1:  Building Smatch
 ---------------------------
@@ -54,6 +58,10 @@ You can also build a directory like this:
 	~/progs/smatch/devel/smatch_scripts/kchecker drivers/whatever/
 
 The kchecker script prints its warnings to stdout.
+
+The above scripts will ensure that any ARCH or CROSS_COMPILE environment
+variables are passed to kernel build system - thus allowing for the use of
+Smatch with kernels that are normally built with cross-compilers.
 
 If you are building something else (which is not the Linux kernel) then use
 something like:

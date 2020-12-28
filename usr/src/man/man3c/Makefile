@@ -14,7 +14,7 @@
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2013, OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
-# Copyright 2018 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 # Copyright 2018 Jason King
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
@@ -62,6 +62,7 @@ MANFILES=	__fbufsize.3c					\
 		bstring.3c					\
 		btowc.3c					\
 		byteorder.3c					\
+		c16rtomb.3c					\
 		call_once.3c					\
 		catgets.3c					\
 		catopen.3c					\
@@ -140,6 +141,7 @@ MANFILES=	__fbufsize.3c					\
 		floating_to_decimal.3c				\
 		flock.3c					\
 		flockfile.3c					\
+		fmemopen.3c					\
 		fmtmsg.3c					\
 		fnmatch.3c					\
 		fopen.3c					\
@@ -170,6 +172,7 @@ MANFILES=	__fbufsize.3c					\
 		getenv.3c					\
 		getexecname.3c					\
 		getgrnam.3c					\
+		getgrouplist.3c					\
 		gethostid.3c					\
 		gethostname.3c					\
 		gethrtime.3c					\
@@ -237,7 +240,7 @@ MANFILES=	__fbufsize.3c					\
 		malloc.3c					\
 		mblen.3c					\
 		mbrlen.3c					\
-		mbrtowc.3c					\
+		mbrtoc16.3c					\
 		mbsinit.3c					\
 		mbsrtowcs.3c					\
 		mbstowcs.3c					\
@@ -268,6 +271,7 @@ MANFILES=	__fbufsize.3c					\
 		newlocale.3c					\
 		nl_langinfo.3c					\
 		offsetof.3c					\
+		open_memstream.3c				\
 		opendir.3c					\
 		perror.3c					\
 		pfmt.3c						\
@@ -538,7 +542,6 @@ MANFILES=	__fbufsize.3c					\
 		waitpid.3c					\
 		walkcontext.3c					\
 		wcpcpy.3c					\
-		wcrtomb.3c					\
 		wcscasecmp.3c					\
 		wcscoll.3c					\
 		wcsdup.3c					\
@@ -724,6 +727,7 @@ MANLINKS=	FD_CLR.3c				\
 		bindtextdomain.3c			\
 		btowc_l.3c				\
 		bzero.3c				\
+		c32rtomb.3c				\
 		calloc.3c				\
 		canonicalize_file_name.3c		\
 		catclose.3c				\
@@ -946,6 +950,7 @@ MANLINKS=	FD_CLR.3c				\
 		iswalnum_l.3c				\
 		iswalpha_l.3c				\
 		iswascii.3c				\
+		iswascii_l.3c				\
 		iswblank.3c				\
 		iswblank_l.3c				\
 		iswcntrl.3c				\
@@ -1001,6 +1006,8 @@ MANLINKS=	FD_CLR.3c				\
 		major.3c				\
 		mblen_l.3c				\
 		mbrlen_l.3c				\
+		mbrtoc32.3c				\
+		mbrtowc.3c				\
 		mbrtowc_l.3c				\
 		mbsinit_l.3c				\
 		mbsnrtowcs.3c				\
@@ -1051,6 +1058,7 @@ MANLINKS=	FD_CLR.3c				\
 		ntohl.3c				\
 		ntohll.3c				\
 		ntohs.3c				\
+		open_wmemstream.3c			\
 		openlog.3c				\
 		pclose.3c				\
 		port_dissociate.3c			\
@@ -1151,6 +1159,7 @@ MANLINKS=	FD_CLR.3c				\
 		qeconvert.3c				\
 		qfconvert.3c				\
 		qgconvert.3c				\
+		qsort_r.3c				\
 		quadruple_to_decimal.3c			\
 		rand_r.3c				\
 		rctlblk_get_enforced_value.3c		\
@@ -1379,6 +1388,7 @@ MANLINKS=	FD_CLR.3c				\
 		watol.3c				\
 		watoll.3c				\
 		wcpncpy.3c				\
+		wcrtomb.3c				\
 		wcrtomb_l.3c				\
 		wcscasecmp_l.3c				\
 		wcscat.3c				\
@@ -1592,6 +1602,10 @@ htons.3c				:= LINKSRC = byteorder.3c
 ntohl.3c				:= LINKSRC = byteorder.3c
 ntohll.3c				:= LINKSRC = byteorder.3c
 ntohs.3c				:= LINKSRC = byteorder.3c
+
+c32rtomb.3c				:= LINKSRC = c16rtomb.3c
+wcrtomb.3c				:= LINKSRC = c16rtomb.3c
+wcrtomb_l.3c				:= LINKSRC = c16rtomb.3c
 
 canonicalize_file_name.3c		:= LINKSRC = realpath.3c
 
@@ -1949,6 +1963,7 @@ iswalnum.3c				:= LINKSRC = iswalpha.3c
 iswalnum_l.3c				:= LINKSRC = iswalpha.3c
 iswalpha_l.3c				:= LINKSRC = iswalpha.3c
 iswascii.3c				:= LINKSRC = iswalpha.3c
+iswascii_l.3c				:= LINKSRC = iswalpha.3c
 iswblank.3c				:= LINKSRC = iswalpha.3c
 iswblank_l.3c				:= LINKSRC = iswalpha.3c
 iswcntrl.3c				:= LINKSRC = iswalpha.3c
@@ -2006,9 +2021,11 @@ mblen_l.3c				:= LINKSRC = mblen.3c
 
 mbrlen_l.3c				:= LINKSRC = mbrlen.3c
 
-mbrtowc_l.3c				:= LINKSRC = mbrtowc.3c
-
 mbsinit_l.3c				:= LINKSRC = mbsinit.3c
+
+mbrtoc32.3c				:= LINKSRC = mbrtoc16.3c
+mbrtowc.3c				:= LINKSRC = mbrtoc16.3c
+mbrtowc_l.3c				:= LINKSRC = mbrtoc16.3c
 
 mbsnrtowcs.3c				:= LINKSRC = mbsrtowcs.3c
 mbsnrtowcs_l.3c				:= LINKSRC = mbsrtowcs.3c
@@ -2077,6 +2094,8 @@ duplocale.3c				:= LINKSRC = newlocale.3c
 freelocale.3c				:= LINKSRC = newlocale.3c
 
 nl_langinfo_l.3c			:= LINKSRC = nl_langinfo.3c
+
+open_wmemstream.3c			:= LINKSRC = open_memstream.3c
 
 fdopendir.3c				:= LINKSRC = opendir.3c
 
@@ -2233,6 +2252,8 @@ pthread_spin_init.3c			:= LINKSRC = pthread_spin_destroy.3c
 pthread_spin_trylock.3c			:= LINKSRC = pthread_spin_lock.3c
 
 fputs.3c				:= LINKSRC = puts.3c
+
+qsort_r.3c				:= LINKSRC = qsort.3c
 
 rand_r.3c				:= LINKSRC = rand.3c
 srand.3c				:= LINKSRC = rand.3c
@@ -2500,8 +2521,6 @@ backtrace_symbols_fd.3c			:= LINKSRC = walkcontext.3c
 printstack.3c				:= LINKSRC = walkcontext.3c
 
 wcpncpy.3c				:= LINKSRC = wcpcpy.3c
-
-wcrtomb_l.3c				:= LINKSRC = wcrtomb.3c
 
 wcscasecmp_l.3c				:= LINKSRC = wcscasecmp.3c
 wcsncasecmp.3c				:= LINKSRC = wcscasecmp.3c

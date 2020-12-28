@@ -21,7 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -382,7 +382,16 @@ i_dls_link_rx(void *arg, mac_resource_handle_t mrh, mblk_t *mp,
 
 		vid = VLAN_ID(mhi.mhi_tci);
 
+		/*
+		 * This condition is true only when a sun4v vsw client
+		 * is on the scene; as it is the only type of client
+		 * that multiplexes VLANs on a single client instance.
+		 * All other types of clients have one VLAN per client
+		 * instance. In that case, MAC strips the VLAN tag
+		 * before delivering it to DLS (see mac_rx_deliver()).
+		 */
 		if (mhi.mhi_istagged) {
+
 			/*
 			 * If it is tagged traffic, send it upstream to
 			 * all dld_str_t which are attached to the physical
@@ -557,7 +566,13 @@ dls_rx_promisc(void *arg, mac_resource_handle_t mrh, mblk_t *mp,
 	dls_head_t			*dhp;
 	mod_hash_key_t			key;
 
+	/*
+	 * We expect to deal with only a single packet.
+	 */
+	ASSERT3P(mp->b_next, ==, NULL);
+
 	DLS_PREPARE_PKT(dlp->dl_mh, mp, &mhi, err);
+
 	if (err != 0)
 		goto drop;
 

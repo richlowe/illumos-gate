@@ -50,16 +50,17 @@ ROOTSYMLINKS=	$(LIBLINKS:%=$(ROOTLIB)/%)
 
 
 CPPFLAGS =	-I$(LPINC) $(CPPFLAGS.master)
-LDFLAGS +=	$(MAPFILE.NGB:%=-M%)
+LDFLAGS +=	$(MAPFILE.NGB:%=-Wl,-M%)
 
 # conditional assignments
 #
 lpfilter:=	LDLIBS += $(LIBFLT) $(LIBMSG) $(LIBACC) $(LIBOAM) $(LIBLP) \
-			-lgen -lsecdb
+			-lgen -lsecdb $(LDSTACKPROTECT)
 lpforms:=	LDLIBS += $(LIBFRM) $(LIBMSG) $(LIBREQ) $(LIBOAM) \
-			$(LIBACC) $(LIBLP) -lsecdb
-lpshut:=	LDLIBS += $(LIBMSG) $(LIBOAM) $(LIBLP)
-lpusers:=	LDLIBS += $(LIBMSG) $(LIBACC) $(LIBOAM) $(LIBUSR) $(LIBLP)
+			$(LIBACC) $(LIBLP) -lsecdb $(LDSTACKPROTECT)
+lpshut:=	LDLIBS += $(LIBMSG) $(LIBOAM) $(LIBLP) $(LDSTACKPROTECT)
+lpusers:=	LDLIBS += $(LIBMSG) $(LIBACC) $(LIBOAM) $(LIBUSR) $(LIBLP) \
+			$(LDSTACKPROTECT)
 
 .KEEP_STATE:
 
@@ -78,12 +79,6 @@ clobber:	$(SUBDIRS) local_clobber
 
 local_clobber:
 		$(RM) $(OBJS) $(PROG) $(CLOBBERFILES)
-
-strip:		$(SUBDIRS)
-		$(STRIP) $(PROG)
-
-lint:
-		$(LINT.c) $(SRCS) $(LDLIBS)
 
 $(ROOTSYMLINKS):
 		$(RM) $@; $(SYMLINK) ../sbin/$(@F) $@

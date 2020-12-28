@@ -26,6 +26,7 @@ DEBUGLIBS =
 SRCDIR = $(SRC)/cmd/make/lib/makestate
 MAPFILES = $(SRCDIR)/mapfile-vers
 LDLIBS += -lc
+NATIVE_LIBS += libc.so
 
 FILEMODE= 755
 

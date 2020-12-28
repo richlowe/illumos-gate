@@ -19,30 +19,47 @@
  * CDDL HEADER END
  */
 /*
- * Copyright (c) 2013, Joyent, Inc. All rights reserved.
+ * Copyright (C) 2016 Gvozden Neskovic <neskovic@compeng.uni-frankfurt.de>.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #ifndef _SYS_VDEV_RAIDZ_H
 #define	_SYS_VDEV_RAIDZ_H
 
-#include <sys/vdev.h>
-#include <sys/semaphore.h>
-#ifdef _KERNEL
-#include <sys/ddi.h>
-#include <sys/sunldi.h>
-#include <sys/sunddi.h>
-#endif
+#include <sys/types.h>
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-#ifdef _KERNEL
-extern int vdev_raidz_physio(vdev_t *,
-    caddr_t, size_t, uint64_t, uint64_t, boolean_t, boolean_t);
+struct zio;
+struct raidz_map;
+#if !defined(_KERNEL)
+struct kernel_param {};
 #endif
+
+/*
+ * vdev_raidz interface
+ */
+struct raidz_map *	vdev_raidz_map_alloc(struct zio *, uint64_t,
+    uint64_t, uint64_t);
+void		vdev_raidz_map_free(struct raidz_map *);
+void 		vdev_raidz_generate_parity(struct raidz_map *);
+int 		vdev_raidz_reconstruct(struct raidz_map *, const int *, int);
+
+/*
+ * vdev_raidz_math interface
+ */
+void	vdev_raidz_math_init(void);
+void	vdev_raidz_math_fini(void);
+const struct raidz_impl_ops *vdev_raidz_math_get_ops(void);
+int	vdev_raidz_math_generate(struct raidz_map *);
+int	vdev_raidz_math_reconstruct(struct raidz_map *, const int *,
+	    const int *, const int);
+int	vdev_raidz_impl_set(const char *);
+
 #ifdef	__cplusplus
 }
 #endif
 
-#endif	/* _SYS_VDEV_RAIDZ_H */
+#endif /* _SYS_VDEV_RAIDZ_H */

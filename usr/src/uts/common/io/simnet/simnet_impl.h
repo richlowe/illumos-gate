@@ -21,6 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2019 Joyent, Inc.
  */
 
 #ifndef	_SYS_SIMNET_IMPL_H
@@ -40,6 +41,8 @@ extern "C" {
 #define	MAX_SIMNET_ESSCONF	25	/* Max num of WiFi scan results */
 #define	MAX_ESSLIST_ARGS	10	/* Max num of ESS list arguments */
 #define	MAX_ESSLIST_ARGLEN	50	/* Max ESS list argument len */
+
+#define	SM_MAX_NUM_MCAST_ADDRS	1024
 
 struct simnet_dev;
 
@@ -80,17 +83,29 @@ typedef struct simnet_dev {
 	/* Num of multicast addresses stored in sd_mcastaddrs */
 	uint_t			sd_mcastaddr_count;
 	/* Multicast address list stored in single buffer */
-	uint8_t			*sd_mcastaddrs;
+	struct ether_addr	sd_mcastaddrs[SM_MAX_NUM_MCAST_ADDRS];
 	uint_t			sd_mac_len;
 	uchar_t			sd_mac_addr[MAXMACADDRLEN];
 	simnet_stats_t		sd_stats;
+
+	/* Capabilities */
+	uint_t			sd_rx_cksum;
+	uint_t			sd_tx_cksum;
+	boolean_t		sd_lso;
 } simnet_dev_t;
+
+/* Simnet dladm private properties. */
+#define	SD_PROP_RX_IP_CKSUM	"_rx_ipv4_cksum"
+#define	SD_PROP_TX_ULP_CKSUM	"_tx_ulp_cksum"
+#define	SD_PROP_TX_IP_CKSUM	"_tx_ipv4_cksum"
+#define	SD_PROP_LSO		"_lso"
 
 /* Simnet device flags */
 #define	SDF_SHUTDOWN	0x00000001	/* Device shutdown, no new ops */
 #define	SDF_STARTED	0x00000002	/* Device started, allow ops */
 
 #define	SIMNET_MAX_MTU	9000		/* Max MTU supported by simnet driver */
+#define	SD_LSO_MAXLEN	65535		/* Max LSO supported by simnet driver */
 
 #ifdef	__cplusplus
 }

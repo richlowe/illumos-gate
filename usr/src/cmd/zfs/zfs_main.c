@@ -68,6 +68,7 @@
 #include <libzfs_core.h>
 #include <zfs_prop.h>
 #include <zfs_deleg.h>
+#include <libzutil.h>
 #include <libuutil.h>
 #include <aclutils.h>
 #include <directory.h>
@@ -4096,7 +4097,7 @@ zfs_do_send(int argc, char **argv)
 			 * Incremental source name begins with # or @.
 			 * Default to same fs as target.
 			 */
-			(void) strncpy(frombuf, argv[0], sizeof (frombuf));
+			(void) strlcpy(frombuf, argv[0], sizeof (frombuf));
 			cp = strchr(frombuf, '@');
 			if (cp != NULL)
 				*cp = '\0';
@@ -6849,6 +6850,30 @@ unshare_unmount(int op, int argc, char **argv)
 		}
 
 		/*
+		 * Initialize libshare SA_INIT_SHARE_API_SELECTIVE here
+		 * to avoid unnecessary load/unload of the libshare API
+		 * per shared dataset downstream.
+		 */
+		if (op == OP_SHARE) {
+			get_all_cb_t dslist = { 0 };
+			get_all_datasets(&dslist, B_FALSE);
+
+			if (dslist.cb_used != 0) {
+				sa_init_selective_arg_t sharearg;
+				sharearg.zhandle_arr = dslist.cb_handles;
+				sharearg.zhandle_len = dslist.cb_used;
+				if ((ret = zfs_init_libshare_arg(g_zfs,
+				    SA_INIT_SHARE_API_SELECTIVE, &sharearg)) !=
+				    SA_OK) {
+					(void) fprintf(stderr, gettext(
+					    "Could not initialize libshare, "
+					    "%d"), ret);
+					return (1);
+				}
+			}
+		}
+
+		/*
 		 * Walk the AVL tree in reverse, unmounting each filesystem and
 		 * removing it from the AVL tree in the process.
 		 */
@@ -7305,7 +7330,7 @@ zfs_do_bookmark(int argc, char **argv)
 		*strchr(snapname, '#') = '\0';
 		(void) strlcat(snapname, argv[0], sizeof (snapname));
 	} else {
-		(void) strncpy(snapname, argv[0], sizeof (snapname));
+		(void) strlcpy(snapname, argv[0], sizeof (snapname));
 	}
 	zhp = zfs_open(g_zfs, snapname, ZFS_TYPE_SNAPSHOT);
 	if (zhp == NULL)
@@ -7319,7 +7344,7 @@ zfs_do_bookmark(int argc, char **argv)
 	fnvlist_free(nvl);
 
 	if (ret != 0) {
-		const char *err_msg;
+		const char *err_msg = NULL;
 		char errbuf[1024];
 
 		(void) snprintf(errbuf, sizeof (errbuf),
@@ -7343,11 +7368,13 @@ zfs_do_bookmark(int argc, char **argv)
 			err_msg = "out of space";
 			break;
 		default:
-			err_msg = "unknown error";
+			(void) zfs_standard_error(g_zfs, ret, errbuf);
 			break;
 		}
-		(void) fprintf(stderr, "%s: %s\n", errbuf,
-		    dgettext(TEXT_DOMAIN, err_msg));
+		if (err_msg != NULL) {
+			(void) fprintf(stderr, "%s: %s\n", errbuf,
+			    dgettext(TEXT_DOMAIN, err_msg));
+		}
 	}
 
 	return (ret != 0);
@@ -7364,7 +7391,7 @@ zfs_do_channel_program(int argc, char **argv)
 	char c;
 	char *progbuf, *filename, *poolname;
 	size_t progsize, progread;
-	nvlist_t *outnvl;
+	nvlist_t *outnvl = NULL;
 	uint64_t instrlimit = ZCP_DEFAULT_INSTRLIMIT;
 	uint64_t memlimit = ZCP_DEFAULT_MEMLIMIT;
 	boolean_t sync_flag = B_TRUE, json_output = B_FALSE;
@@ -7504,7 +7531,8 @@ zfs_do_channel_program(int argc, char **argv)
 		 * falling back on strerror() for an unexpected return code.
 		 */
 		char *errstring = NULL;
-		if (nvlist_exists(outnvl, ZCP_RET_ERROR)) {
+		const char *msg = gettext("Channel program execution failed");
+		if (outnvl != NULL && nvlist_exists(outnvl, ZCP_RET_ERROR)) {
 			(void) nvlist_lookup_string(outnvl,
 			    ZCP_RET_ERROR, &errstring);
 			if (errstring == NULL)
@@ -7529,12 +7557,11 @@ zfs_do_channel_program(int argc, char **argv)
 				    "programs must be run as root.";
 				break;
 			default:
-				errstring = strerror(ret);
+				(void) zfs_standard_error(g_zfs, ret, msg);
 			}
 		}
-		(void) fprintf(stderr,
-		    gettext("Channel program execution failed:\n%s\n"),
-		    errstring);
+		if (errstring != NULL)
+			(void) fprintf(stderr, "%s:\n%s\n", msg, errstring);
 	} else {
 		if (json_output) {
 			(void) nvlist_print_json(stdout, outnvl);

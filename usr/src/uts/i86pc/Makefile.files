@@ -23,8 +23,8 @@
 # Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 # Copyright (c) 2010, Intel Corporation.
-# Copyright 2018 Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2019 Joyent, Inc.
 #
 #	This Makefile defines file modules in the directory uts/i86pc
 #	and its children. These are the source files which are i86pc
@@ -65,6 +65,8 @@ CORE_OBJS +=			\
 	hardclk.o		\
 	hat_i86.o		\
 	hat_kdi.o		\
+	hma.o			\
+	hma_asm.o		\
 	hma_fpu.o		\
 	hment.o			\
 	hold_page.o		\
@@ -114,6 +116,7 @@ CORE_OBJS +=			\
 	ppage.o			\
 	pwrnow.o		\
 	smt.o			\
+	seg_vmm.o		\
 	speedstep.o		\
 	ssp.o			\
 	startup.o		\
@@ -152,20 +155,12 @@ CORE_OBJS += $(BOOT_DRIVER_OBJS)
 #	locore.o is special. It must be the first file relocated so that it
 #	it is relocated just where its name implies.
 #
-SPECIAL_OBJS_32 +=		\
-	locore.o		\
-	fast_trap_asm.o		\
-	interrupt.o		\
-	syscall_asm.o
-
-SPECIAL_OBJS_64 +=		\
+SPECIAL_OBJS +=			\
 	locore.o		\
 	fast_trap_asm.o		\
 	interrupt.o		\
 	syscall_asm_amd64.o	\
 	kpti_trampolines.o
-
-SPECIAL_OBJS += $(SPECIAL_OBJS_$(CLASS))
 
 #
 # Objects that get compiled into the identity mapped PT_LOAD section of unix
@@ -242,6 +237,52 @@ UPPC_OBJS += uppc.o psm_common.o
 XSVC_OBJS += xsvc.o
 AMD_IOMMU_OBJS +=	amd_iommu.o amd_iommu_impl.o amd_iommu_acpi.o \
 			amd_iommu_cmd.o amd_iommu_log.o amd_iommu_page_tables.o
+VMM_OBJS += vmm.o \
+	vmm_sol_dev.o \
+	vmm_host.o \
+	vmm_instruction_emul.o \
+	vmm_ioport.o \
+	vmm_lapic.o \
+	vmm_mem.o \
+	vmm_stat.o \
+	vmm_util.o \
+	x86.o \
+	iommu.o \
+	vatpic.o \
+	vatpit.o \
+	vhpet.o \
+	vioapic.o \
+	vlapic.o \
+	vrtc.o \
+	vpmtmr.o \
+	ept.o \
+	vmcs.o \
+	vmx_msr.o \
+	vmx.o \
+	vmx_support.o \
+	vtd.o \
+	vtd_sol.o \
+	svm.o \
+	svm_msr.o \
+	npt.o \
+	vmcb.o \
+	svm_support.o \
+	amdv.o \
+	gipt.o \
+	vmm_sol_vm.o \
+	vmm_sol_glue.o \
+	vmm_sol_ept.o \
+	vmm_sol_rvi.o \
+	vmm_support.o \
+	vmm_zsd.o
+
+VIONA_OBJS += viona_main.o \
+	viona_ring.o \
+	viona_rx.o \
+	viona_tx.o \
+	viona_hook.o \
+
+PPT_OBJS += ppt.o
 
 #
 #	Build up defines and paths.
@@ -270,7 +311,6 @@ ASSYM_DEPS      +=		\
 	mpcore.o		\
 	sseblk.o		\
 	swtch.o			\
-	syscall_asm.o		\
 	syscall_asm_amd64.o	\
 	kpti_trampolines.o	\
 	cpr_wakecode.o
@@ -278,3 +318,10 @@ ASSYM_DEPS      +=		\
 CPR_IMPL_OBJS	= cpr_impl.o	cpr_wakecode.o
 
 $(KDI_ASSYM_DEPS:%=$(OBJS_DIR)/%):	$(DSF_DIR)/$(OBJS_DIR)/kdi_assym.h
+
+#
+# Intel Integrated Memory Controller
+# (Sandy Bridge - Cascade Lake)
+#
+IMC_OBJS =	imc.o imc_decode.o imc_dump.o
+IMCSTUB_OBJS =	imcstub.o

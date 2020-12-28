@@ -39,6 +39,19 @@ char *alloc_string(const char *str)
 	return tmp;
 }
 
+char *alloc_string_newline(const char *str)
+{
+	char *tmp;
+	int len;
+
+	if (!str)
+		return NULL;
+	len = strlen(str);
+	tmp = malloc(len + 2);
+	snprintf(tmp, len + 2, "%s\n", str);
+	return tmp;
+}
+
 void free_string(char *str)
 {
 	free(str);
@@ -134,7 +147,7 @@ struct expression *get_argument_from_call_expr(struct expression_list *args,
 	return NULL;
 }
 
-static struct expression *get_array_expr(struct expression *expr)
+struct expression *get_array_expr(struct expression *expr)
 {
 	struct expression *parent;
 	struct symbol *type;
@@ -161,10 +174,8 @@ static struct expression *get_array_expr(struct expression *expr)
 
 static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 				     struct expression *expr, int len,
-				     int *complicated, int no_parens)
+				     int *complicated)
 {
-
-
 	if (!expr) {
 		/* can't happen on valid code */
 		*complicated = 1;
@@ -191,7 +202,7 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 			}
 		}
 
-		__get_variable_from_expr(sym_ptr, buf, deref, len, complicated, no_parens);
+		__get_variable_from_expr(sym_ptr, buf, deref, len, complicated);
 
 		if (op == '*')
 			append(buf, "->", len);
@@ -223,20 +234,20 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 		}
 
 		if (expr->op == '(') {
-			if (!no_parens && expr->unop->type != EXPR_SYMBOL)
+			if (expr->unop->type != EXPR_SYMBOL)
 				append(buf, "(", len);
 		} else if (expr->op != '*' || !get_array_expr(expr->unop)) {
 			tmp = show_special(expr->op);
 			append(buf, tmp, len);
 		}
 		__get_variable_from_expr(sym_ptr, buf, expr->unop,
-						 len, complicated, no_parens);
+						 len, complicated);
 
-		if (expr->op == '(' && !no_parens && expr->unop->type != EXPR_SYMBOL)
+		if (expr->op == '(' && expr->unop->type != EXPR_SYMBOL)
 			append(buf, ")", len);
 
 		if (expr->op == SPECIAL_DECREMENT ||
-				expr->op == SPECIAL_INCREMENT)
+		    expr->op == SPECIAL_INCREMENT)
 			*complicated = 1;
 
 		return;
@@ -245,7 +256,7 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 		const char *tmp;
 
 		__get_variable_from_expr(sym_ptr, buf, expr->unop,
-						 len, complicated, no_parens);
+						 len, complicated);
 		tmp = show_special(expr->op);
 		append(buf, tmp, len);
 
@@ -263,23 +274,37 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 		*complicated = 1;
 		array_expr = get_array_expr(expr);
 		if (array_expr) {
-			__get_variable_from_expr(sym_ptr, buf, array_expr, len, complicated, no_parens);
+			__get_variable_from_expr(sym_ptr, buf, array_expr, len, complicated);
 			append(buf, "[", len);
 		} else {
-			__get_variable_from_expr(sym_ptr, buf, expr->left, len, complicated, no_parens);
+			__get_variable_from_expr(sym_ptr, buf, expr->left, len, complicated);
 			snprintf(tmp, sizeof(tmp), " %s ", show_special(expr->op));
 			append(buf, tmp, len);
 		}
-		__get_variable_from_expr(NULL, buf, expr->right, len, complicated, no_parens);
+		__get_variable_from_expr(NULL, buf, expr->right, len, complicated);
 		if (array_expr)
 			append(buf, "]", len);
 		return;
 	}
 	case EXPR_VALUE: {
+		sval_t sval = {};
 		char tmp[25];
 
 		*complicated = 1;
-		snprintf(tmp, 25, "%lld", expr->value);
+		if (!get_value(expr, &sval))
+			return;
+		snprintf(tmp, 25, "%s", sval_to_numstr(sval));
+		append(buf, tmp, len);
+		return;
+	}
+	case EXPR_FVALUE: {
+		sval_t sval = {};
+		char tmp[25];
+
+		*complicated = 1;
+		if (!get_value(expr, &sval))
+			return;
+		snprintf(tmp, 25, "%s", sval_to_numstr(sval));
 		append(buf, tmp, len);
 		return;
 	}
@@ -294,13 +319,13 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 		int i;
 
 		*complicated = 1;
-		__get_variable_from_expr(NULL, buf, expr->fn, len, complicated, no_parens);
+		__get_variable_from_expr(NULL, buf, expr->fn, len, complicated);
 		append(buf, "(", len);
 		i = 0;
 		FOR_EACH_PTR(expr->args, tmp) {
 			if (i++)
 				append(buf, ", ", len);
-			__get_variable_from_expr(NULL, buf, tmp, len, complicated, no_parens);
+			__get_variable_from_expr(NULL, buf, tmp, len, complicated);
 		} END_FOR_EACH_PTR(tmp);
 		append(buf, ")", len);
 		return;
@@ -309,7 +334,7 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 	case EXPR_FORCE_CAST:
 		__get_variable_from_expr(sym_ptr, buf,
 					 expr->cast_expression, len,
-					 complicated, no_parens);
+					 complicated);
 		return;
 	case EXPR_SIZEOF: {
 		sval_t sval;
@@ -331,16 +356,30 @@ static void __get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 		if (expr->expr_ident)
 			append(buf, expr->expr_ident->name, len);
 		return;
-	default:
+	case EXPR_SELECT:
+	case EXPR_CONDITIONAL:
 		*complicated = 1;
-		//printf("unknown type = %d\n", expr->type);
+		append(buf, "(", len);
+		__get_variable_from_expr(NULL, buf, expr->conditional, len, complicated);
+		append(buf, ") ?", len);
+		if (expr->cond_true)
+			__get_variable_from_expr(NULL, buf, expr->cond_true, len, complicated);
+		append(buf, ":", len);
+		__get_variable_from_expr(NULL, buf, expr->cond_false, len, complicated);
+		return;
+	default: {
+			char tmp[64];
+
+			snprintf(tmp, sizeof(tmp), "$expr_%p(%d)", expr, expr->type);
+			append(buf, tmp, len);
+			*complicated = 1;
+		}
 		return;
 	}
 }
 
 struct expr_str_cache_results {
 	struct expression *expr;
-	int no_parens;
 	char str[VAR_LEN];
 	struct symbol *sym;
 	int complicated;
@@ -348,7 +387,7 @@ struct expr_str_cache_results {
 
 static void get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 				     struct expression *expr, int len,
-				     int *complicated, int no_parens)
+				     int *complicated)
 {
 	static struct expr_str_cache_results cached[8];
 	struct symbol *tmp_sym = NULL;
@@ -356,8 +395,7 @@ static void get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(cached); i++) {
-		if (expr == cached[i].expr &&
-		    no_parens == cached[i].no_parens) {
+		if (expr == cached[i].expr) {
 			strncpy(buf, cached[i].str, len);
 			if (sym_ptr)
 				*sym_ptr = cached[i].sym;
@@ -366,12 +404,14 @@ static void get_variable_from_expr(struct symbol **sym_ptr, char *buf,
 		}
 	}
 
-	__get_variable_from_expr(&tmp_sym, buf, expr, len, complicated, no_parens);
+	__get_variable_from_expr(&tmp_sym, buf, expr, len, complicated);
 	if (sym_ptr)
 		*sym_ptr = tmp_sym;
 
+	if (expr->smatch_flags & Tmp)
+		return;
+
 	cached[idx].expr = expr;
-	cached[idx].no_parens = no_parens;
 	strncpy(cached[idx].str, buf, VAR_LEN);
 	cached[idx].sym = tmp_sym;
 	cached[idx].complicated = *complicated;
@@ -400,7 +440,7 @@ char *expr_to_str_sym(struct expression *expr, struct symbol **sym_ptr)
 	if (!expr)
 		return NULL;
 	get_variable_from_expr(sym_ptr, var_name, expr, sizeof(var_name),
-				 &complicated, 0);
+			       &complicated);
 	if (complicated < 2)
 		return alloc_string(var_name);
 	else
@@ -431,7 +471,7 @@ char *expr_to_var_sym(struct expression *expr,
 		return NULL;
 	expr = strip_expr(expr);
 	get_variable_from_expr(sym_ptr, var_name, expr, sizeof(var_name),
-				 &complicated, 1);
+			       &complicated);
 
 	if (complicated) {
 		if (sym_ptr)
@@ -589,7 +629,7 @@ int sym_name_is(const char *name, struct expression *expr)
 	return 0;
 }
 
-int is_zero(struct expression *expr)
+int expr_is_zero(struct expression *expr)
 {
 	sval_t sval;
 
@@ -818,24 +858,21 @@ int is_error_return(struct expression *expr)
 	return 0;
 }
 
-int getting_address(void)
+int getting_address(struct expression *expr)
 {
-	struct expression *tmp;
-	int i = 0;
-	int dot_ops = 0;
+	int deref_count = 0;
 
-	FOR_EACH_PTR_REVERSE(big_expression_stack, tmp) {
-		if (!i++)
-			continue;
-		if (tmp->type == EXPR_PREOP && tmp->op == '(')
-			continue;
-		if (tmp->op == '.' && !dot_ops++)
-			continue;
-		if (tmp->op == '&')
-			return 1;
-		return 0;
-	} END_FOR_EACH_PTR_REVERSE(tmp);
-	return 0;
+	while ((expr = expr_get_parent_expr(expr))) {
+		if (expr->type == EXPR_PREOP && expr->op == '*') {
+			/* &foo->bar->baz dereferences "foo->bar" */
+			if (deref_count == 0)
+				deref_count++;
+			return false;
+		}
+		if (expr->type == EXPR_PREOP && expr->op == '&')
+			return true;
+	}
+	return false;
 }
 
 int get_struct_and_member(struct expression *expr, const char **type, const char **member)
@@ -1027,8 +1064,23 @@ int get_param_num_from_sym(struct symbol *sym)
 	struct symbol *tmp;
 	int i;
 
-	if (!cur_func_sym)
-		return -1;
+	if (!sym)
+		return UNKNOWN_SCOPE;
+
+	if (sym->ctype.modifiers & MOD_TOPLEVEL) {
+		if (sym->ctype.modifiers & MOD_STATIC)
+			return FILE_SCOPE;
+		return GLOBAL_SCOPE;
+	}
+
+	if (!cur_func_sym) {
+		if (!parse_error) {
+			sm_msg("warn: internal.  problem with scope:  %s",
+			       sym->ident ? sym->ident->name : "<anon var>");
+		}
+		return GLOBAL_SCOPE;
+	}
+
 
 	i = 0;
 	FOR_EACH_PTR(cur_func_sym->ctype.base_type->arguments, tmp) {
@@ -1036,7 +1088,7 @@ int get_param_num_from_sym(struct symbol *sym)
 			return i;
 		i++;
 	} END_FOR_EACH_PTR(tmp);
-	return -1;
+	return LOCAL_SCOPE;
 }
 
 int get_param_num(struct expression *expr)
@@ -1045,12 +1097,28 @@ int get_param_num(struct expression *expr)
 	char *name;
 
 	if (!cur_func_sym)
-		return -1;
+		return UNKNOWN_SCOPE;
 	name = expr_to_var_sym(expr, &sym);
 	free_string(name);
 	if (!sym)
-		return -1;
+		return UNKNOWN_SCOPE;
 	return get_param_num_from_sym(sym);
+}
+
+struct symbol *get_param_sym_from_num(int num)
+{
+	struct symbol *sym;
+	int i;
+
+	if (!cur_func_sym)
+		return NULL;
+
+	i = 0;
+	FOR_EACH_PTR(cur_func_sym->ctype.base_type->arguments, sym) {
+		if (i++ == num)
+			return sym;
+	} END_FOR_EACH_PTR(sym);
+	return NULL;
 }
 
 int ms_since(struct timeval *start)

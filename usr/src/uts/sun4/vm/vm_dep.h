@@ -416,7 +416,7 @@ typedef	struct {
 }
 
 #define	PLCNT_DECR(pp, mn, mtype, szc, flags) {				\
-	long	cnt = ((-1) << PAGE_BSZS_SHIFT(szc));			\
+	long	cnt = ((ULONG_MAX) << PAGE_BSZS_SHIFT(szc));		\
 	PLCNT_DO(pp, mn, mtype, szc, cnt, flags);			\
 }
 
@@ -473,6 +473,7 @@ typedef	struct {
 	spgcnt_t _cnt = (spgcnt_t)(cnt);				       \
 	int _mn;							       \
 	pgcnt_t _np;							       \
+	rv = 0;								       \
 	if (&plat_mem_node_intersect_range != NULL) {			       \
 		for (_mn = 0; _mn < max_mem_nodes; _mn++) {		       \
 			plat_mem_node_intersect_range((pfn), _cnt, _mn, &_np); \
@@ -527,7 +528,7 @@ extern plcnt_t	plcnt;
  * if allocation from the RELOC pool failed and there is sufficient cage
  * memory, attempt to allocate from the NORELOC pool.
  */
-#define	MTYPE_NEXT(mnode, mtype, flags) { 				\
+#define	MTYPE_NEXT(mnode, mtype, flags) {				\
 	if (!(flags & (PG_NORELOC | PGI_NOCAGE | PGI_RELOCONLY)) &&	\
 	    (kcage_freemem >= kcage_lotsfree)) {			\
 		if (plcnt[mnode][MTYPE_NORELOC].plc_mt_pgmax == 0) {	\
@@ -629,6 +630,7 @@ switch (consistent_coloring) {						\
 		cmn_err(CE_WARN,					\
 			"AS_2_BIN: bad consistent coloring value");	\
 		/* assume default algorithm -> continue */		\
+		/* FALLTHROUGH */					\
 	case 0: {                                                       \
 		uint32_t ndx, new;					\
 		int slew = 0;						\

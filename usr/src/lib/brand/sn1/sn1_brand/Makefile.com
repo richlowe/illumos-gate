@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2020 Joyent, Inc.
 #
 
 LIBRARY =	sn1_brand.a
@@ -67,14 +68,14 @@ CFLAGS +=	$(CCVERBOSE)
 DYNFLAGS +=	$(DYNFLAGS_$(CLASS))
 DYNFLAGS +=	$(BLOCAL) $(ZNOVERSION) -Wl,-e_start
 #DYNFLAGS +=	-R$(NATIVE_DIR)/lib -R$(NATIVE_DIR)/usr/lib
-LDLIBS +=	-lc -lmapmalloc
+LDLIBS +=	-lmapmalloc -lc
 
+ZGUIDANCE =	-Wl,-zguidance=nounused
 $(LIBS):= PICS += $(SHAREDOBJS)
 
 .KEEP_STATE:
 
 all: $(LIBS)
 
-lint: lintcheck
 
 include $(SRC)/lib/Makefile.targ

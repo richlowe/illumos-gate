@@ -13,6 +13,7 @@
  * Copyright 2013 Nexenta Inc.  All rights reserved.
  * Copyright (c) 2014, 2016 by Delphix. All rights reserved.
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2019 Joshua M. Clulow <josh@sysmgr.org>
  */
 
 /* Based on the NetBSD virtio driver by Minoura Makoto. */
@@ -62,6 +63,7 @@
 #include <sys/ethernet.h>
 #include <sys/vlan.h>
 #include <sys/sysmacros.h>
+#include <sys/smbios.h>
 
 #include <sys/dlpi.h>
 #include <sys/taskq.h>
@@ -72,6 +74,7 @@
 #include <sys/random.h>
 #include <sys/containerof.h>
 #include <sys/stream.h>
+#include <inet/tcp.h>
 
 #include <sys/mac.h>
 #include <sys/mac_provider.h>
@@ -178,6 +181,13 @@ static const uchar_t vioif_broadcast[ETHERADDRL] = {
  * Interval for the periodic TX reclaim.
  */
 uint_t vioif_reclaim_ms = 200;
+
+/*
+ * Allow the operator to override the kinds of interrupts we'll use for
+ * vioif.  This value defaults to -1 so that it can be overridden to 0 in
+ * /etc/system.
+ */
+int vioif_allowed_int_types = -1;
 
 /*
  * DMA attribute template for transmit and receive buffers.  The SGL entry
@@ -1009,7 +1019,7 @@ vioif_send(vioif_t *vif, mblk_t *mp)
 	for (nmp = mp; nmp; nmp = nmp->b_cont)
 		msg_size += MBLKL(nmp);
 
-	if (vif->vif_tx_tso4) {
+	if (vif->vif_tx_tso4 || vif->vif_tx_tso6) {
 		mac_lso_get(mp, &lso_mss, &lso_flags);
 		lso_required = (lso_flags & HW_LSO) != 0;
 	}
@@ -1075,8 +1085,70 @@ vioif_send(vioif_t *vif, mblk_t *mp)
 	 * Setup LSO fields if required.
 	 */
 	if (lso_required) {
-		vnh->vnh_gso_type = VIRTIO_NET_HDR_GSO_TCPV4;
+		mac_ether_offload_flags_t needed;
+		mac_ether_offload_info_t meo;
+		uint32_t cksum;
+		size_t len;
+		mblk_t *pullmp = NULL;
+		tcpha_t *tcpha;
+
+		if (mac_ether_offload_info(mp, &meo) != 0) {
+			goto fail;
+		}
+
+		needed = MEOI_L2INFO_SET | MEOI_L3INFO_SET | MEOI_L4INFO_SET;
+		if ((meo.meoi_flags & needed) != needed) {
+			goto fail;
+		}
+
+		if (meo.meoi_l4proto != IPPROTO_TCP) {
+			goto fail;
+		}
+
+		if (meo.meoi_l3proto == ETHERTYPE_IP && vif->vif_tx_tso4) {
+			vnh->vnh_gso_type = VIRTIO_NET_HDR_GSO_TCPV4;
+		} else if (meo.meoi_l3proto == ETHERTYPE_IPV6 &&
+		    vif->vif_tx_tso6) {
+			vnh->vnh_gso_type = VIRTIO_NET_HDR_GSO_TCPV6;
+		} else {
+			goto fail;
+		}
+
+		/*
+		 * The TCP stack does not include the length in the TCP
+		 * pseudo-header when it is performing LSO since hardware
+		 * generally asks for it to be removed (as it'll change).
+		 * Unfortunately, for virtio, we actually need it. This means we
+		 * need to go through and calculate the actual length and fix
+		 * things up. Because the virtio spec cares about the ECN flag
+		 * and indicating that, at least this means we'll have that
+		 * available as well.
+		 */
+		if (MBLKL(mp) < vnh->vnh_hdr_len) {
+			pullmp = msgpullup(mp, vnh->vnh_hdr_len);
+			if (pullmp == NULL)
+				goto fail;
+			tcpha = (tcpha_t *)(pullmp->b_rptr + meo.meoi_l2hlen +
+			    meo.meoi_l3hlen);
+		} else {
+			tcpha = (tcpha_t *)(mp->b_rptr + meo.meoi_l2hlen +
+			    meo.meoi_l3hlen);
+		}
+
+		len = meo.meoi_len - meo.meoi_l2hlen - meo.meoi_l3hlen;
+		cksum = ntohs(tcpha->tha_sum) + len;
+		cksum = (cksum >> 16) + (cksum & 0xffff);
+		cksum = (cksum >> 16) + (cksum & 0xffff);
+		tcpha->tha_sum = htons(cksum);
+
+		if (tcpha->tha_flags & TH_CWR) {
+			vnh->vnh_gso_type |= VIRTIO_NET_HDR_GSO_ECN;
+		}
 		vnh->vnh_gso_size = (uint16_t)lso_mss;
+		vnh->vnh_hdr_len = meo.meoi_l2hlen + meo.meoi_l3hlen +
+		    meo.meoi_l4hlen;
+
+		freemsg(pullmp);
 	}
 
 	/*
@@ -1444,8 +1516,9 @@ vioif_m_getcapab(void *arg, mac_capab_t cap, void *cap_data)
 		}
 
 		mac_capab_lso_t *lso = cap_data;
-		lso->lso_flags = LSO_TX_BASIC_TCP_IPV4;
+		lso->lso_flags = LSO_TX_BASIC_TCP_IPV4 | LSO_TX_BASIC_TCP_IPV6;
 		lso->lso_basic_tcp_ipv4.lso_max = VIOIF_RX_DATA_SIZE;
+		lso->lso_basic_tcp_ipv6.lso_max = VIOIF_RX_DATA_SIZE;
 
 		return (B_TRUE);
 	}
@@ -1547,6 +1620,7 @@ vioif_check_features(vioif_t *vif)
 
 	vif->vif_tx_csum = 0;
 	vif->vif_tx_tso4 = 0;
+	vif->vif_tx_tso6 = 0;
 
 	if (vioif_has_feature(vif, VIRTIO_NET_F_CSUM)) {
 		/*
@@ -1560,6 +1634,7 @@ vioif_check_features(vioif_t *vif)
 		 */
 		boolean_t gso = vioif_has_feature(vif, VIRTIO_NET_F_GSO);
 		boolean_t tso4 = vioif_has_feature(vif, VIRTIO_NET_F_HOST_TSO4);
+		boolean_t tso6 = vioif_has_feature(vif, VIRTIO_NET_F_HOST_TSO6);
 		boolean_t ecn = vioif_has_feature(vif, VIRTIO_NET_F_HOST_ECN);
 
 		/*
@@ -1569,10 +1644,56 @@ vioif_check_features(vioif_t *vif)
 		 * we require the device to support the combination of
 		 * segmentation offload and ECN support.
 		 */
-		if (gso || (tso4 && ecn)) {
+		if (gso) {
+			vif->vif_tx_tso4 = 1;
+			vif->vif_tx_tso6 = 1;
+		}
+		if (tso4 && ecn) {
 			vif->vif_tx_tso4 = 1;
 		}
+		if (tso6 && ecn) {
+			vif->vif_tx_tso6 = 1;
+		}
 	}
+}
+
+static int
+vioif_select_interrupt_types(void)
+{
+	id_t id;
+	smbios_system_t sys;
+	smbios_info_t info;
+
+	if (vioif_allowed_int_types != -1) {
+		/*
+		 * If this value was tuned via /etc/system or the debugger,
+		 * use the provided value directly.
+		 */
+		return (vioif_allowed_int_types);
+	}
+
+	if ((id = smbios_info_system(ksmbios, &sys)) == SMB_ERR ||
+	    smbios_info_common(ksmbios, id, &info) == SMB_ERR) {
+		/*
+		 * The system may not have valid SMBIOS data, so ignore a
+		 * failure here.
+		 */
+		return (0);
+	}
+
+	if (strcmp(info.smbi_manufacturer, "Google") == 0 &&
+	    strcmp(info.smbi_product, "Google Compute Engine") == 0) {
+		/*
+		 * An undiagnosed issue with the Google Compute Engine (GCE)
+		 * hypervisor exists.  In this environment, no RX interrupts
+		 * are received if MSI-X handlers are installed.  This does not
+		 * appear to be true for the Virtio SCSI driver.  Fixed
+		 * interrupts do appear to work, so we fall back for now:
+		 */
+		return (DDI_INTR_TYPE_FIXED);
+	}
+
+	return (0);
 }
 
 static int
@@ -1605,7 +1726,8 @@ vioif_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		goto fail;
 	}
 
-	if (virtio_init_complete(vio, 0) != DDI_SUCCESS) {
+	if (virtio_init_complete(vio, vioif_select_interrupt_types()) !=
+	    DDI_SUCCESS) {
 		dev_err(dip, CE_WARN, "failed to complete Virtio init");
 		goto fail;
 	}

@@ -21,10 +21,10 @@
 
 /*
  * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2011, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2011, 2020 by Delphix. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright (c) 2017 Datto Inc.
  * Copyright (c) 2017, Intel Corporation.
  */
@@ -35,6 +35,15 @@
 #define	_SYS_FS_ZFS_H
 
 #include <sys/time.h>
+/*
+ * In OpenZFS we include sys/zio_priority.h to get the enum value of
+ * ZIO_PRIORITY_NUM_QUEUEABLE, which is used for the various array sizes in
+ * the structure definitions below. However, in illumos zio_priority.h is not
+ * readily available to the userland code where we have a very large number of
+ * files including sys/zfs.h. Thus, we define ZIO_PRIORITY_N_QUEUEABLE here and
+ * this should be kept in sync if ZIO_PRIORITY_NUM_QUEUEABLE changes.
+ */
+#define	ZIO_PRIORITY_N_QUEUEABLE	8
 
 #ifdef	__cplusplus
 extern "C" {
@@ -552,6 +561,11 @@ typedef enum zfs_key_location {
 #define	ZPL_VERSION_USERSPACE		ZPL_VERSION_4
 #define	ZPL_VERSION_SA			ZPL_VERSION_5
 
+/* Persistent L2ARC version */
+#define	L2ARC_PERSISTENT_VERSION_1	1ULL
+#define	L2ARC_PERSISTENT_VERSION	L2ARC_PERSISTENT_VERSION_1
+#define	L2ARC_PERSISTENT_VERSION_STRING	"1"
+
 /* Rewind policy information */
 #define	ZPOOL_NO_REWIND		1  /* No policy - default behavior */
 #define	ZPOOL_NEVER_REWIND	2  /* Do not search for best txg or rewind */
@@ -601,6 +615,55 @@ typedef struct zpool_load_policy {
 #define	ZPOOL_CONFIG_CHECKPOINT_STATS	"checkpoint_stats" /* not on disk */
 #define	ZPOOL_CONFIG_VDEV_STATS		"vdev_stats"	/* not stored on disk */
 #define	ZPOOL_CONFIG_INDIRECT_SIZE	"indirect_size"	/* not stored on disk */
+
+/* container nvlist of extended stats */
+#define	ZPOOL_CONFIG_VDEV_STATS_EX	"vdev_stats_ex"
+
+/* Active queue read/write stats */
+#define	ZPOOL_CONFIG_VDEV_SYNC_R_ACTIVE_QUEUE	"vdev_sync_r_active_queue"
+#define	ZPOOL_CONFIG_VDEV_SYNC_W_ACTIVE_QUEUE	"vdev_sync_w_active_queue"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_R_ACTIVE_QUEUE	"vdev_async_r_active_queue"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_W_ACTIVE_QUEUE	"vdev_async_w_active_queue"
+#define	ZPOOL_CONFIG_VDEV_SCRUB_ACTIVE_QUEUE	"vdev_async_scrub_active_queue"
+#define	ZPOOL_CONFIG_VDEV_TRIM_ACTIVE_QUEUE	"vdev_async_trim_active_queue"
+
+/* Queue sizes */
+#define	ZPOOL_CONFIG_VDEV_SYNC_R_PEND_QUEUE	"vdev_sync_r_pend_queue"
+#define	ZPOOL_CONFIG_VDEV_SYNC_W_PEND_QUEUE	"vdev_sync_w_pend_queue"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_R_PEND_QUEUE	"vdev_async_r_pend_queue"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_W_PEND_QUEUE	"vdev_async_w_pend_queue"
+#define	ZPOOL_CONFIG_VDEV_SCRUB_PEND_QUEUE	"vdev_async_scrub_pend_queue"
+#define	ZPOOL_CONFIG_VDEV_TRIM_PEND_QUEUE	"vdev_async_trim_pend_queue"
+
+/* Latency read/write histogram stats */
+#define	ZPOOL_CONFIG_VDEV_TOT_R_LAT_HISTO	"vdev_tot_r_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_TOT_W_LAT_HISTO	"vdev_tot_w_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_DISK_R_LAT_HISTO	"vdev_disk_r_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_DISK_W_LAT_HISTO	"vdev_disk_w_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_SYNC_R_LAT_HISTO	"vdev_sync_r_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_SYNC_W_LAT_HISTO	"vdev_sync_w_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_R_LAT_HISTO	"vdev_async_r_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_W_LAT_HISTO	"vdev_async_w_lat_histo"
+#define	ZPOOL_CONFIG_VDEV_SCRUB_LAT_HISTO	"vdev_scrub_histo"
+#define	ZPOOL_CONFIG_VDEV_TRIM_LAT_HISTO	"vdev_trim_histo"
+
+/* Request size histograms */
+#define	ZPOOL_CONFIG_VDEV_SYNC_IND_R_HISTO	"vdev_sync_ind_r_histo"
+#define	ZPOOL_CONFIG_VDEV_SYNC_IND_W_HISTO	"vdev_sync_ind_w_histo"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_IND_R_HISTO	"vdev_async_ind_r_histo"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_IND_W_HISTO	"vdev_async_ind_w_histo"
+#define	ZPOOL_CONFIG_VDEV_IND_SCRUB_HISTO	"vdev_ind_scrub_histo"
+#define	ZPOOL_CONFIG_VDEV_IND_TRIM_HISTO	"vdev_ind_trim_histo"
+#define	ZPOOL_CONFIG_VDEV_SYNC_AGG_R_HISTO	"vdev_sync_agg_r_histo"
+#define	ZPOOL_CONFIG_VDEV_SYNC_AGG_W_HISTO	"vdev_sync_agg_w_histo"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_AGG_R_HISTO	"vdev_async_agg_r_histo"
+#define	ZPOOL_CONFIG_VDEV_ASYNC_AGG_W_HISTO	"vdev_async_agg_w_histo"
+#define	ZPOOL_CONFIG_VDEV_AGG_SCRUB_HISTO	"vdev_agg_scrub_histo"
+#define	ZPOOL_CONFIG_VDEV_AGG_TRIM_HISTO	"vdev_agg_trim_histo"
+
+/* Number of slow IOs */
+#define	ZPOOL_CONFIG_VDEV_SLOW_IOS		"vdev_slow_ios"
+
 #define	ZPOOL_CONFIG_WHOLE_DISK		"whole_disk"
 #define	ZPOOL_CONFIG_ERRCOUNT		"error_count"
 #define	ZPOOL_CONFIG_NOT_PRESENT	"not_present"
@@ -1001,6 +1064,7 @@ typedef struct vdev_stat {
 	uint64_t	vs_initialize_action_time; /* time_t */
 	uint64_t	vs_checkpoint_space;    /* checkpoint-consumed space */
 	uint64_t	vs_resilver_deferred;	/* resilver deferred	*/
+	uint64_t	vs_slow_ios;		/* slow IOs */
 	uint64_t	vs_trim_errors;		/* trimming errors	*/
 	uint64_t	vs_trim_notsup;		/* supported by device */
 	uint64_t	vs_trim_bytes_done;	/* bytes trimmed */
@@ -1008,6 +1072,58 @@ typedef struct vdev_stat {
 	uint64_t	vs_trim_state;		/* vdev_trim_state_t */
 	uint64_t	vs_trim_action_time;	/* time_t */
 } vdev_stat_t;
+
+/*
+ * Extended stats
+ *
+ * These are stats which aren't included in the original iostat output.  For
+ * convenience, they are grouped together in vdev_stat_ex, although each stat
+ * is individually exported as a nvlist.
+ */
+typedef struct vdev_stat_ex {
+	/* Number of ZIOs issued to disk and waiting to finish */
+	uint64_t vsx_active_queue[ZIO_PRIORITY_N_QUEUEABLE];
+
+	/* Number of ZIOs pending to be issued to disk */
+	uint64_t vsx_pend_queue[ZIO_PRIORITY_N_QUEUEABLE];
+
+	/*
+	 * Below are the histograms for various latencies. Buckets are in
+	 * units of nanoseconds.
+	 */
+
+	/*
+	 * 2^37 nanoseconds = 134s. Timeouts will probably start kicking in
+	 * before this.
+	 */
+#define	VDEV_L_HISTO_BUCKETS	37	/* Latency histo buckets */
+#define	VDEV_RQ_HISTO_BUCKETS	25	/* Request size histo buckets */
+
+	/* Amount of time in ZIO queue (ns) */
+	uint64_t vsx_queue_histo[ZIO_PRIORITY_N_QUEUEABLE]
+	    [VDEV_L_HISTO_BUCKETS];
+
+	/* Total ZIO latency (ns).  Includes queuing and disk access time */
+	uint64_t vsx_total_histo[ZIO_TYPES][VDEV_L_HISTO_BUCKETS];
+
+	/* Amount of time to read/write the disk (ns) */
+	uint64_t vsx_disk_histo[ZIO_TYPES][VDEV_L_HISTO_BUCKETS];
+
+	/* "lookup the bucket for a value" macro */
+#define	HISTO(val, buckets)	(val != 0 ? MIN(highbit64(val) - 1, \
+	    buckets - 1) : 0)
+#define	L_HISTO(a)	HISTO(a, VDEV_L_HISTO_BUCKETS)
+#define	RQ_HISTO(a)	HISTO(a, VDEV_RQ_HISTO_BUCKETS)
+
+	/* Physical IO histogram */
+	uint64_t vsx_ind_histo[ZIO_PRIORITY_N_QUEUEABLE]
+	    [VDEV_RQ_HISTO_BUCKETS];
+
+	/* Delegated (aggregated) physical IO histogram */
+	uint64_t vsx_agg_histo[ZIO_PRIORITY_N_QUEUEABLE]
+	    [VDEV_RQ_HISTO_BUCKETS];
+
+} vdev_stat_ex_t;
 
 /*
  * DDT statistics.  Note: all fields should be 64-bit because this
@@ -1057,88 +1173,110 @@ typedef struct ddt_histogram {
  * /dev/zfs ioctl numbers.
  */
 typedef enum zfs_ioc {
+	/*
+	 * Core features - 81/128 numbers reserved.
+	 */
+#ifdef __FreeBSD__
+	ZFS_IOC_FIRST = 0,
+#else
 	ZFS_IOC_FIRST =	('Z' << 8),
+#endif
 	ZFS_IOC = ZFS_IOC_FIRST,
-	ZFS_IOC_POOL_CREATE = ZFS_IOC_FIRST,
-	ZFS_IOC_POOL_DESTROY,
-	ZFS_IOC_POOL_IMPORT,
-	ZFS_IOC_POOL_EXPORT,
-	ZFS_IOC_POOL_CONFIGS,
-	ZFS_IOC_POOL_STATS,
-	ZFS_IOC_POOL_TRYIMPORT,
-	ZFS_IOC_POOL_SCAN,
-	ZFS_IOC_POOL_FREEZE,
-	ZFS_IOC_POOL_UPGRADE,
-	ZFS_IOC_POOL_GET_HISTORY,
-	ZFS_IOC_VDEV_ADD,
-	ZFS_IOC_VDEV_REMOVE,
-	ZFS_IOC_VDEV_SET_STATE,
-	ZFS_IOC_VDEV_ATTACH,
-	ZFS_IOC_VDEV_DETACH,
-	ZFS_IOC_VDEV_SETPATH,
-	ZFS_IOC_VDEV_SETFRU,
-	ZFS_IOC_OBJSET_STATS,
-	ZFS_IOC_OBJSET_ZPLPROPS,
-	ZFS_IOC_DATASET_LIST_NEXT,
-	ZFS_IOC_SNAPSHOT_LIST_NEXT,
-	ZFS_IOC_SET_PROP,
-	ZFS_IOC_CREATE,
-	ZFS_IOC_DESTROY,
-	ZFS_IOC_ROLLBACK,
-	ZFS_IOC_RENAME,
-	ZFS_IOC_RECV,
-	ZFS_IOC_SEND,
-	ZFS_IOC_INJECT_FAULT,
-	ZFS_IOC_CLEAR_FAULT,
-	ZFS_IOC_INJECT_LIST_NEXT,
-	ZFS_IOC_ERROR_LOG,
-	ZFS_IOC_CLEAR,
-	ZFS_IOC_PROMOTE,
-	ZFS_IOC_SNAPSHOT,
-	ZFS_IOC_DSOBJ_TO_DSNAME,
-	ZFS_IOC_OBJ_TO_PATH,
-	ZFS_IOC_POOL_SET_PROPS,
-	ZFS_IOC_POOL_GET_PROPS,
-	ZFS_IOC_SET_FSACL,
-	ZFS_IOC_GET_FSACL,
-	ZFS_IOC_SHARE,
-	ZFS_IOC_INHERIT_PROP,
-	ZFS_IOC_SMB_ACL,
-	ZFS_IOC_USERSPACE_ONE,
-	ZFS_IOC_USERSPACE_MANY,
-	ZFS_IOC_USERSPACE_UPGRADE,
-	ZFS_IOC_HOLD,
-	ZFS_IOC_RELEASE,
-	ZFS_IOC_GET_HOLDS,
-	ZFS_IOC_OBJSET_RECVD_PROPS,
-	ZFS_IOC_VDEV_SPLIT,
-	ZFS_IOC_NEXT_OBJ,
-	ZFS_IOC_DIFF,
-	ZFS_IOC_TMP_SNAPSHOT,
-	ZFS_IOC_OBJ_TO_STATS,
-	ZFS_IOC_SPACE_WRITTEN,
-	ZFS_IOC_SPACE_SNAPS,
-	ZFS_IOC_DESTROY_SNAPS,
-	ZFS_IOC_POOL_REGUID,
-	ZFS_IOC_POOL_REOPEN,
-	ZFS_IOC_SEND_PROGRESS,
-	ZFS_IOC_LOG_HISTORY,
-	ZFS_IOC_SEND_NEW,
-	ZFS_IOC_SEND_SPACE,
-	ZFS_IOC_CLONE,
-	ZFS_IOC_BOOKMARK,
-	ZFS_IOC_GET_BOOKMARKS,
-	ZFS_IOC_DESTROY_BOOKMARKS,
-	ZFS_IOC_CHANNEL_PROGRAM,
-	ZFS_IOC_REMAP,
-	ZFS_IOC_POOL_CHECKPOINT,
-	ZFS_IOC_POOL_DISCARD_CHECKPOINT,
-	ZFS_IOC_POOL_INITIALIZE,
-	ZFS_IOC_POOL_SYNC,
-	ZFS_IOC_LOAD_KEY,
-	ZFS_IOC_UNLOAD_KEY,
-	ZFS_IOC_CHANGE_KEY,
-	ZFS_IOC_POOL_TRIM,
+	ZFS_IOC_POOL_CREATE = ZFS_IOC_FIRST,	/* 0x5a00 */
+	ZFS_IOC_POOL_DESTROY,			/* 0x5a01 */
+	ZFS_IOC_POOL_IMPORT,			/* 0x5a02 */
+	ZFS_IOC_POOL_EXPORT,			/* 0x5a03 */
+	ZFS_IOC_POOL_CONFIGS,			/* 0x5a04 */
+	ZFS_IOC_POOL_STATS,			/* 0x5a05 */
+	ZFS_IOC_POOL_TRYIMPORT,			/* 0x5a06 */
+	ZFS_IOC_POOL_SCAN,			/* 0x5a07 */
+	ZFS_IOC_POOL_FREEZE,			/* 0x5a08 */
+	ZFS_IOC_POOL_UPGRADE,			/* 0x5a09 */
+	ZFS_IOC_POOL_GET_HISTORY,		/* 0x5a0a */
+	ZFS_IOC_VDEV_ADD,			/* 0x5a0b */
+	ZFS_IOC_VDEV_REMOVE,			/* 0x5a0c */
+	ZFS_IOC_VDEV_SET_STATE,			/* 0x5a0d */
+	ZFS_IOC_VDEV_ATTACH,			/* 0x5a0e */
+	ZFS_IOC_VDEV_DETACH,			/* 0x5a0f */
+	ZFS_IOC_VDEV_SETPATH,			/* 0x5a10 */
+	ZFS_IOC_VDEV_SETFRU,			/* 0x5a11 */
+	ZFS_IOC_OBJSET_STATS,			/* 0x5a12 */
+	ZFS_IOC_OBJSET_ZPLPROPS,		/* 0x5a13 */
+	ZFS_IOC_DATASET_LIST_NEXT,		/* 0x5a14 */
+	ZFS_IOC_SNAPSHOT_LIST_NEXT,		/* 0x5a15 */
+	ZFS_IOC_SET_PROP,			/* 0x5a16 */
+	ZFS_IOC_CREATE,				/* 0x5a17 */
+	ZFS_IOC_DESTROY,			/* 0x5a18 */
+	ZFS_IOC_ROLLBACK,			/* 0x5a19 */
+	ZFS_IOC_RENAME,				/* 0x5a1a */
+	ZFS_IOC_RECV,				/* 0x5a1b */
+	ZFS_IOC_SEND,				/* 0x5a1c */
+	ZFS_IOC_INJECT_FAULT,			/* 0x5a1d */
+	ZFS_IOC_CLEAR_FAULT,			/* 0x5a1e */
+	ZFS_IOC_INJECT_LIST_NEXT,		/* 0x5a1f */
+	ZFS_IOC_ERROR_LOG,			/* 0x5a20 */
+	ZFS_IOC_CLEAR,				/* 0x5a21 */
+	ZFS_IOC_PROMOTE,			/* 0x5a22 */
+	ZFS_IOC_SNAPSHOT,			/* 0x5a23 */
+	ZFS_IOC_DSOBJ_TO_DSNAME,		/* 0x5a24 */
+	ZFS_IOC_OBJ_TO_PATH,			/* 0x5a25 */
+	ZFS_IOC_POOL_SET_PROPS,			/* 0x5a26 */
+	ZFS_IOC_POOL_GET_PROPS,			/* 0x5a27 */
+	ZFS_IOC_SET_FSACL,			/* 0x5a28 */
+	ZFS_IOC_GET_FSACL,			/* 0x5a29 */
+	ZFS_IOC_SHARE,				/* 0x5a2a */
+	ZFS_IOC_INHERIT_PROP,			/* 0x5a2b */
+	ZFS_IOC_SMB_ACL,			/* 0x5a2c */
+	ZFS_IOC_USERSPACE_ONE,			/* 0x5a2d */
+	ZFS_IOC_USERSPACE_MANY,			/* 0x5a2e */
+	ZFS_IOC_USERSPACE_UPGRADE,		/* 0x5a2f */
+	ZFS_IOC_HOLD,				/* 0x5a30 */
+	ZFS_IOC_RELEASE,			/* 0x5a31 */
+	ZFS_IOC_GET_HOLDS,			/* 0x5a32 */
+	ZFS_IOC_OBJSET_RECVD_PROPS,		/* 0x5a33 */
+	ZFS_IOC_VDEV_SPLIT,			/* 0x5a34 */
+	ZFS_IOC_NEXT_OBJ,			/* 0x5a35 */
+	ZFS_IOC_DIFF,				/* 0x5a36 */
+	ZFS_IOC_TMP_SNAPSHOT,			/* 0x5a37 */
+	ZFS_IOC_OBJ_TO_STATS,			/* 0x5a38 */
+	ZFS_IOC_SPACE_WRITTEN,			/* 0x5a39 */
+	ZFS_IOC_SPACE_SNAPS,			/* 0x5a3a */
+	ZFS_IOC_DESTROY_SNAPS,			/* 0x5a3b */
+	ZFS_IOC_POOL_REGUID,			/* 0x5a3c */
+	ZFS_IOC_POOL_REOPEN,			/* 0x5a3d */
+	ZFS_IOC_SEND_PROGRESS,			/* 0x5a3e */
+	ZFS_IOC_LOG_HISTORY,			/* 0x5a3f */
+	ZFS_IOC_SEND_NEW,			/* 0x5a40 */
+	ZFS_IOC_SEND_SPACE,			/* 0x5a41 */
+	ZFS_IOC_CLONE,				/* 0x5a42 */
+	ZFS_IOC_BOOKMARK,			/* 0x5a43 */
+	ZFS_IOC_GET_BOOKMARKS,			/* 0x5a44 */
+	ZFS_IOC_DESTROY_BOOKMARKS,		/* 0x5a45 */
+	ZFS_IOC_POOL_SYNC,			/* 0x5a47 */
+	ZFS_IOC_CHANNEL_PROGRAM,		/* 0x5a48 */
+	ZFS_IOC_LOAD_KEY,			/* 0x5a49 */
+	ZFS_IOC_UNLOAD_KEY,			/* 0x5a4a */
+	ZFS_IOC_CHANGE_KEY,			/* 0x5a4b */
+	ZFS_IOC_REMAP,				/* 0x5a4c */
+	ZFS_IOC_POOL_CHECKPOINT,		/* 0x5a4d */
+	ZFS_IOC_POOL_DISCARD_CHECKPOINT,	/* 0x5a4e */
+	ZFS_IOC_POOL_INITIALIZE,		/* 0x5a4f */
+	ZFS_IOC_POOL_TRIM,			/* 0x5a50 */
+	ZFS_IOC_REDACT,				/* 0x5a51 */
+	ZFS_IOC_GET_BOOKMARK_PROPS,		/* 0x5a52 */
+
+	/*
+	 * Per-platform (Optional) - 8/128 numbers reserved.
+	 */
+	ZFS_IOC_PLATFORM = ZFS_IOC_FIRST + 0x80,
+	ZFS_IOC_EVENTS_NEXT,			/* 0x81 (Linux) */
+	ZFS_IOC_EVENTS_CLEAR,			/* 0x82 (Linux) */
+	ZFS_IOC_EVENTS_SEEK,			/* 0x83 (Linux) */
+	ZFS_IOC_NEXTBOOT,			/* 0x84 (FreeBSD) */
+	ZFS_IOC_JAIL,				/* 0x85 (FreeBSD) */
+	ZFS_IOC_UNJAIL,				/* 0x86 (FreeBSD) */
+	ZFS_IOC_SET_BOOTENV,			/* 0x87 */
+	ZFS_IOC_GET_BOOTENV,			/* 0x88 */
 	ZFS_IOC_LAST
 } zfs_ioc_t;
 
@@ -1159,6 +1297,11 @@ typedef enum {
 	ZFS_ERR_FROM_IVSET_GUID_MISSING,
 	ZFS_ERR_FROM_IVSET_GUID_MISMATCH,
 	ZFS_ERR_SPILL_BLOCK_FLAG_MISSING,
+	ZFS_ERR_UNKNOWN_SEND_STREAM_FEATURE,
+	ZFS_ERR_IOC_CMD_UNAVAIL,
+	ZFS_ERR_IOC_ARG_UNAVAIL,
+	ZFS_ERR_IOC_ARG_REQUIRED,
+	ZFS_ERR_IOC_ARG_BADTYPE,
 } zfs_errno_t;
 
 /*

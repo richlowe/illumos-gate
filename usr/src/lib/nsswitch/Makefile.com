@@ -30,8 +30,6 @@ SRCDIR =	../common
 
 DEBUGLIBS =	$(DYNLIB1)
 
-LINTFLAGS =	-ux
-LINTOUT =	lint.out
 
 CPPFLAGS +=	-D_REENTRANT
 
@@ -47,7 +45,6 @@ SMATCH=off
 LDLIBS +=	-lc
 HSONAME =
 
-CLEANFILES +=	$(LINTOUT)
 CLOBBERFILES +=	$(DYNLIB1)
 
 # Leaf target makefiles establish exactly what they will build by assigning to

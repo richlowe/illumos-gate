@@ -24,6 +24,9 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2020 Joyent, Inc.
+ */
 
 #include <sys/types.h>
 #include <sys/inttypes.h>
@@ -81,6 +84,7 @@ dboot_elfload64(uintptr_t file_image)
 	paddr_t dst;
 	paddr_t next_addr;
 
+	next_addr = 0;
 	elf_file = (caddr_t)file_image;
 
 	allphdrs = NULL;

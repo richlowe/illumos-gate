@@ -21,7 +21,8 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2018 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Nexenta by DDN, Inc. All rights reserved.
+ * Copyright 2020 RackTop Systems, Inc.
  */
 
 #ifndef	_LIBSMB_H
@@ -160,6 +161,7 @@ typedef enum {
 	SMB_CI_ENCRYPT,
 	SMB_CI_MIN_PROTOCOL,
 	SMB_CI_BYPASS_TRAVERSE_CHECKING,
+	SMB_CI_ENCRYPT_CIPHER,
 
 	SMB_CI_MAX
 } smb_cfg_id_t;
@@ -221,6 +223,7 @@ extern int smb_config_check_protocol(char *);
 extern uint32_t smb_config_get_max_protocol(void);
 extern uint32_t smb_config_get_min_protocol(void);
 extern void smb_config_upgrade(void);
+extern uint16_t smb31_config_get_encrypt_cipher(void);
 
 extern smb_cfg_val_t smb_config_get_require(smb_cfg_id_t);
 
@@ -638,6 +641,7 @@ typedef struct smb_trusted_domains {
 typedef struct smb_dcinfo {
 	char			dc_name[MAXHOSTNAMELEN];
 	smb_inaddr_t		dc_addr;
+	uint32_t		dc_flags;
 } smb_dcinfo_t;
 
 /*
@@ -722,7 +726,9 @@ boolean_t smb_lgrp_itererror(smb_giter_t *);
 int smb_lgrp_iterate(smb_giter_t *, smb_group_t *);
 
 int smb_lookup_sid(const char *, lsa_account_t *);
+int smb_lookup_lsid(const char *, lsa_account_t *);
 int smb_lookup_name(const char *, sid_type_t, lsa_account_t *);
+int smb_lookup_lname(const char *, sid_type_t, lsa_account_t *);
 
 #define	SMB_LGRP_SUCCESS		0
 #define	SMB_LGRP_INVALID_ARG		1

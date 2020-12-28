@@ -23,6 +23,7 @@
  * Copyright (c) 2011, 2016 by Delphix. All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc. All rights reserved.
  * Copyright 2014 Josef "Jeff" Sipek <jeffpc@josefsipek.net>
+ * Copyright 2020 Joyent, Inc.
  */
 /*
  * Copyright (c) 2010, Intel Corporation.
@@ -30,9 +31,6 @@
  */
 /*
  * Portions Copyright 2009 Advanced Micro Devices, Inc.
- */
-/*
- * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -910,6 +908,7 @@
  * more work in the system to mitigate against:
  *
  *   - Spectre v1
+ *   - swapgs (Spectre v1 variant)
  *   - Spectre v2
  *   - Meltdown (Spectre v3)
  *   - Rogue Register Read (Spectre v3a)
@@ -926,7 +925,7 @@
  * overall approach that the system has taken to address these as well as their
  * shortcomings. Unfortunately, not all of the above have been handled today.
  *
- * SPECTRE FAMILY (Spectre v2, ret2spec, SpectreRSB)
+ * SPECTRE v2, ret2spec, SpectreRSB
  *
  * The second variant of the spectre attack focuses on performing branch target
  * injection. This generally impacts indirect call instructions in the system.
@@ -1035,10 +1034,42 @@
  * it may make more sense to investigate using prediction barriers as the whole
  * system is only executing a single instruction at a time while in kmdb.
  *
- * SPECTRE FAMILY (v1, v4)
+ * SPECTRE v1, v4
  *
  * The v1 and v4 variants of spectre are not currently mitigated in the
  * system and require other classes of changes to occur in the code.
+ *
+ * SPECTRE v1 (SWAPGS VARIANT)
+ *
+ * The class of Spectre v1 vulnerabilities aren't all about bounds checks, but
+ * can generally affect any branch-dependent code. The swapgs issue is one
+ * variant of this. If we are coming in from userspace, we can have code like
+ * this:
+ *
+ *	cmpw	$KCS_SEL, REGOFF_CS(%rsp)
+ *	je	1f
+ *	movq	$0, REGOFF_SAVFP(%rsp)
+ *	swapgs
+ *	1:
+ *	movq	%gs:CPU_THREAD, %rax
+ *
+ * If an attacker can cause a mis-speculation of the branch here, we could skip
+ * the needed swapgs, and use the /user/ %gsbase as the base of the %gs-based
+ * load. If subsequent code can act as the usual Spectre cache gadget, this
+ * would potentially allow KPTI bypass. To fix this, we need an lfence prior to
+ * any use of the %gs override.
+ *
+ * The other case is also an issue: if we're coming into a trap from kernel
+ * space, we could mis-speculate and swapgs the user %gsbase back in prior to
+ * using it. AMD systems are not vulnerable to this version, as a swapgs is
+ * serializing with respect to subsequent uses. But as AMD /does/ need the other
+ * case, and the fix is the same in both cases (an lfence at the branch target
+ * 1: in this example), we'll just do it unconditionally.
+ *
+ * Note that we don't enable user-space "wrgsbase" via CR4_FSGSBASE, making it
+ * harder for user-space to actually set a useful %gsbase value: although it's
+ * not clear, it might still be feasible via lwp_setprivate(), though, so we
+ * mitigate anyway.
  *
  * MELTDOWN
  *
@@ -1153,25 +1184,78 @@
  * Rather than implement this, we recommend that one disables hyper-threading
  * through the use of psradm -aS.
  *
+ * TSX ASYNCHRONOUS ABORT
+ *
+ * TSX Asynchronous Abort (TAA) is another side-channel vulnerability that
+ * behaves like MDS, but leverages Intel's transactional instructions as another
+ * vector. Effectively, when a transaction hits one of these cases (unmapped
+ * page, various cache snoop activity, etc.) then the same data can be exposed
+ * as in the case of MDS. This means that you can attack your twin.
+ *
+ * Intel has described that there are two different ways that we can mitigate
+ * this problem on affected processors:
+ *
+ *   1) We can use the same techniques used to deal with MDS. Flushing the
+ *      microarchitectural buffers and disabling hyperthreading will mitigate
+ *      this in the same way.
+ *
+ *   2) Using microcode to disable TSX.
+ *
+ * Now, most processors that are subject to MDS (as in they don't have MDS_NO in
+ * the IA32_ARCH_CAPABILITIES MSR) will not receive microcode to disable TSX.
+ * That's OK as we're already doing all such mitigations. On the other hand,
+ * processors with MDS_NO are all supposed to receive microcode updates that
+ * enumerate support for disabling TSX. In general, we'd rather use this method
+ * when available as it doesn't require disabling hyperthreading to be
+ * effective. Currently we basically are relying on microcode for processors
+ * that enumerate MDS_NO.
+ *
+ * The microcode features are enumerated as part of the IA32_ARCH_CAPABILITIES.
+ * When bit 7 (IA32_ARCH_CAP_TSX_CTRL) is present, then we are given two
+ * different powers. The first allows us to cause all transactions to
+ * immediately abort. The second gives us a means of disabling TSX completely,
+ * which includes removing it from cpuid. If we have support for this in
+ * microcode during the first cpuid pass, then we'll disable TSX completely such
+ * that user land never has a chance to observe the bit. However, if we are late
+ * loading the microcode, then we must use the functionality to cause
+ * transactions to automatically abort. This is necessary for user land's sake.
+ * Once a program sees a cpuid bit, it must not be taken away.
+ *
+ * We track whether or not we should do this based on what cpuid pass we're in.
+ * Whenever we hit cpuid_scan_security() on the boot CPU and we're still on pass
+ * 1 of the cpuid logic, then we can completely turn off TSX. Notably this
+ * should happen twice. Once in the normal cpuid_pass1() code and then a second
+ * time after we do the initial microcode update.  As a result we need to be
+ * careful in cpuid_apply_tsx() to only use the MSR if we've loaded a suitable
+ * microcode on the current CPU (which happens prior to cpuid_pass_ucode()).
+ *
+ * If TAA has been fixed, then it will be enumerated in IA32_ARCH_CAPABILITIES
+ * as TAA_NO. In such a case, we will still disable TSX: it's proven to be an
+ * unfortunate feature in a number of ways, and taking the opportunity to
+ * finally be able to turn it off is likely to be of benefit in the future.
+ *
  * SUMMARY
  *
  * The following table attempts to summarize the mitigations for various issues
  * and what's done in various places:
  *
  *  - Spectre v1: Not currently mitigated
+ *  - swapgs: lfences after swapgs paths
  *  - Spectre v2: Retpolines/RSB Stuffing or EIBRS if HW support
  *  - Meltdown: Kernel Page Table Isolation
  *  - Spectre v3a: Updated CPU microcode
  *  - Spectre v4: Not currently mitigated
  *  - SpectreRSB: SMEP and RSB Stuffing
- *  - L1TF: spec_uarch_flush, smt exclusion, requires microcode
- *  - MDS: x86_md_clear, requires microcode, disabling hyper threading
+ *  - L1TF: spec_uarch_flush, SMT exclusion, requires microcode
+ *  - MDS: x86_md_clear, requires microcode, disabling SMT
+ *  - TAA: x86_md_clear and disabling SMT OR microcode and disabling TSX
  *
  * The following table indicates the x86 feature set bits that indicate that a
  * given problem has been solved or a notable feature is present:
  *
  *  - RDCL_NO: Meltdown, L1TF, MSBDS subset of MDS
  *  - MDS_NO: All forms of MDS
+ *  - TAA_NO: TAA
  */
 
 #include <sys/types.h>
@@ -1227,6 +1311,27 @@ typedef enum {
 uint_t x86_disable_spectrev2 = 0;
 static x86_spectrev2_mitigation_t x86_spectrev2_mitigation =
     X86_SPECTREV2_RETPOLINE;
+
+/*
+ * The mitigation status for TAA:
+ * X86_TAA_NOTHING -- no mitigation available for TAA side-channels
+ * X86_TAA_DISABLED -- mitigation disabled via x86_disable_taa
+ * X86_TAA_MD_CLEAR -- MDS mitigation also suffices for TAA
+ * X86_TAA_TSX_FORCE_ABORT -- transactions are forced to abort
+ * X86_TAA_TSX_DISABLE -- force abort transactions and hide from CPUID
+ * X86_TAA_HW_MITIGATED -- TSX potentially active but H/W not TAA-vulnerable
+ */
+typedef enum {
+	X86_TAA_NOTHING,
+	X86_TAA_DISABLED,
+	X86_TAA_MD_CLEAR,
+	X86_TAA_TSX_FORCE_ABORT,
+	X86_TAA_TSX_DISABLE,
+	X86_TAA_HW_MITIGATED
+} x86_taa_mitigation_t;
+
+uint_t x86_disable_taa = 0;
+static x86_taa_mitigation_t x86_taa_mitigation = X86_TAA_NOTHING;
 
 uint_t pentiumpro_bug4046376;
 
@@ -1326,10 +1431,15 @@ static char *x86_feature_names[NUM_X86_FEATURES] = {
 	"tbm",
 	"avx512_vnni",
 	"amd_pcec",
-	"mb_clear",
+	"md_clear",
 	"mds_no",
 	"core_thermal",
-	"pkg_thermal"
+	"pkg_thermal",
+	"tsx_ctrl",
+	"taa_no",
+	"ppin",
+	"vaes",
+	"vpclmulqdq"
 };
 
 boolean_t
@@ -2165,7 +2275,8 @@ cpuid_intel_getids(cpu_t *cpu, void *feature)
 		 * Multi-core (and possibly multi-threaded)
 		 * processors.
 		 */
-		uint_t ncpu_per_core;
+		uint_t ncpu_per_core = 0;
+
 		if (cpi->cpi_ncore_per_chip == 1)
 			ncpu_per_core = cpi->cpi_ncpu_per_chip;
 		else if (cpi->cpi_ncore_per_chip > 1)
@@ -2637,8 +2748,8 @@ cpuid_use_amd_retpoline(struct cpuid_info *cpi)
 	/*
 	 * We need to determine whether or not lfence is serializing. It always
 	 * is on families 0xf and 0x11. On others, it's controlled by
-	 * MSR_AMD_DECODE_CONFIG (MSRC001_1029). If some hypervisor gives us a
-	 * crazy old family, don't try and do anything.
+	 * MSR_AMD_DE_CFG (MSRC001_1029). If some hypervisor gives us a crazy
+	 * old family, don't try and do anything.
 	 */
 	if (cpi->cpi_family < 0xf)
 		return (B_FALSE);
@@ -2653,20 +2764,116 @@ cpuid_use_amd_retpoline(struct cpuid_info *cpi)
 	 * for it.
 	 */
 	if (!on_trap(&otd, OT_DATA_ACCESS)) {
-		val = rdmsr(MSR_AMD_DECODE_CONFIG);
-		val |= AMD_DECODE_CONFIG_LFENCE_DISPATCH;
-		wrmsr(MSR_AMD_DECODE_CONFIG, val);
-		val = rdmsr(MSR_AMD_DECODE_CONFIG);
+		val = rdmsr(MSR_AMD_DE_CFG);
+		val |= AMD_DE_CFG_LFENCE_DISPATCH;
+		wrmsr(MSR_AMD_DE_CFG, val);
+		val = rdmsr(MSR_AMD_DE_CFG);
 	} else {
 		val = 0;
 	}
 	no_trap();
 
-	if ((val & AMD_DECODE_CONFIG_LFENCE_DISPATCH) != 0)
+	if ((val & AMD_DE_CFG_LFENCE_DISPATCH) != 0)
 		return (B_TRUE);
 	return (B_FALSE);
 }
 #endif	/* !__xpv */
+
+/*
+ * Determine how we should mitigate TAA or if we need to. Regardless of TAA, if
+ * we can disable TSX, we do so.
+ *
+ * This determination is done only on the boot CPU, potentially after loading
+ * updated microcode.
+ */
+static void
+cpuid_update_tsx(cpu_t *cpu, uchar_t *featureset)
+{
+	struct cpuid_info *cpi = cpu->cpu_m.mcpu_cpi;
+
+	VERIFY(cpu->cpu_id == 0);
+
+	if (cpi->cpi_vendor != X86_VENDOR_Intel) {
+		x86_taa_mitigation = X86_TAA_HW_MITIGATED;
+		return;
+	}
+
+	if (x86_disable_taa) {
+		x86_taa_mitigation = X86_TAA_DISABLED;
+		return;
+	}
+
+	/*
+	 * If we do not have the ability to disable TSX, then our only
+	 * mitigation options are in hardware (TAA_NO), or by using our existing
+	 * MDS mitigation as described above.  The latter relies upon us having
+	 * configured MDS mitigations correctly! This includes disabling SMT if
+	 * we want to cross-CPU-thread protection.
+	 */
+	if (!is_x86_feature(featureset, X86FSET_TSX_CTRL)) {
+		/*
+		 * It's not clear whether any parts will enumerate TAA_NO
+		 * *without* TSX_CTRL, but let's mark it as such if we see this.
+		 */
+		if (is_x86_feature(featureset, X86FSET_TAA_NO)) {
+			x86_taa_mitigation = X86_TAA_HW_MITIGATED;
+			return;
+		}
+
+		if (is_x86_feature(featureset, X86FSET_MD_CLEAR) &&
+		    !is_x86_feature(featureset, X86FSET_MDS_NO)) {
+			x86_taa_mitigation = X86_TAA_MD_CLEAR;
+		} else {
+			x86_taa_mitigation = X86_TAA_NOTHING;
+		}
+		return;
+	}
+
+	/*
+	 * We have TSX_CTRL, but we can only fully disable TSX if we're early
+	 * enough in boot.
+	 *
+	 * Otherwise, we'll fall back to causing transactions to abort as our
+	 * mitigation. TSX-using code will always take the fallback path.
+	 */
+	if (cpi->cpi_pass < 4) {
+		x86_taa_mitigation = X86_TAA_TSX_DISABLE;
+	} else {
+		x86_taa_mitigation = X86_TAA_TSX_FORCE_ABORT;
+	}
+}
+
+/*
+ * As mentioned, we should only touch the MSR when we've got a suitable
+ * microcode loaded on this CPU.
+ */
+static void
+cpuid_apply_tsx(x86_taa_mitigation_t taa, uchar_t *featureset)
+{
+	uint64_t val;
+
+	switch (taa) {
+	case X86_TAA_TSX_DISABLE:
+		if (!is_x86_feature(featureset, X86FSET_TSX_CTRL))
+			return;
+		val = rdmsr(MSR_IA32_TSX_CTRL);
+		val |= IA32_TSX_CTRL_CPUID_CLEAR | IA32_TSX_CTRL_RTM_DISABLE;
+		wrmsr(MSR_IA32_TSX_CTRL, val);
+		break;
+	case X86_TAA_TSX_FORCE_ABORT:
+		if (!is_x86_feature(featureset, X86FSET_TSX_CTRL))
+			return;
+		val = rdmsr(MSR_IA32_TSX_CTRL);
+		val |= IA32_TSX_CTRL_RTM_DISABLE;
+		wrmsr(MSR_IA32_TSX_CTRL, val);
+		break;
+	case X86_TAA_HW_MITIGATED:
+	case X86_TAA_MD_CLEAR:
+	case X86_TAA_DISABLED:
+	case X86_TAA_NOTHING:
+		break;
+	}
+}
 
 static void
 cpuid_scan_security(cpu_t *cpu, uchar_t *featureset)
@@ -2757,6 +2964,14 @@ cpuid_scan_security(cpu_t *cpu, uchar_t *featureset)
 					add_x86_feature(featureset,
 					    X86FSET_MDS_NO);
 				}
+				if (reg & IA32_ARCH_CAP_TSX_CTRL) {
+					add_x86_feature(featureset,
+					    X86FSET_TSX_CTRL);
+				}
+				if (reg & IA32_ARCH_CAP_TAA_NO) {
+					add_x86_feature(featureset,
+					    X86FSET_TAA_NO);
+				}
 			}
 			no_trap();
 		}
@@ -2769,16 +2984,25 @@ cpuid_scan_security(cpu_t *cpu, uchar_t *featureset)
 			add_x86_feature(featureset, X86FSET_FLUSH_CMD);
 	}
 
+	/*
+	 * Take care of certain mitigations on the non-boot CPU. The boot CPU
+	 * will have already run this function and determined what we need to
+	 * do. This gives us a hook for per-HW thread mitigations such as
+	 * enhanced IBRS, or disabling TSX.
+	 */
 	if (cpu->cpu_id != 0) {
 		if (x86_spectrev2_mitigation == X86_SPECTREV2_ENHANCED_IBRS) {
 			cpuid_enable_enhanced_ibrs();
 		}
+
+		cpuid_apply_tsx(x86_taa_mitigation, featureset);
 		return;
 	}
 
 	/*
 	 * Go through and initialize various security mechanisms that we should
-	 * only do on a single CPU. This includes Spectre V2, L1TF, and MDS.
+	 * only do on a single CPU. This includes Spectre V2, L1TF, MDS, and
+	 * TAA.
 	 */
 
 	/*
@@ -2828,6 +3052,13 @@ cpuid_scan_security(cpu_t *cpu, uchar_t *featureset)
 	 * need to perform an l1d flush.
 	 */
 	cpuid_update_l1d_flush(cpu, featureset);
+
+	/*
+	 * Determine what our mitigation strategy should be for TAA and then
+	 * also apply TAA mitigations.
+	 */
+	cpuid_update_tsx(cpu, featureset);
+	cpuid_apply_tsx(x86_taa_mitigation, featureset);
 }
 
 /*
@@ -2999,6 +3230,60 @@ cpuid_pass1_thermal(cpu_t *cpu, uchar_t *featureset)
 		add_x86_feature(featureset, X86FSET_PKG_THERMAL);
 	}
 }
+
+/*
+ * PPIN is the protected processor inventory number. On AMD this is an actual
+ * feature bit. However, on Intel systems we need to read the platform
+ * information MSR if we're on a specific model.
+ */
+#if !defined(__xpv)
+static void
+cpuid_pass1_ppin(cpu_t *cpu, uchar_t *featureset)
+{
+	on_trap_data_t otd;
+	struct cpuid_info *cpi = cpu->cpu_m.mcpu_cpi;
+
+	switch (cpi->cpi_vendor) {
+	case X86_VENDOR_AMD:
+		/*
+		 * This leaf will have already been gathered in the topology
+		 * functions.
+		 */
+		if (cpi->cpi_xmaxeax >= CPUID_LEAF_EXT_8) {
+			if (cpi->cpi_extd[8].cp_ebx & CPUID_AMD_EBX_PPIN) {
+				add_x86_feature(featureset, X86FSET_PPIN);
+			}
+		}
+		break;
+	case X86_VENDOR_Intel:
+		if (cpi->cpi_family != 6)
+			break;
+		switch (cpi->cpi_model) {
+		case INTC_MODEL_IVYBRIDGE_XEON:
+		case INTC_MODEL_HASWELL_XEON:
+		case INTC_MODEL_BROADWELL_XEON:
+		case INTC_MODEL_BROADWELL_XEON_D:
+		case INTC_MODEL_SKYLAKE_XEON:
+			if (!on_trap(&otd, OT_DATA_ACCESS)) {
+				uint64_t value;
+
+				value = rdmsr(MSR_PLATFORM_INFO);
+				if ((value & MSR_PLATFORM_INFO_PPIN) != 0) {
+					add_x86_feature(featureset,
+					    X86FSET_PPIN);
+				}
+			}
+			no_trap();
+			break;
+		default:
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}
+#endif	/* ! __xpv */
 
 void
 cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
@@ -3312,6 +3597,8 @@ cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
 			ecp->cp_ebx &= ~CPUID_INTC_EBX_7_0_ALL_AVX512;
 			ecp->cp_ecx &= ~CPUID_INTC_ECX_7_0_ALL_AVX512;
 			ecp->cp_edx &= ~CPUID_INTC_EDX_7_0_ALL_AVX512;
+			ecp->cp_ecx &= ~CPUID_INTC_ECX_7_0_VAES;
+			ecp->cp_ecx &= ~CPUID_INTC_ECX_7_0_VPCLMULQDQ;
 		}
 
 		if (ecp->cp_ebx & CPUID_INTC_EBX_7_0_SMEP)
@@ -3339,10 +3626,17 @@ cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
 		if (ecp->cp_ebx & CPUID_INTC_EBX_7_0_CLFLUSHOPT)
 			add_x86_feature(featureset, X86FSET_CLFLUSHOPT);
 
-		if (cpi->cpi_vendor == X86_VENDOR_Intel) {
-			if (ecp->cp_ebx & CPUID_INTC_EBX_7_0_INVPCID)
-				add_x86_feature(featureset, X86FSET_INVPCID);
+		if (ecp->cp_ebx & CPUID_INTC_EBX_7_0_INVPCID)
+			add_x86_feature(featureset, X86FSET_INVPCID);
 
+		if (ecp->cp_ecx & CPUID_INTC_ECX_7_0_UMIP)
+			add_x86_feature(featureset, X86FSET_UMIP);
+		if (ecp->cp_ecx & CPUID_INTC_ECX_7_0_PKU)
+			add_x86_feature(featureset, X86FSET_PKU);
+		if (ecp->cp_ecx & CPUID_INTC_ECX_7_0_OSPKE)
+			add_x86_feature(featureset, X86FSET_OSPKE);
+
+		if (cpi->cpi_vendor == X86_VENDOR_Intel) {
 			if (ecp->cp_ebx & CPUID_INTC_EBX_7_0_MPX)
 				add_x86_feature(featureset, X86FSET_MPX);
 
@@ -3434,13 +3728,6 @@ cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
 		if (cpi->cpi_std[7].cp_ebx & CPUID_INTC_EBX_7_0_SHA)
 			add_x86_feature(featureset, X86FSET_SHA);
 
-		if (cpi->cpi_std[7].cp_ecx & CPUID_INTC_ECX_7_0_UMIP)
-			add_x86_feature(featureset, X86FSET_UMIP);
-		if (cpi->cpi_std[7].cp_ecx & CPUID_INTC_ECX_7_0_PKU)
-			add_x86_feature(featureset, X86FSET_PKU);
-		if (cpi->cpi_std[7].cp_ecx & CPUID_INTC_ECX_7_0_OSPKE)
-			add_x86_feature(featureset, X86FSET_OSPKE);
-
 		if (cp->cp_ecx & CPUID_INTC_ECX_XSAVE) {
 			add_x86_feature(featureset, X86FSET_XSAVE);
 
@@ -3476,6 +3763,16 @@ cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
 				    CPUID_INTC_EBX_7_0_AVX2)
 					add_x86_feature(featureset,
 					    X86FSET_AVX2);
+
+				if (cpi->cpi_std[7].cp_ecx &
+				    CPUID_INTC_ECX_7_0_VAES)
+					add_x86_feature(featureset,
+					    X86FSET_VAES);
+
+				if (cpi->cpi_std[7].cp_ecx &
+				    CPUID_INTC_ECX_7_0_VPCLMULQDQ)
+					add_x86_feature(featureset,
+					    X86FSET_VPCLMULQDQ);
 			}
 
 			if (cpi->cpi_vendor == X86_VENDOR_Intel &&
@@ -3537,10 +3834,8 @@ cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
 		}
 	}
 
-	if (cpi->cpi_vendor == X86_VENDOR_Intel) {
-		if (cp->cp_ecx & CPUID_INTC_ECX_PCID) {
-			add_x86_feature(featureset, X86FSET_PCID);
-		}
+	if (cp->cp_ecx & CPUID_INTC_ECX_PCID) {
+		add_x86_feature(featureset, X86FSET_PCID);
 	}
 
 	if (cp->cp_ecx & CPUID_INTC_ECX_X2APIC) {
@@ -3837,8 +4132,15 @@ cpuid_pass1(cpu_t *cpu, uchar_t *featureset)
 		}
 	}
 
+	/*
+	 * cpuid_pass1_ppin assumes that cpuid_pass1_topology has already been
+	 * run and thus gathered some of its dependent leaves.
+	 */
 	cpuid_pass1_topology(cpu, featureset);
 	cpuid_pass1_thermal(cpu, featureset);
+#if !defined(__xpv)
+	cpuid_pass1_ppin(cpu, featureset);
+#endif
 
 	/*
 	 * Synthesize chip "revision" and socket type
@@ -4202,6 +4504,10 @@ cpuid_pass2(cpu_t *cpu)
 					    X86FSET_AVX512NNIW);
 					remove_x86_feature(x86_featureset,
 					    X86FSET_AVX512FMAPS);
+					remove_x86_feature(x86_featureset,
+					    X86FSET_VAES);
+					remove_x86_feature(x86_featureset,
+					    X86FSET_VPCLMULQDQ);
 
 					CPI_FEATURES_ECX(cpi) &=
 					    ~CPUID_INTC_ECX_XSAVE;
@@ -4224,6 +4530,11 @@ cpuid_pass2(cpu_t *cpu)
 
 					CPI_FEATURES_7_0_ECX(cpi) &=
 					    ~CPUID_INTC_ECX_7_0_ALL_AVX512;
+
+					CPI_FEATURES_7_0_ECX(cpi) &=
+					    ~CPUID_INTC_ECX_7_0_VAES;
+					CPI_FEATURES_7_0_ECX(cpi) &=
+					    ~CPUID_INTC_ECX_7_0_VPCLMULQDQ;
 
 					CPI_FEATURES_7_0_EDX(cpi) &=
 					    ~CPUID_INTC_EDX_7_0_ALL_AVX512;
@@ -5015,6 +5326,10 @@ cpuid_pass4(cpu_t *cpu, uint_t *hwcap_out)
 					hwcap_flags_2 |= AV_386_2_AVX512_VNNI;
 				if (*ecx_7 & CPUID_INTC_ECX_7_0_AVX512VPOPCDQ)
 					hwcap_flags_2 |= AV_386_2_AVX512VPOPCDQ;
+				if (*ecx_7 & CPUID_INTC_ECX_7_0_VAES)
+					hwcap_flags_2 |= AV_386_2_VAES;
+				if (*ecx_7 & CPUID_INTC_ECX_7_0_VPCLMULQDQ)
+					hwcap_flags_2 |= AV_386_2_VPCLMULQDQ;
 
 				if (*edx_7 & CPUID_INTC_EDX_7_0_AVX5124NNIW)
 					hwcap_flags_2 |= AV_386_2_AVX512_4NNIW;

@@ -22,6 +22,7 @@
 /*
  * Copyright (c) 1988, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 Oxide Computer Company
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -153,7 +154,7 @@ typedef struct	proc {
 	char	p_stat;			/* status of process */
 	char	p_wcode;		/* current wait code */
 	ushort_t p_pidflag;		/* flags protected only by pidlock */
-	int 	p_wdata;		/* current wait return value */
+	int	p_wdata;		/* current wait return value */
 	pid_t	p_ppid;			/* process id of parent */
 	struct	proc	*p_link;	/* forward link */
 	struct	proc	*p_parent;	/* ptr to parent process */
@@ -162,16 +163,16 @@ typedef struct	proc {
 	struct	proc	*p_psibling;	/* ptr to prev sibling proc on chain */
 	struct	proc	*p_sibling_ns;	/* prt to siblings with new state */
 	struct	proc	*p_child_ns;	/* prt to children with new state */
-	struct	proc 	*p_next;	/* active chain link next */
-	struct	proc 	*p_prev;	/* active chain link prev */
-	struct	proc 	*p_nextofkin;	/* gets accounting info at exit */
-	struct	proc 	*p_orphan;
-	struct	proc 	*p_nextorph;
+	struct	proc	*p_next;	/* active chain link next */
+	struct	proc	*p_prev;	/* active chain link prev */
+	struct	proc	*p_nextofkin;	/* gets accounting info at exit */
+	struct	proc	*p_orphan;
+	struct	proc	*p_nextorph;
 	struct	proc	*p_pglink;	/* process group hash chain link next */
 	struct	proc	*p_ppglink;	/* process group hash chain link prev */
 	struct	sess	*p_sessp;	/* session information */
-	struct	pid 	*p_pidp;	/* process ID info */
-	struct	pid 	*p_pgidp;	/* process group ID info */
+	struct	pid	*p_pidp;	/* process ID info */
+	struct	pid	*p_pgidp;	/* process group ID info */
 	/*
 	 * Fields protected by p_lock
 	 */
@@ -216,7 +217,7 @@ typedef struct	proc {
 	 * Per process lwp and kernel thread stuff
 	 */
 	id_t	p_lwpid;		/* most recently allocated lwpid */
-	int 	p_lwpcnt;		/* number of lwps in this process */
+	int	p_lwpcnt;		/* number of lwps in this process */
 	int	p_lwprcnt;		/* number of not stopped lwps */
 	int	p_lwpdaemon;		/* number of TP_DAEMON lwps */
 	int	p_lwpwait;		/* number of lwps in lwp_wait() */
@@ -315,6 +316,7 @@ typedef struct	proc {
 	size_t p_swrss;			/* resident set size before last swap */
 	struct aio	*p_aio;		/* pointer to async I/O struct */
 	struct itimer	**p_itimer;	/* interval timers */
+	uint_t		p_itimer_sz;	/* max allocated interval timers */
 	timeout_id_t	p_alarmid;	/* alarm's timeout id */
 	caddr_t		p_usrstack;	/* top of the process stack */
 	uint_t		p_stkprot;	/* stack memory protection */
@@ -354,6 +356,8 @@ typedef struct	proc {
 	kcondvar_t	p_poolcv;	/* synchronization with pools */
 	uint_t		p_poolcnt;	/* # threads inside pool barrier */
 	uint_t		p_poolflag;	/* pool-related flags (see below) */
+	uint_t		p_upanicflag;	/* upanic-related flags (see below) */
+	void		*p_upanic;	/* optional upanic data */
 	uintptr_t	p_portcnt;	/* event ports counter */
 	struct zone	*p_zone;	/* zone in which process lives */
 	struct vnode	*p_execdir;	/* directory that p_exec came from */
@@ -522,6 +526,14 @@ extern struct pid pid0;		/* p0's pid */
  */
 #define	PBWAIT		0x0001  /* process should wait outside fork/exec/exit */
 #define	PEXITED		0x0002  /* process exited and about to become zombie */
+
+/*
+ * p_upanicflag codes
+ */
+#define	P_UPF_PANICKED	0x0001
+#define	P_UPF_HAVEMSG	0x0002
+#define	P_UPF_TRUNCMSG	0x0004
+#define	P_UPF_INVALMSG	0x0008
 
 /* Macro to convert proc pointer to a user block pointer */
 #define	PTOU(p)		(&(p)->p_user)
@@ -698,7 +710,7 @@ extern	kthread_t	*thread_create(
 	void		(*proc)(),
 	void		*arg,
 	size_t		len,
-	proc_t 		*pp,
+	proc_t		*pp,
 	int		state,
 	pri_t		pri);
 extern	void	thread_exit(void) __NORETURN;
@@ -741,7 +753,7 @@ extern	int	tsd_agent_set(kthread_t *, uint_t, void *);
 /* lwp function prototypes */
 
 extern kthread_t *lwp_kernel_create(proc_t *, void (*)(), void *, int, pri_t);
-extern	klwp_t 		*lwp_create(
+extern	klwp_t		*lwp_create(
 	void		(*proc)(),
 	caddr_t		arg,
 	size_t		len,

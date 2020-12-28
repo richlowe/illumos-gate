@@ -22,7 +22,7 @@
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 OmniTI Computer Consulting, Inc.  All rights reserved.
- * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <Python.h>
@@ -51,7 +51,7 @@ enum {
 PyObject *beCreateSnapshot(PyObject *, PyObject *);
 PyObject *beCopy(PyObject *, PyObject *);
 PyObject *beList(PyObject *, PyObject *, PyObject *);
-PyObject *beActivate(PyObject *, PyObject *);
+PyObject *beActivate(PyObject *, PyObject *, PyObject *);
 PyObject *beDestroy(PyObject *, PyObject *);
 PyObject *beDestroySnapshot(PyObject *, PyObject *);
 PyObject *beRename(PyObject *, PyObject *);
@@ -93,7 +93,6 @@ static boolean_t convertPyArgsToNvlist(nvlist_t **nvList, int numArgs, ...);
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beCreateSnapshot(PyObject *self, PyObject *args)
 {
@@ -159,7 +158,6 @@ beCreateSnapshot(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beCopy(PyObject *self, PyObject *args)
 {
@@ -202,9 +200,15 @@ beCopy(PyObject *self, PyObject *args)
 			    NULL, NULL));
 		}
 		while (PyDict_Next(beNameProperties, &pos, &pkey, &pvalue)) {
+#if PY_MAJOR_VERSION >= 3
 			if (!convertPyArgsToNvlist(&beProps, 2,
-			    PyBytes_AS_STRING(pkey),
-			    PyBytes_AS_STRING(pvalue))) {
+			    PyUnicode_AsUTF8(pkey),
+			    PyUnicode_AsUTF8(pvalue))) {
+#else
+			if (!convertPyArgsToNvlist(&beProps, 2,
+			    PyString_AsString(pkey),
+			    PyString_AsString(pvalue))) {
+#endif
 				nvlist_free(beProps);
 				nvlist_free(beAttrs);
 				return (Py_BuildValue("[iss]", BE_PY_ERR_NVLIST,
@@ -279,7 +283,6 @@ beCopy(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beList(PyObject *self, PyObject *args, PyObject *keywds)
 {
@@ -407,7 +410,10 @@ done:
  *              to activate a Boot Environment
  * Parameters:
  *   args -     pointer to a python object containing:
- *     beName - The name of the BE to activate
+ *     bename    - The name of the BE to activate
+ *     temporary - If True, perform a temporary BE activation
+ *                 If False, remove a temporary BE activation
+ *                 If not present, do nothing in regard to temporary activation
  *
  * Returns a pointer to a python object:
  *      BE_SUCCESS - Success
@@ -415,28 +421,36 @@ done:
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
-beActivate(PyObject *self, PyObject *args)
+beActivate(PyObject *self, PyObject *args, PyObject *keywds)
 {
 	char		*beName = NULL;
 	int		ret = BE_PY_SUCCESS;
 	nvlist_t	*beAttrs = NULL;
+	int		temp = -1;
 
-	if (!PyArg_ParseTuple(args, "z", &beName)) {
-		return (Py_BuildValue("i", BE_PY_ERR_PARSETUPLE));
+	static char *kwlist[] = {"bename", "temporary", NULL};
+
+	if (!PyArg_ParseTupleAndKeywords(args, keywds, "z|i",
+	    kwlist, &beName, &temp)) {
+		ret = BE_PY_ERR_PARSETUPLE;
+		goto done;
 	}
 
-	if (!convertPyArgsToNvlist(&beAttrs, 2, BE_ATTR_ORIG_BE_NAME, beName)) {
-		nvlist_free(beAttrs);
-		return (Py_BuildValue("i", BE_PY_ERR_NVLIST));
+	if (!convertPyArgsToNvlist(&beAttrs, 2, BE_ATTR_ORIG_BE_NAME, beName) ||
+	    beAttrs == NULL) {
+		ret = BE_PY_ERR_NVLIST;
+		goto done;
 	}
 
-	if (beAttrs == NULL) {
-		return (Py_BuildValue("i", BE_PY_ERR_NVLIST));
+	if (temp != -1 && nvlist_add_boolean_value(beAttrs,
+	    BE_ATTR_ACTIVE_NEXTBOOT, temp == 0 ? B_FALSE : B_TRUE) != 0) {
+		ret = BE_PY_ERR_NVLIST;
+		goto done;
 	}
 
 	ret = be_activate(beAttrs);
+done:
 	nvlist_free(beAttrs);
 	return (Py_BuildValue("i", ret));
 }
@@ -455,7 +469,6 @@ beActivate(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beDestroy(PyObject *self, PyObject *args)
 {
@@ -514,7 +527,6 @@ beDestroy(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beDestroySnapshot(PyObject *self, PyObject *args)
 {
@@ -558,7 +570,6 @@ beDestroySnapshot(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beRename(PyObject *self, PyObject *args)
 {
@@ -603,7 +614,6 @@ beRename(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beMount(PyObject *self, PyObject *args)
 {
@@ -646,7 +656,6 @@ beMount(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beUnmount(PyObject *self, PyObject *args)
 {
@@ -701,7 +710,6 @@ beUnmount(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beRollback(PyObject *self, PyObject *args)
 {
@@ -747,7 +755,6 @@ beRollback(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 bePrintErrors(PyObject *self, PyObject *args)
 {
@@ -772,7 +779,6 @@ bePrintErrors(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beGetErrDesc(PyObject *self, PyObject *args)
 {
@@ -806,7 +812,6 @@ beGetErrDesc(PyObject *self, PyObject *args)
  * Scope:
  *      Public
  */
-/* ARGSUSED */
 PyObject *
 beVerifyBEName(PyObject *self, PyObject *args)
 {
@@ -1032,6 +1037,7 @@ convertPyArgsToNvlist(nvlist_t **nvList, int numArgs, ...)
 			(void) printf("nvlist_add_string failed for %s (%s).\n",
 			    pt, pt2);
 			nvlist_free(*nvList);
+			*nvList = NULL;
 			return (B_FALSE);
 		}
 	}
@@ -1059,7 +1065,7 @@ beMapLibbePyErrorToString(int errCode)
 	switch (errCode) {
 	case BE_PY_ERR_APPEND:
 		return ("Unable to append a dictionary to a list "
-		    "of dictinaries.");
+		    "of dictionaries.");
 	case BE_PY_ERR_DICT:
 		return ("Creation of a Python dictionary failed.");
 	case BE_PY_ERR_LIST:
@@ -1080,24 +1086,25 @@ beMapLibbePyErrorToString(int errCode)
 /* Private python initialization structure */
 
 static struct PyMethodDef libbeMethods[] = {
-	{"beCopy", (PyCFunction)beCopy, METH_VARARGS, "Create/Copy a BE."},
-	{"beCreateSnapshot", (PyCFunction)beCreateSnapshot, METH_VARARGS,
+	{"beCopy", beCopy, METH_VARARGS, "Create/Copy a BE."},
+	{"beCreateSnapshot", beCreateSnapshot, METH_VARARGS,
 	    "Create a snapshot."},
-	{"beDestroy", (PyCFunction)beDestroy, METH_VARARGS, "Destroy a BE."},
-	{"beDestroySnapshot", (PyCFunction)beDestroySnapshot, METH_VARARGS,
+	{"beDestroy", beDestroy, METH_VARARGS, "Destroy a BE."},
+	{"beDestroySnapshot", beDestroySnapshot, METH_VARARGS,
 	    "Destroy a snapshot."},
-	{"beMount", (PyCFunction)beMount, METH_VARARGS, "Mount a BE."},
-	{"beUnmount", (PyCFunction)beUnmount, METH_VARARGS, "Unmount a BE."},
-	{"beList", (PyCFunction)beList, METH_VARARGS | METH_KEYWORDS,
+	{"beMount", beMount, METH_VARARGS, "Mount a BE."},
+	{"beUnmount", beUnmount, METH_VARARGS, "Unmount a BE."},
+	{"beList", (PyCFunction)(uintptr_t)beList, METH_VARARGS | METH_KEYWORDS,
 	    "List BE info."},
-	{"beRename", (PyCFunction)beRename, METH_VARARGS, "Rename a BE."},
-	{"beActivate", (PyCFunction)beActivate, METH_VARARGS, "Activate a BE."},
-	{"beRollback", (PyCFunction)beRollback, METH_VARARGS, "Rollback a BE."},
-	{"bePrintErrors", (PyCFunction)bePrintErrors, METH_VARARGS,
+	{"beRename", beRename, METH_VARARGS, "Rename a BE."},
+	{"beActivate", (PyCFunction)(uintptr_t)beActivate,
+	    METH_VARARGS | METH_KEYWORDS, "Activate a BE."},
+	{"beRollback", beRollback, METH_VARARGS, "Rollback a BE."},
+	{"bePrintErrors", bePrintErrors, METH_VARARGS,
 	    "Enable/disable error printing."},
-	{"beGetErrDesc", (PyCFunction)beGetErrDesc, METH_VARARGS,
+	{"beGetErrDesc", beGetErrDesc, METH_VARARGS,
 	    "Map Error codes to strings."},
-	{"beVerifyBEName", (PyCFunction)beVerifyBEName, METH_VARARGS,
+	{"beVerifyBEName", beVerifyBEName, METH_VARARGS,
 	    "Verify BE name."},
 	{NULL, NULL, 0, NULL}
 };

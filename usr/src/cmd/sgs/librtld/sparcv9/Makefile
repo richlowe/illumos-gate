@@ -32,7 +32,7 @@ CPPFLAGS +=	-I../../../../uts/sparc/krtld
 
 all:		$(DYNLIB) $(LIBLINKS)
 
-install:	all $(ROOTLIBS64)
+install:	all $(ROOTLIBS64) $(ROOTCOMPATLINKS64)
 
 CPPFLAGS +=	-D_ELF64
 

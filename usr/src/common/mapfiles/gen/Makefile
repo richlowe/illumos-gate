@@ -31,6 +31,9 @@ include		$(SRC)/Makefile.master
 $(__GNUC)FILES=	$(MACH)_gcc_map.noexeglobs
 $(__SUNC)FILES= $(MACH)_cc_map.noexeglobs
 
+NATIVE_LIBS	+= libc.so
+LDFLAGS		+= $(BDIRECT)
+
 $(__GNUC)$(BUILD64)FILES += $(MACH64)_gcc_map.noexeglobs
 $(__SUNC)$(BUILD64)FILES += $(MACH64)_cc_map.noexeglobs
 
@@ -43,8 +46,6 @@ TEMPLATE1=	map.noexeglobs.1.template
 TEMPLATE2=	map.noexeglobs.2.template
 
 all install:	$(FILES)
-
-lint:
 
 clean:
 		$(RM) $(SYMS1) $(SYMS2) $(MAIN1) $(MAIN2)
@@ -91,10 +92,10 @@ $(MACH64)_gcc_map.noexeglobs :=	LINK =	$(LINK64.c)
 # global.
 
 %map.noexeglobs:main.c $(TEMPLATE1) $(TEMPLATE2)
-	$(LINK) -o $(MAIN1) -M$(TEMPLATE1) main.c
+	$(LINK) -o $(MAIN1) -Wl,-M$(TEMPLATE1) main.c
 	$(ELFDUMP) -s -N.dynsym $(MAIN1) | $(EGREP) "WEAK|GLOB" | \
 	    $(GREP) -v UNDEF | $(AWK) '{print $$9 }' | $(SORT) > $(SYMS1)
-	$(LINK) -o $(MAIN2) -M$(TEMPLATE2) main.c
+	$(LINK) -o $(MAIN2) -Wl,-M$(TEMPLATE2) main.c
 	$(ELFDUMP) -s -N.dynsym $(MAIN2) | $(EGREP) "WEAK|GLOB" | \
 	    $(GREP) -v UNDEF | $(AWK) '{print $$9 }' | $(SORT) > $(SYMS2)
 	$(ECHO) "# GENERATED FILE - DO NOT EDIT"	>  $@

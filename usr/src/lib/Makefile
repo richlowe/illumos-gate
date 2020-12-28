@@ -22,7 +22,7 @@
 #
 # Copyright (c) 1989, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2012 by Delphix. All rights reserved.
-# Copyright 2019, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 # Copyright (c) 2013 Gary Mills
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2015 Gary Mills
@@ -47,6 +47,7 @@ include ../Makefile.master
 
 # Build libc and its dependencies
 SUBDIRS=			\
+	ssp_ns			\
 	crt			\
 	../cmd/sgs/libconv	\
 	../cmd/sgs/libdl	\
@@ -179,6 +180,7 @@ SUBDIRS +=				\
 	libofmt		\
 	libpam		\
 	libpcidb	\
+	libpcsc		\
 	libpctx		\
 	libpicl		\
 	libpicltree	\
@@ -220,7 +222,6 @@ SUBDIRS +=				\
 	libstmfproxy	\
 	libsum		\
 	libsun_ima	\
-	libsys		\
 	libsysevent	\
 	libtecla	\
 	libtermcap	\
@@ -231,6 +232,7 @@ SUBDIRS +=				\
 	libtsnet	\
 	libtsol		\
 	libumem		\
+	libutempter	\
 	libuuid		\
 	libuutil	\
 	libvolmgt	\
@@ -242,12 +244,14 @@ SUBDIRS +=				\
 	libxcurses2	\
 	libxnet		\
 	libzfs		\
+	libzfsbootenv	\
 	libzfs_core	\
 	libzfs_jni	\
 	libzonecfg	\
 	libzoneinfo	\
 	libzonestat	\
 	libzpool	\
+	libzutil	\
 	madv		\
 	mpapi		\
 	mpss		\
@@ -277,7 +281,10 @@ SUBDIRS +=				\
 
 i386_SUBDIRS=		\
 	libfdisk	\
-	libsaveargs
+	libppt		\
+	libsaveargs	\
+	libvmm		\
+	libvmmapi
 
 sparc_SUBDIRS=		\
 	efcode		\
@@ -394,7 +401,6 @@ HDRSUBDIRS=				\
 	libdhcputil	\
 	libdisasm	\
 	libdiskmgt	\
-	libdwarf	\
 	libdladm	\
 	libdll		\
 	libdlpi		\
@@ -437,6 +443,7 @@ HDRSUBDIRS=				\
 	libofmt		\
 	libpam		\
 	libpcidb	\
+	libpcsc		\
 	libpctx		\
 	libpicl		\
 	libpicltree	\
@@ -477,6 +484,7 @@ HDRSUBDIRS=				\
 	libtsnet	\
 	libtsol		\
 	libumem		\
+	libutempter	\
 	libuutil	\
 	libvolmgt	\
 	libvrrpadm	\
@@ -500,7 +508,10 @@ HDRSUBDIRS=				\
 
 i386_HDRSUBDIRS=	\
 	libfdisk	\
-	libsaveargs
+	libppt		\
+	libsaveargs	\
+	libvmm		\
+	libvmmapi
 
 sparc_HDRSUBDIRS=	\
 	libds		\
@@ -543,13 +554,14 @@ install_extra:
 
 clean clobber:		$(NOWAIT_SUBDIRS:%=%-nodepend)
 
-lint:
 
 install_h check:	$(HDRSUBDIRS:%=%-nodepend)
 
 _msg:			$(MSGSUBDIRS:%=%-nodepend) .WAIT _dc
 
 _dc:			$(DCSUBDIRS:%=%-nodepend)
+
+lint:
 
 # Library interdependencies are called out explicitly here.
 ../cmd/sgs/libconv: crt
@@ -568,18 +580,20 @@ basedeps :=	TARGET=install
 
 # The following dependencies are currently required by libdbus-1 and should
 # be used for anything linking against it.
-dbusdeps:	libsecdb libtsol libinetutil libscf libuutil libgen libsmbios
+dbusdeps:	libsecdb libtsol libinetutil libscf libuutil libgen libsmbios \
+		libbsm
 
 # The following dependencies don't need to be listed below as they are built
 # before everything else:
 # libc libm libmd libmp libnsl libnvpair libsocket
+../cmd/sendmail/libmilter:	libsocket libnsl
 abi:		libctf libmapmalloc libproc
 auditd_plugins: libbsm libsecdb libgss libmtmalloc
 brand:		libzonecfg libmapmalloc
 cfgadm_plugins:	libdevice libdevinfo libhotplug librcm hbaapi libkstat libscf
 fm:		libexacct libipmi libzfs scsi libdevinfo libdevid libcfgadm \
 		libcontract libsysevent ../cmd/sgs/libelf libdladm libsff \
-		libpcidb
+		libpcidb libdiskmgt
 $(SPARC_BLD)fm:	libpri
 gss_mechs/mech_dh: libgss
 gss_mechs/mech_dummy: libgss
@@ -587,17 +601,21 @@ gss_mechs/mech_krb5: libgss libresolv2 pkcs11 libkstat
 gss_mechs/mech_spnego: gss_mechs/mech_krb5
 hal:		dbusdeps
 krb5:		gss_mechs/mech_krb5 libtecla libldap5
+libads:		libnsl
 libadt_jni:	libbsm
 libadutils:	libldap5 libresolv2
-libbe:		libzfs libinstzones libuuid libgen libdevinfo libefi libficl
+libbe:		libzfs libinstzones libuuid libgen libdevinfo libefi libficl \
+		libzfsbootenv
 libbsm:		libinetutil libscf libsecdb libtsol
 libcfgadm:	libdevinfo
+libcontract:	libnvpair
 libcmd:		libsum libast
-libcmdutils:	libavl
+libcmdutils:	libavl libnvpair
 libcpc:		libpctx
 libcrypt:	libgen
 libctf:		libdwarf
 libdemangle:	libcustr
+libdevice:	libnvpair
 libdevid:	libdevinfo
 libdevinfo:	libsec libgen
 libdhcpagent:	libdhcputil libuuid libdlpi libcontract
@@ -611,6 +629,7 @@ libdlpi:	libinetutil libdladm
 libds:		libsysevent
 libdtrace:	libproc libgen libctf libmapmalloc
 libdtrace_jni:	libuutil libdtrace
+libdwarf:	../cmd/sgs/libelf
 libefi:		libuuid libsmbios
 libelfsign:	libcryptoutil libkmf ../cmd/sgs/libelf
 libeti:		libcurses
@@ -624,11 +643,14 @@ libgrubmgmt:	libdevinfo libzfs libfstyp libefi
 $(INTEL_BLD)libgrubmgmt: libfdisk
 libidmap:	libavl libuutil
 libinetsvc:	libscf
+libinetutil:	libsocket
 libinstzones:	libzonecfg libcontract
 libipadm:	libinetutil libdlpi libdhcpagent libdladm libsecdb libdhcputil
+libipmi:	libm libnvpair libsocket libnsl
 libipmp:	libinetutil
 libipsecutil:	libtecla libtsol libkmf
 libiscsit:	libstmf libuuid
+libhotplug:	libnvpair
 libkmf:		libcryptoutil pkcs11 libcustr
 libkvm:		../cmd/sgs/libelf
 libldap5:	libsasl
@@ -642,17 +664,20 @@ libpctx:	libproc
 libpkg:		libscf libadm
 libpool:	libscf libexacct
 libpp:		libast
+libppt:		libpcidb libdevinfo libcmdutils
 libproc:	../cmd/sgs/librtld_db ../cmd/sgs/libelf libctf
 $(INTEL_BLD)libproc: libsaveargs
 libproject:	libpool libproc libsecdb
-libprtdiag:	libkstat
+libprtdiag:	libkstat libdevinfo
 libprtdiag_psr:	libprtdiag
 libraidcfg:	libdevinfo
+librcm:		libnvpair
 librestart:	libuutil libscf libpool libproject libsecdb libsysevent
 libsasl:	libgss pkcs11
 libsaveargs:	libdisasm
-libscf:		libuutil libgen libsmbios
+libscf:		libuutil libgen libnsl libnvpair libsmbios
 libsec:		libavl libidmap
+libsecdb:	libnsl
 libsff:		libnvpair
 libshare:	libscf libzfs libuuid libfsmgt libsecdb libumem libsmbfs
 libshell:	libast libcmd libdll libsecdb
@@ -674,16 +699,20 @@ libtsnet:	libtsol libsecdb
 libtsol:	libsecdb
 libuuid:	libdlpi
 libv12n:	libds libuuid
+libvmm:		libvmmapi
 libvolmgt:	libadm
 libvrrpadm:	libdladm libscf
 libvscan:	libscf libsecdb
-libzfs:		libdevid libgen libuutil libadm libavl libefi libidmap \
-		libumem libtsol libzfs_core libcryptoutil pkcs11 libmd libcmdutils
-libzfs_jni:	libdiskmgt libzfs
+libzfs:		libdevid libgen libuutil libavl libefi libidmap \
+		libumem libtsol libzfs_core libcryptoutil pkcs11 libmd libzutil
+libzfsbootenv:	libzfs libnvpair
+libzfs_core:	libnvpair
+libzfs_jni:	libdiskmgt libzfs libzutil
 libzonecfg:	libuuid libsysevent libsec libbrand libpool libscf libproc \
 		libuutil libbsm libsecdb
 libzonestat:	libcmdutils libumem
-libzpool:	libavl libumem libcmdutils libsysevent libfakekernel libzfs
+libzpool:	libavl libumem libcmdutils libsysevent libfakekernel libzutil
+libzutil:	libadm libavl libdevid libefi
 madv:		libgen
 mpapi:		libpthread libdevinfo libsysevent
 mpss:		libgen

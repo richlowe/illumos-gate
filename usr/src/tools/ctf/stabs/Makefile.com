@@ -32,23 +32,21 @@ SRCS = \
 	fth_enum.c \
 	fth_struct.c \
 	genassym.c \
-	list.c \
 	memory.c \
 	utils.c
 
 include ../../Makefile.ctf
 
 LDLIBS += -lctf
+NATIVE_LIBS += libctf.so
 
-OBJS = $(SRCS:%.c=%.o)
-LINTFILES = $(SRCS:%.c=%.ln)
+OBJS = $(SRCS:%.c=%.o) list.o
 
-LINTFLAGS = -mnux -L$(ROOT)/usr/lib
 CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-unused
 
 .NO_PARALLEL:
-.PARALLEL: $(OBJS) $(LINTFILES)
+.PARALLEL: $(OBJS)
 
 all: $(PROG)
 
@@ -59,17 +57,14 @@ $(PROG): $(OBJS)
 %.o: ../common/%.c
 	$(COMPILE.c) $<
 
+%.o: $(SRC)/common/list/%.c
+	$(COMPILE.c) $<
+
 $(ROOTONBLDMACHPROG): $(PROG)
 
 install: $(ROOTONBLDMACHPROG)
 
 clean:
 	$(RM) $(OBJS) $(LINTFILES)
-
-%.ln: ../common/%.c
-	$(LINT.c) -c $<
-
-lint: $(LINTFILES)
-	$(LINT) $(LINTFLAGS) $(LINTFILES) $(LDLIBS)
 
 include ../../Makefile.ctf.targ

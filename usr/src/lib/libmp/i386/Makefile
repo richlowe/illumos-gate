@@ -38,11 +38,15 @@ $(ROOTFULLDBGDIR)/$(OLIBRARY) :=	FILEMODE= 755
 
 .KEEP_STATE:
 
+#
+# Note the use of LDLIBS.lib as opposed to LDLIBS is so we can get the
+# search path, but not the actual additional libraries.
+#
 $(OLIBRARY):	pics/pics_mp.o libmp.so.2 $(OMAPFILE) debugobj
 	$(CC) $(CFLAGS) -o $@ $(GSHARED) -h $(OLIBRARY) $(ZTEXT) $(ZDEFS) \
 	    -Wl,-zdebuglink=debugobj/libmp.so.1 \
-	    $(BDIRECT) pics/pics_mp.o libmp.so.2 -M$(OMAPFILE) \
-	    $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+	    $(BDIRECT) pics/pics_mp.o libmp.so.2 -Wl,-M$(OMAPFILE) \
+	    $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) $(LDLIBS.lib)
 	$(POST_PROCESS_SO)
 
 pics/pics_mp.o:
@@ -52,4 +56,4 @@ pics/pics_mp.o:
 all: $(LIBS) $(OLIBRARY)
 
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLIBDIR)/$(OLIBRARY) \
-	 $(ROOTFULLDBGDIR)/$(OLIBRARY)
+	 $(ROOTFULLDBGDIR)/$(OLIBRARY) $(ROOTCOMPATLINKS)

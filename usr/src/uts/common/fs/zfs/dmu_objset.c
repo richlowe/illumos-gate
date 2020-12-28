@@ -28,6 +28,7 @@
  * Copyright (c) 2015, STRATO AG, Inc. All rights reserved.
  * Copyright (c) 2014 Integros [integros.com]
  * Copyright 2017 Nexenta Systems, Inc.
+ * Copyright (c) 2017 Open-E, Inc. All Rights Reserved.
  */
 
 /* Portions Copyright 2010 Robert Milkowski */
@@ -80,6 +81,8 @@ int dmu_find_threads = 0;
  * if there are enough holes to fill.
  */
 int dmu_rescan_dnode_threshold = 131072;
+
+static char *upgrade_tag = "upgrade_tag";
 
 static void dmu_objset_find_dp_cb(void *arg);
 
@@ -851,7 +854,7 @@ dmu_objset_refresh_ownership(dsl_dataset_t *ds, dsl_dataset_t **newds,
 	dp = ds->ds_dir->dd_pool;
 	dsl_pool_config_enter(dp, FTAG);
 
-	dsl_dataset_disown(ds, 0, tag);
+	dsl_dataset_disown(ds, decrypt, tag);
 	VERIFY0(dsl_dataset_own(dp, name,
 	    (decrypt) ? DS_HOLD_FLAG_DECRYPT : 0, tag, newds));
 	dsl_pool_config_exit(dp, FTAG);
@@ -980,6 +983,7 @@ dmu_objset_evict_done(objset_t *os)
 	mutex_destroy(&os->os_userused_lock);
 	mutex_destroy(&os->os_obj_lock);
 	mutex_destroy(&os->os_user_ptr_lock);
+	mutex_destroy(&os->os_upgrade_lock);
 	for (int i = 0; i < TXG_SIZE; i++) {
 		multilist_destroy(os->os_dirty_dnodes[i]);
 	}
@@ -1476,14 +1480,20 @@ dmu_objset_upgrade_task_cb(void *data)
 	mutex_enter(&os->os_upgrade_lock);
 	os->os_upgrade_status = EINTR;
 	if (!os->os_upgrade_exit) {
+		int status;
+
 		mutex_exit(&os->os_upgrade_lock);
 
-		os->os_upgrade_status = os->os_upgrade_cb(os);
+		status = os->os_upgrade_cb(os);
+
 		mutex_enter(&os->os_upgrade_lock);
+
+		os->os_upgrade_status = status;
 	}
 	os->os_upgrade_exit = B_TRUE;
 	os->os_upgrade_id = 0;
 	mutex_exit(&os->os_upgrade_lock);
+	dsl_dataset_long_rele(dmu_objset_ds(os), upgrade_tag);
 }
 
 static void
@@ -1492,6 +1502,9 @@ dmu_objset_upgrade(objset_t *os, dmu_objset_upgrade_cb_t cb)
 	if (os->os_upgrade_id != 0)
 		return;
 
+	ASSERT(dsl_pool_config_held(dmu_objset_pool(os)));
+	dsl_dataset_long_hold(dmu_objset_ds(os), upgrade_tag);
+
 	mutex_enter(&os->os_upgrade_lock);
 	if (os->os_upgrade_id == 0 && os->os_upgrade_status == 0) {
 		os->os_upgrade_exit = B_FALSE;
@@ -1499,8 +1512,12 @@ dmu_objset_upgrade(objset_t *os, dmu_objset_upgrade_cb_t cb)
 		os->os_upgrade_id = taskq_dispatch(
 		    os->os_spa->spa_upgrade_taskq,
 		    dmu_objset_upgrade_task_cb, os, TQ_SLEEP);
-		if (os->os_upgrade_id == 0)
+		if (os->os_upgrade_id == TASKQID_INVALID) {
+			dsl_dataset_long_rele(dmu_objset_ds(os), upgrade_tag);
 			os->os_upgrade_status = ENOMEM;
+		}
+	} else {
+		dsl_dataset_long_rele(dmu_objset_ds(os), upgrade_tag);
 	}
 	mutex_exit(&os->os_upgrade_lock);
 }
@@ -1511,10 +1528,12 @@ dmu_objset_upgrade_stop(objset_t *os)
 	mutex_enter(&os->os_upgrade_lock);
 	os->os_upgrade_exit = B_TRUE;
 	if (os->os_upgrade_id != 0) {
-		os->os_upgrade_id = 0;
+		taskqid_t tid = os->os_upgrade_id;
+
 		mutex_exit(&os->os_upgrade_lock);
 
-		taskq_wait(os->os_spa->spa_upgrade_taskq);
+		taskq_wait_id(os->os_spa->spa_upgrade_taskq, tid);
+		txg_wait_synced(os->os_spa->spa_dsl_pool, 0);
 	} else {
 		mutex_exit(&os->os_upgrade_lock);
 	}
@@ -1829,7 +1848,7 @@ userquota_compare(const void *l, const void *r)
 	 */
 	rv = strcmp(luqn->uqn_id, ruqn->uqn_id);
 
-	return (AVL_ISIGN(rv));
+	return (TREE_ISIGN(rv));
 }
 
 static void
@@ -2215,7 +2234,7 @@ dmu_objset_userquota_get_ids(dnode_t *dn, boolean_t before, dmu_tx_t *tx)
 		if (flags & DN_ID_OLD_EXIST) {
 			dn->dn_newuid = dn->dn_olduid;
 			dn->dn_newgid = dn->dn_oldgid;
-			dn->dn_newgid = dn->dn_oldprojid;
+			dn->dn_newprojid = dn->dn_oldprojid;
 		} else {
 			dn->dn_newuid = 0;
 			dn->dn_newgid = 0;
@@ -2306,6 +2325,7 @@ dmu_objset_space_upgrade(objset_t *os)
 		dmu_tx_hold_bonus(tx, obj);
 		objerr = dmu_tx_assign(tx, TXG_WAIT);
 		if (objerr != 0) {
+			dmu_buf_rele(db, FTAG);
 			dmu_tx_abort(tx);
 			continue;
 		}

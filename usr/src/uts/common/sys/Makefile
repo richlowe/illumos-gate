@@ -27,6 +27,8 @@
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2017 Nexenta Systems, Inc.
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
+# Copyright 2019 Peter Tribble.
+# Copyright 2015, Joyent, Inc. All rights reserved.
 #
 
 include $(SRC)/uts/Makefile.uts
@@ -94,6 +96,7 @@ CHKHDRS=			\
 	bofi.h			\
 	bofi_impl.h		\
 	bpp_io.h		\
+	bootbanner.h		\
 	bootstat.h		\
 	brand.h			\
 	buf.h			\
@@ -347,6 +350,7 @@ CHKHDRS=			\
 	lgrp.h			\
 	lgrp_user.h		\
 	libc_kernel.h		\
+	limits.h		\
 	link.h			\
 	linker_set.h		\
 	list.h			\
@@ -693,12 +697,8 @@ AUDIOHDRS=			\
 AVHDRS=				\
 	iec61883.h
 
-BSCHDRS=			\
-	bscbus.h		\
-	bscv_impl.h		\
-	lom_ebuscodes.h		\
+LOMHDRS=			\
 	lom_io.h		\
-	lom_priv.h		\
 	lombus.h
 
 MDESCHDRS=			\
@@ -839,6 +839,7 @@ FSHDRS=				\
 	decomp.h		\
 	dv_node.h		\
 	sdev_impl.h		\
+	sdev_plugin.h		\
 	fifonode.h		\
 	hsfs_isospec.h		\
 	hsfs_node.h		\
@@ -1027,6 +1028,10 @@ USBWCMHDRS=		\
 UGENHDRS=           \
 	usb_ugen.h
 
+USBCCIDHDRS = \
+	ccid.h \
+	uccid.h
+
 HOTPLUGHDRS=	\
 	hpcsvc.h	\
 	hpctrl.h
@@ -1128,7 +1133,7 @@ CHECKHDRS=						\
 	$($(MACH)_HDRS:%.h=%.check)			\
 	$(AUDIOHDRS:%.h=audio/%.check)			\
 	$(AVHDRS:%.h=av/%.check)			\
-	$(BSCHDRS:%.h=%.check)				\
+	$(LOMHDRS:%.h=%.check)				\
 	$(CHKHDRS:%.h=%.check)				\
 	$(CPUDRVHDRS:%.h=%.check)			\
 	$(CRYPTOHDRS:%.h=crypto/%.check)		\
@@ -1173,6 +1178,7 @@ CHECKHDRS=						\
 	$(SYSEVENTHDRS:%.h=sysevent/%.check)            \
 	$(CONTRACTHDRS:%.h=contract/%.check)            \
 	$(USBAUDHDRS:%.h=usb/clients/audio/%.check)   \
+	$(USBCCIDHDRS:%.h=usb/clients/ccid/%.check)	\
 	$(USBHUBDHDRS:%.h=usb/hubd/%.check)		\
 	$(USBHIDHDRS:%.h=usb/clients/hid/%.check)	\
 	$(USBMSHDRS:%.h=usb/clients/mass_storage/%.check)	\
@@ -1247,6 +1253,7 @@ CHECKHDRS=						\
 	$(ROOTUSBCDCHDRS)       \
 	$(ROOTUSBVIDHDRS)       \
 	$(ROOTUSBWCMHDRS)	\
+	$(ROOTUSBCCIDHDRS)	\
 	$(ROOTUGENHDRS)		\
 	$(ROOT1394HDRS)         \
 	$(ROOTHOTPLUGHDRS)	\
@@ -1305,6 +1312,7 @@ install_h:			\
 	$(ROOTUWBHDRS)		\
 	$(ROOTUWBAHDRS)		\
 	$(ROOTUSBHDRS)		\
+	$(ROOTUSBCCIDHDRS)	\
 	$(ROOTUSBAUDHDRS)	\
 	$(ROOTUSBHUBDHDRS)	\
 	$(ROOTUSBHIDHDRS)	\

@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -81,7 +79,7 @@ fc_get_request(common_data_t *cdp)
 		return (0);
 	}
 
-	if ((cdp->attach = fc_get_ap(cdp)) == NULL)
+	if ((cdp->attach = fc_get_ap(cdp)) == 0)
 		return (0);
 
 	return (1);
@@ -180,8 +178,8 @@ save_fcode_to_file(fcode_env_t *env)
 		return;
 	}
 	log_message(MSG_INFO, "Fcode %p,%x to file '%s'\n", buf, len, fname);
-	fwrite(buf, len, sizeof (char), fd);
-	fclose(fd);
+	(void) fwrite(buf, len, sizeof (char), fd);
+	(void) fclose(fd);
 }
 
 void
@@ -327,7 +325,7 @@ get_request(fcode_env_t *env)
 	common_data_t *cdp = env->private;
 
 	if (cdp->fcode_fd >= 0)
-		close(cdp->fcode_fd);
+		(void) close(cdp->fcode_fd);
 	if (!open_fcode_dev(env))
 		exit(1);
 	if (!fc_get_request(cdp)) {
@@ -355,7 +353,7 @@ get_efdaemon_request(fcode_env_t *env)
 		exit(1);
 	}
 
-	if ((cdp->attach = fc_get_ap(cdp)) == NULL)
+	if ((cdp->attach = fc_get_ap(cdp)) == 0)
 		exit(1);
 
 	get_my_args(env);
@@ -407,7 +405,7 @@ finish_request(fcode_env_t *env)
 {
 	common_data_t *cdp = env->private;
 
-	close(cdp->fcode_fd);
+	(void) close(cdp->fcode_fd);
 }
 
 /*

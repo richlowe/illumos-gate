@@ -99,7 +99,7 @@ LPLIBS =			\
 
 SYSLIBS=	-lcurses -lgen -lcurses -lnsl -ltsol -lsecdb -lbsm
 
-LDLIBS +=	$(LPLIBS) $(SYSLIBS)
+LDLIBS +=	$(LPLIBS) $(SYSLIBS) $(LDSTACKPROTECT)
 
 POFILE=		lp_cmd_lpsched.po
 

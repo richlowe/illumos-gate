@@ -30,7 +30,6 @@ DEBUGLIBS=
 CPPFLAGS +=	-I../inc -I$(SRC)/cmd/smserverd/
 LDLIBS +=	-lc $(PLUGIN_SPECIFIC_LIB)
 
-LINTPLUGIN  = llib-$(LIBNAME).ln
 PLUGINDIR = $(ROOTLIBDIR)/smedia
 PLUGINDIR64 = $(ROOTLIBDIR)/smedia/$(MACH64)
 FILEMODE = 555
@@ -39,26 +38,13 @@ SOFILES	= $(LIBRARY:%.a=%.so)
 PLUGINS  = $(LIBS:%=$(PLUGINDIR)/%)
 PLUGINS64  = $(LIBS:%=$(PLUGINDIR64)/%)
 
-CLEANFILES=	$(LINTOUT) $(LINTPLUGIN)
-
 SRCDIR =	../common
 
 # not linted
 SMATCH=off
 
-LINTFLAGS += -xu
-LINTFLAGS64 += -xu
-$(LINTPLUGIN) :=	SRCS=$(OBJECTS:%.o=../common/%.c)
-$(LINTPLUGIN) :=	LINTFLAGS=-nvx
-$(LINTPLUGIN) :=	TARGET_ARCH=
-
-LINTSRC=	$(LINTPLUGIN:%.ln=%)
-ROOTLINTDIR=	$(ROOTLIBDIR)
-ROOTLINT=	$(LINTSRC:%=$(ROOTLINTDIR)/%)
-
 .KEEP_STATE:
 
-lint:	lintcheck
 
 objs/%.o pics/%.o: ../common/%.c
 	$(COMPILE.c) -o $@ $<

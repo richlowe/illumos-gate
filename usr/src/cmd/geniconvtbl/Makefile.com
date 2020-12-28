@@ -104,7 +104,7 @@ $(ITM) :=	sparcv9_CFLAGS += -xregs=no%appl
 LDLIBS += -lgen
 
 MY_NATIVE_CPPFLAGS = -D_FILE_OFFSET_BITS=64 -I. -I..
-MY_NATIVE_LDFLAGS = $(MAPFILE.NES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+MY_NATIVE_LDFLAGS = $(MAPFILE.NES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) $(ZDIRECT) $(ZLAZYLOAD)
 MY_NATIVE_LDLIBS = -lgen
 
 #
@@ -128,7 +128,7 @@ $(PROG): $(OBJS)
 	$(POST_PROCESS)
 
 $(ITM): $(SRCI)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -M$(MAPFILE) -o $@ $(SRCI) $(LDLIBS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -Wl,-M$(MAPFILE) -o $@ $(SRCI) $(LDLIBS)
 	$(POST_PROCESS_SO)
 
 $(YTABC) $(YTABH): $(SRCY)
@@ -151,18 +151,6 @@ $(POFILES): $(SRCSC) $(SRCI) $(SRCY) $(SRCL)
 	$(COMPILE.cpp) $<  > $<.i
 	$(BUILD.po)
 
-
-lint : lint_SRCS1  lint_SRCS2
-
-
-lint_SRCS1: $(SRCS)
-	$(LINT.c) $(SRCS) $(LDLIBS)
-
-lint_SRCS2: $(SRCI)
-	$(LINT.c) $(SRCI) $(LDLIBS)
-
-
-
 hdrchk: $(HDRCHECKS)
 
 cstyle: $(SRCS)
@@ -176,8 +164,6 @@ clean:
 
 %.o:	../%.c
 	$(COMPILE.c) $<
-
-
 
 # install rule
 $(ROOTDIRS32)/%: $(ROOTDIRS32) %
@@ -196,4 +182,3 @@ $(ROOTLIB) $(ROOTBIN):
 	-$(INS.dir)
 
 include ../../Makefile.targ
-

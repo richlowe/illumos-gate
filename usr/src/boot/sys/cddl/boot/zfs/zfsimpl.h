@@ -59,12 +59,24 @@
  * Copyright (c) 2013 by Delphix. All rights reserved.
  */
 
-#ifndef _ZFSIMPL_H
-#define	_ZFSIMPL_H
+#ifndef _ZFSIMPL_H_
+#define	_ZFSIMPL_H_
+
+#include <sys/queue.h>
+#include <sys/list.h>
+#include <bootstrap.h>
 
 #define	MAXNAMELEN	256
 
 #define _NOTE(s)
+
+/*
+ * AVL comparator helpers
+ */
+#define	AVL_ISIGN(a)	(((a) > 0) - ((a) < 0))
+#define	AVL_CMP(a, b)	(((a) > (b)) - ((a) < (b)))
+#define	AVL_PCMP(a, b)	\
+	(((uintptr_t)(a) > (uintptr_t)(b)) - ((uintptr_t)(a) < (uintptr_t)(b)))
 
 /* CRC64 table */
 #define	ZFS_CRC64_POLY	0xC96C5795D7870F42ULL	/* ECMA-182, reflected form */
@@ -487,13 +499,21 @@ typedef struct zio_gbh {
 #define	VDEV_RAIDZ_MAXPARITY	3
 
 #define	VDEV_PAD_SIZE		(8 << 10)
-/* 2 padding areas (vl_pad1 and vl_pad2) to skip */
+/* 2 padding areas (vl_pad1 and vl_be) to skip */
 #define	VDEV_SKIP_SIZE		VDEV_PAD_SIZE * 2
 #define	VDEV_PHYS_SIZE		(112 << 10)
 #define	VDEV_UBERBLOCK_RING	(128 << 10)
 
+/*
+ * MMP blocks occupy the last MMP_BLOCKS_PER_LABEL slots in the uberblock
+ * ring when MMP is enabled.
+ */
+#define	MMP_BLOCKS_PER_LABEL	1
+
+/* The largest uberblock we support is 8k. */
+#define	MAX_UBERBLOCK_SHIFT	(13)
 #define	VDEV_UBERBLOCK_SHIFT(vd)	\
-	MAX((vd)->v_top->v_ashift, UBERBLOCK_SHIFT)
+	MIN(MAX((vd)->v_top->v_ashift, UBERBLOCK_SHIFT), MAX_UBERBLOCK_SHIFT)
 #define	VDEV_UBERBLOCK_COUNT(vd)	\
 	(VDEV_UBERBLOCK_RING >> VDEV_UBERBLOCK_SHIFT(vd))
 #define	VDEV_UBERBLOCK_OFFSET(vd, n)	\
@@ -505,9 +525,29 @@ typedef struct vdev_phys {
 	zio_eck_t	vp_zbt;
 } vdev_phys_t;
 
+typedef enum vbe_vers {
+	/* The bootenv file is stored as ascii text in the envblock */
+	VB_RAW = 0,
+
+	/*
+	 * The bootenv file is converted to an nvlist and then packed into the
+	 * envblock.
+	 */
+	VB_NVLIST = 1
+} vbe_vers_t;
+
+typedef struct vdev_boot_envblock {
+	uint64_t	vbe_version;
+	char		vbe_bootenv[VDEV_PAD_SIZE - sizeof (uint64_t) -
+			sizeof (zio_eck_t)];
+	zio_eck_t	vbe_zbt;
+} vdev_boot_envblock_t;
+
+CTASSERT(sizeof (vdev_boot_envblock_t) == VDEV_PAD_SIZE);
+
 typedef struct vdev_label {
 	char		vl_pad1[VDEV_PAD_SIZE];			/*  8K  */
-	char		vl_pad2[VDEV_PAD_SIZE];			/*  8K  */
+	vdev_boot_envblock_t vl_be;				/*  8K  */
 	vdev_phys_t	vl_vdev_phys;				/* 112K	*/
 	char		vl_uberblock[VDEV_UBERBLOCK_RING];	/* 128K	*/
 } vdev_label_t;							/* 256K total */
@@ -747,6 +787,7 @@ typedef enum {
 #define	ZPOOL_CONFIG_IS_LOG		"is_log"
 #define	ZPOOL_CONFIG_TIMESTAMP		"timestamp" /* not stored on disk */
 #define	ZPOOL_CONFIG_FEATURES_FOR_READ	"features_for_read"
+#define	ZPOOL_CONFIG_VDEV_CHILDREN	"vdev_children"
 
 /*
  * The persistent vdev state is stored as separate values rather than a single
@@ -843,15 +884,90 @@ typedef enum pool_state {
  */
 #define	UBERBLOCK_MAGIC		0x00bab10c		/* oo-ba-bloc!	*/
 #define	UBERBLOCK_SHIFT		10			/* up to 1K	*/
+#define	MMP_MAGIC		0xa11cea11		/* all-see-all  */
 
-struct uberblock {
+#define	MMP_INTERVAL_VALID_BIT	0x01
+#define	MMP_SEQ_VALID_BIT	0x02
+#define	MMP_FAIL_INT_VALID_BIT	0x04
+
+#define	MMP_VALID(ubp)		(ubp->ub_magic == UBERBLOCK_MAGIC && \
+				    ubp->ub_mmp_magic == MMP_MAGIC)
+#define	MMP_INTERVAL_VALID(ubp)	(MMP_VALID(ubp) && (ubp->ub_mmp_config & \
+				    MMP_INTERVAL_VALID_BIT))
+#define	MMP_SEQ_VALID(ubp)	(MMP_VALID(ubp) && (ubp->ub_mmp_config & \
+				    MMP_SEQ_VALID_BIT))
+#define	MMP_FAIL_INT_VALID(ubp)	(MMP_VALID(ubp) && (ubp->ub_mmp_config & \
+				    MMP_FAIL_INT_VALID_BIT))
+
+#define	MMP_INTERVAL(ubp)	((ubp->ub_mmp_config & 0x00000000FFFFFF00) \
+				    >> 8)
+#define	MMP_SEQ(ubp)		((ubp->ub_mmp_config & 0x0000FFFF00000000) \
+				    >> 32)
+#define	MMP_FAIL_INT(ubp)	((ubp->ub_mmp_config & 0xFFFF000000000000) \
+				    >> 48)
+
+typedef struct uberblock {
 	uint64_t	ub_magic;	/* UBERBLOCK_MAGIC		*/
 	uint64_t	ub_version;	/* SPA_VERSION			*/
 	uint64_t	ub_txg;		/* txg of last sync		*/
 	uint64_t	ub_guid_sum;	/* sum of all vdev guids	*/
 	uint64_t	ub_timestamp;	/* UTC time of last sync	*/
 	blkptr_t	ub_rootbp;	/* MOS objset_phys_t		*/
-};
+	/* highest SPA_VERSION supported by software that wrote this txg */
+	uint64_t	ub_software_version;
+	/* Maybe missing in uberblocks we read, but always written */
+	uint64_t	ub_mmp_magic;
+	/*
+	 * If ub_mmp_delay == 0 and ub_mmp_magic is valid, MMP is off.
+	 * Otherwise, nanosec since last MMP write.
+	 */
+	uint64_t	ub_mmp_delay;
+
+	/* BEGIN CSTYLED */
+	/*
+	 * The ub_mmp_config contains the multihost write interval, multihost
+	 * fail intervals, sequence number for sub-second granularity, and
+	 * valid bit mask.  This layout is as follows:
+	 *
+	 *   64      56      48      40      32      24      16      8       0
+	 *   +-------+-------+-------+-------+-------+-------+-------+-------+
+	 * 0 | Fail Intervals|      Seq      |   Write Interval (ms) | VALID |
+	 *   +-------+-------+-------+-------+-------+-------+-------+-------+
+	 *
+	 * This allows a write_interval of (2^24/1000)s, over 4.5 hours
+	 *
+	 * VALID Bits:
+	 * - 0x01 - Write Interval (ms)
+	 * - 0x02 - Sequence number exists
+	 * - 0x04 - Fail Intervals
+	 * - 0xf8 - Reserved
+	 */
+	/* END CSTYLED */
+	uint64_t	ub_mmp_config;
+
+	/*
+	 * ub_checkpoint_txg indicates two things about the current uberblock:
+	 *
+	 * 1] If it is not zero then this uberblock is a checkpoint. If it is
+	 *    zero, then this uberblock is not a checkpoint.
+	 *
+	 * 2] On checkpointed uberblocks, the value of ub_checkpoint_txg is
+	 *    the ub_txg that the uberblock had at the time we moved it to
+	 *    the MOS config.
+	 *
+	 * The field is set when we checkpoint the uberblock and continues to
+	 * hold that value even after we've rewound (unlike the ub_txg that
+	 * is reset to a higher value).
+	 *
+	 * Besides checks used to determine whether we are reopening the
+	 * pool from a checkpointed uberblock [see spa_ld_select_uberblock()],
+	 * the value of the field is used to determine which ZIL blocks have
+	 * been allocated according to the ms_sm when we are rewinding to a
+	 * checkpoint. Specifically, if blk_birth > ub_checkpoint_txg, then
+	 * the ZIL block is not allocated [see uses of spa_min_claim_txg()].
+	 */
+	uint64_t	ub_checkpoint_txg;
+} uberblock_t;
 
 /*
  * Flags.
@@ -930,6 +1046,7 @@ typedef struct dnode_phys {
 
 	uint64_t dn_pad3[4];
 
+	/* BEGIN CSTYLED */
 	/*
 	 * The tail region is 448 bytes for a 512 byte dnode, and
 	 * correspondingly larger for larger dnode sizes. The spill
@@ -946,6 +1063,7 @@ typedef struct dnode_phys {
 	 * | dn_blkptr[0]  | dn_bonus[0..191]      | dn_spill      |
 	 * +---------------+-----------------------+---------------+
 	 */
+	/* END CSTYLED */
 	union {
 		blkptr_t dn_blkptr[1+DN_OLD_MAX_BONUSLEN/sizeof (blkptr_t)];
 		struct {
@@ -1249,8 +1367,7 @@ typedef struct dsl_dataset_phys {
 #define	ZAP_HASHBITS		28
 #define	MZAP_ENT_LEN		64
 #define	MZAP_NAME_LEN		(MZAP_ENT_LEN - 8 - 4 - 2)
-#define	MZAP_MAX_BLKSHIFT	SPA_MAXBLOCKSHIFT
-#define	MZAP_MAX_BLKSZ		(1 << MZAP_MAX_BLKSHIFT)
+#define	MZAP_MAX_BLKSZ		SPA_OLD_MAXBLOCKSIZE
 
 typedef struct mzap_ent_phys {
 	uint64_t mze_value;
@@ -1262,7 +1379,8 @@ typedef struct mzap_ent_phys {
 typedef struct mzap_phys {
 	uint64_t mz_block_type;	/* ZBT_MICRO */
 	uint64_t mz_salt;
-	uint64_t mz_pad[6];
+	uint64_t mz_normflags;
+	uint64_t mz_pad[5];
 	mzap_ent_phys_t mz_chunk[1];
 	/* actually variable size depending on block size */
 } mzap_phys_t;
@@ -1319,6 +1437,8 @@ typedef struct zap_phys {
 	uint64_t zap_num_leafs;		/* number of leafs */
 	uint64_t zap_num_entries;	/* number of entries */
 	uint64_t zap_salt;		/* salt to stir into hash function */
+	uint64_t zap_normflags;		/* flags for u8_textprep_str() */
+	uint64_t zap_flags;		/* zap_flags_t */
 	/*
 	 * This structure is followed by padding, and then the embedded
 	 * pointer table.  The embedded pointer table takes up second
@@ -1329,9 +1449,12 @@ typedef struct zap_phys {
 
 typedef struct zap_table_phys zap_table_phys_t;
 
+struct spa;
 typedef struct fat_zap {
 	int zap_block_shift;			/* block size shift */
 	zap_phys_t *zap_phys;
+	const struct spa *zap_spa;
+	const dnode_phys_t *zap_dnode;
 } fat_zap_t;
 
 #define	ZAP_LEAF_MAGIC 0x2AB1EAF
@@ -1546,10 +1669,9 @@ typedef struct znode_phys {
  */
 struct vdev;
 struct spa;
-typedef int vdev_phys_read_t(struct vdev *vdev, void *priv,
-    off_t offset, void *buf, size_t bytes);
-typedef int vdev_read_t(struct vdev *vdev, const blkptr_t *bp,
-    void *buf, off_t offset, size_t bytes);
+typedef int vdev_phys_read_t(struct vdev *, void *, off_t, void *, size_t);
+typedef int vdev_phys_write_t(struct vdev *, off_t, void *, size_t);
+typedef int vdev_read_t(struct vdev *, const blkptr_t *, void *, off_t, size_t);
 
 typedef STAILQ_HEAD(vdev_list, vdev) vdev_list_t;
 
@@ -1671,16 +1793,19 @@ typedef struct vdev {
 	const char	*v_phys_path;	/* vdev bootpath */
 	const char	*v_devid;	/* vdev devid */
 	uint64_t	v_guid;		/* vdev guid */
-	int		v_id;		/* index in parent */
+	uint64_t	v_id;		/* index in parent */
+	uint64_t	v_psize;	/* physical device capacity */
 	int		v_ashift;	/* offset to block shift */
 	int		v_nparity;	/* # parity for raidz */
 	struct vdev	*v_top;		/* parent vdev */
-	int		v_nchildren;	/* # children */
+	size_t		v_nchildren;	/* # children */
 	vdev_state_t	v_state;	/* current state */
 	vdev_phys_read_t *v_phys_read;	/* read from raw leaf vdev */
+	vdev_phys_write_t *v_phys_write; /* write to raw leaf vdev */
 	vdev_read_t	*v_read;	/* read from vdev */
-	void		*v_read_priv;	/* private data for read function */
-	struct spa	*spa;		/* link to spa */
+	void		*v_priv;	/* data for read/write function */
+	boolean_t	v_islog;
+	struct spa	*v_spa;		/* link to spa */
 	/*
 	 * Values stored in the config for an indirect or removing vdev.
 	 */
@@ -1699,12 +1824,13 @@ typedef struct spa {
 	uint64_t	spa_guid;	/* pool guid */
 	uint64_t	spa_txg;	/* most recent transaction */
 	struct uberblock spa_uberblock;	/* best uberblock so far */
-	vdev_list_t	spa_vdevs;	/* list of all toplevel vdevs */
+	vdev_t		*spa_root_vdev;	/* toplevel vdev container */
 	objset_phys_t	spa_mos;	/* MOS for this pool */
 	zio_cksum_salt_t spa_cksum_salt;	/* secret salt for cksum */
 	void		*spa_cksum_tmpls[ZIO_CHECKSUM_FUNCTIONS];
-	int		spa_inited;	/* initialized */
 	vdev_t		*spa_boot_vdev;	/* boot device for kernel */
+	boolean_t	spa_with_log;	/* this pool has log */
+	void		*spa_bootenv;	/* bootenv from pool label */
 } spa_t;
 
 /* IO related arguments. */
@@ -1722,6 +1848,6 @@ typedef struct zio {
 	int		io_error;
 } zio_t;
 
-static void decode_embedded_bp_compressed(const blkptr_t *, void *);
+extern void decode_embedded_bp_compressed(const blkptr_t *, void *);
 
-#endif	/* _ZFSIMPL_H */
+#endif	/* _ZFSIMPL_H_ */

@@ -46,7 +46,7 @@ BLTOBJ =	msg.o
 OBJS=		$(BLTOBJ) $(COMOBJ) $(COMOBJ32) $(COMOBJ64) $(SGSCOMMONOBJ)
 
 MAPFILE=	$(MAPFILE.NGB)
-MAPOPT=		$(MAPFILE:%=-M%)
+MAPOPT=		$(MAPFILE:%=-Wl,-M%)
 
 CPPFLAGS=	-I. -I../common -I../../include -I../../include/$(MACH) \
 		-I$(SRC)/lib/libc/inc -I$(SRC)/uts/$(ARCH)/sys \
@@ -56,6 +56,8 @@ LLDFLAGS64 =	$(VAR_ELFDUMP_LLDFLAGS64)
 LDFLAGS +=	$(VERSREF) $(MAPOPT) $(LLDFLAGS)
 LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) -llddbg \
 		    $(CONVLIBDIR) -lconv
+
+NATIVE_LDFLAGS = $(LDASSERTS) $(BDIRECT) $(ZASSERTDEFLIB)=libc.so
 
 CERRWARN +=	$(CNOWARN_UNINIT)
 

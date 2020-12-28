@@ -21,6 +21,8 @@
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2019 Western Digital Corporation.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -477,13 +479,14 @@ sda_slot_fini(sda_slot_t *slot)
 }
 
 static bd_ops_t sda_bd_ops = {
-	BD_OPS_VERSION_0,
+	BD_OPS_CURRENT_VERSION,
 	sda_mem_bd_driveinfo,
 	sda_mem_bd_mediainfo,
 	NULL,			/* devid_init */
 	NULL,			/* sync_cache */
 	sda_mem_bd_read,
 	sda_mem_bd_write,
+	NULL,			/* free_space */
 };
 
 void

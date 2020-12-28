@@ -21,10 +21,10 @@
 
 /*
  * Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2019 Joyent, Inc.
  * Copyright (c) 2011 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2013, 2017 by Delphix. All rights reserved.
  * Copyright 2014, OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 /* Copyright (c) 1990 Mentat Inc. */
 
@@ -1019,10 +1019,23 @@ finish:
 
 	/* If we have an upper handle (socket), release it */
 	if (IPCL_IS_NONSTR(connp)) {
-		ASSERT(connp->conn_upper_handle != NULL);
-		(*connp->conn_upcalls->su_closed)(connp->conn_upper_handle);
+		sock_upcalls_t *upcalls = connp->conn_upcalls;
+		sock_upper_handle_t handle = connp->conn_upper_handle;
+
+		ASSERT(upcalls != NULL);
+		ASSERT(upcalls->su_closed != NULL);
+		ASSERT(handle != NULL);
+		/*
+		 * Set these to NULL first because closed() will free upper
+		 * structures.  Acquire conn_lock because an external caller
+		 * like conn_get_socket_info() will upcall if these are
+		 * non-NULL.
+		 */
+		mutex_enter(&connp->conn_lock);
 		connp->conn_upper_handle = NULL;
 		connp->conn_upcalls = NULL;
+		mutex_exit(&connp->conn_lock);
+		upcalls->su_closed(handle);
 	}
 }
 
@@ -1421,13 +1434,26 @@ tcp_free(tcp_t *tcp)
 	 * nothing to do other than clearing the field.
 	 */
 	if (connp->conn_upper_handle != NULL) {
-		if (IPCL_IS_NONSTR(connp)) {
-			(*connp->conn_upcalls->su_closed)(
-			    connp->conn_upper_handle);
-			tcp->tcp_detached = B_TRUE;
-		}
+		sock_upcalls_t *upcalls = connp->conn_upcalls;
+		sock_upper_handle_t handle = connp->conn_upper_handle;
+
+		/*
+		 * Set these to NULL first because closed() will free upper
+		 * structures.  Acquire conn_lock because an external caller
+		 * like conn_get_socket_info() will upcall if these are
+		 * non-NULL.
+		 */
+		mutex_enter(&connp->conn_lock);
 		connp->conn_upper_handle = NULL;
 		connp->conn_upcalls = NULL;
+		mutex_exit(&connp->conn_lock);
+		if (IPCL_IS_NONSTR(connp)) {
+			ASSERT(upcalls != NULL);
+			ASSERT(upcalls->su_closed != NULL);
+			ASSERT(handle != NULL);
+			upcalls->su_closed(handle);
+			tcp->tcp_detached = B_TRUE;
+		}
 	}
 }
 
@@ -3315,9 +3341,11 @@ tcp_update_lso(tcp_t *tcp, ip_xmit_attr_t *ixa)
 	 */
 	if (ixa->ixa_flags & IXAF_LSO_CAPAB) {
 		ill_lso_capab_t	*lsoc = &ixa->ixa_lso_capab;
+		uint_t lso_max = (ixa->ixa_flags & IXAF_IS_IPV4) ?
+		    lsoc->ill_lso_max_tcpv4 : lsoc->ill_lso_max_tcpv6;
 
-		ASSERT(lsoc->ill_lso_max > 0);
-		tcp->tcp_lso_max = MIN(TCP_MAX_LSO_LENGTH, lsoc->ill_lso_max);
+		ASSERT3U(lso_max, >, 0);
+		tcp->tcp_lso_max = MIN(TCP_MAX_LSO_LENGTH, lso_max);
 
 		DTRACE_PROBE3(tcp_update_lso, boolean_t, tcp->tcp_lso,
 		    boolean_t, B_TRUE, uint32_t, tcp->tcp_lso_max);

@@ -23,6 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2020 Peter Tribble
+#
 
 #
 # Makefile for Java Print Manager server
@@ -30,8 +32,6 @@
 
 LIBRARY =	libpmgr.a
 VERS =		.1
-
-JNIHDR_FILES =	com_sun_admin_pm_server_DoPrinterNS.h
 
 OBJECTS =	DoPrinterNS.o NS.o
 
@@ -58,8 +58,6 @@ CLASSFILES =	Printer.class \
 		pmHostNotPingableException.class \
 		pmNSNotConfiguredException.class \
 		pmMisc.class
-
-JNICLASSFILES =	DoPrinterNS.class
 
 include		$(SRC)/lib/Makefile.lib
 
@@ -90,20 +88,12 @@ SMATCH=off
 
 LDLIBS +=	-lprint -lnsl -lsocket -lc
 
-CLEANFILES=	*.class $(LINTLIB) $(LINTOUT)
-CLOBBERFILES=	$(JNIHDR_FILES) $(LIBLINKS)
+CLEANFILES=	*.class
+CLOBBERFILES=	$(LIBLINKS)
 
-all: $(CLASSFILES) $(JNIHDR_FILES) $(DYNLIB)
+all: $(CLASSFILES) $(DYNLIB)
 
 install: all $(ROOTLIBS) $(ROOTDIRS) $(ROOTLINKS)
-
-#
-# Build jni header file
-# Use $@ instead of the "unreliable" $*
-#
-$(JNIHDR_FILES): $(JNICLASSFILES)
-	$(JAVAH) -jni -classpath $(CLASSPATH) \
-		`echo $@ | sed 's/.h$$//' | tr _ .`
 
 #
 # Build standalone programs for testing
@@ -111,8 +101,6 @@ $(JNIHDR_FILES): $(JNICLASSFILES)
 NS: NS.c
 	$(CC) NS.c $(CCGDEBUG) $(ILDOFF) -o NS -DMAIN=1 $(ENVLDLIBS1) $(ENVLIBS2) \
 	    -lprint -lnsl -lsocket
-
-lint: $(JNIHDR_FILES) lintcheck
 
 cstyle:
 	cstyle $(SRCS)

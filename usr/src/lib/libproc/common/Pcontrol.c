@@ -27,6 +27,7 @@
  * Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
  * Copyright (c) 2013 by Delphix. All rights reserved.
  * Copyright 2015, Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <assert.h>
@@ -1201,6 +1202,7 @@ Pfree(struct ps_prochandle *P)
 	while (P->num_fd > 0) {
 		fd_info_t *fip = list_next(&P->fd_head);
 		list_unlink(fip);
+		proc_fdinfo_free(fip->fd_info);
 		free(fip);
 		P->num_fd--;
 	}
@@ -1310,6 +1312,8 @@ Psecflags(struct ps_prochandle *P, prsecflags_t **psf)
 
 	if ((ret = P->ops.pop_secflags(P, psf, P->data)) == 0) {
 		if ((*psf)->pr_version != PRSECFLAGS_VERSION_1) {
+			free(*psf);
+			*psf = NULL;
 			errno = EINVAL;
 			return (-1);
 		}

@@ -21,9 +21,9 @@
 /*
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2020 Joyent, Inc.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
  * libfstyp module for zfs
@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/debug.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <libintl.h>
@@ -38,6 +39,7 @@
 #include <string.h>
 #include <libnvpair.h>
 #include <libzfs.h>
+#include <libzutil.h>
 #include <libfstyp_module.h>
 #include <errno.h>
 
@@ -88,10 +90,16 @@ fstyp_mod_ident(fstyp_mod_handle_t handle)
 	char	*str;
 	uint64_t u64;
 	char	buf[64];
+	int	num_labels = 0;
 
-	if (zpool_read_label(h->fd, &h->config) != 0) {
-		return (FSTYP_ERR_NO_MATCH);
+	if (zpool_read_label(h->fd, &h->config, &num_labels) != 0) {
+		/* This is the only reason zpool_read_label() can fail */
+		VERIFY3S(errno, ==, ENOMEM);
+		return (FSTYP_ERR_NOMEM);
 	}
+
+	if (num_labels == 0)
+		return (FSTYP_ERR_NO_MATCH);
 
 	if (nvlist_lookup_uint64(h->config, ZPOOL_CONFIG_POOL_STATE,
 	    &state) != 0 || state == POOL_STATE_DESTROYED) {

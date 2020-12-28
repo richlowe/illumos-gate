@@ -24,7 +24,9 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright 2020 Nexenta by DDN, Inc. All rights reserved.
+ */
 
 #include <sys/file.h>
 #include <sys/sunndi.h>
@@ -103,7 +105,6 @@ static uint64_t counter_reg_offsets[] = {
 
 static ldi_ident_t ldi_identifier;
 static boolean_t ldi_identifier_valid = B_FALSE;
-static cred_t *credentials = NULL;
 
 /* Called by _init to determine if it is OK to install driver. */
 int
@@ -118,7 +119,6 @@ fpc_platform_module_init(dev_info_t *dip)
 {
 	int status;
 
-	credentials = crget();
 	status = ldi_ident_from_dip(dip, &ldi_identifier);
 	if (status == 0)
 		ldi_identifier_valid = B_TRUE;
@@ -189,8 +189,7 @@ bad_regs_length:
 	if (regs_p)
 		kmem_free(regs_p, regs_length);
 bad_regs_p:
-	if (platform_specific_data)
-		kmem_free(platform_specific_data, sizeof (fire4u_specific_t));
+	kmem_free(platform_specific_data, sizeof (fire4u_specific_t));
 	if (nodename)
 		kmem_free(nodename, nodename_size);
 
@@ -214,8 +213,6 @@ fpc_platform_module_fini(dev_info_t *dip)
 {
 	if (ldi_identifier_valid)
 		ldi_ident_release(ldi_identifier);
-	if (credentials)
-		crfree(credentials);
 }
 
 fire_perfreg_handle_t
@@ -229,7 +226,7 @@ fpc_get_perfreg_handle(int devnum)
 	if ((handle_impl->devspec =
 	    fpc_get_platform_data_by_number(devnum)) != NULL) {
 		rval = ldi_open_by_name(handle_impl->devspec->nodename,
-		    OPEN_FLAGS, credentials, &handle_impl->devhandle,
+		    OPEN_FLAGS, kcred, &handle_impl->devhandle,
 		    ldi_identifier);
 	}
 
@@ -246,7 +243,7 @@ fpc_free_counter_handle(fire_perfreg_handle_t handle)
 {
 	fire_counter_handle_impl_t *handle_impl =
 	    (fire_counter_handle_impl_t *)handle;
-	(void) ldi_close(handle_impl->devhandle, OPEN_FLAGS, credentials);
+	(void) ldi_close(handle_impl->devhandle, OPEN_FLAGS, kcred);
 	kmem_free(handle_impl, sizeof (fire_counter_handle_impl_t));
 	return (SUCCESS);
 }
@@ -284,7 +281,7 @@ fpc_event_io(fire_perfreg_handle_t handle, fire_perfcnt_t group,
 
 	/* Read original value. */
 	if (((rval = ldi_ioctl(handle_impl->devhandle, cmd, (intptr_t)&prg,
-	    FKIOCTL, credentials, &ioctl_rval)) == SUCCESS) && (!is_write)) {
+	    FKIOCTL, kcred, &ioctl_rval)) == SUCCESS) && (!is_write)) {
 		*reg_data = prg.data;
 	}
 
@@ -325,7 +322,7 @@ fpc_counter_io(fire_perfreg_handle_t handle, fire_perfcnt_t group,
 	prg.data = *value;
 
 	if (((rval = ldi_ioctl(handle_impl->devhandle, command, (intptr_t)&prg,
-	    FKIOCTL, credentials, &ioctl_rval)) == SUCCESS) && (!is_write)) {
+	    FKIOCTL, kcred, &ioctl_rval)) == SUCCESS) && (!is_write)) {
 		*value = prg.data;
 	}
 

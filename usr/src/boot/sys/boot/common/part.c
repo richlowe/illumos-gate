@@ -56,7 +56,6 @@ static const uuid_t gpt_uuid_freebsd_ufs = GPT_ENT_TYPE_FREEBSD_UFS;
 static const uuid_t gpt_uuid_efi = GPT_ENT_TYPE_EFI;
 static const uuid_t gpt_uuid_freebsd = GPT_ENT_TYPE_FREEBSD;
 static const uuid_t gpt_uuid_freebsd_boot = GPT_ENT_TYPE_FREEBSD_BOOT;
-static const uuid_t gpt_uuid_freebsd_nandfs = GPT_ENT_TYPE_FREEBSD_NANDFS;
 static const uuid_t gpt_uuid_freebsd_swap = GPT_ENT_TYPE_FREEBSD_SWAP;
 static const uuid_t gpt_uuid_freebsd_zfs = GPT_ENT_TYPE_FREEBSD_ZFS;
 static const uuid_t gpt_uuid_freebsd_vinum = GPT_ENT_TYPE_FREEBSD_VINUM;
@@ -64,6 +63,7 @@ static const uuid_t gpt_uuid_illumos_boot = GPT_ENT_TYPE_ILLUMOS_BOOT;
 static const uuid_t gpt_uuid_illumos_ufs = GPT_ENT_TYPE_ILLUMOS_UFS;
 static const uuid_t gpt_uuid_illumos_zfs = GPT_ENT_TYPE_ILLUMOS_ZFS;
 static const uuid_t gpt_uuid_reserved = GPT_ENT_TYPE_RESERVED;
+static const uuid_t gpt_uuid_apple_apfs = GPT_ENT_TYPE_APPLE_APFS;
 #endif
 
 struct pentry {
@@ -95,7 +95,6 @@ static struct parttypes {
 	{ PART_EFI,		"EFI" },
 	{ PART_FREEBSD,		"FreeBSD" },
 	{ PART_FREEBSD_BOOT,	"FreeBSD boot" },
-	{ PART_FREEBSD_NANDFS,	"FreeBSD nandfs" },
 	{ PART_FREEBSD_UFS,	"FreeBSD UFS" },
 	{ PART_FREEBSD_ZFS,	"FreeBSD ZFS" },
 	{ PART_FREEBSD_SWAP,	"FreeBSD swap" },
@@ -114,7 +113,8 @@ static struct parttypes {
 	{ PART_VTOC_USR,	"usr" },
 	{ PART_VTOC_STAND,	"stand" },
 	{ PART_VTOC_VAR,	"var" },
-	{ PART_VTOC_HOME,	"home" }
+	{ PART_VTOC_HOME,	"home" },
+	{ PART_APFS,		"APFS" }
 };
 
 const char *
@@ -156,8 +156,6 @@ gpt_parttype(uuid_t type)
 		return (PART_FREEBSD_SWAP);
 	else if (uuid_equal(&type, &gpt_uuid_freebsd_vinum, NULL))
 		return (PART_FREEBSD_VINUM);
-	else if (uuid_equal(&type, &gpt_uuid_freebsd_nandfs, NULL))
-		return (PART_FREEBSD_NANDFS);
 	else if (uuid_equal(&type, &gpt_uuid_freebsd, NULL))
 		return (PART_FREEBSD);
 	else if (uuid_equal(&type, &gpt_uuid_illumos_boot, NULL))
@@ -168,6 +166,8 @@ gpt_parttype(uuid_t type)
 		return (PART_ILLUMOS_ZFS);
 	else if (uuid_equal(&type, &gpt_uuid_reserved, NULL))
 		return (PART_RESERVED);
+	else if (uuid_equal(&type, &gpt_uuid_apple_apfs, NULL))
+		return (PART_APFS);
 	return (PART_UNKNOWN);
 }
 
@@ -469,8 +469,6 @@ bsd_parttype(uint8_t type)
 {
 
 	switch (type) {
-	case FS_NANDFS:
-		return (PART_FREEBSD_NANDFS);
 	case FS_SWAP:
 		return (PART_FREEBSD_SWAP);
 	case FS_BSDFFS:
@@ -551,8 +549,6 @@ vtoc8_parttype(uint16_t type)
 {
 
 	switch (type) {
-	case VTOC_TAG_FREEBSD_NANDFS:
-		return (PART_FREEBSD_NANDFS);
 	case VTOC_TAG_FREEBSD_SWAP:
 		return (PART_FREEBSD_SWAP);
 	case VTOC_TAG_FREEBSD_UFS:
@@ -758,13 +754,14 @@ ptable_open(void *dev, uint64_t sectors, uint16_t sectorsize, diskread_t *dread)
 	struct dos_partition *dp;
 	struct ptable *table;
 	uint8_t *buf;
-	int i, count;
+	int i;
 #ifdef LOADER_MBR_SUPPORT
 	struct pentry *entry;
 	uint32_t start, end;
 	int has_ext;
 #endif
 	table = NULL;
+	dp = NULL;
 	buf = malloc(sectorsize);
 	if (buf == NULL)
 		return (NULL);
@@ -825,29 +822,28 @@ ptable_open(void *dev, uint64_t sectors, uint16_t sectorsize, diskread_t *dread)
 		goto out;
 	}
 	/* Check that we have PMBR. Also do some validation. */
-	dp = (struct dos_partition *)(buf + DOSPARTOFF);
-	for (i = 0, count = 0; i < NDOSPART; i++) {
+	dp = malloc(NDOSPART * sizeof (struct dos_partition));
+	if (dp == NULL)
+		goto out;
+	bcopy(buf + DOSPARTOFF, dp, NDOSPART * sizeof (struct dos_partition));
+
+	/*
+	 * macOS can create PMBR partition in a hybrid MBR; that is, an MBR
+	 * partition which has a DOSTYP_PMBR entry defined to start at sector 1.
+	 * After the DOSTYP_PMBR, there may be other paritions. A UEFI
+	 * compliant PMBR has no other partitions.
+	 */
+	for (i = 0; i < NDOSPART; i++) {
 		if (dp[i].dp_flag != 0 && dp[i].dp_flag != 0x80) {
 			DPRINTF("invalid partition flag %x", dp[i].dp_flag);
 			goto out;
 		}
 #ifdef LOADER_GPT_SUPPORT
-		if (dp[i].dp_typ == DOSPTYP_PMBR) {
+		if (dp[i].dp_typ == DOSPTYP_PMBR && dp[i].dp_start == 1) {
 			table->type = PTABLE_GPT;
 			DPRINTF("PMBR detected");
 		}
 #endif
-		if (dp[i].dp_typ != 0)
-			count++;
-	}
-	/* Do we have some invalid values? */
-	if (table->type == PTABLE_GPT && count > 1) {
-		if (dp[1].dp_typ != DOSPTYP_HFS) {
-			table->type = PTABLE_NONE;
-			DPRINTF("Incorrect PMBR, ignore it");
-		} else {
-			DPRINTF("Bootcamp detected");
-		}
 	}
 #ifdef LOADER_GPT_SUPPORT
 	if (table->type == PTABLE_GPT) {
@@ -892,6 +888,7 @@ ptable_open(void *dev, uint64_t sectors, uint16_t sectorsize, diskread_t *dread)
 #endif /* LOADER_MBR_SUPPORT */
 #endif /* LOADER_MBR_SUPPORT || LOADER_GPT_SUPPORT */
 out:
+	free(dp);
 	free(buf);
 	return (table);
 }

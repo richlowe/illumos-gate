@@ -21,6 +21,9 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2012 OmniTI Computer Consulting, Inc  All rights reserved.
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2020 RackTop Systems, Inc.
  */
 
 #ifndef	_SYS_AGGR_IMPL_H
@@ -54,25 +57,47 @@ extern "C" {
  */
 #define	MAC_PSEUDO_RING_INUSE	0x01
 
+#define	MAX_GROUPS_PER_PORT	128
+
+/*
+ * VLAN filters placed on the Rx pseudo group.
+ */
+typedef struct aggr_vlan {
+	list_node_t	av_link;
+	uint16_t	av_vid;		/* VLAN ID */
+	uint_t		av_refs;	/* num aggr clients using this VID */
+} aggr_vlan_t;
+
 typedef struct aggr_unicst_addr_s {
 	uint8_t				aua_addr[ETHERADDRL];
 	struct aggr_unicst_addr_s	*aua_next;
 } aggr_unicst_addr_t;
 
 typedef struct aggr_pseudo_rx_ring_s {
-	mac_ring_handle_t	arr_rh;	/* filled in by aggr_fill_ring() */
-	struct aggr_port_s	*arr_port;
-	mac_ring_handle_t	arr_hw_rh;
-	uint_t			arr_flags;
-	uint64_t		arr_gen;
+	mac_ring_handle_t		arr_rh;	/* set by aggr_fill_ring() */
+	struct aggr_port_s		*arr_port;
+	struct aggr_pseudo_rx_group_s	*arr_grp;
+	mac_ring_handle_t		arr_hw_rh;
+	uint_t				arr_flags;
+	uint64_t			arr_gen;
 } aggr_pseudo_rx_ring_t;
 
+/*
+ * An aggr pseudo group abstracts the underlying ports' HW groups. For
+ * example, if each port has 8 groups (mac_group_t), then the aggr
+ * will create 8 pseudo groups. Each pseudo group represents a
+ * collection of HW groups: one group from each port. If you have
+ * three ports then the pseudo group stands in for three HW groups.
+ */
 typedef struct aggr_pseudo_rx_group_s {
+	uint_t			arg_index;
 	struct aggr_grp_s	*arg_grp; /* filled in by aggr_fill_group() */
 	mac_group_handle_t	arg_gh;   /* filled in by aggr_fill_group() */
 	aggr_unicst_addr_t	*arg_macaddr;
 	aggr_pseudo_rx_ring_t	arg_rings[MAX_RINGS_PER_GROUP];
 	uint_t			arg_ring_cnt;
+	uint_t			arg_untagged; /* num clients untagged */
+	list_t			arg_vlans;    /* VLANs on this group */
 } aggr_pseudo_rx_group_t;
 
 typedef struct aggr_pseudo_tx_ring_s {
@@ -106,12 +131,13 @@ typedef struct aggr_port_s {
 			lp_collector_enabled : 1,
 			lp_promisc_on : 1,
 			lp_no_link_update : 1,
-			lp_rx_grp_added : 1,
 			lp_tx_grp_added : 1,
 			lp_closing : 1,
-			lp_pad_bits : 24;
+			lp_pad_bits : 25;
 	mac_handle_t	lp_mh;
-	mac_client_handle_t lp_mch;
+
+	mac_client_handle_t	lp_mch;
+
 	const mac_info_t *lp_mip;
 	mac_notify_handle_t lp_mnh;
 	uint_t		lp_tx_idx;		/* idx in group's tx array */
@@ -123,14 +149,21 @@ typedef struct aggr_port_s {
 	aggr_lacp_port_t lp_lacp;		/* LACP state */
 	lacp_stats_t	lp_lacp_stats;
 	uint32_t	lp_margin;
-	mac_promisc_handle_t lp_mphp;
+
 	mac_unicast_handle_t lp_mah;
 
 	/* List of non-primary addresses that requires promiscous mode set */
 	aggr_unicst_addr_t	*lp_prom_addr;
-	/* handle of the underlying HW RX group */
-	mac_group_handle_t	lp_hwgh;
-	int			lp_tx_ring_cnt;
+
+	/*
+	 * References to the underlying HW Rx groups of this port.
+	 * Used by aggr to program HW classification for the pseudo
+	 * groups.
+	 */
+	mac_group_handle_t	lp_hwghs[MAX_GROUPS_PER_PORT];
+
+	uint_t			lp_tx_ring_alloc;
+	uint_t			lp_tx_ring_cnt;
 	/* handles of the underlying HW TX rings */
 	mac_ring_handle_t	*lp_tx_rings;
 	/*
@@ -164,6 +197,7 @@ typedef struct aggr_grp_s {
 	uint16_t	lg_key;			/* key (group port number) */
 	uint32_t	lg_refs;		/* refcount */
 	uint16_t	lg_nports;		/* number of MAC ports */
+	uint16_t	lg_nports_high;		/* highest no. of MAC ports */
 	uint8_t		lg_addr[ETHERADDRL];	/* group MAC address */
 	uint16_t
 			lg_closing : 1,
@@ -176,7 +210,7 @@ typedef struct aggr_grp_s {
 			lg_lso : 1,
 			lg_pad_bits : 8;
 	aggr_port_t	*lg_ports;		/* list of configured ports */
-	aggr_port_t	*lg_mac_addr_port;
+	aggr_port_t	*lg_mac_addr_port;	/* using address of this port */
 	mac_handle_t	lg_mh;
 	zoneid_t	lg_zoneid;
 	uint_t		lg_nattached_ports;
@@ -186,11 +220,18 @@ typedef struct aggr_grp_s {
 	uint_t		lg_tx_ports_size;	/* size of lg_tx_ports */
 	uint32_t	lg_tx_policy;		/* outbound policy */
 	uint8_t		lg_mac_tx_policy;
-	uint64_t	lg_ifspeed;
 	link_state_t	lg_link_state;
+
+
+	/*
+	 * The lg_stat_lock must be held when accessing these fields.
+	 */
+	kmutex_t	lg_stat_lock;
+	uint64_t	lg_ifspeed;
 	link_duplex_t	lg_link_duplex;
 	uint64_t	lg_stat[MAC_NSTAT];
 	uint64_t	lg_ether_stat[ETHER_NSTAT];
+
 	aggr_lacp_mode_t lg_lacp_mode;		/* off, active, or passive */
 	Agg_t		aggr;			/* 802.3ad data */
 	uint32_t	lg_hcksum_txflags;
@@ -213,7 +254,9 @@ typedef struct aggr_grp_s {
 	kthread_t	*lg_lacp_rx_thread;
 	boolean_t	lg_lacp_done;
 
-	aggr_pseudo_rx_group_t	lg_rx_group;
+	uint_t			lg_rx_group_count;
+	aggr_pseudo_rx_group_t	lg_rx_groups[MAX_GROUPS_PER_PORT];
+
 	aggr_pseudo_tx_group_t	lg_tx_group;
 
 	kmutex_t	lg_tx_flowctl_lock;
@@ -335,8 +378,11 @@ extern void aggr_grp_port_hold(aggr_port_t *);
 extern void aggr_grp_port_rele(aggr_port_t *);
 extern void aggr_grp_port_wait(aggr_grp_t *);
 
-extern int aggr_port_addmac(aggr_port_t *, const uint8_t *);
-extern void aggr_port_remmac(aggr_port_t *, const uint8_t *);
+extern int aggr_port_addmac(aggr_port_t *, uint_t, const uint8_t *);
+extern void aggr_port_remmac(aggr_port_t *, uint_t, const uint8_t *);
+
+extern int aggr_port_addvlan(aggr_port_t *, uint_t, uint16_t);
+extern int aggr_port_remvlan(aggr_port_t *, uint_t, uint16_t);
 
 extern mblk_t *aggr_ring_tx(void *, mblk_t *);
 extern mblk_t *aggr_find_tx_ring(void *, mblk_t *,

@@ -26,6 +26,7 @@
 # Copyright 2016 Garrett D'Amore <garrett@damore.org>
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2019 RackTop Systems
+# Copyright 2019 Peter Tribble.
 #
 
 #
@@ -51,14 +52,10 @@ GENLIB_DIR	 = $(UTSBASE)/intel/genunix
 IPDRV_DIR	 = $(UTSBASE)/intel/ip
 MODSTUBS_DIR	 = $(UNIX_DIR)
 DSF_DIR		 = $(UTSBASE)/$(PLATFORM)/genassym
-LINTS_DIR	 = $(OBJS_DIR)
-LINT_LIB_DIR	 = $(UTSBASE)/intel/lint-libs/$(OBJS_DIR)
 
 UNIX_O		 = $(UNIX_DIR)/$(OBJS_DIR)/unix.o
 GENLIB		 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
 MODSTUBS_O	 = $(MODSTUBS_DIR)/$(OBJS_DIR)/modstubs.o
-LINT_LIB	 = $(UTSBASE)/i86pc/lint-libs/$(OBJS_DIR)/llib-lunix.ln
-GEN_LINT_LIB	 = $(UTSBASE)/intel/lint-libs/$(OBJS_DIR)/llib-lgenunix.ln
 
 #
 #	Include the makefiles which define build rule templates, the
@@ -108,13 +105,6 @@ DEF_BUILDS		= $(DEF_BUILDS64)
 ALL_BUILDS		= $(ALL_BUILDS64)
 
 #
-#	x86 or amd64 inline templates
-#
-INLINES_32		= $(UTSBASE)/intel/ia32/ml/ia32.il
-INLINES_64		= $(UTSBASE)/intel/amd64/ml/amd64.il
-INLINES			+= $(INLINES_$(CLASS))
-
-#
 #	kernel-specific optimizations; override default in Makefile.master
 #
 
@@ -128,42 +118,12 @@ COPTIMIZE		= $(COPTFLAG_$(CLASS))
 
 CFLAGS			= $(CFLAGS_XARCH)
 CFLAGS			+= $(COPTIMIZE)
-CFLAGS			+= $(INLINES) -D_ASM_INLINES
+CFLAGS			+= -D_ASM_INLINES
 CFLAGS			+= $(CCMODE)
 CFLAGS			+= $(SPACEFLAG)
 CFLAGS			+= $(CCUNBOUND)
 CFLAGS			+= $(CFLAGS_uts)
 CFLAGS			+= -xstrconst
-
-#
-# Options to control which version of stack-protector we enable. This
-# gives us a bit of flexibility and is unfortunately necessary as some
-# modules do not function correctly with our defaults (qede).
-#
-#  o STACKPROTECT_		Sets the appropriate version for the compiler
-#  o STACKPROTECT_strong	Sets us to use strong on all of the
-#				compilers it supports. This is the same
-#				as the default.
-#
-#  o STACKPROTECT_none		Disables the stack protector.
-#
-#  o STACKPROTECT_all		Enables it for everything.
-#
-#  o STACKPROTECT_basic		Enables the basic stack protector.
-#
-# -fstack-protector-strong is not available in our gcc4 which is why we
-# have per-compiler versions below.
-#
-STACKPROTECT_		= -_gcc4=-fstack-protector
-STACKPROTECT_		+= -_gcc7=-fstack-protector-strong
-STACKPROTECT_		+= -_gcc8=-fstack-protector-strong
-STACKPROTECT_		+= -_gcc9=-fstack-protector-strong
-
-STACKPROTECT_strong	= $(STACKPROTECT_)
-STACKPROTECT_none	= -_gcc=-fstack-protector-none
-STACKPROTECT_all	= -_gcc=-fstack-protector-all
-STACKPROTECT_basic	= -_gcc=-fstack-protector
-
 CFLAGS			+= $(STACKPROTECT_$(STACKPROTECT))
 
 ASFLAGS_XARCH_32	= $(i386_ASFLAGS)
@@ -253,8 +213,6 @@ DRV_KMODS	+= bge
 DRV_KMODS	+= bofi
 DRV_KMODS	+= bpf
 DRV_KMODS	+= bridge
-DRV_KMODS	+= bscbus
-DRV_KMODS	+= bscv
 DRV_KMODS	+= chxge
 DRV_KMODS	+= cxgbe
 DRV_KMODS	+= ntxn
@@ -315,6 +273,7 @@ DRV_KMODS	+= log
 DRV_KMODS	+= logindmux
 DRV_KMODS	+= mega_sas
 DRV_KMODS	+= mc-amd
+DRV_KMODS	+= mlxcx
 DRV_KMODS	+= mm
 DRV_KMODS	+= mouse8042
 DRV_KMODS	+= mpt_sas
@@ -505,6 +464,7 @@ DRV_KMODS	+= ses
 #
 #	USB specific modules
 #
+DRV_KMODS	+= ccid
 DRV_KMODS	+= hid
 DRV_KMODS	+= hubd
 DRV_KMODS	+= uhci
@@ -762,15 +722,17 @@ KICONV_KMODS	+= kiconv_emea kiconv_ja kiconv_ko kiconv_sc kiconv_tc
 DACF_KMODS	+= net_dacf
 
 #
-# Ensure that the variable member of the cpu_t (cpu_m) is defined
-# for the lint builds so as not to cause lint errors during the
-# global cross check.
-#
-LINTFLAGS	+= -D_MACHDEP -I$(UTSBASE)/i86pc
-
-#
 #	Sensor related drivers
 #
-DRV_KMODS	+= amdf17nbdf
+DRV_KMODS	+= ksensor ksensor_test
 DRV_KMODS	+= coretemp
 DRV_KMODS	+= pchtemp
+DRV_KMODS	+= amdnbtemp
+DRV_KMODS	+= smntemp
+
+#
+#	AMD Zen Nexus driver and Related
+#
+DRV_KMODS	+= amdzen
+DRV_KMODS	+= amdzen_stub
+DRV_KMODS	+= usmn zen_udf

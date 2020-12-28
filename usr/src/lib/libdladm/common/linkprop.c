@@ -22,6 +22,7 @@
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2017 Joyent, Inc.
  * Copyright 2015 Garrett D'Amore <garrett@damore.org>
+ * Copyright 2020 RackTop Systems, Inc.
  */
 
 #include <stdlib.h>
@@ -154,13 +155,13 @@ static pd_getf_t	get_zone, get_autopush, get_rate_mod, get_rate,
 			get_bridge_pvid, get_protection, get_rxrings,
 			get_txrings, get_cntavail, get_secondary_macs,
 			get_allowedips, get_allowedcids, get_pool,
-			get_rings_range, get_linkmode_prop,
+			get_rings_range, get_linkmode_prop, get_bits,
 			get_promisc_filtered;
 
 static pd_setf_t	set_zone, set_rate, set_powermode, set_radio,
 			set_public_prop, set_resource, set_stp_prop,
 			set_bridge_forward, set_bridge_pvid, set_secondary_macs,
-			set_promisc_filtered;
+			set_promisc_filtered, set_public_bitprop;
 
 static pd_checkf_t	check_zone, check_autopush, check_rate, check_hoplimit,
 			check_encaplim, check_uint32, check_maxbw, check_cpus,
@@ -254,6 +255,10 @@ static link_attr_t link_attr[] = {
 	{ MAC_PROP_MTU,		sizeof (uint32_t),	"mtu"},
 
 	{ MAC_PROP_FLOWCTRL,	sizeof (link_flowctrl_t), "flowctrl"},
+
+	{ MAC_PROP_ADV_FEC_CAP,	sizeof (link_fec_t),	"adv_fec_cap"},
+
+	{ MAC_PROP_EN_FEC_CAP,	sizeof (link_fec_t),	"en_fec_cap"},
 
 	{ MAC_PROP_ZONE,	sizeof (dld_ioc_zid_t),	"zone"},
 
@@ -433,6 +438,12 @@ static  val_desc_t	link_flow_vals[] = {
 	{ "rx",		LINK_FLOWCTRL_RX	},
 	{ "bi",		LINK_FLOWCTRL_BI	}
 };
+static  val_desc_t	link_fec_vals[] = {
+	{ "none",	LINK_FEC_NONE		},
+	{ "auto",	LINK_FEC_AUTO		},
+	{ "rs",		LINK_FEC_RS		},
+	{ "base-r",	LINK_FEC_BASE_R		}
+};
 static  val_desc_t	link_priority_vals[] = {
 	{ "low",	MPL_LOW	},
 	{ "medium",	MPL_MEDIUM	},
@@ -549,6 +560,16 @@ static prop_desc_t	prop_table[] = {
 	{ "flowctrl", { "", 0 },
 	    link_flow_vals, VALCNT(link_flow_vals),
 	    set_public_prop, NULL, get_flowctl, NULL,
+	    0, DATALINK_CLASS_PHYS, DL_ETHER },
+
+	{ "adv_fec_cap", { "", LINK_FEC_AUTO },
+	    link_fec_vals, VALCNT(link_fec_vals),
+	    NULL, NULL, get_bits, NULL,
+	    0, DATALINK_CLASS_PHYS, DL_ETHER },
+
+	{ "en_fec_cap", { "", LINK_FEC_AUTO },
+	    link_fec_vals, VALCNT(link_fec_vals),
+	    set_public_bitprop, NULL, get_bits, NULL,
 	    0, DATALINK_CLASS_PHYS, DL_ETHER },
 
 	{ "secondary-macs", { "--", 0 }, NULL, 0,
@@ -1086,6 +1107,21 @@ dladm_set_linkprop(dladm_handle_t handle, datalink_id_t linkid,
 	}
 
 	/*
+	 * For well-known property names, normalize the case.  We can also
+	 * save the property name itself, so that we can just do a pointer
+	 * equality test later and avoid an extra strcmp.
+	 */
+	if (prop_name != NULL) {
+		int i;
+		for (i = 0; i < DLADM_MAX_PROPS; i++) {
+			if (strcasecmp(prop_name, prop_table[i].pd_name) == 0) {
+				prop_name = prop_table[i].pd_name;
+				break;
+			}
+		}
+	}
+
+	/*
 	 * Check for valid link property against the flags passed
 	 * and set the link property when active flag is passed.
 	 */
@@ -1115,7 +1151,7 @@ dladm_set_linkprop(dladm_handle_t handle, datalink_id_t linkid,
 				if (!(pdp->pd_flags & PD_AFTER_PERM))
 					continue;
 				if (prop_name != NULL &&
-				    strcasecmp(prop_name, pdp->pd_name) != 0)
+				    prop_name != pdp->pd_name)
 					continue;
 				status = pdp->pd_set(handle, pdp, linkid, NULL,
 				    0, flags, 0);
@@ -1195,9 +1231,12 @@ dladm_get_linkprop(dladm_handle_t handle, datalink_id_t linkid,
 	    prop_val == NULL || val_cntp == NULL || *val_cntp == 0)
 		return (DLADM_STATUS_BADARG);
 
-	for (i = 0; i < DLADM_MAX_PROPS; i++)
-		if (strcasecmp(prop_name, prop_table[i].pd_name) == 0)
+	for (i = 0; i < DLADM_MAX_PROPS; i++) {
+		if (strcasecmp(prop_name, prop_table[i].pd_name) == 0) {
+			prop_name = prop_table[i].pd_name;
 			break;
+		}
+	}
 
 	if (i == DLADM_MAX_PROPS) {
 		if (prop_name[0] == '_') {
@@ -1327,9 +1366,12 @@ dladm_get_linkprop_values(dladm_handle_t handle, datalink_id_t linkid,
 	    ret_val == NULL || val_cntp == NULL || *val_cntp == 0)
 		return (DLADM_STATUS_BADARG);
 
-	for (pdp = prop_table; pdp < prop_table + DLADM_MAX_PROPS; pdp++)
-		if (strcasecmp(prop_name, pdp->pd_name) == 0)
+	for (pdp = prop_table; pdp < prop_table + DLADM_MAX_PROPS; pdp++) {
+		if (strcasecmp(prop_name, pdp->pd_name) == 0) {
+			prop_name = pdp->pd_name;
 			break;
+		}
+	}
 
 	if (pdp == prop_table + DLADM_MAX_PROPS)
 		return (DLADM_STATUS_NOTFOUND);
@@ -3846,6 +3888,33 @@ done:
 	return (status);
 }
 
+static dladm_status_t
+set_public_bitprop(dladm_handle_t handle, prop_desc_t *pdp,
+    datalink_id_t linkid, val_desc_t *vdp, uint_t val_cnt, uint_t flags,
+    datalink_media_t media)
+{
+	uint_t		i, j;
+	val_desc_t	vd = { 0 };
+
+	if ((pdp->pd_flags & PD_CHECK_ALLOC) != 0)
+		return (DLADM_STATUS_BADARG);
+
+	for (i = 0; i < val_cnt; i++) {
+		for (j = 0; j < pdp->pd_noptval; j++) {
+			if (strcasecmp(vdp[i].vd_name,
+			    pdp->pd_optval[j].vd_name) == 0) {
+				vd.vd_val |= pdp->pd_optval[j].vd_val;
+				break;
+			}
+		}
+	}
+
+	if (vd.vd_val == 0)
+		return (DLADM_STATUS_BADARG);
+
+	return (set_public_prop(handle, pdp, linkid, &vd, 1, flags, media));
+}
+
 dladm_status_t
 i_dladm_macprop(dladm_handle_t handle, void *dip, boolean_t set)
 {
@@ -4158,6 +4227,34 @@ get_flowctl(dladm_handle_t handle, prop_desc_t *pdp,
 	return (DLADM_STATUS_OK);
 }
 
+static dladm_status_t
+get_bits(dladm_handle_t handle, prop_desc_t *pdp,
+    datalink_id_t linkid, char **prop_val, uint_t *val_cnt,
+    datalink_media_t media, uint_t flags, uint_t *perm_flags)
+{
+	uint32_t	v;
+	dladm_status_t	status;
+	uint_t		i, cnt;
+
+	status = i_dladm_get_public_prop(handle, linkid, pdp->pd_name, flags,
+	    perm_flags, &v, sizeof (v));
+	if (status != DLADM_STATUS_OK)
+		return (status);
+
+	cnt = 0;
+	for (i = 0; cnt < *val_cnt && i < pdp->pd_noptval; i++) {
+		if ((v & pdp->pd_optval[i].vd_val) != 0) {
+			(void) snprintf(prop_val[cnt++], DLADM_STRSIZE,
+			    pdp->pd_optval[i].vd_name);
+		}
+	}
+
+	if (i < pdp->pd_noptval)
+		return (DLADM_STATUS_BADVALCNT);
+
+	*val_cnt = cnt;
+	return (DLADM_STATUS_OK);
+}
 
 /* ARGSUSED */
 static dladm_status_t

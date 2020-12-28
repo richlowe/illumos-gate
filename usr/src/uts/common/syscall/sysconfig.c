@@ -22,6 +22,7 @@
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2016 Joyent, Inc.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -46,6 +47,7 @@
 #include <sys/timer.h>
 #include <sys/zone.h>
 #include <sys/vm_usage.h>
+#include <vm/as.h>
 
 extern rctl_hndl_t rc_process_sigqueue;
 
@@ -110,6 +112,9 @@ sysconfig(int which)
 
 	case _CONFIG_NPROC_MAX:
 		return (max_ncpus);
+
+	case _CONFIG_NPROC_NCPU:
+		return (NCPU); /* Private sysconfig for direct NCPU access */
 
 	case _CONFIG_STACK_PROT:
 		return (curproc->p_stkprot & ~PROT_USER);
@@ -218,6 +223,9 @@ sysconfig(int which)
 
 	case _CONFIG_EPHID_MAX:
 		return (MAXEPHUID);
+
+	case _CONFIG_UADDR_MAX:
+		return ((long)(uintptr_t)curproc->p_as->a_userlimit);
 
 	case _CONFIG_SYMLOOP_MAX:
 		return (MAXSYMLINKS);

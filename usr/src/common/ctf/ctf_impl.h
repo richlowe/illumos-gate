@@ -25,7 +25,8 @@
  * Use is subject to license terms.
  */
 /*
- * Copyright 2019, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #ifndef	_CTF_IMPL_H
@@ -248,11 +249,18 @@ struct ctf_file {
 #define	LCTF_CHILD	0x0002	/* CTF container is a child */
 #define	LCTF_RDWR	0x0004	/* CTF container is writable */
 #define	LCTF_DIRTY	0x0008	/* CTF container has been modified */
+/*
+ * The storage for this CTF container was allocated via ctf_data_alloc()
+ * and libctf should free it with ctf_data_free() on close.
+ */
+#define	LCTF_FREE	0x0010
 
 #define	CTF_ELF_SCN_NAME	".SUNW_ctf"
 
 extern ssize_t ctf_get_ctt_size(const ctf_file_t *, const ctf_type_t *,
     ssize_t *, ssize_t *);
+
+extern void ctf_set_ctt_size(ctf_type_t *, ssize_t);
 
 extern const ctf_type_t *ctf_lookup_by_id(ctf_file_t **, ctf_id_t);
 
@@ -265,6 +273,7 @@ extern ctf_helem_t *ctf_hash_lookup(ctf_hash_t *, ctf_file_t *,
     const char *, size_t);
 extern uint_t ctf_hash_size(const ctf_hash_t *);
 extern void ctf_hash_destroy(ctf_hash_t *);
+extern void ctf_hash_dump(const char *, ctf_hash_t *, ctf_file_t *);
 
 #define	ctf_list_prev(elem)	((void *)(((ctf_list_t *)(elem))->l_prev))
 #define	ctf_list_next(elem)	((void *)(((ctf_list_t *)(elem))->l_next))
@@ -303,6 +312,7 @@ extern void *ctf_alloc(size_t);
 extern void ctf_free(void *, size_t);
 
 extern char *ctf_strdup(const char *);
+extern void ctf_strfree(char *);
 extern const char *ctf_strerror(int);
 extern void ctf_dprintf(const char *, ...);
 

@@ -71,8 +71,8 @@ pics/elfcap.o:	$(ELFCAP)/elfcap.c
 		$(POST_PROCESS_O)
 
 $(RTLD):	pics $(PICS) $(CRTS) debugobj
-		$(LD) -o $@ -dy -G -zdebuglink=debugobj/ld.so.1 $(DYNFLAGS) $(CRTI) $(PICS) \
-		    $(LDLIBS) $(CRTN)
+		$(LD) -o $@ -dy $(GSHARED) -zdebuglink=debugobj/ld.so.1 $(DYNFLAGS) $(CRTI) \
+		    $(PICS) $(LDLIBS) $(CRTN)
 		$(POST_PROCESS_SO)
 
 delete:

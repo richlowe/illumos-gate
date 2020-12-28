@@ -40,7 +40,7 @@ undesirable in at least some versions).  This mirrors the structure of the
 system, such that the debug object for `/lib/libc.so.1` is
 `/usr/lib/debug/lib/libc.so.1`.  Both 32bit and 64bit debug objects are
 delivered into this same hierarchy, such that the amd64 libc debug object is
-`/usr/debug/lib/amd64/libc.so.1`.  There is no `/usr/debug/amd64`.
+`/usr/lib/debug/lib/amd64/libc.so.1`.  There is no `/usr/lib/debug/amd64`.
 
 
 

@@ -11,7 +11,7 @@
 
 /*
  * Copyright 2016 Nexenta Systems, Inc.
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright 2019 Western Digital Corporation
  */
 
@@ -137,13 +137,16 @@ typedef struct {
 	uint8_t psd_rsvd10[9];
 } nvme_idctl_psd_t;
 
+#define	NVME_SERIAL_SZ	20
+#define	NVME_MODEL_SZ	40
+
 /* NVMe Identify Controller Data Structure */
 typedef struct {
 	/* Controller Capabilities & Features */
 	uint16_t id_vid;		/* PCI vendor ID */
 	uint16_t id_ssvid;		/* PCI subsystem vendor ID */
-	char id_serial[20];		/* Serial Number */
-	char id_model[40];		/* Model Number */
+	char id_serial[NVME_SERIAL_SZ];	/* Serial Number */
+	char id_model[NVME_MODEL_SZ];	/* Model Number */
 	char id_fwrev[8];		/* Firmware Revision */
 	uint8_t id_rab;			/* Recommended Arbitration Burst */
 	uint8_t id_oui[3];		/* vendor IEEE OUI */
@@ -433,16 +436,41 @@ typedef struct {
 	nvme_uint128_t hl_unsafe_shutdn; /* Unsafe Shutdowns */
 	nvme_uint128_t hl_media_errors;	/* Media Errors */
 	nvme_uint128_t hl_errors_logged; /* Number of errors logged */
-	uint8_t hl_rsvd2[512 - 192];
+	/* Added in NVMe 1.2 */
+	uint32_t hl_warn_temp_time;	/* Warning Composite Temp Time */
+	uint32_t hl_crit_temp_time;	/* Critical Composite Temp Time */
+	uint16_t hl_temp_sensor_1;	/* Temperature Sensor 1 */
+	uint16_t hl_temp_sensor_2;	/* Temperature Sensor 2 */
+	uint16_t hl_temp_sensor_3;	/* Temperature Sensor 3 */
+	uint16_t hl_temp_sensor_4;	/* Temperature Sensor 4 */
+	uint16_t hl_temp_sensor_5;	/* Temperature Sensor 5 */
+	uint16_t hl_temp_sensor_6;	/* Temperature Sensor 6 */
+	uint16_t hl_temp_sensor_7;	/* Temperature Sensor 7 */
+	uint16_t hl_temp_sensor_8;	/* Temperature Sensor 8 */
+	/* Added in NVMe 1.3 */
+	uint32_t hl_tmtemp_1_tc;	/* Thermal Mgmt Temp 1 Transition # */
+	uint32_t hl_tmtemp_2_tc;	/* Thermal Mgmt Temp 1 Transition # */
+	uint32_t hl_tmtemp_1_time;	/* Time in Thermal Mgmt Temp 1 */
+	uint32_t hl_tmtemp_2_time;	/* Time in Thermal Mgmt Temp 2 */
+	uint8_t hl_rsvd2[512 - 232];
 } nvme_health_log_t;
 
+/*
+ * The NVMe spec allows for up to seven firmware slots.
+ */
+#define	NVME_MAX_FWSLOTS	7
+#define	NVME_FWVER_SZ		8
+
 typedef struct {
-	uint8_t fw_afi:3;		/* Active Firmware Slot */
+	/* Active Firmware Slot */
+	uint8_t fw_afi:3;
 	uint8_t fw_rsvd1:1;
-	uint8_t fw_next:3;		/* Next Active Firmware Slot */
+	/* Next Active Firmware Slot */
+	uint8_t fw_next:3;
 	uint8_t fw_rsvd2:1;
 	uint8_t fw_rsvd3[7];
-	char fw_frs[7][8];		/* Firmware Revision / Slot */
+	/* Firmware Revision / Slot */
+	char fw_frs[NVME_MAX_FWSLOTS][NVME_FWVER_SZ];
 	uint8_t fw_rsvd4[512 - 64];
 } nvme_fwslot_log_t;
 
@@ -539,10 +567,17 @@ typedef struct {
 typedef union {
 	struct {
 		uint16_t tt_tmpth;	/* Temperature Threshold */
-		uint16_t tt_rsvd;
+		uint16_t tt_tmpsel:4;	/* Temperature Select */
+		uint16_t tt_thsel:2;	/* Temperature Type */
+		uint16_t tt_resv:10;
 	} b;
 	uint32_t r;
 } nvme_temp_threshold_t;
+
+#define	NVME_TEMP_THRESH_MAX_SENSOR	8
+#define	NVME_TEMP_THRESH_ALL	0xf
+#define	NVME_TEMP_THRESH_OVER	0x00
+#define	NVME_TEMP_THRESH_UNDER	0x01
 
 /* Error Recovery Feature */
 typedef union {

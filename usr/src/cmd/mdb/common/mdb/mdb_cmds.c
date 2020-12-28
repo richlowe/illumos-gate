@@ -1956,14 +1956,14 @@ cmd_findsym(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 		} else
 			value = argv[i].a_un.a_val;
 
-		if (value != NULL)
+		if (value != (uintptr_t)NULL)
 			symlist[len++] = value;
 	}
 
 	if (flags & DCMD_ADDRSPEC)
 		symlist[len++] = addr;
 
-	symlist[len] = NULL;
+	symlist[len] = (uintptr_t)NULL;
 
 	if (optg)
 		type = MDB_TGT_BIND_GLOBAL | MDB_TGT_TYPE_FUNC;
@@ -2090,7 +2090,7 @@ cmd_dis(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	if (opt_f)
 		as = MDB_TGT_AS_FILE;
 	else
-		as = MDB_TGT_AS_VIRT;
+		as = MDB_TGT_AS_VIRT_I;
 
 	if (opt_w == FALSE) {
 		n++;
@@ -2635,8 +2635,9 @@ tgt_status(const mdb_tgt_status_t *tsp)
 		return (DCMD_OK);
 
 	if (tsp->st_pc != 0) {
-		if (mdb_dis_ins2str(mdb.m_disasm, mdb.m_target, MDB_TGT_AS_VIRT,
-		    buf, sizeof (buf), tsp->st_pc) != tsp->st_pc)
+		if (mdb_dis_ins2str(mdb.m_disasm, mdb.m_target,
+		    MDB_TGT_AS_VIRT_I, buf, sizeof (buf), tsp->st_pc) !=
+		    tsp->st_pc)
 			format = "target stopped at:\n%-#16a%8T%s\n";
 		else
 			format = "target stopped at %a:\n";
@@ -3163,6 +3164,7 @@ const mdb_dcmd_t mdb_dcmd_builtins[] = {
 	{ "typeset", "[+/-t] var ...", "set variable attributes", cmd_typeset },
 	{ "typedef", "[-c model | -d | -l | -r file | -w file ] [type] [name]",
 		"create synthetic types", cmd_typedef, cmd_typedef_help },
+	{ "typelist", NULL, "list known types", cmd_typelist },
 	{ "unset", "[name ...]", "unset variables", cmd_unset },
 	{ "vars", "[-npt]", "print listing of variables", cmd_vars },
 	{ "version", NULL, "print debugger version string", cmd_version },

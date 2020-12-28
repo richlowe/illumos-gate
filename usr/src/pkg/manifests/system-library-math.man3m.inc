@@ -208,10 +208,12 @@ link path=usr/share/man/man3m/fesetround.3m target=fegetround.3m
 link path=usr/share/man/man3m/fex_get_handling.3m target=fex_set_handling.3m
 link path=usr/share/man/man3m/fex_get_log.3m target=fex_set_log.3m
 link path=usr/share/man/man3m/fex_get_log_depth.3m target=fex_set_log.3m
-link path=usr/share/man/man3m/fex_getexcepthandler.3m target=fex_set_handling.3m
+link path=usr/share/man/man3m/fex_getexcepthandler.3m \
+    target=fex_set_handling.3m
 link path=usr/share/man/man3m/fex_log_entry.3m target=fex_set_log.3m
 link path=usr/share/man/man3m/fex_set_log_depth.3m target=fex_set_log.3m
-link path=usr/share/man/man3m/fex_setexcepthandler.3m target=fex_set_handling.3m
+link path=usr/share/man/man3m/fex_setexcepthandler.3m \
+    target=fex_set_handling.3m
 link path=usr/share/man/man3m/floorf.3m target=floor.3m
 link path=usr/share/man/man3m/floorl.3m target=floor.3m
 link path=usr/share/man/man3m/fmaf.3m target=fma.3m

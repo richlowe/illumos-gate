@@ -80,6 +80,7 @@ struct ident {
 
 enum token_type {
 	TOKEN_EOF,
+	TOKEN_BAD,
 	TOKEN_ERROR,
 	TOKEN_IDENT,
 	TOKEN_ZERO_IDENT,
@@ -217,6 +218,7 @@ extern struct token eof_token_entry;
 
 extern int init_stream(const char *, int fd, const char **next_path);
 extern const char *stream_name(int stream);
+struct ident *alloc_ident(const char *name, int len);
 extern struct ident *hash_ident(struct ident *);
 extern struct ident *built_in_ident(const char *);
 extern struct token *built_in_token(int, struct ident *);
@@ -238,6 +240,8 @@ extern char *pos_ident(struct position pos);
 
 extern void store_macro_pos(struct token *);
 extern char *get_macro_name(struct position pos);
+extern char *get_inner_macro(struct position pos);
+extern struct string_list *get_all_macros(struct position pos);
 
 static inline int match_op(struct token *token, unsigned int op)
 {

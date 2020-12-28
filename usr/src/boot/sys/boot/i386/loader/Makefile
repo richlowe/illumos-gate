@@ -56,12 +56,12 @@ LIBFICL=	../../libficl/$(MACH)/libficl.a
 # Always add MI sources
 SRCS +=	boot.c commands.c console.c devopen.c interp.c
 SRCS +=	interp_backslash.c interp_parse.c ls.c misc.c
-SRCS +=	module.c linenoise.c multiboot2.c
+SRCS +=	module.c linenoise.c multiboot2.c nvstore.c
 SRCS +=	zfs_cmd.c
 SRCS +=	font.c $(FONT).c tem.c
 
 module.o := CPPFLAGS += -I$(BOOTSRC)/libcrypto
-tem.o := CPPFLAGS += $(DEFAULT_CONSOLE_COLOR) -I$(LZ4)
+tem.o := CPPFLAGS += $(DEFAULT_CONSOLE_COLOR)
 
 SRCS +=	load_elf32.c load_elf32_obj.c reloc_elf32.c
 SRCS +=	load_elf64.c load_elf64_obj.c reloc_elf64.c
@@ -103,6 +103,11 @@ CPPFLAGS +=	-I../btx/lib
 #LDFLAGS+=	-g
 
 include ../Makefile.inc
+
+conf.o := CPPFLAGS += -I../../../cddl/boot/zfs
+multiboot2.o := CPPFLAGS += -I../../../cddl/boot/zfs
+main.o := CPPFLAGS += -I../../../cddl/boot/zfs -I$(SRC)/uts/common/fs/zfs
+zfs_cmd.o := CPPFLAGS += -I../../../cddl/boot/zfs
 
 # For multiboot2.h, must be last, to avoid conflicts
 CPPFLAGS +=	-I$(SRC)/uts/common

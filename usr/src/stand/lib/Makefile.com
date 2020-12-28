@@ -31,11 +31,10 @@ include $(SRC)/lib/Makefile.lib
 include $(SRC)/stand/lib/Makefile.$(MACH)
 
 SRCDIR =	.
-LIBS +=		$(LIBRARY) $(LINTLIB)
+LIBS +=		$(LIBRARY)
 CFLAGS +=	$(CCVERBOSE)
 LDFLAGS =	-r
-LDLIBS +=	-lsa -lfakeboot
-$(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
+LDLIBS +=	-lsa
 
 #
 # Reset ROOTLIBDIR to an alternate directory so that we don't clash with
@@ -72,8 +71,8 @@ CMNDIR =	.
 # the proto area since those headers match libc's implementation, and
 # libc is of course not available to standalone binaries.
 #
-CPPDEFS	= 	-D$(KARCH) -D_BOOT -D_KERNEL -D_MACHDEP
-CPPINCS	= 	-YI,$(STANDDIR)/lib/sa -I$(STANDDIR)/lib/sa \
+CPPDEFS	=	-D$(KARCH) -D_BOOT -D_KERNEL -D_MACHDEP
+CPPINCS	=	-YI,$(STANDDIR)/lib/sa -I$(STANDDIR)/lib/sa \
 		-I$(STANDDIR) -I$(SRCDIR) -I$(CMNDIR) \
 		-I$(STANDDIR)/$(MACH) -I$(SYSDIR)/common $(ARCHDIRS) \
 		-I$(SYSDIR)/sun4 -I$(SYSDIR)/$(KARCH)
@@ -137,5 +136,11 @@ DHCPCPPFLAGS = -I$(CMNNETDIR)/dhcp
 # is shameful.
 #
 SOCKCPPFLAGS = -I$(STANDDIR)/lib/sock -D_SYS_STREAM_H
+
+#
+# Using Makefile.lib pulls in the stack protector. Explicitly disable it
+# as it is not initialized or supported in this environment currently.
+#
+STACKPROTECT = none
 
 .KEEP_STATE:

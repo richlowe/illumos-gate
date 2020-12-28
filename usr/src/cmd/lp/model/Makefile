@@ -59,8 +59,8 @@ ROOTMODELS =		$(MODELS:%=$(ROOTLIBLPMODEL)/%)
 CPPFLAGS =		-I$(LPINC) $(CPPFLAGS.master)
 
 # conditional assignments
-lp.tell :=			LDLIBS += $(LIBMSG) $(LIBLP)
-lp.set drain.output lp.cat :=	LDLIBS += $(LIBLP) -lcurses
+lp.tell :=			LDLIBS += $(LIBMSG) $(LIBLP) $(LDSTACKPROTECT)
+lp.set drain.output lp.cat :=	LDLIBS += $(LIBLP) -lcurses $(LDSTACKPROTECT)
 lp.tsol_separator :=		LDLIBS += -ltsol
 
 $(ROOTMISC) :=		FILEMODE = 0444

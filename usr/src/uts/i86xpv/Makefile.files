@@ -154,20 +154,12 @@ CORE_OBJS +=			\
 #	locore.o is special. It must be the first file relocated so that it
 #	it is relocated just where its name implies.
 #
-SPECIAL_OBJS_32 +=		\
-	locore.o		\
-	fast_trap_asm.o		\
-	interrupt.o		\
-	syscall_asm.o
-
-SPECIAL_OBJS_64 +=		\
+SPECIAL_OBJS +=			\
 	locore.o		\
 	fast_trap_asm.o		\
 	interrupt.o		\
 	syscall_asm_amd64.o	\
 	kpti_trampolines.o
-
-SPECIAL_OBJS += $(SPECIAL_OBJS_$(CLASS))
 
 #
 # object files used to boot into full kernel
@@ -232,10 +224,7 @@ INC_PATH	+= -I$(UTSBASE)/i86xpv -I$(UTSBASE)/i86pc -I$(SRC)/common \
 
 #
 # Since the assym files are derived, the dependencies must be explicit for
-# all files including this file. (This is only actually required in the
-# instance when the .nse_depinfo file does not exist.) It may seem that
-# the lint targets should also have a similar dependency, but they don't
-# since only C headers are included when #defined(__lint) is true.
+# all files including this file.
 #
 
 ASSYM_DEPS      +=		\
@@ -254,7 +243,6 @@ ASSYM_DEPS      +=		\
 	panic_asm.o		\
 	sseblk.o		\
 	swtch.o			\
-	syscall_asm.o		\
 	syscall_asm_amd64.o
 
 $(KDI_ASSYM_DEPS:%=$(OBJS_DIR)/%):	$(DSF_DIR)/$(OBJS_DIR)/kdi_assym.h

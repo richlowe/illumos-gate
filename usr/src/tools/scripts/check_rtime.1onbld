@@ -19,7 +19,7 @@
 .\"
 .\" CDDL HEADER END
 .\"
-.Dd February 19, 2018
+.Dd February 3, 2020
 .Dt CHECK_RTIME 1ONBLD
 .Os
 .Sh NAME
@@ -393,7 +393,7 @@ Dependencies may be marked as forbidden
 this allows the build to warn should people use them accidentally.
 Forbidden dependencies are printed as:
 .Pp
-.Dl foo: NEEDED=bar.so.1    <forbidden dependency, missing -nodefaultlibs?>
+.Dl foo: NEEDED=bar.so.1  <forbidden dependency, missing -nodefaultlibs?>
 .El
 .Pp
 .Nm check_rtime
@@ -595,13 +595,13 @@ exceptions will not suffice.
 Objects that are allowed to contain debugging information (stabs).
 .It TEXTREL
 Objects for which we allow relocations to the text segment.
-.It BUNDEF_OBJ
+.It UNREF_OBJ
 Objects that are allowed to be unreferenced.
 .It UNDEF_REF
 Objects that are allowed undefined references.
 .It UNUSED_DEPS
 Objects that are allowed to have unused dependencies.
-.It BUNUSED_OBJ
+.It UNUSED_OBJ
 Objects that are always allowed to be unused dependencies.
 .It UNUSED_RPATH
 Objects that are allowed to have unused runpath directories.

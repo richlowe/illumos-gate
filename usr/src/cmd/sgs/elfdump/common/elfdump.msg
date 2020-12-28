@@ -23,6 +23,7 @@
 # Copyright (c) 1997, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2012 DEY Storage Systems, Inc.  All rights reserved.
 # Copyright 2018 Joyent, Inc.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
 @ _START_
@@ -314,6 +315,7 @@
 @ MSG_NOTE_BADCORETYPE	"%s: unknown note type %#x\n"
 
 @ MSG_NOTE_BAD_SECFLAGS_VER	"unknown prsecflags_t version: "
+@ MSG_NOTE_BAD_UPANIC_VER	"unknown prupanic_t version: "
 
 #
 # Debug section messages
@@ -477,9 +479,10 @@
 @ MSG_CNOTE_DESC_PSINFO_T		"desc: (psinfo_t)"
 @ MSG_CNOTE_DESC_PSTATUS_T		"desc: (pstatus_t)"
 @ MSG_CNOTE_DESC_STRUCT_UTSNAME		"desc: (struct utsname)"
-@ MSG_CNOTE_DESC_PRFDINFO_T		"desc: (prfdinfo_t)"
+@ MSG_CNOTE_DESC_PRFDINFO_T		"desc: (prfdinfo_core_t)"
 @ MSG_CNOTE_DESC_PRSECFLAGS_T		"desc: (prsecflags_t)"
 @ MSG_CNOTE_DESC_PRLWPNAME_T		"desc: (prlwpname_t)"
+@ MSG_CNOTE_DESC_PRUPANIC_T		"desc: (prupanic_t)"
 
 @ MSG_CNOTE_FMT_LINE		"%*s%-*s%s"
 @ MSG_CNOTE_FMT_LINE_2UP	"%*s%-*s%-*s%-*s%s"
@@ -654,6 +657,9 @@
 @ MSG_CNOTE_T_PR_INO			"pr_ino:"
 @ MSG_CNOTE_T_PR_FILEFLAGS		"pr_fileflags:"
 @ MSG_CNOTE_T_PR_FDFLAGS		"pr_fdflags:"
+@ MSG_CNOTE_T_PRU_VERSION		"pru_version:"
+@ MSG_CNOTE_T_PRU_FLAGS			"pru_flags:"
+@ MSG_CNOTE_T_PRU_DATA			"pru_data:"
 
 
 # Names of fake sections generated from program header data

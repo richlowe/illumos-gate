@@ -105,7 +105,7 @@ CLOBBERFILES += $(CLOBBERFILES_$(CURTYPE))
 
 LIBS_standalone	= $(STANDLIBRARY)
 DEBUGLIBS_standalone =
-LIBS_library = $(DYNLIB) $(LINTLIB)
+LIBS_library = $(DYNLIB)
 DEBUGLIBS_library = $(DYNLIB)
 LIBS = $(LIBS_$(CURTYPE))
 DEBUGLIBS = $(DEBUGLIBS_$(CURTYPE))
@@ -121,13 +121,17 @@ ASFLAGS_standalone = -DDIS_STANDALONE
 ASFLAGS_library =
 ASFLAGS += -P $(ASFLAGS_$(CURTYPE)) -D_ASM
 
-$(LINTLIB) := SRCS = $(COMDIR)/$(LINTSRC)
-
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	$(CNOWARN_UNINIT)
 
 # not linted
 SMATCH=off
+
+#
+# The standalone environment currently does not support the stack
+# protector.
+#
+STACKPROTECT = none
 
 # We want the thread-specific errno in the library, but we don't want it in
 # the standalone.  $(DTS_ERRNO) is designed to add -D_TS_ERRNO to $(CPPFLAGS),

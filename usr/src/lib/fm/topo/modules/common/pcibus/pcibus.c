@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <sys/fm/protocol.h>
@@ -165,7 +165,7 @@ hostbridge_asdevice(topo_mod_t *mod, tnode_t *bus)
 }
 
 static int
-pciexfn_add_ufm(topo_mod_t *mod, tnode_t *node)
+pciexfn_add_ufm(topo_mod_t *mod, tnode_t *parent, tnode_t *node)
 {
 	char *devpath = NULL;
 	ufm_ioc_getcaps_t ugc = { 0 };
@@ -174,6 +174,7 @@ pciexfn_add_ufm(topo_mod_t *mod, tnode_t *node)
 	nvlist_t *ufminfo = NULL, **images;
 	uint_t nimages;
 	int err, fd, ret = -1;
+	tnode_t *create;
 
 	if (topo_prop_get_string(node, TOPO_PGROUP_IO, TOPO_IO_DEV, &devpath,
 	    &err) != 0) {
@@ -269,7 +270,31 @@ pciexfn_add_ufm(topo_mod_t *mod, tnode_t *node)
 		(void) topo_mod_seterrno(mod, EMOD_UNKNOWN);
 		goto err;
 	}
-	if (topo_node_range_create(mod, node, UFM, 0, (nimages - 1)) != 0) {
+
+	/*
+	 * There's nothing for us to do if there are no images.
+	 */
+	if (nimages == 0) {
+		ret = 0;
+		goto err;
+	}
+
+	/*
+	 * In general, almost all UFMs are device-wide. That is, in a
+	 * multi-function device, there is still a single global firmware image.
+	 * At this time, we default to putting the UFM data always on the device
+	 * node. However, if someone creates a UFM on something that's not the
+	 * first function, we'll create a UFM under that function for now. If we
+	 * add support for hardware that has per-function UFMs, then we should
+	 * update the UFM API to convey that scope.
+	 */
+	if (topo_node_instance(node) != 0) {
+		create = node;
+	} else {
+		create = parent;
+	}
+
+	if (topo_node_range_create(mod, create, UFM, 0, (nimages - 1)) != 0) {
 		topo_mod_dprintf(mod, "failed to create %s range", UFM);
 		/* errno set */
 		goto err;
@@ -287,7 +312,8 @@ pciexfn_add_ufm(topo_mod_t *mod, tnode_t *node)
 			(void) topo_mod_seterrno(mod, EMOD_UNKNOWN);
 			goto err;
 		}
-		if ((ufmnode = topo_mod_create_ufm(mod, node, descr, NULL)) ==
+
+		if ((ufmnode = topo_mod_create_ufm(mod, create, descr, NULL)) ==
 		    NULL) {
 			topo_mod_dprintf(mod, "failed to create ufm nodes for "
 			    "%s", descr);
@@ -429,7 +455,7 @@ pciexfn_declare(topo_mod_t *mod, tnode_t *parent, di_node_t dn,
 	 * information via the DDI UFM subsystem and, if so, create the
 	 * corresponding ufm topo nodes.
 	 */
-	if (pciexfn_add_ufm(mod, ntn) != 0) {
+	if (pciexfn_add_ufm(mod, parent, ntn) != 0) {
 		topo_node_unbind(ntn);
 		return (NULL);
 	}
@@ -463,6 +489,11 @@ pciexdev_declare(topo_mod_t *mod, tnode_t *parent, di_node_t dn,
 	if ((ntn = pci_tnode_create(mod, parent, PCIEX_DEVICE, i, dn)) == NULL)
 		return (NULL);
 	if (did_props_set(ntn, pd, Dev_common_props, Dev_propcnt) < 0) {
+		topo_node_unbind(ntn);
+		return (NULL);
+	}
+
+	if (pci_create_dev_sensors(mod, ntn) < 0) {
 		topo_node_unbind(ntn);
 		return (NULL);
 	}
@@ -551,6 +582,11 @@ pcidev_declare(topo_mod_t *mod, tnode_t *parent, di_node_t dn,
 		return (NULL);
 	}
 
+	if (pci_create_dev_sensors(mod, ntn) < 0) {
+		topo_node_unbind(ntn);
+		return (NULL);
+	}
+
 	/*
 	 * We can expect to find pci functions beneath the device
 	 */
@@ -630,11 +666,12 @@ static void
 declare_dev_and_fn(topo_mod_t *mod, tnode_t *bus, tnode_t **dev, di_node_t din,
     int board, int bridge, int rc, int devno, int fnno, int depth)
 {
-	int dcnt = 0, rcnt;
-	char *propstr;
+	int dcnt = 0, rcnt, err;
+	char *propstr, *label = NULL, *pdev = NULL;
 	tnode_t *fn;
 	uint_t class, subclass;
 	uint_t vid, did;
+	uint_t pdev_sz = 0;
 	did_t *dp = NULL;
 
 	if (*dev == NULL) {
@@ -773,6 +810,84 @@ declare_dev_and_fn(topo_mod_t *mod, tnode_t *bus, tnode_t **dev, di_node_t din,
 				pci_receptacle_instantiate(mod, fn, din);
 		}
 	}
+
+	/*
+	 * If this is an NVMe device and if the FRU label indicates it's not an
+	 * onboard device then invoke the disk enumerator to enumerate the NVMe
+	 * controller and associated namespaces.
+	 *
+	 * We skip NVMe devices that appear to be onboard as those are likely
+	 * M.2 or U.2 devices and so should be enumerated via a
+	 * platform-specific XML map so that they can be associated with the
+	 * correct physical bay/slot.  This code is intended to pick up NVMe
+	 * devices that are part of PCIe add-in cards.
+	 */
+	if (topo_node_label(fn, &label, &err) != 0) {
+		topo_mod_dprintf(mod, "%s: failed to lookup FRU label on %s=%d",
+		    __func__, topo_node_name(fn), topo_node_instance(fn));
+		goto out;
+	}
+
+	if (class == PCI_CLASS_MASS && subclass == PCI_MASS_NVME &&
+	    strcmp(label, "MB") != 0) {
+		char *driver = di_driver_name(din);
+		char *slash;
+		topo_pgroup_info_t pgi;
+
+		if (topo_prop_get_string(fn, TOPO_PGROUP_IO, TOPO_IO_DEV,
+		    &pdev, &err) != 0) {
+			topo_mod_dprintf(mod, "%s: failed to lookup %s on "
+			    "%s=%d", __func__, TOPO_IO_DEV, topo_node_name(fn),
+			    topo_node_instance(fn));
+			goto out;
+		}
+
+		/*
+		 * Add the binding properties that are required by the disk
+		 * enumerator to discover the accociated NVMe controller.
+		 */
+		pdev_sz = strlen(pdev) + 1;
+		if ((slash = strrchr(pdev, '/')) == NULL) {
+			topo_mod_dprintf(mod, "%s: malformed dev path\n",
+			    __func__);
+			(void) topo_mod_seterrno(mod, EMOD_PARTIAL_ENUM);
+			goto out;
+		}
+		*slash = '\0';
+
+		pgi.tpi_name = TOPO_PGROUP_BINDING;
+		pgi.tpi_namestab = TOPO_STABILITY_PRIVATE;
+		pgi.tpi_datastab = TOPO_STABILITY_PRIVATE;
+		pgi.tpi_version = TOPO_VERSION;
+		if (topo_pgroup_create(fn, &pgi, &err) != 0 ||
+		    topo_prop_set_string(fn, TOPO_PGROUP_BINDING,
+		    TOPO_BINDING_DRIVER, TOPO_PROP_IMMUTABLE, driver,
+		    &err) != 0 ||
+		    topo_prop_set_string(fn, TOPO_PGROUP_BINDING,
+		    TOPO_BINDING_PARENT_DEV, TOPO_PROP_IMMUTABLE, pdev,
+		    &err) != 0) {
+			topo_mod_dprintf(mod, "%s: failed to set binding "
+			    "props", __func__);
+			(void) topo_mod_seterrno(mod, EMOD_PARTIAL_ENUM);
+			goto out;
+		}
+
+		/*
+		 * Load and invoke the disk enumerator module.
+		 */
+		if (topo_mod_load(mod, DISK, TOPO_VERSION) == NULL) {
+			topo_mod_dprintf(mod, "pcibus enum could not load "
+			    "disk enum\n");
+			(void) topo_mod_seterrno(mod, EMOD_PARTIAL_ENUM);
+			goto out;
+		}
+		(void) topo_mod_enumerate(mod, fn, DISK, NVME, 0, 0, NULL);
+	}
+out:
+	if (pdev != NULL) {
+		topo_mod_free(mod, pdev, pdev_sz);
+	}
+	topo_mod_strfree(mod, label);
 }
 
 int

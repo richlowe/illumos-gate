@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright 2017 Nexenta Systems, Inc. All rights reserved.
+ * Copyright 2019 Nexenta by DDN, Inc. All rights reserved.
  */
 
 #include <mdb/mdb_modapi.h>
@@ -1409,6 +1409,12 @@ user_priv_bits[] = {
 	{ "CHANGE_NOTIFY",
 	    SMB_USER_PRIV_CHANGE_NOTIFY,
 	    SMB_USER_PRIV_CHANGE_NOTIFY },
+	{ "READ_FILE",
+	    SMB_USER_PRIV_READ_FILE,
+	    SMB_USER_PRIV_READ_FILE },
+	{ "WRITE_FILE",
+	    SMB_USER_PRIV_WRITE_FILE,
+	    SMB_USER_PRIV_WRITE_FILE },
 	{ NULL, 0, 0 }
 };
 
@@ -3252,8 +3258,7 @@ smb_mbuf_dump_dcmd(uintptr_t addr, uint_t flags, int argc,
 	    addr, mdata, mh.mh_len);
 
 	dumpptr_flags = MDB_DUMP_RELATIVE | MDB_DUMP_ASCII | MDB_DUMP_HEADER;
-	if (mdb_dumpptr(mdata, len, dumpptr_flags,
-	    (mdb_dumpptr_cb_t)mdb_vread, NULL) < 0)
+	if (mdb_dumpptr(mdata, len, dumpptr_flags, NULL, NULL) < 0)
 		return (DCMD_ERR);
 
 	return (DCMD_OK);

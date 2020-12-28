@@ -59,9 +59,7 @@ AS_CPPFLAGS += -D_ASM
 
 all:		$(LIBS)
 
-install:	all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTLINT64)
-
-lint:		lintcheck
+install:	all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTCOMPATLINKS64)
 
 pics/%.o: %.s
 		$(COMPILE.s) -o $@ ${@F:.o=.s}
@@ -76,7 +74,7 @@ pics/%.o: $(SRC)/common/crypto/sha2/amd64/%.s
 		$(POST_PROCESS_O)
 
 pics/%.o.objcap: pics/%.o
-		$(LD) -r -o $@ -M$(CAPFILE) -Breduce $<
+		$(LD) -r -o $@ -Wl,-M$(CAPFILE) $(BREDUCE) $<
 		$(POST_PROCESS_O)
 
 pics/%.o.symcap: pics/%.o.objcap

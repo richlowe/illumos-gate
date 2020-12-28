@@ -43,6 +43,9 @@ include		$(SRC)/cmd/sgs/Makefile.com
 
 LIBS =		$(DYNLIB)
 
+COMPATLINKS =	usr/lib/$(DYNLIB)
+COMPATLINKS64 = usr/lib/$(MACH64)/$(DYNLIB)
+
 SRCDIR =	../common
 CPPFLAGS +=	-I../../rtld/common -I$(SRC)/lib/libc/inc \
 		-I$(SRC)/uts/common/krtld -I$(SRC)/common/sgsrtcid \

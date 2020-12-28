@@ -411,7 +411,7 @@ dr_cpu_list_wrk(dr_cpu_hdr_t *req, dr_cpu_hdr_t **resp, int *resp_len)
 	case DR_CPU_FORCE_UNCONFIG:
 		drctl_flags = DRCTL_FLAG_FORCE;
 		force = B_TRUE;
-		_NOTE(FALLTHROUGH)
+		/* FALLTHROUGH */
 	case DR_CPU_UNCONFIGURE:
 		dr_fn = dr_cpu_unconfigure;
 		drctl_cmd = DRCTL_CPU_UNCONFIG_REQUEST;
@@ -583,7 +583,7 @@ dr_cpu_res_array_init(dr_cpu_hdr_t *req, drctl_rsrc_t *rsrc, int nrsrc)
 		 * on the memory allocated for the message buffer
 		 * itself.
 		 */
-		if (rsrc[idx].offset != NULL) {
+		if (rsrc[idx].offset != 0) {
 			err_str = (char *)rsrc + rsrc[idx].offset;
 			err_len = strlen(err_str) + 1;
 

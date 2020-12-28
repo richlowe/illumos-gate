@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <ctype.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -66,7 +64,7 @@ do_emit(fcode_env_t *env, uchar_t c)
 	if (isatty(fileno(stdout))) {
 		if ((c >= 0x20 && c <= 0x7f) || c == '\n' || c == '\r' ||
 		    c == '\b')
-			putchar(c);
+			(void) putchar(c);
 		else if (c < 0x20)
 			printf("@%c", c + '@');
 		else
@@ -102,14 +100,14 @@ keyquestion(fcode_env_t *env)
 {
 	struct timeval timeval;
 	fd_set readfds;
-	int ret;
 
 	if (isatty(fileno(stdin))) {
 		FD_ZERO(&readfds);
 		FD_SET(fileno(stdin), &readfds);
 		timeval.tv_sec = 0;
 		timeval.tv_usec = 1000;
-		ret = select(fileno(stdin) + 1, &readfds, NULL, NULL, &timeval);
+		(void) select(fileno(stdin) + 1, &readfds, NULL, NULL,
+		    &timeval);
 		if (FD_ISSET(fileno(stdin), &readfds))
 			PUSH(DS, TRUE);
 		else
@@ -127,7 +125,7 @@ key(fcode_env_t *env)
 	uchar_t c;
 
 	if (isatty(fileno(stdin))) {
-		read(fileno(stdin), &c, 1);
+		(void) read(fileno(stdin), &c, 1);
 		PUSH(DS, c);
 	} else
 		forth_abort(env, "'key' called in non-interactive mode");
@@ -180,7 +178,7 @@ expect(fcode_env_t *env)
 	read_line(env);
 	rbuf = pop_a_string(env, NULL);
 	if (rbuf) {
-		strcpy(buf, rbuf);
+		(void) strcpy(buf, rbuf);
 		env->span = strlen(buf);
 	} else
 		env->span = 0;
@@ -203,7 +201,7 @@ do_ms(fcode_env_t *env)
 	if (d) {
 		rqtp.tv_sec = 0;
 		rqtp.tv_nsec = d*1000*1000;
-		nanosleep(&rqtp, 0);
+		(void) nanosleep(&rqtp, 0);
 	}
 }
 
@@ -214,12 +212,12 @@ do_get_msecs(fcode_env_t *env)
 	long ms;
 	timespec_t rqtp;
 
-	gettimeofday(&tp, NULL);
+	(void) gettimeofday(&tp, NULL);
 	ms = (tp.tv_usec/1000) + (tp.tv_sec * 1000);
 	PUSH(DS, (fstack_t)ms);
 	rqtp.tv_sec = 0;
 	rqtp.tv_nsec = 1000*1000;
-	nanosleep(&rqtp, 0);
+	(void) nanosleep(&rqtp, 0);
 }
 
 #define	CMN_MSG_SIZE	256
@@ -230,7 +228,7 @@ typedef struct CMN_MSG_T cmn_msg_t;
 struct CMN_MSG_T {
 	char		buf[CMN_MSG_SIZE];
 	int		level;
-	int 		len;
+	int		len;
 	cmn_msg_t	*prev;
 	cmn_msg_t	*next;
 };
@@ -243,7 +241,7 @@ struct CMN_FMT_T {
 	char	format; /* format type */
 };
 
-static cmn_msg_t 	*root = NULL;
+static cmn_msg_t	*root = NULL;
 static int		cmn_msg_level = 0;
 
 /*
@@ -271,7 +269,7 @@ static int		cmn_msg_level = 0;
  * For valid formatting, caller's supplied cmn_fmt_t elements are
  * filled in:
  *	fwidth:
- * 		> 0 - returned value is the field width
+ *		> 0 - returned value is the field width
  *		< 0 - returned value is negation of field width for
  *			64 bit data formats
  *	cwidth:
@@ -296,7 +294,7 @@ validfmt(char *fmt, cmn_fmt_t *cfstr)
 	cwidth = &cfstr->cwidth;
 	format = &cfstr->format;
 	*fwidth = *cwidth = 0;
-	*format = NULL;
+	*format = '\0';
 	dig1 = dig2 = NULL;
 
 	/* check for left justification character */
@@ -336,7 +334,7 @@ validfmt(char *fmt, cmn_fmt_t *cfstr)
 		/* if too many digits in the width return error */
 		if (nbytes > CMN_MAX_DIGITS)
 			return (1);
-		strncpy(cdigs, dig1, nbytes);
+		(void) strncpy(cdigs, dig1, nbytes);
 		cdigs[nbytes] = 0;
 		*cwidth = atoi(cdigs);
 	}
@@ -355,13 +353,14 @@ validfmt(char *fmt, cmn_fmt_t *cfstr)
 	case '%':
 		if (isll)
 			return (1);
+		/* FALLTHROUGH */
 	case 'd':
 	case 'x':
 		*format = *fmt;
 		(*fwidth)++;
 		break;
 	case 'p':
-		isll = 1; 		/* uses 64 bit format */
+		isll = 1;		/* uses 64 bit format */
 		*format = *fmt;
 		(*fwidth)++;
 		break;
@@ -392,7 +391,7 @@ validfmt(char *fmt, cmn_fmt_t *cfstr)
 
 static void
 fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
-	long long *llarg)
+    long long *llarg)
 {
 	char	*cbuf;
 	char	snf[3];
@@ -410,6 +409,7 @@ fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
 		switch (format) {
 		case 'x':
 			cnv = 16;
+			/* FALLTHROUGH */
 		case 'd':
 		case 'c':
 		case 'p':
@@ -423,8 +423,8 @@ fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
 			return;
 		default:
 			log_message(MSG_ERROR,
-				"fmt_args:invalid format type! (%s)\n",
-					&format);
+			    "fmt_args:invalid format type! (%s)\n",
+			    &format);
 			return;
 		}
 
@@ -436,9 +436,9 @@ fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
 
 			if (snprintf(cbuf, cbsize, snf, *arg) < 0)
 				log_message(MSG_ERROR,
-					"fmt_args: snprintf output error\n");
-			while ((cbuf[ndigits] != NULL) &&
-				(ndigits < cbsize))
+				    "fmt_args: snprintf output error\n");
+			while ((cbuf[ndigits] != '\0') &&
+			    (ndigits < cbsize))
 				ndigits++;
 
 			/* if truncation is necessary, do it */
@@ -449,8 +449,7 @@ fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
 					str = (char *)*arg;
 					str[cw] = 0;
 				} else
-					*arg = strtol(cbuf,
-						(char **)NULL, cnv);
+					*arg = strtol(cbuf, (char **)NULL, cnv);
 			}
 			free(cbuf);
 		}
@@ -470,7 +469,7 @@ fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
 				cnv = 16;
 				if (snprintf(cbuf, cbsize, "%p", *llarg) < 0)
 					log_message(MSG_ERROR,
-						"fmt_args: snprintf error\n");
+					    "fmt_args: snprintf error\n");
 				break;
 			case 'x':
 				cnv = 16;
@@ -481,17 +480,17 @@ fmt_args(fcode_env_t *env, int cw, int fw, char format, long *arg,
 			case 'd':
 				if (snprintf(cbuf, cbsize, "%ld", *llarg) < 0)
 					log_message(MSG_ERROR,
-						"fmt_args: snprintf error\n");
+					    "fmt_args: snprintf error\n");
 				break;
 			default:
 				log_message(MSG_ERROR,
 				    "invalid long format type! (l%s)\n",
-						&format);
+				    &format);
 				free(cbuf);
 				return;
 			}
-			while ((cbuf[ndigits] != NULL) &&
-				(ndigits < cbsize)) {
+			while ((cbuf[ndigits] != '\0') &&
+			    (ndigits < cbsize)) {
 				ndigits++;
 			}
 			/* if truncation is necessary, do it */
@@ -554,43 +553,43 @@ fmt_str(fcode_env_t *env, char *fmt, char *fmtbuf, int bsize)
 			}
 
 			bytes = pct - fmt;
-			strncpy(tbuf, fmt, bytes);
-			strncpy(tbuf+bytes, "%", 1);
-			strncpy(tbuf+bytes+1, fmt+bytes, 1);
+			(void) strncpy(tbuf, fmt, bytes);
+			(void) strncpy(tbuf+bytes, "%", 1);
+			(void) strncpy(tbuf+bytes+1, fmt+bytes, 1);
 			bytes += 2;
 			tbuf[bytes] = 0;
 
 			log_message(MSG_ERROR,
-				"fmt_str: invalid format type! (%s)\n",
-				tbuf+bytes-3);
+			    "fmt_str: invalid format type! (%s)\n",
+			    tbuf+bytes-3);
 
-			strncpy(fmtbuf, tbuf, bsize);
+			(void) strncpy(fmtbuf, tbuf, bsize);
 			return;
 		}
 
 		if (fw > 0) {	/* process normal (not long) formats */
 			bytes = pct - fmt + fw;
-			strncpy(tbuf, fmt, bytes);
+			(void) strncpy(tbuf, fmt, bytes);
 			tbuf[bytes] = 0;
 		} else {
 			/* if here, fw must be a long format */
 			if (*fmptr == 'p') {
 				bytes = pct - fmt - fw;
-				strncpy(tbuf, fmt, bytes);
+				(void) strncpy(tbuf, fmt, bytes);
 				tbuf[bytes] = 0;
 			} else {
 				bytes = pct - fmt - fw - 2;
-				strncpy(tbuf, fmt, bytes);
+				(void) strncpy(tbuf, fmt, bytes);
 				tbuf[bytes] = 'l';
-				strncpy(tbuf+bytes+1, fmt+bytes, 2);
+				(void) strncpy(tbuf+bytes+1, fmt+bytes, 2);
 				tbuf[bytes+1+2] = 0;
 			}
 		}
 
 		/* if more input buffer to process, recurse */
 		if ((l - abs(fw)) != 0) {
-		    fmt_str(env, pct+abs(fw), (tbuf + strlen(tbuf)),
-				CMN_MSG_SIZE - strlen(tbuf));
+			fmt_str(env, pct+abs(fw), (tbuf + strlen(tbuf)),
+			    CMN_MSG_SIZE - strlen(tbuf));
 		}
 
 		/* call to extract args for snprintf() calls below */
@@ -611,7 +610,7 @@ fmt_str(fcode_env_t *env, char *fmt, char *fmtbuf, int bsize)
 			default:
 				log_message(MSG_ERROR,
 				    "fmt_str: invalid format (%s)\n",
-					fmptr);
+				    fmptr);
 				return;
 			}
 
@@ -619,7 +618,7 @@ fmt_str(fcode_env_t *env, char *fmt, char *fmtbuf, int bsize)
 			(void) snprintf(fmtbuf, bsize, tbuf, llarg);
 
 	} else
-		strncpy(fmtbuf, fmt, bsize);
+		(void) strncpy(fmtbuf, fmt, bsize);
 }
 
 /*
@@ -642,7 +641,7 @@ fc_cmn_append(fcode_env_t *env)
 
 	if (root == NULL) {
 		log_message(MSG_ERROR,
-			"fc_cmn_append: no message context for append\n");
+		    "fc_cmn_append: no message context for append\n");
 		return;
 	}
 
@@ -651,11 +650,11 @@ fc_cmn_append(fcode_env_t *env)
 
 	if ((root->len + len) < CMN_MSG_SIZE) {
 		fmt_str(env, str, root->buf+root->len, CMN_MSG_SIZE -
-			root->len);
+		    root->len);
 		root->len += len;
 	} else
 		log_message(MSG_ERROR,
-			"fc_cmn_append: append exceeds max msg size\n");
+		    "fc_cmn_append: append exceeds max msg size\n");
 }
 
 /*
@@ -721,13 +720,13 @@ fc_cmn_start(fcode_env_t *env, char *head, int path)
 	new->prev = root;
 	if (root != 0)
 		root->next = new;
-	strcpy(new->buf, head);
+	(void) strcpy(new->buf, head);
 	new->len = strlen(head);
 	if (path && env->current_device) {
 		dpath = get_path(env, env->current_device);
-		strcpy(new->buf+new->len, dpath);
+		(void) strcpy(new->buf+new->len, dpath);
 		new->len += strlen(dpath);
-		strncpy(new->buf+new->len++, ": ", 2);
+		(void) strncpy(new->buf+new->len++, ": ", 2);
 		++new->len;
 		free(dpath);
 	}

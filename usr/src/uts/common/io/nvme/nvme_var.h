@@ -12,7 +12,7 @@
 /*
  * Copyright 2018 Nexenta Systems, Inc.
  * Copyright 2016 The MathWorks, Inc. All rights reserved.
- * Copyright 2017 Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  * Copyright 2019 Western Digital Corporation.
  */
 
@@ -38,6 +38,7 @@ extern "C" {
 #define	NVME_ADMIN_QUEUE		0x4
 #define	NVME_CTRL_LIMITS		0x8
 #define	NVME_INTERRUPTS			0x10
+#define	NVME_UFM_INIT			0x20
 
 #define	NVME_MIN_ADMIN_QUEUE_LEN	16
 #define	NVME_MIN_IO_QUEUE_LEN		16
@@ -104,6 +105,8 @@ struct nvme_cq {
 	uint_t ncq_tail;
 	uintptr_t ncq_hdbl;
 	int ncq_phase;
+
+	taskq_t *ncq_cmd_taskq;
 
 	kmutex_t ncq_mutex;
 };
@@ -179,6 +182,7 @@ struct nvme {
 	int n_pagesize;
 
 	int n_namespace_count;
+	uint_t n_namespaces_attachable;
 	uint_t n_ioq_count;
 	uint_t n_cq_count;
 
@@ -198,8 +202,6 @@ struct nvme {
 	int n_fm_cap;
 
 	ksema_t n_abort_sema;
-
-	ddi_taskq_t *n_cmd_taskq;
 
 	/* state for devctl minor node */
 	nvme_minor_state_t n_minor;
@@ -242,6 +244,12 @@ struct nvme {
 	uint32_t n_vendor_event;
 	uint32_t n_unknown_event;
 
+	/* DDI UFM handle */
+	ddi_ufm_handle_t *n_ufmh;
+	/* Cached Firmware Slot Information log page */
+	nvme_fwslot_log_t *n_fwslot;
+	/* Lock protecting the cached firmware slot info */
+	kmutex_t n_fwslot_mutex;
 };
 
 struct nvme_namespace {

@@ -32,4 +32,4 @@ LIBS =		$(DYNLIB1)
 
 include		../../Makefile.targ
 
-install:	all $(ROOTLIBS64)
+install:	all $(ROOTLIBS64) $(ROOTCOMPATLINKS64)

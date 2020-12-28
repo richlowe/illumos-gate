@@ -22,8 +22,6 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 LIBRARY=	libdscp.a
 VERS=		.1
@@ -33,9 +31,8 @@ OBJECTS=	libdscp.o
 include	../../Makefile.lib
 include	../../Makefile.rootfs
 
-LIBS =		$(DYNLIB) $(LINTLIB)
-LDLIBS +=	-lc -lsocket -lnsl
-$(LINTLIB) :=	SRCS = $(SRCDIR)/$(LINTSRC)
+LIBS =		$(DYNLIB)
+LDLIBS +=	-lc -lsocket
 
 CPPFLAGS +=	-I..
 CFLAGS +=	$(CCVERBOSE)
@@ -57,6 +54,5 @@ all: $(LIBS)
 
 install: all .WAIT $(ROOTLIBDIR) $(ROOTLIB)
 
-lint: lintcheck
 
 include ../../Makefile.targ

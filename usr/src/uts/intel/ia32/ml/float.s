@@ -22,6 +22,7 @@
 /*
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2018, Joyent, Inc.
+ * Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*      Copyright (c) 1990, 1991 UNIX System Laboratories, Inc. */
@@ -42,20 +43,7 @@
 #include <sys/privregs.h>
 #include <sys/x86_archext.h>
 
-#if defined(__lint)
-#include <sys/types.h>
-#include <sys/fp.h>
-#else
 #include "assym.h"
-#endif
-
-#if defined(__lint)
- 
-uint_t
-fpu_initial_probe(void)
-{ return (0); }
-
-#else	/* __lint */
 
 	/*
 	 * Returns zero if x87 "chip" is present(!)
@@ -68,47 +56,15 @@ fpu_initial_probe(void)
 	ret
 	SET_SIZE(fpu_initial_probe)
 
-#endif	/* __lint */
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-fxsave_insn(struct fxsave_state *fx)
-{}
-
-#else	/* __lint */
-
 	ENTRY_NP(fxsave_insn)
 	fxsaveq (%rdi)
 	ret
 	SET_SIZE(fxsave_insn)
 
-#endif	/* __lint */
-
 /*
  * One of these routines is called from any lwp with floating
  * point context as part of the prolog of a context switch.
  */
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-xsave_ctxt(void *arg)
-{}
-
-/*ARGSUSED*/
-void
-xsaveopt_ctxt(void *arg)
-{}
-
-/*ARGSUSED*/
-void
-fpxsave_ctxt(void *arg)
-{}
-
-#else	/* __lint */
 
 /*
  * These three functions define the Intel "xsave" handling for CPUs with
@@ -224,32 +180,6 @@ fpxsave_ctxt(void *arg)
 	.4byte	0x0
 	.4byte	0x0
 
-#endif	/* __lint */
-
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-fpsave(struct fnsave_state *f)
-{}
-
-/*ARGSUSED*/
-void
-fpxsave(struct fxsave_state *f)
-{}
-
-/*ARGSUSED*/
-void
-xsave(struct xsave_state *f, uint64_t m)
-{}
-
-/*ARGSUSED*/
-void
-xsaveopt(struct xsave_state *f, uint64_t m)
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(fpxsave)
 	CLTS
@@ -283,26 +213,10 @@ xsaveopt(struct xsave_state *f, uint64_t m)
 	ret
 	SET_SIZE(xsaveopt)
 
-#endif	/* __lint */
-
 /*
  * These functions are used when restoring the FPU as part of the epilogue of a
  * context switch.
  */
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-fpxrestore_ctxt(void *arg)
-{}
-
-/*ARGSUSED*/
-void
-xrestore_ctxt(void *arg)
-{}
-
-#else	/* __lint */
 
 	ENTRY(fpxrestore_ctxt)
 	cmpl	$_CONST(FPU_EN|FPU_VALID), FPU_CTX_FPU_FLAGS(%rdi)
@@ -328,22 +242,6 @@ xrestore_ctxt(void *arg)
 	ret
 	SET_SIZE(xrestore_ctxt)
 
-#endif	/* __lint */
-
-
-#if defined(__lint)
-
-/*ARGSUSED*/
-void
-fpxrestore(struct fxsave_state *f)
-{}
-
-/*ARGSUSED*/
-void
-xrestore(struct xsave_state *f, uint64_t m)
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(fpxrestore)
 	CLTS
@@ -360,38 +258,18 @@ xrestore(struct xsave_state *f, uint64_t m)
 	ret
 	SET_SIZE(xrestore)
 
-#endif	/* __lint */
-
 /*
  * Disable the floating point unit.
  */
 
-#if defined(__lint)
-
-void
-fpdisable(void)
-{}
-
-#else	/* __lint */
-
 	ENTRY_NP(fpdisable)
-	STTS(%rdi)			/* set TS bit in %cr0 (disable FPU) */ 
+	STTS(%rdi)			/* set TS bit in %cr0 (disable FPU) */
 	ret
 	SET_SIZE(fpdisable)
-
-#endif	/* __lint */
 
 /*
  * Initialize the fpu hardware.
  */
-
-#if defined(__lint)
-
-void
-fpinit(void)
-{}
-
-#else	/* __lint */
 
 	ENTRY_NP(fpinit)
 	CLTS
@@ -407,31 +285,17 @@ fpinit(void)
 	leaq	avx_initial(%rip), %rcx
 	xorl	%edx, %edx
 	movl	$XFEATURE_AVX, %eax
-	bt	$X86FSET_AVX, x86_featureset
+	btl	$X86FSET_AVX, x86_featureset
 	cmovael	%edx, %eax
 	orl	$(XFEATURE_LEGACY_FP | XFEATURE_SSE), %eax
 	xrstor (%rcx)
 	ret
 	SET_SIZE(fpinit)
 
-#endif	/* __lint */
-
 /*
  * Clears FPU exception state.
  * Returns the FP status word.
  */
-
-#if defined(__lint)
-
-uint32_t
-fperr_reset(void)
-{ return (0); }
-
-uint32_t
-fpxerr_reset(void)
-{ return (0); }
-
-#else	/* __lint */
 
 	ENTRY_NP(fperr_reset)
 	CLTS
@@ -454,18 +318,6 @@ fpxerr_reset(void)
 	ret
 	SET_SIZE(fpxerr_reset)
 
-#endif	/* __lint */
-
-#if defined(__lint)
-
-uint32_t
-fpgetcwsw(void)
-{
-	return (0);
-}
-
-#else   /* __lint */
-
 	ENTRY_NP(fpgetcwsw)
 	pushq	%rbp
 	movq	%rsp, %rbp
@@ -478,21 +330,9 @@ fpgetcwsw(void)
 	ret
 	SET_SIZE(fpgetcwsw)
 
-#endif  /* __lint */
-
 /*
  * Returns the MXCSR register.
  */
-
-#if defined(__lint)
-
-uint32_t
-fpgetmxcsr(void)
-{
-	return (0);
-}
-
-#else   /* __lint */
 
 	ENTRY_NP(fpgetmxcsr)
 	pushq	%rbp
@@ -505,4 +345,3 @@ fpgetmxcsr(void)
 	ret
 	SET_SIZE(fpgetmxcsr)
 
-#endif  /* __lint */

@@ -133,19 +133,20 @@ $(ROOTDEMODIRS) :=	DIRMODE =	755
 
 ARFLAGS=	r
 SONAME=		$(DYNLIB)
+
 # For most libraries, we should be able to resolve all symbols at link time,
 # either within the library or as dependencies, all text should be pure, and
 # combining relocations into one relocation table reduces startup costs.
 # All options are tunable to allow overload/omission from lower makefiles.
-
+HSONAME=	-h$(SONAME)
 
 # NB: We put debug objects in 'debugobj/' not 'debug/' because 'debug' targets
 # are common, and we need something that won't cause havoc in client Makefiles.
-HSONAME=	-h$(SONAME)
 DEBUGLINK=	$(DEBUGLIBS:%=-Wl,-zdebuglink=debugobj/%)
 
-DYNFLAGS=	$(HSONAME) $(ZTEXT) $(ZDEFS) $(DEBUGLINK) $(BDIRECT) \
-		$(MAPFILES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%)
+DYNFLAGS=	$(HSONAME) $(ZTEXT) $(ZDEFS) $(BDIRECT) \
+		$(MAPFILES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
+		$(DEBUGLINK) $(LDCHECKS)
 
 LDLIBS=		$(LDLIBS.lib)
 
@@ -179,6 +180,13 @@ INS.liblinkccc=	-$(RM) $@; $(SYMLINK) $(LIBLINKPATH)$(LIBLINKSCCC)$(VERS) $@
 # default 64-bit dynamic library symlink
 INS.liblink64=	-$(RM) $@; $(SYMLINK) $(LIBLINKPATH)$(LIBLINKS)$(VERS) $@
 INS.liblinkccc64= -$(RM) $@; $(SYMLINK) $(LIBLINKPATH)$(LIBLINKSCCC)$(VERS) $@
+
+#
+# Default to adding stack protection to all libraries.
+#
+CFLAGS +=	$(CCSTACKPROTECT)
+CFLAGS64 +=	$(CCSTACKPROTECT)
+LDLIBS +=	$(LDSTACKPROTECT)
 
 #
 # If appropriate, augment POST_PROCESS_O and POST_PROCESS_SO to do CTF
@@ -224,7 +232,7 @@ HSONAMECCC=	-h $(SONAMECCC)
 # Keep in sync with the standard DYNFLAGS
 #
 $(DYNLIBCCC):=	DYNFLAGS = $(HSONAMECCC) $(ZTEXT) $(DEBUGLINK) $(ZDEFS) \
-		$(MAPFILES:%=-M%) $(MAPFILE.PGA:%=-M%) $(MAPFILE.NED:%=-M%) \
+		$(MAPFILES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
 		$(BDIRECT) $(NORUNPATH)
 
 
@@ -262,5 +270,16 @@ CLOBBERTARGFILES= $(LIBS) $(DYNLIB) $(CLOBBERFILES)
 TYPECHECK_LIB32 =		$(TYPECHECK_LIB:%=$(MACH)/%)
 TYPECHECK_LIB64 =		$(TYPECHECK_LIB:%=$(MACH64)/%)
 TYPECHECK_LIST=			$(TYPELIST:%=-T %)
-$(BUILD64)TYPECHECK.lib =	$(CTFDIFF) -t -I $(TYPECHECK_LIST) $(TYPECHECK_LIB32) $(TYPECHECK_LIB64)
+$(BUILD64)TYPECHECK.lib =	$(CTFDIFF) -t -I $(TYPECHECK_LIST) \
+	$(TYPECHECK_LIB32) $(TYPECHECK_LIB64)
 TYPECHECK =			$(TYPECHECK_LIB:%=%.typecheck)
+
+# Links we need to create for compatibility
+COMPATLINKS=
+COMPATLINKS64=
+ROOTCOMPATLINKS=	$(COMPATLINKS:%=$(ROOT)/%)
+ROOTCOMPATLINKS64=	$(COMPATLINKS64:%=$(ROOT)/%)
+
+# So if someone doesn't set the target-specific variable they get a clue what
+# went wrong.
+COMPATLINKTARGET=	/__you_didnt_use_COMPATLINKS_properly__

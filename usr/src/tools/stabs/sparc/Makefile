@@ -29,12 +29,11 @@ STABS_SRC = ..
 #       Define the module and object file sets.
 #
 STABS_PROG	= stabs	  # name doesn't conflict with Makefile.master STABS
-PROG	= stabs	  # name doesn't conflict with Makefile.master STABS
+PROG		= stabs	  # name doesn't conflict with Makefile.master STABS
 STABS_SRCS	= $(STABS_SRC)/main.c $(STABS_SRC)/stabs.c \
 		  $(STABS_SRC)/forth.c $(STABS_SRC)/genassym.c \
 		  $(STABS_SRC)/squander.c
 STABS_OBJS	= $(STABS_SRCS:$(STABS_SRC)/%.c=%.o)
-LINTS		= $(STABS_OBJS:%.o=%.ln)
 
 SRCS		= $(STABS_SRCS)
 OBJECTS		= $(STABS_OBJS)
@@ -48,9 +47,12 @@ include ../../Makefile.tools
 
 FILEMODE        = 555
 
-CFLAGS		+= $(CCVERBOSE)
+INC_PATH	= -I$(STABS_SRC)
+# GCC false positive in stabs.c
+CERRWARN	+= -_gcc=-Wno-clobbered
 
-INC_PATH = -I$(STABS_SRC)
+LDLIBS		+= -lm
+NATIVE_LIBS	+= libm.so
 
 #
 #       Default build targets.
@@ -63,17 +65,11 @@ all: $(STABS_PROG)
 
 install: all .WAIT $(ROOTONBLDMACHPROG)
 
-lint:	$(SRCS)
-	@$(LINT) $(LINTFLAGS) $(SRCS)
-
 clean:
 	$(RM) $(CLEANFILES)
 
-clean.lint:
-	$(RM) $(LINTS)
-
 $(STABS_PROG): $(STABS_OBJS)
-	$(LINK.c) -o $@ $(STABS_OBJS) -lm
+	$(LINK.c) -o $@ $(STABS_OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 %.o: $(STABS_SRC)/%.c

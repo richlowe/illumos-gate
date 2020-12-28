@@ -21,7 +21,7 @@
 
 /*
  * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2019, Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 #include <libxml/parser.h>
@@ -54,16 +54,6 @@ static int fac_enum_process(topo_mod_t *, xmlNodePtr, tnode_t *);
 static int decorate_nodes(topo_mod_t *, tf_rdata_t *, xmlNodePtr, tnode_t *,
     tf_pad_t **);
 
-
-static void
-strarr_free(topo_mod_t *mod, char **arr, uint_t nelems)
-{
-	int i;
-
-	for (i = 0; i < nelems; i++)
-		topo_mod_strfree(mod, arr[i]);
-	topo_mod_free(mod, arr, (nelems * sizeof (char *)));
-}
 
 int
 xmlattr_to_stab(topo_mod_t *mp, xmlNodePtr n, const char *stabname,
@@ -114,16 +104,18 @@ xmlattr_to_int(topo_mod_t *mp,
 	xmlChar *str;
 	xmlChar *estr;
 
-	topo_dprintf(mp->tm_hdl, TOPO_DBG_XML, "xmlattr_to_int(propname=%s)\n",
-	    propname);
-	if ((str = xmlGetProp(n, (xmlChar *)propname)) == NULL)
+	if ((str = xmlGetProp(n, (xmlChar *)propname)) == NULL) {
+		topo_dprintf(mp->tm_hdl, TOPO_DBG_XML,
+		    "%s: failed to lookup %s attribute", __func__, propname);
 		return (topo_mod_seterrno(mp, ETOPO_PRSR_NOATTR));
-
+	}
 	errno = 0;
 	*value = strtoull((char *)str, (char **)&estr, 0);
 	if (errno != 0 || *estr != '\0') {
 		/* no conversion was done */
 		xmlFree(str);
+		topo_dprintf(mp->tm_hdl, TOPO_DBG_XML,
+		    "%s: failed to convert %s attribute", __func__, propname);
 		return (topo_mod_seterrno(mp, ETOPO_PRSR_BADNUM));
 	}
 	xmlFree(str);
@@ -388,7 +380,7 @@ xlate_common(topo_mod_t *mp, xmlNodePtr xn, topo_type_t ptype, nvlist_t *nvl,
 		}
 
 		rv = nvlist_add_string_array(nvl, name, strarrbuf, nelems);
-		strarr_free(mp, strarrbuf, nelems);
+		topo_mod_strfreev(mp, strarrbuf, nelems);
 		break;
 	case TOPO_TYPE_FMRI_ARRAY:
 		if ((nvlarrbuf = topo_mod_alloc(mp, (nelems *
@@ -1356,12 +1348,17 @@ pad_process(topo_mod_t *mp, tf_rdata_t *rd, xmlNodePtr pxn, tnode_t *ptn,
 		*rpad = new;
 	}
 
-	if (new->tpad_dcnt > 0)
-		if (dependents_create(mp, rd->rd_finfo, new, pxn, ptn) < 0)
-			return (-1);
-
+	/*
+	 * We need to process the property groups before enumerating any
+	 * dependents as that enuemration can itself have dependencies on
+	 * properties set on the parent node.
+	 */
 	if (new->tpad_pgcnt > 0)
 		if (pgroups_create(mp, new, ptn) < 0)
+			return (-1);
+
+	if (new->tpad_dcnt > 0)
+		if (dependents_create(mp, rd->rd_finfo, new, pxn, ptn) < 0)
 			return (-1);
 
 	return (0);

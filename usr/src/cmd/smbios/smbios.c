@@ -22,6 +22,7 @@
 /*
  * Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
  * Copyright (c) 2017, Joyent, Inc.
+ * Copyright 2020 Oxide Computer Company
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
@@ -177,14 +178,39 @@ jedec_print(FILE *fp, const char *desc, uint_t id)
 	const char *name;
 	uint_t cont, vendor;
 
-	vendor = id & 0xff;
-	cont = (id >> 8) & 0xff;
+	/*
+	 * SMBIOS encodes data in the way that the underlying memory standard
+	 * does. In this case, the upper byte indicates the vendor that we care
+	 * about while the lower byte indicates the number of continuations that
+	 * are needed. libjedec indexes this based on zero (e.g. table 1 is zero
+	 * continuations), which is how the spec encodes it. We add one so that
+	 * we can match how the spec describes it.
+	 */
+	vendor = id >> 8;
+	cont = id & 0x7f;
 	name = libjedec_vendor_string(cont, vendor);
 	if (name == NULL) {
-		oprintf(fp, "  %s: 0x%x\n", desc, id);
+		oprintf(fp, "  %s: Bank: 0x%x Vendor: 0x%x\n", desc, cont + 1,
+		    vendor);
 	} else {
-		oprintf(fp, "  %s: 0x%x (%s)\n", desc, id, name);
+		oprintf(fp, "  %s: Bank: 0x%x Vendor: 0x%x (%s)\n", desc,
+		    cont + 1, vendor, name);
 	}
+}
+
+/*
+ * Print a 128-bit data as a series of 16 hex digits.
+ */
+static void
+u128_print(FILE *fp, const char *desc, const uint8_t *data)
+{
+	uint_t i;
+
+	oprintf(fp, "%s: ", desc);
+	for (i = 0; i < 16; i++) {
+		oprintf(fp, " %02x", data[i]);
+	}
+	oprintf(fp, "\n");
 }
 
 static int
@@ -485,10 +511,6 @@ print_processor(smbios_hdl_t *shp, id_t id, FILE *fp)
 	desc_printf(smbios_processor_family_desc(p.smbp_family),
 	    fp, "  Family: %u", p.smbp_family);
 
-	if (p.smbp_family2 != 0)
-		desc_printf(smbios_processor_family_desc(p.smbp_family2),
-		    fp, "  Family Ext: %u", p.smbp_family2);
-
 	oprintf(fp, "  CPUID: 0x%llx\n", (u_longlong_t)p.smbp_cpuid);
 
 	desc_printf(smbios_processor_type_desc(p.smbp_type),
@@ -524,34 +546,19 @@ print_processor(smbios_hdl_t *shp, id_t id, FILE *fp)
 	}
 
 	if (p.smbp_corecount != 0) {
-		if (p.smbp_corecount != 0xff || p.smbp_corecount2 == 0)
-			oprintf(fp, "  Core Count: %u\n", p.smbp_corecount);
-		else
-			oprintf(fp, "  Core Count: %u\n", p.smbp_corecount2);
+		oprintf(fp, "  Core Count: %u\n", p.smbp_corecount);
 	} else {
 		oprintf(fp, "  Core Count: Unknown\n");
 	}
 
 	if (p.smbp_coresenabled != 0) {
-		if (p.smbp_coresenabled != 0xff || p.smbp_coresenabled2 == 0) {
-			oprintf(fp, "  Cores Enabled: %u\n",
-			    p.smbp_coresenabled);
-		} else {
-			oprintf(fp, "  Cores Enabled: %u\n",
-			    p.smbp_coresenabled2);
-		}
+		oprintf(fp, "  Cores Enabled: %u\n", p.smbp_coresenabled);
 	} else {
 		oprintf(fp, "  Cores Enabled: Unknown\n");
 	}
 
 	if (p.smbp_threadcount != 0) {
-		if (p.smbp_threadcount != 0xff || p.smbp_threadcount2 == 0) {
-			oprintf(fp, "  Thread Count: %u\n",
-			    p.smbp_threadcount);
-		} else {
-			oprintf(fp, "  Thread Count: %u\n",
-			    p.smbp_threadcount2);
-		}
+		oprintf(fp, "  Thread Count: %u\n", p.smbp_threadcount);
 	} else {
 		oprintf(fp, "  Thread Count: Unknown\n");
 	}
@@ -710,7 +717,7 @@ print_slot(smbios_hdl_t *shp, id_t id, FILE *fp)
 			oprintf(fp, "  Slot Peer %u:\n", i);
 			oprintf(fp, "    Segment group: %u\n",
 			    peer[i].smblp_group);
-			oprintf(fp, "    Bus/Device/Function: %u/%u/%u",
+			oprintf(fp, "    Bus/Device/Function: %u/%u/%u\n",
 			    peer[i].smblp_bus, peer[i].smblp_device,
 			    peer[i].smblp_function);
 			oprintf(fp, "    Electrical width: %u\n",
@@ -718,6 +725,25 @@ print_slot(smbios_hdl_t *shp, id_t id, FILE *fp)
 		}
 
 		smbios_info_slot_peers_free(shp, npeers, peer);
+	}
+
+	if (s.smbl_info != 0) {
+		if (s.smbl_type >= SMB_SLT_PCIE &&
+		    s.smbl_type <= SMB_SLT_PCIEG6P) {
+			oprintf(fp, "  PCIe Generation: %d\n", s.smbl_info);
+		} else {
+			oprintf(fp, "  Slot Type: 0x%x\n", s.smbl_info);
+		}
+	}
+
+	if (s.smbl_pwidth != 0) {
+		desc_printf(smbios_slot_width_desc(s.smbl_pwidth),
+		    fp, "  Physical Width: 0x%x", s.smbl_pwidth);
+	}
+
+	if (s.smbl_pitch != 0) {
+		oprintf(fp, "  Slot Pitch: %u.%u mm\n", s.smbl_pitch / 100,
+		    s.smbl_pitch % 100);
 	}
 }
 
@@ -955,15 +981,18 @@ print_memdevice(smbios_hdl_t *shp, id_t id, FILE *fp)
 	flag_printf(fp, "Flags", md.smbmd_flags, sizeof (md.smbmd_flags) * NBBY,
 	    smbios_memdevice_flag_name, smbios_memdevice_flag_desc);
 
-	if (md.smbmd_speed != 0)
-		oprintf(fp, "  Speed: %u MT/s\n", md.smbmd_speed);
-	else
+	if (md.smbmd_extspeed != 0) {
+		oprintf(fp, "  Speed: %" PRIu64 " MT/s\n", md.smbmd_extspeed);
+	} else {
 		oprintf(fp, "  Speed: Unknown\n");
+	}
 
-	if (md.smbmd_clkspeed != 0)
-		oprintf(fp, "  Configured Speed: %u MT/s\n", md.smbmd_clkspeed);
-	else
+	if (md.smbmd_extclkspeed != 0) {
+		oprintf(fp, "  Configured Speed: %" PRIu64 " MT/s\n",
+		    md.smbmd_extclkspeed);
+	} else {
 		oprintf(fp, "  Configured Speed: Unknown\n");
+	}
 
 	oprintf(fp, "  Device Locator: %s\n", md.smbmd_dloc);
 	oprintf(fp, "  Bank Locator: %s\n", md.smbmd_bloc);
@@ -995,7 +1024,7 @@ print_memdevice(smbios_hdl_t *shp, id_t id, FILE *fp)
 	}
 
 	if (md.smbmd_opcap_flags != 0) {
-		flag_printf(fp, "  Operating Mode Capabilities",
+		flag_printf(fp, "Operating Mode Capabilities",
 		    md.smbmd_opcap_flags, sizeof (md.smbmd_opcap_flags) * NBBY,
 		    smbios_memdevice_op_capab_name,
 		    smbios_memdevice_op_capab_desc);
@@ -1403,6 +1432,136 @@ print_powersup(smbios_hdl_t *shp, id_t id, FILE *fp)
 }
 
 static void
+print_processor_info_riscv(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_processor_info_riscv_t rv;
+
+	if (smbios_info_processor_riscv(shp, id, &rv) != 0) {
+		smbios_warn(shp, "failed to read RISC-V specific processor "
+		    "information");
+		return;
+	}
+
+	if (rv.smbpirv_boothart != 0) {
+		oprintf(fp, "    Boot Hart\n");
+	}
+	u128_print(fp, "    Hart ID", rv.smbpirv_hartid);
+	u128_print(fp, "    Vendor ID", rv.smbpirv_vendid);
+	u128_print(fp, "    Architecture ID", rv.smbpirv_archid);
+	u128_print(fp, "    Implementation ID", rv.smbpirv_machid);
+	flag64_printf(fp, "  ISA", rv.smbpirv_isa,
+	    sizeof (rv.smbpirv_isa) * NBBY, smbios_riscv_isa_name,
+	    smbios_riscv_isa_desc);
+	flag_printf(fp, "  Privilege Levels", rv.smbpirv_privlvl,
+	    sizeof (rv.smbpirv_privlvl) * NBBY, smbios_riscv_priv_name,
+	    smbios_riscv_priv_desc);
+	u128_print(fp, "    Machine Exception Trap Delegation",
+	    rv.smbpirv_metdi);
+	u128_print(fp, "    Machine Interrupt Trap Delegation",
+	    rv.smbpirv_mitdi);
+	desc_printf(smbios_riscv_width_desc(rv.smbpirv_xlen),
+	    fp, "    Register Width: 0x%x", rv.smbpirv_xlen);
+	desc_printf(smbios_riscv_width_desc(rv.smbpirv_mxlen),
+	    fp, "    M-Mode Register Width: 0x%x", rv.smbpirv_mxlen);
+	desc_printf(smbios_riscv_width_desc(rv.smbpirv_sxlen),
+	    fp, "    S-Mode Register Width: 0x%x", rv.smbpirv_sxlen);
+	desc_printf(smbios_riscv_width_desc(rv.smbpirv_uxlen),
+	    fp, "    U-Mode Register Width: 0x%x", rv.smbpirv_uxlen);
+}
+
+static void
+print_processor_info(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_processor_info_t p;
+
+	if (smbios_info_processor_info(shp, id, &p) != 0) {
+		smbios_warn(shp, "failed to read processor additional "
+		    "information");
+		return;
+	}
+
+	id_printf(fp, "  Processor Handle: ", p.smbpi_processor);
+	desc_printf(smbios_processor_info_type_desc(p.smbpi_ptype),
+	    fp, "  Processor Type: %u", p.smbpi_ptype);
+
+	switch (p.smbpi_ptype) {
+	case SMB_PROCINFO_T_RV32:
+	case SMB_PROCINFO_T_RV64:
+	case SMB_PROCINFO_T_RV128:
+		oprintf(fp, "  RISC-V Additional Processor Information:\n");
+		print_processor_info_riscv(shp, id, fp);
+		break;
+	default:
+		break;
+	}
+}
+
+static void
+print_battery(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_battery_t bat;
+
+	if (smbios_info_battery(shp, id, &bat) != 0) {
+		smbios_warn(shp, "failed to read battery information");
+		return;
+	}
+
+	if (bat.smbb_date != NULL) {
+		oprintf(fp, "  Manufacture Date: %s\n", bat.smbb_date);
+	}
+
+	if (bat.smbb_serial != NULL) {
+		oprintf(fp, "  Serial Number: %s\n", bat.smbb_serial);
+	}
+
+	if (bat.smbb_chem != SMB_BDC_UNKNOWN) {
+		desc_printf(smbios_battery_chem_desc(bat.smbb_chem),
+		    fp, "  Battery Chemistry: 0x%x", bat.smbb_chem);
+	}
+
+	if (bat.smbb_cap != 0) {
+		oprintf(fp, "  Design Capacity: %u mWh\n", bat.smbb_cap);
+	} else {
+		oprintf(fp, "  Design Capacity: unknown\n");
+	}
+
+	if (bat.smbb_volt != 0) {
+		oprintf(fp, "  Design Voltage: %u mV\n", bat.smbb_volt);
+	} else {
+		oprintf(fp, "  Design Voltage: unknown\n");
+	}
+
+	oprintf(fp, "  SBDS Version Number: %s\n", bat.smbb_version);
+	if (bat.smbb_err != UINT8_MAX) {
+		oprintf(fp, "  Maximum Error: %u\n", bat.smbb_err);
+	} else {
+		oprintf(fp, "  Maximum Error: unknown\n", bat.smbb_err);
+	}
+	oprintf(fp, "  SBDS Serial Number: %04x\n", bat.smbb_ssn);
+	oprintf(fp, "  SBDS Manufacture Date: %u-%02u-%02u\n", bat.smbb_syear,
+	    bat.smbb_smonth, bat.smbb_sday);
+	oprintf(fp, "  SBDS Device Chemistry: %s\n", bat.smbb_schem);
+	oprintf(fp, "  OEM-specific Information: 0x%08x\n", bat.smbb_oemdata);
+}
+
+static void
+print_pointdev(smbios_hdl_t *shp, id_t id, FILE *fp)
+{
+	smbios_pointdev_t pd;
+
+	if (smbios_info_pointdev(shp, id, &pd) != 0) {
+		smbios_warn(shp, "failed to read pointer device information");
+		return;
+	}
+
+	desc_printf(smbios_pointdev_type_desc(pd.smbpd_type),
+	    fp, "  Type: %u", pd.smbpd_type);
+	desc_printf(smbios_pointdev_iface_desc(pd.smbpd_iface),
+	    fp, "  Interface: %u", pd.smbpd_iface);
+	oprintf(fp, "  Buttons: %u\n", pd.smbpd_nbuttons);
+}
+
+static void
 print_extprocessor(smbios_hdl_t *shp, id_t id, FILE *fp)
 {
 	int i;
@@ -1597,6 +1756,14 @@ print_struct(smbios_hdl_t *shp, const smbios_struct_t *sp, void *fp)
 		oprintf(fp, "\n");
 		print_memdevmap(shp, sp->smbstr_id, fp);
 		break;
+	case SMB_TYPE_BATTERY:
+		oprintf(fp, "\n");
+		print_battery(shp, sp->smbstr_id, fp);
+		break;
+	case SMB_TYPE_POINTDEV:
+		oprintf(fp, "\n");
+		print_pointdev(shp, sp->smbstr_id, fp);
+		break;
 	case SMB_TYPE_SECURITY:
 		oprintf(fp, "\n");
 		print_hwsec(shp, fp);
@@ -1632,6 +1799,10 @@ print_struct(smbios_hdl_t *shp, const smbios_struct_t *sp, void *fp)
 	case SMB_TYPE_OBDEVEXT:
 		oprintf(fp, "\n");
 		print_obdevs_ext(shp, sp->smbstr_id, fp);
+		break;
+	case SMB_TYPE_PROCESSOR_INFO:
+		oprintf(fp, "\n");
+		print_processor_info(shp, sp->smbstr_id, fp);
 		break;
 	case SUN_OEM_EXT_PROCESSOR:
 		oprintf(fp, "\n");

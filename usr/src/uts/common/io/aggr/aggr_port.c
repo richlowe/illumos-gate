@@ -21,6 +21,8 @@
 /*
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright 2012 OmniTI Computer Consulting, Inc  All rights reserved.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -69,10 +71,10 @@ aggr_port_destructor(void *buf, void *arg)
 {
 	aggr_port_t *port = buf;
 
-	ASSERT(port->lp_mnh == NULL);
-	ASSERT(port->lp_mphp == NULL);
-	ASSERT(!port->lp_rx_grp_added && !port->lp_tx_grp_added);
-	ASSERT(port->lp_hwgh == NULL);
+	ASSERT3P(port->lp_mnh, ==, NULL);
+	ASSERT(!port->lp_tx_grp_added);
+	for (uint_t i = 0; i < MAX_GROUPS_PER_PORT; i++)
+		ASSERT3P(port->lp_hwghs[i], ==, NULL);
 }
 
 void
@@ -126,7 +128,6 @@ aggr_port_init_callbacks(aggr_port_t *port)
 	aggr_grp_port_hold(port);
 }
 
-/* ARGSUSED */
 int
 aggr_port_create(aggr_grp_t *grp, const datalink_id_t linkid, boolean_t force,
     aggr_port_t **pp)
@@ -195,9 +196,9 @@ aggr_port_create(aggr_grp_t *grp, const datalink_id_t linkid, boolean_t force,
 	}
 
 	/*
-	 * As the underlying mac's current margin size is used to determine
+	 * As the underlying MAC's current margin size is used to determine
 	 * the margin size of the aggregation itself, request the underlying
-	 * mac not to change to a smaller size.
+	 * MAC not to change to a smaller size.
 	 */
 	if ((err = mac_margin_add(mh, &margin, B_TRUE)) != 0) {
 		id_free(aggr_portids, portid);
@@ -206,7 +207,7 @@ aggr_port_create(aggr_grp_t *grp, const datalink_id_t linkid, boolean_t force,
 
 	if ((err = mac_unicast_add(mch, NULL, MAC_UNICAST_PRIMARY |
 	    MAC_UNICAST_DISABLE_TX_VID_CHECK, &mah, 0, &diag)) != 0) {
-		VERIFY(mac_margin_remove(mh, margin) == 0);
+		VERIFY3S(mac_margin_remove(mh, margin), ==, 0);
 		id_free(aggr_portids, portid);
 		goto fail;
 	}
@@ -261,6 +262,7 @@ aggr_port_create(aggr_grp_t *grp, const datalink_id_t linkid, boolean_t force,
 fail:
 	if (mch != NULL)
 		mac_client_close(mch, MAC_CLOSE_FLAGS_EXCLUSIVE);
+
 	mac_close(mh);
 	return (err);
 }
@@ -270,13 +272,11 @@ aggr_port_delete(aggr_port_t *port)
 {
 	aggr_lacp_port_t *pl = &port->lp_lacp;
 
-	ASSERT(port->lp_mphp == NULL);
 	ASSERT(!port->lp_promisc_on);
-
 	port->lp_closing = B_TRUE;
+	VERIFY0(mac_margin_remove(port->lp_mh, port->lp_margin));
+	mac_client_clear_flow_cb(port->lp_mch);
 
-	VERIFY(mac_margin_remove(port->lp_mh, port->lp_margin) == 0);
-	mac_rx_clear(port->lp_mch);
 	/*
 	 * If the notification callback is already in process and waiting for
 	 * the aggr grp's mac perimeter, don't wait (otherwise there would be
@@ -307,8 +307,10 @@ aggr_port_delete(aggr_port_t *port)
 	 * port's MAC_NOTE_UNICST notify callback function being called.
 	 */
 	(void) mac_unicast_primary_set(port->lp_mh, port->lp_addr);
+
 	if (port->lp_mah != NULL)
 		(void) mac_unicast_remove(port->lp_mch, port->lp_mah);
+
 	mac_client_close(port->lp_mch, MAC_CLOSE_FLAGS_EXCLUSIVE);
 	mac_close(port->lp_mh);
 	AGGR_PORT_REFRELE(port);
@@ -373,10 +375,14 @@ aggr_port_notify_link(aggr_grp_t *grp, aggr_port_t *port)
 	/* link speed changes? */
 	ifspeed = aggr_port_stat(port, MAC_STAT_IFSPEED);
 	if (port->lp_ifspeed != ifspeed) {
+		mutex_enter(&grp->lg_stat_lock);
+
 		if (port->lp_state == AGGR_PORT_STATE_ATTACHED)
 			do_detach |= (ifspeed != grp->lg_ifspeed);
 		else
 			do_attach |= (ifspeed == grp->lg_ifspeed);
+
+		mutex_exit(&grp->lg_stat_lock);
 	}
 	port->lp_ifspeed = ifspeed;
 
@@ -515,6 +521,10 @@ aggr_port_stop(aggr_port_t *port)
 	port->lp_started = B_FALSE;
 }
 
+/*
+ * Set the promisc mode of the port. If the port is already in the
+ * requested mode then do nothing.
+ */
 int
 aggr_port_promisc(aggr_port_t *port, boolean_t on)
 {
@@ -523,27 +533,14 @@ aggr_port_promisc(aggr_port_t *port, boolean_t on)
 	ASSERT(MAC_PERIM_HELD(port->lp_mh));
 
 	if (on == port->lp_promisc_on)
-		/* already in desired promiscous mode */
 		return (0);
 
-	if (on) {
-		mac_rx_clear(port->lp_mch);
-		rc = mac_promisc_add(port->lp_mch, MAC_CLIENT_PROMISC_ALL,
-		    aggr_recv_cb, port, &port->lp_mphp,
-		    MAC_PROMISC_FLAGS_NO_TX_LOOP);
-		if (rc != 0) {
-			mac_rx_set(port->lp_mch, aggr_recv_cb, port);
-			return (rc);
-		}
-	} else {
-		mac_promisc_remove(port->lp_mphp);
-		port->lp_mphp = NULL;
-		mac_rx_set(port->lp_mch, aggr_recv_cb, port);
-	}
+	rc = mac_set_promisc(port->lp_mh, on);
 
-	port->lp_promisc_on = on;
+	if (rc == 0)
+		port->lp_promisc_on = on;
 
-	return (0);
+	return (rc);
 }
 
 /*
@@ -583,35 +580,45 @@ aggr_port_stat(aggr_port_t *port, uint_t stat)
 }
 
 /*
- * Add a non-primary unicast address to the underlying port. If the port
- * supports HW Rx group, try to add the address into the HW Rx group of
- * the port first. If that fails, or if the port does not support HW Rx
- * group, enable the port's promiscous mode.
+ * Add a non-primary unicast address to the underlying port. If the
+ * port supports HW Rx groups, then try to add the address filter to
+ * the HW group first. If that fails, or if the port does not support
+ * RINGS capab, then enable the port's promiscous mode.
  */
 int
-aggr_port_addmac(aggr_port_t *port, const uint8_t *mac_addr)
+aggr_port_addmac(aggr_port_t *port, uint_t idx, const uint8_t *mac_addr)
 {
 	aggr_unicst_addr_t	*addr, **pprev;
 	mac_perim_handle_t	pmph;
 	int			err;
 
 	ASSERT(MAC_PERIM_HELD(port->lp_grp->lg_mh));
+	ASSERT3U(idx, <, MAX_GROUPS_PER_PORT);
 	mac_perim_enter_by_mh(port->lp_mh, &pmph);
 
 	/*
-	 * If the underlying port support HW Rx group, add the mac to its
-	 * RX group directly.
+	 * If the port doesn't have a HW group to back the aggr's
+	 * pseudo group, then try using the port's default group and
+	 * let the aggr SW classify its traffic. This scenario happens
+	 * when mixing ports with a different number of HW groups.
 	 */
-	if ((port->lp_hwgh != NULL) &&
-	    ((mac_hwgroup_addmac(port->lp_hwgh, mac_addr)) == 0)) {
+	if (port->lp_hwghs[idx] == NULL)
+		idx = 0;
+
+	/*
+	 * If there is an underlying HW Rx group, then try adding this
+	 * unicast address to it.
+	 */
+	if ((port->lp_hwghs[idx] != NULL) &&
+	    ((mac_hwgroup_addmac(port->lp_hwghs[idx], mac_addr)) == 0)) {
 		mac_perim_exit(pmph);
 		return (0);
 	}
 
 	/*
-	 * If that fails, or if the port does not support HW Rx group, enable
-	 * the port's promiscous mode. (Note that we turn on the promiscous
-	 * mode only if the port is already started.
+	 * If the port doesn't have HW groups, or we failed to add the
+	 * HW filter, then enable the port's promiscuous mode. We
+	 * enable promiscuous mode only if the port is already started.
 	 */
 	if (port->lp_started &&
 	    ((err = aggr_port_promisc(port, B_TRUE)) != 0)) {
@@ -643,13 +650,14 @@ aggr_port_addmac(aggr_port_t *port, const uint8_t *mac_addr)
  * promiscous mode.
  */
 void
-aggr_port_remmac(aggr_port_t *port, const uint8_t *mac_addr)
+aggr_port_remmac(aggr_port_t *port, uint_t idx, const uint8_t *mac_addr)
 {
 	aggr_grp_t		*grp = port->lp_grp;
 	aggr_unicst_addr_t	*addr, **pprev;
 	mac_perim_handle_t	pmph;
 
 	ASSERT(MAC_PERIM_HELD(grp->lg_mh));
+	ASSERT3U(idx, <, MAX_GROUPS_PER_PORT);
 	mac_perim_enter_by_mh(port->lp_mh, &pmph);
 
 	/*
@@ -662,6 +670,7 @@ aggr_port_remmac(aggr_port_t *port, const uint8_t *mac_addr)
 			break;
 		pprev = &addr->aua_next;
 	}
+
 	if (addr != NULL) {
 		/*
 		 * This unicast address put the port into the promiscous mode,
@@ -674,8 +683,65 @@ aggr_port_remmac(aggr_port_t *port, const uint8_t *mac_addr)
 		if (port->lp_prom_addr == NULL && !grp->lg_promisc)
 			(void) aggr_port_promisc(port, B_FALSE);
 	} else {
-		ASSERT(port->lp_hwgh != NULL);
-		(void) mac_hwgroup_remmac(port->lp_hwgh, mac_addr);
+		/* See comment in aggr_port_addmac(). */
+		if (port->lp_hwghs[idx] == NULL)
+			idx = 0;
+
+		ASSERT3P(port->lp_hwghs[idx], !=, NULL);
+		(void) mac_hwgroup_remmac(port->lp_hwghs[idx], mac_addr);
 	}
+
 	mac_perim_exit(pmph);
+}
+
+int
+aggr_port_addvlan(aggr_port_t *port, uint_t idx, uint16_t vid)
+{
+	mac_perim_handle_t	pmph;
+	int			err;
+
+	ASSERT(MAC_PERIM_HELD(port->lp_grp->lg_mh));
+	ASSERT3U(idx, <, MAX_GROUPS_PER_PORT);
+	mac_perim_enter_by_mh(port->lp_mh, &pmph);
+
+	/* See comment in aggr_port_addmac(). */
+	if (port->lp_hwghs[idx] == NULL)
+		idx = 0;
+
+	/*
+	 * Add the VLAN filter to the HW group if the port has a HW
+	 * group. If the port doesn't have a HW group, then it will
+	 * implicitly allow tagged traffic to pass and there is
+	 * nothing to do.
+	 */
+	if (port->lp_hwghs[idx] == NULL)
+		err = 0;
+	else
+		err = mac_hwgroup_addvlan(port->lp_hwghs[idx], vid);
+
+	mac_perim_exit(pmph);
+	return (err);
+}
+
+int
+aggr_port_remvlan(aggr_port_t *port, uint_t idx, uint16_t vid)
+{
+	mac_perim_handle_t	pmph;
+	int			err;
+
+	ASSERT(MAC_PERIM_HELD(port->lp_grp->lg_mh));
+	ASSERT3U(idx, <, MAX_GROUPS_PER_PORT);
+	mac_perim_enter_by_mh(port->lp_mh, &pmph);
+
+	/* See comment in aggr_port_addmac(). */
+	if (port->lp_hwghs[idx] == NULL)
+		idx = 0;
+
+	if (port->lp_hwghs[idx] == NULL)
+		err = 0;
+	else
+		err = mac_hwgroup_remvlan(port->lp_hwghs[idx], vid);
+
+	mac_perim_exit(pmph);
+	return (err);
 }

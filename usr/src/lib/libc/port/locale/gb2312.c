@@ -39,7 +39,7 @@
 
 static size_t	_GB2312_mbrtowc(wchar_t *_RESTRICT_KYWD,
 		    const char *_RESTRICT_KYWD,
-		    size_t, mbstate_t *_RESTRICT_KYWD);
+		    size_t, mbstate_t *_RESTRICT_KYWD, boolean_t);
 static int	_GB2312_mbsinit(const mbstate_t *);
 static size_t	_GB2312_wcrtomb(char *_RESTRICT_KYWD, wchar_t,
 		    mbstate_t *_RESTRICT_KYWD);
@@ -49,12 +49,6 @@ static size_t	_GB2312_mbsnrtowcs(wchar_t *_RESTRICT_KYWD,
 static size_t	_GB2312_wcsnrtombs(char *_RESTRICT_KYWD,
 		    const wchar_t **_RESTRICT_KYWD, size_t, size_t,
 		    mbstate_t *_RESTRICT_KYWD);
-
-
-typedef struct {
-	int	count;
-	uchar_t	bytes[2];
-} _GB2312State;
 
 void
 _GB2312_init(struct lc_ctype *lct)
@@ -101,7 +95,7 @@ _GB2312_check(const char *str, size_t n)
 
 static size_t
 _GB2312_mbrtowc(wchar_t *_RESTRICT_KYWD pwc, const char *_RESTRICT_KYWD s,
-    size_t n, mbstate_t *_RESTRICT_KYWD ps)
+    size_t n, mbstate_t *_RESTRICT_KYWD ps, boolean_t zero)
 {
 	_GB2312State *gs;
 	wchar_t wc;
@@ -137,7 +131,11 @@ _GB2312_mbrtowc(wchar_t *_RESTRICT_KYWD pwc, const char *_RESTRICT_KYWD s,
 	if (pwc != NULL)
 		*pwc = wc;
 	gs->count = 0;
-	return (wc == L'\0' ? 0 : len - ocount);
+	if (zero || wc != L'\0') {
+		return (len - ocount);
+	} else {
+		return (0);
+	}
 }
 
 static size_t

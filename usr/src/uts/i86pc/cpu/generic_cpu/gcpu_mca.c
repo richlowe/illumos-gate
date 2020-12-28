@@ -854,6 +854,8 @@ gcpu_ereport_post(const gcpu_logout_t *gcl, int bankidx,
 	} else {
 		ereport = fm_nvlist_create(NULL);
 		nva = NULL;
+		eqep = NULL;
+		scr_eqep = NULL;
 	}
 
 	if (ereport == NULL)
@@ -1328,7 +1330,7 @@ gcpu_mca_init(cmi_hdl_t hdl)
 			 * Set threshold to 1 while unset the en field, to avoid
 			 * CMCI trigged before APIC LVT entry init.
 			 */
-			ctl2 = ctl2 & (~MSR_MC_CTL2_EN) | 1;
+			ctl2 = (ctl2 & (~MSR_MC_CTL2_EN)) | 1;
 			(void) cmi_hdl_wrmsr(hdl, IA32_MSR_MC_CTL2(i), ctl2);
 
 			/*
@@ -1363,7 +1365,7 @@ gcpu_mca_init(cmi_hdl_t hdl)
 	 * AMD docs since K7 say we should process anything we find here.
 	 */
 	if (!gcpu_suppress_log_on_init &&
-	    (vendor == X86_VENDOR_Intel && family >= 0xf ||
+	    ((vendor == X86_VENDOR_Intel && family >= 0xf) ||
 	    vendor == X86_VENDOR_AMD))
 		gcpu_mca_logout(hdl, NULL, -1ULL, NULL, B_FALSE,
 		    GCPU_MPT_WHAT_POKE_ERR);
@@ -1808,6 +1810,7 @@ gcpu_mca_logout(cmi_hdl_t hdl, struct regs *rp, uint64_t bankmask,
 
 	if (ismc) {
 		gcl = mca->gcpu_mca_logout[GCPU_MCA_LOGOUT_EXCEPTION];
+		pgcl = NULL;
 	} else {
 		int pidx = mca->gcpu_mca_nextpoll_idx;
 		int ppidx = (pidx == GCPU_MCA_LOGOUT_POLLER_1) ?

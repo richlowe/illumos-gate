@@ -123,11 +123,11 @@ zil_bp_compare(const void *x1, const void *x2)
 	const dva_t *dva1 = &((zil_bp_node_t *)x1)->zn_dva;
 	const dva_t *dva2 = &((zil_bp_node_t *)x2)->zn_dva;
 
-	int cmp = AVL_CMP(DVA_GET_VDEV(dva1), DVA_GET_VDEV(dva2));
+	int cmp = TREE_CMP(DVA_GET_VDEV(dva1), DVA_GET_VDEV(dva2));
 	if (likely(cmp))
 		return (cmp);
 
-	return (AVL_CMP(DVA_GET_OFFSET(dva1), DVA_GET_OFFSET(dva2)));
+	return (TREE_CMP(DVA_GET_OFFSET(dva1), DVA_GET_OFFSET(dva2)));
 }
 
 static void
@@ -510,7 +510,7 @@ zil_lwb_vdev_compare(const void *x1, const void *x2)
 	const uint64_t v1 = ((zil_vdev_node_t *)x1)->zv_vdev;
 	const uint64_t v2 = ((zil_vdev_node_t *)x2)->zv_vdev;
 
-	return (AVL_CMP(v1, v2));
+	return (TREE_CMP(v1, v2));
 }
 
 static lwb_t *
@@ -1743,13 +1743,13 @@ zil_aitx_compare(const void *x1, const void *x2)
 	const uint64_t o1 = ((itx_async_node_t *)x1)->ia_foid;
 	const uint64_t o2 = ((itx_async_node_t *)x2)->ia_foid;
 
-	return (AVL_CMP(o1, o2));
+	return (TREE_CMP(o1, o2));
 }
 
 /*
  * Remove all async itx with the given oid.
  */
-static void
+void
 zil_remove_async(zilog_t *zilog, uint64_t oid)
 {
 	uint64_t otxg, txg;
@@ -1800,16 +1800,6 @@ zil_itx_assign(zilog_t *zilog, itx_t *itx, dmu_tx_t *tx)
 	uint64_t txg;
 	itxg_t *itxg;
 	itxs_t *itxs, *clean = NULL;
-
-	/*
-	 * Object ids can be re-instantiated in the next txg so
-	 * remove any async transactions to avoid future leaks.
-	 * This can happen if a fsync occurs on the re-instantiated
-	 * object for a WR_INDIRECT or WR_NEED_COPY write, which gets
-	 * the new file data and flushes a write record for the old object.
-	 */
-	if ((itx->itx_lr.lrc_txtype & ~TX_CI) == TX_REMOVE)
-		zil_remove_async(zilog, itx->itx_oid);
 
 	/*
 	 * Ensure the data of a renamed file is committed before the rename.

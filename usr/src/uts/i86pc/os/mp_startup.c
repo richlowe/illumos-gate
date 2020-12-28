@@ -27,7 +27,7 @@
  * All rights reserved.
  */
 /*
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
  */
@@ -77,6 +77,8 @@
 #include <sys/sysmacros.h>
 #if defined(__xpv)
 #include <sys/hypervisor.h>
+#else
+#include <sys/hma.h>
 #endif
 #include <sys/cpu_module.h>
 #include <sys/ontrap.h>
@@ -1615,6 +1617,14 @@ done:
 		workaround_errata_end();
 	cmi_post_mpstartup();
 
+#if !defined(__xpv)
+	/*
+	 * Once other CPUs have completed startup procedures, perform
+	 * initialization of hypervisor resources for HMA.
+	 */
+	hma_init();
+#endif
+
 	if (use_mp && ncpus != boot_max_ncpus) {
 		cmn_err(CE_NOTE,
 		    "System detected %d cpus, but "
@@ -1861,7 +1871,9 @@ mp_startup_common(boolean_t boot)
 	(void) spl0();
 
 	/*
-	 * Fill out cpu_ucode_info.  Update microcode if necessary.
+	 * Fill out cpu_ucode_info.  Update microcode if necessary. Note that
+	 * this is done after pass1 on the boot CPU, but it needs to be later on
+	 * for the other CPUs.
 	 */
 	ucode_check(cp);
 	cpuid_pass_ucode(cp, new_x86_featureset);
@@ -2094,6 +2106,8 @@ cpu_sep_enable(void)
 	ASSERT(curthread->t_preempt || getpil() >= LOCK_LEVEL);
 
 	wrmsr(MSR_INTC_SEP_CS, (uint64_t)(uintptr_t)KCS_SEL);
+
+	CPU->cpu_m.mcpu_fast_syscall_state |= FSS_SEP_ENABLED;
 }
 
 static void
@@ -2107,6 +2121,8 @@ cpu_sep_disable(void)
 	 * the sysenter or sysexit instruction to trigger a #gp fault.
 	 */
 	wrmsr(MSR_INTC_SEP_CS, 0);
+
+	CPU->cpu_m.mcpu_fast_syscall_state &= ~FSS_SEP_ENABLED;
 }
 
 static void
@@ -2117,6 +2133,8 @@ cpu_asysc_enable(void)
 
 	wrmsr(MSR_AMD_EFER, rdmsr(MSR_AMD_EFER) |
 	    (uint64_t)(uintptr_t)AMD_EFER_SCE);
+
+	CPU->cpu_m.mcpu_fast_syscall_state |= FSS_ASYSC_ENABLED;
 }
 
 static void
@@ -2131,4 +2149,6 @@ cpu_asysc_disable(void)
 	 */
 	wrmsr(MSR_AMD_EFER, rdmsr(MSR_AMD_EFER) &
 	    ~((uint64_t)(uintptr_t)AMD_EFER_SCE));
+
+	CPU->cpu_m.mcpu_fast_syscall_state &= ~FSS_ASYSC_ENABLED;
 }

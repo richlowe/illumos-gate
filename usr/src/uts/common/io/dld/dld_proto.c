@@ -1184,7 +1184,6 @@ proto_unitdata_req(dld_str_t *dsp, mblk_t *mp)
 	uint16_t		sap;
 	uint_t			addr_length;
 	mblk_t			*bp, *payload;
-	uint32_t		start, stuff, end, value, flags;
 	t_uscalar_t		dl_err;
 	uint_t			max_sdu;
 
@@ -1253,9 +1252,7 @@ proto_unitdata_req(dld_str_t *dsp, mblk_t *mp)
 	/*
 	 * Transfer the checksum offload information if it is present.
 	 */
-	hcksum_retrieve(payload, NULL, NULL, &start, &stuff, &end, &value,
-	    &flags);
-	(void) hcksum_assoc(bp, NULL, NULL, start, stuff, end, value, flags, 0);
+	mac_hcksum_clone(payload, bp);
 
 	/*
 	 * Link the payload onto the new header.
@@ -1377,24 +1374,22 @@ dld_capab_direct(dld_str_t *dsp, void *data, uint_t flags)
 }
 
 /*
- * dld_capab_poll_enable()
+ * This function is misnamed. All polling and fanouts are run out of
+ * the lower MAC for VNICs and out of the MAC for NICs. The
+ * availability of Rx rings and promiscous mode is taken care of
+ * between the soft ring set (mac_srs), the Rx ring, and the SW
+ * classifier. Fanout, if necessary, is done by the soft rings that
+ * are part of the SRS. By default the SRS divvies up the packets
+ * based on protocol: TCP, UDP, or Other (OTH).
  *
- * This function is misnamed. All polling  and fanouts are run out of the
- * lower mac (in case of VNIC and the only mac in case of NICs). The
- * availability of Rx ring and promiscous mode is all taken care between
- * the soft ring set (mac_srs), the Rx ring, and S/W classifier. Any
- * fanout necessary is done by the soft rings that are part of the
- * mac_srs (by default mac_srs sends the packets up via a TCP and
- * non TCP soft ring).
- *
- * The mac_srs (or its associated soft rings) always store the ill_rx_ring
+ * The SRS (or its associated soft rings) always store the ill_rx_ring
  * (the cookie returned when they registered with IP during plumb) as their
  * 2nd argument which is passed up as mac_resource_handle_t. The upcall
  * function and 1st argument is what the caller registered when they
  * called mac_rx_classify_flow_add() to register the flow. For VNIC,
  * the function is vnic_rx and argument is vnic_t. For regular NIC
  * case, it mac_rx_default and mac_handle_t. As explained above, the
- * mac_srs (or its soft ring) will add the ill_rx_ring (mac_resource_handle_t)
+ * SRS (or its soft ring) will add the ill_rx_ring (mac_resource_handle_t)
  * from its stored 2nd argument.
  */
 static int
@@ -1407,11 +1402,11 @@ dld_capab_poll_enable(dld_str_t *dsp, dld_capab_poll_t *poll)
 		return (ENOTSUP);
 
 	/*
-	 * Enable client polling if and only if DLS bypass is possible.
-	 * Special cases like VLANs need DLS processing in the Rx data path.
-	 * In such a case we can neither allow the client (IP) to directly
-	 * poll the softring (since DLS processing hasn't been done) nor can
-	 * we allow DLS bypass.
+	 * Enable client polling if and only if DLS bypass is
+	 * possible. Some traffic requires DLS processing in the Rx
+	 * data path. In such a case we can neither allow the client
+	 * (IP) to directly poll the soft ring (since DLS processing
+	 * hasn't been done) nor can we allow DLS bypass.
 	 */
 	if (!mac_rx_bypass_set(dsp->ds_mch, dsp->ds_rx, dsp->ds_rx_arg))
 		return (ENOTSUP);
@@ -1481,13 +1476,23 @@ dld_capab_lso(dld_str_t *dsp, void *data, uint_t flags)
 		 * accordingly.
 		 */
 		if (mac_capab_get(dsp->ds_mh, MAC_CAPAB_LSO, &mac_lso)) {
-			lso->lso_max = mac_lso.lso_basic_tcp_ipv4.lso_max;
+			lso->lso_max_tcpv4 = mac_lso.lso_basic_tcp_ipv4.lso_max;
+			lso->lso_max_tcpv6 = mac_lso.lso_basic_tcp_ipv6.lso_max;
 			lso->lso_flags = 0;
 			/* translate the flag for mac clients */
 			if ((mac_lso.lso_flags & LSO_TX_BASIC_TCP_IPV4) != 0)
 				lso->lso_flags |= DLD_LSO_BASIC_TCP_IPV4;
-			dsp->ds_lso = B_TRUE;
-			dsp->ds_lso_max = lso->lso_max;
+			if ((mac_lso.lso_flags & LSO_TX_BASIC_TCP_IPV6) != 0)
+				lso->lso_flags |= DLD_LSO_BASIC_TCP_IPV6;
+			dsp->ds_lso = lso->lso_flags != 0;
+			/*
+			 * DLS uses this to try and make sure that a raw ioctl
+			 * doesn't send too much data, but doesn't currently
+			 * check the actual SAP that is sending this (or that
+			 * it's TCP). So for now, just use the max value here.
+			 */
+			dsp->ds_lso_max = MAX(lso->lso_max_tcpv4,
+			    lso->lso_max_tcpv6);
 		} else {
 			dsp->ds_lso = B_FALSE;
 			dsp->ds_lso_max = 0;
@@ -1517,17 +1522,25 @@ dld_capab(dld_str_t *dsp, uint_t type, void *data, uint_t flags)
 	 * completes. So we limit the check to DLD_ENABLE case.
 	 */
 	if ((flags == DLD_ENABLE && type != DLD_CAPAB_PERIM) &&
-	    (dsp->ds_sap != ETHERTYPE_IP ||
+	    (!(dsp->ds_sap == ETHERTYPE_IP || dsp->ds_sap == ETHERTYPE_IPV6) ||
 	    !check_mod_above(dsp->ds_rq, "ip"))) {
 		return (ENOTSUP);
 	}
 
 	switch (type) {
 	case DLD_CAPAB_DIRECT:
+		if (dsp->ds_sap == ETHERTYPE_IPV6) {
+			err = ENOTSUP;
+			break;
+		}
 		err = dld_capab_direct(dsp, data, flags);
 		break;
 
 	case DLD_CAPAB_POLL:
+		if (dsp->ds_sap == ETHERTYPE_IPV6) {
+			err = ENOTSUP;
+			break;
+		}
 		err =  dld_capab_poll(dsp, data, flags);
 		break;
 
@@ -1602,7 +1615,8 @@ proto_capability_advertise(dld_str_t *dsp, mblk_t *mp)
 	/*
 	 * Direct capability negotiation interface between IP and DLD
 	 */
-	if (dsp->ds_sap == ETHERTYPE_IP && check_mod_above(dsp->ds_rq, "ip")) {
+	if ((dsp->ds_sap == ETHERTYPE_IP || dsp->ds_sap == ETHERTYPE_IPV6) &&
+	    check_mod_above(dsp->ds_rq, "ip")) {
 		dld_capable = B_TRUE;
 		subsize += sizeof (dl_capability_sub_t) +
 		    sizeof (dl_capab_dld_t);

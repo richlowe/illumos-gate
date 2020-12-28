@@ -21,7 +21,9 @@
 
 /*
  * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2019 Joyent, Inc.
  * Copyright 2017 OmniTI Computer Consulting, Inc. All rights reserved.
+ * Copyright 2020 RackTop Systems, Inc.
  */
 
 #include <sys/types.h>
@@ -56,6 +58,11 @@
 #include <sys/sdt.h>
 #include <sys/pattr.h>
 #include <sys/strsun.h>
+#include <sys/vlan.h>
+#include <inet/ip.h>
+#include <inet/tcp.h>
+#include <netinet/udp.h>
+#include <netinet/sctp.h>
 
 /*
  * MAC Provider Interface.
@@ -107,6 +114,37 @@ void
 mac_free(mac_register_t *mregp)
 {
 	kmem_free(mregp, sizeof (mac_register_t));
+}
+
+/*
+ * Convert a MAC's offload features into the equivalent DB_CKSUMFLAGS
+ * value.
+ */
+static uint16_t
+mac_features_to_flags(mac_handle_t mh)
+{
+	uint16_t flags = 0;
+	uint32_t cap_sum = 0;
+	mac_capab_lso_t cap_lso;
+
+	if (mac_capab_get(mh, MAC_CAPAB_HCKSUM, &cap_sum)) {
+		if (cap_sum & HCKSUM_IPHDRCKSUM)
+			flags |= HCK_IPV4_HDRCKSUM;
+
+		if (cap_sum & HCKSUM_INET_PARTIAL)
+			flags |= HCK_PARTIALCKSUM;
+		else if (cap_sum & (HCKSUM_INET_FULL_V4 | HCKSUM_INET_FULL_V6))
+			flags |= HCK_FULLCKSUM;
+	}
+
+	/*
+	 * We don't need the information stored in 'cap_lso', but we
+	 * need to pass a non-NULL pointer to appease the driver.
+	 */
+	if (mac_capab_get(mh, MAC_CAPAB_LSO, &cap_lso))
+		flags |= HW_LSO;
+
+	return (flags);
 }
 
 /*
@@ -339,9 +377,13 @@ mac_register(mac_register_t *mregp, mac_handle_t *mhp)
 	    mip, 0, &p0, TS_RUN, minclsyspri);
 
 	/*
+	 * Cache the DB_CKSUMFLAGS that this MAC supports.
+	 */
+	mip->mi_tx_cksum_flags = mac_features_to_flags((mac_handle_t)mip);
+
+	/*
 	 * Initialize the capabilities
 	 */
-
 	bzero(&mip->mi_rx_rings_cap, sizeof (mac_capab_rings_t));
 	bzero(&mip->mi_tx_rings_cap, sizeof (mac_capab_rings_t));
 
@@ -683,7 +725,7 @@ mac_trill_snoop(mac_handle_t mh, mblk_t *mp)
 	mac_impl_t *mip = (mac_impl_t *)mh;
 
 	if (mip->mi_promisc_list != NULL)
-		mac_promisc_dispatch(mip, mp, NULL);
+		mac_promisc_dispatch(mip, mp, NULL, B_FALSE);
 }
 
 /*
@@ -695,21 +737,20 @@ mac_rx_common(mac_handle_t mh, mac_resource_handle_t mrh, mblk_t *mp_chain)
 {
 	mac_impl_t		*mip = (mac_impl_t *)mh;
 	mac_ring_t		*mr = (mac_ring_t *)mrh;
-	mac_soft_ring_set_t 	*mac_srs;
+	mac_soft_ring_set_t	*mac_srs;
 	mblk_t			*bp = mp_chain;
-	boolean_t		hw_classified = B_FALSE;
 
 	/*
 	 * If there are any promiscuous mode callbacks defined for
 	 * this MAC, pass them a copy if appropriate.
 	 */
 	if (mip->mi_promisc_list != NULL)
-		mac_promisc_dispatch(mip, mp_chain, NULL);
+		mac_promisc_dispatch(mip, mp_chain, NULL, B_FALSE);
 
 	if (mr != NULL) {
 		/*
 		 * If the SRS teardown has started, just return. The 'mr'
-		 * continues to be valid until the driver unregisters the mac.
+		 * continues to be valid until the driver unregisters the MAC.
 		 * Hardware classified packets will not make their way up
 		 * beyond this point once the teardown has started. The driver
 		 * is never passed a pointer to a flow entry or SRS or any
@@ -722,11 +763,25 @@ mac_rx_common(mac_handle_t mh, mac_resource_handle_t mrh, mblk_t *mp_chain)
 			freemsgchain(mp_chain);
 			return;
 		}
-		if (mr->mr_classify_type == MAC_HW_CLASSIFIER) {
-			hw_classified = B_TRUE;
+
+		/*
+		 * The ring is in passthru mode; pass the chain up to
+		 * the pseudo ring.
+		 */
+		if (mr->mr_classify_type == MAC_PASSTHRU_CLASSIFIER) {
 			MR_REFHOLD_LOCKED(mr);
+			mutex_exit(&mr->mr_lock);
+			mr->mr_pt_fn(mr->mr_pt_arg1, mr->mr_pt_arg2, mp_chain,
+			    B_FALSE);
+			MR_REFRELE(mr);
+			return;
 		}
-		mutex_exit(&mr->mr_lock);
+
+		/*
+		 * The passthru callback should only be set when in
+		 * MAC_PASSTHRU_CLASSIFIER mode.
+		 */
+		ASSERT3P(mr->mr_pt_fn, ==, NULL);
 
 		/*
 		 * We check if an SRS is controlling this ring.
@@ -734,19 +789,24 @@ mac_rx_common(mac_handle_t mh, mac_resource_handle_t mrh, mblk_t *mp_chain)
 		 * routine otherwise we need to go through mac_rx_classify
 		 * to reach the right place.
 		 */
-		if (hw_classified) {
+		if (mr->mr_classify_type == MAC_HW_CLASSIFIER) {
+			MR_REFHOLD_LOCKED(mr);
+			mutex_exit(&mr->mr_lock);
+			ASSERT3P(mr->mr_srs, !=, NULL);
 			mac_srs = mr->mr_srs;
+
 			/*
-			 * This is supposed to be the fast path.
-			 * All packets received though here were steered by
-			 * the hardware classifier, and share the same
-			 * MAC header info.
+			 * This is the fast path. All packets received
+			 * on this ring are hardware classified and
+			 * share the same MAC header info.
 			 */
 			mac_srs->srs_rx.sr_lower_proc(mh,
 			    (mac_resource_handle_t)mac_srs, mp_chain, B_FALSE);
 			MR_REFRELE(mr);
 			return;
 		}
+
+		mutex_exit(&mr->mr_lock);
 		/* We'll fall through to software classification */
 	} else {
 		flow_entry_t *flent;
@@ -945,12 +1005,33 @@ mac_pdata_update(mac_handle_t mh, void *mac_pdata, size_t dsize)
 }
 
 /*
- * Invoked by driver as well as the framework to notify its capability change.
+ * The mac provider or mac frameowrk calls this function when it wants
+ * to notify upstream consumers that the capabilities have changed and
+ * that they should modify their own internal state accordingly.
+ *
+ * We currently have no regard for the fact that a provider could
+ * decide to drop capabilities which would invalidate pending traffic.
+ * For example, if one was to disable the Tx checksum offload while
+ * TCP/IP traffic was being sent by mac clients relying on that
+ * feature, then those packets would hit the write with missing or
+ * partial checksums. A proper solution involves not only providing
+ * notfication, but also performing client quiescing. That is, a capab
+ * change should be treated as an atomic transaction that forms a
+ * barrier between traffic relying on the current capabs and traffic
+ * relying on the new capabs. In practice, simnet is currently the
+ * only provider that could hit this, and it's an easily avoidable
+ * situation (and at worst it should only lead to some dropped
+ * packets). But if we ever want better on-the-fly capab change to
+ * actual hardware providers, then we should give this update
+ * mechanism a proper implementation.
  */
 void
 mac_capab_update(mac_handle_t mh)
 {
-	/* Send MAC_NOTE_CAPAB_CHG notification */
+	/*
+	 * Send a MAC_NOTE_CAPAB_CHG notification to alert upstream
+	 * clients to renegotiate capabilities.
+	 */
 	i_mac_notify((mac_impl_t *)mh, MAC_NOTE_CAPAB_CHG);
 }
 
@@ -1253,6 +1334,19 @@ i_mac_notify_thread(void *arg)
 		}
 
 		/*
+		 * Depending on which capabs have changed, the Tx
+		 * checksum flags may also need to be updated.
+		 */
+		if ((bits & (1 << MAC_NOTE_CAPAB_CHG)) != 0) {
+			mac_perim_handle_t mph;
+			mac_handle_t mh = (mac_handle_t)mip;
+
+			mac_perim_enter_by_mh(mh, &mph);
+			mip->mi_tx_cksum_flags = mac_features_to_flags(mh);
+			mac_perim_exit(mph);
+		}
+
+		/*
 		 * Do notification callbacks for each notification type.
 		 */
 		for (type = 0; type < MAC_NNOTE; type++) {
@@ -1434,6 +1528,22 @@ mac_prop_info_set_default_link_flowctrl(mac_prop_info_handle_t ph,
 }
 
 void
+mac_prop_info_set_default_fec(mac_prop_info_handle_t ph, link_fec_t val)
+{
+	mac_prop_info_state_t *pr = (mac_prop_info_state_t *)ph;
+
+	/* nothing to do if the caller doesn't want the default value */
+	if (pr->pr_default == NULL)
+		return;
+
+	ASSERT(pr->pr_default_size >= sizeof (link_fec_t));
+
+	bcopy(&val, pr->pr_default, sizeof (val));
+
+	pr->pr_flags |= MAC_PROP_INFO_DEFAULT;
+}
+
+void
 mac_prop_info_set_range_uint32(mac_prop_info_handle_t ph, uint32_t min,
     uint32_t max)
 {
@@ -1472,7 +1582,8 @@ mac_prop_info_set_perm(mac_prop_info_handle_t ph, uint8_t perm)
 	pr->pr_flags |= MAC_PROP_INFO_PERM;
 }
 
-void mac_hcksum_get(mblk_t *mp, uint32_t *start, uint32_t *stuff,
+void
+mac_hcksum_get(const mblk_t *mp, uint32_t *start, uint32_t *stuff,
     uint32_t *end, uint32_t *value, uint32_t *flags_ptr)
 {
 	uint32_t flags;
@@ -1497,8 +1608,9 @@ void mac_hcksum_get(mblk_t *mp, uint32_t *start, uint32_t *stuff,
 		*flags_ptr = flags;
 }
 
-void mac_hcksum_set(mblk_t *mp, uint32_t start, uint32_t stuff,
-    uint32_t end, uint32_t value, uint32_t flags)
+void
+mac_hcksum_set(mblk_t *mp, uint32_t start, uint32_t stuff, uint32_t end,
+    uint32_t value, uint32_t flags)
 {
 	ASSERT(DB_TYPE(mp) == M_DATA);
 
@@ -1507,6 +1619,31 @@ void mac_hcksum_set(mblk_t *mp, uint32_t start, uint32_t stuff,
 	DB_CKSUMEND(mp) = (intptr_t)end;
 	DB_CKSUMFLAGS(mp) = (uint16_t)flags;
 	DB_CKSUM16(mp) = (uint16_t)value;
+}
+
+void
+mac_hcksum_clone(const mblk_t *src, mblk_t *dst)
+{
+	ASSERT3U(DB_TYPE(src), ==, M_DATA);
+	ASSERT3U(DB_TYPE(dst), ==, M_DATA);
+
+	/*
+	 * Do these assignments unconditionally, rather than only when
+	 * flags is non-zero. This protects a situation where zeroed
+	 * hcksum data does not make the jump onto an mblk_t with
+	 * stale data in those fields. It's important to copy all
+	 * possible flags (HCK_* as well as HW_*) and not just the
+	 * checksum specific flags. Dropping flags during a clone
+	 * could result in dropped packets. If the caller has good
+	 * reason to drop those flags then it should do it manually,
+	 * after the clone.
+	 */
+	DB_CKSUMFLAGS(dst) = DB_CKSUMFLAGS(src);
+	DB_CKSUMSTART(dst) = DB_CKSUMSTART(src);
+	DB_CKSUMSTUFF(dst) = DB_CKSUMSTUFF(src);
+	DB_CKSUMEND(dst) = DB_CKSUMEND(src);
+	DB_CKSUM16(dst) = DB_CKSUM16(src);
+	DB_LSOMSS(dst) = DB_LSOMSS(src);
 }
 
 void
@@ -1533,4 +1670,156 @@ mac_transceiver_info_set_usable(mac_transceiver_info_t *infop,
     boolean_t usable)
 {
 	infop->mti_usable = usable;
+}
+
+/*
+ * We should really keep track of our offset and not walk everything every
+ * time. I can't imagine that this will be kind to us at high packet rates;
+ * however, for the moment, let's leave that.
+ *
+ * This walks a message block chain without pulling up to fill in the context
+ * information. Note that the data we care about could be hidden across more
+ * than one mblk_t.
+ */
+static int
+mac_meoi_get_uint8(mblk_t *mp, off_t off, uint8_t *out)
+{
+	size_t mpsize;
+	uint8_t *bp;
+
+	mpsize = msgsize(mp);
+	/* Check for overflow */
+	if (off + sizeof (uint16_t) > mpsize)
+		return (-1);
+
+	mpsize = MBLKL(mp);
+	while (off >= mpsize) {
+		mp = mp->b_cont;
+		off -= mpsize;
+		mpsize = MBLKL(mp);
+	}
+
+	bp = mp->b_rptr + off;
+	*out = *bp;
+	return (0);
+
+}
+
+static int
+mac_meoi_get_uint16(mblk_t *mp, off_t off, uint16_t *out)
+{
+	size_t mpsize;
+	uint8_t *bp;
+
+	mpsize = msgsize(mp);
+	/* Check for overflow */
+	if (off + sizeof (uint16_t) > mpsize)
+		return (-1);
+
+	mpsize = MBLKL(mp);
+	while (off >= mpsize) {
+		mp = mp->b_cont;
+		off -= mpsize;
+		mpsize = MBLKL(mp);
+	}
+
+	/*
+	 * Data is in network order. Note the second byte of data might be in
+	 * the next mp.
+	 */
+	bp = mp->b_rptr + off;
+	*out = *bp << 8;
+	if (off + 1 == mpsize) {
+		mp = mp->b_cont;
+		bp = mp->b_rptr;
+	} else {
+		bp++;
+	}
+
+	*out |= *bp;
+	return (0);
+
+}
+
+
+int
+mac_ether_offload_info(mblk_t *mp, mac_ether_offload_info_t *meoi)
+{
+	size_t off;
+	uint16_t ether;
+	uint8_t ipproto, iplen, l4len, maclen;
+
+	bzero(meoi, sizeof (mac_ether_offload_info_t));
+
+	meoi->meoi_len = msgsize(mp);
+	off = offsetof(struct ether_header, ether_type);
+	if (mac_meoi_get_uint16(mp, off, &ether) != 0)
+		return (-1);
+
+	if (ether == ETHERTYPE_VLAN) {
+		off = offsetof(struct ether_vlan_header, ether_type);
+		if (mac_meoi_get_uint16(mp, off, &ether) != 0)
+			return (-1);
+		meoi->meoi_flags |= MEOI_VLAN_TAGGED;
+		maclen = sizeof (struct ether_vlan_header);
+	} else {
+		maclen = sizeof (struct ether_header);
+	}
+	meoi->meoi_flags |= MEOI_L2INFO_SET;
+	meoi->meoi_l2hlen = maclen;
+	meoi->meoi_l3proto = ether;
+
+	switch (ether) {
+	case ETHERTYPE_IP:
+		/*
+		 * For IPv4 we need to get the length of the header, as it can
+		 * be variable.
+		 */
+		off = offsetof(ipha_t, ipha_version_and_hdr_length) + maclen;
+		if (mac_meoi_get_uint8(mp, off, &iplen) != 0)
+			return (-1);
+		iplen &= 0x0f;
+		if (iplen < 5 || iplen > 0x0f)
+			return (-1);
+		iplen *= 4;
+		off = offsetof(ipha_t, ipha_protocol) + maclen;
+		if (mac_meoi_get_uint8(mp, off, &ipproto) == -1)
+			return (-1);
+		break;
+	case ETHERTYPE_IPV6:
+		iplen = 40;
+		off = offsetof(ip6_t, ip6_nxt) + maclen;
+		if (mac_meoi_get_uint8(mp, off, &ipproto) == -1)
+			return (-1);
+		break;
+	default:
+		return (0);
+	}
+	meoi->meoi_l3hlen = iplen;
+	meoi->meoi_l4proto = ipproto;
+	meoi->meoi_flags |= MEOI_L3INFO_SET;
+
+	switch (ipproto) {
+	case IPPROTO_TCP:
+		off = offsetof(tcph_t, th_offset_and_rsrvd) + maclen + iplen;
+		if (mac_meoi_get_uint8(mp, off, &l4len) == -1)
+			return (-1);
+		l4len = (l4len & 0xf0) >> 4;
+		if (l4len < 5 || l4len > 0xf)
+			return (-1);
+		l4len *= 4;
+		break;
+	case IPPROTO_UDP:
+		l4len = sizeof (struct udphdr);
+		break;
+	case IPPROTO_SCTP:
+		l4len = sizeof (sctp_hdr_t);
+		break;
+	default:
+		return (0);
+	}
+
+	meoi->meoi_l4hlen = l4len;
+	meoi->meoi_flags |= MEOI_L4INFO_SET;
+	return (0);
 }

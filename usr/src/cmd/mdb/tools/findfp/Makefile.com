@@ -43,20 +43,18 @@ include ../../common/Makefile.util
 # running kernel's includes and libraries.
 #
 CPPFLAGS = -I../../common -I../common
-CFLAGS += $(CCVERBOSE)
+CFLAGS = $(NATIVE_CFLAGS) $(CCVERBOSE)
 CERRWARN += $(CNOWARN_UNINIT)
-LDFLAGS =
+LDFLAGS = $(NATIVE_LDFLAGS) $(ZLAZYLOAD) $(BDIRECT)
 LDLIBS = -lelf
-
-LINTFILES = $(SRCS:%.c=%.ln)
+CC = $(NATIVECC)
+LD = $(NATIVELD)
+NATIVE_LIBS += libelf.so libc.so
 
 install all: $(PROG)
 
 clobber clean:
-	$(RM) $(OBJS) $(LINTFILES) $(PROG)
-
-lint: $(LINTFILES)
-	$(LINT) $(LINTFLAGS) $(LINTFILES) $(LDLIBS)
+	$(RM) $(OBJS) $(PROG)
 
 $(PROG): $(OBJS)
 	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
@@ -69,9 +67,3 @@ $(PROG): $(OBJS)
 %.o: ../common/%.c
 	$(COMPILE.c) $<
 	$(POST_PROCESS_O)
-
-%.ln: %.c
-	$(LINT.c) -c $<
-
-%.ln: ../common/%.c
-	$(LINT.c) -c $<
