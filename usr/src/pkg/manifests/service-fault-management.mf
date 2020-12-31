@@ -264,6 +264,10 @@ file path=etc/net-snmp/snmp/mibs/SUN-IREPORT-MIB.mib \
 #
 file path=kernel/drv/$(ARCH64)/fm group=sys
 file path=kernel/drv/fm.conf group=sys
+
+#
+# Some libraries need to be in lib for install
+#
 file path=lib/fm/$(ARCH64)/libfmevent.so.1 \
     variant.opensolaris.zone=__NODEFAULT
 file path=lib/fm/libfmevent.so.1 variant.opensolaris.zone=__NODEFAULT
@@ -296,30 +300,8 @@ file path=usr/include/fm/topo_hc.h
 file path=usr/include/fm/topo_list.h
 file path=usr/include/fm/topo_method.h
 file path=usr/include/fm/topo_mod.h
-
-#
-# Some libraries need to be in lib for install
-#
-
 #
 #	64-bit .so.1
-#
-#
-# fmri scheme support: all are common to both global and non-global zones
-#
-
-#
-# Libraries for usr/lib/fm; we include these in both global and non-global
-# contexts except for the ldom and seslog libraries.
-#
-#
-#	32-bit .so.1
-#
-
-#
-# mdb support will automatically be included in both contexts;
-# we allow eft.so to be included despite not delivering
-# the eft plugin in non-global zones
 #
 file path=usr/lib/fm/$(ARCH64)/libdiagcode.so.1 \
     variant.opensolaris.zone=__NODEFAULT
@@ -462,6 +444,9 @@ file path=usr/lib/fm/fmd/plugins/zfs-diagnosis.conf
 file path=usr/lib/fm/fmd/plugins/zfs-diagnosis.so mode=0555
 file path=usr/lib/fm/fmd/plugins/zfs-retire.conf
 file path=usr/lib/fm/fmd/plugins/zfs-retire.so mode=0555
+#
+# fmri scheme support: all are common to both global and non-global zones
+#
 file path=usr/lib/fm/fmd/schemes/$(ARCH64)/cpu.so mode=0555 \
     variant.opensolaris.zone=__NODEFAULT
 file path=usr/lib/fm/fmd/schemes/$(ARCH64)/dev.so mode=0555 \
@@ -506,6 +491,13 @@ file path=usr/lib/fm/fmd/schemes/sw.so mode=0555 \
     variant.opensolaris.zone=__NODEFAULT
 file path=usr/lib/fm/fmd/schemes/zfs.so mode=0555 \
     variant.opensolaris.zone=__NODEFAULT
+#
+# Libraries for usr/lib/fm; we include these in both global and non-global
+# contexts except for the ldom and seslog libraries.
+#
+#
+#	32-bit .so.1
+#
 file path=usr/lib/fm/libdiagcode.so.1 variant.opensolaris.zone=__NODEFAULT
 file path=usr/lib/fm/libdiskstatus.so.1 variant.opensolaris.zone=__NODEFAULT
 file path=usr/lib/fm/libfmd_adm.so.1 variant.opensolaris.zone=__NODEFAULT
@@ -574,6 +566,11 @@ file path=usr/lib/locale/C/LC_MESSAGES/SUNOS.mo mode=0444 \
     variant.opensolaris.zone=__NODEFAULT
 file path=usr/lib/locale/C/LC_MESSAGES/ZFS.mo mode=0444 \
     variant.opensolaris.zone=__NODEFAULT
+#
+# mdb support will automatically be included in both contexts;
+# we allow eft.so to be included despite not delivering
+# the eft plugin in non-global zones
+#
 file path=usr/lib/mdb/proc/eft.so group=sys mode=0555
 file path=usr/lib/mdb/proc/fmd.so group=sys mode=0555
 #
