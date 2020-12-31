@@ -47,10 +47,6 @@ file path=usr/include/sys/usb/clients/ccid/ccid.h
 file path=usr/include/sys/usb/clients/ccid/uccid.h
 file path=usr/lib/cfgadm/$(ARCH64)/ccid.so.1 variant.opensolaris.zone=global
 file path=usr/lib/cfgadm/ccid.so.1 variant.opensolaris.zone=global
-file path=usr/lib/debug/usr/lib/cfgadm/$(ARCH64)/ccid.so.1 \
-    variant.opensolaris.zone=global
-file path=usr/lib/debug/usr/lib/cfgadm/ccid.so.1 \
-    variant.opensolaris.zone=global
 file path=usr/sbin/ccidadm mode=0555 variant.opensolaris.zone=global
 file path=usr/share/man/man1m/ccidadm.1m variant.opensolaris.zone=global
 file path=usr/share/man/man7d/ccid.7d

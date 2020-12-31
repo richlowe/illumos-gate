@@ -36,11 +36,6 @@ dir path=usr group=sys
 dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
 file path=usr/lib/$(ARCH64)/libsun_fc.so.1
-# Generated variants will contain underscores
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libsun_fc.so.1 \
-    pkg.linted.pkglint.action001.1=True
-file path=usr/lib/debug/usr/lib/libsun_fc.so.1 \
-    pkg.linted.pkglint.action001.1=True
 file path=usr/lib/libsun_fc.so.1
 legacy pkg=SUNWfchba desc="SNIA HBA library for Sun Fibre Channel adapters" \
     name="Sun Fibre Channel Host Bus Adapter Library"

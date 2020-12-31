@@ -44,10 +44,6 @@ dir path=usr/share/man/man1m
 dir path=usr/share/man/man3gss
 dir path=usr/share/man/man3lib
 file path=usr/lib/$(ARCH64)/libgss.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libgss.so.1
-file path=usr/lib/debug/usr/lib/libgss.so.1
-file path=usr/lib/debug/usr/lib/sasl/$(ARCH64)/gssapi.so.1
-file path=usr/lib/debug/usr/lib/sasl/gssapi.so.1
 file path=usr/lib/gss/gsscred_clean group=sys mode=0744
 file path=usr/lib/gss/gssd mode=0555
 file path=usr/lib/libgss.so.1

@@ -31,7 +31,6 @@
 NAME = pcidr_plugin
 LIBRARY = $(NAME).a
 VERS =
-
 TOPOBJECTS = pcidr_common.o
 LOCOBJECTS = $(NAME).o pcidr_cfga.o
 OBJECTS = $(LOCOBJECTS) $(TOPOBJECTS)
@@ -39,6 +38,8 @@ OBJECTS = $(LOCOBJECTS) $(TOPOBJECTS)
 include $(SRC)/lib/Makefile.lib
 include $(SRC)/cmd/pcidr/Makefile.com
 #############################################################################
+
+DEBUGLIBS =
 
 THISDIR = ../../plugins/default
 USR_SRC_BASE = ../../../..

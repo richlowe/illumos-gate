@@ -86,7 +86,8 @@ file path=opt/onbld/bin/$(ARCH)/cw mode=0555
 $(i386_ONLY)file path=opt/onbld/bin/$(ARCH)/elfextract mode=0555
 file path=opt/onbld/bin/$(ARCH)/findunref mode=0555
 $(sparc_ONLY)file path=opt/onbld/bin/$(ARCH)/forth mode=0555
-$(sparc_ONLY)file path=opt/onbld/bin/$(ARCH)/forth_preload.so.1 mode=0555
+$(sparc_ONLY)file path=opt/onbld/bin/$(ARCH)/forth_preload.so.1 mode=0555 \
+    pkg.autodebug=false
 file path=opt/onbld/bin/$(ARCH)/install mode=0555
 file path=opt/onbld/bin/$(ARCH)/lintdump mode=0555
 file path=opt/onbld/bin/$(ARCH)/localedef mode=0555
@@ -154,10 +155,10 @@ file path=opt/onbld/etc/exception_lists/interface_check
 file path=opt/onbld/etc/exception_lists/interface_cmp
 file path=opt/onbld/etc/its.conf
 file path=opt/onbld/etc/its.reg
-file path=opt/onbld/lib/$(ARCH)/64/libmakestate.so.1
-file path=opt/onbld/lib/$(ARCH)/libctf.so.1 mode=0555
-file path=opt/onbld/lib/$(ARCH)/libdwarf.so.1
-file path=opt/onbld/lib/$(ARCH)/libmakestate.so.1
+file path=opt/onbld/lib/$(ARCH)/64/libmakestate.so.1 pkg.autodebug=false
+file path=opt/onbld/lib/$(ARCH)/libctf.so.1 mode=0555 pkg.autodebug=false
+file path=opt/onbld/lib/$(ARCH)/libdwarf.so.1 pkg.autodebug=false
+file path=opt/onbld/lib/$(ARCH)/libmakestate.so.1 pkg.autodebug=false
 file path=opt/onbld/lib/perl/onbld_elfmod.pm
 file path=opt/onbld/lib/perl/onbld_elfmod_vertype.pm
 $(python3tools_ONLY)file \

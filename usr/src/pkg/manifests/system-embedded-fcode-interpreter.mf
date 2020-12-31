@@ -70,14 +70,6 @@ file path=lib/svc/manifest/platform/sun4u/efdaemon.xml group=sys mode=0444
 file path=lib/svc/manifest/platform/sun4v/efdaemon.xml group=sys mode=0444
 file path=platform/sun4u/kernel/misc/$(ARCH64)/gptwo_cpu group=sys mode=0755
 file path=platform/sun4u/kernel/misc/$(ARCH64)/gptwocfg group=sys mode=0755
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/fcdriver.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/fcode.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/fcpackage.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/fcthread.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/lfc_gptwo.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/lfc_jupiter.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/lfc_upa.so
-file path=usr/lib/debug/usr/lib/efcode/$(ARCH64)/lfc_upa_pci.so
 file path=usr/lib/efcode/$(ARCH64)/efdaemon mode=0555
 file path=usr/lib/efcode/$(ARCH64)/fcdriver.so
 file path=usr/lib/efcode/$(ARCH64)/fcode.so

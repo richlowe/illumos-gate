@@ -28,8 +28,6 @@ dir path=usr/lib/$(ARCH64)
 file path=usr/include/winscard.h
 file path=usr/include/wintypes.h
 file path=usr/lib/$(ARCH64)/libpcsc.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libpcsc.so.1
-file path=usr/lib/debug/usr/lib/libpcsc.so.1
 file path=usr/lib/libpcsc.so.1
 link path=usr/lib/$(ARCH64)/libpcsc.so target=./libpcsc.so.1
 link path=usr/lib/libpcsc.so target=./libpcsc.so.1

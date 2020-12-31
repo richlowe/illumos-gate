@@ -35,6 +35,7 @@ LIBS= $(DYNLIB)
 
 MAPFILES=
 LIBLINKS=
+DEBUGLIBS=
 LDLIBS += -L$(ROOT)/usr/lib -lsysevent -lnvpair -lc
 
 # sysevent SLM dirs

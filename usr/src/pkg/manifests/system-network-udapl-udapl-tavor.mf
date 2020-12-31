@@ -52,8 +52,6 @@ file path=etc/init.d/dodatadm.udaplt group=sys mode=0744 \
 file path=kernel/drv/$(ARCH64)/daplt group=sys
 file path=kernel/drv/daplt.conf group=sys
 file path=usr/lib/$(ARCH64)/udapl_tavor.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/udapl_tavor.so.1
-file path=usr/lib/debug/usr/lib/udapl_tavor.so.1
 file path=usr/lib/udapl_tavor.so.1
 file path=usr/share/dat/SUNWudaplt.conf group=sys mode=0644
 hardlink path=etc/rc2.d/S81dodatadm.udaplt \

@@ -66,8 +66,6 @@ file path=usr/include/pool.h
 file path=usr/kernel/drv/$(ARCH64)/pool group=sys
 file path=usr/kernel/drv/pool.conf group=sys
 file path=usr/lib/$(ARCH64)/libpool.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libpool.so.1
-file path=usr/lib/debug/usr/lib/libpool.so.1
 file path=usr/lib/libpool.so.1
 file path=usr/lib/rcm/modules/SUNW_pool_rcm.so mode=0555
 file path=usr/sbin/pooladm mode=0555

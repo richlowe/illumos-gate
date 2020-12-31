@@ -43,7 +43,6 @@ file path=usr/ast/bin/msggen mode=0555
 file path=usr/ast/bin/msgget mode=0555
 file path=usr/include/ast/pp.h
 file path=usr/include/ast/ppkey.h
-file path=usr/lib/debug/usr/lib/libpp.so.1
 file path=usr/lib/libpp.so.1
 file path=usr/share/man/man1/msgcc.1
 file path=usr/share/man/man1/msgcpp.1

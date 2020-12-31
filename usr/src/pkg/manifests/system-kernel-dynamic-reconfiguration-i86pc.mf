@@ -68,8 +68,6 @@ file path=lib/svc/method/svc-acpihpd mode=0555
 file path=platform/i86pc/kernel/drv/$(ARCH64)/dr group=sys
 file path=platform/i86pc/kernel/drv/dr.conf group=sys mode=0644
 file path=platform/i86pc/kernel/misc/$(ARCH64)/drmach_acpi group=sys mode=0755
-file path=usr/lib/debug/usr/platform/i86pc/lib/cfgadm/$(ARCH64)/sbd.so.1
-file path=usr/lib/debug/usr/platform/i86pc/lib/cfgadm/sbd.so.1
 file path=usr/platform/i86pc/lib/acpihpd group=sys mode=0755
 file path=usr/platform/i86pc/lib/cfgadm/$(ARCH64)/sbd.so.1
 file path=usr/platform/i86pc/lib/cfgadm/sbd.so.1

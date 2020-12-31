@@ -53,10 +53,6 @@ file path=etc/smhba.conf group=sys original_name=SUNWsmhba:etc/smhba.conf \
 file path=usr/include/smhbaapi.h
 file path=usr/lib/$(ARCH64)/libSMHBAAPI.so.1
 file path=usr/lib/$(ARCH64)/libsun_sas.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libSMHBAAPI.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libsun_sas.so.1
-file path=usr/lib/debug/usr/lib/libSMHBAAPI.so.1
-file path=usr/lib/debug/usr/lib/libsun_sas.so.1
 file path=usr/lib/libSMHBAAPI.so.1
 file path=usr/lib/libsun_sas.so.1
 file path=usr/sbin/sasinfo mode=0555

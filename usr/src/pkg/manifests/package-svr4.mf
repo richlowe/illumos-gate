@@ -65,9 +65,6 @@ file path=usr/bin/pkgparam group=sys mode=0555
 file path=usr/bin/pkgproto mode=0555
 file path=usr/bin/pkgtrans mode=0555
 file path=usr/lib/$(ARCH64)/libinstzones.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libinstzones.so.1
-file path=usr/lib/debug/usr/lib/libinstzones.so.1
-file path=usr/lib/debug/usr/lib/libpkg.so.1
 file path=usr/lib/libinstzones.so.1
 file path=usr/lib/libpkg.so.1
 file path=usr/sadm/install/bin/pkginstall group=sys mode=0555

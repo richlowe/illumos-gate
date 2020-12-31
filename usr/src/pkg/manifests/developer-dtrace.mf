@@ -167,10 +167,6 @@ file path=usr/include/sys/lockstat.h
 file path=usr/include/sys/sdt.h
 file path=usr/lib/$(ARCH64)/libdtrace.so.1
 file path=usr/lib/$(ARCH64)/libdtrace_jni.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libdtrace.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libdtrace_jni.so.1
-file path=usr/lib/debug/usr/lib/libdtrace.so.1
-file path=usr/lib/debug/usr/lib/libdtrace_jni.so.1
 file path=usr/lib/devfsadm/linkmod/SUNW_dtrace_link.so group=sys
 file path=usr/lib/dtrace/64/drti.o mode=0444
 file path=usr/lib/dtrace/64/libdtrace_forceload.so mode=0555

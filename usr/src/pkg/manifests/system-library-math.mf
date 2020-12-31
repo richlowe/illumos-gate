@@ -60,13 +60,6 @@ file path=usr/include/iso/math_iso.h
 file path=usr/include/math.h
 file path=usr/include/sys/ieeefp.h
 file path=usr/include/tgmath.h
-file path=usr/lib/debug/lib/$(ARCH64)/libm.so.1
-file path=usr/lib/debug/lib/$(ARCH64)/libm.so.2
-file path=usr/lib/debug/lib/$(ARCH64)/libmvec.so.1
-file path=usr/lib/debug/lib/libm.so.1
-file path=usr/lib/debug/lib/libm.so.2
-file path=usr/lib/debug/lib/libmvec.so.1
-$(i386_ONLY)file path=usr/lib/debug/lib/libmvec/libmvec_hwcap1.so.1
 legacy pkg=SUNWlibms desc="Math Libraries (Usr)" \
     hotline="Please contact your local service provider" \
     name="Math Libraries (Usr)" vendor="Sun Microsystems, Inc." \

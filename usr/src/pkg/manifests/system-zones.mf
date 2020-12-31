@@ -86,12 +86,6 @@ file path=usr/lib/brand/ipkg/platform.xml mode=0444
 file path=usr/lib/brand/shared/common.ksh mode=0444
 file path=usr/lib/brand/shared/query mode=0755
 file path=usr/lib/brand/shared/uninstall.ksh mode=0444
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libbrand.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libzonecfg.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libzonestat.so.1
-file path=usr/lib/debug/usr/lib/libbrand.so.1
-file path=usr/lib/debug/usr/lib/libzonecfg.so.1
-file path=usr/lib/debug/usr/lib/libzonestat.so.1
 file path=usr/lib/libbrand.so.1
 file path=usr/lib/libzonecfg.so.1
 file path=usr/lib/libzonestat.so.1

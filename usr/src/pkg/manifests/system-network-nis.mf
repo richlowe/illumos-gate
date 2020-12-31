@@ -64,7 +64,6 @@ file path=usr/bin/ypcat group=other mode=0555
 file path=usr/bin/ypmatch group=other mode=0555
 file path=usr/bin/yppasswd mode=0555
 file path=usr/bin/ypwhich group=other mode=0555
-file path=usr/lib/debug/usr/lib/libnisdb.so.2
 file path=usr/lib/ldap/idsconfig mode=0555
 file path=usr/lib/ldap/ldap_cachemgr mode=0555
 file path=usr/lib/libnisdb.so.2

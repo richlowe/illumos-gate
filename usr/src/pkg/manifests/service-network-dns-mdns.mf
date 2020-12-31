@@ -53,10 +53,6 @@ file path=usr/bin/dns-sd mode=0555
 file path=usr/include/dns_sd.h
 file path=usr/lib/$(ARCH64)/libdns_sd.so.1
 file path=usr/lib/$(ARCH64)/nss_mdns.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libdns_sd.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/nss_mdns.so.1
-file path=usr/lib/debug/usr/lib/libdns_sd.so.1
-file path=usr/lib/debug/usr/lib/nss_mdns.so.1
 file path=usr/lib/inet/mdnsd mode=0555
 file path=usr/lib/libdns_sd.so.1
 file path=usr/lib/nss_mdns.so.1

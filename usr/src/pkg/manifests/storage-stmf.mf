@@ -93,10 +93,6 @@ file path=usr/include/sys/stmf_defines.h
 file path=usr/include/sys/stmf_ioctl.h
 file path=usr/lib/$(ARCH64)/libstmf.so.1
 file path=usr/lib/$(ARCH64)/libstmfproxy.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libstmf.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libstmfproxy.so.1
-file path=usr/lib/debug/usr/lib/libstmf.so.1
-file path=usr/lib/debug/usr/lib/libstmfproxy.so.1
 file path=usr/lib/libstmf.so.1
 file path=usr/lib/libstmfproxy.so.1
 file path=usr/lib/mdb/kvm/$(ARCH64)/stmf.so group=sys mode=0555

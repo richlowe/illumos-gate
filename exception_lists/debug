@@ -130,3 +130,6 @@ NO_CTF ^MACH(lib)/c_synonyms.so.1
 
 # Old libmp has no CTF
 NO_CTF ^lib/libmp.so.1
+
+# PCI DR plugins have no DWARF
+NO_DEBUGLINK ^usr/lib/pci/pcidr_plugin.so

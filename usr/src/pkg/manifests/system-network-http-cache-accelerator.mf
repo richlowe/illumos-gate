@@ -77,8 +77,6 @@ file path=kernel/drv/$(ARCH64)/nca group=sys
 file path=kernel/drv/nca.conf group=sys
 file path=usr/bin/ncab2clf mode=0555
 file path=usr/lib/$(ARCH64)/ncad_addr.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/ncad_addr.so.1
-file path=usr/lib/debug/usr/lib/ncad_addr.so.1
 file path=usr/lib/inet/ncaconfd mode=0555
 file path=usr/lib/ncad_addr.so.1
 file path=usr/share/man/man1/nca.1

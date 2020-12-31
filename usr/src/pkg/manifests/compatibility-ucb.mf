@@ -46,16 +46,6 @@ dir path=usr/ucblib
 dir path=usr/ucblib/$(ARCH64)
 file path=etc/mail/Mail.rc original_name=SUNWscp:etc/mail/Mail.rc \
     preserve=true
-file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libcurses.so.1
-file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libdbm.so.1
-file path=usr/lib/debug/usr/ucblib/$(ARCH64)/librpcsoc.so.1
-file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libtermcap.so.1
-file path=usr/lib/debug/usr/ucblib/$(ARCH64)/libucb.so.1
-file path=usr/lib/debug/usr/ucblib/libcurses.so.1
-file path=usr/lib/debug/usr/ucblib/libdbm.so.1
-file path=usr/lib/debug/usr/ucblib/librpcsoc.so.1
-file path=usr/lib/debug/usr/ucblib/libtermcap.so.1
-file path=usr/lib/debug/usr/ucblib/libucb.so.1
 file path=usr/share/man/man1b/basename.1b
 file path=usr/share/man/man1b/biff.1b
 file path=usr/share/man/man1b/chown.1b

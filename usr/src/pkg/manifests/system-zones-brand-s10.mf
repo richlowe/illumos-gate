@@ -91,13 +91,6 @@ file path=usr/lib/brand/solaris10/smf_disable.lst mode=0444
 file path=usr/lib/brand/solaris10/solaris10_librtld_db.so.1
 file path=usr/lib/brand/solaris10/uninstall mode=0755
 file path=usr/lib/brand/solaris10/version mode=0444
-file path=usr/lib/debug/usr/lib/$(ARCH64)/s10_brand.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/s10_npreload.so.1
-file \
-    path=usr/lib/debug/usr/lib/brand/solaris10/$(ARCH64)/solaris10_librtld_db.so.1
-file path=usr/lib/debug/usr/lib/brand/solaris10/solaris10_librtld_db.so.1
-file path=usr/lib/debug/usr/lib/s10_brand.so.1
-file path=usr/lib/debug/usr/lib/s10_npreload.so.1
 file path=usr/lib/s10_brand.so.1
 file path=usr/lib/s10_npreload.so.1
 legacy pkg=SUNWs10brandr desc="Support for the 'Solaris10' Brand" \

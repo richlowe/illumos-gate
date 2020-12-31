@@ -41,11 +41,6 @@ dir path=lib
 dir path=lib/$(ARCH64)
 file path=lib/$(ARCH64)/libmpscsi_vhci.so.1
 file path=lib/libmpscsi_vhci.so.1
-# Generated variants will contain underscores
-file path=usr/lib/debug/lib/$(ARCH64)/libmpscsi_vhci.so.1 \
-    pkg.linted.pkglint.action001.1=True
-file path=usr/lib/debug/lib/libmpscsi_vhci.so.1 \
-    pkg.linted.pkglint.action001.1=True
 legacy pkg=SUNWmpsvplr \
     desc="SNIA MP API plugin library for the scsi_vhci driver (Root)" \
     name="Sun MP API library for the scsi_vhci driver (Root)"

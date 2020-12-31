@@ -97,10 +97,6 @@ file path=platform/sun4v/kernel/misc/$(ARCH64)/ldc group=sys mode=0755
 file path=platform/sun4v/kernel/misc/$(ARCH64)/platsvc group=sys mode=0755
 file path=usr/lib/$(ARCH64)/libds.so.1
 file path=usr/lib/$(ARCH64)/libpri.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libds.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libpri.so.1
-file path=usr/lib/debug/usr/lib/libds.so.1
-file path=usr/lib/debug/usr/lib/libpri.so.1
 file path=usr/lib/ldoms/drd mode=0555
 file path=usr/lib/ldoms/ldmad mode=0555
 file path=usr/lib/ldoms/vntsd mode=0555

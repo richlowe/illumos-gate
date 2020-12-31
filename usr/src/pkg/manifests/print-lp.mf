@@ -88,8 +88,6 @@ file path=lib/svc/method/print-svc mode=0555
 file path=usr/bin/lpget group=lp mode=0511
 file path=usr/bin/lpset group=lp mode=4511
 file path=usr/bin/lptest group=lp mode=0555
-file path=usr/lib/debug/usr/lib/libprint.so.2
-file path=usr/lib/debug/usr/lib/print/psm-lpsched.so.1 group=lp
 file path=usr/lib/libprint.so.2
 file path=usr/lib/lp/bin/accept mode=0555
 file path=usr/lib/lp/bin/alert.proto group=lp mode=0444

@@ -175,7 +175,6 @@ file path=usr/bin/vacation mode=0555
 file path=usr/include/libmilter/README
 file path=usr/include/libmilter/mfapi.h
 file path=usr/include/libmilter/mfdef.h
-file path=usr/lib/debug/usr/lib/libmilter.so.1
 file path=usr/lib/help/auths/locale/C/MailHeader.html
 file path=usr/lib/help/auths/locale/C/MailQueue.html
 file path=usr/lib/libmilter.so.1

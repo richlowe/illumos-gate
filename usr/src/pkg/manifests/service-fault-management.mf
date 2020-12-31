@@ -300,23 +300,10 @@ file path=usr/include/fm/topo_mod.h
 #
 # Some libraries need to be in lib for install
 #
-file path=usr/lib/debug/lib/fm/$(ARCH64)/libfmevent.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/lib/fm/libfmevent.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
+
 #
 #	64-bit .so.1
 #
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libdiagcode.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libdiskstatus.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libfmd_adm.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libfmd_agent.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libfmd_log.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libfmd_msg.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libfmd_snmp.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libfmnotify.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libseslog.so.1
-file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libtopo.so.1
 #
 # fmri scheme support: all are common to both global and non-global zones
 #
@@ -328,25 +315,7 @@ file path=usr/lib/debug/usr/lib/fm/$(ARCH64)/libtopo.so.1
 #
 #	32-bit .so.1
 #
-file path=usr/lib/debug/usr/lib/fm/libdiagcode.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libdiskstatus.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libfmd_adm.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libfmd_agent.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libfmd_log.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libfmd_msg.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libfmd_snmp.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libfmnotify.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
-file path=usr/lib/debug/usr/lib/fm/libseslog.so.1
-file path=usr/lib/debug/usr/lib/fm/libtopo.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
+
 #
 # mdb support will automatically be included in both contexts;
 # we allow eft.so to be included despite not delivering

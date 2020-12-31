@@ -38,7 +38,6 @@ dir path=usr/lib/rcm
 dir path=usr/lib/rcm/modules
 file path=lib/svc/manifest/network/bridge.xml group=sys mode=0444
 file path=usr/lib/bridged mode=0555
-file path=usr/lib/debug/usr/lib/librstp.so.1
 file path=usr/lib/librstp.so.1
 file path=usr/lib/rcm/modules/SUNW_bridge_rcm.so mode=0555
 legacy pkg=SUNWbridger desc="Datalink layer bridging support" \

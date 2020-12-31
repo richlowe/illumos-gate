@@ -77,24 +77,14 @@ file path=usr/bin/kpasswd mode=0555
 file path=usr/bin/krb5-config mode=0555
 file path=usr/bin/ktutil mode=0555
 file path=usr/lib/$(ARCH64)/gss/mech_krb5.so.1
-file path=usr/lib/$(ARCH64)/libkrb5.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/gss/mech_krb5.so.1
-file path=usr/lib/debug/usr/lib/gss/mech_krb5.so.1
-file path=usr/lib/debug/usr/lib/krb5/$(ARCH64)/libkadm5clnt.so.1
-file path=usr/lib/debug/usr/lib/krb5/libkadm5clnt.so.1
-file path=usr/lib/debug/usr/lib/krb5/libss.so.1
-file path=usr/lib/debug/usr/lib/krb5/plugins/preauth/pkinit.so.1
-file path=usr/lib/debug/usr/lib/security/$(ARCH64)/pam_krb5.so.1
-file path=usr/lib/debug/usr/lib/security/$(ARCH64)/pam_krb5_migrate.so.1
-file path=usr/lib/debug/usr/lib/security/pam_krb5.so.1
-file path=usr/lib/debug/usr/lib/security/pam_krb5_migrate.so.1
+file path=usr/lib/$(ARCH64)/libkrb5.so.1 pkg.autodebug=false
 file path=usr/lib/gss/mech_krb5.so.1
 file path=usr/lib/krb5/$(ARCH64)/libkadm5clnt.so.1
 file path=usr/lib/krb5/ktkt_warnd mode=0555
 file path=usr/lib/krb5/libkadm5clnt.so.1
 file path=usr/lib/krb5/libss.so.1
 file path=usr/lib/krb5/plugins/preauth/pkinit.so.1
-file path=usr/lib/libkrb5.so.1
+file path=usr/lib/libkrb5.so.1 pkg.autodebug=false
 file path=usr/lib/security/$(ARCH64)/pam_krb5.so.1
 file path=usr/lib/security/$(ARCH64)/pam_krb5_migrate.so.1
 file path=usr/lib/security/pam_krb5.so.1

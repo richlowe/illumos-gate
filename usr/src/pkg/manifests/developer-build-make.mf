@@ -22,8 +22,6 @@ dir path=usr/share/man/man1
 dir path=usr/share/man/man1s
 file path=usr/bin/make mode=0555
 file path=usr/lib/$(ARCH64)/libmakestate.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libmakestate.so.1
-file path=usr/lib/debug/usr/lib/libmakestate.so.1
 file path=usr/lib/libmakestate.so.1
 file path=usr/share/lib/make/make.rules
 file path=usr/share/lib/make/svr4.make.rules

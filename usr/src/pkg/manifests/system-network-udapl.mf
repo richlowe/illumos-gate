@@ -50,8 +50,6 @@ dir path=usr/share/man/man4
 file path=etc/dat/dat.conf group=sys original_name=SUNWudapl:etc/dat/dat.conf \
     preserve=true
 file path=usr/lib/$(ARCH64)/libdat.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libdat.so.1
-file path=usr/lib/debug/usr/lib/libdat.so.1
 file path=usr/lib/libdat.so.1
 file path=usr/sbin/datadm mode=0555
 file path=usr/share/man/man1m/datadm.1m

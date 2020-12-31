@@ -33,8 +33,6 @@ dir path=usr group=sys
 dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
 file path=usr/lib/$(ARCH64)/libdemangle-sys.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libdemangle-sys.so.1
-file path=usr/lib/debug/usr/lib/libdemangle-sys.so.1
 file path=usr/lib/libdemangle-sys.so.1
 license lic_CDDL license=lic_CDDL
 license usr/src/lib/libdemangle/THIRDPARTYLICENSE \

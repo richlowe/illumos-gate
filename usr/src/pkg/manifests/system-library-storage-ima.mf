@@ -36,8 +36,6 @@ dir path=usr group=sys
 dir path=usr/lib
 dir path=usr/lib/$(ARCH64)
 file path=usr/lib/$(ARCH64)/libsun_ima.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libsun_ima.so.1
-file path=usr/lib/debug/usr/lib/libsun_ima.so.1
 file path=usr/lib/libsun_ima.so.1
 legacy pkg=SUNWima \
     desc="SNIA iSCSI Managment API plugin library for iSCSI adapters" \

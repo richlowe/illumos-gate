@@ -41,10 +41,6 @@ dir path=usr/share/man/man1m
 file path=lib/svc/manifest/system/poold.xml group=sys mode=0444 \
     variant.opensolaris.zone=global
 file path=lib/svc/method/svc-poold mode=0555 variant.opensolaris.zone=global
-file path=usr/lib/debug/usr/lib/pool/libjkstat.so.1
-file path=usr/lib/debug/usr/lib/pool/libjlgrp.so.1
-file path=usr/lib/debug/usr/lib/pool/libjpool.so.1
-file path=usr/lib/debug/usr/lib/pool/libjsyslog.so.1
 file path=usr/lib/pool/JPool.jar mode=0444
 file path=usr/lib/pool/libjkstat.so.1
 file path=usr/lib/pool/libjlgrp.so.1

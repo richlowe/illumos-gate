@@ -87,21 +87,9 @@ file path=sbin/zpool mode=0555
 file path=usr/lib/$(ARCH64)/libzfs_jni.so.1
 file path=usr/lib/$(ARCH64)/libzfsbootenv.so.1
 file path=usr/lib/$(ARCH64)/libzpool.so.1
-file path=usr/lib/debug/lib/$(ARCH64)/libzfs.so.1
-file path=usr/lib/debug/lib/$(ARCH64)/libzfs_core.so.1
-file path=usr/lib/debug/lib/$(ARCH64)/libzutil.so.1
-file path=usr/lib/debug/lib/libzfs.so.1
-file path=usr/lib/debug/lib/libzfs_core.so.1
-file path=usr/lib/debug/lib/libzutil.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libzfs_jni.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libzfsbootenv.so.1
-file path=usr/lib/debug/usr/lib/$(ARCH64)/libzpool.so.1
-file path=usr/lib/debug/usr/lib/libzfs_jni.so.1
-file path=usr/lib/debug/usr/lib/libzfsbootenv.so.1
-$(i386_ONLY)file path=usr/lib/debug/usr/lib/libzpool.so.1
 file path=usr/lib/devfsadm/linkmod/SUNW_zfs_link.so group=sys
 file path=usr/lib/fs/zfs/bootinstall mode=0555
-file path=usr/lib/fs/zfs/fstyp.so.1 mode=0555
+file path=usr/lib/fs/zfs/fstyp.so.1 mode=0555 pkg.autodebug=false
 file path=usr/lib/libzfs_jni.so.1
 file path=usr/lib/libzfsbootenv.so.1
 $(i386_ONLY)file path=usr/lib/libzpool.so.1
