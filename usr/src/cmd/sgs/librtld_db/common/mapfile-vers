@@ -55,6 +55,7 @@ SYMBOL_VERSION SUNW_1.1 {
 	rd_plt_resolution;
 	rd_reset;
     local:
+	link_ver_string	{ ASSERT = { TYPE = OBJECT; SIZE = 23; }; };
 	*;
 };
 
@@ -77,11 +78,12 @@ $endif
 #Externally defined symbols
 SYMBOL_SCOPE {
     global:
-	ps_pauxv		{ FLAGS = NODIRECT PARENT };
-	ps_pdmodel		{ FLAGS = NODIRECT PARENT };
-	ps_pglobal_lookup	{ FLAGS = NODIRECT PARENT };
-	ps_pglobal_sym		{ FLAGS = NODIRECT PARENT };
-	ps_plog			{ FLAGS = NODIRECT PARENT };
-	ps_pread		{ FLAGS = NODIRECT PARENT };
-	ps_pwrite		{ FLAGS = NODIRECT PARENT };
+	ps_pauxv		{ FLAGS = NODIRECT PARENT; };
+	ps_pdmodel		{ FLAGS = NODIRECT PARENT; };
+	ps_pglobal_lookup	{ FLAGS = NODIRECT PARENT; };
+	ps_pglobal_sym		{ FLAGS = NODIRECT PARENT; };
+	ps_plog			{ FLAGS = NODIRECT PARENT; };
+	ps_pread		{ FLAGS = NODIRECT PARENT; };
+	ps_pwrite		{ FLAGS = NODIRECT PARENT; };
 };
+

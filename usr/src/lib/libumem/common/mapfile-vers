@@ -89,5 +89,12 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	vmem_xalloc;
 	vmem_xfree;
     local:
+	_umem_alloc;
+	_umem_alloc_align;
+	_umem_cache_alloc;
+	_umem_cache_free;
+	_umem_free;
+	_umem_free_align;
+	_umem_zalloc;
 	*;
 };

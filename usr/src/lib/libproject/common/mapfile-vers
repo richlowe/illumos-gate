@@ -62,5 +62,14 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	setproject_initpriv;
 	setproject_proc;
     local:
+	_getprojidbyname;
+	_inproj;
+	_setprojent;
+	_endprojent;
+	_getprojent;
+	_fgetprojent;
+	_getdefaultproj;
+	_getprojbyid;
+	_getprojbyname;
 	*;
 };

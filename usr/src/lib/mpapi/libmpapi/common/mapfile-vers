@@ -89,5 +89,7 @@ SYMBOL_VERSION SUNW_1.0 {
 	MP_DeregisterPlugin;
 	Sun_MP_SendScsiCmd;
     local:
+	InitLibrary;
+	ExitLibrary;
 	*;
 };

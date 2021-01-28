@@ -156,6 +156,7 @@ SYMBOL_VERSION SUNW_0.7 {
 	elf32_xlatetof;
 	elf32_xlatetom;
     local:
+	link_ver_string	{ ASSERT = { TYPE = OBJECT; SIZE = 23; }; };
 	*;
 };
 
@@ -176,3 +177,4 @@ $if _ELF32
 	elf_demangle;
 $endif
 };
+

@@ -105,6 +105,8 @@ proc_TGTFLAGS		= -D_USER
 
 CSTD			= $(CSTD_GNU99)
 
+ZGUIDANCE		= -Wl,-zguidance=noasserts
+
 CFLAGS			+= $(CCVERBOSE)
 CFLAGS64		+= $(CCVERBOSE)
 CPPFLAGS		+= $($(MDBTGT)_TGTFLAGS) -I../../../common

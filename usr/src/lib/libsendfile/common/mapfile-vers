@@ -49,5 +49,11 @@ $if _ELF32	# largefile interfaces for 32-bit applications
 $endif
 
     local:
+	_sendfilev;
+	_sendfile;
+$if _ELF32
+	_sendfile64;
+	_sendfilev64;
+$endif
 	*;
 };

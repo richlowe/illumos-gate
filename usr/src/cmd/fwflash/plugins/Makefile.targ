@@ -58,12 +58,14 @@ $(HERMON-MELLANOX_LIB):= SONAME = $(HERMON-MELLANOX_LIB)
 $(TAVOR-MELLANOX_LIB):=	SONAME = $(TAVOR-MELLANOX_LIB)
 $(SD-GENERIC_LIB):= SONAME = $(SD-GENERIC_LIB)
 
-$(HERMON-MELLANOX_LIB):= DYNFLAGS += -R/usr/lib/fwflash/identify 
+$(HERMON-MELLANOX_LIB):= DYNFLAGS += -R/usr/lib/fwflash/identify
 $(HERMON-MELLANOX_LIB):= LDLIBS += -L. $(ROOT)/usr/lib/fwflash/identify/hermon.so
 
 $(SD-GENERIC_LIB):= LDLIBS += -L$(ROOT)/usr/lib/scsi -lscsi
 $(SD-GENERIC_LIB):= DYNFLAGS += -R/usr/lib/scsi
 
+# Size assertions are non-constant and not useful here
+ZGUIDANCE=-Wl,-zguidance=noasserts
 
 .KEEP STATE:
 
@@ -71,7 +73,7 @@ all: $(LIBS)
 
 install: all $(ROOTLIBS)
 
-lint: $(LINTFILE) 
+lint: $(LINTFILE)
 
 _msg msg: $(POFILE)
 
