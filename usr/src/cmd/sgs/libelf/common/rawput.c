@@ -25,9 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*	  All Rights Reserved	*/
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -49,26 +47,26 @@ _elf_read(int fd, off_t off, size_t fsz)
 	char		*p;
 
 	if (fsz == 0)
-		return (0);
+		return (NULL);
 
 	if (fd == -1) {
 		_elf_seterr(EREQ_NOFD, 0);
-		return (0);
+		return (NULL);
 	}
 
 	if (lseek(fd, off, 0) != off) {
 		_elf_seterr(EIO_SEEK, errno);
-		return (0);
+		return (NULL);
 	}
-	if ((p = (char *)malloc(fsz)) == 0) {
+	if ((p = malloc(fsz)) == NULL) {
 		_elf_seterr(EMEM_DATA, errno);
-		return (0);
+		return (NULL);
 	}
 
 	if (read(fd, p, fsz) != fsz) {
 		_elf_seterr(EIO_READ, errno);
 		free(p);
-		return (0);
+		return (NULL);
 	}
 	return (p);
 }

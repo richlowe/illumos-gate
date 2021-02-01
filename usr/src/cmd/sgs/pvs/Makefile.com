@@ -49,9 +49,6 @@ LDFLAGS +=	$(VERSREF) $(MAPOPTS) $(LLDFLAGS)
 LDLIBS +=	$(LDDBGLIBDIR) -llddbg $(ELFLIBDIR) -lelf \
 		    $(CONVLIBDIR) -lconv
 
-# not linted
-SMATCH=off
-
 BLTDEFS=	msg.h
 BLTDATA=	msg.c
 BLTMESG=	$(SGSMSGDIR)/pvs

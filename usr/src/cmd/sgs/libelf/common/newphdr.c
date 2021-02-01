@@ -25,9 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*	  All Rights Reserved	*/
 
 #include <stdlib.h>
 #include <memory.h>
@@ -110,10 +108,10 @@ elf_newphdr(Elf * elf, size_t count)
 		((Ehdr*)elf->ed_ehdr)->e_phentsize = 0;
 		elf->ed_phdrsz = 0;
 		ELFUNLOCK(elf)
-		return (0);
+		return (NULL);
 	}
 
-	if ((ph = malloc(sz)) == 0) {
+	if ((ph = malloc(sz)) == NULL) {
 		_elf_seterr(EMEM_PHDR, errno);
 		elf->ed_phflags &= ~ELF_F_DIRTY;
 		elf->ed_phdr = 0;
@@ -121,7 +119,7 @@ elf_newphdr(Elf * elf, size_t count)
 		((Ehdr*)elf->ed_ehdr)->e_phentsize = 0;
 		elf->ed_phdrsz = 0;
 		ELFUNLOCK(elf)
-		return (0);
+		return (NULL);
 	}
 
 	elf->ed_myflags |= EDF_PHALLOC;

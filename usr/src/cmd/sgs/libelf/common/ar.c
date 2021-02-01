@@ -145,25 +145,25 @@ _elf_armem(Elf *elf, char *file, size_t fsz)
 
 	if (f->ar_fmag[0] != fmag[0] || f->ar_fmag[1] != fmag[1]) {
 		_elf_seterr(EFMT_ARFMAG, 0);
-		return (0);
+		return (NULL);
 	}
 
 	/*
 	 * Allocate a new member structure and assign it to the next free
 	 * free memlist ident.
 	 */
-	if ((m = (Member *)malloc(sizeof (Member))) == 0) {
+	if ((m = malloc(sizeof (Member))) == NULL) {
 		_elf_seterr(EMEM_ARMEM, errno);
-		return (0);
+		return (NULL);
 	}
 	if ((elf->ed_memlist == 0) || (ol->m_free == ol->m_end)) {
-		if ((l = (Memlist *)malloc(sizeof (Memlist) +
+		if ((l = malloc(sizeof (Memlist) +
 		    (sizeof (Memident) * MEMIDENTNO))) == 0) {
 			_elf_seterr(EMEM_ARMEM, errno);
 			free(m);
-			return (0);
+			return (NULL);
 		}
-		l->m_next = 0;
+		l->m_next = NULL;
 		l->m_free = (Memident *)(l + 1);
 		l->m_end = (Memident *)((uintptr_t)l->m_free +
 		    (sizeof (Memident) * MEMIDENTNO));
@@ -312,7 +312,7 @@ _elf_arinit(Elf * elf)
 				return;
 			if (elf->ed_vm == 0) {
 				char	*nmem;
-				if ((nmem = malloc(sz)) == 0) {
+				if ((nmem = malloc(sz)) == NULL) {
 					_elf_seterr(EMEM_ARSTR, errno);
 					return;
 				}

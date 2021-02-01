@@ -356,7 +356,7 @@ aout_find_com(struct nlist *sp, const char *name)
 	(void) strcpy(rs->rtc_sp->n_un.n_name, name);
 	rs->rtc_sp->n_type = N_COMM;
 	if ((rs->rtc_sp->n_value =
-	    (long)calloc(rs->rtc_sp->n_value, 1)) == (long)NULL)
+	    (ulong_t)calloc(1, rs->rtc_sp->n_value)) == (ulong_t)NULL)
 		return (NULL);
 	return (rs->rtc_sp);
 }

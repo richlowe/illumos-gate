@@ -154,7 +154,7 @@ elf_regsyms(Rt_map *lmp)
 				return (0);
 			}
 		}
-		if ((rp = calloc(sizeof (Reglist), 1)) == NULL)
+		if ((rp = calloc(1, sizeof (Reglist))) == NULL)
 			return (0);
 		rp->rl_lmp = lmp;
 		rp->rl_sym = symdef;

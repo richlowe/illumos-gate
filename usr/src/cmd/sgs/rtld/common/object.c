@@ -70,7 +70,7 @@ elf_obj_init(Lm_list *lml, Aliste lmco, const char *oname)
 	/*
 	 * Initialize an output file descriptor and the entrance criteria.
 	 */
-	if ((ofl = calloc(sizeof (Ofl_desc), 1)) == NULL)
+	if ((ofl = calloc(1, sizeof (Ofl_desc))) == NULL)
 		return (NULL);
 
 	ofl->ofl_dehdr = &dehdr;
@@ -98,7 +98,7 @@ elf_obj_init(Lm_list *lml, Aliste lmco, const char *oname)
 	 */
 	lmsz = S_DROUND(sizeof (Rt_map)) + sizeof (Rt_elfp);
 	if ((ld_ent_setup(ofl, syspagsz) == S_ERROR) ||
-	    ((olmp = calloc(lmsz, 1)) == NULL)) {
+	    ((olmp = calloc(1, lmsz)) == NULL)) {
 		free(ofl);
 		return (NULL);
 	}
@@ -276,9 +276,8 @@ elf_obj_fini(Lm_list *lml, Rt_map *lmp, Rt_map *clmp, int *in_nfavl)
 	    (check_plat_names(scapset, oalp, &rej) == 0)) ||
 	    (((oalp = ofl->ofl_ocapset.oc_mach.cl_val) != NULL) &&
 	    (check_mach_names(scapset, oalp, &rej) == 0))) {
-		if ((lml_main.lm_flags & LML_FLG_TRC_LDDSTUB) && lmp &&
+		if ((lml_main.lm_flags & LML_FLG_TRC_LDDSTUB) &&
 		    (FLAGS1(lmp) & FL1_RT_LDDSTUB) && (NEXT(lmp) == NULL)) {
-			/* LINTED */
 			(void) printf(MSG_INTL(ldd_reject[rej.rej_type]),
 			    ofl->ofl_name, rej.rej_str);
 		}
@@ -341,7 +340,6 @@ elf_obj_fini(Lm_list *lml, Rt_map *lmp, Rt_map *clmp, int *in_nfavl)
 	/*
 	 * Replace the original (temporary) link map with the new link map.
 	 */
-	/* LINTED */
 	lmc = (Lm_cntl *)alist_item_by_offset(lml->lm_lists, CNTL(nlmp));
 	lml->lm_obj--;
 

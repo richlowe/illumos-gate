@@ -85,7 +85,7 @@ addenv(Crle_desc *crle, const char *arg, unsigned int flags)
 				crle->c_strsize -= env->e_totsz;
 				crle->c_strsize += totsz;
 
-				if ((env->e_str = strdup(arg)) == 0) {
+				if ((env->e_str = strdup(arg)) == NULL) {
 					int err = errno;
 					(void) fprintf(stderr,
 					    MSG_INTL(MSG_SYS_MALLOC),
@@ -131,11 +131,12 @@ addenv(Crle_desc *crle, const char *arg, unsigned int flags)
 	/*
 	 * Allocate a new environment descriptor.
 	 */
-	if (((env = malloc(sizeof (Env_desc))) == 0) ||
-	    ((env->e_str = strdup(arg)) == 0)) {
+	if (((env = malloc(sizeof (Env_desc))) == NULL) ||
+	    ((env->e_str = strdup(arg)) == NULL)) {
 		int err = errno;
 		(void) fprintf(stderr, MSG_INTL(MSG_SYS_MALLOC),
 		    crle->c_name, strerror(err));
+		free(env);
 		return (0);
 	}
 	env->e_varsz = varsz;
@@ -211,7 +212,7 @@ addlib(Crle_desc *crle, char **lib, const char *args)
 			 */
 			alen += 1;
 			tlen += alen;
-			if ((str = realloc((void *)*lib, tlen)) == 0) {
+			if ((str = realloc(*lib, tlen)) == NULL) {
 				int err = errno;
 				(void) fprintf(stderr, MSG_INTL(MSG_SYS_MALLOC),
 				    crle->c_name, strerror(err));
@@ -220,7 +221,6 @@ addlib(Crle_desc *crle, char **lib, const char *args)
 			if (llen == 0)
 				(void) strcpy(str, arg);
 			else {
-				/* LINTED */
 				(void) sprintf(&str[llen],
 				    MSG_ORIG(MSG_FMT_COLON), arg);
 			}
@@ -253,7 +253,7 @@ dlflags(Crle_desc *crle, const char *arg)
 	if ((_flags = (int)strtol(arg, (char **)NULL, 0)) != 0)
 		return (_flags);
 
-	if ((_arg = malloc(strlen(arg) + 1)) == 0)
+	if ((_arg = malloc(strlen(arg) + 1)) == NULL)
 		return (0);
 	(void) strcpy(_arg, arg);
 

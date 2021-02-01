@@ -73,7 +73,7 @@ count_reloc(Cache *cache, Cache *_cache, Rt_map *lmp, int flags, Addr addr,
 	/*
 	 * Allocate a relocation structure for this relocation section.
 	 */
-	if ((reloc = calloc(cnt, sizeof (Reloc))) == 0)
+	if ((reloc = calloc(cnt, sizeof (Reloc))) == NULL)
 		return (1);
 	_cache->c_info = (void *)reloc;
 

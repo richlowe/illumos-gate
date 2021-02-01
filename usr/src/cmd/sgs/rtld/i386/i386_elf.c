@@ -222,7 +222,7 @@ elf_bndr(Rt_map *lmp, ulong_t reloff, caddr_t from)
 	 * the relocation offset is invalid then its possible someone has walked
 	 * over the .got entries or jumped to plt0 out of the blue.
 	 */
-	if (!lmp || ((reloff % sizeof (Rel)) != 0)) {
+	if ((reloff % sizeof (Rel)) != 0) {
 		Conv_inv_buf_t inv_buf;
 
 		eprintf(lml, ERR_FATAL, MSG_INTL(MSG_REL_PLTREF),
@@ -700,7 +700,7 @@ elf_reloc(Rt_map *lmp, uint_t plt, int *in_nfavl, APlist **textrel)
 						    rel, binfo))
 							continue;
 
-					   	ret = 0;
+						ret = 0;
 						break;
 
 					    } else {
@@ -918,7 +918,7 @@ static int
 _elf_copy_reloc(const char *name, Rt_map *rlmp, Rt_map *dlmp)
 {
 	Sym		*symref, *symdef;
-	caddr_t 	ref, def;
+	caddr_t		ref, def;
 	Rt_map		*_lmp;
 	Rel		rel;
 	Slookup		sl;
@@ -1002,7 +1002,7 @@ elf_copy_gen(Rt_map *lmp)
 Pltbindtype
 /* ARGSUSED1 */
 elf_plt_write(uintptr_t addr, uintptr_t vaddr, void *rptr, uintptr_t symval,
-	Xword pltndx)
+    Xword pltndx)
 {
 	Rel		*rel = (Rel*)rptr;
 	uintptr_t	pltaddr;

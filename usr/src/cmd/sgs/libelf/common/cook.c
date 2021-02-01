@@ -25,7 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <string.h>
 #include <ar.h>
@@ -93,9 +93,9 @@ _elf_dnode()
 {
 	register Dnode	*d;
 
-	if ((d = (Dnode *)malloc(sizeof (Dnode))) == 0) {
+	if ((d = malloc(sizeof (Dnode))) == NULL) {
 		_elf_seterr(EMEM_DNODE, errno);
-		return (0);
+		return (NULL);
 	}
 	*d = _elf_dnode_init;
 	d->db_myflags = DBF_ALLOC;

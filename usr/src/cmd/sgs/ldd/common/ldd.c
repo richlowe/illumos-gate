@@ -699,7 +699,7 @@ run(int nfile, char *cname, char *fname, const char *ename, int class)
 				}
 			}
 
-			if ((str = (char *)malloc(strlen(preload) +
+			if ((str = malloc(strlen(preload) +
 			    strlen(fname) + strlen(files) + 5)) == 0) {
 				(void) fprintf(stderr, MSG_INTL(MSG_SYS_MALLOC),
 				    cname);

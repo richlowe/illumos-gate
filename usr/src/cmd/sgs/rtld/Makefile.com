@@ -96,11 +96,9 @@ LDLIB =		-L ../../libld/$(MACH)
 RTLDLIB =	-L ../../librtld/$(MACH)
 
 CERRWARN +=	$(CNOWARN_UNINIT)
-CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-switch
 
-# not linted
-SMATCH=off
+pics/object.o :=	SMOFF += check_kmalloc_wrong_size
 
 # These definitions require that libc be built in the same workspace
 # as the run-time linker and before the run-time linker is built.

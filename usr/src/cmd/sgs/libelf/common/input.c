@@ -25,7 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -252,7 +252,7 @@ _elf_inmap(Elf * elf)
 
 		if (vmsz % sizeof (Elf64) != 0)
 			vmsz += sizeof (Elf64) - vmsz % sizeof (Elf64);
-		if ((elf->ed_vm = (unsigned *)malloc(vmsz + sz)) == 0) {
+		if ((elf->ed_vm = malloc(vmsz + sz)) == NULL) {
 			_elf_seterr(EMEM_VM, errno);
 			return (OK_NO);
 		}

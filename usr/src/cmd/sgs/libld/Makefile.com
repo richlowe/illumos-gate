@@ -87,15 +87,9 @@ include		$(SRC)/cmd/sgs/Makefile.com
 SRCDIR =	$(SGSHOME)/libld
 MAPFILEDIR =	$(SRCDIR)/common
 
-CERRWARN += -_gcc=-Wno-unused-value
-CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-char-subscripts
-CERRWARN += -_gcc=-Wno-type-limits
 $(RELEASE_BUILD)CERRWARN += -_gcc=-Wno-unused
-
-SMOFF += no_if_block
 
 # Location of the shared relocation engines maintained under usr/src/uts.
 #
@@ -113,8 +107,15 @@ LDLIBS +=	$(CONVLIBDIR) -lconv $(LDDBGLIBDIR) -llddbg \
 DYNFLAGS +=	$(VERSREF) '-R$$ORIGIN'
 
 # too hairy
-pics/sections32.o := SMATCH=off
-pics/sections64.o := SMATCH=off
+pics/sections32.o :=	SMATCH=off
+pics/sections64.o :=	SMATCH=off
+# confused about our strange allocation choices
+pics/syms32.o :=	SMOFF += check_kmalloc_wrong_size
+pics/syms64.o :=	SMOFF += check_kmalloc_wrong_size
+pics/entry32.o :=	SMOFF += check_kmalloc_wrong_size
+pics/entry64.o :=	SMOFF += check_kmalloc_wrong_size
+pics/relocate32.o :=	SMOFF += check_kmalloc_wrong_size
+pics/relocate64.o :=	SMOFF += check_kmalloc_wrong_size
 
 BLTDEFS =	msg.h
 BLTDATA =	msg.c

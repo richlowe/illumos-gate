@@ -70,7 +70,7 @@ _elf_outmap(int fd, size_t sz, unsigned int *pflag)
 	 * use calloc rather than malloc, as ld(1) assumes that the backing
 	 * storage it is working with is zero filled.
 	 */
-	if ((p = (char *)calloc(1, sz)) == 0)
+	if ((p = calloc(1, sz)) == NULL)
 		_elf_seterr(EMEM_OUT, errno);
 	return (p);
 }

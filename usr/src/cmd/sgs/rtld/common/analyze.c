@@ -1543,7 +1543,7 @@ find_file(Lm_list *lml, Rt_map *clmp, uint_t flags, Fdesc *fdp, Rej_desc *rej,
 	if ((olen + pdp->pd_plen + 1) >= PATH_MAX) {
 		eprintf(lml, ERR_FATAL, MSG_INTL(MSG_SYS_OPEN), oname,
 		    strerror(ENAMETOOLONG));
-			return (0);
+		return (0);
 	}
 	if ((fdp->fd_nname = (LM_GET_SO(clmp)(pdp->pd_pname, oname,
 	    pdp->pd_plen, olen))) == NULL)

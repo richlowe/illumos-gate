@@ -46,6 +46,4 @@ LDFLAGS +=	$(LLDFLAGS)
 
 CERRWARN +=	$(CNOWARN_UNINIT)
 
-SMOFF += indenting
-
 LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf

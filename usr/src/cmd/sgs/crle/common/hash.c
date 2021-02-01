@@ -23,7 +23,6 @@
  * Copyright (c) 2000 by Sun Microsystems, Inc.
  * All rights reserved.
  */
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -36,11 +35,13 @@ make_hash(int size, Hash_type type, ulong_t ident)
 {
 	Hash_tbl *	tbl;
 
-	if ((tbl = malloc(sizeof (Hash_tbl))) == 0)
-		return (0);
+	if ((tbl = malloc(sizeof (Hash_tbl))) == NULL)
+		return (NULL);
 
-	if ((tbl->t_entry = calloc((unsigned)(sizeof (Hash_ent *)), size)) == 0)
-		return (0);
+	if ((tbl->t_entry = calloc(size, sizeof (Hash_ent *))) == NULL) {
+		free(tbl);
+		return (NULL);
+	}
 
 	tbl->t_ident = ident;
 	tbl->t_type = type;
@@ -69,8 +70,8 @@ get_hash(Hash_tbl * tbl, Addr key, Half id, int mode)
 		    ent = ent->e_next) {
 			if (tbl->t_type == HASH_STR) {
 				if ((strcmp((const char *)ent->e_key,
-				    (const char *)key) == 0) && ((id == 0) ||
-				    (id == ent->e_id)))
+				    (const char *)key) == 0) &&
+				    ((id == 0) || (id == ent->e_id)))
 					return (ent);
 			} else {
 				if (ent->e_key == key)
@@ -79,13 +80,13 @@ get_hash(Hash_tbl * tbl, Addr key, Half id, int mode)
 		}
 	}
 	if (!(mode & HASH_ADD_ENT))
-		return (0);
+		return (NULL);
 
 	/*
 	 * Key not found in this hash table ... insert new entry into bucket.
 	 */
-	if ((ent = calloc(sizeof (Hash_ent), 1)) == 0)
-		return (0);
+	if ((ent = calloc(1, sizeof (Hash_ent))) == NULL)
+		return (NULL);
 
 	ent->e_key = key;
 	ent->e_hash = hashval;

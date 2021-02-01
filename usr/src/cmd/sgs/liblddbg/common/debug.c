@@ -429,7 +429,7 @@ Dbg_setup(dbg_setup_caller_t caller, const char *string, Dbg_desc *dbp,
 	 */
 	dbp->d_extra &= ~(DBG_E_HELP | DBG_E_HELP_EXIT);
 
-	if ((_name = (char *)malloc(strlen(string) + 1)) == NULL)
+	if ((_name = malloc(strlen(string) + 1)) == NULL)
 		return (0);
 	(void) strcpy(_name, string);
 

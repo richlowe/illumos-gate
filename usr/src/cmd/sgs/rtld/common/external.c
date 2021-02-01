@@ -743,7 +743,8 @@ gettimeofday(struct timeval *tv, void *tz)
 		 * lacks comm page support: Make the clock_gettime syscall and
 		 * divide out the tv_usec field as required.
 		 */
-		__clock_gettime_sys(CLOCK_REALTIME, (timespec_t *)tv);
+		if (__clock_gettime_sys(CLOCK_REALTIME, (timespec_t *)tv) != 0)
+			return (-1);
 		tv->tv_usec /= 1000;
 	}
 

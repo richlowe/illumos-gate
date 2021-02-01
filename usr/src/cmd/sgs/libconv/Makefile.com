@@ -91,11 +91,7 @@ include	$(SRC)/cmd/sgs/Makefile.com
 
 SRCDIR =	$(SRC)/cmd/sgs/libconv
 
-CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-switch
-
-# not linted
-SMATCH=off
 
 CTFCONVERT_O=
 

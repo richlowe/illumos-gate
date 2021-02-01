@@ -396,7 +396,7 @@ fpavl_insert(Lm_list *lml, Rt_map *lmp, const char *name, avl_index_t where)
 	/*
 	 * Insert new node in tree.
 	 */
-	if ((fpnp = calloc(sizeof (FullPathNode), 1)) == NULL)
+	if ((fpnp = calloc(1, sizeof (FullPathNode))) == NULL)
 		return (0);
 
 	fpnp->fpn_node.pn_name = name;
@@ -459,7 +459,7 @@ nfavl_insert(const char *name, avl_index_t where)
 	/*
 	 * Insert new node in tree.
 	 */
-	if ((pnp = calloc(sizeof (PathNode), 1)) != NULL) {
+	if ((pnp = calloc(1, sizeof (PathNode))) != NULL) {
 		pnp->pn_name = name;
 		pnp->pn_hash = hash;
 		avl_insert(nfavl, pnp, where);
@@ -506,7 +506,7 @@ spavl_insert(const char *name)
 	/*
 	 * Insert new node in tree.
 	 */
-	if ((pnp = calloc(sizeof (PathNode), 1)) != NULL) {
+	if ((pnp = calloc(1, sizeof (PathNode))) != NULL) {
 		pnp->pn_name = strdup(buffer);
 		pnp->pn_hash = hash;
 		avl_insert(spavl, pnp, where);
@@ -2888,7 +2888,7 @@ veprintf(Lm_list *lml, Error error, const char *format, va_list args)
 	static int	lock = 0;
 	Prfbuf		prf;
 
-	if (lock || (nextptr == (errbuf + ERRSIZE)))
+	if (lock || (nextptr > (errbuf + (ERRSIZE - 1))))
 		return;
 
 	/*
@@ -3126,7 +3126,7 @@ rtldexit(Lm_list * lml, int status)
 				}
 			}
 			if (lasterr && ((lasterr < errbuf) ||
-			    (lasterr > (errbuf + ERRSIZE)))) {
+			    (lasterr > (errbuf + (ERRSIZE - 1))))) {
 				(void) write(2, lasterr, strlen(lasterr));
 				(void) write(2, MSG_ORIG(MSG_STR_NL),
 				    MSG_STR_NL_SIZE);

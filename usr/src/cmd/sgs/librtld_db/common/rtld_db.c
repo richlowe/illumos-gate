@@ -163,7 +163,7 @@ rd_new(struct ps_prochandle *php)
 	rd_agent_t	*rap;
 
 	LOG(ps_plog(MSG_ORIG(MSG_DB_RDNEW), php));
-	if ((rap = (rd_agent_t *)calloc(1, sizeof (rd_agent_t))) == NULL)
+	if ((rap = calloc(1, sizeof (rd_agent_t))) == NULL)
 		return (0);
 
 	rap->rd_psp = php;
@@ -215,7 +215,7 @@ rd_loadobj_iter(rd_agent_t *rap, rl_iter_f *cb, void *client_data)
 
 rd_err_e
 rd_plt_resolution(rd_agent_t *rap, psaddr_t pc, lwpid_t lwpid,
-	psaddr_t pltbase, rd_plt_info_t *rpi)
+    psaddr_t pltbase, rd_plt_info_t *rpi)
 {
 	rd_err_e	err;
 	RDAGLOCK(rap);

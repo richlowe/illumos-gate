@@ -156,7 +156,7 @@ ld_main(int argc, char **argv, Half mach)
 	DBG_DELTATIME = DBG_TOTALTIME;
 
 	/* Output file descriptor */
-	if ((ofl = libld_calloc(1, sizeof (Ofl_desc))) == 0)
+	if ((ofl = libld_calloc(1, sizeof (Ofl_desc))) == NULL)
 		return (1);
 
 	/* Initialize target state */
@@ -175,7 +175,7 @@ ld_main(int argc, char **argv, Half mach)
 	/*
 	 * Build up linker version string
 	 */
-	if ((ofl->ofl_sgsid = (char *)libld_calloc(MSG_SGS_ID_SIZE +
+	if ((ofl->ofl_sgsid = libld_calloc(MSG_SGS_ID_SIZE +
 	    strlen(link_ver_string) + 1, 1)) == NULL)
 		return (1);
 	(void) strcpy(ofl->ofl_sgsid, MSG_ORIG(MSG_SGS_ID));

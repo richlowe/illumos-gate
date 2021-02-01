@@ -53,30 +53,30 @@ _elf_member(int fd, Elf * ref, unsigned flags)
 	size_t		base;
 
 	if (ref->ed_nextoff >= ref->ed_fsz)
-		return (0);
+		return (NULL);
 	if (ref->ed_fd == -1)		/* disabled */
 		fd = -1;
 	if (flags & EDF_WRITE) {
 		_elf_seterr(EREQ_ARRDWR, 0);
-		return (0);
+		return (NULL);
 	}
 	if (ref->ed_fd != fd) {
 		_elf_seterr(EREQ_ARMEMFD, 0);
-		return (0);
+		return (NULL);
 	}
 	if ((_elf_vm(ref, ref->ed_nextoff, sizeof (struct ar_hdr)) !=
 	    OK_YES) || ((mh = _elf_armem(ref,
 	    ref->ed_ident + ref->ed_nextoff, ref->ed_fsz)) == 0))
-		return (0);
+		return (NULL);
 
 	base = ref->ed_nextoff + sizeof (struct ar_hdr);
 	if (ref->ed_fsz - base < mh->m_hdr.ar_size) {
 		_elf_seterr(EFMT_ARMEMSZ, 0);
-		return (0);
+		return (NULL);
 	}
-	if ((elf = (Elf *)calloc(1, sizeof (Elf))) == 0) {
+	if ((elf = calloc(1, sizeof (Elf))) == NULL) {
 		_elf_seterr(EMEM_ELF, errno);
-		return (0);
+		return (NULL);
 	}
 	++ref->ed_activ;
 	elf->ed_parent = ref;
@@ -110,16 +110,16 @@ _elf_regular(int fd, unsigned flags)		/* initialize regular file */
 {
 	Elf		*elf;
 
-	if ((elf = (Elf *)calloc(1, sizeof (Elf))) == 0) {
+	if ((elf = calloc(1, sizeof (Elf))) == NULL) {
 		_elf_seterr(EMEM_ELF, errno);
-		return (0);
+		return (NULL);
 	}
 
 	elf->ed_fd = fd;
 	elf->ed_myflags |= flags;
 	if (_elf_inmap(elf) != OK_YES) {
 		free(elf);
-		return (0);
+		return (NULL);
 	}
 	return (elf);
 }
@@ -203,12 +203,12 @@ elf_memory(char *image, size_t sz)
 	ELFACCESSDATA(work, _elf_work)
 	if (work == EV_NONE) {
 		_elf_seterr(ESEQ_VER, 0);
-		return (0);
+		return (NULL);
 	}
 
-	if ((elf = (Elf *)calloc(1, sizeof (Elf))) == 0) {
+	if ((elf = calloc(1, sizeof (Elf))) == NULL) {
 		_elf_seterr(EMEM_ELF, errno);
-		return (0);
+		return (NULL);
 	}
 	elf->ed_fd = -1;
 	elf->ed_myflags |= EDF_READ | EDF_MEMORY;
@@ -301,15 +301,15 @@ elf_begin(int fd, Elf_Cmd cmd, Elf *ref)
 	if (work == EV_NONE)	/* version() not called yet */
 	{
 		_elf_seterr(ESEQ_VER, 0);
-		return (0);
+		return (NULL);
 	}
 	switch (cmd) {
 	default:
 		_elf_seterr(EREQ_BEGIN, 0);
-		return (0);
+		return (NULL);
 
 	case ELF_C_NULL:
-		return (0);
+		return (NULL);
 
 	case ELF_C_IMAGE:
 		if (ref) {
@@ -319,7 +319,7 @@ elf_begin(int fd, Elf_Cmd cmd, Elf *ref)
 			if ((image = ref->ed_wrimage) == 0) {
 				_elf_seterr(EREQ_NOWRIMAGE, 0);
 				ELFUNLOCK(ref);
-				return (0);
+				return (NULL);
 			}
 			imagesz = ref->ed_wrimagesz;
 			ELFUNLOCK(ref);
@@ -327,9 +327,9 @@ elf_begin(int fd, Elf_Cmd cmd, Elf *ref)
 		}
 		/* FALLTHROUGH */
 	case ELF_C_WRITE:
-		if ((elf = (Elf *)calloc(1, sizeof (Elf))) == 0) {
+		if ((elf = calloc(1, sizeof (Elf))) == NULL) {
 			_elf_seterr(EMEM_ELF, errno);
-			return (0);
+			return (NULL);
 		}
 		ELFRWLOCKINIT(&elf->ed_rwlock);
 		elf->ed_fd = fd;
@@ -354,14 +354,14 @@ elf_begin(int fd, Elf_Cmd cmd, Elf *ref)
 	 */
 
 	if (ref == 0) {
-		if ((elf = _elf_regular(fd, flags)) == 0)
-			return (0);
+		if ((elf = _elf_regular(fd, flags)) == NULL)
+			return (NULL);
 	} else {
 		ELFWLOCK(ref);
 		if ((ref->ed_myflags & flags) != flags) {
 			_elf_seterr(EREQ_RDWR, 0);
 			ELFUNLOCK(ref);
-			return (0);
+			return (NULL);
 		}
 		/*
 		 * new activation ?
@@ -371,9 +371,9 @@ elf_begin(int fd, Elf_Cmd cmd, Elf *ref)
 			ELFUNLOCK(ref);
 			return (ref);
 		}
-		if ((elf = _elf_member(fd, ref, flags)) == 0) {
+		if ((elf = _elf_member(fd, ref, flags)) == NULL) {
 			ELFUNLOCK(ref);
-			return (0);
+			return (NULL);
 		}
 		ELFUNLOCK(ref);
 	}

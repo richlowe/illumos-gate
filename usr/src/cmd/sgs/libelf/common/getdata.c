@@ -25,9 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*	  All Rights Reserved	*/
 
 #include <stdlib.h>
 #include <assert.h>
@@ -61,7 +59,7 @@ static const size_t	align32[ELF_T_NUM] =
 	sizeof (Elf32),		/* ELF_T_VERNEED */
 	sizeof (Elf64_Sxword),	/* ELF_T_SXWORD */
 	sizeof (Elf64),		/* ELF_T_XWORD */
-	sizeof (Elf32_Half), 	/* ELF_T_SYMINFO */
+	sizeof (Elf32_Half),	/* ELF_T_SYMINFO */
 	sizeof (Elf32),		/* ELF_T_NOTE */
 	sizeof (Elf32_Lword),	/* ELF_T_MOVE */
 	sizeof (Elf32_Lword),	/* ELF_T_MOVEP */
@@ -90,7 +88,7 @@ static const size_t	align64[ELF_T_NUM] =
 	sizeof (Elf64),		/* ELF_T_VNEED */
 	sizeof (Elf64),		/* ELF_T_SXWORD */
 	sizeof (Elf64),		/* ELF_T_XWORD */
-	sizeof (Elf32_Half), 	/* ELF_T_SYMINFO */
+	sizeof (Elf32_Half),	/* ELF_T_SYMINFO */
 	sizeof (Elf32),		/* ELF_T_NOTE */
 	sizeof (Elf64),		/* ELF_T_MOVE */
 	sizeof (Elf64),		/* ELF_T_MOVEP */
@@ -270,16 +268,16 @@ _elf_locked_getdata(Elf_Scn * scn, Elf_Data * data)
 
 		/*FALLTHRU*/
 	case ES_FROZEN:
-		if ((d->db_buf = malloc(d->db_data.d_size)) == 0) {
+		if ((d->db_buf = malloc(d->db_data.d_size)) == NULL) {
 			_elf_seterr(EMEM_DATA, errno);
-			return (0);
+			return (NULL);
 		}
 		d->db_data.d_buf = d->db_buf;
 		break;
 
 	default:
 		_elf_seterr(EBUG_COOKSTAT, 0);
-		return (0);
+		return (NULL);
 	}
 
 	if (elf->ed_class == ELFCLASS32) {

@@ -1527,13 +1527,13 @@ initialize(int shnum, Cmd_Info *cmd_info, file_state_t *state)
 		mcs_exit(FAILURE);
 	}
 
-	state->off_table = (int64_t *)calloc(shnum, sizeof (int64_t));
+	state->off_table = calloc(shnum, sizeof (int64_t));
 	if (state->off_table == NULL) {
 		error_message(MALLOC_ERROR, PLAIN_ERROR, NULL, prog);
 		mcs_exit(FAILURE);
 	}
 
-	state->nobits_table = (int64_t *)calloc(shnum, sizeof (int64_t));
+	state->nobits_table = calloc(shnum, sizeof (int64_t));
 	if (state->nobits_table == NULL) {
 		error_message(MALLOC_ERROR, PLAIN_ERROR, NULL, prog);
 		mcs_exit(FAILURE);

@@ -543,7 +543,7 @@ setup(char **envp, auxv_t *auxv, Word _flags, char *_platform, int _syspagsz,
 			 * relocation code.
 			 */
 			if ((mpp =
-			    calloc(sizeof (mmapobj_result_t), 2)) == NULL)
+			    calloc(2, sizeof (mmapobj_result_t))) == NULL)
 				return (0);
 
 			if ((fdm.fd_nname =

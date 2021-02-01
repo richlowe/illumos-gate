@@ -23,9 +23,6 @@
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-/* LINTLIBRARY */
 
 #include	<sys/mman.h>
 #include	<sys/types.h>
@@ -262,7 +259,7 @@ filladdr(void)
 	num = (int)(status.st_size / sizeof (prmap_t));
 	size = num * sizeof (prmap_t);
 
-	if ((maps = alloca(size)) == 0) {
+	if ((maps = alloca(size)) == NULL) {
 		(void) fprintf(stderr, MSG_INTL(MSG_SYS_ALLOC),
 		    MSG_ORIG(MSG_FIL_LIBCRLE), strerror(ENOMEM));
 		(void) close(pfd);

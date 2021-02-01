@@ -19,7 +19,7 @@
  * CDDL HEADER END
  */
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * Copyright (c) 1995, 2010, Oracle and/or its affiliates. All rights reserved.
@@ -98,7 +98,7 @@ main(int argc, char **argv, char *envp[])
 	/*
 	 * Initialize cmd_info
 	 */
-	cmd_info = (Cmd_info *)calloc(1, sizeof (Cmd_info));
+	cmd_info = calloc(1, sizeof (Cmd_info));
 	if (cmd_info == NULL) {
 		int err = errno;
 		(void) fprintf(stderr, MSG_INTL(MSG_MALLOC), strerror(err));
@@ -112,7 +112,7 @@ main(int argc, char **argv, char *envp[])
 	 * Option handling.
 	 */
 	if (argv[1][0] != '-') {
-		new = (char *)malloc(strlen(argv[1]) + 2);
+		new = malloc(strlen(argv[1]) + 2);
 		if (new == NULL) {
 			int err = errno;
 			(void) fprintf(stderr, MSG_INTL(MSG_MALLOC),

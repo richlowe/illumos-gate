@@ -69,7 +69,8 @@ _elf_seterr(Msg lib_err, int sys_err)
 }
 
 int
-_elf_geterr() {
+_elf_geterr()
+{
 	if (thr_main())
 		return (_elf_err);
 	return ((uintptr_t)pthread_getspecific(errkey));
@@ -108,7 +109,7 @@ elf_errmsg(int err)
 		buffer = pthread_getspecific(bufkey);
 
 		if (!buffer) {
-			if ((buffer = malloc(MAXELFERR)) == 0)
+			if ((buffer = malloc(MAXELFERR)) == NULL)
 				return (MSG_INTL(EMEM_ERRMSG));
 			if (thr_setspecific(bufkey, buffer) != 0) {
 				free(buffer);

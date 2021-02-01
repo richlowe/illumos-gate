@@ -273,7 +273,7 @@ disp_scansyms(Ifl_desc * ifl, Rel_desc *rld, Boolean rlocal, int inspect,
 	if (tsdp == 0) {
 		if ((rlocal == TRUE) ||
 		    ((rtype != STT_OBJECT) && (rtype != STT_SECTION)))
-		return (tsdp);
+			return (tsdp);
 	} else {
 		/*
 		 * If both symbols are local, no copy relocations can occur to

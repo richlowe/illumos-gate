@@ -25,7 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved		*/
 
 /*
  * This stuff used to live in cook.c, but was moved out to
@@ -97,7 +97,7 @@ _elf_prepscn(Elf *elf, size_t cnt)
 	if (cnt == 0)
 		return (OK_YES);
 
-	if ((s = malloc(cnt * sizeof (Elf_Scn))) == 0) {
+	if ((s = calloc(cnt, sizeof (Elf_Scn))) == NULL) {
 		_elf_seterr(EMEM_SCN, errno);
 		return (OK_NO);
 	}
@@ -196,9 +196,9 @@ _elf_snode()
 {
 	register Snode	*s;
 
-	if ((s = malloc(sizeof (Snode))) == 0) {
+	if ((s = malloc(sizeof (Snode))) == NULL) {
 		_elf_seterr(EMEM_SNODE, errno);
-		return (0);
+		return (NULL);
 	}
 	*s = _elf_snode_init;
 	ELFMUTEXINIT(&s->sb_scn.s_mutex);
@@ -316,7 +316,7 @@ _elf_phdr(Elf * elf, int inplace)
 		elf->ed_phdr = (Elf_Void *)(elf->ed_ident + eh->e_phoff);
 		elf->ed_status = ES_COOKED;
 	} else {
-		if ((elf->ed_phdr = malloc(msz)) == 0) {
+		if ((elf->ed_phdr = malloc(msz)) == NULL) {
 			_elf_seterr(EMEM_PHDR, errno);
 			return (-1);
 		}
@@ -403,7 +403,7 @@ _elf_shdr(Elf * elf, int inplace)
 		elf->ed_shdr = (Shdr *)(elf->ed_ident + eh->e_shoff);
 		elf->ed_status = ES_COOKED;
 	} else {
-		if ((elf->ed_shdr = malloc(msz)) == 0) {
+		if ((elf->ed_shdr = malloc(msz)) == NULL) {
 			_elf_seterr(EMEM_SHDR, errno);
 			return (-1);
 		}

@@ -24,8 +24,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include <sys/systeminfo.h>
 #include <sys/utsname.h>
 #include <limits.h>
@@ -47,8 +45,8 @@ conv_isalist(void)
 	long		size;
 	int		no;
 
-	if ((desc = calloc(1, sizeof (Isa_desc))) == 0)
-		return (0);
+	if ((desc = calloc(1, sizeof (Isa_desc))) == NULL)
+		return (NULL);
 
 	/*
 	 * If we can't get the isalist() perhaps we've gone back to a release
@@ -61,7 +59,7 @@ conv_isalist(void)
 	/*
 	 * Duplicate the isalist string in preparation for breaking it up.
 	 */
-	if ((list = strdup(info)) == 0)
+	if ((list = strdup(info)) == NULL)
 		return (desc);
 	desc->isa_list = list;
 
@@ -73,7 +71,7 @@ conv_isalist(void)
 		if (*ptr == ' ')
 			no++;
 	}
-	if ((opt = malloc(no * sizeof (Isa_opt))) == 0)
+	if ((opt = calloc(no, sizeof (Isa_opt))) == NULL)
 		return (desc);
 	desc->isa_opt = opt;
 	desc->isa_optno = no;
@@ -111,8 +109,8 @@ conv_uts(void)
 	Uts_desc *	desc;
 	size_t		size;
 
-	if ((desc = calloc(1, sizeof (Uts_desc))) == 0)
-		return (0);
+	if ((desc = calloc(1, sizeof (Uts_desc))) == NULL)
+		return (NULL);
 
 	/*
 	 * If we can't get the uname(2) silently ignore.
@@ -124,14 +122,14 @@ conv_uts(void)
 	 * Duplicate the operating system name and release components.
 	 */
 	size = strlen(utsname.sysname);
-	if ((desc->uts_osname = malloc(size + 1)) == 0)
+	if ((desc->uts_osname = malloc(size + 1)) == NULL)
 		return (desc);
 	desc->uts_osnamesz = size;
 	(void) strncpy(desc->uts_osname, utsname.sysname, size);
 
 	size = strlen(utsname.release);
-	if ((desc->uts_osrel = malloc(size + 1)) == 0)
-		return (0);
+	if ((desc->uts_osrel = malloc(size + 1)) == NULL)
+		return (NULL);
 	desc->uts_osrelsz = size;
 	(void) strncpy(desc->uts_osrel, utsname.release, size);
 

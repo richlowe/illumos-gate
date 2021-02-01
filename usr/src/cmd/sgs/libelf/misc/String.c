@@ -25,10 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
-
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*	  All Rights Reserved	*/
 
 /*
  * C++ Demangler Source Code
@@ -56,19 +53,18 @@ jmp_buf jbuf;
  * can be appended to it
  */
 static String *
-grow(s)
-String *s;
+grow(String *s)
 {
 	String *ns;
 	int sz = s->sg.max * 2;
 	assert(sz > 0);
 #ifdef ELF
-	if ((ns = (String *)malloc(sz + sizeof (StringGuts) + 1)) == NULL)
+	if ((ns = malloc(sz + sizeof (StringGuts) + 1)) == NULL)
 		longjmp(jbuf, 1);
 	(void) memcpy(ns, s, s->sg.max + sizeof (StringGuts) + 1);
 	free(s);
 #else
-	if ((ns = (String *)realloc(s, sz + sizeof (StringGuts) + 1)) == NULL)
+	if ((ns = realloc(s, sz + sizeof (StringGuts) + 1)) == NULL)
 		longjmp(jbuf, 1);
 #endif
 	ns->sg.max = sz;
@@ -81,9 +77,7 @@ String *s;
  * can be prepended to it.
  */
 static String *
-ror(s, n)
-String *s;
-int n;
+ror(String *s, int n)
 {
 	assert(s != 0);
 	while (s->sg.end + n > s->sg.max)
@@ -110,9 +104,7 @@ int n;
  * to s
  */
 String *
-prep_String(c, s)
-char *c;
-String *s;
+prep_String(char *c, String *s)
 {
 	return (nprep_String(c, s, ID_NAME_MAX));
 }
@@ -122,10 +114,7 @@ String *s;
  * first n characters of c to s
  */
 String *
-nprep_String(c, s, n)
-const char *c;
-String *s;
-int n;
+nprep_String(const char *c, String *s, int n)
 {
 	int len = strlen(c);
 	assert(s != 0);
@@ -143,9 +132,7 @@ int n;
  * c to s.
  */
 String *
-app_String(s, c)
-String *s;
-const char *c;
+app_String(String *s, const char *c)
 {
 	return (napp_String(s, c, ID_NAME_MAX));
 }
@@ -179,12 +166,11 @@ napp_String(String *s, const char *c, int n)
  * from being re-initialized.
  */
 String *
-mk_String(s)
-String *s;
+mk_String(String *s)
 {
 	if (s)
 		return (s);
-	s = (String *)malloc(STRING_START + sizeof (StringGuts) + 1);
+	s = malloc(STRING_START + sizeof (StringGuts) + 1);
 	if (s == NULL)
 		longjmp(jbuf, 1);
 	s->sg.start = s->sg.end = STRING_START/2;
@@ -194,8 +180,7 @@ String *s;
 }
 
 void
-free_String(s)
-String *s;
+free_String(String *s)
 {
 	if (s)
 		free(s);
@@ -207,9 +192,7 @@ String *s;
  * Used for initialization.
  */
 String *
-set_String(s, c)
-String *s;
-char *c;
+set_String(String *s, char *c)
 {
 	int len = strlen(c)*2;
 	while (len > s->sg.max)

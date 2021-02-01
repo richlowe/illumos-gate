@@ -49,8 +49,6 @@ LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
 LDFLAGS +=	$(VERSREF) $(MAPOPTS) $(LLDFLAGS)
 LDLIBS +=	$(CONVLIBDIR) -lconv -lelf
 
-SMOFF += or_vs_and
-
 BLTDEFS=        msg.h
 BLTDATA=        msg.c
 BLTMESG=        $(SGSMSGDIR)/ldd
@@ -66,3 +64,6 @@ SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA) \
 		$(SGSCOMMONOBJ:%.o=$(SGSCOMMON)/%.c)
 
 CLEANFILES +=	$(BLTFILES)
+
+# We bitwise and M_FLAGSPLUS, which is 0 unless on SPARC
+ldd.o := SMOFF += or_vs_and

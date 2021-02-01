@@ -343,7 +343,7 @@ rt_dldump(Rt_map *lmp, const char *opath, int flags, Addr addr)
 
 	if (status)
 		num++;
-	if ((icache = calloc(num + 1, sizeof (Cache))) == 0) {
+	if ((icache = calloc(num + 1, sizeof (Cache))) == NULL) {
 		cleanup(ielf, oelf, melf, icache, mcache, fd, opath);
 		return (1);
 	}
@@ -568,7 +568,7 @@ rt_dldump(Rt_map *lmp, const char *opath, int flags, Addr addr)
 	 * Establish a buffer for the new section header string table.  This
 	 * will be filled in as each new section is created.
 	 */
-	if ((shstr = malloc(shstr_size)) == 0) {
+	if ((shstr = malloc(shstr_size)) == NULL) {
 		cleanup(ielf, oelf, melf, icache, mcache, fd, opath);
 		return (1);
 	}
@@ -769,7 +769,7 @@ rt_dldump(Rt_map *lmp, const char *opath, int flags, Addr addr)
 	/*
 	 * Construct a cache to maintain the memory files section information.
 	 */
-	if ((mcache = calloc(shndx, sizeof (Cache))) == 0) {
+	if ((mcache = calloc(shndx, sizeof (Cache))) == NULL) {
 		cleanup(ielf, oelf, melf, icache, mcache, fd, opath);
 		return (1);
 	}

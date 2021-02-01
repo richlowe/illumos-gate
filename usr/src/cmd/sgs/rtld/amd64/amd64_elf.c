@@ -82,7 +82,7 @@ static const uchar_t dyn_plt_template[] = {
 /* 0x08 */  0x4c, 0x8d, 0x1d, 0x00,	/* leaq  trace_fields(%rip), %r11 */
 		0x00, 0x00, 0x00,
 /* 0x0f */  0x4c, 0x89, 0x5d, 0xf8,	/* movq  %r11, -0x8(%rbp) */
-/* 0x13 */  0x49, 0xbb, 0x00, 0x00, 	/* movq  $elf_plt_trace, %r11 */
+/* 0x13 */  0x49, 0xbb, 0x00, 0x00,	/* movq	 $elf_plt_trace, %r11 */
 		0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00,
 /* 0x1d */  0x41, 0xff, 0xe3		/* jmp   *%r11 */
@@ -236,20 +236,6 @@ elf_bndr(Rt_map *lmp, ulong_t pltndx, caddr_t from)
 		dbg_desc->d_class = 0;
 	}
 
-	/*
-	 * Perform some basic sanity checks.  If we didn't get a load map or
-	 * the relocation offset is invalid then its possible someone has walked
-	 * over the .got entries or jumped to plt0 out of the blue.
-	 */
-	if ((!lmp) && (pltndx <=
-	    (ulong_t)PLTRELSZ(lmp) / (ulong_t)RELENT(lmp))) {
-		Conv_inv_buf_t inv_buf;
-
-		eprintf(lml, ERR_FATAL, MSG_INTL(MSG_REL_PLTREF),
-		    conv_reloc_amd64_type(R_AMD64_JUMP_SLOT, 0, &inv_buf),
-		    EC_NATPTR(lmp), EC_XWORD(pltndx), EC_NATPTR(from));
-		rtldexit(lml, 1);
-	}
 	reloff = pltndx * (ulong_t)RELENT(lmp);
 
 	/*
@@ -257,6 +243,22 @@ elf_bndr(Rt_map *lmp, ulong_t pltndx, caddr_t from)
 	 */
 	addr = (ulong_t)JMPREL(lmp);
 	rptr = (Rela *)(addr + reloff);
+
+	/*
+	 * Perform some basic sanity checks.  If the relocation offset is
+	 * invalid then its possible someone has walked over the .got entries
+	 * or jumped to plt0 out of the blue.
+	 */
+	if ((uintptr_t)rptr >= (addr + PLTRELSZ(lmp))) {
+		Conv_inv_buf_t inv_buf;
+
+		eprintf(lml, ERR_FATAL, MSG_INTL(MSG_REL_PLTREF),
+		    conv_reloc_amd64_type(R_AMD64_JUMP_SLOT, 0, &inv_buf),
+		    EC_NATPTR(lmp), EC_XWORD(pltndx), EC_NATPTR(from));
+		rtldexit(lml, 1);
+	}
+
+
 	rsymndx = ELF_R_SYM(rptr->r_info);
 	rsym = (Sym *)((ulong_t)SYMTAB(lmp) + (rsymndx * SYMENT(lmp)));
 	name = (char *)(STRTAB(lmp) + rsym->st_name);
@@ -938,7 +940,7 @@ elf_plt_init(void *got, caddr_t l)
 Pltbindtype
 /* ARGSUSED1 */
 elf_plt_write(uintptr_t addr, uintptr_t vaddr, void *rptr, uintptr_t symval,
-	Xword pltndx)
+    Xword pltndx)
 {
 	Rela		*rel = (Rela*)rptr;
 	uintptr_t	pltaddr;

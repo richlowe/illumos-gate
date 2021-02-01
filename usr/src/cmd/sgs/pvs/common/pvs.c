@@ -720,7 +720,7 @@ gvers_desc(const char *name, unsigned long hash, APlist **lst, const char *file)
 	GVer_desc	*vdp;
 
 	if ((vdp = gvers_find(name, hash, *lst)) == NULL) {
-		if ((vdp = calloc(sizeof (GVer_desc), 1)) == NULL) {
+		if ((vdp = calloc(1, sizeof (GVer_desc))) == NULL) {
 			int err = errno;
 			(void) fprintf(stderr, MSG_INTL(MSG_SYS_MALLOC), cname,
 			    file, strerror(err));

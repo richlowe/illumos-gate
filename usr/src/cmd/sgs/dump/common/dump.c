@@ -791,109 +791,121 @@ dump_reloc_table(Elf *elf_file, GElf_Ehdr *p_ehdr,
 			continue;
 		}
 
-	head_scns = p_head_scns;
+		head_scns = p_head_scns;
 
-	if (elf_getshdrnum(elf_file, &shnum) == -1) {
-		(void) fprintf(stderr,
-		    "%s: %s: elf_getshdrnum failed: %s\n",
-		    prog_name, filename, elf_errmsg(-1));
-		return;
-	}
-
-	if ((p_scns->p_shdr.sh_link == 0) ||
-	    /* LINTED */
-	    (p_scns->p_shdr.sh_link >= (GElf_Word)shnum)) {
-		(void) fprintf(stderr, "%s: %s: invalid sh_link field: "
-		    "section #: %d sh_link: %d\n",
-		    /* LINTED */
-		    prog_name, filename, (int)elf_ndxscn(p_scns->p_sd),
-		    (int)p_scns->p_shdr.sh_link);
-		return;
-	}
-	head_scns += (p_scns->p_shdr.sh_link -1);
-
-	if (head_scns->p_shdr.sh_type == SHT_SYMTAB) {
-		reloc_symtab = p_symtab;
-	} else if (head_scns->p_shdr.sh_type  == SHT_DYNSYM) {
-		reloc_symtab = p_dynsym;
-	} else {
-		(void) fprintf(stderr,
-"%s: %s: could not get symbol table\n", prog_name, filename);
-		return;
-	}
-
-	sym_data = NULL;
-	sym_size = 0;
-	reloc_size = 0;
-
-	if ((sym_data = elf_getdata(reloc_symtab->p_sd, NULL)) == NULL) {
-		(void) fprintf(stderr,
-		"%s: %s: no symbol table data\n", prog_name, filename);
-		return;
-	}
-	sym_size = sym_data->d_size;
-
-	if (p_scns->p_shdr.sh_type == SHT_RELA) {
-		if (!n_flag && r_flag)
-			(void) printf("\n%s:\n", p_scns->scn_name);
-		if (!p_flag && (!n_flag && r_flag))
-			(void) printf("%-*s%-*s%-*s%s\n\n",
-			    12 + adj, "Offset", 22, "Symndx",
-			    18, "Type", "Addend");
-		if ((rel_data = elf_getdata(p_scns->p_sd, NULL)) == NULL) {
+		if (elf_getshdrnum(elf_file, &shnum) == -1) {
 			(void) fprintf(stderr,
-"%s: %s: no relocation information\n", prog_name, filename);
+			    "%s: %s: elf_getshdrnum failed: %s\n",
+			    prog_name, filename, elf_errmsg(-1));
 			return;
 		}
-		reloc_size = rel_data->d_size;
 
-		if (n_flag) {
-			rn_flag = 1;
-			print_rela(elf_file, p_scns, rel_data, sym_data, p_ehdr,
-			    reloc_size, sym_size, filename, reloc_symtab);
+		if ((p_scns->p_shdr.sh_link == 0) ||
+		    /* LINTED */
+		    (p_scns->p_shdr.sh_link >= (GElf_Word)shnum)) {
+			(void) fprintf(stderr, "%s: %s: invalid sh_link field: "
+			    "section #: %d sh_link: %d\n",
+			    /* LINTED */
+			    prog_name, filename, (int)elf_ndxscn(p_scns->p_sd),
+			    (int)p_scns->p_shdr.sh_link);
+			return;
 		}
-		if (d_flag) {
-			rn_flag = 0;
-			print_rela(elf_file, p_scns, rel_data, sym_data, p_ehdr,
-			    reloc_size, sym_size, filename, reloc_symtab);
+		head_scns += (p_scns->p_shdr.sh_link -1);
+
+		if (head_scns->p_shdr.sh_type == SHT_SYMTAB) {
+			reloc_symtab = p_symtab;
+		} else if (head_scns->p_shdr.sh_type  == SHT_DYNSYM) {
+			reloc_symtab = p_dynsym;
+		} else {
+			(void) fprintf(stderr,
+			    "%s: %s: could not get symbol table\n", prog_name,
+			    filename);
+			return;
 		}
-		if (!n_flag && !d_flag)
-			print_rela(elf_file, p_scns, rel_data, sym_data, p_ehdr,
-			    reloc_size, sym_size, filename, reloc_symtab);
-	} else {
-		if (p_scns->p_shdr.sh_type == SHT_REL) {
+
+		sym_data = NULL;
+		sym_size = 0;
+		reloc_size = 0;
+
+		if ((sym_data = elf_getdata(reloc_symtab->p_sd,
+		    NULL)) == NULL) {
+			(void) fprintf(stderr,
+			    "%s: %s: no symbol table data\n", prog_name,
+			    filename);
+			return;
+		}
+		sym_size = sym_data->d_size;
+
+		if (p_scns->p_shdr.sh_type == SHT_RELA) {
 			if (!n_flag && r_flag)
 				(void) printf("\n%s:\n", p_scns->scn_name);
-			if (!p_flag && (!n_flag && r_flag)) {
-				(void) printf("%-*s%-*s%s\n\n",
-				    12 + adj, "Offset", 20, "Symndx", "Type");
-			}
-			if ((rel_data = elf_getdata(p_scns->p_sd, NULL))
-			    == NULL) {
+			if (!p_flag && (!n_flag && r_flag))
+				(void) printf("%-*s%-*s%-*s%s\n\n",
+				    12 + adj, "Offset", 22, "Symndx",
+				    18, "Type", "Addend");
+			if ((rel_data = elf_getdata(p_scns->p_sd,
+			    NULL)) == NULL) {
 				(void) fprintf(stderr,
-"%s: %s: no relocation information\n", prog_name, filename);
+				    "%s: %s: no relocation information\n",
+				    prog_name, filename);
 				return;
 			}
 			reloc_size = rel_data->d_size;
+
 			if (n_flag) {
 				rn_flag = 1;
-				print_rel(elf_file, p_scns, rel_data, sym_data,
-				    p_ehdr, reloc_size, sym_size,
+				print_rela(elf_file, p_scns, rel_data,
+				    sym_data, p_ehdr, reloc_size, sym_size,
 				    filename, reloc_symtab);
 			}
 			if (d_flag) {
 				rn_flag = 0;
-				print_rel(elf_file, p_scns, rel_data, sym_data,
-				    p_ehdr, reloc_size, sym_size,
+				print_rela(elf_file, p_scns, rel_data,
+				    sym_data, p_ehdr, reloc_size, sym_size,
 				    filename, reloc_symtab);
 			}
 			if (!n_flag && !d_flag)
-				print_rel(elf_file, p_scns, rel_data, sym_data,
-				    p_ehdr, reloc_size, sym_size,
+				print_rela(elf_file, p_scns, rel_data,
+				    sym_data, p_ehdr, reloc_size, sym_size,
 				    filename, reloc_symtab);
+		} else {
+			if (p_scns->p_shdr.sh_type == SHT_REL) {
+				if (!n_flag && r_flag)
+					(void) printf("\n%s:\n",
+					    p_scns->scn_name);
+				if (!p_flag && (!n_flag && r_flag)) {
+					(void) printf("%-*s%-*s%s\n\n",
+					    12 + adj, "Offset", 20,
+					    "Symndx", "Type");
+				}
+				if ((rel_data = elf_getdata(p_scns->p_sd,
+				    NULL)) == NULL) {
+					(void) fprintf(stderr,
+					    "%s: %s: no relocation "
+					    "information\n",
+					    prog_name, filename);
+					return;
+				}
+				reloc_size = rel_data->d_size;
+				if (n_flag) {
+					rn_flag = 1;
+					print_rel(elf_file, p_scns, rel_data,
+					    sym_data, p_ehdr, reloc_size,
+					    sym_size, filename, reloc_symtab);
+				}
+				if (d_flag) {
+					rn_flag = 0;
+					print_rel(elf_file, p_scns, rel_data,
+					    sym_data, p_ehdr, reloc_size,
+					    sym_size, filename, reloc_symtab);
+				}
+				if (!n_flag && !d_flag)
+					print_rel(elf_file, p_scns, rel_data,
+					    sym_data, p_ehdr, reloc_size,
+					    sym_size, filename, reloc_symtab);
+			}
 		}
-	}
-	p_scns++;
+		p_scns++;
 	}
 }
 

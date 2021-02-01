@@ -77,7 +77,7 @@ ask_db(struct db *dbp, const char *file)
 	n = (char *)file;
 	if ((liblen = extract_name(&n)) == -1)
 		return (NULL);
-	if ((libname = malloc(liblen + 1)) == 0)
+	if ((libname = malloc(liblen + 1)) == NULL)
 		return (NULL);
 	(void) strncpy(libname, n, liblen);
 	libname[liblen] = '\0';
@@ -191,7 +191,7 @@ find_so(const char *ds)
 	 * Have a directory, have a buffer.  Allocate up a database
 	 * and initialize it.
 	 */
-	dbp = calloc(sizeof (struct db), 1);
+	dbp = calloc(1, sizeof (struct db));
 	dbp->db_name = RELPTR(dbp, calloc((strlen(ds) + 1), 1));
 	(void) strcpy((char *)&AP(dbp)[dbp->db_name], ds);
 
@@ -278,7 +278,7 @@ find_so(const char *ds)
 				}
 				if (ep->dbe_next == 0) {
 					ep->dbe_next = RELPTR(dbp,
-					    calloc(sizeof (struct dbe), 1));
+					    calloc(1, sizeof (struct dbe)));
 					/* LINTED */
 					ep  = (struct dbe *)
 					    &AP(dbp)[ep->dbe_next];
@@ -325,7 +325,7 @@ get_lo(struct db *dbp, char *cp, int cplen, int m, int n)
 	 * field in the database (!)
 	 */
 	lop = (struct link_object *)RELPTR(dbp,
-	    calloc(sizeof (struct link_object), 1));
+	    calloc(1, sizeof (struct link_object)));
 	/* LINTED */
 	tlop = (struct link_object *)&AP(dbp)[(long)lop];
 	tlop->lo_major = m;

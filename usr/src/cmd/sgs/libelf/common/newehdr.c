@@ -25,9 +25,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*	  All Rights Reserved	*/
 
 #include <stdlib.h>
 #include <errno.h>
@@ -103,10 +101,10 @@ elf_newehdr(Elf * elf)
 	}
 	ELFWLOCK(elf)
 
-	if ((eh = (Ehdr *)malloc(sizeof (Ehdr))) == 0) {
+	if ((eh = malloc(sizeof (Ehdr))) == NULL) {
 		_elf_seterr(EMEM_EHDR, errno);
 		ELFUNLOCK(elf)
-		return (0);
+		return (NULL);
 	}
 	*eh = _elf_ehdr_init;
 	elf->ed_myflags |= EDF_EHALLOC;

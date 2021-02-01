@@ -485,9 +485,9 @@ compress(char *str, size_t *size)
 		}
 		if (hash_num == hash_end) {
 			hash_end *= 2;
-			hash_key = realloc((char *)hash_key,
+			hash_key = realloc(hash_key,
 			    hash_end * sizeof (int));
-			hash_str = realloc((char *)hash_str,
+			hash_str = realloc(hash_str,
 			    hash_end * sizeof (size_t));
 			if (hash_key == NULL || hash_str == NULL) {
 				error_message(MALLOC_ERROR, PLAIN_ERROR, NULL,

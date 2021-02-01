@@ -133,7 +133,7 @@ typedef struct {
 		uint_t	n;		/* # items in shxndx.data */
 	} shxndx;
 	VERSYM_STATE	*versym;	/* NULL, or associated VERSYM section */
-	Sym 		*sym;		/* Array of symbols */
+	Sym		*sym;		/* Array of symbols */
 	Word		symn;		/* # of symbols */
 } SYMTBL_STATE;
 
@@ -1269,8 +1269,8 @@ output_symbol(SYMTBL_STATE *state, Word symndx, Word info, Word disp_symndx,
 	    (sym->st_shndx != SHN_UNDEF) && ((sym->st_shndx < SHN_LORESERVE) ||
 	    (sym->st_shndx == SHN_XINDEX)) && (tshdr != NULL)) {
 		Word v = sym->st_value;
-			if (state->ehdr->e_type != ET_REL)
-				v -= tshdr->sh_addr;
+		if (state->ehdr->e_type != ET_REL)
+			v -= tshdr->sh_addr;
 		if (((v + sym->st_size) > tshdr->sh_size)) {
 			(void) fprintf(stderr,
 			    MSG_INTL(MSG_ERR_BADSYM6), state->file,
@@ -1575,7 +1575,7 @@ cap_section(const char *file, Cache *cache, Word shnum, Cache *ccache,
 	    ((ehdr->e_type == ET_EXEC) || (ehdr->e_type == ET_DYN))) {
 		Capinfo		*cip;
 		Capchain	*chain;
-		Cache   	*chcache;
+		Cache		*chcache;
 		Shdr		*chshdr;
 		Word		chainnum, inum;
 
@@ -1965,7 +1965,7 @@ syminfo(Cache *cache, Word shnum, Ehdr *ehdr, uchar_t osabi, const char *file)
 	Elf_syminfo_title(0);
 
 	for (ndx = 1, info++; ndx < infonum; ndx++, info++) {
-		Sym 		*sym;
+		Sym		*sym;
 		const char	*needed, *name;
 		Word		expect_dt;
 		Word		boundto = info->si_boundto;
@@ -2135,7 +2135,7 @@ version_def(Verdef *vdf, Word vdf_num, Cache *vcache, Cache *scache,
  *	contain the largest version index seen.
  *
  * note:
- * 	The versym section of an object that follows the original
+ *	The versym section of an object that follows the original
  *	Solaris versioning rules only contains indexes into the verdef
  *	section. Symbols defined in other objects (UNDEF) are given
  *	a version of 0, indicating that they are not defined by
@@ -4328,7 +4328,7 @@ got(Cache *cache, Word shnum, Ehdr *ehdr, const char *file)
 	gotents = (Word)(gotshdr->sh_size / gentsize);
 	gotdata = gotcache->c_data->d_buf;
 
-	if ((gottable = calloc(gotents, sizeof (Got_info))) == 0) {
+	if ((gottable = calloc(gotents, sizeof (Got_info))) == NULL) {
 		int err = errno;
 		(void) fprintf(stderr, MSG_INTL(MSG_ERR_MALLOC), file,
 		    strerror(err));
@@ -4663,7 +4663,7 @@ shdr_cache(const char *file, Elf *elf, Ehdr *ehdr, size_t shstrndx,
 		/*
 		 * If a shstrtab exists, assign the section name.
 		 */
-		if (names && _cache->c_shdr) {
+		if (names != NULL) {
 			if (_cache->c_shdr->sh_name &&
 			    /* LINTED */
 			    (nameshdr->sh_size > _cache->c_shdr->sh_name)) {
@@ -4699,6 +4699,7 @@ shdr_cache(const char *file, Elf *elf, Ehdr *ehdr, size_t shstrndx,
 						(void) fprintf(stderr,
 						    MSG_INTL(MSG_ERR_MALLOC),
 						    file, strerror(err));
+						free(shdr_ndx_arr);
 						return (0);
 					}
 					(void) snprintf(_cache->c_name, strsz,
@@ -4736,6 +4737,7 @@ shdr_cache(const char *file, Elf *elf, Ehdr *ehdr, size_t shstrndx,
 			int err = errno;
 			(void) fprintf(stderr, MSG_INTL(MSG_ERR_MALLOC),
 			    file, strerror(err));
+			free(shdr_ndx_arr);
 			return (0);
 		}
 		(void) strcpy(_cache->c_name, scnndxnm);
@@ -4846,6 +4848,7 @@ shdr_cache(const char *file, Elf *elf, Ehdr *ehdr, size_t shstrndx,
 				    file, _cache->c_name);
 		}
 	}
+	free(shdr_ndx_arr);
 
 	return (1);
 }

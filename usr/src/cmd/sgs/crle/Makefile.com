@@ -42,9 +42,6 @@ OBJS=		$(BLTOBJ) $(COMOBJ) $(SGSCOMMONOBJ)
 MAPFILE=	$(MAPFILE.NGB)
 MAPOPT=		$(MAPFILE:%=-Wl,-M%)
 
-# not linted
-SMATCH=off
-
 CPPFLAGS +=	-I$(SRC)/common/sgsrtcid -I$(SRC)/uts/$(ARCH)/sys \
 		-D__EXTENSIONS__
 LLDFLAGS =	'-R$$ORIGIN/../lib'
@@ -68,3 +65,6 @@ SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA) \
 		$(COMMON:%.o=$(SGSCOMMON)/%.c)
 
 CLEANFILES +=	$(BLTFILES)
+
+# smatch sees the Studio strdupa macro, which is bad.
+print.o := SMOFF += all_func_returns
