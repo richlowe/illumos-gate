@@ -37,7 +37,6 @@
 # information about overriding the defaults.
 #
 <include global_zone_only_component>
-<include system-kernel.man1m.inc>
 <include system-kernel.man2.inc>
 <include system-kernel.man4.inc>
 <include system-kernel.man5.inc>
@@ -46,6 +45,7 @@
 <include system-kernel.man7fs.inc>
 <include system-kernel.man7m.inc>
 <include system-kernel.man7p.inc>
+<include system-kernel.man8.inc>
 <include system-kernel.man9.inc>
 <include system-kernel.man9e.inc>
 <include system-kernel.man9f.inc>
@@ -472,9 +472,6 @@ dir  path=usr/kernel/drv/$(ARCH64) group=sys
 file path=usr/kernel/drv/$(ARCH64)/signalfd group=sys
 file path=usr/kernel/drv/signalfd.conf group=sys
 dir  path=usr/share/man
-dir  path=usr/share/man/man1m
-$(sparc_ONLY)file path=usr/share/man/man1m/monitor.1m
-$(sparc_ONLY)file path=usr/share/man/man1m/obpsym.1m
 dir  path=usr/share/man/man2
 dir  path=usr/share/man/man3
 dir  path=usr/share/man/man4
@@ -485,6 +482,9 @@ $(i386_ONLY)file path=usr/share/man/man7d/smbios.7d
 dir  path=usr/share/man/man7fs
 dir  path=usr/share/man/man7m
 dir  path=usr/share/man/man7p
+dir  path=usr/share/man/man8
+$(sparc_ONLY)file path=usr/share/man/man8/monitor.8
+$(sparc_ONLY)file path=usr/share/man/man8/obpsym.8
 dir  path=usr/share/man/man9
 dir  path=usr/share/man/man9e
 dir  path=usr/share/man/man9f
