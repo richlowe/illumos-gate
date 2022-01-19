@@ -49,13 +49,13 @@ file path=kernel/misc/$(ARCH64)/ibtl group=sys mode=0755
 dir  path=usr/share/man
 dir  path=usr/share/man/man4
 file path=usr/share/man/man4/ib.4
+dir  path=usr/share/man/man4d
+file path=usr/share/man/man4d/ib.4d
+file path=usr/share/man/man4d/ibcm.4d
+file path=usr/share/man/man4d/ibdm.4d
+file path=usr/share/man/man4d/ibtl.4d
 dir  path=usr/share/man/man7
 file path=usr/share/man/man7/ibmf.7
-dir  path=usr/share/man/man7d
-file path=usr/share/man/man7d/ib.7d
-file path=usr/share/man/man7d/ibcm.7d
-file path=usr/share/man/man7d/ibdm.7d
-file path=usr/share/man/man7d/ibtl.7d
 driver name=ib perms="* 0644 root sys"
 legacy pkg=SUNWib desc="Sun InfiniBand Framework" \
     name="Sun InfiniBand Framework"

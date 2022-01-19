@@ -331,13 +331,13 @@
 .if '\\$2'4' .ds ]D File Formats
 .if '\\$2'4B' .ds ]D SunOS/BSD Compatibility Package File Formats
 .if '\\$2'4b' .ds ]D SunOS/BSD Compatibility Package File Formats
+.if '\\$2'4D' .ds ]D Devices
+.if '\\$2'4d' .ds ]D Devices
 .if '\\$2'5' .ds ]D Standards, Environments, and Macros
 .if '\\$2'6' .ds ]D Games and Demos
 .if '\\$2'7' .ds ]D Device and Network Interfaces
 .if '\\$2'7B' .ds ]D SunOS/BSD Compatibility Special Files
 .if '\\$2'7b' .ds ]D SunOS/BSD Compatibility Special Files
-.if '\\$2'7D' .ds ]D Devices
-.if '\\$2'7d' .ds ]D Devices
 .if '\\$2'7FS' .ds ]D File Systems
 .if '\\$2'7fs' .ds ]D File Systems
 .if '\\$2'7I' .ds ]D Ioctl Requests

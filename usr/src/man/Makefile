@@ -88,9 +88,9 @@ SUBDIRS=	man1		\
 		man3xcurses	\
 		man3xnet	\
 		man4		\
+		man4d		\
 		man5		\
 		man7		\
-		man7d		\
 		man7fs		\
 		man7i		\
 		man7ipp		\
