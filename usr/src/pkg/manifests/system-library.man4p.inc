@@ -11,4 +11,4 @@
 
 # Copyright 2011, Richard Lowe
 
-file path=usr/share/man/man7p/sip.7p
+file path=usr/share/man/man4p/sip.4p

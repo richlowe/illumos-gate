@@ -12,7 +12,7 @@
 .\" Copyright (c) 2015, Joyent, Inc.  All rights reserved.
 .\"
 .Dd Sep 02, 2015
-.Dt NDP 7P
+.Dt NDP 4P
 .Os
 .Sh NAME
 .Nm ndp ,

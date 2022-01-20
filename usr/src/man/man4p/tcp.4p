@@ -16,7 +16,7 @@
 .\" Copyright 1989 AT&T
 .\"
 .Dd "Jan 07, 2019"
-.Dt TCP 7P
+.Dt TCP 4P
 .Os
 .Sh NAME
 .Nm tcp ,

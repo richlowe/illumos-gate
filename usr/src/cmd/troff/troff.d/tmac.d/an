@@ -341,13 +341,13 @@
 .if '\\$2'4ipp' .ds ]D IP Quality of Service Modules
 .if '\\$2'4M' .ds ]D STREAMS Modules
 .if '\\$2'4m' .ds ]D STREAMS Modules
+.if '\\$2'4P' .ds ]D Protocols
+.if '\\$2'4p' .ds ]D Protocols
 .if '\\$2'5' .ds ]D Standards, Environments, and Macros
 .if '\\$2'6' .ds ]D Games and Demos
 .if '\\$2'7' .ds ]D Device and Network Interfaces
 .if '\\$2'7B' .ds ]D SunOS/BSD Compatibility Special Files
 .if '\\$2'7b' .ds ]D SunOS/BSD Compatibility Special Files
-.if '\\$2'7P' .ds ]D Protocols
-.if '\\$2'7p' .ds ]D Protocols
 .if '\\$2'8' .ds ]D Maintenance Commands and Procedures
 .if '\\$2'8C' .ds ]D Maintenance Procedures
 .if '\\$2'8c' .ds ]D Maintenance Procedures
