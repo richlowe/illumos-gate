@@ -873,7 +873,7 @@ $(sparc_ONLY)file path=usr/share/man/man4d/todopl.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/tsalarm.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/zs.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/zsh.4d
-$(sparc_ONLY)dir path=usr/share/man/man7m
+$(sparc_ONLY)dir path=usr/share/man/man4m
 $(sparc_ONLY)driver name=ac
 $(i386_ONLY)driver name=acpinex alias=acpivirtnex
 $(i386_ONLY)driver name=acpippm

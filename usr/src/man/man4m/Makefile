@@ -16,39 +16,39 @@
 
 include		$(SRC)/Makefile.master
 
-MANSECT= 	7m
+MANSECT= 	4m
 
-_MANFILES = 	bufmod.7m	\
-		connld.7m	\
-		ldterm.7m	\
-		pckt.7m		\
-		pfmod.7m	\
-		pipemod.7m	\
-		ptem.7m		\
-		sppptun.7m	\
-		timod.7m	\
-		tirdwr.7m	\
-		ttcompat.7m	\
-		usb_ah.7m	\
-		usbkbm.7m	\
-		usbms.7m	\
-		vuidmice.7m
+_MANFILES = 	bufmod.4m	\
+		connld.4m	\
+		ldterm.4m	\
+		pckt.4m		\
+		pfmod.4m	\
+		pipemod.4m	\
+		ptem.4m		\
+		sppptun.4m	\
+		timod.4m	\
+		tirdwr.4m	\
+		ttcompat.4m	\
+		usb_ah.4m	\
+		usbkbm.4m	\
+		usbms.4m	\
+		vuidmice.4m
 
 sparc_MANFILES=
 
-MANLINKS=	vuid2ps2.7m	\
-		vuid3ps2.7m	\
-		vuidm3p.7m	\
-		vuidm4p.7m	\
-		vuidm5p.7m
+MANLINKS=	vuid2ps2.4m	\
+		vuid3ps2.4m	\
+		vuidm3p.4m	\
+		vuidm4p.4m	\
+		vuidm5p.4m
 
 MANFILES=	$(_MANFILES) $($(MACH)_MANFILES)
 
-vuid2ps2.7m	:= LINKSRC = vuidmice.7m
-vuid3ps2.7m	:= LINKSRC = vuidmice.7m
-vuidm3p.7m	:= LINKSRC = vuidmice.7m
-vuidm4p.7m	:= LINKSRC = vuidmice.7m
-vuidm5p.7m	:= LINKSRC = vuidmice.7m
+vuid2ps2.4m	:= LINKSRC = vuidmice.4m
+vuid3ps2.4m	:= LINKSRC = vuidmice.4m
+vuidm3p.4m	:= LINKSRC = vuidmice.4m
+vuidm4p.4m	:= LINKSRC = vuidmice.4m
+vuidm5p.4m	:= LINKSRC = vuidmice.4m
 
 .KEEP_STATE:
 

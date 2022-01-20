@@ -41,9 +41,9 @@
 <include system-kernel.man4.inc>
 <include system-kernel.man4d.inc>
 <include system-kernel.man4fs.inc>
+<include system-kernel.man4m.inc>
 <include system-kernel.man5.inc>
 <include system-kernel.man7.inc>
-<include system-kernel.man7m.inc>
 <include system-kernel.man7p.inc>
 <include system-kernel.man8.inc>
 <include system-kernel.man9.inc>
@@ -479,8 +479,8 @@ dir  path=usr/share/man/man4d
 $(sparc_ONLY)file path=usr/share/man/man4d/dad.4d
 $(i386_ONLY)file path=usr/share/man/man4d/smbios.4d
 dir  path=usr/share/man/man4fs
+dir  path=usr/share/man/man4m
 dir  path=usr/share/man/man5
-dir  path=usr/share/man/man7m
 dir  path=usr/share/man/man7p
 dir  path=usr/share/man/man8
 $(sparc_ONLY)file path=usr/share/man/man8/monitor.8
