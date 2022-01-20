@@ -16,7 +16,7 @@
 .\" fields enclosed by brackets "[]" replaced with your own identifying
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .Dd August 13, 2021
-.Dt TERMIO 7I
+.Dt TERMIO 4I
 .Os
 .Sh NAME
 .Nm termio

@@ -16,30 +16,30 @@
 
 include		$(SRC)/Makefile.master
 
-MANSECT=	7i
+MANSECT=	4i
 
-MANFILES=	audio.7i	\
-		cdio.7i		\
-		dkio.7i		\
-		dsp.7i		\
-		fbio.7i		\
-		fdio.7i		\
-		hdio.7i		\
-		iec61883.7i	\
-		ipnat.7i	\
-		mhd.7i		\
-		mixer.7i	\
-		mtio.7i		\
-		prnio.7i	\
-		quotactl.7i	\
-		sesio.7i	\
-		sockio.7i	\
-		streamio.7i	\
-		termio.7i	\
-		termiox.7i	\
-		uscsi.7i	\
-		visual_io.7i	\
-		vt.7i
+MANFILES=	audio.4i	\
+		cdio.4i		\
+		dkio.4i		\
+		dsp.4i		\
+		fbio.4i		\
+		fdio.4i		\
+		hdio.4i		\
+		iec61883.4i	\
+		ipnat.4i	\
+		mhd.4i		\
+		mixer.4i	\
+		mtio.4i		\
+		prnio.4i	\
+		quotactl.4i	\
+		sesio.4i	\
+		sockio.4i	\
+		streamio.4i	\
+		termio.4i	\
+		termiox.4i	\
+		uscsi.4i	\
+		visual_io.4i	\
+		vt.4i
 
 .KEEP_STATE:
 

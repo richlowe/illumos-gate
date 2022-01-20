@@ -20,7 +20,7 @@
 .\" Copyright (c) 2017, Joyent, Inc.
 .\"
 .Dd October 23, 2017
-.Dt DKIO 7I
+.Dt DKIO 4I
 .Os
 .Sh NAME
 .Nm dkio

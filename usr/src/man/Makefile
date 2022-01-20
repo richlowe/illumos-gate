@@ -90,9 +90,9 @@ SUBDIRS=	man1		\
 		man4		\
 		man4d		\
 		man4fs		\
+		man4i		\
 		man5		\
 		man7		\
-		man7i		\
 		man7ipp		\
 		man7m		\
 		man7p		\
