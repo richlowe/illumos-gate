@@ -18,7 +18,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd November 29, 2021
-.Dt PCFS 7FS
+.Dt PCFS 4FS
 .Os
 .Sh NAME
 .Nm pcfs

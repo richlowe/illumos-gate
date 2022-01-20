@@ -18,7 +18,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd November 29, 2021
-.Dt DEVFS 7FS
+.Dt DEVFS 4FS
 .Os
 .Sh NAME
 .Nm devfs

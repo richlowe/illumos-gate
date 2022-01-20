@@ -18,7 +18,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd November 1, 2006
-.Dt HSFS 7FS
+.Dt HSFS 4FS
 .Os
 .Sh NAME
 .Nm hsfs

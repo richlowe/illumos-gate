@@ -18,7 +18,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd September 9, 2009
-.Dt SMBFS 7FS
+.Dt SMBFS 4FS
 .Os
 .Sh NAME
 .Nm smbfs

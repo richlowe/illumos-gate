@@ -19,7 +19,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd July 3, 1990
-.Dt FD 7FS
+.Dt FD 4FS
 .Os
 .Sh NAME
 .Nm fd ,

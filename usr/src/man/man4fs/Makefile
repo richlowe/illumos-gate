@@ -17,31 +17,31 @@
 
 include		$(SRC)/Makefile.master
 
-MANSECT= 	7fs
+MANSECT= 	4fs
 
-MANFILES= 	bootfs.7fs	\
-		ctfs.7fs	\
-	 	dcfs.7fs	\
-	 	dev.7fs		\
-	 	devfs.7fs	\
-		fd.7fs		\
-	 	hsfs.7fs	\
-	 	lofs.7fs	\
-	 	objfs.7fs	\
-	 	pcfs.7fs	\
-	 	sharefs.7fs	\
-	 	smbfs.7fs	\
-	 	tmpfs.7fs	\
-	 	udfs.7fs	\
-	 	ufs.7fs
+MANFILES= 	bootfs.4fs	\
+		ctfs.4fs	\
+	 	dcfs.4fs	\
+	 	dev.4fs		\
+	 	devfs.4fs	\
+		fd.4fs		\
+	 	hsfs.4fs	\
+	 	lofs.4fs	\
+	 	objfs.4fs	\
+	 	pcfs.4fs	\
+	 	sharefs.4fs	\
+	 	smbfs.4fs	\
+	 	tmpfs.4fs	\
+	 	udfs.4fs	\
+	 	ufs.4fs
 
-MANLINKS=	stderr.7fs	\
-		stdin.7fs	\
-		stdout.7fs
+MANLINKS=	stderr.4fs	\
+		stdin.4fs	\
+		stdout.4fs
 
-stderr.7fs	:= LINKSRC = fd.7fs
-stdin.7fs	:= LINKSRC = fd.7fs
-stdout.7fs	:= LINKSRC = fd.7fs
+stderr.4fs	:= LINKSRC = fd.4fs
+stdin.4fs	:= LINKSRC = fd.4fs
+stdout.4fs	:= LINKSRC = fd.4fs
 
 .KEEP_STATE:
 

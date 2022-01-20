@@ -11,4 +11,4 @@
 
 # Copyright 2011, Richard Lowe
 
-file path=usr/share/man/man7fs/pcfs.7fs
+file path=usr/share/man/man4fs/pcfs.4fs

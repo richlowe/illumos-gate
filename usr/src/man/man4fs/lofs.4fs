@@ -19,7 +19,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd November 24, 2014
-.Dt LOFS 7FS
+.Dt LOFS 4FS
 .Os
 .Sh NAME
 .Nm lofs

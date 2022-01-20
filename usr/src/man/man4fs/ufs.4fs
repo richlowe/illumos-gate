@@ -19,7 +19,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd November 29, 2021
-.Dt UFS 7FS
+.Dt UFS 4FS
 .Os
 .Sh NAME
 .Nm ufs

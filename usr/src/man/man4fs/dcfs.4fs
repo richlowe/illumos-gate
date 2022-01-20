@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2004, Sun Microsystems, Inc. All Rights Reserved.
+.\" Copyright (c) 2007, Sun Microsystems, Inc.  All Rights Reserved
 .\" Copyright 2021 Oxide Computer Company
 .\"
 .\" The contents of this file are subject to the terms of the
@@ -17,30 +17,33 @@
 .\" fields enclosed by brackets "[]" replaced with your own identifying
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
-.Dd November 18, 2004
-.Dt CTFS 7FS
+.Dd November 28, 2007
+.Dt DCFS 4FS
 .Os
 .Sh NAME
-.Nm ctfs
-.Nd contract file system
+.Nm dcfs
+.Nd Compression file system
+.Sh SYNOPSIS
+.In sys/filio.h
+.In sys/fs/decomp.h
 .Sh DESCRIPTION
 The
 .Nm
-filesystem is the interface to the contract sub-system.
+filesystem is a layered filesystem that you use to compress data when writing to
+a file and decompress upon read.
+The primary function of the
 .Nm
-is mounted during boot at
-.Pa /system/contract .
-For information on contracts and the contents of this filesystem, see
-.Xr contract 4 .
-.Sh FILES
-.Bl -tag -width Pa
-.It Pa /system/contract
-Mount point for the
-.Nm
-file system
-.El
+filesystem is to compress individual files when constructing a boot archive and
+when reading or booting from the archive.
+.Sh INTERFACE STABILITY
+.Sy Uncommitted
 .Sh SEE ALSO
-.Xr contract 4 ,
-.Xr vfstab 4 ,
+.Xr boot 1M ,
+.Xr bootadm 1M ,
+.Xr fiocompress 1M ,
 .Xr attributes 5 ,
-.Xr smf 5
+.Xr ufs 7FS
+.Sh NOTES
+The
+.Nm
+compression/decompression file system works only with UFS.

@@ -18,7 +18,7 @@
 .\" information: Portions Copyright [yyyy] [name of copyright owner]
 .\"
 .Dd November 29, 2021
-.Dt OBJFS 7FS
+.Dt OBJFS 4FS
 .Os
 .Sh NAME
 .Nm objfs

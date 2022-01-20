@@ -13,7 +13,7 @@
 .\" Copyright 2021 Oxide Computer Company
 .\"
 .Dd May 8, 2014
-.Dt BOOTFS 7FS
+.Dt BOOTFS 4FS
 .Os
 .Sh NAME
 .Nm bootfs
