@@ -96,7 +96,7 @@
 	<documentation>
 		<manpage title='slpd' section='8' />
 		<manpage title='slp' section='4P' />
-		<manpage title='slp.conf' section='4' />
+		<manpage title='slp.conf' section='5' />
 	</documentation>
 
 	</template>

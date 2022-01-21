@@ -68,9 +68,9 @@ system-wide configuration definitions
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='smf' section='5'
+			<manpage title='smf' section='7'
 			    manpath='/usr/share/man' />
-			<manpage title='smf_template' section='5'
+			<manpage title='smf_template' section='7'
 			    manpath='/usr/share/man' />
 		</documentation>
 

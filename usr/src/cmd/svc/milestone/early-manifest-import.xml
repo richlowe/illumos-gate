@@ -89,11 +89,11 @@ early manifest import
 		<documentation>
 			<manpage title='svc.startd' section='8'
 			    manpath='/usr/share/man' />
-			<manpage title='smf_method' section='5'
+			<manpage title='smf_method' section='7'
 			    manpath='/usr/share/man' />
-			<manpage title='smf' section='5'
+			<manpage title='smf' section='7'
 			    manpath='/usr/share/man' />
-			<manpage title='smf_bootstrap' section='5'
+			<manpage title='smf_bootstrap' section='7'
 			    manpath='/usr/share/man' />
 		</documentation>
 

@@ -324,16 +324,16 @@
 				section='8'
 				manpath='/usr/share/man'/>
 			<manpage title='audit_flags'
-				section='5'
+				section='7'
 				manpath='/usr/share/man'/>
 			<manpage title='audit_binfile'
-				section='5'
+				section='7'
 				manpath='/usr/share/man'/>
 			<manpage title='audit_syslog'
-				section='5'
+				section='7'
 				manpath='/usr/share/man'/>
 			<manpage title='audit_remote'
-				section='5'
+				section='7'
 				manpath='/usr/share/man'/>
 	         </documentation>
 	</template>

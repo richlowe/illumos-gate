@@ -78,7 +78,7 @@
 				</loctext>
 			</common_name>
 			<documentation>
-				<manpage title='nodename' section='4'
+				<manpage title='nodename' section='5'
 					manpath='/usr/share/man' />
 			</documentation>
 		</template>
@@ -110,7 +110,7 @@
 			<documentation>
 				<manpage title='domainname' section='8'
 					manpath='/usr/share/man' />
-				<manpage title='defaultdomain' section='4'
+				<manpage title='defaultdomain' section='5'
 					manpath='/usr/share/man' />
 			</documentation>
 		</template>

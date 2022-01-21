@@ -84,7 +84,7 @@
 		<documentation>
 			<manpage title='utmpd' section='8'
 				manpath='/usr/share/man' />
-			<manpage title='utmpx' section='4'
+			<manpage title='utmpx' section='5'
 				manpath='/usr/share/man' />
 		</documentation>
 	</template>
