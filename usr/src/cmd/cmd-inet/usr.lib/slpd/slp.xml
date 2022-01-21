@@ -28,8 +28,6 @@
     be overwritten by package or patch operations, including
     operating system upgrade.  Make customizations in a different
     file.
-
-    ident	"%Z%%M%	%I%	%E% SMI"
 -->
 
 <service_bundle type='manifest' name='SUNWslpr:slpd'>
@@ -96,7 +94,7 @@
 		</loctext>
 	</common_name>
 	<documentation>
-		<manpage title='slpd' section='1M' />
+		<manpage title='slpd' section='8' />
 		<manpage title='slp' section='7P' />
 		<manpage title='slp.conf' section='4' />
 	</documentation>

@@ -23,8 +23,6 @@
 
  CDDL HEADER END
 
-        ident	"%Z%%M%	%I%	%E% SMI"
-
 	NOTE:  This service manifest is not editable; its contents will
 	be overwritten by package or patch operations, including
 	operating system upgrade.  Make customizations in a different
@@ -107,7 +105,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 		<propval name='value_authorization' type='astring'
 			value='solaris.smf.value.routing' />
 	</property_group>
-	
+
 	<!-- Properties in this group are modifiable via routeadm (1M) -->
 	<property_group name='routing' type='application'>
 		<stability value='Evolving' />
@@ -129,7 +127,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 
 		<!-- Equivalent to optional logging file -->
 		<propval name='log_file' type='astring' value='' />
-		
+
 		<propval name='value_authorization' type='astring'
 			value='solaris.smf.value.routing' />
 	</property_group>
@@ -141,7 +139,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='in.ripngd' section='1M'
+			<manpage title='in.ripngd' section='8'
 				manpath='/usr/share/man' />
 		</documentation>
 	</template>

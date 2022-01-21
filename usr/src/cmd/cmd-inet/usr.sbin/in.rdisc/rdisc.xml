@@ -102,7 +102,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 		<!-- Equivalent to -r option if true -->
 		<propval name='act_as_router' type='boolean' value='false' />
 
-		<!-- Equivalent to -a option if true --> 
+		<!-- Equivalent to -a option if true -->
 		<propval name='accept_all' type='boolean' value='false' />
 
 		<!-- Equivalent to -p preference option if set -->
@@ -127,7 +127,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='in.rdisc' section='1M'
+			<manpage title='in.rdisc' section='8'
 				manpath='/usr/share/man' />
 		</documentation>
 	</template>

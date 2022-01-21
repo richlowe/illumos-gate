@@ -122,7 +122,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 		<propval name='quiet_mode' type='boolean' value='false' />
 
 		<!-- Equivalent to -s option if true -->
-		<propval name='supply_routes' type='boolean' value='false' />	
+		<propval name='supply_routes' type='boolean' value='false' />
 
 		<!-- Equivalent to -S option if true -->
 		<propval name='default_routes_only' type='boolean'
@@ -162,7 +162,7 @@ privileges='basic,proc_owner,proc_fork,proc_exec,proc_info,proc_session,file_cho
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='in.routed' section='1M'
+			<manpage title='in.routed' section='8'
 				manpath='/usr/share/man' />
 		</documentation>
 	</template>

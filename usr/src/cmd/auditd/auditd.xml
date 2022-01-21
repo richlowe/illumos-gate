@@ -315,13 +315,13 @@
 		</common_name>
 		<documentation>
 			<manpage title='auditd'
-				section='1M'
+				section='8'
 				manpath='/usr/share/man'/>
 			<manpage title='audit'
-				section='1M'
+				section='8'
 				manpath='/usr/share/man'/>
 			<manpage title='auditconfig'
-				section='1M'
+				section='8'
 				manpath='/usr/share/man'/>
 			<manpage title='audit_flags'
 				section='5'

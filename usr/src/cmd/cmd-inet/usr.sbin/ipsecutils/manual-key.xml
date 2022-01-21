@@ -23,8 +23,6 @@
 
  CDDL HEADER END
 
-        ident	"%Z%%M%	%I%	%E% SMI"
-
         NOTE:  This service manifest is not editable; its contents will
         be overwritten by package or patch operations, including
         operating system upgrade.  Make customizations in a different
@@ -132,8 +130,8 @@
 	</property_group>
 
         <!-- The properties defined below can be changed by a user
-	with 'solaris.smf.value.ipsec' authorization using the 
-	svccfg(1M) command. 
+	with 'solaris.smf.value.ipsec' authorization using the
+	svccfg(1M) command.
 
 	EG:
 
@@ -183,7 +181,7 @@
                         </loctext>
                 </description>
                 <documentation>
-                        <manpage title='ipseckey' section='1M'
+                        <manpage title='ipseckey' section='8'
                                 manpath='/usr/share/man' />
                 </documentation>
         </template>

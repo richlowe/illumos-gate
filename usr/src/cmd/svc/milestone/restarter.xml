@@ -72,7 +72,7 @@ master restarter
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='svc.startd' section='1M'
+			<manpage title='svc.startd' section='8'
 			    manpath='/usr/share/man' />
 			<manpage title='smf_method' section='5'
 			    manpath='/usr/share/man' />

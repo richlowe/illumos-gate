@@ -91,7 +91,7 @@
 			<manpage title='zones' section='5' manpath='/usr/share/man' />
 			<manpage
 				title='zonecfg'
-				section='1M'
+				section='8'
 				manpath='/usr/share/man' />
 		</documentation>
 	</template>
