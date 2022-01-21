@@ -107,7 +107,7 @@ Service manifests for SCSI Target Mode Framework
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='stmf' section='7D'
+			<manpage title='stmf' section='4D'
 				manpath='/usr/share/man' />
 			<manpage title='stmfadm' section='8'
 				manpath='/usr/share /man' />

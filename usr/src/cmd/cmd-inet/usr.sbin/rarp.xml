@@ -102,7 +102,7 @@ Reverse Address Resolution Protocol (RARP) server
 			</loctext>
 		</common_name>
 		<documentation>
-			<manpage title='rarp' section='7P'
+			<manpage title='rarp' section='4P'
 			    manpath='/usr/share/man' />
 			<manpage title='in.rarpd' section='8'
 			    manpath='/usr/share/man' />
