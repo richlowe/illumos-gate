@@ -126,8 +126,8 @@ file path=usr/share/man/man3dat/dat_srq_set_lw.3dat
 file path=usr/share/man/man3dat/dat_strerror.3dat
 dir  path=usr/share/man/man3lib
 file path=usr/share/man/man3lib/libdat.3lib
-dir  path=usr/share/man/man4
-file path=usr/share/man/man4/dat.conf.4
+dir  path=usr/share/man/man5
+file path=usr/share/man/man5/dat.conf.5
 dir  path=usr/share/man/man8
 file path=usr/share/man/man8/datadm.8
 legacy pkg=SUNWudaplr desc="DAT static registry file" \

@@ -2171,8 +2171,6 @@ link path=usr/share/man/man3head/wordexp.3head target=wordexp.h.3head
 file path=usr/share/man/man3head/wordexp.h.3head
 link path=usr/share/man/man3head/xlocale.3head target=xlocale.h.3head
 file path=usr/share/man/man3head/xlocale.h.3head
-dir  path=usr/share/man/man4
-file path=usr/share/man/man4/note.4
 dir  path=usr/share/man/man4i
 file path=usr/share/man/man4i/cdio.4i
 file path=usr/share/man/man4i/dkio.4i
@@ -2193,7 +2191,9 @@ file path=usr/share/man/man4i/uscsi.4i
 file path=usr/share/man/man4i/visual_io.4i
 file path=usr/share/man/man4i/vt.4i
 dir  path=usr/share/man/man5
-file path=usr/share/man/man5/prof.5
+file path=usr/share/man/man5/note.5
+dir  path=usr/share/man/man7
+file path=usr/share/man/man7/prof.7
 dir  path=usr/share/src group=sys
 dir  path=usr/share/src/uts
 $(i386_ONLY)dir path=usr/share/src/uts/i86pc

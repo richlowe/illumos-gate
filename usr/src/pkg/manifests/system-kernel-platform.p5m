@@ -846,10 +846,6 @@ $(sparc_ONLY)dir path=platform/sun4v/kernel/sys group=sys
 $(sparc_ONLY)dir path=platform/sun4v/kernel/sys/$(ARCH64) group=sys
 $(sparc_ONLY)link path=platform/sun4v/kernel/unix target=$(ARCH64)/unix
 $(sparc_ONLY)dir path=usr/share/man
-dir  path=usr/share/man/man4
-$(i386_ONLY)link path=usr/share/man/man4/isa.4 target=sysbus.4
-$(sparc_ONLY)file path=usr/share/man/man4/sbus.4
-$(i386_ONLY)file path=usr/share/man/man4/sysbus.4
 $(sparc_ONLY)dir path=usr/share/man/man4d
 $(sparc_ONLY)file path=usr/share/man/man4d/bbc_beep.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/dr.4d
@@ -873,7 +869,11 @@ $(sparc_ONLY)file path=usr/share/man/man4d/todopl.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/tsalarm.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/zs.4d
 $(sparc_ONLY)file path=usr/share/man/man4d/zsh.4d
-$(sparc_ONLY)dir path=usr/share/man/man4m
+dir  path=usr/share/man/man5
+$(i386_ONLY)link path=usr/share/man/man5/isa.5 target=sysbus.5
+$(sparc_ONLY)file path=usr/share/man/man5/sbus.5
+$(i386_ONLY)file path=usr/share/man/man5/sysbus.5
+$(sparc_ONLY)dir path=usr/share/man/man5m
 $(sparc_ONLY)driver name=ac
 $(i386_ONLY)driver name=acpinex alias=acpivirtnex
 $(i386_ONLY)driver name=acpippm

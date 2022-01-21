@@ -328,9 +328,9 @@
 .if '\\$2'3xc' .ds ]D X/Open Curses Library Functions
 .if '\\$2'3XN' .ds ]D X/Open Networking Services Library Functions
 .if '\\$2'3xn' .ds ]D X/Open Networking Services Library Functions
-.if '\\$2'4' .ds ]D File Formats
-.if '\\$2'4B' .ds ]D SunOS/BSD Compatibility Package File Formats
-.if '\\$2'4b' .ds ]D SunOS/BSD Compatibility Package File Formats
+.if '\\$2'4' .ds ]D Device and Network Interfaces
+.if '\\$2'4B' .ds ]D SunOS/BSD Compatibility Special Files
+.if '\\$2'4b' .ds ]D SunOS/BSD Compatibility Special Files
 .if '\\$2'4D' .ds ]D Devices
 .if '\\$2'4d' .ds ]D Devices
 .if '\\$2'4FS' .ds ]D File Systems
@@ -343,11 +343,11 @@
 .if '\\$2'4m' .ds ]D STREAMS Modules
 .if '\\$2'4P' .ds ]D Protocols
 .if '\\$2'4p' .ds ]D Protocols
-.if '\\$2'5' .ds ]D Standards, Environments, and Macros
+.if '\\$2'5' .ds ]D File Formats
+.if '\\$2'5B' .ds ]D SunOS/BSD Compatibility Package File Formats
+.if '\\$2'5b' .ds ]D SunOS/BSD Compatibility Package File Formats
 .if '\\$2'6' .ds ]D Games and Demos
-.if '\\$2'7' .ds ]D Device and Network Interfaces
-.if '\\$2'7B' .ds ]D SunOS/BSD Compatibility Special Files
-.if '\\$2'7b' .ds ]D SunOS/BSD Compatibility Special Files
+.if '\\$2'7' .ds ]D Standards, Environments, and Macros
 .if '\\$2'8' .ds ]D Maintenance Commands and Procedures
 .if '\\$2'8C' .ds ]D Maintenance Procedures
 .if '\\$2'8c' .ds ]D Maintenance Procedures

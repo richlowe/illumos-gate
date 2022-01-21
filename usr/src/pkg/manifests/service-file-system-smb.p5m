@@ -85,11 +85,11 @@ dir  path=usr/sbin
 file path=usr/sbin/smbadm mode=0555
 file path=usr/sbin/smbstat mode=0555
 dir  path=usr/share/man
-dir  path=usr/share/man/man4
-file path=usr/share/man/man4/smb.4
-file path=usr/share/man/man4/smbautohome.4
 dir  path=usr/share/man/man5
-file path=usr/share/man/man5/pam_smb_passwd.5
+file path=usr/share/man/man5/smb.5
+file path=usr/share/man/man5/smbautohome.5
+dir  path=usr/share/man/man7
+file path=usr/share/man/man7/pam_smb_passwd.7
 dir  path=usr/share/man/man8
 file path=usr/share/man/man8/smbadm.8
 file path=usr/share/man/man8/smbd.8

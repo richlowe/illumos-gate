@@ -125,8 +125,8 @@ link path=usr/share/man/man3lib/SMHBA_SetPersistentBinding.3lib \
     target=libSMHBAAPI.3lib
 file path=usr/share/man/man3lib/libSMHBAAPI.3lib
 link path=usr/share/man/man3lib/libsmhbaapi.3lib target=libSMHBAAPI.3lib
-dir  path=usr/share/man/man4
-file path=usr/share/man/man4/smhba.conf.4
+dir  path=usr/share/man/man5
+file path=usr/share/man/man5/smhba.conf.5
 dir  path=usr/share/man/man8
 file path=usr/share/man/man8/sasinfo.8
 legacy pkg=SUNWsmhba desc="T11 Storage Management HBA API Libraries and CLI" \

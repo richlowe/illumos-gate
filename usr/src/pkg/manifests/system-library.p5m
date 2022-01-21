@@ -73,9 +73,9 @@
 <include system-library.man3volmgt.inc>
 <include system-library.man3xcurses.inc>
 <include system-library.man3xnet.inc>
-<include system-library.man4.inc>
 <include system-library.man4p.inc>
 <include system-library.man5.inc>
+<include system-library.man7.inc>
 set name=pkg.fmri value=pkg:/system/library@$(PKGVERS)
 set name=pkg.summary value="Core Solaris, (Shared Libs)"
 set name=pkg.description \

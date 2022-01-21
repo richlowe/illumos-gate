@@ -33,10 +33,10 @@
 #
 
 <include SUNWcs.man1.inc>
-<include SUNWcs.man4.inc>
 <include SUNWcs.man4d.inc>
 <include SUNWcs.man4fs.inc>
 <include SUNWcs.man5.inc>
+<include SUNWcs.man7.inc>
 <include SUNWcs.man8.inc>
 set name=pkg.fmri value=pkg:/SUNWcs@$(PKGVERS)
 set name=pkg.summary value="Core Solaris"
