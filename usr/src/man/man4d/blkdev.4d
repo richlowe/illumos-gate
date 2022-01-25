@@ -36,9 +36,9 @@ SCSI commands.
 The most typical use case for
 .Nm
 devices is to be used to host a file system, such as
-.Xr pcfs 7FS
+.Xr pcfs 4FS
 or
-.Xr zfs 7FS .
+.Xr zfs 4FS .
 .
 .Sh INTERFACE STABILITY
 .Sy Uncommitted .
@@ -73,8 +73,8 @@ See
 .Sh SEE ALSO
 .Xr rmformat 1 ,
 .Xr sd 4D ,
-.Xr pcfs 7FS ,
-.Xr zfs 7FS ,
+.Xr pcfs 4FS ,
+.Xr zfs 4FS ,
 .Xr dkio 7I ,
 .Xr devinfo 8 ,
 .Xr fdisk 8 ,

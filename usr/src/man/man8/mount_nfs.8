@@ -756,11 +756,11 @@ example# mount serv-x:/usr/man,serv-y:/var/man,nfs://serv-z/man /usr/man
 .Xr mnttab 4 ,
 .Xr nfs 4 ,
 .Xr nfssec.conf 4 ,
+.Xr lofs 4FS ,
 .Xr attributes 5 ,
 .Xr fsattr 5 ,
 .Xr nfssec 5 ,
 .Xr standards 5 ,
-.Xr lofs 7FS ,
 .Xr inet 7P ,
 .Xr inet6 7P ,
 .Xr lockd 8 ,
@@ -794,7 +794,7 @@ example# mount serv-x:/usr/man,serv-y:/var/man,nfs://serv-z/man /usr/man
 .Sh NOTES
 An NFS server should not attempt to mount its own file systems.
 See
-.Xr lofs 7FS .
+.Xr lofs 4FS .
 .Pp
 If the directory on which a file system is to be mounted is a symbolic link,
 the file system is mounted on the directory to which the symbolic link refers,

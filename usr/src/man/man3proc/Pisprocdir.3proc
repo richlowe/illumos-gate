@@ -52,4 +52,4 @@ in
 .Sh SEE ALSO
 .Xr libproc 3LIB ,
 .Xr proc 4 ,
-.Xr lofs 7FS
+.Xr lofs 4FS

@@ -38,8 +38,8 @@ when reading or booting from the archive.
 .Sh INTERFACE STABILITY
 .Sy Uncommitted
 .Sh SEE ALSO
+.Xr ufs 4FS ,
 .Xr attributes 5 ,
-.Xr ufs 7FS ,
 .Xr boot 8 ,
 .Xr bootadm 8 ,
 .Xr fiocompress 8

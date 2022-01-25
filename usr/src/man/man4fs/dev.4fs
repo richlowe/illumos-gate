@@ -34,7 +34,7 @@ filesystem is mounted during boot on
 This filesystem is colloqiually called
 .Sq sdev
 as a way to distinguish it from the
-.Xr devfs 7FS
+.Xr devfs 4FS
 filesystem mounted at
 .Pa /devices .
 .Pp
@@ -74,7 +74,7 @@ Mount point for the
 filesystem in the global zone and non-global zones.
 .El
 .Sh SEE ALSO
-.Xr devfs 7FS ,
+.Xr devfs 4FS ,
 .Xr devfsadm 8 ,
 .Xr format 8
 .Sh NOTES
