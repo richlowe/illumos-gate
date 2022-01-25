@@ -21,16 +21,16 @@
 The
 .Nm
 driver is a counterpart to the
-.Xr imc 7D
+.Xr imc 4D
 driver.
 The
 .Nm
 driver is responsible for attaching to all of the logical PCI devices
 that are exposed by Intel CPUs and providing them for use by the
-.Xr imc 7D
+.Xr imc 4D
 driver.
 For more information on how this is used by the system, please see
-.Xr imc 7D .
+.Xr imc 4D .
 .Sh ARCHITECTURE
 The
 .Nm
@@ -43,4 +43,4 @@ systems.
 64-bit device driver (x86).
 .El
 .Sh SEE ALSO
-.Xr imc 7D
+.Xr imc 4D

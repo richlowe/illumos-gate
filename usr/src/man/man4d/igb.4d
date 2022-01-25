@@ -43,7 +43,7 @@ Intel Ethernet Controller I350
 .El
 .Pp
 Many other Intel 1 GbE devices are supported by the
-.Xr e1000g 7D
+.Xr e1000g 4D
 driver.
 .Pp
 The driver supports the following functionality depending on the
@@ -120,7 +120,7 @@ Configuration file.
 .Sh SEE ALSO
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
-.Xr e1000g 7D ,
+.Xr e1000g 4D ,
 .Xr dlpi 7P ,
 .Xr dladm 8 ,
 .Xr mac 9E

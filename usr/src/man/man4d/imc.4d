@@ -59,10 +59,10 @@ necessary hardware support.
 The
 .Nm
 driver is a pseudo-device driver that amalgamates all of the different
-.Xr imcstub 7D
+.Xr imcstub 4D
 instances into a coherent view.
 The
-.Xr imcstub 7D
+.Xr imcstub 4D
 driver attaches to all of the different PCI devices that the processor
 exposes.
 .Pp
@@ -98,6 +98,6 @@ systems.
 Driver configuration file.
 .El
 .Sh SEE ALSO
-.Xr imcstub 7D ,
+.Xr imcstub 4D ,
 .Xr fmadm 8 ,
 .Xr fmdump 8

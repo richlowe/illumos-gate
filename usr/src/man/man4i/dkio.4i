@@ -831,8 +831,8 @@ recreation of all logical device nodes.
 .El
 .Sh SEE ALSO
 .Xr ioctl 2 ,
-.Xr cmdk 7D ,
-.Xr sd 7D ,
+.Xr cmdk 4D ,
+.Xr sd 4D ,
 .Xr cdio 7I ,
 .Xr fdio 7I ,
 .Xr hdio 7I ,

@@ -72,7 +72,7 @@ See
 .
 .Sh SEE ALSO
 .Xr rmformat 1 ,
-.Xr sd 7D ,
+.Xr sd 4D ,
 .Xr pcfs 7FS ,
 .Xr zfs 7FS ,
 .Xr dkio 7I ,

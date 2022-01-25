@@ -138,7 +138,7 @@ variable-length, device-specific information into and out of framebuffers.
 .Sh SEE ALSO
 .Xr ioctl 2 ,
 .Xr mmap 2 ,
-.Xr cgsix 7D
+.Xr cgsix 4D
 .Sh BUGS
 The
 .Dv FBIOSATTR

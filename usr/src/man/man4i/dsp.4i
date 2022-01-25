@@ -597,6 +597,6 @@ Uncommitted
 .Xr poll 2 ,
 .Xr read 2 ,
 .Xr write 2 ,
+.Xr audio 4D ,
 .Xr attributes 5 ,
-.Xr audio 7D ,
 .Xr mixer 7I

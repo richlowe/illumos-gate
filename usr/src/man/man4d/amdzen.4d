@@ -43,7 +43,7 @@ AMD Zen 3 Milan and Vermeer
 .Pp
 This driver is a nexus driver and facilitates access to the northbridge,
 data fabric, and SMN between various other devices such as
-.Xr smntemp 7D .
+.Xr smntemp 4D .
 The various processor devices that make up the northbridge and data
 fabric have the
 .Sy amdzen_stub
@@ -57,12 +57,12 @@ The
 .Nm
 driver is a nexus driver that has the following children:
 .Bl -tag -width "smntemp(7D)"
-.It Xr smntemp 7D
+.It Xr smntemp 4D
 Provides access to on-die temperature sensors.
-.It Xr usmn 7D
+.It Xr usmn 4D
 Provides read access to the SMN.
 This driver is intended for development purposes.
-.It Xr zen_udf 7D
+.It Xr zen_udf 4D
 Provides read access to the data fabric.
 This driver is intended for development purposes.
 .El
@@ -75,6 +75,6 @@ drivers are limited to
 .Sy x86
 platforms with AMD Family 17h and 19h processors.
 .Sh SEE ALSO
-.Xr smntemp 7D ,
-.Xr usmn 7D ,
-.Xr zen_udf 7D
+.Xr smntemp 4D ,
+.Xr usmn 4D ,
+.Xr zen_udf 4D

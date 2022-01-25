@@ -23,14 +23,14 @@
 The
 .Nm
 driver uses the
-.Xr blkdev 7D
+.Xr blkdev 4D
 framework to provide access to
 NVMe compliant solid-state storage devices.
 All NVMe version 1.x devices are supported.
 .Lp
 NVMe devices supporting multiple namespaces will present each
 namespace as its own
-.Xr blkdev 7D
+.Xr blkdev 4D
 instance in the system.
 .
 .Sh CONFIGURATION
@@ -83,7 +83,7 @@ the hardware supports it.
 The default setting is 1, which enables the volatile write cache.
 .It Va min-phys-block-size
 This is the minimum physical block size that is reported to
-.Xr blkdev 7d .
+.Xr blkdev 4D .
 This value must be a power of 2 greater than or equal to 512.
 If the device reports a best block size larger than what is
 specified here the driver will ignore the value specified here.
@@ -138,4 +138,4 @@ See
 .El
 .
 .Sh SEE ALSO
-.Xr blkdev 7D
+.Xr blkdev 4D

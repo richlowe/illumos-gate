@@ -755,7 +755,7 @@ The
 field of the
 .Vt mtop
 struct is used to pass the record size to/from the
-.Xr st 7D
+.Xr st 4D
 driver.
 A value of
 .Ql 0
@@ -779,7 +779,7 @@ flag, in order to execute this operation.
 .Dv MTIOCGETERROR
 allows user-level applications to retrieve error records
 from the
-.Xr st 7D
+.Xr st 4D
 driver.
 An error record consists of the SCSI command cdb
 which causes the error and a
@@ -1184,7 +1184,7 @@ ioctl(fd, MTIOCGETDRIVETYPE, &mtreq);
 .Xr aioread 3C ,
 .Xr aiowrite 3C ,
 .Xr ar.h 3HEAD ,
-.Xr st 7D ,
+.Xr st 4D ,
 .Xr dd 8
 .Pp
 .%T 1/4 Inch Tape Drive Tutorial

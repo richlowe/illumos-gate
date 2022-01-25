@@ -54,7 +54,7 @@ at a networking level.
 On some x86 systems USB ports may be routed to either an instance of the
 .Nm
 driver or an instance of the
-.Xr ehci 7D
+.Xr ehci 4D
 driver.
 By default, all such ports are routed to the
 .Nm
@@ -101,8 +101,8 @@ Driver configuration file
 .El
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
-.Xr ehci 7D ,
-.Xr usba 7D ,
+.Xr ehci 4D ,
+.Xr usba 4D ,
 .Xr cfgadm 8 ,
 .Xr cfgadm_usb 8 ,
 .Xr dladm 8

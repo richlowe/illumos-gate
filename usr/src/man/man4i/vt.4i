@@ -294,7 +294,7 @@ VT devices.
 .Sh SEE ALSO
 .Xr ioctl 2 ,
 .Xr signal 3C ,
-.Xr wscons 7D
+.Xr wscons 4D
 .Sh NOTES
 By default, there are only five virtual console instance login prompts running
 on

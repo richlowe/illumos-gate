@@ -361,10 +361,10 @@ capability.
 .Xr ioctl 2 ,
 .Xr read 2 ,
 .Xr write 2 ,
-.Xr attributes 5 ,
-.Xr ecpp 7D ,
-.Xr lp 7D ,
-.Xr usbprn 7D
+.Xr ecpp 4D ,
+.Xr lp 4D ,
+.Xr usbprn 4D ,
+.Xr attributes 5
 .Rs
 .%T IEEE Std 1284-1994
 .Re

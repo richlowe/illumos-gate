@@ -32,5 +32,5 @@ This driver is intended strictly for facilitating platform development
 and is not recommended for systems that aren't doing kernel development
 on AMD Zen platforms.
 .Sh SEE ALSO
-.Xr amdzen 7D ,
-.Xr usmn 7D
+.Xr amdzen 4D ,
+.Xr usmn 4D

@@ -61,10 +61,10 @@ are not supported at this time.
 For AMD Family 17h
 .Pq Zen
 processors, the
-.Xr smntemp 7D
+.Xr smntemp 4D
 driver provides access to the temperature sensors.
 .Sh SEE ALSO
-.Xr smntemp 7D ,
+.Xr smntemp 4D ,
 .Xr fmadm 8
 .Rs
 .%A AMD

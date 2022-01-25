@@ -347,7 +347,7 @@ namespaces, or support formatting at all.
 LBA formats using a non-zero metadata size are not supported by
 .Nm
 or
-.Xr nvme 7D .
+.Xr nvme 4D .
 .Pp
 The list of supported LBA formats on a namespace can be retrieved
 with the
@@ -380,13 +380,13 @@ namespaces, or support erasing at all.
 .Ar ctl[/ns]
 .Xc
 Temporarily detaches the
-.Xr blkdev 7D
+.Xr blkdev 4D
 instance from the specified namespace or all namespaces of the controller.
 This will prevent I/O access to the affected namespace(s).
 Detach will only succeed if the affected namespace(s) are not
 currently opened.
 The detached state will not persist across reboots or reloads of the
-.Xr nvme 7D
+.Xr nvme 4D
 driver.
 .It Xo
 .Nm
@@ -394,7 +394,7 @@ driver.
 .Ar ctl[/ns]
 .Xc
 Attaches the
-.Xr blkdev 7D
+.Xr blkdev 4D
 instance to the specified namespace or all namespaces of the controller.
 This will make I/O accesses to the namespace(s) possible again after a
 previous
@@ -573,6 +573,6 @@ is
 .Sy Not-an-Interface
 and may change any time.
 .Sh SEE ALSO
-.Xr nvme 7D
+.Xr nvme 4D
 .Pp
 .Lk http://www.nvmexpress.org/specifications/ "NVMe specifications"

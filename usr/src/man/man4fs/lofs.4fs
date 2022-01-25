@@ -110,7 +110,7 @@ mount -F lofs /tmp /mnt
 .Xr mount 2 ,
 .Xr sysfs 2 ,
 .Xr vfstab 4 ,
-.Xr lofi 7D ,
+.Xr lofi 4D ,
 .Xr lofiadm 8 ,
 .Xr mount 8
 .Sh NOTES

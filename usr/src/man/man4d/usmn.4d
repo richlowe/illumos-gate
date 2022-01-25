@@ -38,5 +38,5 @@ Arbitrary writes to the SMN can severely damage and destabilize the system.
 If you do not need access to the SMN, then this driver should not be
 present on the system.
 .Sh SEE ALSO
-.Xr amdzen 7D ,
-.Xr zen_udf 7D
+.Xr amdzen 4D ,
+.Xr zen_udf 4D

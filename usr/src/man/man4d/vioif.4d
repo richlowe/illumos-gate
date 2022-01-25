@@ -80,7 +80,7 @@ x86 device driver.
 .El
 .Sh SEE ALSO
 .Xr libdlpi 3LIB ,
-.Xr virtio 7D ,
+.Xr virtio 4D ,
 .Xr dlpi 7P ,
 .Xr dladm 8 ,
 .Xr mac 9E

@@ -48,13 +48,13 @@ device under control of that driver.
 The
 .Nm
 command is supported by the
-.Xr sd 7D
+.Xr sd 4D
 driver for
 .Sy SCSI
 disks and
 .Sy ATAPI
 CD-ROM drives, and by the
-.Xr st 7D
+.Xr st 4D
 driver for
 .Sy SCSI
 tape drives.
@@ -351,9 +351,9 @@ point to an invalid address.
 Committed
 .Sh SEE ALSO
 .Xr ioctl 2 ,
-.Xr attributes 5 ,
-.Xr sd 7D ,
-.Xr st 7D
+.Xr sd 4D ,
+.Xr st 4D ,
+.Xr attributes 5
 .Rs
 .%T ANSI Small Computer System Interface-2 (SCSI-2)
 .Re

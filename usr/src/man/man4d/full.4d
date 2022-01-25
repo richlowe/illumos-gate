@@ -27,7 +27,7 @@ Writes always yield the error
 .Er ENOSPC.
 .Lp
 Reads supply an endless stream of zeros, identical to
-.Xr zero 7D
+.Xr zero 4D
 .Lp
 .Xr lseek 2
 will always return successfully.
@@ -41,6 +41,6 @@ is not implemented.
 .El
 .
 .Sh SEE ALSO
-.Xr mem 7D ,
-.Xr null 7D ,
-.Xr zero 7D
+.Xr mem 4D ,
+.Xr null 4D ,
+.Xr zero 4D

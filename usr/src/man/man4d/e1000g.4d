@@ -185,7 +185,7 @@ PRO/1000 XT Server and Desktop Adapter
 .El
 .Pp
 The
-.Xr igb 7D
+.Xr igb 4D
 driver supports many other Intel Gigabit parts.
 .Sh CONFIGURATION
 The
@@ -208,6 +208,6 @@ Driver configuration file
 .Sh SEE ALSO
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
-.Xr igb 7D ,
+.Xr igb 4D ,
 .Xr dlpi 7P ,
 .Xr dladm 8

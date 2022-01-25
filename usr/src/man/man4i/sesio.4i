@@ -91,5 +91,5 @@ uint8_t  reserved[3];    /* Reserved; Set to 0 */
 .Sh ARCHITECTURE
 SPARC
 .Sh SEE ALSO
-.Xr ses 7D ,
+.Xr ses 4D ,
 .Xr ioctl 9E

@@ -38,8 +38,8 @@ driver is only supported on
 x86 device driver.
 .El
 .Sh SEE ALSO
-.Xr vioblk 7D ,
-.Xr vioif 7D
+.Xr vioblk 4D ,
+.Xr vioif 4D
 .Rs
 .%T Virtual I/O Device (VIRTIO) Version 1.1
 .%D April, 2019

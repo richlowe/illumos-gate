@@ -63,7 +63,7 @@ This is a mandatory ioctl and must return a unique string.
 We suggest that the name be formed as
 .Ao companysymbol Ac Ns Ao devicetype Ac .
 For example, the
-.Xr cgsix 7D
+.Xr cgsix 4D
 driver
 returns
 .Sy SUNWcg6 .
