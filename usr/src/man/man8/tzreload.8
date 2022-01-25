@@ -45,7 +45,7 @@ only triggers this update for the current zone.
 In addition to updating processes, the
 .Nm
 command also notifies
-.Xr cron 1M
+.Xr cron 8
 to reinitialize the job scheduler with the new timezone information.
 .Sh OPTIONS
 The following options are supported:
@@ -61,18 +61,18 @@ Standard zone information directory.
 .Sh INTERFACE STABILITY
 .Sy Committed
 .Sh SEE ALSO
-.Xr cron 1M ,
-.Xr zdump 1M ,
-.Xr zic 1M ,
-.Xr zoneadm 1M ,
 .Xr ctime 3C ,
 .Xr mktime 3C ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr cron 8 ,
+.Xr zdump 8 ,
+.Xr zic 8 ,
+.Xr zoneadm 8
 .Sh NOTES
 Although
 .Nm
 reinitializes
-.Xr cron 1M ,
+.Xr cron 8 ,
 applications that are affected by timezone changes still need to be restarted or
 reinitialized if they do not reread the new timezone information before timezone
 changes take place.

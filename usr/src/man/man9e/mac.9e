@@ -440,7 +440,7 @@ family of properties, they may change depending on power settings.
 See the
 .Sy Ethernet Link Properties
 section in
-.Xr dladm 1M
+.Xr dladm 8
 for more information.
 .Pp
 It's worth discussing how these different values get used throughout the
@@ -503,7 +503,7 @@ fail the call to
 .Xr detach 9E .
 .Ss Interacting with Devices
 Administrators always interact with devices through the
-.Xr dladm 1M
+.Xr dladm 8
 command line interface.
 The state of devices such as whether the link is considered
 .Sy up
@@ -522,7 +522,7 @@ It is also the preferred way that these properties are set and configured.
 While device tunables may be presented in a
 .Xr driver.conf 4
 file, it is recommended instead to expose such things through
-.Xr dladm 1M
+.Xr dladm 8
 private properties, whether explicitly documented or not.
 .Sh CAPABILITIES
 Capabilities in the MAC Framework are optional features that a device
@@ -1310,7 +1310,7 @@ structure.
 The driver may define whatever semantics it wants for these private
 properties.
 They will not be listed when running
-.Xr dladm 1M ,
+.Xr dladm 8 ,
 unless explicitly requested by name.
 All such properties should start with a leading underscore character and then
 consist of alphanumeric ASCII characters and additional underscores or hyphens.
@@ -1976,10 +1976,10 @@ to switch from one format to the other.
 This way, data can be gathered to determine what the impact of each method is on
 a given platform.
 .Sh SEE ALSO
-.Xr dladm 1M ,
 .Xr driver.conf 4 ,
 .Xr ieee802.3 5 ,
 .Xr dlpi 7P ,
+.Xr dladm 8 ,
 .Xr _fini 9E ,
 .Xr _info 9E ,
 .Xr _init 9E ,

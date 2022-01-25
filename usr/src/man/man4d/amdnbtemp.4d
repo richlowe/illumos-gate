@@ -64,8 +64,8 @@ processors, the
 .Xr smntemp 7D
 driver provides access to the temperature sensors.
 .Sh SEE ALSO
-.Xr fmadm 1M ,
-.Xr smntemp 7D
+.Xr smntemp 7D ,
+.Xr fmadm 8
 .Rs
 .%A AMD
 .%B BIOS and Kernel Developer’s Guide (BKDG) for AMD Family 16h Models 00h-0Fh Processors

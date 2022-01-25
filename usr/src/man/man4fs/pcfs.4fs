@@ -58,7 +58,7 @@ supports FAT12 (floppies) and FAT16 and FAT32 file systems.
 file systems can be force umounted using the
 .Fl -f
 argument to
-.Xr umount 1M .
+.Xr umount 8 .
 .Pp
 The
 .Nm
@@ -83,7 +83,7 @@ Mount options can be passed to
 .Nm
 using the optptr and optlen arguments.
 See
-.Xr mount_pcfs 1M
+.Xr mount_pcfs 8
 for a list of mount options supported by
 .Nm
 .Pp
@@ -108,7 +108,7 @@ timestamps.
 You can override this behavior using the
 .Ar noclamptime
 mount option, as described in
-.Xr mount_pcfs 1M .
+.Xr mount_pcfs 8 .
 .Pp
 Timestamps on FAT formatted media are recorded in local time.
 If the recording and receiving systems use different timezones, the
@@ -121,7 +121,7 @@ of timestamps as read from a FAT formatted medium in a given timezone
 .Pq that of the recorder .
 By default, the local timezone of the receiver is used.
 See
-.Xr mount_pcfs 1M
+.Xr mount_pcfs 8
 for details.
 .Pp
 The root directory of a FAT formatted medium has no timestamps and
@@ -462,12 +462,12 @@ result in the more descriptive short names:
 .Xr fdformat 1 ,
 .Xr unix2dos 1 ,
 .Xr volcheck 1 ,
-.Xr mount 1M ,
-.Xr mount_pcfs 1M ,
-.Xr umount 1M ,
 .Xr ctime 3C ,
 .Xr vfstab 4 ,
-.Xr environ 5
+.Xr environ 5 ,
+.Xr mount 8 ,
+.Xr mount_pcfs 8 ,
+.Xr umount 8
 .Sh WARNINGS
 Do not physically eject a FAT floppy while the device is mounted as
 .Nm

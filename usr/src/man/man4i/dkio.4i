@@ -766,9 +766,9 @@ forces the driver to re-examine the alternates slice and
 rebuild the internal bad block map accordingly.
 It should be used whenever the
 alternates slice is changed by any method other than the
-.Xr addbadsec 1M
+.Xr addbadsec 8
 or
-.Xr format 1M
+.Xr format 8
 utilities.
 .Dv DKIOCADDBAD
 can only be used for software
@@ -830,15 +830,15 @@ Any modification to any of the logical partitions results in the
 recreation of all logical device nodes.
 .El
 .Sh SEE ALSO
-.Xr addbadsec 1M ,
-.Xr fdisk 1M ,
-.Xr format 1M ,
 .Xr ioctl 2 ,
 .Xr cmdk 7D ,
 .Xr sd 7D ,
 .Xr cdio 7I ,
 .Xr fdio 7I ,
-.Xr hdio 7I
+.Xr hdio 7I ,
+.Xr addbadsec 8 ,
+.Xr fdisk 8 ,
+.Xr format 8
 .Sh NOTES
 Blocksize information provided in
 .Dv DKIOCGMEDIAINFO

@@ -46,7 +46,7 @@ can run this daemon.
 The
 .Nm
 daemon is automatically invoked using
-.Xr share 1M
+.Xr share 8
 with the
 .Fl a
 option.
@@ -170,17 +170,17 @@ Daemon failed to start.
 .El
 .Sh SEE ALSO
 .Xr svcs 1 ,
-.Xr mountd 1M ,
-.Xr share 1M ,
-.Xr sharectl 1M ,
-.Xr sharemgr 1M ,
-.Xr svcadm 1M ,
 .Xr nfs 4 ,
 .Xr sharetab 4 ,
 .Xr system 4 ,
 .Xr attributes 5 ,
 .Xr smf 5 ,
-.Xr zones 5
+.Xr zones 5 ,
+.Xr mountd 8 ,
+.Xr share 8 ,
+.Xr sharectl 8 ,
+.Xr sharemgr 8 ,
+.Xr svcadm 8
 .Sh NOTES
 Manually starting and restarting
 .Nm
@@ -190,7 +190,7 @@ If it is necessary to do so, use
 to enable or disable the nfs service
 .Pq svc:/network/nfs/server .
 If it is disabled, it will be enabled by
-.Xr share_nfs 1M ,
+.Xr share_nfs 8 ,
 unless its
 .Sy application Ns / Ns Sy auto_enable
 property is set to
@@ -198,7 +198,7 @@ property is set to
 See
 .Xr smf 5
 and
-.Xr svcadm 1M
+.Xr svcadm 8
 for more information.
 .Pp
 The
@@ -212,7 +212,7 @@ svc:/network/nfs/server
 .Pp
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using
-.Xr svcadm 1M .
+.Xr svcadm 8 .
 The service's status can be queried using the
 .Xr svcs 1
 command.

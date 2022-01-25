@@ -58,11 +58,11 @@ Because the driver leverages the
 .Xr blkdev 7D
 framework, most standard disk manipulation utilities will function such
 as
-.Xr diskinfo 1M
+.Xr diskinfo 8
 for discovering devices,
-.Xr format 1M
+.Xr format 8
 for manipulating partition tables,
-.Xr iostat 1M
+.Xr iostat 8
 for seeing device I/O statistics, and a subset of the
 .Xr dkio 7I
 ioctl requests to retrieve information about the device.
@@ -81,10 +81,10 @@ Character device minor node.
 x86 device driver.
 .El
 .Sh SEE ALSO
-.Xr diskinfo 1M ,
 .Xr blkdev 7D ,
 .Xr virtio 7D ,
-.Xr dkio 7I
+.Xr dkio 7I ,
+.Xr diskinfo 8
 .Rs
 .%T Virtual I/O Device (VIRTIO) Version 1.1
 .%D April, 2019

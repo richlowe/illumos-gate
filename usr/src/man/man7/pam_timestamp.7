@@ -83,7 +83,7 @@ or timestamp file is expired or corrupt.
 The following example is a
 .Xr pam.conf 4
 fragment that illustrates default settings for allowing
-.Xr su 1M
+.Xr su 8
 authentication:
 .Bd -literal -offset indent
 su  auth required	pam_unix_cred.so.1
@@ -105,9 +105,9 @@ su  auth required	pam_unix_auth.so.1
 .Sh MT LEVEL
 .Sy MT-Safe .
 .Sh SEE ALSO
-.Xr su 1M ,
 .Xr syslog 3C ,
 .Xr pam 3PAM ,
 .Xr pam_sm_authenticate 3PAM ,
 .Xr pam_sm_setcred 3PAM ,
-.Xr pam.conf 4
+.Xr pam.conf 4 ,
+.Xr su 8

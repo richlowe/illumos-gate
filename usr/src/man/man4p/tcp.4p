@@ -277,7 +277,7 @@ The operating system also provides alternative algorithms that may be more
 appropriate for your application, including the CUBIC congestion control
 algorithm described in RFC 8312.
 These can be configured system-wide using
-.Xr ipadm 1M ,
+.Xr ipadm 8 ,
 or on a per-connection basis with the TCP-level socket option
 .Dv TCP_CONGESTION ,
 whose argument is the name of the algorithm to use
@@ -376,7 +376,7 @@ has been made, it is too late to increase the send or receive window beyond the
 default TCP limit of 64K.
 .It
 For all applications, use
-.Xr ndd 1M
+.Xr ndd 8
 to modify the configuration parameter
 .Cm tcp_wscale_always .
 If
@@ -825,8 +825,6 @@ The system ran out of memory for internal data structures.
 .El
 .Sh SEE ALSO
 .Xr svcs 1 ,
-.Xr ndd 1M ,
-.Xr svcadm 1M ,
 .Xr ioctl 2 ,
 .Xr read 2 ,
 .Xr write 2 ,
@@ -841,7 +839,9 @@ The system ran out of memory for internal data structures.
 .Xr inet 7P ,
 .Xr inet6 7P ,
 .Xr ip 7P ,
-.Xr ip6 7P
+.Xr ip6 7P ,
+.Xr ndd 8 ,
+.Xr svcadm 8
 .Rs
 .%A "K. Ramakrishnan"
 .%A "S. Floyd"
@@ -891,7 +891,7 @@ under the service identifier
 .Pp
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using
-.Xr svcadm 1M .
+.Xr svcadm 8 .
 The service's
 status can be queried using the
 .Xr svcs 1

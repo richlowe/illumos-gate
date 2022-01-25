@@ -40,15 +40,15 @@ Administrators do not interact with the
 .Nm
 driver directly.
 USB devices are managed with
-.Xr cfgadm 1M .
+.Xr cfgadm 8 .
 See
-.Xr cfgadm_usb 1M
+.Xr cfgadm_usb 8
 for more information on how to specifically manage USB devices and how
 they are laid out in the system.
-.Xr cfgadm 1M
+.Xr cfgadm 8
 is only used to manage devices at a USB level.
 For example, a USB NIC would still be managed with
-.Xr dladm 1M
+.Xr dladm 8
 at a networking level.
 .Pp
 On some x86 systems USB ports may be routed to either an instance of the
@@ -100,9 +100,9 @@ Device driver (x86)
 Driver configuration file
 .El
 .Sh SEE ALSO
-.Xr cfgadm 1M ,
-.Xr cfgadm_usb 1M ,
-.Xr dladm 1M ,
 .Xr driver.conf 4 ,
 .Xr ehci 7D ,
-.Xr usba 7D
+.Xr usba 7D ,
+.Xr cfgadm 8 ,
+.Xr cfgadm_usb 8 ,
+.Xr dladm 8

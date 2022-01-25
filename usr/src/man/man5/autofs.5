@@ -26,14 +26,14 @@
 .Nd automount configuration properties
 .Sh DESCRIPTION
 The behavior of the
-.Xr automount 1M
+.Xr automount 8
 command and the
-.Xr automountd 1M
+.Xr automountd 8
 daemon is controlled by property values that are stored in the Service
 Management Facility,
 .Xr smf 5 .
 The
-.Xr sharectl 1M
+.Xr sharectl 8
 command should be used to query or change values for these properties.
 .Pp
 Changes made to
@@ -43,7 +43,7 @@ property values on an
 or
 .Nm automountd
 command line override the values set using
-.Xr sharectl 1M .
+.Xr sharectl 8 .
 .Pp
 The following list describes the properties:
 .Bl -tag -width Ds
@@ -107,7 +107,7 @@ VAR1=val1,VAR2=val2\e,val3
 .Ed
 .El
 .Sh SEE ALSO
-.Xr automount 1M ,
-.Xr automountd 1M ,
-.Xr sharectl 1M ,
-.Xr smf 5
+.Xr smf 5 ,
+.Xr automount 8 ,
+.Xr automountd 8 ,
+.Xr sharectl 8

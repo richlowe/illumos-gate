@@ -52,8 +52,8 @@ Special character device.
 firmware files
 .El
 .Sh SEE ALSO
-.Xr dladm 1M ,
-.Xr wificonfig 1M
+.Xr dladm 8 ,
+.Xr wificonfig 8
 .Pp
 .Em 802.11 - Wireless LAN Media  Access Control  and  Physical Layer
 Specification- IEEE, 2001

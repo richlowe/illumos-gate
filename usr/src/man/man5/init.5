@@ -45,11 +45,11 @@ and
 .Pp
 It can also be used to set any additional environment variables which should be
 present in all processes started by
-.Xr init 1M
+.Xr init 8
 or
-.Xr svc.startd 1M ,
+.Xr svc.startd 8 ,
 and in any
-.Xr zoneadmd 1M
+.Xr zoneadmd 8
 daemons started automatically to support zone operations.
 .Pp
 The format of the file is a set of tokens of the form:
@@ -90,7 +90,7 @@ If the
 .Ev CMASK
 variable is specified, it is not passed to the environment but the value is
 used to set the initial umask that
-.Xr init 1M
+.Xr init 8
 uses and that every other process inherits.
 The
 .Ev CMASK
@@ -102,7 +102,7 @@ A sequence of valid octal digits followed by other trailing characters will be
 treated as if the trailing characters were not present.
 .Pp
 For
-.Xr init 1M ,
+.Xr init 8 ,
 the number of environment variables that can be set is limited to 20.
 .Pp
 .Pa /etc/TIMEZONE
@@ -111,12 +111,12 @@ is a symbolic link to
 This link exists for compatibility with legacy software, is obsolete, and may
 be removed in a future release.
 .Sh SEE ALSO
-.Xr init 1M ,
-.Xr rtc 1M ,
-.Xr svc.startd 1M ,
-.Xr zoneadmd 1M ,
 .Xr ctime 3C ,
-.Xr environ 5
+.Xr environ 5 ,
+.Xr init 8 ,
+.Xr rtc 8 ,
+.Xr svc.startd 8 ,
+.Xr zoneadmd 8
 .Sh NOTES
 When changing the
 .Ev TZ
@@ -137,5 +137,5 @@ is the same name as the
 variable setting.
 .Pp
 See
-.Xr rtc 1M
+.Xr rtc 8
 for more information.

@@ -32,7 +32,7 @@ via a private ioctl interface.
 .Pp
 The UFM interfaces described below are used in the implementation of the
 system through tools such as
-.Xr fwflash 1M
+.Xr fwflash 8
 or as part of the fault management architecture.
 .Sh FILES
 .Bl -tag -width Pa

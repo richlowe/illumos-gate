@@ -45,11 +45,11 @@ the default mount directory
 the name of the file system type
 .Pq Em FS type ,
 the number used by
-.Xr fsck 1M
+.Xr fsck 8
 to decide whether to check the file system automatically
 .Pq Em fsck pass ,
 whether the file system should be mounted automatically by
-.Xr mountall 1M
+.Xr mountall 8
 .Pq Em mount at boot ,
 and the file system mount options
 .Pq Em mount options .
@@ -122,9 +122,9 @@ The following is an example for a UFS file system in which logging is enabled:
 .Ed
 .Pp
 See
-.Xr mount_nfs 1M
+.Xr mount_nfs 8
 for a description of NFS mount options and
-.Xr mount_ufs 1M
+.Xr mount_ufs 8
 for a description of UFS options.
 .Pp
 .Sy Example 2
@@ -170,7 +170,7 @@ example above
 .Pc
 for a pcfs logical drive.
 See
-.Xr mount_pcfs 1M
+.Xr mount_pcfs 8
 for syntax for pcfs logical drives and for pcfs-specific mount options.
 .Pp
 .Sy Example 3
@@ -186,11 +186,11 @@ See
 .Xr lofs 7FS
 for an overview of the loopback file system.
 .Sh SEE ALSO
-.Xr fsck 1M ,
-.Xr mount 1M ,
-.Xr mount_hsfs 1M ,
-.Xr mount_nfs 1M ,
-.Xr mount_tmpfs 1M ,
-.Xr mount_ufs 1M ,
-.Xr swap 1M ,
-.Xr getvfsent 3C
+.Xr getvfsent 3C ,
+.Xr fsck 8 ,
+.Xr mount 8 ,
+.Xr mount_hsfs 8 ,
+.Xr mount_nfs 8 ,
+.Xr mount_tmpfs 8 ,
+.Xr mount_ufs 8 ,
+.Xr swap 8

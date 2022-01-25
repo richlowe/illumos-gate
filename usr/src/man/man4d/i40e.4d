@@ -40,7 +40,7 @@ of frames, it supports the following features:
 Jumbo frames up to 9710 bytes.
 .It
 Promiscuous access via
-.Xr snoop 1M and
+.Xr snoop 8 and
 .Xr dlpi 7P
 .It
 IPv4 Checksum Offload
@@ -86,20 +86,20 @@ At this time, the driver requires the use of auto-negotiation.
 The
 .Nm
 driver is managed by the
-.Xr dladm 1M
+.Xr dladm 8
 utility.
-.Xr dladm 1M
+.Xr dladm 8
 is the preferred interface for setting all properties.
 While
 .Xr driver.conf 4
 based configuration is possible,
-.Xr dladm 1M
+.Xr dladm 8
 is recommended.
 The
 .Nm
 driver may be joined into an aggregation based on the link aggregation
 control protocol (LACP) through
-.Xr dladm 1M .
+.Xr dladm 8 .
 .Sh PROPERTIES
 The device supports the following properties which may be tuned through
 its driver.conf file,
@@ -110,11 +110,11 @@ binding to it.
 This happens when an IP interfaces is plumbed or another
 .Xr dlpi 7P
 consumer such as
-.Xr snoop 1M
+.Xr snoop 8
 or an LLDP daemon is started.
 .Pp
 Some properties may be tuned at runtime with the
-.Xr dladm 1M
+.Xr dladm 8
 utility.
 Properties that can be will have the name of the dladm property called out
 explicitly.
@@ -329,7 +329,7 @@ Device driver (x86)
 Driver configuration file
 .El
 .Sh SEE ALSO
-.Xr dladm 1M ,
-.Xr snoop 1M ,
 .Xr driver.conf 4 ,
-.Xr dlpi 7P
+.Xr dlpi 7P ,
+.Xr dladm 8 ,
+.Xr snoop 8

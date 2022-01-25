@@ -44,7 +44,7 @@ may have unique operational semantics.
 Most of the common device names under
 .Pa /dev
 are created automatically by
-.Xr devfsadm 1M
+.Xr devfsadm 8
 Others, such as
 .Pa /dev/pts ,
 .Pa /dev/net ,
@@ -52,12 +52,12 @@ and
 .Pa /dev/zvol
 are dynamic and reflect the operational state of the system.
 You can manually generate device names for newly attached hardware by invoking
-.Xr devfsadm 1M
+.Xr devfsadm 8
 or implicitly, by indirectly causing a lookup or readdir operation in the
 filesystem to occur.
 For example, you can discover a disk that was attached when the system was
 powered down (and generate a name for that device) by invoking
-.Xr format 1M .
+.Xr format 8 .
 .Pp
 In a non-global zone, the
 .Nm
@@ -74,9 +74,9 @@ Mount point for the
 filesystem in the global zone and non-global zones.
 .El
 .Sh SEE ALSO
-.Xr devfsadm 1M ,
-.Xr format 1M ,
-.Xr devfs 7FS
+.Xr devfs 7FS ,
+.Xr devfsadm 8 ,
+.Xr format 8
 .Sh NOTES
 The global
 .Pa /dev

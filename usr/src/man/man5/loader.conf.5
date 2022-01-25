@@ -70,7 +70,7 @@ The configuration variables are read from the following files:
 .Bl -tag -width Ar
 .It Ar /boot/solaris/bootenv.rc
 Managed by the
-.Xr eeprom 1M
+.Xr eeprom 8
 command.
 .It Ar /boot/defaults/loader.conf
 Loader defaults provided by the operating system.
@@ -87,7 +87,7 @@ TFTP does not provide the directory list.
 .It Ar /boot/transient.conf
 Configuration file for transient boot.
 This file is created by the
-.Xr reboot 1M
+.Xr reboot 8
 command and is automatically removed when system is reaching the multi-user
 run level.
 .El
@@ -235,10 +235,10 @@ If set to
 the beastie boot menu will be displayed without ANSI coloring.
 .El
 .Sh SEE ALSO
-.Xr boot 1M ,
-.Xr eeprom 1M ,
 .Xr loader 5 ,
-.Xr loader.4th 5
+.Xr loader.4th 5 ,
+.Xr boot 8 ,
+.Xr eeprom 8
 .Sh NOTES
 The
 .Xr loader 5

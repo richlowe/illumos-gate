@@ -36,7 +36,7 @@ plugged into a reader.
 The driver also provides interfaces to obtain status information, the
 ATR (answer to reset), and obtain exclusive access to the device.
 In addition, the system exposes control of CCID devices through
-.Xr cfgadm 1M .
+.Xr cfgadm 8 .
 .Ss Supported Devices
 The CCID specification allows for readers to come in different flavors.
 These different flavors support different communication protocols and
@@ -92,7 +92,7 @@ To deal with this, symlinks based on other properties will be provided
 (for example, the USB serial number).
 .Pp
 All of the CCID devices in the system can also be listed by using the
-.Xr ccidadm 1M
+.Xr ccidadm 8
 command.
 .Ss I/O Model
 To send and receive responses to commands, a program must open up the
@@ -536,14 +536,14 @@ No transaction is active.
 The CCID reader has been disconnected.
 .El
 .Sh SEE ALSO
-.Xr ccidadm 1M ,
-.Xr cfgadm 1M ,
 .Xr close 2 ,
 .Xr ioctl 2 ,
 .Xr open 2 ,
 .Xr poll 2 ,
 .Xr read 2 ,
-.Xr write 2
+.Xr write 2 ,
+.Xr ccidadm 8 ,
+.Xr cfgadm 8
 .Rs
 .%T Universal Serial Bus Device Class: Smart Card CCID
 .%O Revision 1.1

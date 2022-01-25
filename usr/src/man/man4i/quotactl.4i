@@ -212,11 +212,11 @@ file pointed to by
 .Fa addr .
 .El
 .Sh SEE ALSO
-.Xr quota 1M ,
-.Xr quotacheck 1M ,
-.Xr quotaon 1M ,
 .Xr getrlimit 2 ,
-.Xr mount 2
+.Xr mount 2 ,
+.Xr quota 8 ,
+.Xr quotacheck 8 ,
+.Xr quotaon 8
 .Sh BUGS
 There should be some way to integrate this call with the resource limit
 interface provided by

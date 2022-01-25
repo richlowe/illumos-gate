@@ -179,9 +179,9 @@
 The
 .Nm
 command is a stable replacement for the
-.Xr ifconfig 1M
+.Xr ifconfig 8
 and
-.Xr ndd 1M
+.Xr ndd 8
 commands.
 It is used to create IP interfaces and to configure IP addresses on those
 interfaces.
@@ -607,7 +607,7 @@ DNS labels, or by appending to
 the DNS domain name value configured in
 .Pa /etc/default/dhcpagent
 for
-.Xr dhcpagent 1m .
+.Xr dhcpagent 8 .
 N.b. that the DHCP server implementation ultimately determines whether and
 how the client-sent FQDN is used.
 .It Fl t Ns \&, Ns Fl -temporary
@@ -836,7 +836,7 @@ Packets can be transmitted
 .Pq Cm on Ns / Ns Cm off .
 .It Cm zone
 The zone the addrobj is in (temporary-only--use
-.Xr zonecfg 1M
+.Xr zonecfg 8
 to make persistent).
 .El
 .It Fl t Ns \&, Ns Fl -temporary
@@ -1048,14 +1048,14 @@ subcommand for the list of property names.
 .El
 .El
 .Sh SEE ALSO
-.Xr arp 1M ,
-.Xr cfgadm 1M ,
-.Xr dhcpagent 1M ,
-.Xr dladm 1M ,
-.Xr if_mpadm 1M ,
-.Xr ifconfig 1M ,
-.Xr ndd 1M ,
-.Xr zonecfg 1M ,
 .Xr nodename 4 ,
 .Xr nsswitch.conf 4 ,
-.Xr dhcp 5
+.Xr dhcp 5 ,
+.Xr arp 8 ,
+.Xr cfgadm 8 ,
+.Xr dhcpagent 8 ,
+.Xr dladm 8 ,
+.Xr if_mpadm 8 ,
+.Xr ifconfig 8 ,
+.Xr ndd 8 ,
+.Xr zonecfg 8

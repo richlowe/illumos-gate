@@ -41,7 +41,7 @@ interfaces.
 The primary methods of configuration are via modification of the
 .Pa /kernel/drv/qede.conf
 file or execution of the
-.Xr dladm 1M
+.Xr dladm 8
 utility.
 There are many configuration items available and all are thoroughly
 documented in the
@@ -52,18 +52,18 @@ reloaded or the system rebooted.
 In order to reload the driver with new configuration changes all
 .Nm qede
 interfaces must be first unplumbed and then the
-.Xr update_drv 1M
+.Xr update_drv 8
 tool must be executed.
 For the configuration items that do not require a driver reload the
-.Xr dladm 1M
+.Xr dladm 8
 tool can be used to dynamically change the option.
 Use of
-.Xr dladm 1M
+.Xr dladm 8
 is the preferred method.
 .Sh DEBUGGING
 .Ss kstat
 There are many statistics exposed via
-.Xr kstat 1M
+.Xr kstat 8
 by the
 .Nm
 driver.
@@ -94,7 +94,7 @@ To get a list of all the individual statistics in these groups run:
 # kstat -m qede -i 0 -l
 .Ed
 .Sh SEE ALSO
-.Xr dladm 1M ,
-.Xr ifconfig 1M ,
 .Xr driver.conf 4 ,
-.Xr dlpi 7P
+.Xr dlpi 7P ,
+.Xr dladm 8 ,
+.Xr ifconfig 8

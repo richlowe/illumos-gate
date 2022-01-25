@@ -106,13 +106,13 @@ file systems are mounted using:
 mount -F lofs /tmp /mnt
 .Ed
 .Sh SEE ALSO
-.Xr lofiadm 1M ,
-.Xr mount 1M ,
 .Xr chroot 2 ,
 .Xr mount 2 ,
 .Xr sysfs 2 ,
 .Xr vfstab 4 ,
-.Xr lofi 7D
+.Xr lofi 7D ,
+.Xr lofiadm 8 ,
+.Xr mount 8
 .Sh NOTES
 All access to entries in
 .Nm
@@ -122,7 +122,7 @@ If a mount point is made available in multiple locations via
 and is busy in any of those locations, an attempt to mount a file system at that
 mount point fails unless the overlay flag is specified.
 See
-.Xr mount 1M .
+.Xr mount 8 .
 Examples of a mount point being busy within a
 .Nm
 mount include having a file system mounted on it or it being a processes'

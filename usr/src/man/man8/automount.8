@@ -36,13 +36,13 @@ utility installs
 .Nm autofs
 mount points and associates an automount map with each mount point.
 It starts the
-.Xr automountd 1M
+.Xr automountd 8
 daemon if it finds any non-trivial entries in either local or distributed
 automount maps and if the daemon is not already running.
 The
 .Nm autofs
 file system monitors attempts to access directories within it and notifies the
-.Xr automountd 1M
+.Xr automountd 8
 daemon.
 The daemon uses the map to locate a file system, which it then mounts at the
 point of reference within the
@@ -200,7 +200,7 @@ options, and
 .Ar location
 specifies a file system from which the directory may be mounted.
 In the case of a simple NFS mount, the options that can be used are specified in
-.Xr mount_nfs 1M ,
+.Xr mount_nfs 8 ,
 and
 .Ar location
 takes the form:
@@ -644,14 +644,14 @@ See
 .Xr ls 1 ,
 .Xr svcs 1 ,
 .Xr uname 1 ,
-.Xr automountd 1M ,
-.Xr mount 1M ,
-.Xr mount_nfs 1M ,
-.Xr svcadm 1M ,
 .Xr autofs 4 ,
 .Xr attributes 5 ,
 .Xr nfssec 5 ,
-.Xr smf 5
+.Xr smf 5 ,
+.Xr automountd 8 ,
+.Xr mount 8 ,
+.Xr mount_nfs 8 ,
+.Xr svcadm 8
 .Sh NOTES
 .Nm autofs
 mount points must not be hierarchically related.
@@ -702,7 +702,7 @@ retries.
 Note that this is significantly different from the default
 .Pq 10000
 for the
-.Xr mount_nfs 1M
+.Xr mount_nfs 8
 utility.
 .Pp
 The Network Information Service
@@ -722,7 +722,7 @@ svc:/system/filesystem/autofs:default
 .Pp
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using
-.Xr svcadm 1M .
+.Xr svcadm 8 .
 The service's status can be queried using the
 .Xr svcs 1
 command.

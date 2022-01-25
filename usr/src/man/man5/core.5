@@ -53,7 +53,7 @@ abnormally terminating process, using a global core file name pattern and a
 per-process core file name pattern.
 These patterns are expanded to determine the pathname of the resulting core
 files, and can be configured by
-.Xr coreadm 1M .
+.Xr coreadm 8 .
 By default, the global core file pattern is disabled and not used, and the
 per-process core file pattern is set to
 .Sy core .
@@ -122,7 +122,7 @@ effective group ID is different from its real group ID.
 Similarly, set-user-ID and set-group-ID programs do not produce core files as
 this could potentially compromise system security.
 These processes can be explicitly granted permission to produce core files using
-.Xr coreadm 1M ,
+.Xr coreadm 8 ,
 at the risk of exposing secure information.
 .El
 .Pp
@@ -144,7 +144,7 @@ field in the file header has type
 The program header contains an entry for every segment that was part of the
 process address space, including shared library segments.
 The contents of the mappings specified by
-.Xr coreadm 1M
+.Xr coreadm 8
 are also part of the core image.
 Each program header has its
 .Fa p_memsz
@@ -162,7 +162,7 @@ is
 A mapping's data can be excluded due to the core file content settings
 .Po
 see
-.Xr coreadm 1M
+.Xr coreadm 8
 .Pc ,
 due to a failure, or due to a signal received after core dump initiation but
 before its completion.
@@ -414,7 +414,7 @@ structure is defined in
 This optional entry indicates which parts of the process image are specified
 to be included in the core file.
 See
-.Xr coreadm 1M .
+.Xr coreadm 8 .
 .It Vt prsecflags_t
 .Fa n_type :
 .Dv NT_SECFLAGS .
@@ -546,7 +546,7 @@ entry for more details.
 .El
 .Pp
 Depending on the
-.Xr coreadm 1M
+.Xr coreadm 8
 settings, the section header of an ELF core file can contain entries for CTF,
 DWARF debug information, symbol table, and string table sections.
 The
@@ -566,7 +566,6 @@ see
 .Xr mdb 1 ,
 .Xr proc 1 ,
 .Xr ps 1 ,
-.Xr coreadm 1M ,
 .Xr getrlimit 2 ,
 .Xr setrlimit 2 ,
 .Xr setuid 2 ,
@@ -580,4 +579,5 @@ see
 .Xr a.out 4 ,
 .Xr proc 4 ,
 .Xr security-flags 5 ,
-.Xr zones 5
+.Xr zones 5 ,
+.Xr coreadm 8

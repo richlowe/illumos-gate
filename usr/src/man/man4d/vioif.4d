@@ -59,7 +59,7 @@ and be found in the file system at
 The networking devices created by the
 .Nm
 driver can be controlled through
-.Xr dladm 1M .
+.Xr dladm 8 .
 There is no
 .Xr driver.conf 4
 file for
@@ -79,10 +79,10 @@ special character device.
 x86 device driver.
 .El
 .Sh SEE ALSO
-.Xr dladm 1M ,
 .Xr libdlpi 3LIB ,
 .Xr virtio 7D ,
 .Xr dlpi 7P ,
+.Xr dladm 8 ,
 .Xr mac 9E
 .Rs
 .%T Virtual I/O Device (VIRTIO) Version 1.1

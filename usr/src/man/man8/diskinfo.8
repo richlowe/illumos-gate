@@ -49,7 +49,7 @@ the fields provided indicate the base name of the device in the
 .Pa /dev/dsk
 directory, the disk's vendor and product identification strings, the serial
 number of the device, whether the device is faulty as diagnosed by
-.Xr fmd 1M ,
+.Xr fmd 8 ,
 whether the locate or identification indicator is on for the device
 .Pq if one is present ,
 and the chassis and bay number containing the disk if known.
@@ -103,7 +103,7 @@ The base name of the device node within the
 directory.
 The names of partitions and/or slices, if any, are derived from this name as
 described by
-.Xr prtvtoc 1M .
+.Xr prtvtoc 8 .
 .Pp
 This field is available in all output modes.
 .It Sy FLRS
@@ -186,6 +186,6 @@ The vendor identification string reported by the device.
 This field is available in all output modes.
 .El
 .Sh SEE ALSO
-.Xr fmd 1M ,
-.Xr prtvtoc 1M ,
-.Xr sd 7D
+.Xr sd 7D ,
+.Xr fmd 8 ,
+.Xr prtvtoc 8

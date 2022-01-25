@@ -27,7 +27,7 @@ The
 utility extracts the binary data from a dump of the system's Advanced
 Configuration and Power Interface (ACPI) tables.
 The dump is usually obtained via the
-.Xr acpidump 1M
+.Xr acpidump 8
 command.
 The resulting binary file(s) are represented in the ACPI
 .Sy ASL
@@ -67,7 +67,7 @@ Extract all ACPI tables
 The following example extracts all of the individual ACPI tables from a
 previously created dump of the ACPI tables from a running system.
 Such a dump can be created with the
-.Xr acpidump 1M
+.Xr acpidump 8
 utility.
 Extracted tables can then be inspected or disassembled by the
 iasl utility on any platform.
@@ -110,4 +110,4 @@ Acpi table [EINJ] -     336 bytes written to einj.dat
 28 binary ACPI tables extracted
 .Ed
 .Sh SEE ALSO
-.Xr acpidump 1M
+.Xr acpidump 8

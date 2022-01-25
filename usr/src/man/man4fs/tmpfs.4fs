@@ -100,7 +100,7 @@ for example, running out of space on
 .Nm
 .Pc
 can allocate more swap space by using the
-.Xr swap 1M
+.Xr swap 8
 command.
 .Pp
 Another constraint is that the number of files available in a
@@ -127,7 +127,7 @@ An additional mount option can be specified to control the size of an individual
 .Nm
 file system.
 See
-.Xr mount_tmpfs 1M
+.Xr mount_tmpfs 8
 for more details.
 .Sh DIAGNOSTICS
 If
@@ -143,7 +143,7 @@ is attempting to write more than it is allowed, or if currently executing
 programs are using a lot of memory.
 To make more space available, remove unnecessary files, exit from some programs,
 or allocate more swap space using
-.Xr swap 1M .
+.Xr swap 8 .
 .It "directory: File system full, memory allocation failed"
 .Nm
 ran out of physical memory while attempting to create a new file or
@@ -151,14 +151,14 @@ directory.
 Remove unnecessary files or directories or install more physical memory.
 .El
 .Sh SEE ALSO
-.Xr df 1M ,
-.Xr mount 1M ,
-.Xr mount_tmpfs 1M ,
-.Xr swap 1M ,
 .Xr mmap 2 ,
 .Xr mount 2 ,
 .Xr umount 2 ,
-.Xr vfstab 4
+.Xr vfstab 4 ,
+.Xr df 8 ,
+.Xr mount 8 ,
+.Xr mount_tmpfs 8 ,
+.Xr swap 8
 .Sh WARNINGS
 Files and directories on a
 .Nm
@@ -181,7 +181,7 @@ to a
 .Nm
 file is not supported.
 .Pp
-.Xr df 1M
+.Xr df 8
 output is of limited accuracy since a
 .Nm
 file system size

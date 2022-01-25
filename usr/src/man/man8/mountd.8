@@ -46,18 +46,18 @@ whether the client should get read-write, read-only, or no access.
 This access can be dependent on the security mode used in the remoted procedure
 call from the client.
 See
-.Xr share_nfs 1M .
+.Xr share_nfs 8 .
 .Pp
 The command also provides information as to what file systems are mounted by
 which clients.
 This information can be printed using the
-.Xr showmount 1M
+.Xr showmount 8
 command.
 .Pp
 The
 .Nm
 daemon is automatically invoked by
-.Xr share 1M .
+.Xr share 8 .
 .Pp
 Only super user can run the mountd daemon.
 .Pp
@@ -85,14 +85,14 @@ console, as well as how it got that result.
 shared file system table
 .El
 .Sh SEE ALSO
-.Xr nfsd 1M ,
-.Xr share 1M ,
-.Xr share_nfs 1M ,
-.Xr sharectl 1M ,
-.Xr showmount 1M ,
 .Xr nfs 4 ,
 .Xr sharetab 4 ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr nfsd 8 ,
+.Xr share 8 ,
+.Xr share_nfs 8 ,
+.Xr sharectl 8 ,
+.Xr showmount 8
 .Sh NOTES
 Since
 .Nm

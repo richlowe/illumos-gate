@@ -40,9 +40,9 @@ The
 .Nm share
 utility makes local file systems available for mounting by remote systems.
 It starts the
-.Xr nfsd 1M
+.Xr nfsd 8
 and
-.Xr mountd 1M
+.Xr mountd 8
 daemons if they are not already running.
 .Pp
 If no argument is specified, then
@@ -559,13 +559,13 @@ The location of the log file, as well as the necessary logging work
 files, is specified by the global entry in
 .Pa /etc/nfs/nfslog.conf .
 The
-.Xr nfslogd 1M
+.Xr nfslogd 8
 daemon runs only if at least one file system entry in
 .Pa /etc/dfs/dfstab
 is shared with logging enabled upon starting or rebooting the system.
 Simply sharing a file system with logging enabled from the command line does not
 start the
-.Xr nfslogd 1M .
+.Xr nfslogd 8 .
 .Ss Example 2 Remap A User Coming From The Particular NFS Client
 The following example remaps the user with uid
 .Sy 100
@@ -577,18 +577,18 @@ to user
 share -o uidmap=100:joe:@10.0.0.1 /export
 .Ed
 .Sh SEE ALSO
-.Xr mount 1M ,
-.Xr mountd 1M ,
-.Xr nfsd 1M ,
-.Xr nfslogd 1M ,
-.Xr share 1M ,
-.Xr unshare 1M ,
 .Xr getnetbyname 3SOCKET ,
 .Xr netgroup 4 ,
 .Xr nfslog.conf 4 ,
 .Xr acl 5 ,
 .Xr attributes 5 ,
-.Xr nfssec 5
+.Xr nfssec 5 ,
+.Xr mount 8 ,
+.Xr mountd 8 ,
+.Xr nfsd 8 ,
+.Xr nfslogd 8 ,
+.Xr share 8 ,
+.Xr unshare 8
 .Sh NOTES
 If the
 .Sy sec Ns =
@@ -785,7 +785,7 @@ share -F nfs -o ro /disk
 .Ed
 .Pp
 The
-.Xr mountd 1M
+.Xr mountd 8
 process allows the processing of a path name that contains a symbolic link.
 This allows the processing of paths that are not themselves explicitly shared
 with

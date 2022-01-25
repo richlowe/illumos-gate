@@ -47,7 +47,7 @@ which is documented in
 provides a more usable interface on top of that.
 .Pp
 For administrative control, the device can be manipulated through the
-.Xr dladm 1M
+.Xr dladm 8
 utility.
 .Pp
 The following Ethernet controllers are supported by this driver:
@@ -194,7 +194,7 @@ file contains some user configurable parameters, the format of which
 is documented in
 .Xr driver.conf 4 .
 Generally, the use of
-.Xr dladm 1M
+.Xr dladm 8
 is recommended over editing the configuration file.
 .Sh FILES
 .Bl -tag -width Pa
@@ -206,8 +206,8 @@ Device driver (SPARC)
 Driver configuration file
 .El
 .Sh SEE ALSO
-.Xr dladm 1M ,
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
 .Xr igb 7D ,
-.Xr dlpi 7P
+.Xr dlpi 7P ,
+.Xr dladm 8

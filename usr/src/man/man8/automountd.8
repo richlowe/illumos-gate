@@ -36,7 +36,7 @@ is an RPC server that answers file system mount and unmount requests from the
 file system.
 It uses local files or name service maps to locate file systems to be mounted.
 These maps are described with the
-.Xr automount 1M
+.Xr automount 8
 command.
 .Pp
 If
@@ -45,12 +45,12 @@ finds any non-trivial entries in either the local or distributed automount maps
 and if the daemon is not running already, the
 .Nm
 daemon is automatically invoked by
-.Xr automount 1M .
+.Xr automount 8 .
 .Nm
 enables the svc:/network/nfs/nlockmgr service
-.Pq Xr lockd 1M ,
+.Pq Xr lockd 8 ,
 and the svc:/network/nfs/status service
-.Pq Xr statd 1M ,
+.Pq Xr statd 8 ,
 if NFS mounts need to be done.
 .Sh OPTIONS
 The following options are supported:
@@ -92,12 +92,12 @@ Master map for automounter.
 .El
 .Sh SEE ALSO
 .Xr svcs 1 ,
-.Xr automount 1M ,
-.Xr svcadm 1M ,
 .Xr autofs 4 ,
 .Xr attributes 5 ,
 .Xr largefile 5 ,
-.Xr smf 5
+.Xr smf 5 ,
+.Xr automount 8 ,
+.Xr svcadm 8
 .Sh NOTES
 The
 .Nm
@@ -110,11 +110,11 @@ svc:/system/filesystem/autofs
 .Pp
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using
-.Xr svcadm 1M .
+.Xr svcadm 8 .
 The service's status can be queried using
 .Xr svcs 1 .
 If it is disabled, it is enabled by
-.Xr automount 1M
+.Xr automount 8
 unless the
 .Sy application Ns / Ns Sy auto_enable
 property is set to

@@ -54,7 +54,7 @@ system.
 Commands such as
 .Xr date 1
 and
-.Xr rdate 1M ,
+.Xr rdate 8 ,
 which are used to set the time on a system, invoke
 .Nm Fl c
 to ensure that daylight savings time (DST) is corrected for properly.
@@ -63,7 +63,7 @@ to ensure that daylight savings time (DST) is corrected for properly.
 .It Fl c
 This option checks for DST and makes corrections to the RTC if necessary.
 It is normally run once a day by a
-.Xr cron 1M
+.Xr cron 8
 job.
 .Pp
 If there is no RTC time zone or
@@ -74,7 +74,7 @@ This option specifies that the RTC runs in local standard time all year round.
 It is incompatible with Windows, but is convenient if only one operating system
 is to be run on the computer.
 The
-.Xr cron 1M
+.Xr cron 8
 command is not necessary, and should not be run.
 .It Fl u
 This option specifies that the RTC runs in UTC time.
@@ -83,14 +83,14 @@ As a side effect, it sets the time zone in
 to UTC.
 Windows can operate in UTC time, but requires a registry change to do so.
 The
-.Xr cron 1M
+.Xr cron 8
 command is not necessary.
 .It Fl v
 This option specifies that the RTC tracks local time, including DST changes.
 This is the default.
 It accomodates Windows with no changes.
 The
-.Xr cron 1M
+.Xr cron 8
 command is necessary to change the RTC when DST is in effect.
 .It Fl w
 This option does nothing.
@@ -119,6 +119,6 @@ the system time.
 .Sy x86
 .Sh SEE ALSO
 .Xr date 1 ,
-.Xr cron 1M ,
-.Xr rdate 1M ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr cron 8 ,
+.Xr rdate 8

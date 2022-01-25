@@ -39,7 +39,7 @@ like
 for IPv4.
 NDP is also responsible for spreading information about the network gateway and
 how hosts should configure themselves
-.Pq see Xr in.ndpd 1M for more on how this happens .
+.Pq see Xr in.ndpd 8 for more on how this happens .
 .Sh APPLICATION PROGRAMMING INTERFACE
 The operating system provides several ioctls to help manipulate the mappings
 obtained through NDP.
@@ -339,11 +339,11 @@ int main(int argc, char *argv[]) {
 }
 .Ed
 .Sh SEE ALSO
-.Xr ifconfig 1M ,
-.Xr in.ndpd 1M ,
-.Xr ndp 1M ,
 .Xr sockaddr_in6 3SOCKET ,
-.Xr privileges 5
+.Xr privileges 5 ,
+.Xr ifconfig 8 ,
+.Xr in.ndpd 8 ,
+.Xr ndp 8
 .Rs
 .%A Narten, T.
 .%A Nordmark, E.

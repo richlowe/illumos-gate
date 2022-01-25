@@ -67,9 +67,9 @@ floppy or
 image), because the block device can then be used with the normal system
 utilities for mounting, checking or repairing filesystems.
 See
-.Xr fsck 1M
+.Xr fsck 8
 and
-.Xr mount 1M .
+.Xr mount 8 .
 .Pp
 Use
 .Nm
@@ -96,8 +96,8 @@ directories for partitions or slices.
 .Pp
 Before using these devices, users should create or verify
 partitioning by using partition management tools such as
-.Xr format 1M and
-.Xr fdisk 1M .
+.Xr format 8 and
+.Xr fdisk 8 .
 Once the device has been appropriately partitioned, the labeled
 device can be used as normal disk to create and mount file systems and to store
 data.
@@ -343,7 +343,7 @@ command:
 .Ed
 .Pp
 Use the
-.Xr mount 1M
+.Xr mount 8
 command to mount the image:
 .Bd -literal
 # mount -F hsfs -o ro /dev/lofi/1 /mnt
@@ -577,15 +577,15 @@ mount: /dev/lofi/1 is not this fstype
 .Ed
 .El
 .Sh SEE ALSO
-.Xr fdisk 1M ,
-.Xr format 1M ,
-.Xr fsck 1M ,
-.Xr mount 1M ,
-.Xr mount_ufs 1M ,
-.Xr newfs 1M ,
 .Xr attributes 5 ,
 .Xr lofi 7D ,
-.Xr lofs 7FS
+.Xr lofs 7FS ,
+.Xr fdisk 8 ,
+.Xr format 8 ,
+.Xr fsck 8 ,
+.Xr mount 8 ,
+.Xr mount_ufs 8 ,
+.Xr newfs 8
 .Sh NOTES
 Just as you would not directly access a disk device that has mounted file
 systems, you should not access a file associated with a block device except
@@ -632,7 +632,7 @@ for
 For compatibility purposes, a raw device is also exported along with the block
 device.
 For example,
-.Xr newfs 1M
+.Xr newfs 8
 requires one.
 .Pp
 The output of

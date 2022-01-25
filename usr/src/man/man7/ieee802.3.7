@@ -40,23 +40,23 @@ See the device driver's documentation for those specific details.
 .
 .Lp
 Values that are statistics are visible
-.Xr kstat 1M ,
+.Xr kstat 8 ,
 whereas properties are visible using the
-.Xr dladm 1M
+.Xr dladm 8
 .Sy show-linkprop
 subcommand.
 Tunables are properties that can be changed using the
-.Xr dladm 1M
+.Xr dladm 8
 .Sy set-linkprop
 subcommand.
 A more useful summary of current operational state can be seen with the
-.Xr dladm 1M
+.Xr dladm 8
 .Sy show-ether
 subcommand.
 .
 .Ss Statistics
 The following statistics are accessible with
-.Xr kstat 1M .
+.Xr kstat 8 .
 Note that some statistics are available in both 32- and 64-bit counters,
 in which case the name of the 64 bit statistic will be the same as the
 32-bit, but with
@@ -292,11 +292,11 @@ Values are as follows:
 .El
 .Ss Properties
 The following parameters are accessible with
-.Xr dladm 1M .
+.Xr dladm 8 .
 Some of these are normally read-only.
 Other properties that are not specific to IEEE 802.3 / Ethernet links are also
 available via
-.Xr dladm 1M ,
+.Xr dladm 8 ,
 and are documented in its man page rather than here.
 .
 .Bl -tag -width adv_1000hdx_cap
@@ -389,7 +389,7 @@ Advertisement of these modes can be enabled or disabled by setting the
 appropriate
 .Sy en_
 property in
-.Xr dladm 1M .
+.Xr dladm 8 .
 .Lp
 Auto-negotiation may also be disabled, by setting the
 .Sy adv_autoneg_cap
@@ -467,13 +467,13 @@ property refers to the link layer property.
 It may be necessary to configure upper layer protocols such as IP to use a
 different size when this changes.
 See
-.Xr ifconfig 1M .
+.Xr ifconfig 8 .
 .
 .Ss Virtual LANs
 Most devices support virtual LANs (and also priority control tagging) though
 the use of a 4-byte tag inserted between the frame header and payload.
 The details of configuration of this are covered in the
-.Xr dladm 1M
+.Xr dladm 8
 manual.
 .
 .Ss Data Link Provider Interface (DLPI) Details
@@ -506,19 +506,19 @@ Ethernet drivers on the support both DLPI style 1 and style 2 operation.
 Additionally, it is possible to configure provide
 .Dq vanity
 names to interfaces using the
-.Xr dladm 1M
+.Xr dladm 8
 .Sy rename-link
 subcommand.
 Such vanity names are only accessible using DLPI style 1.
 .Sh NOTES
 There may be other mechanisms available to configure link layer properties.
 Historically the
-.Xr ndd 1M
+.Xr ndd 8
 command, and
 .Xr driver.conf 4
 files could be used to do this.
 These methods are deprecated in favor of
-.Xr dladm 1M
+.Xr dladm 8
 properties.
 .
 .Sh INTERFACE STABILITY
@@ -531,14 +531,14 @@ and some devices may support additional statistics and properties.
 The DLPI and IEEE 802.3 itself are
 .Sy Standard .
 .Sh SEE ALSO
-.Xr dladm 1M ,
-.Xr ifconfig 1M ,
-.Xr kstat 1M ,
-.Xr ndd 1M ,
-.Xr netstat 1M ,
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
-.Xr dlpi 7P
+.Xr dlpi 7P ,
+.Xr dladm 8 ,
+.Xr ifconfig 8 ,
+.Xr kstat 8 ,
+.Xr ndd 8 ,
+.Xr netstat 8
 .Rs
 .%T IEEE 802.3: Ethernet
 .%Q IEEE Standards Association

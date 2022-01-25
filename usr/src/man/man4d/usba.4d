@@ -103,7 +103,6 @@ They are formatted in the following manner:
 Driver is incompatible with USBA framework.
 .El
 .Sh SEE ALSO
-.Xr cfgadm_usb 1M ,
 .Xr attributes 5 ,
 .Xr ehci 7D ,
 .Xr hid 7D ,
@@ -124,6 +123,7 @@ Driver is incompatible with USBA framework.
 .Xr usbvc 7D ,
 .Xr virtualkm 7D ,
 .Xr xhci 7D ,
+.Xr cfgadm_usb 8 ,
 .Xr Intro 9F ,
 .Xr Intro 9S
 .Pp

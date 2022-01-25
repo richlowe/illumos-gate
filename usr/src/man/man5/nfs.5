@@ -28,17 +28,17 @@
 .Nd NFS configuration properties
 .Sh DESCRIPTION
 The behavior of the
-.Xr nfsd 1M ,
-.Xr nfsmapid 1M ,
-.Xr lockd 1M ,
+.Xr nfsd 8 ,
+.Xr nfsmapid 8 ,
+.Xr lockd 8 ,
 and
-.Xr mountd 1M
+.Xr mountd 8
 daemons and
-.Xr mount_nfs 1M
+.Xr mount_nfs 8
 command is controlled by property values that are stored in the Service
 Management Facility, smf(5).
 The
-.Xr sharectl 1M
+.Xr sharectl 8
 command should be used to query or change values for these properties.
 .Pp
 Changes made to
@@ -50,7 +50,7 @@ property values on the
 or
 .Nm mount_nfs
 command line override the values set using
-.Xr sharectl 1M .
+.Xr sharectl 8 .
 .Pp
 The following list describes the properties:
 .Bl -tag -width Ds
@@ -70,7 +70,7 @@ while default maximum is
 You can override this range on a per-mount basis by using the
 .Fl o Sy vers Ns =
 option to
-.Xr mount_nfs 1M .
+.Xr mount_nfs 8 .
 .It Xo
 .Sy server_versmin Ns = Ns Ar num
 .br
@@ -207,13 +207,13 @@ which means it should use a default binding.
 As described above, the setting for
 .Sy nfsmapid_domain
 overrides the domain used by
-.Xr nfsmapid 1M
+.Xr nfsmapid 8
 for building and comparing outbound and inbound attribute strings, respectively.
 This setting overrides any other mechanism for setting the NFSv4 domain.
 In the absence of a
 .Sy nfsmapid_domain
 setting, the
-.Xr nfsmapid 1M
+.Xr nfsmapid 8
 daemon determines the NFSv4 domain as follows:
 .Bl -bullet
 .It
@@ -245,7 +245,7 @@ exists,
 .Nm nfsmapid
 falls back on using the configured domain name
 .Po see
-.Xr domainname 1M
+.Xr domainname 8
 .Pc ,
 which is returned with the leading domain suffix removed.
 For example, for
@@ -308,12 +308,12 @@ Delegated ZFS datasets to a zone are shareable, as well as lofs-remounted
 directories.
 The zone must have sys_nfs privileges; most brands grant this already.
 .Sh SEE ALSO
-.Xr lockd 1M ,
-.Xr mount_nfs 1M ,
-.Xr mountd 1M ,
-.Xr nfsd 1M ,
-.Xr nfsmapid 1M ,
-.Xr sharectl 1M ,
 .Xr brands 5 ,
 .Xr smf 5 ,
-.Xr zones 5
+.Xr zones 5 ,
+.Xr lockd 8 ,
+.Xr mount_nfs 8 ,
+.Xr mountd 8 ,
+.Xr nfsd 8 ,
+.Xr nfsmapid 8 ,
+.Xr sharectl 8

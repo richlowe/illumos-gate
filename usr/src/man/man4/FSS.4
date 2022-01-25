@@ -177,7 +177,7 @@ command, as shown in the following example:
 .Ed
 .Sh CONFIGURING SCHEDULER WITH DISPADMIN
 You can use the
-.Xr dispadmin 1M
+.Xr dispadmin 8
 command to examine and tune the FSS
 scheduler's time quantum value.
 Time quantum is the amount of time that a
@@ -204,7 +204,7 @@ Thus, by
 default, the QUANTUM value represents the time quantum in milliseconds.
 .Pp
 If you change the RES value using
-.Xr dispadmin 1M
+.Xr dispadmin 8
 with the
 .Fl r
 option, you also change the QUANTUM value.
@@ -217,15 +217,15 @@ You can use the
 option to change the time quantum value.
 Note that such changes are not preserved across reboot.
 Please refer to the
-.Xr dispadmin 1M
+.Xr dispadmin 8
 man page for additional information.
 .Sh SEE ALSO
 .Xr prctl 1 ,
 .Xr priocntl 1 ,
-.Xr dispadmin 1M ,
-.Xr psrset 1M ,
 .Xr priocntl 2 ,
 .Xr project 4 ,
-.Xr resource_controls 5
+.Xr resource_controls 5 ,
+.Xr dispadmin 8 ,
+.Xr psrset 8
 .Pp
 .%T System Administration Guide: Virtualization Using the Solaris Operating System

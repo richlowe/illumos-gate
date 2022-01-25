@@ -38,7 +38,7 @@ is installed in a
 or
 .Cm boot
 partition of a disk with
-.Xr installboot 1M .
+.Xr installboot 8 .
 .Ss IMPLEMENTATION NOTES
 The GPT standard allows a variable number of partitions, but
 .Nm
@@ -60,7 +60,7 @@ Currently GPT and MBR partition schemes are supported.
 The default boot partition is recorded into
 .Nm
 binary by
-.Xr installboot 1M
+.Xr installboot 8
 and the default boot file system is determined at run time.
 .Nm
 does support booting from the
@@ -117,7 +117,7 @@ can be used to list the content of named directory and
 command can be used to query information about discovered devices.
 The output format for ZFS pools is similar to that of
 .Cm zpool status
-.Pq see Xr zpool 1M .
+.Pq see Xr zpool 8 .
 .Pp
 The configured or automatically determined ZFS boot filesystem is
 stored in the
@@ -175,7 +175,7 @@ is installed in combination with a
 .Dq protective MBR
 .Po
 see
-.Xr installboot 1M
+.Xr installboot 8
 .Pc .
 To install
 .Nm
@@ -186,6 +186,6 @@ drive:
 installboot /boot/pmbr /boot/gptzfsboot /dev/rdsk/c0t0d0s0
 .Ed
 .Sh SEE ALSO
-.Xr installboot 1M ,
-.Xr zpool 1M ,
-.Xr loader 5
+.Xr loader 5 ,
+.Xr installboot 8 ,
+.Xr zpool 8

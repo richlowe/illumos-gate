@@ -131,7 +131,7 @@ to prevent Unix users from using each others' Windows credentials.
 See the
 .Ar dirperms
 option to
-.Xr mount_smbfs 1M
+.Xr mount_smbfs 8
 for details regarding how to control
 .Nm
 mount point permissions.
@@ -145,6 +145,6 @@ concern, such as for public read-only resources.
 .Sy Uncommitted
 .Sh SEE ALSO
 .Xr smbutil 1 ,
-.Xr mount_smbfs 1M ,
 .Xr nsmbrc 4 ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr mount_smbfs 8

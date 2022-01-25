@@ -187,7 +187,7 @@ The log size may be larger (up to a maximum of 512 Mbytes), depending upon the
 number of cylinder groups present in the file system.
 The log is continually flushed as it fills up.
 The log is also flushed when the file system is unmounted or as a result of a
-.Xr lockfs 1M
+.Xr lockfs 8
 command.
 .Ss Mounting UFS File Systems
 You can mount a UFS file system in various ways using syntax similar to the
@@ -195,7 +195,7 @@ following:
 .Bl -enum
 .It
 Use
-.Xr mount 1M
+.Xr mount 8
 from the command line:
 .Bd -literal -offset indent
 # mount -F ufs /dev/dsk/c0t0d0s7 /export/home
@@ -210,44 +210,44 @@ file to mount the file system at boot time:
 .El
 .Pp
 For more information on mounting UFS file systems, see
-.Xr mount_ufs 1M .
+.Xr mount_ufs 8 .
 .Sh INTERFACE STABILITY
 .Sy Uncomitted
 .Sh SEE ALSO
-.Xr df 1M ,
-.Xr fsck 1M ,
-.Xr fsck_ufs 1M ,
-.Xr fstyp 1M ,
-.Xr lockfs 1M ,
-.Xr mkfs_ufs 1M ,
-.Xr newfs 1M ,
-.Xr tunefs 1M ,
-.Xr ufsdump 1M ,
-.Xr ufsrestore 1M ,
 .Xr mount 2 ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr df 8 ,
+.Xr fsck 8 ,
+.Xr fsck_ufs 8 ,
+.Xr fstyp 8 ,
+.Xr lockfs 8 ,
+.Xr mkfs_ufs 8 ,
+.Xr newfs 8 ,
+.Xr tunefs 8 ,
+.Xr ufsdump 8 ,
+.Xr ufsrestore 8
 .Sh NOTES
 For information about internal UFS structures, see
-.Xr newfs 1M
+.Xr newfs 8
 and
-.Xr mkfs_ufs 1M .
+.Xr mkfs_ufs 8 .
 For information about dumping and restoring file systems, see
-.Xr ufsdump 1M ,
-.Xr ufsrestore 1M ,
+.Xr ufsdump 8 ,
+.Xr ufsrestore 8 ,
 and
 .Pa /usr/include/protocols/dumprestore.h .
 If you experience difficulty in allocating space on the ufs filesystem, it may
 be due to fragmentation.
 Fragmentation can occur when you do not have sufficient free blocks to satisfy
 an allocation request even though
-.Xr df 1M
+.Xr df 8
 indicates that enough free space is available.
 (This may occur because df only uses the available fragment count to calculate
 available space, but the file system requires contiguous sets of fragments for
 most allocations).
 If you suspect that you have exhausted contiguous fragments on your file system,
 you can use the
-.Xr fstyp 1M
+.Xr fstyp 8
 utility with the
 .Fl v
 option.
@@ -259,11 +259,11 @@ and
 .Pq (number of fragments free)
 fields.
 On unmounted filesystems, you can use
-.Xr fsck 1M
+.Xr fsck 8
 and observe the last line of output, which reports, among other items, the
 number of fragments and the degree of fragmentation.
 To correct a fragmentation problem, run
-.Xr ufsdump 1M
+.Xr ufsdump 8
 and
-.Xr ufsrestore 1M
+.Xr ufsrestore 8
 on the ufs filesystem.

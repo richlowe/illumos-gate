@@ -605,7 +605,7 @@ Processes with a handler will output status information when they receive
 .Dv SIGINFO ,
 for
 example,
-.Xr dd 1M .
+.Xr dd 8 .
 If a process does not have a
 .Dv SIGINFO
 handler, the

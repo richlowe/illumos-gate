@@ -209,7 +209,7 @@ A storage pool is a collection of devices that provides physical storage and
 data replication for ZFS datasets.
 All datasets within a storage pool share the same space.
 See
-.Xr zfs 1M
+.Xr zfs 8
 for information on managing datasets.
 .Ss Virtual Devices (vdevs)
 A "virtual device" describes a single device or a collection of devices
@@ -571,7 +571,7 @@ class by setting the
 dataset property.
 It defaults to zero so you must opt-in by setting it to a non-zero value.
 See
-.Xr zfs 1M
+.Xr zfs 8
 for more info on setting this property.
 .Ss Properties
 Each pool has several properties associated with it.
@@ -638,7 +638,7 @@ contained datasets can actually use.
 The amount of space used in a raidz configuration depends on the characteristics
 of the data being written.
 In addition, ZFS reserves some space for internal accounting that the
-.Xr zfs 1M
+.Xr zfs 8
 command takes into account, but the
 .Nm
 command does not.
@@ -777,7 +777,7 @@ The minimum legal nonzero setting is
 Controls whether a non-privileged user is granted access based on the dataset
 permissions defined on the dataset.
 See
-.Xr zfs 1M
+.Xr zfs 8
 for more information on ZFS delegated administration.
 .It Sy failmode Ns = Ns Sy wait Ns | Ns Sy continue Ns | Ns Sy panic
 Controls the system behavior in the event of catastrophic pool failure.
@@ -1168,7 +1168,7 @@ The mount point must be an absolute path,
 or
 .Sy none .
 For more information on dataset mount points, see
-.Xr zfs 1M .
+.Xr zfs 8 .
 .It Fl n
 Displays the configuration that would be used without actually creating the
 pool.
@@ -1195,7 +1195,7 @@ Sets the given file system properties in the root file system of the pool.
 See the
 .Sx Properties
 section of
-.Xr zfs 1M
+.Xr zfs 8
 for a list of valid properties that can be set.
 .It Fl R Ar root
 Equivalent to
@@ -1445,7 +1445,7 @@ Import the pool without mounting any file systems.
 Comma-separated list of mount options to use when mounting datasets within the
 pool.
 See
-.Xr zfs 1M
+.Xr zfs 8
 for a description of dataset properties and mount options.
 .It Fl o Ar property Ns = Ns Ar value
 Sets the specified property on the imported pool.
@@ -1552,7 +1552,7 @@ option, above.
 Comma-separated list of mount options to use when mounting datasets within the
 pool.
 See
-.Xr zfs 1M
+.Xr zfs 8
 for a description of dataset properties and mount options.
 .It Fl o Ar property Ns = Ns Ar value
 Sets the specified property on the imported pool.
@@ -2541,6 +2541,6 @@ command line option.
 .Sh INTERFACE STABILITY
 .Sy Evolving
 .Sh SEE ALSO
-.Xr zfs 1M ,
 .Xr attributes 5 ,
-.Xr zpool-features 5
+.Xr zpool-features 5 ,
+.Xr zfs 8

@@ -1135,7 +1135,7 @@ Tape Positioning and Tape Drives
 Suppose you have written three files to the non-rewinding 1/2\(dq tape device,
 .Pa /dev/rmt/0ln ,
 and that you want to go back and
-.Xr dd 1M
+.Xr dd 8
 the second file off the tape.
 The commands to do this are:
 .Bd -literal -offset 2n
@@ -1178,13 +1178,13 @@ ioctl(fd, MTIOCGETDRIVETYPE, &mtreq);
 .Sh SEE ALSO
 .Xr mt 1 ,
 .Xr tar 1 ,
-.Xr dd 1M ,
 .Xr open 2 ,
 .Xr read 2 ,
 .Xr write 2 ,
 .Xr aioread 3C ,
 .Xr aiowrite 3C ,
 .Xr ar.h 3HEAD ,
-.Xr st 7D
+.Xr st 7D ,
+.Xr dd 8
 .Pp
 .%T 1/4 Inch Tape Drive Tutorial

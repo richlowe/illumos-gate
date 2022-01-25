@@ -59,9 +59,9 @@ is once again unmounted.
 .Pp
 .Nm
 starts the
-.Xr lockd 1M
+.Xr lockd 8
 and
-.Xr statd 1M
+.Xr statd 8
 daemons if they are not already running.
 .Pp
 If the resource is listed in the
@@ -151,11 +151,11 @@ supports both NFSv3 and NFSv4 mounts.
 The default NFS version is NFSv4.
 .Ss Options
 See
-.Xr mount 1M
+.Xr mount 8
 for the list of supported
 .Ar generic_options .
 See
-.Xr share_nfs 1M
+.Xr share_nfs 8
 for a description of server options.
 .Bl -tag -width Ds
 .It Fl o Ar specific_options
@@ -295,7 +295,7 @@ the URL must be the same.
 .It Sy posix
 Request POSIX.1 semantics for the file system.
 Requires a mount Version 2
-.Xr mountd 1M
+.Xr mountd 8
 on the server.
 See
 .Xr standards 5
@@ -338,7 +338,7 @@ See the discussion of URLs and the public option under
 for a more detailed discussion.
 .It Sy quota Ns | Ns Sy noquota
 Enable or prevent
-.Xr quota 1M
+.Xr quota 8
 to check whether the user is over quota on this file system; if the file system
 has quotas enabled on the server, quotas are still checked for operations on
 this file system.
@@ -466,7 +466,7 @@ File systems mounted with the
 option indicate that
 .Nm mount
 is to retry in the background if the server's mount daemon
-.Pq Xr mountd 1M
+.Pq Xr mountd 8
 does not respond.
 .Nm mount
 retries the request up to the count specified in the
@@ -528,9 +528,9 @@ See
 If the server supports the public file handle, the attempt is successful;
 .Nm mount
 does not need to contact the server's
-.Xr rpcbind 1M
+.Xr rpcbind 8
 and the
-.Xr mountd 1M
+.Xr mountd 8
 daemons to get the port number of the
 .Nm mount
 server and the initial file handle of
@@ -748,12 +748,6 @@ example# mount serv-x:/usr/man,serv-y:/var/man,nfs://serv-z/man /usr/man
 .El
 .Sh SEE ALSO
 .Xr rdist 1 ,
-.Xr lockd 1M ,
-.Xr mountall 1M ,
-.Xr mountd 1M ,
-.Xr nfsd 1M ,
-.Xr quota 1M ,
-.Xr statd 1M ,
 .Xr mkdir 2 ,
 .Xr mmap 2 ,
 .Xr mount 2 ,
@@ -768,7 +762,13 @@ example# mount serv-x:/usr/man,serv-y:/var/man,nfs://serv-z/man /usr/man
 .Xr standards 5 ,
 .Xr lofs 7FS ,
 .Xr inet 7P ,
-.Xr inet6 7P
+.Xr inet6 7P ,
+.Xr lockd 8 ,
+.Xr mountall 8 ,
+.Xr mountd 8 ,
+.Xr nfsd 8 ,
+.Xr quota 8 ,
+.Xr statd 8
 .Rs
 .%A Callaghan
 .%A Brent
@@ -832,7 +832,7 @@ svc:/network/nfs/client:default
 .Pp
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using
-.Xr svcadm 1M .
+.Xr svcadm 8 .
 The service's status can be queried using the
 .Xr svcs 1
 command.

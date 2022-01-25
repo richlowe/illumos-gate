@@ -41,7 +41,7 @@ subject to change without notice, and should not be used directly.
 Raw temperature information can be dumped through the FMA developer
 utility fmtopo.
 .Sh SEE ALSO
-.Xr fmadm 1M
+.Xr fmadm 8
 .Rs
 .%A Intel Corporation
 .%B Intel 64 and IA-32 Architectures Software Developer's Manual

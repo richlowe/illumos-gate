@@ -51,7 +51,7 @@ raw-device
 .Ar raw-device attach-raw-device
 .Sh DESCRIPTION
 The
-.Xr boot 1M
+.Xr boot 8
 boot program is loaded from disk and is responsible of loading kernel and its
 support files from specific file system.
 .Pp
@@ -115,7 +115,7 @@ The boot partition must use following GPT UUID:
 which is provided by
 .Qq boot
 tag in
-.Xr format 1M
+.Xr format 8
 partition menu.
 .El
 .Pp
@@ -221,13 +221,13 @@ The following command installs loader stage files and master boot record:
 .Sh INTERFACE STABILITY
 .Sy Uncommitted
 .Sh SEE ALSO
-.Xr boot 1M ,
-.Xr bootadm 1M ,
-.Xr fdisk 1M ,
-.Xr fmthard 1M ,
-.Xr format 1M ,
-.Xr kernel 1M ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr boot 8 ,
+.Xr bootadm 8 ,
+.Xr fdisk 8 ,
+.Xr fmthard 8 ,
+.Xr format 8 ,
+.Xr kernel 8
 .Sh WARNINGS
 Installing
 .Sy stage1

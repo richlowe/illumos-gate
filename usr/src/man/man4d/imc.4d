@@ -98,6 +98,6 @@ systems.
 Driver configuration file.
 .El
 .Sh SEE ALSO
-.Xr fmadm 1M ,
-.Xr fmdump 1M ,
-.Xr imcstub 7D
+.Xr imcstub 7D ,
+.Xr fmadm 8 ,
+.Xr fmdump 8

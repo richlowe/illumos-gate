@@ -129,7 +129,7 @@ are considered
 .Sy Evolving
 and may change in the future.
 .Sh SEE ALSO
-.Xr dladm 1M ,
-.Xr snoop 1M ,
 .Xr driver.conf 4 ,
-.Xr dlpi 7P
+.Xr dlpi 7P ,
+.Xr dladm 8 ,
+.Xr snoop 8

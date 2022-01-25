@@ -64,7 +64,7 @@ Support for multiple hardware rings, enabling receive-side steering
 and multiple MAC address filters.
 .It
 Promiscuous access via
-.Xr snoop 1M
+.Xr snoop 8
 and
 .Xr dlpi 7P .
 .It
@@ -99,11 +99,11 @@ By default, the device will use auto-negotiation and prefer the highest
 compatible speed.
 The advertised speeds and broader configuration can be observed and
 modified with
-.Xr dladm 1M .
+.Xr dladm 8 .
 While
 .Xr driver.conf 4
 based configuration is possible, it is recommended that
-.Xr dladm 1M
+.Xr dladm 8
 is used wherever possible.
 .Sh FILES
 .Bl -tag -width Pa
@@ -118,9 +118,9 @@ SPARC device driver
 Configuration file.
 .El
 .Sh SEE ALSO
-.Xr dladm 1M ,
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
 .Xr e1000g 7D ,
 .Xr dlpi 7P ,
+.Xr dladm 8 ,
 .Xr mac 9E

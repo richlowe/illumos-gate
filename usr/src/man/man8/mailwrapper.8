@@ -43,11 +43,11 @@ See below.
 .Sh DESCRIPTION
 At one time, the only Mail Transfer Agent (MTA) software easily available
 was
-.Xr sendmail 1M .
+.Xr sendmail 8 .
 As a result of this, most Mail User Agents (MUAs) such as
 .Xr mail 1
 had the path and calling conventions expected by
-.Xr sendmail 1M
+.Xr sendmail 8
 compiled in.
 .Pp
 Times have changed, however.
@@ -60,17 +60,17 @@ It would be difficult to modify all MUA software typically available
 on a system, so most of the authors of alternative MTAs have written
 their front end message submission programs so that they use the same
 calling conventions as
-.Xr sendmail 1M
+.Xr sendmail 8
 and may be put into place instead of
-.Xr sendmail 1M
+.Xr sendmail 8
 in
 .Pa /usr/lib/sendmail .
 .Pp
-.Xr sendmail 1M
+.Xr sendmail 8
 also typically has aliases named
 .Xr mailq 1
 and
-.Xr newaliases 1M
+.Xr newaliases 8
 linked to it.
 The program knows to behave differently when its
 .Va argv[0]
@@ -85,7 +85,7 @@ based on calling name, or through a set of programs that provide
 similar functionality.
 .Pp
 Although having drop-in replacements for
-.Xr sendmail 1M
+.Xr sendmail 8
 helps in installing alternative MTAs, it essentially makes the
 configuration of the system depend on hand installing new programs in
 .Pa /usr .
@@ -107,14 +107,14 @@ The
 utility is designed to replace
 .Pa /usr/lib/sendmail
 and to invoke an appropriate MTA instead of
-.Xr sendmail 1M
+.Xr sendmail 8
 based on configuration information placed in
 .Pa /etc/mailer.conf .
 This permits the administrator to configure which MTA is to be invoked on
 the system at run time.
 .Pp
 Other configuration files may need to be altered when replacing
-.Xr sendmail 1M .
+.Xr sendmail 8 .
 .Sh EXIT STATUS
 .Ex -std
 .Sh DIAGNOSTICS
@@ -125,6 +125,6 @@ or does not contain a mapping for the name under which it was invoked.
 .Sh SEE ALSO
 .Xr mail 1 ,
 .Xr mailq 1 ,
-.Xr newaliases 1M ,
-.Xr sendmail 1M ,
-.Xr mailer.conf 4
+.Xr mailer.conf 4 ,
+.Xr newaliases 8 ,
+.Xr sendmail 8

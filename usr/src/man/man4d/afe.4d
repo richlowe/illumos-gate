@@ -44,7 +44,7 @@ Most of them also support flow control.
 The device driver supports the
 .Xr ieee802.3 5
 properties, which can be configured with
-.Xr dladm 1M .
+.Xr dladm 8 .
 .
 .\" The driver also has a "forcefiber" driver.conf setting, but this is for
 .\" very very obscure hardware, and we are not documenting this option
@@ -56,11 +56,11 @@ properties, which can be configured with
 Special character device.
 .El
 .Sh SEE ALSO
-.Xr dladm 1M ,
-.Xr ifconfig 1M ,
 .Xr pci 4 ,
 .Xr ieee802.3 5 ,
-.Xr dlpi 7P
+.Xr dlpi 7P ,
+.Xr dladm 8 ,
+.Xr ifconfig 8
 .Rs
 .%T IEEE 802.3: Ethernet
 .%Q IEEE Standards Association

@@ -328,7 +328,7 @@
 The
 .Nm
 command configures ZFS datasets within a ZFS storage pool, as described in
-.Xr zpool 1M .
+.Xr zpool 8 .
 A dataset is identified by a unique path within the ZFS namespace.
 For example:
 .Bd -literal
@@ -370,11 +370,11 @@ A storage pool is also the root of the ZFS file system hierarchy.
 The root of the pool can be accessed as a file system, such as mounting and
 unmounting, taking snapshots, and setting properties.
 The physical storage characteristics, however, are managed by the
-.Xr zpool 1M
+.Xr zpool 8
 command.
 .Pp
 See
-.Xr zpool 1M
+.Xr zpool 8
 for more information on creating and administering pools.
 .Ss Snapshots
 A snapshot is a read-only copy of a file system or volume.
@@ -512,7 +512,7 @@ administrator.
 For more information about
 .Nm zonecfg
 syntax, see
-.Xr zonecfg 1M .
+.Xr zonecfg 8 .
 .Pp
 After a dataset is delegated to a non-global zone, the
 .Sy zoned
@@ -1367,7 +1367,7 @@ the special class.
 Before setting this property, a special class vdev must be added to the
 pool.
 See
-.Xr zpool 1M
+.Xr zpool 8
 for more details on the special allocation class.
 .It Sy mountpoint Ns = Ns Pa path Ns | Ns Sy none Ns | Ns Sy legacy
 Controls the mount point used for this file system.
@@ -1398,7 +1398,7 @@ This is used for SMB clients.
 Changes to this property only take effect when the file system is umounted and
 remounted.
 See
-.Xr mount 1M
+.Xr mount 8
 for more information on
 .Sy nbmand
 mounts.
@@ -1725,7 +1725,7 @@ A file system with the
 property set to
 .Sy off
 is managed through traditional tools such as
-.Xr sharemgr 1M .
+.Xr sharemgr 8 .
 Otherwise, the file system is automatically shared and unshared with the
 .Nm zfs Cm share
 and
@@ -1734,10 +1734,10 @@ commands.
 If the property is set to
 .Sy on ,
 the
-.Xr sharemgr 1M
+.Xr sharemgr 8
 command is invoked with no options.
 Otherwise, the
-.Xr sharemgr 1M
+.Xr sharemgr 8
 command is invoked with options equivalent to the contents of this property.
 .Pp
 Because SMB shares requires a resource name, a unique resource name is
@@ -1793,8 +1793,8 @@ A file system with a
 property of
 .Sy off
 is managed through traditional tools such as
-.Xr share 1M ,
-.Xr unshare 1M ,
+.Xr share 8 ,
+.Xr unshare 8 ,
 and
 .Xr dfstab 4 .
 Otherwise, the file system is automatically shared and unshared with the
@@ -1804,10 +1804,10 @@ and
 commands.
 If the property is set to
 .Sy on ,
-.Xr share 1M
+.Xr share 8
 command is invoked with no options.
 Otherwise, the
-.Xr share 1M
+.Xr share 8
 command is invoked with options equivalent to the contents of this property.
 .Pp
 When the
@@ -2042,7 +2042,7 @@ properties are also new permissions that can be assigned to non-privileged users
 by using the ZFS delegated administration feature.
 .Ss "Temporary Mount Point Properties"
 When a file system is mounted, either through
-.Xr mount 1M
+.Xr mount 8
 for legacy mounts or the
 .Nm zfs Cm mount
 command for normal file systems, its mount options are set according to its
@@ -2135,9 +2135,9 @@ A ZFS swap file configuration is not supported.
 .Pp
 If you need to change your swap area or dump device after the system is
 installed or upgraded, use the
-.Xr swap 1M
+.Xr swap 8
 and
-.Xr dumpadm 1M
+.Xr dumpadm 8
 commands.
 .Ss "Encryption"
 Enabling the
@@ -2851,7 +2851,7 @@ systems running older versions of the software.
 .Pp
 In general, the file system version is independent of the pool version.
 See
-.Xr zpool 1M
+.Xr zpool 8
 for information on the
 .Nm zpool Cm upgrade
 command.
@@ -3103,7 +3103,7 @@ Mounts ZFS file systems.
 .It Fl O
 Perform an overlay mount.
 See
-.Xr mount 1M
+.Xr mount 8
 for more information.
 .It Fl a
 Mount all available ZFS file systems.
@@ -4230,7 +4230,7 @@ Channel programs may only be run with root privileges.
 .sp
 For full documentation of the ZFS channel program interface, see the manual
 page for
-.Xr zfs-program 1M .
+.Xr zfs-program 8 .
 .Bl -tag -width ""
 .It Fl j
 Display channel program output in JSON format.
@@ -4259,7 +4259,7 @@ The default memory limit is 10 MB, and can be set to a maximum of 100 MB.
 All remaining argument strings are passed directly to the channel program as
 arguments.
 See
-.Xr zfs-program 1M
+.Xr zfs-program 8
 for more information.
 .El
 .It Xo
@@ -4430,7 +4430,7 @@ property is
 The default is
 .Sy off .
 See
-.Xr zpool 1M
+.Xr zpool 8
 for more information on pool properties.
 .Bd -literal
 # zfs list
@@ -4751,17 +4751,17 @@ M       F       /tank/test/modified
 .Sh SEE ALSO
 .Xr gzip 1 ,
 .Xr ssh 1 ,
-.Xr mount 1M ,
-.Xr share 1M ,
-.Xr sharemgr 1M ,
-.Xr unshare 1M ,
-.Xr zfs-program 1M ,
-.Xr zonecfg 1M ,
-.Xr zpool 1M ,
 .Xr chmod 2 ,
 .Xr stat 2 ,
 .Xr write 2 ,
 .Xr fsync 3C ,
 .Xr dfstab 4 ,
 .Xr acl 5 ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr mount 8 ,
+.Xr share 8 ,
+.Xr sharemgr 8 ,
+.Xr unshare 8 ,
+.Xr zfs-program 8 ,
+.Xr zonecfg 8 ,
+.Xr zpool 8

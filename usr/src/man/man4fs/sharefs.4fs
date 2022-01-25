@@ -39,11 +39,11 @@ File contents are described in
 .Xr sharetab 4 .
 .Pp
 File contents can be modified as a result of
-.Xr share 1M ,
-.Xr sharectl 1M ,
-.Xr sharemgr 1M ,
+.Xr share 8 ,
+.Xr sharectl 8 ,
+.Xr sharemgr 8 ,
 and changing properties of a
-.Xr zfs 1M
+.Xr zfs 8
 data set.
 .Pp
 The module may not be unloaded dynamically by the kernel.
@@ -53,9 +53,9 @@ The module may not be unloaded dynamically by the kernel.
 System record of shared file systems.
 .El
 .Sh SEE ALSO
-.Xr share 1M ,
-.Xr sharectl 1M ,
-.Xr sharemgr 1M ,
-.Xr zfs 1M ,
 .Xr sharetab 4 ,
-.Xr zones 5
+.Xr zones 5 ,
+.Xr share 8 ,
+.Xr sharectl 8 ,
+.Xr sharemgr 8 ,
+.Xr zfs 8

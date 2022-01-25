@@ -121,9 +121,9 @@ Conversion of uppercase to lowercase characters may be disabled by using the
 .Fl o
 .Ar nomaplcase
 option to
-.Xr mount 1M .
+.Xr mount 8 .
 See
-.Xr mount_hsfs 1M .
+.Xr mount_hsfs 8 .
 .Pp
 If the CD-ROM contains Rock Ridge, ISO 9660 version 2 or Joliet extensions, the
 file names and directory names may contain any character supported under
@@ -200,9 +200,9 @@ See
 .Xr system 4 .
 .El
 .Sh SEE ALSO
-.Xr mount 1M ,
-.Xr mount_hsfs 1M ,
-.Xr vfstab 4
+.Xr vfstab 4 ,
+.Xr mount 8 ,
+.Xr mount_hsfs 8
 .Pp
 .Rs
 .%A N. V. Phillips
@@ -243,10 +243,10 @@ Use of the
 .Fl o
 .Ar notraildot
 option to
-.Xr mount 1M
+.Xr mount 8
 makes it optional to specify the trailing dot.
 See
-.Xr mount_hsfs 1M .
+.Xr mount_hsfs 8 .
 .Sh NOTES
 No translation of any sort is done on the contents of High Sierra or ISO 9660
 format CD-ROMs; only directory and file names are subject to interpretation by

@@ -58,7 +58,7 @@ Set the
 property for the
 .Nm nfs
 protocol using
-.Xr sharectl 1M .
+.Xr sharectl 8 .
 .It
 Specify the
 .Sy _nfsv4idmapdomain
@@ -66,19 +66,19 @@ DNS resource record.
 .El
 .Sh SEE ALSO
 .Xr svcs 1 ,
-.Xr automountd 1M ,
-.Xr groupdel 1M ,
-.Xr groupmod 1M ,
-.Xr mount_nfs 1M ,
-.Xr passmgmt 1M ,
-.Xr share_nfs 1M ,
-.Xr sharectl 1M ,
-.Xr svcadm 1M ,
-.Xr userdel 1M ,
-.Xr usermod 1M ,
 .Xr nfs 4 ,
 .Xr attributes 5 ,
-.Xr smf 5
+.Xr smf 5 ,
+.Xr automountd 8 ,
+.Xr groupdel 8 ,
+.Xr groupmod 8 ,
+.Xr mount_nfs 8 ,
+.Xr passmgmt 8 ,
+.Xr share_nfs 8 ,
+.Xr sharectl 8 ,
+.Xr svcadm 8 ,
+.Xr userdel 8 ,
+.Xr usermod 8
 .Sh NOTES
 The
 .Nm
@@ -91,16 +91,16 @@ svc:/network/nfs/mapid
 .Pp
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using
-.Xr svcadm 1M .
+.Xr svcadm 8 .
 The service's status can be queried using the
 .Xr svcs 1
 command.
 .Pp
 If it is disabled, it will be enabled by
-.Xr mount_nfs 1M ,
-.Xr share_nfs 1M ,
+.Xr mount_nfs 8 ,
+.Xr share_nfs 8 ,
 and
-.Xr automountd 1M ,
+.Xr automountd 8 ,
 unless its
 .Sy application Ns / Ns Sy auto_enable
 property is set to
@@ -124,13 +124,13 @@ as follows:
 The utilities that allow you to change UID and GID are:
 .Bl -bullet
 .It
-.Xr usermod 1M
+.Xr usermod 8
 .It
-.Xr userdel 1M
+.Xr userdel 8
 .It
-.Xr groupmod 1M
+.Xr groupmod 8
 .It
-.Xr groupdel 1M
+.Xr groupdel 8
 .It
-.Xr passmgmt 1M
+.Xr passmgmt 8
 .El

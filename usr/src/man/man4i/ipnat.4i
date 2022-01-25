@@ -163,7 +163,7 @@ typedef struct natlookup {
 .It Dv SIOCSTPUT
 Move a NAT mapping structure from user space into the kernel.
 This ioctl is used by
-.Xr ipfs 1M
+.Xr ipfs 8
 to restore NAT sessions saved in
 .Pa /var/db/ipf/ipnat.ipf .
 The
@@ -430,7 +430,7 @@ before issuing a
 .Sh INTERFACE STABILITY
 Committed
 .Sh SEE ALSO
-.Xr ipfs 1M ,
-.Xr ipnat 1M ,
 .Xr ioctl 2 ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr ipfs 8 ,
+.Xr ipnat 8

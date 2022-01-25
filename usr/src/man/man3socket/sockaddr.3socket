@@ -350,7 +350,7 @@ is non-zero this refers to the interface identifier that corresponds to
 the
 .Sy struct sockaddr_dl .
 This identifier is the same identifier that's shown by tools like
-.Xr ifconfig 1M
+.Xr ifconfig 8
 and used in the SIOC* set of socket ioctls.
 The member
 .Em sdl_type
@@ -435,7 +435,7 @@ The member
 .Em sll_ifindex
 is the interface's index.
 It is used as an identifier in various ioctls and included in the output of
-.Xr ifconfig 1M .
+.Xr ifconfig 8 .
 When calling
 .Xr bind 3SOCKET
 it should be filled in with the index that corresponds to the interface

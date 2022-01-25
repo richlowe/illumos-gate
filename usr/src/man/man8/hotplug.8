@@ -269,17 +269,17 @@ ERROR: there are no connections to display.
 .Pp
 If this error message is seen, note that the system might still have other I/O
 devices that support hotplugging, through the
-.Xr cfgadm 1M
+.Xr cfgadm 8
 command instead of
 .Nm .
 .Sh INTERFACE STABILITY
 .Sy Committed
 .Sh SEE ALSO
-.Xr cfgadm 1M ,
-.Xr hotplugd 1M ,
 .Xr getsubopt 3C ,
 .Xr rcmscript 4 ,
-.Xr attributes 5
+.Xr attributes 5 ,
+.Xr cfgadm 8 ,
+.Xr hotplugd 8
 .Sh NOTES
 The
 .Nm
@@ -291,7 +291,7 @@ must be enabled as a prerequisite for using the
 .Nm
 command.
 See
-.Xr hotplugd 1M .
+.Xr hotplugd 8 .
 .Pp
 The authorization
 .Pa solaris.hotplug.modify

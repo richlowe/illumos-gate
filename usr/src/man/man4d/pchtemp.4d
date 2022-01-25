@@ -65,7 +65,7 @@ Raw temperature information can be dumped through the FMA developer
 utility
 .Sy fmtopo .
 .Sh SEE ALSO
-.Xr fmadm 1M
+.Xr fmadm 8
 .Rs
 .%A Intel Corporation
 .%B Intel 300 Series and Intel C240 Series Chipset Family Platform Controller Hub

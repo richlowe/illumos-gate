@@ -46,9 +46,9 @@ subject to change without notice, and should not be used directly.
 Raw temperature information can be dumped through the FMA developer
 utility fmtopo.
 .Sh SEE ALSO
-.Xr fmadm 1M ,
 .Xr amdnbtemp 7D ,
-.Xr amdzen 7D
+.Xr amdzen 7D ,
+.Xr fmadm 8
 .Rs
 .%A AMD
 .%B Open-Source Register Reference For AMD Family 17h Processors Models 00h-2Fh

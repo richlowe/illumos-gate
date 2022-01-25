@@ -38,4 +38,4 @@ subject to change without notice, and should not be used directly.
 Sensor information can be dumped through the FMA developer utility
 .Sy fmtopo .
 .Sh SEE ALSO
-.Xr fmadm 1M
+.Xr fmadm 8

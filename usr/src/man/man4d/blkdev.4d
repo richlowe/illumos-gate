@@ -72,11 +72,11 @@ See
 .
 .Sh SEE ALSO
 .Xr rmformat 1 ,
-.Xr devinfo 1M ,
-.Xr fdisk 1M ,
-.Xr mount 1M ,
-.Xr umount 1M ,
 .Xr sd 7D ,
 .Xr pcfs 7FS ,
 .Xr zfs 7FS ,
-.Xr dkio 7I
+.Xr dkio 7I ,
+.Xr devinfo 8 ,
+.Xr fdisk 8 ,
+.Xr mount 8 ,
+.Xr umount 8
