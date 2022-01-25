@@ -38,7 +38,7 @@ The commands of
 by themselves are not enough for most uses.
 Please refer to the
 examples below for the most common situations, and to
-.Xr loader 5
+.Xr loader 7
 for additional commands.
 .Pp
 Before using any of the commands provided in
@@ -68,7 +68,7 @@ The environment variables that effect its behavior are:
 .Bl -tag -width bootfile -offset indent
 .It Va loader_version
 Set automatically by
-.Xr loader 5 ,
+.Xr loader 7 ,
 but you can override it by setting in
 .Xr loader.conf 4 .
 This should be the version of boot loader used.
@@ -92,17 +92,17 @@ causes the version to be printed without color
 .Bl -tag -width /boot/version.4th -compact
 .It Pa /boot/loader
 The
-.Xr loader 5 .
+.Xr loader 7 .
 .It Pa /boot/forth/version.4th
 .Nm
 itself.
 .It Pa /boot/loader.rc
-.Xr loader 5
+.Xr loader 7
 bootstrapping script.
 .El
 .Sh EXAMPLES
 Override
-.Xr loader 5
+.Xr loader 7
 version in
 .Xr loader.conf 4 :
 .Pp
@@ -111,5 +111,5 @@ loader_version="loader 1.1"
 .Ed
 .Sh SEE ALSO
 .Xr loader.conf 4 ,
-.Xr color.4th 5 ,
-.Xr loader 5
+.Xr color.4th 7 ,
+.Xr loader 7

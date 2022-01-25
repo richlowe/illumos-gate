@@ -54,7 +54,7 @@ System record of shared file systems.
 .El
 .Sh SEE ALSO
 .Xr sharetab 4 ,
-.Xr zones 5 ,
+.Xr zones 7 ,
 .Xr share 8 ,
 .Xr sharectl 8 ,
 .Xr sharemgr 8 ,

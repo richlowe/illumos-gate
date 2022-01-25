@@ -33,13 +33,13 @@ The file that goes by the name of
 .Nm
 is a set of commands designed to add submenu functionality to the dynamic menu
 system provided by
-.Xr menu.4th 5 .
+.Xr menu.4th 7 .
 Submenus are managed through a system of carefully named environment variables.
 The commands of
 .Nm
 by themselves are not enough for most uses.
 Please refer to the examples below for the most common situations, and to
-.Xr menu.4th 5
+.Xr menu.4th 7
 for additional commands.
 .Pp
 Before using any of the commands provided in
@@ -306,7 +306,7 @@ above, use any number between 1 and 65535.
 .Bl -tag -width /boot/menu-commands.4th -compact
 .It Pa /boot/loader
 The
-.Xr loader 5 .
+.Xr loader 7 .
 .It Pa /boot/forth/menu.4th
 Dynamic menu module.
 .It Pa /boot/forth/menu-commands.4th
@@ -315,7 +315,7 @@ Contains the goto_menu command.
 .Nm
 itself.
 .It Pa /boot/loader.rc
-.Xr loader 5
+.Xr loader 7
 bootstrapping script.
 .El
 .Sh EXAMPLES
@@ -353,7 +353,7 @@ set submenu_command[1]="1 goto_menu"
 .Ed
 .Sh SEE ALSO
 .Xr loader.conf 4 ,
-.Xr beastie.4th 5 ,
-.Xr loader 5 ,
-.Xr loader.4th 5 ,
-.Xr menu.4th 5
+.Xr beastie.4th 7 ,
+.Xr loader 7 ,
+.Xr loader.4th 7 ,
+.Xr menu.4th 7

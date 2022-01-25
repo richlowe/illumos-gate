@@ -627,7 +627,7 @@ Total size of the storage pool.
 .It Sy unsupported@ Ns Em feature_guid
 Information about unsupported features that are enabled on the pool.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details.
 .El
 .Pp
@@ -831,7 +831,7 @@ which moves
 .Ar feature_name
 to the enabled state.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on feature states.
 .It Sy listsnapshots Ns = Ns Sy on Ns | Ns Sy off
 Controls whether information about snapshots associated with this pool is
@@ -864,7 +864,7 @@ in use.
 See
 .Sy zfs_multihost_interval
 in the
-.Xr zfs-module-parameters 5
+.Xr zfs-module-parameters 7
 man page.
 In order to enable this property each host must set a unique hostid.
 The default value is
@@ -1147,7 +1147,7 @@ with the
 .Fl o
 option.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details about feature properties.
 .It Fl f
 Forces use of
@@ -1182,7 +1182,7 @@ section for a list of valid properties that can be set.
 .It Fl o Cm feature@ Ns Ar feature Ns = Ns Ar value
 Sets the given pool feature.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for a list of valid features that can be set.
 .Pp
 .Ar value
@@ -1927,7 +1927,7 @@ the background.
 The removal progress can be monitored with
 .Nm zpool Cm status.
 This feature must be enabled to be used, see
-.Xr zpool-features 5
+.Xr zpool-features 7
 .Pp
 A mirrored top-level device (log or data) can be removed by specifying the top-level mirror for the
 same.
@@ -2286,7 +2286,7 @@ to enable all features on all pools.
 .Xc
 Displays legacy ZFS versions supported by the current software.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for a description of feature flags features supported by the current software.
 .It Xo
 .Nm
@@ -2298,7 +2298,7 @@ Enables all supported features on the given pool.
 Once this is done, the pool will no longer be accessible on systems that do not
 support feature flags.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on compatibility with systems that support feature flags, but do not
 support all features enabled on the pool.
 .Bl -tag -width Ds
@@ -2541,6 +2541,6 @@ command line option.
 .Sh INTERFACE STABILITY
 .Sy Evolving
 .Sh SEE ALSO
-.Xr attributes 5 ,
-.Xr zpool-features 5 ,
+.Xr attributes 7 ,
+.Xr zpool-features 7 ,
 .Xr zfs 8

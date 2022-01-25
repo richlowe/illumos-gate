@@ -665,7 +665,7 @@ Committed
 .Xr read 2 ,
 .Xr write 2 ,
 .Xr av1394 4D ,
-.Xr attributes 5
+.Xr attributes 7
 .Rs
 .%B IIEC 61883 Consumer audio/video equipment - Digital interface
 .Re

@@ -48,13 +48,13 @@ containing a HDD-style partition table and boot code.
 is intended to be placed in a MBR x86 boot partition to allow the system to find
 the standard
 .Fx
-.Xr loader 5
+.Xr loader 7
 in the ISO filesystem later in the image.
 .Sh BOOTING
 .Nm
 looks for an ISO filesystem image on the device it was booted from and
 seeks to read the primary illumos
-.Xr loader 5
+.Xr loader 7
 from there.
 .Sh SEE ALSO
 .Xr installboot 8

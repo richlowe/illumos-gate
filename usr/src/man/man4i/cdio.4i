@@ -629,7 +629,7 @@ Uncommitted
 .Sh SEE ALSO
 .Xr ioctl 2 ,
 .Xr read 2 ,
-.Xr attributes 5
+.Xr attributes 7
 .Rs
 .%Q N. V. Phillips
 .%Q Sony Corporation

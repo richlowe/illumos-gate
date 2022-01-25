@@ -86,4 +86,4 @@ in
 .Xr libproc 3LIB ,
 .Xr Ppriv 3PROC ,
 .Xr proc 4 ,
-.Xr privileges 5
+.Xr privileges 7

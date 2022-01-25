@@ -30,7 +30,7 @@ control access rights of a multihost disk, using
 disk reservations on the disk device.
 .Pp
 The stability level of this interface (see
-.Xr attributes 5 )
+.Xr attributes 7 )
 is evolving.
 As a result, the interface is subject to change and you should limit your use of
 it.
@@ -383,4 +383,4 @@ Uncommitted
 .Sh SEE ALSO
 .Xr ioctl 2 ,
 .Xr open 2 ,
-.Xr attributes 5
+.Xr attributes 7

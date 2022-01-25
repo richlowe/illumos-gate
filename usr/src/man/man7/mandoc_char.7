@@ -24,13 +24,13 @@
 .Nd mandoc special characters
 .Sh DESCRIPTION
 This page documents the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 escape sequences accepted by
 .Xr mandoc 1
 to represent special characters in
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 documents.
 .Pp
 The rendering depends on the
@@ -95,7 +95,7 @@ This is not that \e(em rather, this is that.
 .Ed
 .Pp
 In
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 documents, the minus sign is normally written as
 .Sq \e- .
 In manual pages, some style guides recommend to also use
@@ -128,7 +128,7 @@ macro arguments, other software may not respect these rules and may
 break the line even in such cases.
 .Pp
 Some
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 implementations contains dictionaries allowing to break the line
 at syllable boundaries even inside words that contain no hyphens.
 Such automatic hyphenation is not supported by
@@ -157,7 +157,7 @@ On request and macro lines, the normal space character serves as an
 argument delimiter.
 To include whitespace into arguments, quoting is usually the best choice;
 see the MACRO SYNTAX section in
-.Xr mandoc_roff 5 .
+.Xr mandoc_roff 7 .
 In some cases, using the non-breaking space escape sequence
 .Pq Sq \e\ \&
 may be preferable.
@@ -167,7 +167,7 @@ of input lines, the zero-width space
 .Pq Sq \e&
 is often useful.
 For example, in
-.Xr mdoc 5 ,
+.Xr mdoc 7 ,
 a normal space character can be displayed in single quotes in either
 of the following ways:
 .Pp
@@ -191,7 +191,7 @@ In output modes supporting such special output characters, for example
 and sometimes less consistently in
 .Fl T Cm utf8 ,
 some
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 formatters convert the following ASCII input characters to the
 following Unicode special output characters:
 .Bl -column x(ga U+2018 -offset indent
@@ -216,9 +216,9 @@ The period
 .Pq Sq \&.
 is handled specially at the beginning of an input line,
 where it introduces a
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 request or a macro, and when appearing alone as a macro argument in
-.Xr mdoc 5 .
+.Xr mdoc 7 .
 In such situations, prepend a zero-width space
 .Pq Sq \e&.
 to make it behave like normal text.
@@ -240,11 +240,11 @@ is not the right way to output a backslash.
 Because
 .Xr mandoc 1
 does not implement full
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 functionality, it may work with
 .Xr mandoc 1 ,
 but it may have weird effects on complete
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 implementations.
 .Sh SPECIAL CHARACTERS
 Special characters are encoded as
@@ -258,7 +258,7 @@ and
 For details, see the
 .Em Special Characters
 subsection of the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 manual.
 .Pp
 Spaces, non-breaking unless stated otherwise:
@@ -808,9 +808,9 @@ known representation.
 .El
 .Sh SEE ALSO
 .Xr mandoc 1 ,
-.Xr man 5 ,
-.Xr mandoc_roff 5 ,
-.Xr mdoc 5
+.Xr man 7 ,
+.Xr mandoc_roff 7 ,
+.Xr mdoc 7
 .Sh AUTHORS
 The
 .Nm
@@ -822,7 +822,7 @@ The predefined string
 mimics the behaviour of the
 .Sq \&|
 character in
-.Xr mdoc 5 ;
+.Xr mdoc 7 ;
 thus, if you wish to render a vertical bar with no side effects, use
 the
 .Sq \e(ba

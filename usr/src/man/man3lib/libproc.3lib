@@ -71,7 +71,7 @@ Users with the privilege
 .Brq Sy PRIV_PROC_OWNER
 may manipulate processes that they do not own; however, additional
 restrictions as described in
-.Xr privileges 5
+.Xr privileges 7
 apply.
 .Pp
 In addition, the
@@ -917,7 +917,7 @@ Values in the environment follow the convention of the form
 For more information on environment variables see
 .Xr exec 2
 and
-.Xr environ 5 .
+.Xr environ 7 .
 For additional information on using this type, see
 .Xr Penv_iter 3PROC .
 .Pp
@@ -1086,7 +1086,7 @@ section.
 The MT-Level of a routine that matches the above description will refer to this
 manual page.
 If it does not, then it refers to the standard attributes in
-.Xr attributes 5 .
+.Xr attributes 7 .
 .Sh INTERFACE STABILITY
 .Sy Uncommitted
 .Pp
@@ -1109,9 +1109,9 @@ changes may occur which break both source and binary compatibility.
 .Xr elf 3ELF ,
 .Xr ctf 4 ,
 .Xr proc 4 ,
-.Xr attributes 5 ,
-.Xr environ 5 ,
-.Xr privileges 5 ,
+.Xr attributes 7 ,
+.Xr environ 7 ,
+.Xr privileges 7 ,
 .Xr coreadm 8
 .Pp
 .Rs

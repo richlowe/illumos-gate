@@ -110,7 +110,7 @@ but includes an additional argument:
 .It Fa zoneid
 Zone to which log messages should be directed.
 See
-.Xr zones 5 .
+.Xr zones 7 .
 .El
 .Ss Fn vzcmn_err
 The
@@ -122,7 +122,7 @@ but includes an additional argument:
 .It Fa zoneid
 Zone to which log messages should be directed.
 See
-.Xr zones 5 .
+.Xr zones 7 .
 .El
 .Sh DESCRIPTION
 .Ss Fn cmn_err
@@ -415,7 +415,7 @@ zcmn_err(crgetzoneid(ddi_get_cred()), CE_NOTE, "out of processes");
 .Ed
 .El
 .Sh SEE ALSO
-.Xr zones 5 ,
+.Xr zones 7 ,
 .Xr dmesg 8 ,
 .Xr kernel 8 ,
 .Xr ddi_binding_name 9F ,

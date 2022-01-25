@@ -26,16 +26,16 @@ The
 .Nm roff
 language is a general purpose text formatting language.
 Since traditional implementations of the
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 manual formatting languages are based on it,
 many real-world manuals use small numbers of
 .Nm
 requests and escape sequences intermixed with their
-.Xr mdoc 5
+.Xr mdoc 7
 or
-.Xr man 5
+.Xr man 7
 code.
 To properly format such manuals, the
 .Xr mandoc 1
@@ -131,13 +131,13 @@ One-letter backslash escape.
 .El
 .Pp
 See
-.Xr mandoc_char 5
+.Xr mandoc_char 7
 for a complete list.
 .Ss Font Selection
 In
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 documents, fonts are usually selected with macros.
 The
 .Ic \ef
@@ -145,7 +145,7 @@ escape sequence and the
 .Ic \&ft
 request can be used to manually change the font,
 but this is not recommended in
-.Xr mdoc 5
+.Xr mdoc 7
 documents.
 Such manual font changes are overridden by many subsequent macros.
 .Pp
@@ -292,10 +292,10 @@ Examples:
 .Bl -tag -width ".Bl -tag -width 2i" -offset indent -compact
 .It Li \&.Bl -tag -width 2i
 two-inch tagged list indentation in
-.Xr mdoc 5
+.Xr mdoc 7
 .It Li \&.HP 2i
 two-inch tagged list indentation in
-.Xr man 5
+.Xr man 7
 .It Li \&.sp 2v
 two vertical spaces
 .El
@@ -355,9 +355,9 @@ Thus, the following request lines are all equivalent:
 .Ed
 .Sh MACRO SYNTAX
 Macros are provided by the
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 languages and can be defined by the
 .Ic \&de
 request.
@@ -639,9 +639,9 @@ characters terminating each line, optionally containing calls to
 requests,
 .Nm
 macros or high-level macros like
-.Xr man 5
+.Xr man 7
 or
-.Xr mdoc 5
+.Xr mdoc 7
 macros, whichever applies to the document in question.
 .Pp
 Specifying a custom
@@ -815,7 +815,7 @@ H SYNOPSIS
 invokes the
 .Ic SH
 macro when used in a
-.Xr man 5
+.Xr man 7
 document.
 Such abuse is of course strongly discouraged.
 .It Ic \&ds1 Ar stringname Op Oo \(dq Oc Ns Ar string
@@ -877,7 +877,7 @@ This is a Heirloom extension and currently unsupported.
 .It Ic \&EQ
 Begin an equation block.
 See
-.Xr eqn 5
+.Xr eqn 7
 for a description of the equation language.
 .It Ic \&errprint Ar message
 Print a string like an error message.
@@ -921,10 +921,10 @@ In fill mode, input from subsequent input lines is added to
 the same output line until the next word no longer fits,
 at which point the output line is broken.
 This request is implied by the
-.Xr mdoc 5
+.Xr mdoc 7
 .Ic \&Sh
 macro and by the
-.Xr man 5
+.Xr man 7
 .Ic \&SH ,
 .Ic \&SS ,
 and
@@ -1237,9 +1237,9 @@ request are discarded.
 .It Ic \&in Op Oo Cm + Ns | Ns Cm - Oc Ns Ar width
 Change indentation.
 See
-.Xr man 5 .
+.Xr man 7 .
 Ignored in
-.Xr mdoc 5 .
+.Xr mdoc 7 .
 .It Ic \&index Ar register stringname substring
 Find a substring in a string.
 This is a Heirloom extension and currently unsupported.
@@ -1369,12 +1369,12 @@ Subsequent input lines are kept together on the same output line
 even when exceeding the right margin,
 and line breaks in subsequent input cause output line breaks.
 This request is implied by the
-.Xr mdoc 5
+.Xr mdoc 7
 .Ic \&Bd Fl unfilled
 and
 .Ic \&Bd Fl literal
 macros and by the
-.Xr man 5
+.Xr man 7
 .Ic \&EX
 macro.
 The
@@ -1424,7 +1424,7 @@ is handled specially:
 .Bl -tag -width Ds
 .It Cm nS
 If set to a positive integer value, certain
-.Xr mdoc 5
+.Xr mdoc 7
 macros will behave in the same way as in the
 .Em SYNOPSIS
 section.
@@ -1434,7 +1434,7 @@ section, even when called within the
 .Em SYNOPSIS
 section itself.
 Note that starting a new
-.Xr mdoc 5
+.Xr mdoc 7
 section with the
 .Ic \&Sh
 macro will reset this register.
@@ -1558,9 +1558,9 @@ Rename a request, macro, diversion, or string.
 In
 .Xr mandoc 1 ,
 user-defined macros,
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 macros, and user-defined strings can be renamed, but renaming of
 predefined strings and of
 .Nm
@@ -1734,7 +1734,7 @@ This is a groff extension and currently ignored.
 .It Ic \&TS
 Begin a table, which formats input in aligned rows and columns.
 See
-.Xr tbl 5
+.Xr tbl 7
 for a description of the tbl language.
 .It Ic \&uf Ar font
 Globally set the underline font.
@@ -1879,9 +1879,9 @@ The
 .Nm
 parser recognises the following escape sequences.
 In
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 documents, using escape sequences is discouraged except for those
 described in the
 .Sx LANGUAGE SYNTAX
@@ -1900,7 +1900,7 @@ The escape sequence backslash-space
 is an unpaddable space-sized non-breaking space character; see
 .Sx Whitespace
 and
-.Xr mandoc_char 5 .
+.Xr mandoc_char 7 .
 .It Ic \e!
 Embed text up to and including the end of the input line into the
 current diversion or into intermediate output without interpreting
@@ -1925,13 +1925,13 @@ Hyphenation allowed at this point of the word; ignored by
 Non-printing zero-width character,
 often used for various kinds of escaping; see
 .Sx Whitespace ,
-.Xr mandoc_char 5 ,
+.Xr mandoc_char 7 ,
 and the
 .Dq MACRO SYNTAX
 and
 .Dq Delimiters
 sections in
-.Xr mdoc 5 .
+.Xr mdoc 7 .
 .It Ic \e\(aq
 Acute accent special character; use
 .Ic \e(aa
@@ -1939,7 +1939,7 @@ instead.
 .It Ic \e( Ns Ar cc
 .Sx Special Characters
 with two-letter names, see
-.Xr mandoc_char 5 .
+.Xr mandoc_char 7 .
 .It Ic \e)
 Zero-width space transparent to end-of-sentence detection;
 ignored by
@@ -1964,7 +1964,7 @@ portable and differ across implementations.
 Those supported by
 .Xr mandoc 1
 are listed in
-.Xr mandoc_char 5 .
+.Xr mandoc_char 7 .
 .Pp
 Strings can be defined, changed, and deleted with the
 .Ic \&ds ,
@@ -1979,7 +1979,7 @@ Left italic correction (groff extension); ignored by
 Special character
 .Dq mathematical minus sign ;
 see
-.Xr mandoc_char 5
+.Xr mandoc_char 7
 for details.
 .It Ic \e/
 Right italic correction (groff extension); ignored by
@@ -1996,7 +1996,7 @@ This is a groff extension and currently unsupported.
 .It Ic \e[ Ns Ar name Ns Ic \&]
 .Sx Special Characters
 with names of arbitrary length, see
-.Xr mandoc_char 5 .
+.Xr mandoc_char 7 .
 .It Ic \e^
 One-twelfth em half-narrow space character, effectively zero-width in
 .Xr mandoc 1 .
@@ -2278,7 +2278,7 @@ Diversions and environments are not implemented,
 and support for traps is very incomplete.
 .It
 Use of macros is not supported inside
-.Xr tbl 5
+.Xr tbl 7
 code.
 .El
 .Pp
@@ -2287,15 +2287,15 @@ The special semantics of the
 number register is an idiosyncrasy of
 .Ox
 manuals and not supported by other
-.Xr mdoc 5
+.Xr mdoc 7
 implementations.
 .Sh SEE ALSO
 .Xr mandoc 1 ,
-.Xr eqn 5 ,
-.Xr man 5 ,
-.Xr mandoc_char 5 ,
-.Xr mdoc 5 ,
-.Xr tbl 5
+.Xr eqn 7 ,
+.Xr man 7 ,
+.Xr mandoc_char 7 ,
+.Xr mdoc 7 ,
+.Xr tbl 7
 .Rs
 .%A Joseph F. Ossanna
 .%A Brian W. Kernighan

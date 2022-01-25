@@ -302,15 +302,15 @@ NFS can be served out of a non-global zone.
 All of the above documentation applies to an in-zone NFS server.
 File sharing in zones is restricted to filesystems a zone completely controls.
 Some zone brands (see
-.Xr brands 5 )
+.Xr brands 7 )
 do not give the zone's root its own filesystem, for example.
 Delegated ZFS datasets to a zone are shareable, as well as lofs-remounted
 directories.
 The zone must have sys_nfs privileges; most brands grant this already.
 .Sh SEE ALSO
-.Xr brands 5 ,
-.Xr smf 5 ,
-.Xr zones 5 ,
+.Xr brands 7 ,
+.Xr smf 7 ,
+.Xr zones 7 ,
 .Xr lockd 8 ,
 .Xr mount_nfs 8 ,
 .Xr mountd 8 ,

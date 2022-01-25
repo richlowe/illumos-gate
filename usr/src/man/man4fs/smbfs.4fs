@@ -146,5 +146,5 @@ concern, such as for public read-only resources.
 .Sh SEE ALSO
 .Xr smbutil 1 ,
 .Xr nsmbrc 4 ,
-.Xr attributes 5 ,
+.Xr attributes 7 ,
 .Xr mount_smbfs 8

@@ -39,7 +39,7 @@ when reading or booting from the archive.
 .Sy Uncommitted
 .Sh SEE ALSO
 .Xr ufs 4FS ,
-.Xr attributes 5 ,
+.Xr attributes 7 ,
 .Xr boot 8 ,
 .Xr bootadm 8 ,
 .Xr fiocompress 8

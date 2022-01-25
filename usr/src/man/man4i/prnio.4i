@@ -364,7 +364,7 @@ capability.
 .Xr ecpp 4D ,
 .Xr lp 4D ,
 .Xr usbprn 4D ,
-.Xr attributes 5
+.Xr attributes 7
 .Rs
 .%T IEEE Std 1284-1994
 .Re

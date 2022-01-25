@@ -762,6 +762,6 @@ The extension names are Uncommitted.
 .Xr open 2 ,
 .Xr read 2 ,
 .Xr dsp 4I ,
-.Xr attributes 5
+.Xr attributes 7
 .Sh BUGS
 The names of mixer extensions are not guaranteed to be predictable.

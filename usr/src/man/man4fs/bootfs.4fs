@@ -80,5 +80,5 @@ displayed in the file system.
 This information is provided for informational purposes only, it is not
 to be construed as a stable interface.
 .Sh SEE ALSO
-.Xr loader 5 ,
+.Xr loader 7 ,
 .Xr kstat 8

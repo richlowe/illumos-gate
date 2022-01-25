@@ -26,9 +26,9 @@ The
 .Nm tbl
 language formats tables.
 It is used within
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 pages.
 This manual describes the subset of the
 .Nm
@@ -37,7 +37,7 @@ language accepted by the
 utility.
 .Pp
 Each table is started with a
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 .Ic \&TS
 macro, consist of at most one line of
 .Sx Options ,
@@ -76,7 +76,7 @@ layout key.
 This is a GNU extension.
 .It Cm delim
 Use the two characters of the argument as
-.Xr eqn 5
+.Xr eqn 7
 delimiters.
 Currently unsupported.
 .It Cm doublebox
@@ -106,7 +106,7 @@ By default, the horizontal tabulator character is used.
 The table layout follows an
 .Sx Options
 line or a
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 .Ic \&TS
 or
 .Ic \&T&
@@ -181,7 +181,7 @@ modifier.
 The next one or two characters select the font to use for this cell.
 One-character font names must be followed by a blank or period.
 See the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 manual for supported font names.
 .It Cm i
 Use an italic font for the contents of this cell.
@@ -403,18 +403,18 @@ The
 implementation of
 .Nm
 doesn't support
-.Xr mdoc 5
+.Xr mdoc 7
 and
-.Xr man 5
+.Xr man 7
 macros and
-.Xr eqn 5
+.Xr eqn 7
 equations inside tables.
 .Sh SEE ALSO
 .Xr mandoc 1 ,
-.Xr man 5 ,
-.Xr mandoc_char 5 ,
-.Xr mandoc_roff 5 ,
-.Xr mdoc 5
+.Xr man 7 ,
+.Xr mandoc_char 7 ,
+.Xr mandoc_roff 7 ,
+.Xr mdoc 7
 .Rs
 .%A M. E. Lesk
 .%T Tbl \(em A Program to Format Tables

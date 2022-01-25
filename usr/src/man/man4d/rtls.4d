@@ -41,7 +41,7 @@ They also support full size MTUs (1500 bytes), even when used with VLANs.
 .
 .Lp
 The device driver supports the
-.Xr ieee802.3 5
+.Xr ieee802.3 7
 properties, which can be configured with
 .Xr dladm 8 .
 .
@@ -53,7 +53,7 @@ Special character device.
 .Sh SEE ALSO
 .Xr pci 4 ,
 .Xr dlpi 4P ,
-.Xr ieee802.3 5 ,
+.Xr ieee802.3 7 ,
 .Xr dladm 8 ,
 .Xr ifconfig 8
 .Rs

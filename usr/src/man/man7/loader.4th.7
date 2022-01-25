@@ -50,7 +50,7 @@ The commands of
 by themselves are not enough for most uses.
 Please refer to the
 examples below for the most common situations, and to
-.Xr loader 5
+.Xr loader 7
 for additional commands.
 .Pp
 Before using any of the commands provided in
@@ -105,7 +105,7 @@ is not set to NO) to boot the system.
 is the command used in the default
 .Pa /boot/loader.rc
 file
-.Pq see Xr loader 5 .
+.Pq see Xr loader 7 .
 .Pp
 .It Ic initialize
 Initialize the support library so commands can be used without executing
@@ -173,12 +173,12 @@ silently returns without error.
 .Bl -tag -width /boot/forth/loader.4th -compact
 .It Pa /boot/loader
 The
-.Xr loader 5 .
+.Xr loader 7 .
 .It Pa /boot/forth/loader.4th
 .Nm
 itself.
 .It Pa /boot/loader.rc
-.Xr loader 5
+.Xr loader 7
 bootstrapping script.
 .It Pa /boot/defaults/loader.conf
 File loaded by the
@@ -203,4 +203,4 @@ boot-conf
 .Ed
 .Sh SEE ALSO
 .Xr loader.conf 4 ,
-.Xr loader 5
+.Xr loader 7

@@ -122,7 +122,7 @@ Driver is incompatible with USBA framework.
 .Xr usbvc 4D ,
 .Xr virtualkm 4D ,
 .Xr xhci 4D ,
-.Xr attributes 5 ,
+.Xr attributes 7 ,
 .Xr cfgadm_usb 8 ,
 .Xr Intro 9F ,
 .Xr Intro 9S

@@ -361,7 +361,7 @@ All files on a boot partition are owned by super-user.
 Only the super-user may create, delete, or modify files on a boot partition.
 .Sh ENVIRONMENT
 See
-.Xr environ 5
+.Xr environ 7
 for descriptions of the following environment variables
 for the current locale setting:
 .Ev LANG ,
@@ -464,7 +464,7 @@ result in the more descriptive short names:
 .Xr volcheck 1 ,
 .Xr ctime 3C ,
 .Xr vfstab 4 ,
-.Xr environ 5 ,
+.Xr environ 7 ,
 .Xr mount 8 ,
 .Xr mount_pcfs 8 ,
 .Xr umount 8

@@ -353,7 +353,7 @@ Committed
 .Xr ioctl 2 ,
 .Xr sd 4D ,
 .Xr st 4D ,
-.Xr attributes 5
+.Xr attributes 7
 .Rs
 .%T ANSI Small Computer System Interface-2 (SCSI-2)
 .Re

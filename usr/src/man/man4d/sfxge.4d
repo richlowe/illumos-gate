@@ -31,7 +31,7 @@ The maximum frame size supported by these devices is 9202 bytes, including
 the tag, if present.
 .Lp
 The device driver supports the
-.Xr ieee802.3 5
+.Xr ieee802.3 7
 properties, which can be configured with
 .Xr dladm 8 .
 .Sh FILES
@@ -43,7 +43,7 @@ Special character device.
 .Sh SEE ALSO
 .Xr pci 4 ,
 .Xr dlpi 4P ,
-.Xr ieee802.3 5 ,
+.Xr ieee802.3 7 ,
 .Xr dladm 8 ,
 .Xr ifconfig 8
 .Rs

@@ -75,17 +75,17 @@ Text lines are interpreted within the current state.
 Many aspects of the basic syntax of the
 .Nm
 language are based on the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 language; see the
 .Em LANGUAGE SYNTAX
 and
 .Em MACRO SYNTAX
 sections in the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 manual for details, in particular regarding
 comments, escape sequences, whitespace, and quoting.
 However, using
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 requests in
 .Nm
 documents is discouraged;
@@ -347,7 +347,7 @@ The contexts are user, kernel, or interrupt.
 Lists the environment variables used by the utility,
 and explains the syntax and semantics of their values.
 The
-.Xr environ 5
+.Xr environ 7
 manual provides examples of typical content and formatting.
 .Pp
 See
@@ -400,7 +400,7 @@ Codesets (EUC), but also other multi-byte encodings such as UTF-8 and GB2312.
 .Pp
 Generally there will be some limitations that are fairly standard.
 See
-.Xr standards 5
+.Xr standards 7
 for more information about some of these.
 Most interfaces should support at least UTF-8 in addition to ASCII.
 .It Em INTERFACE STABILITY
@@ -471,7 +471,7 @@ is discouraged (perhaps a better newer alternative is present).
 This section describes considerations for the interface when used within
 programs that use multiple threads.
 More discussion of these considerations is made in the MT-Level section of
-.Xr attributes 5 .
+.Xr attributes 7 .
 The interface can be described in the following ways.
 .Bl -tag -width Ds
 .It Nm Safe
@@ -984,7 +984,7 @@ which resolves to
 .Sy 6n .
 .It
 A scaling width as described in
-.Xr mandoc_roff 5 .
+.Xr mandoc_roff 7 .
 .It
 An arbitrary string, which indents by the length of this string.
 .El
@@ -1082,7 +1082,7 @@ arguments accept macro names as described for
 .Ic \&Bd
 .Fl offset ,
 scaling widths as described in
-.Xr mandoc_roff 5 ,
+.Xr mandoc_roff 7 ,
 or use the length of the given string.
 The
 .Fl offset
@@ -1375,7 +1375,7 @@ the special string
 can be given as an argument.
 .It
 The traditional, purely numeric
-.Xr man 5
+.Xr man 7
 format
 .Ar year Ns \(en Ns Ar month Ns \(en Ns Ar day
 is accepted, too.
@@ -1601,7 +1601,7 @@ macros.
 .Tg Ev
 .It Ic \&Ev Ar identifier ...
 Environmental variables such as those specified in
-.Xr environ 5 .
+.Xr environ 7 .
 .Pp
 Examples:
 .Dl \&.Ev DISPLAY
@@ -1707,7 +1707,7 @@ Examples:
 .Pp
 For GNU-sytle long options, escaping the additional hyphen-minus is not
 strictly required, but may be safer with future versions of GNU troff; see
-.Xr mandoc_char 5
+.Xr mandoc_char 7
 for details.
 .Pp
 See also
@@ -2830,7 +2830,7 @@ macro or the body of a partial-implicit block macro
 beyond the end of the input line.
 This macro originally existed to work around the 9-argument limit
 of historic
-.Xr mandoc_roff 5 .
+.Xr mandoc_roff 7 .
 .Tg Xr
 .It Ic \&Xr Ar name section
 Link to another manual
@@ -3237,11 +3237,11 @@ macros.
 Whenever any
 .Nm
 macro switches the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 font mode, it will automatically restore the previous font when exiting
 its scope.
 Manually switching the font using the
-.Xr mandoc_roff 5
+.Xr mandoc_roff 7
 .Ql \ef
 font escape sequences is never required.
 .Sh COMPATIBILITY
@@ -3302,11 +3302,11 @@ but produces large indentations.
 .Sh SEE ALSO
 .Xr man 1 ,
 .Xr mandoc 1 ,
-.Xr eqn 5 ,
-.Xr man 5 ,
-.Xr mandoc_char 5 ,
-.Xr mandoc_roff 5 ,
-.Xr tbl 5
+.Xr eqn 7 ,
+.Xr man 7 ,
+.Xr mandoc_char 7 ,
+.Xr mandoc_roff 7 ,
+.Xr tbl 7
 .Pp
 The web page
 .Lk https://mandoc.bsd.lv/mdoc/ "extended documentation for the mdoc language"

@@ -108,4 +108,4 @@ Operation timed out
 .Sh SEE ALSO
 .Xr libdlpi 3LIB ,
 .Xr dlpi 4P ,
-.Xr attributes 5
+.Xr attributes 7

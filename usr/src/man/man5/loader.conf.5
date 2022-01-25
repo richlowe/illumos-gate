@@ -38,7 +38,7 @@ Through
 it you can specify the kernel to be booted, parameters to be passed to
 it, and additional modules to be loaded; and generally set all variables
 described in
-.Xr loader 5 .
+.Xr loader 7 .
 .Pp
 Loader implements set of builtin commands and functions and script
 interpreter as standalone binary program.
@@ -110,7 +110,7 @@ All settings have the following format:
 .Pp
 Unless it belongs to one of the classes of settings that receive special
 treatment, a setting will set the value of a
-.Xr loader 5
+.Xr loader 7
 environment variable.
 The settings that receive special
 treatment are listed below.
@@ -123,11 +123,11 @@ prefix refer to the same module.
 .Bl -tag -width Ar
 .It Ar exec
 Immediately executes a
-.Xr loader 5
+.Xr loader 7
 command.
 This type of setting cannot be processed by programs other
 than
-.Xr loader 5 ,
+.Xr loader 7 ,
 so its use should be avoided.
 Multiple instances of it will be processed
 independently.
@@ -235,13 +235,13 @@ If set to
 the beastie boot menu will be displayed without ANSI coloring.
 .El
 .Sh SEE ALSO
-.Xr loader 5 ,
-.Xr loader.4th 5 ,
+.Xr loader 7 ,
+.Xr loader.4th 7 ,
 .Xr boot 8 ,
 .Xr eeprom 8
 .Sh NOTES
 The
-.Xr loader 5
+.Xr loader 7
 stops reading
 .Nm
 when it encounters a syntax error, so any options which are vital for

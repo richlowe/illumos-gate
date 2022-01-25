@@ -2762,7 +2762,7 @@ limit sets are all changed.
 Privilege flags can also be set.
 The process is made privilege aware unless it can relinquish privilege awareness.
 See
-.Xr privileges 5 .
+.Xr privileges 7 .
 .Pp
 The limit set of the target process cannot be grown.
 The other privilege sets must be subsets of the intersection of the effective set
@@ -2813,7 +2813,7 @@ The limit set of the controlling process must be a superset of the limit set
 of the target process.
 Additional restrictions apply if any of the uids of the target process are 0.
 See
-.Xr privileges 5 .
+.Xr privileges 7 .
 .Pp
 Even if held by a privileged process, an open process or lwp file descriptor
 (other than file descriptors for the world-readable files) becomes invalid if
@@ -3114,7 +3114,7 @@ using
 .Sy PCSCRED
 and the security policy imposed additional restrictions.
 See
-.Xr privileges 5 .
+.Xr privileges 7 .
 .El
 .Sh SEE ALSO
 .Xr ls 1 ,
@@ -3165,9 +3165,9 @@ See
 .Xr contract 4 ,
 .Xr core 4 ,
 .Xr process 4 ,
-.Xr lfcompile 5 ,
-.Xr privileges 5 ,
-.Xr security-flags 5 ,
+.Xr lfcompile 7 ,
+.Xr privileges 7 ,
+.Xr security-flags 7 ,
 .Xr chroot 8
 .Sh NOTES
 Descriptions of structures in this document include only interesting structure

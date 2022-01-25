@@ -215,7 +215,7 @@ For more information on mounting UFS file systems, see
 .Sy Uncomitted
 .Sh SEE ALSO
 .Xr mount 2 ,
-.Xr attributes 5 ,
+.Xr attributes 7 ,
 .Xr df 8 ,
 .Xr fsck 8 ,
 .Xr fsck_ufs 8 ,

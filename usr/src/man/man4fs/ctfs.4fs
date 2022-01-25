@@ -42,5 +42,5 @@ file system
 .Sh SEE ALSO
 .Xr contract 4 ,
 .Xr vfstab 4 ,
-.Xr attributes 5 ,
-.Xr smf 5
+.Xr attributes 7 ,
+.Xr smf 7

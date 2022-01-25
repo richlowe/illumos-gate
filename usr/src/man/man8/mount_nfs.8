@@ -298,7 +298,7 @@ Requires a mount Version 2
 .Xr mountd 8
 on the server.
 See
-.Xr standards 5
+.Xr standards 7
 for information regarding POSIX.
 .It Sy proto Ns = Ns Ar netid Ns | Ns Sy rdma
 By default, the transport protocol that the NFS mount uses is the first
@@ -414,7 +414,7 @@ Only one mode can be specified with the
 .Sy sec Ns =
 option.
 See
-.Xr nfssec 5
+.Xr nfssec 7
 for the available
 .Ar mode
 options.
@@ -456,7 +456,7 @@ Allow or disallow the creation and manipulation of extended attributes.
 The default is
 .Sy xattr .
 See
-.Xr fsattr 5
+.Xr fsattr 7
 for a description of extended attributes.
 .El
 .Sh NFS FILE SYSTEMS
@@ -511,7 +511,7 @@ The server can require authenticated NFS requests from the client.
 .Sy sec Ns = Ns Sy dh
 authentication might be required.
 See
-.Xr nfssec 5 .
+.Xr nfssec 7 .
 .Ss URLs and the public option
 If the
 .Sy public
@@ -759,10 +759,10 @@ example# mount serv-x:/usr/man,serv-y:/var/man,nfs://serv-z/man /usr/man
 .Xr lofs 4FS ,
 .Xr inet 4P ,
 .Xr inet6 4P ,
-.Xr attributes 5 ,
-.Xr fsattr 5 ,
-.Xr nfssec 5 ,
-.Xr standards 5 ,
+.Xr attributes 7 ,
+.Xr fsattr 7 ,
+.Xr nfssec 7 ,
+.Xr standards 7 ,
 .Xr lockd 8 ,
 .Xr mountall 8 ,
 .Xr mountd 8 ,
@@ -824,7 +824,7 @@ entry in the
 file.
 .Pp
 The NFS client service is managed by the service management facility,
-.Xr smf 5 ,
+.Xr smf 7 ,
 under the service identifier:
 .Bd -literal -offset indent
 svc:/network/nfs/client:default

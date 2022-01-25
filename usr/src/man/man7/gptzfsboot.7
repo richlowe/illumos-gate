@@ -77,14 +77,14 @@ If the
 .Cm bootfs
 property is not set, then the root filesystem of the pool is used as
 the default.
-.Xr loader 5
+.Xr loader 7
 is loaded from the boot filesystem.
 If
 .Pa /boot/config
 is present in the boot filesystem, boot options are read from it.
 .Pp
 The ZFS GUIDs of the boot pool and boot file system are made available to
-.Xr loader 5 .
+.Xr loader 7 .
 .Ss USAGE
 Normally
 .Nm
@@ -95,7 +95,7 @@ interact with
 through a prompt.
 .Pp
 The filesystem specification and the path to
-.Xr loader 5
+.Xr loader 7
 is specified as
 .Pp
 .Sm off
@@ -121,7 +121,7 @@ The output format for ZFS pools is similar to that of
 .Pp
 The configured or automatically determined ZFS boot filesystem is
 stored in the
-.Xr loader 5
+.Xr loader 7
 .Cm loaddev
 variable, and also set as the initial value of the
 .Cm currdev
@@ -130,14 +130,14 @@ variable.
 The following options are supported by
 .Nm
 and
-.Xr loader 5 :
+.Xr loader 7 :
 .Bl -tag -width indent
 .It Fl D
 Dual console.
 Use both text and serial console with
 .Nm
 and
-.Xr loader 5 .
+.Xr loader 7 .
 .It Fl P
 Probe for keyboard.
 If there is no keyboard, switch on the dual console and serial console.
@@ -151,7 +151,7 @@ Keep the
 console quiet.
 .It Fl t
 Keep the VGA text mode for
-.Xr loader 5 .
+.Xr loader 7 .
 .El
 .Pp
 The following options will be passed to the kernel:
@@ -186,6 +186,6 @@ drive:
 installboot /boot/pmbr /boot/gptzfsboot /dev/rdsk/c0t0d0s0
 .Ed
 .Sh SEE ALSO
-.Xr loader 5 ,
+.Xr loader 7 ,
 .Xr installboot 8 ,
 .Xr zpool 8

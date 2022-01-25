@@ -184,7 +184,7 @@ associated with this interface.
 They may be lacking the
 .Sy PRIV_SYS_NET_CONFIG
 privilege
-.Po see Xr privileges 5 Pc ,
+.Po see Xr privileges 7 Pc ,
 or the interface is managed by IPMP (IP Network Multipathing).
 .It Sy ESRCH
 There is no entry matching the specified address.
@@ -340,7 +340,7 @@ int main(int argc, char *argv[]) {
 .Ed
 .Sh SEE ALSO
 .Xr sockaddr_in6 3SOCKET ,
-.Xr privileges 5 ,
+.Xr privileges 7 ,
 .Xr ifconfig 8 ,
 .Xr in.ndpd 8 ,
 .Xr ndp 8

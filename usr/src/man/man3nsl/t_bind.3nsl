@@ -415,7 +415,7 @@ Safe
 .Xr t_connect 3NSL ,
 .Xr t_unbind 3NSL ,
 .Xr sockaddr 3SOCKET ,
-.Xr attributes 5
+.Xr attributes 7
 .Sh WARNINGS
 The requirement that the value of
 .Sy qlen

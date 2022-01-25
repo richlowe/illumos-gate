@@ -599,4 +599,4 @@ Uncommitted
 .Xr write 2 ,
 .Xr audio 4D ,
 .Xr mixer 4I ,
-.Xr attributes 5
+.Xr attributes 7

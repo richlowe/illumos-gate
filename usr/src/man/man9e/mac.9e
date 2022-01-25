@@ -1978,7 +1978,7 @@ a given platform.
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
 .Xr dlpi 4P ,
-.Xr ieee802.3 5 ,
+.Xr ieee802.3 7 ,
 .Xr dladm 8 ,
 .Xr _fini 9E ,
 .Xr _info 9E ,

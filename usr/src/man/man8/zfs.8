@@ -1164,7 +1164,7 @@ and
 .Sy edonr
 checksum algorithms require enabling the appropriate features on the pool.
 Please see
-.Xr zpool-features 5
+.Xr zpool-features 7
 for more information on these algorithms.
 .Pp
 Changing this property affects only newly-written data.
@@ -1204,7 +1204,7 @@ but can only be used on pools with the
 feature set to
 .Sy enabled .
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags and the
 .Sy lz4_compress
 feature.
@@ -1353,7 +1353,7 @@ does not override the ancestor's
 but rather imposes an additional limit.
 This feature must be enabled to be used
 .Po see
-.Xr zpool-features 5
+.Xr zpool-features 7
 .Pc .
 .It Sy special_small_blocks Ns = Ns Em size
 This value represents the threshold block size for including small file
@@ -1460,7 +1460,7 @@ For example, this means that recursive snapshots taken from the global zone are
 counted against each delegated dataset within a zone.
 This feature must be enabled to be used
 .Po see
-.Xr zpool-features 5
+.Xr zpool-features 7
 .Pc .
 .It Sy userquota@ Ns Em user Ns = Ns Em size Ns | Ns Sy none
 Limits the amount of space consumed by the specified user.
@@ -1597,7 +1597,7 @@ If the
 .Sy large_blocks
 feature is enabled on the pool, the size may be up to 1 Mbyte.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags.
 .Pp
 Changing the file system's
@@ -3196,7 +3196,7 @@ command.
 .Pp
 This feature must be enabled to be used.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags and the
 .Sy bookmarks
 feature.
@@ -3250,7 +3250,7 @@ The receiving system must have the
 .Sy large_blocks
 pool feature enabled as well.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags and the
 .Sy large_blocks
 feature.
@@ -3301,7 +3301,7 @@ dataset, since encrypted datasets cannot use the
 .Sy embedded_data
 feature.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags and the
 .Sy embedded_data
 feature.
@@ -3435,7 +3435,7 @@ The receiving system must have the
 .Sy large_blocks
 pool feature enabled as well.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags and the
 .Sy large_blocks
 feature.
@@ -3479,7 +3479,7 @@ dataset, since encrypted datasets cannot use the
 .Sy embedded_data
 feature.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags and the
 .Sy embedded_data
 feature.
@@ -3814,7 +3814,7 @@ To use this flag, the storage pool must have the
 .Sy extensible_dataset
 feature enabled.
 See
-.Xr zpool-features 5
+.Xr zpool-features 7
 for details on ZFS feature flags.
 .It Fl u
 File system that is associated with the received stream is not mounted.
@@ -4756,8 +4756,8 @@ M       F       /tank/test/modified
 .Xr write 2 ,
 .Xr fsync 3C ,
 .Xr dfstab 4 ,
-.Xr acl 5 ,
-.Xr attributes 5 ,
+.Xr acl 7 ,
+.Xr attributes 7 ,
 .Xr mount 8 ,
 .Xr share 8 ,
 .Xr sharemgr 8 ,

@@ -431,6 +431,6 @@ before issuing a
 Committed
 .Sh SEE ALSO
 .Xr ioctl 2 ,
-.Xr attributes 5 ,
+.Xr attributes 7 ,
 .Xr ipfs 8 ,
 .Xr ipnat 8

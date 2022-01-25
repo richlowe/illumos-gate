@@ -839,7 +839,7 @@ The system ran out of memory for internal data structures.
 .Xr inet6 4P ,
 .Xr ip 4P ,
 .Xr ip6 4P ,
-.Xr smf 5 ,
+.Xr smf 7 ,
 .Xr ndd 8 ,
 .Xr svcadm 8
 .Rs
@@ -885,7 +885,7 @@ The system ran out of memory for internal data structures.
 The
 .Sy tcp
 service is managed by the service management facility,
-.Xr smf 5 ,
+.Xr smf 7 ,
 under the service identifier
 .Sy svc:/network/initial:default .
 .Pp

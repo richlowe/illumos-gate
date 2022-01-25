@@ -44,7 +44,7 @@ By default, the following is the system-wide configuration for meta slot.
 Meta slot is enabled.
 Meta slot provides token-based object support with the Software RSA PKCS#11
 softtoken
-.Pq Xr pkcs11_softtoken 5 .
+.Pq Xr pkcs11_softtoken 7 .
 Meta slot is
 allowed to move sensitive token objects to other slots if that is necessary to
 perform an operation.
@@ -199,7 +199,7 @@ shared object
 .El
 .Sh ATTRIBUTES
 See
-.Xr attributes 5
+.Xr attributes 7
 for descriptions of the following attributes:
 .Sh INTERFACE STABILITY
 .Sy Committed
@@ -212,9 +212,9 @@ Section 5.1.5 of PKCS#11 Cryptographic Token Interface Base Standard v2.40
 .Xr Intro 3 ,
 .Xr syslog 3C ,
 .Xr SUNW_C_GetMechSession 3EXT ,
-.Xr attributes 5  ,
-.Xr pkcs11_kernel 5 ,
-.Xr pkcs11_softtoken 5 ,
+.Xr attributes 7  ,
+.Xr pkcs11_kernel 7 ,
+.Xr pkcs11_softtoken 7 ,
 .Xr cryptoadm 8 ,
 .Xr pkgadd 8
 .Rs

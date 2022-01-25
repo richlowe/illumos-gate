@@ -76,4 +76,4 @@ in
 .Sh SEE ALSO
 .Xr libproc 3LIB ,
 .Xr proc 4 ,
-.Xr security-flags 5
+.Xr security-flags 7
