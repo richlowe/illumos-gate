@@ -154,7 +154,7 @@ Remove unnecessary files or directories or install more physical memory.
 .Xr mmap 2 ,
 .Xr mount 2 ,
 .Xr umount 2 ,
-.Xr vfstab 4 ,
+.Xr vfstab 5 ,
 .Xr df 8 ,
 .Xr mount 8 ,
 .Xr mount_tmpfs 8 ,

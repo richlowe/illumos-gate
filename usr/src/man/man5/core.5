@@ -133,7 +133,7 @@ The format of a core file is object file specific.
 For ELF executable programs
 .Po
 see
-.Xr a.out 4
+.Xr a.out 5
 .Pc ,
 the core file generated is also an ELF file, containing ELF program and file
 headers.
@@ -420,7 +420,7 @@ See
 .Dv NT_SECFLAGS .
 This entry contains the process security-flags, see
 .Xr security-flags 7 ,
-.Xr proc 4 ,
+.Xr proc 5 ,
 and
 .Xr psecflags 1
 for more information.
@@ -540,7 +540,8 @@ This entry is present only for an agent LWP and contains the
 .Vt psinfo_t
 of the process that created the agent LWP.
 See the
-.Xr proc 4 description of the
+.Xr proc 5
+description of the
 .Sy spymaster
 entry for more details.
 .El
@@ -576,8 +577,8 @@ see
 .Xr getzonenamebyid 3C ,
 .Xr elf 3ELF ,
 .Xr signal.h 3HEAD ,
-.Xr a.out 4 ,
-.Xr proc 4 ,
+.Xr a.out 5 ,
+.Xr proc 5 ,
 .Xr security-flags 7 ,
 .Xr zones 7 ,
 .Xr coreadm 8

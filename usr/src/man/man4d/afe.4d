@@ -56,8 +56,8 @@ properties, which can be configured with
 Special character device.
 .El
 .Sh SEE ALSO
-.Xr pci 4 ,
 .Xr dlpi 4P ,
+.Xr pci 5 ,
 .Xr ieee802.3 7 ,
 .Xr dladm 8 ,
 .Xr ifconfig 8

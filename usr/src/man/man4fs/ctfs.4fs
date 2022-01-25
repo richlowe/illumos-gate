@@ -31,7 +31,7 @@ filesystem is the interface to the contract sub-system.
 is mounted during boot at
 .Pa /system/contract .
 For information on contracts and the contents of this filesystem, see
-.Xr contract 4 .
+.Xr contract 5 .
 .Sh FILES
 .Bl -tag -width Pa
 .It Pa /system/contract
@@ -40,7 +40,7 @@ Mount point for the
 file system
 .El
 .Sh SEE ALSO
-.Xr contract 4 ,
-.Xr vfstab 4 ,
+.Xr contract 5 ,
+.Xr vfstab 5 ,
 .Xr attributes 7 ,
 .Xr smf 7

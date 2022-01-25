@@ -361,7 +361,7 @@ A directory containing references to the contracts held by the process.
 Each entry is a symlink to the contract's directory under
 .Pa /system/contract .
 See
-.Xr contract 4 .
+.Xr contract 5 .
 .Ss as
 Contains the address-space image of the process; it can be opened for both
 reading and writing.
@@ -1089,9 +1089,9 @@ of
 .Sy pr_contract
 is the id of the process contract of which the process is a member.
 See
-.Xr contract 4
+.Xr contract 5
 and
-.Xr process 4 .
+.Xr process 5 .
 .Ss cred
 Contains a description of the credentials associated with the process:
 .Bd -literal -offset 2
@@ -1861,7 +1861,7 @@ not affect the original template which was activated, though they do affect the
 active template.
 It is not possible to activate an active template descriptor.
 See
-.Xr contract 4 .
+.Xr contract 5 .
 .Sh CONTROL MESSAGES
 Process state changes are effected through messages written to a process's
 .Sy ctl
@@ -2666,7 +2666,7 @@ Should the target process generate a core
 dump with the agent lwp in place, this information will be available via the
 .Sy NT_SPYMASTER
 note in the core file (see
-.Xr core 4 ) .
+.Xr core 5 ) .
 .Pp
 The agent lwp is not allowed to execute any variation of the
 .Sy SYS_fork
@@ -3162,9 +3162,9 @@ See
 .Xr signal.h 3HEAD ,
 .Xr types32.h 3HEAD ,
 .Xr ucontext.h 3HEAD ,
-.Xr contract 4 ,
-.Xr core 4 ,
-.Xr process 4 ,
+.Xr contract 5 ,
+.Xr core 5 ,
+.Xr process 5 ,
 .Xr lfcompile 7 ,
 .Xr privileges 7 ,
 .Xr security-flags 7 ,

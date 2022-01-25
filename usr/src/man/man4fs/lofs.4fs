@@ -109,8 +109,8 @@ mount -F lofs /tmp /mnt
 .Xr chroot 2 ,
 .Xr mount 2 ,
 .Xr sysfs 2 ,
-.Xr vfstab 4 ,
 .Xr lofi 4D ,
+.Xr vfstab 5 ,
 .Xr lofiadm 8 ,
 .Xr mount 8
 .Sh NOTES

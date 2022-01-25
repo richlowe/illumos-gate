@@ -54,7 +54,7 @@ Several different hardware buses such as PCIe and USB automatically discover and
 enumerate devices that they encounter.
 .It
 For devices driven by
-.Xr driver.conf 4
+.Xr driver.conf 5
 enumeration, edit the
 .Pa driver.conf
 file to add a new entry, then use
@@ -94,7 +94,7 @@ Mount point for
 file system in the global zone.
 .El
 .Sh SEE ALSO
-.Xr vfstab 4 ,
+.Xr vfstab 5 ,
 .Xr devfsadm 8 ,
 .Xr attach 9E
 .Sh NOTES

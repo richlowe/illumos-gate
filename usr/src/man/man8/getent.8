@@ -95,22 +95,22 @@ or service, service/protocol, port, or port/proto for
 .Nm
 prints out the database entries that match each of the supplied keys, one per
 line, in the format of the matching administrative file:
-.Xr passwd 4 ,
-.Xr shadow 4 ,
-.Xr group 4 ,
-.Xr project 4 ,
-.Xr hosts 4 ,
-.Xr services 4 ,
-.Xr protocols 4 ,
-.Xr ethers 4 ,
-.Xr netgroup 4 ,
-.Xr networks 4 ,
-.Xr netmasks 4 ,
-.Xr auth_attr 4 ,
-.Xr exec_attr 4 ,
-.Xr prof_attr 4 ,
+.Xr passwd 5 ,
+.Xr shadow 5 ,
+.Xr group 5 ,
+.Xr project 5 ,
+.Xr hosts 5 ,
+.Xr services 5 ,
+.Xr protocols 5 ,
+.Xr ethers 5 ,
+.Xr netgroup 5 ,
+.Xr networks 5 ,
+.Xr netmasks 5 ,
+.Xr auth_attr 5 ,
+.Xr exec_attr 5 ,
+.Xr prof_attr 5 ,
 or
-.Xr user_attr 4 .
+.Xr user_attr 5 .
 If no key is given, all entries returned by the corresponding enumeration
 library routine, for example,
 .Xr getpwent 3C
@@ -189,7 +189,7 @@ name will result in entries from the selected netgroup being displayed as
 string triples
 .Pq hostname, username, domain ,
 in a format compatible with
-.Xr netgroup 4 .
+.Xr netgroup 5 .
 .Pp
 Specifying the
 .Ar netgroup
@@ -304,19 +304,19 @@ There is no support for enumeration on this database.
 .Xr getnetbyname 3SOCKET ,
 .Xr getprotobyname 3SOCKET ,
 .Xr getservbyname 3SOCKET ,
-.Xr auth_attr 4 ,
-.Xr ethers 4 ,
-.Xr exec_attr 4 ,
-.Xr group 4 ,
-.Xr hosts 4 ,
-.Xr netmasks 4 ,
-.Xr networks 4 ,
-.Xr nsswitch.conf 4 ,
-.Xr passwd 4 ,
-.Xr prof_attr 4 ,
-.Xr project 4 ,
-.Xr protocols 4 ,
-.Xr services 4 ,
-.Xr shadow 4 ,
-.Xr user_attr 4 ,
+.Xr auth_attr 5 ,
+.Xr ethers 5 ,
+.Xr exec_attr 5 ,
+.Xr group 5 ,
+.Xr hosts 5 ,
+.Xr netmasks 5 ,
+.Xr networks 5 ,
+.Xr nsswitch.conf 5 ,
+.Xr passwd 5 ,
+.Xr prof_attr 5 ,
+.Xr project 5 ,
+.Xr protocols 5 ,
+.Xr services 5 ,
+.Xr shadow 5 ,
+.Xr user_attr 5 ,
 .Xr attributes 7

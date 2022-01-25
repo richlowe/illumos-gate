@@ -56,7 +56,7 @@ Mount point for objfs file system in the global zone.
 .Sh Interface Stability
 .Sy Private
 .Sh SEE ALSO
-.Xr vfstab 4
+.Xr vfstab 5
 .Sh NOTES
 The content of the ELF files is private to the implementation and subject to
 change without notice.

@@ -91,7 +91,7 @@ utility.
 .Xr dladm 8
 is the preferred interface for setting all properties.
 While
-.Xr driver.conf 4
+.Xr driver.conf 5
 based configuration is possible,
 .Xr dladm 8
 is recommended.
@@ -329,7 +329,7 @@ Device driver (x86)
 Driver configuration file
 .El
 .Sh SEE ALSO
-.Xr driver.conf 4 ,
 .Xr dlpi 4P ,
+.Xr driver.conf 5 ,
 .Xr dladm 8 ,
 .Xr snoop 8

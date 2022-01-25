@@ -197,10 +197,10 @@ to the
 .Pa /etc/system
 system configuration file and rebooting.
 See
-.Xr system 4 .
+.Xr system 5 .
 .El
 .Sh SEE ALSO
-.Xr vfstab 4 ,
+.Xr vfstab 5 ,
 .Xr mount 8 ,
 .Xr mount_hsfs 8
 .Pp

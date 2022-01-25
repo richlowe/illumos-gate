@@ -847,12 +847,12 @@ Due to the way host controller drivers need to interact with hotplug,
 drivers should generally set the
 .Sy ddi-forceattach
 property to one in their
-.Xr driver.conf 4
+.Xr driver.conf 5
 file.
 .Sh SEE ALSO
-.Xr driver.conf 4 ,
 .Xr hubd 4D ,
 .Xr usba 4D ,
+.Xr driver.conf 5 ,
 .Xr attach 9E ,
 .Xr close 9E ,
 .Xr detach 9E ,

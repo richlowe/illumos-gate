@@ -361,7 +361,7 @@ Device driver (x86)
 Driver configuration file containing user-configurable options
 .El
 .Sh SEE ALSO
-.Xr driver.conf 4 ,
 .Xr dlpi 4P ,
+.Xr driver.conf 5 ,
 .Xr dladm 8 ,
 .Xr snoop 8

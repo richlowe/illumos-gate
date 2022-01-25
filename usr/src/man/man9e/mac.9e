@@ -520,7 +520,7 @@ are all exposed.
 It is also the preferred way that these properties are set and configured.
 .Pp
 While device tunables may be presented in a
-.Xr driver.conf 4
+.Xr driver.conf 5
 file, it is recommended instead to expose such things through
 .Xr dladm 8
 private properties, whether explicitly documented or not.
@@ -635,7 +635,7 @@ In other words, each mblk_t that is linked together by the
 pointer may have checksum flags set.
 .Pp
 It is recommended that device drivers provide a private property or
-.Xr driver.conf 4
+.Xr driver.conf 5
 property to control whether or not checksumming is enabled for both rx
 and tx; however, the default disposition is recommended to be enabled
 for both.
@@ -1976,8 +1976,8 @@ to switch from one format to the other.
 This way, data can be gathered to determine what the impact of each method is on
 a given platform.
 .Sh SEE ALSO
-.Xr driver.conf 4 ,
 .Xr dlpi 4P ,
+.Xr driver.conf 5 ,
 .Xr ieee802.3 7 ,
 .Xr dladm 8 ,
 .Xr _fini 9E ,

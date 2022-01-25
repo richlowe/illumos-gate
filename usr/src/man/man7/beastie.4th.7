@@ -64,14 +64,14 @@ Draws the logo.
 The logo that is drawn is configured by setting the
 .Ic loader_logo
 variable in
-.Xr loader.conf 4 .
+.Xr loader.conf 5 .
 .Pp
 The position of the logo can be configured by setting the
 .Ic loader_logo_x
 and
 .Ic loader_logo_y
 variables in
-.Xr loader.conf 4 .
+.Xr loader.conf 5 .
 The default values are 46 (x) and 4 (y).
 .Pp
 .It Ic clear-beastie
@@ -83,7 +83,7 @@ Initializes the interactive boot loader menu.
 The
 .Ic loader_delay
 variable can be configured in
-.Xr loader.conf 4
+.Xr loader.conf 5
 to the number of seconds you would like to delay loading the boot menu.
 During the delay the user can press Ctrl-C to fall back to
 .Ic autoboot
@@ -135,12 +135,12 @@ beastie-start
 .Ed
 .Pp
 Set a different logo in
-.Xr loader.conf 4 :
+.Xr loader.conf 5 :
 .Pp
 .Bd -literal -offset indent -compact
 loader_logo="beastie"
 .Ed
 .Sh SEE ALSO
-.Xr loader.conf 4 ,
+.Xr loader.conf 5 ,
 .Xr loader 7 ,
 .Xr loader.4th 7

@@ -36,7 +36,7 @@ It is mounted during boot time as a read-only file at
 Filesystem contents are dynamic and reflect the current set of shares in the
 zone.
 File contents are described in
-.Xr sharetab 4 .
+.Xr sharetab 5 .
 .Pp
 File contents can be modified as a result of
 .Xr share 8 ,
@@ -53,7 +53,7 @@ The module may not be unloaded dynamically by the kernel.
 System record of shared file systems.
 .El
 .Sh SEE ALSO
-.Xr sharetab 4 ,
+.Xr sharetab 5 ,
 .Xr zones 7 ,
 .Xr share 8 ,
 .Xr sharectl 8 ,

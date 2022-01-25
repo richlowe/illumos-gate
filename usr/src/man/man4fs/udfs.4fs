@@ -74,7 +74,7 @@ The
 file system also supports regular files, directories, and symbolic links, as
 well as device nodes such as block, character, FIFO, and Socket.
 .Sh SEE ALSO
-.Xr vfstab 4 ,
+.Xr vfstab 5 ,
 .Xr mount 8 ,
 .Xr mount_udfs 8
 .Sh NOTES

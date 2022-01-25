@@ -71,7 +71,7 @@ The
 driver supports the following properties which may be tuned in the
 .Nm
 driver's
-.Xr driver.conf 4
+.Xr driver.conf 5
 file.
 .Bl -tag -width Sy
 .It Sy xhci-reroute
@@ -100,9 +100,9 @@ Device driver (x86)
 Driver configuration file
 .El
 .Sh SEE ALSO
-.Xr driver.conf 4 ,
 .Xr ehci 4D ,
 .Xr usba 4D ,
+.Xr driver.conf 5 ,
 .Xr cfgadm 8 ,
 .Xr cfgadm_usb 8 ,
 .Xr dladm 8

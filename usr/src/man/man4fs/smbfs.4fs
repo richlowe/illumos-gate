@@ -145,6 +145,6 @@ concern, such as for public read-only resources.
 .Sy Uncommitted
 .Sh SEE ALSO
 .Xr smbutil 1 ,
-.Xr nsmbrc 4 ,
+.Xr nsmbrc 5 ,
 .Xr attributes 7 ,
 .Xr mount_smbfs 8

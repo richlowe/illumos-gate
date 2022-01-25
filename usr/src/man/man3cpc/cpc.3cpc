@@ -188,7 +188,7 @@ existing application without changing the source code.
 A separate library,
 .Sy libpctx ,
 provides a simple set of interfaces that use the facilities of
-.Xr proc 4
+.Xr proc 5
 to control a target process, and together with functions in
 .Sy libcpc ,
 allow
@@ -227,5 +227,5 @@ handles.
 .Xr pctx_capture 3CPC ,
 .Xr pctx_set_events 3CPC ,
 .Xr libcpc 3LIB ,
-.Xr proc 4 ,
+.Xr proc 5 ,
 .Xr cpustat 8

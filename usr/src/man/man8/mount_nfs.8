@@ -144,7 +144,7 @@ The
 command maintains a table of mounted file systems in
 .Pa /etc/mnttab ,
 described in
-.Xr mnttab 4 .
+.Xr mnttab 5 .
 .Pp
 .Nm mount_nfs
 supports both NFSv3 and NFSv4 mounts.
@@ -396,7 +396,7 @@ over NFS version 3 mounts, or to  negotiate a mode over Version 4 mounts.
 The preferred mode for NFS Version 3 mounts is the default mode specified in
 .Pa /etc/nfssec.conf
 .Po see
-.Xr nfssec.conf 4
+.Xr nfssec.conf 5
 .Pc
 on the client.
 If there is no default configured in this file or if the server does not export
@@ -437,7 +437,7 @@ is the highest one available on both systems.
 If the NFS server does not support the client's default maximum, the next lowest
 version attempted until a matching version is found.
 See
-.Xr nfs 4
+.Xr nfs 5
 for more information on setting default minimum and maximum client versions.
 .It Sy wsize Ns = Ns Ar n
 Set the write buffer size to a maximum of
@@ -753,12 +753,12 @@ example# mount serv-x:/usr/man,serv-y:/var/man,nfs://serv-z/man /usr/man
 .Xr mount 2 ,
 .Xr open 2 ,
 .Xr umount 2 ,
-.Xr mnttab 4 ,
-.Xr nfs 4 ,
-.Xr nfssec.conf 4 ,
 .Xr lofs 4FS ,
 .Xr inet 4P ,
 .Xr inet6 4P ,
+.Xr mnttab 5 ,
+.Xr nfs 5 ,
+.Xr nfssec.conf 5 ,
 .Xr attributes 7 ,
 .Xr fsattr 7 ,
 .Xr nfssec 7 ,

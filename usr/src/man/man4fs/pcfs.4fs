@@ -463,7 +463,7 @@ result in the more descriptive short names:
 .Xr unix2dos 1 ,
 .Xr volcheck 1 ,
 .Xr ctime 3C ,
-.Xr vfstab 4 ,
+.Xr vfstab 5 ,
 .Xr environ 7 ,
 .Xr mount 8 ,
 .Xr mount_pcfs 8 ,

@@ -94,7 +94,7 @@ To get a list of all the individual statistics in these groups run:
 # kstat -m qede -i 0 -l
 .Ed
 .Sh SEE ALSO
-.Xr driver.conf 4 ,
 .Xr dlpi 4P ,
+.Xr driver.conf 5 ,
 .Xr dladm 8 ,
 .Xr ifconfig 8

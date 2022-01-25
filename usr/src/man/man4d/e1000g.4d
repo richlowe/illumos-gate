@@ -192,7 +192,7 @@ The
 .Pa e1000g.conf
 file contains some user configurable parameters, the format of which
 is documented in
-.Xr driver.conf 4 .
+.Xr driver.conf 5 .
 Generally, the use of
 .Xr dladm 8
 is recommended over editing the configuration file.
@@ -207,7 +207,7 @@ Driver configuration file
 .El
 .Sh SEE ALSO
 .Xr libdlpi 3LIB ,
-.Xr driver.conf 4 ,
 .Xr igb 4D ,
 .Xr dlpi 4P ,
+.Xr driver.conf 5 ,
 .Xr dladm 8

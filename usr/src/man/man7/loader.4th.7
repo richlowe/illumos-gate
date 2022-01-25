@@ -32,7 +32,7 @@
 The file that goes by the name of
 .Nm
 is a set of commands designed to manipulate
-.Xr loader.conf 4
+.Xr loader.conf 5
 files.
 The default
 .Pa /boot/loader.rc
@@ -40,7 +40,7 @@ includes
 .Nm
 and uses one of its commands to automatically read and process
 the standard
-.Xr loader.conf 4
+.Xr loader.conf 5
 files.
 Other commands exists to help the user specify alternate
 configurations.
@@ -71,7 +71,7 @@ The commands provided by it are:
 .It Ic boot Ar directory Op Cm ...
 .It Ic boot Fl flag Cm ...
 Boot as specified by the
-.Xr loader.conf 4
+.Xr loader.conf 5
 files read.
 .Pp
 Depending on the arguments passed, it can override boot flags and
@@ -91,7 +91,7 @@ so it can be stopped.
 Reads
 .Pa /boot/defaults/loader.conf ,
 all other
-.Xr loader.conf 4
+.Xr loader.conf 5
 files specified in it, then loads the desired kernel and modules
 .Pq if not already loaded .
 After which you can use the
@@ -116,7 +116,7 @@ Like
 it reads
 .Pa /boot/defaults/loader.conf
 and all other
-.Xr loader.conf 4
+.Xr loader.conf 5
 files specified in it
 .Pq but does not load kernel or modules .
 Returns a flag on the stack to indicate
@@ -124,7 +124,7 @@ if any configuration files were successfully loaded.
 .Pp
 .It Ic read-conf Ar filename
 Reads and processes a
-.Xr loader.conf 4
+.Xr loader.conf 5
 file.
 Does not proceed to boot.
 .Pp
@@ -143,23 +143,23 @@ on and off.
 .Pp
 .It Ic show-module Ar module
 Shows the information gathered in the
-.Xr loader.conf 4
+.Xr loader.conf 5
 files about the module
 .Ar module .
 .Pp
 .It Ic show-module-options
 Shows all modules defined in current
-.Xr loader.conf 4
+.Xr loader.conf 5
 configuration.
 .Pp
 .It Ic retry
 Used inside
-.Xr loader.conf 4
+.Xr loader.conf 5
 files to specify the action after a module loading fails.
 .Pp
 .It Ic ignore
 Used inside
-.Xr loader.conf 4
+.Xr loader.conf 5
 files to specify the action after a module loading fails.
 .It Ic try-include Ar file Op Ar
 Process script files if they exist.
@@ -202,5 +202,5 @@ read-conf /boot/special.conf
 boot-conf
 .Ed
 .Sh SEE ALSO
-.Xr loader.conf 4 ,
+.Xr loader.conf 5 ,
 .Xr loader 7

@@ -61,7 +61,7 @@ The networking devices created by the
 driver can be controlled through
 .Xr dladm 8 .
 There is no
-.Xr driver.conf 4
+.Xr driver.conf 5
 file for
 .Nm
 currently.

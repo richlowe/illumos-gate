@@ -592,7 +592,7 @@ This takes the following options:
 .It Fl 1 Ns \&, Ns Fl -primary
 Specify that the interface is primary.
 One effect will be that
-.Xr nodename 4
+.Xr nodename 5
 will serve as
 .Fl h Ns \&, Ns Fl -reqhost
 if that switch is not otherwise specified.
@@ -824,7 +824,7 @@ The address is not advertised to routing
 The host name to send to the DHCP server in order to request an association
 of the FQDN to the interface.
 For a primary DHCP interface,
-.Xr nodename 4
+.Xr nodename 5
 is sent if this property is not defined.
 See the
 .Nm
@@ -1048,8 +1048,8 @@ subcommand for the list of property names.
 .El
 .El
 .Sh SEE ALSO
-.Xr nodename 4 ,
-.Xr nsswitch.conf 4 ,
+.Xr nodename 5 ,
+.Xr nsswitch.conf 5 ,
 .Xr dhcp 7 ,
 .Xr arp 8 ,
 .Xr cfgadm 8 ,

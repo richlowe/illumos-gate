@@ -86,5 +86,5 @@ will be returned to indicate an unknown string.
 .Sy MT-Safe
 .Sh SEE ALSO
 .Xr libproc 3LIB ,
-.Xr proc 4 ,
+.Xr proc 5 ,
 .Xr coreadm 8
