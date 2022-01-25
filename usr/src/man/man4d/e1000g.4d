@@ -42,7 +42,7 @@ and found in the file system at
 This device node supports the Data Link Provider Interface
 .Pq DLPI
 which is documented in
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 .Xr libdlpi 3LIB
 provides a more usable interface on top of that.
 .Pp
@@ -209,5 +209,5 @@ Driver configuration file
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
 .Xr igb 4D ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8

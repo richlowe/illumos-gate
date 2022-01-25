@@ -69,9 +69,9 @@ argument for these calls is the protocol number for TCP, available from
 .Xr getprotobyname 3SOCKET .
 IP level options may also be used with TCP.
 See
-.Xr ip 7P
+.Xr ip 4P
 and
-.Xr ip6 7P .
+.Xr ip6 4P .
 .Ss "Listening And Connecting"
 TCP uses IP's host-level addressing and adds its own per-host
 collection of
@@ -84,9 +84,9 @@ Although other protocols, such as the User Datagram Protocol
 may use the same host and port address format, the port space of these
 protocols is distinct.
 See
-.Xr inet 7P
+.Xr inet 4P
 and
-.Xr inet6 7P
+.Xr inet6 4P
 for details on
 the common aspects of addressing in the Internet protocol family.
 .Pp
@@ -138,7 +138,7 @@ destination or default gateway address, although the rules can be more complex.
 See
 .Sy "Source Address Selection"
 in
-.Xr inet6 7P
+.Xr inet6 4P
 for a detailed discussion of how this works in IPv6.
 .Pp
 Note that no two TCP sockets can be bound to the same port unless the bound IP
@@ -835,11 +835,11 @@ The system ran out of memory for internal data structures.
 .Xr getsockopt 3SOCKET ,
 .Xr listen 3SOCKET ,
 .Xr send 3SOCKET ,
+.Xr inet 4P ,
+.Xr inet6 4P ,
+.Xr ip 4P ,
+.Xr ip6 4P ,
 .Xr smf 5 ,
-.Xr inet 7P ,
-.Xr inet6 7P ,
-.Xr ip 7P ,
-.Xr ip6 7P ,
 .Xr ndd 8 ,
 .Xr svcadm 8
 .Rs

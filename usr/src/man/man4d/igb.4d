@@ -66,7 +66,7 @@ and multiple MAC address filters.
 Promiscuous access via
 .Xr snoop 8
 and
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 .It
 LED control.
 .It
@@ -81,7 +81,7 @@ This device can be used with the Data Link Provider Interface
 through either
 .Xr libdlpi 3LIB
 or
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 .Pp
 Each instance is assigned a unique ascending integer identifier starting
 from zero.
@@ -121,6 +121,6 @@ Configuration file.
 .Xr libdlpi 3LIB ,
 .Xr driver.conf 4 ,
 .Xr e1000g 4D ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8 ,
 .Xr mac 9E

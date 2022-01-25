@@ -24,7 +24,7 @@ The
 .Nm
 Ethernet driver is a multi-threaded, loadable, clonable, GLDv3-based
 driver supporting the Data Link Provider Interface,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 over QLogic FastLinQ QL45xxx 10/25/40/50/100 Gigabit Ethernet
 controllers.
 Multiple QLogic FastLinQ controllers installed within the system are
@@ -95,6 +95,6 @@ To get a list of all the individual statistics in these groups run:
 .Ed
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8 ,
 .Xr ifconfig 8

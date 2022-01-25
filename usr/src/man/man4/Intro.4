@@ -140,7 +140,7 @@ SunOS supports both socket-based and
 network communications.
 .Pp
 The Internet protocol family, described in
-.Xr inet 7P ,
+.Xr inet 4P ,
 is the primary protocol family supported by SunOS, although the system can
 support a number of others.
 The raw interface provides low-level services, such as
@@ -158,7 +158,7 @@ Major protocols in the Internet family include:
 .It
 The Internet Protocol (IP) itself, which supports the universal datagram
 format, as described in
-.Xr ip 7P .
+.Xr ip 4P .
 This is the default protocol for
 .Dv SOCK_RAW
 type sockets within the
@@ -166,23 +166,23 @@ type sockets within the
 domain.
 .It
 The Transmission Control Protocol (TCP); see
-.Xr tcp 7P .
+.Xr tcp 4P .
 This is the default protocol for
 .Dv SOCK_STREAM
 type sockets.
 .It
 The User Datagram Protocol (UDP); see
-.Xr udp 7P .
+.Xr udp 4P .
 This is the default
 protocol for
 .Dv SOCK_DGRAM
 type sockets.
 .It
 The Address Resolution Protocol (ARP); see
-.Xr arp 7P .
+.Xr arp 4P .
 .It
 The Internet Control Message Protocol (ICMP); see
-.Xr icmp 7P .
+.Xr icmp 4P .
 .El
 .El
 .Sh SEE ALSO
@@ -193,12 +193,12 @@ The Internet Control Message Protocol (ICMP); see
 .Xr st 4D ,
 .Xr mtio 4I ,
 .Xr streamio 4I ,
-.Xr arp 7P ,
-.Xr icmp 7P ,
-.Xr inet 7P ,
-.Xr ip 7P ,
-.Xr tcp 7P ,
-.Xr udp 7P ,
+.Xr arp 4P ,
+.Xr icmp 4P ,
+.Xr inet 4P ,
+.Xr ip 4P ,
+.Xr tcp 4P ,
+.Xr udp 4P ,
 .Xr add_drv 8 ,
 .Xr rem_drv 8
 .Pp

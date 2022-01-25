@@ -128,9 +128,9 @@ specifies the number of bytes in the address, and
 .Sy buf
 points to the address buffer.
 For
-.Xr tcp 7P
+.Xr tcp 4P
 and
-.Xr udp 7P
+.Xr udp 4P
 transports,
 .Sy buf
 points to a

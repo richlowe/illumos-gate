@@ -42,8 +42,8 @@ Special character device.
 .
 .Sh SEE ALSO
 .Xr pci 4 ,
+.Xr dlpi 4P ,
 .Xr ieee802.3 5 ,
-.Xr dlpi 7P ,
 .Xr dladm 8 ,
 .Xr ifconfig 8
 .Rs

@@ -25,7 +25,7 @@ The
 driver is a GLDv3 NIC driver for the ConnectX-4, ConnectX-4 Lx, ConnectX-5 and
 ConnectX-6 families of ethernet controllers from Mellanox.
 It supports the Data Link Provider Interface,
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 .Pp
 This driver supports:
 .Bl -dash -offset indent
@@ -39,7 +39,7 @@ when using VNICs.
 .It
 Promiscuous access via
 .Xr snoop 8 and
-.Xr dlpi 7P
+.Xr dlpi 4P
 .It
 LED control
 .It
@@ -362,6 +362,6 @@ Driver configuration file containing user-configurable options
 .El
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8 ,
 .Xr snoop 8

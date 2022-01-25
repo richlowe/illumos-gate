@@ -46,7 +46,7 @@ This device can be used with the Data Link Provider Interface
 through either
 .Xr libdlpi 3LIB
 or
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 .Pp
 Each instance is assigned a unique ascending integer identifier starting
 from zero.
@@ -81,7 +81,7 @@ x86 device driver.
 .Sh SEE ALSO
 .Xr libdlpi 3LIB ,
 .Xr virtio 4D ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8 ,
 .Xr mac 9E
 .Rs

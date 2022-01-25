@@ -35,7 +35,7 @@ ioctl(s, SIOCLIFDELND, &lifr);
 The Neighbor Discovery Protocol (NDP) is a protocol used to distribute and
 request information about neighboring IPv6 systems on the local network, much
 like
-.Xr ARP 7P
+.Xr ARP 4P
 for IPv4.
 NDP is also responsible for spreading information about the network gateway and
 how hosts should configure themselves
@@ -51,7 +51,7 @@ and
 for getting, setting, and deleting respectively.
 Each of these ioctls takes a
 .Vt struct lifreq
-.Pq see Xr if 7P for details ,
+.Pq see Xr if 4P for details ,
 where the
 .Fa lifr_lifru
 field is of type

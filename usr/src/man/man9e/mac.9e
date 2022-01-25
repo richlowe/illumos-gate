@@ -68,7 +68,7 @@ or
 .Xr close 9E
 routines.
 In addition, all of the work to interact with
-.Xr dlpi 7P
+.Xr dlpi 4P
 is taken care of automatically and transparently.
 .Ss Initializing MAC Support
 For a device to be used in the framework, it must register with the
@@ -1977,8 +1977,8 @@ This way, data can be gathered to determine what the impact of each method is on
 a given platform.
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
+.Xr dlpi 4P ,
 .Xr ieee802.3 5 ,
-.Xr dlpi 7P ,
 .Xr dladm 8 ,
 .Xr _fini 9E ,
 .Xr _info 9E ,

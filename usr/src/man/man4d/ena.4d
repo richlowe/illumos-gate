@@ -130,6 +130,6 @@ are considered
 and may change in the future.
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8 ,
 .Xr snoop 8

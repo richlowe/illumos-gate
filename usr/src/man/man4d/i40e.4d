@@ -26,7 +26,7 @@ The
 .Nm
 driver is a GLDv3, multi-threaded, clonable, loadable device driver that
 supports the Data Link Provider Interface,
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 The
 .Nm
 driver supports the Intel 710 and 722 Ethernet Controller families of
@@ -41,7 +41,7 @@ Jumbo frames up to 9710 bytes.
 .It
 Promiscuous access via
 .Xr snoop 8 and
-.Xr dlpi 7P
+.Xr dlpi 4P
 .It
 IPv4 Checksum Offload
 .It
@@ -60,7 +60,7 @@ For each device supported by the
 installed in the system, a character-special file will be created.
 This file supports the Data Link Provider Interface (DLPI) which is documented
 in
-.Xr dlpi 7P .
+.Xr dlpi 4P .
 For most consumers, the use of
 .Xr libdlpi 3LIB ,
 is recommended.
@@ -108,7 +108,7 @@ Most of these properties cannot be changed after the device has been started.
 The device is started in response to a DLPI consumer opening the device and
 binding to it.
 This happens when an IP interfaces is plumbed or another
-.Xr dlpi 7P
+.Xr dlpi 4P
 consumer such as
 .Xr snoop 8
 or an LLDP daemon is started.
@@ -330,6 +330,6 @@ Driver configuration file
 .El
 .Sh SEE ALSO
 .Xr driver.conf 4 ,
-.Xr dlpi 7P ,
+.Xr dlpi 4P ,
 .Xr dladm 8 ,
 .Xr snoop 8
