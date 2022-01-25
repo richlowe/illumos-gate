@@ -24,7 +24,7 @@
 .In sys/hdio.h
 .Sh DESCRIPTION
 Note \(em the SMC and IPI drivers have been discontinued.
-.Xr dkio 7I
+.Xr dkio 4I
 is now the preferred method for retrieving disk information.
 .Pp
 The SMD and IPI disk drivers supplied with this release support a set of
@@ -109,4 +109,4 @@ struct hdk_diag {
 .Ed
 .Sh SEE ALSO
 .Xr ioctl 2 ,
-.Xr dkio 7I
+.Xr dkio 4I

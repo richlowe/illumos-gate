@@ -134,7 +134,7 @@ This is the
 .Em slice
 number, representing a subset of the disk.
 See
-.Xr dkio 7I .
+.Xr dkio 4I .
 .El
 .
 .Sh SEE ALSO

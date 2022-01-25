@@ -273,5 +273,5 @@ struct    fd_raw {
 .Sh SEE ALSO
 .Xr ioctl 2 ,
 .Xr fd 4D ,
-.Xr dkio 7I ,
-.Xr hdio 7I
+.Xr dkio 4I ,
+.Xr hdio 4I

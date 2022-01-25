@@ -64,7 +64,7 @@ for discovering devices,
 for manipulating partition tables,
 .Xr iostat 8
 for seeing device I/O statistics, and a subset of the
-.Xr dkio 7I
+.Xr dkio 4I
 ioctl requests to retrieve information about the device.
 .Sh ARCHITECTURE
 The
@@ -83,7 +83,7 @@ x86 device driver.
 .Sh SEE ALSO
 .Xr blkdev 4D ,
 .Xr virtio 4D ,
-.Xr dkio 7I ,
+.Xr dkio 4I ,
 .Xr diskinfo 8
 .Rs
 .%T Virtual I/O Device (VIRTIO) Version 1.1

@@ -25,7 +25,7 @@ It provides a hardware independent layer for such storage devices, allowing them
 to concentrate on the hardware-specific details, while
 .Nm
 takes care of all the other details, such as
-.Xr dkio 7I .
+.Xr dkio 4I .
 .Lp
 The
 .Nm
@@ -67,7 +67,7 @@ This is the
 .Em slice
 number, representing a subset of the disk.
 See
-.Xr dkio 7I .
+.Xr dkio 4I .
 .El
 .
 .Sh SEE ALSO
@@ -75,7 +75,7 @@ See
 .Xr sd 4D ,
 .Xr pcfs 4FS ,
 .Xr zfs 4FS ,
-.Xr dkio 7I ,
+.Xr dkio 4I ,
 .Xr devinfo 8 ,
 .Xr fdisk 8 ,
 .Xr mount 8 ,

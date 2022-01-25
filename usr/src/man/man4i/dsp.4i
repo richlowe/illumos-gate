@@ -46,7 +46,7 @@ and
 .Dv SNDCTL_AUDIOINFO
 ioctls.
 See
-.Xr mixer 7I .
+.Xr mixer 4I .
 The user should be provided
 wth the ability to select a different audio device, or alternatively, an
 environment variable such as
@@ -233,14 +233,14 @@ and
 .Dv SNDCTL_AUDIOINFO
 ioctls to determine the device node names of audio devices on the system.
 See
-.Xr mixer 7I
+.Xr mixer 4I
 for additional details.
 .Sh IOCTLS
 .Ss "Information IOCTLs"
 The following ioctls are supported on the audio device, as well as the mixer
 device.
 See
-.Xr mixer 7I
+.Xr mixer 4I
 for details.
 .Bd -literal -offset 2n
 .Dv OSS_GETVERSION
@@ -598,5 +598,5 @@ Uncommitted
 .Xr read 2 ,
 .Xr write 2 ,
 .Xr audio 4D ,
-.Xr attributes 5 ,
-.Xr mixer 7I
+.Xr mixer 4I ,
+.Xr attributes 5

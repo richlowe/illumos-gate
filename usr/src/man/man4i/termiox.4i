@@ -23,7 +23,7 @@
 .Nd extended general terminal interface
 .Sh DESCRIPTION
 The extended general terminal interface supplements the
-.Xr termio 7I
+.Xr termio 4I
 general terminal interface by adding support for asynchronous hardware flow
 control, isochronous flow control and clock modes, and local implementations of
 additional asynchronous features.
@@ -36,7 +36,7 @@ See
 for your system to find out which capabilities are supported.
 .Ss "Hardware Flow Control Modes"
 Hardware flow control supplements the
-.Xr termio 7I
+.Xr termio 4I
 .Dv IXON ,
 .Dv IXOFF ,
 and
@@ -136,7 +136,7 @@ for connectivity.
 Thus, RTS and DTR (or CTS and CD) cannot both be used for
 hardware flow control at the same time.
 Other mutual exclusions may apply, such as the simultaneous setting of the
-.Xr termio 7I
+.Xr termio 4I
 .Dv HUPCL
 and the
 .Vt termiox
@@ -399,15 +399,15 @@ queued for input are discarded and then the change occurs.
 .Sh SEE ALSO
 .Xr stty 1 ,
 .Xr ioctl 2 ,
-.Xr termio 7I
+.Xr termio 4I
 .Sh NOTES
 The
 .Nm termiox Ns Pq 7I
 system call is provided for compatibility with previous
 releases and its use is discouraged.
 Instead, the
-.Xr termio 7I
+.Xr termio 4I
 system call is recommended.
 See
-.Xr termio 7I
+.Xr termio 4I
 for usage information.

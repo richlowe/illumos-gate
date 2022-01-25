@@ -250,7 +250,7 @@ The
 .Dv I_NREAD
 .Sy ioctl
 (see
-.Xr streamio 7I )
+.Xr streamio 4I )
 may be used to determine the amount of data that may be read without blocking.
 The device may alternatively be set to a non-blocking mode, in which case
 .Xr read 2
@@ -280,7 +280,7 @@ queue may be discarded by using the
 .Sy STREAMS
 ioctl.
 See
-.Xr streamio 7I .
+.Xr streamio 4I .
 When changing record parameters, the input stream should be paused and flushed
 before the change, and resumed afterward.
 Otherwise, subsequent reads may return samples
@@ -357,7 +357,7 @@ the
 .Sy STREAMS
 ioctl.
 (See
-.Xr streamio 7I ) .
+.Xr streamio 4I ) .
 .Pp
 Output data is played from the
 .Sy STREAMS
@@ -614,7 +614,7 @@ The
 .Va monitor_gain
 field is present for compatibility, and is no longer supported.
 See
-.Xr dsp 7I
+.Xr dsp 4I
 for more detail.
 .Pp
 Likewise, the
@@ -627,7 +627,7 @@ and
 .Fa record.mod_ports
 are no longer supported.
 See
-.Xr dsp 7I
+.Xr dsp 4I
 for more detail.
 .Pp
 The
@@ -638,7 +638,7 @@ fields are fixed to
 .Dv AUDIO_MID_BALANCE .
 Changes to volume levels for different channels can be
 made using the interfaces in
-.Xr dsp 7I .
+.Xr dsp 4I .
 .Pp
 The
 .Fa play.pause
@@ -772,7 +772,7 @@ set to
 and no changes are made to the device state.
 .Ss "Streamio IOCTLS"
 All of the
-.Xr streamio 7I
+.Xr streamio 4I
 .Xr ioctl 2
 commands may be issued for the
 .Pa /dev/audio
@@ -985,9 +985,9 @@ Obsolete Uncommitted
 .Xr poll 2 ,
 .Xr read 2 ,
 .Xr write 2 ,
-.Xr attributes 5 ,
-.Xr dsp 7I ,
-.Xr streamio 7I
+.Xr dsp 4I ,
+.Xr streamio 4I ,
+.Xr attributes 5
 .Sh BUGS
 Due to a feature of the
 .Sy STREAMS

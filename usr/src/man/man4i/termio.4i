@@ -2190,4 +2190,4 @@ Files in or under
 .Xr tcsetpgrp 3C ,
 .Xr termios 3C ,
 .Xr signal.h 3HEAD ,
-.Xr streamio 7I
+.Xr streamio 4I

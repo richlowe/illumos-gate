@@ -52,7 +52,7 @@ should use the
 and
 .Dv SNDCTL_DSP_SETRECVOL
 ioctls that are documented in
-.Xr dsp 7I .
+.Xr dsp 4I .
 .Ss "Sndstat Device"
 The
 .Pa /dev/sndstat
@@ -450,7 +450,7 @@ or
 .Dv SNDCTL_DSP_SETRECVOL
 ioctls for that purpose.
 See
-.Xr dsp 7I
+.Xr dsp 4I
 for more information.
 Ordinary
 applications should never attempt to change master port selection or hardware
@@ -761,7 +761,7 @@ The extension names are Uncommitted.
 .Xr ioctl 2 ,
 .Xr open 2 ,
 .Xr read 2 ,
-.Xr attributes 5 ,
-.Xr dsp 7I
+.Xr dsp 4I ,
+.Xr attributes 5
 .Sh BUGS
 The names of mixer extensions are not guaranteed to be predictable.

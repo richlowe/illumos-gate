@@ -833,9 +833,9 @@ recreation of all logical device nodes.
 .Xr ioctl 2 ,
 .Xr cmdk 4D ,
 .Xr sd 4D ,
-.Xr cdio 7I ,
-.Xr fdio 7I ,
-.Xr hdio 7I ,
+.Xr cdio 4I ,
+.Xr fdio 4I ,
+.Xr hdio 4I ,
 .Xr addbadsec 8 ,
 .Xr fdisk 8 ,
 .Xr format 8
