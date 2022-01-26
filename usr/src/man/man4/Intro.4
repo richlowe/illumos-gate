@@ -35,7 +35,7 @@ for driver subsystems and classes.
 .Pp
 This section contains the following major collections:
 .Bl -tag -width "xxxxx"
-.It Pq Sy 7D
+.It Pq Sy 4D
 The system provides drivers for a variety of hardware devices, such as disk,
 magnetic tapes, serial communication lines, mice, and frame buffers, as well
 as virtual devices such as pseudo-terminals and windows.
@@ -102,10 +102,10 @@ is rebooted or the driver has been removed and re-added (see
 .Xr rem_drv 8
 and
 .Xr add_drv 8 ) .
-.It Pq Sy 7FS
+.It Pq Sy 4FS
 This section describes the programmatic interface for several file systems
 supported by SunOS.
-.It Pq Sy 7I
+.It Pq Sy 4I
 This section describes ioctl requests which apply to a class of drivers or
 subsystems.
 For example, ioctl requests which apply to most tape devices are
@@ -115,14 +115,14 @@ Ioctl requests relevant to only a specific
 device are described on the man page for that device.
 The page for the device
 in question should still be examined for exceptions to the ioctls listed in
-section 7I.
-.It Pq Sy 7M
+section 4I.
+.It Pq Sy 4M
 This section describes
 .Sy STREAMS
 modules.
 Note that
 .Sy STREAMS
-drivers are discussed in section 7D.
+drivers are discussed in section 4D.
 .Xr streamio 4I
 contains a list of ioctl requests used to manipulate
 .Sy STREAMS
@@ -133,7 +133,7 @@ framework.
 requests specific to a
 .Sy STREAMS
 module will be discussed on the man page for that module.
-.It Pq Sy 7P
+.It Pq Sy 4P
 This section describes various network protocols available in SunOS.
 SunOS supports both socket-based and
 .Sy STREAMS Ns -based
