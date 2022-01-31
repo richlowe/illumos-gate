@@ -14,7 +14,7 @@ accessing functionality and data within an implementation of a network layer
 protocol (OSI layer 3.) A protocol may or may not provide full coverage for
 each of the functions that  is described within this interface. Where it does
 not, it must return an appropriate error condition for that call. Documentation
-pertaining to the network protocol, as found in man page section 7pP, must list
+pertaining to the network protocol, as found in man page section 4P, must list
 which functions provided by this interface are and are not supported.
 .SH ATTRIBUTES
 .sp
