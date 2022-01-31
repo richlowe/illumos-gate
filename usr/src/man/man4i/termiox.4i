@@ -402,7 +402,7 @@ queued for input are discarded and then the change occurs.
 .Xr termio 4I
 .Sh NOTES
 The
-.Nm termiox Ns Pq 7I
+.Nm termiox Ns Pq 4I
 system call is provided for compatibility with previous
 releases and its use is discouraged.
 Instead, the
