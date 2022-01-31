@@ -908,7 +908,7 @@ method context resource pool
 				<description>
 					<loctext xml:lang='C'>
 The resource pool name on which to launch the method.  :default can be used
-as a token to indicate the pool specified in the project(4) entry given in
+as a token to indicate the pool specified in the project(5) entry given in
 the project attribute.
 					</loctext>
 				</description>
@@ -969,7 +969,7 @@ method credential privileges
 				</common_name>
 				<description>
 					<loctext xml:lang='C'>
-An optional string specifying the privilege set as defined in privileges(5).
+An optional string specifying the privilege set as defined in privileges(7).
 					</loctext>
 				</description>
 				<cardinality min='1' max='1' />
@@ -985,7 +985,7 @@ method credential limit privilege set
 				<description>
 					<loctext xml:lang='C'>
 An optional string specifying the limit privilege set as defined in
-privileges(5).
+privileges(7).
 					</loctext>
 				</description>
 				<cardinality min='1' max='1' />
@@ -1013,7 +1013,7 @@ method profile RBAC profile specification
 				<description>
 					<loctext xml:lang='C'>
 The name of an RBAC (role-based access control) profile which, along with the
-method executable, identifies an entry in exec_attr(4).
+method executable, identifies an entry in exec_attr(5).
 					</loctext>
 				</description>
 				<cardinality min='1' max='1' />

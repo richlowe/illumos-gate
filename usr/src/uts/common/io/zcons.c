@@ -70,7 +70,7 @@
  * slave while the associated non-global zone ran, thus ensuring that the
  * slave's STREAMS anchor would never be popped from within the non-global zone
  * (because zoneadmd runs in the global zone).  However, this file descriptor
- * was removed to make zone console management more robust.  sad(7D) is now
+ * was removed to make zone console management more robust.  sad(4D) is now
  * used to automatically set up the slave's STREAMS modules when the zone
  * console is freshly opened within the associated non-global zone.  However,
  * when a process within the non-global zone freshly opens the zone console, the
@@ -533,9 +533,9 @@ zc_slave_open(zc_state_t *zcs,
 	}
 
 	/*
-	 * Set up sad(7D) so that the necessary STREAMS modules will be in
+	 * Set up sad(4D) so that the necessary STREAMS modules will be in
 	 * place.  A wrinkle is that 'ptem' must be anchored
-	 * in place (see streamio(7i)) because we always want the console to
+	 * in place (see streamio(4I)) because we always want the console to
 	 * have terminal semantics.
 	 */
 	minor = ddi_get_instance(zcs->zc_devinfo) << 1 | ZC_SLAVE_MINOR;

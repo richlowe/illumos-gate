@@ -28,7 +28,7 @@
 	operating system upgrade.  Make customizations in a different
 	file.
 
-	NOTE: Do NOT edit the 'config' properties directly, use acctadm(1M)
+	NOTE: Do NOT edit the 'config' properties directly, use acctadm(8)
 	instead.
 
 	Service manifest for extended accounting.

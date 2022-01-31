@@ -84,7 +84,7 @@
 
 	<!-- To prevent ipseckey generating warnings about duplicate
 	SAs when the service is refreshed, ipseckey will flush the
-	existing SAs when its called from smf(5). -->
+	existing SAs when its called from smf(7). -->
 
         <exec_method
                 type='method'
@@ -108,7 +108,7 @@
 			svcadm mark <state> manual-key
 			svcadm clear manual-key
 
-		see auths(1) and user_attr(4)-->
+		see auths(1) and user_attr(5)-->
 
 		<propval
 			name='action_authorization'
@@ -120,7 +120,7 @@
 			svcadm disable manual-key
 			svcadm enable manual-key
 
-		see auths(1) and user_attr(4)-->
+		see auths(1) and user_attr(5)-->
 
 		<propval
 			name='value_authorization'
@@ -131,7 +131,7 @@
 
         <!-- The properties defined below can be changed by a user
 	with 'solaris.smf.value.ipsec' authorization using the
-	svccfg(1M) command.
+	svccfg(8) command.
 
 	EG:
 

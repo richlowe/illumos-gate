@@ -77,7 +77,7 @@ the default distinguished name is "cn=Directory Manager".
 If the LDAP server is Sun Directory Server then an example
 of the distinguished name is "cn=admin, dc=XYZ, dc=COM".
 
-The Oracle Solaris Print Manager uses ldapclient(1M) to determine
+The Oracle Solaris Print Manager uses ldapclient(8) to determine
 the default LDAP server name. If there is more than one
 server specified then the first one will be used.
 
