@@ -72,9 +72,9 @@ then target ID entries for tape drives from 65 to 65+N must be added in
 - configuration file for CPQary3
 .PD
 .SH "SEE ALSO"
-.BR driver.conf (4),
-.BR sd (7D),
-.BR st (7D)
+.BR sd (4D),
+.BR st (4D),
+.BR driver.conf (5)
 .SH NOTES
 The Smart Array controllers supported by the current version of the
 cpqary3 driver do not support 'format unit' SCSI command. Hence, selecting

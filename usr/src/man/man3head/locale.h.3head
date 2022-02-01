@@ -177,6 +177,6 @@ Interface Stability	Standard
 .BR uselocale (3C),
 .BR localeconv (3C),
 .BR stddef.h (3HEAD),
-.BR attributes (5),
-.BR locale (5),
-.BR standards (5)
+.BR attributes (7),
+.BR locale (7),
+.BR standards (7)

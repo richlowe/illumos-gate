@@ -25,7 +25,7 @@ The
 .B bnxe
 Ethernet driver is a multi-threaded, loadable,
 clonable, GLDv3-based driver supporting the Data Link Provider Interface,
-.BR dlpi (7P),
+.BR dlpi (4P),
 over QLogic NetXtreme II 10 Gigabit Ethernet controllers.  Multiple
 NetXtreme II controllers installed within the system are supported by
 the driver.
@@ -138,8 +138,8 @@ Device driver (SPARC)
 .RE
 
 .SH SEE ALSO
-.BR driver.conf (4),
-.BR gld (7P),
+.BR gld (4P),
+.BR driver.conf (5),
 .BR dladm (8),
 .BR ifconfig (8),
 .BR netstat (8)
