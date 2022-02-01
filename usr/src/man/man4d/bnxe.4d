@@ -42,7 +42,7 @@ devices provide 10/100/1000/2500/10000 Mbps networking interfaces.
 The primary methods of configuration are via modification of the
 .I /kernel/drv/bnxe.conf
 file or execution of the
-.BR dladm (1M)
+.BR dladm (8)
 utility. There are many configuration items available and all are thoroughly
 documented in the
 .I /kernel/drv/bnxe.conf
@@ -51,10 +51,10 @@ changes to this file to take affect the driver must be reloaded or the system
 rebooted. In order to reload the driver with new configuration changes all
 .B bnxe
 interfaces must be first unplumbed and then the
-.BR update_drv (1M)
+.BR update_drv (8)
 tool must be executed. For the configuration items that do not require a
 driver reload the
-.BR dladm (1M)
+.BR dladm (8)
 tool can be used to dynamically change the option.
 
 .SH DEBUGGING
@@ -138,11 +138,11 @@ Device driver (SPARC)
 .RE
 
 .SH SEE ALSO
-.BR dladm (1M),
-.BR netstat (1M),
-.BR ifconfig (1M),
 .BR driver.conf (4),
-.BR gld (7P)
+.BR gld (7P),
+.BR dladm (8),
+.BR ifconfig (8),
+.BR netstat (8)
 .LP
 .I QLogic NetXtreme II 10 Gigabit Adapter Driver Installation Notes
 .LP
