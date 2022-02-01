@@ -66,7 +66,7 @@ full pathname of the \fBpasswd\fR, \fBpasswd.adjunct\fR files and use the
 .sp
 .LP
 The daemon is started automatically on the master server of the passwd map by
-\fBypstart\fR(1M), which is invoked at boot time by the
+\fBypstart\fR(8), which is invoked at boot time by the
 \fBsvcs:/network/nis/server:default\fR service.
 .sp
 .LP
@@ -89,7 +89,7 @@ Any deviation causes a password update to fail.
 .LP
 If you remove or add a \fBshadow\fR or \fBpasswd.adjunct\fR file after
 \fBrpc.yppasswdd\fR has started, you must stop and restart the daemon to enable
-it to recognize the change. See \fBypstart\fR(1m) for information on restarting
+it to recognize the change. See \fBypstart\fR(8) for information on restarting
 the daemon.
 .sp
 .LP
@@ -98,7 +98,7 @@ with 'r' to be a restricted shell. By default, the daemon does not check
 whether a shell begins with an '\fBr\fR'. However, you can tell it to do so by
 uncommenting the \fBcheck_restricted_shell_name=1\fR line in
 \fB/etc/default/yppasswdd\fR. The result will be to restrict a user's ability
-to change from his default shell. See \fByppasswdd\fR(4).
+to change from his default shell. See \fByppasswdd\fR(5).
 .sp
 .LP
 On start up, \fByppasswdd\fR checks for the existence of a NIS to LDAP (N2L)
@@ -112,7 +112,7 @@ In N2L mode, changes are written directly to the Directory Information Tree
 source files, \fBpasswd\fR, \fBshadow\fR, and \fBpasswd.adjunct\fR, for
 example, are not updated. Thus, in N2L mode, the \fB-D\fR option is
 meaningless. In N2L mode, \fByppasswdd\fR propagates changes by calling
-\fByppush\fR(1M) instead of \fBypmake\fR(1M). The \fB-m\fR option is thus
+\fByppush\fR(8) instead of \fBypmake\fR(8). The \fB-m\fR option is thus
 unused.
 .sp
 .LP
@@ -124,10 +124,10 @@ information to the DIT. If you are not using password aging, then the
 .sp
 .LP
 \fBsvcs\fR(1), \fBmake\fR(1S), \fBpasswd\fR(1), \fByppasswd\fR(1),
-\fBinetd\fR(1M), \fBsvcadm\fR(1M), \fBypmake\fR(1M), \fByppush\fR(1M),
-\fBypstart\fR(1M), \fBNISLDAPmapping\fR(4), \fBpasswd\fR(4), \fBshadow\fR(4),
-\fBypfiles\fR(4), \fByppasswdd\fR(4), \fBypserv\fR(4), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBinetd\fR(8), \fBsvcadm\fR(8), \fBypmake\fR(8), \fByppush\fR(8),
+\fBypstart\fR(8), \fBNISLDAPmapping\fR(5), \fBpasswd\fR(5), \fBshadow\fR(5),
+\fBypfiles\fR(5), \fByppasswdd\fR(5), \fBypserv\fR(5), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
@@ -151,7 +151,7 @@ permission.
 .sp
 .LP
 The NIS server service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -163,5 +163,5 @@ svcs:/network/nis/server:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

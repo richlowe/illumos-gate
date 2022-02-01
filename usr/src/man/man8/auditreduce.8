@@ -33,7 +33,7 @@ or files from another directory, or files named explicitly on the command line.
 .sp
 .LP
 The select function allows audit records to be selected on the basis of
-numerous criteria relating to the record's content (see \fBaudit.log\fR(4) for
+numerous criteria relating to the record's content (see \fBaudit.log\fR(5) for
 details of record content). A record must meet all of the
 \fIrecord-selection-option\fR criteria to be selected.
 .SS "Audit Trail Filename Format"
@@ -187,7 +187,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -259,7 +259,7 @@ Select records that occurred before \fIdate-time\fR.
 .RS 4n
 Select records by audit class. Records with events that are mapped to the audit
 classes specified by \fIaudit-classes\fR are selected. Audit class names are
-defined in \fBaudit_class\fR(4). Using the \fBaudit\fR \fIflags,\fR one can
+defined in \fBaudit_class\fR(5). Using the \fBaudit\fR \fIflags,\fR one can
 select records based upon success and failure criteria.
 .RE
 
@@ -539,7 +539,7 @@ or creating user.
 .RS 4n
 Select records containing socket objects with the specified \fIport_number\fR
 or the specified \fImachine\fR where \fImachine\fR is a machine name as defined
-in \fBhosts\fR(4).
+in \fBhosts\fR(5).
 .RE
 
 .sp
@@ -550,7 +550,7 @@ in \fBhosts\fR(4).
 .sp .6
 .RS 4n
 Select records containing fault management resource identifier (FMRI) objects
-with the specified \fIservice instance\fR. See \fBsmf\fR(5).
+with the specified \fIservice instance\fR. See \fBsmf\fR(7).
 .RE
 
 .RE
@@ -610,7 +610,7 @@ input is taken from the standard input.
 .ad
 .sp .6
 .RS 4n
-An audit trail file as defined in \fBaudit.log\fR(4). An audit trail file not
+An audit trail file as defined in \fBaudit.log\fR(5). An audit trail file not
 named on the command line must conform to the audit trail file name format.
 Audit trail files produced as output of \fBauditreduce\fR are in this format as
 well. The format is:
@@ -658,7 +658,7 @@ relative to the starting time. Thus, this form can only be used with the
 .ad
 .sp .6
 .RS 4n
-The literal string or ordinal event number as found in \fBaudit_event\fR(4). If
+The literal string or ordinal event number as found in \fBaudit_event\fR(5). If
 \fIevent\fR is not found in the \fBaudit_event\fR file it is considered
 invalid.
 .RE
@@ -670,7 +670,7 @@ invalid.
 .ad
 .sp .6
 .RS 4n
-The literal string or ordinal group ID number as found in \fBgroup\fR(4). If
+The literal string or ordinal group ID number as found in \fBgroup\fR(5). If
 \fIgroup\fR is not found in the \fBgroup\fR file it is considered invalid.
 \fIgroup\fR can be negative.
 .RE
@@ -707,7 +707,7 @@ A regular expression describing a pathname.
 .ad
 .sp .6
 .RS 4n
-The literal username or ordinal user ID number as found in \fBpasswd\fR(4). If
+The literal username or ordinal user ID number as found in \fBpasswd\fR(5). If
 the username is not found in the \fBpasswd\fR file it is considered invalid.
 \fIuser\fR can be negative.
 .RE
@@ -717,7 +717,7 @@ the username is not found in the \fBpasswd\fR file it is considered invalid.
 \fBExample 1 \fRThe auditreduce command
 .sp
 .LP
-\fBpraudit\fR(1M) is available to display audit records in a human-readable
+\fBpraudit\fR(8) is available to display audit records in a human-readable
 form.
 
 .sp
@@ -860,7 +860,7 @@ location of audit trails, when stored
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -879,9 +879,9 @@ The command invocation is Stable. The binary file format is Stable. The binary
 file contents is Unstable.
 .SH SEE ALSO
 .LP
-\fBpraudit\fR(1M), \fBaudit.log\fR(4), \fBaudit_class\fR(4),
-\fBgroup\fR(4), \fBhosts\fR(4), \fBpasswd\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5)
+\fBpraudit\fR(8), \fBaudit.log\fR(5), \fBaudit_class\fR(5),
+\fBgroup\fR(5), \fBhosts\fR(5), \fBpasswd\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7)
 .SH DIAGNOSTICS
 .LP
 \fBauditreduce\fR displays error messages if there are command line errors and

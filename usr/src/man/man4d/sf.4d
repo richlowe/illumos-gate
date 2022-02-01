@@ -17,13 +17,13 @@ sf@\fIport\fR,0
 .LP
 The  \fBsf\fR driver is a SCSA compliant nexus driver which supports the Fibre
 Channel Protocol for SCSI on Private Fibre Channel Arbitrated loops. An SBus
-card called the  \fBSOC+\fR card (see  \fBsocal\fR(7D)) connects the Fibre
+card called the  \fBSOC+\fR card (see  \fBsocal\fR(4D)) connects the Fibre
 Channel loop to the host system.
 .sp
 .LP
 The  \fBsf\fR driver interfaces with the  \fBSOC+\fR device driver,
-\fBsocal\fR(7D), the SCSI disk target driver,  \fBssd\fR(7D), and the SCSI-3
-Enclosure Services driver,  \fBses\fR(7D). It only supports SCSI devices of
+\fBsocal\fR(4D), the SCSI disk target driver,  \fBssd\fR(4D), and the SCSI-3
+Enclosure Services driver,  \fBses\fR(4D). It only supports SCSI devices of
 type disk and ses.
 .sp
 .LP
@@ -59,7 +59,7 @@ ELF kernel module
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -75,8 +75,8 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBluxadm\fR(1M), \fBprtconf\fR(1M), \fBdriver.conf\fR(4), \fBsocal\fR(7D),
-\fBssd\fR(7D)
+\fBluxadm\fR(8), \fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBsocal\fR(4D),
+\fBssd\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

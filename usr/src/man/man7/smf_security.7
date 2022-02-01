@@ -8,10 +8,10 @@
 smf_security \- service management facility security behavior
 .SH DESCRIPTION
 .LP
-The configuration subsystem for the service management facility, \fBsmf\fR(5),
+The configuration subsystem for the service management facility, \fBsmf\fR(7),
 requires privilege to modify the configuration of a service. Privileges are
 granted to a user by associating the authorizations described below to the user
-through \fBuser_attr\fR(4) and \fBprof_attr\fR(4). See \fBrbac\fR(5).
+through \fBuser_attr\fR(5) and \fBprof_attr\fR(5). See \fBrbac\fR(7).
 .sp
 .LP
 The following authorization is used to manipulate services and service
@@ -28,11 +28,11 @@ properties, and to read protected property values.
 
 .SS "Property Group Authorizations"
 .LP
-The \fBsmf\fR(5) configuration subsystem associates properties with each
+The \fBsmf\fR(7) configuration subsystem associates properties with each
 service and service instance. Related properties are grouped. Groups can
 represent an execution method, credential information, application data, or
 restarter state. The ability to create or modify property groups can cause
-\fBsmf\fR(5) components to perform actions that can require operating system
+\fBsmf\fR(7) components to perform actions that can require operating system
 privilege. Accordingly, the framework requires appropriate authorization to
 manipulate property groups.
 .sp
@@ -40,7 +40,7 @@ manipulate property groups.
 Each property group has a type corresponding to its purpose. The core property
 group types are \fBmethod\fR, \fBdependency\fR, \fBapplication\fR, and
 \fBframework\fR. Additional property group types can be introduced, provided
-they conform to the extended naming convention in \fBsmf\fR(5). The following
+they conform to the extended naming convention in \fBsmf\fR(7). The following
 basic authorizations, however, apply only to the core property group types:
 .sp
 .ne 2
@@ -155,7 +155,7 @@ is retrievable only as described in \fBProperty Group Authorizations\fR.
 Administrative domains with policies that prohibit backup of data considered
 sensitive should exclude the SMF repository databases from their backups. In
 the face of such a policy, non-protected property values can be backed up by
-using the \fBsvccfg\fR(1M) archive command to create an archive of the
+using the \fBsvccfg\fR(8) archive command to create an archive of the
 repository without protected property values.
 .SS "Service Action Authorization"
 .LP
@@ -184,7 +184,7 @@ modify this property.
 .SS "Defined Rights Profiles"
 .LP
 Two rights profiles are included that offer grouped authorizations for
-manipulating typical \fBsmf\fR(5) operations.
+manipulating typical \fBsmf\fR(7) operations.
 .sp
 .ne 2
 .na
@@ -217,11 +217,11 @@ privilege checks. See NOTES.
 .SH SEE ALSO
 .LP
 \fBauths\fR(1), \fBprofiles\fR(1),
-\fBsvccfg\fR(1M), \fBprof_attr\fR(4), \fBuser_attr\fR(4), \fBrbac\fR(5),
-\fBsmf\fR(5)
+\fBsvccfg\fR(8), \fBprof_attr\fR(5), \fBuser_attr\fR(5), \fBrbac\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .LP
-The present version of \fBsmf\fR(5) does not support remote repositories.
+The present version of \fBsmf\fR(7) does not support remote repositories.
 .sp
 .LP
 When a service is configured to be started as root but with privileges

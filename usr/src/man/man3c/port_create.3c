@@ -118,7 +118,7 @@ The \fBport_create()\fR function will fail if:
 The maximum allowable number of ports is currently open in the system. The
 maximum allowable number of ports is the minimum value of the
 \fBproject.max-port-ids\fR resource control. See \fBsetrctl\fR(2) and
-\fBrctladm\fR(1M) for information on using resource controls.
+\fBrctladm\fR(8) for information on using resource controls.
 .RE
 
 .sp
@@ -132,7 +132,7 @@ The process has too many open descriptors.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -151,7 +151,7 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBrctladm\fR(1M), \fBclose\fR(2), \fBexit\fR(2), \fBfork\fR(2), \fBpoll\fR(2),
+\fBrctladm\fR(8), \fBclose\fR(2), \fBexit\fR(2), \fBfork\fR(2), \fBpoll\fR(2),
 \fBsetrctl\fR(2), \fBaio_read\fR(3C), \fBaio_write\fR(3C), \fBaio.h\fR(3HEAD),
 \fBlio_listio\fR(3C), \fBmq_notify\fR(3C), \fBport_associate\fR(3C),
-\fBport_get\fR(3C), \fBtimer_create\fR(3C), \fBattributes\fR(5)
+\fBport_get\fR(3C), \fBtimer_create\fR(3C), \fBattributes\fR(7)

@@ -29,7 +29,7 @@ interfaces available for the DTrace facility and the probes offered by the
 \fBfbt\fR provider.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -44,7 +44,7 @@ Interface Stability	Private
 
 .SH SEE ALSO
 .LP
-\fBdtrace\fR(1M), \fBattributes\fR(5), \fBdtrace\fR(7D)
+\fBdtrace\fR(8), \fBattributes\fR(7), \fBdtrace\fR(4D)
 .sp
 .LP
 \fIDynamic Tracing Guide\fR:

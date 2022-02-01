@@ -17,7 +17,7 @@ strace \- print STREAMS trace messages
 .LP
 \fBstrace\fR without arguments writes all STREAMS event trace messages from all
 drivers and modules to its standard output. These messages are obtained from
-the STREAMS log driver (see \fBlog\fR(7D)). If arguments are provided, they
+the STREAMS log driver (see \fBlog\fR(4D)). If arguments are provided, they
 must be in triplets of the form \fImid, sid, level\fR, where \fImid\fR is a
 STREAMS module  \fBID\fR number, \fIsid\fR is a sub-ID number,  and \fIlevel\fR
 is a tracing priority level. Each triplet indicates that tracing messages are
@@ -147,7 +147,7 @@ of  \fB0\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBlog\fR(7D)
+\fBattributes\fR(7), \fBlog\fR(4D)
 .sp
 .LP
 \fI\fR

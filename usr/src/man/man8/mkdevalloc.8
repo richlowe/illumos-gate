@@ -15,11 +15,11 @@ mkdevalloc \- Make device_allocate entries
 .SH DESCRIPTION
 .LP
 The \fBmkdevalloc\fR command writes to standard out a set of
-\fBdevice_allocate\fR(4) entries describing the system's frame buffer, audio
+\fBdevice_allocate\fR(5) entries describing the system's frame buffer, audio
 and removable media devices.
 .sp
 .LP
-The \fBmkdevalloc\fR command is used by the \fBinit.d\fR(4) scripts to create
+The \fBmkdevalloc\fR command is used by the \fBinit.d\fR(5) scripts to create
 or update the \fB/etc/security/device_allocate\fR file.
 .sp
 .LP
@@ -60,7 +60,7 @@ frame buffer    framebuffer      fb            /bin/true
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -75,7 +75,7 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 .LP
-\fBallocate\fR(1), \fBattributes\fR(5)
+\fBallocate\fR(1), \fBattributes\fR(7)
 .SH NOTES
 .LP
 \fBmkdevalloc\fR might not be supported in a future release of the Solaris

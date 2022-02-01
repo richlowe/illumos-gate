@@ -593,7 +593,7 @@ shared object
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -616,7 +616,7 @@ MT Level	MT-Safe
 \fBelf32_getphdr\fR(3ELF), \fBelf32_newphdr\fR(3ELF),
 \fBelf32_getshdr\fR(3ELF), \fBelf32_xlatetof\fR(3ELF),
 \fBelf32_xlatetom\fR(3ELF), \fBelf_errno\fR(3ELF), \fBlibelf\fR(3LIB),
-\fBattributes\fR(5)
+\fBattributes\fR(7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

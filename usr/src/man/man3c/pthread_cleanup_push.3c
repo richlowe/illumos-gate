@@ -107,7 +107,7 @@ The  \fBpthread_cleanup_push()\fR function will not return an error code of
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -121,7 +121,7 @@ Interface Stability	Committed
 _
 MT-Level	MT-Safe
 _
-Standard	See \fBstandards\fR(5).
+Standard	See \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
@@ -130,9 +130,9 @@ Standard	See \fBstandards\fR(5).
 \fBlongjmp\fR(3C), \fBpthread_cancel\fR(3C), \fBpthread_cleanup_pop\fR(3C),
 \fBpthread_exit\fR(3C), \fBpthread_join\fR(3C),
 \fBpthread_setcancelstate\fR(3C), \fBpthread_setcanceltype\fR(3C),
-\fBpthread_testcancel\fR(3C), \fBattributes\fR(5), \fBcancellation\fR(5),
-\fBcondition\fR(5), \fBstandards\fR(5)
+\fBpthread_testcancel\fR(3C), \fBattributes\fR(7), \fBcancellation\fR(7),
+\fBcondition\fR(7), \fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP
-See \fBcancellation\fR(5) for a discussion of cancellation concepts.
+See \fBcancellation\fR(7) for a discussion of cancellation concepts.

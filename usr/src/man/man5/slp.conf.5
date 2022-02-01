@@ -16,7 +16,7 @@ slp.conf \- configuration file for Service Location Protocol agents
 .sp
 .LP
 \fBslp.conf \fR provides all  Service Location Protocol ("\fBSLP\fR") agents
-with  their  operational  configuration. \fBslpd\fR(1M) reads \fBslp.conf\fR on
+with  their  operational  configuration. \fBslpd\fR(8) reads \fBslp.conf\fR on
 startup. Service Agents ("\fBSA\fRs") and User Agents ("\fBUA\fRs") read
 \fBslp.conf\fR on invocation of the \fBSA\fR and \fBUA\fR  library routines;
 configuration parameters are then cached on a per-process basis. All \fBSA\fR's
@@ -140,8 +140,8 @@ Boolean
 \fBTrue\fR or \fBFalse\fR
 .RE
 
-A boolean that indicates whether \fBslpd\fR(1M) is to act as  a \fBDA\fR. If
-\fBFalse\fR, \fBslpd\fR(1M) is not run as a \fBDA\fR.
+A boolean that indicates whether \fBslpd\fR(8) is to act as  a \fBDA\fR. If
+\fBFalse\fR, \fBslpd\fR(8) is not run as a \fBDA\fR.
 .RE
 
 .sp
@@ -310,7 +310,7 @@ IPv4 addresses or host names
 
 A  list of  \fBIP\fR  addresses  or  \fBDNS\fR-resolvable  names that denote
 the  \fBDA\fRs to  use for statically  configured \fBUA\fRs and  \fBSA\fRs. The
-property is read by \fBslpd\fR(1M), and registrations are forwarded to the
+property is read by \fBslpd\fR(8), and registrations are forwarded to the
 \fBDA\fRs. The \fBDA\fRs are provided to \fBUA\fRs upon request. Unlike other
 properties, this property is "read-only", so attempts to change it after the
 configuration file has been read are ignored.
@@ -347,7 +347,7 @@ changed.
 .LP
 These properties direct tracing and logging information to be sent to
 \fBsyslogd\fR at the \fBLOG_INFO\fR priority. These properties affect
-\fBslpd\fR(1M) only.
+\fBslpd\fR(8) only.
 .sp
 .ne 2
 .na
@@ -1113,7 +1113,7 @@ type.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1131,7 +1131,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBslpd\fR(1M), \fBslpd.reg\fR(4), \fBslp_api\fR(3SLP), \fBslp\fR(7P)
+\fBslpd\fR(8), \fBslpd.reg\fR(5), \fBslp_api\fR(3SLP), \fBslp\fR(4P)
 .sp
 .LP
 \fISystem Administration Guide: Network Services\fR

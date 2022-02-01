@@ -15,7 +15,7 @@ accelerates the SCSI protocol by mapping SCSI data transfer phases to RDMA
 operations using InfiniBand as the underlying transport.
 .sp
 .LP
-SRP target services are enabled and disabled through \fBsmf\fR(5), using the
+SRP target services are enabled and disabled through \fBsmf\fR(7), using the
 FMRI \fBsvc:/system/ibsrp/target\fR.
 .sp
 .LP
@@ -62,7 +62,7 @@ Driver configuration file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -78,8 +78,8 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBstmfadm\fR(1M), \fBib\fR(7D), \fBibdma\fR(7D), \fBibtl\fR(7D),
-\fBattributes\fR(5)
+\fBstmfadm\fR(8), \fBib\fR(4D), \fBibdma\fR(4D), \fBibtl\fR(4D),
+\fBattributes\fR(7)
 .sp
 .LP
 \fICOMSTAR Administration Guide\fR

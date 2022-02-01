@@ -98,9 +98,9 @@ IPv6 does not support broadcast addresses; their function is supported by IPv6
 multicast addresses.
 .sp
 .LP
-Options at the \fBIP\fR level may be used with \fBUDP\fR. See \fBip\fR(7P) or
-\fBip6\fR(7P). Additionally, there is one UDP-level option of interest to IPsec
-Key Management applications (see \fBipsec\fR(7P)and \fBpf_key\fR(7P)):
+Options at the \fBIP\fR level may be used with \fBUDP\fR. See \fBip\fR(4P) or
+\fBip6\fR(4P). Additionally, there is one UDP-level option of interest to IPsec
+Key Management applications (see \fBipsec\fR(4P)and \fBpf_key\fR(4P)):
 .sp
 .ne 2
 .na
@@ -129,8 +129,8 @@ fit within its \fIhigh-water\fR capacity are silently discarded.
 .LP
 \fBUDP\fR processes Internet Control Message Protocol ("\fBICMP\fR") and
 Internet Control Message Protocol Version 6 ("\fBICMP6\fR") error messages
-received in response to \fBUDP\fR packets it has sent. See \fBicmp\fR(7P) and
-\fBicmp6\fR(7P).
+received in response to \fBUDP\fR packets it has sent. See \fBicmp\fR(4P) and
+\fBicmp6\fR(4P).
 .sp
 .LP
 \fBICMP\fR "source quench" messages are ignored. \fBICMP\fR "destination
@@ -149,9 +149,9 @@ similarly passed upstream. All other \fBICMP6\fR messages are ignored.
 .sp
 .LP
 \fBread\fR(2), \fBwrite\fR(2), \fBbind\fR(3SOCKET), \fBconnect\fR(3SOCKET),
-\fBrecv\fR(3SOCKET), \fBsend\fR(3SOCKET), \fBicmp\fR(7P), \fBicmp6\fR(7P),
-\fBinet\fR(7P), \fBinet6\fR(7P), \fBip\fR(7P), \fBipsec\fR(7P), \fBip6\fR(7P),
-\fBpf_key\fR(7P), \fBtcp\fR(7P)
+\fBrecv\fR(3SOCKET), \fBsend\fR(3SOCKET), \fBicmp\fR(4P), \fBicmp6\fR(4P),
+\fBinet\fR(4P), \fBinet6\fR(4P), \fBip\fR(4P), \fBipsec\fR(4P), \fBip6\fR(4P),
+\fBpf_key\fR(4P), \fBtcp\fR(4P)
 .sp
 .LP
 Postel, Jon, \fIRFC 768, User Datagram Protocol\fR, Network Information Center,

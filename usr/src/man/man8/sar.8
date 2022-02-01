@@ -32,7 +32,7 @@ system actions occur. These include counters for \fBCPU\fR utilization, buffer
 usage, disk and tape \fBI/O\fR activity, \fBTTY\fR device activity, switching
 and system-call activity, file-access, queue activity, inter-process
 communications, and paging. For more general system statistics, use
-\fBiostat\fR(1M), \fBsar\fR(1), or \fBvmstat\fR(1M).
+\fBiostat\fR(8), \fBsar\fR(1), or \fBvmstat\fR(8).
 .sp
 .LP
 \fBsadc\fR and two shell procedures, \fBsa1\fR and \fBsa2\fR, are used to
@@ -134,15 +134,15 @@ Daily report file
 .SH SEE ALSO
 .LP
 \fBcrontab\fR(1), \fBsar\fR(1), \fBsvcs\fR(1), \fBtimex\fR(1),
-\fBiostat\fR(1M), \fBsvcadm\fR(1M), \fBvmstat\fR(1M), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBiostat\fR(8), \fBsvcadm\fR(8), \fBvmstat\fR(8), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .sp
 .LP
 \fI\fR
 .SH NOTES
 .LP
 The \fBsar\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -154,5 +154,5 @@ svc:/system/sar
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

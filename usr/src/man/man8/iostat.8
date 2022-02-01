@@ -78,8 +78,8 @@ Note that the \fBnames\fR printed in these state change messages are affected
 by the \fB-n\fR and \fB-m\fR options as appropriate.
 .sp
 .LP
-For more general system statistics, use \fBsar\fR(1), \fBsar\fR(1M), or
-\fBvmstat\fR(1M).
+For more general system statistics, use \fBsar\fR(1), \fBsar\fR(8), or
+\fBvmstat\fR(8).
 .SS "Output"
 .sp
 .LP
@@ -225,7 +225,7 @@ The following options are supported:
 .RS 12n
 Report the percentage of time the system has spent in user mode, in system
 mode, in dtrace probes, and idling. See the NOTES section and
-\fBmpstat\fR(1m) for more information.
+\fBmpstat\fR(8) for more information.
 .RE
 
 .sp
@@ -413,7 +413,7 @@ time. See \fBtime\fR(2). Specify \fBd\fR for standard date format. See
 \fB\fB-X\fR\fR
 .ad
 .RS 12n
-For disks under \fBscsi_vhci\fR(7D) control, in addition to disk \fIlun\fR
+For disks under \fBscsi_vhci\fR(4D) control, in addition to disk \fIlun\fR
 statistics, also report statistics for \fIlun\fR.\fIcontroller\fR.
 .RE
 
@@ -440,7 +440,7 @@ is implied.
 \fB\fB-Y\fR\fR
 .ad
 .RS 12n
-For disks under \fBscsi_vhci\fR(7D) control, in addition to disk \fIlun\fR
+For disks under \fBscsi_vhci\fR(4D) control, in addition to disk \fIlun\fR
 statistics, also report statistics for \fIlun\fR.\fItargetport\fR and
 \fIlun\fR.\fItargetport\fR.\fIcontroller\fR.
 .sp
@@ -640,7 +640,7 @@ ssd22.t2.fp3    0.0    0.0    0.4    0.0  0.0  0.0    0.0   0   0
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -659,8 +659,8 @@ Invocation is evolving. Human readable output is unstable.
 .SH SEE ALSO
 .sp
 .LP
-\fBdate\fR(1), \fBsar\fR(1), \fBsar\fR(1M), \fBmpstat\fR(1M), \fBvmstat\fR(1M),
-\fBtime\fR(2), \fBattributes\fR(5), \fBscsi_vhci\fR(7D)
+\fBdate\fR(1), \fBsar\fR(1), \fBsar\fR(8), \fBmpstat\fR(8), \fBvmstat\fR(8),
+\fBtime\fR(2), \fBattributes\fR(7), \fBscsi_vhci\fR(4D)
 .SH NOTES
 .sp
 .LP
@@ -674,9 +674,9 @@ are fairly normal in such cases.
 .sp
 .LP
 The \fBmpstat\fR utility reports the same \fBdt\fR, \fBusr\fR, and \fBsys\fR
-statistics. See \fBmpstat\fR(1M) for more information.
+statistics. See \fBmpstat\fR(8) for more information.
 .sp
 .LP
 When executed in a \fBzone\fR and if the pools facility is active,
-\fBiostat\fR(1M) will only provide information for those processors in the
+\fBiostat\fR(8) will only provide information for those processors in the
 processor set of the pool to which the \fBzone\fR is bound.

@@ -66,8 +66,8 @@ specified when installing to a client from a server (for example,
 .sp
 \fBremovef\fR inherits the value of the \fBPKG_INSTALL_ROOT\fR environment
 variable. (See ENVIRONMENT VARIABLES, below.) If \fBPKG_INSTALL_ROOT\fR is set,
-such as when the \fB-R\fR option is used with \fBpkgadd\fR(1M) or
-\fBpkgrm\fR(1M), there is no need to use the \fBremovef\fR \fB-R\fR option.
+such as when the \fB-R\fR option is used with \fBpkgadd\fR(8) or
+\fBpkgrm\fR(8), there is no need to use the \fBremovef\fR \fB-R\fR option.
 .LP
 Note -
 .sp
@@ -75,7 +75,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -143,7 +143,7 @@ removef \fB-f\fR $PKGINST || exit 2
 .sp
 .LP
 \fBremovef\fR inherits the value of the following environment variable. This
-variable is set when \fBpkgadd\fR(1M) or \fBpkgrm\fR(1M) is invoked with the
+variable is set when \fBpkgadd\fR(8) or \fBpkgrm\fR(8) is invoked with the
 \fB-R\fR option.
 .sp
 .ne 2
@@ -184,15 +184,15 @@ An error occurred.
 .sp
 .LP
 \fBpkginfo\fR(1), \fBpkgmk\fR(1), \fBpkgparam\fR(1), \fBpkgproto\fR(1),
-\fBpkgtrans\fR(1), \fBinstallf\fR(1M), \fBpkgadd\fR(1M), \fBpkgask\fR(1M),
-\fBpkgchk\fR(1M), \fBpkgrm\fR(1M), \fBattributes\fR(5), \fBlargefile\fR(5)
+\fBpkgtrans\fR(1), \fBinstallf\fR(8), \fBpkgadd\fR(8), \fBpkgask\fR(8),
+\fBpkgchk\fR(8), \fBpkgrm\fR(8), \fBattributes\fR(7), \fBlargefile\fR(7)
 .sp
 .LP
 \fI\fR
 .SH NOTES
 .sp
 .LP
-Package commands are \fBlargefile\fR(5)-aware. They handle files larger than 2
+Package commands are \fBlargefile\fR(7)-aware. They handle files larger than 2
 GB in the same way they handle smaller files. In their current implementations,
-\fBpkgadd\fR(1M), \fBpkgtrans\fR(1) and other package commands can process a
+\fBpkgadd\fR(8), \fBpkgtrans\fR(1) and other package commands can process a
 datastream of  up to 4 GB.

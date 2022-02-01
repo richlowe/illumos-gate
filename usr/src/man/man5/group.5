@@ -75,14 +75,14 @@ to time.
 .sp
 .LP
 If the number of characters in an entry exceeds 2047, group maintenance
-commands, such as \fBgroupdel\fR(1M) and \fBgroupmod\fR(1M), fail.
+commands, such as \fBgroupdel\fR(8) and \fBgroupmod\fR(8), fail.
 .sp
 .LP
 Previous releases used a group entry beginning with a `\fB+\fR' (plus sign) or
 `\fB\(mi\fR\&' (minus sign) to selectively incorporate entries from a naming
 service source (for example, an NIS map or data from an LDAP server) for group.
 If still required, this is supported by specifying \fBgroup:compat\fR in
-\fBnsswitch.conf\fR(4). The \fBcompat\fR source may not be supported in future
+\fBnsswitch.conf\fR(5). The \fBcompat\fR source may not be supported in future
 releases. Possible sources are \fBfiles\fR followed by \fBldap\fR.
 This has the effect of incorporating information from an LDAP
 server after the \fBgroup\fR file.
@@ -153,9 +153,9 @@ maps would be effectively incorporated after the entry for stooges.
 
 .SH SEE ALSO
 .LP
-\fBgroups\fR(1), \fBgrpck\fR(1B), \fBnewgrp\fR(1), \fBgroupadd\fR(1M),
-\fBgroupdel\fR(1M), \fBgroupmod\fR(1M), \fBgetgrnam\fR(3C),
-\fBinitgroups\fR(3C), \fBnsswitch.conf\fR(4), \fBunistd.h\fR(3HEAD)
+\fBgroups\fR(1), \fBgrpck\fR(1B), \fBnewgrp\fR(1), \fBgroupadd\fR(8),
+\fBgroupdel\fR(8), \fBgroupmod\fR(8), \fBgetgrnam\fR(3C),
+\fBinitgroups\fR(3C), \fBnsswitch.conf\fR(5), \fBunistd.h\fR(3HEAD)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

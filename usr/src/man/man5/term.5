@@ -15,8 +15,8 @@ term \- format of compiled term file
 .SH DESCRIPTION
 .sp
 .LP
-The \fBterm\fR file is compiled from \fBterminfo\fR(4) source files using
-\fBtic\fR(1M). Compiled files are organized in a directory hierarchy under the
+The \fBterm\fR file is compiled from \fBterminfo\fR(5) source files using
+\fBtic\fR(8). Compiled files are organized in a directory hierarchy under the
 first letter of each terminal name. For example, the \fBvt100\fR file would
 have the pathname \fB/usr/lib/terminfo/v/vt100\fR. The default directory is
 \fB/usr/share/lib/terminfo\fR. Synonyms for the same terminal are implemented
@@ -84,7 +84,7 @@ the size, in bytes, of the string table.
 .LP
 The terminal name section comes next. It contains the first line of the
 \fBterminfo\fR description, listing the various names for the terminal,
-separated by the bar ( | ) character (see \fBterm\fR(5)). The section is
+separated by the bar ( | ) character (see \fBterm\fR(7)). The section is
 terminated with an \fBASCII NUL\fR character.
 .sp
 .LP
@@ -214,5 +214,5 @@ X/Open Curses \fBterminfo\fR header
 .SH SEE ALSO
 .sp
 .LP
-\fBinfocmp\fR(1M), \fBcurses\fR(3CURSES), \fBcurses\fR(3XCURSES),
-\fBterminfo\fR(4), \fBterm\fR(5)
+\fBinfocmp\fR(8), \fBcurses\fR(3CURSES), \fBcurses\fR(3XCURSES),
+\fBterminfo\fR(5), \fBterm\fR(7)

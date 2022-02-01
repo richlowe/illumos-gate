@@ -27,11 +27,11 @@ client.
 .LP
 \fBpam_sm_authenticate\fR(3PAM) uses a host-based client service principal,
 present in the local \fBkeytab\fR (\fB/etc/krb5/krb5.keytab\fR) to authenticate
-to \fBkadmind\fR(1M) (defaults to the \fBhost/nodename.fqdn\fR service
+to \fBkadmind\fR(8) (defaults to the \fBhost/nodename.fqdn\fR service
 principal), for the principal creation operation. Also, for successful creation
 of the \fBkrb5\fR user principal account, the host-based client service
 principal being used needs to be assigned the appropriate privilege on the
-master KDC's \fBkadm5.acl\fR(4) file. \fBkadmind\fR(1M) checks for the
+master KDC's \fBkadm5.acl\fR(5) file. \fBkadmind\fR(8) checks for the
 appropriate privilege and validates the user password using PAM by calling
 \fBpam_authenticate\fR(3PAM) and \fBpam_acct_mgmt\fR(3PAM) for the
 \fBk5migrate\fR service.
@@ -44,9 +44,9 @@ unless instructed otherwise by the presence of the \fBquiet\fR option.
 .LP
 The authentication component always returns \fBPAM_IGNORE\fR and is meant to be
 stacked in \fBpam.conf\fR with a requirement that it be listed below
-pam_authtok_get(5) in the authentication stack. Also, if \fBpam_krb5_migrate\fR
+pam_authtok_get(7) in the authentication stack. Also, if \fBpam_krb5_migrate\fR
 is used in the authentication stack of a particular service, it is mandatory
-that \fBpam_krb5\fR(5) be listed in the PAM account stack of that service for
+that \fBpam_krb5\fR(7) be listed in the PAM account stack of that service for
 proper operation (see EXAMPLES).
 .SH OPTIONS
 The following options can be passed to the KerberosV5 auto-migrate
@@ -68,7 +68,7 @@ Provides \fBsyslog\fR(3C) debugging information at \fBLOG_DEBUG\fR level.
 .ad
 .sp .6
 .RS 4n
-Name of the service used to authenticate to \fBkadmind\fR(1M) defaults to
+Name of the service used to authenticate to \fBkadmind\fR(8) defaults to
 \fBhost\fR. This means that the module uses \fBhost/\fR\fI<nodename.fqdn>\fR as
 its client service principal name, KerberosV5 user principal creation operation
 or \fI<service>\fR/\fI<nodename.fqdn>\fR if this option is provided.
@@ -107,7 +107,7 @@ to \fBnow\fR (current time).
 \fBExample 1 \fRSample Entries from \fBpam.conf\fR
 .sp
 .LP
-The following entries from \fBpam.conf\fR(4) demonstrate the use of the
+The following entries from \fBpam.conf\fR(5) demonstrate the use of the
 \fBpam_krb5_migrate.so.1\fR module:
 
 .sp
@@ -139,7 +139,7 @@ available for use as a Kerberos V5 password.
 \fBExample 2 \fRSample Entries from \fBkadm5.acl\fR
 .sp
 .LP
-The following entries from \fBkadm5.acl\fR(4) permit or deny privileges to the
+The following entries from \fBkadm5.acl\fR(5) permit or deny privileges to the
 host client service principal:
 
 .sp
@@ -161,7 +161,7 @@ principals for addition of the root user account.
 \fBExample 3 \fRSample Entries in \fBpam.conf\fR of the Master KDC
 .sp
 .LP
-The entries below enable \fBkadmind\fR(1M) on the master KDC to use the
+The entries below enable \fBkadmind\fR(8) on the master KDC to use the
 \fBk5migrate\fR PAM service in order to validate Unix user passwords for
 accounts that require migration to the Kerberos realm.
 
@@ -174,7 +174,7 @@ k5migrate        account required        pam_unix_account.so.1
 .in -2
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -188,7 +188,7 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBkadmind\fR(1M), \fBsyslog\fR(3C), \fBpam_authenticate\fR(3PAM),
-\fBpam_acct_mgmt\fR(3PAM), \fBpam_sm_authenticate\fR(3PAM), \fBkadm5.acl\fR(4),
-\fBpam.conf\fR(4), \fBattributes\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_krb5\fR(5)
+\fBkadmind\fR(8), \fBsyslog\fR(3C), \fBpam_authenticate\fR(3PAM),
+\fBpam_acct_mgmt\fR(3PAM), \fBpam_sm_authenticate\fR(3PAM), \fBkadm5.acl\fR(5),
+\fBpam.conf\fR(5), \fBattributes\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_krb5\fR(7)

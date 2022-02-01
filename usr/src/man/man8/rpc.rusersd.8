@@ -16,18 +16,18 @@ rpc.rusersd, rusersd \- network username server
 .sp
 .LP
 \fBrpc.rusersd\fR is a server that returns a list of users on the host. The
-\fBrpc.rusersd\fR daemon may be started by \fBinetd\fR(1M) or \fBlisten\fR(1M).
+\fBrpc.rusersd\fR daemon may be started by \fBinetd\fR(8) or \fBlisten\fR(8).
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBinetadm\fR(1M), \fBinetd\fR(1M), \fBlisten\fR(1M),
-\fBpmadm\fR(1M), \fBsacadm\fR(1M), \fBsvcadm\fR(1M), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBinetadm\fR(8), \fBinetd\fR(8), \fBlisten\fR(8),
+\fBpmadm\fR(8), \fBsacadm\fR(8), \fBsvcadm\fR(8), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
 The \fBrpc.rusersd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -39,8 +39,8 @@ svc:/network/rpc/rusers:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Responsibility for
-initiating and restarting this service is delegated to \fBinetd\fR(1M). Use
-\fBinetadm\fR(1M) to make configuration changes and to view configuration
+requesting restart, can be performed using \fBsvcadm\fR(8). Responsibility for
+initiating and restarting this service is delegated to \fBinetd\fR(8). Use
+\fBinetadm\fR(8) to make configuration changes and to view configuration
 information for this service. The service's status can be queried using the
 \fBsvcs\fR(1) command.

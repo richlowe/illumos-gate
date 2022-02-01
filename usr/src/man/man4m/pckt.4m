@@ -17,7 +17,7 @@ int ioctl(\fI fd, \fRI_PUSH, "pckt");
 .LP
 \fBpckt\fR is a STREAMS module that may be used with a pseudo terminal to
 packetize certain messages. The \fBpckt\fR module should be pushed (see
-\fBI_PUSH\fR on  \fBstreamio\fR(7I)) onto the master side of a pseudo terminal.
+\fBI_PUSH\fR on  \fBstreamio\fR(4I)) onto the master side of a pseudo terminal.
 .sp
 .LP
 Packetizing is performed by prefixing a message with an  \fBM_PROTO\fR message.
@@ -46,8 +46,8 @@ the application to separate the data into its component parts.
 .SH SEE ALSO
 .sp
 .LP
-\fBgetmsg\fR(2), \fBioctl\fR(2), \fBldterm\fR(7M), \fBptem\fR(7M),
-\fBstreamio\fR(7I), \fBtermio\fR(7I)
+\fBgetmsg\fR(2), \fBioctl\fR(2), \fBldterm\fR(4M), \fBptem\fR(4M),
+\fBstreamio\fR(4I), \fBtermio\fR(4I)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

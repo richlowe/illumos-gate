@@ -20,7 +20,7 @@ ypinit \- set up NIS client
 .LP
 \fBypinit\fR can be used to set up an \fBNIS\fR client system. You must be the
 superuser to run this command. This script need not be used at all if
-\fBypbind\fR(1M) is started with the \fB-broadcast\fR option (it is invoked
+\fBypbind\fR(8) is started with the \fB-broadcast\fR option (it is invoked
 with this option from the \fBsvc:/network/nis/client:default service\fR).
 .sp
 .LP
@@ -96,12 +96,12 @@ Lists the servers to which the NIS client is allowed to bind.
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBypwhich\fR(1), \fBsvcadm\fR(1M), \fBypbind\fR(1M),
-\fBsysinfo\fR(2), \fBhosts\fR(4), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBypwhich\fR(1), \fBsvcadm\fR(8), \fBypbind\fR(8),
+\fBsysinfo\fR(2), \fBhosts\fR(5), \fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 .LP
 The \fBNIS client\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -113,7 +113,7 @@ svc:/network/nis/client:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .SH BUGS
 .LP

@@ -18,10 +18,10 @@ module to allow operations
 .LP
 The \fBpam_allow\fR module implements all the PAM service module functions and
 returns \fBPAM_SUCCESS\fR for all calls. Opposite functionality is available in
-the \fBpam_deny\fR(5) module.
+the \fBpam_deny\fR(7) module.
 .sp
 .LP
-Proper Solaris authentication operation requires \fBpam_unix_cred\fR(5) be
+Proper Solaris authentication operation requires \fBpam_unix_cred\fR(7) be
 stacked above \fBpam_allow\fR.
 .sp
 .LP
@@ -77,7 +77,7 @@ gdm-autologin auth  sufficient  pam_allow.so.1
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -96,8 +96,8 @@ MT Level	MT-Safe with exceptions
 .sp
 .LP
 \fBlibpam\fR(3LIB), \fBpam\fR(3PAM), \fBpam_sm\fR(3PAM), \fBsyslog\fR(3C),
-\fBpam.conf\fR(4), \fBattributes\fR(5), \fBpam_deny\fR(5),
-\fBpam_unix_cred\fR(5)
+\fBpam.conf\fR(5), \fBattributes\fR(7), \fBpam_deny\fR(7),
+\fBpam_unix_cred\fR(7)
 .SH NOTES
 .sp
 .LP

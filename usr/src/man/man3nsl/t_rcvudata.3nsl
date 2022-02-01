@@ -252,7 +252,7 @@ the buffer format.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -269,4 +269,4 @@ MT Level	Safe
 .sp
 .LP
 \fBfcntl\fR(2), \fBt_alloc\fR(3NSL), \fBt_open\fR(3NSL),
-\fBt_rcvuderr\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBattributes\fR(5)
+\fBt_rcvuderr\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBattributes\fR(7)

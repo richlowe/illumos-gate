@@ -47,7 +47,7 @@ The following is the general format of a new-style entry:
 .sp
 .LP
 New-style entries differ for each \fBftype\fR. The \fBftype\fR designates the
-entry type, as specified in \fBpkgmap\fR(4). The format for new-style entries,
+entry type, as specified in \fBpkgmap\fR(5). The format for new-style entries,
 for each \fBftype\fR, is as follows:
 .sp
 .in +2
@@ -117,7 +117,7 @@ The relative path to the real file or linked-to directory name.
 \fB\fIftype\fR\fR
 .ad
 .RS 11n
-A one-character field that indicates the entry type (see \fBpkgmap\fR(4)).
+A one-character field that indicates the entry type (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -126,7 +126,7 @@ A one-character field that indicates the entry type (see \fBpkgmap\fR(4)).
 \fB\fIclass\fR\fR
 .ad
 .RS 11n
-The installation class to which the file belongs (see \fBpkgmap\fR(4)).
+The installation class to which the file belongs (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -145,7 +145,7 @@ more than one package can be present.
 \fB\fImode\fR\fR
 .ad
 .RS 11n
-The octal mode of the file (see \fBpkgmap\fR(4)).
+The octal mode of the file (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -154,7 +154,7 @@ The octal mode of the file (see \fBpkgmap\fR(4)).
 \fB\fIowner\fR\fR
 .ad
 .RS 11n
-The owner of the file (see \fBpkgmap\fR(4)).
+The owner of the file (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -163,7 +163,7 @@ The owner of the file (see \fBpkgmap\fR(4)).
 \fB\fIgroup\fR\fR
 .ad
 .RS 11n
-The group to which the file belongs (see \fBpkgmap\fR(4)).
+The group to which the file belongs (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -172,7 +172,7 @@ The group to which the file belongs (see \fBpkgmap\fR(4)).
 \fB\fImajor\fR\fR
 .ad
 .RS 11n
-The major device number (see \fBpkgmap\fR(4)).
+The major device number (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -181,7 +181,7 @@ The major device number (see \fBpkgmap\fR(4)).
 \fB\fIminor\fR\fR
 .ad
 .RS 11n
-The minor device number (see \fBpkgmap\fR(4)).
+The minor device number (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -190,7 +190,7 @@ The minor device number (see \fBpkgmap\fR(4)).
 \fB\fIsize\fR\fR
 .ad
 .RS 11n
-The actual size of the file in bytes as reported by sum (see \fBpkgmap\fR(4)).
+The actual size of the file in bytes as reported by sum (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -199,7 +199,7 @@ The actual size of the file in bytes as reported by sum (see \fBpkgmap\fR(4)).
 \fB\fIcksum\fR\fR
 .ad
 .RS 11n
-The checksum of the file contents (see \fBpkgmap\fR(4)).
+The checksum of the file contents (see \fBpkgmap\fR(5)).
 .RE
 
 .sp
@@ -208,13 +208,13 @@ The checksum of the file contents (see \fBpkgmap\fR(4)).
 \fB\fImodtime\fR\fR
 .ad
 .RS 11n
-The time of last modification (see \fBpkgmap\fR(4)).
+The time of last modification (see \fBpkgmap\fR(5)).
 .RE
 
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -230,16 +230,16 @@ Interface Stability	Unstable
 .SH SEE ALSO
 .sp
 .LP
-\fBpkgadd\fR(1M), \fBpkgadm\fR(1M), \fBpkgchk\fR(1M), \fBpkgmap\fR(4),
-\fBattributes\fR(5)
+\fBpkgadd\fR(8), \fBpkgadm\fR(8), \fBpkgchk\fR(8), \fBpkgmap\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
 As shown above, the interface stability of \fB/var/sadm/install/contents\fR is
-Unstable (see \fBattributes\fR(5)). It is common practice to use this file in a
+Unstable (see \fBattributes\fR(7)). It is common practice to use this file in a
 read-only manner to determine which files belong to which packages installed on
 a system. While this file has been present for many releases of the Solaris
 operating system, it might not be present in future releases. The fully
 supported way to obtain information from the installed package database is
-through \fBpkgchk\fR(1M). It is highly recommended that you use \fBpkgchk\fR
+through \fBpkgchk\fR(8). It is highly recommended that you use \fBpkgchk\fR
 rather than relying on the \fBcontents\fR file.

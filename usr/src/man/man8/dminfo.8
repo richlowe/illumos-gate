@@ -34,7 +34,7 @@ dminfo \- report information about a device entry in a device maps file
 
 .SH DESCRIPTION
 .LP
-\fBdminfo\fR reports and updates information about the \fBdevice_maps\fR(4)
+\fBdminfo\fR reports and updates information about the \fBdevice_maps\fR(5)
 file.
 .SH OPTIONS
 .LP
@@ -55,7 +55,7 @@ entries that match the requested case(s) are printed.
 \fB\fB-d\fR \fIdev\(mipath\fR\fR
 .ad
 .RS 18n
-Search by \fIdev\(mipath\fR. Search \fBdevice_maps\fR(4) for a device special
+Search by \fIdev\(mipath\fR. Search \fBdevice_maps\fR(5) for a device special
 pathname in the \fIdevice_list\fR field matching the \fIdev\(mipath\fR
 argument. This option cannot be used with \fB-n\fR, \fB-t\fR or \fB-u\fR.
 .RE
@@ -76,7 +76,7 @@ Use a device_maps file with \fIpathname\fR instead of
 \fB\fB-n\fR \fIdev\(miname\fR\fR
 .ad
 .RS 18n
-Search by \fIdev\(miname\fR. Search \fBdevice_maps\fR(4) for a
+Search by \fIdev\(miname\fR. Search \fBdevice_maps\fR(5) for a
 \fIdevice_name\fR field matching \fIdev\(miname\fR. This option cannot be used
 with \fB-d\fR, \fB-t\fR or \fB-u\fR.
 .RE
@@ -87,7 +87,7 @@ with \fB-d\fR, \fB-t\fR or \fB-u\fR.
 \fB\fB-t\fR \fIdev\(mitype\fR\fR
 .ad
 .RS 18n
-Search by \fIdev\(mitype\fR. Search \fBdevice_maps\fR(4) for a
+Search by \fIdev\(mitype\fR. Search \fBdevice_maps\fR(5) for a
 \fIdevice_type\fR field matching the given \fIdev\(mitype\fR. This option
 cannot be used with \fB-d\fR, \fB-n\fR or \fB-u\fR.
 .RE
@@ -98,9 +98,9 @@ cannot be used with \fB-d\fR, \fB-n\fR or \fB-u\fR.
 \fB\fB-u\fR \fIdm\(mientry\fR\fR
 .ad
 .RS 18n
-Update the \fBdevice_maps\fR(4) file. This option is provided to add entries to
-the \fBdevice_maps\fR(4) file. The \fIdm\(mientry\fR must be a complete
-\fBdevice_maps\fR(4) file entry. The \fIdm\(mientry\fR has fields, as in the
+Update the \fBdevice_maps\fR(5) file. This option is provided to add entries to
+the \fBdevice_maps\fR(5) file. The \fIdm\(mientry\fR must be a complete
+\fBdevice_maps\fR(5) file entry. The \fIdm\(mientry\fR has fields, as in the
 \fBdevice_maps\fR file. It uses the colon (\fB:\fR) as a field separator, and
 white space as the \fIdevice_list\fR subfield separators. The \fIdm\(mientry\fR
 is not made if any fields are missing, or if the \fIdm\(mientry\fR would be a
@@ -149,4 +149,4 @@ Incorrect syntax.
 \fB/etc/security/device_maps\fR
 .SH SEE ALSO
 .LP
-\fBdevice_maps\fR(4), \fBattributes\fR(5)
+\fBdevice_maps\fR(5), \fBattributes\fR(7)

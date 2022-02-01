@@ -325,7 +325,7 @@ the \fIminor_status\fR parameter details the error condition.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -344,7 +344,7 @@ MT-Level	Safe
 \fBgss_accept_sec_context\fR(3GSS), \fBgss_acquire_cred\fR(3GSS),
 \fBgss_init_sec_context\fR(3GSS), \fBgss_inquire_context\fR(3GSS),
 \fBgss_inquire_cred\fR(3GSS), \fBgss_release_cred\fR(3GSS),
-\fBgss_release_oid_set\fR(3GSS), \fBlibgss\fR(3LIB), \fBattributes\fR(5)
+\fBgss_release_oid_set\fR(3GSS), \fBlibgss\fR(3LIB), \fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

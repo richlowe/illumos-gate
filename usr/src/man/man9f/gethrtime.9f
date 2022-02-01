@@ -39,7 +39,7 @@ called.
 .sp
 .LP
 \fBproc\fR(1), \fBgettimeofday\fR(3C), \fBsettimeofday\fR(3C),
-\fBattributes\fR(5)
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

@@ -123,7 +123,7 @@ provide nonblocking semantics as described for \fBO_NONBLOCK\fR in \fBopen\fR(2)
 
 .sp
 .LP
-There must be an entry in the \fBnetconfig\fR(4) file for at least each
+There must be an entry in the \fBnetconfig\fR(5) file for at least each
 protocol family and type required. If  a non-zero protocol has been specified
 but no exact match for the protocol family, type, and protocol is found, then
 the first entry containing the specified family and type with a \fIprotocol\fR
@@ -298,7 +298,7 @@ One or more of the specified flags is not supported.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -319,7 +319,7 @@ MT-Level	Safe
 \fBconnect\fR(3SOCKET), \fBgetsockname\fR(3SOCKET), \fBgetsockopt\fR(3SOCKET),
 \fBin.h\fR(3HEAD), \fBlisten\fR(3SOCKET), \fBrecv\fR(3SOCKET), \fBopen\fR(2),
 \fBsetsockopt\fR(3SOCKET), \fBsend\fR(3SOCKET), \fBshutdown\fR(3SOCKET),
-\fBsocket.h\fR(3HEAD), \fBsocketpair\fR(3SOCKET), \fBattributes\fR(5)
+\fBsocket.h\fR(3HEAD), \fBsocketpair\fR(3SOCKET), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

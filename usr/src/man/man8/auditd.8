@@ -17,10 +17,10 @@ auditd \- audit daemon
 .LP
 The audit daemon, \fBauditd\fR, controls the generation and location of audit
 trail files and the generation of syslog messages based on its configuration,
-stored in \fBsmf\fR(5) and managed using the \fBauditconfig\fR(1M) command.
+stored in \fBsmf\fR(7) and managed using the \fBauditconfig\fR(8) command.
 .sp
 .LP
-\fBaudit\fR(1M) is used to control \fBauditd\fR. It can cause \fBauditd\fR to:
+\fBaudit\fR(8) is used to control \fBauditd\fR. It can cause \fBauditd\fR to:
 .RS +4
 .TP
 .ie t \(bu
@@ -42,7 +42,7 @@ close the audit trail and terminate auditing.
 .RE
 .SS "Auditing Conditions"
 .LP
-The audit daemon invokes the program \fBaudit_warn\fR(1M) under the following
+The audit daemon invokes the program \fBaudit_warn\fR(8) under the following
 conditions with the indicated options:
 .sp
 .ne 2
@@ -127,7 +127,7 @@ audit daemon to exit.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -142,9 +142,9 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBaudit\fR(1M), \fBauditconfig\fR(1M), \fBaudit_binfile\fR(5),
-\fBaudit_warn\fR(1M), \fBpraudit\fR(1M), \fBauditon\fR(2), \fBaudit.log\fR(4),
-\fBattributes\fR(5)
+\fBaudit\fR(8), \fBauditconfig\fR(8), \fBaudit_binfile\fR(7),
+\fBaudit_warn\fR(8), \fBpraudit\fR(8), \fBauditon\fR(2), \fBaudit.log\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .LP
 If the audit policy \fBperzone\fR is set, \fBauditd\fR runs in each zone,
@@ -163,13 +163,13 @@ local zone's \fB/etc/security\fR directory's files:
 Configuration changes do not affect audit sessions that are currently running,
 as the changes do not modify a process's preselection mask. To change the
 preselection mask on a running process, use the \fB-setpmask\fR option of the
-\fBauditconfig\fR command (see \fBauditconfig\fR(1M)). If the user logs out and
+\fBauditconfig\fR command (see \fBauditconfig\fR(8)). If the user logs out and
 logs back in, the new configuration changes will be reflected in the next audit
 session.
 .sp
 .LP
 The \fBauditd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -182,5 +182,5 @@ svc:/system/auditd
 .LP
 The service's status can be queried using the \fBsvcs\fR(1) command. While
 administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M), the \fBaudit\fR(1M)
+requesting restart, can be performed using \fBsvcadm\fR(8), the \fBaudit\fR(8)
 command is the preferred administrative interface.

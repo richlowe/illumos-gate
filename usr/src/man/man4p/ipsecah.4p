@@ -29,14 +29,14 @@ header, if tunnels are  being used.
 .sp
 .LP
 AH is implemented as a module that is auto-pushed on top of IP. The entry
-\fB/dev/ipsecah\fR is used for tuning AH with \fBndd\fR(1M).
+\fB/dev/ipsecah\fR is used for tuning AH with \fBndd\fR(8).
 .SS "Authentication Algorithms"
 .sp
 .LP
 Current authentication algorithms supported include HMAC-MD5 and HMAC-SHA-1.
 Each authentication algorithm has its own key size and key format properties.
 You can obtain a list of authentication algorithms and their properties by
-using the \fBipsecalgs\fR(1M) command. You can also use the functions described
+using the \fBipsecalgs\fR(8) command. You can also use the functions described
 in the \fBgetipsecalgbyname\fR(3NSL) man page to retrieve the properties of
 algorithms.
 .SS "Security Considerations"
@@ -48,7 +48,7 @@ can still be seen by an adversary.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -63,9 +63,9 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBipsecalgs\fR(1M), \fBipsecconf\fR(1M), \fBndd\fR(1M), \fBattributes\fR(5),
-\fBgetipsecalgbyname\fR(3NSL), \fBip\fR(7P), \fBipsec\fR(7P),
-\fBipsecesp\fR(7P)
+\fBipsecalgs\fR(8), \fBipsecconf\fR(8), \fBndd\fR(8), \fBattributes\fR(7),
+\fBgetipsecalgbyname\fR(3NSL), \fBip\fR(4P), \fBipsec\fR(4P),
+\fBipsecesp\fR(4P)
 .sp
 .LP
 Kent, S. and Atkinson, R. \fIRFC 2402, IP Authentication Header\fR, The

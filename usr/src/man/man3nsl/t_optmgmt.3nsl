@@ -517,7 +517,7 @@ transport provider has processed all previously sent data units.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -537,4 +537,4 @@ MT Level	Safe
 \fBt_alloc\fR(3NSL), \fBt_bind\fR(3NSL), \fBt_close\fR(3NSL),
 \fBt_connect\fR(3NSL), \fBt_getinfo\fR(3NSL), \fBt_listen\fR(3NSL),
 \fBt_open\fR(3NSL), \fBt_rcv\fR(3NSL), \fBt_rcvconnect\fR(3NSL),
-\fBt_rcvudata\fR(3NSL), \fBt_snddis\fR(3NSL), \fBattributes\fR(5)
+\fBt_rcvudata\fR(3NSL), \fBt_snddis\fR(3NSL), \fBattributes\fR(7)

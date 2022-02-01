@@ -16,7 +16,7 @@ ipmon \- monitors /dev/ipl for logged packets
 .SH DESCRIPTION
 .LP
 The \fBipmon\fR command is part of a suite of commands associated with the
-Solaris IP Filter feature. See \fBipfilter\fR(5).
+Solaris IP Filter feature. See \fBipfilter\fR(7).
 .sp
 .LP
 The \fBipmon\fR command opens \fB/dev/ipl\fR for reading and awaits data to be
@@ -24,7 +24,7 @@ saved from the packet filter. The binary data read from the device is reprinted
 in human readable form. However, IP addresses are not mapped back to hostnames,
 nor are ports mapped back to service names. The output goes to standard output,
 by default, or a filename, if specified on the command line. Should the
-\fB-s\fR option be used, output is sent instead to \fBsyslogd\fR(1M). Messages
+\fB-s\fR option be used, output is sent instead to \fBsyslogd\fR(8). Messages
 sent by means of \fBsyslog\fR have the day, month, and year removed from the
 message, but the time (including microseconds), as recorded in the log, is
 still included.
@@ -60,7 +60,7 @@ The name of the interface on which the packet was processed, for example,
 .el o
 The group and rule number of the rule, for example, \fB@0:17\fR. These can be
 viewed with \fBipfstat\fR \fB-in\fR for input rules or \fBipfstat\fR \fB-in\fR
-for output rules. See \fBipfstat\fR(1M).
+for output rules. See \fBipfstat\fR(8).
 .RE
 .RS +4
 .TP
@@ -94,7 +94,7 @@ example, \fBlen 20 40\fR.
 .LP
 If the packet is a TCP packet, there will be an additional field starting with
 a hyphen followed by letters corresponding to any flags that were set. See
-\fBipf.conf\fR(4) for a list of letters and their flags.
+\fBipf.conf\fR(5) for a list of letters and their flags.
 .sp
 .LP
 If the packet is an ICMP packet, there will be two fields at the end, the first
@@ -351,7 +351,7 @@ Show the log header record data in hex.
 .RS 4n
 Monitor packets the specified zone's in-zone filter. If neither this option
 nor \fB-G\fR is specified, the current zone is used. This command is only
-available in the Global Zone. See \fBZONES\fR in \fBipf\fR(1m) for more
+available in the Global Zone. See \fBZONES\fR in \fBipf\fR(8) for more
 information.
 .RE
 
@@ -364,7 +364,7 @@ information.
 .RS 4n
 Monitor packets for the specified zone's global zone controlled filter. If
 neither this option nor \fB-z\fR is specified, the current zone is used. This
-command is only available in the Global Zone. See \fBZONES\fR in \fBipf\fR(1m)
+command is only available in the Global Zone. See \fBZONES\fR in \fBipf\fR(8)
 for more information.
 .RE
 
@@ -389,7 +389,7 @@ for more information.
 .RE
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -404,8 +404,8 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBipf\fR(1M), \fBipfstat\fR(1M), \fBipnat\fR(1M), \fBattributes\fR(5),
-\fBipfilter\fR(5), \fBzones(5)\fR
+\fBipf\fR(8), \fBipfstat\fR(8), \fBipnat\fR(8), \fBattributes\fR(7),
+\fBipfilter\fR(7), \fBzones\fR(7)
 .sp
 .LP
 \fI\fR

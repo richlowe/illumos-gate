@@ -34,7 +34,7 @@ when a transfer is not possible, for instance, when the request message is
 undeliverable, or when the timeout period on responses has expired.
 .sp
 .LP
-Refer to \fBypfiles\fR(4) and \fBypserv\fR(1M) for an overview of the \fBNIS\fR
+Refer to \fBypfiles\fR(5) and \fBypserv\fR(8) for an overview of the \fBNIS\fR
 service.
 .SH OPTIONS
 .sp
@@ -102,7 +102,7 @@ mode.
 .SH SEE ALSO
 .sp
 .LP
-\fBypserv\fR(1M), \fBypxfr\fR(1M), \fBypfiles\fR(4), \fBattributes\fR(5)
+\fBypserv\fR(8), \fBypxfr\fR(8), \fBypfiles\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
@@ -115,7 +115,7 @@ permission.
 .sp
 .LP
 In the current implementation (version 2 \fBNIS\fR protocol), the transfer
-agent is \fBypxfr\fR(1M), which is started by the \fBypserv\fR program. If
+agent is \fBypxfr\fR(8), which is started by the \fBypserv\fR program. If
 \fByppush\fR detects that it is speaking to a version 1 \fBNIS\fR protocol
 server, it uses the older protocol, sending a version 1 \fBYPPROC_GET\fR
 request and issues a message to that effect. Unfortunately, there is no way of

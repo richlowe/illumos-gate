@@ -22,7 +22,7 @@ configuration files.
 .sp
 .LP
 If \fBrem_drv\fR has been executed, the next time the system is rebooted it
-automatically performs a reconfiguration boot (see \fBkernel\fR(1M)).
+automatically performs a reconfiguration boot (see \fBkernel\fR(8)).
 .SH OPTIONS
 .sp
 .LP
@@ -44,7 +44,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-b\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -100,5 +100,5 @@ option, above.
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_drv\fR(1M), \fBkernel\fR(1M), \fBupdate_drv\fR(1M), \fBattributes\fR(5),
-\fBzones\fR(5), \fBdevfs\fR(7FS)
+\fBadd_drv\fR(8), \fBkernel\fR(8), \fBupdate_drv\fR(8), \fBattributes\fR(7),
+\fBzones\fR(7), \fBdevfs\fR(4FS)

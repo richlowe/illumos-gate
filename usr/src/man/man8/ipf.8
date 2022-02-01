@@ -15,7 +15,7 @@ ipf \- alter packet filtering lists for IP packet input and output
 
 .SH DESCRIPTION
 The \fBipf\fR utility is part of a suite of commands associated with the
-Solaris IP Filter feature. See \fBipfilter\fR(5).
+Solaris IP Filter feature. See \fBipfilter\fR(7).
 .sp
 .LP
 The \fBipf\fR utility opens the filenames listed (treating a hyphen (\fB-\fR)
@@ -39,24 +39,24 @@ activate the Solaris IP Filter feature.
 .TP
 1.
 Assume a role that includes the IP Filter Management rights profile (see
-\fBrbac\fR(5)) or become superuser.
+\fBrbac\fR(7)) or become superuser.
 .RE
 .RS +4
 .TP
 2.
-Configure system and services' firewall policies. See \fBsvc.ipfd\fR(1M) and
-\fBipf\fR(4).
+Configure system and services' firewall policies. See \fBsvc.ipfd\fR(8) and
+\fBipf\fR(5).
 .RE
 .RS +4
 .TP
 3.
 (Optional) Create a network address translation (NAT) configuration file.
-See \fBipnat\fR(4).
+See \fBipnat\fR(5).
 .RE
 .RS +4
 .TP
 4.
-(Optional) Create an address pool configuration file. See \fBippool\fR(4).
+(Optional) Create an address pool configuration file. See \fBippool\fR(5).
 .sp
 Create an \fBippool.conf\fR file if you want to refer to a group of addresses as
 a single address pool. If you want the address pool configuration file to be
@@ -118,7 +118,7 @@ Load \fBippools\fR:
 .in -2
 .sp
 
-See \fBippool\fR(1M).
+See \fBippool\fR(8).
 .RE
 .RS +4
 .TP
@@ -145,7 +145,7 @@ See \fBippool\fR(1M).
 .in -2
 .sp
 
-See \fBipnat\fR(1M).
+See \fBipnat\fR(8).
 .RE
 .LP
 Note -
@@ -506,7 +506,7 @@ Links to IP Filter pseudo devices.
 .ad
 .sp .6
 .RS 4n
-Location of \fBipf\fR startup configuration file. See \fBipf\fR(4).
+Location of \fBipf\fR startup configuration file. See \fBipf\fR(5).
 .RE
 
 .sp
@@ -520,7 +520,7 @@ Contains numerous IP Filter examples.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -534,9 +534,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBipfstat\fR(1M), \fBipmon\fR(1M), \fBipnat\fR(1M), \fBippool\fR(1M),
-\fBsvcadm\fR(1M), \fBsvc.ipfd\fR(1M), \fBipf\fR(4), \fBipnat\fR(4),
-\fBippool\fR(4), \fBattributes\fR(5), \fBipfilter\fR(5), \fBzones(5)\fR
+\fBipfstat\fR(8), \fBipmon\fR(8), \fBipnat\fR(8), \fBippool\fR(8),
+\fBsvcadm\fR(8), \fBsvc.ipfd\fR(8), \fBipf\fR(5), \fBipnat\fR(5),
+\fBippool\fR(5), \fBattributes\fR(7), \fBipfilter\fR(7), \fBzones\fR(7)
 .sp
 .LP
 \fI\fR

@@ -349,7 +349,7 @@ Logging is discussed below.
 .el o
 \fBTZ\fR
 .RE
-See \fBenviron\fR(5) for a description of these variables. See \fBgettext\fR(1)
+See \fBenviron\fR(7) for a description of these variables. See \fBgettext\fR(1)
 for details on retrieving localized messages.
 .RE
 .sp
@@ -622,8 +622,8 @@ pair \fBrcm_failure_reason\fR and exit with status 1.
 .SS "Logging"
 .LP
 A script must log all error and debug messages by writing to stdout the
-name-value pairs listed below. The logged messages go to \fBsyslogd\fR(1M) with
-the \fBsyslog\fR facility of \fBLOG_DAEMON\fR. See \fBsyslog.conf\fR(4).
+name-value pairs listed below. The logged messages go to \fBsyslogd\fR(8) with
+the \fBsyslog\fR facility of \fBLOG_DAEMON\fR. See \fBsyslog.conf\fR(5).
 .sp
 .ne 2
 .na
@@ -954,7 +954,7 @@ where \fIfailure_reason\fR is a localized human readable message describing the
 reason for failure of the RCM command.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -969,9 +969,9 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBgettext\fR(1), \fBcfgadm\fR(1M), \fBcfgadm_scsi\fR(1M),
-\fBcfgadm_pci\fR(1M), \fBsyslog\fR(3C), \fBsignal.h\fR(3HEAD),
-\fBsyslog.conf\fR(4), \fBattributes\fR(5), \fBenviron\fR(5)
+\fBgettext\fR(1), \fBcfgadm\fR(8), \fBcfgadm_scsi\fR(8),
+\fBcfgadm_pci\fR(8), \fBsyslog\fR(3C), \fBsignal.h\fR(3HEAD),
+\fBsyslog.conf\fR(5), \fBattributes\fR(7), \fBenviron\fR(7)
 .SH NOTES
 .LP
 RCM scripts are expected to properly handle all RCM commands that the script

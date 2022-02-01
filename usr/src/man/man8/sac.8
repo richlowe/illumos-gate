@@ -71,7 +71,7 @@ states:
 .ad
 .RS 14n
 The port monitor is currently running and is accepting connections. See
-\fBsacadm\fR(1M) with the \fB-e\fR option.
+\fBsacadm\fR(8) with the \fB-e\fR option.
 .RE
 
 .sp
@@ -215,23 +215,23 @@ monitors on the system.
 .SH SEE ALSO
 .sp
 .LP
-\fBpmadm\fR(1M), \fBsacadm\fR(1M), \fBfork\fR(2) \fBpam\fR(3PAM),
-\fBpam.conf\fR(4), \fBattributes\fR(5), \fBpam_authtok_check\fR(5),
-\fBpam_authtok_get\fR(5), \fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5),
-\fBpam_passwd_auth\fR(5), \fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5),
-\fBpam_unix_session\fR(5)
+\fBpmadm\fR(8), \fBsacadm\fR(8), \fBfork\fR(2) \fBpam\fR(3PAM),
+\fBpam.conf\fR(5), \fBattributes\fR(7), \fBpam_authtok_check\fR(7),
+\fBpam_authtok_get\fR(7), \fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7),
+\fBpam_passwd_auth\fR(7), \fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7),
+\fBpam_unix_session\fR(7)
 .SH NOTES
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported. Similar functionality is
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).
 .sp
 .LP
 The service access controller service is managed by the service management
-facility, \fBsmf\fR(5), under the service identifier:
+facility, \fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -243,5 +243,5 @@ svc:/system/sac:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

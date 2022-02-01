@@ -296,13 +296,13 @@ Binary executable \fBvntsd\fR file.
 .ad
 .sp .6
 .RS 4n
-Service management facility (\fBsmf\fR(5)) manifest file for \fBvntsd\fR.
+Service management facility (\fBsmf\fR(7)) manifest file for \fBvntsd\fR.
 .RE
 
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -318,12 +318,12 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBtelnet\fR(1), \fBsvccfg\fR(1M), \fBusermod\fR(1M), \fBauth_attr\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5)
+\fBtelnet\fR(1), \fBsvccfg\fR(8), \fBusermod\fR(8), \fBauth_attr\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
-The \fBvntsd\fR is managed by the service management facility, \fBsmf\fR(5),
+The \fBvntsd\fR is managed by the service management facility, \fBsmf\fR(7),
 under the service identifier:
 .sp
 .in +2
@@ -334,7 +334,7 @@ svc:/ldoms/vntsd
 
 .sp
 .LP
-You can change the following properties using the \fBsvccfg\fR(1M) command:
+You can change the following properties using the \fBsvccfg\fR(8) command:
 .sp
 .ne 2
 .na
@@ -396,7 +396,7 @@ default value is 0, which disables timeout.
 Enable the authorization checking of users and roles for the domain console or
 consoles that are being accessed. The default value of this property is
 \fBfalse\fR to maintain backward compatibility. To enable authorization
-checking, use the \fBsvccfg\fR(1M) command to set the property value to
+checking, use the \fBsvccfg\fR(8) command to set the property value to
 \fBtrue\fR. While this option is enabled, \fBvntsd\fR listens and accepts
 connections on \fBlocalhost\fR. If the \fBlisten_addr\fR property specifies an
 alternate IP address when this option is enabled, \fBvntsd\fR ignores the
@@ -405,7 +405,7 @@ that are initiated from other hosts will also fail. Authorizations are
 available to access all consoles or console groups, or to access specific
 consoles or console groups. When the \fBvntsd\fR service is enabled, the
 following authorization is added to the authorization description database,
-\fBauth_attr\fR(4):
+\fBauth_attr\fR(5):
 .sp
 .in +2
 .nf
@@ -416,7 +416,7 @@ solaris.vntsd.consoles:::Access All LDoms Guest Consoles::
 
 Add any fine-grained authorizations based on the name of the console group. For
 example, if the name of the console group to be authorized is \fBldg1\fR, add
-the following entry to the \fBauth_attr\fR(4) file:
+the following entry to the \fBauth_attr\fR(5) file:
 .sp
 .in +2
 .nf
@@ -427,7 +427,7 @@ solaris.vntsd.console-ldg1:::Access Specific LDoms Guest Console::
 
 By default, the authorization to access all consoles is assigned to the root
 user or role. The Primary Administrator (superuser) can use the
-\fBusermod\fR(1M) command to assign the required authorization or
+\fBusermod\fR(8) command to assign the required authorization or
 authorizations to other users or roles.
 .sp
 The following example gives user \fBuser1\fR the authorization to access all

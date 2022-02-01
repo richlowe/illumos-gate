@@ -71,7 +71,7 @@ l l l .
 .SH SEE ALSO
 .sp
 .LP
-\fBcsh\fR(1), \fBtime\fR(1), \fBgetrusage\fR(3C), \fBattributes\fR(5)
+\fBcsh\fR(1), \fBtime\fR(1), \fBgetrusage\fR(3C), \fBattributes\fR(7)
 .SH BUGS
 .sp
 .LP

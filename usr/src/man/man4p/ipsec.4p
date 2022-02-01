@@ -16,7 +16,7 @@ data, partial sequence integrity  (replay protection), and data authentication.
 with or without the knowledge of an Internet application.
 .sp
 .LP
-IPsec applies to both IPv4 and IPv6. See \fBip\fR(7P) and \fBip6\fR(7P).
+IPsec applies to both IPv4 and IPv6. See \fBip\fR(4P) and \fBip6\fR(4P).
 .SS "Protection Mechanisms"
 .sp
 .LP
@@ -40,12 +40,12 @@ a key. Encryption algorithms operate on data in units of a "block size".
 .SS "NAT Traversal"
 .sp
 .LP
-IPsec's ESP can also encapsulate itself in UDP if IKE (see \fBin.iked\fR(1M))
+IPsec's ESP can also encapsulate itself in UDP if IKE (see \fBin.iked\fR(8))
 discovers a Network Address Translator (NAT) between two communicating
 endpoints.
 .sp
 .LP
-A UDP socket can be specified as a NAT-Traversal endpoint. See \fBudp\fR(7P)
+A UDP socket can be specified as a NAT-Traversal endpoint. See \fBudp\fR(4P)
 for details.
 .SS "Security Associations"
 .sp
@@ -54,14 +54,14 @@ for details.
 that specify security properties from one host to another. Two communicating
 machines require two \fBSA\fRs (at a minimum) to communicate securely. However,
 communicating machines that use multicast can share the same multicast
-\fBSA\fR. \fBSA\fRs are managed through the \fBpf_key\fR(7P) interface. For
+\fBSA\fR. \fBSA\fRs are managed through the \fBpf_key\fR(4P) interface. For
 IPv4, automatic \fBSA\fR management is available through the Internet Key
-Exchange (IKE), as implemented by \fBin.iked\fR(1M). A command-line front-end
-is available by means of \fBipseckey\fR(1M). An IPsec \fBSA\fR is identified by
+Exchange (IKE), as implemented by \fBin.iked\fR(8). A command-line front-end
+is available by means of \fBipseckey\fR(8). An IPsec \fBSA\fR is identified by
 a tuple of <\fBAH\fR or \fBESP\fR, destination \fBIP\fR address, and
 \fBSPI\fR>. The Security Parameters Index (\fBSPI\fR) is an arbitrary 32-bit
 value that is transmitted on the wire with an \fBAH\fR or \fBESP\fR packet. See
-\fBipsecah\fR(7P) or \fBipsecesp\fR(7P)  for an explanation about where the
+\fBipsecah\fR(4P) or \fBipsecesp\fR(4P)  for an explanation about where the
 \fBSPI\fR falls in a protected packet.
 .SS "Protection Policy and Enforcement Mechanisms"
 .sp
@@ -69,7 +69,7 @@ value that is transmitted on the wire with an \fBAH\fR or \fBESP\fR packet. See
 Mechanism and policy are separate. The policy for applying IPsec is enforced on
 a system-wide or per-socket level. Configuring system-wide policy and
 per-tunnel policy (see Transport Mode and Tunnel Mode sections) is done via the
-\fBipsecconf\fR(1M) command. Configuring per-socket policy is discussed later
+\fBipsecconf\fR(8) command. Configuring per-socket policy is discussed later
 in this section.
 .sp
 .LP
@@ -91,7 +91,7 @@ not applied. Instead, the outbound policy on an intra-machine packet translates
 into an inbound packet with those mechanisms applied.
 .sp
 .LP
-IPsec policy is enforced in the \fBip\fR(7P) driver. Several \fBndd\fR tunables
+IPsec policy is enforced in the \fBip\fR(4P) driver. Several \fBndd\fR tunables
 for \fB/dev/ip\fR affect policy enforcement, including:
 .sp
 .ne 2
@@ -131,7 +131,7 @@ If 1, allow inbound cleartext PIM messages to bypass IPsec policy.
 IPsec logs policy failures and errors to \fB/var/adm/messages\fR. To prevent
 syslog from being overloaded, the IPsec kernel modules limit the rate at which
 errors can be logged. You can query/set ipsec_policy_log_interval using
-\fBndd\fR(1M). The value is in milliseconds. Only one message can be logged per
+\fBndd\fR(8). The value is in milliseconds. Only one message can be logged per
 interval.
 .RE
 
@@ -303,11 +303,11 @@ sections within individual reference manual pages.
 .LP
 While a non-root user cannot bypass IPsec, a non-root user can set policy to be
 different from the system-wide policy. For ways to prevent this, consult the
-\fBndd\fR(1M) variables in \fB/dev/ip\fR.
+\fBndd\fR(8) variables in \fB/dev/ip\fR.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -323,10 +323,10 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBin.iked\fR(1M), \fBipsecconf\fR(1M), \fBipseckey\fR(1M), \fBndd\fR(1M),
-\fBgetsockopt\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET), \fBattributes\fR(5),
-\fBinet\fR(7P), \fBip\fR(7P), \fBip6\fR(7P), \fBipsecah\fR(7P),
-\fBipsecesp\fR(7P), \fBpf_key\fR(7P), \fBudp\fR(7P)
+\fBin.iked\fR(8), \fBipsecconf\fR(8), \fBipseckey\fR(8), \fBndd\fR(8),
+\fBgetsockopt\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET), \fBattributes\fR(7),
+\fBinet\fR(4P), \fBip\fR(4P), \fBip6\fR(4P), \fBipsecah\fR(4P),
+\fBipsecesp\fR(4P), \fBpf_key\fR(4P), \fBudp\fR(4P)
 .sp
 .LP
 Kent, S., and Atkinson, R., \fIRFC 2401, Security Architecture for the Internet

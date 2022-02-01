@@ -26,12 +26,12 @@ used to protect both inbound and outbound packets.
 .LP
 A user process (or possibly multiple co-operating processes) maintains
 \fBSADB\fRs by sending messages over a special kind of socket.  This is
-analogous to the method described in \fBroute\fR(7P). Only a superuser may
+analogous to the method described in \fBroute\fR(4P). Only a superuser may
 access an \fBSADB\fR.
 .sp
 .LP
-SunOS applications that use PF_KEY include \fBipseckey\fR(1M) and
-\fBin.iked\fR(1M).
+SunOS applications that use PF_KEY include \fBipseckey\fR(8) and
+\fBin.iked\fR(8).
 .sp
 .LP
 The operating system may spontaneously send pf_key messages to listening
@@ -448,7 +448,7 @@ address. A non-zero remote NAT-T address represents a peer's behind-a-NAT
 address if it is not equivalent to the SA's remote address. An SA with NAT-T
 extensions will protect-and-transmit outbound traffic.  Processing of inbound
 NAT-T traffic requires a UDP socket bound to the appropriate local port and it
-\fBmust\fR have the UDP_NAT_T_ENDPOINT (see \fBudp\fR(7P)) socket option
+\fBmust\fR have the UDP_NAT_T_ENDPOINT (see \fBudp\fR(4P)) socket option
 enabled.
 .sp
 .LP
@@ -921,7 +921,7 @@ Diagnostic Values:
 .in -2
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -934,9 +934,9 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBin.iked\fR(1M), \fBipseckey\fR(1M), \fBsockaddr\fR(3SOCKET),
-\fBipsec\fR(7P), \fBipsecah\fR(7P),
-\fBipsecesp\fR(7P), \fBroute\fR(7P), \fBudp\fR(7P)
+\fBin.iked\fR(8), \fBipseckey\fR(8), \fBsockaddr\fR(3SOCKET),
+\fBipsec\fR(4P), \fBipsecah\fR(4P),
+\fBipsecesp\fR(4P), \fBroute\fR(4P), \fBudp\fR(4P)
 .sp
 .LP
 McDonald, D.L., Metz, C.W., and Phan, B.G., \fIRFC 2367, PF_KEY Key Management

@@ -35,8 +35,8 @@ contain drivers (such as digital cameras and PDAs).
 .SH BINDING
 .LP
 In general, no explicit binding of the \fBugen\fR driver is necessary because
-\fBusb_mid\fR(7D) is the default driver for devices without a class or vendor
-unique driver. \fBusb_mid\fR(7D) creates the same logical device names as
+\fBusb_mid\fR(4D) is the default driver for devices without a class or vendor
+unique driver. \fBusb_mid\fR(4D) creates the same logical device names as
 \fBugen\fR, but only if no child interfaces are explicitly bound to \fBugen\fR.
 If it is necessary to bind \fBugen\fR explicitly to a device or interface, the
 following section explains the necessary steps.
@@ -44,11 +44,11 @@ following section explains the necessary steps.
 .LP
 \fBugen\fR can bind to a device with one or more interfaces in its entirety, or
 to a single interface of that device. The binding type depends on information
-that is passed to \fBadd_drv\fR(1M) or \fBupdate_drv\fR(1M).
+that is passed to \fBadd_drv\fR(8) or \fBupdate_drv\fR(8).
 .sp
 .LP
-An \fBadd_drv\fR(1M) command binds \fBugen\fR to a list of device types it is
-to control. \fBupdate_drv\fR(1M) adds an additional device type to the list of
+An \fBadd_drv\fR(8) command binds \fBugen\fR to a list of device types it is
+to control. \fBupdate_drv\fR(8) adds an additional device type to the list of
 device types being managed by the driver.
 .sp
 .LP
@@ -70,7 +70,7 @@ Note, the USB device version may vary depending on the device.
 .sp
 .LP
 When using ugen for the first time, you must add the driver utilizing
-\fBadd_drv\fR(1M), using a command of the following form:
+\fBadd_drv\fR(8), using a command of the following form:
 .sp
 .in +2
 .nf
@@ -93,7 +93,7 @@ If the command fails with:
 
 .sp
 .LP
-\&...add the device using \fBupdate_drv\fR(1M):
+\&...add the device using \fBupdate_drv\fR(8):
 .sp
 .in +2
 .nf
@@ -123,11 +123,11 @@ descriptor (\fBusb_cfg_descr\fR(9S)). For example "usbif1234,4567.config1.0."
 .sp
 .LP
 Note that you can use update_drv to also remove bindings. Please see
-\fBupdate_drv\fR(1M) for more information.
+\fBupdate_drv\fR(8) for more information.
 .sp
 .LP
 After a successful add_drv or update_drv, remove the device and reinsert. Check
-with the \fBprtconf\fR(1M) -D option to determine if \fBugen\fR is successfully
+with the \fBprtconf\fR(8) -D option to determine if \fBugen\fR is successfully
 bound to the device and the nodes created in /dev/usb/<vid>.<pid> (see below).
 .sp
 .LP
@@ -1638,7 +1638,7 @@ device. (All logical device names for a single device share the same \fIN\fR.)
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1654,7 +1654,7 @@ Architecture	SPARC & x86, PCI-based systems
 .SH SEE ALSO
 .LP
 \fBclose\fR(2), \fBpoll\fR(2), \fBread\fR(2),
-\fBwrite\fR(2), \fBaioread\fR(3C), \fBaiowrite\fR(3C), \fBusba\fR(7D),
+\fBwrite\fR(2), \fBaioread\fR(3C), \fBaiowrite\fR(3C), \fBusba\fR(4D),
 \fBusb_dev_descr\fR(9S)
 .SH DIAGNOSTICS
 .LP

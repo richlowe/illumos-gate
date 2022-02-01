@@ -19,7 +19,7 @@ fmd \- fault manager daemon
 \fBfmd\fR receives telemetry information relating to problems detected by the
 system software, diagnoses these problems, and initiates proactive self-healing
 activities such as disabling faulty components. When appropriate, the fault
-manager also sends a message to the \fBsyslogd\fR(1M) service to notify an
+manager also sends a message to the \fBsyslogd\fR(8) service to notify an
 administrator that a problem has been detected. The message directs
 administrators to a knowledge article on http://illumos.org/msg/, which
 explains more about the problem impact and appropriate responses.
@@ -27,11 +27,11 @@ explains more about the problem impact and appropriate responses.
 .LP
 Each problem diagnosed by the fault manager is assigned a Universal Unique
 Identifier (\fBUUID\fR). The \fBUUID\fR uniquely identifies this particular
-problem across any set of systems. The \fBfmdump\fR(1M) utility can be used to
+problem across any set of systems. The \fBfmdump\fR(8) utility can be used to
 view the list of problems diagnosed by the fault manager, along with their
-\fBUUID\fRs and knowledge article message identifiers. The \fBfmadm\fR(1M)
+\fBUUID\fRs and knowledge article message identifiers. The \fBfmadm\fR(8)
 utility can be used to view the resources on the system believed to be faulty.
-The \fBfmstat\fR(1M) utility can be used to report statistics kept by the fault
+The \fBfmstat\fR(8) utility can be used to report statistics kept by the fault
 manager. The fault manager is started automatically when the operating system
 boots, so it is not necessary to use the \fBfmd\fR command directly.
 .SH OPTIONS
@@ -54,7 +54,7 @@ default fault manager configuration files.
 .ad
 .RS 16n
 Set the specified fault manager option to the specified value. Fault manager
-options are currently a Private interface; see \fBattributes\fR(5) for
+options are currently a Private interface; see \fBattributes\fR(7) for
 information about Private interfaces.
 .RE
 
@@ -137,7 +137,7 @@ Fault manager log directory
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -152,14 +152,14 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBfmadm\fR(1M), \fBfmdump\fR(1M), \fBfmstat\fR(1M),
-\fBsyslogd\fR(1M), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBfmadm\fR(8), \fBfmdump\fR(8), \fBfmstat\fR(8),
+\fBsyslogd\fR(8), \fBattributes\fR(7), \fBsmf\fR(7)
 .sp
 .LP
 http://illumos.org/msg/
 .SH NOTES
 .LP
-The Fault Manager is managed by the service management facility, \fBsmf\fR(5),
+The Fault Manager is managed by the service management facility, \fBsmf\fR(7),
 under the service identifier:
 .sp
 .in +2

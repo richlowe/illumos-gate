@@ -17,14 +17,14 @@ init.d \- initialization and termination scripts for changing init states
 \fB/etc/init.d\fR is a directory containing initialization and termination
 scripts for changing init states. These scripts are linked when appropriate to
 files in the \fBrc?.d\fR directories, where `\fB?\fR' is a single character
-corresponding to the init state. See \fBinit\fR(1M) for definitions of the
+corresponding to the init state. See \fBinit\fR(8) for definitions of the
 states.
 .sp
 .LP
-The service management facility (see \fBsmf\fR(5)) is the preferred mechanism
+The service management facility (see \fBsmf\fR(7)) is the preferred mechanism
 for service initiation and termination. The \fBinit.d\fR and \fBrc?.d\fR
 directories are obsolete, and are provided for compatibility purposes only.
-Applications launched from these directories by \fBsvc.startd\fR(1M) are
+Applications launched from these directories by \fBsvc.startd\fR(8) are
 incomplete services, and will not be restarted on failure.
 .sp
 .LP
@@ -60,7 +60,7 @@ are not intended to be invoked from a command line.
 .sp
 .LP
 When changing to init state 2 (multi-user mode, network resources not
-exported), \fB/sbin/rc2\fR is initiated by the \fBsvc.startd\fR(1M) process.
+exported), \fB/sbin/rc2\fR is initiated by the \fBsvc.startd\fR(8) process.
 The following steps are performed by \fB/sbin/rc2\fR.
 
 .RS +4
@@ -88,20 +88,20 @@ and by \fB/etc/rc0.d/K67netdaemon stop\fR when shutting the system down.
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBinit\fR(1M), \fBsvc.startd\fR(1M), \fBsvccfg\fR(1M),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBinit\fR(8), \fBsvc.startd\fR(8), \fBsvccfg\fR(8),
+\fBsmf\fR(7)
 .SH NOTES
 .LP
 Solaris now provides an expanded mechanism, which includes automated restart,
 for applications historically started via the init script mechanism. The
-Service Management Facility (introduced in \fBsmf\fR(5)) is the preferred
+Service Management Facility (introduced in \fBsmf\fR(7)) is the preferred
 delivery mechanism for persistently running applications. Existing \fBinit.d\fR
 scripts will, however, continue to be executed according to the rules in this
 manual page. The details of execution in relation to managed services are
-available in \fBsvc.startd\fR(1M).
+available in \fBsvc.startd\fR(8).
 .sp
 .LP
 On earlier Solaris releases, a script named with a suffix of '.sh' would be
 sourced, allowing scripts to modify the environment of other scripts executed
 later. This behavior is no longer supported; for altering the environment in
-which services are run, see the \fBsetenv\fR subcommand in \fBsvccfg\fR(1M).
+which services are run, see the \fBsetenv\fR subcommand in \fBsvccfg\fR(8).

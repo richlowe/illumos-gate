@@ -17,9 +17,9 @@ audit_binfile \- generation of audit logs
 .LP
 The \fBaudit_binfile\fR plugin module for audit,
 \fB/usr/lib/security/audit_binfile.so\fR, writes binary audit data to files as
-specified in the plugin's attributes configured by \fBauditconfig\fR(1M); it
-is the default plugin for the audit daemon \fBauditd\fR(1M). Its output is
-described by \fBaudit.log\fR(4).
+specified in the plugin's attributes configured by \fBauditconfig\fR(8); it
+is the default plugin for the audit daemon \fBauditd\fR(8). Its output is
+described by \fBaudit.log\fR(5).
 .SH OBJECT ATTRIBUTES
 .LP
 The \fBp_dir\fR attribute specifies a comma-separated list of
@@ -27,8 +27,8 @@ directories to be used for storing audit files.
 .sp
 .LP
 The \fBp_minfree\fR attribute specifies the percentage of free space required.
-If free space falls below this threshold, the audit daemon \fBauditd\fR(1M)
-invokes the shell script \fBaudit_warn\fR(1M). The default threshold is 0%.
+If free space falls below this threshold, the audit daemon \fBauditd\fR(8)
+invokes the shell script \fBaudit_warn\fR(8). The default threshold is 0%.
 .sp
 .LP
 The \fBp_fsize\fR attribute defines the maximum size in bytes that an audit
@@ -41,7 +41,7 @@ be within the range of [512,000, 2,147,483,647].
 .LP
 The following commands cause \fBaudit_binfile.so\fR to be activated, specify the
 directories for writing audit logs, and specify the percentage of required free
-space per directory. Note that using \fBauditconfig\fR(1M) only allows one
+space per directory. Note that using \fBauditconfig\fR(8) only allows one
 attribute to be set at a time.
 .sp
 .in +2
@@ -57,7 +57,7 @@ p_dir=/var/audit/jedgar/eggplant,\e
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -74,4 +74,4 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBauditd\fR(1M), \fBauditconfig\fR(1M), \fBaudit.log\fR(4), \fBattributes\fR(5)
+\fBauditd\fR(8), \fBauditconfig\fR(8), \fBaudit.log\fR(5), \fBattributes\fR(7)

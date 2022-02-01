@@ -30,12 +30,12 @@ are hidden until the file system is unmounted.
 .sp
 .LP
 The \fBufs\fR file system supports direct mounting of files containing the file
-system as well as block devices. See \fBmount\fR(1M) and \fBlofiadm\fR(1M).
+system as well as block devices. See \fBmount\fR(8) and \fBlofiadm\fR(8).
 .sp
 .LP
 If \fBmount\fR is invoked with \fIspecial\fR or \fImount_point\fR as the only
 arguments, \fBmount\fR will search \fB/etc/vfstab\fR to fill in the missing
-arguments, including the \fIspecific_options\fR. See \fBmount\fR(1M).
+arguments, including the \fIspecific_options\fR. See \fBmount\fR(8).
 .sp
 .LP
 If \fIspecial\fR and \fImount_point\fR are specified without any
@@ -48,7 +48,7 @@ rather than on top of the symbolic link itself.
 .SH OPTIONS
 .sp
 .LP
-See \fBmount\fR(1M) for the list of supported \fIgeneric_options\fR.
+See \fBmount\fR(8) for the list of supported \fIgeneric_options\fR.
 .sp
 .LP
 The following options are supported:
@@ -141,7 +141,7 @@ file system to be mounted has contained a large file (a file whose size is
 greater than or equal to 2 Gbyte) since the last invocation of \fBfsck\fR on
 the file system. The large file need not be present in the file system at the
 time of the mount for the mount to fail; it could have been created previously
-and destroyed. Invoking \fBfsck\fR (see \fBfsck_ufs\fR(1M)) on the file system
+and destroyed. Invoking \fBfsck\fR (see \fBfsck_ufs\fR(8)) on the file system
 will reset the file system state if no large files are present. After invoking
 \fBfsck\fR, a successful mount of the file system with \fBnolargefiles\fR
 specified indicates the absence of large files in the file system; an
@@ -300,7 +300,7 @@ Read-write with quotas turned on. Equivalent to \fBrw, quota\fR.
 .sp .6
 .RS 4n
 Allow or disallow the creation and manipulation of extended attributes. The
-default is \fBxattr\fR. See \fBfsattr\fR(5) for a description of extended
+default is \fBxattr\fR. See \fBfsattr\fR(7) for a description of extended
 attributes.
 .RE
 
@@ -362,10 +362,10 @@ list of default parameters for each file system
 .SH SEE ALSO
 .sp
 .LP
-\fBgetfacl\fR(1), \fBfsck\fR(1M), \fBfsck_ufs\fR(1M), \fBlofiadm\fR(1M),
-\fBmount\fR(1M), \fBmountall\fR(1M), \fBfcntl\fR(2), \fBmount\fR(2),
-\fBstat\fR(2), \fBmnttab\fR(4), \fBvfstab\fR(4), \fBattributes\fR(5),
-\fBfsattr\fR(5), \fBlargefile\fR(5)
+\fBgetfacl\fR(1), \fBfsck\fR(8), \fBfsck_ufs\fR(8), \fBlofiadm\fR(8),
+\fBmount\fR(8), \fBmountall\fR(8), \fBfcntl\fR(2), \fBmount\fR(2),
+\fBstat\fR(2), \fBmnttab\fR(5), \fBvfstab\fR(5), \fBattributes\fR(7),
+\fBfsattr\fR(7), \fBlargefile\fR(7)
 .SH NOTES
 .sp
 .LP

@@ -134,7 +134,7 @@ General system failure
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -153,4 +153,4 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBlibpicltree\fR(3PICLTREE), \fBptree_add_prop\fR(3PICLTREE),
-\fBattributes\fR(5)
+\fBattributes\fR(7)

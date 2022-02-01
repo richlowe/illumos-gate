@@ -200,7 +200,7 @@ Comparative features of the various allocation libraries can be found in the
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -219,7 +219,7 @@ MT-Level	Safe
 \fBbrk\fR(2), \fBgetrlimit\fR(2), \fBbsdmalloc\fR(3MALLOC), \fBdlopen\fR(3C),
 \fBmalloc\fR(3C), \fBmalloc\fR(3MALLOC), \fBmapmalloc\fR(3MALLOC),
 \fBsignal.h\fR(3HEAD), \fBumem_alloc\fR(3MALLOC), \fBwatchmalloc\fR(3MALLOC),
-\fBattributes\fR(5)
+\fBattributes\fR(7)
 .SH WARNINGS
 .sp
 .LP

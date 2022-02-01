@@ -192,7 +192,7 @@ Provider Library cannot be removed when it is in use by a DAT Consumer.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -211,4 +211,4 @@ MT-Level	Unsafe
 .sp
 .LP
 \fBdat_cno_free\fR(3DAT), \fBdat_evd_free\fR(3DAT), \fBdat_ia_open\fR(3DAT),
-\fBlibdat\fR(3LIB), \fBattributes\fR(5)
+\fBlibdat\fR(3LIB), \fBattributes\fR(7)

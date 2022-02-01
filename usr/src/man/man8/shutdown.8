@@ -171,13 +171,13 @@ controls process dispatching by \fBinit\fR
 .SH SEE ALSO
 .sp
 .LP
-\fBboot\fR(1M), \fBhalt\fR(1M), \fBinit\fR(1M), \fBkillall\fR(1M),
-\fBreboot\fR(1M), \fBufsdump\fR(1M), \fBinit.d\fR(4), \fBinittab\fR(4),
-\fBnologin\fR(4), \fBattributes\fR(5)
+\fBboot\fR(8), \fBhalt\fR(8), \fBinit\fR(8), \fBkillall\fR(8),
+\fBreboot\fR(8), \fBufsdump\fR(8), \fBinit.d\fR(5), \fBinittab\fR(5),
+\fBnologin\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
 When a system transitions down to the \fBS\fR or \fBs\fR state, the
-\fB/etc/nologin\fR file (see \fBnologin\fR(4)) is created. Upon subsequent
+\fB/etc/nologin\fR file (see \fBnologin\fR(5)) is created. Upon subsequent
 transition to state 2 (multi-user state), this file is removed by a script in
 the \fB/etc/rc2.d\fR directory.

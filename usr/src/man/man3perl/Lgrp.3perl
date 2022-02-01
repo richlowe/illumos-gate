@@ -1056,7 +1056,7 @@ always returns an empty list. The \fBlgrp_latency_cookie()\fR function is an
 alias for \fBlgrp_latency()\fR for version 1.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1078,4 +1078,4 @@ Interface Stability	Unstable
 \fBlgrp_latency_cookie\fR(3LGRP), \fBlgrp_mem_size\fR(3LGRP),
 \fBlgrp_nlgrps\fR(3LGRP), \fBlgrp_parents\fR(3LGRP),
 \fBlgrp_resources\fR(3LGRP), \fBlgrp_root\fR(3LGRP), \fBlgrp_version\fR(3LGRP),
-\fBlgrp_view\fR(3LGRP), \fBliblgrp\fR(3LIB), \fBattributes\fR(5)
+\fBlgrp_view\fR(3LGRP), \fBliblgrp\fR(3LIB), \fBattributes\fR(7)

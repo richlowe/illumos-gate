@@ -18,7 +18,7 @@ updaters \- configuration file for NIS updating
 The file \fB/var/yp/updaters\fR is a makefile (see \fBmake\fR(1S)) which is
 used for updating the Network Information Service (NIS) databases. Databases
 can only be updated in a secure network, that is, one that has a
-\fBpublickey\fR(4) database. Each entry in the file is a make target for a
+\fBpublickey\fR(5) database. Each entry in the file is a make target for a
 particular \fBNIS\fR database. For example, if there is an \fBNIS\fR database
 named \fBpasswd.byname\fR that can be updated, there should be a \fBmake\fR
 target named \fBpasswd.byname\fR in the \fBupdaters\fR file with the command to
@@ -104,7 +104,7 @@ The makefile used for updating the  \fBNIS\fR databases.
 .SH SEE ALSO
 .sp
 .LP
-\fBmake\fR(1S), \fBrpc.ypupdated\fR(1M), \fBpublickey\fR(4)
+\fBmake\fR(1S), \fBrpc.ypupdated\fR(8), \fBpublickey\fR(5)
 .SH NOTES
 .sp
 .LP

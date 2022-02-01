@@ -203,7 +203,7 @@ The system ran out of memory for internal data structures.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attribute:
+See \fBattributes\fR(7) for descriptions of the following attribute:
 .sp
 
 .sp
@@ -219,7 +219,7 @@ Architecture	x86, SPARC
 .SH SEE ALSO
 \fBread\fR(2), \fBgetsockopt\fR(3XNET), \fBsocket.h\fR(3HEAD),
 \fBaccept\fR(3SOCKET), \fBbind\fR(3SOCKET), \fBconnect\fR(3SOCKET),
-\fBsend\fR(3SOCKET), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBsend\fR(3SOCKET), \fBattributes\fR(7), \fBstandards\fR(7)
 .sp
 .LP
 \fIInfiniband Architecture Specification Vol 1- Annex 4\fR \(em November, 2002

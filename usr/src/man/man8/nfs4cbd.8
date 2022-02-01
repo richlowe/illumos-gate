@@ -25,13 +25,13 @@ client.
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBmount_nfs\fR(1M), \fBsvcadm\fR(1M), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBmount_nfs\fR(8), \fBsvcadm\fR(8), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
 The \fBnfs4cbd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -43,12 +43,12 @@ svc:/network/nfs/cbd
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP
-If it is disabled, it will be enabled by \fBmount_nfs\fR(1M) and
-\fBautomountd\fR(1M) on the first NFSv4 mount, unless its
+If it is disabled, it will be enabled by \fBmount_nfs\fR(8) and
+\fBautomountd\fR(8) on the first NFSv4 mount, unless its
 \fBapplication/auto_enable\fR property is set to \fBfalse\fR.
 .sp
 .LP

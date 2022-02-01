@@ -31,8 +31,8 @@ policy.
 .LP
 \fBpam_ldap\fR must be used in conjunction with the modules that support the
 UNIX authentication, password, and account management, which are
-\fBpam_authtok_get\fR(5), \fBpam_passwd_auth\fR(5), \fBpam_unix_account\fR(5),
-and \fBpam_unix_auth\fR(5). \fBpam_ldap\fR is designed to be stacked directly
+\fBpam_authtok_get\fR(7), \fBpam_passwd_auth\fR(7), \fBpam_unix_account\fR(7),
+and \fBpam_unix_auth\fR(7). \fBpam_ldap\fR is designed to be stacked directly
 below these modules. If other modules are designed to be stacked in this
 manner, the modules can be stacked below the \fBpam_ldap\fR module. The
 Examples section shows how the UNIX modules are stacked with \fBpam_ldap\fR.
@@ -51,7 +51,7 @@ authenticated. See NOTES for information on password prompting.
 .sp
 .LP
 The authentication method used is either defined in the client profile , or the
-authentication method is configured by using the \fBldapclient\fR(1M) command.
+authentication method is configured by using the \fBldapclient\fR(8) command.
 To determine the authentication method to use, this module first attempts to
 use the authentication method that is defined, for service \fBpam_ldap\fR, for
 example, \fBserviceAuthenticationMethod:pam_ldap:sasl/DIGEST-MD5\fR. If no
@@ -119,9 +119,9 @@ presented here.
 .SS "LDAP Password Management Module"
 .LP
 LDAP password management is no longer supported by \fBpam_ldap\fR. Use
-\fBpam_authtok_store\fR(5) instead of \fBpam_ldap\fR for password change.
-\fBpam_authtok_store\fR(5) handles both the local and LDAP accounts and updates
-the passwords in all the repositories configured by \fBnsswitch.conf\fR(4).
+\fBpam_authtok_store\fR(7) instead of \fBpam_ldap\fR for password change.
+\fBpam_authtok_store\fR(7) handles both the local and LDAP accounts and updates
+the passwords in all the repositories configured by \fBnsswitch.conf\fR(5).
 .SH ERRORS
 .LP
 The authentication service returns the following error codes:
@@ -349,7 +349,7 @@ other password required   pam_authtok_store.so.1 server_policy
 .ad
 .RS 30n
 The LDAP configuration files of the client. Do not manually modify these files,
-as these files might not be human readable. Use \fBldapclient\fR(1M) to update
+as these files might not be human readable. Use \fBldapclient\fR(8) to update
 these files.
 .RE
 
@@ -364,7 +364,7 @@ PAM configuration file.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -381,14 +381,14 @@ MT-Level	MT-Safe with exceptions
 
 .SH SEE ALSO
 .LP
-\fBldap\fR(1), \fBidsconfig\fR(1M), \fBldap_cachemgr\fR(1M),
-\fBldapclient\fR(1M), \fBlibpam\fR(3LIB), \fBpam\fR(3PAM),
+\fBldap\fR(1), \fBidsconfig\fR(8), \fBldap_cachemgr\fR(8),
+\fBldapclient\fR(8), \fBlibpam\fR(3LIB), \fBpam\fR(3PAM),
 \fBpam_sm_acct_mgmt\fR(3PAM), \fBpam_sm_authenticate\fR(3PAM),
 \fBpam_sm_chauthtok\fR(3PAM), \fBpam_sm_close_session\fR(3PAM),
 \fBpam_sm_open_session\fR(3PAM), \fBpam_sm_setcred\fR(3PAM), \fBsyslog\fR(3C),
-\fBpam.conf\fR(4), \fBattributes\fR(5), \fBpam_authtok_check\fR(5),
-\fBpam_authtok_get\fR(5), \fBpam_authtok_store\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5)
+\fBpam.conf\fR(5), \fBattributes\fR(7), \fBpam_authtok_check\fR(7),
+\fBpam_authtok_get\fR(7), \fBpam_authtok_store\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7)
 .SH NOTES
 .LP
 The interfaces in \fBlibpam\fR(3LIB) are MT-Safe only if each thread within the
@@ -397,10 +397,10 @@ multi-threaded application uses its own \fBPAM\fR handle.
 .LP
 The previously supported \fBuse_first_pass\fR and \fBtry_first_pass\fR options
 are obsolete in this version, are no longer needed, can safely be removed from
-\fBpam.conf\fR(4), and are silently ignored. They might be removed in a future
+\fBpam.conf\fR(5), and are silently ignored. They might be removed in a future
 release. Password prompting must be provided for by stacking
-\fBpam_authtok_get\fR(5) before \fBpam_ldap\fR in the \fBauth\fR and
-\fBpassword\fR module stacks and \fBpam_passwd_auth\fR(5) in the \fBpasswd\fR
+\fBpam_authtok_get\fR(7) before \fBpam_ldap\fR in the \fBauth\fR and
+\fBpassword\fR module stacks and \fBpam_passwd_auth\fR(7) in the \fBpasswd\fR
 service \fBauth\fR stack (as described in the EXAMPLES section). The previously
 supported password update function is replaced in this release by the
 previously recommended use of \fBpam_authtok_store\fR with the

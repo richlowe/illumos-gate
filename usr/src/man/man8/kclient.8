@@ -22,7 +22,7 @@ utility to:
 .ie t \(bu
 .el o
 Configure a machine as a Kerberos client for a specified realm and for KDC by
-setting up \fBkrb5.conf\fR(4).
+setting up \fBkrb5.conf\fR(5).
 .RE
 .RS +4
 .TP
@@ -85,7 +85,7 @@ servers that are non-Solaris and non-MS Active Directory servers.
 .TP
 .ie t \(bu
 .el o
-Configure \fBpam.conf\fR(4) to use Kerberos authentication for specified
+Configure \fBpam.conf\fR(5) to use Kerberos authentication for specified
 services.
 .RE
 .RS +4
@@ -127,7 +127,7 @@ local host's \fBkeytab\fR.
 .sp
 .LP
 The \fBkclient\fR utility assumes that the local host has been setup for DNS
-and requires the presence of a valid \fBresolv.conf\fR(4). Also, \fBkclient\fR
+and requires the presence of a valid \fBresolv.conf\fR(5). Also, \fBkclient\fR
 can fail if the localhost time is not synchronized with that of the KDC. For
 Kerberos to function the localhost time must be within five minutes of that of
 the KDC. It is advised that both systems run some form of time synchronization
@@ -143,7 +143,7 @@ The non-interactive mode supports the following options:
 .sp .6
 .RS 4n
 Set up the machine for kerberized NFS. This involves making changes to
-\fBkrb5*\fR security flavors in \fBnfssec.conf\fR(4). This option will also add
+\fBkrb5*\fR security flavors in \fBnfssec.conf\fR(5). This option will also add
 \fBnfs/fqdn\fR and \fBroot/fqdn\fR entries to the local host's \fBkeytab\fR
 file if the \fB-K\fR option has not been specified.
 .RE
@@ -243,7 +243,7 @@ with the server if the \fBms_ad\fR option is specified.
 .ad
 .sp .6
 .RS 4n
-Specifies the pathname to the \fBkrb5.conf\fR(4) master file, to be copied over
+Specifies the pathname to the \fBkrb5.conf\fR(5) master file, to be copied over
 to the local host. The path specified normally points to a master copy on a
 remote host and brought over to the local host by means of NFS.
 .RE
@@ -256,7 +256,7 @@ remote host and brought over to the local host by means of NFS.
 .sp .6
 .RS 4n
 Specifies the DNS lookup option to be used and specified in the
-\fBkrb5.conf\fR(4) file. Valid \fIdnsarg\fR entries are: \fBnone\fR,
+\fBkrb5.conf\fR(5) file. Valid \fIdnsarg\fR entries are: \fBnone\fR,
 \fBdns_lookup_kdc\fR, \fBdns_lookup_realm\fR and \fBdns_fallback\fR. Any other
 entry is considered invalid. The latter three \fIdnsarg\fR values assume the
 same meaning as those described in \fBkrb5.conf\fR. \fBdns_lookup_kdc\fR
@@ -406,7 +406,7 @@ listed in the profile.
 .RS 4n
 Specifies that the PAM service names, listed in \fIpam_service\fR, are
 authenticated through Kerberos before any other type of authentication. Using
-this option updates \fBpam.conf\fR(4) to include \fBpam_krb5\fR(5) to existing
+this option updates \fBpam.conf\fR(5) to include \fBpam_krb5\fR(7) to existing
 authentication stacks for the specified service(s) in \fIpam_service\fR. An
 example of a possible \fIpam_service\fR value is: \fBdtlogin,sshd-kbdint\fR.
 .RE
@@ -447,7 +447,7 @@ and/or added to the local \fBkeytab\fR for multiple DNS domains, enter:
 Note that the \fBkrb5\fR administrative principal used by the administrator
 needs to have only \fBadd\fR, \fBinquire\fR, \fBchange-pwd\fR and \fBmodify\fR
 privileges (for the principals in the KDC database) in order for the
-\fBkclient\fR utility to run. A sample \fBkadm5.acl\fR(4) entry is:
+\fBkclient\fR utility to run. A sample \fBkadm5.acl\fR(5) entry is:
 
 .sp
 .in +2
@@ -563,7 +563,7 @@ DNS resolver configuration file.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -578,12 +578,12 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 \fBencrypt\fR(1), \fBksh93\fR(1), \fBldapdelete\fR(1), \fBldapmodify\fR(1),
-\fBldapsearch\fR(1), \fBdd\fR(1M), \fBsmbadm\fR(1M), \fBkadm5.acl\fR(4),
-\fBkrb5.conf\fR(4), \fBnfssec.conf\fR(4), \fBpam.conf\fR(4),
-\fBresolv.conf\fR(4), \fBattributes\fR(5), \fBpam_krb5\fR(5)
+\fBldapsearch\fR(1), \fBdd\fR(8), \fBsmbadm\fR(8), \fBkadm5.acl\fR(5),
+\fBkrb5.conf\fR(5), \fBnfssec.conf\fR(5), \fBpam.conf\fR(5),
+\fBresolv.conf\fR(5), \fBattributes\fR(7), \fBpam_krb5\fR(7)
 .SH NOTES
 \fBfqdn\fR stands for the Fully Qualified Domain Name of the local host. The
-\fBkclient\fR utility saves copies of both the \fBkrb5.conf\fR(4) and
-\fBnfssec.conf\fR(4) files to files with corresponding names and \fB\&.sav\fR
-extensions. The optional copy of the \fBkrb5.conf\fR(4) master file is neither
+\fBkclient\fR utility saves copies of both the \fBkrb5.conf\fR(5) and
+\fBnfssec.conf\fR(5) files to files with corresponding names and \fB\&.sav\fR
+extensions. The optional copy of the \fBkrb5.conf\fR(5) master file is neither
 encrypted nor integrity-protected and it takes place over regular NFS.

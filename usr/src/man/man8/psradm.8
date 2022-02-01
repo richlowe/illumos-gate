@@ -119,7 +119,7 @@ of the specified processors was in the faulted state. Set the specified
 processors to faulted, if no other transition option was specified. Forced
 transitions can only be made to \fBfaulted\fR, \fBspare\fR, or \fBoff-line\fR
 states. Administrators are encouraged to use the \fB-Q\fR option for
-\fBpbind\fR(1M) to find out which threads will be affected by forced a
+\fBpbind\fR(8) to find out which threads will be affected by forced a
 processor state transition.
 .RE
 
@@ -288,8 +288,8 @@ Records logging processor status changes
 
 .SH SEE ALSO
 .LP
-\fBpbind\fR(1M), \fBpsrinfo\fR(1M), \fBpsrset\fR(1M), \fBp_online\fR(2),
-\fBprocessor_bind\fR(2), \fBattributes\fR(5)
+\fBpbind\fR(8), \fBpsrinfo\fR(8), \fBpsrset\fR(8), \fBp_online\fR(2),
+\fBprocessor_bind\fR(2), \fBattributes\fR(7)
 .SH DIAGNOSTICS
 .ne 2
 .na

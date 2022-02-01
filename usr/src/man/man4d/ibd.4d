@@ -20,7 +20,7 @@ provides IPoIB service for all IBA ports present in the system.
 .LP
 The \fBibd\fR driver is a multi-threaded, loadable, clonable, STREAMS hardware
 driver supporting the connectionless Data Link Provider Interface,
-\fBdlpi\fR(7P)). The \fBibd\fR driver provides basic support for the IBA
+\fBdlpi\fR(4P)). The \fBibd\fR driver provides basic support for the IBA
 Unreliable Datagram Queue Pair hardware. Functions include QP initialization,
 frame transmit and receive, multicast and promiscuous mode support, and
 statistics reporting.
@@ -33,7 +33,7 @@ Use the cloning, character-special device \fB/dev/ibd\fR to access all
 The \fBibd\fR driver is dependent on GLD, a loadable kernel module that
 provides the \fBibd\fR driver with the DLPI and STREAMS functionality required
 of a LAN driver. Except as noted in the Application Programming Interface
-section of this manpage, see \fBgld\fR(7D) for more details on the primitives
+section of this manpage, see \fBgld\fR(4D) for more details on the primitives
 supported by the driver. The GLD module is located at
 \fB/kernel/misc/sparcv9/gld\fR on 64 bit systems and at \fB/kernel/misc/gld\fR
 on 32 bit systems.
@@ -108,7 +108,7 @@ versions, the same general information will be provided.
 .LP
 While joining IBA multicast groups corresponding to IP multicast groups as part
 of multicast promiscuous operations as required by IP multicast routers, or as
-part of running \fBsnoop\fR(1M), it is possible that joins to some multicast
+part of running \fBsnoop\fR(8), it is possible that joins to some multicast
 groups can fail due to inherent resource constraints in the IBA components. In
 such cases, warning message similar to the following appear in the system log,
 indicating the interface on which the failure occurred:
@@ -160,7 +160,7 @@ NOTICE: ibd0: Failure on port up to rejoin multicast gid
 .sp
 .LP
 If the corresponding HCA port is in the unavailable state defined above when
-initializing an ibd interface using \fBifconfig\fR(1M), a message is emitted by
+initializing an ibd interface using \fBifconfig\fR(8), a message is emitted by
 the driver:
 .sp
 .in +2
@@ -185,7 +185,7 @@ maximum MTU 2048
 
 .sp
 .LP
-In all cases of these reported problems when running \fBifconfig\fR(1M), it
+In all cases of these reported problems when running \fBifconfig\fR(8), it
 should be checked that IBA cabling is intact, an SM is running on the fabric,
 and the broadcast-GID with appropriate properties has been created in the IBA
 partition.
@@ -193,7 +193,7 @@ partition.
 .LP
 The IPoIB service comes preconfigured on all HCA ports in the system. To turn
 the service off, or back on after turning it off, refer to documentation in
-\fBcfgadm_ib(1M)\fR.
+\fBcfgadm_ib(8)\fR.
 .SH FILES
 .ne 2
 .na
@@ -241,13 +241,13 @@ configuration file to start IPoIB service
 
 .SH SEE ALSO
 .LP
-\fBcfgadm\fR(1M), \fBcfgadm_ib(1M)\fR, \fBifconfig\fR(1M), \fBsyslogd\fR(1M),
-\fBgld\fR(7D), \fBib\fR(7D), \fBkstat\fR(7D), \fBstreamio\fR(7I),
-\fBdlpi\fR(7P), \fBattributes\fR(5), \fBattach\fR(9E)
+\fBcfgadm\fR(8), \fBcfgadm_ib(8)\fR, \fBifconfig\fR(8), \fBsyslogd\fR(8),
+\fBgld\fR(4D), \fBib\fR(4D), \fBkstat\fR(4D), \fBstreamio\fR(4I),
+\fBdlpi\fR(4P), \fBattributes\fR(7), \fBattach\fR(9E)
 .SH NOTES
 .LP
 IBD is a GLD-based driver and provides the statistics described by
-\fBgld\fR(7D). Note that valid received packets not accepted by any stream
+\fBgld\fR(4D). Note that valid received packets not accepted by any stream
 (long) will increase when IBD transmits broadcast IP packets. This happens
 because the infiniband hardware copies and loops back the transmitted broadcast
 packets to the source. These packets are discarded by GLD and are recorded

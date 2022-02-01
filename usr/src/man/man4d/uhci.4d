@@ -57,7 +57,7 @@ Driver configuration file.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -72,8 +72,8 @@ Architecture	SPARC or  x86  PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBattributes\fR(5), \fBehci\fR(7D), \fBhubd\fR(7D), \fBohci\fR(7D),
-\fBusba\fR(7D)
+\fBattributes\fR(7), \fBehci\fR(4D), \fBhubd\fR(4D), \fBohci\fR(4D),
+\fBusba\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR
@@ -89,7 +89,7 @@ Architecture	SPARC or  x86  PCI-based systems
 .SH DIAGNOSTICS
 .LP
 All host controller errors are passed to the client drivers. Root errors are
-documented in \fBhubd\fR(7D).
+documented in \fBhubd\fR(4D).
 .sp
 .LP
 In addition to being logged, the following messages may appear on the system

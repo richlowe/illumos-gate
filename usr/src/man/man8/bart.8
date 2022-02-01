@@ -28,12 +28,12 @@ bart \- basic audit reporting tool
 .SH DESCRIPTION
 .sp
 .LP
-\fBbart\fR(1M) is a tool that performs a file-level check of the software
+\fBbart\fR(8) is a tool that performs a file-level check of the software
 contents of a system.
 .sp
 .LP
 You can also specify the files to track and the types of discrepancies to flag
-by means of a rules file, \fBbart_rules\fR. See \fBbart_rules\fR(4).
+by means of a rules file, \fBbart_rules\fR. See \fBbart_rules\fR(5).
 .sp
 .LP
 The \fBbart\fR utility performs two basic functions:
@@ -45,12 +45,12 @@ The \fBbart\fR utility performs two basic functions:
 .RS 16n
 The manifest generator tool takes a file-level \fBsnapshot\fR of a system. The
 output is a catalog of file attributes referred to as a \fBmanifest\fR. See
-\fBbart_manifest\fR(4).
+\fBbart_manifest\fR(5).
 .sp
 You can specify that the list of files be cataloged in three ways. Use \fBbart
 create\fR with no options, specify the files by name on the command line, or
 create a rules file with directives that specify which the files to monitor.
-See \fBbart_rules\fR(4).
+See \fBbart_rules\fR(5).
 .sp
 By default, the manifest generator catalogs all attributes of all files in the
 root (\fB/\fR) file system. File systems mounted on the root file system are
@@ -109,7 +109,7 @@ Specify the file attributes to be ignored globally. Specify attributes as a
 comma separated list.
 .sp
 This option produces the same behavior as supplying the file attributes to a
-global \fBIGNORE\fR keyword in the rules file. See \fBbart_rules\fR(4).
+global \fBIGNORE\fR keyword in the rules file. See \fBbart_rules\fR(5).
 .RE
 
 .sp
@@ -150,7 +150,7 @@ for programmatic parsing. The output is not localized.
 .RS 21n
 Use \fIrules_file\fR to specify which files and directories to catalog, and to
 define which file attribute discrepancies to flag. If \fIrules_file\fR is
-\fB-\fR, then the rules are read from standard input. See \fBbart_rules\fR(4)
+\fB-\fR, then the rules are read from standard input. See \fBbart_rules\fR(5)
 for the definition of the syntax.
 .RE
 
@@ -169,7 +169,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -207,7 +207,7 @@ output, and write error messages to standard error.
 .sp
 .LP
 The \fBbart create\fR command generates a system manifest. See
-\fBbart_manifest\fR(4).
+\fBbart_manifest\fR(5).
 .sp
 .LP
 When the \fBbart compare\fR command compares two system manifests, it generates
@@ -232,7 +232,7 @@ that is suitable for programmatic manipulation.
 .RS 13n
 Name of the file that differs between \fIcontrol-manifest\fR and
 \fItest-manifest\fR. For file names that contain embedded whitespace or newline
-characters, see \fBbart_manifest\fR(4).
+characters, see \fBbart_manifest\fR(5).
 .RE
 
 .sp
@@ -417,7 +417,7 @@ Same as \fIfilename\fR in the default format.
 .RS 4n
 A description of the file attributes that differ between the control and test
 manifests for each file. Each entry includes the attribute value from each
-manifest. See \fBbart_manifest\fR(4) for the definition of the attributes.
+manifest. See \fBbart_manifest\fR(5) for the definition of the attributes.
 .RE
 
 .sp
@@ -612,7 +612,7 @@ bart compare -r rules manifest1 manifest2
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -628,8 +628,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBcksum\fR(1), \fBdigest\fR(1), \fBfind\fR(1), \fBbart_manifest\fR(4),
-\fBbart_rules\fR(4), \fBattributes\fR(5)
+\fBcksum\fR(1), \fBdigest\fR(1), \fBfind\fR(1), \fBbart_manifest\fR(5),
+\fBbart_rules\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

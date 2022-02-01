@@ -51,7 +51,7 @@ The global scheduling priority associated with this priority level. The mapping
 between time-sharing priority levels and global scheduling priorities is
 determined at boot time by the system configuration. \fBts_globpri\fR is the
 only member of the \fBts_dptbl\fR which cannot be changed with
-\fBdispadmin\fR(1M).
+\fBdispadmin\fR(8).
 .RE
 
 .sp
@@ -126,7 +126,7 @@ scheduler by reconfiguring the \fBts_dptbl\fR. Since processes in the
 time-sharing and inter-active scheduling classes share the same dispatch
 parameter table (\fBts_dptbl\fR), changes to this table will affect both
 scheduling classes. There are two methods available for doing this: reconfigure
-with a loadable module at boot-time or by using \fBdispadmin\fR(1M) at
+with a loadable module at boot-time or by using \fBdispadmin\fR(8) at
 run-time.
 .SS "ts_dptbl Loadable Module"
 The \fBts_dptbl\fR can be reconfigured with a loadable module which contains a
@@ -139,7 +139,7 @@ relevant procedure and source code is described in the \fBREPLACING THE
 TS_DPTBL LOADABLE MODULE\fR section.
 .SS "dispadmin Configuration File"
 With the exception of \fBts_globpri\fR all of the members of the \fBts_dptbl\fR
-can be examined and modified on a running system using the \fBdispadmin\fR(1M)
+can be examined and modified on a running system using the \fBdispadmin\fR(8)
 command. Invoking \fBdispadmin\fR for the time-sharing or inter-active class
 allows the administrator to retrieve the current \fBts_dptbl\fR configuration
 from the kernel's in-core table, or overwrite the in-core table with values
@@ -259,7 +259,7 @@ Replace the current \fBTS_DPTBL\fR in \fB/kernel/sched\fR.
 .TP
 5.
 You will have to make changes in the \fB/etc/system\fR file to reflect the
-changes to the sizes of the tables. See \fBsystem\fR(4). The two variables
+changes to the sizes of the tables. See \fBsystem\fR(5). The two variables
 affected are \fBts_maxupri\fR and \fBts_maxkmdpri\fR. The syntax for setting
 these is as follows:
 .sp
@@ -430,7 +430,7 @@ ts_getmaxumdpri()
 .in -2
 
 .SH SEE ALSO
-\fBpriocntl\fR(1), \fBdispadmin\fR(1M), \fBpriocntl\fR(2), \fBsystem\fR(4)
+\fBpriocntl\fR(1), \fBdispadmin\fR(8), \fBpriocntl\fR(2), \fBsystem\fR(5)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

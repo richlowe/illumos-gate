@@ -40,7 +40,7 @@ commonly found on mobile computers.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -56,4 +56,4 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBsda\fR(7D)
+\fBattributes\fR(7), \fBsda\fR(4D)

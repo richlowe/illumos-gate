@@ -21,10 +21,10 @@ devfsadm, devfsadmd \- administration command for /dev
 .SH DESCRIPTION
 .sp
 .LP
-\fBdevfsadm\fR(1M) maintains the \fB/dev\fR namespace. It replaces the previous
-suite of \fBdevfs\fR administration tools including \fBdrvconfig\fR(1M),
-\fBdisks\fR(1M), \fBtapes\fR(1M), \fBports\fR(1M), \fBaudlinks\fR(1M), and
-\fBdevlinks\fR(1M).
+\fBdevfsadm\fR(8) maintains the \fB/dev\fR namespace. It replaces the previous
+suite of \fBdevfs\fR administration tools including \fBdrvconfig\fR(8),
+\fBdisks\fR(8), \fBtapes\fR(8), \fBports\fR(8), \fBaudlinks\fR(8), and
+\fBdevlinks\fR(8).
 .sp
 .LP
 The default operation is to attempt to load every driver in the system and
@@ -33,19 +33,19 @@ links to device nodes in \fB/dev\fR and \fB/devices\fR and loads the device
 policy.
 .sp
 .LP
-\fBdevfsadmd\fR(1M) is the daemon version of \fBdevfsadm\fR(1M). The daemon is
+\fBdevfsadmd\fR(8) is the daemon version of \fBdevfsadm\fR(8). The daemon is
 started during system startup and is responsible for handling both
 reconfiguration boot processing and updating \fB/dev\fR and \fB/devices\fR in
 response to dynamic reconfiguration event notifications from the kernel.
 .sp
 .LP
-For compatibility purposes, \fBdrvconfig\fR(1M), \fBdisks\fR(1M),
-\fBtapes\fR(1M), \fBports\fR(1M), \fBaudlinks\fR(1M), and \fBdevlinks\fR(1M)
+For compatibility purposes, \fBdrvconfig\fR(8), \fBdisks\fR(8),
+\fBtapes\fR(8), \fBports\fR(8), \fBaudlinks\fR(8), and \fBdevlinks\fR(8)
 are implemented as links to \fBdevfsadm\fR.
 .sp
 .LP
 In addition to managing \fB/dev\fR, \fBdevfsadm\fR also maintains the
-\fBpath_to_inst\fR(4) database.
+\fBpath_to_inst\fR(5) database.
 .SH OPTIONS
 .sp
 .LP
@@ -227,10 +227,10 @@ additional device privileges
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBadd_drv\fR(1M), \fBmodinfo\fR(1M), \fBmodload\fR(1M),
-\fBmodunload\fR(1M), \fBrem_drv\fR(1M), \fBsvcadm\fR(1M), \fBtapes\fR(1M),
-\fBpath_to_inst\fR(4), \fBattributes\fR(5), \fBprivileges\fR(5), \fBsmf\fR(5),
-\fBdevfs\fR(7FS)
+\fBsvcs\fR(1), \fBadd_drv\fR(8), \fBmodinfo\fR(8), \fBmodload\fR(8),
+\fBmodunload\fR(8), \fBrem_drv\fR(8), \fBsvcadm\fR(8), \fBtapes\fR(8),
+\fBpath_to_inst\fR(5), \fBattributes\fR(7), \fBprivileges\fR(7), \fBsmf\fR(7),
+\fBdevfs\fR(4FS)
 .SH NOTES
 .sp
 .LP
@@ -241,11 +241,11 @@ documentation that lacks this notice constitutes an \fBAPI\fR.
 .sp
 .LP
 \fBdevfsadm\fR no longer manages the \fB/devices\fR name space. See
-\fBdevfs\fR(7FS).
+\fBdevfs\fR(4FS).
 .sp
 .LP
 The device configuration service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier, and can be used to start
+\fBsmf\fR(7), under the service identifier, and can be used to start
 \fBdevfsadm\fR during reconfiguration boot by:
 .sp
 .in +2
@@ -269,5 +269,5 @@ svc:/system/sysevent:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

@@ -41,8 +41,8 @@ of the \fBPHY\fR.
 .sp
 .LP
 You can set the capabilities advertised by the \fBatge\fR controlled device
-using \fBdladm\fR(1M). The driver supports only those parameters which begin
-with en (enabled) in the parameters listed by the command \fBdladm\fR(1M). Each
+using \fBdladm\fR(8). The driver supports only those parameters which begin
+with en (enabled) in the parameters listed by the command \fBdladm\fR(8). Each
 of these boolean parameters determines if the device advertises that mode of
 operation when the hardware supports it.
 .SH FILES
@@ -76,7 +76,7 @@ Special character device
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -92,8 +92,8 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBndd\fR(1M), \fBnetstat\fR(1M), \fBdriver.conf\fR(4),
-\fBattributes\fR(5), \fBieee802.3\fR(5), \fBdlpi\fR(7P), \fBstreamio\fR(7I)
+\fBdladm\fR(8), \fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5),
+\fBattributes\fR(7), \fBieee802.3\fR(7), \fBdlpi\fR(4P), \fBstreamio\fR(4I)
 .sp
 .LP
 \fIWriting Device Drivers\fR

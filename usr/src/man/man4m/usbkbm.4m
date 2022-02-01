@@ -28,13 +28,13 @@ translation and reading events from the keyboard are in \fB<sys/kbio.h>\fR and
 .sp
 .LP
 The \fBusbkbm\fR \fBSTREAMS\fR module adheres to the interfaces exported by
-\fBkb\fR(7M). Refer to the \fBDESCRIPTION\fR section of \fBkb\fR(7M) for a
+\fBkb\fR(4M). Refer to the \fBDESCRIPTION\fR section of \fBkb\fR(4M) for a
 discussion of the keyboard translation modes and the \fBIOCTL\fR section for
 the supported \fBioctl\fR(2) requests.
 .SS "IOCTLS"
 .LP
 \fBUSB\fR Keyboard \fBusbkbm\fR returns different values for the following
-ioctls than \fBkb\fR(7M):
+ioctls than \fBkb\fR(4M):
 .sp
 .ne 2
 .na
@@ -85,7 +85,7 @@ of the \fBHID\fR 1.0 specifications.
 .ad
 .sp .6
 .RS 4n
-The \fBkb\fR(7M) indicates that inappropriate commands for particular keyboards
+The \fBkb\fR(4M) indicates that inappropriate commands for particular keyboards
 are ignored. Because clicking is not supported on the \fBUSB\fR keyboard,
 \fBusbkbm\fR ignores this command
 .RE
@@ -97,7 +97,7 @@ are ignored. Because clicking is not supported on the \fBUSB\fR keyboard,
 .ad
 .sp .6
 .RS 4n
-Set keyboard LEDs. Same as \fBkb\fR(7M).
+Set keyboard LEDs. Same as \fBkb\fR(4M).
 .RE
 
 .sp
@@ -157,7 +157,7 @@ SPARC 64-bit ELF kernel STREAMS module
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -173,8 +173,8 @@ Architecture	PCI-based  systems
 .SH SEE ALSO
 .LP
 \fBdumpkeys\fR(1), \fBkbd\fR(1), \fBloadkeys\fR(1), \fBioctl\fR(2),
-\fBkeytables\fR(4), \fBattributes\fR(5), \fBhid\fR(7D), \fBusba\fR(7D),
-\fBvirtualkm\fR(7D), \fBkb\fR(7M)
+\fBkeytables\fR(5), \fBattributes\fR(7), \fBhid\fR(4D), \fBusba\fR(4D),
+\fBvirtualkm\fR(4D), \fBkb\fR(4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

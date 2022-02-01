@@ -33,7 +33,7 @@ MultiMediaCard (MMC) slot and card device drivers.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -49,11 +49,11 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBsdhost\fR(7D)
+\fBattributes\fR(7), \fBsdhost\fR(4D)
 .SH NOTES
 .sp
 .LP
 The \fBsda\fR module provides support only for SD/MMC devices that are
 connected via a supported slot driver. Notably, slots that are on USB busses
 are normally treated as USB mass storage devices and are serviced by the
-\fBscsa2usb\fR(7D) driver.
+\fBscsa2usb\fR(4D) driver.

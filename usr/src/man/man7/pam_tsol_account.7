@@ -25,13 +25,13 @@ upon demand. Its path is specified in the \fBPAM\fR configuration file.
 \fBpam_tsol_account.so.1\fR contains a function to perform account management,
 \fBpam_sm_acct_mgmt()\fR. The function checks for the allowed label range for
 the user.  The allowable label range is set by the defaults in the
-\fBlabel_encodings\fR(4) file. These defaults can be overridden by entries in
-the \fBuser_attr\fR(4) database.
+\fBlabel_encodings\fR(5) file. These defaults can be overridden by entries in
+the \fBuser_attr\fR(5) database.
 .sp
 .LP
 By default, this module requires that remote hosts connecting to the  global
 zone must have a CIPSO host type. To disable this policy, add the
-\fBallow_unlabeled\fR keyword as an option to the entry in \fBpam.conf\fR(4),
+\fBallow_unlabeled\fR keyword as an option to the entry in \fBpam.conf\fR(5),
 as in:
 .sp
 .in +2
@@ -101,7 +101,7 @@ information on error-related return values, see the \fBpam\fR(3PAM) man page.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for description of the following attributes:
+See \fBattributes\fR(7) for description of the following attributes:
 .sp
 
 .sp
@@ -125,8 +125,8 @@ multi-threaded application uses its own PAM handle.
 .LP
 \fBkeylogin\fR(1), \fBlibpam\fR(3LIB), \fBpam\fR(3PAM),
 \fBpam_sm_acct_mgmt\fR(3PAM), \fBpam_start\fR(3PAM), \fBsyslog\fR(3C),
-\fBlabel_encodings\fR(4), \fBpam.conf\fR(4), \fBuser_attr\fR(4),
-\fBattributes\fR(5)
+\fBlabel_encodings\fR(5), \fBpam.conf\fR(5), \fBuser_attr\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 Chapter 17, \fIUsing PAM,\fR in \fISystem Administration Guide: Security

@@ -16,7 +16,7 @@ statd \- network status monitor
 .sp
 .LP
 \fBstatd\fR is an intermediate version of the status monitor. It interacts with
-\fBlockd\fR(1M) to provide the crash and recovery functions for the locking
+\fBlockd\fR(8) to provide the crash and recovery functions for the locking
 services on NFS. \fBstatd\fR keeps track of the clients with processes which
 hold locks on a server. When the server reboots after a crash, \fBstatd\fR
 sends a message to the \fBstatd\fR on each client indicating that the server
@@ -32,8 +32,8 @@ rebooting client should be released, allowing other processes to lock those
 files.
 .sp
 .LP
-\fBlockd\fR is started by \fBautomountd\fR(1M), \fBmount_nfs\fR(1M), and
-\fBshare\fR(1M) if NFS automounts are needed.
+\fBlockd\fR is started by \fBautomountd\fR(8), \fBmount_nfs\fR(8), and
+\fBshare\fR(8) if NFS automounts are needed.
 .SH FILES
 .sp
 .ne 2
@@ -79,8 +79,8 @@ statd daemon.
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBautomountd\fR(1M), \fBlockd\fR(1M), \fBmount_nfs\fR(1M),
-\fBshare\fR(1M), \fBsvcadm\fR(1M), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBautomountd\fR(8), \fBlockd\fR(8), \fBmount_nfs\fR(8),
+\fBshare\fR(8), \fBsvcadm\fR(8), \fBattributes\fR(7), \fBsmf\fR(7)
 .sp
 .LP
 \fI\fR
@@ -91,7 +91,7 @@ The crash of a server is only detected upon its recovery.
 .sp
 .LP
 The \fBstatd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -103,10 +103,10 @@ svc:/network/nfs/status
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP
-If it is disabled, it will be enabled by \fBmount_nfs\fR(1M),
-\fBshare_nfs\fR(1M), and \fBautomountd\fR(1M) unless  its
+If it is disabled, it will be enabled by \fBmount_nfs\fR(8),
+\fBshare_nfs\fR(8), and \fBautomountd\fR(8) unless  its
 \fBapplication/auto_enable\fR property is set to \fBfalse\fR.

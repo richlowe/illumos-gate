@@ -29,8 +29,8 @@ Supported \fI802.11g\fR data rates (Mbits/sec.) are 1, 2, 5.5, 11, 6, 9, 12,
  The \fBath\fR driver supports only BSS networks (also known  as "ap" or
 "infrastructure" networks) and the "open" (or "opensystem") authentication
 type. Only  WEP encryption is currently supported. Configuration and
-administration can be performed  through  the  \fBdladm\fR(1M) or
-\fBwificonfig\fR(1M) utilities.
+administration can be performed  through  the  \fBdladm\fR(8) or
+\fBwificonfig\fR(8) utilities.
 .SH FILES
 .sp
 .ne 2
@@ -62,7 +62,7 @@ Special character device.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -78,7 +78,7 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBwificonfig\fR(1M), \fBgld\fR(7D)
+\fBdladm\fR(8), \fBwificonfig\fR(8), \fBgld\fR(4D)
 .sp
 .LP
 \fIANSI/IEEE Std 802.11\fR- Standard for Wireless LAN Technology, 1999.

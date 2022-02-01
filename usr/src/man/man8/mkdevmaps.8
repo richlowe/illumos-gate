@@ -15,11 +15,11 @@ mkdevmaps \- make device_maps entries
 .SH DESCRIPTION
 .LP
 The \fBmkdevmaps\fR command writes to standard out a set of
-\fBdevice_maps\fR(4) entries describing the system's frame buffer, audio, and
+\fBdevice_maps\fR(5) entries describing the system's frame buffer, audio, and
 removable media devices.
 .sp
 .LP
-The \fBmkdevmaps\fR command is used by the \fBinit.d\fR(4) scripts to create or
+The \fBmkdevmaps\fR command is used by the \fBinit.d\fR(5) scripts to create or
 update the \fB/etc/security/device_maps\fR file.
 .sp
 .LP
@@ -39,7 +39,7 @@ frame buffer    /dev/fb
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -54,7 +54,7 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 .LP
-\fBallocate\fR(1), \fBattributes\fR(5)
+\fBallocate\fR(1), \fBattributes\fR(7)
 .SH NOTES
 .LP
 \fBmkdevmaps\fR might not be supported in a future release of the Solaris

@@ -289,14 +289,14 @@ listed in the table, a single asterisk (\fB*\fR), or a regular expression. If
 is used to generate a filter-specific option. The  \fIreplacement\fR is what
 will be used as the option.
 .sp
-Regular expressions are the same as those found on the \fBregexp\fR(5) manual
+Regular expressions are the same as those found on the \fBregexp\fR(7) manual
 page. This includes the \fB\e(\fR\&...\fB\e)\fR and \fB\e\fR\fIn\fR
 constructions, which can be used to extract portions of the \fIpattern\fR for
 copying into the \fIreplacement\fR, and the \fB&\fR, which can be used to copy
 the entire \fIpattern\fR into the \fIreplacement\fR.
 .sp
 The \fIreplacement\fR can also contain a \fB*\fR; it too, is replaced with the
-entire \fIpattern\fR, just like the \fB&\fR of \fBregexp\fR(5).
+entire \fIpattern\fR, just like the \fB&\fR of \fBregexp\fR(7).
 .RE
 
 .sp
@@ -376,7 +376,7 @@ If the command fails, an error message is sent to standard error.
 .SS "Large File Behavior"
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBlpfilter\fR
+See \fBlargefile\fR(7) for the description of the behavior of \fBlpfilter\fR
 when encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH EXAMPLES
 .LP
@@ -482,8 +482,8 @@ An error occurred.
 .SH SEE ALSO
 .sp
 .LP
-\fBlp\fR(1), \fBsh\fR(1), \fBlpadmin\fR(1M), \fBattributes\fR(5),
-\fBlargefile\fR(5), \fBregexp\fR(5)
+\fBlp\fR(1), \fBsh\fR(1), \fBlpadmin\fR(8), \fBattributes\fR(7),
+\fBlargefile\fR(7), \fBregexp\fR(7)
 .sp
 .LP
 \fI\fR

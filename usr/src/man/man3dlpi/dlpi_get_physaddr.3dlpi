@@ -97,7 +97,7 @@ Invalid argument
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for description of the following attributes:
+See \fBattributes\fR(7) for description of the following attributes:
 .sp
 
 .sp
@@ -115,4 +115,4 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi_set_physaddr\fR(3DLPI), \fBlibdlpi\fR(3LIB), \fBattributes\fR(5)
+\fBdlpi_set_physaddr\fR(3DLPI), \fBlibdlpi\fR(3LIB), \fBattributes\fR(7)

@@ -20,13 +20,13 @@ coreadm \- core file administration
 
 .SH DESCRIPTION
 \fBcoreadm\fR specifies the name and location of core files produced by
-abnormally-terminating processes. See \fBcore\fR(4).
+abnormally-terminating processes. See \fBcore\fR(5).
 .sp
 .LP
 Only users and roles that belong to the "Maintenance and Repair" RBAC profile
 can execute the first form of the \fBSYNOPSIS\fR. This form configures
 system-wide core file options, including a global core file name pattern and a
-core file name pattern for the \fBinit\fR(1M) process. All settings are saved
+core file name pattern for the \fBinit\fR(8) process. All settings are saved
 persistently and will be applied at boot.
 .sp
 .LP
@@ -684,10 +684,10 @@ Invalid command-line options were specified.
 .RE
 
 .SH SEE ALSO
-\fBgcore\fR(1), \fBpfexec\fR(1), \fBsvcs\fR(1), \fBinit\fR(1M),
-\fBsvcadm\fR(1M), \fBexec\fR(2), \fBfork\fR(2), \fBsetuid\fR(2), \fBtime\fR(2),
-\fBsyslog\fR(3C), \fBcore\fR(4), \fBprof_attr\fR(4), \fBuser_attr\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5)
+\fBgcore\fR(1), \fBpfexec\fR(1), \fBsvcs\fR(1), \fBinit\fR(8),
+\fBsvcadm\fR(8), \fBexec\fR(2), \fBfork\fR(2), \fBsetuid\fR(2), \fBtime\fR(2),
+\fBsyslog\fR(3C), \fBcore\fR(5), \fBprof_attr\fR(5), \fBuser_attr\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 In a local (non-global) zone, the global settings apply to processes running in
 that zone. In addition, the global zone's apply to processes run in any zone.
@@ -699,7 +699,7 @@ to take effect in the global zone.
 .sp
 .LP
 The \fBcoreadm\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -711,7 +711,7 @@ svc:/system/coreadm:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP

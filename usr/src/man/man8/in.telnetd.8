@@ -16,9 +16,9 @@ in.telnetd, telnetd \- DARPA TELNET protocol server
 .SH DESCRIPTION
 \fBin.telnetd\fR is a server that supports the \fBDARPA\fR standard
 \fBTELNET\fR virtual terminal protocol. \fBin.telnetd\fR is normally invoked in
-the internet server (see \fBinetd\fR(1M)), for requests to connect to the
+the internet server (see \fBinetd\fR(8)), for requests to connect to the
 \fBTELNET\fR port as indicated by the \fB/etc/services\fR file (see
-\fBservices\fR(4)).
+\fBservices\fR(5)).
 .sp
 .LP
 \fBin.telnetd\fR operates by allocating a pseudo-terminal device for a client,
@@ -33,7 +33,7 @@ options to the client side indicating a willingness to do \fIremote\fR
 \fBecho\fR of characters, and to \fIsuppress\fR \fIgo\fR \fIahead\fR. The
 pseudo-terminal allocated to the client is configured to operate in "cooked"
 mode, and with \fBXTABS\fR, \fBICRNL\fR and \fBONLCR\fR enabled. See
-\fBtermio\fR(7I).
+\fBtermio\fR(4I).
 .sp
 .LP
 \fBin.telnetd\fR is willing to do: \fIecho\fR, \fIbinary\fR, \fIsuppress\fR
@@ -171,7 +171,7 @@ Disables displaying host specific information before login has been completed.
 .ad
 .RS 15n
 Uses the indicated Kerberos V5 realm. By default, the daemon will determine its
-realm from the settings in the \fBkrb5.conf\fR(4) file.
+realm from the settings in the \fBkrb5.conf\fR(5) file.
 .RE
 
 .sp
@@ -213,7 +213,7 @@ Disables Kerberos V5 authentication support negotiation.
 .RE
 
 .SH USAGE
-\fBtelnetd\fR and \fBin.telnetd\fR are IPv6-enabled. See \fBip6\fR(7P).
+\fBtelnetd\fR and \fBin.telnetd\fR are IPv6-enabled. See \fBip6\fR(4P).
 .SH SECURITY
 \fBin.telnetd\fR can authenticate using Kerberos V5 authentication,
 \fBpam\fR(3PAM), or both. By default, the telnet server will accept valid
@@ -239,7 +239,7 @@ must have a \fBkeytab\fR entry in the \fB/etc/krb5/krb5.keytab\fR file on the
 \fBhost/bigmachine.eng.example.com\fR
 .sp
 .LP
-See \fBkadmin\fR(1M) for instructions on adding a principal to a
+See \fBkadmin\fR(8) for instructions on adding a principal to a
 \fBkrb5.keytab\fR file. See \fI\fR for a discussion of Kerberos
 authentication.
 .sp
@@ -290,13 +290,13 @@ For a Kerberized telnet service, the correct \fBPAM\fR service name is
 
 .SH SEE ALSO
 \fBlogin\fR(1), \fBsvcs\fR(1), \fBtelnet\fR(1),
-\fBinetadm\fR(1M), \fBinetd\fR(1M), \fBkadmin\fR(1M), \fBsvcadm\fR(1M),
-\fBpam\fR(3PAM), \fBgetnameinfo\fR(3SOCKET), \fBissue\fR(4),
-\fBkrb5.conf\fR(4), \fBpam.conf\fR(4), \fBservices\fR(4), \fBattributes\fR(5),
-\fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), \fBpam_unix_session\fR(5),
-\fBsmf\fR(5), \fBip6\fR(7P), \fBtermio\fR(7I)
+\fBinetadm\fR(8), \fBinetd\fR(8), \fBkadmin\fR(8), \fBsvcadm\fR(8),
+\fBpam\fR(3PAM), \fBgetnameinfo\fR(3SOCKET), \fBissue\fR(5),
+\fBkrb5.conf\fR(5), \fBpam.conf\fR(5), \fBservices\fR(5), \fBattributes\fR(7),
+\fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), \fBpam_unix_session\fR(7),
+\fBsmf\fR(7), \fBip6\fR(4P), \fBtermio\fR(4I)
 .sp
 .LP
 \fI\fR
@@ -367,15 +367,15 @@ intelligent flushing of input and output queues.
 \fBin.telnetd\fR never sends \fBTELNET\fR \fIgo\fR \fIahead\fR commands.
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported.. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported.. Similar functionality is
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).
 .sp
 .LP
 The \fBin.telnetd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -387,8 +387,8 @@ svc:/network/telnet
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Responsibility for
-initiating and restarting this service is delegated to \fBinetd\fR(1M). Use
-\fBinetadm\fR(1M) to make configuration changes and to view configuration
+requesting restart, can be performed using \fBsvcadm\fR(8). Responsibility for
+initiating and restarting this service is delegated to \fBinetd\fR(8). Use
+\fBinetadm\fR(8) to make configuration changes and to view configuration
 information for this service. The service's status can be queried using the
 \fBsvcs\fR(1) command.

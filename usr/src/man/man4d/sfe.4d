@@ -16,7 +16,7 @@ sfe \- SiS900 series Fast Ethernet device driver
 .sp
 .LP
 The \fBsfe\fR driver is a loadable, clonable, GLD-based  STREAMS driver
-supporting the Data Link Provider Interface \fBdlpi\fR(7P) on Silicon
+supporting the Data Link Provider Interface \fBdlpi\fR(4P) on Silicon
 Integrated Systems 900 series Fast Ethernet controllers.
 .SH APPLICATION PROGRAMMING INTERFACE
 .sp
@@ -76,8 +76,8 @@ Likewise, inbound frames with a SAP between zero and 1500 are interpreted as
 .SH PROPERTIES
 .sp
 .LP
-The following properties  may  be  configured  using  either \fBndd\fR(1M) or
-the \fBsfe.conf\fR configuration file as described by \fBdriver.conf\fR(4):
+The following properties  may  be  configured  using  either \fBndd\fR(8) or
+the \fBsfe.conf\fR configuration file as described by \fBdriver.conf\fR(5):
 .sp
 .ne 2
 .na
@@ -127,7 +127,7 @@ Mbps hub or is an older network card.)
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -194,8 +194,8 @@ Configuration file.
 .SH SEE ALSO
 .sp
 .LP
-\fBndd\fR(1M), \fBdriver.conf\fR(4), \fBattributes\fR(5), \fBstreamio\fR(7I),
-\fBdlpi\fR(7P)
+\fBndd\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7), \fBstreamio\fR(4I),
+\fBdlpi\fR(4P)
 .sp
 .LP
 \fIIEEE 802.3\fR \(em Institute of Electrical and Electronics Engineers, 2002

@@ -21,7 +21,7 @@ capacity has been used.The amount of space reported as used and available is
 less than the amount of space in the file system; this is because the system
 reserves a fraction of the space in the file system to allow its file system
 allocation routines to work well. The amount reserved is typically about 10%;
-this can be adjusted using \fBtunefs\fR(1M). When all the space on the file
+this can be adjusted using \fBtunefs\fR(8). When all the space on the file
 system except for this reserve is in use, only the superuser can allocate new
 files and data blocks to existing files. When the file system is overallocated
 in this way, \fBdf\fR might report that the file system is more than 100%
@@ -37,7 +37,7 @@ The following options are supported:
 \fB\fIgeneric_options\fR\fR
 .ad
 .RS 19n
-Options supported by the generic \fBdf\fR command. See \fBdf\fR(1M) for a
+Options supported by the generic \fBdf\fR command. See \fBdf\fR(8) for a
 description of these options.
 .RE
 
@@ -73,8 +73,8 @@ list of file systems currently mounted
 .SH SEE ALSO
 .sp
 .LP
-\fBdf\fR(1M), \fBfsck\fR(1M), \fBfstyp\fR(1M), \fBtunefs\fR(1M),
-\fBmnttab\fR(4), \fBattributes\fR(5), \fBufs\fR(7FS),
+\fBdf\fR(8), \fBfsck\fR(8), \fBfstyp\fR(8), \fBtunefs\fR(8),
+\fBmnttab\fR(5), \fBattributes\fR(7), \fBufs\fR(4FS),
 .SH NOTES
 .sp
 .LP
@@ -92,9 +92,9 @@ requires contiguous sets of fragments for most allocations.
 .sp
 .LP
 If you suspect that you have exhausted contiguous fragments on your file
-system, you can use the \fBfstyp\fR(1M) utility with the \fB-v\fR option. In
+system, you can use the \fBfstyp\fR(8) utility with the \fB-v\fR option. In
 the \fBfstyp\fR output, look at the \fBnbfree\fR (number of blocks free) and
 \fBnffree\fR (number of fragments free) fields. On unmounted filesystems, you
-can use \fBfsck\fR(1M) and observe the last line of output, which reports,
+can use \fBfsck\fR(8) and observe the last line of output, which reports,
 among other items, the number of fragments and the degree of fragmentation. See
-\fBfsck\fR(1M).
+\fBfsck\fR(8).

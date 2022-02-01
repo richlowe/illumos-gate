@@ -19,7 +19,7 @@ Device contracts allow processes to monitor events involving a device of
 interest and to react and/or block state changes involving such devices.
 .sp
 .LP
-Device contracts are managed using the \fBcontract\fR(4) file system and the
+Device contracts are managed using the \fBcontract\fR(5) file system and the
 \fBlibcontract\fR(3LIB) library. The process contract type directory is
 \fB/system/contract/device\fR.
 .SS "Creation"
@@ -167,7 +167,7 @@ this synchronously with the breaking of the old contract via
 .SS "TERMS"
 .sp
 .LP
-The following common contract terms, defined in \fBcontract\fR(4), have
+The following common contract terms, defined in \fBcontract\fR(5), have
 device-contract specific attributes:
 .sp
 .ne 2
@@ -195,7 +195,7 @@ events. Use \fBct_tmpl_set_critical\fR(3CONTRACT) to set this term.
 .LP
 The following contract terms can be read from or written to a device contract
 template using the named \fBlibcontract\fR(3LIB) interfaces. These contract
-terms are in addition to those described in \fBcontract\fR(4).
+terms are in addition to those described in \fBcontract\fR(5).
 .sp
 .ne 2
 .na
@@ -371,4 +371,4 @@ Contains definitions of events, status fields and event fields
 \fBct_dev_status_get_dev_state\fR(3CONTRACT),
 \fBct_dev_status_get_aset\fR(3CONTRACT),
 \fBct_dev_status_get_minor\fR(3CONTRACT), \fBlibcontract\fR(3LIB),
-\fBcontract\fR(4), \fBprivileges\fR(5)
+\fBcontract\fR(5), \fBprivileges\fR(7)

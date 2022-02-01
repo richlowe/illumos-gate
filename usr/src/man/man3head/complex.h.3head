@@ -115,7 +115,7 @@ Values are interpreted as radians, not degrees.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -136,7 +136,7 @@ Interface Stability	Standard
 \fBccos\fR(3M), \fBccosh\fR(3M), \fBcexp\fR(3M), \fBcimag\fR(3M),
 \fBclog\fR(3M), \fBconj\fR(3M), \fBcpow\fR(3M), \fBcproj\fR(3M),
 \fBcreal\fR(3M), \fBcsin\fR(3M), \fBcsinh\fR(3M), \fBcsqrt\fR(3M),
-\fBctan\fR(3M), \fBctanh\fR(3M), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBctan\fR(3M), \fBctanh\fR(3M), \fBattributes\fR(7), \fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

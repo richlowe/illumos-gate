@@ -35,7 +35,7 @@
 
 .SH "DESCRIPTION"
 The \fBpcn\fR driver is a multi\-threaded, loadable, clonable GLDv3\-based
-STREAMS driver supporting the Data Link Provider Interface \fBdlpi\fR(7P) for
+STREAMS driver supporting the Data Link Provider Interface \fBdlpi\fR(4P) for
 the AMD PCnet family of Ethernet controllers.
 .SH "APPLICATION PROGRAMMING INTERFACE"
 The \fBpcn\fR driver can be used as either a "style 1" or a "style 2" Data Link
@@ -96,7 +96,7 @@ adapter type.  See the \fIIEEE802.3\fR standard for more information.
 .sp
 .LP
 The capabilities advertised by the \fBpcn\fR device can be set using
-\fBdladm\fR(1m).  The driver supports a number of parameters whose names
+\fBdladm\fR(8).  The driver supports a number of parameters whose names
 begin with \fBen_\fR (see below).  Each of these parameters contains a
 boolean value that determines if the device advertises that mode of
 operations.  The \fBadv_autoneg_cap\fR parameter controls whether
@@ -119,7 +119,7 @@ All capabilities default to enabled.  Note that changing any capability
 parameter causes the link to go down while the link partners renegotiate
 the link speed/duplex using the newly changed capabilities.
 .SH "ATTRIBUTES"
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -155,7 +155,7 @@ Device driver (x86)
 .RE
 
 .SH "SEE ALSO"
-\fBattributes\fR(5), \fBstreamio\fR(7I), \fBdlpi\fR(7p)
+\fBattributes\fR(7), \fBstreamio\fR(4I), \fBdlpi\fR(4P)
 .sp
 .LP
 \fIIEEE 802.3\fR \(em Institute of Electrical and Electronics Engineers, 2002

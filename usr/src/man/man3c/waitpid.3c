@@ -222,7 +222,7 @@ implemented as a call to the more general \fBwaitid\fR(2) function.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -236,7 +236,7 @@ Interface Stability	Committed
 _
 MT-Level	Async-Signal-Safe
 _
-Standard	See \fBstandards\fR(5).
+Standard	See \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
@@ -244,4 +244,4 @@ Standard	See \fBstandards\fR(5).
 .LP
 \fBIntro\fR(2), \fBexec\fR(2), \fBexit\fR(2), \fBfork\fR(2), \fBpause\fR(2),
 \fBsigaction\fR(2), \fBptrace\fR(3C), \fBsignal\fR(3C), \fBsiginfo.h\fR(3HEAD),
-\fBwait\fR(3C), \fBwait.h\fR(3HEAD), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBwait\fR(3C), \fBwait.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)

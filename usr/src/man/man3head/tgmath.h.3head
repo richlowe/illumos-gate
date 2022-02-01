@@ -233,7 +233,7 @@ cproj(ldc)	cprojl(ldc)
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -250,4 +250,4 @@ Interface Stability	Standard
 .sp
 .LP
 \fBmodf\fR(3M), \fBcomplex.h\fR(3HEAD), \fBmath.h\fR(3HEAD), \fBcabs\fR(3M),
-\fBfabs\fR(3M), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBfabs\fR(3M), \fBattributes\fR(7), \fBstandards\fR(7)

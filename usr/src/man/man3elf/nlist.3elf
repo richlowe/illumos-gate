@@ -52,7 +52,7 @@ contain a valid name list.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -71,5 +71,5 @@ MT-Level	Safe
 .sp
 .LP
 \fBelf\fR(3ELF), \fBkvm_nlist\fR(3KVM), \fBkvm_open\fR(3KVM),
-\fBlibelf\fR(3LIB), \fBa.out\fR(4), \fBattributes\fR(5), \fBksyms\fR(7D),
-\fBmem\fR(7D)
+\fBlibelf\fR(3LIB), \fBa.out\fR(5), \fBattributes\fR(7), \fBksyms\fR(4D),
+\fBmem\fR(4D)

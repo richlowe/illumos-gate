@@ -19,16 +19,16 @@ Architecture)-compliant nexus driver that binds to device level nodes of a
 composite (multi interface) device if no vendor or class-specific driver is
 available. The \fBusb_mid\fR driver creates interface nodes or interface
 association nodes and attempts to bind drivers to them. If no driver is found
-for interface association nodes, \fBusb_ia\fR(7D) is bound by default.
+for interface association nodes, \fBusb_ia\fR(4D) is bound by default.
 .SS "UGEN (Generic USB)"
 .LP
-The \fBusb_mid\fR driver also supports a \fBugen\fR(7D) interface allowing raw
+The \fBusb_mid\fR driver also supports a \fBugen\fR(4D) interface allowing raw
 access to the device, for example by libusb applications, by
 passing the drivers bound to each interface. Since a libusb application might
 change the state of the device, you should not access the device through the
 child interface drivers. Note that the \fBusb_mid\fR driver creates a ugen
 interface only if none of its children are explicitly bound to the
-\fBugen\fR(7D) driver. Additionally, \fBusb_mid\fR does not create children.
+\fBugen\fR(4D) driver. Additionally, \fBusb_mid\fR does not create children.
 .SH FILES
 .ne 2
 .na
@@ -66,12 +66,12 @@ interface only if none of its children are explicitly bound to the
 .ad
 .sp .6
 .RS 4n
-ugen(7D) nodes.
+ugen(4D) nodes.
 .RE
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -86,8 +86,8 @@ Architecture	SPARC & x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBcfgadm_usb\fR(1M), \fBattributes\fR(5), \fBusba\fR(7D),
-\fBusb_ia\fR(7D)
+\fBcfgadm_usb\fR(8), \fBattributes\fR(7), \fBusba\fR(4D),
+\fBusb_ia\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -42,12 +42,12 @@ Aliases might require quoting (with double-quotes) if they contain numbers. See
 \fBEXAMPLES\fR.
 .SS "The \fB/etc/minor_perm\fR File"
 .LP
-\fBadd_drv\fR and \fBupdate_drv\fR(1M) read the \fB/etc/minor_perm\fR file to
+\fBadd_drv\fR and \fBupdate_drv\fR(8) read the \fB/etc/minor_perm\fR file to
 obtain permission information. The permission specified is applied to matching
 minor nodes created when a device bound to the driver is attached. A minor
 node's permission may be manually changed by \fBchmod\fR(1). For such nodes,
 the specified permissions apply, overriding the default permissions specified
-via \fBadd_drv\fR or \fBupdate_drv\fR(1M).
+via \fBadd_drv\fR or \fBupdate_drv\fR(8).
 .sp
 .LP
 The format of the \fB/etc/minor_perm\fR file is as follows:
@@ -152,7 +152,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-b\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -244,7 +244,7 @@ The following tokens are defined: \fBread_priv_set\fR and \fBwrite_priv_set\fR.
 effective set of the calling process when opening a device for reading.
 \fBwrite_priv_set\fR defines the privileges that need to be asserted in the
 effective set of the calling process when opening a device for writing. See
-\fBprivileges\fR(5).
+\fBprivileges\fR(7).
 .sp
 A missing minor spec is interpreted as a \fB*\fR.
 .RE
@@ -580,10 +580,10 @@ device privileges
 
 .SH SEE ALSO
 .LP
-\fBboot\fR(1M), \fBchmod\fR(1), \fBdevfsadm\fR(1M), \fBkernel\fR(1M),
-\fBmodinfo\fR(1M), \fBrem_drv\fR(1M), \fBupdate_drv\fR(1M),
-\fBdriver.conf\fR(4), \fBsystem\fR(4), \fBattributes\fR(5),
-\fBprivileges\fR(5), \fBdevfs\fR(7FS), \fBddi_create_minor_node\fR(9F)
+\fBboot\fR(8), \fBchmod\fR(1), \fBdevfsadm\fR(8), \fBkernel\fR(8),
+\fBmodinfo\fR(8), \fBrem_drv\fR(8), \fBupdate_drv\fR(8),
+\fBdriver.conf\fR(5), \fBsystem\fR(5), \fBattributes\fR(7),
+\fBprivileges\fR(7), \fBdevfs\fR(4FS), \fBddi_create_minor_node\fR(9F)
 .sp
 .LP
 \fI\fR
@@ -592,7 +592,7 @@ device privileges
 It is possible to add a driver for a device already being managed by a
 different driver, where the driver being added appears in the device's
 \fBcompatible\fR list before the current driver. In such cases, a
-reconfiguration boot is required (see \fBboot\fR(1M) and \fBkernel\fR(1M)).
+reconfiguration boot is required (see \fBboot\fR(8) and \fBkernel\fR(8)).
 After the reconfiguration boot, device links in \fB/dev\fR and references to
 these files may no longer be valid (see the \fB-v\fR flag). If a
 reconfiguration boot would be required to complete the driver installation,
@@ -622,8 +622,8 @@ The existence of this notice does not imply that any other documentation that
 lacks this notice constitutes an API.
 .sp
 .LP
-\fB/etc/minor_perm\fR can only be updated by \fBadd_drv\fR(1M),
-\fBrem_drv\fR(1M) or \fBupdate_drv\fR(1M).
+\fB/etc/minor_perm\fR can only be updated by \fBadd_drv\fR(8),
+\fBrem_drv\fR(8) or \fBupdate_drv\fR(8).
 .sp
 .LP
 In the current version of \fBadd_drv\fR, the use of double quotes to specify an

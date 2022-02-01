@@ -237,7 +237,7 @@ summarize recovery actions taken and errors encountered during recovery. See
 All usb request types share the same callback handling. See
 \fBusb_callback_flags\fR(9S) for details.
 .SH ATTRIBUTES
-See attributes(5) for descriptions of the following attributes:
+See attributes(7) for descriptions of the following attributes:
 .sp
 
 .sp

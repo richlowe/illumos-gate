@@ -36,14 +36,14 @@ If no special device is specified, all \fBudfs\fR file systems specified in the
 \fBvfstab\fR file with a \fBfsckdev\fR entry are checked. If the \fB-p\fR
 (\fBpreen\fR) option is specified, \fBudfs\fR file systems with an
 \fBfsckpass\fR number greater than \fB1\fR are checked in parallel. See
-\fBfsck\fR(1M).
+\fBfsck\fR(8).
 .sp
 .LP
 In the case of correcting serious inconsistencies, by default, \fBfsck\fR asks
 for confirmation before making a repair and waits for the operator to respond
 with either \fByes\fR or \fBno\fR. If the operator does not have write
 permission on the file system, \fBfsck\fR defaults to the \fB-n\fR (no
-corrections) option. See \fBfsck\fR(1M).
+corrections) option. See \fBfsck\fR(8).
 .sp
 .LP
 Repairing some file system inconsistencies can result in loss of data. The
@@ -230,9 +230,9 @@ List of default parameters for each file system.
 
 .SH SEE ALSO
 .LP
-\fBfsck\fR(1M), \fBfsdb_udfs\fR(1M), \fBfstyp\fR(1M), \fBmkfs\fR(1M),
-\fBmkfs_udfs\fR(1M), \fBmountall\fR(1M), \fBreboot\fR(1M), \fBvfstab\fR(4),
-\fBattributes\fR(5)
+\fBfsck\fR(8), \fBfsdb_udfs\fR(8), \fBfstyp\fR(8), \fBmkfs\fR(8),
+\fBmkfs_udfs\fR(8), \fBmountall\fR(8), \fBreboot\fR(8), \fBvfstab\fR(5),
+\fBattributes\fR(7)
 .SH WARNINGS
 .LP
 The operating system buffers file system data. Running \fBfsck\fR on a mounted

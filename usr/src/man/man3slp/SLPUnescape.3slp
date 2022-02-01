@@ -92,8 +92,8 @@ When set, use this file for configuration.
 .SH SEE ALSO
 .sp
 .LP
-\fBslpd\fR(1M), \fBSLPFree\fR(3SLP), \fBslp_api\fR(3SLP), \fBslp.conf\fR(4),
-\fBslpd.reg\fR(4), \fBattributes\fR(5)
+\fBslpd\fR(8), \fBSLPFree\fR(3SLP), \fBslp_api\fR(3SLP), \fBslp.conf\fR(5),
+\fBslpd.reg\fR(5), \fBattributes\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Network Services\fR

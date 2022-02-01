@@ -28,7 +28,7 @@ boot \- start the system kernel or a standalone program
 Bootstrapping is the process of loading and executing a standalone program. For
 the purpose of this discussion, bootstrapping means the process of loading and
 executing the bootable operating system. Typically, the standalone program is
-the operating system kernel (see \fBkernel\fR(1M)), but any standalone program
+the operating system kernel (see \fBkernel\fR(8)), but any standalone program
 can be booted instead. On a SPARC-based system, the diagnostic monitor for a
 machine is a good example of a standalone program other than the operating
 system that can be booted.
@@ -41,8 +41,8 @@ statically-linked, it will jump directly to the standalone.
 .sp
 .LP
 Once the kernel is loaded, it starts the UNIX system, mounts the necessary file
-systems (see \fBvfstab\fR(4)), and runs \fB/sbin/init\fR to bring the system to
-the "initdefault" state specified in \fB/etc/inittab\fR. See \fBinittab\fR(4).
+systems (see \fBvfstab\fR(5)), and runs \fB/sbin/init\fR to bring the system to
+the "initdefault" state specified in \fB/etc/inittab\fR. See \fBinittab\fR(5).
 .SS "SPARC Bootstrap Procedure"
 .LP
 On SPARC based systems, the bootstrap procedure on most machines consists of
@@ -60,7 +60,7 @@ used by the firmware. The name of the file to load, and the device to load it
 from can also be manipulated.
 .sp
 .LP
-These flags and names can be set using the \fBeeprom\fR(1M) command from the
+These flags and names can be set using the \fBeeprom\fR(8) command from the
 shell, or by using \fBPROM\fR commands from the \fBok\fR prompt after the
 system has been halted.
 .sp
@@ -122,7 +122,7 @@ received, the PROM then broadcasts a TFTP request to fetch the first block of
 \fBinetboot\fR. Subsequent requests will be sent to the server that initially
 answered the first block request. After loading, \fBinetboot\fR will also use
 reverse ARP to fetch its IP address, then broadcast \fBbootparams\fR RPC calls
-(see \fBbootparams\fR(4)) to locate configuration information and its root file
+(see \fBbootparams\fR(5)) to locate configuration information and its root file
 system. \fBinetboot\fR then loads the boot archive by means of NFS and
 transfers control to that archive.
 .sp
@@ -138,7 +138,7 @@ name appears to be an HTTP URL. If it does not, the PROM downloads
 \fBinetboot\fR, loads that file into memory, and executes it. \fBinetboot\fR
 loads the boot archive, which takes over the machine and releases
 \fBinetboot\fR. Startup scripts then initiate the DHCP agent (see
-\fBdhcpagent\fR(1M)), which implements further DHCP activities.
+\fBdhcpagent\fR(8)), which implements further DHCP activities.
 
 .SS "iSCSI Boot"
 .LP
@@ -169,7 +169,7 @@ the second level boot will look for the standalone in a platform-dependent
 search path. This path is guaranteed to contain
 \fB/platform/\fR\fIplatform-name\fR. Many SPARC platforms next search the
 platform-specific path entry \fB/platform/\fR\fIhardware-class-name\fR. See
-\fBfilesystem\fR(5). If the pathname is absolute, \fBboot\fR will use the
+\fBfilesystem\fR(7). If the pathname is absolute, \fBboot\fR will use the
 specified path. The \fBboot\fR program then loads the standalone at the
 appropriate address, and then transfers control.
 .sp
@@ -648,7 +648,7 @@ this dataset is mounted at /\fIpoolname\fR in the root file system.
 .LP
 There can be multiple bootable datasets (that is, root file systems) within a
 pool. The default file system to load the kernel is identified by the boot
-pool \fBbootfs\fR property (see \fBzpool\fR(1M)). All bootable datasets are
+pool \fBbootfs\fR property (see \fBzpool\fR(8)). All bootable datasets are
 listed in the \fBmenu.lst\fR file, which is used by the boot loader to compose
 the Boot Environment menu, to implement support to load a kernel and boot from
 an alternate Boot Environment.
@@ -659,8 +659,8 @@ specified in the boot loader configuration and hands control over to the
 \fBunix\fR binary. The Unix operating system initializes, links in the
 necessary modules from the boot archive and mounts the root file system on
 the real root device. At this point, the kernel regains
-storage I/O, mounts additional file systems (see \fBvfstab\fR(4)), and starts
-various operating system services (see \fBsmf\fR(5)).
+storage I/O, mounts additional file systems (see \fBvfstab\fR(5)), and starts
+various operating system services (see \fBsmf\fR(7)).
 
 .SH OPTIONS
 .SS "SPARC"
@@ -736,7 +736,7 @@ Display verbose debugging information.
 .sp .6
 .RS 4n
 The boot program passes all \fIboot-flags\fR to \fBfile\fR. They are not
-interpreted by \fBboot\fR. See the \fBkernel\fR(1M) and \fBkmdb\fR(1) manual
+interpreted by \fBboot\fR. See the \fBkernel\fR(8) and \fBkmdb\fR(1) manual
 pages for information about the options available with the default standalone
 program.
 .RE
@@ -800,7 +800,7 @@ The following x86 options are supported:
 One or more property-value pairs to be passed to the kernel. Multiple
 property-value pairs must be separated by a comma. Use of this option is the
 equivalent of the command: \fBeeprom\fR \fIprop\fR=\fIval\fR. See
-\fBeeprom\fR(1M) for available properties and valid values.
+\fBeeprom\fR(8) for available properties and valid values.
 .RE
 
 .sp
@@ -811,7 +811,7 @@ equivalent of the command: \fBeeprom\fR \fIprop\fR=\fIval\fR. See
 .sp .6
 .RS 4n
 The boot program passes all \fIboot-flags\fR to \fBfile\fR. They are not
-interpreted by \fBboot\fR. See \fBkernel\fR(1M) and \fBkmdb\fR(1) for
+interpreted by \fBboot\fR. See \fBkernel\fR(8) and \fBkmdb\fR(1) for
 information about the options available with the kernel.
 .RE
 
@@ -838,7 +838,7 @@ system. This will allow configuring third party boot programs to use the
 chainload technique to boot illumos system.
 
 If the first stage is installed on the master boot block (see the \fB-m\fR
-option of \fBinstallboot\fR(1M)), then \fBstage2\fR is loaded directly
+option of \fBinstallboot\fR(8)), then \fBstage2\fR is loaded directly
 from the Solaris partition regardless of the active partition.
 .sp
 .LP
@@ -910,7 +910,7 @@ When booting from UFS, the root device is specified by the \fBbootpath\fR
 property, and the root file system type is specified by the \fBfstype\fR
 property. These properties should be setup by the Solaris Install/Upgrade
 process in \fB/boot/solaris/bootenv.rc\fR and can be overridden with the
-\fB-B\fR option, described above (see the \fBeeprom\fR(1M) man page).
+\fB-B\fR option, described above (see the \fBeeprom\fR(8) man page).
 .sp
 .LP
 When booting from ZFS, the root device is automatically passed by the boot
@@ -1095,11 +1095,11 @@ the root pool of your current system.
 
 .SH SEE ALSO
 .LP
-\fBkmdb\fR(1), \fBuname\fR(1), \fBbootadm\fR(1M), \fBeeprom\fR(1M),
-\fBinit\fR(1M), \fBinstallboot\fR(1M), \fBkernel\fR(1M), \fBmonitor\fR(1M),
-\fBshutdown\fR(1M), \fBsvcadm\fR(1M), \fBumountall\fR(1M), \fBzpool\fR(1M),
-\fBuadmin\fR(2), \fBbootparams\fR(4), \fBinittab\fR(4), \fBvfstab\fR(4),
-\fBfilesystem\fR(5)
+\fBkmdb\fR(1), \fBuname\fR(1), \fBbootadm\fR(8), \fBeeprom\fR(8),
+\fBinit\fR(8), \fBinstallboot\fR(8), \fBkernel\fR(8), \fBmonitor\fR(8),
+\fBshutdown\fR(8), \fBsvcadm\fR(8), \fBumountall\fR(8), \fBzpool\fR(8),
+\fBuadmin\fR(2), \fBbootparams\fR(5), \fBinittab\fR(5), \fBvfstab\fR(5),
+\fBfilesystem\fR(7)
 .sp
 .LP
 RFC 903, \fIA Reverse Address Resolution Protocol\fR,

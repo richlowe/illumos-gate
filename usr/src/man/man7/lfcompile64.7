@@ -25,7 +25,7 @@ functions (\fIxxx\fR\fB64()\fR) and types in addition to all the regular
 functions (\fIxxx\fR\fB()\fR) and types. Both \fIxxx\fR\fB()\fR and
 \fIxxx\fR\fB64()\fR functions are available to the program source.  A 32-bit
 application must use the \fIxxx\fR\fB64()\fR functions in order to access large
-files. See the \fBlf64\fR(5) manual page for a complete listing of the 64-bit
+files. See the \fBlf64\fR(7) manual page for a complete listing of the 64-bit
 transitional interfaces.
 .sp
 .LP
@@ -35,7 +35,7 @@ functions, structures, and types. An application compiled in the large file
 compilation environment is able to use the \fIxxx\fR\fB()\fR source interfaces
 to access both large and small files, rather than having to explicitly utilize
 the transitional \fIxxx\fR\fB64()\fR interface calls to access large files. See
-the \fBlfcompile\fR(5) manual page for more information regarding the large
+the \fBlfcompile\fR(7) manual page for more information regarding the large
 file compilation environment.
 .sp
 .LP
@@ -55,7 +55,7 @@ No compile-time flags need to be set.
 Applications that wish to access the transitional interfaces as well as the
 POSIX or X/Open specification-conforming interfaces should use the following
 compilation methods and set whichever feature test macros are appropriate to
-obtain the desired environment (see \fBstandards\fR(5)).
+obtain the desired environment (see \fBstandards\fR(7)).
 .RS +4
 .TP
 .ie t \(bu
@@ -130,5 +130,5 @@ interfaces:
 .SH SEE ALSO
 .sp
 .LP
-\fBgetconf\fR(1), \fBlseek\fR(2), \fBfopen\fR(3C), \fBlf64\fR(5),
-\fBstandards\fR(5)
+\fBgetconf\fR(1), \fBlseek\fR(2), \fBfopen\fR(3C), \fBlf64\fR(7),
+\fBstandards\fR(7)

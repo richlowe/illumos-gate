@@ -130,7 +130,7 @@ funlockfile(iop);
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -150,9 +150,9 @@ MT-Level	MT-Safe
 .LP
 \fBIntro\fR(3), \fB__fsetlocking\fR(3C), \fBferror\fR(3C), \fBfprintf\fR(3C),
 \fBgetc\fR(3C), \fBputc\fR(3C), \fBstdio\fR(3C), \fBungetc\fR(3C),
-\fBattributes\fR(5), \fBstandards\fR(5)
+\fBattributes\fR(7), \fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP
 The interfaces on this page  are as specified in IEEE Std 1003.1:2001.  See
-\fBstandards\fR(5).
+\fBstandards\fR(7).

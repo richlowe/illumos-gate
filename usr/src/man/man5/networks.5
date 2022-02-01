@@ -49,12 +49,12 @@ it up to date regarding unofficial aliases and/or unknown networks.
 .LP
 Network numbers may be specified in the conventional dot (`\fB\&.\fR') notation
 using the \fBinet_network\fR routine from the Internet address manipulation
-library, \fBinet\fR(7P). Network names may contain any printable character
+library, \fBinet\fR(4P). Network names may contain any printable character
 other than a field delimiter, \fBNEWLINE\fR, or comment character.
 .SH SEE ALSO
 .LP
 \fBgetnetbyaddr\fR(3SOCKET), \fBgetnetbyname\fR(3SOCKET), \fBinet\fR(3SOCKET),
-\fBnsswitch.conf\fR(4), \fBinet\fR(7P)
+\fBnsswitch.conf\fR(5), \fBinet\fR(4P)
 .SH NOTES
 .LP
 The official SVR4 name of the \fBnetworks\fR file is \fB/etc/inet/networks\fR.
@@ -67,5 +67,5 @@ address \fB24.132.47.86\fR that has a mask of \fBfffffe00\fR, its network
 number is \fB803351\fR. This is obtained when the address is shifted right by 9
 bits. The address maps to \fB12.66.23\fR. The trailing 0 bits should not be
 specified.  The network number here is different from that described in
-\fBnetmasks\fR(4). For this example, the entry in \fBnetmasks\fR would be
+\fBnetmasks\fR(5). For this example, the entry in \fBnetmasks\fR would be
 \fB24.132.46.0 fffffe00\fR.

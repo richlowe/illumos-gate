@@ -24,4 +24,4 @@ drivers. There are no user-configurable options for this driver.
 .SH SEE ALSO
 .sp
 .LP
-\fBpcmciad\fR(1M)
+\fBpcmciad\fR(8)

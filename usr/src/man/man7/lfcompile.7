@@ -28,7 +28,7 @@ All relevant data types are defined to be of correct size (for example,
 An application compiled in this environment is able to use the
 \fIxxx\fR\fB()\fR source interfaces to access both large and small files,
 rather than having to explicitly utilize the transitional \fIxxx\fR\fB64()\fR
-interface calls to access large files. See the \fBlfcompile64\fR(5) manual page
+interface calls to access large files. See the \fBlfcompile64\fR(7) manual page
 for information regarding the transitional compilation environment.
 .sp
 .LP
@@ -85,7 +85,7 @@ information about  \fBfseeko()\fR and \fBftello()\fR.
 Applications wishing to access  \fBfseeko()\fR and \fBftello()\fR as well as
 the POSIX and X/Open specification-conforming interfaces should define the
 macro \fB_LARGEFILE_SOURCE\fR to be 1 and set whichever feature test macros are
-appropriate to obtain the desired environment (see \fBstandards\fR(5)).
+appropriate to obtain the desired environment (see \fBstandards\fR(7)).
 .SH EXAMPLES
 .sp
 .LP
@@ -147,8 +147,8 @@ $ c89 -D_LARGEFILE_SOURCE  a.c
 .sp
 .LP
 \fBcsh\fR(1), \fBgetconf\fR(1), \fBksh\fR(1), \fByacc\fR(1), \fBsh\fR(1),
-\fBfseek\fR(3C), \fBftell\fR(3C), \fBlf64\fR(5), \fBlfcompile64\fR(5),
-\fBstandards\fR(5)
+\fBfseek\fR(3C), \fBftell\fR(3C), \fBlf64\fR(7), \fBlfcompile64\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

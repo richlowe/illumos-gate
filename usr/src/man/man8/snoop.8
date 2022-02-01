@@ -19,8 +19,8 @@ snoop \- capture and inspect network packets
 From a datalink or IP interface, \fBsnoop\fR captures packets and displays
 their contents. If the datalink or IP interface is not specified, \fBsnoop\fR
 will pick a datalink to use, giving priority to datalinks that have been
-plumbed for IP traffic. \fBsnoop\fR uses the \fBpfmod\fR(7M) and
-\fBbufmod\fR(7M) STREAMS modules to provide efficient capture of packets from
+plumbed for IP traffic. \fBsnoop\fR uses the \fBpfmod\fR(4M) and
+\fBbufmod\fR(4M) STREAMS modules to provide efficient capture of packets from
 the network. Captured packets can be displayed as they are received or saved to
 a file (which is \fIRFC 1761\fR-compliant) for later inspection.
 .sp
@@ -86,7 +86,7 @@ are not displayed when this flag is used.
 .sp .6
 .RS 4n
 Capture IP packets from the network using the IP interface specified by
-\fIinterface\fR, for example, \fBlo0\fR. The \fBifconfig\fR(1M) command can be
+\fIinterface\fR, for example, \fBlo0\fR. The \fBifconfig\fR(8) command can be
 used to list available IP interfaces. The \fB-I\fR and \fB-d\fR options are
 mutually exclusive.
 .RE
@@ -159,7 +159,7 @@ there is no disk space left or until interrupted with Control-C.
 .sp .6
 .RS 4n
 Capture link-layer packets from the network using the DLPI datalink specified
-by \fIdatalink\fR, for example, \fBbge0\fR or \fBnet0\fR. The \fBdladm\fR(1M)
+by \fIdatalink\fR, for example, \fBbge0\fR or \fBnet0\fR. The \fBdladm\fR(8)
 \fBshow-link\fR subcommand can be used to list available datalinks. The
 \fB-d\fR and \fB-I\fR options are mutually exclusive.
 .RE
@@ -1136,9 +1136,9 @@ Internet services and aliases.
 .RE
 
 .SH SEE ALSO
-\fBdladm\fR(1M), \fBifconfig\fR(1M), \fBnetstat\fR(1M), \fBhosts\fR(4),
-\fBrpc\fR(4), \fBservices\fR(4), \fBattributes\fR(5), \fBaudio\fR(7I),
-\fBipnet\fR(7D), \fBbufmod\fR(7M), \fBdlpi\fR(7P), \fBpfmod\fR(7M)
+\fBdladm\fR(8), \fBifconfig\fR(8), \fBnetstat\fR(8), \fBhosts\fR(5),
+\fBrpc\fR(5), \fBservices\fR(5), \fBattributes\fR(7), \fBaudio\fR(4I),
+\fBipnet\fR(4D), \fBbufmod\fR(4M), \fBdlpi\fR(4P), \fBpfmod\fR(4M)
 .sp
 .LP
 Callaghan, B. and Gilligan, R. \fIRFC 1761, Snoop Version 2 Packet Capture File

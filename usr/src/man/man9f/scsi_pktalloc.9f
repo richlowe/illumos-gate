@@ -190,7 +190,7 @@ interrupt context.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -206,7 +206,7 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBscsi_dmafree\fR(9F), \fBscsi_dmaget\fR(9F),
+\fBattributes\fR(7), \fBscsi_dmafree\fR(9F), \fBscsi_dmaget\fR(9F),
 \fBbuf\fR(9S), \fBscsi_pkt\fR(9S)
 .sp
 .LP

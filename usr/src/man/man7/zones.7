@@ -18,15 +18,15 @@ zones.
 .sp
 .LP
 The privileges available within a zone are restricted to prevent operations
-with system-wide impact. See \fBprivileges\fR(5).
+with system-wide impact. See \fBprivileges\fR(7).
 .sp
 .LP
-You can configure and administer zones with the \fBzoneadm\fR(1M) and
-\fBzonecfg\fR(1M) utilities. You can specify the configuration details a zone,
+You can configure and administer zones with the \fBzoneadm\fR(8) and
+\fBzonecfg\fR(8) utilities. You can specify the configuration details a zone,
 install file system contents including software packages into the zone, and
 manage the runtime state of the zone. You can use the \fBzlogin\fR(1) to run
 commands within an active zone. You can do this without logging in through a
-network-based login server such as \fBsshd\fR(1M).
+network-based login server such as \fBsshd\fR(8).
 .sp
 .LP
 The autobooting of zones is enabled and disabled by the zones service,
@@ -36,16 +36,16 @@ identified by the FMRI:
 svc:/system/zones:default
 .sp
 .LP
-See \fBzoneadm\fR(1M). Note that a zone has an \fBautoboot\fR property, which
+See \fBzoneadm\fR(8). Note that a zone has an \fBautoboot\fR property, which
 can be set to \fBtrue\fR (always autoboot). However, if the zones service is
 disabled, autoboot will not occur, regardless of the setting of the autoboot
-property for a given zone. See \fBzonecfg\fR(1M).
+property for a given zone. See \fBzonecfg\fR(8).
 .sp
 .LP
 An alphanumeric name and numeric ID identify each active zone. Alphanumeric
-names are configured using the \fBzonecfg\fR(1M) utility. Numeric IDs are
+names are configured using the \fBzonecfg\fR(8) utility. Numeric IDs are
 automatically assigned when the zone is booted. The \fBzonename\fR(1) utility
-reports the current zone name, and the \fBzoneadm\fR(1M) utility can be used to
+reports the current zone name, and the \fBzoneadm\fR(8) utility can be used to
 report the names and IDs of configured zones.
 .sp
 .LP
@@ -120,7 +120,7 @@ cannot be destroyed. Such cases require operator intervention.
 .SS "Process Access Restrictions"
 Processes running inside a zone (aside from the global zone) have restricted
 access to other processes. Only processes in the same zone are visible through
-\fB/proc\fR (see \fBproc\fR(4) or through system call interfaces that take
+\fB/proc\fR (see \fBproc\fR(5) or through system call interfaces that take
 process IDs such as \fBkill\fR(2) and \fBpriocntl\fR(2). Attempts to access
 processes that exist in other zones (including the global zone) fail with the
 same error code that would be issued if the specified process did not exist.
@@ -131,7 +131,7 @@ that might affect other zones. The set of privileges limits the capabilities of
 privileged users (such as the super-user or root user) within the zone. The
 list of privileges available within a zone can be displayed using the
 \fBppriv\fR(1) utility. For more information about privileges, see
-\fBprivileges\fR(5).
+\fBprivileges\fR(7).
 .SS "Device Restrictions"
 The set of devices available within a zone is restricted, to prevent a process
 in one zone from interfering with processes in other zones. For example, a
@@ -139,33 +139,33 @@ process in a zone should not be able to modify kernel memory using
 \fB/dev/kmem\fR, or modify the contents of the root disk. Thus, by default,
 only a few pseudo devices considered safe for use within a zone are available.
 Additional devices can be made available within specific zones using the
-\fBzonecfg\fR(1M) utility.
+\fBzonecfg\fR(8) utility.
 .sp
 .LP
 The device and privilege restrictions have a number of effects on the utilities
-that can run in a non-global zone. For example, the \fBeeprom\fR(1M),
-\fBprtdiag\fR(1M), and \fBprtconf\fR(1M) utilities do not work in a zone since
+that can run in a non-global zone. For example, the \fBeeprom\fR(8),
+\fBprtdiag\fR(8), and \fBprtconf\fR(8) utilities do not work in a zone since
 they rely on devices that are not normally available.
 .SS "Brands"
 A zone may be assigned a brand when it is initially created. A branded zone is
 one whose software does not match that software found in the global zone. The
 software may include Solaris software configured or laid out differently, or it
 may include non-Solaris software. The particular collection of software is
-called a "brand" (see \fBbrands\fR(5)). Once installed, a zone's brand may not
+called a "brand" (see \fBbrands\fR(7)). Once installed, a zone's brand may not
 be changed unless the zone is first uninstalled.
 .SS "File Systems"
 Each zone has its own section of the file system hierarchy, rooted at a
 directory known as the zone root. Processes inside the zone can access only
 files within that part of the hierarchy, that is, files that are located
 beneath the zone root. This prevents processes in one zone from corrupting or
-examining file system data associated with another zone. The \fBchroot\fR(1M)
+examining file system data associated with another zone. The \fBchroot\fR(8)
 utility can be used within a zone, but can only restrict the process to a root
 path accessible within the zone.
 .sp
 .LP
 In order to preserve file system space, sections of the file system can be
 mounted into one or more zones using the read-only option of the
-\fBlofs\fR(7FS) file system. This allows the same file system data to be shared
+\fBlofs\fR(4FS) file system. This allows the same file system data to be shared
 in multiple zones, while preserving the security guarantees supplied by zones.
 .sp
 .LP
@@ -174,11 +174,11 @@ cannot be accessed from other zones, including the global zone. The mounts are
 removed when the zone is halted or rebooted.
 .sp
 .LP
-A zone can share filesystems using \fBnfs\fR(4) or \fBsmb\fR(4)
+A zone can share filesystems using \fBnfs\fR(5) or \fBsmb\fR(5)
 subject to the restrictions earlier in this section, plus the additional
 restriction that file sharing can only be done from filesystems a zone
-completely controls. Some \fBbrands\fR(5) do not have the zone root set to a
-filesystem boundary.  \fBsharefs\fR(7FS) can instantiate per-zone subject to
+completely controls. Some \fBbrands\fR(7) do not have the zone root set to a
+filesystem boundary.  \fBsharefs\fR(4FS) can instantiate per-zone subject to
 the brand restrictions.
 .SS "Networking"
 A zone has its own port number space for \fBTCP\fR, \fBUDP\fR, and \fBSCTP\fR
@@ -212,12 +212,12 @@ its \fBIP\fR address and spoof \fBARP\fR packets.
 .sp
 .LP
 The shared-\fBIP\fR zones are assigned one or more network interface names and
-\fBIP\fR addresses in \fBzonecfg\fR(1M). The network interface name(s) must
+\fBIP\fR addresses in \fBzonecfg\fR(8). The network interface name(s) must
 also be configured in the global zone.
 .sp
 .LP
 The exclusive-\fBIP\fR zones are assigned one or more network interface names
-in \fBzonecfg\fR(1M). The network interface names must be exclusively assigned
+in \fBzonecfg\fR(8). The network interface names must be exclusively assigned
 to that zone, that is, it (or they) can not be assigned to some other running
 zone, nor can they be used by the global zone.
 .sp
@@ -227,16 +227,16 @@ The full \fBIP\fR-level functionality in the form of \fBDHCP\fR client,
 not in shared-\fBIP\fR zones.
 .SS "Host Identifiers"
 A zone is capable of emulating a 32-bit host identifier, which can be
-configured via \fBzonecfg\fR(1M), for the purpose of system consolidation. If a
+configured via \fBzonecfg\fR(8), for the purpose of system consolidation. If a
 zone emulates a host identifier, then commands such as \fBhostid\fR(1) and
-\fBsysdef\fR(1M) as well as C interfaces such as \fBsysinfo\fR(2) and
+\fBsysdef\fR(8) as well as C interfaces such as \fBsysinfo\fR(2) and
 \fBgethostid\fR(3C) that are executed within the context of the zone will
 display or return the zone's emulated host identifier rather than the host
 machine's identifier.
 .SH SEE ALSO
 \fBhostid\fR(1), \fBzlogin\fR(1), \fBzonename\fR(1),
-\fBsshd\fR(1M), \fBsysdef\fR(1M), \fBzoneadm\fR(1M), \fBzonecfg\fR(1M),
+\fBsshd\fR(8), \fBsysdef\fR(8), \fBzoneadm\fR(8), \fBzonecfg\fR(8),
 \fBkill\fR(2), \fBpriocntl\fR(2), \fBsysinfo\fR(2), \fBgethostid\fR(3C),
-\fBgetzoneid\fR(3C), \fBucred_get\fR(3C), \fBnfs\fR(4), \fBproc\fR(4),
-\fBsmb\fR(4), \fBattributes\fR(5), \fBbrands\fR(5), \fBprivileges\fR(5),
-\fBsharefs\fR(7FS), \fBcrgetzoneid\fR(9F)
+\fBgetzoneid\fR(3C), \fBucred_get\fR(3C), \fBnfs\fR(5), \fBproc\fR(5),
+\fBsmb\fR(5), \fBattributes\fR(7), \fBbrands\fR(7), \fBprivileges\fR(7),
+\fBsharefs\fR(4FS), \fBcrgetzoneid\fR(9F)

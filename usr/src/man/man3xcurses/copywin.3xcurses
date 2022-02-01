@@ -132,7 +132,7 @@ No errors are defined.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -151,4 +151,4 @@ MT-Level	Unsafe
 .sp
 .LP
 \fBcurses\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBnewpad\fR(3XCURSES),
-\fBoverlay\fR(3XCURSES), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBoverlay\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)

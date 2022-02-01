@@ -255,7 +255,7 @@ symbols from <\fBsys/time.h\fR>. See \fBtime.h\fR(3HEAD).
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -272,4 +272,4 @@ Interface Stability	Standard
 .sp
 .LP
 \fBgetrlimit\fR(2), \fBgetpriority\fR(3C), \fBtime.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)

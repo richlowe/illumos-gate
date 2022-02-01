@@ -139,7 +139,7 @@ if (blkno >= (1<<20)) {
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -155,7 +155,7 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBscsi_setup_cdb\fR(9F), \fBscsi_device\fR(9S),
+\fBattributes\fR(7), \fBscsi_setup_cdb\fR(9F), \fBscsi_device\fR(9S),
 \fBscsi_pkt\fR(9S)
 .sp
 .LP

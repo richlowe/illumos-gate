@@ -67,8 +67,8 @@ module: tswtclmt                         instance: <action id>
 .SH SEE ALSO
 .sp
 .LP
-\fBipqosconf\fR(1M), \fBdlcosmk\fR(7ipp), \fBdscpmk\fR(7ipp),
-\fBflowacct\fR(7ipp), \fBipqos\fR(7ipp), \fBipgpc\fR(7ipp), \fBtokenmt\fR(7ipp)
+\fBipqosconf\fR(8), \fBdlcosmk\fR(4IPP), \fBdscpmk\fR(4IPP),
+\fBflowacct\fR(4IPP), \fBipqos\fR(4IPP), \fBipgpc\fR(4IPP), \fBtokenmt\fR(4IPP)
 .sp
 .LP
 \fIRFC 2859, A Time Sliding Window Three Colour Marker (TSWTCM)\fR W. Fang, N.

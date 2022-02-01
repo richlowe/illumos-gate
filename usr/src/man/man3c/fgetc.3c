@@ -89,7 +89,7 @@ char\fR converted to an \fBint\fR, from the input stream pointed to by
 stream (if defined).
 .sp
 .LP
-For standard-conforming (see \fBstandards\fR(5)) applications, if the
+For standard-conforming (see \fBstandards\fR(7)) applications, if the
 end-of-file indicator for the stream is set, \fBfgetc()\fR returns \fBEOF\fR
 whether or not a next byte is present.
 .sp
@@ -139,7 +139,7 @@ Upon successful completion, \fBfgetc()\fR, \fBgetc()\fR, \fBgetc_unlocked()\fR,
 \fBgetchar()\fR, \fBgetchar_unlocked()\fR, and \fBgetw()\fR return the next
 byte from the input stream pointed to by \fIstream\fR. If the stream is at
 end-of-file, the end-of-file indicator for the stream is set and these
-functions return \fBEOF\fR. For standard-conforming (see \fBstandards\fR(5))
+functions return \fBEOF\fR. For standard-conforming (see \fBstandards\fR(7))
 applications, if the end-of-file indicator for the stream is set, these
 functions return \fBEOF\fR whether or not the stream is at end-of-file. If a
 read error occurs, the error indicator for the stream is set, \fBEOF\fR is
@@ -265,7 +265,7 @@ functions instead.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -289,7 +289,7 @@ MT-Level	See \fBNOTES\fR below.
 \fBfgets\fR(3C), \fBfgetwc\fR(3C), \fBfgetws\fR(3C), \fBflockfile\fR(3C),
 \fBfopen\fR(3C), \fBfread\fR(3C), \fBfscanf\fR(3C), \fBgets\fR(3C),
 \fBputc\fR(3C), \fBscanf\fR(3C), \fBstdio\fR(3C), \fBungetc\fR(3C),
-\fBungetwc\fR(3C), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBungetwc\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

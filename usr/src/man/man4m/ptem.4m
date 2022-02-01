@@ -20,8 +20,8 @@ ptem \- STREAMS Pseudo Terminal Emulation module
 discipline and pseudo terminal driver, emulates a terminal.
 .sp
 .LP
-The \fBptem\fR module must be pushed (see  \fBI_PUSH\fR, \fBstreamio\fR(7I))
-onto the slave side of a pseudo terminal STREAM, before the \fBldterm\fR(7M)
+The \fBptem\fR module must be pushed (see  \fBI_PUSH\fR, \fBstreamio\fR(4I))
+onto the slave side of a pseudo terminal STREAM, before the \fBldterm\fR(4M)
 module is pushed.
 .sp
 .LP
@@ -61,8 +61,8 @@ and passed upstream; the resulting mode is retained for use in subsequent
 .SH SEE ALSO
 .sp
 .LP
-\fBstty\fR(1), \fBioctl\fR(2), \fBldterm\fR(7M), \fBpckt\fR(7M),
-\fBstreamio\fR(7I), \fBtermio\fR(7I)
+\fBstty\fR(1), \fBioctl\fR(2), \fBldterm\fR(4M), \fBpckt\fR(4M),
+\fBstreamio\fR(4I), \fBtermio\fR(4I)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

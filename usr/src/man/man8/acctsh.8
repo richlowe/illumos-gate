@@ -75,11 +75,11 @@ accounting
 .LP
 \fBchargefee\fR can be invoked to charge a \fInumber\fR of units to
 \fIlogin-name\fR. A record is written to \fB/var/adm/fee\fR, to be merged with
-other accounting records by \fBrunacct\fR(1M).
+other accounting records by \fBrunacct\fR(8).
 .SS "ckpacct Command"
 .sp
 .LP
-\fBckpacct\fR should be initiated using \fBcron\fR(1M) to periodically check
+\fBckpacct\fR should be initiated using \fBcron\fR(8) to periodically check
 the size of \fB/var/adm/pacct\fR. If the size exceeds \fIblocks\fR, \fB500\fR
 by default, \fBturnacct\fR will be invoked with argument \fBswitch\fR. To avoid
 a conflict with \fBturnacct switch\fR execution in \fBrunacct\fR, do not run
@@ -89,16 +89,16 @@ automatically turn off the collection of process accounting records via the
 \fBoff\fR argument to \fBturnacct\fR. When at least  \fB500\fR blocks are
 restored,  the accounting will be activated again on the next invocation of
 \fBckpacct\fR. This feature is sensitive to the frequency at which
-\fBckpacct\fR is executed, usually by the \fBcron\fR(1M) command.
+\fBckpacct\fR is executed, usually by the \fBcron\fR(8) command.
 .SS "dodisk Command"
 .sp
 .LP
-\fBdodisk\fR should be invoked by \fBcron\fR(1M) to perform the disk accounting
+\fBdodisk\fR should be invoked by \fBcron\fR(8) to perform the disk accounting
 functions.
 .SS "lastlogin Command"
 .sp
 .LP
-\fBlastlogin\fR is invoked by \fBrunacct\fR(1M) to update
+\fBlastlogin\fR is invoked by \fBrunacct\fR(8) to update
 \fB/var/adm/acct/sum/loginlog\fR, which shows the last date on which each
 person logged in.
 .SS "monacct Command"
@@ -107,7 +107,7 @@ person logged in.
 \fBmonacct\fR should be invoked once each month or each accounting period.
 \fInumber\fR indicates which month or period it is. If \fInumber\fR is not
 given, it defaults to the current month (01\(mi12). This default is useful if
-\fBmonacct\fR is to executed using \fBcron\fR(1M) on the first day of each
+\fBmonacct\fR is to executed using \fBcron\fR(8) on the first day of each
 month. \fBmonacct\fR creates summary files in \fB/var/adm/acct/fiscal\fR and
 restarts the summary files in \fB/var/adm/acct/sum\fR.
 .SS "nulladm Command"
@@ -120,11 +120,11 @@ group are \fBadm\fR. It is called by various accounting shell procedures.
 .LP
 \fBprctmp\fR can be used to print the session record file (normally
 \fB/var/adm/acct/nite/ctmp\fR created by \fBacctcon1\fR (see
-\fBacctcon\fR(1M)).
+\fBacctcon\fR(8)).
 .SS "prdaily Command"
 .sp
 .LP
-\fBprdaily\fR is invoked by \fBrunacct\fR(1M) to format a report of the
+\fBprdaily\fR is invoked by \fBrunacct\fR(8) to format a report of the
 previous day's accounting data. The report resides in
 \fB/var/adm/acct/sum/rprt/mmdd\fR where \fImmdd\fR is the month and day of the
 report. The current daily accounting reports may be printed by typing
@@ -148,13 +148,13 @@ to turn process accounting on.
 .SS "turnacct Command"
 .sp
 .LP
-\fBturnacct\fR is an interface to \fBaccton\fR (see \fBacct\fR(1M)) to turn
+\fBturnacct\fR is an interface to \fBaccton\fR (see \fBacct\fR(8)) to turn
 process accounting \fBon\fR or \fBoff\fR. The \fBswitch\fR argument moves the
 current \fB/var/adm/pacct\fR to the next free name in
 \fB/var/adm/pacct.\fIincr\fR\fR (where \fIincr\fR is a number starting with
 \fB0\fR and incrementing by one  for each additional \fBpacct\fR file), then
 turns accounting back on again. This procedure is called by \fBckpacct\fR and
-thus can be taken care of by the \fBcron\fR(1M) command and used to keep \fB
+thus can be taken care of by the \fBcron\fR(8) command and used to keep \fB
 pacct\fR to a reasonable size.   \fBshutacct\fR uses \fBturnacct\fR to stop
 process accounting.   \fBstartup\fR uses \fBturnacct\fR to start process
 accounting.
@@ -189,7 +189,7 @@ each invocation of \fBmonacct\fR.
 \fB\fB-o\fR\fR
 .ad
 .RS 6n
-This option uses \fBacctdusg\fR (see \fBacct\fR(1M)) to do a slower version of
+This option uses \fBacctdusg\fR (see \fBacct\fR(8)) to do a slower version of
 disk accounting by login directory. \fIfilename\fRs specifies the one or more
 filesystem names where disk accounting will be done.  If \fIfilename\fRs are
 used, disk accounting will be done on these filesystems only. If the \fB-o\fR
@@ -205,7 +205,7 @@ names of mountable filesystems.
 \fB\fB/etc/logadm.conf\fR\fR
 .ad
 .RS 30n
-Configuration file for the \fBlogadm\fR(1M) command
+Configuration file for the \fBlogadm\fR(8) command
 .RE
 
 .sp
@@ -311,13 +311,13 @@ History of user access and administration information
 .SH SEE ALSO
 .sp
 .LP
-\fBacctcom\fR(1), \fBacct\fR(1M), \fBacctcms\fR(1M), \fBacctcon\fR(1M),
-\fBacctmerg\fR(1M), \fBacctprc\fR(1M), \fBcron\fR(1M), \fBfwtmp\fR(1M),
-\fBlogadm\fR(1M), \fBrunacct\fR(1M), \fBacct\fR(2), \fBacct.h\fR(3HEAD),
-\fButmpx\fR(4), \fBattributes\fR(5)
+\fBacctcom\fR(1), \fBacct\fR(8), \fBacctcms\fR(8), \fBacctcon\fR(8),
+\fBacctmerg\fR(8), \fBacctprc\fR(8), \fBcron\fR(8), \fBfwtmp\fR(8),
+\fBlogadm\fR(8), \fBrunacct\fR(8), \fBacct\fR(2), \fBacct.h\fR(3HEAD),
+\fButmpx\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
-See \fBrunacct\fR(1M) for the main daily accounting shell script, which
+See \fBrunacct\fR(8) for the main daily accounting shell script, which
 performs the accumulation of connect, process, fee, and disk accounting on a
 daily basis. It also creates summaries of command usage.

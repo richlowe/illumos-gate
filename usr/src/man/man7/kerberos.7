@@ -28,7 +28,7 @@ unique ticket, its identity is guaranteed.
 .LP
 To obtain tickets, a client must first initialize the Kerberos session, either
 by using the \fBkinit\fR(1) command or a \fBPAM\fR module. (See
-\fBpam_krb5\fR(5)). \fBkinit\fR prompts for a password, and then communicates
+\fBpam_krb5\fR(7)). \fBkinit\fR prompts for a password, and then communicates
 with a \fIKey Distribution Center\fR (\fBKDC\fR). The \fBKDC\fR returns a
 \fITicket-Granting Ticket\fR (\fBTGT\fR) and prompts for a confirmation
 password. If the client confirms the password, it can use the Ticket-Granting
@@ -133,7 +133,7 @@ the words \fBadmin\fR and \fBhost\fR are reserved keywords.
 
 .SH SEE ALSO
 \fBkdestroy\fR(1), \fBkinit\fR(1), \fBklist\fR(1), \fBkpasswd\fR(1),
-\fBkrb5.conf\fR(4), \fBkrb5envvar\fR(5)
+\fBkrb5.conf\fR(5), \fBkrb5envvar\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Security Services\fR

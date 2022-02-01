@@ -19,7 +19,7 @@ newaliases \- rebuild the data base for the mail aliases file
 \fB/etc/mail/aliases\fR.
 .sp
 .LP
-\fBnewaliases\fR accepts all the flags that \fBsendmail\fR(1M) accepts.
+\fBnewaliases\fR accepts all the flags that \fBsendmail\fR(8) accepts.
 However, most of these flags have no effect, except for the \fB-C\fR option and
 three of the \fBProcessing\fR \fBOptions\fR that can be set from a
 configuration file with the \fB-o\fR option:
@@ -60,7 +60,7 @@ Set the default log level to \fIn\fR. Defaults to \fB9\fR.
 .ad
 .sp .6
 .RS 4n
-Validate the \fBRHS\fR of aliases when rebuilding the \fBaliases\fR(4)
+Validate the \fBRHS\fR of aliases when rebuilding the \fBaliases\fR(5)
 database.
 .RE
 
@@ -73,7 +73,7 @@ database.
 .sp
 .LP
 The following command runs \fBnewaliases\fR on an alias file different from the
-\fB/etc/mail/aliases\fR default in \fBsendmail\fR(1M):
+\fB/etc/mail/aliases\fR default in \fBsendmail\fR(8):
 
 .sp
 .in +2
@@ -200,4 +200,4 @@ Berkeley DataBase file maintained by newaliases
 .SH SEE ALSO
 .sp
 .LP
-\fBsendmail\fR(1M), \fBaliases\fR(4), \fBattributes\fR(5)
+\fBsendmail\fR(8), \fBaliases\fR(5), \fBattributes\fR(7)

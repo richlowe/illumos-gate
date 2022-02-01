@@ -39,14 +39,14 @@ The \fBasy\fR module is a loadable STREAMS driver that provides basic support
 for Intel-8250, National Semiconductor-16450, 16550, and some 16650 and 16750
 and equivalent UARTs connected via the ISA-bus, in addition to basic
 asynchronous communication support. The \fBasy\fR module supports those
-\fBtermio\fR(7I) device control functions specified by flags in the
+\fBtermio\fR(4I) device control functions specified by flags in the
 \fBc_cflag\fR word of the \fBtermios\fR structure, and by the \fBIGNBRK,\fR
 \fBIGNPAR,\fR \fBPARMRK\fR, \fBINPCK\fR, \fBIXON\fR, \fBIXANY\fR, or
 \fBIXOFF\fR flags in the c_iflag word of the termios structure. All other
-\fBtermio\fR(7I) functions must be performed by \fBSTREAMS\fR modules pushed
-atop the driver. When a device is opened, the \fBldterm\fR(7M) and
-\fBttcompat\fR(7M) \fBSTREAMS\fR modules are automatically pushed on top of the
-stream, providing the standard \fBtermio\fR(7I) interface.
+\fBtermio\fR(4I) functions must be performed by \fBSTREAMS\fR modules pushed
+atop the driver. When a device is opened, the \fBldterm\fR(4M) and
+\fBttcompat\fR(4M) \fBSTREAMS\fR modules are automatically pushed on top of the
+stream, providing the standard \fBtermio\fR(4I) interface.
 .sp
 .LP
 The character-special devices \fB/dev/term/a\fR, \fB/dev/term/b\fR,
@@ -70,7 +70,7 @@ Note -
 .RS 2
 This module is affected by the setting of certain eeprom variables,
 ttya-ignore-cd and ttya-rts-dtr-off (and similarly for ttyb-, ttyc-, and ttyd-
-parameters). For information on these parameters, see the \fBeeprom\fR(1M) man
+parameters). For information on these parameters, see the \fBeeprom\fR(8) man
 page.
 .RE
 .LP
@@ -128,7 +128,7 @@ run over the serial console port when Alternate Break sequence is in effect.
 Although PPP is a binary protocol, it is able to avoid these sequences using
 the ACCM feature in \fIRFC 1662\fR. For Solaris PPP 4.0, you do this by adding
 the following line to the \fB/etc/ppp/options\fR file (or other configuration
-files used for the connection; see \fBpppd\fR(1M) for details):
+files used for the connection; see \fBpppd\fR(8) for details):
 .sp
 .in +2
 .nf
@@ -141,7 +141,7 @@ asyncmap 0x00002000
 By default, the Alternate Break sequence is a three character sequence:
 carriage return, tilde and control-B (CR ~ CTRL-B), but may be changed by the
 driver. For more information on breaking (entering the debugger or monitor),
-see \fBkbd\fR(1) and \fBkb\fR(7M).
+see \fBkbd\fR(1) and \fBkb\fR(4M).
 .SH ERRORS
 .sp
 .LP
@@ -233,7 +233,7 @@ dial-in tty lines
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -249,9 +249,9 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBtip\fR(1), \fBkbd\fR(1), \fBuucp\fR(1C), \fBeeprom\fR(1M), \fBpppd\fR(1M),
-\fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C), \fBattributes\fR(5),
-\fBldterm\fR(7M), \fBttcompat\fR(7M), \fBkb\fR(7M), \fBtermio\fR(7I)
+\fBtip\fR(1), \fBkbd\fR(1), \fBuucp\fR(1C), \fBeeprom\fR(8), \fBpppd\fR(8),
+\fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C), \fBattributes\fR(7),
+\fBldterm\fR(4M), \fBttcompat\fR(4M), \fBkb\fR(4M), \fBtermio\fR(4I)
 .SH DIAGNOSTICS
 .sp
 .ne 2

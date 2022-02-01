@@ -223,7 +223,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -268,7 +268,7 @@ installation software database or the indicated \fBpkgmap\fR file.
 .sp .6
 .RS 4n
 Check packages based on the value of the \fBCATEGORY\fR parameter stored in the
-installed or spooled package's \fBpkginfo\fR(4) file.
+installed or spooled package's \fBpkginfo\fR(5) file.
 .RE
 
 .SH OPERANDS
@@ -400,15 +400,15 @@ An error occurred.
 .SH SEE ALSO
 .sp
 .LP
-\fBpkginfo\fR(1), \fBpkgtrans\fR(1), \fBpkgadd\fR(1M), \fBpkgask\fR(1M),
-\fBpkgrm\fR(1M), \fBpkginfo\fR(4), \fBattributes\fR(5), \fBlargefile\fR(5)
+\fBpkginfo\fR(1), \fBpkgtrans\fR(1), \fBpkgadd\fR(8), \fBpkgask\fR(8),
+\fBpkgrm\fR(8), \fBpkginfo\fR(5), \fBattributes\fR(7), \fBlargefile\fR(7)
 .sp
 .LP
 \fI\fR
 .SH NOTES
 .sp
 .LP
-Package commands are \fBlargefile\fR(5)-aware. They handle files larger than 2
+Package commands are \fBlargefile\fR(7)-aware. They handle files larger than 2
 GB in the same way they handle smaller files. In their current implementations,
-\fBpkgadd\fR(1M), \fBpkgtrans\fR(1) and other package commands can process a
+\fBpkgadd\fR(8), \fBpkgtrans\fR(1) and other package commands can process a
 datastream of  up to 4 GB.

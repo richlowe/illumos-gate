@@ -217,7 +217,7 @@ xxmmap(dev_t dev, off_t off, int prot)
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -233,7 +233,7 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBattributes\fR(5), \fBattach\fR(9E), \fBdetach\fR(9E),
+\fBmmap\fR(2), \fBattributes\fR(7), \fBattach\fR(9E), \fBdetach\fR(9E),
 \fBdevmap\fR(9E), \fBsegmap\fR(9E), \fBddi_btop\fR(9F),
 \fBddi_get_soft_state\fR(9F), \fBddi_mmap_get_model\fR(9F),
 \fBddi_model_convert_from\fR(9F), \fBddi_regs_map_free\fR(9F),

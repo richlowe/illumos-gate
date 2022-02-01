@@ -40,9 +40,9 @@ cfgadm_scsi \- SCSI hardware specific commands for cfgadm
 .LP
 The \fBSCSI\fR hardware specific library \fB/usr/lib/cfgadm/scsi.so.1\fR
 provides the functionality for \fBSCSI\fR hot-plugging through the
-\fBcfgadm\fR(1M) command. \fBcfgadm\fR operates on attachment points, which are
+\fBcfgadm\fR(8) command. \fBcfgadm\fR operates on attachment points, which are
 locations in the system where hardware resources can be dynamically
-reconfigured. Refer to \fBcfgadm\fR(1M) for information regarding attachment
+reconfigured. Refer to \fBcfgadm\fR(8) for information regarding attachment
 points.
 .sp
 .LP
@@ -118,7 +118,7 @@ sysctrl0:slot1       sbus-upa     connected    configured   ok
 
 .sp
 .LP
-Refer to \fBcfgadm\fR(1M) for more information regarding listing attachment
+Refer to \fBcfgadm\fR(8) for more information regarding listing attachment
 points. The receptacle and occupant state for attachment points at the
 \fBSCSI\fR controller have the following meanings:
 .sp
@@ -329,7 +329,7 @@ No hardware specific options are currently defined.
 .ad
 .RS 24n
 Attachment points of class \fBscsi\fR can be listed by using the \fBselect\fR
-sub-option. Refer to the \fBcfgadm\fR(1M) man page for additional information.
+sub-option. Refer to the \fBcfgadm\fR(8) man page for additional information.
 .RE
 
 .sp
@@ -712,8 +712,8 @@ platform-specific library for generic \fBSCSI\fR hot-plugging
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm\fR(1M), \fBluxadm\fR(1M), \fBconfig_admin\fR(3CFGADM),
-\fBlibcfgadm\fR(3LIB), \fBattributes\fR(5)
+\fBcfgadm\fR(8), \fBluxadm\fR(8), \fBconfig_admin\fR(3CFGADM),
+\fBlibcfgadm\fR(3LIB), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

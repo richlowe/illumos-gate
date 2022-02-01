@@ -15,9 +15,9 @@ bootparams \- boot parameter data base
 .SH DESCRIPTION
 The \fBbootparams\fR file contains a list of client entries that diskless
 clients use for booting. Diskless booting clients retrieve this information by
-issuing requests to a server running the \fBrpc.bootparamd\fR(1M) program. The
+issuing requests to a server running the \fBrpc.bootparamd\fR(8) program. The
 \fBbootparams\fR file may be used in conjunction with or in place of other
-sources for the \fBbootparams\fR information. See \fBnsswitch.conf\fR(4).
+sources for the \fBbootparams\fR information. See \fBnsswitch.conf\fR(5).
 .sp
 .LP
 For each client the file contains an entry with the client's name and a list of
@@ -133,7 +133,7 @@ then in "wildcard" entry. If none is found, the server's domain name is used.
 For the JumpStart installation of machines that do not have video displays, use
 the \fBterm\fR keyword to identify the terminal type of the boot server.
 Terminal types are listed in \fB/usr/share/lib/terminfo\fR (see
-\fBterminfo\fR(4)).
+\fBterminfo\fR(5)).
 .sp
 .LP
 An entry with the \fBns\fR keyword associates a server (a name server) with,
@@ -214,7 +214,7 @@ ns=otis:nisplus(255.255.255.0) term=:xterms domain=eu.cte.example.com
 .RE
 
 .SH SEE ALSO
-\fBrpc.bootparamd\fR(1M), \fBnsswitch.conf\fR(4)
+\fBrpc.bootparamd\fR(8), \fBnsswitch.conf\fR(5)
 .SH NOTES
 The \fBNIS+\fR, \fBsysidtool\fR, and jumpstart facilities are not present in
 illumos. They are documented here solely for users who wish to use illumos as
@@ -224,4 +224,4 @@ a jumpstart server for older Solaris releases.
 Solaris diskless clients use the keywords \fBroot\fR and \fBrootopts\fR to look
 up the pathname for the root filesystem and the mount options for the root
 filesystem, respectively. These are the only keywords meaningful for diskless
-booting clients. See \fBmount_ufs\fR(1M).
+booting clients. See \fBmount_ufs\fR(8).

@@ -37,7 +37,7 @@ svc:/network/routing/route:default
 .sp
 .LP
 The daemon listens on a \fBudp\fR socket for the \fBroute\fR service (see
-\fBservices\fR(4)) for Routing Information Protocol packets. It also sends and
+\fBservices\fR(5)) for Routing Information Protocol packets. It also sends and
 receives multicast Router Discovery ICMP messages. If the host is a router,
 \fBin.routed\fR periodically supplies copies of its routing tables to any
 directly connected hosts and networks. It also advertises or solicits default
@@ -51,7 +51,7 @@ for the interfaces to the kernel routing table. Soon after being first started,
 and provided there is at least one interface on which RIP has not been
 disabled, \fBin.routed\fR deletes all pre-existing non-static routes in the
 kernel table. Static routes in the kernel table are preserved and included in
-RIP responses if they have a valid RIP metric (see \fBroute\fR(1M)).
+RIP responses if they have a valid RIP metric (see \fBroute\fR(8)).
 .sp
 .LP
 If more than one interface is present (not counting the loopback interface), it
@@ -65,13 +65,13 @@ When a request packet is received, \fBin.routed\fR formulates a reply based on
 the information maintained in its internal tables. The response packet
 generated contains a list of known routes, each marked with a "hop count"
 metric (a count of 16 or greater is considered "infinite"). Advertised metrics
-reflect the metric associated with an interface (see \fBifconfig\fR(1M)), so
+reflect the metric associated with an interface (see \fBifconfig\fR(8)), so
 setting the metric on an interface is an effective way to steer traffic.
 .sp
 .LP
 Responses do not include routes with a first hop on the requesting network, to
 implement in part split-horizon. Requests from query programs such as
-\fBrtquery\fR(1M) are answered with the complete table.
+\fBrtquery\fR(8) are answered with the complete table.
 .sp
 .LP
 The routing table maintained by the daemon includes space for several gateways
@@ -114,7 +114,7 @@ interfaces that support multicasting.
 .LP
 If no response is received on a remote interface, if there are errors while
 sending responses, or if there are more errors than input or output (see
-\fBnetstat\fR(1M)), then the cable or some other part of the interface is
+\fBnetstat\fR(8)), then the cable or some other part of the interface is
 assumed to be disconnected or broken, and routes are adjusted appropriately.
 .sp
 .LP
@@ -134,7 +134,7 @@ The Router Discovery standard requires that advertisements have a default
 "lifetime" of 30 minutes. That means should something happen, a client can be
 without a good route for 30 minutes. It is a good idea to reduce the default to
 45 seconds using \fB\fR\fB-P\fR \fBrdisc_interval=45\fR on the command line or
-\fBrdisc_interval=45\fR in the \fB/etc/gateways\fR file. See \fBgateways\fR(4).
+\fBrdisc_interval=45\fR in the \fB/etc/gateways\fR file. See \fBgateways\fR(5).
 .sp
 .LP
 While using Router Discovery (which happens by default when the system has a
@@ -147,7 +147,7 @@ running with \fB-q\fR might need the \fBno_rdisc\fR argument described below.
 .LP
 To support "legacy" systems that can handle neither RIPv2 nor Router Discovery,
 you can use the \fBpm_rdisc\fR parameter in the \fB/etc/gateways\fR. See
-\fBgateways\fR(4).
+\fBgateways\fR(5).
 .sp
 .LP
 By default, neither Router Discovery advertisements nor solicitations are sent
@@ -423,7 +423,7 @@ Displays the version of the daemon.
 Increase the debugging level, which causes more information to be logged on the
 tracefile specified with \fB-T\fR or stdout. The debugging level can be
 increased or decreased with the \fBSIGUSR1\fR or \fBSIGUSR2\fR signals or with
-the \fBrtquery\fR(1M) command.
+the \fBrtquery\fR(8) command.
 .RE
 
 .SH FILES
@@ -434,7 +434,7 @@ the \fBrtquery\fR(1M) command.
 .ad
 .RS 22n
 If this file is present and contains the address of a default router, the
-system startup script does not run \fBin.routed\fR. See \fBdefaultrouter\fR(4).
+system startup script does not run \fBin.routed\fR. See \fBdefaultrouter\fR(5).
 .RE
 
 .sp
@@ -444,15 +444,15 @@ system startup script does not run \fBin.routed\fR. See \fBdefaultrouter\fR(4).
 .ad
 .RS 22n
 List of distant gateways and general configuration options for \fBin.routed\fR.
-See \fBgateways\fR(4).
+See \fBgateways\fR(5).
 .RE
 
 .SH SEE ALSO
 .sp
 .LP
-\fBroute\fR(1M), \fBrouteadm\fR(1M), \fBrtquery\fR(1M), \fBsvcadm\fR(1M),
-\fBioctl\fR(2), \fBinet\fR(3SOCKET), \fBdefaultrouter\fR(4), \fBgateways\fR(4),
-\fBattributes\fR(5), \fBicmp\fR(7P), \fBinet\fR(7P), \fBudp\fR(7P)
+\fBroute\fR(8), \fBrouteadm\fR(8), \fBrtquery\fR(8), \fBsvcadm\fR(8),
+\fBioctl\fR(2), \fBinet\fR(3SOCKET), \fBdefaultrouter\fR(5), \fBgateways\fR(5),
+\fBattributes\fR(7), \fBicmp\fR(4P), \fBinet\fR(4P), \fBudp\fR(4P)
 .sp
 .LP
 \fIInternet Transport Protocols, XSIS 028112, Xerox System Integration

@@ -16,7 +16,7 @@ ports \- creates /dev entries and inittab entries for serial lines
 .SH DESCRIPTION
 .sp
 .LP
-\fBdevfsadm\fR(1M) is now the preferred command for \fB/dev\fR and
+\fBdevfsadm\fR(8) is now the preferred command for \fB/dev\fR and
 \fB/devices\fR and should be used instead of \fBports\fR.
 .sp
 .LP
@@ -53,7 +53,7 @@ Creates new \fB/dev/term\fR and \fB/dev/cua\fR links for new serial devices.
 .RS +4
 .TP
 4.
-Invokes \fBsacadm\fR(1M) to make new port monitor entries for the new
+Invokes \fBsacadm\fR(8) to make new port monitor entries for the new
 devices. This is not done automatically for on-board ports; on workstations
 these ports are often not used for dial-in sessions, so a port-monitor for one
 of these ports must be created explicitly.
@@ -122,7 +122,7 @@ The following options are supported:
 .RS 14n
 Causes \fBports\fR to presume that the \fB/dev/term\fR, \fB/dev/cua\fR, and
 \fB/devices\fR directories are found under \fIrootdir\fR, not directly under
-\fB/\fR. If this argument is specified, \fBsacadm\fR(1M) is not invoked, since
+\fB/\fR. If this argument is specified, \fBsacadm\fR(8) is not invoked, since
 it would update terminal administration files under \fB/etc\fR without regard
 to the \fIrootdir\fR.
 .RE
@@ -286,8 +286,8 @@ Logical dialout port devices
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_drv\fR(1M), \fBdevfsadm\fR(1M), \fBdrvconfig\fR(1M), \fBpmadm\fR(1M),
-\fBsacadm\fR(1M), \fBattributes\fR(5), \fBdevfs\fR(7FS), \fBattach\fR(9E),
+\fBadd_drv\fR(8), \fBdevfsadm\fR(8), \fBdrvconfig\fR(8), \fBpmadm\fR(8),
+\fBsacadm\fR(8), \fBattributes\fR(7), \fBdevfs\fR(4FS), \fBattach\fR(9E),
 \fBddi_create_minor_node\fR(9F)
 .sp
 .LP

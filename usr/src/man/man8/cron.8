@@ -45,7 +45,7 @@ submitted.
 .sp
 .LP
 \fBcron\fR and \fBat\fR jobs are not executed if your account is locked.
-The \fBshadow\fR(4) file defines which accounts are not
+The \fBshadow\fR(5) file defines which accounts are not
 locked and will have their jobs executed.
 .SS "Setting cron Jobs Across Timezones"
 .LP
@@ -90,7 +90,7 @@ jobs to \fB/usr/bin:/usr/ucb:\fR. Root jobs continue to use
 \fB/usr/sbin:/usr/bin\fR.
 .sp
 .LP
-The \fBcron\fR log file is periodically rotated by \fBlogadm\fR(1M).
+The \fBcron\fR log file is periodically rotated by \fBlogadm\fR(8).
 .SH FILES
 .ne 2
 .na
@@ -156,13 +156,13 @@ Configuration file for \fBlogadm\fR
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBat\fR(1), \fBcrontab\fR(1), \fBsh\fR(1), \fBlogadm\fR(1M),
-\fBsvcadm\fR(1M), \fBqueuedefs\fR(4), \fBshadow\fR(4), \fBattributes\fR(5),
-\fBrbac\fR(5), \fBsmf\fR(5), \fBsmf_security\fR(5)
+\fBsvcs\fR(1), \fBat\fR(1), \fBcrontab\fR(1), \fBsh\fR(1), \fBlogadm\fR(8),
+\fBsvcadm\fR(8), \fBqueuedefs\fR(5), \fBshadow\fR(5), \fBattributes\fR(7),
+\fBrbac\fR(7), \fBsmf\fR(7), \fBsmf_security\fR(7)
 .SH NOTES
 .LP
 The \fBcron\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -174,10 +174,10 @@ svc:/system/cron:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command. Most administrative
 actions may be delegated to users with the \fBsolaris.smf.manage.cron\fR
-authorization (see \fBrbac\fR(5) and \fBsmf_security\fR(5)).
+authorization (see \fBrbac\fR(7) and \fBsmf_security\fR(7)).
 .SH DIAGNOSTICS
 .LP
 A history of all actions taken by \fBcron\fR is stored in \fB/var/cron/log\fR

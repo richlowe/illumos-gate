@@ -9,7 +9,7 @@ scsi \- configuration files for SCSI target drivers
 .SH DESCRIPTION
 The architecture of the illumos \fBSCSI\fR subsystem distinguishes two types of
 device drivers: \fBSCSI\fR target drivers, and \fBSCSI\fR host adapter drivers.
-Target drivers like \fBsd\fR(7D) and \fBst\fR(7D) manage the device on the
+Target drivers like \fBsd\fR(4D) and \fBst\fR(4D) manage the device on the
 other end of the \fBSCSI\fR bus. Host adapter drivers manage the \fBSCSI\fR bus
 on behalf of all the devices that share it.
 .sp
@@ -22,13 +22,13 @@ for further details of these, and associated routines.
 .sp
 .LP
 Depending on the interconnect (transport), SCSI target devices are either
-self-identifying or rely on \fBdriver.conf\fR(4) entries to be recognized by
+self-identifying or rely on \fBdriver.conf\fR(5) entries to be recognized by
 the system. For self-identifying target devices the driver binding is chosen
 based on the IEEE-1275 like 'compatible' forms of the target devices. Currently
-the Fibre Channel interconnects, \fBfcp\fR(7D), \fBifp\fR(7D),
-\fBscsi_vhci\fR(7D), \fBsf\fR(7D), and the SATA framework drivers (see
-\fBsata\fR(7D)) are self-identifying. You must specify other possible
-interconnects target devices by using the target driver \fBdriver.conf\fR(4)
+the Fibre Channel interconnects, \fBfcp\fR(4D), \fBifp\fR(4D),
+\fBscsi_vhci\fR(4D), \fBsf\fR(4D), and the SATA framework drivers (see
+\fBsata\fR(4D)) are self-identifying. You must specify other possible
+interconnects target devices by using the target driver \fBdriver.conf\fR(5)
 configuration files.
 .SS "Self-Identifying"
 Host adapter drivers of class scsi-self-identifying that dynamically create
@@ -37,8 +37,8 @@ on each child. The compatible property is an ordered array of strings, each
 string is a compatible \fBform\fR. High precedence forms are defined first. For
 a particular device, the highest precedence form that has an established driver
 alias selects the driver for the device. Driver associations to compatible
-forms, called aliases, are administered by way of \fBadd_drv\fR(1M),
-\fBupdate_drv\fR(1M), and \fBrem_drv\fR(1M) utilities.
+forms, called aliases, are administered by way of \fBadd_drv\fR(8),
+\fBupdate_drv\fR(8), and \fBrem_drv\fR(8) utilities.
 .sp
 .LP
 The forms for self-identifying SCSI target devices are derived from the SCSI
@@ -292,7 +292,7 @@ in the file shipped with illumos.
 .LP
 The following line is a stub device definition which implies the host adapter
 drivers of class scsi-self-identifying might have children that bind to the
-\fBsd\fR(7D) driver:
+\fBsd\fR(4D) driver:
 
 .sp
 .in +2
@@ -303,7 +303,7 @@ name="sd" class="scsi-self-identifying";
 .sp
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -317,9 +317,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBadd_drv\fR(1M), \fBrem_drv\fR(1M), \fBupdate_drv\fR(1M),
-\fBdriver.conf\fR(4), \fBattributes\fR(5), \fBfcp\fR(7D), \fBifp\fR(7D),
-\fBsata\fR(7D), \fBscsi_vhci\fR(7D), \fBsd\fR(7D), \fBsf\fR(7D), \fBst\fR(7D),
+\fBadd_drv\fR(8), \fBrem_drv\fR(8), \fBupdate_drv\fR(8),
+\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBfcp\fR(4D), \fBifp\fR(4D),
+\fBsata\fR(4D), \fBscsi_vhci\fR(4D), \fBsd\fR(4D), \fBsf\fR(4D), \fBst\fR(4D),
 \fBscsi_ifgetcap\fR(9F), \fBscsi_init_pkt\fR(9F), \fBscsi_transport\fR(9F)
 .sp
 .LP
@@ -337,7 +337,7 @@ Interface Stability	Committed
 .LP
 \fIIEEE 1275 SCSI Target Device Binding\fR
 .SH NOTES
-With \fBdriver.conf\fR(4) configuration, you need to ensure that the
+With \fBdriver.conf\fR(5) configuration, you need to ensure that the
 \fBtarget\fR and \fBlun\fR values claimed by your target driver do not conflict
 with existing target drivers on the system. For example, if the target is a
 direct access device, the standard \fBsd.conf\fR file usually makes \fBsd\fR

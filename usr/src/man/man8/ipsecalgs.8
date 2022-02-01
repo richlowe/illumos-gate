@@ -101,8 +101,8 @@ algorithms and the protocols they belong to. These numbers are defined by the
 Internet Assigned Numbers Authority (IANA). Each algorithm belongs to a
 protocol. Algorithm information includes supported key lengths, block or MAC
 length, and the name of the cryptographic mechanism corresponding to that
-algorithm. This information is used by the IPsec modules, \fBipsecesp\fR(7P)
-and \fBipsecah\fR(7P), to determine the authentication and encryption
+algorithm. This information is used by the IPsec modules, \fBipsecesp\fR(4P)
+and \fBipsecah\fR(4P), to determine the authentication and encryption
 algorithms that can be applied to IPsec traffic.
 .sp
 .LP
@@ -131,7 +131,7 @@ provide authentication.
 .LP
 The mechanism name specified by an algorithm entry must correspond to a valid
 Solaris Cryptographic Framework mechanism. You can obtain the list of available
-mechanisms by using the \fBcryptoadm\fR(1M) command.
+mechanisms by using the \fBcryptoadm\fR(8) command.
 .sp
 .LP
 Applications can retrieve the supported algorithms and their associated
@@ -186,7 +186,7 @@ block length by separating the values with commas.
 .RS 6n
 Designates the execution mode of cryptographic requests for the specified
 protocol in the absence of cryptographic hardware provider. See
-\fBcryptoadm\fR(1M). \fIexec-mode\fR can be one of the following values:
+\fBcryptoadm\fR(8). \fIexec-mode\fR can be one of the following values:
 .sp
 .ne 2
 .na
@@ -314,7 +314,7 @@ Displays the kernel algorithm tables.
 .RS 6n
 Specifies the name of the cryptographic framework mechanism name corresponding
 to the algorithm. Cryptographic framework mechanisms are described in the
-\fBcryptoadm\fR(1M) man page.
+\fBcryptoadm\fR(8) man page.
 .RE
 
 .sp
@@ -465,7 +465,7 @@ Never edit this file manually.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -481,10 +481,10 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBcryptoadm\fR(1M), \fBipsecconf\fR(1M), \fBipseckey\fR(1M), \fBsvcadm\fR(1M),
+\fBcryptoadm\fR(8), \fBipsecconf\fR(8), \fBipseckey\fR(8), \fBsvcadm\fR(8),
 \fBgetipsecalgbyname\fR(3NSL), \fBgetipsecprotobyname\fR(3NSL),
-\fBike.config\fR(4), \fBattributes\fR(5), \fBsmf\fR(5), \fBipsecah\fR(7P),
-\fBipsecesp\fR(7P)
+\fBike.config\fR(5), \fBattributes\fR(7), \fBsmf\fR(7), \fBipsecah\fR(4P),
+\fBipsecesp\fR(4P)
 .sp
 .LP
 Piper, Derrell, \fIRFC 2407, The Internet IP Security Domain of Interpretation
@@ -499,7 +499,7 @@ decrypt packets.
 .sp
 .LP
 Synchronization of the \fBipsecalgs\fR configuration with the kernel at system
-startup is provided by the following \fBsmf\fR(5) service:
+startup is provided by the following \fBsmf\fR(7) service:
 .sp
 .in +2
 .nf
@@ -526,13 +526,13 @@ svc:/network/ipsec/ike:default (disabled)
 .LP
 Services that are delivered disabled are delivered that way because the system
 administrator must create configuration files for those services before
-enabling them. See \fBipseckey\fR(1M) and \fBike.config\fR(4). The default
+enabling them. See \fBipseckey\fR(8) and \fBike.config\fR(5). The default
 policy for the \fBpolicy\fR service is to allow all traffic to pass without
-IPsec protection. See \fBipsecconf\fR(1M).
+IPsec protection. See \fBipsecconf\fR(8).
 .sp
 .LP
 The correct administrative procedure is to create the configuration file for
-each service, then enable each service using \fBsvcadm\fR(1M), as shown in the
+each service, then enable each service using \fBsvcadm\fR(8), as shown in the
 following example:
 .sp
 .in +2
@@ -560,7 +560,7 @@ example# \fBsvcadm refresh ipsecalgs\fR
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling,
-refreshing, and requesting restart can be performed using \fBsvcadm\fR(1M). A
+refreshing, and requesting restart can be performed using \fBsvcadm\fR(8). A
 user who has been assigned the authorization shown below can perform these
 actions:
 .sp
@@ -573,14 +573,14 @@ solaris.smf.manage.ipsec
 
 .sp
 .LP
-See \fBauths\fR(1), \fBuser_attr\fR(4), \fBrbac\fR(5).
+See \fBauths\fR(1), \fBuser_attr\fR(5), \fBrbac\fR(7).
 .sp
 .LP
-The \fBipsecalgs\fR \fBsmf\fR(5) service does not have any user-configurable
+The \fBipsecalgs\fR \fBsmf\fR(7) service does not have any user-configurable
 properties.
 .sp
 .LP
-The \fBsmf\fR(5) framework records any errors in the service-specific log file.
+The \fBsmf\fR(7) framework records any errors in the service-specific log file.
 Use any of the following commands to examine the \fBlogfile\fR property:
 .sp
 .in +2
@@ -596,6 +596,6 @@ example# \fBsvccfg -s ipsecalgs listprop\fR
 .LP
 This command requires \fBsys_ip_config\fR privilege to operate and thus can run
 in the global zone and in exclusive-IP zones. All shared-IP zones share the
-same available set of algorithms; however, you can use \fBipsecconf\fR(1M) to
+same available set of algorithms; however, you can use \fBipsecconf\fR(8) to
 set up system policy that uses differing algorithms for various shared-IP
 zones. All exclusive-IP zones have their own set of algorithms.

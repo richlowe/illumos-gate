@@ -22,7 +22,7 @@ Ethernet controllers.
 .SS "Properties"
 .sp
 .LP
-The following properties can be configured using \fBdladm\fR(1M):
+The following properties can be configured using \fBdladm\fR(8):
 .sp
 .ne 2
 .na
@@ -151,7 +151,7 @@ Special network device
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a descriptions of the following attributes:
+See \fBattributes\fR(7) for a descriptions of the following attributes:
 .sp
 
 .sp
@@ -169,4 +169,4 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBattributes\fR(5), \fBdlpi\fR(7P)
+\fBdladm\fR(8), \fBattributes\fR(7), \fBdlpi\fR(4P)

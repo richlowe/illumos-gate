@@ -19,7 +19,7 @@ being installed already exists on the system.
 with this release. The default file is not writable, so to assign values
 different from this file, create a new \fBadmin\fR file. There are no naming
 restrictions for \fBadmin\fR files. Name the file when installing a package
-with the \fB-a\fR option of \fBpkgadd\fR(1M). If the \fB-a\fR option is not
+with the \fB-a\fR option of \fBpkgadd\fR(8). If the \fB-a\fR option is not
 used, the default \fBadmin\fR file is used.
 .sp
 .LP
@@ -32,7 +32,7 @@ parameter in the following form:
 .LP
 All of the parameters listed below can be defined in an \fBadmin\fR file, but
 it is not required to assign values to all of these. If a value is not
-assigned, \fBpkgadd\fR(1M) asks the installer how to proceed.
+assigned, \fBpkgadd\fR(8) asks the installer how to proceed.
 .sp
 .LP
 The valid parameters and their possible values are shown below except as noted.
@@ -52,7 +52,7 @@ there is no \fBbasedir\fR entry in the file, the installer will be prompted for
 a path name, as if the file contained the entry \fBbasedir=ask\fR. This
 parameter can also be set to \fBdefault\fR (entry is \fBbasedir=default\fR). In
 this instance, the package is installed into the base directory specified by
-the \fBBASEDIR\fR parameter in the \fBpkginfo\fR(4) file.
+the \fBBASEDIR\fR parameter in the \fBpkginfo\fR(5) file.
 .RE
 
 .sp
@@ -360,7 +360,7 @@ Abort installation if space requirements are not met.
 .ad
 .RS 30n
 Determines the user that will run request scripts. This parameter can have
-either of the values described below. See \fBpkgadd\fR(1M) for details on the
+either of the values described below. See \fBpkgadd\fR(8) for details on the
 conditions under which this parameter is useful.
 .sp
 .ne 2
@@ -370,7 +370,7 @@ conditions under which this parameter is useful.
 .RS 12n
 Run request script as user \fBinstall\fR, if such a user exists, with the
 privileges of that user. Otherwise, run script as user \fBroot\fR, with UID
-equal to 0 and with all/zone privileges. (See \fBzones\fR(5).)
+equal to 0 and with all/zone privileges. (See \fBzones\fR(7).)
 .RE
 
 .sp
@@ -457,7 +457,7 @@ default \fBadmin\fR file
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -472,7 +472,7 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBpkgadd\fR(1M), \fBpkginfo\fR(4), \fBattributes\fR(5), \fBzones\fR(5)
+\fBpkgadd\fR(8), \fBpkginfo\fR(5), \fBattributes\fR(7), \fBzones\fR(7)
 .SH NOTES
 .LP
 The value \fBask\fR should not be defined in an \fBadmin\fR file that will be

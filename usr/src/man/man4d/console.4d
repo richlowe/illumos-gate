@@ -18,35 +18,35 @@ console \- STREAMS-based console interface
 The file \fB/dev/console\fR refers to the system console device.
 \fB/dev/console\fR should be used for interactive purposes only. Use of
 \fB/dev/console\fR for logging purposes is discouraged; \fBsyslog\fR(3C) or
-\fBmsglog\fR(7D) should be used instead.
+\fBmsglog\fR(4D) should be used instead.
 .sp
 .LP
 The identity of this device depends on the \fBEEPROM\fR or \fBNVRAM\fR settings
 in effect at the most recent system reboot; by default, it is the ``workstation
 console'' device consisting of the workstation keyboard and frame buffer acting
-in concert to emulate an \fBASCII\fR terminal (see \fBwscons\fR(7D)).
+in concert to emulate an \fBASCII\fR terminal (see \fBwscons\fR(4D)).
 .sp
 .LP
 Regardless of the system configuration, the console device provides
 asynchronous serial driver semantics so that, in conjunction with the
-\fBSTREAMS\fR line discipline module \fBldterm\fR(7M), it supports the
-\fBtermio\fR(7I) terminal interface.
+\fBSTREAMS\fR line discipline module \fBldterm\fR(4M), it supports the
+\fBtermio\fR(4I) terminal interface.
 .SH SEE ALSO
 .sp
 .LP
-\fBsyslog\fR(3C), \fBtermios\fR(3C), \fBldterm\fR(7M), \fBtermio\fR(7I),
-\fBmsglog\fR(7D), \fBwscons\fR(7D)
+\fBsyslog\fR(3C), \fBtermios\fR(3C), \fBldterm\fR(4M), \fBtermio\fR(4I),
+\fBmsglog\fR(4D), \fBwscons\fR(4D)
 .SH NOTES
 .sp
 .LP
 In contrast to pre-SunOS 5.0 releases, it is no longer possible to redirect I/O
 intended for \fB/dev/console\fR to some other device. Instead, redirection now
 applies to the workstation console device using a revised programming interface
-(see \fBwscons\fR(7D)). Since the system console is normally configured to be
+(see \fBwscons\fR(4D)). Since the system console is normally configured to be
 the work station console, the overall effect is largely unchanged from previous
 releases.
 .sp
 .LP
-See \fBwscons\fR(7D) for detailed descriptions of control sequence syntax,
+See \fBwscons\fR(4D) for detailed descriptions of control sequence syntax,
 \fBANSI\fR control functions, control character functions and escape sequence
 functions.

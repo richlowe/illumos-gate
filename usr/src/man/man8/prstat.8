@@ -68,7 +68,7 @@ Long names are not truncated in this mode.
 .RS 4n
 Report only processes or lwps that are bound to processor sets in the given
 list. Each processor set is identified by an integer as reported by
-\fBpsrset\fR(1M). The load averages displayed are the sum of the load averages
+\fBpsrset\fR(8). The load averages displayed are the sum of the load averages
 of the specified processor sets (see \fBpset_getloadavg\fR(3C)). Processes with
 one or more LWPs bound to processor sets in the given list are reported even
 when the \fB-L\fR option is not used.
@@ -117,7 +117,7 @@ extra column showing process or lwps home \fIlgroup\fR with the header LGRP.
 .RS 4n
 Report only processes or lwps whose project \fBID\fR is in the given list. Each
 project \fBID\fR can be specified as either a project name or a numerical
-project \fBID\fR. See \fBproject\fR(4).
+project \fBID\fR. See \fBproject\fR(5).
 .RE
 
 .sp
@@ -205,7 +205,7 @@ Report only processes whose process \fBID\fR is in the given list.
 .RS 4n
 Report only processes or \fBlwp\fRs which have most recently executed on a
 \fBCPU\fR in the given list. Each \fBCPU\fR is identified by an integer as
-reported by \fBpsrinfo\fR(1M).
+reported by \fBpsrinfo\fR(8).
 .RE
 
 .sp
@@ -384,7 +384,7 @@ to fit the column.
 .RS 4n
 Report only processes or LWPs whose zone ID is in the given list. Each zone ID
 can be specified as either a zone name or a numerical zone ID. See
-\fBzones\fR(5).
+\fBzones\fR(7).
 .RE
 
 .sp
@@ -446,7 +446,7 @@ devices, in kilobytes (\fBK\fR), megabytes (\fBM\fR), or gigabytes (\fBG\fR).
 .RS 4n
 The resident set size of the process (\fBRSS\fR), in kilobytes (\fBK\fR),
 megabytes (\fBM\fR), or gigabytes (\fBG\fR). The RSS value is an estimate
-provided by \fBproc\fR(4) that might underestimate the actual resident set
+provided by \fBproc\fR(5) that might underestimate the actual resident set
 size. Users who want to get more accurate usage information for capacity
 planning should use the \fB-x\fR option to \fBpmap\fR(1) instead.
 .RE
@@ -487,7 +487,7 @@ Sleeping: process is waiting for an event to complete.
 .sp .6
 .RS 4n
 Waiting: process is waiting for CPU usage to drop to the CPU-caps enforced
-limits. See the description of \fBCPU-caps\fR in \fBresource_controls\fR(5).
+limits. See the description of \fBCPU-caps\fR in \fBresource_controls\fR(7).
 .RE
 
 .sp
@@ -863,16 +863,16 @@ An error occurred.
 .SH SEE ALSO
 .LP
 \fBdate\fR(1), \fBlgrpinfo\fR(1), \fBplgrp\fR(1), \fBproc\fR(1), \fBps\fR(1),
-\fBtime\fR(2), \fBpsrinfo\fR(1M), \fBpsrset\fR(1M), \fBsar\fR(1M),
-\fBpset_getloadavg\fR(3C), \fBproc\fR(4), \fBproject\fR(4),
-\fBattributes\fR(5), \fBresource_controls\fR(5), \fBzones\fR(5)
+\fBtime\fR(2), \fBpsrinfo\fR(8), \fBpsrset\fR(8), \fBsar\fR(8),
+\fBpset_getloadavg\fR(3C), \fBproc\fR(5), \fBproject\fR(5),
+\fBattributes\fR(7), \fBresource_controls\fR(7), \fBzones\fR(7)
 .SH NOTES
 .LP
 The snapshot of system usage displayed by \fBprstat\fR is true only for a
 split-second, and it may not be accurate by the time it is displayed. When the
 \fB-m\fR option is specified, \fBprstat\fR tries to turn on microstate
 accounting for each process; the original state is restored when \fBprstat\fR
-exits. See \fBproc\fR(4) for additional information about the microstate
+exits. See \fBproc\fR(5) for additional information about the microstate
 accounting facility.
 .sp
 .LP

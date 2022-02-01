@@ -76,7 +76,7 @@ higher level of dump (0, 1, ..., 9).  Files that were deleted between the level
 completely restore a file system, use the \fBr\fR function restore the level 0
 dump, and again for each incremental dump. Although  this function letter is
 intended for a complete restore onto a new file system (one just created with
-\fBnewfs\fR(1M)), if the file  system contains files not on the backup media,
+\fBnewfs\fR(8)), if the file  system contains files not on the backup media,
 they are preserved.
 .RE
 
@@ -188,7 +188,7 @@ Debug. Turn on debugging output.
 Use \fIdump_file\fR instead of \fB/dev/rmt/0\fR as the file to restore from.
 Typically \fIdump_file\fR specifies a tape or diskette drive. If
 \fIdump_file\fR is specified as `\fB\(mi\fR\&', \fBufsrestore\fR reads from the
-standard input. This allows \fBufsdump\fR(1M) and \fBufsrestore\fR to be used
+standard input. This allows \fBufsdump\fR(8) and \fBufsrestore\fR to be used
 in a pipeline to copy a file system:
 .sp
 .in +2
@@ -201,7 +201,7 @@ example# ufsdump 0f \(mi /dev/rdsk/c0t0d0s7 \e
 
 If the name of the file is of the form \fImachine\fR\fB:\fR\fIdevice\fR, the
 restore is done from the specified machine over the network using
-\fBrmt\fR(1M). Since \fBufsrestore\fR is normally run by root, the name of the
+\fBrmt\fR(8). Since \fBufsrestore\fR is normally run by root, the name of the
 local machine must appear in the \fB/.rhosts\fR file of the remote machine. If
 the file is specified as \fIuser\fR\fB@\fR\fImachine\fR\fB:\fR\fIdevice\fR,
 \fBufsrestore\fR will attempt to execute as the specified user on the remote
@@ -513,7 +513,7 @@ function letters, and must come last.
 .SH USAGE
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBufsrestore\fR
+See \fBlargefile\fR(7) for the description of the behavior of \fBufsrestore\fR
 when encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH EXIT STATUS
 .sp
@@ -598,8 +598,8 @@ information passed between incremental restores
 .SH SEE ALSO
 .sp
 .LP
-\fBmore\fR(1), \fBmkfs\fR(1M), \fBmount\fR(1M), \fBrmt\fR(1M),
-\fBufsdump\fR(1M), \fBufsdump\fR(4), \fBattributes\fR(5), \fBlargefile\fR(5)
+\fBmore\fR(1), \fBmkfs\fR(8), \fBmount\fR(8), \fBrmt\fR(8),
+\fBufsdump\fR(8), \fBufsdump\fR(5), \fBattributes\fR(7), \fBlargefile\fR(7)
 .SH DIAGNOSTICS
 .sp
 .LP

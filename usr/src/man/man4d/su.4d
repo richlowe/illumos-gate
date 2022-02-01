@@ -31,18 +31,18 @@ Sun machines using those same Intel, National Semiconductor and Southbridge
 chipsets. The \fBsu\fR driver provides basic asynchronous communication support
 for serial ports. Both the serial devices and keyboard/mouse devices will have
 streams built with appropriate modules pushed atop the  \fBsu\fR driver by
-means of either the \fBautopush\fR(1M) or \fBdacf.conf\fR(4) facilities,
+means of either the \fBautopush\fR(8) or \fBdacf.conf\fR(5) facilities,
 depending on the OS revision and architecture in use.
 .sp
 .LP
-The \fBsu\fR module supports those \fBtermio\fR(7I) device control functions
+The \fBsu\fR module supports those \fBtermio\fR(4I) device control functions
 specified by flags in the \fBc_cflag\fR word of the \fBtermios\fR structure,
 and by the \fBIGNBRK,\fR \fBIGNPAR,\fR \fBPARMRK,\fR or \fBINPCK\fR flags in
 the \fBc_iflag\fR word of the \fBtermios\fR structure. All other
-\fBtermio\fR(7I) functions must be performed by \fBSTREAMS\fR modules pushed
-atop the driver.  When a device is opened, the \fBldterm\fR(7M) and
-\fBttcompat\fR(7M) \fBSTREAMS\fR modules are automatically pushed on top of the
-stream, providing the standard \fBtermio\fR(7I) interface.
+\fBtermio\fR(4I) functions must be performed by \fBSTREAMS\fR modules pushed
+atop the driver.  When a device is opened, the \fBldterm\fR(4M) and
+\fBttcompat\fR(4M) \fBSTREAMS\fR modules are automatically pushed on top of the
+stream, providing the standard \fBtermio\fR(4I) interface.
 .sp
 .LP
 The character-special devices \fB/dev/ttya\fR and \fB/dev/ttyb\fR are used to
@@ -104,7 +104,7 @@ run over the serial console port when Alternate Break sequence is in effect.
 Although PPP is a binary protocol, it is able to avoid these sequences using
 the ACCM feature in \fIRFC 1662\fR. For Solaris PPP 4.0, you do this by adding
 the following line to the \fB/etc/ppp/options\fR file (or other configuration
-files used for the connection; see \fBpppd\fR(1M) for details):
+files used for the connection; see \fBpppd\fR(8) for details):
 .sp
 .in +2
 .nf
@@ -117,7 +117,7 @@ asyncmap  0x00002000
 By default, the Alternate Break sequence is a three character sequence:
 carriage return, tilde and control-B (CR ~ CTRL-B), but may be changed by the
 driver. For more information on breaking (entering the debugger or monitor),
-see \fBkbd\fR(1) and \fBkb\fR(7M).
+see \fBkbd\fR(1) and \fBkb\fR(4M).
 .SH ERRORS
 .LP
 An \fBopen()\fR will fail under the following conditions:
@@ -180,7 +180,7 @@ binary compatibility package device names
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -196,9 +196,9 @@ Architecture	 SPARC
 .SH SEE ALSO
 .LP
 \fBstrconf\fR(1), \fBkbd\fR(1), \fBtip\fR(1), \fBuucp\fR(1C),
-\fBautopush\fR(1M), \fBkstat\fR(1M), \fBpppd\fR(1M), \fBioctl\fR(2),
-\fBopen\fR(2), \fBtermios\fR(3C), \fBdacf.conf\fR(4), \fBattributes\fR(5),
-\fBkb\fR(7M), \fBldterm\fR(7M), \fBttcompat\fR(7M), \fBtermio\fR(7I)
+\fBautopush\fR(8), \fBkstat\fR(8), \fBpppd\fR(8), \fBioctl\fR(2),
+\fBopen\fR(2), \fBtermios\fR(3C), \fBdacf.conf\fR(5), \fBattributes\fR(7),
+\fBkb\fR(4M), \fBldterm\fR(4M), \fBttcompat\fR(4M), \fBtermio\fR(4I)
 .SH DIAGNOSTICS
 .LP
 The \fBsu\fR driver keeps track of various warning and error conditions using

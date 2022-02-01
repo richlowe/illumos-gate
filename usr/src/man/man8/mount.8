@@ -55,7 +55,7 @@ system resides.
 The table of currently mounted file systems can be found by examining the
 mounted file system information file. This is provided by a file system that is
 usually mounted on \fB/etc/mnttab\fR. The mounted file system information is
-described in \fBmnttab\fR(4). Mounting a file system adds an entry to the mount
+described in \fBmnttab\fR(5). Mounting a file system adds an entry to the mount
 table; a \fBumount\fR removes an entry from the table.
 .LP
 When invoked with both the \fIspecial\fR and \fImount_point\fR arguments and
@@ -77,7 +77,7 @@ For file system types that support it, a file can be mounted directly as a file
 system by specifying the full path to the file as the special argument.  In
 such a case, the \fBnosuid\fR option is enforced. If specific file system
 support for such loopback file mounts is not present, you can still use
-\fBlofiadm\fR(1M) to mount a file system image. In this case, no special
+\fBlofiadm\fR(8) to mount a file system image. In this case, no special
 options are enforced.
 .LP
 Only a user with sufficient privilege (at least \fBPRIV_SYS_MOUNT\fR) can mount
@@ -205,7 +205,7 @@ effect.
 .RS 4n
 Specify \fIFSType\fR-specific options in a comma separated (without spaces)
 list of suboptions and keyword-attribute pairs for interpretation by the
-\fIFSType\fR-specific module of the command. (See \fBmount_ufs\fR(1M).) When
+\fIFSType\fR-specific module of the command. (See \fBmount_ufs\fR(8).) When
 you use \fB-o\fR with a file system that has an entry in \fB/etc/vfstab\fR, any
 \fBmount\fR options entered for that file system in \fB/etc/vfstab\fR are
 ignored.
@@ -385,7 +385,7 @@ The following commands mount and unmount a DVD image.
 
 .SH USAGE
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBmount\fR and
+See \fBlargefile\fR(7) for the description of the behavior of \fBmount\fR and
 \fBumount\fR when encountering files greater than or equal to 2 Gbyte ( 2^31
 bytes).
 .SH FILES
@@ -431,12 +431,12 @@ List of default parameters for each file system.
 
 .SH SEE ALSO
 .LP
-\fBlofiadm\fR(1M), \fBmount_hsfs\fR(1M), \fBmount_nfs\fR(1M),
-\fBmount_pcfs\fR(1M),  \fBmount_smbfs\fR(1M), \fBmount_tmpfs\fR(1M),
-\fBmount_udfs\fR(1M), \fBmount_ufs\fR(1M), \fBmountall\fR(1M),
-\fBumountall\fR(1M), \fBfcntl\fR(2), \fBmmap\fR(2), \fBmnttab\fR(4),
-\fBvfstab\fR(4), \fBattributes\fR(5), \fBlargefile\fR(5),
-\fBprivileges\fR(5), \fBlofs\fR(7FS), \fBpcfs\fR(7FS)
+\fBlofiadm\fR(8), \fBmount_hsfs\fR(8), \fBmount_nfs\fR(8),
+\fBmount_pcfs\fR(8),  \fBmount_smbfs\fR(8), \fBmount_tmpfs\fR(8),
+\fBmount_udfs\fR(8), \fBmount_ufs\fR(8), \fBmountall\fR(8),
+\fBumountall\fR(8), \fBfcntl\fR(2), \fBmmap\fR(2), \fBmnttab\fR(5),
+\fBvfstab\fR(5), \fBattributes\fR(7), \fBlargefile\fR(7),
+\fBprivileges\fR(7), \fBlofs\fR(4FS), \fBpcfs\fR(4FS)
 .SH NOTES
 .LP
 If the directory on which a file system is to be mounted is a symbolic link,

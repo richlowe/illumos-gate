@@ -28,7 +28,7 @@ name
 where \fBname\fR is the user's login name.
 .sp
 .LP
-The FTP Server, \fBin.ftpd\fR(1M), reads the \fBftpusers\fR file. If the login
+The FTP Server, \fBin.ftpd\fR(8), reads the \fBftpusers\fR file. If the login
 name of the user matches one of the entries listed, it rejects the login
 attempt.
 .sp
@@ -55,7 +55,7 @@ nobody4
 
 .sp
 .LP
-These entries match the default instantiated entries from \fBpasswd\fR(4). The
+These entries match the default instantiated entries from \fBpasswd\fR(5). The
 list of default entries typically contains the superuser \fBroot\fR and other
 administrative and system application identities.
 .sp
@@ -72,11 +72,11 @@ security policy for remote login access by \fBroot\fR.
 Other default entries are administrative identities that are typically assumed
 by system applications but never used for local or remote login, for example
 \fBsys\fR and \fBnobody\fR. Since these entries do not have a valid password
-field instantiated in \fBshadow\fR(4), no login can be performed.
+field instantiated in \fBshadow\fR(5), no login can be performed.
 .sp
 .LP
 If a site adds similar administrative or system application identities in
-\fBpasswd\fR(4) and \fBshadow\fR(4), for example, \fBmajordomo\fR, the site
+\fBpasswd\fR(5) and \fBshadow\fR(5), for example, \fBmajordomo\fR, the site
 should consider including them in the \fBftpusers\fR file for a consistent
 security policy.
 .sp
@@ -130,7 +130,7 @@ shadow password file
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -149,5 +149,5 @@ The interface stability for \fB/etc/ftpd/ftpusers\fR is Volatile. The interface
 stability for \fB/etc/ftpusers\fR is (Obsolete).
 .SH SEE ALSO
 .LP
-\fBlogin\fR(1), \fBftphosts\fR(4),
-\fBpasswd\fR(4), \fBshadow\fR(4), \fBattributes\fR(5), \fBenviron\fR(5)
+\fBlogin\fR(1), \fBftphosts\fR(5),
+\fBpasswd\fR(5), \fBshadow\fR(5), \fBattributes\fR(7), \fBenviron\fR(7)

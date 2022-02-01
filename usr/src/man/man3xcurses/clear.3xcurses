@@ -81,7 +81,7 @@ An error occurred.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -101,5 +101,5 @@ MT-Level	Unsafe
 .LP
 \fBbkgdset\fR(3XCURSES), \fBclearok\fR(3XCURSES), \fBclrtobot\fR(3XCURSES),
 \fBclrtoeol\fR(3XCURSES), \fBdoupdate\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBrefresh\fR(3XCURSES), \fBwrefresh\fR(3XCURSES), \fBattributes\fR(5),
-\fBstandards\fR(5)
+\fBrefresh\fR(3XCURSES), \fBwrefresh\fR(3XCURSES), \fBattributes\fR(7),
+\fBstandards\fR(7)

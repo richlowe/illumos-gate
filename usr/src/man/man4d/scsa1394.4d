@@ -26,11 +26,11 @@ Operation Request Blocks (\fBORB\fR's).
 .LP
 The \fBscsa1394\fR driver creates a child device info node for each logical
 unit (LUN) on the mass storage device. The standard Solaris SCSI disk driver is
-attached to those nodes. Refer to \fBsd\fR(7D).
+attached to those nodes. Refer to \fBsd\fR(4D).
 .sp
 .LP
 This driver supports multiple LUN devices and creates a separate child device
-info node for each LUN. All child LUN nodes attach to \fBsd\fR(7D).
+info node for each LUN. All child LUN nodes attach to \fBsd\fR(4D).
 .sp
 .LP
 In previous releases, all 1394 mass storage devices were treated as removable
@@ -49,7 +49,7 @@ Mass storage devices are managed by a volume manager. Software that manages
 removable media creates a device nickname that can be listed with
 \fBeject\fR(1) or \fBrmmount\fR(1). A device that is not mounted automatically
 can be mounted using \fBrmmount\fR(1) under \fB/rmdisk/\fIlabel\fR\fR. Note
-that the \fBmount\fR(1M) and \fBmount\fR(1M) commands do not accept nicknames;
+that the \fBmount\fR(8) and \fBmount\fR(8) commands do not accept nicknames;
 you must use explicit device names with these commands.
 .sp
 .LP
@@ -66,10 +66,10 @@ the USB device, use \fBeject\fR(1) to unmount the file system.
 .LP
 You can disable the automatic mounting and unmounting of removable devices by
 inserting a entry for a removable device in \fB/etc/vfstab\fR. In this entry,
-you must set the \fBmount at boot\fR field to \fBno\fR. See \fBvfstab\fR(4).
+you must set the \fBmount at boot\fR field to \fBno\fR. See \fBvfstab\fR(5).
 .SH USING \fBmount\fR AND \fBumount\fR
 .LP
-Use \fBmount\fR(1M) to explicitly mount the device and \fBumount\fR(1M) to
+Use \fBmount\fR(8) to explicitly mount the device and \fBumount\fR(8) to
 unmount the device. Use \fBeject\fR(1) to eject the media. After you have
 explicitly mounted a removable device, you cannot use a nickname as an argument
 to \fBeject\fR.
@@ -83,17 +83,17 @@ the device. A storage device can be hot inserted at any time.
 .LP
 Block special file names are located in \fB/dev/dsk\fR. Raw file names are
 located in \fB/dev/rdsk\fR. Input/output requests to the devices must follow
-the same restrictions as those for SCSI disks. Refer to \fBsd\fR(7D).
+the same restrictions as those for SCSI disks. Refer to \fBsd\fR(4D).
 .SH IOCTLS
 .LP
-Refer to \fBcdio\fR(7I) and \fBdkio\fR(7I).
+Refer to \fBcdio\fR(4I) and \fBdkio\fR(4I).
 .SH ERRORS
 .LP
-Refer to \fBsd\fR(7D).
+Refer to \fBsd\fR(4D).
 .SH FILES
 .LP
 The device special files for the 1394 mass storage device are created like
-those for a SCSI disk. Refer to \fBsd\fR(7D).
+those for a SCSI disk. Refer to \fBsd\fR(4D).
 .sp
 .ne 2
 .na
@@ -157,7 +157,7 @@ is a generic removable media device.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -173,10 +173,10 @@ Architecture	SPARC, x86, PCI-based systems
 .SH SEE ALSO
 .LP
 \fBcdrw\fR(1), \fBeject\fR(1), \fBrmformat\fR(1), \fBrmmount\fR(1),
-\fBcfgadm_scsi\fR(1M), \fBfdisk\fR(1M), \fBmount\fR(1M), \fBumount\fR(1M),
-\fBscsi\fR(4), \fBvfstab\fR(4),
-\fBattributes\fR(5), \fBhci1394\fR(7D), \fBsd\fR(7D), \fBpcfs\fR(7FS),
-\fBcdio\fR(7I), \fBdkio\fR(7I)
+\fBcfgadm_scsi\fR(8), \fBfdisk\fR(8), \fBmount\fR(8), \fBumount\fR(8),
+\fBscsi\fR(5), \fBvfstab\fR(5),
+\fBattributes\fR(7), \fBhci1394\fR(4D), \fBsd\fR(4D), \fBpcfs\fR(4FS),
+\fBcdio\fR(4I), \fBdkio\fR(4I)
 .sp
 .LP
 \fIIEEE Std 1394-1995 Standard for a High Performance Serial Bus\fR

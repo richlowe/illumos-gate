@@ -93,7 +93,7 @@ within them.
 .sp
 .LP
 A group name must conform to service management facility (SMF) (see
-\fBsmf\fR(5)) service-naming conventions, thus is limited to starting with an
+\fBsmf\fR(7)) service-naming conventions, thus is limited to starting with an
 alphabetic character, with the rest of the name consisting only of alphanumeric
 characters plus \fB-\fR (hyphen) and \fB_\fR (underbar).
 .sp
@@ -313,7 +313,7 @@ The \fB-P\fR option is required and must specify a valid protocol.
 .sp
 Optionsets are protocol-specific sets of properties that can be negotiated by
 the protocol client. For NFS, optionsets are equivalent to security modes as
-defined in \fBnfssec\fR(5). If \fB-S\fR \fIoptionset\fR is specified, the
+defined in \fBnfssec\fR(7). If \fB-S\fR \fIoptionset\fR is specified, the
 properties are applied to the selected optionset. Otherwise they are applied to
 the general optionset.
 .sp
@@ -410,7 +410,7 @@ subgroup. Any ZFS sub-filesystems under the ZFS filesystem designated by
 The effect of the \fBadd-share\fR subcommand on a ZFS dataset is determined by
 the values of the \fBsharesmb\fR and \fBsharenfs\fR properties of that dataset.
 .sp
-See \fBzfs\fR(1M) for a description of the \fBsharesmb\fR and \fBsharenfs\fR
+See \fBzfs\fR(8) for a description of the \fBsharesmb\fR and \fBsharenfs\fR
 properties.
 .sp
 The following are examples of the \fBadd-share\fR subcommand.
@@ -539,7 +539,7 @@ SMF to start sharing at system boot.
 A group will not start sharing if it is in the \fBsharemgr\fR \fBdisabled\fR
 state. However, the corresponding SMF service instance will be started.
 .sp
-Note that the \fBstart\fR subcommand is similar to the \fBshareall\fR(1M)
+Note that the \fBstart\fR subcommand is similar to the \fBshareall\fR(8)
 command in that it starts up only the configured shares. That is, the enabled
 shares will start being shared, but the configuration state is left the same.
 The command:
@@ -574,7 +574,7 @@ subcommand is similar to \fBdisable\fR in that all shares are no longer shared,
 but it works only on groups that are enabled. \fBstop\fR is used by the SMF to
 stop sharing at system shutdown.
 .sp
-Note that the \fBstop\fR subcommand is similar to the \fBunshareall\fR(1M)
+Note that the \fBstop\fR subcommand is similar to the \fBunshareall\fR(8)
 command in that all active shares are unshared, but the configuration is left
 the same. That is, the shares are stopped but the service instances are left
 enabled. The command:
@@ -606,7 +606,7 @@ enabled. The command:
 .sp .6
 .RS 4n
 Shares the specified path in the \fBdefault\fR share group. This subcommand
-implements the \fBshare\fR(1M) functionality. Shares that are shared in this
+implements the \fBshare\fR(8) functionality. Shares that are shared in this
 manner will be transient shares. Use of the \fB-p\fR option causes the shares
 to be persistent.
 .RE
@@ -619,7 +619,7 @@ to be persistent.
 .ad
 .sp .6
 .RS 4n
-Unshares the specified share. This subcommand implements the \fBunshare\fR(1M)
+Unshares the specified share. This subcommand implements the \fBunshare\fR(8)
 functionality. By default, the \fBunshare\fR is temporary. The \fB-p\fR option
 is provided to remove the share from the configuration in a way that persists
 across reboots.
@@ -870,7 +870,7 @@ Set the guest access policy for the share. When set to \fBtrue\fR guest access
 is allowed on this share. When set to \fBfalse\fR or not defined guest access
 is not allowed on this share. This property is not defined by default.
 .sp
-An \fBidmap\fR(1M) name-based rule can be used to map \fBguest\fR to any local
+An \fBidmap\fR(8) name-based rule can be used to map \fBguest\fR to any local
 username, such as \fBguest\fR or \fBnobody\fR. If the local account has a
 password in \fB/var/smb/smbpasswd\fR the guest connection will be authenticated
 against that password. Any connection made using an account that maps to the
@@ -964,7 +964,7 @@ only to a share and not to a group.
 .sp
 .LP
 NFS also supports negotiated optionsets for supported security modes. The
-security modes are documented in \fBnfssec\fR(5). The properties supported for
+security modes are documented in \fBnfssec\fR(7). The properties supported for
 these optionsets are:
 .sp
 .ne 2
@@ -1051,7 +1051,7 @@ user id.
 .ad
 .sp .6
 .RS 4n
-When sharing with \fBsec=dh\fR (see \fBnfssec\fR(5)), set the maximum lifetime
+When sharing with \fBsec=dh\fR (see \fBnfssec\fR(7)), set the maximum lifetime
 (in seconds) of the RPC request's credential (in the authentication header)
 that the NFS server allows. If a credential arrives with a lifetime larger than
 what is allowed, the NFS server rejects the request. The default value is 30000
@@ -1137,7 +1137,7 @@ following:
 .sp .6
 .RS 4n
 The name of a host. With a server configured for DNS or LDAP naming in the
-\fBnsswitch.conf\fR(4) \fBhosts\fR entry, a hostname must be represented as a
+\fBnsswitch.conf\fR(5) \fBhosts\fR entry, a hostname must be represented as a
 fully qualified DNS or LDAP name.
 .RE
 
@@ -1149,7 +1149,7 @@ fully qualified DNS or LDAP name.
 .sp .6
 .RS 4n
 A \fInetgroup\fR contains a number of hostnames. With a server configured for
-DNS or LDAP naming in the \fBnsswitch.conf\fR(4) \fBhosts\fR entry, any
+DNS or LDAP naming in the \fBnsswitch.conf\fR(5) \fBhosts\fR entry, any
 hostname in a netgroup must be represented as a fully qualified DNS or LDAP
 name.
 .RE
@@ -1163,7 +1163,7 @@ name.
 .RS 4n
 To use domain membership the server must use DNS or LDAP, rather than, for
 example, NIS, to resolve hostnames to IP addresses. That is, the
-\fBhosts\fR entry in the \fBnsswitch.conf\fR(4) must specify \fBdns\fR or
+\fBhosts\fR entry in the \fBnsswitch.conf\fR(5) must specify \fBdns\fR or
 \fBldap\fR ahead of \fBnis\fR, because only DNS and LDAP
 return the full domain name of the host. Other name services, such as NIS,
 cannot be used to resolve hostnames on the server because, when mapping
@@ -1316,7 +1316,7 @@ Error codes used for exit status.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1330,5 +1330,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBidmap\fR(1M), \fBsharectl\fR(1M), \fBzfs\fR(1M), \fBattributes\fR(5),
-\fBnfssec\fR(5), \fBsmf\fR(5), \fBstandards\fR(5)
+\fBidmap\fR(8), \fBsharectl\fR(8), \fBzfs\fR(8), \fBattributes\fR(7),
+\fBnfssec\fR(7), \fBsmf\fR(7), \fBstandards\fR(7)

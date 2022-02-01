@@ -29,10 +29,10 @@ hard disks and, on x86 systems, adds boot information to the Solaris
 \fBfdisk\fR partition. One or more of the options \fB-s\fR \fIdatafile\fR,
 \fB-d\fR \fIdata\fR, or \fB-n\fR \fIvolume_name\fR must be used to request
 modifications to the disk label. To print disk label contents, see
-\fBprtvtoc\fR(1M). The
+\fBprtvtoc\fR(8). The
 \fB/dev/rdsk/c\fR\fI?\fR[\fBt\fR\fI?\fR]\fBd\fR\fI?\fR\fBs2\fR file must be the
 character special file of the device where the new label is to be installed. On
-x86 systems, \fBfdisk\fR(1M) must be run on the drive before \fBfmthard\fR.
+x86 systems, \fBfdisk\fR(8) must be run on the drive before \fBfmthard\fR.
 .sp
 .LP
 If you are using an x86 system, note that the term ``partition'' in this page
@@ -176,11 +176,11 @@ and use it as the \fIdatafile\fR argument to the \fB-s\fR option.
 .SH SEE ALSO
 .sp
 .LP
-\fBuname\fR(1), \fBformat\fR(1M), \fBprtvtoc\fR(1M), \fBattributes\fR(5)
+\fBuname\fR(1), \fBformat\fR(8), \fBprtvtoc\fR(8), \fBattributes\fR(7)
 .SS "x86 Only"
 .sp
 .LP
-\fBfdisk\fR(1M), \fBinstallgrub\fR(1M)
+\fBfdisk\fR(8), \fBinstallgrub\fR(8)
 .SH NOTES
 .sp
 .LP
@@ -190,4 +190,4 @@ precaution, save the old \fBVTOC\fR.
 .sp
 .LP
 For disks under two terabytes, \fBfmthard\fR cannot write a \fBVTOC\fR on an
-unlabeled disk. Use \fBformat\fR(1M) for this purpose.
+unlabeled disk. Use \fBformat\fR(8) for this purpose.

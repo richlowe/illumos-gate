@@ -148,7 +148,7 @@ Slave disk on Secondary channel.
 .SH IOCTLS
 .sp
 .LP
-Refer to \fBdkio\fR(7I).
+Refer to \fBdkio\fR(4I).
 .SH ERRORS
 .sp
 .ne 2
@@ -225,8 +225,8 @@ The device is a read-only device.
 .SH SEE ALSO
 .sp
 .LP
-\fBformat\fR(1M), \fBmount\fR(1M), \fBlseek\fR(2), \fBread\fR(2),
-\fBwrite\fR(2), \fBdriver.conf\fR(4), \fBvfstab\fR(4), \fBdkio\fR(7I)
+\fBformat\fR(8), \fBmount\fR(8), \fBlseek\fR(2), \fBread\fR(2),
+\fBwrite\fR(2), \fBdriver.conf\fR(5), \fBvfstab\fR(5), \fBdkio\fR(4I)
 .sp
 .LP
 X3T10 ATA-4 specifications.

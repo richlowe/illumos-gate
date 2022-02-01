@@ -17,7 +17,7 @@ sulog \- su command log file
 .sp
 .LP
 The  \fBsulog\fR file is a record of all attempts by users on the system  to
-execute the \fBsu\fR(1M) command.  Each time  \fBsu\fR(1M) is executed, an
+execute the \fBsu\fR(8) command.  Each time  \fBsu\fR(8) is executed, an
 entry is added to the \fBsulog\fR file.
 .sp
 .LP
@@ -40,7 +40,7 @@ where
 \fB\fBdate\fR\fR
 .ad
 .RS 11n
-The month and date \fBsu\fR(1M) was executed.  \fBdate\fR is displayed in the
+The month and date \fBsu\fR(8) was executed.  \fBdate\fR is displayed in the
 form \fImm\fR\fB/\fR\fBdd\fR where  \fImm\fR is the month number and \fBdd\fR
 is the day number in the month.
 .RE
@@ -51,7 +51,7 @@ is the day number in the month.
 \fB\fBtime\fR\fR
 .ad
 .RS 11n
-The time  \fBsu\fR(1M) was executed. \fBtime\fR is displayed in the form
+The time  \fBsu\fR(8) was executed. \fBtime\fR is displayed in the form
 \fIHH\fR\fB/\fR\fIMM\fR where  \fIHH\fR is the hour number (24 hour system) and
 \fIMM\fR is the minute number.
 .RE
@@ -62,7 +62,7 @@ The time  \fBsu\fR(1M) was executed. \fBtime\fR is displayed in the form
 \fB\fIresult\fR\fR
 .ad
 .RS 11n
-The result of the  \fBsu\fR(1M) command.  A ` + ' sign is displayed in this
+The result of the  \fBsu\fR(8) command.  A ` + ' sign is displayed in this
 field if the su attempt was successful; otherwise  a ` - ' sign is displayed.
 .RE
 
@@ -72,7 +72,7 @@ field if the su attempt was successful; otherwise  a ` - ' sign is displayed.
 \fB\fIport\fR\fR
 .ad
 .RS 11n
-The name of the terminal device from which  \fBsu\fR(1M) was executed.
+The name of the terminal device from which  \fBsu\fR(8) was executed.
 .RE
 
 .sp
@@ -81,7 +81,7 @@ The name of the terminal device from which  \fBsu\fR(1M) was executed.
 \fB\fIuser\fR\fR
 .ad
 .RS 11n
-The user id of the user executing the  \fBsu\fR(1M) command.
+The user id of the user executing the  \fBsu\fR(8) command.
 .RE
 
 .sp
@@ -90,7 +90,7 @@ The user id of the user executing the  \fBsu\fR(1M) command.
 \fB\fInewuser\fR\fR
 .ad
 .RS 11n
-The user id being switched to with  \fBsu\fR(1M).
+The user id being switched to with  \fBsu\fR(8).
 .RE
 
 .SH EXAMPLES
@@ -136,4 +136,4 @@ contains the default location of  \fBsulog\fR
 .SH SEE ALSO
 .sp
 .LP
-\fBsu\fR(1M)
+\fBsu\fR(8)

@@ -20,7 +20,7 @@ pam_unix_account \- PAM account management module for UNIX
 provides functionality to the \fBPAM\fR account management stack. The module
 provides functions to validate that the user's account is not locked or expired
 and that the user's password does not need to be changed. The module retrieves
-account information from the configured databases in \fBnsswitch.conf\fR(4).
+account information from the configured databases in \fBnsswitch.conf\fR(5).
 .sp
 .LP
 The following options can be passed to the module:
@@ -141,7 +141,7 @@ No account is present for the user
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -160,8 +160,8 @@ MT Level	MT-Safe with exceptions
 .sp
 .LP
 \fBpam\fR(3PAM), \fBpam_authenticate\fR(3PAM), \fBsyslog\fR(3C),
-\fBlibpam\fR(3LIB), \fBpam.conf\fR(4), \fBnsswitch.conf\fR(4),
-\fBattributes\fR(5)
+\fBlibpam\fR(3LIB), \fBpam.conf\fR(5), \fBnsswitch.conf\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

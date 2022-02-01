@@ -11,22 +11,22 @@ term \- conventional names for terminals
 .LP
 Terminal names are maintained as part of the shell environment in the
 environment variable \fB\fR\fBTERM\fR\fB\&. \fR See \fBsh\fR(1),
-\fBprofile\fR(4), and \fBenviron\fR(5). These names are used by certain
+\fBprofile\fR(5), and \fBenviron\fR(7). These names are used by certain
 commands (for example, \fBtabs\fR, \fBtput\fR, and \fBvi\fR) and certain
 functions (for example, see \fBcurses\fR(3CURSES)).
 .sp
 .LP
 Files under \fB/usr/share/lib/terminfo\fR are used to name terminals and
 describe their capabilities. These files are in the format described in
-\fBterminfo\fR(4). Entries in \fBterminfo\fR source files consist of a number
+\fBterminfo\fR(5). Entries in \fBterminfo\fR source files consist of a number
 of comma-separated fields. To print a description of a terminal  \fIterm\fR,
-use the command  \fBinfocmp\fR \fB-I\fR \fIterm\fR. See \fBinfocmp\fR(1M).
+use the command  \fBinfocmp\fR \fB-I\fR \fIterm\fR. See \fBinfocmp\fR(8).
 White space after each comma is ignored. The first line of each terminal
 description in the \fBterminfo\fR database gives the names by which
 \fBterminfo\fR knows the terminal, separated by bar (\fB|\fR) characters. The
 first name given is the most common abbreviation for the terminal (this is the
 one to use to set the environment variable \fBTERMINFO\fR in
-\fB$HOME/.profile\fR; see \fBprofile\fR(4)), the last name given should be a
+\fB$HOME/.profile\fR; see \fBprofile\fR(5)), the last name given should be a
 long name fully identifying the terminal, and all others are understood as
 synonyms for the terminal name. All names but the last should contain no blanks
 and must be unique in the first 14 characters; the last name may contain blanks
@@ -67,7 +67,7 @@ Suffix	Meaning	Example
 To avoid conflicts with the naming conventions used in describing the different
 modes of a terminal (for example, \fB-w\fR), it is recommended that a
 terminal's root name not contain hyphens. Further, it is good practice to make
-all terminal names used in the  \fBterminfo\fR(4) database unique. Terminal
+all terminal names used in the  \fBterminfo\fR(5) database unique. Terminal
 entries that are present only for inclusion in other entries via the \fBuse=\fR
 facilities should have a '\fB+\fR' in their name, as in  \fB4415+nl\fR.
 .sp
@@ -204,5 +204,5 @@ compiled terminal description database
 .sp
 .LP
 \fBsh\fR(1), \fBstty\fR(1), \fBtabs\fR(1), \fBtput\fR(1), \fBvi\fR(1),
-\fBinfocmp\fR(1M), \fBcurses\fR(3CURSES), \fBprofile\fR(4), \fBterminfo\fR(4),
-\fBenviron\fR(5)
+\fBinfocmp\fR(8), \fBcurses\fR(3CURSES), \fBprofile\fR(5), \fBterminfo\fR(5),
+\fBenviron\fR(7)

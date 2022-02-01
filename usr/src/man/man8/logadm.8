@@ -18,7 +18,7 @@ logadm \- manage endlessly growing log files
 
 .SH DESCRIPTION
 \fBlogadm\fR is a general log rotation tool that is suitable for running from
-\fBcron\fR(1M).
+\fBcron\fR(8).
 .sp
 .LP
 Without arguments, \fBlogadm\fR reads the \fB/etc/logadm.conf\fR file, and for
@@ -197,7 +197,7 @@ being added automatically, specify \fB\fR\fB-C\fR \fB0\fR .
 .RS 4n
 Send error messages by email to \fImail_addr\fR.
 .sp
-As \fBlogadm\fR is typically run from \fBcron\fR(1M), error messages are
+As \fBlogadm\fR is typically run from \fBcron\fR(8), error messages are
 captured by \fBcron\fR and mailed to the owner of the \fBcrontab\fR.
 .sp
 This option is useful if you want the mail regarding error messages to go to
@@ -875,7 +875,7 @@ configuration file for \fBlogadm\fR command
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -890,8 +890,8 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 \fBchgrp\fR(1), \fBchmod\fR(1), \fBchown\fR(1), \fBcsh\fR(1), \fBgzip\fR(1),
-\fBcron\fR(1M), \fBctime\fR(3C), \fBstrftime\fR(3C), \fBlogadm.conf\fR(4),
-\fBattributes\fR(5)
+\fBcron\fR(8), \fBctime\fR(3C), \fBstrftime\fR(3C), \fBlogadm.conf\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 When \fBlogadm\fR applies expire conditions (supplied by the \fB-A\fR,
 \fB-C\fR, and \fB-S\fR options), it deletes files, the oldest first, until the
@@ -908,6 +908,6 @@ very time-consuming.
 .sp
 .LP
 By default, \fBlogadm\fR works in \fBGMT\fR. Therefore, all entries written to
-the \fB/etc/logadm.conf\fR file (see \fBlogadm.conf\fR(4)) will have a
+the \fB/etc/logadm.conf\fR file (see \fBlogadm.conf\fR(5)) will have a
 \fBGMT\fR timestamp. Users can use the \fB-l\fR option to set \fBlogadm\fR to
 local time.

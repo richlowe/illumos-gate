@@ -37,7 +37,7 @@ set in the Korn Shell (see \fBksh\fR(1)) by typing:
 .sp
 .LP
 To set environment variables using other command line interfaces or shells, see
-the \fBenviron\fR(5) manual page.
+the \fBenviron\fR(7) manual page.
 .sp
 .LP
 Three additional environment variables are useful, and can be set in the Korn
@@ -587,7 +587,7 @@ of input functions like \fBgetch\fR(3XCURSES) and \fBgetnstr\fR(3XCURSES).
 .RS 27n
 In line input mode, the terminal driver handles the input of line units as well
 as  \fBSIGERASE\fR and \fBSIGKILL\fR character processing.   See
-\fBtermio\fR(7I) for more information.
+\fBtermio\fR(4I) for more information.
 .sp
 In this mode, the \fBgetch()\fR and \fBgetnstr()\fR functions will not return
 until a complete line has been read by the terminal driver, at which point only
@@ -857,7 +857,7 @@ This second example is the same as the first, but with the right margin.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -888,5 +888,5 @@ MT-Level	Unsafe
 \fBtimeout\fR(3XCURSES), \fBwaddchstr\fR(3XCURSES), \fBwaddstr\fR(3XCURSES),
 \fBwcwidth\fR(3C), \fBwget_wch\fR(3XCURSES), \fBwinsch\fR(3XCURSES),
 \fBwnoutrefresh\fR(3XCURSES), \fBwprintw\fR(3XCURSES),
-\fBwrefresh\fR(3XCURSES), \fBwtimeout\fR(3XCURSES), \fBattributes\fR(5),
-\fBenviron\fR(5), \fBstandards\fR(5), \fBtermio\fR(7I)
+\fBwrefresh\fR(3XCURSES), \fBwtimeout\fR(3XCURSES), \fBattributes\fR(7),
+\fBenviron\fR(7), \fBstandards\fR(7), \fBtermio\fR(4I)

@@ -76,7 +76,7 @@ For example:
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -92,7 +92,7 @@ Interface Stability	Evolving
 .sp
 .LP
 \fBldap\fR(3LDAP), \fBldap_search\fR(3LDAP), \fBldap_result\fR(3LDAP),
-\fBqsort\fR(3C), \fBattributes\fR(5)
+\fBqsort\fR(3C), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

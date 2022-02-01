@@ -50,7 +50,7 @@ associated file are readable by the invoking process. Care must be taken to
 ensure that the file is readable only by the set of principals that need to
 retrieve their unencrypted keys.
 .sp
-The \fBWRFILE\fR type is used by the \fBkadmin\fR(1M) command. Specifying this
+The \fBWRFILE\fR type is used by the \fBkadmin\fR(8) command. Specifying this
 type allows the administrator to designate an alternate \fBkeytab\fR file to
 write to without using extra command line arguments for file location.
 .RE
@@ -156,7 +156,7 @@ condition obtains:
 .el o
 The duration from the last write to the replay cache before reboot to the point
 when the Kerberized server applications are running is less than the Kerberos
-clockskew (see \fBkrb5.conf\fR(4)).
+clockskew (see \fBkrb5.conf\fR(5)).
 .RE
 When specifying the \fBNONE\fR replay cache time you need to understand that
 this disables the replay cache, and all security risks that this presents. This
@@ -208,7 +208,7 @@ another file specified by KRB5_CONFIG. For example (using kinit from
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -224,5 +224,5 @@ Interface Stability	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBchmod\fR(1), \fBkinit\fR(1), \fBklist\fR(1), \fBksh\fR(1), \fBkadmin\fR(1M),
-\fBkadmind\fR(1M), \fBkrb5.conf\fR(4), \fBattributes\fR(5), \fBkerberos\fR(5)
+\fBchmod\fR(1), \fBkinit\fR(1), \fBklist\fR(1), \fBksh\fR(1), \fBkadmin\fR(8),
+\fBkadmind\fR(8), \fBkrb5.conf\fR(5), \fBattributes\fR(7), \fBkerberos\fR(7)

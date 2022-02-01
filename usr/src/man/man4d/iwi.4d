@@ -11,7 +11,7 @@ iwi \- Intel Pro. Wireless 802.11a/b/g IPW2200B/G IPW2915A/B/G Driver
 .LP
 The  \fBiwi\fR \fI802.11b/g \fR wireless NIC driver is a multi-threaded,
 loadable, clonable,  GLDv3-based STREAMS driver supporting  the Data Link
-Provider Interface, \fBdlpi\fR(7P), on Intel Pro Wireless 2200BG 2915ABG
+Provider Interface, \fBdlpi\fR(4P), on Intel Pro Wireless 2200BG 2915ABG
 chipset-based wireless NIC's. Driver functions include controller
 initialization, wireless \fI802.11b \fR infrastructure network connection, WEP
 and frame transmit and receive.
@@ -27,8 +27,8 @@ and 54 Mbits/sec.
 The \fBiwi\fR driver supports only BSS networks (also known as "ap" or
 "infrastructure" networks) and "open"(or "open-system") or "shared system"
 authentication. Only WEP encryption is currently supported. You perform
-configuration and administration tasks using the \fBdladm\fR(1M) and
-\fBwificonfig\fR(1M) utilities.
+configuration and administration tasks using the \fBdladm\fR(8) and
+\fBwificonfig\fR(8) utilities.
 .SH FILES
 .sp
 .ne 2
@@ -60,7 +60,7 @@ Special character device.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -76,8 +76,8 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBwificonfig\fR(1M), \fBattributes\fR(5), \fBgld\fR(7D),
-\fBdlpi\fR(7P)
+\fBdladm\fR(8), \fBwificonfig\fR(8), \fBattributes\fR(7), \fBgld\fR(4D),
+\fBdlpi\fR(4P)
 .sp
 .LP
 \fIANSI/IEEE Std 802.11- Standard for Wireless LAN  Technology\fR \(em 1999

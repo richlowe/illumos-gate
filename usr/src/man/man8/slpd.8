@@ -79,7 +79,7 @@ All configuration options are available from the configuration file. \fBslpd\fR
 reads its configuration file upon startup.
 .sp
 .LP
-Stop and start the slpd daemon using \fBsvcadm\fR(1M).  Use the command
+Stop and start the slpd daemon using \fBsvcadm\fR(8).  Use the command
 \fBsvcadm enable network/slp\fR to start the slpd daemon.  Use the command
 \fBsvcadm disable network/slp\fR to stop it.
 .sp
@@ -152,7 +152,7 @@ The proxy registration file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -170,8 +170,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBsvcadm\fR(1M), \fBslp_api\fR(3SLP), \fBslp.conf\fR(4),
-\fBslpd.reg\fR(4), \fBattributes\fR(5), \fBsmf\fR(5), \fBslp\fR(7P)
+\fBsvcs\fR(1), \fBsvcadm\fR(8), \fBslp_api\fR(3SLP), \fBslp.conf\fR(5),
+\fBslpd.reg\fR(5), \fBattributes\fR(7), \fBsmf\fR(7), \fBslp\fR(4P)
 .sp
 .LP
 \fI\fR
@@ -183,7 +183,7 @@ Location Protocol, Version 2\fR, The Internet Society, June 1999.
 .sp
 .LP
 The \fBslpd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -195,5 +195,5 @@ svc:/network/slp
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

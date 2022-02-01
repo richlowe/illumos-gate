@@ -29,7 +29,7 @@ Configure a master Key Distribution Center (KDC) server.
 .el o
 Configure a slave KDC. This assumes that a master KDC has already been
 configured. The default propagation method configured is incremental
-propagation. See \fBkpropd\fR(1M).
+propagation. See \fBkpropd\fR(8).
 .RE
 .RS +4
 .TP
@@ -116,7 +116,7 @@ the output of \fBlogname\fR(1) appended by \fB/admin\fR.
 .RS 4n
 Specifies the encryption type to be used when creating the key for the master
 key, which is used to encrypt all principal keys in the database. The set of
-valid encryption types used here are described in \fBkrb5.conf\fR(4) under the
+valid encryption types used here are described in \fBkrb5.conf\fR(5) under the
 \fBpermitted_enctypes\fR option. Note that the encryption type specified here
 must be supported on all KDCs or else they will not be able to decrypt any of
 the principal keys. Solaris 9 and earlier releases support only the
@@ -193,8 +193,8 @@ made.
 .ad
 .sp .6
 .RS 4n
-Create a master KDC. Upon successful configuration the \fBkrb5kdc\fR(1M) and
-\fBkadmind\fR(1M) are enabled on the machine.
+Create a master KDC. Upon successful configuration the \fBkrb5kdc\fR(8) and
+\fBkadmind\fR(8) are enabled on the machine.
 .RE
 
 .sp
@@ -204,8 +204,8 @@ Create a master KDC. Upon successful configuration the \fBkrb5kdc\fR(1M) and
 .ad
 .sp .6
 .RS 4n
-Configures a slave KDC. After configuration, the \fBkrb5kdc\fR(1M) and
-\fBkpropd\fR(1M) services are enabled on the machine.
+Configures a slave KDC. After configuration, the \fBkrb5kdc\fR(8) and
+\fBkpropd\fR(8) services are enabled on the machine.
 .sp
 \fImasterkdc\fR specifies the master KDC to authenticate and with which to
 perform administrative tasks. If the \fB-m\fR option is not specified, you are
@@ -238,19 +238,19 @@ of such associated processes as:
 .TP
 .ie t \(bu
 .el o
-\fBkrb5kdc\fR(1M)
+\fBkrb5kdc\fR(8)
 .RE
 .RS +4
 .TP
 .ie t \(bu
 .el o
-\fBkadmind\fR(1M)
+\fBkadmind\fR(8)
 .RE
 .RS +4
 .TP
 .ie t \(bu
 .el o
-\fBkpropd\fR(1M)
+\fBkpropd\fR(8)
 .RE
 The subcommand also displays information on incremental propagation if the
 configuration has this feature enabled, as well as any issues with dependent
@@ -349,7 +349,7 @@ Kerberos administrative access control list (ACL).
 .ad
 .sp .6
 .RS 4n
-Service keys specific to \fBkadmind\fR(1M).
+Service keys specific to \fBkadmind\fR(8).
 .RE
 
 .sp
@@ -385,7 +385,7 @@ Used by slaves to indicate from which server to receive updates.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -405,7 +405,7 @@ Interface.
 .SH SEE ALSO
 .sp
 .LP
-\fBlogname\fR(1), \fBssh\fR(1), \fBkadmin\fR(1M), \fBkadmind\fR(1M),
-\fBkdb5_util\fR(1M), \fBkdb5_ldap_util\fR(1M), \fBkpropd\fR(1M),
-\fBkrb5kdc\fR(1M), \fBping\fR(1M), \fBsvcadm\fR(1M), \fBkdc.conf\fR(4),
-\fBkrb5.conf\fR(4), \fBattributes\fR(5)
+\fBlogname\fR(1), \fBssh\fR(1), \fBkadmin\fR(8), \fBkadmind\fR(8),
+\fBkdb5_util\fR(8), \fBkdb5_ldap_util\fR(8), \fBkpropd\fR(8),
+\fBkrb5kdc\fR(8), \fBping\fR(8), \fBsvcadm\fR(8), \fBkdc.conf\fR(5),
+\fBkrb5.conf\fR(5), \fBattributes\fR(7)

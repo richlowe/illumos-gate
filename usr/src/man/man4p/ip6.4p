@@ -28,7 +28,7 @@ The \fBIPv6\fR protocol is the next generation of the internetwork datagram
 delivery protocol of the Internet protocol family. Programs may use \fBIPv6\fR
 through higher-level protocols such as the Transmission Control Protocol
 (\fBTCP\fR) or the User Datagram Protocol (\fBUDP\fR), or may interface
-directly to \fBIPv6\fR. See \fBtcp\fR(7P) and \fBudp\fR(7P). Direct access may
+directly to \fBIPv6\fR. See \fBtcp\fR(4P) and \fBudp\fR(4P). Direct access may
 be by means of the socket interface, using a "raw socket," or by means of the
 Transport Level Interface (\fBTLI\fR). The protocol options and \fBIPv6\fR
 extension headers defined in the \fBIPv6\fR specification may be set in
@@ -121,7 +121,7 @@ checksum if the value in the checksum field is zero.
 .ad
 .RS 24n
 Enable or obtain IPsec security settings for this socket. For more details on
-the protection services of IPsec, see \fBipsec\fR(7P).
+the protection services of IPsec, see \fBipsec\fR(4P).
 .RE
 
 .sp
@@ -161,7 +161,7 @@ Boolean. If set, only V6 packets can be sent or received
 .ad
 .RS 24n
 Enable or obtain Source Address Selection rule settings for this socket. For
-more details on the Source Address Selection rules, see \fBinet6\fR(7P).
+more details on the Source Address Selection rules, see \fBinet6\fR(4P).
 .RE
 
 .sp
@@ -500,7 +500,7 @@ Using this orientation, \fBIPv6\fR is layered \fIabove\fR the network interface
 drivers and \fIbelow\fR the transport protocols such as \fBUDP\fR and
 \fBTCP\fR. The Internet Control Message Protocol (\fBICMPv6\fR) for the
 Internet Protocol Version 6 (\fBIPv6\fR) is logically a part of \fBIPv6\fR. See
-\fBicmp6\fR(7P).
+\fBicmp6\fR(4P).
 .sp
 .LP
 Unlike \fBIP\fR, \fBIPv6\fR provides no checksum of the \fBIPv6\fR header. Also
@@ -517,19 +517,19 @@ supported), and fragment header.
 .sp
 .LP
 By default, the IPv6 layer will not forward IPv6 packets that are not addressed
-to it. This behavior can be overridden by using  \fBrouteadm\fR(1M) to enable
+to it. This behavior can be overridden by using  \fBrouteadm\fR(8) to enable
 the ipv6-forwarding option. IPv6 forwarding is configured at boot time based on
-the setting of \fBrouteadm\fR(1M)'s ipv6-forwarding option.
+the setting of \fBrouteadm\fR(8)'s ipv6-forwarding option.
 .sp
 .LP
 For backwards compatibility, IPv6 forwarding can be enabled or disabled using
-\fBndd\fR(1M)'s ip_forwarding variable.  It is set to 1 if IPv6 forwarding is
+\fBndd\fR(8)'s ip_forwarding variable.  It is set to 1 if IPv6 forwarding is
 enabled, or 0 if it is disabled.
 .sp
 .LP
 Additionally, finer-grained forwarding can be configured in IPv6. Each
 interface can be configured to forward IPv6 packets by setting the IFF_ROUTER
-interface flag. This flag can be set and cleared using \fBifconfig\fR(1M)'s
+interface flag. This flag can be set and cleared using \fBifconfig\fR(8)'s
 router and -router options. If an interface's IFF_ROUTER flag is set, packets
 can be forwarded to or from the interface. If it is clear, packets will neither
 be forwarded from this interface to others, nor forwarded to this interface.
@@ -539,11 +539,11 @@ flags.
 .LP
 For backwards compatibility, each interface creates an
 \fB<ifname>ip6_forwarding /dev/ip6\fR variable that can be modified using
-\fBndd\fR(1M). An interface's \fB:ip6_forwarding ndd\fR variable is a boolean
+\fBndd\fR(8). An interface's \fB:ip6_forwarding ndd\fR variable is a boolean
 variable that mirrors the status of its IFF_ROUTER interface flag. It is set to
 1 if the flag is set, or 0 if it is clear. This interface specific
 \fB<ifname>:ip6_forwarding ndd\fR variable is obsolete and may be removed in a
-future release of Solaris. The \fBifconfig\fR(1M) router and -router interfaces
+future release of Solaris. The \fBifconfig\fR(8) router and -router interfaces
 are preferred.
 .sp
 .LP
@@ -573,13 +573,13 @@ reconstructed within a short time period.
 Errors in sending discovered at the network interface driver layer are passed
 by IPv6 back up to the user process.
 .SH SEE ALSO
-\fBsvcs\fR(1), \fBndd\fR(1M), \fBrouteadm\fR(1M), \fBsvcadm\fR(1M),
+\fBsvcs\fR(1), \fBndd\fR(8), \fBrouteadm\fR(8), \fBsvcadm\fR(8),
 \fBread\fR(2), \fBwrite\fR(2), \fBbind\fR(3SOCKET), \fBconnect\fR(3SOCKET),
 \fBgetsockopt\fR(3SOCKET), \fBrecv\fR(3SOCKET), \fBrecvmsg\fR(3SOCKET),
 \fBsend\fR(3SOCKET), \fBsendmsg\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET),
-\fBdefaultrouter\fR(4), \fBsmf\fR(5), \fBicmp6\fR(7P), \fBif_tcp\fR(7P),
-\fBipsec\fR(7P), \fBinet6\fR(7P), \fBrouting\fR(7P), \fBtcp\fR(7P),
-\fBudp\fR(7P)
+\fBdefaultrouter\fR(5), \fBsmf\fR(7), \fBicmp6\fR(4P), \fBif_tcp\fR(4P),
+\fBipsec\fR(4P), \fBinet6\fR(4P), \fBrouting\fR(4P), \fBtcp\fR(4P),
+\fBudp\fR(4P)
 .sp
 .LP
 Deering, S. and Hinden, B. \fI RFC 2460, Internet Protocol, Version 6 (IPv6)
@@ -763,7 +763,7 @@ packet's \fBIPv6\fR header or extension headers.
 .sp
 .LP
 The \fBip6\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -775,5 +775,5 @@ svc:/network/initial:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

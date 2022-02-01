@@ -27,7 +27,7 @@ Attributes are split into groups entitled \fBbasic\fR and \fBextended\fR. The
 basic group records only the nbytes, npackets and action name, while the
 extended group is a superset of the basic group and records all attributes. The
 attributes to be recorded, in addition to the accounting file that contains
-flow details, are selected using \fBacctadm\fR(1M). The \fBflowacct\fR module
+flow details, are selected using \fBacctadm\fR(8). The \fBflowacct\fR module
 does not provide a mechanism to retrieve flow information from the accounting
 file nor to interpret the retrieved information.
 .SH STATISTICS
@@ -62,6 +62,6 @@ module: flowacct                   instance: <action id>
 .SH SEE ALSO
 .sp
 .LP
-\fBipqosconf\fR(1M), \fBacctadm\fR(1M), \fBlibexacct3LIB\fR,
-\fBdlcosmk\fR(7ipp), \fBdscpmk\fR(7ipp), \fBipqos\fR(7ipp), \fBipgpc\fR(7ipp),
-\fBtokenmt\fR(7ipp), \fBtswtclmt\fR(7ipp)
+\fBipqosconf\fR(8), \fBacctadm\fR(8), \fBlibexacct3LIB\fR,
+\fBdlcosmk\fR(4IPP), \fBdscpmk\fR(4IPP), \fBipqos\fR(4IPP), \fBipgpc\fR(4IPP),
+\fBtokenmt\fR(4IPP), \fBtswtclmt\fR(4IPP)

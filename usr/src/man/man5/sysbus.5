@@ -17,7 +17,7 @@ can occupy.
 .LP
 Configuration files for \fBISA\fR device drivers are only necessary to describe
 properties used by a particular driver that are not part of the standard
-properties found in the device tree. See \fBdriver.conf\fR(4) for further
+properties found in the device tree. See \fBdriver.conf\fR(5) for further
 details of configuration file syntax.
 .sp
 .LP
@@ -85,7 +85,7 @@ The order of the tuples in the reg property is determined by the boot system
 probe code and depends on the characteristics of each particular device.
 However, the reg property maintains the same order of entries from system boot
 to system boot.  The recommended way to determine the reg property for a
-particular device is to use the \fBprtconf\fR(1M) command after installing the
+particular device is to use the \fBprtconf\fR(8) command after installing the
 particular device.  The output of the \fBprtconf\fR command can be examined to
 determine the reg property for any installed device.
 .sp
@@ -104,7 +104,7 @@ devices that use DMA channels have a \fBdma-channels\fR property.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -118,7 +118,7 @@ Architecture	x86
 .TE
 
 .SH SEE ALSO
-\fBprtconf\fR(1M), \fBdriver.conf\fR(4), \fBscsi\fR(4), \fBattributes\fR(5),
+\fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBscsi\fR(5), \fBattributes\fR(7),
 \fBddi_add_intr\fR(9F), \fBddi_intr_hilevel\fR(9F), \fBddi_map_regs\fR(9F),
 \fBddi_prop_op\fR(9F)
 .sp

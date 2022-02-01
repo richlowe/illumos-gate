@@ -9,7 +9,7 @@
 resource_controls \- resource controls available through project database
 .SH DESCRIPTION
 The resource controls facility is configured through the project database. See
-\fBproject\fR(4). You can set and modify resource controls through the
+\fBproject\fR(5). You can set and modify resource controls through the
 following utilities:
 .RS +4
 .TP
@@ -21,19 +21,19 @@ following utilities:
 .TP
 .ie t \(bu
 .el o
-\fBprojadd\fR(1M)
+\fBprojadd\fR(8)
 .RE
 .RS +4
 .TP
 .ie t \(bu
 .el o
-\fBprojmod\fR(1M)
+\fBprojmod\fR(8)
 .RE
 .RS +4
 .TP
 .ie t \(bu
 .el o
-\fBrctladm\fR(1M)
+\fBrctladm\fR(8)
 .RE
 .sp
 .LP
@@ -41,7 +41,7 @@ In a program, you use \fBsetrctl\fR(2) to set resource control values.
 .sp
 .LP
 In addition to the preceding resource controls, there are resource pools,
-accessible through the \fBpooladm\fR(1M) and \fBpoolcfg\fR(1M) utilities. In a
+accessible through the \fBpooladm\fR(8) and \fBpoolcfg\fR(8) utilities. In a
 program, resource pools can be manipulated through the \fBlibpool\fR(3LIB)
 library.
 .sp
@@ -225,7 +225,7 @@ action.
 .sp .6
 .RS 4n
 Number of CPU shares granted to a project for use with the fair share scheduler
-(see \fBFSS\fR(7)). The unit used is the number of shares (an integer). This
+(see \fBFSS\fR(4)). The unit used is the number of shares (an integer). This
 resource control does not support the \fBsyslog\fR action.
 .RE
 
@@ -524,7 +524,7 @@ mappings and \fBtmpfs\fR mounts for this zone.
 
 .sp
 .LP
-See \fBzones\fR(5).
+See \fBzones\fR(7).
 .SS "Units Used in Resource Controls"
 Resource controls can be expressed as in units of size (bytes), time (seconds),
 or as a count (integer). These units use the strings specified below.
@@ -607,7 +607,7 @@ The preceding examples use the scaling factors specified in the table above.
 .sp
 .LP
 Note that unit modifiers (for example, \fB5G\fR) are accepted by the
-\fBprctl\fR(1), \fBprojadd\fR(1M), and \fBprojmod\fR(1M) commands. You cannot
+\fBprctl\fR(1), \fBprojadd\fR(8), and \fBprojmod\fR(8) commands. You cannot
 use unit modifiers in the project database itself.
 .SS "Resource Control Values and Privilege Levels"
 A threshold value on a resource control constitutes a point at which local
@@ -682,7 +682,7 @@ local.
 .sp
 .LP
 Global actions apply to resource control values for every resource control on
-the system. You can use \fBrctladm\fR(1M) to perform the following actions:
+the system. You can use \fBrctladm\fR(8) to perform the following actions:
 .RS +4
 .TP
 .ie t \(bu
@@ -809,7 +809,7 @@ it is a member. Therefore, a deny action is not allowed on the
 .LP
 Due to implementation restrictions, the global properties of each control can
 restrict the range of available actions that can be set on the threshold value.
-(See \fBrctladm\fR(1M).) A list of available signal actions is presented in the
+(See \fBrctladm\fR(8).) A list of available signal actions is presented in the
 following list. For additional information about signals, see
 \fBsignal\fR(3HEAD).
 .sp
@@ -904,7 +904,7 @@ controls with the \fBRCTL_GLOBAL_CPUTIME\fR property
 Each resource control on the system has a certain set of associated properties.
 This set of properties is defined as a set of flags, which are associated with
 all controlled instances of that resource. Global flags cannot be modified, but
-the flags can be retrieved by using either \fBrctladm\fR(1M) or the
+the flags can be retrieved by using either \fBrctladm\fR(8) or the
 \fBsetrctl\fR(2) system call.
 .sp
 .LP
@@ -1011,7 +1011,7 @@ container's control is enforced first. Thus, action is taken on
 \fBprocess.max-cpu-time\fR before \fBtask.max-cpu-time\fR if both controls are
 encountered simultaneously.
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -1025,10 +1025,10 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBprctl\fR(1), \fBpooladm\fR(1M), \fBpoolcfg\fR(1M), \fBprojadd\fR(1M),
-\fBprojmod\fR(1M), \fBrctladm\fR(1M), \fBsetrctl\fR(2),
-\fBrctlblk_set_value\fR(3C), \fBlibpool\fR(3LIB), \fBproject\fR(4),
-\fBattributes\fR(5), \fBFSS\fR(7)
+\fBprctl\fR(1), \fBpooladm\fR(8), \fBpoolcfg\fR(8), \fBprojadd\fR(8),
+\fBprojmod\fR(8), \fBrctladm\fR(8), \fBsetrctl\fR(2),
+\fBrctlblk_set_value\fR(3C), \fBlibpool\fR(3LIB), \fBproject\fR(5),
+\fBattributes\fR(7), \fBFSS\fR(4)
 .sp
 .LP
 \fISystem Administration Guide:  Virtualization Using the Solaris Operating

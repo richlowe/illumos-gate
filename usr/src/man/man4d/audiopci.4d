@@ -49,7 +49,7 @@ Driver configuration file
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -64,8 +64,8 @@ Architecture	PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2), \fBattributes\fR(5), \fBaudio\fR(7I), \fBmixer\fR(7I),
-\fBstreamio\fR(7I)
+\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBmixer\fR(4I),
+\fBstreamio\fR(4I)
 .sp
 .LP
 \fICreative Technology Ltd ES1370 Specification\fR

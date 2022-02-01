@@ -58,7 +58,7 @@ protocol suite can only be observed by using the \fBdladm\fR command.
 The forms of \fBifconfig\fR that use the \fBauto-dhcp\fR or \fBdhcp\fR
 arguments are used to control the Dynamic Host Configuration Protocol
 ("\fBDHCP\fR") configuration of the interface. In this mode, \fBifconfig\fR is
-used to control operation of \fBdhcpagent\fR(1M), the \fBDHCP\fR client daemon.
+used to control operation of \fBdhcpagent\fR(8), the \fBDHCP\fR client daemon.
 Once an interface is placed under \fBDHCP\fR control by using the \fBstart\fR
 operand, \fBifconfig\fR should not, in normal operation, be used to modify the
 address or characteristics of the interface. If the address of an interface
@@ -92,7 +92,7 @@ appropriate zone to which to deliver data is determined using the
 \fBtnzonecfg\fR database. This option is available only if the system is
 configured with the Solaris Trusted Extensions feature.
 .sp
-The \fBtnzonecfg\fR database is described in the \fBtnzonecfg(4)\fR man page,
+The \fBtnzonecfg\fR database is described in the \fBtnzonecfg(5)\fR man page,
 which is part of the \fISolaris Trusted Extensions Reference Manual\fR.
 .RE
 
@@ -154,7 +154,7 @@ specified. The algorithm can be either a number or an algorithm name, including
 must be specified on the same command line. To disable tunnel security, specify
 an \fBauth_alg\fR of \fBnone\fR.
 .sp
-It is now preferable to use the \fBipsecconf\fR(1M) command when configuring a
+It is now preferable to use the \fBipsecconf\fR(8) command when configuring a
 tunnel's security properties. If \fBipsecconf\fR was used to set a tunnel's
 security properties, this keyword will not affect the tunnel.
 .RE
@@ -418,8 +418,8 @@ addressed to this host. Additionally, when all logical interfaces on a given
 physical interface are "down," the physical interface itself is disabled.
 .sp
 When a logical interface is down, all routes that specify that interface as the
-output (using the \fB-ifp\fR option in the \fBroute\fR(1M) command or
-\fBRTA_IFP\fR in a \fBroute\fR(7P) socket) are removed from the forwarding
+output (using the \fB-ifp\fR option in the \fBroute\fR(8) command or
+\fBRTA_IFP\fR in a \fBroute\fR(4P) socket) are removed from the forwarding
 table. Routes marked with \fBRTF_STATIC\fR are returned to the table if the
 interface is brought back up, while routes not marked with \fBRTF_STATIC\fR are
 simply deleted.
@@ -441,11 +441,11 @@ because the gateway is unreachable.
 Set the tunnel encapsulation limit for the interface to n. This option applies
 to IPv4-in-IPv6 and IPv6-in-IPv6 tunnels only, and it simply modifies the
 \fBencaplimit\fR link property of the underlying IPv6 tunnel link (see
-\fBdladm\fR(1M)). The tunnel encapsulation limit controls how many more tunnels
+\fBdladm\fR(8)). The tunnel encapsulation limit controls how many more tunnels
 a packet can enter before it leaves any tunnel, that is, the tunnel nesting
 level.
 .sp
-This option is obsolete, superseded by the \fBdladm\fR(1M) \fBencaplimit\fR
+This option is obsolete, superseded by the \fBdladm\fR(8) \fBencaplimit\fR
 link property.
 .RE
 
@@ -458,10 +458,10 @@ link property.
 .RS 4n
 Disable generation of the tunnel encapsulation limit. This option applies only
 to IPv4-in-IPv6 and IPv6-in-IPv6 tunnels. This simply sets the \fBencaplimit\fR
-link property of the underlying IPv6 tunnel link to 0 (see \fBdladm\fR(1M)
+link property of the underlying IPv6 tunnel link to 0 (see \fBdladm\fR(8)
 \fBencaplimit\fR).
 .sp
-This option is obsolete, superseded by the \fBdladm\fR(1M) \fBencaplimit\fR
+This option is obsolete, superseded by the \fBdladm\fR(8) \fBencaplimit\fR
 link property.
 .RE
 
@@ -478,7 +478,7 @@ or \fBnone\fR, to indicate no algorithm preference. If an \fBESP\fR encryption
 algorithm is specified but the authentication algorithm is not, the default
 value for the \fBESP\fR authentication algorithm will be \fBany\fR.
 .sp
-It is now preferable to use the \fBipsecconf\fR(1M) command when configuring a
+It is now preferable to use the \fBipsecconf\fR(8) command when configuring a
 tunnel's security properties. If \fBipsecconf\fR was used to set a tunnel's
 security properties, this keyword will not affect the tunnel.
 .RE
@@ -497,7 +497,7 @@ security, specify the value of \fBencr_alg\fR as \fBnone\fR. If an \fBESP\fR
 authentication algorithm is specified, but the encryption algorithm is not, the
 default value for the \fBESP\fR encryption will be \fBnull\fR.
 .sp
-It is now preferable to use the \fBipsecconf\fR(1M) command when configuring a
+It is now preferable to use the \fBipsecconf\fR(8) command when configuring a
 tunnel's security properties. If \fBipsecconf\fR was used to set a tunnel's
 security properties, this keyword will not affect the tunnel.
 .RE
@@ -523,7 +523,7 @@ Some, though not all, Ethernet interface cards have their own addresses. To use
 cards that do not have their own addresses, refer to section 3.2.3(4) of the
 IEEE 802.3 specification for a definition of the locally administered address
 space. Note that all IP interfaces in an IPMP group must have unique hardware
-addresses; see \fBin.mpathd\fR(1M).
+addresses; see \fBin.mpathd\fR(8).
 .RE
 
 .sp
@@ -758,13 +758,13 @@ with a "\fB+\fR" (plus sign) address, or
 .TP
 4.
 with a pseudo host name/pseudo network name found in the network database
-\fBnetworks\fR(4).
+\fBnetworks\fR(5).
 .RE
 If a "\fB+\fR" (plus sign) is given for the netmask value, the mask is looked
-up in the \fBnetmasks\fR(4) database. This lookup finds the longest matching
+up in the \fBnetmasks\fR(5) database. This lookup finds the longest matching
 netmask in the database by starting with the interface's IPv4 address as the
 key and iteratively masking off more and more low order bits of the address.
-This iterative lookup ensures that the \fBnetmasks\fR(4) database can be used
+This iterative lookup ensures that the \fBnetmasks\fR(5) database can be used
 to specify the netmasks when variable length subnetmasks are used within a
 network number.
 .sp
@@ -772,7 +772,7 @@ If a pseudo host name/pseudo network name is supplied as the netmask value,
 netmask data may be located in the \fBhosts\fR or \fBnetworks\fR database.
 Names are looked up by first using \fBgethostbyname\fR(3NSL). If not found
 there, the names are looked up in \fBgetnetbyname\fR(3SOCKET). These interfaces
-may in turn use \fBnsswitch.conf\fR(4) to determine what data store(s) to use
+may in turn use \fBnsswitch.conf\fR(5) to determine what data store(s) to use
 to fetch the actual value.
 .sp
 For both \fBinet\fR and \fBinet6\fR, the same information conveyed by
@@ -935,7 +935,7 @@ Set the destination address of a tunnel. The address should not be the same as
 the \fBdest_address\fR of the tunnel, because no packets leave the system over
 such a tunnel.
 .sp
-This option is obsolete, superseded by the \fBdladm\fR(1M) \fBcreate-iptun\fR
+This option is obsolete, superseded by the \fBdladm\fR(8) \fBcreate-iptun\fR
 and \fBmodify-iptun\fR subcommands.
 .RE
 
@@ -950,9 +950,9 @@ Set the hop limit for a tunnel interface. The hop limit value is used as the
 \fBTTL\fR in the IPv4 header for the IPv6-in-IPv4 and IPv4-in-IPv4 tunnels. For
 IPv6-in-IPv6 and IPv4-in-IPv6 tunnels, the hop limit value is used as the hop
 limit in the IPv6 header. This option simply modifies the \fBhoplimit\fR link
-property of the underlying IP tunnel link (see \fBdladm\fR(1M)).
+property of the underlying IP tunnel link (see \fBdladm\fR(8)).
 .sp
-This option is obsolete, superseded by the \fBdladm\fR(1M) \fBhoplimit\fR link
+This option is obsolete, superseded by the \fBdladm\fR(8) \fBhoplimit\fR link
 property.
 .RE
 
@@ -1007,7 +1007,7 @@ Set the source address of a tunnel. This is the source address on an outer
 encapsulating \fBIP\fR header. It must be an address of another interface
 already configured using \fBifconfig\fR.
 .sp
-This option is obsolete, superseded by the \fBdladm\fR(1M) \fBcreate-iptun\fR
+This option is obsolete, superseded by the \fBdladm\fR(8) \fBcreate-iptun\fR
 and \fBmodify-iptun\fR subcommands.
 .RE
 
@@ -1056,7 +1056,7 @@ keyword \fBnone\fR is used, then any previous selection is cleared.
 When an application does not choose a non-zero source address using
 \fBbind\fR(3SOCKET), the system will select an appropriate source address based
 on the outbound interface and the address selection rules (see
-\fBipaddrsel\fR(1M)).
+\fBipaddrsel\fR(8)).
 .sp
 When \fBusesrc\fR is specified and the specified interface is selected in the
 forwarding table for output, the system looks first to the specified physical
@@ -1077,7 +1077,7 @@ that are sent through \fBeri0\fR. Further examples are provided in the
 \fBEXAMPLES\fR section.
 .sp
 While you can specify any physical interface (or even loopback), be aware that
-you can also specify the virtual IP interface (see \fBvni\fR(7D)). The virtual
+you can also specify the virtual IP interface (see \fBvni\fR(4D)). The virtual
 IP interface is not associated with any physical hardware and is thus immune to
 hardware failures. You can specify any number of physical interfaces to use the
 source address hosted on a single virtual interface. This simplifies the
@@ -1128,7 +1128,7 @@ receive packets.
 Place the logical interface in zone \fIzonename\fR. The named zone must be
 active in the kernel in the ready or running state. The interface is unplumbed
 when the zone is halted or rebooted. The zone must be configured to be an
-shared-IP zone. \fBzonecfg\fR(1M) is used to assign network interface names to
+shared-IP zone. \fBzonecfg\fR(8) is used to assign network interface names to
 exclusive-IP zones.
 .RE
 
@@ -1279,12 +1279,12 @@ command line, the command line overrides the \fBDEFAULT_IP\fR settings.
 .sp .6
 .RS 4n
 For the IPv4 family (\fBinet\fR), the \fIaddress\fR is either a host name
-present in the host name data base (see \fBhosts\fR(4)) or in the Network
+present in the host name data base (see \fBhosts\fR(5)) or in the Network
 Information Service (NIS) map \fBhosts\fR, or an IPv4 address expressed in the
 Internet standard "dot notation".
 .sp
 For the IPv6 family (\fBinet6\fR), the \fIaddress\fR is either a host name
-present in the host name data base (see \fBhosts\fR(4)) or in the Network
+present in the host name data base (see \fBhosts\fR(5)) or in the Network
 Information Service (\fBNIS\fR) map \fBipnode\fR, or an IPv6 address expressed
 in the Internet standard colon-separated hexadecimal format represented as
 \fIx:x:x:x:x:x:x:x\fR where \fIx\fR is a hexadecimal number between \fB0\fR and
@@ -1400,7 +1400,7 @@ IPMP IP interfaces, this will only be set if all interfaces in the group have
 CoS set.
 .sp
 Note that this flag is only set on interfaces over VLAN links and over Ethernet
-links that have their \fBdladm\fR(1M) \fBtagmode\fR link property set to
+links that have their \fBdladm\fR(8) \fBtagmode\fR link property set to
 \fBnormal\fR.
 .RE
 
@@ -1426,7 +1426,7 @@ on all \fBNOFAILOVER\fR addresses, though this may change in a future release.
 .ad
 .sp .6
 .RS 4n
-The logical interface is managed by \fBdhcpagent\fR(1M).
+The logical interface is managed by \fBdhcpagent\fR(8).
 .RE
 
 .sp
@@ -1484,7 +1484,7 @@ dynamic MTU changes that can occur when drivers notify IP of link MTU changes.
 The physical interface is functioning but is not used to send or receive data
 traffic according to administrative policy. This flag is initially set by the
 \fBstandby\fR subcommand and is subsequently controlled by \fBin.mpathd\fR. It
-also set when \fBFAILBACK=no\fR mode is enabled (see \fBin.mpathd\fR(1M)) to
+also set when \fBFAILBACK=no\fR mode is enabled (see \fBin.mpathd\fR(8)) to
 indicate that the IP interface has repaired but is not being used.
 .RE
 
@@ -1610,8 +1610,8 @@ advertise this address.
 .sp .6
 .RS 4n
 The interface is offline and thus cannot send or receive IP data traffic. This
-is only set on IP interfaces in an IPMP group. See \fBif_mpadm\fR(1M) and
-\fBcfgadm\fR(1M).
+is only set on IP interfaces in an IPMP group. See \fBif_mpadm\fR(8) and
+\fBcfgadm\fR(8).
 .RE
 
 .sp
@@ -1849,7 +1849,7 @@ Interfaces assigned to the same IPMP group are treated as equivalent and
 monitored for failure by \fBin.mpathd\fR. Provided that active interfaces in
 the group remain, IP interface failures (and any subsequent repairs) are
 handled transparently to sockets-based applications. IPMP is also integrated
-with the Dynamic Reconfiguration framework (see \fBcfgadm\fR(1M)), which
+with the Dynamic Reconfiguration framework (see \fBcfgadm\fR(8)), which
 enables network adapters to be replaced in a way that is invisible to
 sockets-based applications.
 .sp
@@ -1857,7 +1857,7 @@ sockets-based applications.
 The IP module automatically load-spreads all outbound traffic across all active
 interfaces in an IPMP group. Similarly, all \fBUP\fR addresses hosted on the
 IPMP IP interface will be distributed across the active interfaces to promote
-inbound load-spreading. The \fBipmpstat\fR(1M) utility allows many aspects of
+inbound load-spreading. The \fBipmpstat\fR(8) utility allows many aspects of
 the IPMP subsystem to be observed, including the current binding of IP data
 addresses to IP interfaces.
 .sp
@@ -1893,7 +1893,7 @@ the address is removed from the group.
 .LP
 Each interface placed into an IPMP group may be optionally configured with a
 "test" address that \fBin.mpathd\fR will use for probe-based failure detection;
-see \fBin.mpathd\fR(1M). These addresses must be marked \fBNOFAILOVER\fR (using
+see \fBin.mpathd\fR(8). These addresses must be marked \fBNOFAILOVER\fR (using
 the \fB-failover\fR subcommand) prior to being marked \fBUP\fR. Test addresses
 may also be acquired through DHCP by means of the \fBdhcp\fR subcommand.
 .sp
@@ -1979,7 +1979,7 @@ or more IP nodes, and an IP interface above this link which allows the system
 to transmit and receive IP packets encapsulated by the underlying link.
 .sp
 .LP
-The \fBdladm\fR(1M) command is used to configure tunnel links, and
+The \fBdladm\fR(8) command is used to configure tunnel links, and
 \fBifconfig\fR is used to configure IP interfaces over those tunnel links.  An
 IPv4-over-IPv4 tunnel is created by plumbing an IPv4 interface over an IPv4
 tunnel link.  An IPv6-over-IPv4 tunnel is created by plumbing an IPv6 interface
@@ -2055,7 +2055,7 @@ unplumbed).
 .LP
 The \fBtsrc\fR, \fBtdst\fR, \fBencaplim\fR, and \fBhoplimit\fR options to
 \fBifconfig\fR are obsolete and maintained only for backward compatibility.
-They are equivalent to their \fBdladm\fR(1M) counterparts.
+They are equivalent to their \fBdladm\fR(8) counterparts.
 .SS "Display of Tunnel Security Settings"
 The \fBifconfig\fR output for IP tunnel interfaces indicates whether IPsec
 policy is configured for the underlying IP tunnel link. For example, a line of
@@ -2071,7 +2071,7 @@ tunnel security settings  -->  use 'ipsecconf -ln -i ip.tun1'
 .sp
 .LP
 If you do net set security policy, using either \fBifconfig\fR or
-\fBipsecconf\fR(1M), there is no tunnel security setting displayed.
+\fBipsecconf\fR(8), there is no tunnel security setting displayed.
 .SH EXAMPLES
 \fBExample 1 \fRUsing the \fBifconfig\fR Command
 .sp
@@ -2164,7 +2164,7 @@ example% \fBifconfig tun0 plumb mysrc thedst up\fR
 
 .sp
 .LP
-Use \fBipsecconf\fR(1M), as described above, to configure tunnel security
+Use \fBipsecconf\fR(8), as described above, to configure tunnel security
 properties.
 
 .sp
@@ -2362,7 +2362,7 @@ and its aliases.
 .sp
 .LP
 The following is an example of how the \fBusesrc\fR feature can be used with
-the \fBzones\fR(5) facility in Solaris. The following commands are invoked in
+the \fBzones\fR(7) facility in Solaris. The following commands are invoked in
 the global zone:
 
 .sp
@@ -2413,7 +2413,7 @@ vni0:3:
 There is one virtual interface alias per zone (\fBtest1\fR, \fBtest2\fR, and
 \fBtest3\fR). A source address from the virtual interface alias in the same
 zone is selected. The virtual interface aliases were created using
-\fBzonecfg\fR(1M) as follows:
+\fBzonecfg\fR(8) as follows:
 
 .sp
 .in +2
@@ -2437,7 +2437,7 @@ the same way.
 .LP
 The following example shows how to disable automatic use of DHCPv6 on all
 interfaces, and immediately shut down DHCPv6 on the interface named \fBhme0\fR.
-See \fBin.ndpd\fR(1M) and \fBndpd.conf\fR(4) for more information on the
+See \fBin.ndpd\fR(8) and \fBndpd.conf\fR(5) for more information on the
 automatic DHCPv6 configuration mechanism.
 
 .sp
@@ -2471,7 +2471,7 @@ Default Internet protocol type.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -2489,14 +2489,14 @@ Interface Stability for command output	Uncommitted
 .TE
 
 .SH SEE ALSO
-\fBdhcpinfo\fR(1), \fBcfgadm\fR(1M), \fBdhcpagent\fR(1M), \fBdladm\fR(1M),
-\fBif_mpadm\fR(1M), \fBin.mpathd\fR(1M), \fBin.ndpd\fR(1M),
-\fBin.routed\fR(1M), \fBipmpstat\fR(1M), \fBipsecconf\fR(1M), \fBndd\fR(1M),
-\fBnetstat\fR(1M), \fBzoneadm\fR(1M), \fBzonecfg\fR(1M), \fBethers\fR(3SOCKET),
-\fBgethostbyname\fR(3NSL), \fBgetnetbyname\fR(3SOCKET), \fBhosts\fR(4),
-\fBinet_type\fR(4), \fBndpd.conf\fR(4), \fBnetmasks\fR(4), \fBnetworks\fR(4),
-\fBnsswitch.conf\fR(4), \fBattributes\fR(5), \fBprivileges\fR(5),
-\fBzones\fR(5), \fBarp\fR(7P), \fBipsecah\fR(7P), \fBipsecesp\fR(7P)
+\fBdhcpinfo\fR(1), \fBcfgadm\fR(8), \fBdhcpagent\fR(8), \fBdladm\fR(8),
+\fBif_mpadm\fR(8), \fBin.mpathd\fR(8), \fBin.ndpd\fR(8),
+\fBin.routed\fR(8), \fBipmpstat\fR(8), \fBipsecconf\fR(8), \fBndd\fR(8),
+\fBnetstat\fR(8), \fBzoneadm\fR(8), \fBzonecfg\fR(8), \fBethers\fR(3SOCKET),
+\fBgethostbyname\fR(3NSL), \fBgetnetbyname\fR(3SOCKET), \fBhosts\fR(5),
+\fBinet_type\fR(5), \fBndpd.conf\fR(5), \fBnetmasks\fR(5), \fBnetworks\fR(5),
+\fBnsswitch.conf\fR(5), \fBattributes\fR(7), \fBprivileges\fR(7),
+\fBzones\fR(7), \fBarp\fR(4P), \fBipsecah\fR(4P), \fBipsecesp\fR(4P)
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR

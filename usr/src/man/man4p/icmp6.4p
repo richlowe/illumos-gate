@@ -42,7 +42,7 @@ descriptors and sockets are connectionless and are normally used with the
 calls. They may also be used with the \fBsendmsg()\fR/\fBrecvgmsg()\fR calls
 when sending or receiving ancillary data. In order to send \fBICMP6\fR packets,
 a process needs the \fBPRIV_NET_ICMPACCESS\fR privilege. (See
-\fBprivileges\fR(5) for more information on privileges.)
+\fBprivileges\fR(7) for more information on privileges.)
 .sp
 .LP
 Outgoing packets automatically have an Internet Protocol Version 6 (\fBIPv6\fR)
@@ -70,8 +70,8 @@ holder of an open \fBICMP6\fR socket or \fBTLI\fR descriptor.
 .LP
 \fBgetprotobyname\fR(3SOCKET), \fBrecv\fR(3SOCKET), \fBrecvmsg\fR(3SOCKET),
 \fBsend\fR(3SOCKET), \fBsendmsg\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET),
-\fBt_rcvudata\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBprivileges\fR(5),
-\fBinet6\fR(7P), \fBip6\fR(7P), \fBrouting\fR(7P)
+\fBt_rcvudata\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBprivileges\fR(7),
+\fBinet6\fR(4P), \fBip6\fR(4P), \fBrouting\fR(4P)
 .sp
 .LP
 Conta, A. and Deering, S., \fIRFC 2463, Internet Control Message Protocol

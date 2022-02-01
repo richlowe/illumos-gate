@@ -23,9 +23,9 @@ driver and a \fBSCSA\fR HBA driver. As such, the \fBscsa2usb\fR driver only
 supports storage devices that utilize the above two transports.
 .sp
 .LP
-The \fBscsa2usb\fR driver also supports a \fBugen\fR(7D) interface allowing raw
+The \fBscsa2usb\fR driver also supports a \fBugen\fR(4D) interface allowing raw
 access to the device, for example by libusb applications, bypassing
-the child \fBsd\fR(7D) or \fBst\fR(7D) driver. Because a libusb application
+the child \fBsd\fR(4D) or \fBst\fR(4D) driver. Because a libusb application
 might change the state of the device, you should not access the disk or tape
 concurrently.
 .sp
@@ -36,13 +36,13 @@ The \fBscsa2usb\fR nexus driver maps \fBSCSA\fR target driver requests to
 .LP
 The \fBscsa2usb\fR driver creates a child device info node for each logical
 unit (LUN) on the mass storage device. The standard Solaris \fBSCSI\fR disk
-driver or tape driver is attached to those nodes. Refer to \fBsd\fR(7D) or
-\fBst\fR(7D).
+driver or tape driver is attached to those nodes. Refer to \fBsd\fR(4D) or
+\fBst\fR(4D).
 .sp
 .LP
 This driver supports multiple LUN devices and creates a separate child device
-info node for each LUN. All child LUN nodes attach to \fBsd\fR(7D) for disks or
-\fBst\fR(7D) for tapes.
+info node for each LUN. All child LUN nodes attach to \fBsd\fR(4D) for disks or
+\fBst\fR(4D) for tapes.
 .sp
 .LP
 In previous releases, all USB disk storage devices were treated as removable
@@ -105,7 +105,7 @@ Disk storage devices are managed by Volume Manager. Software that manages
 removable media creates a device nickname that can be listed with
 \fBeject\fR(1) or \fBrmmount\fR(1). A device that is not mounted automatically
 can be mounted using \fBrmmount\fR(1) under \fB/rmdisk/\fIlabel\fR\fR. Note
-that the \fBmount\fR(1M) and \fBmount\fR(1M) commands do not accept nicknames;
+that the \fBmount\fR(8) and \fBmount\fR(8) commands do not accept nicknames;
 you must use explicit device names with these commands.
 .sp
 .LP
@@ -125,9 +125,9 @@ it.
 .LP
 You can disable the automatic mounting and unmounting of removable devices by
 inserting a entry for a removable device in \fB/etc/vfstab\fR. In this entry,
-you must set the \fBmount at boot\fR field to \fBno\fR. See \fBvfstab\fR(4).
+you must set the \fBmount at boot\fR field to \fBno\fR. See \fBvfstab\fR(5).
 .SS "Using \fBmount\fR and \fBumount\fR"
-Use \fBmount\fR(1M) to explicitly mount the device and \fBumount\fR(1M) to
+Use \fBmount\fR(8) to explicitly mount the device and \fBumount\fR(8) to
 unmount the device. Use \fBeject\fR(1) to eject the media. After you have
 explicitly mounted a removable device, you cannot use a nickname as an argument
 to \fBeject\fR.
@@ -141,15 +141,15 @@ the device. A storage device can be hot inserted at any time.
 Disk block special file names are located in \fB/dev/dsk\fR, while raw file
 names are located in \fB/dev/rdsk\fR. Tape raw file names are located in
 \fB/dev/rmt\fR. Input/output requests to the devices must follow the same
-restrictions as those for SCSI disks or tapes. Refer to \fBsd\fR(7D) or
-\fBst\fR(7D).
+restrictions as those for SCSI disks or tapes. Refer to \fBsd\fR(4D) or
+\fBst\fR(4D).
 .SH IOCTLS
-Refer to \fBdkio\fR(7I) and \fBcdio\fR(7I).
+Refer to \fBdkio\fR(4I) and \fBcdio\fR(4I).
 .SH ERRORS
-Refer to \fBsd\fR(7D) for disks or \fBst\fR(7D) for tapes.
+Refer to \fBsd\fR(4D) for disks or \fBst\fR(4D) for tapes.
 .SH FILES
 The device special files for the USB mass storage device are created like those
-for a \fBSCSI\fR disk or SCSI tape. Refer to \fBsd\fR(7D) or \fBst\fR(7D).
+for a \fBSCSI\fR disk or SCSI tape. Refer to \fBsd\fR(4D) or \fBst\fR(4D).
 .sp
 .ne 2
 .na
@@ -177,7 +177,7 @@ Raw files for disks.
 .ad
 .sp .6
 .RS 4n
-ugen(7D) nodes
+ugen(4D) nodes
 .RE
 
 .sp
@@ -252,7 +252,7 @@ Can be used to override specific characteristics.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -267,11 +267,11 @@ Architecture	SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 \fBcdrw\fR(1), \fBeject\fR(1), \fBrmformat\fR(1), \fBrmmount\fR(1),
-\fBcfgadm_scsi\fR(1M), \fBcfgadm_usb\fR(1M), \fBfdisk\fR(1M), \fBmount\fR(1M),
-\fBumount\fR(1M),
-\fBscsi\fR(4), \fBvfstab\fR(4), \fBattributes\fR(5),
-\fBieee1394\fR(7D), \fBsd\fR(7D), \fBst\fR(7D), \fBugen\fR(7D), \fBusba\fR(7D),
-\fBpcfs\fR(7FS), \fBcdio\fR(7I), \fBdkio\fR(7I)
+\fBcfgadm_scsi\fR(8), \fBcfgadm_usb\fR(8), \fBfdisk\fR(8), \fBmount\fR(8),
+\fBumount\fR(8),
+\fBscsi\fR(5), \fBvfstab\fR(5), \fBattributes\fR(7),
+\fBieee1394\fR(4D), \fBsd\fR(4D), \fBst\fR(4D), \fBugen\fR(4D), \fBusba\fR(4D),
+\fBpcfs\fR(4FS), \fBcdio\fR(4I), \fBdkio\fR(4I)
 .sp
 .LP
 \fIWriting Device Drivers\fR
@@ -305,7 +305,7 @@ SCSI Specification \fIT10/1236-D Revision 20\fR \(em July 2001
 .LP
 SCSI Specification \fIT10/1416-D Revision 23\fR \(em May 2005
 .SH DIAGNOSTICS
-Refer to \fBsd\fR(7D) and \fBst\fR(7D).
+Refer to \fBsd\fR(4D) and \fBst\fR(4D).
 .sp
 .LP
 In addition to being logged, the following messages may appear on the system

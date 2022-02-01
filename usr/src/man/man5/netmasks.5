@@ -57,7 +57,7 @@ sixteen bits in the network field.
 When using variable length subnetting, the format is identical. However, there
 should be a line for each subnet with the  first field being the subnet and the
 second field being the netmask that applies to that subnet. The users of the
-database, such as \fBifconfig\fR(1M), perform a lookup to find the longest
+database, such as \fBifconfig\fR(8), perform a lookup to find the longest
 possible matching mask. It is possible to combine the  \fIRFC-950\fR and
 \fIRFC-1519\fR form of subnet masks in the netmasks file. For example,
 .sp
@@ -109,7 +109,7 @@ Invalid entries are ignored.
 .SH SEE ALSO
 .sp
 .LP
-\fBifconfig\fR(1M), \fBinet\fR(7P)
+\fBifconfig\fR(8), \fBinet\fR(4P)
 .sp
 .LP
 Postel, Jon, and Mogul, Jeff, \fIInternet Standard Subnetting Procedure\fR,

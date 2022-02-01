@@ -22,7 +22,7 @@ root directory.
 .SH OPTIONS
 .sp
 .LP
-See \fBmkfs\fR(1M) for the list of supported \fIgeneric_options\fR.
+See \fBmkfs\fR(8) for the list of supported \fIgeneric_options\fR.
 .sp
 .LP
 The following options are supported:
@@ -85,7 +85,7 @@ Specify the number of 512-byte blocks in the file system.
 .SH SEE ALSO
 .sp
 .LP
-\fBfsck\fR(1M), \fBmkfs\fR(1M), \fBattributes\fR(5)
+\fBfsck\fR(8), \fBmkfs\fR(8), \fBattributes\fR(7)
 .SH DIAGNOSTICS
 .sp
 .in +2
@@ -183,5 +183,5 @@ One of the arguments is potentially a bad numeric.
 You can use \fBlofiadm\fR to create a file that appears to a \fBmkfs\fR command
 (for example, \fBmkfs_pcfs\fR or \fBmkfs_ufs\fR) as a raw device. You can then
 use a \fBmkfs\fR command to create a file system on that device. See
-\fBlofiadm\fR(1M) for examples of creating a UFS and a PC (FAT) file system on
+\fBlofiadm\fR(8) for examples of creating a UFS and a PC (FAT) file system on
 a device created by \fBlofiadm\fR.

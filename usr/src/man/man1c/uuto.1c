@@ -259,7 +259,7 @@ A pathname of a file on the local system to be copied to \fIdestination\fR.
 .SH ENVIRONMENT VARIABLES
 .sp
 .LP
-See \fBenviron\fR(5) for descriptions of the following environment variables
+See \fBenviron\fR(7) for descriptions of the following environment variables
 that affect the execution of \fBuuto\fR and \fBuupick\fR: \fBLC_TYPE\fR,
 \fBLC_MESSAGES\fR, and \fBNLSPATH\fR.
 .SH EXIT STATUS
@@ -298,7 +298,7 @@ An error occurred.
 .sp
 .LP
 \fBmail\fR(1), \fBuucp\fR(1C), \fBuustat\fR(1C), \fBuux\fR(1C),
-\fBuucleanup\fR(1M), \fBattributes\fR(5)
+\fBuucleanup\fR(8), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

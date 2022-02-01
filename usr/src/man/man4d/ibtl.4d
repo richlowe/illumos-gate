@@ -61,7 +61,7 @@ Reliable Connected (RC) transport types only.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -77,7 +77,7 @@ Interface Stability	Consolidation Private
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBib\fR(7D), \fBibcm\fR(7D), \fBibdm\fR(7D)
+\fBattributes\fR(7), \fBib\fR(4D), \fBibcm\fR(4D), \fBibdm\fR(4D)
 .sp
 .LP
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.1\fR

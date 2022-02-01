@@ -21,7 +21,7 @@ for mail nodes that have transient connections to their service providers.
 The \fBetrn\fR utility initiates an SMTP session with the host
 \fIserver-host\fR and sends one or more \fBETRN\fR commands as follows: If no
 \fIclient-hosts\fR are specified, \fBetrn\fR looks up every host name for which
-\fBsendmail\fR(1M) accepts email and, for each name, sends an \fBETRN\fR
+\fBsendmail\fR(8) accepts email and, for each name, sends an \fBETRN\fR
 command with that name as the argument. If any \fIclient-hosts\fR are
 specified, \fBetrn\fR uses each of these as arguments for successive \fBETRN\fR
 commands.
@@ -37,7 +37,7 @@ System boot special case. Make sure localhost is accepting SMTP connections
 before initiating the SMTP session with server-host.
 .sp
 This option is useful because it prevents race conditions between
-\fBsendmail\fR(1M) accepting connections and \fIserver-host\fR attempting to
+\fBsendmail\fR(8) accepting connections and \fIserver-host\fR attempting to
 deliver queued mail. This check is performed automatically if no
 \fIclient-hosts\fR are specified.
 .RE
@@ -139,7 +139,7 @@ ETRN_HOSTS="server1.example.com server2.example.com"
 .LP
 results in set of a \fBETRN\fR commands being sent to both
 \fBserver1.example.com\fR and \fBserver2.example.com\fR; each set contains one
-\fBETRN\fR command for each host name for which \fBsendmail\fR(1M) accepts
+\fBETRN\fR command for each host name for which \fBsendmail\fR(8) accepts
 email, with that host name as the argument.
 
 .SH FILES
@@ -161,7 +161,7 @@ Variables used by \fBsvc:/network/smtp:sendmail\fR
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -175,7 +175,7 @@ Interface Stability	Stable
 .TE
 
 .SH SEE ALSO
-\fBsendmail\fR(1M), \fBattributes\fR(5)
+\fBsendmail\fR(8), \fBattributes\fR(7)
 .sp
 .LP
 RFC 1985

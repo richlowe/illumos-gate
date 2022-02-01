@@ -33,9 +33,9 @@ cfgadm_usb \- USB hardware-specific commands for cfgadm
 .LP
 The Universal Serial Bus (\fBUSB\fR) hardware-specific library
 \fB/usr/lib/cfgadm/usb.so.1\fR provides the functionality for administering
-\fBUSB\fR devices via the \fBcfgadm\fR(1M) command. \fBcfgadm\fR operates on
+\fBUSB\fR devices via the \fBcfgadm\fR(8) command. \fBcfgadm\fR operates on
 attachment points. For details regarding attachment points, refer to
-\fBcfgadm\fR(1M).
+\fBcfgadm\fR(8).
 .sp
 .LP
 For \fBUSB\fR administration, the only attachment points supported are the
@@ -344,7 +344,7 @@ in the expected state. Use the \fBcfgadm\fR \fB-l\fR command to display the
 device's current status.
 .sp
 .LP
-All other options have the same meaning as defined in \fBcfgadm\fR(1M).
+All other options have the same meaning as defined in \fBcfgadm\fR(8).
 .sp
 .LP
 The following options are supported:
@@ -432,7 +432,7 @@ Not supported.
 .ad
 .sp .6
 .RS 4n
-The \fB-l\fR option works as described in \fBcfgadm\fR(1M). When paired with
+The \fB-l\fR option works as described in \fBcfgadm\fR(8). When paired with
 the \fB-v\fR option, the \fBInformation\fR field contains the following
 \fBUSB\fR-specific information:
 .RS +4
@@ -491,7 +491,7 @@ of the options available.
 .sp .6
 .RS 4n
 Attachment points of class \fBUSB\fR can be listed by using the \fBselect\fR
-sub-option. See \fBcfgadm\fR(1M).
+sub-option. See \fBcfgadm\fR(8).
 .RE
 
 .sp
@@ -966,8 +966,8 @@ Hardware specific library for generic USB device administration
 
 .SH SEE ALSO
 .LP
-\fBcfgadm\fR(1M), \fBconfig_admin\fR(3CFGADM), \fBattributes\fR(5),
-\fBscsa2usb\fR(7D), \fBusba\fR(7D)
+\fBcfgadm\fR(8), \fBconfig_admin\fR(3CFGADM), \fBattributes\fR(7),
+\fBscsa2usb\fR(4D), \fBusba\fR(4D)
 .sp
 .LP
 Universal Serial Bus 1.1 Specification (\fBwww.usb.org\fR)
@@ -976,10 +976,10 @@ Universal Serial Bus 1.1 Specification (\fBwww.usb.org\fR)
 \fI\fR
 .SH NOTES
 .LP
-\fBcfgadm\fR(1M) can not unconfigure, disconnect, reset, or change the
+\fBcfgadm\fR(8) can not unconfigure, disconnect, reset, or change the
 configuration of any \fBUSB\fR device currently opened by any application.
 These operations also fail on a hub if a device in its hierarchy is opened by
-an application. See \fBscsa2usb\fR(7D) for unconfiguring a \fBUSB\fR
+an application. See \fBscsa2usb\fR(4D) for unconfiguring a \fBUSB\fR
 mass-storage device that is currently in use.
 .sp
 .LP

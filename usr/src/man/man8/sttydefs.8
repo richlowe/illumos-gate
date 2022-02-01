@@ -68,10 +68,10 @@ user's intervention.
 .RS 20n
 Specify the value to be used in the \fIfinal-flags\fR field in
 \fB/etc/ttydefs\fR. \fIfinal-flags\fR must be in a format recognized by the
-\fBstty\fR command. \fIfinal-flags\fR are the \fBtermio\fR(7I) settings used by
+\fBstty\fR command. \fIfinal-flags\fR are the \fBtermio\fR(4I) settings used by
 \fBttymon\fR after receiving a successful connection request and immediately
 before invoking the service on the port. If this option is not specified,
-\fBsttydefs\fR will set \fIfinal-flags\fR equal to the \fBtermio\fR(7I) flags
+\fBsttydefs\fR will set \fIfinal-flags\fR equal to the \fBtermio\fR(4I) flags
 \fB9600\fR and \fBsane\fR.
 .RE
 
@@ -86,7 +86,7 @@ Specify the value to be used in the \fIinitial-flags\fR field in
 \fBstty\fR command. These flags are used by \fBttymon\fR when searching for the
 correct baud rate. They are set prior to writing the prompt. If this option is
 not specified, \fBsttydefs\fR will set \fIinitial-flags\fR equal to the
-\fBtermio\fR(7I) flag \fB9600\fR.
+\fBtermio\fR(4I) flag \fB9600\fR.
 .RE
 
 .sp
@@ -189,4 +189,4 @@ sttydefs \fB-a\fR 9600 \fB-n\fR 1200 \fB-i\fR 9600 \fB-f\fR "9600 sane"
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBtermio\fR(7I)
+\fBattributes\fR(7), \fBtermio\fR(4I)

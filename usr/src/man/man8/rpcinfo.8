@@ -81,7 +81,7 @@ call to the remote \fBrpcbind\fR.
 .sp
 .LP
 The \fIprognum\fR argument is a number that represents an \fBRPC\fR program
-number (see \fBrpc\fR(4)).
+number (see \fBrpc\fR(5)).
 .sp
 .LP
 If a \fIversnum\fR is specified, \fBrpcinfo\fR attempts to call that version of
@@ -103,7 +103,7 @@ The \fBEXAMPLES\fR section describe other ways of using \fBrpcinfo\fR.
 Specify the transport on which the service is required. If this option is not
 specified, \fBrpcinfo\fR uses the transport specified in the \fBNETPATH\fR
 environment variable, or if that is unset or \fINULL,\fR the transport in the
-\fBnetconfig\fR(4) database is used. This is a generic option, and can be used
+\fBnetconfig\fR(5) database is used. This is a generic option, and can be used
 in conjunction with other options as shown in the \fBSYNOPSIS\fR.
 .RE
 
@@ -347,5 +347,5 @@ or
 
 .SH SEE ALSO
 .LP
-\fBrpcbind\fR(1M), \fBrpc\fR(3NSL), \fBnetconfig\fR(4), \fBrpc\fR(4),
-\fBattributes\fR(5)
+\fBrpcbind\fR(8), \fBrpc\fR(3NSL), \fBnetconfig\fR(5), \fBrpc\fR(5),
+\fBattributes\fR(7)

@@ -15,14 +15,14 @@ rquotad \- remote quota server
 .SH DESCRIPTION
 .sp
 .LP
-\fBrquotad\fR is an \fBrpc\fR(4) server which returns quotas for a user of a
+\fBrquotad\fR is an \fBrpc\fR(5) server which returns quotas for a user of a
 local file system which is mounted by a remote machine over the \fBNFS.\fR The
-results are used by \fBquota\fR(1M) to display user quotas for remote file
-systems. The \fBrquotad\fR daemon is normally invoked by \fBinetd\fR(1M).
+results are used by \fBquota\fR(8) to display user quotas for remote file
+systems. The \fBrquotad\fR daemon is normally invoked by \fBinetd\fR(8).
 .SH USAGE
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBrquotad\fR
+See \fBlargefile\fR(7) for the description of the behavior of \fBrquotad\fR
 when encountering files greater than or equal to 2 Gbyte (2^31 bytes).
 .SH FILES
 .sp
@@ -37,10 +37,10 @@ quota file at a UFS file system root
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBautomountd\fR(1M), \fBinetadm\fR(1M), \fBinetd\fR(1M),
-\fBmount_nfs\fR(1M), \fBquota\fR(1M), \fBshare_nfs\fR(1M), \fBsvcadm\fR(1M),
-\fBrpc\fR(4), \fBservices\fR(4), \fBattributes\fR(5), \fBlargefile\fR(5),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBautomountd\fR(8), \fBinetadm\fR(8), \fBinetd\fR(8),
+\fBmount_nfs\fR(8), \fBquota\fR(8), \fBshare_nfs\fR(8), \fBsvcadm\fR(8),
+\fBrpc\fR(5), \fBservices\fR(5), \fBattributes\fR(7), \fBlargefile\fR(7),
+\fBsmf\fR(7)
 .sp
 .LP
 \fI\fR
@@ -48,7 +48,7 @@ quota file at a UFS file system root
 .sp
 .LP
 The \fBrquotad\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -60,13 +60,13 @@ svc:/network/nfs/rquota
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Responsibility for
-initiating and restarting this service is delegated to \fBinetd\fR(1M). Use
-\fBinetadm\fR(1M) to make configuration changes and to view configuration
+requesting restart, can be performed using \fBsvcadm\fR(8). Responsibility for
+initiating and restarting this service is delegated to \fBinetd\fR(8). Use
+\fBinetadm\fR(8) to make configuration changes and to view configuration
 information for this service. The service's status can be queried using the
 \fBsvcs\fR(1) command.
 .sp
 .LP
-If it is disabled, it will be enabled by \fBmount_nfs\fR(1M),
-\fBshare_nfs\fR(1M), and \fBautomountd\fR(1M) unless its
+If it is disabled, it will be enabled by \fBmount_nfs\fR(8),
+\fBshare_nfs\fR(8), and \fBautomountd\fR(8) unless its
 \fBapplication/auto_enable\fR property is set to \fBfalse\fR.

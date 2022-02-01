@@ -17,7 +17,7 @@ ypset \- point ypbind at a particular server
 .sp
 .LP
 In order to run \fBypset\fR, \fBypbind\fR must be initiated with the
-\fB\(miypset\fR or \fB\(miypsetme\fR options. See \fBypbind\fR(1M). \fBypset\fR
+\fB\(miypset\fR or \fB\(miypsetme\fR options. See \fBypbind\fR(8). \fBypset\fR
 tells \fBypbind\fR to get NIS services for the specified \fIypdomain\fR from
 the \fBypserv\fR process running on \fIserver\fR. If \fIserver\fR is down, or
 is not running \fBypserv\fR, this might not be discovered until an NIS client
@@ -65,7 +65,7 @@ call, \fByp_all()\fR, uses connection-oriented transport and derives the NIS
 server's address  based on the connectionless address supplied by \fBypset\fR.
 .sp
 .LP
-Refer to \fBypfiles\fR(4) for an overview of the NIS name service.
+Refer to \fBypfiles\fR(5) for an overview of the NIS name service.
 .SH OPTIONS
 .sp
 .ne 2
@@ -89,4 +89,4 @@ Set \fBypbind\fR's binding on \fIhost\fR, instead of locally. Specify
 .SH SEE ALSO
 .sp
 .LP
-\fBypwhich\fR(1), \fBypfiles\fR(4), \fBattributes\fR(5)
+\fBypwhich\fR(1), \fBypfiles\fR(5), \fBattributes\fR(7)

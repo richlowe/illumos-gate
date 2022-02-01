@@ -17,7 +17,7 @@ rge \- Realtek Gigabit/Fast Ethernet Network Adapter driver
 .LP
 The \fBrge\fR Gigabit/Fast Ethernet driver is a multi-threaded,  loadable,
 clonable,  GLD-based  STREAMS  driver supporting  the Data Link Provider
-Interface, \fBdlpi\fR(7P), on  the Realtek Gigabit/Fast Ethernet Network
+Interface, \fBdlpi\fR(4P), on  the Realtek Gigabit/Fast Ethernet Network
 Adapter.
 .sp
 .LP
@@ -31,9 +31,9 @@ The cloning,  character-special device \fB/dev/rge\fR is  used to access all
 Realtek Gigabit/Fast Ethernet devices installed within the system.
 .sp
 .LP
-The \fBrge\fR driver is managed by the \fBdladm\fR(1M) command line utility,
+The \fBrge\fR driver is managed by the \fBdladm\fR(8) command line utility,
 which allows VLANs to be defined on top of \fBrge\fR  instances and for
-\fBrge\fR instances to be aggregated. See \fBdladm\fR(1M) for more details.
+\fBrge\fR instances to be aggregated. See \fBdladm\fR(8) for more details.
 .sp
 .LP
 The values returned by the driver in the DL_INFO_ACK primitive in response to
@@ -118,7 +118,7 @@ speed and mode. Link speed and mode can be any one of the following:
 .sp
 .LP
 Alternatively, you can set the capabilities advertised by the \fBrge\fR device
-using \fBndd\fR(1M). The driver supports a number of parameters whose names
+using \fBndd\fR(8). The driver supports a number of parameters whose names
 begin with \fBadv_\fR. Each of these parameters contains a boolean value that
 determines if the device advertises that mode of operation. The
 \fIadv_pause_cap\fR indicates if half/full duplex pause is advertised to link
@@ -203,7 +203,7 @@ SPARC \fBrge\fR driver binary.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -219,7 +219,7 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBattributes\fR(5), \fBstreamio\fR(7I), \fBdlpi\fR(7P)
+\fBdladm\fR(8), \fBattributes\fR(7), \fBstreamio\fR(4I), \fBdlpi\fR(4P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

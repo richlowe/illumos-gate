@@ -120,7 +120,7 @@ No thread could be found corresponding to the given thread ID.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -139,7 +139,7 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBpthread_cancel\fR(3C), \fBpthread_create\fR(3C), \fBpthread_detach\fR(3C),
-\fBpthread_exit\fR(3C), \fBwait\fR(3C), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBpthread_exit\fR(3C), \fBwait\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

@@ -36,7 +36,7 @@ ELF Kernel Module
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -52,7 +52,7 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBsbus\fR(4), \fBsf\fR(7D), \fBssd\fR(7D)
+\fBsbus\fR(5), \fBsf\fR(4D), \fBssd\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

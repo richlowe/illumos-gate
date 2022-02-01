@@ -16,7 +16,7 @@ fmadm \- fault management configuration tool
 .SH DESCRIPTION
 The \fBfmadm\fR utility can be used by administrators and service personnel to
 view and modify system configuration parameters maintained by the Fault
-Manager, \fBfmd\fR(1M). \fBfmd\fR receives telemetry information relating to
+Manager, \fBfmd\fR(8). \fBfmd\fR receives telemetry information relating to
 problems detected by the system software, diagnoses these problems, and
 initiates proactive self-healing activities such as disabling faulty
 components.
@@ -50,12 +50,12 @@ from a human administrator, it produces a message indicating its needs. It also
 refers you to a knowledge article on http://illumos.org/msg/. This web site
 might ask you to use \fBfmadm\fR or one of the other fault management utilities
 to gather more information or perform additional tasks. The documentation for
-\fBfmd\fR(1M), \fBfmdump\fR(1M), and \fBfmstat\fR(1M) describe more about tools
+\fBfmd\fR(8), \fBfmdump\fR(8), and \fBfmstat\fR(8) describe more about tools
 to observe fault management activities.
 .sp
 .LP
 The \fBfmadm\fR utility requires the user to possess the \fBPRIV_SYS_ADMIN\fR
-privilege. See \fBprivileges\fR(5). The \fBfmadm\fR \fBload\fR subcommand
+privilege. See \fBprivileges\fR(7). The \fBfmadm\fR \fBload\fR subcommand
 requires that the user possess all privileges.
 .SS "SUBCOMMANDS"
 \fBfmadm\fR accepts the following subcommands. Some of the subcommands accept
@@ -364,7 +364,7 @@ necessary as the Fault Manager manages its modules automatically.
 .ad
 .sp .6
 .RS 4n
-The \fBrotate\fR subcommand is a helper command for \fBlogadm\fR(1M), so that
+The \fBrotate\fR subcommand is a helper command for \fBlogadm\fR(8), so that
 \fBlogadm\fR can rotate live log files correctly. It is not intended to be
 invoked directly. Use one of the following commands to cause the appropriate
 logfile to be rotated, if the current one is not zero in size:
@@ -443,7 +443,7 @@ Invalid command-line options were specified.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -461,8 +461,8 @@ Interface Stability	See below.
 The command-line options are Committed. The human-readable output is
 not-an-interface.
 .SH SEE ALSO
-\fBfmd\fR(1M), \fBfmdump\fR(1M), \fBfmstat\fR(1M), \fBlogadm\fR(1M),
-\fBsyslogd\fR(1M), \fBattributes\fR(5), \fBprivileges\fR(5)
+\fBfmd\fR(8), \fBfmdump\fR(8), \fBfmstat\fR(8), \fBlogadm\fR(8),
+\fBsyslogd\fR(8), \fBattributes\fR(7), \fBprivileges\fR(7)
 .sp
 .LP
 http://illumos.org/msg/

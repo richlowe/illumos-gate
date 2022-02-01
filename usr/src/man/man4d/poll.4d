@@ -332,7 +332,7 @@ special file does not exist.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -347,7 +347,7 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBopen\fR(2), \fBpoll\fR(2), \fBwrite\fR(2), \fBattributes\fR(5)
+\fBopen\fR(2), \fBpoll\fR(2), \fBwrite\fR(2), \fBattributes\fR(7)
 .SH NOTES
 The \fB/dev/poll\fR API is particularly beneficial to applications that poll a
 large number of file descriptors repeatedly.  Applications will exhibit the

@@ -18,7 +18,7 @@ ypmake \- rebuild NIS database
 The file called \fBMakefile\fR in \fB/var/yp\fR is used by \fBmake\fR(1S) to
 build the  Network Information Service (\fBNIS\fR) database. With no arguments,
 \fBmake\fR creates \fBdbm\fR databases for any \fBNIS\fR maps that are
-out-of-date, and then executes \fByppush\fR(1M) to notify slave databases that
+out-of-date, and then executes \fByppush\fR(8) to notify slave databases that
 there has been a change.
 .sp
 .LP
@@ -38,7 +38,7 @@ construct a domain other than the master's default domain. The default for
 The default for \fBNOPUSH\fR is the null string.
 .sp
 .LP
-Refer to \fBypfiles\fR(4) and \fBypserv\fR(1M) for an overview of the
+Refer to \fBypfiles\fR(5) and \fBypserv\fR(8) for an overview of the
 \fBNIS\fR service.
 .sp
 .LP
@@ -49,7 +49,7 @@ LDAP DIT. In N2L mode, authoritative NIS information is obtained from the DIT.
 The NIS source files and \fBypmake\fR have no role, and they should not be
 used. If \fBypmake\fR is accidentally run, then the server components will
 detect this, and will log a warning message. For additional information, see
-\fBypfiles\fR(4).
+\fBypfiles\fR(5).
 .SH FILES
 .ne 2
 .na
@@ -79,7 +79,7 @@ Default directory for source files.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5)  for descriptions of the following attributes:
+See \fBattributes\fR(7)  for descriptions of the following attributes:
 .sp
 
 .sp
@@ -94,9 +94,9 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBmake\fR(1S), \fBmakedbm\fR(1M),
-\fBypbind\fR(1M), \fByppush\fR(1M), \fBypserv\fR(1M), \fBypclnt\fR(3NSL),
-\fBNISLDAPmapping\fR(4), \fBypfiles\fR(4), \fBypserv\fR(4)
+\fBmake\fR(1S), \fBmakedbm\fR(8),
+\fBypbind\fR(8), \fByppush\fR(8), \fBypserv\fR(8), \fBypclnt\fR(3NSL),
+\fBNISLDAPmapping\fR(5), \fBypfiles\fR(5), \fBypserv\fR(5)
 .SH NOTES
 .LP
 The Network Information Service (\fBNIS\fR) was formerly known as Sun Yellow

@@ -169,7 +169,7 @@ Character special device
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -185,7 +185,7 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBgld\fR(7D), \fBdlpi\fR(7P), \fBstreamio\fR(7I)
+\fBattributes\fR(7), \fBgld\fR(4D), \fBdlpi\fR(4P), \fBstreamio\fR(4I)
 .sp
 .LP
 \fIWriting Device Drivers\fR

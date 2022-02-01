@@ -17,10 +17,10 @@ specified by the \fBIETF\fR standard-track documents \fIRFC 2165\fR,  \fIRFC
 .sp
 .LP
 There are two components to the \fBSLP\fR technology. The first is a daemon,
-\fBslpd\fR(1M), which coordinates \fBSLP\fR operations. The second is a
+\fBslpd\fR(8), which coordinates \fBSLP\fR operations. The second is a
 software library, \fBslp_api\fR(3SLP), through which processes access a public
 \fBAPI\fR. Both components are configured by means of the \fBSLP\fR
-configuration file, \fBslp.conf\fR(4).
+configuration file, \fBslp.conf\fR(5).
 .sp
 .LP
 The \fBSLP\fR \fBAPI\fR is useful for two types of processes:
@@ -59,7 +59,7 @@ flushed, unless it is refreshed prior to expiration.
 .TP
 .ie t \(bu
 .el o
-\fBslpd\fR(1M) can be configured to function as a transparent directory agent.
+\fBslpd\fR(8) can be configured to function as a transparent directory agent.
 This feature makes \fBSLP\fR scalable to the enterprise. System administrators
 can configure directory agents to achieve a number of different strategies for
 scalability.
@@ -82,12 +82,12 @@ service provider strategies.
 .el o
 Services may be registered by proxy through a serialized registration file.
 This is an alternative to registering services through the \fBAPI\fR. See
-\fBslpd.reg\fR(4) for more information.
+\fBslpd.reg\fR(5) for more information.
 .RE
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -107,8 +107,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBslpd\fR(1M), \fBslp_api\fR(3SLP), \fBslp.conf\fR(4), \fBslpd.reg\fR(4),
-\fBattributes\fR(5)
+\fBslpd\fR(8), \fBslp_api\fR(3SLP), \fBslp.conf\fR(5), \fBslpd.reg\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 Guttman, E.,  Perkins, C., Veizades, J., and Day, M., \fIRFC 2608, Service

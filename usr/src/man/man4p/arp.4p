@@ -50,7 +50,7 @@ interface.
 To facilitate  communications with  systems that do  not use ARP,  ioctl()
 requests are  provided  to  enter and delete entries  in  the  IP-to-link
 address tables. Ioctls  that change the table  contents require the
-\fBPRIV_SYS_NET_CONFIG\fR privilege. See \fBprivileges\fR(5).
+\fBPRIV_SYS_NET_CONFIG\fR privilege. See \fBprivileges\fR(7).
 .sp
 .in +2
 .nf
@@ -236,7 +236,7 @@ the IPMP group has not entirely failed).
 logical  interface is brought up (\fBIFF_UP\fR) or any time the hardware link
 goes up  (\fBIFF_RUNNING\fR), ARP sends probes (ar$spa == 0) for the assigned
 address.  If  a conflict is  found, the interface is torn down. See
-\fBifconfig\fR(1M) for more details.
+\fBifconfig\fR(8) for more details.
 .sp
 .LP
 \fBARP\fR watches for hosts impersonating the local host, that is, any host
@@ -343,8 +343,8 @@ A network interface is no longer  associated with ARP.
 
 .SH SEE ALSO
 .LP
-\fBarp\fR(1M), \fBifconfig\fR(1M), \fBsockaddr\fR(3SOCKET), \fBprivileges\fR(5),
-\fBif_tcp\fR(7P), \fBinet\fR(7P), \fBnetinfo\fR(9F)
+\fBarp\fR(8), \fBifconfig\fR(8), \fBsockaddr\fR(3SOCKET), \fBprivileges\fR(7),
+\fBif_tcp\fR(4P), \fBinet\fR(4P), \fBnetinfo\fR(9F)
 .sp
 .LP
 Plummer, Dave, \fIAn Ethernet Address Resolution Protocol\fR or \fIConverting
@@ -414,7 +414,7 @@ automatically and reenabled. The conflict has been resolved.
 .ad
 .sp .6
 .RS 4n
-This  message appears if \fBarp\fR(1M) has been used to create a published
+This  message appears if \fBarp\fR(8) has been used to create a published
 permanent (\fBATF_AUTHORITY\fR) entry, and some other host on the local network
 responds to mapping requests for the published ARP entry.
 .RE

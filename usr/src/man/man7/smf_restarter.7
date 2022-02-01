@@ -41,7 +41,7 @@ maintain availability of the service.
 .RS 19n
 This is an optional property that allows the specification of an alternate
 restarter to manage the service instance. If the restarter property is empty or
-absent, the restarter defaults to \fBsvc.startd\fR(1M).
+absent, the restarter defaults to \fBsvc.startd\fR(8).
 .RE
 
 .sp
@@ -65,7 +65,7 @@ includes the following properties:
 .ad
 .RS 19n
 The current state and next state, if currently in transition, for instances
-stored in these properties. See \fBsmf\fR(5) for a description of the potential
+stored in these properties. See \fBsmf\fR(7) for a description of the potential
 states.
 .RE
 
@@ -102,5 +102,5 @@ executing.
 .RE
 
 .SH SEE ALSO
-\fBsvcs\fR(1), \fBsvc.startd\fR(1M), \fBservice_bundle\fR(4), \fBsmf\fR(5),
-\fBsmf_method\fR(5)
+\fBsvcs\fR(1), \fBsvc.startd\fR(8), \fBservice_bundle\fR(5), \fBsmf\fR(7),
+\fBsmf_method\fR(7)

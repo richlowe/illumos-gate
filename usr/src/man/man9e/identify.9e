@@ -12,7 +12,7 @@ illumos DDI specific (illumos DDI). This entry point is no longer supported.
 .SH SEE ALSO
 \fBnulldev\fR(9F), \fBdev_ops\fR(9S)
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp

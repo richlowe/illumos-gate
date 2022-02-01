@@ -185,12 +185,12 @@ previous state).
 .ad
 .sp .6
 .RS 4n
-Solaris link aggregations as configured by \fBdladm\fR(1M) export DLPI nodes
+Solaris link aggregations as configured by \fBdladm\fR(8) export DLPI nodes
 for both the link aggregation, and individual links that comprises the
 aggregation, to allow observability of the aggregated links. To allow
-applications such as  \fBsnoop\fR(1M) to open those individual aggregated links
-while disallowing other consumers such as \fBip\fR(7P), DL_PASSIVE_REQ (a DLPI
-primitive), must be issued by \fBsnoop\fR(1M) and similar applications.
+applications such as  \fBsnoop\fR(8) to open those individual aggregated links
+while disallowing other consumers such as \fBip\fR(4P), DL_PASSIVE_REQ (a DLPI
+primitive), must be issued by \fBsnoop\fR(8) and similar applications.
 .sp
 The DL_PASSIVE_REQ primitive is an M_PROTO message containing the following
 payload:
@@ -225,7 +225,7 @@ DL_SET_PHYS_ADDR_REQ
 A consumer that has not issued a DL_PASSIVE_REQ and has successfully issued one
 of the above primitives is considered \fBactive\fR.
 .sp
-The creation of a link aggregation using \fBdladm\fR(1M) fails if one of the
+The creation of a link aggregation using \fBdladm\fR(8) fails if one of the
 links included in the aggregation has an \fBactive\fR consumer, but succeeds if
 the links do not have any DLPI consumers or only \fBpassive\fR consumers.
 .RE
@@ -238,7 +238,7 @@ the links do not have any DLPI consumers or only \fBpassive\fR consumers.
 .sp .6
 .RS 4n
 The \fBDLIOCRAW\fR ioctl function is used by some DLPI applications, most
-notably the \fBsnoop\fR(1M) command. The \fBDLIOCRAW\fR command puts the stream
+notably the \fBsnoop\fR(8) command. The \fBDLIOCRAW\fR command puts the stream
 into a raw mode, which, upon receive, causes the full MAC-level packet to
 be sent upstream in an \fBM_DATA\fR message instead of it being transformed
 into the \fBDL_UNITDATA_IND\fR form normally used for reporting incoming
@@ -372,7 +372,7 @@ using the priority value specified in the VLAN headers and send the packets.
 Files in or under \fB/dev\fR.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -389,8 +389,8 @@ T}	Committed
 
 .SH SEE ALSO
 .LP
-\fBdladm\fR(1M), \fBsnoop\fR(1M), \fBlibdlpi\fR(3LIB), \fBgld\fR(7D),
-\fBip\fR(7P)
+\fBdladm\fR(8), \fBsnoop\fR(8), \fBlibdlpi\fR(3LIB), \fBgld\fR(4D),
+\fBip\fR(4P)
 .SH NOTES
 .LP
 A Solaris DLPI link name consists of a \fBDLPI provider name\fR followed by a

@@ -46,12 +46,12 @@ Diffie-Hellman key derivation using either \fB768\fR, \fB1024\fR, or
 Authentication protection with cipher choices of \fBAES\fR, \fBDES\fR,
 Blowfish, or \fB3DES\fR, and hash choices of either \fBHMAC-MD5\fR or
 \fBHMAC-SHA-1\fR. Encryption in \fBin.iked\fR is limited to the \fBIKE\fR
-authentication and key exchange. See \fBipsecesp\fR(7P) for information
+authentication and key exchange. See \fBipsecesp\fR(4P) for information
 regarding IPsec protection choices.
 .RE
 .sp
 .LP
-\fBin.iked\fR is managed by the following \fBsmf\fR(5) service:
+\fBin.iked\fR is managed by the following \fBsmf\fR(7) service:
 .sp
 .in +2
 .nf
@@ -63,24 +63,24 @@ svc:/network/ipsec/ike
 .sp
 .LP
 This service is delivered disabled because the configuration file needs to be
-created before the service can be enabled. See \fBike.config\fR(4) for the
+created before the service can be enabled. See \fBike.config\fR(5) for the
 format of this file.
 .sp
 .LP
-See "Service Management Facility" for information on managing the \fBsmf\fR(5)
+See "Service Management Facility" for information on managing the \fBsmf\fR(7)
 service.
 .sp
 .LP
 \fBin.iked\fR listens for incoming \fBIKE\fR requests from the network and for
 requests for outbound traffic using the \fBPF_KEY\fR socket. See
-\fBpf_key\fR(7P).
+\fBpf_key\fR(4P).
 .sp
 .LP
 \fBin.iked\fR has two support programs that are used for IKE administration and
-diagnosis: \fBikeadm\fR(1M) and \fBikecert\fR(1M).
+diagnosis: \fBikeadm\fR(8) and \fBikecert\fR(8).
 .sp
 .LP
-The \fBikeadm\fR(1M) command can read the \fB/etc/inet/ike/config\fR file as a
+The \fBikeadm\fR(8) command can read the \fB/etc/inet/ike/config\fR file as a
 \fBrule\fR, then pass the configuration information to the running
 \fBin.iked\fR daemon using a doors interface.
 .sp
@@ -93,7 +93,7 @@ example# \fBikeadm read rule /etc/inet/ike/config\fR
 
 .sp
 .LP
-Refreshing the \fBike\fR \fBsmf\fR(5) service provided to manage the
+Refreshing the \fBike\fR \fBsmf\fR(7) service provided to manage the
 \fBin.iked\fR daemon sends a \fBSIGHUP\fR signal to the \fBin.iked\fR daemon,
 which will (re)read \fB/etc/inet/ike/config\fR and reload the certificate
 database.
@@ -106,14 +106,14 @@ more details on managing the \fBin.iked\fR daemon.
 .sp
 .LP
 The IKE daemon (\fBin.iked\fR) is managed by the service management facility,
-\fBsmf\fR(5). The following group of services manage the components of IPsec:
+\fBsmf\fR(7). The following group of services manage the components of IPsec:
 .sp
 .in +2
 .nf
-svc:/network/ipsec/ipsecalgs   (See ipsecalgs(1M))
-svc:/network/ipsec/policy      (See ipsecconf(1M))
-svc:/network/ipsec/manual-key  (See ipseckey(1M))
-svc:/network/ipsec/ike         (see ike.config(4))
+svc:/network/ipsec/ipsecalgs   (See ipsecalgs(8))
+svc:/network/ipsec/policy      (See ipsecconf(8))
+svc:/network/ipsec/manual-key  (See ipseckey(8))
+svc:/network/ipsec/ike         (see ike.config(5))
 .fi
 .in -2
 .sp
@@ -126,7 +126,7 @@ described in the respective man pages listed above.
 .sp
 .LP
 The correct administrative procedure is to create the configuration file for
-each service, then enable each service using \fBsvcadm\fR(1M).
+each service, then enable each service using \fBsvcadm\fR(8).
 .sp
 .LP
 The \fBike\fR service has a dependency on the \fBipsecalgs\fR and \fBpolicy\fR
@@ -154,7 +154,7 @@ The following properties are defined for the \fBike\fR service:
 .ad
 .sp .6
 .RS 4n
-Defines the level that \fBikeadm\fR(1M) invocations can change or observe the
+Defines the level that \fBikeadm\fR(8) invocations can change or observe the
 running \fBin.iked\fR. The acceptable values for this property are the same as
 those for the \fB-p\fR option. See the description of \fB-p\fR in
 \fBOPTIONS\fR.
@@ -168,7 +168,7 @@ those for the \fB-p\fR option. See the description of \fB-p\fR in
 .sp .6
 .RS 4n
 Defines the configuration file to use. The default value is
-\fB/etc/inet/ike/config\fR. See \fBike.config\fR(4) for the format of this
+\fB/etc/inet/ike/config\fR. See \fBike.config\fR(5) for the format of this
 file. This property has the same effect as the \fB-f\fR flag. See the
 description of \fB-f\fR in \fBOPTIONS\fR.
 .RE
@@ -184,7 +184,7 @@ Defines the amount of debug output that is written to the \fBdebug_logfile\fR
 file, described below. The default value for this is \fBop\fR or
 \fBoperator\fR. This property controls the recording of information on events
 such as re-reading the configuration file. Acceptable value for
-\fBdebug_level\fR are listed in the \fBikeadm\fR(1M) man page. The value
+\fBdebug_level\fR are listed in the \fBikeadm\fR(8) man page. The value
 \fBall\fR is equivalent to the \fB-d\fR flag. See the description of \fB-d\fR
 in \fBOPTIONS\fR.
 .RE
@@ -198,7 +198,7 @@ in \fBOPTIONS\fR.
 .RS 4n
 Defines where debug output should be written. The messages written here are
 from debug code within \fBin.iked\fR. Startup error messages are recorded by
-the \fBsmf\fR(5) framework and recorded in a service-specific log file. Use any
+the \fBsmf\fR(7) framework and recorded in a service-specific log file. Use any
 of the following commands to examine the \fBlogfile\fR property:
 .sp
 .in +2
@@ -227,13 +227,13 @@ file have syntax errors. The default value is \fBfalse\fR, which causes
 .sp
 Setting this value to \fBtrue\fR causes the IKE service to stay online, but
 correct operation requires the administrator to configure the running daemon
-with \fBikeadm\fR(1M). This option is provided for compatibility with previous
+with \fBikeadm\fR(8). This option is provided for compatibility with previous
 releases.
 .RE
 
 .sp
 .LP
-These properties can be modified using \fBsvccfg\fR(1M) by users who have been
+These properties can be modified using \fBsvccfg\fR(8) by users who have been
 assigned the following authorization:
 .sp
 .in +2
@@ -261,10 +261,10 @@ solaris.network.ipsec.ike.token.logout
 
 .sp
 .LP
-See \fBauths\fR(1), \fBikeadm\fR(1M), \fBuser_attr\fR(4), \fBrbac\fR(5).
+See \fBauths\fR(1), \fBikeadm\fR(8), \fBuser_attr\fR(5), \fBrbac\fR(7).
 .sp
 .LP
-The service needs to be refreshed using \fBsvcadm\fR(1M) before a new property
+The service needs to be refreshed using \fBsvcadm\fR(8) before a new property
 value is effective. General, non-modifiable properties can be viewed with the
 \fBsvcprop\fR(1) command.
 .sp
@@ -280,7 +280,7 @@ value is effective. General, non-modifiable properties can be viewed with the
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling,
-refreshing, and requesting restart can be performed using \fBsvcadm\fR(1M). A
+refreshing, and requesting restart can be performed using \fBsvcadm\fR(8). A
 user who has been assigned the authorization shown below can perform these
 actions:
 .sp
@@ -296,11 +296,11 @@ solaris.smf.manage.ipsec
 The service's status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP
-The \fBin.iked\fR daemon is designed to be run under \fBsmf\fR(5) management.
+The \fBin.iked\fR daemon is designed to be run under \fBsmf\fR(7) management.
 While the \fBin.iked\fR command can be run from the command line, this is
 discouraged. If the \fBin.iked\fR command is to be run from the command line,
-the \fBike\fR \fBsmf\fR(5) service should be disabled first. See
-\fBsvcadm\fR(1M).
+the \fBike\fR \fBsmf\fR(7) service should be disabled first. See
+\fBsvcadm\fR(8).
 .SH OPTIONS
 .sp
 .LP
@@ -332,7 +332,7 @@ produces large amounts of debugging output. This option is deprecated. See
 .ad
 .RS 15n
 Use \fIfilename\fR instead of \fB/etc/inet/ike/config\fR. See
-\fBike.config\fR(4) for the format of this file. This option is deprecated. See
+\fBike.config\fR(5) for the format of this file. This option is deprecated. See
 "Service Management Facility" for more details.
 .RE
 
@@ -343,7 +343,7 @@ Use \fIfilename\fR instead of \fB/etc/inet/ike/config\fR. See
 .ad
 .RS 15n
 Specify privilege level (\fIlevel\fR). This option sets how much
-\fBikeadm\fR(1M) invocations can change or observe about the running
+\fBikeadm\fR(8) invocations can change or observe about the running
 \fBin.iked\fR.
 .sp
 Valid \fIlevels\fR are:
@@ -384,7 +384,7 @@ This option is deprecated. See "Service Management Facility" for more details.
 .LP
 This program has sensitive private keying information in its image. Care should
 be taken with any core dumps or system dumps of a running \fBin.iked\fR daemon,
-as these files contain sensitive keying information. Use the \fBcoreadm\fR(1M)
+as these files contain sensitive keying information. Use the \fBcoreadm\fR(8)
 command to limit any corefiles produced by \fBin.iked\fR.
 .SH FILES
 .sp
@@ -442,9 +442,9 @@ Public key certificate revocation lists.
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBcoreadm\fR(1M), \fBikeadm\fR(1M), \fBikecert\fR(1M),
-\fBsvccfg\fR(1M), \fBsvcadm\fR(1M), \fBike.config\fR(4), \fBattributes\fR(5),
-\fBsmf\fR(5), \fBipsecesp\fR(7P), \fBpf_key\fR(7P)
+\fBsvcs\fR(1), \fBcoreadm\fR(8), \fBikeadm\fR(8), \fBikecert\fR(8),
+\fBsvccfg\fR(8), \fBsvcadm\fR(8), \fBike.config\fR(5), \fBattributes\fR(7),
+\fBsmf\fR(7), \fBipsecesp\fR(4P), \fBpf_key\fR(4P)
 .sp
 .LP
 Harkins, Dan and Carrel, Dave. \fIRFC 2409, Internet Key Exchange (IKE)\fR.

@@ -14,7 +14,7 @@ fmstat \- report fault management module statistics
 
 .SH DESCRIPTION
 The \fBfmstat\fR utility can be used by administrators and service personnel to
-report statistics associated with the Fault Manager, \fBfmd\fR(1M) and
+report statistics associated with the Fault Manager, \fBfmd\fR(8) and
 its associated set of modules. The Fault Manager runs in the background on each
 system. It receives telemetry information relating to problems detected
 by the system software, diagnoses these problems, and initiates proactive
@@ -23,7 +23,7 @@ self-healing activities such as disabling faulty components.
 .LP
 You can use \fBfmstat\fR to view statistics for diagnosis engines and agents
 that are currently participating in fault management. The documentation for
-\fBfmd\fR(1M), \fBfmadm\fR(1M), and \fBfmdump\fR(1M) describes more about tools
+\fBfmd\fR(8), \fBfmadm\fR(8), and \fBfmdump\fR(8) describes more about tools
 to observe fault management activities.
 .sp
 .LP
@@ -138,7 +138,7 @@ The amount of persistent buffer space currently allocated by this module.
 .sp
 .LP
 The \fBfmstat\fR utility requires the user to possess the \fBPRIV_SYS_ADMIN\fR
-privilege. See \fBprivileges\fR(5).
+privilege. See \fBprivileges\fR(7).
 .SH OPTIONS
 The following options are supported:
 .sp
@@ -177,7 +177,7 @@ Print a report on the statistics associated with the specified fault management
 module, instead of the default statistics report. Modules can publish an
 arbitrary set of statistics to help Sun service the fault management software
 itself. The module statistics constitute a Private interface. See
-\fBattributes\fR(5) for information on Sun's rules for Private interfaces.
+\fBattributes\fR(7) for information on Sun's rules for Private interfaces.
 Scripts should not be written that depend upon the values of fault management
 module statistics as they can change without notice.
 .RE
@@ -272,7 +272,7 @@ Successful completion.
 .ad
 .RS 5n
 A fatal error occurred. A fatal error could be the failure to communicate with
-\fBfmd\fR(1M). It could also be that insufficient privileges were available to
+\fBfmd\fR(8). It could also be that insufficient privileges were available to
 perform the requested operation.
 .RE
 
@@ -286,7 +286,7 @@ Invalid command-line options were specified.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -304,5 +304,5 @@ Interface Stability	See below.
 The command-line options are Evolving. The human-readable default report is
 Unstable. The human-readable module report is Private.
 .SH SEE ALSO
-\fBfmadm\fR(1M), \fBfmd\fR(1M), \fBfmdump\fR(1M), \fBattributes\fR(5),
-\fBprivileges\fR(5)
+\fBfmadm\fR(8), \fBfmd\fR(8), \fBfmdump\fR(8), \fBattributes\fR(7),
+\fBprivileges\fR(7)

@@ -15,7 +15,7 @@ fmdump \- fault management log viewer
 
 .SH DESCRIPTION
 The \fBfmdump\fR utility can be used to display the contents of any of the log
-files associated with the Fault Manager, \fBfmd\fR(1M). The Fault
+files associated with the Fault Manager, \fBfmd\fR(8). The Fault
 Manager runs in the background on each system. It receives telemetry
 information relating to problems detected by the system software, diagnoses
 these problems, and initiates proactive self-healing activities such as
@@ -92,7 +92,7 @@ article located on http://illumos.org/msg/
 .LP
 If a problem requires action by a human administrator or service technician or
 affects system behavior, the Fault Manager also issues a human-readable message
-to \fBsyslogd\fR(1M). This message provides a summary of the problem and a
+to \fBsyslogd\fR(8). This message provides a summary of the problem and a
 reference to the knowledge article on http://illumos.org/msg/.
 .sp
 .LP
@@ -185,7 +185,7 @@ Select fault log or error log events, depending on the \fB-e\fR option, that
 have properties with a matching name (and optionally a matching value). For
 string properties the value can be a regular expression match. Regular
 expression syntax is described in the EXTENDED REGULAR EXPRESSIONS section of
-the \fBregex\fR(5) manual page. Be careful when using the characters:
+the \fBregex\fR(7) manual page. Be careful when using the characters:
 .sp
 .in +2
 .nf
@@ -608,7 +608,7 @@ Fault management fault log
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -626,8 +626,8 @@ Interface Stability	See below.
 The command-line options are Evolving. The human-readable error log output is
 Private. The human-readable fault log output is Evolving.
 .SH SEE ALSO
-\fBsh\fR(1), \fBfmadm\fR(1M), \fBfmd\fR(1M), \fBfmstat\fR(1M),
-\fBsyslogd\fR(1M), \fBlibexacct\fR(3LIB), \fBattributes\fR(5), \fBregex\fR(5)
+\fBsh\fR(1), \fBfmadm\fR(8), \fBfmd\fR(8), \fBfmstat\fR(8),
+\fBsyslogd\fR(8), \fBlibexacct\fR(3LIB), \fBattributes\fR(7), \fBregex\fR(7)
 .sp
 .LP
 \fI\fR

@@ -81,7 +81,7 @@ The value of the attribute being set is not valid.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -104,7 +104,7 @@ MT-Level	MT-Safe
 \fBposix_spawnattr_getschedparam\fR(3C),
 \fBposix_spawnattr_getschedpolicy\fR(3C),
 \fBposix_spawnattr_setsigdefault\fR(3C), \fBposix_spawnattr_setsigmask\fR(3C),
-\fBattributes\fR(5)
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

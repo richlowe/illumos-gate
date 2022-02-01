@@ -19,10 +19,10 @@ restrict remote login and shell access.
 Network groups are usually stored in network information services,
 such as \fBLDAP\fR, or \fBNIS\fR, but may alternatively be stored in
 the local \fB/etc/netgroup\fR file.  The \fBnetgroup\fR line of the
-\fBnsswitch.conf\fR(4) file determines which of those sources are used.
+\fBnsswitch.conf\fR(5) file determines which of those sources are used.
 .sp
 This manual page describes the format for a file that is used to supply input
-to a program such as \fBldapaddent\fR(1M) for LDAP, or \fBmakedbm\fR(1M) for
+to a program such as \fBldapaddent\fR(8) for LDAP, or \fBmakedbm\fR(8) for
 NIS.  The same file format is used in the local \fB/etc/netgroup\fR file.
 .sp
 Each line of the file defines the name and membership of a network group. The
@@ -85,9 +85,9 @@ is equivalent to
 .sp
 .sp
 You can also use netgroups to control \fBNFS\fR mount access (see
-\fBshare_nfs\fR(1M)) and to control remote login and shell access (see
-\fBhosts.equiv\fR(4)). You can also use them to control local login access (see
-\fBpasswd\fR(4), \fBshadow\fR(4), and \fBcompat\fR in \fBnsswitch.conf\fR(4)).
+\fBshare_nfs\fR(8)) and to control remote login and shell access (see
+\fBhosts.equiv\fR(5)). You can also use them to control local login access (see
+\fBpasswd\fR(5), \fBshadow\fR(5), and \fBcompat\fR in \fBnsswitch.conf\fR(5)).
 .sp
 When used for these purposes, a host is considered a member of a \fBnetgroup\fR
 if the \fBnetgroup\fR contains any triple in which the \fBhostname\fR field
@@ -110,16 +110,16 @@ basis of host and user membership in separate netgroups.
 .ad
 .RS 17n
 Used by a network information service's utility to construct a map or table
-that contains \fBnetgroup\fR information. For example, \fBldapaddent\fR(1M)
+that contains \fBnetgroup\fR information. For example, \fBldapaddent\fR(8)
 uses \fB/etc/netgroup\fR to construct an LDAP container.  Alternatively,
 the \fB/etc/netgroup\fR file may be used directly if the \fBfiles\fR
-source is specified in \fBnsswitch.conf\fR(4) for the \fBnetgroup\fR
+source is specified in \fBnsswitch.conf\fR(5) for the \fBnetgroup\fR
 database.
 .RE
 .SH SEE ALSO
-\fBldapaddent\fR(1M), \fBmakedbm\fR(1M),
-\fBshare_nfs\fR(1M), \fBinnetgr\fR(3C), \fBhosts\fR(4), \fBhosts.equiv\fR(4),
-\fBnsswitch.conf\fR(4), \fBpasswd\fR(4), \fBshadow\fR(4)
+\fBldapaddent\fR(8), \fBmakedbm\fR(8),
+\fBshare_nfs\fR(8), \fBinnetgr\fR(3C), \fBhosts\fR(5), \fBhosts.equiv\fR(5),
+\fBnsswitch.conf\fR(5), \fBpasswd\fR(5), \fBshadow\fR(5)
 .SH NOTES
 Applications may make general membership tests using the \fBinnetgr()\fR
 function. See \fBinnetgr\fR(3C).
@@ -143,7 +143,7 @@ hostname will also suffice for this purpose.
 Use of placeholders will improve search performance.
 .sp
 When a machine with multiple interfaces and multiple names is defined as a
-member of a \fBnetgroup\fR, one must list all of the names. See \fBhosts\fR(4).
+member of a \fBnetgroup\fR, one must list all of the names. See \fBhosts\fR(5).
 A manageable way to do this is to define a \fBnetgroup\fR containing all of the
 machine names. For example, for a host "gateway" that has names
 "gateway-subnet1" and "gateway-subnet2" one may define the \fBnetgroup\fR:

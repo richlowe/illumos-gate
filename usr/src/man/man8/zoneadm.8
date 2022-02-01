@@ -108,10 +108,10 @@ and can also determine whether the host is capable of supporting the zone. The
 path can be "\fB-\fR", to read the input from standard input.
 .sp
 The zone's brand may include additional options that govern how the zone will
-be attached. See \fBbrands\fR(5) for specific brand information.
+be attached. See \fBbrands\fR(7) for specific brand information.
 .sp
 The zone being attached must first be configured using the \fBzonecfg\fR (see
-\fBzonecfg\fR(1M)) command. This does not apply when running "\fBattach\fR
+\fBzonecfg\fR(8)) command. This does not apply when running "\fBattach\fR
 \fB-n\fR".
 .sp
 Use the following command to attach a zone:
@@ -144,7 +144,7 @@ The following \fIboot_options\fR are supported:
 .RS 4n
 Select an alternative executable to be the primordial Process. \fIaltinit\fR is
 a valid path to an executable. The default primordial process is
-\fBinit\fR(1M).
+\fBinit\fR(8).
 .RE
 
 .sp
@@ -158,9 +158,9 @@ The \fIsmf_options\fR include two categories of options to control booting
 behavior of the service management facility: recovery options and messages
 options.
 .sp
-Message options determine the type and amount of messages that \fBsmf\fR(5)
+Message options determine the type and amount of messages that \fBsmf\fR(7)
 displays during boot. Service options determine the services which are used to
-boot the system. See \fBkernel\fR(1M) for a listing of the \fB-m\fR suboptions.
+boot the system. See \fBkernel\fR(8) for a listing of the \fB-m\fR suboptions.
 .RE
 
 .sp
@@ -171,8 +171,8 @@ boot the system. See \fBkernel\fR(1M) for a listing of the \fB-m\fR suboptions.
 .sp .6
 .RS 4n
 Boots only to milestone \fBsvc:/milestone/single-user:default\fR. This
-milestone is equivalent to init level \fBs\fR. See \fBsvc.startd\fR(1M) and
-\fBinit\fR(1M).
+milestone is equivalent to init level \fBs\fR. See \fBsvc.startd\fR(8) and
+\fBinit\fR(8).
 .RE
 
 .RE
@@ -288,7 +288,7 @@ Do not create a \fBZFS\fR file system.
 .RE
 
 The zone's brand may include additional options that govern how the software
-will be installed in the zone. See \fBbrands\fR(5) for specific brand
+will be installed in the zone. See \fBbrands\fR(7) for specific brand
 information.
 .RE
 
@@ -639,7 +639,7 @@ Invalid usage.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -655,14 +655,14 @@ Interface Stability	Committed
 .SH SEE ALSO
 .LP
 \fBread\fR(1), \fBsvcs\fR(1), \fBzlogin\fR(1), \fBzonename\fR(1),
-\fBinit\fR(1M), \fBkernel\fR(1M), \fBsvcadm\fR(1M), \fBsvc.startd\fR(1M),
-\fBsvc.startd\fR(1M), \fBzonecfg\fR(1M), \fBlibuuid\fR(3LIB),
-\fBattributes\fR(5), \fBbrands\fR(5), \fBnative\fR(5), \fBsmf\fR(5),
-\fBzones\fR(5)
+\fBinit\fR(8), \fBkernel\fR(8), \fBsvcadm\fR(8), \fBsvc.startd\fR(8),
+\fBsvc.startd\fR(8), \fBzonecfg\fR(8), \fBlibuuid\fR(3LIB),
+\fBattributes\fR(7), \fBbrands\fR(7), \fBnative\fR(7), \fBsmf\fR(7),
+\fBzones\fR(7)
 .SH NOTES
 .LP
-The \fBzones\fR(5) service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+The \fBzones\fR(7) service is managed by the service management facility,
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -674,5 +674,5 @@ svc:/system/zones:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

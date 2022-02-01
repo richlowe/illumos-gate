@@ -106,7 +106,7 @@ collating sequence.
 collation database for \fIlocale\fR
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .TS
 box;
 c | c
@@ -125,4 +125,4 @@ MT-Level	MT-Safe
 .LP
 \fBlocaledef\fR(1), \fBnewlocale\fR(3C), \fBsetlocale\fR(3C), \fBstring\fR(3C),
 \fBstrxfrm\fR(3C), \fBuselocale\fR(3C),
-\fBwsxfrm\fR(3C), \fBattributes\fR(5), \fBenviron\fR(5), \fBstandards\fR(5)
+\fBwsxfrm\fR(3C), \fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)

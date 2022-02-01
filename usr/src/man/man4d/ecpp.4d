@@ -71,7 +71,7 @@ workstation and the peripheral must support the requested mode.
 Characteristics of the \fBecpp\fR driver may be tuned by the variables
 described in \fB/kernel/drv/ecpp.conf\fR. These variables are read by the
 kernel during system startup. To tune the variables, edit the \fBecpp.conf\fR
-file and invoke \fBupdate_drv\fR(1M) to have the kernel read the file again.
+file and invoke \fBupdate_drv\fR(8) to have the kernel read the file again.
 .sp
 .LP
 Some Centronics peripherals and certain \fIIEEE 1284\fR compatible peripherals
@@ -102,7 +102,7 @@ The \fBioctl\fR(2) calls described below are supported. Note that when
 to the device before processing the \fBioctl\fR(2) call.
 .sp
 .LP
-The ecpp driver supports \fBprnio\fR(7I) interfaces.
+The ecpp driver supports \fBprnio\fR(4I) interfaces.
 .LP
 Note -
 .sp
@@ -331,7 +331,7 @@ bits are reserved. Reading reserved bits always return 1. An attempt to write
 \fB\fB/dev/lp\fIN\fR\fR\fR
 .ad
 .RS 19n
-x86 only. (Backwards compatibility with former \fBlp\fR(7D) devices.)
+x86 only. (Backwards compatibility with former \fBlp\fR(4D) devices.)
 .RE
 
 .sp
@@ -403,8 +403,8 @@ A \fBECPPIOC_SETPARMS\fR \fBioctl()\fR is attempted with an out-of-range value
 in the \fBecpp_transfer_parms\fR structure. A \fBECPPIOC_SETREGS\fR
 \fBioctl()\fR is attempted with an invalid value in the \fBecpp_regs\fR
 structure. An \fBioctl()\fR is attempted with an invalid value in the command
-argument.An invalid command argument is received during \fBmodload\fR(1M) or
-\fBmodunload\fR(1M).
+argument.An invalid command argument is received during \fBmodload\fR(8) or
+\fBmodunload\fR(8).
 .RE
 
 .sp
@@ -429,7 +429,7 @@ peripheral error.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -447,9 +447,9 @@ Interface stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBmodload\fR(1M), \fBmodunload\fR(1M), \fBupdate_drv\fR(1M), \fBioctl\fR(2),
-\fBopen\fR(2), \fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(5),
-\fBusbprn\fR(7D), \fBprnio\fR(7I), \fBstreamio\fR(7I)
+\fBmodload\fR(8), \fBmodunload\fR(8), \fBupdate_drv\fR(8), \fBioctl\fR(2),
+\fBopen\fR(2), \fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(7),
+\fBusbprn\fR(4D), \fBprnio\fR(4I), \fBstreamio\fR(4I)
 .sp
 .LP
 \fIIEEE Std 1284-1994\fR

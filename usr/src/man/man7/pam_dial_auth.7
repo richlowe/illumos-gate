@@ -17,7 +17,7 @@ pam_dial_auth \- authentication management PAM module for dialups
 .sp
 .LP
 The \fBpam_dial_auth\fR module implements \fBpam_sm_authenticate\fR(3PAM) which
-authenticates the user according to the \fBdialups\fR(4) and \fBd_passwd\fR(4)
+authenticates the user according to the \fBdialups\fR(5) and \fBd_passwd\fR(5)
 files configuration.
 .sp
 .LP
@@ -27,8 +27,8 @@ returns \fBPAM_IGNORE\fR.
 .sp
 .LP
 The value of the \fBPAM_TTY\fR item is checked against entries in
-\fBdialups\fR(4). If there is a match, the user's shell is compared against
-entries in \fBd_passwd\fR(4). If there is a matching entry, the user is
+\fBdialups\fR(5). If there is a match, the user's shell is compared against
+entries in \fBd_passwd\fR(5). If there is a matching entry, the user is
 prompted for a password which is validated against the entry found.
 .sp
 .LP
@@ -45,7 +45,7 @@ The following option may be passed in to this service module:
 .SH ERRORS
 .sp
 .LP
-If \fBdialups\fR(4) is not present, \fBPAM_IGNORE\fR is returned. Upon
+If \fBdialups\fR(5) is not present, \fBPAM_IGNORE\fR is returned. Upon
 successful completion of \fBpam_sm_authenticate()\fR, \fBPAM_SUCCESS\fR is
 returned. The following error codes are returned upon error:
 .sp
@@ -72,7 +72,7 @@ Error in the calling service, \fBPAM_TTY\fR is not set.
 \fB\fBPAM_SYSTEM_ERR\fR\fR
 .ad
 .RS 20n
-System error (\fBd_passwd\fR(4) is not present).
+System error (\fBd_passwd\fR(5) is not present).
 .RE
 
 .sp
@@ -87,7 +87,7 @@ No account is present for \fIuser\fR.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -104,10 +104,10 @@ MT Level	MT-Safe with exceptions
 .sp
 .LP
 \fBpam\fR(3PAM), \fBpam_authenticate\fR(3PAM), \fBpam_sm_authenticate\fR(3PAM),
-\fBd_passwd\fR(4), \fBdialups\fR(4), \fBlibpam\fR(3LIB), \fBpam.conf\fR(4),
-\fBattributes\fR(5), \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), \fBpam_unix_session\fR(5)
+\fBd_passwd\fR(5), \fBdialups\fR(5), \fBlibpam\fR(3LIB), \fBpam.conf\fR(5),
+\fBattributes\fR(7), \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), \fBpam_unix_session\fR(7)
 .SH NOTES
 .sp
 .LP
@@ -115,8 +115,8 @@ The interfaces in \fBlibpam\fR(3LIB) are MT-Safe only if each thread within the
 multi-threaded application uses its own \fBPAM\fR handle.
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported. Similar functionality is
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).

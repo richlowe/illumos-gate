@@ -23,7 +23,7 @@ int ioctl(\fIfd\fR,I_PUSH,"ldterm");
 .fi
 
 .SH DESCRIPTION
-The \fBldterm\fR STREAMS module provides most of the \fBtermio\fR(7I) terminal
+The \fBldterm\fR STREAMS module provides most of the \fBtermio\fR(4I) terminal
 interface.  The \fBvis \fRmodule does not perform the low-level device control
 functions specified by flags in the \fBc_cflag\fR word of the
 \fBtermio/termios\fR structure, or by the \fBIGNBRK\fR, \fBIGNPAR\fR,
@@ -129,7 +129,7 @@ message is passed downstream without change.
 .RS 13n
 If the size of the data buffer associated with the message is the size of
 \fBstruct iocblk\fR, \fBldterm\fR will perform functional negotiation to
-determine where the \fBtermio\fR(7I) processing is to be done. If the command
+determine where the \fBtermio\fR(4I) processing is to be done. If the command
 field of the \fBiocblk\fR structure (\fBioc_cmd\fR) is set to
 \fBMC_NO_CANON\fR, the input canonical processing normally performed on
 \fBM_DATA\fR messages is disabled and those messages are passed upstream
@@ -274,7 +274,7 @@ is meaningless.
 .RE
 
 .SH SEE ALSO
-\fBtermios\fR(3C), \fBconsole\fR(7D), \fBtermio\fR(7I)
+\fBtermios\fR(3C), \fBconsole\fR(4D), \fBtermio\fR(4I)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

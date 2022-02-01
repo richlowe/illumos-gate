@@ -16,7 +16,7 @@ disks \- creates /dev entries for hard disks attached to the system
 .SH DESCRIPTION
 .sp
 .LP
-\fBdevfsadm\fR(1M) is now the preferred command for \fB/dev\fR and should be
+\fBdevfsadm\fR(8) is now the preferred command for \fB/dev\fR and should be
 used instead of \fBdisks\fR.
 .sp
 .LP
@@ -46,7 +46,7 @@ subsidiary controller attached to a peripheral bus such as \fBSCSI\fR or
 \fBIPI\fR (the \fBtarget\fR number for \fBSCSI,\fR and the \fBfacility\fR
 number for \fBIPI\fR controllers). \fBd\fR\fIN\fR is the number of the disk
 attached to the controller. \fBs\fR\fIN\fR is the \fIslice\fR number on the
-disk. \fBp\fR\fIN\fR is the FDISK partition number used by \fBfdisk\fR(1M).
+disk. \fBp\fR\fIN\fR is the FDISK partition number used by \fBfdisk\fR(8).
 (x86 Only)
 .RE
 .RS +4
@@ -66,8 +66,8 @@ this newly-assigned controller number.
 .sp
 .LP
 \fBdisks\fR is run automatically each time a reconfiguration-boot is performed
-or when \fBadd_drv\fR(1M) is executed. When invoking \fBdisks\fR manually,
-first run \fBdrvconfig\fR(1M) to ensure \fB/devices\fR is consistent with the
+or when \fBadd_drv\fR(8) is executed. When invoking \fBdisks\fR manually,
+first run \fBdrvconfig\fR(8) to ensure \fB/devices\fR is consistent with the
 current device configuration.
 .SS "Notice to Driver Writers"
 .sp
@@ -111,7 +111,7 @@ consists of the string \fBp5\fR through \fBp36\fR followed by \fB,raw\fR.
 .LP
 SPARC drivers should only use the first eight slices: \fBa\fR through \fBh\fR,
 while x86 drivers can use \fBa\fR through \fBu\fR, with \fBq\fR through \fBu\fR
-corresponding to \fBfdisk\fR(1M) primary partitions. \fBq\fR represents the
+corresponding to \fBfdisk\fR(8) primary partitions. \fBq\fR represents the
 entire disk, while \fBr\fR, \fBs\fR, \fBt\fR, and \fBu\fR represent up to four
 additional primary partitions. For logical drives, \fBp5\fR to \fBp36\fR
 correspond to the 32 logical drives that are supported. The device nodes for
@@ -206,7 +206,7 @@ xkdiskattach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 .sp
 .LP
 Installing the \fBxkdisk\fR disk driver on a Sun Fire 4800, with the driver
-controlling a \fBSCSI\fR disk (target 3 attached to an \fBisp\fR(7D) \fBSCSI
+controlling a \fBSCSI\fR disk (target 3 attached to an \fBisp\fR(4D) \fBSCSI
 HBA)\fR and performing a reconfiguration-boot (causing disks to be run) creates
 the following special files in \fB/devices\fR.
 
@@ -304,8 +304,8 @@ Device special files (minor device nodes)
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_drv\fR(1M), \fBdevfsadm\fR(1M), \fBfdisk\fR(1M), \fBattributes\fR(5),
-\fBisp\fR(7D), \fBdevfs\fR(7FS), \fBdkio\fR(7I), \fBattach\fR(9E),
+\fBadd_drv\fR(8), \fBdevfsadm\fR(8), \fBfdisk\fR(8), \fBattributes\fR(7),
+\fBisp\fR(4D), \fBdevfs\fR(4FS), \fBdkio\fR(4I), \fBattach\fR(9E),
 \fBddi_create_minor_node\fR(9F)
 .sp
 .LP

@@ -50,9 +50,9 @@ svcadm \- manipulate service instances
 
 .SH DESCRIPTION
 \fBsvcadm\fR issues requests for actions on services executing within the
-service management facility (see \fBsmf\fR(5)). Actions for a service are
+service management facility (see \fBsmf\fR(7)). Actions for a service are
 carried out by its assigned service restarter agent. The default service
-restarter is \fBsvc.startd\fR (see \fBsvc.startd\fR(1M)).
+restarter is \fBsvc.startd\fR (see \fBsvc.startd\fR(8)).
 .SH OPTIONS
 The following options are supported:
 .sp
@@ -82,7 +82,7 @@ Print actions verbosely to standard output.
 .ad
 .RS 20n
 Administer services in all zones.  This option is only applicable
-from the global zone, see \fBzones\fR(5).
+from the global zone, see \fBzones\fR(7).
 .RE
 
 .sp
@@ -92,7 +92,7 @@ from the global zone, see \fBzones\fR(5).
 .ad
 .RS 20n
 Administer services in the specified zone.  This option is only applicable
-from the global zone, see \fBzones\fR(5).
+from the global zone, see \fBzones\fR(7).
 .RE
 
 .SH SUBCOMMANDS
@@ -107,7 +107,7 @@ For subcommands taking one or more operands, if the operand specifies a service
 management resource identifier) matches more than one service or instance, a
 warning message is displayed and that operand is ignored.
 If a pattern matches more than one service or instance, the subcommand is
-applied to all matches. See \fBsmf\fR(5).
+applied to all matches. See \fBsmf\fR(7).
 .sp
 .LP
 In the case that the service has more than one instance, \fBsvcadm\fR return a
@@ -122,7 +122,7 @@ non-zero exit status.
 Enables the service instances specified by the operands. For each service
 instance, the assigned restarter will try to bring it to the online state. This
 action requires permission to modify the "general" property group of the
-service instance (see \fBsmf_security\fR(5)).
+service instance (see \fBsmf_security\fR(7)).
 .sp
 If the \fB-r\fR option is specified, \fBsvcadm\fR enables each service instance
 and recursively enables its dependencies.
@@ -135,7 +135,7 @@ service cannot reach these states without administrator intervention.
 If the \fB-t\fR option is specified, \fBsvcadm\fR temporarily enables each
 service instance. Temporary enable only lasts until reboot. This action
 requires permission to modify the "restarter_actions" property group of the
-service instance (see \fBsmf_security\fR(5)). By default, \fBenable\fR is
+service instance (see \fBsmf_security\fR(7)). By default, \fBenable\fR is
 persistent across reboot.
 .RE
 
@@ -149,7 +149,7 @@ persistent across reboot.
 Disables the service instance specified by the operands. For each service
 instance, the assigned restarter will try to bring it to the disabled state.
 This action requires permission to modify the "general" property group of the
-service instance (see \fBsmf_security\fR(5)).
+service instance (see \fBsmf_security\fR(7)).
 .sp
 If the \fB-s\fR option is specified, \fBsvcadm\fR disables each service
 instance and then waits for each service instance to enter the disabled state.
@@ -159,7 +159,7 @@ this state without administrator intervention.
 If the \fB-t\fR option is specified, \fBsvcadm\fR temporarily disables each
 service instance. Temporary disable only lasts until reboot. This action
 requires permission to modify the "restarter_actions" property group of the
-service instance (see \fBsmf_security\fR(5)). By default, \fBdisable\fR is
+service instance (see \fBsmf_security\fR(7)). By default, \fBdisable\fR is
 persistent across reboot.
 .sp
 If the \fB-c\fR option is specified, the given free-form comment is recorded
@@ -177,10 +177,10 @@ and is reported by \fBsvcs\fR(1).
 .RS 4n
 Requests that the service instances specified by the operands be restarted.
 This action requires permission to modify the "restarter_actions" property
-group of the service instance (see \fBsmf_security\fR(5)).
+group of the service instance (see \fBsmf_security\fR(7)).
 .sp
 This subcommand can restart only those services that are in the online or
-degraded states, as those states are defined in \fBsmf\fR(5).
+degraded states, as those states are defined in \fBsmf\fR(7).
 .sp
 If the \fB-d\fR option is specified, the restarter sends a \fBSIGABRT\fR to all
 members of the contract, which should cause a core dump, before restarting
@@ -201,12 +201,12 @@ from the current configuration. Some of these values take effect immediately
 next service \fBrestart\fR. See the restarter and service documentation for
 more information.
 .sp
-If the service is managed by \fBsvc.startd\fR(1M), the \fBrefresh\fR method
+If the service is managed by \fBsvc.startd\fR(8), the \fBrefresh\fR method
 will be invoked if it exists to request the service reread its own
 configuration. For other restarters, see the restarter documentation.
 .sp
 This action requires permission to modify the "restarter_actions" property
-group of the service instance (see \fBsmf_security\fR(5)).
+group of the service instance (see \fBsmf_security\fR(7)).
 .RE
 
 .sp
@@ -221,7 +221,7 @@ For each service instance specified by the operands, if the instance is in the
 been repaired. If the instance is in the \fBdegraded\fR state, request that the
 assigned restarter take the service to the \fBonline\fR state. This action
 requires permission to modify the "restarter_actions" property group of the
-service instance (see \fBsmf_security\fR(5)).
+service instance (see \fBsmf_security\fR(7)).
 .RE
 
 .SS "Exceptional Operations"
@@ -237,8 +237,8 @@ administrative manipulation.
 .RS 4n
 If \fIinstance_state\fR is "maintenance", then for each service specified by
 the operands, \fBsvcadm\fR requests that the assigned restarter place the
-service in the \fBmaintenance\fR state. See \fBsvc.startd\fR(1M) and
-\fBinetd\fR(1M) for a detailed description of the actions taken for each
+service in the \fBmaintenance\fR state. See \fBsvc.startd\fR(8) and
+\fBinetd\fR(8) for a detailed description of the actions taken for each
 restarter.
 .sp
 If \fIinstance_state\fR is "degraded", then for services specified by the
@@ -287,7 +287,7 @@ level, invoke \fB/sbin/init\fR directly.
 .sp
 This action requires permission to modify the "options_ovr" property group of
 the \fBsvc:/system/svc/restarter:default\fR service instance (see
-\fBsmf_security\fR(5)).
+\fBsmf_security\fR(7)).
 .sp
 The \fB-d\fR option immediately changes the milestone to the requested
 milestone, as above. Additionally, it makes the specified milestone the default
@@ -296,7 +296,7 @@ by the \fBoptions/milestone\fR property on the master restarter,
 \fBsvc:/system/svc/restarter:default\fR. If this property is absent, "all" is
 the default. This action requires permission to modify the "options" property
 group of the \fBsvc:/system/svc/restarter:default\fR service instance (see
-\fBsmf_security\fR(5)).
+\fBsmf_security\fR(7)).
 .RE
 
 .SS "Operands"
@@ -354,7 +354,7 @@ should not be used in scripts or other permanent tools.
 .ad
 .RS 11n
 A pattern that is matched against the \fIFMRIs\fR of service instances
-according to the "globbing" rules described by \fBfnmatch\fR(5). If the pattern
+according to the "globbing" rules described by \fBfnmatch\fR(7). If the pattern
 does not begin with "svc:", then "svc:/" is prepended.
 .RE
 
@@ -508,7 +508,7 @@ with the service's dependencies.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -526,9 +526,9 @@ Interface Stability	See below.
 The interactive output is Uncommitted. The invocation and non-interactive
 output are Committed.
 .SH SEE ALSO
-\fBsvcprop\fR(1), \fBsvcs\fR(1), \fBinetd\fR(1M), \fBinit\fR(1M),
-\fBsvccfg\fR(1M), \fBsvc.startd\fR(1M), \fBlibscf\fR(3LIB), \fBcontract\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5), \fBsmf_security\fR(5), \fBzones\fR(5)
+\fBsvcprop\fR(1), \fBsvcs\fR(1), \fBinetd\fR(8), \fBinit\fR(8),
+\fBsvccfg\fR(8), \fBsvc.startd\fR(8), \fBlibscf\fR(3LIB), \fBcontract\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7), \fBsmf_security\fR(7), \fBzones\fR(7)
 .SH NOTES
 The amount of time \fBsvcadm\fR will spend waiting for services and their
 dependencies to change state is implicitly limited by their method timeouts.

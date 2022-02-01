@@ -33,10 +33,10 @@ Protocol (\fBTCP\fR), and the User Datagram Protocol (\fBUDP\fR).
 \fBTCP\fR supports the socket interface's \fBSOCK_STREAM\fR abstraction and
 \fBTLI\fR's  \fBT_COTS_ORD\fR service  type. \fBUDP\fR supports the
 \fBSOCK_DGRAM\fR socket abstraction and the \fBTLI\fR \fBT_CLTS\fR service
-type. See \fBtcp\fR(7P) and \fBudp\fR(7P). A direct interface to \fBIPv6\fR is
-available using the socket interface. See \fBip6\fR(7P). \fBICMPv6\fR is used
+type. See \fBtcp\fR(4P) and \fBudp\fR(4P). A direct interface to \fBIPv6\fR is
+available using the socket interface. See \fBip6\fR(4P). \fBICMPv6\fR is used
 by the kernel to handle and report errors in protocol processing. It  is also
-accessible to user programs. See \fBicmp6\fR(7P). \fBNDP\fR is used to
+accessible to user programs. See \fBicmp6\fR(4P). \fBNDP\fR is used to
 translate 128-bit \fBIPv6\fR addresses into 48-bit Ethernet addresses.
 .sp
 .LP
@@ -253,7 +253,7 @@ used to break the tie.
 .sp
 .LP
 The sense of some rules may be reversed on a per-socket basis using the
-IPV6_SRC_PREFERENCES socket option (see \fBip6\fR(7P)). The flag values for
+IPV6_SRC_PREFERENCES socket option (see \fBip6\fR(4P)). The flag values for
 this option are defined in <\fBnetinet/in.h\fR> and are referenced in the
 description of the appropriate rules below.
 .sp
@@ -321,7 +321,7 @@ packets to D and the other is not, then prefer the former.
 .ad
 .RS 30n
 This rule uses labels which are obtained through the IPv6 default address
-selection policy table. See \fBipaddrsel\fR(1M) for a description of the
+selection policy table. See \fBipaddrsel\fR(8) for a description of the
 default contents of the table and how the table is configured.
 .sp
 If Label(SA) == Label(D) and Label(SB) != Label(D), then prefer SA.
@@ -337,12 +337,12 @@ If Label(SB) == Label(D) and Label(SA) != Label(D), then prefer SB.
 .RS 30n
 This rule prefers public addresses over temporary addresses, as defined in
 \fIRFC 3041\fR. Temporary addresses are disabled by default and may be enabled
-by appropriate settings in \fBndpd.conf\fR(4).
+by appropriate settings in \fBndpd.conf\fR(5).
 .sp
 The sense of this rule may be set on a per-socket basis using the
 IPV6_SRC_PREFERENCES socket option.  Passing the flag IPV6_PREFER_SRC_TMP or
 IPV6_PREFER_SRC_PUBLIC will cause temporary or public addresses to be
-preferred, respectively, for that particular socket.  See \fBip6\fR(7P) for
+preferred, respectively, for that particular socket.  See \fBip6\fR(4P) for
 more information about IPv6 socket options.
 .RE
 
@@ -375,7 +375,7 @@ specifying an address.
 \fBgetipnodebyname\fR(3SOCKET), \fBgetprotobyname\fR(3SOCKET),
 \fBgetservbyname\fR(3SOCKET), \fBgetsockopt\fR(3SOCKET), \fBinet\fR(3SOCKET),
 \fBsend\fR(3SOCKET), \fBsockaddr\fR(3SOCKET),
-\fBicmp6\fR(7P), \fBip6\fR(7P), \fBtcp\fR(7P), \fBudp\fR(7P)
+\fBicmp6\fR(4P), \fBip6\fR(4P), \fBtcp\fR(4P), \fBudp\fR(4P)
 .sp
 .LP
 Conta, A. and Deering, S., \fIInternet Control Message Protocol (ICMPv6) for

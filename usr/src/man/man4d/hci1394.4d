@@ -39,7 +39,7 @@ Device driver (x86)
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -55,7 +55,7 @@ Interface Stability	Unstable
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(5), \fBieee1394\fR(7D)
+\fBattributes\fR(7), \fBieee1394\fR(4D)
 .sp
 .LP
 \fIIEEE 1394 - IEEE Standard for a High Performance Serial Bus\fR

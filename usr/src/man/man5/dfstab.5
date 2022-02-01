@@ -15,14 +15,14 @@ sharing resources across a network. \fBdfstab\fR gives a system administrator a
 uniform method of controlling the automatic sharing of local resources.
 .sp
 .LP
-Each line of the \fBdfstab\fR file consists of a \fBshare\fR(1M) command. The
+Each line of the \fBdfstab\fR file consists of a \fBshare\fR(8) command. The
 \fBdfstab\fR file can be read by the shell to share all resources. System
 administrators can also prepare their own shell scripts to execute particular
 lines from \fBdfstab\fR.
 .sp
 .LP
 The contents of \fBdfstab\fR put into effect when the command shown below is
-run. See \fBsvcadm\fR(1M).
+run. See \fBsvcadm\fR(8).
 .sp
 .in +2
 .nf
@@ -33,7 +33,7 @@ run. See \fBsvcadm\fR(1M).
 .SH SEE ALSO
 .sp
 .LP
-\fBshare\fR(1M), \fBshareall\fR(1M), \fBsharemgr\fR(1M), \fBsvcadm\fR(1M)
+\fBshare\fR(8), \fBshareall\fR(8), \fBsharemgr\fR(8), \fBsvcadm\fR(8)
 .SH NOTES
 .sp
 .LP
@@ -41,4 +41,4 @@ Do not modify this file directly. This file is reconstructed and only
 maintained for backwards compatibility. Configuration lines could be lost.
 .sp
 .LP
-Use the \fBsharemgr\fR(1M) command for all share management.
+Use the \fBsharemgr\fR(8) command for all share management.

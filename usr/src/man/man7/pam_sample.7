@@ -26,7 +26,7 @@ The SAMPLE authentication module provides functions to test the \fBPAM\fR
 framework functionality using the \fBpam_sm_authenticate\fR(3PAM) call. The
 SAMPLE module implementation of the \fBpam_sm_authenticate\fR(3PAM) function
 compares the user entered password with the password set in the
-\fBpam.conf\fR(4) file, or the string "test" if a default test password has not
+\fBpam.conf\fR(5) file, or the string "test" if a default test password has not
 been set. The following options can be passed in to the SAMPLE Authentication
 module:
 .sp
@@ -169,7 +169,7 @@ return \fBPAM_SUCCESS.\fR
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for description of the following attributes:
+See \fBattributes\fR(7) for description of the following attributes:
 .sp
 
 .sp
@@ -187,8 +187,8 @@ MT Level	MT-Safe with exceptions
 .LP
 \fBpam\fR(3PAM), \fBpam_sm_authenticate\fR(3PAM), \fBpam_sm_chauthtok\fR(3PAM),
 \fBpam_sm_close_session\fR(3PAM), \fBpam_sm_open_session\fR(3PAM),
-\fBpam_sm_setcred\fR(3PAM), \fBlibpam\fR(3LIB), \fBpam.conf\fR(4),
-\fBattributes\fR(5)
+\fBpam_sm_setcred\fR(3PAM), \fBlibpam\fR(3LIB), \fBpam.conf\fR(5),
+\fBattributes\fR(7)
 .SH WARNINGS
 .sp
 .LP

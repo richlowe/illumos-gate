@@ -18,7 +18,7 @@ in.rexecd, rexecd \- remote execution server
 .LP
 \fBin.rexecd\fR is the server for the \fBrexec\fR(3SOCKET) routine.  The server
 provides remote execution facilities with authentication based on user names
-and passwords. It is invoked automatically as needed by \fBinetd\fR(1M), and
+and passwords. It is invoked automatically as needed by \fBinetd\fR(8), and
 then executes the following protocol:
 .RS +4
 .TP
@@ -70,12 +70,12 @@ shell inherits the network connections established by \fBrexecd\fR.
 .SH USAGE
 .sp
 .LP
-\fBin.rexecd\fR and \fBrexecd\fR are IPv6-enabled. See \fBip6\fR(7P).
+\fBin.rexecd\fR and \fBrexecd\fR are IPv6-enabled. See \fBip6\fR(4P).
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBinetd\fR(1M), \fBinetadm\fR(1M), \fBsvcadm\fR(1M),
-\fBrexec\fR(3SOCKET), \fBattributes\fR(5), \fBsmf\fR(5), \fBip6\fR(7P)
+\fBsvcs\fR(1), \fBinetd\fR(8), \fBinetadm\fR(8), \fBsvcadm\fR(8),
+\fBrexec\fR(3SOCKET), \fBattributes\fR(7), \fBsmf\fR(7), \fBip6\fR(4P)
 .SH DIAGNOSTICS
 .sp
 .LP
@@ -160,7 +160,7 @@ The user's login shell could not be started.
 .sp
 .LP
 The \fBin.rexecd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -172,8 +172,8 @@ svc:/network/rexec:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Responsibility for
-initiating and restarting this service is delegated to \fBinetd\fR(1M). Use
-\fBinetadm\fR(1M) to make configuration changes and to view configuration
+requesting restart, can be performed using \fBsvcadm\fR(8). Responsibility for
+initiating and restarting this service is delegated to \fBinetd\fR(8). Use
+\fBinetadm\fR(8) to make configuration changes and to view configuration
 information for this service. The service's status can be queried using the
 \fBsvcs\fR(1) command.

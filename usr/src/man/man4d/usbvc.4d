@@ -337,7 +337,7 @@ The driver received an \fBopen\fR(2) request for a disconnected device.
 .ad
 .sp .6
 .RS 4n
-\fBugen\fR(7D) nodes.
+\fBugen\fR(4D) nodes.
 .RE
 
 .sp
@@ -352,7 +352,7 @@ Device node for isochronous input from USB video device and device control.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -367,9 +367,9 @@ Architecture	 SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBcfgadm_usb\fR(1M), \fBioctl\fR(2), \fBopen\fR(2), \fBmmap\fR(2),
-\fBread\fR(2), \fBattributes\fR(5), \fBugen\fR(7D),
-\fBusba\fR(7D), \fBattach\fR(9E)
+\fBcfgadm_usb\fR(8), \fBioctl\fR(2), \fBopen\fR(2), \fBmmap\fR(2),
+\fBread\fR(2), \fBattributes\fR(7), \fBugen\fR(4D),
+\fBusba\fR(4D), \fBattach\fR(9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

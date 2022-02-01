@@ -42,7 +42,7 @@ The \fBSATA\fR hardware specific library, \fB/usr/lib/cfgadm/sata.so.1\fR,
 provides the functionality for \fBSATA\fR hot plugging through the \fBcfgadm\fR
 command. \fBcfgadm\fR operates on attachment points, which are locations in the
 system where hardware resources can be dynamically reconfigured. See
-\fBcfgadm\fR(1M) for information regarding attachment points.
+\fBcfgadm\fR(8) for information regarding attachment points.
 .sp
 .LP
 Each \fBSATA\fR controller's and port multiplier's device port is represented
@@ -173,7 +173,7 @@ Ap_Id                     Type        Receptacle   Occupant     Condition
 
 .sp
 .LP
-See \fBcfgadm\fR(1M)for more information regarding listing of attachment
+See \fBcfgadm\fR(8)for more information regarding listing of attachment
 points.
 .sp
 .LP
@@ -434,7 +434,7 @@ Not supported.
 .ad
 .sp .6
 .RS 4n
-The \fB-l\fR option works as described in \fBcfgadm\fR(1M). When paired with
+The \fB-l\fR option works as described in \fBcfgadm\fR(8). When paired with
 the \fB-v\fR option, the "Information" field contains the following
 \fBSATA\fR-specific information:
 .RS +4
@@ -475,7 +475,7 @@ No hardware specific options are currently defined.
 .sp .6
 .RS 4n
 Attachment points of class \fBSATA\fR can be listed by using the select
-suboption. See \fBcfgadm\fR(1M).
+suboption. See \fBcfgadm\fR(8).
 .RE
 
 .sp
@@ -799,8 +799,8 @@ Hardware specific library for generic \fBSATA\fR hot plugging.
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm\fR(1M), \fBconfig_admin\fR(3CFGADM), \fBlibcfgadm\fR(3LIB),
-\fBattributes\fR(5)
+\fBcfgadm\fR(8), \fBconfig_admin\fR(3CFGADM), \fBlibcfgadm\fR(3LIB),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

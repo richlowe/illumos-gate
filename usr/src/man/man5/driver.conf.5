@@ -34,7 +34,7 @@ file, where the generic node name and \fBcompatible\fR property associated with
 a self-identifying devices are typically not used, the node name must be a
 binding name. The binding name is the name chosen by the system to bind a
 driver to the device. The binding name is either an alias associated with the
-driver established by \fBadd_drv\fR(1M) or the driver name itself.
+driver established by \fBadd_drv\fR(8) or the driver name itself.
 .sp
 .LP
 The syntax of a single entry in a driver configuration file takes one of three
@@ -184,7 +184,7 @@ debug-level=3;
 .LP
 This creates two \fBdevinfo\fR nodes called \fBACME,example\fR which attaches
 below the \fBpseudo\fR node in the kernel device tree. The \fBinstance\fR
-property is only interpreted by the \fBpseudo\fR node, see \fBpseudo\fR(4) for
+property is only interpreted by the \fBpseudo\fR node, see \fBpseudo\fR(5) for
 further details. A property called \fBdebug-level\fR is created on the first
 \fBdevinfo\fR node which has the value 1. The \fBexample\fR driver is able to
 fetch the value of this property using \fBddi_prop_get_int\fR(9F).
@@ -202,7 +202,7 @@ the second node retrieves the value of the global \fBdebug-level\fR property
 
 .SH SEE ALSO
 .LP
-\fBadd_drv\fR(1M), \fBpci\fR(4), \fBpseudo\fR(4), \fBsbus\fR(4), \fBscsi\fR(4),
+\fBadd_drv\fR(8), \fBpci\fR(5), \fBpseudo\fR(5), \fBsbus\fR(5), \fBscsi\fR(5),
 \fBprobe\fR(9E), \fBddi_getlongprop\fR(9F), \fBddi_getprop\fR(9F),
 \fBddi_getproplen\fR(9F), \fBddi_prop_get_int\fR(9F),
 \fBddi_prop_lookup\fR(9F), \fBddi_prop_op\fR(9F)
@@ -217,5 +217,5 @@ vendor-unique string. A reasonably compact and unique choice is the vendor
 over-the-counter stock symbol.
 .SH NOTES
 .LP
-The \fBupdate_drv\fR(1M) command should be used to prompt the kernel to reread
+The \fBupdate_drv\fR(8) command should be used to prompt the kernel to reread
 \fBdriver.conf\fR files.

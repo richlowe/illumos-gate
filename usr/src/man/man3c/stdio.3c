@@ -116,7 +116,7 @@ than 255 files may be opened using \fBfopen()\fR, and only file descriptors 0
 through 255 can be used in a stream. This restriction only holds for the 32-bit
 compilation environment. The 64-bit environment may use more streams and the use
 of more than 255 may be enabled in a 32-bit environment through the use of
-\fBextendedFILE\fR(5).
+\fBextendedFILE\fR(7).
 .sp
 .LP
 The functions and constants mentioned in the entries of section 3S of this

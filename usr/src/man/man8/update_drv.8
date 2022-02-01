@@ -25,7 +25,7 @@ update_drv \- modify device driver attributes
 
 .SH DESCRIPTION
 The \fBupdate_drv\fR command informs the system about attribute changes to an
-installed device driver. It can be used to re-read the \fBdriver.conf\fR(4)
+installed device driver. It can be used to re-read the \fBdriver.conf\fR(5)
 file, or to add, modify, or delete a driver's minor node permissions or
 aliases.
 .sp
@@ -78,7 +78,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-b\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -127,7 +127,7 @@ such devices remain.
 .RS 4n
 A white-space separated list of aliases for the driver. If \fB-a\fR or \fB-d\fR
 option is not specified then this option is ignored. The \fIidentify-name\fR
-string is mandatory. If all aliases need to be removed, \fBrem_drv\fR(1M) is
+string is mandatory. If all aliases need to be removed, \fBrem_drv\fR(8) is
 recommended.
 .RE
 
@@ -240,7 +240,7 @@ example# update_drv -a -i '"usb459,20"' ugen
 \fBExample 4 \fRRe-reading the \fBdriver.conf\fR File For the \fBohci\fR Driver
 .sp
 .LP
-The following command re-reads the \fBdriver.conf\fR(4) file.
+The following command re-reads the \fBdriver.conf\fR(5) file.
 
 .sp
 .in +2
@@ -303,8 +303,8 @@ An error occurred.
 .RE
 
 .SH SEE ALSO
-\fBadd_drv\fR(1M), \fBmodunload\fR(1M), \fBrem_drv\fR(1M),
-\fBdriver.conf\fR(4), \fBattributes\fR(5), \fBprivileges\fR(5)
+\fBadd_drv\fR(8), \fBmodunload\fR(8), \fBrem_drv\fR(8),
+\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBprivileges\fR(7)
 .SH NOTES
 If \fB-a\fR or \fB-d\fR options are specified, \fBupdate_drv\fR does not reread
 the \fBdriver.conf\fR file.

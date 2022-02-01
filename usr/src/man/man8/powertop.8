@@ -57,7 +57,7 @@ This feature is most useful when invoked while the application being analyzed
 is running.
 .sp
 .LP
-\fBPowerTOP\fR runs on \fBxVM\fR(5) domains. However, the report for idle state
+\fBPowerTOP\fR runs on \fBxVM\fR(7) domains. However, the report for idle state
 transitions might or might not be accurate as the physical CPU can be shared by
 different virtual CPUs. Both wakeup count and event report displays information
 regarding the current virtualized environment.
@@ -206,7 +206,7 @@ Incorrect usage.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -223,9 +223,9 @@ Interface Stability	Volatile
 
 .SH SEE ALSO
 .LP
-\fBkstat\fR(1M), \fBpmconfig\fR(1M), \fBpowerd\fR(1M), \fBpsrinfo\fR(1M),
-\fBuadmin\fR(2), \fBlibdevinfo\fR(3LIB), \fBattributes\fR(5), \fBxVM\fR(5),
-\fBcpr\fR(7), \fBpm\fR(7D), \fBpm-components\fR(9P), \fBremovable-media\fR(9P)
+\fBkstat\fR(8), \fBpmconfig\fR(8), \fBpowerd\fR(8), \fBpsrinfo\fR(8),
+\fBuadmin\fR(2), \fBlibdevinfo\fR(3LIB), \fBattributes\fR(7), \fBxVM\fR(7),
+\fBcpr\fR(4), \fBpm\fR(4D), \fBpm-components\fR(9P), \fBremovable-media\fR(9P)
 .SH USAGE
 .LP
 You must have \fBDTrace\fR privileges to run \fBPowerTOP\fR and root

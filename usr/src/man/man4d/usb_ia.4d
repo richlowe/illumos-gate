@@ -27,8 +27,8 @@ to bind drivers to each child interface.
 .sp
 .LP
 Each interface association node has a parent device node that is created by
-\fBusb_mid\fR(7D) and all \fBugen\fR(7D) interfaces are exported by
-\fBusb_mid\fR(7D). (Note: attempting to export \fBugen\fR(7D) interfaces using
+\fBusb_mid\fR(4D) and all \fBugen\fR(4D) interfaces are exported by
+\fBusb_mid\fR(4D). (Note: attempting to export \fBugen\fR(4D) interfaces using
 \fBusb_ia\fR is prohibited.)
 .SH FILES
 .ne 2
@@ -62,7 +62,7 @@ Each interface association node has a parent device node that is created by
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -77,7 +77,7 @@ Architecture	SPARC & x86 PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBattributes\fR(5), \fBugen\fR(7D), \fBusb_mid\fR(7D), \fBusba\fR(7D)
+\fBattributes\fR(7), \fBugen\fR(4D), \fBusb_mid\fR(4D), \fBusba\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

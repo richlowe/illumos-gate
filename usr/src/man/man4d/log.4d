@@ -22,7 +22,7 @@ log \- interface to STREAMS error logging and event tracing
 .LP
 \fBlog\fR is a STREAMS software device driver that provides an interface for
 console logging and for the STREAMS error logging and event tracing processes
-(see \fBstrerr\fR(1M), and \fBstrace\fR(1M)). \fBlog\fR presents two separate
+(see \fBstrerr\fR(8), and \fBstrace\fR(8)). \fBlog\fR presents two separate
 interfaces: a function call interface in the kernel through which STREAMS
 drivers and modules submit \fBlog\fR messages; and a set of  \fBioctl\fR(2)
 requests and STREAMS messages for interaction with a user level console logger,
@@ -183,7 +183,7 @@ The following driver configuration properties may be defined in the
 .ad
 .RS 11n
 If \fBmsgid=1\fR, each message will be preceded by a message ID as described in
-\fBsyslogd\fR(1M).
+\fBsyslogd\fR(8).
 .RE
 
 .sp
@@ -283,7 +283,7 @@ Log configuration file.
 .SH SEE ALSO
 .sp
 .LP
-\fBstrace\fR(1M), \fBstrerr\fR(1M), \fBIntro\fR(3), \fBgetmsg\fR(2),
+\fBstrace\fR(8), \fBstrerr\fR(8), \fBIntro\fR(3), \fBgetmsg\fR(2),
 \fBioctl\fR(2), \fBputmsg\fR(2), \fBwrite\fR(2), \fBprintf\fR(3C),
 \fBstrlog\fR(9F)
 .sp

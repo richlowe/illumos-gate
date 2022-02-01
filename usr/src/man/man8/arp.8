@@ -37,7 +37,7 @@ arp \- address resolution display and control
 .SH DESCRIPTION
 .LP
 The \fBarp\fR program displays and modifies the Internet-to-MAC address
-translation tables used by the address resolution protocol (see \fBarp\fR(7P)).
+translation tables used by the address resolution protocol (see \fBarp\fR(4P)).
 .sp
 .LP
 With no flags, the program displays the current \fBARP\fR entry for
@@ -47,7 +47,7 @@ dot notation.
 .LP
 Options that modify the ARP translation tables (\fB-d\fR, \fB-f\fR, and
 \fB-s\fR) can be used only when the invoked command is granted the
-\fBPRIV_SYS_NET_CONFIG\fR privilege. See \fBprivileges\fR(5).
+\fBPRIV_SYS_NET_CONFIG\fR privilege. See \fBprivileges\fR(7).
 .SH OPTIONS
 .ne 2
 .na
@@ -243,5 +243,5 @@ kernel and thus cannot be changed.
 
 .SH SEE ALSO
 .LP
-\fBifconfig\fR(1M), \fBnetstat\fR(1M), \fBndp\fR(1M), \fBattributes\fR(5),
-\fBprivileges\fR(5), \fBarp\fR(7P)
+\fBifconfig\fR(8), \fBnetstat\fR(8), \fBndp\fR(8), \fBattributes\fR(7),
+\fBprivileges\fR(7), \fBarp\fR(4P)

@@ -102,7 +102,7 @@ Root of the overall file system name space.
 .ad
 .sp .6
 .RS 4n
-The device name file system. See \fBdev\fR(7FS).
+The device name file system. See \fBdev\fR(4FS).
 .RE
 
 .sp
@@ -283,7 +283,7 @@ Terminal devices.
 .ad
 .sp .6
 .RS 4n
-The devices file system. See \fBdevfs\fR(7FS).
+The devices file system. See \fBdevfs\fR(4FS).
 .RE
 
 .sp
@@ -327,7 +327,7 @@ Process accounting system configuration information.
 .ad
 .sp .6
 .RS 4n
-Configuration information for \fBcron\fR(1M).
+Configuration information for \fBcron\fR(8).
 .RE
 
 .sp
@@ -387,7 +387,7 @@ Dynamic Host Configuration Protocol (\fBDHCP\fR) configuration files.
 .ad
 .sp .6
 .RS 4n
-Fault manager configuration files. For more information, see \fBfmd\fR(1M).
+Fault manager configuration files. For more information, see \fBfmd\fR(8).
 .RE
 
 .sp
@@ -450,7 +450,7 @@ Configuration files for Internet services.
 .sp .6
 .RS 4n
 Shell scripts for transitioning between init states. The service management
-facility, \fBsmf\fR(5) is the preferred mechanism for managing services.
+facility, \fBsmf\fR(7) is the preferred mechanism for managing services.
 .RE
 
 .sp
@@ -560,7 +560,7 @@ Solaris \fBPPP\fR configuration files.
 .ad
 .sp .6
 .RS 4n
-Scripts for entering or leaving run level 0. See \fBinit\fR(1M).
+Scripts for entering or leaving run level 0. See \fBinit\fR(8).
 .RE
 
 .sp
@@ -570,7 +570,7 @@ Scripts for entering or leaving run level 0. See \fBinit\fR(1M).
 .ad
 .sp .6
 .RS 4n
-Scripts for entering or leaving run level 1. See \fBinit\fR(1M).
+Scripts for entering or leaving run level 1. See \fBinit\fR(8).
 .RE
 
 .sp
@@ -580,7 +580,7 @@ Scripts for entering or leaving run level 1. See \fBinit\fR(1M).
 .ad
 .sp .6
 .RS 4n
-Scripts for entering or leaving run level 2. See \fBinit\fR(1M).
+Scripts for entering or leaving run level 2. See \fBinit\fR(8).
 .RE
 
 .sp
@@ -590,7 +590,7 @@ Scripts for entering or leaving run level 2. See \fBinit\fR(1M).
 .ad
 .sp .6
 .RS 4n
-Scripts for entering or leaving run level 3. See \fBinit\fR(1M).
+Scripts for entering or leaving run level 3. See \fBinit\fR(8).
 .RE
 
 .sp
@@ -651,7 +651,7 @@ Extensions).
 .ad
 .sp .6
 .RS 4n
-Default profile scripts for new user accounts. See \fBuseradd\fR(1M).
+Default profile scripts for new user accounts. See \fBuseradd\fR(8).
 .RE
 
 .sp
@@ -785,7 +785,7 @@ Default root of the shared file system tree.
 .sp .6
 .RS 4n
 Default root of a subtree for user directories. Often managed by the
-automounter, see \fBautomount\fR(1M) for more details.
+automounter, see \fBautomount\fR(8) for more details.
 .RE
 
 .sp
@@ -797,7 +797,7 @@ automounter, see \fBautomount\fR(1M) for more details.
 .RS 4n
 Subtree of platform-dependent loadable kernel modules required as part of the
 boot process. It includes the generic part of the core kernel that is
-platform-independent, \fB/kernel/genunix\fR. See \fBkernel\fR(1M) An approved
+platform-independent, \fB/kernel/genunix\fR. See \fBkernel\fR(8) An approved
 installation location for bundled Solaris software and for add-on system
 software.
 .RE
@@ -950,7 +950,7 @@ The semantics of the series of directories is equivalent to \fB/\fR (root).
 .RS 4n
 Platform-specific modules required for boot. These modules have semantics
 equivalent to \fB/kernel\fR. It includes the file \fBunix\fR, the core kernel.
-See \fBkernel\fR(1M). An approved installation location for bundled Solaris
+See \fBkernel\fR(8). An approved installation location for bundled Solaris
 software and for add-on system software.
 .RE
 
@@ -1043,7 +1043,7 @@ Solaris software and for add-on system software.
 .ad
 .sp .6
 .RS 4n
-Root of a subtree for the process file system. See \fBproc\fR(4).
+Root of a subtree for the process file system. See \fBproc\fR(5).
 .RE
 
 .sp
@@ -1067,7 +1067,7 @@ Solaris software.
 .sp .6
 .RS 4n
 Mount point for the contract (CTFS) and object (OBJFS) file systems. See
-\fBctfs\fR(7FS) and \fBobjfs\fR(7FS).
+\fBctfs\fR(4FS) and \fBobjfs\fR(4FS).
 .RE
 
 .sp
@@ -1078,7 +1078,7 @@ Mount point for the contract (CTFS) and object (OBJFS) file systems. See
 .sp .6
 .RS 4n
 Temporary files. Usually mounted as a memory based file system. See
-\fBtmpfs\fR(7FS).
+\fBtmpfs\fR(4FS).
 .RE
 
 .sp
@@ -1133,7 +1133,7 @@ Default location for Audit log files.
 .ad
 .sp .6
 .RS 4n
-Directory provided for global core files storage. See \fBcoreadm\fR(1M).
+Directory provided for global core files storage. See \fBcoreadm\fR(8).
 .RE
 
 .sp
@@ -1143,7 +1143,7 @@ Directory provided for global core files storage. See \fBcoreadm\fR(1M).
 .ad
 .sp .6
 .RS 4n
-Default depository for kernel crash dumps. See \fBdumpadm\fR(1M).
+Default depository for kernel crash dumps. See \fBdumpadm\fR(8).
 .RE
 
 .sp
@@ -1153,7 +1153,7 @@ Default depository for kernel crash dumps. See \fBdumpadm\fR(1M).
 .ad
 .sp .6
 .RS 4n
-Log files for \fBcron\fR(1M).
+Log files for \fBcron\fR(8).
 .RE
 
 .sp
@@ -1163,7 +1163,7 @@ Log files for \fBcron\fR(1M).
 .ad
 .sp .6
 .RS 4n
-Fault manager state files. For more information, see \fBfmd\fR(1M).
+Fault manager state files. For more information, see \fBfmd\fR(8).
 .RE
 
 .sp
@@ -1356,7 +1356,7 @@ Service access facility logging and accounting files.
 .sp .6
 .RS 4n
 Contains directories for files used in printer spooling, mail delivery,
-\fBcron\fR(1M), \fBat\fR(1), and so forth.
+\fBcron\fR(8), \fBat\fR(1), and so forth.
 .RE
 
 .sp
@@ -1366,7 +1366,7 @@ Contains directories for files used in printer spooling, mail delivery,
 .ad
 .sp .6
 .RS 4n
-\fBsendmail\fR(1M) client files.
+\fBsendmail\fR(8) client files.
 .RE
 
 .sp
@@ -1376,7 +1376,7 @@ Contains directories for files used in printer spooling, mail delivery,
 .ad
 .sp .6
 .RS 4n
-\fBcron\fR(1M) and \fBat\fR(1) spooling files.
+\fBcron\fR(8) and \fBat\fR(1) spooling files.
 .RE
 
 .sp
@@ -1537,7 +1537,7 @@ property.
 .ad
 .sp .6
 .RS 4n
-Databases used by \fBNIS\fR and \fBypbind\fR(1M).
+Databases used by \fBNIS\fR and \fBypbind\fR(8).
 .RE
 
 .SS "\fB/usr\fR File System"
@@ -1818,7 +1818,7 @@ x86 platforms.
 .ad
 .sp .6
 .RS 4n
-Accounting scripts and binaries. See \fBacct\fR(1M).
+Accounting scripts and binaries. See \fBacct\fR(8).
 .RE
 
 .sp
@@ -1872,7 +1872,7 @@ Contains \fBcfgadm\fR hardware-specific driver plugins.
 .sp .6
 .RS 4n
 Scheduling-class-specific directories containing executables for
-\fBpriocntl\fR(1) and \fBdispadmin\fR(1M).
+\fBpriocntl\fR(1) and \fBdispadmin\fR(8).
 .RE
 
 .sp
@@ -2409,7 +2409,7 @@ Symbolic link to the \fB/usr/share/man\fR directory.
 .sp .6
 .RS 4n
 Entry points for foreign name service requests relayed using the network
-listener. See \fBlisten\fR(1M).
+listener. See \fBlisten\fR(8).
 .RE
 
 .sp
@@ -2770,7 +2770,7 @@ Tab setting escape sequences.
 .ad
 .sp .6
 .RS 4n
-Terminal description files for \fBterminfo\fR(4).
+Terminal description files for \fBterminfo\fR(5).
 .RE
 
 .sp
@@ -2941,10 +2941,10 @@ Directory for newer versions of POSIX-compliant utilities.
 \fBisainfo\fR(1), \fBmail\fR(1), \fBmailx\fR(1), \fBnroff\fR(1),
 \fBpriocntl\fR(1), \fBrefer\fR(1), \fBsar\fR(1), \fBsh\fR(1), \fBspell\fR(1),
 \fBsvcs\fR(1), \fBtroff\fR(1), \fBuname\fR(1), \fBuucp\fR(1C), \fBvi\fR(1),
-\fBacct\fR(1M), \fBcron\fR(1M), \fBdispadmin\fR(1M), \fBdladm\fR(1M),
-\fBfmd\fR(1M), \fBfsck\fR(1M), \fBinit\fR(1M), \fBkernel\fR(1M),
-\fBmknod\fR(1M), \fBmount\fR(1M), \fBsvcadm\fR(1M), \fBsvccfg\fR(1M),
-\fBuseradd\fR(1M), \fBypbind\fR(1M), \fBmount\fR(2), \fBIntro\fR(4),
-\fBproc\fR(4), \fBterminfo\fR(4), \fBsmf\fR(5), \fBctfs\fR(7FS),
-\fBdev\fR(7FS), \fBdevfs\fR(7FS), \fBctfs\fR(7FS), \fBobjfs\fR(7FS),
-\fBtmpfs\fR(7FS)
+\fBacct\fR(8), \fBcron\fR(8), \fBdispadmin\fR(8), \fBdladm\fR(8),
+\fBfmd\fR(8), \fBfsck\fR(8), \fBinit\fR(8), \fBkernel\fR(8),
+\fBmknod\fR(8), \fBmount\fR(8), \fBsvcadm\fR(8), \fBsvccfg\fR(8),
+\fBuseradd\fR(8), \fBypbind\fR(8), \fBmount\fR(2), \fBIntro\fR(5),
+\fBproc\fR(5), \fBterminfo\fR(5), \fBsmf\fR(7), \fBctfs\fR(4FS),
+\fBdev\fR(4FS), \fBdevfs\fR(4FS), \fBctfs\fR(4FS), \fBobjfs\fR(4FS),
+\fBtmpfs\fR(4FS)

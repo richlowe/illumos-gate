@@ -27,9 +27,9 @@ failures; and, when appropriate, to listen for network requests for services.
 .sp
 .LP
 Services are no longer managed by editing the inetd configuration file,
-\fBinetd.conf\fR(4). Instead, you use \fBinetconv\fR(1M) to convert the
+\fBinetd.conf\fR(5). Instead, you use \fBinetconv\fR(8) to convert the
 configuration file content into SMF format services, then manage these services
-using \fBinetadm\fR(1M) and \fBsvcadm\fR(1M). Once a service has been converted
+using \fBinetadm\fR(8) and \fBsvcadm\fR(8). Once a service has been converted
 by \fBinetconv\fR, any changes to the legacy data in the \fBinetd\fR config
 file will not become effective. However, \fBinetd\fR does alert the
 administrator when it notices change in the configuration file. See the start
@@ -60,7 +60,7 @@ to an SMF request, or when it receives a SIGHUP signal. See the \fBrefresh\fR
 description under "inetd Methods" for the behavior on configuration refresh.
 .sp
 .LP
-You can use the \fBinetadm\fR(1M) or \fBsvccfg\fR(1M) utilities to make
+You can use the \fBinetadm\fR(8) or \fBsvccfg\fR(8) utilities to make
 configuration changes to Internet services within the SMF repository.
 \fBinetadm\fR has the advantage over \fBsvccfg\fR in that it provides an
 Internet/RPC service context.
@@ -68,7 +68,7 @@ Internet/RPC service context.
 .LP
 As part of its service management duties, \fBinetd\fR implements a state
 machine for each of its managed services. The states in this machine are made
-up of the \fBsmf\fR(5) set of states. The semantics of these states are as
+up of the \fBsmf\fR(7) set of states. The semantics of these states are as
 follows:
 .sp
 .ne 2
@@ -183,7 +183,7 @@ this state.
 
 .sp
 .LP
-Use \fBinetadm\fR(1M) to obtain the current state of a managed service.
+Use \fBinetadm\fR(8) to obtain the current state of a managed service.
 .SS "Service Methods"
 .LP
 As part of certain state transitions \fBinetd\fR will execute, if supplied, one
@@ -278,7 +278,7 @@ applicable to all \fBinetd\fR-managed services.
 .sp
 .LP
 For details on viewing and modifying the configuration of a service and the
-defaults, refer to \fBinetadm\fR(1M).
+defaults, refer to \fBinetadm\fR(8).
 .sp
 .LP
 The basic configuration of a service is stored in a property group named
@@ -399,7 +399,7 @@ If true, pass \fBinetd\fR's environment on to the service's start method.
 Regardless of this setting, \fBinetd\fR will set the variables \fBSMF_FMRI\fR,
 \fBSMF_METHOD\fR, and \fBSMF_RESTARTER\fR in the start method's environment, as
 well as any environment variables set in the method context. These variables
-are described in \fBsmf_method\fR(5).
+are described in \fBsmf_method\fR(7).
 .RE
 
 .sp
@@ -515,7 +515,7 @@ If true, and this is a \fBnowait\fR-type service, \fBinetd\fR logs the client's
 IP address and TCP port number, along with the name of the service, for each
 incoming connection, using the \fBsyslog\fR(3C) facility. \fBinetd\fR uses the
 \fBsyslog\fR facility \fBcode\fR daemon and \fBnotice\fR priority level. See
-\fBsyslog.conf\fR(4) for a description of \fBsyslog\fR codes and severity
+\fBsyslog.conf\fR(5) for a description of \fBsyslog\fR codes and severity
 levels. This logging is separate from the logging done by the TCP wrappers
 facility.
 .sp
@@ -534,14 +534,14 @@ If \fBtrue\fR, enable TCP wrappers access control. This applies only to
 services with \fBendpoint_type\fR set to \fBstreams\fR and \fBwait\fR set to
 \fBfalse\fR. The \fBsyslog\fR facility \fBcode\fR daemon is used to log allowed
 connections (using the \fBnotice\fR severity level) and denied traffic (using
-the \fBwarning\fR severity level). See \fBsyslog.conf\fR(4) for a description
+the \fBwarning\fR severity level). See \fBsyslog.conf\fR(5) for a description
 of \fBsyslog\fR codes and severity levels. The stability level of the TCP
 wrappers facility and its configuration files is External. As the TCP wrappers
 facility is not controlled by Sun, intra-release incompatibilities are not
-uncommon. See \fBattributes\fR(5).
+uncommon. See \fBattributes\fR(7).
 .sp
 For more information about configuring TCP wrappers, refer to
-\fBtcpd\fR(1M) and \fBhosts_access\fR(4).
+\fBtcpd\fR(8) and \fBhosts_access\fR(5).
 .sp
 \fBtcp_wrappers\fR is equivalent to the previous inetd's
 \fB/etc/default/inetd\fR property \fBENABLE_TCPWRAPPERS\fR.
@@ -585,7 +585,7 @@ A number of the basic properties are optional for a service. In their absence,
 their values are taken from the set of default values present in the
 \fBdefaults\fR property group in the \fBinetd\fR service. These properties,
 with their seed values, are listed below. Note that these values are
-configurable through \fBinetadm\fR(1M).
+configurable through \fBinetadm\fR(8).
 .sp
 .in +2
 .nf
@@ -608,7 +608,7 @@ tcp_wrappers        false
 Each method specified for a service will have its configuration stored in the
 SMF repository, within a property group of the same name as the method. The set
 of properties allowable for these methods includes those specified for the
-services managed by \fBsvc.startd\fR(1M). (See \fBsvc.startd\fR(1M) for further
+services managed by \fBsvc.startd\fR(8). (See \fBsvc.startd\fR(8) for further
 details.) Additionally, for the \fBinetd_start\fR method, you can set the
 \fBarg0\fR property.
 .sp
@@ -632,12 +632,12 @@ arg0='/path/to/service/daemon'
 
 .sp
 .LP
-In addition to the special method tokens mentioned in \fBsmf_method\fR(5),
+In addition to the special method tokens mentioned in \fBsmf_method\fR(7),
 \fBinetd\fR also supports the \fB:kill_process\fR token for \fBwait\fR-type
 services. This results in behavior identical to that if the \fB:kill\fR token
 were supplied, except that the \fBkill\fR signal is sent only to the parent
 process of the \fBwait\fR-type service's \fBstart\fR method, not to all members
-of its encompassing process contract (see \fBprocess\fR(4)).
+of its encompassing process contract (see \fBprocess\fR(5)).
 .SS "Configuring Protocols for Sockets-Based Services"
 .LP
 When configuring \fBinetd\fR for a sockets-based service, you have the choice,
@@ -683,7 +683,7 @@ IPv4 and IPv6.
 .SS "\fBinetd\fR Methods"
 .LP
 \fBinetd\fR provides the methods listed below for consumption by the master
-restarter, \fBsvc.startd\fR(1M).
+restarter, \fBsvc.startd\fR(8).
 .sp
 .ne 2
 .na
@@ -696,9 +696,9 @@ beginning to handle \fBsmf\fR requests for its managed services and network
 requests for those services that are in either the \fBonline\fR or
 \fBdegraded\fR state.
 .sp
-In addition, \fBinetd\fR also checks if the \fBinetd.conf\fR(4)-format
+In addition, \fBinetd\fR also checks if the \fBinetd.conf\fR(5)-format
 configuration file it is monitoring has changed since the last
-\fBinetconv\fR(1M) conversion was carried out. If it has, then a message
+\fBinetconv\fR(8) conversion was carried out. If it has, then a message
 telling the administrator to re-run \fBinetconv\fR to effect the changes made
 is logged in \fBsyslog\fR.
 .RE
@@ -724,7 +724,7 @@ methods in the process.
 .sp .6
 .RS 4n
 Results in a refresh being performed for each of its managed services and the
-\fBinetd.conf\fR(4) format configuration file being checked for change, as in
+\fBinetd.conf\fR(5) format configuration file being checked for change, as in
 the \fBstart\fR method. When a service is refreshed, its behavior depends on
 its current state:
 .RS +4
@@ -772,7 +772,7 @@ No options are supported.
 .sp .6
 .RS 4n
 Specifies an alternate location for the legacy service file
-(\fBinetd.conf\fR(4)).
+(\fBinetd.conf\fR(5)).
 .RE
 
 .sp
@@ -812,11 +812,11 @@ online         15:52:10 svc:/network/mysvc:stream6
 
 .sp
 .LP
-See \fBsvcs\fR(1) and \fBinetadm\fR(1M) for descriptions of those commands.
+See \fBsvcs\fR(1) and \fBinetadm\fR(8) for descriptions of those commands.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -831,17 +831,17 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBfmd\fR(1M), \fBinetadm\fR(1M), \fBinetconv\fR(1M), \fBsvcadm\fR(1M),
-\fBsvccfg\fR(1M), \fBsvcs\fR(1), \fBsvc.startd\fR(1M), \fBsyslog\fR(3C),
+\fBfmd\fR(8), \fBinetadm\fR(8), \fBinetconv\fR(8), \fBsvcadm\fR(8),
+\fBsvccfg\fR(8), \fBsvcs\fR(1), \fBsvc.startd\fR(8), \fBsyslog\fR(3C),
 \fBgetnetconfigent\fR(3NSL), \fBgetrpcbyname\fR(3NSL),
-\fBgetservbyname\fR(3SOCKET), \fBinetd.conf\fR(4), \fBprocess\fR(4),
-\fBsyslog.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5), \fBsmf_method\fR(5)
+\fBgetservbyname\fR(3SOCKET), \fBinetd.conf\fR(5), \fBprocess\fR(5),
+\fBsyslog.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7), \fBsmf_method\fR(7)
 .SH NOTES
 .LP
 The \fBinetd\fR daemon performs the same function as, but is implemented
 significantly differently from, the daemon of the same name in Solaris 9 and
 prior Solaris operating system releases. In the current Solaris release,
-\fBinetd\fR is part of the Service Management Facility (see \fBsmf\fR(5)) and
+\fBinetd\fR is part of the Service Management Facility (see \fBsmf\fR(7)) and
 will run only within that facility.
 .sp
 .LP

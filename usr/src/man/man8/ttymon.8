@@ -27,19 +27,19 @@ ttymon \- port monitor for terminal ports
 ports, to set terminal modes, baud rates, and line disciplines for the ports,
 and to connect users or applications to services associated with the ports.
 Normally, \fBttymon\fR is configured to run under the Service Access
-Controller, \fBsac\fR(1M), as part of the Service Access Facility (SAF). It is
-configured using the \fBsacadm\fR(1M) command. Each instance of \fBttymon\fR
+Controller, \fBsac\fR(8), as part of the Service Access Facility (SAF). It is
+configured using the \fBsacadm\fR(8) command. Each instance of \fBttymon\fR
 can monitor multiple ports. The ports monitored by an instance of \fBttymon\fR
 are specified in the port monitor's administrative file. The administrative
-file is configured using the \fBpmadm\fR(1M) and \fBttyadm\fR(1M) commands.
+file is configured using the \fBpmadm\fR(8) and \fBttyadm\fR(8) commands.
 When an instance of \fBttymon\fR is invoked by the \fBsac\fR command, it starts
 to monitor its ports. For each port, \fBttymon\fR first initializes the line
 disciplines, if they are specified, and the speed and terminal settings. For
 ports with entries in \fB/etc/logindevperm\fR, device owner, group and
-permissions are set. (See \fBlogindevperm\fR(4).) The values used for
+permissions are set. (See \fBlogindevperm\fR(5).) The values used for
 initialization are taken from the appropriate entry in the TTY settings file.
-This file is maintained by the \fBsttydefs\fR(1M) command. Default line
-disciplines on ports are usually set up by the \fBautopush\fR(1M) command of
+This file is maintained by the \fBsttydefs\fR(8) command. Default line
+disciplines on ports are usually set up by the \fBautopush\fR(8) command of
 the Autopush Facility.
 .sp
 .LP
@@ -48,7 +48,7 @@ indicates that the speed is inappropriate by pressing the BREAK key,
 \fBttymon\fR tries the next speed and writes the prompt again. When valid input
 is received, \fBttymon\fR interprets the per-service configuration file for the
 port, if one exists, creates a \fButmpx\fR entry if required (see
-\fButmpx\fR(4)), establishes the service environment, and then invokes the
+\fButmpx\fR(5)), establishes the service environment, and then invokes the
 service associated with the port. Valid input consists of a string of at least
 one non-newline character, terminated by a carriage return. After the service
 terminates, \fBttymon\fR cleans up the \fButmpx\fR entry, if one exists, and
@@ -63,7 +63,7 @@ baud rates that can be determined by \fIautobaud\fR are \fB110\fR, \fB1200\fR,
 .sp
 .LP
 If a port is configured as a bidirectional port, \fBttymon\fR will allow users
-to connect to a service, and, if the port is free, will allow \fBuucico\fR(1M),
+to connect to a service, and, if the port is free, will allow \fBuucico\fR(8),
 \fBcu\fR(1C), or \fBct\fR(1C) to use it for dialing out. If a port is
 bidirectional, \fBttymon\fR will wait to read a character before it prints a
 prompt.
@@ -100,12 +100,12 @@ determining if a prompt was actually issued by \fBttymon\fR and, if so, what
 that prompt actually was.
 .sp
 .LP
-See \fBttyadm\fR(1M) for options that can be set for ports monitored by
+See \fBttyadm\fR(8) for options that can be set for ports monitored by
 \fBttymon\fR under the Service Access Controller.
 .SS "System Console Invocation"
 .sp
 .LP
-The invocation of ttymon on the system console is managed under \fBsmf\fR(5) by
+The invocation of ttymon on the system console is managed under \fBsmf\fR(7) by
 the service \fBsvc:/system/console-login\fR. It provides a number of properties
 within the property group \fBttymon\fR to control the invocation, as follows:
 .sp
@@ -266,7 +266,7 @@ the system console \fBttymon\fR invocation:
 .LP
 If any of the \fBLC_*\fR variables ( \fBLC_CTYPE\fR, \fBLC_MESSAGES\fR,
 \fBLC_TIME\fR, \fBLC_COLLATE\fR, \fBLC_NUMERIC\fR, and \fBLC_MONETARY\fR ) (see
-\fBenviron\fR(5)) are not set in the environment, the operational behavior of
+\fBenviron\fR(7)) are not set in the environment, the operational behavior of
 \fBttymon\fR for each corresponding locale category is determined by the value
 of the \fBLANG\fR environment variable. If \fBLC_ALL\fR is set, its contents
 are used to override both the \fBLANG\fR and the other \fBLC_*\fR variables. If
@@ -302,13 +302,13 @@ The command-line syntax is Stable. The SMF properties are Evolving.
 .SH SEE ALSO
 .sp
 .LP
-\fBct\fR(1C), \fBcu\fR(1C), \fBautopush\fR(1M), \fBpmadm\fR(1M), \fBsac\fR(1M),
-\fBsacadm\fR(1M), \fBsttydefs\fR(1M), \fBttyadm\fR(1M), \fBuucico\fR(1M),
-\fBpam\fR(3PAM), \fBlogindevperm\fR(4), \fBpam.conf\fR(4), \fButmpx\fR(4),
-\fBattributes\fR(5), \fBenviron\fR(5), \fBpam_authtok_check\fR(5),
-\fBpam_authtok_get\fR(5), \fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5),
-\fBpam_passwd_auth\fR(5), \fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5),
-\fBpam_unix_session\fR(5), \fBsmf\fR(5)
+\fBct\fR(1C), \fBcu\fR(1C), \fBautopush\fR(8), \fBpmadm\fR(8), \fBsac\fR(8),
+\fBsacadm\fR(8), \fBsttydefs\fR(8), \fBttyadm\fR(8), \fBuucico\fR(8),
+\fBpam\fR(3PAM), \fBlogindevperm\fR(5), \fBpam.conf\fR(5), \fButmpx\fR(5),
+\fBattributes\fR(7), \fBenviron\fR(7), \fBpam_authtok_check\fR(7),
+\fBpam_authtok_get\fR(7), \fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7),
+\fBpam_passwd_auth\fR(7), \fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7),
+\fBpam_unix_session\fR(7), \fBsmf\fR(7)
 .sp
 .LP
 \fI\fR
@@ -320,8 +320,8 @@ If a port is monitored by more than one \fBttymon\fR, it is possible for the
 input.
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported. Similar functionality is
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).

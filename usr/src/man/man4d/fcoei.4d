@@ -20,7 +20,7 @@ services, common transport frames and initiator mode FCP frames.
 .sp
 .LP
 The \fBfcoei\fR driver interfaces with the Sun Fibre Channel port driver,
-\fBfp\fR(7D), and the FCoE transport driver, \fBfcoe\fR(7D).
+\fBfp\fR(4D), and the FCoE transport driver, \fBfcoe\fR(4D).
 .SH FILES
 .ne 2
 .na
@@ -40,7 +40,7 @@ Device driver (SPARC)
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -54,8 +54,8 @@ Architecture	SPARC, x86
 .TE
 
 .SH SEE ALSO
-\fBdriver.conf\fR(4), \fBattributes\fR(5), \fBfcoe\fR(7D), \fBfcoet\fR(7D),
-\fBfp\fR(7D)
+\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBfcoe\fR(4D), \fBfcoet\fR(4D),
+\fBfp\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

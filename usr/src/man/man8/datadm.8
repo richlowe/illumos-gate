@@ -14,7 +14,7 @@ datadm \- maintain DAT static registry file
 
 .SH DESCRIPTION
 The \fBdatadm\fR utility maintains the DAT static registry file,
-\fBdat.conf\fR(4).
+\fBdat.conf\fR(5).
 .sp
 .LP
 This administrative configuration program allows uDAPL service providers to add
@@ -34,7 +34,7 @@ The following options are supported:
 \fB\fB-a\fR \fBservice_provider.conf\fR\fR
 .ad
 .RS 28n
-Enumerate each device entry in the \fBservice_provider.conf\fR(4) file into a
+Enumerate each device entry in the \fBservice_provider.conf\fR(5) file into a
 list of interface adapters, that is, interfaces to external network that are
 available to uDAPL consumers.
 .RE
@@ -46,7 +46,7 @@ available to uDAPL consumers.
 .ad
 .RS 28n
 Remove the list of interface adapters that corresponds to the device entry in
-the \fBservice_provider.conf\fR(4) file.
+the \fBservice_provider.conf\fR(5) file.
 .RE
 
 .sp
@@ -74,13 +74,13 @@ Display the DAT static registry file, \fBdat.conf\fR.
 .sp
 .LP
 The following example enumerates a device entry in the
-\fBservice_provider.conf\fR(4) file into interface adapters in the
-\fBdat.conf\fR(4) file.
+\fBservice_provider.conf\fR(5) file into interface adapters in the
+\fBdat.conf\fR(5) file.
 
 .sp
 .LP
 Assume that \fBSUNW\fR has a service provider library that supports the device
-\fBtavor\fR. It has a \fBservice_provider.conf\fR(4) file installed in the
+\fBtavor\fR. It has a \fBservice_provider.conf\fR(5) file installed in the
 directory \fB/usr/share/dat/SUNWudaplt.conf\fR with a single entry as follows:
 
 .sp
@@ -177,7 +177,7 @@ DAT static registry file
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -191,5 +191,5 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBlibdat\fR(3LIB), \fBdat.conf\fR(4),
-\fBservice_provider.conf\fR(4), \fBattributes\fR(5)
+\fBlibdat\fR(3LIB), \fBdat.conf\fR(5),
+\fBservice_provider.conf\fR(5), \fBattributes\fR(7)

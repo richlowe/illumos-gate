@@ -22,7 +22,7 @@ superblock. This helps increase the security of file systems exported by
 .sp
 .LP
 \fBfsirand\fR must be used only on an unmounted file system that has been
-checked with \fBfsck\fR(1M) The only exception is that it can be used on the
+checked with \fBfsck\fR(8) The only exception is that it can be used on the
 root file system in single-user mode, if the system is immediately re-booted
 afterwards.
 .SH OPTIONS
@@ -39,9 +39,9 @@ generation numbers.
 .SH USAGE
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBfsirand\fR
+See \fBlargefile\fR(7) for the description of the behavior of \fBfsirand\fR
 when encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH SEE ALSO
 .sp
 .LP
-\fBfsck\fR(1M), \fBattributes\fR(5), \fBlargefile\fR(5)
+\fBfsck\fR(8), \fBattributes\fR(7), \fBlargefile\fR(7)

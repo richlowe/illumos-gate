@@ -40,7 +40,7 @@ The port number to connect.
 .sp
 .LP
 The \fBcldap_open()\fR function is called to prepare for connectionless LDAP
-communication (over \fBudp\fR(7P)). It allocates an LDAP structure which is
+communication (over \fBudp\fR(4P)). It allocates an LDAP structure which is
 passed to future search requests.
 .sp
 .LP
@@ -60,7 +60,7 @@ will be set appropriately.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -76,4 +76,4 @@ Interface Stability	Evolving
 .sp
 .LP
 \fBldap\fR(3LDAP) \fBcldap_search_s\fR(3LDAP), \fBcldap_setretryinfo\fR(3LDAP),
-\fBcldap_close\fR(3LDAP), \fBattributes\fR(5), \fBudp\fR(7P)
+\fBcldap_close\fR(3LDAP), \fBattributes\fR(7), \fBudp\fR(4P)

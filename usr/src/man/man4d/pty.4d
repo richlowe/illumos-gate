@@ -14,16 +14,16 @@ as a \fIpseudo-terminal\fR. The two devices comprising a pseudo-terminal are
 known as a \fIcontroller\fR and a \fIslave\fR. The slave device distinguishes
 between the \fBB0\fR baud rate and other baud rates specified in the
 \fBc_cflag\fR word of the \fBtermios\fR structure, and the \fBCLOCAL\fR flag in
-that word. It does not support any of the other \fBtermio\fR(7I) device control
+that word. It does not support any of the other \fBtermio\fR(4I) device control
 functions specified by flags in the \fBc_cflag\fR word of the \fBtermios\fR
 structure and by the \fB\fR\fBIGNBRK\fR\fB, \fR \fB\fR\fBIGNPAR\fR\fB, \fR
 \fB\fR\fBPARMRK\fR\fB, \fR or \fBINPCK\fR flags in the \fBc_iflag\fR word of
 the \fBtermios\fR structure, as these functions apply only to asynchronous
-serial ports.  All other \fBtermio\fR(7I) functions must be performed by
+serial ports.  All other \fBtermio\fR(4I) functions must be performed by
 \fBSTREAMS\fR modules pushed atop the driver; when a slave device is opened,
-the \fBldterm\fR(7M) and \fBttcompat\fR(7M) \fBSTREAMS\fR modules are
+the \fBldterm\fR(4M) and \fBttcompat\fR(4M) \fBSTREAMS\fR modules are
 automatically pushed on top of the stream, providing the standard
-\fBtermio\fR(7I) interface.
+\fBtermio\fR(4I) interface.
 .sp
 .LP
 Instead of having a hardware interface and associated hardware that supports
@@ -237,8 +237,8 @@ pseudo-terminal slave devices
 .SH SEE ALSO
 .sp
 .LP
-\fBrlogin\fR(1), \fBrlogind\fR(1M), \fBldterm\fR(7M), \fBtermio\fR(7I),
-\fBttcompat\fR(7M),
+\fBrlogin\fR(1), \fBrlogind\fR(8), \fBldterm\fR(4M), \fBtermio\fR(4I),
+\fBttcompat\fR(4M),
 .SH NOTES
 .sp
 .LP

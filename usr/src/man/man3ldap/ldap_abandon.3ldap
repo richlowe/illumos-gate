@@ -38,7 +38,7 @@ returned from a future call to \fBldap_result\fR(3LDAP).
 setting \fIld_errno\fR appropriately. See \fBldap_error\fR(3LDAP) for details.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -53,4 +53,4 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .LP
 \fBldap\fR(3LDAP), \fBldap_result\fR(3LDAP), \fBldap_error\fR(3LDAP),
-\fBattributes\fR(5)
+\fBattributes\fR(7)

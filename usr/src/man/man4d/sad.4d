@@ -52,7 +52,7 @@ depends upon the command, but it is generally an integer or a pointer to a
 .SH COMMAND FUNCTIONS
 .sp
 .LP
-The autopush facility (see  \fBautopush\fR(1M)) allows one to configure a list
+The autopush facility (see  \fBautopush\fR(8)) allows one to configure a list
 of modules to be automatically pushed on a stream when a driver is  first
 opened. Autopush is controlled by the following commands:
 .sp

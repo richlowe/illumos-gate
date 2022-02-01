@@ -63,7 +63,7 @@ state and help improve the quality of future generated random numbers.
 .LP
 \fB/dev/random\fR collects entropy from providers that are registered with the
 kernel-level cryptographic framework and implement random number generation
-routines. The \fBcryptoadm\fR(1M) utility allows an administrator to configure
+routines. The \fBcryptoadm\fR(8) utility allows an administrator to configure
 which providers will be used with \fB/dev/random\fR.
 .SH ERRORS
 .sp
@@ -117,7 +117,7 @@ is available.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -132,14 +132,14 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBcryptoadm\fR(1M), \fBopen\fR(2), \fBpoll\fR(2), \fBattributes\fR(5)
+\fBcryptoadm\fR(8), \fBopen\fR(2), \fBpoll\fR(2), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
 \fB/dev/random\fR can be configured to use only the hardware-based providers
 registered with the kernel-level cryptographic framework by disabling the
-software-based provider using \fBcryptoadm\fR(1M). You can also use
-\fBcryptoadm\fR(1M) to obtain the name of the software-based provider.
+software-based provider using \fBcryptoadm\fR(8). You can also use
+\fBcryptoadm\fR(8) to obtain the name of the software-based provider.
 .sp
 .LP
 Because no entropy is available, disabling all randomness providers causes

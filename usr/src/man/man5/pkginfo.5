@@ -33,7 +33,7 @@ parameters are mandatory. Other parameters are optional.
 .LP
 \fBpkginfo\fR provides optional parameters and an environment variable in
 support of the zones (multiple Solaris environments) feature. See
-\fBzones\fR(5).
+\fBzones\fR(7).
 .sp
 .LP
 The following parameters are mandatory:
@@ -228,7 +228,7 @@ A list of allowable run states for package installation (for example, "\fBS s
 environment supports the run levels \fBs\fR, \fBS\fR, \fB0\fR, \fB1\fR,
 \fB2\fR, \fB3\fR, \fB5\fR, and \fB6\fR. Applicable run levels for this
 parameter are \fBs\fR, \fBS\fR, \fB1\fR, \fB2\fR, and \fB3\fR. See
-\fBinit\fR(1M) for details.
+\fBinit\fR(8) for details.
 .RE
 
 .sp
@@ -266,7 +266,7 @@ field are placed on the medium using the standard ordering procedures.
 .ad
 .sp .6
 .RS 4n
-Production stamp used to mark the \fBpkgmap\fR(4) file on the output volumes.
+Production stamp used to mark the \fBpkgmap\fR(5) file on the output volumes.
 Provides a means for distinguishing between production copies of a version if
 more than one is in use at a time. If \fBPSTAMP\fR is not defined, the default
 is used. The default consists of the UNIX system machine name followed by the
@@ -285,7 +285,7 @@ allows run states of \fBS\fR, \fBs\fR or \fB1\fR). The Solaris operating
 environment supports the run levels \fBs\fR, \fBS\fR, \fB0\fR, \fB1\fR,
 \fB2\fR, \fB3\fR, \fB5\fR, and \fB6\fR. Applicable run levels for this
 parameter are \fBs\fR, \fBS\fR, \fB1\fR, \fB2\fR, and \fB3\fR See
-\fBinit\fR(1M) for details.
+\fBinit\fR(8) for details.
 .RE
 
 .sp
@@ -679,7 +679,7 @@ RSTATES="S 2"
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -729,7 +729,7 @@ SUNW_PKG_DIR	Evolving
 .SH SEE ALSO
 .LP
 \fBisalist\fR(1), \fBlimit\fR(1), \fBpkgmk\fR(1), \fBuname\fR(1),
-\fBinit\fR(1M), \fBpkgmap\fR(4), \fBattributes\fR(5), \fBzones\fR(5)
+\fBinit\fR(8), \fBpkgmap\fR(5), \fBattributes\fR(7), \fBzones\fR(7)
 .sp
 .LP
 \fIApplication Packaging Developer\&'s Guide\fR

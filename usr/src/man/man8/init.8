@@ -23,16 +23,16 @@ init, telinit \- process control initialization
 .LP
 \fBinit\fR is the default primordial user process. (Options given to the kernel
 during boot may result in the invocation of an alternative primordial user
-process, as described on \fBkernel\fR(1M)). \fBinit\fR initiates the core
-components of the service management facility, \fBsvc.configd\fR(1M) and
-\fBsvc.startd\fR(1M), and restarts these components if they fail. For backwards
+process, as described on \fBkernel\fR(8)). \fBinit\fR initiates the core
+components of the service management facility, \fBsvc.configd\fR(8) and
+\fBsvc.startd\fR(8), and restarts these components if they fail. For backwards
 compatibility, \fBinit\fR also starts and restarts general processes according
 to \fB/etc/inittab\fR, as desribed below.
 .sp
 .LP
 The run levels and system booting descriptions given below are provided for
 compatibility purposes only, and otherwise made obsolete by the service
-management facility, \fBsmf\fR(5).
+management facility, \fBsmf\fR(7).
 .SS "init Failure"
 .sp
 .LP
@@ -55,7 +55,7 @@ First, it reads \fB/etc/default/init\fR to set environment variables. This is
 typically where \fBTZ\fR (time zone) and locale-related environments such as
 \fBLANG\fR or \fBLC_CTYPE\fR get set. (See the FILES section at the end of this
 page.) \fBinit\fR then looks in \fB/etc/inittab\fR for the \fBinitdefault\fR
-entry (see \fBinittab\fR(4)). If the \fBinitdefault\fR entry:
+entry (see \fBinittab\fR(5)). If the \fBinitdefault\fR entry:
 .sp
 .ne 2
 .na
@@ -65,7 +65,7 @@ entry (see \fBinittab\fR(4)). If the \fBinitdefault\fR entry:
 .RS 4n
 \fBinit\fR usually uses the run level specified in that entry as the initial
 run level to enter only if the options/milestone property has not been
-specified for \fBsvc.startd\fR(1M).
+specified for \fBsvc.startd\fR(8).
 .RE
 
 .sp
@@ -75,8 +75,8 @@ specified for \fBsvc.startd\fR(1M).
 .ad
 .sp .6
 .RS 4n
-The service management facility, \fBsmf\fR(5), examines its configuration
-specified in \fBsvc.startd\fR(1M), and enters the milestone specified by the
+The service management facility, \fBsmf\fR(7), examines its configuration
+specified in \fBsvc.startd\fR(8), and enters the milestone specified by the
 options/milestone property.
 .RE
 
@@ -93,7 +93,7 @@ run levels:
 .RS 4n
 \fBinit\fR goes to the single-user state. In this state, the system console
 device (\fB/dev/console\fR) is opened for reading and writing and the command
-\fB/sbin/su\fR, (see \fBsu\fR(1M)), is invoked. Use either \fBinit\fR or
+\fB/sbin/su\fR, (see \fBsu\fR(8)), is invoked. Use either \fBinit\fR or
 \fBtelinit\fR to change the run level of the system. Note that if the shell is
 terminated (using an end-of-file), \fBinit\fR only re-initializes to the
 single-user state if \fB/etc/inittab\fR does not exist.
@@ -115,7 +115,7 @@ single-user state if \fB/etc/inittab\fR does not exist.
 .LP
 If this is the first time since power up that \fBinit\fR has entered a run
 level other than single-user state, \fBinit\fR first scans \fB/etc/inittab\fR
-for \fBboot\fR and \fBbootwait\fR entries (see \fBinittab\fR(4)). These entries
+for \fBboot\fR and \fBbootwait\fR entries (see \fBinittab\fR(5)). These entries
 are performed before any other processing of \fB/etc/inittab\fR takes place,
 providing that the run level entered matches that of the entry. In this way any
 special initialization of the operating system, such as mounting file systems,
@@ -151,8 +151,8 @@ When a run level change request is made, \fBinit\fR or a designate sends the
 warning signal (\fBSIGTERM\fR) to all processes that are undefined in the
 target run level. A minimum interval of five seconds is observed before
 \fBinit\fR or its designate forcibly terminates these processes by sending a
-kill signal (\fBSIGKILL\fR). Additionally, init informs \fBsvc.startd\fR(1M)
-that the run level is changing. \fBsvc.startd\fR(1M) then restricts the system
+kill signal (\fBSIGKILL\fR). Additionally, init informs \fBsvc.startd\fR(8)
+that the run level is changing. \fBsvc.startd\fR(8) then restricts the system
 to the set of services which the milestone corresponding to the run-level
 change depends on.
 .sp
@@ -221,7 +221,7 @@ mounted. Only a small set of essential kernel processes are left running. This
 mode is for administrative tasks such as installing optional utility packages.
 All files are accessible and no users are logged in on the system.
 .sp
-This request corresponds to a request for \fBsmf\fR(5) to restrict the system
+This request corresponds to a request for \fBsmf\fR(7) to restrict the system
 milestone to svc:/milestone/single-user:default.
 .RE
 
@@ -236,7 +236,7 @@ Put the system in multi-user mode. All multi-user environment terminal
 processes and daemons are spawned. This state is commonly referred to as the
 multi-user state.
 .sp
-This request corresponds to a request for \fBsmf\fR(5) to restrict the system
+This request corresponds to a request for \fBsmf\fR(7) to restrict the system
 milestone to svc:/milestone/multi-user:default.
 .RE
 
@@ -249,7 +249,7 @@ milestone to svc:/milestone/multi-user:default.
 .RS 4n
 Extend multi-user mode by making local resources available over the network.
 .sp
-This request corresponds to a request for \fBsmf\fR(5) to restrict the system
+This request corresponds to a request for \fBsmf\fR(7) to restrict the system
 milestone to svc:/milestone/multi-user-server:default.
 .RE
 
@@ -334,7 +334,7 @@ killed. This last condition insures that all port monitors started by the
 \fBSAC\fR are killed and all services started by these port monitors, including
 \fBttymon\fR login services, are killed.
 .sp
-This request corresponds to a request for \fBsmf\fR(5) to restrict the system
+This request corresponds to a request for \fBsmf\fR(7) to restrict the system
 milestone to svc:/milestone/single-user:default.
 .RE
 
@@ -369,7 +369,7 @@ variables are:
 Either specifies the timezone information (see \fBctime\fR(3C)) or the name of
 a timezone information file \fB/usr/share/lib/zoneinfo\fR.
 .sp
-Refer to the \fBTIMEZONE\fR(4) man page before changing this setting.
+Refer to the \fBTIMEZONE\fR(5) man page before changing this setting.
 .RE
 
 .sp
@@ -523,12 +523,12 @@ A named pipe used for internal communication.
 .SH SEE ALSO
 .sp
 .LP
-\fBlogin\fR(1), \fBsh\fR(1), \fBstty\fR(1), \fBwho\fR(1), \fBkernel\fR(1M),
-\fBshutdown\fR(1M), \fBsu\fR(1M), \fBsvc.configd\fR(1M), \fBsvc.startd\fR(1M),
-\fBttymon\fR(1M), \fBioctl\fR(2), \fBkill\fR(2), \fBctime\fR(3C),
-\fBpam\fR(3PAM), \fBinit.d\fR(4), \fBinittab\fR(4), \fBpam.conf\fR(4),
-\fBTIMEZONE\fR(4), \fButmpx\fR(4), \fBattributes\fR(5),
-\fBpam_unix_session\fR(5), \fBsmf\fR(5), \fBtermio\fR(7I)
+\fBlogin\fR(1), \fBsh\fR(1), \fBstty\fR(1), \fBwho\fR(1), \fBkernel\fR(8),
+\fBshutdown\fR(8), \fBsu\fR(8), \fBsvc.configd\fR(8), \fBsvc.startd\fR(8),
+\fBttymon\fR(8), \fBioctl\fR(2), \fBkill\fR(2), \fBctime\fR(3C),
+\fBpam\fR(3PAM), \fBinit.d\fR(5), \fBinittab\fR(5), \fBpam.conf\fR(5),
+\fBTIMEZONE\fR(5), \fButmpx\fR(5), \fBattributes\fR(7),
+\fBpam_unix_session\fR(7), \fBsmf\fR(7), \fBtermio\fR(4I)
 .SH DIAGNOSTICS
 .sp
 .LP
@@ -563,7 +563,7 @@ file system is not accessible.
 .sp
 .LP
 When a system transitions down to the \fBS\fR or \fBs\fR state, the
-\fB/etc/nologin\fR file (see \fBnologin\fR(4)) is created. Upon subsequent
+\fB/etc/nologin\fR file (see \fBnologin\fR(5)) is created. Upon subsequent
 transition to run level 2, this file is removed.
 .sp
 .LP
@@ -571,5 +571,5 @@ transition to run level 2, this file is removed.
 communication.
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported. Similar functionality is
-provided by \fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported. Similar functionality is
+provided by \fBpam_unix_session\fR(7).

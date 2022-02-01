@@ -62,7 +62,7 @@ ikeadm [\fB-np\fR] token [login | logout] \fIPKCS#11_Token_Object\fR
 .LP
 The \fBikeadm\fR utility retrieves information from and manipulates the
 configuration of the Internet Key Exchange (\fBIKE\fR) protocol daemon,
-\fBin.iked\fR(1M).
+\fBin.iked\fR(8).
 .sp
 .LP
 \fBikeadm\fR supports a set of operations, which may be performed on one or
@@ -412,7 +412,7 @@ that is loaded. See .
 .sp .6
 .RS 4n
 Display default values used by the \fBin.iked\fR daemon. Some values can be
-overridden in the daemon configuration file (see \fBike.config\fR(4)); for these
+overridden in the daemon configuration file (see \fBike.config\fR(5)); for these
 values, the token name is displayed in the \fBget defaults\fR output. The
 output will reflect where a configuration token has changed the default.
 .sp
@@ -539,8 +539,8 @@ string assigned to the rule when it is created.
 .LP
 Formatting a rule or preshared key for the add command follows the format rules
 for the in.iked configuration files. Both are made up of a series of id-value
-pairs, contained in curly braces (\fB{\fR and \fB}\fR). See \fBike.config\fR(4)
-and \fBike.preshared\fR(4) for details on the formatting of rules and preshared
+pairs, contained in curly braces (\fB{\fR and \fB}\fR). See \fBike.config\fR(5)
+and \fBike.preshared\fR(5) for details on the formatting of rules and preshared
 keys.
 .SH SECURITY
 .LP
@@ -808,7 +808,7 @@ An error occurred. Writes an appropriate error message to standard error.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -823,8 +823,8 @@ Interface Stability	Not an Interface
 
 .SH SEE ALSO
 .LP
-\fBin.iked\fR(1M), \fBike.config\fR(4), \fBike.preshared\fR(4),
-\fBattributes\fR(5), \fBipsec\fR(7P)
+\fBin.iked\fR(8), \fBike.config\fR(5), \fBike.preshared\fR(5),
+\fBattributes\fR(7), \fBipsec\fR(4P)
 .sp
 .LP
 Schneier, Bruce, \fIApplied Cryptography: Protocols, Algorithms, and Source

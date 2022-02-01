@@ -19,13 +19,13 @@ sgen \- Generic SCSI device driver
 
 .SH DESCRIPTION
 .LP
-The \fBsgen\fR driver exports the \fBuscsi\fR(7I) interfaces to user processes.
+The \fBsgen\fR driver exports the \fBuscsi\fR(4I) interfaces to user processes.
 The \fBsgen\fR driver can be configured to bind to \fBSCSI\fR devices for which
 no system driver is available. Examples of such devices include \fBSCSI\fR
 scanners and \fBSCSI\fR processor devices.
 .SH SECURITY
 .LP
-Typically, drivers which export the \fBuscsi\fR(7I) interface unconditionally
+Typically, drivers which export the \fBuscsi\fR(4I) interface unconditionally
 require that the user present superuser credentials. The \fBsgen\fR driver does
 not, and relies on the filesystem permissions on its device special file to
 govern who may access that device. By default, access is restricted and device
@@ -53,7 +53,7 @@ desired, it is recommended that the devices be separated onto a dedicated
 .SH CONFIGURATION
 .LP
 The \fBsgen\fR driver is configurable via the \fBsgen.conf\fR file. In addition
-to standard \fBSCSI\fR device configuration directives (see \fBscsi\fR(4)),
+to standard \fBSCSI\fR device configuration directives (see \fBscsi\fR(5)),
 administrators can set several additional properties for the \fBsgen\fR driver.
 .sp
 .LP
@@ -63,7 +63,7 @@ system. To do so, it must be configured by the administrator using the
 .sp
 .LP
 As with other \fBSCSI\fR drivers, the \fBsgen.conf\fR configuration file
-enumerates the targets  \fBsgen\fR should use. See \fBscsi\fR(4) for more
+enumerates the targets  \fBsgen\fR should use. See \fBscsi\fR(5) for more
 details. For each target enumerated in the \fBsgen.conf\fR file,  the
 \fBsgen\fR driver sends a \fBSCSI INQUIRY\fR command to gather information
 about the device present at that target. The \fBinquiry-config-list\fR property
@@ -87,7 +87,7 @@ It is important for the administrator to ensure that devices claimed by the
 For example, if  the \fBsgen\fR driver is configured to bind to a direct access
 device, the standard \fBsd.conf\fR file will usually cause \fBsd\fR to claim
 the device as well. This can cause unpredictable results. In general, the
-\fBuscsi\fR(7I) interface exported by \fBsd\fR(7D) or \fBst\fR(7D) should be
+\fBuscsi\fR(4I) interface exported by \fBsd\fR(4D) or \fBst\fR(4D) should be
 used to gain access to direct access and sequential devices.
 .sp
 .LP
@@ -98,7 +98,7 @@ kernel resources. To use  the \fBsgen\fR driver effectively on desktop systems,
 simply uncomment all of the name="\fBsgen\fR" lines in \fBsgen.conf\fR file. On
 larger systems with many \fBSCSI\fR controllers, carefully edit the
 \fBsgen.conf\fR file so that \fBsgen\fR binds only where needed. Refer to
-\fBdriver.conf\fR(4) for further details.
+\fBdriver.conf\fR(5) for further details.
 .SH PROPERTIES
 .ne 2
 .na
@@ -322,7 +322,7 @@ for naming disks. For example, \fB/dev/dsk/c0t0d0s0\fR and
 
 .SH IOCTLS
 .LP
-The \fBsgen\fR driver exports the \fBuscsi\fR(7I) interface for each device it
+The \fBsgen\fR driver exports the \fBuscsi\fR(4I) interface for each device it
 manages. This allows a user process to talk directly to a \fBSCSI\fR device for
 which there is no other driver installed in the system. Additionally,  the
 \fBsgen\fR driver supports the following ioctls:
@@ -404,8 +404,8 @@ For large systems where boot times are a concern, it is recommended that the
 should examine.
 .SH SEE ALSO
 .LP
-\fBdriver.conf\fR(4), \fBscsi\fR(4), \fBsd\fR(7D), \fBst\fR(7D),
-\fBuscsi\fR(7I)
+\fBdriver.conf\fR(5), \fBscsi\fR(5), \fBsd\fR(4D), \fBst\fR(4D),
+\fBuscsi\fR(4I)
 .sp
 .LP
 \fIWriting Device Drivers\fR

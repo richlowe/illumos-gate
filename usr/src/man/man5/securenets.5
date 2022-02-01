@@ -41,13 +41,13 @@ indicating that the second field is a specific host to be allowed access.
 .RE
 .sp
 .LP
-Both \fBypserv\fR(1M) and \fBypxfrd\fR(1M) use the \fB/var/yp/securenets\fR
-file.  The file is read when the  \fBypserv\fR(1M) and \fBypxfrd\fR(1M) daemons
-begin. If \fB/var/yp/securenets\fR is present, \fBypserv\fR(1M) and
-\fBypxfrd\fR(1M) respond only to \fBIP\fR addresses in the range given. In
+Both \fBypserv\fR(8) and \fBypxfrd\fR(8) use the \fB/var/yp/securenets\fR
+file.  The file is read when the  \fBypserv\fR(8) and \fBypxfrd\fR(8) daemons
+begin. If \fB/var/yp/securenets\fR is present, \fBypserv\fR(8) and
+\fBypxfrd\fR(8) respond only to \fBIP\fR addresses in the range given. In
 order for a change in the \fB/var/yp/securenets\fR file to take effect, you
-must kill and restart any active daemons using \fBypstop\fR(1M) and
-\fBypstart\fR(1M).
+must kill and restart any active daemons using \fBypstop\fR(8) and
+\fBypstart\fR(8).
 .sp
 .LP
 An important thing to note for all the examples below is that the server must
@@ -166,7 +166,7 @@ Configuration file for \fBNIS\fR security.
 .RE
 
 .SH SEE ALSO
-\fBypserv\fR(1M), \fBypstart\fR(1M), \fBypstop\fR(1M), \fBypxfrd\fR(1M)
+\fBypserv\fR(8), \fBypstart\fR(8), \fBypstop\fR(8), \fBypxfrd\fR(8)
 .SH NOTES
 The Network Information Service (NIS) was formerly known as Sun Yellow Pages
 (YP).  The functionality of the two remains the same; only the name has

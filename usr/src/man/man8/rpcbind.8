@@ -44,7 +44,7 @@ for indirect calls. This is the \fBUDP\fR port on most systems.
 .sp
 .LP
 The \fBrpcbind\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -56,12 +56,12 @@ svc:/network/rpc/bind
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). \fBrpcbind\fR can
+requesting restart, can be performed using \fBsvcadm\fR(8). \fBrpcbind\fR can
 only be started by the superuser or someone in the Primary Administrator role.
 .sp
 .LP
 The configuration properties of this service can be modified with
-\fBsvccfg\fR(1M).
+\fBsvccfg\fR(8).
 .sp
 .LP
 The following SMF property is used to allow or disallow access to \fBrpcbind\fR
@@ -94,11 +94,11 @@ parameter is enabled, then all calls to \fBrpcbind\fR originating from
 non-local addresses are automatically wrapped by the TCP wrappers facility. The
 \fBsyslog\fR facility code daemon is used to log allowed connections (using the
 \fBinfo\fR severity level) and denied traffic (using the \fBwarning\fR severity
-level). See \fBsyslog.conf\fR(4) for a description of \fBsyslog\fR codes and
+level). See \fBsyslog.conf\fR(5) for a description of \fBsyslog\fR codes and
 severity levels. The stability level of the TCP wrappers facility and its
 configuration files is External. As the TCP wrappers facility is not controlled
 by Sun, intrarelease incompatibilities are not uncommon. See
-\fBattributes\fR(5).
+\fBattributes\fR(7).
 .RE
 
 .sp
@@ -228,7 +228,7 @@ purposes.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -246,9 +246,9 @@ Interface Stability	See below.
 TCP wrappers is External.
 .SH SEE ALSO
 .LP
-\fBsmf\fR(5), \fBrpcinfo\fR(1M), \fBsvcadm\fR(1M), \fBsvccfg\fR(1M),
-\fBrpcbind\fR(3NSL), \fBsyslog.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5),
-\fBhosts_access\fR(4)
+\fBsmf\fR(7), \fBrpcinfo\fR(8), \fBsvcadm\fR(8), \fBsvccfg\fR(8),
+\fBrpcbind\fR(3NSL), \fBsyslog.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7),
+\fBhosts_access\fR(5)
 .SH NOTES
 .LP
 Terminating \fBrpcbind\fR with \fBSIGKILL\fR prevents the warm-start files from

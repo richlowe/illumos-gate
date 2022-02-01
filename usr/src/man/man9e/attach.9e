@@ -131,7 +131,7 @@ Operation failed
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -145,7 +145,7 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcpr\fR(7), \fBpm\fR(7D), \fBpm\fR(9P), \fBpm-components\fR(9P),
+\fBcpr\fR(4), \fBpm\fR(4D), \fBpm\fR(9P), \fBpm-components\fR(9P),
 \fBdetach\fR(9E), \fBgetinfo\fR(9E), \fBidentify\fR(9E), \fBopen\fR(9E),
 \fBpower\fR(9E), \fBprobe\fR(9E), \fBddi_add_intr\fR(9F),
 \fBddi_create_minor_node\fR(9F), \fBddi_get_instance\fR(9F),

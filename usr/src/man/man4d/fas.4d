@@ -69,7 +69,7 @@ Create a file called \fB/kernel/drv/fas.conf\fR and add this line:
 .LP
 This disables tagged queuing, Fast \fBSCSI,\fR and Wide mode for all \fBfas\fR
 instances. The following example disables an option for one specific \fBfas\fR
-(refer to \fBdriver.conf\fR(4) for more details):
+(refer to \fBdriver.conf\fR(5) for more details):
 
 .sp
 .in +2
@@ -109,7 +109,7 @@ tree or following the link of the logical device name:
 
 .sp
 .LP
-Determine the register property values using the output from  \fBprtconf\fR(1M)
+Determine the register property values using the output from  \fBprtconf\fR(8)
 (with the \fB-v\fR option):
 
 .sp
@@ -231,7 +231,7 @@ Optional configuration file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -249,7 +249,7 @@ T}
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(1M), \fBdriver.conf\fR(4), \fBattributes\fR(5),
+\fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7),
 \fBscsi_abort\fR(9F), \fBscsi_hba_attach\fR(9F), \fBscsi_ifgetcap\fR(9F),
 \fBscsi_ifsetcap\fR(9F), \fBscsi_reset\fR(9F), \fBscsi_sync_pkt\fR(9F),
 \fBscsi_transport\fR(9F), \fBscsi_device\fR(9S), \fBscsi_extended_sense\fR(9S),
@@ -969,7 +969,7 @@ transfer speed (\fBtarget<n>-sync-speed\fR), whether wide bus is supported
 rate in KB/sec. The  \fBtarget<n>-TQ\fR and the  \fBtarget<n>-wide\fR property
 have value \fB1\fR to indicate that the corresponding capability is enabled, or
 \fB0\fR to indicate that  the capability is disabled for that target. Refer to
-\fBprtconf\fR(1M) (verbose option) for viewing the \fBfas\fR properties.
+\fBprtconf\fR(8) (verbose option) for viewing the \fBfas\fR properties.
 .sp
 .in +2
 .nf

@@ -122,7 +122,7 @@ If the \fBidmap\fR utility is invoked without a subcommand or option, it reads
 the subcommands from standard input. When standard input is a TTY, the
 \fBidmap\fR command prints the usage message and exits.
 .SS "Mapping Mechanisms"
-The \fBidmapd\fR(1M) daemon maps Windows user and group SIDs to UNIX UIDs and
+The \fBidmapd\fR(8) daemon maps Windows user and group SIDs to UNIX UIDs and
 GIDs as follows:
 .RS +4
 .TP
@@ -169,7 +169,7 @@ with the same name:
 
 .sp
 .LP
-If configured to use a directory service, \fBidmapd\fR(1M) will first try to
+If configured to use a directory service, \fBidmapd\fR(8) will first try to
 use the mapping information that is stored in user or group objects in the
 Active Directory (AD) and/or the native LDAP directory service. For example, an
 AD object for a given Windows user or group can be augmented to include the
@@ -178,14 +178,14 @@ LDAP object for a given Solaris user or group can be augmented to include the
 corresponding Windows user or group name.
 .sp
 .LP
-\fBidmapd\fR(1M) can be configured to use AD and/or native LDAP directory-based
+\fBidmapd\fR(8) can be configured to use AD and/or native LDAP directory-based
 name mappings by setting the appropriate service management facility (SMF)
 properties of the \fBidmap\fR service. See "Service Properties," below, for
 more details.
 .sp
 .LP
 If directory-based name mapping is not configured or if configured but not
-found, then \fBidmapd\fR(1M) will process locally stored name-based mapping
+found, then \fBidmapd\fR(8) will process locally stored name-based mapping
 rules.
 .sp
 .LP
@@ -353,10 +353,10 @@ is performed in the following order:
 \fB*\fR to \fIwindows-name\fR\fB@\fR\fIdomain\fR
 .RE
 .SS "Service Properties"
-The service properties determine the behavior of the \fBidmapd\fR(1M) daemon.
-These properties are stored in the SMF repository (see \fBsmf\fR(5)) under
+The service properties determine the behavior of the \fBidmapd\fR(8) daemon.
+These properties are stored in the SMF repository (see \fBsmf\fR(7)) under
 property group \fBconfig\fR. They can be accessed and modified using
-\fBsvccfg\fR(1M), which requires \fBsolaris.smf.value.idmap\fR authorization.
+\fBsvccfg\fR(8), which requires \fBsolaris.smf.value.idmap\fR authorization.
 The service properties for the \fBidmap\fR service are:
 .sp
 .ne 2
@@ -414,7 +414,7 @@ is used.
 .sp
 .LP
 Changes to service properties do not affect a running \fBidmap\fR service. The
-service must be refreshed (with \fBsvcadm\fR(1M)) for the changes to take
+service must be refreshed (with \fBsvcadm\fR(8)) for the changes to take
 effect.
 .SH OPERANDS
 The \fBidmap\fR command uses the following operands:
@@ -866,7 +866,7 @@ The following options are supported:
 .sp .6
 .RS 4n
 Specify authentication method when modifying native LDAP entry. See
-\fBldapaddent\fR(1M) for details. Default value is \fBsasl/GSSAPI\fR.
+\fBldapaddent\fR(8) for details. Default value is \fBsasl/GSSAPI\fR.
 .RE
 
 .sp
@@ -1244,7 +1244,7 @@ An error occurred. A diagnostic message is written to standard error.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1258,11 +1258,11 @@ Interface Stability	Uncommitted
 .TE
 
 .SH SEE ALSO
-\fBsvcs\fR(1), \fBidmapd\fR(1M), \fBldapaddent\fR(1M), \fBsvcadm\fR(1M),
-\fBsvccfg\fR(1M), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBidmapd\fR(8), \fBldapaddent\fR(8), \fBsvcadm\fR(8),
+\fBsvccfg\fR(8), \fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 The \fBidmapd\fR service is managed by the service management facility,
-\fBsmf\fR(5). The service identifier for the \fBidmapd\fR service is
+\fBsmf\fR(7). The service identifier for the \fBidmapd\fR service is
 \fBsvc:/system/idmap\fR.
 .sp
 .LP

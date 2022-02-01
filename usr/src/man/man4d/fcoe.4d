@@ -14,7 +14,7 @@ encapsulate the raw Fibre Channel frame.
 .sp
 .LP
 The \fBfcoe\fR driver interfaces with FCoE target mode device driver,
-\fBfcoet\fR(7D).
+\fBfcoet\fR(4D).
 .SH FILES
 .ne 2
 .na
@@ -34,7 +34,7 @@ Device driver (SPARC)
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -48,7 +48,7 @@ Architecture	SPARC, x86
 .TE
 
 .SH SEE ALSO
-\fBdriver.conf\fR(4), \fBattributes\fR(5), \fBfcoet\fR(7D)
+\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBfcoet\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

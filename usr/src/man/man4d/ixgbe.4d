@@ -16,7 +16,7 @@ ixgbe \- Intel 10Gb PCI Express NIC Driver
 .SH DESCRIPTION
 The \fBixgbe\fR 10 Gigabit Ethernet driver is a multi-threaded, loadable,
 clonable, GLD-based STREAMS driver supporting the Data Link Provider Interface,
-\fBdlpi\fR(7P), on Intel 10-Gigabit PCI Express Ethernet controllers.
+\fBdlpi\fR(4P), on Intel 10-Gigabit PCI Express Ethernet controllers.
 .sp
 .LP
 The \fBixgbe\fR driver functions include controller initialization, frame
@@ -57,9 +57,9 @@ The cloning character-special device, \fB/dev/ixgbe\fR, is used to access all
 Intel 10-Gigabit PCI Express Ethernet devices installed within the system.
 .sp
 .LP
-The \fBixgbe\fR driver is managed by the \fBdladm\fR(1M) command line utility,
+The \fBixgbe\fR driver is managed by the \fBdladm\fR(8) command line utility,
 which allows VLANs to be defined on top of \fBixgbe\fR instances and for
-\fBixgbe\fR instances to be aggregated. See \fBdladm\fR(1M) for more details.
+\fBixgbe\fR instances to be aggregated. See \fBdladm\fR(8) for more details.
 .sp
 .LP
 You must send an explicit DL_ATTACH_REQ message to associate the opened stream
@@ -161,7 +161,7 @@ Driver configuration file
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -177,8 +177,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBdladm\fR(1M), \fBnetstat\fR(1M), \fBdriver.conf\fR(4), \fBattributes\fR(5),
-\fBstreamio\fR(7I), \fBdlpi\fR(7P)
+\fBdladm\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7),
+\fBstreamio\fR(4I), \fBdlpi\fR(4P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

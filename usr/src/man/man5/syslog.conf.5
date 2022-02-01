@@ -14,7 +14,7 @@ syslog.conf \- configuration file for syslogd system log daemon
 .SH DESCRIPTION
 .LP
 The file \fB/etc/syslog.conf\fR contains information used by the system log
-daemon, \fBsyslogd\fR(1M), to forward a system message to appropriate log files
+daemon, \fBsyslogd\fR(8), to forward a system message to appropriate log files
 and/or users. \fBsyslogd\fR preprocesses this file through \fBm4\fR(1) to
 obtain the correct information for certain log files, defining \fBLOGHOST\fR if
 the address of "loghost" is the same as one of the addresses of the host that
@@ -93,7 +93,7 @@ Various system daemons.
 \fB\fBauth\fR\fR
 .ad
 .RS 12n
-The authorization system: \fBlogin\fR(1), \fBsu\fR(1M), \fBgetty\fR(1M), among
+The authorization system: \fBlogin\fR(1), \fBsu\fR(8), \fBgetty\fR(8), among
 others.
 .RE
 
@@ -388,7 +388,7 @@ l l .
 
 .sp
 .LP
-\fBsyslogd\fR(1M) logs all mail system messages except \fBdebug\fR messages and
+\fBsyslogd\fR(8) logs all mail system messages except \fBdebug\fR messages and
 all \fBnotice\fR (or higher) messages into a file named \fB/var/log/notice\fR.
 It logs all critical messages into \fB/var/log/critical\fR, and all kernel
 messages and 20-minute marks onto the system console.
@@ -403,7 +403,7 @@ logged in the file \fB/var/log/auth\fR.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -419,6 +419,6 @@ Interface Stability	Stable
 .SH SEE ALSO
 .LP
 \fBat\fR(1), \fBcrontab\fR(1), \fBlogger\fR(1), \fBlogin\fR(1), \fBlp\fR(1),
-\fBlpc\fR(1B), \fBlpr\fR(1B), \fBm4\fR(1), \fBcron\fR(1M), \fBgetty\fR(1M),
-\fBin.ftpd\fR(1M), \fBsu\fR(1M), \fBsyslogd\fR(1M), \fBsyslog\fR(3C),
-\fBhosts\fR(4), \fBattributes\fR(5)
+\fBlpc\fR(1B), \fBlpr\fR(1B), \fBm4\fR(1), \fBcron\fR(8), \fBgetty\fR(8),
+\fBin.ftpd\fR(8), \fBsu\fR(8), \fBsyslogd\fR(8), \fBsyslog\fR(3C),
+\fBhosts\fR(5), \fBattributes\fR(7)

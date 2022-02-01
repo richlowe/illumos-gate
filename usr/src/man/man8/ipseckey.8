@@ -53,8 +53,8 @@ ipseckey \- manually manipulate an IPsec Security Association Database (SADB)
 
 .SH DESCRIPTION
 The \fBipseckey\fR command is used to manually manipulate the security
-association databases of the network security services, \fBipsecah\fR(7P) and
-\fBipsecesp\fR(7P). You can use the \fBipseckey\fR command to set up security
+association databases of the network security services, \fBipsecah\fR(4P) and
+\fBipsecesp\fR(4P). You can use the \fBipseckey\fR command to set up security
 associations between communicating parties when automated key management is not
 available.
 .sp
@@ -62,7 +62,7 @@ available.
 While the \fBipseckey\fR utility has only a limited number of general options,
 it supports a rich command language. The user may specify requests to be
 delivered by means of a programmatic interface specific for manual keying. See
-\fBpf_key\fR(7P). When \fBipseckey\fR is invoked with no arguments, it will
+\fBpf_key\fR(4P). When \fBipseckey\fR is invoked with no arguments, it will
 enter an interactive mode which prints a prompt to the standard output and
 accepts commands from the standard input until the end-of-file is reached. Some
 commands require an explicit security association ("\fBSA\fR") type, while
@@ -249,7 +249,7 @@ Remove all \fBSA\fR for a given \fBSA_TYPE\fR, or all \fBSA\fR for all types.
 .RS 4n
 Continuously report on any \fBPF_KEY\fR messages. This uses the
 \fBSADB_X_PROMISC\fR message to enable messages that a normal \fBPF_KEY\fR
-socket would not receive to be received. See \fBpf_key\fR(7P).
+socket would not receive to be received. See \fBpf_key\fR(4P).
 .RE
 
 .sp
@@ -504,7 +504,7 @@ Often, algorithm names will have several synonyms. This extension is required
 by the \fBadd\fR command for certain \fBSA\fR types. It is also used by the
 \fBupdate\fR command.
 .sp
-Use the \fBipsecalgs\fR(1M) command to obtain the complete list of
+Use the \fBipsecalgs\fR(8) command to obtain the complete list of
 authentication algorithms.
 .RE
 
@@ -525,7 +525,7 @@ strings indicating an algorithm name. Current encryption algorithms include DES
 ("aes"). This extension is required by the add command for certain \fBSA\fR
 types. It is also used by the \fBupdate\fR command.
 .sp
-Use the \fBipsecalgs\fR(1M) command to obtain the complete list of encryption
+Use the \fBipsecalgs\fR(8) command to obtain the complete list of encryption
 algorithms.
 .RE
 
@@ -535,7 +535,7 @@ The next six extensions are lifetime extensions. There are two varieties,
 "\fBhard\fR" and "\fBsoft\fR". If a \fBhard\fR lifetime expires, the \fBSA\fR
 will be deleted automatically by the system. If a \fBsoft\fR lifetime expires,
 an \fBSADB_EXPIRE\fR message will be transmitted by the system, and its state
-will be downgraded to \fBdying\fR from \fBmature\fR. See \fBpf_key\fR(7P). The
+will be downgraded to \fBdying\fR from \fBmature\fR. See \fBpf_key\fR(4P). The
 \fBmonitor\fR command to \fBkey\fR allows you to view \fBSADB_EXPIRE\fR
 messages.
 .sp
@@ -1063,11 +1063,11 @@ A world-readable file with keying material in it is also risky.
 .TP
 3.
 The \fBipseckey\fR command is designed to be managed by the \fBmanual-key\fR
-\fBsmf\fR(5) service. Because the \fBsmf\fR(5) log files are world-readable,
+\fBsmf\fR(7) service. Because the \fBsmf\fR(7) log files are world-readable,
 the \fBipseckey\fR does not record any syntax errors in the log files, as these
 errors might include secret information.
 .sp
-If a syntax error is found when the \fBmanual-key\fR \fBsmf\fR(5) service is
+If a syntax error is found when the \fBmanual-key\fR \fBsmf\fR(7) service is
 enabled, the service enters maintenance mode. The log file will indicate that
 there was a syntax error, but will not specify what the error was.
 .sp
@@ -1091,7 +1091,7 @@ For further thoughts on this subject, see the afterward by Matt Blaze in Bruce
 Schneier's \fIApplied Cryptography: Protocols, Algorithms, and Source Code in
 C\fR.
 .SS "Service Management Facility"
-IPsec manual keys are managed by the service management facility, \fBsmf\fR(5).
+IPsec manual keys are managed by the service management facility, \fBsmf\fR(7).
 The services listed below manage the components of IPsec. These services are
 delivered as follows:
 .sp
@@ -1117,19 +1117,19 @@ that, as a starting condition, packets are not protected by IPsec. After you
 create the configuration file \fB/etc/inet/ipsecinit.conf\fR and refresh the
 service (\fBsvcadm refresh\fR, see below), the policy contained in the
 configuration file is applied. If there is an error in this file, the service
-enters maintenance mode. See \fBipsecconf\fR(1M).
+enters maintenance mode. See \fBipsecconf\fR(8).
 .sp
 .LP
 Services that are delivered disabled are delivered that way because the system
 administrator must create configuration files for those services before
-enabling them. See \fBike.config\fR(4) for the \fBike\fR service.
+enabling them. See \fBike.config\fR(5) for the \fBike\fR service.
 .sp
 .LP
-See \fBipsecalgs\fR(1M) for the \fBipsecalgs\fR service.
+See \fBipsecalgs\fR(8) for the \fBipsecalgs\fR service.
 .sp
 .LP
 The correct administrative procedure is to create the configuration file for
-each service, then enable each service using \fBsvcadm\fR(1M).
+each service, then enable each service using \fBsvcadm\fR(8).
 .sp
 .LP
 If the configuration needs to be changed, edit the configuration file then
@@ -1146,13 +1146,13 @@ example# \fBsvcadm refresh manual-key\fR
 .LP
 \fBWarning:\fR To prevent \fBipseckey\fR complaining about duplicate
 Associations, the \fBipseckey\fR command flushes the Security Association Data
-Base (SADB) when the \fBipseckey\fR command is run from \fBsmf\fR(5), before
+Base (SADB) when the \fBipseckey\fR command is run from \fBsmf\fR(7), before
 adding any new Security Associations defined in the configuration file. This
 differs from the command line behavior where the SADB is not flushed before
 adding new Security Associations.
 .sp
 .LP
-The \fBsmf\fR(5) framework will record any errors in the service-specific log
+The \fBsmf\fR(7) framework will record any errors in the service-specific log
 file. Use any of the following commands to examine the \fBlogfile\fR property:
 .sp
 .in +2
@@ -1177,7 +1177,7 @@ config/config_file
 
 .sp
 .LP
-This property can be modified using \fBsvccfg\fR(1M) by users who have been
+This property can be modified using \fBsvccfg\fR(8) by users who have been
 assigned the following authorization:
 .sp
 .in +2
@@ -1189,10 +1189,10 @@ solaris.smf.value.ipsec
 
 .sp
 .LP
-See \fBauths\fR(1), \fBuser_attr\fR(4), \fBrbac\fR(5).
+See \fBauths\fR(1), \fBuser_attr\fR(5), \fBrbac\fR(7).
 .sp
 .LP
-The service needs to be refreshed using \fBsvcadm\fR(1M) before the new
+The service needs to be refreshed using \fBsvcadm\fR(8) before the new
 property is effective. General non-modifiable properties can be viewed with the
 \fBsvcprop\fR(1) command.
 .sp
@@ -1208,7 +1208,7 @@ property is effective. General non-modifiable properties can be viewed with the
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling,
-refreshing, and requesting restart can be performed using \fBsvcadm\fR(1M). A
+refreshing, and requesting restart can be performed using \fBsvcadm\fR(8). A
 user who has been assigned the authorization shown below can perform these
 actions:
 .sp
@@ -1224,11 +1224,11 @@ solaris.smf.manage.ipsec
 The service's status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP
-The \fBipseckey\fR command is designed to be run under \fBsmf\fR(5) management.
+The \fBipseckey\fR command is designed to be run under \fBsmf\fR(7) management.
 While the \fBipsecconf\fR command can be run from the command line, this is
 discouraged. If the \fBipseckey\fR command is to be run from the command line,
-the \fBmanual-key\fR \fBsmf\fR(5) service should be disabled first. See
-\fBsvcadm\fR(1M).
+the \fBmanual-key\fR \fBsmf\fR(7) service should be disabled first. See
+\fBsvcadm\fR(8).
 .SH EXAMPLES
 \fBExample 1 \fREmptying Out All \fBSA\fRs
 .sp
@@ -1476,7 +1476,7 @@ and \fBSECURITY\fR for more information.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1489,10 +1489,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBps\fR(1), \fBsvcprop\fR(1), \fBsvcs\fR(1), \fBipsecconf\fR(1M),
-\fBipsecalgs\fR(1M), \fBroute\fR(1M), \fBsvcadm\fR(1M), \fBsvccfg\fR(1M),
-\fBike.config\fR(4), \fBattributes\fR(5), \fBsmf\fR(5), \fBipsec\fR(7P),
-\fBipsecah\fR(7P), \fBipsecesp\fR(7P), \fBpf_key\fR(7P)
+\fBps\fR(1), \fBsvcprop\fR(1), \fBsvcs\fR(1), \fBipsecconf\fR(8),
+\fBipsecalgs\fR(8), \fBroute\fR(8), \fBsvcadm\fR(8), \fBsvccfg\fR(8),
+\fBike.config\fR(5), \fBattributes\fR(7), \fBsmf\fR(7), \fBipsec\fR(4P),
+\fBipsecah\fR(4P), \fBipsecesp\fR(4P), \fBpf_key\fR(4P)
 .sp
 .LP
 Schneier, B., \fIApplied Cryptography: Protocols, Algorithms, and Source Code
@@ -1506,7 +1506,7 @@ as possible.
 The \fBipseckey\fR command does not attempt to use a \fBCOMMAND\fR that has a
 syntax error. A \fBCOMMAND\fR might be syntactically correct but can
 nevertheless generate an error because the kernel rejected the request made to
-\fBpf_key\fR(7P). This might occur because a key had an invalid length or
+\fBpf_key\fR(4P). This might occur because a key had an invalid length or
 because an unsupported algorithm was specified.
 .sp
 .LP
@@ -1608,7 +1608,7 @@ provides more detail about what precise value was incorrect and why.
 
 .SH NOTES
 In spite of its IPsec-specific name, \fBipseckey\fR is analogous to
-\fBroute\fR(1M), in that it is a command-line interface to a socket-based
+\fBroute\fR(8), in that it is a command-line interface to a socket-based
 administration engine, in this case, \fBPF_KEY\fR. \fBPF_KEY\fR was originally
 developed at the United States Naval Research Laboratory.
 .sp

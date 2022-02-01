@@ -21,12 +21,12 @@ unmount removable media and hot-pluggable storage. The default mount point is
 .sp
 .LP
 \fBrmvolmgr\fR is one of a number of Hardware Abstraction Layer (HAL)-aware
-tools that are shipped with the Solaris operating system. See \fBhald\fR(1M).
+tools that are shipped with the Solaris operating system. See \fBhald\fR(8).
 .sp
 .LP
 Multiple instances of \fBrmvolmgr\fR can be run simultaneously. A system
 instance of \fBrmvolmgr\fR runs by default as a service management facility
-(SMF) service (see \fBsmf\fR(5)). Its fault management resource identifier
+(SMF) service (see \fBsmf\fR(7)). Its fault management resource identifier
 (FMRI) is:
 .sp
 .in +2
@@ -103,7 +103,7 @@ Invoke in system instance mode.
 \fBExample 1 \fRUsing SMF Properties to Set Options
 .sp
 .LP
-The following \fBsvccfg\fR(1M) command and subcommands use SMF properties to
+The following \fBsvccfg\fR(8) command and subcommands use SMF properties to
 set the \fB-c\fR and \fB-n\fR options.
 
 .sp
@@ -126,7 +126,7 @@ example#
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -142,5 +142,5 @@ Interface Stability	Volatile
 .SH SEE ALSO
 .sp
 .LP
-\fBhald\fR(1M), \fBsvccfg\fR(1M), \fBattributes\fR(5), \fBhal\fR(5),
-\fBsmf\fR(5)
+\fBhald\fR(8), \fBsvccfg\fR(8), \fBattributes\fR(7), \fBhal\fR(7),
+\fBsmf\fR(7)

@@ -8,7 +8,7 @@
 brands \- alternate operating environments for non-global zones
 .SH DESCRIPTION
 The branded zone (BrandZ) framework extends the Solaris Zones infrastructure
-described in \fBzones\fR(5) to include the creation of brands, which provide
+described in \fBzones\fR(7) to include the creation of brands, which provide
 non-global zones that contain non-native operating environments.
 .sp
 .LP
@@ -39,14 +39,14 @@ A brand is an attribute of a zone, set at zone create time.
 .TP
 .ie t \(bu
 .el o
-The zonecfg tool (see \fBzonecfg\fR(1M)) is used to set a zone's brand type and
+The zonecfg tool (see \fBzonecfg\fR(8)) is used to set a zone's brand type and
 configure the zone.
 .RE
 .RS +4
 .TP
 .ie t \(bu
 .el o
-The zoneadm tool (see \fBzoneadm\fR(1M)) is used to report a zone's brand type
+The zoneadm tool (see \fBzoneadm\fR(8)) is used to report a zone's brand type
 and administer the zone.
 .RE
 .SS "Device Support"
@@ -57,7 +57,7 @@ administrator chooses to add an unsupported device despite that warning, that
 device might or might not work as expected. The configuration will be untested
 and unsupported.
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -71,4 +71,4 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBzoneadm\fR(1M), \fBzonecfg\fR(1M), \fBattributes\fR(5), \fBzones\fR(5)
+\fBzoneadm\fR(8), \fBzonecfg\fR(8), \fBattributes\fR(7), \fBzones\fR(7)

@@ -42,7 +42,7 @@ default realm of the local host as defined in \fB/etc/krb5/krb5.conf\fR. If the
 host entry is not found in the keytab file, the authentication fails.
 Administrators may optionally disable this "strict" verification by setting
 "\fBverify_ap_req_nofail = false\fR" in \fB/etc/krb5/krb5.conf\fR. See
-\fBkrb5.conf\fR(4) for more details on this option. This allows \fBTGT\fR
+\fBkrb5.conf\fR(5) for more details on this option. This allows \fBTGT\fR
 verification to succeed in the absence of a keytab host principal entry.
 .sp
 .LP
@@ -667,7 +667,7 @@ Non-Kerberos users should specify their respective repositories by using the
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -684,11 +684,11 @@ Interface Stability	Evolving
 .sp
 .LP
 \fBkdestroy\fR(1), \fBkinit\fR(1), \fBkpasswd\fR(1), \fBpasswd\fR(1),
-\fBktkt_warnd\fR(1M), \fBlibpam\fR(3LIB), \fBpam\fR(3PAM), \fBpam_sm\fR(3PAM),
+\fBktkt_warnd\fR(8), \fBlibpam\fR(3LIB), \fBpam\fR(3PAM), \fBpam_sm\fR(3PAM),
 \fBpam_sm_acct_mgmt\fR(3PAM), \fBpam_sm_authenticate\fR(3PAM),
 \fBpam_sm_chauthtok\fR(3PAM), \fBpam_sm_close_session\fR(3PAM),
 \fBpam_sm_open_session\fR(3PAM), \fBpam_sm_setcred\fR(3PAM), \fBsyslog\fR(3C),
-\fBpam.conf\fR(4), \fBattributes\fR(5), \fBkerberos\fR(5), \fBkrb5envvar\fR(5)
+\fBpam.conf\fR(5), \fBattributes\fR(7), \fBkerberos\fR(7), \fBkrb5envvar\fR(7)
 .SH NOTES
 .sp
 .LP
@@ -697,5 +697,5 @@ multi-threaded application uses its own \fBPAM\fR handle.
 .sp
 .LP
 On successful acquisition of initial credentials (ticket-granting ticket),
-\fBktkt_warnd\fR(1M) will be notified, to alert the user when the initial
+\fBktkt_warnd\fR(8) will be notified, to alert the user when the initial
 credentials are about to expire.

@@ -54,8 +54,8 @@ this limit.
 .sp
 .LP
 \fBroleadd\fR requires that usernames be in the format described in
-\fBpasswd\fR(4). A warning message is displayed if these restrictions are not
-met. See \fBpasswd\fR(4) for the requirements for usernames.
+\fBpasswd\fR(5). A warning message is displayed if these restrictions are not
+met. See \fBpasswd\fR(5) for the requirements for usernames.
 .LP
 To change the action of \fBroleadd\fR when the traditional login name
 length limit of eight characters is exceeded, edit the file
@@ -71,7 +71,7 @@ The following options are supported:
 .ad
 .sp .6
 .RS 4n
-One or more comma separated authorizations defined in \fBauth_attr\fR(4). Only
+One or more comma separated authorizations defined in \fBauth_attr\fR(5). Only
 a user or role who has \fBgrant\fR rights to the authorization can assign it to
 a role.
 .RE
@@ -227,7 +227,7 @@ Null
 .sp
 .ne 2
 .na
-\fBkey=value\fR (pairs defined in \fBuser_attr\fR(4))
+\fBkey=value\fR (pairs defined in \fBuser_attr\fR(5))
 .ad
 .sp .6
 .RS 4n
@@ -317,7 +317,7 @@ this purpose.
 A \fIkey=value\fR pair to add to the role's attributes. Multiple \fB-K\fR
 options may be used to add multiple \fIkey=value\fR pairs. The generic \fB-K\fR
 option with the appropriate key may be used instead of the specific implied key
-options (\fB-A\fR, \fB-p\fR, \fB-P\fR). See \fBuser_attr\fR(4) for a
+options (\fB-A\fR, \fB-p\fR, \fB-P\fR). See \fBuser_attr\fR(5) for a
 list of valid \fIkey=value\fR pairs. The "type" key is not a valid key for this
 option. Keys cannot be repeated.
 .RE
@@ -362,7 +362,7 @@ This option allows a \fBUID\fR to be duplicated (non-unique).
 .sp .6
 .RS 4n
 Name of the project with which the added role is associated. See the
-\fIprojname\fR field as defined in \fBproject\fR(4).
+\fIprojname\fR field as defined in \fBproject\fR(5).
 .RE
 
 .sp
@@ -372,7 +372,7 @@ Name of the project with which the added role is associated. See the
 .ad
 .sp .6
 .RS 4n
-One or more comma-separated execution profiles defined in \fBprof_attr\fR(4).
+One or more comma-separated execution profiles defined in \fBprof_attr\fR(5).
 .RE
 
 .sp
@@ -428,7 +428,7 @@ reserved for allocation by the Operating System.
 \fB/etc/user_attr\fR
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -444,10 +444,10 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .LP
 \fBpasswd\fR(1), \fBpfsh\fR(1), \fBprofiles\fR(1), \fBroles\fR(1),
-\fBgroupadd\fR(1M), \fBgroupdel\fR(1M), \fBgroupmod\fR(1M),
-\fBgrpck\fR(1M), \fBlogins\fR(1M), \fBpwck\fR(1M), \fBuserdel\fR(1M),
-\fBusermod\fR(1M), \fBzfs\fR(1M), \fBgetdate\fR(3C), \fBauth_attr\fR(4),
-\fBpasswd\fR(4), \fBprof_attr\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5)
+\fBgroupadd\fR(8), \fBgroupdel\fR(8), \fBgroupmod\fR(8),
+\fBgrpck\fR(8), \fBlogins\fR(8), \fBpwck\fR(8), \fBuserdel\fR(8),
+\fBusermod\fR(8), \fBzfs\fR(8), \fBgetdate\fR(3C), \fBauth_attr\fR(5),
+\fBpasswd\fR(5), \fBprof_attr\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7)
 .SH DIAGNOSTICS
 .LP
 In case of an error, \fBroleadd\fR prints an error message and exits with a

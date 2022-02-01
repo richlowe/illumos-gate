@@ -33,7 +33,7 @@ subcommands.
 .LP
 Changes made to an existing service in the repository typically do not take
 effect for that service until the next time the service instance is refreshed.
-See the \fBrefresh\fR subcommand on the \fBsvcadm\fR(1M) man page for more
+See the \fBrefresh\fR subcommand on the \fBsvcadm\fR(8) man page for more
 details.
 .SH OPTIONS
 .LP
@@ -56,7 +56,7 @@ Reads and executes \fBsvccfg\fR subcommands from \fIcommand-file\fR.
 .sp .6
 .RS 4n
 Selects the entity indicated by \fIFMRI\fR (a fault management resource
-identifier) before executing any subcommands. See \fBsmf\fR(5).
+identifier) before executing any subcommands. See \fBsmf\fR(7).
 .RE
 
 .sp
@@ -145,7 +145,7 @@ Exits immediately.
 .ad
 .sp .6
 .RS 4n
-Uses \fIrepfile\fR as a repository. By default, \fBsvccfg\fR(1M) uses the
+Uses \fIrepfile\fR as a repository. By default, \fBsvccfg\fR(8) uses the
 system repository.
 .sp
 Use repository only with files from the identical version of Solaris, including
@@ -200,9 +200,9 @@ their type changed by the profile. Nonexistent services and instances are
 ignored. Services and instances modified by the profile will be refreshed. If
 \fB-n\fR is specified, the profile is processed and no changes are applied to
 the SMF repository. Any syntax error found will be reported on stderr and an
-exit code of \fB1\fR will be returned. See \fBsmf\fR(5) for a description of
+exit code of \fB1\fR will be returned. See \fBsmf\fR(7) for a description of
 service profiles. This command requires privileges to modify properties in the
-service and instance. See \fBsmf_security\fR(5) for the privileges required to
+service and instance. See \fBsmf_security\fR(7) for the privileges required to
 modify properties. If \fIfile\fR is not a service profile, the subcommand
 fails.
 .RE
@@ -233,7 +233,7 @@ backup.
 .sp
 Without the \fB-a\fR option, property groups containing protected information
 (identified by the presence of the \fBread_authorization\fR property\(emsee
-\fBsmf_security\fR(5)) will be archived without their property values. When the
+\fBsmf_security\fR(7)) will be archived without their property values. When the
 \fB-a\fR option is specified, all values will be archived. An error results if
 there are insufficient privileges to read these values.
 .RE
@@ -252,7 +252,7 @@ created on behalf of another service.
 .sp
 Without the \fB-a\fR option, property groups containing protected information
 (identified by the presence of the \fBread_authorization\fR property\(emsee
-\fBsmf_security\fR(5)) will be exported without their property values. When the
+\fBsmf_security\fR(7)) will be exported without their property values. When the
 \fB-a\fR option is specified, all values will be archived. An error results if
 there are insufficient privileges to read these values.
 .sp
@@ -272,13 +272,13 @@ is exported and a warning is issued.  If you specify an abbreviation, such as
 .RS 4n
 If \fIfile\fR is a service manifest, then the services and instances it
 specifies are imported into the repository. According to the file, dependencies
-may be created in other services. See \fBsmf\fR(5) for a description of service
-manifests. See \fBsmf_security\fR(5) for the privileges required to create and
+may be created in other services. See \fBsmf\fR(7) for a description of service
+manifests. See \fBsmf_security\fR(7) for the privileges required to create and
 modify service configurations.
 .sp
 Services and instances in the manifest will be validated against template data
 in the manifest and the repository, and warnings will be issued for all
-template violations. See \fBsmf_template\fR(5) for a description of templates.
+template violations. See \fBsmf_template\fR(7) for a description of templates.
 If the \fB-V\fR option is specified, manifests that violate the defined
 templates will fail to import. In interactive invocations of \fBsvccfg\fR,
 \fB-V\fR is the default behavior.
@@ -315,7 +315,7 @@ Restores the contents of the repository from a full XML service description
 previously created by the \fBarchive\fR subcommand. If the archive was
 generated without the use of the \fB-a\fR option, the contents of the
 repository following completion of the restore will not include the values of
-any read-protected properties (see \fBsmf_security\fR(5)). If these are
+any read-protected properties (see \fBsmf_security\fR(7)). If these are
 required, they must be restored manually.
 .sp
 Restoring an archive which is inconsistent with currently installed software
@@ -347,10 +347,10 @@ status.
 .sp
 For an instance \fIfmri\fR, instance entity selection, or snapshot entity
 selection, the specified instance in its composed form (see "Properties and
-Property Groups" in \fBsmf\fR(5)) will be validated against template data in
+Property Groups" in \fBsmf\fR(7)) will be validated against template data in
 the repository. Instance FMRIs and instance entity selections use the "running"
 snapshot for validation. Warnings will be issued for all template violations.
-See \fBsmf_template\fR(5) for a description of templates.
+See \fBsmf_template\fR(7) for a description of templates.
 .RE
 
 .SS "Entity Selection, Modification, and Navigation Subcommands"
@@ -364,7 +364,7 @@ An "entity" refers to a scope, service, or service instance.
 .sp .6
 .RS 4n
 A new entity with the given name is created as a child of the current
-selection. See \fBsmf_security\fR(5) for the privileges required to create
+selection. See \fBsmf_security\fR(7) for the privileges required to create
 entities.
 .RE
 
@@ -382,7 +382,7 @@ instance has a "dependents" property group of type "framework", then for each
 of its properties with type "astring" or "fmri", if the property has a single
 value which names a service or service instance then the dependency property
 group in the indicated service or service instance with the same name as the
-property will be deleted. See \fBsmf_security\fR(5) for the privileges required
+property will be deleted. See \fBsmf_security\fR(7) for the privileges required
 to delete service configurations.
 .RE
 
@@ -394,7 +394,7 @@ to delete service configurations.
 .sp .6
 .RS 4n
 The child entities of the current selection whose names match the glob pattern
-\fIpattern\fR are displayed (see \fBfnmatch\fR(5)). \&':properties' is also
+\fIpattern\fR are displayed (see \fBfnmatch\fR(7)). \&':properties' is also
 listed for property-bearing entities, namely services and service instances.
 .RE
 
@@ -431,7 +431,7 @@ Adds a property group with the given \fIname\fR and type to the current
 selection. \fIflags\fR is a string of characters which designates the flags
 with which to create the property group. 'P' represents
 \fBSCF_PG_FLAG_NONPERSISTENT\fR (see \fBscf_service_add_pg\fR(3SCF)). See
-\fBsmf_security\fR(5) for the privileges required to create property groups.
+\fBsmf_security\fR(7) for the privileges required to create property groups.
 .RE
 
 .sp
@@ -448,7 +448,7 @@ containing double-quotes or backslashes must be enclosed by double-quotes and
 the contained double-quotes and backslashes must be quoted by backslashes.
 Nonexistent properties are created, in which case the \fItype\fR specifier must
 be present. See \fBscf_value_create\fR(3SCF) for a list of available property
-types. See \fBsmf_security\fR(5) for the privileges required to modify
+types. See \fBsmf_security\fR(7) for the privileges required to modify
 properties. The new value will be appended to the end of the list of property
 values associated with the property.
 .RE
@@ -461,7 +461,7 @@ values associated with the property.
 .sp .6
 .RS 4n
 Deletes the property group \fIname\fR of the current selection. See
-\fBsmf_security\fR(5) for the privileges required to delete property groups.
+\fBsmf_security\fR(7) for the privileges required to delete property groups.
 .RE
 
 .sp
@@ -472,7 +472,7 @@ Deletes the property group \fIname\fR of the current selection. See
 .sp .6
 .RS 4n
 Deletes the named property group or property of the current selection. See
-\fBsmf_security\fR(5) for the privileges required to delete properties.
+\fBsmf_security\fR(7) for the privileges required to delete properties.
 .RE
 
 .sp
@@ -483,7 +483,7 @@ Deletes the named property group or property of the current selection. See
 .sp .6
 .RS 4n
 Deletes all values matching the given \fIglob\fR pattern in the named property.
-Succeeds even if no values match. See \fBsmf_security\fR(5) for the privileges
+Succeeds even if no values match. See \fBsmf_security\fR(7) for the privileges
 required to modify properties.
 .RE
 
@@ -506,7 +506,7 @@ The \fB-v\fR option gives all information available, including descriptions for
 current settings, constraints, and other possible setting choices.
 .sp
 The \fB-t\fR option shows only the template data for the selection (see
-\fBsmf_template\fR(5)), and does not display the current settings for property
+\fBsmf_template\fR(7)), and does not display the current settings for property
 groups and properties.
 .RE
 
@@ -521,7 +521,7 @@ Comments of commands to reproduce the property groups and properties of the
 current selection are placed in a temporary file and the program named by the
 \fBEDITOR\fR environment variable is invoked to edit it. Upon completion, the
 commands in the temporary file are executed. The default editor is \fBvi\fR(1).
-See \fBsmf_security\fR(5) for the privileges required to create, modify, or
+See \fBsmf_security\fR(7) for the privileges required to create, modify, or
 delete properties.
 .RE
 
@@ -577,7 +577,7 @@ located, it is searched for in a similar manner.
 .sp
 Once the property is located, all values which begin with \fIenvvar\fR followed
 by a "=" are removed, and the value "\fIenvvar\fR=\fIvalue\fR" is added. See
-\fBsmf_security\fR(5) for the privileges required to modify properties.
+\fBsmf_security\fR(7) for the privileges required to modify properties.
 .RE
 
 .sp
@@ -599,7 +599,7 @@ property already exists and the \fItype\fR disagrees with the existing
 double-quotes. String values which contain double-quotes or backslashes must be
 enclosed by double-quotes and the contained double-quotes and backslashes must
 be quoted by backslashes. If the named property does not exist, it is created,
-as long as the type is specified. See \fBsmf_security\fR(5) for the privileges
+as long as the type is specified. See \fBsmf_security\fR(7) for the privileges
 required to create or modify properties. Multiple values will be stored in the
 order in which they are specified.
 .RE
@@ -626,7 +626,7 @@ its parent is also searched. If the "inetd_start" property group is not
 located, it is searched for in a similar manner.
 .sp
 Once the property is located, all values which begin with \fIenvvar\fR followed
-by "=" are removed. See \fBsmf_security\fR(5) for the privileges required to
+by "=" are removed. See \fBsmf_security\fR(7) for the privileges required to
 modify properties.
 .RE
 
@@ -650,8 +650,8 @@ Displays snapshots available for the currently selected instance.
 Reverts the properties of the currently selected instance and its service to
 those recorded in the named snapshot. If no argument is given, use the
 currently selected snapshot and deselect it on success. The changed property
-values can be made active via the \fBrefresh\fR subcommand of \fBsvcadm\fR(1M).
-See \fBsmf_security\fR(5) for the privileges required to change properties.
+values can be made active via the \fBrefresh\fR subcommand of \fBsvcadm\fR(8).
+See \fBsmf_security\fR(7) for the privileges required to change properties.
 .RE
 
 .sp
@@ -698,7 +698,7 @@ service in the XML manifest specified on the command line.
 .sp
 .LP
 Note that the manifest must follow the format specified in
-\fBservice_bundle\fR(4).
+\fBservice_bundle\fR(5).
 
 .LP
 \fBExample 2 \fRExporting a Service Description
@@ -833,7 +833,7 @@ Invalid command line options were specified.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -852,8 +852,8 @@ The interactive output is Uncommitted. The invocation and non-interactive
 output are Committed.
 .SH SEE ALSO
 .LP
-\fBsvcprop\fR(1), \fBsvcs\fR(1), \fBsvcadm\fR(1M), \fBsvc.configd\fR(1M),
+\fBsvcprop\fR(1), \fBsvcs\fR(1), \fBsvcadm\fR(8), \fBsvc.configd\fR(8),
 \fBlibscf\fR(3LIB), \fBlibumem\fR(3LIB), \fBscf_service_add_pg\fR(3SCF),
-\fBscf_value_create\fR(3SCF), \fBcontract\fR(4), \fBservice_bundle\fR(4),
-\fBattributes\fR(5), \fBfnmatch\fR(5), \fBsmf\fR(5), \fBsmf_method\fR(5),
-\fBsmf_security\fR(5), \fBsmf_template\fR(5)
+\fBscf_value_create\fR(3SCF), \fBcontract\fR(5), \fBservice_bundle\fR(5),
+\fBattributes\fR(7), \fBfnmatch\fR(7), \fBsmf\fR(7), \fBsmf_method\fR(7),
+\fBsmf_security\fR(7), \fBsmf_template\fR(7)

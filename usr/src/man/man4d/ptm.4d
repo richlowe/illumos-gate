@@ -14,7 +14,7 @@ The pseudo-tty subsystem simulates a terminal connection, where the master side
 represents the terminal and the slave represents the user process's special
 device end point. In order to use the pseudo-tty subsystem, a node for the
 master side driver \fB/dev/ptmx\fR and \fBN\fR number of nodes for the slave
-driver must be installed. See \fBpts\fR(7D). The master device is set up as a
+driver must be installed. See \fBpts\fR(4D). The master device is set up as a
 cloned device where its major device number is the major for the clone device
 and its minor device number is the major for the \fBptm\fR driver. There are no
 nodes in the file system for master devices. The master pseudo driver is opened
@@ -85,8 +85,8 @@ slave devices (M = 0 -> N-1)
 .SH SEE ALSO
 .sp
 .LP
-\fBgrantpt\fR(3C), \fBptsname\fR(3C), \fBunlockpt\fR(3C), \fBpckt\fR(7M),
-\fBpts\fR(7D)
+\fBgrantpt\fR(3C), \fBptsname\fR(3C), \fBunlockpt\fR(3C), \fBpckt\fR(4M),
+\fBpts\fR(4D)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

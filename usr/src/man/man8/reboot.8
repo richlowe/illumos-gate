@@ -28,18 +28,18 @@ kernel. This form of \fBreboot\fR is shown in the second synopsis, above.
 .sp
 .LP
 Although \fBreboot\fR can be run by the super-user at any time,
-\fBshutdown\fR(1M) is normally used first to warn all users logged in of the
-impending loss of service. See \fBshutdown\fR(1M) for details.
+\fBshutdown\fR(8) is normally used first to warn all users logged in of the
+impending loss of service. See \fBshutdown\fR(8) for details.
 .sp
 .LP
-The \fBreboot\fR utility performs a \fBsync\fR(1M) operation on the disks, and
-then a multi-user reboot is initiated. See \fBinit\fR(1M) for details. On x86
+The \fBreboot\fR utility performs a \fBsync\fR(8) operation on the disks, and
+then a multi-user reboot is initiated. See \fBinit\fR(8) for details. On x86
 systems, reboot may also update the boot archive as needed to ensure a
 successful reboot.
 .sp
 .LP
 The \fBreboot\fR utility normally logs the reboot to the system log daemon,
-\fBsyslogd\fR(1M), and places a shutdown record in the login accounting file
+\fBsyslogd\fR(8), and places a shutdown record in the login accounting file
 \fB/var/adm/wtmpx\fR. These actions are inhibited if the \fB-n\fR or \fB-q\fR
 options are present.
 .sp
@@ -54,7 +54,7 @@ The following options are supported:
 .ad
 .sp .6
 .RS 4n
-Force a system crash dump before rebooting. See \fBdumpadm\fR(1M) for
+Force a system crash dump before rebooting. See \fBdumpadm\fR(8) for
 information on configuring system crash dumps.
 .RE
 
@@ -86,7 +86,7 @@ Service \fBsvc:/system/boot-config:default\fR is enabled by default. It
 requires \fBsolaris.system.shutdown\fR as \fBaction_authorization\fR and
 \fBvalue_authorization\fR. When the \fBconfig/fastreboot_default\fR property is
 set to \fBtrue\fR, \fBreboot\fR will behave as \fBreboot\fR \fB-f\fR. The value
-of this property can be changed using \fBsvccfg\fR(1M) and \fBsvcadm\fR(1M), to
+of this property can be changed using \fBsvccfg\fR(8) and \fBsvcadm\fR(8), to
 control the default reboot behavior.
 .sp
 See \fBEXAMPLES\fR for details.
@@ -99,7 +99,7 @@ See \fBEXAMPLES\fR for details.
 .ad
 .sp .6
 .RS 4n
-Suppress sending a message to the system log daemon, \fBsyslogd\fR(1M) about
+Suppress sending a message to the system log daemon, \fBsyslogd\fR(8) about
 who executed \fBreboot\fR.
 .RE
 
@@ -110,7 +110,7 @@ who executed \fBreboot\fR.
 .ad
 .sp .6
 .RS 4n
-Avoid calling \fBsync\fR(2) and do not log the reboot to \fBsyslogd\fR(1M) or
+Avoid calling \fBsync\fR(2) and do not log the reboot to \fBsyslogd\fR(8) or
 to \fB/var/adm/wtmpx\fR. The kernel still attempts to sync filesystems prior to
 reboot, except if the \fB-d\fR option is also present. If \fB-d\fR is used with
 \fB-n\fR, the kernel does not attempt to sync file systems.
@@ -154,7 +154,7 @@ The following operands are supported:
 .RS 4n
 An optional \fIboot_arguments\fR specifies arguments to the \fBuadmin\fR(2)
 function that are passed to the boot program and kernel upon restart. The form
-and list of arguments is described in the \fBboot\fR(1M) and \fBkernel\fR(1M)
+and list of arguments is described in the \fBboot\fR(8) and \fBkernel\fR(8)
 man pages. If the arguments are specified, whitespace between them is replaced
 by single spaces unless the whitespace is quoted for the shell. If the
 \fIboot_arguments\fR begin with a hyphen, they must be preceded by the \fB--\fR
@@ -166,7 +166,7 @@ delimiter (two hyphens) to denote the end of the \fBreboot\fR argument list.
 .sp
 .LP
 In the following example, the delimiter \fB--\fR (two hyphens) must be used to
-separate the options of \fBreboot\fR from the arguments of \fBboot\fR(1M).
+separate the options of \fBreboot\fR from the arguments of \fBboot\fR(8).
 
 .sp
 .in +2
@@ -349,12 +349,12 @@ login accounting file
 .RE
 
 .SH SEE ALSO
-\fBmdb\fR(1), \fBboot\fR(1M), \fBdumpadm\fR(1M), \fBfsck\fR(1M),
-\fBhalt\fR(1M), \fBinit\fR(1M), \fBkernel\fR(1M), \fBshutdown\fR(1M),
-\fBsvcadm\fR(1M), \fBsvccfg\fR(1M), \fBsync\fR(1M), \fBsyslogd\fR(1M),
-\fBsync\fR(2), \fBuadmin\fR(2), \fBreboot\fR(3C), \fBattributes\fR(5)
+\fBmdb\fR(1), \fBboot\fR(8), \fBdumpadm\fR(8), \fBfsck\fR(8),
+\fBhalt\fR(8), \fBinit\fR(8), \fBkernel\fR(8), \fBshutdown\fR(8),
+\fBsvcadm\fR(8), \fBsvccfg\fR(8), \fBsync\fR(8), \fBsyslogd\fR(8),
+\fBsync\fR(2), \fBuadmin\fR(2), \fBreboot\fR(3C), \fBattributes\fR(7)
 .SH NOTES
 The \fBreboot\fR utility does not execute the scripts in
-\fB/etc/rc\fInum\fR.d\fR or execute shutdown actions in \fBinittab\fR(4). To
-ensure a complete shutdown of system services, use \fBshutdown\fR(1M) or
-\fBinit\fR(1M) to reboot a Solaris system.
+\fB/etc/rc\fInum\fR.d\fR or execute shutdown actions in \fBinittab\fR(5). To
+ensure a complete shutdown of system services, use \fBshutdown\fR(8) or
+\fBinit\fR(8) to reboot a Solaris system.

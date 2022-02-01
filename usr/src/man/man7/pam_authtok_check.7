@@ -85,7 +85,7 @@ The password must not be based on a dictionary word. The list of words to be
 used for the site's dictionary can be specified with \fBDICTIONLIST\fR. It
 should contain a comma-separated list of filenames, one word per line. The
 database that is created from these files is stored in the directory named by
-\fBDICTIONDBDIR\fR (defaults to \fB/var/passwd\fR). See \fBmkpwdict\fR(1M) for
+\fBDICTIONDBDIR\fR (defaults to \fB/var/passwd\fR). See \fBmkpwdict\fR(8) for
 information on pre-generating the database. If neither \fBDICTIONLIST\fR nor
 \fBDICTIONDBDIR\fR is specified, no dictionary check is made.
 .RE
@@ -153,7 +153,7 @@ See \fBpasswd\fR(1) for a description of the contents.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -171,12 +171,12 @@ MT Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBpasswd\fR(1), \fBpam\fR(3PAM), \fBmkpwdict\fR(1M),
+\fBpasswd\fR(1), \fBpam\fR(3PAM), \fBmkpwdict\fR(8),
 \fBpam_chauthtok\fR(3PAM), \fBsyslog\fR(3C), \fBlibpam\fR(3LIB),
-\fBpam.conf\fR(4), \fBpasswd\fR(4), \fBshadow\fR(4), \fBattributes\fR(5),
-\fBpam_authtok_get\fR(5), \fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5),
-\fBpam_passwd_auth\fR(5), \fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5),
-\fBpam_unix_session\fR(5)
+\fBpam.conf\fR(5), \fBpasswd\fR(5), \fBshadow\fR(5), \fBattributes\fR(7),
+\fBpam_authtok_get\fR(7), \fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7),
+\fBpam_passwd_auth\fR(7), \fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7),
+\fBpam_unix_session\fR(7)
 .SH NOTES
 .sp
 .LP
@@ -184,8 +184,8 @@ The interfaces in \fBlibpam\fR(3LIB) are MT-Safe only if each thread within the
 multi-threaded application uses its own \fBPAM\fR handle.
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported. Similar functionality is
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).

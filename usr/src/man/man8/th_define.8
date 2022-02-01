@@ -52,7 +52,7 @@ given by the errdef become satisfied (in practice, this will occur when the
 access counts go to zero).
 .sp
 .LP
-You use the \fBth_manage\fR(1M) command with the \fBstart\fR option to activate
+You use the \fBth_manage\fR(8) command with the \fBstart\fR option to activate
 the resulting errdef. The effect of \fBth_manage\fR with the \fBstart\fR option
 is that the \fBbofi\fR driver acts upon the errdef by matching the number of
 hardware accesses\(emspecified in \fIcount\fR, that are of the type specified
@@ -440,9 +440,9 @@ log until the log becomes full). Note that, if the errdef specification matches
 multiple driver handles, multiple logging errdefs are registered with the
 \fBbofi\fR driver and logging terminates when all logs become full or when
 \fIcollect_time\fR expires or when the associated errdefs are cleared. The
-current state of the log can be checked with the \fBth_manage\fR(1M) command,
+current state of the log can be checked with the \fBth_manage\fR(8) command,
 using the \fBbroadcast\fR parameter. A log can be terminated by running
-\fBth_manage\fR(1M) with the \fBclear_errdefs\fR option or by sending a
+\fBth_manage\fR(8) with the \fBclear_errdefs\fR option or by sending a
 \fBSIGALRM\fR signal to the \fBth_define\fR process. See \fBalarm\fR(2) for the
 semantics of \fBSIGALRM\fR.
 .RE
@@ -946,5 +946,5 @@ operators.
 
 .SH SEE ALSO
 .LP
-\fBkill\fR(1), \fBth_manage\fR(1M), \fBalarm\fR(2),
+\fBkill\fR(1), \fBth_manage\fR(8), \fBalarm\fR(2),
 \fBddi_check_acc_handle\fR(9F), \fBddi_check_dma_handle\fR(9F)

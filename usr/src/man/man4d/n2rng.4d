@@ -33,7 +33,7 @@ this may inhibit support personnel.
 
 .SH CRYPTO STATISTICS
 Solaris crypto drivers must implement statistics variables.
-Statistics reported by \fBn2rng\fR may be read using the \fBkstat\fR(1M)
+Statistics reported by \fBn2rng\fR may be read using the \fBkstat\fR(8)
 utility.
 The \fBn2rng\fR driver maintains the following statistics:
 .sp
@@ -66,7 +66,7 @@ Number of bytes read from the RNG device.
 .SH KERNEL STATISTICS
 The \fBn2rng\fR driver tallies a set of kernel driver statistics when in the
 Control domain.
-Statistics reported by \fBn2rng\fR may be read using the \fBkstat\fR(1M)
+Statistics reported by \fBn2rng\fR may be read using the \fBkstat\fR(8)
 utility.
 .sp
 .ne 2
@@ -152,7 +152,7 @@ Driver configuration file
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -168,4 +168,4 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcryptoadm\fR(1M), \fBkstat\fR(1M), \fBattributes\fR(5)
+\fBcryptoadm\fR(8), \fBkstat\fR(8), \fBattributes\fR(7)

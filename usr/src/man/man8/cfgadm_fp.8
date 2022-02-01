@@ -29,9 +29,9 @@ cfgadm_fp \- driver specific commands for cfgadm
 .LP
 The \fBfp\fR port driver plug-in \fB/usr/lib/cfgadm/fp.so.1\fR provides the
 functionality for Fibre Channel Fabric device node management through
-\fBcfgadm\fR(1M). \fBcfgadm\fR operates on attachment points. Attachment points
+\fBcfgadm\fR(8). \fBcfgadm\fR operates on attachment points. Attachment points
 are locations in the system where hardware resources can be dynamically
-reconfigured. Refer to \fBcfgadm\fR(1M) for additional details on attachment
+reconfigured. Refer to \fBcfgadm\fR(8) for additional details on attachment
 points.
 .sp
 .LP
@@ -383,7 +383,7 @@ LUNs that are specified in the "pwwn-lun-blacklist" property in the
 \fBfp.conf\fR file will remain unconfigured. The FCP SCSI LUN level listing
 reflects the state of such FCP SCSI LUNs. They stay in the "unconfigured" state
 after reboot or Solaris Dynamic Reconfiguration on the controller that they are
-connected through. Refer to \fBfp\fR(7D) for additional details on the
+connected through. Refer to \fBfp\fR(4D) for additional details on the
 "pwwn-lun-blacklist" property.
 .RE
 
@@ -400,7 +400,7 @@ controller that the device is connected, at which time all fabric devices are
 automatically enumerated. The default behavior may be changed through the use
 of the "manual_configuration_only" property in the \fBfp.conf\fR file. If the
 property is set, the device remains unconfigured after reboot. Refer to
-\fBfp\fR(7D) for additional details on the "manual_configuration_only"
+\fBfp\fR(4D) for additional details on the "manual_configuration_only"
 property.
 .RE
 
@@ -477,7 +477,7 @@ repository. When a Fibre Channel Fabric device is unconfigured using the
 \fB-c\fR \fBunconfigure\fR operation, its physical \fBap_id\fR is deleted from
 the same repository. All fabric devices are automatically enumerated by default
 and the repository is used only if the \fBfp.conf\fR
-"manual_configuration_only" property is set. Refer to \fBfp\fR(7D) for
+"manual_configuration_only" property is set. Refer to \fBfp\fR(4D) for
 additional details on the "manual_configuration_only" property.
 .sp
 You can specify the following commands with the \fB-c\fR option to control the
@@ -532,7 +532,7 @@ is removed.
 .ad
 .sp .6
 .RS 4n
-Refer to \fBcfgadm\fR(1M) for usage information.
+Refer to \fBcfgadm\fR(8) for usage information.
 .RE
 
 .sp
@@ -557,7 +557,7 @@ No hardware specific functions are available at present.
 
 .sp
 .LP
-All other options have the same meaning as defined in the \fBcfgadm\fR(1M) man
+All other options have the same meaning as defined in the \fBcfgadm\fR(8) man
 page.
 .SH EXAMPLES
 .LP
@@ -689,8 +689,8 @@ Reconfigures Fabric device(s) of which physical \fBap_id\fR is listed in
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBcfgadm\fR(1M), \fBsvcadm\fR(1M), \fBconfig_admin\fR(3CFGADM),
-\fBlibcfgadm\fR(3LIB), \fBattributes\fR(5), \fBsmf\fR(5), \fBfp\fR(7D)
+\fBsvcs\fR(1), \fBcfgadm\fR(8), \fBsvcadm\fR(8), \fBconfig_admin\fR(3CFGADM),
+\fBlibcfgadm\fR(3LIB), \fBattributes\fR(7), \fBsmf\fR(7), \fBfp\fR(4D)
 .SH WARNINGS
 .sp
 .LP
@@ -724,7 +724,7 @@ has been replaced by the new \fBunusable_SCSI_LUN\fR option.
 .sp
 .LP
 The \fBcfgadm_fp\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -736,7 +736,7 @@ svc:/system/device/fc-fabric:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP

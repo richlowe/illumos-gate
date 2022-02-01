@@ -30,7 +30,7 @@ each IP interface (probe-based failure detection). Link-based failure detection
 is instantaneous and is always enabled (provided the network driver supports
 the feature); probe-based failure detection must be enabled through the
 configuration of one or more test addresses (described below), but tests the
-entire IP interface send and receive path. The \fBipmpstat\fR(1M) utility can
+entire IP interface send and receive path. The \fBipmpstat\fR(8) utility can
 be used to check which failure detection methods are enabled.
 .sp
 .LP
@@ -45,14 +45,14 @@ same failure detection methods.
 As mentioned above, to perform probe-based failure detection \fBin.mpathd\fR
 requires a test address on each IP interface for the purpose of sending and
 receiving probes. Each address must be marked \fBNOFAILOVER\fR (see
-\fBifconfig\fR(1M)) and \fBin.mpathd\fR will be limited to probing targets on
+\fBifconfig\fR(8)) and \fBin.mpathd\fR will be limited to probing targets on
 the same subnet. Each address may be configured statically or acquired by means
 of DHCP. To find targets, \fBin.mpathd\fR first consults the routing table for
 routes on the same subnet, and uses the specified next-hop. If no routes match,
 it sends all-hosts ICMP probes and selects a subset of the systems that
 respond. Thus, for probe-based failure detection to operate, there must be at
 least one neighbor on each subnet that responds to ICMP echo request probes.
-The \fBipmpstat\fR(1M) utility can be used to display both the current probe
+The \fBipmpstat\fR(8) utility can be used to display both the current probe
 target information and the status of sent probes.
 .sp
 .LP
@@ -81,7 +81,7 @@ administrative configuration specifies, \fBin.mpathd\fR will deactivate one of
 the interfaces (preferably one marked \fBSTANDBY\fR), except when the
 \fBFAILBACK\fR variable is used, as described below. Similar adjustments will
 be made by \fBin.mpathd\fR when offlining IP interfaces (for instance, in
-response to \fBif_mpadm\fR(1M)).
+response to \fBif_mpadm\fR(8)).
 .sp
 .LP
 The \fBin.mpathd\fR daemon accesses three variable values in
@@ -131,8 +131,8 @@ Contains default values used by the \fBin.mpathd\fR daemon.
 .SH SEE ALSO
 .sp
 .LP
-\fBif_mpadm\fR(1M), \fBifconfig\fR(1M), \fBipmpstat\fR(1M),
-\fBattributes\fR(5), \fBicmp\fR(7P), \fBicmp6\fR(7P),
+\fBif_mpadm\fR(8), \fBifconfig\fR(8), \fBipmpstat\fR(8),
+\fBattributes\fR(7), \fBicmp\fR(4P), \fBicmp6\fR(4P),
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR

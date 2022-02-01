@@ -32,14 +32,14 @@ hidden.
 .LP
 If you want to construct a FAT with \fBmkfs\fR for \fBpcfs\fR on a medium that
 is not formatted, you must first perform a low-level format on the medium with
-\fBfdformat\fR(1) or \fBformat\fR(1M). Non-diskette media must also be
-partitioned with the \fBfdisk\fR(1M) utility. Note that all existing data on
+\fBfdformat\fR(1) or \fBformat\fR(8). Non-diskette media must also be
+partitioned with the \fBfdisk\fR(8) utility. Note that all existing data on
 the diskette or disk partition, if any, is destroyed when a new \fBFAT\fR is
 constructed.
 .sp
 .LP
 \fIgeneric_options\fR are supported by the generic \fBmkfs\fR command. See
-\fBmkfs\fR(1M) for a description of these options.
+\fBmkfs\fR(8) for a description of these options.
 .sp
 .LP
 \fIraw_device_file\fR indicates the device on which to write unless the \fB-o
@@ -48,7 +48,7 @@ are passed from the generic \fBmkfs\fR module.
 .SH OPTIONS
 .sp
 .LP
-See \fBmkfs\fR(1M) for the list of supported generic options.
+See \fBmkfs\fR(8) for the list of supported generic options.
 .sp
 .LP
 The following options are supported:
@@ -147,7 +147,7 @@ origination sector can be modified with the hidden option (\fB-h\fR).
 .ad
 .RS 14n
 The number of sectors per track on the disk. If not specified, the value is
-determined by using a \fBdkio\fR(7I) ioctl to get the disk geometry, or (for
+determined by using a \fBdkio\fR(4I) ioctl to get the disk geometry, or (for
 diskette) from the results of an \fBFDIOGCHAR\fR ioctl.
 .RE
 
@@ -158,7 +158,7 @@ diskette) from the results of an \fBFDIOGCHAR\fR ioctl.
 .ad
 .RS 14n
 The number of tracks per cylinder on the disk. If not specified, the value is
-determined by using a \fBdkio\fR(7I) ioctl to get the disk geometry, or (for
+determined by using a \fBdkio\fR(4I) ioctl to get the disk geometry, or (for
 diskette) from the results of an \fBFDIOGCHAR\fR ioctl.
 .RE
 
@@ -254,7 +254,7 @@ suffix indicates that the first partition on the disk should receive the new
 \fBFAT\fR.
 .sp
 For a file, \fIraw_device_file\fR is the block device name returned by
-\fBlofiadm\fR(1M).
+\fBlofiadm\fR(8).
 .RE
 
 .SH EXAMPLES
@@ -325,7 +325,7 @@ mkfs -F pcfs -o nsect=32,ntrack=64 /dev/rdsk/c0t3d0s2:c
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -341,9 +341,9 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBfdformat\fR(1), \fBfdisk\fR(1M), \fBformat\fR(1M), \fBlofiadm\fR(1M),
-\fBmkfs\fR(1M), \fBattributes\fR(5), \fBfd\fR(7D), \fBdkio\fR(7I),
-\fBfdio\fR(7I)
+\fBfdformat\fR(1), \fBfdisk\fR(8), \fBformat\fR(8), \fBlofiadm\fR(8),
+\fBmkfs\fR(8), \fBattributes\fR(7), \fBfd\fR(4D), \fBdkio\fR(4I),
+\fBfdio\fR(4I)
 .SH NOTES
 .sp
 .LP
@@ -371,5 +371,5 @@ the specific \fBMS-DOS\fR system files required by the default boot loader.
 You can use \fBlofiadm\fR to create a file that appears to a \fBmkfs\fR command
 (for example, \fBmkfs_pcfs\fR or \fBmkfs_ufs\fR) as a raw device. You can then
 use a \fBmkfs\fR command to create a file system on that device. See
-\fBlofiadm\fR(1M) for examples of creating a UFS and a PC (FAT) file system on
+\fBlofiadm\fR(8) for examples of creating a UFS and a PC (FAT) file system on
 a device created by \fBlofiadm\fR.

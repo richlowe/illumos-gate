@@ -88,14 +88,14 @@ will no longer be accessible.
 If a streams-based (see \fBIntro\fR(2)) \fIfildes\fR is closed and the calling
 process was previously registered to receive a \fBSIGPOLL\fR signal (see
 \fBsignal\fR(3C)) for events associated with that stream (see \fBI_SETSIG\fR in
-\fBstreamio\fR(7I)), the calling process will be unregistered for events
+\fBstreamio\fR(4I)), the calling process will be unregistered for events
 associated with the stream.  The last \fBclose()\fR for a stream causes the
 stream associated with \fIfildes\fR to be dismantled. If \fBO_NONBLOCK\fR and
 \fBO_NDELAY\fR are not set and there have been no signals posted for the
 stream, and if there is data on the module's write queue, \fBclose()\fR waits
 up to 15 seconds (for each module and driver) for any output to drain before
 dismantling the stream. The time delay can be changed via an \fBI_SETCLTIME\fR
-\fBioctl\fR(2) request (see \fBstreamio\fR(7I)). If the \fBO_NONBLOCK\fR or
+\fBioctl\fR(2) request (see \fBstreamio\fR(4I)). If the \fBO_NONBLOCK\fR or
 \fBO_NDELAY\fR flag is set, or if there are any pending signals, \fBclose()\fR
 does not wait for output to drain, and dismantles the stream immediately.
 .sp
@@ -271,7 +271,7 @@ file should use the corresponding \fBfclose\fR(3C) function rather than
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -292,5 +292,5 @@ MT-Level	Async-Signal-Safe
 \fBIntro\fR(2), \fBcreat\fR(2), \fBdup\fR(2), \fBexec\fR(2), \fBfcntl\fR(2),
 \fBioctl\fR(2), \fBopen\fR(2) \fBpipe\fR(2), \fBfattach\fR(3C),
 \fBfclose\fR(3C), \fBfdetach\fR(3C), \fBfopen\fR(3C), \fBsignal\fR(3C),
-\fBsignal.h\fR(3HEAD), \fBattributes\fR(5), \fBstandards\fR(5),
-\fBstreamio\fR(7I)
+\fBsignal.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7),
+\fBstreamio\fR(4I)

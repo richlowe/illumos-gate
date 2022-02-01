@@ -41,7 +41,7 @@ PCI Express error handling and PCI Express MSI interrupts.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -57,7 +57,7 @@ Architecture	x64 PCI Express-based systems
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBpcie\fR(4), \fBpcie_pci\fR(7D)
+\fBattributes\fR(7), \fBpcie\fR(5), \fBpcie_pci\fR(4D)
 .sp
 .LP
 \fIPCI Express Base Specification v1.0a\fR \(em 2003

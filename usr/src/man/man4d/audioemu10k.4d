@@ -47,7 +47,7 @@ SPDIF features on devices with such capabilities.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -63,4 +63,4 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBaudio\fR(7I), \fBdsp\fR(7I), \fBmixer\fR(7I)
+\fBattributes\fR(7), \fBaudio\fR(4I), \fBdsp\fR(4I), \fBmixer\fR(4I)

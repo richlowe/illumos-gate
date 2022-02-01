@@ -152,7 +152,7 @@ implemented as a call to \fBwaitpid(-1, stat_loc, 0)\fR.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -172,4 +172,4 @@ MT-Level	Async-Signal-Safe
 .LP
 \fBIntro\fR(2), \fBexec\fR(2), \fBexit\fR(2), \fBfork\fR(2), \fBpause\fR(2),
 \fBwaitid\fR(2), \fBptrace\fR(3C), \fBsignal\fR(3C), \fBsignal.h\fR(3HEAD),
-\fBwaitpid\fR(3C), \fBwait.h\fR(3HEAD), \fBattributes\fR(5)
+\fBwaitpid\fR(3C), \fBwait.h\fR(3HEAD), \fBattributes\fR(7)

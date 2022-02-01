@@ -32,7 +32,7 @@ the operating system. See the chapter entitled "User Process Tracing"  in the
 providers to instrument processes.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -47,7 +47,7 @@ Interface Stability	Private
 
 .SH SEE ALSO
 .LP
-\fBdtrace\fR(1M), \fBattributes\fR(5), \fBdtrace\fR(7D)
+\fBdtrace\fR(8), \fBattributes\fR(7), \fBdtrace\fR(4D)
 .sp
 .LP
 \fIDynamic Tracing Guide\fR:

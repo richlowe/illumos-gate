@@ -22,7 +22,7 @@ calling the specific \fBmkfs\fR module indicated by  \fB-F\fR\fI
 FSType\fR\fB\&.\fR
 .sp
 .LP
-\fBNote\fR: ufs file systems are normally created with the \fBnewfs\fR(1M)
+\fBNote\fR: ufs file systems are normally created with the \fBnewfs\fR(8)
 command.
 .sp
 .LP
@@ -33,7 +33,7 @@ command.
 which to write the file system. It is required and  must be the first argument
 following the  \fIspecific_options\fR (if any). \fIoperands\fR are
 \fIFSType\fR-specific. See the \fIFSType\fR-specific manual page of  \fBmkfs\fR
-(for example,  \fBmkfs_ufs \fR(1M)) for a detailed description.
+(for example,  \fBmkfs_ufs\fR(8)) for a detailed description.
 .SH OPTIONS
 .sp
 .LP
@@ -86,7 +86,7 @@ module specific to the file system type.
 .SH USAGE
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBmkfs\fR when
+See \fBlargefile\fR(7) for the description of the behavior of \fBmkfs\fR when
 encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH FILES
 .sp
@@ -120,8 +120,8 @@ List of default parameters for each file system
 .SH SEE ALSO
 .sp
 .LP
-\fBmkfs_ufs\fR(1M), \fBnewfs\fR(1M), \fBvfstab\fR(4), \fBattributes\fR(5),
-\fBlargefile\fR(5)
+\fBmkfs_ufs\fR(8), \fBnewfs\fR(8), \fBvfstab\fR(5), \fBattributes\fR(7),
+\fBlargefile\fR(7)
 .sp
 .LP
 Manual pages for the  \fIFSType\fR-specific modules of  \fBmkfs\fR.
@@ -133,6 +133,6 @@ This command might not be supported for all \fIFSType\fRs.
 .LP
 You can use \fBlofiadm\fR to create a file that appears to a \fBmkfs\fR command
 as a raw device. You can then use a \fBmkfs\fR command to create a file system
-on that device. See \fBlofiadm\fR(1M) for examples of creating a UFS and a PC
-(FAT) file system (using \fBmkfs_ufs\fR(1M) and \fBmkfs_pcfs\fR(1M)) on a
+on that device. See \fBlofiadm\fR(8) for examples of creating a UFS and a PC
+(FAT) file system (using \fBmkfs_ufs\fR(8) and \fBmkfs_pcfs\fR(8)) on a
 device created by \fBlofiadm\fR.

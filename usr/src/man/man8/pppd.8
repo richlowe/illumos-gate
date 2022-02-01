@@ -126,7 +126,7 @@ Request a callback to the given telephone number using Microsoft CBCP.
 .ad
 .RS 23n
 Use the executable or shell command specified by \fIscript\fR to set up the
-serial line. This script would typically use the \fBchat\fR(1M) program to dial
+serial line. This script would typically use the \fBchat\fR(8) program to dial
 the modem and start the remote \fBPPP\fR session. A value for this option
 originating from a privileged source cannot be overridden by a non-privileged
 user.
@@ -208,7 +208,7 @@ of the use of this option.
 .ad
 .RS 23n
 Run the executable or shell command specified by \fIscript\fR to initialize the
-serial line. This script would typically use the \fBchat\fR(1M) program to
+serial line. This script would typically use the \fBchat\fR(8) program to
 configure the modem to enable auto-answer. A value for this option from a
 privileged source cannot be overridden by a non-privileged user.
 .RE
@@ -771,7 +771,7 @@ Enable debugging code in the kernel-level PPP driver. Argument \fIn\fR is the
 sum of the following values: \fB1\fR to enable general debug messages, \fB2\fR
 to request that contents of received packets be printed, and \fB4\fR to request
 contents of transmitted packets be printed. Messages printed by the kernel are
-logged by \fBsyslogd\fR(1M) to a file directed in the \fB/etc/syslog.conf\fR
+logged by \fBsyslogd\fR(8) to a file directed in the \fB/etc/syslog.conf\fR
 configuration file. Do not use the \fBkdebug\fR option to debug failed links.
 Use the \fBdebug\fR option instead.
 .RE
@@ -1265,8 +1265,8 @@ the \fBpersist\fR or \fBdemand\fR option is specified.
 .RS 4n
 Cause \fBpppd\fR to use I_LINK instead of I_PLINK. This is the default. When
 I_LINK is used, the system cleans up terminated interfaces (even when SIGKILL
-is used) but does not allow \fBifconfig\fR(1M) to unplumb PPP streams or insert
-or remove modules dynamically. Use the \fBplink\fR option if \fBifconfig\fR(1M)
+is used) but does not allow \fBifconfig\fR(8) to unplumb PPP streams or insert
+or remove modules dynamically. Use the \fBplink\fR option if \fBifconfig\fR(8)
 modinsert, modremove or unplumb support is needed.
 .RE
 
@@ -1425,8 +1425,8 @@ connection.
 .RS 4n
 Cause \fBpppd\fR to use I_PLINK instead of I_LINK. The default is to use
 I_LINK, which cleans up terminated interface (even if SIGKILL is used), but
-does not allow \fBifconfig\fR(1M) to unplumb PPP streams or insert or remove
-modules dynamically. Use this option if \fBifconfig\fR(1M)
+does not allow \fBifconfig\fR(8) to unplumb PPP streams or insert or remove
+modules dynamically. Use this option if \fBifconfig\fR(8)
 modinsert/modremove/unplumb support is needed. See also the \fBplumbed\fR
 option.
 .RE
@@ -1456,7 +1456,7 @@ that for the session. If IPv4 addresses or IPv6 interface IDs or link MTU are
 otherwise unspecified, they are copied from the interface selected. This mode
 mimics some of the functionality of the older \fBaspppd\fR implementation and
 may be helpful when \fBpppd\fR is used with external applications that use
-\fBifconfig\fR(1M).
+\fBifconfig\fR(8).
 .RE
 
 .sp
@@ -1541,7 +1541,7 @@ user-ID and permissions. Because this option uses a pseudo-tty and a process to
 transfer characters between the pseudo-tty and the real serial device, it
 increases the latency and CPU overhead of transferring data over the PPP
 interface. Characters are stored in a tagged format with timestamps that can be
-displayed in readable form using the \fBpppdump\fR(1M) program. This option is
+displayed in readable form using the \fBpppdump\fR(8) program. This option is
 generally used when debugging the kernel portion of \fBpppd\fR (especially CCP
 compression algorithms) and not for debugging link configuration problems. See
 the \fBdebug\fR option.
@@ -1725,7 +1725,7 @@ Set PPP interface unit number to \fIn\fR, if possible.
 .RS 4n
 With this option, \fBpppd\fR detaches from its controlling terminal after
 establishing the PPP connection. When this is specified, messages sent to
-\fBstderr\fR by the connect script, usually \fBchat\fR(1M), and debugging
+\fBstderr\fR by the connect script, usually \fBchat\fR(8), and debugging
 messages from the debug option are directed to \fBpppd\fR's standard output.
 .RE
 
@@ -2262,7 +2262,7 @@ cua/a 19200 crtscts connect '/usr/bin/chat -f /etc/ppp/chat-isp' noauth
 
 .sp
 .LP
-For this example, \fBchat\fR(1M) is used to dial the ISP's modem and process
+For this example, \fBchat\fR(8) is used to dial the ISP's modem and process
 any login sequence required. The \fB/etc/ppp/chat-isp\fR file is used by
 \fBchat\fR and could contain the following:
 
@@ -2287,7 +2287,7 @@ OK "atdt2468135"
 
 .sp
 .LP
-See the \fBchat\fR(1M) man page for details of \fBchat\fR scripts.
+See the \fBchat\fR(8) man page for details of \fBchat\fR scripts.
 
 .LP
 \fBExample 2 \fRUsing \fBpppd\fR with \fBproxyarp\fR
@@ -2616,7 +2616,7 @@ but only to certain trusted peers.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -2630,8 +2630,8 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBchat\fR(1M), \fBifconfig\fR(1M), \fBcrypt\fR(3C), \fBpam\fR(3PAM),
-\fBattributes\fR(5)
+\fBchat\fR(8), \fBifconfig\fR(8), \fBcrypt\fR(3C), \fBpam\fR(3PAM),
+\fBattributes\fR(7)
 .sp
 .LP
 Haskin, D., Allen, E. \fIRFC 2472 - IP Version 6 Over PPP\fR. Network Working

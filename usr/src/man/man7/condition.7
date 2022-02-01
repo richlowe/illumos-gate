@@ -107,7 +107,7 @@ all threads waiting on the  condition variable.
 The condition destroy functions destroy any state, but not the space,
 associated with the condition variable.
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -127,8 +127,8 @@ MT-Level	MT-Safe
 \fBpthread_cond_broadcast\fR(3C), \fBpthread_cond_destroy\fR(3C),
 \fBpthread_cond_init\fR(3C), \fBpthread_cond_signal\fR(3C),
 \fBpthread_cond_timedwait\fR(3C), \fBpthread_cond_wait\fR(3C),
-\fBpthread_condattr_init\fR(3C), \fBsignal\fR(3C), \fBattributes\fR(5),
-\fBmutex\fR(5), \fBstandards\fR(5)
+\fBpthread_condattr_init\fR(3C), \fBsignal\fR(3C), \fBattributes\fR(7),
+\fBmutex\fR(7), \fBstandards\fR(7)
 .SH NOTES
 If more than one thread is blocked on a condition variable, the order in which
 threads are unblocked is determined by the scheduling policy.

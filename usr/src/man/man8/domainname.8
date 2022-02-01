@@ -24,7 +24,7 @@ components of Solaris to resolve names for entries such as are found in
 as \fBNIS\fR use \fBdomainname\fR to resolve names.
 .sp
 .LP
-With appropriate privileges (root or an equivalent role [see \fBrbac\fR(5)]),
+With appropriate privileges (root or an equivalent role [see \fBrbac\fR(7)]),
 you can set the name of the domain by specifying the name as an argument to the
 \fBdomainname\fR command.
 .sp
@@ -37,7 +37,7 @@ service. If the new domain name is not saved in the \fB/etc/defaultdomain\fR
 file, the machine reverts to the old domain after it reboots.
 .sp
 .LP
-The \fBsendmail\fR(1M) daemon, as shipped with Solaris, and the \fBsendmail\fR
+The \fBsendmail\fR(8) daemon, as shipped with Solaris, and the \fBsendmail\fR
 implementation provided by \fBsendmail.org\fR (formerly referred to as
 "Berkeley 8.x sendmail") both attempt to determine a local host's fully
 qualified host name at startup and both pursue follow-up actions if the initial
@@ -47,7 +47,7 @@ differ.
 .LP
 Both implementations use a standard Solaris or Unix system call to determine
 its fully qualified host name at startup, following the name service priorities
-specified in \fBnsswitch.conf\fR(4). To this point, the Solaris and
+specified in \fBnsswitch.conf\fR(5). To this point, the Solaris and
 \fBsendmail.org\fR versions behave identically.
 .sp
 .LP
@@ -65,7 +65,7 @@ if needed.
 .sp
 .LP
 If the Solaris \fBsendmail\fR cannot determine the fully qualified host name,
-use \fBcheck-hostname\fR(1M) as a troubleshooting aid. This script can offer
+use \fBcheck-hostname\fR(8) as a troubleshooting aid. This script can offer
 guidance as to appropriate corrective action.
 .SH FILES
 .ne 2
@@ -88,15 +88,15 @@ guidance as to appropriate corrective action.
 .SH SEE ALSO
 .LP
 \fBsvcs\fR(1),
-\fBcheck-hostname\fR(1M), \fBhostconfig\fR(1M), \fBnamed\fR(1M),
-\fBsendmail\fR(1M), \fBsvcadm\fR(1M), \fBypinit\fR(1M),
-\fBaliases\fR(4), \fBdefaultdomain\fR(4),
-\fBhosts\fR(4), \fBnsswitch.conf\fR(4), \fBpasswd\fR(4), \fBattributes\fR(5),
-\fBrbac\fR(5), \fBsmf\fR(5)
+\fBcheck-hostname\fR(8), \fBhostconfig\fR(8), \fBnamed\fR(8),
+\fBsendmail\fR(8), \fBsvcadm\fR(8), \fBypinit\fR(8),
+\fBaliases\fR(5), \fBdefaultdomain\fR(5),
+\fBhosts\fR(5), \fBnsswitch.conf\fR(5), \fBpasswd\fR(5), \fBattributes\fR(7),
+\fBrbac\fR(7), \fBsmf\fR(7)
 .SH NOTES
 .LP
 The \fBdomainname\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -108,5 +108,5 @@ svc:/system/identity:domain
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

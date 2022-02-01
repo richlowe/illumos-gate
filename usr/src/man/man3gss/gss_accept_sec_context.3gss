@@ -520,7 +520,7 @@ do {
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -538,7 +538,7 @@ MT-Level	Safe
 \fBgss_delete_sec_context\fR(3GSS), \fBgss_export_sec_context\fR(3GSS),
 \fBgss_get_mic\fR(3GSS), \fBgss_init_sec_context\fR(3GSS),
 \fBgss_release_cred\fR(3GSS), \fBgss_release_name\fR(3GSS),
-\fBgss_store_cred\fR(3GSS), \fBgss_wrap\fR(3GSS), \fBattributes\fR(5)
+\fBgss_store_cred\fR(3GSS), \fBgss_wrap\fR(3GSS), \fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

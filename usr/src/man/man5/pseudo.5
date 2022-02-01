@@ -23,7 +23,7 @@ Each entry in the configuration file creates a prototype devinfo node. Each
 node is assigned an instance number which is determined by the value of the
 \fIinstance\fR property. This property is only applicable to children of the
 \fIpseudo\fR parent, and is required since pseudo devices have no hardware
-address from which to determine the instance number. See \fBdriver.conf\fR(4)
+address from which to determine the instance number. See \fBdriver.conf\fR(5)
 for further details of configuration file syntax.
 .SH EXAMPLES
 .LP
@@ -52,7 +52,7 @@ name="ramdisk" parent="pseudo" instance=1 disk-size=512;\fR
 .SH SEE ALSO
 .sp
 .LP
-\fBdriver.conf\fR(4), \fBddi_prop_op\fR(9F)
+\fBdriver.conf\fR(5), \fBddi_prop_op\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

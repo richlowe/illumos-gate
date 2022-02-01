@@ -26,9 +26,9 @@ on the capability of a SATA device, port multiplier and SATA HBA controller.
 The Solaris SATA framework adheres to the \fISerial ATA 1.0a\fR specification
 and supports SATA-2 signaling speed 3.0Gb/sec. SATA devices that are connected
 to SATA HBAs controlled by a SATA framework-compliant HBA driver are treated by
-the system as SCSI devices. The Solaris SCSI disk driver (\fBsd\fR(7D)) is
+the system as SCSI devices. The Solaris SCSI disk driver (\fBsd\fR(4D)) is
 attached as a target driver for each device node created by the SATA framework.
-You can use the \fBcfgadm\fR(1M) utility to manage hot plugged and unplugged
+You can use the \fBcfgadm\fR(8) utility to manage hot plugged and unplugged
 SATA devices.
 .SH FILES
 .ne 2
@@ -50,7 +50,7 @@ SATA devices.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attribute:
+See \fBattributes\fR(7) for descriptions of the following attribute:
 .sp
 
 .sp
@@ -65,9 +65,9 @@ Architecture	x86
 
 .SH SEE ALSO
 .LP
-\fBcfgadm\fR(1M), \fBprtconf\fR(1M), \fBcfgadm_sata\fR(1M),
-\fBattributes\fR(5), \fBahci\fR(7D), \fBnv_sata\fR(7D),
-\fBsd\fR(7D), \fBsi3124\fR(7D)
+\fBcfgadm\fR(8), \fBprtconf\fR(8), \fBcfgadm_sata\fR(8),
+\fBattributes\fR(7), \fBahci\fR(4D), \fBnv_sata\fR(4D),
+\fBsd\fR(4D), \fBsi3124\fR(4D)
 .sp
 .LP
 \fISerial ATA 1.0a Specification\fR \(em Serial ATA International Organization.
@@ -146,7 +146,7 @@ request from the host.
 .RS 4n
 The specified SATA device port failed and is in an unusable state. You can
 change the port state by deactivating the port and activating it again using
-cfgadm SATA hardware-specific commands (see \fBcfgadm_sata\fR(1M)).
+cfgadm SATA hardware-specific commands (see \fBcfgadm_sata\fR(8)).
 .RE
 
 .sp

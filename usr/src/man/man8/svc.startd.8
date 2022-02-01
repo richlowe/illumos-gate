@@ -33,12 +33,12 @@ restarted if any failures occur. \fBsvc.startd\fR should never be invoked
 directly.
 .sp
 .LP
-See \fBsmf_restarter\fR(5) for information on configuration and behavior common
+See \fBsmf_restarter\fR(7) for information on configuration and behavior common
 to all restarters.
 .sp
 .LP
 \fBsvcs\fR(1) reports status for all services managed by the Service
-Configuration Facility. \fBsvcadm\fR(1M) allows manipulation of service
+Configuration Facility. \fBsvcadm\fR(8) allows manipulation of service
 instances with respect to the service's restarter.
 .SS "Environment Variables"
 Environment variables with the "SMF_" prefix are reserved and may be
@@ -46,9 +46,9 @@ overwritten.
 .sp
 .LP
 \fBsvc.startd\fR supplies the "SMF_" environment variables specified in
-\fBsmf_method\fR(5) to the method. PATH is set to "\fB/usr/sbin:/usr/bin\fR" by
+\fBsmf_method\fR(7) to the method. PATH is set to "\fB/usr/sbin:/usr/bin\fR" by
 default. By default, all other environment variables supplied to
-\fBsvc.startd\fR are those inherited from \fBinit\fR(1M).
+\fBsvc.startd\fR are those inherited from \fBinit\fR(8).
 .sp
 .LP
 Duplicate entries are reduced to a single entry. The value used is undefined.
@@ -56,7 +56,7 @@ Environment entries that are not prefixed with "<\fIname\fR>=" are ignored.
 .SS "Restarter Options"
 \fBsvc.startd\fR is not configured by command line options. Instead,
 configuration is read from the service configuration repository. You can use
-\fBsvccfg\fR(1M) to set all options and properties.
+\fBsvccfg\fR(8) to set all options and properties.
 .sp
 .LP
 The following configuration variables in the \fBoptions\fR property group are
@@ -75,7 +75,7 @@ print to the console during boot. The supported message options include
 to console during boot. The \fBverbose\fR option prints a single message per
 service started to indicate success or failure. You can use the \fBboot\fR
 \fB-m\fR option to override the \fBboot_messages\fR setting at boot time. See
-\fBkernel\fR(1M).
+\fBkernel\fR(8).
 .RE
 
 .sp
@@ -128,7 +128,7 @@ milestone where no services are running apart from the master
 \fBsvc:/system/svc/restarter:default\fR. By default, \fBsvc.startd\fR uses
 \fBall\fR, a synthetic milestone that depends on every service. If this
 property is specified, it overrides any \fBinitdefault\fR setting in
-\fBinittab\fR(4).
+\fBinittab\fR(5).
 .RE
 
 .sp
@@ -153,7 +153,7 @@ Configuration errors, such as disabling \fBsvc.startd\fR are logged by
 \fBsyslog\fR, but ignored.
 .SS "SERVICE STATES"
 Services managed by \fBsvc.startd\fR can appear in any of the states described
-in \fBsmf\fR(5). The state definitions are unmodified by this restarter.
+in \fBsmf\fR(7). The state definitions are unmodified by this restarter.
 .SS "SERVICE REPORTING"
 In addition to any logging done by the managed service, \fBsvc.startd\fR
 provides a common set of service reporting and logging mechanisms.
@@ -247,7 +247,7 @@ instance and the restarter.
 .sp
 .LP
 The general form of methods for the fork/exec model provided by
-\fBsvc.startd\fR are presented in \fBsmf_method\fR(5). The following methods
+\fBsvc.startd\fR are presented in \fBsmf_method\fR(7). The following methods
 are supported as required or optional by services managed by \fBsvc.startd\fR.
 .sp
 .ne 2
@@ -296,14 +296,14 @@ specify the \fB:true\fR token for that method.
 .sp
 .LP
 \fBsvc.startd\fR honors any method context specified for the service or any
-specific method. The method expansion tokens described in \fBsmf_method\fR(5)
+specific method. The method expansion tokens described in \fBsmf_method\fR(7)
 are available for use in all methods invoked by \fBsvc.startd\fR.
 .sp
 .LP
 \fBProperties\fR
 .sp
 .LP
-An overview of the general properties is available in \fBsmf\fR(5). The
+An overview of the general properties is available in \fBsmf\fR(7). The
 specific way in which these general properties interacts with \fBsvc.startd\fR
 follows:
 .sp
@@ -421,7 +421,7 @@ code or if fails to complete before the timeout specified expires. If
 \fBsvc.startd\fR immediately places the service in the maintenance state. For
 all other failures, \fBsvc.startd\fR places the service in the offline state.
 If a service is offline and its dependencies are satisfied, \fBsvc.startd\fR
-tries again to start the service (see \fBsmf\fR(5)).
+tries again to start the service (see \fBsmf\fR(7)).
 .sp
 .LP
 If a contract or transient service does not return from its start method before
@@ -568,8 +568,8 @@ svc:/system/svc/restarter:default> exit
 This request will take effect on the next restart of \fBsvc.startd\fR.
 
 .SH SEE ALSO
-\fBsvcs\fR(1), \fBsvcprop\fR(1), \fBkernel\fR(1M), \fBinit\fR(1M),
-\fBsvcadm\fR(1M), \fBsvccfg\fR(1M), \fBsvc.configd\fR(1M), \fBsetsid\fR(2),
+\fBsvcs\fR(1), \fBsvcprop\fR(1), \fBkernel\fR(8), \fBinit\fR(8),
+\fBsvcadm\fR(8), \fBsvccfg\fR(8), \fBsvc.configd\fR(8), \fBsetsid\fR(2),
 \fBsyslog\fR(3C), \fBlibscf\fR(3LIB), \fBscf_value_is_type\fR(3SCF),
-\fBcontract\fR(4), \fBinit.d\fR(4), \fBprocess\fR(4), \fBinittab\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5), \fBsmf_method\fR(5)
+\fBcontract\fR(5), \fBinit.d\fR(5), \fBprocess\fR(5), \fBinittab\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7), \fBsmf_method\fR(7)

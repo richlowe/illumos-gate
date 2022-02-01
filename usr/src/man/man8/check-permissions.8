@@ -16,7 +16,7 @@ check-permissions \- check permissions on mail rerouting files
 .sp
 .LP
 The  \fBcheck-permissions\fR script is intended as a migration aid for
-\fBsendmail\fR(1M). It checks the \fB/etc/mail/sendmail.cf\fR file for all
+\fBsendmail\fR(8). It checks the \fB/etc/mail/sendmail.cf\fR file for all
 configured alias files, and checks the alias files for \fB:include:\fR files.
 It also checks for certain \fB\&.forward\fR files. For each file that
 \fBcheck-permissions\fR checks, it verifies that none of the parent directories
@@ -80,7 +80,7 @@ Ascii mail aliases file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -96,4 +96,4 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBgetent\fR(1M), \fBsendmail\fR(1M), \fBaliases\fR(4), \fBattributes\fR(5)
+\fBgetent\fR(8), \fBsendmail\fR(8), \fBaliases\fR(5), \fBattributes\fR(7)

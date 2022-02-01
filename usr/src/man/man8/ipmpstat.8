@@ -147,7 +147,7 @@ take precedence.
 .sp .6
 .RS 4n
 The state of the address. Either \fBup\fR if the address is \fBIFF_UP\fR (see
-\fBifconfig\fR(1M)), or \fBdown\fR if the address is not \fBIFF_UP\fR.
+\fBifconfig\fR(8)), or \fBdown\fR if the address is not \fBIFF_UP\fR.
 .RE
 
 .sp
@@ -208,7 +208,7 @@ output fields are supported:
 .sp .6
 .RS 4n
 The IPMP IP interface name associated with the information. For the anonymous
-group (see \fBin.mpathd\fR(1M)), this field will be empty.
+group (see \fBin.mpathd\fR(8)), this field will be empty.
 .RE
 
 .sp
@@ -342,7 +342,7 @@ used by the system for IP data traffic.
 .sp .6
 .RS 4n
 The IPMP IP interface associated with the IP interface. For IP interfaces in
-the anonymous group (see \fBin.mpathd\fR(1M)), this field will be empty.
+the anonymous group (see \fBin.mpathd\fR(8)), this field will be empty.
 .RE
 
 .sp
@@ -827,7 +827,7 @@ interface:
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 .LP
 \fB/usr/sbin/ipmpstat\fR:
@@ -852,5 +852,5 @@ Human-Friendly Format	Not-an-Interface
 \fB/sbin/ipmpstat\fR is not a Committed interface.
 .SH SEE ALSO
 .LP
-\fBif_mpadm\fR(1M), \fBifconfig\fR(1M), \fBin.mpathd\fR(1M),
-\fBattributes\fR(5)
+\fBif_mpadm\fR(8), \fBifconfig\fR(8), \fBin.mpathd\fR(8),
+\fBattributes\fR(7)

@@ -27,7 +27,7 @@ machine remove power, if possible.
 .sp
 .LP
 The \fBhalt\fR and \fBpoweroff\fR utilities normally log the system shutdown to
-the system log daemon, \fBsyslogd\fR(1M), and place a shutdown record in the
+the system log daemon, \fBsyslogd\fR(8), and place a shutdown record in the
 login accounting file \fB/var/adm/wtmpx\fR. These actions are inhibited if the
 \fB-n\fR or \fB-q\fR options are present.
 .SH OPTIONS
@@ -40,7 +40,7 @@ The following options are supported:
 \fB\fB-d\fR\fR
 .ad
 .RS 6n
-Force a system crash dump before rebooting. See \fBdumpadm\fR(1M) for
+Force a system crash dump before rebooting. See \fBdumpadm\fR(8) for
 information on configuring system crash dumps.
 .RE
 
@@ -50,7 +50,7 @@ information on configuring system crash dumps.
 \fB\fB-l\fR\fR
 .ad
 .RS 6n
-Suppress sending a message to the system log daemon, \fBsyslogd\fR(1M), about
+Suppress sending a message to the system log daemon, \fBsyslogd\fR(8), about
 who executed \fBhalt\fR.
 .RE
 
@@ -60,7 +60,7 @@ who executed \fBhalt\fR.
 \fB\fB-n\fR\fR
 .ad
 .RS 6n
-Prevent the \fBsync\fR(1M) before stopping.
+Prevent the \fBsync\fR(8) before stopping.
 .RE
 
 .sp
@@ -94,13 +94,13 @@ History of user access and administration information.
 .SH SEE ALSO
 .sp
 .LP
-\fBdumpadm\fR(1M), \fBinit\fR(1M), \fBreboot\fR(1M), \fBshutdown\fR(1M),
-\fBsync\fR(1M), \fBsyslogd\fR(1M), \fBinittab\fR(4), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBdumpadm\fR(8), \fBinit\fR(8), \fBreboot\fR(8), \fBshutdown\fR(8),
+\fBsync\fR(8), \fBsyslogd\fR(8), \fBinittab\fR(5), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
 The \fBhalt\fR and \fBpoweroff\fR utilities do not cleanly shutdown
-\fBsmf\fR(5) services. Execute the scripts in \fB/etc/rcnum.d\fR or execute
-shutdown actions in \fBinittab\fR(4). To ensure a complete shutdown of system
-services, use \fBshutdown\fR(1M) or \fBinit\fR(1M) to reboot a Solaris system.
+\fBsmf\fR(7) services. Execute the scripts in \fB/etc/rcnum.d\fR or execute
+shutdown actions in \fBinittab\fR(5). To ensure a complete shutdown of system
+services, use \fBshutdown\fR(8) or \fBinit\fR(8) to reboot a Solaris system.

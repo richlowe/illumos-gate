@@ -75,7 +75,7 @@ LDAP client machine, using a profile stored on an LDAP server specified by
 profile to determine the configuration of the LDAP client. Using a
 configuration profile allows for easy installation of LDAP client and
 propagation of configuration changes to LDAP clients. The
-\fBldap_cachemgr\fR(1M) utility will update the LDAP client configuration when
+\fBldap_cachemgr\fR(8) utility will update the LDAP client configuration when
 its cache expires by reading the profile. For more information on the
 configuration profile refer to IETF document \fIA Configuration Schema for LDAP
 Based Directory User Agents\fR.
@@ -152,7 +152,7 @@ initialization are:
 \fBldapclient\fR does not set up a client to resolve hostnames using DNS. It
 simply copies \fB/etc/nsswitch.ldap\fR to \fB/etc/nsswitch.conf\fR. If you
 prefer to use DNS for host resolution, please refer to the DNS documentation
-for information on setting up DNS. See \fBresolv.conf\fR(4). If you want to use
+for information on setting up DNS. See \fBresolv.conf\fR(5). If you want to use
 \fBsasl/GSSAPI\fR as the authentication method, you have to use DNS for
 \fBhosts\fR and \fBipnodes\fR resolution.
 .sp
@@ -658,7 +658,7 @@ is the name of the profile to be generated. The default value is \fBdefault\fR.
 .RS 4n
 Specify the TTL value in seconds for the client information. This is only
 relevant if the machine was initialized with a client profile. If you do not
-want \fBldap_cachemgr\fR(1M) to attempt to refresh the LDAP client
+want \fBldap_cachemgr\fR(8) to attempt to refresh the LDAP client
 configuration from the LDAP server, set \fBprofileTTL\fR to 0 (zero). Valid
 values are either zero 0 (for no expiration) or a positive integer in seconds.
 The default value is 12 hours.
@@ -724,9 +724,9 @@ Three services support this feature: \fBpasswd-cmd\fR, \fBkeyserv\fR, and
 \fBpam_ldap\fR. The \fBpasswd-cmd\fR service is used to define the
 authentication method to be used by \fBpasswd\fR(1) to change the user's
 password and other attributes. The \fBkeyserv\fR service is used to identify
-the authentication method to be used by the \fBchkey\fR(1) and \fBnewkey\fR(1M)
+the authentication method to be used by the \fBchkey\fR(1) and \fBnewkey\fR(8)
 utilities. The \fBpam_ldap\fR service defines the authentication method to be
-used for authenticating users when \fBpam_ldap\fR(5) is configured. If this
+used for authenticating users when \fBpam_ldap\fR(7) is configured. If this
 attribute is not set for any of these services, the \fBauthenticationMethod\fR
 attribute is used to define the authentication method. This is a multivalued
 attribute.
@@ -1087,7 +1087,7 @@ modified manually. Their content is not guaranteed to be human readable. Use
 .sp .6
 .RS 4n
 System default domain name, matching the domain name of the data in the LDAP
-servers. See \fBdefaultdomain\fR(4).
+servers. See \fBdefaultdomain\fR(5).
 .RE
 
 .sp
@@ -1097,7 +1097,7 @@ servers. See \fBdefaultdomain\fR(4).
 .ad
 .sp .6
 .RS 4n
-Configuration file for the name-service switch. See \fBnsswitch.conf\fR(4).
+Configuration file for the name-service switch. See \fBnsswitch.conf\fR(5).
 .RE
 
 .sp
@@ -1112,7 +1112,7 @@ files.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1128,9 +1128,9 @@ Interface Stability	Evolving
 .SH SEE ALSO
 \fBchkey\fR(1), \fBldap\fR(1), \fBldapadd\fR(1), \fBldapdelete\fR(1),
 \fBldaplist\fR(1), \fBldapmodify\fR(1), \fBldapmodrdn\fR(1),
-\fBldapsearch\fR(1), \fBidsconfig\fR(1M), \fBldapaddent\fR(1M),
-\fBldap_cachemgr\fR(1M), \fBdefaultdomain\fR(4),
-\fBnsswitch.conf\fR(4), \fBresolv.conf\fR(4), \fBattributes\fR(5)
+\fBldapsearch\fR(1), \fBidsconfig\fR(8), \fBldapaddent\fR(8),
+\fBldap_cachemgr\fR(8), \fBdefaultdomain\fR(5),
+\fBnsswitch.conf\fR(5), \fBresolv.conf\fR(5), \fBattributes\fR(7)
 .SH CAUTION
 Currently \fBStartTLS\fR is not supported by \fBlibldap.so.5\fR, therefore the
 port number provided refers to the port used during a TLS open, rather than the

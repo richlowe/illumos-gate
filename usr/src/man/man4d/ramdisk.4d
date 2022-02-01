@@ -16,8 +16,8 @@ ramdisk \- RAM disk device driver
 .sp
 .LP
 The \fBramdisk\fR driver supports numerous ramdisk devices that are created by
-the system during the boot  process (see \fBboot\fR(1M)) or during normal
-system operation (see \fBramdiskadm\fR(1M) for more information).
+the system during the boot  process (see \fBboot\fR(8)) or during normal
+system operation (see \fBramdiskadm\fR(8) for more information).
 .SH DEVICE SPECIAL FILES
 .sp
 .LP
@@ -162,7 +162,7 @@ Driver configuration file. (Do not alter).
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attribute:
+See \fBattributes\fR(7) for descriptions of the following attribute:
 .sp
 
 .sp
@@ -178,8 +178,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBramdiskadm\fR(1M), \fBfsck\fR(1M), \fBfstyp\fR(1M), \fBmount\fR(1M),
-\fBnewfs\fR(1M), \fBdriver.conf\fR(4), \fBfilesystem\fR(5), \fBdkio\fR(7I)
+\fBramdiskadm\fR(8), \fBfsck\fR(8), \fBfstyp\fR(8), \fBmount\fR(8),
+\fBnewfs\fR(8), \fBdriver.conf\fR(5), \fBfilesystem\fR(7), \fBdkio\fR(4I)
 .SH NOTES
 .sp
 .LP

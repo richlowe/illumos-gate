@@ -56,10 +56,10 @@ time and cumulative residence-length product for each queue.
 .sp
 .LP
 Not all device drivers make per-partition IO statistics available for
-reporting. \fBssd\fR and \fBsd\fR(7D) per-partition statistics are  enabled by
+reporting. \fBssd\fR and \fBsd\fR(4D) per-partition statistics are  enabled by
 default but may be disabled in their configuration files.
 .SH IOCTLS
-Refer to  \fBdkio\fR(7I).
+Refer to  \fBdkio\fR(4I).
 .SH ERRORS
 .ne 2
 .na
@@ -146,7 +146,7 @@ The default value is 1, which causes partition IO statistics to be maintained.
 Set this value to zero to prevent the driver from recording partition
 statistics. This slightly reduces the CPU overhead for IO, minimizes the amount
 of \fBsar\fR(1) data collected and makes these statistics unavailable for
-reporting by \fBiostat\fR(1M) even though the \fB-p\fR/\fB-P\fR option is
+reporting by \fBiostat\fR(8) even though the \fB-p\fR/\fB-P\fR option is
 specified.  Regardless of this setting, disk IO statistics are always
 maintained.
 .RE
@@ -260,9 +260,9 @@ partition \fIn\fR (0-7)
 .RE
 
 .SH SEE ALSO
-\fBsar\fR(1), \fBformat\fR(1M), \fBiostat\fR(1M), \fBioctl\fR(2),
+\fBsar\fR(1), \fBformat\fR(8), \fBiostat\fR(8), \fBioctl\fR(2),
 \fBlseek\fR(2), \fBopen\fR(2), \fBread\fR(2), \fBwrite\fR(2),
-\fBscsi\fR(4), \fBdriver.conf\fR(4), \fBcdio\fR(7I), \fBdkio\fR(7I)
+\fBscsi\fR(5), \fBdriver.conf\fR(5), \fBcdio\fR(4I), \fBdkio\fR(4I)
 .sp
 .LP
 \fIANSI Small Computer System Interface-2 (SCSI-2)\fR

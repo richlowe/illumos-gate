@@ -15,7 +15,7 @@ $HOME/.printers
 .SH DESCRIPTION
 .LP
 The \fB$HOME/.printers\fR file is a simplified version of the system
-\fB/etc/printers.conf\fR file. See \fBprinters.conf\fR(4). Users create the
+\fB/etc/printers.conf\fR file. See \fBprinters.conf\fR(5). Users create the
 \fB$HOME/.printers\fR file in their home directory. This optional file is
 customizable by the user.
 .sp
@@ -30,7 +30,7 @@ Sets personal aliases for all print commands.
 .TP
 2.
 Sets the interest list for the \fBlpget\fR, \fBlpstat\fR, and \fBcancel\fR
-commands. See \fBlpget\fR(1M), \fBlpstat\fR(1) and \fBcancel\fR(1).
+commands. See \fBlpget\fR(8), \fBlpstat\fR(1) and \fBcancel\fR(1).
 .RE
 .RS +4
 .TP
@@ -60,10 +60,10 @@ by a NEWLINE.
 .LP
 Specify the alias or aliases in the first field. Separate multiple aliases by a
 pipe sign (`\fB|\fR'). Specify the destination in the second field. A
-destination names a printer or class of printers, See \fBlpadmin\fR(1M).
+destination names a printer or class of printers, See \fBlpadmin\fR(8).
 Specify the destination using atomic, URI-style
 (\fIscheme\fR\fB://\fR\fBendpoint\fR), or POSIX-style
-(\fIserver\fR\fB:\fR\fIdestination\fR) names. See \fBprinters.conf\fR(4) for
+(\fIserver\fR\fB:\fR\fIdestination\fR) names. See \fBprinters.conf\fR(5) for
 information regarding the naming conventions for destination names.
 .SS "Setting the Interest List for lpget, lpstat and cancel"
 .LP
@@ -71,7 +71,7 @@ Specify \fB_all\fR in the first field. Specify the list of destinations for the
 interest list in the second field. Separate each destinations by a comma
 (`\fB,\fR'). Specify destinations using atomic, URI-style
 (\fIscheme\fR\fB://\fR\fBendpoint\fR), or POSIX-style
-(\fIserver\fR\fB:\fR\fIdestination\fR) names. See \fBprinters.conf\fR(4) for
+(\fIserver\fR\fB:\fR\fIdestination\fR) names. See \fBprinters.conf\fR(5) for
 information regarding the naming conventions for destination names. This list
 of destinations can refer to an alias defined in \fB$HOME/.printers\fR.
 .SS "Setting the Default Destination"
@@ -79,14 +79,14 @@ of destinations can refer to an alias defined in \fB$HOME/.printers\fR.
 Specify \fB_default\fR in the first field. Specify the default destination in
 the second field. Specify the default destination using atomic, URI-style
 (\fIscheme\fR\fB://\fR\fBendpoint\fR), or POSIX-style
-(\fIserver\fR\fB:\fR\fIdestination\fR) names. See \fBprinters.conf\fR(4) for
+(\fIserver\fR\fB:\fR\fIdestination\fR) names. See \fBprinters.conf\fR(5) for
 information regarding the naming conventions for destination names. The default
 destination can refer to an alias defined in \fB$HOME/.printers\fR.
 .SS "Locating Destination Information"
 .LP
 The print client commands locate destination information based on the
 "printers" database entry in the \fB/etc/nsswitch.conf\fR file. See
-\fBnsswitch.conf\fR(4).
+\fBnsswitch.conf\fR(5).
 .SS "Locating the Personal Default Destination"
 .LP
 The default destination is located differently depending on the command.
@@ -275,7 +275,7 @@ LDAP version of \fB/etc/printers.conf\fR
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -291,8 +291,8 @@ Interface Stability	Stable
 .SH SEE ALSO
 .LP
 \fBcancel\fR(1), \fBlp\fR(1), \fBlpq\fR(1B), \fBlpr\fR(1B), \fBlprm\fR(1B),
-\fBlpstat\fR(1), \fBlpadmin\fR(1M), \fBlpget\fR(1M), \fBnsswitch.conf\fR(4),
-\fBprinters.conf\fR(4), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBlpstat\fR(1), \fBlpadmin\fR(8), \fBlpget\fR(8), \fBnsswitch.conf\fR(5),
+\fBprinters.conf\fR(5), \fBattributes\fR(7), \fBstandards\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

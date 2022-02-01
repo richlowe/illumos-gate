@@ -115,7 +115,7 @@ The operation is successful.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -136,4 +136,4 @@ MT-Level	Safe
 .sp
 .LP
 \fBlibMPAPI\fR(3LIB), \fBMP_GetAssociatedTPGOidList\fR(3MPAPI),
-\fBMP_GetMPLuOidListFromTPG\fR(3MPAPI), \fBattributes\fR(5)
+\fBMP_GetMPLuOidListFromTPG\fR(3MPAPI), \fBattributes\fR(7)

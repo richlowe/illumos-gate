@@ -23,7 +23,7 @@ date) to magnetic tape, diskette, or disk file.
 The \fBufsdump\fR command can only be used on unmounted file systems, or those
 mounted read-only. Attempting to dump a mounted, read-write file system might
 result in a system disruption or the inability to restore files from the dump.
-Consider using the \fBfssnap\fR(1M) command to create a file system snapshot if
+Consider using the \fBfssnap\fR(8) command to create a file system snapshot if
 you need a point-in-time image of a file system that is mounted.
 .sp
 .LP
@@ -77,7 +77,7 @@ files modified or added since the "level \fB2\fR" (Monday) backup. A "level
 .sp .6
 .RS 4n
 Archive file. Archive a dump table-of-contents in the specified
-\fIarchive_file\fR to be used by \fBufsrestore\fR(1M) to determine whether a
+\fIarchive_file\fR to be used by \fBufsrestore\fR(8) to determine whether a
 file is in the dump file that is being restored.
 .RE
 
@@ -143,7 +143,7 @@ values for tape devices are:
 .sp .6
 .RS 4n
 1000 BPI The tape densities and other options are documented in the
-\fBst\fR(7D) man page.
+\fBst\fR(4D) man page.
 .RE
 
 .RE
@@ -170,7 +170,7 @@ Dump file. Use \fIdump_file\fR as the file to dump to, instead of
 standard output.
 .sp
 If the name of the file is of the form \fImachine\fR\fB:\fR\fIdevice,\fR the
-dump is done from the specified machine over the network using \fBrmt\fR(1M).
+dump is done from the specified machine over the network using \fBrmt\fR(8).
 Since \fBufsdump\fR is normally run by root, the name of the local machine must
 appear in the \fB/.rhosts\fR file of the remote machine. If the file is
 specified as \fIuser\fR\fB@\fR\fImachine\fR\fB:\fR\fIdevice,\fR \fBufsdump\fR
@@ -217,7 +217,7 @@ is specific to the \fBufsdump\fR tape format, and bears no resemblance to
 .RS 4n
 Notify all operators in the \fBsys\fR group that \fBufsdump\fR requires
 attention by sending messages to their terminals, in a manner similar to that
-used by the \fBwall\fR(1M) command. Otherwise, such messages are sent only to
+used by the \fBwall\fR(8) command. Otherwise, such messages are sent only to
 the terminals (such as the console) on which the user running \fBufsdump\fR is
 logged in.
 .RE
@@ -451,7 +451,7 @@ If no \fIoptions\fR are given, the default is \fB9uf\fR \fB/dev/rmt/0\fR
 \fIfiles_to_dump\fR.
 .SH USAGE
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBufsdump\fR
+See \fBlargefile\fR(7) for the description of the behavior of \fBufsdump\fR
 when encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH EXAMPLES
 .LP
@@ -569,10 +569,10 @@ list of file systems
 
 .SH SEE ALSO
 .LP
-\fBcpio\fR(1), \fBtar\fR(1), \fBdd\fR(1M), \fBdevnm\fR(1M), \fBfssnap\fR(1M),
-\fBprtvtoc\fR(1M), \fBrmt\fR(1M), \fBshutdown\fR(1M), \fBufsrestore\fR(1M),
-\fBvolcopy\fR(1M), \fBwall\fR(1M), \fBscanf\fR(3C), \fBufsdump\fR(4),
-\fBattributes\fR(5), \fBlargefile\fR(5), \fBst\fR(7D)
+\fBcpio\fR(1), \fBtar\fR(1), \fBdd\fR(8), \fBdevnm\fR(8), \fBfssnap\fR(8),
+\fBprtvtoc\fR(8), \fBrmt\fR(8), \fBshutdown\fR(8), \fBufsrestore\fR(8),
+\fBvolcopy\fR(8), \fBwall\fR(8), \fBscanf\fR(3C), \fBufsdump\fR(5),
+\fBattributes\fR(7), \fBlargefile\fR(7), \fBst\fR(4D)
 .SH NOTES
 .SS "Read Errors"
 .LP
@@ -600,7 +600,7 @@ checkpoint after a defective volume has been replaced.
 .LP
 It is vital to perform full, "level \fB0\fR", dumps at regular intervals. When
 performing a full dump, bring the machine down to single-user mode using
-\fBshutdown\fR(1M). While preparing for a full dump, it is a good idea to clean
+\fBshutdown\fR(8). While preparing for a full dump, it is a good idea to clean
 the tape drive and heads. Incremental dumps should be performed with the system
 running in single-user mode.
 .sp

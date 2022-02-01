@@ -101,7 +101,7 @@ itadm \- administer iSCSI targets
 .SH DESCRIPTION
 .LP
 The \fBitadm\fR command manages Internet SCSI (iSCSI) target nodes within the
-SCSI Target Mode Framework described in \fBstmfadm\fR(1M) and
+SCSI Target Mode Framework described in \fBstmfadm\fR(8) and
 \fBlibstmf\fR(3LIB).  This allows the iSCSI initiators to access STMF logical
 units using the iSCSI protocol. In addition to iSCSI target nodes, \fBitadm\fR
 manages two other classes of managed objects: iSCSI Target Portal Groups, and
@@ -233,7 +233,7 @@ Specifies the CHAP username for a target for use in mutual CHAP authentication.
 This value is allowed only for targets, cannot be set globally, and is used
 only when the initiator node is configured to use mutual CHAP authentication.
 If no value is specified then the target node name is used as the username. See
-\fBiscsiadm\fR(1M).
+\fBiscsiadm\fR(8).
 .RE
 
 .sp
@@ -968,7 +968,7 @@ iqn.1986-03.com.sun:02:2cb0c526-c05a-e279-e396-a367006f4227  online   1
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -983,4 +983,4 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBiscsiadm\fR(1M), \fBstmfadm\fR(1M), \fBlibstmf\fR(3LIB), \fBattributes\fR(5)
+\fBiscsiadm\fR(8), \fBstmfadm\fR(8), \fBlibstmf\fR(3LIB), \fBattributes\fR(7)

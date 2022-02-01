@@ -23,9 +23,9 @@ boot.
 The \fBldap_cachemgr\fR utility provides caching for all parameters as
 specified and used by the LDAP naming service clients. The \fBldap_cachemgr\fR
 utility uses the cache files which are originally created by executing the
-\fBldapclient\fR(1M) utility, as cold start files. Updates to the cache files
+\fBldapclient\fR(8) utility, as cold start files. Updates to the cache files
 take place dynamically if profiles are used to configure the client. See the
-\fBinit\fR option to \fBldapclient\fR(1M).
+\fBinit\fR option to \fBldapclient\fR(8).
 .sp
 .LP
 The \fBldap_cachemgr\fR utility helps improve the performance of the clients
@@ -38,7 +38,7 @@ configuration files readable by superuser only.
 The cache maintained by this daemon is shared by all the processes that access
 LDAP Naming information. All processes access this cache through a door call.
 On startup, \fBldap_cachemgr\fR initializes the cache from the cache files. See
-\fBldapclient\fR(1M). Thus, the cache survives machine reboots.
+\fBldapclient\fR(8). Thus, the cache survives machine reboots.
 .sp
 .LP
 The \fBldap_cachemgr\fR daemon also acts as its own administration tool. If an
@@ -124,7 +124,7 @@ Default log file.
 .RS 4n
 Files containing the LDAP configuration of the client. These files are not to
 be modified manually. Their content is not guaranteed to be human readable. Use
-\fBldapclient\fR(1M) to update these files.
+\fBldapclient\fR(8) to update these files.
 .RE
 
 .SH WARNINGS
@@ -136,13 +136,13 @@ release.
 .LP
 \fBldap\fR(1), \fBldapadd\fR(1), \fBldapdelete\fR(1), \fBldaplist\fR(1),
 \fBldapmodify\fR(1), \fBldapmodrdn\fR(1), \fBldapsearch\fR(1), \fBpkill\fR(1),
-\fBsvcs\fR(1), \fBidsconfig\fR(1M), \fBldapaddent\fR(1M), \fBldapclient\fR(1M),
-\fBsvcadm\fR(1M), \fBsignal.h\fR(3HEAD),
-\fBresolv.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBidsconfig\fR(8), \fBldapaddent\fR(8), \fBldapclient\fR(8),
+\fBsvcadm\fR(8), \fBsignal.h\fR(3HEAD),
+\fBresolv.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 .LP
 The \fBldap_cachemgr\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -154,5 +154,5 @@ svc:/network/ldap/client
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

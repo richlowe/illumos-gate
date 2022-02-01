@@ -222,7 +222,7 @@ string \fBauditing\fR meaning auditing is enabled and turned on (the kernel
 audit module is constructing and queuing audit records); \fBnoaudit\fR, meaning
 auditing is enabled but turned off (the kernel audit module is not constructing
 and queuing audit records); or \fBnospace\fR, meaning there is no space for
-saving audit records. See \fBauditon\fR(2) and \fBauditd\fR(1M) for further
+saving audit records. See \fBauditon\fR(2) and \fBauditd\fR(8) for further
 information.
 .RE
 
@@ -519,7 +519,7 @@ gen nona kern  aud  ctl  enq wrtn wblk rblk drop  tot  mem
 .in -2
 .sp
 
-See \fBauditstat\fR(1M) for a description of the headings in \fB-getstat\fR
+See \fBauditstat\fR(8) for a description of the headings in \fB-getstat\fR
 output.
 .RE
 
@@ -815,7 +815,7 @@ By default, they are not included.
 .ad
 .RS 16n
 Maintain separate configuration, queues, and logs for each zone and execute a
-separate version of \fBauditd\fR(1M) for each zone.
+separate version of \fBauditd\fR(8) for each zone.
 .RE
 
 .sp
@@ -1037,7 +1037,7 @@ Stores class definitions used in the audit system.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1052,10 +1052,10 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBaudit\fR(1M), \fBauditd\fR(1M), \fBauditstat\fR(1M),
-\fBpraudit\fR(1M), \fBauditon\fR(2), \fBexecv\fR(2), \fBaudit_class\fR(4),
-\fBaudit_event\fR(4), \fBattributes\fR(5),
-\fBaudit_binfile\fR(5), \fBaudit_remote\fR(5), \fBaudit_syslog\fR(5)
+\fBaudit\fR(8), \fBauditd\fR(8), \fBauditstat\fR(8),
+\fBpraudit\fR(8), \fBauditon\fR(2), \fBexecv\fR(2), \fBaudit_class\fR(5),
+\fBaudit_event\fR(5), \fBattributes\fR(7),
+\fBaudit_binfile\fR(7), \fBaudit_remote\fR(7), \fBaudit_syslog\fR(7)
 .SH NOTES
 .LP
 If the \fBaudit_remote\fR or \fBaudit_syslog\fR plugins are active, the
@@ -1077,9 +1077,9 @@ audit reflects the local zone if \fBperzone\fR is set. Otherwise, it reflects
 the settings of the global zone.
 .sp
 .LP
-The \fB-setcond\fR option has been removed. Use \fBaudit\fR(1M) to enable or
+The \fB-setcond\fR option has been removed. Use \fBaudit\fR(8) to enable or
 disable auditing.
 .sp
 .LP
 The \fB-getfsize\fR and \fB-setfsize\fR options have been removed. Use
-\fBaudit_binfile\fR(5) \fBp_fsize\fR to set the audit file size.
+\fBaudit_binfile\fR(7) \fBp_fsize\fR to set the audit file size.

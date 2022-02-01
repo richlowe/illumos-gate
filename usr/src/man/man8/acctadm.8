@@ -106,7 +106,7 @@ resource groups for all available accounting types. See OPERANDS.
 .ad
 .sp .6
 .RS 4n
-Start method for the \fBsmf\fR(5) instance. This option is used to restore the
+Start method for the \fBsmf\fR(7) instance. This option is used to restore the
 extended accounting configuration at boot.
 .RE
 
@@ -170,8 +170,8 @@ facility.
 .ad
 .sp .6
 .RS 4n
-Run \fBacctadm\fR on links and flows administered by \fBdladm\fR(1M) and
-\fBflowadm\fR(1M), respectively. Basic network accounting relates only to
+Run \fBacctadm\fR on links and flows administered by \fBdladm\fR(8) and
+\fBflowadm\fR(8), respectively. Basic network accounting relates only to
 links, while extended network accounting includes both link and flow
 accounting.
 .RE
@@ -328,7 +328,7 @@ Invalid command line options were specified.
 .ad
 .sp .6
 .RS 4n
-A fatal, non-configuration error occurred during the start of the \fBsmf\fR(5)
+A fatal, non-configuration error occurred during the start of the \fBsmf\fR(7)
 service instance.
 .RE
 
@@ -339,13 +339,13 @@ service instance.
 .ad
 .sp .6
 .RS 4n
-A fatal configuration error occurred during the start of the \fBsmf\fR(5)
+A fatal configuration error occurred during the start of the \fBsmf\fR(7)
 service instance.
 .RE
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -360,8 +360,8 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBdladm\fR(1M), \fBflowadm\fR(1M), \fBacct\fR(2), \fBattributes\fR(5),
-\fBsmf\fR(5), \fBipqos\fR(7IPP)
+\fBdladm\fR(8), \fBflowadm\fR(8), \fBacct\fR(2), \fBattributes\fR(7),
+\fBsmf\fR(7), \fBipqos\fR(4IPP)
 .SH NOTES
 .LP
 Both extended accounting and regular accounting can be active.
@@ -372,7 +372,7 @@ platform.
 .sp
 .LP
 Extended accounting configuration is stored in the service management facility
-(\fBsmf\fR(5)) repository. The configuration is restored at boot by a transient
+(\fBsmf\fR(7)) repository. The configuration is restored at boot by a transient
 service instance, one per accounting type:
 .sp
 .in +2
@@ -389,7 +389,7 @@ svc:/system/extended-accounting:net         Network accounting
 .LP
 The instances are enabled or disabled by \fBacctadm\fR as needed. Configuration
 changes are made using \fBacctadm\fR; service properties should not be modified
-directly using \fBsvccfg\fR(1M).
+directly using \fBsvccfg\fR(8).
 .sp
 .LP
 Users can manage extended accounting (start accounting, stop accounting, change

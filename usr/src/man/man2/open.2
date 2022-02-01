@@ -468,9 +468,9 @@ files.  For \fBSTREAMS\fR drivers, the implementation of \fBO_NONBLOCK\fR and
 .sp
 .LP
 When \fBopen()\fR is invoked to open a named stream, and the \fBconnld\fR
-module (see \fBconnld\fR(7M)) has been pushed on the pipe, \fBopen()\fR blocks
+module (see \fBconnld\fR(4M)) has been pushed on the pipe, \fBopen()\fR blocks
 until the server process has issued an \fBI_RECVFD\fR \fBioctl()\fR (see
-\fBstreamio\fR(7I)) to receive the file descriptor.
+\fBstreamio\fR(4I)) to receive the file descriptor.
 .sp
 .LP
 If \fIpath\fR names the master side of a pseudo-terminal device, then it is
@@ -548,7 +548,7 @@ of the file to be created.
 The {\fBPRIV_FILE_DAC_SEARCH\fR} privilege allows processes to search
 directories regardless of permission bits. The {\fBPRIV_FILE_DAC_WRITE\fR}
 privilege allows processes to open files for writing regardless of permission
-bits. See \fBprivileges\fR(5) for special considerations when opening files
+bits. See \fBprivileges\fR(7) for special considerations when opening files
 owned by UID 0 for writing. The {\fBPRIV_FILE_DAC_READ\fR} privilege allows
 processes to open files for reading regardless of permission bits.
 .RE
@@ -991,10 +991,10 @@ if ((pfd = open(filename, O_WRONLY | O_CREAT | O_TRUNC,
 
 .SH USAGE
 The \fBopen()\fR function has a transitional interface for 64-bit file offsets.
-See \fBlf64\fR(5). Note that using \fBopen64()\fR is equivalent to using
+See \fBlf64\fR(7). Note that using \fBopen64()\fR is equivalent to using
 \fBopen()\fR with \fBO_LARGEFILE\fR set in \fIoflag\fR.
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1008,7 +1008,7 @@ Interface Stability	Committed
 _
 MT-Level	Async-Signal-Safe
 _
-Standard	For \fBopen()\fR, see \fBstandards\fR(5).
+Standard	For \fBopen()\fR, see \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
@@ -1017,8 +1017,8 @@ Standard	For \fBopen()\fR, see \fBstandards\fR(5).
 \fBlseek\fR(2), \fBputmsg\fR(2), \fBread\fR(2), \fBstat\fR(2), \fBumask\fR(2),
 \fBwrite\fR(2), \fBattropen\fR(3C), \fBdirectio\fR(3C),
 \fBfcntl.h\fR(3HEAD), \fBstat.h\fR(3HEAD),
-\fBunlockpt\fR(3C), \fBattributes\fR(5), \fBlf64\fR(5), \fBprivileges\fR(5),
-\fBstandards\fR(5), \fBconnld\fR(7M), \fBstreamio\fR(7I)
+\fBunlockpt\fR(3C), \fBattributes\fR(7), \fBlf64\fR(7), \fBprivileges\fR(7),
+\fBstandards\fR(7), \fBconnld\fR(4M), \fBstreamio\fR(4I)
 .SH NOTES
 Hierarchical Storage Management (HSM) file systems can sometimes cause long
 delays when opening a file, since HSM files must be recalled from secondary

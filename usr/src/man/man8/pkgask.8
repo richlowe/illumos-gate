@@ -53,7 +53,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -65,7 +65,7 @@ zone's file system. See \fBzones\fR(5).
 .RS 16n
 Identify a file or directory which should be created to contain the responses
 to interaction with the package. The name must be a full pathname. The file, or
-directory of files, can later be used as input to the \fBpkgadd\fR(1M) command.
+directory of files, can later be used as input to the \fBpkgadd\fR(8) command.
 .RE
 
 .SH OPERANDS
@@ -106,8 +106,8 @@ An error occurred.
 .sp
 .LP
 \fBpkginfo\fR(1), \fBpkgmk\fR(1), \fBpkgparam\fR(1), \fBpkgproto\fR(1),
-\fBpkgtrans\fR(1), \fBinstallf\fR(1M), \fBpkgadd\fR(1M), \fBpkgchk\fR(1M),
-\fBpkgrm\fR(1M), \fBremovef\fR(1M), \fBadmin\fR(4), \fBattributes\fR(5)
+\fBpkgtrans\fR(1), \fBinstallf\fR(8), \fBpkgadd\fR(8), \fBpkgchk\fR(8),
+\fBpkgrm\fR(8), \fBremovef\fR(8), \fBadmin\fR(5), \fBattributes\fR(7)
 .sp
 .LP
 \fI\fR
@@ -118,14 +118,14 @@ The \fB-r\fR option can be used to indicate a directory name as well as a
 filename. The directory name is used to create numerous response files, each
 sharing the name of the package with which it should be associated. This would
 be used, for example, when you will be adding multiple interactive packages
-with one invocation of \fBpkgadd\fR(1M). Each package would need a response
+with one invocation of \fBpkgadd\fR(8). Each package would need a response
 file. To create multiple response files with the same name as the package
 instance, name the directory in which the files should be created and supply
 multiple instance names with the \fBpkgask\fR command. When installing the
-packages, you will be able to identify this directory to the \fBpkgadd\fR(1M)
+packages, you will be able to identify this directory to the \fBpkgadd\fR(8)
 command.
 .sp
 .LP
 If the default \fBadmin\fR file is too restrictive, the administration file may
 need to be modified to allow for total non-interaction during a package
-installation. See \fBadmin\fR(4) for details.
+installation. See \fBadmin\fR(5) for details.

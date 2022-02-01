@@ -22,7 +22,7 @@ to protect data that follows in the datagram. For \fBTCP\fR packets, \fBESP\fR
 encapsulates the \fBTCP\fR header and its data only.  If the packet is an
 \fBIP\fR in \fBIP\fR datagram, \fBESP\fR protects the inner \fBIP\fR datagram.
 Per-socket policy allows "self-encapsulation" so \fBESP\fR can encapsulate
-\fBIP\fR options when necessary. See \fBipsec\fR(7P).
+\fBIP\fR options when necessary. See \fBipsec\fR(4P).
 .sp
 .LP
 Unlike the authentication header (\fBAH\fR), \fBESP\fR allows multiple
@@ -31,12 +31,12 @@ expose vulnerabilities.) For example, only \fBESP\fR can be used to provide
 confidentiality. But protecting confidentiality alone exposes vulnerabilities
 in both replay attacks and cut-and-paste attacks. Similarly, if \fBESP\fR
 protects only integrity and does not fully protect against eavesdropping, it
-may provide weaker protection than \fBAH\fR. See \fBipsecah\fR(7P).
+may provide weaker protection than \fBAH\fR. See \fBipsecah\fR(4P).
 .SS "ESP Device"
 .sp
 .LP
 \fBESP\fR is implemented as a module that is auto-pushed on top of \fBIP\fR.
-Use the \fB/dev/ipsecesp\fR entry to tune \fBESP\fR with \fBndd\fR(1M).
+Use the \fB/dev/ipsecesp\fR entry to tune \fBESP\fR with \fBndd\fR(8).
 .SS "Algorithms"
 .sp
 .LP
@@ -45,7 +45,7 @@ algorithms include HMAC-MD5 and HMAC-SHA-1. Encryption algorithms include DES,
 Triple-DES, Blowfish and AES. Each authentication and encryption algorithm
 contain key size and key format properties. You can obtain a list of
 authentication and encryption algorithms and their properties by using the
-\fBipsecalgs\fR(1M) command. You can also use the functions described in the
+\fBipsecalgs\fR(8) command. You can also use the functions described in the
 \fBgetipsecalgbyname\fR(3NSL) man page to retrieve the properties of
 algorithms. Because of export laws in the United States, not all encryption
 algorithms are available outside of the United States.
@@ -58,7 +58,7 @@ vulnerable to eavesdropping when used without confidentiality.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -73,8 +73,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBipsecalgs\fR(1M), \fBipsecconf\fR(1M), \fBndd\fR(1M), \fBattributes\fR(5),
-\fBgetipsecalgbyname\fR(3NSL), \fBip\fR(7P), \fBipsec\fR(7P), \fBipsecah\fR(7P)
+\fBipsecalgs\fR(8), \fBipsecconf\fR(8), \fBndd\fR(8), \fBattributes\fR(7),
+\fBgetipsecalgbyname\fR(3NSL), \fBip\fR(4P), \fBipsec\fR(4P), \fBipsecah\fR(4P)
 .sp
 .LP
 Kent, S. and Atkinson, R. \fIRFC 2406, IP Encapsulating Security Payload

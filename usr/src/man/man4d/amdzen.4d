@@ -56,7 +56,7 @@ driver.
 The
 .Nm
 driver is a nexus driver that has the following children:
-.Bl -tag -width "smntemp(7D)"
+.Bl -tag -width "smntemp(4D)"
 .It Xr smntemp 4D
 Provides access to on-die temperature sensors.
 .It Xr usmn 4D

@@ -17,7 +17,7 @@ dcs \- domain configuration server
 .LP
 The Domain Configuration Server (DCS) is a daemon process that runs on Sun
 servers that support remote Dynamic Reconfiguration (DR) clients. It is started
-by the Service Management Facility (see \fBsmf\fR(5)) when the first DR request
+by the Service Management Facility (see \fBsmf\fR(7)) when the first DR request
 is received from a client connecting to the network service \fBsun-dr\fR. After
 the DCS accepts a DR request, it uses the \fBlibcfgadm\fR(3LIB) interface to
 execute the DR operation. After the operation is performed, the results are
@@ -81,7 +81,7 @@ entries in the \fB/etc/syslog.conf\fR file log all of the DCS error messages to
 the \fB/var/adm/messages\fR log.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -96,13 +96,13 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBcfgadm_sbd\fR(1M), \fBsvcadm\fR(1M),
+\fBsvcs\fR(1), \fBcfgadm_sbd\fR(8), \fBsvcadm\fR(8),
 \fBsyslog\fR(3C), \fBconfig_admin\fR(3CFGADM), \fBlibcfgadm\fR(3LIB),
-\fBsyslog.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5), \fBdr\fR(7D)
+\fBsyslog.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7), \fBdr\fR(4D)
 .SH NOTES
 .LP
 The \fBdcs\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the fault management resource identifier (FMRI):
+\fBsmf\fR(7), under the fault management resource identifier (FMRI):
 .sp
 .in +2
 .nf
@@ -114,5 +114,5 @@ svc:/platform/sun4u/dcs:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

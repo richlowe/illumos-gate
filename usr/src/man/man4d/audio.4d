@@ -158,7 +158,7 @@ Driver configuration file
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -174,4 +174,4 @@ Interface Stability	Uncommitted
 .TE
 
 .SH SEE ALSO
-\fBioctl\fR(2), \fBattributes\fR(5), \fBaudio\fR(7I), \fBdsp\fR(7I)
+\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBdsp\fR(4I)

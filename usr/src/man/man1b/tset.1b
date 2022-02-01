@@ -448,8 +448,8 @@ unset noglob
 .SH SEE ALSO
 .sp
 .LP
-\fBcsh\fR(1), \fBsh\fR(1), \fBstty\fR(1), \fBvi\fR(1), \fBattributes\fR(5),
-\fBenviron\fR(5)
+\fBcsh\fR(1), \fBsh\fR(1), \fBstty\fR(1), \fBvi\fR(1), \fBattributes\fR(7),
+\fBenviron\fR(7)
 .SH NOTES
 .sp
 .LP

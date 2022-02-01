@@ -21,18 +21,18 @@ The \fBusbftdi\fR driver is a loadable STREAMS and USBA (Solaris USB
 Architecture) compliant client driver that provides basic asynchronous
 communication support for FTDI USB-to-serial converters. Serial device streams
 are built with appropriate modules that are pushed atop the \fBusbftdi\fR
-driver by the \fBautopush\fR(1M) facility.
+driver by the \fBautopush\fR(8) facility.
 .SS "Application Programming Interface"
 .sp
 .LP
-The \fBusbftdi\fR module supports the \fBtermio\fR(7I) device control functions
+The \fBusbftdi\fR module supports the \fBtermio\fR(4I) device control functions
 specified by flags in the \fBc_cflag\fR word of the \fBtermios\fR structure,
 and by the \fBIGNBRK, IGNPAR, PARMRK\fR, and \fBINPCK\fR flags in the
-\fBc_iflag\fR word of the \fBtermios\fR structure. All other \fBtermio\fR(7I)
+\fBc_iflag\fR word of the \fBtermios\fR structure. All other \fBtermio\fR(4I)
 functions must be performed by STREAMS modules pushed atop the driver. When a
-device is opened, the , \fBldterm\fR(7M) and \fBttcompat\fR(7M) STREAMS modules
+device is opened, the , \fBldterm\fR(4M) and \fBttcompat\fR(4M) STREAMS modules
 are automatically pushed on top of the stream, providing the standard
-\fBtermio\fR(7I) interface.
+\fBtermio\fR(4I) interface.
 .sp
 .LP
 Use device logical names \fB/dev/term/[0-9]*\fR to access the serial ports for
@@ -45,7 +45,7 @@ for a dial-out line.
 .sp
 .LP
 Device hot-removal is functionally equivalent to a modem disconnect event, as
-defined in \fBtermio\fR(7I).
+defined in \fBtermio\fR(4I).
 .sp
 .LP
 Input and output line speeds can be set to the following baud rates: 300, 600,
@@ -71,7 +71,7 @@ waiting for DCD to be asserted.
 .sp
 .LP
 This behavior also matches the default \fBignore carrier detect\fR behavior of
-the onboard serial ports of machines that have them. See \fBeeprom\fR(1M) for
+the onboard serial ports of machines that have them. See \fBeeprom\fR(8) for
 further details.
 .sp
 .LP
@@ -218,7 +218,7 @@ Dial-in tty lines
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -234,10 +234,10 @@ Architecture	SPARC, x86, PCI-based systems
 .SH SEE ALSO
 .sp
 .LP
-\fBstrconf\fR(1), \fBtip\fR(1), \fBuucp\fR(1C), \fBautopush\fR(1M),
-\fBeeprom\fR(1M), \fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C),
-\fBusba\fR(7D), \fBtermio\fR(7I), \fBldterm\fR(7M), \fBttcompat\fR(7M),
-\fBeeprom\fR(1M), \fBattributes\fR(5),
+\fBstrconf\fR(1), \fBtip\fR(1), \fBuucp\fR(1C), \fBautopush\fR(8),
+\fBeeprom\fR(8), \fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C),
+\fBusba\fR(4D), \fBtermio\fR(4I), \fBldterm\fR(4M), \fBttcompat\fR(4M),
+\fBeeprom\fR(8), \fBattributes\fR(7),
 .SH DIAGNOSTICS
 .sp
 .LP

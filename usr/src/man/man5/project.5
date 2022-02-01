@@ -98,9 +98,9 @@ where \fIname\fR is the arbitrary string specifying the key's name and
 \fIvalue\fR is the optional key value. An explanation of the valid name-value
 pair syntax is provided in the \fBUSAGE\fR section of this page. The expected
 most frequent use of the attribute field is for the specification of resource
-controls. See \fBresource_controls\fR(5) for a description of the resource
+controls. See \fBresource_controls\fR(7) for a description of the resource
 controls supported in the current release of the Solaris operating system. You
-can also use the attribute field for resource caps (see \fBrcapd\fR(1M)) and
+can also use the attribute field for resource caps (see \fBrcapd\fR(8)) and
 for the \fBproject.pool\fR attribute (see \fBsetproject\fR(3PROJECT)).
 .RE
 
@@ -155,7 +155,7 @@ and only one line.
 
 .sp
 .LP
-An example project entry for \fBnsswitch.conf\fR(4) is:
+An example project entry for \fBnsswitch.conf\fR(5) is:
 
 .sp
 .in +2
@@ -220,11 +220,11 @@ support (into further values lists) by parentheses. Each of these values can be
 composed of the upper and lower case alphabetic characters, the digits '0'
 through '9', and the punctuation characters hyphen (-), plus (+), period (.),
 slash (/), and underscore (_). Example resource control value specifications
-are provided in EXAMPLES, above, and in \fBresource_controls\fR(5) and
+are provided in EXAMPLES, above, and in \fBresource_controls\fR(7) and
 \fBgetprojent\fR(3PROJECT).
 .SH SEE ALSO
 .sp
 .LP
 \fBnewtask\fR(1), \fBprojects\fR(1), \fBprctl\fR(1),
 \fBgetprojent\fR(3PROJECT), \fBsetrctl\fR(2), \fBunistd.h\fR(3HEAD),
-\fBnsswitch.conf\fR(4), \fBresource_controls\fR(5)
+\fBnsswitch.conf\fR(5), \fBresource_controls\fR(7)

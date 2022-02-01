@@ -22,7 +22,7 @@ routines to gain access to this information.
 .sp
 .LP
 The search order for multiple \fBprof_attr\fR sources is specified in the
-\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(4) man
+\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(5) man
 page.
 .sp
 .LP
@@ -89,7 +89,7 @@ keys can be specified. There are four valid keys: \fBhelp\fR, \fBprofiles\fR,
 \fB\&.html\fR.
 .sp
 \fBauths\fR specifies a comma-separated list of authorization names chosen from
-those names defined in the \fBauth_attr\fR(4) database. Authorization names can
+those names defined in the \fBauth_attr\fR(5) database. Authorization names can
 be specified using the asterisk (\fB*\fR) character as a wildcard. For example,
 \fBsolaris.printer.*\fR would mean all of Sun's authorizations for printing.
 .sp
@@ -97,7 +97,7 @@ be specified using the asterisk (\fB*\fR) character as a wildcard. For example,
 those names defined in the \fBprof_attr\fR database.
 .sp
 \fBprivs\fR specifies a comma-separated list of privileges names chosen from
-those names defined in the \fBpriv_names\fR(4) database. These privileges can
+those names defined in the \fBpriv_names\fR(5) database. These privileges can
 then be used for executing commands with \fBpfexec\fR(1).
 .RE
 
@@ -144,7 +144,7 @@ able to log in and do system maintenance in single-user mode and at other times
 when the network name service databases are not available. So that the profile
 definitions for root can be located at such times, root's profiles should be
 defined in the local \fBprof_attr\fR file, and the order shown in the example
-\fBnsswitch.conf\fR(4) file entry under EXAMPLES is highly recommended.
+\fBnsswitch.conf\fR(5) file entry under EXAMPLES is highly recommended.
 .sp
 .LP
 Because the list of legal keys is likely to expand, any code that parses this
@@ -165,5 +165,5 @@ equals (\fB=\fR), and backslash (\fB\e\fR).
 .SH SEE ALSO
 .LP
 \fBauths\fR(1), \fBpfexec\fR(1), \fBprofiles\fR(1), \fBgetauthattr\fR(3SECDB),
-\fBgetprofattr\fR(3SECDB), \fBgetuserattr\fR(3SECDB), \fBauth_attr\fR(4),
-\fBexec_attr\fR(4), \fBpriv_names\fR(4), \fBuser_attr\fR(4)
+\fBgetprofattr\fR(3SECDB), \fBgetuserattr\fR(3SECDB), \fBauth_attr\fR(5),
+\fBexec_attr\fR(5), \fBpriv_names\fR(5), \fBuser_attr\fR(5)

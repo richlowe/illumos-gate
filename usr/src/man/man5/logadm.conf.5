@@ -16,7 +16,7 @@ logadm.conf \- configuration file for logadm command
 .sp
 .LP
 \fB/etc/logadm.conf\fR is the default configuration file for the log management
-tool \fBlogadm\fR(1M). Comments are allowed using the pound character (\fB#\fR)
+tool \fBlogadm\fR(8). Comments are allowed using the pound character (\fB#\fR)
 and extend to the end of line. Each non-comment line has the form:
 .sp
 .in +2
@@ -36,22 +36,22 @@ quotes may be used to protect spaces or alternate-style quotes in strings.
 .sp
 .LP
 The preferred method for changing \fB/etc/logadm.conf\fR is to use the
-\fB-V\fR, \fB-w\fR, and \fB-r\fR options to the \fBlogadm\fR(1M) command, which
+\fB-V\fR, \fB-w\fR, and \fB-r\fR options to the \fBlogadm\fR(8) command, which
 allow you to lookup an entry, write an entry, or remove an entry from
 \fB/etc/logadm.conf\fR.
 .sp
 .LP
 A full description of how and when \fB/etc/logadm.conf\fR is used and sample
-entries are found in \fBlogadm\fR(1M).
+entries are found in \fBlogadm\fR(8).
 .sp
 .LP
-By default, \fBlogadm\fR(1M) works in \fBGMT\fR. Therefore, all entries in
+By default, \fBlogadm\fR(8) works in \fBGMT\fR. Therefore, all entries in
 \fB/etc/logadm.conf\fR will have a \fBGMT\fR timestamp. Users can use the
 \fB-l\fR option to set \fBlogadm\fR to local time.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -67,4 +67,4 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBlogadm\fR(1M), \fBattributes\fR(5)
+\fBlogadm\fR(8), \fBattributes\fR(7)

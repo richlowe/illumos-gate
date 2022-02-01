@@ -107,10 +107,10 @@ defaults to \fB/usr/\fR\fIname\fR.
 \fB\fB-K\fR \fIkey=value\fR\fR
 .ad
 .RS 16n
-Set a \fIkey=value\fR pair. See \fBuser_attr\fR(4), \fBauth_attr\fR(4), and
-\fBprof_attr\fR(4). The valid \fIkey=value\fR pairs are defined in
-\fBuser_attr\fR(4), but the "type" key is subject to the \fBusermod\fR(1M) and
-\fBrolemod\fR(1M) restrictions. Multiple \fIkey=value\fR pairs may be added
+Set a \fIkey=value\fR pair. See \fBuser_attr\fR(5), \fBauth_attr\fR(5), and
+\fBprof_attr\fR(5). The valid \fIkey=value\fR pairs are defined in
+\fBuser_attr\fR(5), but the "type" key is subject to the \fBusermod\fR(8) and
+\fBrolemod\fR(8) restrictions. Multiple \fIkey=value\fR pairs may be added
 with multiple \fB-K\fR options.
 .RE
 
@@ -184,7 +184,7 @@ greater than 99. Without the \fB-o\fR option, it enforces the uniqueness of a
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -199,9 +199,9 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBpasswd\fR(1), \fBrolemod\fR(1M), \fBuseradd\fR(1M), \fBuserdel\fR(1M),
-\fBusermod\fR(1M), \fBauth_attr\fR(4), \fBpasswd\fR(4), \fBprof_attr\fR(4),
-\fBshadow\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5)
+\fBpasswd\fR(1), \fBrolemod\fR(8), \fBuseradd\fR(8), \fBuserdel\fR(8),
+\fBusermod\fR(8), \fBauth_attr\fR(5), \fBpasswd\fR(5), \fBprof_attr\fR(5),
+\fBshadow\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7)
 .SH EXIT STATUS
 .LP
 The \fBpassmgmt\fR command exits with one of the following values:

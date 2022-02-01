@@ -65,7 +65,7 @@ The \fBnetwork/smb/client\fR service must be enabled to successfully mount a
 CIFS share. This service is enabled, by default.
 .sp
 .LP
-To enable the service, enter the following \fBsvcadm\fR(1M) command:
+To enable the service, enter the following \fBsvcadm\fR(8) command:
 .sp
 .in +2
 .nf
@@ -139,11 +139,11 @@ quotes: \fBmount -F smbfs "//SALES;george@RSERVER" /mnt\fR.
 .RS 4n
 The path to the location where the file system is to be mounted or unmounted.
 The \fBmount\fR command maintains a table of mounted file systems in the
-\fB/etc/mnttab\fR file. See the \fBmnttab\fR(4) man page.
+\fB/etc/mnttab\fR file. See the \fBmnttab\fR(5) man page.
 .RE
 
 .SH OPTIONS
-See the \fBmount\fR(1M) man page for the list of supported
+See the \fBmount\fR(8) man page for the list of supported
 \fIgeneric-options\fR.
 .sp
 .ne 2
@@ -168,7 +168,7 @@ the list. The properties are as follows:
 .sp .6
 .RS 4n
 Enable (or disable) presentation of Access Control Lists (ACLs)
-on files and directories under this \fBsmbfs\fR(7FS) mount.
+on files and directories under this \fBsmbfs\fR(4FS) mount.
 The default behavior is \fBnoacl\fR, which presents files and
 directories as owned by the owner of the mount point and having
 permissions based on \fBfileperms\fR or \fBdirperms\fR.
@@ -227,7 +227,7 @@ the directory where the volume is mounted.
 .ad
 .sp .6
 .RS 4n
-Enable (or disable) cancellation of \fBsmbfs\fR(7FS) I/O operations when the
+Enable (or disable) cancellation of \fBsmbfs\fR(4FS) I/O operations when the
 user interrupts the calling thread (for example, by hitting Ctrl-C while an
 operation is underway). The default is \fBintr\fR (interruption enabled), so
 cancellation is normally allowed.
@@ -295,7 +295,7 @@ directory where the volume is mounted.
 .RS 4n
 Enable (or disable) Solaris Extended Attributes in this mount point. This
 option defaults to \fBxattr\fR (enabled Extended Attributes), but note: if the
-CIFS server does not support CIFS "named streams", \fBsmbfs\fR(7FS) forces this
+CIFS server does not support CIFS "named streams", \fBsmbfs\fR(4FS) forces this
 option to \fBnoxattr\fR. When a mount has the \fBnoxattr\fR option, attempts to
 use Solaris Extended attributes fail with EINVAL.
 .RE
@@ -472,7 +472,7 @@ connection.
 .RE
 
 .SH ATTRIBUTES
-See the \fBattributes\fR(5) man page for descriptions of the following
+See the \fBattributes\fR(7) man page for descriptions of the following
 attributes:
 .sp
 
@@ -488,10 +488,10 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 \fBldap\fR(1), \fBsmbutil\fR(1),
-\fBmount\fR(1M), \fBmountall\fR(1M), \fBsvcadm\fR(1M),
+\fBmount\fR(8), \fBmountall\fR(8), \fBsvcadm\fR(8),
 \fBacl\fR(2), \fBfcntl\fR(2), \fBlink\fR(2), \fBmknod\fR(2), \fBmount\fR(2),
-\fBsymlink\fR(2), \fBumount\fR(2), \fBmnttab\fR(4), \fBnsmbrc\fR(4),
-\fBvfstab\fR(4), \fBattributes\fR(5), \fBpcfs\fR(7FS), \fBsmbfs\fR(7FS)
+\fBsymlink\fR(2), \fBumount\fR(2), \fBmnttab\fR(5), \fBnsmbrc\fR(5),
+\fBvfstab\fR(5), \fBattributes\fR(7), \fBpcfs\fR(4FS), \fBsmbfs\fR(4FS)
 .SH AUTHORS
 This manual page contains material originally authored by Boris Popov,
 \fBbpATbutya.kz\fR, \fBbpATFreeBSD.org\fR.

@@ -239,7 +239,7 @@ realm.
 This relation controls the encryption types for session keys permitted by
 server applications that use Kerberos for authentication. In addition, it
 controls the encryption types of keys added to a \fBkeytab\fR by means of the
-\fBkadmin\fR(1M) \fBktadd\fR command. The default is:
+\fBkadmin\fR(8) \fBktadd\fR command. The default is:
 \fBaes256-cts-hmac-sha1-96\fR, \fBaes128-cts-hmac-sha1-96\fR,
 \fBdes3-hmac-sha1-kd\fR, \fBarcfour-hmac-md5\fR, \fBarcfour-hmac-md5-exp\fR,
 \fBdes-cbc-md5\fR, \fBdes-cbc-crc\fR.
@@ -731,7 +731,7 @@ Where:
 .fi
 .in -2
 
-Regular expressions are defined in \fBregex\fR(5).
+Regular expressions are defined in \fBregex\fR(7).
 .sp
 For example:
 .sp
@@ -1737,7 +1737,7 @@ Each server URI should be separated by whitespace.
 .RS 4n
 File containing stashed passwords used by the KDC when binding to the LDAP
 Directory Server. The default is \fB/var/krb5/service_passwd\fR. This file is
-created using \fBkdb5_ldap_util\fR(1M).
+created using \fBkdb5_ldap_util\fR(8).
 .RE
 
 .sp
@@ -1829,7 +1829,7 @@ a Kerberos configuration file when the KDC is using the LDAP KDB plug-in.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1848,8 +1848,8 @@ All of the keywords are Committed, except for the \fBPKINIT\fR keywords, which
 are Volatile.
 .SH SEE ALSO
 \fBkinit\fR(1), \fBrcp\fR(1), \fBrdist\fR(1), \fBrlogin\fR(1), \fBrsh\fR(1),
-\fBtelnet\fR(1), \fBsyslog\fR(3C), \fBattributes\fR(5), \fBkerberos\fR(5),
-\fBregex\fR(5)
+\fBtelnet\fR(1), \fBsyslog\fR(3C), \fBattributes\fR(7), \fBkerberos\fR(7),
+\fBregex\fR(7)
 .SH NOTES
 If the \fBkrb5.conf\fR file is not formatted properly, the \fBtelnet\fR command
 fails. However, the \fBdtlogin\fR and \fBlogin\fR commands still succeed, even

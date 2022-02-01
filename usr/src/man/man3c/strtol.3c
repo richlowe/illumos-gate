@@ -250,7 +250,7 @@ type.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -273,4 +273,4 @@ The \fBstrtol()\fR, \fBstrtoll()\fR, \fBatol()\fR, \fBatoll()\fR, and
 .sp
 .LP
 \fBisalpha\fR(3C), \fBisspace\fR(3C), \fBscanf\fR(3C), \fBstrtod\fR(3C),
-\fBstrtoul\fR(3C), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBstrtoul\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)

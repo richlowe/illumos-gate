@@ -39,7 +39,7 @@ line out, line in, and microphone.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a descriptions of the following attributes:
+See \fBattributes\fR(7) for a descriptions of the following attributes:
 .sp
 
 .sp
@@ -57,8 +57,8 @@ Stability level	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2), \fBattributes\fR(5), \fBaudio\fR(7I), \fBmixer\fR(7I),
-\fBstreamio\fR(7I)
+\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBmixer\fR(4I),
+\fBstreamio\fR(4I)
 .sp
 .LP
 Acer Laboratories Inc. \fBM5451\fR PCI Audio Processor Technical Specification

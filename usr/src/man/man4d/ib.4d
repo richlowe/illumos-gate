@@ -12,11 +12,11 @@ ib \- InfiniBand Bus Nexus Driver
 The \fBib\fR (IB nexus) driver is a pseudo nexus driver that supports
 enumeration of port devices, VPPA (Virtual Physical Point Attachment), HCA_SVC
 (HCA  Service) devices, and I/O controllers (IOC) on the InfiniBand fabric that
-are visible to the host and provides interfaces to \fBcfgadm_ib\fR(1M) to
+are visible to the host and provides interfaces to \fBcfgadm_ib\fR(8) to
 manage hot-plugging of IB devices. The \fBib\fR nexus driver enumerates the
 port device, VPPA devices and HCA_SVC devices based on entries specified in the
 \fBib.conf\fR file. IOC devices are enumerated on demand. The IB  nexus driver
-uses InfiniBand Device Manager services (\fBibdm\fR(7D)) to enumerate port
+uses InfiniBand Device Manager services (\fBibdm\fR(4D)) to enumerate port
 devices, VPPA devices, HCA_SVC devices, and IOCs on the IB fabric.
 .SH CONFIGURATION
 .sp
@@ -208,7 +208,7 @@ driver configuration file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -226,8 +226,8 @@ Interface Stability	Consolidation Private
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm_ib\fR(1M), \fBdriver.conf\fR(4), \fBib\fR(4), \fBattributes\fR(5),
-\fBibcm\fR(7D), \fBibdm\fR(7D), \fBibtl\fR(7D)
+\fBcfgadm_ib\fR(8), \fBdriver.conf\fR(5), \fBib\fR(5), \fBattributes\fR(7),
+\fBibcm\fR(4D), \fBibdm\fR(4D), \fBibtl\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

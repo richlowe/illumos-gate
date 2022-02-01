@@ -16,7 +16,7 @@ Process contracts allow processes to create a fault boundary around a set of
 subprocesses and observe events which occur within that boundary.
 .sp
 .LP
-Process contracts are managed using the \fBcontract\fR(4) file system and the
+Process contracts are managed using the \fBcontract\fR(5) file system and the
 \fBlibcontract\fR(3LIB) library. The process contract type directory is
 \fB/system/contract/process\fR.
 .SS "CREATION"
@@ -66,7 +66,7 @@ A member of the process contract exited.
 .sp .6
 .RS 4n
 A process failed and dumped core. This could also occur if the process would
-have dumped core had appropriate \fBcoreadm\fR(1M) options been enabled and
+have dumped core had appropriate \fBcoreadm\fR(8) options been enabled and
 core file size was unlimited.
 .RE
 
@@ -92,7 +92,7 @@ A process was killed because of an uncorrectable hardware error.
 .RE
 
 .SS "TERMS"
-The following common contract terms, defined in \fBcontract\fR(4), have
+The following common contract terms, defined in \fBcontract\fR(5), have
 process-contract specific attributes:
 .sp
 .ne 2
@@ -126,7 +126,7 @@ CT_PR_EV_SIGNAL)\fR.
 .LP
 The following contract terms can be read from or written to a process contract
 template using the named \fBlibcontract\fR(3LIB) interfaces. These contract
-terms are in addition to those described in \fBcontract\fR(4).
+terms are in addition to those described in \fBcontract\fR(5).
 .sp
 .ne 2
 .na
@@ -490,7 +490,7 @@ The name of the system-wide core file in the global zone. Use
 
 .sp
 .LP
-See \fBcoreadm\fR(1M) for more information about per-process, global, and
+See \fBcoreadm\fR(8) for more information about per-process, global, and
 system-wide core files.
 .sp
 .LP
@@ -531,7 +531,7 @@ Contains definitions of event-type macros.
 .RE
 
 .SH SEE ALSO
-\fBctrun\fR(1), \fBctstat\fR(1), \fBctwatch\fR(1), \fBcoreadm\fR(1M),
+\fBctrun\fR(1), \fBctstat\fR(1), \fBctwatch\fR(1), \fBcoreadm\fR(8),
 \fBclose\fR(2), \fBfork\fR(2), \fBioctl\fR(2), \fBopen\fR(2), \fBpoll\fR(2),
 \fBct_pr_event_get_exitstatus\fR(3CONTRACT),
 \fBct_pr_event_get_gcorefile\fR(3CONTRACT),
@@ -546,4 +546,4 @@ Contains definitions of event-type macros.
 \fBct_pr_tmpl_set_transfer\fR(3CONTRACT), \fBct_tmpl_set_cookie\fR(3CONTRACT),
 \fBct_tmpl_set_critical\fR(3CONTRACT),
 \fBct_tmpl_set_informative\fR(3CONTRACT), \fBlibcontract\fR(3LIB),
-\fBcontract\fR(4), \fBprivileges\fR(5)
+\fBcontract\fR(5), \fBprivileges\fR(7)

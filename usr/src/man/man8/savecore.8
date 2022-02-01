@@ -19,7 +19,7 @@ was made) and writes a reboot message in the shutdown log. By default, it is
 invoked by the \fBdumpadm\fR service each time the system boots.
 .sp
 .LP
-Depending on the \fBdumpadm\fR(1M) configuration \fBsavecore\fR saves either
+Depending on the \fBdumpadm\fR(8) configuration \fBsavecore\fR saves either
 the compressed or uncompressed crash dump. The compressed crash dump is saved in
 the file \fIdirectory\fR\fB/vmdump.\fR\fIn\fR.
 \fBsavecore\fR saves the uncompressed crash dump data in the file
@@ -64,7 +64,7 @@ the dump has already been saved.
 Attempt to save a crash dump from the specified file instead of from the
 system's current dump device. This option may be useful if the information
 stored on the dump device has been copied to an on-disk file by means of the
-\fBdd\fR(1M) command.
+\fBdd\fR(8) command.
 .RE
 
 .sp
@@ -79,7 +79,7 @@ to save a live snapshot of the system to the dump device, and then immediately
 to retrieve the data and to write it out to a new set of crash dump files in
 the specified directory. Live system crash dumps can only be performed if you
 have configured your system to have a dedicated dump device using
-\fBdumpadm\fR(1M).
+\fBdumpadm\fR(8).
 .sp
 \fBsavecore\fR \fB-L\fR does not suspend the system, so the contents of memory
 continue to change while the dump is saved. This means that live crash dumps
@@ -118,7 +118,7 @@ The following operands are supported:
 .RS 13n
 Save the crash dump files to the specified directory. If \fIdirectory\fR is not
 specified, \fBsavecore\fR saves the crash dump files to the default
-\fBsavecore\fR \fIdirectory\fR, configured by \fBdumpadm\fR(1M).
+\fBsavecore\fR \fIdirectory\fR, configured by \fBdumpadm\fR(8).
 .RE
 
 .SH FILES
@@ -177,12 +177,12 @@ default crash dump directory
 
 .SH SEE ALSO
 .LP
-\fBadb\fR(1), \fBmdb\fR(1), \fBsvcs\fR(1), \fBdd\fR(1M), \fBdumpadm\fR(1M),
-\fBsvcadm\fR(1M), \fBsyslog\fR(3C), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBadb\fR(1), \fBmdb\fR(1), \fBsvcs\fR(1), \fBdd\fR(8), \fBdumpadm\fR(8),
+\fBsvcadm\fR(8), \fBsyslog\fR(3C), \fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 .LP
 The system crash dump service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -194,7 +194,7 @@ svc:/system/dumpadm:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP

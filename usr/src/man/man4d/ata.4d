@@ -126,7 +126,7 @@ convenient, or in some cases necessary, for you to set some of the DMA related
 properties as a system global boot environment property. You set or modify
 properties in the boot environment immediately prior to booting the illumos
 kernel using the boot loader command line. You can also set
-boot environment properties using the \fBeeprom\fR(1M) command or by editing
+boot environment properties using the \fBeeprom\fR(8) command or by editing
 the \fBbootenv.rc\fR configuration file. If a property is set in both the
 driver's \fBata.conf\fR file and the boot environment, the \fBata.conf\fR
 property takes precedence.
@@ -165,7 +165,7 @@ If ata-disk-dma-enabled set to '0,' DMA is disabled for all ATA disks in the
 system. If this property is absent or set to '1,' DMA is enabled for all ATA
 disks and no further property checks are made. If needed, this property should
 be created by the administrator using the boot loader command line or the
-\fBeeprom\fR(1M) command.
+\fBeeprom\fR(8) command.
 .RE
 
 .sp
@@ -183,7 +183,7 @@ made.
 .sp
 The Solaris installation program creates this property in the boot environment
 with a value of '1.' It can be changed with the boot loader command line
-or \fBeeprom\fR(1M) as shown in the Example section of this manpage.
+or \fBeeprom\fR(8) as shown in the Example section of this manpage.
 .RE
 
 .sp
@@ -200,7 +200,7 @@ ATAPI devices. If this property is absent or set to '1,' DMA is enabled and no
 further property checks are made.
 .sp
 If needed, this property should be created by the administrator using the
-boot loader command line or the \fBeeprom\fR(1M) command.
+boot loader command line or the \fBeeprom\fR(8) command.
 .RE
 
 .sp
@@ -317,11 +317,11 @@ Press "Esc" to interrupt the timeout.
 Enter: boot -B atapi-cd-dma-enabled=1
 .RE
 .LP
-\fBExample 4 \fRChange DMA Property with eeprom(1M)
+\fBExample 4 \fRChange DMA Property with eeprom(8)
 .sp
 .LP
 To enable DMA for optical devices while the Solaris kernel is running with the
-\fBeeprom\fR(1M) system command:
+\fBeeprom\fR(8) system command:
 
 .sp
 .in +2
@@ -357,13 +357,13 @@ Configuration file.
 .ad
 .sp .6
 .RS 4n
-Boot environment variables file for Solaris x86. \fBeeprom\fR(1M) can be used
+Boot environment variables file for Solaris x86. \fBeeprom\fR(8) can be used
 to modify properties in this file.
 .RE
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -378,7 +378,7 @@ Architecture	x86
 
 .SH SEE ALSO
 .LP
-\fBeeprom\fR(1M), \fBattributes\fR(5)
+\fBeeprom\fR(8), \fBattributes\fR(7)
 .sp
 .LP
 \fIINCITS T13 ATA/ATAPI-7\fR specifications

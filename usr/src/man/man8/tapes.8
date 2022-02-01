@@ -15,7 +15,7 @@ tapes \- creates /dev entries for tape drives attached to the system
 .SH DESCRIPTION
 .sp
 .LP
-\fBdevfsadm\fR(1M) is now the preferred command for \fB/dev\fR and
+\fBdevfsadm\fR(8) is now the preferred command for \fB/dev\fR and
 \fB/devices\fR and should be used instead of \fBtapes\fR.
 .sp
 .LP
@@ -52,11 +52,11 @@ removed by hand.
 .sp
 .LP
 \fBtapes\fR is run each time a reconfiguration-boot is performed, or when
-\fBadd_drv\fR(1M) is executed.
+\fBadd_drv\fR(8) is executed.
 .SS "Notice to Driver Writers"
 .sp
 .LP
-\fBtapes\fR(1M) considers all devices with the node type \fBDDI_NT_TAPE\fR to
+\fBtapes\fR(8) considers all devices with the node type \fBDDI_NT_TAPE\fR to
 be tape devices; these devices must have their minor name created with a
 specific format. The minor name encodes operational modes for the tape device
 and consists of an \fBASCII\fR string of the form [
@@ -84,13 +84,13 @@ over the \fBEOF\fR mark and begin reading from the next file.
 .LP
 \fBn\fR or no-rewind-on-close instructs the driver to not rewind to the
 beginning of tape when the device is closed. Normal behavior for tape devices
-is to reposition to BOT when closing. See \fBmtio\fR(7I).
+is to reposition to BOT when closing. See \fBmtio\fR(4I).
 .sp
 .LP
 The minor number for tape devices should be created by encoding the device's
 instance number using the tape macro \fBMTMINOR\fR and ORing in the proper
 combination of density, \fBBSD\fR behavior, and no-rewind flags. See
-\fBmtio\fR(7I).
+\fBmtio\fR(4I).
 .sp
 .LP
 To prevent \fBtapes\fR from attempting to automatically generate links for a
@@ -175,7 +175,7 @@ xktapeattach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 .sp
 .LP
 Installing the \fBxktape\fR driver on a Sun Fire 4800, with the driver
-controlling a \fBSCSI\fR tape (target 4 attached to an \fBisp\fR(7D) \fBSCSI
+controlling a \fBSCSI\fR tape (target 4 attached to an \fBisp\fR(4D) \fBSCSI
 HBA)\fR and performing a reconfiguration-boot creates the following special
 files in \fB/devices\fR.
 
@@ -260,8 +260,8 @@ tape device nodes
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_drv\fR(1M), \fBdevfsadm\fR(1M), \fBattributes\fR(5), \fBisp\fR(7D),
-\fBdevfs\fR(7FS), \fBmtio\fR(7I), \fBattach\fR(9E),
+\fBadd_drv\fR(8), \fBdevfsadm\fR(8), \fBattributes\fR(7), \fBisp\fR(4D),
+\fBdevfs\fR(4FS), \fBmtio\fR(4I), \fBattach\fR(9E),
 \fBddi_create_minor_node\fR(9F)
 .sp
 .LP

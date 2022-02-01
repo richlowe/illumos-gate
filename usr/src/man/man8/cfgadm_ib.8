@@ -32,12 +32,12 @@ cfgadm_ib \- InfiniBand hardware specific commands for cfgadm
 .sp
 .LP
 The InfiniBand hardware specific library \fB/usr/lib/cfgadm/ib.so.1\fR provides
-the functionality for administering its fabric through the \fBcfgadm\fR(1M)
-utility. \fBcfgadm\fR operates on attachment points. See \fBcfgadm\fR(1M).
+the functionality for administering its fabric through the \fBcfgadm\fR(8)
+utility. \fBcfgadm\fR operates on attachment points. See \fBcfgadm\fR(8).
 .sp
 .LP
 An InfiniBand (\fBIB\fR) device is enumerated by the IB nexus driver,
-\fBib\fR(7D), based on the services from the IB Device Manager (IBDM).
+\fBib\fR(4D), based on the services from the IB Device Manager (IBDM).
 .sp
 .LP
 The IB nexus driver creates and initializes five types of child device nodes:
@@ -73,9 +73,9 @@ IB Pseudo devices
 .RE
 .sp
 .LP
-See \fBib\fR(7D) for details on enumeration of IB Port, IB VPPA, and IB HCA_SVC
-devices. For additional information on IBDM, see \fBibdm\fR(7D). See
-\fBib\fR(4) for details on IB Pseudo devices.
+See \fBib\fR(4D) for details on enumeration of IB Port, IB VPPA, and IB HCA_SVC
+devices. For additional information on IBDM, see \fBibdm\fR(4D). See
+\fBib\fR(5) for details on IB Pseudo devices.
 .sp
 .LP
 For IB administration, two types of static attachment point are created for the
@@ -96,7 +96,7 @@ shorter, and has a more user friendly name.
 The static ap_id for the IB fabric is \fBib\fR. The IB devices are dynamic
 attachment points and have no physical ap_id. The logical ap_id of an IOC
 contains its GUID, \fBib::\fR\fIIOC-GUID\fR. An example of an IOC ap_id is
-\fBib::80020123456789a\fR. The logical ap_id of a Pseudo device, see ib(4) for
+\fBib::80020123456789a\fR. The logical ap_id of a Pseudo device, see ib(5) for
 details, is of the format \fBib::\fR\fIdriver_name\fR\fB,\fR\fIunit-address\fR.
 An example of a pseudo ap_id would be \fBib::sdp,0\fR where "\fBsdp\fR" is the
 driver name and "\fB0\fR" is its \fIunit-address\fR property. The logical ap_id
@@ -187,7 +187,7 @@ cfgadm \fB-c\fR unconfigure
 .LP
 operation. The distinction was made by the information displayed under the
 \fBCondition\fR column. The IB device with a zero P_Key and HCA GUID is a
-HCA_SVC device. Refer to \fBcfgadm\fR(1M) for more information regarding
+HCA_SVC device. Refer to \fBcfgadm\fR(8) for more information regarding
 listing attachment points.
 .sp
 .LP
@@ -362,7 +362,7 @@ Obtain IB specific help for an IB attachment point.
 .sp .6
 .RS 4n
 List the state and condition of IB attachment points. The \fB-l\fR option works
-as described in \fBcfgadm\fR(1M).
+as described in \fBcfgadm\fR(8).
 .sp
 When paired with the \fB-a\fR option, displays the dynamic attachment points as
 well (IOC, VPPA, Port, Pseudo, and HCA_SVC devices).
@@ -411,7 +411,7 @@ This option is not currently defined.
 .sp .6
 .RS 4n
 Attachment points of class ib can be listed by using the select sub-option.
-Refer to the \fBcfgadm\fR(1M) man page for more information.
+Refer to the \fBcfgadm\fR(8) man page for more information.
 .RE
 
 .sp
@@ -435,7 +435,7 @@ The following hardware specific functions are supported:
 .RS 4n
 This hardware specific function is supported on the static \fBIB\fR attachment
 point. It can be used to add a new service to \fB/kernel/drv/ib.conf\fR file
-and to update the \fBib\fR(7D) driver.
+and to update the \fBib\fR(4D) driver.
 .sp
 You must use the \fBservice=\fR\fIname\fR option to indicate the new service to
 be added. You must use the option \fBcomm=[port|vppa|hca_svc]\fR option to add
@@ -453,7 +453,7 @@ the \fBname\fR service to either \fBport-svc-list\fR or to the
 .RS 4n
 This hardware specific function is supported on the static \fBIB\fR attachment
 point only. It can be used to delete an existing service from the
-\fB/kernel/drv/ib.conf\fR file and also from the \fBib\fR(7D) driver's data
+\fB/kernel/drv/ib.conf\fR file and also from the \fBib\fR(4D) driver's data
 base. You must use the \fBservice=name\fR option to indicate which service to
 delete. You must use the \fBcomm=[port|vppa|hca_svc]\fR option to delete this
 service from the \fBport-svc-list\fR, \fBvppa-svc-list\fR, or
@@ -517,7 +517,7 @@ the properties of specified IOC device node. This command updates the
 \fBport-list\fR, \fBport-entries\fR, \fBservice-id\fR, and \fBservice-name\fR
 IOC node properties .
 .sp
-See \fBib\fR(7D).
+See \fBib\fR(4D).
 .RE
 
 .sp
@@ -531,7 +531,7 @@ Supported on the static \fBib\fR attachment point. Updates the \fBPKEY\fR
 information inside \fBIBTL\fR. \fBIBTL\fR re-reads the \fBP_Key\fR tables for
 all the ports on each \fBHCA\fR present on the host.
 .sp
-See \fBibtl\fR(7D).
+See \fBibtl\fR(4D).
 .RE
 
 .RE
@@ -848,8 +848,8 @@ Hardware-specific library for generic InfiniBand device administration
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm\fR(1M), \fBconfig_admin\fR(3CFGADM), \fBlibcfgadm\fR(3LIB),
-\fBib\fR(4), \fBattributes\fR(5), \fBib\fR(7D), \fBibdm\fR(7D), \fBibtl\fR(7D)
+\fBcfgadm\fR(8), \fBconfig_admin\fR(3CFGADM), \fBlibcfgadm\fR(3LIB),
+\fBib\fR(5), \fBattributes\fR(7), \fBib\fR(4D), \fBibdm\fR(4D), \fBibtl\fR(4D)
 .sp
 .LP
 InfiniBand Specification Volume 1 (http://www.infinibandta.org)

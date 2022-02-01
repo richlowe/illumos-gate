@@ -23,15 +23,15 @@ to access this information.
 .sp
 .LP
 The search order for multiple execution profile sources is specified in the
-\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(4) man
-page. The search order follows the entry for \fBprof_attr\fR(4).
+\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(5) man
+page. The search order follows the entry for \fBprof_attr\fR(5).
 .sp
 .LP
 A profile is a logical grouping of authorizations and commands that is
 interpreted by a profile shell to form a secure execution environment. The
 shells that interpret profiles are \fBpfcsh\fR, \fBpfksh\fR, and \fBpfsh\fR.
 See the \fBpfsh\fR(1) man page. Each user's account is assigned zero or more
-profiles in the \fBuser_attr\fR(4) database file.
+profiles in the \fBuser_attr\fR(5) database file.
 .sp
 .LP
 Each entry in the \fBexec_attr\fR database consists of one line of text
@@ -58,7 +58,7 @@ The name of the profile. Profile names are case-sensitive.
 .RS 10n
 The security policy that is associated with the profile entry. The valid
 policies are \fBsuser\fR (standard Solaris superuser) and \fBsolaris\fR. The
-\fBsolaris\fR policy recognizes privileges (see \fBprivileges\fR(5)); the
+\fBsolaris\fR policy recognizes privileges (see \fBprivileges\fR(7)); the
 \fBsuser\fR policy does not.
 .sp
 The \fBsolaris\fR and \fBsuser\fR policies can coexist in the same
@@ -189,7 +189,7 @@ Control profile to execute with an effective user \fBID\fR of root (\fB0\fR):
 \fB/etc/security/exec_attr\fR
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -222,8 +222,8 @@ equals (\fB=\fR), and backslash (\fB\e\fR).
 .SH SEE ALSO
 .LP
 \fBauths\fR(1), \fBprofiles\fR(1), \fBroles\fR(1),
-\fBsh\fR(1), \fBmakedbm\fR(1M), \fBgetauthattr\fR(3SECDB),
+\fBsh\fR(1), \fBmakedbm\fR(8), \fBgetauthattr\fR(3SECDB),
 \fBgetexecattr\fR(3SECDB), \fBgetprofattr\fR(3SECDB),
-\fBgetuserattr\fR(3SECDB), \fBkva_match\fR(3SECDB), \fBauth_attr\fR(4),
-\fBprof_attr\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5),
-\fBprivileges\fR(5)
+\fBgetuserattr\fR(3SECDB), \fBkva_match\fR(3SECDB), \fBauth_attr\fR(5),
+\fBprof_attr\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7),
+\fBprivileges\fR(7)

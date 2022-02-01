@@ -41,13 +41,13 @@ route \- manually manipulate the routing tables
 
 .SH DESCRIPTION
 \fBroute\fR manually manipulates the network routing tables. These tables are
-normally maintained by the system routing daemon, such as \fBin.routed\fR(1M)
-and \fBin.ripngd\fR(1M).
+normally maintained by the system routing daemon, such as \fBin.routed\fR(8)
+and \fBin.ripngd\fR(8).
 .sp
 .LP
 \fBroute\fR supports a limited number of general options, but a rich command
 language. Users can specify an arbitrary request that can be delivered by means
-of the programmatic interface discussed in \fBroute\fR(7P).
+of the programmatic interface discussed in \fBroute\fR(4P).
 .sp
 .LP
 \fBroute\fR uses a routing socket and the new message types \fBRTM_ADD\fR,
@@ -644,11 +644,11 @@ List of network names and addresses
 .RE
 
 .SH SEE ALSO
-\fBuname\fR(1), \fBin.ripngd\fR(1M), \fBin.routed\fR(1M), \fBnetstat\fR(1M),
-\fBrouted\fR(1M), \fBioctl\fR(2), \fBgetipnodebyname\fR(3SOCKET),
-\fBgetnetbyname\fR(3SOCKET), \fBinet_addr\fR(3C), \fBdefaultrouter\fR(4),
-\fBhosts\fR(4), \fBnetworks\fR(4), \fBattributes\fR(5), \fBARP\fR(7P),
-\fBip\fR(7P), \fBroute\fR(7P), \fBrouting\fR(7P)
+\fBuname\fR(1), \fBin.ripngd\fR(8), \fBin.routed\fR(8), \fBnetstat\fR(8),
+\fBrouted\fR(8), \fBioctl\fR(2), \fBgetipnodebyname\fR(3SOCKET),
+\fBgetnetbyname\fR(3SOCKET), \fBinet_addr\fR(3C), \fBdefaultrouter\fR(5),
+\fBhosts\fR(5), \fBnetworks\fR(5), \fBattributes\fR(7), \fBARP\fR(4P),
+\fBip\fR(4P), \fBroute\fR(4P), \fBrouting\fR(4P)
 .SH DIAGNOSTICS
 .ne 2
 .na
@@ -750,7 +750,7 @@ Specifying that destinations are local (with the \fB-interface\fR modifier)
 assumes that the routers implement \fBproxy ARP\fR, meaning that they respond
 to ARP queries for all reachable destinations. Normally, using either router
 discovery or RIP is more reliable and scalable than using proxy ARP. See
-\fBin.routed\fR(1M) for information related to RIP.
+\fBin.routed\fR(8) for information related to RIP.
 .sp
 .LP
 Combining the all destinations are local route with subnet or network routes

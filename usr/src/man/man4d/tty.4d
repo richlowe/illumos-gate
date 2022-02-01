@@ -26,4 +26,4 @@ desired and it is tiresome to find out what terminal is currently in use.
 .SH SEE ALSO
 .sp
 .LP
-\fBports\fR(1M), \fBconsole\fR(7D)
+\fBports\fR(8), \fBconsole\fR(4D)

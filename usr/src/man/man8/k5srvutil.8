@@ -70,7 +70,7 @@ In all cases, the default keytab file is \fB/etc/krb5/krb5.keytab\fR unless
 overridden by the \fB-f\fR option.
 .sp
 .LP
-\fBk5srvutil\fR uses the \fBkadmin\fR(1M) program to edit the keytab in place.
+\fBk5srvutil\fR uses the \fBkadmin\fR(8) program to edit the keytab in place.
 However, old keys are retained, so they are available in case of failure.
 .SH OPTIONS
 .LP
@@ -105,7 +105,7 @@ Displays old and new keys when using the \fBchange\fR operand.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -120,4 +120,4 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBktutil\fR(1), \fBkadmin\fR(1M), \fBattributes\fR(5)
+\fBktutil\fR(1), \fBkadmin\fR(8), \fBattributes\fR(7)

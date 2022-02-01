@@ -17,7 +17,7 @@ bge \- SUNW,bge Gigabit Ethernet driver for Broadcom BCM57xx
 .LP
 The \fBbge\fR Gigabit Ethernet driver is a multi-threaded, loadable, clonable,
 GLD-based STREAMS driver supporting the Data Link Provider Interface,
-\fBdlpi\fR(7P), on Broadcom BCM57xx
+\fBdlpi\fR(4P), on Broadcom BCM57xx
 (BCM5700/5701/5703/5704/5705/5705M/5714/5721/5751/5751M/5782/5788 on x86)
 Gigabit Ethernet controllers fitted to the system motherboard. With the
 exception of BCM5700/BCM5701/BCM5704S, these devices incorporate both MAC and
@@ -48,9 +48,9 @@ BCM57xx devices ( (BCM5700/5701/5703/5704, 5705/5714/5721/5751/5751M/5782 on
 x86) fitted to the system motherboard.
 .sp
 .LP
-The \fBbge\fR driver is managed by the \fBdladm\fR(1M) command line utility,
+The \fBbge\fR driver is managed by the \fBdladm\fR(8) command line utility,
 which allows VLANs to be defined on top of bge  instances and for \fBbge\fR
-instances to be aggregated. See \fBdladm\fR(1M) for more details.
+instances to be aggregated. See \fBdladm\fR(8) for more details.
 .sp
 .LP
 You must send an explicit DL_ATTACH_REQ message to associate the opened stream
@@ -171,7 +171,7 @@ throughput mode supported by the other device.
 .sp
 .LP
 Alternatively, you can set the capabilities advertised by the \fBbge\fR device
-using \fBdladm\fR(1M). The driver supports a number of parameters whose names
+using \fBdladm\fR(8). The driver supports a number of parameters whose names
 begin with \fBen_\fR (see below). Each of these parameters contains a boolean
 value that determines whether the device advertises that mode of operation. If
 \fBen_autoneg_cap\fR is set to 0, the driver forces the mode of operation
@@ -245,8 +245,8 @@ link_state
 .sp
 .LP
 The default MTU is 1500. To enable Jumbo Frames support, you can configure the
-\fBbge\fR driver by defining the default_mtu property via \fBdladm\fR(1M) or in
-\fBdriver.conf\fR(4) to greater than 1500 bytes (for example:
+\fBbge\fR driver by defining the default_mtu property via \fBdladm\fR(8) or in
+\fBdriver.conf\fR(5) to greater than 1500 bytes (for example:
 default_mtu=9000). Note that the largest jumbo size supported by bge is 9000
 bytes. Additionally, not all bge-derived devices currently support Jumbo
 Frames. The following devices  support Jumbo Frames up to 9KB:  BCM5700, 5701,
@@ -283,7 +283,7 @@ currently do not support Jumbo Frames.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -299,8 +299,8 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBdriver.conf\fR(4), \fBattributes\fR(5), \fBstreamio\fR(7I),
-\fBdlpi\fR(7P)
+\fBdladm\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7), \fBstreamio\fR(4I),
+\fBdlpi\fR(4P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

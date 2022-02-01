@@ -17,7 +17,7 @@ pam_roles.so.1
 .LP
 The \fBpam_roles\fR module implements \fBpam_sm_acct_mgmt\fR(3PAM). It provides
 functionality to verify that a user is authorized to assume a role. It also
-prevents direct logins to a role. The \fBuser_attr\fR(4) database is used to
+prevents direct logins to a role. The \fBuser_attr\fR(5) database is used to
 determine which users can assume which roles.
 .sp
 .LP
@@ -29,7 +29,7 @@ calling service implies that the user is asserting a new identity. Notice that
 root can never have roles.
 .sp
 .LP
-This module is generally stacked above the \fBpam_unix_account\fR(5) module.
+This module is generally stacked above the \fBpam_unix_account\fR(7) module.
 .sp
 .LP
 The following options are interpreted:
@@ -91,7 +91,7 @@ identity name in its list of roles.
 \fBExample 1 \fRUsing the \fBpam_roles.so.1\fR Module
 .sp
 .LP
-The following are sample entries from \fBpam.conf\fR(4). These entries
+The following are sample entries from \fBpam.conf\fR(5). These entries
 demonstrate the use of the \fBpam_roles.so.1\fR module:
 
 .sp
@@ -124,7 +124,7 @@ protocol (such as \fBsshd\fR-hostbased).
 
 .sp
 .LP
-The following is a sample entry for a \fBpam.conf\fR(4) file. It demonstrates
+The following is a sample entry for a \fBpam.conf\fR(5) file. It demonstrates
 the use of \fBpam_roles\fR configuration for remote roles for the
 \fBsshd\fR-hostbased service.
 
@@ -140,7 +140,7 @@ sshd-hostbased account required pam_unix_account
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -158,13 +158,13 @@ MT Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBroles\fR(1), \fBsshd\fR(1M), \fBsu\fR(1M), \fBlibpam\fR(3LIB),
+\fBroles\fR(1), \fBsshd\fR(8), \fBsu\fR(8), \fBlibpam\fR(3LIB),
 \fBpam\fR(3PAM), \fBpam_acct_mgmt\fR(3PAM), \fBpam_setcred\fR(3PAM),
 \fBpam_set_item\fR(3PAM), \fBpam_sm_acct_mgmt\fR(3PAM), \fBsyslog\fR(3C),
-\fBpam.conf\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5),
-\fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), \fBpam_unix_session\fR(5)
+\fBpam.conf\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7),
+\fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), \fBpam_unix_session\fR(7)
 .SH NOTES
 .sp
 .LP

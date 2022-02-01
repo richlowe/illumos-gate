@@ -73,7 +73,7 @@ Broadcast message to the console and pseudo-terminals.
 .ad
 .RS 14n
 Broadcast to the users in a specified group only, per the group database (see
-\fBgroup\fR(4)).
+\fBgroup\fR(5)).
 .RE
 
 .sp
@@ -102,7 +102,7 @@ If the  \fBLC_*\fR variables (\fBLC_CTYPE\fR, \fBLC_TIME\fR, \fBLC_COLLATE\fR,
 \fBLC_NUMERIC\fR, and \fBLC_MONETARY\fR) are not set in the environment, the
 operational behavior of \fBwall\fR for each corresponding locale category is
 determined by  the value of the \fBLANG\fR environment variable. See
-\fBenviron\fR(5). If \fBLC_ALL\fR is set, its contents are used to override
+\fBenviron\fR(7). If \fBLC_ALL\fR is set, its contents are used to override
 both the  \fBLANG\fR and the other \fBLC_*\fR variables. If none of the above
 variables are set in the environment, the "C" (U.S. style) locale determines
 how \fBwall\fR behaves.
@@ -113,8 +113,8 @@ how \fBwall\fR behaves.
 .SH SEE ALSO
 .sp
 .LP
-\fBmesg\fR(1), \fBwrite\fR(1), \fBsetuid\fR(2), \fBattributes\fR(5),
-\fBenviron\fR(5)
+\fBmesg\fR(1), \fBwrite\fR(1), \fBsetuid\fR(2), \fBattributes\fR(7),
+\fBenviron\fR(7)
 .SH NOTES
 .sp
 .LP

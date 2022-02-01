@@ -200,7 +200,7 @@ not available on all systems.
 .ad
 .RS 15n
 Performs \fBumount\fR on any file systems and then formats. See
-\fBmount\fR(1M).
+\fBmount\fR(8).
 .RE
 
 .sp
@@ -434,17 +434,17 @@ OPERANDS for a description of \fIN\fR.
 .sp
 .LP
 \fBcpio\fR(1), \fBeject\fR(1), \fBrmformat\fR(1), \fBtar\fR(1),
-\fBvolcheck\fR(1), \fBvolrmmount\fR(1), \fBmount\fR(1M), \fBnewfs\fR(1M),
-\fBprtvtoc\fR(1M), \fBattributes\fR(5), \fBpcfs\fR(7FS)
+\fBvolcheck\fR(1), \fBvolrmmount\fR(1), \fBmount\fR(8), \fBnewfs\fR(8),
+\fBprtvtoc\fR(8), \fBattributes\fR(7), \fBpcfs\fR(4FS)
 .SS "x86 Only"
 .sp
 .LP
-\fBfd\fR(7D)
+\fBfd\fR(4D)
 .SH NOTES
 .sp
 .LP
 A diskette or \fBPCMCIA\fR memory card containing a \fBufs\fR file system
-created on a SPARC based system (by using \fBfdformat\fR and \fBnewfs\fR(1M)),
+created on a SPARC based system (by using \fBfdformat\fR and \fBnewfs\fR(8)),
 is not identical to a diskette or \fBPCMCIA\fR memory card containing a ufs
 file system created on an x86 based system. Do not interchange ufs diskettes or
 memory cards between these platforms. Use \fBcpio\fR(1) or \fBtar\fR(1) to

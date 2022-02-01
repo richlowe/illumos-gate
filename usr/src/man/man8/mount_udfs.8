@@ -30,12 +30,12 @@ hidden until the file system is unmounted.
 .LP
 If mount is invoked with either \fIspecial\fR or \fImount_point\fR as the only
 arguments, \fBmount\fR searches \fB/etc/vfstab\fR to fill in the missing
-arguments, including the \fIspecific_options\fR. See \fBmount\fR(1M).
+arguments, including the \fIspecific_options\fR. See \fBmount\fR(8).
 .sp
 .LP
 The \fBudfs\fR file system supports direct mounting of files containing the
-file system as well as block devices. See \fBmount\fR(1M) and
-\fBlofiadm\fR(1M).
+file system as well as block devices. See \fBmount\fR(8) and
+\fBlofiadm\fR(8).
 .sp
 .LP
 If \fIspecial\fR and \fImount_point\fR are specified without any
@@ -48,7 +48,7 @@ rather than on top of the symbolic link itself.
 .SH OPTIONS
 .sp
 .LP
-See \fBmount\fR(1M) for the list of supported \fIgeneric_options\fR.
+See \fBmount\fR(8) for the list of supported \fIgeneric_options\fR.
 .sp
 .LP
 The following options are supported:
@@ -124,9 +124,9 @@ List of default parameters for each file system
 .SH SEE ALSO
 .sp
 .LP
-\fBfsck\fR(1M), \fBfsck_udfs\fR(1M), \fBlofiadm\fR(1M), \fBmount\fR(1M),
-\fBmountall\fR(1M), \fBmount\fR(2), \fBmnttab\fR(4), \fBvfstab\fR(4),
-\fBattributes\fR(5)
+\fBfsck\fR(8), \fBfsck_udfs\fR(8), \fBlofiadm\fR(8), \fBmount\fR(8),
+\fBmountall\fR(8), \fBmount\fR(2), \fBmnttab\fR(5), \fBvfstab\fR(5),
+\fBattributes\fR(7)
 .SH DIAGNOSTICS
 .sp
 .ne 2

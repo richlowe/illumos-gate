@@ -40,7 +40,7 @@ both support moving requests between queues. The BSD print protocol does not.
 .sp
 .LP
 When moving requests, \fBlpmove\fR does not check the acceptance status of the
-destination to which the print requests are being moved (see \fBaccept\fR(1M)).
+destination to which the print requests are being moved (see \fBaccept\fR(8)).
 \fBlpmove\fR does not move requests that have options (for example, content
 type or requiring a special form) that cannot be handled by the new
 destination.
@@ -64,7 +64,7 @@ identifier associated with a print request as reported by \fBlpstat\fR. See
 \fB\fIdestination\fR\fR
 .ad
 .RS 15n
-The name of the printer or class of printers (see \fBlpadmin\fR(1M)) to which
+The name of the printer or class of printers (see \fBlpadmin\fR(8)) to which
 \fBlpmove\fR moves a \fIspecified\fR print request. Specify \fIdestination\fR
 using atomic, URI-style (\fIscheme\fR://\fIendpoint\fR), POSIX-style
 (\fIserver\fR\fB:\fR\fIdestination\fR) syntax.
@@ -84,8 +84,8 @@ requests. Specify \fIdestination\fR using atomic, URI-style
 
 .sp
 .LP
-See \fBprinters.conf\fR(4) for information regarding the naming conventions for
-atomic names and \fBstandards\fR(5) for information regarding POSIX.
+See \fBprinters.conf\fR(5) for information regarding the naming conventions for
+atomic names and \fBstandards\fR(7) for information regarding POSIX.
 .SH EXIT STATUS
 .LP
 The following exit values are returned:
@@ -145,7 +145,7 @@ LDAP version of \fB/etc/printers.conf\fR
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -160,9 +160,9 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 .LP
-\fBlp\fR(1), \fBlpr\fR(1B), \fBlpstat\fR(1), \fBaccept\fR(1M),
-\fBlpadmin\fR(1M), \fBlpsched\fR(1M), \fBprinters.conf\fR(4),
-\fBattributes\fR(5), \fBstandards\fR(5)
+\fBlp\fR(1), \fBlpr\fR(1B), \fBlpstat\fR(1), \fBaccept\fR(8),
+\fBlpadmin\fR(8), \fBlpsched\fR(8), \fBprinters.conf\fR(5),
+\fBattributes\fR(7), \fBstandards\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Solaris Printing\fR

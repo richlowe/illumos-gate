@@ -21,12 +21,12 @@ security implications.
 .sp
 .LP
 An authorized user can use the \fBsharectl\fR command to set global values for
-these properties in SMF. See \fBsharectl\fR(1M).
+these properties in SMF. See \fBsharectl\fR(8).
 .sp
 .LP
 A regular user can change the global values when granted the "SMBFS Management"
-rights profile in the \fB/etc/user_attr\fR file. See \fBuser_attr\fR(4) and
-\fBrbac\fR(5).
+rights profile in the \fB/etc/user_attr\fR file. See \fBuser_attr\fR(5) and
+\fBrbac\fR(7).
 .sp
 .LP
 The SMBFS library first reads from SMF and then the \fB$HOME/.nsmbrc\fR file
@@ -195,7 +195,7 @@ be set in the default section. Valid values are \fByes\fR, \fBtrue\fR,
 .sp .6
 .RS 4n
 Specifies whether to perform NetBIOS/WINS name lookups. To force all lookups to
-be done through the name service switch (see \fBnsswitch.conf\fR(4)), set the
+be done through the name service switch (see \fBnsswitch.conf\fR(5)), set the
 value to \fBno\fR. This property can \fBonly\fR be set by an administrator by
 using the \fBsharectl\fR command. This property can only be set in the default
 section. Valid values are \fByes\fR, \fBtrue\fR, \fBno\fR, and \fBfalse\fR. The
@@ -393,7 +393,7 @@ connection.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -407,9 +407,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBsmbutil\fR(1), \fBmount_smbfs\fR(1M), \fBsharectl\fR(1M),
-\fBnsswitch.conf\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5), \fBrbac\fR(5),
-\fBsmbfs\fR(7FS)
+\fBsmbutil\fR(1), \fBmount_smbfs\fR(8), \fBsharectl\fR(8),
+\fBnsswitch.conf\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7), \fBrbac\fR(7),
+\fBsmbfs\fR(4FS)
 .SH NOTES
 By default, passwords stored in the \fB\&.nsmbrc\fR file are ignored unless
 \fBonly\fR the file owner has read and write permission.

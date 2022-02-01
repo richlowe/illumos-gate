@@ -15,7 +15,7 @@ nscd.conf \- name service cache daemon configuration
 .SH DESCRIPTION
 .LP
 The \fBnscd.conf\fR file contains the configuration information for
-\fBnscd\fR(1M). Each line specifies either an \fIattribute\fR and a
+\fBnscd\fR(8). Each line specifies either an \fIattribute\fR and a
 \fIvalue\fR, or an \fIattribute\fR, \fIcachename\fR, and a \fIvalue\fR. Fields
 are separated either by SPACE or TAB characters. A `\fB#\fR' (number sign)
 indicates the beginning of a comment; characters up to the end of the line are
@@ -52,7 +52,7 @@ particularly over \fBNFS\fR. \fIvalue\fR may be either \fByes\fR or \fBno\fR.
 .sp .6
 .RS 4n
 Sets the debug level desired. \fIvalue\fR may range from \fB0\fR (the default)
-to \fB10\fR. Use of this option causes \fBnscd\fR(1M) to run in the foreground
+to \fB10\fR. Use of this option causes \fBnscd\fR(8) to run in the foreground
 and not become a daemon. Note that the output of the debugging command is not
 likely to remain the same from release-to-release; scripts should \fInot\fR
 rely on its format.
@@ -91,7 +91,7 @@ this attribute can be either \fByes\fR or \fBno\fR.
 .sp .6
 .RS 4n
 This attribute allows the administrator to set the number of entries
-\fBnscd\fR(1M) is to keep current in the specified cache. \fIvalue\fR is an
+\fBnscd\fR(8) is to keep current in the specified cache. \fIvalue\fR is an
 integer number which should approximate the number of entries frequently used
 during the day.
 .RE
@@ -178,7 +178,7 @@ automatically adjusts the hash table size.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -195,8 +195,8 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBnscd\fR(1M), \fBauth_attr\fR(4), \fBbootparams\fR(4),
-\fBethers\fR(4), \fBexec_attr\fR(4), \fBgroup\fR(4), \fBhosts\fR(4),
-\fBnetmasks\fR(4), \fBnetworks\fR(4), \fBpasswd\fR(4), \fBprinters\fR(4),
-\fBprof_attr\fR(4), \fBproject\fR(4), \fBprotocols\fR(4), \fBrpc\fR(4),
-\fBservices\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5)
+\fBnscd\fR(8), \fBauth_attr\fR(5), \fBbootparams\fR(5),
+\fBethers\fR(5), \fBexec_attr\fR(5), \fBgroup\fR(5), \fBhosts\fR(5),
+\fBnetmasks\fR(5), \fBnetworks\fR(5), \fBpasswd\fR(5), \fBprinters\fR(5),
+\fBprof_attr\fR(5), \fBproject\fR(5), \fBprotocols\fR(5), \fBrpc\fR(5),
+\fBservices\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7)

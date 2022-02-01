@@ -61,7 +61,7 @@ A restricted shell can be invoked in one of the following ways:
 .TP
 1.
 \fBrsh\fR is the file name part of the last entry in the \fB/etc/passwd\fR
-file (see \fBpasswd\fR(4));
+file (see \fBpasswd\fR(5));
 .RE
 .RS +4
 .TP
@@ -90,7 +90,7 @@ end-user does not have write and execute permissions in the same directory.
 .sp
 .LP
 The net effect of these rules is that the writer of the \fI\&.profile\fR (see
-\fBprofile\fR(4)) has complete control over user actions by performing
+\fBprofile\fR(5)) has complete control over user actions by performing
 guaranteed setup actions and leaving the user in an appropriate directory
 (probably \fInot\fR the login directory).
 .sp
@@ -107,7 +107,7 @@ the last command executed.
 .SH SEE ALSO
 .LP
 \fBIntro\fR(1), \fBcd\fR(1), \fBlogin\fR(1), \fBrsh\fR(1), \fBsh\fR(1),
-\fBexec\fR(2), \fBpasswd\fR(4), \fBprofile\fR(4), \fBattributes\fR(5)
+\fBexec\fR(2), \fBpasswd\fR(5), \fBprofile\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .LP
 The restricted shell, \fB/usr/lib/rsh\fR, should not be confused with the

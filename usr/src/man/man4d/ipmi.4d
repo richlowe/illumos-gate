@@ -37,7 +37,7 @@ specification and implementation guidelines, refer to
 http://www.intel.com/design/servers/ipmi/.
 The driver is adapted from the FreeBSD driver which is in turn adapted from
 the Linux driver, however, not all features described in the standard are
-supported. The current implementation depends on the \fBsmbios\fR(7d) to
+supported. The current implementation depends on the \fBsmbios\fR(4D) to
 discover the existence of an IPMI device.
 
 .SH IOCTLS
@@ -160,7 +160,7 @@ Unregister to receive a specific command
 .RE
 
 .SH SEE ALSO
-\fBipmitool\fR(1), \fBioctl\fR(2), \fBsmbios\fR(7d)
+\fBipmitool\fR(1), \fBioctl\fR(2), \fBsmbios\fR(4D)
 .sp
 .LP
 \fIIntelligent Platform Management Interface Specification Second

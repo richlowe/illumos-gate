@@ -30,17 +30,17 @@ USB  architecture) compliant client driver that provides basic asynchronous
 communication support for Prolific PL2303 USB-to-serial converters. Supported
 devices include PL2303H, PL2303HX and PL2303X.  Serial device streams are built
 with appropriate modules that are pushed atop the \fBusbsprl\fR driver by the
-\fBautopush\fR(1M) facility.
+\fBautopush\fR(8) facility.
 .sp
 .LP
-The \fBusbsprl\fR module supports the \fBtermio\fR(7I) device control functions
+The \fBusbsprl\fR module supports the \fBtermio\fR(4I) device control functions
 specified by flags in the \fBc_cflag\fR word of the termios structure, and by
 the IGNBRK,  IGNPAR,  PARMRK and INPCK flags in the \fBc_iflag\fR word of the
-termios structure. All other \fBtermio\fR(7I) functions must be performed by
+termios structure. All other \fBtermio\fR(4I) functions must be performed by
 \fBSTREAMS\fR modules pushed atop the driver. When a device is opened, the
-\fBldterm\fR(7M) and \fBttcompat\fR(7M)  \fBSTREAMS\fR modules are
+\fBldterm\fR(4M) and \fBttcompat\fR(4M)  \fBSTREAMS\fR modules are
 automatically pushed on top of the stream, providing the standard
-\fBtermio\fR(7I) interface.
+\fBtermio\fR(4I) interface.
 .sp
 .LP
 Use device logical names \fB/dev/term/[0-9]\fR*  to  access  the serial ports.
@@ -72,11 +72,11 @@ enabling the line for login in \fB/etc/inittab\fR) or dial-out (by
 .sp
 .LP
 Device hot-removal  is functionally equivalent to a modem disconnect event, as
-defined in \fBtermio\fR(7I).
+defined in \fBtermio\fR(4I).
 .SH IOCTLS
 .sp
 .LP
-The  \fBusbsprl\fR driver supports the  standard set of \fBtermio\fR(7I) ioctl
+The  \fBusbsprl\fR driver supports the  standard set of \fBtermio\fR(4I) ioctl
 calls.
 .sp
 .LP
@@ -182,7 +182,7 @@ dial-in tty lines.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -198,9 +198,9 @@ Architecture	SPARC, x86, PCI-based systems
 .SH SEE ALSO
 .sp
 .LP
-\fBstrconf\fR(1), \fBtip\fR(1), \fBuucp\fR(1C), \fBautopush\fR(1M),
-\fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C), \fBattributes\fR(5),
-\fBusba\fR(7D), \fBtermio\fR(7I), \fBldterm\fR(7M), \fBttcompat\fR(7M)
+\fBstrconf\fR(1), \fBtip\fR(1), \fBuucp\fR(1C), \fBautopush\fR(8),
+\fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C), \fBattributes\fR(7),
+\fBusba\fR(4D), \fBtermio\fR(4I), \fBldterm\fR(4M), \fBttcompat\fR(4M)
 .SH DIAGNOSTICS
 .sp
 .LP

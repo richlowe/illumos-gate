@@ -20,7 +20,7 @@ mode. The driver supports only BSS networks (also known as \fBap\fR or
 \fBinfrastructure\fR networks) and \fBopen\fR(or \fBopen-system\fR)  or
 \fBshared system\fR authentication. For wireless security, WEP encryption,
 WPA-PSK, and WPA2-PSK are currently supported. Configuration and administration
-tasks can be performed with the \fBdladm\fR(1M) and \fBwificonfig\fR(1M)
+tasks can be performed with the \fBdladm\fR(8) and \fBwificonfig\fR(8)
 utilities.
 .SH FILES
 .sp
@@ -53,7 +53,7 @@ Special character device
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -71,5 +71,5 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBwificonfig\fR(1M), \fBattributes\fR(5), \fBdlpi\fR(7P),
-\fBgld\fR(7D)
+\fBdladm\fR(8), \fBwificonfig\fR(8), \fBattributes\fR(7), \fBdlpi\fR(4P),
+\fBgld\fR(4D)

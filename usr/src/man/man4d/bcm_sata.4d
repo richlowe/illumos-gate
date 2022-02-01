@@ -50,7 +50,7 @@ The \fBbcm_sata\fR module contains no user configurable parameters.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -66,8 +66,8 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm\fR(1M), \fBcfgadm_sata\fR(1M), \fBprtconf\fR(1M),
-\fBattributes\fR(5), \fBsata\fR(7D), \fBsd\fR(7D)
+\fBcfgadm\fR(8), \fBcfgadm_sata\fR(8), \fBprtconf\fR(8),
+\fBattributes\fR(7), \fBsata\fR(4D), \fBsd\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

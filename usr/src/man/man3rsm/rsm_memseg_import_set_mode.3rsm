@@ -53,7 +53,7 @@ Invalid segment handle.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -70,4 +70,4 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 \fBrsm_memseg_import_get\fR(3RSM), \fBrsm_memseg_import_init_barrier\fR(3RSM),
-\fBrsm_memseg_import_put\fR(3RSM), \fBattributes\fR(5)
+\fBrsm_memseg_import_put\fR(3RSM), \fBattributes\fR(7)

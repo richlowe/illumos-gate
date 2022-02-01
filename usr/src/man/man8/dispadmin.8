@@ -73,11 +73,11 @@ class.
 .sp .6
 .RS 4n
 Gets the parameters for the specified class and writes them to the standard
-output. Parameters for the real-time class are described in \fBrt_dptbl\fR(4).
+output. Parameters for the real-time class are described in \fBrt_dptbl\fR(5).
 Parameters for the time-sharing and inter-active classes are described in
-\fBts_dptbl\fR(4). Parameters for the fair-share class are described in
-\fBFSS\fR(7). Parameters for the fixed-priority class are described in
-\fBfx_dptbl\fR(4).
+\fBts_dptbl\fR(5). Parameters for the fair-share class are described in
+\fBFSS\fR(4). Parameters for the fixed-priority class are described in
+\fBfx_dptbl\fR(5).
 .sp
 The \fB-g\fR and \fB-s\fR options are mutually exclusive: you may not retrieve
 the table at the same time you are overwriting it.
@@ -214,9 +214,9 @@ Possible location for argument to \fB-s\fR option.
 .RE
 
 .SH SEE ALSO
-\fBpriocntl\fR(1), \fBsvcs\fR(1), \fBsvcadm\fR(1M), \fBpriocntl\fR(2),
-\fBfx_dptbl\fR(4), \fBrt_dptbl\fR(4), \fBts_dptbl\fR(4), \fBattributes\fR(5),
-\fBsmf\fR(5), \fBFSS\fR(7)
+\fBpriocntl\fR(1), \fBsvcs\fR(1), \fBsvcadm\fR(8), \fBpriocntl\fR(2),
+\fBfx_dptbl\fR(5), \fBrt_dptbl\fR(5), \fBts_dptbl\fR(5), \fBattributes\fR(7),
+\fBsmf\fR(7), \fBFSS\fR(4)
 .sp
 .LP
 \fI\fR \fI\fR
@@ -226,7 +226,7 @@ overwrite the current scheduler parameters due to lack of required permissions
 or a problem with the specified input file.
 .SH NOTES
 The default scheduling class setting facility is managed by the service
-management facility, \fBsmf\fR(5), under the service identifier:
+management facility, \fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -237,6 +237,6 @@ svc:/system/scheduler:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Note that
+requesting restart, can be performed using \fBsvcadm\fR(8). Note that
 disabling the service while it is running will not change anything. The
 service's status can be queried using the \fBsvcs\fR(1) command.

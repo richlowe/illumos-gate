@@ -14,7 +14,7 @@ dynamic instrumentation for locking primitives in the kernel.
 .LP
 The \fBlockstat\fR provider makes probes available that you can use to discern
 lock contention statistics, or to understand virtually any aspect of locking
-behavior inside the operating system kernel. The \fBlockstat\fR(1M) command is
+behavior inside the operating system kernel. The \fBlockstat\fR(8) command is
 implemented as a DTrace consumer that uses the lockstat provider to gather raw
 data.
 .sp
@@ -26,7 +26,7 @@ interfaces available for the DTrace facility and the probes offered by the
 \fBlockstat\fR provider.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -41,7 +41,7 @@ Interface Stability 	Private
 
 .SH SEE ALSO
 .LP
-\fBdtrace\fR(1M), \fBlockstat\fR(1M), \fBattributes\fR(5), \fBdtrace\fR(7D)
+\fBdtrace\fR(8), \fBlockstat\fR(8), \fBattributes\fR(7), \fBdtrace\fR(4D)
 .sp
 .LP
 \fIDynamic Tracing Guide\fR:

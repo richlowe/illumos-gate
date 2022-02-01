@@ -57,7 +57,7 @@ will be used.
 .LP
 If a file system type supports parallel checking, for example, \fBufs,\fR some
 file systems eligible for checking may be checked in parallel. Consult the file
-system-specific man page (for example, \fBfsck_ufs\fR(1M)) for more
+system-specific man page (for example, \fBfsck_ufs\fR(8)) for more
 information.
 .SH OPTIONS
 .LP
@@ -153,7 +153,7 @@ by commas (with no intervening spaces).
 .RS 4n
 Use block \fIn\fR as the super block for the file system. Block 32 is always
 one of the alternate super blocks. Determine the location of other super blocks
-by running \fBnewfs\fR(1M) with the \fB-Nv\fR options specified.
+by running \fBnewfs\fR(8) with the \fB-Nv\fR options specified.
 .RE
 
 .sp
@@ -172,7 +172,7 @@ negative answer is given, no further operations are done on the file system. In
 preen mode, the direction of the conversion is listed and done if possible
 without user interaction. Conversion in preen mode is best used when all the
 file systems are being converted at once. The format of a file system can be
-determined from the first line of output from \fBfstyp\fR(1M). Note: the
+determined from the first line of output from \fBfstyp\fR(8). Note: the
 \fBc\fR option is seldom used and is included only for compatibility with
 pre-4.1 releases. There is no guarantee that this option will be included in
 future releases.
@@ -316,7 +316,7 @@ file system is mounted read-only and is OK
 .SH USAGE
 .LP
 The \fBfsck\fR command is \fBlarge file aware\fR for UFS file systems, per the
-\fBlargefile\fR(5) man page.
+\fBlargefile\fR(7) man page.
 .SH FILES
 .ne 2
 .na
@@ -350,7 +350,7 @@ list of default parameters for each file system
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -365,10 +365,10 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBclri\fR(1M), \fBfsck_ufs\fR(1M), \fBfsdb_ufs\fR(1M),
-\fBfsirand\fR(1M), \fBfstyp\fR(1M), \fBmkfs\fR(1M), \fBmkfs_ufs\fR(1M),
-\fBmountall\fR(1M), \fBnewfs\fR(1M), \fBreboot\fR(1M), \fBvfstab\fR(4),
-\fBattributes\fR(5), \fBlargefile\fR(5), \fBufs\fR(7FS)
+\fBclri\fR(8), \fBfsck_ufs\fR(8), \fBfsdb_ufs\fR(8),
+\fBfsirand\fR(8), \fBfstyp\fR(8), \fBmkfs\fR(8), \fBmkfs_ufs\fR(8),
+\fBmountall\fR(8), \fBnewfs\fR(8), \fBreboot\fR(8), \fBvfstab\fR(5),
+\fBattributes\fR(7), \fBlargefile\fR(7), \fBufs\fR(4FS)
 .SH WARNINGS
 .LP
 The operating system buffers file system data. Running \fBfsck\fR on a mounted
@@ -383,7 +383,7 @@ occur if running \fBfsck\fR on a file system modifies the file system.
 This command may not be supported for all \fIFSTypes\fR.
 .LP
 Starting with Solaris 9, \fBfsck\fR manages extended attribute data on the
-disk. (See \fBfsattr\fR(5) for a description of extended file attributes.) A
+disk. (See \fBfsattr\fR(7) for a description of extended file attributes.) A
 file system with extended attributes can be mounted on versions of Solaris that
 are not attribute-aware (versions prior to Solaris 9), but the attributes will
 not be accessible and \fBfsck\fR will strip them from the files and place them

@@ -367,7 +367,7 @@ management.
 .sp
 .LP
 \fBinq_encserv\fR, if set, indicates that the device contains an embedded
-enclosure services component (\fBses\fR(7D)).
+enclosure services component (\fBses\fR(4D)).
 .sp
 .LP
 \fBinq_dualp\fR, if set, indicates that the \fBSCSI\fR target device supports

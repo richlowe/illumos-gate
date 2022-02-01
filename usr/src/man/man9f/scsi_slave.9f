@@ -145,7 +145,7 @@ allocated.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -161,7 +161,7 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBattach\fR(9E), \fBprobe\fR(9E),
+\fBattributes\fR(7), \fBattach\fR(9E), \fBprobe\fR(9E),
 \fBddi_iopb_alloc\fR(9F), \fBmakecom\fR(9F), \fBscsi_dmaget\fR(9F),
 \fBscsi_ifgetcap\fR(9F), \fBscsi_pktalloc\fR(9F), \fBscsi_poll\fR(9F),
 \fBscsi_probe\fR(9F), \fBscsi_device\fR(9S)

@@ -29,12 +29,12 @@ http://\fIwww.dmtf.org\fR.
 The \fBSMBIOS\fR image consists of a table of structures, each describing some
 aspect of the system software or hardware configuration. The content of the
 image varies widely by platform and BIOS vendor and may not exist on some
-systems. You can use the \fBsmbios\fR(1M) utility to inspect the contents of
+systems. You can use the \fBsmbios\fR(8) utility to inspect the contents of
 the \fBSMBIOS\fR image and copy it to a file.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -50,7 +50,7 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBprtdiag\fR(1M), \fBsmbios\fR(1M), \fBattributes\fR(5)
+\fBprtdiag\fR(8), \fBsmbios\fR(8), \fBattributes\fR(7)
 .sp
 .LP
 \fISystem Management BIOS Reference Specification\fR, Version 2, Release 4 \(em

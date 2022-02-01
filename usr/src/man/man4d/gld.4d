@@ -76,7 +76,7 @@ that are not IEEE 802-style LAN devices, or where a device type or DLPI service
 not supported by GLD is required.
 .SS "Device Naming Constraints"
 The name of the device-specific driver module must adhere to the naming
-constraints outlined in the NOTES section of \fBdlpi\fR(7P).
+constraints outlined in the NOTES section of \fBdlpi\fR(4P).
 .SS "Type DL_ETHER: Ethernet V2 and ISO 8802-3 (IEEE 802.3)"
 For devices designated type \fBDL_ETHER\fR, GLD provides support for both
 Ethernet V2 and ISO 8802-3 (IEEE 802.3) packet processing. Ethernet V2 enables
@@ -284,9 +284,9 @@ primitive will be successful.
 .sp
 .LP
 GLD supports the DL_NOTE_LINK_UP, DL_NOTE_LINK_DOWN and DL_NOTE_SPEED
-notifications using the DL_NOTIFY_IND primitive. See \fBdlpi\fR(7P).
+notifications using the DL_NOTIFY_IND primitive. See \fBdlpi\fR(4P).
 .SS "Implemented ioctl Functions"
-GLD implements the \fBDLIOCRAW\fR ioctl described in \fBdlpi\fR(7P).  For any
+GLD implements the \fBDLIOCRAW\fR ioctl described in \fBdlpi\fR(4P).  For any
 other ioctl command, GLD passes it to the device-specific driver's
 \fBgldm_ioctl()\fR function as described in \fBgld\fR(9E).
 .SS "Requirements on GLD Drivers"
@@ -447,7 +447,7 @@ illumos network drivers must implement statistics variables. GLD itself tallies
 some network statistics, but other statistics must be counted by each GLD-based
 driver. GLD provides support for GLD-based drivers to report a standard set of
 network driver statistics. Statistics are reported by GLD using the
-\fBkstat\fR(7D) and \fBkstat\fR(9S) mechanism. The \fBDL_GET_STATISTICS_REQ\fR
+\fBkstat\fR(4D) and \fBkstat\fR(9S) mechanism. The \fBDL_GET_STATISTICS_REQ\fR
 DLPI command may also be used to retrieve the current statistics counters. All
 statistics are maintained as unsigned, and all are 32 bits unless otherwise
 noted.
@@ -1004,7 +1004,7 @@ loadable kernel module
 .RE
 
 .SH SEE ALSO
-\fBld\fR(1), \fBkstat\fR(7D), \fBdlpi\fR(7P), \fBattach\fR(9E), \fBgld\fR(9E),
+\fBld\fR(1), \fBkstat\fR(4D), \fBdlpi\fR(4P), \fBattach\fR(9E), \fBgld\fR(9E),
 \fBopen\fR(9E), \fBgld\fR(9F), \fBgld_mac_info\fR(9S), \fBgld_stats\fR(9S),
 \fBkstat\fR(9S)
 .sp

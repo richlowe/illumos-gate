@@ -138,7 +138,7 @@ The default values are \fBPMCHANGEPERM=console-owner\fR and
 \fBCPRCHANGEPERM=console-owner\fR.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -153,15 +153,15 @@ Interface Stability 	Unstable
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBpowerd\fR(1M), \fBpower.conf\fR(4), \fBsvcadm\fR(1M),
-\fBattributes\fR(5), \fBsmf\fR(5), \fBcpr\fR(7), \fBpm\fR(7D)
+\fBsvcs\fR(1), \fBpowerd\fR(8), \fBpower.conf\fR(5), \fBsvcadm\fR(8),
+\fBattributes\fR(7), \fBsmf\fR(7), \fBcpr\fR(4), \fBpm\fR(4D)
 .sp
 .LP
 \fIUsing Power Management\fR
 .SH NOTES
 .LP
 The \fBpmconfig\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -173,7 +173,7 @@ svc:/system/power:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .SH DIAGNOSTICS
 .LP

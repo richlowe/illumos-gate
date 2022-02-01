@@ -21,7 +21,7 @@ assignments are imbalanced and harmful to system performance, it will generate
 and implement new assignments.
 .sp
 .LP
-Any notifications will be delivered via \fBsyslogd\fR(1M).
+Any notifications will be delivered via \fBsyslogd\fR(8).
 .sp
 .LP
 Because \fBintrd\fR dynamically monitors a system  for optimal performance, it
@@ -30,7 +30,7 @@ behavior is normal.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -46,13 +46,13 @@ Interface Stability 	Unstable
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBsvcadm\fR(1M), \fBsyslogd\fR(1M), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBsvcadm\fR(8), \fBsyslogd\fR(8), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
 The interrupt distribution daemon is managed by the service management
-facility, \fBsmf\fR(5), under the service identifier:
+facility, \fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -64,5 +64,5 @@ svc:/system/intrd:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

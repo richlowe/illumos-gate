@@ -83,9 +83,9 @@ name:   <class name>                    class: <action name>
 .SH SEE ALSO
 .sp
 .LP
-\fBipqosconf\fR(1M), \fBdlcosmk\fR(7ipp), \fBdscpmk\fR(7ipp),
-\fBflowacct\fR(7ipp), \fBipqos\fR(7ipp), \fBtokenmt\fR(7ipp),
-\fBtswtclmt\fR(7ipp)
+\fBipqosconf\fR(8), \fBdlcosmk\fR(4IPP), \fBdscpmk\fR(4IPP),
+\fBflowacct\fR(4IPP), \fBipqos\fR(4IPP), \fBtokenmt\fR(4IPP),
+\fBtswtclmt\fR(4IPP)
 .sp
 .LP
 \fIRFC 2475, An Architecture for Differentiated Services\fR S. Blake, D. Black,

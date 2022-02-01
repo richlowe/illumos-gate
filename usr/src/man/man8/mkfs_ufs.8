@@ -18,10 +18,10 @@ mkfs_ufs \- construct a UFS file system
 .sp
 .LP
 The UFS-specific module of \fBmkfs\fR builds a UFS file system with a root
-directory and a \fBlost+found\fR directory (see \fBfsck\fR(1M)).
+directory and a \fBlost+found\fR directory (see \fBfsck\fR(8)).
 .sp
 .LP
-The UFS-specific \fBmkfs\fR is rarely run directly. Use the \fBnewfs\fR(1M)
+The UFS-specific \fBmkfs\fR is rarely run directly. Use the \fBnewfs\fR(8)
 command instead.
 .sp
 .LP
@@ -35,7 +35,7 @@ and is required (even with \fB\fR\fB-o\fR\fB N\fR), unless the \fB-V\fR or
 .sp
 .LP
 \fIgeneric_options\fR are supported by the generic \fBmkfs\fR command. See
-\fBmkfs\fR(1M) for a description of these options.
+\fBmkfs\fR(8) for a description of these options.
 .SH OPTIONS
 .sp
 .LP
@@ -164,7 +164,7 @@ file system.
 The default is ((64 Mbytes/partition size) * 100), rounded down to the nearest
 integer and limited between 1% and 10%, inclusively.
 .sp
-This parameter can be subsequently changed using the \fBtunefs\fR(1M) command.
+This parameter can be subsequently changed using the \fBtunefs\fR(8) command.
 .RE
 
 .sp
@@ -205,7 +205,7 @@ You can set \fBmaxcontig\fR to any positive integer value.
 The actual value will be the lesser of what has been specified and what the
 hardware supports.
 .sp
-You can subsequently change this parameter by using \fBtunefs\fR(1M).
+You can subsequently change this parameter by using \fBtunefs\fR(8).
 .RE
 
 .sp
@@ -292,7 +292,7 @@ The file system can either be instructed to try to minimize the \fBtime\fR
 spent allocating blocks, or to try to minimize the \fBspace\fR fragmentation on
 the disk. The default is \fItime\fR.
 .sp
-This parameter can be subsequently changed with the \fBtunefs\fR(1M) command.
+This parameter can be subsequently changed with the \fBtunefs\fR(8) command.
 .RE
 
 .sp
@@ -331,8 +331,8 @@ The disk partition on which to write.
 .SH SEE ALSO
 .sp
 .LP
-\fBfsck\fR(1M), \fBmkfs\fR(1M), \fBnewfs\fR(1M), \fBtunefs\fR(1M),
-\fBdir_ufs\fR(4), \fBattributes\fR(5), \fBufs\fR(7FS)
+\fBfsck\fR(8), \fBmkfs\fR(8), \fBnewfs\fR(8), \fBtunefs\fR(8),
+\fBdir_ufs\fR(5), \fBattributes\fR(7), \fBufs\fR(4FS)
 .SH DIAGNOSTICS
 .sp
 .LP
@@ -399,7 +399,7 @@ Warning: \fInum\fR sector(s) in last cylinder group unallocated
 You can use \fBlofiadm\fR to create a file that appears to the \fBmkfs\fR
 command (for example, \fBmkfs_pcfs\fR or \fBmkfs_ufs\fR) as a raw device. You
 can then use the \fBmkfs\fR command to create a file system on that device. See
-\fBlofiadm\fR(1M) for examples of creating a \fBUFS\fR and a \fBPC\fR
+\fBlofiadm\fR(8) for examples of creating a \fBUFS\fR and a \fBPC\fR
 (\fBFAT\fR) file system on a device created by \fBlofiadm\fR.
 .sp
 .LP

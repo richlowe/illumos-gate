@@ -16,7 +16,7 @@ pppoed \- PPPoE server daemon
 .sp
 .LP
 The \fBpppoed\fR daemon implements the server-side negotiation of PPPoE. When a
-client requests service from this daemon, a copy of \fBpppd\fR(1M) is invoked
+client requests service from this daemon, a copy of \fBpppd\fR(8) is invoked
 to handle the actual PPP communication.
 .sp
 .LP
@@ -50,7 +50,7 @@ delimit tokens, quotes to enclose strings that can contain whitespace, and
 escape sequences for special characters. Environment variables are substituted
 using familiar \fB$VAR\fR and \fB${VAR}\fR syntax and set using
 \fBNEWVAR=\fIstring\fR\fR. Variables are both usable in subsequent options and
-provided to the \fBpppd\fR(1M) processes spawned for each client, but they are
+provided to the \fBpppd\fR(8) processes spawned for each client, but they are
 interpreted as they are encountered during option processing. Thus, all set
 variables are seen by all processes spawned; position in the configuration
 files has no effect on this.
@@ -127,7 +127,7 @@ per-device \fB/etc/ppp/pppoe.\fIdevice\fR\fR files.
 .ad
 .sp .6
 .RS 4n
-Specifies extra options to \fBpppd\fR(1M). It defaults to "\fBplugin pppoe.so
+Specifies extra options to \fBpppd\fR(8). It defaults to "\fBplugin pppoe.so
 directtty\fR" and usually does not need to be overridden.
 .RE
 
@@ -405,7 +405,7 @@ ASCII text file containing dumped \fBpppoed\fR state information
 .SH SEE ALSO
 .sp
 .LP
-\fBpppd\fR(1M), \fBpppoec\fR(1M), \fBsppptun\fR(1M), \fBsppptun\fR(7M)
+\fBpppd\fR(8), \fBpppoec\fR(8), \fBsppptun\fR(8), \fBsppptun\fR(4M)
 .sp
 .LP
 Mamakos, L., et al. \fIRFC 2516, A Method for Transmitting PPP Over Ethernet
@@ -419,7 +419,7 @@ are ignored.
 .sp
 .LP
 The Ethernet interfaces to be used must be plumbed for PPPoE using the
-\fBsppptun\fR(1M) utility before services can be offered.
+\fBsppptun\fR(8) utility before services can be offered.
 .sp
 .LP
 The daemon operate runs even if there are no services to offer. If you want to

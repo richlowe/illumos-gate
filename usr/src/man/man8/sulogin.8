@@ -25,7 +25,7 @@ directly invoke \fBsulogin\fR. The user must have the
 .LP
 The \fBsulogin\fR utility can prompt the user to enter the root password on a
 variable number of serial console devices, in addition to the traditional
-console device. See \fBconsadm\fR(1M) and \fBmsglog\fR(7D) for a description of
+console device. See \fBconsadm\fR(8) and \fBmsglog\fR(4D) for a description of
 how to configure a serial device to display the single-user login prompt.
 .SH FILES
 .sp
@@ -67,7 +67,7 @@ If present, sets the number of seconds to wait before login failure is printed
 to the screen and another login attempt is allowed. Default is \fB4\fR seconds.
 Minimum is \fB0\fR seconds. Maximum is \fB5\fR seconds.
 .sp
-Both \fBsu\fR(1M) and \fBlogin\fR(1) are affected by the value of
+Both \fBsu\fR(8) and \fBlogin\fR(1) are affected by the value of
 \fBSLEEPTIME\fR.
 .RE
 
@@ -76,8 +76,8 @@ Both \fBsu\fR(1M) and \fBlogin\fR(1) are affected by the value of
 .SH SEE ALSO
 .sp
 .LP
-\fBauths\fR(1), \fBlogin\fR(1), \fBconsadm\fR(1M), \fBinit\fR(1M),
-\fBsu\fR(1M), \fBattributes\fR(5), \fBmsglog\fR(7D)
+\fBauths\fR(1), \fBlogin\fR(1), \fBconsadm\fR(8), \fBinit\fR(8),
+\fBsu\fR(8), \fBattributes\fR(7), \fBmsglog\fR(4D)
 .SH NOTES
 .sp
 .LP

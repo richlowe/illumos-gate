@@ -42,7 +42,7 @@ described in the \fB/usr/include/sys/rt.h\fR header file.
 .ad
 .RS 14n
 The global scheduling priority associated with this priority level. The
-\fBrt_globpri\fR values cannot be changed with \fBdispadmin\fR(1M).
+\fBrt_globpri\fR values cannot be changed with \fBdispadmin\fR(8).
 .RE
 
 .sp
@@ -69,7 +69,7 @@ absolute time.
 An administrator can affect the behavior of the real-time portion of the
 scheduler by reconfiguring the \fBrt_dptbl\fR. There are two methods available
 for doing this: reconfigure with a loadable module at boot-time or by using
-\fBdispadmin\fR(1M) at run-time.
+\fBdispadmin\fR(8) at run-time.
 .SS "rt_dptbl Loadable Module"
 The \fBrt_dptbl\fR can be reconfigured with a loadable module which contains a
 new real time dispatch table. The module containing the dispatch table is
@@ -80,7 +80,7 @@ real time class. The relevant procedure and source code is described in the
 Examples section.
 .SS "dispadmin Configuration File"
 The \fBrt_quantum\fR values in the \fBrt_dptbl\fR can be examined and modified
-on a running system using the \fBdispadmin\fR(1M) command. Invoking
+on a running system using the \fBdispadmin\fR(8) command. Invoking
 \fBdispadmin\fR for the real-time class allows the administrator to retrieve
 the current \fBrt_dptbl\fR configuration from the kernel's in-core table, or
 overwrite the in-core table with values from a configuration file. The
@@ -201,7 +201,7 @@ Replace the current \fBRT_DPTBL\fR in \fB/usr/kernel/sched\fR.
 .TP
 5.
 You will have to make changes in the \fB/etc/system\fR file to reflect the
-changes to the sizes of the tables. See \fBsystem\fR(4). The \fBrt_maxpri\fR
+changes to the sizes of the tables. See \fBsystem\fR(5). The \fBrt_maxpri\fR
 variable may need changing. The syntax for setting this is:
 .sp
 .in +2
@@ -336,7 +336,7 @@ rtdpent_t       config_rt_dptbl[] = {
 .in -2
 
 .SH SEE ALSO
-\fBpriocntl\fR(1), \fBdispadmin\fR(1M), \fBpriocntl\fR(2), \fBsystem\fR(4)
+\fBpriocntl\fR(1), \fBdispadmin\fR(8), \fBpriocntl\fR(2), \fBsystem\fR(5)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

@@ -22,8 +22,8 @@ pppoec \- PPPoE chat utility
 .sp
 .LP
 The \fBpppoec\fR utility implements the client-side negotiation of PPPoE. It is
-intended to be used with the \fBpppd\fR(1M) \fBconnect\fR option, in the same
-manner as the \fBchat\fR(1M) utility is used for asynchronous dial-up PPP.
+intended to be used with the \fBpppd\fR(8) \fBconnect\fR option, in the same
+manner as the \fBchat\fR(8) utility is used for asynchronous dial-up PPP.
 .sp
 .LP
 When given with the \fB-i\fR flag, \fBpppoec\fR sends out a broadcast query on
@@ -34,7 +34,7 @@ services are displayed on standard output.
 .LP
 Otherwise, when given without the \fB-i\fR flag, \fBpppoec\fR does the full
 PPPoE client-side negotiation. The \fIdevice\fR parameter is the intended
-Ethernet interface, and must already be plumbed with \fBsppptun\fR(1M). The
+Ethernet interface, and must already be plumbed with \fBsppptun\fR(8). The
 optional \fIservice\fR parameter specifies a particular service desired; other
 offered services will be ignored. The optional \fIserver\fR parameter specifies
 a specific server desired. You can specify \fIserver\fR as an Ethernet address
@@ -253,7 +253,7 @@ usual location of error output (see DIAGNOSTICS, below)
 .SH SEE ALSO
 .sp
 .LP
-\fBpppd\fR(1M), \fBsppptun\fR(1M), \fBpppoed\fR(1M), \fBsppptun\fR(7M)
+\fBpppd\fR(8), \fBsppptun\fR(8), \fBpppoed\fR(8), \fBsppptun\fR(4M)
 .sp
 .LP
 \fIRFC 2516, Method for Transmitting PPP Over Ethernet (PPPoE)\fR, Mamakos et

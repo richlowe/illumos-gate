@@ -228,7 +228,7 @@ usb_callback_flags(9s) for a description of use and operation.
 .in -2
 
 .SH ATTRIBUTES
-See attributes(5) for descriptions of the following attributes:
+See attributes(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -244,7 +244,7 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(5), \fBusb_alloc_request\fR(9F),
+\fBattributes\fR(7), \fBusb_alloc_request\fR(9F),
 \fBusb_get_current_frame_number\fR(9F),
 \fBusb_get_max_pkts_per_isoc_request\fR(9F), \fBusb_pipe_bulk_xfer\fR(9F),
 \fBusb_pipe_ctrl_xfer\fR(9F), \fBusb_pipe_intr_xfer\fR(9F),

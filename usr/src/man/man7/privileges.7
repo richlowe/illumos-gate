@@ -619,7 +619,7 @@ Allow a process to assign a new task ID to the calling process.
 .sp .6
 .RS 4n
 Allow a process to trace or send signals to processes in other zones. See
-\fBzones\fR(5).
+\fBzones\fR(7).
 .RE
 
 .sp
@@ -641,7 +641,7 @@ Allow a process to enable and disable and manage accounting through
 .sp .6
 .RS 4n
 Allow a process to perform system administration tasks such as setting node and
-domain name and managing \fBfmd\fR(1M) and \fBnscd\fR(1M).
+domain name and managing \fBfmd\fR(8) and \fBnscd\fR(8).
 .RE
 
 .sp
@@ -782,8 +782,8 @@ locking operations, bind to NFS reserved ports: ports 2049 (\fBnfs\fR) and port
 .ad
 .sp .6
 .RS 4n
-Allow a process to create, configure, and destroy PPP instances with pppd(1M)
-\fBpppd\fR(1M) and control PPPoE plumbing with \fBsppptun\fR(1M)sppptun(1M).
+Allow a process to create, configure, and destroy PPP instances with pppd(8)
+\fBpppd\fR(8) and control PPPoE plumbing with \fBsppptun\fR(8).
 This privilege is granted by default to exclusive IP stack instance zones.
 .RE
 
@@ -880,7 +880,7 @@ Extensions.
 .ad
 .sp .6
 .RS 4n
-Allows a process to manage virtualized environments such as \fBxVM\fR(5).
+Allows a process to manage virtualized environments such as \fBxVM\fR(7).
 .RE
 
 .sp
@@ -1076,7 +1076,7 @@ Extensions.
 .ad
 .sp .6
 .RS 4n
-Allows a process access to the \fBxVM\fR(5) control devices for managing guest
+Allows a process access to the \fBxVM\fR(7) control devices for managing guest
 domains and the hypervisor. This privilege is used only if booted into xVM on
 x86 platforms.
 .RE
@@ -1306,7 +1306,7 @@ called \fBprivilege debugging\fR. When privilege debugging is enabled for a
 process, the kernel reports missing privileges on the controlling terminal of
 the process. (Enable debugging for a process with the \fB-D\fR option of
 \fBppriv\fR(1).) Additionally, the administrator can enable system-wide
-privilege debugging by setting the \fBsystem\fR(4) variable \fBpriv_debug\fR
+privilege debugging by setting the \fBsystem\fR(5) variable \fBpriv_debug\fR
 using:
 .sp
 .in +2
@@ -1319,14 +1319,14 @@ set priv_debug = 1
 .LP
 On a running system, you can use \fBmdb\fR(1) to change this variable.
 .SS "Privilege Administration"
-Use \fBusermod\fR(1M) or \fBrolemod\fR(1M)
+Use \fBusermod\fR(8) or \fBrolemod\fR(8)
 to assign privileges to or modify privileges for, respectively, a user or a
 role. Use \fBppriv\fR(1) to enumerate the privileges supported on a system and
 \fBtruss\fR(1) to determine which privileges a program requires.
 .SH SEE ALSO
-\fBmdb\fR(1), \fBppriv\fR(1), \fBadd_drv\fR(1M), \fBifconfig\fR(1M),
-\fBlockd\fR(1M), \fBnfsd\fR(1M), \fBpppd\fR(1M), \fBrem_drv\fR(1M),
-\fBsmbd\fR(1M), \fBsppptun\fR(1M), \fBupdate_drv\fR(1M), \fBIntro\fR(2),
+\fBmdb\fR(1), \fBppriv\fR(1), \fBadd_drv\fR(8), \fBifconfig\fR(8),
+\fBlockd\fR(8), \fBnfsd\fR(8), \fBpppd\fR(8), \fBrem_drv\fR(8),
+\fBsmbd\fR(8), \fBsppptun\fR(8), \fBupdate_drv\fR(8), \fBIntro\fR(2),
 \fBaccess\fR(2), \fBacct\fR(2), \fBacl\fR(2), \fBadjtime\fR(2), \fBaudit\fR(2),
 \fBauditon\fR(2), \fBchmod\fR(2), \fBchown\fR(2), \fBchroot\fR(2),
 \fBcreat\fR(2), \fBexec\fR(2), \fBfcntl\fR(2), \fBfork\fR(2),
@@ -1347,8 +1347,8 @@ role. Use \fBppriv\fR(1) to enumerate the privileges supported on a system and
 \fBpriv_addset\fR(3C), \fBpriv_set\fR(3C), \fBpriv_getbyname\fR(3C),
 \fBpriv_getbynum\fR(3C), \fBpriv_set_to_str\fR(3C), \fBpriv_str_to_set\fR(3C),
 \fBsocket\fR(3SOCKET), \fBt_bind\fR(3NSL), \fBtimer_create\fR(3C),
-\fBucred_get\fR(3C), \fBexec_attr\fR(4), \fBproc\fR(4), \fBsystem\fR(4),
-\fBuser_attr\fR(4), \fBxVM\fR(5), \fBddi_cred\fR(9F), \fBdrv_priv\fR(9F),
+\fBucred_get\fR(3C), \fBexec_attr\fR(5), \fBproc\fR(5), \fBsystem\fR(5),
+\fBuser_attr\fR(5), \fBxVM\fR(7), \fBddi_cred\fR(9F), \fBdrv_priv\fR(9F),
 \fBpriv_getbyname\fR(9F), \fBpriv_policy\fR(9F), \fBpriv_policy_choice\fR(9F),
 \fBpriv_policy_only\fR(9F)
 .sp

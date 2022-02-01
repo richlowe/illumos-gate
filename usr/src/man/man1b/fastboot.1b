@@ -28,5 +28,5 @@ These commands are provided for compatibility only.
 .SH SEE ALSO
 .sp
 .LP
-\fBfsck\fR(1M), \fBhalt\fR(1M), \fBinit\fR(1M), \fBreboot\fR(1M),
-\fBinit.d\fR(4), \fBattributes\fR(5)
+\fBfsck\fR(8), \fBhalt\fR(8), \fBinit\fR(8), \fBreboot\fR(8),
+\fBinit.d\fR(5), \fBattributes\fR(7)

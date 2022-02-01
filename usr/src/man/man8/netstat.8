@@ -208,7 +208,7 @@ Selects an output interface. You can specify the interface by name (such as
 used, the filter matches all routes having a specified interface (anything
 other than null). If \fBnone\fR is used, the filter matches all routes having a
 null interface. Note that you can view the index number (\fIifIndex\fR) for an
-interface with the \fB-a\fR option of \fBifconfig\fR(1M).
+interface with the \fB-a\fR option of \fBifconfig\fR(8).
 .RE
 
 .sp
@@ -274,7 +274,7 @@ DISPLAYS, below.
 Show the state of the interfaces that are used for \fBIP\fR traffic. Normally
 this shows statistics for the physical interfaces. When combined with the
 \fB-a\fR option, this will also report information for the logical interfaces.
-See \fBifconfig\fR(1M).
+See \fBifconfig\fR(8).
 .RE
 
 .sp
@@ -440,7 +440,7 @@ table entries. The \fB-R\fR modifier is available only if the system is
 configured with the Solaris Trusted Extensions feature.
 .sp
 With \fB-r\fR only, this option displays the routing entries' gateway security
-attributes. See \fBroute\fR(1M) for more information on security attributes.
+attributes. See \fBroute\fR(8) for more information on security attributes.
 .sp
 When displaying socket information using the first form of the command, this
 option displays additional information for Multi-Level Port(MLP) sockets. This
@@ -532,8 +532,8 @@ to look up the corresponding symbolic hostname or network name in the
 If the network or hostname for an address is not known, or if the \fB-n\fR
 option is specified, the numerical network address is shown. Unspecified, or
 "wildcard", addresses and ports appear as an asterisk (\fB*\fR). For more
-information regarding the Internet naming conventions, refer to \fBinet\fR(7P)
-and \fBinet6\fR(7P).
+information regarding the Internet naming conventions, refer to \fBinet\fR(4P)
+and \fBinet6\fR(4P).
 .LP
 For SCTP sockets, because an endpoint can be represented by multiple addresses,
 the verbose option (\fB-v\fR) displays the list of all the local and remote
@@ -773,7 +773,7 @@ Displays the memory usage, for example, STREAMS mblks.
 .ad
 .RS 6n
 Displays the net to media mapping table. For IPv4, the address resolution table
-is displayed. See \fBarp\fR(1M). For IPv6, the neighbor cache is displayed.
+is displayed. See \fBarp\fR(8). For IPv6, the neighbor cache is displayed.
 .RE
 
 .sp
@@ -825,7 +825,7 @@ interface per line. If an interface is specified using the \fB-I\fR option, it
 displays information for only the specified interface.
 .LP
 The list consists of the interface name, \fBmtu\fR (maximum transmission unit,
-or maximum packet size)(see \fBifconfig\fR(1M)), the network to which the
+or maximum packet size)(see \fBifconfig\fR(8)), the network to which the
 interface is attached, addresses for each interface, and counter associated
 with the interface. The counters show the number of input packets, input
 errors, output packets, output errors, and collisions, respectively. For
@@ -1020,7 +1020,7 @@ The interface is busy with a \fBDHCP\fR transaction.
 .ad
 .RS 11n
 The interface is the primary interface. See \fBdhcpinfo\fR(1) and
-\fBifconfig\fR(1M).
+\fBifconfig\fR(8).
 .RE
 
 .sp
@@ -1051,11 +1051,11 @@ future lease.
 .RE
 
 .SH SEE ALSO
-\fBarp\fR(1M), \fBdhcpinfo\fR(1), \fBdhcpagent\fR(1M), \fBifconfig\fR(1M),
-\fBiostat\fR(1M), \fBkstat\fR(1M), \fBmibiisa\fR(1M), \fBndp\fR(1M), \fBsavecore\fR(1M),
-\fBvmstat\fR(1M), \fBhosts\fR(4), \fBinet_type\fR(4), \fBnetworks\fR(4),
-\fBprotocols\fR(4), \fBservices\fR(4), \fBattributes\fR(5), \fBdhcp\fR(5),
-\fBkstat\fR(7D), \fBinet\fR(7P), \fBinet6\fR(7P)
+\fBarp\fR(8), \fBdhcpinfo\fR(1), \fBdhcpagent\fR(8), \fBifconfig\fR(8),
+\fBiostat\fR(8), \fBkstat\fR(8), \fBmibiisa\fR(8), \fBndp\fR(8), \fBsavecore\fR(8),
+\fBvmstat\fR(8), \fBhosts\fR(5), \fBinet_type\fR(5), \fBnetworks\fR(5),
+\fBprotocols\fR(5), \fBservices\fR(5), \fBattributes\fR(7), \fBdhcp\fR(7),
+\fBkstat\fR(4D), \fBinet\fR(4P), \fBinet6\fR(4P)
 .sp
 .LP
 Droms, R., \fIRFC 2131, Dynamic Host Configuration Protocol\fR, Network Working
@@ -1077,7 +1077,7 @@ the command-line to explicitly request IPv6 information by using the
 \fBDEFAULT_IP\fR setting.
 .LP
 If you need to examine network status information following a kernel crash, use
-the \fBmdb\fR(1) utility on the \fBsavecore\fR(1M) output.
+the \fBmdb\fR(1) utility on the \fBsavecore\fR(8) output.
 .LP
 The \fBnetstat\fR utility obtains TCP statistics from the system by opening
 \fB/dev/tcp\fR and issuing queries. Because of this, \fBnetstat\fR might
@@ -1085,8 +1085,8 @@ display an extra, unused connection in \fBIDLE\fR state when reporting
 connection status.
 .LP
 Previous versions of \fBnetstat\fR had undocumented methods for reporting
-kernel statistics published using the \fBkstat\fR(7D) facility. This
-functionality has been removed. Use \fBkstat\fR(1M) instead.
+kernel statistics published using the \fBkstat\fR(4D) facility. This
+functionality has been removed. Use \fBkstat\fR(8) instead.
 .LP
 \fBnetstat\fR restricts its output to information that is relevant to the zone
 in which \fBnetstat\fR runs. (This is true for both shared-IP and exclusive-IP

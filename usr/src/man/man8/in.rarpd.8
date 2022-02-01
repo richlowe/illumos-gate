@@ -101,7 +101,7 @@ example# /usr/sbin/in.rarpd le 0
 \fB\fB/etc/ethers\fR\fR
 .ad
 .RS 15n
-File or other source, as specified by \fBnsswitch.conf\fR(4).
+File or other source, as specified by \fBnsswitch.conf\fR(5).
 .RE
 
 .sp
@@ -110,7 +110,7 @@ File or other source, as specified by \fBnsswitch.conf\fR(4).
 \fB\fB/etc/hosts\fR\fR
 .ad
 .RS 15n
-File or other source, as specified by \fBnsswitch.conf\fR(4).
+File or other source, as specified by \fBnsswitch.conf\fR(5).
 .RE
 
 .sp
@@ -143,9 +143,9 @@ File or other source, as specified by \fBnsswitch.conf\fR(4).
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBboot\fR(1M), \fBifconfig\fR(1M), \fBsvcadm\fR(1M),
-\fBethers\fR(4), \fBhosts\fR(4), \fBnetconfig\fR(4),
-\fBnsswitch.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5), \fBdlpi\fR(7P)
+\fBsvcs\fR(1), \fBboot\fR(8), \fBifconfig\fR(8), \fBsvcadm\fR(8),
+\fBethers\fR(5), \fBhosts\fR(5), \fBnetconfig\fR(5),
+\fBnsswitch.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7), \fBdlpi\fR(4P)
 .sp
 .LP
 Finlayson, R., Mann, T., Mogul, J., and Theimer, M., \fIRFC 903, A Reverse
@@ -155,7 +155,7 @@ June 1984.
 .sp
 .LP
 The \fBin.rarpd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -167,5 +167,5 @@ svc:/network/rarp
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

@@ -110,7 +110,7 @@ Optional configuration file
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -125,7 +125,7 @@ Architecture	SPARC, x86
 
 .SH SEE ALSO
 .LP
-\fBprtconf\fR(1M), \fBdriver.conf\fR(4), \fBpci\fR(4), \fBattributes\fR(5),
+\fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBpci\fR(5), \fBattributes\fR(7),
 \fBscsi_abort\fR(9F), \fBscsi_device\fR(9S), \fBscsi_extended_sense\fR(9S),
 \fBscsi_inquiry\fR(9S), \fBscsi_hba_attach_setup\fR(9F),
 \fBscsi_ifgetcap\fR(9F), \fBscsi_ifsetcap\fR(9F), \fBscsi_pkt\fR(9S),

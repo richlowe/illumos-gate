@@ -35,7 +35,7 @@ its associated device drivers and loadable modules, or by faulty hardware.
 Whatever the cause, the crash dump itself provides invaluable information to
 your support engineer to aid in diagnosing the problem. As such, it is vital
 that the crash dump be retrieved and given to your support provider. Following
-an operating system crash, the \fBsavecore\fR(1M) utility is executed
+an operating system crash, the \fBsavecore\fR(8) utility is executed
 automatically during boot to retrieve the crash dump from the dump device, and
 write it to the file system. The directory in which the crash
 dump is saved on reboot can also be configured using \fBdumpadm\fR.
@@ -43,7 +43,7 @@ dump is saved on reboot can also be configured using \fBdumpadm\fR.
 .LP
 When the operating system takes a crash dump the default behavior is to
 compress the crash dump. This behavior is controlled by the \fB-z\fR option.
-When compression is turned on, the \fBsavecore\fR(1M) utility writes one file
+When compression is turned on, the \fBsavecore\fR(8) utility writes one file
 to the file system named \fIvmdump.X\fR. If compression is disabled, it instead
 writes two files named \fIunix.X\fR and \fIvmcore.X\fR. In the uncompressed
 case, both data files form the \fIsaved crash dump\fR. In both cases X is an
@@ -54,7 +54,7 @@ For systems with a UFS root file system, the default dump device is  configured
 to be an appropriate swap partition. Swap partitions are disk partitions
 reserved as virtual memory backing store for the operating system. Thus, no
 permanent information resides in swap to be overwritten by the dump. See
-\fBswap\fR(1M). For systems with a ZFS root file system, dedicated ZFS volumes
+\fBswap\fR(8). For systems with a ZFS root file system, dedicated ZFS volumes
 are used for swap and dump areas. For further information about setting up a
 dump area with ZFS,  see the \fIZFS Administration Guide\fR. To view the
 current dump  configuration, use the \fBdumpadm\fR command with no arguments:
@@ -165,7 +165,7 @@ the system is running a ZFS root file system.
 .RS 4n
 If the special token \fBswap\fR is specified as the dump device, \fBdumpadm\fR
 examines the  active swap entries and selects the most appropriate entry to
-configure as the dump device. See \fBswap\fR(1M). Refer to the \fBNOTES\fR
+configure as the dump device. See \fBswap\fR(8). Refer to the \fBNOTES\fR
 below for details of the algorithm  used to select an appropriate swap entry.
 When the system is first installed with a UFS root file system, \fBdumpadm\fR
 uses the value for \fBswap\fR to determine the initial dump device setting. A
@@ -415,19 +415,19 @@ that command.
 .sp .6
 .RS 4n
 Contains minimum amount of free space for \fIsavecore-directory\fR. See
-\fBsavecore\fR(1M).
+\fBsavecore\fR(8).
 .RE
 
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBuname\fR(1), \fBsavecore\fR(1M), \fBsvcadm\fR(1M),
-\fBswap\fR(1M), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBuname\fR(1), \fBsavecore\fR(8), \fBsvcadm\fR(8),
+\fBswap\fR(8), \fBattributes\fR(7), \fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
 The system crash dump service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -439,7 +439,7 @@ svc:/system/dumpadm:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .SS "Dump Device Selection"
 .sp

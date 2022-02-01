@@ -38,12 +38,12 @@ Control Message Protocol ("\fBICMP\fR"), the Transmission Control Protocol
 \fBTCP\fR supports the socket interface's \fBSOCK_STREAM\fR abstraction and
 \fBTLI\fR's \fBT_COTS_ORD\fR service type. \fBUDP\fR supports the
 \fBSOCK_DGRAM\fR socket abstraction and the \fBTLI\fR \fBT_CLTS\fR service
-type. See \fBtcp\fR(7P) and \fBudp\fR(7P). A direct interface to \fBIP\fR is
-available using both \fBTLI\fR and the socket interface (see \fBip\fR(7P)).
+type. See \fBtcp\fR(4P) and \fBudp\fR(4P). A direct interface to \fBIP\fR is
+available using both \fBTLI\fR and the socket interface (see \fBip\fR(4P)).
 \fBICMP\fR is used by the kernel to handle and report errors in protocol
-processing. It is also accessible to user programs (see \fBicmp\fR(7P)).
+processing. It is also accessible to user programs (see \fBicmp\fR(4P)).
 \fBARP\fR is used to translate 32-bit \fBIP\fR addresses into 48-bit Ethernet
-addresses. See \fBarp\fR(7P).
+addresses. See \fBarp\fR(4P).
 .sp
 .LP
 The 32-bit \fBIP\fR address is divided into network number and host number
@@ -157,8 +157,8 @@ the \fBTLI\fR.
 \fBconnect\fR(3SOCKET), \fBgethostbyname\fR(3NSL), \fBgetnetbyname\fR(3SOCKET),
 \fBgetprotobyname\fR(3SOCKET), \fBgetservbyname\fR(3SOCKET),
 \fBgetsockopt\fR(3SOCKET), \fBsend\fR(3SOCKET), \fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET), \fBarp\fR(7P), \fBicmp\fR(7P), \fBip\fR(7P),
-\fBtcp\fR(7P), \fBudp\fR(7P)
+\fBsocket\fR(3SOCKET), \fBarp\fR(4P), \fBicmp\fR(4P), \fBip\fR(4P),
+\fBtcp\fR(4P), \fBudp\fR(4P)
 .sp
 .LP
 Network Information Center, \fIDDN Protocol Handbook\fR (3 vols.), Network

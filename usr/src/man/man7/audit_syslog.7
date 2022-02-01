@@ -18,17 +18,17 @@ audit_syslog \- realtime conversion of audit data to syslog messages
 The \fBaudit_syslog\fR plugin module for audit,
 \fB/usr/lib/security/audit_syslog.so\fR, provides realtime conversion of
 audit data to syslog-formatted (text) data and sends it to a syslog
-daemon as configured in \fBsyslog.conf\fR(4).
+daemon as configured in \fBsyslog.conf\fR(5).
 .sp
 .LP
 Messages to \fBsyslog\fR are written if the \fBaudit_syslog\fR plugin is
-activated and configured using \fBauditconfig\fR(1M).
+activated and configured using \fBauditconfig\fR(8).
 .sp
 .LP
 Syslog messages are generated with the facility code of
-\fBLOG_AUDIT\fR (\fBaudit\fR in \fBsyslog.conf\fR(4)) and severity of
+\fBLOG_AUDIT\fR (\fBaudit\fR in \fBsyslog.conf\fR(5)) and severity of
 \fBLOG_NOTICE\fR. Audit \fBsyslog\fR messages contain data selected from the
-tokens described for the binary audit log. (See \fBaudit.log\fR(4)). As with
+tokens described for the binary audit log. (See \fBaudit.log\fR(5)). As with
 all \fBsyslog\fR messages, each line in a \fBsyslog\fR file consists of two
 parts, a \fBsyslog\fR header and a message.
 .sp
@@ -169,7 +169,7 @@ access(2) ok session 255 by janeuser as janeuser:staff from  \e
 The \fBp_flags\fR attribute is used to further filter audit data being sent
 to the \fBsyslog\fR daemon beyond the default and non-attributable
 audit flags. The parameter is a comma-separated list; each
-item represents an audit class (see \fBaudit_class\fR(4)) and is specified
+item represents an audit class (see \fBaudit_class\fR(5)) and is specified
 using the same syntax used by \fBauditconfig\fR for the \fB-setflags\fR and
 \fB-setnaflags\fR options. The default (no \fBp_flags\fR set) is that no
 audit records are generated.
@@ -210,7 +210,7 @@ Plugin: audit_syslog (active)
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -231,8 +231,8 @@ The message format and message content are Uncommitted. The configuration
 parameters are Committed.
 .SH SEE ALSO
 .LP
-\fBauditd\fR(1M), \fBauditconfig\fR(1M), \fBaudit_class\fR(4),
-\fBsyslog.conf\fR(4), \fBattributes\fR(5)
+\fBauditd\fR(8), \fBauditconfig\fR(8), \fBaudit_class\fR(5),
+\fBsyslog.conf\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .LP
 Use of the \fBplugin\fR configuration line to include \fBaudit_syslog.so\fR

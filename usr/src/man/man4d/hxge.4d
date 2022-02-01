@@ -14,7 +14,7 @@ hxge \- Sun Blade 10 Gigabit Ethernet network driver
 .SH DESCRIPTION
 The \fBhxge\fR Gigabit Ethernet driver is a multi-threaded, loadable, clonable,
 GLD-based STREAMS driver supporting the Data Link Provider Interface,
-\fBdlpi\fR(7P), on the Sun Blade Shared 10Gb Ethernet Interface.
+\fBdlpi\fR(4P), on the Sun Blade Shared 10Gb Ethernet Interface.
 .sp
 .LP
 The Shared PCI-Express 10 Gb networking interface provides network I/O
@@ -30,9 +30,9 @@ The cloning character-special device, \fB/dev/hxge\fR, is used to access Sun
 Blade Shared 10Gb Ethernet Interface devices installed within the system.
 .sp
 .LP
-The \fBhxge\fR driver is managed by the \fBdladm\fR(1M) command line utility,
+The \fBhxge\fR driver is managed by the \fBdladm\fR(8) command line utility,
 which allows VLANs to be defined on top of \fBhxge\fR instances and for
-\fBhxge\fR instances to be aggregated. See \fBdladm\fR(1M) for more details.
+\fBhxge\fR instances to be aggregated. See \fBdladm\fR(8) for more details.
 .sp
 .LP
 You must send an explicit DL_ATTACH_REQ message to associate the opened stream
@@ -120,22 +120,22 @@ class-opt-ipv4-tcp = 0x20000;
 
 .sp
 .LP
-You can also use the \fBndd\fR(1M) command to configure the \fBhxge\fR driver
+You can also use the \fBndd\fR(8) command to configure the \fBhxge\fR driver
 at runtime to discard any classes of traffic.
 .sp
 .LP
-The \fBhxge\fR driver supports self-healing functionality, see \fBfmd\fR(1M). By
+The \fBhxge\fR driver supports self-healing functionality, see \fBfmd\fR(8). By
 default it is configured to DDI_FM_EREPORT_CAPABLE | DDI_FM_ERRCB_CAPABLE.
 You configure the \fBhxge\fR driver by defining the fm-capable property in
 \fBhxge.conf\fR to other capabilities or to 0x0 to disable it entirely.
 .sp
 .LP
-The \fBhxge\fR driver may be configured using the standard \fBifconfig\fR(1M)
+The \fBhxge\fR driver may be configured using the standard \fBifconfig\fR(8)
 command.
 .sp
 .LP
 The \fBhxge\fR driver also reports various hardware and software statistics
-data. You can view these statistics using the \fBkstat\fR(1M) command.
+data. You can view these statistics using the \fBkstat\fR(8) command.
 .SH FILES
 .ne 2
 .na
@@ -173,7 +173,7 @@ Configuration file.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -187,9 +187,9 @@ Architecture	SPARC, x86
 .TE
 
 .SH SEE ALSO
-\fBdladm\fR(1M), \fBfmd\fR(1M), \fBifconfig\fR(1M), \fBkstat\fR(1M),
-\fBndd\fR(1M), \fBnetstat\fR(1M), \fBdriver.conf\fR(4), \fBattributes\fR(5),
-\fBstreamio\fR(7I), \fBdlpi\fR(7P)
+\fBdladm\fR(8), \fBfmd\fR(8), \fBifconfig\fR(8), \fBkstat\fR(8),
+\fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7),
+\fBstreamio\fR(4I), \fBdlpi\fR(4P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

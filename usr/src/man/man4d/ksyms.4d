@@ -23,7 +23,7 @@ symbol state of the currently running kernel. You can determine the size  of
 the image with the \fBfstat\fR(\|) system call. The recommended method for
 accessing the  \fB/dev/ksyms\fR file is by using the  \fBELF\fR access library.
 See \fBelf\fR(3ELF) for details.  If you are not familiar with  \fBELF\fR
-format, see \fBa.out\fR(4).
+format, see \fBa.out\fR(5).
 .sp
 .LP
 \fB/dev/ksyms\fR is an executable for the processor on which you are accessing
@@ -63,8 +63,8 @@ table entries reference.
 .SH SEE ALSO
 .sp
 .LP
-\fBkernel\fR(1M), \fBstat\fR(2), \fBelf\fR(3ELF), \fBkvm_open\fR(3KVM),
-\fBa.out\fR(4), \fBmem\fR(7D)
+\fBkernel\fR(8), \fBstat\fR(2), \fBelf\fR(3ELF), \fBkvm_open\fR(3KVM),
+\fBa.out\fR(5), \fBmem\fR(4D)
 .SH WARNINGS
 .sp
 .LP

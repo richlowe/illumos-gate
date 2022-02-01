@@ -22,7 +22,7 @@ krb5kdc \- KDC daemon
 process the Kerberos tickets. For Kerberos to function properly, \fBkrb5kdc\fR
 must be running on at least one \fBKDC\fR that the Kerberos clients can access.
 Prior to running \fBkrb5kdc\fR, you must initialize the Kerberos database using
-\fBkdb5_util\fR(1M). See the \fI\fR for information regarding how to set up
+\fBkdb5_util\fR(8). See the \fI\fR for information regarding how to set up
 \fBKDC\fRs and initialize the Kerberos database.
 .SH OPTIONS
 .sp
@@ -121,7 +121,7 @@ the LDAP plug-in. These arguments are:
 Specifies the DN of the object used by the KDC server to bind to the LDAP
 server. This object should have the rights to read the realm container,
 principal container and the subtree that is referenced by the realm. Overrides
-the \fBldap_kdc_dn\fR parameter setting in \fBkrb5.conf\fR(4).
+the \fBldap_kdc_dn\fR parameter setting in \fBkrb5.conf\fR(5).
 .RE
 
 .sp
@@ -133,7 +133,7 @@ the \fBldap_kdc_dn\fR parameter setting in \fBkrb5.conf\fR(4).
 .RS 4n
 Specifies the password for the above-mentioned \fIbinddn\fR. It is recommended
 not to use this option. Instead, the password can be stashed using the
-\fBstashsrvpw\fR command of \fBkdb5_ldap_util\fR(1M).
+\fBstashsrvpw\fR command of \fBkdb5_ldap_util\fR(8).
 .RE
 
 .sp
@@ -215,10 +215,10 @@ using \fBkprop\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBkill\fR(1), \fBkpasswd\fR(1), \fBkadmind\fR(1M),
-\fBkadmin.local\fR(1M), \fBkdb5_util\fR(1M), \fBkdb5_ldap_util\fR(1M),
-\fBlogadm\fR(1M), \fBkrb5.conf\fR(4), \fBattributes\fR(5), \fBkrb5envvar\fR(5),
-\fBkerberos\fR(5),
+\fBkill\fR(1), \fBkpasswd\fR(1), \fBkadmind\fR(8),
+\fBkadmin.local\fR(8), \fBkdb5_util\fR(8), \fBkdb5_ldap_util\fR(8),
+\fBlogadm\fR(8), \fBkrb5.conf\fR(5), \fBattributes\fR(7), \fBkrb5envvar\fR(7),
+\fBkerberos\fR(7),
 .sp
 .LP
 \fI\fR
@@ -235,8 +235,8 @@ using the \fBkill\fR(1)command:
 .sp .6
 .RS 4n
 \fBkrb5kdc\fR closes and re-opens log files that it directly opens. This can be
-useful for external log-rotation utilities such as \fBlogadm\fR(1M). If this
-method is used for log file rotation, set the \fBkrb5.conf\fR(4)
+useful for external log-rotation utilities such as \fBlogadm\fR(8). If this
+method is used for log file rotation, set the \fBkrb5.conf\fR(5)
 \fBkdc_rotate\fR period relation to \fBnever\fR.
 .RE
 

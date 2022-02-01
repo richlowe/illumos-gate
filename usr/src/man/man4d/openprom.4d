@@ -137,7 +137,7 @@ there are no more properties.
 .RS 19n
 These ioctls provide an interface to the raw \fIconfig_ops\fR operations in the
 \fBPROM\fR monitor. One can use them to traverse the system device tree; see
-\fBprtconf\fR(1M).
+\fBprtconf\fR(8).
 .RE
 
 .sp
@@ -382,8 +382,8 @@ PROM monitor configuration interface
 .SH SEE ALSO
 .sp
 .LP
-\fBeeprom\fR(1M), \fBmonitor\fR(1M), \fBprtconf\fR(1M), \fBioctl\fR(2),
-\fBmem\fR(7D)
+\fBeeprom\fR(8), \fBmonitor\fR(8), \fBprtconf\fR(8), \fBioctl\fR(2),
+\fBmem\fR(4D)
 .SH BUGS
 .sp
 .LP

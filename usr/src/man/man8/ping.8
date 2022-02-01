@@ -309,7 +309,7 @@ packets to this base and increments it by one at each probe.
 Bypass the normal routing tables and send directly to a host on an attached
 network. If the host is not on a directly attached network, an error is
 returned. This option can be used to \fBping\fR a local host through an
-interface that has been dropped by the router daemon. See \fBin.routed\fR(1M).
+interface that has been dropped by the router daemon. See \fBin.routed\fR(8).
 .RE
 
 .sp
@@ -332,7 +332,7 @@ packets. The default time to live (hop limit) for unicast packets can be set
 with the \fBndd\fR module, \fB/dev/icmp\fR, using the \fBicmp_ipv4_ttl\fR
 variable for IPv4 and the \fBicmp_ipv6_hoplimit\fR variable for IPv6. The
 default time to live (hop limit) for multicast is one hop. See \fBEXAMPLES\fR.
-For further information, see \fBndd\fR(1M).
+For further information, see \fBndd\fR(8).
 .RE
 
 .sp
@@ -421,9 +421,9 @@ machine was not alive.
 
 .SH SEE ALSO
 .LP
-\fBifconfig\fR(1M), \fBin.routed\fR(1M), \fBndd\fR(1M), \fBnetstat\fR(1M),
-\fBrpcinfo\fR(1M), \fBtraceroute\fR(1M), \fBattributes\fR(5), \fBicmp\fR(7P),
-\fBicmp6\fR(7P)
+\fBifconfig\fR(8), \fBin.routed\fR(8), \fBndd\fR(8), \fBnetstat\fR(8),
+\fBrpcinfo\fR(8), \fBtraceroute\fR(8), \fBattributes\fR(7), \fBicmp\fR(4P),
+\fBicmp6\fR(4P)
 
 .SH DIAGNOSTICS
 .ne 2

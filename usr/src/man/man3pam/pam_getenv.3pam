@@ -35,7 +35,7 @@ pointer.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -54,7 +54,7 @@ MT-Level	MT-Safe with exceptions
 .sp
 .LP
 \fBpam\fR(3PAM), \fBpam_getenvlist\fR(3PAM), \fBpam_putenv\fR(3PAM),
-\fBlibpam\fR(3LIB), \fBattributes\fR(5)
+\fBlibpam\fR(3LIB), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

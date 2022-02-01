@@ -22,13 +22,13 @@ the image files (\fBunix\fR and \fBgenunix\fR) and the modules loaded at any
 instant in time. The system will not function without a kernel to control it.
 .sp
 .LP
-The kernel is loaded by the \fBboot\fR(1M) command in a machine-specific way.
+The kernel is loaded by the \fBboot\fR(8) command in a machine-specific way.
 The kernel may be loaded from disk, \fBCD-ROM\fR, or DVD (\fBdiskfull boot\fR)
 or over the network (\fBdiskless boot\fR). In either case, the directories
 under \fB/platform\fR and \fB/kernel\fR must be readable and must contain
 executable code which is able to perform the required kernel service. If the
 \fB-a\fR flag is given, the user is able to supply different pathnames for the
-default locations of the kernel and modules. See \fBboot\fR(1M) for more
+default locations of the kernel and modules. See \fBboot\fR(8) for more
 information on loading a specific kernel.
 .sp
 .LP
@@ -63,7 +63,7 @@ option of \fBuname\fR(1).
 .sp
 .LP
 The kernel configuration can be controlled using the \fB/etc/system\fR file
-(see \fBsystem\fR(4)).
+(see \fBsystem\fR(5)).
 .sp
 .LP
 \fBgenunix\fR is the platform-independent component of the base kernel.
@@ -84,7 +84,7 @@ itself. Default responses will be contained in square brackets ([ ]), and the
 user may simply enter RETURN to use the default response (note that RETURN is
 labeled ENTER on some keyboards). To help repair a damaged \fB/etc/system\fR
 file, enter \fB/dev/null\fR at the prompt that asks for the pathname of the
-system configuration file. See \fBsystem\fR(4).
+system configuration file. See \fBsystem\fR(5).
 .RE
 
 .sp
@@ -96,7 +96,7 @@ system configuration file. See \fBsystem\fR(4).
 .RS 4n
 Select an alternative executable to be the primordial process. \fIaltinit\fR
 must be a valid path to an executable. The default primordial process is
-\fBinit\fR(1M).
+\fBinit\fR(8).
 .RE
 
 .sp
@@ -110,7 +110,7 @@ The \fIsmf_options\fR include two categories of options to control booting
 behavior of the service management facility: recovery options and messages
 options.
 .sp
-Message options determine the type and amount of messages that \fBsmf\fR(5)
+Message options determine the type and amount of messages that \fBsmf\fR(7)
 displays during boot. Service options determine the services which are used to
 boot the system.
 .sp
@@ -135,7 +135,7 @@ Prints standard per-service output and all \fBsvc.startd\fR messages to log.
 Boot with some SMF services temporarily disabled, as indicated by
 \fImilestone\fR. \fImilestone\fR can be "none", "single-user", "multi-user",
 "multi-user-server", or "all". See the \fBmilestone\fR subcommand of
-\fBsvcadm\fR(1M).
+\fBsvcadm\fR(8).
 .RE
 
 Messages options
@@ -170,8 +170,8 @@ Prints standard per-service output with more informational messages.
 .sp .6
 .RS 4n
 Reconfiguration boot. The system will probe all attached hardware devices and
-configure the logical namespace in \fB/dev\fR. See \fBadd_drv\fR(1M) and
-\fBrem_drv\fR(1M) for additional information about maintaining device drivers.
+configure the logical namespace in \fB/dev\fR. See \fBadd_drv\fR(8) and
+\fBrem_drv\fR(8) for additional information about maintaining device drivers.
 .RE
 
 .sp
@@ -181,7 +181,7 @@ configure the logical namespace in \fB/dev\fR. See \fBadd_drv\fR(1M) and
 .ad
 .sp .6
 .RS 4n
-Boots only to init level 's'. See \fBinit\fR(1M).
+Boots only to init level 's'. See \fBinit\fR(8).
 .RE
 
 .sp
@@ -193,7 +193,7 @@ Boots only to init level 's'. See \fBinit\fR(1M).
 .RS 4n
 Boots with verbose messages enabled. If this flag is not given, the messages
 are still printed, but the output is directed to the system logfile. See
-\fBsyslogd\fR(1M).
+\fBsyslogd\fR(8).
 .RE
 
 .sp
@@ -210,7 +210,7 @@ of Sun Cluster software that supports this option has been installed.
 .SH EXAMPLES
 .sp
 .LP
-See \fBboot\fR(1M) for examples and instructions on how to boot.
+See \fBboot\fR(8) for examples and instructions on how to boot.
 .SH FILES
 .sp
 .ne 2
@@ -372,14 +372,14 @@ subdirectories.
 .SH SEE ALSO
 .sp
 .LP
-\fBuname\fR(1), \fBisainfo\fR(1), \fBadd_drv\fR(1M), \fBboot\fR(1M),
-\fBinit\fR(1M), \fBkadb\fR(1M), \fBrem_drv\fR(1M), \fBsavecore\fR(1M),
-\fBsvc.startd\fR(1M), \fBsvcadm\fR(1M), \fBsyslogd\fR(1M), \fBsystem\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5), \fBdevfs\fR(7FS)
+\fBuname\fR(1), \fBisainfo\fR(1), \fBadd_drv\fR(8), \fBboot\fR(8),
+\fBinit\fR(8), \fBkadb\fR(8), \fBrem_drv\fR(8), \fBsavecore\fR(8),
+\fBsvc.startd\fR(8), \fBsvcadm\fR(8), \fBsyslogd\fR(8), \fBsystem\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7), \fBdevfs\fR(4FS)
 .SS "SPARC Only"
 .sp
 .LP
-\fBmonitor\fR(1M)
+\fBmonitor\fR(8)
 .SH DIAGNOSTICS
 .sp
 .LP

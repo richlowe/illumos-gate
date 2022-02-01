@@ -171,7 +171,7 @@ context.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -187,7 +187,7 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5),
+\fBattributes\fR(7),
 \fBscsi_alloc_consistent_buf\fR(9F), \fBscsi_free_consistent_buf\fR(9F),
 \fBscsi_pktalloc\fR(9F), \fBscsi_resalloc\fR(9F), \fBscsi_pkt\fR(9S)
 .sp

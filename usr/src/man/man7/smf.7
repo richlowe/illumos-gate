@@ -24,7 +24,7 @@ scope.
 .sp
 .LP
 Each service instance is named with a fault management resource identifier
-(FMRI) with the scheme \fBsvc:\fR. For example, the \fBsyslogd\fR(1M) daemon
+(FMRI) with the scheme \fBsvc:\fR. For example, the \fBsyslogd\fR(8) daemon
 started at system startup is the default service instance named:
 .sp
 .in +2
@@ -49,7 +49,7 @@ a category beginning with 'site'.
 .sp
 .LP
 A service instance is either enabled or disabled. All services can be enabled
-or disabled with the \fBsvcadm\fR(1M) command.
+or disabled with the \fBsvcadm\fR(8) command.
 .sp
 .LP
 The list of managed service instances on a system can be displayed with the
@@ -134,45 +134,45 @@ started and the \fBrestart_on\fR attribute is not \fBnone\fR.
 .sp
 .LP
 The dependencies on a service can be listed with \fBsvcs\fR(1)\ or
-\fBsvccfg\fR(1M), and modified with \fBsvccfg\fR(1M).
+\fBsvccfg\fR(8), and modified with \fBsvccfg\fR(8).
 .SS "Restarters"
 .sp
 .LP
 Each service is managed by a restarter. The master restarter,
-\fBsvc.startd\fR(1M) manages states for the entire set of service instances and
+\fBsvc.startd\fR(8) manages states for the entire set of service instances and
 their dependencies. The master restarter acts on behalf of its services and on
 delegated restarters that can provide specific execution environments for
-certain application classes. For instance, \fBinetd\fR(1M) is a delegated
+certain application classes. For instance, \fBinetd\fR(8) is a delegated
 restarter that provides its service instances with an initial environment
 composed of a network connection as input and output file descriptors. Each
-instance delegated to \fBinetd\fR(1M) is in the online state. While the daemon
+instance delegated to \fBinetd\fR(8) is in the online state. While the daemon
 of a particular instance might not be running, the instance is available to
 run.
 .sp
 .LP
 As dependencies are satisfied when instances move to the online state,
-\fBsvc.startd\fR(1M) invokes start methods of other instances or directs the
+\fBsvc.startd\fR(8) invokes start methods of other instances or directs the
 delegated restarter to do so. These operations might overlap.
 .sp
 .LP
 The current set of services and associated restarters can be examined using
 \fBsvcs\fR(1). A description of the common configuration used by all restarters
-is given in \fBsmf_restarter\fR(5).
+is given in \fBsmf_restarter\fR(7).
 .SS "Methods"
 .sp
 .LP
 Each service or service instance must define a set of methods that start, stop,
-and, optionally, refresh the service. See \fBsmf_method\fR(5) for a more
-complete description of the method conventions for \fBsvc.startd\fR(1M) and
+and, optionally, refresh the service. See \fBsmf_method\fR(7) for a more
+complete description of the method conventions for \fBsvc.startd\fR(8) and
 similar \fBfork\fR(2)-\fBexec\fR(2) restarters.
 .sp
 .LP
 Administrative methods, such as for the capture of legacy configuration
-information into the repository, are discussed on the \fBsvccfg\fR(1M) manual
+information into the repository, are discussed on the \fBsvccfg\fR(8) manual
 page.
 .sp
 .LP
-The methods for a service can be listed and modified using the \fBsvccfg\fR(1M)
+The methods for a service can be listed and modified using the \fBsvccfg\fR(8)
 command.
 .SS "States"
 .sp
@@ -188,7 +188,7 @@ contracts events. The following states are defined:
 .RS 17n
 This is the initial state for all service instances. Instances are moved to
 maintenance, offline, or a disabled state upon evaluation by
-\fBsvc.startd\fR(1M) or the appropriate restarter.
+\fBsvc.startd\fR(8) or the appropriate restarter.
 .RE
 
 .sp
@@ -279,7 +279,7 @@ service instance. A service or service instance has an arbitrary number of
 property groups in which to store application data. Using property groups in
 this way allows the configuration of the application to derive the attributes
 that the repository provides for all data in the facility. The application can
-also use the appropriate subset of the \fBservice_bundle\fR(4) DTD to represent
+also use the appropriate subset of the \fBservice_bundle\fR(5) DTD to represent
 its configuration data within the framework.
 .sp
 .LP
@@ -292,7 +292,7 @@ relationship between the service instance and its parent service.
 .sp
 .LP
 Properties are protected from modification by unauthorized processes. See
-\fBsmf_security\fR(5).
+\fBsmf_security\fR(7).
 .SS "General Property Group"
 .sp
 .LP
@@ -343,7 +343,7 @@ during package installation.
 .ad
 .RS 15n
 Configuration as prescribed by the manifest of the service that is taken during
-\fBsvccfg\fR(1M) import operation. This snapshot provides a baseline for
+\fBsvccfg\fR(8) import operation. This snapshot provides a baseline for
 determining property customization.
 .RE
 
@@ -377,7 +377,7 @@ Configuration captured during a successful transition to the online state.
 
 .sp
 .LP
-The \fBsvccfg\fR(1M) command can be used to interact with snapshots.
+The \fBsvccfg\fR(8) command can be used to interact with snapshots.
 .SS "Special Property Groups"
 .sp
 .LP
@@ -390,13 +390,13 @@ system restart.
 .LP
 The current state of each service instance, as well as the properties
 associated with services and service instances, is stored in a system
-repository managed by \fBsvc.configd\fR(1M). This repository is transactional
+repository managed by \fBsvc.configd\fR(8). This repository is transactional
 and able to provide previous versions of properties and property groups
 associated with each service or service instance.
 .sp
 .LP
 The repository for service management facility data is managed by
-\fBsvc.configd\fR(1M).
+\fBsvc.configd\fR(8).
 .SS "Service Bundles, Manifests, and Profiles"
 .sp
 .LP
@@ -430,7 +430,7 @@ instances. Template elements cannot be defined in a profile.
 .sp
 .LP
 Service bundles can be imported or exported from a repository using the
-\fBsvccfg\fR(1M) command. See \fBservice_bundle\fR(4) for a description of the
+\fBsvccfg\fR(8) command. See \fBservice_bundle\fR(5) for a description of the
 service bundle file format with guidelines for authoring service bundles.
 .sp
 .LP
@@ -487,13 +487,13 @@ legacy-run state.
 .LP
 These instances do not have an enabled property (type \fBboolean\fR in the
 general property group) and, generally, cannot be manipulated with the
-\fBsvcadm\fR(1M) command. No error diagnosis or restart is done for these
+\fBsvcadm\fR(8) command. No error diagnosis or restart is done for these
 programs.
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBinetd\fR(1M), \fBsvcadm\fR(1M), \fBsvccfg\fR(1M),
-\fBsvc.configd\fR(1M), \fBsvc.startd\fR(1M), \fBexec\fR(2), \fBfork\fR(2),
-\fBlibscf\fR(3LIB), \fBstrftime\fR(3C), \fBcontract\fR(4),
-\fBservice_bundle\fR(4), \fBsmf_bootstrap\fR(5), \fBsmf_method\fR(5),
-\fBsmf_restarter\fR(5), \fBsmf_security\fR(5)
+\fBsvcs\fR(1), \fBinetd\fR(8), \fBsvcadm\fR(8), \fBsvccfg\fR(8),
+\fBsvc.configd\fR(8), \fBsvc.startd\fR(8), \fBexec\fR(2), \fBfork\fR(2),
+\fBlibscf\fR(3LIB), \fBstrftime\fR(3C), \fBcontract\fR(5),
+\fBservice_bundle\fR(5), \fBsmf_bootstrap\fR(7), \fBsmf_method\fR(7),
+\fBsmf_restarter\fR(7), \fBsmf_security\fR(7)

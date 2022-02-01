@@ -61,7 +61,7 @@ Configuration descriptors define the following bmAttributes:
 .in -2
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -77,7 +77,7 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(5), \fBusb_get_alt_if\fR(9F), \fBusb_get_cfg\fR(9F),
+\fBattributes\fR(7), \fBusb_get_alt_if\fR(9F), \fBusb_get_cfg\fR(9F),
 \fBusb_get_dev_data\fR(9F), \fBusb_get_string_descr\fR(9F),
 \fBusb_parse_data\fR(9F), \fBusb_ctrl_request\fR(9S), \fBusb_dev_descr\fR(9S),
 \fBusb_dev_qlf_descr\fR(9S), \fBusb_ep_descr\fR(9S), \fBusb_if_descr\fR(9S),

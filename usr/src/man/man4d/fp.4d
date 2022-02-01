@@ -136,7 +136,7 @@ configured. LUN numbers are interpreted as decimals. White spaces and commas
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -154,9 +154,9 @@ manual_configuration_only	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm_fp\fR(1M), \fBprtconf\fR(1M), \fBstmsboot\fR(1M),
-\fBdriver.conf\fR(4), \fBattributes\fR(5), \fBfcp\fR(7D), \fBfctl\fR(7D),
-\fBscsi_vhci\fR(7D)
+\fBcfgadm_fp\fR(8), \fBprtconf\fR(8), \fBstmsboot\fR(8),
+\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBfcp\fR(4D), \fBfctl\fR(4D),
+\fBscsi_vhci\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

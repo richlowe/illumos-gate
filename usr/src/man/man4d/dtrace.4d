@@ -12,12 +12,12 @@ The \fBdtrace\fR driver provides the dynamic instrumentation and tracing
 facilities for the DTrace software, as well as the built-in \fBdtrace\fR
 provider. The \fBdtrace\fR driver is not a public interface and you access the
 instrumentation offered by this provider through DTrace tools such as
-\fBdtrace\fR(1M).  Refer to the \fIDynamic Tracing Guide\fR for a
+\fBdtrace\fR(8).  Refer to the \fIDynamic Tracing Guide\fR for a
 description of the public documented interfaces available for the DTrace
 facility and dtrace provider probes.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -32,7 +32,7 @@ Interface Stability 	Private
 
 .SH SEE ALSO
 .LP
-\fBdtrace\fR(1M), \fBlibdtrace\fR(3LIB), \fBattributes\fR(5)
+\fBdtrace\fR(8), \fBlibdtrace\fR(3LIB), \fBattributes\fR(7)
 .sp
 .LP
 \fIDynamic Tracing Guide\fR:

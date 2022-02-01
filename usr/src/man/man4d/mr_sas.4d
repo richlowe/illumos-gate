@@ -144,7 +144,7 @@ Driver configuration file containing one user-configurable option
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -162,7 +162,7 @@ Interface Stability	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(1M), \fBattributes\fR(5), \fBsata\fR(7D),
+\fBprtconf\fR(8), \fBattributes\fR(7), \fBsata\fR(4D),
 \fBscsi_hba_attach_setup\fR(9F), \fBscsi_sync_pkt\fR(9F),
 \fBscsi_transport\fR(9F), \fBscsi_device\fR(9S), \fBscsi_inquiry\fR(9S),
 \fBscsi_pkt\fR(9S)

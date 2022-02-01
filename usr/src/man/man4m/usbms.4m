@@ -36,7 +36,7 @@ defined in the \fBHID\fR specification.
 .sp
 .LP
 The \fBusbms\fR module must be pushed on top of the \fBHID\fR class driver (see
-\fBhid\fR(7D)). In the \fBVUID_FIRM_EVENT\fR mode, the \fBusbms\fR module
+\fBhid\fR(4D)). In the \fBVUID_FIRM_EVENT\fR mode, the \fBusbms\fR module
 translates packets from the \fBUSB\fR mouse into Firm events. The Firm event
 structure is defined in \fB<sys/vuid_event.h>\fR\&. The \fBSTREAMS\fR module
 state is initially set to raw or \fBVUID_NATIVE\fR mode which performs no
@@ -275,7 +275,7 @@ SPARC 64-bit ELF kernel STREAMS module
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -290,8 +290,8 @@ Architecture	PCI-based  systems
 
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2), \fBattributes\fR(5), \fBhid\fR(7D), \fBvirtualkm\fR(7D),
-\fBusba\fR(7D)
+\fBioctl\fR(2), \fBattributes\fR(7), \fBhid\fR(4D), \fBvirtualkm\fR(4D),
+\fBusba\fR(4D)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

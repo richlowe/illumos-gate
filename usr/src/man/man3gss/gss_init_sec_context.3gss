@@ -647,7 +647,7 @@ while (!context_established) {
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -664,7 +664,7 @@ MT-Level	Safe
 .sp
 .LP
 \fBgss_delete_sec_context\fR(3GSS), \fBgss_export_sec_context\fR(3GSS),
-\fBgss_get_mic\fR(3GSS), \fBgss_wrap\fR(3GSS), \fBattributes\fR(5)
+\fBgss_get_mic\fR(3GSS), \fBgss_wrap\fR(3GSS), \fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

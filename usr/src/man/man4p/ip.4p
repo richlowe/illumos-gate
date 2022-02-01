@@ -32,14 +32,14 @@ ip, IP \- Internet Protocol
 IP is the internetwork datagram delivery protocol that is central to the
 Internet protocol family. Programs may use \fBIP\fR through higher-level
 protocols such as the Transmission Control Protocol (TCP) or the User Datagram
-Protocol (UDP), or may interface directly to IP. See \fBtcp\fR(7P) and
-\fBudp\fR(7P). Direct access may be by means of the socket interface, using a
+Protocol (UDP), or may interface directly to IP. See \fBtcp\fR(4P) and
+\fBudp\fR(4P). Direct access may be by means of the socket interface, using a
 "raw socket," or by means of the Transport Level Interface (TLI). The protocol
 options defined in the IP specification may be set in outgoing datagrams.
 .sp
 .LP
 Packets sent to or from this system may be subject to IPsec policy. See
-\fBipsec\fR(7P) for more information.
+\fBipsec\fR(4P) for more information.
 .SH APPLICATION PROGRAMMING INTERFACE
 The STREAMS driver \fB/dev/rawip\fR is the TLI transport provider that provides
 raw access to IP.
@@ -99,7 +99,7 @@ Internet family.
 .ad
 .RS 22n
 Enable or obtain IPsec security settings for this socket. For more details on
-the protection services of IPsec, see \fBipsec\fR(7P).
+the protection services of IPsec, see \fBipsec\fR(4P).
 .RE
 
 .sp
@@ -457,7 +457,7 @@ Datagrams flow through the IP layer in two directions: from the network
 \fIup\fR to user processes and from user processes \fIdown\fR to the network.
 Using this orientation, IP is layered \fIabove\fR the network interface drivers
 and \fIbelow\fR the transport protocols such as UDP and TCP. The Internet
-Control Message Protocol (ICMP) is logically a part of IP. See \fBicmp\fR(7P).
+Control Message Protocol (ICMP) is logically a part of IP. See \fBicmp\fR(4P).
 .sp
 .LP
 IP provides for a checksum of the header part, but not the data part, of the
@@ -472,19 +472,19 @@ record route, and internet timestamp.
 .sp
 .LP
 By default, the IP layer will not forward IPv4 packets that are not addressed
-to it. This behavior can be overridden by using  \fBrouteadm\fR(1M) to enable
+to it. This behavior can be overridden by using  \fBrouteadm\fR(8) to enable
 the ipv4-forwarding option. IPv4 forwarding is configured at boot time based on
-the setting of \fBrouteadm\fR(1M)'s ipv4-forwarding option.
+the setting of \fBrouteadm\fR(8)'s ipv4-forwarding option.
 .sp
 .LP
 For backwards compatibility, IPv4 forwarding can be enabled or disabled using
-\fBndd\fR(1M)'s ip_forwarding variable.  It is set to 1 if IPv4 forwarding is
+\fBndd\fR(8)'s ip_forwarding variable.  It is set to 1 if IPv4 forwarding is
 enabled, or 0 if it is disabled.
 .sp
 .LP
 Additionally, finer-grained forwarding can be configured in IP. Each interface
 can be configured to forward IP packets by setting the IFF_ROUTER interface
-flag. This flag can be set and cleared using \fBifconfig\fR(1M)'s router and
+flag. This flag can be set and cleared using \fBifconfig\fR(8)'s router and
 router options. If an interface's IFF_ROUTER flag is set, packets can be
 forwarded to or from the interface. If it is clear, packets will neither be
 forwarded from this interface to others, nor forwarded to this interface.
@@ -494,11 +494,11 @@ flags.
 .LP
 For backwards compatibility, each interface creates an
 \fB<ifname>:ip_forwarding /dev/ip\fR variable that can be modified using
-\fBndd\fR(1M). An interface's \fB:ip_forwarding ndd\fR variable is a boolean
+\fBndd\fR(8). An interface's \fB:ip_forwarding ndd\fR variable is a boolean
 variable that mirrors the status of its IFF_ROUTER interface flag. It is set to
 1 if the flag is set, or 0 if it is clear. This interface specific \fB<ifname>
 :ip_forwarding ndd\fR variable is obsolete and may be removed in a future
-release of Solaris. The \fBifconfig\fR(1M) router and -router interfaces are
+release of Solaris. The \fBifconfig\fR(8) router and -router interfaces are
 preferred.
 .sp
 .LP
@@ -528,7 +528,7 @@ by IP back up to the user process.
 .LP
 Multi-Data Transmit allows more than one packet to be sent from the IP module
 to another in a given call, thereby reducing the per-packet processing costs.
-The behavior of Multi-Data Transmit can be overrideen by using \fBndd\fR(1M) to
+The behavior of Multi-Data Transmit can be overrideen by using \fBndd\fR(8) to
 set the \fB/dev/ip\fR variable, ip_multidata_outbound to 0. Note, the IP module
 will only initiate Multi-Data Transmit if the network interface driver supports
 it.
@@ -692,12 +692,12 @@ An address has changed on a logical  interface.
 .RE
 
 .SH SEE ALSO
-\fBifconfig\fR(1M), \fBrouteadm\fR(1M), \fBndd\fR(1M), \fBread\fR(2),
+\fBifconfig\fR(8), \fBrouteadm\fR(8), \fBndd\fR(8), \fBread\fR(2),
 \fBwrite\fR(2), \fBsocket.h\fR(3HEAD), \fBbind\fR(3SOCKET),
 \fBconnect\fR(3SOCKET), \fBgetsockopt\fR(3SOCKET), \fBrecv\fR(3SOCKET),
-\fBsend\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET), \fBdefaultrouter\fR(4),
-\fBicmp\fR(7P), \fBif_tcp\fR(7P), \fBinet\fR(7P), \fBip\fR(7P), \fBip6\fR(7P),
-\fBipsec\fR(7P), \fBrouting\fR(7P), \fBtcp\fR(7P), \fBudp\fR(7P),
+\fBsend\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET), \fBdefaultrouter\fR(5),
+\fBicmp\fR(4P), \fBif_tcp\fR(4P), \fBinet\fR(4P), \fBip\fR(4P), \fBip6\fR(4P),
+\fBipsec\fR(4P), \fBrouting\fR(4P), \fBtcp\fR(4P), \fBudp\fR(4P),
 \fBnet_hook_register\fR(9F), \fBhook_pkt_event\fR(9S)
 .sp
 .LP

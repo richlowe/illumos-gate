@@ -95,7 +95,7 @@ The operation failed.
 .SH CONTEXT
 This function is called from kernel context only.
 .SH SEE ALSO
-\fBreboot\fR(1M), \fBuadmin\fR(1M), \fBuadmin\fR(2), \fBattach\fR(9E),
+\fBreboot\fR(8), \fBuadmin\fR(8), \fBuadmin\fR(2), \fBattach\fR(9E),
 \fBdetach\fR(9E), \fBddi_add_intr\fR(9F), \fBddi_map_regs\fR(9F),
 \fBpci_config_setup\fR(9F), \fBtimeout\fR(9F), \fBdev_ops\fR(9S)
 .SH NOTES

@@ -17,7 +17,7 @@ The \fBnetid\fR file is a local source of information on mappings between
 netnames (see \fBsecure_rpc\fR(3NSL)) and user ids or hostnames in the local
 domain. The \fBnetid\fR file can be used in conjunction with, or instead of,
 a network nameservice. The \fBpublickey\fR entry in
-the \fBnsswitch.conf\fR (see \fBnsswitch.conf\fR(4)) file determines which of
+the \fBnsswitch.conf\fR (see \fBnsswitch.conf\fR(5)) file determines which of
 these sources will be queried by the system to translate netnames to local user
 ids or hostnames.
 .sp
@@ -78,7 +78,7 @@ domain name.
 \fB\fIuid\fR\fR
 .ad
 .RS 12n
-The numerical id of the user (see \fBpasswd\fR(4)). When specifying a host
+The numerical id of the user (see \fBpasswd\fR(5)). When specifying a host
 name, \fIuid\fR is always zero.
 .RE
 
@@ -88,7 +88,7 @@ name, \fIuid\fR is always zero.
 \fB\fIgroup\fR\fR
 .ad
 .RS 12n
-The numerical id of the group the user belongs to (see \fBgroup\fR(4)).
+The numerical id of the group the user belongs to (see \fBgroup\fR(5)).
 Several groups, separated by commas, may be listed for a single \fIuid\fR.
 .RE
 
@@ -98,7 +98,7 @@ Several groups, separated by commas, may be listed for a single \fIuid\fR.
 \fB\fBhostname\fR\fR
 .ad
 .RS 12n
-The local hostname (see \fBhosts\fR(4)).
+The local hostname (see \fBhosts\fR(5)).
 .RE
 
 .sp
@@ -167,5 +167,5 @@ public key database
 .RE
 
 .SH SEE ALSO
-\fBnetname2user\fR(3NSL), \fBsecure_rpc\fR(3NSL), \fBgroup\fR(4),
-\fBhosts\fR(4), \fBnsswitch.conf\fR(4), \fBpasswd\fR(4), \fBpublickey\fR(4)
+\fBnetname2user\fR(3NSL), \fBsecure_rpc\fR(3NSL), \fBgroup\fR(5),
+\fBhosts\fR(5), \fBnsswitch.conf\fR(5), \fBpasswd\fR(5), \fBpublickey\fR(5)

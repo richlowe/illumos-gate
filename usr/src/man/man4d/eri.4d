@@ -17,7 +17,7 @@ eri \- eri Fast-Ethernet device driver
 .LP
 The \fBeri\fR Fast Ethernet driver is a multi-threaded, loadable, clonable,
 \fBSTREAMS\fR\(embased hardware driver supporting the connectionless Data Link
-Provider Interface \fBdlpi\fR(7P) over an \fBeri\fR Fast-Ethernet controller.
+Provider Interface \fBdlpi\fR(4P) over an \fBeri\fR Fast-Ethernet controller.
 Multiple \fBeri\fR devices installed within the system are supported by the
 driver.
 .sp
@@ -52,7 +52,7 @@ The cloning character-special device  \fB/dev/eri\fR is used to access all
 The  \fBeri\fR driver is a "style 2" Data Link Service provider. All
 \fBM_PROTO\fR and \fBM_PCPROTO\fR type messages are interpreted as \fBDLPI\fR
 primitives. Valid \fBDLPI\fR primitives are defined in \fB<sys/dlpi.h>.\fR
-Refer to \fBdlpi\fR(7P) for more information.
+Refer to \fBdlpi\fR(4P) for more information.
 .sp
 .LP
 An explicit \fBDL_ATTACH_REQ\fR message by the user is required to associate
@@ -347,5 +347,5 @@ also read only.
 .SH SEE ALSO
 .sp
 .LP
-\fBndd\fR(1M), \fBnetstat\fR(1M), \fBdriver.conf\fR(4), \fBhme\fR(7D),
-\fBqfe\fR(7d), \fBdlpi\fR(7P)
+\fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5), \fBhme\fR(4D),
+\fBqfe\fR(4D), \fBdlpi\fR(4P)

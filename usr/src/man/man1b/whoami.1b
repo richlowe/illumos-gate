@@ -33,5 +33,5 @@ username data base
 .SH SEE ALSO
 .sp
 .LP
-\fBsu\fR(1M), \fBwho\fR(1), \fBgetuid\fR(2), \fBgetpwnam\fR(3C),
-\fBattributes\fR(5)
+\fBsu\fR(8), \fBwho\fR(1), \fBgetuid\fR(2), \fBgetpwnam\fR(3C),
+\fBattributes\fR(7)

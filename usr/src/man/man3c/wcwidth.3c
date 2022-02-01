@@ -82,7 +82,7 @@ not correspond to a printing wide-character code).
 No errors are defined.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .TS
 box;
 c | c
@@ -102,5 +102,5 @@ is Uncommitted.
 .SH SEE ALSO
 .LP
 \fBnewlocale\fR(3C), \fBsetlocale\fR(3C), \fBuselocale\fR(3C),
-\fBwcswidth\fR(3C), \fBattributes\fR(5),
-\fBstandards\fR(5)
+\fBwcswidth\fR(3C), \fBattributes\fR(7),
+\fBstandards\fR(7)

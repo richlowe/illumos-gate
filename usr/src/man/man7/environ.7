@@ -21,7 +21,7 @@ A name may be placed in the environment by the \fBexport\fR command and
 \fIname\fR=\fIvalue\fR arguments in \fBsh\fR(1), or by one of the \fBexec\fR
 functions. It is unwise to conflict with certain shell variables such as
 \fBMAIL\fR, \fBPS1\fR, \fBPS2\fR, and \fBIFS\fR that are frequently exported by
-\fB\&.profile\fR files; see \fBprofile\fR(4).
+\fB\&.profile\fR files; see \fBprofile\fR(5).
 .LP
 The following environmental variables can be used by applications and are
 expected to be set in the target run-time environment.
@@ -33,7 +33,7 @@ expected to be set in the target run-time environment.
 .sp .6
 .RS 4n
 The name of the user's login directory, set by \fBlogin\fR(1) from the password
-file; see \fBpasswd\fR(4).
+file; see \fBpasswd\fR(5).
 .RE
 
 .sp
@@ -529,5 +529,5 @@ The \fItime\fR has the same format as \fIoffset\fR except that no leading sign
 \fBgettxt\fR(3C), \fBlocaleconv\fR(3C), \fBmblen\fR(3C), \fBmktime\fR(3C),
 \fBnewlocale\fR(3C),
 \fBprintf\fR(3C), \fBsetlocale\fR(3C), \fBstrcoll\fR(3C), \fBstrftime\fR(3C),
-\fBstrtod\fR(3C), \fBstrxfrm\fR(3C), \fBuselocale\fR(3C), \fBTIMEZONE\fR(4),
-\fBnetconfig\fR(4), \fBpasswd\fR(4), \fBprofile\fR(4)
+\fBstrtod\fR(3C), \fBstrxfrm\fR(3C), \fBuselocale\fR(3C), \fBTIMEZONE\fR(5),
+\fBnetconfig\fR(5), \fBpasswd\fR(5), \fBprofile\fR(5)

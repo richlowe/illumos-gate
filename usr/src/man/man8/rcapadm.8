@@ -24,7 +24,7 @@ rcapadm \- configure resource capping daemon
 The \fBrcapadm\fR command allows a user with the privileges described below to
 configure various attributes of the resource capping daemon. If used without
 arguments, \fBrcapadm\fR displays the current status of the resource capping
-daemon if it has been configured. See \fBrcapd\fR(1M) for more information.
+daemon if it has been configured. See \fBrcapd\fR(8) for more information.
 .sp
 .LP
 In the current release of the Solaris operating environment, \fBrcapadm\fR is
@@ -173,7 +173,7 @@ are dynamically specifying a cap on physical memory usage (using \fB-m\fR).
 Note -
 .sp
 .RS 2
-To set a persistent cap on memory usage within a zone, use \fBzonecfg\fR(1M).
+To set a persistent cap on memory usage within a zone, use \fBzonecfg\fR(8).
 .RE
 .SH EXAMPLES
 .LP
@@ -190,7 +190,7 @@ Enforcement
 .LP
 The command shown below specifies the maximum amount of memory that can be
 consumed by a specified zone. Note that this value lasts only until the next
-reboot. To set a persistent cap, use \fBzonecfg\fR(1M).
+reboot. To set a persistent cap, use \fBzonecfg\fR(8).
 
 .sp
 .in +2
@@ -234,7 +234,7 @@ Invalid command-line options were specified.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -252,8 +252,8 @@ Interface Stability	Evolving
 The \fB-z\fR and \fB-m\fR options are committed interfaces.
 .SH SEE ALSO
 .LP
-\fBrcapstat\fR(1), \fBrcapd\fR(1M), \fBzonecfg\fR(1M), \fBproject\fR(4),
-\fBattributes\fR(5), \fBzones\fR(5)
+\fBrcapstat\fR(1), \fBrcapd\fR(8), \fBzonecfg\fR(8), \fBproject\fR(5),
+\fBattributes\fR(7), \fBzones\fR(7)
 .sp
 .LP
 "Physical Memory Control Using the Resource Capping Daemon" in \fISystem

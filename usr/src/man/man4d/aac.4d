@@ -26,7 +26,7 @@ hardware through BIOS.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -81,7 +81,7 @@ Configuration file. (Contains no user-configurable options).
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(1M), \fBattributes\fR(5), \fBscsi_hba_attach\fR(9F),
+\fBprtconf\fR(8), \fBattributes\fR(7), \fBscsi_hba_attach\fR(9F),
 \fBscsi_sync_pkt\fR(9F), \fBscsi_transport\fR(9F), \fBscsi_device\fR(9S),
 \fBscsi_inquiry\fR(9S), \fBscsi_pkt\fR(9S)
 .sp

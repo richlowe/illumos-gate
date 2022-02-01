@@ -17,7 +17,7 @@ chxge \- Chelsio Ethernet network interface controllers
 .LP
 The \fBchxge\fR Ethernet driver is a  multi-threaded, loadable, clonable,
 STREAMS hardware driver supporting the connectionless Data Link Provider
-Interface, \fBdlpi\fR(7P), over Chelsio NIC controllers. Multiple (and  mixed)
+Interface, \fBdlpi\fR(4P), over Chelsio NIC controllers. Multiple (and  mixed)
 NIC controllers installed within the  system are supported  by  the driver. The
 \fBchxge\fR driver provides basic support for the NIC hardware. Functions
 include chip initialization, frame transmit and receive, and error recovery and
@@ -32,7 +32,7 @@ devices installed within the system.
 .LP
 The \fBchxge\fR driver is dependent on \fB/kernel/misc/gld\fR, a loadable
 kernel  module  that  provides the \fBchxge\fR driver with the DLPI and STREAMS
-functionality required of a LAN driver. See \fBgld\fR(7D) for more details on
+functionality required of a LAN driver. See \fBgld\fR(4D) for more details on
 the primitives supported by the driver.
 .sp
 .LP
@@ -110,7 +110,7 @@ x86 platform kernel module. (64-bit).
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -126,5 +126,5 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBnetstat\fR(1M), \fBattributes\fR(5), \fBgld\fR(7D), \fBdlpi\fR(7P),
+\fBnetstat\fR(8), \fBattributes\fR(7), \fBgld\fR(4D), \fBdlpi\fR(4P),
 \fBgld\fR(9F), \fBgld_mac_info\fR(9S)

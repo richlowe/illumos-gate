@@ -166,7 +166,7 @@ myapp_errfn(const char *fn, int subcode, const char *fmt, va_list ap)
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -184,4 +184,4 @@ MT-Level	Safe
 .SH SEE ALSO
 .LP
 \fBcpc_bind_curlwp\fR(3CPC), \fBlibcpc\fR(3LIB), \fBvsnprintf\fR(3C),
-\fBattributes\fR(5)
+\fBattributes\fR(7)

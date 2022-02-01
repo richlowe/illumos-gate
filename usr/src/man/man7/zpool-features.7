@@ -23,7 +23,7 @@ zpool\-features \- ZFS pool feature descriptions
 ZFS pool on\-disk format versions are specified via "features" which replace
 the old on\-disk format numbers (the last supported on\-disk format number is
 28). To enable a feature on a pool use the \fBupgrade\fR subcommand of the
-\fBzpool\fR(1M) command, or set the \fBfeature@\fR\fIfeature_name\fR property
+\fBzpool\fR(8) command, or set the \fBfeature@\fR\fIfeature_name\fR property
 to \fBenabled\fR.
 .sp
 .LP
@@ -100,7 +100,7 @@ Some features may make on\-disk format changes that do not interfere with other
 software's ability to read from the pool. These features are referred to as
 "read\-only compatible". If all unsupported features on a pool are read\-only
 compatible, the pool can be imported in read\-only mode by setting the
-\fBreadonly\fR property during import (see \fBzpool\fR(1M) for details on
+\fBreadonly\fR property during import (see \fBzpool\fR(8) for details on
 importing pools).
 .SS "Unsupported features"
 .LP
@@ -237,7 +237,7 @@ giving approximately 10% better compression ratio.
 
 When the \fBlz4_compress\fR feature is set to \fBenabled\fR, the
 administrator can turn on \fBlz4\fR compression on any dataset on the
-pool using the \fBzfs\fR(1M) command. Also, all newly written metadata
+pool using the \fBzfs\fR(8) command. Also, all newly written metadata
 will be compressed with \fBlz4\fR algorithm. Since this feature is not
 read-only compatible, this operation will render the pool unimportable
 on systems without support for the \fBlz4_compress\fR feature. Booting
@@ -285,7 +285,7 @@ of multiple vdevs.  Those vdevs may be arranged in any mirrored or raidz
 configuration.
 
 When the \fBmulti_vdev_crash_dump\fR feature is set to \fBenabled\fR,
-the administrator can use the \fBdumpadm\fR(1M) command to configure a
+the administrator can use the \fBdumpadm\fR(8) command to configure a
 dump device on a pool comprised of multiple vdevs.
 .RE
 
@@ -460,7 +460,7 @@ This feature is an enhancement of device_removal, which will over time
 reduce the memory used to track removed devices.  When indirect blocks
 are freed or remapped, we note that their part of the indirect mapping
 is "obsolete", i.e. no longer needed.  See also the \fBzfs remap\fR
-subcommand in \fBzfs\fR(1M).
+subcommand in \fBzfs\fR(8).
 
 This feature becomes \fBactive\fR when the "zpool remove" command is
 used on a top-level vdev, and will never return to being \fBenabled\fR.
@@ -831,4 +831,4 @@ return to being \fBenabled\fR.
 .RE
 
 .SH "SEE ALSO"
-\fBzfs\fR(1M), \fBzpool\fR(1M)
+\fBzfs\fR(8), \fBzpool\fR(8)

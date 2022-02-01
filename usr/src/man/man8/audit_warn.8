@@ -16,14 +16,14 @@ audit_warn \- audit daemon warning script
 .SH DESCRIPTION
 .LP
 The \fBaudit_warn\fR utility processes warning or error messages from the audit
-daemon. When a problem is encountered, the audit daemon, \fBauditd\fR(1M) calls
+daemon. When a problem is encountered, the audit daemon, \fBauditd\fR(8) calls
 \fBaudit_warn\fR with the appropriate arguments. The \fIoption\fR argument
 specifies the error type.
 .sp
 .LP
 The system administrator can specify a list of mail recipients to be notified
 when an audit_warn situation arises by defining a mail alias called
-\fBaudit_warn\fR in \fBaliases\fR(4). The users that make up the
+\fBaudit_warn\fR in \fBaliases\fR(5). The users that make up the
 \fBaudit_warn\fR alias are typically the \fBaudit\fR and \fBroot\fR users.
 .SH OPTIONS
 .LP
@@ -134,7 +134,7 @@ resources.
 \fB\fBconfig_error\fR\fR
 .ad
 .RS 16n
-No plugins loaded (including the binary file plugin, \fBaudit_binfile\fR(5))
+No plugins loaded (including the binary file plugin, \fBaudit_binfile\fR(7))
 due to configuration errors. The name string is
 \fB--\fR to indicate that no plugin name applies.
 .RE
@@ -202,7 +202,7 @@ Indicates that there was a problem creating a symlink from
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -220,8 +220,8 @@ Interface Stability	Evolving
 The interface stability is evolving. The file content is unstable.
 .SH SEE ALSO
 .LP
-\fBaudit\fR(1M), \fBauditd\fR(1M), \fBaliases\fR(4),
-\fBaudit.log\fR(4), \fBattributes\fR(5)
+\fBaudit\fR(8), \fBauditd\fR(8), \fBaliases\fR(5),
+\fBaudit.log\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .LP
 If the audit policy \fBperzone\fR is set, the \fB/etc/security/audit_warn\fR

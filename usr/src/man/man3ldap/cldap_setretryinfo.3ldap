@@ -56,7 +56,7 @@ the retransmission algorithm used.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -72,4 +72,4 @@ Interface Stability	Evolving
 .sp
 .LP
 \fBldap\fR(3LDAP), \fBcldap_open\fR(3LDAP), \fBcldap_search_s\fR(3LDAP),
-\fBcldap_close\fR(3LDAP), \fBattributes\fR(5)
+\fBcldap_close\fR(3LDAP), \fBattributes\fR(7)

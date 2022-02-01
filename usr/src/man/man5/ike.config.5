@@ -18,7 +18,7 @@ requests. It also contains rules for preparing outbound \fBIKE\fR requests.
 .sp
 .LP
 You can test the syntactic correctness of an \fB/etc/inet/ike/config\fR file by
-using the \fB-c\fR or \fB-f\fR options of \fBin.iked\fR(1M). You must use the
+using the \fB-c\fR or \fB-f\fR options of \fBin.iked\fR(8). You must use the
 \fB-c\fR option to test a \fBconfig\fR file. You might need to use the \fB-f\fR
 option if it is not in \fB/etc/inet/ike/config\fR.
 .SS "Lexical Components"
@@ -174,7 +174,7 @@ alternative names, the filename or \fBslot\fR of a certificate in
 
 Any \fIcert-sel\fR preceded by the character \fB!\fR indicates a negative
 match, that is, not matching this specifier. These are the same kind of strings
-used in \fBikecert\fR(1M).
+used in \fBikecert\fR(8).
 .RE
 
 .sp
@@ -275,7 +275,7 @@ negotiation linger before deleting it. Default value: 300 seconds.
 .ad
 .sp .6
 .RS 4n
-If this keyword is present in the file, \fBin.iked\fR(1M) ignores Certificate
+If this keyword is present in the file, \fBin.iked\fR(8) ignores Certificate
 Revocation Lists (\fBCRL\fRs) for root \fBCA\fRs (as given in \fBcert_root\fR)
 .RE
 
@@ -299,16 +299,16 @@ A list of LDAP servers to query for certificates. The list can be additive.
 The string that follows is a name of a shared object (\fB\&.so\fR) that
 implements the PKCS#11 standard. The name is passed directly into
 \fBdlopen\fR(3C) for linking, with all of the semantics of that library call.
-By default, \fBin.iked\fR(1M) runs the same ISA as the running kernel, so a
+By default, \fBin.iked\fR(8) runs the same ISA as the running kernel, so a
 library specified using \fBpkcs11_path\fR and an absolute pathname \fBmust\fR
 match the same ISA as the kernel. One can use the start/exec SMF property (see
-\fBsvccfg\fR(1M)) to change \fBin.iked\fR's ISA, but it is not recommended.
+\fBsvccfg\fR(8)) to change \fBin.iked\fR's ISA, but it is not recommended.
 .sp
 If this setting is not present, the default value is set to \fBlibpkcs11.so\fR.
 Most cryptographic providers go through the default library, and this parameter
 should only be used if a specialized provider of IKE-useful cryptographic
 services cannot interface with the Solaris Cryptographic Framework. See
-\fBcryptoadm\fR(1M).
+\fBcryptoadm\fR(8).
 .sp
 This option is now deprecated, and may be removed in a future release.
 .RE
@@ -383,7 +383,7 @@ The string following this keyword must be a URL for a SOCKS proxy, for example,
 .ad
 .sp .6
 .RS 4n
-If this keyword is present in the file, \fBin.iked\fR(1M) uses HTTP to retrieve
+If this keyword is present in the file, \fBin.iked\fR(8) uses HTTP to retrieve
 Certificate Revocation Lists (\fBCRL\fRs).
 .RE
 
@@ -648,7 +648,7 @@ aes-cbc}\fR
 .ad
 .sp .6
 .RS 4n
-An encryption algorithm, as in \fBipsecconf\fR(1M). However, of the ciphers
+An encryption algorithm, as in \fBipsecconf\fR(8). However, of the ciphers
 listed above, only \fBaes\fR and \fBaes-cbc\fR allow optional key-size setting,
 using the "low value-to-high value" syntax. To specify a single AES key size,
 the low value must equal the high value. If no range is specified, all three
@@ -664,10 +664,10 @@ AES key sizes are allowed.
 .RS 4n
 An authentication algorithm.
 .sp
-Use \fBipsecalgs\fR(1M) with the \fB-l\fR option to list the IPsec protocols
+Use \fBipsecalgs\fR(8) with the \fB-l\fR option to list the IPsec protocols
 and algorithms currently defined on a system. The \fBcryptoadm list\fR command
 displays a list of installed providers and their mechanisms. See
-\fBcryptoadm\fR(1M).
+\fBcryptoadm\fR(8).
 .RE
 
 .sp
@@ -940,7 +940,7 @@ aes-cbc}\fR
 .ad
 .sp .6
 .RS 4n
-An encryption algorithm, as in \fBipsecconf\fR(1M). However, of the ciphers
+An encryption algorithm, as in \fBipsecconf\fR(8). However, of the ciphers
 listed above, only \fBaes\fR and \fBaes-cbc\fR allow optional key-size setting,
 using the "low value-to-high value" syntax. To specify a single AES key size,
 the low value must equal the high value. If no range is specified, all three
@@ -954,7 +954,7 @@ AES key sizes are allowed.
 .ad
 .sp .6
 .RS 4n
-An authentication algorithm, as specified in \fBipseckey\fR(1M).
+An authentication algorithm, as specified in \fBipseckey\fR(8).
 .RE
 
 .sp
@@ -996,7 +996,7 @@ The following is an example of an \fBike.config\fR file:
 ### certificate parameters...
 
 # Root certificates. I SHOULD use a full Distinguished Name.
-# I must have this certificate in my local filesystem, see ikecert(1m).
+# I must have this certificate in my local filesystem, see ikecert(8).
 cert_root    "C=US, O=Sun Microsystems\\, Inc., CN=Sun CA"
 
 # Explicitly trusted certs that need no signatures, or perhaps
@@ -1149,7 +1149,7 @@ p2_pfs 2
 .in -2
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1163,9 +1163,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcryptoadm\fR(1M), \fBikeadm\fR(1M), \fBin.iked\fR(1M), \fBikecert\fR(1M),
-\fBipseckey\fR(1M), \fBipsecalgs\fR(1M), \fBipsecconf\fR(1M), \fBsvccfg\fR(1M),
-\fBdlopen\fR(3C), \fBattributes\fR(5), \fBrandom\fR(7D)
+\fBcryptoadm\fR(8), \fBikeadm\fR(8), \fBin.iked\fR(8), \fBikecert\fR(8),
+\fBipseckey\fR(8), \fBipsecalgs\fR(8), \fBipsecconf\fR(8), \fBsvccfg\fR(8),
+\fBdlopen\fR(3C), \fBattributes\fR(7), \fBrandom\fR(4D)
 .sp
 .LP
 Harkins, Dan and Carrel, Dave. \fIRFC 2409, Internet Key Exchange (IKE)\fR.

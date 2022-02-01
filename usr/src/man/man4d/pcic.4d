@@ -109,4 +109,4 @@ This   property must be defined and  must  be  below 10.
 .SH SEE ALSO
 .sp
 .LP
-\fBcardbus\fR(4), \fBstp4020\fR(7D), \fBpcmcia\fR(7D)
+\fBcardbus\fR(5), \fBstp4020\fR(4D), \fBpcmcia\fR(4D)

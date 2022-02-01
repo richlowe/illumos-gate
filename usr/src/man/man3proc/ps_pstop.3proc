@@ -112,7 +112,7 @@ The function did not return successfully.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for description of the following attributes:
+See \fBattributes\fR(7) for description of the following attributes:
 .sp
 
 .sp
@@ -128,4 +128,4 @@ MT Level	Safe
 .SH SEE ALSO
 .LP
 \fBkill\fR(2), \fBlibc_db\fR(3LIB), \fBproc_service\fR(3PROC),
-\fBattributes\fR(5), \fBthreads\fR(5)
+\fBattributes\fR(7), \fBthreads\fR(7)

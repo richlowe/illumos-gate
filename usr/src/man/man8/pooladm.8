@@ -177,7 +177,7 @@ example# \fB/usr/sbin/pooladm -e\fR
 .sp
 .LP
 The following command enables the pool facility through use of the Service
-Management Facility. See \fBsmf\fR(5).
+Management Facility. See \fBsmf\fR(7).
 
 .sp
 .in +2
@@ -215,7 +215,7 @@ Configuration file for \fBpooladm\fR.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -234,8 +234,8 @@ The invocation is Evolving. The output is Unstable.
 .SH SEE ALSO
 .sp
 .LP
-\fBpoolcfg\fR(1M), \fBpoolbind\fR(1M), \fBpsrset\fR(1M), \fBsvcadm\fR(1M),
-\fBpset_destroy\fR(2), \fBlibpool\fR(3LIB), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBpoolcfg\fR(8), \fBpoolbind\fR(8), \fBpsrset\fR(8), \fBsvcadm\fR(8),
+\fBpset_destroy\fR(2), \fBlibpool\fR(3LIB), \fBattributes\fR(7), \fBsmf\fR(7)
 .sp
 .LP
 \fI\fR
@@ -254,9 +254,9 @@ is active. See \fBlibpool\fR(3LIB).
 .sp
 .LP
 You cannot enable the pools facility on a system where processor sets have been
-created. Use the \fBpsrset\fR(1M) command or \fBpset_destroy\fR(2) to destroy
+created. Use the \fBpsrset\fR(8) command or \fBpset_destroy\fR(2) to destroy
 processor sets manually before you enable the pools facility.
 .sp
 .LP
-Because the Resource Pools facility is an \fBsmf\fR(5) service, it can also be
+Because the Resource Pools facility is an \fBsmf\fR(7) service, it can also be
 enabled and disabled using the standard SMF interfaces.

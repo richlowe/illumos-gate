@@ -39,7 +39,7 @@ Display user's quota on all mounted file systems where quotas exist.
 .SH USAGE
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBquota\fR when
+See \fBlargefile\fR(7) for the description of the behavior of \fBquota\fR when
 encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH FILES
 .sp
@@ -54,13 +54,13 @@ list of currently mounted filesystems
 .SH SEE ALSO
 .sp
 .LP
-\fBedquota\fR(1M), \fBquotaon\fR(1M), \fBquotacheck\fR(1M), \fBrepquota\fR(1M),
-\fBrquotad\fR(1M), \fBattributes\fR(5), \fBlargefile\fR(5), \fBzones\fR(5)
+\fBedquota\fR(8), \fBquotaon\fR(8), \fBquotacheck\fR(8), \fBrepquota\fR(8),
+\fBrquotad\fR(8), \fBattributes\fR(7), \fBlargefile\fR(7), \fBzones\fR(7)
 .SH NOTES
 .sp
 .LP
 \fBquota\fR displays quotas for NFS mounted UFS- or ZFS-based file systems if
-the \fBrquotad\fR daemon is running. See \fBrquotad\fR(1M). In a \fBzones\fR(5)
+the \fBrquotad\fR daemon is running. See \fBrquotad\fR(8). In a \fBzones\fR(7)
 environment, \fBquota\fR displays quotas only for the zone in which it is
 invoked.
 .sp

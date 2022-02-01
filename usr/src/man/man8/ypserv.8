@@ -20,23 +20,23 @@ ypserv, ypxfrd \- NIS server and binder processes
 The Network Information Service (\fBNIS\fR) provides a simple network lookup
 service consisting of databases and processes. The databases are \fBndbm\fR
 files in a directory tree rooted at \fB/var/yp\fR. See \fBndbm\fR(3C). These
-files are described in \fBypfiles\fR(4). The processes are
+files are described in \fBypfiles\fR(5). The processes are
 \fB/usr/lib/netsvc/yp/ypserv\fR, the \fBNIS\fR database lookup server, and
 \fB/usr/lib/netsvc/yp/ypbind\fR, the \fBNIS\fR binder. The programmatic
 interface to the \fBNIS\fR service is described in \fBypclnt\fR(3NSL).
-Administrative tools are described in \fByppoll\fR(1M), \fByppush\fR(1M),
-\fBypset\fR(1M), \fBypxfr\fR(1M), and \fBypwhich\fR(1). Tools to see the
+Administrative tools are described in \fByppoll\fR(8), \fByppush\fR(8),
+\fBypset\fR(8), \fBypxfr\fR(8), and \fBypwhich\fR(1). Tools to see the
 contents of \fBNIS\fR maps are described in \fBypcat\fR(1), and
 \fBypmatch\fR(1). Database generation and maintenance tools are described in
-\fBypinit\fR(1M), \fBypmake\fR(1M), and \fBmakedbm\fR(1M).
+\fBypinit\fR(8), \fBypmake\fR(8), and \fBmakedbm\fR(8).
 .sp
 .LP
 The \fBypserv\fR utility is a daemon process typically activated at system
 startup from \fBsvc:/network/nis/server:default\fR. Alternatively, you can, as
-the root user, start \fBNIS\fR services using \fBypstart\fR(1M) from the
+the root user, start \fBNIS\fR services using \fBypstart\fR(8) from the
 command-line. \fBypserv\fR runs only on \fBNIS\fR server machines with a
 complete \fBNIS\fR database. You can halt all \fBNIS\fR services using the
-\fBypstop\fR(1M) command.
+\fBypstop\fR(8) command.
 .sp
 .LP
 The \fBypxfrd\fR utility transfers entire \fBNIS\fR maps in an efficient
@@ -107,7 +107,7 @@ Two other functions supply information about the map, rather than map entries:
 \fByp_order\fR(3NSL), and \fByp_master\fR(3NSL). In fact, both order number and
 master name exist in the map as key-value pairs, but the server will not return
 either through the normal lookup functions. If you examine the map with
-\fBmakedbm\fR(1M), however, they are visible. Other functions are used within
+\fBmakedbm\fR(8), however, they are visible. Other functions are used within
 the \fBNIS\fR service subsystem itself, and are not of general interest to
 \fBNIS\fR clients. These functions include \fBdo_you_serve_this_domain?\fR,
 \fBtransfer_map\fR, and \fBreinitialize_internal_state\fR.
@@ -121,12 +121,12 @@ server starts in N2L mode. If the file is not present it starts in
 .LP
 In N2L mode, a new set of map files, with an \fBLDAP_\fR prefix, are generated,
 based on the contents of the LDAP DIT. The old map files, NIS source files and
-\fBypmake\fR(1M) are not used.
+\fBypmake\fR(8) are not used.
 .sp
 .LP
-It is possible that \fBypmake\fR(1M) can be accidentally run in N2L mode. If
+It is possible that \fBypmake\fR(8) can be accidentally run in N2L mode. If
 the occurs, the old style map files are overwritten. That the map files are
-overwritten is harmless. However, any resulting \fByppush\fR(1M) operation will
+overwritten is harmless. However, any resulting \fByppush\fR(8) operation will
 push information based on the DIT rather than the source files. The user may
 not expect information based on the DIT. \fBypserv\fR keeps track of the last
 modification date of the old style map files. If the map files have been
@@ -173,7 +173,7 @@ The \fBNIS\fR service should go to the \fBDNS\fR for more host information.
 This requires the existence of a correct \fB/etc/resolv.conf\fR file pointing
 to a \fBDNS\fR server. This option turns on \fBDNS\fR forwarding regardless of
 whether or not the \fBYP_INTERDOMAIN\fR flag is set in the \fBhosts\fR maps.
-See \fBmakedbm\fR(1M). In the absence of an \fB/etc/resolv.conf\fR file,
+See \fBmakedbm\fR(8). In the absence of an \fB/etc/resolv.conf\fR file,
 \fBypserv\fR complains, but ignores the \fB-d\fR option.
 .RE
 
@@ -251,7 +251,7 @@ When run with the \fB-i\fR, \fB-r\fR, \fB-I\fR, \fB-ir\fR or \fB-Ir\fR options,
 the \fBypserv\fR command runs in the foreground and exits once map
 initialization has been completed. Once the \fBypserv\fR command exits, the
 user knows the maps are ready and can restart \fBypserv\fR and the other
-\fByp\fR daemons by running \fBypstart\fR(1M).
+\fByp\fR daemons by running \fBypstart\fR(8).
 .sp
 .LP
 If there is a requirement to initialize the \fBDIT\fR from the NIS source
@@ -297,12 +297,12 @@ Lists the \fBNIS\fR server hosts that \fBypbind\fR can bind to.
 
 .SH SEE ALSO
 \fBsvcs\fR(1), \fBypcat\fR(1), \fBypmatch\fR(1), \fBypwhich\fR(1),
-\fBdomainname\fR(1M), \fBmakedbm\fR(1M), \fBsvcadm\fR(1M), \fBypbind\fR(1M),
-\fBypinit\fR(1M), \fBypmake\fR(1M), \fByppoll\fR(1M), \fByppush\fR(1M),
-\fBypset\fR(1M), \fBypstart\fR(1M), \fBypstop\fR(1M), \fBypxfr\fR(1M),
+\fBdomainname\fR(8), \fBmakedbm\fR(8), \fBsvcadm\fR(8), \fBypbind\fR(8),
+\fBypinit\fR(8), \fBypmake\fR(8), \fByppoll\fR(8), \fByppush\fR(8),
+\fBypset\fR(8), \fBypstart\fR(8), \fBypstop\fR(8), \fBypxfr\fR(8),
 \fBndbm\fR(3C), \fBypclnt\fR(3NSL), \fBlibnsl\fR(3LIB),
-\fBNISLDAPmapping\fR(4), \fBsecurenets\fR(4), \fBypfiles\fR(4),
-\fBypserv\fR(4), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBNISLDAPmapping\fR(5), \fBsecurenets\fR(5), \fBypfiles\fR(5),
+\fBypserv\fR(5), \fBattributes\fR(7), \fBsmf\fR(7)
 
 .SH NOTES
 \fBypserv\fR supports multiple domains. The \fBypserv\fR process determines the
@@ -324,7 +324,7 @@ the 1024 byte limitations described in the USAGE and NOTES sections of the
 .sp
 .LP
 The NIS server service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -336,5 +336,5 @@ svc:/network/nis/server:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

@@ -150,7 +150,7 @@ strings in the LDAP protocol.
 Make calls to \fBldap_init_getfilter\fR(3LDAP) and \fBldap_search\fR(3LDAP) to
 generate filters to be used in \fBldap_search\fR(3LDAP) and
 \fBldap_search_s\fR(3LDAP). \fBldap_init_getfilter()\fR reads
-\fBldapfilter.conf\fR(4), the LDAP configuration file, while
+\fBldapfilter.conf\fR(5), the LDAP configuration file, while
 \fBldap_init_getfilter_buf()\fR reads the configuration information from
 \fIbuf\fR of length \fIbuflen\fR. \fBldap_getfilter_free\fR(3LDAP) frees memory
 that has been allocated by means of \fBldap_init_getfilter()\fR.
@@ -1575,7 +1575,7 @@ Free memory allocated by LDAP API functions.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -1590,4 +1590,4 @@ Stability Level	Evolving
 
 .SH SEE ALSO
 .LP
-\fBattributes\fR(5)
+\fBattributes\fR(7)

@@ -26,7 +26,7 @@ a controlling process, the service access controller (SAC), and two
 administrative levels corresponding to two levels in the supporting directory
 structure. The top administrative level is concerned with port monitor
 administration, the lower level with service administration. The \fBSAC\fR is
-documented in the \fBsac\fR(1M) man page. The administrative levels and
+documented in the \fBsac\fR(8) man page. The administrative levels and
 associated utilities are documented in the \fISystem Administration Guide -
 Volume II\fR. The requirements for writing port monitors and the functions a
 port monitor must perform to run under the \fBSAF\fR and the \fBSAC\fR are
@@ -103,7 +103,7 @@ A port monitor must be able to restrict access to the system without disturbing
 services that are still running. In order to do this, a port monitor must
 maintain two internal states: enabled and disabled. The port monitor starts in
 the state indicated by the \fBISTATE\fR environment variable provided by the
-\fBsac.\fR See sac(1M) for details. Enabling or disabling a port monitor
+\fBsac.\fR See sac(8) for details. Enabling or disabling a port monitor
 affects all ports for which the port monitor is responsible. If a port monitor
 is responsible for a single port, only that port will be affected. If a port
 monitor is responsible for multiple ports, the entire collection of ports will
@@ -210,8 +210,8 @@ A port monitor's current directory contains an administrative file named
 conjunction with a port monitor-specific administrative command.
 .sp
 The port monitor administrative command for a listen port monitor is
-\fBnlsadmin\fR(1M); the port monitor administrative command for ttymon is
-\fBttyadm\fR(1M). Any port monitor written by a user must be provided with an
+\fBnlsadmin\fR(8); the port monitor administrative command for ttymon is
+\fBttyadm\fR(8). Any port monitor written by a user must be provided with an
 administrative command specific to that port monitor to perform similar
 functions.
 .RE
@@ -472,8 +472,8 @@ all the port monitors for which the \fBSAC\fR is responsible. This file exists
 on the delivered system. Initially, it is empty except for a single comment
 line that contains the version number of the \fBSAC.\fR Port monitors are added
 to the system by making entries in the \fBSAC's\fR administrative file. These
-entries should be made using the administrative command \fBsacadm\fR(1M) with a
-\fB-a\fR option. \fBsacadm\fR(1M) is also used to remove entries from the
+entries should be made using the administrative command \fBsacadm\fR(8) with a
+\fB-a\fR option. \fBsacadm\fR(8) is also used to remove entries from the
 \fBSAC's\fR administrative file. Each entry in the \fBSAC's\fR administrative
 file contains the following information.
 .sp
@@ -564,9 +564,9 @@ directory will contain files defined by the \fBSAF\fR (\fB_pmtab\fR,
 \fB_pid\fR) and the per-service configuration scripts, if they exist. The
 directory \fB/var/saf/\fR\fIpmtag,\fR where \fIpmtag\fR is the tag of the port
 monitor, is available for the port monitor's private files. Each port monitor
-has its own administrative file. The \fBpmadm\fR(1M) command should be used to
+has its own administrative file. The \fBpmadm\fR(8) command should be used to
 add, remove, or modify service entries in this file. Each time a change is made
-using \fBpmadm\fR(1M), the corresponding port monitor rereads its
+using \fBpmadm\fR(8), the corresponding port monitor rereads its
 administrative file. Each entry in a port monitor's administrative file defines
 how the port monitor treats a specific port and what service is to be invoked
 on that port. Some fields must be present for all types of port monitors. Each
@@ -581,7 +581,7 @@ specific data (for example, for a ttymon port monitor, this will include the
 prompt string which is meaningful to ttymon). Each type of port monitor must
 provide a command that takes the necessary port monitor-specific data as
 arguments and outputs these data in a form suitable for storage in the file.
-The \fBttyadm\fR(1M) command does this for ttymon and \fBnlsadmin\fR(1M) does
+The \fBttyadm\fR(8) command does this for ttymon and \fBnlsadmin\fR(8) does
 it for listen. For a user-defined port monitor, a similar administrative
 command must also be supplied. Each service entry in the port monitor
 administrative file must have the following format and contain the information
@@ -807,8 +807,8 @@ monitor.
 .ad
 .RS 17n
 The port monitor's configuration script. The port monitor configuration script
-is run by the SAC. The \fBSAC\fR is started by \fBinit\fR(1M) as a result of an
-entry in \fB/etc/inittab\fR that calls \fBsac\fR(1M).
+is run by the SAC. The \fBSAC\fR is started by \fBinit\fR(8) as a result of an
+entry in \fB/etc/inittab\fR that calls \fBsac\fR(8).
 .RE
 
 .sp
@@ -856,7 +856,7 @@ The per-service configuration script for the service with the tag \fIsvctag\fR.
 .ad
 .RS 17n
 The \fBFIFO\fR through which the port monitor will send messages to
-\fBsac\fR(1M).
+\fBsac\fR(8).
 .RE
 
 .RE
@@ -1485,7 +1485,7 @@ The following administrative commands relate to \fBSAF.\fR
 .sp
 .ne 2
 .na
-\fB\fBsacadm\fR(1M)\fR
+\fB\fBsacadm\fR(8)\fR
 .ad
 .RS 14n
 port monitor administrative command
@@ -1494,7 +1494,7 @@ port monitor administrative command
 .sp
 .ne 2
 .na
-\fB\fBpmadm\fR(1M)\fR
+\fB\fBpmadm\fR(8)\fR
 .ad
 .RS 14n
 service administration command
@@ -1503,6 +1503,6 @@ service administration command
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(1), \fBsh\fR(1), \fBinit\fR(1M), \fBnlsadmin\fR(1M),
-\fBpmadm\fR(1M), \fBsac\fR(1M), \fBsacadm\fR(1M), \fBttyadm\fR(1M),
-\fBfork\fR(2), \fBdoconfig\fR(3NSL), \fBattributes\fR(5)
+\fBexec\fR(1), \fBsh\fR(1), \fBinit\fR(8), \fBnlsadmin\fR(8),
+\fBpmadm\fR(8), \fBsac\fR(8), \fBsacadm\fR(8), \fBttyadm\fR(8),
+\fBfork\fR(2), \fBdoconfig\fR(3NSL), \fBattributes\fR(7)

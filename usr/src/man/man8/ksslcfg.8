@@ -48,7 +48,7 @@ ksslcfg \- enable and configure SMF instance of Kernel SSL
 .fi
 
 .SH DESCRIPTION
-\fBksslcfg\fR manages \fBsmf\fR(5) instances for the Kernel SSL proxy module.
+\fBksslcfg\fR manages \fBsmf\fR(7) instances for the Kernel SSL proxy module.
 An SSL-enabled web server can use the services of its Kernel SSL proxy to
 improve the performance of the HTTPS packets processing. It does so by creating
 an instance of the Kernel SSL service, specifying the SSL proxy port and
@@ -64,7 +64,7 @@ port, if it is enabled, and deletes the instance from the SMF repository.
 .sp
 .LP
 \fBksslcfg\fR can be run as root or by other users assigned to the Network
-Security profile. See \fBrbac\fR(5) and \fBuser_attr\fR(4). You must run
+Security profile. See \fBrbac\fR(7) and \fBuser_attr\fR(5). You must run
 \fBksslcfg\fR to configure your Kernel SSL proxy before you start your
 application.
 .sp
@@ -158,7 +158,7 @@ token specified by \fB-T\fR. This option is to be used only with \fB-f\fR
 This option is applicable only with the \fBpkcs11\fR key format, when the token
 label is the Sun Software PKCS#11 softtoken. Use this option to override the
 default location of the PKCS#11 softtoken directory (\fB$HOME/.sunw\fR). See
-\fBpkcs11_softtoken\fR(5).
+\fBpkcs11_softtoken\fR(7).
 .RE
 
 .sp
@@ -376,7 +376,7 @@ An error occurred.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -395,9 +395,9 @@ Command line options are Evolving; command output is Unstable. The FMRI service
 name (\fBsvc://network/ssl/proxy\fR) is Unstable, as is the FMRI instance's
 name format. The utility name is Stable.
 .SH SEE ALSO
-\fBnca\fR(1), \fBsvcprop\fR(1), \fBsvcs\fR(1), \fBcryptoadm\fR(1M),
-\fBsvcadm\fR(1M), \fBsvccfg\fR(1M), \fBuser_attr\fR(4), \fBattributes\fR(5),
-\fBpkcs11_softtoken\fR(5), \fBrbac\fR(5), \fBsmf\fR(5)
+\fBnca\fR(1), \fBsvcprop\fR(1), \fBsvcs\fR(1), \fBcryptoadm\fR(8),
+\fBsvcadm\fR(8), \fBsvccfg\fR(8), \fBuser_attr\fR(5), \fBattributes\fR(7),
+\fBpkcs11_softtoken\fR(7), \fBrbac\fR(7), \fBsmf\fR(7)
 .SH NOTES
 \fBksslcfg\fR \fBcreate\fR without an host argument creates an \fBINADDR_ANY\fR
 \fBsmf\fR instance. \fBksslcfg\fR \fBdelete\fR without an host argument deletes
@@ -405,5 +405,5 @@ only the \fBINADDR_ANY\fR instance. \fBksslcfg\fR \fBdelete\fR needs a host
 argument to delete any non-\fBINADDR_ANY\fR instance.
 .sp
 .LP
-On a system with \fBzones\fR(5) installed, the \fBksslcfg\fR command can be
+On a system with \fBzones\fR(7) installed, the \fBksslcfg\fR command can be
 used only in the global zone at this time.

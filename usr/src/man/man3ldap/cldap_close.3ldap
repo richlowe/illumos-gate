@@ -36,7 +36,7 @@ The LDAP pointer returned by a previous call to \fBcldap_open\fR(3LDAP).
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp

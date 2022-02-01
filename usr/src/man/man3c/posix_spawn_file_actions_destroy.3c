@@ -118,7 +118,7 @@ The value specified by \fIfile_actions\fR is invalid.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -137,4 +137,4 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBposix_spawn\fR(3C), \fBposix_spawn_file_actions_addclose\fR(3C),
-\fBattributes\fR(5), \fBstandards\fR(5)
+\fBattributes\fR(7), \fBstandards\fR(7)

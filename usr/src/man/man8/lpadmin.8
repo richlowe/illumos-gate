@@ -548,7 +548,7 @@ conjunction with the \fB-p\fR, \fB-d\fR, \fB-x\fR, or \fB-S\fR options.
 The \fB-o\fR option defines default printer configuration values given to an
 interface program. The default can be explicitly overwritten for individual
 requests by the user (see \fBlp\fR(1)), or taken from a preprinted form
-description (see \fBlpforms\fR(1M) and \fBlp\fR(1)).
+description (see \fBlpforms\fR(8) and \fBlp\fR(1)).
 .sp
 There are several options which are predefined by the system. In addition, any
 number of key-value pairs can be defined. See the section "Predefined Options
@@ -598,7 +598,7 @@ a list of character set name ``mappings'' or aliases. Each ``mapping'' is of
 the form \fIknown-name=alias\fR The \fIknown-name\fR is a character set number
 preceded by \fBcs\fR (such as \fBcs3\fR for character set three) or a character
 set name from the \fBterminfo\fR database entry \fBcsnm\fR. See
-\fBterminfo\fR(4). If this option is not used to specify a list, only the names
+\fBterminfo\fR(5). If this option is not used to specify a list, only the names
 already known from the \fBterminfo\fR database or numbers with a prefix of
 \fBcs\fR is acceptable for the printer. If \fIlist\fR is the word \fBnone\fR,
 any existing print wheel lists or character set aliases are removed.
@@ -1226,7 +1226,7 @@ Sets boolean values \fBfoo=true | foo=false\fR.
 
 .SH EXAMPLES
 In the following examples, \fIprtr\fR can be any name up to 14 characters and
-can be the same name as the \fBping\fR(1M) name.
+can be the same name as the \fBping\fR(8) name.
 .LP
 \fBExample 1 \fRConfiguring an HP Postscript Printer with a Jet Direct Network
 Interface
@@ -1321,7 +1321,7 @@ System printer configuration database
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1336,8 +1336,8 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 \fBenable\fR(1), \fBlp\fR(1), \fBlpstat\fR(1), \fBmail\fR(1), \fBstty\fR(1),
-\fBaccept\fR(1M), \fBlpforms\fR(1M), \fBlpsched\fR(1M), \fBlpsystem\fR(1M),
-\fBping\fR(1M), \fBdial\fR(3NSL), \fBterminfo\fR(4), \fBattributes\fR(5)
+\fBaccept\fR(8), \fBlpforms\fR(8), \fBlpsched\fR(8), \fBlpsystem\fR(8),
+\fBping\fR(8), \fBdial\fR(3NSL), \fBterminfo\fR(5), \fBattributes\fR(7)
 .sp
 .LP
 \fI\fR

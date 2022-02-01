@@ -29,7 +29,7 @@ DEC 21040/21041/21140 devices installed in the system.
 .LP
 The \fBdnet\fR driver is dependent on \fB/kernel/misc/gld\fR, a loadable kernel
 module that provides the \fBdnet\fR driver with the \fBDLPI\fR and
-\fBSTREAMS\fR functionality required of a \fBLAN\fR driver.  See \fBgld\fR(7D)
+\fBSTREAMS\fR functionality required of a \fBLAN\fR driver.  See \fBgld\fR(4D)
 for more details on the primitives supported by the driver.
 .sp
 .LP
@@ -166,7 +166,7 @@ character special device
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -182,7 +182,7 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBdlpi\fR(7P), \fBgld\fR(7D) \fBstreamio\fR(7I)
+\fBattributes\fR(7), \fBdlpi\fR(4P), \fBgld\fR(4D) \fBstreamio\fR(4I)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -13,7 +13,7 @@ system. On a properly setup system, it can be used to build a firewall.
 .sp
 .LP
 Solaris IP Filter is installed with the Solaris operating system. However,
-packet filtering is not enabled by default. See \fBipf\fR(1M) for a procedure
+packet filtering is not enabled by default. See \fBipf\fR(8) for a procedure
 to enable and activate the IP Filter feature.
 .SH HOST-BASED FIREWALL
 .LP
@@ -30,11 +30,11 @@ Note -
 .sp
 .RS 2
 Users can still specify their own ipf rule file if they choose not to take
-advantage of the framework. See \fBipf\fR(1M) and \fBipf\fR(4).
+advantage of the framework. See \fBipf\fR(8) and \fBipf\fR(5).
 .RE
 .SS "Model"
 .LP
-This section describes the host-based firewall framework. See svc.ipfd(1M) for
+This section describes the host-based firewall framework. See svc.ipfd(8) for
 details on how to configure firewall policies.
 .sp
 .LP
@@ -164,7 +164,7 @@ service and system-wide policy(s) whose firewall mode is not \fBNone\fR.
 .sp
 .LP
 A user configures a firewall by setting the system-wide policies and policy for
-each network service. See svc.ipfd(1M) on how to configure a firewall policy.
+each network service. See svc.ipfd(8) on how to configure a firewall policy.
 .sp
 .LP
 The firewall framework composes of policy configuration and a mechanism to
@@ -188,7 +188,7 @@ network services' policies are stored in each SMF service
 .ie t \(bu
 .el o
 a user activates a firewall by enabling \fBnetwork/ipfilter\fR (see
-\fBipf\fR(1M))
+\fBipf\fR(8))
 .RE
 .RS +4
 .TP
@@ -292,7 +292,7 @@ traffic flow looks like the following diagram.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -307,16 +307,16 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBipf\fR(1M), \fBipnat\fR(1M), \fBsvcadm\fR(1M),
-\fBsvc.ipfd\fR(1M), \fBipf\fR(4), \fBipnat\fR(4), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBipf\fR(8), \fBipnat\fR(8), \fBsvcadm\fR(8),
+\fBsvc.ipfd\fR(8), \fBipf\fR(5), \fBipnat\fR(5), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR
 .SH NOTES
 .LP
 The \fBipfilter\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -328,7 +328,7 @@ svc:/network/ipfilter:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP

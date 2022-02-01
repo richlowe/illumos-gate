@@ -23,7 +23,7 @@ to store information about networks that are connected to the system. The
 Network Selection component also includes \fBgetnetpath\fR(3NSL) routines to
 provide application-specific network search paths. These routines access the
 \fBnetconfig\fR database based on the environment variable \fBNETPATH\fR. See
-\fBenviron\fR(5).
+\fBenviron\fR(7).
 .sp
 .LP
 \fBnetconfig\fR contains an entry for each network available on the system.
@@ -406,7 +406,7 @@ The \fIname-to-address translation libraries\fR support a ``directory service''
 field indicates the absence of any \fItranslation libraries\fR. This has a
 special meaning for networks of the protocol family \fBinet :\fR its
 name-to-address mapping is provided by the name service switch based on the
-entries for \fBhosts\fR and \fBservices\fR in \fBnsswitch.conf\fR(4). For
+entries for \fBhosts\fR and \fBservices\fR in \fBnsswitch.conf\fR(5). For
 networks of other families, a ``\fB\(mi\fR\&'' indicates non-functional
 name-to-address mapping. Otherwise, this field consists of a comma-separated
 list of pathnames to dynamically linked libraries. The pathname of the library
@@ -578,7 +578,7 @@ ticots     tpi_cots      v   loopback -      /dev/ticots     straddr.so
 .sp
 .LP
 \fBdlopen\fR(3C), \fBgetnetconfig\fR(3NSL), \fBgetnetpath\fR(3NSL),
-\fBnsswitch.conf\fR(4)
+\fBnsswitch.conf\fR(5)
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR

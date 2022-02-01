@@ -401,7 +401,7 @@ Reads the local descriptor table of the \fBLWP\fR.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for description of the following attributes:
+See \fBattributes\fR(7) for description of the following attributes:
 .sp
 
 .sp
@@ -417,7 +417,7 @@ MT Level	Safe
 .SH SEE ALSO
 .LP
 \fBlibc_db\fR(3LIB), \fBlibrtld_db\fR(3LIB), \fBps_pread\fR(3PROC),
-\fBrtld_db\fR(3EXT), \fBattributes\fR(5)
+\fBrtld_db\fR(3EXT), \fBattributes\fR(7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

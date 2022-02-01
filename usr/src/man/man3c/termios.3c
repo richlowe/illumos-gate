@@ -83,7 +83,7 @@ termios \- general terminal interface
 .LP
 These functions describe a general terminal interface for controlling
 asynchronous communications ports. A more detailed overview of the terminal
-interface can be found in \fBtermio\fR(7I), which also describes an
+interface can be found in \fBtermio\fR(4I), which also describes an
 \fBioctl\fR(2) interface that provides the same functionality. However, the
 function interface described by these functions is the preferred user
 interface.
@@ -97,4 +97,4 @@ Each of these functions is now described on a separate manual page.
 \fBcfsetispeed\fR(3C), \fBcfsetospeed\fR(3C), \fBtcdrain\fR(3C),
 \fBtcflow\fR(3C), \fBtcflush\fR(3C), \fBtcgetattr\fR(3C), \fBtcgetpgrp\fR(3C),
 \fBtcgetsid\fR(3C), \fBtcsendbreak\fR(3C), \fBtcsetattr\fR(3C),
-\fBtcgetpgrp\fR(3C), \fBtcsendbreak\fR(3C), \fBtermio\fR(7I)
+\fBtcgetpgrp\fR(3C), \fBtcsendbreak\fR(3C), \fBtermio\fR(4I)

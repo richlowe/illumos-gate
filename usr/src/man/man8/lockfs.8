@@ -88,7 +88,7 @@ Error-lock (\fBelock\fR) the specified \fIfile-system\fR. elock blocks all
 local access to the locked file system and returns \fBEWOULDBLOCK\fR on all
 remote access. File systems are elocked by \fBUFS\fR on detection of internal
 inconsistency. They may only be unlocked after successful repair by \fBfsck\fR,
-which is usually done automatically (see \fBmount_ufs\fR(1M)). elocked file
+which is usually done automatically (see \fBmount_ufs\fR(8)). elocked file
 systems can be unmounted.
 .RE
 
@@ -103,7 +103,7 @@ Force a synchronous flush of all data that is dirty at the time \fBfsflush\fR
 is run to its backing store for the named file system (or for all file
 systems.)
 .sp
-It is a more reliable method than using \fBsync\fR(1M) because it does not
+It is a more reliable method than using \fBsync\fR(8) because it does not
 return until all possible data has been pushed. In the case of \fBUFS\fR
 filesystems with logging enabled, the log is also rolled before returning.
 Additional data can be modified by the time \fBfsflush\fR exits, so using one
@@ -187,7 +187,7 @@ file system, the \fBlockfs\fR command will take effect on the root file system.
 .SH USAGE
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBlockfs\fR when
+See \fBlargefile\fR(7) for the description of the behavior of \fBlockfs\fR when
 encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH EXAMPLES
 .LP
@@ -307,8 +307,8 @@ example#
 .SH SEE ALSO
 .sp
 .LP
-\fBkill\fR(1), \fBmount_ufs\fR(1M), \fBsync\fR(1M), \fBattributes\fR(5),
-\fBlargefile\fR(5), \fBufs\fR(7FS),
+\fBkill\fR(1), \fBmount_ufs\fR(8), \fBsync\fR(8), \fBattributes\fR(7),
+\fBlargefile\fR(7), \fBufs\fR(4FS),
 .sp
 .LP
 \fI\fR

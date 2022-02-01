@@ -29,7 +29,7 @@ printers.conf \- system printing configuration database
 The \fBprinters.conf\fR file is the system printing configuration database.
 System administrators use \fBprinters.conf\fR to describe destinations for the
 print client commands and the print protocol adaptor. A destination names a
-printer or class of printers. See \fBlpadmin\fR(1M). The \fBLP\fR print spooler
+printer or class of printers. See \fBlpadmin\fR(8). The \fBLP\fR print spooler
 uses private \fBLP\fR configuration data for represented in the
 \fBprinters.conf\fR database.
 .SS "Entries"
@@ -40,7 +40,7 @@ terminated by a NEWLINE. The first field of each entry specifies the name of
 the destination and aliases to which the entry describes. Specify one or more
 names or aliases of the destination in this first field. Specify the
 destination using atomic names. URI-style and POSIX-style names are not
-acceptable. See \fBstandards\fR(5). Separate destination names by pipe signs
+acceptable. See \fBstandards\fR(7). Separate destination names by pipe signs
 (`\fB|\fR').
 .sp
 .LP
@@ -59,7 +59,7 @@ multiple lines by adding a backslash (`\fB\e\fR\&') as the last character in
 the line. \fBprinters.conf\fR can include comments. Comments have a pound sign
 (`\fB#\fR') as the first character in the line, and are terminated by a
 NEWLINE. Use the \fBlpset\fR command to create or modify \fBprinters.conf\fR.
-See \fBlpset\fR(1M). Do \fBnot\fR make changes in \fBprinters.conf\fR by using
+See \fBlpset\fR(8). Do \fBnot\fR make changes in \fBprinters.conf\fR by using
 an editor.
 .SS "Specifying Configuration Options"
 .LP
@@ -178,7 +178,7 @@ Sets the interest list for the \fBlpget\fR, \fBlpstat\fR, and \fBcancel\fR
 commands. \fIdestination_list\fR is a comma-separated list of destinations.
 Specify \fIdestination\fR using atomic, URI-style
 (\fIscheme\fR://\fIendpoint\fR), or Posix-style names (\fBserver:printer\fR).
-See \fBlpget\fR(1M), \fBlpstat\fR(1), and \fBcancel\fR(1).
+See \fBlpget\fR(8), \fBlpstat\fR(1), and \fBcancel\fR(1).
 .RE
 
 .SS "LP Server Options"
@@ -210,7 +210,7 @@ associated print service and communications endpoint make use of a specific
 name resolution ordering. Destination names in URI and POSIX form are complete
 unto themselves and require no further resolution.  Names in atomic form are
 resolved based on the \fBprinters\fR database entry in the /etc/nsswitch.conf
-file. See nsswitch.conf(4)
+file. See nsswitch.conf(5)
 .SS "Locating the Personal Default Destination"
 .LP
 The default destination is located differently depending on the command.
@@ -417,7 +417,7 @@ LDAP version of \fB/etc/printers.conf\fR
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -433,10 +433,10 @@ Stability Level	Stable
 .SH SEE ALSO
 .LP
 \fBcancel\fR(1), \fBenable\fR(1), \fBenable\fR(1), \fBlp\fR(1), \fBlpq\fR(1B),
-\fBlpr\fR(1B), \fBlprm\fR(1B), \fBlpstat\fR(1), \fBaccept\fR(1M),
-\fBin.lpd\fR(1M), \fBlpadmin\fR(1M), \fBlpget\fR(1M), \fBlpmove\fR(1M),
-\fBlpset\fR(1M), \fBaccept\fR(1M), \fBnsswitch.conf\fR(4), \fBprinters\fR(4),
-\fBattributes\fR(5), \fBstandards\fR(5)
+\fBlpr\fR(1B), \fBlprm\fR(1B), \fBlpstat\fR(1), \fBaccept\fR(8),
+\fBin.lpd\fR(8), \fBlpadmin\fR(8), \fBlpget\fR(8), \fBlpmove\fR(8),
+\fBlpset\fR(8), \fBaccept\fR(8), \fBnsswitch.conf\fR(5), \fBprinters\fR(5),
+\fBattributes\fR(7), \fBstandards\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

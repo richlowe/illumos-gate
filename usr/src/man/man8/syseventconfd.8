@@ -17,7 +17,7 @@ syseventconfd \- kernel system event command invocation daemon
 .sp
 .LP
 \fBsyseventconfd\fR is the user-level daemon that invokes user-level commands
-in response to kernel system events received from \fBsyseventd\fR(1M).
+in response to kernel system events received from \fBsyseventd\fR(8).
 .SH OPTIONS
 .sp
 .LP
@@ -56,13 +56,13 @@ The root path must match the root path used to invoke \fBsyseventd\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBsvcs\fR(1), \fBsvcadm\fR(1M), \fBsyseventd\fR(1M), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBsvcs\fR(1), \fBsvcadm\fR(8), \fBsyseventd\fR(8), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP
 The \fBsyseventconfd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -74,5 +74,5 @@ svc:/system/sysevent:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
+requesting restart, can be performed using \fBsvcadm\fR(8). The service's
 status can be queried using the \fBsvcs\fR(1) command.

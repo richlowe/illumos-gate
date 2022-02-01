@@ -27,7 +27,7 @@ which matches any IP address.
 A web server uses the environment variable \fBLD_PRELOAD\fR and the
 \fBncaport.conf\fR configuration file to convert an \fBAF_INET\fR socket to an
 \fBAF_NCA\fR socket. \fBLD_PRELOAD\fR enables the NCA socket utility library to
-be loaded before \fBlibsocket.so.1\fR. See the \fBncad_addr\fR(4) for details.
+be loaded before \fBlibsocket.so.1\fR. See the \fBncad_addr\fR(5) for details.
 When a web server issues the \fBbind\fR(3SOCKET) system call, it is intercepted
 by the interposition library \fBncad_addr.so\fR. If the bind address is in the
 \fBncaport.conf\fR file, the \fBAF_INET\fR socket is converted to a
@@ -55,7 +55,7 @@ ncaport=*/9000
 .SH SEE ALSO
 .LP
 \fBnca\fR(1), \fBbind\fR(3SOCKET), \fBinet_pton\fR(3C),
-\fBncad_addr\fR(4), \fBattributes\fR(5)
+\fBncad_addr\fR(5), \fBattributes\fR(7)
 .SH NOTES
 .LP
 For those web servers that use \fBAF_NCA\fR sockets, the NCA port configuration

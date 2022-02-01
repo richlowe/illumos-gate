@@ -19,7 +19,7 @@ reliable connected channels along with service, multicast, and path
 lookup-related functionality. \fBIBCM\fR implements the CM protocol as per the
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.1\fR and utilizes
 the InfiniBand Management Framework module for all IB management-related
-functionality and the InfiniBand Transport Layer (see \fBibtl\fR(7D)) for all
+functionality and the InfiniBand Transport Layer (see \fBibtl\fR(4D)) for all
 IB Verbs-related functionality.
 .SH FILES
 .sp
@@ -52,7 +52,7 @@ IB Verbs-related functionality.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -68,7 +68,7 @@ Interface Stability	 Consolidation Private
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBibtl\fR(7D)
+\fBattributes\fR(7), \fBibtl\fR(4D)
 .sp
 .LP
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.1\fR

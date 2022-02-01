@@ -17,7 +17,7 @@ auditrecord \- display audit record formats
 .LP
 The \fBauditrecord\fR utility displays the event ID, audit class and selection
 mask, and record format for audit record event types defined in
-\fBaudit_event\fR(4). You can use \fBauditrecord\fR to generate a list of all
+\fBaudit_event\fR(5). You can use \fBauditrecord\fR to generate a list of all
 audit record formats, or to select audit record formats based on event class,
 event name, generating program name, system call name, or event ID.
 .sp
@@ -227,7 +227,7 @@ associated system call or program.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -244,8 +244,8 @@ Interface Stability	Obsolete Uncommitted
 
 .SH SEE ALSO
 .LP
-\fBauditconfig\fR(1M), \fBpraudit\fR(1M), \fBaudit.log\fR(4),
-\fBaudit_class\fR(4), \fBaudit_event\fR(4), \fBattributes\fR(5)
+\fBauditconfig\fR(8), \fBpraudit\fR(8), \fBaudit.log\fR(5),
+\fBaudit_class\fR(5), \fBaudit_event\fR(5), \fBattributes\fR(7)
 .SH DIAGNOSTICS
 .LP
 If unable to read either of its input files or to write its output file,
@@ -271,7 +271,7 @@ can be produced. Various audit policies and optional tokens, such as those
 shown below, might also be present.
 .sp
 .LP
-The following is a list of \fBpraudit\fR(1M) token names with their
+The following is a list of \fBpraudit\fR(8) token names with their
 descriptions.
 .sp
 .ne 2

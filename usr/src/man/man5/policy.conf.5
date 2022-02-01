@@ -32,7 +32,7 @@ The following keys are defined:
 .RS 4n
 Specify the default set of authorizations granted to all users. This entry is
 interpreted by \fBchkauthattr\fR(3SECDB). The value is zero or more
-comma-separated authorizations defined in \fBauth_attr\fR(4).
+comma-separated authorizations defined in \fBauth_attr\fR(5).
 .RE
 
 .sp
@@ -44,7 +44,7 @@ comma-separated authorizations defined in \fBauth_attr\fR(4).
 .RS 4n
 Specify the default set of profiles granted to all users. This entry is
 interpreted by \fBchkauthattr\fR(3SECDB) and \fBgetexecuser\fR(3SECDB). The
-value is zero or more comma-separated profiles defined in \fBprof_attr\fR(4).
+value is zero or more comma-separated profiles defined in \fBprof_attr\fR(5).
 .RE
 
 .sp
@@ -57,7 +57,7 @@ value is zero or more comma-separated profiles defined in \fBprof_attr\fR(4).
 Specify an additional default set of profiles granted to the \fIconsole user\fR
 user. This entry is interpreted by \fBchkauthattr\fR(3SECDB) and
 \fBgetexecuser\fR(3SECDB). The value is zero or more comma-separated profiles
-defined in \fBprof_attr\fR(4).
+defined in \fBprof_attr\fR(5).
 .RE
 
 .sp
@@ -68,10 +68,10 @@ defined in \fBprof_attr\fR(4).
 .sp .6
 .RS 4n
 Settings for these keys determine the default privileges that users have. (See
-\fBprivileges\fR(5).) If these keys are not set, the default privileges are
+\fBprivileges\fR(7).) If these keys are not set, the default privileges are
 taken from the inherited set. \fBPRIV_DEFAULT\fR determines the default set on
 login. \fBPRIV_LIMIT\fR defines the limit set on login. Users can have
-privileges assigned or taken away through use of \fBuser_attr\fR(4). Privileges
+privileges assigned or taken away through use of \fBuser_attr\fR(5). Privileges
 can also be assigned to profiles, in which case users who have those profiles
 can exercise the assigned privileges through \fBpfexec\fR(1).
 .sp
@@ -98,7 +98,7 @@ privilege set can cause unexpected failure modes in applications.
 Specifies whether a local account is locked after the count of failed logins
 for a user equals or exceeds the allowed number of retries as defined by
 \fBRETRIES\fR in \fB/etc/default/login\fR. The default value for users is
-\fBNO\fR. Individual account overrides are provided by \fBuser_attr\fR(4).
+\fBNO\fR. Individual account overrides are provided by \fBuser_attr\fR(5).
 .RE
 
 .sp
@@ -133,7 +133,7 @@ another algorithm, such as \fBCRYPT_DEFAULT=1\fR for BSD and Linux MD5.
 .sp .6
 .RS 4n
 Specify the default algorithm for new passwords. The Solaris default was once
-the traditional UNIX algorithm. This is not listed in \fBcrypt.conf\fR(4) since
+the traditional UNIX algorithm. This is not listed in \fBcrypt.conf\fR(5) since
 it is internal to \fBlibc\fR. The reserved name \fB__unix__\fR is used to refer
 to it.
 .RE
@@ -225,7 +225,7 @@ Defines policy for the system.
 .SH ATTRIBUTES
 
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -242,9 +242,9 @@ Interface Stability	Committed
 
 .LP
 \fBlogin\fR(1), \fBpfexec\fR(1), \fBchkauthattr\fR(3SECDB),
-\fBgetexecuser\fR(3SECDB), \fBauth_attr\fR(4), \fBcrypt.conf\fR(4),
-\fBprof_attr\fR(4), \fBuser_attr\fR(4), \fBattributes\fR(5),
-\fBprivileges\fR(5)
+\fBgetexecuser\fR(3SECDB), \fBauth_attr\fR(5), \fBcrypt.conf\fR(5),
+\fBprof_attr\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7),
+\fBprivileges\fR(7)
 .SH NOTES
 
 .LP

@@ -114,7 +114,7 @@ two of them can be set with the same value.
 For SCSI Enclosure Services (\fBses\fR or \fBsgen\fR) devices, an identifying
 target-port worldwide name is displayed, if available.
 .sp
-For \fBufm\fR(7D) based devices, identifying information such as PCI
+For \fBufm\fR(4D) based devices, identifying information such as PCI
 identifiers and supported capabilities such as the ability to read
 firmware images or slot information is reported. For each firmware image
 on the device, each slot is displayed along with information about the
@@ -253,7 +253,7 @@ Device[0] /devices/pci@0/pci@0/pci@2/scsi@0/ses@3,0:ses
 .sp
 .LP
 Finally, for devices that support the system's upgradeable firmware
-module APIs (see \fBufm\fR(7D)), one might see output like:
+module APIs (see \fBufm\fR(4D)), one might see output like:
 
 .sp
 .in +2
@@ -395,7 +395,7 @@ Failure
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -409,8 +409,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(5), \fBhermon\fR(7D), \fBses\fR(7D), \fBtavor\fR(7D),
-\fBufm\fR(7D)
+\fBattributes\fR(7), \fBhermon\fR(4D), \fBses\fR(4D), \fBtavor\fR(4D),
+\fBufm\fR(4D)
 .sp
 .LP
 The InfiniBand Trade Association website, http://www.infinibandta.org

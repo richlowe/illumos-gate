@@ -27,7 +27,7 @@ portions are disallowed.
 .sp
 .LP
 The \fBtirdwr\fR module must only be pushed (see \fBI_PUSH\fR in
-\fBstreamio\fR(7I)) onto a stream terminated by a transport protocol provider
+\fBstreamio\fR(4I)) onto a stream terminated by a transport protocol provider
 which supports the \fBTI\fR. After the \fBtirdwr\fR module has been pushed onto
 a stream, none of the \fBTI\fR functions can be used. Subsequent calls to
 \fBTI\fR functions cause an error on the stream. Once the error is detected,
@@ -36,7 +36,7 @@ subsequent system calls on the stream return an error with \fBerrno\fR set to
 .sp
 .LP
 The following are the actions taken by the \fBtirdwr\fR module when pushed on
-the stream, popped (see \fBI_POP\fR in  \fBstreamio\fR(7I)) off  the stream, or
+the stream, popped (see \fBI_POP\fR in  \fBstreamio\fR(4I)) off  the stream, or
 when data passes through it.
 .sp
 .ne 2
@@ -156,7 +156,7 @@ release request will be sent to the remote side of the transport connection.
 .sp
 .LP
 \fBIntro\fR(3), \fBgetmsg\fR(2), \fBputmsg\fR(2), \fBread\fR(2),
-\fBwrite\fR(2), \fBIntro\fR(3), \fBstreamio\fR(7I), \fBtimod\fR(7M)
+\fBwrite\fR(2), \fBIntro\fR(3), \fBstreamio\fR(4I), \fBtimod\fR(4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

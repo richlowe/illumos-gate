@@ -17,7 +17,7 @@ daemon
 .sp
 .LP
 The \fB/etc/gateways\fR file is used by the routing daemon,
-\fBin.routed\fR(1M). When the daemon starts, it reads \fB/etc/gateways\fR to
+\fBin.routed\fR(8). When the daemon starts, it reads \fB/etc/gateways\fR to
 find such distant gateways that cannot be located using only information from a
 routing socket, to discover if some of the local gateways are passive, and to
 obtain other parameters.
@@ -63,7 +63,7 @@ Name of the destination network or host. It can be a symbolic network name or
 an Internet address specified in \fBdot\fR notation (see \fBinet\fR(3SOCKET)).
 If it is a name, then it must either be defined in \fB/etc/networks\fR or
 \fB/etc/hosts\fR, or a naming service must have been started before
-\fBin.routed\fR(1M).
+\fBin.routed\fR(8).
 .RE
 
 .sp
@@ -108,7 +108,7 @@ One of these keywords must be present to indicate whether the gateway should be
 treated as passive or active, or whether the gateway is external to the scope
 of the RIP protocol. A passive gateway is not expected to exchange routing
 information, while gateways marked active should be willing to exchange RIP
-packets. See \fBin.routed\fR(1M) for further details.
+packets. See \fBin.routed\fR(8) for further details.
 .RE
 
 .sp
@@ -494,7 +494,7 @@ used to set a broadcast type advertisement on a point-to-point link.
 .SH SEE ALSO
 .sp
 .LP
-\fBin.routed\fR(1M), \fBroute\fR(1M), \fBrtquery\fR(1M), \fBinet\fR(3SOCKET),
+\fBin.routed\fR(8), \fBroute\fR(8), \fBrtquery\fR(8), \fBinet\fR(3SOCKET),
 .sp
 .LP
 \fIInternet Transport Protocols, XSIS 028112, Xerox System Integration

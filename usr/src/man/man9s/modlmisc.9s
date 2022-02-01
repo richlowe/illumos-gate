@@ -46,4 +46,4 @@ also contain other information (such as a version number).
 .RE
 
 .SH SEE ALSO
-\fBmodload\fR(1M), \fBmodlinkage\fR(9S)
+\fBmodload\fR(8), \fBmodlinkage\fR(9S)

@@ -22,7 +22,7 @@ ioctl(\fIfd\fR, I_PUSH, "ttcompat");
 \fBttcompat\fR is a STREAMS module that translates the \fBioctl\fR calls
 supported by the older \fBVersion\fR \fB7,\fR \fB4BSD,\fR and \fBXENIX\fR
 terminal drivers into the \fBioctl\fR calls supported by the \fBtermio\fR
-interface (see \fBtermio\fR(7I)). All other messages pass through this module
+interface (see \fBtermio\fR(4I)). All other messages pass through this module
 unchanged; the behavior of \fBread\fR and \fBwrite\fR calls is unchanged, as is
 the behavior of \fBioctl\fR calls other than the ones supported by
 \fBttcompat\fR.
@@ -674,4 +674,4 @@ TIOCOUTQ
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2), \fBtermios\fR(3C), \fBldterm\fR(7M), \fBtermio\fR(7I)
+\fBioctl\fR(2), \fBtermios\fR(3C), \fBldterm\fR(4M), \fBtermio\fR(4I)

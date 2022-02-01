@@ -14,9 +14,9 @@ provides no namespace or functionality.
 .sp
 .LP
 In some circumstances having device nodes bound to \fBnulldriver\fR is
-expected. For example, \fBprtconf\fR(1M) might capture a nexus driver with a
+expected. For example, \fBprtconf\fR(8) might capture a nexus driver with a
 \fBnulldriver\fR bound child if the nexus is performing child discovery.
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(1M), \fBattach\fR(9E), \fBdetach\fR(9E), \fBprobe\fR(9E)
+\fBprtconf\fR(8), \fBattach\fR(9E), \fBdetach\fR(9E), \fBprobe\fR(9E)

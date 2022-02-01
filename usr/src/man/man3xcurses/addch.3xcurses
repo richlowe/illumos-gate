@@ -126,7 +126,7 @@ None.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -147,5 +147,5 @@ MT-Level	Unsafe
 \fBattroff\fR(3XCURSES), \fBbkgdset\fR(3XCURSES), \fBdoupdate\fR(3XCURSES),
 \fBinch\fR(3XCURSES), \fBinsch\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
 \fBnl\fR(3XCURSES), \fBprintw\fR(3XCURSES), \fBscrollok\fR(3XCURSES),
-\fBscrl\fR(3XCURSES), \fBterminfo\fR(4), \fBattributes\fR(5),
-\fBstandards\fR(5)
+\fBscrl\fR(3XCURSES), \fBterminfo\fR(5), \fBattributes\fR(7),
+\fBstandards\fR(7)

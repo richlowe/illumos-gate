@@ -30,7 +30,7 @@ located in the directory \fB/var/spool/rwho\fR.
 .sp
 .LP
 The \fBrwho\fR server transmits and receives messages at the port indicated in
-the \fBrwho\fR service specification, see \fBservices\fR(4). The messages sent
+the \fBrwho\fR service specification, see \fBservices\fR(5). The messages sent
 and received are defined in \fB/usr/include/protocols/rwhod.h\fR and are of the
 form:
 .sp
@@ -67,7 +67,7 @@ averages over the 1, 5, and 15 minute intervals prior to a server's
 transmission.  The host name included is that returned by the \fBuname\fR(2)
 system call. The array at the end of the message contains information about the
 users who are logged in to the sending machine.  This information includes the
-contents of the \fButmpx\fR(4) entry for each non-idle terminal line and a
+contents of the \fButmpx\fR(5) entry for each non-idle terminal line and a
 value indicating the time since a character was last received on the terminal
 line.
 .sp
@@ -113,8 +113,8 @@ information about other machines
 .SH SEE ALSO
 .sp
 .LP
-\fBruptime\fR(1), \fBrwho\fR(1), \fBw\fR(1), \fBuname\fR(2), \fBservices\fR(4),
-\fButmpx\fR(4), \fBattributes\fR(5)
+\fBruptime\fR(1), \fBrwho\fR(1), \fBw\fR(1), \fBuname\fR(2), \fBservices\fR(5),
+\fButmpx\fR(5), \fBattributes\fR(7)
 .SH WARNINGS
 .sp
 .LP

@@ -276,7 +276,7 @@ been initialized.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -295,4 +295,4 @@ MT-Level	MT-Safe
 .LP
 \fBsockaddr\fR(3SOCKET),
 \fBbind\fR(3XNET), \fBconnect\fR(3XNET), \fBlisten\fR(3XNET),
-\fBsocket\fR(3XNET), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBsocket\fR(3XNET), \fBattributes\fR(7), \fBstandards\fR(7)

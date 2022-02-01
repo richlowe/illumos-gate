@@ -19,13 +19,13 @@ sckmd \- Sun cryptographic key management daemon
 maintain the Internet Protocol Security (\fBIPsec\fR) Security Associations
 (\fBSAs\fR) needed to secure communications between a Service Processor or
 System Controller (SC) and platform management software running within a
-domain. The \fBdcs\fR(1M) daemon uses these Security
-Associations. See \fBipsec\fR(7P) for a description of Security Associations.
+domain. The \fBdcs\fR(8) daemon uses these Security
+Associations. See \fBipsec\fR(4P) for a description of Security Associations.
 .sp
 .LP
 The \fBsckmd\fR daemon receives \fBSA\fRs from the Service Processor or
 \fBSC\fR and installs these \fBSA\fRs in a domain's Security Association
-Database (\fBSADB\fR) using \fBpf_key\fR(7P).
+Database (\fBSADB\fR) using \fBpf_key\fR(4P).
 .sp
 .LP
 \fBsckmd\fR starts up at system boot time as an \fBSMF\fR service. The
@@ -43,7 +43,7 @@ svc:/platform/sun4u/sckmd:default
 A domain supports only one running \fBsckmd\fR process at a time.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -58,9 +58,9 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBdcs\fR(1M), \fBipsecconf\fR(1M), \fBipsecalgs\fR(1M),
-\fBattributes\fR(5), \fBipsec\fR(7P), \fBipsecah\fR(7P), \fBipsecesp\fR(7P),
-\fBpf_key\fR(7P)
+\fBdcs\fR(8), \fBipsecconf\fR(8), \fBipsecalgs\fR(8),
+\fBattributes\fR(7), \fBipsec\fR(4P), \fBipsecah\fR(4P), \fBipsecesp\fR(4P),
+\fBpf_key\fR(4P)
 .SH NOTES
 .LP
 The \fBsckmd\fR service is used only on Sun Fire high-end systems.
@@ -68,7 +68,7 @@ It provides a mechanism for exchanging
 \fBIPsec\fR keys between a domain and its System Controller (\fBSC\fR) or
 Service Processor. These platforms use \fBIPsec\fR to secure the communications
 between the \fBSC\fR or Service Processor and a platform-specific daemon
-in the domain, such as \fBdcs\fR(1M).
+in the domain, such as \fBdcs\fR(8).
 .sp
 .LP
 The documentation for each platform that supports \fBsckmd\fR describes how to

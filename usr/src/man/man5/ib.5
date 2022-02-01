@@ -10,7 +10,7 @@ ib \- InfiniBand device driver configuration files
 .sp
 .LP
 The InfiniBand (IB) bus is an I/O transport based on switched  fabrics. IB
-devices are managed by the \fBib\fR(7D) nexus driver. There are three
+devices are managed by the \fBib\fR(4D) nexus driver. There are three
 categories of InfiniBand devices:
 .RS +4
 .TP
@@ -33,11 +33,11 @@ IB Pseudo devices
 .sp
 .LP
 The IB  port/IB VPPA/IB HCA_SVC devices are enumerated by way of the
-\fBib.conf\fR file. See \fBib\fR(7D).
+\fBib.conf\fR file. See \fBib\fR(4D).
 .sp
 .LP
 The IB IOC devices are enumerated using the InfiniBand Device management class.
-See \fBibdm\fR(7D).
+See \fBibdm\fR(4D).
 .sp
 .LP
 For devices not in these two categories, most notably IB Pseudo devices, the
@@ -50,14 +50,14 @@ value pairs you can retrieve using the DDI property interfaces. See
 Configuration files for IB device drivers must identify the parent driver
 explicitly as \fBib\fR, and must create a string array property called
 \fBunit-address\fR which is unique to this entry in the configuration file.
-Drivers name \fBibport\fR and \fBioc\fR are reserved by \fBib\fR(7D) and should
+Drivers name \fBibport\fR and \fBioc\fR are reserved by \fBib\fR(4D) and should
 not be used.
 .sp
 .LP
 Each entry in the configuration file creates a prototype \fBdevinfo\fR node.
 Each node is assigned a unit address which is determined by the value of the
 \fBunit-address\fR  property. This property is only applicable to children of
-the IB parent and is required. See \fBdriver.conf\fR(4) for further details on
+the IB parent and is required. See \fBdriver.conf\fR(5) for further details on
 configuration file syntax.
 .SH EXAMPLES
 .sp
@@ -83,4 +83,4 @@ that implements a generic IB driver. This file creates a node called
 .SH SEE ALSO
 .sp
 .LP
-\fBdriver.conf\fR(4), \fBib\fR(7D), \fBibtl\fR(7D), \fBddi_prop_op\fR(9F)
+\fBdriver.conf\fR(5), \fBib\fR(4D), \fBibtl\fR(4D), \fBddi_prop_op\fR(9F)

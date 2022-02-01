@@ -166,7 +166,7 @@ limits of the device.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -182,4 +182,4 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBgetrlimit\fR(2), \fBulimit\fR(2), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBgetrlimit\fR(2), \fBulimit\fR(2), \fBattributes\fR(7), \fBstandards\fR(7)

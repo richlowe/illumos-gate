@@ -68,7 +68,7 @@ after the module is successfully loaded.  The first argument passed is the
 module ID (in decimal). The other argument is module specific. The module
 specific information is: the block and character major numbers for drivers, the
 system call number for system calls, or, for  other module types, the index
-into the appropriate kernel table. See  \fBmodinfo\fR(1M)
+into the appropriate kernel table. See  \fBmodinfo\fR(8)
 .RE
 
 .sp
@@ -83,8 +83,8 @@ Use the kernel's internal modpath variable as the search path for the module.
 .SH SEE ALSO
 .sp
 .LP
-\fBld\fR(1), \fBadd_drv\fR(1M), \fBkernel\fR(1M), \fBmodinfo\fR(1M),
-\fBmodunload\fR(1M), \fBsystem\fR(4), \fBattributes\fR(5), \fBmodldrv\fR(9S),
+\fBld\fR(1), \fBadd_drv\fR(8), \fBkernel\fR(8), \fBmodinfo\fR(8),
+\fBmodunload\fR(8), \fBsystem\fR(5), \fBattributes\fR(7), \fBmodldrv\fR(9S),
 \fBmodlinkage\fR(9S), \fBmodlstrmod\fR(9S), \fBmodule_info\fR(9S)
 .sp
 .LP
@@ -92,5 +92,5 @@ Use the kernel's internal modpath variable as the search path for the module.
 .SH NOTES
 .sp
 .LP
-Use \fBadd_drv\fR(1M) to add device drivers, not \fBmodload\fR. See \fI\fR for
+Use \fBadd_drv\fR(8) to add device drivers, not \fBmodload\fR. See \fI\fR for
 procedures on adding device drivers.

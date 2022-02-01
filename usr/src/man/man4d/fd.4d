@@ -243,7 +243,7 @@ application should try the operation again.
 \fB\fBEFAULT\fR\fR
 .ad
 .RS 10n
-An invalid address was specified in an ioctl command (see \fBfdio\fR(7I)).
+An invalid address was specified in an ioctl command (see \fBfdio\fR(4I)).
 .RE
 
 .sp
@@ -254,7 +254,7 @@ An invalid address was specified in an ioctl command (see \fBfdio\fR(7I)).
 .RS 10n
 The number of bytes read or written is not a multiple of the diskette's sector
 size. This error is also returned when an unsupported command is specified
-using the \fBFDIOCMD\fR ioctl command (see \fBfdio\fR(7I)).
+using the \fBFDIOCMD\fR ioctl command (see \fBfdio\fR(4I)).
 .RE
 
 .sp
@@ -284,7 +284,7 @@ An attempt was made to write past the end of the diskette.
 .ad
 .RS 10n
 The floppy disk driver does not support the requested ioctl functions (see
-\fBfdio\fR(7I)).
+\fBfdio\fR(4I)).
 .RE
 
 .sp
@@ -660,8 +660,8 @@ symbolic link to the entry in \fB/dev/rdiskette1\fR
 .SH SEE ALSO
 .sp
 .LP
-\fBfdformat\fR(1), \fBdd\fR(1M), \fBdrvconfig\fR(1M), \fBread\fR(2),
-\fBwrite\fR(2), \fBdriver.conf\fR(4), \fBdkio\fR(7I) \fBfdio\fR(7I)
+\fBfdformat\fR(1), \fBdd\fR(8), \fBdrvconfig\fR(8), \fBread\fR(2),
+\fBwrite\fR(2), \fBdriver.conf\fR(5), \fBdkio\fR(4I) \fBfdio\fR(4I)
 .SH DIAGNOSTICS
 .SS "All Platforms"
 .sp
@@ -788,7 +788,7 @@ heavily loaded. Decrease the load on the system and retry the diskette access.
 .LP
 3.5" high density diskettes have 18 sectors per track and 5.25" high density
 diskettes have 15 sectors per track. They can cross a track (though not a
-cylinder) boundary without losing data, so when using \fBdd\fR(1M) or
+cylinder) boundary without losing data, so when using \fBdd\fR(8) or
 \fBread\fR(2)/\fBwrite\fR(2) calls to or from the raw diskette, you should
 specify \fBbs=18k\fR or multiples thereof for 3.5" diskettes, and \fBbs=15k\fR
 or multiples thereof for 5.25" diskettes.

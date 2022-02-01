@@ -38,7 +38,7 @@ in Intel ICH, nVidia nForce, and AMD 8111 chips.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a descriptions of the following attributes:
+See \fBattributes\fR(7) for a descriptions of the following attributes:
 .sp
 
 .sp
@@ -54,8 +54,8 @@ Interface Stability	Uncommitted
 .TE
 
 .SH SEE ALSO
-\fBioctl\fR(2), \fBattributes\fR(5), \fBaudio\fR(7I), \fBmixer\fR(7I),
-\fBstreamio\fR(7I)
+\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBmixer\fR(4I),
+\fBstreamio\fR(4I)
 .sp
 .LP
 \fIAMD-8111 HyperTransport I/O Hub Data Sheet\fR \(em Advanced Micro Devices

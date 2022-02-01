@@ -397,7 +397,7 @@ provides full support for ISO C, POSIX, and X/Open namespace reservations.
 If this pragma feature is not supported by the compiler, the headers use the
 \fB#define\fR directive to map internal function names onto appropriate library
 entry point names. In this instance, applications should avoid using the
-explicit 64-bit file offset symbols listed on the \fBlf64\fR(5) manual page,
+explicit 64-bit file offset symbols listed on the \fBlf64\fR(7) manual page,
 since these names are used by the implementation to name the alternative entry
 points.
 .sp
@@ -484,4 +484,4 @@ c99 $(getconf POSIX_V6_LP64_OFF64_CFLAGS) -D_XOPEN_SOURCE=600 \e
 .SH SEE ALSO
 .LP
 \fBcsh\fR(1), \fBksh\fR(1), \fBsh\fR(1), \fBexec\fR(2), \fBsysconf\fR(3C),
-\fBsystem\fR(3C), \fBenviron\fR(5), \fBlf64\fR(5)
+\fBsystem\fR(3C), \fBenviron\fR(7), \fBlf64\fR(7)

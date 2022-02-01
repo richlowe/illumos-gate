@@ -95,7 +95,7 @@ or \fIelsize\fR is 0, a unique pointer to the arena is returned.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -112,4 +112,4 @@ MT-Level	Safe
 .sp
 .LP
 \fBbrk\fR(2), \fBgetrlimit\fR(2), \fBmmap\fR(2), \fBrealloc\fR(3C),
-\fBmalloc\fR(3MALLOC), \fBattributes\fR(5)
+\fBmalloc\fR(3MALLOC), \fBattributes\fR(7)

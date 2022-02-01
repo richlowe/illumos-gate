@@ -233,7 +233,7 @@ status = mkfifo("/home/cnd/mod_done", S_IWUSR | S_IRUSR |
 .in -2
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -250,4 +250,4 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 \fBmkdir\fR(1), \fBchmod\fR(2), \fBexec\fR(2), \fBmknod\fR(2), \fBumask\fR(2),
-\fBstat.h\fR(3HEAD), \fBufs\fR(7FS), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBstat.h\fR(3HEAD), \fBufs\fR(4FS), \fBattributes\fR(7), \fBstandards\fR(7)

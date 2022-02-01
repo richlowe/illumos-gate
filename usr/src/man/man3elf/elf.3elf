@@ -354,7 +354,7 @@ failure()
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -380,14 +380,14 @@ MT-Level	MT-Safe
 \fBelf_hash\fR(3ELF), \fBelf_kind\fR(3ELF), \fBelf_memory\fR(3ELF),
 \fBelf_rawfile\fR(3ELF), \fBelf_strptr\fR(3ELF), \fBelf_update\fR(3ELF),
 \fBelf_version\fR(3ELF), \fBgelf\fR(3ELF), \fBlibelf\fR(3LIB),
-\fBattributes\fR(5), \fBlfcompile\fR(5)
+\fBattributes\fR(7), \fBlfcompile\fR(7)
 .sp
 .LP
 \fIANSI C Programmer's Guide\fR
 .SS "SPARC only"
 .sp
 .LP
-\fBa.out\fR(4)
+\fBa.out\fR(5)
 .SH NOTES
 .sp
 .LP

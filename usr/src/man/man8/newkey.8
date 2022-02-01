@@ -32,7 +32,7 @@ The key pair can be stored in the \fB/etc/publickey\fR file or the NIS
 .sp
 .LP
 \fBnewkey\fR consults the \fBpublickey\fR entry in the name service switch
-configuration file (see \fBnsswitch.conf\fR(4)) to determine which naming
+configuration file (see \fBnsswitch.conf\fR(5)) to determine which naming
 service is used to store the secure \fBRPC\fR keys. If the \fBpublickey\fR
 entry specifies a unique name service, \fBnewkey\fR will add the key in the
 specified name service. However, if there are multiple name services listed,
@@ -90,4 +90,4 @@ available in the future.
 .SH SEE ALSO
 .LP
 \fBchkey\fR(1), \fBkeylogin\fR(1),
-\fBnsswitch.conf\fR(4), \fBpublickey\fR(4), \fBattributes\fR(5)
+\fBnsswitch.conf\fR(5), \fBpublickey\fR(5), \fBattributes\fR(7)

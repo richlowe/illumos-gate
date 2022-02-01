@@ -20,16 +20,16 @@ inetd.conf \- Internet servers database
 In the current release of the Solaris operating system, the \fBinetd.conf\fR
 file is no longer directly used to configure \fBinetd\fR. The Solaris services
 which were formerly configured using this file are now configured in the
-Service Management Facility (see \fBsmf\fR(5)) using \fBinetadm\fR(1M). Any
+Service Management Facility (see \fBsmf\fR(7)) using \fBinetadm\fR(8). Any
 records remaining in this file after installation or upgrade, or later created
-by installing additional software, must be converted to \fBsmf\fR(5) services
-and imported into the SMF repository using \fBinetconv\fR(1M), otherwise the
+by installing additional software, must be converted to \fBsmf\fR(7) services
+and imported into the SMF repository using \fBinetconv\fR(8), otherwise the
 service will not be available.
 .sp
 .LP
 For Solaris operating system releases prior to the current release (such as
 Solaris 9), the \fBinetd.conf\fR file contains the list of servers that
-\fBinetd\fR(1M) invokes when it receives an Internet request over a socket.
+\fBinetd\fR(8) invokes when it receives an Internet request over a socket.
 Each server entry is composed of a single line of the form:
 .sp
 .in +2
@@ -235,8 +235,8 @@ Internet network services
 
 .SH SEE ALSO
 .LP
-\fBrlogin\fR(1), \fBrsh\fR(1), \fBin.tftpd\fR(1M), \fBinetadm\fR(1M),
-\fBinetconv\fR(1M), \fBinetd\fR(1M), \fBservices\fR(4), \fBsmf\fR(5)
+\fBrlogin\fR(1), \fBrsh\fR(1), \fBin.tftpd\fR(8), \fBinetadm\fR(8),
+\fBinetconv\fR(8), \fBinetd\fR(8), \fBservices\fR(5), \fBsmf\fR(7)
 .SH NOTES
 .LP
 \fB/etc/inet/inetd.conf\fR is the official SVR4 name of the \fBinetd.conf\fR
@@ -247,4 +247,4 @@ compatibility.
 This man page describes \fBinetd.conf\fR as it was supported in Solaris
 operating system releases prior to the current release. The services that were
 configured by means of \fBinetd.conf\fR are now configured in the Service
-Management Facility (see \fBsmf\fR(5)) using \fBinetadm\fR(1M).
+Management Facility (see \fBsmf\fR(7)) using \fBinetadm\fR(8).

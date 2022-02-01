@@ -136,7 +136,7 @@ Provides access to CPU identification data.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -151,5 +151,5 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBpsrinfo\fR(1M), \fBprtconf\fR(1M), \fBpread\fR(2), \fBread\fR(2),
-\fBattributes\fR(5)
+\fBpsrinfo\fR(8), \fBprtconf\fR(8), \fBpread\fR(2), \fBread\fR(2),
+\fBattributes\fR(7)

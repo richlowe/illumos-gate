@@ -82,7 +82,7 @@ possible error codes.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -98,7 +98,7 @@ Interface Stability	Evolving
 .sp
 .LP
 \fBldap\fR(3LDAP), \fBldap_first_entry\fR(3LDAP),
-\fBldap_first_attribute\fR(3LDAP), \fBldap_error\fR(3LDAP), \fBattributes\fR(5)
+\fBldap_first_attribute\fR(3LDAP), \fBldap_error\fR(3LDAP), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

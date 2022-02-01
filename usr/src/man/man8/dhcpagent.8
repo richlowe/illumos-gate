@@ -27,22 +27,22 @@ it must negotiate an extension using \fBDHCP\fR. For this reason,
 powers down.
 .sp
 .LP
-For IPv4, the \fBdhcpagent\fR daemon is controlled through \fBipadm\fR(1M),
-\fBnwamcfg\fR(1M), or \fBifconfig\fR(1M) in much the same way that the
-\fBinit\fR(1M) daemon is controlled by \fBtelinit\fR(1M). \fBdhcpagent\fR can
+For IPv4, the \fBdhcpagent\fR daemon is controlled through \fBipadm\fR(8),
+\fBnwamcfg\fR(8), or \fBifconfig\fR(8) in much the same way that the
+\fBinit\fR(8) daemon is controlled by \fBtelinit\fR(8). \fBdhcpagent\fR can
 be invoked as a user process, albeit one requiring root privileges, but this is
-not necessary, as \fBipadm\fR(1M), \fBnwamcfg\fR(1M), or \fBifconfig\fR(1M)
+not necessary, as \fBipadm\fR(8), \fBnwamcfg\fR(8), or \fBifconfig\fR(8)
 will start \fBdhcpagent\fR automatically.
 .sp
 .LP
 For IPv6, the \fBdhcpagent\fR daemon is invoked automatically by
-\fBin.ndpd\fR(1M). It can also be controlled through \fBifconfig\fR(1M), if
+\fBin.ndpd\fR(8). It can also be controlled through \fBifconfig\fR(8), if
 necessary.
 .sp
 .LP
 When invoked, \fBdhcpagent\fR enters a passive state while it awaits
-instructions from \fBipadm\fR(1M), \fBnwamcfg\fR(1M), \fBifconfig\fR(1M), or
-\fBin.ndpd\fR(1M). When \fBdhcpagent\fR receives a command to configure an
+instructions from \fBipadm\fR(8), \fBnwamcfg\fR(8), \fBifconfig\fR(8), or
+\fBin.ndpd\fR(8). When \fBdhcpagent\fR receives a command to configure an
 interface, \fBdhcpagent\fR brings up the interface (if necessary) and starts
 DHCP. Once DHCP is complete, \fBdhcpagent\fR can be queried for the values of
 the various network parameters. In addition, if DHCP was used to obtain a lease
@@ -72,7 +72,7 @@ from DHCP, the interface is abandoned from DHCP control.
 For IPv6, \fBdhcpagent\fR automatically plumbs and unplumbs logical interfaces
 as necessary for the IPv6 addresses supplied by the server. The IPv6 prefix
 length (netmask) is not set by the DHCPv6 protocol, but is instead set by
-\fBin.ndpd\fR(1M) using prefix information obtained by Router Advertisements.
+\fBin.ndpd\fR(8) using prefix information obtained by Router Advertisements.
 If any of the logical interfaces created by \fBdhcpagent\fR is unplumbed, or
 configured with a different IP address, it will be abandoned from DHCP control.
 If the link-local interface is unplumbed, then all addresses configured by DHCP
@@ -102,7 +102,7 @@ so requests may arrive while some or all of the interfaces are still
 unconfigured. To handle these cases, one interface may be designated as
 primary, which makes it the authoritative source for the values of \fBDHCP\fR
 parameters in the case where no specific interface is requested. See
-\fBdhcpinfo\fR(1) and \fBifconfig\fR(1M) for details.
+\fBdhcpinfo\fR(1) and \fBifconfig\fR(8) for details.
 .sp
 .LP
 For IPv4, the \fBdhcpagent\fR daemon can be configured to request a particular
@@ -284,7 +284,7 @@ might not be present.
 These events occur when an interface acquires new or updated configuration
 information from a DHCP server by means of the DHCPv4 \fBINFORM\fR or the
 DHCPv6 Information-Request message. These messages are sent using an
-\fBifconfig\fR(1M) \fBdhcp inform\fR command or when the DHCPv6 Router
+\fBifconfig\fR(8) \fBdhcp inform\fR command or when the DHCPv6 Router
 Advertisement \fBO\fR (letter 0) bit is set and the \fBM\fR bit is not set.
 Thus, these events occur when the DHCP client does not obtain an IP address
 lease from the server, and instead obtains only configuration parameters.
@@ -367,7 +367,7 @@ If the interface is being adopted, the following conditions apply:
 .sp
 \fBdhcpagent\fR uses the client id specified in
 \fB/chosen\fR:\fI<client_id>\fR, as published by the PROM or as specified on a
-\fBboot\fR(1M) command line. If this value is not present, the client id is
+\fBboot\fR(8) command line. If this value is not present, the client id is
 undefined. The DHCP server then determines what to use as a client id. It is an
 error condition if the interface is an Infiniband interface and the PROM value
 is not present.
@@ -702,14 +702,14 @@ configurations:
 .sp
 .ne 2
 .na
-1.  \fBipadm\fR(1M): include the \fB-1,--primary\fR flag when creating an
-address that uses DHCP so that \fBnodename\fR(4) is used as the
+1.  \fBipadm\fR(8): include the \fB-1,--primary\fR flag when creating an
+address that uses DHCP so that \fBnodename\fR(5) is used as the
 \fIhostname\fR.
 .ad
 .sp
 .ne 2
 .na
-2.  \fBipadm\fR(1M): include the \fB-h,--reqhost\fR \fIhostname\fR switch
+2.  \fBipadm\fR(8): include the \fB-h,--reqhost\fR \fIhostname\fR switch
 when executing the \fBcreate-addr -T dhcp\fR subcommand, or use the
 \fBset-addrprop -p reqhost=\fR\fIhostname\fR subcommand for any existing
 DHCP address.
@@ -717,14 +717,14 @@ DHCP address.
 .sp
 .ne 2
 .na
-3.  \fBnwamcfg\fR(1M): set a property,
+3.  \fBnwamcfg\fR(8): set a property,
 \fBip-primary=\fR\fIon\fR, for an ncu ip that uses DHCP so that
-\fBnodename\fR(4) is used as the \fIhostname\fR.
+\fBnodename\fR(5) is used as the \fIhostname\fR.
 .ad
 .sp
 .ne 2
 .na
-4.  \fBnwamcfg\fR(1M): set a property,
+4.  \fBnwamcfg\fR(8): set a property,
 \fBip-reqhost=\fR\fIhostname\fR, for an ncu ip that uses DHCP.
 .ad
 .sp
@@ -750,8 +750,8 @@ Default value of this option is \fIyes\fR.
 .sp .6
 .RS 4n
 Indicates the value that should be appended to a PQDN specified by the
-\fB-h,--reqhost\fR option of \fBipadm\fR(1M), by the ncu \fBip-reqhost\fR
-property of \fBnwamcfg\fR(1M), or by \fBnodename\fR(4) to construct an FQDN
+\fB-h,--reqhost\fR option of \fBipadm\fR(8), by the ncu \fBip-reqhost\fR
+property of \fBnwamcfg\fR(8), or by \fBnodename\fR(5) to construct an FQDN
 for \fBREQUEST_FQDN\fR processing.
 If the \fIhostname\fR value is already an FQDN, then the value of this
 option is not used.
@@ -765,10 +765,10 @@ option is not used.
 .sp .6
 .RS 4n
 Indicates that a domain name returned by the DHCP server or the \fBdomain\fR
-from \fBresolv.conf\fR(4) should be adopted if needed to construct an FQDN
-from a PQDN specified by the \fB-h,--reqhost\fR option of \fBipadm\fR(1M),
-by the ncu \fBip-reqhost\fR property of \fBnwamcfg\fR(1M), or by
-\fBnodename\fR(4).
+from \fBresolv.conf\fR(5) should be adopted if needed to construct an FQDN
+from a PQDN specified by the \fB-h,--reqhost\fR option of \fBipadm\fR(8),
+by the ncu \fBip-reqhost\fR property of \fBnwamcfg\fR(8), or by
+\fBnodename\fR(5).
 If the \fIhostname\fR value is already an FQDN, then the value of this
 option is not applicable.
 The eligible DHCP option for domain name is DHCPv4 \fBDNSdmain\fR.
@@ -817,7 +817,7 @@ Location of a DHCP event program.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -831,9 +831,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBdhcpinfo\fR(1), \fBifconfig\fR(1M), \fBinit\fR(1M), \fBin.mpathd\fR(1M),
-\fBin.ndpd\fR(1M), \fBipadm\fR(1M), \fBnwamcfg\fR(1M), \fBsyslog\fR(3C),
-\fBnodename\fR(4), \fBresolv.conf\fR(4), \fBattributes\fR(5), \fBdhcp\fR(5)
+\fBdhcpinfo\fR(1), \fBifconfig\fR(8), \fBinit\fR(8), \fBin.mpathd\fR(8),
+\fBin.ndpd\fR(8), \fBipadm\fR(8), \fBnwamcfg\fR(8), \fBsyslog\fR(3C),
+\fBnodename\fR(5), \fBresolv.conf\fR(5), \fBattributes\fR(7), \fBdhcp\fR(7)
 .sp
 .LP
 \fI\fR
@@ -885,7 +885,7 @@ the daemon will not add or remove default routes in this case. Note that the
 actual DHCP packet exchange may be performed over any active IP interface in
 the IPMP group. It is strongly recommended that test addresses have infinite
 leases. Otherwise, an extended network outage detectable only by probes may
-cause test address leases to expire, causing \fBin.mpathd\fR(1M) to revert to
+cause test address leases to expire, causing \fBin.mpathd\fR(8) to revert to
 link-based failure detection and trigger an erroneous repair.
 .sp
 .LP

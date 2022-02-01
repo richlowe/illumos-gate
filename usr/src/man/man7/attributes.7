@@ -28,7 +28,7 @@ Interface Stability	Committed
 _
 MT-Level	Safe
 _
-Standard	See \fBstandards\fR(5).
+Standard	See \fBstandards\fR(7).
 .TE
 
 .SS "Architecture"
@@ -650,7 +650,7 @@ other race-condition reasons, the use of \fBforkall()\fR is discouraged.
 .sp
 In all Solaris releases prior to Solaris 10, the behavior of \fBfork()\fR
 depended on whether or not the application was linked with \fB-lpthread\fR
-(POSIX threads, see \fBstandards\fR(5)). If linked with \fB-lpthread\fR,
+(POSIX threads, see \fBstandards\fR(7)). If linked with \fB-lpthread\fR,
 \fBfork()\fR behaved like \fBfork1()\fR; otherwise it behaved like
 \fBforkall()\fR. To avoid any confusion concerning the behavior of
 \fBfork()\fR, applications can specifically call \fBfork1()\fR or
@@ -717,4 +717,4 @@ accepted organization such as IETF, or as informal as the sole contributor in
 the case of FOSS (Free or Open Source Software).
 .SH SEE ALSO
 .LP
-\fBuname\fR(1), \fBIntro\fR(3), \fBstandards\fR(5)
+\fBuname\fR(1), \fBIntro\fR(3), \fBstandards\fR(7)

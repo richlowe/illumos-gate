@@ -312,7 +312,7 @@ administrator wants as some of the peer's addresses are supposed to be blocked.
 .sp
 .LP
 Another example is the use of IP Filter, which provides several functions such
-as IP packet filtering (\fBipf\fR(1M)) and NAT \fBipnat\fR(1M)). For packet
+as IP packet filtering (\fBipf\fR(8)) and NAT \fBipnat\fR(8)). For packet
 filtering, one issue is that a filter policy can block packets from some of the
 addresses of an association while allowing packets from other addresses to go
 through. This can degrade SCTP's performance when failure occurs. There is a
@@ -324,7 +324,7 @@ afterwards when a different IP address is used for the association.
 .SH SEE ALSO
 .sp
 .LP
-\fBipf\fR(1M), \fBipnat\fR(1M), \fBndd\fR(1M),  \fBioctl\fR(2), \fBclose\fR(2),
+\fBipf\fR(8), \fBipnat\fR(8), \fBndd\fR(8),  \fBioctl\fR(2), \fBclose\fR(2),
 \fBread\fR(2), \fBwrite\fR(2), \fBaccept\fR(3SOCKET), \fBbind\fR(3SOCKET),
 \fBconnect\fR(3SOCKET), \fBgetprotobyname\fR(3SOCKET),
 \fBgetsockopt\fR(3SOCKET), \fBlibsctp\fR(3LIB), \fBlisten\fR(3SOCKET),
@@ -334,8 +334,8 @@ afterwards when a different IP address is used for the association.
 \fBsctp_opt_info\fR(3SOCKET), \fBsctp_peeloff\fR(3SOCKET),
 \fBsctp_recvmsg\fR(3SOCKET), \fBsctp_sendmsg\fR(3SOCKET), \fBsend\fR(3SOCKET),
 \fBsendmsg\fR(3SOCKET), \fBsendto\fR(3SOCKET), \fBsocket\fR(3SOCKET),
-\fBipfilter\fR(5), \fBtcp\fR(7P), \fBudp\fR(7P), \fBinet\fR(7P),
-\fBinet6\fR(7P), \fBip\fR(7P), \fBip6\fR(7P)
+\fBipfilter\fR(7), \fBtcp\fR(4P), \fBudp\fR(4P), \fBinet\fR(4P),
+\fBinet6\fR(4P), \fBip\fR(4P), \fBip6\fR(4P)
 .sp
 .LP
 R. Stewart, Q. Xie, K. Morneault, C. Sharp, H. Schwarzbauer, T. Taylor,  I.

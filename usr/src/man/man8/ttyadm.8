@@ -24,11 +24,11 @@ ttyadm \- format and output port monitor-specific information
 .sp
 .LP
 The \fBttyadm\fR command is an administrative command that formats
-\fBttymon\fR(1M)-specific information and writes it to standard output. The
+\fBttymon\fR(8)-specific information and writes it to standard output. The
 Service Access Facility (SAF) requires each port monitor to provide such a
 command. Note that the port monitor administrative file is updated by the
-Service Access Controller's administrative commands, \fBsacadm\fR(1M) and
-\fBpmadm\fR(1M). \fBttyadm\fR provides a means of presenting formatted port
+Service Access Controller's administrative commands, \fBsacadm\fR(8) and
+\fBpmadm\fR(8). \fBttyadm\fR provides a means of presenting formatted port
 monitor-specific (\fBttymon\fR-specific) data to these commands.
 .SH OPTIONS
 .sp
@@ -42,7 +42,7 @@ The following options are supported:
 .RS 15n
 Set the ``bi-directional port'' flag. When this flag is set, the line can be
 used in both directions. \fBttymon\fR will allow users to connect to the
-service associated with the port, but if the port is free, \fBuucico\fR(1M),
+service associated with the port, but if the port is free, \fBuucico\fR(8),
 \fBcu\fR(1C), or \fBct\fR(1C) can use it for dialing out.
 .RE
 
@@ -216,8 +216,8 @@ error and \fBttymon\fR will exit with a non-zero status.
 .SH SEE ALSO
 .sp
 .LP
-\fBct\fR(1C), \fBcu\fR(1C), \fBpmadm\fR(1M), \fBsacadm\fR(1M),
-\fBttymon\fR(1M), \fBuucico\fR(1M), \fBattributes\fR(5)
+\fBct\fR(1C), \fBcu\fR(1C), \fBpmadm\fR(8), \fBsacadm\fR(8),
+\fBttymon\fR(8), \fBuucico\fR(8), \fBattributes\fR(7)
 .sp
 .LP
 \fI\fR

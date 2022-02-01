@@ -56,8 +56,8 @@ interaction throughout the installation and package request scripts are run as
 .LP
 If you have package request scripts that require running as user \fBroot\fR
 (instead of \fBnoaccess\fR [the default] or user \fBinstall\fR), use the
-\fBrscript_alt\fR parameter in the \fBadmin\fR(4) file to make an appropriate
-selection. See \fBadmin\fR(4).
+\fBrscript_alt\fR parameter in the \fBadmin\fR(5) file to make an appropriate
+selection. See \fBadmin\fR(5).
 .sp
 .LP
 Note that, in Solaris 8 and Solaris 9, the default user when running a request
@@ -66,14 +66,14 @@ system's patch level. In the current release, the default user is
 \fBnoaccess\fR.
 .sp
 .LP
-When running \fBpkgadd\fR in the global zone (see \fBzones\fR(5)), a package
-that contains a request script (see \fBpkgask\fR(1M)) is added only to the
+When running \fBpkgadd\fR in the global zone (see \fBzones\fR(7)), a package
+that contains a request script (see \fBpkgask\fR(8)) is added only to the
 global zone. The package is not propagated to any current or
 yet-to-be-installed non-global zone. This behavior mimics the effect of the
 \fB-G\fR option, described below.
 .sp
 .LP
-Package commands are \fBlargefile\fR(5)-aware. They handle files larger than 2
+Package commands are \fBlargefile\fR(7)-aware. They handle files larger than 2
 GB in the same way they handle smaller files. In their current implementations,
 \fBpkgadd\fR, \fBpkgtrans\fR(1) and other package commands can process a
 datastream of  up to 4 GB.
@@ -114,7 +114,7 @@ or yet-to-be-created non-global zone. When used in a non-global zone, the
 package(s) are added to the non-global zone only.
 .sp
 This option causes package installation to fail if, in the \fBpkginfo\fR file
-for a package, \fBSUNW_PKG_ALLZONES\fR is set to true. See \fBpkginfo\fR(4).
+for a package, \fBSUNW_PKG_ALLZONES\fR is set to true. See \fBpkginfo\fR(5).
 .RE
 
 .sp
@@ -149,7 +149,7 @@ installed files. The default mode is interactive.
 .sp .6
 .RS 4n
 Identify a file or directory which contains output from a previous
-\fBpkgask\fR(1M) session. This file supplies the interaction responses that
+\fBpkgask\fR(8) session. This file supplies the interaction responses that
 would be requested by the package in interactive mode. \fIresponse\fR must be a
 full pathname.
 .RE
@@ -173,7 +173,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -291,7 +291,7 @@ quotes (\fB\&'\fR) or preceded by a backslash (\fB\e\fR).
 .sp .6
 .RS 4n
 Install packages based on the value of the \fBCATEGORY\fR parameter stored in
-the package's \fBpkginfo\fR(4) file. All packages on the source medium whose
+the package's \fBpkginfo\fR(5) file. All packages on the source medium whose
 \fBCATEGORY\fR matches one of the specified categories will be selected for
 installation or spooling.
 .RE
@@ -425,7 +425,7 @@ Location where \fBpkgadd\fR logs an instance of software installation.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -441,9 +441,9 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .LP
 \fBpkginfo\fR(1), \fBpkgmk\fR(1), \fBpkgparam\fR(1), \fBpkgproto\fR(1),
-\fBpkgtrans\fR(1), \fBinstallf\fR(1M), \fBpkgadm\fR(1M), \fBpkgask\fR(1M),
-\fBpkgchk\fR(1M), \fBpkgrm\fR(1M), \fBremovef\fR(1M), \fBadmin\fR(4),
-\fBpkginfo\fR(4), \fBattributes\fR(5), \fBlargefile\fR(5), \fBzones\fR(5)
+\fBpkgtrans\fR(1), \fBinstallf\fR(8), \fBpkgadm\fR(8), \fBpkgask\fR(8),
+\fBpkgchk\fR(8), \fBpkgrm\fR(8), \fBremovef\fR(8), \fBadmin\fR(5),
+\fBpkginfo\fR(5), \fBattributes\fR(7), \fBlargefile\fR(7), \fBzones\fR(7)
 
 .SH NOTES
 .LP
@@ -467,4 +467,4 @@ needed to complete it.
 .LP
 If the default \fIadmin\fR file is too restrictive, the administration file may
 need to be modified to allow for total non-interaction during a package
-installation. See \fBadmin\fR(4) for details.
+installation. See \fBadmin\fR(5) for details.

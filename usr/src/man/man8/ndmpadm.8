@@ -15,7 +15,7 @@ ndmpadm \- administer Network Data Management Protocol activities
 
 .SH DESCRIPTION
 .LP
-The \fBndmpadm\fR command can be used to query the \fBndmpd\fR(1M) daemon to
+The \fBndmpadm\fR command can be used to query the \fBndmpd\fR(8) daemon to
 get the status of active sessions, terminate a session, query backup devices,
 and set or get the current NDMP (Network Data Management Protocol) service
 variables and properties. \fBndmpadm\fR is implemented as a set of subcommands,
@@ -188,7 +188,7 @@ The syntax for the \fBset\fR subcommand is:
 .sp
 .LP
 The properties you can set with the \fBset\fR subcommand are described in the
-\fBndmp\fR(4) man page.
+\fBndmp\fR(5) man page.
 .SS "\fBshow-devices\fR Subcommand"
 .LP
 The syntax for the \fBshow-devices\fR subcommand is:
@@ -403,7 +403,7 @@ Invalid command-line options were specified.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -418,13 +418,13 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBdump\fR(1), \fBtar\fR(1), \fBndmpd\fR(1M), \fBndmpstat\fR(1M),
-\fBsvccfg\fR(1M), \fBsyslogd\fR(1M), \fBndmp\fR(4), \fBattributes\fR(5),
-\fBsmf\fR(5)
+\fBdump\fR(1), \fBtar\fR(1), \fBndmpd\fR(8), \fBndmpstat\fR(8),
+\fBsvccfg\fR(8), \fBsyslogd\fR(8), \fBndmp\fR(5), \fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .LP
-The \fBndmpd\fR(1M) daemon is managed by the service management facility
-(\fBsmf\fR(5)), under the service identifier:
+The \fBndmpd\fR(8) daemon is managed by the service management facility
+(\fBsmf\fR(7)), under the service identifier:
 .sp
 .in +2
 .nf
@@ -436,7 +436,7 @@ svc:/system/ndmpd
 .sp
 .LP
 Administrative actions on this service, such as setting and getting a property
-can be alternatively performed using \fBsvccfg\fR(1M). For example to enable
+can be alternatively performed using \fBsvccfg\fR(8). For example to enable
 Direct Access Recovery (DAR) mode:
 .sp
 .in +2

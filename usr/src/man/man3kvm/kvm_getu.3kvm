@@ -79,7 +79,7 @@ fragment that is stored in the u-area.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -98,7 +98,7 @@ MT-Level	Unsafe
 .sp
 .LP
 \fBkvm_nextproc\fR(3KVM), \fBkvm_open\fR(3KVM), \fBkvm_kread\fR(3KVM),
-\fBmalloc\fR(3C), \fBlibkvm\fR(3LIB), \fBattributes\fR(5)
+\fBmalloc\fR(3C), \fBlibkvm\fR(3LIB), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

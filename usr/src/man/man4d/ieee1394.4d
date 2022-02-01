@@ -78,7 +78,7 @@ _
 .TE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -92,8 +92,8 @@ Architecture	PCI-based systems
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(5), \fBav1394\fR(7D), \fBdcam1394\fR(7D), \fBhci1394\fR(7D),
-\fBscsa1394\fR(7D), \fBiec61883\fR(7I)
+\fBattributes\fR(7), \fBav1394\fR(4D), \fBdcam1394\fR(4D), \fBhci1394\fR(4D),
+\fBscsa1394\fR(4D), \fBiec61883\fR(4I)
 .sp
 .LP
 \fIIEEE 1394a\fR Specification - 1394 Trade Association, 2000

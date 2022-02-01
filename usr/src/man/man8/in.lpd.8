@@ -23,7 +23,7 @@ verbose status, and canceling print jobs.
 .sp
 .LP
 The \fBin.lpd\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -35,9 +35,9 @@ svc:/network/lp
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Responsibility for
-initiating and restarting this service is delegated to \fBinetd\fR(1M). Use
-\fBinetadm\fR(1M) to make configuration changes and to view configuration
+requesting restart, can be performed using \fBsvcadm\fR(8). Responsibility for
+initiating and restarting this service is delegated to \fBinetd\fR(8). Use
+\fBinetadm\fR(8) to make configuration changes and to view configuration
 information for this service. The service's status can be queried using the
 \fBsvcs\fR(1) command.
 .sp
@@ -118,5 +118,5 @@ Spooler translation modules.
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBinetadm\fR(1M), \fBinetd\fR(1M), \fBsvcadm\fR(1M),
-\fBprinters.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBinetadm\fR(8), \fBinetd\fR(8), \fBsvcadm\fR(8),
+\fBprinters.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7)

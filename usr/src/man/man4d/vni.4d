@@ -11,20 +11,20 @@ vni \- STREAMS virtual network interface driver
 .LP
 The \fBvni\fR pseudo device is a multi-threaded, loadable, clonable, STREAMS
 pseudo-device supporting the connectionless Data Link Provider Interface
-\fBdlpi\fR(7P) Style 2. Note that DLPI is intended to interact with IP, meaning
+\fBdlpi\fR(4P) Style 2. Note that DLPI is intended to interact with IP, meaning
 that DLPI access to applications is not supported. (For example, snoop fails on
 the \fBvni\fR interface.)
 .sp
 .LP
 The \fBvni\fR device is a software-only interface and does not send or receive
 data. The device provides a DLPI upper interface that identifies itself to IP
-with a private media type. It can be configured via \fBifconfig\fR(1M) and can
+with a private media type. It can be configured via \fBifconfig\fR(8) and can
 have IP addresses assigned to it, making aliases possible.
 .sp
 .LP
 The \fBvni\fR pseudo device is particularly useful in hosting an IP address
 when used in conjunction with the 'usesrc' \fBifconfig\fR option (see
-\fBifconfig\fR(1M) for examples).  The logical instances of the device can also
+\fBifconfig\fR(8) for examples).  The logical instances of the device can also
 be used to host addresses as an alternative to hosting them over the loopback
 interface.
 .sp
@@ -58,4 +58,4 @@ multipathing (IPMP) group.
 .SH SEE ALSO
 .sp
 .LP
-\fBifconfig\fR(1M), \fBin.mpathd\fR(1M), \fBip\fR(7P), \fBip6\fR(7P)
+\fBifconfig\fR(8), \fBin.mpathd\fR(8), \fBip\fR(4P), \fBip6\fR(4P)

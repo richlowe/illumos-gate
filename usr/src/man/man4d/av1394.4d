@@ -12,7 +12,7 @@ av1394 \- 1394 audio/video driver
 .fi
 
 .SH DESCRIPTION
-The \fBav1394\fR driver implements \fBiec61883\fR(7I) interfaces for IEEE 1394
+The \fBav1394\fR driver implements \fBiec61883\fR(4I) interfaces for IEEE 1394
 compliant devices.
 .SS "Asynchronous Transactions"
 The driver allows applications to act as FCP controllers, but not FCP targets.
@@ -21,7 +21,7 @@ Only \fBIEC61883_FCP_CMD\fR requests can be sent with \fBwrite\fR(2). Only
 .SS "Isochronous Transactions"
 When the read/write method of is used for transmit, the driver is capable of
 auto-detecting and transmitting SD-DVCR 525/60 and 625/50 streams. See
-\fBiec61883\fR(7I) for details.
+\fBiec61883\fR(4I) for details.
 .SH FILES
 .ne 2
 .na
@@ -59,7 +59,7 @@ Device driver (x86)
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -75,8 +75,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(5), \fBhci1394\fR(7D),
-\fBiec61883\fR(7I)
+\fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(7), \fBhci1394\fR(4D),
+\fBiec61883\fR(4I)
 .sp
 .LP
 \fIIEEE Std 1394-1995 Standard for a High Performance Serial Bus\fR

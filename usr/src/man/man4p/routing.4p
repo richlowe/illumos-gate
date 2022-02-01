@@ -15,7 +15,7 @@ The network facilities provide general packet routing. The \fBrouting\fR
 interface described here can be used to maintain the system's IPv4 routing
 table. It has been maintained for compatibility with older applications. The
 recommended interface for maintaining the system's routing tables is the
-routing socket, described at \fBroute\fR(7P). The routing socket can be used to
+routing socket, described at \fBroute\fR(4P). The routing socket can be used to
 manipulate both the IPv4 and IPv6 routing tables of the system. Routing table
 maintenance may be implemented in applications processes.
 .sp
@@ -160,4 +160,4 @@ destination/subnet on any of the network interfaces.
 .SH SEE ALSO
 .sp
 .LP
-\fBroute\fR(1M), \fBioctl\fR(2), \fBroute\fR(7P)
+\fBroute\fR(8), \fBioctl\fR(2), \fBroute\fR(4P)

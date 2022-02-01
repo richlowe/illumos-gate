@@ -41,7 +41,7 @@ how to code for them.
 .LP
 An authorization is a unique string that represents a user's right to perform
 some operation or class of operations. Authorization definitions are stored in
-a database called \fBauth_attr\fR(4). For programming authorization checks,
+a database called \fBauth_attr\fR(5). For programming authorization checks,
 only the authorization name is significant.
 .sp
 .LP
@@ -77,8 +77,8 @@ int chkauthattr(const char *authname, const char *username);
 
 .sp
 .LP
-The \fBchkauthattr()\fR function checks the \fBpolicy.conf\fR(4),
-\fBuser_attr\fR(4), and \fBprof_attr\fR(4) databases in order for a match to
+The \fBchkauthattr()\fR function checks the \fBpolicy.conf\fR(5),
+\fBuser_attr\fR(5), and \fBprof_attr\fR(5) databases in order for a match to
 the given authorization.
 .sp
 .LP
@@ -231,8 +231,8 @@ fi
 .SH SEE ALSO
 .sp
 .LP
-\fBld.so.1\fR(1), \fBchkauthattr\fR(3SECDB), \fBauth_attr\fR(4),
-\fBpolicy.conf\fR(4), \fBprof_attr\fR(4), \fBuser_attr\fR(4)
+\fBld.so.1\fR(1), \fBchkauthattr\fR(3SECDB), \fBauth_attr\fR(5),
+\fBpolicy.conf\fR(5), \fBprof_attr\fR(5), \fBuser_attr\fR(5)
 .sp
 .LP
 \fISystem Administration Guide: Security Services\fR

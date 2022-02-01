@@ -313,7 +313,7 @@ whether or not it is \fBbinding\fR, \fBrequisite\fR, \fBrequired\fR,
 .SS "Utilities and Files"
 .LP
 The specific service names and module types for each service should be
-documented in the man page for that service. For instance, the \fBsshd\fR(1M)
+documented in the man page for that service. For instance, the \fBsshd\fR(8)
 man page lists all of the \fBPAM\fR service names and module types for the
 \fBsshd\fR command.
 .sp
@@ -421,7 +421,7 @@ OTHER   password include        unix_common
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -439,24 +439,24 @@ Interface Stability	See Below.
 The format is Stable. The contents has no stability attributes.
 .SH SEE ALSO
 .LP
-\fBlogin\fR(1), \fBpasswd\fR(1), \fBin.rlogind\fR(1M),
-\fBin.rshd\fR(1M), \fBin.telnetd\fR(1M), \fBin.uucpd\fR(1M), \fBinit\fR(1M),
-\fBsac\fR(1M), \fBttymon\fR(1M), \fBsu\fR(1M),
-\fBpam\fR(3PAM), \fBsyslog\fR(3C), \fBlibpam\fR(3LIB), \fBattributes\fR(5),
-\fBenviron\fR(5), \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_krb5\fR(5),
-\fBpam_passwd_auth\fR(5), \fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5),
-\fBpam_unix_session\fR(5)
+\fBlogin\fR(1), \fBpasswd\fR(1), \fBin.rlogind\fR(8),
+\fBin.rshd\fR(8), \fBin.telnetd\fR(8), \fBin.uucpd\fR(8), \fBinit\fR(8),
+\fBsac\fR(8), \fBttymon\fR(8), \fBsu\fR(8),
+\fBpam\fR(3PAM), \fBsyslog\fR(3C), \fBlibpam\fR(3LIB), \fBattributes\fR(7),
+\fBenviron\fR(7), \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_krb5\fR(7),
+\fBpam_passwd_auth\fR(7), \fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7),
+\fBpam_unix_session\fR(7)
 .SH NOTES
 .LP
 The \fBpam_unix\fR module is no longer supported. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).
 .sp
 .LP
 With the removal of the \fBpam_unix\fR module, the SunOS delivered PAM service
 modules no longer need or support the "\fBuse_first_pass\fR" or
 "\fBtry_first_pass\fR" options. This functionality is provided by stacking
-\fBpam_authtok_get\fR(5) above a module that requires a password.
+\fBpam_authtok_get\fR(7) above a module that requires a password.

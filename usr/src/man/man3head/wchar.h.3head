@@ -177,7 +177,7 @@ Inclusion of the <\fBwchar.h\fR> header can make visible all symbols from the
 headers <\fBctype.h\fR>,  <\fBstring.h\fR>, <\fBstdarg.h\fR>, <\fBstddef.h\fR>,
 <\fBstdio.h\fR>, <\fBstdlib.h\fR>, and <\fBtime.h\fR>.
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 .TS
 box;
@@ -207,5 +207,5 @@ Interface Stability	Standard
 \fBwmemchr\fR(3C), \fBwmemcmp\fR(3C), \fBwmemcpy\fR(3C), \fBwmemmove\fR(3C),
 \fBwmemset\fR(3C), \fBstdarg\fR(3EXT), \fBstddef.h\fR(3HEAD),
 \fBstdio.h\fR(3HEAD), \fBstdlib.h\fR(3HEAD), \fBstring.h\fR(3HEAD),
-\fBtime.h\fR(3HEAD), \fBwctype.h\fR(3HEAD), \fBattributes\fR(5),
-\fBstandards\fR(5)
+\fBtime.h\fR(3HEAD), \fBwctype.h\fR(3HEAD), \fBattributes\fR(7),
+\fBstandards\fR(7)

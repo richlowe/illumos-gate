@@ -17,7 +17,7 @@ audit_event \- audit event definition and class mapping
 \fB/etc/security/audit_event\fR is a user-configurable ASCII system file that
 stores event definitions used in the audit system. As part of this definition,
 each event is mapped to one or more of the audit classes defined in
-\fBaudit_class\fR(4).
+\fBaudit_class\fR(5).
 Programs can use the \fBgetauevent\fR(3BSM) routines to access audit
 event information.
 .sp
@@ -141,7 +141,7 @@ The following is an example of some \fBaudit_event\fR file entries:
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -168,4 +168,4 @@ The file format stability is Committed. The file content is Uncommitted.
 
 .SH SEE ALSO
 .LP
-\fBgetauevent\fR(3BSM), \fBaudit_class\fR(4)
+\fBgetauevent\fR(3BSM), \fBaudit_class\fR(5)

@@ -17,8 +17,8 @@ rmtab \- remote mounted file system table
 .sp
 .LP
 \fBrmtab\fR contains a table of filesystems that are remotely mounted by
-\fBNFS\fR clients. This file is maintained by \fBmountd\fR(1M), the mount
-daemon. The data in this file should be obtained only from  \fBmountd\fR(1M)
+\fBNFS\fR clients. This file is maintained by \fBmountd\fR(8), the mount
+daemon. The data in this file should be obtained only from  \fBmountd\fR(8)
 using the \fBMOUNTPROC_DUMP\fR remote procedure call.
 .sp
 .LP
@@ -38,7 +38,7 @@ mount request and deletes the appropriate entries for an unmount request.
 .sp
 .LP
 Lines beginning with a hash (' \fB#\fR') are commented out. These lines are
-removed from the file by \fBmountd\fR(1M) when it first starts up. Stale
+removed from the file by \fBmountd\fR(8) when it first starts up. Stale
 entries may accumulate for clients that crash without sending an unmount
 request.
 .SH FILES
@@ -54,4 +54,4 @@ request.
 .SH SEE ALSO
 .sp
 .LP
-\fBmountd\fR(1M), \fBshowmount\fR(1M)
+\fBmountd\fR(8), \fBshowmount\fR(8)

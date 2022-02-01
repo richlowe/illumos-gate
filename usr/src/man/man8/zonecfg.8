@@ -59,7 +59,7 @@ global zone.
 .sp
 .LP
 In the following text, "rctl" is used as an abbreviation for "resource
-control". See \fBresource_controls\fR(5).
+control". See \fBresource_controls\fR(7).
 .sp
 .LP
 Every zone is configured with an associated brand. The brand determines the
@@ -68,7 +68,7 @@ the zone when it is installed, boots, or is shutdown. Once a zone has been
 installed the brand cannot be changed. The default brand is determined by the
 installed distribution in the global zone. Some brands do not support all of
 the \fBzonecfg\fR properties and resources. See the brand-specific man page for
-more details on each brand. For an overview of brands, see the \fBbrands\fR(5)
+more details on each brand. For an overview of brands, see the \fBbrands\fR(7)
 man page.
 .SS "Resources"
 The following resource types are supported:
@@ -504,7 +504,7 @@ list syntax. That is, "foo" is equivalent to "[foo]". A list can be empty
 .sp
 .LP
 In interpreting property values, \fBzonecfg\fR accepts regular expressions as
-specified in \fBfnmatch\fR(5). See \fBEXAMPLES\fR.
+specified in \fBfnmatch\fR(7). See \fBEXAMPLES\fR.
 .sp
 .LP
 The property types are described as follows:
@@ -548,7 +548,7 @@ regardless of the setting of this property. You enable the zones service with a
 .sp
 
 Replace \fBenable\fR with \fBdisable\fR to disable the zones service. See
-\fBsvcadm\fR(1M).
+\fBsvcadm\fR(8).
 .RE
 
 .sp
@@ -560,7 +560,7 @@ Replace \fBenable\fR with \fBdisable\fR to disable the zones service. See
 .RS 4n
 Arguments (options) to be passed to the zone bootup, unless options are
 supplied to the "\fBzoneadm boot\fR" command, in which case those take
-precedence. The valid arguments are described in \fBzoneadm\fR(1M).
+precedence. The valid arguments are described in \fBzoneadm\fR(8).
 .RE
 
 .sp
@@ -588,23 +588,23 @@ preceding their names with a dash (-) or an exclamation point (!). The special
 privilege string "zone" is not supported in this context. If the special string
 "default" occurs as the first token in the property, it expands into a safe set
 of privileges that preserve the resource and security isolation described in
-\fBzones\fR(5). A missing or empty property is equivalent to this same set of
+\fBzones\fR(7). A missing or empty property is equivalent to this same set of
 safe privileges.
 .sp
 The system administrator must take extreme care when configuring privileges for
 a zone. Some privileges cannot be excluded through this mechanism as they are
 required in order to boot a zone. In addition, there are certain privileges
 which cannot be given to a zone as doing so would allow processes inside a zone
-to unduly affect processes in other zones. \fBzoneadm\fR(1M) indicates when an
+to unduly affect processes in other zones. \fBzoneadm\fR(8) indicates when an
 invalid privilege has been added or removed from a zone's privilege set when an
 attempt is made to either "boot" or "ready" the zone.
 .sp
-See \fBprivileges\fR(5) for a description of privileges. The command "\fBppriv
+See \fBprivileges\fR(7) for a description of privileges. The command "\fBppriv
 -l\fR" (see \fBppriv\fR(1)) produces a list of all Solaris privileges. You can
 specify privileges as they are displayed by \fBppriv\fR. In
-\fBprivileges\fR(5), privileges are listed in the form
+\fBprivileges\fR(7), privileges are listed in the form
 PRIV_\fIprivilege_name\fR. For example, the privilege \fIsys_time\fR, as you
-would specify it in this property, is listed in \fBprivileges\fR(5) as
+would specify it in this property, is listed in \fBprivileges\fR(7) as
 \fBPRIV_SYS_TIME\fR.
 .RE
 
@@ -653,7 +653,7 @@ uppercase and lowercase hexadecimal digits are acceptable.
 .sp .6
 .RS 4n
 Values needed to determine how, where, and so forth to mount file systems. See
-\fBmount\fR(1M), \fBmount\fR(2), \fBfsck\fR(1M), and \fBvfstab\fR(4).
+\fBmount\fR(8), \fBmount\fR(2), \fBfsck\fR(8), and \fBvfstab\fR(5).
 .RE
 
 .sp
@@ -726,7 +726,7 @@ Device name to match.
 .sp .6
 .RS 4n
 The name and \fIpriv\fR/\fIlimit\fR/\fIaction\fR triple of a resource control.
-See \fBprctl\fR(1) and \fBrctladm\fR(1M). The preferred way to set rctl values
+See \fBprctl\fR(1) and \fBrctladm\fR(8). The preferred way to set rctl values
 is to use the global property name associated with a specific rctl.
 .RE
 
@@ -750,7 +750,7 @@ that type. \fBuint\fR means unsigned, that is, a non-negative integer.
 .sp .6
 .RS 4n
 The name of a \fBZFS\fR dataset to be accessed from within the zone. See
-\fBzfs\fR(1M).
+\fBzfs\fR(8).
 .RE
 
 .sp
@@ -879,11 +879,11 @@ Under any other conditions, the system default scheduling class is used.
 .sp .6
 .RS 4n
 The number of CPUs that should be assigned for this zone's exclusive use. The
-zone will create a pool and processor set when it boots. See \fBpooladm\fR(1M)
-and \fBpoolcfg\fR(1M) for more information on resource pools. The \fBncpu\fR
+zone will create a pool and processor set when it boots. See \fBpooladm\fR(8)
+and \fBpoolcfg\fR(8) for more information on resource pools. The \fBncpu\fR
 property can specify a single value or a range (for example, 1-4) of
 processors. The \fBimportance\fR property is optional; if set, it will specify
-the \fBpset.importance\fR value for use by \fBpoold\fR(1M). If this resource is
+the \fBpset.importance\fR value for use by \fBpoold\fR(8). If this resource is
 used, there must be enough free processors to allocate to this zone when it
 boots or the zone will not boot. The processors assigned to this zone will not
 be available for the use of the global zone or other zones. This resource is
@@ -903,7 +903,7 @@ be applied to the value for each of these numbers (for example, 1M is one
 megabyte). Each of these properties is optional but at least one property must
 be set when adding this resource. Only a single instance of this resource can
 be added to the zone. The \fBphysical\fR property sets the \fBmax-rss\fR for
-this zone. This will be enforced by \fBrcapd\fR(1M) running in the global zone.
+this zone. This will be enforced by \fBrcapd\fR(8) running in the global zone.
 The \fBswap\fR property is the preferred way to set the \fBzone.max-swap\fR
 rctl. The \fBlocked\fR property is the preferred way to set the
 \fBzone.max-locked-memory\fR rctl.
@@ -926,7 +926,7 @@ have their own caps, the minimum value takes precedence.
 .sp
 The \fBcapped-cpu\fR property is an alias for \fBzone.cpu-cap\fR resource
 control and is related to the \fBzone.cpu-cap\fR resource control. See
-\fBresource_controls\fR(5).
+\fBresource_controls\fR(7).
 .RE
 
 .sp
@@ -966,7 +966,7 @@ a new zone using this zone as a clone source.
 .sp .6
 .RS 4n
 A comma-separated list of additional filesystems that may be mounted within
-the zone; for example "ufs,pcfs". By default, only hsfs(7fs) and network
+the zone; for example "ufs,pcfs". By default, only hsfs(4FS) and network
 filesystems can be mounted. If the first entry in the list is "-" then
 that disables all of the default filesystems. If any filesystems are listed
 after "-" then only those filesystems can be mounted.
@@ -1061,11 +1061,11 @@ kernel statistics for all active CPU caps:
 
 .sp
 .LP
-A \fBkstat\fR(1M) command running in a zone displays only CPU caps relevant for
+A \fBkstat\fR(8) command running in a zone displays only CPU caps relevant for
 that zone and for projects in that zone. See \fBEXAMPLES\fR.
 .sp
 .LP
-The following are cap-related arguments for use with \fBkstat\fR(1M):
+The following are cap-related arguments for use with \fBkstat\fR(8):
 .sp
 .ne 2
 .na
@@ -1099,7 +1099,7 @@ project or zone identifier.
 
 .sp
 .LP
-The following fields are displayed in response to a \fBkstat\fR(1M) command
+The following fields are displayed in response to a \fBkstat\fR(8) command
 requesting statistics for all CPU caps.
 .sp
 .ne 2
@@ -1329,7 +1329,7 @@ Use the \fB-a\fR \fIpath\fR option to facilitate configuring a detached zone on
 a new host. The \fIpath\fR parameter is the zonepath location of a detached
 zone that has been moved on to this new host. Once the detached zone is
 configured, it should be installed using the "\fBzoneadm attach\fR" command
-(see \fBzoneadm\fR(1M)). All validation of the new zone happens during the
+(see \fBzoneadm\fR(8)). All validation of the new zone happens during the
 \fBattach\fR process, not during zone configuration.
 .sp
 Use the \fB-b\fR option to create a blank configuration. Without arguments,
@@ -1587,7 +1587,7 @@ other zones configured on the system.
 .sp
 .LP
 The IP addresses and routing should be configured inside the new zone using
-the normal networking administration tools such as \fBipadm\fR(1M).
+the normal networking administration tools such as \fBipadm\fR(8).
 
 .sp
 .in +2
@@ -1628,8 +1628,8 @@ zonecfg:myzone> \fBexit\fR
 
 .sp
 .LP
-For more information about resource pools, see \fBpooladm\fR(1M) and
-\fBpoolcfg\fR(1M).
+For more information about resource pools, see \fBpooladm\fR(8) and
+\fBpoolcfg\fR(8).
 
 .LP
 \fBExample 5 \fRChanging the Name of a Zone
@@ -1933,7 +1933,7 @@ Invalid usage.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1947,13 +1947,13 @@ Interface Stability	Volatile
 .TE
 
 .SH SEE ALSO
-\fBppriv\fR(1), \fBprctl\fR(1), \fBzlogin\fR(1), \fBkstat\fR(1M),
-\fBmount\fR(1M), \fBpooladm\fR(1M), \fBpoolcfg\fR(1M), \fBpoold\fR(1M),
-\fBrcapd\fR(1M), \fBrctladm\fR(1M), \fBsvcadm\fR(1M), \fBipadm\fR(1M),
-\fBzfs\fR(1M), \fBzoneadm\fR(1M), \fBpriv_str_to_set\fR(3C),
-\fBkstat\fR(3KSTAT), \fBvfstab\fR(4), \fBattributes\fR(5), \fBbrands\fR(5),
-\fBfnmatch\fR(5), \fBlx\fR(5), \fBprivileges\fR(5), \fBresource_controls\fR(5),
-\fBsecurity-flags\fR(5), \fBzones\fR(5)
+\fBppriv\fR(1), \fBprctl\fR(1), \fBzlogin\fR(1), \fBkstat\fR(8),
+\fBmount\fR(8), \fBpooladm\fR(8), \fBpoolcfg\fR(8), \fBpoold\fR(8),
+\fBrcapd\fR(8), \fBrctladm\fR(8), \fBsvcadm\fR(8), \fBipadm\fR(8),
+\fBzfs\fR(8), \fBzoneadm\fR(8), \fBpriv_str_to_set\fR(3C),
+\fBkstat\fR(3KSTAT), \fBvfstab\fR(5), \fBattributes\fR(7), \fBbrands\fR(7),
+\fBfnmatch\fR(7), \fBlx\fR(7), \fBprivileges\fR(7), \fBresource_controls\fR(7),
+\fBsecurity-flags\fR(7), \fBzones\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Solaris Containers-Resource Management, and

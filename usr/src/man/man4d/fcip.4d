@@ -18,14 +18,14 @@ fcip \- IP/ARP over Fibre Channel datagram encapsulation driver
 The \fBfcip\fR driver is a Fibre Channel upper layer protocol module for
 encapsulating \fBIP\fR (IPv4) and \fBARP\fR datagrams over Fibre Channel. The
 \fBfcip\fR driver is  a  loadable,  clonable, \fBSTREAMS\fR driver supporting
-the connectionless Data Link Provider Interface, \fBdlpi\fR(7P) over any Sun
+the connectionless Data Link Provider Interface, \fBdlpi\fR(4P) over any Sun
 Fibre Channel transport layer-compliant host adapter.
 .sp
 .LP
 The \fBfcip\fR driver complies with the \fIRFC 2625\fR specification for
 encapsulating IP/ARP datagrams over Fibre Channel, and allows encapsulation of
 IPv4 only, as specified in  \fIRFC 2625\fR. The \fBfcip\fR  driver interfaces
-with the \fBfp\fR(7d) Sun Fibre Channel port driver.
+with the \fBfp\fR(4D) Sun Fibre Channel port driver.
 .SH APPLICATION PROGRAMMING INTERFACE
 .sp
 .LP
@@ -38,7 +38,7 @@ system.
 The \fBfcip\fR driver is a "style 2" Data Link Service Provider. All
 \fBM_PROTO\fR and \fBM_PCPROTO\fR type messages  are interpreted as \fBDLPI\fR
 primitives. Valid \fBDLPI\fR primitives are defined in \fB<sys/dlpi.h>\fR\&.
-Refer  to \fBdlpi\fR(7P) for  more information on \fBDLPI\fR primitives.
+Refer  to \fBdlpi\fR(4P) for  more information on \fBDLPI\fR primitives.
 .sp
 .LP
 An explicit \fBDL_ATTACH_REQ\fR message must be sent to  associate the opened
@@ -47,7 +47,7 @@ as an unsigned long data type and indicates the corresponding Fibre Channel
 port driver instance number. An error  (\fBDL_ERROR_ACK\fR) is  returned by the
 driver if the ppa field value does not correspond to a valid port driver
 instance number or if the Fibre Channel port is  not \fBONLINE\fR. Refer  to
-\fBfp\fR(7d) for more  details on the Fibre Channel port driver.
+\fBfp\fR(4D) for more  details on the Fibre Channel port driver.
 .sp
 .LP
 The values returned by the driver in the \fBDL_INFO_ACK\fR primitive in
@@ -201,7 +201,7 @@ fcip driver configuration file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -217,8 +217,8 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBnetstat\fR(1M), \fBprtconf\fR(1M), \fBdriver.conf\fR(4), \fBfp\fR(7d),
-\fBdlpi\fR(7P)
+\fBnetstat\fR(8), \fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBfp\fR(4D),
+\fBdlpi\fR(4P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

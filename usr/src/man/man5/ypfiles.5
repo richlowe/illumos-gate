@@ -40,7 +40,7 @@ N2L mode enables NIS clients to be supported in an LDAP environment.
 .sp
 .LP
 In N2L mode, the old style DBM files, NIS source files, and the
-\fBypmake\fR(1M) utility have to role. They are retained to enable easy
+\fBypmake\fR(8) utility have to role. They are retained to enable easy
 conversion back to the traditional mode, if required.
 .SS "Converting from N2L to Traditional NIS"
 .LP
@@ -54,7 +54,7 @@ files, \fB/var/yp/*/LDAP_*\fR can also be deleted.
 .LP
 If you want to run the system in traditional mode with information based on the
 DIT, then the NIS source files must be regenerated based on the N2L maps. To
-regenerate the NIS source files based on the N2L maps, run \fBypmap2src\fR(1M).
+regenerate the NIS source files based on the N2L maps, run \fBypmap2src\fR(8).
 .SH FILES
 .ne 2
 .na
@@ -149,6 +149,6 @@ NIS to LDAP mode map files
 
 .SH SEE ALSO
 .LP
-\fBldap\fR(1), \fBmakedbm\fR(1M), \fBypbind\fR(1M), \fBypinit\fR(1M),
-\fBypmake\fR(1M), \fBypmap2src\fR(1M), \fBypserv\fR(1M), \fBypxfrd\fR(1M),
+\fBldap\fR(1), \fBmakedbm\fR(8), \fBypbind\fR(8), \fBypinit\fR(8),
+\fBypmake\fR(8), \fBypmap2src\fR(8), \fBypserv\fR(8), \fBypxfrd\fR(8),
 \fBndbm\fR(3C), \fBypclnt\fR(3NSL)

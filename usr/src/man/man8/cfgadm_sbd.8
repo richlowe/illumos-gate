@@ -37,7 +37,7 @@ system boards. It also enables you to connect or disconnect a system board from
 a running system without having to reboot the system.
 .sp
 .LP
-The \fBcfgadm\fR command resides in \fB/usr/sbin\fR. See \fBcfgadm\fR(1M). The
+The \fBcfgadm\fR command resides in \fB/usr/sbin\fR. See \fBcfgadm\fR(8). The
 \fBcfgadm_sbd\fR plugin resides \fB/usr/platform/sun4u/lib/cfgadm\fR.
 .sp
 .LP
@@ -461,7 +461,7 @@ of a command with platform-specific options:
 .sp
 .LP
 This man page does not include the \fB-v\fR, \fB-a\fR, \fB-s\fR, or \fB-h\fR
-options for the \fBcfgadm\fR command. See \fBcfgadm\fR(1M) for descriptions of
+options for the \fBcfgadm\fR command. See \fBcfgadm\fR(8) for descriptions of
 those options. The following options are supported by the \fBcfgadm_sbd\fR
 plugin:
 .sp
@@ -485,7 +485,7 @@ and deletes the physical memory from the system memory pool. If any device is
 still in use, the \fBcfgadm\fR command fails and reports the failure to the
 user. You can retry the command as soon as the device is no longer busy. If a
 \fBCPU\fR is in use, you must ensure that it is off line before you proceed.
-See \fBpbind\fR(1M), \fBpsradm\fR(1M) and \fBpsrinfo\fR(1M).
+See \fBpbind\fR(8), \fBpsradm\fR(8) and \fBpsrinfo\fR(8).
 .sp
 The \fBunconfigure\fR function moves the physical memory to another system
 board before it deletes the memory from the board you want to unconfigure.
@@ -553,7 +553,7 @@ memory is initialized then adds the memory to the system memory pool. The
 has been completed successfully.
 .sp
 For I/O devices, you must use the \fBmount\fR and the \fBifconfig\fR commands
-before the devices can be used. See \fBifconfig\fR(1M) and \fBmount\fR(1M).
+before the devices can be used. See \fBifconfig\fR(8) and \fBmount\fR(8).
 .RE
 
 .sp
@@ -600,7 +600,7 @@ constraints of the hardware and operating system.
 .RS 15n
 Lists the state and condition of attachment points specified in the format
 controlled by the \fB-s\fR, \fB-v\fR, and \fB-a\fR options as specified in
-\fBcfgadm\fR(1M). The \fBcfgadm_sbd\fR plugin provides specific information in
+\fBcfgadm\fR(8). The \fBcfgadm_sbd\fR plugin provides specific information in
 the info field as described below. The format of this information might be
 altered by the \fB\fR\fB-o\fR\fB parsable\fR option.
 .sp
@@ -808,7 +808,7 @@ Returns the information in the \fBinfo\fR field as a boolean \fIname\fR or a
 set of \fBname=value\fR pairs, separated by a space character.
 .sp
 The \fB-o parsable\fR option can be used in conjunction with the \fB-s\fR
-option. See the \fBcfgadm\fR(1M) man page for more information about the
+option. See the \fBcfgadm\fR(8) man page for more information about the
 \fB-s\fR option.
 .RE
 
@@ -1060,7 +1060,7 @@ address=0x1000000 size=2097152 source=SB0::memory
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attribute:
+See \fBattributes\fR(7) for a description of the following attribute:
 .sp
 
 .sp
@@ -1079,9 +1079,9 @@ The interface stability is evolving. The output stability is unstable.
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm\fR(1M), \fBdevfsadm\fR(1M), \fBifconfig\fR(1M), \fBmount\fR(1M),
-\fBpbind\fR(1M), \fBpsradm\fR(1M), \fBpsrinfo\fR(1M),
-\fBconfig_admin\fR(3CFGADM), \fBattributes\fR(5)
+\fBcfgadm\fR(8), \fBdevfsadm\fR(8), \fBifconfig\fR(8), \fBmount\fR(8),
+\fBpbind\fR(8), \fBpsradm\fR(8), \fBpsrinfo\fR(8),
+\fBconfig_admin\fR(3CFGADM), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

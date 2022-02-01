@@ -13,9 +13,9 @@ The \fBiscsi\fR driver is a software initiator that transports SCSI commands
 over TCP/IP as described in \fIRFC 3720\fR.
 .sp
 .LP
-The initiator driver is administered through \fBiscsiadm\fR(1M). The
+The initiator driver is administered through \fBiscsiadm\fR(8). The
 \fBiscsi\fR initiator service is managed by the service management facility,
-\fBsmf\fR(5), under the following FMRI:
+\fBsmf\fR(7), under the following FMRI:
 .sp
 .in +2
 .nf
@@ -27,7 +27,7 @@ svc:/network/iscsi/initiator:default
 .sp
 .LP
 The \fBiscsi\fR initiator acts as a host adapter driver that attaches the
-appropriate target driver, for example, \fBsd\fR(7D) for disks, or \fBst\fR(7D)
+appropriate target driver, for example, \fBsd\fR(4D) for disks, or \fBst\fR(4D)
 for tapes) for devices it discovers. See the \fISystem Administration Guide:
 Devices and File Systems\fR for more information.
 .sp
@@ -37,10 +37,10 @@ start the discovery and enumeration of iSCSI devices during boot, but it
 doesn't guarantee the success of discovery for certain iSCSI devices. If the
 service is disabled, \fBiscsi\fR driver stops the discovery and enumeration of
 iSCSI devices and also tries to offline all existing iSCSI devices.
-\fBiscsiadm\fR(1M) works only when the service is enabled.
+\fBiscsiadm\fR(8) works only when the service is enabled.
 .sp
 .LP
-iSCSI \fBboot\fR(1M) is not affected by the status of the \fBiscsi\fR initiator
+iSCSI \fBboot\fR(8) is not affected by the status of the \fBiscsi\fR initiator
 service.
 .SH FILES
 .sp
@@ -91,8 +91,8 @@ Driver configuration file
 .SH SEE ALSO
 .sp
 .LP
-\fBiscsiadm\fR(1M), \fBattributes\fR(5), \fBsmf\fR(5), \fBsd\fR(7D),
-\fBst\fR(7D)
+\fBiscsiadm\fR(8), \fBattributes\fR(7), \fBsmf\fR(7), \fBsd\fR(4D),
+\fBst\fR(4D)
 .sp
 .LP
 \fIRFC 3720 Internet Small Computer Systems Interface (iSCSI)\fR

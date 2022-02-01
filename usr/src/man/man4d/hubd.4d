@@ -24,7 +24,7 @@ switching.
 When a device is attached to a hub port, the \fBhubd\fR driver enumerates the
 device by determining its type and assigning an address to it. For
 multi-configuration devices, \fBhubd\fR sets the preferred configuration (refer
-to \fBcfgadm_usb\fR(1M) to select a configuration). The \fBhubd\fR driver
+to \fBcfgadm_usb\fR(8) to select a configuration). The \fBhubd\fR driver
 attaches a driver to the device if one is available for the default or selected
 configuration. When the device is disconnected from the hub port, the
 \fBhubd\fR driver offlines any driver instance attached to the device.
@@ -57,7 +57,7 @@ configuration. When the device is disconnected from the hub port, the
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -72,7 +72,7 @@ Architecture	SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBcfgadm_usb\fR(1M), \fBattributes\fR(5), \fBusba\fR(7D)
+\fBcfgadm_usb\fR(8), \fBattributes\fR(7), \fBusba\fR(4D)
 .sp
 .LP
 \fIWriting Device Drivers\fR

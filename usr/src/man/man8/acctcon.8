@@ -79,7 +79,7 @@ sessions charged, number of logins, and number of logoffs.  This file helps
 track line usage, identify bad lines, and find software and hardware oddities.
 Hangup, termination of \fBlogin\fR(1) and termination of the login shell each
 generate logoff records, so that the number of logoffs is often three to four
-times the number of sessions. See \fB init\fR(1M) and \fButmpx\fR(4).
+times the number of sessions. See \fBinit\fR(8) and \fButmpx\fR(5).
 .RE
 
 .sp
@@ -133,10 +133,10 @@ History of user access and administration information
 .SH SEE ALSO
 .sp
 .LP
-\fBacctcom\fR(1), \fBlogin\fR(1), \fBacct\fR(1M), \fBacctcms\fR(1M),
-\fBacctmerg\fR(1M), \fBacctprc\fR(1M), \fBacctsh\fR(1M), \fBfwtmp\fR(1M),
-\fBinit\fR(1M), \fBrunacct\fR(1M), \fBacct\fR(2), \fBacct.h\fR(3HEAD),
-\fButmpx\fR(4), \fBattributes\fR(5)
+\fBacctcom\fR(1), \fBlogin\fR(1), \fBacct\fR(8), \fBacctcms\fR(8),
+\fBacctmerg\fR(8), \fBacctprc\fR(8), \fBacctsh\fR(8), \fBfwtmp\fR(8),
+\fBinit\fR(8), \fBrunacct\fR(8), \fBacct\fR(2), \fBacct.h\fR(3HEAD),
+\fButmpx\fR(5), \fBattributes\fR(7)
 .sp
 .LP
 \fI\fR
@@ -144,7 +144,7 @@ History of user access and administration information
 .sp
 .LP
 The line usage report is confused by date changes. Use \fBwtmpfix\fR (see
-\fBfwtmp\fR(1M)), with the \fB/var/adm/wtmpx\fR file as an argument, to correct
+\fBfwtmp\fR(8)), with the \fB/var/adm/wtmpx\fR file as an argument, to correct
 this situation.
 .sp
 .LP

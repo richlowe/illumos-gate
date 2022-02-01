@@ -16,9 +16,9 @@ modunload \- unload a module
 .sp
 .LP
 \fBmodunload\fR unloads a loadable module from the running system. The
-\fImodule_id\fR is the \fBID\fR of the module as shown by \fBmodinfo\fR(1M). If
+\fImodule_id\fR is the \fBID\fR of the module as shown by \fBmodinfo\fR(8). If
 \fBID\fR is \fB0\fR, all modules that were autoloaded which are unloadable, are
-unloaded. Modules loaded by \fBmodload\fR(1M) are not affected.
+unloaded. Modules loaded by \fBmodload\fR(8) are not affected.
 .SH OPTIONS
 .sp
 .LP
@@ -54,7 +54,7 @@ Specify the module to be unloaded.
 .SH SEE ALSO
 .sp
 .LP
-\fBmodinfo\fR(1M), \fBmodload\fR(1M), \fBupdate_drv\fR(1M), \fBattributes\fR(5)
+\fBmodinfo\fR(8), \fBmodload\fR(8), \fBupdate_drv\fR(8), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
@@ -63,4 +63,4 @@ to reread the associated driver configuration file. While this works in the
 current Solaris release, it is not the supported way to reread the
 configuration file and is not guaranteed to work in future releases. The
 supported way for rereading driver configuration file is through the
-\fBupdate_drv\fR(1M) command.
+\fBupdate_drv\fR(8) command.

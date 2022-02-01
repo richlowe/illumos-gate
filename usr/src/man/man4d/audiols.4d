@@ -40,7 +40,7 @@ This device is capable of 5.1 surround sound.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a descriptions of the following attributes:
+See \fBattributes\fR(7) for a descriptions of the following attributes:
 .sp
 
 .sp
@@ -56,5 +56,5 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2), \fBattributes\fR(5), \fBaudio\fR(7I), \fBmixer\fR(7I),
-\fBstreamio\fR(7I)
+\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBmixer\fR(4I),
+\fBstreamio\fR(4I)

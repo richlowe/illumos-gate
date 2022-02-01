@@ -60,7 +60,7 @@ Services\fR
 .sp
 .LP
 When native \fBPF_NCA\fR socket support does not exist in the web server, the
-\fBncad_addr\fR(4) interface must be used to provide NCA support in that web
+\fBncad_addr\fR(5) interface must be used to provide NCA support in that web
 server.
 .sp
 .LP
@@ -69,7 +69,7 @@ processes while running \fBNCA\fR might cause undesirable behavior.
 .sp
 .LP
 \fBNCA\fR supports the logging of in-kernel cache hits. See
-\fBncalogd.conf\fR(4). \fBNCA\fR stores logs in a binary format. Use the
+\fBncalogd.conf\fR(5). \fBNCA\fR stores logs in a binary format. Use the
 \fBncab2clf\fR(1) utility to convert the log from a binary format to the Common
 Log File format.
 .SH FILES
@@ -131,7 +131,7 @@ match with entries in \fB/etc/hostname.{}{0-9}\fR for \fBNCA\fR to function.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -152,9 +152,9 @@ Interface Stability	Committed
 \fBbind\fR(3SOCKET), \fBconnect\fR(3SOCKET), \fBdoor_bind\fR(3C),
 \fBdoor_call\fR(3C), \fBdoor_create\fR(3C), \fBgetsockopt\fR(3SOCKET),
 \fBlisten\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET), \fBshutdown\fR(3SOCKET),
-\fBsocket.h\fR(3HEAD), \fBsocket\fR(3SOCKET), \fBncad_addr\fR(4),
-\fBnca.if\fR(4), \fBncakmod.conf\fR(4), \fBncaport.conf\fR(4),
-\fBncalogd.conf\fR(4), \fBattributes\fR(5)
+\fBsocket.h\fR(3HEAD), \fBsocket\fR(3SOCKET), \fBncad_addr\fR(5),
+\fBnca.if\fR(5), \fBncakmod.conf\fR(5), \fBncaport.conf\fR(5),
+\fBncalogd.conf\fR(5), \fBattributes\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR

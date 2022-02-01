@@ -16,12 +16,12 @@ processes most typically dispatched by \fBinit\fR are daemons.
 .LP
 It is no longer necessary to edit the \fB/etc/inittab\fR file directly.
 Administrators should use the Solaris Service Management Facility (SMF) to
-define services instead. Refer to \fBsmf\fR(5) and the \fISystem Administration
+define services instead. Refer to \fBsmf\fR(7) and the \fISystem Administration
 Guide: Basic Administration\fR for more information on SMF.
 .sp
 .LP
-To modify parameters passed to \fBttymon\fR(1M), use \fBsvccfg\fR(1M) to modify
-the SMF repository. See \fBttymon\fR(1M) for details on the available SMF
+To modify parameters passed to \fBttymon\fR(8), use \fBsvccfg\fR(8) to modify
+the SMF repository. See \fBttymon\fR(8) for details on the available SMF
 properties.
 .sp
 .LP
@@ -75,7 +75,7 @@ There are three other values, \fBa\fR, \fBb\fR and \fBc\fR, which can appear in
 the \fIrstate\fR field, even though they are not true run levels. Entries which
 have these characters in the \fIrstate\fR field are processed only when an
 \fBinit\fR or \fBtelinit\fR process requests them to be run (regardless of the
-current run level of the system). See \fBinit\fR(1M). These differ from run
+current run level of the system). See \fBinit\fR(8). These differ from run
 levels in that \fBinit\fR can never enter run level \fBa\fR, \fBb\fR or
 \fBc\fR. Also, a request for the execution of any of these processes does not
 change the current run level. Furthermore, a process started by an \fBa\fR,
@@ -230,9 +230,9 @@ with \fBexec\fR and passed to a forked \fBsh\fR as \fBsh \(mic 'exec\fR
 .SH SEE ALSO
 .sp
 .LP
-\fBsh\fR(1), \fBwho\fR(1), \fBinit\fR(1M), \fBsvcadm\fR(1M),
-\fBsvc.startd\fR(1M), \fBttymon\fR(1M), \fBexec\fR(2), \fBopen\fR(2),
-\fBsignal\fR(3C), \fBsmf\fR(5)
+\fBsh\fR(1), \fBwho\fR(1), \fBinit\fR(8), \fBsvcadm\fR(8),
+\fBsvc.startd\fR(8), \fBttymon\fR(8), \fBexec\fR(2), \fBopen\fR(2),
+\fBsignal\fR(3C), \fBsmf\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR
@@ -243,8 +243,8 @@ With the introduction of the service management facility, the system-provided
 \fB/etc/inittab\fR file is greatly reduced from previous releases.
 .sp
 .LP
-The \fBinitdefault\fR entry is not recognized in Solaris 10. See \fBsmf\fR(5)
-for information on \fBSMF\fR milestones, and \fBsvcadm\fR(1M), which describes
+The \fBinitdefault\fR entry is not recognized in Solaris 10. See \fBsmf\fR(7)
+for information on \fBSMF\fR milestones, and \fBsvcadm\fR(8), which describes
 the "\fBsvcadm\fR \fBmilestone\fR \fB-d\fR" command; this provides similar
 functionality to modifying the \fBinitdefault\fR entry in previous versions of
 the Solaris OS.

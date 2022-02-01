@@ -26,8 +26,8 @@ slave device. After both the master and slave have been opened, the user has
 two file descriptors which are end points of a full duplex connection composed
 of two streams automatically connected at the master and slave drivers. The
 user may then push modules onto either side of the stream pair. Unless compiled
-in XPG4v2 mode (see below), the consumer needs to push the \fBptem\fR(7M) and
-\fBldterm\fR(7M) modules onto the slave side of the pseudo-terminal subsystem
+in XPG4v2 mode (see below), the consumer needs to push the \fBptem\fR(4M) and
+\fBldterm\fR(4M) modules onto the slave side of the pseudo-terminal subsystem
 to get terminal semantics.
 .sp
 .LP
@@ -63,7 +63,7 @@ having to explicitly push any modules to achieve this). It also requires that
 .sp
 Experience has shown, however, that most software does not expect slave pty
 devices to operate in this manner and therefore this XPG4v2-compliant
-behaviour is only enabled in XPG4v2/SUS (see \fBstandards\fR(5)) mode.
+behaviour is only enabled in XPG4v2/SUS (see \fBstandards\fR(7)) mode.
 .SH EXAMPLES
 .in +2
 .nf
@@ -100,8 +100,8 @@ slave devices (M = 0 -> N-1)
 .RE
 
 .SH SEE ALSO
-\fBgrantpt\fR(3C), \fBptsname\fR(3C), \fBunlockpt\fR(3C), \fBldterm\fR(7M),
-\fBptm\fR(7D), \fBptem\fR(7M), \fBstandards\fR(5)
+\fBgrantpt\fR(3C), \fBptsname\fR(3C), \fBunlockpt\fR(3C), \fBldterm\fR(4M),
+\fBptm\fR(4D), \fBptem\fR(4M), \fBstandards\fR(7)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

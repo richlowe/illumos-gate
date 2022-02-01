@@ -64,7 +64,7 @@ For non-\fBinetd\fR services. The IANA name or RPC name, equivalent to the
 For non-\fBinetd\fR services. A boolean property where a \fBtrue\fR value
 indicates an RPC service, equivalent to the \fBinetd/isrpc\fR property. For RPC
 services, the value of \fBfirewall_context/name\fR is not an IANA name but is
-either an RPC program number or name. See \fBrpc\fR(4).
+either an RPC program number or name. See \fBrpc\fR(5).
 .RE
 
 .sp
@@ -106,7 +106,7 @@ installation of an updated service definition.
 A per-service property group, \fBfirewall_config\fR, stores the services'
 firewall policy configuration. Because \fBnetwork/ipfilter:default\fR is
 responsible for two firewall policies, the Global Default and Global Override
-system-wide policies (as explained in \fBipfilter\fR(5)), it has two property
+system-wide policies (as explained in \fBipfilter\fR(7)), it has two property
 groups, \fBfirewall_config_default\fR and \fBfirewall_config_override\fR, to
 store the respective system-wide policies.
 .sp
@@ -423,7 +423,7 @@ Initially, the system-wide policies are set to \fBnone\fR and network services'
 policies are set to \fBuse_global\fR. Enabling \fBnetwork/ipfilter\fR activates
 the firewall with an empty set of IP Filter rules, since system-wide policy is
 \fBnone\fR and all services inherit that policy. To configure a more
-restrictive policy, use \fBsvccfg\fR(1M) to modify network services and
+restrictive policy, use \fBsvccfg\fR(8) to modify network services and
 system-wide policies.
 .sp
 .LP
@@ -599,7 +599,7 @@ svc:/network/ntp:default
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -614,6 +614,6 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBsvcprop\fR(1), \fBsvcs\fR(1), \fBipf\fR(1M), \fBsvcadm\fR(1M),
-\fBsvccfg\fR(1M), \fBgetservbyname\fR(3SOCKET), \fBrpc\fR(4),
-\fBattributes\fR(5), \fBipfilter\fR(5), \fBsmf\fR(5)
+\fBsvcprop\fR(1), \fBsvcs\fR(1), \fBipf\fR(8), \fBsvcadm\fR(8),
+\fBsvccfg\fR(8), \fBgetservbyname\fR(3SOCKET), \fBrpc\fR(5),
+\fBattributes\fR(7), \fBipfilter\fR(7), \fBsmf\fR(7)

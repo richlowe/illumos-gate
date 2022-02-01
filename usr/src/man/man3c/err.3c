@@ -127,7 +127,7 @@ err(1, "%s", string);
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -149,4 +149,4 @@ These functions are safe to use in multithreaded applications as long as
 .SH SEE ALSO
 .LP
 \fBexit\fR(3C), \fBgetexecname\fR(3C), \fBsetlocale\fR(3C), \fBstrerror\fR(3C),
-\fBattributes\fR(5)
+\fBattributes\fR(7)

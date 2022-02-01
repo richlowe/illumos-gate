@@ -172,8 +172,8 @@ Major     Minor     Lastminor     Modules
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(1M), \fBttymon\fR(1M), \fBattributes\fR(5), \fBldterm\fR(7M),
-\fBsad\fR(7D), \fBstreamio\fR(7I), \fBttcompat\fR(7M)
+\fBdladm\fR(8), \fBttymon\fR(8), \fBattributes\fR(7), \fBldterm\fR(4M),
+\fBsad\fR(4D), \fBstreamio\fR(4I), \fBttcompat\fR(4M)
 .sp
 .LP
 \fI\fR
@@ -182,7 +182,7 @@ Major     Minor     Lastminor     Modules
 .LP
 The use of the \fBautopush\fR command is obsolete for networking data-links.
 The preferred method of configuring a list of automatically pushed STREAMS
-modules on a given networking data-link interface is the \fBdladm\fR(1M)
+modules on a given networking data-link interface is the \fBdladm\fR(8)
 \fBautopush\fR link property.
 .sp
 .LP
@@ -191,5 +191,5 @@ inadequate for networking devices. The granularity of the \fBautopush\fR
 command's configuration is driver-wide, and not per-interface as one might
 expect. Another reason not to use \fBautopush\fR is that administrators are
 more familiar with the names of their network interfaces than with device major
-and minor numbers. The \fBdladm\fR(1M) command allows the configuration using
+and minor numbers. The \fBdladm\fR(8) command allows the configuration using
 data-link interface names.

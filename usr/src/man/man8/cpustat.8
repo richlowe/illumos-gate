@@ -201,7 +201,7 @@ of \fBlibcpc\fR(3LIB). See \fBcpc\fR(3CPC).
 .LP
 The \fBcpustat\fR utility only monitors the \fBCPU\fRs that are accessible to
 it in the current processor set. Thus, several instances of the utility can be
-running on the \fBCPU\fRs in different processor sets. See \fBpsrset\fR(1M) for
+running on the \fBCPU\fRs in different processor sets. See \fBpsrset\fR(8) for
 more information about processor sets.
 .sp
 .LP
@@ -320,7 +320,7 @@ If a short interval is requested, \fBcpustat\fR might not be able to keep up
 with the desired sample rate. In this case, some samples might be dropped.
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -335,10 +335,10 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBcputrack\fR(1), \fBnawk\fR(1), \fBperl\fR(1), \fBiostat\fR(1M),
-\fBprstat\fR(1M), \fBpsrset\fR(1M), \fBvmstat\fR(1M), \fBcpc\fR(3CPC),
+\fBcputrack\fR(1), \fBnawk\fR(1), \fBperl\fR(1), \fBiostat\fR(8),
+\fBprstat\fR(8), \fBpsrset\fR(8), \fBvmstat\fR(8), \fBcpc\fR(3CPC),
 \fBcpc_open\fR(3CPC), \fBcpc_bind_cpu\fR(3CPC), \fBgethrtime\fR(3C),
-\fBstrtoll\fR(3C), \fBlibcpc\fR(3LIB), \fBattributes\fR(5)
+\fBstrtoll\fR(3C), \fBlibcpc\fR(3LIB), \fBattributes\fR(7)
 .SH NOTES
 .LP
 When \fBcpustat\fR is run on a Pentium 4 with HyperThreading enabled, a CPC set

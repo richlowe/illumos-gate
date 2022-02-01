@@ -43,7 +43,7 @@ routes.
 .LP
 IP forwarding and routing functions are also represented as services within the
 service management facility (SMF), and can be administered by means of
-\fBsvcadm\fR(1M) also, using the following fault management resource
+\fBsvcadm\fR(8) also, using the following fault management resource
 identifiers (FMRIs):
 .sp
 .in +2
@@ -107,7 +107,7 @@ Note -
 The root file system of any non-global zones must not be referenced with the
 \fB-R\fR option. Doing so might damage the global zone's file system, might
 compromise the security of the global zone, and might damage the non-global
-zone's file system. See \fBzones\fR(5).
+zone's file system. See \fBzones\fR(7).
 .RE
 .RE
 
@@ -317,7 +317,7 @@ packets to and from interfaces when appropriate. The SMF service associated
 with this configuration variable is \fBsvc:/network/routing/ipv4-forwarding\fR.
 This service will be enabled or disabled as appropriate when \fBrouteadm\fR is
 called with the \fBu\fR option. As an alternative, you can use
-\fBsvcadm\fR(1M). Services that require \fBipv4-forwarding\fR to be enabled
+\fBsvcadm\fR(8). Services that require \fBipv4-forwarding\fR to be enabled
 should specify a dependency on this service.
 .RE
 
@@ -330,10 +330,10 @@ should specify a dependency on this service.
 .RS 4n
 Determines whether an IPv4 routing daemon is run. The system default is
 \fBenabled\fR unless the \fB/etc/defaultrouter\fR file exists (see
-\fBdefaultrouter\fR(4)), in which case the default is \fBdisabled\fR. The value
+\fBdefaultrouter\fR(5)), in which case the default is \fBdisabled\fR. The value
 of this option reflects the state of all IPv4 routing services, such that if
 any IPv4 routing service is enabled, \fBipv4-routing\fR is enabled. This allows
-users to interact with routing services using \fBsvcadm\fR(1M), as well as
+users to interact with routing services using \fBsvcadm\fR(8), as well as
 through \fBrouteadm\fR. IPv4 routing services, specified by means of the
 \fBrouting-svcs\fR variable, will be prepared for enable on next boot when the
 user explicitly enables \fBipv4-routing\fR. The SMF routing daemon service for
@@ -354,7 +354,7 @@ and from interfaces when appropriate. If disabled, IP will not forward IPv6
 packets to and from interfaces when appropriate. The SMF service associated
 with this configuration variable is \fBsvc:/network/routing/ipv6-forwarding\fR.
 This service will be enabled or disabled as appropriate when \fBrouteadm\fR is
-called with the \fB-u\fR option, or \fBsvcadm\fR(1M) is used. Services that
+called with the \fB-u\fR option, or \fBsvcadm\fR(8) is used. Services that
 require \fBipv6-forwarding\fR to be enabled should specify a dependency on this
 service.
 .RE
@@ -370,7 +370,7 @@ Determines whether an IPv6 routing daemon is run. The system default is
 \fBdisabled\fR. The value of this option reflects the state of all IPv6 routing
 services, such that, if any IPv6 routing service is enabled, \fBipv6-routing\fR
 is enabled. This allows users to interact with routing services via
-\fBsvcadm\fR(1M) as well as through \fBrouteadm\fR. IPv6 routing services,
+\fBsvcadm\fR(8) as well as through \fBrouteadm\fR. IPv6 routing services,
 specified by means of the \fBrouting-svcs\fR variable, will be prepared for
 enable on next boot when the user explicitly enables \fBipv6-routing\fR. The
 SMF routing daemon service for \fBin.ripngd\fR
@@ -390,7 +390,7 @@ router's routing table with static routes.
 The forwarding settings are global settings. Each interface also has an
 \fBIFF_ROUTER\fR forwarding flag that determines whether packets can be
 forwarded to or from a particular interface. That flag can be independently
-controlled by means of \fBifconfig\fR(1M)'s router option. When the global
+controlled by means of \fBifconfig\fR(8)'s router option. When the global
 forwarding setting is changed (that is, \fB-u\fR is issued to change the value
 from \fBenabled\fR to \fBdisabled\fR or vice-versa), all interface flags in the
 system are changed simultaneously to reflect the new global policy. Interfaces
@@ -493,7 +493,7 @@ example# \fBrouteadm -e ipv4-routing -u\fR
 
 .sp
 .LP
-See \fBin.routed\fR(1M) for details of property names and how they relate to
+See \fBin.routed\fR(8) for details of property names and how they relate to
 daemon behavior.
 
 .SH EXIT STATUS
@@ -528,7 +528,7 @@ Parameters for IP forwarding and routing. (Not to be edited.)
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -543,5 +543,5 @@ Interface Stability	Stable
 
 .SH SEE ALSO
 .LP
-\fBifconfig\fR(1M), \fBin.routed\fR(1M), \fBsvcadm\fR(1M), \fBgateways\fR(4),
-\fBattributes\fR(5), \fBsmf\fR(5)
+\fBifconfig\fR(8), \fBin.routed\fR(8), \fBsvcadm\fR(8), \fBgateways\fR(5),
+\fBattributes\fR(7), \fBsmf\fR(7)

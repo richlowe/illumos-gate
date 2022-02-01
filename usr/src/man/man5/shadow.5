@@ -136,14 +136,14 @@ The encrypted password consists of at most \fBCRYPT_MAXCIPHERTEXTLEN\fR
 characters chosen from a 64-character alphabet (\fB\&.\fR, \fB/\fR,
 \fB0\(mi9\fR, \fBA\(miZ\fR, \fBa\(miz\fR). Two additional special characters,
 "$" and ",", can also be used and are defined in \fBcrypt\fR(3C). To update
-this file, use the \fBpasswd\fR(1), \fBuseradd\fR(1M), \fBusermod\fR(1M), or
-\fBuserdel\fR(1M) commands.
+this file, use the \fBpasswd\fR(1), \fBuseradd\fR(8), \fBusermod\fR(8), or
+\fBuserdel\fR(8) commands.
 .sp
 .LP
 In order to make system administration manageable, \fB/etc/shadow\fR entries
 should appear in exactly the same order as \fB/etc/passwd\fR entries; this
 includes ``+'' and ``-'' entries if the \fBcompat\fR source is being used (see
-\fBnsswitch.conf\fR(4)).
+\fBnsswitch.conf\fR(5)).
 .sp
 .LP
 Values for the various time-related fields are interpreted as Greenwich Mean
@@ -186,7 +186,7 @@ time of last login
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -201,19 +201,19 @@ Interface Stability	Stable
 
 .SH SEE ALSO
 .LP
-\fBlogin\fR(1), \fBpasswd\fR(1), \fBuseradd\fR(1M), \fBuserdel\fR(1M),
-\fBusermod\fR(1M), \fBstrtol\fR(3C), \fBcrypt\fR(3C), \fBcrypt_gensalt\fR(3C),
-\fBgetspnam\fR(3C), \fBputspent\fR(3C), \fBnsswitch.conf\fR(4),
-\fBpasswd\fR(4), \fBattributes\fR(5), \fBpam_unix_account\fR(5),
-\fBpam_unix_auth\fR(5)
+\fBlogin\fR(1), \fBpasswd\fR(1), \fBuseradd\fR(8), \fBuserdel\fR(8),
+\fBusermod\fR(8), \fBstrtol\fR(3C), \fBcrypt\fR(3C), \fBcrypt_gensalt\fR(3C),
+\fBgetspnam\fR(3C), \fBputspent\fR(3C), \fBnsswitch.conf\fR(5),
+\fBpasswd\fR(5), \fBattributes\fR(7), \fBpam_unix_account\fR(7),
+\fBpam_unix_auth\fR(7)
 .SH NOTES
 .LP
 If password aging is turned on in any name service the \fIpasswd:\fR line in
 the \fB/etc/nsswitch.conf\fR file must have a format specified in the
-\fBnsswitch.conf\fR(4) man page.
+\fBnsswitch.conf\fR(5) man page.
 .sp
 .LP
 If the \fB/etc/nsswitch.conf\fR passwd policy is not in one of the supported
 formats, logins will not be allowed upon password expiration, because the
 software does not know how to handle password updates under these conditions.
-See \fBnsswitch.conf\fR(4) for additional information.
+See \fBnsswitch.conf\fR(5) for additional information.

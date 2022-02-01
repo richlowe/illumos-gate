@@ -81,7 +81,7 @@ None.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -100,4 +100,4 @@ MT-Level	Unsafe
 .sp
 .LP
 \fBdoupdate\fR(3XCURSES), \fBinitscr\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBslk_attroff\fR(3XCURSES), \fBattributes\fR(5), \fBstandards\fR(5)
+\fBslk_attroff\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)

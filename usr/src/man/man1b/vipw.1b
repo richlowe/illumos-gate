@@ -46,4 +46,4 @@ for root.
 .SH SEE ALSO
 .sp
 .LP
-\fBpasswd\fR(1), \fBvi\fR(1), \fBpasswd\fR(4), \fBattributes\fR(5)
+\fBpasswd\fR(1), \fBvi\fR(1), \fBpasswd\fR(5), \fBattributes\fR(7)

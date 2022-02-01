@@ -21,7 +21,7 @@ Specification, Volume 1: Release 1.2.1\fR.
 \fBIBDMA\fR responds to incoming Device Management Datagrams (MADS) by
 enumerating available target-side Infiniband services. Initiator systems can
 use this service to discover target-side resources such as the virtual I/O
-Controllers exported by \fBsrpt\fR(7D).
+Controllers exported by \fBsrpt\fR(4D).
 .SH FILES
 .sp
 .ne 2
@@ -53,8 +53,8 @@ Controllers exported by \fBsrpt\fR(7D).
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(5), \fBib\fR(7D), \fBibdm\fR(7D), \fBibtl\fR(7D),
-\fBsrpt\fR(7D)
+\fBattributes\fR(7), \fBib\fR(4D), \fBibdm\fR(4D), \fBibtl\fR(4D),
+\fBsrpt\fR(4D)
 .sp
 .LP
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.2.1\fR

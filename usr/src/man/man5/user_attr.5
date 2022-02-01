@@ -21,8 +21,8 @@ routines to gain access to this information.
 .sp
 .LP
 The search order for multiple \fBuser_attr\fR sources is specified in the
-\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(4) man
-page. The search order follows that for \fBpasswd\fR(4).
+\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(5) man
+page. The search order follows that for \fBpasswd\fR(5).
 .sp
 .LP
 Each entry in the \fBuser_attr\fR databases consists of a single line with five
@@ -42,7 +42,7 @@ fields separated by colons (\fB:\fR). Line continuations using the backslash
 .ad
 .sp .6
 .RS 4n
-The name of the user as specified in the \fBpasswd\fR(4) database.
+The name of the user as specified in the \fBpasswd\fR(5) database.
 .RE
 
 .sp
@@ -94,7 +94,7 @@ system:
 .sp .6
 .RS 4n
 Specifies a comma-separated list of authorization names chosen from those names
-defined in the \fBauth_attr\fR(4) database. Authorization names may be
+defined in the \fBauth_attr\fR(5) database. Authorization names may be
 specified using the asterisk (\fB*\fR) character as a wildcard. For example,
 \fBsolaris.printer.*\fR means all of Sun's printer authorizations.
 .RE
@@ -107,9 +107,9 @@ specified using the asterisk (\fB*\fR) character as a wildcard. For example,
 .sp .6
 .RS 4n
 Contains an ordered, comma-separated list of profile names chosen from
-\fBprof_attr\fR(4). Profiles are enforced by the profile shells, \fBpfcsh\fR,
+\fBprof_attr\fR(5). Profiles are enforced by the profile shells, \fBpfcsh\fR,
 \fBpfksh\fR, and \fBpfsh\fR. See \fBpfsh\fR(1). A default profile is assigned
-in \fB/etc/security/policy.conf\fR (see \fBpolicy.conf\fR(4)). If no profiles
+in \fB/etc/security/policy.conf\fR (see \fBpolicy.conf\fR(5)). If no profiles
 are assigned, the profile shells do not allow the user to execute any commands.
 .RE
 
@@ -159,7 +159,7 @@ the user has logged in.
 .ad
 .sp .6
 .RS 4n
-Can be assigned a name of one project from the \fBproject\fR(4) database to be
+Can be assigned a name of one project from the \fBproject\fR(5) database to be
 used as a default project to place the user in at login time. For more
 information, see \fBgetdefaultproj\fR(3PROJECT).
 .RE
@@ -183,7 +183,7 @@ See "Privileges Keywords," below.
 .sp .6
 .RS 4n
 The maximum set of privileges a user or any process started by the user,
-whether through \fBsu\fR(1M) or any other means, can obtain. The system
+whether through \fBsu\fR(8) or any other means, can obtain. The system
 administrator must take extreme care when removing privileges from the limit
 set. Removing any basic privilege has the ability of crippling all
 applications; removing any other privilege can cause many or all applications
@@ -215,8 +215,8 @@ Trusted Extensions feature:
 .RS 4n
 Contains the maximum label at which the user can operate. If unspecified, in
 the Defense Intelligence Agency (\fBDIA\fR) encodings scheme, the default is
-specified in \fBlabel_encodings\fR(4) (see \fBlabel_encodings\fR(4) and
-\fBlabels\fR(5) in the \fISolaris Trusted Extensions Reference Manual\fR).
+specified in \fBlabel_encodings\fR(5) (see \fBlabel_encodings\fR(5) and
+\fBlabels\fR(7) in the \fISolaris Trusted Extensions Reference Manual\fR).
 .RE
 
 .sp
@@ -228,7 +228,7 @@ specified in \fBlabel_encodings\fR(4) (see \fBlabel_encodings\fR(4) and
 .RS 4n
 Contains the minimum label at which the user can log in. If unspecified, in the
 \fBDIA\fR encodings scheme, the default is specified in
-\fBlabel_encodings\fR(4) (see \fBlabel_encodings\fR(4) and \fBlabels\fR(5) in
+\fBlabel_encodings\fR(5) (see \fBlabel_encodings\fR(5) and \fBlabels\fR(7) in
 the \fISolaris Trusted Extensions Reference Manual\fR).
 .RE
 
@@ -237,8 +237,8 @@ the \fISolaris Trusted Extensions Reference Manual\fR).
 .sp
 .LP
 Except for the \fBtype\fR key, the \fB\fIkey\fR=\fIvalue\fR\fR fields in
-\fB/etc/user_attr\fR can be added using \fBroleadd\fR(1M) and
-\fBuseradd\fR(1M). You can use \fBrolemod\fR(1M) and \fBusermod\fR(1M) to
+\fB/etc/user_attr\fR can be added using \fBroleadd\fR(8) and
+\fBuseradd\fR(8). You can use \fBrolemod\fR(8) and \fBusermod\fR(8) to
 modify \fB\fIkey\fR=\fIvalue\fR\fR fields in \fB/etc/user_attr\fR. Modification
 of the \fBtype\fR key is restricted as described in \fBrolemod\fR and
 \fBusermod\fR.
@@ -247,16 +247,16 @@ The \fBdefaultpriv\fR and \fBlimitpriv\fR are the privileges-related keywords
 and are described above.
 .sp
 .LP
-See \fBprivileges\fR(5) for a description of privileges. The command
+See \fBprivileges\fR(7) for a description of privileges. The command
 \fBppriv\fR \fB-l\fR (see \fBppriv\fR(1)) produces a list of all supported
 privileges. Note that you specify privileges as they are displayed by
-\fBppriv\fR. In \fBprivileges\fR(5), privileges are listed in the form
+\fBppriv\fR. In \fBprivileges\fR(7), privileges are listed in the form
 \fBPRIV_\fR\fI<privilege_name>\fR\&. For example, the privilege
 \fBfile_chown\fR, as you would specify it in \fBuser_attr\fR, is listed in
-\fBprivileges\fR(5) as \fBPRIV_FILE_CHOWN\fR.
+\fBprivileges\fR(7) as \fBPRIV_FILE_CHOWN\fR.
 .sp
 .LP
-See \fBusermod\fR(1M) for examples of commands that
+See \fBusermod\fR(8) for examples of commands that
 modify privileges and their subsequent effect on \fBuser_attr\fR.
 .SH EXAMPLES
 \fBExample 1 \fRAssigning a Profile to Root
@@ -278,7 +278,7 @@ The \fBsolaris.*\fR wildcard authorization shown above gives root all the
 \fBsolaris\fR authorizations; and the \fBsolaris.grant\fR authorization gives
 root the right to grant to others any \fBsolaris\fR authorizations that root
 has. The combination of authorizations enables root to grant to others all the
-\fBsolaris\fR authorizations. See \fBauth_attr\fR(4) for more about
+\fBsolaris\fR authorizations. See \fBauth_attr\fR(5) for more about
 authorizations.
 
 .SH FILES
@@ -288,7 +288,7 @@ authorizations.
 .ad
 .sp .6
 .RS 4n
-See \fBnsswitch.conf\fR(4).
+See \fBnsswitch.conf\fR(5).
 .RE
 
 .sp
@@ -302,7 +302,7 @@ Described here.
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -322,11 +322,11 @@ Interface Stability	See below
 The command-line syntax is Committed. The output is Uncommitted.
 .SH SEE ALSO
 \fBauths\fR(1), \fBpfcsh\fR(1), \fBpfksh\fR(1), \fBpfsh\fR(1), \fBppriv\fR(1),
-\fBprofiles\fR(1), \fBroles\fR(1), \fBroleadd\fR(1M), \fBrolemod\fR(1M),
-\fBuseradd\fR(1M), \fBusermod\fR(1M), \fBgetdefaultproj\fR(3PROJECT),
-\fBgetuserattr\fR(3SECDB), \fBauth_attr\fR(4), \fBexec_attr\fR(4),
-\fBnsswitch.conf\fR(4), \fBpasswd\fR(4), \fBpolicy.conf\fR(4),
-\fBprof_attr\fR(4), \fBproject\fR(4), \fBattributes\fR(5), \fBprivileges\fR(5)
+\fBprofiles\fR(1), \fBroles\fR(1), \fBroleadd\fR(8), \fBrolemod\fR(8),
+\fBuseradd\fR(8), \fBusermod\fR(8), \fBgetdefaultproj\fR(3PROJECT),
+\fBgetuserattr\fR(3SECDB), \fBauth_attr\fR(5), \fBexec_attr\fR(5),
+\fBnsswitch.conf\fR(5), \fBpasswd\fR(5), \fBpolicy.conf\fR(5),
+\fBprof_attr\fR(5), \fBproject\fR(5), \fBattributes\fR(7), \fBprivileges\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Security Services\fR
@@ -336,7 +336,7 @@ including the fact that root needs to be able to log in and do system
 maintenance in single-user mode, before the network name service databases are
 available. For this reason, an entry should exist for root in the local
 \fBuser_attr\fR file, and the precedence shown in the example
-\fBnsswitch.conf\fR(4) file entry under EXAMPLES is highly recommended.
+\fBnsswitch.conf\fR(5) file entry under EXAMPLES is highly recommended.
 .sp
 .LP
 Because the list of legal keys is likely to expand, any code that parses this

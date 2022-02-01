@@ -10,27 +10,27 @@ lofi \- Loopback file driver
 .sp
 .LP
 The \fBlofi\fR file driver exports a file as a block device, enabling system
-utilities such as \fBfstyp\fR(1M), \fBfsck\fR(1M) and \fBmount\fR(1M) to
+utilities such as \fBfstyp\fR(8), \fBfsck\fR(8) and \fBmount\fR(8) to
 operate on underlying file system images (including CD-ROM and FAT floppy
 images) contained on the block device. Reads and writes to the block device are
-translated to reads and writes on the exported file. See \fBlofiadm\fR(1M) for
+translated to reads and writes on the exported file. See \fBlofiadm\fR(8) for
 examples.
 .sp
 .LP
 File block device entries are contained in \fB/dev/lofi\fR. The
 \fB/dev/rlofi\fR file contains the character (or raw) device entries. Entries
 are in the  form of decimal  numbers and are assigned  through
-\fBlofiadm\fR(1M).  When  created, these device entries are owned by root, in
+\fBlofiadm\fR(8).  When  created, these device entries are owned by root, in
 group sys and have permissions of 0600. Ownership, group, and permission
 settings can be altered, however there may be ramifications. See
-\fBlofiadm\fR(1M) for more information.
+\fBlofiadm\fR(8) for more information.
 .sp
 .LP
-\fBlofi\fR devices can be compressed. See \fBlofiadm\fR(1M) for more
+\fBlofi\fR devices can be compressed. See \fBlofiadm\fR(8) for more
 information.
 .sp
 .LP
-Files exported through \fBlofi\fR can also be encrypted. See \fBlofiadm\fR(1M)
+Files exported through \fBlofi\fR can also be encrypted. See \fBlofiadm\fR(8)
 for details on how to specify encryption keys.
 .SH FILES
 .sp
@@ -106,7 +106,7 @@ Driver configuration file. (Do not alter).
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -124,8 +124,8 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBfstyp\fR(1M), \fBfsck\fR(1M), \fBmount\fR(1M), \fBlofiadm\fR(1M),
-\fBnewfs\fR(1M), \fBattributes\fR(5), \fBlofs\fR(7FS)
+\fBfstyp\fR(8), \fBfsck\fR(8), \fBmount\fR(8), \fBlofiadm\fR(8),
+\fBnewfs\fR(8), \fBattributes\fR(7), \fBlofs\fR(4FS)
 .SH NOTES
 .sp
 .LP
@@ -135,4 +135,4 @@ through the \fBlofi\fR file driver.
 .sp
 .LP
 For compatibility purposes, a raw device is also exported with the block
-device. (For example, \fBnewfs\fR(1M)).
+device. (For example, \fBnewfs\fR(8)).

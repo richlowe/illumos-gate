@@ -99,7 +99,7 @@ cannot be allocated.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -118,7 +118,7 @@ MT-Level	Safe
 .sp
 .LP
 \fBlabel_to_str\fR(3TSOL), \fBlibtsol\fR(3LIB), \fBstr_to_label\fR(3TSOL),
-\fBlabel_encodings\fR(4), \fBattributes\fR(5), \fBlabels\fR(5)
+\fBlabel_encodings\fR(5), \fBattributes\fR(7), \fBlabels\fR(7)
 .sp
 .LP
 \fIDetermining Whether the Printing Service Is Running in a Labeled

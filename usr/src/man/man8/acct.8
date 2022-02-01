@@ -40,20 +40,20 @@ accounting and miscellaneous accounting commands
 .SH DESCRIPTION
 Accounting software is structured as a set of tools (consisting of both C
 programs and shell procedures) that can be used to build accounting systems.
-\fBacctsh\fR(1M) describes the set of shell procedures built on top of the C
+\fBacctsh\fR(8) describes the set of shell procedures built on top of the C
 programs.
 .sp
 .LP
 Connect time accounting is handled by various programs that write records into
-\fB/var/adm/wtmpx\fR, as described in \fButmpx\fR(4). The programs described in
-\fBacctcon\fR(1M) convert this file into session and charging records, which
-are then summarized by \fBacctmerg\fR(1M).
+\fB/var/adm/wtmpx\fR, as described in \fButmpx\fR(5). The programs described in
+\fBacctcon\fR(8) convert this file into session and charging records, which
+are then summarized by \fBacctmerg\fR(8).
 .sp
 .LP
 Process accounting is performed by the system kernel. Upon termination of a
 process, one record per process is written to a file (normally
-\fB/var/adm/pacct\fR). The programs in \fBacctprc\fR(1M) summarize this data
-for charging purposes; \fBacctcms\fR(1M) is used to summarize command usage.
+\fB/var/adm/pacct\fR). The programs in \fBacctprc\fR(8) summarize this data
+for charging purposes; \fBacctcms\fR(8) is used to summarize command usage.
 Current process data may be examined using \fBacctcom\fR(1).
 .sp
 .LP
@@ -61,7 +61,7 @@ Process accounting records and connect time accounting records (or any
 accounting records in the \fBtacct\fR format described in \fBacct.h\fR(3HEAD))
 can be merged and summarized into total accounting records by \fBacctmerg\fR
 (see \fBtacct\fR format in \fBacct.h\fR(3HEAD)). \fBprtacct\fR (see
-\fBacctsh\fR(1M)) is used to format any or all accounting records.
+\fBacctsh\fR(8)) is used to format any or all accounting records.
 .sp
 .LP
 \fBacctdisk\fR reads lines that contain user \fBID\fR, login name, and number
@@ -80,10 +80,10 @@ is given, it must be the name of an existing file, to which the kernel appends
 process accounting records (see \fBacct\fR(2) and \fBacct.h\fR(3HEAD)).
 .sp
 .LP
-\fBacctwtmp\fR writes a \fButmpx\fR(4) record to \fIfilename\fR. The record
+\fBacctwtmp\fR writes a \fButmpx\fR(5) record to \fIfilename\fR. The record
 contains the current time and a string of characters that describe the
 \fIreason\fR. A record type of \fBACCOUNTING\fR is assigned (see
-\fButmpx\fR(4)) \fIreason\fR must be a string of 11 or fewer characters,
+\fButmpx\fR(5)) \fIreason\fR must be a string of 11 or fewer characters,
 numbers, \fB$\fR, or spaces. For example, the following are suggestions for use
 in reboot and shutdown procedures, respectively:
 .sp
@@ -98,7 +98,7 @@ acctwtmp "acctg off" /var/adm/wtmpx
 .LP
 For each user currently logged on, \fBclosewtmp\fR puts a false
 \fBDEAD_PROCESS\fR record in the \fB/var/adm/wtmpx\fR file. \fBrunacct\fR (see
-\fBrunacct\fR(1M)) uses this false \fBDEAD_PROCESS\fR record so that the
+\fBrunacct\fR(8)) uses this false \fBDEAD_PROCESS\fR record so that the
 connect accounting procedures can track the time used by users logged on before
 \fBrunacct\fR was invoked.
 .sp
@@ -133,7 +133,7 @@ password file is \fB/etc/passwd\fR.
 .SH ENVIRONMENT VARIABLES
 If any of the \fBLC_*\fR variables (\fBLC_TYPE\fR, \fBLC_MESSAGES\fR,
 \fBLC_TIME\fR, \fBLC_COLLATE\fR, \fBLC_NUMERIC\fR, and \fBLC_MONETARY\fR) (see
-\fBenviron\fR(5)) are not set in the environment, the operational behavior of
+\fBenviron\fR(7)) are not set in the environment, the operational behavior of
 \fBacct\fR for each corresponding locale category is determined by the value of
 the \fBLANG\fR environment variable. If \fBLC_ALL\fR is set, its contents are
 used to override both the \fBLANG\fR and the other \fBLC_*\fR variables. If
@@ -200,10 +200,10 @@ History of user access and administration information.
 .RE
 
 .SH SEE ALSO
-\fBacctcom\fR(1), \fBacctcms\fR(1M), \fBacctcon\fR(1M), \fBacctmerg\fR(1M),
-\fBacctprc\fR(1M), \fBacctsh\fR(1M), \fBfwtmp\fR(1M), \fBrunacct\fR(1M),
-\fBacct\fR(2), \fBacct.h\fR(3HEAD), \fBpasswd\fR(4), \fButmpx\fR(4),
-\fBattributes\fR(5), \fBenviron\fR(5)
+\fBacctcom\fR(1), \fBacctcms\fR(8), \fBacctcon\fR(8), \fBacctmerg\fR(8),
+\fBacctprc\fR(8), \fBacctsh\fR(8), \fBfwtmp\fR(8), \fBrunacct\fR(8),
+\fBacct\fR(2), \fBacct.h\fR(3HEAD), \fBpasswd\fR(5), \fButmpx\fR(5),
+\fBattributes\fR(7), \fBenviron\fR(7)
 .sp
 .LP
 \fI\fR

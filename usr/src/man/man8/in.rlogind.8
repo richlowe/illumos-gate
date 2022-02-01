@@ -19,7 +19,7 @@ provides a remote login facility with authentication based on Kerberos V5 or
 privileged port numbers.
 .sp
 .LP
-\fBin.rlogind\fR is invoked by \fBinetd\fR(1M) when a remote login connection
+\fBin.rlogind\fR is invoked by \fBinetd\fR(8) when a remote login connection
 is established. When Kerberos V5 authentication is required (see option
 \fB-k\fR below), the authentication sequence is as follows:
 .RS +4
@@ -32,7 +32,7 @@ Check Kerberos V5 authentication.
 .TP
 .ie t \(bu
 .el o
-Check authorization according to the rules in \fBkrb5_auth_rules\fR(5).
+Check authorization according to the rules in \fBkrb5_auth_rules\fR(7).
 .RE
 .RS +4
 .TP
@@ -53,7 +53,7 @@ file on the \fBin.rlogind\fR server. An example principal might be:
 \fBhost/bigmachine.eng.example.com\fR
 .sp
 .LP
-See \fBkadmin\fR(1M) for instructions on adding a principal to a
+See \fBkadmin\fR(8) for instructions on adding a principal to a
 \fBkrb5.keytab\fR file. See \fI\fR for a discussion of Kerberos
 authentication.
 .sp
@@ -76,8 +76,8 @@ exists in both \fB/etc/hosts\fR and \fB/etc/hosts.equiv\fR, a user logging in
 from the client is not prompted for a password. If the address is associated
 with a host for which no corresponding entry exists in \fB/etc/hosts\fR, the
 user is prompted for a password, regardless of  whether or not an entry for the
-client is present in  \fB/etc/hosts.equiv\fR. See \fBhosts\fR(4) and
-\fBhosts.equiv\fR(4).
+client is present in  \fB/etc/hosts.equiv\fR. See \fBhosts\fR(5) and
+\fBhosts.equiv\fR(5).
 .RE
 .sp
 .LP
@@ -171,7 +171,7 @@ authorization check is passed, then the user is allowed to log in.
 .ad
 .RS 13n
 Uses the indicated Kerberos V5 realm. By default, the daemon will determine its
-realm from the settings in the \fBkrb5.conf\fR(4) file.
+realm from the settings in the \fBkrb5.conf\fR(5) file.
 .RE
 
 .sp
@@ -230,7 +230,7 @@ Same as \fB-e\fR, for backwards compatibility.
 .RE
 
 .SH USAGE
-\fBrlogind\fR and \fBin.rlogind\fR are IPv6-enabled. See \fBip6\fR(7P).
+\fBrlogind\fR and \fBin.rlogind\fR are IPv6-enabled. See \fBip6\fR(4P).
 \fBIPv6\fR is not currently supported with Kerberos V5 authentication.
 .sp
 .LP
@@ -279,7 +279,7 @@ entry for the client exists in both \fB/etc/hosts\fR and
 password. If the address is associated with a host for which no corresponding
 entry exists in \fB/etc/hosts\fR, the user is prompted for a password,
 regardless of whether or not an entry for the client is present in
-\fB/etc/hosts.equiv\fR. See \fBhosts\fR(4) and \fBhosts.equiv\fR(4).
+\fB/etc/hosts.equiv\fR. See \fBhosts\fR(5) and \fBhosts.equiv\fR(5).
 .sp
 .LP
 When running a Kerberized rlogin service (with or without the encryption
@@ -296,13 +296,13 @@ through the \fBpam_rhosts_auth.so.1\fR module is sufficient to authenticate the
 user. Only if this authentication fails is the next authentication module used.
 .SH SEE ALSO
 \fBlogin\fR(1), \fBsvcs\fR(1), \fBrlogin\fR(1),
-\fBin.rshd\fR(1M), \fBinetadm\fR(1M), \fBinetd\fR(1M), \fBkadmin\fR(1M),
-\fBsvcadm\fR(1M), \fBpam\fR(3PAM), \fBhosts\fR(4), \fBhosts.equiv\fR(4),
-\fBkrb5.conf\fR(4), \fBpam.conf\fR(4), \fBattributes\fR(5), \fBenviron\fR(5),
-\fBkrb5_auth_rules\fR(5), \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), \fBpam_unix_session\fR(5),
-\fBsmf\fR(5)
+\fBin.rshd\fR(8), \fBinetadm\fR(8), \fBinetd\fR(8), \fBkadmin\fR(8),
+\fBsvcadm\fR(8), \fBpam\fR(3PAM), \fBhosts\fR(5), \fBhosts.equiv\fR(5),
+\fBkrb5.conf\fR(5), \fBpam.conf\fR(5), \fBattributes\fR(7), \fBenviron\fR(7),
+\fBkrb5_auth_rules\fR(7), \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), \fBpam_unix_session\fR(7),
+\fBsmf\fR(7)
 .sp
 .LP
 \fI\fR
@@ -349,15 +349,15 @@ machine and the connecting medium.  This is insecure, but it is useful in an
 A facility to allow all data exchanges to be encrypted should be present.
 .sp
 .LP
-The \fBpam_unix\fR(5) module is no longer supported. Similar functionality is
-provided by \fBpam_authtok_check\fR(5), \fBpam_authtok_get\fR(5),
-\fBpam_authtok_store\fR(5), \fBpam_dhkeys\fR(5), \fBpam_passwd_auth\fR(5),
-\fBpam_unix_account\fR(5), \fBpam_unix_auth\fR(5), and
-\fBpam_unix_session\fR(5).
+The \fBpam_unix\fR(7) module is no longer supported. Similar functionality is
+provided by \fBpam_authtok_check\fR(7), \fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7), \fBpam_dhkeys\fR(7), \fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), and
+\fBpam_unix_session\fR(7).
 .sp
 .LP
 The \fBin.rlogind\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -371,8 +371,8 @@ svc:/network/login:eklogin (rlogin with kerberos and encryption)
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M). Responsibility for
-initiating and restarting this service is delegated to \fBinetd\fR(1M). Use
-\fBinetadm\fR(1M) to make configuration changes and to view configuration
+requesting restart, can be performed using \fBsvcadm\fR(8). Responsibility for
+initiating and restarting this service is delegated to \fBinetd\fR(8). Use
+\fBinetadm\fR(8) to make configuration changes and to view configuration
 information for this service. The service's status can be queried using the
 \fBsvcs\fR(1) command.

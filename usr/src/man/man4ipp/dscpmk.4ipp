@@ -55,8 +55,8 @@ Also, for each DSCP the following is exported:
 .SH SEE ALSO
 .sp
 .LP
-\fBipqosconf\fR(1M), \fBdlcosmk\fR(7ipp), \fBflowacct\fR(7ipp),
-\fBipqos\fR(7ipp), \fBipgpc\fR(7ipp), \fBtokenmt\fR(7ipp), \fBtswtclmt\fR(7ipp)
+\fBipqosconf\fR(8), \fBdlcosmk\fR(4IPP), \fBflowacct\fR(4IPP),
+\fBipqos\fR(4IPP), \fBipgpc\fR(4IPP), \fBtokenmt\fR(4IPP), \fBtswtclmt\fR(4IPP)
 .sp
 .LP
 \fIRFC 2474, Definition of the Differentiated Services Field (DS Field) in the

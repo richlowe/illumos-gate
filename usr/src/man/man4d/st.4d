@@ -15,7 +15,7 @@ st \- driver for SCSI tape devices
 .SH DESCRIPTION
 .LP
 The \fBst\fR device driver provides a standard interface to various \fBSCSI\fR
-tape devices. See \fBmtio\fR(7I) for details.
+tape devices. See \fBmtio\fR(4I) for details.
 .sp
 .LP
 To determine if the \fBst\fR device driver supports your tape device, SPARC
@@ -73,7 +73,7 @@ SCMD_REPORT_LUNS
 In multi-initiator environments, the driver will not reserve  the tape drive if
 above commands are issued. For other SCSI commands, the driver reserves the
 tape drive and releases the drive at close if  it has been reserved. Refer to
-the MTIOCRESERVE and MTIOCRELEASE ioctls  in \fBmtio\fR(7I) for information
+the MTIOCRESERVE and MTIOCRELEASE ioctls  in \fBmtio\fR(4I) for information
 about how to allow a tape drive to remain  reserved upon close. See the flag
 options below for information about  disabling this feature.
 .sp
@@ -83,13 +83,13 @@ disables all existing SCSI-2 reservations.
 .sp
 .LP
 If the tape drive is opened in O_NDELAY mode, no reservation occurs  during the
-open, as per the POSIX standard (see \fBstandards\fR(5)). However, if a command
+open, as per the POSIX standard (see \fBstandards\fR(7)). However, if a command
 not found in the above list is used, a  reservation will occur to provide
 reserve/release functionality before the command is issued.
 .SS "Persistent Errors and Asynchronous Tape Operation"
 .LP
-The \fBst\fR driver now supports persistent errors (see \fBmtio\fR(7I) and
-asynchronous tape operations (see \fBmtio\fR(7I), \fBaioread\fR(3C), and
+The \fBst\fR driver now supports persistent errors (see \fBmtio\fR(4I) and
+asynchronous tape operations (see \fBmtio\fR(4I), \fBaioread\fR(3C), and
 \fBaiowrite\fR(3C)).
 .SS "Read Operation"
 .LP
@@ -186,7 +186,7 @@ or
 .LP
 A semicolon (\fB;\fR) is used to terminate a prototype devinfo node
 specification. Individual elements listed within the specification should not
-be separated by a semicolon. (Refer to \fBdriver.conf\fR(4) for more
+be separated by a semicolon. (Refer to \fBdriver.conf\fR(5) for more
 information.)
 .sp
 .LP
@@ -385,7 +385,7 @@ Otherwise, file skipping happens one file at a time.
 .sp .6
 .RS 4n
 The flag indicates the device will not complain if the \fBst\fR driver is
-unloaded and loaded again (see \fBmodload\fR(1M) and \fBmodunload\fR(1M)). That
+unloaded and loaded again (see \fBmodload\fR(8) and \fBmodunload\fR(8)). That
 is, the driver will return the correct inquiry string.
 .RE
 
@@ -636,7 +636,7 @@ implemented as required.
 .SH IOCTLS
 .LP
 The behavior of \fBSCSI\fR tape positioning ioctls is the same across all
-devices which support them. (Refer to \fBmtio\fR(7I).) However, not all devices
+devices which support them. (Refer to \fBmtio\fR(4I).) However, not all devices
 support all ioctls. The driver returns an \fBENOTTY\fR error on unsupported
 ioctls.
 .sp
@@ -809,7 +809,7 @@ set for the built-in config entries of Archive \fBDAT\fR and Exabyte drives.
 If this flag is set, the \fBst\fR driver issues a SCSI-2 \fBREAD\fR \fBBLOCK\fR
 \fBLIMITS\fR command to the device to determine the maximum record size allowed
 by it. If the command fails, \fBst\fR continues to use the maximum record sizes
-mentioned in the \fBmtio\fR(7I) man page.
+mentioned in the \fBmtio\fR(4I) man page.
 .sp
 .LP
 If the command succeeds, \fBst\fR restricts the maximum transfer size of a
@@ -881,7 +881,7 @@ definitions for \fBSCSI\fR tape drives
 .sp .6
 .RS 4n
 where \fBl,m,h,u,c\fR specifies the density (low, medium, high,
-ultra/compressed), \fBb\fR the optional BSD behavior (see \fBmtio\fR(7I)), and
+ultra/compressed), \fBb\fR the optional BSD behavior (see \fBmtio\fR(4I)), and
 \fBn\fR the optional no rewind behavior. For example, \fB/dev/rmt/0lbn\fR
 specifies unit 0, low density, BSD behavior, and no rewind.
 .sp
@@ -949,10 +949,10 @@ l l .
 
 .SH SEE ALSO
 .LP
-\fBmt\fR(1), \fBmodload\fR(1M), \fBmodunload\fR(1M), \fBopen\fR(2),
+\fBmt\fR(1), \fBmodload\fR(8), \fBmodunload\fR(8), \fBopen\fR(2),
 \fBread\fR(2), \fBwrite\fR(2), \fBaioread\fR(3C), \fBaiowrite\fR(3C),
-\fBkstat\fR(3KSTAT), \fBdriver.conf\fR(4), \fBscsi\fR(4), \fBstandards\fR(5),
-\fBesp\fR(7D), \fBisp\fR(7D), \fBmtio\fR(7I), \fBioctl\fR(9E)
+\fBkstat\fR(3KSTAT), \fBdriver.conf\fR(5), \fBscsi\fR(5), \fBstandards\fR(7),
+\fBesp\fR(4D), \fBisp\fR(4D), \fBmtio\fR(4I), \fBioctl\fR(9E)
 .SH DIAGNOSTICS
 .LP
 The \fBst\fR driver diagnostics may be printed to the console or messages file.
@@ -1383,7 +1383,7 @@ disables the ability to read and write with large block sizes and allows the
 reading of tapes written prior to Solaris 2.4 with large block sizes.
 .sp
 .LP
-(Refer to \fBmtio\fR(7I) for a description of maximum record sizes.)
+(Refer to \fBmtio\fR(4I) for a description of maximum record sizes.)
 .SH BUGS
 .LP
 Tape devices that do not return a \fBBUSY\fR status during tape loading prevent

@@ -25,14 +25,14 @@ running the \fBgrowfs\fR command. When adding space to a mirror, you expand
 each submirror before expanding the file system.
 .sp
 .LP
-\fBgrowfs\fR will ``write-lock'' (see \fBlockfs\fR(1M)) a mounted file system
+\fBgrowfs\fR will ``write-lock'' (see \fBlockfs\fR(8)) a mounted file system
 when expanding. The length of time the file system is write-locked can be
 shortened by expanding the file system in stages. For instance, to expand a 1
 Gbyte file system to 2 Gbytes, the file system can be grown in 16 Mbyte stages
 using the \fB-s\fR option to specify the total size of the new file system at
 each stage. The argument for \fB-s\fR is the number of sectors, and must be a
 multiple of the cylinder size. Note: The file system cannot be grown if a
-cylinder size of less than 2 is specified. Refer to the \fBnewfs\fR(1M) man
+cylinder size of less than 2 is specified. Refer to the \fBnewfs\fR(8) man
 page for information on the options available when growing a file system.
 .sp
 .LP
@@ -105,8 +105,8 @@ An error occurred.
 
 .SH SEE ALSO
 .LP
-\fBfsck\fR(1M), \fBlockfs\fR(1M), \fBmkfs\fR(1M), \fBnewfs\fR(1M),
-\fBattributes\fR(5)
+\fBfsck\fR(8), \fBlockfs\fR(8), \fBmkfs\fR(8), \fBnewfs\fR(8),
+\fBattributes\fR(7)
 .SH LIMITATIONS
 .LP
 Only UFS file systems (either mounted or unmounted) can be expanded using the

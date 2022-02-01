@@ -17,14 +17,14 @@ nfslog.conf \- NFS server logging configuration file
 .LP
 The \fBnfslog.conf\fR file specifies the location of the \fBNFS\fR server logs,
 as well as the location of the private work files used by the \fBNFS\fR server
-and \fBnfslogd\fR(1M) daemon during logging. Each entry in the file consists of
+and \fBnfslogd\fR(8) daemon during logging. Each entry in the file consists of
 a mandatory tag identifier and one or more parameter identifiers. The parameter
 identifier specifies the value or location of the specific parameter. For
 instance, the parameter identifier "\fBlog=/var/nfs/logs/serverLog\fR"
 specifies the location of the \fBNFS\fR server activity log. The mandatory tag
 identifier serves as an index into the \fB/etc/nfs/nfslog.conf\fR file to
 identify the various parameters to be used. At export time, the
-\fBshare_nfs\fR(1M) command specifies the \fBNFS\fR server logging parameters
+\fBshare_nfs\fR(8) command specifies the \fBNFS\fR server logging parameters
 to use by associating a tag from the \fB/etc/nfs/nfslog.conf\fR file to the
 exported file system. It is legal for more than one file system to be exported
 using the same logging tag identifier.
@@ -83,7 +83,7 @@ Specifies the location of the private file handle to path mapping database
 files. These database files are for the private use of the \fBNFS\fR server
 kernel module and the \fBnfslog\fRd daemon. These files will be located in the
 \fBdefaultdir\fR, unless \fB<path>\fR is an absolute path. These database files
-are permanently stored in the file system. Consult \fBnfslogd\fR(1M) for
+are permanently stored in the file system. Consult \fBnfslogd\fR(8) for
 information on pruning the database files.
 .RE
 
@@ -168,11 +168,11 @@ global settings.
 .SH SEE ALSO
 .sp
 .LP
-\fBnfslogd\fR(1M), \fBshare_nfs\fR(1M), \fBattributes\fR(5)
+\fBnfslogd\fR(8), \fBshare_nfs\fR(8), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP
 Logs, work files, and file handle to path mapping database can become very
 large. Be aware of appropriate placement within the file system name space. See
-\fBnfslogd\fR(1M)) for information on pruning the database files and cycling
+\fBnfslogd\fR(8)) for information on pruning the database files and cycling
 logs.

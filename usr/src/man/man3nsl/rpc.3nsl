@@ -33,7 +33,7 @@ linked with the \fBlibnsl\fR library.
 In the case of multithreaded applications, the \fB-mt\fR option must be
 specified on the command line at compilation time to enable a thread-specific
 version of \fBrpc_createerr()\fR. See \fBrpc_clnt_create\fR(3NSL) and
-\fBthreads\fR(5).
+\fBthreads\fR(7).
 .sp
 .LP
 When used in multithreaded applications, client-side routines are MT-Safe.
@@ -1251,7 +1251,7 @@ which they are described:
 \fB/etc/netconfig\fR
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1270,5 +1270,5 @@ MT-Level	MT-Safe with exceptions
 \fBrpc_clnt_calls\fR(3NSL), \fBrpc_clnt_create\fR(3NSL),
 \fBrpc_svc_calls\fR(3NSL), \fBrpc_svc_create\fR(3NSL), \fBrpc_svc_err\fR(3NSL),
 \fBrpc_svc_reg\fR(3NSL), \fBrpc_xdr\fR(3NSL), \fBrpcbind\fR(3NSL),
-\fBsecure_rpc\fR(3NSL), \fBthreads\fR(5), \fBxdr\fR(3NSL), \fBnetconfig\fR(4),
-\fBrpc\fR(4), \fBattributes\fR(5), \fBenviron\fR(5)
+\fBsecure_rpc\fR(3NSL), \fBthreads\fR(7), \fBxdr\fR(3NSL), \fBnetconfig\fR(5),
+\fBrpc\fR(5), \fBattributes\fR(7), \fBenviron\fR(7)

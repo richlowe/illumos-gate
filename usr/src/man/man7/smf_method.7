@@ -9,11 +9,11 @@
 smf_method \- service management framework conventions for methods
 .SH DESCRIPTION
 .LP
-The class of services managed by \fBsvc.startd\fR(1M) in the service management
-framework, \fBsmf\fR(5), consists of applications that fit a simple
-\fBfork\fR(2)-\fBexec\fR(2) model. The \fBsvc.startd\fR(1M) master daemon and
+The class of services managed by \fBsvc.startd\fR(8) in the service management
+framework, \fBsmf\fR(7), consists of applications that fit a simple
+\fBfork\fR(2)-\fBexec\fR(2) model. The \fBsvc.startd\fR(8) master daemon and
 other restarters support the \fBfork\fR(2)-\fBexec\fR(2) model, potentially
-with additional capabilities. The \fBsvc.startd\fR(1M) daemon and other
+with additional capabilities. The \fBsvc.startd\fR(8) daemon and other
 restarters require that the methods which activate, manipulate, or examine a
 service instance follow the conventions described in this manual page.
 .SS "Invocation form"
@@ -34,7 +34,7 @@ form:
 .LP
 The \fIabbr_method_name\fR used for the recommended form is a supported method
 such as \fBstart\fR or \fBstop\fR. The set of methods supported by a restarter
-is given on the related restarter page. The \fBsvc.startd\fR(1M) daemon
+is given on the related restarter page. The \fBsvc.startd\fR(8) daemon
 supports \fBstart\fR, \fBstop\fR, and \fBrefresh\fR methods.
 .sp
 .LP
@@ -141,7 +141,7 @@ the method. See the \fBMethod Context\fR section for more information.
 When defined in the \fBexec\fR string of the method by the restarter
 \fBsvc.startd\fR, a set of tokens are parsed and expanded with appropriate
 value. Other restarters might not support method tokens. The delegated
-restarter for inet services, \fBinetd\fR(1M), does not support the following
+restarter for inet services, \fBinetd\fR(8), does not support the following
 method expansions.
 .sp
 .ne 2
@@ -281,7 +281,7 @@ T}
 Unrecoverable configuration error. A common condition that returns this exit status is the absence of required configuration files for an enabled service instance.
 T}
 \fBSMF_EXIT_ERR_NOSMF\fR	\fB99\fR	T{
-Method has been mistakenly invoked outside the \fBsmf\fR(5) facility. Services that depend on \fBsmf\fR(5) capabilities should exit with this status value.
+Method has been mistakenly invoked outside the \fBsmf\fR(7) facility. Services that depend on \fBsmf\fR(7) capabilities should exit with this status value.
 T}
 \fBSMF_EXIT_ERR_PERM\fR	\fB100\fR	T{
 Method requires a form of permission such as file access, privilege, authorization, or other credential that is not available when invoked.
@@ -322,7 +322,7 @@ suitable for inclusion via the source operator in any Bourne-compatible shell.
 .LP
 To assist in the composition of scripts that can serve as SMF methods as well
 as \fB/etc/init.d\fR scripts, the \fBsmf_present()\fR shell function is
-provided. If the \fBsmf\fR(5) facility is not available, \fBsmf_present()\fR
+provided. If the \fBsmf\fR(7) facility is not available, \fBsmf_present()\fR
 returns a non-zero exit status.
 .sp
 .LP
@@ -388,7 +388,7 @@ of a number of \fBNAME=value\fR strings.
 .sp .6
 .RS 4n
 The name of an RBAC (role-based access control) profile which, along with the
-method executable, identifies an entry in \fBexec_attr\fR(4).
+method executable, identifies an entry in \fBexec_attr\fR(5).
 .RE
 
 .sp
@@ -430,7 +430,7 @@ numeric or text form.
 .sp .6
 .RS 4n
 An optional string specifying the privilege set as defined in
-\fBprivileges\fR(5).
+\fBprivileges\fR(7).
 .RE
 
 .sp
@@ -441,7 +441,7 @@ An optional string specifying the privilege set as defined in
 .sp .6
 .RS 4n
 An optional string specifying the limit privilege set as defined in
-\fBprivileges\fR(5).
+\fBprivileges\fR(7).
 .RE
 
 .sp
@@ -463,7 +463,7 @@ launch the method. If the property is unset, \fB:home\fR is used.
 .ad
 .sp .6
 .RS 4n
-The security flags to apply when launching the method.  See \fBsecurity-flags\fR(5).
+The security flags to apply when launching the method.  See \fBsecurity-flags\fR(7).
 .sp
 .LP
 The "default" keyword specifies those flags specified in
@@ -485,7 +485,7 @@ include further flags which may harm poorly implemented software.
 .sp .6
 .RS 4n
 An optional string that specifies the corefile pattern to use for the service,
-as per \fBcoreadm\fR(1M). Most restarters supply a default. Setting this
+as per \fBcoreadm\fR(8). Most restarters supply a default. Setting this
 property overrides local customizations to the global core pattern.
 .RE
 
@@ -509,7 +509,7 @@ whose \fBuid\fR is used to launch the method.
 .sp .6
 .RS 4n
 The resource pool name on which to launch the method. \fB:default\fR can be
-used as a token to indicate the pool specified in the \fBproject\fR(4) entry
+used as a token to indicate the pool specified in the \fBproject\fR(5) entry
 given in the \fBproject\fR attribute above.
 .RE
 
@@ -572,15 +572,15 @@ Definitions of exit status codes.
 
 .SH SEE ALSO
 .LP
-\fBzonename\fR(1), \fBcoreadm\fR(1M), \fBinetd\fR(1M), \fBsvccfg\fR(1M),
-\fBsvc.startd\fR(1M), \fBexec\fR(2), \fBfork\fR(2),
-\fBgetdefaultproj\fR(3PROJECT), \fBexec_attr\fR(4), \fBproject\fR(4),
-\fBservice_bundle\fR(4), \fBattributes\fR(5), \fBprivileges\fR(5),
-\fBrbac\fR(5), \fBsmf\fR(5), \fBsmf_bootstrap\fR(5), \fBzones\fR(5),
-\fBsecurity-flags\fR(5)
+\fBzonename\fR(1), \fBcoreadm\fR(8), \fBinetd\fR(8), \fBsvccfg\fR(8),
+\fBsvc.startd\fR(8), \fBexec\fR(2), \fBfork\fR(2),
+\fBgetdefaultproj\fR(3PROJECT), \fBexec_attr\fR(5), \fBproject\fR(5),
+\fBservice_bundle\fR(5), \fBattributes\fR(7), \fBprivileges\fR(7),
+\fBrbac\fR(7), \fBsmf\fR(7), \fBsmf_bootstrap\fR(7), \fBzones\fR(7),
+\fBsecurity-flags\fR(7)
 .SH NOTES
 .LP
-The present version of \fBsmf\fR(5) does not support multiple repositories.
+The present version of \fBsmf\fR(7) does not support multiple repositories.
 .sp
 .LP
 When a service is configured to be started as root but with privileges

@@ -45,7 +45,7 @@ stored through \fIptr\fR, if  \fIptr\fR is non-null.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -65,7 +65,7 @@ MT-Level	MT-Safe
 .LP
 \fBelf\fR(3ELF), \fBelf32_getehdr\fR(3ELF), \fBelf_begin\fR(3ELF),
 \fBelf_cntl\fR(3ELF), \fBelf_getdata\fR(3ELF), \fBelf_getident\fR(3ELF),
-\fBelf_kind\fR(3ELF), \fBlibelf\fR(3LIB), \fBattributes\fR(5)
+\fBelf_kind\fR(3ELF), \fBlibelf\fR(3LIB), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

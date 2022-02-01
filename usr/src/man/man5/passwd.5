@@ -64,7 +64,7 @@ must not contain a colon (\fB:\fR) or a newline (\fB\en\fR).
 .ad
 .RS 15n
 is an empty field. The encrypted password for the user is in the corresponding
-entry in the \fB/etc/shadow\fR file. \fBpwconv\fR(1M) relies on a special value
+entry in the \fB/etc/shadow\fR file. \fBpwconv\fR(8) relies on a special value
 of '\fBx\fR' in the password field of \fB/etc/passwd\fR. If this value
 of '\fBx\fR' exists in the password field of \fB/etc/passwd\fR, this indicates
 that the password for the user is already in \fB/etc/shadow\fR and should not
@@ -168,7 +168,7 @@ entries for all members of the network group \fInetgroup\fR.
 .sp
 .LP
 This is also supported by specifying ``passwd : compat'' in
-\fBnsswitch.conf\fR(4). The "compat" source might not be supported in future
+\fBnsswitch.conf\fR(5). The "compat" source might not be supported in future
 releases. The preferred sources are \fBfiles\fR followed by the identifier of a
 name service, such as \fBnis\fR or \fBldap\fR. This has the effect of
 incorporating the entire contents of the naming service's \fBpasswd\fR database
@@ -335,12 +335,12 @@ but with a \fIgcos\fR field of \fBGuest\fR
 .LP
 \fBchgrp\fR(1), \fBchown\fR(1), \fBfinger\fR(1), \fBgroups\fR(1),
 \fBlogin\fR(1), \fBnewgrp\fR(1), \fBpasswd\fR(1),
-\fBsh\fR(1), \fBsort\fR(1), \fBdomainname\fR(1M), \fBgetent\fR(1M),
-\fBpassmgmt\fR(1M), \fBpwck\fR(1M), \fBpwconv\fR(1M),
-\fBsu\fR(1M), \fBuseradd\fR(1M), \fBuserdel\fR(1M), \fBusermod\fR(1M),
+\fBsh\fR(1), \fBsort\fR(1), \fBdomainname\fR(8), \fBgetent\fR(8),
+\fBpassmgmt\fR(8), \fBpwck\fR(8), \fBpwconv\fR(8),
+\fBsu\fR(8), \fBuseradd\fR(8), \fBuserdel\fR(8), \fBusermod\fR(8),
 \fBa64l\fR(3C), \fBcrypt\fR(3C), \fBgetpw\fR(3C), \fBgetpwnam\fR(3C),
-\fBgetspnam\fR(3C), \fBputpwent\fR(3C), \fBgroup\fR(4), \fBhosts.equiv\fR(4),
-\fBnsswitch.conf\fR(4), \fBshadow\fR(4), \fBenviron\fR(5),
+\fBgetspnam\fR(3C), \fBputpwent\fR(3C), \fBgroup\fR(5), \fBhosts.equiv\fR(5),
+\fBnsswitch.conf\fR(5), \fBshadow\fR(5), \fBenviron\fR(7),
 \fBunistd.h\fR(3HEAD)
 .sp
 .LP

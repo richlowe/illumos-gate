@@ -15,7 +15,7 @@ devlinks \- adds /dev entries for miscellaneous devices and pseudo-devices
 .SH DESCRIPTION
 .sp
 .LP
-\fBdevfsadm\fR(1M) is now the preferred command for \fB/dev\fR and
+\fBdevfsadm\fR(8) is now the preferred command for \fB/dev\fR and
 \fB/devices\fR and should be used instead of \fBdevlinks\fR.
 .sp
 .LP
@@ -26,7 +26,7 @@ directory tree. The links are created according to specifications found in the
 .sp
 .LP
 \fBdevlinks\fR is called each time the system is reconfiguration-booted, and
-can only be run after \fBdrvconfig\fR(1M) is run.
+can only be run after \fBdrvconfig\fR(8) is run.
 .sp
 .LP
 The \fItable-file\fR (normally \fB/etc/devlink.tab\fR) is an ASCII file, with
@@ -297,7 +297,7 @@ the default rule-file
 .SH SEE ALSO
 .sp
 .LP
-\fBdevfsadm\fR(1M), \fBattributes\fR(5), \fBdevfs\fR(7FS),
+\fBdevfsadm\fR(8), \fBattributes\fR(7), \fBdevfs\fR(4FS),
 \fBddi_create_minor_node\fR(9F)
 .SH BUGS
 .sp

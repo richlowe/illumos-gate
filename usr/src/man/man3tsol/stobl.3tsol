@@ -192,7 +192,7 @@ and values for the defined labels of this system.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -215,7 +215,7 @@ The \fBstobsl()\fR and \fBstobclear()\fR functions are obsolete. Use the
 .sp
 .LP
 \fBblcompare\fR(3TSOL), \fBhextob\fR(3TSOL), \fBlibtsol\fR(3LIB),
-\fBstr_to_label\fR(3TSOL), \fBattributes\fR(5)
+\fBstr_to_label\fR(3TSOL), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

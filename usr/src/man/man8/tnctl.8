@@ -21,11 +21,11 @@ the Solaris kernel.
 .sp
 .LP
 As part of Solaris Trusted Extensions initialization, \fBtnctl\fR is run in the
-global zone by an \fBsmf\fR(5) script during system boot. The \fBtnctl\fR
+global zone by an \fBsmf\fR(7) script during system boot. The \fBtnctl\fR
 command is not intended to be used during normal system administration.
 Instead, if a local trusted networking database file is modified,
 the administrator first issues
-\fBtnchkdb\fR(1M) to check the syntax, and then refreshes the kernel copy with
+\fBtnchkdb\fR(8) to check the syntax, and then refreshes the kernel copy with
 this command:
 .sp
 .in +2
@@ -59,8 +59,8 @@ form:
 .sp
 
 Where \fIport\fR can be a number in the range 1 to 65535. or any known service
-(see \fBservices\fR(4)), and protocol can be a number in the range 1 to 255, or
-any known protocol (see \fBprotocols\fR(4)).
+(see \fBservices\fR(5)), and protocol can be a number in the range 1 to 255, or
+any known protocol (see \fBprotocols\fR(5)).
 .RE
 
 .sp
@@ -166,7 +166,7 @@ reload MLPs for a non-global zone, reboot the zone:
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -221,9 +221,9 @@ Configuration file for the name service switch
 
 .SH SEE ALSO
 .LP
-\fBsvcs\fR(1), \fBsvcadm\fR(1M), \fBtninfo\fR(1M), \fBtnd\fR(1M),
-\fBtnchkdb\fR(1M), \fBzoneadm\fR(1M), \fBnsswitch.conf\fR(4),
-\fBprotocols\fR(4), \fBservices\fR(4), \fBattributes\fR(5), \fBsmf\fR(5)
+\fBsvcs\fR(1), \fBsvcadm\fR(8), \fBtninfo\fR(8), \fBtnd\fR(8),
+\fBtnchkdb\fR(8), \fBzoneadm\fR(8), \fBnsswitch.conf\fR(5),
+\fBprotocols\fR(5), \fBservices\fR(5), \fBattributes\fR(7), \fBsmf\fR(7)
 .sp
 .LP
 \fIHow to Synchronize Kernel Cache With Network Databases\fR in \fISolaris
@@ -239,7 +239,7 @@ is configured with Trusted Extensions.
 .sp
 .LP
 The \fBtnctl\fR service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -252,7 +252,7 @@ svc:/network/tnctl
 .LP
 The service's status can be queried by using \fBsvcs\fR(1). Administrative
 actions on this service, such as refreshing the kernel cache, can be performed
-using \fBsvcadm\fR(1M), as in:
+using \fBsvcadm\fR(8), as in:
 .sp
 .in +2
 .nf

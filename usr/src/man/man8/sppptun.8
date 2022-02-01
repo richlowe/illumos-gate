@@ -38,7 +38,7 @@ to specify Ethernet interfaces that are to be used for PPPoE, and the
 .sp
 .LP
 The use of \fBsppptun\fR to add interfaces is similar to the use of
-\fBifconfig\fR(1M) to add interfaces to IP. The plumbing is done once for each
+\fBifconfig\fR(8) to add interfaces to IP. The plumbing is done once for each
 interface, preferably at system start-up time, and is not normally manipulated
 on a running system. If multiple instances of PPP are run over a single
 interface, they share the plumbing to that interface. Plumbing for each session
@@ -86,7 +86,7 @@ This plumbs a new interface into the driver. The \fIprotocol\fR parameter is
 the PPPoE "Discovery Stage" connection. Both connections must be present for
 each Ethernet interface that is to be used for PPPoE. The \fIdevice\fR
 parameter is the path name of the Ethernet interface to use (use
-\fBifconfig\fR(1M) to list available devices). If the path begins with
+\fBifconfig\fR(8) to list available devices). If the path begins with
 \fB/dev/\fR, then this portion may be omitted.
 .sp
 The \fB-s\fR \fIsap\fR option can be specified to use an alternate Ethertype
@@ -229,7 +229,7 @@ Solaris PPP tunneling device driver
 .SH SEE ALSO
 .sp
 .LP
-\fBpppd\fR(1M), \fBpppoec\fR(1M), \fBpppoed\fR(1M), \fBsppptun\fR(7M)
+\fBpppd\fR(8), \fBpppoec\fR(8), \fBpppoed\fR(8), \fBsppptun\fR(4M)
 .sp
 .LP
 \fIRFC 2516, Method for Transmitting PPP Over Ethernet (PPPoE)\fR, Mamakos et

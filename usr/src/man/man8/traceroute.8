@@ -451,7 +451,7 @@ Set the desired number of probe queries. The default is 3.
 Bypass the normal routing tables and send directly to a host on an attached
 network. If the host is not on a directly-attached network, an error is
 returned. This option can be used to send probes to a local host through an
-interface that has been dropped by the router daemon. See \fBin.routed\fR(1M).
+interface that has been dropped by the router daemon. See \fBin.routed\fR(8).
 You cannot use this option if the \fB-g\fR option is used.
 .RE
 
@@ -660,10 +660,10 @@ An error occurred.
 .RE
 
 .SH SEE ALSO
-\fBnetstat\fR(1M), \fBsignal\fR(3C), \fBping\fR(1M), \fBattributes\fR(5),
-\fBprivileges\fR(5), \fBzones\fR(5)
+\fBnetstat\fR(8), \fBsignal\fR(3C), \fBping\fR(8), \fBattributes\fR(7),
+\fBprivileges\fR(7), \fBzones\fR(7)
 .SH WARNINGS
 This utility is intended for use in network testing, measurement and
 management. It should be used primarily for manual fault isolation. Because of
 the load it could impose on the network, it is unwise to use
-\fBtraceroute\fR(1M) during normal operations or from automated scripts.
+\fBtraceroute\fR(8) during normal operations or from automated scripts.

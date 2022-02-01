@@ -100,7 +100,7 @@ attributes may be present:
 .ad
 .RS 13n
 Allowable values are "true" or "false". If the value is "false", the file
-system is damaged or was not unmounted cleanly and the \fBfsck\fR(1M) command
+system is damaged or was not unmounted cleanly and the \fBfsck\fR(8) command
 must be run before this file system can be mounted.
 .RE
 
@@ -141,17 +141,17 @@ file system.
 .ad
 .RS 6n
 Produce verbose output. This is usually information about the file systems
-superblock and varies across different \fIFSTypes\fR. See \fBufs\fR(7FS),
-\fBmkfs_ufs\fR(1M), and \fBtunefs\fR(1M) for details.
+superblock and varies across different \fIFSTypes\fR. See \fBufs\fR(4FS),
+\fBmkfs_ufs\fR(8), and \fBtunefs\fR(8) for details.
 .RE
 
 .SH USAGE
-See \fBlargefile\fR(5) for the description of the behavior of \fBfstyp\fR when
+See \fBlargefile\fR(7) for the description of the behavior of \fBfstyp\fR when
 encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH SEE ALSO
-\fBfsck\fR(1M), \fBmkfs_ufs\fR(1M), \fBtunefs\fR(1M), \fBattributes\fR(5),
-\fBlibfstyp\fR(3LIB), \fBlargefile\fR(5), \fBhsfs\fR(7FS), \fBufs\fR(7FS),
-\fBpcfs\fR(7FS)
+\fBfsck\fR(8), \fBmkfs_ufs\fR(8), \fBtunefs\fR(8), \fBattributes\fR(7),
+\fBlibfstyp\fR(3LIB), \fBlargefile\fR(7), \fBhsfs\fR(4FS), \fBufs\fR(4FS),
+\fBpcfs\fR(4FS)
 .SH NOTES
 The use of heuristics implies that the result of \fBfstyp\fR is not guaranteed
 to be accurate.

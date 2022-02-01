@@ -1788,7 +1788,7 @@ Links assigned to a bridge must all have the same MTU. This is checked when the
 link is assigned. The link is added to the bridge in a deactivated form if it
 is not the first link on the bridge and it has a differing MTU.
 .sp
-Note that systems using bridging should not set the \fBeeprom\fR(1M)
+Note that systems using bridging should not set the \fBeeprom\fR(8)
 \fBlocal-mac-address?\fR variable to false.
 .sp
 The options are the same as for the \fBcreate-bridge\fR subcommand.
@@ -4050,12 +4050,12 @@ Show all configured etherstubs by default, or the specified etherstub if
 .sp .6
 .RS 4n
 Create an IP tunnel link named \fIiptun-link\fR. Such links can additionally be
-protected with IPsec using \fBipsecconf\fR(1M).
+protected with IPsec using \fBipsecconf\fR(8).
 .sp
 An IP tunnel is conceptually comprised of two parts: a virtual link between two
 or more IP nodes, and an IP interface above this link that allows the system to
 transmit and receive IP packets encapsulated by the underlying link. This
-subcommand creates a virtual link. The \fBifconfig\fR(1M) command is used to
+subcommand creates a virtual link. The \fBifconfig\fR(8) command is used to
 configure IP interfaces above the link.
 .sp
 .ne 2
@@ -4325,7 +4325,7 @@ associated with the tunnel link, enter:
 .in -2
 .sp
 
-See \fBipsecconf\fR(1M) for more details on how to configure IPsec policy.
+See \fBipsecconf\fR(8) for more details on how to configure IPsec policy.
 .RE
 
 .sp
@@ -4335,9 +4335,9 @@ See \fBipsecconf\fR(1M) for more details on how to configure IPsec policy.
 .ad
 .sp .6
 .RS 4n
-The IP tunnel link was implicitly created with \fBifconfig\fR(1M), and will be
+The IP tunnel link was implicitly created with \fBifconfig\fR(8), and will be
 automatically deleted when it is no longer referenced (that is, when the last
-IP interface over the tunnel is unplumbed). See \fBifconfig\fR(1M) for details
+IP interface over the tunnel is unplumbed). See \fBifconfig\fR(8) for details
 on implicit tunnel creation.
 .RE
 
@@ -4377,7 +4377,7 @@ The tunnel destination address.
 .sp .6
 .RS 4n
 Show the historical network usage from a stored extended accounting file.
-Configuration and enabling of network accounting through \fBacctadm\fR(1M) is
+Configuration and enabling of network accounting through \fBacctadm\fR(8) is
 required. The default output will be the summary of network usage for the
 entire period of time in which extended accounting was enabled.
 .sp
@@ -4499,7 +4499,7 @@ list. It is an error to specify more than one anchor or to have an anchor first
 in the list.
 .sp
 The \fBautopush\fR property is preferred over the more general
-\fBautopush\fR(1M) command.
+\fBautopush\fR(8) command.
 .RE
 
 .sp
@@ -4518,7 +4518,7 @@ ordering for any individual connection will be maintained.
 The processor or set of processors are not exclusively reserved for the link.
 Only the kernel threads and interrupts associated with processing of the link
 are bound to the processor or the set of processors specified. In case it is
-desired that processors be dedicated to the link, \fBpsrset\fR(1M) can be used
+desired that processors be dedicated to the link, \fBpsrset\fR(8) can be used
 to create a processor set and then specifying the processors from the processor
 set to bind the link to.
 .sp
@@ -4732,9 +4732,9 @@ The default value is 0.
 Specifies the zone to which the link belongs. This property can be modified
 only temporarily through \fBdladm\fR, and thus the \fB-t\fR option must be
 specified. To modify the zone assignment such that it persists across reboots,
-please use \fBzonecfg\fR(1M). Possible values consist of any exclusive-IP zone
+please use \fBzonecfg\fR(8). Possible values consist of any exclusive-IP zone
 currently running on the system. By default, the zone binding is as per
-\fBzonecfg\fR(1M).
+\fBzonecfg\fR(8).
 .RE
 
 .SS "Wifi Link Properties"
@@ -4789,7 +4789,7 @@ is no fixed speed.
 .RE
 
 .SS "Ethernet Link Properties"
-The following MII Properties, as documented in \fBieee802.3\fR(5), are
+The following MII Properties, as documented in \fBieee802.3\fR(7), are
 supported in read-only mode:
 .RS +4
 .TP
@@ -5424,7 +5424,7 @@ operation implicitly creates a virtual switch connecting \fBhello0\fR and
 .sp
 .LP
 Network usage statistics can be stored using the extended accounting facility,
-\fBacctadm\fR(1M).
+\fBacctadm\fR(8).
 
 .sp
 .in +2
@@ -5568,11 +5568,11 @@ sitetunnel0: flags=2200041 <UP,RUNNING,NONUD,IPv6> mtu 65515 index 3
 .sp
 .LP
 Note that the system automatically configures the IPv6 address on the 6to4 IP
-interface. See \fBifconfig\fR(1M) for a description of how IPv6 addresses are
+interface. See \fBifconfig\fR(8) for a description of how IPv6 addresses are
 configured on 6to4 tunnel links.
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 .LP
 \fB/usr/sbin\fR
@@ -5604,9 +5604,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBacctadm\fR(1M), \fBautopush\fR(1M), \fBifconfig\fR(1M), \fBipsecconf\fR(1M),
-\fBndd\fR(1M), \fBpsrset\fR(1M), \fBwpad\fR(1M), \fBzonecfg\fR(1M),
-\fBattributes\fR(5), \fBieee802.3\fR(5), \fBdlpi\fR(7P)
+\fBacctadm\fR(8), \fBautopush\fR(8), \fBifconfig\fR(8), \fBipsecconf\fR(8),
+\fBndd\fR(8), \fBpsrset\fR(8), \fBwpad\fR(8), \fBzonecfg\fR(8),
+\fBattributes\fR(7), \fBieee802.3\fR(7), \fBdlpi\fR(4P)
 .SH NOTES
 The preferred method of referring to an aggregation in the aggregation
 subcommands is by its link name. Referring to an aggregation by its integer

@@ -16,7 +16,7 @@ logindevperm, fbtab \- login-based device permissions
 .sp
 .LP
 The \fB/etc/logindevperm\fR file contains information that is used by
-\fBlogin\fR(1) and \fBttymon\fR(1M) to change the owner, group, and permissions
+\fBlogin\fR(1) and \fBttymon\fR(8) to change the owner, group, and permissions
 of devices upon logging into or out of a console device. By default, this file
 contains lines for the keyboard, mouse, audio, and frame buffer devices.
 .sp
@@ -30,7 +30,7 @@ specified in \fB/etc/logindevperm\fR.
 If the console is \fB/dev/vt/active\fR, the owner of the devices is the first
 user logged in on the consoles (\fB/dev/console\fR or \fB/dev/vt/#\fR). Upon
 this first user's logout the owner and group of these devices is reset by
-\fBttymon\fR(1M) to owner root and root's group as specified in
+\fBttymon\fR(8) to owner root and root's group as specified in
 \fB/etc/passwd\fR.
 .sp
 .LP
@@ -61,7 +61,7 @@ A fully qualified name, for example, \fBfbs\fR.
 .TP
 .ie t \(bu
 .el o
-A regular expression, for example, \fB[a-z0-9.]+\fR. See \fBregexp\fR(5) for
+A regular expression, for example, \fB[a-z0-9.]+\fR. See \fBregexp\fR(7) for
 more information on regular expressions.
 .RE
 .RS +4
@@ -86,7 +86,7 @@ Some examples of \fB/etc/logindevperm\fR file entries include:
 
 .sp
 .LP
-Specify all \fBugen\fR(7D) endpoints and status nodes.
+Specify all \fBugen\fR(4D) endpoints and status nodes.
 .sp
 .LP
 Drivers can also be specified to limit the permission changes to minor nodes
@@ -101,7 +101,7 @@ driver=usb_mid,scsa2usb,usbprn  # libusb devices
 
 .sp
 .LP
-Due to the persistence of \fBdevfs\fR(7FS) minor node management, the user
+Due to the persistence of \fBdevfs\fR(4FS) minor node management, the user
 should be logged in as root if the list of minor nodes will be reduced and the
 devices should all be plugged in.
 .sp
@@ -111,7 +111,7 @@ changed using \fBchmod\fR(1) and \fBchown\fR(1), as with any other user-owned
 file.
 .sp
 .LP
-Upon logout the owner and group of these devices are reset by \fBttymon\fR(1M)
+Upon logout the owner and group of these devices are reset by \fBttymon\fR(8)
 to owner \fBroot\fR and root's group as specified in \fB/etc/passwd\fR
 (typically \fBother\fR). The permissions are set as specified in the
 \fB/etc/logindevperm\fR file.
@@ -128,8 +128,8 @@ File that contains user group information.
 .SH SEE ALSO
 .sp
 .LP
-\fBchmod\fR(1), \fBchown\fR(1), \fBlogin\fR(1), \fBttymon\fR(1M),
-\fBpasswd\fR(4), \fBregexp\fR(5), \fBugen\fR(7D)
+\fBchmod\fR(1), \fBchown\fR(1), \fBlogin\fR(1), \fBttymon\fR(8),
+\fBpasswd\fR(5), \fBregexp\fR(7), \fBugen\fR(4D)
 .SH NOTES
 .sp
 .LP

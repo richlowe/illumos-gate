@@ -28,7 +28,7 @@ and supplementary group list set to those of the specified \fIusername\fR.
 Additionally, the new shell's project ID is set to the default project ID of
 the specified user. See \fBgetdefaultproj\fR(3PROJECT),
 \fBsetproject\fR(3PROJECT). The new shell will be the shell specified in the
-shell field of \fIusername\fR's password file entry (see \fBpasswd\fR(4)). If
+shell field of \fIusername\fR's password file entry (see \fBpasswd\fR(5)). If
 no shell is specified, \fB/usr/bin/sh\fR is used (see \fBsh\fR(1)). If
 superuser privilege is requested and the shell for the superuser cannot be
 invoked using \fBexec\fR(2), \fB/sbin/sh\fR is used as a fallback. To return to
@@ -75,7 +75,7 @@ of \fB$\fR\fBPATH\fR\fB, \fR which is controlled by \fBPATH\fR and
 .sp
 .LP
 All attempts to become another user using \fBsu\fR are logged in the log file
-\fB/var/adm/sulog\fR (see \fBsulog\fR(4)).
+\fB/var/adm/sulog\fR (see \fBsulog\fR(5)).
 .SH SECURITY
 .sp
 .LP
@@ -140,7 +140,7 @@ while becoming user \fBbin\fR.
 .LP
 If any of the \fBLC_*\fR variables ( \fBLC_CTYPE\fR, \fBLC_MESSAGES\fR,
 \fBLC_TIME\fR, \fBLC_COLLATE\fR, \fBLC_NUMERIC\fR, and \fBLC_MONETARY\fR) (see
-\fBenviron\fR(5)) are not set in the environment, the operational behavior of
+\fBenviron\fR(7)) are not set in the environment, the operational behavior of
 \fBsu\fR for each corresponding locale category is determined by the value of
 the \fBLANG\fR environment variable. If \fBLC_ALL\fR is set, its contents are
 used to override both the \fBLANG\fR and the other \fBLC_*\fR variables. If
@@ -292,8 +292,8 @@ Sets the TZ environment variable of the shell.
 .sp
 .LP
 \fBcsh\fR(1), \fBenv\fR(1), \fBksh\fR(1), \fBlogin\fR(1), \fBroles\fR(1),
-\fBsh\fR(1), \fBsyslogd\fR(1M), \fBexec\fR(2), \fBgetdefaultproj\fR(3PROJECT),
+\fBsh\fR(1), \fBsyslogd\fR(8), \fBexec\fR(2), \fBgetdefaultproj\fR(3PROJECT),
 \fBsetproject\fR(3PROJECT), \fBpam\fR(3PAM), \fBpam_authenticate\fR(3PAM),
-\fBpam_acct_mgmt\fR(3PAM), \fBpam_setcred\fR(3PAM), \fBpam.conf\fR(4),
-\fBpasswd\fR(4), \fBprofile\fR(4), \fBsulog\fR(4), \fBsyslog\fR(3C),
-\fBattributes\fR(5), \fBenviron\fR(5)
+\fBpam_acct_mgmt\fR(3PAM), \fBpam_setcred\fR(3PAM), \fBpam.conf\fR(5),
+\fBpasswd\fR(5), \fBprofile\fR(5), \fBsulog\fR(5), \fBsyslog\fR(3C),
+\fBattributes\fR(7), \fBenviron\fR(7)

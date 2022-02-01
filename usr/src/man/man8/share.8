@@ -21,7 +21,7 @@ The \fBshare\fR command exports, or makes a resource available for mounting,
 through a remote file system of type \fIFSType\fR. If the option \fB-F\fR
 \fIFSType\fR is omitted, the first file system type listed in
 \fB/etc/dfs/fstypes\fR is used as default. For a description of NFS specific
-options, see \fBshare_nfs\fR(1M). \fIpathname\fR is the pathname of the
+options, see \fBshare_nfs\fR(8). \fIpathname\fR is the pathname of the
 directory to be shared. When invoked with no arguments, \fBshare\fR displays
 all shared file systems.
 .SH OPTIONS
@@ -54,7 +54,7 @@ Specify the filesystem type.
 .sp .6
 .RS 4n
 The \fIspecific_options\fR are used to control access of the shared resource.
-(See \fBshare_nfs\fR(1M) for the NFS specific options.) They may be any of the
+(See \fBshare_nfs\fR(8) for the NFS specific options.) They may be any of the
 following:
 .sp
 .ne 2
@@ -180,8 +180,8 @@ System record of shared file systems.
 .SH SEE ALSO
 .sp
 .LP
-\fBmountd\fR(1M), \fBnfsd\fR(1M), \fBshare_nfs\fR(1M), \fBshareall\fR(1M),
-\fBunshare\fR(1M), \fBattributes\fR(5)
+\fBmountd\fR(8), \fBnfsd\fR(8), \fBshare_nfs\fR(8), \fBshareall\fR(8),
+\fBunshare\fR(8), \fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

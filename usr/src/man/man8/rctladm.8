@@ -18,7 +18,7 @@ rctladm \- display or modify global state of system resource controls
 The \fBrctladm\fR command allows the examination and modification of active
 resource controls on the running system. An instance of a resource control is
 referred to as an \fBrctl\fR. See \fBsetrctl\fR(2) for a description of an
-\fBrctl\fR; see \fBresource_controls\fR(5) for a list of the \fBrctl\fRs
+\fBrctl\fR; see \fBresource_controls\fR(7) for a list of the \fBrctl\fRs
 supported in the current release of the Solaris operating system. Logging of
 \fBrctl\fR violations can be activated or deactivated system-wide and active
 \fBrctl\fRs (and their state) can be listed.
@@ -51,7 +51,7 @@ severity level. To do this, specify \fBsyslog=\fIlevel\fR\fR, where \fIlevel\fR
 is one of the string tokens given as valid severity levels in \fBsyslog\fR(3C).
 You can omit the common \fBLOG_\fR prefix on the severity level. Note that not
 all \fBrctl\fRs support the \fBsyslog\fR action. See
-\fBresource_controls\fR(5).
+\fBresource_controls\fR(7).
 .RE
 
 .sp
@@ -181,7 +181,7 @@ Each time \fBrctladm\fR is executed, it updates the contents of
 .LP
 \fBsetrctl\fR(2), \fBgetrctl\fR(2), \fBprctl\fR(1),
 \fBrctlblk_get_global_flags\fR(3C), \fBrctlblk_get_global_action\fR(3C),
-\fBattributes\fR(5), \fBresource_controls\fR(5)
+\fBattributes\fR(7), \fBresource_controls\fR(7)
 .SH NOTES
 .sp
 .LP

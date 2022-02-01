@@ -12,13 +12,13 @@ servers.
 .sp
 .LP
 The Solaris system must first join an AD domain and then add the \fBad\fR
-keyword to the appropriate entries in the \fBnsswitch.conf\fR(4) file. The
-Solaris system joins the AD domain by using the  \fBkclient\fR(1M) utility. The
+keyword to the appropriate entries in the \fBnsswitch.conf\fR(5) file. The
+Solaris system joins the AD domain by using the  \fBkclient\fR(8) utility. The
 AD name service only supports the naming databases for \fBpasswd\fR and
 \fBgroup\fR.
 .sp
 .LP
-Windows users are not able to log in. The \fBuser_attr\fR(4) database has no
+Windows users are not able to log in. The \fBuser_attr\fR(5) database has no
 entries for Windows users, and the \fBpasswd\fR(1) command does not support the
 synchronization of user passwords with AD.
 .sp
@@ -27,7 +27,7 @@ The Solaris AD client uses auto-discovery techniques to find AD directory
 servers, such as domain controllers and global catalog servers. The client also
 uses the LDAP v3 protocol to access naming information from AD servers. The AD
 server schema requires no modification because the AD client works with native
-AD schema. The Solaris AD client uses the \fBidmap\fR(1M) service to map
+AD schema. The Solaris AD client uses the \fBidmap\fR(8) service to map
 between Windows security identifiers (SIDs) and Solaris user identifiers (UIDs)
 and group identifiers (GIDs). User names and group names are taken from the
 \fBsAMAccountName\fR attribute of the AD user and group objects and then tagged
@@ -37,7 +37,7 @@ user name or group name by the \fB@\fR character.
 .LP
 The client uses the SASL/GSSAPI/KRB5 security model. The \fBkclient\fR utility
 is used to join the client to AD. During the join operation, \fBkclient\fR
-configures Kerberos v5 on the client. See \fBkclient\fR(1M).
+configures Kerberos v5 on the client. See \fBkclient\fR(8).
 .SH FILES
 .ne 2
 .na
@@ -67,6 +67,6 @@ Name service switch module for AD.
 .RE
 
 .SH SEE ALSO
-\fBpasswd\fR(1), \fBsvcs\fR(1), \fBidmap\fR(1M), \fBidmapd\fR(1M),
-\fBkclient\fR(1M), \fBsvcadm\fR(1M), \fBsvccfg\fR(1M),
-\fBnsswitch.conf\fR(4), \fBuser_attr\fR(4), \fBsmf\fR(5)
+\fBpasswd\fR(1), \fBsvcs\fR(1), \fBidmap\fR(8), \fBidmapd\fR(8),
+\fBkclient\fR(8), \fBsvcadm\fR(8), \fBsvccfg\fR(8),
+\fBnsswitch.conf\fR(5), \fBuser_attr\fR(5), \fBsmf\fR(7)

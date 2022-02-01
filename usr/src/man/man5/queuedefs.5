@@ -16,7 +16,7 @@ queuedefs \- queue description file for at, batch, and cron
 .sp
 .LP
 The \fBqueuedefs\fR file describes the characteristics of the queues managed by
-\fBcron\fR(1M). Each non-comment line in this file describes one queue. The
+\fBcron\fR(8). Each non-comment line in this file describes one queue. The
 format of the lines are as follows:
 .sp
 .LP
@@ -99,7 +99,7 @@ run it.
 .LP
 The \fBb\fR queue, for \fBbatch\fR(1) jobs, can have up to 2 jobs running
 simultaneously; those jobs will be run with a \fBnice\fR(1) value of 2.  If a
-job cannot be run because too many other jobs are running, \fBcron\fR(1M) will
+job cannot be run because too many other jobs are running, \fBcron\fR(8) will
 wait 90 seconds before trying again to run it. All other queues can have up to
 100 jobs running simultaneously; they will be run with a \fBnice\fR value of 2,
 and if a job cannot be run because too many other jobs are running \fBcron\fR
@@ -118,4 +118,4 @@ queue description file for  \fBat\fR, \fBbatch\fR, and  \fBcron\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBat\fR(1), \fBcrontab\fR(1), \fBnice\fR(1), \fBcron\fR(1M)
+\fBat\fR(1), \fBcrontab\fR(1), \fBnice\fR(1), \fBcron\fR(8)

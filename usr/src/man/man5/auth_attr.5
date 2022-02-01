@@ -21,7 +21,7 @@ Programs use the \fBgetauthattr\fR(3SECDB) routines to access this information.
 .sp
 .LP
 The search order for multiple authorization sources is specified in the
-\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(4) man
+\fB/etc/nsswitch.conf\fR file, as described in the \fBnsswitch.conf\fR(5) man
 page.
 .sp
 .LP
@@ -208,7 +208,7 @@ With the above authorizations, the administrator can assign to others the
 \fBsolaris.login.enable\fR authorization. If the administrator has both the
 grant authorization, \fBsolaris.admin.printmgr.grant\fR, and the wildcard
 authorization, \fBsolaris.admin.printmgr.*\fR, the administrator can grant to
-others any of the printer authorizations. See \fBuser_attr\fR(4) for more
+others any of the printer authorizations. See \fBuser_attr\fR(5) for more
 information about how wildcards can be used to assign multiple authorizations
 whose names begin with the same components.
 
@@ -254,8 +254,8 @@ auth_attr:files nis
 .SH SEE ALSO
 .LP
 \fBgetauthattr\fR(3SECDB), \fBgetexecattr\fR(3SECDB),
-\fBgetprofattr\fR(3SECDB), \fBgetuserattr\fR(3SECDB), \fBexec_attr\fR(4),
-\fBnsswitch.conf\fR(4), \fBuser_attr\fR(4)
+\fBgetprofattr\fR(3SECDB), \fBgetuserattr\fR(3SECDB), \fBexec_attr\fR(5),
+\fBnsswitch.conf\fR(5), \fBuser_attr\fR(5)
 .SH NOTES
 .LP
 Because the list of legal keys is likely to expand, any code that parses this

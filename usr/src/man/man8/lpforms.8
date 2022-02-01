@@ -200,7 +200,7 @@ Before printing the content of a print request needing this form, the generic
 interface program provided with  the LP print service will initialize the
 physical printer to handle pages \fIscaled-decimal-number1\fR long, and
 \fIscaled-decimal-number2\fR wide using the printer type as a key into the
-\fBterminfo\fR(4) database. The page length and page width will also be passed,
+\fBterminfo\fR(5) database. The page length and page width will also be passed,
 if possible, to each filter used in a request needing this form.
 .RE
 
@@ -226,7 +226,7 @@ filter the page subset of 1-\fIinteger\fR.
 Before printing the content of a print request needing this form, the interface
 program provided with the  LP print service will initialize the physical
 printer to handle these pitches, using the printer type as a key into the
-\fBterminfo\fR(4) database.  Also, the pitches will be passed, if possible, to
+\fBterminfo\fR(5) database.  Also, the pitches will be passed, if possible, to
 each filter used in a request needing this form. \fIscaled-decimal-number3\fR
 is in lines-per-centimeter if a \fBc\fR is appended, and lines-per-inch
 otherwise; similarly, \fIscaled-decimal-number4\fR is in
@@ -624,7 +624,7 @@ alert definition for the form will be removed.
 .SS "Large File Behavior"
 .sp
 .LP
-See \fBlargefile\fR(5) for the description of the behavior of \fBlpforms\fR
+See \fBlargefile\fR(7) for the description of the behavior of \fBlpforms\fR
 when encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH EXIT STATUS
 .sp
@@ -661,8 +661,8 @@ Fault handler for \fBlpform\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBlp\fR(1), \fBlpstat\fR(1), \fBlpadmin\fR(1M), \fBterminfo\fR(4),
-\fBattributes\fR(5), \fBlargefile\fR(5)
+\fBlp\fR(1), \fBlpstat\fR(1), \fBlpadmin\fR(8), \fBterminfo\fR(5),
+\fBattributes\fR(7), \fBlargefile\fR(7)
 .sp
 .LP
 \fI\fR

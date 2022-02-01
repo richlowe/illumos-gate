@@ -35,7 +35,7 @@ to both versions.
 By default, both versions of \fBkadmin\fR attempt to determine your user name
 and perform operations on behalf of your "\fIusername\fR/\fIadmin\fR" instance.
 Operations performed are subject to privileges granted or denied to this user
-instance by the Kerberos ACL file (see \fBkadm5.acl\fR(4)). You may perform
+instance by the Kerberos ACL file (see \fBkadm5.acl\fR(5)). You may perform
 administration as another user instance by using the \fB-p\fR option.
 .sp
 .LP
@@ -55,7 +55,7 @@ uses that service ticket to interact with \fBkadmind\fR.
 .LP
 The local version, \fBkadmin.local\fR, must be run with an effective UID of
 root, and normally uses a key from the \fB/var/krb5/.k5.\fR\fIrealm\fR stash
-file (see \fBkdb5_util\fR(1M)) to decrypt information from the database rather
+file (see \fBkdb5_util\fR(8)) to decrypt information from the database rather
 than prompting for a password. The \fB-m\fR option will bypass the
 \fB\&.k5.\fR\fIrealm\fR stash file and prompt for the master password.
 .SH OPTIONS
@@ -203,7 +203,7 @@ LDAP and the \fBBerkeley-db2\fR plug-in. These arguments are:
 .sp .6
 .RS 4n
 LDAP simple bind DN for authorization on the directory server. Overrides the
-\fBldap_kadmind_dn\fR parameter setting in \fBkrb5.conf\fR(4).
+\fBldap_kadmind_dn\fR parameter setting in \fBkrb5.conf\fR(5).
 .RE
 
 .sp
@@ -547,7 +547,7 @@ unauthorized users gain read access to the script.
 .ad
 .sp .6
 .RS 4n
-Override the list of enctype:salttype pairs given in \fBkdc.conf\fR(4) for
+Override the list of enctype:salttype pairs given in \fBkdc.conf\fR(5) for
 setting the key of the principal. The quotes are necessary if there are
 multiple enctype:salttype pairs. One key for each similar enctype and same
 salttype will be created and the first one listed will be used. For example, in
@@ -714,7 +714,7 @@ Sets the password to the specified string. Not recommended.
 .ad
 .sp .6
 .RS 4n
-Override the list of enctype:salttype pairs given in \fBkdc.conf\fR(4) for
+Override the list of enctype:salttype pairs given in \fBkdc.conf\fR(5) for
 setting the key of the principal. The quotes are necessary if there are
 multiple enctype:salttype pairs. For each key, the first matching similar
 enctype and same salttype in the list will be used to set the new key(s).
@@ -1160,9 +1160,9 @@ keys with the same encryption type but different \fBsalt\fR types. If the
 \fB/etc/krb5/krb5.keytab\fR, is used.
 .sp
 The "\fB-e\fR \fB\fIenctype\fR:salt\fR" option overrides the list of
-\fIenctypes\fR given in \fBkrb5.conf\fR(4), in the \fBpermitted_enctypes\fR
+\fIenctypes\fR given in \fBkrb5.conf\fR(5), in the \fBpermitted_enctypes\fR
 parameter. If "\fB-e\fR \fB\fIenctype\fR:salt\fR" is not used and
-\fBpermitted_enctypes\fR is not defined in \fBkrb5.conf\fR(4), a key for each
+\fBpermitted_enctypes\fR is not defined in \fBkrb5.conf\fR(5), a key for each
 \fIenctype\fR supported by the system on which \fBkadmin\fR is run will be
 created and added to the \fBkeytab\fR. Restricting the \fIenctypes\fR of keys
 in the \fBkeytab\fR is useful when the system for which keys are being created
@@ -1394,7 +1394,7 @@ You can also use the following time modifiers: \fBfirst\fR, \fBsecond\fR,
 \fBeighth\fR, \fBninth\fR, \fBtenth\fR, \fBeleventh\fR, \fBtwelfth\fR, and
 \fBago\fR.
 .SH ENVIRONMENT VARIABLES
-See \fBenviron\fR(5) for descriptions of the following environment variables
+See \fBenviron\fR(7) for descriptions of the following environment variables
 that affect the execution of \fBkadmin\fR:
 .sp
 .ne 2
@@ -1481,7 +1481,7 @@ Keytab for \fBkadmind\fR principals: \fBkadmin\fR/\fIfqdn\fR,
 .RE
 
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1495,10 +1495,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBkpasswd\fR(1), \fBmore\fR(1), \fBkadmind\fR(1M),
-\fBkdb5_util\fR(1M), \fBkdb5_ldap_util\fR(1M), \fBkproplog\fR(1M),
-\fBkadm5.acl\fR(4), \fBkdc.conf\fR(4), \fBkrb5.conf\fR(4), \fBattributes\fR(5),
-\fBenviron\fR(5), \fBkerberos\fR(5), \fBkrb5envvar\fR(5)
+\fBkpasswd\fR(1), \fBmore\fR(1), \fBkadmind\fR(8),
+\fBkdb5_util\fR(8), \fBkdb5_ldap_util\fR(8), \fBkproplog\fR(8),
+\fBkadm5.acl\fR(5), \fBkdc.conf\fR(5), \fBkrb5.conf\fR(5), \fBattributes\fR(7),
+\fBenviron\fR(7), \fBkerberos\fR(7), \fBkrb5envvar\fR(7)
 .SH HISTORY
 The \fBkadmin\fR program was originally written by Tom Yu at MIT, as an
 interface to the OpenVision Kerberos administration program.

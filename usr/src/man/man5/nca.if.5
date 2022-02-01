@@ -25,7 +25,7 @@ backed by a \fBhostname.{interface_name}\fR, then list only an asterik
 .LP
 When the \fBncakmod\fR(1) initialization script is invoked during system boot,
 it will attempt to configure each physical interface specified in the
-\fBnca.if\fR file by using \fBncaconfd\fR(1M). Note that there must be an
+\fBnca.if\fR file by using \fBncaconfd\fR(8). Note that there must be an
 accompanying \fBhostname.{interface_name}\fR file and an entry in
 \fB/etc/hosts\fR for the contents of \fBhostname.{interface_name}\fR.
 .sp
@@ -114,7 +114,7 @@ match with entries in \fB/etc/hostname.{}{0-9}\fR for \fBNCA\fR to function.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -130,8 +130,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBnca\fR(1), \fBncab2clf\fR(1), \fBncakmod\fR(1), \fBifconfig\fR(1M),
-\fBncakmod.conf\fR(4), \fBncalogd.conf\fR(4), \fBattributes\fR(5)
+\fBnca\fR(1), \fBncab2clf\fR(1), \fBncakmod\fR(1), \fBifconfig\fR(8),
+\fBncakmod.conf\fR(5), \fBncalogd.conf\fR(5), \fBattributes\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR

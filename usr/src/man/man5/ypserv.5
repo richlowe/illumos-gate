@@ -16,20 +16,20 @@ ypserv \- configuration file for NIS to LDAP transition daemons
 .SH DESCRIPTION
 .LP
 The \fBypserv\fR file specifies configuration information for the
-\fBypserv\fR(1M) daemon. Configuration information can come from LDAP or be
+\fBypserv\fR(8) daemon. Configuration information can come from LDAP or be
 specified in the \fBypserv\fR file.
 .sp
 .LP
-You can create a simple \fBypserv\fR file by running \fBinityp2l\fR(1M). The
+You can create a simple \fBypserv\fR file by running \fBinityp2l\fR(8). The
 \fBypserv\fR file can then be customized as required.
 .sp
 .LP
 A related \fBNISLDAPmapping\fR file contains mapping information that converts
-NIS entries into LDAP entries. See the \fBNISLDAPmapping\fR(4) man page for an
+NIS entries into LDAP entries. See the \fBNISLDAPmapping\fR(5) man page for an
 overview of the setup that is needed to map NIS data to or from LDAP.
 .SH EXTENDED DESCRIPTION
 .LP
-The \fBypserv\fR(1M) server recognizes the attributes that follow. Values
+The \fBypserv\fR(8) server recognizes the attributes that follow. Values
 specified for these attributes in the \fBypserv\fR file, including any empty
 values, override values that are obtained from LDAP. However, the
 \fBnisLDAPconfig*\fR values are read from the \fBypserv\fR file only
@@ -273,11 +273,11 @@ recognized and default values for \fBnisLDAPTLSCertificateDBPath\fR, see the
 .ad
 .sp .6
 .RS 4n
-Proxy user used by \fBypserv\fR(1M), \fBypxfrd\fR(1M) and \fByppasswdd\fR(1M)
+Proxy user used by \fBypserv\fR(8), \fBypxfrd\fR(8) and \fByppasswdd\fR(8)
 to read or to write from or to LDAP. Assumed to have the appropriate permission
 to read and modify LDAP data. There is no default value. If the value ends in a
 comma, the value of the context for the current domain, as defined by a
-\fBnisLDAPdomainContext\fR attribute, is appended. See \fBNISLDAPmapping\fR(4).
+\fBnisLDAPdomainContext\fR attribute, is appended. See \fBNISLDAPmapping\fR(5).
 For example:
 .sp
 .in +2
@@ -507,7 +507,7 @@ default value for \fBnisLDAPstoreErrortimeout\fR is 15 seconds. The
 .SS "Storing Configuration Attributes in LDAP"
 .LP
 Most attributes described on this man page, as well as those described on
-\fBNISLDAPmapping\fR(4), can be stored in LDAP. In order to do so, you will
+\fBNISLDAPmapping\fR(5), can be stored in LDAP. In order to do so, you will
 need to add the following definitions to your LDAP server, which are described
 here in \fBLDIF\fR format suitable for use by \fBldapadd\fR(1). The attribute
 and objectclass OIDs are examples only.
@@ -690,7 +690,7 @@ preferredServerList: 127.0.0.1:389
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -705,9 +705,9 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 .LP
-\fBldapadd\fR(1), \fBldapmodify\fR(1), \fBinityp2l\fR(1M), \fByppasswdd\fR(1M),
-\fBypserv\fR(1M), \fBypxfrd\fR(1M), \fBNISLDAPmapping\fR(4),
-\fBattributes\fR(5)
+\fBldapadd\fR(1), \fBldapmodify\fR(1), \fBinityp2l\fR(8), \fByppasswdd\fR(8),
+\fBypserv\fR(8), \fBypxfrd\fR(8), \fBNISLDAPmapping\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISystem Administration Guide: Naming and Directory Services (DNS, NIS, and

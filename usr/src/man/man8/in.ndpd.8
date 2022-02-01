@@ -53,7 +53,7 @@ privacy extensions for stateless address autoconfiguration.
 .RE
 .sp
 .LP
-Other aspects of Neighbor Discovery are implemented by \fBip6\fR(7P),
+Other aspects of Neighbor Discovery are implemented by \fBip6\fR(4P),
 including:
 .RS +4
 .TP
@@ -114,14 +114,14 @@ generate the addresses. \fBin.ndpd\fR will plumb logical interfaces for each of
 these addresses.
 .sp
 .LP
-Stateful autoconfiguration involves the \fBdhcpagent\fR(1M) daemon and the use
+Stateful autoconfiguration involves the \fBdhcpagent\fR(8) daemon and the use
 of the DHCPv6 protocol. The \fBdhcpagent\fR daemon is responsible for plumbing
 the logical interfaces for the acquired addresses, maintaining the leases, and
 handling duplicate addresses. \fBin.ndpd\fR starts the \fBdhcpagent\fR daemon
 automatically and signals when DHCPv6 should be started. \fBin.ndpd\fR also
 detects when \fBdhcpagent\fR configures the logical interfaces, and sets the
 appropriate prefix length on each according to received Routing Advertisement
-messages. \fBin.ndpd\fR will not stop \fBdhcpagent\fR; use \fBifconfig\fR(1M)
+messages. \fBin.ndpd\fR will not stop \fBdhcpagent\fR; use \fBifconfig\fR(8)
 to control \fBdhcpagent\fR if necessary.
 .sp
 .LP
@@ -169,7 +169,7 @@ service properties are set using a command of the form:
 Turn off stateless and stateful address auto configuration. When set, the
 daemon does not autoconfigure any addresses and does not renumber any
 addresses. This option does the same thing as the following lines in
-\fBndpd.conf\fR(4):
+\fBndpd.conf\fR(5):
 .sp
 .in +2
 .nf
@@ -230,9 +230,9 @@ the hosts.
 .RE
 
 .SH SEE ALSO
-\fBdhcpagent\fR(1M), \fBifconfig\fR(1M), \fBndp\fR(1M), \fBrouteadm\fR(1M),
-\fBsvcadm\fR(1M), \fBndpd.conf\fR(4), \fBattributes\fR(5), \fBsmf\fR(5),
-\fBicmp6\fR(7P), \fBip6\fR(7P), \fBndp\fR(7P)
+\fBdhcpagent\fR(8), \fBifconfig\fR(8), \fBndp\fR(8), \fBrouteadm\fR(8),
+\fBsvcadm\fR(8), \fBndpd.conf\fR(5), \fBattributes\fR(7), \fBsmf\fR(7),
+\fBicmp6\fR(4P), \fBip6\fR(4P), \fBndp\fR(4P)
 .sp
 .LP
 Narten, T., Nordmark, E., Simpson, W. \fIRFC 2461, Neighbor Discovery for IP
@@ -250,7 +250,7 @@ Receipt of a \fBSIGHUP\fR signal will make \fBin.ndpd\fR restart and reread
 \fB/etc/inet/ndpd.conf\fR.
 .SH NOTES
 The \fBin.ndpd\fR daemon service is managed by the service management facility,
-\fBsmf\fR(5), under the service identifier:
+\fBsmf\fR(7), under the service identifier:
 .sp
 .in +2
 .nf
@@ -261,5 +261,5 @@ svc:/network/routing/ndp:default
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(1M) or
-\fBrouteadm\fR(1M).
+requesting restart, can be performed using \fBsvcadm\fR(8) or
+\fBrouteadm\fR(8).

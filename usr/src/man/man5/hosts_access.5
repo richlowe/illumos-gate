@@ -14,7 +14,7 @@ impatient reader is encouraged to skip to the EXAMPLES section for a
 quick introduction.
 .PP
 An extended version of the access control language is described in the
-\fIhosts_options\fR(4) document. The extensions are turned on at
+\fIhosts_options\fR(5) document. The extensions are turned on at
 program build time by building with -DPROCESS_OPTIONS.
 .PP
 In the following text, \fIdaemon\fR is the process name of a
@@ -145,7 +145,7 @@ Shell commands should not rely on the PATH setting of the inetd.
 Instead, they should use absolute path names, or they should begin with
 an explicit PATH=whatever statement.
 .PP
-The \fIhosts_options\fR(4) document describes an alternative language
+The \fIhosts_options\fR(5) document describes an alternative language
 that uses the shell command field in a different and incompatible way.
 .SH % EXPANSIONS
 The following expansions are available within shell commands:
@@ -183,7 +183,7 @@ Patterns like these can be used when the machine has different internet
 addresses with different internet hostnames.  Service providers can use
 this facility to offer FTP, GOPHER or WWW archives with internet names
 that may even belong to different organizations. See also the `twist'
-option in the hosts_options(4) document. Some systems (Solaris,
+option in the hosts_options(5) document. Some systems (Solaris,
 FreeBSD) can have more than one internet address on one physical
 interface; with other systems you may have to resort to SLIP or PPP
 pseudo interfaces that live in a dedicated network address space.
@@ -365,8 +365,8 @@ that shouldn\'t.  All problems are reported via the syslog daemon.
 .fi
 .SH SEE ALSO
 .nf
-tcpd(1M) tcp/ip daemon wrapper program.
-tcpdchk(1M), tcpdmatch(1M), test programs.
+tcpd(8) tcp/ip daemon wrapper program.
+tcpdchk(8), tcpdmatch(8), test programs.
 .SH BUGS
 If a name server lookup times out, the host name will not be available
 to the access control software, even though the host is registered.

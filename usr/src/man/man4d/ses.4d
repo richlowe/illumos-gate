@@ -142,7 +142,7 @@ Driver configuration file
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -158,5 +158,5 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBdriver.conf\fR(4), \fBscsi\fR(4), \fBattributes\fR(5), \fBesp\fR(7D),
-\fBisp\fR(7D), \fBioctl\fR(9E)
+\fBdriver.conf\fR(5), \fBscsi\fR(5), \fBattributes\fR(7), \fBesp\fR(4D),
+\fBisp\fR(4D), \fBioctl\fR(9E)

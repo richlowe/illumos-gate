@@ -35,7 +35,7 @@ The \fBidev_vector\fR field contains the interrupt vector number for vectored
 bus architectures such as VMEbus. The \fBidev_priority\fR field contains the
 bus interrupt priority level.
 .SH ATTRIBUTES
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp

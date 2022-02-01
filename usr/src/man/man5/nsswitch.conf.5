@@ -15,7 +15,7 @@ nsswitch.conf \- configuration file for the name service switch
 .SH DESCRIPTION
 .LP
 The operating system uses a number of databases of information about hosts,
-ipnodes, users (\fBpasswd\fR(4), \fBshadow\fR(4), and \fBuser_attr\fR(4)), and
+ipnodes, users (\fBpasswd\fR(5), \fBshadow\fR(5), and \fBuser_attr\fR(5)), and
 groups. Data for these can come from a variety of sources: hostnames and host
 addresses, for example, can be found in \fB/etc/hosts\fR, \fBNIS\fR,
 \fBLDAP\fR, \fBDNS\fR or Multicast \fBDNS\fR. Zero or more sources
@@ -31,10 +31,10 @@ The following databases use the \fBswitch\fR file:
 c c
 l l .
 Database	Used By
-\fBaliases\fR	\fBsendmail\fR(1M)
+\fBaliases\fR	\fBsendmail\fR(8)
 \fBauth_attr\fR	\fBgetauthnam\fR(3SECDB)
-\fBautomount\fR	\fBautomount\fR(1M)
-\fBbootparams\fR	\fBrpc.bootparamd\fR(1M)
+\fBautomount\fR	\fBautomount\fR(8)
+\fBbootparams\fR	\fBrpc.bootparamd\fR(8)
 \fBethers\fR	\fBethers\fR(3SOCKET)
 \fBgroup\fR	\fBgetgrnam\fR(3C)
 \fBhosts\fR	T{
@@ -42,13 +42,13 @@ Database	Used By
 T}
 \fBipnodes\fR	Same as \fBhosts\fR.
 \fBnetgroup\fR	\fBinnetgr\fR(3C)
-\fBnetmasks\fR	\fBifconfig\fR(1M)
+\fBnetmasks\fR	\fBifconfig\fR(8)
 \fBnetworks\fR	\fBgetnetbyname\fR(3SOCKET)
 \fBpasswd\fR	T{
 \fBgetpwnam\fR(3C), \fBgetspnam\fR(3C), \fBgetusernam\fR(3SECDB)
 T}
 \fBprinters\fR	T{
-\fBlp\fR(1), \fBlpstat\fR(1), \fBcancel\fR(1), \fBlpr\fR(1B), \fBlpq\fR(1B), \fBlprm\fR(1B), \fBin.lpd\fR(1M), \fBlpadmin\fR(1M), \fBlpget\fR(1M), \fBlpset\fR(1M)
+\fBlp\fR(1), \fBlpstat\fR(1), \fBcancel\fR(1), \fBlpr\fR(1B), \fBlpq\fR(1B), \fBlprm\fR(1B), \fBin.lpd\fR(8), \fBlpadmin\fR(8), \fBlpget\fR(8), \fBlpset\fR(8)
 T}
 \fBprof_attr\fR	\fBgetprofnam\fR(3SECDB), \fBgetexecprof\fR(3SECDB)
 \fBproject\fR	T{
@@ -215,7 +215,7 @@ In order to ensure that they all return consistent results,
 \fBgetservbyname\fR(3SOCKET), and \fBnetdir_getbyname\fR(3NSL) functions are
 all implemented in terms of the same internal library function. This function
 obtains the system-wide source lookup policy for \fBhosts\fR, \fBipnodes\fR,
-and \fBservices\fR based on the \fBinet\fR family entries in \fBnetconfig\fR(4)
+and \fBservices\fR based on the \fBinet\fR family entries in \fBnetconfig\fR(5)
 and uses the switch entries only if the \fBnetconfig\fR entries have a \fB-\fR
 (hyphen) in the last column for \fBnametoaddr\fR libraries. See the Notes
 section in \fBgethostbyname\fR(3NSL) and \fBgetservbyname\fR(3SOCKET) for
@@ -304,7 +304,7 @@ often \fBeverything in the file followed by everything in NIS\fR, expressed by
 a solitary \fB+\fR at the end of \fB/etc/passwd\fR. The switch provides an
 alternative for this case (\fBpasswd: files nis\fR) that does not require
 \fB+\fR entries in \fB/etc/passwd\fR and \fB/etc/shadow\fR (the latter is a new
-addition to SunOS 5.0, see \fBshadow\fR(4)).
+addition to SunOS 5.0, see \fBshadow\fR(5)).
 .sp
 .LP
 If this is not sufficient, the \fBNIS/YP\fR compatibility source provides full
@@ -589,7 +589,7 @@ ldap
 In order to get information from the Internet Domain Name Service for hosts
 that are not listed in the enterprise level name service, such as
 \fBLDAP\fR, use the following configuration and set up the
-\fB/etc/resolv.conf\fR file (see \fBresolv.conf\fR(4) for more details):
+\fB/etc/resolv.conf\fR file (see \fBresolv.conf\fR(5) for more details):
 .sp
 .ne 2
 .na
@@ -766,8 +766,8 @@ Sample configuration file that uses \fBfiles\fR, \fBdns\fR and \fBmdns\fR
 .SH SEE ALSO
 .LP
 \fBkpasswd\fR(1), \fBldap\fR(1), \fBnewtask\fR(1),
-\fBpasswd\fR(1), \fBautomount\fR(1M), \fBifconfig\fR(1M), \fBmdnsd\fR(1M),
-\fBrpc.bootparamd\fR(1M), \fBsendmail\fR(1M),
+\fBpasswd\fR(1), \fBautomount\fR(8), \fBifconfig\fR(8), \fBmdnsd\fR(8),
+\fBrpc.bootparamd\fR(8), \fBsendmail\fR(8),
 \fBgetgrnam\fR(3C), \fBgetnetgrent\fR(3C),
 \fBgetpwnam\fR(3C), \fBgetspnam\fR(3C), \fBgethostbyname\fR(3NSL),
 \fBgetpublickey\fR(3NSL), \fBgetrpcbyname\fR(3NSL), \fBnetdir\fR(3NSL),
@@ -777,9 +777,9 @@ Sample configuration file that uses \fBfiles\fR, \fBdns\fR and \fBmdns\fR
 \fBgetexecprof\fR(3SECDB), \fBgetprofnam\fR(3SECDB), \fBgetuserattr\fR(3SECDB),
 \fBgetusernam\fR(3SECDB), \fBethers\fR(3SOCKET), \fBgetaddrinfo\fR(3SOCKET),
 \fBgetnetbyname\fR(3SOCKET), \fBgetprotobyname\fR(3SOCKET),
-\fBgetservbyname\fR(3SOCKET), \fBauth_attr\fR(4), \fBhosts\fR(4),
-\fBnetconfig\fR(4), \fBproject\fR(4), \fBresolv.conf\fR(4), \fBuser_attr\fR(4),
-\fBypfiles\fR(4), \fBad\fR(5)
+\fBgetservbyname\fR(3SOCKET), \fBauth_attr\fR(5), \fBhosts\fR(5),
+\fBnetconfig\fR(5), \fBproject\fR(5), \fBresolv.conf\fR(5), \fBuser_attr\fR(5),
+\fBypfiles\fR(5), \fBad\fR(7)
 .SH NOTES
 .LP
 Within each process that uses \fBnsswitch.conf\fR, the entire file is read only
@@ -797,4 +797,4 @@ Misspelled names of sources and databases are treated as legitimate names of
 .LP
 The following functions do \fBnot\fR use the switch: \fBfgetgrent\fR(3C),
 \fBfgetprojent\fR(3PROJECT), \fBfgetpwent\fR(3C), \fBfgetspent\fR(3C),
-\fBgetpw\fR(3C), \fBputpwent\fR(3C), \fBshadow\fR(4).
+\fBgetpw\fR(3C), \fBputpwent\fR(3C), \fBshadow\fR(5).

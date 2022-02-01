@@ -54,7 +54,7 @@ shared object
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -70,9 +70,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBnlsadmin\fR(1M), \fBgetenv\fR(3C), \fBt_alloc\fR(3NSL),
+\fBnlsadmin\fR(8), \fBgetenv\fR(3C), \fBt_alloc\fR(3NSL),
 \fBt_connect\fR(3NSL), \fBt_error\fR(3NSL), \fBt_free\fR(3NSL),
-\fBt_sync\fR(3NSL), \fBattributes\fR(5)
+\fBt_sync\fR(3NSL), \fBattributes\fR(7)
 .SH WARNINGS
 .sp
 .LP

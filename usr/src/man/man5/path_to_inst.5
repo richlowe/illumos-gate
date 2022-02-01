@@ -28,8 +28,8 @@ In order to keep instance numbers persistent across reboots, the system records
 them in \fB/etc/path_to_inst\fR.
 .sp
 .LP
-This file is read only at boot time, and is updated by \fBadd_drv\fR(1M) and
-\fBdevfsadm\fR(1M).
+This file is read only at boot time, and is updated by \fBadd_drv\fR(8) and
+\fBdevfsadm\fR(8).
 .sp
 .LP
 Note that it is generally not necessary for the system administrator to change
@@ -38,7 +38,7 @@ this file, as the system will maintain it.
 .LP
 The system administrator can change the assignment of instance numbers by
 editing this file and doing a reconfiguration reboot. However, any changes made
-in this file will be lost if \fBadd_drv\fR(1M) or \fBdevfsadm\fR(1M) is run
+in this file will be lost if \fBadd_drv\fR(8) or \fBdevfsadm\fR(8) is run
 before the system is rebooted.
 .sp
 .LP
@@ -117,7 +117,7 @@ Mapping of physical device names to instance numbers.
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_drv\fR(1M), \fBboot\fR(1M), \fBdevfsadm\fR(1M), \fBmknod\fR(1M)
+\fBadd_drv\fR(8), \fBboot\fR(8), \fBdevfsadm\fR(8), \fBmknod\fR(8)
 .SH WARNINGS
 .sp
 .LP
@@ -125,7 +125,7 @@ If the file is removed the system may not be bootable (as it may rely on
 information found in this file to find the root, usr or swap device). If it
 does successfully boot, it will regenerate the file, but after rebooting
 devices may end up having different minor numbers than they did before, and
-special files created via \fBmknod\fR(1M) may refer to different devices than
+special files created via \fBmknod\fR(8) may refer to different devices than
 expected.
 .sp
 .LP

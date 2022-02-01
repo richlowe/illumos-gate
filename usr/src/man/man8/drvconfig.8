@@ -17,13 +17,13 @@ drvconfig \- apply permission and ownership changes to devices
 .SH DESCRIPTION
 .sp
 .LP
-\fBdevfsadm\fR(1M) is now the preferred command and should be used instead of
+\fBdevfsadm\fR(8) is now the preferred command and should be used instead of
 \fBdrvconfig\fR.
 .sp
 .LP
 The default operation of \fBdrvconfig\fR is to apply permission and ownership
 changes to devices. Normally, this command is run automatically after a new
-driver has been installed (with \fBadd_drv\fR(1M)) and the system has been
+driver has been installed (with \fBadd_drv\fR(8)) and the system has been
 rebooted.
 .SH OPTIONS
 .sp
@@ -48,7 +48,7 @@ by. This option, if used, must be used with the \fB-m\fR \fImajor_num\fR, the
 .RS 16n
 Add a new major number to name binding into the kernel's internal
 \fBname_to_major\fR tables. This option is not normally used directly, but is
-used by other utilities such as \fBadd_drv\fR(1M). Use of the \fB-b\fR option
+used by other utilities such as \fBadd_drv\fR(8). Use of the \fB-b\fR option
 requires that \fB-i\fR and \fB-m\fR be used also. No \fB/devices\fR entries are
 created.
 .RE
@@ -71,7 +71,7 @@ only effective when used with the \fB-b\fR option.
 .ad
 .RS 16n
 Only configure the devices for the named driver. The following options are used
-by the implementation of \fBadd_drv\fR(1M) and \fBrem_drv\fR(1M), and may not
+by the implementation of \fBadd_drv\fR(8) and \fBrem_drv\fR(8), and may not
 be supported in future versions of Solaris:
 .RE
 
@@ -163,6 +163,6 @@ Driver class binding file
 .SH SEE ALSO
 .sp
 .LP
-\fBsh\fR(1), \fBadd_drv\fR(1M), \fBmodinfo\fR(1M), \fBmodload\fR(1M),
-\fBmodunload\fR(1M), \fBrem_drv\fR(1M), \fBupdate_drv\fR(1M),
-\fBpath_to_inst\fR(4), \fBattributes\fR(5), \fBdevfs\fR(7FS)
+\fBsh\fR(1), \fBadd_drv\fR(8), \fBmodinfo\fR(8), \fBmodload\fR(8),
+\fBmodunload\fR(8), \fBrem_drv\fR(8), \fBupdate_drv\fR(8),
+\fBpath_to_inst\fR(5), \fBattributes\fR(7), \fBdevfs\fR(4FS)

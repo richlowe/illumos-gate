@@ -201,7 +201,7 @@ test level, are supplied as sub-options using the \fB-o\fR option.
 .sp
 .LP
 Operations that change the state of the system configuration are audited by the
-system log daemon \fBsyslogd\fR(1M).
+system log daemon \fBsyslogd\fR(8).
 .sp
 .LP
 The arguments for this command conform to the \fBgetopt\fR(3C) and
@@ -295,8 +295,8 @@ through the receptacle.
 Performs hardware specific operations that allow an occupant's hardware
 resources to be usable by Solaris. Occupants that are configured are part of
 the system configuration and are available for manipulation by Solaris device
-manipulation maintenance commands (eg: \fBpsradm\fR(1M), \fBmount\fR(1M),
-\fBifconfig\fR(1M)).
+manipulation maintenance commands (eg: \fBpsradm\fR(8), \fBmount\fR(8),
+\fBifconfig\fR(8)).
 .RE
 
 .sp
@@ -718,7 +718,7 @@ example# cfgadm -c configure c0::dsk/c0t0d0
 .sp
 
 .SH ENVIRONMENT VARIABLES
-See \fBenviron\fR(5) for descriptions of the following environment variables
+See \fBenviron\fR(7) for descriptions of the following environment variables
 that affect the execution of \fBcfgadm\fR: \fBLC_TIME\fR, \fBLC_MESSAGES\fR,
 \fBNLSPATH\fR and \fBTZ\fR.
 .sp
@@ -791,12 +791,12 @@ Usage error.
 .RE
 
 .SH SEE ALSO
-\fBcfgadm_fp\fR(1M), \fBcfgadm_ib\fR(1M),
-\fBcfgadm_pci\fR(1M), \fBcfgadm_sbd\fR(1M), \fBcfgadm_scsi\fR(1M),
-\fBcfgadm_usb\fR(1M), \fBifconfig\fR(1M), \fBmount\fR(1M), \fBprtdiag\fR(1M),
-\fBpsradm\fR(1M), \fBsyslogd\fR(1M), \fBconfig_admin\fR(3CFGADM),
-\fBgetopt\fR(3C), \fBgetsubopt\fR(3C), \fBisatty\fR(3C), \fBattributes\fR(5),
-\fBenviron\fR(5)
+\fBcfgadm_fp\fR(8), \fBcfgadm_ib\fR(8),
+\fBcfgadm_pci\fR(8), \fBcfgadm_sbd\fR(8), \fBcfgadm_scsi\fR(8),
+\fBcfgadm_usb\fR(8), \fBifconfig\fR(8), \fBmount\fR(8), \fBprtdiag\fR(8),
+\fBpsradm\fR(8), \fBsyslogd\fR(8), \fBconfig_admin\fR(3CFGADM),
+\fBgetopt\fR(3C), \fBgetsubopt\fR(3C), \fBisatty\fR(3C), \fBattributes\fR(7),
+\fBenviron\fR(7)
 .SH DIAGNOSTICS
 Diagnostic messages appear on the standard error output. Other than options and
 usage errors, the following are diagnostic messages produced by this utility:

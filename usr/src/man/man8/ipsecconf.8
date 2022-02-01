@@ -58,7 +58,7 @@ found and there is at least one entry for the tunnel, the traffic will
 automatically drop. The difference in behavior is because of the assumptions
 about IPsec tunnels made in many implementations. Datagrams that are being
 forwarded will not be subjected to policy checks that are added using this
-command.  See \fBifconfig\fR(1M) and \fBdladm\fR(1M) for information on how to
+command.  See \fBifconfig\fR(8) and \fBdladm\fR(8) for information on how to
 protect forwarded packets.  Depending upon the match of the policy entry, a
 specific action will be taken.
 .sp
@@ -107,7 +107,7 @@ entered.
 .LP
 Policy entries are not preserved across system restarts. Permanent policy
 entries should be added to \fB/etc/inet/ipsecinit.conf\fR. This file is read by
-the following \fBsmf\fR(5) service:
+the following \fBsmf\fR(7) service:
 .sp
 .in +2
 .nf
@@ -158,7 +158,7 @@ not advisable to depend upon this feature.
 .RS 4n
 Check the syntax of the configuration file and report any errors without making
 any changes to the policy. This option is useful when debugging configurations
-and when \fBsmf\fR(5) reports a configuration error. See \fBSECURITY\fR.
+and when \fBsmf\fR(7) reports a configuration error. See \fBSECURITY\fR.
 .RE
 
 .sp
@@ -328,7 +328,7 @@ corresponding entry in the datagram.
 .sp
 .LP
 One thing to remember is that UDP port 500 is always bypassed regardless of any
-policy entries. This is a requirement for \fBin.iked\fR(1M) to work.
+policy entries. This is a requirement for \fBin.iked\fR(8) to work.
 .sp
 .LP
 File can be commented by using a \fB#\fR as the first character. Comments may
@@ -681,7 +681,7 @@ be present. A range of codes can be specified with a hyphen separating numbers.
 .ad
 .sp .6
 .RS 4n
-Specifies a tunnel network interface, as configured with \fBifconfig\fR(1M). If
+Specifies a tunnel network interface, as configured with \fBifconfig\fR(8). If
 a tunnel of \fIname\fR does not yet exist, the policy entries are added anyway,
 and joined with the tunnel state when it is created. If a tunnel is unplumbed,
 its policy entries disappear.
@@ -702,7 +702,7 @@ For per-tunnel security, specify whether the IPsec SAs protecting the traffic
 should be tunnel-mode SAs or transport-mode SAs. If transport-mode SAs are
 specified, no addresses can appear in the policy entry. Transport-mode is
 backward compatible with Solaris 9, and tunnel IPsec policies configured with
-\fBifconfig\fR(1M) will show up as transport mode entries here.
+\fBifconfig\fR(8) will show up as transport mode entries here.
 .RE
 
 .sp
@@ -733,7 +733,7 @@ This entry can contain either a string or a decimal number.
 This should be either \fBMD5\fR or \fBHMAC-MD5\fR denoting the \fBHMAC-MD5\fR
 algorithm as described in \fIRFC 2403\fR, and \fBSHA1\fR, or \fBHMAC-SHA1\fR or
 \fBSHA\fR or \fBHMAC-SHA\fR denoting the \fBHMAC-SHA\fR algorithm described in
-\fIRFC 2404\fR. You can use the \fBipsecalgs\fR(1M) command to obtain the
+\fIRFC 2404\fR. You can use the \fBipsecalgs\fR(8) command to obtain the
 complete list of authentication algorithms.
 .sp
 The string can also be \fBANY\fR, which denotes no-preference for the
@@ -794,7 +794,7 @@ BLOWFISH or BLOWFISH-CBC	BLOWFISH-CBC	2451
 AES or AES-CBC	AES-CBC	2451
 .TE
 
-You can use the \fBipsecalgs\fR(1M) command to obtain the complete list of
+You can use the \fBipsecalgs\fR(8) command to obtain the complete list of
 authentication algorithms.
 .sp
 The value can be \fBNULL\fR, which implies a \fBNULL\fR encryption, pursuant to
@@ -932,7 +932,7 @@ Values following this decide the attribute of the security association. Value
 indicates whether a unique security association should be used or any existing
 \fBSA\fR can be used. If there is a policy requirement, \fBSA\fRs are created
 dynamically on the first outbound datagram using the key management daemon.
-Static \fBSA\fRs can be created using \fBipseckey\fR(1M). The values used here
+Static \fBSA\fRs can be created using \fBipseckey\fR(8). The values used here
 determine whether a new \fBSA\fR will be used/obtained. Valid values are
 strings that could be one of the following:
 .sp
@@ -1071,7 +1071,7 @@ The standard uses of \fBAH\fR and \fBESP\fR were what drove this ranking of
 authentication, which will allow cut-and-paste or replay attacks, or without
 encryption, which makes it equivalent or slightly weaker than \fBAH\fR. An
 administrator should take care to use \fBESP\fR properly. See
-\fBipsecesp\fR(7P) for more details.
+\fBipsecesp\fR(4P) for more details.
 .sp
 .LP
 If the new entry has \fBbypass\fR as action, \fBbypass\fR has the highest
@@ -1104,7 +1104,7 @@ the configuration file is writable only by trusted users.
 .sp
 .LP
 The configuration file is defined by a property of the \fBpolicy\fR
-\fBsmf\fR(5) service. The default configuration file, is
+\fBsmf\fR(7) service. The default configuration file, is
 \fB/etc/inet/ipsecinit.conf\fR. This can be changed using the \fBsvcprop\fR(1)
 command. See \fBNOTES\fR for more details.
 .sp
@@ -1123,7 +1123,7 @@ trustworthy.
 .LP
 If the name switch is configured to use a name service that is not local to the
 system, bypass policy entries might be required to prevent the policy from
-preventing communication to the name service. See \fBnsswitch.conf\fR(4).
+preventing communication to the name service. See \fBnsswitch.conf\fR(5).
 .sp
 .LP
 Policy is latched for \fBTCP/UDP\fR sockets on which a \fBconnect\fR(3SOCKET)
@@ -1133,9 +1133,9 @@ is not advisable to depend upon this feature.
 .sp
 .LP
 The \fBipsecconf\fR command can only be run by a user who has sufficient
-privilege to open the \fBpf_key\fR(7P) socket. The appropriate privilege can be
+privilege to open the \fBpf_key\fR(4P) socket. The appropriate privilege can be
 assigned to a user with the Network IPsec Management profile. See
-\fBprofiles\fR(1), \fBrbac\fR(5), \fBprof_attr\fR(4).
+\fBprofiles\fR(1), \fBrbac\fR(7), \fBprof_attr\fR(5).
 .sp
 .LP
 Make sure to set up the policies before starting any communications, as
@@ -1144,7 +1144,7 @@ Similarly, do not change policies in the middle of a communication.
 .sp
 .LP
 Note that certain \fBndd\fR tunables affect how policies configured with this
-tool are enforced; see \fBipsecesp\fR(7P) for more details.
+tool are enforced; see \fBipsecesp\fR(4P) for more details.
 .SH EXAMPLES
 .LP
 \fBExample 1 \fRProtecting Outbound \fBTCP\fR Traffic With \fBESP\fR and the
@@ -1519,7 +1519,7 @@ the remote machine spiderweb:
 .sp
 .LP
 The following example is equivalent to "\fBencr_algs aes encr_auth_algs md5\fR"
-in \fBifconfig\fR(1M):
+in \fBifconfig\fR(8):
 
 .sp
 .in +2
@@ -1539,7 +1539,7 @@ topology, such that a client's default route goes "inside".
 .sp
 .in +2
 .nf
-# Unlike route(1m), the default route has to be spelled-out.
+# Unlike route(8), the default route has to be spelled-out.
 {tunnel ip.tun0 negotiate tunnel raddr client-inside/32
 laddr 0.0.0.0/0} ipsec {encr_algs aes encr_auth_algs sha1}
 .fi
@@ -1596,7 +1596,7 @@ Cache of IPsec policies currently configured for the system, maintained by
 .sp .6
 .RS 4n
 File containing IPsec policies to be installed at system restart by the
-\fBpolicy\fR \fBsmf\fR(5) service. See \fBNOTES\fR for more information.
+\fBpolicy\fR \fBsmf\fR(7) service. See \fBNOTES\fR for more information.
 .RE
 
 .sp
@@ -1611,7 +1611,7 @@ Sample input file for \fBipseconf\fR.
 
 .SH ATTRIBUTES
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -1627,15 +1627,15 @@ Interface Stability	Committed
 .SH SEE ALSO
 .LP
 \fBauths\fR(1), \fBprofiles\fR(1), \fBsvcprop\fR(1), \fBsvcs\fR(1),
-\fBin.iked\fR(1M), \fBinit\fR(1M), \fBifconfig\fR(1M), \fBipsecalgs\fR(1M),
-\fBipseckey\fR(1M), \fBsvcadm\fR(1M), \fBsvccfg\fR(1M),
+\fBin.iked\fR(8), \fBinit\fR(8), \fBifconfig\fR(8), \fBipsecalgs\fR(8),
+\fBipseckey\fR(8), \fBsvcadm\fR(8), \fBsvccfg\fR(8),
 \fBgethostbyname\fR(3NSL), \fBaccept\fR(3SOCKET), \fBconnect\fR(3SOCKET),
 \fBgethostbyname\fR(3XNET), \fBgetnetbyname\fR(3XNET),
 \fBgetprotobyname\fR(3XNET), \fBgetservbyname\fR(3XNET),
-\fBgetaddrinfo\fR(3SOCKET), \fBsocket\fR(3SOCKET), \fBike.config\fR(4),
-\fBnsswitch.conf\fR(4), \fBprof_attr\fR(4), \fBuser_attr\fR(4),
-\fBattributes\fR(5), \fBrbac\fR(5), \fBsmf\fR(5), \fBipsecah\fR(7P),
-\fBipsecesp\fR(7P), \fBpf_key\fR(7P)
+\fBgetaddrinfo\fR(3SOCKET), \fBsocket\fR(3SOCKET), \fBike.config\fR(5),
+\fBnsswitch.conf\fR(5), \fBprof_attr\fR(5), \fBuser_attr\fR(5),
+\fBattributes\fR(7), \fBrbac\fR(7), \fBsmf\fR(7), \fBipsecah\fR(4P),
+\fBipsecesp\fR(4P), \fBpf_key\fR(4P)
 .sp
 .LP
 Glenn, R. and Kent, S. \fIRFC 2410, The NULL Encryption Algorithm and Its Use
@@ -1728,7 +1728,7 @@ new entry.
 
 .SH NOTES
 .LP
-IPsec manual keys are managed by the service management facility, \fBsmf\fR(5).
+IPsec manual keys are managed by the service management facility, \fBsmf\fR(7).
 The services listed below manage the components of IPsec. These services are
 delivered as follows:
 .sp
@@ -1746,7 +1746,7 @@ svc:/network/ipsec/ike:default (disabled)
 .LP
 The manual-key service is delivered disabled. The system administrator must
 create manual IPsec Security Associations (SAs), as described in
-\fBipseckey\fR(1M), before enabling that service.
+\fBipseckey\fR(8), before enabling that service.
 .sp
 .LP
 The policy service is delivered enabled, but without a configuration file, so
@@ -1759,14 +1759,14 @@ this file, the service enters maintenance mode.
 .LP
 Services that are delivered disabled are delivered that way because the system
 administrator must create configuration files for those services before
-enabling them. See \fBike.config\fR(4) for the \fBike\fR service.
+enabling them. See \fBike.config\fR(5) for the \fBike\fR service.
 .sp
 .LP
-See \fBipsecalgs\fR(1M) for the \fBipsecalgs\fR service.
+See \fBipsecalgs\fR(8) for the \fBipsecalgs\fR service.
 .sp
 .LP
 The correct administrative procedure is to create the configuration file for
-each service, then enable each service using \fBsvcadm\fR(1M).
+each service, then enable each service using \fBsvcadm\fR(8).
 .sp
 .LP
 If the configuration needs to be changed, edit the configuration file then
@@ -1781,7 +1781,7 @@ example# \fBsvcadm refresh policy\fR
 
 .sp
 .LP
-The \fBsmf\fR(5) framework will record any errors in the service-specific log
+The \fBsmf\fR(7) framework will record any errors in the service-specific log
 file. Use any of the following commands to examine the \fBlogfile\fR property:
 .sp
 .in +2
@@ -1806,7 +1806,7 @@ config/config_file
 
 .sp
 .LP
-This property can be modified using \fBsvccfg\fR(1M) by users who have been
+This property can be modified using \fBsvccfg\fR(8) by users who have been
 assigned the following authorization:
 .sp
 .in +2
@@ -1818,10 +1818,10 @@ solaris.smf.value.ipsec
 
 .sp
 .LP
-See \fBauths\fR(1), \fBuser_attr\fR(4), \fBrbac\fR(5).
+See \fBauths\fR(1), \fBuser_attr\fR(5), \fBrbac\fR(7).
 .sp
 .LP
-The service needs to be refreshed using \fBsvcadm\fR(1M) before the new
+The service needs to be refreshed using \fBsvcadm\fR(8) before the new
 property is effective. General non-modifiable properties can be viewed with the
 \fBsvcprop\fR(1) command.
 .sp
@@ -1836,7 +1836,7 @@ property is effective. General non-modifiable properties can be viewed with the
 .sp
 .LP
 Administrative actions on this service, such as enabling, disabling,
-refreshing, and requesting restart can be performed using \fBsvcadm\fR(1M). A
+refreshing, and requesting restart can be performed using \fBsvcadm\fR(8). A
 user who has been assigned the authorization shown below can perform these
 actions:
 .sp
@@ -1853,7 +1853,7 @@ The service's status can be queried using the \fBsvcs\fR(1) command.
 .sp
 .LP
 The \fBipsecconf\fR command is designed to be managed by the \fBpolicy\fR
-\fBsmf\fR(5) service. While the \fBipsecconf\fR command can be run from the
+\fBsmf\fR(7) service. While the \fBipsecconf\fR command can be run from the
 command line, this is discouraged. If the \fBipsecconf\fR command is to be run
-from the command line, the \fBpolicy\fR \fBsmf\fR(5) service should be disabled
-first. See \fBsvcadm\fR(1M).
+from the command line, the \fBpolicy\fR \fBsmf\fR(7) service should be disabled
+first. See \fBsvcadm\fR(8).

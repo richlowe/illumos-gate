@@ -28,7 +28,7 @@ ppdmgr \- utility for managing PPD files
 The PPD File Manager adds PPD files to the print system's PPD file
 repositories. When changes in the PPD file repositories are made by the
 utility, they are reflected in the Solaris Print Manager (see
-\fBprintmgr\fR(1M)) GUI printer driver field when adding or modifying local
+\fBprintmgr\fR(8)) GUI printer driver field when adding or modifying local
 attached or network attached printers.
 .sp
 .LP
@@ -38,7 +38,7 @@ are supplied by third party vendors may be available in the "\fBvendor\fR"
 repository. PPD files that are supplied by system administrators may be
 available in the "\fBadmin\fR" repository, and PPD files that are added using
 this utility are available in the "user" repository. When this utility is used
-to update or rebuild printer information reflected in the \fBprintmgr\fR(1M),
+to update or rebuild printer information reflected in the \fBprintmgr\fR(8),
 the special reserved repository name "\fBall\fR" can be used to specify all of
 the available PPD file repositories.
 .sp
@@ -298,7 +298,7 @@ An error occurred.
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -314,4 +314,4 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBprintmgr\fR(1M), \fBattributes\fR(5)
+\fBprintmgr\fR(8), \fBattributes\fR(7)

@@ -23,7 +23,7 @@ formerly known as Sun StorEdge Traffic Manager (STMS) or MPxIO.
 .LP
 The \fBstmsboot\fR program is an administrative command to manage enumeration
 of multipath-capable devices with Solaris I/O multipathing. Solaris I/O
-multipathing-enabled devices are enumerated under \fBscsi_vhci\fR(7D),
+multipathing-enabled devices are enumerated under \fBscsi_vhci\fR(4D),
 providing multipathing capabilities. Solaris I/O multipathing-disabled devices
 are enumerated under the physical controller.
 .sp
@@ -48,8 +48,8 @@ The following options are supported:
 .sp .6
 .RS 4n
 Enables Solaris I/O multipathing on all supported multipath-capable controller
-ports. Multipath-capable ports include fibre channel (\fBfp\fR(7D)) controller
-ports and SAS (\fBmpt\fR(7D)) controller ports. Following this enabling, you
+ports. Multipath-capable ports include fibre channel (\fBfp\fR(4D)) controller
+ports and SAS (\fBmpt\fR(4D)) controller ports. Following this enabling, you
 are prompted to reboot. During the reboot, \fBvfstab\fR and the dump
 configuration will be updated to reflect the device name changes. Specifying
 either \fB-D\fR \fBmpt\fR or \fB-D\fR \fBfp\fR limits the enabling operation to
@@ -64,8 +64,8 @@ ports attached using the specified driver.
 .sp .6
 .RS 4n
 Disables Solaris I/O multipathing on all supported multipath-capable controller
-ports. Multipath-capable ports include fibre channel (\fBfp\fR(7D)) controller
-ports and SAS (\fBmpt\fR(7D)) controller ports. Following this disabling, you
+ports. Multipath-capable ports include fibre channel (\fBfp\fR(4D)) controller
+ports and SAS (\fBmpt\fR(4D)) controller ports. Following this disabling, you
 are prompted to reboot. During the reboot, \fBvfstab\fR and the dump
 configuration will be updated to reflect the device name changes. Specifying
 either \fB-D\fR \fBmpt\fR or \fB-D\fR \fBfp\fR limits the disabling operation
@@ -116,7 +116,7 @@ Solaris I/O multipathing is not enabled, then no mappings are displayed.
 .LP
 The primary function of \fBstmsboot\fR is to control the enabling and disabling
 of Solaris I/O multipathing on the host. The utility automatically updates
-\fBvfstab\fR(4) and \fBdumpadm\fR(1M) configuration to reflect device name
+\fBvfstab\fR(5) and \fBdumpadm\fR(8) configuration to reflect device name
 changes. The system administrator is responsible for modifying application
 configuration (for example, backup software, DBMS, and so forth) to reflect
 updated device names.
@@ -147,7 +147,7 @@ To enable Solaris I/O multipathing for all multipath-capable controllers, run:
 
 .sp
 .LP
-To enable Solaris I/O multipathing on multipath-capable \fBmpt\fR(7D)
+To enable Solaris I/O multipathing on multipath-capable \fBmpt\fR(4D)
 controller ports, enter:
 
 .sp
@@ -188,7 +188,7 @@ enter:
 
 .sp
 .LP
-To disable Solaris I/O multipathing on multipath-capable \fBmpt\fR(7D)
+To disable Solaris I/O multipathing on multipath-capable \fBmpt\fR(4D)
 controller ports, enter:
 
 .sp
@@ -218,8 +218,8 @@ controller ports, enter:
 .LP
 To enable Solaris I/O multipathing on specific fibre channel controller ports
 and disable the feature on others, manually edit the \fB/kernel/drv/fp.conf\fR
-file. (See \fBfp\fR(7D).) The following command will update \fBvfstab\fR(4) and
-\fBdumpadm\fR(1M) configurations to reflect the changed device names:
+file. (See \fBfp\fR(4D).) The following command will update \fBvfstab\fR(5) and
+\fBdumpadm\fR(8) configurations to reflect the changed device names:
 
 .sp
 .in +2
@@ -232,12 +232,12 @@ file. (See \fBfp\fR(7D).) The following command will update \fBvfstab\fR(4) and
 .sp
 .LP
 A similar procedure involving the \fB/kernel/drv/mpt.conf\fR file should be
-followed for devices attached by means of the \fBmpt\fR(7D) driver.
+followed for devices attached by means of the \fBmpt\fR(4D) driver.
 
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -253,10 +253,10 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBdumpadm\fR(1M), \fBfsck\fR(1M), \fBmpathadm\fR(1M), \fBufsdump\fR(1M),
-\fBzfs\fR(1M), \fBzpool\fR(1M), \fBdumpdates\fR(4), \fBvfstab\fR(4),
-\fBemlxs\fR(7D), \fBfcp\fR(7D), \fBfp\fR(7D), \fBmpt\fR(7D), \fBqlc\fR(7D),
-\fBscsi_vhci\fR(7D)
+\fBdumpadm\fR(8), \fBfsck\fR(8), \fBmpathadm\fR(8), \fBufsdump\fR(8),
+\fBzfs\fR(8), \fBzpool\fR(8), \fBdumpdates\fR(5), \fBvfstab\fR(5),
+\fBemlxs\fR(4D), \fBfcp\fR(4D), \fBfp\fR(4D), \fBmpt\fR(4D), \fBqlc\fR(4D),
+\fBscsi_vhci\fR(4D)
 .sp
 .LP
 \fISolaris SAN Configuration and Multipathing Guide\fR (see
@@ -297,8 +297,8 @@ more details.
 .SS "Using \fBufsdump\fR"
 .sp
 .LP
-The \fBufsdump\fR(1M) command records details of filesystem dumps in
-\fB/etc/dumpdates\fR (see \fBdumpdates\fR(4)). Among other items, the entries
+The \fBufsdump\fR(8) command records details of filesystem dumps in
+\fB/etc/dumpdates\fR (see \fBdumpdates\fR(5)). Among other items, the entries
 contain device names. An effect of the "active" \fBstmsboot\fR options
 (\fB-e\fR, \fB-d\fR, and \fB-u\fR) is to change the device name of a storage
 device.
@@ -377,11 +377,11 @@ To view mappings between the old and new device names, run \fBstmsboot\fR
 .LP
 With active-passive storage arrays, it is possible that while your host is
 rebooting the array controller could failover the path that a particular target
-is using. In this scenario, \fBfsck\fR(1M) will fail to open the physical path
+is using. In this scenario, \fBfsck\fR(8) will fail to open the physical path
 listed in \fB/etc/vfstab\fR. The \fBsvc:/system/filesystem/local:default\fR SMF
 service will transition to a maintenance state as a result. To rectify this,
 consult the documentation for your storage array to failback the path. The
-\fBmpathadm\fR(1M) can assist with determining the active and passive path(s).
+\fBmpathadm\fR(8) can assist with determining the active and passive path(s).
 .SH LIMITATIONS
 .sp
 .LP
@@ -389,7 +389,7 @@ On x86 platforms, the current Solaris release does not support disabling
 Solaris I/O multipathing of boot devices attached by means of fibre channel.
 Solaris I/O multipathing is always enabled for supported fibre channel-attached
 boot devices. Disabling Solaris I/O multipathing in this situation must be
-performed on a per-port basis. See \fBfp\fR(7D).
+performed on a per-port basis. See \fBfp\fR(4D).
 .sp
 .LP
 Executing \fBdevfsadm\fR \fB-C\fR removes obsolete device entries that

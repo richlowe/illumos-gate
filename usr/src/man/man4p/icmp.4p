@@ -31,7 +31,7 @@ parameter to the socket call, can be obtained from
 connectionless, and are normally used with the \fBt_sndudata\fR /
 \fBt_rcvudata\fR and the \fBsendto()\fR / \fBrecvfrom()\fR calls. In order to
 send \fBICMP\fR packets, a process needs the \fBPRIV_NET_ICMPACCESS\fR
-privilege. (See \fBprivileges\fR(5) for more information on privileges.)
+privilege. (See \fBprivileges\fR(7) for more information on privileges.)
 .sp
 .LP
 Outgoing packets automatically have an Internet Protocol (\fBIP\fR) header
@@ -51,8 +51,8 @@ open \fBICMP\fR socket or \fBTLI\fR descriptor.
 .SH SEE ALSO
 .LP
 \fBgetprotobyname\fR(3SOCKET), \fBrecv\fR(3SOCKET), \fBsend\fR(3SOCKET),
-\fBt_rcvudata\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBprivileges\fR(5),
-\fBinet\fR(7P), \fBip\fR(7P), \fBrouting\fR(7P)
+\fBt_rcvudata\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBprivileges\fR(7),
+\fBinet\fR(4P), \fBip\fR(4P), \fBrouting\fR(4P)
 .sp
 .LP
 Postel, Jon, \fIInternet Control Message Protocol \(em DARPA Internet Program

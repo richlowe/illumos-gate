@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for descriptions of the following attributes:
+See \fBattributes\fR(7) for descriptions of the following attributes:
 .sp
 
 .sp
@@ -268,4 +268,4 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBcpl_complete_word\fR(3TECLA), \fBgl_get_line\fR(3TECLA),
-\fBlibtecla\fR(3LIB), \fBpca_lookup_file\fR(3TECLA), \fBattributes\fR(5)
+\fBlibtecla\fR(3LIB), \fBpca_lookup_file\fR(3TECLA), \fBattributes\fR(7)

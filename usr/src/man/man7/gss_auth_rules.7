@@ -30,7 +30,7 @@ The GSS authorization rules are as follows:
 .el o
 If the mechanism of the connection has a set of authorization rules, then use
 those rules. For example, if the mechanism is Kerberos, then use the
-\fBkrb5_auth_rules\fR(5), so that authorization is consistent between raw
+\fBkrb5_auth_rules\fR(7), so that authorization is consistent between raw
 Kerberos applications and GSS/Kerberos applications.
 .RE
 .RS +4
@@ -50,13 +50,13 @@ local user's \fBgssname\fR exactly, as compared by
 .ad
 .RS 15n
 System account file. This information may also be in a directory service. See
-\fBpasswd\fR(4).
+\fBpasswd\fR(5).
 .RE
 
 .SH ATTRIBUTES
 .sp
 .LP
-See \fBattributes\fR(5) for a description of the following attributes:
+See \fBattributes\fR(7) for a description of the following attributes:
 .sp
 
 .sp
@@ -72,5 +72,5 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBftp\fR(1), \fBssh\fR(1), \fBgsscred\fR(1M), \fBgss_compare_name\fR(3GSS),
-\fBpasswd\fR(4), \fBattributes\fR(5), \fBkrb5_auth_rules\fR(5)
+\fBftp\fR(1), \fBssh\fR(1), \fBgsscred\fR(8), \fBgss_compare_name\fR(3GSS),
+\fBpasswd\fR(5), \fBattributes\fR(7), \fBkrb5_auth_rules\fR(7)
