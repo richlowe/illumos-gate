@@ -499,20 +499,20 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(3),
-\fBpool_component_info\fR(3POOL),
-\fBpool_conf_open\fR(3POOL),
-\fBpool_conf_to_elem\fR(3POOL),
-\fBpool_create\fR(3POOL),
-\fBpool_error\fR(3POOL),
-\fBpool_get_binding\fR(3POOL),
-\fBpool_get_property\fR(3POOL),
-\fBpool_get_resource\fR(3POOL),
-\fBpool_resource_create\fR(3POOL),
-\fBpool_value_alloc\fR(3POOL),
-\fBpool_walk_pools\fR(3POOL),
-\fBattributes\fR(7),
-\fBsmf\fR(7)
+.BR Intro (3),
+.BR pool_component_info (3POOL),
+.BR pool_conf_open (3POOL),
+.BR pool_conf_to_elem (3POOL),
+.BR pool_create (3POOL),
+.BR pool_error (3POOL),
+.BR pool_get_binding (3POOL),
+.BR pool_get_property (3POOL),
+.BR pool_get_resource (3POOL),
+.BR pool_resource_create (3POOL),
+.BR pool_value_alloc (3POOL),
+.BR pool_walk_pools (3POOL),
+.BR attributes (7),
+.BR smf (7)
 .SH NOTES
 Functions in \fBlibpool\fR can be used to manipulate static configurations even
 when the pools facility is not enabled. See \fBpooladm\fR(8) and

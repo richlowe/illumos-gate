@@ -81,9 +81,9 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBcurses\fR(3CURSES),
-\fBwaddwch\fR(3CURSES),
-\fBattributes\fR(7)
+.BR curses (3CURSES),
+.BR waddwch (3CURSES),
+.BR attributes (7)
 .SH NOTES
 The header file <\fBcurses.h\fR> automatically includes the header files
 <\fBstdio.h\fR>, <\fBnctrl.h\fR> and <\fBwidec.h\fR>.

@@ -1090,4 +1090,4 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBlibsip\fR(3LIB)
+.BR libsip (3LIB)

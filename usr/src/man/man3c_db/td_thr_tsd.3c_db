@@ -85,4 +85,4 @@ MT-Level	Safe
 .sp
 .LP
 \fBlibc_db\fR(3LIB), \fBtd_ta_tsd_iter\fR(3C_DB), \fBthr_getspecific\fR(3C),
-\fBattributes\fR(7)
+.BR attributes (7)

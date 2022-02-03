@@ -93,10 +93,10 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBsocket.h\fR(3HEAD),
-\fBaccept\fR(3SOCKET),
-\fBbind\fR(3SOCKET),
-\fBgetsockname\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7)
+.BR socket.h (3HEAD),
+.BR accept (3SOCKET),
+.BR bind (3SOCKET),
+.BR getsockname (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR attributes (7)

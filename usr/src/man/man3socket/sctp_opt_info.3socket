@@ -354,14 +354,14 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBin.h\fR(3HEAD),
-\fBlibsctp\fR(3LIB),
-\fBgetsockopt\fR(3SOCKET),
-\fBsetsockopt\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBinet\fR(4P),
-\fBinet6\fR(4P),
-\fBip\fR(4P),
-\fBip6\fR(4P),
-\fBsctp\fR(4P)
+.BR in.h (3HEAD),
+.BR libsctp (3LIB),
+.BR getsockopt (3SOCKET),
+.BR setsockopt (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR inet (4P),
+.BR inet6 (4P),
+.BR ip (4P),
+.BR ip6 (4P),
+.BR sctp (4P)

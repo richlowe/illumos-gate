@@ -92,9 +92,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBprintf\fR(3C),
-\fBlibcurses\fR(3XCURSES),
-\fBmvprintw\fR(3XCURSES),
-\fBvw_printw\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR printf (3C),
+.BR libcurses (3XCURSES),
+.BR mvprintw (3XCURSES),
+.BR vw_printw (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

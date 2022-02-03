@@ -36,7 +36,7 @@ through the HAL APIs, which are documented on the HAL web site. See
 The \fBvolmgt_ownspath()\fR function checks to see if a given \fIpath\fR is
 contained in the volume management name space. This is achieved by comparing
 the beginning of the supplied path name with the output from
-\fBvolmgt_root\fR(3VOLMGT)
+.BR volmgt_root (3VOLMGT)
 .SH RETURN VALUES
 .LP
 The return from this function is undefined.
@@ -84,7 +84,7 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 .LP
-\fBvolmgt_root\fR(3VOLMGT),
-\fBvolmgt_running\fR(3VOLMGT),
-\fBattributes\fR(7),
-\fBhal\fR(7)
+.BR volmgt_root (3VOLMGT),
+.BR volmgt_running (3VOLMGT),
+.BR attributes (7),
+.BR hal (7)

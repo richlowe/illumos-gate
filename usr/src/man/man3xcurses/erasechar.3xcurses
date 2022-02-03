@@ -91,9 +91,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBget_wch\fR(3XCURSES),
-\fBgetch\fR(3XCURSES),
-\fBgetstr\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR get_wch (3XCURSES),
+.BR getch (3XCURSES),
+.BR getstr (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

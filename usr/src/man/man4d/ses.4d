@@ -158,9 +158,9 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBesp\fR(4D),
-\fBisp\fR(4D),
-\fBdriver.conf\fR(5),
-\fBscsi\fR(5),
-\fBattributes\fR(7),
-\fBioctl\fR(9E)
+.BR esp (4D),
+.BR isp (4D),
+.BR driver.conf (5),
+.BR scsi (5),
+.BR attributes (7),
+.BR ioctl (9E)

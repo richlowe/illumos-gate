@@ -145,6 +145,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsasl_errors\fR(3SASL),
-\fBsasl_server_new\fR(3SASL),
-\fBattributes\fR(7)
+.BR sasl_errors (3SASL),
+.BR sasl_server_new (3SASL),
+.BR attributes (7)

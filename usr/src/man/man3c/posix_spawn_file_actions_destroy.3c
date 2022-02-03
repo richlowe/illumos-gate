@@ -136,7 +136,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBposix_spawn\fR(3C),
-\fBposix_spawn_file_actions_addclose\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR posix_spawn (3C),
+.BR posix_spawn_file_actions_addclose (3C),
+.BR attributes (7),
+.BR standards (7)

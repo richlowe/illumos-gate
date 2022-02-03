@@ -125,9 +125,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_accept_sec_context\fR(3GSS),
-\fBgss_init_sec_context\fR(3GSS),
-\fBattributes\fR(7)
+.BR gss_accept_sec_context (3GSS),
+.BR gss_init_sec_context (3GSS),
+.BR attributes (7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

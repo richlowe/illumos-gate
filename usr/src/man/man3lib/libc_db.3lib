@@ -159,4 +159,4 @@ MT-Level	Safe
 
 .SH SEE ALSO
 \fBIntro\fR(3), \fBtd_ta_new\fR(3C_DB), \fBattributes\fR(7),
-\fBthreads\fR(7)
+.BR threads (7)

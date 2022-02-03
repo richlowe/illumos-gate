@@ -389,11 +389,11 @@ CSI	Enabled
 .SH SEE ALSO
 .sp
 .LP
-\fBed\fR(1),
-\fBex\fR(1),
-\fBvi\fR(1),
-\fBXPG4\fR(7),
-\fBattributes\fR(7)
+.BR ed (1),
+.BR ex (1),
+.BR vi (1),
+.BR XPG4 (7),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

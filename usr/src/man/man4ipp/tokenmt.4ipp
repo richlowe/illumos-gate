@@ -154,13 +154,13 @@ module: tokenmt                          instance: <action id>
 
 .SH SEE ALSO
 .LP
-\fBdlcosmk\fR(4IPP),
-\fBdscpmk\fR(4IPP),
-\fBflowacct\fR(4IPP),
-\fBipgpc\fR(4IPP),
-\fBipqos\fR(4IPP),
-\fBtswtclmt\fR(4IPP),
-\fBipqosconf\fR(8)
+.BR dlcosmk (4IPP),
+.BR dscpmk (4IPP),
+.BR flowacct (4IPP),
+.BR ipgpc (4IPP),
+.BR ipqos (4IPP),
+.BR tswtclmt (4IPP),
+.BR ipqosconf (8)
 .sp
 .LP
 \fIRFC 2697, A Single Rate Three Color Marker\fR J. Heinanen, R. Guerin \(em

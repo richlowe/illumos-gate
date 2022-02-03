@@ -46,7 +46,7 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBprintf\fR(3C),
-\fBscanf\fR(3C),
-\fBwsprintf\fR(3C),
-\fBattributes\fR(7)
+.BR printf (3C),
+.BR scanf (3C),
+.BR wsprintf (3C),
+.BR attributes (7)

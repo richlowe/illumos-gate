@@ -48,9 +48,9 @@ Architecture	SPARC, x86
 .TE
 
 .SH SEE ALSO
-\fBfcoet\fR(4D),
-\fBdriver.conf\fR(5),
-\fBattributes\fR(7)
+.BR fcoet (4D),
+.BR driver.conf (5),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

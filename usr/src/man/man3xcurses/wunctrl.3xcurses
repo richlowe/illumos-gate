@@ -79,8 +79,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBkeyname\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBunctrl\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR keyname (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR unctrl (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

@@ -45,5 +45,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBhook_alloc\fR(9F),
-\fBhook_t\fR(9S)
+.BR hook_alloc (9F),
+.BR hook_t (9S)

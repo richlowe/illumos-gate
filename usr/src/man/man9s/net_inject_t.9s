@@ -72,6 +72,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_inject\fR(9F),
-\fBnetinfo\fR(9F)
+.BR attributes (7),
+.BR net_inject (9F),
+.BR netinfo (9F)

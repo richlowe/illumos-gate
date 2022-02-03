@@ -70,8 +70,8 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBabort\fR(3C),
-\fBgettext\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR abort (3C),
+.BR gettext (3C),
+.BR setlocale (3C),
+.BR attributes (7),
+.BR standards (7)

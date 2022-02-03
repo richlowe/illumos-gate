@@ -101,7 +101,7 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2),
-\fBgetexecname\fR(3C),
-\fBattributes\fR(7),
-\fBisalist\fR(7)
+.BR exec (2),
+.BR getexecname (3C),
+.BR attributes (7),
+.BR isalist (7)

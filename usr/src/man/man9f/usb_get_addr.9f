@@ -62,5 +62,5 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBusb_pipe_xopen\fR(9F)
+.BR attributes (7),
+.BR usb_pipe_xopen (9F)

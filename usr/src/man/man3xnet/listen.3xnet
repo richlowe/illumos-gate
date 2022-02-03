@@ -188,8 +188,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBaccept\fR(3XNET),
-\fBconnect\fR(3XNET),
-\fBsocket\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR accept (3XNET),
+.BR connect (3XNET),
+.BR socket (3XNET),
+.BR attributes (7),
+.BR standards (7)

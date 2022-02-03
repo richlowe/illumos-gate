@@ -105,10 +105,10 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP),
-\fBldap_first_attribute\fR(3LDAP),
-\fBldap_get_dn\fR(3LDAP),
-\fBldap_get_values\fR(3LDAP),
-\fBldap_result\fR(3LDAP),
-\fBldap_search\fR(3LDAP),
-\fBattributes\fR(7)
+.BR ldap (3LDAP),
+.BR ldap_first_attribute (3LDAP),
+.BR ldap_get_dn (3LDAP),
+.BR ldap_get_values (3LDAP),
+.BR ldap_result (3LDAP),
+.BR ldap_search (3LDAP),
+.BR attributes (7)

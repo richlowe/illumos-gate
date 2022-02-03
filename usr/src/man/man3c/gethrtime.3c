@@ -74,11 +74,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBproc\fR(1),
-\fBadjtime\fR(2),
-\fBgettimeofday\fR(3C),
-\fBsettimeofday\fR(3C),
-\fBattributes\fR(7)
+.BR proc (1),
+.BR adjtime (2),
+.BR gettimeofday (3C),
+.BR settimeofday (3C),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

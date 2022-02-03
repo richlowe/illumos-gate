@@ -83,17 +83,17 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlseek\fR(2),
-\fBread\fR(2),
-\fBferror\fR(3C),
-\fBfgetc\fR(3C),
-\fBfgetwc\fR(3C),
-\fBfopen\fR(3C),
-\fBfread\fR(3C),
-\fBgetchar\fR(3C),
-\fBscanf\fR(3C),
-\fBstdio\fR(3C),
-\fBungetc\fR(3C),
-\fBungetwc\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR lseek (2),
+.BR read (2),
+.BR ferror (3C),
+.BR fgetc (3C),
+.BR fgetwc (3C),
+.BR fopen (3C),
+.BR fread (3C),
+.BR getchar (3C),
+.BR scanf (3C),
+.BR stdio (3C),
+.BR ungetc (3C),
+.BR ungetwc (3C),
+.BR attributes (7),
+.BR standards (7)

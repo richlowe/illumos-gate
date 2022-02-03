@@ -285,25 +285,25 @@ MT-Level	See \fBNOTES\fR below.
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3),
-\fB__fsetlocking\fR(3C),
-\fBfclose\fR(3C),
-\fBfeof\fR(3C),
-\fBfgets\fR(3C),
-\fBfgetwc\fR(3C),
-\fBfgetws\fR(3C),
-\fBflockfile\fR(3C),
-\fBfopen\fR(3C),
-\fBfread\fR(3C),
-\fBfscanf\fR(3C),
-\fBgets\fR(3C),
-\fBputc\fR(3C),
-\fBscanf\fR(3C),
-\fBstdio\fR(3C),
-\fBungetc\fR(3C),
-\fBungetwc\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (3),
+.BR __fsetlocking (3C),
+.BR fclose (3C),
+.BR feof (3C),
+.BR fgets (3C),
+.BR fgetwc (3C),
+.BR fgetws (3C),
+.BR flockfile (3C),
+.BR fopen (3C),
+.BR fread (3C),
+.BR fscanf (3C),
+.BR gets (3C),
+.BR putc (3C),
+.BR scanf (3C),
+.BR stdio (3C),
+.BR ungetc (3C),
+.BR ungetwc (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

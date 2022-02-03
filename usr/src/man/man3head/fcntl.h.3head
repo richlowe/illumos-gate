@@ -623,15 +623,15 @@ Standard	See \fBstandards\fR(7).
 
 .SH SEE ALSO
 .LP
-\fBcreat\fR(2),
-\fBexec\fR(2),
-\fBfcntl\fR(2),
-\fBopen\fR(2),
-\fBfdatasync\fR(3C),
-\fBfsync\fR(3C),
-\fBattributes\fR(7),
-\fBfsattr\fR(7),
-\fBstandards\fR(7)
+.BR creat (2),
+.BR exec (2),
+.BR fcntl (2),
+.BR open (2),
+.BR fdatasync (3C),
+.BR fsync (3C),
+.BR attributes (7),
+.BR fsattr (7),
+.BR standards (7)
 .SH NOTES
 .LP
 Data is successfully  transferred for a write operation to a regular file when

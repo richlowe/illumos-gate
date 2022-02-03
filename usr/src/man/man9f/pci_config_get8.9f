@@ -135,6 +135,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBpci_config_setup\fR(9F),
-\fBpci_config_teardown\fR(9F)
+.BR attributes (7),
+.BR pci_config_setup (9F),
+.BR pci_config_teardown (9F)

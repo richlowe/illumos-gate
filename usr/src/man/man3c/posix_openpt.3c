@@ -197,9 +197,9 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBopen\fR(2),
-\fBgrantpt\fR(3C),
-\fBptsname\fR(3C),
-\fBunlockpt\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR open (2),
+.BR grantpt (3C),
+.BR ptsname (3C),
+.BR unlockpt (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -52,10 +52,10 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBnlist\fR(3ELF),
-\fBkvm_kread\fR(3KVM),
-\fBkvm_open\fR(3KVM),
-\fBattributes\fR(7)
+.BR nlist (3ELF),
+.BR kvm_kread (3KVM),
+.BR kvm_open (3KVM),
+.BR attributes (7)
 .SH NOTES
 .LP
 Although the \fBlibkvm\fR API is Stable, the symbol names and data values that

@@ -445,7 +445,7 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP),
-\fBldap_entry2text\fR(3LDAP),
-\fBldaptemplates.conf\fR(5),
-\fBattributes\fR(7)
+.BR ldap (3LDAP),
+.BR ldap_entry2text (3LDAP),
+.BR ldaptemplates.conf (5),
+.BR attributes (7)

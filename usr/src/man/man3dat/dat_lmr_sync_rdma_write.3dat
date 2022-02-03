@@ -161,6 +161,6 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBdat_lmr_sync_rdma_read\fR(3DAT),
-\fBlibdat\fR(3LIB),
-\fBattributes\fR(7)
+.BR dat_lmr_sync_rdma_read (3DAT),
+.BR libdat (3LIB),
+.BR attributes (7)

@@ -419,14 +419,14 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB),
-\fBscf_error\fR(3SCF),
-\fBscf_handle_decode_fmri\fR(3SCF),
-\fBscf_instance_create\fR(3SCF),
-\fBscf_iter_service_pgs\fR(3SCF),
-\fBscf_iter_service_pgs_typed\fR(3SCF),
-\fBscf_pg_create\fR(3SCF),
-\fBscf_scope_create\fR(3SCF),
-\fBscf_service_to_fmri\fR(3SCF),
-\fBattributes\fR(7),
-\fBsmf\fR(7)
+.BR libscf (3LIB),
+.BR scf_error (3SCF),
+.BR scf_handle_decode_fmri (3SCF),
+.BR scf_instance_create (3SCF),
+.BR scf_iter_service_pgs (3SCF),
+.BR scf_iter_service_pgs_typed (3SCF),
+.BR scf_pg_create (3SCF),
+.BR scf_scope_create (3SCF),
+.BR scf_service_to_fmri (3SCF),
+.BR attributes (7),
+.BR smf (7)

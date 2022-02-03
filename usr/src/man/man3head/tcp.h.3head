@@ -90,7 +90,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBsocket.h\fR(3HEAD),
-\fBgetsockopt\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR socket.h (3HEAD),
+.BR getsockopt (3XNET),
+.BR attributes (7),
+.BR standards (7)

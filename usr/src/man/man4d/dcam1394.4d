@@ -937,8 +937,8 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBhci1394\fR(4D),
-\fBattributes\fR(7)
+.BR hci1394 (4D),
+.BR attributes (7)
 .sp
 .LP
 \fI1394 Trade Association Digital Camera Specification, Version 1.04 - 1996\fR

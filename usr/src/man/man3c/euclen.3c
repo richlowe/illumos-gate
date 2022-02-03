@@ -71,6 +71,6 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBgetwidth\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7)
+.BR getwidth (3C),
+.BR setlocale (3C),
+.BR attributes (7)

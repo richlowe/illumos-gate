@@ -129,10 +129,10 @@ Architecture	SPARC, x86, PCI-based systems
 .TE
 
 .SH SEE ALSO
-\fBusba\fR(4D),
-\fBvirtualkm\fR(4D),
-\fBattributes\fR(7),
-\fBcfgadm_usb\fR(8)
+.BR usba (4D),
+.BR virtualkm (4D),
+.BR attributes (7),
+.BR cfgadm_usb (8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

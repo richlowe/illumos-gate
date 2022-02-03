@@ -75,11 +75,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBaddch\fR(3XCURSES),
-\fBclearok\fR(3XCURSES),
-\fBclrtobot\fR(3XCURSES),
-\fBdoupdate\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBscrl\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR addch (3XCURSES),
+.BR clearok (3XCURSES),
+.BR clrtobot (3XCURSES),
+.BR doupdate (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR scrl (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

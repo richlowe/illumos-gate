@@ -104,8 +104,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBopendir\fR(3C),
-\fBreaddir\fR(3C),
-\fBseekdir\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR opendir (3C),
+.BR readdir (3C),
+.BR seekdir (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -101,6 +101,6 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBassert\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR assert (3C),
+.BR attributes (7),
+.BR standards (7)

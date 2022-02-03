@@ -130,9 +130,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBrpc_clnt_calls\fR(3NSL),
-\fBattributes\fR(7),
-\fBspray\fR(8)
+.BR rpc_clnt_calls (3NSL),
+.BR attributes (7),
+.BR spray (8)
 .SH NOTES
 .sp
 .LP

@@ -1653,14 +1653,14 @@ Architecture	SPARC & x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBclose\fR(2),
-\fBpoll\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBaioread\fR(3C),
-\fBaiowrite\fR(3C),
-\fBusba\fR(4D),
-\fBusb_dev_descr\fR(9S)
+.BR close (2),
+.BR poll (2),
+.BR read (2),
+.BR write (2),
+.BR aioread (3C),
+.BR aiowrite (3C),
+.BR usba (4D),
+.BR usb_dev_descr (9S)
 .SH DIAGNOSTICS
 .LP
 In addition to being logged, the following messages may appear on the system

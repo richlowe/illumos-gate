@@ -84,7 +84,7 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7)
+.BR attributes (7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

@@ -88,6 +88,6 @@ applications should continue to prefer using event ports via the
 interfaces.  See \fBepoll\fR(7) for compatibility details and restrictions.
 
 .SH SEE ALSO
-\fBepoll_ctl\fR(3C),
-\fBepoll_wait\fR(3C),
-\fBepoll\fR(7)
+.BR epoll_ctl (3C),
+.BR epoll_wait (3C),
+.BR epoll (7)

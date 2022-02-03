@@ -305,13 +305,13 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBmbstowcs\fR(3C),
-\fBwcswidth\fR(3C),
-\fBwcwidth\fR(3C),
-\fBattr_get\fR(3XCURSES),
-\fBattroff\fR(3XCURSES),
-\fBdelscreen\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBripoffline\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR mbstowcs (3C),
+.BR wcswidth (3C),
+.BR wcwidth (3C),
+.BR attr_get (3XCURSES),
+.BR attroff (3XCURSES),
+.BR delscreen (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR ripoffline (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

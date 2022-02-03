@@ -147,7 +147,7 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_hook_register\fR(9F),
-\fBnet_hook_unregister\fR(9F),
-\fBnet_protocol_lookup\fR(9F)
+.BR attributes (7),
+.BR net_hook_register (9F),
+.BR net_hook_unregister (9F),
+.BR net_protocol_lookup (9F)

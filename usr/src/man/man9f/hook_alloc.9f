@@ -48,5 +48,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBhook_free\fR(9F),
-\fBhook_t\fR(9S)
+.BR hook_free (9F),
+.BR hook_t (9S)

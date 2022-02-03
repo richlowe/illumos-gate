@@ -278,8 +278,8 @@ MT-Level	Safe with exceptions
 
 .SH SEE ALSO
 .LP
-\fBpvs\fR(1),
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBlibxnet\fR(3LIB),
-\fBattributes\fR(7)
+.BR pvs (1),
+.BR Intro (2),
+.BR Intro (3),
+.BR libxnet (3LIB),
+.BR attributes (7)

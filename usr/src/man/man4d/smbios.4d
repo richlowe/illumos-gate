@@ -50,9 +50,9 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7),
-\fBprtdiag\fR(8),
-\fBsmbios\fR(8)
+.BR attributes (7),
+.BR prtdiag (8),
+.BR smbios (8)
 .sp
 .LP
 \fISystem Management BIOS Reference Specification\fR, Version 2, Release 4 \(em

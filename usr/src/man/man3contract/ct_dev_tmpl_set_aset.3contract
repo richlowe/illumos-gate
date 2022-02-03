@@ -263,8 +263,8 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBlibcontract\fR(3LIB),
-\fBcontract\fR(5),
-\fBdevices\fR(5),
-\fBattributes\fR(7),
-\fBlfcompile\fR(7)
+.BR libcontract (3LIB),
+.BR contract (5),
+.BR devices (5),
+.BR attributes (7),
+.BR lfcompile (7)

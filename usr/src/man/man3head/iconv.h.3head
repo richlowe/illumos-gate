@@ -84,8 +84,8 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBiconv\fR(3C),
-\fBiconv_close\fR(3C),
-\fBiconv_open\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR iconv (3C),
+.BR iconv_close (3C),
+.BR iconv_open (3C),
+.BR attributes (7),
+.BR standards (7)

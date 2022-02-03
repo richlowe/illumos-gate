@@ -78,10 +78,10 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBstack_getbounds\fR(3C),
-\fBstack_inbounds\fR(3C),
-\fBstack_violation\fR(3C),
-\fBattributes\fR(7)
+.BR stack_getbounds (3C),
+.BR stack_inbounds (3C),
+.BR stack_violation (3C),
+.BR attributes (7)
 .sp
 .LP
 Solaris 64-bit Developer's Guide

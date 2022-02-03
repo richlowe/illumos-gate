@@ -165,11 +165,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfork\fR(2),
-\fBmemcntl\fR(2),
-\fBmmap\fR(2),
-\fBmlockall\fR(3C),
-\fBplock\fR(3C),
-\fBsysconf\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fork (2),
+.BR memcntl (2),
+.BR mmap (2),
+.BR mlockall (3C),
+.BR plock (3C),
+.BR sysconf (3C),
+.BR attributes (7),
+.BR standards (7)

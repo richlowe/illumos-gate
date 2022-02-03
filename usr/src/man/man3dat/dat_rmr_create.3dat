@@ -104,4 +104,4 @@ MT-Level	Safe
 .sp
 .LP
 \fBdat_rmr_bind\fR(3DAT) , \fBlibdat\fR(3LIB),
-\fBattributes\fR(7)
+.BR attributes (7)

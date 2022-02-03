@@ -198,6 +198,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3),
-\fBstmfAddViewEntry\fR(3STMF),
-\fBattributes\fR(7)
+.BR Intro (3),
+.BR stmfAddViewEntry (3STMF),
+.BR attributes (7)

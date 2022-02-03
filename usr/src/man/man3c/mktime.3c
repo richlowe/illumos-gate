@@ -222,8 +222,8 @@ MT-Level	MT-Safe with exceptions
 
 .SH SEE ALSO
 .LP
-\fBctime\fR(3C),
-\fBgetenv\fR(3C),
-\fBTIMEZONE\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ctime (3C),
+.BR getenv (3C),
+.BR TIMEZONE (5),
+.BR attributes (7),
+.BR standards (7)

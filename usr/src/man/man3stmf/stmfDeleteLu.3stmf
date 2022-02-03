@@ -76,6 +76,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibstmf\fR(3LIB),
-\fBstmfRemoveViewEntry\fR(3STMF),
-\fBattributes\fR(7)
+.BR libstmf (3LIB),
+.BR stmfRemoveViewEntry (3STMF),
+.BR attributes (7)

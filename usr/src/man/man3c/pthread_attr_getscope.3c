@@ -125,11 +125,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_attr_init\fR(3C),
-\fBpthread_attr_setinheritsched\fR(3C),
-\fBpthread_attr_setschedparam\fR(3C),
-\fBpthread_attr_setschedpolicy\fR(3C),
-\fBpthread_create\fR(3C),
-\fBpthread_setschedparam\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_attr_init (3C),
+.BR pthread_attr_setinheritsched (3C),
+.BR pthread_attr_setschedparam (3C),
+.BR pthread_attr_setschedpolicy (3C),
+.BR pthread_create (3C),
+.BR pthread_setschedparam (3C),
+.BR attributes (7),
+.BR standards (7)

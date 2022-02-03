@@ -101,10 +101,10 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBgetipsecalgbyname\fR(3NSL),
-\fBgetipsecalgbyname\fR(3NSL),
-\fBattributes\fR(7),
-\fBipsecalgs\fR(8)
+.BR getipsecalgbyname (3NSL),
+.BR getipsecalgbyname (3NSL),
+.BR attributes (7),
+.BR ipsecalgs (8)
 .sp
 .LP
 Piper, D. \fIRFC 2407, The Internet IP Security Domain of Interpretation for

@@ -271,8 +271,8 @@ Non-persistent write errors.
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2),
-\fBstreamio\fR(4I)
+.BR read (2),
+.BR streamio (4I)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

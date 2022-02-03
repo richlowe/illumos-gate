@@ -64,5 +64,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBtsalarm_get\fR(3EXT),
-\fBattributes\fR(7)
+.BR tsalarm_get (3EXT),
+.BR attributes (7)

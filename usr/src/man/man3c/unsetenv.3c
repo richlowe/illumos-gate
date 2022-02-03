@@ -103,8 +103,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBclearenv\fR(3C),
-\fBgetenv\fR(3C),
-\fBsetenv\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR clearenv (3C),
+.BR getenv (3C),
+.BR setenv (3C),
+.BR attributes (7),
+.BR standards (7)

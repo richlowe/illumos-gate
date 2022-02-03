@@ -78,10 +78,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBendwin\fR(3XCURSES),
-\fBinitscr\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBnewterm\fR(3XCURSES),
-\fBsetupterm\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR endwin (3XCURSES),
+.BR initscr (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR newterm (3XCURSES),
+.BR setupterm (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

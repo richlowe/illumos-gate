@@ -138,12 +138,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(3C),
-\fBthr_create\fR(3C),
-\fBthr_join\fR(3C),
-\fBthr_keycreate\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR exit (3C),
+.BR thr_create (3C),
+.BR thr_join (3C),
+.BR thr_keycreate (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

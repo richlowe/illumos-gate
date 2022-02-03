@@ -191,10 +191,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBct_status_free\fR(3CONTRACT),
-\fBct_status_read\fR(3CONTRACT),
-\fBlibcontract\fR(3LIB),
-\fBcontract\fR(5),
-\fBprocess\fR(5),
-\fBattributes\fR(7),
-\fBlfcompile\fR(7)
+.BR ct_status_free (3CONTRACT),
+.BR ct_status_read (3CONTRACT),
+.BR libcontract (3LIB),
+.BR contract (5),
+.BR process (5),
+.BR attributes (7),
+.BR lfcompile (7)

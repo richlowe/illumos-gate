@@ -54,10 +54,10 @@ module: dlcosmk                          instance: <action id>
 .SH SEE ALSO
 .sp
 .LP
-\fBdscpmk\fR(4IPP),
-\fBflowacct\fR(4IPP),
-\fBipgpc\fR(4IPP),
-\fBipqos\fR(4IPP),
-\fBtokenmt\fR(4IPP),
-\fBtswtclmt\fR(4IPP),
-\fBipqosconf\fR(8)
+.BR dscpmk (4IPP),
+.BR flowacct (4IPP),
+.BR ipgpc (4IPP),
+.BR ipqos (4IPP),
+.BR tokenmt (4IPP),
+.BR tswtclmt (4IPP),
+.BR ipqosconf (8)

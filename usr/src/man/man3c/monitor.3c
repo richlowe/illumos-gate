@@ -201,7 +201,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprofil\fR(2),
-\fBend\fR(3C),
-\fBattributes\fR(7),
-\fBprof\fR(7)
+.BR profil (2),
+.BR end (3C),
+.BR attributes (7),
+.BR prof (7)

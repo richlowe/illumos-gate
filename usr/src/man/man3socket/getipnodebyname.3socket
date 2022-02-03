@@ -504,14 +504,14 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBhtonl\fR(3C),
-\fBnetdb.h\fR(3HEAD),
-\fBgethostbyname\fR(3NSL),
-\fBgetaddrinfo\fR(3SOCKET),
-\fBinet\fR(3SOCKET),
-\fBhosts\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBattributes\fR(7)
+.BR htonl (3C),
+.BR netdb.h (3HEAD),
+.BR gethostbyname (3NSL),
+.BR getaddrinfo (3SOCKET),
+.BR inet (3SOCKET),
+.BR hosts (5),
+.BR nsswitch.conf (5),
+.BR attributes (7)
 .SH NOTES
 .LP
 No enumeration functions are provided for IPv6. Existing enumeration functions

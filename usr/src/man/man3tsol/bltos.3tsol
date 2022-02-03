@@ -232,12 +232,12 @@ The \fBbsltos()\fR and \fBbcleartos()\fR functions are Obsolete. Use the
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C),
-\fBmalloc\fR(3C),
-\fBlibtsol\fR(3LIB),
-\fBlabel_to_str\fR(3TSOL),
-\fBlabel_encodings\fR(5),
-\fBattributes\fR(7)
+.BR free (3C),
+.BR malloc (3C),
+.BR libtsol (3LIB),
+.BR label_to_str (3TSOL),
+.BR label_encodings (5),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

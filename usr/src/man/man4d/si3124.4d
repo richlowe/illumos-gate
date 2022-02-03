@@ -62,12 +62,12 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBnv_sata\fR(4D),
-\fBsata\fR(4D),
-\fBattributes\fR(7),
-\fBcfgadm\fR(8),
-\fBcfgadm_sata\fR(8),
-\fBprtconf\fR(8)
+.BR nv_sata (4D),
+.BR sata (4D),
+.BR attributes (7),
+.BR cfgadm (8),
+.BR cfgadm_sata (8),
+.BR prtconf (8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

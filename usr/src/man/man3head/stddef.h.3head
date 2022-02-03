@@ -148,9 +148,9 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBgetconf\fR(1),
-\fBconfstr\fR(3C),
-\fBtypes.h\fR(3HEAD),
-\fBwchar.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR getconf (1),
+.BR confstr (3C),
+.BR types.h (3HEAD),
+.BR wchar.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

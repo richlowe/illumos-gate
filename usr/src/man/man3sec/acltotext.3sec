@@ -226,6 +226,6 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBacl\fR(2),
-\fBmalloc\fR(3C),
-\fBattributes\fR(7)
+.BR acl (2),
+.BR malloc (3C),
+.BR attributes (7)

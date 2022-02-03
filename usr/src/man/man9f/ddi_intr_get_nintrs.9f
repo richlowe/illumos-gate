@@ -170,10 +170,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_intr_alloc\fR(9F),
-\fBddi_intr_enable\fR(9F),
-\fBddi_intr_get_supported_types\fR(9F)
+.BR attributes (7),
+.BR ddi_intr_alloc (9F),
+.BR ddi_intr_enable (9F),
+.BR ddi_intr_get_supported_types (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

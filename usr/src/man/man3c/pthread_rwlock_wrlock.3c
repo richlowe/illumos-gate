@@ -144,9 +144,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_rwlock_init\fR(3C),
-\fBpthread_rwlock_rdlock\fR(3C),
-\fBpthread_rwlock_unlock\fR(3C),
-\fBpthread_rwlockattr_init\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_rwlock_init (3C),
+.BR pthread_rwlock_rdlock (3C),
+.BR pthread_rwlock_unlock (3C),
+.BR pthread_rwlockattr_init (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -357,10 +357,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgencat\fR(1),
-\fBcatgets\fR(3C),
-\fBgettext\fR(3C),
-\fBsetlocale\fR(3C),
-\fBnl_types.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBenviron\fR(7)
+.BR gencat (1),
+.BR catgets (3C),
+.BR gettext (3C),
+.BR setlocale (3C),
+.BR nl_types.h (3HEAD),
+.BR attributes (7),
+.BR environ (7)

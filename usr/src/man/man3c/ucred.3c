@@ -284,12 +284,12 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetpflags\fR(2),
-\fBgetppriv\fR(2),
-\fBdoor_ucred\fR(3C),
-\fBgetpeerucred\fR(3C),
-\fBpriv_set\fR(3C),
-\fBsocket.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBlabels\fR(7),
-\fBprivileges\fR(7)
+.BR getpflags (2),
+.BR getppriv (2),
+.BR door_ucred (3C),
+.BR getpeerucred (3C),
+.BR priv_set (3C),
+.BR socket.h (3HEAD),
+.BR attributes (7),
+.BR labels (7),
+.BR privileges (7)

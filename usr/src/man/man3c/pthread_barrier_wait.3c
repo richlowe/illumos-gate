@@ -137,6 +137,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_barrier_destroy\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_barrier_destroy (3C),
+.BR attributes (7),
+.BR standards (7)

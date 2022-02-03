@@ -102,8 +102,8 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBgets\fR(3C),
-\fBattributes\fR(7)
+.BR gets (3C),
+.BR attributes (7)
 .SH NOTES
 When compiling multithread applications, the \fB_REENTRANT\fR flag must be
 defined on the compile line.  This flag should only be used in multithreaded

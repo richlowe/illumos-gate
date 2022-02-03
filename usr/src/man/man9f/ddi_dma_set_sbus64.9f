@@ -95,12 +95,12 @@ Architecture	SBus
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_dma_addr_bind_handle\fR(9F),
-\fBddi_dma_alloc_handle\fR(9F),
-\fBddi_dma_buf_bind_handle\fR(9F),
-\fBddi_dma_burstsizes\fR(9F),
-\fBddi_dma_attr\fR(9S)
+.BR attributes (7),
+.BR ddi_dma_addr_bind_handle (9F),
+.BR ddi_dma_alloc_handle (9F),
+.BR ddi_dma_buf_bind_handle (9F),
+.BR ddi_dma_burstsizes (9F),
+.BR ddi_dma_attr (9S)
 .SH NOTES
 64-bit SBus mode is activated on a per SBus slot basis. If there are multiple
 SBus cards in one slot, they all must operate in 64-bit mode or they all must

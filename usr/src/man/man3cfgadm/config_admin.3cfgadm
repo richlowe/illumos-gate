@@ -649,18 +649,18 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlopen\fR(3C),
-\fBdlsym\fR(3C),
-\fBfree\fR(3C),
-\fBgetsubopt\fR(3C),
-\fBmalloc\fR(3C),
-\fBqsort\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstrcmp\fR(3C),
-\fBlibcfgadm\fR(3LIB),
-\fBattributes\fR(7),
-\fBcfgadm\fR(8),
-\fBdevinfo\fR(8)
+.BR dlopen (3C),
+.BR dlsym (3C),
+.BR free (3C),
+.BR getsubopt (3C),
+.BR malloc (3C),
+.BR qsort (3C),
+.BR setlocale (3C),
+.BR strcmp (3C),
+.BR libcfgadm (3LIB),
+.BR attributes (7),
+.BR cfgadm (8),
+.BR devinfo (8)
 .SH NOTES
 .sp
 .LP

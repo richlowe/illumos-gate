@@ -107,9 +107,9 @@ MT Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBrtld_db\fR(3EXT),
-\fBlibc_db\fR(3LIB),
-\fBlibrtld_db\fR(3LIB),
-\fBproc_service\fR(3PROC),
-\fBattributes\fR(7),
-\fBthreads\fR(7)
+.BR rtld_db (3EXT),
+.BR libc_db (3LIB),
+.BR librtld_db (3LIB),
+.BR proc_service (3PROC),
+.BR attributes (7),
+.BR threads (7)

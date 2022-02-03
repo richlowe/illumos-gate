@@ -90,6 +90,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_ispartialchecksum\fR(9F),
-\fBnet_protocol_lookup\fR(9F)
+.BR attributes (7),
+.BR net_ispartialchecksum (9F),
+.BR net_protocol_lookup (9F)

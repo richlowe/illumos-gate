@@ -208,11 +208,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_inopts\fR(3CURSES),
-\fBcurs_move\fR(3CURSES),
-\fBcurs_refresh\fR(3CURSES),
-\fBcurses\fR(3CURSES),
-\fBattributes\fR(7)
+.BR curs_inopts (3CURSES),
+.BR curs_move (3CURSES),
+.BR curs_refresh (3CURSES),
+.BR curses (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

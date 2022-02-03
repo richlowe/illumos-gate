@@ -277,19 +277,19 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBdriver.conf\fR(5),
-\fBisa\fR(5),
-\fBsbus\fR(5),
-\fBsysbus\fR(5),
-\fBattach\fR(9E),
-\fBdetach\fR(9E),
-\fBIntro\fR(9F),
-\fBddi_intr_hilevel\fR(9F),
-\fBmutex\fR(9F),
-\fBmutex_init\fR(9F),
-\fBrw_init\fR(9F),
-\fBrwlock\fR(9F),
-\fBddi_idevice_cookie\fR(9S)
+.BR driver.conf (5),
+.BR isa (5),
+.BR sbus (5),
+.BR sysbus (5),
+.BR attach (9E),
+.BR detach (9E),
+.BR Intro (9F),
+.BR ddi_intr_hilevel (9F),
+.BR mutex (9F),
+.BR mutex_init (9F),
+.BR rw_init (9F),
+.BR rwlock (9F),
+.BR ddi_idevice_cookie (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

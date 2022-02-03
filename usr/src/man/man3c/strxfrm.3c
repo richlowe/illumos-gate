@@ -135,13 +135,13 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBlocaledef\fR(1),
-\fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstrcmp\fR(3C),
-\fBstrcoll\fR(3C),
-\fBuselocale\fR(3C),
-\fBwscoll\fR(3C),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR localedef (1),
+.BR newlocale (3C),
+.BR setlocale (3C),
+.BR strcmp (3C),
+.BR strcoll (3C),
+.BR uselocale (3C),
+.BR wscoll (3C),
+.BR attributes (7),
+.BR environ (7),
+.BR standards (7)

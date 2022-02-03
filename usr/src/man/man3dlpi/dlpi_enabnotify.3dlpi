@@ -202,8 +202,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi_disabnotify\fR(3DLPI),
-\fBdlpi_recv\fR(3DLPI),
-\fBlibdlpi\fR(3LIB),
-\fBdlpi\fR(4P),
-\fBattributes\fR(7)
+.BR dlpi_disabnotify (3DLPI),
+.BR dlpi_recv (3DLPI),
+.BR libdlpi (3LIB),
+.BR dlpi (4P),
+.BR attributes (7)

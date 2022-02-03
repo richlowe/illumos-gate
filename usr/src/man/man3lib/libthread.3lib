@@ -96,11 +96,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1),
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBlibc\fR(3LIB),
-\fBlibc_db\fR(3LIB),
-\fBlibpthread\fR(3LIB),
-\fBattributes\fR(7),
-\fBthreads\fR(7)
+.BR pvs (1),
+.BR Intro (2),
+.BR Intro (3),
+.BR libc (3LIB),
+.BR libc_db (3LIB),
+.BR libpthread (3LIB),
+.BR attributes (7),
+.BR threads (7)

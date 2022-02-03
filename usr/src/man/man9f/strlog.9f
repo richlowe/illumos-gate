@@ -180,11 +180,11 @@ Error messages dated \fImm-dd\fR appended by \fBstrerr\fR(8) from the
 .SH SEE ALSO
 .sp
 .LP
-\fBgetmsg\fR(2),
-\fBlog\fR(4D),
-\fBstrace\fR(8),
-\fBstrerr\fR(8),
-\fBmodule_info\fR(9S)
+.BR getmsg (2),
+.BR log (4D),
+.BR strace (8),
+.BR strerr (8),
+.BR module_info (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

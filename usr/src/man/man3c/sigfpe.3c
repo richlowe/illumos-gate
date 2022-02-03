@@ -184,11 +184,11 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBsigaction\fR(2),
-\fBabort\fR(3C),
-\fBsignal\fR(3C),
-\fBfloatingpoint.h\fR(3HEAD),
-\fBattributes\fR(7)
+.BR sigaction (2),
+.BR abort (3C),
+.BR signal (3C),
+.BR floatingpoint.h (3HEAD),
+.BR attributes (7)
 .SH DIAGNOSTICS
 .LP
 The \fBsigfpe()\fR function returns (void(*)())-1 if \fIcode\fR is not zero or

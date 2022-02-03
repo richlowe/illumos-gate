@@ -185,10 +185,10 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBgld\fR(4D),
-\fBstreamio\fR(4I),
-\fBdlpi\fR(4P),
-\fBattributes\fR(7)
+.BR gld (4D),
+.BR streamio (4I),
+.BR dlpi (4P),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

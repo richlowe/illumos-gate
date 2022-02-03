@@ -314,12 +314,12 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_prop_create\fR(9F),
-\fBddi_prop_get_int\fR(9F),
-\fBddi_prop_lookup\fR(9F),
-\fBkmem_alloc\fR(9F),
-\fBkmem_free\fR(9F)
+.BR attributes (7),
+.BR ddi_prop_create (9F),
+.BR ddi_prop_get_int (9F),
+.BR ddi_prop_lookup (9F),
+.BR kmem_alloc (9F),
+.BR kmem_free (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

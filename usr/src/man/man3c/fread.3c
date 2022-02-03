@@ -143,14 +143,14 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2),
-\fBfclose\fR(3C),
-\fBferror\fR(3C),
-\fBfopen\fR(3C),
-\fBgetc\fR(3C),
-\fBgets\fR(3C),
-\fBprintf\fR(3C),
-\fBputc\fR(3C),
-\fBputs\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR read (2),
+.BR fclose (3C),
+.BR ferror (3C),
+.BR fopen (3C),
+.BR getc (3C),
+.BR gets (3C),
+.BR printf (3C),
+.BR putc (3C),
+.BR puts (3C),
+.BR attributes (7),
+.BR standards (7)

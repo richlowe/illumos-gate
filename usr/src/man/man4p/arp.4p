@@ -343,13 +343,13 @@ A network interface is no longer  associated with ARP.
 
 .SH SEE ALSO
 .LP
-\fBsockaddr\fR(3SOCKET),
-\fBif_tcp\fR(4P),
-\fBinet\fR(4P),
-\fBprivileges\fR(7),
-\fBarp\fR(8),
-\fBifconfig\fR(8),
-\fBnetinfo\fR(9F)
+.BR sockaddr (3SOCKET),
+.BR if_tcp (4P),
+.BR inet (4P),
+.BR privileges (7),
+.BR arp (8),
+.BR ifconfig (8),
+.BR netinfo (9F)
 .sp
 .LP
 Plummer, Dave, \fIAn Ethernet Address Resolution Protocol\fR or \fIConverting

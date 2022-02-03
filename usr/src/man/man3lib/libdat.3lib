@@ -136,10 +136,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3),
-\fBdat.conf\fR(5),
-\fBattributes\fR(7),
-\fBdatadm\fR(8)
+.BR Intro (3),
+.BR dat.conf (5),
+.BR attributes (7),
+.BR datadm (8)
 .SH NOTES
 .sp
 .LP

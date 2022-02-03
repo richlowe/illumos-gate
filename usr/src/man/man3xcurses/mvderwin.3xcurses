@@ -90,8 +90,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdelwin\fR(3XCURSES),
-\fBderwin\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR delwin (3XCURSES),
+.BR derwin (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

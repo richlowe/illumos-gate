@@ -419,12 +419,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgeniconvtbl\fR(1),
-\fBiconv\fR(1),
-\fBiconv_close\fR(3C),
-\fBiconv_open\fR(3C),
-\fBgeniconvtbl\fR(5),
-\fBattributes\fR(7),
-\fBiconv\fR(7),
-\fBiconv_unicode\fR(7),
-\fBstandards\fR(7)
+.BR geniconvtbl (1),
+.BR iconv (1),
+.BR iconv_close (3C),
+.BR iconv_open (3C),
+.BR geniconvtbl (5),
+.BR attributes (7),
+.BR iconv (7),
+.BR iconv_unicode (7),
+.BR standards (7)

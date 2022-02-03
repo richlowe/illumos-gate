@@ -221,8 +221,8 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBgetconf\fR(1),
-\fBpoll\fR(2),
-\fBconfstr\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR getconf (1),
+.BR poll (2),
+.BR confstr (3C),
+.BR attributes (7),
+.BR standards (7)

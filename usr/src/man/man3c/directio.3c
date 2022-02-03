@@ -152,13 +152,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2),
-\fBopen\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBfcntl.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBfstyp\fR(8)
+.BR mmap (2),
+.BR open (2),
+.BR read (2),
+.BR write (2),
+.BR fcntl.h (3HEAD),
+.BR attributes (7),
+.BR fstyp (8)
 .SH WARNINGS
 .sp
 .LP

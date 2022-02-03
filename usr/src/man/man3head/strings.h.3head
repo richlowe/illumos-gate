@@ -76,8 +76,8 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBffs\fR(3C),
-\fBstring\fR(3C),
-\fBstddef.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ffs (3C),
+.BR string (3C),
+.BR stddef.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

@@ -763,19 +763,19 @@ The \fBstrftime()\fR and \fBstrftime_l()\fR functions are Standard.
 .LP
 For \fBstrftime()\fR and \fBstrftime_l()\fR, see \fBstandards\fR(7).
 .SH SEE ALSO
-\fBdate\fR(1),
-\fBctime\fR(3C),
-\fBmktime\fR(3C),
-\fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstrptime\fR(3C),
-\fBtzset\fR(3C),
-\fBuselocale\fR(3C),
-\fBTIMEZONE\fR(5),
-\fBzoneinfo\fR(5),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR date (1),
+.BR ctime (3C),
+.BR mktime (3C),
+.BR newlocale (3C),
+.BR setlocale (3C),
+.BR strptime (3C),
+.BR tzset (3C),
+.BR uselocale (3C),
+.BR TIMEZONE (5),
+.BR zoneinfo (5),
+.BR attributes (7),
+.BR environ (7),
+.BR standards (7)
 .SH NOTES
 The conversion specification for \fB%V\fR was changed in the Solaris 7 release.
 This change was based on the public review draft of the ISO C9x standard at

@@ -109,9 +109,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_acquire_cred\fR(3GSS),
-\fBgss_create_empty_oid_set\fR(3GSS),
-\fBattributes\fR(7)
+.BR gss_acquire_cred (3GSS),
+.BR gss_create_empty_oid_set (3GSS),
+.BR attributes (7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

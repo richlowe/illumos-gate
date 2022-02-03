@@ -247,12 +247,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsysevent_bind_handle\fR(3SYSEVENT),
-\fBsysevent_get_attr_list\fR(3SYSEVENT),
-\fBsysevent_get_class_name\fR(3SYSEVENT),
-\fBsysevent_get_vendor_name\fR(3SYSEVENT),
-\fBattributes\fR(7),
-\fBsyseventd\fR(8)
+.BR sysevent_bind_handle (3SYSEVENT),
+.BR sysevent_get_attr_list (3SYSEVENT),
+.BR sysevent_get_class_name (3SYSEVENT),
+.BR sysevent_get_vendor_name (3SYSEVENT),
+.BR attributes (7),
+.BR syseventd (8)
 .SH NOTES
 .sp
 .LP

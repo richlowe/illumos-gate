@@ -245,11 +245,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBtran_getcap\fR(9E),
-\fBtran_setcap\fR(9E),
-\fBscsi_ifgetcap\fR(9F),
-\fBscsi_ifsetcap\fR(9F),
-\fBscsi_reset_notify\fR(9F)
+.BR tran_getcap (9E),
+.BR tran_setcap (9E),
+.BR scsi_ifgetcap (9F),
+.BR scsi_ifsetcap (9F),
+.BR scsi_reset_notify (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

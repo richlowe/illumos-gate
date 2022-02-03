@@ -146,7 +146,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBacl_get\fR(3SEC),
-\fBacl_trivial\fR(3SEC),
-\fBacl\fR(7),
-\fBattributes\fR(7)
+.BR acl_get (3SEC),
+.BR acl_trivial (3SEC),
+.BR acl (7),
+.BR attributes (7)

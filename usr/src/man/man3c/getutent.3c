@@ -168,10 +168,10 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBgetutxent\fR(3C),
-\fBttyslot\fR(3C),
-\fButmpx\fR(5),
-\fBattributes\fR(7)
+.BR getutxent (3C),
+.BR ttyslot (3C),
+.BR utmpx (5),
+.BR attributes (7)
 .SH NOTES
 .LP
 The most current entry is saved in a static structure.  Multiple accesses

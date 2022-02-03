@@ -283,15 +283,15 @@ Log configuration file.
 .SH SEE ALSO
 .sp
 .LP
-\fBgetmsg\fR(2),
-\fBioctl\fR(2),
-\fBputmsg\fR(2),
-\fBwrite\fR(2),
-\fBIntro\fR(3),
-\fBprintf\fR(3C),
-\fBstrace\fR(8),
-\fBstrerr\fR(8),
-\fBstrlog\fR(9F)
+.BR getmsg (2),
+.BR ioctl (2),
+.BR putmsg (2),
+.BR write (2),
+.BR Intro (3),
+.BR printf (3C),
+.BR strace (8),
+.BR strerr (8),
+.BR strlog (9F)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

@@ -106,6 +106,6 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBgettaskid\fR(2),
-\fBsettaskid\fR(2),
-\fBattributes\fR(7)
+.BR gettaskid (2),
+.BR settaskid (2),
+.BR attributes (7)

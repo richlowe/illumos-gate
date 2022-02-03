@@ -815,13 +815,13 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBbtowc\fR(3C),
-\fBfputwc\fR(3C),
-\fBfwscanf\fR(3C),
-\fBmbrtowc\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR btowc (3C),
+.BR fputwc (3C),
+.BR fwscanf (3C),
+.BR mbrtowc (3C),
+.BR setlocale (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

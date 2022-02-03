@@ -257,20 +257,20 @@ xxioctl(dev_t dev, int cmd, intptr_t arg, int mode,
 .in -2
 
 .SH SEE ALSO
-\fBstty\fR(1),
-\fBdkio\fR(4I),
-\fBfbio\fR(4I),
-\fBtermio\fR(4I),
-\fBttymon\fR(8),
-\fBopen\fR(9E),
-\fBput\fR(9E),
-\fBsrv\fR(9E),
-\fBcopyin\fR(9F),
-\fBcopyout\fR(9F),
-\fBddi_copyin\fR(9F),
-\fBddi_copyout\fR(9F),
-\fBddi_model_convert_from\fR(9F),
-\fBcb_ops\fR(9S)
+.BR stty (1),
+.BR dkio (4I),
+.BR fbio (4I),
+.BR termio (4I),
+.BR ttymon (8),
+.BR open (9E),
+.BR put (9E),
+.BR srv (9E),
+.BR copyin (9F),
+.BR copyout (9F),
+.BR ddi_copyin (9F),
+.BR ddi_copyout (9F),
+.BR ddi_model_convert_from (9F),
+.BR cb_ops (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

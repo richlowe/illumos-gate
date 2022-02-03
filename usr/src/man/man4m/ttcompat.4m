@@ -674,7 +674,7 @@ TIOCOUTQ
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2),
-\fBtermios\fR(3C),
-\fBtermio\fR(4I),
-\fBldterm\fR(4M)
+.BR ioctl (2),
+.BR termios (3C),
+.BR termio (4I),
+.BR ldterm (4M)

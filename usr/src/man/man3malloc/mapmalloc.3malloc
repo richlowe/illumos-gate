@@ -111,9 +111,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbrk\fR(2),
-\fBgetrlimit\fR(2),
-\fBmmap\fR(2),
-\fBrealloc\fR(3C),
-\fBmalloc\fR(3MALLOC),
-\fBattributes\fR(7)
+.BR brk (2),
+.BR getrlimit (2),
+.BR mmap (2),
+.BR realloc (3C),
+.BR malloc (3MALLOC),
+.BR attributes (7)

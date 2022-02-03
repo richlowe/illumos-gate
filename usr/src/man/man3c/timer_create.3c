@@ -157,13 +157,13 @@ Standard	See \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
-\fBexec\fR(2),
-\fBfork\fR(2),
-\fBtime\fR(2),
-\fBclock_settime\fR(3C),
-\fBsignal\fR(3C),
-\fBtimer_delete\fR(3C),
-\fBtimer_settime\fR(3C),
-\fBsignal.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR exec (2),
+.BR fork (2),
+.BR time (2),
+.BR clock_settime (3C),
+.BR signal (3C),
+.BR timer_delete (3C),
+.BR timer_settime (3C),
+.BR signal.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

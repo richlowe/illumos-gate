@@ -53,11 +53,11 @@ Controllers exported by \fBsrpt\fR(4D).
 .SH SEE ALSO
 .sp
 .LP
-\fBib\fR(4D),
-\fBibdm\fR(4D),
-\fBibtl\fR(4D),
-\fBsrpt\fR(4D),
-\fBattributes\fR(7)
+.BR ib (4D),
+.BR ibdm (4D),
+.BR ibtl (4D),
+.BR srpt (4D),
+.BR attributes (7)
 .sp
 .LP
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.2.1\fR

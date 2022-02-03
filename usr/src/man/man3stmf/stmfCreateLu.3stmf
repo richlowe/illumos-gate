@@ -151,7 +151,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibstmf\fR(3LIB),
-\fBstmfCreateLuResource\fR(3STMF),
-\fBstmfSetLuProp\fR(3STMF),
-\fBattributes\fR(7)
+.BR libstmf (3LIB),
+.BR stmfCreateLuResource (3STMF),
+.BR stmfSetLuProp (3STMF),
+.BR attributes (7)

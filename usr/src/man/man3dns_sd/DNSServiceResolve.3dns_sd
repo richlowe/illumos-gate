@@ -101,4 +101,4 @@ MT-Level	Safe
 .sp
 .LP
 \fBDNSServiceBrowse\fR(3DNS_SD), \fBDNSServiceRefDeallocate\fR(3DNS_SD),
-\fBattributes\fR(7)
+.BR attributes (7)

@@ -189,9 +189,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmsgget\fR(2),
-\fBsemget\fR(2),
-\fBshmget\fR(2),
-\fBstat\fR(2),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR msgget (2),
+.BR semget (2),
+.BR shmget (2),
+.BR stat (2),
+.BR attributes (7),
+.BR standards (7)

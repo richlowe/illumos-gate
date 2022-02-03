@@ -134,9 +134,9 @@ functionality as the Unsafe functions, but have a slightly different function
 call interface to make them MT-Safe.
 .SH SEE ALSO
 .LP
-\fBaudit_class\fR(5),
-\fBaudit_event\fR(5),
-\fBattributes\fR(7)
+.BR audit_class (5),
+.BR audit_event (5),
+.BR attributes (7)
 .SH NOTES
 .LP
 All information is contained in a static area, so it must be copied if it is to

@@ -80,8 +80,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBsysinfo\fR(2),
-\fBuname\fR(2),
-\fBgethostid\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR sysinfo (2),
+.BR uname (2),
+.BR gethostid (3C),
+.BR attributes (7),
+.BR standards (7)

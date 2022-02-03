@@ -168,14 +168,14 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBputc\fR(3C),
-\fBcurs_attr\fR(3CURSES),
-\fBcurs_clear\fR(3CURSES),
-\fBcurs_inch\fR(3CURSES),
-\fBcurs_outopts\fR(3CURSES),
-\fBcurs_refresh\fR(3CURSES),
-\fBcurses\fR(3CURSES),
-\fBattributes\fR(7)
+.BR putc (3C),
+.BR curs_attr (3CURSES),
+.BR curs_clear (3CURSES),
+.BR curs_inch (3CURSES),
+.BR curs_outopts (3CURSES),
+.BR curs_refresh (3CURSES),
+.BR curses (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

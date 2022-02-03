@@ -253,10 +253,10 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBfcntl\fR(2),
-\fBt_getinfo\fR(3NSL),
-\fBt_look\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_snd\fR(3NSL),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fcntl (2),
+.BR t_getinfo (3NSL),
+.BR t_look (3NSL),
+.BR t_open (3NSL),
+.BR t_snd (3NSL),
+.BR attributes (7),
+.BR standards (7)

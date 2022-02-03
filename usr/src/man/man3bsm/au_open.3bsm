@@ -107,9 +107,9 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBaudit\fR(2),
-\fBauditon\fR(2),
-\fBau_preselect\fR(3BSM),
-\fBau_to\fR(3BSM),
-\fBfree\fR(3C),
-\fBattributes\fR(7)
+.BR audit (2),
+.BR auditon (2),
+.BR au_preselect (3BSM),
+.BR au_to (3BSM),
+.BR free (3C),
+.BR attributes (7)

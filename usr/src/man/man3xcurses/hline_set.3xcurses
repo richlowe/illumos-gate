@@ -153,9 +153,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBborder\fR(3XCURSES),
-\fBborder_set\fR(3XCURSES),
-\fBhline\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR border (3XCURSES),
+.BR border_set (3XCURSES),
+.BR hline (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

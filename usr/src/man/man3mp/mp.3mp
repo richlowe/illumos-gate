@@ -160,10 +160,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBmalloc\fR(3C),
-\fBlibmp\fR(3LIB),
-\fBexp\fR(3M),
-\fBattributes\fR(7)
+.BR malloc (3C),
+.BR libmp (3LIB),
+.BR exp (3M),
+.BR attributes (7)
 .SH DIAGNOSTICS
 .sp
 .LP

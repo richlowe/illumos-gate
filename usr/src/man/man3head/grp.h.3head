@@ -90,7 +90,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBgetgrnam\fR(3C),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR getgrnam (3C),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

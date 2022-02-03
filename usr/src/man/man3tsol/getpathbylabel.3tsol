@@ -134,11 +134,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBreadlink\fR(2),
-\fBlibtsol\fR(3LIB),
-\fBgetzonerootbyid\fR(3TSOL),
-\fBattributes\fR(7),
-\fBlabels\fR(7)
+.BR readlink (2),
+.BR libtsol (3LIB),
+.BR getzonerootbyid (3TSOL),
+.BR attributes (7),
+.BR labels (7)
 .SH WARNINGS
 .sp
 .LP

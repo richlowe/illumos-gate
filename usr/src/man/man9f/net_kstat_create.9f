@@ -192,9 +192,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBddi_get_instance\fR(9F),
-\fBkstat_create\fR(9F),
-\fBkstat_delete\fR(9F),
-\fBnet_kstat_delete\fR(9F),
-\fBhook_t\fR(9S),
-\fBkstat_named\fR(9S)
+.BR ddi_get_instance (9F),
+.BR kstat_create (9F),
+.BR kstat_delete (9F),
+.BR net_kstat_delete (9F),
+.BR hook_t (9S),
+.BR kstat_named (9S)

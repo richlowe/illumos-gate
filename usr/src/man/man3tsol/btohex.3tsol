@@ -140,12 +140,12 @@ multithreaded applications.
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtsol\fR(3LIB),
-\fBlabel_to_str\fR(3TSOL),
-\fBattributes\fR(7),
-\fBlabels\fR(7),
-\fBatohexlabel\fR(8),
-\fBhextoalabel\fR(8)
+.BR libtsol (3LIB),
+.BR label_to_str (3TSOL),
+.BR attributes (7),
+.BR labels (7),
+.BR atohexlabel (8),
+.BR hextoalabel (8)
 .SH NOTES
 .sp
 .LP

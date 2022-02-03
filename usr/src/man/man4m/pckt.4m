@@ -46,12 +46,12 @@ the application to separate the data into its component parts.
 .SH SEE ALSO
 .sp
 .LP
-\fBgetmsg\fR(2),
-\fBioctl\fR(2),
-\fBstreamio\fR(4I),
-\fBtermio\fR(4I),
-\fBldterm\fR(4M),
-\fBptem\fR(4M)
+.BR getmsg (2),
+.BR ioctl (2),
+.BR streamio (4I),
+.BR termio (4I),
+.BR ldterm (4M),
+.BR ptem (4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

@@ -62,5 +62,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpicl_initialize\fR(3PICL),
-\fBattributes\fR(7)
+.BR picl_initialize (3PICL),
+.BR attributes (7)

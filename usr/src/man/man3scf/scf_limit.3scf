@@ -114,6 +114,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB),
-\fBscf_error\fR(3SCF),
-\fBattributes\fR(7)
+.BR libscf (3LIB),
+.BR scf_error (3SCF),
+.BR attributes (7)

@@ -198,6 +198,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBglob\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR glob (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -125,10 +125,10 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBhtonl\fR(3C),
-\fBinet_addr\fR(3C),
-\fBin.h\fR(3HEAD),
-\fBinet_addr\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (3),
+.BR htonl (3C),
+.BR inet_addr (3C),
+.BR in.h (3HEAD),
+.BR inet_addr (3XNET),
+.BR attributes (7),
+.BR standards (7)

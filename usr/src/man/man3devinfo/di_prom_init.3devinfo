@@ -76,10 +76,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmalloc\fR(3C),
-\fBdi_nodeid\fR(3DEVINFO),
-\fBdi_prom_prop_lookup_bytes\fR(3DEVINFO),
-\fBdi_prom_prop_next\fR(3DEVINFO),
-\fBlibdevinfo\fR(3LIB),
-\fBopenprom\fR(4D),
-\fBattributes\fR(7)
+.BR malloc (3C),
+.BR di_nodeid (3DEVINFO),
+.BR di_prom_prop_lookup_bytes (3DEVINFO),
+.BR di_prom_prop_next (3DEVINFO),
+.BR libdevinfo (3LIB),
+.BR openprom (4D),
+.BR attributes (7)

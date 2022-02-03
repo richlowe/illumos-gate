@@ -348,8 +348,8 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBber_decode\fR(3LDAP),
-\fBattributes\fR(7)
+.BR ber_decode (3LDAP),
+.BR attributes (7)
 .sp
 .LP
 Yeong, W., Howes, T., and Hardcastle-Kille, S., "Lightweight Directory Access

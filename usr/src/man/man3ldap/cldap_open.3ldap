@@ -76,7 +76,7 @@ Interface Stability	Evolving
 .sp
 .LP
 \fBldap\fR(3LDAP) \fBcldap_close\fR(3LDAP),
-\fBcldap_search_s\fR(3LDAP),
-\fBcldap_setretryinfo\fR(3LDAP),
-\fBudp\fR(4P),
-\fBattributes\fR(7)
+.BR cldap_search_s (3LDAP),
+.BR cldap_setretryinfo (3LDAP),
+.BR udp (4P),
+.BR attributes (7)

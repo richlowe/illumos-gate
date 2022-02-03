@@ -107,12 +107,12 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc\fR(3CPC),
-\fBcpc_bind_event\fR(3CPC),
-\fBpctx_capture\fR(3CPC),
-\fBpctx_create\fR(3CPC),
-\fBlibcpc\fR(3LIB),
-\fBattributes\fR(7)
+.BR cpc (3CPC),
+.BR cpc_bind_event (3CPC),
+.BR pctx_capture (3CPC),
+.BR pctx_create (3CPC),
+.BR libcpc (3LIB),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

@@ -74,6 +74,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3),
-\fBattributes\fR(7),
-\fBlisten\fR(8)
+.BR Intro (3),
+.BR attributes (7),
+.BR listen (8)

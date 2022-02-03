@@ -949,22 +949,22 @@ l l .
 
 .SH SEE ALSO
 .LP
-\fBmt\fR(1),
-\fBopen\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBaioread\fR(3C),
-\fBaiowrite\fR(3C),
-\fBkstat\fR(3KSTAT),
-\fBesp\fR(4D),
-\fBisp\fR(4D),
-\fBmtio\fR(4I),
-\fBdriver.conf\fR(5),
-\fBscsi\fR(5),
-\fBstandards\fR(7),
-\fBmodload\fR(8),
-\fBmodunload\fR(8),
-\fBioctl\fR(9E)
+.BR mt (1),
+.BR open (2),
+.BR read (2),
+.BR write (2),
+.BR aioread (3C),
+.BR aiowrite (3C),
+.BR kstat (3KSTAT),
+.BR esp (4D),
+.BR isp (4D),
+.BR mtio (4I),
+.BR driver.conf (5),
+.BR scsi (5),
+.BR standards (7),
+.BR modload (8),
+.BR modunload (8),
+.BR ioctl (9E)
 .SH DIAGNOSTICS
 .LP
 The \fBst\fR driver diagnostics may be printed to the console or messages file.

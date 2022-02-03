@@ -88,6 +88,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibstmf\fR(3LIB),
-\fBstmfFreeLuResource\fR(3STMF),
-\fBattributes\fR(7)
+.BR libstmf (3LIB),
+.BR stmfFreeLuResource (3STMF),
+.BR attributes (7)

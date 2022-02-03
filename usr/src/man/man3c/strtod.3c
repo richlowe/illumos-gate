@@ -327,14 +327,14 @@ MT-Level	MT-Safe with exceptions
 .TE
 
 .SH SEE ALSO
-\fBisspace\fR(3C),
-\fBlocaleconv\fR(3C),
-\fBscanf\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstrtol\fR(3C),
-\fBmath.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR isspace (3C),
+.BR localeconv (3C),
+.BR scanf (3C),
+.BR setlocale (3C),
+.BR strtol (3C),
+.BR math.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 The \fBstrtod()\fR and \fBatof()\fR functions can be used safely in
 multithreaded applications, as long as \fBsetlocale\fR(3C) is not called to

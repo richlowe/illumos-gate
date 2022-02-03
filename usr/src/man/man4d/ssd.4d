@@ -260,18 +260,18 @@ partition \fIn\fR (0-7)
 .RE
 
 .SH SEE ALSO
-\fBsar\fR(1),
-\fBioctl\fR(2),
-\fBlseek\fR(2),
-\fBopen\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBcdio\fR(4I),
-\fBdkio\fR(4I),
-\fBdriver.conf\fR(5),
-\fBscsi\fR(5),
-\fBformat\fR(8),
-\fBiostat\fR(8)
+.BR sar (1),
+.BR ioctl (2),
+.BR lseek (2),
+.BR open (2),
+.BR read (2),
+.BR write (2),
+.BR cdio (4I),
+.BR dkio (4I),
+.BR driver.conf (5),
+.BR scsi (5),
+.BR format (8),
+.BR iostat (8)
 .sp
 .LP
 \fIANSI Small Computer System Interface-2 (SCSI-2)\fR

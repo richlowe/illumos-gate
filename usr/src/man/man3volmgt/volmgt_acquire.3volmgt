@@ -191,11 +191,11 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C),
-\fBmalloc\fR(3C),
-\fBvolmgt_release\fR(3VOLMGT),
-\fBattributes\fR(7),
-\fBhal\fR(7)
+.BR free (3C),
+.BR malloc (3C),
+.BR volmgt_release (3VOLMGT),
+.BR attributes (7),
+.BR hal (7)
 .SH NOTES
 .sp
 .LP

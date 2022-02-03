@@ -416,11 +416,11 @@ MT Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBrtld_db\fR(3EXT),
-\fBlibc_db\fR(3LIB),
-\fBlibrtld_db\fR(3LIB),
-\fBps_pread\fR(3PROC),
-\fBattributes\fR(7)
+.BR rtld_db (3EXT),
+.BR libc_db (3LIB),
+.BR librtld_db (3LIB),
+.BR ps_pread (3PROC),
+.BR attributes (7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

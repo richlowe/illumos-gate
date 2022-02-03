@@ -98,9 +98,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBelf\fR(3ELF),
-\fBelf_begin\fR(3ELF),
-\fBelf_getarsym\fR(3ELF),
-\fBar.h\fR(3HEAD),
-\fBlibelf\fR(3LIB),
-\fBattributes\fR(7)
+.BR elf (3ELF),
+.BR elf_begin (3ELF),
+.BR elf_getarsym (3ELF),
+.BR ar.h (3HEAD),
+.BR libelf (3LIB),
+.BR attributes (7)

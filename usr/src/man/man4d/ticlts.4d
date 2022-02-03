@@ -212,5 +212,5 @@ the \fBTCP/IP\fR model.
 .SH SEE ALSO
 .sp
 .LP
-\fBt_rcvdis\fR(3NSL),
-\fBt_rcvuderr\fR(3NSL)
+.BR t_rcvdis (3NSL),
+.BR t_rcvuderr (3NSL)

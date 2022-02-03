@@ -92,11 +92,11 @@ Interface stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBpm\fR(4D),
-\fBattributes\fR(7),
-\fBattach\fR(9E),
-\fBdetach\fR(9E),
-\fBddi_prop_create\fR(9F)
+.BR pm (4D),
+.BR attributes (7),
+.BR attach (9E),
+.BR detach (9E),
+.BR ddi_prop_create (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

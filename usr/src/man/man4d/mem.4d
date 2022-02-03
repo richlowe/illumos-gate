@@ -119,10 +119,10 @@ including memory that is associated with an I/O device.
 .SH SEE ALSO
 .sp
 .LP
-\fBllseek\fR(2),
-\fBmmap\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2)
+.BR llseek (2),
+.BR mmap (2),
+.BR read (2),
+.BR write (2)
 .SH WARNINGS
 .sp
 .LP

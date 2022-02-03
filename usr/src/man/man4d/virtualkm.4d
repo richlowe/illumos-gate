@@ -216,16 +216,16 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBkbd\fR(1),
-\fBread\fR(2),
-\fBhid\fR(4D),
-\fBusba\fR(4D),
-\fBkb\fR(4M),
-\fBusbkbm\fR(4M),
-\fBusbms\fR(4M),
-\fBvuidmice\fR(4M),
-\fBattributes\fR(7),
-\fBeeprom\fR(8)
+.BR kbd (1),
+.BR read (2),
+.BR hid (4D),
+.BR usba (4D),
+.BR kb (4M),
+.BR usbkbm (4M),
+.BR usbms (4M),
+.BR vuidmice (4M),
+.BR attributes (7),
+.BR eeprom (8)
 .SH DIAGNOSTICS
 .LP
 The messages described below may appear on the system console as well as

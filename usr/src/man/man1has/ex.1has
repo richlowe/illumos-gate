@@ -887,18 +887,18 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBed\fR(1),
-\fBedit\fR(1),
-\fBgrep\fR(1),
-\fBsed\fR(1),
-\fBsort\fR(1),
-\fBvi\fR(1),
-\fBcurses\fR(3CURSES),
-\fBterm\fR(5),
-\fBterminfo\fR(5),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR ed (1),
+.BR edit (1),
+.BR grep (1),
+.BR sed (1),
+.BR sort (1),
+.BR vi (1),
+.BR curses (3CURSES),
+.BR term (5),
+.BR terminfo (5),
+.BR attributes (7),
+.BR environ (7),
+.BR standards (7)
 .sp
 .LP
 \fISolaris Advanced User\&'s Guide\fR

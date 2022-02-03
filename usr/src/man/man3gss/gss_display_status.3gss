@@ -161,9 +161,9 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBgss_acquire_cred\fR(3GSS),
-\fBgss_release_buffer\fR(3GSS),
-\fBattributes\fR(7)
+.BR gss_acquire_cred (3GSS),
+.BR gss_release_buffer (3GSS),
+.BR attributes (7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

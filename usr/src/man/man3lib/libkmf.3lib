@@ -158,9 +158,9 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBkmfcfg\fR(1),
-\fBpktool\fR(1),
-\fBattributes\fR(7)
+.BR kmfcfg (1),
+.BR pktool (1),
+.BR attributes (7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

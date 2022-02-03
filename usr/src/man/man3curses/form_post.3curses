@@ -129,11 +129,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurses\fR(3CURSES),
-\fBforms\fR(3CURSES),
-\fBpanel_update\fR(3CURSES),
-\fBpanels\fR(3CURSES),
-\fBattributes\fR(7)
+.BR curses (3CURSES),
+.BR forms (3CURSES),
+.BR panel_update (3CURSES),
+.BR panels (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

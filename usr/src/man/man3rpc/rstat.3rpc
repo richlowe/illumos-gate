@@ -74,7 +74,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrup\fR(1),
-\fBrpc_clnt_calls\fR(3NSL),
-\fBattributes\fR(7),
-\fBrpc.rstatd\fR(8)
+.BR rup (1),
+.BR rpc_clnt_calls (3NSL),
+.BR attributes (7),
+.BR rpc.rstatd (8)

@@ -425,8 +425,8 @@ selection.
 .LP
 \fBinq_ius\fR the \fBSPI3\fR target device supports information unit transfers.
 .SH SEE ALSO
-\fBscsi_probe\fR(9F),
-\fBscsi_device\fR(9S)
+.BR scsi_probe (9F),
+.BR scsi_device (9S)
 .sp
 .LP
 \fIANSI Small Computer System Interface-2 (SCSI-2)\fR

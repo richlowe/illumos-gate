@@ -53,4 +53,4 @@ MT-Level	Safe
 .LP
 \fBDNSServiceBrowse\fR(3DNS_SD), \fBDNSServiceQueryRecord\fR(3DNS_SD),
 \fBDNSServiceRegister\fR(3DNS_SD), \fBDNSServiceResolve\fR(3DNS_SD),
-\fBattributes\fR(7)
+.BR attributes (7)

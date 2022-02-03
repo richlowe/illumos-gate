@@ -85,11 +85,11 @@ slave devices (M = 0 -> N-1)
 .SH SEE ALSO
 .sp
 .LP
-\fBgrantpt\fR(3C),
-\fBptsname\fR(3C),
-\fBunlockpt\fR(3C),
-\fBpts\fR(4D),
-\fBpckt\fR(4M)
+.BR grantpt (3C),
+.BR ptsname (3C),
+.BR unlockpt (3C),
+.BR pts (4D),
+.BR pckt (4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

@@ -51,7 +51,7 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBcldap_open\fR(3LDAP),
-\fBcldap_search_s\fR(3LDAP),
-\fBcldap_setretryinfo\fR(3LDAP),
-\fBldap\fR(3LDAP)
+.BR cldap_open (3LDAP),
+.BR cldap_search_s (3LDAP),
+.BR cldap_setretryinfo (3LDAP),
+.BR ldap (3LDAP)

@@ -131,16 +131,16 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBin.h\fR(3HEAD),
-\fBsocket.h\fR(3HEAD),
-\fBlibsctp\fR(3LIB),
-\fBaccept\fR(3SOCKET),
-\fBbind\fR(3SOCKET),
-\fBconnect\fR(3SOCKET),
-\fBlisten\fR(3SOCKET),
-\fBrecvmsg\fR(3SOCKET),
-\fBsctp_opt_info\fR(3SOCKET),
-\fBsetsockopt\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBsctp\fR(4P)
+.BR in.h (3HEAD),
+.BR socket.h (3HEAD),
+.BR libsctp (3LIB),
+.BR accept (3SOCKET),
+.BR bind (3SOCKET),
+.BR connect (3SOCKET),
+.BR listen (3SOCKET),
+.BR recvmsg (3SOCKET),
+.BR sctp_opt_info (3SOCKET),
+.BR setsockopt (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR sctp (4P)

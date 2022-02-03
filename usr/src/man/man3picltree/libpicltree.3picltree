@@ -178,8 +178,8 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBlibpicltree\fR(3LIB),
-\fBlibpicl\fR(3PICL),
-\fBpicld_log\fR(3PICLTREE),
-\fBpicld_plugin_register\fR(3PICLTREE),
-\fBattributes\fR(7)
+.BR libpicltree (3LIB),
+.BR libpicl (3PICL),
+.BR picld_log (3PICLTREE),
+.BR picld_plugin_register (3PICLTREE),
+.BR attributes (7)

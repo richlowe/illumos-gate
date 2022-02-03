@@ -111,9 +111,9 @@ function is Standard.  The
 function is Uncommitted.
 .SH SEE ALSO
 .LP
-\fBfgetwc\fR(3C),
-\fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C),
-\fBuselocale\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fgetwc (3C),
+.BR newlocale (3C),
+.BR setlocale (3C),
+.BR uselocale (3C),
+.BR attributes (7),
+.BR standards (7)

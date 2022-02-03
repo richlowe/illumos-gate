@@ -141,11 +141,11 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBcldap_close\fR(3LDAP),
-\fBcldap_open\fR(3LDAP),
-\fBcldap_setretryinfo\fR(3LDAP),
-\fBldap\fR(3LDAP),
-\fBldap_error\fR(3LDAP),
-\fBldap_search_s\fR(3LDAP),
-\fBudp\fR(4P),
-\fBattributes\fR(7)
+.BR cldap_close (3LDAP),
+.BR cldap_open (3LDAP),
+.BR cldap_setretryinfo (3LDAP),
+.BR ldap (3LDAP),
+.BR ldap_error (3LDAP),
+.BR ldap_search_s (3LDAP),
+.BR udp (4P),
+.BR attributes (7)

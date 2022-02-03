@@ -286,11 +286,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2),
-\fBmmap\fR(2),
-\fBopen\fR(2),
-\fBlibdevinfo\fR(3LIB),
-\fBattributes\fR(7)
+.BR ioctl (2),
+.BR mmap (2),
+.BR open (2),
+.BR libdevinfo (3LIB),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

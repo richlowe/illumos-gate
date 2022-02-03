@@ -66,13 +66,13 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(2),
-\fBgetrlimit\fR(2),
-\fBkill\fR(2),
-\fBfclose\fR(3C),
-\fBraise\fR(3C),
-\fBsignal\fR(3C),
-\fBwait\fR(3C),
-\fBwaitpid\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR exit (2),
+.BR getrlimit (2),
+.BR kill (2),
+.BR fclose (3C),
+.BR raise (3C),
+.BR signal (3C),
+.BR wait (3C),
+.BR waitpid (3C),
+.BR attributes (7),
+.BR standards (7)

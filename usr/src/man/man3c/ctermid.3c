@@ -79,5 +79,5 @@ T}
 .SH SEE ALSO
 .sp
 .LP
-\fBttyname\fR(3C),
-\fBattributes\fR(7)
+.BR ttyname (3C),
+.BR attributes (7)

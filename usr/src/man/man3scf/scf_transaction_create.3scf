@@ -754,8 +754,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB),
-\fBscf_error\fR(3SCF),
-\fBscf_pg_create\fR(3SCF),
-\fBscf_value_reset\fR(3SCF),
-\fBattributes\fR(7)
+.BR libscf (3LIB),
+.BR scf_error (3SCF),
+.BR scf_pg_create (3SCF),
+.BR scf_value_reset (3SCF),
+.BR attributes (7)

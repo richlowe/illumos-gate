@@ -146,9 +146,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB),
-\fBMP_GetProprietaryLoadBalanceProperties\fR(3MPAPI),
-\fBattributes\fR(7)
+.BR libMPAPI (3LIB),
+.BR MP_GetProprietaryLoadBalanceProperties (3MPAPI),
+.BR attributes (7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

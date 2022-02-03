@@ -115,11 +115,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpipe\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBsocket.h\fR(3HEAD),
-\fBattributes\fR(7)
+.BR pipe (2),
+.BR read (2),
+.BR write (2),
+.BR socket.h (3HEAD),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

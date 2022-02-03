@@ -120,9 +120,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBerrno\fR(3C),
-\fBldap\fR(3LDAP),
-\fBldap_bind\fR(3LDAP),
-\fBldap_get_option\fR(3LDAP),
-\fBldap_set_option\fR(3LDAP),
-\fBattributes\fR(7)
+.BR errno (3C),
+.BR ldap (3LDAP),
+.BR ldap_bind (3LDAP),
+.BR ldap_get_option (3LDAP),
+.BR ldap_set_option (3LDAP),
+.BR attributes (7)

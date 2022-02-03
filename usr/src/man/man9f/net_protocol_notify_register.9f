@@ -132,5 +132,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_protocol_lookup\fR(9F)
+.BR attributes (7),
+.BR net_protocol_lookup (9F)

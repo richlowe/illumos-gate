@@ -192,11 +192,11 @@ NetBSD, and GNU C libraries.
 .SH SEE ALSO
 .sp
 .LP
-\fBprintf\fR(3C),
-\fBstdarg\fR(3EXT),
-\fBattributes\fR(7),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR printf (3C),
+.BR stdarg (3EXT),
+.BR attributes (7),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

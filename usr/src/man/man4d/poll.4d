@@ -347,10 +347,10 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBopen\fR(2),
-\fBpoll\fR(2),
-\fBwrite\fR(2),
-\fBattributes\fR(7)
+.BR open (2),
+.BR poll (2),
+.BR write (2),
+.BR attributes (7)
 .SH NOTES
 The \fB/dev/poll\fR API is particularly beneficial to applications that poll a
 large number of file descriptors repeatedly.  Applications will exhibit the

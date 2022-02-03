@@ -95,5 +95,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3),
-\fBattributes\fR(7)
+.BR Intro (3),
+.BR attributes (7)

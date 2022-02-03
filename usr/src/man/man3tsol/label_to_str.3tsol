@@ -211,12 +211,12 @@ Standard is specified in \fBlabel_encodings\fR(5).
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C),
-\fBlibtsol\fR(3LIB),
-\fBstr_to_label\fR(3TSOL),
-\fBlabel_encodings\fR(5),
-\fBattributes\fR(7),
-\fBlabels\fR(7)
+.BR free (3C),
+.BR libtsol (3LIB),
+.BR str_to_label (3TSOL),
+.BR label_encodings (5),
+.BR attributes (7),
+.BR labels (7)
 .sp
 .LP
 \fIUsing the label_to_str Function\fR in \fISolaris Trusted Extensions

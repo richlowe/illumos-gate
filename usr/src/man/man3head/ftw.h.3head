@@ -202,7 +202,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBftw\fR(3C),
-\fBstat.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ftw (3C),
+.BR stat.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

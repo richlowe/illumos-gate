@@ -90,6 +90,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibc_db\fR(3LIB),
-\fBattributes\fR(7),
-\fBthreads\fR(7)
+.BR libc_db (3LIB),
+.BR attributes (7),
+.BR threads (7)

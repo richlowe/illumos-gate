@@ -109,11 +109,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBputchar\fR(3C),
-\fBlibcurses\fR(3XCURSES),
-\fBsetupterm\fR(3XCURSES),
-\fBtgetent\fR(3XCURSES),
-\fBtigetflag\fR(3XCURSES),
-\fBterminfo\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR putchar (3C),
+.BR libcurses (3XCURSES),
+.BR setupterm (3XCURSES),
+.BR tgetent (3XCURSES),
+.BR tigetflag (3XCURSES),
+.BR terminfo (5),
+.BR attributes (7),
+.BR standards (7)

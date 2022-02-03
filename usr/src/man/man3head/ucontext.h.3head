@@ -64,10 +64,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBgetcontext\fR(2),
-\fBsigaction\fR(2),
-\fBsigaltstack\fR(2),
-\fBsigprocmask\fR(2),
-\fBmakecontext\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR getcontext (2),
+.BR sigaction (2),
+.BR sigaltstack (2),
+.BR sigprocmask (2),
+.BR makecontext (3C),
+.BR attributes (7),
+.BR standards (7)

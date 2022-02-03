@@ -74,4 +74,4 @@ MT-Level	Unsafe
 .sp
 .LP
 \fBpvs\fR(1),  \fBIntro\fR(3),  \fBbsdmalloc\fR(3MALLOC),
-\fBattributes\fR(7)
+.BR attributes (7)

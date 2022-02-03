@@ -181,6 +181,6 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBstrerror\fR(3C),
-\fBt_errno\fR(3NSL),
-\fBattributes\fR(7)
+.BR strerror (3C),
+.BR t_errno (3NSL),
+.BR attributes (7)

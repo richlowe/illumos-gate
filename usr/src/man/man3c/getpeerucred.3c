@@ -134,10 +134,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdoor_ucred\fR(3C),
-\fBucred_get\fR(3C),
-\fBconnld\fR(4M),
-\fBattributes\fR(7)
+.BR door_ucred (3C),
+.BR ucred_get (3C),
+.BR connld (4M),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

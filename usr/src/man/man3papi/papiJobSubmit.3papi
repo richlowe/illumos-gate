@@ -738,6 +738,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpapi\fR(3LIB),
-\fBpapiAttributeListAddValue\fR(3PAPI),
-\fBattributes\fR(7)
+.BR libpapi (3LIB),
+.BR papiAttributeListAddValue (3PAPI),
+.BR attributes (7)

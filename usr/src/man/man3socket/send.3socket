@@ -293,15 +293,15 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBfcntl\fR(2),
-\fBpoll\fR(2),
-\fBwrite\fR(2),
-\fBselect\fR(3C),
-\fBsocket.h\fR(3HEAD),
-\fBconnect\fR(3SOCKET),
-\fBgetsockopt\fR(3SOCKET),
-\fBrecv\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBtcp\fR(4P),
-\fBattributes\fR(7)
+.BR fcntl (2),
+.BR poll (2),
+.BR write (2),
+.BR select (3C),
+.BR socket.h (3HEAD),
+.BR connect (3SOCKET),
+.BR getsockopt (3SOCKET),
+.BR recv (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR tcp (4P),
+.BR attributes (7)

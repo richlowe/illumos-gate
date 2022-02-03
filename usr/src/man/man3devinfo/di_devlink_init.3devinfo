@@ -168,11 +168,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2),
-\fBmmap\fR(2),
-\fBopen\fR(2),
-\fBmalloc\fR(3C),
-\fBdi_devlink_path\fR(3DEVINFO),
-\fBdi_devlink_walk\fR(3DEVINFO),
-\fBlibdevinfo\fR(3LIB),
-\fBattributes\fR(7)
+.BR ioctl (2),
+.BR mmap (2),
+.BR open (2),
+.BR malloc (3C),
+.BR di_devlink_path (3DEVINFO),
+.BR di_devlink_walk (3DEVINFO),
+.BR libdevinfo (3LIB),
+.BR attributes (7)

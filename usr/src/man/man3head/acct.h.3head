@@ -131,18 +131,18 @@ prime/non-prime time table
 .SH SEE ALSO
 .sp
 .LP
-\fBacctcom\fR(1),
-\fBacct\fR(2),
-\fBexec\fR(2),
-\fBfork\fR(2),
-\fBacct\fR(8),
-\fBacctcon\fR(8),
-\fBacctmerg\fR(8),
-\fBacctprc\fR(8),
-\fBacctsh\fR(8),
-\fBprtacct\fR(8),
-\fBrunacct\fR(8),
-\fBshutacct\fR(8)
+.BR acctcom (1),
+.BR acct (2),
+.BR exec (2),
+.BR fork (2),
+.BR acct (8),
+.BR acctcon (8),
+.BR acctmerg (8),
+.BR acctprc (8),
+.BR acctsh (8),
+.BR prtacct (8),
+.BR runacct (8),
+.BR shutacct (8)
 .SH NOTES
 .sp
 .LP

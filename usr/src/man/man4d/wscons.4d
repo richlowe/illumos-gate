@@ -1030,13 +1030,13 @@ Interface Stability	Stable
 .TE
 
 .SH SEE ALSO
-\fBioctl\fR(2),
-\fBpoll\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBconsole\fR(4D),
-\fBvisual_io\fR(4I),
-\fBeeprom\fR(8)
+.BR ioctl (2),
+.BR poll (2),
+.BR read (2),
+.BR write (2),
+.BR console (4D),
+.BR visual_io (4I),
+.BR eeprom (8)
 .SH WARNINGS
 The redirection ioctls block while there is I/O outstanding on the device
 instance being redirected. If you try to redirect the workstation console while

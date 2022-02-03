@@ -138,13 +138,13 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBlseek\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBreaddir\fR(3C),
-\fBdkio\fR(4I),
-\fBscsi\fR(5),
-\fBvfstab\fR(5),
-\fBattributes\fR(7),
-\fBfdisk\fR(8),
-\fBmount\fR(8)
+.BR lseek (2),
+.BR read (2),
+.BR write (2),
+.BR readdir (3C),
+.BR dkio (4I),
+.BR scsi (5),
+.BR vfstab (5),
+.BR attributes (7),
+.BR fdisk (8),
+.BR mount (8)

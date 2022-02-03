@@ -372,22 +372,22 @@ For \fBmalloc()\fR, \fBcalloc()\fR, \fBfree()\fR, \fBrealloc()\fR, and
 \fBvalloc()\fR, see \fBstandards\fR(7).
 .SH SEE ALSO
 .LP
-\fBexit\fR(2),
-\fBmmap\fR(2),
-\fBsbrk\fR(2),
-\fBlongjmp\fR(3C),
-\fBmalloc\fR(3C),
-\fBpthread_exit\fR(3C),
-\fBthr_exit\fR(3C),
-\fBlibumem\fR(3LIB),
-\fBbsdmalloc\fR(3MALLOC),
-\fBmalloc\fR(3MALLOC),
-\fBmapmalloc\fR(3MALLOC),
-\fBumem_cache_create\fR(3MALLOC),
-\fBumem_debug\fR(3MALLOC),
-\fBwatchmalloc\fR(3MALLOC),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR exit (2),
+.BR mmap (2),
+.BR sbrk (2),
+.BR longjmp (3C),
+.BR malloc (3C),
+.BR pthread_exit (3C),
+.BR thr_exit (3C),
+.BR libumem (3LIB),
+.BR bsdmalloc (3MALLOC),
+.BR malloc (3MALLOC),
+.BR mapmalloc (3MALLOC),
+.BR umem_cache_create (3MALLOC),
+.BR umem_debug (3MALLOC),
+.BR watchmalloc (3MALLOC),
+.BR attributes (7),
+.BR standards (7)
 .sp
 .LP
 \fIModular Debugger Guide\fR:

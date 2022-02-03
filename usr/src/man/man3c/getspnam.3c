@@ -202,15 +202,15 @@ T}
 
 .SH SEE ALSO
 .LP
-\fBpasswd\fR(1),
-\fByppasswd\fR(1),
-\fBIntro\fR(3),
-\fBgetlogin\fR(3C),
-\fBgetpwnam\fR(3C),
-\fBnsswitch.conf\fR(5),
-\fBpasswd\fR(5),
-\fBshadow\fR(5),
-\fBattributes\fR(7)
+.BR passwd (1),
+.BR yppasswd (1),
+.BR Intro (3),
+.BR getlogin (3C),
+.BR getpwnam (3C),
+.BR nsswitch.conf (5),
+.BR passwd (5),
+.BR shadow (5),
+.BR attributes (7)
 .SH WARNINGS
 .LP
 The reentrant interfaces \fBgetspnam_r()\fR, \fBgetspent_r()\fR, and

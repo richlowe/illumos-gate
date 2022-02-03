@@ -239,12 +239,12 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBt_connect\fR(3NSL),
-\fBt_getinfo\fR(3NSL),
-\fBt_listen\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_snd\fR(3NSL),
-\fBattributes\fR(7)
+.BR t_connect (3NSL),
+.BR t_getinfo (3NSL),
+.BR t_listen (3NSL),
+.BR t_open (3NSL),
+.BR t_snd (3NSL),
+.BR attributes (7)
 .SH WARNINGS
 .sp
 .LP

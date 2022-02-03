@@ -370,21 +370,21 @@ Applications can override this algorithm by calling  \fBbind\fR(3SOCKET) and
 specifying an address.
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2),
-\fBbind\fR(3SOCKET),
-\fBconnect\fR(3SOCKET),
-\fBgetipnodebyaddr\fR(3SOCKET),
-\fBgetipnodebyname\fR(3SOCKET),
-\fBgetprotobyname\fR(3SOCKET),
-\fBgetservbyname\fR(3SOCKET),
-\fBgetsockopt\fR(3SOCKET),
-\fBinet\fR(3SOCKET),
-\fBsend\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBicmp6\fR(4P),
-\fBip6\fR(4P),
-\fBtcp\fR(4P),
-\fBudp\fR(4P)
+.BR ioctl (2),
+.BR bind (3SOCKET),
+.BR connect (3SOCKET),
+.BR getipnodebyaddr (3SOCKET),
+.BR getipnodebyname (3SOCKET),
+.BR getprotobyname (3SOCKET),
+.BR getservbyname (3SOCKET),
+.BR getsockopt (3SOCKET),
+.BR inet (3SOCKET),
+.BR send (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR icmp6 (4P),
+.BR ip6 (4P),
+.BR tcp (4P),
+.BR udp (4P)
 .sp
 .LP
 Conta, A. and Deering, S., \fIInternet Control Message Protocol (ICMPv6) for

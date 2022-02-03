@@ -225,14 +225,14 @@ The device is a read-only device.
 .SH SEE ALSO
 .sp
 .LP
-\fBlseek\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBdkio\fR(4I),
-\fBdriver.conf\fR(5),
-\fBvfstab\fR(5),
-\fBformat\fR(8),
-\fBmount\fR(8)
+.BR lseek (2),
+.BR read (2),
+.BR write (2),
+.BR dkio (4I),
+.BR driver.conf (5),
+.BR vfstab (5),
+.BR format (8),
+.BR mount (8)
 .sp
 .LP
 X3T10 ATA-4 specifications.

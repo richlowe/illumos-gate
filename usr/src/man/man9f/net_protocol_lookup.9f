@@ -68,5 +68,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_protocol_release\fR(9F)
+.BR attributes (7),
+.BR net_protocol_release (9F)

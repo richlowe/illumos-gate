@@ -468,11 +468,11 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBclose\fR(2),
-\fBselect\fR(3C),
-\fBsocket.h\fR(3HEAD),
-\fBaccept\fR(3SOCKET),
-\fBgetsockname\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7)
+.BR close (2),
+.BR select (3C),
+.BR socket.h (3HEAD),
+.BR accept (3SOCKET),
+.BR getsockname (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR attributes (7)

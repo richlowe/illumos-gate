@@ -75,7 +75,7 @@ MT-Level	MT-safe
 .TE
 
 .SH SEE ALSO
-\fBgettxt\fR(3C),
-\fBlfmt\fR(3C),
-\fBpfmt\fR(3C),
-\fBattributes\fR(7)
+.BR gettxt (3C),
+.BR lfmt (3C),
+.BR pfmt (3C),
+.BR attributes (7)

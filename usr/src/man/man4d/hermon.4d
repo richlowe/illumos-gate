@@ -81,9 +81,9 @@ Architecture	PCIe-based systems
 .SH SEE ALSO
 .sp
 .LP
-\fBdriver.conf\fR(5),
-\fBprinters.conf\fR(5),
-\fBattributes\fR(7)
+.BR driver.conf (5),
+.BR printers.conf (5),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -135,7 +135,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB),
-\fBMP_GetAssociatedTPGOidList\fR(3MPAPI),
-\fBMP_GetMPLuOidListFromTPG\fR(3MPAPI),
-\fBattributes\fR(7)
+.BR libMPAPI (3LIB),
+.BR MP_GetAssociatedTPGOidList (3MPAPI),
+.BR MP_GetMPLuOidListFromTPG (3MPAPI),
+.BR attributes (7)

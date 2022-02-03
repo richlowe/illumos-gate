@@ -61,8 +61,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(2),
-\fBatexit\fR(3C),
-\fBdldump\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR exit (2),
+.BR atexit (3C),
+.BR dldump (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -934,14 +934,14 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBsockaddr\fR(3SOCKET),
-\fBipsec\fR(4P),
-\fBipsecah\fR(4P),
-\fBipsecesp\fR(4P),
-\fBroute\fR(4P),
-\fBudp\fR(4P),
-\fBin.iked\fR(8),
-\fBipseckey\fR(8)
+.BR sockaddr (3SOCKET),
+.BR ipsec (4P),
+.BR ipsecah (4P),
+.BR ipsecesp (4P),
+.BR route (4P),
+.BR udp (4P),
+.BR in.iked (8),
+.BR ipseckey (8)
 .sp
 .LP
 McDonald, D.L., Metz, C.W., and Phan, B.G., \fIRFC 2367, PF_KEY Key Management

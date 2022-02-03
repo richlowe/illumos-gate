@@ -148,13 +148,13 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBpm\fR(4D),
-\fBpower.conf\fR(5),
-\fBattach\fR(9E),
-\fBdetach\fR(9E),
-\fBddi_prop_update_string_array\fR(9F),
-\fBpm_busy_component\fR(9F),
-\fBpm_idle_component\fR(9F)
+.BR pm (4D),
+.BR power.conf (5),
+.BR attach (9E),
+.BR detach (9E),
+.BR ddi_prop_update_string_array (9F),
+.BR pm_busy_component (9F),
+.BR pm_idle_component (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

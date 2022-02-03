@@ -77,6 +77,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBtran_bus_reset\fR(9E),
-\fBscsi_hba_tran\fR(9S)
+.BR attributes (7),
+.BR tran_bus_reset (9E),
+.BR scsi_hba_tran (9S)

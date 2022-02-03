@@ -105,12 +105,12 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBclosedir\fR(3C),
-\fBopendir\fR(3C),
-\fBreaddir\fR(3C),
-\fBrewinddir\fR(3C),
-\fBseekdir\fR(3C),
-\fBtelldir\fR(3C),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR closedir (3C),
+.BR opendir (3C),
+.BR readdir (3C),
+.BR rewinddir (3C),
+.BR seekdir (3C),
+.BR telldir (3C),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

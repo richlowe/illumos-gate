@@ -356,8 +356,8 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBsdp_new_session\fR(3COMMPUTIL),
-\fBsdp_parse\fR(3COMMPUTIL),
-\fBsdp_session_to_str\fR(3COMMPUTIL),
-\fBlibcommputil\fR(3LIB),
-\fBattributes\fR(7)
+.BR sdp_new_session (3COMMPUTIL),
+.BR sdp_parse (3COMMPUTIL),
+.BR sdp_session_to_str (3COMMPUTIL),
+.BR libcommputil (3LIB),
+.BR attributes (7)

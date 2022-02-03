@@ -439,15 +439,15 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBclose\fR(2),
-\fBpoll\fR(2),
-\fBselect\fR(3C),
-\fBsockaddr\fR(3SOCKET),
-\fBaccept\fR(3XNET),
-\fBbind\fR(3XNET),
-\fBgetsockname\fR(3XNET),
-\fBsend\fR(3XNET),
-\fBshutdown\fR(3XNET),
-\fBsocket\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR close (2),
+.BR poll (2),
+.BR select (3C),
+.BR sockaddr (3SOCKET),
+.BR accept (3XNET),
+.BR bind (3XNET),
+.BR getsockname (3XNET),
+.BR send (3XNET),
+.BR shutdown (3XNET),
+.BR socket (3XNET),
+.BR attributes (7),
+.BR standards (7)

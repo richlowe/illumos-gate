@@ -274,9 +274,9 @@ is meaningless.
 .RE
 
 .SH SEE ALSO
-\fBtermios\fR(3C),
-\fBconsole\fR(4D),
-\fBtermio\fR(4I)
+.BR termios (3C),
+.BR console (4D),
+.BR termio (4I)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

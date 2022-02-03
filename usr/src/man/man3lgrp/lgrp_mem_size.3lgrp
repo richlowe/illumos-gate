@@ -104,8 +104,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlgrp_cpus\fR(3LGRP),
-\fBlgrp_init\fR(3LGRP),
-\fBlgrp_resources\fR(3LGRP),
-\fBliblgrp\fR(3LIB),
-\fBattributes\fR(7)
+.BR lgrp_cpus (3LGRP),
+.BR lgrp_init (3LGRP),
+.BR lgrp_resources (3LGRP),
+.BR liblgrp (3LIB),
+.BR attributes (7)

@@ -152,11 +152,11 @@ MT-Level	See \fBDESCRIPTION\fR section.
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBnetgroup\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBattributes\fR(7)
+.BR Intro (2),
+.BR Intro (3),
+.BR netgroup (5),
+.BR nsswitch.conf (5),
+.BR attributes (7)
 .SH WARNINGS
 The function \fBgetnetgrent_r()\fR is included in this release on an
 uncommitted basis only, and is subject to change or removal in future minor

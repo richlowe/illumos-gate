@@ -97,12 +97,12 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBmalloc\fR(3C),
-\fBkvm_kread\fR(3KVM),
-\fBkvm_nextproc\fR(3KVM),
-\fBkvm_open\fR(3KVM),
-\fBlibkvm\fR(3LIB),
-\fBattributes\fR(7)
+.BR malloc (3C),
+.BR kvm_kread (3KVM),
+.BR kvm_nextproc (3KVM),
+.BR kvm_open (3KVM),
+.BR libkvm (3LIB),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

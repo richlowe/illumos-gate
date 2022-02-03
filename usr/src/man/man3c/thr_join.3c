@@ -133,11 +133,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBthr_create\fR(3C),
-\fBthr_exit\fR(3C),
-\fBwait\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR thr_create (3C),
+.BR thr_exit (3C),
+.BR wait (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

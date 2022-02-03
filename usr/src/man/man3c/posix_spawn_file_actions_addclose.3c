@@ -181,11 +181,11 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2),
-\fBdup\fR(2),
-\fBopen\fR(2),
-\fBposix_spawn\fR(3C),
-\fBposix_spawn_file_actions_adddup2\fR(3C),
-\fBposix_spawn_file_actions_destroy\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR close (2),
+.BR dup (2),
+.BR open (2),
+.BR posix_spawn (3C),
+.BR posix_spawn_file_actions_adddup2 (3C),
+.BR posix_spawn_file_actions_destroy (3C),
+.BR attributes (7),
+.BR standards (7)

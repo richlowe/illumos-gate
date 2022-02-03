@@ -90,13 +90,13 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBsocket.h\fR(3HEAD),
-\fBbind\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBsocketpair\fR(3SOCKET),
-\fBbind\fR(3XNET),
-\fBsocket\fR(3XNET),
-\fBsocketpair\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR socket.h (3HEAD),
+.BR bind (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR socketpair (3SOCKET),
+.BR bind (3XNET),
+.BR socket (3XNET),
+.BR socketpair (3XNET),
+.BR attributes (7),
+.BR standards (7)

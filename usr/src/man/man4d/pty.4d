@@ -238,7 +238,7 @@ pseudo-terminal slave devices
 .sp
 .LP
 \fBrlogin\fR(1), \fBrlogind\fR(8), \fBldterm\fR(4M), \fBtermio\fR(4I),
-\fBttcompat\fR(4M),
+.BR ttcompat (4M),
 .SH NOTES
 .sp
 .LP

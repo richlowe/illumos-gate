@@ -60,7 +60,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetutent\fR(3C),
-\fBttyname\fR(3C),
-\fButmpx\fR(5),
-\fBattributes\fR(7)
+.BR getutent (3C),
+.BR ttyname (3C),
+.BR utmpx (5),
+.BR attributes (7)

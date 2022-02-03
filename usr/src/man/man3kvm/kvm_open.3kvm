@@ -157,21 +157,21 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2),
-\fBexit\fR(2),
-\fBpathconf\fR(2),
-\fBgetloadavg\fR(3C),
-\fBsysconf\fR(3C),
-\fBkstat\fR(3KSTAT),
-\fBkvm_getu\fR(3KVM),
-\fBkvm_kread\fR(3KVM),
-\fBkvm_nextproc\fR(3KVM),
-\fBkvm_nlist\fR(3KVM),
-\fBlibkvm\fR(3LIB),
-\fBproc\fR(5),
-\fBattributes\fR(7),
-\fBlfcompile\fR(7),
-\fBsavecore\fR(8)
+.BR exec (2),
+.BR exit (2),
+.BR pathconf (2),
+.BR getloadavg (3C),
+.BR sysconf (3C),
+.BR kstat (3KSTAT),
+.BR kvm_getu (3KVM),
+.BR kvm_kread (3KVM),
+.BR kvm_nextproc (3KVM),
+.BR kvm_nlist (3KVM),
+.BR libkvm (3LIB),
+.BR proc (5),
+.BR attributes (7),
+.BR lfcompile (7),
+.BR savecore (8)
 .SH NOTES
 .sp
 .LP

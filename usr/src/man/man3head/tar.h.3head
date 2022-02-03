@@ -182,6 +182,6 @@ Evolving.
 .SH SEE ALSO
 .sp
 .LP
-\fBpax\fR(1),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pax (1),
+.BR attributes (7),
+.BR standards (7)

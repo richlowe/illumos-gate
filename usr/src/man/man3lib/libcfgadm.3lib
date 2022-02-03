@@ -63,8 +63,8 @@ MT-Level	Mt-Safe
 .TE
 
 .SH SEE ALSO
-\fBpvs\fR(1),
-\fBIntro\fR(3),
-\fBconfig_admin\fR(3CFGADM),
-\fBattributes\fR(7),
-\fBcfgadm\fR(8)
+.BR pvs (1),
+.BR Intro (3),
+.BR config_admin (3CFGADM),
+.BR attributes (7),
+.BR cfgadm (8)

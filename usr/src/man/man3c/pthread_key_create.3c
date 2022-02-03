@@ -246,9 +246,9 @@ For \fBpthread_key_create()\fR, see \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_getspecific\fR(3C),
-\fBpthread_key_delete\fR(3C),
-\fBpthread_once\fR(3C),
-\fBpthread_setspecific\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_getspecific (3C),
+.BR pthread_key_delete (3C),
+.BR pthread_once (3C),
+.BR pthread_setspecific (3C),
+.BR attributes (7),
+.BR standards (7)

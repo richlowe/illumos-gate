@@ -116,7 +116,7 @@ kmem_free(info, strlen(info) + 1);
 .SH CONTEXT
 This function can be called from kernel or interrupt context.
 .SH SEE ALSO
-\fBdriver.conf\fR(5)
+.BR driver.conf (5)
 .sp
 .LP
 \fIWriting Device Drivers \fR

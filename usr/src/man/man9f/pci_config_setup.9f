@@ -89,7 +89,7 @@ Architecture	PCI Local Bus
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7)
+.BR attributes (7)
 .sp
 .LP
 \fIIEEE 1275 PCI Bus Binding\fR

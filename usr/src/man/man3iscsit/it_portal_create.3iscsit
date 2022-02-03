@@ -121,12 +121,12 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBit_config_commit\fR(3ISCSIT),
-\fBit_ini_create\fR(3ISCSIT),
-\fBit_tgt_create\fR(3ISCSIT),
-\fBit_tpg_create\fR(3ISCSIT),
-\fBlibiscsit\fR(3LIB),
-\fBlibiscsit\fR(3LIB),
-\fBlibnvpair\fR(3LIB),
-\fBlibstmf\fR(3LIB),
-\fBattributes\fR(7)
+.BR it_config_commit (3ISCSIT),
+.BR it_ini_create (3ISCSIT),
+.BR it_tgt_create (3ISCSIT),
+.BR it_tpg_create (3ISCSIT),
+.BR libiscsit (3LIB),
+.BR libiscsit (3LIB),
+.BR libnvpair (3LIB),
+.BR libstmf (3LIB),
+.BR attributes (7)

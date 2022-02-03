@@ -92,12 +92,12 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBisa\fR(5),
-\fBattributes\fR(7),
-\fBddi_put16\fR(9F),
-\fBddi_put32\fR(9F),
-\fBddi_put8\fR(9F),
-\fBinb\fR(9F)
+.BR isa (5),
+.BR attributes (7),
+.BR ddi_put16 (9F),
+.BR ddi_put32 (9F),
+.BR ddi_put8 (9F),
+.BR inb (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -51,7 +51,7 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_instance_alloc\fR(9F),
-\fBnet_instance_unregister\fR(9F),
-\fBnet_instance_t\fR(9S)
+.BR attributes (7),
+.BR net_instance_alloc (9F),
+.BR net_instance_unregister (9F),
+.BR net_instance_t (9S)

@@ -77,10 +77,10 @@ Architecture	SPARC & x86 PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBugen\fR(4D),
-\fBusb_mid\fR(4D),
-\fBusba\fR(4D),
-\fBattributes\fR(7)
+.BR ugen (4D),
+.BR usb_mid (4D),
+.BR usba (4D),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -87,9 +87,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_inch\fR(3CURSES),
-\fBcurses\fR(3CURSES),
-\fBattributes\fR(7)
+.BR curs_inch (3CURSES),
+.BR curses (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

@@ -88,6 +88,6 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBattributes\fR(7),
-\fBsyseventd\fR(8)
+.BR Intro (3),
+.BR attributes (7),
+.BR syseventd (8)

@@ -292,12 +292,12 @@ MT-Level	MT-safe
 .TE
 
 .SH SEE ALSO
-\fBaddsev\fR(3C),
-\fBgettxt\fR(3C),
-\fBlfmt\fR(3C),
-\fBprintf\fR(3C),
-\fBsetcat\fR(3C),
-\fBsetlabel\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7),
-\fBenviron\fR(7)
+.BR addsev (3C),
+.BR gettxt (3C),
+.BR lfmt (3C),
+.BR printf (3C),
+.BR setcat (3C),
+.BR setlabel (3C),
+.BR setlocale (3C),
+.BR attributes (7),
+.BR environ (7)

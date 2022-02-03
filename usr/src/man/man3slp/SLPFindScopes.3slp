@@ -88,12 +88,12 @@ When set, use this file for configuration.
 .SH SEE ALSO
 .sp
 .LP
-\fBSLPFree\fR(3SLP),
-\fBslp_api\fR(3SLP),
-\fBslp.conf\fR(5),
-\fBslpd.reg\fR(5),
-\fBattributes\fR(7),
-\fBslpd\fR(8)
+.BR SLPFree (3SLP),
+.BR slp_api (3SLP),
+.BR slp.conf (5),
+.BR slpd.reg (5),
+.BR attributes (7),
+.BR slpd (8)
 .sp
 .LP
 \fISystem Administration Guide: Network Services\fR

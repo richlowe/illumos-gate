@@ -367,15 +367,15 @@ Architecture	 SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2),
-\fBmmap\fR(2),
-\fBopen\fR(2),
-\fBread\fR(2),
-\fBugen\fR(4D),
-\fBusba\fR(4D),
-\fBattributes\fR(7),
-\fBcfgadm_usb\fR(8),
-\fBattach\fR(9E)
+.BR ioctl (2),
+.BR mmap (2),
+.BR open (2),
+.BR read (2),
+.BR ugen (4D),
+.BR usba (4D),
+.BR attributes (7),
+.BR cfgadm_usb (8),
+.BR attach (9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

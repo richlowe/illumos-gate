@@ -201,11 +201,11 @@ T}
 
 .SH SEE ALSO
 .LP
-\fBrpc\fR(3NSL),
-\fBnsswitch.conf\fR(5),
-\fBrpc\fR(5),
-\fBattributes\fR(7),
-\fBrpcinfo\fR(8)
+.BR rpc (3NSL),
+.BR nsswitch.conf (5),
+.BR rpc (5),
+.BR attributes (7),
+.BR rpcinfo (8)
 .SH WARNINGS
 .LP
 The reentrant interfaces \fBgetrpcbyname_r()\fR, \fBgetrpcbynumber_r()\fR, and

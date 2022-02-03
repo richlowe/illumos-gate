@@ -236,6 +236,6 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBt_rcvudata\fR(3NSL),
-\fBt_sndudata\fR(3NSL),
-\fBattributes\fR(7)
+.BR t_rcvudata (3NSL),
+.BR t_sndudata (3NSL),
+.BR attributes (7)

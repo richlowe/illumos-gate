@@ -83,8 +83,8 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBbind\fR(3SOCKET),
-\fBgetpeername\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7)
+.BR bind (3SOCKET),
+.BR getpeername (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR attributes (7)

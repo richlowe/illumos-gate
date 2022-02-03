@@ -169,7 +169,7 @@ MT-Level	MT-Safe, and Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBtcsendbreak\fR(3C),
-\fBtermio\fR(4I),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR tcsendbreak (3C),
+.BR termio (4I),
+.BR attributes (7),
+.BR standards (7)

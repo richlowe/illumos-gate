@@ -106,7 +106,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetnetconfig\fR(3NSL),
-\fBnetconfig\fR(5),
-\fBattributes\fR(7),
-\fBenviron\fR(7)
+.BR getnetconfig (3NSL),
+.BR netconfig (5),
+.BR attributes (7),
+.BR environ (7)

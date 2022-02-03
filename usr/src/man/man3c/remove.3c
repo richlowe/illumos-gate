@@ -55,7 +55,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrmdir\fR(2),
-\fBunlink\fR(2),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR rmdir (2),
+.BR unlink (2),
+.BR attributes (7),
+.BR standards (7)

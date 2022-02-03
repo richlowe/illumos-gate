@@ -130,16 +130,16 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBcputrack\fR(1),
-\fBcpc\fR(3CPC),
-\fBcpc_access\fR(3CPC),
-\fBcpc_bind_event\fR(3CPC),
-\fBcpc_enable\fR(3CPC),
-\fBcpc_getcpuver\fR(3CPC),
-\fBcpc_pctx_bind_event\fR(3CPC),
-\fBcpc_version\fR(3CPC),
-\fBlibcpc\fR(3LIB),
-\fBattributes\fR(7)
+.BR cputrack (1),
+.BR cpc (3CPC),
+.BR cpc_access (3CPC),
+.BR cpc_bind_event (3CPC),
+.BR cpc_enable (3CPC),
+.BR cpc_getcpuver (3CPC),
+.BR cpc_pctx_bind_event (3CPC),
+.BR cpc_version (3CPC),
+.BR libcpc (3LIB),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

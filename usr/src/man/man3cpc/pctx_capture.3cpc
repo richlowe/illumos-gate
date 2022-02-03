@@ -142,9 +142,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBfork\fR(2),
-\fBcpc\fR(3CPC),
-\fBpctx_set_events\fR(3CPC),
-\fBlibpctx\fR(3LIB),
-\fBproc\fR(5),
-\fBattributes\fR(7)
+.BR fork (2),
+.BR cpc (3CPC),
+.BR pctx_set_events (3CPC),
+.BR libpctx (3LIB),
+.BR proc (5),
+.BR attributes (7)

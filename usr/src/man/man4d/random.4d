@@ -132,10 +132,10 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBopen\fR(2),
-\fBpoll\fR(2),
-\fBattributes\fR(7),
-\fBcryptoadm\fR(8)
+.BR open (2),
+.BR poll (2),
+.BR attributes (7),
+.BR cryptoadm (8)
 .SH NOTES
 .sp
 .LP

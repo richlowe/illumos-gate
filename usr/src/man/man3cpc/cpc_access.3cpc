@@ -86,12 +86,12 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc\fR(3CPC),
-\fBcpc_open\fR(3CPC),
-\fBcpc_seterrfn\fR(3CPC),
-\fBlibcpc\fR(3LIB),
-\fBproc\fR(5),
-\fBattributes\fR(7)
+.BR cpc (3CPC),
+.BR cpc_open (3CPC),
+.BR cpc_seterrfn (3CPC),
+.BR libcpc (3LIB),
+.BR proc (5),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

@@ -86,15 +86,15 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBsem_destroy\fR(3C),
-\fBsem_getvalue\fR(3C),
-\fBsem_init\fR(3C),
-\fBsem_open\fR(3C),
-\fBsem_post\fR(3C),
-\fBsem_timedwait\fR(3C),
-\fBsem_unlink\fR(3C),
-\fBsem_wait\fR(3C),
-\fBfcntl.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR sem_destroy (3C),
+.BR sem_getvalue (3C),
+.BR sem_init (3C),
+.BR sem_open (3C),
+.BR sem_post (3C),
+.BR sem_timedwait (3C),
+.BR sem_unlink (3C),
+.BR sem_wait (3C),
+.BR fcntl.h (3HEAD),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

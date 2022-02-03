@@ -187,12 +187,12 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7),
-\fBscsi_alloc_consistent_buf\fR(9F),
-\fBscsi_free_consistent_buf\fR(9F),
-\fBscsi_pktalloc\fR(9F),
-\fBscsi_resalloc\fR(9F),
-\fBscsi_pkt\fR(9S)
+.BR attributes (7),
+.BR scsi_alloc_consistent_buf (9F),
+.BR scsi_free_consistent_buf (9F),
+.BR scsi_pktalloc (9F),
+.BR scsi_resalloc (9F),
+.BR scsi_pkt (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -183,7 +183,7 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBvsnprintf\fR(3C),
-\fBcpc_bind_curlwp\fR(3CPC),
-\fBlibcpc\fR(3LIB),
-\fBattributes\fR(7)
+.BR vsnprintf (3C),
+.BR cpc_bind_curlwp (3CPC),
+.BR libcpc (3LIB),
+.BR attributes (7)

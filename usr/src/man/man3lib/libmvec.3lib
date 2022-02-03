@@ -88,7 +88,7 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(3),
-\fBcomplex.h\fR(3HEAD),
-\fBlibm\fR(3LIB),
-\fBattributes\fR(7)
+.BR Intro (3),
+.BR complex.h (3HEAD),
+.BR libm (3LIB),
+.BR attributes (7)

@@ -138,11 +138,11 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBmq_close\fR(3C),
-\fBmq_open\fR(3C),
-\fBmqueue.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR mq_close (3C),
+.BR mq_open (3C),
+.BR mqueue.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

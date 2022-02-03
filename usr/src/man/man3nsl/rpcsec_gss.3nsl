@@ -434,12 +434,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrpc\fR(3NSL),
-\fBrpc_clnt_auth\fR(3NSL),
-\fBxdr\fR(3NSL),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBgsscred\fR(8)
+.BR rpc (3NSL),
+.BR rpc_clnt_auth (3NSL),
+.BR xdr (3NSL),
+.BR attributes (7),
+.BR environ (7),
+.BR gsscred (8)
 .sp
 .LP
 \fIONC+ Developer\&'s Guide\fR

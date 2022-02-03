@@ -359,14 +359,14 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBcut\fR(1),
-\fBmail\fR(1),
-\fBuucp\fR(1C),
-\fBuuglist\fR(1C),
-\fBuustat\fR(1C),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR cut (1),
+.BR mail (1),
+.BR uucp (1C),
+.BR uuglist (1C),
+.BR uustat (1C),
+.BR attributes (7),
+.BR environ (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

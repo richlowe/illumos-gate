@@ -99,9 +99,9 @@ The \fBscandir()\fR function is Unsafe. The \fBalphasort()\fR function is Safe.
 .SH SEE ALSO
 .sp
 .LP
-\fBmalloc\fR(3C),
-\fBqsort\fR(3C),
-\fBreaddir\fR(3C),
-\fBstrcoll\fR(3C),
-\fBattributes\fR(7),
-\fBlf64\fR(7)
+.BR malloc (3C),
+.BR qsort (3C),
+.BR readdir (3C),
+.BR strcoll (3C),
+.BR attributes (7),
+.BR lf64 (7)

@@ -100,13 +100,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpagesize\fR(1),
-\fBbrk\fR(2),
-\fBgetrlimit\fR(2),
-\fBmmap\fR(2),
-\fBmprotect\fR(2),
-\fBmunmap\fR(2),
-\fBmalloc\fR(3C),
-\fBmsync\fR(3C),
-\fBsysconf\fR(3C),
-\fBattributes\fR(7)
+.BR pagesize (1),
+.BR brk (2),
+.BR getrlimit (2),
+.BR mmap (2),
+.BR mprotect (2),
+.BR munmap (2),
+.BR malloc (3C),
+.BR msync (3C),
+.BR sysconf (3C),
+.BR attributes (7)

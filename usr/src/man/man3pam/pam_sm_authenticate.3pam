@@ -168,16 +168,16 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpam\fR(3LIB),
-\fBpam\fR(3PAM),
-\fBpam_authenticate\fR(3PAM),
-\fBpam_get_item\fR(3PAM),
-\fBpam_set_data\fR(3PAM),
-\fBpam_set_item\fR(3PAM),
-\fBpam_setcred\fR(3PAM),
-\fBpam_start\fR(3PAM),
-\fBpam.conf\fR(5),
-\fBattributes\fR(7)
+.BR libpam (3LIB),
+.BR pam (3PAM),
+.BR pam_authenticate (3PAM),
+.BR pam_get_item (3PAM),
+.BR pam_set_data (3PAM),
+.BR pam_set_item (3PAM),
+.BR pam_setcred (3PAM),
+.BR pam_start (3PAM),
+.BR pam.conf (5),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

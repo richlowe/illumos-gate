@@ -144,11 +144,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_attr\fR(3CURSES),
-\fBcurs_initscr\fR(3CURSES),
-\fBcurs_refresh\fR(3CURSES),
-\fBcurses\fR(3CURSES),
-\fBattributes\fR(7)
+.BR curs_attr (3CURSES),
+.BR curs_initscr (3CURSES),
+.BR curs_refresh (3CURSES),
+.BR curses (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

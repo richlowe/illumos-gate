@@ -176,12 +176,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBposix_spawn\fR(3C),
-\fBposix_spawnattr_destroy\fR(3C),
-\fBposix_spawnattr_getpgroup\fR(3C),
-\fBposix_spawnattr_getschedparam\fR(3C),
-\fBposix_spawnattr_getschedpolicy\fR(3C),
-\fBposix_spawnattr_getsigdefault\fR(3C),
-\fBposix_spawnattr_getsigmask\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR posix_spawn (3C),
+.BR posix_spawnattr_destroy (3C),
+.BR posix_spawnattr_getpgroup (3C),
+.BR posix_spawnattr_getschedparam (3C),
+.BR posix_spawnattr_getschedpolicy (3C),
+.BR posix_spawnattr_getsigdefault (3C),
+.BR posix_spawnattr_getsigmask (3C),
+.BR attributes (7),
+.BR standards (7)

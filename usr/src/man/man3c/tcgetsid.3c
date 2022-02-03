@@ -117,6 +117,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBtermio\fR(4I),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR termio (4I),
+.BR attributes (7),
+.BR standards (7)

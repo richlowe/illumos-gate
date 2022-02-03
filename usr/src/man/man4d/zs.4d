@@ -252,21 +252,21 @@ Architecture	SPARC
 
 .SH SEE ALSO
 .LP
-\fBtip\fR(1),
-\fBcu\fR(1C),
-\fBuucp\fR(1C),
-\fBioctl\fR(2),
-\fBopen\fR(2),
-\fBzsh\fR(4D),
-\fBtermio\fR(4I),
-\fBkb\fR(4M),
-\fBldterm\fR(4M),
-\fBttcompat\fR(4M),
-\fBattributes\fR(7),
-\fBeeprom\fR(8),
-\fBkadb\fR(8),
-\fBports\fR(8),
-\fBpppd\fR(8)
+.BR tip (1),
+.BR cu (1C),
+.BR uucp (1C),
+.BR ioctl (2),
+.BR open (2),
+.BR zsh (4D),
+.BR termio (4I),
+.BR kb (4M),
+.BR ldterm (4M),
+.BR ttcompat (4M),
+.BR attributes (7),
+.BR eeprom (8),
+.BR kadb (8),
+.BR ports (8),
+.BR pppd (8)
 .SH DIAGNOSTICS
 .ne 2
 .na

@@ -345,11 +345,11 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBsockaddr\fR(3SOCKET),
-\fBconnect\fR(3XNET),
-\fBgetsockname\fR(3XNET),
-\fBlisten\fR(3XNET),
-\fBsocket\fR(3XNET),
-\fBattributes\fR(7),
-\fBprivileges\fR(7),
-\fBstandards\fR(7)
+.BR sockaddr (3SOCKET),
+.BR connect (3XNET),
+.BR getsockname (3XNET),
+.BR listen (3XNET),
+.BR socket (3XNET),
+.BR attributes (7),
+.BR privileges (7),
+.BR standards (7)

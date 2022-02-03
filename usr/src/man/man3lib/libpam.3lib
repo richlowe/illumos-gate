@@ -112,19 +112,19 @@ MT Level	MT-Safe with exceptions
 .sp
 .LP
 \fBpvs\fR(1),  \fBIntro\fR(3),  \fBpam\fR(3PAM),
-\fBpam.conf\fR(5),
-\fBattributes\fR(7),
-\fBpam_authtok_check\fR(7),
-\fBpam_authtok_get\fR(7),
-\fBpam_authtok_store\fR(7),
-\fBpam_dhkeys\fR(7),
-\fBpam_dial_auth\fR(7),
-\fBpam_passwd_auth\fR(7),
-\fBpam_rhosts_auth\fR(7),
-\fBpam_sample\fR(7),
-\fBpam_unix_account\fR(7),
-\fBpam_unix_auth\fR(7),
-\fBpam_unix_session\fR(7)
+.BR pam.conf (5),
+.BR attributes (7),
+.BR pam_authtok_check (7),
+.BR pam_authtok_get (7),
+.BR pam_authtok_store (7),
+.BR pam_dhkeys (7),
+.BR pam_dial_auth (7),
+.BR pam_passwd_auth (7),
+.BR pam_rhosts_auth (7),
+.BR pam_sample (7),
+.BR pam_unix_account (7),
+.BR pam_unix_auth (7),
+.BR pam_unix_session (7)
 .SH NOTES
 .sp
 .LP

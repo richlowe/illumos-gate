@@ -141,11 +141,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdi_init\fR(3DEVINFO),
-\fBdi_prom_prop_next\fR(3DEVINFO),
-\fBlibdevinfo\fR(3LIB),
-\fBopenprom\fR(4D),
-\fBattributes\fR(7)
+.BR di_init (3DEVINFO),
+.BR di_prom_prop_next (3DEVINFO),
+.BR libdevinfo (3LIB),
+.BR openprom (4D),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

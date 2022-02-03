@@ -138,12 +138,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbsearch\fR(3C),
-\fBhsearch\fR(3C),
-\fBstring\fR(3C),
-\fBtsearch\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR bsearch (3C),
+.BR hsearch (3C),
+.BR string (3C),
+.BR tsearch (3C),
+.BR attributes (7),
+.BR standards (7)
 .sp
 .LP
 \fIThe Art of Computer Programming, Volume 3, Sorting and Searching by Donald

@@ -243,12 +243,12 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBioctl\fR(2),
-\fBopen\fR(2),
-\fBread_vtoc\fR(3EXT),
-\fBlibefi\fR(3LIB),
-\fBdkio\fR(4I),
-\fBattributes\fR(7),
-\fBfmthard\fR(8),
-\fBformat\fR(8),
-\fBprtvtoc\fR(8)
+.BR ioctl (2),
+.BR open (2),
+.BR read_vtoc (3EXT),
+.BR libefi (3LIB),
+.BR dkio (4I),
+.BR attributes (7),
+.BR fmthard (8),
+.BR format (8),
+.BR prtvtoc (8)

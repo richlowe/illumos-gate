@@ -157,8 +157,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbasename\fR(1),
-\fBchdir\fR(2),
-\fBbasename\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR basename (1),
+.BR chdir (2),
+.BR basename (3C),
+.BR attributes (7),
+.BR standards (7)

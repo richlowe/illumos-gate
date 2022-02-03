@@ -163,10 +163,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_release_name\fR(3GSS),
-\fBgss_release_oid_set\fR(3GSS),
-\fBlibgss\fR(3LIB),
-\fBattributes\fR(7)
+.BR gss_release_name (3GSS),
+.BR gss_release_oid_set (3GSS),
+.BR libgss (3LIB),
+.BR attributes (7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

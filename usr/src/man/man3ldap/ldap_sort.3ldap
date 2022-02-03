@@ -91,11 +91,11 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBqsort\fR(3C),
-\fBldap\fR(3LDAP),
-\fBldap_result\fR(3LDAP),
-\fBldap_search\fR(3LDAP),
-\fBattributes\fR(7)
+.BR qsort (3C),
+.BR ldap (3LDAP),
+.BR ldap_result (3LDAP),
+.BR ldap_search (3LDAP),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

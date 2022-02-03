@@ -63,9 +63,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBsecure_rpc\fR(3NSL),
-\fBypclnt\fR(3NSL),
-\fBattributes\fR(7)
+.BR secure_rpc (3NSL),
+.BR ypclnt (3NSL),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

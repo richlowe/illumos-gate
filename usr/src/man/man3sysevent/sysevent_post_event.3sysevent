@@ -221,11 +221,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBnvlist_add_boolean\fR(3NVPAIR),
-\fBnvlist_alloc\fR(3NVPAIR),
-\fBattributes\fR(7),
-\fBdevfsadm\fR(8),
-\fBsyseventd\fR(8)
+.BR nvlist_add_boolean (3NVPAIR),
+.BR nvlist_alloc (3NVPAIR),
+.BR attributes (7),
+.BR devfsadm (8),
+.BR syseventd (8)
 .SH NOTES
 .sp
 .LP

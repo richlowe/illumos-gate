@@ -268,9 +268,9 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfcntl\fR(2),
-\fBt_alloc\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_rcvuderr\fR(3NSL),
-\fBt_sndudata\fR(3NSL),
-\fBattributes\fR(7)
+.BR fcntl (2),
+.BR t_alloc (3NSL),
+.BR t_open (3NSL),
+.BR t_rcvuderr (3NSL),
+.BR t_sndudata (3NSL),
+.BR attributes (7)

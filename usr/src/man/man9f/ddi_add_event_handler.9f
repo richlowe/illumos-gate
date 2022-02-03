@@ -161,9 +161,9 @@ Stability Level	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_get_eventcookie\fR(9F),
-\fBddi_remove_event_handler\fR(9F)
+.BR attributes (7),
+.BR ddi_get_eventcookie (9F),
+.BR ddi_remove_event_handler (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

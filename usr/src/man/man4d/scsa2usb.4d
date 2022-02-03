@@ -266,26 +266,26 @@ Architecture	SPARC, x86, PCI-based systems
 .TE
 
 .SH SEE ALSO
-\fBcdrw\fR(1),
-\fBeject\fR(1),
-\fBrmformat\fR(1),
-\fBrmmount\fR(1),
-\fBieee1394\fR(4D),
-\fBsd\fR(4D),
-\fBst\fR(4D),
-\fBugen\fR(4D),
-\fBusba\fR(4D),
-\fBpcfs\fR(4FS),
-\fBcdio\fR(4I),
-\fBdkio\fR(4I),
-\fBscsi\fR(5),
-\fBvfstab\fR(5),
-\fBattributes\fR(7),
-\fBcfgadm_scsi\fR(8),
-\fBcfgadm_usb\fR(8),
-\fBfdisk\fR(8),
-\fBmount\fR(8),
-\fBumount\fR(8)
+.BR cdrw (1),
+.BR eject (1),
+.BR rmformat (1),
+.BR rmmount (1),
+.BR ieee1394 (4D),
+.BR sd (4D),
+.BR st (4D),
+.BR ugen (4D),
+.BR usba (4D),
+.BR pcfs (4FS),
+.BR cdio (4I),
+.BR dkio (4I),
+.BR scsi (5),
+.BR vfstab (5),
+.BR attributes (7),
+.BR cfgadm_scsi (8),
+.BR cfgadm_usb (8),
+.BR fdisk (8),
+.BR mount (8),
+.BR umount (8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

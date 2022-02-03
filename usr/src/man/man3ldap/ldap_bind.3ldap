@@ -240,9 +240,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP),
-\fBldap_error\fR(3LDAP),
-\fBldap_open\fR(3LDAP),
-\fBldap_result\fR(3LDAP),
-\fBlibsasl\fR(3LIB),
-\fBattributes\fR(7)
+.BR ldap (3LDAP),
+.BR ldap_error (3LDAP),
+.BR ldap_open (3LDAP),
+.BR ldap_result (3LDAP),
+.BR libsasl (3LIB),
+.BR attributes (7)

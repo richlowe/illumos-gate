@@ -53,10 +53,10 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBsigaction\fR(2),
-\fBgettext\fR(3C),
-\fBperror\fR(3C),
-\fBsetlocale\fR(3C),
-\fBsiginfo.h\fR(3HEAD),
-\fBsignal.h\fR(3HEAD),
-\fBattributes\fR(7)
+.BR sigaction (2),
+.BR gettext (3C),
+.BR perror (3C),
+.BR setlocale (3C),
+.BR siginfo.h (3HEAD),
+.BR signal.h (3HEAD),
+.BR attributes (7)

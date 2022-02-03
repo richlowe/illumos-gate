@@ -261,12 +261,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbrk\fR(2),
-\fBmalloc\fR(3C),
-\fBlibmtmalloc\fR(3LIB),
-\fBbsdmalloc\fR(3MALLOC),
-\fBmapmalloc\fR(3MALLOC),
-\fBmtmalloc\fR(3MALLOC),
-\fBumem_alloc\fR(3MALLOC),
-\fBwatchmalloc\fR(3MALLOC),
-\fBattributes\fR(7)
+.BR brk (2),
+.BR malloc (3C),
+.BR libmtmalloc (3LIB),
+.BR bsdmalloc (3MALLOC),
+.BR mapmalloc (3MALLOC),
+.BR mtmalloc (3MALLOC),
+.BR umem_alloc (3MALLOC),
+.BR watchmalloc (3MALLOC),
+.BR attributes (7)

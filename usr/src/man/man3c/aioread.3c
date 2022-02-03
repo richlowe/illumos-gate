@@ -182,15 +182,15 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBclose\fR(2),
-\fBexecve\fR(2),
-\fBexit\fR(2),
-\fBllseek\fR(2),
-\fBlseek\fR(2),
-\fBopen\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBaiocancel\fR(3C),
-\fBaiowait\fR(3C),
-\fBattributes\fR(7),
-\fBlf64\fR(7)
+.BR close (2),
+.BR execve (2),
+.BR exit (2),
+.BR llseek (2),
+.BR lseek (2),
+.BR open (2),
+.BR read (2),
+.BR write (2),
+.BR aiocancel (3C),
+.BR aiowait (3C),
+.BR attributes (7),
+.BR lf64 (7)

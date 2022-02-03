@@ -37,7 +37,7 @@ to reconfiguration requests, such as executing commands \fBcfgadm\fR(8),
 .SH SEE ALSO
 .sp
 .LP
-\fBdriver.conf\fR(5)
+.BR driver.conf (5)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -230,5 +230,5 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi\fR(4P),
-\fBattributes\fR(7)
+.BR dlpi (4P),
+.BR attributes (7)

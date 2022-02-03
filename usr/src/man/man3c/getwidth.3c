@@ -62,9 +62,9 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBeuclen\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7)
+.BR euclen (3C),
+.BR setlocale (3C),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

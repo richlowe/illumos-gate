@@ -81,6 +81,6 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBarc4random\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR arc4random (3C),
+.BR attributes (7),
+.BR standards (7)

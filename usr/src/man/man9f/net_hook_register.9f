@@ -183,5 +183,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_hook_unregister\fR(9F),
-\fBhook_t\fR(9S)
+.BR net_hook_unregister (9F),
+.BR hook_t (9S)

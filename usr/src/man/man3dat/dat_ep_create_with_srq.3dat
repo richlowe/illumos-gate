@@ -379,9 +379,9 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBdat_ep_create\fR(3DAT),
-\fBdat_srq_create\fR(3DAT),
-\fBdat_srq_free\fR(3DAT),
-\fBdat_srq_query\fR(3DAT),
-\fBlibdat\fR(3LIB),
-\fBattributes\fR(7)
+.BR dat_ep_create (3DAT),
+.BR dat_srq_create (3DAT),
+.BR dat_srq_free (3DAT),
+.BR dat_srq_query (3DAT),
+.BR libdat (3LIB),
+.BR attributes (7)

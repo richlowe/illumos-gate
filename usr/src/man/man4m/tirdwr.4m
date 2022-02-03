@@ -155,14 +155,14 @@ release request will be sent to the remote side of the transport connection.
 .SH SEE ALSO
 .sp
 .LP
-\fBgetmsg\fR(2),
-\fBputmsg\fR(2),
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBIntro\fR(3),
-\fBIntro\fR(3),
-\fBstreamio\fR(4I),
-\fBtimod\fR(4M)
+.BR getmsg (2),
+.BR putmsg (2),
+.BR read (2),
+.BR write (2),
+.BR Intro (3),
+.BR Intro (3),
+.BR streamio (4I),
+.BR timod (4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

@@ -155,12 +155,12 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBselect\fR(3C),
-\fBrpc\fR(3NSL),
-\fBrpc_svc_calls\fR(3NSL),
-\fBrpc_svc_create\fR(3NSL),
-\fBrpc_svc_err\fR(3NSL),
-\fBrpcbind\fR(3NSL),
-\fBattributes\fR(7),
-\fBinetd\fR(8),
-\fBrpcbind\fR(8)
+.BR select (3C),
+.BR rpc (3NSL),
+.BR rpc_svc_calls (3NSL),
+.BR rpc_svc_create (3NSL),
+.BR rpc_svc_err (3NSL),
+.BR rpcbind (3NSL),
+.BR attributes (7),
+.BR inetd (8),
+.BR rpcbind (8)

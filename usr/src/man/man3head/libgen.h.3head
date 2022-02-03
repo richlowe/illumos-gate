@@ -76,8 +76,8 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBbasename\fR(3C),
-\fBdirname\fR(3C),
-\fBlibgen\fR(3LIB),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR basename (3C),
+.BR dirname (3C),
+.BR libgen (3LIB),
+.BR attributes (7),
+.BR standards (7)

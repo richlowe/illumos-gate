@@ -68,8 +68,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtsnet\fR(3LIB),
-\fBattributes\fR(7)
+.BR libtsnet (3LIB),
+.BR attributes (7)
 .sp
 .LP
 \fIObtaining the Remote Host Type\fR in \fISolaris Trusted Extensions

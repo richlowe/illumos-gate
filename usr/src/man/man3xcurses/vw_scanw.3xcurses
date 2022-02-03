@@ -91,8 +91,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBscanf\fR(3C),
-\fBlibcurses\fR(3XCURSES),
-\fBmvscanw\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR scanf (3C),
+.BR libcurses (3XCURSES),
+.BR mvscanw (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

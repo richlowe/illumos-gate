@@ -316,5 +316,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtsalarm\fR(3LIB),
-\fBattributes\fR(7)
+.BR libtsalarm (3LIB),
+.BR attributes (7)

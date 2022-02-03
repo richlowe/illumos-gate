@@ -187,4 +187,4 @@ Standard	See \fBstandards\fR(7).
 .sp
 .LP
 \fBmmap\fR(2), \fBmadvise\fR(3C), posix_madvise(3C), \fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR standards (7)

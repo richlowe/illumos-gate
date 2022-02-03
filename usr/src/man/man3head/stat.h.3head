@@ -110,8 +110,8 @@ Standard	See \fBstandards\fR(7).
 
 .SH SEE ALSO
 .LP
-\fBfutimens\fR(2),
-\fBstat\fR(2),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR futimens (2),
+.BR stat (2),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

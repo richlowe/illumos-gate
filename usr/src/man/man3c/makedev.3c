@@ -104,6 +104,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmknod\fR(2),
-\fBstat\fR(2),
-\fBattributes\fR(7)
+.BR mknod (2),
+.BR stat (2),
+.BR attributes (7)

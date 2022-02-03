@@ -92,6 +92,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBptree_register_handler\fR(3PICLTREE),
-\fBptree_unregister_handler\fR(3PICLTREE),
-\fBattributes\fR(7)
+.BR ptree_register_handler (3PICLTREE),
+.BR ptree_unregister_handler (3PICLTREE),
+.BR attributes (7)

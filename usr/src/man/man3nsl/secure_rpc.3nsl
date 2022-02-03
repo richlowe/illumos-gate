@@ -351,10 +351,10 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBchkey\fR(1),
-\fBkeylogin\fR(1),
-\fBrpc\fR(3NSL),
-\fBrpc_clnt_auth\fR(3NSL),
-\fBattributes\fR(7),
-\fBkeyserv\fR(8),
-\fBnewkey\fR(8)
+.BR chkey (1),
+.BR keylogin (1),
+.BR rpc (3NSL),
+.BR rpc_clnt_auth (3NSL),
+.BR attributes (7),
+.BR keyserv (8),
+.BR newkey (8)

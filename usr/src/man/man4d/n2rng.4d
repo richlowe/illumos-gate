@@ -168,6 +168,6 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBcryptoadm\fR(8),
-\fBkstat\fR(8)
+.BR attributes (7),
+.BR cryptoadm (8),
+.BR kstat (8)

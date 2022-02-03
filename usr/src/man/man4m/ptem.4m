@@ -61,12 +61,12 @@ and passed upstream; the resulting mode is retained for use in subsequent
 .SH SEE ALSO
 .sp
 .LP
-\fBstty\fR(1),
-\fBioctl\fR(2),
-\fBstreamio\fR(4I),
-\fBtermio\fR(4I),
-\fBldterm\fR(4M),
-\fBpckt\fR(4M)
+.BR stty (1),
+.BR ioctl (2),
+.BR streamio (4I),
+.BR termio (4I),
+.BR ldterm (4M),
+.BR pckt (4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

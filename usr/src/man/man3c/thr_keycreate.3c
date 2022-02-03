@@ -277,10 +277,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_once\fR(3C),
-\fBthr_exit\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_once (3C),
+.BR thr_exit (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH WARNINGS
 .sp
 .LP

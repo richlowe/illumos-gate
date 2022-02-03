@@ -61,6 +61,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsasl_errors\fR(3SASL),
-\fBsasl_seterror\fR(3SASL),
-\fBattributes\fR(7)
+.BR sasl_errors (3SASL),
+.BR sasl_seterror (3SASL),
+.BR attributes (7)

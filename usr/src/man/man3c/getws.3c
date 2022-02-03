@@ -89,13 +89,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBferror\fR(3C),
-\fBfgetwc\fR(3C),
-\fBfread\fR(3C),
-\fBgetwc\fR(3C),
-\fBputws\fR(3C),
-\fBscanf\fR(3C),
-\fBungetc\fR(3C),
-\fBungetwc\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ferror (3C),
+.BR fgetwc (3C),
+.BR fread (3C),
+.BR getwc (3C),
+.BR putws (3C),
+.BR scanf (3C),
+.BR ungetc (3C),
+.BR ungetwc (3C),
+.BR attributes (7),
+.BR standards (7)

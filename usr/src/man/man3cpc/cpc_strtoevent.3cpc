@@ -166,14 +166,14 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C),
-\fBgetsubopt\fR(3C),
-\fBcpc\fR(3CPC),
-\fBcpc_getcpuver\fR(3CPC),
-\fBcpc_set_add_request\fR(3CPC),
-\fBcpc_seterrfn\fR(3CPC),
-\fBlibcpc\fR(3LIB),
-\fBattributes\fR(7)
+.BR free (3C),
+.BR getsubopt (3C),
+.BR cpc (3CPC),
+.BR cpc_getcpuver (3CPC),
+.BR cpc_set_add_request (3CPC),
+.BR cpc_seterrfn (3CPC),
+.BR libcpc (3LIB),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

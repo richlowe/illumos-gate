@@ -80,10 +80,10 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7),
-\fBgetmajor\fR(9F),
-\fBgetminor\fR(9F),
-\fBmakedevice\fR(9F)
+.BR attributes (7),
+.BR getmajor (9F),
+.BR getminor (9F),
+.BR makedevice (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -117,13 +117,13 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_fm_acc_err_get\fR(9F),
-\fBddi_fm_dma_err_get\fR(9F),
-\fBddi_fm_handler_register\fR(9F),
-\fBddi_peek\fR(9F),
-\fBddi_poke\fR(9F),
-\fBpci_ereport_post\fR(9F)
+.BR attributes (7),
+.BR ddi_fm_acc_err_get (9F),
+.BR ddi_fm_dma_err_get (9F),
+.BR ddi_fm_handler_register (9F),
+.BR ddi_peek (9F),
+.BR ddi_poke (9F),
+.BR pci_ereport_post (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

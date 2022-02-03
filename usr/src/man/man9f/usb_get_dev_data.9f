@@ -400,5 +400,5 @@ Interface stability	Committed
 \fBusb_lookup_ep_data\fR(9F), \fBusb_parse_data\fR(9F),
 \fBusb_pipe_xopen\fR(9F), \fBusb_cfg_descr\fR(9S),
 \fBusb_client_dev_data(9S)\fR, \fBusb_ep_descr\fR(9S),
-\fBusb_if_descr\fR(9S),
-\fBusb_string_descr\fR(9S)
+.BR usb_if_descr (9S),
+.BR usb_string_descr (9S)

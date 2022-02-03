@@ -102,15 +102,15 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlgrp_children\fR(3LGRP),
-\fBlgrp_cookie_stale\fR(3LGRP),
-\fBlgrp_cpus\fR(3LGRP),
-\fBlgrp_fini\fR(3LGRP),
-\fBlgrp_mem_size\fR(3LGRP),
-\fBlgrp_nlgrps\fR(3LGRP),
-\fBlgrp_parents\fR(3LGRP),
-\fBlgrp_resources\fR(3LGRP),
-\fBlgrp_root\fR(3LGRP),
-\fBlgrp_view\fR(3LGRP),
-\fBliblgrp\fR(3LIB),
-\fBattributes\fR(7)
+.BR lgrp_children (3LGRP),
+.BR lgrp_cookie_stale (3LGRP),
+.BR lgrp_cpus (3LGRP),
+.BR lgrp_fini (3LGRP),
+.BR lgrp_mem_size (3LGRP),
+.BR lgrp_nlgrps (3LGRP),
+.BR lgrp_parents (3LGRP),
+.BR lgrp_resources (3LGRP),
+.BR lgrp_root (3LGRP),
+.BR lgrp_view (3LGRP),
+.BR liblgrp (3LIB),
+.BR attributes (7)

@@ -116,5 +116,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBptree_create_table\fR(3PICLTREE),
-\fBattributes\fR(7)
+.BR ptree_create_table (3PICLTREE),
+.BR attributes (7)

@@ -76,10 +76,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBprintf\fR(3C),
-\fBvprintf\fR(3C),
-\fBcurses\fR(3CURSES),
-\fBattributes\fR(7)
+.BR printf (3C),
+.BR vprintf (3C),
+.BR curses (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

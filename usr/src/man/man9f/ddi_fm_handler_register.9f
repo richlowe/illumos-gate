@@ -187,16 +187,16 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBfmd\fR(8),
-\fBattach\fR(9E),
-\fBdetach\fR(9E),
-\fBddi_fm_ereport_post\fR(9F),
-\fBddi_fm_init\fR(9F),
-\fBddi_get8\fR(9F),
-\fBddi_put8\fR(9F),
-\fBpci_ereport_post\fR(9F),
-\fBddi_fm_error\fR(9S)
+.BR attributes (7),
+.BR fmd (8),
+.BR attach (9E),
+.BR detach (9E),
+.BR ddi_fm_ereport_post (9F),
+.BR ddi_fm_init (9F),
+.BR ddi_get8 (9F),
+.BR ddi_put8 (9F),
+.BR pci_ereport_post (9F),
+.BR ddi_fm_error (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

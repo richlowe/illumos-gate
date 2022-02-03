@@ -64,6 +64,6 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBlex\fR(1),
-\fBIntro\fR(3),
-\fBattributes\fR(7)
+.BR lex (1),
+.BR Intro (3),
+.BR attributes (7)

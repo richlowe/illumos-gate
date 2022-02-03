@@ -165,11 +165,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBdriver.conf\fR(5),
-\fBattributes\fR(7),
-\fBprtconf\fR(8),
-\fBattach\fR(9E),
-\fBdetach\fR(9E)
+.BR driver.conf (5),
+.BR attributes (7),
+.BR prtconf (8),
+.BR attach (9E),
+.BR detach (9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

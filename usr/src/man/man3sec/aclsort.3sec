@@ -98,6 +98,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBacl\fR(2),
-\fBaclcheck\fR(3SEC),
-\fBattributes\fR(7)
+.BR acl (2),
+.BR aclcheck (3SEC),
+.BR attributes (7)

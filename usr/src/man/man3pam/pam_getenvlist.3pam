@@ -54,11 +54,11 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpam\fR(3LIB),
-\fBpam\fR(3PAM),
-\fBpam_getenv\fR(3PAM),
-\fBpam_putenv\fR(3PAM),
-\fBattributes\fR(7)
+.BR libpam (3LIB),
+.BR pam (3PAM),
+.BR pam_getenv (3PAM),
+.BR pam_putenv (3PAM),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

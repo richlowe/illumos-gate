@@ -37,10 +37,10 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBsyslog\fR(3C),
-\fBsysmsg\fR(4D),
-\fBattributes\fR(7),
-\fBsyslogd\fR(8)
+.BR syslog (3C),
+.BR sysmsg (4D),
+.BR attributes (7),
+.BR syslogd (8)
 .SH NOTES
 .sp
 .LP

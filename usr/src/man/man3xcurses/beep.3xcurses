@@ -63,7 +63,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibcurses\fR(3XCURSES),
-\fBterminfo\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR libcurses (3XCURSES),
+.BR terminfo (5),
+.BR attributes (7),
+.BR standards (7)

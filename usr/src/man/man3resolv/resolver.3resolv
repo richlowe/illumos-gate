@@ -500,11 +500,11 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBlibresolv\fR(3LIB),
-\fBgethostbyname\fR(3NSL),
-\fBresolv.conf\fR(5),
-\fBattributes\fR(7),
-\fBdomainname\fR(8)
+.BR libresolv (3LIB),
+.BR gethostbyname (3NSL),
+.BR resolv.conf (5),
+.BR attributes (7),
+.BR domainname (8)
 .sp
 .LP
 Lottor, M. \fIRFC 1033, Domain Administrators Operations Guide\fR. Network

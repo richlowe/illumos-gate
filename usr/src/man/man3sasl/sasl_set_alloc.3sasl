@@ -75,7 +75,7 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7)
+.BR attributes (7)
 .SH NOTES
 While most of \fBlibsasl\fR is MT-Safe, \fBsasl_set_*\fR modifies the global
 state and should be considered Unsafe.

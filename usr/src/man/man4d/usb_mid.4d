@@ -86,10 +86,10 @@ Architecture	SPARC & x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBusb_ia\fR(4D),
-\fBusba\fR(4D),
-\fBattributes\fR(7),
-\fBcfgadm_usb\fR(8)
+.BR usb_ia (4D),
+.BR usba (4D),
+.BR attributes (7),
+.BR cfgadm_usb (8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

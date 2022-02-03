@@ -132,14 +132,14 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetaudit\fR(2),
-\fBau_open\fR(3BSM),
-\fBgetauclassent\fR(3BSM),
-\fBgetauevent\fR(3BSM),
-\fBmalloc\fR(3C),
-\fBaudit_class\fR(5),
-\fBaudit_event\fR(5),
-\fBattributes\fR(7)
+.BR getaudit (2),
+.BR au_open (3BSM),
+.BR getauclassent (3BSM),
+.BR getauevent (3BSM),
+.BR malloc (3C),
+.BR audit_class (5),
+.BR audit_event (5),
+.BR attributes (7)
 .SH NOTES
 .LP
 The \fBau_preselect()\fR function is normally called prior to constructing and

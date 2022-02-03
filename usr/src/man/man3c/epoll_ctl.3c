@@ -314,9 +314,9 @@ applications should continue to prefer using event ports via the
 interfaces.  See \fBepoll\fR(7) for compatibility details and restrictions.
 
 .SH SEE ALSO
-\fBepoll_create\fR(3C),
-\fBepoll_wait\fR(3C),
-\fBport_associate\fR(3C),
-\fBport_create\fR(3C),
-\fBport_get\fR(3C),
-\fBepoll\fR(7)
+.BR epoll_create (3C),
+.BR epoll_wait (3C),
+.BR port_associate (3C),
+.BR port_create (3C),
+.BR port_get (3C),
+.BR epoll (7)

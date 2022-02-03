@@ -374,13 +374,13 @@ The \fBendgrent()\fR, \fBgetgrent()\fR, \fBgetgrgid()\fR, \fBgetgrgid_r()\fR,
 Standard.
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBgetpwnam\fR(3C),
-\fBgroup\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBpasswd\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (3),
+.BR getpwnam (3C),
+.BR group (5),
+.BR nsswitch.conf (5),
+.BR passwd (5),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .LP
 When compiling multithreaded programs, see \fBIntro\fR(3).

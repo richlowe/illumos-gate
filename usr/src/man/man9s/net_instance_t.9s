@@ -84,5 +84,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnetinfo\fR(9F)
+.BR attributes (7),
+.BR netinfo (9F)

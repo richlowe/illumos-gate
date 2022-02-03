@@ -199,6 +199,6 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBposix_madvise\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR posix_madvise (3C),
+.BR attributes (7),
+.BR standards (7)

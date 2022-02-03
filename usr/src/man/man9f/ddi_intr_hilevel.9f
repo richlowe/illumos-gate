@@ -91,9 +91,9 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(9F),
-\fBddi_add_intr\fR(9F),
-\fBmutex\fR(9F)
+.BR Intro (9F),
+.BR ddi_add_intr (9F),
+.BR mutex (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -134,8 +134,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBacl\fR(2),
-\fBaclcheck\fR(3SEC),
-\fBaclsort\fR(3SEC),
-\fBacl\fR(7),
-\fBattributes\fR(7)
+.BR acl (2),
+.BR aclcheck (3SEC),
+.BR aclsort (3SEC),
+.BR acl (7),
+.BR attributes (7)

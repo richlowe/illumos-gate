@@ -124,7 +124,7 @@ Interface Stability	Committed
 \fBattributes\fR(7), \fBddi_dma_mem_alloc\fR(9F),
 \fBddi_fm_acc_err_clear\fR(9F), \fBddi_fm_service_impact\fR(9F),
 \fBddi_get8\fR(9F), \fBddi_put8\fR(9F), \fBddi_regs_map_setup\fR(9F),
-\fBddi_fm_error\fR(9S),
+.BR ddi_fm_error (9S),
 .sp
 .LP
 \fIWriting Device Drivers\fR

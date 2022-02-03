@@ -175,15 +175,15 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3),
-\fBin.h\fR(3HEAD),
-\fBendhostent\fR(3NSL),
-\fBendnetent\fR(3SOCKET),
-\fBendprotoent\fR(3SOCKET),
-\fBendservent\fR(3SOCKET),
-\fBendhostent\fR(3XNET),
-\fBendnetent\fR(3XNET),
-\fBendprotoent\fR(3XNET),
-\fBendservent\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (3),
+.BR in.h (3HEAD),
+.BR endhostent (3NSL),
+.BR endnetent (3SOCKET),
+.BR endprotoent (3SOCKET),
+.BR endservent (3SOCKET),
+.BR endhostent (3XNET),
+.BR endnetent (3XNET),
+.BR endprotoent (3XNET),
+.BR endservent (3XNET),
+.BR attributes (7),
+.BR standards (7)

@@ -92,11 +92,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsocket.h\fR(3HEAD),
-\fBaccept\fR(3SOCKET),
-\fBconnect\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7)
+.BR socket.h (3HEAD),
+.BR accept (3SOCKET),
+.BR connect (3SOCKET),
+.BR socket (3SOCKET),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

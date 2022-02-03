@@ -214,11 +214,11 @@ The \fBstobsl()\fR and \fBstobclear()\fR functions are obsolete. Use the
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtsol\fR(3LIB),
-\fBblcompare\fR(3TSOL),
-\fBhextob\fR(3TSOL),
-\fBstr_to_label\fR(3TSOL),
-\fBattributes\fR(7)
+.BR libtsol (3LIB),
+.BR blcompare (3TSOL),
+.BR hextob (3TSOL),
+.BR str_to_label (3TSOL),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

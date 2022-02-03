@@ -121,10 +121,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB),
-\fBMP_DeregisterPlugin\fR(3MPAPI),
-\fBmpapi.conf\fR(5),
-\fBattributes\fR(7)
+.BR libMPAPI (3LIB),
+.BR MP_DeregisterPlugin (3MPAPI),
+.BR mpapi.conf (5),
+.BR attributes (7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

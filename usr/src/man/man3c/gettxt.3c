@@ -132,11 +132,11 @@ MT-Level	Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBexstr\fR(1),
-\fBmkmsgs\fR(1),
-\fBsrchtxt\fR(1),
-\fBfmtmsg\fR(3C),
-\fBgettext\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7),
-\fBenviron\fR(7)
+.BR exstr (1),
+.BR mkmsgs (1),
+.BR srchtxt (1),
+.BR fmtmsg (3C),
+.BR gettext (3C),
+.BR setlocale (3C),
+.BR attributes (7),
+.BR environ (7)

@@ -107,12 +107,12 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBpvs\fR(1),
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBlibc\fR(3LIB),
-\fBlibc_db\fR(3LIB),
-\fBlibthread\fR(3LIB),
-\fBattributes\fR(7),
-\fBstandards\fR(7),
-\fBthreads\fR(7)
+.BR pvs (1),
+.BR Intro (2),
+.BR Intro (3),
+.BR libc (3LIB),
+.BR libc_db (3LIB),
+.BR libthread (3LIB),
+.BR attributes (7),
+.BR standards (7),
+.BR threads (7)

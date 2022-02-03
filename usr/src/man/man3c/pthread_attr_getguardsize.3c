@@ -183,7 +183,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_attr_init\fR(3C),
-\fBsysconf\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_attr_init (3C),
+.BR sysconf (3C),
+.BR attributes (7),
+.BR standards (7)

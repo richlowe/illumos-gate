@@ -142,8 +142,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP),
-\fBldap_add\fR(3LDAP),
-\fBldap_error\fR(3LDAP),
-\fBldap_get_option\fR(3LDAP),
-\fBattributes\fR(7)
+.BR ldap (3LDAP),
+.BR ldap_add (3LDAP),
+.BR ldap_error (3LDAP),
+.BR ldap_get_option (3LDAP),
+.BR attributes (7)

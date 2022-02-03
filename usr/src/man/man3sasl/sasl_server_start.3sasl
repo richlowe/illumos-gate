@@ -138,6 +138,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgethostname\fR(3C),
-\fBsasl_errors\fR(3SASL),
-\fBattributes\fR(7)
+.BR gethostname (3C),
+.BR sasl_errors (3SASL),
+.BR attributes (7)

@@ -180,8 +180,8 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2),
-\fBt_getstate\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_unbind\fR(3NSL),
-\fBattributes\fR(7)
+.BR close (2),
+.BR t_getstate (3NSL),
+.BR t_open (3NSL),
+.BR t_unbind (3NSL),
+.BR attributes (7)

@@ -159,5 +159,5 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBnote\fR(5),
-\fBattributes\fR(7)
+.BR note (5),
+.BR attributes (7)

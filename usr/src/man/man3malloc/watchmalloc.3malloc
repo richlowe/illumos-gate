@@ -221,16 +221,16 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBproc\fR(1),
-\fBcalloc\fR(3C),
-\fBfree\fR(3C),
-\fBmalloc\fR(3C),
-\fBmemalign\fR(3C),
-\fBrealloc\fR(3C),
-\fBvalloc\fR(3C),
-\fBlibmapmalloc\fR(3LIB),
-\fBbsdmalloc\fR(3MALLOC),
-\fBmalloc\fR(3MALLOC),
-\fBmapmalloc\fR(3MALLOC),
-\fBproc\fR(5),
-\fBattributes\fR(7)
+.BR proc (1),
+.BR calloc (3C),
+.BR free (3C),
+.BR malloc (3C),
+.BR memalign (3C),
+.BR realloc (3C),
+.BR valloc (3C),
+.BR libmapmalloc (3LIB),
+.BR bsdmalloc (3MALLOC),
+.BR malloc (3MALLOC),
+.BR mapmalloc (3MALLOC),
+.BR proc (5),
+.BR attributes (7)

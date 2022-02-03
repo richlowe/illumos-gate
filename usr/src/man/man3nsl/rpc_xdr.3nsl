@@ -160,6 +160,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrpc\fR(3NSL),
-\fBxdr\fR(3NSL),
-\fBattributes\fR(7)
+.BR rpc (3NSL),
+.BR xdr (3NSL),
+.BR attributes (7)

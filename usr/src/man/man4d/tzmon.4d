@@ -50,7 +50,7 @@ Interface stability 	Private
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7)
+.BR attributes (7)
 .sp
 .LP
 \fIAdvanced Configuration and Power Interface Specification, (ACPI), Version

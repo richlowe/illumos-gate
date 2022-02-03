@@ -66,10 +66,10 @@ Password file
 .SH SEE ALSO
 .sp
 .LP
-\fBchgrp\fR(1),
-\fBchown\fR(2),
-\fBgroup\fR(5),
-\fBpasswd\fR(5),
-\fBattributes\fR(7),
-\fBlargefile\fR(7),
-\fBprivileges\fR(7)
+.BR chgrp (1),
+.BR chown (2),
+.BR group (5),
+.BR passwd (5),
+.BR attributes (7),
+.BR largefile (7),
+.BR privileges (7)

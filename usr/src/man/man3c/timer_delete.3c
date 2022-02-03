@@ -113,6 +113,6 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBtimer_create\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR timer_create (3C),
+.BR attributes (7),
+.BR standards (7)

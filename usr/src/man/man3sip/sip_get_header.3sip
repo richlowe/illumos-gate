@@ -92,4 +92,4 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibsip\fR(3LIB)
+.BR libsip (3LIB)

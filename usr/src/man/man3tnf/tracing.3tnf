@@ -302,12 +302,12 @@ MT Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprex\fR(1),
-\fBtnfdump\fR(1),
-\fBtnfxtract\fR(1),
-\fBTNF_DECLARE_RECORD\fR(3TNF),
-\fBTNF_PROBE\fR(3TNF),
-\fBlibtnfctl\fR(3TNF),
-\fBtnf_process_disable\fR(3TNF),
-\fBtnf_kernel_probes\fR(5),
-\fBattributes\fR(7)
+.BR prex (1),
+.BR tnfdump (1),
+.BR tnfxtract (1),
+.BR TNF_DECLARE_RECORD (3TNF),
+.BR TNF_PROBE (3TNF),
+.BR libtnfctl (3TNF),
+.BR tnf_process_disable (3TNF),
+.BR tnf_kernel_probes (5),
+.BR attributes (7)

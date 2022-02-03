@@ -408,4 +408,4 @@ MT-Level	MT-Safe
 .LP
 \fBclose\fR(2), \fBbind\fR(3XNET), \fBendprotoent\fR(3XNET),
 \fBsetsockopt\fR(3XNET), \fBsocket\fR(3XNET), \fBattributes\fR,
-\fBstandards\fR(7)
+.BR standards (7)

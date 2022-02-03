@@ -815,26 +815,26 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBselect\fR(3C),
-\fBlibnsl\fR(3LIB),
-\fBnetdir\fR(3NSL),
-\fBnetdir_getbyname\fR(3NSL),
-\fBrpc\fR(3NSL),
-\fBrpc_clnt_auth\fR(3NSL),
-\fBrpc_clnt_calls\fR(3NSL),
-\fBrpc_clnt_create\fR(3NSL),
-\fBrpc_svc_calls\fR(3NSL),
-\fBrpc_svc_create\fR(3NSL),
-\fBrpc_svc_err\fR(3NSL),
-\fBrpc_svc_reg\fR(3NSL),
-\fBrpc_xdr\fR(3NSL),
-\fBrpcbind\fR(3NSL),
-\fBsecure_rpc\fR(3NSL),
-\fBxdr_authsys_parms\fR(3NSL),
-\fBattributes\fR(7),
-\fBkeyserv\fR(8),
-\fBrpcbind\fR(8),
-\fBrpcinfo\fR(8)
+.BR select (3C),
+.BR libnsl (3LIB),
+.BR netdir (3NSL),
+.BR netdir_getbyname (3NSL),
+.BR rpc (3NSL),
+.BR rpc_clnt_auth (3NSL),
+.BR rpc_clnt_calls (3NSL),
+.BR rpc_clnt_create (3NSL),
+.BR rpc_svc_calls (3NSL),
+.BR rpc_svc_create (3NSL),
+.BR rpc_svc_err (3NSL),
+.BR rpc_svc_reg (3NSL),
+.BR rpc_xdr (3NSL),
+.BR rpcbind (3NSL),
+.BR secure_rpc (3NSL),
+.BR xdr_authsys_parms (3NSL),
+.BR attributes (7),
+.BR keyserv (8),
+.BR rpcbind (8),
+.BR rpcinfo (8)
 .SH NOTES
 .LP
 These interfaces are unsafe in multithreaded applications.  Unsafe interfaces

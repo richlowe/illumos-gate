@@ -153,23 +153,23 @@ numbers. These semantics apply when Internet family protocols are used using
 the \fBTLI\fR.
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2),
-\fBbyteorder\fR(3C),
-\fBgethostbyname\fR(3NSL),
-\fBbind\fR(3SOCKET),
-\fBconnect\fR(3SOCKET),
-\fBgetnetbyname\fR(3SOCKET),
-\fBgetprotobyname\fR(3SOCKET),
-\fBgetservbyname\fR(3SOCKET),
-\fBgetsockopt\fR(3SOCKET),
-\fBsend\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBarp\fR(4P),
-\fBicmp\fR(4P),
-\fBip\fR(4P),
-\fBtcp\fR(4P),
-\fBudp\fR(4P)
+.BR ioctl (2),
+.BR byteorder (3C),
+.BR gethostbyname (3NSL),
+.BR bind (3SOCKET),
+.BR connect (3SOCKET),
+.BR getnetbyname (3SOCKET),
+.BR getprotobyname (3SOCKET),
+.BR getservbyname (3SOCKET),
+.BR getsockopt (3SOCKET),
+.BR send (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR arp (4P),
+.BR icmp (4P),
+.BR ip (4P),
+.BR tcp (4P),
+.BR udp (4P)
 .sp
 .LP
 Network Information Center, \fIDDN Protocol Handbook\fR (3 vols.), Network

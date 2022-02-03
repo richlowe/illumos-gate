@@ -219,13 +219,13 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBdoor_bind\fR(3C),
-\fBdoor_call\fR(3C),
-\fBdoor_info\fR(3C),
-\fBdoor_revoke\fR(3C),
-\fBdoor_server_create\fR(3C),
-\fBdoor_setparam\fR(3C),
-\fBfattach\fR(3C),
-\fBlibdoor\fR(3LIB),
-\fBattributes\fR(7),
-\fBcancellation\fR(7)
+.BR door_bind (3C),
+.BR door_call (3C),
+.BR door_info (3C),
+.BR door_revoke (3C),
+.BR door_server_create (3C),
+.BR door_setparam (3C),
+.BR fattach (3C),
+.BR libdoor (3LIB),
+.BR attributes (7),
+.BR cancellation (7)

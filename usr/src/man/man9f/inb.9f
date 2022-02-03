@@ -85,12 +85,12 @@ Stability Level	 Obsolete
 .TE
 
 .SH SEE ALSO
-\fBisa\fR(5),
-\fBattributes\fR(7),
-\fBddi_get16\fR(9F),
-\fBddi_get32\fR(9F),
-\fBddi_get8\fR(9F),
-\fBoutb\fR(9F)
+.BR isa (5),
+.BR attributes (7),
+.BR ddi_get16 (9F),
+.BR ddi_get32 (9F),
+.BR ddi_get8 (9F),
+.BR outb (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

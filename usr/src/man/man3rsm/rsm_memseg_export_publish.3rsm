@@ -273,8 +273,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrsm_memseg_export_create\fR(3RSM),
-\fBattributes\fR(7)
+.BR rsm_memseg_export_create (3RSM),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

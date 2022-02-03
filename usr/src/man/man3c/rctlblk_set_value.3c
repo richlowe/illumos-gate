@@ -436,8 +436,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetrctl\fR(2),
-\fBsetrctl\fR(2),
-\fBgethrtime\fR(3C),
-\fBattributes\fR(7),
-\fBrctladm\fR(8)
+.BR getrctl (2),
+.BR setrctl (2),
+.BR gethrtime (3C),
+.BR attributes (7),
+.BR rctladm (8)

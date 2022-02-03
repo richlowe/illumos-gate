@@ -70,11 +70,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBelf\fR(3ELF),
-\fBkvm_nlist\fR(3KVM),
-\fBkvm_open\fR(3KVM),
-\fBlibelf\fR(3LIB),
-\fBksyms\fR(4D),
-\fBmem\fR(4D),
-\fBa.out\fR(5),
-\fBattributes\fR(7)
+.BR elf (3ELF),
+.BR kvm_nlist (3KVM),
+.BR kvm_open (3KVM),
+.BR libelf (3LIB),
+.BR ksyms (4D),
+.BR mem (4D),
+.BR a.out (5),
+.BR attributes (7)

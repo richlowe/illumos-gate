@@ -305,14 +305,14 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBar\fR(1),
-\fBcat\fR(1),
-\fBcp\fR(1),
-\fBtar\fR(1),
-\fBopen\fR(2),
-\fBnetconfig\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ar (1),
+.BR cat (1),
+.BR cp (1),
+.BR tar (1),
+.BR open (2),
+.BR netconfig (5),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .LP
 The \fB\&.pag\fR file will contain holes so that its apparent size may be

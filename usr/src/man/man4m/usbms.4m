@@ -290,11 +290,11 @@ Architecture	PCI-based  systems
 
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2),
-\fBhid\fR(4D),
-\fBusba\fR(4D),
-\fBvirtualkm\fR(4D),
-\fBattributes\fR(7)
+.BR ioctl (2),
+.BR hid (4D),
+.BR usba (4D),
+.BR virtualkm (4D),
+.BR attributes (7)
 .sp
 .LP
 \fISystem Administration Guide: Basic Administration\fR

@@ -230,6 +230,6 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBsem_post\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR sem_post (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -84,6 +84,6 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap_error\fR(3LDAP),
-\fBldap_result\fR(3LDAP),
-\fBattributes\fR(7)
+.BR ldap_error (3LDAP),
+.BR ldap_result (3LDAP),
+.BR attributes (7)

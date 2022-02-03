@@ -144,16 +144,16 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBattroff\fR(3XCURSES),
-\fBbkgdset\fR(3XCURSES),
-\fBdoupdate\fR(3XCURSES),
-\fBinch\fR(3XCURSES),
-\fBinsch\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBnl\fR(3XCURSES),
-\fBprintw\fR(3XCURSES),
-\fBscrl\fR(3XCURSES),
-\fBscrollok\fR(3XCURSES),
-\fBterminfo\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR attroff (3XCURSES),
+.BR bkgdset (3XCURSES),
+.BR doupdate (3XCURSES),
+.BR inch (3XCURSES),
+.BR insch (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR nl (3XCURSES),
+.BR printw (3XCURSES),
+.BR scrl (3XCURSES),
+.BR scrollok (3XCURSES),
+.BR terminfo (5),
+.BR attributes (7),
+.BR standards (7)

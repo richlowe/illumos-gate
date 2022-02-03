@@ -531,19 +531,19 @@ Standard	See \fBstandards\fR(7).
 
 .SH SEE ALSO
 .LP
-\fBhtonl\fR(3C),
-\fBnetdb.h\fR(3HEAD),
-\fBgethostbyname\fR(3NSL),
-\fBgetipnodebyname\fR(3SOCKET),
-\fBinet\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBinet6\fR(4P),
-\fBhosts\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7),
-\fBipaddrsel\fR(8)
+.BR htonl (3C),
+.BR netdb.h (3HEAD),
+.BR gethostbyname (3NSL),
+.BR getipnodebyname (3SOCKET),
+.BR inet (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR inet6 (4P),
+.BR hosts (5),
+.BR nsswitch.conf (5),
+.BR attributes (7),
+.BR standards (7),
+.BR ipaddrsel (8)
 .sp
 .LP
 Draves, R. \fIRFC 3484, Default Address Selection for Internet Protocol version

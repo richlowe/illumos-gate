@@ -131,9 +131,9 @@ qassociate(q, -1);
 This informs the framework that this driver has been modified to be
 DDI-compliant.
 .SH SEE ALSO
-\fBgld\fR(4D),
-\fBdlpi\fR(4P),
-\fBopen\fR(9E),
-\fBput\fR(9E),
-\fBddi_no_info\fR(9F),
-\fBqueue\fR(9S)
+.BR gld (4D),
+.BR dlpi (4P),
+.BR open (9E),
+.BR put (9E),
+.BR ddi_no_info (9F),
+.BR queue (9S)

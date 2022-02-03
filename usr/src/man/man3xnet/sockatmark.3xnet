@@ -136,8 +136,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBselect\fR(3C),
-\fBrecv\fR(3XNET),
-\fBrecvmsg\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR select (3C),
+.BR recv (3XNET),
+.BR recvmsg (3XNET),
+.BR attributes (7),
+.BR standards (7)

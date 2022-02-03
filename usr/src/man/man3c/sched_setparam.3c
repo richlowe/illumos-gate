@@ -159,12 +159,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2),
-\fBexec\fR(2),
-\fBsched_getparam\fR(3C),
-\fBsched_getscheduler\fR(3C),
-\fBsched_setscheduler\fR(3C),
-\fBsched.h\fR(3HEAD),
-\fBlibrt\fR(3LIB),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (2),
+.BR exec (2),
+.BR sched_getparam (3C),
+.BR sched_getscheduler (3C),
+.BR sched_setscheduler (3C),
+.BR sched.h (3HEAD),
+.BR librt (3LIB),
+.BR attributes (7),
+.BR standards (7)

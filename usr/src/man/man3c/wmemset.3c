@@ -95,9 +95,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBwmemchr\fR(3C),
-\fBwmemcmp\fR(3C),
-\fBwmemcpy\fR(3C),
-\fBwmemmove\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR wmemchr (3C),
+.BR wmemcmp (3C),
+.BR wmemcpy (3C),
+.BR wmemmove (3C),
+.BR attributes (7),
+.BR standards (7)

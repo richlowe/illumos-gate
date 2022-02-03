@@ -237,15 +237,15 @@ MT-Level	See below.
 .TE
 
 .SH SEE ALSO
-\fBgeteuid\fR(2),
-\fBgetuid\fR(2),
-\fBcuserid\fR(3C),
-\fBgetgrnam\fR(3C),
-\fBgetpwnam\fR(3C),
-\fBgetpwuid\fR(3C),
-\fButmpx\fR(5),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR geteuid (2),
+.BR getuid (2),
+.BR cuserid (3C),
+.BR getgrnam (3C),
+.BR getpwnam (3C),
+.BR getpwuid (3C),
+.BR utmpx (5),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 When compiling multithreaded programs, see \fBIntro\fR(3).
 .sp

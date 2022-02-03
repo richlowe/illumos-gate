@@ -230,14 +230,14 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetexecattr\fR(3SECDB),
-\fBgetprofattr\fR(3SECDB),
-\fBgetuserattr\fR(3SECDB),
-\fBkva_match\fR(3SECDB),
-\fBauth_attr\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBpolicy.conf\fR(5),
-\fBprof_attr\fR(5),
-\fBuser_attr\fR(5),
-\fBattributes\fR(7),
-\fBrbac\fR(7)
+.BR getexecattr (3SECDB),
+.BR getprofattr (3SECDB),
+.BR getuserattr (3SECDB),
+.BR kva_match (3SECDB),
+.BR auth_attr (5),
+.BR nsswitch.conf (5),
+.BR policy.conf (5),
+.BR prof_attr (5),
+.BR user_attr (5),
+.BR attributes (7),
+.BR rbac (7)

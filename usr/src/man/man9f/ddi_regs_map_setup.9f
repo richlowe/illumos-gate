@@ -195,14 +195,14 @@ Architecture	PCI Local Bus, SBus, ISA
 .TE
 
 .SH SEE ALSO
-\fBcardbus\fR(5),
-\fBisa\fR(5),
-\fBpci\fR(5),
-\fBpcie\fR(5),
-\fBsbus\fR(5),
-\fBattributes\fR(7),
-\fBddi_regs_map_free\fR(9F),
-\fBddi_device_acc_attr\fR(9S)
+.BR cardbus (5),
+.BR isa (5),
+.BR pci (5),
+.BR pcie (5),
+.BR sbus (5),
+.BR attributes (7),
+.BR ddi_regs_map_free (9F),
+.BR ddi_device_acc_attr (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

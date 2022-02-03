@@ -215,8 +215,8 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBt_error\fR(3NSL),
-\fBt_getinfo\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_rcvrel\fR(3NSL),
-\fBattributes\fR(7)
+.BR t_error (3NSL),
+.BR t_getinfo (3NSL),
+.BR t_open (3NSL),
+.BR t_rcvrel (3NSL),
+.BR attributes (7)

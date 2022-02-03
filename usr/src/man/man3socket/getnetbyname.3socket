@@ -258,14 +258,14 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBnetdb.h\fR(3HEAD),
-\fBbyteorder\fR(3SOCKET),
-\fBinet\fR(3SOCKET),
-\fBnetworks\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBattributes\fR(7)
+.BR Intro (2),
+.BR Intro (3),
+.BR netdb.h (3HEAD),
+.BR byteorder (3SOCKET),
+.BR inet (3SOCKET),
+.BR networks (5),
+.BR nsswitch.conf (5),
+.BR attributes (7)
 .sp
 .LP
 Fuller, V., Li, T., Yu, J., and Varadhan, K. \fIRFC 1519, Classless

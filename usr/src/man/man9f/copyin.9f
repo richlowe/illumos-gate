@@ -161,13 +161,13 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7),
-\fBioctl\fR(9E),
-\fBbcopy\fR(9F),
-\fBcopyout\fR(9F),
-\fBddi_copyin\fR(9F),
-\fBddi_copyout\fR(9F),
-\fBuiomove\fR(9F)
+.BR attributes (7),
+.BR ioctl (9E),
+.BR bcopy (9F),
+.BR copyout (9F),
+.BR ddi_copyin (9F),
+.BR ddi_copyout (9F),
+.BR uiomove (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

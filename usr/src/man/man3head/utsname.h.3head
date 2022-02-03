@@ -97,6 +97,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBuname\fR(2),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR uname (2),
+.BR attributes (7),
+.BR standards (7)

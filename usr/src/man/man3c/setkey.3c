@@ -116,7 +116,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcrypt\fR(3C),
-\fBencrypt\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR crypt (3C),
+.BR encrypt (3C),
+.BR attributes (7),
+.BR standards (7)

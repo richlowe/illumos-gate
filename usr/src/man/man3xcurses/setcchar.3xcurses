@@ -104,9 +104,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBattroff\fR(3XCURSES),
-\fBcan_change_color\fR(3XCURSES),
-\fBgetcchar\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR attroff (3XCURSES),
+.BR can_change_color (3XCURSES),
+.BR getcchar (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

@@ -60,8 +60,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_kill\fR(3C),
-\fBpthread_self\fR(3C),
-\fBsignal.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_kill (3C),
+.BR pthread_self (3C),
+.BR signal.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

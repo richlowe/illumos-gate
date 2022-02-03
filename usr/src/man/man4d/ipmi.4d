@@ -160,9 +160,9 @@ Unregister to receive a specific command
 .RE
 
 .SH SEE ALSO
-\fBipmitool\fR(1),
-\fBioctl\fR(2),
-\fBsmbios\fR(4D)
+.BR ipmitool (1),
+.BR ioctl (2),
+.BR smbios (4D)
 .sp
 .LP
 \fIIntelligent Platform Management Interface Specification Second

@@ -117,9 +117,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBkill\fR(1),
-\fBpthread_self\fR(3C),
-\fBpthread_sigmask\fR(3C),
-\fBraise\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR kill (1),
+.BR pthread_self (3C),
+.BR pthread_sigmask (3C),
+.BR raise (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -249,19 +249,19 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBkbd\fR(1),
-\fBtip\fR(1),
-\fBuucp\fR(1C),
-\fBioctl\fR(2),
-\fBopen\fR(2),
-\fBtermios\fR(3C),
-\fBtermio\fR(4I),
-\fBkb\fR(4M),
-\fBldterm\fR(4M),
-\fBttcompat\fR(4M),
-\fBattributes\fR(7),
-\fBeeprom\fR(8),
-\fBpppd\fR(8)
+.BR kbd (1),
+.BR tip (1),
+.BR uucp (1C),
+.BR ioctl (2),
+.BR open (2),
+.BR termios (3C),
+.BR termio (4I),
+.BR kb (4M),
+.BR ldterm (4M),
+.BR ttcompat (4M),
+.BR attributes (7),
+.BR eeprom (8),
+.BR pppd (8)
 .SH DIAGNOSTICS
 .sp
 .ne 2

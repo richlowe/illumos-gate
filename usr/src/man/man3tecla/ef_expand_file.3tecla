@@ -267,8 +267,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtecla\fR(3LIB),
-\fBcpl_complete_word\fR(3TECLA),
-\fBgl_get_line\fR(3TECLA),
-\fBpca_lookup_file\fR(3TECLA),
-\fBattributes\fR(7)
+.BR libtecla (3LIB),
+.BR cpl_complete_word (3TECLA),
+.BR gl_get_line (3TECLA),
+.BR pca_lookup_file (3TECLA),
+.BR attributes (7)

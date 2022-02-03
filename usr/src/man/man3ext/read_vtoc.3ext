@@ -159,13 +159,13 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2),
-\fBefi_alloc_and_init\fR(3EXT),
-\fBdkio\fR(4I),
-\fBattributes\fR(7),
-\fBfmthard\fR(8),
-\fBformat\fR(8),
-\fBprtvtoc\fR(8)
+.BR ioctl (2),
+.BR efi_alloc_and_init (3EXT),
+.BR dkio (4I),
+.BR attributes (7),
+.BR fmthard (8),
+.BR format (8),
+.BR prtvtoc (8)
 .SH BUGS
 .sp
 .LP

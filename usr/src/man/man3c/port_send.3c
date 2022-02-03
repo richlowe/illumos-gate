@@ -220,10 +220,10 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsetrctl\fR(2),
-\fBport_alert\fR(3C),
-\fBport_associate\fR(3C),
-\fBport_create\fR(3C),
-\fBport_get\fR(3C),
-\fBattributes\fR(7),
-\fBrctladm\fR(8)
+.BR setrctl (2),
+.BR port_alert (3C),
+.BR port_associate (3C),
+.BR port_create (3C),
+.BR port_get (3C),
+.BR attributes (7),
+.BR rctladm (8)

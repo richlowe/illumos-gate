@@ -404,11 +404,11 @@ For large systems where boot times are a concern, it is recommended that the
 should examine.
 .SH SEE ALSO
 .LP
-\fBsd\fR(4D),
-\fBst\fR(4D),
-\fBuscsi\fR(4I),
-\fBdriver.conf\fR(5),
-\fBscsi\fR(5)
+.BR sd (4D),
+.BR st (4D),
+.BR uscsi (4I),
+.BR driver.conf (5),
+.BR scsi (5)
 .sp
 .LP
 \fIWriting Device Drivers\fR

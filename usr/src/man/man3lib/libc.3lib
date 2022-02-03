@@ -980,12 +980,12 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBpvs\fR(1),
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBattributes\fR(7),
-\fBlf64\fR(7),
-\fBstandards\fR(7)
+.BR pvs (1),
+.BR Intro (2),
+.BR Intro (3),
+.BR attributes (7),
+.BR lf64 (7),
+.BR standards (7)
 .SH NOTES
 The synonyms compatibility library, \fBc_synonyms.so.1\fR, provides a mechanism
 to support old applications and libraries that were mistakenly built using

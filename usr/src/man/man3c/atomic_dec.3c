@@ -139,16 +139,16 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBatomic_add\fR(3C),
-\fBatomic_and\fR(3C),
-\fBatomic_bits\fR(3C),
-\fBatomic_cas\fR(3C),
-\fBatomic_inc\fR(3C),
-\fBatomic_or\fR(3C),
-\fBatomic_swap\fR(3C),
-\fBmembar_ops\fR(3C),
-\fBattributes\fR(7),
-\fBatomic_ops\fR(9F)
+.BR atomic_add (3C),
+.BR atomic_and (3C),
+.BR atomic_bits (3C),
+.BR atomic_cas (3C),
+.BR atomic_inc (3C),
+.BR atomic_or (3C),
+.BR atomic_swap (3C),
+.BR membar_ops (3C),
+.BR attributes (7),
+.BR atomic_ops (9F)
 .SH NOTES
 .sp
 .LP

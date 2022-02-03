@@ -107,4 +107,4 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnetinfo\fR(9F)
+.BR netinfo (9F)

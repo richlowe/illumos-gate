@@ -51,6 +51,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBthr_setprio\fR(3C),
-\fBlibc_db\fR(3LIB),
-\fBattributes\fR(7)
+.BR thr_setprio (3C),
+.BR libc_db (3LIB),
+.BR attributes (7)

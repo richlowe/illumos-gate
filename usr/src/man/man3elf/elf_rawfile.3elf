@@ -63,15 +63,15 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBelf\fR(3ELF),
-\fBelf32_getehdr\fR(3ELF),
-\fBelf_begin\fR(3ELF),
-\fBelf_cntl\fR(3ELF),
-\fBelf_getdata\fR(3ELF),
-\fBelf_getident\fR(3ELF),
-\fBelf_kind\fR(3ELF),
-\fBlibelf\fR(3LIB),
-\fBattributes\fR(7)
+.BR elf (3ELF),
+.BR elf32_getehdr (3ELF),
+.BR elf_begin (3ELF),
+.BR elf_cntl (3ELF),
+.BR elf_getdata (3ELF),
+.BR elf_getident (3ELF),
+.BR elf_kind (3ELF),
+.BR libelf (3LIB),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

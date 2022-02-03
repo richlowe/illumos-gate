@@ -565,11 +565,11 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBrpc\fR(3NSL),
-\fBrpc_clnt_auth\fR(3NSL),
-\fBrpc_clnt_calls\fR(3NSL),
-\fBrpc_svc_create\fR(3NSL),
-\fBsvc_raw_create\fR(3NSL),
-\fBattributes\fR(7),
-\fBthreads\fR(7),
-\fBrpcbind\fR(8)
+.BR rpc (3NSL),
+.BR rpc_clnt_auth (3NSL),
+.BR rpc_clnt_calls (3NSL),
+.BR rpc_svc_create (3NSL),
+.BR svc_raw_create (3NSL),
+.BR attributes (7),
+.BR threads (7),
+.BR rpcbind (8)

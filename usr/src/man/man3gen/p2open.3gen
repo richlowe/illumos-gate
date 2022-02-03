@@ -96,10 +96,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBfclose\fR(3C),
-\fBpopen\fR(3C),
-\fBsetbuf\fR(3C),
-\fBattributes\fR(7)
+.BR fclose (3C),
+.BR popen (3C),
+.BR setbuf (3C),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

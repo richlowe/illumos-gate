@@ -413,13 +413,13 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBtran_reset\fR(9E),
-\fBscsi_hba_lookup_capstr\fR(9F),
-\fBscsi_reset\fR(9F),
-\fBscsi_reset_notify\fR(9F),
-\fBddi_dma_attr\fR(9S),
-\fBscsi_address\fR(9S),
-\fBscsi_arq_status\fR(9S)
+.BR tran_reset (9E),
+.BR scsi_hba_lookup_capstr (9F),
+.BR scsi_reset (9F),
+.BR scsi_reset_notify (9F),
+.BR ddi_dma_attr (9S),
+.BR scsi_address (9S),
+.BR scsi_arq_status (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

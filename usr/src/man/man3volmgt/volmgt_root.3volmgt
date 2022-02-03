@@ -85,12 +85,12 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBopen\fR(2),
-\fBvolmgt_check\fR(3VOLMGT),
-\fBvolmgt_inuse\fR(3VOLMGT),
-\fBvolmgt_running\fR(3VOLMGT),
-\fBattributes\fR(7),
-\fBhal\fR(7)
+.BR open (2),
+.BR volmgt_check (3VOLMGT),
+.BR volmgt_inuse (3VOLMGT),
+.BR volmgt_running (3VOLMGT),
+.BR attributes (7),
+.BR hal (7)
 .SH NOTES
 .sp
 .LP

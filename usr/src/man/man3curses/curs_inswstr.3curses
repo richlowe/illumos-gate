@@ -98,10 +98,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBclrtoeol\fR(3CURSES),
-\fBcurses\fR(3CURSES),
-\fBwinwch\fR(3CURSES),
-\fBattributes\fR(7)
+.BR clrtoeol (3CURSES),
+.BR curses (3CURSES),
+.BR winwch (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

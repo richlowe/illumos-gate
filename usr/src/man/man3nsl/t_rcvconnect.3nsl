@@ -236,12 +236,12 @@ MT Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBfcntl\fR(2),
-\fBt_accept\fR(3NSL),
-\fBt_alloc\fR(3NSL),
-\fBt_bind\fR(3NSL),
-\fBt_connect\fR(3NSL),
-\fBt_listen\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_optmgmt\fR(3NSL),
-\fBattributes\fR(7)
+.BR fcntl (2),
+.BR t_accept (3NSL),
+.BR t_alloc (3NSL),
+.BR t_bind (3NSL),
+.BR t_connect (3NSL),
+.BR t_listen (3NSL),
+.BR t_open (3NSL),
+.BR t_optmgmt (3NSL),
+.BR attributes (7)

@@ -735,10 +735,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcondvar\fR(9F),
-\fBkmem_alloc\fR(9F),
-\fBmutex\fR(9F),
-\fBkstat\fR(9S)
+.BR condvar (9F),
+.BR kmem_alloc (9F),
+.BR mutex (9F),
+.BR kstat (9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

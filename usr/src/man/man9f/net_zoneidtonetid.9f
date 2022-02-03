@@ -53,5 +53,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBnet_netidtozonid\fR(9F)
+.BR attributes (7),
+.BR net_netidtozonid (9F)

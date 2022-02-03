@@ -360,8 +360,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnvlist_alloc\fR(9F),
-\fBnvpair_type\fR(9F)
+.BR nvlist_alloc (9F),
+.BR nvpair_type (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

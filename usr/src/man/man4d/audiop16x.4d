@@ -69,8 +69,8 @@ Architecture	x86, SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2),
-\fBaudio\fR(4I),
-\fBmixer\fR(4I),
-\fBstreamio\fR(4I),
-\fBattributes\fR(7)
+.BR ioctl (2),
+.BR audio (4I),
+.BR mixer (4I),
+.BR streamio (4I),
+.BR attributes (7)

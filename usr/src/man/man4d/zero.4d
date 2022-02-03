@@ -38,6 +38,6 @@ special file object provided a common ancestor mapped the object
 .SH SEE ALSO
 .sp
 .LP
-\fBfork\fR(2),
-\fBmmap\fR(2),
-\fBsysconf\fR(3C)
+.BR fork (2),
+.BR mmap (2),
+.BR sysconf (3C)

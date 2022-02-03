@@ -101,9 +101,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBfcntl.h\fR(3HEAD),
-\fBsignal.h\fR(3HEAD),
-\fBtime.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fcntl.h (3HEAD),
+.BR signal.h (3HEAD),
+.BR time.h (3HEAD),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

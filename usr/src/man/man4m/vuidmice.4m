@@ -290,8 +290,8 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBvirtualkm\fR(4D),
-\fBattributes\fR(7)
+.BR virtualkm (4D),
+.BR attributes (7)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

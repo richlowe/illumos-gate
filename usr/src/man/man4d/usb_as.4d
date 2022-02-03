@@ -75,10 +75,10 @@ Stability level 	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBusb_ac\fR(4D),
-\fBusba\fR(4D),
-\fBaudio\fR(4I),
-\fBattributes\fR(7)
+.BR usb_ac (4D),
+.BR usba (4D),
+.BR audio (4I),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

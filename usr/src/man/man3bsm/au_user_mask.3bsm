@@ -62,11 +62,11 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBlogin\fR(1),
-\fBgetaudit\fR(2),
-\fBsetaudit\fR(2),
-\fBau_preselect\fR(3BSM),
-\fBattributes\fR(7)
+.BR login (1),
+.BR getaudit (2),
+.BR setaudit (2),
+.BR au_preselect (3BSM),
+.BR attributes (7)
 .SH NOTES
 .LP
 The \fBau_user_mask()\fR function should be called by programs like

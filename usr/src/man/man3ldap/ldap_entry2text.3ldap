@@ -219,4 +219,4 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 \fBldap\fR(3LDAP), \fBldap_disptmpl\fR(3LDAP), \fBldaptemplates.conf\fR(5) ,
-\fBattributes\fR(7)
+.BR attributes (7)

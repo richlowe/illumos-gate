@@ -317,14 +317,14 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfork\fR(2),
-\fBpthread_attr_init\fR(3C),
-\fBpthread_cancel\fR(3C),
-\fBpthread_exit\fR(3C),
-\fBpthread_join\fR(3C),
-\fBsysconf\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fork (2),
+.BR pthread_attr_init (3C),
+.BR pthread_cancel (3C),
+.BR pthread_exit (3C),
+.BR pthread_join (3C),
+.BR sysconf (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

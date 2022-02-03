@@ -484,9 +484,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfmtmsg\fR(1),
-\fBaddseverity\fR(3C),
-\fBgettxt\fR(3C),
-\fBprintf\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fmtmsg (1),
+.BR addseverity (3C),
+.BR gettxt (3C),
+.BR printf (3C),
+.BR attributes (7),
+.BR standards (7)

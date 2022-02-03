@@ -295,8 +295,8 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBlibcurses\fR(3LIB),
-\fBcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (3),
+.BR libcurses (3LIB),
+.BR curses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

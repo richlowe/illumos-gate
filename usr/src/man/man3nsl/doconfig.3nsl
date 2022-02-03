@@ -167,10 +167,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBsh\fR(1),
-\fBattributes\fR(7),
-\fBpmadm\fR(8),
-\fBsacadm\fR(8)
+.BR sh (1),
+.BR attributes (7),
+.BR pmadm (8),
+.BR sacadm (8)
 .SH NOTES
 .sp
 .LP

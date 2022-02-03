@@ -357,12 +357,12 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfcntl\fR(2),
-\fBt_getinfo\fR(3NSL),
-\fBt_look\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_rcv\fR(3NSL),
-\fBattributes\fR(7)
+.BR fcntl (2),
+.BR t_getinfo (3NSL),
+.BR t_look (3NSL),
+.BR t_open (3NSL),
+.BR t_rcv (3NSL),
+.BR attributes (7)
 .SH WARNINGS
 .sp
 .LP

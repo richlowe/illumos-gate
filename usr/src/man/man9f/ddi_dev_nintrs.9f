@@ -63,12 +63,12 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBisa\fR(5),
-\fBsbus\fR(5),
-\fBIntro\fR(9F),
-\fBddi_add_intr\fR(9F),
-\fBddi_dev_nregs\fR(9F),
-\fBddi_dev_regsize\fR(9F)
+.BR isa (5),
+.BR sbus (5),
+.BR Intro (9F),
+.BR ddi_add_intr (9F),
+.BR ddi_dev_nregs (9F),
+.BR ddi_dev_regsize (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

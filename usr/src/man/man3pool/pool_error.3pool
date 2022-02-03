@@ -162,6 +162,6 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBerrno\fR(3C),
-\fBlibpool\fR(3LIB),
-\fBattributes\fR(7)
+.BR errno (3C),
+.BR libpool (3LIB),
+.BR attributes (7)

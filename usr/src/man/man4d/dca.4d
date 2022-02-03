@@ -231,11 +231,11 @@ Interface Stability	Unstable
 .SH SEE ALSO
 .sp
 .LP
-\fBdriver.conf\fR(5),
-\fBattributes\fR(7),
-\fBcryptoadm\fR(8),
-\fBkstat\fR(8),
-\fBprtconf\fR(8)
+.BR driver.conf (5),
+.BR attributes (7),
+.BR cryptoadm (8),
+.BR kstat (8),
+.BR prtconf (8)
 .sp
 .LP
 \fISolaris Cryptographic Framework.\fR

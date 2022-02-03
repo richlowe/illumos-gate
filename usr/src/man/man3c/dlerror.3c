@@ -50,14 +50,14 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBld\fR(1),
-\fBdladdr\fR(3C),
-\fBdlclose\fR(3C),
-\fBdldump\fR(3C),
-\fBdlopen\fR(3C),
-\fBdlsym\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ld (1),
+.BR dladdr (3C),
+.BR dlclose (3C),
+.BR dldump (3C),
+.BR dlopen (3C),
+.BR dlsym (3C),
+.BR attributes (7),
+.BR standards (7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

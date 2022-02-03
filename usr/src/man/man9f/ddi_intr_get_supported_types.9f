@@ -102,13 +102,13 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBpcmcia\fR(4D),
-\fBpci\fR(5),
-\fBsysbus\fR(5),
-\fBattributes\fR(7),
-\fBddi_intr_add_handler\fR(9F),
-\fBddi_intr_alloc\fR(9F),
-\fBddi_intr_enable\fR(9F)
+.BR pcmcia (4D),
+.BR pci (5),
+.BR sysbus (5),
+.BR attributes (7),
+.BR ddi_intr_add_handler (9F),
+.BR ddi_intr_alloc (9F),
+.BR ddi_intr_enable (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

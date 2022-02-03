@@ -144,9 +144,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBhsearch\fR(3C),
-\fBlsearch\fR(3C),
-\fBqsort\fR(3C),
-\fBtsearch\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR hsearch (3C),
+.BR lsearch (3C),
+.BR qsort (3C),
+.BR tsearch (3C),
+.BR attributes (7),
+.BR standards (7)

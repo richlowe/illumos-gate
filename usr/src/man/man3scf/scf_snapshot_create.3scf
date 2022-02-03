@@ -392,9 +392,9 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBlibscf\fR(3LIB),
-\fBscf_error\fR(3SCF),
-\fBscf_iter_instance_snapshots\fR(3SCF),
-\fBscf_snapshot_get_base_snaplevel\fR(3SCF),
-\fBattributes\fR(7),
-\fBsmf\fR(7)
+.BR libscf (3LIB),
+.BR scf_error (3SCF),
+.BR scf_iter_instance_snapshots (3SCF),
+.BR scf_snapshot_get_base_snaplevel (3SCF),
+.BR attributes (7),
+.BR smf (7)

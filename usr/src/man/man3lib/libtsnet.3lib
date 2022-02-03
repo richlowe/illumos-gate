@@ -64,6 +64,6 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(3),
-\fBlibtsol\fR(3LIB),
-\fBattributes\fR(7)
+.BR Intro (3),
+.BR libtsol (3LIB),
+.BR attributes (7)

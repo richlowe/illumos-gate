@@ -46,5 +46,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibdlpi\fR(3LIB),
-\fBattributes\fR(7)
+.BR libdlpi (3LIB),
+.BR attributes (7)

@@ -118,10 +118,10 @@ MT-Level	MT-Safe
 The \fBwcscoll()\fR and \fBwcscoll_l()\fR functions are Standard.
 The \fBwscoll()\fR function is Committed.
 .SH SEE ALSO
-\fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C),
-\fBuselocale\fR(3C),
-\fBwcscmp\fR(3C),
-\fBwcsxfrm\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR newlocale (3C),
+.BR setlocale (3C),
+.BR uselocale (3C),
+.BR wcscmp (3C),
+.BR wcsxfrm (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -123,7 +123,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBendhostent\fR(3XNET),
-\fBendservent\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR endhostent (3XNET),
+.BR endservent (3XNET),
+.BR attributes (7),
+.BR standards (7)

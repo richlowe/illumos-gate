@@ -121,9 +121,9 @@ MT-Level	MT-Safe, and Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsetpgid\fR(2),
-\fBsetsid\fR(2),
-\fBtcsetpgrp\fR(3C),
-\fBtermio\fR(4I),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR setpgid (2),
+.BR setsid (2),
+.BR tcsetpgrp (3C),
+.BR termio (4I),
+.BR attributes (7),
+.BR standards (7)

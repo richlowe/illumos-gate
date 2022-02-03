@@ -270,10 +270,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBfmd\fR(8),
-\fBddi_fm_handler_register\fR(9F),
-\fBddi_fm_init\fR(9F),
-\fBddi_peek\fR(9F),
-\fBddi_poke\fR(9F),
-\fBddi_fm_error\fR(9S)
+.BR attributes (7),
+.BR fmd (8),
+.BR ddi_fm_handler_register (9F),
+.BR ddi_fm_init (9F),
+.BR ddi_peek (9F),
+.BR ddi_poke (9F),
+.BR ddi_fm_error (9S)

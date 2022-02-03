@@ -187,16 +187,16 @@ MT Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBprex\fR(1),
-\fBdlclose\fR(3C),
-\fBdlopen\fR(3C),
-\fBTNF_PROBE\fR(3TNF),
-\fBlibtnfctl\fR(3TNF),
-\fBtnfctl_probe_enable\fR(3TNF),
-\fBtnfctl_probe_trace\fR(3TNF),
-\fBtracing\fR(3TNF),
-\fBproc\fR(5),
-\fBattributes\fR(7)
+.BR prex (1),
+.BR dlclose (3C),
+.BR dlopen (3C),
+.BR TNF_PROBE (3TNF),
+.BR libtnfctl (3TNF),
+.BR tnfctl_probe_enable (3TNF),
+.BR tnfctl_probe_trace (3TNF),
+.BR tracing (3TNF),
+.BR proc (5),
+.BR attributes (7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

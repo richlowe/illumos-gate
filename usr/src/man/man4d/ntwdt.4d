@@ -93,8 +93,8 @@ Architecture	SPARC
 .TE
 
 .SH SEE ALSO
-\fBdriver.conf\fR(5),
-\fBattributes\fR(7)
+.BR driver.conf (5),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

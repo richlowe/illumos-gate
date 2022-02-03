@@ -63,10 +63,10 @@ Interface Stability	 Contract Consolidation Private
 .SH SEE ALSO
 .sp
 .LP
-\fBib\fR(4D),
-\fBibcm\fR(4D),
-\fBibtl\fR(4D),
-\fBattributes\fR(7)
+.BR ib (4D),
+.BR ibcm (4D),
+.BR ibtl (4D),
+.BR attributes (7)
 .sp
 .LP
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.1\fR

@@ -143,12 +143,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBfclose\fR(3C),
-\fBmalloc\fR(3C),
-\fBrpc\fR(3NSL),
-\fBxdr_admin\fR(3NSL),
-\fBxdr_complex\fR(3NSL),
-\fBxdr_simple\fR(3NSL),
-\fBattributes\fR(7)
+.BR read (2),
+.BR write (2),
+.BR fclose (3C),
+.BR malloc (3C),
+.BR rpc (3NSL),
+.BR xdr_admin (3NSL),
+.BR xdr_complex (3NSL),
+.BR xdr_simple (3NSL),
+.BR attributes (7)

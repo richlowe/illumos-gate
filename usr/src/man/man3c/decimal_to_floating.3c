@@ -96,7 +96,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBscanf\fR(3C),
-\fBstring_to_decimal\fR(3C),
-\fBstrtod\fR(3C),
-\fBattributes\fR(7)
+.BR scanf (3C),
+.BR string_to_decimal (3C),
+.BR strtod (3C),
+.BR attributes (7)

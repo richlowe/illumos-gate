@@ -113,6 +113,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBndbm\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR ndbm (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -439,8 +439,8 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBusb_get_cfg\fR(9F),
-\fBusb_get_dev_data\fR(9F),
-\fBusb_get_string_descr\fR(9F),
-\fBusb_pipe_ctrl_xfer\fR(9F)
+.BR attributes (7),
+.BR usb_get_cfg (9F),
+.BR usb_get_dev_data (9F),
+.BR usb_get_string_descr (9F),
+.BR usb_pipe_ctrl_xfer (9F)

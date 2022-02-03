@@ -388,7 +388,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfnmatch\fR(3C),
-\fBglob\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fnmatch (3C),
+.BR glob (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -977,6 +977,6 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBkrb5-config\fR(1),
-\fBlibgss\fR(3LIB),
-\fBattributes\fR(7)
+.BR krb5-config (1),
+.BR libgss (3LIB),
+.BR attributes (7)

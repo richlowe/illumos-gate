@@ -166,8 +166,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBif_nametoindex\fR(3SOCKET),
-\fBif\fR(4P),
-\fBattributes\fR(7),
-\fBstandards\fR(7),
-\fBifconfig\fR(8)
+.BR if_nametoindex (3SOCKET),
+.BR if (4P),
+.BR attributes (7),
+.BR standards (7),
+.BR ifconfig (8)

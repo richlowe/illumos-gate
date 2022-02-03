@@ -145,11 +145,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_intr_alloc\fR(9F),
-\fBddi_intr_enable\fR(9F),
-\fBmutex_init\fR(9F),
-\fBrw_init\fR(9F)
+.BR attributes (7),
+.BR ddi_intr_alloc (9F),
+.BR ddi_intr_enable (9F),
+.BR mutex_init (9F),
+.BR rw_init (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

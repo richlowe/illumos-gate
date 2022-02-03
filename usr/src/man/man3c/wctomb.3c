@@ -109,12 +109,12 @@ The \fBwctomb()\fR function is Standard.  The \fBwctomb_l()\fR function
 is Uncommitted.
 .SH SEE ALSO
 .LP
-\fBmblen\fR(3C),
-\fBmbstowcs\fR(3C),
-\fBmbtowc\fR(3C),
-\fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C),
-\fBuselocale\fR(3C),
-\fBwcstombs\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR mblen (3C),
+.BR mbstowcs (3C),
+.BR mbtowc (3C),
+.BR newlocale (3C),
+.BR setlocale (3C),
+.BR uselocale (3C),
+.BR wcstombs (3C),
+.BR attributes (7),
+.BR standards (7)

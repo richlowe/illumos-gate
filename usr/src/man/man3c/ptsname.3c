@@ -94,12 +94,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBopen\fR(2),
-\fBgrantpt\fR(3C),
-\fBttyname\fR(3C),
-\fBunlockpt\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR open (2),
+.BR grantpt (3C),
+.BR ttyname (3C),
+.BR unlockpt (3C),
+.BR attributes (7),
+.BR standards (7)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

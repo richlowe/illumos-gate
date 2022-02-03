@@ -42,4 +42,4 @@ Interface Stability	Stable
 .sp
 .LP
 \fBconsadm\fR(8), \fBsyslogd\fR(8) , \fBconsole\fR(4D),
-\fBattributes\fR(7)
+.BR attributes (7)

@@ -112,12 +112,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpriocntl\fR(1),
-\fBexec\fR(2),
-\fBfork\fR(2),
-\fBpriocntl\fR(2),
-\fBattributes\fR(7),
-\fBthreads\fR(7)
+.BR priocntl (1),
+.BR exec (2),
+.BR fork (2),
+.BR priocntl (2),
+.BR attributes (7),
+.BR threads (7)
 .SH NOTES
 .sp
 .LP

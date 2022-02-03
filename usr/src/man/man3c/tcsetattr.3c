@@ -216,8 +216,8 @@ MT-Level	MT-Safe, and Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgetispeed\fR(3C),
-\fBtcgetattr\fR(3C),
-\fBtermio\fR(4I),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR cfgetispeed (3C),
+.BR tcgetattr (3C),
+.BR termio (4I),
+.BR attributes (7),
+.BR standards (7)

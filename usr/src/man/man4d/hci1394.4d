@@ -55,8 +55,8 @@ Interface Stability	Unstable
 .TE
 
 .SH SEE ALSO
-\fBieee1394\fR(4D),
-\fBattributes\fR(7)
+.BR ieee1394 (4D),
+.BR attributes (7)
 .sp
 .LP
 \fIIEEE 1394 - IEEE Standard for a High Performance Serial Bus\fR

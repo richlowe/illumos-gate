@@ -32,9 +32,9 @@ Interface Stability 	Private
 
 .SH SEE ALSO
 .LP
-\fBlibdtrace\fR(3LIB),
-\fBattributes\fR(7),
-\fBdtrace\fR(8)
+.BR libdtrace (3LIB),
+.BR attributes (7),
+.BR dtrace (8)
 .sp
 .LP
 \fIDynamic Tracing Guide\fR:

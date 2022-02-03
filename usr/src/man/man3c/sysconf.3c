@@ -506,14 +506,14 @@ Standard	See \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
-\fBfpathconf\fR(2),
-\fBseteuid\fR(2),
-\fBsetrlimit\fR(2),
-\fBconfstr\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7),
-\fBpooladm\fR(8),
-\fBzoneadm\fR(8)
+.BR fpathconf (2),
+.BR seteuid (2),
+.BR setrlimit (2),
+.BR confstr (3C),
+.BR attributes (7),
+.BR standards (7),
+.BR pooladm (8),
+.BR zoneadm (8)
 .SH NOTES
 A call to \fBsetrlimit()\fR can cause the value of \fBOPEN_MAX\fR to change.
 .sp

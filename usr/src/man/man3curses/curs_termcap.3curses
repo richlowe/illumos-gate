@@ -99,10 +99,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBputc\fR(3C),
-\fBcurs_terminfo\fR(3CURSES),
-\fBcurses\fR(3CURSES),
-\fBattributes\fR(7)
+.BR putc (3C),
+.BR curs_terminfo (3CURSES),
+.BR curses (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

@@ -375,5 +375,5 @@ MT Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBopen\fR(2),
-\fBattributes\fR(7)
+.BR open (2),
+.BR attributes (7)

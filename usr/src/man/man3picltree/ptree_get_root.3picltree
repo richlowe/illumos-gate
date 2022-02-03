@@ -65,6 +65,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpicltree\fR(3PICLTREE),
-\fBptree_create_node\fR(3PICLTREE),
-\fBattributes\fR(7)
+.BR libpicltree (3PICLTREE),
+.BR ptree_create_node (3PICLTREE),
+.BR attributes (7)

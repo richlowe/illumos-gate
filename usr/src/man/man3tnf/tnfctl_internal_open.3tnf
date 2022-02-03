@@ -87,14 +87,14 @@ MT Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBld\fR(1),
-\fBprex\fR(1),
-\fBdlclose\fR(3C),
-\fBdlopen\fR(3C),
-\fBTNF_PROBE\fR(3TNF),
-\fBlibtnfctl\fR(3TNF),
-\fBtracing\fR(3TNF),
-\fBattributes\fR(7)
+.BR ld (1),
+.BR prex (1),
+.BR dlclose (3C),
+.BR dlopen (3C),
+.BR TNF_PROBE (3TNF),
+.BR libtnfctl (3TNF),
+.BR tracing (3TNF),
+.BR attributes (7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

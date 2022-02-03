@@ -124,11 +124,11 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBfopen\fR(3C),
-\fBfsetpos\fR(3C),
-\fBftell\fR(3C),
-\fBrewind\fR(3C),
-\fBungetc\fR(3C),
-\fBattributes\fR(7),
-\fBlf64\fR(7),
-\fBstandards\fR(7)
+.BR fopen (3C),
+.BR fsetpos (3C),
+.BR ftell (3C),
+.BR rewind (3C),
+.BR ungetc (3C),
+.BR attributes (7),
+.BR lf64 (7),
+.BR standards (7)

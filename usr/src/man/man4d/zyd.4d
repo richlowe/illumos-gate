@@ -71,11 +71,11 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBgld\fR(4D),
-\fBdlpi\fR(4P),
-\fBattributes\fR(7),
-\fBdladm\fR(8),
-\fBwificonfig\fR(8)
+.BR gld (4D),
+.BR dlpi (4P),
+.BR attributes (7),
+.BR dladm (8),
+.BR wificonfig (8)
 .sp
 .LP
 \fI802.11 - Wireless LAN  Media  Access Control and  Physical Layer

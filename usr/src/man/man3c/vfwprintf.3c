@@ -116,10 +116,10 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBfwprintf\fR(3C),
-\fBsetlocale\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR fwprintf (3C),
+.BR setlocale (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

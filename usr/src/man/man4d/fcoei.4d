@@ -54,11 +54,11 @@ Architecture	SPARC, x86
 .TE
 
 .SH SEE ALSO
-\fBfcoe\fR(4D),
-\fBfcoet\fR(4D),
-\fBfp\fR(4D),
-\fBdriver.conf\fR(5),
-\fBattributes\fR(7)
+.BR fcoe (4D),
+.BR fcoet (4D),
+.BR fp (4D),
+.BR driver.conf (5),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

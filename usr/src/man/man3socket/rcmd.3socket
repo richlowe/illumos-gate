@@ -168,12 +168,12 @@ should be called only from the main thread.
 .SH SEE ALSO
 .sp
 .LP
-\fBrlogin\fR(1),
-\fBrsh\fR(1),
-\fBIntro\fR(2),
-\fBgethostbyname\fR(3NSL),
-\fBgetaddrinfo\fR(3SOCKET),
-\fBrexec\fR(3SOCKET),
-\fBattributes\fR(7),
-\fBin.rexecd\fR(8),
-\fBin.rshd\fR(8)
+.BR rlogin (1),
+.BR rsh (1),
+.BR Intro (2),
+.BR gethostbyname (3NSL),
+.BR getaddrinfo (3SOCKET),
+.BR rexec (3SOCKET),
+.BR attributes (7),
+.BR in.rexecd (8),
+.BR in.rshd (8)

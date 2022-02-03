@@ -144,10 +144,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBshmctl\fR(2),
-\fBshmget\fR(2),
-\fBshmop\fR(2),
-\fBipc.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR shmctl (2),
+.BR shmget (2),
+.BR shmop (2),
+.BR ipc.h (3HEAD),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

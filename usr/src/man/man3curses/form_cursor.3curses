@@ -77,9 +77,9 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBcurses\fR(3CURSES),
-\fBforms\fR(3CURSES),
-\fBattributes\fR(7)
+.BR curses (3CURSES),
+.BR forms (3CURSES),
+.BR attributes (7)
 .SH NOTES
 .LP
 The header \fB<form.h>\fR automatically includes the headers  \fB<eti.h>\fR and

@@ -130,8 +130,8 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBsigaction\fR(2),
-\fBsigaddset\fR(3C),
-\fBsigemptyset\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR sigaction (2),
+.BR sigaddset (3C),
+.BR sigemptyset (3C),
+.BR attributes (7),
+.BR standards (7)

@@ -103,8 +103,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpicl_get_prop_by_name\fR(3PICL),
-\fBpicl_get_propinfo\fR(3PICL),
-\fBpicl_get_propval\fR(3PICL),
-\fBpicl_get_propval_by_name\fR(3PICL),
-\fBattributes\fR(7)
+.BR picl_get_prop_by_name (3PICL),
+.BR picl_get_propinfo (3PICL),
+.BR picl_get_propval (3PICL),
+.BR picl_get_propval_by_name (3PICL),
+.BR attributes (7)

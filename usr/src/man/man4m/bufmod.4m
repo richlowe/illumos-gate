@@ -292,8 +292,8 @@ final argument.
 .SH SEE ALSO
 .sp
 .LP
-\fBpfmod\fR(4M),
-\fBdlpi\fR(4P)
+.BR pfmod (4M),
+.BR dlpi (4P)
 .SH NOTES
 .sp
 .LP

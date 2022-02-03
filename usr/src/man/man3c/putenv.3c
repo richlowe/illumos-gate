@@ -122,12 +122,12 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBexec\fR(2),
-\fBgetenv\fR(3C),
-\fBmalloc\fR(3C),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR exec (2),
+.BR getenv (3C),
+.BR malloc (3C),
+.BR attributes (7),
+.BR environ (7),
+.BR standards (7)
 .SH WARNINGS
 .LP
 The \fIstring\fR argument should not be an automatic variable.  It should be

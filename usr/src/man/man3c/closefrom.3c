@@ -141,7 +141,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2),
-\fBgetrlimit\fR(2),
-\fBproc\fR(5),
-\fBattributes\fR(7)
+.BR close (2),
+.BR getrlimit (2),
+.BR proc (5),
+.BR attributes (7)

@@ -100,9 +100,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBlimits.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR read (2),
+.BR write (2),
+.BR limits.h (3HEAD),
+.BR types.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

@@ -205,18 +205,18 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBsocket.h\fR(3HEAD),
-\fBconnect\fR(3SOCKET),
-\fBgetsockopt\fR(3SOCKET),
-\fBsendmsg\fR(3SOCKET),
-\fBsendto\fR(3SOCKET),
-\fBsetsockopt\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBconnect\fR(3XNET),
-\fBgetsockopt\fR(3XNET),
-\fBsendmsg\fR(3XNET),
-\fBsendto\fR(3XNET),
-\fBsetsockopt\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR Intro (3),
+.BR socket.h (3HEAD),
+.BR connect (3SOCKET),
+.BR getsockopt (3SOCKET),
+.BR sendmsg (3SOCKET),
+.BR sendto (3SOCKET),
+.BR setsockopt (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR connect (3XNET),
+.BR getsockopt (3XNET),
+.BR sendmsg (3XNET),
+.BR sendto (3XNET),
+.BR setsockopt (3XNET),
+.BR attributes (7),
+.BR standards (7)

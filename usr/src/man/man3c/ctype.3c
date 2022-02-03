@@ -348,10 +348,10 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstdio\fR(3C),
-\fBuselocale\fR(3C),
-\fBascii\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR newlocale (3C),
+.BR setlocale (3C),
+.BR stdio (3C),
+.BR uselocale (3C),
+.BR ascii (7),
+.BR environ (7),
+.BR standards (7)

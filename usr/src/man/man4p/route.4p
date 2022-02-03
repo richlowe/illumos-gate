@@ -322,11 +322,11 @@ struct rt_metrics {
 
 .SH SEE ALSO
 .LP
-\fBioctl\fR(2),
-\fBsetsockopt\fR(3SOCKET),
-\fBshutdown\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBrouting\fR(4P)
+.BR ioctl (2),
+.BR setsockopt (3SOCKET),
+.BR shutdown (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR routing (4P)
 .SH NOTES
 .LP
 Some of the metrics might not be implemented and return zero. The implemented

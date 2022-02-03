@@ -253,9 +253,9 @@ For \fBmq_receive()\fR and \fBmq_timedreceive()\fR. see \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBmq_open\fR(3C),
-\fBmq_send\fR(3C),
-\fBmq_setattr\fR(3C),
-\fBmqueue.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR mq_open (3C),
+.BR mq_send (3C),
+.BR mq_setattr (3C),
+.BR mqueue.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)

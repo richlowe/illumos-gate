@@ -124,8 +124,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBopenprom\fR(4D),
-\fBattributes\fR(7)
+.BR openprom (4D),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

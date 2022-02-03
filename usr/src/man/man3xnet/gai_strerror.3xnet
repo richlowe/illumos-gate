@@ -181,7 +181,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetaddrinfo\fR(3XNET),
-\fBgetnameinfo\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR getaddrinfo (3XNET),
+.BR getnameinfo (3XNET),
+.BR attributes (7),
+.BR standards (7)

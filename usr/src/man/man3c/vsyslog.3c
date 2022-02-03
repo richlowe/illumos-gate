@@ -80,5 +80,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsyslog\fR(3C),
-\fBattributes\fR(7)
+.BR syslog (3C),
+.BR attributes (7)

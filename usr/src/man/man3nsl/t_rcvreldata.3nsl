@@ -226,12 +226,12 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBt_getinfo\fR(3NSL),
-\fBt_open\fR(3NSL),
-\fBt_rcvrel\fR(3NSL),
-\fBt_sndrel\fR(3NSL),
-\fBt_sndreldata\fR(3NSL),
-\fBattributes\fR(7)
+.BR t_getinfo (3NSL),
+.BR t_open (3NSL),
+.BR t_rcvrel (3NSL),
+.BR t_sndrel (3NSL),
+.BR t_sndreldata (3NSL),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

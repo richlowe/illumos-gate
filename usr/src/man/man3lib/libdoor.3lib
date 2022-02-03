@@ -82,9 +82,9 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBlibc\fR(3LIB),
-\fBattributes\fR(7)
+.BR Intro (3),
+.BR libc (3LIB),
+.BR attributes (7)
 .sp
 .LP
 Stevens, W. Richard. \fIUNIX Network Programming, Volume 2: Interprocess

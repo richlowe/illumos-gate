@@ -100,11 +100,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpasswd\fR(1),
-\fBcrypt\fR(3C),
-\fBcrypt_genhash_impl\fR(3C),
-\fBcrypt_gensalt\fR(3C),
-\fBgetpassphrase\fR(3C),
-\fBcrypt.conf\fR(5),
-\fBpasswd\fR(5),
-\fBattributes\fR(7)
+.BR passwd (1),
+.BR crypt (3C),
+.BR crypt_genhash_impl (3C),
+.BR crypt_gensalt (3C),
+.BR getpassphrase (3C),
+.BR crypt.conf (5),
+.BR passwd (5),
+.BR attributes (7)

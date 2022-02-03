@@ -283,15 +283,15 @@ T}
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(2),
-\fBIntro\fR(3),
-\fBbyteorder\fR(3C),
-\fBnetdb.h\fR(3HEAD),
-\fBnetdir\fR(3NSL),
-\fBnetconfig\fR(5),
-\fBnsswitch.conf\fR(5),
-\fBservices\fR(5),
-\fBattributes\fR(7)
+.BR Intro (2),
+.BR Intro (3),
+.BR byteorder (3C),
+.BR netdb.h (3HEAD),
+.BR netdir (3NSL),
+.BR netconfig (5),
+.BR nsswitch.conf (5),
+.BR services (5),
+.BR attributes (7)
 .SH WARNINGS
 .LP
 The reentrant interfaces \fBgetservbyname_r()\fR, \fBgetservbyport_r()\fR, and

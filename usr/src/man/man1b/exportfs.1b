@@ -79,8 +79,8 @@ individual options).
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7),
-\fBshare\fR(8),
-\fBshareall\fR(8),
-\fBunshare\fR(8),
-\fBunshareall\fR(8)
+.BR attributes (7),
+.BR share (8),
+.BR shareall (8),
+.BR unshare (8),
+.BR unshareall (8)

@@ -61,4 +61,4 @@ Interface stability	Unknown
 .SH SEE ALSO
 .sp
 .LP
-\fBfp\fR(4D)
+.BR fp (4D)

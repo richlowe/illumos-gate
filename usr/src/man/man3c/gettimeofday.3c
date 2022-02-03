@@ -121,10 +121,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBadjtime\fR(2),
-\fBctime\fR(3C),
-\fBgethrtime\fR(3C),
-\fBTIMEZONE\fR(5),
-\fBattributes\fR(7),
-\fBprivileges\fR(7),
-\fBstandards\fR(7)
+.BR adjtime (2),
+.BR ctime (3C),
+.BR gethrtime (3C),
+.BR TIMEZONE (5),
+.BR attributes (7),
+.BR privileges (7),
+.BR standards (7)

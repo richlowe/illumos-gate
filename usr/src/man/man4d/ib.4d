@@ -226,13 +226,13 @@ Interface Stability	Consolidation Private
 .SH SEE ALSO
 .sp
 .LP
-\fBibcm\fR(4D),
-\fBibdm\fR(4D),
-\fBibtl\fR(4D),
-\fBdriver.conf\fR(5),
-\fBib\fR(5),
-\fBattributes\fR(7),
-\fBcfgadm_ib\fR(8)
+.BR ibcm (4D),
+.BR ibdm (4D),
+.BR ibtl (4D),
+.BR driver.conf (5),
+.BR ib (5),
+.BR attributes (7),
+.BR cfgadm_ib (8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

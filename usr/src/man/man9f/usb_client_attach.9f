@@ -222,7 +222,7 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBattach\fR(9E),
-\fBdetach\fR(9E),
-\fBusb_get_dev_data\fR(9F)
+.BR attributes (7),
+.BR attach (9E),
+.BR detach (9E),
+.BR usb_get_dev_data (9F)

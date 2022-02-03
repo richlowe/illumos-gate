@@ -87,7 +87,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpoll\fR(2),
-\fBrsm_intr_signal_post\fR(3RSM),
-\fBrsm_intr_signal_wait_pollfd\fR(3RSM),
-\fBattributes\fR(7)
+.BR poll (2),
+.BR rsm_intr_signal_post (3RSM),
+.BR rsm_intr_signal_wait_pollfd (3RSM),
+.BR attributes (7)

@@ -50,11 +50,11 @@ Architecture	SMBus-based SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBkbd\fR(1),
-\fBbbc_beep\fR(4D),
-\fBkb\fR(4M),
-\fBusbkbm\fR(4M),
-\fBattributes\fR(7)
+.BR kbd (1),
+.BR bbc_beep (4D),
+.BR kb (4M),
+.BR usbkbm (4M),
+.BR attributes (7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

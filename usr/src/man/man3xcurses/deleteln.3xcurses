@@ -70,9 +70,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBbkgdset\fR(3XCURSES),
-\fBinsdelln\fR(3XCURSES),
-\fBinsertln\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR bkgdset (3XCURSES),
+.BR insdelln (3XCURSES),
+.BR insertln (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

@@ -313,18 +313,18 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2),
-\fBexit\fR(2),
-\fBumask\fR(2),
-\fBmq_close\fR(3C),
-\fBmq_receive\fR(3C),
-\fBmq_send\fR(3C),
-\fBmq_setattr\fR(3C),
-\fBmq_unlink\fR(3C),
-\fBsysconf\fR(3C),
-\fBmqueue.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR exec (2),
+.BR exit (2),
+.BR umask (2),
+.BR mq_close (3C),
+.BR mq_receive (3C),
+.BR mq_send (3C),
+.BR mq_setattr (3C),
+.BR mq_unlink (3C),
+.BR sysconf (3C),
+.BR mqueue.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

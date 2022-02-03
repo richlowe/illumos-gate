@@ -107,13 +107,13 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2),
-\fBgetzoneidbyname\fR(3C),
-\fBgetzonenamebyid\fR(3C),
-\fBlibtsol\fR(3LIB),
-\fBm_label_free\fR(3TSOL),
-\fBattributes\fR(7),
-\fBlabels\fR(7)
+.BR Intro (2),
+.BR getzoneidbyname (3C),
+.BR getzonenamebyid (3C),
+.BR libtsol (3LIB),
+.BR m_label_free (3TSOL),
+.BR attributes (7),
+.BR labels (7)
 .SH NOTES
 .sp
 .LP

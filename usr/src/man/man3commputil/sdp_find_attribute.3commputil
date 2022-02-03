@@ -79,6 +79,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsdp_parse\fR(3COMMPUTIL),
-\fBlibcommputil\fR(3LIB),
-\fBattributes\fR(7)
+.BR sdp_parse (3COMMPUTIL),
+.BR libcommputil (3LIB),
+.BR attributes (7)

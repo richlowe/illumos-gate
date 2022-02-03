@@ -248,10 +248,10 @@ For invalid expressions.
 .SH SEE ALSO
 .sp
 .LP
-\fBsh\fR(1),
-\fBtest\fR(1),
-\fBattributes\fR(7),
-\fBregexp\fR(7)
+.BR sh (1),
+.BR test (1),
+.BR attributes (7),
+.BR regexp (7)
 .SH DIAGNOSTICS
 .sp
 .ne 2

@@ -81,14 +81,14 @@ Configuration file. (Contains no user-configurable options).
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7),
-\fBprtconf\fR(8),
-\fBscsi_hba_attach\fR(9F),
-\fBscsi_sync_pkt\fR(9F),
-\fBscsi_transport\fR(9F),
-\fBscsi_device\fR(9S),
-\fBscsi_inquiry\fR(9S),
-\fBscsi_pkt\fR(9S)
+.BR attributes (7),
+.BR prtconf (8),
+.BR scsi_hba_attach (9F),
+.BR scsi_sync_pkt (9F),
+.BR scsi_transport (9F),
+.BR scsi_device (9S),
+.BR scsi_inquiry (9S),
+.BR scsi_pkt (9S)
 .sp
 .LP
 \fISmall Computer System Interface-2 (SCSI-2)\fR

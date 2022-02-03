@@ -75,11 +75,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBddi_dma_mem_alloc\fR(9F),
-\fBddi_fm_acc_err_get\fR(9F),
-\fBddi_fm_dma_err_get\fR(9F),
-\fBddi_regs_map_setup\fR(9F)
+.BR attributes (7),
+.BR ddi_dma_mem_alloc (9F),
+.BR ddi_fm_acc_err_get (9F),
+.BR ddi_fm_dma_err_get (9F),
+.BR ddi_regs_map_setup (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

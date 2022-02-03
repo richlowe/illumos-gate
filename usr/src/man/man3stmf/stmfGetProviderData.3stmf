@@ -95,10 +95,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibstmf\fR(3LIB),
-\fBnvlist_free\fR(3NVPAIR),
-\fBstmfGetProviderDataProt\fR(3STMF),
-\fBattributes\fR(7)
+.BR libstmf (3LIB),
+.BR nvlist_free (3NVPAIR),
+.BR stmfGetProviderDataProt (3STMF),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

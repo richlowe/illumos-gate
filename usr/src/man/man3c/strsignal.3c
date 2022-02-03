@@ -50,8 +50,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgettext\fR(3C),
-\fBpsignal\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstr2sig\fR(3C),
-\fBattributes\fR(7)
+.BR gettext (3C),
+.BR psignal (3C),
+.BR setlocale (3C),
+.BR str2sig (3C),
+.BR attributes (7)

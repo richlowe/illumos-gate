@@ -195,14 +195,14 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBselect\fR(3C),
-\fBgetsockopt\fR(3XNET),
-\fBrecv\fR(3XNET),
-\fBrecvfrom\fR(3XNET),
-\fBrecvmsg\fR(3XNET),
-\fBsend\fR(3XNET),
-\fBsendto\fR(3XNET),
-\fBsetsockopt\fR(3XNET),
-\fBsocket\fR(3XNET),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR select (3C),
+.BR getsockopt (3XNET),
+.BR recv (3XNET),
+.BR recvfrom (3XNET),
+.BR recvmsg (3XNET),
+.BR send (3XNET),
+.BR sendto (3XNET),
+.BR setsockopt (3XNET),
+.BR socket (3XNET),
+.BR attributes (7),
+.BR standards (7)

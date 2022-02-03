@@ -289,17 +289,17 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2),
-\fBdup\fR(2),
-\fBexec\fR(2),
-\fBfcntl\fR(2),
-\fBmmap\fR(2),
-\fBumask\fR(2),
-\fBshm_unlink\fR(3C),
-\fBsysconf\fR(3C),
-\fBfcntl.h\fR(3HEAD),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR close (2),
+.BR dup (2),
+.BR exec (2),
+.BR fcntl (2),
+.BR mmap (2),
+.BR umask (2),
+.BR shm_unlink (3C),
+.BR sysconf (3C),
+.BR fcntl.h (3HEAD),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

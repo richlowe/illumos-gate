@@ -65,14 +65,14 @@ Architecture	x86
 
 .SH SEE ALSO
 .LP
-\fBahci\fR(4D),
-\fBnv_sata\fR(4D),
-\fBsd\fR(4D),
-\fBsi3124\fR(4D),
-\fBattributes\fR(7),
-\fBcfgadm\fR(8),
-\fBcfgadm_sata\fR(8),
-\fBprtconf\fR(8)
+.BR ahci (4D),
+.BR nv_sata (4D),
+.BR sd (4D),
+.BR si3124 (4D),
+.BR attributes (7),
+.BR cfgadm (8),
+.BR cfgadm_sata (8),
+.BR prtconf (8)
 .sp
 .LP
 \fISerial ATA 1.0a Specification\fR \(em Serial ATA International Organization.

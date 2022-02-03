@@ -179,6 +179,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7),
-\fBfmd\fR(8),
-\fBddi_fm_service_impact\fR(9F)
+.BR attributes (7),
+.BR fmd (8),
+.BR ddi_fm_service_impact (9F)

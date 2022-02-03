@@ -68,8 +68,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcrypt\fR(1),
-\fBIntro\fR(3),
-\fBencrypt\fR(3C),
-\fBsetkey\fR(3C),
-\fBattributes\fR(7)
+.BR crypt (1),
+.BR Intro (3),
+.BR encrypt (3C),
+.BR setkey (3C),
+.BR attributes (7)

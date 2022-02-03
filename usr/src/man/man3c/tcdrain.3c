@@ -137,7 +137,7 @@ MT-Level	MT-Safe, and Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBtcflush\fR(3C),
-\fBtermio\fR(4I),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR tcflush (3C),
+.BR termio (4I),
+.BR attributes (7),
+.BR standards (7)

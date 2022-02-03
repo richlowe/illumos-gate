@@ -148,21 +148,21 @@ similarly passed upstream. All other \fBICMP6\fR messages are ignored.
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2),
-\fBwrite\fR(2),
-\fBbind\fR(3SOCKET),
-\fBconnect\fR(3SOCKET),
-\fBrecv\fR(3SOCKET),
-\fBsend\fR(3SOCKET),
-\fBicmp\fR(4P),
-\fBicmp6\fR(4P),
-\fBinet\fR(4P),
-\fBinet6\fR(4P),
-\fBip\fR(4P),
-\fBip6\fR(4P),
-\fBipsec\fR(4P),
-\fBpf_key\fR(4P),
-\fBtcp\fR(4P)
+.BR read (2),
+.BR write (2),
+.BR bind (3SOCKET),
+.BR connect (3SOCKET),
+.BR recv (3SOCKET),
+.BR send (3SOCKET),
+.BR icmp (4P),
+.BR icmp6 (4P),
+.BR inet (4P),
+.BR inet6 (4P),
+.BR ip (4P),
+.BR ip6 (4P),
+.BR ipsec (4P),
+.BR pf_key (4P),
+.BR tcp (4P)
 .sp
 .LP
 Postel, Jon, \fIRFC 768, User Datagram Protocol\fR, Network Information Center,

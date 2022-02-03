@@ -78,11 +78,11 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBib\fR(4D),
-\fBibdma\fR(4D),
-\fBibtl\fR(4D),
-\fBattributes\fR(7),
-\fBstmfadm\fR(8)
+.BR ib (4D),
+.BR ibdma (4D),
+.BR ibtl (4D),
+.BR attributes (7),
+.BR stmfadm (8)
 .sp
 .LP
 \fICOMSTAR Administration Guide\fR

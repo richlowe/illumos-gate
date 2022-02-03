@@ -162,20 +162,20 @@ MT-Level	MT-Safe with exceptions
 .sp
 .LP
 \fBlocale\fR(1), \fBctype\fR(3C), \fBgetdate\fR(3C) \fBgettext\fR(3C),
-\fBgettxt\fR(3C),
-\fBisdigit\fR(3C),
-\fBlibc\fR(3LIB),
-\fBlocaleconv\fR(3C),
-\fBmbtowc\fR(3C),
-\fBstrcoll\fR(3C),
-\fBstrftime\fR(3C),
-\fBstrptime\fR(3C)
+.BR gettxt (3C),
+.BR isdigit (3C),
+.BR libc (3LIB),
+.BR localeconv (3C),
+.BR mbtowc (3C),
+.BR strcoll (3C),
+.BR strftime (3C),
+.BR strptime (3C)
 \fBstrxfrm\fR(3C) \fBtolower\fR(3C),
-\fBwctomb\fR(3C),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBlocale\fR(7),
-\fBstandards\fR(7)
+.BR wctomb (3C),
+.BR attributes (7),
+.BR environ (7),
+.BR locale (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

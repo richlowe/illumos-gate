@@ -302,5 +302,5 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibdat\fR(3LIB),
-\fBattributes\fR(7)
+.BR libdat (3LIB),
+.BR attributes (7)

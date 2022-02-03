@@ -54,6 +54,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetpwnam\fR(3C),
-\fBputspent\fR(3C),
-\fBattributes\fR(7)
+.BR getpwnam (3C),
+.BR putspent (3C),
+.BR attributes (7)

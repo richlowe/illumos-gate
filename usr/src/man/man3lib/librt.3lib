@@ -138,8 +138,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1),
-\fBIntro\fR(3),
-\fBlibc\fR(3LIB),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pvs (1),
+.BR Intro (3),
+.BR libc (3LIB),
+.BR attributes (7),
+.BR standards (7)

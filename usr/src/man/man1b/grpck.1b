@@ -24,10 +24,10 @@ any errors; it checks the \fB/etc/group\fR file by default.
 .SH SEE ALSO
 .sp
 .LP
-\fBgroups\fR(1),
-\fBgroup\fR(5),
-\fBpasswd\fR(5),
-\fBattributes\fR(7)
+.BR groups (1),
+.BR group (5),
+.BR passwd (5),
+.BR attributes (7)
 .SH DIAGNOSTICS
 .sp
 .ne 2

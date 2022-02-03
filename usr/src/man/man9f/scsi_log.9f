@@ -96,10 +96,10 @@ All formatting conversions in use by \fBcmn_err()\fR also work with
 The \fBscsi_log()\fR function may be called from user, interrupt, or kernel
 context.
 .SH SEE ALSO
-\fBsd\fR(4D),
-\fBkernel\fR(8),
-\fBcmn_err\fR(9F),
-\fBscsi_errmsg\fR(9F)
+.BR sd (4D),
+.BR kernel (8),
+.BR cmn_err (9F),
+.BR scsi_errmsg (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

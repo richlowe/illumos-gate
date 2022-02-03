@@ -389,11 +389,11 @@ T}	Committed
 
 .SH SEE ALSO
 .LP
-\fBlibdlpi\fR(3LIB),
-\fBgld\fR(4D),
-\fBip\fR(4P),
-\fBdladm\fR(8),
-\fBsnoop\fR(8)
+.BR libdlpi (3LIB),
+.BR gld (4D),
+.BR ip (4P),
+.BR dladm (8),
+.BR snoop (8)
 .SH NOTES
 .LP
 A Solaris DLPI link name consists of a \fBDLPI provider name\fR followed by a

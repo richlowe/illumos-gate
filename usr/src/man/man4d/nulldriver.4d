@@ -19,7 +19,7 @@ expected. For example, \fBprtconf\fR(8) might capture a nexus driver with a
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(8),
-\fBattach\fR(9E),
-\fBdetach\fR(9E),
-\fBprobe\fR(9E)
+.BR prtconf (8),
+.BR attach (9E),
+.BR detach (9E),
+.BR probe (9E)

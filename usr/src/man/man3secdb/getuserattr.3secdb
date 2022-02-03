@@ -148,9 +148,9 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetauthattr\fR(3SECDB),
-\fBgetexecattr\fR(3SECDB),
-\fBgetprofattr\fR(3SECDB),
-\fBkva_match\fR(3SECDB),
-\fBuser_attr\fR(5),
-\fBattributes\fR(7)
+.BR getauthattr (3SECDB),
+.BR getexecattr (3SECDB),
+.BR getprofattr (3SECDB),
+.BR kva_match (3SECDB),
+.BR user_attr (5),
+.BR attributes (7)

@@ -122,11 +122,11 @@ increases to 9, more detailed debugging information is given.
 .SH SEE ALSO
 .sp
 .LP
-\fBlogin\fR(1),
-\fBcu\fR(1C),
-\fBuucp\fR(1C),
-\fBattributes\fR(7),
-\fBttymon\fR(8)
+.BR login (1),
+.BR cu (1C),
+.BR uucp (1C),
+.BR attributes (7),
+.BR ttymon (8)
 .SH NOTES
 .sp
 .LP

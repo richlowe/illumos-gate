@@ -220,17 +220,17 @@ multithreaded application uses its own \fBPAM\fR handle.
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpam\fR(3LIB),
-\fBpam\fR(3PAM),
-\fBpam_acct_mgmt\fR(3PAM),
-\fBpam_authenticate\fR(3PAM),
-\fBpam_chauthtok\fR(3PAM),
-\fBpam_get_user\fR(3PAM),
-\fBpam_open_session\fR(3PAM),
-\fBpam_setcred\fR(3PAM),
-\fBpam_start\fR(3PAM),
-\fBattributes\fR(7),
-\fBpam_unix_cred\fR(7)
+.BR libpam (3LIB),
+.BR pam (3PAM),
+.BR pam_acct_mgmt (3PAM),
+.BR pam_authenticate (3PAM),
+.BR pam_chauthtok (3PAM),
+.BR pam_get_user (3PAM),
+.BR pam_open_session (3PAM),
+.BR pam_setcred (3PAM),
+.BR pam_start (3PAM),
+.BR attributes (7),
+.BR pam_unix_cred (7)
 .SH NOTES
 .sp
 .LP

@@ -837,11 +837,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBctype\fR(3C),
-\fBmktime\fR(3C),
-\fBsetlocale\fR(3C),
-\fBstrftime\fR(3C),
-\fBstrptime\fR(3C),
-\fBattributes\fR(7),
-\fBenviron\fR(7),
-\fBstandards\fR(7)
+.BR ctype (3C),
+.BR mktime (3C),
+.BR setlocale (3C),
+.BR strftime (3C),
+.BR strptime (3C),
+.BR attributes (7),
+.BR environ (7),
+.BR standards (7)

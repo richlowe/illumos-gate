@@ -299,13 +299,13 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_mutex_consistent\fR(3C),
-\fBpthread_mutex_init\fR(3C),
-\fBpthread_mutexattr_setprotocol\fR(3C),
-\fBpthread_mutexattr_setrobust\fR(3C),
-\fBpthread_mutexattr_settype\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR pthread_mutex_consistent (3C),
+.BR pthread_mutex_init (3C),
+.BR pthread_mutexattr_setprotocol (3C),
+.BR pthread_mutexattr_setrobust (3C),
+.BR pthread_mutexattr_settype (3C),
+.BR attributes (7),
+.BR standards (7)
 .SH NOTES
 .sp
 .LP

@@ -101,10 +101,10 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibMPAPI\fR(3LIB),
-\fBMP_GetPluginOidList\fR(3MPAPI),
-\fBMP_GetProprietaryLoadBalanceProperties\fR(3MPAPI),
-\fBattributes\fR(7)
+.BR libMPAPI (3LIB),
+.BR MP_GetPluginOidList (3MPAPI),
+.BR MP_GetProprietaryLoadBalanceProperties (3MPAPI),
+.BR attributes (7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

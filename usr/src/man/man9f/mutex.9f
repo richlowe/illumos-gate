@@ -173,15 +173,15 @@ xxstart(struct xxunit *un)
 .in -2
 
 .SH SEE ALSO
-\fBlockstat\fR(8),
-\fBIntro\fR(9F),
-\fBcondvar\fR(9F),
-\fBddi_intr_add_handler\fR(9F),
-\fBddi_intr_alloc\fR(9F),
-\fBddi_intr_get_pri\fR(9F),
-\fBddi_intr_get_softint_pri\fR(9F),
-\fBrwlock\fR(9F),
-\fBsemaphore\fR(9F)
+.BR lockstat (8),
+.BR Intro (9F),
+.BR condvar (9F),
+.BR ddi_intr_add_handler (9F),
+.BR ddi_intr_alloc (9F),
+.BR ddi_intr_get_pri (9F),
+.BR ddi_intr_get_softint_pri (9F),
+.BR rwlock (9F),
+.BR semaphore (9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

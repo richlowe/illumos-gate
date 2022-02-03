@@ -124,10 +124,10 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBsemctl\fR(2),
-\fBsemget\fR(2),
-\fBsemop\fR(2),
-\fBsem_post\fR(3C),
-\fBsem_wait\fR(3C),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR semctl (2),
+.BR semget (2),
+.BR semop (2),
+.BR sem_post (3C),
+.BR sem_wait (3C),
+.BR attributes (7),
+.BR standards (7)

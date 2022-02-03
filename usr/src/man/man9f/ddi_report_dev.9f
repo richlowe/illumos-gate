@@ -36,8 +36,8 @@ system was booted with the verbose (\fB-v\fR) argument.
 .SH CONTEXT
 \fBddi_report_dev()\fR can be called from user context.
 .SH SEE ALSO
-\fBdmesg\fR(8),
-\fBkernel\fR(8)
+.BR dmesg (8),
+.BR kernel (8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

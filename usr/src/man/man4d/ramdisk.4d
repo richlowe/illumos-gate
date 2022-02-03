@@ -178,14 +178,14 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBdkio\fR(4I),
-\fBdriver.conf\fR(5),
-\fBfilesystem\fR(7),
-\fBfsck\fR(8),
-\fBfstyp\fR(8),
-\fBmount\fR(8),
-\fBnewfs\fR(8),
-\fBramdiskadm\fR(8)
+.BR dkio (4I),
+.BR driver.conf (5),
+.BR filesystem (7),
+.BR fsck (8),
+.BR fstyp (8),
+.BR mount (8),
+.BR newfs (8),
+.BR ramdiskadm (8)
 .SH NOTES
 .sp
 .LP

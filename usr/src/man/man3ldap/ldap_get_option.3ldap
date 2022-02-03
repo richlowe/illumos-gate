@@ -545,9 +545,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBldap_init\fR(3LDAP),
-\fBsasl_setprop\fR(3SASL),
-\fBattributes\fR(7)
+.BR ldap_init (3LDAP),
+.BR sasl_setprop (3SASL),
+.BR attributes (7)
 .SH NOTES
 .sp
 .LP

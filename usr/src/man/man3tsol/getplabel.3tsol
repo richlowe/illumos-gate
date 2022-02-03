@@ -64,11 +64,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBucred_getlabel\fR(3C),
-\fBlibtsol\fR(3LIB),
-\fBm_label_alloc\fR(3TSOL),
-\fBm_label_free\fR(3TSOL),
-\fBattributes\fR(7)
+.BR ucred_getlabel (3C),
+.BR libtsol (3LIB),
+.BR m_label_alloc (3TSOL),
+.BR m_label_free (3TSOL),
+.BR attributes (7)
 .sp
 .LP
 \fIObtaining a Process Label\fR in \fISolaris Trusted Extensions Developer\&'s

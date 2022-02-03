@@ -280,9 +280,9 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBopen\fR(2),
-\fBwritev\fR(2),
-\fBsendfile\fR(3EXT),
-\fBlibsendfile\fR(3LIB),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7)
+.BR open (2),
+.BR writev (2),
+.BR sendfile (3EXT),
+.BR libsendfile (3LIB),
+.BR socket (3SOCKET),
+.BR attributes (7)

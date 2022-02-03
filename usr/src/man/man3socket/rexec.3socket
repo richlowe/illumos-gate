@@ -101,10 +101,10 @@ This interface is Unsafe in multithreaded applications. Unsafe interfaces
 should be called only from the main thread.
 .SH SEE ALSO
 .LP
-\fBhtonl\fR(3C),
-\fBgethostbyname\fR(3NSL),
-\fBgetaddrinfo\fR(3SOCKET),
-\fBgetservbyname\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7),
-\fBin.rexecd\fR(8)
+.BR htonl (3C),
+.BR gethostbyname (3NSL),
+.BR getaddrinfo (3SOCKET),
+.BR getservbyname (3SOCKET),
+.BR socket (3SOCKET),
+.BR attributes (7),
+.BR in.rexecd (8)

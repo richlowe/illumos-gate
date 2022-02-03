@@ -131,9 +131,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBpower.conf\fR(5),
-\fBattributes\fR(7),
-\fBpower\fR(9E)
+.BR power.conf (5),
+.BR attributes (7),
+.BR power (9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

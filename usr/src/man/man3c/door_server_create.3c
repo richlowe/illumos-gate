@@ -141,13 +141,13 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBdoor_bind\fR(3C),
-\fBdoor_call\fR(3C),
-\fBdoor_create\fR(3C),
-\fBdoor_return\fR(3C),
-\fBpthread_create\fR(3C),
-\fBpthread_setcancelstate\fR(3C),
-\fBthr_create\fR(3C),
-\fBattributes\fR(7),
-\fBcancellation\fR(7),
-\fBstandards\fR(7)
+.BR door_bind (3C),
+.BR door_call (3C),
+.BR door_create (3C),
+.BR door_return (3C),
+.BR pthread_create (3C),
+.BR pthread_setcancelstate (3C),
+.BR thr_create (3C),
+.BR attributes (7),
+.BR cancellation (7),
+.BR standards (7)

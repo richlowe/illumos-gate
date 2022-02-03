@@ -82,8 +82,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBattr_get\fR(3XCURSES),
-\fBattroff\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR attr_get (3XCURSES),
+.BR attroff (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

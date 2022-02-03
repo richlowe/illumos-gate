@@ -58,5 +58,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibcommputil\fR(3LIB),
-\fBattributes\fR(7)
+.BR libcommputil (3LIB),
+.BR attributes (7)

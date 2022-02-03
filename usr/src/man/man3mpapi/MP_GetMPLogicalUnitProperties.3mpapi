@@ -111,10 +111,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB),
-\fBMP_GetMPLuOidListFromTPG\fR(3MPAPI),
-\fBMP_GetMultipathLus\fR(3MPAPI),
-\fBattributes\fR(7)
+.BR libMPAPI (3LIB),
+.BR MP_GetMPLuOidListFromTPG (3MPAPI),
+.BR MP_GetMultipathLus (3MPAPI),
+.BR attributes (7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

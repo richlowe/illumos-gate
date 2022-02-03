@@ -94,5 +94,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcpow\fR(3M),
-\fBattributes\fR(7)
+.BR cpow (3M),
+.BR attributes (7)

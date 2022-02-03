@@ -211,10 +211,10 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBif_nametoindex\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET),
-\fBattributes\fR(7)
+.BR if_nametoindex (3SOCKET),
+.BR sockaddr (3SOCKET),
+.BR socket (3SOCKET),
+.BR attributes (7)
 .sp
 .LP
 RFC 3678

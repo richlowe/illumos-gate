@@ -298,10 +298,10 @@ MT-Level	See Description.
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3),
-\fBsysconf\fR(3C),
-\fBlibproject\fR(3LIB),
-\fBproject_walk\fR(3PROJECT),
-\fBnsswitch.conf\fR(5),
-\fBproject\fR(5),
-\fBattributes\fR(7)
+.BR Intro (3),
+.BR sysconf (3C),
+.BR libproject (3LIB),
+.BR project_walk (3PROJECT),
+.BR nsswitch.conf (5),
+.BR project (5),
+.BR attributes (7)

@@ -123,8 +123,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBmalloc\fR(3MALLOC),
-\fBattributes\fR(7)
+.BR malloc (3MALLOC),
+.BR attributes (7)
 .SH NOTES
 .LP
 The \fBlibsysevent\fR interfaces do not work at all in non-global zones.

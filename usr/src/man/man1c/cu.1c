@@ -699,17 +699,17 @@ lock file
 .SH SEE ALSO
 .sp
 .LP
-\fBcat\fR(1),
-\fBecho\fR(1),
-\fBstty\fR(1),
-\fBtip\fR(1),
-\fBuname\fR(1),
-\fBct\fR(1C),
-\fBuucp\fR(1C),
-\fBuuname\fR(1C),
-\fBremote\fR(5),
-\fBattributes\fR(7),
-\fBenviron\fR(7)
+.BR cat (1),
+.BR echo (1),
+.BR stty (1),
+.BR tip (1),
+.BR uname (1),
+.BR ct (1C),
+.BR uucp (1C),
+.BR uuname (1C),
+.BR remote (5),
+.BR attributes (7),
+.BR environ (7)
 .sp
 .LP
 \fISystem Administration Guide: IP Services\fR

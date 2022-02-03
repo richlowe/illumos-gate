@@ -153,8 +153,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBbkgrnd\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBsetcchar\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR bkgrnd (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR setcchar (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

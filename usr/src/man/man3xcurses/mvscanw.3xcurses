@@ -108,10 +108,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBscanf\fR(3C),
-\fBwcstombs\fR(3C),
-\fBgetnstr\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES),
-\fBprintw\fR(3XCURSES),
-\fBattributes\fR(7),
-\fBstandards\fR(7)
+.BR scanf (3C),
+.BR wcstombs (3C),
+.BR getnstr (3XCURSES),
+.BR libcurses (3XCURSES),
+.BR printw (3XCURSES),
+.BR attributes (7),
+.BR standards (7)

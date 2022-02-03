@@ -156,7 +156,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibmd5\fR(3LIB)
+.BR libmd5 (3LIB)
 .sp
 .LP
 Rivest, R., The MD5 Message-Digest Algorithm, RFC 1321, April 1992.

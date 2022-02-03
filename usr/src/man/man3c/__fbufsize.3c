@@ -170,10 +170,10 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBfgetc\fR(3C),
-\fBflockfile\fR(3C),
-\fBfputc\fR(3C),
-\fBfread\fR(3C),
-\fBfwrite\fR(3C),
-\fBstdio\fR(3C),
-\fBattributes\fR(7)
+.BR fgetc (3C),
+.BR flockfile (3C),
+.BR fputc (3C),
+.BR fread (3C),
+.BR fwrite (3C),
+.BR stdio (3C),
+.BR attributes (7)

@@ -171,12 +171,12 @@ are Unsafe. The equivalent functions \fBgetauevent_r()\fR,
 and an MT-Safe function call interface.
 .SH SEE ALSO
 .LP
-\fBgetauclassent\fR(3BSM),
-\fBgetpwnam\fR(3C),
-\fBaudit_class\fR(5),
-\fBaudit_event\fR(5),
-\fBpasswd\fR(5),
-\fBattributes\fR(7)
+.BR getauclassent (3BSM),
+.BR getpwnam (3C),
+.BR audit_class (5),
+.BR audit_event (5),
+.BR passwd (5),
+.BR attributes (7)
 .SH NOTES
 .LP
 All information for the \fBgetauevent()\fR, \fBgetauevnam()\fR, and

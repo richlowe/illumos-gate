@@ -150,7 +150,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetnetpath\fR(3NSL),
-\fBnetconfig\fR(5),
-\fBattributes\fR(7),
-\fBenviron\fR(7)
+.BR getnetpath (3NSL),
+.BR netconfig (5),
+.BR attributes (7),
+.BR environ (7)
