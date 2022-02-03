@@ -727,10 +727,20 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBfgetc\fR(3C), \fBfgets\fR(3C), \fBfgetwc\fR(3C), \fBfread\fR(3C),
-\fBisspace\fR(3C), \fBprintf\fR(3C), \fBsetlocale\fR(3C), \fBstrtod\fR(3C),
-\fBstrtol\fR(3C), \fBstrtoul\fR(3C), \fBwcrtomb\fR(3C), \fBungetc\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBfgetc\fR(3C),
+\fBfgets\fR(3C),
+\fBfgetwc\fR(3C),
+\fBfread\fR(3C),
+\fBisspace\fR(3C),
+\fBprintf\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstrtod\fR(3C),
+\fBstrtol\fR(3C),
+\fBstrtoul\fR(3C),
+\fBungetc\fR(3C),
+\fBwcrtomb\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

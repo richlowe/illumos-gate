@@ -283,8 +283,14 @@ Log configuration file.
 .SH SEE ALSO
 .sp
 .LP
-\fBstrace\fR(8), \fBstrerr\fR(8), \fBIntro\fR(3), \fBgetmsg\fR(2),
-\fBioctl\fR(2), \fBputmsg\fR(2), \fBwrite\fR(2), \fBprintf\fR(3C),
+\fBgetmsg\fR(2),
+\fBioctl\fR(2),
+\fBputmsg\fR(2),
+\fBwrite\fR(2),
+\fBIntro\fR(3),
+\fBprintf\fR(3C),
+\fBstrace\fR(8),
+\fBstrerr\fR(8),
 \fBstrlog\fR(9F)
 .sp
 .LP

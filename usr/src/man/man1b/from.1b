@@ -49,4 +49,7 @@ encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH SEE ALSO
 .sp
 .LP
-\fBbiff\fR(1B), \fBmail\fR(1B), \fBattributes\fR(7), \fBlargefile\fR(7)
+\fBbiff\fR(1B),
+\fBmail\fR(1B),
+\fBattributes\fR(7),
+\fBlargefile\fR(7)

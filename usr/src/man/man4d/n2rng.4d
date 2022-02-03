@@ -168,4 +168,6 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcryptoadm\fR(8), \fBkstat\fR(8), \fBattributes\fR(7)
+\fBattributes\fR(7),
+\fBcryptoadm\fR(8),
+\fBkstat\fR(8)

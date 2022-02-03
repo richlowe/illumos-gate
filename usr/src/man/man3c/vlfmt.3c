@@ -104,4 +104,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgettxt\fR(3C), \fBlfmt\fR(3C), \fBattributes\fR(7), \fBstdarg\fR(3EXT)
+\fBgettxt\fR(3C),
+\fBlfmt\fR(3C),
+\fBstdarg\fR(3EXT),
+\fBattributes\fR(7)

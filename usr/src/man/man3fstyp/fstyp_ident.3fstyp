@@ -83,5 +83,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfstyp_init\fR(3FSTYP), \fBfstyp_mod_init\fR(3FSTYP),
-\fBfstyp_strerror\fR(3FSTYP), \fBlibfstyp\fR(3LIB), \fBattributes\fR(7)
+\fBfstyp_init\fR(3FSTYP),
+\fBfstyp_mod_init\fR(3FSTYP),
+\fBfstyp_strerror\fR(3FSTYP),
+\fBlibfstyp\fR(3LIB),
+\fBattributes\fR(7)

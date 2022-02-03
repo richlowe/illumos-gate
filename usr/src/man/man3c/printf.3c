@@ -1084,11 +1084,27 @@ See \fBstandards\fR(7) for the standards conformance of \fBprintf()\fR,
 function is modeled on the one that appears in the FreeBSD, NetBSD, and GNU C
 libraries.
 .SH SEE ALSO
-\fBexit\fR(2), \fBlseek\fR(2), \fBwrite\fR(2), \fBabort\fR(3C), \fBecvt\fR(3C),
-\fBexit\fR(3C), \fBfclose\fR(3C), \fBfflush\fR(3C), \fBfputwc\fR(3C),
-\fBfree\fR(3C), \fBmalloc\fR(3C), \fBputc\fR(3C), \fBscanf\fR(3C),
-\fBsetlocale\fR(3C), \fBstdio\fR(3C), \fBvprintf\fR(3C), \fBwcstombs\fR(3C),
-\fBwctomb\fR(3C), \fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)
+\fBexit\fR(2),
+\fBlseek\fR(2),
+\fBwrite\fR(2),
+\fBabort\fR(3C),
+\fBecvt\fR(3C),
+\fBexit\fR(3C),
+\fBfclose\fR(3C),
+\fBfflush\fR(3C),
+\fBfputwc\fR(3C),
+\fBfree\fR(3C),
+\fBmalloc\fR(3C),
+\fBputc\fR(3C),
+\fBscanf\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstdio\fR(3C),
+\fBvprintf\fR(3C),
+\fBwcstombs\fR(3C),
+\fBwctomb\fR(3C),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 If the \fBj\fR length modifier is used, 32-bit applications that were compiled
 using \fBc89\fR on releases prior to Solaris 10 will experience undefined

@@ -207,8 +207,14 @@ Standard	See \fBstandards\fR(7).
 
 .SH SEE ALSO
 .LP
-\fBpthread_attr_init\fR(3C), \fBsched_getparam\fR(3C),
-\fBsched_get_priority_max\fR(3C), \fBsched_get_priority_max\fR(3C),
-\fBsched_get_priority_min\fR(3C), \fBsched_setparam\fR(3C),
-\fBsched_getscheduler\fR(3C), \fBsched_setscheduler\fR(3C),
-\fBattributes\fR(7), \fBpthreads\fR(7), \fBstandards\fR(7)
+\fBpthread_attr_init\fR(3C),
+\fBsched_get_priority_max\fR(3C),
+\fBsched_get_priority_max\fR(3C),
+\fBsched_get_priority_min\fR(3C),
+\fBsched_getparam\fR(3C),
+\fBsched_getscheduler\fR(3C),
+\fBsched_setparam\fR(3C),
+\fBsched_setscheduler\fR(3C),
+\fBattributes\fR(7),
+\fBpthreads\fR(7),
+\fBstandards\fR(7)

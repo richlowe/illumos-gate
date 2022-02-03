@@ -63,10 +63,19 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpsradm\fR(8), \fBpsrinfo\fR(8), \fBpsrset\fR(8), \fBp_online\fR(2),
-\fBprocessor_bind\fR(2), \fBprocessor_info\fR(2), \fBpset_assign\fR(2),
-\fBpset_bind\fR(2), \fBpset_info\fR(2), \fBmeminfo\fR(2),
-\fBlgrp_home\fR(3LGRP), \fBsysconf\fR(3C), \fBattributes\fR(7)
+\fBmeminfo\fR(2),
+\fBp_online\fR(2),
+\fBprocessor_bind\fR(2),
+\fBprocessor_info\fR(2),
+\fBpset_assign\fR(2),
+\fBpset_bind\fR(2),
+\fBpset_info\fR(2),
+\fBsysconf\fR(3C),
+\fBlgrp_home\fR(3LGRP),
+\fBattributes\fR(7),
+\fBpsradm\fR(8),
+\fBpsrinfo\fR(8),
+\fBpsrset\fR(8)
 .SH NOTES
 .sp
 .LP

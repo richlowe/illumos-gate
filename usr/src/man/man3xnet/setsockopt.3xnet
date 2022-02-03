@@ -375,5 +375,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbind\fR(3XNET), \fBendprotoent\fR(3XNET), \fBgetsockopt\fR(3XNET),
-\fBsocket\fR(3XNET), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBbind\fR(3XNET),
+\fBendprotoent\fR(3XNET),
+\fBgetsockopt\fR(3XNET),
+\fBsocket\fR(3XNET),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -178,8 +178,12 @@ allocated.
 .in -2
 
 .SH SEE ALSO
-\fBattach\fR(9E), \fBprobe\fR(9E), \fBscsi_slave\fR(9F),
-\fBscsi_unprobe\fR(9F), \fBscsi_unslave\fR(9F), \fBscsi_device\fR(9S),
+\fBattach\fR(9E),
+\fBprobe\fR(9E),
+\fBscsi_slave\fR(9F),
+\fBscsi_unprobe\fR(9F),
+\fBscsi_unslave\fR(9F),
+\fBscsi_device\fR(9S),
 \fBscsi_inquiry\fR(9S)
 .sp
 .LP

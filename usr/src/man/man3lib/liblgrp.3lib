@@ -83,9 +83,19 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3), \fBlgrp_affinity_get\fR(3LGRP), \fBlgrp_children\fR(3LGRP),
-\fBlgrp_cookie_stale\fR(3LGRP), \fBlgrp_cpus\fR(3LGRP), \fBlgrp_fini\fR(3LGRP),
-\fBlgrp_home\fR(3LGRP), \fBlgrp_init\fR(3LGRP), \fBlgrp_latency\fR(3LGRP),
-\fBlgrp_mem_size\fR(3LGRP), \fBlgrp_nlgrps\fR(3LGRP),
-\fBlgrp_parents\fR(3LGRP), \fBlgrp_root\fR(3LGRP), \fBlgrp_version\fR(3LGRP),
-\fBlgrp_view\fR(3LGRP), \fBattributes\fR(7)
+\fBIntro\fR(3),
+\fBlgrp_affinity_get\fR(3LGRP),
+\fBlgrp_children\fR(3LGRP),
+\fBlgrp_cookie_stale\fR(3LGRP),
+\fBlgrp_cpus\fR(3LGRP),
+\fBlgrp_fini\fR(3LGRP),
+\fBlgrp_home\fR(3LGRP),
+\fBlgrp_init\fR(3LGRP),
+\fBlgrp_latency\fR(3LGRP),
+\fBlgrp_mem_size\fR(3LGRP),
+\fBlgrp_nlgrps\fR(3LGRP),
+\fBlgrp_parents\fR(3LGRP),
+\fBlgrp_root\fR(3LGRP),
+\fBlgrp_version\fR(3LGRP),
+\fBlgrp_view\fR(3LGRP),
+\fBattributes\fR(7)

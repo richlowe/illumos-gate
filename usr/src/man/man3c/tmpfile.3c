@@ -164,5 +164,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBunlink\fR(2), \fBfopen\fR(3C), \fBmkstemp\fR(3C), \fBmktemp\fR(3C),
-\fBtmpnam\fR(3C), \fBlf64\fR(7), \fBstandards\fR(7)
+\fBunlink\fR(2),
+\fBfopen\fR(3C),
+\fBmkstemp\fR(3C),
+\fBmktemp\fR(3C),
+\fBtmpnam\fR(3C),
+\fBlf64\fR(7),
+\fBstandards\fR(7)

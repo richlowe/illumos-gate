@@ -220,7 +220,10 @@ MT-Level	See \fBNOTES\fR below.
 
 .SH SEE ALSO
 .LP
-\fBarc4random\fR(3C), \fBdrand48\fR(3C), \fBrand\fR(3C), \fBattributes\fR(7),
+\fBarc4random\fR(3C),
+\fBdrand48\fR(3C),
+\fBrand\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)
 .SH NOTES
 .LP

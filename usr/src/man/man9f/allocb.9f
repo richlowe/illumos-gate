@@ -195,8 +195,14 @@ the \fBputnext\fR(9F) function is used to send the message upstream, returning
 .SH SEE ALSO
 .sp
 .LP
-\fBRD\fR(9F), \fBbufcall\fR(9F), \fBesballoc\fR(9F), \fBesbbcall\fR(9F),
-\fBputnext\fR(9F), \fBtestb\fR(9F), \fBdatab\fR(9S), \fBmsgb\fR(9S)
+\fBRD\fR(9F),
+\fBbufcall\fR(9F),
+\fBesballoc\fR(9F),
+\fBesbbcall\fR(9F),
+\fBputnext\fR(9F),
+\fBtestb\fR(9F),
+\fBdatab\fR(9S),
+\fBmsgb\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

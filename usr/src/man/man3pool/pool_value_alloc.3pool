@@ -241,4 +241,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpool\fR(3LIB), \fBpool_error\fR(3POOL), \fBattributes\fR(7)
+\fBlibpool\fR(3LIB),
+\fBpool_error\fR(3POOL),
+\fBattributes\fR(7)

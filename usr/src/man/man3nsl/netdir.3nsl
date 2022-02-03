@@ -323,5 +323,8 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBgethostname\fR(3C), \fBgetnetconfig\fR(3NSL), \fBgetnetpath\fR(3NSL),
-\fBnetconfig\fR(5), \fBattributes\fR(7)
+\fBgethostname\fR(3C),
+\fBgetnetconfig\fR(3NSL),
+\fBgetnetpath\fR(3NSL),
+\fBnetconfig\fR(5),
+\fBattributes\fR(7)

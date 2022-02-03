@@ -302,6 +302,16 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(2), \fBalarm\fR(2), \fBchmod\fR(2), \fBclose\fR(2), \fBcreat\fR(2),
-\fBfcntl\fR(2), \fBmmap\fR(2), \fBopen\fR(2), \fBread\fR(2), \fBwrite\fR(2),
-\fBattributes\fR(7), \fBlf64\fR(7), \fBstandards\fR(7)
+\fBIntro\fR(2),
+\fBalarm\fR(2),
+\fBchmod\fR(2),
+\fBclose\fR(2),
+\fBcreat\fR(2),
+\fBfcntl\fR(2),
+\fBmmap\fR(2),
+\fBopen\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBattributes\fR(7),
+\fBlf64\fR(7),
+\fBstandards\fR(7)

@@ -395,4 +395,7 @@ System-wide default device driver properties
 .SH SEE ALSO
 .sp
 .LP
-\fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5), \fBdlpi\fR(4P)
+\fBdlpi\fR(4P),
+\fBdriver.conf\fR(5),
+\fBndd\fR(8),
+\fBnetstat\fR(8)

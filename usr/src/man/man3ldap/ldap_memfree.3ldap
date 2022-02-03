@@ -60,5 +60,8 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBldap\fR(3LDAP), \fBldap_first_attribute\fR(3LDAP), \fBldap_get_dn\fR(3LDAP),
-\fBldap_next_attribute\fR(3LDAP), \fBattributes\fR(7)
+\fBldap\fR(3LDAP),
+\fBldap_first_attribute\fR(3LDAP),
+\fBldap_get_dn\fR(3LDAP),
+\fBldap_next_attribute\fR(3LDAP),
+\fBattributes\fR(7)

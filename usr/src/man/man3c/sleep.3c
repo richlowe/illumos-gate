@@ -94,4 +94,6 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBnanosleep\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBnanosleep\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

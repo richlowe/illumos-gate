@@ -164,10 +164,17 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBputwchar\fR(3C), \fBclrtoeol\fR(3CURSES), \fBcurses\fR(3CURSES),
-\fBcurs_attr\fR(3CURSES), \fBcurs_inwch\fR(3CURSES),
-\fBcurs_outopts\fR(3CURSES), \fBrefresh\fR(3CURSES), \fBstandout\fR(3CURSES),
-\fBwinwch\fR(3CURSES), \fBwrefresh\fR(3CURSES), \fBattributes\fR(7)
+\fBputwchar\fR(3C),
+\fBclrtoeol\fR(3CURSES),
+\fBcurs_attr\fR(3CURSES),
+\fBcurs_inwch\fR(3CURSES),
+\fBcurs_outopts\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBrefresh\fR(3CURSES),
+\fBstandout\fR(3CURSES),
+\fBwinwch\fR(3CURSES),
+\fBwrefresh\fR(3CURSES),
+\fBattributes\fR(7)
 .SH NOTES
 The header file <\fBcurses.h\fR> automatically includes the header files
 <\fBstdio.h\fR>, <\fBunctrl.h\fR> and <\fBwidec.h\fR>.

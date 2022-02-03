@@ -552,7 +552,8 @@ xx_event(event_t event, int priority, event_callback_args_t *args)
 .in -2
 
 .SH SEE ALSO
-\fBcsx_Event2Text\fR(9F), \fBcsx_RegisterClient\fR(9F),
+\fBcsx_Event2Text\fR(9F),
+\fBcsx_RegisterClient\fR(9F),
 \fBcsx_RequestSocketMask\fR(9F)
 .sp
 .LP

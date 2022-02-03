@@ -312,5 +312,7 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBsasl_auxprop_getctx\fR(3SASL), \fBsasl_auxprop_request\fR(3SASL),
-\fBsasl_errors\fR(3SASL), \fBattributes\fR(7)
+\fBsasl_auxprop_getctx\fR(3SASL),
+\fBsasl_auxprop_request\fR(3SASL),
+\fBsasl_errors\fR(3SASL),
+\fBattributes\fR(7)

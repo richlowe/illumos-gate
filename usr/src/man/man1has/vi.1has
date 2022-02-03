@@ -1829,8 +1829,15 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(1), \fBctags\fR(1), \fBed\fR(1), \fBedit\fR(1), \fBex\fR(1),
-\fBattributes\fR(7), \fBenviron\fR(7), \fBlargefile\fR(7), \fBstandards\fR(7)
+\fBIntro\fR(1),
+\fBctags\fR(1),
+\fBed\fR(1),
+\fBedit\fR(1),
+\fBex\fR(1),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBlargefile\fR(7),
+\fBstandards\fR(7)
 .sp
 .LP
 \fISolaris Advanced User\&'s Guide\fR

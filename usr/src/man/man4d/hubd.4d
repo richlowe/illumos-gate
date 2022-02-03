@@ -72,7 +72,9 @@ Architecture	SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBcfgadm_usb\fR(8), \fBattributes\fR(7), \fBusba\fR(4D)
+\fBusba\fR(4D),
+\fBattributes\fR(7),
+\fBcfgadm_usb\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

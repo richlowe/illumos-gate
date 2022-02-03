@@ -134,7 +134,8 @@ functionality as the Unsafe functions, but have a slightly different function
 call interface to make them MT-Safe.
 .SH SEE ALSO
 .LP
-\fBaudit_class\fR(5), \fBaudit_event\fR(5),
+\fBaudit_class\fR(5),
+\fBaudit_event\fR(5),
 \fBattributes\fR(7)
 .SH NOTES
 .LP

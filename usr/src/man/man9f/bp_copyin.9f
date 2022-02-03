@@ -78,5 +78,8 @@ The \fBbp_copyin()\fR function can be called from user or kernel context only.
 .SH SEE ALSO
 .sp
 .LP
-\fBbp_copyout\fR(9F), \fBbp_mapin\fR(9F), \fBbp_mapout\fR(9F),
-\fBddi_copyout\fR(9F), \fBbuf\fR(9S)
+\fBbp_copyout\fR(9F),
+\fBbp_mapin\fR(9F),
+\fBbp_mapout\fR(9F),
+\fBddi_copyout\fR(9F),
+\fBbuf\fR(9S)

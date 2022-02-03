@@ -347,5 +347,9 @@ also read only.
 .SH SEE ALSO
 .sp
 .LP
-\fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5), \fBhme\fR(4D),
-\fBqfe\fR(4D), \fBdlpi\fR(4P)
+\fBhme\fR(4D),
+\fBqfe\fR(4D),
+\fBdlpi\fR(4P),
+\fBdriver.conf\fR(5),
+\fBndd\fR(8),
+\fBnetstat\fR(8)

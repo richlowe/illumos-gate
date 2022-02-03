@@ -151,8 +151,13 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBpm\fR(4D), \fBpm-components\fR(9P), \fBattach\fR(9E), \fBdetach\fR(9E),
-\fBpower\fR(9E), \fBpm_busy_component\fR(9F), \fBpm_idle_component\fR(9F)
+\fBpm\fR(4D),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
+\fBpower\fR(9E),
+\fBpm_busy_component\fR(9F),
+\fBpm_idle_component\fR(9F),
+\fBpm-components\fR(9P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

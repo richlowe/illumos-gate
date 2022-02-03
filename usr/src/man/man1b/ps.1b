@@ -389,8 +389,14 @@ the user block.
 
 .SH SEE ALSO
 .LP
-\fBkill\fR(1), \fBps\fR(1), \fBwhodo\fR(8), \fBgetpriority\fR(3C),
-\fBnice\fR(2), \fBproc\fR(5), \fBattributes\fR(7), \fBtermio\fR(4I)
+\fBkill\fR(1),
+\fBps\fR(1),
+\fBnice\fR(2),
+\fBgetpriority\fR(3C),
+\fBtermio\fR(4I),
+\fBproc\fR(5),
+\fBattributes\fR(7),
+\fBwhodo\fR(8)
 .SH NOTES
 .LP
 Things can change while \fBps\fR is running. The picture \fBps\fR gives is only

@@ -51,7 +51,9 @@ context.
 .SH SEE ALSO
 .sp
 .LP
-\fBbtop\fR(9F), \fBddi_btopr\fR(9F), \fBptob\fR(9F)
+\fBbtop\fR(9F),
+\fBddi_btopr\fR(9F),
+\fBptob\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

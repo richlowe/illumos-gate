@@ -1653,8 +1653,13 @@ Architecture	SPARC & x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBclose\fR(2), \fBpoll\fR(2), \fBread\fR(2),
-\fBwrite\fR(2), \fBaioread\fR(3C), \fBaiowrite\fR(3C), \fBusba\fR(4D),
+\fBclose\fR(2),
+\fBpoll\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBaioread\fR(3C),
+\fBaiowrite\fR(3C),
+\fBusba\fR(4D),
 \fBusb_dev_descr\fR(9S)
 .SH DIAGNOSTICS
 .LP

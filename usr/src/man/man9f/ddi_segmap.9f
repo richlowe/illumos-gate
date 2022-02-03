@@ -297,8 +297,13 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBattributes\fR(7), \fBdevmap\fR(9E), \fBmmap\fR(9E),
-\fBsegmap\fR(9E), \fBdevmap_setup\fR(9F), \fBcb_ops\fR(9S),
+\fBmmap\fR(2),
+\fBattributes\fR(7),
+\fBdevmap\fR(9E),
+\fBmmap\fR(9E),
+\fBsegmap\fR(9E),
+\fBdevmap_setup\fR(9F),
+\fBcb_ops\fR(9S),
 \fBddi_device_acc_attr\fR(9S)
 .sp
 .LP

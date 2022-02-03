@@ -404,5 +404,7 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibscf\fR(3LIB), \fBscf_entry_add_value\fR(3SCF), \fBscf_error\fR(3SCF),
+\fBlibscf\fR(3LIB),
+\fBscf_entry_add_value\fR(3SCF),
+\fBscf_error\fR(3SCF),
 \fBattributes\fR(7)

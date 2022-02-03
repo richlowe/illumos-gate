@@ -83,4 +83,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBraise\fR(3C), \fBsignal\fR(3C), \fBattributes\fR(7)
+\fBraise\fR(3C),
+\fBsignal\fR(3C),
+\fBattributes\fR(7)

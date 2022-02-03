@@ -87,6 +87,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_evd_clear_unwaitable\fR(3DAT), \fBdat_evd_dequeue\fR(3DAT),
-\fBdat_evd_query\fR(3DAT), \fBdat_evd_wait\fR(3DAT), \fBlibdat\fR(3LIB),
+\fBdat_evd_clear_unwaitable\fR(3DAT),
+\fBdat_evd_dequeue\fR(3DAT),
+\fBdat_evd_query\fR(3DAT),
+\fBdat_evd_wait\fR(3DAT),
+\fBlibdat\fR(3LIB),
 \fBattributes\fR(7)

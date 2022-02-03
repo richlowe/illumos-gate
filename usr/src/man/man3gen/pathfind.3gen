@@ -116,8 +116,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsh\fR(1), \fBtest\fR(1), \fBaccess\fR(2), \fBmknod\fR(2), \fBstat\fR(2),
-\fBgetenv\fR(3C), \fBattributes\fR(7)
+\fBsh\fR(1),
+\fBtest\fR(1),
+\fBaccess\fR(2),
+\fBmknod\fR(2),
+\fBstat\fR(2),
+\fBgetenv\fR(3C),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

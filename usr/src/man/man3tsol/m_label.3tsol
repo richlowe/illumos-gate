@@ -117,8 +117,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlabel_to_str\fR(3TSOL), \fBlibtsol\fR(3LIB), \fBstr_to_label\fR(3TSOL),
-\fBlabel_encodings\fR(5), \fBattributes\fR(7), \fBlabels\fR(7)
+\fBlibtsol\fR(3LIB),
+\fBlabel_to_str\fR(3TSOL),
+\fBstr_to_label\fR(3TSOL),
+\fBlabel_encodings\fR(5),
+\fBattributes\fR(7),
+\fBlabels\fR(7)
 .sp
 .LP
 \fIDetermining Whether the Printing Service Is Running in a Labeled

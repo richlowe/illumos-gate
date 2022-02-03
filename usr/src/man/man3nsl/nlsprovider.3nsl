@@ -56,7 +56,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBnlsadmin\fR(8), \fBattributes\fR(7)
+\fBattributes\fR(7),
+\fBnlsadmin\fR(8)
 .SH NOTES
 .sp
 .LP

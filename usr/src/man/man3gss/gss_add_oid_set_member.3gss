@@ -109,7 +109,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_acquire_cred\fR(3GSS), \fBgss_create_empty_oid_set\fR(3GSS),
+\fBgss_acquire_cred\fR(3GSS),
+\fBgss_create_empty_oid_set\fR(3GSS),
 \fBattributes\fR(7)
 .sp
 .LP

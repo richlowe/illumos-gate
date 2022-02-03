@@ -59,7 +59,9 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBtran_setup_pkt\fR(9E), \fBscsi_pkt\fR(9S)
+\fBattributes\fR(7),
+\fBtran_setup_pkt\fR(9E),
+\fBscsi_pkt\fR(9S)
 .SH NOTES
 HBA driver calls \fBscsi_hba_pkt_comp()\fR instead of calling
 \fBscsi_pkt\fR(9S) \fIpkt_comp\fR directly.

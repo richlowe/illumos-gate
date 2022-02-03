@@ -301,5 +301,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBregcomp\fR(3C), \fBtypes.h\fR(3HEAD), \fBattributes\fR(7),
+\fBregcomp\fR(3C),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

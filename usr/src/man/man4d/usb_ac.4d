@@ -97,9 +97,16 @@ Interface Stability	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm_usb\fR(8), \fBioctl\fR(2), \fBattributes\fR(7), \fBhid\fR(4D),
-\fBusba\fR(4D), \fBusb_as\fR(4D), \fBaudio\fR(4I), \fBmixer\fR(4I),
-\fBstreamio\fR(4I), \fBusb_ah\fR(4M)
+\fBioctl\fR(2),
+\fBhid\fR(4D),
+\fBusb_as\fR(4D),
+\fBusba\fR(4D),
+\fBaudio\fR(4I),
+\fBmixer\fR(4I),
+\fBstreamio\fR(4I),
+\fBusb_ah\fR(4M),
+\fBattributes\fR(7),
+\fBcfgadm_usb\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

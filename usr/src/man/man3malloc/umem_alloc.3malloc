@@ -372,11 +372,21 @@ For \fBmalloc()\fR, \fBcalloc()\fR, \fBfree()\fR, \fBrealloc()\fR, and
 \fBvalloc()\fR, see \fBstandards\fR(7).
 .SH SEE ALSO
 .LP
-\fBexit\fR(2), \fBmmap\fR(2), \fBsbrk\fR(2), \fBbsdmalloc\fR(3MALLOC),
-\fBlibumem\fR(3LIB), \fBlongjmp\fR(3C), \fBmalloc\fR(3C),
-\fBmalloc\fR(3MALLOC), \fBmapmalloc\fR(3MALLOC), \fBpthread_exit\fR(3C),
-\fBthr_exit\fR(3C), \fBumem_cache_create\fR(3MALLOC),
-\fBumem_debug\fR(3MALLOC), \fBwatchmalloc\fR(3MALLOC), \fBattributes\fR(7),
+\fBexit\fR(2),
+\fBmmap\fR(2),
+\fBsbrk\fR(2),
+\fBlongjmp\fR(3C),
+\fBmalloc\fR(3C),
+\fBpthread_exit\fR(3C),
+\fBthr_exit\fR(3C),
+\fBlibumem\fR(3LIB),
+\fBbsdmalloc\fR(3MALLOC),
+\fBmalloc\fR(3MALLOC),
+\fBmapmalloc\fR(3MALLOC),
+\fBumem_cache_create\fR(3MALLOC),
+\fBumem_debug\fR(3MALLOC),
+\fBwatchmalloc\fR(3MALLOC),
+\fBattributes\fR(7),
 \fBstandards\fR(7)
 .sp
 .LP

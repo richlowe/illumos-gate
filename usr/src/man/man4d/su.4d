@@ -195,10 +195,22 @@ Architecture	 SPARC
 
 .SH SEE ALSO
 .LP
-\fBstrconf\fR(1), \fBkbd\fR(1), \fBtip\fR(1), \fBuucp\fR(1C),
-\fBautopush\fR(8), \fBkstat\fR(8), \fBpppd\fR(8), \fBioctl\fR(2),
-\fBopen\fR(2), \fBtermios\fR(3C), \fBdacf.conf\fR(5), \fBattributes\fR(7),
-\fBkb\fR(4M), \fBldterm\fR(4M), \fBttcompat\fR(4M), \fBtermio\fR(4I)
+\fBkbd\fR(1),
+\fBstrconf\fR(1),
+\fBtip\fR(1),
+\fBuucp\fR(1C),
+\fBioctl\fR(2),
+\fBopen\fR(2),
+\fBtermios\fR(3C),
+\fBtermio\fR(4I),
+\fBkb\fR(4M),
+\fBldterm\fR(4M),
+\fBttcompat\fR(4M),
+\fBdacf.conf\fR(5),
+\fBattributes\fR(7),
+\fBautopush\fR(8),
+\fBkstat\fR(8),
+\fBpppd\fR(8)
 .SH DIAGNOSTICS
 .LP
 The \fBsu\fR driver keeps track of various warning and error conditions using

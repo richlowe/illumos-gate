@@ -649,5 +649,9 @@ MT-Level	Mt-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpathconf\fR(2), \fBsysconf\fR(3C), \fBattributes\fR(7), \fBlfcompile\fR(7),
-\fBlfcompile64\fR(7), \fBstandards\fR(7)
+\fBpathconf\fR(2),
+\fBsysconf\fR(3C),
+\fBattributes\fR(7),
+\fBlfcompile\fR(7),
+\fBlfcompile64\fR(7),
+\fBstandards\fR(7)

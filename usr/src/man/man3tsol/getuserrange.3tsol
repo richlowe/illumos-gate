@@ -91,8 +91,12 @@ obsolete or supplement \fBlabel_encodings\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C), \fBlibtsol\fR(3LIB), \fBm_label_free\fR(3TSOL),
-\fBlabel_encodings\fR(5), \fBuser_attr\fR(5), \fBattributes\fR(7)
+\fBfree\fR(3C),
+\fBlibtsol\fR(3LIB),
+\fBm_label_free\fR(3TSOL),
+\fBlabel_encodings\fR(5),
+\fBuser_attr\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

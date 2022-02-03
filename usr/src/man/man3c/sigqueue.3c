@@ -168,5 +168,9 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBkill\fR(2), \fBsiginfo.h\fR(3HEAD), \fBsignal.h\fR(3HEAD),
-\fBsigwaitinfo\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBkill\fR(2),
+\fBsigwaitinfo\fR(3C),
+\fBsiginfo.h\fR(3HEAD),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

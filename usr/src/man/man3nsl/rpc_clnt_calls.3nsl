@@ -334,5 +334,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprintf\fR(3C), \fBrpc\fR(3NSL), \fBrpc_clnt_auth\fR(3NSL),
-\fBrpc_clnt_create\fR(3NSL), \fBattributes\fR(7)
+\fBprintf\fR(3C),
+\fBrpc\fR(3NSL),
+\fBrpc_clnt_auth\fR(3NSL),
+\fBrpc_clnt_create\fR(3NSL),
+\fBattributes\fR(7)

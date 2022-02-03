@@ -124,9 +124,20 @@ Interface Stability	Standard
 .TE
 
 .SH SEE ALSO
-\fBiswalpha\fR(3C), \fBiswctype\fR(3C), \fBlocale.h\fR(3HEAD),
-\fBsetlocale\fR(3C), \fBstdarg\fR(3EXT), \fBstddef.h\fR(3HEAD),
-\fBstdio.h\fR(3HEAD), \fBstdlib.h\fR(3HEAD), \fBstring.h\fR(3HEAD),
-\fBtime.h\fR(3HEAD), \fBtowctrans\fR(3C), \fBtowlower\fR(3C),
-\fBtowupper\fR(3C), \fBwctrans\fR(3C), \fBwctype\fR(3C), \fBattributes\fR(7),
+\fBiswalpha\fR(3C),
+\fBiswctype\fR(3C),
+\fBsetlocale\fR(3C),
+\fBtowctrans\fR(3C),
+\fBtowlower\fR(3C),
+\fBtowupper\fR(3C),
+\fBwctrans\fR(3C),
+\fBwctype\fR(3C),
+\fBstdarg\fR(3EXT),
+\fBlocale.h\fR(3HEAD),
+\fBstddef.h\fR(3HEAD),
+\fBstdio.h\fR(3HEAD),
+\fBstdlib.h\fR(3HEAD),
+\fBstring.h\fR(3HEAD),
+\fBtime.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

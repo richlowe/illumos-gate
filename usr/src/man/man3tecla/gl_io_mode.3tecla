@@ -541,6 +541,10 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBcpl_complete_word\fR(3TECLA), \fBef_expand_file\fR(3TECLA),
-\fBgl_get_line\fR(3TECLA), \fBlibtecla\fR(3LIB), \fBpca_lookup_file\fR(3TECLA),
-\fBattributes\fR(7), \fBtecla\fR(7)
+\fBlibtecla\fR(3LIB),
+\fBcpl_complete_word\fR(3TECLA),
+\fBef_expand_file\fR(3TECLA),
+\fBgl_get_line\fR(3TECLA),
+\fBpca_lookup_file\fR(3TECLA),
+\fBattributes\fR(7),
+\fBtecla\fR(7)

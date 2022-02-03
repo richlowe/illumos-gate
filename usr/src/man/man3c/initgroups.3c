@@ -68,4 +68,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetgroups\fR(2), \fBgetgrnam\fR(3C), \fBattributes\fR(7)
+\fBgetgroups\fR(2),
+\fBgetgrnam\fR(3C),
+\fBattributes\fR(7)

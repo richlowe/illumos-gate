@@ -113,5 +113,9 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBdup\fR(2), \fBfork\fR(2), \fBopen\fR(2), \fBsetsid\fR(2),
+\fBIntro\fR(2),
+\fBdup\fR(2),
+\fBfork\fR(2),
+\fBopen\fR(2),
+\fBsetsid\fR(2),
 \fBattributes\fR(7)

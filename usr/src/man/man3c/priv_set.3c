@@ -128,5 +128,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsetppriv\fR(2), \fBpriv_str_to_set\fR(3C), \fBattributes\fR(7),
+\fBsetppriv\fR(2),
+\fBpriv_str_to_set\fR(3C),
+\fBattributes\fR(7),
 \fBprivileges\fR(7)

@@ -121,7 +121,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB), \fBMP_DeregisterPlugin\fR(3MPAPI), \fBmpapi.conf\fR(5),
+\fBlibMPAPI\fR(3LIB),
+\fBMP_DeregisterPlugin\fR(3MPAPI),
+\fBmpapi.conf\fR(5),
 \fBattributes\fR(7)
 .sp
 .LP

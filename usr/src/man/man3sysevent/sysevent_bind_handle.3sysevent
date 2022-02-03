@@ -152,8 +152,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsyseventd\fR(8), \fBsysevent_subscribe_event\fR(3SYSEVENT),
-\fBattributes\fR(7)
+\fBsysevent_subscribe_event\fR(3SYSEVENT),
+\fBattributes\fR(7),
+\fBsyseventd\fR(8)
 .SH NOTES
 .sp
 .LP

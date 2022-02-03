@@ -120,6 +120,12 @@ MT-Level	Async-Signal-Safe
 
 .SH SEE ALSO
 .LP
-\fBclose\fR(2), \fBcreat\fR(2), \fBexec\fR(2), \fBfcntl\fR(2),
-\fBgetrlimit\fR(2), \fBopen\fR(2), \fBpipe\fR(2), \fBattributes\fR(7),
+\fBclose\fR(2),
+\fBcreat\fR(2),
+\fBexec\fR(2),
+\fBfcntl\fR(2),
+\fBgetrlimit\fR(2),
+\fBopen\fR(2),
+\fBpipe\fR(2),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

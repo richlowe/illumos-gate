@@ -651,7 +651,9 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(3), \fBMP_RegisterPlugin\fR(3MPAPI), \fBattributes\fR(7)
+\fBIntro\fR(3),
+\fBMP_RegisterPlugin\fR(3MPAPI),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

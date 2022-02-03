@@ -169,8 +169,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBallocb\fR(9F), \fBddi_intr_get_pri\fR(9F),
-\fBddi_intr_get_softint_pri\fR(9F), \fBfreeb\fR(9F), \fBdatab\fR(9S),
+\fBallocb\fR(9F),
+\fBddi_intr_get_pri\fR(9F),
+\fBddi_intr_get_softint_pri\fR(9F),
+\fBfreeb\fR(9F),
+\fBdatab\fR(9S),
 \fBfree_rtn\fR(9S)
 .sp
 .LP

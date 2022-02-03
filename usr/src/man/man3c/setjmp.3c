@@ -246,9 +246,14 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetcontext\fR(2), \fBpriocntl\fR(2), \fBsigaction\fR(2),
-\fBsigaltstack\fR(2), \fBsigprocmask\fR(2), \fBsignal\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetcontext\fR(2),
+\fBpriocntl\fR(2),
+\fBsigaction\fR(2),
+\fBsigaltstack\fR(2),
+\fBsigprocmask\fR(2),
+\fBsignal\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH WARNINGS
 .sp
 .LP

@@ -254,4 +254,8 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdup\fR(2), \fBexec\fR(2), \fBfork\fR(2), \fBopen\fR(2), \fBattributes\fR(7)
+\fBdup\fR(2),
+\fBexec\fR(2),
+\fBfork\fR(2),
+\fBopen\fR(2),
+\fBattributes\fR(7)

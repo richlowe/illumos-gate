@@ -750,5 +750,10 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBls\fR(1), \fBtar\fR(1), \fBacl\fR(2), \fBmalloc\fR(3C),
-\fBaclfromtext\fR(3SEC), \fBacl\fR(7), \fBattributes\fR(7)
+\fBls\fR(1),
+\fBtar\fR(1),
+\fBacl\fR(2),
+\fBmalloc\fR(3C),
+\fBaclfromtext\fR(3SEC),
+\fBacl\fR(7),
+\fBattributes\fR(7)

@@ -161,7 +161,8 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBgss_acquire_cred\fR(3GSS), \fBgss_release_buffer\fR(3GSS),
+\fBgss_acquire_cred\fR(3GSS),
+\fBgss_release_buffer\fR(3GSS),
 \fBattributes\fR(7)
 .sp
 .LP

@@ -774,7 +774,18 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2), \fBfcntl\fR(2), \fBgetmsg\fR(2), \fBioctl\fR(2), \fBopen\fR(2),
-\fBpipe\fR(2), \fBpoll\fR(2), \fBputmsg\fR(2), \fBread\fR(2), \fBwrite\fR(2),
-\fBsignal\fR(3C), \fBtypes.h\fR(3HEAD), \fBunistd.h\fR(3HEAD),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBclose\fR(2),
+\fBfcntl\fR(2),
+\fBgetmsg\fR(2),
+\fBioctl\fR(2),
+\fBopen\fR(2),
+\fBpipe\fR(2),
+\fBpoll\fR(2),
+\fBputmsg\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBsignal\fR(3C),
+\fBtypes.h\fR(3HEAD),
+\fBunistd.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

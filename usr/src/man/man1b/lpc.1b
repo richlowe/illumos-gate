@@ -314,9 +314,15 @@ Interface Stability	Standard
 .TE
 
 .SH SEE ALSO
-\fBlpq\fR(1B), \fBlpr\fR(1B), \fBlprm\fR(1B), \fBlpstat\fR(1),
-\fBlpsched\fR(8), \fBlpshut\fR(8), \fBsvcadm\fR(8), \fBprinters.conf\fR(5),
-\fBattributes\fR(7)
+\fBlpstat\fR(1),
+\fBlpq\fR(1B),
+\fBlpr\fR(1B),
+\fBlprm\fR(1B),
+\fBprinters.conf\fR(5),
+\fBattributes\fR(7),
+\fBlpsched\fR(8),
+\fBlpshut\fR(8),
+\fBsvcadm\fR(8)
 .SH DIAGNOSTICS
 Use the \fBsvcs\fR(1) utility to check if \fBsvc:/application/print/server\fR
 is running. If it is not running, use \fBsvcadm enable

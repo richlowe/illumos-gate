@@ -201,6 +201,10 @@ Standard	See \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
-\fBtime.h\fR(3HEAD), \fBclock_settime\fR(3C), \fBtimer_create\fR(3C),
-\fBtimer_delete\fR(3C), \fBattributes\fR(7), \fBprivileges\fR(7),
+\fBclock_settime\fR(3C),
+\fBtimer_create\fR(3C),
+\fBtimer_delete\fR(3C),
+\fBtime.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBprivileges\fR(7),
 \fBstandards\fR(7)

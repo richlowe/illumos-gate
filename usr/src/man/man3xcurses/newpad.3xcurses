@@ -207,6 +207,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBclearok\fR(3XCURSES), \fBdoupdate\fR(3XCURSES),
-\fBis_linetouched\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBpechochar\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBclearok\fR(3XCURSES),
+\fBdoupdate\fR(3XCURSES),
+\fBis_linetouched\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBpechochar\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

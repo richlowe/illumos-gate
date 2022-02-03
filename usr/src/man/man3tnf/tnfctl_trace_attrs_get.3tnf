@@ -173,7 +173,12 @@ MT Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprex\fR(1), \fBTNF_PROBE\fR(3TNF), \fBlibtnfctl\fR(3TNF),
-\fBtnfctl_buffer_alloc\fR(3TNF), \fBtnfctl_continue\fR(3TNF),
-\fBtnfctl_filter_list_get\fR(3TNF), \fBtnf_process_disable\fR(3TNF),
-\fBtracing\fR(3TNF), \fBattributes\fR(7)
+\fBprex\fR(1),
+\fBTNF_PROBE\fR(3TNF),
+\fBlibtnfctl\fR(3TNF),
+\fBtnf_process_disable\fR(3TNF),
+\fBtnfctl_buffer_alloc\fR(3TNF),
+\fBtnfctl_continue\fR(3TNF),
+\fBtnfctl_filter_list_get\fR(3TNF),
+\fBtracing\fR(3TNF),
+\fBattributes\fR(7)

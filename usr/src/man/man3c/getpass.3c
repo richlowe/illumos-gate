@@ -163,4 +163,5 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBattributes\fR(7),
+\fBstandards\fR(7)

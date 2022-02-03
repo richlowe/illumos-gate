@@ -458,6 +458,11 @@ The \fBiswalpha_l()\fR, \fBiswalnum_l()\fR, \fBiswblank_l()\fR, \fBiswcntrl_l()\
 functions are Standard.
 .SH SEE ALSO
 .LP
-\fBlocaledef\fR(1), \fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C), \fBstdio\fR(3C), \fBuselocale\fR(3C),
-\fBascii\fR(7), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBlocaledef\fR(1),
+\fBnewlocale\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstdio\fR(3C),
+\fBuselocale\fR(3C),
+\fBascii\fR(7),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

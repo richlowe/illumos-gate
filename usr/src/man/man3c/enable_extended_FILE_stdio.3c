@@ -193,9 +193,16 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2), \fBfcntl\fR(2), \fBgetrlimit\fR(2), \fBfdopen\fR(3C),
-\fBfopen\fR(3C), \fBpopen\fR(3C), \fBsignal.h\fR(3HEAD), \fBstdio\fR(3C),
-\fBattributes\fR(7), \fBextendedFILE\fR(7)
+\fBclose\fR(2),
+\fBfcntl\fR(2),
+\fBgetrlimit\fR(2),
+\fBfdopen\fR(3C),
+\fBfopen\fR(3C),
+\fBpopen\fR(3C),
+\fBstdio\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBextendedFILE\fR(7)
 .SH NOTES
 .sp
 .LP

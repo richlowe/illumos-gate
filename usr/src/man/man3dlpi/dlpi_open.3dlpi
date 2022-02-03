@@ -210,5 +210,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi_close\fR(3DLPI), \fBdlpi_set_timeout\fR(3DLPI), \fBlibdlpi\fR(3LIB),
-\fBattributes\fR(7), \fBdlpi\fR(4P), \fBipnet\fR(4D)
+\fBdlpi_close\fR(3DLPI),
+\fBdlpi_set_timeout\fR(3DLPI),
+\fBlibdlpi\fR(3LIB),
+\fBipnet\fR(4D),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7)

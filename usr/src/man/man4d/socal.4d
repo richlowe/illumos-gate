@@ -52,7 +52,9 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBsbus\fR(5), \fBsf\fR(4D), \fBssd\fR(4D)
+\fBsf\fR(4D),
+\fBssd\fR(4D),
+\fBsbus\fR(5)
 .sp
 .LP
 \fIWriting Device Drivers\fR

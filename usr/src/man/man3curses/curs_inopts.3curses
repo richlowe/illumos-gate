@@ -238,8 +238,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_getch\fR(3CURSES), \fBcurs_initscr\fR(3CURSES), \fBcurses\fR(3CURSES),
-\fBattributes\fR(7), \fBtermio\fR(4I)
+\fBcurs_getch\fR(3CURSES),
+\fBcurs_initscr\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBtermio\fR(4I),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

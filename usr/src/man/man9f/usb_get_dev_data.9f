@@ -399,5 +399,6 @@ Interface stability	Committed
 \fBusb_get_cfg\fR(9F), \fBusb_get_string_descr\fR(9F),
 \fBusb_lookup_ep_data\fR(9F), \fBusb_parse_data\fR(9F),
 \fBusb_pipe_xopen\fR(9F), \fBusb_cfg_descr\fR(9S),
-\fBusb_client_dev_data(9S)\fR, \fBusb_ep_descr\fR(9S), \fBusb_if_descr\fR(9S),
+\fBusb_client_dev_data(9S)\fR, \fBusb_ep_descr\fR(9S),
+\fBusb_if_descr\fR(9S),
 \fBusb_string_descr\fR(9S)

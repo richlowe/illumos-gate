@@ -99,4 +99,5 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBrsm_memseg_import_open_barrier\fR(3RSM),
-\fBrsm_memseg_import_set_mode\fR(3RSM), \fBattributes\fR(7)
+\fBrsm_memseg_import_set_mode\fR(3RSM),
+\fBattributes\fR(7)

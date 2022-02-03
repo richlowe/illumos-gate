@@ -250,4 +250,6 @@ actions and operations:
 .SH SEE ALSO
 .sp
 .LP
-\fBbufmod\fR(4M), \fBdlpi\fR(4P), \fBpullupmsg\fR(9F)
+\fBbufmod\fR(4M),
+\fBdlpi\fR(4P),
+\fBpullupmsg\fR(9F)

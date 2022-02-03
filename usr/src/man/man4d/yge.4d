@@ -169,4 +169,6 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(8), \fBattributes\fR(7), \fBdlpi\fR(4P)
+\fBdlpi\fR(4P),
+\fBattributes\fR(7),
+\fBdladm\fR(8)

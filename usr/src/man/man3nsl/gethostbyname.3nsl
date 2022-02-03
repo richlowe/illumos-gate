@@ -363,9 +363,17 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(2), \fBIntro\fR(3), \fBbyteorder\fR(3C), \fBinet\fR(3SOCKET),
-\fBnetdb.h\fR(3HEAD), \fBnetdir\fR(3NSL), \fBhosts\fR(5), \fBnetconfig\fR(5),
-\fBnss\fR(5), \fBnsswitch.conf\fR(5), \fBattributes\fR(7)
+\fBIntro\fR(2),
+\fBIntro\fR(3),
+\fBbyteorder\fR(3C),
+\fBnetdb.h\fR(3HEAD),
+\fBnetdir\fR(3NSL),
+\fBinet\fR(3SOCKET),
+\fBhosts\fR(5),
+\fBnetconfig\fR(5),
+\fBnss\fR(5),
+\fBnsswitch.conf\fR(5),
+\fBattributes\fR(7)
 .SH WARNINGS
 The reentrant interfaces \fBgethostbyname_r()\fR, \fBgethostbyaddr_r()\fR, and
 \fBgethostent_r()\fR are included in this release on an uncommitted basis only

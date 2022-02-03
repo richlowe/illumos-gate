@@ -244,7 +244,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBstring\fR(3C), \fBattributes\fR(7), \fBbcopy\fR(9F), \fBddi_copyin\fR(9F),
+\fBstring\fR(3C),
+\fBattributes\fR(7),
+\fBbcopy\fR(9F),
+\fBddi_copyin\fR(9F),
 \fBkmem_alloc\fR(9F)
 .sp
 .LP

@@ -71,10 +71,16 @@ MT Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprex\fR(1), \fBTNF_PROBE\fR(3TNF), \fBdlclose\fR(3C), \fBdlopen\fR(3C),
-\fBlibtnfctl\fR(3TNF), \fBtnfctl_close\fR(3TNF),
-\fBtnfctl_probe_state_get\fR(3TNF), \fBtracing\fR(3TNF),
-\fBtnf_kernel_probes\fR(5), \fBattributes\fR(7)
+\fBprex\fR(1),
+\fBdlclose\fR(3C),
+\fBdlopen\fR(3C),
+\fBTNF_PROBE\fR(3TNF),
+\fBlibtnfctl\fR(3TNF),
+\fBtnfctl_close\fR(3TNF),
+\fBtnfctl_probe_state_get\fR(3TNF),
+\fBtracing\fR(3TNF),
+\fBtnf_kernel_probes\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

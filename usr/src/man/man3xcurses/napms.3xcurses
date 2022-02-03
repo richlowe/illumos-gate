@@ -62,5 +62,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdelay_output\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
+\fBdelay_output\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

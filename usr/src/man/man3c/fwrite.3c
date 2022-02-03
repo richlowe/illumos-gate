@@ -105,7 +105,16 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBwrite\fR(2), \fBfclose\fR(3C), \fBferror\fR(3C), \fBfopen\fR(3C),
-\fBfread\fR(3C), \fBgetc\fR(3C), \fBgets\fR(3C), \fBopen_wmemstream\fR(3C),
-\fBprintf\fR(3C), \fBputc\fR(3C), \fBputs\fR(3C), \fBattributes\fR(7),
+\fBwrite\fR(2),
+\fBfclose\fR(3C),
+\fBferror\fR(3C),
+\fBfopen\fR(3C),
+\fBfread\fR(3C),
+\fBgetc\fR(3C),
+\fBgets\fR(3C),
+\fBopen_wmemstream\fR(3C),
+\fBprintf\fR(3C),
+\fBputc\fR(3C),
+\fBputs\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

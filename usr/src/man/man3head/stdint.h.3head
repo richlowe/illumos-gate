@@ -903,5 +903,9 @@ Interface Stability	Standard
 .TE
 
 .SH SEE ALSO
-\fBinttypes.h\fR(3HEAD), \fBsignal.h\fR(3HEAD), \fBstddef.h\fR(3HEAD),
-\fBwchar.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBinttypes.h\fR(3HEAD),
+\fBsignal.h\fR(3HEAD),
+\fBstddef.h\fR(3HEAD),
+\fBwchar.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -152,5 +152,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprintf\fR(3C), \fBsetlocale\fR(3C), \fBsprintf\fR(3C), \fBattributes\fR(7),
+\fBprintf\fR(3C),
+\fBsetlocale\fR(3C),
+\fBsprintf\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

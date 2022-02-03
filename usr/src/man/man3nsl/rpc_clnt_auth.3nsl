@@ -124,5 +124,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBrpc\fR(3NSL), \fBrpc_clnt_calls\fR(3NSL), \fBrpc_clnt_create\fR(3NSL),
-\fBsecure_rpc\fR(3NSL), \fBattributes\fR(7)
+\fBrpc\fR(3NSL),
+\fBrpc_clnt_calls\fR(3NSL),
+\fBrpc_clnt_create\fR(3NSL),
+\fBsecure_rpc\fR(3NSL),
+\fBattributes\fR(7)

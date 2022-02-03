@@ -94,8 +94,12 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBopen\fR(2), \fBstat\fR(2), \fBvolmgt_check\fR(3VOLMGT),
-\fBvolmgt_inuse\fR(3VOLMGT), \fBattributes\fR(7), \fBhal\fR(7)
+\fBopen\fR(2),
+\fBstat\fR(2),
+\fBvolmgt_check\fR(3VOLMGT),
+\fBvolmgt_inuse\fR(3VOLMGT),
+\fBattributes\fR(7),
+\fBhal\fR(7)
 .SH NOTES
 .sp
 .LP

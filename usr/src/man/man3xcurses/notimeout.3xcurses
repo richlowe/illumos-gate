@@ -115,5 +115,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetch\fR(3XCURSES), \fBhalfdelay\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBnodelay\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetch\fR(3XCURSES),
+\fBhalfdelay\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnodelay\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

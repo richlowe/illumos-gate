@@ -181,6 +181,12 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBbaudrate\fR(3XCURSES), \fBbeep\fR(3XCURSES), \fBinitscr\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBmvcur\fR(3XCURSES), \fBtigetflag\fR(3XCURSES),
-\fBuse_env\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBbaudrate\fR(3XCURSES),
+\fBbeep\fR(3XCURSES),
+\fBinitscr\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBmvcur\fR(3XCURSES),
+\fBtigetflag\fR(3XCURSES),
+\fBuse_env\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

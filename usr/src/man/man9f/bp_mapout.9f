@@ -49,7 +49,9 @@ out any kernel mapping that a layer above the device driver might rely on.
 .SH SEE ALSO
 .sp
 .LP
-\fBstrategy\fR(9E), \fBbp_mapin\fR(9F), \fBbuf\fR(9S)
+\fBstrategy\fR(9E),
+\fBbp_mapin\fR(9F),
+\fBbuf\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

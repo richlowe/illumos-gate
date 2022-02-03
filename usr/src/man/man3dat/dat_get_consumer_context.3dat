@@ -90,4 +90,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_set_consumer_context\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_set_consumer_context\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

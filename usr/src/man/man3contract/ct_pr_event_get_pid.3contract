@@ -247,6 +247,11 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBct_event_free\fR(3CONTRACT), \fBct_event_read\fR(3CONTRACT),
-\fBct_event_read_critical\fR(3CONTRACT), \fBlibcontract\fR(3LIB),
-\fBcontract\fR(5), \fBprocess\fR(5), \fBattributes\fR(7), \fBlfcompile\fR(7)
+\fBct_event_free\fR(3CONTRACT),
+\fBct_event_read\fR(3CONTRACT),
+\fBct_event_read_critical\fR(3CONTRACT),
+\fBlibcontract\fR(3LIB),
+\fBcontract\fR(5),
+\fBprocess\fR(5),
+\fBattributes\fR(7),
+\fBlfcompile\fR(7)

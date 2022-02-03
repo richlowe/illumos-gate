@@ -314,8 +314,12 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_prop_create\fR(9F), \fBddi_prop_get_int\fR(9F),
-\fBddi_prop_lookup\fR(9F), \fBkmem_alloc\fR(9F), \fBkmem_free\fR(9F)
+\fBattributes\fR(7),
+\fBddi_prop_create\fR(9F),
+\fBddi_prop_get_int\fR(9F),
+\fBddi_prop_lookup\fR(9F),
+\fBkmem_alloc\fR(9F),
+\fBkmem_free\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -64,4 +64,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBgetcwd\fR(3C), \fBattributes\fR(7)
+\fBexec\fR(2),
+\fBgetcwd\fR(3C),
+\fBattributes\fR(7)

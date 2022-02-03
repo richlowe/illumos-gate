@@ -92,8 +92,14 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(8), \fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5),
-\fBattributes\fR(7), \fBieee802.3\fR(7), \fBdlpi\fR(4P), \fBstreamio\fR(4I)
+\fBstreamio\fR(4I),
+\fBdlpi\fR(4P),
+\fBdriver.conf\fR(5),
+\fBattributes\fR(7),
+\fBieee802.3\fR(7),
+\fBdladm\fR(8),
+\fBndd\fR(8),
+\fBnetstat\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

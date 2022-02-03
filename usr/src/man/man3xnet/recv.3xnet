@@ -336,7 +336,15 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBpoll\fR(2), \fBrecvmsg\fR(3XNET), \fBrecvfrom\fR(3XNET), \fBselect\fR(3C),
-\fBsend\fR(3XNET), \fBsendmsg\fR(3XNET), \fBsendto\fR(3XNET),
-\fBshutdown\fR(3XNET), \fBsocket\fR(3XNET), \fBattributes\fR(7),
-\fBstandards\fR(7), \fBtcp\fR(4P)
+\fBpoll\fR(2),
+\fBselect\fR(3C),
+\fBrecvfrom\fR(3XNET),
+\fBrecvmsg\fR(3XNET),
+\fBsend\fR(3XNET),
+\fBsendmsg\fR(3XNET),
+\fBsendto\fR(3XNET),
+\fBshutdown\fR(3XNET),
+\fBsocket\fR(3XNET),
+\fBtcp\fR(4P),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

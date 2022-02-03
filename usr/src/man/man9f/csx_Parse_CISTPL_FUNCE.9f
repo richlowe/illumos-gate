@@ -1138,9 +1138,12 @@ No \fBPCMCIA \fRhardware installed.
 .SH CONTEXT
 This function may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_GetFirstTuple\fR(9F), \fBcsx_GetTupleData\fR(9F),
-\fBcsx_Parse_CISTPL_FUNCID\fR(9F), \fBcsx_RegisterClient\fR(9F),
-\fBcsx_ValidateCIS\fR(9F), \fBtuple\fR(9S)
+\fBcsx_GetFirstTuple\fR(9F),
+\fBcsx_GetTupleData\fR(9F),
+\fBcsx_Parse_CISTPL_FUNCID\fR(9F),
+\fBcsx_RegisterClient\fR(9F),
+\fBcsx_ValidateCIS\fR(9F),
+\fBtuple\fR(9S)
 .sp
 .LP
 \fIPC Card 95 Standard, PCMCIA/JEIDA\fR

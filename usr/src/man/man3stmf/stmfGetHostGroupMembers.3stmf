@@ -85,4 +85,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBstmfFreeMemory\fR(3STMF), \fBlibstmf\fR(3LIB), \fBattributes\fR(7)
+\fBlibstmf\fR(3LIB),
+\fBstmfFreeMemory\fR(3STMF),
+\fBattributes\fR(7)

@@ -159,6 +159,10 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_cond_init\fR(3C), \fBpthread_create\fR(3C),
-\fBpthread_mutex_init\fR(3C), \fBpthread_mutex_lock\fR(3C),
-\fBsched_get_priority_min\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBpthread_cond_init\fR(3C),
+\fBpthread_create\fR(3C),
+\fBpthread_mutex_init\fR(3C),
+\fBpthread_mutex_lock\fR(3C),
+\fBsched_get_priority_min\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

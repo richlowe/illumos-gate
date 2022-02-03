@@ -215,8 +215,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc_bind_curlwp\fR(3CPC), \fBcpc_buf_create\fR(3CPC), \fBcpc_npic\fR(3CPC),
-\fBcpc_seterrhndlr\fR(3CPC), \fBlibcpc\fR(3LIB), \fBstrtol\fR(3C),
+\fBstrtol\fR(3C),
+\fBcpc_bind_curlwp\fR(3CPC),
+\fBcpc_buf_create\fR(3CPC),
+\fBcpc_npic\fR(3CPC),
+\fBcpc_seterrhndlr\fR(3CPC),
+\fBlibcpc\fR(3LIB),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

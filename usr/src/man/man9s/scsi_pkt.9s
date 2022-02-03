@@ -682,9 +682,13 @@ Command timed out.
 .RE
 
 .SH SEE ALSO
-\fBtran_init_pkt\fR(9E), \fBtran_setup_pkt\fR(9E), \fBscsi_arq_status\fR(9S),
-\fBscsi_init_pkt\fR(9F), \fBscsi_transport\fR(9F), \fBscsi_status\fR(9S),
-\fBscsi_hba_pkt_comp\fR(9F)
+\fBtran_init_pkt\fR(9E),
+\fBtran_setup_pkt\fR(9E),
+\fBscsi_hba_pkt_comp\fR(9F),
+\fBscsi_init_pkt\fR(9F),
+\fBscsi_transport\fR(9F),
+\fBscsi_arq_status\fR(9S),
+\fBscsi_status\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

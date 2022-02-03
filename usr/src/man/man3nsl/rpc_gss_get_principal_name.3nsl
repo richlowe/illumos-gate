@@ -118,8 +118,12 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBfree\fR(3C), \fBrpc\fR(3NSL), \fBrpc_gss_get_mechanisms\fR(3NSL),
-\fBrpc_gss_set_svc_name\fR(3NSL), \fBrpcsec_gss\fR(3NSL), \fBmech\fR(5),
+\fBfree\fR(3C),
+\fBrpc\fR(3NSL),
+\fBrpc_gss_get_mechanisms\fR(3NSL),
+\fBrpc_gss_set_svc_name\fR(3NSL),
+\fBrpcsec_gss\fR(3NSL),
+\fBmech\fR(5),
 \fBattributes\fR(7)
 .sp
 .LP

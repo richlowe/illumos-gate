@@ -49,9 +49,15 @@ itself. Since  \fBtran_destroy_pkt\fR(9E) must also free \fBDMA \fRresources,
 it is important that the \fBHBA \fRdriver keeps accurate note of whether
 \fBscsi_pkt\fR(9S) structures have \fBDMA \fRresources allocated.
 .SH SEE ALSO
-\fBattach\fR(9E), \fBtran_destroy_pkt\fR(9E), \fBtran_init_pkt\fR(9E),
-\fBscsi_dmafree\fR(9F), \fBscsi_dmaget\fR(9F), \fBscsi_hba_attach\fR(9F),
-\fBscsi_init_pkt\fR(9F), \fBscsi_address\fR(9S), \fBscsi_hba_tran\fR(9S),
+\fBattach\fR(9E),
+\fBtran_destroy_pkt\fR(9E),
+\fBtran_init_pkt\fR(9E),
+\fBscsi_dmafree\fR(9F),
+\fBscsi_dmaget\fR(9F),
+\fBscsi_hba_attach\fR(9F),
+\fBscsi_init_pkt\fR(9F),
+\fBscsi_address\fR(9S),
+\fBscsi_hba_tran\fR(9S),
 \fBscsi_pkt\fR(9S)
 .sp
 .LP

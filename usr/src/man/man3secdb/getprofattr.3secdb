@@ -148,6 +148,10 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBauths\fR(1), \fBprofiles\fR(1), \fBgetexecattr\fR(3SECDB),
-\fBgetauthattr\fR(3SECDB), \fBkva_match\fR(3SECDB), \fBprof_attr\fR(5),
+\fBauths\fR(1),
+\fBprofiles\fR(1),
+\fBgetauthattr\fR(3SECDB),
+\fBgetexecattr\fR(3SECDB),
+\fBkva_match\fR(3SECDB),
+\fBprof_attr\fR(5),
 \fBattributes\fR(7)

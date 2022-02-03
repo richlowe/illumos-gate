@@ -46,5 +46,7 @@ context.
 .SH SEE ALSO
 .sp
 .LP
-\fBgetrbuf\fR(9F), \fBkmem_alloc\fR(9F), \fBkmem_free\fR(9F),
+\fBgetrbuf\fR(9F),
+\fBkmem_alloc\fR(9F),
+\fBkmem_free\fR(9F),
 \fBkmem_zalloc\fR(9F)

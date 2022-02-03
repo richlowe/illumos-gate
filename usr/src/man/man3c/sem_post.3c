@@ -149,5 +149,8 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBsched_setscheduler\fR(3C), \fBsem_wait\fR(3C), \fBsemaphore\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBsched_setscheduler\fR(3C),
+\fBsem_wait\fR(3C),
+\fBsemaphore\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

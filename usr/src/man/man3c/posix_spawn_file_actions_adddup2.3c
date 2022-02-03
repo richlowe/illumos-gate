@@ -138,7 +138,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdup2\fR(3C), \fBposix_spawn\fR(3C),
+\fBdup2\fR(3C),
+\fBposix_spawn\fR(3C),
 \fBposix_spawn_file_actions_addclose\fR(3C),
-\fBposix_spawn_file_actions_destroy\fR(3C), \fBattributes\fR(7),
+\fBposix_spawn_file_actions_destroy\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

@@ -293,16 +293,28 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBdevlinks\fR(8), \fBprtconf\fR(8), \fBIntro\fR(3),
-\fBdi_binding_name\fR(3DEVINFO), \fBdi_child_node\fR(3DEVINFO),
-\fBdi_devfs_path\fR(3DEVINFO), \fBdi_init\fR(3DEVINFO),
-\fBdi_minor_devt\fR(3DEVINFO), \fBdi_minor_next\fR(3DEVINFO),
-\fBdi_path_bus_addr\fR(3DEVINFO), \fBdi_path_client_next_path\fR(3DEVINFO),
-\fBdi_path_prop_bytes\fR(3DEVINFO), \fBdi_path_prop_lookup_bytes\fR(3DEVINFO),
-\fBdi_path_prop_next\fR(3DEVINFO), \fBdi_prom_init\fR(3DEVINFO),
-\fBdi_prop_bytes\fR(3DEVINFO), \fBdi_prop_lookup_bytes\fR(3DEVINFO),
-\fBdi_prop_next\fR(3DEVINFO), \fBdi_walk_minor\fR(3DEVINFO),
-\fBdi_walk_node\fR(3DEVINFO), \fBattributes\fR(7)
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBdi_binding_name\fR(3DEVINFO),
+\fBdi_child_node\fR(3DEVINFO),
+\fBdi_devfs_path\fR(3DEVINFO),
+\fBdi_init\fR(3DEVINFO),
+\fBdi_minor_devt\fR(3DEVINFO),
+\fBdi_minor_next\fR(3DEVINFO),
+\fBdi_path_bus_addr\fR(3DEVINFO),
+\fBdi_path_client_next_path\fR(3DEVINFO),
+\fBdi_path_prop_bytes\fR(3DEVINFO),
+\fBdi_path_prop_lookup_bytes\fR(3DEVINFO),
+\fBdi_path_prop_next\fR(3DEVINFO),
+\fBdi_prom_init\fR(3DEVINFO),
+\fBdi_prop_bytes\fR(3DEVINFO),
+\fBdi_prop_lookup_bytes\fR(3DEVINFO),
+\fBdi_prop_next\fR(3DEVINFO),
+\fBdi_walk_minor\fR(3DEVINFO),
+\fBdi_walk_node\fR(3DEVINFO),
+\fBattributes\fR(7),
+\fBdevlinks\fR(8),
+\fBprtconf\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

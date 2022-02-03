@@ -92,7 +92,10 @@ Interface stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBpm\fR(4D), \fBattach\fR(9E), \fBdetach\fR(9E),
+\fBpm\fR(4D),
+\fBattributes\fR(7),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
 \fBddi_prop_create\fR(9F)
 .sp
 .LP

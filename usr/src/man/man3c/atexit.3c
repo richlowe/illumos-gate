@@ -128,5 +128,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBdlclose\fR(3C), \fBexit\fR(3C), \fBsysconf\fR(3C),
+\fBexec\fR(2),
+\fBdlclose\fR(3C),
+\fBexit\fR(3C),
+\fBsysconf\fR(3C),
 \fBattributes\fR(7)

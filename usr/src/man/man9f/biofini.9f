@@ -48,8 +48,13 @@ kmem_free(bp, biosize());
 .in -2
 
 .SH SEE ALSO
-\fBbioinit\fR(9F), \fBbioreset\fR(9F), \fBbiosize\fR(9F), \fBfreerbuf\fR(9F),
-\fBkmem_alloc\fR(9F), \fBkmem_free\fR(9F), \fBbuf\fR(9S)
+\fBbioinit\fR(9F),
+\fBbioreset\fR(9F),
+\fBbiosize\fR(9F),
+\fBfreerbuf\fR(9F),
+\fBkmem_alloc\fR(9F),
+\fBkmem_free\fR(9F),
+\fBbuf\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

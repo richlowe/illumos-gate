@@ -88,4 +88,6 @@ could not be successfully modified.
 .SH SEE ALSO
 .sp
 .LP
-\fBtouch\fR(1), \fBattributes\fR(7), \fBlargefile\fR(7)
+\fBtouch\fR(1),
+\fBattributes\fR(7),
+\fBlargefile\fR(7)

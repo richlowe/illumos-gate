@@ -169,7 +169,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBit_config_commit\fR(3ISCSIT), \fBit_ini_create\fR(3ISCSIT),
-\fBit_portal_create\fR(3ISCSIT), \fBit_tgt_create\fR(3ISCSIT),
-\fBlibiscsit\fR(3LIB), \fBlibnvpair\fR(3LIB), \fBlibstmf\fR(3LIB),
+\fBit_config_commit\fR(3ISCSIT),
+\fBit_ini_create\fR(3ISCSIT),
+\fBit_portal_create\fR(3ISCSIT),
+\fBit_tgt_create\fR(3ISCSIT),
+\fBlibiscsit\fR(3LIB),
+\fBlibnvpair\fR(3LIB),
+\fBlibstmf\fR(3LIB),
 \fBattributes\fR(7)

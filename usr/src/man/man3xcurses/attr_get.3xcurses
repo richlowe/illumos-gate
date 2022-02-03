@@ -161,7 +161,13 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_wch\fR(3XCURSES), \fBaddnwstr\fR(3XCURSES), \fBattroff\fR(3XCURSES),
-\fBbkgrndset\fR(3XCURSES), \fBcurses\fR(3XCURSES), \fBinit_color\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBstart_color\fR(3XCURSES), \fBattributes\fR(7),
+\fBadd_wch\fR(3XCURSES),
+\fBaddnwstr\fR(3XCURSES),
+\fBattroff\fR(3XCURSES),
+\fBbkgrndset\fR(3XCURSES),
+\fBcurses\fR(3XCURSES),
+\fBinit_color\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBstart_color\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

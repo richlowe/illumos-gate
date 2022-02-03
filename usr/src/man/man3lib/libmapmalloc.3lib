@@ -77,5 +77,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBmmap\fR(2), \fBsbrk\fR(2), \fBIntro\fR(3), \fBmalloc\fR(3C),
-\fBmalloc\fR(3MALLOC), \fBmapmalloc\fR(3MALLOC), \fBattributes\fR(7)
+\fBpvs\fR(1),
+\fBmmap\fR(2),
+\fBsbrk\fR(2),
+\fBIntro\fR(3),
+\fBmalloc\fR(3C),
+\fBmalloc\fR(3MALLOC),
+\fBmapmalloc\fR(3MALLOC),
+\fBattributes\fR(7)

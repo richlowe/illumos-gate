@@ -99,7 +99,8 @@ Upon failure.
 .SH CONTEXT
 These functions can be called from a user, interrupt, or kernel context.
 .SH SEE ALSO
-\fBmakecom\fR(9F), \fBscsi_pkt\fR(9S)
+\fBmakecom\fR(9F),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

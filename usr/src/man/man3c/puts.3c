@@ -71,7 +71,16 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(2), \fBwrite\fR(2), \fBIntro\fR(3), \fBabort\fR(3C),
-\fBfclose\fR(3C), \fBferror\fR(3C), \fBfflush\fR(3C), \fBfopen\fR(3C),
-\fBfputc\fR(3C), \fBprintf\fR(3C), \fBstdio\fR(3C), \fBattributes\fR(7),
+\fBexit\fR(2),
+\fBwrite\fR(2),
+\fBIntro\fR(3),
+\fBabort\fR(3C),
+\fBfclose\fR(3C),
+\fBferror\fR(3C),
+\fBfflush\fR(3C),
+\fBfopen\fR(3C),
+\fBfputc\fR(3C),
+\fBprintf\fR(3C),
+\fBstdio\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

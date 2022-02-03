@@ -281,5 +281,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrsm_get_controller\fR(3RSM), \fBrsm_memseg_export_publish\fR(3RSM),
+\fBrsm_get_controller\fR(3RSM),
+\fBrsm_memseg_export_publish\fR(3RSM),
 \fBattributes\fR(7)

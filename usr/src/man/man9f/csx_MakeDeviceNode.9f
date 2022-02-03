@@ -222,7 +222,8 @@ No \fBPCMCIA \fRhardware installed.
 .SH CONTEXT
 These functions may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_RegisterClient\fR(9F), \fBddi_create_minor_node\fR(9F),
+\fBcsx_RegisterClient\fR(9F),
+\fBddi_create_minor_node\fR(9F),
 \fBddi_remove_minor_node\fR(9F)
 .sp
 .LP

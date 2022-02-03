@@ -969,7 +969,16 @@ Interface Stability	Standard
 .TE
 
 .SH SEE ALSO
-\fBgetconf\fR(1), \fBcfgetispeed\fR(3C), \fBcfsetispeed\fR(3C),
-\fBconfstr\fR(3C), \fBtcdrain\fR(3C), \fBtcflow\fR(3C), \fBtcflush\fR(3C),
-\fBtcgetattr\fR(3C), \fBtcgetsid\fR(3C), \fBtcsendbreak\fR(3C),
-\fBtcsetattr\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetconf\fR(1),
+\fBcfgetispeed\fR(3C),
+\fBcfsetispeed\fR(3C),
+\fBconfstr\fR(3C),
+\fBtcdrain\fR(3C),
+\fBtcflow\fR(3C),
+\fBtcflush\fR(3C),
+\fBtcgetattr\fR(3C),
+\fBtcgetsid\fR(3C),
+\fBtcsendbreak\fR(3C),
+\fBtcsetattr\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

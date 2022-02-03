@@ -510,8 +510,12 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBddi_add_intr\fR(9F), \fBddi_in_panic\fR(9F), \fBddi_intr_hilevel\fR(9F),
-\fBddi_remove_intr\fR(9F), \fBIntro\fR(9F), \fBmutex_init\fR(9F)
+\fBIntro\fR(9F),
+\fBddi_add_intr\fR(9F),
+\fBddi_in_panic\fR(9F),
+\fBddi_intr_hilevel\fR(9F),
+\fBddi_remove_intr\fR(9F),
+\fBmutex_init\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

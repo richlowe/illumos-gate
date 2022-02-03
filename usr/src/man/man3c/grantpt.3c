@@ -123,7 +123,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBopen\fR(2), \fBptsname\fR(3C), \fBunlockpt\fR(3C), \fBattributes\fR(7),
+\fBopen\fR(2),
+\fBptsname\fR(3C),
+\fBunlockpt\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)
 .sp
 .LP

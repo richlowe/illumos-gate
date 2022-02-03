@@ -49,5 +49,8 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBhostid\fR(1), \fBsysinfo\fR(2), \fBattributes\fR(7), \fBstandards\fR(7),
+\fBhostid\fR(1),
+\fBsysinfo\fR(2),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
 \fBzones\fR(7)

@@ -41,4 +41,5 @@ with the \fB-MAP_FIXED\fR option set.
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBsysconf\fR(3C)
+\fBmmap\fR(2),
+\fBsysconf\fR(3C)

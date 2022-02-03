@@ -93,4 +93,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBimaxdiv\fR(3C),  \fBattributes\fR(7), \fBstandards\fR(7)
+\fBimaxdiv\fR(3C),  \fBattributes\fR(7),
+\fBstandards\fR(7)

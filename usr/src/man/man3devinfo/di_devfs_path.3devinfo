@@ -152,7 +152,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdi_init\fR(3DEVINFO), \fBlibdevinfo\fR(3LIB), \fBmalloc\fR(3C),
+\fBmalloc\fR(3C),
+\fBdi_init\fR(3DEVINFO),
+\fBlibdevinfo\fR(3LIB),
 \fBattributes\fR(7)
 .sp
 .LP

@@ -167,4 +167,7 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBarc4random\fR(3C), \fBrand\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBarc4random\fR(3C),
+\fBrand\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

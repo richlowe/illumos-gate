@@ -66,8 +66,13 @@ See \fBdupb\fR(9F).
 .SH SEE ALSO
 .sp
 .LP
-\fBsrv\fR(9E), \fBbcanput\fR(9F), \fBcanput\fR(9F), \fBdupb\fR(9F),
-\fBputbq\fR(9F), \fBputq\fR(9F), \fBqenable\fR(9F)
+\fBsrv\fR(9E),
+\fBbcanput\fR(9F),
+\fBcanput\fR(9F),
+\fBdupb\fR(9F),
+\fBputbq\fR(9F),
+\fBputq\fR(9F),
+\fBqenable\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

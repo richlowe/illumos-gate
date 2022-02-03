@@ -342,6 +342,10 @@ The external variables \fB_nl_msg_cat_cntr\fR and \fB_nl_domain_bindings\fR are
 Uncommitted.
 .SH SEE ALSO
 .LP
-\fBmsgfmt\fR(1), \fBxgettext\fR(1), \fBiconv_open\fR(3C),
-\fBlibintl.h\fR(3HEAD), \fBsetlocale\fR(3C), \fBattributes\fR(7),
+\fBmsgfmt\fR(1),
+\fBxgettext\fR(1),
+\fBiconv_open\fR(3C),
+\fBsetlocale\fR(3C),
+\fBlibintl.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBenviron\fR(7)

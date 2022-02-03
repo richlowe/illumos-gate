@@ -47,7 +47,8 @@ A \fBdatab\fR structure is defined as type \fBdblk_t\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBfree_rtn\fR(9S), \fBmsgb\fR(9S)
+\fBfree_rtn\fR(9S),
+\fBmsgb\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

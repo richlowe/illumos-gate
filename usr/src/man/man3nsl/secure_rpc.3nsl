@@ -351,5 +351,10 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBchkey\fR(1), \fBkeylogin\fR(1), \fBkeyserv\fR(8), \fBnewkey\fR(8),
-\fBrpc\fR(3NSL), \fBrpc_clnt_auth\fR(3NSL), \fBattributes\fR(7)
+\fBchkey\fR(1),
+\fBkeylogin\fR(1),
+\fBrpc\fR(3NSL),
+\fBrpc_clnt_auth\fR(3NSL),
+\fBattributes\fR(7),
+\fBkeyserv\fR(8),
+\fBnewkey\fR(8)

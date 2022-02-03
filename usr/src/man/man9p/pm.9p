@@ -80,8 +80,12 @@ Interface stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBpower.conf\fR(5), \fBpm\fR(4D), \fBattach\fR(9E), \fBdetach\fR(9E),
-\fBpm_busy_component\fR(9F), \fBpm_idle_component\fR(9F),
+\fBpm\fR(4D),
+\fBpower.conf\fR(5),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
+\fBpm_busy_component\fR(9F),
+\fBpm_idle_component\fR(9F),
 \fBpm-components\fR(9P)
 .sp
 .LP

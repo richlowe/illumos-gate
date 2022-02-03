@@ -43,7 +43,9 @@ scsi_destroy_pkt(un->un_rqs);
 .in -2
 
 .SH SEE ALSO
-\fBtran_destroy_pkt\fR(9E), \fBscsi_init_pkt\fR(9F), \fBscsi_pkt\fR(9S)
+\fBtran_destroy_pkt\fR(9E),
+\fBscsi_init_pkt\fR(9F),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

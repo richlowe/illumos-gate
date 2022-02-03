@@ -109,7 +109,9 @@ MT-Level
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_ia_open\fR(3DAT), \fBdat_provider_fini\fR(3DAT),
+\fBdat_ia_open\fR(3DAT),
+\fBdat_provider_fini\fR(3DAT),
 \fBdat_registry_add_provider\fR(3DAT),
-\fBdat_registry_remove_provider\fR(3DAT), \fBlibdat\fR(3LIB),
+\fBdat_registry_remove_provider\fR(3DAT),
+\fBlibdat\fR(3LIB),
 \fBattributes\fR(7)

@@ -297,8 +297,12 @@ An error occurred.
 .SH SEE ALSO
 .sp
 .LP
-\fBmail\fR(1), \fBuucp\fR(1C), \fBuustat\fR(1C), \fBuux\fR(1C),
-\fBuucleanup\fR(8), \fBattributes\fR(7)
+\fBmail\fR(1),
+\fBuucp\fR(1C),
+\fBuustat\fR(1C),
+\fBuux\fR(1C),
+\fBattributes\fR(7),
+\fBuucleanup\fR(8)
 .SH NOTES
 .sp
 .LP

@@ -62,5 +62,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBlgrp_cookie_stale\fR(3LGRP), \fBlgrp_fini\fR(3LGRP), \fBlgrp_init\fR(3LGRP),
-\fBliblgrp\fR(3LIB), \fBattributes\fR(7)
+\fBlgrp_cookie_stale\fR(3LGRP),
+\fBlgrp_fini\fR(3LGRP),
+\fBlgrp_init\fR(3LGRP),
+\fBliblgrp\fR(3LIB),
+\fBattributes\fR(7)

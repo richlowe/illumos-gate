@@ -90,7 +90,8 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_release_oid_set\fR(3GSS), \fBgss_str_to_oid\fR(3GSS),
+\fBgss_release_oid_set\fR(3GSS),
+\fBgss_str_to_oid\fR(3GSS),
 \fBattributes\fR(7)
 .sp
 .LP

@@ -172,9 +172,16 @@ Architecture	PCI-based  systems
 
 .SH SEE ALSO
 .LP
-\fBdumpkeys\fR(1), \fBkbd\fR(1), \fBloadkeys\fR(1), \fBioctl\fR(2),
-\fBkeytables\fR(5), \fBattributes\fR(7), \fBhid\fR(4D), \fBusba\fR(4D),
-\fBvirtualkm\fR(4D), \fBkb\fR(4M)
+\fBdumpkeys\fR(1),
+\fBkbd\fR(1),
+\fBloadkeys\fR(1),
+\fBioctl\fR(2),
+\fBhid\fR(4D),
+\fBusba\fR(4D),
+\fBvirtualkm\fR(4D),
+\fBkb\fR(4M),
+\fBkeytables\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

@@ -144,8 +144,12 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBscsi_pktalloc\fR(9F), \fBscsi_pktfree\fR(9F),
-\fBscsi_resalloc\fR(9F), \fBscsi_resfree\fR(9F), \fBbuf\fR(9S),
+\fBattributes\fR(7),
+\fBscsi_pktalloc\fR(9F),
+\fBscsi_pktfree\fR(9F),
+\fBscsi_resalloc\fR(9F),
+\fBscsi_resfree\fR(9F),
+\fBbuf\fR(9S),
 \fBscsi_pkt\fR(9S)
 .sp
 .LP

@@ -382,8 +382,11 @@ PROM monitor configuration interface
 .SH SEE ALSO
 .sp
 .LP
-\fBeeprom\fR(8), \fBmonitor\fR(8), \fBprtconf\fR(8), \fBioctl\fR(2),
-\fBmem\fR(4D)
+\fBioctl\fR(2),
+\fBmem\fR(4D),
+\fBeeprom\fR(8),
+\fBmonitor\fR(8),
+\fBprtconf\fR(8)
 .SH BUGS
 .sp
 .LP

@@ -119,5 +119,7 @@ MT Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibc_db\fR(3LIB), \fBproc_service\fR(3PROC), \fBattributes\fR(7),
+\fBlibc_db\fR(3LIB),
+\fBproc_service\fR(3PROC),
+\fBattributes\fR(7),
 \fBthreads\fR(7)

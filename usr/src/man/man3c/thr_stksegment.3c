@@ -84,4 +84,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsigaltstack\fR(2), \fBthr_create\fR(3C), \fBattributes\fR(7)
+\fBsigaltstack\fR(2),
+\fBthr_create\fR(3C),
+\fBattributes\fR(7)

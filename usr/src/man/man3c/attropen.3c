@@ -60,4 +60,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBopen\fR(2), \fBattributes\fR(7), \fBfsattr\fR(7)
+\fBopen\fR(2),
+\fBattributes\fR(7),
+\fBfsattr\fR(7)

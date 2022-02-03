@@ -106,7 +106,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB), \fBMP_DisableAutoProbing\fR(3MPAPI), \fBattributes\fR(7)
+\fBlibMPAPI\fR(3LIB),
+\fBMP_DisableAutoProbing\fR(3MPAPI),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

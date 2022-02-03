@@ -184,8 +184,11 @@ MT-Level	See \fBNOTES\fR below.
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3), \fBnsswitch.conf\fR(5), \fBprotocols\fR(5),
-\fBattributes\fR(7), \fBnetdb.h\fR(3HEAD)
+\fBIntro\fR(3),
+\fBnetdb.h\fR(3HEAD),
+\fBnsswitch.conf\fR(5),
+\fBprotocols\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .LP
 Although \fBgetprotobyname_r()\fR, \fBgetprotobynumber_r()\fR, and

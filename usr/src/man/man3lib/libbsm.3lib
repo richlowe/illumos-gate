@@ -89,4 +89,6 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBpvs\fR(1), \fBIntro\fR(3), \fBattributes\fR(7)
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBattributes\fR(7)

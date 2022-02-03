@@ -51,8 +51,11 @@ Architecture	BBC-based SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBkbd\fR(1), \fBattributes\fR(7), \fBgrbeep\fR(4D), \fBkb\fR(4M),
-\fBusbkbm\fR(4M)
+\fBkbd\fR(1),
+\fBgrbeep\fR(4D),
+\fBkb\fR(4M),
+\fBusbkbm\fR(4M),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

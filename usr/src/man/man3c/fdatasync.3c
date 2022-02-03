@@ -131,6 +131,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBfcntl\fR(2), \fBopen\fR(2), \fBread\fR(2), \fBwrite\fR(2), \fBfsync\fR(3C),
-\fBaio_fsync\fR(3C), \fBfcntl.h\fR(3HEAD), \fBattributes\fR(7),
+\fBfcntl\fR(2),
+\fBopen\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBaio_fsync\fR(3C),
+\fBfsync\fR(3C),
+\fBfcntl.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

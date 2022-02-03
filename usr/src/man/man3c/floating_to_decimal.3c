@@ -123,5 +123,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBeconvert\fR(3C), \fBfconvert\fR(3C), \fBgconvert\fR(3C), \fBprintf\fR(3C),
-\fBsprintf\fR(3C), \fBattributes\fR(7)
+\fBeconvert\fR(3C),
+\fBfconvert\fR(3C),
+\fBgconvert\fR(3C),
+\fBprintf\fR(3C),
+\fBsprintf\fR(3C),
+\fBattributes\fR(7)

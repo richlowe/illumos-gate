@@ -164,4 +164,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_protocol_lookup\fR(9F), \fBnetinfo\fR(9F)
+\fBnet_protocol_lookup\fR(9F),
+\fBnetinfo\fR(9F)

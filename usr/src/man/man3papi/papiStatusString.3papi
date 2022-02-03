@@ -82,4 +82,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpapi\fR(3LIB), \fBattributes\fR(7)
+\fBlibpapi\fR(3LIB),
+\fBattributes\fR(7)

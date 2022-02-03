@@ -217,8 +217,11 @@ Architecture	SPARC
 .SH SEE ALSO
 .sp
 .LP
-\fBnetstat\fR(8), \fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBfp\fR(4D),
-\fBdlpi\fR(4P)
+\fBfp\fR(4D),
+\fBdlpi\fR(4P),
+\fBdriver.conf\fR(5),
+\fBnetstat\fR(8),
+\fBprtconf\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -105,7 +105,10 @@ failures is incremented (lines 12, 17). If an invalid message type is detected,
 .SH SEE ALSO
 .sp
 .LP
-\fBput\fR(9E), \fBcmn_err\fR(9F), \fBdatamsg\fR(9F), \fBputctl1\fR(9F),
+\fBput\fR(9E),
+\fBcmn_err\fR(9F),
+\fBdatamsg\fR(9F),
+\fBputctl1\fR(9F),
 \fBputnextctl\fR(9F)
 .sp
 .LP

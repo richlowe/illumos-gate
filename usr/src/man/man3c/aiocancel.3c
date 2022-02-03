@@ -85,7 +85,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBaioread\fR(3C), \fBaiowait\fR(3C), \fBattributes\fR(7)
+\fBaioread\fR(3C),
+\fBaiowait\fR(3C),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

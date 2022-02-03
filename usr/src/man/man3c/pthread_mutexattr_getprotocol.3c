@@ -232,6 +232,10 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_attr_getschedparam\fR(3C), \fBpthread_mutex_init\fR(3C),
-\fBpthread_mutexattr_init\fR(3C), \fBsched_setparam\fR(3C),
-\fBsched_setscheduler\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBpthread_attr_getschedparam\fR(3C),
+\fBpthread_mutex_init\fR(3C),
+\fBpthread_mutexattr_init\fR(3C),
+\fBsched_setparam\fR(3C),
+\fBsched_setscheduler\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

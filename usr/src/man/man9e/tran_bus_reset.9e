@@ -93,4 +93,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBtran_quiesce\fR(9E), \fBscsi_hba_tran\fR(9S)
+\fBattributes\fR(7),
+\fBtran_quiesce\fR(9E),
+\fBscsi_hba_tran\fR(9S)

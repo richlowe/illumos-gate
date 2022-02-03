@@ -150,5 +150,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurses\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBnewpad\fR(3XCURSES),
-\fBoverlay\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBcurses\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnewpad\fR(3XCURSES),
+\fBoverlay\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

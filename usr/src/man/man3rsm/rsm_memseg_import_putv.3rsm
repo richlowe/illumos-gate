@@ -219,4 +219,5 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBrsm_create_localmemory_handle\fR(3RSM),
-\fBrsm_free_localmemory_handle\fR(3RSM), \fBattributes\fR(7)
+\fBrsm_free_localmemory_handle\fR(3RSM),
+\fBattributes\fR(7)

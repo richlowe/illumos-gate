@@ -132,5 +132,7 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBnet_instance_register\fR(9F),
-\fBnet_instance_unregister\fR(9F), \fBnet_zoneidtonetid\fR(9F)
+\fBattributes\fR(7),
+\fBnet_instance_register\fR(9F),
+\fBnet_instance_unregister\fR(9F),
+\fBnet_zoneidtonetid\fR(9F)

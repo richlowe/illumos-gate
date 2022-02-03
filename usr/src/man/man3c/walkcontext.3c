@@ -236,8 +236,12 @@ Async-Signal-Safe.
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBgetcontext\fR(2), \fBsigaction\fR(2), \fBdladdr\fR(3C),
-\fBsiginfo.h\fR(3HEAD), \fBattributes\fR(7)
+\fBIntro\fR(2),
+\fBgetcontext\fR(2),
+\fBsigaction\fR(2),
+\fBdladdr\fR(3C),
+\fBsiginfo.h\fR(3HEAD),
+\fBattributes\fR(7)
 .sp
 .LP
 Weaver, David L. and Tom Germond, eds. \fIThe SPARC Architecture Manual\fR,

@@ -291,11 +291,21 @@ MT-Level	See \fBNOTES\fR below.
 .TE
 
 .SH SEE ALSO
-\fBgetrlimit\fR(2), \fBulimit\fR(2) \fBwrite\fR(2), \fBIntro\fR(3),
-\fBabort\fR(3C), \fBexit\fR(3C), \fBfclose\fR(3C), \fBferror\fR(3C),
-\fBfflush\fR(3C), \fBflockfile\fR(3C), \fBprintf\fR(3C),
-\fBputc\fR(3C), \fBputs\fR(3C), \fBsetbuf\fR(3C), \fBstdio\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetrlimit\fR(2), \fBulimit\fR(2) \fBwrite\fR(2),
+\fBIntro\fR(3),
+\fBabort\fR(3C),
+\fBexit\fR(3C),
+\fBfclose\fR(3C),
+\fBferror\fR(3C),
+\fBfflush\fR(3C),
+\fBflockfile\fR(3C),
+\fBprintf\fR(3C),
+\fBputc\fR(3C),
+\fBputs\fR(3C),
+\fBsetbuf\fR(3C),
+\fBstdio\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 The \fBfputc()\fR, \fBputc()\fR, \fBputchar()\fR, and \fBputw()\fR routines are
 MT-Safe in multithreaded applications.  The \fBputc_unlocked()\fR and

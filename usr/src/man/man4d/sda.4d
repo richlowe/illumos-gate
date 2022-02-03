@@ -49,7 +49,8 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBsdhost\fR(4D)
+\fBsdhost\fR(4D),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

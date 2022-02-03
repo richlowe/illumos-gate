@@ -692,13 +692,30 @@ An address has changed on a logical  interface.
 .RE
 
 .SH SEE ALSO
-\fBifconfig\fR(8), \fBrouteadm\fR(8), \fBndd\fR(8), \fBread\fR(2),
-\fBwrite\fR(2), \fBsocket.h\fR(3HEAD), \fBbind\fR(3SOCKET),
-\fBconnect\fR(3SOCKET), \fBgetsockopt\fR(3SOCKET), \fBrecv\fR(3SOCKET),
-\fBsend\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET), \fBdefaultrouter\fR(5),
-\fBicmp\fR(4P), \fBif_tcp\fR(4P), \fBinet\fR(4P), \fBip\fR(4P), \fBip6\fR(4P),
-\fBipsec\fR(4P), \fBrouting\fR(4P), \fBtcp\fR(4P), \fBudp\fR(4P),
-\fBnet_hook_register\fR(9F), \fBhook_pkt_event\fR(9S)
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBsocket.h\fR(3HEAD),
+\fBbind\fR(3SOCKET),
+\fBconnect\fR(3SOCKET),
+\fBgetsockopt\fR(3SOCKET),
+\fBrecv\fR(3SOCKET),
+\fBsend\fR(3SOCKET),
+\fBsetsockopt\fR(3SOCKET),
+\fBicmp\fR(4P),
+\fBif_tcp\fR(4P),
+\fBinet\fR(4P),
+\fBip\fR(4P),
+\fBip6\fR(4P),
+\fBipsec\fR(4P),
+\fBrouting\fR(4P),
+\fBtcp\fR(4P),
+\fBudp\fR(4P),
+\fBdefaultrouter\fR(5),
+\fBifconfig\fR(8),
+\fBndd\fR(8),
+\fBrouteadm\fR(8),
+\fBnet_hook_register\fR(9F),
+\fBhook_pkt_event\fR(9S)
 .sp
 .LP
 Braden, R., \fIRFC 1122, Requirements for Internet Hosts \(mi Communication

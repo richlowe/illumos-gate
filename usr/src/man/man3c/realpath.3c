@@ -208,5 +208,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetcwd\fR(3C), \fBlimits.h\fR(3HEAD), \fBsysconf\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetcwd\fR(3C),
+\fBsysconf\fR(3C),
+\fBlimits.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

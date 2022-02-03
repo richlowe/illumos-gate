@@ -52,7 +52,9 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBkvm_open\fR(3KVM), \fBkvm_kread\fR(3KVM), \fBnlist\fR(3ELF),
+\fBnlist\fR(3ELF),
+\fBkvm_kread\fR(3KVM),
+\fBkvm_open\fR(3KVM),
 \fBattributes\fR(7)
 .SH NOTES
 .LP

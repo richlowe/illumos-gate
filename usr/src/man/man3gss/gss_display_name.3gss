@@ -130,7 +130,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_import_name\fR(3GSS), \fBgss_release_buffer\fR(3GSS),
+\fBgss_import_name\fR(3GSS),
+\fBgss_release_buffer\fR(3GSS),
 \fBattributes\fR(7)
 .sp
 .LP

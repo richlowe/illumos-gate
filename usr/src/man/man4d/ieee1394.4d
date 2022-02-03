@@ -92,8 +92,12 @@ Architecture	PCI-based systems
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBav1394\fR(4D), \fBdcam1394\fR(4D), \fBhci1394\fR(4D),
-\fBscsa1394\fR(4D), \fBiec61883\fR(4I)
+\fBav1394\fR(4D),
+\fBdcam1394\fR(4D),
+\fBhci1394\fR(4D),
+\fBscsa1394\fR(4D),
+\fBiec61883\fR(4I),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIIEEE 1394a\fR Specification - 1394 Trade Association, 2000

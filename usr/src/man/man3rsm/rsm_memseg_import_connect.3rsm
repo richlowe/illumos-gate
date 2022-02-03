@@ -234,4 +234,5 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBrsm_memseg_import_map\fR(3RSM), \fBattributes\fR(7)
+\fBrsm_memseg_import_map\fR(3RSM),
+\fBattributes\fR(7)

@@ -53,5 +53,10 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBsigaction\fR(2), \fBgettext\fR(3C), \fBperror\fR(3C), \fBsetlocale\fR(3C),
-\fBsiginfo.h\fR(3HEAD), \fBsignal.h\fR(3HEAD), \fBattributes\fR(7)
+\fBsigaction\fR(2),
+\fBgettext\fR(3C),
+\fBperror\fR(3C),
+\fBsetlocale\fR(3C),
+\fBsiginfo.h\fR(3HEAD),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7)

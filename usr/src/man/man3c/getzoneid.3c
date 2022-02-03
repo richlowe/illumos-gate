@@ -126,5 +126,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBchroot\fR(2), \fBmalloc\fR(3C), \fBattributes\fR(7),
+\fBIntro\fR(2),
+\fBchroot\fR(2),
+\fBmalloc\fR(3C),
+\fBattributes\fR(7),
 \fBzones\fR(7)

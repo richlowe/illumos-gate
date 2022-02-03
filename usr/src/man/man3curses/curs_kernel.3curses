@@ -154,9 +154,13 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBcurs_initscr\fR(3CURSES), \fBcurs_outopts\fR(3CURSES),
-\fBcurs_refresh\fR(3CURSES), \fBcurs_scr_dump\fR(3CURSES),
-\fBcurs_slk\fR(3CURSES), \fBcurses\fR(3CURSES), \fBattributes\fR(7)
+\fBcurs_initscr\fR(3CURSES),
+\fBcurs_outopts\fR(3CURSES),
+\fBcurs_refresh\fR(3CURSES),
+\fBcurs_scr_dump\fR(3CURSES),
+\fBcurs_slk\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBattributes\fR(7)
 .SH NOTES
 The header <\fBcurses.h\fR> automatically includes the headers  <\fBstdio.h\fR>
 and <\fBunctrl.h\fR>.

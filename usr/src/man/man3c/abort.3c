@@ -66,6 +66,13 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(2), \fBgetrlimit\fR(2), \fBkill\fR(2), \fBfclose\fR(3C),
-\fBraise\fR(3C), \fBsignal\fR(3C), \fBwait\fR(3C), \fBwaitpid\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBexit\fR(2),
+\fBgetrlimit\fR(2),
+\fBkill\fR(2),
+\fBfclose\fR(3C),
+\fBraise\fR(3C),
+\fBsignal\fR(3C),
+\fBwait\fR(3C),
+\fBwaitpid\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

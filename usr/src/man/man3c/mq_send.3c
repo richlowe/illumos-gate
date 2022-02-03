@@ -241,6 +241,10 @@ Standard	See below.
 For \fBmq_send()\fR and \fBmq_timedsend()\fR, see \fBstandards\fR(7).
 .SH SEE ALSO
 .LP
-\fBsysconf\fR(3C), \fBmqueue.h\fR(3HEAD), \fBmq_open\fR(3C),
-\fBmq_receive\fR(3C), \fBmq_setattr\fR(3C), \fBattributes\fR(7),
+\fBmq_open\fR(3C),
+\fBmq_receive\fR(3C),
+\fBmq_setattr\fR(3C),
+\fBsysconf\fR(3C),
+\fBmqueue.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

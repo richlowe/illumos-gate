@@ -172,9 +172,22 @@ function is Standard.  The
 function is Uncommitted.
 .SH SEE ALSO
 .LP
-\fBfeof\fR(3C), \fBferror\fR(3C), \fBfgetc\fR(3C), \fBfgets\fR(3C),
-\fBfgetws\fR(3C), \fBfopen\fR(3C), \fBfread\fR(3C), \fBfscanf\fR(3C),
-\fBgetc\fR(3C), \fBgetchar\fR(3C), \fBgets\fR(3C), \fBscanf\fR(3C),
-\fBnewlocale\fR(3C), \fBsetlocale\fR(3C), \fBungetc\fR(3C), \fBungetwc\fR(3C),
-\fBuselocale\fR(3C), \fBattributes\fR(7),
+\fBfeof\fR(3C),
+\fBferror\fR(3C),
+\fBfgetc\fR(3C),
+\fBfgets\fR(3C),
+\fBfgetws\fR(3C),
+\fBfopen\fR(3C),
+\fBfread\fR(3C),
+\fBfscanf\fR(3C),
+\fBgetc\fR(3C),
+\fBgetchar\fR(3C),
+\fBgets\fR(3C),
+\fBnewlocale\fR(3C),
+\fBscanf\fR(3C),
+\fBsetlocale\fR(3C),
+\fBungetc\fR(3C),
+\fBungetwc\fR(3C),
+\fBuselocale\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

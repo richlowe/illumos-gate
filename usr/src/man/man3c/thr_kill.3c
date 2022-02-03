@@ -115,5 +115,10 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBkill\fR(2), \fBsigaction\fR(2), \fBraise\fR(3C), \fBsignal.h\fR(3HEAD),
-\fBthr_self\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBkill\fR(2),
+\fBsigaction\fR(2),
+\fBraise\fR(3C),
+\fBthr_self\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

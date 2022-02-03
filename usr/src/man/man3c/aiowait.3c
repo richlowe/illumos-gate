@@ -109,7 +109,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBaiocancel\fR(3C), \fBaioread\fR(3C), \fBattributes\fR(7)
+\fBaiocancel\fR(3C),
+\fBaioread\fR(3C),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

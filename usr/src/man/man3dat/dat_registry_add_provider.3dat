@@ -118,4 +118,6 @@ MT-Level
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_ia_open\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_ia_open\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

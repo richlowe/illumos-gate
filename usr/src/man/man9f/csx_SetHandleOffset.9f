@@ -50,7 +50,8 @@ Successful operation.
 .SH CONTEXT
 This function may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_GetHandleOffset\fR(9F), \fBcsx_RequestIO\fR(9F),
+\fBcsx_GetHandleOffset\fR(9F),
+\fBcsx_RequestIO\fR(9F),
 \fBcsx_RequestIRQ\fR(9F)
 .sp
 .LP

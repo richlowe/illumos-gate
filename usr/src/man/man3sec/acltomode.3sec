@@ -88,4 +88,5 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBacl\fR(2), \fBattributes\fR(7)
+\fBacl\fR(2),
+\fBattributes\fR(7)

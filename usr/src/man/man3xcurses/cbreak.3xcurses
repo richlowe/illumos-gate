@@ -88,6 +88,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetch\fR(3XCURSES), \fBhalfdelay\fR(3XCURSES), \fBnodelay\fR(3XCURSES),
-\fBtimeout\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
-\fBstandards\fR(7), \fBtermio\fR(4I)
+\fBgetch\fR(3XCURSES),
+\fBhalfdelay\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnodelay\fR(3XCURSES),
+\fBtimeout\fR(3XCURSES),
+\fBtermio\fR(4I),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

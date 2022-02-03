@@ -194,4 +194,7 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(3), \fBprinters\fR(5), \fBprinters.conf\fR(5), \fBattributes\fR(7)
+\fBIntro\fR(3),
+\fBprinters\fR(5),
+\fBprinters.conf\fR(5),
+\fBattributes\fR(7)

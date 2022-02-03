@@ -162,9 +162,16 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfdetach\fR(8), \fBchmod\fR(2), \fBmount\fR(2), \fBstat\fR(2),
-\fBdoor_create\fR(3C), \fBfdetach\fR(3C), \fBisastream\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7), \fBstreamio\fR(4I)
+\fBchmod\fR(2),
+\fBmount\fR(2),
+\fBstat\fR(2),
+\fBdoor_create\fR(3C),
+\fBfdetach\fR(3C),
+\fBisastream\fR(3C),
+\fBstreamio\fR(4I),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBfdetach\fR(8)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

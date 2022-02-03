@@ -275,6 +275,13 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBctype\fR(3C), \fBdecimal_to_floating\fR(3C), \fBgetc_unlocked\fR(3C),
-\fBisspace\fR(3C), \fBlocaleconv\fR(3C), \fBscanf\fR(3C), \fBsetlocale\fR(3C),
-\fBstrtod\fR(3C), \fBungetc\fR(3C), \fBattributes\fR(7)
+\fBctype\fR(3C),
+\fBdecimal_to_floating\fR(3C),
+\fBgetc_unlocked\fR(3C),
+\fBisspace\fR(3C),
+\fBlocaleconv\fR(3C),
+\fBscanf\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstrtod\fR(3C),
+\fBungetc\fR(3C),
+\fBattributes\fR(7)

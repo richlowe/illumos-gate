@@ -313,10 +313,18 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBexit\fR(2), \fBumask\fR(2), \fBsysconf\fR(3C),
-\fBmqueue.h\fR(3HEAD), \fBmq_close\fR(3C), \fBmq_receive\fR(3C),
-\fBmq_send\fR(3C), \fBmq_setattr\fR(3C), \fBmq_unlink\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBexec\fR(2),
+\fBexit\fR(2),
+\fBumask\fR(2),
+\fBmq_close\fR(3C),
+\fBmq_receive\fR(3C),
+\fBmq_send\fR(3C),
+\fBmq_setattr\fR(3C),
+\fBmq_unlink\fR(3C),
+\fBsysconf\fR(3C),
+\fBmqueue.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

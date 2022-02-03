@@ -100,8 +100,13 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBpower.conf\fR(5), \fBpm\fR(4D), \fBattach\fR(9E), \fBdetach\fR(9E),
-\fBpower\fR(9E), \fBpm_raise_power\fR(9F), \fBpm\fR(9P),
+\fBpm\fR(4D),
+\fBpower.conf\fR(5),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
+\fBpower\fR(9E),
+\fBpm_raise_power\fR(9F),
+\fBpm\fR(9P),
 \fBpm-components\fR(9P)
 .sp
 .LP

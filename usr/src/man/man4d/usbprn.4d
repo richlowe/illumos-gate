@@ -359,9 +359,17 @@ Architecture	SPARC, x86, PCI-based systems
 .TE
 
 .SH SEE ALSO
-\fBcfgadm_usb\fR(8), \fBprintmgr\fR(8), \fBioctl\fR(2), \fBopen\fR(2),
-\fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(7),
-\fBecpp\fR(4D), \fBugen\fR(4D), \fBusba\fR(4D), \fBprnio\fR(4I),
+\fBioctl\fR(2),
+\fBopen\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBecpp\fR(4D),
+\fBugen\fR(4D),
+\fBusba\fR(4D),
+\fBprnio\fR(4I),
+\fBattributes\fR(7),
+\fBcfgadm_usb\fR(8),
+\fBprintmgr\fR(8),
 \fBattach\fR(9E)
 .sp
 .LP

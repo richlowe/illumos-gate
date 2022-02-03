@@ -89,5 +89,6 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBnvlist_lookup_nvpair\fR(3NVPAIR), \fBnvlist_alloc\fR(9F),
-\fBattributes\fR(7)
+\fBnvlist_lookup_nvpair\fR(3NVPAIR),
+\fBattributes\fR(7),
+\fBnvlist_alloc\fR(9F)

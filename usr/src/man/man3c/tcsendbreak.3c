@@ -139,4 +139,7 @@ MT-Level	MT-Safe, and Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBtcdrain\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7), \fBtermio\fR(4I)
+\fBtcdrain\fR(3C),
+\fBtermio\fR(4I),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

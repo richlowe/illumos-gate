@@ -53,7 +53,9 @@ and before the close  routine calls \fBqprocsoff\fR(9F).
 The \fBqunbufcall()\fR function can be called from user, interrupt, or kernel
 context.
 .SH SEE ALSO
-\fBmt-streams\fR(9F), \fBqbufcall\fR(9F), \fBqtimeout\fR(9F),
+\fBmt-streams\fR(9F),
+\fBqbufcall\fR(9F),
+\fBqtimeout\fR(9F),
 \fBquntimeout\fR(9F)
 .sp
 .LP

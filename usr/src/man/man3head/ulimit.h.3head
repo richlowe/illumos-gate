@@ -94,4 +94,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBulimit\fR(2), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBulimit\fR(2),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

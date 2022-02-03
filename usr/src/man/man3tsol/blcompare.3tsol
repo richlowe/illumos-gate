@@ -77,8 +77,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetplabel\fR(3TSOL), \fBlabel_to_str\fR(3TSOL), \fBlibtsol\fR(3LIB),
-\fBucred_getlabel\fR(3C), \fBlabel_encodings\fR(5), \fBattributes\fR(7),
+\fBucred_getlabel\fR(3C),
+\fBlibtsol\fR(3LIB),
+\fBgetplabel\fR(3TSOL),
+\fBlabel_to_str\fR(3TSOL),
+\fBlabel_encodings\fR(5),
+\fBattributes\fR(7),
 \fBlabels\fR(7)
 .sp
 .LP

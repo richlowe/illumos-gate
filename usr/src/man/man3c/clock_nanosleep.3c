@@ -175,5 +175,9 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBclock_getres\fR(3C), \fBnanosleep\fR(3C), \fBpthread_cond_timedwait\fR(3C),
-\fBsleep\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBclock_getres\fR(3C),
+\fBnanosleep\fR(3C),
+\fBpthread_cond_timedwait\fR(3C),
+\fBsleep\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

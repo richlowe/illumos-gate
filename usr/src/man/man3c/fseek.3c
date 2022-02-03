@@ -315,6 +315,12 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBgetrlimit\fR(2), \fBulimit\fR(2), \fBftell\fR(3C),
-\fBrewind\fR(3C), \fBungetc\fR(3C), \fBungetwc\fR(3C), \fBattributes\fR(7),
-\fBlf64\fR(7), \fBstandards\fR(7)
+\fBgetrlimit\fR(2),
+\fBulimit\fR(2),
+\fBftell\fR(3C),
+\fBrewind\fR(3C),
+\fBungetc\fR(3C),
+\fBungetwc\fR(3C),
+\fBattributes\fR(7),
+\fBlf64\fR(7),
+\fBstandards\fR(7)

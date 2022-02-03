@@ -409,10 +409,19 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(2), \fBgetrlimit\fR(2), \fBmmap\fR(2), \fBexit\fR(3C),
-\fBsleep\fR(3C), \fBthr_exit\fR(3C), \fBthr_join\fR(3C),
-\fBthr_min_stack\fR(3C), \fBthr_setconcurrency\fR(3C), \fBthr_suspend\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7), \fBthreads\fR(7)
+\fBexit\fR(2),
+\fBgetrlimit\fR(2),
+\fBmmap\fR(2),
+\fBexit\fR(3C),
+\fBsleep\fR(3C),
+\fBthr_exit\fR(3C),
+\fBthr_join\fR(3C),
+\fBthr_min_stack\fR(3C),
+\fBthr_setconcurrency\fR(3C),
+\fBthr_suspend\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBthreads\fR(7)
 .SH NOTES
 .sp
 .LP

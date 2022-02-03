@@ -184,13 +184,26 @@ MT Level	MT-Safe with exceptions
 
 .SH SEE ALSO
 .LP
-\fBkeylogin\fR(1), \fBkeylogout\fR(1), \fBpam\fR(3PAM),
-\fBpam_authenticate\fR(3PAM), \fBpam_chauthtok\fR(3PAM),
-\fBpam_setcred\fR(3PAM), \fBpam_get_item\fR(3PAM), \fBpam_set_data\fR(3PAM),
-\fBpam_get_data\fR(3PAM), \fBsyslog\fR(3C), \fBlibpam\fR(3LIB),
-\fBpam.conf\fR(5), \fBattributes\fR(7), \fBpam_authtok_check\fR(7),
-\fBpam_authtok_get\fR(7), \fBpam_authtok_store\fR(7), \fBpam_passwd_auth\fR(7),
-\fBpam_unix_account\fR(7), \fBpam_unix_auth\fR(7), \fBpam_unix_session\fR(7)
+\fBkeylogin\fR(1),
+\fBkeylogout\fR(1),
+\fBsyslog\fR(3C),
+\fBlibpam\fR(3LIB),
+\fBpam\fR(3PAM),
+\fBpam_authenticate\fR(3PAM),
+\fBpam_chauthtok\fR(3PAM),
+\fBpam_get_data\fR(3PAM),
+\fBpam_get_item\fR(3PAM),
+\fBpam_set_data\fR(3PAM),
+\fBpam_setcred\fR(3PAM),
+\fBpam.conf\fR(5),
+\fBattributes\fR(7),
+\fBpam_authtok_check\fR(7),
+\fBpam_authtok_get\fR(7),
+\fBpam_authtok_store\fR(7),
+\fBpam_passwd_auth\fR(7),
+\fBpam_unix_account\fR(7),
+\fBpam_unix_auth\fR(7),
+\fBpam_unix_session\fR(7)
 .SH NOTES
 .LP
 The interfaces in \fBlibpam\fR(3LIB) are MT-Safe only if each thread within the

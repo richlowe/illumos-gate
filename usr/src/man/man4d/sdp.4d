@@ -217,9 +217,15 @@ Architecture	x86, SPARC
 .TE
 
 .SH SEE ALSO
-\fBread\fR(2), \fBgetsockopt\fR(3XNET), \fBsocket.h\fR(3HEAD),
-\fBaccept\fR(3SOCKET), \fBbind\fR(3SOCKET), \fBconnect\fR(3SOCKET),
-\fBsend\fR(3SOCKET), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBread\fR(2),
+\fBsocket.h\fR(3HEAD),
+\fBaccept\fR(3SOCKET),
+\fBbind\fR(3SOCKET),
+\fBconnect\fR(3SOCKET),
+\fBsend\fR(3SOCKET),
+\fBgetsockopt\fR(3XNET),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .sp
 .LP
 \fIInfiniband Architecture Specification Vol 1- Annex 4\fR \(em November, 2002

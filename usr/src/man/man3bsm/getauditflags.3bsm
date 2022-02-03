@@ -63,7 +63,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBaudit.log\fR(5), \fBattributes\fR(7)
+\fBaudit.log\fR(5),
+\fBattributes\fR(7)
 .SH BUGS
 .LP
 This is not a very extensible interface.

@@ -150,8 +150,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdi_init\fR(3DEVINFO), \fBdi_prom_prop_lookup_bytes\fR(3DEVINFO),
-\fBlibdevinfo\fR(3LIB), \fBattributes\fR(7)
+\fBdi_init\fR(3DEVINFO),
+\fBdi_prom_prop_lookup_bytes\fR(3DEVINFO),
+\fBlibdevinfo\fR(3LIB),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

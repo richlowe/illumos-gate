@@ -137,5 +137,7 @@ MT-Level	MT-Safe
 \fBposix_spawn\fR(3C), posix_spawnattr_getpgroup(3C),
 posix_spawnattr_getpgroup(3C), \fBposix_spawnattr_getschedparam\fR(3C),
 \fBposix_spawnattr_getschedpolicy\fR(3C),
-\fBposix_spawnattr_getsigdefault\fR(3C), \fBposix_spawnattr_getsigmask\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBposix_spawnattr_getsigdefault\fR(3C),
+\fBposix_spawnattr_getsigmask\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

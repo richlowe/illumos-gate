@@ -154,4 +154,6 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBlgrp_home\fR(3LGRP), \fBliblgrp\fR(3LIB), \fBattributes\fR(7)
+\fBlgrp_home\fR(3LGRP),
+\fBliblgrp\fR(3LIB),
+\fBattributes\fR(7)

@@ -155,7 +155,9 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBscsi_setup_cdb\fR(9F), \fBscsi_device\fR(9S),
+\fBattributes\fR(7),
+\fBscsi_setup_cdb\fR(9F),
+\fBscsi_device\fR(9S),
 \fBscsi_pkt\fR(9S)
 .sp
 .LP

@@ -124,8 +124,13 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBfstyp\fR(8), \fBfsck\fR(8), \fBmount\fR(8), \fBlofiadm\fR(8),
-\fBnewfs\fR(8), \fBattributes\fR(7), \fBlofs\fR(4FS)
+\fBlofs\fR(4FS),
+\fBattributes\fR(7),
+\fBfsck\fR(8),
+\fBfstyp\fR(8),
+\fBlofiadm\fR(8),
+\fBmount\fR(8),
+\fBnewfs\fR(8)
 .SH NOTES
 .sp
 .LP

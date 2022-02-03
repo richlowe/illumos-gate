@@ -179,8 +179,12 @@ No \fBPCMCIA \fRhardware installed.
 .SH CONTEXT
 This function may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_Get8\fR(9F), \fBcsx_GetMappedAddr\fR(9F), \fBcsx_Put8\fR(9F),
-\fBcsx_RepGet8\fR(9F), \fBcsx_RepPut8\fR(9F), \fBcsx_RequestIO\fR(9F),
+\fBcsx_Get8\fR(9F),
+\fBcsx_GetMappedAddr\fR(9F),
+\fBcsx_Put8\fR(9F),
+\fBcsx_RepGet8\fR(9F),
+\fBcsx_RepPut8\fR(9F),
+\fBcsx_RequestIO\fR(9F),
 \fBcsx_RequestWindow\fR(9F)
 .sp
 .LP

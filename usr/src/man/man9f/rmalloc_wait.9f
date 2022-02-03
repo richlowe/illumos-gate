@@ -60,7 +60,10 @@ in most cases \fBrmalloc_wait()\fR should not be called from interrupt context.
 .SH SEE ALSO
 .sp
 .LP
-\fBrmalloc\fR(9F), \fBrmallocmap\fR(9F), \fBrmfree\fR(9F), \fBrmfreemap\fR(9F)
+\fBrmalloc\fR(9F),
+\fBrmallocmap\fR(9F),
+\fBrmfree\fR(9F),
+\fBrmfreemap\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

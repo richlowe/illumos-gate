@@ -76,8 +76,11 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(8), \fBwificonfig\fR(8), \fBattributes\fR(7), \fBgld\fR(4D),
-\fBdlpi\fR(4P)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7),
+\fBdladm\fR(8),
+\fBwificonfig\fR(8)
 .sp
 .LP
 \fIANSI/IEEE Std 802.11- Standard for Wireless LAN  Technology\fR \(em 1999

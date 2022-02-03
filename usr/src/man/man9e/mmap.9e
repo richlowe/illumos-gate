@@ -233,12 +233,22 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBattributes\fR(7), \fBattach\fR(9E), \fBdetach\fR(9E),
-\fBdevmap\fR(9E), \fBsegmap\fR(9E), \fBddi_btop\fR(9F),
-\fBddi_get_soft_state\fR(9F), \fBddi_mmap_get_model\fR(9F),
-\fBddi_model_convert_from\fR(9F), \fBddi_regs_map_free\fR(9F),
-\fBddi_regs_map_setup\fR(9F), \fBddi_soft_state\fR(9F), \fBdevmap_setup\fR(9F),
-\fBgetminor\fR(9F), \fBhat_getkpfnum\fR(9F)
+\fBmmap\fR(2),
+\fBattributes\fR(7),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
+\fBdevmap\fR(9E),
+\fBsegmap\fR(9E),
+\fBddi_btop\fR(9F),
+\fBddi_get_soft_state\fR(9F),
+\fBddi_mmap_get_model\fR(9F),
+\fBddi_model_convert_from\fR(9F),
+\fBddi_regs_map_free\fR(9F),
+\fBddi_regs_map_setup\fR(9F),
+\fBddi_soft_state\fR(9F),
+\fBdevmap_setup\fR(9F),
+\fBgetminor\fR(9F),
+\fBhat_getkpfnum\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

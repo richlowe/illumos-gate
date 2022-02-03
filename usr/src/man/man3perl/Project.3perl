@@ -251,6 +251,10 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBgetprojid\fR(2), \fBgetdefaultproj\fR(3PROJECT), \fBinproj\fR(3PROJECT),
-\fBlibproject\fR(3LIB), \fBsetproject\fR(3PROJECT), \fBproject\fR(5),
+\fBgetprojid\fR(2),
+\fBlibproject\fR(3LIB),
+\fBgetdefaultproj\fR(3PROJECT),
+\fBinproj\fR(3PROJECT),
+\fBsetproject\fR(3PROJECT),
+\fBproject\fR(5),
 \fBattributes\fR(7)

@@ -212,5 +212,7 @@ Architecture	x86
 .TE
 
 .SH SEE ALSO
-\fBisa\fR(5), \fBattributes\fR(7),
-\fBddi_dmae\fR(9F), \fBddi_dma_attr\fR(9S)
+\fBisa\fR(5),
+\fBattributes\fR(7),
+\fBddi_dmae\fR(9F),
+\fBddi_dma_attr\fR(9S)

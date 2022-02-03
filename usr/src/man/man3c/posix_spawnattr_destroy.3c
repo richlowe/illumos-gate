@@ -143,8 +143,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBposix_spawn\fR(3C), \fBposix_spawnattr_getflags\fR(3C),
-\fBposix_spawnattr_getpgroup\fR(3C), \fBposix_spawnattr_getschedparam\fR(3C),
+\fBposix_spawn\fR(3C),
+\fBposix_spawnattr_getflags\fR(3C),
+\fBposix_spawnattr_getpgroup\fR(3C),
+\fBposix_spawnattr_getschedparam\fR(3C),
 \fBposix_spawnattr_getschedpolicy\fR(3C),
-\fBposix_spawnattr_getsigdefault\fR(3C), \fBposix_spawnattr_getsigmask\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBposix_spawnattr_getsigdefault\fR(3C),
+\fBposix_spawnattr_getsigmask\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

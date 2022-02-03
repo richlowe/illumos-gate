@@ -222,5 +222,7 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBattach\fR(9E), \fBdetach\fR(9E),
+\fBattributes\fR(7),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
 \fBusb_get_dev_data\fR(9F)

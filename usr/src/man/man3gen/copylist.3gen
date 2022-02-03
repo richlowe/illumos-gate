@@ -75,7 +75,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmalloc\fR(3C), \fBattributes\fR(7), \fBlf64\fR(7)
+\fBmalloc\fR(3C),
+\fBattributes\fR(7),
+\fBlf64\fR(7)
 .SH NOTES
 .sp
 .LP

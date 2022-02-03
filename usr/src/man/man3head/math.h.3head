@@ -404,5 +404,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3), \fBfenv.h\fR(3HEAD), \fBlibm\fR(3LIB), \fBlimits.h\fR(3HEAD),
-\fBmatherr\fR(3M), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBIntro\fR(3),
+\fBfenv.h\fR(3HEAD),
+\fBlimits.h\fR(3HEAD),
+\fBlibm\fR(3LIB),
+\fBmatherr\fR(3M),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

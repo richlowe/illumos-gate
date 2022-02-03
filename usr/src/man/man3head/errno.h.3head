@@ -82,4 +82,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBIntro\fR(2),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -356,7 +356,13 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBconnect\fR(3XNET), \fBgai_strerror\fR(3XNET), \fBgethostbyname\fR(3XNET),
-\fBgetnameinfo\fR(3XNET), \fBgetservbyname\fR(3XNET), \fBinet_addr\fR(3XNET),
-\fBinet_ntop\fR(3XNET), \fBsocket\fR(3XNET), \fBattributes\fR(7),
+\fBconnect\fR(3XNET),
+\fBgai_strerror\fR(3XNET),
+\fBgethostbyname\fR(3XNET),
+\fBgetnameinfo\fR(3XNET),
+\fBgetservbyname\fR(3XNET),
+\fBinet_addr\fR(3XNET),
+\fBinet_ntop\fR(3XNET),
+\fBsocket\fR(3XNET),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

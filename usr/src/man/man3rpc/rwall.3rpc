@@ -51,5 +51,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrpc.rwalld\fR(8), \fBwall\fR(8), \fBrpc_clnt_calls\fR(3NSL),
-\fBattributes\fR(7)
+\fBrpc_clnt_calls\fR(3NSL),
+\fBattributes\fR(7),
+\fBrpc.rwalld\fR(8),
+\fBwall\fR(8)

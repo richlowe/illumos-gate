@@ -24,4 +24,5 @@ kernel statistics driver
 .SH SEE ALSO
 .sp
 .LP
-\fBkstat\fR(3KSTAT), \fBkstat\fR(9S)
+\fBkstat\fR(3KSTAT),
+\fBkstat\fR(9S)

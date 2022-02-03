@@ -96,7 +96,11 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBrpc\fR(3NSL), \fBrpc_gss_set_callback\fR(3NSL), \fBrpc_gss_set_svc_name\fR(3NSL), \fBrpcsec_gss\fR(3NSL), \fBattributes\fR(7)
+\fBrpc\fR(3NSL),
+\fBrpc_gss_set_callback\fR(3NSL),
+\fBrpc_gss_set_svc_name\fR(3NSL),
+\fBrpcsec_gss\fR(3NSL),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIONC+ Developer\&'s Guide\fR

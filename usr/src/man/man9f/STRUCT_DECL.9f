@@ -447,7 +447,10 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBdevmap\fR(9E), \fBioctl\fR(9E), \fBmmap\fR(9E), \fBddi_mmap_get_model\fR(9F)
+\fBdevmap\fR(9E),
+\fBioctl\fR(9E),
+\fBmmap\fR(9E),
+\fBddi_mmap_get_model\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

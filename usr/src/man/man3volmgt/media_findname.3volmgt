@@ -158,11 +158,19 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBfdformat\fR(1), \fBlstat\fR(2), \fBreadlink\fR(2), \fBstat\fR(2),
-\fBfree\fR(3C), \fBmalloc\fR(3C), \fBvolmgt_check\fR(3VOLMGT),
-\fBvolmgt_inuse\fR(3VOLMGT), \fBvolmgt_root\fR(3VOLMGT),
-\fBvolmgt_running\fR(3VOLMGT), \fBvolmgt_symname\fR(3VOLMGT),
-\fBattributes\fR(7), \fBhal\fR(7)
+\fBfdformat\fR(1),
+\fBlstat\fR(2),
+\fBreadlink\fR(2),
+\fBstat\fR(2),
+\fBfree\fR(3C),
+\fBmalloc\fR(3C),
+\fBvolmgt_check\fR(3VOLMGT),
+\fBvolmgt_inuse\fR(3VOLMGT),
+\fBvolmgt_root\fR(3VOLMGT),
+\fBvolmgt_running\fR(3VOLMGT),
+\fBvolmgt_symname\fR(3VOLMGT),
+\fBattributes\fR(7),
+\fBhal\fR(7)
 .SH NOTES
 .sp
 .LP

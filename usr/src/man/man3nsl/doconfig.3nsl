@@ -167,7 +167,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBsh\fR(1), \fBpmadm\fR(8), \fBsacadm\fR(8), \fBattributes\fR(7)
+\fBsh\fR(1),
+\fBattributes\fR(7),
+\fBpmadm\fR(8),
+\fBsacadm\fR(8)
 .SH NOTES
 .sp
 .LP

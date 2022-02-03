@@ -172,11 +172,22 @@ Architecture	SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBcdrw\fR(1), \fBeject\fR(1), \fBrmformat\fR(1), \fBrmmount\fR(1),
-\fBcfgadm_scsi\fR(8), \fBfdisk\fR(8), \fBmount\fR(8), \fBumount\fR(8),
-\fBscsi\fR(5), \fBvfstab\fR(5),
-\fBattributes\fR(7), \fBhci1394\fR(4D), \fBsd\fR(4D), \fBpcfs\fR(4FS),
-\fBcdio\fR(4I), \fBdkio\fR(4I)
+\fBcdrw\fR(1),
+\fBeject\fR(1),
+\fBrmformat\fR(1),
+\fBrmmount\fR(1),
+\fBhci1394\fR(4D),
+\fBsd\fR(4D),
+\fBpcfs\fR(4FS),
+\fBcdio\fR(4I),
+\fBdkio\fR(4I),
+\fBscsi\fR(5),
+\fBvfstab\fR(5),
+\fBattributes\fR(7),
+\fBcfgadm_scsi\fR(8),
+\fBfdisk\fR(8),
+\fBmount\fR(8),
+\fBumount\fR(8)
 .sp
 .LP
 \fIIEEE Std 1394-1995 Standard for a High Performance Serial Bus\fR

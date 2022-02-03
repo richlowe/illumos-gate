@@ -372,15 +372,32 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBar.h\fR(3HEAD), \fBelf32_checksum\fR(3ELF), \fBelf32_fsize\fR(3ELF),
-\fBelf32_getshdr\fR(3ELF), \fBelf32_xlatetof\fR(3ELF), \fBelf_begin\fR(3ELF),
-\fBelf_cntl\fR(3ELF), \fBelf_errmsg\fR(3ELF), \fBelf_fill\fR(3ELF),
-\fBelf_getarhdr\fR(3ELF), \fBelf_getarsym\fR(3ELF), \fBelf_getbase\fR(3ELF),
-\fBelf_getdata\fR(3ELF), \fBelf_getident\fR(3ELF), \fBelf_getscn\fR(3ELF),
-\fBelf_hash\fR(3ELF), \fBelf_kind\fR(3ELF), \fBelf_memory\fR(3ELF),
-\fBelf_rawfile\fR(3ELF), \fBelf_strptr\fR(3ELF), \fBelf_update\fR(3ELF),
-\fBelf_version\fR(3ELF), \fBgelf\fR(3ELF), \fBlibelf\fR(3LIB),
-\fBattributes\fR(7), \fBlfcompile\fR(7)
+\fBelf32_checksum\fR(3ELF),
+\fBelf32_fsize\fR(3ELF),
+\fBelf32_getshdr\fR(3ELF),
+\fBelf32_xlatetof\fR(3ELF),
+\fBelf_begin\fR(3ELF),
+\fBelf_cntl\fR(3ELF),
+\fBelf_errmsg\fR(3ELF),
+\fBelf_fill\fR(3ELF),
+\fBelf_getarhdr\fR(3ELF),
+\fBelf_getarsym\fR(3ELF),
+\fBelf_getbase\fR(3ELF),
+\fBelf_getdata\fR(3ELF),
+\fBelf_getident\fR(3ELF),
+\fBelf_getscn\fR(3ELF),
+\fBelf_hash\fR(3ELF),
+\fBelf_kind\fR(3ELF),
+\fBelf_memory\fR(3ELF),
+\fBelf_rawfile\fR(3ELF),
+\fBelf_strptr\fR(3ELF),
+\fBelf_update\fR(3ELF),
+\fBelf_version\fR(3ELF),
+\fBgelf\fR(3ELF),
+\fBar.h\fR(3HEAD),
+\fBlibelf\fR(3LIB),
+\fBattributes\fR(7),
+\fBlfcompile\fR(7)
 .sp
 .LP
 \fIANSI C Programmer's Guide\fR

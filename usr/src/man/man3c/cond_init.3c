@@ -413,9 +413,16 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBfork\fR(2), \fBmmap\fR(2), \fBsetitimer\fR(2), \fBshmop\fR(2),
-\fBmutex_init\fR(3C), \fBsignal\fR(3C), \fBattributes\fR(7),
-\fBcondition\fR(7), \fBmutex\fR(7), \fBstandards\fR(7)
+\fBfork\fR(2),
+\fBmmap\fR(2),
+\fBsetitimer\fR(2),
+\fBshmop\fR(2),
+\fBmutex_init\fR(3C),
+\fBsignal\fR(3C),
+\fBattributes\fR(7),
+\fBcondition\fR(7),
+\fBmutex\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 If more than one thread is blocked on a condition variable, the order in which
 threads are unblocked is determined by the scheduling policy. When each thread,

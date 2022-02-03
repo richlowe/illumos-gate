@@ -103,5 +103,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBconnect\fR(3SOCKET), \fBsocket\fR(3SOCKET), \fBsocket.h\fR(3HEAD),
+\fBsocket.h\fR(3HEAD),
+\fBconnect\fR(3SOCKET),
+\fBsocket\fR(3SOCKET),
 \fBattributes\fR(7)

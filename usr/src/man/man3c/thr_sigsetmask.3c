@@ -338,11 +338,21 @@ MT-Level	MT-Safe and Async-Signal-Safe
 
 .SH SEE ALSO
 .LP
-\fBsigaction\fR(2), \fBsigprocmask\fR(2), \fBsigwait\fR(2),
-\fBcond_wait\fR(3C), \fBpthread_cancel\fR(3C), \fBpthread_create\fR(3C),
-\fBpthread_join\fR(3C), \fBpthread_self\fR(3C), \fBsigaddset\fR(3C),
-\fBsigemptyset\fR(3C), \fBsigsetops\fR(3C), \fBsleep\fR(3C),
-\fBattributes\fR(7), \fBcancellation\fR(7), \fBstandards\fR(7)
+\fBsigaction\fR(2),
+\fBsigprocmask\fR(2),
+\fBsigwait\fR(2),
+\fBcond_wait\fR(3C),
+\fBpthread_cancel\fR(3C),
+\fBpthread_create\fR(3C),
+\fBpthread_join\fR(3C),
+\fBpthread_self\fR(3C),
+\fBsigaddset\fR(3C),
+\fBsigemptyset\fR(3C),
+\fBsigsetops\fR(3C),
+\fBsleep\fR(3C),
+\fBattributes\fR(7),
+\fBcancellation\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .LP
 It is not possible to block signals that cannot be caught or ignored (see

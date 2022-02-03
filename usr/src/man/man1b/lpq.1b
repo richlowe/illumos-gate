@@ -196,9 +196,17 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBlp\fR(1), \fBlpc\fR(1B), \fBlpr\fR(1B), \fBlprm\fR(1B), \fBlpstat\fR(1),
-\fBlpadmin\fR(8), \fBnsswitch.conf\fR(5), \fBprinters\fR(5),
-\fBprinters.conf\fR(5), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBlp\fR(1),
+\fBlpstat\fR(1),
+\fBlpc\fR(1B),
+\fBlpr\fR(1B),
+\fBlprm\fR(1B),
+\fBnsswitch.conf\fR(5),
+\fBprinters\fR(5),
+\fBprinters.conf\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBlpadmin\fR(8)
 .SH NOTES
 .LP
 When IPP is in use, the user is prompted for a passphrase if the remote print

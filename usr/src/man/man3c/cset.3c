@@ -96,4 +96,6 @@ MT-Level	MT-Safe with exceptions
 .TE
 
 .SH SEE ALSO
-\fBsetlocale\fR(3C), \fBeuclen\fR(3C), \fBattributes\fR(7)
+\fBeuclen\fR(3C),
+\fBsetlocale\fR(3C),
+\fBattributes\fR(7)

@@ -423,6 +423,12 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBrctladm\fR(8), \fBpoll\fR(2), \fBsetrctl\fR(2), \fBport_alert\fR(3C),
-\fBport_create\fR(3C), \fBport_get\fR(3C), \fBport_send\fR(3C),
-\fBsignal.h\fR(3HEAD), \fBattributes\fR(7)
+\fBpoll\fR(2),
+\fBsetrctl\fR(2),
+\fBport_alert\fR(3C),
+\fBport_create\fR(3C),
+\fBport_get\fR(3C),
+\fBport_send\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBrctladm\fR(8)

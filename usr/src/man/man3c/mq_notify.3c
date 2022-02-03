@@ -144,6 +144,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBmq_close\fR(3C), \fBmq_open\fR(3C), \fBmq_receive\fR(3C), \fBmq_send\fR(3C),
-\fBmqueue.h\fR(3HEAD), \fBsiginfo.h\fR(3HEAD), \fBsignal.h\fR(3HEAD),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBmq_close\fR(3C),
+\fBmq_open\fR(3C),
+\fBmq_receive\fR(3C),
+\fBmq_send\fR(3C),
+\fBmqueue.h\fR(3HEAD),
+\fBsiginfo.h\fR(3HEAD),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

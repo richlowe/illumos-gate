@@ -79,4 +79,6 @@ underscore.
 .SH SEE ALSO
 .sp
 .LP
-\fBbrk\fR(2), \fBmalloc\fR(3C), \fBstdio\fR(3C)
+\fBbrk\fR(2),
+\fBmalloc\fR(3C),
+\fBstdio\fR(3C)

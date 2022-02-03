@@ -71,4 +71,5 @@ MT-Level	MT\(miSafe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3), \fBattributes\fR(7)
+\fBIntro\fR(3),
+\fBattributes\fR(7)

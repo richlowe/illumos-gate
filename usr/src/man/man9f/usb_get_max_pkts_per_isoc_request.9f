@@ -108,6 +108,9 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBusb_pipe_isoc_xfer\fR(9F), \fBusb_alloc_request\fR(9F),
-\fBusb_get_current_frame_number\fR(9F), \fBusb_ep_descr\fR(9S),
+\fBattributes\fR(7),
+\fBusb_alloc_request\fR(9F),
+\fBusb_get_current_frame_number\fR(9F),
+\fBusb_pipe_isoc_xfer\fR(9F),
+\fBusb_ep_descr\fR(9S),
 \fBusb_isoc_request\fR(9S)

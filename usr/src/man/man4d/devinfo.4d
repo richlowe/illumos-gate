@@ -35,7 +35,8 @@ Stability Level	Private
 .SH SEE ALSO
 .sp
 .LP
-\fBlibdevinfo\fR(3LIB), \fBattributes\fR(7)
+\fBlibdevinfo\fR(3LIB),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

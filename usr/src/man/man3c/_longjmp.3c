@@ -122,5 +122,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBlongjmp\fR(3C), \fBsetjmp\fR(3C), \fBsiglongjmp\fR(3C), \fBsigsetjmp\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBlongjmp\fR(3C),
+\fBsetjmp\fR(3C),
+\fBsiglongjmp\fR(3C),
+\fBsigsetjmp\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

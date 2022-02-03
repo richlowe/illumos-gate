@@ -124,5 +124,8 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C), \fBmalloc\fR(3C), \fBmemalign\fR(3C), \fBattributes\fR(7),
+\fBfree\fR(3C),
+\fBmalloc\fR(3C),
+\fBmemalign\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

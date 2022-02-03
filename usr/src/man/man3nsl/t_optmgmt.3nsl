@@ -533,8 +533,19 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2), \fBpoll\fR(2), \fBselect\fR(3C), \fBt_accept\fR(3NSL),
-\fBt_alloc\fR(3NSL), \fBt_bind\fR(3NSL), \fBt_close\fR(3NSL),
-\fBt_connect\fR(3NSL), \fBt_getinfo\fR(3NSL), \fBt_listen\fR(3NSL),
-\fBt_open\fR(3NSL), \fBt_rcv\fR(3NSL), \fBt_rcvconnect\fR(3NSL),
-\fBt_rcvudata\fR(3NSL), \fBt_snddis\fR(3NSL), \fBattributes\fR(7)
+\fBclose\fR(2),
+\fBpoll\fR(2),
+\fBselect\fR(3C),
+\fBt_accept\fR(3NSL),
+\fBt_alloc\fR(3NSL),
+\fBt_bind\fR(3NSL),
+\fBt_close\fR(3NSL),
+\fBt_connect\fR(3NSL),
+\fBt_getinfo\fR(3NSL),
+\fBt_listen\fR(3NSL),
+\fBt_open\fR(3NSL),
+\fBt_rcv\fR(3NSL),
+\fBt_rcvconnect\fR(3NSL),
+\fBt_rcvudata\fR(3NSL),
+\fBt_snddis\fR(3NSL),
+\fBattributes\fR(7)

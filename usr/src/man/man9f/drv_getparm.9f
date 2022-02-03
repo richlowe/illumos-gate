@@ -148,7 +148,9 @@ be called from user, interrupt, or kernel context when using the \fBLBOLT\fR or
 \fBTIME\fR argument.
 .SH SEE ALSO
 .LP
-\fBddi_get_lbolt\fR(9F), \fBddi_get_pid\fR(9F), \fBddi_get_time\fR(9F),
+\fBddi_get_lbolt\fR(9F),
+\fBddi_get_pid\fR(9F),
+\fBddi_get_time\fR(9F),
 \fBbuf\fR(9S)
 .sp
 .LP

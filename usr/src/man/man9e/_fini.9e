@@ -151,8 +151,13 @@ _fini(void)
 .in -2
 
 .SH SEE ALSO
-\fBadd_drv\fR(8), \fBmod_info\fR(9F), \fBmod_install\fR(9F),
-\fBmod_remove\fR(9F), \fBmutex\fR(9F), \fBmodldrv\fR(9S), \fBmodlinkage\fR(9S),
+\fBadd_drv\fR(8),
+\fBmod_info\fR(9F),
+\fBmod_install\fR(9F),
+\fBmod_remove\fR(9F),
+\fBmutex\fR(9F),
+\fBmodldrv\fR(9S),
+\fBmodlinkage\fR(9S),
 \fBmodlstrmod\fR(9S)
 .sp
 .LP

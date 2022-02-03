@@ -1220,8 +1220,11 @@ Set horizontal window size to \fIn\fR \fIpixels\fR.
 .SH SEE ALSO
 .sp
 .LP
-\fBtabs\fR(1), \fBioctl\fR(2), \fBattributes\fR(7), \fBtermio\fR(4I),
-\fBtermiox\fR(4I)
+\fBtabs\fR(1),
+\fBioctl\fR(2),
+\fBtermio\fR(4I),
+\fBtermiox\fR(4I),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

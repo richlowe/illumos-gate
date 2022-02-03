@@ -295,6 +295,10 @@ MT-Level	Safe
 .LP
 \fBfcntl\fR(2), \fBioctl\fR(2), \fBpoll\fR(2), \fBread\fR(2),
 \fBconnect\fR(3SOCKET), \fBgetsockopt\fR(3SOCKET), \fBlibxnet\fR(3LIB),
-\fBport_get(3C)\fR, \fBselect\fR(3C), \fBsend\fR(3SOCKET),
-\fBsockaddr\fR(3SOCKET), \fBsocket\fR(3SOCKET), \fBsocket.h\fR(3HEAD),
-\fBattributes\fR(7), \fBtcp\fR(4P)
+\fBport_get(3C)\fR, \fBselect\fR(3C),
+\fBsocket.h\fR(3HEAD),
+\fBsend\fR(3SOCKET),
+\fBsockaddr\fR(3SOCKET),
+\fBsocket\fR(3SOCKET),
+\fBtcp\fR(4P),
+\fBattributes\fR(7)

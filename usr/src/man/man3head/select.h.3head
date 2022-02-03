@@ -114,5 +114,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBselect\fR(3C), \fBsignal.h\fR(3HEAD), \fBtime.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBselect\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBtime.h\fR(3HEAD),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -317,10 +317,14 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_dma_addr_bind_handle\fR(9F),
-\fBddi_dma_alloc_handle\fR(9F), \fBddi_dma_buf_bind_handle\fR(9F),
-\fBddi_dma_burstsizes\fR(9F), \fBddi_dma_mem_alloc\fR(9F),
-\fBddi_dma_nextcookie\fR(9F), \fBddi_fm_dma_err_get\fR(9F),
+\fBattributes\fR(7),
+\fBddi_dma_addr_bind_handle\fR(9F),
+\fBddi_dma_alloc_handle\fR(9F),
+\fBddi_dma_buf_bind_handle\fR(9F),
+\fBddi_dma_burstsizes\fR(9F),
+\fBddi_dma_mem_alloc\fR(9F),
+\fBddi_dma_nextcookie\fR(9F),
+\fBddi_fm_dma_err_get\fR(9F),
 \fBddi_dma_cookie\fR(9S)
 .sp
 .LP

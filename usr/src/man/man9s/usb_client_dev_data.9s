@@ -285,7 +285,14 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBusb_get_alt_if\fR(9F), \fBusb_get_cfg\fR(9F), \fBusb_get_dev_data\fR(9F),
-\fBusb_get_string_descr\fR(9F), \fBusb_lookup_ep_data\fR(9F),
-\fBusb_parse_data\fR(9F), \fBusb_pipe_open\fR(9F), \fBusb_cfg_descr\fR(9S),
-\fBusb_if_descr\fR(9S), \fBusb_ep_descr\fR(9S), \fBusb_string_descr\fR(9S)
+\fBusb_get_alt_if\fR(9F),
+\fBusb_get_cfg\fR(9F),
+\fBusb_get_dev_data\fR(9F),
+\fBusb_get_string_descr\fR(9F),
+\fBusb_lookup_ep_data\fR(9F),
+\fBusb_parse_data\fR(9F),
+\fBusb_pipe_open\fR(9F),
+\fBusb_cfg_descr\fR(9S),
+\fBusb_ep_descr\fR(9S),
+\fBusb_if_descr\fR(9S),
+\fBusb_string_descr\fR(9S)

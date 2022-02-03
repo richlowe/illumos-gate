@@ -54,7 +54,9 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBpam\fR(3PAM), \fBpam_start\fR(3PAM), \fBattributes\fR(7)
+\fBpam\fR(3PAM),
+\fBpam_start\fR(3PAM),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

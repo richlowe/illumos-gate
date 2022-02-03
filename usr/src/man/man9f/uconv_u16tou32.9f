@@ -473,7 +473,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBuconv_u16tou32\fR(3C), \fBattributes\fR(7)
+\fBuconv_u16tou32\fR(3C),
+\fBattributes\fR(7)
 .sp
 .LP
 The Unicode Standard (http://www.unicode.org)

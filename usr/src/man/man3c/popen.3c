@@ -238,6 +238,15 @@ Standard.
 .SH SEE ALSO
 .sp
 .LP
-\fBksh\fR(1), \fBpipe\fR(2), \fBfclose\fR(3C), \fBfopen\fR(3C),
-\fBposix_spawn\fR(3C), \fBstdio\fR(3C), \fBsystem\fR(3C), \fBwait\fR(3C),
-\fBwaitpid\fR(3C), \fBwait.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBksh\fR(1),
+\fBpipe\fR(2),
+\fBfclose\fR(3C),
+\fBfopen\fR(3C),
+\fBposix_spawn\fR(3C),
+\fBstdio\fR(3C),
+\fBsystem\fR(3C),
+\fBwait\fR(3C),
+\fBwaitpid\fR(3C),
+\fBwait.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

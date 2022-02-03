@@ -100,9 +100,13 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBnewlocale\fR(3C), \fBsetlocale\fR(3C), \fBuselocale\fR(3C),
-\fBlanginfo.h\fR(3HEAD), \fBnl_types.h\fR(3HEAD),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBnewlocale\fR(3C),
+\fBsetlocale\fR(3C),
+\fBuselocale\fR(3C),
+\fBlanginfo.h\fR(3HEAD),
+\fBnl_types.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH WARNINGS
 .LP
 The array pointed to by the return value should not be modified by the program.

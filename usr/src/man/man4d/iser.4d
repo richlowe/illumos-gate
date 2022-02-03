@@ -61,7 +61,10 @@ Driver configuration file
 .SH SEE ALSO
 .sp
 .LP
-\fBiscsiadm\fR(8), \fBitadm\fR(8), \fBattributes\fR(7), \fBibd\fR(4D)
+\fBibd\fR(4D),
+\fBattributes\fR(7),
+\fBiscsiadm\fR(8),
+\fBitadm\fR(8)
 .sp
 .LP
 \fISystem Administration Guide: Devices and File Systems\fR

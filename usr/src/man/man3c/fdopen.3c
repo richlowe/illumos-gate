@@ -199,5 +199,11 @@ respects this function is Standard.
 .SH SEE ALSO
 .sp
 .LP
-\fBcreat\fR(2), \fBdup\fR(2), \fBopen\fR(2), \fBpipe\fR(2), \fBfclose\fR(3C),
-\fBfopen\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBcreat\fR(2),
+\fBdup\fR(2),
+\fBopen\fR(2),
+\fBpipe\fR(2),
+\fBfclose\fR(3C),
+\fBfopen\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

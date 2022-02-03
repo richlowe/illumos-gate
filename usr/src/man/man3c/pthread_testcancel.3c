@@ -100,11 +100,18 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3), \fBpthread_cleanup_pop\fR(3C), \fBpthread_cleanup_push\fR(3C),
-\fBpthread_exit\fR(3C), \fBpthread_join\fR(3C),
-\fBpthread_setcancelstate\fR(3C), \fBpthread_setcanceltype\fR(3C),
-\fBsetjmp\fR(3C), \fBattributes\fR(7), \fBcancellation\fR(7),
-\fBcondition\fR(7), \fBstandards\fR(7)
+\fBIntro\fR(3),
+\fBpthread_cleanup_pop\fR(3C),
+\fBpthread_cleanup_push\fR(3C),
+\fBpthread_exit\fR(3C),
+\fBpthread_join\fR(3C),
+\fBpthread_setcancelstate\fR(3C),
+\fBpthread_setcanceltype\fR(3C),
+\fBsetjmp\fR(3C),
+\fBattributes\fR(7),
+\fBcancellation\fR(7),
+\fBcondition\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

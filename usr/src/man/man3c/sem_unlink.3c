@@ -139,8 +139,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBexit\fR(2), \fBsem_close\fR(3C), \fBsem_open\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBexec\fR(2),
+\fBexit\fR(2),
+\fBsem_close\fR(3C),
+\fBsem_open\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

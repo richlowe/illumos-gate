@@ -115,4 +115,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi_set_physaddr\fR(3DLPI), \fBlibdlpi\fR(3LIB), \fBattributes\fR(7)
+\fBdlpi_set_physaddr\fR(3DLPI),
+\fBlibdlpi\fR(3LIB),
+\fBattributes\fR(7)

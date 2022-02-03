@@ -133,7 +133,9 @@ None.
 \fBkstat_named_init()\fR and \fBkstat_named_setstr()\fR can be called from user
 or kernel context.
 .SH SEE ALSO
-\fBkstat_create\fR(9F), \fBkstat_install\fR(9F), \fBkstat\fR(9S),
+\fBkstat_create\fR(9F),
+\fBkstat_install\fR(9F),
+\fBkstat\fR(9S),
 \fBkstat_named\fR(9S)
 .sp
 .LP

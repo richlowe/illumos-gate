@@ -558,9 +558,15 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBsetcontext\fR(2), \fBatexit\fR(3C), \fBlibumem\fR(3LIB), \fBlongjmp\fR(3C),
-\fBswapcontext\fR(3C), \fBthr_exit\fR(3C), \fBumem_alloc\fR(3MALLOC),
-\fBumem_debug\fR(3MALLOC), \fBattributes\fR(7)
+\fBsetcontext\fR(2),
+\fBatexit\fR(3C),
+\fBlongjmp\fR(3C),
+\fBswapcontext\fR(3C),
+\fBthr_exit\fR(3C),
+\fBlibumem\fR(3LIB),
+\fBumem_alloc\fR(3MALLOC),
+\fBumem_debug\fR(3MALLOC),
+\fBattributes\fR(7)
 .sp
 .LP
 Bonwick, Jeff, "The Slab Allocator: An Object-Caching Kernel Memory Allocator",

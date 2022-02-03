@@ -101,6 +101,9 @@ The \fBwcwidth()\fR function is Standard.  The \fBwcwidth_l()\fR function
 is Uncommitted.
 .SH SEE ALSO
 .LP
-\fBnewlocale\fR(3C), \fBsetlocale\fR(3C), \fBuselocale\fR(3C),
-\fBwcswidth\fR(3C), \fBattributes\fR(7),
+\fBnewlocale\fR(3C),
+\fBsetlocale\fR(3C),
+\fBuselocale\fR(3C),
+\fBwcswidth\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

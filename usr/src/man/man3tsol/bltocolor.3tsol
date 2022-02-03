@@ -93,7 +93,9 @@ should be used in multithreaded applications.
 .SH SEE ALSO
 .sp
 .LP
-\fBlabel_to_str\fR(3TSOL), \fBlibtsol\fR(3LIB), \fBattributes\fR(7)
+\fBlibtsol\fR(3LIB),
+\fBlabel_to_str\fR(3TSOL),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

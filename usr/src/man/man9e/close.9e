@@ -303,9 +303,16 @@ function is  provided to determine when this hazard exists.
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2), \fBfcntl\fR(2), \fBopen\fR(2), \fBumount\fR(2),
-\fBdetach\fR(9E), \fBopen\fR(9E), \fBddi_can_receive_sig\fR(9F),
-\fBcb_ops\fR(9S), \fBqinit\fR(9S), \fBqueue\fR(9S)
+\fBclose\fR(2),
+\fBfcntl\fR(2),
+\fBopen\fR(2),
+\fBumount\fR(2),
+\fBdetach\fR(9E),
+\fBopen\fR(9E),
+\fBddi_can_receive_sig\fR(9F),
+\fBcb_ops\fR(9S),
+\fBqinit\fR(9S),
+\fBqueue\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

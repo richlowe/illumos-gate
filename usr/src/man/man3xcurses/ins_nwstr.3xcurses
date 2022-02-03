@@ -163,6 +163,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_wchnstr\fR(3XCURSES), \fBaddnwstr\fR(3XCURSES),
-\fBclrtoeol\fR(3XCURSES), \fBins_wch\fR(3XCURSES), \fBinsnstr\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBadd_wchnstr\fR(3XCURSES),
+\fBaddnwstr\fR(3XCURSES),
+\fBclrtoeol\fR(3XCURSES),
+\fBins_wch\fR(3XCURSES),
+\fBinsnstr\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

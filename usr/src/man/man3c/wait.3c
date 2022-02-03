@@ -170,6 +170,15 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBexec\fR(2), \fBexit\fR(2), \fBfork\fR(2), \fBpause\fR(2),
-\fBwaitid\fR(2), \fBptrace\fR(3C), \fBsignal\fR(3C), \fBsignal.h\fR(3HEAD),
-\fBwaitpid\fR(3C), \fBwait.h\fR(3HEAD), \fBattributes\fR(7)
+\fBIntro\fR(2),
+\fBexec\fR(2),
+\fBexit\fR(2),
+\fBfork\fR(2),
+\fBpause\fR(2),
+\fBwaitid\fR(2),
+\fBptrace\fR(3C),
+\fBsignal\fR(3C),
+\fBwaitpid\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBwait.h\fR(3HEAD),
+\fBattributes\fR(7)

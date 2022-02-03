@@ -155,7 +155,9 @@ Device driver (x86)
 .RE
 
 .SH "SEE ALSO"
-\fBattributes\fR(7), \fBstreamio\fR(4I), \fBdlpi\fR(4P)
+\fBstreamio\fR(4I),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIIEEE 802.3\fR \(em Institute of Electrical and Electronics Engineers, 2002

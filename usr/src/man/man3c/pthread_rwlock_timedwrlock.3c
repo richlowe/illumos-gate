@@ -168,7 +168,11 @@ The \fBpthread_rwlock_timedwrlock()\fR function is Standard. The
 \fBpthread_rwlock_reltimedwrlock_np()\fR function is Stable.
 .SH SEE ALSO
 .LP
-\fBpthread_rwlock_destroy\fR(3C), \fBpthread_rwlock_rdlock\fR(3C),
-\fBpthread_rwlock_timedrdlock\fR(3C), \fBpthread_rwlock_trywrlock\fR(3C),
-\fBpthread_rwlock_unlock\fR(3C), \fBpthread_rwlock_wrlock\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBpthread_rwlock_destroy\fR(3C),
+\fBpthread_rwlock_rdlock\fR(3C),
+\fBpthread_rwlock_timedrdlock\fR(3C),
+\fBpthread_rwlock_trywrlock\fR(3C),
+\fBpthread_rwlock_unlock\fR(3C),
+\fBpthread_rwlock_wrlock\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

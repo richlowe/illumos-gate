@@ -123,8 +123,16 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBbind\fR(3SOCKET), \fBin.h\fR(3HEAD), \fBlibsctp\fR(3LIB),
-\fBsctp_freeladdrs\fR(3SOCKET), \fBsctp_getladdrs\fR(3SOCKET),
+\fBin.h\fR(3HEAD),
+\fBlibsctp\fR(3LIB),
+\fBbind\fR(3SOCKET),
+\fBsctp_freeladdrs\fR(3SOCKET),
+\fBsctp_getladdrs\fR(3SOCKET),
 \fBsockaddr\fR(3SOCKET),
-\fBsocket\fR(3SOCKET), \fBattributes\fR(7), \fBinet\fR(4P), \fBinet6\fR(4P),
-\fBip\fR(4P), \fBip6\fR(4P), \fBsctp\fR(4P)
+\fBsocket\fR(3SOCKET),
+\fBinet\fR(4P),
+\fBinet6\fR(4P),
+\fBip\fR(4P),
+\fBip6\fR(4P),
+\fBsctp\fR(4P),
+\fBattributes\fR(7)

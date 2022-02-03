@@ -469,7 +469,8 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBuconv_u16tou32\fR(9F)
+\fBattributes\fR(7),
+\fBuconv_u16tou32\fR(9F)
 .sp
 .LP
 The Unicode Standard (http://www.unicode.org)

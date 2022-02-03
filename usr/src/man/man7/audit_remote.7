@@ -326,13 +326,24 @@ The plugin configuration parameters are Committed. The client/server protocol
 (version \fB"01"\fR) is Contracted Project Private. See \fBaudit.log\fR(5) for
 the audit record format and content stability.
 .SH SEE ALSO
-\fBauditd\fR(8), \fBauditconfig\fR(8), \fBaudit_warn\fR(8),
-\fBgetipnodebyname\fR(3SOCKET), \fBgetservbyname\fR(3XNET),
-\fBgss_accept_sec_context\fR(3GSS), \fBgss_get_mic\fR(3GSS),
-\fBgss_init_sec_context\fR(3GSS), \fBgss_wrap\fR(3GSS), \fBgss_unwrap\fR(3GSS),
-\fBlibgss\fR(3LIB), \fBlibsocket\fR(3LIB),
-\fBaudit.log\fR(5), \fBkrb5.conf\fR(5), \fBmech\fR(5), \fBattributes\fR(7),
-\fBkerberos\fR(7), \fBtcp\fR(4P)
+\fBgss_accept_sec_context\fR(3GSS),
+\fBgss_get_mic\fR(3GSS),
+\fBgss_init_sec_context\fR(3GSS),
+\fBgss_unwrap\fR(3GSS),
+\fBgss_wrap\fR(3GSS),
+\fBlibgss\fR(3LIB),
+\fBlibsocket\fR(3LIB),
+\fBgetipnodebyname\fR(3SOCKET),
+\fBgetservbyname\fR(3XNET),
+\fBtcp\fR(4P),
+\fBaudit.log\fR(5),
+\fBkrb5.conf\fR(5),
+\fBmech\fR(5),
+\fBattributes\fR(7),
+\fBkerberos\fR(7),
+\fBaudit_warn\fR(8),
+\fBauditconfig\fR(8),
+\fBauditd\fR(8)
 .SH NOTES
 \fBaudit_remote\fR authenticates itself to the remote audit service by way of
 GSS-API (\fBlibgss\fR(3LIB)). Default gss credentials are used as provided by

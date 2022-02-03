@@ -55,4 +55,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetpwnam\fR(3C), \fBpasswd\fR(5), \fBattributes\fR(7)
+\fBgetpwnam\fR(3C),
+\fBpasswd\fR(5),
+\fBattributes\fR(7)

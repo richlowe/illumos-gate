@@ -187,8 +187,11 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBmdb\fR(1), \fBabort\fR(3C), \fBsignal\fR(3C),
-\fBumem_cache_create\fR(3MALLOC), \fBumem_setmtbf\fR(3MALLOC),
+\fBmdb\fR(1),
+\fBabort\fR(3C),
+\fBsignal\fR(3C),
+\fBumem_cache_create\fR(3MALLOC),
+\fBumem_setmtbf\fR(3MALLOC),
 \fBattributes\fR(7)
 .sp
 .LP

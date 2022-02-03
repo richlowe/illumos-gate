@@ -126,5 +126,9 @@ Architecture	SPARC, x86
 .SH SEE ALSO
 .sp
 .LP
-\fBnetstat\fR(8), \fBattributes\fR(7), \fBgld\fR(4D), \fBdlpi\fR(4P),
-\fBgld\fR(9F), \fBgld_mac_info\fR(9S)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7),
+\fBnetstat\fR(8),
+\fBgld\fR(9F),
+\fBgld_mac_info\fR(9S)

@@ -249,11 +249,20 @@ T}
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7),
-\fBscsi_abort\fR(9F), \fBscsi_hba_attach\fR(9F), \fBscsi_ifgetcap\fR(9F),
-\fBscsi_ifsetcap\fR(9F), \fBscsi_reset\fR(9F), \fBscsi_sync_pkt\fR(9F),
-\fBscsi_transport\fR(9F), \fBscsi_device\fR(9S), \fBscsi_extended_sense\fR(9S),
-\fBscsi_inquiry\fR(9S), \fBscsi_pkt\fR(9S)
+\fBdriver.conf\fR(5),
+\fBattributes\fR(7),
+\fBprtconf\fR(8),
+\fBscsi_abort\fR(9F),
+\fBscsi_hba_attach\fR(9F),
+\fBscsi_ifgetcap\fR(9F),
+\fBscsi_ifsetcap\fR(9F),
+\fBscsi_reset\fR(9F),
+\fBscsi_sync_pkt\fR(9F),
+\fBscsi_transport\fR(9F),
+\fBscsi_device\fR(9S),
+\fBscsi_extended_sense\fR(9S),
+\fBscsi_inquiry\fR(9S),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

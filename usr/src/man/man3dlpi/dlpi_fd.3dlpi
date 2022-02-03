@@ -58,5 +58,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpoll\fR(2), \fBlibdlpi\fR(3LIB), \fBattributes\fR(7), \fBdlpi\fR(4P),
-\fBpfmod\fR(4M)
+\fBpoll\fR(2),
+\fBlibdlpi\fR(3LIB),
+\fBpfmod\fR(4M),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7)

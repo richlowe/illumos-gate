@@ -174,4 +174,7 @@ Interface Stability	Uncommitted
 .TE
 
 .SH SEE ALSO
-\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBdsp\fR(4I)
+\fBioctl\fR(2),
+\fBaudio\fR(4I),
+\fBdsp\fR(4I),
+\fBattributes\fR(7)

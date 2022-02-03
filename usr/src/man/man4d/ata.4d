@@ -378,7 +378,8 @@ Architecture	x86
 
 .SH SEE ALSO
 .LP
-\fBeeprom\fR(8), \fBattributes\fR(7)
+\fBattributes\fR(7),
+\fBeeprom\fR(8)
 .sp
 .LP
 \fIINCITS T13 ATA/ATAPI-7\fR specifications

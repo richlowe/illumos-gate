@@ -95,7 +95,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBstring\fR(3C), \fBstrfind\fR(3GEN), \fBattributes\fR(7)
+\fBstring\fR(3C),
+\fBstrfind\fR(3GEN),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

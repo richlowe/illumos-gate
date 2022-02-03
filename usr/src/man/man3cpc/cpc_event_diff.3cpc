@@ -85,8 +85,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc\fR(3CPC), \fBcpc_buf_add\fR(3CPC), \fBcpc_buf_sub\fR(3CPC),
-\fBcpc_event\fR(3CPC), \fBlibcpc\fR(3LIB), \fBattributes\fR(7)
+\fBcpc\fR(3CPC),
+\fBcpc_buf_add\fR(3CPC),
+\fBcpc_buf_sub\fR(3CPC),
+\fBcpc_event\fR(3CPC),
+\fBlibcpc\fR(3LIB),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

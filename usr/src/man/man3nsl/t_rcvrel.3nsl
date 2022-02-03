@@ -190,5 +190,7 @@ MT Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBt_getinfo\fR(3NSL), \fBt_open\fR(3NSL), \fBt_sndrel\fR(3NSL),
+\fBt_getinfo\fR(3NSL),
+\fBt_open\fR(3NSL),
+\fBt_sndrel\fR(3NSL),
 \fBattributes\fR(7)

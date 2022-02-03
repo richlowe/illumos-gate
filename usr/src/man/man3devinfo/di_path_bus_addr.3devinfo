@@ -153,12 +153,18 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdi_bus_addr\fR(3DEVINFO), \fBdi_devfs_path\fR(3DEVINFO),
-\fBdi_init\fR(3DEVINFO), \fBdi_instance\fR(3DEVINFO),
-\fBdi_node_name\fR(3DEVINFO), \fBdi_path_client_next_path\fR(3DEVINFO),
-\fBdi_path_prop_next\fR(3DEVINFO), \fBdi_path_prop_bytes\fR(3DEVINFO),
-\fBdi_path_prop_lookup_bytes\fR(3DEVINFO), \fBdi_path_prop_next\fR(3DEVINFO),
-\fBlibdevinfo\fR(3LIB), \fBattributes\fR(7)
+\fBdi_bus_addr\fR(3DEVINFO),
+\fBdi_devfs_path\fR(3DEVINFO),
+\fBdi_init\fR(3DEVINFO),
+\fBdi_instance\fR(3DEVINFO),
+\fBdi_node_name\fR(3DEVINFO),
+\fBdi_path_client_next_path\fR(3DEVINFO),
+\fBdi_path_prop_bytes\fR(3DEVINFO),
+\fBdi_path_prop_lookup_bytes\fR(3DEVINFO),
+\fBdi_path_prop_next\fR(3DEVINFO),
+\fBdi_path_prop_next\fR(3DEVINFO),
+\fBlibdevinfo\fR(3LIB),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -72,6 +72,14 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2), \fBexec\fR(2), \fBfchdir\fR(2), \fBfstat\fR(2),
-\fBclosedir\fR(3C), \fBopendir\fR(3C), \fBreaddir\fR(3C), \fBrewinddir\fR(3C),
-\fBseekdir\fR(3C), \fBtelldir\fR(3C), \fBattributes\fR(7)
+\fBclose\fR(2),
+\fBexec\fR(2),
+\fBfchdir\fR(2),
+\fBfstat\fR(2),
+\fBclosedir\fR(3C),
+\fBopendir\fR(3C),
+\fBreaddir\fR(3C),
+\fBrewinddir\fR(3C),
+\fBseekdir\fR(3C),
+\fBtelldir\fR(3C),
+\fBattributes\fR(7)

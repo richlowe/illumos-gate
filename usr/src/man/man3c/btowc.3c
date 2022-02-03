@@ -105,5 +105,10 @@ function is Uncommitted.
 .SH SEE ALSO
 .sp
 .LP
-\fBnewlocale\fR(3C), \fBsetlocale\fR(3C), \fBuselocale\fR(3C), \fBwctob\fR(3C),
-\fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)
+\fBnewlocale\fR(3C),
+\fBsetlocale\fR(3C),
+\fBuselocale\fR(3C),
+\fBwctob\fR(3C),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)

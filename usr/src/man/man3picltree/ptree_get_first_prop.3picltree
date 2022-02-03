@@ -121,4 +121,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBptree_get_prop_by_name\fR(3PICLTREE), \fBattributes\fR(7)
+\fBptree_get_prop_by_name\fR(3PICLTREE),
+\fBattributes\fR(7)

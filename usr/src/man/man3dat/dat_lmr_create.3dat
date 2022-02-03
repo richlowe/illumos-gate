@@ -409,4 +409,6 @@ T}
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_lmr_free\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_lmr_free\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

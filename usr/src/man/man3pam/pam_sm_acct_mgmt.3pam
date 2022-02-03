@@ -140,8 +140,13 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBpam\fR(3PAM), \fBpam_acct_mgmt\fR(3PAM), \fBpam_set_data\fR(3PAM),
-\fBpam_start\fR(3PAM), \fBsyslog\fR(3C), \fBlibpam\fR(3LIB), \fBpam.conf\fR(5),
+\fBsyslog\fR(3C),
+\fBlibpam\fR(3LIB),
+\fBpam\fR(3PAM),
+\fBpam_acct_mgmt\fR(3PAM),
+\fBpam_set_data\fR(3PAM),
+\fBpam_start\fR(3PAM),
+\fBpam.conf\fR(5),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

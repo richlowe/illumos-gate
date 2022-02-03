@@ -80,7 +80,9 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBgetmajor\fR(9F), \fBgetminor\fR(9F),
+\fBattributes\fR(7),
+\fBgetmajor\fR(9F),
+\fBgetminor\fR(9F),
 \fBmakedevice\fR(9F)
 .sp
 .LP

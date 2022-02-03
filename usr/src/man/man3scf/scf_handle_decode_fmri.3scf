@@ -285,4 +285,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB), \fBscf_error\fR(3SCF), \fBattributes\fR(7)
+\fBlibscf\fR(3LIB),
+\fBscf_error\fR(3SCF),
+\fBattributes\fR(7)

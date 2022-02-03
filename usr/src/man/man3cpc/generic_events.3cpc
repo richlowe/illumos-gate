@@ -1251,7 +1251,8 @@ Interface Stability	Volatile
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc\fR(3CPC), \fBattributes\fR(7)
+\fBcpc\fR(3CPC),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

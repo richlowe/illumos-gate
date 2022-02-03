@@ -231,6 +231,9 @@ Standard	uDAPL, 1.1, 1.2 (except \fBRO_AWARE_\fR)
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_evd_modify_cno\fR(3DAT), \fBdat_evd_resize\fR(3DAT),
-\fBdat_ia_close\fR(3DAT), \fBdat_registry_list_providers\fR(3DAT),
-\fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_evd_modify_cno\fR(3DAT),
+\fBdat_evd_resize\fR(3DAT),
+\fBdat_ia_close\fR(3DAT),
+\fBdat_registry_list_providers\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

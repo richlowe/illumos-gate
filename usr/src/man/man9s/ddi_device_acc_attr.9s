@@ -367,8 +367,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_fm_acc_err_get\fR(9F), \fBddi_get16\fR(9F),
-\fBddi_put16\fR(9F), \fBddi_regs_map_setup\fR(9F)
+\fBattributes\fR(7),
+\fBddi_fm_acc_err_get\fR(9F),
+\fBddi_get16\fR(9F),
+\fBddi_put16\fR(9F),
+\fBddi_regs_map_setup\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

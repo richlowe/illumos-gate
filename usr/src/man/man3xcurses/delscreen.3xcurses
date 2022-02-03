@@ -64,5 +64,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBendwin\fR(3XCURSES), \fBinitscr\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBnewterm\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBendwin\fR(3XCURSES),
+\fBinitscr\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnewterm\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

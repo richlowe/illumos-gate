@@ -288,9 +288,17 @@ rv = ddi_modclose(modp);
 .in -2
 
 .SH SEE ALSO
-\fBdlclose\fR(3C), \fBdlopen\fR(3C), \fBdlsym\fR(3C), \fBlibdl\fR(3LIB),
-\fBboot\fR(8), \fBelfwrap\fR(1), \fBmodload\fR(8), \fBsystem\fR(5),
-\fB_fini\fR(9E), \fB_info\fR(9E), \fB_init\fR(9E)
+\fBelfwrap\fR(1),
+\fBdlclose\fR(3C),
+\fBdlopen\fR(3C),
+\fBdlsym\fR(3C),
+\fBlibdl\fR(3LIB),
+\fBsystem\fR(5),
+\fBboot\fR(8),
+\fBmodload\fR(8),
+\fB_fini\fR(9E),
+\fB_info\fR(9E),
+\fB_init\fR(9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

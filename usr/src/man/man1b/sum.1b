@@ -30,7 +30,10 @@ encountering files greater than or equal to 2 Gbyte ( 2^31 bytes).
 .SH SEE ALSO
 .sp
 .LP
-\fBsum\fR(1), \fBwc\fR(1), \fBattributes\fR(7), \fBlargefile\fR(7)
+\fBsum\fR(1),
+\fBwc\fR(1),
+\fBattributes\fR(7),
+\fBlargefile\fR(7)
 .SH DIAGNOSTICS
 .sp
 .LP

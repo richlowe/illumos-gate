@@ -47,7 +47,10 @@ context.
 .SH SEE ALSO
 .sp
 .LP
-\fBenableok\fR(9F), \fBinsq\fR(9F), \fBputbq\fR(9F), \fBputq\fR(9F),
+\fBenableok\fR(9F),
+\fBinsq\fR(9F),
+\fBputbq\fR(9F),
+\fBputq\fR(9F),
 \fBqenable\fR(9F)
 .sp
 .LP

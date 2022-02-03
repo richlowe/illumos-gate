@@ -277,9 +277,15 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBsar\fR(8), \fBread\fR(2), \fBtimes\fR(2), \fBwrite\fR(2),
-\fBgetpagesize\fR(3C), \fBgettimeofday\fR(3C), \fBwait\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBread\fR(2),
+\fBtimes\fR(2),
+\fBwrite\fR(2),
+\fBgetpagesize\fR(3C),
+\fBgettimeofday\fR(3C),
+\fBwait\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBsar\fR(8)
 .SH NOTES
 .sp
 .LP

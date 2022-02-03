@@ -60,4 +60,7 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBaudio\fR(4I), \fBdsp\fR(4I), \fBmixer\fR(4I)
+\fBaudio\fR(4I),
+\fBdsp\fR(4I),
+\fBmixer\fR(4I),
+\fBattributes\fR(7)

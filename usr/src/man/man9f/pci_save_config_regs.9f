@@ -133,7 +133,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBpower\fR(9E)
+\fBattributes\fR(7),
+\fBpower\fR(9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

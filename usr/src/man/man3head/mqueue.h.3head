@@ -101,5 +101,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBfcntl.h\fR(3HEAD), \fBsignal.h\fR(3HEAD), \fBtime.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBfcntl.h\fR(3HEAD),
+\fBsignal.h\fR(3HEAD),
+\fBtime.h\fR(3HEAD),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -444,9 +444,16 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBmail\fR(1), \fBuuglist\fR(1C), \fBuustat\fR(1C), \fBuux\fR(1C),
-\fBUutry\fR(8), \fBuuxqt\fR(8), \fBchmod\fR(2), \fBattributes\fR(7),
-\fBenviron\fR(7), \fBstandards\fR(7)
+\fBmail\fR(1),
+\fBuuglist\fR(1C),
+\fBuustat\fR(1C),
+\fBuux\fR(1C),
+\fBchmod\fR(2),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7),
+\fBUutry\fR(8),
+\fBuuxqt\fR(8)
 .SH NOTES
 .sp
 .LP

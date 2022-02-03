@@ -312,5 +312,10 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfree\fR(3C), \fBmalloc\fR(3C), \fBt_connect\fR(3NSL), \fBt_free\fR(3NSL),
-\fBt_getinfo\fR(3NSL), \fBt_open\fR(3NSL), \fBattributes\fR(7)
+\fBfree\fR(3C),
+\fBmalloc\fR(3C),
+\fBt_connect\fR(3NSL),
+\fBt_free\fR(3NSL),
+\fBt_getinfo\fR(3NSL),
+\fBt_open\fR(3NSL),
+\fBattributes\fR(7)

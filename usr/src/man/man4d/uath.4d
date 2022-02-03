@@ -89,8 +89,11 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBdladm\fR(8), \fBwificonfig\fR(8), \fBattributes\fR(7), \fBdlpi\fR(4P),
-\fBgld\fR(4D)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7),
+\fBdladm\fR(8),
+\fBwificonfig\fR(8)
 .sp
 .LP
 \fIIEEE802.11b/g - Wireless LAN Standard - IEEE, 2003\fR

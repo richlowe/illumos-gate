@@ -84,7 +84,9 @@ removed in a future Solaris Trusted Extensions release. Use the
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtsol\fR(3LIB), \fBstr_to_label\fR(3TSOL), \fBattributes\fR(7),
+\fBlibtsol\fR(3LIB),
+\fBstr_to_label\fR(3TSOL),
+\fBattributes\fR(7),
 \fBlabels\fR(7)
 .SH NOTES
 .sp

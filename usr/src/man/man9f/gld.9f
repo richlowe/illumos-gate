@@ -287,8 +287,13 @@ on failure.
 .LP
 \fBgld_intr\fR(\|) returns a value appropriate for an interrupt handler.
 .SH SEE ALSO
-\fBgld\fR(4D), \fBgld\fR(9E), \fBgld_mac_info\fR(9S), \fBgld_stats\fR(9S),
-\fBdlpi\fR(4P), \fBattach\fR(9E), \fBddi_add_intr\fR(9F)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBattach\fR(9E),
+\fBgld\fR(9E),
+\fBddi_add_intr\fR(9F),
+\fBgld_mac_info\fR(9S),
+\fBgld_stats\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

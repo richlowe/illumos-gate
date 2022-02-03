@@ -62,7 +62,13 @@ Interface Stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBatomic_add\fR(9F), \fBatomic_and\fR(9F), \fBatomic_cas\fR(9F),
-\fBatomic_dec\fR(9F), \fBatomic_inc\fR(9F), \fBatomic_or\fR(9F),
-\fBatomic_swap\fR(9F), \fBmembar_ops\fR(9F), \fBattributes\fR(7),
-\fBatomic_ops\fR(3C)
+\fBatomic_ops\fR(3C),
+\fBattributes\fR(7),
+\fBatomic_add\fR(9F),
+\fBatomic_and\fR(9F),
+\fBatomic_cas\fR(9F),
+\fBatomic_dec\fR(9F),
+\fBatomic_inc\fR(9F),
+\fBatomic_or\fR(9F),
+\fBatomic_swap\fR(9F),
+\fBmembar_ops\fR(9F)

@@ -240,7 +240,8 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBcurses\fR(3CURSES), \fBattributes\fR(7)
+\fBcurses\fR(3CURSES),
+\fBattributes\fR(7)
 .SH NOTES
 The header \fB<menu.h>\fR automatically includes the headers  \fB<eti.h>\fR and
 \fB<curses.h>\fR\&.

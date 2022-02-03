@@ -200,5 +200,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc_bind_curlwp\fR(3CPC), \fBgeneric_events\fR(3CPC), \fBlibcpc\fR(3LIB),
+\fBcpc_bind_curlwp\fR(3CPC),
+\fBgeneric_events\fR(3CPC),
+\fBlibcpc\fR(3LIB),
 \fBattributes\fR(7)

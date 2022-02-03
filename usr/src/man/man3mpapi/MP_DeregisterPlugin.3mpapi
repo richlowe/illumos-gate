@@ -105,7 +105,9 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibMPAPI\fR(3LIB), \fBMP_RegisterPlugin\fR(3MPAPI), \fBmpapi.conf\fR(5),
+\fBlibMPAPI\fR(3LIB),
+\fBMP_RegisterPlugin\fR(3MPAPI),
+\fBmpapi.conf\fR(5),
 \fBattributes\fR(7)
 .sp
 .LP

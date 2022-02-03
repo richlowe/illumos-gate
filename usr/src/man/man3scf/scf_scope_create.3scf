@@ -240,7 +240,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB), \fBscf_error\fR(3SCF), \fBscf_handle_decode_fmri\fR(3SCF),
-\fBscf_iter_handle_scopes\fR(3SCF), \fBscf_iter_next_scope\fR(3SCF),
-\fBscf_iter_scope_services\fR(3SCF), \fBscf_scope_to_fmri\fR(3SCF),
-\fBscf_service_create\fR(3SCF), \fBattributes\fR(7)
+\fBlibscf\fR(3LIB),
+\fBscf_error\fR(3SCF),
+\fBscf_handle_decode_fmri\fR(3SCF),
+\fBscf_iter_handle_scopes\fR(3SCF),
+\fBscf_iter_next_scope\fR(3SCF),
+\fBscf_iter_scope_services\fR(3SCF),
+\fBscf_scope_to_fmri\fR(3SCF),
+\fBscf_service_create\fR(3SCF),
+\fBattributes\fR(7)

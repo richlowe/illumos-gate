@@ -78,8 +78,12 @@ swapping if the host and the device have incompatible endian characteristics.
 .SH CONTEXT
 These functions may be called from user, kernel, or interrupt context.
 .SH SEE ALSO
-\fBcsx_DupHandle\fR(9F), \fBcsx_Get8\fR(9F), \fBcsx_GetMappedAddr\fR(9F),
-\fBcsx_RepGet8\fR(9F), \fBcsx_RepPut8\fR(9F), \fBcsx_RequestIO\fR(9F),
+\fBcsx_DupHandle\fR(9F),
+\fBcsx_Get8\fR(9F),
+\fBcsx_GetMappedAddr\fR(9F),
+\fBcsx_RepGet8\fR(9F),
+\fBcsx_RepPut8\fR(9F),
+\fBcsx_RequestIO\fR(9F),
 \fBcsx_RequestWindow\fR(9F)
 .sp
 .LP

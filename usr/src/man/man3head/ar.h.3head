@@ -210,7 +210,10 @@ _____________________|______________|___________________________
 .SH SEE ALSO
 .sp
 .LP
-\fBar\fR(1), \fBld\fR(1), \fBstrip\fR(1), \fBa.out\fR(5)
+\fBar\fR(1),
+\fBld\fR(1),
+\fBstrip\fR(1),
+\fBa.out\fR(5)
 .SH NOTES
 .sp
 .LP

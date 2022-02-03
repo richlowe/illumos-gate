@@ -414,10 +414,21 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBld\fR(1), \fBld.so.1\fR(1), \fBstrip\fR(1), \fB_Exit\fR(2), \fBbrk\fR(2),
-\fBexec\fR(2), \fB_exithandle\fR(3C), \fBdladdr\fR(3C), \fBdlclose\fR(3C),
-\fBdlerror\fR(3C), \fBdlopen\fR(3C), \fBdlsym\fR(3C), \fBend\fR(3C),
-\fBmalloc\fR(3C), \fBattributes\fR(7)
+\fBld\fR(1),
+\fBld.so.1\fR(1),
+\fBstrip\fR(1),
+\fB_Exit\fR(2),
+\fBbrk\fR(2),
+\fBexec\fR(2),
+\fB_exithandle\fR(3C),
+\fBdladdr\fR(3C),
+\fBdlclose\fR(3C),
+\fBdlerror\fR(3C),
+\fBdlopen\fR(3C),
+\fBdlsym\fR(3C),
+\fBend\fR(3C),
+\fBmalloc\fR(3C),
+\fBattributes\fR(7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

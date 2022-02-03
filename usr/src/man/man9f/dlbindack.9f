@@ -185,7 +185,9 @@ driver using \fBgld\fR(4D).
 All \fBDLPI\fR helper functions can be called from user, interrupt, or kernel
 context.
 .SH SEE ALSO
-\fBgld\fR(4D), \fBdlpi\fR(4P), \fBqreply\fR(9F)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBqreply\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

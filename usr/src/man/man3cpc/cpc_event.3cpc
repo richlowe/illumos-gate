@@ -97,5 +97,8 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBgethrtime\fR(3C), \fBcpc\fR(3CPC), \fBcpc_version\fR(3CPC),
-\fBlibcpc\fR(3LIB), \fBattributes\fR(7)
+\fBgethrtime\fR(3C),
+\fBcpc\fR(3CPC),
+\fBcpc_version\fR(3CPC),
+\fBlibcpc\fR(3LIB),
+\fBattributes\fR(7)

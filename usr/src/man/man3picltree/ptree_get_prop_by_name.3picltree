@@ -118,4 +118,5 @@ MT-Level	MT-Safe
 .sp
 .LP
 \fBptree_get_first_prop\fR(3PICLTREE),
-\fBptree_get_propval_by_name\fR(3PICLTREE), \fBattributes\fR(7)
+\fBptree_get_propval_by_name\fR(3PICLTREE),
+\fBattributes\fR(7)

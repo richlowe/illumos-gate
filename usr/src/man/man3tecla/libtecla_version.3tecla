@@ -100,4 +100,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibtecla\fR(3LIB), \fBattributes\fR(7)
+\fBlibtecla\fR(3LIB),
+\fBattributes\fR(7)

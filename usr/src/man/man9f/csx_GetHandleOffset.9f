@@ -49,7 +49,8 @@ Successful operation.
 .SH CONTEXT
 This function may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_RequestIO\fR(9F), \fBcsx_RequestIRQ\fR(9F),
+\fBcsx_RequestIO\fR(9F),
+\fBcsx_RequestIRQ\fR(9F),
 \fBcsx_SetHandleOffset\fR(9F)
 .sp
 .LP

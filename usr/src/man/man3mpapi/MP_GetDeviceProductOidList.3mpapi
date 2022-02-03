@@ -134,7 +134,8 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibMPAPI\fR(3LIB), \fBMP_GetDeviceProductProperties\fR(3MPAPI),
+\fBlibMPAPI\fR(3LIB),
+\fBMP_GetDeviceProductProperties\fR(3MPAPI),
 \fBattributes\fR(7)
 .sp
 .LP

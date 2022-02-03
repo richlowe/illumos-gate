@@ -77,6 +77,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBbkgdset\fR(3XCURSES), \fBclear\fR(3XCURSES), \fBclearok\fR(3XCURSES),
-\fBclrtobot\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
+\fBbkgdset\fR(3XCURSES),
+\fBclear\fR(3XCURSES),
+\fBclearok\fR(3XCURSES),
+\fBclrtobot\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

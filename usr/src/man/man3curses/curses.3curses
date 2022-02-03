@@ -3200,8 +3200,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurses\fR(3XCURSES), \fBlibcurses\fR(3LIB), \fBlibcurses\fR(3XCURSES),
-\fBterminfo\fR(5), \fBattributes\fR(7)
+\fBlibcurses\fR(3LIB),
+\fBcurses\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBterminfo\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

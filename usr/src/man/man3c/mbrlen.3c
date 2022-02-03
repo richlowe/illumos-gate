@@ -182,9 +182,13 @@ function is Standard.  The
 function is Uncommitted.
 .SH SEE ALSO
 .LP
-\fBmbrtowc\fR(3C), \fBmbsinit\fR(3C), \fBnewlocale\fR(3C),
-\fBsetlocale\fR(3C), \fBattributes\fR(7),
-\fBenviron\fR(7), \fBstandards\fR(7)
+\fBmbrtowc\fR(3C),
+\fBmbsinit\fR(3C),
+\fBnewlocale\fR(3C),
+\fBsetlocale\fR(3C),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

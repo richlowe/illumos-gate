@@ -668,5 +668,8 @@ As described on the \fBlgamma\fR(3M) manual page, \fBgamma()\fR and
 \fBlgamma()\fR and their \fBfloat\fR and \fBlong double\fR counterparts are
 Unsafe. All other functions in \fBlibm.so.2\fR are MT-Safe.
 .SH SEE ALSO
-\fBIntro\fR(3), \fBlgamma\fR(3M), \fBmath.h\fR(3HEAD), \fBattributes\fR(7),
+\fBIntro\fR(3),
+\fBmath.h\fR(3HEAD),
+\fBlgamma\fR(3M),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

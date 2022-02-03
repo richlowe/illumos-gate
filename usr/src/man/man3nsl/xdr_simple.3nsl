@@ -369,5 +369,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmalloc\fR(3C), \fBrpc\fR(3NSL), \fBxdr_admin\fR(3NSL),
-\fBxdr_complex\fR(3NSL), \fBxdr_create\fR(3NSL), \fBattributes\fR(7)
+\fBmalloc\fR(3C),
+\fBrpc\fR(3NSL),
+\fBxdr_admin\fR(3NSL),
+\fBxdr_complex\fR(3NSL),
+\fBxdr_create\fR(3NSL),
+\fBattributes\fR(7)

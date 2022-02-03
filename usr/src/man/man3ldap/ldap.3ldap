@@ -81,7 +81,9 @@ Use \fBldap_modify_ext\fR(3LDAP) and \fBldap_modify_ext_s\fR(3LDAP) to modify
 an existing entry in a LDAP server that supports for LDAPv3 server and client
 controls. Similarly, use \fBldap_rename\fR(3LDAP) and
 \fBldap_rename_s\fR(3LDAP) to change the name of an LDAP entry. The
-\fBldap_modrdn\fR(3LDAP), \fBldap_modrdn_s\fR(3LDAP), \fBldap_modrdn2\fR(3LDAP)
+\fBldap_modrdn\fR(3LDAP),
+\fBldap_modrdn2\fR(3LDAP),
+\fBldap_modrdn_s\fR(3LDAP)
 and \fBldap_modrdn2_s\fR(3LDAP) interfaces are deprecated.
 .SS "Obtaining Results"
 .LP

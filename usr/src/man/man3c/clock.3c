@@ -57,5 +57,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBtimes\fR(2), \fBpopen\fR(3C), \fBsystem\fR(3C), \fBwait\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBtimes\fR(2),
+\fBpopen\fR(3C),
+\fBsystem\fR(3C),
+\fBwait\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -165,8 +165,12 @@ schema are Standard. Standard is specified in \fBlabel_encodings\fR(5).
 .SH SEE ALSO
 .sp
 .LP
-\fBlabel_to_str\fR(3TSOL), \fBlibtsol\fR(3LIB), \fBm_label\fR(3TSOL),
-\fBlabel_encodings\fR(5), \fBattributes\fR(7), \fBlabels\fR(7)
+\fBlibtsol\fR(3LIB),
+\fBlabel_to_str\fR(3TSOL),
+\fBm_label\fR(3TSOL),
+\fBlabel_encodings\fR(5),
+\fBattributes\fR(7),
+\fBlabels\fR(7)
 .sp
 .LP
 \fIValidating the Label Request Against the Printer\&'s Label Range\fR in

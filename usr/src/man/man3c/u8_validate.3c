@@ -280,8 +280,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBu8_strcmp\fR(3C), \fBu8_textprep_str\fR(3C), \fBattributes\fR(7),
-\fBu8_strcmp\fR(9F), \fBu8_textprep_str\fR(9F), \fBu8_validate\fR(9F)
+\fBu8_strcmp\fR(3C),
+\fBu8_textprep_str\fR(3C),
+\fBattributes\fR(7),
+\fBu8_strcmp\fR(9F),
+\fBu8_textprep_str\fR(9F),
+\fBu8_validate\fR(9F)
 .sp
 .LP
 The Unicode Standard (http://www.unicode.org)

@@ -299,9 +299,16 @@ MT\(miLevel	MT\(miSafe
 .TE
 
 .SH SEE ALSO
-\fBld\fR(1), \fBld.so.1\fR(1), \fBdladdr\fR(3C), \fBdlclose\fR(3C),
-\fBdldump\fR(3C), \fBdlerror\fR(3C), \fBdlinfo\fR(3C), \fBdlsym\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBld\fR(1),
+\fBld.so.1\fR(1),
+\fBdladdr\fR(3C),
+\fBdlclose\fR(3C),
+\fBdldump\fR(3C),
+\fBdlerror\fR(3C),
+\fBdlinfo\fR(3C),
+\fBdlsym\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

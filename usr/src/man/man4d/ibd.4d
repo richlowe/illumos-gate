@@ -241,9 +241,15 @@ configuration file to start IPoIB service
 
 .SH SEE ALSO
 .LP
-\fBcfgadm\fR(8), \fBcfgadm_ib(8)\fR, \fBifconfig\fR(8), \fBsyslogd\fR(8),
-\fBgld\fR(4D), \fBib\fR(4D), \fBkstat\fR(4D), \fBstreamio\fR(4I),
-\fBdlpi\fR(4P), \fBattributes\fR(7), \fBattach\fR(9E)
+\fBcfgadm\fR(8), \fBcfgadm_ib(8)\fR, \fBgld\fR(4D),
+\fBib\fR(4D),
+\fBkstat\fR(4D),
+\fBstreamio\fR(4I),
+\fBdlpi\fR(4P),
+\fBattributes\fR(7),
+\fBifconfig\fR(8),
+\fBsyslogd\fR(8),
+\fBattach\fR(9E)
 .SH NOTES
 .LP
 IBD is a GLD-based driver and provides the statistics described by

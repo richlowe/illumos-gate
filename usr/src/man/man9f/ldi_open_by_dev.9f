@@ -313,8 +313,10 @@ These functions may be called from user or kernel context.
 These functions should not be called from a device's attach, detach, or power
 entry point. This could result in a system crash or deadlock.
 .SH SEE ALSO
-\fBscsi_vhci\fR(4D), \fBldi_ident_from_dev\fR(9F),
-\fBldi_ident_from_dip\fR(9F), \fBldi_ident_from_stream\fR(9F)
+\fBscsi_vhci\fR(4D),
+\fBldi_ident_from_dev\fR(9F),
+\fBldi_ident_from_dip\fR(9F),
+\fBldi_ident_from_stream\fR(9F)
 .SH NOTES
 Use only OTYP_CHR or OTYP_BLK options when you use the \fBldi_open_by_dev()\fR
 and \fBldi_open_by_devid()\fR functions to open a device. Other flags,

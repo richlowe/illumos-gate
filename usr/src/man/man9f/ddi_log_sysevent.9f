@@ -326,7 +326,9 @@ static int
 .in -2
 
 .SH SEE ALSO
-\fBsyseventd\fR(8), \fBattributes\fR(7), \fBnvlist_add_boolean\fR(9F),
+\fBattributes\fR(7),
+\fBsyseventd\fR(8),
+\fBnvlist_add_boolean\fR(9F),
 \fBnvlist_alloc\fR(9F)
 .sp
 .LP

@@ -77,7 +77,10 @@ Interface Stability	Consolidation Private
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBib\fR(4D), \fBibcm\fR(4D), \fBibdm\fR(4D)
+\fBib\fR(4D),
+\fBibcm\fR(4D),
+\fBibdm\fR(4D),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIInfiniBand Architecture Specification, Volume 1: Release 1.1\fR

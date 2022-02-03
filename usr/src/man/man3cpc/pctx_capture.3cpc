@@ -142,5 +142,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBfork\fR(2), \fBcpc\fR(3CPC), \fBpctx_set_events\fR(3CPC),
-\fBlibpctx\fR(3LIB), \fBproc\fR(5), \fBattributes\fR(7)
+\fBfork\fR(2),
+\fBcpc\fR(3CPC),
+\fBpctx_set_events\fR(3CPC),
+\fBlibpctx\fR(3LIB),
+\fBproc\fR(5),
+\fBattributes\fR(7)

@@ -95,5 +95,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsqrt\fR(3M), \fBfeclearexcept\fR(3M), \fBfetestexcept\fR(3M),
+\fBfeclearexcept\fR(3M),
+\fBfetestexcept\fR(3M),
+\fBsqrt\fR(3M),
 \fBattributes\fR(7)

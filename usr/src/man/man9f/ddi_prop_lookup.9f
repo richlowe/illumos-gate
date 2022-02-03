@@ -430,8 +430,11 @@ int	noptions;
 .in -2
 
 .SH SEE ALSO
-\fBexecve\fR(2), \fBddi_prop_exists\fR(9F), \fBddi_prop_get_int\fR(9F),
-\fBddi_prop_remove\fR(9F), \fBddi_prop_undefine\fR(9F),
+\fBexecve\fR(2),
+\fBddi_prop_exists\fR(9F),
+\fBddi_prop_get_int\fR(9F),
+\fBddi_prop_remove\fR(9F),
+\fBddi_prop_undefine\fR(9F),
 \fBddi_prop_update\fR(9F)
 .sp
 .LP

@@ -273,5 +273,11 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBiswspace\fR(3C), \fBlocaleconv\fR(3C), \fBmath.h\fR(3HEAD), \fBscanf\fR(3C),
-\fBsetlocale\fR(3C), \fBwcstol\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBiswspace\fR(3C),
+\fBlocaleconv\fR(3C),
+\fBscanf\fR(3C),
+\fBsetlocale\fR(3C),
+\fBwcstol\fR(3C),
+\fBmath.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

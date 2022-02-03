@@ -102,5 +102,8 @@ MT-Level	See the manual page for each interface.
 
 .SH SEE ALSO
 .LP
-\fBpvs\fR(1), \fBIntro\fR(2), \fBIntro\fR(3), \fBsocket.h\fR(3HEAD),
+\fBpvs\fR(1),
+\fBIntro\fR(2),
+\fBIntro\fR(3),
+\fBsocket.h\fR(3HEAD),
 \fBattributes\fR(7)

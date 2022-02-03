@@ -455,6 +455,13 @@ Standard	See below.
 For the Basic Utility Command syntax is Standard, see \fBstandards\fR(7).
 .SH SEE ALSO
 .LP
-\fBIntro\fR(1), \fBgetopt\fR(1), \fBgetopts\fR(1), \fBgetopt_long\fR(3C),
-\fBgetsubopt\fR(3C), \fBgettext\fR(3C), \fBsetlocale\fR(3C), \fBattributes\fR(7),
-\fBenviron\fR(7), \fBstandards\fR(7)
+\fBIntro\fR(1),
+\fBgetopt\fR(1),
+\fBgetopts\fR(1),
+\fBgetopt_long\fR(3C),
+\fBgetsubopt\fR(3C),
+\fBgettext\fR(3C),
+\fBsetlocale\fR(3C),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)

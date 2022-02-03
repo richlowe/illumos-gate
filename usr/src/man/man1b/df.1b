@@ -108,5 +108,8 @@ List of default parameters for each file system
 .SH SEE ALSO
 .sp
 .LP
-\fBdu\fR(1), \fBquot\fR(8), \fBtunefs\fR(8), \fBmnttab\fR(5),
-\fBattributes\fR(7)
+\fBdu\fR(1),
+\fBmnttab\fR(5),
+\fBattributes\fR(7),
+\fBquot\fR(8),
+\fBtunefs\fR(8)

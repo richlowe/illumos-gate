@@ -122,4 +122,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBrsm_memseg_export_publish\fR(3RSM), \fBattributes\fR(7)
+\fBrsm_memseg_export_publish\fR(3RSM),
+\fBattributes\fR(7)

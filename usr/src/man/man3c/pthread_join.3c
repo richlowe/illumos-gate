@@ -138,8 +138,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_cancel\fR(3C), \fBpthread_create\fR(3C), \fBpthread_detach\fR(3C),
-\fBpthread_exit\fR(3C), \fBwait\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBpthread_cancel\fR(3C),
+\fBpthread_create\fR(3C),
+\fBpthread_detach\fR(3C),
+\fBpthread_exit\fR(3C),
+\fBwait\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

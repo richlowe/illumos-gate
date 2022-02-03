@@ -44,7 +44,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_refresh\fR(3CURSES), \fBcurses\fR(3CURSES), \fBpanels\fR(3CURSES),
+\fBcurs_refresh\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBpanels\fR(3CURSES),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

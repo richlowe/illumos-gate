@@ -125,7 +125,9 @@ For any other error.
 .RE
 
 .SH SEE ALSO
-\fBkstat_create\fR(9F), \fBkstat_install\fR(9F), \fBkstat\fR(9S)
+\fBkstat_create\fR(9F),
+\fBkstat_install\fR(9F),
+\fBkstat\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

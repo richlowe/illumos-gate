@@ -657,5 +657,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsvc.configd\fR(8), \fBscf_tmpl_value_in_constraint\fR(3SCF),
-\fBattributes\fR(7), \fBsmf_template\fR(7)
+\fBscf_tmpl_value_in_constraint\fR(3SCF),
+\fBattributes\fR(7),
+\fBsmf_template\fR(7),
+\fBsvc.configd\fR(8)

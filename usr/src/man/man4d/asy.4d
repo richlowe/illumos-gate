@@ -249,9 +249,19 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBtip\fR(1), \fBkbd\fR(1), \fBuucp\fR(1C), \fBeeprom\fR(8), \fBpppd\fR(8),
-\fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C), \fBattributes\fR(7),
-\fBldterm\fR(4M), \fBttcompat\fR(4M), \fBkb\fR(4M), \fBtermio\fR(4I)
+\fBkbd\fR(1),
+\fBtip\fR(1),
+\fBuucp\fR(1C),
+\fBioctl\fR(2),
+\fBopen\fR(2),
+\fBtermios\fR(3C),
+\fBtermio\fR(4I),
+\fBkb\fR(4M),
+\fBldterm\fR(4M),
+\fBttcompat\fR(4M),
+\fBattributes\fR(7),
+\fBeeprom\fR(8),
+\fBpppd\fR(8)
 .SH DIAGNOSTICS
 .sp
 .ne 2

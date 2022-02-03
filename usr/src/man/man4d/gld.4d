@@ -1004,8 +1004,15 @@ loadable kernel module
 .RE
 
 .SH SEE ALSO
-\fBld\fR(1), \fBkstat\fR(4D), \fBdlpi\fR(4P), \fBattach\fR(9E), \fBgld\fR(9E),
-\fBopen\fR(9E), \fBgld\fR(9F), \fBgld_mac_info\fR(9S), \fBgld_stats\fR(9S),
+\fBld\fR(1),
+\fBkstat\fR(4D),
+\fBdlpi\fR(4P),
+\fBattach\fR(9E),
+\fBgld\fR(9E),
+\fBopen\fR(9E),
+\fBgld\fR(9F),
+\fBgld_mac_info\fR(9S),
+\fBgld_stats\fR(9S),
 \fBkstat\fR(9S)
 .sp
 .LP

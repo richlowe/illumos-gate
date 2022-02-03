@@ -273,8 +273,15 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBsyncinit\fR(8), \fBsyncloop\fR(8), \fBsyncstat\fR(8), \fBioctl\fR(2),
-\fBopen\fR(2), \fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(7), \fBzs\fR(4D)
+\fBioctl\fR(2),
+\fBopen\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBzs\fR(4D),
+\fBattributes\fR(7),
+\fBsyncinit\fR(8),
+\fBsyncloop\fR(8),
+\fBsyncstat\fR(8)
 .sp
 .LP
 Refer to the \fIZilog Z8530 SCC Serial Communications Controller Technical

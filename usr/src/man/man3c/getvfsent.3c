@@ -130,7 +130,8 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBvfstab\fR(5), \fBattributes\fR(7)
+\fBvfstab\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .LP
 The members of the \fBvfstab\fR structure point to information contained in a

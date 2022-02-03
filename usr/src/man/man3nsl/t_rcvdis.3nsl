@@ -232,5 +232,9 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBt_alloc\fR(3NSL), \fBt_connect\fR(3NSL), \fBt_listen\fR(3NSL),
-\fBt_open\fR(3NSL), \fBt_snddis\fR(3NSL), \fBattributes\fR(7)
+\fBt_alloc\fR(3NSL),
+\fBt_connect\fR(3NSL),
+\fBt_listen\fR(3NSL),
+\fBt_open\fR(3NSL),
+\fBt_snddis\fR(3NSL),
+\fBattributes\fR(7)

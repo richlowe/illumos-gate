@@ -73,8 +73,14 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBipsecalgs\fR(8), \fBipsecconf\fR(8), \fBndd\fR(8), \fBattributes\fR(7),
-\fBgetipsecalgbyname\fR(3NSL), \fBip\fR(4P), \fBipsec\fR(4P), \fBipsecah\fR(4P)
+\fBgetipsecalgbyname\fR(3NSL),
+\fBip\fR(4P),
+\fBipsec\fR(4P),
+\fBipsecah\fR(4P),
+\fBattributes\fR(7),
+\fBipsecalgs\fR(8),
+\fBipsecconf\fR(8),
+\fBndd\fR(8)
 .sp
 .LP
 Kent, S. and Atkinson, R. \fIRFC 2406, IP Encapsulating Security Payload

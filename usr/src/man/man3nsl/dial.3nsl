@@ -170,8 +170,12 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBuucp\fR(1C), \fBalarm\fR(2), \fBread\fR(2), \fBwrite\fR(2),
-\fBattributes\fR(7), \fBtermio\fR(4I)
+\fBuucp\fR(1C),
+\fBalarm\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBtermio\fR(4I),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

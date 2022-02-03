@@ -68,4 +68,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fByacc\fR(1), \fBIntro\fR(3), \fBattributes\fR(7)
+\fByacc\fR(1),
+\fBIntro\fR(3),
+\fBattributes\fR(7)

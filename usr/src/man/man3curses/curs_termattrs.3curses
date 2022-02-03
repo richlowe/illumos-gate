@@ -123,8 +123,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_initscr\fR(3CURSES), \fBcurs_outopts\fR(3CURSES),
-\fBcurses\fR(3CURSES), \fBattributes\fR(7)
+\fBcurs_initscr\fR(3CURSES),
+\fBcurs_outopts\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

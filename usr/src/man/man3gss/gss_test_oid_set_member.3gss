@@ -110,8 +110,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_acquire_cred\fR(3GSS), \fBgss_indicate_mechs\fR(3GSS),
-\fBgss_inquire_cred\fR(3GSS), \fBattributes\fR(7)
+\fBgss_acquire_cred\fR(3GSS),
+\fBgss_indicate_mechs\fR(3GSS),
+\fBgss_inquire_cred\fR(3GSS),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

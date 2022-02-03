@@ -70,5 +70,7 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBsecure_rpc\fR(3NSL), \fBnsswitch.conf\fR(5), \fBpublickey\fR(5),
+\fBsecure_rpc\fR(3NSL),
+\fBnsswitch.conf\fR(5),
+\fBpublickey\fR(5),
 \fBattributes\fR(7)

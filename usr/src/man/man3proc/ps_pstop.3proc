@@ -127,5 +127,8 @@ MT Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBkill\fR(2), \fBlibc_db\fR(3LIB), \fBproc_service\fR(3PROC),
-\fBattributes\fR(7), \fBthreads\fR(7)
+\fBkill\fR(2),
+\fBlibc_db\fR(3LIB),
+\fBproc_service\fR(3PROC),
+\fBattributes\fR(7),
+\fBthreads\fR(7)

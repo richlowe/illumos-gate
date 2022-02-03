@@ -103,8 +103,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBvolcheck\fR(1), \fBopen\fR(2), \fBstat\fR(2), \fBvolmgt_inuse\fR(3VOLMGT),
-\fBvolmgt_running\fR(3VOLMGT), \fBattributes\fR(7), \fBhal\fR(7)
+\fBvolcheck\fR(1),
+\fBopen\fR(2),
+\fBstat\fR(2),
+\fBvolmgt_inuse\fR(3VOLMGT),
+\fBvolmgt_running\fR(3VOLMGT),
+\fBattributes\fR(7),
+\fBhal\fR(7)
 .SH NOTES
 .sp
 .LP

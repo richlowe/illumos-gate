@@ -154,9 +154,14 @@ manual_configuration_only	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm_fp\fR(8), \fBprtconf\fR(8), \fBstmsboot\fR(8),
-\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBfcp\fR(4D), \fBfctl\fR(4D),
-\fBscsi_vhci\fR(4D)
+\fBfcp\fR(4D),
+\fBfctl\fR(4D),
+\fBscsi_vhci\fR(4D),
+\fBdriver.conf\fR(5),
+\fBattributes\fR(7),
+\fBcfgadm_fp\fR(8),
+\fBprtconf\fR(8),
+\fBstmsboot\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

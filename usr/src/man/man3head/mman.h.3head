@@ -238,6 +238,14 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBmprotect\fR(2), \fBmunmap\fR(2), \fBmadvise\fR(3C),
-\fBmlock\fR(3C), \fBmlockall\fR(3C), \fBmsync\fR(3C), \fBshm_open\fR(3C),
-\fBshm_unlink\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBmmap\fR(2),
+\fBmprotect\fR(2),
+\fBmunmap\fR(2),
+\fBmadvise\fR(3C),
+\fBmlock\fR(3C),
+\fBmlockall\fR(3C),
+\fBmsync\fR(3C),
+\fBshm_open\fR(3C),
+\fBshm_unlink\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

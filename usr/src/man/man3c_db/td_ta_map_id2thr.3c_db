@@ -111,5 +111,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibc_db\fR(3LIB), \fBthr_create\fR(3C), \fBthr_self\fR(3C),
+\fBthr_create\fR(3C),
+\fBthr_self\fR(3C),
+\fBlibc_db\fR(3LIB),
 \fBattributes\fR(7)

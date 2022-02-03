@@ -41,7 +41,8 @@ int       l_index;   /* index for lower stream. */
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2), \fBstreamio\fR(4I)
+\fBioctl\fR(2),
+\fBstreamio\fR(4I)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

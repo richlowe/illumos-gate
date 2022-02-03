@@ -623,8 +623,14 @@ Standard	See \fBstandards\fR(7).
 
 .SH SEE ALSO
 .LP
-\fBcreat\fR(2), \fBexec\fR(2), \fBfcntl\fR(2), \fBopen\fR(2),
-\fBfdatasync\fR(3C), \fBfsync\fR(3C), \fBfsattr\fR(7), \fBattributes\fR(7),
+\fBcreat\fR(2),
+\fBexec\fR(2),
+\fBfcntl\fR(2),
+\fBopen\fR(2),
+\fBfdatasync\fR(3C),
+\fBfsync\fR(3C),
+\fBattributes\fR(7),
+\fBfsattr\fR(7),
 \fBstandards\fR(7)
 .SH NOTES
 .LP

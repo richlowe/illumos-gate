@@ -106,4 +106,5 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBattributes\fR(7),
+\fBstandards\fR(7)

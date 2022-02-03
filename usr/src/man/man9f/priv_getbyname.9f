@@ -122,7 +122,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBprivileges\fR(7)
+\fBattributes\fR(7),
+\fBprivileges\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

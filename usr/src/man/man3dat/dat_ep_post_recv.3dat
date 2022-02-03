@@ -235,4 +235,5 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

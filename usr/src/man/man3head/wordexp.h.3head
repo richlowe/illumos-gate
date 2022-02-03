@@ -221,4 +221,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBwordexp\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBwordexp\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

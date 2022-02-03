@@ -931,7 +931,10 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBslpd\fR(8), \fBslp.conf\fR(5), \fBslpd.reg\fR(5), \fBattributes\fR(7)
+\fBslp.conf\fR(5),
+\fBslpd.reg\fR(5),
+\fBattributes\fR(7),
+\fBslpd\fR(8)
 .sp
 .LP
 \fISystem Administration Guide: Network Services\fR

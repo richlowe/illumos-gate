@@ -261,9 +261,13 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_initscr\fR(3CURSES), \fBcurs_kernel\fR(3CURSES),
-\fBcurs_termcap\fR(3CURSES), \fBcurses\fR(3CURSES), \fBputc\fR(3C),
-\fBterminfo\fR(5), \fBattributes\fR(7)
+\fBputc\fR(3C),
+\fBcurs_initscr\fR(3CURSES),
+\fBcurs_kernel\fR(3CURSES),
+\fBcurs_termcap\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBterminfo\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

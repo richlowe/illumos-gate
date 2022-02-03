@@ -280,4 +280,6 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBtypes32.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBtypes32.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -298,6 +298,10 @@ MT-Level	See Description.
 
 .SH SEE ALSO
 .LP
-\fBIntro\fR(3), \fBlibproject\fR(3LIB), \fBproject_walk\fR(3PROJECT),
-\fBsysconf\fR(3C), \fBnsswitch.conf\fR(5), \fBproject\fR(5),
+\fBIntro\fR(3),
+\fBsysconf\fR(3C),
+\fBlibproject\fR(3LIB),
+\fBproject_walk\fR(3PROJECT),
+\fBnsswitch.conf\fR(5),
+\fBproject\fR(5),
 \fBattributes\fR(7)

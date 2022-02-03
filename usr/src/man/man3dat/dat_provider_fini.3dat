@@ -72,5 +72,7 @@ MT-Level
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_provider_init\fR(3DAT), \fBdat_registry_remove_provider\fR(3DAT),
-\fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_provider_init\fR(3DAT),
+\fBdat_registry_remove_provider\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

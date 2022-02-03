@@ -162,5 +162,9 @@ The \fBpthread_mutex_timedlock()\fR is Standard. The
 .SH SEE ALSO
 .sp
 .LP
-\fBtime\fR(2), \fBpthread_mutex_destroy\fR(3C), \fBpthread_mutex_lock\fR(3C),
-\fBpthread_mutex_trylock\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBtime\fR(2),
+\fBpthread_mutex_destroy\fR(3C),
+\fBpthread_mutex_lock\fR(3C),
+\fBpthread_mutex_trylock\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

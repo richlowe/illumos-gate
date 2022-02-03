@@ -79,5 +79,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcputrack\fR(1), \fBIntro\fR(3), \fBcpc\fR(3CPC), \fBlibcpc\fR(3LIB),
-\fBproc\fR(5), \fBattributes\fR(7)
+\fBcputrack\fR(1),
+\fBIntro\fR(3),
+\fBcpc\fR(3CPC),
+\fBlibcpc\fR(3LIB),
+\fBproc\fR(5),
+\fBattributes\fR(7)

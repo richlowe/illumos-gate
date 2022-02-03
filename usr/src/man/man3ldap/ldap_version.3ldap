@@ -49,4 +49,5 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBldap_get_option\fR(3LDAP), \fBattributes\fR(7)
+\fBldap_get_option\fR(3LDAP),
+\fBattributes\fR(7)

@@ -170,8 +170,12 @@ default form found in the program itself (in most cases, U.S. English).
 .SH SEE ALSO
 .sp
 .LP
-\fBpwd\fR(1), \fBdf\fR(8), \fBdu\fR(1), \fBquot\fR(8), \fBattributes\fR(7),
-\fBenviron\fR(7)
+\fBdu\fR(1),
+\fBpwd\fR(1),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBdf\fR(8),
+\fBquot\fR(8)
 .SH NOTES
 .sp
 .LP

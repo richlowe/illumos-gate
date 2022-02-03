@@ -109,5 +109,8 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBbstring\fR(3C), \fBmalloc\fR(3C), \fBstring\fR(3C), \fBattributes\fR(7),
+\fBbstring\fR(3C),
+\fBmalloc\fR(3C),
+\fBstring\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

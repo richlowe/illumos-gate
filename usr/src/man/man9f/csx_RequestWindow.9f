@@ -439,8 +439,10 @@ No \fBPCMCIA \fRhardware installed.
 .SH CONTEXT
 These functions may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_ConvertSpeed\fR(9F), \fBcsx_MapMemPage\fR(9F),
-\fBcsx_ModifyWindow\fR(9F), \fBcsx_RegisterClient\fR(9F),
+\fBcsx_ConvertSpeed\fR(9F),
+\fBcsx_MapMemPage\fR(9F),
+\fBcsx_ModifyWindow\fR(9F),
+\fBcsx_RegisterClient\fR(9F),
 \fBcsx_RequestConfiguration\fR(9F)
 .sp
 .LP

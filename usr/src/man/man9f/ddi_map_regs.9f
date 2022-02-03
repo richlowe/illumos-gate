@@ -185,7 +185,9 @@ Interface Stability 	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBsbus\fR(5), \fBddi_regs_map_free\fR(9F),
+\fBsbus\fR(5),
+\fBattributes\fR(7),
+\fBddi_regs_map_free\fR(9F),
 \fBddi_regs_map_setup\fR(9F)
 .sp
 .LP

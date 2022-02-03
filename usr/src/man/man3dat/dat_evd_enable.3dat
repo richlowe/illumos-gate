@@ -80,4 +80,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_evd_disable\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_evd_disable\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

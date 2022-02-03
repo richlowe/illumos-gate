@@ -76,4 +76,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetpwnam\fR(3C), \fBgetspnam\fR(3C), \fBputpwent\fR(3C), \fBattributes\fR(7)
+\fBgetpwnam\fR(3C),
+\fBgetspnam\fR(3C),
+\fBputpwent\fR(3C),
+\fBattributes\fR(7)

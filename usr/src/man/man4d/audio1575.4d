@@ -54,8 +54,11 @@ Stability level	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBmixer\fR(4I),
-\fBstreamio\fR(4I)
+\fBioctl\fR(2),
+\fBaudio\fR(4I),
+\fBmixer\fR(4I),
+\fBstreamio\fR(4I),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIUli M1575 Super South Bridge Data Sheet Data Sheet\fR\(em Uli USA Inc.

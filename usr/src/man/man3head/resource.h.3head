@@ -271,5 +271,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBgetrlimit\fR(2), \fBgetpriority\fR(3C), \fBtime.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetrlimit\fR(2),
+\fBgetpriority\fR(3C),
+\fBtime.h\fR(3HEAD),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

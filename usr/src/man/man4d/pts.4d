@@ -100,8 +100,13 @@ slave devices (M = 0 -> N-1)
 .RE
 
 .SH SEE ALSO
-\fBgrantpt\fR(3C), \fBptsname\fR(3C), \fBunlockpt\fR(3C), \fBldterm\fR(4M),
-\fBptm\fR(4D), \fBptem\fR(4M), \fBstandards\fR(7)
+\fBgrantpt\fR(3C),
+\fBptsname\fR(3C),
+\fBunlockpt\fR(3C),
+\fBptm\fR(4D),
+\fBldterm\fR(4M),
+\fBptem\fR(4M),
+\fBstandards\fR(7)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

@@ -356,5 +356,7 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBlibnvpair\fR(3LIB), \fBnvlist_alloc\fR(3NVPAIR), \fBnvpair_type\fR(3NVPAIR),
+\fBlibnvpair\fR(3LIB),
+\fBnvlist_alloc\fR(3NVPAIR),
+\fBnvpair_type\fR(3NVPAIR),
 \fBattributes\fR(7)

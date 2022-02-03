@@ -72,4 +72,5 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBacl\fR(7), \fBattributes\fR(7)
+\fBacl\fR(7),
+\fBattributes\fR(7)

@@ -216,5 +216,8 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBusb_get_status\fR(9F), \fBusb_pipe_reset\fR(9F),
-\fBusb_pipe_get_state\fR(9F), \fBusb_callback_flags\fR(9S)
+\fBattributes\fR(7),
+\fBusb_get_status\fR(9F),
+\fBusb_pipe_get_state\fR(9F),
+\fBusb_pipe_reset\fR(9F),
+\fBusb_callback_flags\fR(9S)

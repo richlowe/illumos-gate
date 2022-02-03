@@ -131,12 +131,30 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBcabs\fR(3M), \fBcacos\fR(3M), \fBcacosh\fR(3M), \fBcarg\fR(3M),
-\fBcasin\fR(3M), \fBcasinh\fR(3M), \fBcatan\fR(3M), \fBcatanh\fR(3M),
-\fBccos\fR(3M), \fBccosh\fR(3M), \fBcexp\fR(3M), \fBcimag\fR(3M),
-\fBclog\fR(3M), \fBconj\fR(3M), \fBcpow\fR(3M), \fBcproj\fR(3M),
-\fBcreal\fR(3M), \fBcsin\fR(3M), \fBcsinh\fR(3M), \fBcsqrt\fR(3M),
-\fBctan\fR(3M), \fBctanh\fR(3M), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBcabs\fR(3M),
+\fBcacos\fR(3M),
+\fBcacosh\fR(3M),
+\fBcarg\fR(3M),
+\fBcasin\fR(3M),
+\fBcasinh\fR(3M),
+\fBcatan\fR(3M),
+\fBcatanh\fR(3M),
+\fBccos\fR(3M),
+\fBccosh\fR(3M),
+\fBcexp\fR(3M),
+\fBcimag\fR(3M),
+\fBclog\fR(3M),
+\fBconj\fR(3M),
+\fBcpow\fR(3M),
+\fBcproj\fR(3M),
+\fBcreal\fR(3M),
+\fBcsin\fR(3M),
+\fBcsinh\fR(3M),
+\fBcsqrt\fR(3M),
+\fBctan\fR(3M),
+\fBctanh\fR(3M),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

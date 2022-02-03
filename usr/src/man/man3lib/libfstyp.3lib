@@ -63,5 +63,7 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBIntro\fR(3), \fBfstyp_mod_init\fR(3FSTYP), \fBlibnvpair\fR(3LIB),
+\fBIntro\fR(3),
+\fBfstyp_mod_init\fR(3FSTYP),
+\fBlibnvpair\fR(3LIB),
 \fBattributes\fR(7)

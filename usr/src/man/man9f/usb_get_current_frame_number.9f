@@ -84,6 +84,9 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBusb_alloc_isoc_req\fR(9F),
-\fBusb_get_max_pkts_per_isoc_request\fR(9F), \fBusb_pipe_isoc_xfer\fR(9F),
-\fBusb_pipe_get_max_bulk_transfer_size\fR(9F), \fBusb_isoc_request\fR(9S)
+\fBattributes\fR(7),
+\fBusb_alloc_isoc_req\fR(9F),
+\fBusb_get_max_pkts_per_isoc_request\fR(9F),
+\fBusb_pipe_get_max_bulk_transfer_size\fR(9F),
+\fBusb_pipe_isoc_xfer\fR(9F),
+\fBusb_isoc_request\fR(9S)

@@ -84,7 +84,10 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBIntro\fR(3), \fBlibtnfctl\fR(3TNF), \fBtracing\fR(3TNF),
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBlibtnfctl\fR(3TNF),
+\fBtracing\fR(3TNF),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

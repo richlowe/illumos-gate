@@ -161,5 +161,9 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBsem_destroy\fR(3C), \fBsem_open\fR(3C), \fBsem_post\fR(3C),
-\fBsem_wait\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBsem_destroy\fR(3C),
+\fBsem_open\fR(3C),
+\fBsem_post\fR(3C),
+\fBsem_wait\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -49,4 +49,5 @@ paul george ringo\fRexample%
 .SH SEE ALSO
 .sp
 .LP
-\fBwho\fR(1), \fBattributes\fR(7)
+\fBwho\fR(1),
+\fBattributes\fR(7)

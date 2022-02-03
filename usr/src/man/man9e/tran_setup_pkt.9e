@@ -215,13 +215,22 @@ undefined behavior.
 .SH RETURN VALUES
 \fBtran_setup_pkt()\fR must return zero on success, and \fB-1\fR on failure.
 .SH SEE ALSO
-\fBattach\fR(9E), \fBtran_sync_pkt\fR(9E), \fBbioerror\fR(9F),
-\fBddi_dma_buf_bind_handle\fR(9F), \fBkmem_cache_create\fR(9F),
-\fBscsi_alloc_consistent_buf\fR(9F), \fBscsi_destroy_pkt\fR(9F),
-\fBscsi_hba_attach\fR(9F), \fBscsi_hba_pkt_alloc\fR(9F),
-\fBscsi_hba_pkt_comp\fR(9F), \fBscsi_hba_pkt_free\fR(9F),
-\fBscsi_init_pkt\fR(9F), \fBbuf\fR(9S), \fBscsi_address\fR(9S),
-\fBscsi_hba_tran\fR(9S), \fBscsi_pkt\fR(9S)
+\fBattach\fR(9E),
+\fBtran_sync_pkt\fR(9E),
+\fBbioerror\fR(9F),
+\fBddi_dma_buf_bind_handle\fR(9F),
+\fBkmem_cache_create\fR(9F),
+\fBscsi_alloc_consistent_buf\fR(9F),
+\fBscsi_destroy_pkt\fR(9F),
+\fBscsi_hba_attach\fR(9F),
+\fBscsi_hba_pkt_alloc\fR(9F),
+\fBscsi_hba_pkt_comp\fR(9F),
+\fBscsi_hba_pkt_free\fR(9F),
+\fBscsi_init_pkt\fR(9F),
+\fBbuf\fR(9S),
+\fBscsi_address\fR(9S),
+\fBscsi_hba_tran\fR(9S),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

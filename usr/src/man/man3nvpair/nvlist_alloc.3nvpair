@@ -586,4 +586,6 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBlibnvpair\fR(3LIB), \fBattributes\fR(7), \fBnvlist_alloc\fR(9F)
+\fBlibnvpair\fR(3LIB),
+\fBattributes\fR(7),
+\fBnvlist_alloc\fR(9F)

@@ -343,5 +343,10 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBfclose\fR(3C), \fBfdopen\fR(3C), \fBfopen\fR(3C), \fBstdio\fR(3C),
-\fBattributes\fR(7), \fBlf64\fR(7), \fBstandards\fR(7)
+\fBfclose\fR(3C),
+\fBfdopen\fR(3C),
+\fBfopen\fR(3C),
+\fBstdio\fR(3C),
+\fBattributes\fR(7),
+\fBlf64\fR(7),
+\fBstandards\fR(7)

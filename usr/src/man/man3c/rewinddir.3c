@@ -104,5 +104,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfork\fR(2), \fBclosedir\fR(3C), \fBopendir\fR(3C), \fBreaddir\fR(3C),
-\fBseekdir\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBfork\fR(2),
+\fBclosedir\fR(3C),
+\fBopendir\fR(3C),
+\fBreaddir\fR(3C),
+\fBseekdir\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

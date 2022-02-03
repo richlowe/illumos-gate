@@ -59,5 +59,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBflushinp\fR(3XCURSES), \fBintrflush\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBflushinp\fR(3XCURSES),
+\fBintrflush\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

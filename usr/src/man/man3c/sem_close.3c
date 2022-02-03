@@ -127,8 +127,11 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBsem_init\fR(3C), \fBsem_open\fR(3C), \fBsem_unlink\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBsem_init\fR(3C),
+\fBsem_open\fR(3C),
+\fBsem_unlink\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

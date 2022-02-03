@@ -72,4 +72,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpicl_shutdown\fR(3PICL), \fBattributes\fR(7)
+\fBpicl_shutdown\fR(3PICL),
+\fBattributes\fR(7)

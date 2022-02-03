@@ -48,7 +48,9 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBstandards\fR(7), \fBstreamio\fR(4I)
+\fBstreamio\fR(4I),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

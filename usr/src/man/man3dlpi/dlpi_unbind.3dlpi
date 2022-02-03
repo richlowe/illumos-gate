@@ -81,4 +81,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi_bind\fR(3DLPI), \fBlibdlpi\fR(3LIB), \fBattributes\fR(7)
+\fBdlpi_bind\fR(3DLPI),
+\fBlibdlpi\fR(3LIB),
+\fBattributes\fR(7)

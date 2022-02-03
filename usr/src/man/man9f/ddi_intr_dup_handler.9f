@@ -274,10 +274,15 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_intr_add_handler\fR(9F), \fBddi_intr_alloc\fR(9F),
-\fBddi_intr_clr_mask\fR(9F), \fBddi_intr_disable\fR(9F),
-\fBddi_intr_enable\fR(9F), \fBddi_intr_free\fR(9F),
-\fBddi_intr_get_pending\fR(9F), \fBddi_intr_get_supported_types\fR(9F),
+\fBattributes\fR(7),
+\fBddi_intr_add_handler\fR(9F),
+\fBddi_intr_alloc\fR(9F),
+\fBddi_intr_clr_mask\fR(9F),
+\fBddi_intr_disable\fR(9F),
+\fBddi_intr_enable\fR(9F),
+\fBddi_intr_free\fR(9F),
+\fBddi_intr_get_pending\fR(9F),
+\fBddi_intr_get_supported_types\fR(9F),
 \fBddi_intr_set_mask\fR(9F)
 .sp
 .LP

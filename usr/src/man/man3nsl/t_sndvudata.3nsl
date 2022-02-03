@@ -277,4 +277,5 @@ MT Level	Safe
 .LP
 \fBfcntl\fR(2), \fBt_alloc\fR(3NSL), \fBt_open\fR(3NSL),
 \fBt_rcvudata\fR(3NSL), \fBt_rcvvudata\fR(3NSL) \fBt_rcvuderr\fR(3NSL),
-\fBt_sndudata\fR(3NSL), \fBattributes\fR(7)
+\fBt_sndudata\fR(3NSL),
+\fBattributes\fR(7)

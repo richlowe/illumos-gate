@@ -53,5 +53,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdel_curterm\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
+\fBdel_curterm\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

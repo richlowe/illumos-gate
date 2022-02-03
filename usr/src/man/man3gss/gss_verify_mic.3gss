@@ -199,7 +199,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_wrap\fR(3GSS), \fBattributes\fR(7)
+\fBgss_wrap\fR(3GSS),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

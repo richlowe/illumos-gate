@@ -100,8 +100,12 @@ xxwrite(dev_t dev, struct uio *uiop, cred_t *credp)
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2), \fBwrite\fR(2), \fBread\fR(9E), \fBphysio\fR(9F),
-\fBcb_ops\fR(9S), \fBuio\fR(9S)
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBread\fR(9E),
+\fBphysio\fR(9F),
+\fBcb_ops\fR(9S),
+\fBuio\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

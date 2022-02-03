@@ -267,5 +267,9 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBopen\fR(2), \fBlibsendfile\fR(3LIB), \fBsendfilev\fR(3EXT),
-\fBsocket\fR(3SOCKET), \fBattributes\fR(7), \fBlf64\fR(7)
+\fBopen\fR(2),
+\fBsendfilev\fR(3EXT),
+\fBlibsendfile\fR(3LIB),
+\fBsocket\fR(3SOCKET),
+\fBattributes\fR(7),
+\fBlf64\fR(7)

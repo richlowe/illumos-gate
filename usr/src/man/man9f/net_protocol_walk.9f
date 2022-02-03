@@ -58,5 +58,6 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_protocol_lookup\fR(9F), \fBnet_protocol_release\fR(9F),
-\fBattributes\fR(7)
+\fBattributes\fR(7),
+\fBnet_protocol_lookup\fR(9F),
+\fBnet_protocol_release\fR(9F)

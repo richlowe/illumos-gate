@@ -75,4 +75,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_getmtu\fR(9F), \fBnet_protocol_lookup\fR(9F)
+\fBnet_getmtu\fR(9F),
+\fBnet_protocol_lookup\fR(9F)

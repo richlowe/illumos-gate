@@ -140,8 +140,18 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBattr_off\fR(3XCURSES), \fBbkgrndset\fR(3XCURSES), \fBcurses\fR(3XCURSES),
-\fBdoupdate\fR(3XCURSES), \fBin_wch\fR(3XCURSES), \fBins_wch\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBnl\fR(3XCURSES), \fBprintw\fR(3XCURSES),
-\fBscrollok\fR(3XCURSES), \fBscrl\fR(3XCURSES), \fBsetscrreg\fR(3XCURSES),
-\fBterminfo\fR(5), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBattr_off\fR(3XCURSES),
+\fBbkgrndset\fR(3XCURSES),
+\fBcurses\fR(3XCURSES),
+\fBdoupdate\fR(3XCURSES),
+\fBin_wch\fR(3XCURSES),
+\fBins_wch\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnl\fR(3XCURSES),
+\fBprintw\fR(3XCURSES),
+\fBscrl\fR(3XCURSES),
+\fBscrollok\fR(3XCURSES),
+\fBsetscrreg\fR(3XCURSES),
+\fBterminfo\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

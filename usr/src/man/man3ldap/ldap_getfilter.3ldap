@@ -148,7 +148,9 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP), \fBldapfilter.conf\fR(5), \fBattributes\fR(7)
+\fBldap\fR(3LDAP),
+\fBldapfilter.conf\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

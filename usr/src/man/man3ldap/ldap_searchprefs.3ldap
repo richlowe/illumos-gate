@@ -123,7 +123,9 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP), \fBldapsearchprefs.conf\fR(5), \fBattributes\fR(7)
+\fBldap\fR(3LDAP),
+\fBldapsearchprefs.conf\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 Yeong, W., Howes, T., and Hardcastle-Kille, S., "Lightweight Directory Access

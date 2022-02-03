@@ -118,5 +118,11 @@ For portability to implementations conforming to X/Open standards prior to SUS,
 .SH SEE ALSO
 .sp
 .LP
-\fBgrep\fR(1), \fBregcmp\fR(1), \fBregcmp\fR(3C), \fBregcomp\fR(3C),
-\fBregexec\fR(3C), \fBregexpr\fR(3GEN), \fBregexp\fR(7), \fBstandards\fR(7)
+\fBgrep\fR(1),
+\fBregcmp\fR(1),
+\fBregcmp\fR(3C),
+\fBregcomp\fR(3C),
+\fBregexec\fR(3C),
+\fBregexpr\fR(3GEN),
+\fBregexp\fR(7),
+\fBstandards\fR(7)

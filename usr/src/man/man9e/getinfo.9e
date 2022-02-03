@@ -134,7 +134,10 @@ rd_getinfo(dev_info_t *dip, ddi_info_cmd_t infocmd, void *arg,
 .in -2
 
 .SH SEE ALSO
-\fBddi_no_info\fR(9F), \fBnodev\fR(9F), \fBcb_ops\fR(9S), \fBdev_ops\fR(9S)
+\fBddi_no_info\fR(9F),
+\fBnodev\fR(9F),
+\fBcb_ops\fR(9S),
+\fBdev_ops\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

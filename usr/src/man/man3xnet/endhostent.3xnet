@@ -207,5 +207,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBendservent\fR(3XNET), \fBhtonl\fR(3XNET), \fBinet_addr\fR(3XNET),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBendservent\fR(3XNET),
+\fBhtonl\fR(3XNET),
+\fBinet_addr\fR(3XNET),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

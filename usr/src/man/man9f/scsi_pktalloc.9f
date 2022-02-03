@@ -206,8 +206,11 @@ Stability Level	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBscsi_dmafree\fR(9F), \fBscsi_dmaget\fR(9F),
-\fBbuf\fR(9S), \fBscsi_pkt\fR(9S)
+\fBattributes\fR(7),
+\fBscsi_dmafree\fR(9F),
+\fBscsi_dmaget\fR(9F),
+\fBbuf\fR(9S),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

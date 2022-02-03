@@ -179,4 +179,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmount\fR(2), \fBmnttab\fR(5), \fBattributes\fR(7)
+\fBmount\fR(2),
+\fBmnttab\fR(5),
+\fBattributes\fR(7)

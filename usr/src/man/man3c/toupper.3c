@@ -62,6 +62,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBnewlocale\fR(3C), \fBsetlocale\fR(3C),
+\fBnewlocale\fR(3C),
+\fBsetlocale\fR(3C),
 \fBuselocale\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBattributes\fR(7),
+\fBstandards\fR(7)

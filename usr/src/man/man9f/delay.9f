@@ -92,9 +92,15 @@ displayed on the system console (line 14). The driver waits an allotted time
 .SH SEE ALSO
 .sp
 .LP
-\fBbiodone\fR(9F), \fBbiowait\fR(9F), \fBcv_timedwait\fR(9F),
-\fBddi_in_panic\fR(9F), \fBdrv_hztousec\fR(9F), \fBdrv_usectohz\fR(9F),
-\fBdrv_usecwait\fR(9F), \fBtimeout\fR(9F), \fBuntimeout\fR(9F)
+\fBbiodone\fR(9F),
+\fBbiowait\fR(9F),
+\fBcv_timedwait\fR(9F),
+\fBddi_in_panic\fR(9F),
+\fBdrv_hztousec\fR(9F),
+\fBdrv_usectohz\fR(9F),
+\fBdrv_usecwait\fR(9F),
+\fBtimeout\fR(9F),
+\fBuntimeout\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

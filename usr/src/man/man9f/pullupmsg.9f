@@ -111,7 +111,10 @@ processing messages on the queue.
 .SH SEE ALSO
 .sp
 .LP
-\fBsrv\fR(9E), \fBallocb\fR(9F), \fBmsgpullup\fR(9F), \fBmsgb\fR(9S)
+\fBsrv\fR(9E),
+\fBallocb\fR(9F),
+\fBmsgpullup\fR(9F),
+\fBmsgb\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

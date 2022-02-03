@@ -353,11 +353,17 @@ configuration.
 context, except when \fIcallback\fR is set to \fBDDI_DMA_SLEEP\fR, in which
 case it can be called from user or kernel context only.
 .SH SEE ALSO
-\fBddi_dma_addr_bind_handle\fR(9F), \fBddi_dma_alloc_handle\fR(9F),
-\fBddi_dma_cookie_get\fR(9F), \fBddi_dma_cookie_iter\fR(9F),
-\fBddi_dma_free_handle\fR(9F), \fBddi_dma_getwin\fR(9F),
-\fBddi_dma_ncookies\fR(9F), \fBddi_dma_sync\fR(9F),
-\fBddi_dma_unbind_handle\fR(9F), \fBbuf\fR(9S), \fBddi_dma_attr\fR(9S),
+\fBddi_dma_addr_bind_handle\fR(9F),
+\fBddi_dma_alloc_handle\fR(9F),
+\fBddi_dma_cookie_get\fR(9F),
+\fBddi_dma_cookie_iter\fR(9F),
+\fBddi_dma_free_handle\fR(9F),
+\fBddi_dma_getwin\fR(9F),
+\fBddi_dma_ncookies\fR(9F),
+\fBddi_dma_sync\fR(9F),
+\fBddi_dma_unbind_handle\fR(9F),
+\fBbuf\fR(9S),
+\fBddi_dma_attr\fR(9S),
 \fBddi_dma_cookie\fR(9S)
 .sp
 .LP

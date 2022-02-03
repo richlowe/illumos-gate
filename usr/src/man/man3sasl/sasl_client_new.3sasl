@@ -204,4 +204,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsasl_client_init\fR(3SASL), \fBsasl_errors\fR(3SASL), \fBattributes\fR(7)
+\fBsasl_client_init\fR(3SASL),
+\fBsasl_errors\fR(3SASL),
+\fBattributes\fR(7)

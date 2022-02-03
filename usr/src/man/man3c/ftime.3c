@@ -122,5 +122,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBdate\fR(1), \fBtime\fR(2), \fBctime\fR(3C), \fBgettimeofday\fR(3C),
-\fBtimezone\fR(5), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBdate\fR(1),
+\fBtime\fR(2),
+\fBctime\fR(3C),
+\fBgettimeofday\fR(3C),
+\fBtimezone\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

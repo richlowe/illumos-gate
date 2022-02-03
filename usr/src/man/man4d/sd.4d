@@ -437,12 +437,28 @@ Where \fIn\fR=0 the node corresponds to the entire disk.
 .RE
 
 .SH SEE ALSO
-\fBsar\fR(1), \fBcfgadm_scsi\fR(8), \fBfdisk\fR(8), \fBformat\fR(8),
-\fBiostat\fR(8), \fBclose\fR(2), \fBioctl\fR(2), \fBlseek\fR(2),
-\fBread\fR(2), \fBwrite\fR(2), \fBdriver.conf\fR(5), \fBscsi\fR(5),
-\fBfilesystem\fR(7), \fBscsa2usb\fR(4D), \fBssd\fR(4D), \fBhsfs\fR(4FS),
-\fBpcfs\fR(4FS), \fBudfs\fR(4FS), \fBcdio\fR(4I), \fBdkio\fR(4I),
-\fBscsi_ifsetcap\fR(9F), \fBscsi_reset\fR(9F)
+\fBsar\fR(1),
+\fBclose\fR(2),
+\fBioctl\fR(2),
+\fBlseek\fR(2),
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBscsa2usb\fR(4D),
+\fBssd\fR(4D),
+\fBhsfs\fR(4FS),
+\fBpcfs\fR(4FS),
+\fBudfs\fR(4FS),
+\fBcdio\fR(4I),
+\fBdkio\fR(4I),
+\fBdriver.conf\fR(5),
+\fBscsi\fR(5),
+\fBfilesystem\fR(7),
+\fBcfgadm_scsi\fR(8),
+\fBfdisk\fR(8),
+\fBformat\fR(8),
+\fBiostat\fR(8),
+\fBscsi_ifsetcap\fR(9F),
+\fBscsi_reset\fR(9F)
 .sp
 .LP
 \fIANSI Small Computer System Interface-2 (SCSI-2)\fR

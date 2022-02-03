@@ -88,7 +88,10 @@ function has finished executing.
 routine, or from a \fBqwriter()\fR, \fBqtimeout\fR(9F), or \fBqbufcall\fR(9F)
 callback function.
 .SH SEE ALSO
-\fBput\fR(9E), \fBsrv\fR(9E), \fBmt-streams\fR(9F), \fBqbufcall\fR(9F),
+\fBput\fR(9E),
+\fBsrv\fR(9E),
+\fBmt-streams\fR(9F),
+\fBqbufcall\fR(9F),
 \fBqtimeout\fR(9F)
 .sp
 .LP

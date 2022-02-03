@@ -67,5 +67,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBderwin\fR(3XCURSES), \fBdupwin\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBderwin\fR(3XCURSES),
+\fBdupwin\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -151,5 +151,9 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBgettext\fR(3C), \fBperror\fR(3C), \fBsetlocale\fR(3C), \fBuselocale\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBgettext\fR(3C),
+\fBperror\fR(3C),
+\fBsetlocale\fR(3C),
+\fBuselocale\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

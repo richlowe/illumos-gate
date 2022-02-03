@@ -210,4 +210,6 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBacl\fR(2), \fBaclsort\fR(3SEC), \fBattributes\fR(7)
+\fBacl\fR(2),
+\fBaclsort\fR(3SEC),
+\fBattributes\fR(7)

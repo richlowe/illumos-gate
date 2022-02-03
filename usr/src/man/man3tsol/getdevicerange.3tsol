@@ -105,8 +105,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlist_devices\fR(1), \fBfree\fR(3C), \fBlibtsol\fR(3LIB),
-\fBm_label_free\fR(3TSOL), \fBattributes\fR(7)
+\fBlist_devices\fR(1),
+\fBfree\fR(3C),
+\fBlibtsol\fR(3LIB),
+\fBm_label_free\fR(3TSOL),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIValidating the Label Request Against the Printer\&'s Label Range\fR in

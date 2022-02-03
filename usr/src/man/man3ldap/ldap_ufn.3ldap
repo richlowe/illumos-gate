@@ -112,8 +112,12 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBgettimeofday\fR(3C), \fBldap\fR(3LDAP), \fBldap_search\fR(3LDAP),
-\fBldap_getfilter\fR(3LDAP), \fBldapfilter.conf\fR(5), \fBldap_error\fR(3LDAP),
+\fBgettimeofday\fR(3C),
+\fBldap\fR(3LDAP),
+\fBldap_error\fR(3LDAP),
+\fBldap_getfilter\fR(3LDAP),
+\fBldap_search\fR(3LDAP),
+\fBldapfilter.conf\fR(5),
 \fBattributes\fR(7)
 .SH NOTES
 .LP

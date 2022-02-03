@@ -232,6 +232,13 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBexit\fR(2), \fBulimit\fR(2), \fBabort\fR(3C), \fBfclose\fR(3C),
-\fBferror\fR(3C), \fBfflush\fR(3C), \fBfopen\fR(3C), \fBsetbuf\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBexit\fR(2),
+\fBulimit\fR(2),
+\fBabort\fR(3C),
+\fBfclose\fR(3C),
+\fBferror\fR(3C),
+\fBfflush\fR(3C),
+\fBfopen\fR(3C),
+\fBsetbuf\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

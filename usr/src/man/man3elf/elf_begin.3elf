@@ -371,9 +371,22 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcreat\fR(2), \fBlseek\fR(2), \fBmmap\fR(2), \fBopen\fR(2),
-\fBar.h\fR(3HEAD), \fBelf\fR(3ELF), \fBelf32_getehdr\fR(3ELF),
-\fBelf_cntl\fR(3ELF), \fBelf_getarhdr\fR(3ELF), \fBelf_getarsym\fR(3ELF),
-\fBelf_getbase\fR(3ELF), \fBelf_getdata\fR(3ELF), \fBelf_getscn\fR(3ELF),
-\fBelf_kind\fR(3ELF), \fBelf_rawfile\fR(3ELF), \fBelf_update\fR(3ELF),
-\fBelf_version\fR(3ELF), \fBlibelf\fR(3LIB), \fBattributes\fR(7)
+\fBcreat\fR(2),
+\fBlseek\fR(2),
+\fBmmap\fR(2),
+\fBopen\fR(2),
+\fBelf\fR(3ELF),
+\fBelf32_getehdr\fR(3ELF),
+\fBelf_cntl\fR(3ELF),
+\fBelf_getarhdr\fR(3ELF),
+\fBelf_getarsym\fR(3ELF),
+\fBelf_getbase\fR(3ELF),
+\fBelf_getdata\fR(3ELF),
+\fBelf_getscn\fR(3ELF),
+\fBelf_kind\fR(3ELF),
+\fBelf_rawfile\fR(3ELF),
+\fBelf_update\fR(3ELF),
+\fBelf_version\fR(3ELF),
+\fBar.h\fR(3HEAD),
+\fBlibelf\fR(3LIB),
+\fBattributes\fR(7)

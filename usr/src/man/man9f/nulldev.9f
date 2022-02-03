@@ -38,7 +38,8 @@ do nothing.
 .SH SEE ALSO
 .sp
 .LP
-\fBnodev\fR(9F), \fBcb_ops\fR(9S)
+\fBnodev\fR(9F),
+\fBcb_ops\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

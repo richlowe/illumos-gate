@@ -157,5 +157,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdi_devlink_init\fR(3DEVINFO), \fBdi_devlink_path\fR(3DEVINFO),
-\fBlibdevinfo\fR(3LIB), \fBmalloc\fR(3C), \fBattributes\fR(7), \fBregex\fR(7)
+\fBmalloc\fR(3C),
+\fBdi_devlink_init\fR(3DEVINFO),
+\fBdi_devlink_path\fR(3DEVINFO),
+\fBlibdevinfo\fR(3LIB),
+\fBattributes\fR(7),
+\fBregex\fR(7)

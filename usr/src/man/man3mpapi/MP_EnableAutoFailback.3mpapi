@@ -97,7 +97,9 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibMPAPI\fR(3LIB), \fBMP_DisableAutoFailback\fR(3MPAPI), \fBattributes\fR(7)
+\fBlibMPAPI\fR(3LIB),
+\fBMP_DisableAutoFailback\fR(3MPAPI),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIMultipath Management API Version 1.0\fR

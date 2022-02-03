@@ -139,8 +139,12 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBdlopen\fR(3C), \fBpam\fR(3PAM), \fBpam_getenv\fR(3PAM),
-\fBpam_getenvlist\fR(3PAM), \fBlibpam\fR(3LIB), \fBattributes\fR(7)
+\fBdlopen\fR(3C),
+\fBlibpam\fR(3LIB),
+\fBpam\fR(3PAM),
+\fBpam_getenv\fR(3PAM),
+\fBpam_getenvlist\fR(3PAM),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

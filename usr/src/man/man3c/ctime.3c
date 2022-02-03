@@ -386,9 +386,18 @@ function in an MT-Safe manner. The \fBmktime()\fR, \fBlocaltime_r()\fR, and
 .SH SEE ALSO
 .sp
 .LP
-\fBtime\fR(2), \fBIntro\fR(3), \fBgetenv\fR(3C), \fBmktime\fR(3C),
-\fBprintf\fR(3C), \fBputenv\fR(3C), \fBsetlocale\fR(3C), \fBstrftime\fR(3C),
-\fBTIMEZONE\fR(5), \fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)
+\fBtime\fR(2),
+\fBIntro\fR(3),
+\fBgetenv\fR(3C),
+\fBmktime\fR(3C),
+\fBprintf\fR(3C),
+\fBputenv\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstrftime\fR(3C),
+\fBTIMEZONE\fR(5),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

@@ -475,10 +475,15 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB), \fBscf_error\fR(3SCF), \fBscf_iter_instance_pgs\fR(3SCF),
+\fBlibscf\fR(3LIB),
+\fBscf_error\fR(3SCF),
+\fBscf_iter_instance_pgs\fR(3SCF),
 \fBscf_iter_instance_pgs_typed\fR(3SCF),
-\fBscf_iter_instance_snapshots\fR(3SCF), \fBscf_pg_create\fR(3SCF),
-\fBscf_snapshot_create\fR(3SCF), \fBattributes\fR(7), \fBsmf\fR(7)
+\fBscf_iter_instance_snapshots\fR(3SCF),
+\fBscf_pg_create\fR(3SCF),
+\fBscf_snapshot_create\fR(3SCF),
+\fBattributes\fR(7),
+\fBsmf\fR(7)
 .SH NOTES
 .sp
 .LP

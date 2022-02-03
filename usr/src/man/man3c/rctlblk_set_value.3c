@@ -436,5 +436,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBrctladm\fR(8), \fBgetrctl\fR(2), \fBsetrctl\fR(2), \fBgethrtime\fR(3C),
-\fBattributes\fR(7)
+\fBgetrctl\fR(2),
+\fBsetrctl\fR(2),
+\fBgethrtime\fR(3C),
+\fBattributes\fR(7),
+\fBrctladm\fR(8)

@@ -95,4 +95,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibfcoe\fR(3LIB), \fBattributes\fR(7)
+\fBlibfcoe\fR(3LIB),
+\fBattributes\fR(7)

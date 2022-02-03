@@ -199,5 +199,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBisalpha\fR(3C), \fBisspace\fR(3C), \fBscanf\fR(3C), \fBstrtod\fR(3C),
-\fBstrtol\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBisalpha\fR(3C),
+\fBisspace\fR(3C),
+\fBscanf\fR(3C),
+\fBstrtod\fR(3C),
+\fBstrtol\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

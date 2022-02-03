@@ -114,7 +114,8 @@ context.
 .SH SEE ALSO
 .sp
 .LP
-\fBstrqget\fR(9F), \fBqueue\fR(9S)
+\fBstrqget\fR(9F),
+\fBqueue\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

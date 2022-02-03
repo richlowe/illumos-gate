@@ -60,4 +60,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetutent\fR(3C), \fBttyname\fR(3C), \fButmpx\fR(5), \fBattributes\fR(7)
+\fBgetutent\fR(3C),
+\fBttyname\fR(3C),
+\fButmpx\fR(5),
+\fBattributes\fR(7)

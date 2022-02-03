@@ -159,4 +159,5 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBt_bind\fR(3NSL), \fBattributes\fR(7)
+\fBt_bind\fR(3NSL),
+\fBattributes\fR(7)

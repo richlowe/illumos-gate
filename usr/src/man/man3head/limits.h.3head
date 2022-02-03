@@ -1594,4 +1594,7 @@ Default process priority.
 .SH SEE ALSO
 .sp
 .LP
-\fBfpathconf\fR(2), \fBpathconf\fR(2), \fBsysconf\fR(3C), \fBstandards\fR(7)
+\fBfpathconf\fR(2),
+\fBpathconf\fR(2),
+\fBsysconf\fR(3C),
+\fBstandards\fR(7)

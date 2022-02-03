@@ -220,11 +220,16 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_intr_add_handler\fR(9F),
-\fBddi_intr_block_enable\fR(9F), \fBddi_intr_disable\fR(9F),
-\fBddi_intr_enable\fR(9F), \fBddi_intr_get_cap\fR(9F),
-\fBddi_intr_get_nintrs\fR(9F), \fBddi_intr_get_pri\fR(9F),
-\fBddi_intr_get_supported_types\fR(9F), \fBddi_intr_remove_handler\fR(9F)
+\fBattributes\fR(7),
+\fBddi_intr_add_handler\fR(9F),
+\fBddi_intr_block_enable\fR(9F),
+\fBddi_intr_disable\fR(9F),
+\fBddi_intr_enable\fR(9F),
+\fBddi_intr_get_cap\fR(9F),
+\fBddi_intr_get_nintrs\fR(9F),
+\fBddi_intr_get_pri\fR(9F),
+\fBddi_intr_get_supported_types\fR(9F),
+\fBddi_intr_remove_handler\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

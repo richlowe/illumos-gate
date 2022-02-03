@@ -157,5 +157,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBksh\fR(1), \fBsh\fR(1), \fBpopen\fR(3C), \fBposix_spawn\fR(3C),
-\fBwait\fR(3C), \fBwaitpid\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBksh\fR(1),
+\fBsh\fR(1),
+\fBpopen\fR(3C),
+\fBposix_spawn\fR(3C),
+\fBwait\fR(3C),
+\fBwaitpid\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

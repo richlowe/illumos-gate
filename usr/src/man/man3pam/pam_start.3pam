@@ -195,10 +195,16 @@ MT-Level	MT-Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBlibpam\fR(3LIB), \fBpam\fR(3PAM), \fBpam_acct_mgmt\fR(3PAM),
-\fBpam_authenticate\fR(3PAM), \fBpam_chauthtok\fR(3PAM),
-\fBpam_open_session\fR(3PAM), \fBpam_setcred\fR(3PAM),
-\fBpam_set_data\fR(3PAM), \fBpam_strerror\fR(3PAM), \fBattributes\fR(7)
+\fBlibpam\fR(3LIB),
+\fBpam\fR(3PAM),
+\fBpam_acct_mgmt\fR(3PAM),
+\fBpam_authenticate\fR(3PAM),
+\fBpam_chauthtok\fR(3PAM),
+\fBpam_open_session\fR(3PAM),
+\fBpam_set_data\fR(3PAM),
+\fBpam_setcred\fR(3PAM),
+\fBpam_strerror\fR(3PAM),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

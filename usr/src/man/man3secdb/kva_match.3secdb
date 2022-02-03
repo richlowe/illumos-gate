@@ -44,8 +44,10 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetauthattr\fR(3SECDB), \fBgetexecattr\fR(3SECDB),
-\fBgetprofattr\fR(3SECDB), \fBgetuserattr\fR(3SECDB)
+\fBgetauthattr\fR(3SECDB),
+\fBgetexecattr\fR(3SECDB),
+\fBgetprofattr\fR(3SECDB),
+\fBgetuserattr\fR(3SECDB)
 .SH NOTES
 .LP
 The \fBkva_match()\fR function returns a pointer to data that already exists in

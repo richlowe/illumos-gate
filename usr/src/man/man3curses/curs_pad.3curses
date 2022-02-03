@@ -121,9 +121,15 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBaddch\fR(3CURSES), \fBcurses\fR(3CURSES), \fBrefresh\fR(3CURSES),
-\fBsubwin\fR(3CURSES), \fBtouchline\fR(3CURSES), \fBtouchwin\fR(3CURSES),
-\fBwaddch\fR(3CURSES), \fBwnoutrefresh\fR(3CURSES), \fBwrefresh\fR(3CURSES),
+\fBaddch\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBrefresh\fR(3CURSES),
+\fBsubwin\fR(3CURSES),
+\fBtouchline\fR(3CURSES),
+\fBtouchwin\fR(3CURSES),
+\fBwaddch\fR(3CURSES),
+\fBwnoutrefresh\fR(3CURSES),
+\fBwrefresh\fR(3CURSES),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

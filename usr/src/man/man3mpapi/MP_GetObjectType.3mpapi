@@ -103,7 +103,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibMPAPI\fR(3LIB), \fBMP_RegisterForObjectVisibilityChanges\fR(3MPAPI),
+\fBlibMPAPI\fR(3LIB),
+\fBMP_RegisterForObjectVisibilityChanges\fR(3MPAPI),
 \fBattributes\fR(7)
 .sp
 .LP

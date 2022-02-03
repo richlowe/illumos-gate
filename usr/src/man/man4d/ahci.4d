@@ -74,7 +74,10 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBcfgadm\fR(8), \fBcfgadm_sata\fR(8), \fBprtconf\fR(8), \fBsata\fR(4D)
+\fBsata\fR(4D),
+\fBcfgadm\fR(8),
+\fBcfgadm_sata\fR(8),
+\fBprtconf\fR(8)
 .sp
 .LP
 \fIAdvanced Host Controller Interface 1.0\fR

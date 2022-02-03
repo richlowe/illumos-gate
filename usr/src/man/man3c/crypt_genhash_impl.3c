@@ -92,6 +92,11 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBpasswd\fR(1), \fBcrypt\fR(3C), \fBcrypt_gensalt_impl\fR(3C), \fBfree\fR(3C),
-\fBgetpassphrase\fR(3C), \fBcrypt.conf\fR(5), \fBpasswd\fR(5),
+\fBpasswd\fR(1),
+\fBcrypt\fR(3C),
+\fBcrypt_gensalt_impl\fR(3C),
+\fBfree\fR(3C),
+\fBgetpassphrase\fR(3C),
+\fBcrypt.conf\fR(5),
+\fBpasswd\fR(5),
 \fBattributes\fR(7)

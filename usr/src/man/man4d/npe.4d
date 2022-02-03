@@ -57,7 +57,9 @@ Architecture	x64 PCI Express-based systems
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBpcie\fR(5), \fBpcie_pci\fR(4D)
+\fBpcie_pci\fR(4D),
+\fBpcie\fR(5),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIPCI Express Base Specification v1.0a\fR \(em 2003

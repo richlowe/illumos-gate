@@ -122,4 +122,7 @@ MT-Level	See \fBresolver\fR(3RESOLV)
 .TE
 
 .SH SEE ALSO
-\fBpvs\fR(1), \fBIntro\fR(3), \fBresolver\fR(3RESOLV), \fBattributes\fR(7)
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBresolver\fR(3RESOLV),
+\fBattributes\fR(7)

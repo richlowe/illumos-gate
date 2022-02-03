@@ -272,5 +272,10 @@ The \fBstrtol()\fR, \fBstrtoll()\fR, \fBatol()\fR, \fBatoll()\fR, and
 .SH SEE ALSO
 .sp
 .LP
-\fBisalpha\fR(3C), \fBisspace\fR(3C), \fBscanf\fR(3C), \fBstrtod\fR(3C),
-\fBstrtoul\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBisalpha\fR(3C),
+\fBisspace\fR(3C),
+\fBscanf\fR(3C),
+\fBstrtod\fR(3C),
+\fBstrtoul\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

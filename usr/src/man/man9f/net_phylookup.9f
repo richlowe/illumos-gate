@@ -67,5 +67,7 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_getifname\fR(9F), \fBnet_phygetnext\fR(9F),
-\fBnet_protocol_lookup\fR(9F), \fBattributes\fR(7)
+\fBattributes\fR(7),
+\fBnet_getifname\fR(9F),
+\fBnet_phygetnext\fR(9F),
+\fBnet_protocol_lookup\fR(9F)

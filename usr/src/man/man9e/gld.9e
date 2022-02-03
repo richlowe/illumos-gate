@@ -404,8 +404,13 @@ on hardware failure.
 .RE
 
 .SH SEE ALSO
-\fBgld\fR(4D), \fBgld\fR(9F), \fBgld_mac_info\fR(9S), \fBgld_stats\fR(9S),
-\fBdlpi\fR(4P), \fBattach\fR(9E), \fBddi_add_intr\fR(9F)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBattach\fR(9E),
+\fBddi_add_intr\fR(9F),
+\fBgld\fR(9F),
+\fBgld_mac_info\fR(9S),
+\fBgld_stats\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

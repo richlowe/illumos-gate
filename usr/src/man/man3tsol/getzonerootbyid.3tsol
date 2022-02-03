@@ -117,8 +117,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBfree\fR(3C), \fBgetzonenamebyid\fR(3C), \fBlibtsol\fR(3LIB),
-\fBattributes\fR(7), \fBlabels\fR(7)
+\fBIntro\fR(2),
+\fBfree\fR(3C),
+\fBgetzonenamebyid\fR(3C),
+\fBlibtsol\fR(3LIB),
+\fBattributes\fR(7),
+\fBlabels\fR(7)
 .SH NOTES
 .sp
 .LP

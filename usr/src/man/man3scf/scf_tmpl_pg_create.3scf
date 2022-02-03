@@ -303,5 +303,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsvc.configd\fR(8), \fBscf_tmpl_pg_name\fR(3SCF),
-\fBscf_tmpl_prop_create\fR(3SCF), \fBattributes\fR(7), \fBsmf_template\fR(7)
+\fBscf_tmpl_pg_name\fR(3SCF),
+\fBscf_tmpl_prop_create\fR(3SCF),
+\fBattributes\fR(7),
+\fBsmf_template\fR(7),
+\fBsvc.configd\fR(8)

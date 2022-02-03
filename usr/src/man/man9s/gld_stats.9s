@@ -160,7 +160,10 @@ also be specified.
 .RE
 
 .SH SEE ALSO
-\fBgld\fR(4D), \fBgld\fR(9F), \fBgld\fR(9E), \fBgld_mac_info\fR(9S)
+\fBgld\fR(4D),
+\fBgld\fR(9E),
+\fBgld\fR(9F),
+\fBgld_mac_info\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

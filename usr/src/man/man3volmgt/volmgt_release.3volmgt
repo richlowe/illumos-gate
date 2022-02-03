@@ -110,4 +110,6 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBvolmgt_acquire\fR(3VOLMGT), \fBattributes\fR(7), \fBhal\fR(7)
+\fBvolmgt_acquire\fR(3VOLMGT),
+\fBattributes\fR(7),
+\fBhal\fR(7)

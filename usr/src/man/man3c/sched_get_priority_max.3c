@@ -116,7 +116,13 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBlibrt\fR(3LIB), \fBsched.h\fR(3HEAD), \fBsched_getparam\fR(3C),
-\fBsched_setparam\fR(3C), \fBsched_getscheduler\fR(3C),
-\fBsched_rr_get_interval\fR(3C), \fBsched_setscheduler\fR(3C),
-\fBtime.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBsched_getparam\fR(3C),
+\fBsched_getscheduler\fR(3C),
+\fBsched_rr_get_interval\fR(3C),
+\fBsched_setparam\fR(3C),
+\fBsched_setscheduler\fR(3C),
+\fBsched.h\fR(3HEAD),
+\fBtime.h\fR(3HEAD),
+\fBlibrt\fR(3LIB),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

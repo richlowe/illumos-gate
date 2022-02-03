@@ -324,4 +324,6 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBlibpool\fR(3LIB), \fBpool_error\fR(3POOL), \fBattributes\fR(7)
+\fBlibpool\fR(3LIB),
+\fBpool_error\fR(3POOL),
+\fBattributes\fR(7)

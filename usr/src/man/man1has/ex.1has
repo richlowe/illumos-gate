@@ -887,9 +887,18 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBed\fR(1), \fBedit\fR(1), \fBgrep\fR(1), \fBsed\fR(1), \fBsort\fR(1),
-\fBvi\fR(1), \fBcurses\fR(3CURSES), \fBterm\fR(5), \fBterminfo\fR(5),
-\fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)
+\fBed\fR(1),
+\fBedit\fR(1),
+\fBgrep\fR(1),
+\fBsed\fR(1),
+\fBsort\fR(1),
+\fBvi\fR(1),
+\fBcurses\fR(3CURSES),
+\fBterm\fR(5),
+\fBterminfo\fR(5),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)
 .sp
 .LP
 \fISolaris Advanced User\&'s Guide\fR

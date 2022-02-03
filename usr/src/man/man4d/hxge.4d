@@ -187,9 +187,16 @@ Architecture	SPARC, x86
 .TE
 
 .SH SEE ALSO
-\fBdladm\fR(8), \fBfmd\fR(8), \fBifconfig\fR(8), \fBkstat\fR(8),
-\fBndd\fR(8), \fBnetstat\fR(8), \fBdriver.conf\fR(5), \fBattributes\fR(7),
-\fBstreamio\fR(4I), \fBdlpi\fR(4P)
+\fBstreamio\fR(4I),
+\fBdlpi\fR(4P),
+\fBdriver.conf\fR(5),
+\fBattributes\fR(7),
+\fBdladm\fR(8),
+\fBfmd\fR(8),
+\fBifconfig\fR(8),
+\fBkstat\fR(8),
+\fBndd\fR(8),
+\fBnetstat\fR(8)
 .sp
 .LP
 \fIWriting Device Drivers\fR

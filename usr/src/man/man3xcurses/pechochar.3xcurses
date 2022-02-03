@@ -89,5 +89,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBadd_wch\fR(3XCURSES), \fBaddch\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBnewpad\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBadd_wch\fR(3XCURSES),
+\fBaddch\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnewpad\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

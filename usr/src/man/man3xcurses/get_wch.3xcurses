@@ -151,7 +151,14 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcbreak\fR(3XCURSES), \fBecho\fR(3XCURSES), \fBhalfdelay\fR(3XCURSES),
-\fBkeypad\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBnodelay\fR(3XCURSES),
-\fBnotimeout\fR(3XCURSES), \fBraw\fR(3XCURSES), \fBtimeout\fR(3XCURSES),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBcbreak\fR(3XCURSES),
+\fBecho\fR(3XCURSES),
+\fBhalfdelay\fR(3XCURSES),
+\fBkeypad\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBnodelay\fR(3XCURSES),
+\fBnotimeout\fR(3XCURSES),
+\fBraw\fR(3XCURSES),
+\fBtimeout\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

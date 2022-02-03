@@ -51,4 +51,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_zoneidtonetid\fR(9F), \fBattributes\fR(7)
+\fBattributes\fR(7),
+\fBnet_zoneidtonetid\fR(9F)

@@ -106,7 +106,12 @@ Interface Stability	Obsolete
 .TE
 
 .SH SEE ALSO
-\fBisa\fR(5), \fBddi_io_get8\fR(9F), \fBddi_io_put8\fR(9F),
-\fBddi_io_rep_get8\fR(9F), \fBddi_regs_map_setup\fR(9F),
-\fBddi_rep_put8\fR(9F), \fBddi_rep_put16\fR(9F), \fBddi_rep_put32\fR(9F),
+\fBisa\fR(5),
+\fBddi_io_get8\fR(9F),
+\fBddi_io_put8\fR(9F),
+\fBddi_io_rep_get8\fR(9F),
+\fBddi_regs_map_setup\fR(9F),
+\fBddi_rep_put16\fR(9F),
+\fBddi_rep_put32\fR(9F),
+\fBddi_rep_put8\fR(9F),
 \fBddi_device_acc_attr\fR(9S)

@@ -1248,7 +1248,17 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBaccess\fR(2), \fBexec\fR(2), \fBfcntl\fR(2), \fBfpathconf\fR(2),
-\fBlseek\fR(2), \fBconfstr\fR(3C), \fBlockf\fR(3C), \fBsysconf\fR(3C),
-\fBtermios\fR(3C), \fBgroup\fR(5), \fBpasswd\fR(5), \fBattributes\fR(7),
-\fBstandards\fR(7), \fBtermio\fR(4I)
+\fBaccess\fR(2),
+\fBexec\fR(2),
+\fBfcntl\fR(2),
+\fBfpathconf\fR(2),
+\fBlseek\fR(2),
+\fBconfstr\fR(3C),
+\fBlockf\fR(3C),
+\fBsysconf\fR(3C),
+\fBtermios\fR(3C),
+\fBtermio\fR(4I),
+\fBgroup\fR(5),
+\fBpasswd\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

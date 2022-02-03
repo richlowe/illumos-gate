@@ -111,8 +111,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBnlsadmin\fR(8), \fBt_error\fR(3NSL), \fBt_snd\fR(3NSL), \fBt_rcv\fR(3NSL),
-\fBattributes\fR(7)
+\fBt_error\fR(3NSL),
+\fBt_rcv\fR(3NSL),
+\fBt_snd\fR(3NSL),
+\fBattributes\fR(7),
+\fBnlsadmin\fR(8)
 .SH WARNINGS
 .sp
 .LP

@@ -93,5 +93,7 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBlibrt\fR(3LIB), \fBsched.h\fR(3HEAD), \fBattributes\fR(7),
+\fBsched.h\fR(3HEAD),
+\fBlibrt\fR(3LIB),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

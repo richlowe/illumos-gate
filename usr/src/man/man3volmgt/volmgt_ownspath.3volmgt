@@ -84,5 +84,7 @@ Interface Stability	Obsolete
 
 .SH SEE ALSO
 .LP
-\fBvolmgt_root\fR(3VOLMGT), \fBvolmgt_running\fR(3VOLMGT), \fBattributes\fR(7),
+\fBvolmgt_root\fR(3VOLMGT),
+\fBvolmgt_running\fR(3VOLMGT),
+\fBattributes\fR(7),
 \fBhal\fR(7)

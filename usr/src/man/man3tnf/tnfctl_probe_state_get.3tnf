@@ -348,7 +348,13 @@ MT Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBprex\fR(1), \fBTNF_PROBE\fR(3TNF), \fBlibtnfctl\fR(3TNF),
-\fBtnfctl_check_libs\fR(3TNF), \fBtnfctl_continue\fR(3TNF),
-\fBtnfctl_probe_apply\fR(3TNF), \fBtnfctl_probe_apply_ids\fR(3TNF),
-\fBtracing\fR(3TNF), \fBtnf_kernel_probes\fR(5), \fBattributes\fR(7)
+\fBprex\fR(1),
+\fBTNF_PROBE\fR(3TNF),
+\fBlibtnfctl\fR(3TNF),
+\fBtnfctl_check_libs\fR(3TNF),
+\fBtnfctl_continue\fR(3TNF),
+\fBtnfctl_probe_apply\fR(3TNF),
+\fBtnfctl_probe_apply_ids\fR(3TNF),
+\fBtracing\fR(3TNF),
+\fBtnf_kernel_probes\fR(5),
+\fBattributes\fR(7)

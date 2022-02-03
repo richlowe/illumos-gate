@@ -79,6 +79,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibcommputil\fR(3LIB), \fBsdp_find_attribute\fR(3COMMPUTIL),
-\fBsdp_find_media\fR(3COMMPUTIL), \fBsdp_find_media_rtpmap\fR(3COMMPUTIL),
+\fBsdp_find_attribute\fR(3COMMPUTIL),
+\fBsdp_find_media\fR(3COMMPUTIL),
+\fBsdp_find_media_rtpmap\fR(3COMMPUTIL),
+\fBlibcommputil\fR(3LIB),
 \fBattributes\fR(7)

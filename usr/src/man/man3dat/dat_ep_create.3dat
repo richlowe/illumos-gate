@@ -287,7 +287,11 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_ep_connect\fR(3DAT), \fBdat_ep_dup_connect\fR(3DAT),
-\fBdat_ep_free\fR(3DAT), \fBdat_ep_get_status\fR(3DAT),
-\fBdat_ep_modify\fR(3DAT), \fBdat_ep_query\fR(3DAT), \fBlibdat\fR(3LIB),
+\fBdat_ep_connect\fR(3DAT),
+\fBdat_ep_dup_connect\fR(3DAT),
+\fBdat_ep_free\fR(3DAT),
+\fBdat_ep_get_status\fR(3DAT),
+\fBdat_ep_modify\fR(3DAT),
+\fBdat_ep_query\fR(3DAT),
+\fBlibdat\fR(3LIB),
 \fBattributes\fR(7)

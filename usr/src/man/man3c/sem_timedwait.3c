@@ -183,6 +183,12 @@ Standard	See below.
 For \fBsem_timedwait()\fR, see \fBstandards\fR(7).
 .SH SEE ALSO
 .LP
-\fBsemctl\fR(2), \fBsemget\fR(2), \fBsemop\fR(2), \fBtime\fR(2),
-\fBsem_post\fR(3C), \fBsem_trywait\fR(3C), \fBsem_wait\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBsemctl\fR(2),
+\fBsemget\fR(2),
+\fBsemop\fR(2),
+\fBtime\fR(2),
+\fBsem_post\fR(3C),
+\fBsem_trywait\fR(3C),
+\fBsem_wait\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

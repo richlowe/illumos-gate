@@ -183,6 +183,12 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBclose\fR(2), \fBexit\fR(2), \fBgetrlimit\fR(2), \fBulimit\fR(2),
-\fBfcloseall\fR(3C), \fBfopen\fR(3C), \fBstdio\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBclose\fR(2),
+\fBexit\fR(2),
+\fBgetrlimit\fR(2),
+\fBulimit\fR(2),
+\fBfcloseall\fR(3C),
+\fBfopen\fR(3C),
+\fBstdio\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

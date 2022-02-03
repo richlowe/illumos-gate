@@ -120,6 +120,10 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsigaction\fR(2), \fBsigpending\fR(2), \fBsigprocmask\fR(2),
-\fBsigsuspend\fR(2), \fBsignal.h\fR(3HEAD), \fBattributes\fR(7),
+\fBsigaction\fR(2),
+\fBsigpending\fR(2),
+\fBsigprocmask\fR(2),
+\fBsigsuspend\fR(2),
+\fBsignal.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

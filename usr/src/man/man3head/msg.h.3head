@@ -134,6 +134,11 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBmsgctl\fR(2), \fBmsgget\fR(2), \fBmsgrcv\fR(2), \fBmsgsnd\fR(2),
-\fBipc.h\fR(3HEAD), \fBtypes.h\fR(3HEAD), \fBattributes\fR(7),
+\fBmsgctl\fR(2),
+\fBmsgget\fR(2),
+\fBmsgrcv\fR(2),
+\fBmsgsnd\fR(2),
+\fBipc.h\fR(3HEAD),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

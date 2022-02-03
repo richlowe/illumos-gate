@@ -436,4 +436,5 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBsmhba.conf\fR(5), \fBattributes\fR(7)
+\fBsmhba.conf\fR(5),
+\fBattributes\fR(7)

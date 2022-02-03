@@ -76,7 +76,9 @@ MT-Level	Safe with exceptions
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBIntro\fR(3), \fBmedia_findname\fR(3VOLMGT),
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBmedia_findname\fR(3VOLMGT),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

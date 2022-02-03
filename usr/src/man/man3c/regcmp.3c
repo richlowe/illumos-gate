@@ -196,7 +196,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBed\fR(1), \fBregcmp\fR(1), \fBmalloc\fR(3C), \fBattributes\fR(7),
+\fBed\fR(1),
+\fBregcmp\fR(1),
+\fBmalloc\fR(3C),
+\fBattributes\fR(7),
 \fBregexp\fR(7)
 .SH NOTES
 .sp

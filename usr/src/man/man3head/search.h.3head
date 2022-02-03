@@ -100,5 +100,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBhsearch\fR(3C), \fBinsque\fR(3C), \fBlsearch\fR(3C), \fBtsearch\fR(3C),
-\fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBhsearch\fR(3C),
+\fBinsque\fR(3C),
+\fBlsearch\fR(3C),
+\fBtsearch\fR(3C),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

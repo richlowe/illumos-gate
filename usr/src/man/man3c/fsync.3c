@@ -128,6 +128,11 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBmount_nfs\fR(8), \fBread\fR(2), \fBsync\fR(2), \fBwrite\fR(2),
-\fBfcntl.h\fR(3HEAD), \fBfdatasync\fR(3C), \fBattributes\fR(7),
-\fBstandards\fR(7)
+\fBread\fR(2),
+\fBsync\fR(2),
+\fBwrite\fR(2),
+\fBfdatasync\fR(3C),
+\fBfcntl.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBmount_nfs\fR(8)

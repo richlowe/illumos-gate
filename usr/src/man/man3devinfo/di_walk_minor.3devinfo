@@ -132,7 +132,9 @@ MT-Level	Safe
 
 .SH SEE ALSO
 \fBdladm\fR(8), \fBdi_minor_nodetype\fR(3DEVINFO), dlpi_walk(3DLPI),
-\fBlibdevinfo\fR(3LIB), \fBattributes\fR(7), \fBfilesystem\fR(7),
+\fBlibdevinfo\fR(3LIB),
+\fBattributes\fR(7),
+\fBfilesystem\fR(7),
 \fBddi_create_minor_node\fR(9F)
 .sp
 .LP

@@ -211,9 +211,17 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBkill\fR(1), \fBexit\fR(2), \fBwaitid\fR(2), \fBwaitpid\fR(3C),
-\fBgetrusage\fR(3C), \fBsignal\fR(3C), \fBsignal.h\fR(3HEAD), \fBwait\fR(3C),
-\fBwait.h\fR(3HEAD), \fBproc\fR(5), \fBattributes\fR(7)
+\fBkill\fR(1),
+\fBexit\fR(2),
+\fBwaitid\fR(2),
+\fBgetrusage\fR(3C),
+\fBsignal\fR(3C),
+\fBwait\fR(3C),
+\fBwaitpid\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBwait.h\fR(3HEAD),
+\fBproc\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

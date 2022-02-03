@@ -115,10 +115,14 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_init_sec_context\fR(3GSS), \fBgss_accept_sec_context\fR(3GSS),
-\fBgss_delete_sec_context\fR(3GSS), \fBgss_process_context_token\fR(3GSS),
-\fBgss_inquire_context\fR(3GSS), \fBgss_wrap_size_limit\fR(3GSS),
-\fBgss_export_sec_context\fR(3GSS), \fBgss_import_sec_context\fR(3GSS),
+\fBgss_accept_sec_context\fR(3GSS),
+\fBgss_delete_sec_context\fR(3GSS),
+\fBgss_export_sec_context\fR(3GSS),
+\fBgss_import_sec_context\fR(3GSS),
+\fBgss_init_sec_context\fR(3GSS),
+\fBgss_inquire_context\fR(3GSS),
+\fBgss_process_context_token\fR(3GSS),
+\fBgss_wrap_size_limit\fR(3GSS),
 \fBattributes\fR(7)
 .sp
 .LP

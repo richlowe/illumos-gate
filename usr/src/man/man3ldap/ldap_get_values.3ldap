@@ -97,8 +97,11 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP), \fBldap_first_entry\fR(3LDAP),
-\fBldap_first_attribute\fR(3LDAP), \fBldap_error\fR(3LDAP), \fBattributes\fR(7)
+\fBldap\fR(3LDAP),
+\fBldap_error\fR(3LDAP),
+\fBldap_first_attribute\fR(3LDAP),
+\fBldap_first_entry\fR(3LDAP),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

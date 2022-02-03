@@ -367,8 +367,12 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBu8_strcmp\fR(3C), \fBu8_textprep_str\fR(3C), \fBu8_validate\fR(3C),
-\fBattributes\fR(7), \fBu8_strcmp\fR(9F), \fBu8_validate\fR(9F),
+\fBu8_strcmp\fR(3C),
+\fBu8_textprep_str\fR(3C),
+\fBu8_validate\fR(3C),
+\fBattributes\fR(7),
+\fBu8_strcmp\fR(9F),
+\fBu8_validate\fR(9F),
 \fBuconv_u16tou32\fR(9F)
 .sp
 .LP

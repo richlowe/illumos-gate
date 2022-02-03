@@ -90,7 +90,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBddi_create_minor_node\fR(9F), \fBgetmajor\fR(9F),
+\fBattributes\fR(7),
+\fBddi_create_minor_node\fR(9F),
+\fBgetmajor\fR(9F),
 \fBgetminor\fR(9F)
 .sp
 .LP

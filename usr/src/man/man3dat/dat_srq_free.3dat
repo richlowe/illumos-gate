@@ -94,6 +94,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_srq_create\fR(3DAT), \fBdat_srq_post_recv\fR(3DAT),
-\fBdat_srq_query\fR(3DAT), \fBdat_srq_resize\fR(3DAT),
-\fBdat_srq_set_lw\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_srq_create\fR(3DAT),
+\fBdat_srq_post_recv\fR(3DAT),
+\fBdat_srq_query\fR(3DAT),
+\fBdat_srq_resize\fR(3DAT),
+\fBdat_srq_set_lw\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

@@ -49,7 +49,9 @@ Interface Stability (RARP_RETRIES)	Unstable
 .SH SEE ALSO
 .sp
 .LP
-\fBifconfig\fR(8), \fBin.rarpd\fR(8), \fBarp\fR(4P)
+\fBarp\fR(4P),
+\fBifconfig\fR(8),
+\fBin.rarpd\fR(8)
 .sp
 .LP
 \fIReverse Address Resolution Protocol RFC 903.  June, 1984\fR R. Finlayson, T.

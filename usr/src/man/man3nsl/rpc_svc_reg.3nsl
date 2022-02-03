@@ -155,6 +155,12 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBinetd\fR(8), \fBrpcbind\fR(8), \fBrpc\fR(3NSL), \fBrpc_svc_calls\fR(3NSL),
-\fBrpc_svc_create\fR(3NSL), \fBrpc_svc_err\fR(3NSL), \fBrpcbind\fR(3NSL),
-\fBselect\fR(3C), \fBattributes\fR(7)
+\fBselect\fR(3C),
+\fBrpc\fR(3NSL),
+\fBrpc_svc_calls\fR(3NSL),
+\fBrpc_svc_create\fR(3NSL),
+\fBrpc_svc_err\fR(3NSL),
+\fBrpcbind\fR(3NSL),
+\fBattributes\fR(7),
+\fBinetd\fR(8),
+\fBrpcbind\fR(8)

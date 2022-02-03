@@ -157,8 +157,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBiconv\fR(3C), \fBiconv_close\fR(3C), \fBmalloc\fR(3C),
-\fBalias\fR(5), \fBattributes\fR(7)
+\fBexec\fR(2),
+\fBiconv\fR(3C),
+\fBiconv_close\fR(3C),
+\fBmalloc\fR(3C),
+\fBalias\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

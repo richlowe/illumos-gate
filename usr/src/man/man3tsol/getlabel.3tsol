@@ -161,8 +161,11 @@ Interface Stability	Committed
 
 .SH SEE ALSO
 .LP
-\fBopen\fR(2), \fBpathconf\fR(2), \fBm_label_alloc\fR(3TSOL),
-\fBattributes\fR(7), \fBlabels\fR(7)
+\fBopen\fR(2),
+\fBpathconf\fR(2),
+\fBm_label_alloc\fR(3TSOL),
+\fBattributes\fR(7),
+\fBlabels\fR(7)
 .sp
 .LP
 \fIObtaining a File Label\fR in \fISolaris Trusted Extensions Developer\&'s

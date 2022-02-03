@@ -207,7 +207,9 @@ called from an interrupt routine.
 The \fBscsi_hba_pkt_free()\fR function can be called from user, interrupt, or
 kernel context.
 .SH SEE ALSO
-\fBtran_init_pkt\fR(9E), \fBscsi_address\fR(9S), \fBscsi_pkt\fR(9S)
+\fBtran_init_pkt\fR(9E),
+\fBscsi_address\fR(9S),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

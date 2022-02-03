@@ -83,7 +83,17 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlseek\fR(2), \fBread\fR(2), \fBferror\fR(3C), \fBfgetc\fR(3C),
-\fBfgetwc\fR(3C), \fBfopen\fR(3C), \fBfread\fR(3C), \fBgetchar\fR(3C),
-\fBscanf\fR(3C), \fBstdio\fR(3C), \fBungetc\fR(3C), \fBungetwc\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBlseek\fR(2),
+\fBread\fR(2),
+\fBferror\fR(3C),
+\fBfgetc\fR(3C),
+\fBfgetwc\fR(3C),
+\fBfopen\fR(3C),
+\fBfread\fR(3C),
+\fBgetchar\fR(3C),
+\fBscanf\fR(3C),
+\fBstdio\fR(3C),
+\fBungetc\fR(3C),
+\fBungetwc\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

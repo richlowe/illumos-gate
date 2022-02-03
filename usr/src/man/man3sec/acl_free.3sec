@@ -45,4 +45,6 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBacl_get\fR(3SEC), \fBacl\fR(7), \fBattributes\fR(7)
+\fBacl_get\fR(3SEC),
+\fBacl\fR(7),
+\fBattributes\fR(7)

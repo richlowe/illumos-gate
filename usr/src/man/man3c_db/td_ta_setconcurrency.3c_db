@@ -89,5 +89,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibc_db\fR(3LIB), \fBps_kill\fR(3PROC), \fBthr_setconcurrency\fR(3C),
+\fBthr_setconcurrency\fR(3C),
+\fBlibc_db\fR(3LIB),
+\fBps_kill\fR(3PROC),
 \fBattributes\fR(7)

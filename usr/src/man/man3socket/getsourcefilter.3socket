@@ -211,7 +211,9 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBif_nametoindex\fR(3SOCKET), \fBsocket\fR(3SOCKET), \fBsockaddr\fR(3SOCKET),
+\fBif_nametoindex\fR(3SOCKET),
+\fBsockaddr\fR(3SOCKET),
+\fBsocket\fR(3SOCKET),
 \fBattributes\fR(7)
 .sp
 .LP

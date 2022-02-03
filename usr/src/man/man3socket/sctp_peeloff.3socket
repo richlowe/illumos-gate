@@ -84,4 +84,7 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBin.h\fR(3HEAD), \fBlibsctp\fR(3LIB), \fBsocket\fR(3SOCKET), \fBsctp\fR(4P)
+\fBin.h\fR(3HEAD),
+\fBlibsctp\fR(3LIB),
+\fBsocket\fR(3SOCKET),
+\fBsctp\fR(4P)

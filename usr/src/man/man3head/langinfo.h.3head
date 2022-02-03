@@ -219,6 +219,11 @@ Interface Stability	Standard
 
 .SH SEE ALSO
 .LP
-\fBmkmsgs\fR(1), \fBlocaleconv\fR(3C), \fBnl_langinfo\fR(3C),
-\fBnl_types.h\fR(3HEAD), \fBsetlocale\fR(3C), \fBstrftime\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBmkmsgs\fR(1),
+\fBlocaleconv\fR(3C),
+\fBnl_langinfo\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstrftime\fR(3C),
+\fBnl_types.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

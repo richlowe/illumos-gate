@@ -86,4 +86,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBIntro\fR(3), \fBexp\fR(3M), \fBmp\fR(3MP), \fBattributes\fR(7)
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBexp\fR(3M),
+\fBmp\fR(3MP),
+\fBattributes\fR(7)

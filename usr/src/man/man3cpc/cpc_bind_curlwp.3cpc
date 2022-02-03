@@ -441,9 +441,14 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcpustat\fR(8), \fBcputrack\fR(1), \fBpsrinfo\fR(8),
-\fBprocessor_bind\fR(2), \fBcpc_seterrhndlr\fR(3CPC),
-\fBcpc_set_sample\fR(3CPC), \fBlibcpc\fR(3LIB), \fBattributes\fR(7)
+\fBcputrack\fR(1),
+\fBprocessor_bind\fR(2),
+\fBcpc_set_sample\fR(3CPC),
+\fBcpc_seterrhndlr\fR(3CPC),
+\fBlibcpc\fR(3LIB),
+\fBattributes\fR(7),
+\fBcpustat\fR(8),
+\fBpsrinfo\fR(8)
 .SH NOTES
 .sp
 .LP

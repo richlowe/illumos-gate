@@ -82,8 +82,13 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBld.so.1\fR(1), \fBpvs\fR(1), \fBIntro\fR(3), \fBproc_service\fR(3PROC),
-\fBps_pread\fR(3PROC), \fBrtld_db\fR(3EXT), \fBattributes\fR(7)
+\fBld.so.1\fR(1),
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBrtld_db\fR(3EXT),
+\fBproc_service\fR(3PROC),
+\fBps_pread\fR(3PROC),
+\fBattributes\fR(7)
 .sp
 .LP
 \fILinker and Libraries Guide\fR

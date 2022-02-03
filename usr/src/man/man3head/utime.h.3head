@@ -90,4 +90,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fButime\fR(2), \fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fButime\fR(2),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

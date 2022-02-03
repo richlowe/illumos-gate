@@ -521,6 +521,13 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBypcat\fR(1), \fBypmatch\fR(1), \fBypwhich\fR(1),
-\fBrpcbind\fR(8), \fBypbind\fR(8), \fBypserv\fR(8),
-\fBsysinfo\fR(2), \fBmalloc\fR(3C), \fBypfiles\fR(5), \fBattributes\fR(7)
+\fBypcat\fR(1),
+\fBypmatch\fR(1),
+\fBypwhich\fR(1),
+\fBsysinfo\fR(2),
+\fBmalloc\fR(3C),
+\fBypfiles\fR(5),
+\fBattributes\fR(7),
+\fBrpcbind\fR(8),
+\fBypbind\fR(8),
+\fBypserv\fR(8)

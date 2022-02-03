@@ -67,5 +67,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBfmtmsg\fR(3C), \fBgettext\fR(3C), \fBsetlocale\fR(3C),
-\fBstrerror\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7), \fBthreads\fR(7)
+\fBIntro\fR(2),
+\fBfmtmsg\fR(3C),
+\fBgettext\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstrerror\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBthreads\fR(7)

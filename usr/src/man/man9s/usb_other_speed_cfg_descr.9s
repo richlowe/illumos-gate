@@ -75,7 +75,13 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBusb_get_alt_if\fR(9F), \fBusb_get_cfg\fR(9F),
-\fBusb_get_dev_data\fR(9F), \fBusb_get_string_descr\fR(9F),
-\fBusb_parse_data\fR(9F), \fBusb_cfg_descr\fR(9S), \fBusb_ctrl_request\fR(9S),
-\fBusb_dev_descr\fR(9S), \fBusb_dev_qlf_descr\fR(9S)
+\fBattributes\fR(7),
+\fBusb_get_alt_if\fR(9F),
+\fBusb_get_cfg\fR(9F),
+\fBusb_get_dev_data\fR(9F),
+\fBusb_get_string_descr\fR(9F),
+\fBusb_parse_data\fR(9F),
+\fBusb_cfg_descr\fR(9S),
+\fBusb_ctrl_request\fR(9S),
+\fBusb_dev_descr\fR(9S),
+\fBusb_dev_qlf_descr\fR(9S)

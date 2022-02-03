@@ -129,6 +129,10 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(3C), \fBpthread_cancel\fR(3C), \fBpthread_create\fR(3C),
-\fBpthread_join\fR(3C), \fBpthread_key_create\fR(3C), \fBattributes\fR(7),
+\fBexit\fR(3C),
+\fBpthread_cancel\fR(3C),
+\fBpthread_create\fR(3C),
+\fBpthread_join\fR(3C),
+\fBpthread_key_create\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

@@ -90,4 +90,7 @@ MT-Level	MT-Safe
 The \fBgetwchar()\fR function is Standard.  The \fBgetwchar_l()\fR function
 is Uncommitted.
 .SH SEE ALSO
-\fBfgetwc\fR(3C), \fBgetwc\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBfgetwc\fR(3C),
+\fBgetwc\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

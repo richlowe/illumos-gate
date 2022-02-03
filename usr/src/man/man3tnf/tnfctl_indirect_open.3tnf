@@ -187,9 +187,15 @@ MT Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBprex\fR(1), \fBTNF_PROBE\fR(3TNF), \fBdlclose\fR(3C), \fBdlopen\fR(3C),
-\fBlibtnfctl\fR(3TNF), \fBtnfctl_probe_enable\fR(3TNF),
-\fBtnfctl_probe_trace\fR(3TNF), \fBtracing\fR(3TNF), \fBproc\fR(5),
+\fBprex\fR(1),
+\fBdlclose\fR(3C),
+\fBdlopen\fR(3C),
+\fBTNF_PROBE\fR(3TNF),
+\fBlibtnfctl\fR(3TNF),
+\fBtnfctl_probe_enable\fR(3TNF),
+\fBtnfctl_probe_trace\fR(3TNF),
+\fBtracing\fR(3TNF),
+\fBproc\fR(5),
 \fBattributes\fR(7)
 .sp
 .LP

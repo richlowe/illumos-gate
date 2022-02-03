@@ -56,7 +56,8 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBsetlocale\fR(3C), \fBattributes\fR(7)
+\fBsetlocale\fR(3C),
+\fBattributes\fR(7)
 .SH NOTES
 When compiling multithreaded applications, the \fB_REENTRANT\fR flag must be
 defined on the compile line.  This flag should only be used in multithreaded

@@ -196,9 +196,15 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBgetcontext\fR(2), \fBsigaction\fR(2), \fBsigprocmask\fR(2),
-\fBpthread_exit\fR(3C), \fBucontext.h\fR(3HEAD), \fBattributes\fR(7),
-\fBstandards\fR(7), \fBthreads\fR(7)
+\fBgetcontext\fR(2),
+\fBmmap\fR(2),
+\fBsigaction\fR(2),
+\fBsigprocmask\fR(2),
+\fBpthread_exit\fR(3C),
+\fBucontext.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBthreads\fR(7)
 .SH NOTES
 .sp
 .LP

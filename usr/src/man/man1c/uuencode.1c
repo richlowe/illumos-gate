@@ -389,8 +389,14 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBmail\fR(1), \fBmailx\fR(1), \fBuucp\fR(1C), \fBuux\fR(1C),
-\fBattributes\fR(7), \fBenviron\fR(7), \fBlargefile\fR(7), \fBstandards\fR(7)
+\fBmail\fR(1),
+\fBmailx\fR(1),
+\fBuucp\fR(1C),
+\fBuux\fR(1C),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBlargefile\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

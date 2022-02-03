@@ -151,4 +151,5 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBsip_stack_init\fR(3SIP), \fBattributes\fR(7)
+\fBsip_stack_init\fR(3SIP),
+\fBattributes\fR(7)

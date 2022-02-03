@@ -155,4 +155,7 @@ Standard	See \fBstandards\fR(7).
 .TE
 
 .SH SEE ALSO
-\fBsleep\fR(3C), \fBtime.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBsleep\fR(3C),
+\fBtime.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -252,5 +252,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibcontract\fR(3LIB), \fBcontract\fR(5), \fBattributes\fR(7),
+\fBlibcontract\fR(3LIB),
+\fBcontract\fR(5),
+\fBattributes\fR(7),
 \fBlfcompile\fR(7)

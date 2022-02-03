@@ -67,9 +67,14 @@ Driver configuration file (contains no user-configurable options).
 .SH SEE ALSO
 .sp
 .LP
-\fBprtconf\fR(8), \fBattributes\fR(7), \fBlsimega\fR(4D),
-\fBscsi_hba_attach_setup\fR(9F), \fBscsi_sync_pkt\fR(9F),
-\fBscsi_transport\fR(9F), \fBscsi_inquiry\fR(9S), \fBscsi_device\fR(9S),
+\fBlsimega\fR(4D),
+\fBattributes\fR(7),
+\fBprtconf\fR(8),
+\fBscsi_hba_attach_setup\fR(9F),
+\fBscsi_sync_pkt\fR(9F),
+\fBscsi_transport\fR(9F),
+\fBscsi_device\fR(9S),
+\fBscsi_inquiry\fR(9S),
 \fBscsi_pkt\fR(9S)
 .sp
 .LP

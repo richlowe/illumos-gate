@@ -151,5 +151,8 @@ Interface Stability	Evolving
 
 .SH SEE ALSO
 .LP
-\fBpsrinfo\fR(8), \fBprtconf\fR(8), \fBpread\fR(2), \fBread\fR(2),
-\fBattributes\fR(7)
+\fBpread\fR(2),
+\fBread\fR(2),
+\fBattributes\fR(7),
+\fBprtconf\fR(8),
+\fBpsrinfo\fR(8)

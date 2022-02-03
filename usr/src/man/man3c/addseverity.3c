@@ -152,5 +152,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfmtmsg\fR(1), \fBfmtmsg\fR(3C), \fBgettxt\fR(3C), \fBprintf\fR(3C),
+\fBfmtmsg\fR(1),
+\fBfmtmsg\fR(3C),
+\fBgettxt\fR(3C),
+\fBprintf\fR(3C),
 \fBattributes\fR(7)

@@ -111,9 +111,12 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_intr_block_disable\fR(9F),
-\fBddi_intr_block_enable\fR(9F), \fBddi_intr_disable\fR(9F),
-\fBddi_intr_enable\fR(9F), \fBddi_intr_get_pending\fR(9F)
+\fBattributes\fR(7),
+\fBddi_intr_block_disable\fR(9F),
+\fBddi_intr_block_enable\fR(9F),
+\fBddi_intr_disable\fR(9F),
+\fBddi_intr_enable\fR(9F),
+\fBddi_intr_get_pending\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -222,5 +222,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBexit\fR(2), \fBlibc\fR(3LIB), \fBsignal\fR(3C),
-\fBsignal.h\fR(3HEAD), \fBwait\fR(3C), \fBproc\fR(5), \fBattributes\fR(7)
+\fBexec\fR(2),
+\fBexit\fR(2),
+\fBsignal\fR(3C),
+\fBwait\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBlibc\fR(3LIB),
+\fBproc\fR(5),
+\fBattributes\fR(7)

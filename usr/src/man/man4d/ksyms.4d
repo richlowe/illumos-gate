@@ -63,8 +63,12 @@ table entries reference.
 .SH SEE ALSO
 .sp
 .LP
-\fBkernel\fR(8), \fBstat\fR(2), \fBelf\fR(3ELF), \fBkvm_open\fR(3KVM),
-\fBa.out\fR(5), \fBmem\fR(4D)
+\fBstat\fR(2),
+\fBelf\fR(3ELF),
+\fBkvm_open\fR(3KVM),
+\fBmem\fR(4D),
+\fBa.out\fR(5),
+\fBkernel\fR(8)
 .SH WARNINGS
 .sp
 .LP

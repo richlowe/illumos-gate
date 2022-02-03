@@ -249,5 +249,12 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBmkdir\fR(1), \fBchmod\fR(2), \fBexec\fR(2), \fBmknod\fR(2), \fBumask\fR(2),
-\fBstat.h\fR(3HEAD), \fBufs\fR(4FS), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBmkdir\fR(1),
+\fBchmod\fR(2),
+\fBexec\fR(2),
+\fBmknod\fR(2),
+\fBumask\fR(2),
+\fBstat.h\fR(3HEAD),
+\fBufs\fR(4FS),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -78,7 +78,9 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBstack_getbounds\fR(3C), \fBstack_inbounds\fR(3C), \fBstack_violation\fR(3C),
+\fBstack_getbounds\fR(3C),
+\fBstack_inbounds\fR(3C),
+\fBstack_violation\fR(3C),
 \fBattributes\fR(7)
 .sp
 .LP

@@ -145,11 +145,22 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcpr\fR(4), \fBpm\fR(4D), \fBpm\fR(9P), \fBpm-components\fR(9P),
-\fBdetach\fR(9E), \fBgetinfo\fR(9E), \fBidentify\fR(9E), \fBopen\fR(9E),
-\fBpower\fR(9E), \fBprobe\fR(9E), \fBddi_add_intr\fR(9F),
-\fBddi_create_minor_node\fR(9F), \fBddi_get_instance\fR(9F),
-\fBddi_map_regs\fR(9F), \fBkmem_alloc\fR(9F), \fBpm_raise_power\fR(9F)
+\fBcpr\fR(4),
+\fBpm\fR(4D),
+\fBdetach\fR(9E),
+\fBgetinfo\fR(9E),
+\fBidentify\fR(9E),
+\fBopen\fR(9E),
+\fBpower\fR(9E),
+\fBprobe\fR(9E),
+\fBddi_add_intr\fR(9F),
+\fBddi_create_minor_node\fR(9F),
+\fBddi_get_instance\fR(9F),
+\fBddi_map_regs\fR(9F),
+\fBkmem_alloc\fR(9F),
+\fBpm_raise_power\fR(9F),
+\fBpm\fR(9P),
+\fBpm-components\fR(9P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

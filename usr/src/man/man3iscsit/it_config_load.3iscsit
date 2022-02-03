@@ -175,8 +175,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBit_ini_create\fR(3ISCSIT), \fBit_portal_create\fR(3ISCSIT),
-\fBit_tgt_create\fR(3ISCSIT), \fBit_tpg_create\fR(3ISCSIT),
-\fBlibiscsit\fR(3LIB), \fBlibnvpair\fR(3LIB), \fBlibstmf\fR(3LIB),
-\fBstmfGetProviderData\fR(3STMF), \fBstmfSetProviderData\fR(3STMF),
+\fBit_ini_create\fR(3ISCSIT),
+\fBit_portal_create\fR(3ISCSIT),
+\fBit_tgt_create\fR(3ISCSIT),
+\fBit_tpg_create\fR(3ISCSIT),
+\fBlibiscsit\fR(3LIB),
+\fBlibnvpair\fR(3LIB),
+\fBlibstmf\fR(3LIB),
+\fBstmfGetProviderData\fR(3STMF),
+\fBstmfSetProviderData\fR(3STMF),
 \fBattributes\fR(7)

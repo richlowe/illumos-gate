@@ -240,5 +240,9 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBnice\fR(1), \fBrenice\fR(1), \fBsched_get_priority_max\fR(3C),
-\fBsched_setscheduler\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBnice\fR(1),
+\fBrenice\fR(1),
+\fBsched_get_priority_max\fR(3C),
+\fBsched_setscheduler\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

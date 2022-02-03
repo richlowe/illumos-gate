@@ -50,9 +50,15 @@ all \fBICMP\fR message received by the system is provided to every holder of an
 open \fBICMP\fR socket or \fBTLI\fR descriptor.
 .SH SEE ALSO
 .LP
-\fBgetprotobyname\fR(3SOCKET), \fBrecv\fR(3SOCKET), \fBsend\fR(3SOCKET),
-\fBt_rcvudata\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBprivileges\fR(7),
-\fBinet\fR(4P), \fBip\fR(4P), \fBrouting\fR(4P)
+\fBt_rcvudata\fR(3NSL),
+\fBt_sndudata\fR(3NSL),
+\fBgetprotobyname\fR(3SOCKET),
+\fBrecv\fR(3SOCKET),
+\fBsend\fR(3SOCKET),
+\fBinet\fR(4P),
+\fBip\fR(4P),
+\fBrouting\fR(4P),
+\fBprivileges\fR(7)
 .sp
 .LP
 Postel, Jon, \fIInternet Control Message Protocol \(em DARPA Internet Program

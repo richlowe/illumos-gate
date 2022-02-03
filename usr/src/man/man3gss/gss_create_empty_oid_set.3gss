@@ -93,8 +93,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_acquire_cred\fR(3GSS), \fBgss_add_oid_set_member\fR(3GSS),
-\fBgss_release_oid_set\fR(3GSS), \fBattributes\fR(7)
+\fBgss_acquire_cred\fR(3GSS),
+\fBgss_add_oid_set_member\fR(3GSS),
+\fBgss_release_oid_set\fR(3GSS),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

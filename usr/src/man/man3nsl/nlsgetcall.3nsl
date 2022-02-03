@@ -70,9 +70,14 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBnlsadmin\fR(8), \fBgetenv\fR(3C), \fBt_alloc\fR(3NSL),
-\fBt_connect\fR(3NSL), \fBt_error\fR(3NSL), \fBt_free\fR(3NSL),
-\fBt_sync\fR(3NSL), \fBattributes\fR(7)
+\fBgetenv\fR(3C),
+\fBt_alloc\fR(3NSL),
+\fBt_connect\fR(3NSL),
+\fBt_error\fR(3NSL),
+\fBt_free\fR(3NSL),
+\fBt_sync\fR(3NSL),
+\fBattributes\fR(7),
+\fBnlsadmin\fR(8)
 .SH WARNINGS
 .sp
 .LP

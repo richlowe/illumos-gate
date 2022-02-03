@@ -109,7 +109,10 @@ is detected,  \fBcmn_err\fR(9F) panics the system (line 18).
 .SH SEE ALSO
 .sp
 .LP
-\fBput\fR(9E), \fBcmn_err\fR(9F), \fBdatamsg\fR(9F), \fBputctl\fR(9F),
+\fBput\fR(9E),
+\fBcmn_err\fR(9F),
+\fBdatamsg\fR(9F),
+\fBputctl\fR(9F),
 \fBputnextctl1\fR(9F)
 .sp
 .LP

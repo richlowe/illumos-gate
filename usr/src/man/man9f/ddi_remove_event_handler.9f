@@ -67,7 +67,8 @@ Stability Level	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_add_event_handler\fR(9F),
+\fBattributes\fR(7),
+\fBddi_add_event_handler\fR(9F),
 \fBddi_get_eventcookie\fR(9F)
 .sp
 .LP

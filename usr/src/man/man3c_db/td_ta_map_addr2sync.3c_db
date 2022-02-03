@@ -102,4 +102,5 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibc_db\fR(3LIB), \fBattributes\fR(7)
+\fBlibc_db\fR(3LIB),
+\fBattributes\fR(7)

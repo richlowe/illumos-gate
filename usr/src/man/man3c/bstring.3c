@@ -78,7 +78,9 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBmemory\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBmemory\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .LP
 \fBbcopy\fR(), \fBbcmp\fR(), and \fBbzero\fR() are \fBSTANDARD\fR.

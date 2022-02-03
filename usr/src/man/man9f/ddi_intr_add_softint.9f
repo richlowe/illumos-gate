@@ -491,9 +491,14 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBattach\fR(9E), \fBddi_intr_alloc\fR(9F),
-\fBddi_intr_free\fR(9F), \fBddi_intr_get_hilevel_pri\fR(9F),
-\fBmutex_init\fR(9F), \fBrw_init\fR(9F), \fBrwlock\fR(9F)
+\fBattributes\fR(7),
+\fBattach\fR(9E),
+\fBddi_intr_alloc\fR(9F),
+\fBddi_intr_free\fR(9F),
+\fBddi_intr_get_hilevel_pri\fR(9F),
+\fBmutex_init\fR(9F),
+\fBrw_init\fR(9F),
+\fBrwlock\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

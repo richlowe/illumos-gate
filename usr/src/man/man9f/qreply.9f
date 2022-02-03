@@ -96,7 +96,10 @@ bit is off, then the message is freed (line 15). See the example for
 .SH SEE ALSO
 .sp
 .LP
-\fBput\fR(9E), \fBsrv\fR(9E), \fBflushq\fR(9F), \fBOTHERQ\fR(9F),
+\fBput\fR(9E),
+\fBsrv\fR(9E),
+\fBOTHERQ\fR(9F),
+\fBflushq\fR(9F),
 \fBputnext\fR(9F)
 .sp
 .LP

@@ -170,4 +170,5 @@ These functions can be called from user or kernel context.
 .SH SEE ALSO
 .sp
 .LP
-\fBstreamio\fR(4I), \fBddi_model_convert_from\fR(9F)
+\fBstreamio\fR(4I),
+\fBddi_model_convert_from\fR(9F)

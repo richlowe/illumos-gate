@@ -189,4 +189,5 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBinet_addr\fR(3XNET), \fBattributes\fR(7)
+\fBinet_addr\fR(3XNET),
+\fBattributes\fR(7)

@@ -58,4 +58,7 @@ multipathing (IPMP) group.
 .SH SEE ALSO
 .sp
 .LP
-\fBifconfig\fR(8), \fBin.mpathd\fR(8), \fBip\fR(4P), \fBip6\fR(4P)
+\fBip\fR(4P),
+\fBip6\fR(4P),
+\fBifconfig\fR(8),
+\fBin.mpathd\fR(8)

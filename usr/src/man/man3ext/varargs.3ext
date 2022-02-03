@@ -98,7 +98,10 @@ va_dcl
 .SH SEE ALSO
 .sp
 .LP
-\fBexec\fR(2), \fBprintf\fR(3C), \fBvprintf\fR(3C), \fBstdarg\fR(3EXT)
+\fBexec\fR(2),
+\fBprintf\fR(3C),
+\fBvprintf\fR(3C),
+\fBstdarg\fR(3EXT)
 .SH NOTES
 .sp
 .LP

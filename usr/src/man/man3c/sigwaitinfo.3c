@@ -199,6 +199,10 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBtime\fR(2), \fBsigqueue\fR(3C), \fBsiginfo.h\fR(3HEAD),
-\fBsignal.h\fR(3HEAD), \fBtime.h\fR(3HEAD), \fBattributes\fR(7),
+\fBtime\fR(2),
+\fBsigqueue\fR(3C),
+\fBsiginfo.h\fR(3HEAD),
+\fBsignal.h\fR(3HEAD),
+\fBtime.h\fR(3HEAD),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

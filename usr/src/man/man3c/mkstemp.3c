@@ -164,6 +164,12 @@ The \fBmkstemp()\fR function is Standard. The \fBmkstemps()\fR and
 .SH SEE ALSO
 .sp
 .LP
-\fBgetpid\fR(2), \fBlstat\fR(2), \fBmkdir\fR(2), \fBopen\fR(2),
-\fBtmpfile\fR(3C), \fBmktemp\fR(3C), \fBattributes\fR(7), \fBlf64\fR(7),
+\fBgetpid\fR(2),
+\fBlstat\fR(2),
+\fBmkdir\fR(2),
+\fBopen\fR(2),
+\fBmktemp\fR(3C),
+\fBtmpfile\fR(3C),
+\fBattributes\fR(7),
+\fBlf64\fR(7),
 \fBstandards\fR(7)

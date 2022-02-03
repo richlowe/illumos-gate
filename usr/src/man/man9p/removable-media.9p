@@ -79,7 +79,10 @@ Interface stability	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBpower.conf\fR(5), \fBpm\fR(4D), \fBattach\fR(9E), \fBdetach\fR(9E),
+\fBpm\fR(4D),
+\fBpower.conf\fR(5),
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
 \fBddi_prop_create\fR(9F)
 .sp
 .LP

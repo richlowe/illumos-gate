@@ -303,8 +303,13 @@ The \fBendutxent()\fR, \fBgetutxent()\fR, \fBgetutxid()\fR, \fBgetutxline()\fR,
 \fBpututxline()\fR, and \fBsetutxent()\fR functions are Standard.
 .SH SEE ALSO
 .LP
-\fBgetutent\fR(3C), \fBttyslot\fR(3C), \fBwait\fR(3C), \fBwait.h\fR(3HEAD),
-\fButmpx\fR(5), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetutent\fR(3C),
+\fBttyslot\fR(3C),
+\fBwait\fR(3C),
+\fBwait.h\fR(3HEAD),
+\fButmpx\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .LP
 The most current entry is saved in a static structure.  Multiple accesses

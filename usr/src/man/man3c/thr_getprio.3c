@@ -140,6 +140,11 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpriocntl\fR(2), \fBpthread_setschedprio\fR(3C), \fBsched_setparam\fR(3C),
-\fBthr_create\fR(3C), \fBthr_suspend\fR(3C), \fBthr_yield\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBpriocntl\fR(2),
+\fBpthread_setschedprio\fR(3C),
+\fBsched_setparam\fR(3C),
+\fBthr_create\fR(3C),
+\fBthr_suspend\fR(3C),
+\fBthr_yield\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

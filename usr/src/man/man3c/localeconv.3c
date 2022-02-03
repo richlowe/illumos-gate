@@ -577,4 +577,7 @@ locale.
 .SH SEE ALSO
 .sp
 .LP
-\fBsetlocale\fR(3C), \fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)
+\fBsetlocale\fR(3C),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)

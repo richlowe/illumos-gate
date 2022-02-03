@@ -412,10 +412,19 @@ For \fBendpwent()\fR,  \fBgetpwent()\fR,  \fBgetpwnam()\fR,
 see \fBstandards\fR(7).
 .SH SEE ALSO
 .LP
-\fBpasswd\fR(1), \fByppasswd\fR(1), \fBIntro\fR(2),
-\fBIntro\fR(3), \fBcuserid\fR(3C), \fBgetgrnam\fR(3C), \fBgetlogin\fR(3C),
-\fBgetspnam\fR(3C), \fBnsswitch.conf\fR(5), \fBpasswd\fR(5), \fBshadow\fR(5),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBpasswd\fR(1),
+\fByppasswd\fR(1),
+\fBIntro\fR(2),
+\fBIntro\fR(3),
+\fBcuserid\fR(3C),
+\fBgetgrnam\fR(3C),
+\fBgetlogin\fR(3C),
+\fBgetspnam\fR(3C),
+\fBnsswitch.conf\fR(5),
+\fBpasswd\fR(5),
+\fBshadow\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .LP
 When compiling multithreaded programs, see \fBIntro\fR(3).

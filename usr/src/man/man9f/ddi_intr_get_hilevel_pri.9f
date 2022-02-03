@@ -71,9 +71,13 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_intr_add_handler\fR(9F), \fBddi_intr_alloc\fR(9F),
-\fBddi_intr_enable\fR(9F), \fBddi_intr_get_pri\fR(9F),
-\fBddi_intr_trigger_softint\fR(9F), \fBmutex\fR(9F)
+\fBattributes\fR(7),
+\fBddi_intr_add_handler\fR(9F),
+\fBddi_intr_alloc\fR(9F),
+\fBddi_intr_enable\fR(9F),
+\fBddi_intr_get_pri\fR(9F),
+\fBddi_intr_trigger_softint\fR(9F),
+\fBmutex\fR(9F)
 .sp
 .LP
 \fIWriting Device Drivers\fR

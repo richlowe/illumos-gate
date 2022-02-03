@@ -129,4 +129,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBcrypt\fR(3C), \fBsetkey\fR(3C), \fBattributes\fR(7)
+\fBcrypt\fR(3C),
+\fBsetkey\fR(3C),
+\fBattributes\fR(7)

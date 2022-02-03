@@ -160,4 +160,6 @@ destination/subnet on any of the network interfaces.
 .SH SEE ALSO
 .sp
 .LP
-\fBroute\fR(8), \fBioctl\fR(2), \fBroute\fR(4P)
+\fBioctl\fR(2),
+\fBroute\fR(4P),
+\fBroute\fR(8)

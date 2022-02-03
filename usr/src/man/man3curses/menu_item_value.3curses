@@ -84,7 +84,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurses\fR(3CURSES), \fBmenus\fR(3CURSES), \fBmenu_opts\fR(3CURSES),
+\fBcurses\fR(3CURSES),
+\fBmenu_opts\fR(3CURSES),
+\fBmenus\fR(3CURSES),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

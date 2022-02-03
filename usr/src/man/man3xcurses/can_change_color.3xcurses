@@ -288,5 +288,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBattroff\fR(3XCURSES), \fBdelscreen\fR(3XCURSES), \fBinitscr\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBattroff\fR(3XCURSES),
+\fBdelscreen\fR(3XCURSES),
+\fBinitscr\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -146,5 +146,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBfstyp\fR(8), \fBfstyp_strerror\fR(3FSTYP), \fBlibfstyp\fR(3LIB),
-\fBattributes\fR(7)
+\fBfstyp_strerror\fR(3FSTYP),
+\fBlibfstyp\fR(3LIB),
+\fBattributes\fR(7),
+\fBfstyp\fR(8)

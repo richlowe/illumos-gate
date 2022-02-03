@@ -34,8 +34,12 @@ asynchronous serial driver semantics so that, in conjunction with the
 .SH SEE ALSO
 .sp
 .LP
-\fBsyslog\fR(3C), \fBtermios\fR(3C), \fBldterm\fR(4M), \fBtermio\fR(4I),
-\fBmsglog\fR(4D), \fBwscons\fR(4D)
+\fBsyslog\fR(3C),
+\fBtermios\fR(3C),
+\fBmsglog\fR(4D),
+\fBwscons\fR(4D),
+\fBtermio\fR(4I),
+\fBldterm\fR(4M)
 .SH NOTES
 .sp
 .LP

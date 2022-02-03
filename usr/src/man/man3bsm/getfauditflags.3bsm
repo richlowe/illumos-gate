@@ -64,4 +64,6 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBgetauditflags\fR(3BSM), \fBaudit.log\fR(5), \fBattributes\fR(7)
+\fBgetauditflags\fR(3BSM),
+\fBaudit.log\fR(5),
+\fBattributes\fR(7)

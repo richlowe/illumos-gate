@@ -283,6 +283,10 @@ MT-Level	Safe
 
 .SH SEE ALSO
 \fBlibc_db\fR(3LIB), \fBtd_ta_thr_iter\fR(3C_DB),
-\fBtd_thr_dbsuspend\fR(3C_DB), \fBthr_create\fR(3C), \fBthr_getprio\fR(3C),
-\fBthr_join\fR(3C), \fBthr_sigsetmask\fR(3C), \fBthr_suspend\fR(3C),
-\fBattributes\fR(7), \fBthreads\fR(7)
+\fBtd_thr_dbsuspend\fR(3C_DB), \fBthr_create\fR(3C),
+\fBthr_getprio\fR(3C),
+\fBthr_join\fR(3C),
+\fBthr_sigsetmask\fR(3C),
+\fBthr_suspend\fR(3C),
+\fBattributes\fR(7),
+\fBthreads\fR(7)

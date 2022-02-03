@@ -171,4 +171,7 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBftok\fR(3C), \fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBftok\fR(3C),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

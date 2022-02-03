@@ -267,14 +267,30 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBiconv\fR(3C), \fBiconv_close\fR(3C), \fBiconv_open\fR(3C),
-\fBu8_strcmp\fR(3C), \fBu8_textprep_str\fR(3C), \fBu8_validate\fR(3C),
-\fBuconv_u16tou32\fR(3C), \fBuconv_u16tou8\fR(3C), \fBuconv_u32tou16\fR(3C),
-\fBuconv_u32tou8\fR(3C), \fBuconv_u8tou16\fR(3C), \fBuconv_u8tou32\fR(3C),
-\fBattributes\fR(7), \fBkiconvstr\fR(9F), \fBkiconv_close\fR(9F),
-\fBkiconv_open\fR(9F), \fBu8_strcmp\fR(9F), \fBu8_textprep_str\fR(9F),
-\fBu8_validate\fR(9F), \fBuconv_u16tou32\fR(9F), \fBuconv_u16tou8\fR(9F),
-\fBuconv_u32tou16\fR(9F), \fBuconv_u32tou8\fR(9F), \fBuconv_u8tou16\fR(9F),
+\fBiconv\fR(3C),
+\fBiconv_close\fR(3C),
+\fBiconv_open\fR(3C),
+\fBu8_strcmp\fR(3C),
+\fBu8_textprep_str\fR(3C),
+\fBu8_validate\fR(3C),
+\fBuconv_u16tou32\fR(3C),
+\fBuconv_u16tou8\fR(3C),
+\fBuconv_u32tou16\fR(3C),
+\fBuconv_u32tou8\fR(3C),
+\fBuconv_u8tou16\fR(3C),
+\fBuconv_u8tou32\fR(3C),
+\fBattributes\fR(7),
+\fBkiconv_close\fR(9F),
+\fBkiconv_open\fR(9F),
+\fBkiconvstr\fR(9F),
+\fBu8_strcmp\fR(9F),
+\fBu8_textprep_str\fR(9F),
+\fBu8_validate\fR(9F),
+\fBuconv_u16tou32\fR(9F),
+\fBuconv_u16tou8\fR(9F),
+\fBuconv_u32tou16\fR(9F),
+\fBuconv_u32tou8\fR(9F),
+\fBuconv_u8tou16\fR(9F),
 \fBuconv_u8tou32\fR(9F)
 .sp
 .LP

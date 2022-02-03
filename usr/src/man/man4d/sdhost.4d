@@ -56,4 +56,5 @@ Architecture	x86
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBsda\fR(4D)
+\fBsda\fR(4D),
+\fBattributes\fR(7)

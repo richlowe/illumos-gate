@@ -118,6 +118,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_attr_init\fR(3C), \fBpthread_attr_setstackaddr\fR(3C),
-\fBpthread_attr_setdetachstate\fR(3C), \fBpthread_create\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBpthread_attr_init\fR(3C),
+\fBpthread_attr_setdetachstate\fR(3C),
+\fBpthread_attr_setstackaddr\fR(3C),
+\fBpthread_create\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

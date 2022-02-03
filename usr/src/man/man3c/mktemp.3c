@@ -120,5 +120,8 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmkstemp\fR(3C), \fBtmpfile\fR(3C), \fBtmpnam\fR(3C), \fBattributes\fR(7),
+\fBmkstemp\fR(3C),
+\fBtmpfile\fR(3C),
+\fBtmpnam\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

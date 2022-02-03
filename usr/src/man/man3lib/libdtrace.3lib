@@ -55,7 +55,9 @@ MT-Level	Unsafe
 
 .SH SEE ALSO
 .LP
-\fBdtrace\fR(8), \fBattributes\fR(7), \fBdtrace\fR(4D)
+\fBdtrace\fR(4D),
+\fBattributes\fR(7),
+\fBdtrace\fR(8)
 .sp
 .LP
 \fIDynamic Tracing Guide\fR:

@@ -92,8 +92,12 @@ MT-Level	MT-Safe with exceptions
 .TE
 
 .SH SEE ALSO
-\fBpam\fR(3PAM), \fBpam_open_session\fR(3PAM), \fBsyslog\fR(3C),
-\fBlibpam\fR(3LIB), \fBpam.conf\fR(5), \fBattributes\fR(7)
+\fBsyslog\fR(3C),
+\fBlibpam\fR(3LIB),
+\fBpam\fR(3PAM),
+\fBpam_open_session\fR(3PAM),
+\fBpam.conf\fR(5),
+\fBattributes\fR(7)
 .SH NOTES
 The interfaces in \fBlibpam\fR are MT-Safe only if each thread within the
 multithreaded application uses its own \fBPAM\fR handle.

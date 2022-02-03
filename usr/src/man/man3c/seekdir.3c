@@ -98,5 +98,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBopendir\fR(3C), \fBreaddir\fR(3C), \fBrewinddir\fR(3C), \fBtelldir\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBopendir\fR(3C),
+\fBreaddir\fR(3C),
+\fBrewinddir\fR(3C),
+\fBtelldir\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

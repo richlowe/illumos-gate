@@ -222,9 +222,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_cond_wait\fR(3C), \fBpthread_mutex_lock\fR(3C),
+\fBpthread_cond_wait\fR(3C),
+\fBpthread_mutex_lock\fR(3C),
 \fBpthread_mutexattr_setprioceiling\fR(3C),
 \fBpthread_mutexattr_setprotocol\fR(3C),
-\fBpthread_mutexattr_setpshared\fR(3C), \fBpthread_mutexattr_setrobust\fR(3C),
-\fBpthread_mutexattr_settype\fR(3C), \fBattributes\fR(7), \fBmutex\fR(7),
+\fBpthread_mutexattr_setpshared\fR(3C),
+\fBpthread_mutexattr_setrobust\fR(3C),
+\fBpthread_mutexattr_settype\fR(3C),
+\fBattributes\fR(7),
+\fBmutex\fR(7),
 \fBstandards\fR(7)

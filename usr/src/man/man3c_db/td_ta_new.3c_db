@@ -134,4 +134,6 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibc_db\fR(3LIB), \fBproc_service\fR(3PROC), \fBattributes\fR(7)
+\fBlibc_db\fR(3LIB),
+\fBproc_service\fR(3PROC),
+\fBattributes\fR(7)

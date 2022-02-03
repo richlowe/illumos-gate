@@ -265,5 +265,9 @@ MT-Level	Safe
 .TE
 
 .SH SEE ALSO
-\fBsvc.startd\fR(8), \fBlibscf\fR(3LIB), \fBscf_error\fR(3SCF),
-\fBattributes\fR(7), \fBsmf_security\fR(7), \fBsvcs\fR(1)
+\fBsvcs\fR(1),
+\fBlibscf\fR(3LIB),
+\fBscf_error\fR(3SCF),
+\fBattributes\fR(7),
+\fBsmf_security\fR(7),
+\fBsvc.startd\fR(8)

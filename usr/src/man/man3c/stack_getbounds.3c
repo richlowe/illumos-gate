@@ -67,5 +67,8 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgetustack\fR(2), \fBsigaction\fR(2), \fBsigaltstack\fR(2),
-\fBstack_setbounds\fR(3C), \fBattributes\fR(7)
+\fBgetustack\fR(2),
+\fBsigaction\fR(2),
+\fBsigaltstack\fR(2),
+\fBstack_setbounds\fR(3C),
+\fBattributes\fR(7)

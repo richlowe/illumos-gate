@@ -139,6 +139,8 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBpoll\fR(2), \fBrsm_intr_signal_wait\fR(3RSM),
-\fBrsm_memseg_get_pollfd\fR(3RSM), \fBrsm_memseg_release_pollfd\fR(3RSM),
+\fBpoll\fR(2),
+\fBrsm_intr_signal_wait\fR(3RSM),
+\fBrsm_memseg_get_pollfd\fR(3RSM),
+\fBrsm_memseg_release_pollfd\fR(3RSM),
 \fBattributes\fR(7)

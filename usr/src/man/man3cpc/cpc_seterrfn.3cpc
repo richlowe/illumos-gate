@@ -86,8 +86,11 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBcpc\fR(3CPC), \fBcpc_seterrhndlr\fR(3CPC), \fBlibcpc\fR(3LIB),
-\fBvsnprintf\fR(3C), \fBattributes\fR(7)
+\fBvsnprintf\fR(3C),
+\fBcpc\fR(3CPC),
+\fBcpc_seterrhndlr\fR(3CPC),
+\fBlibcpc\fR(3LIB),
+\fBattributes\fR(7)
 .SH NOTES
 .sp
 .LP

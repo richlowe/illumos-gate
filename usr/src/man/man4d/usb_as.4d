@@ -75,7 +75,10 @@ Stability level 	Committed
 .SH SEE ALSO
 .sp
 .LP
-\fBattributes\fR(7), \fBusba\fR(4D), \fBusb_ac\fR(4D), \fBaudio\fR(4I)
+\fBusb_ac\fR(4D),
+\fBusba\fR(4D),
+\fBaudio\fR(4I),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

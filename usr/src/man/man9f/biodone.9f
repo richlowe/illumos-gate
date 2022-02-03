@@ -107,8 +107,14 @@ device, the routine will report an error condition.  In either case, report the
 .SH SEE ALSO
 .sp
 .LP
-\fBread\fR(2), \fBstrategy\fR(9E), \fBbiowait\fR(9F), \fBddi_add_intr\fR(9F),
-\fBdelay\fR(9F), \fBtimeout\fR(9F), \fBuntimeout\fR(9F), \fBbuf\fR(9S)
+\fBread\fR(2),
+\fBstrategy\fR(9E),
+\fBbiowait\fR(9F),
+\fBddi_add_intr\fR(9F),
+\fBdelay\fR(9F),
+\fBtimeout\fR(9F),
+\fBuntimeout\fR(9F),
+\fBbuf\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

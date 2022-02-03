@@ -88,8 +88,11 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBcurs_initscr\fR(3CURSES), \fBcurs_refresh\fR(3CURSES),
-\fBcurs_util\fR(3CURSES), \fBcurses\fR(3CURSES), \fBsystem\fR(3C),
+\fBsystem\fR(3C),
+\fBcurs_initscr\fR(3CURSES),
+\fBcurs_refresh\fR(3CURSES),
+\fBcurs_util\fR(3CURSES),
+\fBcurses\fR(3CURSES),
 \fBattributes\fR(7)
 .SH NOTES
 .sp

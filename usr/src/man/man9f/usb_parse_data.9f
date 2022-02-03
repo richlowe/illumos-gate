@@ -141,5 +141,7 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBusb_get_dev_data\fR(9F),
-\fBusb_get_string_descr\fR(9F), \fBusb_get_cfg\fR(9F)
+\fBattributes\fR(7),
+\fBusb_get_cfg\fR(9F),
+\fBusb_get_dev_data\fR(9F),
+\fBusb_get_string_descr\fR(9F)

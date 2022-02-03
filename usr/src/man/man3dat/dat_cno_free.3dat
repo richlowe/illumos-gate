@@ -125,4 +125,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_cno_wait\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_cno_wait\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

@@ -68,10 +68,18 @@ each \fBICMP6\fR error message received by the system is provided to every
 holder of an open \fBICMP6\fR socket or \fBTLI\fR descriptor.
 .SH SEE ALSO
 .LP
-\fBgetprotobyname\fR(3SOCKET), \fBrecv\fR(3SOCKET), \fBrecvmsg\fR(3SOCKET),
-\fBsend\fR(3SOCKET), \fBsendmsg\fR(3SOCKET), \fBsetsockopt\fR(3SOCKET),
-\fBt_rcvudata\fR(3NSL), \fBt_sndudata\fR(3NSL), \fBprivileges\fR(7),
-\fBinet6\fR(4P), \fBip6\fR(4P), \fBrouting\fR(4P)
+\fBt_rcvudata\fR(3NSL),
+\fBt_sndudata\fR(3NSL),
+\fBgetprotobyname\fR(3SOCKET),
+\fBrecv\fR(3SOCKET),
+\fBrecvmsg\fR(3SOCKET),
+\fBsend\fR(3SOCKET),
+\fBsendmsg\fR(3SOCKET),
+\fBsetsockopt\fR(3SOCKET),
+\fBinet6\fR(4P),
+\fBip6\fR(4P),
+\fBrouting\fR(4P),
+\fBprivileges\fR(7)
 .sp
 .LP
 Conta, A. and Deering, S., \fIRFC 2463, Internet Control Message Protocol

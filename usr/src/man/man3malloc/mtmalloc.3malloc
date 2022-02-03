@@ -216,9 +216,16 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbrk\fR(2), \fBgetrlimit\fR(2), \fBbsdmalloc\fR(3MALLOC), \fBdlopen\fR(3C),
-\fBmalloc\fR(3C), \fBmalloc\fR(3MALLOC), \fBmapmalloc\fR(3MALLOC),
-\fBsignal.h\fR(3HEAD), \fBumem_alloc\fR(3MALLOC), \fBwatchmalloc\fR(3MALLOC),
+\fBbrk\fR(2),
+\fBgetrlimit\fR(2),
+\fBdlopen\fR(3C),
+\fBmalloc\fR(3C),
+\fBsignal.h\fR(3HEAD),
+\fBbsdmalloc\fR(3MALLOC),
+\fBmalloc\fR(3MALLOC),
+\fBmapmalloc\fR(3MALLOC),
+\fBumem_alloc\fR(3MALLOC),
+\fBwatchmalloc\fR(3MALLOC),
 \fBattributes\fR(7)
 .SH WARNINGS
 .sp

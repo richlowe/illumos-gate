@@ -205,9 +205,12 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibscf\fR(3LIB), \fBscf_error\fR(3SCF), \fBscf_transaction_commit\fR(3SCF),
+\fBlibscf\fR(3LIB),
+\fBscf_error\fR(3SCF),
+\fBscf_transaction_commit\fR(3SCF),
 \fBscf_transaction_property_change\fR(3SCF),
 \fBscf_transaction_property_change_type\fR(3SCF),
 \fBscf_transaction_property_delete\fR(3SCF),
-\fBscf_transaction_property_new\fR(3SCF), \fBscf_transaction_reset\fR(3SCF),
+\fBscf_transaction_property_new\fR(3SCF),
+\fBscf_transaction_reset\fR(3SCF),
 \fBattributes\fR(7)

@@ -294,8 +294,14 @@ Interface Stability	Standard
 .TE
 
 .SH SEE ALSO
-\fBex\fR(1), \fBlex\fR(1), \fBvgrind\fR(1), \fBvi\fR(1), \fByacc\fR(1),
-\fBattributes\fR(7), \fBenviron\fR(7), \fBstandards\fR(7)
+\fBex\fR(1),
+\fBlex\fR(1),
+\fBvgrind\fR(1),
+\fBvi\fR(1),
+\fByacc\fR(1),
+\fBattributes\fR(7),
+\fBenviron\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 Recognition of \fBfunctions\fR, \fBsubroutines\fR, and \fBprocedures\fR for
 \fBFORTRAN\fR and Pascal is done in a very simpleminded way. No attempt is made

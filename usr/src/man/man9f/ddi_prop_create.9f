@@ -519,8 +519,12 @@ T}
 .TE
 
 .SH SEE ALSO
-\fBdriver.conf\fR(5), \fBattributes\fR(7), \fBattach\fR(9E),
-\fBddi_getproplen\fR(9F), \fBddi_prop_op\fR(9F), \fBddi_prop_update\fR(9F),
+\fBdriver.conf\fR(5),
+\fBattributes\fR(7),
+\fBattach\fR(9E),
+\fBddi_getproplen\fR(9F),
+\fBddi_prop_op\fR(9F),
+\fBddi_prop_update\fR(9F),
 \fBmakedevice\fR(9F)
 .sp
 .LP

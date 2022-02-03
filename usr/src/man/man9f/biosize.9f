@@ -24,7 +24,10 @@ embedded in other data structures.
 .SH CONTEXT
 The \fBbiosize()\fR function can be called from any context.
 .SH SEE ALSO
-\fBbiofini\fR(9F), \fBbioinit\fR(9F), \fBgetrbuf\fR(9F), \fBkmem_alloc\fR(9F),
+\fBbiofini\fR(9F),
+\fBbioinit\fR(9F),
+\fBgetrbuf\fR(9F),
+\fBkmem_alloc\fR(9F),
 \fBbuf\fR(9S)
 .sp
 .LP

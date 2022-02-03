@@ -92,4 +92,5 @@ MT-Level	Safe
 
 .SH SEE ALSO
 .LP
-\fBdoor_call\fR(3C), \fBattributes\fR(7)
+\fBdoor_call\fR(3C),
+\fBattributes\fR(7)

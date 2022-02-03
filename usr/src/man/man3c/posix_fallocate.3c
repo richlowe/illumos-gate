@@ -186,5 +186,9 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBcreat\fR(2), \fBopen\fR(2), \fBunlink\fR(2), \fBftruncate\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBcreat\fR(2),
+\fBopen\fR(2),
+\fBunlink\fR(2),
+\fBftruncate\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

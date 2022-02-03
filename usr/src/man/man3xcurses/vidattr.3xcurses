@@ -151,6 +151,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdoupdate\fR(3XCURSES), \fBis_linetouched\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBputchar\fR(3C), \fBtigetflag\fR(3XCURSES),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBputchar\fR(3C),
+\fBdoupdate\fR(3XCURSES),
+\fBis_linetouched\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBtigetflag\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

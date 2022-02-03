@@ -334,8 +334,13 @@ link state, the GLD_CAP_LINKSTATE bit should be set.
 .RE
 
 .SH SEE ALSO
-\fBgld\fR(4D), \fBdlpi\fR(4P), \fBattach\fR(9E), \fBgld\fR(9E),
-\fBddi_add_intr\fR(9F), \fBgld\fR(9F), \fBgld_stats\fR(9S)
+\fBgld\fR(4D),
+\fBdlpi\fR(4P),
+\fBattach\fR(9E),
+\fBgld\fR(9E),
+\fBddi_add_intr\fR(9F),
+\fBgld\fR(9F),
+\fBgld_stats\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -259,5 +259,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbsearch\fR(3C), \fBhsearch\fR(3C), \fBlsearch\fR(3C), \fBattributes\fR(7),
+\fBbsearch\fR(3C),
+\fBhsearch\fR(3C),
+\fBlsearch\fR(3C),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

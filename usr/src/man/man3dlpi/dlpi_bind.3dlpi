@@ -103,5 +103,9 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBdlpi_info\fR(3DLPI), \fBdlpi_recv\fR(3DLPI), \fBdlpi_send\fR(3DLPI),
-\fBdlpi_unbind\fR(3DLPI), \fBlibdlpi\fR(3LIB), \fBattributes\fR(7)
+\fBdlpi_info\fR(3DLPI),
+\fBdlpi_recv\fR(3DLPI),
+\fBdlpi_send\fR(3DLPI),
+\fBdlpi_unbind\fR(3DLPI),
+\fBlibdlpi\fR(3LIB),
+\fBattributes\fR(7)

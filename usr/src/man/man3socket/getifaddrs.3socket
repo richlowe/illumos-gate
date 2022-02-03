@@ -129,9 +129,15 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBipadm\fR(8), \fBifconfig\fR(8), \fBioctl\fR(2), \fBmalloc\fR(3C),
-\fBsocket\fR(3SOCKET), \fBsockaddr\fR(3SOCKET), \fBsocket.h\fR(3HEAD),
-\fBif_tcp\fR(4P), \fBattributes\fR(7)
+\fBioctl\fR(2),
+\fBmalloc\fR(3C),
+\fBsocket.h\fR(3HEAD),
+\fBsockaddr\fR(3SOCKET),
+\fBsocket\fR(3SOCKET),
+\fBif_tcp\fR(4P),
+\fBattributes\fR(7),
+\fBifconfig\fR(8),
+\fBipadm\fR(8)
 
 .SH NOTES
 .LP

@@ -162,4 +162,6 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdat_lmr_sync_rdma_write\fR(3DAT), \fBlibdat\fR(3LIB), \fBattributes\fR(7)
+\fBdat_lmr_sync_rdma_write\fR(3DAT),
+\fBlibdat\fR(3LIB),
+\fBattributes\fR(7)

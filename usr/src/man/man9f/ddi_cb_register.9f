@@ -514,7 +514,9 @@ MT-Level	Unsafe
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_intr_alloc\fR(9F), \fBddi_intr_free\fR(9F),
+\fBattributes\fR(7),
+\fBddi_intr_alloc\fR(9F),
+\fBddi_intr_free\fR(9F),
 \fBddi_intr_set_nreq\fR(9F)
 .SH NOTES
 Users of these interfaces that register for \fBDDI_CB_FLAG_INTR\fR become

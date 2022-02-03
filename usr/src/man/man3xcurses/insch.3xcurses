@@ -118,5 +118,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBins_wch\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
+\fBins_wch\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

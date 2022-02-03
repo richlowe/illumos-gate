@@ -265,7 +265,9 @@ Interface Stability	Evolving
 .SH SEE ALSO
 .sp
 .LP
-\fBldap\fR(3LDAP), \fBldap_search\fR(3LDAP), \fBattributes\fR(7)
+\fBldap\fR(3LDAP),
+\fBldap_search\fR(3LDAP),
+\fBattributes\fR(7)
 .sp
 .LP
 \fBAn\fR \fBLDAP\fR \fBURL\fR \fBFormat,\fR Tim Howes and Mark Smith, December

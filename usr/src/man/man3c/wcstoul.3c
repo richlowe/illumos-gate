@@ -222,5 +222,10 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBisspace\fR(3C), \fBiswalpha\fR(3C), \fBscanf\fR(3C), \fBwcstod\fR(3C),
-\fBwcstol\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBisspace\fR(3C),
+\fBiswalpha\fR(3C),
+\fBscanf\fR(3C),
+\fBwcstod\fR(3C),
+\fBwcstol\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

@@ -149,10 +149,20 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBcpr\fR(4), \fBpm\fR(4D), \fBpm\fR(9P), \fBpm-components\fR(9P),
-\fBattach\fR(9E), \fBdump\fR(9E), \fBopen\fR(9E), \fBpower\fR(9E),
-\fBddi_add_intr\fR(9F), \fBddi_dev_is_needed\fR(9F), \fBddi_map_regs\fR(9F),
-\fBkmem_free\fR(9F), \fBpm_raise_power\fR(9F), \fBtimeout\fR(9F)
+\fBcpr\fR(4),
+\fBpm\fR(4D),
+\fBattach\fR(9E),
+\fBdump\fR(9E),
+\fBopen\fR(9E),
+\fBpower\fR(9E),
+\fBddi_add_intr\fR(9F),
+\fBddi_dev_is_needed\fR(9F),
+\fBddi_map_regs\fR(9F),
+\fBkmem_free\fR(9F),
+\fBpm_raise_power\fR(9F),
+\fBtimeout\fR(9F),
+\fBpm\fR(9P),
+\fBpm-components\fR(9P)
 .sp
 .LP
 \fIWriting Device Drivers\fR

@@ -88,6 +88,9 @@ Interface Stability	Obsolete
 .SH SEE ALSO
 .sp
 .LP
-\fBldap_first_attribute\fR(3LDAP), \fBldap_first_attribute\fR(3LDAP),
-\fBldap_get_values\fR(3LDAP), \fBldap_result\fR(3LDAP),
-\fBldap_search\fR(3LDAP), \fBattributes\fR(7)
+\fBldap_first_attribute\fR(3LDAP),
+\fBldap_first_attribute\fR(3LDAP),
+\fBldap_get_values\fR(3LDAP),
+\fBldap_result\fR(3LDAP),
+\fBldap_search\fR(3LDAP),
+\fBattributes\fR(7)

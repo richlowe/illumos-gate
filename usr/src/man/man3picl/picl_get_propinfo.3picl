@@ -107,5 +107,7 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBlibpicl\fR(3PICL), \fBpicl_get_propval\fR(3PICL),
-\fBpicl_get_propval_by_name\fR(3PICL), \fBattributes\fR(7)
+\fBlibpicl\fR(3PICL),
+\fBpicl_get_propval\fR(3PICL),
+\fBpicl_get_propval_by_name\fR(3PICL),
+\fBattributes\fR(7)

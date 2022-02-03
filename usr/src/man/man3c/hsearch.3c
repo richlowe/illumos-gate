@@ -160,8 +160,13 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBbsearch\fR(3C), \fBlsearch\fR(3C), \fBmalloc\fR(3C), \fBstring\fR(3C),
-\fBtsearch\fR(3C), \fBmalloc\fR(3MALLOC), \fBattributes\fR(7),
+\fBbsearch\fR(3C),
+\fBlsearch\fR(3C),
+\fBmalloc\fR(3C),
+\fBstring\fR(3C),
+\fBtsearch\fR(3C),
+\fBmalloc\fR(3MALLOC),
+\fBattributes\fR(7),
 \fBstandards\fR(7)
 .sp
 .LP

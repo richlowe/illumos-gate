@@ -61,5 +61,8 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBkstat_create\fR(9F), \fBkstat_delete\fR(9F), \fBnet_kstat_create\fR(9F),
-\fBhook_t\fR(9S), \fBkstat_named\fR(9S)
+\fBkstat_create\fR(9F),
+\fBkstat_delete\fR(9F),
+\fBnet_kstat_create\fR(9F),
+\fBhook_t\fR(9S),
+\fBkstat_named\fR(9S)

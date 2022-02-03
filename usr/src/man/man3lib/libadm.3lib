@@ -75,5 +75,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBIntro\fR(3), \fBread_vtoc\fR(3EXT), \fBattributes\fR(7),
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBread_vtoc\fR(3EXT),
+\fBattributes\fR(7),
 \fBregexp\fR(7)

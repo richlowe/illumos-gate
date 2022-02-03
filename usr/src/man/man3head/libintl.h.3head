@@ -46,4 +46,5 @@ Interface Stability	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBgettext\fR(3C), \fBattributes\fR(7)
+\fBgettext\fR(3C),
+\fBattributes\fR(7)

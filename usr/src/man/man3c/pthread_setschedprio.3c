@@ -126,4 +126,6 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBpthread_getschedparam\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBpthread_getschedparam\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

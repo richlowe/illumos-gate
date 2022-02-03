@@ -159,8 +159,15 @@ x@      y@      z@
 .SH SEE ALSO
 .sp
 .LP
-\fBcp\fR(1), \fBls\fR(1), \fBmv\fR(1), \fBrm\fR(1), \fBlink\fR(2),
-\fBreadlink\fR(2), \fBstat\fR(2), \fBsymlink\fR(2), \fBattributes\fR(7),
+\fBcp\fR(1),
+\fBls\fR(1),
+\fBmv\fR(1),
+\fBrm\fR(1),
+\fBlink\fR(2),
+\fBreadlink\fR(2),
+\fBstat\fR(2),
+\fBsymlink\fR(2),
+\fBattributes\fR(7),
 \fBlargefile\fR(7)
 .SH NOTES
 .sp

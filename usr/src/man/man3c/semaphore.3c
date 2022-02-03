@@ -322,10 +322,18 @@ MT-Level	Async-Signal-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBmmap\fR(2), \fBshmop\fR(2), \fBsem_close\fR(3C), \fBsem_destroy\fR(3C),
-\fBsem_getvalue\fR(3C), \fBsem_init\fR(3C), \fBsem_open\fR(3C),
-\fBsem_post\fR(3C), \fBsem_unlink\fR(3C), \fBsem_wait\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBmmap\fR(2),
+\fBshmop\fR(2),
+\fBsem_close\fR(3C),
+\fBsem_destroy\fR(3C),
+\fBsem_getvalue\fR(3C),
+\fBsem_init\fR(3C),
+\fBsem_open\fR(3C),
+\fBsem_post\fR(3C),
+\fBsem_unlink\fR(3C),
+\fBsem_wait\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

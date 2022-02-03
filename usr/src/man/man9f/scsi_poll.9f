@@ -58,7 +58,9 @@ The \fBscsi_poll()\fR function can be called from user, interrupt, or kernel
 context. This function should not be called when the caller is executing
 \fBtimeout\fR(9F) in the context of a thread.
 .SH SEE ALSO
-\fBmakecom\fR(9F), \fBscsi_transport\fR(9F), \fBscsi_pkt\fR(9S)
+\fBmakecom\fR(9F),
+\fBscsi_transport\fR(9F),
+\fBscsi_pkt\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

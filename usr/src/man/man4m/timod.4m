@@ -154,7 +154,10 @@ system error messages file. Please see \fBerrno\fR(3C).
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(3), \fBioctl\fR(2), \fBerrno\fR(3C), \fBtirdwr\fR(4M)
+\fBioctl\fR(2),
+\fBIntro\fR(3),
+\fBerrno\fR(3C),
+\fBtirdwr\fR(4M)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

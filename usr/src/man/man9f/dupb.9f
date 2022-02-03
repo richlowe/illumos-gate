@@ -160,7 +160,10 @@ the new message block (line 34) and pass it along (line 35).
 .in -2
 
 .SH SEE ALSO
-\fBsrv\fR(9E), \fBcopyb\fR(9F), \fBqbufcall\fR(9F), \fBdatab\fR(9S),
+\fBsrv\fR(9E),
+\fBcopyb\fR(9F),
+\fBqbufcall\fR(9F),
+\fBdatab\fR(9S),
 \fBmsgb\fR(9S)
 .sp
 .LP

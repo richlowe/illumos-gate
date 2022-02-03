@@ -93,8 +93,14 @@ remote mounted file system table
 .SH SEE ALSO
 .sp
 .LP
-\fBfastboot\fR(1B), \fBlogin\fR(1), \fBhalt\fR(8), \fBreboot\fR(8),
-\fBsyslogd\fR(8), \fBsync\fR(2), \fBrmtab\fR(5), \fBattributes\fR(7)
+\fBlogin\fR(1),
+\fBfastboot\fR(1B),
+\fBsync\fR(2),
+\fBrmtab\fR(5),
+\fBattributes\fR(7),
+\fBhalt\fR(8),
+\fBreboot\fR(8),
+\fBsyslogd\fR(8)
 .SH NOTES
 .sp
 .LP

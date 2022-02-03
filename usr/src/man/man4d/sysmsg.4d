@@ -41,4 +41,5 @@ Interface Stability	Stable
 .SH SEE ALSO
 .sp
 .LP
-\fBconsadm\fR(8), \fBsyslogd\fR(8) , \fBattributes\fR(7), \fBconsole\fR(4D)
+\fBconsadm\fR(8), \fBsyslogd\fR(8) , \fBconsole\fR(4D),
+\fBattributes\fR(7)

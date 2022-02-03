@@ -91,5 +91,7 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBclearok\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
+\fBclearok\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

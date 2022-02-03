@@ -518,7 +518,18 @@ Standard	See \fBstandards\fR(7).
 
 .SH SEE ALSO
 .LP
-\fBat\fR(1), \fBcrontab\fR(1), \fBlogger\fR(1), \fBlogin\fR(1), \fBlpc\fR(1B),
-\fBlpr\fR(1B), \fBauditd\fR(8), \fBcron\fR(8), \fBgetty\fR(8),
-\fBsu\fR(8), \fBsyslogd\fR(8), \fBprintf\fR(3C),
-\fBsyslog.conf\fR(5), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBat\fR(1),
+\fBcrontab\fR(1),
+\fBlogger\fR(1),
+\fBlogin\fR(1),
+\fBlpc\fR(1B),
+\fBlpr\fR(1B),
+\fBprintf\fR(3C),
+\fBsyslog.conf\fR(5),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBauditd\fR(8),
+\fBcron\fR(8),
+\fBgetty\fR(8),
+\fBsu\fR(8),
+\fBsyslogd\fR(8)

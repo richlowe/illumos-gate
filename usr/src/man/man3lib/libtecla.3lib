@@ -145,7 +145,12 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBenhance\fR(1), \fBIntro\fR(3), \fBcpl_complete_word\fR(3TECLA),
-\fBef_expand_file\fR(3TECLA), \fBgl_get_line\fR(3TECLA),
-\fBgl_io_mode\fR(3TECLA), \fBpca_lookup_file\fR(3TECLA), \fBattributes\fR(7),
+\fBenhance\fR(1),
+\fBIntro\fR(3),
+\fBcpl_complete_word\fR(3TECLA),
+\fBef_expand_file\fR(3TECLA),
+\fBgl_get_line\fR(3TECLA),
+\fBgl_io_mode\fR(3TECLA),
+\fBpca_lookup_file\fR(3TECLA),
+\fBattributes\fR(7),
 \fBtecla\fR(7)

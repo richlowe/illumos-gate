@@ -201,9 +201,18 @@ Architecture	SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBstrconf\fR(1), \fBtip\fR(1), \fBuucp\fR(1C), \fBautopush\fR(8),
-\fBioctl\fR(2), \fBopen\fR(2), \fBtermios\fR(3C), \fBattributes\fR(7),
-\fBusba\fR(4D), \fBtermio\fR(4I), \fBldterm\fR(4M), \fBttcompat\fR(4M)
+\fBstrconf\fR(1),
+\fBtip\fR(1),
+\fBuucp\fR(1C),
+\fBioctl\fR(2),
+\fBopen\fR(2),
+\fBtermios\fR(3C),
+\fBusba\fR(4D),
+\fBtermio\fR(4I),
+\fBldterm\fR(4M),
+\fBttcompat\fR(4M),
+\fBattributes\fR(7),
+\fBautopush\fR(8)
 .SH DIAGNOSTICS
 .LP
 In addition to being logged, the following messages may appear on the system

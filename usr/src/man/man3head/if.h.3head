@@ -97,4 +97,6 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBif_nametoindex\fR(3XNET), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBif_nametoindex\fR(3XNET),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

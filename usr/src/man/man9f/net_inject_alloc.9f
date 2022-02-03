@@ -49,4 +49,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_inject_free\fR(9F), \fBnet_inject_t\fR(9S)
+\fBnet_inject_free\fR(9F),
+\fBnet_inject_t\fR(9S)

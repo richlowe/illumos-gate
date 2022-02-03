@@ -182,4 +182,7 @@ MT-Level	MT-Safe
 .TE
 
 .SH SEE ALSO
-\fBgetrlimit\fR(2), \fBulimit\fR(2), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBgetrlimit\fR(2),
+\fBulimit\fR(2),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

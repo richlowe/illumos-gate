@@ -79,5 +79,9 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBaddch\fR(3XCURSES), \fBdoupdate\fR(3XCURSES), \fBecho_wchar\fR(3XCURSES),
-\fBlibcurses\fR(3XCURSES), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBaddch\fR(3XCURSES),
+\fBdoupdate\fR(3XCURSES),
+\fBecho_wchar\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

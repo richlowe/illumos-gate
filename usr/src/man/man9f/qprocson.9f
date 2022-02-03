@@ -70,8 +70,15 @@ These routines can be called from user, interrupt, or kernel context.
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(9E), \fBopen\fR(9E), \fBput\fR(9E), \fBsrv\fR(9E), \fBput\fR(9F),
-\fBputnext\fR(9F), \fBqbufcall\fR(9F), \fBqtimeout\fR(9F), \fBqwait\fR(9F),
+\fBclose\fR(9E),
+\fBopen\fR(9E),
+\fBput\fR(9E),
+\fBsrv\fR(9E),
+\fBput\fR(9F),
+\fBputnext\fR(9F),
+\fBqbufcall\fR(9F),
+\fBqtimeout\fR(9F),
+\fBqwait\fR(9F),
 \fBqwait_sig\fR(9F)
 .sp
 .LP

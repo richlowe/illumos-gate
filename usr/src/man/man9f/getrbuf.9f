@@ -58,7 +58,9 @@ context. (Drivers must not allow \fBgetrbuf()\fR to sleep if called from an
 interrupt routine.)
 .SH SEE ALSO
 .LP
-\fBbioinit\fR(9F), \fBfreerbuf\fR(9F), \fBkmem_alloc\fR(9F),
+\fBbioinit\fR(9F),
+\fBfreerbuf\fR(9F),
+\fBkmem_alloc\fR(9F),
 \fBkmem_free\fR(9F)
 .sp
 .LP

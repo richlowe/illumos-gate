@@ -312,7 +312,9 @@ equal to zero.
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(2), \fBioctl\fR(2), \fBopen\fR(2)
+\fBIntro\fR(2),
+\fBioctl\fR(2),
+\fBopen\fR(2)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

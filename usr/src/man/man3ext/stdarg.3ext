@@ -150,7 +150,9 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBvprintf\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBvprintf\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

@@ -105,9 +105,12 @@ Interface Stability	Evolving
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBddi_intr_block_enable\fR(9F),
-\fBddi_intr_block_disable\fR(9F), \fBddi_intr_clr_mask\fR(9F),
-\fBddi_intr_disable\fR(9F), \fBddi_intr_enable\fR(9F),
+\fBattributes\fR(7),
+\fBddi_intr_block_disable\fR(9F),
+\fBddi_intr_block_enable\fR(9F),
+\fBddi_intr_clr_mask\fR(9F),
+\fBddi_intr_disable\fR(9F),
+\fBddi_intr_enable\fR(9F),
 \fBddi_intr_set_mask\fR(9F)
 .sp
 .LP

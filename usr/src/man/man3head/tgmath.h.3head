@@ -249,5 +249,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBmodf\fR(3M), \fBcomplex.h\fR(3HEAD), \fBmath.h\fR(3HEAD), \fBcabs\fR(3M),
-\fBfabs\fR(3M), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBcomplex.h\fR(3HEAD),
+\fBmath.h\fR(3HEAD),
+\fBcabs\fR(3M),
+\fBfabs\fR(3M),
+\fBmodf\fR(3M),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

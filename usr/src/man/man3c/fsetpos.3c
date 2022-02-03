@@ -122,6 +122,13 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlseek\fR(2), \fBfgetpos\fR(3C), \fBfopen\fR(3C), \fBfseek\fR(3C),
-\fBftell\fR(3C), \fBrewind\fR(3C), \fBungetc\fR(3C), \fBattributes\fR(7),
-\fBlf64\fR(7), \fBstandards\fR(7)
+\fBlseek\fR(2),
+\fBfgetpos\fR(3C),
+\fBfopen\fR(3C),
+\fBfseek\fR(3C),
+\fBftell\fR(3C),
+\fBrewind\fR(3C),
+\fBungetc\fR(3C),
+\fBattributes\fR(7),
+\fBlf64\fR(7),
+\fBstandards\fR(7)

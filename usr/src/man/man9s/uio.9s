@@ -69,8 +69,14 @@ initialized by the driver and not written to afterward.
 .SH SEE ALSO
 .sp
 .LP
-\fBaread\fR(9E), \fBawrite\fR(9E), \fBread\fR(9E), \fBwrite\fR(9E),
-\fBbzero\fR(9F), \fBkmem_zalloc\fR(9F), \fBuiomove\fR(9F), \fBcb_ops\fR(9S),
+\fBaread\fR(9E),
+\fBawrite\fR(9E),
+\fBread\fR(9E),
+\fBwrite\fR(9E),
+\fBbzero\fR(9F),
+\fBkmem_zalloc\fR(9F),
+\fBuiomove\fR(9F),
+\fBcb_ops\fR(9S),
 \fBiovec\fR(9S)
 .sp
 .LP

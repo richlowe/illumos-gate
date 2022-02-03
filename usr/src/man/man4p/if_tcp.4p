@@ -867,6 +867,13 @@ specified by \fBlifr_ppa\fR plumbed.
 
 .SH SEE ALSO
 .LP
-\fBifconfig\fR(8), \fBin.routed\fR(8), \fBioctl\fR(2),
-\fBsockaddr\fR(3SOCKET), \fBstreamio\fR(4I), \fBarp\fR(4P), \fBdlpi\fR(4P),
-\fBip\fR(4P), \fBip6\fR(4P), \fBndp\fR(4P)
+\fBioctl\fR(2),
+\fBsockaddr\fR(3SOCKET),
+\fBstreamio\fR(4I),
+\fBarp\fR(4P),
+\fBdlpi\fR(4P),
+\fBip\fR(4P),
+\fBip6\fR(4P),
+\fBndp\fR(4P),
+\fBifconfig\fR(8),
+\fBin.routed\fR(8)

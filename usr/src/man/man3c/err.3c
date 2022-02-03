@@ -148,5 +148,8 @@ These functions are safe to use in multithreaded applications as long as
 \fBsetlocale\fR(3C) is not being called to change the locale.
 .SH SEE ALSO
 .LP
-\fBexit\fR(3C), \fBgetexecname\fR(3C), \fBsetlocale\fR(3C), \fBstrerror\fR(3C),
+\fBexit\fR(3C),
+\fBgetexecname\fR(3C),
+\fBsetlocale\fR(3C),
+\fBstrerror\fR(3C),
 \fBattributes\fR(7)

@@ -35,7 +35,9 @@ None.
 .SH CONTEXT
 \fBkstat_delete()\fR can be called from any context.
 .SH SEE ALSO
-\fBkstat_create\fR(9F), \fBkstat_install\fR(9F), \fBkstat_named_init\fR(9F),
+\fBkstat_create\fR(9F),
+\fBkstat_install\fR(9F),
+\fBkstat_named_init\fR(9F),
 \fBkstat\fR(9S)
 .sp
 .LP

@@ -141,4 +141,6 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBusb_pipe_xopen\fR(9F), \fBusb_alloc_request\fR(9F)
+\fBattributes\fR(7),
+\fBusb_alloc_request\fR(9F),
+\fBusb_pipe_xopen\fR(9F)

@@ -175,5 +175,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .LP
 \fBsockaddr\fR(3SOCKET),
-\fBaccept\fR(3XNET), \fBbind\fR(3XNET), \fBgetsockname\fR(3XNET),
-\fBsocket\fR(3XNET), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBaccept\fR(3XNET),
+\fBbind\fR(3XNET),
+\fBgetsockname\fR(3XNET),
+\fBsocket\fR(3XNET),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

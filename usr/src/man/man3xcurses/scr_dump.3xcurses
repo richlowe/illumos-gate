@@ -101,6 +101,10 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBdelscreen\fR(3XCURSES), \fBdoupdate\fR(3XCURSES), \fBendwin\fR(3XCURSES),
-\fBgetwin\fR(3XCURSES), \fBlibcurses\fR(3XCURSES), \fBattributes\fR(7),
+\fBdelscreen\fR(3XCURSES),
+\fBdoupdate\fR(3XCURSES),
+\fBendwin\fR(3XCURSES),
+\fBgetwin\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
 \fBstandards\fR(7)

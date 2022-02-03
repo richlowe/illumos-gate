@@ -106,4 +106,5 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBnet_phygetnext\fR(9F), \fBnet_phylookup\fR(9F)
+\fBnet_phygetnext\fR(9F),
+\fBnet_phylookup\fR(9F)

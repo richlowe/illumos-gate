@@ -148,5 +148,10 @@ to change the locale.
 .SH SEE ALSO
 .sp
 .LP
-\fBsetlocale\fR(3C), \fBwcscmp\fR(3C), \fBwcscoll\fR(3C), \fBwscmp\fR(3C),
-\fBwscoll\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBsetlocale\fR(3C),
+\fBwcscmp\fR(3C),
+\fBwcscoll\fR(3C),
+\fBwscmp\fR(3C),
+\fBwscoll\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

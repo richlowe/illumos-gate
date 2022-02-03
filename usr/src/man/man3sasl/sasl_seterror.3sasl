@@ -94,7 +94,9 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsasl_errdetail\fR(3SASL), \fBsyslog\fR(3C), \fBattributes\fR(7)
+\fBsyslog\fR(3C),
+\fBsasl_errdetail\fR(3SASL),
+\fBattributes\fR(7)
 .sp
 .LP
 Whistler, K. and Adams, G. \fIRFC 2482, Language Tagging in Unicode Plain

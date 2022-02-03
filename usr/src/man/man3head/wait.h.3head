@@ -262,5 +262,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBexit\fR(2), \fBwaitid\fR(2), \fBexit\fR(3C), \fBwait\fR(3C),
-\fBwaitpid\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBexit\fR(2),
+\fBwaitid\fR(2),
+\fBexit\fR(3C),
+\fBwait\fR(3C),
+\fBwaitpid\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

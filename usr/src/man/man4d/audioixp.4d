@@ -64,8 +64,11 @@ Stability level	Uncommitted
 .SH SEE ALSO
 .sp
 .LP
-\fBioctl\fR(2), \fBattributes\fR(7), \fBaudio\fR(4I), \fBmixer\fR(4I),
-\fBstreamio\fR(4I)
+\fBioctl\fR(2),
+\fBaudio\fR(4I),
+\fBmixer\fR(4I),
+\fBstreamio\fR(4I),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIATI IXP400 South Bridge Data Sheet\fR

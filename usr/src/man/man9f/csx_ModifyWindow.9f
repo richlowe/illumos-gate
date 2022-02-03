@@ -243,8 +243,10 @@ No \fBPCMCIA \fRhardware installed.
 .SH CONTEXT
 This function may be called from user or kernel context.
 .SH SEE ALSO
-\fBcsx_ConvertSpeed\fR(9F), \fBcsx_MapMemPage\fR(9F),
-\fBcsx_ReleaseWindow\fR(9F), \fBcsx_RequestWindow\fR(9F)
+\fBcsx_ConvertSpeed\fR(9F),
+\fBcsx_MapMemPage\fR(9F),
+\fBcsx_ReleaseWindow\fR(9F),
+\fBcsx_RequestWindow\fR(9F)
 .sp
 .LP
 \fIPC Card 95 Standard, PCMCIA/JEIDA\fR

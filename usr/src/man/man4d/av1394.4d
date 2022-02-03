@@ -75,8 +75,11 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBread\fR(2), \fBwrite\fR(2), \fBattributes\fR(7), \fBhci1394\fR(4D),
-\fBiec61883\fR(4I)
+\fBread\fR(2),
+\fBwrite\fR(2),
+\fBhci1394\fR(4D),
+\fBiec61883\fR(4I),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIIEEE Std 1394-1995 Standard for a High Performance Serial Bus\fR

@@ -75,4 +75,7 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBpvs\fR(1), \fBIntro\fR(3), \fBrstat\fR(3RPC), \fBattributes\fR(7)
+\fBpvs\fR(1),
+\fBIntro\fR(3),
+\fBrstat\fR(3RPC),
+\fBattributes\fR(7)

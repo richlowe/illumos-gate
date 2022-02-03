@@ -119,8 +119,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBmqueue.h\fR(3HEAD), \fBmq_notify\fR(3C), \fBmq_open\fR(3C),
-\fBmq_unlink\fR(3C), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBmq_notify\fR(3C),
+\fBmq_open\fR(3C),
+\fBmq_unlink\fR(3C),
+\fBmqueue.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP

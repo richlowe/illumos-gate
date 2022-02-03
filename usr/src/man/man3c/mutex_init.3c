@@ -955,10 +955,16 @@ MT-Level	MT-Safe
 
 .SH SEE ALSO
 .LP
-\fBmmap\fR(2), \fBshmop\fR(2), \fBpthread_mutexattr_getprioceiling\fR(3C),
-\fBpthread_mutexattr_getprotocol\fR(3C), \fBpthread_mutexattr_getrobust\fR(3C),
-\fBpthread_mutexattr_gettype\fR(3C), \fBpthread_mutex_getprioceiling\fR(3C),
-\fBpthread_mutex_init\fR(3C), \fBattributes\fR(7), \fBmutex\fR(7),
+\fBmmap\fR(2),
+\fBshmop\fR(2),
+\fBpthread_mutex_getprioceiling\fR(3C),
+\fBpthread_mutex_init\fR(3C),
+\fBpthread_mutexattr_getprioceiling\fR(3C),
+\fBpthread_mutexattr_getprotocol\fR(3C),
+\fBpthread_mutexattr_getrobust\fR(3C),
+\fBpthread_mutexattr_gettype\fR(3C),
+\fBattributes\fR(7),
+\fBmutex\fR(7),
 \fBstandards\fR(7)
 .SH NOTES
 .LP

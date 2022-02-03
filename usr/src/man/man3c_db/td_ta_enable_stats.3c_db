@@ -149,4 +149,6 @@ MT Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBlibc_db\fR(3LIB), \fBthr_getconcurrency\fR(3C), \fBattributes\fR(7)
+\fBthr_getconcurrency\fR(3C),
+\fBlibc_db\fR(3LIB),
+\fBattributes\fR(7)

@@ -138,7 +138,8 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBsasl_errors\fR(3SASL), \fBattributes\fR(7)
+\fBsasl_errors\fR(3SASL),
+\fBattributes\fR(7)
 .sp
 .LP
 Alvestrand, H. \fIRFC 1766, Tags for the Identification of Languages\fR.

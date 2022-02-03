@@ -115,8 +115,12 @@ Interface stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattach\fR(9E), \fBdetach\fR(9E), \fBpm_busy_component\fR(9F),
-\fBpm_idle_component\fR(9F), \fBpm_raise_power\fR(9F), \fBdev_ops\fR(9S)
+\fBattach\fR(9E),
+\fBdetach\fR(9E),
+\fBpm_busy_component\fR(9F),
+\fBpm_idle_component\fR(9F),
+\fBpm_raise_power\fR(9F),
+\fBdev_ops\fR(9S)
 .sp
 .LP
 \fIWriting Device Drivers\fR

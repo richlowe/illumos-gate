@@ -141,8 +141,10 @@ MT-Level	Safe
 .SH SEE ALSO
 .sp
 .LP
-\fBgss_acquire_cred\fR(3GSS), \fBgss_init_sec_context\fR(3GSS),
-\fBgss_release_name\fR(3GSS), \fBattributes\fR(7)
+\fBgss_acquire_cred\fR(3GSS),
+\fBgss_init_sec_context\fR(3GSS),
+\fBgss_release_name\fR(3GSS),
+\fBattributes\fR(7)
 .sp
 .LP
 \fISolaris Security for Developers Guide\fR

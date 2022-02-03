@@ -89,5 +89,11 @@ the calling process.
 .SH SEE ALSO
 .sp
 .LP
-\fBIntro\fR(8), \fBboot\fR(8), \fBdumpadm\fR(8), \fBhalt\fR(8),
-\fBinit\fR(8), \fBkernel\fR(8), \fBreboot\fR(8), \fBuadmin\fR(2)
+\fBuadmin\fR(2),
+\fBIntro\fR(8),
+\fBboot\fR(8),
+\fBdumpadm\fR(8),
+\fBhalt\fR(8),
+\fBinit\fR(8),
+\fBkernel\fR(8),
+\fBreboot\fR(8)

@@ -203,5 +203,10 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBsemctl\fR(2), \fBsemget\fR(2), \fBsemop\fR(2), \fBipc.h\fR(3HEAD),
-\fBtypes.h\fR(3HEAD), \fBattributes\fR(7), \fBstandards\fR(7)
+\fBsemctl\fR(2),
+\fBsemget\fR(2),
+\fBsemop\fR(2),
+\fBipc.h\fR(3HEAD),
+\fBtypes.h\fR(3HEAD),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

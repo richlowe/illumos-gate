@@ -175,5 +175,8 @@ MT-Level	Unsafe
 .SH SEE ALSO
 .sp
 .LP
-\fBinch\fR(3XCURSES), \fBinchstr\fR(3XCURSES), \fBlibcurses\fR(3XCURSES),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBinch\fR(3XCURSES),
+\fBinchstr\fR(3XCURSES),
+\fBlibcurses\fR(3XCURSES),
+\fBattributes\fR(7),
+\fBstandards\fR(7)

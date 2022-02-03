@@ -90,7 +90,10 @@ See the \fBputnextctl\fR(9F) function page for an example of
 .SH SEE ALSO
 .sp
 .LP
-\fBput\fR(9E), \fBallocb\fR(9F), \fBdatamsg\fR(9F), \fBputctl1\fR(9F),
+\fBput\fR(9E),
+\fBallocb\fR(9F),
+\fBdatamsg\fR(9F),
+\fBputctl1\fR(9F),
 \fBputnextctl\fR(9F)
 .sp
 .LP

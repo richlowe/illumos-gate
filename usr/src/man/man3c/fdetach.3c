@@ -183,8 +183,12 @@ Interface Stability	Standard
 .SH SEE ALSO
 .sp
 .LP
-\fBfdetach\fR(8), \fBclose\fR(2), \fBfattach\fR(3C), \fBattributes\fR(7),
-\fBstandards\fR(7), \fBstreamio\fR(4I)
+\fBclose\fR(2),
+\fBfattach\fR(3C),
+\fBstreamio\fR(4I),
+\fBattributes\fR(7),
+\fBstandards\fR(7),
+\fBfdetach\fR(8)
 .sp
 .LP
 \fISTREAMS Programming Guide\fR

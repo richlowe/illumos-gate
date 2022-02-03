@@ -75,8 +75,11 @@ Architecture	SPARC, x86, PCI-based systems
 
 .SH SEE ALSO
 .LP
-\fBattributes\fR(7), \fBehci\fR(4D), \fBhubd\fR(4D), \fBuhci\fR(4D),
-\fBusba\fR(4D)
+\fBehci\fR(4D),
+\fBhubd\fR(4D),
+\fBuhci\fR(4D),
+\fBusba\fR(4D),
+\fBattributes\fR(7)
 .sp
 .LP
 \fIWriting Device Drivers\fR

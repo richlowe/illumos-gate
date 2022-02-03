@@ -103,7 +103,10 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-\fBattributes\fR(7), \fBcpr\fR(4), \fBattach\fR(9E), \fBdetach\fR(9E)
+\fBcpr\fR(4),
+\fBattributes\fR(7),
+\fBattach\fR(9E),
+\fBdetach\fR(9E)
 .sp
 .LP
 \fIWriting Device Drivers\fR

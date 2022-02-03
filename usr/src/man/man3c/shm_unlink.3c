@@ -135,8 +135,12 @@ Standard	See \fBstandards\fR(7).
 .SH SEE ALSO
 .sp
 .LP
-\fBclose\fR(2), \fBmmap\fR(2), \fBmlock\fR(3C), \fBshm_open\fR(3C),
-\fBattributes\fR(7), \fBstandards\fR(7)
+\fBclose\fR(2),
+\fBmmap\fR(2),
+\fBmlock\fR(3C),
+\fBshm_open\fR(3C),
+\fBattributes\fR(7),
+\fBstandards\fR(7)
 .SH NOTES
 .sp
 .LP
