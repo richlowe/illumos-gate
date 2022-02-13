@@ -56,7 +56,7 @@ These include:
 .Bl -bullet -offset indent
 .It
 No mapped-file access because
-.Xr mmap (2)
+.Xr mmap 2
 returns
 .Er ENOSYS .
 .It
@@ -121,7 +121,7 @@ Instead, each Unix user needs to make their own private mount points.
 Currently, all access through an
 .Nm
 mount point uses the Windows credentials established by the user that ran the
-.Xr mount 1
+.Xr mount 8
 command.
 Normally, permissions on
 .Nm
@@ -147,4 +147,5 @@ concern, such as for public read-only resources.
 .Xr smbutil 1 ,
 .Xr nsmbrc 5 ,
 .Xr attributes 7 ,
+.Xr mount 8 ,
 .Xr mount_smbfs 8
