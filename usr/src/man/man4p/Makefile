@@ -39,7 +39,8 @@ MANFILES= 	arp.4p		\
 	 	sip.4p		\
 	 	slp.4p		\
 	 	tcp.4p		\
-	 	udp.4p
+	 	udp.4p		\
+		vxlan.4p
 
 MANLINKS=	AH.4p		\
 		ARP.4p		\
@@ -51,6 +52,7 @@ MANLINKS=	AH.4p		\
 		SCTP.4p		\
 		TCP.4p		\
 		UDP.4p		\
+		VXLAN.4p	\
 	 	if.4p
 
 ARP.4p		:= LINKSRC = arp.4p
@@ -74,6 +76,8 @@ SCTP.4p 	:= LINKSRC = sctp.4p
 TCP.4p		:= LINKSRC = tcp.4p
 
 UDP.4p		:= LINKSRC = udp.4p
+
+VXLAN.4p	:= LINKSRC = vxlan.4p
 
 .KEEP_STATE:
 

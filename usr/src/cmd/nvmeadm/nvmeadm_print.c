@@ -10,9 +10,9 @@
  */
 
 /*
- * Copyright 2016 Nexenta Systems, Inc.
- * Copyright 2019 Western Digital Corporation
  * Copyright 2021 Oxide Computer Company
+ * Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2022 Tintri by DDN, Inc. All rights reserved.
  */
 
 /*
@@ -1909,9 +1909,11 @@ nvme_print_health_log(nvme_health_log_t *hlog, nvme_identify_ctrl_t *idctl,
  * This function pretty-prints the firmware slot information.
  */
 void
-nvme_print_fwslot_log(nvme_fwslot_log_t *fwlog)
+nvme_print_fwslot_log(nvme_fwslot_log_t *fwlog, nvme_identify_ctrl_t *idctl)
 {
 	int i;
+
+	char str[NVME_FWVER_SZ + sizeof (" (read-only)")];
 
 	nvme_print(0, "Firmware Slot Information", -1, NULL);
 	nvme_print_uint64(2, "Active Firmware Slot", fwlog->fw_afi, NULL, NULL);
@@ -1919,7 +1921,13 @@ nvme_print_fwslot_log(nvme_fwslot_log_t *fwlog)
 		nvme_print_uint64(2, "Next Firmware Slot", fwlog->fw_next,
 		    NULL, NULL);
 
-	for (i = 0; i != ARRAYSIZE(fwlog->fw_frs); i++) {
+
+	(void) snprintf(str, sizeof (str), "%.*s%s",
+	    nvme_strlen(fwlog->fw_frs[0], sizeof (fwlog->fw_frs[0])),
+	    fwlog->fw_frs[0], idctl->id_frmw.fw_readonly ? " (read-only)" : "");
+	nvme_print_str(2, "Firmware Revision for Slot", 1, str, sizeof (str));
+
+	for (i = 1; i < idctl->id_frmw.fw_nslot; i++) {
 		nvme_print_str(2, "Firmware Revision for Slot", i + 1,
 		    fwlog->fw_frs[i][0] == '\0' ? "<Unused>" :
 		    fwlog->fw_frs[i], sizeof (fwlog->fw_frs[i]));
@@ -2166,6 +2174,34 @@ nvme_print_feat_async_event(uint64_t res, void *b, size_t s,
 		    nvme_version_check(version, 1, 0),
 		    aec.b.aec_volatile, "enabled", "disabled");
 	}
+
+	/* NVMe 1.2 */
+	nvme_print_bit(4, "Namespace attribute notices",
+	    nvme_version_check(version, 1, 2),
+	    aec.b.aec_nsan, "enabled", "disabled");
+	nvme_print_bit(4, "Firmware activation notices",
+	    nvme_version_check(version, 1, 2),
+	    aec.b.aec_fwact, "enabled", "disabled");
+
+	/* NVMe 1.3 */
+	nvme_print_bit(4, "Telemetry log notices",
+	    nvme_version_check(version, 1, 3),
+	    aec.b.aec_telln, "enabled", "disabled");
+
+	/* NVMe 1.4 */
+	nvme_print_bit(4, "ANA change notices",
+	    nvme_version_check(version, 1, 4),
+	    aec.b.aec_ansacn, "enabled", "disabled");
+	nvme_print_bit(4,
+	    "Predictable latency event aggr. LCNs",
+	    nvme_version_check(version, 1, 4),
+	    aec.b.aec_plat, "enabled", "disabled");
+	nvme_print_bit(4, "LBA status information notices",
+	    nvme_version_check(version, 1, 4),
+	    aec.b.aec_lbasi, "enabled", "disabled");
+	nvme_print_bit(4, "Endurance group event aggregate LCNs",
+	    nvme_version_check(version, 1, 4),
+	    aec.b.aec_egeal, "enabled", "disabled");
 }
 
 void
@@ -2214,21 +2250,12 @@ nvme_print_feat_progress(uint64_t res, void *b, size_t s,
 	    spm.b.spm_pbslc, NULL, NULL);
 }
 
-static const char *
-nvme_str_generic_error(int sc)
+const char *
+nvme_fw_error(int err, int sc)
 {
-	switch (sc) {
-	case NVME_CQE_SC_GEN_SUCCESS:
-		return ("Success");
-	default:
-		return ("See message log (usually /var/adm/messages) "
-		    "for details");
-	}
-}
+	if (sc == 0)
+		return (strerror(err));
 
-static const char *
-nvme_str_specific_error(int sc)
-{
 	switch (sc) {
 	case NVME_CQE_SC_SPC_INV_FW_SLOT:
 		return ("Invalid firmware slot");
@@ -2250,20 +2277,5 @@ nvme_str_specific_error(int sc)
 		return ("See message log (usually /var/adm/messages) "
 		    "for details");
 	}
-}
 
-const char *
-nvme_str_error(int sct, int sc)
-{
-	switch (sct) {
-	case NVME_CQE_SCT_GENERIC:
-		return (nvme_str_generic_error(sc));
-
-	case NVME_CQE_SCT_SPECIFIC:
-		return (nvme_str_specific_error(sc));
-
-	default:
-		return ("See message log (usually /var/adm/messages) "
-		    "for details");
-	}
 }

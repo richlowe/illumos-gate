@@ -105,7 +105,6 @@ _MANFILES=	aac.4d		\
 		poll.4d		\
 		profile.4d	\
 		ptm.4d		\
-		pts.4d		\
 		pty.4d		\
 		qlc.4d		\
 		ramdisk.4d	\
@@ -256,6 +255,7 @@ _MANLINKS=	1394.4d		\
 		firewire.4d	\
 		kmem.4d		\
 		lo0.4d		\
+		pts.4d		\
 		ticots.4d	\
 		ticotsord.4d	\
 		urandom.4d	\
@@ -278,6 +278,8 @@ fdc.4d		:= LINKSRC = fd.4d
 firewire.4d	:= LINKSRC = ieee1394.4d
 
 lo0.4d		:= LINKSRC = ipnet.4d
+
+pts.4d		:= LINKSRC = ptm.4d
 
 allkmem.4d	:= LINKSRC = mem.4d
 kmem.4d		:= LINKSRC = mem.4d

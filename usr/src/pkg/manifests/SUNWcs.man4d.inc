@@ -14,4 +14,4 @@
 file path=usr/share/man/man4d/kstat.4d
 file path=usr/share/man/man4d/ksyms.4d
 file path=usr/share/man/man4d/ptm.4d
-file path=usr/share/man/man4d/pts.4d
+link path=usr/share/man/man4d/pts.4d target=ptm.4d

@@ -100,7 +100,7 @@
 
 	<instance name='default' enabled='true' >
 
-	<!-- Properties in this group are used by routeadm (1M) -->
+	<!-- Properties in this group are used by routeadm(8) -->
 	<property_group name='routeadm' type='framework'>
 		<stability value='Evolving' />
 		<!-- set if routeadm -e/d ipv4-routing is explicitly invoked -->

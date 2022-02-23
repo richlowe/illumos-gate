@@ -162,6 +162,6 @@ If the -U option is not provided, and this variable is set, it will be
 used as the publisher name for the packaging repository.  If -U is not
 provided and this variable is not set, on-nightly will be used.
 .SH SEE ALSO
-.BR beadm "(1M), "
-.BR pkg "(1), "
-.BR pkg "(5) "
+.BR beadm (8),
+.BR pkg (1),
+.BR pkg (7)

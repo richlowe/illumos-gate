@@ -18,7 +18,6 @@ include		$(SRC)/Makefile.master
 
 MANSECT= 	4
 
-
 MANFILES= 	FSS.4	\
 		Intro.4	\
 		cpr.4	\

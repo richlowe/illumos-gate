@@ -14,7 +14,7 @@
 #
 
 #
-# Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2022 Oxide Computer Company
 #
 
@@ -35,7 +35,10 @@ file path=opt/bhyve-tests/tests/mevent/lists_delete mode=0555
 file path=opt/bhyve-tests/tests/mevent/read_disable mode=0555
 file path=opt/bhyve-tests/tests/mevent/read_pause mode=0555
 file path=opt/bhyve-tests/tests/mevent/read_requeue mode=0555
+file path=opt/bhyve-tests/tests/mevent/vnode_file mode=0555
+file path=opt/bhyve-tests/tests/mevent/vnode_zvol mode=0555
 dir  path=opt/bhyve-tests/tests/vmm
+file path=opt/bhyve-tests/tests/vmm/fpu_getset mode=0555
 file path=opt/bhyve-tests/tests/vmm/mem_partial mode=0555
 file path=opt/bhyve-tests/tests/vmm/mem_seg_map mode=0555
 license lic_CDDL license=lic_CDDL

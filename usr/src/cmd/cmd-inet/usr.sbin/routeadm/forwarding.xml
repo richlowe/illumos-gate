@@ -108,7 +108,7 @@
 			value='solaris.smf.manage.routing' />
 	</property_group>
 
-	<!-- Properties in this group are modifiable via routeadm (1M) -->
+	<!-- Properties in this group are modifiable via routeadm(8) -->
 	<property_group name='routeadm' type='application'>
 		<propval name='default-ipv4-forwarding' type='boolean'
 			value='false' />
@@ -212,7 +212,7 @@
 			value='solaris.smf.manage.routing' />
 	</property_group>
 
-	<!-- Properties in this group are modifiable via routeadm (1M) -->
+	<!-- Properties in this group are modifiable via routeadm(8) -->
         <property_group name='routeadm' type='application'>
 		<propval name='default-ipv6-forwarding' type='boolean'
 			value='false' />

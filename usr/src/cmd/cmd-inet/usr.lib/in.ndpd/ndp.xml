@@ -76,7 +76,7 @@
 			value='solaris.smf.manage.routing' />
 	</property_group>
 
-	<!-- Properties in this group are used by routeadm (1M) -->
+	<!-- Properties in this group are used by routeadm(8) -->
 	<property_group name='routeadm' type='application'>
 		<stability value='Unstable' />
 		<!--
@@ -94,7 +94,7 @@
 	</property_group>
 
 
-	<!-- Properties in this group are modifiable via routeadm (1M) -->
+	<!-- Properties in this group are modifiable via routeadm(8) -->
 	<property_group name='routing' type='application'>
 		<stability value='Evolving' />
 

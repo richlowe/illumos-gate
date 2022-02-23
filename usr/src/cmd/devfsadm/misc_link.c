@@ -204,6 +204,9 @@ static devfsadm_create_t misc_cbt[] = {
 	{ "pseudo", "ddi_pseudo", "tpm",
 	    TYPE_EXACT | DRV_EXACT, ILEVEL_0, minor_name
 	},
+	{ "pseudo", "ddi_pseudo", "overlay",
+	    TYPE_EXACT | DRV_EXACT, ILEVEL_0, minor_name
+	}
 };
 
 DEVFSADM_CREATE_INIT_V0(misc_cbt);
@@ -224,8 +227,8 @@ static devfsadm_remove_t misc_remove_cbt[] = {
 	{ "pseudo", "^daplt$",
 	    RM_PRE | RM_ALWAYS, ILEVEL_0, devfsadm_rm_all
 	},
-	{ "pseudo", "^zcons/" ZONENAME_REGEXP "/(" ZCONS_MASTER_NAME "|"
-		ZCONS_SLAVE_NAME ")$",
+	{ "pseudo", "^zcons/" ZONENAME_REGEXP "/(" ZCONS_MANAGER_NAME "|"
+		ZCONS_SUBSIDIARY_NAME ")$",
 	    RM_PRE | RM_HOT | RM_ALWAYS, ILEVEL_0, devfsadm_rm_all
 	},
 	{ "pseudo", "^" CPUID_SELF_NAME "$", RM_ALWAYS | RM_PRE | RM_HOT,
@@ -474,7 +477,7 @@ fc_port(di_minor_t minor, di_node_t node)
 /*
  * Handles:
  *	minor node type "ddi_printer".
- * 	rules of the form: type=ddi_printer;name=bpp  \M0
+ *	rules of the form: type=ddi_printer;name=bpp  \M0
  */
 static int
 printer_create(di_minor_t minor, di_node_t node)
@@ -676,7 +679,7 @@ zcons_create(di_minor_t minor, di_node_t node)
 }
 
 /*
- *	/dev/cpu/self/cpuid 	->	/devices/pseudo/cpuid@0:self
+ *	/dev/cpu/self/cpuid	->	/devices/pseudo/cpuid@0:self
  */
 static int
 cpuid(di_minor_t minor, di_node_t node)

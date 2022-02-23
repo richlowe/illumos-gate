@@ -436,6 +436,9 @@ CHKHDRS=			\
 	ontrap.h		\
 	open.h			\
 	openpromio.h		\
+	overlay.h		\
+	overlay_common.h	\
+	overlay_target.h	\
 	panic.h			\
 	param.h			\
 	pathconf.h		\
@@ -1125,6 +1128,9 @@ NXGEHDRS=			\
 	nxge_virtual.h		\
 	nxge_espc.h
 
+PLATHDRS=		\
+	pci_prd.h
+
 include Makefile.syshdrs
 
 dcam/%.check:	dcam/%.h
@@ -1192,7 +1198,8 @@ CHECKHDRS=						\
 	$(I1394HDRS:%.h=1394/%.check)			\
 	$(RSMHDRS:%.h=rsm/%.check)			\
 	$(TSOLHDRS:%.h=tsol/%.check)			\
-	$(NXGEHDRS:%.h=nxge/%.check)
+	$(NXGEHDRS:%.h=nxge/%.check)			\
+	$(PLATHDRS:%.h=plat/%.check)
 
 
 .KEEP_STATE:
@@ -1232,6 +1239,7 @@ CHECKHDRS=						\
 	$(ROOTTAVORHDRS)	\
 	$(ROOTHERMONHDRS)	\
 	$(ROOTMLNXHDRS)		\
+	$(ROOTPLATHDRS)		\
 	$(ROOTSCSIHDRS)		\
 	$(ROOTSCSIADHDRS)	\
 	$(ROOTSCSICONFHDRS)	\
@@ -1300,6 +1308,7 @@ install_h:			\
 	$(ROOTTAVORHDRS)	\
 	$(ROOTHERMONHDRS)	\
 	$(ROOTMLNXHDRS)		\
+	$(ROOTPLATHDRS)		\
 	$(ROOTSCSIHDRS)		\
 	$(ROOTSCSIADHDRS)	\
 	$(ROOTSCSIISCSIHDRS)	\

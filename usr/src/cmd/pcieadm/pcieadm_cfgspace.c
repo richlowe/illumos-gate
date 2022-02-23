@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2021 Oxide Computer Company
+ * Copyright 2022 Oxide Computer Company
  */
 
 /*
@@ -499,6 +499,7 @@ pcieadm_cfgspace_print_regdef(pcieadm_cfgspace_walk_t *walkp,
 			if (strval == NULL) {
 				strval = "reserved";
 			}
+
 			pcieadm_field_printf(walkp, regdef->prd_short,
 			    regdef->prd_human, regval, "%s (0x%" PRIx64 ")\n",
 			    strval, regval << regdef->prd_lowbit);
@@ -1171,9 +1172,9 @@ static pcieadm_regdef_t pcieadm_regdef_msictrl[] = {
 	    .prd_val = { .prdv_strval = { "unsupported", "supported" } } },
 	{ 8, 8, "pvm", "Per-Vector Masking Capable", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "unsupported", "supported" } } },
-	{ 9, 9, "extmdcap", "Extended Message Data Capable",
+	{ 9, 9, "extmdcap", "Extended Message Data Capable", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "unsupported", "supported" } } },
-	{ 10, 10, "extmden", "extended Message Data Enable",
+	{ 10, 10, "extmden", "extended Message Data Enable", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "unsupported", "supported" } } },
 	{ -1, -1, NULL }
 };
@@ -1438,17 +1439,19 @@ static pcieadm_regdef_t pcieadm_regdef_pcie_linkctl[] = {
 	{ 5, 5, "retrain", "Retrain Link", PRDV_HEX },
 	{ 6, 6, "ccc", "Common Clock Configuration", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "asynchronous", "common" } } },
-	{ 7, 7, "extsync", "Extended Sync", PRDV_HEX,
+	{ 7, 7, "extsync", "Extended Sync", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "disabled", "enabled" } } },
-	{ 8, 8, "clkpm", "Clock Power Management", PRDV_HEX,
+	{ 8, 8, "clkpm", "Clock Power Management", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "disabled", "enabled" } } },
-	{ 9, 9, "hwawd", "Hardware Autonomous Width", PRDV_HEX,
+	{ 9, 9, "hwawd", "Hardware Autonomous Width", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "enabled", "disabled" } } },
-	{ 10, 10, "linkbwint", "Link Bandwidth Management Interrupt", PRDV_HEX,
-	    .prd_val = { .prdv_strval = { "disabled", "enabled" } } },
-	{ 11, 11, "linkabwint", "Link Autonomous Bandwidth Interrupt", PRDV_HEX,
-	    .prd_val = { .prdv_strval = { "disabled", "enabled" } } },
-	{ 14, 15, "drs", "DRS Signaling Control", PRDV_HEX,
+	{ 10, 10, "linkbwint", "Link Bandwidth Management Interrupt",
+	    PRDV_STRVAL, .prd_val = { .prdv_strval = { "disabled",
+	    "enabled" } } },
+	{ 11, 11, "linkabwint", "Link Autonomous Bandwidth Interrupt",
+	    PRDV_STRVAL, .prd_val = { .prdv_strval = { "disabled",
+	    "enabled" } } },
+	{ 14, 15, "drs", "DRS Signaling Control", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "not reported", "Interrupt enabled",
 	    "DRS->FRS enabled" } } },
 	{ -1, -1, NULL }
@@ -1489,9 +1492,9 @@ static pcieadm_regdef_t pcieadm_regdef_pcie_slotcap[] = {
 	    .prd_val = { .prdv_strval = { "unsupported", "supported" } } },
 	{ 7, 14, "slotplv", "Slot Power Limit Value", PRDV_HEX },
 	{ 15, 16, "slotpls", "Slot Power Limit Scale", PRDV_HEX },
-	{ 17, 17, "emi", "Electromechanical Interlock Present",
+	{ 17, 17, "emi", "Electromechanical Interlock Present", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "no", "yes" } } },
-	{ 18, 18, "ncc", "No Command Completed", PRDV_HEX,
+	{ 18, 18, "ncc", "No Command Completed", PRDV_STRVAL,
 	    .prd_val = { .prdv_strval = { "unsupported", "supported" } } },
 	{ 19, 31, "slotno", "Physical Slot Number", PRDV_HEX },
 	{ -1, -1, NULL }
@@ -4264,6 +4267,91 @@ pcieadm_cap_info_ht(pcieadm_cfgspace_walk_t *walkp,
 	}
 }
 
+/*
+ * Root Complex Link Declaration
+ */
+static pcieadm_regdef_t pcieadm_regdef_rcld_desc[] = {
+	{ 0, 3, "type", "Element Type", PRDV_STRVAL,
+	    .prd_val = { .prdv_strval = { "Configuration Space Element",
+	    "System Egress Port or internal sink",
+	    "Internal Root Complex Link" } } },
+	{ 8, 15, "num", "Number of Entries", PRDV_HEX },
+	{ 16, 23, "id", "Component ID", PRDV_HEX },
+	{ 24, 31, "port", "Port Number", PRDV_HEX },
+	{ -1, -1, NULL }
+};
+
+static pcieadm_regdef_t pcieadm_regdef_rcld_link[] = {
+	{ 0, 0, "valid", "Link Valid", PRDV_STRVAL,
+	    .prd_val = { .prdv_strval = { "no", "yes" } } },
+	{ 1, 1, "type", "Link Type", PRDV_STRVAL,
+	    .prd_val = { .prdv_strval = { "RCRB", "Configuration Space" } } },
+	{ 2, 2, "rcrb", "Assosciate RCRB", PRDV_STRVAL,
+	    .prd_val = { .prdv_strval = { "no", "yes" } } },
+	{ 16, 23, "tid", "Target Component ID", PRDV_HEX },
+	{ 24, 31, "tport", "Target Port Number", PRDV_HEX },
+	{ -1, -1, NULL }
+};
+
+/*
+ * Print a variable number of Root Complex Links.
+ */
+static void
+pcieadm_cfgspace_print_rcld(pcieadm_cfgspace_walk_t *walkp,
+    pcieadm_cfgspace_print_t *print, void *arg)
+{
+	uint_t nlinks = walkp->pcw_data->pcb_u8[walkp->pcw_capoff + 5];
+
+	for (uint_t i = 0; i < nlinks; i++) {
+		char mshort[32], mhuman[128];
+		pcieadm_cfgspace_print_t p;
+		uint16_t off = print->pcp_off + i * 0x10;
+		uint8_t type = walkp->pcw_data->pcb_u8[walkp->pcw_capoff + off];
+
+		(void) snprintf(mshort, sizeof (mshort), "link%udesc", i);
+		(void) snprintf(mhuman, sizeof (mhuman), "Link %u Description");
+
+		p.pcp_off = off;
+		p.pcp_len = 4;
+		p.pcp_short = mshort;
+		p.pcp_human = mhuman;
+		p.pcp_print = pcieadm_cfgspace_print_regdef;
+		p.pcp_arg = pcieadm_regdef_rcld_link;
+
+		p.pcp_print(walkp, &p, p.pcp_arg);
+
+		/*
+		 * The way that we print the link depends on the actual type of
+		 * link which is in bit 2 of the link description.
+		 */
+		p.pcp_off += 8;
+
+		if ((type & (1 << 1)) == 0) {
+			(void) snprintf(mshort, sizeof (mshort),
+			    "link%uaddr", i);
+			(void) snprintf(mhuman, sizeof (mhuman),
+			    "Link %u Address");
+			p.pcp_len = 8;
+			p.pcp_print = pcieadm_cfgspace_print_hex;
+			p.pcp_arg = NULL;
+
+			p.pcp_print(walkp, &p, p.pcp_arg);
+		} else {
+			warnx("encountered unsupported RCLD Link Address");
+		}
+	}
+}
+
+static pcieadm_cfgspace_print_t pcieadm_cap_rcld[] = {
+	{ 0x0, 4, "caphdr", "Capability Header",
+	    pcieadm_cfgspace_print_regdef, pcieadm_regdef_pcie_caphdr },
+	{ 0x4, 4, "desc", "Self Description",
+	    pcieadm_cfgspace_print_regdef, pcieadm_regdef_rcld_desc },
+	{ 0x10, 0x10, "link", "Link Entry", pcieadm_cfgspace_print_rcld },
+	{ -1, -1, NULL }
+};
+
+
 pcieadm_pci_cap_t pcieadm_pci_caps[] = {
 	{ PCI_CAP_ID_PM, "pcipm", "PCI Power Management",
 	    pcieadm_cap_info_pcipm, { { 2, 8, pcieadm_cap_pcipm_v3 },
@@ -4316,7 +4404,8 @@ pcieadm_pci_cap_t pcieadm_pcie_caps[] = {
 	{ PCIE_EXT_CAP_ID_PWR_BUDGET, "powbudg", "Power Budgeting",
 	    pcieadm_cap_info_vers, { { 1, 0x10, pcieadm_cap_powbudg } } },
 	{ PCIE_EXT_CAP_ID_RC_LINK_DECL, "rcld",
-	    "Root Complex Link Declaration" },
+	    "Root Complex Link Declaration",  pcieadm_cap_info_vers,
+	    { { 1, 0x1c, pcieadm_cap_rcld } } },
 	{ PCIE_EXT_CAP_ID_RC_INT_LINKCTRL, "rcilc",
 	    "Root Complex Internal Link Control" },
 	{ PCIE_EXT_CAP_ID_RC_EVNT_CEA, "rcecea",

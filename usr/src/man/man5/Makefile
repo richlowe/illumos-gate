@@ -133,6 +133,7 @@ _MANFILES=	Intro.5				\
 		nsmbrc.5			\
 		nss.5				\
 		nsswitch.conf.5			\
+		overlay_files.5			\
 		packingrules.5			\
 		pam.conf.5			\
 		passwd.5			\

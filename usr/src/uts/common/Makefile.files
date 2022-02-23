@@ -705,6 +705,11 @@ NET80211_OBJS += net80211.o net80211_proto.o net80211_input.o \
 
 VNIC_OBJS +=	vnic_ctl.o vnic_dev.o
 
+OVERLAY_OBJS +=	overlay.o overlay_fm.o overlay_mux.o overlay_plugin.o \
+		overlay_prop.o overlay_target.o
+
+OVERLAY_VXLAN_OBJS +=	overlay_vxlan.o
+
 SIMNET_OBJS +=	simnet.o
 
 IB_OBJS +=	ibnex.o ibnex_ioctl.o ibnex_hca.o
@@ -2155,6 +2160,20 @@ CPQARY3_OBJS =	cpqary3.o cpqary3_noe.o cpqary3_talk2ctlr.o	\
 		cpqary3_isr.o cpqary3_transport.o cpqary3_mem.o	\
 		cpqary3_scsi.o cpqary3_util.o cpqary3_ioctl.o	\
 		cpqary3_bd.o
+
+#
+#	HP Smart Array driver module (smrt)
+#
+SMRT_OBJS =	smrt.o \
+		smrt_device.o \
+		smrt_interrupts.o \
+		smrt_commands.o \
+		smrt_logvol.o \
+		smrt_hba.o \
+		smrt_ciss_simple.o \
+		smrt_ciss.o \
+		smrt_physical.o \
+		smrt_sata.o
 
 #
 #	ISCSI_INITIATOR module

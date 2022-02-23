@@ -83,6 +83,7 @@ _MANFILES=	Intro.7			\
 		ms.7			\
 		mutex.7			\
 		nfssec.7		\
+		overlay.7		\
 		pam_allow.7		\
 		pam_authtok_check.7	\
 		pam_authtok_get.7	\

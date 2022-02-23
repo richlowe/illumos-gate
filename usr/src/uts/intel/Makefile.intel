@@ -360,6 +360,7 @@ DRV_KMODS	+= yge
 DRV_KMODS	+= zcons
 DRV_KMODS	+= zyd
 DRV_KMODS	+= simnet
+DRV_KMODS	+= smrt
 DRV_KMODS	+= stmf
 DRV_KMODS	+= stmf_sbd
 DRV_KMODS	+= fct
@@ -703,6 +704,12 @@ MAC_KMODS	+= mac_ipv4
 MAC_KMODS	+= mac_ipv6
 MAC_KMODS	+= mac_wifi
 MAC_KMODS	+= mac_ib
+
+#
+#	Overlay related modules (/kernel/overlay)
+#
+DRV_KMODS	+= overlay
+OVERLAY_KMODS	+= vxlan
 
 #
 # socketmod (kernel/socketmod)
