@@ -23,6 +23,7 @@
 # Copyright 2016 RackTop Systems.
 # Copyright 2017 Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2022 Garrett D'Amore <garrett@damore.org>
 #
 
 include		$(SRC)/cmd/Makefile.cmd
@@ -82,7 +83,7 @@ SUBDIRS-common= libconv		\
 		demo_rdb
 
 SUBDIRS-i386=
-SUBDIRS-sparc=	rtld.4.x
+SUBDIRS-sparc=
 
 SUBDIRS=	$(SUBDIRS-common) $(SUBDIRS-$(MACH))
 
@@ -156,7 +157,7 @@ FRC:
 # Cross-reference customization: ignore the directories named by XRPRUNE,
 # and tweak the file globs slightly.
 #
-XRPRUNE=	rtld.4.x abi
+XRPRUNE=	abi
 XRADD=		*.msg mapfile*
 XRDEL=		Makefile* kobj_*
 

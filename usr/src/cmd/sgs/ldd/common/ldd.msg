@@ -1,5 +1,6 @@
 #
 # Copyright (c) 1996, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2022 Garrett D'Amore <garrett@damore.org>
 #
 # CDDL HEADER START
 #
@@ -46,7 +47,6 @@
 @ MSG_USP_NOHDR		"%s: %s: file built with ?N (NOHDR) mapfile option\n"
 @ MSG_USP_UNKNOWN	"%s: %s: unsupported or unknown file type\n"
 @ MSG_USP_ELFINS	"%s: %s: file has insecure interpreter %s\n"
-@ MSG_USP_AOUTINS	"%s: %s: insecure a.out file\n"
 @ MSG_USP_NOTEXEC	"%s: %s: is not executable\n"
 
 

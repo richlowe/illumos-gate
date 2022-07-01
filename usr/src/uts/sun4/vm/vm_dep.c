@@ -22,6 +22,7 @@
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  * Copyright 2016 Joyent, Inc.
+ * Copyright 2022 Garrett D'Amore <garrett@damore.org>
  */
 
 /*
@@ -426,82 +427,6 @@ chkaout(struct exdata *exp)
 		return (ENOEXEC);
 }
 
-/*
- * The following functions return information about an a.out
- * which is used when a program is executed.
- */
-
-/*
- * Return the load memory address for the data segment.
- */
-caddr_t
-getdmem(struct exec *exp)
-{
-	/*
-	 * XXX - Sparc Reference Hack approaching
-	 * Remember that we are loading
-	 * 8k executables into a 4k machine
-	 * DATA_ALIGN == 2 * PAGESIZE
-	 */
-	if (exp->a_text)
-		return ((caddr_t)(roundup(USRTEXT + exp->a_text, DATA_ALIGN)));
-	else
-		return ((caddr_t)USRTEXT);
-}
-
-/*
- * Return the starting disk address for the data segment.
- */
-ulong_t
-getdfile(struct exec *exp)
-{
-	if (exp->a_magic == ZMAGIC)
-		return (exp->a_text);
-	else
-		return (sizeof (struct exec) + exp->a_text);
-}
-
-/*
- * Return the load memory address for the text segment.
- */
-
-/*ARGSUSED*/
-caddr_t
-gettmem(struct exec *exp)
-{
-	return ((caddr_t)USRTEXT);
-}
-
-/*
- * Return the file byte offset for the text segment.
- */
-uint_t
-gettfile(struct exec *exp)
-{
-	if (exp->a_magic == ZMAGIC)
-		return (0);
-	else
-		return (sizeof (struct exec));
-}
-
-void
-getexinfo(
-	struct exdata *edp_in,
-	struct exdata *edp_out,
-	int *pagetext,
-	int *pagedata)
-{
-	*edp_out = *edp_in;	/* structure copy */
-
-	if ((edp_in->ux_mag == ZMAGIC) &&
-	    ((edp_in->vp->v_flag & VNOMAP) == 0)) {
-		*pagetext = 1;
-		*pagedata = 1;
-	} else {
-		*pagetext = 0;
-		*pagedata = 0;
-	}
-}
 
 /*
  * Return non 0 value if the address may cause a VAC alias with KPM mappings.
