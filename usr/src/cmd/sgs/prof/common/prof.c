@@ -208,8 +208,6 @@ struct snymEntry {
 	float	tot_sl_time;	/* total clock ticks (a la sl_time) */
 };
 
-
-#define	AOUTHSZ		(filhdr.f_opthdr)
 PROF_FILE	filhdr;			/* profile file descriptor */
 Elf32_Shdr	*scnhdrp;	/* pointer to first section header */
 					/* (space by _prof_Malloc) */

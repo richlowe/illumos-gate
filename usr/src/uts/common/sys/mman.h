@@ -160,7 +160,6 @@ extern "C" {
  */
 #define	MR_PADDING	0x1
 #define	MR_HDR_ELF	0x2
-#define	MR_HDR_AOUT	0x3
 
 /*
  * Internal flags for mr_flags field below.

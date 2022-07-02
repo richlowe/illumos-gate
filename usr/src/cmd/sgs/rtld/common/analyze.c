@@ -44,7 +44,6 @@
 #include	"_rtld.h"
 #include	"_audit.h"
 #include	"_elf.h"
-#include	"_a.out.h"
 #include	"_inline_gen.h"
 #include	"msg.h"
 
@@ -1554,9 +1553,6 @@ find_file(Lm_list *lml, Rt_map *clmp, uint_t flags, Fdesc *fdp, Rej_desc *rej,
 
 static Fct	*Vector[] = {
 	&elf_fct,
-#ifdef	A_OUT
-	&aout_fct,
-#endif
 	0
 };
 
@@ -1729,12 +1725,6 @@ map_obj(Lm_list *lml, Fdesc *fdp, size_t fsize, const char *name, int fd,
 			fptr = elf_verify((mpp->mr_addr + mpp->mr_offset),
 			    mpp->mr_fsize, fdp, name, rej);
 		}
-#ifdef	A_OUT
-		if (flags == MR_HDR_AOUT) {
-			fptr = aout_verify((mpp->mr_addr + mpp->mr_offset),
-			    mpp->mr_fsize, fdp, name, rej);
-		}
-#endif
 		if (fptr) {
 			fdp->fd_mapn = mapnum;
 			fdp->fd_mapp = smpp;
@@ -1798,8 +1788,7 @@ load_file(Lm_list *lml, Aliste lmco, Rt_map *clmp, Fdesc *fdp, int *in_nfavl)
 			/* LINTED */
 			ehdr = (Ehdr *)(mpp->mr_addr + mpp->mr_offset);
 			hmpp = mpp;
-		} else if (flags == MR_HDR_AOUT)
-			hmpp = mpp;
+		}
 	}
 
 	/*

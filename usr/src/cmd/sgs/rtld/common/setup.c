@@ -53,7 +53,6 @@
 #include	"_rtld.h"
 #include	"_audit.h"
 #include	"_elf.h"
-#include	"_a.out.h"
 #include	"msg.h"
 
 
@@ -527,65 +526,14 @@ setup(char **envp, auxv_t *auxv, Word _flags, char *_platform, int _syspagsz,
 		}
 	} else {
 		/*
-		 * Set up function ptr and arguments according to the type
-		 * of file class the executable is. (Currently only supported
-		 * types are ELF and a.out format.)  Then create a link map
-		 * for the executable.
+		 * Set up function ptr and arguments according to the type of
+		 * file class the executable is. (Currently the only supported
+		 * type is ELF.)  Then create a link map for the executable.
 		 */
 		if (aoutdyn) {
-#ifdef A_OUT
-			mmapobj_result_t	*mpp;
-
-			/*
-			 * Create a mapping structure sufficient to describe
-			 * a single two segments.  The ADDR() of the a.out is
-			 * established as 0, which is required but the AOUT
-			 * relocation code.
-			 */
-			if ((mpp =
-			    calloc(sizeof (mmapobj_result_t), 2)) == NULL)
-				return (0);
-
-			if ((fdm.fd_nname =
-			    stravl_insert(execname, 0, 0, 0)) == NULL)
-				return (0);
-			if ((mlmp = aout_new_lmp(&lml_main, ALIST_OFF_DATA,
-			    &fdm, 0, 0, aoutdyn, NULL, NULL)) == NULL)
-				return (0);
-
-			/*
-			 * Establish the true mapping information for the a.out.
-			 */
-			if (aout_get_mmap(&lml_main, mpp)) {
-				free(mpp);
-				return (0);
-			}
-
-			MSIZE(mlmp) =
-			    (size_t)(mpp[1].mr_addr + mpp[1].mr_msize) -
-			    S_ALIGN((size_t)mpp[0].mr_addr, syspagsz);
-			MMAPS(mlmp) = mpp;
-			MMAPCNT(mlmp) = 2;
-			PADSTART(mlmp) = (ulong_t)mpp->mr_addr;
-			PADIMLEN(mlmp) = mpp->mr_msize;
-
-			/*
-			 * Disable any object configuration cache (BCP apps
-			 * bring in sbcp which can benefit from any object
-			 * cache, but both the app and sbcp can't use the same
-			 * objects).
-			 */
-			rtld_flags |= RT_FL_NOOBJALT;
-
-			/*
-			 * Make sure no-direct bindings are in effect.
-			 */
-			lml_main.lm_tflags |= LML_TFLG_NODIRECT;
-#else
 			eprintf(&lml_main, ERR_FATAL,
 			    MSG_INTL(MSG_ERR_REJ_UNKFILE), argvname);
 			return (0);
-#endif
 		} else if (phdr) {
 			Phdr			*pptr;
 			Off			i_offset = 0;
@@ -928,10 +876,6 @@ setup(char **envp, auxv_t *auxv, Word _flags, char *_platform, int _syspagsz,
 
 		if (THIS_IS_ELF(mlmp)) {
 			DBG_CALL(Dbg_file_elf(&lml_main, PATHNAME(mlmp),
-			    ADDR(mlmp), MSIZE(mlmp), LIST(mlmp)->lm_lmidstr,
-			    ALIST_OFF_DATA));
-		} else {
-			DBG_CALL(Dbg_file_aout(&lml_main, PATHNAME(mlmp),
 			    ADDR(mlmp), MSIZE(mlmp), LIST(mlmp)->lm_lmidstr,
 			    ALIST_OFF_DATA));
 		}

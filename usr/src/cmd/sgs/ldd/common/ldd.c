@@ -40,9 +40,7 @@
  *
  * If neither -d nor -r is specified, we set only LD_TRACE_LOADED_OBJECTS_[AE].
  * The runtime linker will print the pathnames of all dynamic objects it
- * loads, and then exit.  Note that we distiguish between ELF and AOUT objects
- * when setting this environment variable - AOUT executables cause the mapping
- * of sbcp, the dependencies of which the user isn't interested in.
+ * loads, and then exit.
  *
  * If -d or -r is specified, we also set LD_WARN=1; the runtime linker will
  * perform its normal relocations and issue warning messages for unresolved
@@ -122,7 +120,6 @@
 #include	"machdep.h"
 #include	"sgs.h"
 #include	"conv.h"
-#include	"a.out.h"
 #include	"msg.h"
 
 static int	elf_check(int, char *, char *, Elf *, int);

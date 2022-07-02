@@ -39,8 +39,6 @@
 
 @ _END_
 
-@ MSG_STR_AOUT		"AOUT"
-
 @ MSG_FMT_4XPATH	"./%s"
 @ MSG_FMT_4XLIB		"lib%s.so.%d.%d"
 

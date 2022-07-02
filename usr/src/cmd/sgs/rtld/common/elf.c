@@ -211,7 +211,7 @@ elf_verify(caddr_t addr, size_t size, Fdesc *fdp, const char *name,
 	/*
 	 * Determine if we're an elf file.  If not simply return, we don't set
 	 * any rejection information as this test allows use to scroll through
-	 * the objects we support (ELF, AOUT).
+	 * the objects we support (ELF).
 	 */
 	if (size < sizeof (Ehdr) ||
 	    caddr[EI_MAG0] != ELFMAG0 ||
