@@ -121,7 +121,8 @@ typedef struct au_filehdr au_filehdr_t;
 			    ((char *)(to))[3] = ((char *)(from))[0];
 #endif /* byte swapping */
 
-#if defined(__sparc) || defined(__i386) || defined(__amd64) || defined(__aarch64__)
+#if defined(__sparc) || defined(__i386) || defined(__amd64) || \
+	defined(__aarch64__)
 #define	AUDIO_AU_HOST2FILE(from, to)	AUDIO_AU_FILE2HOST((from), (to))
 #else
 #error unknown machine type;

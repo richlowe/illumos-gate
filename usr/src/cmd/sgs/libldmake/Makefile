@@ -26,6 +26,7 @@
 # Use is subject to license terms.
 #
 
+include		$(SRC)/Makefile.master
 include		../Makefile.sub
 
 .KEEP_STATE:

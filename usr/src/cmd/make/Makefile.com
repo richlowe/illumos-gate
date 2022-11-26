@@ -12,9 +12,10 @@
 # Copyright 2015, Richard Lowe.
 
 MAKE_INCLUDE= $(SRC)/cmd/make/include
+CCFLAGS += $(CCVERBOSE)
 # XXXARM: No exceptions, as we have no unwinder support as yet
 # (and also we don't use exceptions)
-CCFLAGS += $(CCVERBOSE) -_gcc=-fno-exceptions
+$(AARCH64_BLD)CCFLAGS += -_gcc=-fno-exceptions
 CPPFLAGS += -I$(MAKE_INCLUDE) $(MAKE_DEFS)
 
 # So that it's set even for the libraries we build

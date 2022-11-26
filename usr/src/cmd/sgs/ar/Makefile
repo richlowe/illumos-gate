@@ -28,4 +28,5 @@
 # cmd/sgs/ar/Makefile
 #
 
+include		$(SRC)/Makefile.master
 include		$(SRC)/cmd/sgs/Makefile.sub

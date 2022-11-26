@@ -45,6 +45,7 @@
 @ MSG_SYM_LAV9PLTENTER		"la_sparcv9_pltenter"
 @ MSG_SYM_LAX86PLTENTER		"la_i86_pltenter"
 @ MSG_SYM_LAAMD64PLTENTER	"la_amd64_pltenter"
+@ MSG_SYM_LAAARCH64PLTENTER	"la_aarch64_pltenter"
 
 @ MSG_SYM_LAPLTEXIT	"la_pltexit"
 @ MSG_SYM_LAPLTEXIT_64	"la_pltexit64"

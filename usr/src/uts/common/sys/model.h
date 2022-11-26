@@ -167,7 +167,7 @@ typedef unsigned int model_t;
 
 #define	STRUCT_SET_HANDLE(handle, umodel, addr)				\
 	(handle).model = (model_t)(umodel) & DATAMODEL_MASK;		\
-	ASSERT(((umodel) & DATAMODEL_MASK) == DATAMODEL_NATIVE);		\
+	ASSERT(((umodel) & DATAMODEL_MASK) == DATAMODEL_NATIVE);	\
 	(handle).ptr = (addr)
 
 #define	STRUCT_INIT(handle, umodel)					\

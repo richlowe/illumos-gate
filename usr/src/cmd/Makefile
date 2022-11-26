@@ -476,7 +476,7 @@ COMMON_SUBDIRS=	\
 # zoneadm/zoneadm - not 64bit clean, need zone bits
 # ypcmd - not 64bit clean
 # zonestat - not 64bit clean, needs to use the good readdir_r
-$(NOT_AARCH64_BLD)COMMON_SUBDIRS=	\
+$(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
 	perl		\
 	availdevs	\
@@ -515,7 +515,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS=	\
 	pcitool		\
 	policykit	\
 	powertop	\
-	praudit		\
 	pg		\
 	prtdiag		\
 	refer		\
@@ -727,6 +726,7 @@ MSGSUBDIRS=		\
 	pools		\
 	power		\
 	pr		\
+	praudit		\
 	print		\
 	profiles	\
 	projadd		\

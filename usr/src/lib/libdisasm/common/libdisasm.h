@@ -61,8 +61,8 @@ typedef struct dis_handle dis_handle_t;
 #define	DIS_RISCV_64		0x4000
 
 /* arm disassembler flags */
-#define DIS_ARM_32		0x20000
-#define DIS_ARM_64		0x40000
+#define	DIS_ARM_32		0x20000
+#define	DIS_ARM_64		0x40000
 
 /* generic disassembler flags */
 #define	DIS_OCTAL		0x040

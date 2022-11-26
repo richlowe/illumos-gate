@@ -53,7 +53,8 @@ extern "C" {
  */
 
 #if defined(__BUILTIN_VA_ARG_INCR) || \
-	defined(__sparc) || defined(__i386) || defined(__amd64) || defined(__aarch64__)
+	defined(__sparc) || defined(__i386) || defined(__amd64) || \
+	defined(__aarch64__)
 #define	alloca(x)	__builtin_alloca(x)
 
 extern void *__builtin_alloca(size_t);

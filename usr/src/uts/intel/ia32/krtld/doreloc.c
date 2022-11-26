@@ -217,7 +217,7 @@ do_reloc_ld(Rel_desc *rdesc, uchar_t *off, Xword *value,
     const char *file, int bswap, void *lml)
 #else
 int
-do_reloc_rtld(uchar_t rtype, uchar_t *off, Xword *value, const char *sym,
+do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
     const char *file, void *lml)
 #endif
 {

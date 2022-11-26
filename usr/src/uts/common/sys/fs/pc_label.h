@@ -103,7 +103,7 @@ extern "C" {
 /*
  * conversions to/from little endian format
  */
-#if defined(_LITTLE_ENDIAN) && (_ALIGNMENT_REQUIRED==0)
+#if defined(_LITTLE_ENDIAN) && (_ALIGNMENT_REQUIRED == 0)
 /* e.g. i386 machines */
 #define	ltohs(S)	(*((ushort_t *)(&(S))))
 #define	ltohi(I)	(*((uint_t *)(&(I))))

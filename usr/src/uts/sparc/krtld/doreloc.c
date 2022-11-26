@@ -363,7 +363,7 @@ const Rel_entry reloc_table[R_SPARC_NUM] = {
 #if defined(_KERNEL)
 #define	lml	0		/* Needed by arglist of REL_ERR_* macros */
 int
-do_reloc_krtld(uchar_t rtype, uchar_t *off, Xword *value, const char *sym,
+do_reloc_krtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
     const char *file)
 #elif defined(DO_RELOC_LIBLD)
 /*ARGSUSED5*/
@@ -373,7 +373,7 @@ do_reloc_ld(Rel_desc *rdesc, uchar_t *off, Xword *value,
     const char *file, int bswap, void *lml)
 #else
 int
-do_reloc_rtld(uchar_t rtype, uchar_t *off, Xword *value, const char *sym,
+do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
     const char *file, void *lml)
 #endif
 {

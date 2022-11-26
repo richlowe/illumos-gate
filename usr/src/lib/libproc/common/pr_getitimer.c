@@ -42,7 +42,7 @@ pr_getitimer(struct ps_prochandle *Pr, int which, struct itimerval *itv)
 	argdes_t argd[2];	/* arg descriptors for getitimer() */
 	argdes_t *adp;
 	int error;
-#if defined(_LP64) && defined(_MULTI_DATA_MODEL)
+#if defined(_LP64) && defined(_MULTI_DATAMODEL)
 	int victim32 = (Pstatus(Pr)->pr_dmodel == PR_MODEL_ILP32);
 	struct itimerval32 itimerval32;
 #endif
@@ -80,7 +80,7 @@ pr_getitimer(struct ps_prochandle *Pr, int which, struct itimerval *itv)
 		errno = (error > 0)? error : ENOSYS;
 		return (-1);
 	}
-#if defined(_LP64) && defined(_MULTI_DATA_MODEL)
+#if defined(_LP64) && defined(_MULTI_DATAMODEL)
 	if (victim32) {
 		ITIMERVAL32_TO_ITIMERVAL(itv, &itimerval32);
 	}

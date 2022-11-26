@@ -185,7 +185,6 @@ ROOTDIRS=			\
 	$(ROOTDIR)		\
 	$(ROOTDIR)/audio	\
 	$(ROOTDIR)/av		\
-	$(ROOTDIR)/dktp		\
 	$(ROOTDIR)/hotplug	\
 	$(ROOTDIR)/hotplug/pci	\
 	$(ROOTDIR)/crypto	\
@@ -218,7 +217,6 @@ ROOTDIRS=			\
 	$(ROOTDIR)/ib/clients/of/sol_ucma	\
 	$(ROOTDIR)/idm		\
 	$(ROOTDIR)/iscsit	\
-	$(ROOTDIR)/sata		\
 	$(ROOTDIR)/scsi		\
 	$(ROOTDIR)/scsi/adapters	\
 	$(ROOTDIR)/scsi/conf	\

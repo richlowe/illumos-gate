@@ -76,7 +76,6 @@
 <include system-library.man4p.inc>
 <include system-library.man5.inc>
 <include system-library.man7.inc>
-$(not_aarch64)$(nofile path=usr/lib/scsi/plugins/smp/engine/usmp.so
 set name=pkg.fmri value=pkg:/system/library@$(PKGVERS)
 set name=pkg.summary value="Core Solaris, (Shared Libs)"
 set name=pkg.description \
@@ -394,7 +393,6 @@ $(MULTILIB_ONLY)link path=lib/secure/32 target=.
 $(MULTILIB_ONLY)link path=lib/secure/64 target=$(ARCH64)
 $(NOT_MULTILIB)link path=lib/secure/64 target=.
 dir  path=usr group=sys
-$(not_aarch64)file path=usr/$(nlib/scsi/plugins/smp/framework/sas2.so
 dir  path=usr/bin
 dir  path=usr/ccs
 dir  path=usr/ccs/lib
@@ -1079,9 +1077,11 @@ $(not_aarch64)dir path=usr/lib/scsi/plugins/smp
 $(not_aarch64)dir path=usr/lib/scsi/plugins/smp/engine
 $(MULTILIB_ONLY)dir path=usr/lib/scsi/plugins/smp/engine/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/scsi/plugins/smp/engine/$(ARCH64)/usmp.so
+$(MULTILIB_ONLY)file path=usr/lib/scsi/plugins/smp/engine/usmp.so
 $(not_aarch64)dir path=usr/lib/scsi/plugins/smp/framework
 $(MULTILIB_ONLY)dir path=usr/lib/scsi/plugins/smp/framework/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/scsi/plugins/smp/framework/$(ARCH64)/sas2.so
+$(not_aarch64)file path=usr/lib/scsi/plugins/smp/framework/sas2.so
 dir  path=usr/lib/security
 dir  path=usr/lib/security/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/security/$(ARCH64)/crypt_bsdbf.so \

@@ -41,7 +41,7 @@ OBJS= $(PROGSRCS:%.cc=%.o)
 
 # XXXARM: Disable exceptions because that requires a dynamic libgcc_s, at least,
 # and also we don't use exceptions
-CCFLAGS += -_gcc=-fno-exceptions
+$(AARCH64_BLD)CCFLAGS += -_gcc=-fno-exceptions
 
 LDLIBS += -laudio -lm -lc
 

@@ -28,4 +28,5 @@ include		$(SRC)/cmd/sgs/Makefile.com
 # XXXARM: We don't have mdb yet
 $(NOT_AARCH64_BLD) EXTRASUBDIRS =	mdbmod
 
+include		$(SRC)/Makefile.master
 include		$(SRC)/cmd/sgs/Makefile.sub

@@ -1059,7 +1059,7 @@ note_auxv(struct ps_prochandle *P, size_t nbytes)
 			P->auxv = NULL;
 			return (-1);
 		}
-#if defined(_LP64) && defined(_MULTI_DATA_MODEL)
+#if defined(_LP64) && defined(_MULTI_DATAMODEL)
 	}
 #endif
 

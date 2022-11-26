@@ -23,6 +23,8 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+#
 
 #
 # Only publish packages for the currently specified architecture
@@ -39,6 +41,10 @@
 # won't abort based on the action.
 #
 <transform set name=variant.arch value=^(?!$(ARCH)).+$ -> abort>
+
+# Since there might be multiple variant.arch set in the manifest
+# we'll reset it to the arch we are publishing for
+<transform set name=variant.arch -> set value $(ARCH)>
 
 #
 # Catch don't-publish settings from manifest-embedded transforms

@@ -247,7 +247,7 @@ mkprpsinfo(struct ps_prochandle *P, prpsinfo_t *psp)
 	psp->pr_dmodel = P->psinfo.pr_dmodel;
 }
 
-#if defined(_LP64) && defined(_MULTI_DATA_MODEL)
+#if defined(_LP64) && defined(_MULTI_DATAMODEL)
 
 static void
 mkprstatus32(struct ps_prochandle *P, const lwpstatus_t *lsp,

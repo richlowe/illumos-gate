@@ -24,7 +24,6 @@
 # Copyright 2012 Nexenta Systems, Inc. All rights reserved.
 #
 
-$(not_aarch64)nfile path=lib/svc/manifest/network/routing/route.xml group=sys mode=0444
 set name=pkg.fmri value=pkg:/system/network/routing@$(PKGVERS)
 set name=pkg.summary value="Network Routing daemons/commands"
 set name=pkg.description value="Network Routing daemons/commands"
@@ -38,6 +37,8 @@ dir  path=lib/svc/manifest/network/routing group=sys
 file path=lib/svc/manifest/network/routing/ndp.xml group=sys mode=0444
 file path=lib/svc/manifest/network/routing/rdisc.xml group=sys mode=0444
 file path=lib/svc/manifest/network/routing/ripng.xml group=sys mode=0444
+$(not_aarch64)file path=lib/svc/manifest/network/routing/route.xml group=sys \
+    mode=0444
 dir  path=lib/svc/method
 file path=lib/svc/method/svc-ndp mode=0555
 file path=lib/svc/method/svc-rdisc mode=0555

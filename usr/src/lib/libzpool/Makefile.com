@@ -123,7 +123,7 @@ pics/%.o: ../common/%.d $(PICS)
 
 # XXXARM: We don't have DTrace, so we have to stub this
 ../common/%.h: ../common/%.d
-	if [[ $(MACH) == "aarch64" ]]; then \
+	if [[ $(MACH) != "aarch64" ]]; then \
 		$(DTRACE) -xnolibs -h -s $< -o $@; \
 	else \
 		touch $@; \

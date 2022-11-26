@@ -922,8 +922,11 @@ LDLIBS64 +=     $(ADJUNCT_PROTO:%=-L%/usr/lib/$(MACH64) -L%/lib/$(MACH64))
 # needs to be managed more tidily
 $(AARCH64_BLD)LDLIBS64 = $(LDLIBS32)
 
-LD_TARGET =	-z target=$(MACH)
-LD_TARGET64 =	-z target=$(MACH64)
+sparc_LD_TARGET =	$(MACH)
+i386_LD_TARGET = 	x86
+aarch64_LD_TARGET =	$(MACH)
+LD_TARGET =	-z target=$($(MACH)_LD_TARGET)
+LD_TARGET64 =	-z target=$($(MACH)_LD_TARGET)
 
 #
 # Define compilation macros.

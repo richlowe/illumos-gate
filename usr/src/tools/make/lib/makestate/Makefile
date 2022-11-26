@@ -14,6 +14,7 @@
 include $(SRC)/Makefile.master
 
 SUBDIRS = $(NATIVE_MACH)
+$(NOT_AARCH64_BLD)SUBDIRS += $(NATIVE_MACH64)
 
 all	:=	TARGET = all
 install :=	TARGET = install

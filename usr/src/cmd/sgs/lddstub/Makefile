@@ -25,4 +25,5 @@
 # Copyright (c) 1994 by Sun Microsystems, Inc.
 #
 
+include		$(SRC)/Makefile.master
 include		../Makefile.sub

@@ -3120,7 +3120,7 @@ $if amd64
 SYMBOL_VERSION SYSVABI_1.3 {
 $endif
     global:
-$if x86				#XXXARM
+$if _x86				#XXXARM
 	__flt_rounds	{ ASSERT = { TYPE = OBJECT; SIZE = 4; }; };
 $endif
 

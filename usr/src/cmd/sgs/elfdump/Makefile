@@ -24,6 +24,8 @@
 # Use is subject to license terms.
 #
 
+include		$(SRC)/Makefile.master
+
 BUILD32 = $(POUND_SIGN)
 
 include		$(SRC)/cmd/sgs/Makefile.sub

@@ -23,6 +23,8 @@
 # Copyright (c) 1994 by Sun Microsystems, Inc.
 #
 
+include		$(SRC)/Makefile.master
+
 BUILD32 = $(POUND_SIGN)
 
 include		../Makefile.sub

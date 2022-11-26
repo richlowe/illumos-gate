@@ -80,6 +80,7 @@ install:	def
 # Create assym.h
 #
 $(GENASSYM): $(GENASSYM_SRC)
+	$(RM) $@
 	$(NATIVECC) $(NATIVE_CFLAGS) $(ALWAYS_DEFS) $(GENASSYM_DEFS) \
 	    $(NATIVE_INC_PATH) -o $@ $(GENASSYM_SRC)
 

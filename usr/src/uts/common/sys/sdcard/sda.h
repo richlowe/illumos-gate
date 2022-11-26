@@ -198,7 +198,7 @@ typedef enum {
 #define	OCR_21_22V		(1U << 9)
 #define	OCR_20_21V		(1U << 8)
 #define	OCR_18_19V		(1U << 7)
-#define OCR_17_18V		(1U << 6)
+#define	OCR_17_18V		(1U << 6)
 
 /*
  * Command structure.  Used internally by the framework, and by host

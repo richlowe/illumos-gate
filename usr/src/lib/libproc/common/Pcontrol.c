@@ -3792,7 +3792,7 @@ Lstack(struct ps_lwphandle *L, stack_t *stkp)
 	if (P->status.pr_dmodel == PR_MODEL_NATIVE) {
 		if (Pread(P, stkp, sizeof (*stkp), addr) != sizeof (*stkp))
 			return (-1);
-#if defined(_LP64) && defined(_MULTI_DATA_MODEL)
+#if defined(_LP64) && defined(_MULTI_DATAMODEL)
 	} else {
 		stack32_t stk32;
 

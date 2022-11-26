@@ -25,4 +25,5 @@
 # Copyright (c) 1996 by Sun Microsystems, Inc.
 # All rights reserved.
 
+include		$(SRC)/Makefile.master
 include		$(SRC)/cmd/sgs/Makefile.sub

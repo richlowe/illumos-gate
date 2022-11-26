@@ -30,4 +30,4 @@ include ../../../Makefile.lib.64
 
 .KEEP_STATE:
 
-install: all $(ROOTLIBS) $(ROOTLINKS) 
+install: all $(ROOTLIBS) $(ROOTLINKS)
