@@ -27,17 +27,22 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+ */
 
 #include <stdio.h>
 #include <signal.h>
 #include <errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <limits.h>
 #include "dc.h"
 #include <locale.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #define	LASTFUN 026
 long longest = 0, maxsize = 0, active = 0;
@@ -157,7 +162,7 @@ commnds(void)
 			sk2 = sunputc(arg2);
 			binop('*');
 			p = pop();
-			sunputc(p);
+			(void) sunputc(p);
 			savk = n = sk1 + sk2;
 			if (n > k && n > sk1 && n > sk2) {
 				sk = sk1;
@@ -591,7 +596,7 @@ sempty:
 				if (c >= ARRAYST) {
 					rewind(p);
 					while (sfeof(p) == 0)
-						release(getwd(p));
+						release(getwddc(p));
 				}
 				release(p);
 			} else {
@@ -620,7 +625,7 @@ sempty:
 			if (c >= ARRAYST) {
 				rewind(p);
 				while (sfeof(p) == 0) {
-					q = getwd(p);
+					q = getwddc(p);
 					if (q != 0)
 						release(q);
 				}
@@ -703,7 +708,7 @@ sempty:
 				p = sptr->val;
 				if (length(p) - PTRSZ >= c * PTRSZ) {
 					seekc(p, c * PTRSZ);
-					s = getwd(p);
+					s = getwddc(p);
 					if (s != 0) {
 						q = copy(s, length(s));
 						pushp(q);
@@ -1471,7 +1476,7 @@ unreadc(char c)
 void
 binop(char c)
 {
-	struct blk *r;
+	struct blk *r = NULL;
 
 	switch (c) {
 	case '+':
@@ -1483,6 +1488,8 @@ binop(char c)
 	case '/':
 		r = dcdiv(arg1, arg2);
 		break;
+	default:
+		assert(0);
 	}
 	release(arg1);
 	release(arg2);
@@ -1516,7 +1523,7 @@ print(struct blk *hptr)
 	}
 	count = ll;
 	p = copy(hptr, length(hptr));
-	sunputc(p);
+	(void) sunputc(p);
 	fsfile(p);
 	if (sbackc(p) < 0) {
 		chsign(p);
@@ -1783,9 +1790,10 @@ bigot(struct blk *p, int flg)
 	int l;
 	int neg;
 
-	if (flg == 1)
+	if (flg == 1) {
 		t = salloc(0);
-	else {
+		l = 0;
+	} else {
 		t = strptr;
 		l = length(strptr) + fw - 1;
 	}
@@ -1823,7 +1831,7 @@ bigot(struct blk *p, int flg)
 		while (l-- > 0)
 			sputc(strptr, '0');
 		if (neg != 0) {
-			sunputc(strptr);
+			(void) sunputc(strptr);
 			sputc(strptr, '-');
 		}
 	}
@@ -2017,7 +2025,7 @@ cond(char c)
 	if (subt() != 0)
 		return (1);
 	p = pop();
-	sunputc(p);
+	(void) sunputc(p);
 	if (length(p) == 0) {
 		release(p);
 		if (c == '<' || c == '>' || c == NE) {
@@ -2042,7 +2050,7 @@ cond(char c)
 	cc = sbackc(p);
 	release(p);
 	if ((cc < 0 && (c == '<' || c == NG)) ||
-	    (cc > 0) && (c == '>' || c == NL)) {
+	    (cc > 0 && (c == '>' || c == NL))) {
 		readc();
 		return (0);
 	}
@@ -2064,7 +2072,7 @@ load(void)
 			q = salloc(length(p));
 			rewind(p);
 			while (sfeof(p) == 0) {
-				s = getwd(p);
+				s = getwddc(p);
 				if (s == 0)
 					putwd(q, (struct blk *)NULL);
 				else {
@@ -2308,7 +2316,7 @@ garbage(char *s)
 			if (i < ARRAYST) {
 				do {
 					p = tmps->val;
-					if (((int)p->beg & 01) != 0) {
+					if (((intptr_t)p->beg & 01) != 0) {
 						printf(gettext(
 						    "string %o\n"), i);
 						sdump("odd beg", p);
@@ -2322,11 +2330,11 @@ garbage(char *s)
 					p = tmps->val;
 					rewind(p);
 					ct = 0;
-					while ((q = getwd(p)) != NULL) {
+					while ((q = getwddc(p)) != NULL) {
 						ct++;
 						if (q != 0) {
-							if (((int)q->beg & 01)
-							    != 0) {
+							if (((intptr_t)q->beg &
+							    01) != 0) {
 								printf(G1,
 								    i - ARRAYST,
 								    ct);
@@ -2351,7 +2359,7 @@ redef(struct blk *p)
 	char *newp;
 	char *dcmalloc();
 
-	if ((int)p->beg & 01) {
+	if ((intptr_t)p->beg & 01) {
 		printf(gettext("odd ptr %o hdr %o\n"), p->beg, p);
 		ospace("redef-bad");
 	}
@@ -2382,7 +2390,7 @@ release(struct blk *p)
 }
 
 struct blk *
-getwd(struct blk *p)
+getwddc(struct blk *p)
 {
 	struct wblk *wp;
 

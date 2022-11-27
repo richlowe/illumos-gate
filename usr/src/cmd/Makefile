@@ -96,6 +96,7 @@ COMMON_SUBDIRS=	\
 	ctwatch		\
 	datadm		\
 	date		\
+	dc		\
 	dd		\
 	demangle	\
 	deroff		\
@@ -435,7 +436,6 @@ COMMON_SUBDIRS=	\
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
 # cpio - not 64bit clean
-# dc - not 64bit clean
 # csplit - not 64bit clean
 # eqn - not 64bit clean
 # ed - not 64bit clean
@@ -490,7 +490,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	cpc		\
 	csh		\
 	cpio		\
-	dc		\
 	csplit		\
 	eqn		\
 	ed		\

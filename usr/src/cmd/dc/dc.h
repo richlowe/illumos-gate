@@ -27,7 +27,9 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved  	*/
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+/*
+ * Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+ */
 
 #define	FATAL 0
 #define	NFATAL 1
@@ -56,7 +58,7 @@
 #define	salterc(p, c)	{if ((p)->rd == (p)->last) more(p); *(p)->rd++ = c;\
 			    if ((p)->rd > (p)->wt) (p)->wt = (p)->rd; }
 #define	sunputc(p)	(*((p)->rd = --(p)->wt))
-#define	zero(p)		for (pp = (p)->beg; pp < (p)->last; ) *pp++ = '\0'
+#define	zero(p)		for (pp = (p)->beg; pp < (p)->last;) *pp++ = '\0'
 #define	OUTC(x) {printf("%c", x); if (--count == 0)\
 			    {printf("\\\n"); count = ll; } }
 #define	TEST2	{if ((count -= 2) <= 0) {printf("\\\n"); count = ll; } }
@@ -86,7 +88,7 @@ struct	wblk {
 	struct blk **lastw;
 };
 struct	blk *hfree;
-struct	blk *getwd(struct blk *);
+struct	blk *getwddc(struct blk *);
 struct	blk *lookwd(struct blk *);
 struct	blk *getdec(struct blk *, int);
 struct	blk *morehd(void);
@@ -112,11 +114,11 @@ int	k;
 struct	blk *irem;
 int	skd, skr;
 struct	blk *pop(void), *readin(void), *add0(struct blk *, int),
-    *mult(struct blk *, struct blk *);
+	*mult(struct blk *, struct blk *);
 struct	blk *scalint(struct blk *);
 struct	blk *removc(struct blk *, int);
 struct	blk *add(struct blk *, struct blk *),
-    *dcdiv(struct blk *, struct blk *), *removr(struct blk *, int);
+	*dcdiv(struct blk *, struct blk *), *removr(struct blk *, int);
 struct	blk *exp(struct blk *, struct blk *);
 struct	blk *sqrt(struct blk *);
 struct	blk *salloc(int), *copy(struct blk *, int);
@@ -142,6 +144,11 @@ void	salterwd(struct wblk *hptr, struct blk *n);
 void	redef(struct blk *p);
 void	release(struct blk *p);
 void	putwd(struct blk *p, struct blk *c);
+int	command(void);
+int	dscale(void);
+int	eqk(void);
+int	log2(long n);
+int	subt(void);
 
 int	neg;
 struct	sym {

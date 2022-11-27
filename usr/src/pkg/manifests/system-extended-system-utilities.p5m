@@ -94,7 +94,7 @@ file path=usr/bin/cal mode=0555
 file path=usr/bin/col mode=0555
 file path=usr/bin/compress mode=0555
 $(not_aarch64)file path=usr/bin/csplit mode=0555
-$(not_aarch64)file path=usr/bin/dc mode=0555
+file path=usr/bin/dc mode=0555
 file path=usr/bin/diff mode=0555
 file path=usr/bin/diff3 mode=0555
 file path=usr/bin/dircmp mode=0555

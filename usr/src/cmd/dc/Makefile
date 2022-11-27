@@ -23,23 +23,23 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 
 PROG= dc
 XPG6PROG= dc
 XD= exobjs.xpg6
 EXOBJS= dc.o
 XPG6EXOBJS= exobjs.xpg6/dc.o
+OBJS= $(EXOBJS)
+$(XPG6) := OBJS= $(XPG6EXOBJS)
 
 include ../Makefile.cmd
+include ../Makefile.cmd.64
+include ../Makefile.ctf
 
 LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
-CERRWARN += -_gcc=-Wno-implicit-function-declaration
-CERRWARN += -_gcc=-Wno-unused-value
-CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += $(CNOWARN_UNINIT)
 
-# not linted
-SMATCH=off
+SMOFF += all_func_returns
 
 .KEEP_STATE:
 
