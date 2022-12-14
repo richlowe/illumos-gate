@@ -1359,6 +1359,16 @@ parseopt_pass1(Ofl_desc *ofl, int argc, char **argv, int *usage)
 			    MSG_ORIG(MSG_ARG_LOADFLTR)) == 0) {
 				zlflag = TRUE;
 			} else if (strcmp(optarg,
+			    MSG_ORIG(MSG_ARG_NOCOPYRELOC)) == 0) {
+				ofl->ofl_flags |= FLG_OF_NOCOPYRELOC;
+				/*
+				 * This implies -ztextoff, since we will
+				 * definitely create text relocations in
+				 * executables.
+				 */
+				ofl->ofl_flags1 |= FLG_OF1_TEXTOFF;
+				ofl->ofl_guideflags |= FLG_OFG_NO_TEXT;
+			} else if (strcmp(optarg,
 			    MSG_ORIG(MSG_ARG_NORELOC)) == 0) {
 				ofl->ofl_dtflags_1 |= DF_1_NORELOC;
 			} else if (strcmp(optarg,

@@ -28,8 +28,8 @@ ld \- link-editor for object files
 [\fB-z\fR ignore | record] [\fB-z\fR initarray=\fIfunction\fR] [\fB-z\fR initfirst]
 [\fB-z\fR interpose] [\fB-z\fR lazyload | nolazyload]
 [\fB-z\fR ld32=\fIarg1\fR,\fIarg2\fR,...] [\fB-z\fR ld64=\fIarg1\fR,\fIarg2\fR,...]
-[\fB-z\fR loadfltr] [\fB-z\fR muldefs] [\fB-z\fR nocompstrtab] [\fB-z\fR nodefaultlib]
-[\fB-z\fR nodelete] [\fB-z\fR nodlopen] [\fB-z\fR nodump] [\fB-z\fR noldynsym]
+[\fB-z\fR loadfltr] [\fB-z\fR muldefs] [\fB-z\fR nocompstrtab] [-fB-z\fR nocopyreloc]
+[\fB-z\fR nodefaultlib] [\fB-z\fR nodelete] [\fB-z\fR nodlopen] [\fB-z\fR nodump] [\fB-z\fR noldynsym]
 [\fB-z\fR nopartial] [\fB-z\fR noversion] [\fB-z\fR now] [\fB-z\fR origin]
 [\fB-z\fR preinitarray=\fIfunction\fR] [\fB-z\fR redlocsym] [\fB-z\fR relaxreloc]
 [\fB-z\fR rescan-now] [\fB-z\fR recan] [\fB-z\fR rescan-start \fI\&...\fR \fB-z\fR rescan-end]]
@@ -1301,6 +1301,20 @@ Disables the compression of \fBELF\fR string tables. By default, string
 compression is applied to \fBSHT_STRTAB\fR sections, and to \fBSHT_PROGBITS\fR
 sections that have their \fBSHF_MERGE\fR and \fBSHF_STRINGS\fR section flags
 set.
+.RE
+
+.sp
+.ne 2
+.na
+\fB\fB-z\fR \fBnocopyreloc\fR\fR
+.ad
+.sp .6
+.RS 4n
+Disables the generation of COPY relocations, instead transferring their
+original static relocation to the output image.  This options implies \fB-z\fR
+\fBtextoff\fR as it is almost guaranteed to leave text relocations.  This
+option does nothing unless linking an executable file.  This option is
+intended for specific advanced use cases.
 .RE
 
 .sp

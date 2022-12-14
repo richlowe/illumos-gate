@@ -1438,6 +1438,7 @@
 @ MSG_ARG_NOW		"now"
 @ MSG_ARG_ORIGIN	"origin"
 @ MSG_ARG_DEFS		"defs"
+@ MSG_ARG_NOCOPYRELOC	"nocopyreloc"
 @ MSG_ARG_NODEFS	"nodefs"
 @ MSG_ARG_NODUMP	"nodump"
 @ MSG_ARG_NOVERSION	"noversion"

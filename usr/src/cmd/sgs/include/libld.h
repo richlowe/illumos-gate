@@ -472,6 +472,7 @@ struct ofl_desc {
 #define	FLG_OF_ADEFLIB	0x800000000000	/* no libraries in default path */
 
 #define	FLG_OF_KMOD	0x1000000000000	/* output is a kernel module */
+#define	FLG_OF_NOCOPYRELOC	0x2000000000000 /* don't generate copy relocs */
 
 /*
  * In the flags1 arena, establish any options that are applicable to archive

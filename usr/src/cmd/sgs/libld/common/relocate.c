@@ -1087,6 +1087,14 @@ reloc_exec(Rel_desc *rsp, Ofl_desc *ofl)
 	}
 
 	/*
+	 * If we've been directed to not generate copy relocations, emit a GOT
+	 * relocation.
+	 */
+	if ((ofl->ofl_flags & FLG_OF_NOCOPYRELOC) != 0) {
+		return ((*ld_targ.t_mr.mr_add_outrel)(0, rsp, ofl));
+	}
+
+	/*
 	 * Prepare for generating a copy relocation.
 	 *
 	 * If this symbol is one of an alias pair, we need to ensure both
