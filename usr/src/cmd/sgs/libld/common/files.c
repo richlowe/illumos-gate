@@ -1368,8 +1368,13 @@ process_strtab(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 	/*
 	 * Never include .stab.excl sections in any output file.
 	 * If the -s flag has been specified strip any .stab sections.
+	 *
+	 * If the section is a member of a group, leave it alone, we can
+	 * neither strip it out from under the group nor mark it for later
+	 * discarding without knowing intimate details of the grouping.
 	 */
 	if (((ofl->ofl_flags & FLG_OF_STRIP) && ident &&
+	    ((shdr->sh_flags & SHF_GROUP) == 0) &&
 	    (strncmp(name, MSG_ORIG(MSG_SCN_STAB), MSG_SCN_STAB_SIZE) == 0)) ||
 	    (strcmp(name, MSG_ORIG(MSG_SCN_STABEXCL)) == 0) && ident)
 		return (1);
@@ -1576,24 +1581,33 @@ process_progbits(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 	/*
 	 * Never include .stab.excl sections in any output file.
 	 * If the -s flag has been specified strip any .stab sections.
+	 *
+ 	 * If the section is a member of a group, leave it alone, we can
+	 * neither strip it out from under the group nor mark it for later
+	 * discarding without knowing intimate details of the grouping.
 	 */
 	if (ident && (strncmp(name, MSG_ORIG(MSG_SCN_STAB),
 	    MSG_SCN_STAB_SIZE) == 0)) {
-		if ((ofl->ofl_flags & FLG_OF_STRIP) ||
+		if (((ofl->ofl_flags & FLG_OF_STRIP) &&
+		    ((shdr->sh_flags & SHF_GROUP) == 0)) ||
 		    (strcmp((name + MSG_SCN_STAB_SIZE),
-		    MSG_ORIG(MSG_SCN_EXCL)) == 0))
+		    MSG_ORIG(MSG_SCN_EXCL)) == 0)) {
 			return (1);
+		}
 
 		if (strcmp((name + MSG_SCN_STAB_SIZE),
-		    MSG_ORIG(MSG_SCN_INDEX)) == 0)
+		    MSG_ORIG(MSG_SCN_INDEX)) == 0) {
 			is_stab_index = TRUE;
+		}
 	}
 
-	if ((ofl->ofl_flags & FLG_OF_STRIP) && ident) {
+	if ((ofl->ofl_flags & FLG_OF_STRIP) &&
+	    ((shdr->sh_flags & SHF_GROUP) == 0) && ident) {
 		if ((strncmp(name, MSG_ORIG(MSG_SCN_DEBUG),
 		    MSG_SCN_DEBUG_SIZE) == 0) ||
-		    (strcmp(name, MSG_ORIG(MSG_SCN_LINE)) == 0))
+		    (strcmp(name, MSG_ORIG(MSG_SCN_LINE)) == 0)) {
 			return (1);
+		}
 	}
 
 	/*
@@ -1644,8 +1658,13 @@ process_debug(const char *name, Ifl_desc *ifl, Shdr *shdr, Elf_Scn *scn,
 {
 	/*
 	 * Debug information is discarded when the 'ld -s' flag is invoked.
+	 *
+ 	 * If the section is a member of a group, leave it alone, we can
+	 * neither strip it out from under the group nor mark it for later
+	 * discarding without knowing intimate details of the grouping.
 	 */
-	if (ofl->ofl_flags & FLG_OF_STRIP) {
+	if ((ofl->ofl_flags & FLG_OF_STRIP) &&
+	    ((shdr->sh_flags & SHF_GROUP) == 0)) {
 		return (1);
 	}
 	return (process_progbits(name, ifl, shdr, scn, ndx, ident, ofl));
