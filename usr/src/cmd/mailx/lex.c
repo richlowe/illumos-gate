@@ -320,7 +320,7 @@ commands(void)
 top:
 		if ((shudprompt = (intty && !sourcing)) != 0) {
 			if (prompt == NOSTR) {
-				if ((int)value("bsdcompat"))
+				if (value("bsdcompat") != NOSTR)
 					prompt = "& ";
 				else
 					prompt = "";
@@ -328,7 +328,7 @@ top:
 #ifdef SIGCONT
 			sigset(SIGCONT, contin);
 #endif
-			if (intty && value("autoinc") &&
+			if (intty && value("autoinc") != NOSTR &&
 			    stat(editfile, &minfo) >= 0 &&
 			    minfo.st_size > mailsize) {
 				int OmsgCount, i;

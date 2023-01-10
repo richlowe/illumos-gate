@@ -144,7 +144,7 @@ dir  path=etc/logadm.d group=sys
 file path=etc/logindevperm group=sys preserve=true
 $(not_aarch64)file path=etc/magic mode=0444
 dir  path=etc/mail group=mail
-$(not_aarch64)file path=etc/mail/mailx.rc preserve=true
+file path=etc/mail/mailx.rc preserve=true
 file path=etc/mailcap preserve=true
 file path=etc/mime.types preserve=true
 link path=etc/mkfs target=../usr/sbin/mkfs
@@ -666,7 +666,7 @@ file path=usr/bin/m4 mode=0555
 hardlink path=usr/bin/mac target=../../usr/lib/isaexec
 file path=usr/bin/mach mode=0555
 file path=usr/bin/mail group=mail mode=2511
-$(not_aarch64)file path=usr/bin/mailx group=mail mode=2511
+file path=usr/bin/mailx group=mail mode=2511
 $(not_aarch64)file path=usr/bin/makedev mode=0555
 file path=usr/bin/mesg mode=0555
 file path=usr/bin/mkdir mode=0555
@@ -1504,9 +1504,9 @@ file path=usr/sbin/zdump mode=0555
 file path=usr/sbin/zic mode=0555
 dir  path=usr/share
 dir  path=usr/share/lib
-$(not_aarch64)dir path=usr/share/lib/mailx
-$(not_aarch64)file path=usr/share/lib/mailx/mailx.help
-$(not_aarch64)file path=usr/share/lib/mailx/mailx.help.~
+dir  path=usr/share/lib/mailx
+file path=usr/share/lib/mailx/mailx.help
+file path=usr/share/lib/mailx/mailx.help.~
 $(not_aarch64)dir path=usr/share/lib/pub
 dir  path=usr/share/lib/tabset
 file path=usr/share/lib/tabset/3101
@@ -1709,4 +1709,4 @@ depend type=require fmri=system/data/zoneinfo
 #
 # The mailx binary calls /usr/lib/sendmail provided by mailwrapper
 #
-$(not_aarch64)depend type=require fmri=system/network/mailwrapper
+depend type=require fmri=system/network/mailwrapper

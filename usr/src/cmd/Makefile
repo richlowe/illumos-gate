@@ -227,6 +227,7 @@ COMMON_SUBDIRS=	\
 	ls		\
 	mach		\
 	mail		\
+	mailx		\
 	mailwrapper	\
 	make		\
 	makekey		\
@@ -452,7 +453,6 @@ COMMON_SUBDIRS=	\
 # file - wants bits of sys/core.h 64bit apps can't see
 # fwflash - needs libses
 # geniconvtbl - not 64bit clean
-# mailx - not 64bit clean
 # format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
 # ipdadm - needs libipd
@@ -493,7 +493,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	file		\
 	fwflash		\
 	geniconvtbl	\
-	mailx		\
 	hal		\
 	format		\
 	gss		\

@@ -36,8 +36,7 @@ link path=etc/chroot target=../usr/sbin/chroot
 link path=etc/fuser target=../usr/sbin/fuser
 link path=etc/link target=../usr/sbin/link
 $(not_aarch64)dir path=etc/mail group=mail
-$(not_aarch64)file path=etc/mail/Mail.rc \
-    original_name=SUNWscp:etc/mail/Mail.rc preserve=true
+file path=etc/mail/Mail.rc original_name=SUNWscp:etc/mail/Mail.rc preserve=true
 link path=etc/mvdir target=../usr/sbin/mvdir
 link path=etc/pwck target=../usr/sbin/pwck
 link path=etc/termcap target=../usr/share/lib/termcap
@@ -89,7 +88,7 @@ $(not_aarch64)file path=usr/share/man/man1b/whoami.1b
 $(not_aarch64)dir path=usr/ucb
 $(i386_ONLY)dir path=usr/ucb/$(ARCH32)
 $(MULTILIB_ONLY)dir path=usr/ucb/$(ARCH64)
-$(not_aarch64)link path=usr/ucb/Mail target=../bin/mailx
+link path=usr/ucb/Mail target=../bin/mailx
 $(not_aarch64)link path=usr/ucb/arch target=../bin/arch
 $(not_aarch64)file path=usr/ucb/basename mode=0755
 $(not_aarch64)file path=usr/ucb/biff mode=0755
@@ -119,7 +118,7 @@ $(not_aarch64)file path=usr/ucb/ln mode=0755
 $(not_aarch64)link path=usr/ucb/logger target=../bin/logger
 $(not_aarch64)file path=usr/ucb/ls mode=0755
 $(not_aarch64)link path=usr/ucb/mach target=../bin/mach
-$(not_aarch64)link path=usr/ucb/mail target=../bin/mailx
+link path=usr/ucb/mail target=../bin/mailx
 $(not_aarch64)file path=usr/ucb/mkstr mode=0555
 $(not_aarch64)link path=usr/ucb/more target=../bin/more
 $(not_aarch64)link path=usr/ucb/netstat target=../bin/netstat

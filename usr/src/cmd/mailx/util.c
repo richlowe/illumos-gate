@@ -599,7 +599,7 @@ nameof(register struct message *mp)
 	int first = 1, wint = 0;
 	char	*tmp;
 
-	if (value("from") && (cp = hfield("from", mp, addto)) != NOSTR)
+	if (value("from") != NOSTR && (cp = hfield("from", mp, addto)) != NOSTR)
 		return ripoff(cp);
 	ibuf = setinput(mp);
 	copy("", namebuf);
@@ -646,7 +646,7 @@ newname:
 	for (cp = namebuf; *cp == '!'; cp++);
 	while (ishost(host, cp))
 		cp = strchr(cp, '!') + 1;
-	if (value("mustbang") && !strchr(cp, '!')) {
+	if (value("mustbang") != NOSTR && !strchr(cp, '!')) {
 		snprintf(linebuf, sizeof (linebuf), "%s!%s",
 			host, cp);
 		cp = linebuf;

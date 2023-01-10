@@ -657,7 +657,7 @@ puthead(struct header *hp, FILE *fo, int w, long clen)
 	gotcha = 0;
 	if (hp->h_to != NOSTR && (w & GTO))
 		fprintf(fo, "To: "), fmt(hp->h_to, fo), gotcha++;
-	if ((w & GSUBJECT) && (int)value("bsdcompat"))
+	if ((w & GSUBJECT) && value("bsdcompat") != NOSTR)
 		if (hp->h_subject != NOSTR && *hp->h_subject)
 			fprintf(fo, "Subject: %s\n", hp->h_subject), gotcha++;
 		else
@@ -673,7 +673,7 @@ puthead(struct header *hp, FILE *fo, int w, long clen)
 				hp->h_defopt), gotcha++;
 		else
 		fprintf(fo, "Default-Options: %s\n", hp->h_defopt), gotcha++;
-	if ((w & GSUBJECT) && !(int)value("bsdcompat"))
+	if ((w & GSUBJECT) && value("bsdcompat") == NOSTR)
 		if (hp->h_subject != NOSTR && *hp->h_subject)
 			fprintf(fo, "Subject: %s\n", hp->h_subject), gotcha++;
 		else

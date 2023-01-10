@@ -238,19 +238,19 @@ printhead(int mesg)
 	showto = 0;
 	if ((mp->m_flag & (MREAD|MNEW)) == (MREAD|MNEW))
 		dispc = 'R';
-	if (!(int)value("bsdcompat") && (mp->m_flag & (MREAD|MNEW)) == MREAD)
+	if (value("bsdcompat") == NOSTR && (mp->m_flag & (MREAD|MNEW)) == MREAD)
 		dispc = 'O';
 	if ((mp->m_flag & (MREAD|MNEW)) == MNEW)
 		dispc = 'N';
 	if ((mp->m_flag & (MREAD|MNEW)) == 0)
 		dispc = 'U';
 	if (mp->m_flag & MSAVED)
-		if ((int)value("bsdcompat"))
+		if (value("bsdcompat") != NOSTR)
 			dispc = '*';
 		else
 			dispc = 'S';
 	if (mp->m_flag & MPRESERVE)
-		if ((int)value("bsdcompat"))
+		if (value("bsdcompat") != NOSTR)
 			dispc = 'P';
 		else
 			dispc = 'H';
@@ -286,20 +286,20 @@ printhead(int mesg)
 
 	} else {
 		fromline = nameof(mp);
-		if (value("showto") &&
+		if (value("showto") != NOSTR &&
 		    samebody(myname, skin(fromline), FALSE) &&
 		    (cp = hfield("to", mp, addto))) {
 			showto = 1;
 			yankword(cp, fromline = name, sizeof (name),
 				docomma(cp));
 		}
-		if (value("showname"))
+		if (value("showname") != NOSTR)
 			fromline = dispname(fromline);
 		else
 			fromline = skin(fromline);
 	}
 	printf("%c%c%3d ", curind, dispc, mesg);
-	if ((int)value("showfull")) {
+	if (value("showfull") != NOSTR) {
 		if (showto)
 			printf("To %-15s ", fromline);
 		else

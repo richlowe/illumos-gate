@@ -280,7 +280,7 @@ savemsglist(char *file, int *msgvec, int flag)
 	lc = cc = 0;
 	bnry = 0;
 	if (flag & S_SAVING)
-		mflag = (int)value("alwaysignore")?(M_IGNORE|M_SAVING):M_SAVING;
+		mflag = value("alwaysignore") != NOSTR ? (M_IGNORE|M_SAVING) : M_SAVING;
 	else if (flag & S_NOIGNORE)
 		mflag = 0;
 	else

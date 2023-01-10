@@ -121,7 +121,7 @@ collect(struct header *hp)
 	newi = ibuf;
 	removefile(tempMail);
 
-	ignintr = (int)value("ignore");
+	ignintr = value("ignore") != NOSTR;
 	hadintr = 1;
 	inhead = 1;
 	savehp = hp;
@@ -181,11 +181,11 @@ collect(struct header *hp)
 	if (intty && !tflag) {
 		if (hp->h_to == NOSTR)
 			hdrs |= GTO;
-		if (hp->h_subject == NOSTR && value("asksub"))
+		if (hp->h_subject == NOSTR && value("asksub") != NOSTR)
 			hdrs |= GSUBJECT;
-		if (hp->h_cc == NOSTR && value("askcc"))
+		if (hp->h_cc == NOSTR && value("askcc") != NOSTR)
 			hdrs |= GCC;
-		if (hp->h_bcc == NOSTR && value("askbcc"))
+		if (hp->h_bcc == NOSTR && value("askbcc") != NOSTR)
 			hdrs |= GBCC;
 		if (hdrs)
 			t &= ~GNL;
@@ -326,7 +326,7 @@ collect(struct header *hp)
 			continue;
 		}
 		if ((linebuf[0] != escape) || (rflag != NOSTR) ||
-		    (!intty && !(int)value("escapeok"))) {
+		    (!intty && value("escapeok") == NOSTR)) {
 			if (write(fileno(obuf),linebuf,nread) != nread)
 				goto werr;
 			continue;
@@ -438,7 +438,7 @@ collect(struct header *hp)
 				printf(gettext("~h: no can do!?\n"));
 				break;
 			}
-			grabh(hp, GMASK, (int)value("bsdcompat"));
+			grabh(hp, GMASK, value("bsdcompat") != NOSTR);
 			printf(gettext("(continue)\n"));
 			break;
 

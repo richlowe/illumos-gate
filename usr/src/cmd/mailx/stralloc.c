@@ -76,7 +76,7 @@ salloc(unsigned size)
 #if defined(u3b) || defined(sparc)
 	s += 3;		/* needs alignment on quad boundary */
 	s &= ~03;
-#elif defined(i386)
+#elif defined(i386) || defined(__aarch64__)
 	s++;
 	s &= ~01;
 #else
@@ -131,7 +131,7 @@ srealloc(void *optr, unsigned size)
 #if defined(u3b) || defined(sparc)
 		s += 3;		/* needs alignment on quad boundary */
 		s &= ~03;
-#elif defined(i386)
+#elif defined(i386) || defined(__aarch64__)
 		s++;
 		s &= ~01;
 #else

@@ -535,7 +535,7 @@ samebody(register char *user, register char *addr, int fuzzy)
 	char *allnet = value("allnet");
 	int nbangs = allnet ? (strcmp(allnet, "uucp") == 0) ? 2 : 1 : 0;
 
-	if (fuzzy && value("fuzzymatch")) {
+	if (fuzzy && value("fuzzymatch") != NOSTR) {
 		int i;
 
 		(void) strlcpy(ubuf, user, BUFSIZ);

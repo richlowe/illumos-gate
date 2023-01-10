@@ -213,7 +213,7 @@ quit(
 	}
 	for (mp = &message[0]; mp < &message[msgCount]; mp++)
 		if (mp->m_flag & MBOX) {
-			if (msend(mp, obuf, (int)value("alwaysignore") ?
+			if (msend(mp, obuf, value("alwaysignore") != NOSTR ?
 			    M_IGNORE|M_SAVING : M_SAVING, fputs) < 0) {
 				perror(mbox);
 				if (!appending)

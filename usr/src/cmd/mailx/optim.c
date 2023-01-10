@@ -100,7 +100,7 @@ netmap(char name[], char from[])
 	 */
 	if (any('@', from) || any('%', from))
 		return(unuucp(makeremote(name, from)));
-	if (value("onehop") && (cp = strchr(name, '!')) && cp > name) {
+	if (value("onehop") != NOSTR && (cp = strchr(name, '!')) && cp > name) {
 		/*
 		 * "onehop" is set, meaning all machines are one UUCP
 		 * hop away (fat chance, in this day and age), and "name"
@@ -116,7 +116,7 @@ netmap(char name[], char from[])
 			name = strchr(name, '!') + 1;
 			if (cp == from) {
 				from[strlen(from)] = '!';
-				if (value("mustbang") && !strchr(name, '!'))
+				if (value("mustbang") != NOSTR && !strchr(name, '!'))
 					name = oname;
 				return(unuucp(name));
 			}
@@ -348,7 +348,7 @@ makeremote(char name[], char from[])
 	register char *cp;
 	char rbuf[BUFSIZ];
 
-	if (!value("makeremote"))
+	if (value("makeremote") == NOSTR)
 		return(name);
 	if (debug) fprintf(stderr, "makeremote(%s, %s) returns ", name, from);
 	cp = strrchr(from, '@');
