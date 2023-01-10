@@ -28,7 +28,7 @@ char *HO;	/* host name */
 
 int BR;		/* line speed for conversation */
 int FS;		/* frame size for transfers */
-char DU;	/* this host is dialed up */
+int DU;		/* this host is dialed up */
 char HW;	/* this device is hardwired, see hunt.c */
 char *ES;	/* escape character */
 char *EX;	/* exceptions */

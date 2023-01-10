@@ -372,6 +372,7 @@ COMMON_SUBDIRS=	\
 	th_tools	\
 	tic		\
 	time		\
+	tip		\
 	touch		\
 	tr		\
 	trapstat	\
@@ -470,7 +471,6 @@ COMMON_SUBDIRS=	\
 # sh - not 64bit clean
 # srchtxt - not 64bit clean
 # tput - not 64bit clean
-# tip - not 64bit clean
 # tbl - not 64bit clean
 # troff - not 64bit clean
 # tsol - not ported (or 64bit clean)
@@ -518,7 +518,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	sh		\
 	srchtxt		\
 	tput		\
-	tip		\
 	tbl		\
 	troff		\
 	tsol		\

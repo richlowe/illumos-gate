@@ -72,10 +72,10 @@ hunt(char *name)
 			t.c_cflag |= XCLUDE|HUPCL;
 			(void) ioctl(FD, TCSETSF, &t);
 			(void) signal(SIGALRM, f);
-			return ((int)cp);
+			return cp != NULL;
 		}
 		delock(uucplock);
 	}
 	(void) signal(SIGALRM, f);
-	return (deadfl ? -1 : (int)cp);
+	return (deadfl ? -1 : cp != NULL);
 }

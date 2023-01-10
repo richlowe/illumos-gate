@@ -65,7 +65,7 @@ extern char	*HO;		/* host name */
 extern int	BR;		/* line speed for conversation */
 extern int	FS;		/* frame size for transfers */
 
-extern char	DU;		/* this host is dialed up */
+extern int	DU;		/* this host is dialed up */
 extern char	HW;		/* this device is hardwired, see hunt.c */
 extern char	*ES;		/* escape character */
 extern char	*EX;		/* exceptions */
