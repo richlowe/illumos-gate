@@ -148,7 +148,7 @@ file path=etc/mail/mailx.rc preserve=true
 file path=etc/mailcap preserve=true
 file path=etc/mime.types preserve=true
 link path=etc/mkfs target=../usr/sbin/mkfs
-$(not_aarch64)link path=etc/mknod target=../usr/sbin/mknod
+link path=etc/mknod target=../usr/sbin/mknod
 file path=etc/mnttab group=root mode=0444 preserve=true
 file path=etc/motd group=sys preserve=true
 link path=etc/mount target=../sbin/mount
@@ -1403,7 +1403,7 @@ file path=usr/sbin/mkdevalloc mode=0555
 hardlink path=usr/sbin/mkdevmaps target=../../usr/sbin/mkdevalloc
 file path=usr/sbin/mkfile mode=0555
 link path=usr/sbin/mkfs target=./clri
-$(not_aarch64)file path=usr/sbin/mknod mode=0555
+file path=usr/sbin/mknod mode=0555
 file path=usr/sbin/modinfo group=sys mode=0555
 file path=usr/sbin/modload group=sys mode=0555
 file path=usr/sbin/modunload group=sys mode=0555

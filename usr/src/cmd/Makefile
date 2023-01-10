@@ -240,6 +240,7 @@ COMMON_SUBDIRS=	\
 	mkfifo		\
 	mkfile		\
 	mkmsgs		\
+	mknod		\
 	mkpwdict	\
 	mktemp		\
 	modload		\
@@ -460,7 +461,6 @@ COMMON_SUBDIRS=	\
 # isns - not 64bit clean
 # krb5 - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
-# mknod - not 64bit clean
 # nohup - not ported (header bits gone awry)
 # oawk - not 64bit clean?
 # prtdiag - not ported
@@ -500,7 +500,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	krb5		\
 	latencytop	\
 	luxadm		\
-	mknod		\
 	nohup		\
 	oawk		\
 	pcitool		\
