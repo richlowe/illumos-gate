@@ -62,6 +62,7 @@ void **root = NULL;
 
 void output(void);
 void enter(struct ptmp *);
+extern char *uidtonam(uid_t);
 
 int
 main(int argc, char **argv)
@@ -156,7 +157,7 @@ void print_node(const void *node, VISIT order, int level) {
 
 	if (order == postorder || order == leaf) {
 		tb.ta_uid = (*(struct utab **)node)->ut_uid;
-		CPYN(tb.ta_name, (char *)uidtonam((*(struct utab **)node)->ut_uid));
+		CPYN(tb.ta_name, uidtonam((*(struct utab **)node)->ut_uid));
 		tb.ta_cpu[0] = (*(struct utab **)node)->ut_cpu[0];
 		tb.ta_cpu[1] = (*(struct utab **)node)->ut_cpu[1];
                 tb.ta_kcore[0] = (*(struct utab **)node)->ut_kcore[0];

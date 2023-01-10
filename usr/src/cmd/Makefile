@@ -51,6 +51,7 @@ COMMON_SUBDIRS=	\
 	allocate	\
 	Adm		\
 	adbgen		\
+	acct		\
 	acctadm		\
 	arch		\
 	asa		\
@@ -445,7 +446,6 @@ COMMON_SUBDIRS=	\
 # volrmmmount - needs dbus
 # cdrw - needs dbus
 #
-# acct - not 64bit clean
 # bc - not 64bit clean
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
@@ -482,7 +482,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	perl		\
 	availdevs	\
 	bdiff		\
-	acct		\
 	bnu		\
 	cdrw		\
 	bc		\

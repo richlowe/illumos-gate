@@ -556,7 +556,7 @@ println(void)
 	    a->ac_tty != 0xffff? devtolin(a->ac_tty):"?");
 #else
 	fprintf(stdout, " %-*.*s", OUTPUT_LSZ, OUTPUT_LSZ,
-	    a->ac_tty != (dev_t)-1? devtolin(a->ac_tty):"?");
+	    a->ac_tty != (dev32_t)-1 ? devtolin(a->ac_tty) : "?");
 #endif
 	t = a->ac_btime;
 	cftime(time_buf, DATE_FMT1, &t);

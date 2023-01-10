@@ -32,11 +32,11 @@ set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
 set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
-$(not_aarch64)dir path=etc/acct owner=adm group=adm
-$(not_aarch64)file path=etc/acct/holidays \
-    original_name=SUNWacc:etc/acct/holidays preserve=true
+dir  path=etc/acct owner=adm group=adm
+file path=etc/acct/holidays original_name=SUNWacc:etc/acct/holidays \
+    preserve=true
 dir  path=etc/init.d group=sys
-$(not_aarch64)file path=etc/init.d/acct group=sys mode=0744 \
+file path=etc/init.d/acct group=sys mode=0744 \
     original_name=SUNWacc:etc/init.d/acct preserve=true
 dir  path=lib
 dir  path=lib/svc
@@ -47,43 +47,43 @@ dir  path=lib/svc/method
 file path=lib/svc/method/svc-sar group=sys mode=0555
 dir  path=usr group=sys
 dir  path=usr/bin
-$(not_aarch64)file path=usr/bin/acctcom mode=0555
+file path=usr/bin/acctcom mode=0555
 link path=usr/bin/sar target=../sbin/sar
 file path=usr/bin/timex group=sys mode=0555
 dir  path=usr/lib
-$(not_aarch64)dir path=usr/lib/acct
-$(not_aarch64)file path=usr/lib/acct/acctcms mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctcon mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctcon1 mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctcon2 mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctdisk mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctdusg mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctmerg mode=0555
-$(not_aarch64)file path=usr/lib/acct/accton group=adm mode=4755
-$(not_aarch64)file path=usr/lib/acct/acctprc mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctprc1 mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctprc2 mode=0555
-$(not_aarch64)file path=usr/lib/acct/acctwtmp mode=0555
-$(not_aarch64)file path=usr/lib/acct/chargefee mode=0555
-$(not_aarch64)file path=usr/lib/acct/ckpacct mode=0555
-$(not_aarch64)file path=usr/lib/acct/closewtmp mode=0555
-$(not_aarch64)file path=usr/lib/acct/dodisk mode=0555
-$(not_aarch64)file path=usr/lib/acct/fwtmp mode=0555
-$(not_aarch64)file path=usr/lib/acct/lastlogin mode=0555
-$(not_aarch64)file path=usr/lib/acct/monacct mode=0555
-$(not_aarch64)file path=usr/lib/acct/nulladm mode=0555
-$(not_aarch64)file path=usr/lib/acct/prctmp mode=0555
-$(not_aarch64)file path=usr/lib/acct/prdaily mode=0555
-$(not_aarch64)file path=usr/lib/acct/prtacct mode=0555
-$(not_aarch64)file path=usr/lib/acct/ptecms.awk mode=0555
-$(not_aarch64)file path=usr/lib/acct/ptelus.awk mode=0555
-$(not_aarch64)file path=usr/lib/acct/remove mode=0555
-$(not_aarch64)file path=usr/lib/acct/runacct mode=0555
-$(not_aarch64)file path=usr/lib/acct/shutacct mode=0555
-$(not_aarch64)file path=usr/lib/acct/startup mode=0555
-$(not_aarch64)file path=usr/lib/acct/turnacct mode=0555
-$(not_aarch64)file path=usr/lib/acct/utmp2wtmp mode=0555
-$(not_aarch64)file path=usr/lib/acct/wtmpfix mode=0555
+dir  path=usr/lib/acct
+file path=usr/lib/acct/acctcms mode=0555
+file path=usr/lib/acct/acctcon mode=0555
+file path=usr/lib/acct/acctcon1 mode=0555
+file path=usr/lib/acct/acctcon2 mode=0555
+file path=usr/lib/acct/acctdisk mode=0555
+file path=usr/lib/acct/acctdusg mode=0555
+file path=usr/lib/acct/acctmerg mode=0555
+file path=usr/lib/acct/accton group=adm mode=4755
+file path=usr/lib/acct/acctprc mode=0555
+file path=usr/lib/acct/acctprc1 mode=0555
+file path=usr/lib/acct/acctprc2 mode=0555
+file path=usr/lib/acct/acctwtmp mode=0555
+file path=usr/lib/acct/chargefee mode=0555
+file path=usr/lib/acct/ckpacct mode=0555
+file path=usr/lib/acct/closewtmp mode=0555
+file path=usr/lib/acct/dodisk mode=0555
+file path=usr/lib/acct/fwtmp mode=0555
+file path=usr/lib/acct/lastlogin mode=0555
+file path=usr/lib/acct/monacct mode=0555
+file path=usr/lib/acct/nulladm mode=0555
+file path=usr/lib/acct/prctmp mode=0555
+file path=usr/lib/acct/prdaily mode=0555
+file path=usr/lib/acct/prtacct mode=0555
+file path=usr/lib/acct/ptecms.awk mode=0555
+file path=usr/lib/acct/ptelus.awk mode=0555
+file path=usr/lib/acct/remove mode=0555
+file path=usr/lib/acct/runacct mode=0555
+file path=usr/lib/acct/shutacct mode=0555
+file path=usr/lib/acct/startup mode=0555
+file path=usr/lib/acct/turnacct mode=0555
+file path=usr/lib/acct/utmp2wtmp mode=0555
+file path=usr/lib/acct/wtmpfix mode=0555
 dir  path=usr/lib/sa owner=adm
 file path=usr/lib/sa/sa1 mode=0555
 file path=usr/lib/sa/sa2 mode=0555
@@ -136,10 +136,10 @@ link path=usr/share/man/man8/utmp2wtmp.8 target=acct.8
 link path=usr/share/man/man8/wtmpfix.8 target=fwtmp.8
 dir  path=var group=sys
 dir  path=var/adm group=sys mode=0775
-$(not_aarch64)dir path=var/adm/acct owner=adm group=adm mode=0775
-$(not_aarch64)dir path=var/adm/acct/fiscal owner=adm group=adm mode=0775
-$(not_aarch64)dir path=var/adm/acct/nite owner=adm group=adm mode=0775
-$(not_aarch64)dir path=var/adm/acct/sum owner=adm group=adm mode=0775
+dir  path=var/adm/acct owner=adm group=adm mode=0775
+dir  path=var/adm/acct/fiscal owner=adm group=adm mode=0775
+dir  path=var/adm/acct/nite owner=adm group=adm mode=0775
+dir  path=var/adm/acct/sum owner=adm group=adm mode=0775
 dir  path=var/adm/sa owner=adm group=sys mode=0775
 dir  path=var/spool
 dir  path=var/spool/cron group=sys
