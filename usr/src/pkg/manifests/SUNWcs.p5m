@@ -627,7 +627,7 @@ file path=usr/bin/fmt mode=0555
 file path=usr/bin/fmtmsg mode=0555
 file path=usr/bin/fold mode=0555
 file path=usr/bin/fsstat mode=0555
-$(not_aarch64)file path=usr/bin/geniconvtbl mode=0555
+file path=usr/bin/geniconvtbl mode=0555
 file path=usr/bin/getconf mode=0555
 file path=usr/bin/getdev mode=0555
 file path=usr/bin/getdgrp mode=0555

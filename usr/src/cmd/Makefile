@@ -161,6 +161,7 @@ COMMON_SUBDIRS=	\
 	fuser		\
 	gcore		\
 	gencat		\
+	geniconvtbl	\
 	genmsg		\
 	getconf		\
 	getdevpolicy	\
@@ -454,7 +455,6 @@ COMMON_SUBDIRS=	\
 # eqn - not 64bit clean
 # file - wants bits of sys/core.h 64bit apps can't see
 # fwflash - needs libses
-# geniconvtbl - not 64bit clean
 # format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
 # ipdadm - needs libipd
@@ -491,7 +491,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	eqn		\
 	file		\
 	fwflash		\
-	geniconvtbl	\
 	hal		\
 	format		\
 	gss		\
