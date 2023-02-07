@@ -142,7 +142,7 @@ link path=etc/log target=../var/adm/log
 file path=etc/logadm.conf group=sys preserve=true timestamp=19700101T000000Z
 dir  path=etc/logadm.d group=sys
 file path=etc/logindevperm group=sys preserve=true
-$(not_aarch64)file path=etc/magic mode=0444
+file path=etc/magic mode=0444
 dir  path=etc/mail group=mail
 file path=etc/mail/mailx.rc preserve=true
 file path=etc/mailcap preserve=true
@@ -621,7 +621,7 @@ file path=usr/bin/false mode=0555
 file path=usr/bin/fdetach mode=0555
 file path=usr/bin/fdformat mode=4555
 hardlink path=usr/bin/fgrep target=../../usr/bin/grep
-$(not_aarch64)file path=usr/bin/file mode=0555
+file path=usr/bin/file mode=0555
 file path=usr/bin/find mode=0555
 file path=usr/bin/fmt mode=0555
 file path=usr/bin/fmtmsg mode=0555

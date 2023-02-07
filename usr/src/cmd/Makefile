@@ -152,6 +152,7 @@ COMMON_SUBDIRS=	\
 	fdisk		\
 	ficl		\
 	filesync	\
+	file		\
 	find		\
 	flowadm		\
 	flowstat	\
@@ -464,7 +465,6 @@ COMMON_SUBDIRS=	\
 #
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
-# file - wants bits of sys/core.h 64bit apps can't see
 # isns - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
 # nohup - not ported (header bits gone awry)
@@ -485,7 +485,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	cdrw		\
 	cpc		\
 	csh		\
-	file		\
 	hal		\
 	isns		\
 	latencytop	\
