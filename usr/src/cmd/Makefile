@@ -427,6 +427,7 @@ COMMON_SUBDIRS=	\
 	xargs		\
 	xstr		\
 	yes		\
+	ypcmd		\
 	yppasswd	\
 	zdb		\
 	zdump		\
@@ -476,7 +477,6 @@ COMMON_SUBDIRS=	\
 # tsol - not ported (or 64bit clean)
 # truss - not ported
 # vi - not 64bit clean / not ported
-# ypcmd - not 64bit clean
 $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
 	perl		\
@@ -506,7 +506,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	volcheck	\
 	volrmmount	\
 	vi		\
-	ypcmd		\
 
 aarch64_SUBDIRS=	\
 	ahciem

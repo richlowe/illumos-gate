@@ -458,7 +458,7 @@ file path=lib/svc/method/svc-sockfilter mode=0555
 file path=lib/svc/method/svc-utmpd mode=0555
 file path=lib/svc/method/system-log mode=0555
 file path=lib/svc/method/vtdaemon mode=0555
-$(not_aarch64)file path=lib/svc/method/yp mode=0555
+file path=lib/svc/method/yp mode=0555
 dir  path=lib/svc/monitor
 dir  path=lib/svc/seed
 # global.db is not needed in non-global zones, and it's pretty large.

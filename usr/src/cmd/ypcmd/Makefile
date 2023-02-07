@@ -56,7 +56,11 @@ ROOTDIRS =	$(ROOT) $(ROOTUSR) $(ROOTLIB) $(ROOTETC) $(ROOTVAR) \
 		$(ROOTUSRSBIN) $(ROOTBIN)
 
 $(LNSLPROG) :=	LDLIBS += -lnsl
-$(NIS2LDAPPROG) := LDLIBS += -lc -lnsl -lnisdb
+$(NIS2LDAPPROG) := LDLIBS += -lc -lnsl -lnisdb -L$(ADJUNCT_PROTO)/usr/lib/mps
+
+# XXXARM: _Unwind_Resume
+$(AARCH64_BLD)$(NIS2LDAPPROG) := LDLIBS += -lgcc
+
 stdethers :=	LDLIBS += -lsocket
 makedbm :=	MAPFILES = $(MAPFILE.INT) $(MAPFILE.NGB)
 makedbm :=	LDFLAGS += $(MAPFILES:%=-Wl,-M%)

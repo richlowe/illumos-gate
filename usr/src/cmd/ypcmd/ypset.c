@@ -93,7 +93,6 @@ extern void exit();
 extern int getdomainname();
 extern int gethostname();
 extern struct netconfig *getnetconfigent();
-extern unsigned int strlen();
 
 /*
  * This is the mainline for the ypset process.  It pulls whatever arguments

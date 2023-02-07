@@ -357,8 +357,8 @@ logprintf(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 		(void) gettimeofday(&t, NULL);
 		(void) fprintf(stderr, "%19.19s: ", ctime(&t.tv_sec));
 	}
-	(void) fprintf(stderr, (char *)arg1, arg2, arg3, arg4, arg5,
-				arg6, arg7);
+	(void) fprintf(stderr, (char *)(uintptr_t)arg1, arg2, arg3,
+	    arg4, arg5, arg6, arg7);
 	fflush(stderr);
 }
 
