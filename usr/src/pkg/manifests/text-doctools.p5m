@@ -50,7 +50,7 @@ file path=usr/bin/roffbib mode=0555
 file path=usr/bin/soelim mode=0555
 file path=usr/bin/sortbib mode=0555
 $(not_aarch64)file path=usr/bin/ta mode=0555
-$(not_aarch64)file path=usr/bin/tbl mode=0555
+file path=usr/bin/tbl mode=0555
 $(not_aarch64)file path=usr/bin/troff mode=0555
 file path=usr/bin/ul mode=0555
 file path=usr/bin/vgrind mode=0555

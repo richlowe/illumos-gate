@@ -13,9 +13,10 @@
  */
   
  /* t8.c: write out one line of output table */
-# include "t..c"
-# include <locale.h>
-# define realsplit ((ct=='a'||ct=='n') && table[nl][c].rcol)
+#include "t..c"
+#include <locale.h>
+#include <sys/types.h>
+#define realsplit ((ct=='a'||ct=='n') && table[nl][c].rcol)
 
 int watchout;
 int once;
@@ -95,7 +96,7 @@ for(c=0; c<ncol; c++)
 	{
 	s = table[nl][c].col;
 	if (s==0) continue;
-	chfont |= (int)(font[stynum[nl]][c]);
+	chfont |= (int)(uintptr_t)(font[stynum[nl]][c]);
 	if (point(s) ) continue;
 	lf=prev(nl);
 	if (lf>=0 && vspen(table[lf][c].col))
@@ -287,7 +288,7 @@ fprintf(tabout, ".mk ##\n"); /* rmember current vertical position */
 fprintf(tabout, ".nr %d \\n(##\n", S1); /* bottom position */
 for(c=0; c<ncol; c++)
 	{
-	s = (int)table[lin][c].col;
+	s = (int)(uintptr_t)table[lin][c].col;
 	if (point(s)) continue;
 	if (s==0) continue;
 	fprintf(tabout, ".sp |\\n(##u-1v\n");

@@ -376,6 +376,7 @@ COMMON_SUBDIRS=	\
 	tabs		\
 	tail		\
 	tar		\
+	tbl		\
 	tcopy		\
 	tcpd		\
 	th_tools	\
@@ -471,7 +472,6 @@ COMMON_SUBDIRS=	\
 # sendmail - not 64bit clean (probably our build of it is hosed)
 # sh - not 64bit clean
 # srchtxt - not 64bit clean
-# tbl - not 64bit clean
 # troff - not 64bit clean
 # tsol - not ported (or 64bit clean)
 # truss - not ported
@@ -508,7 +508,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	sendmail	\
 	sh		\
 	srchtxt		\
-	tbl		\
 	troff		\
 	tsol		\
 	truss		\

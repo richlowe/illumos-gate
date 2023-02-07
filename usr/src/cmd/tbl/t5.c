@@ -13,7 +13,8 @@
  */
 
  /* t5.c: read data for table */
-# include "t..c"
+#include "t..c"
+#include <sys/types.h>
 
 void	permute(void);
 
@@ -75,7 +76,7 @@ for (nlin=nslin=0; gets1(cstore, MAXSTR); nlin++)
 		if (match(cstore, "T{")) /* text follows */
 			/* get_text was originally gettext and was renamed */
 			table[nlin][icol].col =
-				(char *)get_text(cstore, nlin, icol,
+				(char *)(uintptr_t)get_text(cstore, nlin, icol,
 					font[stynum[nlin]][icol],
 					csize[stynum[nlin]][icol]);
 		else
