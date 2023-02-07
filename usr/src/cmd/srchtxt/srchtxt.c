@@ -63,7 +63,7 @@ extern	int	optind;
 
 static	void	usage();
 static	void	prnt_str();
-static	int	attach();
+static	intptr_t	attach();
 static	void	find_msgs();
 static	char	*syserr();
 
@@ -170,7 +170,7 @@ main(int argc, char **argv)
 					break;
 			}
 			find_msgs(addr, ebuf);
-			(void) munmap((caddr_t)addr, size);
+			(void) munmap((void *)(uintptr_t)addr, size);
 			(void) close(fd);
 			if (end == msgfile)
 				break;
@@ -191,7 +191,7 @@ main(int argc, char **argv)
 				continue;
 			}
 			find_msgs(addr, ebuf);
-			(void) munmap((caddr_t)addr, size);
+			(void) munmap((void *)(uintptr_t)addr, size);
 			(void) close(fd);
 		}
 		(void) closedir(dirp);
@@ -228,7 +228,7 @@ char	*instring;
 }
 
 /* mmap a message file to the address space */
-static int
+static intptr_t
 attach(path, len, fdescr, size)
 char	*path;
 int	len;
@@ -247,7 +247,7 @@ size_t	*size;
 		fd, 0)) != (caddr_t)-1) {
 		*fdescr = fd;
 		*size = sb.st_size;
-		return ((int)addr);
+		return ((intptr_t)addr);
 	} else {
 		if (fd == -1)
 			(void) close(fd);
@@ -265,9 +265,9 @@ char	*regexpr;
 	int	num_msgs;
 	char	*msg;
 
-	num_msgs = *(int *)addr;
+	num_msgs = *(int *)(uintptr_t)addr;
 	for (msgnum = 1; msgnum <= num_msgs; msgnum++) {
-		msg = (char *)(*(int *)(addr + sizeof (int) * msgnum) + addr);
+		msg = (char *)(uintptr_t)(*(int *)(addr + sizeof (int) * msgnum) + addr);
 		if (textflg) {
 			if (step(msg, regexpr))
 				prnt_str(msg);

@@ -361,6 +361,7 @@ COMMON_SUBDIRS=	\
 	spell		\
 	split		\
 	sqlite		\
+	srchtxt		\
 	srptadm		\
 	srptsvc		\
 	ssh		\
@@ -474,7 +475,6 @@ COMMON_SUBDIRS=	\
 # prtdiag - not ported
 # sendmail - not 64bit clean (probably our build of it is hosed)
 # sh - not 64bit clean
-# srchtxt - not 64bit clean
 # tsol - not ported (or 64bit clean)
 # vi - not 64bit clean / not ported
 $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
@@ -499,7 +499,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	rmmount		\
 	sendmail	\
 	sh		\
-	srchtxt		\
 	tsol		\
 	volcheck	\
 	volrmmount	\
