@@ -31,8 +31,8 @@ set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/inet
-$(not_aarch64)dir path=usr/lib/inet/ppp
-$(not_aarch64)file path=usr/lib/inet/ppp/pppoe.so mode=0544
+dir  path=usr/lib/inet/ppp
+file path=usr/lib/inet/ppp/pppoe.so mode=0544
 file path=usr/lib/inet/pppoec mode=0555
 file path=usr/lib/inet/pppoed mode=0555
 dir  path=usr/sbin

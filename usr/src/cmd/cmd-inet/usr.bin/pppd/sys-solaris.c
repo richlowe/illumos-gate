@@ -600,13 +600,13 @@ plumb_ipif(int unit)
 		goto err_ret;
 	}
 	if (use_plink) {
-		ipmuxid = myioctl(udpfd, I_PLINK, (void *)tmpfd);
+		ipmuxid = myioctl(udpfd, I_PLINK, (void *)(intptr_t)tmpfd);
 		if (ipmuxid < 0) {
 			error("Can't I_PLINK PPP device to IP: %m");
 			goto err_ret;
 		}
 	} else {
-		ipmuxid = myioctl(ipfd, I_LINK, (void *)tmpfd);
+		ipmuxid = myioctl(ipfd, I_LINK, (void *)(intptr_t)tmpfd);
 		if (ipmuxid < 0) {
 			error("Can't I_LINK PPP device to IP: %m");
 			goto err_ret;
@@ -664,7 +664,7 @@ unplumb_ipif(int unit)
 			warn("Can't get mux fd: SIOCGLIFMUXID: %m");
 		} else {
 			id = lifr.lifr_ip_muxid;
-			fd = myioctl(udpfd, _I_MUXID2FD, (void *)id);
+			fd = myioctl(udpfd, _I_MUXID2FD, (void *)(intptr_t)id);
 			if (fd < 0) {
 				warn("Can't get mux fd: _I_MUXID2FD: %m");
 			}
@@ -685,7 +685,7 @@ unplumb_ipif(int unit)
 	if (plumbed)
 		return (1);
 	if (use_plink) {
-		if (myioctl(udpfd, I_PUNLINK, (void *)id) < 0) {
+		if (myioctl(udpfd, I_PUNLINK, (void *)(intptr_t)id) < 0) {
 			error("Can't I_PUNLINK PPP from IP: %m");
 			if (fd != -1)
 				(void) close(fd);
@@ -696,7 +696,7 @@ unplumb_ipif(int unit)
 			(void) close(fd);
 		(void) close(udpfd);
 	} else {
-		if (myioctl(ipfd, I_UNLINK, (void *)id) < 0) {
+		if (myioctl(ipfd, I_UNLINK, (void *)(intptr_t)id) < 0) {
 			error("Can't I_UNLINK PPP from IP: %m");
 			return (0);
 		}
@@ -989,7 +989,7 @@ establish_ppp(fd)
 	/*
 	 * Link the serial port under the PPP multiplexor
 	 */
-	if ((fdmuxid = myioctl(pppfd, I_LINK, (void *)fd)) < 0) {
+	if ((fdmuxid = myioctl(pppfd, I_LINK, (void *)(intptr_t)fd)) < 0) {
 		error("Can't link tty to PPP mux: %m");
 		return (-1);
 	}
@@ -1044,7 +1044,7 @@ disestablish_ppp(fd)
 	if (fdmuxid == -1 || integrated_driver) {
 		return;
 	}
-	if (myioctl(pppfd, I_UNLINK, (void *)fdmuxid) < 0) {
+	if (myioctl(pppfd, I_UNLINK, (void *)(intptr_t)fdmuxid) < 0) {
 		if (!hungup) {
 			error("Can't unlink tty from PPP mux: %m");
 		}
@@ -3120,13 +3120,13 @@ plumb_ip6if(int unit)
 		goto err_ret;
 	}
 	if (use_plink) {
-		ip6muxid = myioctl(udp6fd, I_PLINK, (void *)tmpfd);
+		ip6muxid = myioctl(udp6fd, I_PLINK, (void *)(intptr_t)tmpfd);
 		if (ip6muxid < 0) {
 			error("Can't I_PLINK PPP device to IPv6: %m");
 			goto err_ret;
 		}
 	} else {
-		ip6muxid = myioctl(ip6fd, I_LINK, (void *)tmpfd);
+		ip6muxid = myioctl(ip6fd, I_LINK, (void *)(intptr_t)tmpfd);
 		if (ip6muxid < 0) {
 			error("Can't I_LINK PPP device to IPv6: %m");
 			goto err_ret;
@@ -3184,7 +3184,7 @@ unplumb_ip6if(int unit)
 			warn("Can't get mux fd: SIOCGLIFMUXID: %m");
 		} else {
 			id = lifr.lifr_ip_muxid;
-			fd = myioctl(udp6fd, _I_MUXID2FD, (void *)id);
+			fd = myioctl(udp6fd, _I_MUXID2FD, (void *)(intptr_t)id);
 			if (fd < 0) {
 				warn("Can't get mux fd: _I_MUXID2FD: %m");
 			}
@@ -3198,12 +3198,12 @@ unplumb_ip6if(int unit)
 		return (1);
 	ip6muxid = -1;
 	if (use_plink) {
-		if ((fd = myioctl(udp6fd, _I_MUXID2FD, (void *)id)) < 0) {
+		if ((fd = myioctl(udp6fd, _I_MUXID2FD, (void *)(intptr_t)id)) < 0) {
 			error("Can't recapture mux fd: _I_MUXID2FD: %m");
 			(void) close(udp6fd);
 			return (0);
 		}
-		if (myioctl(udp6fd, I_PUNLINK, (void *)id) < 0) {
+		if (myioctl(udp6fd, I_PUNLINK, (void *)(intptr_t)id) < 0) {
 			error("Can't I_PUNLINK PPP from IPv6: %m");
 			(void) close(fd);
 			(void) close(udp6fd);
@@ -3212,7 +3212,7 @@ unplumb_ip6if(int unit)
 		(void) close(fd);
 		(void) close(udp6fd);
 	} else {
-		if (myioctl(ip6fd, I_UNLINK, (void *)id) < 0) {
+		if (myioctl(ip6fd, I_UNLINK, (void *)(intptr_t)id) < 0) {
 			error("Can't I_UNLINK PPP from IPv6: %m");
 			return (0);
 		}
@@ -3560,7 +3560,7 @@ sys_print_state(FILE *strptr)
 		fdmuxid = -1;
 		getbits(ttyfd, devnam, strptr);
 		if (was_linked &&
-		    (fdmuxid = ioctl(pppfd, I_LINK, (void *)ttyfd)) == -1)
+		    (fdmuxid = ioctl(pppfd, I_LINK, (void *)(intptr_t)ttyfd)) == -1)
 			fatal("I_LINK: %m");
 	}
 }
