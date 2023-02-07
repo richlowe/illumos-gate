@@ -78,7 +78,7 @@ hardlink path=usr/xpg4/bin/mv target=../../../usr/xpg4/bin/cp
 file path=usr/xpg4/bin/nice mode=0555
 file path=usr/xpg4/bin/nl mode=0555
 file path=usr/xpg4/bin/nm mode=0555
-$(not_aarch64)file path=usr/xpg4/bin/nohup mode=0555
+file path=usr/xpg4/bin/nohup mode=0555
 link path=usr/xpg4/bin/od target=../../bin/od
 link path=usr/xpg4/bin/pfsh target=../../bin/pfexec
 file path=usr/xpg4/bin/pr mode=0555

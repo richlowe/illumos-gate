@@ -681,7 +681,7 @@ file path=usr/bin/netstat mode=0555
 file path=usr/bin/newgrp group=sys mode=4755
 hardlink path=usr/bin/newtask target=../../usr/lib/isaexec
 file path=usr/bin/nice mode=0555
-$(not_aarch64)hardlink path=usr/bin/nohup target=../../usr/lib/isaexec
+hardlink path=usr/bin/nohup target=../../usr/lib/isaexec
 file path=usr/bin/optisa mode=0555
 hardlink path=usr/bin/page target=../../usr/bin/more
 file path=usr/bin/pagesize mode=0555
