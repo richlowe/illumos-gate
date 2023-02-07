@@ -232,7 +232,7 @@ outputcap(char *cap, int argc, char **argv)
 			if (allnumeric(argv[optind]))
 				parm[parmset] = atoi(argv[optind]);
 			else
-				parm[parmset] = (int)argv[optind];
+				parm[parmset] = atol(argv[optind]);
 
 		if (parmset)
 			putp(tparm(thisstr,
