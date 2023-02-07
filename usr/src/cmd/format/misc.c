@@ -347,7 +347,7 @@ cleanup(int sig)
 		log_print("\n");
 	}
 	if (scan_blocks_fixed >= 0)
-		fmt_print("Total of %lld defective blocks repaired.\n",
+		fmt_print("Total of %"PRId64" defective blocks repaired.\n",
 		    scan_blocks_fixed);
 	if (sig != SIGSTOP) { /* Don't reset on suspend (converted to stop) */
 		scan_cur_block = scan_blocks_fixed = -1;

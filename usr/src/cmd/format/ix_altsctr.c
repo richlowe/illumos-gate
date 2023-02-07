@@ -412,7 +412,7 @@ get_badsec(void)
 	} else {
 		ap->ap_gbadp = malloc(cnt * ALTS_ENT_SIZE);
 		if (ap->ap_gbadp == NULL) {
-			err_print("get_badsec: unable to malloc %d bytes\n",
+			err_print("get_badsec: unable to malloc %zu bytes\n",
 			    cnt * ALTS_ENT_SIZE);
 			fullabort();
 		}

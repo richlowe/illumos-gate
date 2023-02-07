@@ -3222,7 +3222,7 @@ scsi_print_descr_sense(struct scsi_descr_sense_hdr *rq, int rqlen)
 			    ((uint64_t)isd->isd_information[6] << 8)  |
 			    ((uint64_t)isd->isd_information[7]));
 			fmt_print("Information field:               "
-			    "%0llx\n", information);
+			    "%"PRIx64"\n", information);
 			break;
 		}
 		case DESCR_COMMAND_SPECIFIC: {
@@ -3240,7 +3240,7 @@ scsi_print_descr_sense(struct scsi_descr_sense_hdr *rq, int rqlen)
 			    ((uint64_t)c->css_cmd_specific_info[6] << 8)  |
 			    ((uint64_t)c->css_cmd_specific_info[7]));
 			fmt_print("Command-specific information:    "
-			    "%0llx\n", cmd_specific);
+			    "%"PRIx64"\n", cmd_specific);
 			break;
 		}
 		case DESCR_SENSE_KEY_SPECIFIC: {

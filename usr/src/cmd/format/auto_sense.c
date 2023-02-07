@@ -836,7 +836,7 @@ auto_sense(
 		return (NULL);
 	}
 	if (option_msg && diag_msg) {
-		err_print("blocks:  %llu (0x%llx)\n",
+		err_print("blocks:  %"PRIu64" (0x%"PRIx64")\n",
 		    capacity.sc_capacity, capacity.sc_capacity);
 		err_print("blksize: %u\n", capacity.sc_lbasize);
 	}

@@ -160,6 +160,7 @@ COMMON_SUBDIRS=	\
 	fmthard		\
 	fmtmsg		\
 	fold		\
+	format		\
 	fs.d		\
 	fstyp		\
 	fuser		\
@@ -461,7 +462,6 @@ COMMON_SUBDIRS=	\
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
 # file - wants bits of sys/core.h 64bit apps can't see
-# format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
 # isns - not 64bit clean
 # krb5 - not 64bit clean
@@ -487,7 +487,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	csh		\
 	file		\
 	hal		\
-	format		\
 	gss		\
 	isns		\
 	krb5		\

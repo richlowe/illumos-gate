@@ -72,7 +72,7 @@ static int	slist_widest_str(slist_t *slist);
 static void	ljust_print(char *str, int width);
 static int	sup_inputchar(void);
 static void	sup_pushchar(int c);
-static int	geti64(char *str, uint64_t *iptr, uint64_t *wild);
+static int	getdiskaddr(char *str, diskaddr_t *iptr, diskaddr_t *wild);
 
 /*
  * This routine pushes the given character back onto the input stream.
@@ -268,13 +268,13 @@ geti(char *str, int *iptr, int *wild)
 }
 
 /*
- * This routine converts the given token into a long long.  The token
+ * This routine converts the given token into a diskaddr_t. The token
  * must convert cleanly into a 64-bit integer with no unknown characters.
  * If the token is the wildcard string, and the wildcard parameter
  * is present, the wildcard value will be returned.
  */
 static int
-geti64(char *str, uint64_t *iptr, uint64_t *wild)
+getdiskaddr(char *str, diskaddr_t *iptr, diskaddr_t *wild)
 {
 	char	*str2;
 
@@ -333,7 +333,7 @@ getbn(char *str, diskaddr_t *iptr)
 	 */
 	if (*str == '\0') {
 		wild64 = physsects() - 1;
-		if (geti64(cptr, iptr, &wild64))
+		if (getdiskaddr(cptr, iptr, &wild64))
 			return (-1);
 		return (0);
 	}
@@ -412,7 +412,7 @@ input(int type, char *promptstr, int delim, u_ioparam_t *param, int *deflt,
     int cmdflag)
 {
 	int		interactive, help, i, length, index, tied;
-	blkaddr_t	bn;
+	blkaddr32_t	bn;
 	diskaddr_t	bn64;
 	char		**str, **strings;
 	TOKEN		token, cleantoken;
@@ -422,7 +422,7 @@ input(int type, char *promptstr, int delim, u_ioparam_t *param, int *deflt,
 	char		*s;
 	int		value;
 	int		cyls, cylno;
-	uint64_t	blokno;
+	diskaddr_t	blokno;
 	float		nmegs;
 	float		ngigs;
 	char		shell_argv[MAXPATHLEN];
@@ -478,7 +478,7 @@ reprompt:
 #else
 			efi_deflt = (efi_deflt_t *)deflt;
 #endif
-			fmt_print("[%llu]", efi_deflt->start_sector);
+			fmt_print("[%"PRIu64"]", efi_deflt->start_sector);
 			break;
 		case FIO_CSTR:
 		case FIO_MSTR:
@@ -566,7 +566,8 @@ reprompt:
 			efi_deflt = (efi_deflt_t *)deflt;
 #endif
 
-			fmt_print("[%llub, %llue, %llumb, %llugb, %llutb]",
+			fmt_print("[%"PRIu64"b, %"PRIu64"e, %"PRIu64"mb, %"
+			    PRIu64"gb, %"PRIu64"tb]",
 			    efi_deflt->end_sector,
 			    efi_deflt->start_sector + efi_deflt->end_sector - 1,
 			    (efi_deflt->end_sector * cur_blksz) /
@@ -691,7 +692,7 @@ reprompt:
 				/*
 				 * Duplicate and return the default string
 				 */
-				return ((int)alloc_string((char *)deflt));
+				return ((uint64_t)alloc_string((char *)deflt));
 			} else if (type == FIO_SLIST) {
 				/*
 				 * If we can find a match for the default
@@ -774,7 +775,7 @@ reprompt:
 		 * Convert token to a disk block number.
 		 */
 		if (cur_label == L_TYPE_EFI) {
-			if (geti64(cleantoken, (uint64_t *)&bn64, NULL))
+			if (getdiskaddr(cleantoken, (diskaddr_t *)&bn64, NULL))
 				break;
 		} else {
 			if (getbn(cleantoken, &bn64))
@@ -820,7 +821,7 @@ reprompt:
 		 * Check to be sure it is within the legal bounds.
 		 */
 		if ((bn < bounds->lower) || (bn > bounds->upper)) {
-			err_print("`%lu' is out of range [%llu-%llu].\n", bn,
+			err_print("`%u' is out of range [%llu-%llu].\n", bn,
 			    bounds->lower, bounds->upper);
 			break;
 		}
@@ -845,7 +846,7 @@ reprompt:
 		/*
 		 * Convert the token into an integer.
 		 */
-		if (geti64(cleantoken, (uint64_t *)&bn64, NULL)) {
+		if (getdiskaddr(cleantoken, (diskaddr_t *)&bn64, NULL)) {
 			break;
 		}
 		/*
@@ -886,7 +887,7 @@ reprompt:
 		 * Check to be sure it is within the legal bounds.
 		 */
 		if ((bn < bounds->lower) || (bn > bounds->upper)) {
-			err_print("`%lu' is out of range [%llu-%llu].\n", bn,
+			err_print("`%u' is out of range [%llu-%llu].\n", bn,
 			    bounds->lower, bounds->upper);
 			break;
 		}
@@ -1002,7 +1003,7 @@ reprompt:
 		/*
 		 * alloc a copy of the string and return it
 		 */
-		return ((int)alloc_string(token));
+		return ((uint64_t)alloc_string(token));
 
 	/*
 	 * Expecting a blank line.
@@ -1118,7 +1119,7 @@ reprompt:
 			/*
 			 * Convert token to a disk block number.
 			 */
-			if (geti64(cleantoken, &bn64, &bounds->upper))
+			if (getdiskaddr(cleantoken, &bn64, &bounds->upper))
 				break;
 			/*
 			 * Check to be sure it is within the legal bounds.
@@ -1306,7 +1307,7 @@ or g(gigabytes)\n");
 			/*
 			 * Convert token to a disk block number.
 			 */
-			if (geti64(cleantoken, &bn64, &bounds->upper))
+			if (getdiskaddr(cleantoken, &bn64, &bounds->upper))
 				break;
 			/*
 			 * Check to be sure it is within the
@@ -1559,7 +1560,7 @@ or g(gigabytes)\n");
 			/*
 			 * Token is number of blocks
 			 */
-			if (geti64(cleantoken, &blokno, NULL)) {
+			if (getdiskaddr(cleantoken, &blokno, NULL)) {
 				break;
 			}
 			if (blokno > bounds->upper) {
@@ -1575,7 +1576,7 @@ or g(gigabytes)\n");
 			 */
 
 			/* convert token to integer */
-			if (geti64(cleantoken, &blokno, NULL)) {
+			if (getdiskaddr(cleantoken, &blokno, NULL)) {
 				break;
 			}
 
@@ -1584,7 +1585,7 @@ or g(gigabytes)\n");
 			 */
 			if (blokno < efi_deflt->start_sector) {
 				err_print("End Sector must fall on or after "
-				    "start sector %llu\n",
+				    "start sector %"PRIu64"\n",
 				    efi_deflt->start_sector);
 				break;
 			}

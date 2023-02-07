@@ -426,7 +426,7 @@ out:
 		pr_dblock(log_print, scan_cur_block);
 		log_print("\n");
 	}
-	fmt_print("Total of %lld defective blocks repaired.\n",
+	fmt_print("Total of %"PRId64" defective blocks repaired.\n",
 	    scan_blocks_fixed);
 	/*
 	 * Reinitialize the logging variables so they don't get used
@@ -751,8 +751,8 @@ verify_blocks(int flags, diskaddr_t blkno, uint_t blkcnt, unsigned data,
 					    "(expecting 0x%x, got 0x%x) at ",
 					    data, *ptr);
 					pr_dblock(err_print, blkno);
-					err_print(", offset = 0x%x.\n",
-					    (ptr - (uint_t *)pattern_buf) *
+					err_print(", offset = 0x%zx.\n",
+					    (size_t)(ptr - (uint_t *)pattern_buf) *
 					    sizeof (int));
 					goto bad;
 				}
