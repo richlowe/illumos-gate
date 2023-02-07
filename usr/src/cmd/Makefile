@@ -181,6 +181,7 @@ COMMON_SUBDIRS=	\
 	groups		\
 	growfs		\
 	grpck		\
+	gss		\
 	halt		\
 	head		\
 	hostid		\
@@ -464,7 +465,6 @@ COMMON_SUBDIRS=	\
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
 # file - wants bits of sys/core.h 64bit apps can't see
-# gss - not 64bit clean
 # isns - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
 # nohup - not ported (header bits gone awry)
@@ -487,7 +487,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	csh		\
 	file		\
 	hal		\
-	gss		\
 	isns		\
 	latencytop	\
 	luxadm		\

@@ -32,12 +32,12 @@ set name=info.classification value=org.opensolaris.category.2008:System/Security
 set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/inet group=sys
-$(not_aarch64)dir path=etc/krb5 group=sys
-$(not_aarch64)file path=etc/krb5/kadm5.acl group=sys \
+dir  path=etc/krb5 group=sys
+file path=etc/krb5/kadm5.acl group=sys \
     original_name=SUNWkdc:etc/krb5/kadm5.acl preserve=true
-$(not_aarch64)file path=etc/krb5/kdc.conf group=sys \
-    original_name=SUNWkdc:etc/krb5/kdc.conf preserve=true
-$(not_aarch64)file path=etc/krb5/kpropd.acl group=sys \
+file path=etc/krb5/kdc.conf group=sys original_name=SUNWkdc:etc/krb5/kdc.conf \
+    preserve=true
+file path=etc/krb5/kpropd.acl group=sys \
     original_name=SUNWkdc:etc/krb5/kpropd.acl preserve=true
 dir  path=lib
 dir  path=lib/svc

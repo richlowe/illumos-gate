@@ -613,7 +613,7 @@ kgss_init_sec_context_wrapped(minor_status,
 	arg.uid = (OM_uint32) uid;
 
 	arg.context_handle.GSS_CTX_ID_T_len =
-		*context_handle == (OM_uint32) GSS_C_NO_CONTEXT ? 0 :
+		*context_handle == (uintptr_t) GSS_C_NO_CONTEXT ? 0 :
 		(uint_t)sizeof (OM_uint32);
 	arg.context_handle.GSS_CTX_ID_T_val =  (char *)context_handle;
 	arg.gssd_context_verifier = *gssd_context_verifier;
@@ -796,7 +796,7 @@ kgss_init_sec_context(
 		if (*context_handle == GSS_C_NO_CONTEXT) {
 			kctx = KGSS_ALLOC();
 			*context_handle = (gss_ctx_id_t)kctx;
-			kctx->gssd_ctx = (OM_uint32) GSS_C_NO_CONTEXT;
+			kctx->gssd_ctx = (uintptr_t) GSS_C_NO_CONTEXT;
 		} else
 			kctx = (struct kgss_ctx *)*context_handle;
 
@@ -871,7 +871,7 @@ kgss_accept_sec_context_wrapped(minor_status,
 			0 : (uint_t)sizeof (gssd_ctx_id_t);
 	arg.context_handle.GSS_CTX_ID_T_val =  (char *)context_handle;
 	arg.gssd_context_verifier =
-		*context_handle == (OM_uint32) GSS_C_NO_CONTEXT ?
+		*context_handle == (uintptr_t) GSS_C_NO_CONTEXT ?
 			0 : *gssd_context_verifier;
 
 	arg.verifier_cred_handle.GSS_CRED_ID_T_len =
@@ -1109,7 +1109,7 @@ kgss_process_context_token(minor_status,
 	arg.context_handle.GSS_CTX_ID_T_len = (uint_t)sizeof (gss_ctx_id_t);
 	arg.context_handle.GSS_CTX_ID_T_val = (char *)&context_handle;
 	arg.gssd_context_verifier = gssd_context_verifier;
-	arg.token_buffer.GSS_BUFFER_T_len = (uint_t)token_buffer;
+	arg.token_buffer.GSS_BUFFER_T_len = (size_t)token_buffer;
 	arg.token_buffer.GSS_BUFFER_T_val = (char *)token_buffer->value;
 
 	/* call the remote procedure */
@@ -1161,7 +1161,7 @@ kgss_delete_sec_context_wrapped(minor_status,
 	/* copy the procedure arguments into the rpc arg parameter */
 
 	arg.context_handle.GSS_CTX_ID_T_len =
-		*context_handle == (OM_uint32) GSS_C_NO_CONTEXT ? 0 :
+		*context_handle == (uintptr_t) GSS_C_NO_CONTEXT ? 0 :
 		(uint_t)sizeof (OM_uint32);
 	arg.context_handle.GSS_CTX_ID_T_val =  (char *)context_handle;
 
@@ -2469,7 +2469,7 @@ kgss_import_sec_context(minor_status,
 	if (*context_handle == GSS_C_NO_CONTEXT) {
 		kctx = KGSS_ALLOC();
 		*context_handle = (gss_ctx_id_t)kctx;
-		kctx->gssd_ctx = (OM_uint32) GSS_C_NO_CONTEXT;
+		kctx->gssd_ctx = (uintptr_t) GSS_C_NO_CONTEXT;
 	} else
 		kctx = (struct kgss_ctx *)*context_handle;
 	return (kgss_import_sec_context_wrapped(minor_status,

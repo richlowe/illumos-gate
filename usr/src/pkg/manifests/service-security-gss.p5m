@@ -32,18 +32,17 @@ set name=info.classification value=org.opensolaris.category.2008:System/Security
 set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/gss group=sys
-$(not_aarch64)file path=etc/gss/gsscred.conf group=sys \
+file path=etc/gss/gsscred.conf group=sys \
     original_name=SUNWgssc:etc/gss/gsscred.conf preserve=true
-$(not_aarch64)file path=etc/gss/mech group=sys \
-    original_name=SUNWgssc:etc/gss/mech preserve=true
-$(not_aarch64)file path=etc/gss/qop group=sys \
-    original_name=SUNWgssc:etc/gss/qop preserve=true
+file path=etc/gss/mech group=sys original_name=SUNWgssc:etc/gss/mech \
+    preserve=true
+file path=etc/gss/qop group=sys original_name=SUNWgssc:etc/gss/qop preserve=true
 dir  path=lib
 dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys
 dir  path=lib/svc/manifest/network group=sys
 dir  path=lib/svc/manifest/network/rpc group=sys
-$(not_aarch64)file path=lib/svc/manifest/network/rpc/gss.xml group=sys mode=0444
+file path=lib/svc/manifest/network/rpc/gss.xml group=sys mode=0444
 dir  path=usr/share/man
 dir  path=usr/share/man/man5
 file path=usr/share/man/man5/gsscred.conf.5
