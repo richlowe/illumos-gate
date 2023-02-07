@@ -49,6 +49,7 @@ FIRST_SUBDIRS=		\
 
 COMMON_SUBDIRS=	\
 	allocate	\
+	lp		\
 	Adm		\
 	adbgen		\
 	acct		\
@@ -65,8 +66,8 @@ COMMON_SUBDIRS=	\
 	banner		\
 	bart		\
 	basename	\
-	bdiff		\
 	bc		\
+	bdiff		\
 	beadm		\
 	boot		\
 	busstat		\
@@ -226,21 +227,20 @@ COMMON_SUBDIRS=	\
 	loadkeys	\
 	locale		\
 	localedef	\
-	locator		\
 	lockstat	\
+	locator		\
 	lofiadm		\
 	logadm		\
 	logger		\
 	login		\
 	logins		\
 	logname		\
-	lp		\
 	look		\
 	ls		\
 	mach		\
 	mail		\
-	mailx		\
 	mailwrapper	\
+	mailx		\
 	make		\
 	makekey		\
 	man		\
@@ -291,16 +291,16 @@ COMMON_SUBDIRS=	\
 	pcieb		\
 	pfexec		\
 	pfexecd		\
-	pg		\
 	pginfo		\
 	pgstat		\
 	pgrep		\
 	picl		\
 	plimit		\
-	plockstat	\
 	pools		\
 	power		\
 	ppgsz		\
+	pg		\
+	plockstat	\
 	pr		\
 	prctl		\
 	print		\
@@ -443,9 +443,9 @@ COMMON_SUBDIRS=	\
 	zoneadmd	\
 	zonecfg		\
 	zonename	\
-	zonestat	\
-	zlook		\
 	zpool		\
+	zlook		\
+	zonestat	\
 	zstreamdump	\
 	ztest
 
