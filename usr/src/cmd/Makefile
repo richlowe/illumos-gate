@@ -93,6 +93,7 @@ COMMON_SUBDIRS=	\
 	cpio		\
 	cron		\
 	crypt		\
+	csplit		\
 	ctfconvert	\
 	ctfdiff		\
 	ctfdump		\
@@ -459,7 +460,6 @@ COMMON_SUBDIRS=	\
 #
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
-# csplit - not 64bit clean
 # file - wants bits of sys/core.h 64bit apps can't see
 # format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
@@ -485,7 +485,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	cdrw		\
 	cpc		\
 	csh		\
-	csplit		\
 	file		\
 	hal		\
 	format		\
