@@ -506,10 +506,10 @@ interpret_ospf6_lsa(int flags, struct lsa6 *lsa, uchar_t *fragend)
 		break;
 	case LS_TYPE_LINK:
 		llsa = &lsa->lsa_un.un_llsa;
-		if (TRUNC(llsa->llsa_options))
+		if (TRUNC((uintptr_t)llsa->llsa_options))
 			return (-1);
 		ospf_print_bits(ospf6_option_bits, ntohl(llsa->llsa_options));
-		if (TRUNC(llsa->llsa_nprefix))
+		if (TRUNC((uintptr_t)llsa->llsa_nprefix))
 			return (-1);
 		(void) inet_ntop(AF_INET6, &llsa->llsa_lladdr,
 		    addrstr, INET6_ADDRSTRLEN);

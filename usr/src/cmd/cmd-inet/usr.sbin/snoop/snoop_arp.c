@@ -27,6 +27,7 @@
 #include <sys/errno.h>
 #include <setjmp.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <net/if.h>
 #include <net/if_arp.h>
 #include <netinet/in_systm.h>
@@ -191,8 +192,8 @@ printip(unsigned char *p)
 	struct in_addr a;
 
 	memcpy(&a, p, 4);
-	ap = (char *)inet_ntoa(a);
-	np = (char *)addrtoname(AF_INET, &a);
+	ap = inet_ntoa(a);
+	np = addrtoname(AF_INET, &a);
 	(void) snprintf(buff, MAXHOSTNAMELEN, "%s, %s", ap, np);
 	return (buff);
 }
