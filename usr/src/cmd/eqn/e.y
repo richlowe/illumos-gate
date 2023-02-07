@@ -118,10 +118,10 @@ box	: box OVER box	{ boverb($1, $3); }
 int	: INT	{ setintegral(); }
 	;
 
-fwd	: FWD text	{ $$ = atoi((char *) $1); } ;
-up	: UP text	{ $$ = atoi((char *) $1); } ;
-back	: BACK text	{ $$ = atoi((char *) $1); } ;
-down	: DOWN text	{ $$ = atoi((char *) $1); } ;
+fwd	: FWD text	{ $$ = atoi((char *)(uintptr_t) $1); } ;
+up	: UP text	{ $$ = atoi((char *)(uintptr_t) $1); } ;
+back	: BACK text	{ $$ = atoi((char *)(uintptr_t) $1); } ;
+down	: DOWN text	{ $$ = atoi((char *)(uintptr_t) $1); } ;
 
 diacrit	: HAT	{ $$ = HAT; }
 	| VEC	{ $$ = VEC; }
@@ -143,11 +143,11 @@ to	: TO	{ $$=ps; if(fromflg==0)ps -= 3;
 		}
 	;
 
-left	: LEFT text	{ $$ = ((char *)$2)[0]; }
+left	: LEFT text	{ $$ = ((char *)(uintptr_t) $2)[0]; }
 	| LEFT '{'	{ $$ = '{'; }
 	;
 
-right	: RIGHT text	{ $$ = ((char *)$2)[0]; }
+right	: RIGHT text	{ $$ = ((char *)(uintptr_t) $2)[0]; }
 	| RIGHT '}'	{ $$ = '}'; }
 	|		{ $$ = 0; }
 	;
@@ -161,13 +161,13 @@ cpile	: CPILE	{ $$ = ct; } ;
 pile	: PILE	{ $$ = ct; } ;
 rpile	: RPILE	{ $$ = ct; } ;
 
-size	: SIZE text	{ $$ = ps; setsize((char *) $2); }
+size	: SIZE text	{ $$ = ps; setsize((char *)(uintptr_t) $2); }
 	;
 
 font	: ROMAN		{ setfont(ROM); }
 	| ITALIC	{ setfont(ITAL); }
 	| BOLD		{ setfont(BLD); }
-	| FONT text	{ setfont(((char *)$2)[0]); }
+	| FONT text	{ setfont(((char *)(uintptr_t) $2)[0]); }
 	;
 
 sub	: SUB	{ shift(SUB); }
@@ -177,8 +177,8 @@ sup	: SUP	{ shift(SUP); }
 	;
 
 pbox	: '{' eqn '}'	{ $$ = $2; }
-	| QTEXT		{ text(QTEXT, (char *) $1); }
-	| CONTIG	{ text(CONTIG, (char *) $1); }
+	| QTEXT		{ text(QTEXT, (char *)(uintptr_t) $1); }
+	| CONTIG	{ text(CONTIG, (char *)(uintptr_t) $1); }
 	| SPACE		{ text(SPACE, 0); }
 	| THIN		{ text(THIN, 0); }
 	| TAB		{ text(TAB, 0); }

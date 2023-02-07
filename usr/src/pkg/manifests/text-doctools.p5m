@@ -40,10 +40,10 @@ file path=usr/bin/checkeq mode=0555
 file path=usr/bin/checknr mode=0555
 file path=usr/bin/deroff mode=0555
 file path=usr/bin/diffmk mode=0555
-$(not_aarch64)file path=usr/bin/eqn mode=0555
+file path=usr/bin/eqn mode=0555
 file path=usr/bin/indxbib mode=0555
 file path=usr/bin/lookbib mode=0555
-$(not_aarch64)file path=usr/bin/neqn mode=0555
+file path=usr/bin/neqn mode=0555
 file path=usr/bin/nroff mode=0555
 file path=usr/bin/refer mode=0555
 file path=usr/bin/roffbib mode=0555
@@ -256,11 +256,11 @@ file path=usr/share/lib/nterm/tab.8510
 file path=usr/share/lib/nterm/tab.X
 file path=usr/share/lib/nterm/tab.lp
 file path=usr/share/lib/nterm/tab.tn300
-$(not_aarch64)dir path=usr/share/lib/pub
-$(not_aarch64)file path=usr/share/lib/pub/ascii
-$(not_aarch64)file path=usr/share/lib/pub/eqnchar
-$(not_aarch64)file path=usr/share/lib/pub/greek
-$(not_aarch64)file path=usr/share/lib/pub/iso
+dir  path=usr/share/lib/pub
+file path=usr/share/lib/pub/ascii
+file path=usr/share/lib/pub/eqnchar
+file path=usr/share/lib/pub/greek
+file path=usr/share/lib/pub/iso
 dir  path=usr/share/lib/tmac
 file path=usr/share/lib/tmac/acm.me
 file path=usr/share/lib/tmac/an

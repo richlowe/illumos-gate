@@ -15,6 +15,7 @@
 #include "e.h"
 #include "e.def"
 #include <locale.h>
+#include <sys/types.h>
 
 #define	SSIZE	400
 char	token[SSIZE];
@@ -121,7 +122,7 @@ beg:
 				    "quoted string %.20s... too long"), token);
 		}
 		token[sp] = '\0';
-		yylval = (int)&token[0];
+		yylval = (int)(uintptr_t)&token[0];
 		if (c == '\n')
 			error(!FATAL, gettext("missing \" in %.20s"), token);
 		return (QTEXT);
@@ -143,7 +144,7 @@ beg:
 		return (CONTIG);
 	} else if (tp->defn == (char *)DEFINE ||
 	    tp->defn == (char *)NDEFINE || tp->defn == (char *)TDEFINE)
-		define((int)tp->defn);
+		define((int)(uintptr_t)tp->defn);
 	else if (tp->defn == (char *)DELIM)
 		delim();
 	else if (tp->defn == (char *)GSIZE)
@@ -155,7 +156,7 @@ beg:
 	else if (tp->defn == (char *)SPACE)
 		space();
 	else {
-		return ((int)tp->defn);
+		return ((int)(uintptr_t)tp->defn);
 	}
 	goto beg;
 }
@@ -187,7 +188,7 @@ getstr(char *s, int n)
 	    c == '\t' || c == righteq)
 		putbak(c);
 	*p = '\0';
-	yylval = (int)s;
+	yylval = (int)(uintptr_t)s;
 }
 
 int

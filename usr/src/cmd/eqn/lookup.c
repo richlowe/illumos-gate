@@ -15,6 +15,7 @@
 #include "e.h"
 #include "e.def"
 #include <locale.h>
+#include <sys/types.h>
 
 #define	TBLSIZE	100
 
@@ -234,7 +235,7 @@ init_tbl(void)	/* initialize all tables */
 	int i;
 
 	for (i = 0; keyword[i].key != NULL; i++)
-		lookup(keytbl, keyword[i].key, (char *)keyword[i].keyval);
+		lookup(keytbl, keyword[i].key, (char *)(uintptr_t)keyword[i].keyval);
 	for (i = 0; resword[i].res != NULL; i++)
 		lookup(restbl, resword[i].res, resword[i].resval);
 }
