@@ -66,6 +66,7 @@ COMMON_SUBDIRS=	\
 	bart		\
 	basename	\
 	bdiff		\
+	bc		\
 	beadm		\
 	boot		\
 	busstat		\
@@ -451,7 +452,6 @@ COMMON_SUBDIRS=	\
 # volrmmmount - needs dbus
 # cdrw - needs dbus
 #
-# bc - not 64bit clean
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
 # csplit - not 64bit clean
@@ -483,7 +483,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	availdevs	\
 	bnu		\
 	cdrw		\
-	bc		\
 	cpc		\
 	csh		\
 	csplit		\

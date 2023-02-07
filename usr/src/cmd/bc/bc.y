@@ -761,7 +761,7 @@ routput(int *p)
 	if (p >= &b_space[0] && p < &b_space[b_sp_max]) {
 		/* part of a bundle */
 		while (*p != 0)
-			routput((int *)*p++);
+			routput((int *)(uintptr_t)*p++);
 	}
 	else
 		printf((char *)p);	 /* character string */
