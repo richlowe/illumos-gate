@@ -693,7 +693,7 @@ int	x;
 		errprint(gettext("Core limit reached"));
 		edone(0100);
 	}
-	if (j = (unsigned)i % sizeof(int)) {	/*check alignment for 3B*/
+	if (j = (unsigned long)i % sizeof(long)) {	/*check alignment for 3B*/
 		j = sizeof(int) - j;		/*only init calls should need this*/
 		if ((k = sbrk(j)) == (char *) -1) {
 			errprint("Core limit reached");

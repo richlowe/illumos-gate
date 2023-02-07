@@ -387,6 +387,7 @@ COMMON_SUBDIRS=	\
 	tput		\
 	tr		\
 	trapstat	\
+	troff		\
 	true		\
 	tty		\
 	ttymon		\
@@ -472,7 +473,6 @@ COMMON_SUBDIRS=	\
 # sendmail - not 64bit clean (probably our build of it is hosed)
 # sh - not 64bit clean
 # srchtxt - not 64bit clean
-# troff - not 64bit clean
 # tsol - not ported (or 64bit clean)
 # truss - not ported
 # vi - not 64bit clean / not ported
@@ -508,7 +508,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	sendmail	\
 	sh		\
 	srchtxt		\
-	troff		\
 	tsol		\
 	truss		\
 	volcheck	\

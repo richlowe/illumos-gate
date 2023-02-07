@@ -44,14 +44,14 @@ $(not_aarch64)file path=usr/bin/eqn mode=0555
 file path=usr/bin/indxbib mode=0555
 file path=usr/bin/lookbib mode=0555
 $(not_aarch64)file path=usr/bin/neqn mode=0555
-$(not_aarch64)file path=usr/bin/nroff mode=0555
+file path=usr/bin/nroff mode=0555
 file path=usr/bin/refer mode=0555
 file path=usr/bin/roffbib mode=0555
 file path=usr/bin/soelim mode=0555
 file path=usr/bin/sortbib mode=0555
-$(not_aarch64)file path=usr/bin/ta mode=0555
+file path=usr/bin/ta mode=0555
 file path=usr/bin/tbl mode=0555
-$(not_aarch64)file path=usr/bin/troff mode=0555
+file path=usr/bin/troff mode=0555
 file path=usr/bin/ul mode=0555
 file path=usr/bin/vgrind mode=0555
 dir  path=usr/lib
@@ -219,11 +219,11 @@ hardlink path=usr/lib/font/devpost/charlib/~= target=./~
 dir  path=usr/lib/font/devpost/fontmaps group=lp
 file path=usr/lib/font/devpost/fontmaps/post group=lp mode=0444
 file path=usr/lib/font/makedev group=lp mode=0555
-dir path=usr/lib/refer
+dir  path=usr/lib/refer
 file path=usr/lib/refer/hunt mode=0555
 file path=usr/lib/refer/inv mode=0555
 file path=usr/lib/refer/mkey mode=0555
-dir path=usr/lib/refer/papers
+dir  path=usr/lib/refer/papers
 file path=usr/lib/refer/papers/Rbstjissue
 file path=usr/lib/refer/papers/Rv7man
 file path=usr/lib/refer/papers/runinv mode=0755
@@ -232,70 +232,70 @@ file path=usr/lib/vfontedpr mode=0555
 file path=usr/lib/vgrindefs mode=0444
 dir  path=usr/share
 dir  path=usr/share/lib
-$(not_aarch64)dir path=usr/share/lib/nterm
-$(not_aarch64)file path=usr/share/lib/nterm/tab.2631
-$(not_aarch64)file path=usr/share/lib/nterm/tab.2631-c
-$(not_aarch64)file path=usr/share/lib/nterm/tab.2631-e
-$(not_aarch64)file path=usr/share/lib/nterm/tab.300
-$(not_aarch64)file path=usr/share/lib/nterm/tab.300-12
-$(not_aarch64)file path=usr/share/lib/nterm/tab.300S
-$(not_aarch64)file path=usr/share/lib/nterm/tab.300S-12
-$(not_aarch64)hardlink path=usr/share/lib/nterm/tab.300s \
+dir  path=usr/share/lib/nterm
+file path=usr/share/lib/nterm/tab.2631
+file path=usr/share/lib/nterm/tab.2631-c
+file path=usr/share/lib/nterm/tab.2631-e
+file path=usr/share/lib/nterm/tab.300
+file path=usr/share/lib/nterm/tab.300-12
+file path=usr/share/lib/nterm/tab.300S
+file path=usr/share/lib/nterm/tab.300S-12
+hardlink path=usr/share/lib/nterm/tab.300s \
     target=../../../../usr/share/lib/nterm/tab.300S
-$(not_aarch64)hardlink path=usr/share/lib/nterm/tab.300s-12 \
+hardlink path=usr/share/lib/nterm/tab.300s-12 \
     target=../../../../usr/share/lib/nterm/tab.300S-12
-$(not_aarch64)file path=usr/share/lib/nterm/tab.37
-$(not_aarch64)file path=usr/share/lib/nterm/tab.382
-$(not_aarch64)file path=usr/share/lib/nterm/tab.4000A
-$(not_aarch64)hardlink path=usr/share/lib/nterm/tab.4000a \
+file path=usr/share/lib/nterm/tab.37
+file path=usr/share/lib/nterm/tab.382
+file path=usr/share/lib/nterm/tab.4000A
+hardlink path=usr/share/lib/nterm/tab.4000a \
     target=../../../../usr/share/lib/nterm/tab.4000A
-$(not_aarch64)file path=usr/share/lib/nterm/tab.450
-$(not_aarch64)file path=usr/share/lib/nterm/tab.450-12
-$(not_aarch64)file path=usr/share/lib/nterm/tab.832
-$(not_aarch64)file path=usr/share/lib/nterm/tab.8510
-$(not_aarch64)file path=usr/share/lib/nterm/tab.X
-$(not_aarch64)file path=usr/share/lib/nterm/tab.lp
-$(not_aarch64)file path=usr/share/lib/nterm/tab.tn300
+file path=usr/share/lib/nterm/tab.450
+file path=usr/share/lib/nterm/tab.450-12
+file path=usr/share/lib/nterm/tab.832
+file path=usr/share/lib/nterm/tab.8510
+file path=usr/share/lib/nterm/tab.X
+file path=usr/share/lib/nterm/tab.lp
+file path=usr/share/lib/nterm/tab.tn300
 $(not_aarch64)dir path=usr/share/lib/pub
 $(not_aarch64)file path=usr/share/lib/pub/ascii
 $(not_aarch64)file path=usr/share/lib/pub/eqnchar
 $(not_aarch64)file path=usr/share/lib/pub/greek
 $(not_aarch64)file path=usr/share/lib/pub/iso
 dir  path=usr/share/lib/tmac
-$(not_aarch64)file path=usr/share/lib/tmac/acm.me
-$(not_aarch64)file path=usr/share/lib/tmac/an
-$(not_aarch64)file path=usr/share/lib/tmac/ansun
-$(not_aarch64)file path=usr/share/lib/tmac/ansun.tbl
-$(not_aarch64)file path=usr/share/lib/tmac/bib
-$(not_aarch64)file path=usr/share/lib/tmac/chars.me
-$(not_aarch64)file path=usr/share/lib/tmac/deltext.me
-$(not_aarch64)file path=usr/share/lib/tmac/e
-$(not_aarch64)file path=usr/share/lib/tmac/eqn.me
-$(not_aarch64)file path=usr/share/lib/tmac/float.me
-$(not_aarch64)file path=usr/share/lib/tmac/footnote.me
-$(not_aarch64)file path=usr/share/lib/tmac/index.me
-$(not_aarch64)file path=usr/share/lib/tmac/local.me
-$(not_aarch64)file path=usr/share/lib/tmac/m
-$(not_aarch64)file path=usr/share/lib/tmac/mmn
-$(not_aarch64)file path=usr/share/lib/tmac/mmt
-$(not_aarch64)file path=usr/share/lib/tmac/ms.acc
-$(not_aarch64)file path=usr/share/lib/tmac/ms.cov
-$(not_aarch64)file path=usr/share/lib/tmac/ms.eqn
-$(not_aarch64)file path=usr/share/lib/tmac/ms.ref
-$(not_aarch64)file path=usr/share/lib/tmac/ms.tbl
-$(not_aarch64)file path=usr/share/lib/tmac/ms.ths
-$(not_aarch64)file path=usr/share/lib/tmac/ms.toc
-$(not_aarch64)file path=usr/share/lib/tmac/null.me
-$(not_aarch64)file path=usr/share/lib/tmac/refer.me
-$(not_aarch64)file path=usr/share/lib/tmac/s
-$(not_aarch64)file path=usr/share/lib/tmac/sh.me
-$(not_aarch64)file path=usr/share/lib/tmac/tbl.me
-$(not_aarch64)file path=usr/share/lib/tmac/thesis.me
+file path=usr/share/lib/tmac/acm.me
+file path=usr/share/lib/tmac/an
+file path=usr/share/lib/tmac/ansun
+file path=usr/share/lib/tmac/ansun.tbl
+file path=usr/share/lib/tmac/bib
+file path=usr/share/lib/tmac/chars.me
+file path=usr/share/lib/tmac/deltext.me
+file path=usr/share/lib/tmac/e
+file path=usr/share/lib/tmac/eqn.me
+file path=usr/share/lib/tmac/float.me
+file path=usr/share/lib/tmac/footnote.me
+file path=usr/share/lib/tmac/index.me
+file path=usr/share/lib/tmac/local.me
+file path=usr/share/lib/tmac/m
+file path=usr/share/lib/tmac/mmn
+file path=usr/share/lib/tmac/mmt
+file path=usr/share/lib/tmac/ms.acc
+file path=usr/share/lib/tmac/ms.cov
+file path=usr/share/lib/tmac/ms.eqn
+file path=usr/share/lib/tmac/ms.ref
+file path=usr/share/lib/tmac/ms.tbl
+file path=usr/share/lib/tmac/ms.ths
+file path=usr/share/lib/tmac/ms.toc
+file path=usr/share/lib/tmac/null.me
+file path=usr/share/lib/tmac/refer.me
+file path=usr/share/lib/tmac/s
+file path=usr/share/lib/tmac/sh.me
+file path=usr/share/lib/tmac/tbl.me
+file path=usr/share/lib/tmac/thesis.me
 file path=usr/share/lib/tmac/tmac.bib
 file path=usr/share/lib/tmac/tmac.vgrind
-$(not_aarch64)file path=usr/share/lib/tmac/tz.map
-$(not_aarch64)file path=usr/share/lib/tmac/v
-$(not_aarch64)file path=usr/share/lib/tmac/vgrind
+file path=usr/share/lib/tmac/tz.map
+file path=usr/share/lib/tmac/v
+file path=usr/share/lib/tmac/vgrind
 dir  path=usr/share/man
 dir  path=usr/share/man/man1
 file path=usr/share/man/man1/addbib.1
