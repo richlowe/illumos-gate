@@ -818,6 +818,8 @@ find_stack(uintptr_t sp)
 	prgreg_t tref = Lsp->pr_reg[R_G7];
 #elif defined(__amd64)
 	prgreg_t tref = Lsp->pr_reg[REG_FS];
+#elif defined(__aarch64__)
+	prgreg_t tref = Lsp->pr_reg[REG_TP];
 #elif defined(__i386)
 	prgreg_t tref = Lsp->pr_reg[GS];
 #endif
@@ -874,7 +876,7 @@ find_stack(uintptr_t sp)
 			(void) fprintf(stderr,
 			    "cannot get thread handle for "
 			    "lwp#%d, error=%d, tref=0x%.8lx\n",
-			    (int)lwpid, error, (long)tref);
+			    (intptr_t)lwpid, error, (long)tref);
 		return (NULL);
 	}
 
@@ -931,6 +933,8 @@ get_tid(struct callstack *Stk)
 #elif defined(__amd64)
 	prgreg_t tref = (data_model == PR_MODEL_LP64) ?
 	    Lsp->pr_reg[REG_FS] : Lsp->pr_reg[REG_GS];
+#elif defined(__aarch64__)
+	prgreg_t tref = Lsp->pr_reg[REG_TP];
 #elif defined(__i386)
 	prgreg_t tref = Lsp->pr_reg[GS];
 #endif
@@ -1553,6 +1557,8 @@ function_return(private_t *pri, struct callstack *Stk)
 #define	FPADJUST	0
 #elif defined(__amd64)
 #define	FPADJUST	8
+#elif defined(__aarch64__)
+#define	FPADJUST	8
 #elif defined(__i386)
 #define	FPADJUST	4
 #endif
@@ -1741,7 +1747,33 @@ get_arguments(long *argp)
 
 #endif	/* __sparc */
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__aarch64__)
+
+uintptr_t
+get_return_address(uintptr_t *psp)
+{
+	uintptr_t rpc;
+	uintptr_t sp = *psp;
+
+	if (Pread(Proc, &rpc, sizeof (rpc), sp) != sizeof (rpc))
+		return (0);
+	/*
+	 * Ignore arguments pushed on the stack.  See comments in
+	 * get_arguments().
+	 */
+	return (rpc);
+}
+
+int
+get_arguments(long *argp)
+{
+	/* XXXARM: No saveargs yet */
+	return (0);
+}
+
+#endif	/* __aarch64__ */
+
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 
 uintptr_t
 previous_fp(uintptr_t fp, uintptr_t *rpc)

@@ -405,6 +405,9 @@ checkproc(private_t *pri)
 #elif defined(__i386)
 		(void) Lgetareg(Lwp, R_PC, &pc);
 		(void) Lputareg(Lwp, EAX, (prgreg_t)what);
+#elif defined(__aarch64__)
+		(void) Lgetareg(Lwp, R_PC, &pc);
+		(void) Lputareg(Lwp, REG_X0, (prgreg_t)what);
 #else
 #error "unrecognized architecture"
 #endif

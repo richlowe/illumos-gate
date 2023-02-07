@@ -937,7 +937,7 @@ showargs(private_t *pri, int raw)
 	pri->length = 0;
 	ptrsize = (data_model == PR_MODEL_LP64)? 8 : 4;
 
-#if defined(__i386) || defined(__amd64)	/* XX64 */
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)	/* XX64 */
 	ap = (long)Lsp->pr_reg[R_SP];
 	fail = (Pread(Proc, &nargs, sizeof (nargs), ap) != sizeof (nargs));
 	ap += ptrsize;
