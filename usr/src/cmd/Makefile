@@ -210,6 +210,7 @@ COMMON_SUBDIRS=	\
 	kbd		\
 	keyserv		\
 	killall		\
+	krb5		\
 	kvmstat		\
 	last		\
 	lastcomm	\
@@ -465,7 +466,6 @@ COMMON_SUBDIRS=	\
 # file - wants bits of sys/core.h 64bit apps can't see
 # gss - not 64bit clean
 # isns - not 64bit clean
-# krb5 - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
 # nohup - not ported (header bits gone awry)
 # oawk - not 64bit clean?
@@ -489,7 +489,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	hal		\
 	gss		\
 	isns		\
-	krb5		\
 	latencytop	\
 	luxadm		\
 	nohup		\

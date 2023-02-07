@@ -46,7 +46,8 @@ usage()
 int
 main(int argc, char **argv)
 {
-	char c, fqdn[MAXHOSTNAMELEN];
+	int c;
+	char fqdn[MAXHOSTNAMELEN];
 	int ret = 0;
 
 	(void) setlocale(LC_ALL, "");
