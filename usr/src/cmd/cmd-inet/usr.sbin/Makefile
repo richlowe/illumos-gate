@@ -42,8 +42,8 @@ ROOTFS_PROG=	hostconfig route soconfig
 SBINLINKS=	hostconfig route
 
 RPCSVCPROG=	hostconfig
-AUDITPROG=	in.rexecd in.rshd in.telnetd
-PAMPROG=	in.rexecd in.rshd in.telnetd
+AUDITPROG=	in.rexecd in.rlogind in.rshd in.telnetd
+PAMPROG=	in.rexecd in.rlogind in.rshd in.telnetd
 SOCKETPROG=	6to4relay arp hostconfig if_mpadm in.comsat \
 		in.fingerd in.rarpd in.rexecd in.rlogind in.rshd \
 		in.rwhod in.telnetd in.tftpd ipaddrsel ndp route
@@ -64,14 +64,10 @@ K5RSHDOBJS=	in.rshd.o
 K5TELNETOBJS=	in.telnetd.o
 SRCS=		$(PROGSRCS) $(OTHERSRC)
 
-SUBDIRS=	in.rdisc \
-		in.talkd inetadm inetconv ipmpstat ipqosconf \
-		nwamadm nwamcfg routeadm snoop sppptun \
-		wificonfig ifconfig traceroute ping ipsecutils ipadm \
-		ilbadm
-
-# XXXARM: not 64bit clean
-$(NOT_AARCH64_BLD)SUBDIRS += in.routed
+SUBDIRS=	ifconfig ilbadm in.rdisc in.routed \
+		in.talkd inetadm inetconv ipadm ipmpstat ipqosconf ipsecutils \
+		nwamadm nwamcfg ping routeadm \
+		snoop sppptun traceroute wificonfig
 
 MSGSUBDIRS=	ifconfig ilbadm in.routed in.talkd \
 		inetadm inetconv ipadm ipmpstat ipqosconf ipsecutils \
