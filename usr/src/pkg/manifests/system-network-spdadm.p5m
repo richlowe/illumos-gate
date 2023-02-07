@@ -36,9 +36,9 @@ set name=info.classification value=org.opensolaris.category.2008:System/Hardware
 set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
-$(not_aarch64)dir path=usr/lib/rcm
-$(not_aarch64)dir path=usr/lib/rcm/scripts
-$(not_aarch64)file path=usr/lib/rcm/scripts/SUNW,ibsdpu.sh mode=0555
+dir  path=usr/lib/rcm
+dir  path=usr/lib/rcm/scripts
+file path=usr/lib/rcm/scripts/SUNW,ibsdpu.sh mode=0555
 dir  path=usr/sbin
 file path=usr/sbin/sdpadm mode=0555
 dir  path=usr/share/man/man8

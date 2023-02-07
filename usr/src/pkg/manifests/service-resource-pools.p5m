@@ -54,9 +54,9 @@ $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libpool.so target=libpool.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libpool.so.1
 link path=usr/lib/libpool.so target=./libpool.so.1
 file path=usr/lib/libpool.so.1
-$(not_aarch64)dir path=usr/lib/rcm
-$(not_aarch64)dir path=usr/lib/rcm/modules
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_pool_rcm.so mode=0555
+dir  path=usr/lib/rcm
+dir  path=usr/lib/rcm/modules
+file path=usr/lib/rcm/modules/SUNW_pool_rcm.so mode=0555
 dir  path=usr/sbin
 file path=usr/sbin/pooladm mode=0555
 file path=usr/sbin/poolbind mode=0555
