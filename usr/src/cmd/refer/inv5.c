@@ -13,6 +13,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <locale.h>
 
 extern void err();
@@ -45,7 +46,7 @@ recopy(FILE *ft, FILE *fb, FILE *fa, int nhash)
 		fprintf(stderr, gettext("Changing hash value to old %d\n"), n);
 	fclose(fa);
 	if (iflong)
-		getfun = (int(*)())getl;
+		getfun = (int(*)())(uintptr_t)getl;
 	else
 		getfun = getw;
 	for (i = 0; i < n; i++) {

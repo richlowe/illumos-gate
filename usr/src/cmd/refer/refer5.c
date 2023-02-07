@@ -17,6 +17,8 @@
 #define	NFLAB 3000		/* number of bytes to record all labels */
 #define	NLABC 1000		/* max number of labels */
 
+#include <libintl.h>
+
 static char sig[MXSIG];
 static char bflab[NFLAB];
 static char *labtab[NLABC];

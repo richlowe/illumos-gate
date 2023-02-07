@@ -13,6 +13,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 static void putl(long, FILE *);

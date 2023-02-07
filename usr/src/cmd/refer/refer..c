@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
+#include <sys/types.h>
 
 #define FLAG 003
 #define AFLAG 007

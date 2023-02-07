@@ -13,6 +13,7 @@
  */
 
 #include <stdio.h>
+#include <sys/types.h>
 
 #define	unopen(fil) {if (fil != NULL) {fclose(fil); fil = NULL; }}
 
@@ -102,8 +103,8 @@ huntmain(int argc, char *argv[])
 			argc--;
 			argv++;
 			soutput = argv[1];
-			if ((int)argv[2] < 16000) {
-				soutlen = (int)argv[2];
+			if (atoi(argv[2]) < 16000) {
+				soutlen = atoi(argv[2]);
 				argc--;
 				argv++;
 			}
@@ -112,8 +113,8 @@ huntmain(int argc, char *argv[])
 			argc--;
 			argv++;
 			tagout = argv[1];
-			if ((int)argv[2] < 16000) {
-				taglen = (int)argv[2];
+			if (atoi(argv[2]) < 16000) {
+				taglen = atoi(argv[2]);
 				argc--;
 				argv++;
 			}

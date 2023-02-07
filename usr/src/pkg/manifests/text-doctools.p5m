@@ -35,20 +35,20 @@ set name=info.classification \
 set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
-$(not_aarch64)file path=usr/bin/addbib mode=0555
+file path=usr/bin/addbib mode=0555
 file path=usr/bin/checkeq mode=0555
 file path=usr/bin/checknr mode=0555
 file path=usr/bin/deroff mode=0555
 file path=usr/bin/diffmk mode=0555
 $(not_aarch64)file path=usr/bin/eqn mode=0555
-$(not_aarch64)file path=usr/bin/indxbib mode=0555
-$(not_aarch64)file path=usr/bin/lookbib mode=0555
+file path=usr/bin/indxbib mode=0555
+file path=usr/bin/lookbib mode=0555
 $(not_aarch64)file path=usr/bin/neqn mode=0555
 $(not_aarch64)file path=usr/bin/nroff mode=0555
-$(not_aarch64)file path=usr/bin/refer mode=0555
-$(not_aarch64)file path=usr/bin/roffbib mode=0555
+file path=usr/bin/refer mode=0555
+file path=usr/bin/roffbib mode=0555
 file path=usr/bin/soelim mode=0555
-$(not_aarch64)file path=usr/bin/sortbib mode=0555
+file path=usr/bin/sortbib mode=0555
 $(not_aarch64)file path=usr/bin/ta mode=0555
 $(not_aarch64)file path=usr/bin/tbl mode=0555
 $(not_aarch64)file path=usr/bin/troff mode=0555
@@ -219,14 +219,14 @@ hardlink path=usr/lib/font/devpost/charlib/~= target=./~
 dir  path=usr/lib/font/devpost/fontmaps group=lp
 file path=usr/lib/font/devpost/fontmaps/post group=lp mode=0444
 file path=usr/lib/font/makedev group=lp mode=0555
-$(not_aarch64)dir path=usr/lib/refer
-$(not_aarch64)file path=usr/lib/refer/hunt mode=0555
-$(not_aarch64)file path=usr/lib/refer/inv mode=0555
-$(not_aarch64)file path=usr/lib/refer/mkey mode=0555
-$(not_aarch64)dir path=usr/lib/refer/papers
-$(not_aarch64)file path=usr/lib/refer/papers/Rbstjissue
-$(not_aarch64)file path=usr/lib/refer/papers/Rv7man
-$(not_aarch64)file path=usr/lib/refer/papers/runinv mode=0755
+dir path=usr/lib/refer
+file path=usr/lib/refer/hunt mode=0555
+file path=usr/lib/refer/inv mode=0555
+file path=usr/lib/refer/mkey mode=0555
+dir path=usr/lib/refer/papers
+file path=usr/lib/refer/papers/Rbstjissue
+file path=usr/lib/refer/papers/Rv7man
+file path=usr/lib/refer/papers/runinv mode=0755
 link path=usr/lib/tmac target=../share/lib/tmac
 file path=usr/lib/vfontedpr mode=0555
 file path=usr/lib/vgrindefs mode=0444
@@ -291,7 +291,7 @@ $(not_aarch64)file path=usr/share/lib/tmac/s
 $(not_aarch64)file path=usr/share/lib/tmac/sh.me
 $(not_aarch64)file path=usr/share/lib/tmac/tbl.me
 $(not_aarch64)file path=usr/share/lib/tmac/thesis.me
-$(not_aarch64)file path=usr/share/lib/tmac/tmac.bib
+file path=usr/share/lib/tmac/tmac.bib
 file path=usr/share/lib/tmac/tmac.vgrind
 $(not_aarch64)file path=usr/share/lib/tmac/tz.map
 $(not_aarch64)file path=usr/share/lib/tmac/v

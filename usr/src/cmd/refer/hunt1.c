@@ -15,6 +15,8 @@
 #include <locale.h>
 #include <stdio.h>
 #include <assert.h>
+#include <sys/types.h>
+
 extern char refdir[];
 extern int keepold;
 extern char *fgnames[];
@@ -101,8 +103,8 @@ main(int argc, char *argv[])
 			argc--;
 			argv++;
 			soutput = argv[1];
-			if ((int)argv[2] < 16000) {
-				soutlen = (int)argv[2];
+			if (atoi(argv[2]) < 16000) {
+				soutlen = atoi(argv[2]);
 				argc--;
 				argv++;
 			}

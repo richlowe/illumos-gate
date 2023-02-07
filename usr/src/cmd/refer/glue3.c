@@ -14,6 +14,8 @@
 
 #include "refer..c"
 #include <string.h>
+#include <sys/types.h>
+
 #define	move(x, y) close(y); dup(x); close(x);
 
 extern void err();
@@ -81,12 +83,12 @@ callhunt(char *in, char *out, char *arg, int outlen)
 	argv[2] = in;
 	argv[3] = "-t";
 	argv[4] = out;
-	argv[5] = (char *)outlen;
+	argv[5] = (char *)(uintptr_t)outlen;
 	argv[6] = "-T";
 	argv[7] = "-F1";
 	argv[8] = "-o";
 	argv[9] = one;
-	argv[10] = (char *)onelen;
+	argv[10] = (char *)(uintptr_t)onelen;
 	argv[11] = abuff;
 	strcpy(abuff, arg);
 	if (strlen(abuff) > ALEN)

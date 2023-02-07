@@ -14,6 +14,7 @@
 
 #include "refer..c"
 #include <locale.h>
+#include <stdlib.h>
 
 int newr[250];
 
@@ -103,7 +104,6 @@ recopy(char *fnam)
 	int wsize = 50;
 	int finalrn;
 	char sig[MXSIG];
-	extern int *realloc();
 
 	wref = (int *)calloc((unsigned)wsize, (unsigned)sizeof (int));
 	fclose(ftemp);

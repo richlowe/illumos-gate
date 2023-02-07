@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/types.h>
+
 #define	TXTLEN 1000
 
 char *outbuf = 0;
@@ -108,10 +110,10 @@ baddrop(unsigned *mptr, int nf, FILE *fc, int nitem,
 		ar[na++] = "fgrep";
 		ar[na++] = "-r";
 		ar[na++] = "-n";
-		ar[na++] = (char *)need;
+		ar[na++] = (char *)(uintptr_t)need;
 		ar[na++] = "-i";
 		ar[na++] = output;
-		ar[na++] = (char *)len;
+		ar[na++] = (char *)(uintptr_t)len;
 		for (j = 0; j < nitem; j++)
 			ar[na++] = qitem[j];
 #ifdef D1

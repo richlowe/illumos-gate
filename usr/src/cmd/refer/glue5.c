@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <sys/types.h>
 /*
  * fgrep -- print all lines containing any of a set of keywords
  *
@@ -76,12 +77,12 @@ fgrep(int argc, char **argv)
 				rflag++;
 				break;
 			case 'n': /* number of answers needed */
-				need = (int)xargv[1];
+				need = (int)(uintptr_t)xargv[1];
 				xargv++; xargc--;
 				break;
 			case 'i':
 				instr = xargv[1];
-				inct = (int)xargv[2]+2;
+				inct = (int)(uintptr_t)xargv[2]+2;
 #if D2
 fprintf(stderr, "inct %d xargv.2. %o %d\n", inct, xargv[2], xargv[2]);
 #endif

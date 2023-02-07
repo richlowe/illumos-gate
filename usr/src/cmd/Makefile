@@ -318,6 +318,7 @@ COMMON_SUBDIRS=	\
 	ramdiskadm	\
 	rcap		\
 	rctladm		\
+	refer		\
 	regcmp		\
 	renice		\
 	rm		\
@@ -466,7 +467,6 @@ COMMON_SUBDIRS=	\
 # nohup - not ported (header bits gone awry)
 # oawk - not 64bit clean?
 # prtdiag - not ported
-# refer - not 64bit clean
 # rcm_daemon - not 64bit clean
 # sendmail - not 64bit clean (probably our build of it is hosed)
 # sh - not 64bit clean
@@ -501,7 +501,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	policykit	\
 	powertop	\
 	prtdiag		\
-	refer		\
 	rcm_daemon	\
 	rmformat	\
 	rmvolmgr	\
