@@ -66,12 +66,12 @@ SRCS=		$(PROGSRCS) $(OTHERSRC)
 
 SUBDIRS=	in.rdisc \
 		in.talkd inetadm inetconv ipmpstat ipqosconf \
-		nwamadm nwamcfg routeadm snoop \
+		nwamadm nwamcfg routeadm snoop sppptun \
 		wificonfig ifconfig traceroute ping ipsecutils ipadm \
 		ilbadm
 
 # XXXARM: not 64bit clean
-$(NOT_AARCH64_BLD)SUBDIRS += in.routed sppptun
+$(NOT_AARCH64_BLD)SUBDIRS += in.routed
 
 MSGSUBDIRS=	ifconfig ilbadm in.routed in.talkd \
 		inetadm inetconv ipadm ipmpstat ipqosconf ipsecutils \

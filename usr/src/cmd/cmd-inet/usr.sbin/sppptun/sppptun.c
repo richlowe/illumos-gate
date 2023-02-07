@@ -52,7 +52,7 @@ static int verbose;		/* -v on command line */
 struct attach_data {
 	ppptun_lname appstr;    /* String to append to interface name (PPA) */
 	ppptun_atype localaddr; /* Local interface address */
-	uint_t locallen;	/* Length of local address */
+	size_t locallen;	/* Length of local address */
 	uint_t sap;		/* SAP for PPPoE */
 };
 
