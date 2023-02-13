@@ -59,7 +59,7 @@ file path=usr/xpg4/bin/expr mode=0555
 link path=usr/xpg4/bin/fc target=../../bin/alias
 link path=usr/xpg4/bin/fg target=../../bin/alias
 link path=usr/xpg4/bin/fgrep target=../../bin/grep
-$(not_aarch64)file path=usr/xpg4/bin/file mode=0555
+file path=usr/xpg4/bin/file mode=0555
 file path=usr/xpg4/bin/find mode=0555
 file path=usr/xpg4/bin/getconf mode=0555
 link path=usr/xpg4/bin/getopts target=../../bin/alias
