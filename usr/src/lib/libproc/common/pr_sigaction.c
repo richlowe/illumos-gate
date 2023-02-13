@@ -26,7 +26,6 @@
  * Copyright 2017 Hayashi Naoyuki
  */
 
-
 #include <sys/isa_defs.h>
 
 #include <stdlib.h>
