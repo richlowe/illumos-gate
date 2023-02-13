@@ -149,6 +149,7 @@ COMMON_SUBDIRS=	\
 	fdisk		\
 	ficl		\
 	filesync	\
+	file		\
 	find		\
 	flowadm		\
 	flowstat	\
@@ -456,7 +457,6 @@ COMMON_SUBDIRS=	\
 # csh - not 64bit clean
 # csplit - not 64bit clean
 # eqn - not 64bit clean
-# file - wants bits of sys/core.h 64bit apps can't see
 # format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
 # isns - not 64bit clean
@@ -488,7 +488,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	csh		\
 	csplit		\
 	eqn		\
-	file		\
 	hal		\
 	format		\
 	gss		\
