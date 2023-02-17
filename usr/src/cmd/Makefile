@@ -282,6 +282,7 @@ COMMON_SUBDIRS=	\
 	pcidr		\
 	pcieadm		\
 	pcieb		\
+	perl		\
 	pfexec		\
 	pfexecd		\
 	pg		\
@@ -437,7 +438,6 @@ COMMON_SUBDIRS=	\
 
 # XXXARM: Things not built on AArch64 yet
 # abi - not interesting
-# perl - not available for the cross
 # availdevs - needs libzfs (and libzfs_jni!?) (and not interesting)
 # bnu - uses FILE internals not available to LP64
 # hal - needs dbus, etc
@@ -479,7 +479,6 @@ COMMON_SUBDIRS=	\
 # ypcmd - not 64bit clean
 $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
-	perl		\
 	availdevs	\
 	bnu		\
 	cdrw		\

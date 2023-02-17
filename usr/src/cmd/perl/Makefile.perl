@@ -26,6 +26,9 @@ PERLBINDIR64 = $(PERLDIR)/bin
 $(BUILDPERL64)PERLBINDIR = $(PERLDIR)/bin/$(MACH)
 $(BUILDPERL32)PERLBINDIR64 = $(PERLDIR)/bin/$(MACH64)
 
+# XXXARM: the aarch64 cross build is not clean, yet
+$(AARCH64_BLD)CERRWARN += -_gcc=-Wno-attributes -_gcc=-Wno-unused-function
+
 PERLMOD = ../$(MODULE).pm
 PERLEXT = $(MODULE).so
 PERLXS = ../$(MODULE).xs
@@ -45,8 +48,8 @@ ROOTPERLEXT64 = $(ROOTPERLEXTDIR64)/$(MODULE).so
 
 XSUBPP = $(PERLBINDIR)/perl $(PERLDIR)/lib/ExtUtils/xsubpp \
 	-typemap $(PERLDIR)/lib/ExtUtils/typemap
-XSUBPP64 = $(PERLBINDIR64)/perl $(PERLDIR)/lib/ExtUtils/xsubpp \
-	-typemap $(PERLDIR)/lib/ExtUtils/typemap
+XSUBPP64 = $(PERLBINDIR64)/perl -I$(PERLLIBDIR64) \
+	$(PERLDIR)/lib/ExtUtils/xsubpp -typemap $(PERLDIR)/lib/ExtUtils/typemap
 
 # CFLAGS for perl, specifically.
 PCFLAGS= -DPERL_EUPXS_ALWAYS_EXPORT -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
