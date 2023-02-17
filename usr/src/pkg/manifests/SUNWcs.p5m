@@ -1682,8 +1682,7 @@ $(not_aarch64)depend type=require fmri=runtime/perl$(PERL_PKGVERS)
 #
 # intrd uses sun-solaris Perl modules
 #
-$(not_aarch64)depend type=require \
-    fmri=runtime/perl$(PERL_PKGVERS)/module/sun-solaris
+depend type=require fmri=runtime/perl$(PERL_PKGVERS)/module/sun-solaris
 #
 # shell/ksh93 provides the system /bin/sh
 depend type=require fmri=shell/ksh93
