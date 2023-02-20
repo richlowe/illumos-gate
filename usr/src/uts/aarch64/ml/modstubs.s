@@ -439,6 +439,7 @@ fcnname/**/_info:								\
 	STUB(nfssrv,		nfs_getfh,	nomod_minus_one);
 	STUB(nfssrv,		nfsl_flush,	nomod_minus_one);
 	STUB(nfssrv,		rfs4_check_delegated, nomod_zero);
+	STUB(nfssrv,		rfs4_clear_client_state, nomod_zero);
 	STUB(nfssrv,		mountd_args,	nomod_minus_one);
 	NO_UNLOAD_STUB(nfssrv,	rdma_start,	nomod_zero);
 	NO_UNLOAD_STUB(nfssrv,	nfs_svc,	nomod_zero);

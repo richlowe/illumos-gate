@@ -23,6 +23,7 @@
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2016 Joyent, Inc.
 # Copyright 2018 Nexenta Systems, Inc.
+# Copyright 2021 Tintri by DDN, Inc. All rights reserved.
 # Copyright 2022 Garrett D'Amore
 #
 
@@ -72,49 +73,51 @@ COMMON_MODULES_PROC_32BIT =	\
 #
 # MDB modules used for debugging kernels.
 #
-COMMON_MODULES_KVM =	\
-	arp		\
-	cpc		\
-	crypto		\
-	dtrace		\
-	emlxs		\
-	fcip		\
-	fcp		\
-	fctl		\
-	genunix		\
-	hook		\
-	neti		\
-	idm		\
-	ip		\
-	ipc		\
-	ipp		\
-	krtld		\
-	lofs		\
-	logindmux	\
-	mac		\
-	mm		\
-	mpt_sas		\
-	mr_sas		\
-	nsmb		\
-	ptm		\
-	random		\
-	s1394		\
-	scsi_vhci	\
-	sctp		\
-	sd		\
-	smbfs		\
-	smbsrv		\
-	sockfs		\
-	specfs		\
-	sppp		\
-	srpt		\
-	stmf		\
-	stmf_sbd	\
-	ufs		\
-	usba		\
+COMMON_MODULES_KVM = \
+	arp \
+	cpc \
+	crypto	\
+	dtrace	\
+	emlxs \
+	fcip \
+	fcp \
+	fctl \
+	genunix \
+	hook \
+	neti \
+	idm \
+	ip \
+	ipc \
+	ipp \
+	klmmod \
+	krtld \
+	lofs \
+	logindmux \
+	mac \
+	mm \
+	mpt_sas \
+	mr_sas \
+	nfs \
+	nsmb \
+	ptm \
+	random \
+	s1394 \
+	scsi_vhci \
+	sctp \
+	sd \
+	smbfs \
+	smbsrv \
+	sockfs \
+	specfs \
+	sppp \
+	srpt \
+	stmf \
+	stmf_sbd \
+	ufs \
+	usba \
 	zfs
 
 # XXXARM Needs porting
-$(NOT_AARCH64_BLD)COMMON_MODULES_KVM += qlc
+$(NOT_AARCH64_BLD)COMMON_MODULES_KVM += qlc pmcs
 
 include $(SRC)/Makefile.master

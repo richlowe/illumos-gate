@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/machlock.h>
 #include <sys/controlregs.h>
+#include <sys/thread.h>
 #endif
 
 #ifdef	__cplusplus
