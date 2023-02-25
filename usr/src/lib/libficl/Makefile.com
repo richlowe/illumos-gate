@@ -32,7 +32,8 @@ LZ4=		$(SRC)/common/lz4
 CSTD=	$(CSTD_GNU99)
 PNGLITE=	$(SRC)/common/pnglite
 CPPFLAGS +=	-I.. -I$(FICLDIR) -I$(FICLDIR)/emu -D_LARGEFILE64_SOURCE=1
-CPPFLAGS +=	-I$(PNGLITE) -I$(LZ4)
+# The in-tree headers should take precedence over the adjunct
+CPPFLAGS.first +=	-I$(PNGLITE) -I$(LZ4)
 CFLAGS += $(C_BIGPICFLAGS)
 CFLAGS64 += $(C_BIGPICFLAGS64)
 

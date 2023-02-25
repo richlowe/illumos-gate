@@ -18,7 +18,8 @@ PROG=	vtfontcvt
 OBJS=	vtfontcvt.o
 
 LZ4=	$(SRC)/common/lz4
-CPPFLAGS +=	-I$(LZ4)
+# The in-tree headers should take precedence over the adjunct
+CPPFLAGS.first +=	-I$(LZ4)
 LZ4_OBJS=	lz4.o
 OBJS	+=	$(LZ4_OBJS)
 

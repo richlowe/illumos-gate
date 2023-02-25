@@ -60,7 +60,6 @@ INCS += -I../common
 INCS += -I../../../uts/common/fs/zfs
 INCS += -I../../../uts/common/fs/zfs/lua
 INCS += -I../../../common/zfs
-INCS += -I../../../common/lz4
 INCS += -I../../../common
 INCS += -I../../libzutil/common
 
@@ -78,6 +77,8 @@ LDLIBS +=	-lcmdutils -lumem -lavl -lnvpair -lz -lc -lmd \
 		-lfakekernel -lzutil
 NATIVE_LIBS +=	libz.so
 CPPFLAGS.first =	-I$(SRC)/lib/libfakekernel/common
+# The in-tree headers should take precedence over the adjunct
+CPPFLAGS.first +=	-I../../../common/lz4
 CPPFLAGS +=	$(INCS)	-DDEBUG -D_FAKE_KERNEL
 
 

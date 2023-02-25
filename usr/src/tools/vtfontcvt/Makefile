@@ -19,6 +19,7 @@ include		../Makefile.tools
 include		$(CMDDIR)/Makefile.common
 
 NATIVE_LIBS	+= libumem.so
+CPPFLAGS	+= -I$(LZ4)
 CPPFLAGS	+= -I../../uts/common
 .KEEP_STATE:
 
