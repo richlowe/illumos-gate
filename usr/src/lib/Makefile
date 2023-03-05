@@ -72,7 +72,6 @@ SUBDIRS +=		\
 # libmilter -- seems 32bit and not 64bit clean
 # abi -- not ported/necessary
 # c_synonyms -- not ported/necessary
-# pylibbe, pysolaris, pyzfs -- no python yet
 # libdtrace_jni -- java
 # libzfs_jni -- java
 # libadt_jni -- java
@@ -98,9 +97,6 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	libresolv	\
 	libzfs_jni	\
 	policykit	\
-	pylibbe		\
-	pysolaris	\
-	pyzfs		\
 	smbclnt		\
 	libm1
 
@@ -280,6 +276,9 @@ SUBDIRS +=				\
 	passwdutil	\
 	pkcs11		\
 	print		\
+	pylibbe		\
+	pysolaris	\
+	pyzfs		\
 	raidcfg_plugins	\
 	rpcsec_gss	\
 	sasl_plugins	\
