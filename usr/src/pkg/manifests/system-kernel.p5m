@@ -121,7 +121,7 @@ file path=kernel/drv/$(ARCH64)/clone group=sys
 file path=kernel/drv/$(ARCH64)/cn group=sys
 file path=kernel/drv/$(ARCH64)/conskbd group=sys
 file path=kernel/drv/$(ARCH64)/consms group=sys
-$(not_aarch64)file path=kernel/drv/$(ARCH64)/cpuid group=sys
+file path=kernel/drv/$(ARCH64)/cpuid group=sys
 $(i386_ONLY)file path=kernel/drv/$(ARCH64)/cpunex group=sys
 file path=kernel/drv/$(ARCH64)/crypto group=sys
 file path=kernel/drv/$(ARCH64)/cryptoadm group=sys
@@ -198,7 +198,7 @@ file path=kernel/drv/clone.conf group=sys
 file path=kernel/drv/cn.conf group=sys
 file path=kernel/drv/conskbd.conf group=sys
 file path=kernel/drv/consms.conf group=sys
-$(not_aarch64)file path=kernel/drv/cpuid.conf group=sys
+file path=kernel/drv/cpuid.conf group=sys
 file path=kernel/drv/crypto.conf group=sys
 file path=kernel/drv/cryptoadm.conf group=sys
 file path=kernel/drv/devinfo.conf group=sys
