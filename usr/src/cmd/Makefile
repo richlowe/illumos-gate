@@ -73,6 +73,7 @@ COMMON_SUBDIRS=	\
 	captoinfo	\
 	cat		\
 	ccidadm		\
+	cdrw		\
 	cfgadm		\
 	checkeq		\
 	checknr		\
@@ -450,7 +451,6 @@ COMMON_SUBDIRS=	\
 # pcitool - not ported
 # powertop - not ported
 # rmformat - not ported (or useful?)
-# cdrw - needs dbus
 #
 # bc - not 64bit clean
 # cpc - not ported (nor libcpc)
@@ -481,7 +481,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
 	availdevs	\
 	bnu		\
-	cdrw		\
 	bc		\
 	cpc		\
 	csh		\

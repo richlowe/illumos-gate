@@ -450,7 +450,7 @@ open_au_read_stream(char *fname)
 	h->bstr_close = file_stream_close;
 	h->bstr_size = audio_stream_size;
 	h->bstr_rewind = au_stream_rewind;
-	h->bstr_private = (void *)data_size;
+	h->bstr_private = (void *)(uintptr_t)data_size;
 
 	return (h);
 
@@ -519,7 +519,7 @@ open_wav_read_stream(char *fname)
 	h->bstr_close = file_stream_close;
 	h->bstr_size = audio_stream_size;
 	h->bstr_rewind = wav_stream_rewind;
-	h->bstr_private = (void *)data_size;
+	h->bstr_private = (void *)(uintptr_t)data_size;
 
 	return (h);
 
