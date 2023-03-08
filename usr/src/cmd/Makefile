@@ -292,6 +292,7 @@ COMMON_SUBDIRS=	\
 	picl		\
 	plimit		\
 	plockstat	\
+	policykit	\
 	pools		\
 	power		\
 	ppgsz		\
@@ -443,7 +444,6 @@ COMMON_SUBDIRS=	\
 # hal - needs dbus, etc
 # latencytop - needs glib
 # pcitool - not ported
-# policykit - needs dbus
 # powertop - not ported
 # rmformat - not ported (or useful?)
 # rmvolmgr - needs dbus
@@ -497,7 +497,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	nohup		\
 	oawk		\
 	pcitool		\
-	policykit	\
 	powertop	\
 	prtdiag		\
 	refer		\

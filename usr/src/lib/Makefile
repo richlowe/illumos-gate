@@ -80,7 +80,6 @@ SUBDIRS +=		\
 # libresolv -- libresolv.so.1 for binary compat, not needed
 # libm1 -- not built because AArch64 has a special libm right now
 # hal -- heavy dependencies, little benefit
-# policykit -- heavy dependencies, little benefit
 # smbclnt -- low value, needs cross dtrace
 #
 # libcpc -- not ported
@@ -97,7 +96,6 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	libmvec		\
 	libresolv	\
 	libzfs_jni	\
-	policykit	\
 	pylibbe		\
 	pysolaris	\
 	pyzfs		\
@@ -279,6 +277,7 @@ SUBDIRS +=				\
 	pam_modules	\
 	passwdutil	\
 	pkcs11		\
+	policykit	\
 	print		\
 	raidcfg_plugins	\
 	rpcsec_gss	\
