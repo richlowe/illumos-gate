@@ -119,10 +119,10 @@ runner_server_message_handler (DBusConnection *connection,
 			pid = (GPid) dpid;
 
 			/*HAL_INFO (("Previously started process with pid %d exited", pid));*/
-			rp = g_hash_table_lookup (running_processes, (gpointer) pid);
+			rp = g_hash_table_lookup (running_processes, (gpointer)(uintptr_t) pid);
 			if (rp != NULL) {
 				rp->cb (rp->device, 0, 0, NULL, rp->data1, rp->data2);
-				g_hash_table_remove (running_processes, (gpointer) pid);
+				g_hash_table_remove (running_processes, (gpointer)(uintptr_t) pid);
 				g_free (rp);
 			}
 		}
@@ -403,7 +403,7 @@ hald_runner_start (HalDevice *device, const gchar *command_line, char **extra_en
 			rp->data1 = data1;
 			rp->data2 = data2;
 
-			g_hash_table_insert (running_processes, (gpointer) rp->pid, rp);
+			g_hash_table_insert (running_processes, (gpointer)(uintptr_t) rp->pid, rp);
 		}
 	} else {
 	  HAL_ERROR (("Error extracting out_pid from runner's Start()"));

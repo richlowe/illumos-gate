@@ -53,7 +53,7 @@ snmp_get_item(char *host, char *community, char *mib_item)
 	struct snmp_session session, *ss;
 	struct snmp_pdu *request = NULL, *result = NULL;
 	oid Oid[MAX_OID_LEN];
-	unsigned int oid_len = MAX_OID_LEN;
+	size_t oid_len = MAX_OID_LEN;
 
 	/* initialize the SNMP session */
 	snmp_sess_init(&session);
