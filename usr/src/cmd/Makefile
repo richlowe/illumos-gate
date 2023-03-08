@@ -326,6 +326,7 @@ COMMON_SUBDIRS=	\
 	rm		\
 	rmdir		\
 	rmmount		\
+	rmvolmgr	\
 	rmt		\
 	roles		\
 	rpcbind		\
@@ -449,7 +450,6 @@ COMMON_SUBDIRS=	\
 # pcitool - not ported
 # powertop - not ported
 # rmformat - not ported (or useful?)
-# rmvolmgr - needs dbus
 # cdrw - needs dbus
 #
 # bc - not 64bit clean
@@ -501,7 +501,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	refer		\
 	rcm_daemon	\
 	rmformat	\
-	rmvolmgr	\
 	sendmail	\
 	sh		\
 	srchtxt		\
