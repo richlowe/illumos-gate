@@ -35,11 +35,10 @@ dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global
 dir  path=lib/svc/manifest/system group=sys variant.opensolaris.zone=global
 dir  path=lib/svc/manifest/system/filesystem group=sys \
     variant.opensolaris.zone=global
-$(not_aarch64)file path=lib/svc/manifest/system/filesystem/rmvolmgr.xml \
-    group=sys mode=0444 variant.opensolaris.zone=global
-dir  path=lib/svc/method variant.opensolaris.zone=global
-$(not_aarch64)file path=lib/svc/method/svc-rmvolmgr mode=0555 \
+file path=lib/svc/manifest/system/filesystem/rmvolmgr.xml group=sys mode=0444 \
     variant.opensolaris.zone=global
+dir  path=lib/svc/method variant.opensolaris.zone=global
+file path=lib/svc/method/svc-rmvolmgr mode=0555 variant.opensolaris.zone=global
 dir  path=usr group=sys
 dir  path=usr/bin
 $(not_aarch64)file path=usr/bin/rmformat mode=4555
@@ -48,7 +47,7 @@ link path=usr/bin/rmumount target=./rmmount
 file path=usr/bin/volcheck mode=0555
 file path=usr/bin/volrmmount mode=0555
 dir  path=usr/lib
-$(not_aarch64)file path=usr/lib/rmvolmgr mode=0555
+file path=usr/lib/rmvolmgr mode=0555
 dir  path=usr/sbin
 link path=usr/sbin/rmmount target=../bin/rmmount
 dir  path=usr/share/man/man1
