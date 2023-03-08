@@ -43,14 +43,14 @@ $(not_aarch64)file path=lib/svc/method/svc-rmvolmgr mode=0555 \
 dir  path=usr group=sys
 dir  path=usr/bin
 $(not_aarch64)file path=usr/bin/rmformat mode=4555
-$(not_aarch64)file path=usr/bin/rmmount mode=0555
-$(not_aarch64)link path=usr/bin/rmumount target=./rmmount
+file path=usr/bin/rmmount mode=0555
+link path=usr/bin/rmumount target=./rmmount
 file path=usr/bin/volcheck mode=0555
 file path=usr/bin/volrmmount mode=0555
 dir  path=usr/lib
 $(not_aarch64)file path=usr/lib/rmvolmgr mode=0555
 dir  path=usr/sbin
-$(not_aarch64)link path=usr/sbin/rmmount target=../bin/rmmount
+link path=usr/sbin/rmmount target=../bin/rmmount
 dir  path=usr/share/man/man1
 file path=usr/share/man/man1/rmformat.1
 file path=usr/share/man/man1/rmmount.1
