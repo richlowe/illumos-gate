@@ -40,6 +40,7 @@ CORE_OBJS +=			\
 	bcopy.o			\
 	bitmap_arch.o		\
 	bzero.o			\
+	cpuid.o			\
 	ddi_arch.o		\
 	ip_ocsum.o		\
 	memchr.o		\

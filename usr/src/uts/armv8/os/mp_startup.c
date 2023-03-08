@@ -20,7 +20,6 @@
  */
 
 /*
- * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  */
 /*
@@ -30,12 +29,14 @@
 /*
  * Copyright (c) 2012, Joyent, Inc.  All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+ * Copyright 2017 Hayashi Naoyuki
  */
 
 #include <sys/types.h>
 #include <sys/thread.h>
-#include <sys/cpuvar.h>
 #include <sys/cpu.h>
+#include <sys/cpuid.h>
+#include <sys/cpuvar.h>
 #include <sys/t_lock.h>
 #include <sys/param.h>
 #include <sys/proc.h>
@@ -114,22 +115,17 @@ init_cpu_info(struct cpu *cp)
 {
 	processor_info_t *pi = &cp->cpu_type_info;
 
+	cp->cpu_m.mcpu_midr = read_midr();
+	cp->cpu_m.mcpu_revidr = read_revidr();
+
 	/*
 	 * Get clock-frequency property for the CPU.
 	 */
 	pi->pi_clock = (plat_get_cpu_clock(cp->cpu_id) + 500000) / 1000000;
 
-	strcpy(pi->pi_processor_type, "AArch64");
+	strlcpy(pi->pi_processor_type, "AArch64", PI_TYPELEN);
+	strlcat(pi->pi_fputypes, "AArch64", PI_FPUTYPE);
 
-	uint64_t aa64pfr0 = read_id_aa64pfr0();
-	uint64_t aa64isar0 = read_id_aa64isar0();
-	snprintf(pi->pi_fputypes, sizeof (pi->pi_fputypes) - 1, "%s%s%s%s%s%s",
-	    ((((aa64pfr0 >> 16) & 0xF) == 0)? "FP":""),
-	    ((((aa64pfr0 >> 20) & 0xF) == 0)? ".AdvSIMD":""),
-	    ((((aa64isar0 >> 16) & 0xF) == 1)? ".CRC32":""),
-	    ((((aa64isar0 >> 12) & 0xF) == 1)? ".SHA2":""),
-	    ((((aa64isar0 >> 8) & 0xF) == 1)? ".SHA1":""),
-	    ((((aa64isar0 >> 4) & 0xF) == 1)? ".AES":""));
 	/*
 	 * Current frequency in Hz.
 	 */
@@ -137,52 +133,21 @@ init_cpu_info(struct cpu *cp)
 
 	cp->cpu_idstr = kmem_zalloc(CPU_IDSTRLEN, KM_SLEEP);
 	snprintf(cp->cpu_idstr, CPU_IDSTRLEN - 1,
-	    "ARM 64bit MIDR=%08x REVIDR=%08x",
-	    (uint32_t)read_midr(),
-	    (uint32_t)read_revidr());
+	    "AArch64 (midr %08lx revidr %08lx)",
+	    cp->cpu_m.mcpu_midr,
+	    cp->cpu_m.mcpu_revidr);
 
-	cp->cpu_brandstr = kmem_zalloc(strlen(plat_get_cpu_str()) + 1,
-	    KM_SLEEP);
-	strcpy(cp->cpu_brandstr, plat_get_cpu_str());
-
-	cp->cpu_features = kmem_zalloc(120, KM_SLEEP);
-	if (((aa64pfr0 >> 16) & 0xF) == 0) {
-		if (cp->cpu_features[0]) strcat(cp->cpu_features, " ");
-		strcat(cp->cpu_features, "fp");
-	}
-	if (((aa64pfr0 >> 20) & 0xF) == 0) {
-		if (cp->cpu_features[0]) strcat(cp->cpu_features, " ");
-		strcat(cp->cpu_features, "asimd");
-	}
-	if (((aa64isar0 >> 4) & 0xF) == 1) {
-		if (cp->cpu_features[0]) strcat(cp->cpu_features, " ");
-		strcat(cp->cpu_features, "aes pmull");
-	}
-	if (((aa64isar0 >> 8) & 0xF) == 1) {
-		if (cp->cpu_features[0]) strcat(cp->cpu_features, " ");
-		strcat(cp->cpu_features, "sha1");
-	}
-	if (((aa64isar0 >> 12) & 0xF) == 1) {
-		if (cp->cpu_features[0]) strcat(cp->cpu_features, " ");
-		strcat(cp->cpu_features, "sha2");
-	}
-	if (((aa64isar0 >> 16) & 0xF) == 1) {
-		if (cp->cpu_features[0]) strcat(cp->cpu_features, " ");
-		strcat(cp->cpu_features, "crc32");
-	}
+	cp->cpu_brandstr = kmem_zalloc(CPU_IDSTRLEN, KM_SLEEP);
+	cpuid_brandstr(cp, cp->cpu_brandstr, CPU_IDSTRLEN);
 
 	cp->cpu_implementer = kmem_zalloc(16, KM_SLEEP);
-	sprintf(cp->cpu_implementer, "%02x",
-	    (uint32_t)((read_midr() >> 24) & 0xFF));
-	cp->cpu_variant = kmem_zalloc(16, KM_SLEEP);
-	sprintf(cp->cpu_variant, "%x",
-	    (uint32_t)((read_midr() >> 20) & 0xF));
-	cp->cpu_partnum = kmem_zalloc(16, KM_SLEEP);
-	sprintf(cp->cpu_partnum, "%03x",
-	    (uint32_t)((read_midr() >> 4) & 0xFFF));
+	cpuid_implementer(cp, cp->cpu_implementer, 16);
+
+	cp->cpu_partname = kmem_zalloc(16, KM_SLEEP);
+	cpuid_partname(cp, cp->cpu_partname, 16);
+
 	cp->cpu_revision = kmem_zalloc(16, KM_SLEEP);
-	sprintf(cp->cpu_revision, "%d", (uint32_t)(read_midr() & 0xF));
-	cp->cpu_chip = read_midr();
+	sprintf(cp->cpu_revision, "%ld", MIDR_REVISION(cp->cpu_m.mcpu_midr));
 
 	/*
 	 * Supported frequencies.
@@ -473,8 +438,7 @@ mp_startup_boot(void)
 	 */
 	CPUSET_ATOMIC_ADD(cpu_ready_set, cp->cpu_id);
 
-	cmn_err(CE_CONT, "cpu%d: %s\n", cp->cpu_id, cp->cpu_idstr);
-	cmn_err(CE_CONT, "cpu%d: %s\n", cp->cpu_id, cp->cpu_brandstr);
+	cmn_err(CE_CONT, "?cpu%d: %s\n", cp->cpu_id, cp->cpu_brandstr);
 	cmn_err(CE_CONT, "?cpu%d initialization complete - online\n",
 	    cp->cpu_id);
 
@@ -579,7 +543,9 @@ mach_cpucontext_init(void)
 	    (caddr_t)(uintptr_t)BOOT_VEC_BASE, MMU_PAGESIZE,
 	    btop(pa), PROT_READ | PROT_WRITE | PROT_EXEC, HAT_LOAD_NOCONSIST);
 
-	struct cpu_startup_data *cpu_data = (struct cpu_startup_data *)(BOOT_VEC_BASE + (uintptr_t)secondary_vec_end - (uintptr_t)secondary_vec_start);
+	struct cpu_startup_data *cpu_data = (struct cpu_startup_data *)
+	    (BOOT_VEC_BASE + (uintptr_t)secondary_vec_end -
+	    (uintptr_t)secondary_vec_start);
 	cpu_data->mair = read_mair();
 	cpu_data->tcr = read_tcr();
 	cpu_data->ttbr0 = read_ttbr0();
@@ -681,8 +647,8 @@ start_other_cpus(int cprboot)
 {
 	init_cpu_info(CPU);
 
-	cmn_err(CE_CONT, "cpu%d: %s\n", CPU->cpu_id, CPU->cpu_idstr);
-	cmn_err(CE_CONT, "cpu%d: %s\n", CPU->cpu_id, CPU->cpu_brandstr);
+	cmn_err(CE_CONT, "?cpu%d: %s\n", CPU->cpu_id, CPU->cpu_brandstr);
+
 	write_oslar_el1(0);
 	write_cntkctl(read_cntkctl() | 0x3);
 

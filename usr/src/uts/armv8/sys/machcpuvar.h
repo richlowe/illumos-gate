@@ -28,7 +28,7 @@
  */
 
 #ifndef _SYS_MACHCPUVAR_H
-#define _SYS_MACHCPUVAR_H
+#define	_SYS_MACHCPUVAR_H
 
 #ifndef	_ASM
 
@@ -57,30 +57,26 @@ struct	machcpu {
 
 	uint64_t	affinity;
 
-	char		*mcpu_features;
 	char		*mcpu_implementer;
-	char		*mcpu_variant;
-	char		*mcpu_partnum;
+	char		*mcpu_partname;
 	char		*mcpu_revision;
-	chipid_t	mcpu_chip;
+	uint64_t	mcpu_midr;
+	uint64_t	mcpu_revidr;
 };
 
 #ifndef NINTR_THREADS
 #define	NINTR_THREADS	(LOCK_LEVEL)	/* number of interrupt threads */
 #endif
 
-#define	cpu_asid cpu_m.mcpu_asid
-#define	cpu_asid_gen cpu_m.mcpu_asid_gen
+#define	cpu_asid	cpu_m.mcpu_asid
+#define	cpu_asid_gen	cpu_m.mcpu_asid_gen
 #define	cpu_current_hat cpu_m.mcpu_current_hat
-#define	cpu_softinfo cpu_m.mcpu_softinfo
-#define	cpu_pri cpu_m.mcpu_pri
+#define	cpu_implementer	cpu_m.mcpu_implementer
+#define	cpu_partname	cpu_m.mcpu_partname
+#define	cpu_pri		cpu_m.mcpu_pri
+#define	cpu_revision	cpu_m.mcpu_revision
+#define	cpu_softinfo	cpu_m.mcpu_softinfo
 
-#define	cpu_features		cpu_m.mcpu_features
-#define	cpu_implementer		cpu_m.mcpu_implementer
-#define	cpu_variant		cpu_m.mcpu_variant
-#define	cpu_partnum		cpu_m.mcpu_partnum
-#define	cpu_revision		cpu_m.mcpu_revision
-#define	cpu_chip		cpu_m.mcpu_chip
 struct	cpu_startup_data {
 	uint64_t	mair;
 	uint64_t	tcr;

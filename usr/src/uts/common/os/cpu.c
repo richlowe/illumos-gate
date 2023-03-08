@@ -2237,10 +2237,8 @@ static struct {
 	kstat_named_t ci_cacheid;
 	kstat_named_t ci_sktstr;
 #elif defined(__aarch64__)
-	kstat_named_t ci_features;
 	kstat_named_t ci_implementer;
-	kstat_named_t ci_variant;
-	kstat_named_t ci_part;
+	kstat_named_t ci_partname;
 	kstat_named_t ci_revision;
 #else
 #error Unknown platform
@@ -2275,9 +2273,7 @@ static struct {
 	{ "cache_id",			KSTAT_DATA_INT32 },
 	{ "socket_type",		KSTAT_DATA_STRING },
 #elif defined(__aarch64__)
-	{ "features",			KSTAT_DATA_STRING },
 	{ "implementer",		KSTAT_DATA_STRING },
-	{ "variant",			KSTAT_DATA_STRING },
 	{ "part",			KSTAT_DATA_STRING },
 	{ "revision",			KSTAT_DATA_STRING },
 #else
@@ -2345,10 +2341,9 @@ cpu_info_kstat_update(kstat_t *ksp, int rw)
 	kstat_named_setstr(&cpu_info_template.ci_sktstr,
 	    cpuid_getsocketstr(cp));
 #elif defined(__aarch64__)
-	kstat_named_setstr(&cpu_info_template.ci_features, cp->cpu_features);
-	kstat_named_setstr(&cpu_info_template.ci_implementer, cp->cpu_implementer);
-	kstat_named_setstr(&cpu_info_template.ci_variant, cp->cpu_variant);
-	kstat_named_setstr(&cpu_info_template.ci_part, cp->cpu_partnum);
+	kstat_named_setstr(&cpu_info_template.ci_implementer,
+	    cp->cpu_implementer);
+	kstat_named_setstr(&cpu_info_template.ci_partname, cp->cpu_partname);
 	kstat_named_setstr(&cpu_info_template.ci_revision, cp->cpu_revision);
 #else
 #error Unknown platform

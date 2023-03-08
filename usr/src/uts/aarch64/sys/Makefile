@@ -36,6 +36,7 @@ HDRS	=			\
 	bootvfs.h		\
 	controlregs.h		\
 	cpu.h			\
+	cpuid.h			\
 	ddi_isa.h		\
 	fasttrap_isa.h		\
 	fp.h			\
@@ -80,7 +81,7 @@ ROOTDIRS=	$(ROOTDIR) $(ROOTFSDIR)
 
 ROOTHDRS= $(HDRS:%=$(ROOTDIR)/%)
 
-CHECKHDRS= 			\
+CHECKHDRS=			\
 	$(HDRS:%.h=%.check)
 
 # install rules
