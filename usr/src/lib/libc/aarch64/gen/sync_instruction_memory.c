@@ -29,17 +29,18 @@
 void
 sync_instruction_memory(caddr_t addr, size_t len)
 {
-	uint64_t inst_line_size = CTR_TO_INST_LINESIZE(read_ctr_el0());
-	uint64_t data_line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	uint64_t inst_line_size = CTR_IMINLINE_SIZE(read_ctr_el0());
+	uint64_t data_line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 
-	for (uintptr_t v = (uintptr_t)addr; v < (uintptr_t)addr + len; v += data_line_size) {
+	for (uintptr_t v = (uintptr_t)addr;
+	    v < (uintptr_t)addr + len; v += data_line_size) {
 		flush_data_cache(v);
 	}
 	dsb(ish);
-	for (uintptr_t v = (uintptr_t)addr; v < (uintptr_t)addr + len; v += inst_line_size) {
+	for (uintptr_t v = (uintptr_t)addr;
+	    v < (uintptr_t)addr + len; v += inst_line_size) {
 		invalidate_instruction_cache(v);
 	}
 	dsb(ish);
 	isb();
 }
-

@@ -302,6 +302,10 @@ pics/%.o: $(SRC)/common/atomic/$(TARGETMACH)/%.c
 	$(COMPILE.c) $< -o $@
 	$(POST_PROCESS_O)
 
+$(BITEXTOBJS:%=pics/%): $(SRC)/common/bitext/$$(@F:.o=.c)
+	$(COMPILE.c) -o $@ $(SRC)/common/bitext/$(@F:.o=.c)
+	$(POST_PROCESS_O)
+
 $(COMOBJS:%=pics/%): $(SRC)/common/util/$$(@F:.o=.c)
 	$(COMPILE.c) -o $@ $(SRC)/common/util/$(@F:.o=.c)
 	$(POST_PROCESS_O)

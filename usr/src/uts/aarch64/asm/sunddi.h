@@ -41,17 +41,14 @@ extern "C" {
 
 #if defined(_BOOT)
 
-/*
- * XXXARM: dodgy: we should not be messing with EL0
- */
 static inline void
 sync_instruction_memory(caddr_t addr, size_t len)
 {
 	uint64_t inst_line_size, data_line_size;
 	uintptr_t v;
 
-	inst_line_size = CTR_TO_INST_LINESIZE(read_ctr_el0());
-	data_line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	inst_line_size = CTR_IMINLINE_SIZE(read_ctr_el0());
+	data_line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 
 	for (v = (uintptr_t)addr;
 	    v < (uintptr_t)addr + len;

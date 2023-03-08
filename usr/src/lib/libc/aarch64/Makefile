@@ -70,6 +70,7 @@ CHACHAOBJS=			\
 
 XATTROBJS=			\
 	xattr_common.o
+
 COMOBJS=			\
 	bcmp.o			\
 	bcopy.o			\
@@ -82,6 +83,9 @@ COMOBJS=			\
 	strtoul.o		\
 	strtoll.o		\
 	strtoull.o
+
+BITEXTOBJS=		\
+	bitext.o
 
 GENOBJS=			\
 	ptrace.o		\
@@ -942,6 +946,7 @@ MOSTOBJS=			\
 	$(ATOMICOBJS)		\
 	$(CHACHAOBJS)		\
 	$(XATTROBJS)		\
+	$(BITEXTOBJS)		\
 	$(COMOBJS)		\
 	$(GENOBJS)		\
 	$(PORTFP)		\

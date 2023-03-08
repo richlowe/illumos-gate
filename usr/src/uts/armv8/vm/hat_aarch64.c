@@ -73,7 +73,8 @@ struct hat_mmu_info mmu;
 /*
  * forward declaration of internal utility routines
  */
-static pte_t hati_update_pte(htable_t *ht, uint_t entry, pte_t expected, pte_t new);
+static pte_t hati_update_pte(htable_t *ht, uint_t entry, pte_t expected,
+    pte_t new);
 
 uint_t use_boot_reserve = 1;	/* cleared after early boot process */
 uint_t can_steal_post_boot = 0;	/* set late in boot to enable stealing */
@@ -102,9 +103,9 @@ struct hatstats hatstat;
 #define	PP_SETRO(pp)		PP_SETRM(pp, P_RO)
 
 #define	PP_CLRRM(pp, rm)	atomic_and_8(&(pp->p_nrm), ~(rm))
-#define	PP_CLRMOD(pp)   	PP_CLRRM(pp, P_MOD)
-#define	PP_CLRREF(pp)   	PP_CLRRM(pp, P_REF)
-#define	PP_CLRRO(pp)    	PP_CLRRM(pp, P_RO)
+#define	PP_CLRMOD(pp)		PP_CLRRM(pp, P_MOD)
+#define	PP_CLRREF(pp)		PP_CLRRM(pp, P_REF)
+#define	PP_CLRRO(pp)		PP_CLRRM(pp, P_RO)
 #define	PP_CLRALL(pp)		PP_CLRRM(pp, P_MOD | P_REF | P_RO)
 
 /*
@@ -153,7 +154,8 @@ hat_alloc(struct as *as)
 
 	hat->hat_htable = NULL;
 	hat->hat_ht_cached = NULL;
-	ht = htable_create(hat, (uintptr_t)0, MAX_PAGE_LEVEL, NULL);	// create top level
+	/* create top level */
+	ht = htable_create(hat, (uintptr_t)0, MAX_PAGE_LEVEL, NULL);
 	hat->hat_htable = ht;
 
 	/*
@@ -272,8 +274,10 @@ hat_init()
 	htable_init();
 	hment_init();
 
-	hat_cache = kmem_cache_create("hat_t", sizeof (hat_t), 0, hati_constructor, NULL, NULL, NULL, 0, 0);
-	hat_hash_cache = kmem_cache_create("HatHash", MMU_PAGESIZE, 0, NULL, NULL, NULL, NULL, 0, 0);
+	hat_cache = kmem_cache_create("hat_t", sizeof (hat_t),
+	    0, hati_constructor, NULL, NULL, NULL, 0, 0);
+	hat_hash_cache = kmem_cache_create("HatHash", MMU_PAGESIZE,
+	    0, NULL, NULL, NULL, NULL, 0, 0);
 
 	/*
 	 * Set up the kernel's hat
@@ -312,7 +316,8 @@ hat_init()
 	 * running the risk of suffering recursive mutex enters or
 	 * deadlocks.
 	 */
-	hrm_hashtab = kmem_zalloc(HRM_HASHSIZE * sizeof (struct hrmstat *), KM_SLEEP);
+	hrm_hashtab = kmem_zalloc(HRM_HASHSIZE * sizeof (struct hrmstat *),
+	    KM_SLEEP);
 }
 
 /*
@@ -376,7 +381,9 @@ hat_switch(hat_t *hat)
 				hat->hat_asid_gen[cpuid] = cur_gen;
 				hat->hat_asid[cpuid] = cur_asid;
 			}
-			write_ttbr0(((uint64_t)hat->hat_asid[cpuid] << TTBR_ASID_SHIFT) | pfn_to_pa(hat->hat_htable->ht_pfn));
+			write_ttbr0(((uint64_t)hat->hat_asid[cpuid] <<
+			    TTBR_ASID_SHIFT) |
+			    pfn_to_pa(hat->hat_htable->ht_pfn));
 			isb();
 			if (req_tlbi) {
 				tlbi_allis();
@@ -737,9 +744,10 @@ done:
 static void
 clean_dcache(caddr_t addr, uint_t len)
 {
-	uint64_t data_line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	uint64_t data_line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 
-	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size); v < (uintptr_t)addr + len; v += data_line_size) {
+	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size);
+	    v < (uintptr_t)addr + len; v += data_line_size) {
 		clean_data_cache_pou(v);
 	}
 	dsb(ish);
@@ -813,8 +821,10 @@ hati_load_common(
 	else
 		PTE_SET(pte, PTE_UXN);
 
-	if ((attr & PROT_EXEC) || (attr & HAT_ORDER_MASK) != HAT_STORECACHING_OK)
+	if ((attr & PROT_EXEC) ||
+	    (attr & HAT_ORDER_MASK) != HAT_STORECACHING_OK) {
 		clean_dcache(hat_kpm_pfn2va(pfn), LEVEL_SIZE(level));
+	}
 
 	/*
 	 * establish the mapping
@@ -859,7 +869,8 @@ hat_kmap_load(
 	 * Figure out the pte_ptr and htable and use common code to finish up
 	 */
 	pte_ptr = mmu.kmap_ptes + pg_off;
-	ht = mmu.kmap_htables[(va - mmu.kmap_htables[0]->ht_vaddr) >> LEVEL_SHIFT(1)];
+	ht = mmu.kmap_htables[(va - mmu.kmap_htables[0]->ht_vaddr) >>
+	    LEVEL_SHIFT(1)];
 	entry = htable_va2entry(va, ht);
 	++curthread->t_hatdepth;
 	ASSERT(curthread->t_hatdepth < 16);
@@ -872,9 +883,9 @@ hat_kmap_load(
  *
  * Flags for hat_memload/hat_devload/hat_*attr.
  *
- * 	HAT_LOAD	Default flags to load a translation to the page.
+ *	HAT_LOAD	Default flags to load a translation to the page.
  *
- * 	HAT_LOAD_LOCK	Lock down mapping resources; hat_map(), hat_memload(),
+ *	HAT_LOAD_LOCK	Lock down mapping resources; hat_map(), hat_memload(),
  *			and hat_devload().
  *
  *	HAT_LOAD_NOCONSIST Do not add mapping to page_t mapping list.
@@ -1714,7 +1725,8 @@ hat_getattr(hat_t *hat, caddr_t addr, uint_t *attr)
 	case PTE_ATTR_NORMEM_WT:	*attr |= HAT_LOADCACHING_OK;	break;
 	case PTE_ATTR_NORMEM:		*attr |= HAT_STORECACHING_OK;	break;
 	default:
-		panic("hat_getattr(): bad caching attributes: %llx\n", PTE_GET(pte, PTE_ATTR_MASK));
+		panic("hat_getattr(): bad caching attributes: %llx\n",
+		    PTE_GET(pte, PTE_ATTR_MASK));
 	}
 
 	htable_release(ht);
@@ -1767,7 +1779,8 @@ try_again:
 			if (attr & HAT_NOSYNC)
 				newpte |= PTE_NOSYNC;
 			if (attr & PROT_EXEC)
-				newpte &= ~(PTE_GET(oldpte, PTE_AP_USER) ? PTE_UXN: PTE_PXN);
+				newpte &= ~(PTE_GET(oldpte, PTE_AP_USER) ?
+				    PTE_UXN : PTE_PXN);
 			break;
 
 		case HAT_LOAD_ATTR:
@@ -1782,11 +1795,14 @@ try_again:
 				newpte &= ~PTE_AP_RO;
 			else
 				newpte |= PTE_AP_RO;
-			newpte |= (PTE_GET(oldpte, PTE_AP_USER)? PTE_PXN: PTE_UXN);
+			newpte |= (PTE_GET(oldpte, PTE_AP_USER) ?
+			    PTE_PXN : PTE_UXN);
 			if (attr & PROT_EXEC)
-				newpte &= ~(PTE_GET(oldpte, PTE_AP_USER)? PTE_UXN: PTE_PXN);
+				newpte &= ~(PTE_GET(oldpte, PTE_AP_USER) ?
+				    PTE_UXN : PTE_PXN);
 			else
-				newpte |= (PTE_GET(oldpte, PTE_AP_USER)? PTE_UXN: PTE_PXN);
+				newpte |= (PTE_GET(oldpte, PTE_AP_USER) ?
+				    PTE_UXN : PTE_PXN);
 			break;
 
 		case HAT_CLR_ATTR:
@@ -1795,7 +1811,8 @@ try_again:
 			if (attr & HAT_NOSYNC)
 				newpte &= ~PTE_SOFTWARE;
 			if (attr & PROT_EXEC)
-				newpte |= (PTE_GET(oldpte, PTE_AP_USER)? PTE_UXN: PTE_PXN);
+				newpte |= (PTE_GET(oldpte, PTE_AP_USER) ?
+				    PTE_UXN : PTE_PXN);
 			break;
 		}
 
@@ -1817,8 +1834,10 @@ try_again:
 		if (newpte != oldpte) {
 			entry = htable_va2entry(vaddr, ht);
 
-			if ((newpte ^ oldpte) & (PTE_UXN | PTE_PXN))
-				clean_dcache(hat_kpm_pfn2va((PTE2PFN(oldpte, ht->ht_level))), LEVEL_SIZE(ht->ht_level));
+			if ((newpte ^ oldpte) & (PTE_UXN | PTE_PXN)) {
+				clean_dcache(hat_kpm_pfn2va((PTE2PFN(oldpte,
+				    ht->ht_level))), LEVEL_SIZE(ht->ht_level));
+			}
 
 			oldpte = hati_update_pte(ht, entry, oldpte, newpte);
 			if (oldpte != 0) {
@@ -2943,7 +2962,7 @@ hat_setup(hat_t *hat, int flags)
 /*
  * Hat locking functions
  * XXX - these two functions are currently being used by hatstats
- * 	they can be removed by using a per-as mutex for hatstats.
+ *	they can be removed by using a per-as mutex for hatstats.
  */
 void
 hat_enter(hat_t *hat)
@@ -3073,7 +3092,8 @@ hat_page_fault(hat_t *hat, caddr_t vaddr)
 	for (;;) {
 		uint_t entry;
 		pte_t oldpte;
-		htable_t *ht = htable_getpte(hat, (uintptr_t)vaddr, &entry, &oldpte, MAX_PAGE_LEVEL);
+		htable_t *ht = htable_getpte(hat, (uintptr_t)vaddr, &entry,
+		    &oldpte, MAX_PAGE_LEVEL);
 		if (ht == NULL)
 			break;
 
@@ -3086,7 +3106,8 @@ hat_page_fault(hat_t *hat, caddr_t vaddr)
 			break;
 		}
 		if (PTE_GET(oldpte, PTE_AF) == 0) {
-			page_t *pp = page_numtopp_nolock(PTE2PFN(oldpte, ht->ht_level));
+			page_t *pp = page_numtopp_nolock(PTE2PFN(oldpte,
+			    ht->ht_level));
 			if (pp == NULL) {
 				htable_release(ht);
 				break;
@@ -3112,5 +3133,5 @@ hat_page_fault(hat_t *hat, caddr_t vaddr)
 		break;
 	}
 
-	return rv;
+	return (rv);
 }

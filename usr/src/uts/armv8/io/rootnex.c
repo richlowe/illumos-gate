@@ -131,7 +131,8 @@ static uint64_t *rootnex_cnt;
 #endif
 
 /*
- * XXX - does aarch64 even need these or are they left over from the SPARC days?
+ * XXXARM: does aarch64 even need these or are they left over from the SPARC
+ * days?
  */
 /* statically defined integer/boolean properties for the root node */
 static rootnex_intprop_t rootnex_intprp[] = {
@@ -142,13 +143,11 @@ static rootnex_intprop_t rootnex_intprp[] = {
 };
 #define	NROOT_INTPROPS	(sizeof (rootnex_intprp) / sizeof (rootnex_intprop_t))
 
-/*
- * If we're dom0, we're using a real device so we need to load
- * the cookies with MFNs instead of PFNs.
- */
 typedef paddr_t rootnex_addr_t;
-#define	ROOTNEX_PADDR_TO_RBASE(si, pa)		((pa) - (si)->si_cpu_addr_offset)
-#define	ROOTNEX_RBASE_TO_PADDR(si, rbase)	((rbase) + (si)->si_cpu_addr_offset)
+#define	ROOTNEX_PADDR_TO_RBASE(si, pa)		\
+	((pa) - (si)->si_cpu_addr_offset)
+#define	ROOTNEX_RBASE_TO_PADDR(si, rbase)	\
+	((rbase) + (si)->si_cpu_addr_offset)
 
 static struct cb_ops rootnex_cb_ops = {
 	nodev,		/* open */
@@ -638,7 +637,8 @@ rootnex_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 			return (DDI_FAILURE);
 		}
 		uint64_t regspec_size = pdp->par_reg[n].regspec_size;
-		regspec_size |= (((uint64_t)((pdp->par_reg[n].regspec_bustype >> 16) & 0xfff)) << 32);
+		regspec_size |= (((uint64_t)
+		    ((pdp->par_reg[n].regspec_bustype >> 16) & 0xfff)) << 32);
 		*size = (off_t)regspec_size;
 	}
 	return (DDI_SUCCESS);
@@ -673,7 +673,8 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 		len = strlen(buf);
 
 		uint64_t regspec_addr = rp->regspec_addr;
-		regspec_addr |= (((uint64_t)(rp->regspec_bustype & 0xffff)) << 32);
+		regspec_addr |= (((uint64_t)
+		    (rp->regspec_bustype & 0xffff)) << 32);
 
 		switch (rp->regspec_bustype >> 28) {
 		default:
@@ -722,7 +723,7 @@ get_address_cells(pnode_t node)
 	while (node > 0) {
 		int len = prom_getproplen(node, "#address-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#address-cells", (caddr_t)&prop);
 			address_cells = ntohl(prop);
@@ -730,7 +731,7 @@ get_address_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return address_cells;
+	return (address_cells);
 }
 
 static int
@@ -741,7 +742,7 @@ get_size_cells(pnode_t node)
 	while (node > 0) {
 		int len = prom_getproplen(node, "#size-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#size-cells", (caddr_t)&prop);
 			size_cells = ntohl(prop);
@@ -749,7 +750,7 @@ get_size_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return size_cells;
+	return (size_cells);
 }
 
 /*
@@ -795,12 +796,16 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		ASSERT(addr_cells == 1 || addr_cells == 2);
 		ASSERT(size_cells == 1 || size_cells == 2);
 
-		if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "reg", (caddr_t)&rp, &reglen) != DDI_SUCCESS || reglen == 0) {
+		if ((ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS,
+		    "reg", (caddr_t)&rp, &reglen) != DDI_SUCCESS) ||
+		    reglen == 0) {
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
-		int n = reglen / (sizeof(uint32_t) * (addr_cells + size_cells));
-		ASSERT(reglen % (sizeof(uint32_t) * (addr_cells + size_cells)) == 0);
+		int n = reglen / (sizeof (uint32_t) *
+		    (addr_cells + size_cells));
+		ASSERT(reglen % (sizeof (uint32_t) *
+		    (addr_cells + size_cells)) == 0);
 
 		if (rnumber < 0 || rnumber >= n) {
 			kmem_free(rp, reglen);
@@ -812,11 +817,13 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 		for (int i = 0; i < addr_cells; i++) {
 			addr <<= 32;
-			addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+			addr |= ntohl(rp[(addr_cells + size_cells) *
+			    rnumber + i]);
 		}
 		for (int i = 0; i < size_cells; i++) {
 			size <<= 32;
-			size |= ntohl(rp[(addr_cells + size_cells) * rnumber + addr_cells + i]);
+			size |= ntohl(rp[(addr_cells + size_cells) *
+			    rnumber + addr_cells + i]);
 		}
 		kmem_free(rp, reglen);
 		ASSERT((addr & 0xffff000000000000ul) == 0);
@@ -850,8 +857,10 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			error = rootnex_map_regspec(mp, vaddrp);
 			if (error == 0) {
 				if (hp) {
-					ddi_acc_impl_t *ap = (ddi_acc_impl_t *)hp->ah_platform_private;
-					ap->ahi_acc_attr |= DDI_ACCATTR_IO_SPACE;
+					ddi_acc_impl_t *ap = (ddi_acc_impl_t *)
+					    hp->ah_platform_private;
+					ap->ahi_acc_attr |=
+					    DDI_ACCATTR_IO_SPACE;
 					hp->ah_addr = (caddr_t)offset;
 					ap->ahi_io_port_base = (ulong_t)*vaddrp;
 					*vaddrp = (caddr_t)offset;
@@ -862,7 +871,8 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			}
 		} else {
 			uint64_t regspec_addr = rp->regspec_addr;
-			regspec_addr |= (((uint64_t)(rp->regspec_bustype & 0xffff)) << 32);
+			regspec_addr |= (((uint64_t)
+			    (rp->regspec_bustype & 0xffff)) << 32);
 			regspec_addr += offset;
 
 			rp->regspec_addr = regspec_addr & 0xffffffff;
@@ -872,8 +882,10 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			error = rootnex_map_regspec(mp, vaddrp);
 			if (error == 0) {
 				if (hp) {
-					ddi_acc_impl_t *ap = (ddi_acc_impl_t *)hp->ah_platform_private;
-					ap->ahi_acc_attr |= DDI_ACCATTR_CPU_VADDR;
+					ddi_acc_impl_t *ap = (ddi_acc_impl_t *)
+					    hp->ah_platform_private;
+					ap->ahi_acc_attr |=
+					    DDI_ACCATTR_CPU_VADDR;
 					hp->ah_addr = *vaddrp;
 					hp->ah_hat_flags = 0;
 					impl_acc_hdl_init(hp);
@@ -955,7 +967,8 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	uint_t	pgoffset;
 
 	uint64_t regspec_size = rp->regspec_size;
-	regspec_size |= (((uint64_t)((rp->regspec_bustype >> 16) & 0xfff)) << 32);
+	regspec_size |= (((uint64_t)
+	    ((rp->regspec_bustype >> 16) & 0xfff)) << 32);
 
 	if (regspec_size == 0) {
 		cmn_err(CE_NOTE, "rootnex_map_regspec: zero regspec_size\n");
@@ -994,7 +1007,8 @@ rootnex_unmap_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	rp = mp->map_obj.rp;
 
 	uint64_t regspec_size = rp->regspec_size;
-	regspec_size |= (((uint64_t)((rp->regspec_bustype >> 16) & 0xfff)) << 32);
+	regspec_size |= (((uint64_t)
+	    ((rp->regspec_bustype >> 16) & 0xfff)) << 32);
 
 	if (regspec_size == 0) {
 		cmn_err(CE_WARN, "rootnex_unmap_regspec: zero regspec_size\n");
@@ -1020,14 +1034,16 @@ rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
 	regspec_addr |= (((uint64_t)(rp->regspec_bustype & 0xffff)) << 32);
 
 	uint64_t regspec_size = rp->regspec_size;
-	regspec_size |= (((uint64_t)((rp->regspec_bustype >> 16) & 0xfff)) << 32);
+	regspec_size |= (((uint64_t)
+	    ((rp->regspec_bustype >> 16) & 0xfff)) << 32);
 
 	if (regspec_size == 0)
 		return (DDI_ME_INVAL);
 
 	hp->ah_hat_flags = 0;
 	hp->ah_pfn = mmu_btop(regspec_addr + offset);
-	hp->ah_pnum = mmu_btopr(regspec_addr + offset + regspec_size) - hp->ah_pfn;
+	hp->ah_pnum = mmu_btopr(regspec_addr + offset + regspec_size) -
+	    hp->ah_pfn;
 	return (DDI_SUCCESS);
 }
 
@@ -1047,7 +1063,7 @@ get_interrupt_cells(pnode_t node)
 	while (node > 0) {
 		int len = prom_getproplen(node, "#interrupt-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
 			interrupt_cells = ntohl(prop);
@@ -1055,7 +1071,7 @@ get_interrupt_cells(pnode_t node)
 		}
 		len = prom_getproplen(node, "interrupt-parent");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
 			node = prom_findnode_by_phandle(ntohl(prop));
@@ -1063,7 +1079,7 @@ get_interrupt_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return interrupt_cells;
+	return (interrupt_cells);
 }
 
 static int
@@ -1074,7 +1090,7 @@ get_pil(dev_info_t *rdip)
 		int pil;
 	} name_to_pil[] = {
 		{"serial",			12},
-		{"Ethernet controller", 	6},
+		{"Ethernet controller",		6},
 		{ NULL}
 	};
 	const char *type_name[] = {
@@ -1143,7 +1159,8 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_ENABLE:
 		{
-			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
+			int interrupt_cells =
+			    get_interrupt_cells(ddi_get_nodeid(rdip));
 			switch (interrupt_cells) {
 			case 1:
 			case 3:
@@ -1154,10 +1171,15 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 
 			int *irupts_prop;
 			int irupts_len;
-			if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", (caddr_t)&irupts_prop, &irupts_len) != DDI_SUCCESS || irupts_len == 0) {
+			if ((ddi_getlongprop(DDI_DEV_T_ANY, rdip,
+			    DDI_PROP_DONTPASS, "interrupts",
+			    (caddr_t)&irupts_prop,
+			    &irupts_len) != DDI_SUCCESS) ||
+			    (irupts_len == 0)) {
 				return (DDI_FAILURE);
 			}
-			if (interrupt_cells * hdlp->ih_inum >= irupts_len * sizeof(int)) {
+			if (interrupt_cells * hdlp->ih_inum >=
+			    irupts_len * sizeof (int)) {
 				kmem_free(irupts_prop, irupts_len);
 				return (DDI_FAILURE);
 			}
@@ -1168,13 +1190,21 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			switch (interrupt_cells) {
 			case 1:
 				grp = 0;
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
+				vec = ntohl((uint32_t)
+				    irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 0]);
 				cfg = 4;
 				break;
 			case 3:
-				grp = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 1]);
-				cfg = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 2]);
+				grp = ntohl((uint32_t)
+				    irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 0]);
+				vec = ntohl((uint32_t)
+				    irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 1]);
+				cfg = ntohl((uint32_t)irupts_prop[
+				    interrupt_cells *
+				    hdlp->ih_inum + 2]);
 				break;
 			default:
 				kmem_free(irupts_prop, irupts_len);
@@ -1202,14 +1232,17 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			}
 
 			if (!add_avintr((void *)hdlp, hdlp->ih_pri,
-				    hdlp->ih_cb_func, DEVI(rdip)->devi_name, hdlp->ih_vector,
-				    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip))
+			    hdlp->ih_cb_func, DEVI(rdip)->devi_name,
+			    hdlp->ih_vector,
+			    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip)) {
 				return (DDI_FAILURE);
+			}
 		}
 		break;
 
 	case DDI_INTROP_DISABLE:
-		rem_avintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func, hdlp->ih_vector);
+		rem_avintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func,
+		    hdlp->ih_vector);
 		break;
 	case DDI_INTROP_SETMASK:
 	case DDI_INTROP_CLRMASK:
@@ -1217,11 +1250,15 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		return (DDI_FAILURE);
 	case DDI_INTROP_NAVAIL:
 		{
-			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
+			int interrupt_cells =
+			    get_interrupt_cells(ddi_get_nodeid(rdip));
 			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len / (interrupt_cells * sizeof(int));
+			if ((interrupt_cells != 0) &&
+			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
+			    DDI_PROP_DONTPASS, "interrupts", &irupts_len) ==
+			    DDI_SUCCESS) {
+				*(int *)result = irupts_len /
+				    (interrupt_cells * sizeof (int));
 			} else {
 				return (DDI_FAILURE);
 			}
@@ -1229,11 +1266,15 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_NINTRS:
 		{
-			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
+			int interrupt_cells =
+			    get_interrupt_cells(ddi_get_nodeid(rdip));
 			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len / (interrupt_cells * sizeof(int));
+			if ((interrupt_cells != 0) &&
+			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
+			    DDI_PROP_DONTPASS, "interrupts",
+			    &irupts_len) == DDI_SUCCESS) {
+				*(int *)result = irupts_len /
+				    (interrupt_cells * sizeof (int));
 			} else {
 				return (DDI_FAILURE);
 			}
@@ -1547,9 +1588,10 @@ rootnex_coredma_bindhdl(dev_info_t *dip, dev_info_t *rdip,
 	ddi_dma_attr_t cpu_attr;
 	e = i_ddi_convert_dma_attr(&cpu_attr, rdip, attr);
 	if (e != DDI_SUCCESS)
-		return e;
+		return (e);
 
-	sinfo->si_cpu_addr_offset = cpu_attr.dma_attr_addr_lo - attr->dma_attr_addr_lo;
+	sinfo->si_cpu_addr_offset = cpu_attr.dma_attr_addr_lo -
+	    attr->dma_attr_addr_lo;
 
 	/* convert the sleep flags */
 	if (dmareq->dmar_fp == DDI_DMA_SLEEP) {
@@ -1698,7 +1740,8 @@ rootnex_coredma_bindhdl(dev_info_t *dip, dev_info_t *rdip,
 		    uint64_t, rootnex_cnt[ROOTNEX_CNT_ACTIVE_BINDS],
 		    uint_t, dmao->dmao_size, uint_t, *ccountp);
 
-		(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0, DDI_DMA_SYNC_FORDEV);
+		(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0,
+		    DDI_DMA_SYNC_FORDEV);
 		return (DDI_DMA_MAPPED);
 	}
 
@@ -1708,7 +1751,7 @@ rootnex_coredma_bindhdl(dev_info_t *dip, dev_info_t *rdip,
 	 */
 
 	e = rootnex_bind_slowpath(hp, dmareq, dma, attr, &dma->dp_dma,
-			kmflag);
+	    kmflag);
 
 	if ((e != DDI_DMA_MAPPED) && (e != DDI_DMA_PARTIAL_MAP)) {
 		if (dma->dp_need_to_free_cookie) {
@@ -1727,7 +1770,8 @@ rootnex_coredma_bindhdl(dev_info_t *dip, dev_info_t *rdip,
 		hp->dmai_error.err_cf = rootnex_dma_check;
 
 	/* if the first window uses the copy buffer, sync it for the device */
-	(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0, DDI_DMA_SYNC_FORDEV);
+	(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0,
+	    DDI_DMA_SYNC_FORDEV);
 
 	/*
 	 * copy out the first cookie and ccountp, set the cookie pointer to the
@@ -1930,9 +1974,10 @@ rootnex_verify_buffer(rootnex_dma_t *dma)
 		} else {
 			if (rootnex_get_as(&dma->dp_dma) == &kas) {
 				for (i = 0; i < pcnt; i++) {
-					if (ddi_peek8(NULL, (int8_t *)vaddr, &b) ==
-					    DDI_FAILURE)
+					if (ddi_peek8(NULL, (int8_t *)vaddr,
+					    &b) == DDI_FAILURE) {
 						return (DDI_FAILURE);
+					}
 					vaddr += MMU_PAGESIZE;
 				}
 			}
@@ -2352,8 +2397,10 @@ rootnex_get_sgl(ddi_dma_obj_t *dmar_object, ddi_dma_cookie_t *sgl,
 			ASSERT(!PP_ISFREE(pplist[pcnt]));
 			paddr = pfn_to_pa(pplist[pcnt]->p_pagenum);
 			uint_t flags;
-			if (hat_getattr(sglinfo->si_asp->a_hat, vaddr, &flags) == 0) {
-				cache_attr = MAX(cache_attr, flags & HAT_ORDER_MASK);
+			if (hat_getattr(sglinfo->si_asp->a_hat,
+			    vaddr, &flags) == 0) {
+				cache_attr = MAX(cache_attr,
+				    flags & HAT_ORDER_MASK);
 			} else {
 				cache_attr = HAT_STORECACHING_OK;
 			}
@@ -2365,8 +2412,10 @@ rootnex_get_sgl(ddi_dma_obj_t *dmar_object, ddi_dma_cookie_t *sgl,
 			paddr =  pfn_to_pa(hat_getpfnum(sglinfo->si_asp->a_hat,
 			    vaddr));
 			uint_t flags;
-			if (hat_getattr(sglinfo->si_asp->a_hat, vaddr, &flags) == 0) {
-				cache_attr = MAX(cache_attr, flags & HAT_ORDER_MASK);
+			if (hat_getattr(sglinfo->si_asp->a_hat,
+			    vaddr, &flags) == 0) {
+				cache_attr = MAX(cache_attr,
+				    flags & HAT_ORDER_MASK);
 			} else {
 				cache_attr = HAT_STORECACHING_OK;
 			}
@@ -2814,10 +2863,13 @@ rootnex_setup_windows(ddi_dma_impl_t *hp, rootnex_dma_t *dma,
 		 */
 		if ((unsigned)attr->dma_attr_sgllen < sinfo->si_sgl_size) {
 			ASSERT(attr->dma_attr_granular != 0);
-			if (attr->dma_attr_granular == 1 || attr->dma_attr_sgllen == 1) {
-				sglwin = (sinfo->si_sgl_size / attr->dma_attr_sgllen) + 1;
+			if (attr->dma_attr_granular == 1 ||
+			    attr->dma_attr_sgllen == 1) {
+				sglwin = (sinfo->si_sgl_size /
+				    attr->dma_attr_sgllen) + 1;
 			} else {
-				sglwin = (sinfo->si_sgl_size / (attr->dma_attr_sgllen - 1)) + 1;
+				sglwin = (sinfo->si_sgl_size /
+				    (attr->dma_attr_sgllen - 1)) + 1;
 			}
 		} else {
 			sglwin = 0;
@@ -3556,8 +3608,9 @@ rootnex_maxxfer_window_boundary(ddi_dma_impl_t *hp, rootnex_dma_t *dma,
 static void
 rootnex_codedma_cache_clean(uintptr_t start, uintptr_t end)
 {
-	size_t line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
-	for (uintptr_t addr = P2ALIGN(start, line_size); addr < end; addr += line_size) {
+	size_t line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
+	for (uintptr_t addr = P2ALIGN(start, line_size);
+	    addr < end; addr += line_size) {
 		clean_data_cache_poc(addr);
 	}
 	dsb(sy);
@@ -3566,8 +3619,9 @@ rootnex_codedma_cache_clean(uintptr_t start, uintptr_t end)
 static void
 rootnex_codedma_cache_flush(uintptr_t start, uintptr_t end)
 {
-	size_t line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
-	for (uintptr_t addr = P2ALIGN(start, line_size); addr < end; addr += line_size) {
+	size_t line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
+	for (uintptr_t addr = P2ALIGN(start, line_size);
+	    addr < end; addr += line_size) {
 		flush_data_cache(addr);
 	}
 	dsb(sy);
@@ -3591,7 +3645,8 @@ rootnex_codedma_cache_sync(ddi_dma_handle_t handle,
 		return;
 	if (sinfo->si_cache_attr == HAT_UNORDERED_OK ||
 	    sinfo->si_cache_attr == HAT_MERGING_OK ||
-	    (sinfo->si_cache_attr == HAT_LOADCACHING_OK && cache_flags == DDI_DMA_SYNC_FORDEV)) {
+	    (sinfo->si_cache_attr == HAT_LOADCACHING_OK && cache_flags ==
+	    DDI_DMA_SYNC_FORDEV)) {
 		dsb(sy);
 		return;
 	}
@@ -3611,21 +3666,27 @@ rootnex_codedma_cache_sync(ddi_dma_handle_t handle,
 		ncookies = sinfo->si_sgl_size;
 	}
 
-	size_t line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	size_t line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 	off_t end = off + len;
 	off_t cur = 0;
 	for (int i = 0; i < ncookies; i++) {
-		paddr_t paddr = ROOTNEX_RBASE_TO_PADDR(sinfo, cookies[i].dmac_laddress);
-		uintptr_t vaddr = (uintptr_t)hat_kpm_pfn2va((paddr >> MMU_PAGESHIFT)) + (paddr & MMU_PAGEOFFSET);
+		paddr_t paddr = ROOTNEX_RBASE_TO_PADDR(sinfo,
+		    cookies[i].dmac_laddress);
+		uintptr_t vaddr = (uintptr_t)
+		    hat_kpm_pfn2va((paddr >> MMU_PAGESHIFT)) +
+		    (paddr & MMU_PAGEOFFSET);
 
 		size_t map_size = cookies[i].dmac_size;
 
 		if (cur <= off && off < cur + map_size) {
-			size_t op_end = (len == 0? cur + map_size: MIN(cur + map_size, end));
+			size_t op_end = (len == 0 ? cur + map_size :
+			    MIN(cur + map_size, end));
 			if (cache_flags == DDI_DMA_SYNC_FORDEV)
-				rootnex_codedma_cache_clean(vaddr + (off - cur), vaddr + op_end);
+				rootnex_codedma_cache_clean(vaddr + (off - cur),
+				    vaddr + op_end);
 			else
-				rootnex_codedma_cache_flush(vaddr + (off - cur), vaddr + op_end);
+				rootnex_codedma_cache_flush(vaddr + (off - cur),
+				    vaddr + op_end);
 			off = op_end;
 		}
 		cur += map_size;
@@ -3764,13 +3825,15 @@ rootnex_coredma_sync(dev_info_t *dip, dev_info_t *rdip, ddi_dma_handle_t handle,
 				ROOTNEX_DPROBE2(rootnex__sync__cpu,
 				    dev_info_t *, dma->dp_dip, size_t, psize);
 
-				rootnex_codedma_cache_flush((uintptr_t)fromaddr, (uintptr_t)fromaddr + psize);
+				rootnex_codedma_cache_flush((uintptr_t)fromaddr,
+				    (uintptr_t)fromaddr + psize);
 			}
 
 			bcopy(fromaddr, toaddr, psize);
 
 			if (cache_flags == DDI_DMA_SYNC_FORDEV) {
-				rootnex_codedma_cache_clean((uintptr_t)toaddr, (uintptr_t)toaddr + psize);
+				rootnex_codedma_cache_clean((uintptr_t)toaddr,
+				    (uintptr_t)toaddr + psize);
 			}
 		}
 
@@ -3898,7 +3961,8 @@ rootnex_coredma_win(dev_info_t *dip, dev_info_t *rdip, ddi_dma_handle_t handle,
 		hp->dmai_cookie++;
 		hp->dmai_ncookies = *ccountp;
 		hp->dmai_curcookie = 1;
-		(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0, DDI_DMA_SYNC_FORDEV);
+		(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0,
+		    DDI_DMA_SYNC_FORDEV);
 		return (DDI_SUCCESS);
 	}
 
@@ -3949,7 +4013,8 @@ rootnex_coredma_win(dev_info_t *dip, dev_info_t *rdip, ddi_dma_handle_t handle,
 	hp->dmai_curcookie = 1;
 	hp->dmai_cookie++;
 
-	(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0, DDI_DMA_SYNC_FORDEV);
+	(void) rootnex_coredma_sync(dip, rdip, handle, 0, 0,
+	    DDI_DMA_SYNC_FORDEV);
 
 	return (DDI_SUCCESS);
 }

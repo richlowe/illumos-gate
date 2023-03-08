@@ -552,7 +552,7 @@ mach_cpucontext_init(void)
 	cpu_data->ttbr1 = read_ttbr1();
 	cpu_data->sctlr = read_sctlr();
 
-	size_t data_line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	size_t data_line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 	for (uintptr_t addr = P2ALIGN((uintptr_t)cpu_data, data_line_size);
 	    addr < (uintptr_t)cpu_data + sizeof (struct cpu_startup_data);
 	    addr += data_line_size) {

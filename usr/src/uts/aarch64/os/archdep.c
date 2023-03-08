@@ -24,7 +24,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -56,9 +56,10 @@ uint_t adj_shift;
 static void
 clean_dcache_impl(caddr_t addr, uint_t len)
 {
-	uint64_t data_line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	uint64_t data_line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 
-	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size); v < (uintptr_t)addr + len; v += data_line_size) {
+	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size);
+	    v < (uintptr_t)addr + len; v += data_line_size) {
 		clean_data_cache_pou(v);
 	}
 	dsb(ish);
@@ -67,9 +68,10 @@ clean_dcache_impl(caddr_t addr, uint_t len)
 static void
 flush_dcache_impl(caddr_t addr, uint_t len)
 {
-	uint64_t data_line_size = CTR_TO_DATA_LINESIZE(read_ctr_el0());
+	uint64_t data_line_size = CTR_DMINLINE_SIZE(read_ctr_el0());
 
-	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size); v < (uintptr_t)addr + len; v += data_line_size) {
+	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size);
+	    v < (uintptr_t)addr + len; v += data_line_size) {
 		flush_data_cache(v);
 	}
 	dsb(ish);
@@ -191,7 +193,8 @@ exec_set_sp(size_t stksize)
 	lwptoregs(lwp)->r_sp = (uintptr_t)curproc->p_usrstack - stksize;
 }
 
-void hrtime_init(void)
+void
+hrtime_init(void)
 {
 	extern int gethrtime_hires;
 	gethrtime_hires = 1;
@@ -212,7 +215,7 @@ gethrtime(void)
 	uint64_t x = pct / timer_freq;
 	uint64_t y = pct % timer_freq;
 	hrtime_t nsec = x * NANOSEC + y * NANOSEC / timer_freq;
-	return nsec;
+	return (nsec);
 }
 
 hrtime_t
@@ -241,7 +244,7 @@ unscalehrtime(hrtime_t nsec)
 	uint64_t x = nsec / NANOSEC;
 	uint64_t y = nsec % NANOSEC;
 	uint64_t pct = x * timer_freq + y * timer_freq / NANOSEC;
-	return pct;
+	return (pct);
 }
 
 void
@@ -259,7 +262,7 @@ dtrace_gethrtime(void)
 	uint64_t x = pct / timer_freq;
 	uint64_t y = pct % timer_freq;
 	hrtime_t nsec = x * NANOSEC + y * NANOSEC / timer_freq;
-	return nsec;
+	return (nsec);
 }
 
 extern int one_sec;
@@ -359,7 +362,8 @@ setfpregs(klwp_t *lwp, fpregset_t *fp)
 	kpreempt_disable();
 	fpu->fpu_regs.kfpu_cr = fp->fp_cr;
 	fpu->fpu_regs.kfpu_sr = fp->fp_sr;
-	bcopy(fp->d_fpregs, fpu->fpu_regs.kfpu_regs, sizeof(fpu->fpu_regs.kfpu_regs));
+	bcopy(fp->d_fpregs, fpu->fpu_regs.kfpu_regs,
+	    sizeof (fpu->fpu_regs.kfpu_regs));
 	if (ttolwp(curthread) == lwp) {
 		fp_restore(fpu);
 	}
@@ -382,7 +386,7 @@ getfpregs(klwp_t *lwp, fpregset_t *fp)
 
 	fp->fp_cr = fpu->fpu_regs.kfpu_cr;
 	fp->fp_sr = fpu->fpu_regs.kfpu_sr;
-	bcopy(fpu->fpu_regs.kfpu_regs, fp->d_fpregs, sizeof(fp->d_fpregs));
+	bcopy(fpu->fpu_regs.kfpu_regs, fp->d_fpregs, sizeof (fp->d_fpregs));
 
 	kpreempt_enable();
 }
@@ -399,7 +403,7 @@ getuserpc()
 	if (curthread->t_sysnum != 0)
 		upc -= 4;
 
-	return upc;
+	return (upc);
 }
 
 /*
@@ -409,7 +413,7 @@ getuserpc()
 int
 getpcstack(pc_t *pcstack, int pcstack_limit)
 {
-	return 0;
+	return (0);
 }
 
 
@@ -504,7 +508,8 @@ setgregs(klwp_t *lwp, gregset_t grp)
 	rp->r_x30 = grp[REG_X30];
 	rp->r_sp = grp[REG_SP];
 	rp->r_pc = grp[REG_PC];
-	rp->r_spsr = (rp->r_spsr & ~PSR_USERMASK) | (grp[REG_PSR] & PSR_USERMASK);
+	rp->r_spsr = (rp->r_spsr & ~PSR_USERMASK) |
+	    (grp[REG_PSR] & PSR_USERMASK);
 
 	if (ttolwp(curthread) == lwp) {
 		write_tpidr_el0(grp[REG_TP]);
@@ -550,9 +555,9 @@ uint_t auxv_hwcap_include = 0;	/* patch to enable unrecognized features */
 uint_t auxv_hwcap_exclude = 0;	/* patch for broken cpus, debugging */
 
 int
-scanc(size_t length, u_char *string, u_char table[], u_char mask)
+scanc(size_t length, uchar_t *string, uchar_t table[], uchar_t mask)
 {
-	const u_char *end = &string[length];
+	const uchar_t *end = &string[length];
 
 	while (string < end && (table[*string] & mask) == 0)
 		string++;

@@ -37,17 +37,44 @@ BOOT_DIR	= $(SRC)/psm/stand/boot
 DTC_BASE	= $(EXTRA)/dtc
 
 SRT0_O = srt0.o
-OBJS += \
-	   nfsconf.o \
-	   heap_kmem.o readfile.o  sscanf.o strtoul.o strtol.o \
-	   get.o standalloc.o memlist.o memmove.o memchr.o ddi_subr.o \
-	   boot_plat.o uname-m.o uname-i.o machdep.o \
-	   prom_exit.o prom_gettime.o prom_printf.o prom_string.o \
-	   prom_getchar.o prom_init.o prom_panic.o prom_putchar.o \
-	   prom_wrtestr.o prom_node.o prom_node_init.o \
-	   getoptstr.o bootflags.o ramdisk.o \
-	   boot_aarch64.o aarch64_subr.o console.o prom_utils.o \
-	   assfail.o psci.o
+OBJS +=				\
+	aarch64_subr.o		\
+	assfail.o		\
+	bitext.o		\
+	boot_aarch64.o		\
+	boot_plat.o		\
+	bootflags.o		\
+	console.o		\
+	ddi_subr.o		\
+	get.o			\
+	getoptstr.o		\
+	heap_kmem.o		\
+	machdep.o		\
+	memchr.o		\
+	memlist.o		\
+	memmove.o		\
+	nfsconf.o		\
+	prom_exit.o		\
+	prom_getchar.o		\
+	prom_gettime.o		\
+	prom_init.o		\
+	prom_node.o		\
+	prom_node_init.o	\
+	prom_panic.o		\
+	prom_printf.o		\
+	prom_putchar.o		\
+	prom_string.o		\
+	prom_utils.o		\
+	prom_wrtestr.o		\
+	psci.o			\
+	ramdisk.o		\
+	readfile.o		\
+	sscanf.o		\
+	standalloc.o		\
+	strtol.o		\
+	strtoul.o		\
+	uname-i.o		\
+	uname-m.o
 
 DTEXTDOM=
 DTS_ERRNO=
@@ -69,9 +96,9 @@ CMNNETDIR =	$(SRC)/common/net
 CMNDIR =	$(SRC)/common
 CMNUTILDIR =	$(SRC)/common/util
 SYSDIR	=	$(SRC)/uts
-CPPDEFS	= 	-D$(MACH) -D_BOOT -D_KERNEL -D_MACHDEP -D_ELF64_SUPPORT -D_SYSCALL32
+CPPDEFS	=	-D$(MACH) -D_BOOT -D_KERNEL -D_MACHDEP -D_ELF64_SUPPORT -D_SYSCALL32
 # XXXARM: fs/zfs is a vague attempt to get yet another cdefs.h
-CPPINCS	= 	-I$(PORT_DIR) \
+CPPINCS	=	-I$(PORT_DIR) \
 		-I$(PSMSTANDDIR) \
 		-I$(STANDDIR)/lib/sa \
 		-I$(STANDDIR) -I$(CMNDIR) -I$(MACHDIR) \

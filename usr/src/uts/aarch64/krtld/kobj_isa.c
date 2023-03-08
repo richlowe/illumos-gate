@@ -71,21 +71,22 @@ kobj_addrcheck(void *xmp, caddr_t adr)
 
 /*
  * Flush instruction cache after updating text
- * 	This is a nop for this machine arch.
  */
 /*ARGSUSED*/
 void
 kobj_sync_instruction_memory(caddr_t addr, size_t len)
 {
 	uint64_t ctr = read_ctr_el0();
-	uint64_t inst_line_size = CTR_TO_INST_LINESIZE(ctr);
-	uint64_t data_line_size = CTR_TO_DATA_LINESIZE(ctr);
+	uint64_t inst_line_size = CTR_IMINLINE_SIZE(ctr);
+	uint64_t data_line_size = CTR_DMINLINE_SIZE(ctr);
 
-	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size); v < (uintptr_t)addr + len; v += data_line_size) {
+	for (uintptr_t v = P2ALIGN((uintptr_t)addr, data_line_size);
+	    v < (uintptr_t)addr + len; v += data_line_size) {
 		clean_data_cache_pou(v);
 	}
 	dsb(ish);
-	for (uintptr_t v = P2ALIGN((uintptr_t)addr, inst_line_size); v < (uintptr_t)addr + len; v += inst_line_size) {
+	for (uintptr_t v = P2ALIGN((uintptr_t)addr, inst_line_size);
+	    v < (uintptr_t)addr + len; v += inst_line_size) {
 		invalidate_instruction_cache(v);
 	}
 	dsb(ish);
@@ -98,7 +99,7 @@ kobj_sync_instruction_memory(caddr_t addr, size_t len)
 /* ARGSUSED3 */
 int
 get_progbits_size(struct module *mp, struct proginfo *tp, struct proginfo *dp,
-	struct proginfo *sdp)
+    struct proginfo *sdp)
 {
 	struct proginfo *pp;
 	uint_t shn;
