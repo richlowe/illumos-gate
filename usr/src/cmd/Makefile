@@ -405,6 +405,7 @@ COMMON_SUBDIRS=	\
 	valtools	\
 	varpd		\
 	vgrind		\
+	volcheck	\
 	vrrpadm		\
 	vscan		\
 	vt		\
@@ -448,7 +449,6 @@ COMMON_SUBDIRS=	\
 # rmformat - not ported (or useful?)
 # rmvolmgr - needs dbus
 # rmmount - needs dbus
-# volcheck - needs dbus
 # volrmmmount - needs dbus
 # cdrw - needs dbus
 #
@@ -511,7 +511,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	troff		\
 	tsol		\
 	truss		\
-	volcheck	\
 	volrmmount	\
 	vi		\
 	ypcmd		\

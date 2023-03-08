@@ -45,7 +45,7 @@ dir  path=usr/bin
 $(not_aarch64)file path=usr/bin/rmformat mode=4555
 $(not_aarch64)file path=usr/bin/rmmount mode=0555
 $(not_aarch64)link path=usr/bin/rmumount target=./rmmount
-$(not_aarch64)file path=usr/bin/volcheck mode=0555
+file path=usr/bin/volcheck mode=0555
 $(not_aarch64)file path=usr/bin/volrmmount mode=0555
 dir  path=usr/lib
 $(not_aarch64)file path=usr/lib/rmvolmgr mode=0555
