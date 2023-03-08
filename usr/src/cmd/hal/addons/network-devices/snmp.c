@@ -69,7 +69,7 @@ scan_for_devices_using_snmp(LibHalContext *ctx, char *parent, char *community,
 	struct snmp_session session, *ss;
 	struct snmp_pdu *request = NULL, *response = NULL;
 	oid Oid[MAX_OID_LEN];
-	unsigned int oid_len = MAX_OID_LEN;
+	size_t oid_len = MAX_OID_LEN;
 	GList *elem;
 
 	HAL_DEBUG(("scan_for_devices_using_snmp(0x%8.8x, %s, %s, %s)",

@@ -178,6 +178,7 @@ COMMON_SUBDIRS=	\
 	groups		\
 	growfs		\
 	grpck		\
+	hal		\
 	halt		\
 	head		\
 	hostid		\
@@ -441,7 +442,6 @@ COMMON_SUBDIRS=	\
 # abi - not interesting
 # availdevs - needs libzfs (and libzfs_jni!?) (and not interesting)
 # bnu - uses FILE internals not available to LP64
-# hal - needs dbus, etc
 # latencytop - needs glib
 # pcitool - not ported
 # powertop - not ported
@@ -487,7 +487,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	csh		\
 	csplit		\
 	eqn		\
-	hal		\
 	format		\
 	gss		\
 	isns		\

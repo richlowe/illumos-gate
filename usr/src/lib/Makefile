@@ -79,7 +79,6 @@ SUBDIRS +=		\
 # libmvec -- not built because AArch64 has a special libm right now
 # libresolv -- libresolv.so.1 for binary compat, not needed
 # libm1 -- not built because AArch64 has a special libm right now
-# hal -- heavy dependencies, little benefit
 # smbclnt -- low value, needs cross dtrace
 #
 # libcpc -- not ported
@@ -89,7 +88,6 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	abi \
 	brand		\
 	c_synonyms	\
-	hal		\
 	libadt_jni	\
 	libcpc		\
 	libdtrace_jni	\
@@ -115,6 +113,7 @@ SUBDIRS +=				\
 	gss_mechs/mech_dummy	\
 	gss_mechs/mech_krb5	\
 	gss_mechs/mech_spnego	\
+	hal		\
 	hbaapi		\
 	iconv_modules	\
 	krb5		\
