@@ -35,32 +35,31 @@
 #include <sys/bootsvcs.h>
 #include <sys/psci.h>
 
-#define UART_ADDR	(UART_PHYS + SEGKPM_BASE)
+#define	UART_ADDR	(UART_PHYS + SEGKPM_BASE)
 
-#define UARTDR		(*(volatile uint32_t *)(UART_ADDR + 0x00))
-#define UARTFR		(*(volatile uint32_t *)(UART_ADDR + 0x18))
+#define	UARTDR		(*(volatile uint32_t *)(UART_ADDR + 0x00))
+#define	UARTFR		(*(volatile uint32_t *)(UART_ADDR + 0x18))
 
-#define UARTFR_TXFE	(1 << 7)
-#define UARTFR_TXFF	(1 << 5)
-#define UARTFR_RXFE	(1 << 4)
+#define	UARTFR_TXFE	(1 << 7)
+#define	UARTFR_TXFF	(1 << 5)
+#define	UARTFR_RXFE	(1 << 4)
 
-char *plat_get_cpu_str()
+static void
+yield()
 {
-	return "QEMU VIRT CPU";
+	__asm__ volatile("yield":::"memory");
 }
 
-static void yield()
+static int
+_getchar()
 {
-	__asm__ volatile ("yield":::"memory");
-}
-
-static int _getchar()
-{
-	while (UARTFR & UARTFR_RXFE) yield();
+	while (UARTFR & UARTFR_RXFE)
+		yield();
 	return (UARTDR & 0xFF);
 }
 
-static void _putchar(int c)
+static void
+_putchar(int c)
 {
 	while (UARTFR & UARTFR_TXFF) {}
 	UARTDR = c;
@@ -69,9 +68,10 @@ static void _putchar(int c)
 	while (!(UARTFR & UARTFR_TXFE)) {}
 }
 
-static int _ischar()
+static int
+_ischar()
 {
-	return !(UARTFR & UARTFR_RXFE);
+	return (!(UARTFR & UARTFR_RXFE));
 }
 
 static void _reset(bool poff) __NORETURN;
@@ -82,7 +82,7 @@ static void _reset(bool poff)
 	else
 		psci_system_reset();
 	for (;;) {
-		__asm__ volatile ("wfe":::"memory");
+		__asm__ volatile("wfe":::"memory");
 	}
 }
 
@@ -95,22 +95,25 @@ static struct boot_syscalls _sysp =
 };
 struct boot_syscalls *sysp = &_sysp;
 
-void set_platform_defaults(void)
+void
+set_platform_defaults(void)
 {
 	tod_module_name = "todpl031";
 }
 
-uint64_t plat_get_cpu_clock(int cpu_no)
+uint64_t
+plat_get_cpu_clock(int cpu_no)
 {
 	char name[80];
 	sprintf(name, "/cpus/cpu@%d", cpu_no);
 	pnode_t node = prom_finddevice(name);
 	if (node > 0) {
 		uint_t clock;
-		if (prom_getproplen(node, "clock-frequency") == sizeof(uint_t)) {
+		if (prom_getproplen(node, "clock-frequency") ==
+		    sizeof (uint_t)) {
 			prom_getprop(node, "clock-frequency", (caddr_t)&clock);
-			return ntohl(clock);
+			return (ntohl(clock));
 		}
 	}
-	return 1000*1000*1000;
+	return (1000 * 1000 * 1000);
 }

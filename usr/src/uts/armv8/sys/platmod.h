@@ -24,7 +24,7 @@
  */
 
 #ifndef _SYS_PLATMOD_H
-#define _SYS_PLATMOD_H
+#define	_SYS_PLATMOD_H
 
 #ifdef	__cplusplus
 extern "C" {
@@ -33,7 +33,6 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/promif.h>
 
-extern char *plat_get_cpu_str(void);
 extern uint64_t plat_get_cpu_clock(int cpu_no);
 extern int plat_pinmux_set(pnode_t);
 

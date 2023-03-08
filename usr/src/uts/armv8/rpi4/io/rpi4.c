@@ -47,32 +47,30 @@
 #include <sys/vcio.h>
 #include <sys/gpio.h>
 
-#define UART_ADDR	(UART_PHYS + SEGKPM_BASE)
+#define	UART_ADDR	(UART_PHYS + SEGKPM_BASE)
 
-#define UARTDR		(*(volatile uint32_t *)(UART_ADDR + 0x00))
-#define UARTFR		(*(volatile uint32_t *)(UART_ADDR + 0x18))
+#define	UARTDR		(*(volatile uint32_t *)(UART_ADDR + 0x00))
+#define	UARTFR		(*(volatile uint32_t *)(UART_ADDR + 0x18))
 
-#define UARTFR_TXFE	(1 << 7)
-#define UARTFR_TXFF	(1 << 5)
-#define UARTFR_RXFE	(1 << 4)
+#define	UARTFR_TXFE	(1 << 7)
+#define	UARTFR_TXFF	(1 << 5)
+#define	UARTFR_RXFE	(1 << 4)
 
-char *plat_get_cpu_str()
+static void
+yield()
 {
-	return "BCM2711";
+	__asm__ volatile("yield":::"memory");
 }
 
-static void yield()
-{
-	__asm__ volatile ("yield":::"memory");
-}
-
-static int _getchar()
+static int
+_getchar()
 {
 	while (UARTFR & UARTFR_RXFE) yield();
 	return (UARTDR & 0xFF);
 }
 
-static void _putchar(int c)
+static void
+_putchar(int c)
 {
 	while (UARTFR & UARTFR_TXFF) {}
 	UARTDR = c;
@@ -81,19 +79,20 @@ static void _putchar(int c)
 	while (!(UARTFR & UARTFR_TXFE)) {}
 }
 
-static int _ischar()
+static int
+_ischar()
 {
-	return !(UARTFR & UARTFR_RXFE);
+	return (!(UARTFR & UARTFR_RXFE));
 }
 
-static void _reset(bool poff) __NORETURN;
-static void _reset(bool poff)
+static void __NORETURN
+_reset(bool poff)
 {
 	if (poff)
 		psci_system_off();
 	else
 		psci_system_reset();
-	for (;;) { __asm__ volatile ("wfe":::"memory"); }
+	for (;;) { __asm__ volatile("wfe":::"memory"); }
 }
 
 static struct boot_syscalls _sysp =
@@ -105,7 +104,8 @@ static struct boot_syscalls _sysp =
 };
 struct boot_syscalls *sysp = &_sysp;
 
-void set_platform_defaults(void)
+void
+set_platform_defaults(void)
 {
 }
 
@@ -117,7 +117,8 @@ find_cprman(pnode_t node, void *arg)
 	*(pnode_t *)arg = node;
 }
 
-uint64_t plat_get_cpu_clock(int cpu_no)
+uint64_t
+plat_get_cpu_clock(int cpu_no)
 {
 	pnode_t node = 0;
 	int err;
@@ -129,11 +130,12 @@ uint64_t plat_get_cpu_clock(int cpu_no)
 	struct prom_hwclock clk = { node, VCPROP_CLK_ARM };
 	err = plat_hwclock_get_rate(&clk);
 	if (err == -1)
-		return 1500 * 1000 * 1000;
-	return (uint32_t)err;
+		return (1500 * 1000 * 1000);
+	return (err);
 }
 
 static kmutex_t mbox_lock;
+
 static ddi_dma_attr_t dma_attr = {
 	DMA_ATTR_V0,			/* dma_attr_version	*/
 	0x0000000000000000ull,		/* dma_attr_addr_lo	*/
@@ -161,10 +163,10 @@ find_mbox(dev_info_t *dip, void *arg)
 	if (node > 0) {
 		if (prom_is_compatible(node, "brcm,bcm2835-mbox")) {
 			*(dev_info_t **)arg = dip;
-			return DDI_WALK_TERMINATE;
+			return (DDI_WALK_TERMINATE);
 		}
 	}
-	return DDI_WALK_CONTINUE;
+	return (DDI_WALK_CONTINUE);
 }
 
 static void
@@ -183,8 +185,10 @@ mbox_init(void)
 
 	pnode_t node = ddi_get_nodeid(dip);
 	ASSERT(node > 0);
-	if (prom_get_reg_address(node, 0, &base) != 0)
-		cmn_err(CE_PANIC, "prom_get_reg_address faild for mbox register");
+	if (prom_get_reg_address(node, 0, &base) != 0) {
+		cmn_err(CE_PANIC,
+		    "prom_get_reg_address failed for mbox register");
+	}
 	mbox_base = SEGKPM_BASE + base;
 
 	int rv;
@@ -192,14 +196,16 @@ mbox_init(void)
 	if (rv != DDI_SUCCESS) {
 		cmn_err(CE_PANIC, "i_ddi_update_dma_attr failed (%d)!", rv);
 	}
-	dma_attr.dma_attr_count_max = dma_attr.dma_attr_addr_hi - dma_attr.dma_attr_addr_lo;
+	dma_attr.dma_attr_count_max = dma_attr.dma_attr_addr_hi -
+	    dma_attr.dma_attr_addr_lo;
 
 	rv = i_ddi_convert_dma_attr(&dma_mem_attr, dip, &dma_attr);
 	if (rv != DDI_SUCCESS) {
 		cmn_err(CE_PANIC, "i_ddi_convert_dma_attr failed (%d)!", rv);
 	}
 
-	err = i_ddi_mem_alloc(NULL, &dma_mem_attr, MMU_PAGESIZE, 0, IOMEM_DATA_UNCACHED, NULL, &mbox_buffer, NULL, NULL);
+	err = i_ddi_mem_alloc(NULL, &dma_mem_attr, MMU_PAGESIZE, 0,
+	    IOMEM_DATA_UNCACHED, NULL, &mbox_buffer, NULL, NULL);
 	if (err != DDI_SUCCESS)
 		cmn_err(CE_PANIC, "i_ddi_mem_alloc faild for mbox buffer");
 	mbox_buffer_phys = ptob(hat_getpfnum(kas.a_hat, mbox_buffer));
@@ -209,7 +215,7 @@ mbox_init(void)
 static uint32_t
 mbox_reg_read(uint32_t offset)
 {
-	return *(volatile uint32_t *)(mbox_base + offset);
+	return (*(volatile uint32_t *)(mbox_base + offset));
 }
 static void
 mbox_reg_write(uint32_t offset, uint32_t val)
@@ -221,43 +227,49 @@ mbox_prop_send_impl(uint32_t chan, uint32_t addr)
 {
 	// sync
 	for (;;) {
-		if (mbox_reg_read(BCM2835_MBOX0_STATUS) & BCM2835_MBOX_STATUS_EMPTY)
+		if (mbox_reg_read(BCM2835_MBOX0_STATUS) &
+		    BCM2835_MBOX_STATUS_EMPTY) {
 			break;
+		}
 		mbox_reg_read(BCM2835_MBOX0_READ);
 	}
 	for (;;) {
-		if (!(mbox_reg_read(BCM2835_MBOX1_STATUS) & BCM2835_MBOX_STATUS_FULL))
+		if (!(mbox_reg_read(BCM2835_MBOX1_STATUS) &
+		    BCM2835_MBOX_STATUS_FULL)) {
 			break;
+		}
 	}
 
 	mbox_reg_write(BCM2835_MBOX1_WRITE, BCM2835_MBOX_MSG(chan, addr));
 
 	for (;;) {
-		if ((mbox_reg_read(BCM2835_MBOX0_STATUS) & BCM2835_MBOX_STATUS_EMPTY))
+		if ((mbox_reg_read(BCM2835_MBOX0_STATUS) &
+		    BCM2835_MBOX_STATUS_EMPTY)) {
 			continue;
+		}
 		uint32_t val = mbox_reg_read(BCM2835_MBOX0_READ);
 		uint8_t rchan = BCM2835_MBOX_CHAN(val);
 		uint32_t rdata = BCM2835_MBOX_DATA(val);
 		ASSERT(rchan == chan);
 		ASSERT(addr == rdata);
-		return rdata;
+		return (rdata);
 	}
 }
 
 static void
 copy_buffer(void * dst, void *src, uint32_t len)
 {
-	while (len >= sizeof(uint64_t)) {
+	while (len >= sizeof (uint64_t)) {
 		*(volatile uint64_t *)dst = *(volatile uint64_t *)src;
-		dst = (caddr_t)dst + sizeof(uint64_t);
-		src = (caddr_t)src + sizeof(uint64_t);
-		len -= sizeof(uint64_t);
+		dst = (caddr_t)dst + sizeof (uint64_t);
+		src = (caddr_t)src + sizeof (uint64_t);
+		len -= sizeof (uint64_t);
 	}
 	while (len > 0) {
 		*(volatile uint8_t *)dst = *(volatile uint8_t *)src;
-		dst = (caddr_t)dst + sizeof(uint8_t);
-		src = (caddr_t)src + sizeof(uint8_t);
-		len -= sizeof(uint8_t);
+		dst = (caddr_t)dst + sizeof (uint8_t);
+		src = (caddr_t)src + sizeof (uint8_t);
+		len -= sizeof (uint8_t);
 	}
 }
 
@@ -276,7 +288,8 @@ mbox_prop_send(void *data, uint32_t len)
 
 	copy_buffer(mbox_buffer, data, len);
 
-	mbox_prop_send_impl(BCMMBOX_CHANARM2VC, (uint32_t)(mbox_buffer_phys - dma_mem_attr.dma_attr_addr_lo + dma_attr.dma_attr_addr_lo));
+	mbox_prop_send_impl(BCMMBOX_CHANARM2VC, (uint32_t)(mbox_buffer_phys -
+	    dma_mem_attr.dma_attr_addr_lo + dma_attr.dma_attr_addr_lo));
 
 	copy_buffer(data, mbox_buffer, len);
 
@@ -288,10 +301,11 @@ static int clock_id_table[] = {
 	[51] = VCPROP_CLK_EMMC2,
 };
 
-int plat_hwclock_get_rate(struct prom_hwclock *clk)
+int
+plat_hwclock_get_rate(struct prom_hwclock *clk)
 {
 	if (!prom_is_compatible(clk->node, "brcm,bcm2711-cprman"))
-		return -1;
+		return (-1);
 
 	int id;
 	switch (clk->id) {
@@ -307,7 +321,7 @@ int plat_hwclock_get_rate(struct prom_hwclock *clk)
 		struct vcprop_tag end;
 	} vb = {
 		.vb_hdr = {
-			.vpb_len = sizeof(vb),
+			.vpb_len = sizeof (vb),
 			.vpb_rcode = VCPROP_PROCESS_REQUEST,
 		},
 		.vbt_clockrate = {
@@ -323,20 +337,21 @@ int plat_hwclock_get_rate(struct prom_hwclock *clk)
 		},
 	};
 
-	mbox_prop_send(&vb, sizeof(vb));
+	mbox_prop_send(&vb, sizeof (vb));
 
 	if (!vcprop_buffer_success_p(&vb.vb_hdr))
-		return -1;
+		return (-1);
 	if (!vcprop_tag_success_p(&vb.vbt_clockrate.tag))
-		return -1;
+		return (-1);
 
 	return (vb.vbt_clockrate.rate);
 }
 
-int plat_hwclock_set_rate(struct prom_hwclock *clk, int rate)
+int
+plat_hwclock_set_rate(struct prom_hwclock *clk, int rate)
 {
 	if (!prom_is_compatible(clk->node, "brcm,bcm2711-cprman"))
-		return -1;
+		return (-1);
 
 	int id;
 	switch (clk->id) {
@@ -352,7 +367,7 @@ int plat_hwclock_set_rate(struct prom_hwclock *clk, int rate)
 		struct vcprop_tag end;
 	} vb = {
 		.vb_hdr = {
-			.vpb_len = sizeof(vb),
+			.vpb_len = sizeof (vb),
 			.vpb_rcode = VCPROP_PROCESS_REQUEST,
 		},
 		.vbt_clockrate = {
@@ -369,27 +384,27 @@ int plat_hwclock_set_rate(struct prom_hwclock *clk, int rate)
 		},
 	};
 
-	mbox_prop_send(&vb, sizeof(vb));
+	mbox_prop_send(&vb, sizeof (vb));
 
 	if (!vcprop_buffer_success_p(&vb.vb_hdr))
-		return -1;
+		return (-1);
 	if (!vcprop_tag_success_p(&vb.vbt_clockrate.tag))
-		return -1;
+		return (-1);
 
-	return 0;
+	return (0);
 }
 
-int plat_gpio_get(struct gpio_ctrl *gpio)
+int
+plat_gpio_get(struct gpio_ctrl *gpio)
 {
 	int offset;
 	if (prom_is_compatible(gpio->node, "raspberrypi,firmware-gpio")) {
 		offset = 128;
-	}
-	else if (prom_is_compatible(gpio->node, "brcm,bcm2711-gpio")) {
+	} else if (prom_is_compatible(gpio->node, "brcm,bcm2711-gpio")) {
 		offset = 0;
+	} else {
+		return (-1);
 	}
-	else
-		return -1;
 
 	struct {
 		struct vcprop_buffer_hdr	vb_hdr;
@@ -397,7 +412,7 @@ int plat_gpio_get(struct gpio_ctrl *gpio)
 		struct vcprop_tag end;
 	} vb = {
 		.vb_hdr = {
-			.vpb_len = sizeof(vb),
+			.vpb_len = sizeof (vb),
 			.vpb_rcode = VCPROP_PROCESS_REQUEST,
 		},
 		.vbt_gpio = {
@@ -413,27 +428,27 @@ int plat_gpio_get(struct gpio_ctrl *gpio)
 		},
 	};
 
-	mbox_prop_send(&vb, sizeof(vb));
+	mbox_prop_send(&vb, sizeof (vb));
 
 	if (!vcprop_buffer_success_p(&vb.vb_hdr))
-		return -1;
+		return (-1);
 	if (!vcprop_tag_success_p(&vb.vbt_gpio.tag))
-		return -1;
+		return (-1);
 
-	return vb.vbt_gpio.state;
+	return (vb.vbt_gpio.state);
 }
 
-int plat_gpio_set(struct gpio_ctrl *gpio, int value)
+int
+plat_gpio_set(struct gpio_ctrl *gpio, int value)
 {
 	int offset;
 	if (prom_is_compatible(gpio->node, "raspberrypi,firmware-gpio")) {
 		offset = VCPROP_EXP_GPIO_BASE;
-	}
-	else if (prom_is_compatible(gpio->node, "brcm,bcm2711-gpio")) {
+	} else if (prom_is_compatible(gpio->node, "brcm,bcm2711-gpio")) {
 		offset = 0;
+	} else {
+		return (-1);
 	}
-	else
-		return -1;
 
 	struct {
 		struct vcprop_buffer_hdr	vb_hdr;
@@ -441,7 +456,7 @@ int plat_gpio_set(struct gpio_ctrl *gpio, int value)
 		struct vcprop_tag end;
 	} vb = {
 		.vb_hdr = {
-			.vpb_len = sizeof(vb),
+			.vpb_len = sizeof (vb),
 			.vpb_rcode = VCPROP_PROCESS_REQUEST,
 		},
 		.vbt_gpio = {
@@ -458,10 +473,10 @@ int plat_gpio_set(struct gpio_ctrl *gpio, int value)
 		},
 	};
 
-	mbox_prop_send(&vb, sizeof(vb));
+	mbox_prop_send(&vb, sizeof (vb));
 
 	if (!vcprop_buffer_success_p(&vb.vb_hdr))
-		return -1;
+		return (-1);
 
-	return 0;
+	return (0);
 }
