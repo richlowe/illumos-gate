@@ -325,6 +325,7 @@ COMMON_SUBDIRS=	\
 	renice		\
 	rm		\
 	rmdir		\
+	rmmount		\
 	rmt		\
 	roles		\
 	rpcbind		\
@@ -449,7 +450,6 @@ COMMON_SUBDIRS=	\
 # powertop - not ported
 # rmformat - not ported (or useful?)
 # rmvolmgr - needs dbus
-# rmmount - needs dbus
 # cdrw - needs dbus
 #
 # bc - not 64bit clean
@@ -502,7 +502,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	rcm_daemon	\
 	rmformat	\
 	rmvolmgr	\
-	rmmount		\
 	sendmail	\
 	sh		\
 	srchtxt		\
