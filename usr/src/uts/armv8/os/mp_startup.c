@@ -126,7 +126,21 @@ init_cpu_info(struct cpu *cp)
 	pi->pi_clock = (plat_get_cpu_clock(cp->cpu_id) + 500000) / 1000000;
 
 	strlcpy(pi->pi_processor_type, "AArch64", PI_TYPELEN);
-	strlcat(pi->pi_fputypes, "AArch64", PI_FPUTYPE);
+
+	if (has_arm_feature(arm_features, ARM_FEAT_SME2))
+		strlcat(pi->pi_fputypes, "SME2", PI_FPUTYPE);
+	else if (has_arm_feature(arm_features, ARM_FEAT_SME))
+		strlcat(pi->pi_fputypes, "SME", PI_FPUTYPE);
+	else if (has_arm_feature(arm_features, ARM_FEAT_SVE2))
+		strlcat(pi->pi_fputypes, "SVE2", PI_FPUTYPE);
+	else if (has_arm_feature(arm_features, ARM_FEAT_SVE))
+		strlcat(pi->pi_fputypes, "SVE", PI_FPUTYPE);
+	else if (has_arm_feature(arm_features, ARM_FEAT_AdvSIMD))
+		strlcat(pi->pi_fputypes, "AdvSIMD", PI_FPUTYPE);
+	else if (has_arm_feature(arm_features, ARM_FEAT_FP))
+		strlcat(pi->pi_fputypes, "FP", PI_FPUTYPE);
+	else
+		strlcat(pi->pi_fputypes, "missing", PI_FPUTYPE);
 
 	/*
 	 * Current frequency in Hz.
