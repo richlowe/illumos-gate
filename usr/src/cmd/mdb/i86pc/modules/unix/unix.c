@@ -901,7 +901,7 @@ scalehrtime_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 /*
  * The x86 feature set is implemented as a bitmap array. That bitmap array is
  * stored across a number of uchars based on the BT_SIZEOFMAP(NUM_X86_FEATURES)
- * macro. We have the names for each of these features in unix's text segment
+ * macro. We have the names for each of these features in unix's data segment
  * so we do not have to duplicate them and instead just look them up.
  */
 /*ARGSUSED*/

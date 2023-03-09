@@ -155,6 +155,7 @@ file path=usr/lib/mdb/kvm/$(ARCH64)/sppp.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/ufs.so group=sys mode=0555
 $(not_sparc)file path=usr/lib/mdb/kvm/$(ARCH64)/uhci.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/usba.so group=sys mode=0555
+$(aarch64_ONLY)file path=usr/lib/mdb/kvm/aarch64/unix.so group=sys mode=0555
 dir  path=usr/lib/mdb/proc group=sys
 $(not_sparc)dir path=usr/lib/mdb/proc/$(ARCH64)
 file path=usr/lib/mdb/proc/$(ARCH64)/ld.so group=sys mode=0555

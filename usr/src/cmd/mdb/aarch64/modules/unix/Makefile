@@ -19,11 +19,22 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-include $(SRC)/Makefile.master
+# Copyright 2019 Joyent, Inc.
 
-SUBDIRS = aarch64 modules
+MODULE = unix.so
+MDBTGT = kvm
 
-include ../Makefile.subdirs
+MODSRCS = unix.c
+
+include ../../../../Makefile.cmd
+include ../../../../Makefile.cmd.64
+include ../../../aarch64/Makefile.aarch64
+include ../../Makefile.aarch64
+include ../../../Makefile.module
+
+CPPFLAGS += -DMP -D_MACHDEP
+CPPFLAGS += -I../../../../common
+CPPFLAGS += -I$(SRC)/uts/aarch64

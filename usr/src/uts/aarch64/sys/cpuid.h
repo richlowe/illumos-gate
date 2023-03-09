@@ -1143,6 +1143,8 @@ extern void cpuid_implementer(const cpu_t *, char *, size_t);
 extern void cpuid_partname(const cpu_t *, char *, size_t);
 extern void cpuid_brandstr(const cpu_t *, char *, size_t);
 
+extern void cpuid_gather_arm_features(void *);
+
 #ifdef __cplusplus
 }
 #endif

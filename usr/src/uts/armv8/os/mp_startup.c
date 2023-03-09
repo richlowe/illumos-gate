@@ -76,6 +76,8 @@
 #include <sys/platmod.h>
 #include <sys/irq.h>
 #include <sys/psci.h>
+#include <sys/arm_features.h>
+
 
 struct cpu	cpus[1];			/* CPU data */
 struct cpu	*cpu[NCPU] = {&cpus[0]};	/* pointers to all CPUs */
@@ -391,6 +393,23 @@ mp_startup_boot(void)
 	 */
 	cp->cpu_flags &= ~(CPU_POWEROFF | CPU_QUIESCED);
 
+	uchar_t our_features[BT_SIZEOFMAP(NUM_ARM_FEATURES)];
+	bzero(our_features, BT_SIZEOFMAP(NUM_ARM_FEATURES));
+
+	cpuid_gather_arm_features(our_features);
+
+	/*
+	 * All PEs in the system much have the same features.
+	 *
+	 * XXXARM: Note this currently depends on arm_features not having
+	 * non-PE features in it yet, but we can't assert that.
+	 */
+	if (compare_arm_features(arm_features, our_features) == B_FALSE) {
+		cmn_err(CE_CONT, "cpu%d: features\n", cp->cpu_id);
+		print_arm_features(our_features);
+		cmn_err(CE_PANIC, "cpu%d: mismatch\n", cp->cpu_id);
+	}
+
 	init_cpu_info(cp);
 
 	cp->cpu_flags |= CPU_RUNNING | CPU_READY | CPU_EXISTS;
@@ -645,9 +664,17 @@ start_cpu(processorid_t who, uint64_t ignore_affinity)
 void
 start_other_cpus(int cprboot)
 {
+	/*
+	 * XXXARM: Note that while we're `start_other_cpus` we're running on
+	 * the boot CPU and initializing _for_ the boot CPU right now,
+	 * confusingly.
+	 */
+	cpuid_gather_arm_features(arm_features);
+
 	init_cpu_info(CPU);
 
 	cmn_err(CE_CONT, "?cpu%d: %s\n", CPU->cpu_id, CPU->cpu_brandstr);
+	print_arm_features(arm_features);
 
 	write_oslar_el1(0);
 	write_cntkctl(read_cntkctl() | 0x3);
