@@ -611,6 +611,14 @@ read_id_aa64isar1(void)
 }
 
 static inline uint64_t
+read_id_aa64isar2(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, id_aa64isar2_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
 read_id_aa64mmfr0(void)
 {
 	uint64_t reg;
@@ -623,6 +631,46 @@ read_id_aa64mmfr1(void)
 {
 	uint64_t reg;
 	__asm__ __volatile__("mrs %0, id_aa64mmfr1_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
+read_id_aa64mmfr2(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, id_aa64mmfr2_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
+read_id_aa64mmfr3(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, id_aa64mmfr3_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
+read_id_aa64zfr0(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, id_aa64zfr0_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
+read_id_aa64smfr0(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, id_aa64smfr0_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
+read_pmmir(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, pmmir_el1":"=r"(reg)::"memory");
 	return (reg);
 }
 

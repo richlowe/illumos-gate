@@ -27,6 +27,10 @@
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
 
+%.o: $(TOP_CMN_DIR)/bitext/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
 $(NFSBOOT_BIN): $(NFSBOOT_OUT)
 	$(OBJCOPY) --output-target=binary $(NFSBOOT_OUT) $(NFSBOOT_OUT:%.out=%.bin)
 

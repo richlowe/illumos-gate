@@ -50,7 +50,7 @@
 #include <sys/ddidmareq.h>
 #include <sys/controlregs.h>
 #include <sys/pte.h>
-
+#include <sys/cpuid.h>
 
 /*
  * Flag is not set early in boot. Once it is set we are no longer
@@ -82,17 +82,19 @@ hat_kmap_init(uintptr_t base, size_t len)
 	 * on the hypervisor.
 	 */
 	map_addr = base & LEVEL_MASK(PAGE_LEVEL + 1);
-	map_eaddr = (base + len + LEVEL_SIZE(PAGE_LEVEL + 1) - 1) & LEVEL_MASK(PAGE_LEVEL + 1);
+	map_eaddr = (base + len + LEVEL_SIZE(PAGE_LEVEL + 1) - 1) &
+	    LEVEL_MASK(PAGE_LEVEL + 1);
 	map_len = map_eaddr - map_addr;
-	window_size = mmu_btop(map_len) * sizeof(pte_t);
-	window_size = (window_size + LEVEL_SIZE(PAGE_LEVEL + 1)) & LEVEL_MASK(PAGE_LEVEL + 1);
+	window_size = mmu_btop(map_len) * sizeof (pte_t);
+	window_size = (window_size + LEVEL_SIZE(PAGE_LEVEL + 1)) &
+	    LEVEL_MASK(PAGE_LEVEL + 1);
 	htable_cnt = map_len >> LEVEL_SHIFT(PAGE_LEVEL + 1);
 
 	/*
 	 * allocate vmem for the kmap_ptes
 	 */
-	ptes = vmem_xalloc(heap_arena, window_size, LEVEL_SIZE(PAGE_LEVEL + 1), 0,
-	    0, NULL, NULL, VM_SLEEP);
+	ptes = vmem_xalloc(heap_arena, window_size, LEVEL_SIZE(PAGE_LEVEL + 1),
+	    0, 0, NULL, NULL, VM_SLEEP);
 	mmu.kmap_htables =
 	    kmem_alloc(htable_cnt * sizeof (htable_t *), KM_SLEEP);
 
@@ -101,7 +103,8 @@ hat_kmap_init(uintptr_t base, size_t len)
 	 * Note we don't ever htable_release() the kmap page tables - they
 	 * can't ever be stolen, freed, etc.
 	 */
-	for (va = map_addr, i = 0; i < htable_cnt; va += LEVEL_SIZE(PAGE_LEVEL + 1), ++i) {
+	for (va = map_addr, i = 0; i < htable_cnt;
+	    va += LEVEL_SIZE(PAGE_LEVEL + 1), ++i) {
 		ht = htable_create(kas.a_hat, va, PAGE_LEVEL, NULL);
 		if (ht == NULL)
 			panic("hat_kmap_init: ht == NULL");
@@ -146,7 +149,8 @@ hat_kern_alloc(
 				continue;
 			++table_cnt;
 
-			pte_t *l3_ptbl = (pte_t *)pa_to_kseg(l2_ptbl[j] & PTE_PFN_MASK);
+			pte_t *l3_ptbl = (pte_t *)pa_to_kseg(l2_ptbl[j] &
+			    PTE_PFN_MASK);
 			for (int k = 0; k < NPTEPERPT; k++) {
 				if ((l3_ptbl[k] & PTE_TYPE_MASK) != PTE_TABLE)
 					continue;
@@ -161,7 +165,8 @@ hat_kern_alloc(
 	 * the entire top level page table for the kernel. Make sure there's
 	 * enough reserve for that too.
 	 */
-	table_cnt += NPTEPERPT - ((kernelbase >> LEVEL_SHIFT(MAX_PAGE_LEVEL)) & (NPTEPERPT - 1));
+	table_cnt += NPTEPERPT - ((kernelbase >> LEVEL_SHIFT(MAX_PAGE_LEVEL)) &
+	    (NPTEPERPT - 1));
 
 	/*
 	 * Add 1/4 more into table_cnt for extra slop.  The unused
@@ -297,7 +302,7 @@ va_to_pfn(void *vaddr)
 
 	uint64_t pa = (par & PAR_PA_MASK);
 
-	return mmu_btop(pa);
+	return (mmu_btop(pa));
 }
 
 static boolean_t
@@ -314,15 +319,30 @@ is_reserved_memory(paddr_t pa)
 	return (B_TRUE);
 }
 
-void boot_reserve(void)
+void
+boot_reserve(void)
 {
 	size_t count = 0;
 
-	size_t pa_size_array[] = { (1ul << 32), (1ul << 36), (1ul << 40), (1ul << 42), (1ul << 44), (1ul << 48), (1ul << 52) };
-	size_t pa_size = pa_size_array[read_id_aa64mmfr0() & 0xF];
+	size_t pa_size_array[] = {
+		[MMFR0_PARANGE_4G] =	(1ul << 32),	/* 4G */
+		[MMFR0_PARANGE_64G] =	(1ul << 36),	/* 64G */
+		[MMFR0_PARANGE_1T] =	(1ul << 40),	/* 1TB */
+		[MMFR0_PARANGE_4T] =	(1ul << 42),	/* 4TB */
+		[MMFR0_PARANGE_16T] =	(1ul << 44),	/* 16TB */
+		[MMFR0_PARANGE_256T] =	(1ul << 48),	/* 256TB */
+		[MMFR0_PARANGE_4P] =	(1ul << 52),	/* 4PB */
+		[MMFR0_PARANGE_64P] =	(1ul << 56)	/* 64PB */
+	};
+
 	uintptr_t va = KERNELBASE;
 	pte_t *ptbl[MMU_PAGE_LEVELS] = {0};
-	ptbl[MMU_PAGE_LEVELS - 1] = (pte_t *)pa_to_kseg(read_ttbr1() & PTE_PFN_MASK);
+	ptbl[MMU_PAGE_LEVELS - 1] = (pte_t *)pa_to_kseg(read_ttbr1() &
+	    PTE_PFN_MASK);
+
+	ASSERT(MMFR0_PARANGE(read_id_aa64mmfr0()) < ARRAY_SIZE(pa_size_array));
+
+	size_t pa_size = pa_size_array[MMFR0_PARANGE(read_id_aa64mmfr0())];
 
 	ASSERT(is_reserved_memory(read_ttbr1() & PTE_PFN_MASK));
 
@@ -350,7 +370,8 @@ void boot_reserve(void)
 
 		if (l > 0 && (*ptbl[l] & PTE_TYPE_MASK) == PTE_TABLE) {
 			ASSERT(ptbl[l - 1] == NULL);
-			ptbl[l - 1] = (pte_t *)pa_to_kseg(*ptbl[l] & PTE_PFN_MASK);
+			ptbl[l - 1] = (pte_t *)pa_to_kseg(*ptbl[l] &
+			    PTE_PFN_MASK);
 
 			ASSERT(is_reserved_memory(*ptbl[l] & PTE_PFN_MASK));
 
@@ -373,7 +394,8 @@ void boot_reserve(void)
 				ASSERT(pp->p_lckcnt == 1);
 
 				if (pp->p_vnode == NULL) {
-					page_hashin(pp, &kvp, va + MMU_PAGESIZE * x, NULL);
+					page_hashin(pp, &kvp,
+					    va + MMU_PAGESIZE * x, NULL);
 				}
 				count++;
 			}

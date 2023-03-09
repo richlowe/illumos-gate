@@ -61,6 +61,7 @@
 #include <sys/dumphdr.h>
 #include <sys/memnode.h>
 #include <sys/random.h>
+#include <sys/cpuid.h>
 
 #include <vm/hat.h>
 #include <vm/as.h>
@@ -126,7 +127,7 @@ typedef struct {
 		pgcnt_t	mnr_mts_pgcnt;
 		int	mnr_mts_colors;
 		pgcnt_t *mnr_mtsc_pgcnt;
-	} 	*mnr_mts;
+	}	*mnr_mts;
 #endif
 } mnoderange_t;
 
@@ -260,7 +261,8 @@ map_pgsz(int maptype, struct proc *p, caddr_t addr, size_t len, int memcntl)
 	switch (maptype) {
 	case MAPPGSZ_HEAP:
 	case MAPPGSZ_STK:
-		max_lpsize = (maptype == MAPPGSZ_HEAP ? max_uheap_lpsize : max_ustack_lpsize);
+		max_lpsize = (maptype == MAPPGSZ_HEAP ?
+		    max_uheap_lpsize : max_ustack_lpsize);
 		if (max_lpsize == MMU_PAGESIZE) {
 			return (MMU_PAGESIZE);
 		}
@@ -347,22 +349,28 @@ map_pgszcvec(caddr_t addr, size_t size, uintptr_t off, int flags, int type,
     int memcntl)
 {
 	if (flags & MAP_TEXT) {
-		return (map_szcvec(addr, size, off, max_utext_lpsize, shm_lpg_min_physmem));
+		return (map_szcvec(addr, size, off, max_utext_lpsize,
+		    shm_lpg_min_physmem));
 
 	} else if (flags & MAP_INITDATA) {
-		return (map_szcvec(addr, size, off, max_uidata_lpsize, privm_lpg_min_physmem));
+		return (map_szcvec(addr, size, off, max_uidata_lpsize,
+		    privm_lpg_min_physmem));
 
 	} else if (type == MAPPGSZC_SHM) {
-		return (map_szcvec(addr, size, off, max_shm_lpsize, shm_lpg_min_physmem));
+		return (map_szcvec(addr, size, off, max_shm_lpsize,
+		    shm_lpg_min_physmem));
 
 	} else if (type == MAPPGSZC_HEAP) {
-		return (map_szcvec(addr, size, off, max_uheap_lpsize, privm_lpg_min_physmem));
+		return (map_szcvec(addr, size, off, max_uheap_lpsize,
+		    privm_lpg_min_physmem));
 
 	} else if (type == MAPPGSZC_STACK) {
-		return (map_szcvec(addr, size, off, max_ustack_lpsize, privm_lpg_min_physmem));
+		return (map_szcvec(addr, size, off, max_ustack_lpsize,
+		    privm_lpg_min_physmem));
 
 	} else {
-		return (map_szcvec(addr, size, off, max_privmap_lpsize, privm_lpg_min_physmem));
+		return (map_szcvec(addr, size, off, max_privmap_lpsize,
+		    privm_lpg_min_physmem));
 
 	}
 }
@@ -1499,27 +1507,30 @@ page_get_contigpage(pgcnt_t *pgcnt, ddi_dma_attr_t *mattr, int iolock)
 		hi = physmax - 1;
 		lo = 0;
 		sgllen = 1;
-		switch (read_id_aa64mmfr0() & 0xF) {
-		default:
-		case 0:
-			pfnseg = mmu_btop(4ul * 0x40000000ul);
+		switch (MMFR0_PARANGE(read_id_aa64mmfr0())) {
+		case MMFR0_PARANGE_4G:
+			pfnseg = mmu_btop(1ul << 32);
 			break;
-		case 1:
-			pfnseg = mmu_btop(64ul * 0x40000000ul);
+		case MMFR0_PARANGE_64G:
+			pfnseg = mmu_btop(1ul << 36);
 			break;
-		case 2:
-			pfnseg = mmu_btop(1024ul * 0x40000000ul);
+		case MMFR0_PARANGE_1T:
+			pfnseg = mmu_btop(1ul << 40);
 			break;
-		case 3:
-			pfnseg = mmu_btop(4ul * 1024ul * 0x40000000ul);
+		case MMFR0_PARANGE_16T:
+			pfnseg = mmu_btop(1ul << 44);
 			break;
-		case 4:
-			pfnseg = mmu_btop(16ul * 1024ul * 0x40000000ul);
+		case MMFR0_PARANGE_256T:
+			pfnseg = mmu_btop(1ul << 48);
 			break;
-		case 5:
-			pfnseg = mmu_btop(256ul * 1024ul * 0x40000000ul);
+		case MMFR0_PARANGE_4P:
+			pfnseg = mmu_btop(1ul << 52);
+			break;
+		case MMFR0_PARANGE_64P:
+			pfnseg = mmu_btop(1ul << 56);
 			break;
 		}
+
 		minctg = *pgcnt;
 
 		if (minctg < lastctgcnt)
@@ -1872,10 +1883,12 @@ page_get_anylist(struct vnode *vp, u_offset_t off, struct as *as, caddr_t vaddr,
 		if (fullrange != 0) {
 			pp = page_get_mnode_freelist(0, bin, mtype, szc, flags);
 			if (pp == NULL) {
-				pp = page_get_mnode_cachelist(bin, flags, 0, mtype);
+				pp = page_get_mnode_cachelist(bin, flags, 0,
+				    mtype);
 			}
 		} else {
-			pp = page_get_mnode_anylist(bin, szc, flags, 0, mtype, dma_attr);
+			pp = page_get_mnode_anylist(bin, szc, flags, 0,
+			    mtype, dma_attr);
 		}
 		if (pp != NULL) {
 			VM_STAT_ADD(pga_vmstats.pga_allocok);

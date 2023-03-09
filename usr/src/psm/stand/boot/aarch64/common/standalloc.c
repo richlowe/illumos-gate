@@ -24,21 +24,24 @@
  * Use is subject to license terms.
  */
 
-#include <sys/types.h>
-#include <sys/saio.h>
-#include <sys/sysmacros.h>
-#include <sys/promif.h>
-#include <sys/bootconf.h>
-#include <sys/salib.h>
-#include <sys/memlist.h>
-#include <sys/machparam.h>
-#include <sys/cpu.h>
-#include <sys/pte.h>
-#include <sys/memlist_impl.h>
-#include <sys/controlregs.h>
-#include <sys/platform.h>
 #include <sys/boot.h>
+#include <sys/bootconf.h>
+#include <sys/controlregs.h>
+#include <sys/cpu.h>
+#include <sys/cpuid.h>
+#include <sys/machparam.h>
+#include <sys/memlist.h>
+#include <sys/memlist_impl.h>
+#include <sys/platform.h>
+#include <sys/promif.h>
+#include <sys/pte.h>
+#include <sys/saio.h>
+#include <sys/salib.h>
+#include <sys/sysmacros.h>
+#include <sys/types.h>
+
 #include <alloca.h>
+
 #include "boot_plat.h"
 
 #ifdef DEBUG
@@ -62,10 +65,33 @@ static pte_t *l1_ptbl0;
 static pte_t *l1_ptbl1;
 
 static void init_pt(void);
-static inline int l1_pteidx(caddr_t vaddr) { return ((((uintptr_t)vaddr) >> (PAGESHIFT+3*NPTESHIFT)) & ((1<<NPTESHIFT)-1));}
-static inline int l2_pteidx(caddr_t vaddr) { return ((((uintptr_t)vaddr) >> (PAGESHIFT+2*NPTESHIFT)) & ((1<<NPTESHIFT)-1));}
-static inline int l3_pteidx(caddr_t vaddr) { return ((((uintptr_t)vaddr) >> (PAGESHIFT+1*NPTESHIFT)) & ((1<<NPTESHIFT)-1));}
-static inline int l4_pteidx(caddr_t vaddr) { return ((((uintptr_t)vaddr) >> (PAGESHIFT)) & ((1<<NPTESHIFT)-1));}
+
+static inline int
+l1_pteidx(caddr_t vaddr)
+{
+	return ((((uintptr_t)vaddr) >> (PAGESHIFT + 3 * NPTESHIFT)) &
+	    ((1 << NPTESHIFT) - 1));
+}
+
+static inline int
+l2_pteidx(caddr_t vaddr)
+{
+	return ((((uintptr_t)vaddr) >> (PAGESHIFT + 2 * NPTESHIFT)) &
+	    ((1 << NPTESHIFT) - 1));
+}
+
+static inline int
+l3_pteidx(caddr_t vaddr)
+{
+	return ((((uintptr_t)vaddr) >> (PAGESHIFT + 1 * NPTESHIFT)) &
+	    ((1 << NPTESHIFT) - 1));
+}
+
+static inline int
+l4_pteidx(caddr_t vaddr)
+{
+	return ((((uintptr_t)vaddr) >> (PAGESHIFT)) & ((1 << NPTESHIFT) - 1));
+}
 
 
 void
@@ -86,9 +112,7 @@ init_memlists(void)
 	init_physmem();
 }
 
-/*
- * ページテーブルの初期化
- */
+/* Page Table Initialization */
 static void
 init_pt(void)
 {
@@ -109,28 +133,32 @@ init_pt(void)
 	for (struct memlist *ml = plinearlistp; ml != NULL; ml = ml->ml_next) {
 		uintptr_t pa = ml->ml_address;
 		uintptr_t sz = ml->ml_size;
-		map_phys(PTE_UXN | PTE_AF | PTE_NG | PTE_SH_INNER | PTE_AP_KRWUNA | PTE_ATTR_NORMEM, (caddr_t)pa, pa, sz);
+		map_phys(PTE_UXN | PTE_AF | PTE_NG | PTE_SH_INNER |
+		    PTE_AP_KRWUNA | PTE_ATTR_NORMEM, (caddr_t)pa, pa, sz);
 	}
 
 	for (struct memlist *ml = piolistp; ml != NULL; ml = ml->ml_next) {
 		uintptr_t pa = ml->ml_address;
 		uintptr_t sz = ml->ml_size;
-		map_phys(PTE_UXN | PTE_PXN | PTE_AF | PTE_NG | PTE_SH_INNER | PTE_AP_KRWUNA | PTE_ATTR_DEVICE, (caddr_t)pa, pa, sz);
+		map_phys(PTE_UXN | PTE_PXN | PTE_AF | PTE_NG | PTE_SH_INNER |
+		    PTE_AP_KRWUNA | PTE_ATTR_DEVICE, (caddr_t)pa, pa, sz);
 	}
 
-	uint64_t mair = (
-	    (MAIR_ATTR_nGnRnE    << (MAIR_STRONG_ORDER * 8)) |
-	    (MAIR_ATTR_nGnRE     << (MAIR_DEVICE * 8)) |
-	    (MAIR_ATTR_IWB_OWB   << (MAIR_NORMAL_MEMORY * 8)) |
-	    (MAIR_ATTR_IWT_OWT   << (MAIR_NORMAL_MEMORY_WT * 8)) |
-	    (MAIR_ATTR_INC_ONC   << (MAIR_NORMAL_MEMORY_UC * 8)) |
-	    (MAIR_ATTR_nGRE      << (MAIR_UNORDERED * 8))
-	     );
+	uint64_t mair = ((MAIR_ATTR_nGnRnE    << (MAIR_STRONG_ORDER * 8)) |
+	    (MAIR_ATTR_nGnRE	<< (MAIR_DEVICE * 8)) |
+	    (MAIR_ATTR_IWB_OWB	<< (MAIR_NORMAL_MEMORY * 8)) |
+	    (MAIR_ATTR_IWT_OWT	<< (MAIR_NORMAL_MEMORY_WT * 8)) |
+	    (MAIR_ATTR_INC_ONC	<< (MAIR_NORMAL_MEMORY_UC * 8)) |
+	    (MAIR_ATTR_nGRE	<< (MAIR_UNORDERED * 8)));
+
 	uint64_t tcr =
-	    ((read_id_aa64mmfr0() & 0xF) << TCR_IPS_SHIFT) |
-	    TCR_TG1_4K | TCR_SH1_ISH | TCR_ORGN1_WBWA | TCR_IRGN1_WBWA | TCR_T1SZ_256T |
-	    TCR_TG0_4K | TCR_SH0_ISH | TCR_ORGN0_WBWA | TCR_IRGN0_WBWA | TCR_T0SZ_256T;
-	uint64_t sctlr = SCTLR_EL1_RES1 | SCTLR_UCI | SCTLR_UCT | SCTLR_DZE | SCTLR_I | SCTLR_C | SCTLR_M;
+	    ((uint64_t)MMFR0_PARANGE(read_id_aa64mmfr0()) << TCR_IPS_SHIFT) |
+	    TCR_TG1_4K | TCR_SH1_ISH | TCR_ORGN1_WBWA | TCR_IRGN1_WBWA |
+	    TCR_T1SZ_256T | TCR_TG0_4K | TCR_SH0_ISH | TCR_ORGN0_WBWA |
+	    TCR_IRGN0_WBWA | TCR_T0SZ_256T;
+
+	uint64_t sctlr = SCTLR_EL1_RES1 | SCTLR_UCI | SCTLR_UCT | SCTLR_DZE |
+	    SCTLR_I | SCTLR_C | SCTLR_M;
 
 	write_mair(mair);
 	write_tcr(tcr);
@@ -159,12 +187,14 @@ map_pages(pte_t pte_attr, caddr_t vaddr, uint64_t paddr, size_t bytes)
 	pte_t *l1_ptbl = (((uint64_t)vaddr) >> 63)? l1_ptbl1: l1_ptbl0;
 
 	if ((l1_ptbl[l1_idx] & PTE_TYPE_MASK) == 0) {
-		paddr_t pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp);
+		paddr_t pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE,
+		    &pfreelistp);
 		if (pa == 0)
 			prom_panic("phy alloc error for L2 PT\n");
 		bzero((void *)(uintptr_t)pa, MMU_PAGESIZE);
 		dsb(ish);
-		l1_ptbl[l1_idx] = PTE_TABLE_APT_NOUSER | PTE_TABLE_UXNT | pa | PTE_TABLE;
+		l1_ptbl[l1_idx] = PTE_TABLE_APT_NOUSER | PTE_TABLE_UXNT | pa |
+		    PTE_TABLE;
 	}
 
 	if ((l1_ptbl[l1_idx] & PTE_VALID) == 0) {
@@ -189,12 +219,14 @@ map_pages(pte_t pte_attr, caddr_t vaddr, uint64_t paddr, size_t bytes)
 	}
 
 	if ((l2_ptbl[l2_idx] & PTE_TYPE_MASK) == 0) {
-		paddr_t pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp);
+		paddr_t pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE,
+		    &pfreelistp);
 		if (pa == 0)
 			prom_panic("phy alloc error for L2 PT\n");
 		bzero((void *)(uintptr_t)pa, MMU_PAGESIZE);
 		dsb(ish);
-		l2_ptbl[l2_idx] = PTE_TABLE_APT_NOUSER | PTE_TABLE_UXNT | pa | PTE_TABLE;
+		l2_ptbl[l2_idx] = PTE_TABLE_APT_NOUSER | PTE_TABLE_UXNT | pa |
+		    PTE_TABLE;
 	}
 
 	if ((l2_ptbl[l2_idx] & PTE_TYPE_MASK) != PTE_TABLE) {
@@ -219,12 +251,14 @@ map_pages(pte_t pte_attr, caddr_t vaddr, uint64_t paddr, size_t bytes)
 	}
 
 	if ((l3_ptbl[l3_idx] & PTE_TYPE_MASK) == 0) {
-		paddr_t pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE, &pfreelistp);
+		paddr_t pa = memlist_get(MMU_PAGESIZE, MMU_PAGESIZE,
+		    &pfreelistp);
 		if (pa == 0)
 			prom_panic("phy alloc error for L3 PT\n");
 		bzero((void *)(uintptr_t)pa, MMU_PAGESIZE);
 		dsb(ish);
-		l3_ptbl[l3_idx] = PTE_TABLE_APT_NOUSER | PTE_TABLE_UXNT | pa | PTE_TABLE;
+		l3_ptbl[l3_idx] = PTE_TABLE_APT_NOUSER | PTE_TABLE_UXNT | pa |
+		    PTE_TABLE;
 	}
 
 	if ((l3_ptbl[l3_idx] & PTE_TYPE_MASK) != PTE_TABLE) {
@@ -266,9 +300,11 @@ map_phys(pte_t pte_attr, caddr_t vaddr, uint64_t paddr, size_t bytes)
 		uintptr_t va = (uintptr_t)vaddr;
 		size_t maxalign = va & (-va);
 		size_t mapsz;
-		if (maxalign >= MMU_PAGESIZE1G && bytes >= MMU_PAGESIZE1G && paddr >= MMU_PAGESIZE1G) {
+		if (maxalign >= MMU_PAGESIZE1G && bytes >= MMU_PAGESIZE1G &&
+		    paddr >= MMU_PAGESIZE1G) {
 			mapsz = MMU_PAGESIZE1G;
-		} else if (maxalign >= MMU_PAGESIZE2M && bytes >= MMU_PAGESIZE2M && paddr >= MMU_PAGESIZE2M) {
+		} else if (maxalign >= MMU_PAGESIZE2M &&
+		    bytes >= MMU_PAGESIZE2M && paddr >= MMU_PAGESIZE2M) {
 			mapsz = MMU_PAGESIZE2M;
 		} else {
 			mapsz = MMU_PAGESIZE;
@@ -314,9 +350,11 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 				uintptr_t va = (uintptr_t)virthint;
 				size_t maxalign = va & (-va);
 				size_t mapsz;
-				if (maxalign >= MMU_PAGESIZE1G && bytes >= MMU_PAGESIZE1G) {
+				if (maxalign >= MMU_PAGESIZE1G &&
+				    bytes >= MMU_PAGESIZE1G) {
 					mapsz = MMU_PAGESIZE1G;
-				} else if (maxalign >= MMU_PAGESIZE2M && bytes >= MMU_PAGESIZE2M) {
+				} else if (maxalign >= MMU_PAGESIZE2M &&
+				    bytes >= MMU_PAGESIZE2M) {
 					mapsz = MMU_PAGESIZE2M;
 				} else {
 					mapsz = MMU_PAGESIZE;
@@ -325,7 +363,8 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 				if (paddr == 0) {
 					prom_panic("phys mem allocate error\n");
 				}
-				map_phys(PTE_AF | PTE_SH_INNER | PTE_AP_KRWUNA | PTE_ATTR_NORMEM, virthint, paddr, mapsz);
+				map_phys(PTE_AF | PTE_SH_INNER | PTE_AP_KRWUNA |
+				    PTE_ATTR_NORMEM, virthint, paddr, mapsz);
 				bytes -= mapsz;
 				virthint += mapsz;
 			}
@@ -336,13 +375,15 @@ resalloc(enum RESOURCES type, size_t bytes, caddr_t virthint, int align)
 		}
 	}
 
-	return vaddr;
+	return (vaddr);
 }
 
 void
 reset_alloc(void)
-{}
+{
+}
 
 void
 resfree(enum RESOURCES type, caddr_t virtaddr, size_t size)
-{}
+{
+}
