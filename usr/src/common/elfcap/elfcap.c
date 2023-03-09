@@ -37,6 +37,7 @@
 #include	<sys/elf.h>
 #include	<sys/auxv_SPARC.h>
 #include	<sys/auxv_386.h>
+#include	<sys/auxv_aarch64.h>
 #include	<elfcap.h>
 
 /*
@@ -517,6 +518,262 @@ static const elfcap_desc_t hw3_386[ELFCAP_NUM_HW3_386] = {
 };
 
 /*
+ * Order the AArch64 hardware capabilities to match their numeric value.  See
+ * AV_AARCH64_ values in sys/auxv_aarch64.h.
+ */
+static const elfcap_desc_t hw1_aarch64[ELFCAP_NUM_HW1_AARCH64] = {
+	{						/* 0x00000001 */
+		AV_AARCH64_FP, STRDESC("AV_AARCH64_FP"),
+		STRDESC("FP"), STRDESC("fp"),
+	},
+	{						/* 0x00000002 */
+		AV_AARCH64_ADVSIMD, STRDESC("AV_AARCH64_ADVSIMD"),
+		STRDESC("ADVSIMD"), STRDESC("advsimd"),
+	},
+	{						/* 0x00000004 */
+		AV_AARCH64_SVE, STRDESC("AV_AARCH64_SVE"),
+		STRDESC("SVE"), STRDESC("sve"),
+	},
+	{						/* 0x00000008 */
+		AV_AARCH64_CRC32, STRDESC("AV_AARCH64_CRC32"),
+		STRDESC("CRC32"), STRDESC("crc32"),
+	},
+	{						/* 0x00000010 */
+		AV_AARCH64_SB, STRDESC("AV_AARCH64_SB"),
+		STRDESC("SB"), STRDESC("sb"),
+	},
+	{						/* 0x00000020 */
+		AV_AARCH64_SSBS, STRDESC("AV_AARCH64_SSBS"),
+		STRDESC("SSBS"), STRDESC("ssbs"),
+	},
+	{						/* 0x00000040 */
+		AV_AARCH64_DGH, STRDESC("AV_AARCH64_DGH"),
+		STRDESC("DGH"), STRDESC("dgh"),
+	},
+	{						/* 0x00000080 */
+		AV_AARCH64_AES, STRDESC("AV_AARCH64_AES"),
+		STRDESC("AES"), STRDESC("aes"),
+	},
+	{						/* 0x00000100 */
+		AV_AARCH64_PMULL, STRDESC("AV_AARCH64_PMULL"),
+		STRDESC("PMULL"), STRDESC("pmull"),
+	},
+	{						/* 0x00000200 */
+		AV_AARCH64_SHA1, STRDESC("AV_AARCH64_SHA1"),
+		STRDESC("SHA1"), STRDESC("sha1"),
+	},
+	{						/* 0x00000400 */
+		AV_AARCH64_SHA256, STRDESC("AV_AARCH64_SHA256"),
+		STRDESC("SHA256"), STRDESC("sha256"),
+	},
+	{						/* 0x00000800 */
+		AV_AARCH64_SHA512, STRDESC("AV_AARCH64_SHA512"),
+		STRDESC("SHA512"), STRDESC("sha512"),
+	},
+	{						/* 0x00001000 */
+		AV_AARCH64_SHA3, STRDESC("AV_AARCH64_SHA3"),
+		STRDESC("SHA3"), STRDESC("sha3"),
+	},
+	{						/* 0x00002000 */
+		AV_AARCH64_SM3, STRDESC("AV_AARCH64_SM3"),
+		STRDESC("SM3"), STRDESC("sm3"),
+	},
+	{						/* 0x00004000 */
+		AV_AARCH64_SM4, STRDESC("AV_AARCH64_SM4"),
+		STRDESC("SM4"), STRDESC("sm4"),
+	},
+	{						/* 0x00008000 */
+		AV_AARCH64_LSE, STRDESC("AV_AARCH64_LSE"),
+		STRDESC("LSE"), STRDESC("lse"),
+	},
+	{						/* 0x00010000 */
+		AV_AARCH64_RDM, STRDESC("AV_AARCH64_RDM"),
+		STRDESC("RDM"), STRDESC("rdm"),
+	},
+	{						/* 0x00020000 */
+		AV_AARCH64_FP16, STRDESC("AV_AARCH64_FP16"),
+		STRDESC("FP16"), STRDESC("fp16"),
+	},
+	{						/* 0x00040000 */
+		AV_AARCH64_DOTPROD, STRDESC("AV_AARCH64_DOTPROD"),
+		STRDESC("DOTPROD"), STRDESC("dotprod"),
+	},
+	{						/* 0x00080000 */
+		AV_AARCH64_FHM, STRDESC("AV_AARCH64_FHM"),
+		STRDESC("FHM"), STRDESC("fhm"),
+	},
+	{						/* 0x00100000 */
+		AV_AARCH64_DCPOP, STRDESC("AV_AARCH64_DCPOP"),
+		STRDESC("DCPOP"), STRDESC("dcpop"),
+	},
+	{						/* 0x00200000 */
+		AV_AARCH64_F32MM, STRDESC("AV_AARCH64_F32MM"),
+		STRDESC("F32MM"), STRDESC("f32mm"),
+	},
+	{						/* 0x00400000 */
+		AV_AARCH64_F64MM, STRDESC("AV_AARCH64_F64MM"),
+		STRDESC("F64MM"), STRDESC("f64mm"),
+	},
+	{						/* 0x00800000 */
+		AV_AARCH64_DCPODP, STRDESC("AV_AARCH64_DCPODP"),
+		STRDESC("DCPODP"), STRDESC("dcpodp"),
+	},
+	{						/* 0x01000000 */
+		AV_AARCH64_BF16, STRDESC("AV_AARCH64_BF16"),
+		STRDESC("BF16"), STRDESC("bf16"),
+	},
+	{						/* 0x02000000 */
+		AV_AARCH64_I8MM, STRDESC("AV_AARCH64_I8MM"),
+		STRDESC("I8MM"), STRDESC("i8mm"),
+	},
+	{						/* 0x04000000 */
+		AV_AARCH64_FCMA, STRDESC("AV_AARCH64_FCMA"),
+		STRDESC("FCMA"), STRDESC("fcma"),
+	},
+	{						/* 0x08000000 */
+		AV_AARCH64_JSCVT, STRDESC("AV_AARCH64_JSCVT"),
+		STRDESC("JSCVT"), STRDESC("jscvt"),
+	},
+	{						/* 0x10000000 */
+		AV_AARCH64_LRCPC, STRDESC("AV_AARCH64_LRCPC"),
+		STRDESC("LRCPC"), STRDESC("lrcpc"),
+	},
+	{						/* 0x20000000 */
+		AV_AARCH64_PACA, STRDESC("AV_AARCH64_PACA"),
+		STRDESC("paca"), STRDESC("paca"),
+	},
+	{						/* 0x40000000 */
+		AV_AARCH64_PACG, STRDESC("AV_AARCH64_PACG"),
+		STRDESC("pacg"), STRDESC("pacg"),
+	},
+	{						/* 0x80000000 */
+		AV_AARCH64_DIT, STRDESC("AV_AARCH64_DIT"),
+		STRDESC("dit"), STRDESC("dit"),
+	},
+};
+
+static const elfcap_desc_t hw2_aarch64[ELFCAP_NUM_HW2_AARCH64] = {
+	{						/* 0x00000001 */
+		AV_AARCH64_2_FLAGM, STRDESC("AV_AARCH64_2_FLAGM"),
+		STRDESC("FLAGM"), STRDESC("flagm"),
+	},
+	{						/* 0x00000002 */
+		AV_AARCH64_2_FRINTTS, STRDESC("AV_AARCH64_2_FRINTTS"),
+		STRDESC("FRINTTS"), STRDESC("frintts"),
+	},
+	{						/* 0x00000004 */
+		AV_AARCH64_2_BTI, STRDESC("AV_AARCH64_2_BTI"),
+		STRDESC("BTI"), STRDESC("bti"),
+	},
+	{						/* 0x00000008 */
+		AV_AARCH64_2_RNG, STRDESC("AV_AARCH64_2_RNG"),
+		STRDESC("RNG"), STRDESC("rng"),
+	},
+	{						/* 0x00000010 */
+		AV_AARCH64_2_MTE, STRDESC("AV_AARCH64_2_MTE"),
+		STRDESC("MTE"), STRDESC("mte"),
+	},
+	{						/* 0x00000020 */
+		AV_AARCH64_2_MTE3, STRDESC("AV_AARCH64_2_MTE3"),
+		STRDESC("MTE3"), STRDESC("mte3"),
+	},
+	{						/* 0x00000040 */
+		AV_AARCH64_2_ECV, STRDESC("AV_AARCH64_2_ECV"),
+		STRDESC("ECV"), STRDESC("ecv"),
+	},
+	{						/* 0x00000080 */
+		AV_AARCH64_2_AFP, STRDESC("AV_AARCH64_2_AFP"),
+		STRDESC("AFP"), STRDESC("afp"),
+	},
+	{						/* 0x00000100 */
+		AV_AARCH64_2_RPRES, STRDESC("AV_AARCH64_2_RPRES"),
+		STRDESC("RPRES"), STRDESC("rpres"),
+	},
+	{						/* 0x00000200 */
+		AV_AARCH64_2_RPRES, STRDESC("AV_AARCH64_2_RPRES"),
+		STRDESC("RPRES"), STRDESC("rpres"),
+	},
+	{						/* 0x00000400 */
+		AV_AARCH64_2_LD64B, STRDESC("AV_AARCH64_2_LD64B"),
+		STRDESC("LD64B"), STRDESC("ld64b"),
+	},
+	{						/* 0x00000800 */
+		AV_AARCH64_2_ST64BV, STRDESC("AV_AARCH64_2_ST64BV"),
+		STRDESC("ST64BV"), STRDESC("st64bv"),
+	},
+	{						/* 0x00001000 */
+		AV_AARCH64_2_ST64BV0, STRDESC("AV_AARCH64_2_ST64BV0"),
+		STRDESC("ST64BV0"), STRDESC("st64bv0"),
+	},
+	{						/* 0x00002000 */
+		AV_AARCH64_2_WFXT, STRDESC("AV_AARCH64_2_WFXT"),
+		STRDESC("WFXT"), STRDESC("wxft"),
+	},
+	{						/* 0x00004000 */
+		AV_AARCH64_2_MOPS, STRDESC("AV_AARCH64_2_MOPS"),
+		STRDESC("MOPS"), STRDESC("mops"),
+	},
+	{						/* 0x00008000 */
+		AV_AARCH64_2_HBC, STRDESC("AV_AARCH64_2_HBC"),
+		STRDESC("HBC"), STRDESC("hbc"),
+	},
+	{						/* 0x00010000 */
+		AV_AARCH64_2_CMOW, STRDESC("AV_AARCH64_2_CMOW"),
+		STRDESC("CMOW"), STRDESC("cmow"),
+	},
+	{						/* 0x00020000 */
+		AV_AARCH64_2_SVE2, STRDESC("AV_AARCH64_2_SVE2"),
+		STRDESC("SVE2"), STRDESC("sve2"),
+	},
+	{						/* 0x00040000 */
+		AV_AARCH64_2_SVE2_AES, STRDESC("AV_AARCH64_2_SVE2_AES"),
+		STRDESC("SVE2_AES"), STRDESC("sve2_aes"),
+	},
+	{						/* 0x00080000 */
+		AV_AARCH64_2_SVE2_BITPERM, STRDESC("AV_AARCH64_2_SVE2_BITPERM"),
+		STRDESC("SVE2_BITPERM"), STRDESC("sve2_bitperm"),
+	},
+	{						/* 0x00100000 */
+		AV_AARCH64_2_SVE2_PMULL128,
+		STRDESC("AV_AARCH64_2_SVE2_PMULL128"),
+		STRDESC("SVE2_PMULL128"), STRDESC("sve2_pmull128"),
+	},
+	{						/* 0x00200000 */
+		AV_AARCH64_2_SVE2_SHA3, STRDESC("AV_AARCH64_2_SVE2_SHA3"),
+		STRDESC("SVE2_SHA3"), STRDESC("sve2_sha3"),
+	},
+	{						/* 0x00400000 */
+		AV_AARCH64_2_SVE2_SM4, STRDESC("AV_AARCH64_2_SVE2_SM4"),
+		STRDESC("SVE2_SM4"), STRDESC("sve2_sm4"),
+	},
+	{						/* 0x00800000 */
+		AV_AARCH64_2_TME, STRDESC("AV_AARCH64_2_TME"),
+		STRDESC("SVE2_SM4"), STRDESC("sve2_sm4"),
+	},
+	{						/* 0x01000000 */
+		AV_AARCH64_2_SME, STRDESC("AV_AARCH64_2_SME"),
+		STRDESC("SME"), STRDESC("sme"),
+	},
+	{						/* 0x02000000 */
+		AV_AARCH64_2_SME_FA64, STRDESC("AV_AARCH64_2_SME_FA64"),
+		STRDESC("SME_FA64"), STRDESC("sme_fa64"),
+	},
+	{						/* 0x04000000 */
+		AV_AARCH64_2_EBF16, STRDESC("AV_AARCH64_2_EBF16"),
+		STRDESC("EBF16"), STRDESC("ebf16"),
+	},
+	{						/* 0x08000000 */
+		AV_AARCH64_2_SME_F64F64, STRDESC("AV_AARCH64_2_SME_F64F64"),
+		STRDESC("SME_F64F64"), STRDESC("sme_f64f64"),
+	},
+	{						/* 0x08000000 */
+		AV_AARCH64_2_SME_I16I64, STRDESC("AV_AARCH64_2_SME_I16I64"),
+		STRDESC("SME_i16i64"), STRDESC("sme_i16i64"),
+	},
+};
+
+
+/*
  * Concatenate a token to the string buffer.  This can be a capabilities token
  * or a separator token.
  */
@@ -615,8 +872,12 @@ elfcap_hw1_to_str(elfcap_style_t style, elfcap_mask_t val, char *str,
 	if ((fmt < 0) || (fmt >= FORMAT_NELTS))
 		return (ELFCAP_ERR_INVFMT);
 
-	if ((mach == EM_386) || (mach == EM_IA_64) || (mach == EM_AMD64))
-		return (expand(style, val, &hw1_386[0], ELFCAP_NUM_HW1_386,
+	if ((mach == EM_386) || (mach == EM_AMD64))
+		return (expand(style, val, hw1_386, ELFCAP_NUM_HW1_386,
+		    str, len, fmt));
+
+	if (mach == EM_AARCH64)
+		return (expand(style, val, hw1_aarch64, ELFCAP_NUM_HW1_AARCH64,
 		    str, len, fmt));
 
 	if ((mach == EM_SPARC) || (mach == EM_SPARC32PLUS) ||
@@ -641,8 +902,12 @@ elfcap_hw2_to_str(elfcap_style_t style, elfcap_mask_t val, char *str,
 	if ((fmt < 0) || (fmt >= FORMAT_NELTS))
 		return (ELFCAP_ERR_INVFMT);
 
-	if ((mach == EM_386) || (mach == EM_IA_64) || (mach == EM_AMD64))
-		return (expand(style, val, &hw2_386[0], ELFCAP_NUM_HW2_386,
+	if ((mach == EM_386) || (mach == EM_AMD64))
+		return (expand(style, val, hw2_386, ELFCAP_NUM_HW2_386,
+		    str, len, fmt));
+
+	if (mach == EM_AARCH64)
+		return (expand(style, val, hw2_aarch64, ELFCAP_NUM_HW2_AARCH64,
 		    str, len, fmt));
 
 	return (expand(style, val, NULL, 0, str, len, fmt));
@@ -757,8 +1022,11 @@ elfcap_sf1_from_str(elfcap_style_t style, const char *str, ushort_t mach)
 elfcap_mask_t
 elfcap_hw1_from_str(elfcap_style_t style, const char *str, ushort_t mach)
 {
-	if ((mach == EM_386) || (mach == EM_IA_64) || (mach == EM_AMD64))
-		return (value(style, str, &hw1_386[0], ELFCAP_NUM_HW1_386));
+	if ((mach == EM_386) || (mach == EM_AMD64))
+		return (value(style, str, hw1_386, ELFCAP_NUM_HW1_386));
+
+	if (mach == EM_AARCH64)
+		return (value(style, str, hw1_aarch64, ELFCAP_NUM_HW1_AARCH64));
 
 	if ((mach == EM_SPARC) || (mach == EM_SPARC32PLUS) ||
 	    (mach == EM_SPARCV9))
@@ -766,6 +1034,7 @@ elfcap_hw1_from_str(elfcap_style_t style, const char *str, ushort_t mach)
 
 	return (0);
 }
+
 elfcap_mask_t
 elfcap_hw2_from_str(elfcap_style_t style, const char *str, ushort_t mach)
 {
@@ -774,6 +1043,7 @@ elfcap_hw2_from_str(elfcap_style_t style, const char *str, ushort_t mach)
 
 	return (0);
 }
+
 elfcap_mask_t
 elfcap_hw3_from_str(elfcap_style_t style, const char *str, ushort_t mach)
 {
@@ -832,6 +1102,12 @@ elfcap_getdesc_hw1_386(void)
 }
 
 const elfcap_desc_t *
+elfcap_getdesc_hw1_aarch64(void)
+{
+	return (hw1_aarch64);
+}
+
+const elfcap_desc_t *
 elfcap_getdesc_sf1(void)
 {
 	return (sf1);
@@ -841,6 +1117,12 @@ const elfcap_desc_t *
 elfcap_getdesc_hw2_386(void)
 {
 	return (hw2_386);
+}
+
+const elfcap_desc_t *
+elfcap_getdesc_hw2_aarch64(void)
+{
+	return (hw2_aarch64);
 }
 
 const elfcap_desc_t *

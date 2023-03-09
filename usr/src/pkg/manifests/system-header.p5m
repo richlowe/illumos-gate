@@ -699,6 +699,7 @@ file path=usr/include/sys/autoconf.h
 file path=usr/include/sys/auxv.h
 file path=usr/include/sys/auxv_386.h
 file path=usr/include/sys/auxv_SPARC.h
+file path=usr/include/sys/auxv_aarch64.h
 dir  path=usr/include/sys/av
 file path=usr/include/sys/av/iec61883.h
 file path=usr/include/sys/avintr.h

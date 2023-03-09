@@ -1119,3 +1119,111 @@ cpuid_gather_arm_features(void *features)
 		    ARRAY_SIZE(sme_feature_specs), &cpuid_regs);
 	}
 }
+
+/*
+ * Given the ARM features in features, set the relevant hwcaps.  Note once
+ * again that HWCAPs reflect features that the CPU _and the OS_ both support.
+ * This is not straight translation from ARM features.  If the OS doesn't
+ * support a feature, the HWCAP _must not be set_.
+ */
+void
+cpuid_features_to_hwcap(void *features, uint_t *hwcaps1, uint_t *hwcaps2,
+    uint_t *hwcaps3)
+{
+	uint_t *hwcaps[] = { hwcaps1, hwcaps2, hwcaps3 };
+	struct hwcap_map {
+		arm_feature_t hw_feature;
+		uint_t hw_index;
+		uint_t hw_cap;
+	} hwcap_map[] = {
+		{ ARM_FEAT_FP, 1, AV_AARCH64_FP },
+		{ ARM_FEAT_AdvSIMD,	1, AV_AARCH64_ADVSIMD },
+#if 0				/* XXXARM: No SVE yet */
+		{ ARM_FEAT_SVE,		1, AV_AARCH64_SVE },
+#endif
+		{ ARM_FEAT_CRC32,	1, AV_AARCH64_CRC32 },
+		{ ARM_FEAT_SB,		1, AV_AARCH64_SB },
+		/*
+		 * XXXARM: _SSBS controls whether they exist, _SSBS2 whether
+		 * msr/mrs can see them, I think.  See A2-76 and D1-4671.
+		 *
+		 * This means that the useful feature for the HWCAP is SSBS2.
+		 */
+		{ ARM_FEAT_SSBS2,	1, AV_AARCH64_SSBS },
+		{ ARM_FEAT_DGH,		1, AV_AARCH64_DGH },
+		{ ARM_FEAT_AES,		1, AV_AARCH64_AES },
+		{ ARM_FEAT_PMULL,	1, AV_AARCH64_PMULL },
+		{ ARM_FEAT_SHA1,	1, AV_AARCH64_SHA1 },
+		{ ARM_FEAT_SHA256,	1, AV_AARCH64_SHA256 },
+		{ ARM_FEAT_LSE,		1, AV_AARCH64_LSE },
+		{ ARM_FEAT_RDM,		1, AV_AARCH64_RDM },
+		{ ARM_FEAT_FP16,	1, AV_AARCH64_FP16 },
+		{ ARM_FEAT_DotProd,	1, AV_AARCH64_DOTPROD },
+		{ ARM_FEAT_FHM,		1, AV_AARCH64_FHM },
+		{ ARM_FEAT_DPB,		1, AV_AARCH64_DCPOP },
+#if 0				/* XXXARM: No SVE yet */
+		{ ARM_FEAT_F32MM,	1, AV_AARCH64_F32MM },
+		{ ARM_FEAT_F64MM,	1, AV_AARCH64_F64MM },
+#endif
+		{ ARM_FEAT_DPB2,	1, AV_AARCH64_DCPODP },
+		{ ARM_FEAT_BF16,	1, AV_AARCH64_BF16 },
+		{ ARM_FEAT_I8MM,	1, AV_AARCH64_I8MM },
+		{ ARM_FEAT_FCMA,	1, AV_AARCH64_FCMA },
+		{ ARM_FEAT_JSCVT,	1, AV_AARCH64_JSCVT },
+		{ ARM_FEAT_LRCPC,	1, AV_AARCH64_LRCPC },
+#if 0				/* XXXARM: No PAC yet */
+		{ ARM_FEAT_Pauth,	1, AV_AARCH64_PACA },
+		{ ARM_FEAT_PACIMP,	1, AV_AARCH64_PACG },
+#endif
+		{ ARM_FEAT_DIT,		1, AV_AARCH64_DIT },
+		{ ARM_FEAT_FlagM,	2, AV_AARCH64_2_FLAGM },
+		{ ARM_FEAT_LRCPC2,	2, AV_AARCH64_2_ILRCPC },
+		{ ARM_FEAT_LSE2,	2, AV_AARCH64_2_LSE2 },
+		{ ARM_FEAT_FlagM2,	2, AV_AARCH64_2_FLAGM2 },
+		{ ARM_FEAT_FRINTTS,	2, AV_AARCH64_2_FRINTTS },
+#if 0				/* XXXARM: No BTI */
+		{ ARM_FEAT_BTI,		2, AV_AARCH64_2_BTI },
+#endif
+		{ ARM_FEAT_RNG,		2, AV_AARCH64_2_RNG },
+#if 0				/* XXXARM: No MTE */
+		{ ARM_FEAT_MTE,		2, AV_AARCH64_2_MTE },
+		{ ARM_FEAT_MTE3,	2, AV_AARCH64_2_MTE2 },
+#endif
+		{ ARM_FEAT_ECV,			2, AV_AARCH64_2_ECV },
+		{ ARM_FEAT_RPRES,		2, AV_AARCH64_2_RPRES },
+		{ ARM_FEAT_LS64,		2, AV_AARCH64_2_LD64B },
+		{ ARM_FEAT_LS64_V,		2, AV_AARCH64_2_ST64BV },
+		{ ARM_FEAT_LS64_ACCDATA,	2, AV_AARCH64_2_ST64BV0 },
+		{ ARM_FEAT_WFxT,		2, AV_AARCH64_2_WFXT },
+		{ ARM_FEAT_MOPS,		2, AV_AARCH64_2_MOPS },
+		{ ARM_FEAT_HBC,			2, AV_AARCH64_2_HBC },
+		{ ARM_FEAT_CMOW,		2, AV_AARCH64_2_CMOW },
+#if 0				/* XXXARM: No SVE2 support */
+		{ ARM_FEAT_SVE2		2, 2, AV_AARCH64_2_SVE2 },
+		{ ARM_FEAT_SVE_AES,	2, AV_AARCH64_2_SVE2_AES },
+		{ ARM_FEAT_SVE_BitPerm, 2, AV_AARCH64_2_SVE2_BITPERM },
+		{ ARM_FEAT_SVE_PMULL128, 2, AV_AARCH64_2_PMULL128 },
+		{ ARM_FEAT_SVE_SHA3,	2, AV_AARCH64_2_SHA3 },
+		{ ARM_FEAT_SVE_SM4,	2, AV_AARCH64_2_SM4 },
+#endif
+		/* XXXARM: Needs OS support? */
+		{ ARM_FEAT_TME,		2, AV_AARCH64_2_TME },
+#if 0				/* XXXARM: No SME support */
+		{ ARM_FEAT_SME,		2, AV_AARCH64_2_SME },
+		{ ARM_FEAT_SME_FA64,	2, AV_AARCH64_2_FA64 },
+		/* XXXARM: I think this needs SME too */
+		{ ARM_FEAT_EBF16,	2, AV_AARCH64_2_EBF16 },
+		{ ARM_FEAT_SME_F64F64,	2, AV_AARCH64_2_F64F64 },
+		{ ARM_FEAT_SME_I16I64,	2, AV_AARCH64_2_I16I64 },
+#endif
+		{ 0, 0, 0 },
+
+	};
+
+	for (int i = 0; hwcap_map[i].hw_feature != 0; i++) {
+		if (has_arm_feature(features, hwcap_map[i].hw_feature)) {
+			*hwcaps[hwcap_map[i].hw_index - 1] |=
+			    hwcap_map[i].hw_cap;
+		}
+	}
+}

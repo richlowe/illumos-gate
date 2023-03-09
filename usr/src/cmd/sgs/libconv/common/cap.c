@@ -141,18 +141,30 @@ conv_iter_cap_val_hw1(Half mach, Conv_fmt_flags_t fmt_flags,
     conv_iter_cb_t func, void *uvalue)
 {
 	if ((mach == EM_386) || (mach == EM_486) ||
-	    (mach == EM_AMD64) || (mach == CONV_MACH_ALL))
+	    (mach == EM_AMD64) || (mach == CONV_MACH_ALL)) {
 		if (conv_iter_elfcap(elfcap_getdesc_hw1_386(),
 		    ELFCAP_NUM_HW1_386, fmt_flags, func, uvalue) ==
-		    CONV_ITER_DONE)
+		    CONV_ITER_DONE) {
 			return (CONV_ITER_DONE);
+		}
+	}
 
 	if ((mach == EM_SPARC) || (mach == EM_SPARC32PLUS) ||
-	    (mach == EM_SPARCV9) || (mach == CONV_MACH_ALL))
+	    (mach == EM_SPARCV9) || (mach == CONV_MACH_ALL)) {
 		if (conv_iter_elfcap(elfcap_getdesc_hw1_sparc(),
 		    ELFCAP_NUM_HW1_SPARC, fmt_flags, func, uvalue) ==
-		    CONV_ITER_DONE)
+		    CONV_ITER_DONE) {
 			return (CONV_ITER_DONE);
+		}
+	}
+
+	if (mach == EM_AARCH64) {
+		if (conv_iter_elfcap(elfcap_getdesc_hw1_aarch64(),
+		    ELFCAP_NUM_HW1_AARCH64, fmt_flags, func, uvalue) ==
+		    CONV_ITER_DONE) {
+			return (CONV_ITER_DONE);
+		}
+	}
 
 	return (CONV_ITER_CONT);
 }
@@ -163,11 +175,21 @@ conv_iter_cap_val_hw2(Half mach, Conv_fmt_flags_t fmt_flags,
     conv_iter_cb_t func, void *uvalue)
 {
 	if ((mach == EM_386) || (mach == EM_486) ||
-	    (mach == EM_AMD64) || (mach == CONV_MACH_ALL))
+	    (mach == EM_AMD64) || (mach == CONV_MACH_ALL)) {
 		if (conv_iter_elfcap(elfcap_getdesc_hw2_386(),
 		    ELFCAP_NUM_HW2_386, fmt_flags, func, uvalue) ==
-		    CONV_ITER_DONE)
+		    CONV_ITER_DONE) {
 			return (CONV_ITER_DONE);
+		}
+	}
+
+	if (mach == EM_AARCH64) {
+		if (conv_iter_elfcap(elfcap_getdesc_hw2_aarch64(),
+		    ELFCAP_NUM_HW2_AARCH64, fmt_flags, func, uvalue) ==
+		    CONV_ITER_DONE) {
+			return (CONV_ITER_DONE);
+		}
+	}
 
 	return (CONV_ITER_DONE);
 }

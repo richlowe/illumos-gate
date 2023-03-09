@@ -43,6 +43,7 @@ SYSHDRS=	sys/elf.h		\
 		sys/auxv.h		\
 		sys/auxv_SPARC.h	\
 		sys/auxv_386.h		\
+		sys/auxv_aarch64.h	\
 		sys/avl.h		\
 		sys/link.h		\
 		sys/machelf.h		\

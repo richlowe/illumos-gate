@@ -39,9 +39,12 @@ SYSROOT=
 
 CPPFLAGS += -I$(ELFCAP)
 
+# XXXARM: Native, no sysroot
+SYSROOT=
+
 all: $(PROG)
 
-install: $(PROG)
+install: all
 
 check: $(PROG)
 	./$(PROG)

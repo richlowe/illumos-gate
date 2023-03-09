@@ -90,6 +90,7 @@ CHKHDRS=			\
 	autoconf.h		\
 	auxv.h			\
 	auxv_386.h		\
+	auxv_aarch64.h		\
 	auxv_SPARC.h		\
 	avl.h			\
 	avl_impl.h		\

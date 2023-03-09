@@ -118,6 +118,9 @@ typedef enum {
 #define	ELFCAP_NUM_HW1_386		32
 #define	ELFCAP_NUM_HW2_386		32
 #define	ELFCAP_NUM_HW3_386		2
+#define	ELFCAP_NUM_HW1_AARCH64		32
+#define	ELFCAP_NUM_HW2_AARCH64		31
+
 
 /*
  * String buffer lengths that should be sufficient for elfcap values today. This
@@ -126,8 +129,8 @@ typedef enum {
  * the elfcap_chk program that is run in sgs and checked as part of the build.
  */
 #define	ELFCAP_SF1_BUFSIZE	73
-#define	ELFCAP_HW1_BUFSIZE	528
-#define	ELFCAP_HW2_BUFSIZE	632
+#define	ELFCAP_HW1_BUFSIZE	588
+#define	ELFCAP_HW2_BUFSIZE	656
 #define	ELFCAP_HW3_BUFSIZE	66
 
 /*
@@ -176,9 +179,11 @@ extern elfcap_from_str_func_t elfcap_hw3_from_str;
  * non-pic code.
  */
 extern const elfcap_str_t *elfcap_getdesc_formats(void);
-extern const elfcap_desc_t *elfcap_getdesc_hw1_sparc(void);
 extern const elfcap_desc_t *elfcap_getdesc_hw1_386(void);
+extern const elfcap_desc_t *elfcap_getdesc_hw1_aarch64(void);
+extern const elfcap_desc_t *elfcap_getdesc_hw1_sparc(void);
 extern const elfcap_desc_t *elfcap_getdesc_hw2_386(void);
+extern const elfcap_desc_t *elfcap_getdesc_hw2_aarch64(void);
 extern const elfcap_desc_t *elfcap_getdesc_hw3_386(void);
 extern const elfcap_desc_t *elfcap_getdesc_sf1(void);
 

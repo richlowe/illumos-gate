@@ -235,4 +235,9 @@ extern uint_t getisax(uint32_t *, uint_t);
 #include <sys/auxv_386.h>
 #endif
 
+#if defined(_AUXV_TARGET_ALL) || defined(_AUXV_TARGET_AARCH64) ||	\
+	defined(__aarch64__)
+#include <sys/auxv_aarch64.h>
+#endif
+
 #endif	/* _SYS_AUXV_H */

@@ -57,7 +57,7 @@ typedef struct elfcap_getdesc {
 	elfcap_getdesc_f eg_func;
 } elfcap_getdesc_t;
 
-#define	NUM_PLATS 2 /* i386, sparc */
+#define	NUM_PLATS 3	/* aarch64, i386, sparc. */
 
 typedef struct elfcap_case {
 	const char *ec_tag;
@@ -72,10 +72,12 @@ const elfcap_case_t elfcaps[] = {
 	} },
 	{ "ELFCAP_HW1_BUFSIZE", ELFCAP_HW1_BUFSIZE, {
 	    { ELFCAP_NUM_HW1_386, elfcap_getdesc_hw1_386 },
-	    { ELFCAP_NUM_HW1_SPARC, elfcap_getdesc_hw1_sparc }
+	    { ELFCAP_NUM_HW1_SPARC, elfcap_getdesc_hw1_sparc },
+	    { ELFCAP_NUM_HW1_AARCH64, elfcap_getdesc_hw1_aarch64 },
 	} },
 	{ "ELFCAP_HW2_BUFSIZE", ELFCAP_HW2_BUFSIZE, {
 	    { ELFCAP_NUM_HW2_386, elfcap_getdesc_hw2_386 },
+	    { ELFCAP_NUM_HW2_AARCH64, elfcap_getdesc_hw2_aarch64 },
 	    { 0, NULL }
 	} },
 	{ "ELFCAP_HW3_BUFSIZE", ELFCAP_HW3_BUFSIZE, {

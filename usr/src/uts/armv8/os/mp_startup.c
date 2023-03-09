@@ -684,6 +684,8 @@ start_other_cpus(int cprboot)
 	 * confusingly.
 	 */
 	cpuid_gather_arm_features(arm_features);
+	cpuid_features_to_hwcap(arm_features, &auxv_hwcap, &auxv_hwcap_2,
+	    &auxv_hwcap_3);
 
 	init_cpu_info(CPU);
 

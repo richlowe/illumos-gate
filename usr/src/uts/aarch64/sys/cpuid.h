@@ -1144,6 +1144,7 @@ extern void cpuid_partname(const cpu_t *, char *, size_t);
 extern void cpuid_brandstr(const cpu_t *, char *, size_t);
 
 extern void cpuid_gather_arm_features(void *);
+extern void cpuid_features_to_hwcap(void *, uint_t *, uint_t *, uint_t *);
 
 #ifdef __cplusplus
 }
