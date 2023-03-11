@@ -1632,19 +1632,19 @@ if [[ "$t_FLAG" == "y" ]]; then
 		exit 1
 	fi
 
-	STABS=${TOOLS_PROTO}/opt/onbld/bin/${MACH}/stabs
+	STABS=${TOOLS_PROTO}/opt/onbld/bin/${NATIVE_MACH}/stabs
 	export STABS
-	CTFSTABS=${TOOLS_PROTO}/opt/onbld/bin/${MACH}/ctfstabs
+	CTFSTABS=${TOOLS_PROTO}/opt/onbld/bin/${NATIVE_MACH}/ctfstabs
 	export CTFSTABS
 	GENOFFSETS=${TOOLS_PROTO}/opt/onbld/bin/genoffsets
 	export GENOFFSETS
 
-	CTFCONVERT=${TOOLS_PROTO}/opt/onbld/bin/${MACH}/ctfconvert
+	CTFCONVERT=${TOOLS_PROTO}/opt/onbld/bin/${NATIVE_MACH}/ctfconvert
 	export CTFCONVERT
-	CTFMERGE=${TOOLS_PROTO}/opt/onbld/bin/${MACH}/ctfmerge
+	CTFMERGE=${TOOLS_PROTO}/opt/onbld/bin/${NATIVE_MACH}/ctfmerge
 	export CTFMERGE
 
-	PATH="${TOOLS_PROTO}/opt/onbld/bin/${MACH}:${PATH}"
+	PATH="${TOOLS_PROTO}/opt/onbld/bin/${NATIVE_MACH}:${PATH}"
 	PATH="${TOOLS_PROTO}/opt/onbld/bin:${PATH}"
 	export PATH
 
