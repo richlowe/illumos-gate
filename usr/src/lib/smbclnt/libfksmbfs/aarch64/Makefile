@@ -13,11 +13,11 @@
 # Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
 #
 
-MACH_LDLIBS +=	-L$(ROOT)/usr/lib/smbfs/$(MACH64)
+MACH_LDLIBS +=	-L$(ROOT)/usr/lib/smbfs/
 
 include ../Makefile.com
 include ../../../Makefile.lib.64
 
-DYNFLAGS +=	-R/usr/lib/smbfs/$(MACH64)
+DYNFLAGS +=	-R/usr/lib/smbfs/
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
