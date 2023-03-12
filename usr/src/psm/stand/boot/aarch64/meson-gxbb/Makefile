@@ -48,7 +48,9 @@ include $(BOOTSRCDIR)/Makefile.rules
 include ../Makefile.targ
 
 $(ROOT_PSM_NFSBOOT): $(NFSBOOT_BIN) $(ROOT_PSM_DIR)
-	$(MKIMAGE) -A arm64 -O linux -C none  -T kernel -a 0x11000000 -e 0x11000000 -n 'illumos' -d $(NFSBOOT_BIN) $@
+	$(MKIMAGE) -A arm64 -O linux -C none  -T kernel -q \
+		-a 0x11000000 -e 0x11000000 \
+		-n 'illumos' -d $(NFSBOOT_BIN) $@ >/dev/null
 
 $(ROOT_PSM_DTB): $(DTB) $(ROOT_PSM_DIR)
 	$(INS.file) $(DTB)
