@@ -25,6 +25,6 @@
 include ../Makefile.com
 include ../../../Makefile.lib.64
 
-DYNFLAGS += -R/usr/lib/fm/$(MACH64)
+DYNFLAGS += -R/usr/lib/fm/
 
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)
