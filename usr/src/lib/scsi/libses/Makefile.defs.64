@@ -24,6 +24,5 @@
 # Use is subject to license terms.
 #
 
-# XXXARM: not multilib
 $(NOT_AARCH64_BLD)DYNFLAGS += -R/usr/lib/scsi/$(MACH64)
 $(AARCH64_BLD)DYNFLAGS += -R/usr/lib/scsi/
