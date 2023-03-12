@@ -25,8 +25,7 @@
 
 include	../Makefile.lib
 
-# XXXARM: 64bit only, but MACH is confusing on AArch64 right now.
-$(NOT_AARCH64_BLD)SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS=	$(MACH)
 
 LIBRARY=	extendedFILE.a
 

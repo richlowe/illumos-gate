@@ -28,7 +28,6 @@ include         ../../Makefile.lib
 HDRS =			papi.h
 HDRDIR =		common
 SUBDIRS =		$(MACH)
-#$(BUILD64)SUBDIRS +=	$(MACH64)
 
 all :=			TARGET = all
 clean :=		TARGET = clean

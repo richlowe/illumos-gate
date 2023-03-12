@@ -28,7 +28,8 @@
 include		$(SRC)/Makefile.master
 
 SUBDIRS=
-$(SPARC_BLD)SUBDIRS=	$(MACH) $(BUILD64) $(MACH64)
+$(SPARC_BLD)$(BUILD32)SUBDIRS =	$(MACH)
+$(SPARC_BLD)$(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET= all
 clean :=	TARGET= clean

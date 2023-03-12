@@ -23,10 +23,6 @@
 # Copyright 1998-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/sort/Makefile
-#
 
 PROG = sort
 XPG4PROG = sort
@@ -45,7 +41,7 @@ CLOBBERFILES = $(DCFILE) $(POFILE) $(POFILES)
 $(XPG4) := CPPFLAGS += -DXPG4
 XGETFLAGS += -a -x sort.xcl
 
-SUBDIRS =        $(MACH)
+$(BUILD32)SUBDIRS =        $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all     :=      TARGET = all

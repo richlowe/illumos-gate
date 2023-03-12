@@ -27,7 +27,8 @@
 # include library definitions
 include $(SRC)/lib/Makefile.lib
 
-SUBDIRS= $(MACH) $(BUILD64) $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 # conditional assignments
 all :=		TARGET= all
@@ -60,7 +61,7 @@ clobber:  po_clean
 po_clean:
 	$(RM) $(POFILE)
 
-$(MACH) $(MACH64): FRC
+$(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

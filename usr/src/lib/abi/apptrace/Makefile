@@ -26,9 +26,8 @@
 
 include $(SRC)/lib/Makefile.lib
 
-SUBDIRS	=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
-
 
 POFILE =	apptrace.po
 MSGFILES =	common/abienv.i common/apptrace.i

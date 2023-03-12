@@ -28,7 +28,7 @@ include ../Makefile.lib
 HDRS=		rp_plugin.h
 HDRDIR=		common
 
-SUBDIRS=		$(MACH)
+$(BUILD32)SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS +=	$(MACH64)
 POFILE=		libreparse.po
 MSGFILES=	common/fs_reparse_lib.c

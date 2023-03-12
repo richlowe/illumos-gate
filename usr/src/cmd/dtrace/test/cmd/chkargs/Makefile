@@ -23,11 +23,10 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 include $(SRC)/cmd/Makefile.cmd
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 include ../../Makefile.subdirs

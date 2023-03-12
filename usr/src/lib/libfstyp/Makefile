@@ -30,7 +30,7 @@ HDRS=		libfstyp.h libfstyp_module.h
 
 HDRDIR=		common
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET= all

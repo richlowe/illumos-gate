@@ -29,7 +29,7 @@ include $(SRC)/lib/Makefile.lib
 
 HDRS =		libipadm.h ipadm_ndpd.h ipadm_ipmgmt.h
 HDRDIR =	common
-SUBDIRS =	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 POFILE =	libipadm.po
 MSGFILES =	common/libipadm.c common/ipadm_prop.c common/ipadm_persist.c \

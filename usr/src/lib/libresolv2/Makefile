@@ -40,7 +40,8 @@ $(ROOTSVCMETHOD) :=	FILEMODE = 0555
 
 CHKMANIFEST=	$(MANIFEST:%.xml=%.xmlchk)
 
-SUBDIRS=	include $(MACH)
+SUBDIRS = include
+$(BUILD32)SUBDIRS +=	$(MACH)
 $(BUILD64)SUBDIRS +=	$(MACH64)
 
 all :=		TARGET= all

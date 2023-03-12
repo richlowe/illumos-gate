@@ -27,7 +27,7 @@ include ../Makefile.lib
 
 HDRS=		umem.h umem_impl.h sys/vmem_impl_user.h
 HDRDIR=		common
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:= TARGET= all

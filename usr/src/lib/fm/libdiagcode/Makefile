@@ -29,7 +29,7 @@ include ../Makefile.lib
 HDRDIR=		common
 FMHDRS=		diagcode.h
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:= TARGET= all

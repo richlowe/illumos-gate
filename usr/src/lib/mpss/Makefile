@@ -26,7 +26,7 @@
 
 include	../Makefile.lib
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 POFILE =	mpss.po
 MSGFILES =	common/mpss.c

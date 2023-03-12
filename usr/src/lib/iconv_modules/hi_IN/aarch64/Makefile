@@ -14,11 +14,10 @@
 #
 
 include ../Makefile.com
-include ../../Makefile.iconv.64
 
 CFLAGS +=  -I.. -I../common/ -I../include/
 
-ICONV_LIBS      = $(PROGS:%=$(ICONV_DIR_64)/%)
+ICONV_LIBS      = $(PROGS:%=$(ICONV_DIR)/%)
 
 $(ICONV_LIBS) := FILEMODE= 755
 

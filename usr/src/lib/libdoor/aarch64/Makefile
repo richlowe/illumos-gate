@@ -25,7 +25,6 @@
 
 include		$(SRC)/lib/Makefile.filter.com
 include		../Makefile.com
-include		$(SRC)/lib/Makefile.lib.64
 
 #XXXARM: filter library, no sysroot
 SYSROOT=

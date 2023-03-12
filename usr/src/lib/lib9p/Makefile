@@ -15,7 +15,7 @@
 
 include ../Makefile.lib
 
-$(BUILD64)SUBDIRS += $(MACH64)
+$(BUILD64)SUBDIRS = $(MACH64)
 
 HDRS =		lib9p.h
 HDRDIR =	common

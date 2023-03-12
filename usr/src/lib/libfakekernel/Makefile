@@ -34,7 +34,7 @@ HDRDIR=		common
 ROOTHDRDIR=	$(ROOT)/usr/include/libfakekernel
 ROOTHDRS= $(HDRS:%=$(ROOTHDRDIR)/%)
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET= all
@@ -56,7 +56,7 @@ $(ROOTHDRDIR)/%: $(HDRDIR)/%
 $(ROOTHDRDIR):
 	$(INS.dir)
 
-$(MACH) $(MACH64): FRC
+$(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

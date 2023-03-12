@@ -14,14 +14,11 @@
 #
 
 include ../Makefile.com
-include ../../Makefile.iconv.64
 
 CFLAGS +=  -I.. -I../common/
 
-ICONV_LIBS	= $(ALL_SOS:%=$(ICONV_DIR_64)/%)
+ICONV_LIBS	= $(ALL_SOS:%=$(ICONV_DIR)/%)
 
 $(ICONV_LIBS) := FILEMODE= 755
 
-ICONV_DIR = $(ICONV_DIR_64)
-
-install: all $(ICONV_DIR_64) .WAIT $(ICONV_LIBS)
+install: all $(ICONV_DIR) .WAIT $(ICONV_LIBS)

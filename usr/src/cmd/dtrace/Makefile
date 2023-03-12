@@ -28,7 +28,8 @@ PROG= dtrace
 
 include ../Makefile.cmd
 
-SUBDIRS=	$(MACH) demo test
+SUBDIRS = demo test
+$(BUILD32)SUBDIRS += $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all

@@ -29,7 +29,7 @@ TEXT_DOMAIN=	SUNW_OST_SYSOSPAM
 POFILE=		authtok_store.po
 MSGFILES=	authtok_store.c
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET= all

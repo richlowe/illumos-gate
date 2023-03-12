@@ -27,7 +27,7 @@ include ../Makefile.lib
 
 HDRS =		libcontract.h libcontract_priv.h
 HDRDIR =	common
-SUBDIRS	=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 MSGFILES =	common/process_dump.c common/device_dump.c \

@@ -19,11 +19,11 @@ include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
 $(OBJS_OVERRIDE)OBJS = $(PROG).o test_common.o
-OBJS32 = $(OBJS:%.o=%.$(MACH).o)
-PROG32 = $(PROG).$(MACH)
+$(BUILD32)OBJS32 = $(OBJS:%.o=%.$(MACH).o)
+$(BUILD32)PROG32 = $(PROG).$(MACH)
 
-$(BUILD64) OBJS64 = $(OBJS:%.o=%.$(MACH64).o)
-$(BUILD64) PROG64= $(PROG).$(MACH64)
+$(BUILD64)OBJS64 = $(OBJS:%.o=%.$(MACH64).o)
+$(BUILD64)PROG64= $(PROG).$(MACH64)
 
 $(OBJS_OVERRIDE)SRCS = $(PROG).c ../common/test_common.c
 
@@ -60,17 +60,20 @@ $(ARCHPROG): ../common/run_arch_tests.ksh
 	$(CP) ../common/run_arch_tests.ksh $(@)
 	$(CHMOD) +x $@
 
-%.$(MACH).o: %.c
-	$(COMPILE.c) -o $@ $(CFLAGS_$(MACH)) -DARCH=\"$(MACH)\" $<
+# XXXARM: This is kind of horrid for BUILD32/64 but that's what you get for
+# building both platforms in one directory.
 
-%.$(MACH).o: ../common/%.c
-	$(COMPILE.c) -o $@ $(CFLAGS_$(MACH)) -DARCH=\"$(MACH)\" $<
+$(BUILD32)%.$(MACH).o: %.c
+$(BUILD32)	$(COMPILE.c) -o $@ $(CFLAGS_$(MACH)) -DARCH=\"$(MACH)\" $<
 
-%.$(MACH64).o: %.c
-	$(COMPILE64.c) -o $@ $(CFLAGS_$(MACH64)) -DARCH=\"$(MACH64)\" $<
+$(BUILD32)%.$(MACH).o: ../common/%.c
+$(BUILD32)	$(COMPILE.c) -o $@ $(CFLAGS_$(MACH)) -DARCH=\"$(MACH)\" $<
 
-%.$(MACH64).o: ../common/%.c
-	$(COMPILE64.c) -o $@ $(CFLAGS_$(MACH64)) -DARCH=\"$(MACH64)\" $<
+$(BUILD64)%.$(MACH64).o: %.c
+$(BUILD64)	$(COMPILE64.c) -o $@ $(CFLAGS_$(MACH64)) -DARCH=\"$(MACH64)\" $<
+
+$(BUILD64)%.$(MACH64).o: ../common/%.c
+$(BUILD64)	$(COMPILE64.c) -o $@ $(CFLAGS_$(MACH64)) -DARCH=\"$(MACH64)\" $<
 
 install: $(SUBDIRS) $(CMDS)
 

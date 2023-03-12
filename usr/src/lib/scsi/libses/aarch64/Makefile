@@ -26,9 +26,9 @@
 
 include ../Makefile.com
 include ../../../Makefile.lib
-include ../../../Makefile.lib.64
 include ../Makefile.defs
 include ../Makefile.defs.64
+include ../../../Makefile.lib.64
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
 

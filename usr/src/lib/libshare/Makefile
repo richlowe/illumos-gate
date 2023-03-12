@@ -28,7 +28,7 @@ include ../Makefile.lib
 HDRS =		libshare.h libshare_impl.h scfutil.h
 HDRDIR =	common
 
-MACHS = $(MACH)
+$(BUILD32)MACHS = $(MACH)
 $(BUILD64)MACHS += $(MACH64)
 
 # Add plugin module directories here. They need to build after the libshare

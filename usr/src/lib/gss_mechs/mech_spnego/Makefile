@@ -30,7 +30,7 @@
 
 include ../../Makefile.lib
 
-SUBDIRS= $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 HDRS	=	gssapiP_spnego.h

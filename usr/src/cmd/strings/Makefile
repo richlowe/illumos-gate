@@ -18,19 +18,18 @@
 #
 # CDDL HEADER END
 #
-#
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/strings/Makefile
 
-PROG:sh=	basename `pwd`
+PROG = strings
 
 include ../Makefile.cmd
 
-SUBDIRS	= 	$(MACH) $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all
 install	:=	TARGET = install

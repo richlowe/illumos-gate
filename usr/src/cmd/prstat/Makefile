@@ -23,10 +23,6 @@
 # Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/prstat/Makefile
-#
-
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 PROG = prstat
 OBJS = prstat.o prtable.o prsort.o prutil.o prfile.o
@@ -40,7 +36,7 @@ POFILE = pprstat.po
 
 .KEEP_STATE:
 
-$(64ONLY)SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all

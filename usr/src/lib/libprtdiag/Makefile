@@ -26,7 +26,7 @@
 
 include $(SRC)/lib/Makefile.lib
 
-SUBDIRS=	$(MACH)
+SUBDIRS = $(MACH)
 
 all :=		TARGET= all
 install :=	TARGET= install

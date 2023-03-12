@@ -25,7 +25,8 @@
 #
 include ../../Makefile.master
 
-SUBDIRS= $(MACH) $(BUILD64) $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 # include library definitions
 include ../Makefile.lib
@@ -70,7 +71,7 @@ check: $(CHECKHDRS)
 # include library targets
 include ../Makefile.targ
 
-$(MACH) $(MACH64):	FRC
+$(SUBDIRS):	FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 _msg:	$(MSGDOMAIN) $(POFILE)

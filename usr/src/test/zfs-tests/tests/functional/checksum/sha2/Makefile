@@ -15,7 +15,7 @@
 
 include $(SRC)/Makefile.master
 
-SUBDIRS = $(MACH)
-$(BUILD64) SUBDIRS += $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 include $(SRC)/test/Makefile.com

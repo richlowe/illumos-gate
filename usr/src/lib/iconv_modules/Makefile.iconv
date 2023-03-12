@@ -51,12 +51,9 @@ DYNFLAGS=	$(GSHARED) $(ZTEXT) $(ZDEFS) $(BDIRECT) \
 LDLIBS=		-lc
 
 ICONV_DIR	= $(ROOT)/usr/lib/iconv
-
-$(NOT_AARCH64_BLD)ICONV_DIR_64	= $(ROOT)/usr/lib/iconv/$(MACH64)
-$(AARCH64_BLD)ICONV_DIR_64 = $(ROOT)/usr/lib/iconv
+ICONV_DIR_64	= $(ROOT)/usr/lib/iconv/$(MACH64)
 
 ICONV_LIBS	= $(PROGS:%=$(ICONV_DIR)/%)
-
 ICONV_LIBS_64	= $(PROGS:%=$(ICONV_DIR_64)/%)
 
 $(ICONV_LIBS) :=      FILEMODE= 755

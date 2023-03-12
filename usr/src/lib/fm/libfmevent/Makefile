@@ -38,7 +38,7 @@ ROOTLIBDIR64=   $(ROOTFS_LIBDIR)/fm/$(MACH64)
 FMHDRS = libfmevent.h libfmevent_ruleset.h
 HDRDIR = common
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all := TARGET = all

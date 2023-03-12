@@ -96,7 +96,8 @@ CMNNETDIR =	$(SRC)/common/net
 CMNDIR =	$(SRC)/common
 CMNUTILDIR =	$(SRC)/common/util
 SYSDIR	=	$(SRC)/uts
-CPPDEFS	=	-D$(MACH) -D_BOOT -D_KERNEL -D_MACHDEP -D_ELF64_SUPPORT -D_SYSCALL32
+CPPDEFS	=	-D$(MACH) -D_BOOT -D_KERNEL -D_MACHDEP -D_ELF64_SUPPORT \
+	-D_SYSCALL32
 # XXXARM: fs/zfs is a vague attempt to get yet another cdefs.h
 CPPINCS	=	-I$(PORT_DIR) \
 		-I$(PSMSTANDDIR) \
@@ -121,7 +122,8 @@ NFS_LIBS        = $(LIBNFS_LIBS:lib%.a=-l%)
 NFS_DIRS        = $(LIBSYS_DIR:%=-L%)
 LIBDEPS		= $(LIBNFS_LIBS:%=$(LIBSYS_DIR)/%)
 NFS_MAPFILE	= mapfile
-NFS_LDFLAGS	= --gc-sections -T$(NFS_MAPFILE) $(NFS_DIRS)
+NFS_LDFLAGS	= --gc-sections -T$(NFS_MAPFILE) $(NFS_DIRS) \
+	--no-warn-rwx-segments
 
 NFS_SRT0        = $(SRT0_OBJ)
 NFS_OBJS        = $(OBJS)

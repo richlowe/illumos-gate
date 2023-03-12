@@ -31,7 +31,7 @@ HEAD_DIR= ../../head/rpcsvc
 UTS_DIR= ../../uts/common/rpcsvc
 RPC_DIR= ../../uts/common/rpc
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 DERIVED_FILES=  \

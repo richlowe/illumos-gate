@@ -29,7 +29,7 @@ TEXT_DOMAIN=	SUNW_OST_SYSOSPAM
 POFILE=		pam_krb5_migrate.po
 MSGFILES=	krb5_migrate_authenticate.c
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET= all

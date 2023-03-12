@@ -28,7 +28,8 @@ include $(SRC)/Makefile.master
 SLP_COMPONENTS= etc
 # XXXARM: No java
 $(NOT_AARCH64_BLD)SLP_COMPONENTS += javalib
-SUBDIRS =	$(SLP_COMPONENTS) $(MACH)
+SUBDIRS = $(SLP_COMPONENTS)
+$(BUILD32)SUBDIRS += $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 # include library definitions

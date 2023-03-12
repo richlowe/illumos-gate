@@ -26,9 +26,9 @@
 
 include		../../Makefile.lib
 
-sparc_SUBDIRS=	SUNW,SPARC-Enterprise
-SUBDIRS =	$(MACH)
-$(BUILD64)SUBDIRS += $(MACH64) $($(MACH)_SUBDIRS)
+sparcv9_SUBDIRS=	SUNW,SPARC-Enterprise
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64) $($(MACH64)_SUBDIRS)
 
 all :=		TARGET= all
 clean :=	TARGET= clean

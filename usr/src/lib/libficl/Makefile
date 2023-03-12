@@ -19,7 +19,8 @@ HDRS=		ficllocal.h
 
 HDRDIR=		$(SRC)/common/ficl
 
-SUBDIRS=	softcore $(MACH)
+SUBDIRS = softcore
+$(BUILD32)SUBDIRS += $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET= all

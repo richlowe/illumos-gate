@@ -19,20 +19,17 @@
 #
 # CDDL HEADER END
 #
-#
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # Copyright (c) 1989,1997 by Sun Microsystems, Inc.
 # All rights reserved.
-#
-# cmd/gcore/Makefile
 #
 
 PROG=	gcore
 
 include ../Makefile.cmd
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all

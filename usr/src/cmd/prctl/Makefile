@@ -23,16 +23,12 @@
 # Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/prctl/Makefile
-#
 
 PROG=	prctl
 
 include ../Makefile.cmd
 
-$(64ONLY)SUBDIRS= $(MACH)
+$(BUILD32)SUBDIRS= $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all

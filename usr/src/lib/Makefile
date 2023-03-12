@@ -401,7 +401,6 @@ HDRSUBDIRS=		\
 	libcmdutils	\
 	libcommputil	\
 	libcontract	\
-	libcpc		\
 	libcryptoutil	\
 	libctf		\
 	libcurses	\
@@ -418,7 +417,6 @@ HDRSUBDIRS=		\
 	libdlpi		\
 	libdns_sd	\
 	libdtrace	\
-	libdtrace_jni	\
 	libelfsign	\
 	libeti		\
 	libfakekernel	\
@@ -501,7 +499,6 @@ HDRSUBDIRS=		\
 	libxcurses2	\
 	libzfs		\
 	libzfs_core	\
-	libzfs_jni	\
 	libzoneinfo	\
 	libzonestat	\
 	mpapi		\
@@ -533,7 +530,6 @@ sparc_HDRSUBDIRS=	\
 	libpri		\
 	libv12n		\
 	storage
-
 
 $(NOT_AARCH64_BLD)HDRSUBDIRS +=		\
 	../cmd/sendmail/libmilter	\
@@ -757,10 +753,10 @@ udapl:		libdevinfo libdladm
 varpd:		libavl libidspace libumem libnsl libnvpair libmd5 librename \
 		libcustr
 
-$(HDRSUBDIRS) $(SUBDIRS): FRC
+$(SUBDIRS): FRC
 	cd $@; pwd; $(MAKE) $(TARGET)
 
-$(HDRSUBDIRS:%=%-nodepend) $(MSGSUBDIRS:%=%-nodepend) $(SUBDIRS:%=%-nodepend):
+$(SUBDIRS:%=%-nodepend):
 	cd $(@:%-nodepend=%); pwd; $(MAKE) $(TARGET)
 
 FRC:

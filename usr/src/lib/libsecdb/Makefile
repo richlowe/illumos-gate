@@ -24,7 +24,8 @@
 
 include ../Makefile.lib
 
-SUBDIRS =	help $(MACH)
+SUBDIRS = help
+$(BUILD32)SUBDIRS += $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 MSGSUBDIRS=	help

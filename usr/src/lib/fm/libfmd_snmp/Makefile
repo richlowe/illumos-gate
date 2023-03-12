@@ -29,7 +29,7 @@ include ../Makefile.lib
 FMHDRS = fmd_snmp.h
 HDRDIR = common
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 MIBFILES = SUN-FM-MIB.mib SUN-IREPORT-MIB.mib

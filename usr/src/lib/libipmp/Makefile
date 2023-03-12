@@ -29,7 +29,7 @@ include $(SRC)/lib/Makefile.lib
 
 HDRS =		ipmp.h ipmp_admin.h ipmp_mpathd.h ipmp_query.h ipmp_query_impl.h
 HDRDIR =	common
-SUBDIRS	=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 POFILE =	libipmp.po

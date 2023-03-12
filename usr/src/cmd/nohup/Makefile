@@ -23,10 +23,6 @@
 # Copyright (c) 1989, 2001 by Sun Microsystems, Inc.
 # All rights reserved.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
-# cmd/nohup/Makefile
-# 
 
 XPG4PROG = nohup
 PROG = nohup
@@ -35,7 +31,7 @@ include ../Makefile.cmd
 
 .KEEP_STATE:
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all

@@ -26,7 +26,7 @@
 
 include	$(SRC)/lib/Makefile.lib
 
-SUBDIRS = .WAIT $(MACH)
+SUBDIRS = $(MACH)
 
 all :=		TARGET= all
 install :=      TARGET= install
@@ -44,10 +44,7 @@ CHECKHDRS=      $(HDRS:%.h=%.check)
 
 .KEEP_STATE:
 
-all install clean clobber: $(SUBDIRS)
-
-_msg:	$(MACH) $(MACH64)
-
+all install clean clobber _msg: $(SUBDIRS)
 
 $(ROOTHDRDIR)/%: %
 	$(INS.file)

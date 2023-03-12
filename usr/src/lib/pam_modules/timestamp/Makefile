@@ -17,7 +17,7 @@ TEXT_DOMAIN=	SUNW_OST_SYSOSPAM
 POFILE=		pam_timestamp.po
 MSGFILES=	pam_timestamp.c
 
-SUBDIRS=		$(MACH)
+$(BUILD32)SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS +=	$(MACH64)
 
 all :=		TARGET= all

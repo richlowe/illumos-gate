@@ -28,7 +28,7 @@ include $(SRC)/lib/Makefile.lib
 HDRS =		libdlpi.h
 HDRDIR =	common
 
-SUBDIRS =		$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 POFILE =	libdlpi.po

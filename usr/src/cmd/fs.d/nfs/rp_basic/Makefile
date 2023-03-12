@@ -24,10 +24,10 @@
 
 include $(SRC)/lib/Makefile.lib
 
-SUBDIRS =	$(MACH)
+$(BUILD32)SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
-MSGFILES = 	libnfs_basic.c
+MSGFILES =	libnfs_basic.c
 POFILE  =	rp_basic.po
 
 all	:=	TARGET= all
@@ -42,7 +42,7 @@ all clean clobber install lint:	$(SUBDIRS)
 
 catalog: $(POFILE)
 
-$(POFILE): 	$(MSGFILES)
+$(POFILE):	$(MSGFILES)
 	$(BUILDPO.msgfiles)
 
 _msg:	$(MSGDOMAINPOFILE)

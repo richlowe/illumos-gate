@@ -32,7 +32,7 @@ USRKSH_ALIAS_LIST=ksh ksh93 rksh rksh93
 
 include ../../Makefile.cmd
 
-SUBDIRS= $(MACH)
+$(BUILD32)SUBDIRS= $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 SUBDIRS += builtins

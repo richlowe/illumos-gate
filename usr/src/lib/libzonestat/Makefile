@@ -27,7 +27,7 @@ include		../Makefile.lib
 HDRS =		zonestat.h zonestat_impl.h
 HDRDIR =	common
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET = all

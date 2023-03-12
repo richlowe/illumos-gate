@@ -27,7 +27,8 @@
 
 include		../../../Makefile.master
 
-SUBDIRS=	$(MACH) $(BUILD64) $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 # conditional statements
 
@@ -41,7 +42,7 @@ clobber :=	TARGET= clobber
 
 all clean clobber install install_lib:	$(SUBDIRS)
 
-$(MACH) $(MACH64): FRC
-		@cd $@; pwd; $(MAKE) $(TARGET)
+$(SUBDIRS): FRC
+	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

@@ -17,7 +17,7 @@ include		../../Makefile.lib
 
 HDRS =		libvarpd.h libvarpd_client.h libvarpd_provider.h
 HDRDIR =	common
-SUBDIRS =	$(MACH)
+$(BUILD32)SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS +=	$(MACH64)
 
 TYPECHECK_LIB =	libvarpd.so.1

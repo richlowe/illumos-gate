@@ -29,7 +29,7 @@ include ../Makefile.lib
 
 HDRS =		dhcp_hostconf.h dhcpagent_ipc.h dhcpagent_util.h dhcp_stable.h
 HDRDIR =	common
-SUBDIRS =	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET = all

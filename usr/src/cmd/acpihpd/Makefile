@@ -38,7 +38,7 @@ SVCMETHOD = svc-acpihpd
 
 include ../Makefile.cmd
 
-$(64ONLY)SUBDIRS= $(MACH)
+$(BUILD32)SUBDIRS= $(MACH)
 
 ROOTMANIFESTDIR = $(ROOTSVCPLATFORM)/${PLATFORM}
 

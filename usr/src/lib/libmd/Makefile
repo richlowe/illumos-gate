@@ -28,7 +28,8 @@ include		$(SRC)/lib/Makefile.lib
 
 $(SPARC_BLD)CAPDIR = capabilities
 
-SUBDIRS=	$(MACH) $(BUILD64) $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 HDRS =		md4.h md5.h sha1.h sha2.h skein.h
 HDRDIR =	common

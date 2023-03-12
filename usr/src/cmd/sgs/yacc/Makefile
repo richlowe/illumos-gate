@@ -26,7 +26,8 @@
 
 include		../../../Makefile.master
 
-SUBDIRS=	$(MACH) $(BUILD64) $(MACH64)
+$(BUILD32)SUBDIRS = $(MACH)
+$(BUILD64)SUBDIRS += $(MACH64)
 
 CSRC=		common/y1.c common/y2.c common/y3.c common/y4.c
 
@@ -55,7 +56,7 @@ $(POFILE):
 	sed "/^domain/d" < messages.po > $@
 	$(RM) messages.po
 
-$(MACH) $(MACH64): FRC
+$(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

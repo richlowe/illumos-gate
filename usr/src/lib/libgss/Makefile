@@ -32,7 +32,7 @@ GSSCRED_DIR = $(SRC)/cmd/gss/gsscred
 DUPLICATE_SRC = gsscred_utils.c gsscred_file.c # gen_oids.c
 CLEAN_SRC = $(DUPLICATE_SRC) gen_oids.c
 
-SUBDIRS	= $(MACH)
+$(BUILD32)SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS +=	$(MACH64)
 
 ROOTDIRS= $(ROOT)/usr/include

@@ -26,7 +26,7 @@
 
 include	$(SRC)/lib/Makefile.lib
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 # conditional assignments
@@ -46,10 +46,7 @@ CHECKHDRS=      $(HDRS:%.h=%.check)
 
 .KEEP_STATE:
 
-all install clean clobber: $(SUBDIRS)
-
-_msg:	$(MACH) $(MACH64)
-
+all install clean clobber _msg: $(SUBDIRS)
 
 $(ROOTHDRDIR)/%: %
 	$(INS.file)
@@ -61,7 +58,7 @@ install_h: $(ROOTHDRS)
 
 check: $(CHECKHDRS)
 
-$(MACH) $(MACH64): FRC
+$(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

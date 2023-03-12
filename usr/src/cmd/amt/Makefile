@@ -20,12 +20,8 @@
 # CDDL HEADER END
 #
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# cmd/amt/Makefile
 #
 
 PROG=	amt
@@ -35,7 +31,7 @@ include ../Makefile.cmd
 TEXT_DOMAIN=SUNW_OST_OSCMD
 POFILE=$(PROG).po
 
-$(64ONLY)SUBDIRS= $(MACH)
+$(BUILD32)SUBDIRS= $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 CLEANFILES  += $(POFILE)
 

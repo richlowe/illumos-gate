@@ -30,7 +30,7 @@ POFILE=		pam_krb5.po
 MSGFILES=	krb5_acct_mgmt.c krb5_authenticate.c krb5_password.c \
 		krb5_setcred.c
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS +=	$(MACH64)
 
 all :=		TARGET= all

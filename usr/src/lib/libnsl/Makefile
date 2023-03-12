@@ -24,11 +24,13 @@
 #
 #
 
+include $(SRC)/Makefile.master
+
 PROTOCOL_DIR= $(ROOTHDRDIR)/rpcsvc
 PROTOCOL_SRCDIR= $(SRC)/head/rpcsvc
 PROTOCOL_UTS_SRCDIR= $(SRC)/uts/common/rpc
 
-SUBDIRS =	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 # objects are listed by source directory

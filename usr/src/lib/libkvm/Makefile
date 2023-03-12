@@ -28,7 +28,7 @@ include ../Makefile.lib
 HDRS =		kvm.h
 HDRDIR =	.
 
-SUBDIRS =	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all :=		TARGET= all

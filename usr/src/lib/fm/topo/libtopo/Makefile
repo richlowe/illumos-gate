@@ -29,7 +29,7 @@ include ../../Makefile.lib
 FMHDRS = libtopo.h topo_mod.h topo_hc.h topo_list.h topo_method.h
 HDRDIR = common
 
-SUBDIRS = $(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all := TARGET = all

@@ -39,7 +39,7 @@ dir  path=usr/bin/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/cputrack mode=0555
 $(not_aarch64)hardlink path=usr/bin/cputrack target=../lib/isaexec
 dir  path=usr/include
-file path=usr/include/libcpc.h
+$(not_aarch64)file path=usr/include/libcpc.h
 file path=usr/include/libpctx.h
 dir  path=usr/include/sys
 dir  path=usr/kernel group=sys

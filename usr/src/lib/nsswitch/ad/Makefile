@@ -28,7 +28,8 @@
 
 include     ../../../Makefile.master
 
-FILES_SUBDIRS=    $(MACH) $(BUILD64) $(MACH64)
+$(BUILD32)FILES_SUBDIRS = $(MACH)
+$(BUILD64)FILES_SUBDIRS += $(MACH64)
 
 all:=		TARGET= all
 clean:=		TARGET= clean
@@ -39,7 +40,7 @@ install:=	TARGET= install
 
 all clean clobber install: $(FILES_SUBDIRS)
 
-$(MACH) $(MACH64): FRC
+$(FILES_SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

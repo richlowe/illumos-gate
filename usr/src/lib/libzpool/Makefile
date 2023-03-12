@@ -26,7 +26,7 @@
 
 include		../Makefile.lib
 
-$(INTEL_BLD)SUBDIRS	= $(MACH)
+$(INTEL_BLD)$(BUILD32)SUBDIRS	= $(MACH)
 $(BUILD64)SUBDIRS	+= $(MACH64)
 
 all :=		TARGET= all
@@ -42,7 +42,7 @@ install_h: $(ROOTHDRS)
 
 check: $(CHECKHDRS)
 
-$(MACH) $(MACH64): FRC
+$(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:

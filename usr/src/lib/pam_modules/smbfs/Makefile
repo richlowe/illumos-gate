@@ -34,7 +34,7 @@ MSGFILES=	smbfs_login.c
 # make sure it can find what it needs.
 $(POFILE) := CPPFLAGS += -I$(SRC)/lib/libsmbfs
 
-SUBDIRS=	$(MACH)
+$(BUILD32)SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 all	:=	TARGET= all

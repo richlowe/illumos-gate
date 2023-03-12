@@ -476,10 +476,6 @@ TEXT_DOMAIN= SUNW_OST_OSCMD
 
 CLOBBERFILES += $(XPG4) $(XPG6) $(DCFILE)
 
-# This flag is for programs which should not build a 32-bit binary
-sparc_64ONLY= $(POUND_SIGN)
-64ONLY=	 $($(MACH)_64ONLY)
-
 # For programs that are installed in the root filesystem,
 # build $(ROOTFS_PROG) rather than $(PROG)
-$(64ONLY)$(ROOTFS_PROG) := LDFLAGS += -Wl,-I/lib/ld.so.1
+$(BUILD32)$(ROOTFS_PROG) := LDFLAGS += -Wl,-I/lib/ld.so.1
