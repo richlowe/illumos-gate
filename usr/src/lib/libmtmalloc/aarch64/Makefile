@@ -27,5 +27,4 @@
 include ../Makefile.com
 include ../../Makefile.lib.64
 
-# XXXARM: multilib
 install: all $(ROOTLIBS) $(ROOTLINKS)

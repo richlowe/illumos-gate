@@ -24,8 +24,6 @@
 # Use is subject to license terms.
 #
 
-#
-
 include ../Makefile.com
 include ../../Makefile.lib.64
 
@@ -33,8 +31,6 @@ include ../../Makefile.lib.64
 # the whole 64-bit library with PIC instead of "generically" compiling
 # large parts of the 32-bit library with PIC unnecessarily.
 
-aarch64_C_PICFLAGS = $(amd64_C_BIGPICFLAGS)
+aarch64_C_PICFLAGS = $(aarch64_C_BIGPICFLAGS)
 
-
-# XXXARM: no multilib 
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)

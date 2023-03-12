@@ -34,7 +34,6 @@ MISCOBJS=	$(MISCOBJS64)
 
 .KEEP_STATE:
 
-# XXXARM: No multi-lib on aarch64
 install:	all .WAIT $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)
 
 include		../Makefile.targ.64

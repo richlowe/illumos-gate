@@ -29,5 +29,4 @@
 include ../Makefile.com
 include ../../Makefile.lib.64
 
-# XXXARM: No multilib
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)

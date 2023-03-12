@@ -29,5 +29,4 @@ LIBS = $(DYNLIB)
 
 all: $(LIBS)
 
-# XXXARM: No multilib
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)

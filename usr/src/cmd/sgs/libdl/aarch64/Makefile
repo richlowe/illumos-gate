@@ -32,7 +32,6 @@ DYNFLAGS +=	-F /usr/lib/ld.so.1
 # XXXARM: Filter library, no sysroot
 SYSROOT=
 
-# XXXARM: No multilib
 install:	all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS) \
 	$(ROOTCOMPATLINKS)
 

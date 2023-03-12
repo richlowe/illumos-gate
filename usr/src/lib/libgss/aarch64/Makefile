@@ -30,7 +30,6 @@ include ../../Makefile.lib.64
 
 GSSMECH_DIR_V9 = $(ROOT)/usr/lib/gss
 
-# XXXARM: No multilib
 install: all $(GSSMECH_DIR_V9) $(ROOTLIBS) $(ROOTLINKS)
 
 $(GSSMECH_DIR_V9):

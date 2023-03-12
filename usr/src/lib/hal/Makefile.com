@@ -32,7 +32,6 @@ CPPFLAGS =	$(HAL_DBUS_CPPFLAGS) $(HAL_GLIB_CPPFLAGS) $(CPPFLAGS.master)
 LIBDIR =	/usr/lib
 LIBDIR64 =	/usr/lib/$(MACH64)
 ROOTLIBPCDIR =	$(ROOT)/usr/lib/pkgconfig
-# XXXARM: not multilib
 $(NOT_AARCH64_BLD)ROOTLIBPCDIR64 = $(ROOT)/usr/lib/$(MACH64)/pkgconfig
 $(AARCH64_BLD)ROOTLIBPCDIR64 = $(ROOT)/usr/lib/pkgconfig
 $(AARCH64_BLD)ROOTLIBDIR64 = $(ROOT)/usr/lib
@@ -62,4 +61,3 @@ $(LIBPCSRC): ../common/$(LIBPCSRC).in
 	$(SED)	-e "s@__VERSION__@$(HAL_VERSION)@" \
 		-e "s@__LIBDIR__@$(LIBDIR)@" \
 		 < ../common/$(LIBPCSRC).in > $(LIBPCSRC)
-

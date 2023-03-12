@@ -32,7 +32,6 @@ CPPFLAGS +=	-I../../../../uts/aarch64/krtld
 
 all:		$(DYNLIB) $(LIBLINKS)
 
-# XXXARM: no multi-lib
 install:	all $(ROOTLIBS) $(ROOTCOMPATLINKS)
 
 CPPFLAGS +=	-D_ELF64

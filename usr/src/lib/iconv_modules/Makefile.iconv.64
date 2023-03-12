@@ -18,5 +18,4 @@ include $(SRC)/Makefile.master.64
 CPPFLAGS	+= -I../../inc -I. -I../../common
 CFLAGS		+= $(C_PICFLAGS) $(GSHARED)
 
-# XXXARM: Not multilib
 $(NOT_AARCH64_BLD)ICONV_LIBS      = $(PROGS:%=$(ICONV_DIR_64)/%)

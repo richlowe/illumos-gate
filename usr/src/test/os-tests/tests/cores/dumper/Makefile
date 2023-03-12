@@ -32,7 +32,6 @@ ROOTOPTPROGS = $(PROGS32:%=$(ROOTOPTCORE)/%) \
 LDLIBS += -lproc -L$(ROOTOPTCORE) -ldumper -R\$$ORIGIN
 LDLIBS64 += -lproc -L$(ROOTOPTCORE)/$(MACH64) -ldumper -R\$$ORIGIN/$(MACH64)
 
-# XXXARM: No multilib on aarch64
 $(AARCH64_BLD)LDLIBS64 = $(LDLIBS)
 
 #

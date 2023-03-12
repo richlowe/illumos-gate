@@ -52,7 +52,6 @@ LDLIBS=		-lc
 
 ICONV_DIR	= $(ROOT)/usr/lib/iconv
 
-# XXXARM: not multilib
 $(NOT_AARCH64_BLD)ICONV_DIR_64	= $(ROOT)/usr/lib/iconv/$(MACH64)
 $(AARCH64_BLD)ICONV_DIR_64 = $(ROOT)/usr/lib/iconv
 

@@ -34,7 +34,6 @@ $(ROOTFS_DYNLIB64) :=	FILEMODE= 755
 
 all:		$(DYNLIB) $(LIBLINKS)
 
-# XXXARM: No multi-lib
 install:	all $(ROOTLIBS) $(ROOTCOMPATLINKS)
 
 include		../Makefile.targ
