@@ -32,6 +32,6 @@ set name=org.opensolaris.noincorp value=true
 set name=variant.arch value=$(ARCH)
 depend type=require fmri=developer/astdev@0.5.11-0.133
 depend type=require fmri=developer/build/make@0.5.11-0.133
-depend type=require fmri=developer/build/onbld@0.5.11-0.133
+$(not_aarch64)depend type=require fmri=developer/build/onbld@0.5.11-0.133
 depend type=require fmri=developer/object-file@0.5.11-0.133
 depend type=require fmri=system/header@0.5.11-0.133
