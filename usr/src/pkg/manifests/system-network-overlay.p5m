@@ -39,7 +39,7 @@ file path=lib/svc/manifest/network/varpd.xml mode=0444
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
 dir  path=usr/lib/varpd
-dir  path=usr/lib/varpd/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/varpd/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/varpd/$(ARCH64)/libvarpd_direct.so \
     target=libvarpd_direct.so.1
 $(MULTILIB_ONLY)file path=usr/lib/varpd/$(ARCH64)/libvarpd_direct.so.1

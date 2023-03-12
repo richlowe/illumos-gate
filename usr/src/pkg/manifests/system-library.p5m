@@ -233,7 +233,7 @@ $(MULTILIB_ONLY)link path=lib/64 target=$(ARCH64)
 $(NOT_MULTILIB)link path=lib/64 target=.
 $(not_aarch64)file path=lib/c_synonyms.so.1
 dir  path=lib/crypto
-dir  path=lib/crypto/$(ARCH64)
+$(MULTILIB_ONLY)dir path=lib/crypto/$(ARCH64)
 $(MULTILIB_ONLY)file path=lib/crypto/$(ARCH64)/kmf_mapper_cn.so.1
 $(MULTILIB_ONLY)file path=lib/crypto/$(ARCH64)/kmf_nss.so.1
 $(MULTILIB_ONLY)file path=lib/crypto/$(ARCH64)/kmf_openssl.so.1
@@ -388,7 +388,7 @@ file path=lib/nss_files.so.1
 file path=lib/nss_nis.so.1
 file path=lib/nss_user.so.1
 dir  path=lib/secure
-dir  path=lib/secure/$(ARCH64)
+$(MULTILIB_ONLY)dir path=lib/secure/$(ARCH64)
 $(MULTILIB_ONLY)link path=lib/secure/32 target=.
 $(MULTILIB_ONLY)link path=lib/secure/64 target=$(ARCH64)
 $(NOT_MULTILIB)link path=lib/secure/64 target=.
@@ -396,7 +396,7 @@ dir  path=usr group=sys
 dir  path=usr/bin
 dir  path=usr/ccs
 dir  path=usr/ccs/lib
-dir  path=usr/ccs/lib/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/ccs/lib/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/ccs/lib/$(ARCH64)/libcurses.so \
     target=../../../../lib/$(ARCH64)/libcurses.so.1
 $(MULTILIB_ONLY)link path=usr/ccs/lib/$(ARCH64)/libform.so \
@@ -1023,7 +1023,7 @@ file path=usr/lib/liby.so.1
 link path=usr/lib/libzoneinfo.so target=./libzoneinfo.so.1
 file path=usr/lib/libzoneinfo.so.1
 dir  path=usr/lib/lwp
-dir  path=usr/lib/lwp/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/lwp/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/lwp/$(ARCH64)/libthread.so.1 \
     target=../../$(ARCH64)/libthread.so.1
 $(MULTILIB_ONLY)link path=usr/lib/lwp/$(ARCH64)/libthread_db.so.1 \
@@ -1046,7 +1046,7 @@ $(MULTILIB_ONLY)dir path=usr/lib/raidcfg/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/raidcfg/$(ARCH64)/mpt.so.1
 $(not_aarch64)file path=usr/lib/raidcfg/mpt.so.1
 $(not_aarch64)dir path=usr/lib/scsi
-dir  path=usr/lib/scsi/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/scsi/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/scsi/$(ARCH64)/libscsi.so \
     target=./libscsi.so.1
 $(MULTILIB_ONLY)file path=usr/lib/scsi/$(ARCH64)/libscsi.so.1
@@ -1083,7 +1083,7 @@ dir  path=usr/lib/scsi/plugins/smp/framework/$(ARCH64)
 file path=usr/lib/scsi/plugins/smp/framework/$(ARCH64)/sas2.so
 $(MULTILIB_ONLY)file path=usr/lib/scsi/plugins/smp/framework/sas2.so
 dir  path=usr/lib/security
-dir  path=usr/lib/security/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/security/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/security/$(ARCH64)/crypt_bsdbf.so \
     target=./crypt_bsdbf.so.1
 $(MULTILIB_ONLY)file path=usr/lib/security/$(ARCH64)/crypt_bsdbf.so.1
@@ -1280,7 +1280,7 @@ dir  path=usr/share/man/man4p
 dir  path=usr/share/man/man5
 dir  path=usr/xpg4
 dir  path=usr/xpg4/lib
-dir  path=usr/xpg4/lib/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/xpg4/lib/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/xpg4/lib/$(ARCH64)/libcurses.so \
     target=libcurses.so.2
 $(MULTILIB_ONLY)file path=usr/xpg4/lib/$(ARCH64)/libcurses.so.1

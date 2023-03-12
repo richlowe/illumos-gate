@@ -34,7 +34,4 @@ LDLIBS += -L$(SRC)/lib/libfru/libfrureg/ -lfrureg
 
 install: all $(ROOTLIBDIR) $(ROOTLINKSCCC)
 
-$(ROOTLIBDIR64):
-	$(INS.dir)
-
 include ../Makefile.targ

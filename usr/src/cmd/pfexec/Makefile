@@ -34,24 +34,35 @@ FILEMODE =	0555
 
 ROOTBINPFEXEC = $(PFEXEC:%=$(ROOTBIN)/%)
 
+ROOTLINKS = $(ROOTXPG4BIN)/pfsh	\
+	$(ROOTSBIN)/pfsh
+
+$(NOT_AARCH64_BLD)ROOTLINKS += $(ROOTHASBIN)/pfsh
+
 .KEEP_STATE:
 
-all: $(PROG) 
+all: $(PROG)
 
-install: all $(ROOTBINPFEXEC)
+$(ROOTHASBIN)/%: FRC
+	$(RM) $@
+	$(LN) $(ROOTBIN)/pfexec $@
+
+$(ROOTXPG4BIN)/%: FRC
+	$(RM) $@
+	$(SYMLINK) ../../bin/pfexec $@
+
+$(ROOTSBIN)/%: FRC
+	$(RM) $(ROOTSBIN)/pfsh
+	$(SYMLINK) ../usr/bin/pfexec $(ROOTSBIN)/pfsh
+
+install: all $(ROOTBINPFEXEC) $(ROOTLINKS)
 	for s in $(BINSHELLS); do \
 		$(RM) $(ROOTBIN)/pf$$s; \
 		$(LN) $(ROOTBIN)/pfexec $(ROOTBIN)/pf$$s; \
 	done
-	$(RM) $(ROOTXPG4BIN)/pfsh
-	$(SYMLINK) ../../bin/pfexec $(ROOTXPG4BIN)/pfsh
-	$(RM) $(ROOTSBIN)/pfsh
-	$(SYMLINK) ../usr/bin/pfexec $(ROOTSBIN)/pfsh
-	$(RM) $(ROOTHASBIN)/pfsh
-	$(LN) $(ROOTBIN)/pfexec $(ROOTHASBIN)/pfsh
 
 clean:
 
-lint:	lint_SRCS
-
 include ../Makefile.targ
+
+FRC:

@@ -23,8 +23,6 @@
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
 include ../Makefile.com
 include ../../../../Makefile.lib.64
@@ -33,6 +31,6 @@ include ../../../../Makefile.lib.64
 
 all:    $(LIBS)
 
-#install:   all $(ROOTLIBDIR64) .WAIT $(ROOTLIBS) .WAIT $(ROOTLINKS)
+#install:   all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) .WAIT $(ROOTLINKS)
 # We don't really install. This is for debugging only.
 install: all

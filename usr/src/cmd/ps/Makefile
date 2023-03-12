@@ -48,9 +48,13 @@ $(PROG): $(OBJS)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
-install:	$(PROG) $(ROOTPROG)
+$(ROOTUCBPROG):
 	-$(RM) $(ROOTUCBPROG)
 	-$(LN) $(ROOTPROG) $(ROOTUCBPROG)
+
+install:	$(PROG) $(ROOTPROG)
+
+$(NOT_AARCH64_BLD)install: $(ROOTUCBPROG)
 
 clean:
 	$(RM) $(OBJS)

@@ -17,7 +17,6 @@
 
 SUBDIRS=	man1		\
 		man1c		\
-		man1has		\
 		man1s		\
 		man2		\
 		man3		\
@@ -102,8 +101,10 @@ SUBDIRS=	man1		\
 		man9s
 
 # XXXARM: Not shipped on AArch64
-i386_SUBDIRS=		man1b
-sparc_SUBDIRS=		man1b
+i386_SUBDIRS=		man1b	\
+			man1has
+sparc_SUBDIRS=		man1b	\
+			man1has
 
 SUBDIRS += $($(MACH)_SUBDIRS)
 

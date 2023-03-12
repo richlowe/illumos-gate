@@ -424,14 +424,12 @@ MANLINKS=	batch.1		\
 		chdir.1		\
 		checkeq.1	\
 		continue.1	\
-		ctags.1		\
 		decrypt.1	\
 		dirname.1	\
 		dirs.1		\
 		disable.1	\
 		dmake.1		\
 		dumpkeys.1	\
-		edit.1		\
 		egrep.1		\
 		errange.1	\
 		errdate.1	\
@@ -537,11 +535,22 @@ MANLINKS=	batch.1		\
 		valtime.1	\
 		valuid.1	\
 		valyorn.1	\
-		vedit.1		\
 		whatis.1	\
 		whence.1	\
 		while.1		\
 		zcat.1
+
+# Platforms with legacy ship /usr/has and links thereto
+i386_MANLINKS=	ctags.1		\
+		edit.1		\
+		vedit.1
+
+sparc_MANLINKS=	ctags.1		\
+		edit.1		\
+		vedit.1
+
+MANLINKS += $($(MACH)_MANLINKS)
+
 
 intro.1		:= LINKSRC = Intro.1
 

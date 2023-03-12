@@ -54,10 +54,6 @@ ZGUIDANCE=	-Wl,-zguidance=noasserts
 
 all: $(LIBS)
 
-install: $(ROOTLIBDIR) $(ROOTLIBDIR64) all
-
-
-
 pics/ref_subr.o:     ../../lib/ref_subr.c
 	$(COMPILE.c) -o pics/ref_subr.o ../../lib/ref_subr.c
 	$(POST_PROCESS_O)

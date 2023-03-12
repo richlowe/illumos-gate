@@ -59,7 +59,7 @@ CPPFLAGS +=	-D_REENTRANT -I$(AUTOFSSMFLIB_DIR) \
 
 all: $(LIBS)
 
-install: $(ROOTLIBDIR) $(ROOTLIBDIR64) all
+LIBDIRS= $(ROOTLIBDIR)
 
 pics/%.o:       $(AUTOFSSMFLIB_DIR)/%.c
 	$(COMPILE.c) -o $@ $<

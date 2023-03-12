@@ -32,7 +32,7 @@ set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
-dir  path=usr/lib/$(ARCH64)/gss
+$(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)/gss
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libgss.so target=libgss.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libgss.so.1
 dir  path=usr/lib/gss
@@ -41,7 +41,7 @@ $(not_aarch64)file path=usr/lib/gss/gssd mode=0555
 link path=usr/lib/libgss.so target=libgss.so.1
 file path=usr/lib/libgss.so.1
 dir  path=usr/lib/sasl
-dir  path=usr/lib/sasl/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/sasl/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/sasl/$(ARCH64)/gssapi.so.1
 file path=usr/lib/sasl/gssapi.so.1
 dir  path=usr/sbin

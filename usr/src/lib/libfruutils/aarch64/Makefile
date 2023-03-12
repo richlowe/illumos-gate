@@ -29,13 +29,10 @@ include $(SRC)/lib/Makefile.lib.64
 
 LDLIBS += -lc
 
-all:  $(ROOTLIBDIR64) $(LIBS) $(LIBLINKS)
+all:  $(ROOTLIBDIR) $(LIBS) $(LIBLINKS)
 
 $(LIBLINKS):    FRC
 	$(RM) $@; $(SYMLINK) $(DYNLIB) $@
-
-$(ROOTLIBDIR64):
-	$(INS.dir)
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
 

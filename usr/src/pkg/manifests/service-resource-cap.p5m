@@ -38,8 +38,8 @@ dir  path=usr/bin
 file path=usr/bin/rcapstat mode=0555
 dir  path=usr/lib
 dir  path=usr/lib/rcap
-dir  path=usr/lib/rcap/$(ARCH32)
-dir  path=usr/lib/rcap/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/rcap/$(ARCH32)
+$(MULTILIB_ONLY)dir path=usr/lib/rcap/$(ARCH64)
 file path=usr/lib/rcap/rcapd mode=0555
 dir  path=usr/sbin
 file path=usr/sbin/rcapadm mode=0555

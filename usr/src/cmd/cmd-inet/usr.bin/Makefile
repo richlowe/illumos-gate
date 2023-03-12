@@ -137,7 +137,9 @@ ROOTREMSHSYMLINK=$(ROOT)/usr/bin/remsh
 all: $(ALL) $(SUBDIRS)
 
 install: all .WAIT $(ROOTPROG) $(ROOTSUIDPROG) \
-	$(SUBDIRS) $(ROOTSUNWRCP) $(ROOTRSHSYMLINK) $(ROOTREMSHSYMLINK)
+	$(SUBDIRS) $(ROOTSUNWRCP) $(ROOTREMSHSYMLINK)
+
+$(NOT_AARCH64_BLD)install: $(ROOTRSHSYMLINK)
 
 # Messaging - copy $POFILES to $POFILE to work with the parent directory
 # Makefile's '_msg' target.

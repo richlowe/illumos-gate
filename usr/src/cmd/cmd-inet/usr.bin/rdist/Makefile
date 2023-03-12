@@ -71,7 +71,8 @@ $(PROG): $(OBJS) $(KCMDOBJS) $(YOBJS) $(MAPFILE.NGB)
 	$(LINK.c) $(OBJS) $(KCMDOBJS) $(YOBJS) -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
-install: all $(ROOTPROG) $(ROOTSYMLINK)
+install: all $(ROOTPROG)
+$(NOT_AARCH64_BLD)install: $(ROOTSYMLINK)
 
 $(ROOTSYMLINK):
 	$(RM) $@; $(SYMLINK) ../bin/$(PROG) $@

@@ -84,7 +84,7 @@ file path=kernel/drv/fm.conf group=sys
 # lib dirs:
 #
 dir  path=lib/fm variant.opensolaris.zone=__NODEFAULT
-dir  path=lib/fm/$(ARCH64) variant.opensolaris.zone=__NODEFAULT
+$(MULTILIB_ONLY)dir path=lib/fm/$(ARCH64) variant.opensolaris.zone=__NODEFAULT
 
 #
 # libraries .so symlinks in lib
@@ -154,7 +154,8 @@ file path=usr/include/fm/topo_method.h
 file path=usr/include/fm/topo_mod.h
 dir  path=usr/lib variant.opensolaris.zone=__NODEFAULT
 dir  path=usr/lib/fm variant.opensolaris.zone=__NODEFAULT
-dir  path=usr/lib/fm/$(ARCH64) variant.opensolaris.zone=__NODEFAULT
+$(MULTILIB_ONLY)dir path=usr/lib/fm/$(ARCH64) \
+    variant.opensolaris.zone=__NODEFAULT
 
 #
 #	64-bit .so symlinks

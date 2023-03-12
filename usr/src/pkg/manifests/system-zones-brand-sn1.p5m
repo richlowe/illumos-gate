@@ -42,7 +42,7 @@ $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/sn1_brand.so.1
 dir  path=usr/lib/brand
 dir  path=usr/lib/brand/sn1 group=sys
-dir  path=usr/lib/brand/sn1/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/brand/sn1/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/brand/sn1/$(ARCH64)/sn1_librtld_db.so.1
 $(MULTILIB_ONLY)link path=usr/lib/brand/sn1/64 target=$(ARCH64)
 $(aarch64_ONLY)link path=usr/lib/brand/sn1/64 target=.

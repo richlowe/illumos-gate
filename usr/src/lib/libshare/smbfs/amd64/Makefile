@@ -19,8 +19,6 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
@@ -28,4 +26,4 @@
 include ../Makefile.com
 include ../../../Makefile.lib.64
 
-install: all $(ROOTLIBS64) $(ROOTLINKS64)
+install: all $(ROOTLIBDIR64) $(ROOTLIBS64) $(ROOTLINKS64)

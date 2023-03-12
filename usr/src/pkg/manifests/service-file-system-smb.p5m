@@ -50,7 +50,7 @@ $(not_aarch64)file path=usr/kernel/kmdb/$(ARCH64)/smbsrv group=sys mode=0555
 dir  path=usr/lib
 dir  path=usr/lib/fs group=sys
 dir  path=usr/lib/fs/smb group=sys
-dir  path=usr/lib/fs/smb/$(ARCH64) group=sys
+$(MULTILIB_ONLY)dir path=usr/lib/fs/smb/$(ARCH64) group=sys
 $(MULTILIB_ONLY)file path=usr/lib/fs/smb/$(ARCH64)/libshare_smb.so.1
 file path=usr/lib/fs/smb/libshare_smb.so.1
 dir  path=usr/lib/mdb group=sys
@@ -72,7 +72,7 @@ $(MULTILIB_ONLY)file path=usr/lib/security/$(ARCH64)/pam_smb_passwd.so.1
 link path=usr/lib/security/pam_smb_passwd.so target=pam_smb_passwd.so.1
 file path=usr/lib/security/pam_smb_passwd.so.1
 dir  path=usr/lib/smbsrv
-dir  path=usr/lib/smbsrv/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/smbsrv/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/smbsrv/$(ARCH64)/libsmb.so.1
 dir  path=usr/lib/smbsrv/dtrace
 file path=usr/lib/smbsrv/dtrace/nbl-conflict.d mode=0555

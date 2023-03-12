@@ -809,18 +809,8 @@ opt/SUNWonld			i386 sparc
 opt/os-tests/tests/cores/libdumper.so		i386 sparc aarch64
 opt/os-tests/tests/cores/amd64/libdumper.so	i386
 
-# XXXARM
-# aarch64 weirdness that's easier dealt with by exceptions than by changes
-etc/brand/solaris10		aarch64
-usr/lib/brand/solaris10		aarch64
-
 # XXXARM: This is cross-built, and so for the wrong platform.
 opt/onbld		aarch64
-
-# XXXARM: Not delivered on aarch64
-usr/ucb			aarch64
-usr/ucblib		aarch64
-usr/lib/python3.9	aarch64
 
 # The ipmi driver is not built or delivered, but we still need the header at
 # build time

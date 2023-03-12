@@ -40,7 +40,7 @@ $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libsasl.so.1
 link path=usr/lib/libsasl.so target=libsasl.so.1
 file path=usr/lib/libsasl.so.1
 dir  path=usr/lib/sasl
-dir  path=usr/lib/sasl/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/sasl/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/sasl/$(ARCH64)/crammd5.so.1
 $(MULTILIB_ONLY)file path=usr/lib/sasl/$(ARCH64)/digestmd5.so.1
 $(MULTILIB_ONLY)file path=usr/lib/sasl/$(ARCH64)/login.so.1

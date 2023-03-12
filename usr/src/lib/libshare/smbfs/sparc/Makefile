@@ -19,12 +19,10 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
 include ../Makefile.com
 
-install: all $(ROOTLIBS) $(ROOTLINKS)
+install: all $(ROOTLIBDIR) $(ROOTLIBS) $(ROOTLINKS)

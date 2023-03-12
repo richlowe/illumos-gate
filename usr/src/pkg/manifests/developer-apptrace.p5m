@@ -35,7 +35,7 @@ dir  path=usr/bin
 $(not_aarch64)file path=usr/bin/apptrace mode=0555
 dir  path=usr/lib
 dir  path=usr/lib/abi
-dir  path=usr/lib/abi/$(ARCH64)
+$(MULTILIB_ONLY)dir path=usr/lib/abi/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/abi/$(ARCH64)/apptrace.so.1
 $(not_aarch64)file path=usr/lib/abi/apptrace.so.1
 dir  path=usr/share/man

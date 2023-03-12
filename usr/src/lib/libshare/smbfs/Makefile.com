@@ -51,8 +51,6 @@ CPPFLAGS +=	-D_REENTRANT -I$(ADJUNCT_PROTO)/usr/include/libxml2 \
 
 all: $(LIBS)
 
-install: $(ROOTLIBDIR) $(ROOTLIBDIR64) all
-
 $(ROOTLIBDIR):
 	$(INS.dir)
 

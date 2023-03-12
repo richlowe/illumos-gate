@@ -30,7 +30,7 @@ include		$(SRC)/lib/Makefile.lib.64
 #XXXARM: filter library, no sysroot
 SYSROOT=
 
-install:	all $(ROOTLIBDIR64) .WAIT $(ROOTLIBS) $(ROOTLINKS) \
+install:	all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS) \
 	$(ROOTCOMPATLINKS)
 
 include		$(SRC)/lib/Makefile.filter.targ

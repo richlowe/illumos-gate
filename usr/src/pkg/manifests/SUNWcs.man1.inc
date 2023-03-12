@@ -73,7 +73,7 @@ file path=usr/share/man/man1/dumpcs.1
 link path=usr/share/man/man1/dumpkeys.1 target=loadkeys.1
 file path=usr/share/man/man1/echo.1
 file path=usr/share/man/man1/ed.1
-link path=usr/share/man/man1/edit.1 target=../../../has/man/man1has/edit.1has
+$(not_aarch64)link path=usr/share/man/man1/edit.1 target=../../../has/man/man1has/edit.1has
 link path=usr/share/man/man1/egrep.1 target=grep.1
 file path=usr/share/man/man1/eject.1
 file path=usr/share/man/man1/encrypt.1
@@ -276,7 +276,7 @@ link path=usr/share/man/man1/valstr.1 target=ckstr.1
 link path=usr/share/man/man1/valtime.1 target=cktime.1
 link path=usr/share/man/man1/valuid.1 target=ckuid.1
 link path=usr/share/man/man1/valyorn.1 target=ckyorn.1
-link path=usr/share/man/man1/vedit.1 target=../../../has/man/man1has/vi.1has
+$(not_aarch64)link path=usr/share/man/man1/vedit.1 target=../../../has/man/man1has/vi.1has
 file path=usr/share/man/man1/vtfontcvt.1
 file path=usr/share/man/man1/w.1
 link path=usr/share/man/man1/whence.1 target=typeset.1

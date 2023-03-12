@@ -24,12 +24,12 @@
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright (c) 2012, Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2012 OmniTI Computer Consulting, Inc.  All rights reserved.
-# Copyright 2022 Garrett D'Amore <garrett@damore.org>
 # Copyright 2016 Hans Rosenfeld <rosenfeld@grumpf.hope-2000.org>
 # Copyright 2017 Nexenta Systems, Inc.
 # Copyright 2017 RackTop Systems.
-# Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2020 Joyent, Inc.
+# Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2022 Garrett D'Amore <garrett@damore.org>
 #
 
 #
@@ -39,14 +39,36 @@
 #
 
 DIRLINKS=	$(SYM.DIRS)
-$(BUILD64)	DIRLINKS += $(SYM.DIRS64)
+$(BUILD64)DIRLINKS += $(SYM.DIRS64)
 
 TARGETDIRS=	$(DIRS)
-$(BUILD64)	TARGETDIRS += $(DIRS64)
+$(BUILD64)TARGETDIRS += $(DIRS64)
+$(BUILD32)$(BUILD64)TARGETDIRS += $(DIRSMULTILIB)
 
 TARGETDIRS	+= $(FILELINKS) $(DIRLINKS)
 
-i386_DIRS=			\
+LEGACY_DIRS=				\
+	/etc/brand/solaris10		\
+	/usr/has			\
+	/usr/has/bin			\
+	/usr/has/lib			\
+	/usr/has/man			\
+	/usr/lib/brand/solaris10	\
+	/usr/ucb			\
+	/usr/ucblib
+
+LEGACY_DIRS64=			\
+	/usr/ucb/$(MACH64)	\
+	/usr/ucblib/$(MACH64)
+
+
+DIRS32=				\
+	/usr/bin/$(MACH32)	\
+	/usr/lib/rcap/$(MACH32)	\
+	/usr/sbin/$(MACH32)	\
+	/usr/ucb/$(MACH32)
+
+i86_DIRS=			\
 	/boot/acpi		\
 	/boot/acpi/tables	\
 	/boot/grub		\
@@ -55,16 +77,14 @@ i386_DIRS=			\
 	/lib/libmvec		\
 	/usr/lib/xen		\
 	/usr/lib/xen/bin	\
-	/usr/share/bhyve
+	/usr/share/bhyve	\
+	$(LEGACY_DIRS)		\
+	$(DIRS32)
 
-sparc_DIRS=			\
-	/usr/lib/ldoms
-
-$(BUILD32)MACH32_DIRS=		\
-	/usr/ucb/$(MACH32)	\
-	/usr/bin/$(MACH32)	\
-	/usr/lib/rcap/$(MACH32)	\
-	/usr/sbin/$(MACH32)	\
+sparcv7_DIRS=			\
+	/usr/lib/ldoms		\
+	$(LEGACY_DIRS)		\
+	$(DIRS32)
 
 PYTHON3_DIRS = \
 	/usr/lib/python$(PYTHON3_VERSION)					\
@@ -81,6 +101,9 @@ $(BUILDPY3b)PYTHON3_DIRS += \
 	/usr/lib/python$(PYTHON3b_VERSION)/vendor-packages/solaris/__pycache__	\
 	/usr/lib/python$(PYTHON3b_VERSION)/vendor-packages/zfs			\
 	/usr/lib/python$(PYTHON3b_VERSION)/vendor-packages/zfs/__pycache__
+
+# XXXARM: AArch64 has no python yet
+$(AARCH64_BLD)PYTHON3_DIRS=
 
 DIRS=							\
 	/boot						\
@@ -104,7 +127,6 @@ DIRS=							\
 	/devices/pseudo					\
 	/etc						\
 	/etc/brand					\
-	/etc/brand/solaris10				\
 	/etc/cron.d					\
 	/etc/crypto					\
 	/etc/crypto/certs				\
@@ -239,10 +261,6 @@ DIRS=							\
 	/usr/demo					\
 	/usr/demo/SOUND					\
 	/usr/games					\
-	/usr/has					\
-	/usr/has/bin					\
-	/usr/has/lib					\
-        /usr/has/man					\
 	/usr/include					\
 	/usr/include/ads				\
 	/usr/include/ast				\
@@ -266,7 +284,6 @@ DIRS=							\
 	/usr/lib/brand/labeled				\
 	/usr/lib/brand/shared				\
 	/usr/lib/brand/sn1				\
-	/usr/lib/brand/solaris10			\
 	/usr/lib/class					\
 	/usr/lib/class/FSS				\
 	/usr/lib/class/FX				\
@@ -334,9 +351,7 @@ DIRS=							\
 	/usr/share/lib/xml/dtd				\
 	/usr/share/man					\
 	/usr/share/src					\
-	/usr/ucb					\
-	$(MACH32_DIRS)					\
-	/usr/ucblib					\
+	$($(MACH32)_DIRS)				\
 	/usr/xpg4					\
 	/usr/xpg4/bin					\
 	/usr/xpg4/include				\
@@ -435,22 +450,20 @@ sparcv9_DIRS64=				\
 	/usr/platform/sun4v/sbin	\
 	/usr/platform/sun4v/lib		\
 	/usr/platform/sun4u-us3/lib	\
-	/usr/platform/sun4u-opl/lib
+	/usr/platform/sun4u-opl/lib	\
+	$(LEGACY_DIRS64)
 
-amd64_DIRS64= \
-	/platform/i86pc/amd64
+amd64_DIRS64=			\
+	/platform/i86pc/amd64	\
+	$(LEGACY_DIRS64)
 
-# XXXARM: Don't actually need many of these
-# but they're there at present
-DIRS64=						\
-	$($(MACH64)_DIRS64)			\
+# These are only created on multilib platforms, those where BUILD32 and
+# BUILD64 are both true.  DIRS64 exists everywhere BUILD64 is true.
+DIRSMULTILIB= \
 	/lib/$(MACH64)				\
 	/lib/crypto/$(MACH64)			\
 	/lib/fm/$(MACH64)			\
 	/lib/secure/$(MACH64)			\
-	/usr/bin/$(MACH64)			\
-	/usr/ccs/bin/$(MACH64)			\
-	/usr/ccs/lib/$(MACH64)			\
 	/usr/lib/$(MACH64)			\
 	/usr/lib/$(MACH64)/gss			\
 	/usr/lib/brand/sn1/$(MACH64)		\
@@ -465,7 +478,6 @@ DIRS64=						\
 	/usr/lib/lwp/$(MACH64)			\
 	/usr/lib/mdb/kvm/$(MACH64)		\
 	/usr/lib/mdb/proc/$(MACH64)		\
-	$(PYTHON3_DIRS)				\
 	/usr/lib/rcap/$(MACH64)			\
 	/usr/lib/sasl/$(MACH64)			\
 	/usr/lib/scsi/$(MACH64)			\
@@ -474,10 +486,15 @@ DIRS64=						\
 	/usr/lib/smbsrv/$(MACH64)		\
 	/usr/lib/abi/$(MACH64)			\
 	/usr/lib/varpd/$(MACH64)		\
-	/usr/sbin/$(MACH64)			\
-	/usr/ucb/$(MACH64)			\
-	/usr/ucblib/$(MACH64)			\
 	/usr/xpg4/lib/$(MACH64)			\
+	/usr/ccs/lib/$(MACH64)			\
+	/usr/ccs/bin/$(MACH64)			\
+
+DIRS64=						\
+	$($(MACH64)_DIRS64)			\
+	$(PYTHON3_DIRS)				\
+	/usr/bin/$(MACH64)			\
+	/usr/sbin/$(MACH64)			\
 	/var/ld/$(MACH64)
 
 # /var/mail/:saved is built directly by the rootdirs target in
@@ -516,7 +533,12 @@ $(NOT_AARCH64_BLD)SYM.DIRS +=	\
 	/usr/ucblib/32		\
 	/var/ld/32
 
-sparc_SYM.DIRS64=
+LEGACY_SYM.DIRS64=	\
+	/usr/ucblib/64	\
+	/usr/lib/brand/solaris10/64
+
+sparc_SYM.DIRS64=	$(LEGACY_SYM.DIRS64)
+i386_SYM.DIRS64=	$(LEGACY_SYM.DIRS64)
 
 SYM.DIRS64= \
 	$($(MACH)_SYM.DIRS64)		\
@@ -525,7 +547,6 @@ SYM.DIRS64= \
 	/lib/secure/64			\
 	/usr/lib/64			\
 	/usr/lib/brand/sn1/64		\
-	/usr/lib/brand/solaris10/64	\
 	/usr/lib/elfedit/64		\
 	/usr/lib/link_audit/64		\
 	/usr/lib/lwp/64			\
@@ -533,8 +554,7 @@ SYM.DIRS64= \
 	/usr/lib/security/64		\
 	/usr/lib/varpd/64		\
 	/usr/xpg4/lib/64		\
-	/var/ld/64			\
-	/usr/ucblib/64
+	/var/ld/64
 
 # prepend the ROOT prefix
 

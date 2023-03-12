@@ -33,7 +33,7 @@ set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
-dir  path=usr/lib/$(ARCH64)/gss
+$(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)/gss
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/gss/dh1024-0.so target=dh1024-0.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/gss/dh1024-0.so.1
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/gss/dh640-0.so target=dh640-0.so.1

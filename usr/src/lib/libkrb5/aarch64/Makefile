@@ -32,6 +32,6 @@ DYNFLAGS +=	-R/usr/lib/gss
 # XXXARM: Filter, no sysroot
 SYSROOT=
 
-install:	all $(ROOTLIBDIR64) .WAIT $(ROOTLIBS) $(ROOTLINKS)
+install:	all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS)
 
 include		$(SRC)/lib/Makefile.filter.targ
