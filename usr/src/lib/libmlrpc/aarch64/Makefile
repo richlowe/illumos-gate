@@ -23,7 +23,7 @@
 # Use is subject to license terms.
 #
 
-MACH_LDLIBS +=	-L$(ROOT)/usr/lib/smbsrv/$(MACH64)
+MACH_LDLIBS +=	-L$(ROOT)/usr/lib/smbsrv/
 
 include ../Makefile.com
 include ../../Makefile.lib.64
