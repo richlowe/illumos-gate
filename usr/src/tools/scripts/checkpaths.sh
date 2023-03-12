@@ -67,6 +67,9 @@ do
 	*i386|*i386-nd)
 		arch=i386
 		;;
+	*aarch64|*aarch64-nd)
+		arch=aarch64
+		;;
 	*)
 		echo "$ROOT has unknown architecture." >&2
 		exit 1
