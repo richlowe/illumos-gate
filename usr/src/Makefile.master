@@ -515,14 +515,7 @@ sparc_XARCH=	-m32
 sparcv9_XARCH=	-m64
 i386_XARCH=	-m32
 amd64_XARCH=	-m64 -Ui386 -U__i386
-aarch64_XARCH=	-m64 # -xarch=generic64
-
-# assembler '-xarch' flag.  Different from compiler '-xarch' flag.
-sparc_AS_XARCH=		-xarch=v8plus
-sparcv9_AS_XARCH=	-xarch=v9
-i386_AS_XARCH=
-amd64_AS_XARCH=		-xarch=amd64 -P -Ui386 -U__i386
-aarch64_AS_XARCH=	-xarch=generic64
+aarch64_XARCH=	-m64
 
 #
 # These flags define what we need to be 'standalone' i.e. -not- part
@@ -600,25 +593,24 @@ CSTD_GNU89=	-xc99=%none
 CSTD_GNU99=	-xc99=%all
 CSTD=		$(CSTD_GNU89)
 
-# In most places, assignments to these macros should be appended with +=
-# (CPPFLAGS.first allows values to be prepended to CPPFLAGS).
 sparc_CFLAGS=	$(sparc_XARCH) $(CCSTATICSYM)
 sparcv9_CFLAGS=	$(sparcv9_XARCH) -dalign $(CCVERBOSE) $(V9ABIWARN) $(CCREGSYM) \
 		$(CCSTATICSYM)
 i386_CFLAGS=	$(i386_XARCH)
 amd64_CFLAGS=	$(amd64_XARCH) -m64
-
 # XXXARM: Additional options here things that we specify outside the defaults
 # because we hope to switch the system so the defaults are valid:
 #
 # outline-atomics -- need a library implementation for the atomics
 # tls-dialect -- need an implementation of TLSDESC
-aarch64_CFLAGS=	$(aarch64_XARCH) -_gcc=-mno-outline-atomics -_gcc=-mtls-dialect=trad
-sparc_ASFLAGS=	$(sparc_AS_XARCH)
-sparcv9_ASFLAGS=$(sparcv9_AS_XARCH)
-i386_ASFLAGS=	$(i386_AS_XARCH)
-amd64_ASFLAGS=	$(amd64_AS_XARCH)
-aarch64_ASFLAGS=$(aarch64_AS_XARCH)
+aarch64_CFLAGS=	$(aarch64_XARCH) -_gcc=-mno-outline-atomics \
+	-_gcc=-mtls-dialect=trad
+
+$(MACH)_ASFLAGS=	$($(MACH)_CFLAGS)
+$(MACH64)_ASFLAGS=	$($(MACH64)_CFLAGS)
+
+ASFLAGS= 		$($(MACH)_ASFLAGS)
+ASFLAGS64=		$($(MACH64)_ASFLAGS)
 
 #
 sparc_COPTFLAG=		-xO3
@@ -773,6 +765,8 @@ NATIVE_CFLAGS=	$($(NATIVE_MACH)_COPTFLAG) $($(NATIVE_MACH)_CFLAGS) $(CCMODE) \
 		$(CCNOREORDER) $(CCNOAGGRESSIVELOOPS) $(CCINLINESIZE) \
 		$(CSOURCEDEBUGFLAGS) $(CUSERFLAGS)
 
+NATIVE_ASFLAGS=	$(NATIVE_CFLAGS)
+
 NATIVE_CCFLAGS=	$($(NATIVE_MACH)_CCOPTFLAG) $($(NATIVE_MACH)_CCFLAGS) \
 		$(CCSOURCEDEBUGFLAGS) $(CCUSERFLAGS)
 
@@ -781,6 +775,8 @@ NATIVE_CFLAGS64=	$(COPTFLAG64) $($(NATIVE_MACH64)_CFLAGS) $(CCMODE64) \
 		$(IROPTFLAG64) $(CGLOBALSTATIC) $(CCNOAUTOINLINE) \
 		$(CCNOREORDER) $(CCNOAGGRESSIVELOOPS) $(CCINLINESIZE) \
 		$(CSOURCEDEBUGFLAGS) $(CUSERFLAGS64)
+
+NATIVE_ASFLAGS64=	$(NATIVE_CFLAGS64)
 
 NATIVE_CCFLAGS64=	$(CCOPTFLAG64) $($(NATIVE_MACH64)_CCFLAGS) \
 		$(CCSOURCEDEBUGFLAGS) $(CCUSERFLAGS64)
@@ -793,6 +789,8 @@ CPPFLAGS.master=$(DTEXTDOM) $(DTS_ERRNO) \
 	$(ADJUNCT_PROTO:%=-I%/usr/include)
 CPPFLAGS.native=$(ENVCPPFLAGS1) $(ENVCPPFLAGS2) $(ENVCPPFLAGS3) \
 		$(ENVCPPFLAGS4) -I$(NATIVE_ADJUNCT)/include
+# In most places, assignments to these macros should be appended with +=
+# (CPPFLAGS.first allows values to be prepended to CPPFLAGS).
 CPPFLAGS=	$(CPPFLAGS.first) $(CPPFLAGS.master)
 AS_CPPFLAGS=	$(CPPFLAGS.first) $(CPPFLAGS.master)
 JAVAFLAGS=	-source 7 -target 7 -Xlint:deprecation,-options
@@ -941,8 +939,8 @@ COMPILE.c=	$(CC) $(CFLAGS) $(CPPFLAGS) -c
 COMPILE64.c=	$(CC) $(CFLAGS64) $(CPPFLAGS) -c
 COMPILE.cc=	$(CCC) $(CCFLAGS) $(CPPFLAGS) -c
 COMPILE64.cc=	$(CCC) $(CCFLAGS64) $(CPPFLAGS) -c
-COMPILE.s=	$(AS) $(ASFLAGS) $(AS_CPPFLAGS)
-COMPILE64.s=	$(AS) $(ASFLAGS) $($(MACH64)_AS_XARCH) $(AS_CPPFLAGS)
+COMPILE.s=	$(AS) $(ASFLAGS) $(AS_CPPFLAGS) -c
+COMPILE64.s=	$(AS) $(ASFLAGS64) $(AS_CPPFLAGS) -c
 COMPILE.d=	$(DTRACE) -G -32
 COMPILE64.d=	$(DTRACE) -G -64
 COMPILE.b=	$(ELFWRAP) $(ELFWRAP_FLAGS$(CLASS))
@@ -1055,35 +1053,29 @@ BUILD_CPP=		/usr/lib/cpp
 NATIVEBUILD_CPP=	/usr/lib/cpp
 BUILD_LD=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH64)/ld
 NATIVEBUILD_LD=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH64)/ld
+NATIVEBUILD_AS=		$(NATIVEBUILD_CC)
 
 $(MACH)_CC=		$(BUILD_CC)
 $(MACH)_CCC=		$(BUILD_CCC)
 $(MACH)_CPP=		$(BUILD_CPP)
 $(MACH)_LD=		$(BUILD_LD)
+$(MACH)_AS=		$(BUILD_CC)
 $(MACH64)_CC=		$(BUILD_CC)
 $(MACH64)_CCC=		$(BUILD_CCC)
 $(MACH64)_CPP=		$(BUILD_CPP)
 $(MACH64)_LD=		$(BUILD_LD)
-
-sparc_AS=		/usr/bin/as -xregsym=no
-sparcv9_AS=		$($(MACH)_AS)
-
-i386_AS=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/aw.i386
-$(__GNUC)i386_AS=	$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/aw.i386
-amd64_AS=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/aw.i386
-
-aarch64_AS=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/aw.aarch64
+$(MACH64)_AS=		$(BUILD_CC)
 
 NATIVECC=		$(NATIVEBUILD_CC)
 NATIVECCC=		$(NATIVEBUILD_CCC)
 NATIVECPP=		$(NATIVEBUILD_CPP)
-NATIVEAS=		$($(NATIVE_MACH)_AS)
+NATIVEAS=		$(NATIVEBUILD_AS)
 NATIVELD=		$(BUILD_LD)
 
 NATIVECC64=		$(NATIVEBUILD_CC)
 NATIVECCC64=		$(NATIVEBUILD_CCC)
 NATIVECPP64=		$(NATIVEBUILD_CPP)
-NATIVEAS64=		$($(NATIVE_MACH64)_AS)
+NATIVEAS64=		$(NATIVEBUILD_AS)
 NATIVELD64=		$(NATIVEBUILD_LD)
 
 #
@@ -1170,8 +1162,8 @@ aarch64_CC_PICFLAGS =	-_cc=-Kpic -_gcc=-fpic
 CC_PICFLAGS =		$($(MACH)_CC_PICFLAGS)
 CC_PICFLAGS64 =		$($(MACH64)_CC_PICFLAGS)
 
-AS_PICFLAGS=		-K pic
-AS_BIGPICFLAGS=		-K PIC
+AS_PICFLAGS=		$(C_PICFLAGS)
+AS_BIGPICFLAGS=		$(C_BIGPICFLAGS)
 
 #
 # Default label for CTF sections
@@ -1297,6 +1289,9 @@ PKGARCHIVE=$(SRC)/../../packages/$(MACH)/nightly$(PKGARCHIVESUFFIX)
 PKGPUBLISHER_REDIST=	on-nightly
 PKGPUBLISHER_NONREDIST=	on-extra
 
+# Allow suffix rules like the below for .S as well as .s
+.SUFFIXES: .S
+
 #	Default build rules which perform comment section post-processing.
 #
 .c:
@@ -1314,6 +1309,15 @@ PKGPUBLISHER_NONREDIST=	on-extra
 	$(COMPILE.s) -o $@ $<
 	$(POST_PROCESS_S_O)
 .s.a:
+	$(COMPILE.s) -o $% $<
+	$(PROCESS_COMMENT) $%
+	$(AR) $(ARFLAGS) $@ $%
+	$(RM) $%
+
+.S.o:
+	$(COMPILE.s) -o $@ $<
+	$(POST_PROCESS_S_O)
+.S.a:
 	$(COMPILE.s) -o $% $<
 	$(PROCESS_COMMENT) $%
 	$(AR) $(ARFLAGS) $@ $%

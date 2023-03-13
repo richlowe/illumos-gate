@@ -51,7 +51,6 @@ BOOT_SUBDIRS=		\
 	ctf
 
 COMMON_SUBDIRS=		\
-	aw		\
 	codesign	\
 	cscope-fast	\
 	env		\
@@ -95,10 +94,6 @@ i386_SUBDIRS=			\
 	elfextract		\
 	mbh_patch		\
 	btxld
-
-$(INTEL_BLD)sgs: aw
-
-$(AARCH64_BLD)sgs: aw
 
 SUBDIRS=			\
 	$($(MACH)_SUBDIRS)	\

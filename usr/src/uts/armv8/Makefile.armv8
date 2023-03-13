@@ -146,7 +146,7 @@ AS_INC_PATH		+= -I$(DSF_DIR)/$(OBJS_DIR)
 #	GENASSYM_SRC:	genassym.c
 #
 MAPFILE		 = $(UTSBASE)/armv8/conf/Mapfile
-MODSTUBS	 = $(UTSBASE)/$(MACH)/ml/modstubs.s
+MODSTUBS	 = $(UTSBASE)/aarch64/ml/modstubs.S
 
 #
 #	Define the actual specific platforms

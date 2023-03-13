@@ -44,7 +44,7 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/vm/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/ml/%.s $(ASSYM_H)
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/ml/%.S $(ASSYM_H)
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/conf/%.c

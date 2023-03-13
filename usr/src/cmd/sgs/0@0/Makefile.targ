@@ -29,7 +29,11 @@ pics/%.o:	../common/%.c
 		$(POST_PROCESS_O)
 
 pics/%.o:	$(CRTSRCS)/%.s
-		$(BUILD.s)
+		$(COMPILE.s) $< -o $@
+		$(POST_PROCESS_O)
+
+pics/%.o:	$(CRTSRCS)/%.S
+		$(COMPILE.s) $< -o $@
 		$(POST_PROCESS_O)
 
 all:		$(DYNLIB)

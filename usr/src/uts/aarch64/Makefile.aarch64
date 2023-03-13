@@ -97,7 +97,7 @@ include $(UTSBASE)/Makefile.uts
 #
 #	The following must be defined for all implementations:
 #
-MODSTUBS		= $(UTSBASE)/aarch64/ml/modstubs.s
+MODSTUBS		= $(UTSBASE)/aarch64/ml/modstubs.S
 
 #
 #	Define supported builds

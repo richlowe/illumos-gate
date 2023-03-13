@@ -41,7 +41,7 @@
 	.globl	__cerror
 
 #define	__SYSCALL(name)		\
-	svc #(SYS_/**/name)
+	svc #(SYS_##name)
 
 #define	SYSTRAP_RVAL1(name)	__SYSCALL(name)
 #define	SYSTRAP_RVAL2(name)	__SYSCALL(name)
@@ -50,7 +50,7 @@
 
 	/* XXXARM: Make this magic number symbolic */
 #define	SYSFASTTRAP(name)		\
-	svc #(T_/**/name + 0x8000)
+	svc #(T_##name + 0x8000)
 
 #define	SYSCERROR			\
 	b.cc	1f;			\
@@ -73,7 +73,7 @@
  */
 #define	SYSREENTRY(name)	\
 	ENTRY(name);		\
-.restart_/**/name:
+.restart_##name:
 
 #define	SYSRESTART(name)		\
 	b.cc	1f;			\
@@ -124,12 +124,12 @@
 #define	SYSCALL_RESTART(name)		\
 	SYSREENTRY(name);		\
 	SYSTRAP_2RVALS(name);		\
-	SYSRESTART(.restart_/**/name)
+	SYSRESTART(.restart_##name)
 
 #define	SYSCALL_RESTART_RVAL1(name)	\
 	SYSREENTRY(name);		\
 	SYSTRAP_RVAL1(name);		\
-	SYSRESTART(.restart_/**/name)
+	SYSRESTART(.restart_##name)
 
 /*
  * SYSCALL2 provides a common system call sequence when the entry name
@@ -152,12 +152,12 @@
 #define	SYSCALL2_RESTART(entryname, trapname)	\
 	SYSREENTRY(entryname);			\
 	SYSTRAP_2RVALS(trapname);		\
-	SYSRESTART(.restart_/**/entryname)
+	SYSRESTART(.restart_##entryname)
 
 #define	SYSCALL2_RESTART_RVAL1(entryname, trapname)	\
 	SYSREENTRY(entryname);				\
 	SYSTRAP_RVAL1(trapname);			\
-	SYSRESTART(.restart_/**/entryname)
+	SYSRESTART(.restart_##entryname)
 
 /*
  * SYSCALL_NOERROR provides the most common system call sequence for those

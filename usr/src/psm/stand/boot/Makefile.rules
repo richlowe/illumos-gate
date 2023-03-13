@@ -53,11 +53,19 @@
 	$(COMPILE.s) -o $@ $<
 	$(POST_PROCESS_O)
 
+%.o: $(MACH_DIR)/%.S
+	$(COMPILE.s) -o $@ $<
+	$(POST_PROCESS_O)
+
 %.o: $(MACH_DIR)/%.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
 
 %.o: %.s
+	$(COMPILE.s) -o $@ $<
+	$(POST_PROCESS_O)
+
+%.o: %.S
 	$(COMPILE.s) -o $@ $<
 	$(POST_PROCESS_O)
 

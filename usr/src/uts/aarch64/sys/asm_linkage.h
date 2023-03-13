@@ -52,10 +52,10 @@ extern "C" {
 #define	RTMCOUNT(x)	MCOUNT(x)
 
 #define	ANSI_PRAGMA_WEAK(sym, stype)	\
-	.weak	_/**/sym;			\
-	.type	_/**/sym, @stype;		\
+	.weak	_##sym;			\
+	.type	_##sym, @stype;		\
 /* CSTYLED */ \
-_/**/sym	= sym
+_##sym	= sym
 
 #define	ANSI_PRAGMA_WEAK2(sym1, sym2, stype)	\
 	.weak	sym1; \

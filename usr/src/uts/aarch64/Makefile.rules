@@ -49,17 +49,17 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/power/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/brand/sn1/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/brand/sn1/%.S
 	$(COMPILE.s) -o $@ $<
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/brand/solaris10/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/brand/solaris10/%.S
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/dtrace/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/dtrace/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/dtrace/%.S
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/fs/proc/%.c
@@ -78,10 +78,10 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/io/acpica/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/io/acpica/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/io/acpica/%.S
 	$(COMPILE.s) -o $@ $<
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/ml/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/ml/%.S
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/ml/%.c
@@ -240,7 +240,7 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/io/scsi/adapters/pvscsi/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/nskern/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/nskern/%.S
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/os/%.c
@@ -268,7 +268,7 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/kdi/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/kdi/%.s
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/kdi/%.S
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/zfs/%.c
@@ -295,16 +295,7 @@ $(OBJS_DIR)/%.o:	$(UTSBASE)/aarch64/krtld/%.c
 	$(COMPILE.c) $(KRTLD_INC_PATH) $(KRTLD_CPPFLAGS) -o $@ $<
 	$(CTFCONVERT_O)
 
-#
-# _EBOOT indicates that krtld is called from an eboot ELF section
-#
-$(OBJS_DIR)/kobj.o		:= CPPFLAGS += -D_EBOOT
-
-$(EBOOT_OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/ml/%.s
-	$(EBOOT_AS) -P -D_ASM $(EBOOT_DEFS) $(EBOOT_AS_INCL) -o $@ $<
-
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/aarch64/krtld/%.s
+$(OBJS_DIR)/%.o:	$(UTSBASE)/aarch64/krtld/%.S
 	$(COMPILE.s) $(KRTLD_INC_PATH) $(KRTLD_CPPFLAGS) -o $@ $<
 
 $(OBJS_DIR)/%.o:	$(SRC)/common/util/$(SUBARCH_DIR)/%.c

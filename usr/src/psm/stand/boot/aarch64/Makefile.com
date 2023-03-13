@@ -87,7 +87,7 @@ CPPINCS	= 	-I$(PORT_DIR) \
 		-I$(ROOT)/usr/include # Must be last
 
 CPPFLAGS	= $(CPPDEFS) $(CPPINCS) $(STAND_CPPFLAGS)
-AS_CPPFLAGS	= -P -D_ASM $(CPPDEFS) $(CPPINCS) $(STAND_CPPFLAGS)
+AS_CPPFLAGS	= -D_ASM $(CPPDEFS) $(CPPINCS) $(STAND_CPPFLAGS) -I.
 
 LIBNFS_LIBS     = libnfs.a libxdr.a libsock.a libinet.a libtcp.a libfdt.a libhsfs.a libufs.a libzfs.a libsa.a
 NFS_LIBS        = $(LIBNFS_LIBS:lib%.a=-l%)
@@ -101,9 +101,6 @@ NFS_OBJS        = $(OBJS)
 
 NFSBOOT_OUT	= $(NFSBOOT).out
 NFSBOOT_BIN	= $(NFSBOOT).bin
-
-# XXXARM: I don't know why we have to say usr/include again
-AS_CPPFLAGS=  -P -D_ASM $(CPPINCS) -I.
 
 MACHDIR = ../common
 GENASSYM_CF = $(MACHDIR)/genassym.cf

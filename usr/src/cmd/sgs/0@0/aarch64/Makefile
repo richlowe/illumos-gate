@@ -28,8 +28,6 @@ CRTSRCS =	$(SRC)/lib/crt/aarch64
 
 include		$(SRC)/cmd/sgs/0@0/Makefile.com
 
-ASFLAGS +=	-D__aarch64__ $(aarch64_ASFLAGS)
-
 .KEEP_STATE:
 
 install:	all $(ROOTLIBDIR)/$(DYNLIB)

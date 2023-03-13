@@ -34,11 +34,14 @@ CFLAGS =	$(NATIVE_CFLAGS)
 CC =		$(NATIVECC)
 LDCHECKS =
 
+# XXXARM: native, no sysroot
+SYSROOT=
+
 CPPFLAGS += -I$(ELFCAP)
 
 all: $(PROG)
 
-install:
+install: $(PROG)
 
 check: $(PROG)
 	./$(PROG)
