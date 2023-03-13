@@ -26,23 +26,15 @@
 include		$(SRC)/Makefile.master
 
 ROOTDIR=	$(ROOT)/usr/lib/ld
-ROOTDIR64=	$(ROOT)/usr/lib/ld/$(MACH64)
 
-DIRS=		$(ROOTDIR) $(ROOTDIR64)
+DIRS=		$(ROOTDIR)
 FILES=
 
-install: $(DIRS) $(FILES) map.link
+install: $(DIRS) $(FILES)
 
 $(FILES):=	FILEMODE=444
 
 $(DIRS):=	DIRMODE=755
-
-map.link:
-	$(RM) $(ROOTDIR64)/map.default \
-		$(ROOTDIR64)/map.above4G $(ROOTDIR64)/map.below4G
-	$(SYMLINK) ../map.default $(ROOTDIR64)/map.default
-	$(SYMLINK) ../map.above4G $(ROOTDIR64)/map.above4G
-	$(SYMLINK) ../map.below4G $(ROOTDIR64)/map.below4G
 
 $(DIRS):
 	$(INS.dir)
