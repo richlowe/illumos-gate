@@ -20,10 +20,9 @@
 # CDDL HEADER END
 #
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 
 TMP=${FLASH_ROOT}/tmp/SUNWcsr.ttydefs.$$
 TTYDEFS_FILE=${FLASH_ROOT}/etc/ttydefs

@@ -504,14 +504,10 @@ usr/include/sys/kiconv_utf8_gb18030.h
 usr/include/sys/kiconv_utf8_gb2312.h
 usr/include/sys/kiconv_utf8_hkscs.h
 usr/include/sys/kiconv_utf8_uhc.h
-#
-# At this time, the directory and its contents
-# are only useful on sun4u systems
-#
-etc/flash/postdeployment			i386 sparc
+etc/flash/postdeployment			i386
 #
 # This header file is shared only between the power commands and
-# ppm/srn modules # and should not be in any package
+# ppm/srn modules and should not be in any package
 #
 usr/include/sys/srn.h
 #
@@ -809,9 +805,6 @@ opt/os-tests/tests/cores/amd64/libdumper.so	i386
 # aarch64 weirdness that's easier dealt with by exceptions than by changes
 etc/brand/solaris10		aarch64
 usr/lib/brand/solaris10		aarch64
-
-#XXXARM: i386-only, but somehow escaping a bit
-etc/flash		aarch64
 
 # XXXARM: This is cross-built, and so for the wrong platform.
 opt/onbld		aarch64

@@ -28,7 +28,7 @@ SRCS= $(PROG:%=%.sh)
 
 include ../Makefile.cmd
 
-SUBDIRS= etc
+$(INTEL_BLD)SUBDIRS= flash
 
 DEFPM=   zsmon
 
@@ -47,8 +47,8 @@ PMLOG=  log
 
 ROOTETCSAF= $(ETCSAF:%=$(ETCSAFD)/%)
 ROOTETCF= $(ETCF:%=$(ROOTETC)/%)
-ROOTETCPM = $(ETCPM:%=$(ETCPMD)/%) 
-ROOTVARPM = $(PMLOG:%=$(VARPMD)/%) 
+ROOTETCPM = $(ETCPM:%=$(ETCPMD)/%)
+ROOTVARPM = $(PMLOG:%=$(VARPMD)/%)
 
 FILEMODE= 0644
 
@@ -82,7 +82,8 @@ _sactab _pmtab iu.ap ttydefs:
 $(PMLOG):
 	$(TOUCH) $@
 
-install: all $(DIRS) $(SUBDIRS) $(ROOTETCSAF) $(ROOTETCF) $(ROOTETCPM) $(ROOTVARPM)
+install: all $(DIRS) $(SUBDIRS) $(ROOTETCSAF) $(ROOTETCF) $(ROOTETCPM) \
+	$(ROOTVARPM)
 
 $(DIRS):
 	$(INS.dir)

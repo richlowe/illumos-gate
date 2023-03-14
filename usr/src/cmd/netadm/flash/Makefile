@@ -23,8 +23,6 @@
 #
 # Makefile for /etc/flash/
 #
-#
-# cmd/netadm/etc/Makefile
 
 include ../../Makefile.cmd
 
