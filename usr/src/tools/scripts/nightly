@@ -1875,39 +1875,47 @@ if [[ ($build_ok == y) && (($A_FLAG == y) || ($r_FLAG == y)) ]]; then
 		else
 			rtime_sflag="-s"
 		fi
-		check_rtime -i -m -v $rtime_sflag -o -w $elf_ddir \
-			-D object_list  -f object_list -E runtime.err \
-			-I runtime.attr.raw
-		if (( $? != 0 )); then
-			build_extras_ok=n
-		fi
 
-		# check_rtime -I output needs to be sorted in order to
-		# compare it to that from previous builds.
-		sort $elf_ddir/runtime.attr.raw > $elf_ddir/runtime.attr
-		rm $elf_ddir/runtime.attr.raw
+		if [[ $MACH != $(mach) ]]; then
+			echo "runtime checks not done during a cross-build" | \
+				tee -a $LOGFILE >> $mail_msg_file
+		else
+			check_rtime -i -m -v $rtime_sflag -o -w $elf_ddir \
+				    -D object_list  -f object_list \
+				    -E runtime.err -I runtime.attr.raw
+			if (( $? != 0 )); then
+				build_extras_ok=n
+			fi
 
-		# Report errors
-		if [[ -s $elf_ddir/runtime.err ]]; then
-			tee -a $LOGFILE < $elf_ddir/runtime.err \
-				>> $mail_msg_file
-			build_extras_ok=n
-		fi
+			# check_rtime -I output needs to be sorted in order to
+			# compare it to that from previous builds.
+			sort $elf_ddir/runtime.attr.raw > $elf_ddir/runtime.attr
+			rm $elf_ddir/runtime.attr.raw
 
-		# If there is an ELF-data directory from a previous build,
-		# then diff the attr files. These files contain information
-		# about dependencies, versioning, and runpaths. There is some
-		# overlap with the ABI checking done above, but this also
-		# flushes out non-ABI interface differences along with the
-		# other information.
-		echo "\n==== Diff ELF runtime attributes" \
-		    "(since last build) ====\n" | \
-		    tee -a $LOGFILE >> $mail_msg_file >> $mail_msg_file
+			# Report errors
+			if [[ -s $elf_ddir/runtime.err ]]; then
+				tee -a $LOGFILE < $elf_ddir/runtime.err \
+				    >> $mail_msg_file
+				build_extras_ok=n
+			fi
 
-		if [[ -f $elf_ddir.ref/runtime.attr ]]; then
-			diff $elf_ddir.ref/runtime.attr \
-				$elf_ddir/runtime.attr \
-				>> $mail_msg_file
+			# If there is an ELF-data directory from a previous
+			# build, then diff the attr files. These files contain
+			# information about dependencies, versioning, and
+			# runpaths. There is some overlap with the ABI
+			# checking done above, but this also flushes out
+			# non-ABI interface differences along with the other
+			# information.
+			echo "\n==== Diff ELF runtime attributes" \
+			     "(since last build) ====\n" | \
+				tee -a $LOGFILE >> $mail_msg_file >> \
+				    $mail_msg_file
+
+			if [[ -f $elf_ddir.ref/runtime.attr ]]; then
+				diff $elf_ddir.ref/runtime.attr \
+				     $elf_ddir/runtime.attr \
+				     >> $mail_msg_file
+			fi
 		fi
 	fi
 
