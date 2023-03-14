@@ -23,9 +23,9 @@
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 include $(SRC)/Makefile.master
 
-SUBDIRS = scripts baddof badioctl chkargs jdtrace
+SUBDIRS = scripts baddof badioctl chkargs
+$(NOT_AARCH64_BLD)SUBDIRS += jdtrace
 include ../Makefile.subdirs

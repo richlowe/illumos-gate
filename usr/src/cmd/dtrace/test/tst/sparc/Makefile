@@ -24,6 +24,45 @@
 # Use is subject to license terms.
 #
 
+CSRCS =				\
+	ustack/tst.annotated.c	\
+	ustack/tst.helper.c
+
+SSRCS =				\
+	pid/tst.br.S		\
+	pid/tst.branch.S	\
+	pid/tst.embedded.S	\
+	ustack/tst.circstack.S
+
+DSRCS =						\
+	arrays/tst.uregsarray.d			\
+	pid/err.D_PROC_ALIGN.misaligned.d	\
+	pid/tst.br.d				\
+	pid/tst.branch.d			\
+	pid/tst.embedded.d			\
+	ustack/annotated_helper.d		\
+	ustack/helper_helper.d			\
+	ustack/tst.annotated.d			\
+	ustack/tst.circstack.d			\
+	ustack/tst.helper.d
+
+TSTS =						\
+	arrays/tst.uregsarray.d			\
+	pid/err.D_PROC_ALIGN.misaligned.d	\
+	pid/tst.br.d				\
+	pid/tst.br.d.out			\
+	pid/tst.branch.d			\
+	pid/tst.embedded.d			\
+	usdt/tst.tailcall.ksh			\
+	ustack/tst.annotated.d			\
+	ustack/tst.annotated.d.out		\
+	ustack/tst.circstack.d			\
+	ustack/tst.helper.d			\
+	ustack/tst.helper.d.out			\
+	ustack/tst.trapstat.ksh
+
+EXES = pid/err.D_PROC_ALIGN.misaligned.exe
+
 include ../Makefile.com
 
 ASFLAGS += -D_ASM

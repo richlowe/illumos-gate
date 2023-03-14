@@ -55,5 +55,5 @@ foo(int a, int b)
 int
 main(int argc, char **argv)
 {
-	return (foo(argc, (int)argv) == 0);
+	return (foo(argc, (int)(intptr_t)argv) == 0);
 }

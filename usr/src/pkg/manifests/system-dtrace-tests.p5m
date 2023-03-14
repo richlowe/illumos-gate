@@ -30,13 +30,12 @@ set name=pkg.summary value="DTrace Test Suite"
 set name=pkg.description value="DTrace Test Suite Internal Distribution"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-# XXXARM
-set name=variant.arch value=i386 value=sparc
+set name=variant.arch value=$(ARCH)
 dir  path=opt/SUNWdtrt group=sys
 file path=opt/SUNWdtrt/README mode=0444
 dir  path=opt/SUNWdtrt/bin
-dir  path=opt/SUNWdtrt/bin/$(ARCH32)
-file path=opt/SUNWdtrt/bin/$(ARCH32)/chkargs mode=0555
+$(MULTILIB_ONLY)dir path=opt/SUNWdtrt/bin/$(ARCH32)
+$(MULTILIB_ONLY)file path=opt/SUNWdtrt/bin/$(ARCH32)/chkargs mode=0555
 dir  path=opt/SUNWdtrt/bin/$(ARCH64)
 file path=opt/SUNWdtrt/bin/$(ARCH64)/chkargs mode=0555
 file path=opt/SUNWdtrt/bin/baddof mode=0555
@@ -45,15 +44,16 @@ file path=opt/SUNWdtrt/bin/chkargs mode=0555
 file path=opt/SUNWdtrt/bin/dstyle mode=0555
 file path=opt/SUNWdtrt/bin/dtest mode=0555
 file path=opt/SUNWdtrt/bin/dtfailures mode=0555
-file path=opt/SUNWdtrt/bin/exception.lst mode=0444
-file path=opt/SUNWdtrt/bin/jdtrace mode=0555
-dir  path=opt/SUNWdtrt/lib
-dir  path=opt/SUNWdtrt/lib/java
-file path=opt/SUNWdtrt/lib/java/jdtrace.jar
+$(not_aarch64)file path=opt/SUNWdtrt/bin/exception.lst mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/bin/jdtrace mode=0555
+$(not_aarch64)dir path=opt/SUNWdtrt/lib
+$(not_aarch64)dir path=opt/SUNWdtrt/lib/java
+$(not_aarch64)file path=opt/SUNWdtrt/lib/java/jdtrace.jar
 dir  path=opt/SUNWdtrt/tst
-dir  path=opt/SUNWdtrt/tst/$(ARCH)
-dir  path=opt/SUNWdtrt/tst/$(ARCH)/arrays
-file path=opt/SUNWdtrt/tst/$(ARCH)/arrays/tst.uregsarray.d mode=0444
+$(not_aarch64)dir path=opt/SUNWdtrt/tst/$(ARCH)
+$(not_aarch64)dir path=opt/SUNWdtrt/tst/$(ARCH)/arrays
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/arrays/tst.uregsarray.d \
+    mode=0444
 $(i386_ONLY)dir path=opt/SUNWdtrt/tst/$(ARCH)/error
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/error/tst.DTRACEFLT_DIVZERO.d \
     mode=0444
@@ -64,32 +64,38 @@ $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/funcs/tst.badcopyinstr.d \
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/funcs/tst.badcopyout.d mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/funcs/tst.badcopyoutstr.d \
     mode=0444
-dir  path=opt/SUNWdtrt/tst/$(ARCH)/pid
+$(not_aarch64)dir path=opt/SUNWdtrt/tst/$(ARCH)/pid
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/err.uregswrite1.d mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/err.uregswrite1.exe mode=0555
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/err.uregswrite2.d mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/err.uregswrite2.exe mode=0555
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.badinstr.d mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.badinstr.exe mode=0555
-file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.branch.d mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.branch.exe mode=0555
-file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.embedded.d mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.embedded.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.branch.d mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.branch.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.embedded.d mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.embedded.exe mode=0555
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.ret.d mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.ret.exe mode=0555
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.retlist.exe mode=0555
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.retlist.ksh mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.uregswrite.d mode=0444
 $(i386_ONLY)file path=opt/SUNWdtrt/tst/$(ARCH)/pid/tst.uregswrite.exe mode=0555
-dir  path=opt/SUNWdtrt/tst/$(ARCH)/ustack
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.annotated.d mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.annotated.d.out mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.annotated.exe mode=0555
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.circstack.d mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.circstack.exe mode=0555
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.helper.d mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.helper.d.out mode=0444
-file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.helper.exe mode=0555
+$(not_aarch64)dir path=opt/SUNWdtrt/tst/$(ARCH)/ustack
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.annotated.d \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.annotated.d.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.annotated.exe \
+    mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.circstack.d \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.circstack.exe \
+    mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.helper.d mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.helper.d.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/$(ARCH)/ustack/tst.helper.exe mode=0555
 dir  path=opt/SUNWdtrt/tst/common
 dir  path=opt/SUNWdtrt/tst/common/aggs
 file path=opt/SUNWdtrt/tst/common/aggs/err.D_AGG_FUNC.bad.d mode=0444
@@ -848,38 +854,62 @@ file path=opt/SUNWdtrt/tst/common/ip/tst.localtcpstate.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/ip/tst.localtcpstate.ksh.out mode=0444
 file path=opt/SUNWdtrt/tst/common/ip/tst.remotetcpstate.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/ip/tst.remotetcpstate.ksh.out mode=0444
-dir  path=opt/SUNWdtrt/tst/common/java_api
-file path=opt/SUNWdtrt/tst/common/java_api/test.jar
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.exe mode=0555
-file path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.GetAggregate.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.exe mode=0555
-file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeDescription.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeDescription.ksh.out \
+$(not_aarch64)dir path=opt/SUNWdtrt/tst/common/java_api
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/test.jar
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh.out \
     mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d mode=0444
-file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d.out mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh.out \
+    mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.exe mode=0555
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh.out mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.GetAggregate.ksh \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh \
+    mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh.out mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh.out mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.exe \
+    mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh.out \
+    mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeDescription.ksh mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeDescription.ksh.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh \
+    mode=0444
+$(not_aarch64)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh.out mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh.out \
+    mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d mode=0444
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d.out \
+    mode=0444
 dir  path=opt/SUNWdtrt/tst/common/json
 file path=opt/SUNWdtrt/tst/common/json/tst.general.d mode=0444
 file path=opt/SUNWdtrt/tst/common/json/tst.general.d.out mode=0444
@@ -887,7 +917,7 @@ file path=opt/SUNWdtrt/tst/common/json/tst.strsize.d mode=0444
 file path=opt/SUNWdtrt/tst/common/json/tst.strsize.d.out mode=0444
 file path=opt/SUNWdtrt/tst/common/json/tst.usdt.d mode=0444
 file path=opt/SUNWdtrt/tst/common/json/tst.usdt.d.out mode=0444
-file path=opt/SUNWdtrt/tst/common/json/tst.usdt.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/json/tst.usdt.exe mode=0555
 dir  path=opt/SUNWdtrt/tst/common/lexer
 file path=opt/SUNWdtrt/tst/common/lexer/err.D_CHR_NL.char.d mode=0444
 file path=opt/SUNWdtrt/tst/common/lexer/err.D_CHR_NULL.char.d mode=0444
@@ -1970,9 +2000,9 @@ file path=opt/SUNWdtrt/tst/common/union/tst.UnionInside.d mode=0444
 dir  path=opt/SUNWdtrt/tst/common/usdt
 file path=opt/SUNWdtrt/tst/common/usdt/tst.andpid.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.argmap.d mode=0444
-file path=opt/SUNWdtrt/tst/common/usdt/tst.argmap.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/usdt/tst.argmap.exe mode=0555
 file path=opt/SUNWdtrt/tst/common/usdt/tst.args.d mode=0444
-file path=opt/SUNWdtrt/tst/common/usdt/tst.args.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/usdt/tst.args.exe mode=0555
 file path=opt/SUNWdtrt/tst/common/usdt/tst.badguess.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.corruptenv.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.deadstub.ksh mode=0444
@@ -1990,13 +2020,13 @@ file path=opt/SUNWdtrt/tst/common/usdt/tst.entryreturn.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.entryreturn.ksh.out mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.fork.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.fork.ksh.out mode=0444
-file path=opt/SUNWdtrt/tst/common/usdt/tst.forker.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/usdt/tst.forker.exe mode=0555
 file path=opt/SUNWdtrt/tst/common/usdt/tst.forker.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.guess32.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.guess64.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.header.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.include.ksh mode=0444
-file path=opt/SUNWdtrt/tst/common/usdt/tst.lazyprobe.exe mode=0555
+$(not_aarch64)file path=opt/SUNWdtrt/tst/common/usdt/tst.lazyprobe.exe mode=0555
 file path=opt/SUNWdtrt/tst/common/usdt/tst.lazyprobe1.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.lazyprobe2.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/usdt/tst.linkpriv.ksh mode=0444
@@ -2049,5 +2079,6 @@ legacy pkg=SUNWdtrt category=internal \
 license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 depend type=require fmri=diagnostic/cpu-counters
-depend type=require fmri=runtime/java
-depend type=require fmri=runtime/java/runtime64
+#XXXARM: No java -- and shouldn't pkgdepend deal with these?
+$(not_aarch64)depend type=require fmri=runtime/java
+$(not_aarch64)depend type=require fmri=runtime/java/runtime64

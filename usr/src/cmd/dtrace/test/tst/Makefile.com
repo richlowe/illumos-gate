@@ -35,17 +35,6 @@ SUBDIR :sh= basename `pwd`
 TSTDIR = $(ROOTTST)/$(SUBDIR)
 DSTYLE = $(ROOTOPTPKG)/bin/dstyle
 
-CSRCS :sh= find . -name SCCS -prune -o -name *.c -print | cut -b3-
-SSRCS :sh= find . -name SCCS -prune -o -name *.S -print | cut -b3-
-DSRCS :sh= find . -name SCCS -prune -o -name *.d -print | cut -b3-
-
-TSTS :sh= find . -name tst.*.d -o -name err.*.d -o \
-	-name tst.*.d.out -o -name err.*.d.out -o -name tst.*.ksh \
-	-o -name err.*.ksh -o -name tst.*.ksh.out -o -name drp.*.d \
-	-o -name get.*.pl
-
-EXES :sh= find . -name SCCS -prune -o \( -name *.exe -o -name \*.pl \) -print \
-    | cut -b3-
 EXES += $(CSRCS:%.c=%.exe)
 EXES += $(SSRCS:%.S=%.exe)
 
@@ -112,7 +101,11 @@ $(TSTDIR)/%: %
 scripts: FRC
 	@cd ../cmd/scripts; pwd; $(MAKE) install
 
-dstyle: FRC
-	@if [ -n "$(DSRCS)" ]; then $(DSTYLE) $(DSRCS); fi
+DCHECKS = $(DSRCS:%.d=%.dcheck)
+
+%.dcheck: %.d
+	@$(ECHO) "checking $<"; $(DSTYLE) $<
+
+dstyle: $(DCHECKS)
 
 FRC:

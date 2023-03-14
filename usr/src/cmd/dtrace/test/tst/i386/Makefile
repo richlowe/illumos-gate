@@ -24,13 +24,69 @@
 # Use is subject to license terms.
 #
 
+CSRCS =				\
+	pid/err.uregswrite1.c	\
+	pid/err.uregswrite2.c	\
+	pid/tst.uregswrite.c	\
+	ustack/tst.annotated.c	\
+	ustack/tst.helper.c
+
+SSRCS =				\
+	pid/tst.badinstr.S	\
+	pid/tst.branch.S	\
+	pid/tst.embedded.S	\
+	pid/tst.ret.S		\
+	pid/tst.retlist.S	\
+	ustack/tst.circstack.S
+
+DSRCS =					\
+	arrays/tst.uregsarray.d		\
+	error/tst.DTRACEFLT_DIVZERO.d	\
+	funcs/tst.badcopyin.d		\
+	funcs/tst.badcopyinstr.d	\
+	funcs/tst.badcopyout.d		\
+	funcs/tst.badcopyoutstr.d	\
+	pid/err.uregswrite1.d		\
+	pid/err.uregswrite2.d		\
+	pid/tst.badinstr.d		\
+	pid/tst.branch.d		\
+	pid/tst.embedded.d		\
+	pid/tst.ret.d			\
+	pid/tst.uregswrite.d		\
+	ustack/annotated_helper.d	\
+	ustack/helper_helper.d		\
+	ustack/tst.annotated.d		\
+	ustack/tst.circstack.d		\
+	ustack/tst.helper.d
+
+TSTS =					\
+	arrays/tst.uregsarray.d		\
+	error/tst.DTRACEFLT_DIVZERO.d	\
+	funcs/tst.badcopyin.d		\
+	funcs/tst.badcopyinstr.d	\
+	funcs/tst.badcopyout.d		\
+	funcs/tst.badcopyoutstr.d	\
+	pid/err.uregswrite1.d		\
+	pid/err.uregswrite2.d		\
+	pid/tst.badinstr.d		\
+	pid/tst.branch.d		\
+	pid/tst.embedded.d		\
+	pid/tst.ret.d			\
+	pid/tst.retlist.ksh		\
+	pid/tst.uregswrite.d		\
+	ustack/tst.annotated.d		\
+	ustack/tst.annotated.d.out	\
+	ustack/tst.circstack.d		\
+	ustack/tst.helper.d		\
+	ustack/tst.helper.d.out
+
 include ../Makefile.com
 
 ASFLAGS += -D_ASM $(CPPFLAGS)
 CLOBBER_FILES += helper_helper.o annotated_helper.o
 
 # For the helper test we require an executable data section.
-ustack/tst.helper.exe := MAPFILE.NED=  
+ustack/tst.helper.exe := MAPFILE.NED=
 
 ustack/tst.helper.exe: ustack/tst.helper.o ustack/helper_helper.o
 	$(LINK.c) -o ustack/tst.helper.exe \

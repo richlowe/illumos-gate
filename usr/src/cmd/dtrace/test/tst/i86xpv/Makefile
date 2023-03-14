@@ -23,7 +23,12 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
+
+TSTS =				\
+	xdt/tst.basic.ksh	\
+	xdt/tst.hvmenable.ksh	\
+	xdt/tst.memenable.ksh	\
+	xdt/tst.schedargs.ksh	\
+	xdt/tst.schedenable.ksh
 
 include ../Makefile.com

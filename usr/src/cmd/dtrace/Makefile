@@ -28,11 +28,8 @@ PROG= dtrace
 
 include ../Makefile.cmd
 
-SUBDIRS=	$(MACH) demo
+SUBDIRS=	$(MACH) demo test
 $(BUILD64)SUBDIRS += $(MACH64)
-
-# XXXARM: Tests cannot currently be cross-built
-$(NOT_AARCH64_BLD)SUBDIRS += test
 
 all	:=	TARGET = all
 install	:=	TARGET = install

@@ -23,14 +23,15 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 include $(SRC)/Makefile.master
 
-SUBDIRS= common $(MACH:i386=i386 i86xpv)
+SUBDIRS= common
+$(NOT_AARCH64_BLD)SUBDIRS += $(MACH)
+$(INTEL_BLD)SUBDIRS += i86xpv
 include ../Makefile.subdirs
 
-dstyle := TARGET += dstyle
+dstyle := TARGET = dstyle
 
 check: FRC
 	@$(ECHO) "checking dstyle"
