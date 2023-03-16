@@ -39,8 +39,5 @@ install: all $(ROOT_PSM_NFSBOOT)
 include $(BOOTSRCDIR)/Makefile.rules
 include ../Makefile.targ
 
-# XXXARM: This got lost somewhere
-ASFLAGS += -xarch=generic64
-
 $(ROOT_PSM_NFSBOOT): $(NFSBOOT_BIN) $(ROOT_PSM_DIR)
 	$(INS.file) $(NFSBOOT_BIN)

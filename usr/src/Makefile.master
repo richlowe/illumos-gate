@@ -412,9 +412,7 @@ CCCREGSYM=		-Qoption cg -Qiselect-regsym=0
 # using this workaround is not applicable for x86.
 #
 CCSTATICSYM=		-Wc,-Qassembler-ounrefsym=0
-#
-# generate 32-bit addresses in the v9 kernel. Saves memory.
-CCABS32=		-Wc,-xcode=abs32
+
 #
 # generate v9 code which tolerates callers using the v7 ABI, for the sake of
 # system calls.
@@ -516,8 +514,8 @@ CCUNBOUND	= $($(MACH)_CCUNBOUND)
 sparc_XARCH=	-m32
 sparcv9_XARCH=	-m64
 i386_XARCH=	-m32
-amd64_XARCH=	-m64 -Ui386 -U__i386
-aarch64_XARCH=	-m64
+amd64_XARCH=	-m64 -Ui386 -U__i386 -_gcc=-mtune=opteron
+aarch64_XARCH=
 
 #
 # These flags define what we need to be 'standalone' i.e. -not- part
@@ -532,7 +530,8 @@ sparcv9_STAND_FLAGS=	-_gcc=-ffreestanding
 # additions to SSE (SSE2, AVX ,etc.)
 NO_SIMD=		-_gcc=-mno-mmx -_gcc=-mno-sse
 i386_STAND_FLAGS=	-_gcc=-ffreestanding $(NO_SIMD)
-amd64_STAND_FLAGS=	-xmodel=kernel $(NO_SIMD)
+amd64_STAND_FLAGS=	-_gcc=-ffreestanding -_gcc=-mno-red-zone \
+	-_gcc=-mcmodel=kernel
 aarch64_STAND_FLAGS=	-_gcc=-ffreestanding -_gcc=-mgeneral-regs-only \
 	-_gcc=-mstrict-align
 
@@ -544,7 +543,7 @@ aarch64_STAND_FLAGS=	-_gcc=-ffreestanding -_gcc=-mgeneral-regs-only \
 # gap to within 4G of VA, and use a medium model.
 aarch64_STAND_FLAGS += -_gcc=-mcmodel=large
 
-SAVEARGS=		-Wu,-save_args
+SAVEARGS=		-_gcc=-msave-args
 amd64_STAND_FLAGS	+= $(SAVEARGS)
 
 STAND_FLAGS_32 = $($(MACH)_STAND_FLAGS)
@@ -599,7 +598,8 @@ sparc_CFLAGS=	$(sparc_XARCH) $(CCSTATICSYM)
 sparcv9_CFLAGS=	$(sparcv9_XARCH) -dalign $(CCVERBOSE) $(V9ABIWARN) $(CCREGSYM) \
 		$(CCSTATICSYM)
 i386_CFLAGS=	$(i386_XARCH)
-amd64_CFLAGS=	$(amd64_XARCH) -m64
+amd64_CFLAGS=	$(amd64_XARCH)
+
 # XXXARM: Additional options here things that we specify outside the defaults
 # because we hope to switch the system so the defaults are valid:
 #
@@ -1042,8 +1042,8 @@ CW_LINKER=		--linker $(LD)
 # Specify platform compiler versions for languages
 # that we use (currently only c and c++).
 #
-CW=			$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw.$(MACH)
-NATIVE_CW=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw.$(NATIVE_MACH)
+CW=			$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw
+NATIVE_CW=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw
 
 BUILD_CC=		$(CW) $(CW_LINKER) $(CW_CC_COMPILERS) --
 NATIVEBUILD_CC=		$(NATIVE_CW) $(CW_LINKER) $(NATIVE_CW_CC_COMPILERS) --

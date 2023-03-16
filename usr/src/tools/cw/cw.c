@@ -24,24 +24,24 @@
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  *
- * Copyright 2018 Richard Lowe.
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2023 Richard Lowe.
  */
 
 /*
- * Wrapper for the GNU C compiler to make it accept the Sun C compiler
- * arguments where possible.
+ * Wrap the C compiler to run multiple versions for code quality and compiler
+ * migration reasons.
  *
- * Since the translation is inexact, this is something of a work-in-progress.
- *
+ * Historically also translate flags for the GNU C compiler to make it accept
+ * the Sun C compiler arguments where possible (this is being phased out.  Do
+ * not add more)
  */
 
 /*
- * If you modify this file, you must increment CW_VERSION.
- * This is a semver, * incompatible changes should bump the major, anything
- * else the minor.
+ * If you modify this file, you must increment CW_VERSION.  This is a semver,
+ * incompatible changes should bump the major, anything else the minor.
  */
-#define	CW_VERSION	"8.1"
+#define	CW_VERSION	"9.1"
 
 /*
  * -#		Verbose mode
@@ -49,7 +49,6 @@
  * -A<name[(tokens)]>	Preprocessor predicate assertion
  * -C		Prevent preprocessor from removing comments
  * -c		Compile only - produce .o files, suppress linking
- * -cg92	Alias for -xtarget=ss1000
  * -D<name[=token]>	Associate name with token as if by #define
  * -d[y|n]	dynamic [-dy] or static [-dn] option to linker
  * -E		Compile source through preprocessor only, output to stdout
@@ -105,8 +104,6 @@
  * -xbuiltin[=<b>] When profitable inline, or substitute intrinisic functions
  *		for system functions, b={%all,%none}
  * -xCC		Accept C++ style comments
- * -xchip=<c>	Specify the target processor for use by the optimizer
- * -xcode=<c>	Generate different code for forming addresses
  * -xcrossfile[=<n>] Enable optimization and inlining across source files,
  *		n={0|1}
  * -xe		Perform only syntax/semantic checking, no code generation
@@ -127,7 +124,6 @@
  * -xP		Print prototypes for function definitions
  * -xprofile=<p> Collect data for a profile or use a profile to optimize
  *		<p>={{collect,use}[:<path>],tcov}
- * -xregs=<r>	Control register allocation
  * -xs		Allow debugging without object (.o) files
  * -xsb		Compile for use with the WorkShop source browser
  * -xsbfast	Generate only WorkShop source browser info, no compilation
@@ -135,7 +131,6 @@
  *		precision
  * -xspace	Do not do optimizations that increase code size
  * -xstrconst	Place string literals into read-only data segment
- * -xtarget=<t>	Specify target system for optimization
  * -xtemp=<dir>	Set directory for temporary files to <dir>
  * -xtime	Report the execution time for each compilation phase
  * -xunroll=n	Enable unrolling loops n times where possible
@@ -156,7 +151,6 @@
  * -B<[static|dynamic]>		pass-thru (syntax error for anything else)
  * -C				pass-thru
  * -c				pass-thru
- * -cg92			-m32 -mcpu=v8 -mtune=supersparc (SPARC only)
  * -D<name[=token]>		pass-thru
  * -E				pass-thru
  * -erroff=E_EMPTY_TRANSLATION_UNIT ignore
@@ -201,8 +195,6 @@
  * -Wp,<arg>			pass-thru except -xc99=<a>
  * -Wl,<arg>			pass-thru
  * -W{m,0,2,h,i,u>		error/ignore
- * -xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
- * -Wu,-save_args		-msave-args
  * -w				pass-thru
  * -Xa				-std=iso9899:199409 or -ansi
  * -Xt				error
@@ -210,8 +202,6 @@
  * -xarch=<a>			table
  * -xbuiltin[=<b>]		-fbuiltin (-fno-builtin otherwise)
  * -xCC				ignore
- * -xchip=<c>			table
- * -xcode=<c>			table
  * -xcrossfile[=<n>]		ignore
  * -xe				error
  * -xF				error
@@ -226,14 +216,12 @@
  * -xO<n>			-O<n>
  * -xP				error
  * -xprofile=<p>		error
- * -xregs=<r>			table
  * -xs				error
  * -xsb				error
  * -xsbfast			error
  * -xsfpconst			error
  * -xspace			ignore (-not -Os)
  * -xstrconst			ignore
- * -xtarget=<t>			table
  * -xtemp=<dir>			error
  * -xtime			error
  * -xtransition			-Wtransition
@@ -300,7 +288,7 @@ typedef struct {
 typedef struct cw_ictx {
 	struct cw_ictx	*i_next;
 	cw_compiler_t	*i_compiler;
-	char		*i_linker;
+	const char	*i_linker;
 	struct aelist	*i_ae;
 	uint32_t	i_flags;
 	int		i_oldargc;
@@ -320,95 +308,6 @@ typedef struct cw_ictx {
 #define	SS12		0x200	/* Studio 12 */
 
 #define	TRANS_ENTRY	5
-/*
- * Translation table definition for the -xarch= flag. The "x_arg"
- * value is translated into the appropriate gcc flags according
- * to the values in x_trans[n]. The x_flags indicates what compiler
- * is being used and what flags have been set via the use of
- * "x_arg".
- */
-typedef struct xarch_table {
-	char	*x_arg;
-	int	x_flags;
-	char	*x_trans[TRANS_ENTRY];
-} xarch_table_t;
-
-/*
- * The translation table for the -xarch= flag used in the Studio compilers.
- */
-static const xarch_table_t xtbl[] = {
-#if defined(CW_TARGET_i386)
-	{ "generic",	SS11, {NULL} },
-	{ "generic64",	(SS11|M64), { "-m64", "-mtune=opteron" } },
-	{ "amd64",	(SS11|M64), { "-m64", "-mtune=opteron" } },
-	{ "386",	SS11,	{ "-march=i386" } },
-	{ "pentium_pro", SS11,	{ "-march=pentiumpro" } },
-	{ "sse",	SS11, { "-msse", "-mfpmath=sse" } },
-	{ "sse2",	SS11, { "-msse2", "-mfpmath=sse" } },
-#elif defined(CW_TARGET_sparc)
-	{ "generic",	(SS11|M32), { "-m32", "-mcpu=v8" } },
-	{ "generic64",	(SS11|M64), { "-m64", "-mcpu=v9" } },
-	{ "v8",		(SS11|M32), { "-m32", "-mcpu=v8", "-mno-v8plus" } },
-	{ "v8plus",	(SS11|M32), { "-m32", "-mcpu=v9", "-mv8plus" } },
-	{ "v8plusa",	(SS11|M32), { "-m32", "-mcpu=ultrasparc", "-mv8plus",
-			"-mvis" } },
-	{ "v8plusb",	(SS11|M32), { "-m32", "-mcpu=ultrasparc3", "-mv8plus",
-			"-mvis" } },
-	{ "v9",		(SS11|M64), { "-m64", "-mcpu=v9" } },
-	{ "v9a",	(SS11|M64), { "-m64", "-mcpu=ultrasparc", "-mvis" } },
-	{ "v9b",	(SS11|M64), { "-m64", "-mcpu=ultrasparc3", "-mvis" } },
-	{ "sparc",	SS12, { "-mcpu=v9", "-mv8plus" } },
-	{ "sparcvis",	SS12, { "-mcpu=ultrasparc", "-mvis" } },
-	{ "sparcvis2",	SS12, { "-mcpu=ultrasparc3", "-mvis" } }
-#elif defined(CW_TARGET_aarch64)
-	/* { "generic",	M32, { "-march=armv8-a", "-mabi=ilp32" } }, */
-	{ "generic64",	M64, { "-march=armv8-a", "-mabi=lp64" } },
-#endif
-};
-
-static int xtbl_size = sizeof (xtbl) / sizeof (xarch_table_t);
-
-static const char *xchip_tbl[] = {
-#if defined(CW_TARGET_i386)
-	"386",		"-mtune=i386", NULL,
-	"486",		"-mtune=i486", NULL,
-	"pentium",	"-mtune=pentium", NULL,
-	"pentium_pro",  "-mtune=pentiumpro", NULL,
-#elif defined(CW_TARGET_sparc)
-	"super",	"-mtune=supersparc", NULL,
-	"ultra",	"-mtune=ultrasparc", NULL,
-	"ultra3",	"-mtune=ultrasparc3", NULL,
-#endif
-	NULL,		NULL
-};
-
-static const char *xcode_tbl[] = {
-#if defined(CW_TARGET_sparc)
-	"abs32",	"-fno-pic", "-mcmodel=medlow", NULL,
-	"abs44",	"-fno-pic", "-mcmodel=medmid", NULL,
-	"abs64",	"-fno-pic", "-mcmodel=medany", NULL,
-	"pic13",	"-fpic", NULL,
-	"pic32",	"-fPIC", NULL,
-#endif
-	NULL,		NULL
-};
-
-static const char *xtarget_tbl[] = {
-#if defined(CW_TARGET_i386)
-	"pentium_pro",	"-march=pentiumpro", NULL,
-#endif	/* i386 */
-	NULL,		NULL
-};
-
-static const char *xregs_tbl[] = {
-#if defined(CW_TARGET_sparc)
-	"appl",		"-mapp-regs", NULL,
-	"no%appl",	"-mno-app-regs", NULL,
-	"float",	"-mfpu", NULL,
-	"no%float",	"-mno-fpu", NULL,
-#endif	/* sparc */
-	NULL,		NULL
-};
 
 static void
 nomem(void)
@@ -507,53 +406,6 @@ usage(void)
 	exit(2);
 }
 
-static int
-xlate_xtb(struct aelist *h, const char *xarg)
-{
-	int	i, j;
-
-	for (i = 0; i < xtbl_size; i++) {
-		if (strcmp(xtbl[i].x_arg, xarg) == 0)
-			break;
-	}
-
-	/*
-	 * At the end of the table and so no matching "arg" entry
-	 * found and so this must be a bad -xarch= flag.
-	 */
-	if (i == xtbl_size)
-		error(xarg);
-
-	for (j = 0; j < TRANS_ENTRY; j++) {
-		if (xtbl[i].x_trans[j] != NULL)
-			newae(h, xtbl[i].x_trans[j]);
-		else
-			break;
-	}
-	return (xtbl[i].x_flags);
-
-}
-
-static void
-xlate(struct aelist *h, const char *xarg, const char **table)
-{
-	while (*table != NULL && strcmp(xarg, *table) != 0) {
-		while (*table != NULL)
-			table++;
-		table++;
-	}
-
-	if (*table == NULL)
-		error(xarg);
-
-	table++;
-
-	while (*table != NULL) {
-		newae(h, *table);
-		table++;
-	}
-}
-
 /*
  * The compiler wants the output file to end in appropriate extension.  If
  * we're generating a name from whole cloth (path == NULL), we assume that
@@ -635,7 +487,6 @@ do_gcc(cw_ictx_t *ctx)
 	int nolibc = 0;
 	int in_output = 0, seen_o = 0, c_files = 0;
 	cw_op_t op = CW_O_LINK;
-	char *model = NULL;
 	char *nameflag;
 	int mflag = 0;
 
@@ -651,17 +502,6 @@ do_gcc(cw_ictx_t *ctx)
 	newae(ctx->i_ae, "-fno-asm");
 	newae(ctx->i_ae, "-fdiagnostics-show-option");
 	newae(ctx->i_ae, "-nodefaultlibs");
-
-#if defined(CW_TARGET_sparc)
-	/*
-	 * The SPARC ldd and std instructions require 8-byte alignment of
-	 * their address operand.  gcc correctly uses them only when the
-	 * ABI requires 8-byte alignment; unfortunately we have a number of
-	 * pieces of buggy code that doesn't conform to the ABI.  This
-	 * flag makes gcc work more like Studio with -xmemalign=4.
-	 */
-	newae(ctx->i_ae, "-mno-integer-ldd-std");
-#endif
 
 	/*
 	 * This is needed because 'u' is defined
@@ -735,13 +575,6 @@ do_gcc(cw_ictx_t *ctx)
 				nolibc = 1;
 				continue;
 			}
-#if defined(CW_TARGET_sparc)
-			if (strcmp(arg, "-cg92") == 0) {
-				mflag |= xlate_xtb(ctx->i_ae, "v8");
-				xlate(ctx->i_ae, "super", xchip_tbl);
-				continue;
-			}
-#endif	/* sparc */
 		}
 
 		switch ((c = arg[1])) {
@@ -872,22 +705,13 @@ do_gcc(cw_ictx_t *ctx)
 				break;
 			}
 			if (strcmp(arg, "-m64") == 0) {
-#if !defined(CW_TARGET_aarch64)
 				newae(ctx->i_ae, "-m64");
-#endif
-#if defined(CW_TARGET_i386)
-				newae(ctx->i_ae, "-mtune=opteron");
-#endif
 				mflag |= M64;
 				break;
 			}
 			if (strcmp(arg, "-m32") == 0) {
-#if defined(CW_TARGET_aarch64)
-				error(arg);
-#else
 				newae(ctx->i_ae, "-m32");
 				mflag |= M32;
-#endif
 				break;
 			}
 			error(arg);
@@ -980,10 +804,6 @@ do_gcc(cw_ictx_t *ctx)
 				 */
 				break;
 			}
-			if (strncmp(arg, "-Wc,-xcode=", 11) == 0) {
-				xlate(ctx->i_ae, arg + 11, xcode_tbl);
-				break;
-			}
 			if (strncmp(arg, "-Wc,-Qiselect", 13) == 0) {
 				/*
 				 * Prevents insertion of register symbols.
@@ -998,12 +818,6 @@ do_gcc(cw_ictx_t *ctx)
 				 */
 				break;
 			}
-#if defined(CW_TARGET_i386)
-			if (strcmp(arg, "-Wu,-save_args") == 0) {
-				newae(ctx->i_ae, "-msave-args");
-				break;
-			}
-#endif	/* i386 */
 			error(arg);
 			break;
 		case 'X':
@@ -1022,10 +836,6 @@ do_gcc(cw_ictx_t *ctx)
 				error(arg);
 			switch (arg[2]) {
 			case 'a':
-				if (strncmp(arg, "-xarch=", 7) == 0) {
-					mflag |= xlate_xtb(ctx->i_ae, arg + 7);
-					break;
-				}
 				error(arg);
 				break;
 			case 'b':
@@ -1051,14 +861,7 @@ do_gcc(cw_ictx_t *ctx)
 					newae(ctx->i_ae, "-std=gnu89");
 					break;
 				}
-				if (strncmp(arg, "-xchip=", 7) == 0) {
-					xlate(ctx->i_ae, arg + 7, xchip_tbl);
-					break;
-				}
-				if (strncmp(arg, "-xcode=", 7) == 0) {
-					xlate(ctx->i_ae, arg + 7, xcode_tbl);
-					break;
-				}
+
 				if (strncmp(arg, "-xcrossfile", 11) == 0)
 					break;
 				error(arg);
@@ -1083,18 +886,9 @@ do_gcc(cw_ictx_t *ctx)
 					break;
 				error(arg);
 				break;
-#if defined(CW_TARGET_i386)
 			case 'm':
-				if (strcmp(arg, "-xmodel=kernel") == 0) {
-					newae(ctx->i_ae, "-ffreestanding");
-					newae(ctx->i_ae, "-mno-red-zone");
-					model = "-mcmodel=kernel";
-					nolibc = 1;
-					break;
-				}
 				error(arg);
 				break;
-#endif	/* i386 */
 			case 'O':
 				if (strncmp(arg, "-xO", 3) == 0) {
 					size_t len = strlen(arg);
@@ -1128,13 +922,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'r':
-				if (strncmp(arg, "-xregs=", 7) == 0) {
-					xlate(ctx->i_ae, arg + 7, xregs_tbl);
-					break;
-				}
-				error(arg);
-				break;
 			case 's':
 				if (strcmp(arg, "-xs") == 0 ||
 				    strcmp(arg, "-xspace") == 0 ||
@@ -1142,13 +929,8 @@ do_gcc(cw_ictx_t *ctx)
 					break;
 				error(arg);
 				break;
+			case 'r':
 			case 't':
-				if (strncmp(arg, "-xtarget=", 9) == 0) {
-					xlate(ctx->i_ae, arg + 9, xtarget_tbl);
-					break;
-				}
-				error(arg);
-				break;
 			case 'e':
 			case 'h':
 			case 'l':
@@ -1221,30 +1003,10 @@ do_gcc(cw_ictx_t *ctx)
 	case 0:
 		/* FALLTHROUGH */
 	case M32:
-#if defined(CW_TARGET_sparc)
-		/*
-		 * Only -m32 is defined and so put in the missing xarch
-		 * translation.
-		 */
-		newae(ctx->i_ae, "-mcpu=v8");
-		newae(ctx->i_ae, "-mno-v8plus");
-#endif
 		break;
 	case M64:
-#if defined(CW_TARGET_sparc)
-		/*
-		 * Only -m64 is defined and so put in the missing xarch
-		 * translation.
-		 */
-		newae(ctx->i_ae, "-mcpu=v9");
-#endif
 		break;
 	case SS12:
-#if defined(CW_TARGET_sparc)
-		/* no -m32/-m64 flag used - this is an error for sparc builds */
-		(void) fprintf(stderr, "No -m32/-m64 flag defined\n");
-		exit(2);
-#endif
 		break;
 	case SS11:
 		/* FALLTHROUGH */
@@ -1252,15 +1014,6 @@ do_gcc(cw_ictx_t *ctx)
 	case (SS11|M64):
 		break;
 	case (SS12|M32):
-#if defined(CW_TARGET_sparc)
-		/*
-		 * Need to add in further 32 bit options because with SS12
-		 * the xarch=sparcvis option can be applied to 32 or 64
-		 * bit, and so the translatation table (xtbl) cannot handle
-		 * that.
-		 */
-		newae(ctx->i_ae, "-mv8plus");
-#endif
 		break;
 	case (SS12|M64):
 		break;
@@ -1276,9 +1029,6 @@ do_gcc(cw_ictx_t *ctx)
 		else if (op == CW_O_LINK && c_files == 0)
 			exit(0);
 	}
-
-	if (model != NULL)
-		newae(ctx->i_ae, model);
 	if (!nolibc)
 		newae(ctx->i_ae, "-lc");
 	if (!seen_o && (ctx->i_flags & CW_F_SHADOW)) {

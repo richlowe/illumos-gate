@@ -85,7 +85,7 @@ XARCH		= $(XARCH_$(TARGET_ARCH))
 ASOPT_sparc	= -xarch=$(XARCH) $(AS_PICFLAGS)
 ASOPT_sparcv9	= -xarch=$(XARCH) $(AS_PICFLAGS)
 ASOPT_i386	=
-ASOPT_amd64	= -xarch=$(XARCH) $(AS_PICFLAGS)
+ASOPT_amd64	= -m64 -_gcc=-mtune=opteron $(AS_PICFLAGS)
 ASOPT		= $(ASOPT_$(TARGET_ARCH))
 
 ASFLAGS		+= $(ASOPT)

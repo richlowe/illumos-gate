@@ -23,7 +23,7 @@
 .\"
 .\" Copyright 2018 Joyent, Inc.
 .\"
-.Dd September 4, 2018
+.Dd March 15, 2023
 .Dt CW 1ONBLD
 .Os
 .Sh NAME
@@ -150,7 +150,8 @@ the shadow compiler is not invoked.
 .It
 If the
 .Fl o Ar filename
-option was provided, with or without a separating space, it will be replaced with
+option was provided, with or without a separating space, it will be replaced
+with
 .Fl o Ar tempfile
 .It
 If the option

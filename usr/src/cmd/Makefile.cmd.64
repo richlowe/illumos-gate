@@ -37,7 +37,3 @@ sparc_ROOT_INTP=	/lib/$(MACH64)/ld.so.1
 aarch64_ROOT_INTP=	/lib/ld.so.1
 
 $(BUILD64)$(ROOTFS_PROG) := LDFLAGS += -Wl,-I$($(MACH)_ROOT_INTP)
-
-V9CODESIZE = -xcode=abs44
-
-sparcv9_CFLAGS += $(V9CODESIZE)

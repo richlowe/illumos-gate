@@ -29,7 +29,7 @@ LIBCBASE=	../i386
 LIBRARY=	libc_hwcap1.a
 
 EXTN_CPPFLAGS=	-D_CMOV_INSN -D_SSE_INSN -D_MMX_INSN -D_SEP_INSN
-EXTN_CFLAGS=	-xtarget=pentium_pro
+EXTN_CFLAGS=	-_gcc=-march=pentiumpro
 EXTN_DYNFLAGS=	-Wl,-Mmapfile
 
 # Defining this means build targets will first try to use source from this

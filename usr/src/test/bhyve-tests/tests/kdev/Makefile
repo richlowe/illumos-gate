@@ -45,11 +45,11 @@ CPPFLAGS =	-I$(COMPAT)/bhyve -I$(CONTRIB)/bhyve \
 		-I$(SRC)/uts/intel \
 		-I../common
 
-ASFLAGS += 	-D_ASM
-ASFLAGS64 += 	-D_ASM
+ASFLAGS +=	-D_ASM
+ASFLAGS64 +=	-D_ASM
 
 
-CFLAGS = -m64
+CFLAGS =	-m64 -_gcc=-mtune=opteron
 $(PROG) :=	LDLIBS += -lvmmapi
 
 all: $(PROG)

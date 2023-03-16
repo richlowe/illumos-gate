@@ -64,10 +64,6 @@ include		$(SRC)/lib/Makefile.lib.64
 
 MAPFILE-ORDER =			../common/mapfile-order-gcc
 
-# XXXARM:
-# Only 64 on AArch64, but overriden in Makefile.com, hacked here
-ASFLAGS += 	-xarch=generic64
-
 # Add any machine specific flags.
 SONAME=		/lib/ld.so.1
 CPPFLAGS +=	-D_ELF64

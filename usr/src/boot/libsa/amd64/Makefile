@@ -25,7 +25,7 @@ include ../Makefile.com
 
 ASFLAGS =	$(amd64_XARCH) -I$(SRC)/uts/common -D_ASM
 ASFLAGS64 =	$(amd64_XARCH) -I$(SRC)/uts/common -D_ASM
-CFLAGS +=	-m64 $(CFLAGS64)
+CFLAGS +=	-m64 -_gcc=-mtune=opteron $(CFLAGS64)
 CCASFLAGS +=	-m64
 
 # _setjmp/_longjmp

@@ -23,7 +23,7 @@ all install: $(DYNLIB)
 
 include ../Makefile.com
 
-CFLAGS += -m64 $(CFLAGS64)
+CFLAGS += -m64 -_gcc=-mtune=opteron $(CFLAGS64)
 
 include $(BOOTSRC)/Makefile.lib
 

@@ -21,7 +21,7 @@ include ../Makefile.com
 # registers, ending up with better-than-ieee precision.
 #
 CFLAGS		+= -_gcc=-ffloat-store
-$(OBJS_M9XSSE)	:= CFLAGS += -xarch=sse2
+$(OBJS_M9XSSE)	:= CFLAGS += -_gcc=-msse2 -_gcc=-mfpmath=sse
 
 install:	all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)
 
