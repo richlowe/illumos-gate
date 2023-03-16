@@ -757,3 +757,14 @@ _conv_reloc_type(uint_t rel)
 	static Conv_inv_buf_t inv_buf;
 	return (conv_reloc_aarch64_type(rel, 0, &inv_buf));
 }
+
+/*
+ * XXXARM: To keep chkmsg() happy:
+ * MSG_INTL(MSG_REL_NOFIT)
+ * MSG_INTL(MSG_REL_PLTREF)
+ * MSG_INTL(MSG_REL_VALNONALIGN)
+ * MSG_ORIG(MSG_SPECFIL_DYNPLT)
+ * MSG_ORIG(MSG_SYM_ELFPLTTRACE)
+ * MSG_ORIG(MSG_SYM_LADYNDATA)
+ * MSG_ORIG(MSG_SYM_PLT)
+ */

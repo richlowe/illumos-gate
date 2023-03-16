@@ -30,9 +30,6 @@
 @ MSG_REL_NOFIT		"relocation error: %s: file %s: symbol %s: \
 			 value 0x%llx does not fit"
 
-@ MSG_UNW_BADVERS	"dlgetalphaunwind: invalid data buffer dlui_version: \
-			 %d: version unitialized, or exceeds current version: %d"
-
 @ MSG_REL_VALNONALIGN	"relocation error: %s: file %s: symbol %s: \
 			 value 0x%llx is non-aligned"
 @ _END_
