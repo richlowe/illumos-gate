@@ -75,6 +75,8 @@ typeset -r USAGE=$'+
     unless the -F flag is specified in the nightly file.]
 [t?set up environment to use the tools in usr/src/tools (this is the
     default, use +t to use the tools from /opt/onbld)]
+[T?perform a build targetting the specified ISA (aarch64/i386)]:[<target>]
+
 
 <env_file> [command]
 
@@ -124,6 +126,8 @@ typeset flags=(
 	typeset O=false
 	typeset o=false
 	typeset t=true
+	typeset T=
+	typeset T_set=false
 	typeset s=(
 		typeset e=false
 		typeset h=false
@@ -148,6 +152,7 @@ while getopts -a "${progname}" "${USAGE}" OPT ; do
 	  +d)	flags.d=false ; flags.d_set=true ;;
 	  t)	flags.t=true  ;;
 	  +t)	flags.t=false ;;
+	  T)	flags.T=${OPTARG}; flags.T_set=true ;;
 	  \?)	usage ;;
     esac
 done
@@ -197,8 +202,13 @@ unset \
 	ARCH \
 	CLASSPATH
 
-MACH="$(uname -p)"
-NATIVE_MACH="${MACH}"
+if [[ ${flags.T_set} != "false" ]]; then
+	export MACH=${flags.T}
+	export NATIVE_MACH=$(uname -p)
+else
+	export MACH="$(uname -p)"
+	export NATIVE_MACH="${MACH}"
+fi
 
 #
 # Setup environment variables
@@ -224,6 +234,10 @@ else
 	fi
 fi
 shift
+
+if [[ ${flags.T_set} != "false" && ${MACH} != ${flags.T} ]]; then
+	fatal_error "Error: -T was used, but env file changed MACH."
+fi
 
 # Check if we have sufficient data to continue...
 [[ -v CODEMGR_WS ]] || fatal_error "Error: Variable CODEMGR_WS not set."
@@ -395,8 +409,7 @@ printf 'VERSION      is %s\n'   "$VERSION"
 printf 'RELEASE_DATE is %s\n\n' "$RELEASE_DATE"
 
 if [[ -n "$NATIVE_MACH" && "$NATIVE_MACH" != "$MACH" ]]; then
-	printf 'Cross-building enabled\n'
-	printf 'Targeting %s on %s\n\n' "$MACH" "$NATIVE_MACH"
+	printf 'Cross-building for %s on %s host \n' ${MACH} ${NATIVE_MACH}
 fi
 
 if [[ -f "$SRC/Makefile" ]] && egrep -s '^setup:' "$SRC/Makefile" ; then

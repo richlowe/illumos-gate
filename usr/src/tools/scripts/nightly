@@ -480,9 +480,6 @@ function set_debug_build_flags {
 	fi
 }
 
-
-MACH=`uname -p`
-
 if [ "$OPTHOME" = "" ]; then
 	OPTHOME=/opt
 	export OPTHOME
@@ -494,6 +491,7 @@ Where:
 	-i	Fast incremental options (no clobber, check)
 	-n      Do not do a bringover
 	+t	Use the build tools in $ONBLD_TOOLS/bin
+	-T MACH Build for MACH (aarch64, i386)
 	-V VERS set the build version string to VERS
 
 	<env_file>  file in Bourne shell syntax that sets and exports
@@ -563,7 +561,7 @@ build_extras_ok=y
 #
 
 OPTIND=1
-while getopts +intV:W FLAG
+while getopts +intT:V:W FLAG
 do
 	case $FLAG in
 	  i )	i_FLAG=y; i_CMD_LINE_FLAG=y
@@ -572,8 +570,11 @@ do
 		;;
 	 +t )	t_FLAG=n
 		;;
-	  V )	V_FLAG=y
-		V_ARG="$OPTARG"
+	  T )   T_FLAG=y
+		T_ARG=${OPTARG}
+		;;
+	   V )	V_FLAG=y
+		V_ARG=${OPTARG}
 		;;
 	  W )   W_FLAG=y
 		;;
@@ -590,6 +591,14 @@ shift `expr $OPTIND - 1`
 if [ $# -ne 1 ]; then
 	echo "$USAGE"
 	exit 1
+fi
+
+if [[ -z $T_FLAG ]]; then 
+	export MACH=$(uname -p)
+	export NATIVE_MACH=${MACH}
+else
+	export MACH=${T_ARG}
+	export NATIVE_MACH=$(uname -p)
 fi
 
 # check if user is running nightly as root
@@ -668,6 +677,11 @@ else
 		echo "Cannot find env file as either $1 or $OPTHOME/onbld/env/$1"
 		exit 1
 	fi
+fi
+
+if [[ -n $T_ARG && $MACH != $T_ARG ]]; then
+	print -u2 -- "-T was used, but env file changed MACH."
+	exit 1
 fi
 
 # Check if we have sufficient data to continue...
