@@ -25,11 +25,16 @@
 #
 #
 
-COMOBJS64 =	rd_elf64.o plt64_resolution.o
+COMOBJS64 =	rtld_db.o rd_elf64.o
+PLTOBJS =	plt64_resolution.o
+PLTSRCS =	plt64_resolution.c
 
 include		../Makefile.com
 
-SGSMSGTARG +=	$(SGSMSGINTEL)
+# We have no 32bit version, so this requires a little care
+COMOBJS =
+MSGSRCS =	../common/rtld_db.c ../common/rd_elf.c $(PLTSRCS) $(BLTDATA)
+SGSMSGTARG +=	$(SGSMSGAARCH64)
 
 .KEEP_STATE:
 

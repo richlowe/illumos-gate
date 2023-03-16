@@ -28,9 +28,7 @@ include $(SRC)/Makefile.master
 LIBRARY=	librtld_db.a
 VERS=		.1
 
-COMOBJS=	rtld_db.o
-# XXXARM: aarch64 is 64bit only
-$(NOT_AARCH64_BLD)COMOBJS +=	rd_elf.o
+COMOBJS=	rtld_db.o rd_elf.o
 BLTOBJ=		msg.o
 
 OBJECTS =	$(BLTOBJ) $(COMOBJS) $(COMOBJS64) $(PLTOBJS)
@@ -55,6 +53,7 @@ BLTFILES=	$(BLTDEFS) $(BLTDATA)
 SGSMSGCOM=	../common/librtld_db.msg
 SGSMSGINTEL=	../common/librtld_db.intel.msg
 SGSMSGSPARCV9=	../common/librtld_db.sparcv9.msg
+SGSMSGAARCH64=
 SGSMSGTARG=	$(SGSMSGCOM)
 SGSMSGALL=	$(SGSMSGCOM)
 SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA)
