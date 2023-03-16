@@ -26,7 +26,7 @@
  */
 
 #ifndef _SYS_UTRAP_H
-#define _SYS_UTRAP_H
+#define	_SYS_UTRAP_H
 
 #ifdef	__cplusplus
 extern "C" {

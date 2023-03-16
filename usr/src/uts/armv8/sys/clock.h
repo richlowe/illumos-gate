@@ -75,13 +75,15 @@ extern void (*hrtime_tick)(void);
  */
 #define	HRES_LOCK_OFFSET 0	/* byte 0 has the lock bit(bit 0 in the byte) */
 
-#define	CLOCK_LOCK(oldsplp)	\
-	lock_set_spl((lock_t *)&hres_lock + HRES_LOCK_OFFSET, ipltospl(CBE_HIGH_PIL), oldsplp)
+#define	CLOCK_LOCK(oldsplp)					\
+	lock_set_spl((lock_t *)&hres_lock + HRES_LOCK_OFFSET,	\
+	    ipltospl(CBE_HIGH_PIL), oldsplp)
 
-#define	CLOCK_UNLOCK(spl)		\
+#define	CLOCK_UNLOCK(spl)				\
 	atomic_inc_32((volatile uint32_t *)&hres_lock);	\
-	splx(spl);			\
-	LOCKSTAT_RECORD0(LS_CLOCK_UNLOCK_RELEASE, (lock_t *)&hres_lock + HRES_LOCK_OFFSET);
+	splx(spl);					\
+	LOCKSTAT_RECORD0(LS_CLOCK_UNLOCK_RELEASE,	\
+	(lock_t *)&hres_lock + HRES_LOCK_OFFSET);
 
 #endif	/* KERNEL */
 

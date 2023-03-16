@@ -20,13 +20,14 @@
  * CDDL HEADER END
  */
 /*
- * Copyright 2017 Hayashi Naoyuki
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2017 Hayashi Naoyuki
  */
 
 #ifndef _SYS_PROMIF_H
-#define _SYS_PROMIF_H
+#define	_SYS_PROMIF_H
 
 #include <sys/types.h>
 #include <sys/obpdefs.h>
@@ -60,12 +61,16 @@ extern	pnode_t		prom_nextnode(pnode_t nodeid);
 extern	pnode_t		prom_optionsnode(void);
 extern	pnode_t		prom_alias_node(void);
 extern	pnode_t		prom_rootnode(void);
-extern	int		prom_setprop(pnode_t nodeid, const char *name, const caddr_t value, int len);
+extern	int		prom_setprop(pnode_t nodeid, const char *name,
+    const caddr_t value, int len);
 extern	int		prom_getproplen(pnode_t nodeid, const char *name);
-extern	int		prom_getprop(pnode_t nodeid, const char *name, caddr_t value);
-extern	char		*prom_nextprop(pnode_t nodeid, const char *previous, char *next);
+extern	int		prom_getprop(pnode_t nodeid, const char *name,
+    caddr_t value);
+extern	char		*prom_nextprop(pnode_t nodeid, const char *previous,
+    char *next);
 
-extern	char		*prom_decode_composite_string(void *buf, size_t buflen, char *prev);
+extern	char		*prom_decode_composite_string(void *buf, size_t buflen,
+    char *prev);
 extern	pnode_t		prom_findnode_by_phandle(phandle_t phandle);
 
 /*
@@ -73,7 +78,8 @@ extern	pnode_t		prom_findnode_by_phandle(phandle_t phandle);
  */
 extern	pnode_t		prom_finddevice(const char *path);
 
-extern	int		prom_bounded_getprop(pnode_t nodeid, char *name, caddr_t buffer, int buflen);
+extern	int		prom_bounded_getprop(pnode_t nodeid, char *name,
+    caddr_t buffer, int buflen);
 
 /*
  * Device pathnames and pathname conversion: OBP and IEEE 1275-1994.
@@ -92,10 +98,10 @@ extern	int		prom_stdin_is_keyboard(void);
 extern	int		prom_stdout_is_framebuffer(void);
 extern	void		prom_framebuffer_getpos(int *row, int *col);
 extern	void		prom_framebuffer_getcolors(int *fg, int *bg);
-extern  char    	*prom_stdinpath(void);
-extern  char    	*prom_stdoutpath(void);
-extern  void    	prom_strip_options(char *from, char *to);
-extern  void    	prom_pathname(char *);
+extern	char		*prom_stdinpath(void);
+extern	char		*prom_stdoutpath(void);
+extern	void		prom_strip_options(char *from, char *to);
+extern	void		prom_pathname(char *);
 
 /*
  * Special device nodes: IEEE 1275-1994 only.
@@ -155,8 +161,10 @@ extern	int	prom_mayget(void);
 extern	int	prom_mayput(char c);
 extern	int	prom_open(char *name);
 extern	int	prom_close(int fd);
-extern	ssize_t	prom_read(ihandle_t fd, caddr_t buf, size_t len, uint_t startblk, char type);
-extern  ssize_t	prom_write(ihandle_t fd, caddr_t buf, size_t len, uint_t startblk, char type);
+extern	ssize_t	prom_read(ihandle_t fd, caddr_t buf, size_t len,
+    uint_t startblk, char type);
+extern  ssize_t	prom_write(ihandle_t fd, caddr_t buf, size_t len,
+    uint_t startblk, char type);
 extern	int	prom_seek(int fd, u_longlong_t offset);
 extern	void	prom_writestr(const char *buf, size_t bufsize);
 extern	void	prom_pnode_to_pathname(pnode_t, char *);
@@ -241,17 +249,21 @@ extern int prom_get_reg_by_name(pnode_t node, const char *name, uint64_t *base);
 extern int prom_get_address_cells(pnode_t node);
 extern int prom_get_size_cells(pnode_t node);
 extern int prom_get_clock(pnode_t node, int index, struct prom_hwclock *clock);
-extern int prom_get_clock_by_name(pnode_t node, const char *name, struct prom_hwclock *clock);
+extern int prom_get_clock_by_name(pnode_t node, const char *name,
+    struct prom_hwclock *clock);
 extern int prom_get_reset(pnode_t node, int index, struct prom_hwreset *reset);
-extern int prom_get_reset_by_name(pnode_t node, const char *name, struct prom_hwreset *reset);
-extern int prom_get_prop_index(pnode_t node, const char *prop_name, const char *name);
+extern int prom_get_reset_by_name(pnode_t node, const char *name,
+    struct prom_hwreset *reset);
+extern int prom_get_prop_index(pnode_t node, const char *prop_name,
+    const char *name);
 extern void prom_driver_register(const struct prom_compat *data);
 extern boolean_t prom_is_compatible(pnode_t node, const char *name);
 extern void prom_walk(void(*func)(pnode_t, void*), void *arg);
 extern int prom_get_reg_address(pnode_t node, int index, uint64_t *reg);
 extern int prom_get_reg_size(pnode_t node, int index, uint64_t *regsize);
 extern void prom_power_off(void);
-extern int prom_get_bus_address(pnode_t node, uint64_t phys_addr, uint64_t *bus_addr);
+extern int prom_get_bus_address(pnode_t node, uint64_t phys_addr,
+    uint64_t *bus_addr);
 
 #endif	/* _KERNEL */
 

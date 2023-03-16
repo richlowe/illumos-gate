@@ -24,7 +24,7 @@
  */
 
 #ifndef _SYS_GIC_H
-#define _SYS_GIC_H
+#define	_SYS_GIC_H
 
 #include <sys/types.h>
 #include <sys/cpuvar.h>
@@ -48,35 +48,35 @@ struct gic_dist {
 	volatile uint32_t typer;
 	volatile uint32_t iidr;
 	volatile uint32_t resv0[29];
-	//: 0x80
+	/* : 0x80 */
 	volatile uint32_t igroupr[32];
-	//: 0x100
+	/* : 0x100 */
 	volatile uint32_t isenabler[32];
 	volatile uint32_t icenabler[32];
-	//: 0x200
+	/* : 0x200 */
 	volatile uint32_t ispendr[32];
 	volatile uint32_t icpendr[32];
-	//: 0x300
+	/* : 0x300 */
 	volatile uint32_t isactiver[32];
 	volatile uint32_t icactiver[32];
-	//: 0x400
+	/* : 0x400 */
 	volatile uint32_t ipriorityr[256];
-	//: 0x800
+	/* : 0x800 */
 	volatile uint32_t itargetsr[256];
-	//: 0xc00
+	/* : 0xc00 */
 	volatile uint32_t icfgr[64];
-	//: 0xd00
+	/* : 0xd00 */
 	volatile uint32_t resv1[64];
-	//: 0xe00
+	/* : 0xe00 */
 	volatile uint32_t nsacr[64];
-	//: 0xf00
+	/* : 0xf00 */
 	volatile uint32_t sgir;
 	volatile uint32_t resv2[3];
-	//: 0xf10
+	/* : 0xf10 */
 	volatile uint32_t cpendsgir[4];
-	//: 0xf20
+	/* : 0xf20 */
 	volatile uint32_t spendsgir[4];
-	//: 0xf30
+	/* : 0xf30 */
 	volatile uint32_t resv3[52];
 };
 
@@ -85,22 +85,22 @@ struct gic_cpuif {
 	volatile uint32_t pmr;
 	volatile uint32_t bpr;
 	volatile uint32_t iar;
-	//: 0x10
+	/* : 0x10 */
 	volatile uint32_t eoir;
 	volatile uint32_t rpr;
 	volatile uint32_t hppir;
 	volatile uint32_t abpr;
-	//: 0x20
+	/* : 0x20 */
 	volatile uint32_t aiar;
 	volatile uint32_t aeoir;
 	volatile uint32_t ahppir;
-	//: 0x2c
+	/* : 0x2c */
 	volatile uint32_t resv0[41];
-	//: 0xd0
+	/* : 0xd0 */
 	volatile uint32_t apr[4];
-	//: 0xe0
+	/* : 0xe0 */
 	volatile uint32_t nsapr[4];
-	//: 0xf0
+	/* : 0xf0 */
 	volatile uint32_t resv1[3];
 	volatile uint32_t iidr;
 };
@@ -134,7 +134,7 @@ struct gic_cpuif {
 
 /* [25] 1 of N SPI interrupts supported? */
 #define	GICD_TYPER_NO1N_SHIFT	25
-#define GICD_TYPER_NO1N_MASK	(0x1 << GICD_TYPER_NO1N_SHIFT)
+#define	GICD_TYPER_NO1N_MASK	(0x1 << GICD_TYPER_NO1N_SHIFT)
 #define	GICD_TYPER_NO1N(typer)	((typer & GICD_TYPER_NO1N_MASK) >> \
     GICD_TYPER_NO1N_SHIFT)
 
@@ -159,33 +159,34 @@ struct gic_cpuif {
 /* [17] supports LPIs? */
 #define	GICD_TYPER_LPIS_SHIFT	17
 #define	GICD_TYPER_LPIS_MASK	(0x1 << GICD_TYPER_LPIS_SHIFT)
-#define GICD_TYPER_LPIS(typer)	((typer & GICD_TYPER_LPIS_MASK) >> \
+#define	GICD_TYPER_LPIS(typer)	((typer & GICD_TYPER_LPIS_MASK) >> \
     GICD_TYPER_LPIS_SHIFT)
 
 /* [16] supports message-based interrupts via distributor writes? */
 #define	GICD_TYPER_MBIS_SHIFT	16
-#define GICD_TYPER_MBIS_MASK	(0x1 << GICD_TYPER_MBIS_SHIFT)
+#define	GICD_TYPER_MBIS_MASK	(0x1 << GICD_TYPER_MBIS_SHIFT)
 #define	GICD_TYPER_MBIS(typer)	((typer & GICD_TYPER_MBIS_MASK) >> \
     GICD_TYPE_MBIS_SHIFT)
 
 /* [10] supports two security states? */
 #define	GICD_TYPER_SECURITYEXTN_SHIFT	10
-#define GICD_TYPER_SECURITYEXTN_MASK	(0x1 << GICD_TYPER_SECURITYEXTN_SHIFT)
-#define	GICD_TYPER_SECURITYEXTN(typer)	((typer & GICD_TYPER_SECURITYEXTN_MASK) >> \
-    GICD_TYPER_SECURITYEXTN_SHIFT)
+#define	GICD_TYPER_SECURITYEXTN_MASK	(0x1 << GICD_TYPER_SECURITYEXTN_SHIFT)
+#define	GICD_TYPER_SECURITYEXTN(typer)	\
+	((typer & GICD_TYPER_SECURITYEXTN_MASK) >> \
+	GICD_TYPER_SECURITYEXTN_SHIFT)
 
 /* [7:5] number of cpus supported without affinity routing - 1 */
 #define	GICD_TYPER_CPUNUMBER_SHIFT	5
 #define	GICD_TYPER_CPUNUMBER_MASK	(0x7 << GICD_TYPER_CPUNUMBER_SHIFT)
-#define	GICD_TYPER_CPUNUMBER(typer)	((typer & GICD_TYPER_CPUNUMBER_MASK) >> \
-    GICD_TYPER_CPUNUMBER_SHIFT)
+#define	GICD_TYPER_CPUNUMBER(typer)	\
+	((typer & GICD_TYPER_CPUNUMBER_MASK) >> GICD_TYPER_CPUNUMBER_SHIFT)
 
 /* [4:0] maximum SPI INTID, for value N maximum is (32*(N+1))-1 */
 #define	GICD_TYPER_ITLINESNUMBER_SHIFT	0
 #define	GICD_TYPER_ITLINESNUMBER_MASK	0x1f
-#define	GICD_TYPER_ITLINESNUMBER(typer)	((typer & GICD_TYPER_ITLINESNUMBER_MASK) >> \
-    GICD_TYPER_ITLINESNUMBER_SHIFT)
-
+#define	GICD_TYPER_ITLINESNUMBER(typer)	\
+	((typer & GICD_TYPER_ITLINESNUMBER_MASK) >> \
+	GICD_TYPER_ITLINESNUMBER_SHIFT)
 
 /*
  * 8.9.4 GICD_CTLR, Distributor Control Register
@@ -206,7 +207,7 @@ struct gic_cpuif {
 /* [6] disable security? */
 #define	GICD_CTLR_DS_SHIFT	6
 #define	GICD_CTLR_DS_MASK	(0x1 << GICD_CTLR_DS_SHIFT)
-#define GICD_CTLR_DS(ctlr)	((ctlr & GICD_CTLR_DS_MASK) >> \
+#define	GICD_CTLR_DS(ctlr)	((ctlr & GICD_CTLR_DS_MASK) >> \
     GICD_CTLR_DS_SHIFT)
 
 /* [5] enable affinity routing (for non secure state)? */
@@ -224,14 +225,14 @@ struct gic_cpuif {
 /* [2] enable secure group 1 interrupts? */
 #define	GICD_CTLR_ENABLEGRP1S_SHIFT	2
 #define	GICD_CTLR_ENABLEGRP1S_MASK	(0x1 << GICD_CTLR_ENABLEGRP1S_SHIFT)
-#define	GICD_CTLR_ENABLEGRP1S(ctlr)	((ctlr & GICD_CTLR_ENABLEGRP1S_MASK) >> \
-    GICD_CTLR_ENABLEGRP1S_SHIFT)
+#define	GICD_CTLR_ENABLEGRP1S(ctlr)	\
+	((ctlr & GICD_CTLR_ENABLEGRP1S_MASK) >> GICD_CTLR_ENABLEGRP1S_SHIFT)
 
 /* [1] enable non-secure group 1 interrupts?  */
 #define	GICD_CTLR_ENABLEGRP1NS_SHIFT	1
 #define	GICD_CTLR_ENABLEGRP1NS_MASK	(0x1 << GICD_CTLR_ENABLEGRP1NS_SHIFT)
-#define	GICD_CTLR_ENABLEGRP1NS(ctlr)	((ctlr & GICD_CTLR_ENABLEGRP1NS_MASK) >> \
-    GICD_CTLR_ENABLEGRP1NS_SHIFT)
+#define	GICD_CTLR_ENABLEGRP1NS(ctlr)	\
+	((ctlr & GICD_CTLR_ENABLEGRP1NS_MASK) >> GICD_CTLR_ENABLEGRP1NS_SHIFT)
 
 /* [0] enable group 0 interrupts? */
 #define	GICD_CTLR_ENABLEGRP0_SHIFT	0
@@ -257,55 +258,55 @@ struct gic_cpuif {
 /* [9] secure EOI behaviour.  If 1 only does pri drop, not deactivate */
 #define	GICC_CTLR_EOIMODES_SHIFT	9
 #define	GICC_CTLR_EOIMODES_MASK		(0x1 << GICC_CTLR_EOIMODES_SHIFT)
-#define GICC_CTLR_EOIMODES(ctlr)	((ctlr & GICC_CTLR_EOIMODES_MASK) >> \
+#define	GICC_CTLR_EOIMODES(ctlr)	((ctlr & GICC_CTLR_EOIMODES_MASK) >> \
     GICC_CTLR_EOIMODES_SHIFT)
 
 /* [8] disable bypass signal for irq group 1? */
 #define	GICC_CTLR_IRQBYPDISGRP1_SHIFT	8
 #define	GICC_CTLR_IRQBYPDISGRP1_MASK	(0x1 << GICC_CTLR_IRQBYPDISGRP1_SHIFT)
-#define GICC_CTLR_IRQBYPDISGRP1(ctlr)	((ctlr & GICC_CTLR_IRQBYPDISGRP1_MASK) >> \
-    GICC_CTLR_IRQBYPDISGRP1_SHIFT)
+#define	GICC_CTLR_IRQBYPDISGRP1(ctlr)	\
+	((ctlr & GICC_CTLR_IRQBYPDISGRP1_MASK) >> GICC_CTLR_IRQBYPDISGRP1_SHIFT)
 
 /* [7] disable bypass signal for fiq group 1? */
 #define	GICC_CTLR_FIQBYPDISGRP1_SHIFT	7
 #define	GICC_CTLR_FIQBYPDISGRP1_MASK	(0x1 << GICC_CTLR_FIQBYPDISGRP1_SHIFT)
-#define GICC_CTLR_FIQBYPDISGRP1(ctlr)	((ctlr & GICC_CTLR_FIQBYPDISGRP1_MASK) >> \
-    GICC_CTLR_FIQBYPDISGRP1_SHIFT)
+#define	GICC_CTLR_FIQBYPDISGRP1(ctlr)	\
+	((ctlr & GICC_CTLR_FIQBYPDISGRP1_MASK) >> GICC_CTLR_FIQBYPDISGRP1_SHIFT)
 
 /* [6] disable bypass signal for irq group 0 */
 #define	GICC_CTLR_IRQBYPDISGRP0_SHIFT	6
 #define	GICC_CTLR_IRQBYPDISGRP0_MASK	(0x1 << GICC_CTLR_IRQBYPDISGRP0_SHIFT)
-#define GICC_CTLR_IRQBYPDISGRP0(ctlr)	((ctlr & GICC_CTLR_IRQBYPDISGRP0_MASK) >> \
-    GICC_CTLR_IRQBYPDISGRP0_SHIFT)
+#define	GICC_CTLR_IRQBYPDISGRP0(ctlr)	\
+	((ctlr & GICC_CTLR_IRQBYPDISGRP0_MASK) >> GICC_CTLR_IRQBYPDISGRP0_SHIFT)
 
 /* [5] disable bypass signal for fiq group 1? */
 #define	GICC_CTLR_FIQBYPDISGRP0_SHIFT	5
 #define	GICC_CTLR_FIQBYPDISGRP0_MASK	(0x1 << GICC_CTLR_FIQBYPDISGRP0_SHIFT)
-#define GICC_CTLR_FIQBYPDISGRP0(ctlr)	((ctlr & GICC_CTLR_FIQBYPDISGRP0_MASK) >> \
-    GICC_CTLR_FIQBYPDISGRP0_SHIFT)
+#define	GICC_CTLR_FIQBYPDISGRP0(ctlr)	\
+	((ctlr & GICC_CTLR_FIQBYPDISGRP0_MASK) >> GICC_CTLR_FIQBYPDISGRP0_SHIFT)
 
 /* [4] GICC_BPR contrlors both group 0 and group 1? */
 #define	GICC_CTLR_CBPR_SHIFT	4
 #define	GICC_CTLR_CBPR_MASK	(0x1 << GICC_CTLR_CBPR_SHIFT)
-#define GICC_CTLR_CBPR(ctlr)	((ctlr & GICC_CTLR_CBPR_MASK) >> \
+#define	GICC_CTLR_CBPR(ctlr)	((ctlr & GICC_CTLR_CBPR_MASK) >> \
     GICC_CTLR_CBPR_SHIFT)
 
 /* [3] group 0 interrupts via FIQ? */
 #define	GICC_CTLR_FIQEN_SHIFT	3
 #define	GICC_CTLR_FIQEN_MASK	(0x1 << GICC_CTLR_FIQEN_SHIFT)
-#define GICC_CTLR_FIQEN(ctlr)	((ctlr & GICC_CTLR_FIQEN_MASK) >> \
+#define	GICC_CTLR_FIQEN(ctlr)	((ctlr & GICC_CTLR_FIQEN_MASK) >> \
     GICC_CTLR_FIQEN_SHIFT)
 
 /* [1] enable group 1? */
 #define	GICC_CTLR_ENABLEGRP1_SHIFT	1
 #define	GICC_CTLR_ENABLEGRP1_MASK	(0x1 << GICC_CTLR_ENABLEGRP1_SHIFT)
-#define GICC_CTLR_ENABLEGRP1(ctlr)	((ctlr & GICC_CTLR_ENABLEGRP1_MASK) >> \
+#define	GICC_CTLR_ENABLEGRP1(ctlr)	((ctlr & GICC_CTLR_ENABLEGRP1_MASK) >> \
     GICC_CTLR_ENABLEGRP1_SHIFT)
 
 /* [0] enable group 1? */
 #define	GICC_CTLR_ENABLEGRP0_SHIFT	0
 #define	GICC_CTLR_ENABLEGRP0_MASK	(0x1 << GICC_CTLR_ENABLEGRP0_SHIFT)
-#define GICC_CTLR_ENABLEGRP0(ctlr)	((ctlr & GICC_CTLR_ENABLEGRP0_MASK) >> \
+#define	GICC_CTLR_ENABLEGRP0(ctlr)	((ctlr & GICC_CTLR_ENABLEGRP0_MASK) >> \
     GICC_CTLR_ENABLEGRP0_SHIFT)
 
 #define	GICC_CTLR_ENABLE_GROUP0		GICC_CTLR_ENABLEGRP0_MASK
@@ -379,11 +380,13 @@ struct gic_cpuif {
 #define	GICD_SGIR_INTID_SHIFT		0
 #define	GICD_SGIR_INTID_MASK		(0xf << GICD_SGIR_INTID_SHIFT)
 
-#define GICD_SGIR(filter, targets, nsatt, intid)	\
-    (((filter << GICD_SGIR_TARGETFILTER_SHIFT) & GICD_SGIR_TARGETFILTER_MASK) | \
-    ((targets << GICD_SGIR_TARGETS_SHIFT) & GICD_SGIR_TARGETS_MASK) | \
-    ((nsatt << GICD_SGIR_NSATT_SHIFT) & GICD_SGIR_NSATT_MASK) | \
-    ((intid << GICD_SGIR_INTID_SHIFT) & GICD_SGIR_INTID_MASK))
+#define	GICD_SGIR(filter, targets, nsatt, intid)			\
+	(((filter << GICD_SGIR_TARGETFILTER_SHIFT) &			\
+	GICD_SGIR_TARGETFILTER_MASK) |					\
+	((targets << GICD_SGIR_TARGETS_SHIFT) &				\
+	GICD_SGIR_TARGETS_MASK) |					\
+	((nsatt << GICD_SGIR_NSATT_SHIFT) & GICD_SGIR_NSATT_MASK) |	\
+	((intid << GICD_SGIR_INTID_SHIFT) & GICD_SGIR_INTID_MASK))
 
 /*
  * GIC supports at least 16 levels, which is what we need, so we only use

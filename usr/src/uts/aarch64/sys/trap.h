@@ -387,8 +387,8 @@ extern "C" {
 /* [18]	epilogue insn? (CPYE*, SETE* etc.) */
 #define	ISS_MEMx_FROM_EPILOGUE_SHIFT	18
 #define	ISS_MEMx_FROM_EPILOGUE_MASK	(0x1 << ISS_MEMx_FROM_EPILOGUE_SHIFT)
-#define	ISS_MEMx_FROM_EPILOGUE(iss)	((iss & ISS_MEMx_FROM_EPILOGUE_MASK) >> \
-    ISS_MEMx_FROM_EPILOGUE_SHIFT)
+#define	ISS_MEMx_FROM_EPILOGUE(iss)	\
+	((iss & ISS_MEMx_FROM_EPILOGUE_MASK) >> ISS_MEMx_FROM_EPILOGUE_SHIFT)
 
 /* [17]	algorithm option? */
 #define	ISS_MEMx_WRONG_OPTION_SHIFT	17
@@ -786,8 +786,8 @@ typedef enum {
 
 /* When ISV == 0, BIT15 indicates if the FAR is precise */
 #define	ISS_DABORT_FNP_PRECISE		0 /* FAR is address that caused abort */
-#define	ISS_DABORT_FNP_IMPRECISE	1 /* FAR is any VA in the */
-					  /* same granule */
+/* FAR is any VA in the same granule */
+#define	ISS_DABORT_FNP_IMPRECISE	1
 
 /*
  * When DFSC = 0b00.... or 0b101011 & DFSC != 0b0000.. BITS_12_11
@@ -1066,8 +1066,8 @@ typedef enum {
 
 /* We spell this out, unlike other bools, to help clarify it being backwards */
 #define	ISS_WATCHPOINT_FNP_PRECISE	0 /* FAR is address that caused abort */
-#define	ISS_WATCHPOINT_FNP_IMPRECISE	1 /* FAR is any VA in the */
-					  /* same granule */
+/* FAR is any VA in the same granule */
+#define	ISS_WATCHPOINT_FNP_IMPRECISE	1
 
 /* We spell this out, unlike other bools, to help clarify it being backwards */
 #define	ISS_WATCHPOINT_FAR_VALID	0
@@ -1084,8 +1084,8 @@ typedef enum {
 /* [15:0] comment field from insn */
 #define	ISS_BREAKPOINT_COMMENT_SHIFT	0
 #define	ISS_BREAKPOINT_COMMENT_MASK	0xff
-#define	ISS_BREAKPOINT_COMMENT(iss)	((iss & ISS_BREAKPOINT_COMMENT_MASK) >> \
-    ISS_BREAKPOINT_COMMENT_SHIFT)
+#define	ISS_BREAKPOINT_COMMENT(iss)	\
+	((iss & ISS_BREAKPOINT_COMMENT_MASK) >> ISS_BREAKPOINT_COMMENT_SHIFT)
 
 /*
  * ISS encoding for TSTART instruction pp. 656
@@ -1132,8 +1132,8 @@ typedef enum {
 /* [9] permission fault caused by No Tag Access? */
 #define	ISS2_DABORT_NOTAGACCESS_SHIFT	9
 #define	ISS2_DABORT_NOTAGACCESS_MASK	(0x1 << ISS2_DABORT_NOTAGACCESS_SHIFT)
-#define	ISS2_DABORT_NOTAGACCESS(iss2)	((iss2 & ISS2_DABORT_NOTAGACCESS_MASK) >> \
-    ISS2_DABORT_NOTAGACCESS_SHIFT)
+#define	ISS2_DABORT_NOTAGACCESS(iss2)	\
+	((iss2 & ISS2_DABORT_NOTAGACCESS_MASK) >> ISS2_DABORT_NOTAGACCESS_SHIFT)
 
 /* [6] permission fault due to overlay permissions? */
 #define	ISS2_DABORT_OVERLAY_SHIFT	6

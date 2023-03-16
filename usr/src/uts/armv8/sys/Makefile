@@ -47,8 +47,10 @@ HDRS= \
 	ddi_subrdefs.h \
 	vm_machparam.h
 
-
 ROOTHDRS= $(HDRS:%=$(USR_PSM_ISYS_DIR)/%)
+
+CHECKHDRS=	\
+	$(HDRS:%.h=%.check)
 
 install_h: $(ROOTHDRS)
 
@@ -58,3 +60,4 @@ $(USR_PSM_ISYS_DIR)/%: % $(USR_PSM_ISYS_DIR)
 $(USR_PSM_ISYS_DIR):
 	$(INS.dir)
 
+check:	$(CHECKHDRS)

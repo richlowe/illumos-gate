@@ -81,7 +81,8 @@ typedef union mutex_impl {
 #define	MUTEX_SET_WAITERS(lp)	__MUTEX_SET_WAITERS(lp)
 
 #define	MUTEX_HAS_WAITERS(lp)			__MUTEX_HAS_WAITERS(lp)
-#define	MUTEX_CLEAR_LOCK_AND_WAITERS(lp)	__MUTEX_CLEAR_LOCK_AND_WAITERS(lp)
+#define	MUTEX_CLEAR_LOCK_AND_WAITERS(lp)	\
+	__MUTEX_CLEAR_LOCK_AND_WAITERS(lp)
 
 #define	MUTEX_SET_TYPE(lp, type)
 #define	MUTEX_TYPE_ADAPTIVE(lp)	(((lp)->m_owner & MUTEX_DEAD) == 0)
@@ -115,7 +116,10 @@ static inline kthread_id_t
 __MUTEX_OWNER(const volatile mutex_impl_t *lp)
 {
 	uintptr_t owner;
-	__asm__ __volatile__("ldar %0, %1":"=r"(owner):"Q"(lp->m_owner):"memory");
+	__asm__ __volatile__("ldar %0, %1"
+	    : "=r" (owner)
+	    : "Q" (lp->m_owner)
+	    : "memory");
 	return ((kthread_id_t)(owner & MUTEX_THREAD));
 }
 
@@ -125,12 +129,18 @@ __MUTEX_SET_WAITERS(volatile mutex_impl_t *lp)
 	_Bool result;
 	do {
 		uintptr_t owner;
-		__asm__ __volatile__("ldaxr %0, %1":"=r"(owner):"Q"(lp->m_owner):"memory");
+		__asm__ __volatile__("ldaxr %0, %1"
+		    : "=r" (owner)
+		    : "Q" (lp->m_owner)
+		    : "memory");
 		if (owner == 0) {
 			__asm__ __volatile__("clrex":::"memory");
 			break;
 		}
-		__asm__ __volatile__("stxr %w0, %2, %1":"+r"(result),"+Q"(lp->m_owner):"r"(owner | MUTEX_WAITERS):"memory");
+		__asm__ __volatile__("stxr %w0, %2, %1"
+		    : "+r" (result), "+Q"(lp->m_owner)
+		    : "r" (owner | MUTEX_WAITERS)
+		    : "memory");
 	} while (result);
 }
 
@@ -138,8 +148,11 @@ static inline _Bool
 __MUTEX_HAS_WAITERS(const volatile mutex_impl_t *lp)
 {
 	uintptr_t owner;
-	__asm__ __volatile__("ldar %0, %1":"=r"(owner):"Q"(lp->m_owner):"memory");
-	return (owner & MUTEX_WAITERS) != 0;
+	__asm__ __volatile__("ldar %0, %1"
+	    : "=r" (owner)
+	    : "Q" (lp->m_owner)
+	    : "memory");
+	return ((owner & MUTEX_WAITERS) != 0);
 }
 
 static inline void
@@ -151,7 +164,10 @@ __MUTEX_CLEAR_LOCK_AND_WAITERS(volatile mutex_impl_t *lp)
 static inline void
 __MUTEX_DESTROY(volatile mutex_impl_t *lp)
 {
-	__asm__ __volatile__("stlr %1, %0":"+Q"(lp->m_owner):"r"((uintptr_t)curthread | MUTEX_DEAD):"memory");
+	__asm__ __volatile__("stlr %1, %0"
+	    : "+Q" (lp->m_owner)
+	    : "r" ((uintptr_t)curthread | MUTEX_DEAD)
+	    : "memory");
 }
 
 #ifdef	__cplusplus

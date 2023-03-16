@@ -24,7 +24,7 @@
  */
 
 #ifndef _SYS_SPL_H
-#define _SYS_SPL_H
+#define	_SYS_SPL_H
 
 #ifdef	__cplusplus
 extern "C" {

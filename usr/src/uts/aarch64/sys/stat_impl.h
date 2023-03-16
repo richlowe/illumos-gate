@@ -28,7 +28,7 @@
 
 
 #ifndef _SYS_STAT_IMPL_H
-#define _SYS_STAT_IMPL_H
+#define	_SYS_STAT_IMPL_H
 
 #include <sys/feature_tests.h>
 #include <sys/types.h>

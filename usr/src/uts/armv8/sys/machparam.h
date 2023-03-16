@@ -25,10 +25,10 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #ifndef _SYS_MACHPARAM_H
-#define _SYS_MACHPARAM_H
+#define	_SYS_MACHPARAM_H
 
 #ifdef	__cplusplus
 extern "C" {
@@ -92,7 +92,8 @@ extern "C" {
  * Virtual Address Spaces
  */
 #define	PTE_BITS	3
-#define	VA_BITS		(MMU_PAGESHIFT + (MMU_PAGESHIFT - PTE_BITS) * MMU_PAGE_LEVELS + 1)
+#define	VA_BITS		(MMU_PAGESHIFT + (MMU_PAGESHIFT - PTE_BITS) * \
+	MMU_PAGE_LEVELS + 1)
 
 #define	HOLE_START	(ADDRESS_C(1) << (VA_BITS - 1))
 #define	HOLE_END	(~(HOLE_START - 1))

@@ -31,7 +31,7 @@
  */
 
 #ifndef _SYS_SYSCONFIG_IMPL_H
-#define _SYS_SYSCONFIG_IMPL_H
+#define	_SYS_SYSCONFIG_IMPL_H
 
 #ifdef	__cplusplus
 extern "C" {

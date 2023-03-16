@@ -23,7 +23,7 @@
  */
 
 #ifndef _SYS_PSW_H
-#define _SYS_PSW_H
+#define	_SYS_PSW_H
 
 #ifdef	__cplusplus
 extern "C" {

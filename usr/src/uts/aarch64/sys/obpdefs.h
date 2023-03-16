@@ -28,7 +28,7 @@
  */
 
 #ifndef _SYS_OBPDEFS_H
-#define _SYS_OBPDEFS_H
+#define	_SYS_OBPDEFS_H
 
 #ifdef	__cplusplus
 extern "C" {

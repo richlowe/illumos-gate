@@ -48,7 +48,7 @@ extern boot_syscalls_t *sysp;
 #define	BSVC_GETCHAR(sysp)		(((sysp)->bsvc_getchar)())
 #define	BSVC_PUTCHAR(sysp, c)		(((sysp)->bsvc_putchar)(c))
 #define	BSVC_ISCHAR(sysp)		(((sysp)->bsvc_ischar)())
-#define	BSVC_RESET(sysp,poff)		(((sysp)->bsvc_reset)(poff))
+#define	BSVC_RESET(sysp, poff)		(((sysp)->bsvc_reset)(poff))
 
 #ifdef	__cplusplus
 }

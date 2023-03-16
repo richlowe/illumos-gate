@@ -25,7 +25,7 @@
  */
 
 #ifndef _SYS_X_CALL_H
-#define  _SYS_X_CALL_H
+#define	_SYS_X_CALL_H
 
 #include <sys/cpuvar.h>
 
@@ -55,7 +55,8 @@ typedef int (*xc_func_t)(xc_arg_t, xc_arg_t, xc_arg_t);
 extern void	xc_init(void);
 extern void	xc_call(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
 extern void	xc_sync(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
-extern void	xc_call_nowait(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
+extern void	xc_call_nowait(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set,
+    xc_func_t);
 #endif
 
 #endif	/* _KERNEL */
@@ -66,4 +67,4 @@ extern void	xc_call_nowait(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t
 }
 #endif
 
-#endif	/*  _SYS_X_CALL_H */
+#endif	/* _SYS_X_CALL_H */

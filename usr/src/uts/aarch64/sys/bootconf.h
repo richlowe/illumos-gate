@@ -24,7 +24,7 @@
  */
 
 #ifndef _SYS_BOOTCONF_H
-#define _SYS_BOOTCONF_H
+#define	_SYS_BOOTCONF_H
 
 /*
  * Boot time configuration information objects
@@ -57,7 +57,7 @@ extern "C" {
  *  for its memory lists.
  */
 struct bsys_mem {
-	uint_t		extent; 	/* number of bytes in the space */
+	uint_t		extent;		/* number of bytes in the space */
 };
 
 /*

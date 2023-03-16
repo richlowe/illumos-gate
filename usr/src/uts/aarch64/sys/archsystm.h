@@ -59,7 +59,8 @@ extern void tenmicrosec(void);
 extern void bind_hwcap(void);
 extern void av_dispatch_autovect(uint_t);
 extern void av_dispatch_softvect(uint_t);
-extern void switch_sp_and_call(void *, void (*)(uint_t, uint_t), uint_t, uint_t);
+extern void switch_sp_and_call(void *, void (*)(uint_t, uint_t),
+    uint_t, uint_t);
 extern int interrupts_enabled(void);
 extern void fakesoftint(void);
 
@@ -69,7 +70,7 @@ extern void hrtime_init(void);
 
 extern void reset(void) __NORETURN;
 
-#define BLOCKZEROALIGN (4 * sizeof (void *))
+#define	BLOCKZEROALIGN (4 * sizeof (void *))
 
 #endif /* _KERNEL */
 
