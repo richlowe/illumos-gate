@@ -48,7 +48,6 @@ MANFILES=	aac.4d		\
 		dtrace.4d	\
 		e1000g.4d	\
 		ehci.4d		\
-		ena.4d		\
 		fasttrap.4d	\
 		fbt.4d		\
 		fcip.4d		\
@@ -205,6 +204,7 @@ i386_MANFILES=	ahci.4d		\
 		dnet.4d		\
 		ecpp.4d		\
 		elxl.4d		\
+		ena.4d		\
 		fd.4d		\
 		hxge.4d		\
 		i40e.4d		\
@@ -263,7 +263,7 @@ aarch64_MANFILES=	ahci.4d		\
 			audiocmi.4d	\
 			audiocmihd.4d	\
 			audioemu10k.4d	\
-			audiohd.4d 	\
+			audiohd.4d	\
 			audioixp.4d	\
 			audiosolo.4d	\
 			audiovia823x.4d	\
