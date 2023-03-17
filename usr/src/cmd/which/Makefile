@@ -25,7 +25,7 @@ OBJS = which.o
 .KEEP_STATE:
 
 $(PROG): $(OBJS)
-	$(LINK.c) -o $@ $(OBJS)
+	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
 all: $(PROG)
