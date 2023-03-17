@@ -31,7 +31,7 @@ MODULES =				\
 	$(COMMON_MODULES_PROC_64BIT)	\
 	$(COMMON_MODULES_KVM)
 
-MODULES += disk_label uhci libsmbios pmcs
+MODULES += disk_label uhci libsmbios
 
 SUBDIRS = mdb mdb_ks kmdb libstandctf libstand .WAIT $(MODULES)
 
