@@ -475,7 +475,7 @@ ulwp_alloc(void)
 		 */
 #if _TLS_VARIANT == 1
 		ulwp = (ulwp_t *)data;
-#elif _TLS_VARIANT == 1
+#elif _TLS_VARIANT == 2
 		ulwp = (ulwp_t *)(data + tls_size);
 #else
 #error Unknown TLS variant
@@ -622,10 +622,12 @@ _thrp_create(void *stk, size_t stksize, void *(*func)(void *), void *arg,
 		ulwp->ul_stk = stk;
 		ulwp->ul_stktop = (uintptr_t)stk + stksize;
 		ulwp->ul_stksiz = stksize;
+#if _TLS_VARIANT == 1
 		ulwp->ul_tcb.tcb_ulwp = ulwp;
 
 		/* XXXARM: Poison the DTV pointer.  See find_stack for more. */
 		ulwp->ul_tcb.tcb_dtv =  (void *)(uintptr_t)0xbad715bad715;
+#endif
 	}
 	/* ulwp is not in the hash table; make sure hash_out() doesn't fail */
 	ulwp->ul_ix = -1;
