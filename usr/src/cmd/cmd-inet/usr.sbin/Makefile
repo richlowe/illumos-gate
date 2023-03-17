@@ -42,8 +42,8 @@ ROOTFS_PROG=	hostconfig route soconfig
 SBINLINKS=	hostconfig route
 
 RPCSVCPROG=	hostconfig
-AUDITPROG=	in.rexecd in.rshd in.telnetd
-PAMPROG=	in.rexecd in.rshd in.telnetd
+AUDITPROG=	in.rexecd in.rlogind in.rshd in.telnetd
+PAMPROG=	in.rexecd in.rlogind in.rshd in.telnetd
 SOCKETPROG=	6to4relay arp hostconfig if_mpadm in.comsat \
 		in.fingerd in.rarpd in.rexecd in.rlogind in.rshd \
 		in.rwhod in.telnetd in.tftpd ipaddrsel ndp route
