@@ -382,7 +382,6 @@ $(NOT_AARCH64_BLD)MSGSUBDIRS += \
 	pam_modules	\
 	pyzfs		\
 
-
 sparc_MSGSUBDIRS=	\
 	libprtdiag	\
 	libprtdiag_psr
@@ -390,8 +389,7 @@ sparc_MSGSUBDIRS=	\
 i386_MSGSUBDIRS= libfdisk
 aarch64_MSGSUBDIRS= libfdisk
 
-HDRSUBDIRS=				\
-	../cmd/sendmail/libmilter	\
+HDRSUBDIRS=		\
 	auditd_plugins	\
 	fm		\
 	hal		\
@@ -535,6 +533,13 @@ sparc_HDRSUBDIRS=	\
 	libpri		\
 	libv12n		\
 	storage
+
+
+$(NOT_AARCH64_BLD)HDRSUBDIRS +=		\
+	../cmd/sendmail/libmilter	\
+	libcpc				\
+	libdtrace_jni			\
+	libzfs_jni
 
 all :=		TARGET= all
 check :=	TARGET= check
