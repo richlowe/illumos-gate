@@ -842,7 +842,6 @@ DEV_CM_TAIL="development build: $LOGNAME $now [$basews]"
 #
 export POUND_SIGN RELEASE_DATE DEV_CM_TAIL
 
-maketype="distributed"
 if [[ -z "$MAKE" ]]; then
 	MAKE=dmake
 elif [[ ! -x "$MAKE" ]]; then
@@ -1000,23 +999,25 @@ function logshuffle {
 		fi
 	fi
 
-	#
-	# Now that we're about to send mail, it's time to check the noise
-	# file.  In the event that an error occurs beyond this point, it will
-	# be recorded in the nightly.log file, but nowhere else.  This would
-	# include only errors that cause the copying of the noise log to fail
-	# or the mail itself not to be sent.
-	#
-
-	exec >>$LOGFILE 2>&1
-	if [ -s $build_noise_file ]; then
-		echo "\n==== Nightly build noise ($MACH) ====\n" |
-		    tee -a $LOGFILE >>$mail_msg_file
-		cat $build_noise_file >>$LOGFILE
-		cat $build_noise_file >>$mail_msg_file
-		echo | tee -a $LOGFILE >>$mail_msg_file
+	if [[ "$build_ok" == "y" &&
+	    ("$W_FLAG" == "y" || "$build_extras_ok" == "y" ) ]]; then
+		status_string="Completed successfully"
+	elif [[ "$build_ok" == "y" && "$build_extras_ok" == "n" ]]; then
+		err_warning=1
+		status_string="Completed WITH WARNINGS"
+	elif [[ "$build_ok" == "i" ]]; then
+		err_fatal=1
+		status_string="INTERRUPTED"
+	else
+		err_fatal=1
+		status_string="FAILED"
 	fi
-	rm -f $build_noise_file
+
+	if [[ -n $err_warning ]]; then
+		print -u ${real_stderr} "WARNING: ${status_string}"
+	elif [[ -n $err_fatal ]]; then
+		print -u ${real_stderr} "ERROR: ${status_string}"
+	fi
 
 	case "$build_ok" in
 		y)
@@ -1041,6 +1042,28 @@ function logshuffle {
 	run_hook SYS_POST_NIGHTLY $state
 
 	#
+	# Now that we're about to send mail, it's time to check the noise
+	# file.  In the event that an error occurs beyond this point, it will
+	# be recorded in the nightly.log file, but nowhere else.  This would
+	# include only errors that cause the copying of the noise log to fail
+	# or the mail itself not to be sent.
+	#
+
+	exec >>$LOGFILE 2>&1
+	if [ -s $build_noise_file ]; then
+		echo "\n==== Nightly build noise ($MACH) ====\n" |
+		    tee -a $LOGFILE >>$mail_msg_file
+		cat $build_noise_file >>$LOGFILE
+		cat $build_noise_file >>$mail_msg_file
+		echo | tee -a $LOGFILE >>$mail_msg_file
+	fi
+	rm -f $build_noise_file
+
+
+	print "==== Nightly build status ====\n\n${status_string}" >> \
+	      $mail_msg_file
+
+	#
 	# mailx(1) sets From: based on the -r flag
 	# if it is given.
 	#
@@ -1053,7 +1076,7 @@ function logshuffle {
 	    > ${LLOG}/mail_msg
 	if [ "$m_FLAG" = "y" ]; then
 		/usr/bin/mailx ${mailx_r} -s \
-		    "Nightly ${MACH} Build of ${basews} ${state}." \
+		    "Nightly ${MACH} Build of ${basews} ${status_string}." \
 		    "${MAILTO}" < "${LLOG}/mail_msg"
 	fi
 
@@ -1191,7 +1214,7 @@ fi
 #
 START_DATE=`date`
 SECONDS=0
-echo "\n==== Nightly $maketype build started:   $START_DATE ====" \
+echo "\n==== Nightly build started:   $START_DATE ====" \
     | tee -a $LOGFILE > $build_time_file
 
 echo "\nBuild project:  $build_project\nBuild taskid:   $build_taskid" | \
@@ -1199,6 +1222,8 @@ echo "\nBuild project:  $build_project\nBuild taskid:   $build_taskid" | \
 
 # make sure we log only to the nightly build file
 build_noise_file="${TMPDIR}/build_noise"
+real_stderr=3
+exec 3>/dev/stderr		# dup stderr to 3, so we can still use it
 exec </dev/null >$build_noise_file 2>&1
 
 run_hook SYS_PRE_NIGHTLY
@@ -2044,7 +2069,8 @@ if [ "$w_FLAG" = "y" -a "$build_ok" = "y" ]; then
 fi
 
 END_DATE=`date`
-echo "==== Nightly $MACH/$maketype build completed: $END_DATE ====" | \
+
+echo "==== Nightly build completed: $END_DATE ====" | \
     tee -a $LOGFILE >> $build_time_file
 
 typeset -i10 hours
