@@ -31,7 +31,6 @@ MODSRCS = unix.c
 
 include ../../../../Makefile.cmd
 include ../../../../Makefile.cmd.64
-include ../../../aarch64/Makefile.aarch64
 include ../../Makefile.aarch64
 include ../../../Makefile.module
 
