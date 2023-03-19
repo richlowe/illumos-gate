@@ -93,7 +93,7 @@ function normal_build {
 		CODESIGN_USER="$crypto_signer" \
 		    build "non-DEBUG" "$suffix-nd" "-nd" "$MULTI_PROTO"
 	else
-		echo "\n==== No non-DEBUG $open_only build ====\n" >> "$LOGFILE"
+		echo "\n==== No $MACH/non-DEBUG $open_only build ====\n" >> "$LOGFILE"
 	fi
 
 	# non-DEBUG build ends
@@ -105,7 +105,7 @@ function normal_build {
 		CODESIGN_USER="$crypto_signer" \
 		    build "DEBUG" "$suffix" "" "$MULTI_PROTO"
 	else
-		echo "\n==== No DEBUG $open_only build ====\n" >> "$LOGFILE"
+		echo "\n==== No $MACH/DEBUG $open_only build ====\n" >> "$LOGFILE"
 	fi
 
 	# DEBUG build ends
@@ -182,7 +182,7 @@ function build {
 	#
 	#	Build OS-Networking source
 	#
-	echo "\n==== Building OS-Net source at `date` ($LABEL) ====\n" \
+	echo "\n==== Building OS-Net source at `date` ($MACH/$LABEL) ====\n" \
 		>> $LOGFILE
 
 	rm -f $SRC/${INSTALLOG}.out
@@ -190,7 +190,7 @@ function build {
 	/bin/time $MAKE -e install 2>&1 | \
 	    tee -a $SRC/${INSTALLOG}.out >> $LOGFILE
 
-	echo "\n==== Build errors ($LABEL) ====\n" >> $mail_msg_file
+	echo "\n==== Build errors ($MACH/$LABEL) ====\n" >> $mail_msg_file
 	egrep ":" $SRC/${INSTALLOG}.out |
 	    egrep -e "(^${MAKE}:|[ 	]error[: 	\n]|ld: guidance:)" | \
 	    egrep -v "Ignoring unknown host" | \
@@ -210,7 +210,7 @@ function build {
 		this_build_ok=n
 	fi
 
-	echo "\n==== Build warnings ($LABEL) ====\n" >>$mail_msg_file
+	echo "\n==== Build warnings ($MACH/$LABEL) ====\n" >>$mail_msg_file
 	egrep -i 'warn:|warning:' $SRC/${INSTALLOG}.out \
 		| egrep -v '^tic:' \
 		| egrep -v "symbol (\`|')timezone' has differing types:" \
@@ -223,10 +223,10 @@ function build {
 		this_build_ok=n
 	fi
 
-	echo "\n==== Ended OS-Net source build at `date` ($LABEL) ====\n" \
+	echo "\n==== Ended OS-Net source build at `date` ($MACH/$LABEL) ====\n" \
 		>> $LOGFILE
 
-	echo "\n==== Elapsed build time ($LABEL) ====\n" >>$mail_msg_file
+	echo "\n==== Elapsed build time ($MACH/$LABEL) ====\n" >>$mail_msg_file
 	tail -3  $SRC/${INSTALLOG}.out >>$mail_msg_file
 
 	if [ "$i_FLAG" = "n" ]; then
@@ -284,7 +284,7 @@ function build {
 		if [ ! -f $SRC/${NOISE}.ref ]; then
 			cp $SRC/${NOISE}.out $SRC/${NOISE}.ref
 		fi
-		echo "\n==== Build noise differences ($LABEL) ====\n" \
+		echo "\n==== Build noise differences ($MACH/$LABEL) ====\n" \
 			>>$mail_msg_file
 		diff $SRC/${NOISE}.ref $SRC/${NOISE}.out >>$mail_msg_file
 	fi
@@ -294,15 +294,15 @@ function build {
 	#	(gatekeeper builds only)
 	#
 	if [ -n "$CODESIGN_USER" -a "$this_build_ok" = "y" ]; then
-		echo "\n==== Signing proto area at `date` ====\n" >> $LOGFILE
+		echo "\n==== Signing $MACH proto area at `date` ====\n" >> $LOGFILE
 		signing_file="${TMPDIR}/signing"
 		rm -f ${signing_file}
 		export CODESIGN_USER
 		signproto $SRC/tools/codesign/creds 2>&1 | \
 			tee -a ${signing_file} >> $LOGFILE
-		echo "\n==== Finished signing proto area at `date` ====\n" \
+		echo "\n==== Finished signing $MACH proto area at `date` ====\n" \
 		    >> $LOGFILE
-		echo "\n==== Crypto module signing errors ($LABEL) ====\n" \
+		echo "\n==== Crypto module signing errors ($MACH/$LABEL) ====\n" \
 		    >> $mail_msg_file
 		egrep 'WARNING|ERROR' ${signing_file} >> $mail_msg_file
 		if (( $? == 0 )) ; then
@@ -316,7 +316,7 @@ function build {
 	#
 	if [ "$p_FLAG" = "y" -a "$this_build_ok" = "y" ]; then
 		if [ -d $SRC/pkg ]; then
-			echo "\n==== Creating $LABEL packages at `date` ====\n" \
+			echo "\n==== Creating $MACH/$LABEL packages at `date` ====\n" \
 				>> $LOGFILE
 			echo "Clearing out $PKGARCHIVE ..." >> $LOGFILE
 			rm -rf $PKGARCHIVE >> "$LOGFILE" 2>&1
@@ -327,7 +327,7 @@ function build {
 			/bin/time $MAKE -e install 2>&1 | \
 			    tee -a $SRC/pkg/${INSTALLOG}.out >> $LOGFILE
 
-			echo "\n==== package build errors ($LABEL) ====\n" \
+			echo "\n==== package build errors ($MACH/$LABEL) ====\n" \
 				>> $mail_msg_file
 
 			egrep "${MAKE}|ERROR|WARNING" $SRC/pkg/${INSTALLOG}.out | \
@@ -344,11 +344,11 @@ function build {
 			# Handle it gracefully if -p was set but there so
 			# no pkg directory.
 			#
-			echo "\n==== No $LABEL packages to build ====\n" \
+			echo "\n==== No $MACH/$LABEL packages to build ====\n" \
 				>> $LOGFILE
 		fi
 	else
-		echo "\n==== Not creating $LABEL packages ====\n" >> $LOGFILE
+		echo "\n==== Not creating $MACH/$LABEL packages ====\n" >> $LOGFILE
 	fi
 
 	ROOT=$ORIGROOT
@@ -449,10 +449,10 @@ function do_wsdiff {
 	[ "$t_FLAG" = y ] && wsdiff="wsdiff -t"
 
 	echo "\n==== Getting object changes since last build at `date`" \
-	    "($label) ====\n" | tee -a $LOGFILE >> $mail_msg_file
+	    "($MACH/$label) ====\n" | tee -a $LOGFILE >> $mail_msg_file
 	$wsdiff -s -r ${TMPDIR}/wsdiff.results $oldproto $newproto 2>&1 | \
 		    tee -a $LOGFILE >> $mail_msg_file
-	echo "\n==== Object changes determined at `date` ($label) ====\n" | \
+	echo "\n==== Object changes determined at `date` ($MACH/$label) ====\n" | \
 	    tee -a $LOGFILE >> $mail_msg_file
 }
 
@@ -1010,7 +1010,7 @@ function logshuffle {
 
 	exec >>$LOGFILE 2>&1
 	if [ -s $build_noise_file ]; then
-		echo "\n==== Nightly build noise ====\n" |
+		echo "\n==== Nightly build noise ($MACH) ====\n" |
 		    tee -a $LOGFILE >>$mail_msg_file
 		cat $build_noise_file >>$LOGFILE
 		cat $build_noise_file >>$mail_msg_file
@@ -2044,7 +2044,7 @@ if [ "$w_FLAG" = "y" -a "$build_ok" = "y" ]; then
 fi
 
 END_DATE=`date`
-echo "==== Nightly $maketype build completed: $END_DATE ====" | \
+echo "==== Nightly $MACH/$maketype build completed: $END_DATE ====" | \
     tee -a $LOGFILE >> $build_time_file
 
 typeset -i10 hours
