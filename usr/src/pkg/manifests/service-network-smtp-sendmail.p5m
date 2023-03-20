@@ -199,8 +199,8 @@ $(not_aarch64)file path=usr/bin/vacation mode=0555
 dir  path=usr/include
 dir  path=usr/include/libmilter
 $(not_aarch64)file path=usr/include/libmilter/README
-file path=usr/include/libmilter/mfapi.h
-file path=usr/include/libmilter/mfdef.h
+$(not_aarch64)file path=usr/include/libmilter/mfapi.h
+$(not_aarch64)file path=usr/include/libmilter/mfdef.h
 dir  path=usr/lib
 dir  path=usr/lib/help
 dir  path=usr/lib/help/auths
