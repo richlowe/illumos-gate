@@ -363,8 +363,9 @@ MACH64=		$($(MACH)_MACH64)
 
 sparc_MACH32=	sparcv7
 i386_MACH32=	i86
-# XXX: I just know this is going to cause me pain
-aarch64_MACH32=
+# We have no support for 32bit arm, but it proves necessary in the build to
+# have MACH32 set to _something_ to avoid rule collisions when it is empty
+aarch64_MACH32=	aarch32
 MACH32=		$($(MACH)_MACH32)
 
 sparc_BUILD64=
@@ -609,7 +610,7 @@ aarch64_CFLAGS=	$(aarch64_XARCH) -_gcc=-mno-outline-atomics \
 $(MACH)_ASFLAGS=	$($(MACH)_CFLAGS)
 $(MACH64)_ASFLAGS=	$($(MACH64)_CFLAGS)
 
-ASFLAGS= 		$($(MACH)_ASFLAGS)
+ASFLAGS=		$($(MACH)_ASFLAGS)
 ASFLAGS64=		$($(MACH64)_ASFLAGS)
 
 #

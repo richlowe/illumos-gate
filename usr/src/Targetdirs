@@ -60,10 +60,11 @@ i386_DIRS=			\
 sparc_DIRS=			\
 	/usr/lib/ldoms
 
-sparc_64ONLY= $(POUND_SIGN)
-64ONLY=  $($(MACH)_64ONLY)
-
-$(64ONLY) MACH32_DIRS=/usr/ucb/$(MACH32)
+$(BUILD32)MACH32_DIRS=		\
+	/usr/ucb/$(MACH32)	\
+	/usr/bin/$(MACH32)	\
+	/usr/lib/rcap/$(MACH32)	\
+	/usr/sbin/$(MACH32)	\
 
 PYTHON3_DIRS = \
 	/usr/lib/python$(PYTHON3_VERSION)					\
@@ -232,7 +233,6 @@ DIRS=							\
 	/usr/ast					\
 	/usr/ast/bin					\
 	/usr/bin					\
-	/usr/bin/$(MACH32)				\
 	/usr/ccs					\
 	/usr/ccs/bin					\
 	/usr/ccs/lib					\
@@ -299,7 +299,6 @@ DIRS=							\
 	/usr/net/servers				\
 	/usr/lib/pool					\
 	/usr/lib/rcap					\
-	/usr/lib/rcap/$(MACH32)				\
 	/usr/lib/sa					\
 	/usr/lib/saf					\
 	/usr/lib/sasl					\
@@ -319,7 +318,6 @@ DIRS=							\
 	/usr/sadm/install/bin				\
 	/usr/sadm/install/scripts			\
 	/usr/sbin					\
-	/usr/sbin/$(MACH32)				\
 	/usr/share					\
 	/usr/share/applications				\
 	/usr/share/audio				\
