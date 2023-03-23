@@ -46,10 +46,9 @@ function usage
 }
 
 typeset -r USAGE=$'+
-[-?\n@(#)\$Id: bldenv (OS/Net) 2008-04-06 \$\n]
-[-author?OS/Net community <tools-discuss@opensolaris.org>]
-[+NAME?bldenv - spawn shell for interactive incremental OS-Net
-    consolidation builds]
+[-?\n@(#)\$Id: bldenv (illumos) 2012-03-23 \$\n]
+[-author?illumos community <developer@lists.illumos.org>]
+[+NAME?bldenv - spawn shell for interactive illumos builds]
 [+DESCRIPTION?bldenv is a useful companion to the nightly(1) script for
     doing interactive and incremental builds in a workspace
     already built with nightly(1). bldenv spawns a shell set up
@@ -87,7 +86,7 @@ typeset -r USAGE=$'+
             usr/src/cmd/true.]
         [+\n% rlogin wopr-2 -l gk
 {root::wopr-2::49} bldenv -d /export0/jg/on10-se.env
-Build type   is  DEBUG
+Build type   is  sparc/DEBUG
 RELEASE      is  5.10
 VERSION      is  wopr-2::on10-se::11/01/2001
 RELEASE_DATE is  May 2004
@@ -108,8 +107,8 @@ install -s -m 0555 -u root -g bin -f /export0/jg/on10-se/proto/root_sparc/usr/bi
 `install\' is up to date.]
     }
     [+?Example 2: Non-interactive use]{
-        [+?Invoke bldenv to create SUNWonbld with a single command:]
-        [+\nexample% bldenv onnv_06 \'cd $SRC/tools && make pkg\']
+        [+?Invoke bldenv to setup workspace with a single command:]
+        [+\nexample% bldenv onnv_06 \'cd $SRC && make setup\']
         }
 }
 [+SEE ALSO?\bnightly\b(1)]
@@ -280,9 +279,13 @@ DEV_CM_TAIL="development build: $LOGNAME $now [$basews]"
 #
 export POUND_SIGN RELEASE_DATE DEV_CM_TAIL
 
-print 'Build type   is  \c'
+print 'Build type   is \c'
 if ${flags.d} ; then
-	print 'DEBUG'
+	if [[ ${MACH} != ${NATIVE_MACH} ]]; then
+		print "${MACH}/DEBUG (cross)"
+	else
+		print "${MACH}/DEBUG"
+	fi
 	SUFFIX=""
 	unset RELEASE_BUILD
 	unset EXTRA_OPTIONS
@@ -293,7 +296,11 @@ if ${flags.d} ; then
 	fi
 else
 	# default is a non-DEBUG build
-	print 'non-DEBUG'
+	if [[ ${MACH} != ${NATIVE_MACH} ]]; then
+		print "${MACH}/non-DEBUG (cross)"
+	else
+		print "${MACH}/non-DEBUG"
+	fi
 	SUFFIX="-nd"
 	export RELEASE_BUILD=
 	unset EXTRA_OPTIONS
@@ -404,13 +411,11 @@ export \
         PARENT_ROOT \
         PARENT_TOOLS_ROOT
 
-printf 'RELEASE      is %s\n'   "$RELEASE"
+if [[ -n ${RELEASE} ]]; then
+	printf 'RELEASE      is %s\n'   "$RELEASE"
+fi
 printf 'VERSION      is %s\n'   "$VERSION"
 printf 'RELEASE_DATE is %s\n\n' "$RELEASE_DATE"
-
-if [[ -n "$NATIVE_MACH" && "$NATIVE_MACH" != "$MACH" ]]; then
-	printf 'Cross-building for %s on %s host \n' ${MACH} ${NATIVE_MACH}
-fi
 
 if [[ -f "$SRC/Makefile" ]] && egrep -s '^setup:' "$SRC/Makefile" ; then
 	print "The top-level 'setup' target is available \c"
