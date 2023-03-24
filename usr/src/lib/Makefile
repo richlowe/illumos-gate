@@ -82,6 +82,7 @@ SUBDIRS +=		\
 # smbclnt -- low value, needs cross dtrace
 #
 # libcpc -- not ported
+# libpctx -- part of cpc
 # brand -- not ported
 $(NOT_AARCH64_BLD)SUBDIRS += \
 	../cmd/sendmail/libmilter \
@@ -92,6 +93,7 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	libcpc		\
 	libdtrace_jni	\
 	libmvec		\
+	libpctx		\
 	libresolv	\
 	libzfs_jni	\
 	pylibbe		\
@@ -204,7 +206,6 @@ SUBDIRS +=				\
 	libpam		\
 	libpcidb	\
 	libpcsc		\
-	libpctx		\
 	libpicl		\
 	libpicltree	\
 	libpkg		\
@@ -455,7 +456,6 @@ HDRSUBDIRS=		\
 	libpam		\
 	libpcidb	\
 	libpcsc		\
-	libpctx		\
 	libpicl		\
 	libpicltree	\
 	libpool		\
@@ -535,6 +535,7 @@ $(NOT_AARCH64_BLD)HDRSUBDIRS +=		\
 	../cmd/sendmail/libmilter	\
 	libcpc				\
 	libdtrace_jni			\
+	libpctx				\
 	libzfs_jni
 
 all :=		TARGET= all

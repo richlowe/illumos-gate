@@ -40,7 +40,7 @@ $(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/cputrack mode=0555
 $(not_aarch64)hardlink path=usr/bin/cputrack target=../lib/isaexec
 dir  path=usr/include
 $(not_aarch64)file path=usr/include/libcpc.h
-file path=usr/include/libpctx.h
+$(not_aarch64)file path=usr/include/libpctx.h
 dir  path=usr/include/sys
 dir  path=usr/kernel group=sys
 $(not_aarch64)dir path=usr/kernel/pcbe group=sys
@@ -145,8 +145,8 @@ $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libpctx.so target=./libpctx.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libpctx.so.1
 $(not_aarch64)link path=usr/lib/libcpc.so target=./libcpc.so.1
 $(not_aarch64)file path=usr/lib/libcpc.so.1
-link path=usr/lib/libpctx.so target=./libpctx.so.1
-file path=usr/lib/libpctx.so.1
+$(not_aarch64)link path=usr/lib/libpctx.so target=./libpctx.so.1
+$(not_aarch64)file path=usr/lib/libpctx.so.1
 dir  path=usr/sbin
 $(not_aarch64)file path=usr/sbin/cpustat mode=0555
 dir  path=usr/share/man/man1
