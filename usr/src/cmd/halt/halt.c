@@ -1428,6 +1428,18 @@ main(int argc, char *argv[])
 	}
 #endif
 
+/*
+ * XXXARM: Note that parse_fastboot_args, validate_disk, etc, are all also
+ * entirely platform specific
+ */
+#if defined(__aarch64__)
+	if (fast_reboot != 0) {
+		(void) fprintf(stderr, gettext("%s: -f not supported on aarch64\n"),
+		    cmdname);
+		return (EINVAL);
+	}
+#endif
+
 	/*
 	 * If fast reboot, do some sanity check on the argument
 	 */
