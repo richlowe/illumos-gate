@@ -434,10 +434,14 @@ static const char *
 kp_isa(mdb_tgt_t *t)
 {
 	kp_data_t *kp = t->t_data;
-#ifdef __sparc
+#if defined(__sparc)
 	return (kp->kp_model == PR_MODEL_ILP32 ? "sparc" : "sparcv9");
-#else
+#elif defined(__x86)
 	return (kp->kp_model == PR_MODEL_ILP32 ? "i386" : "amd64");
+#elif defined(__aarch64__)
+	return ("aarch64");
+#else
+#error Unknown platform
 #endif
 }
 

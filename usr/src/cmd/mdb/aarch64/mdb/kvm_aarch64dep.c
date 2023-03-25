@@ -483,7 +483,7 @@ mdb_aarch64_kvm_frame(void *arglim, uintptr_t pc, uint_t argc, const long *argv,
 }
 
 int
-mdb_amd64_kvm_framev(void *arglim, uintptr_t pc, uint_t argc, const long *argv,
+mdb_aarch64_kvm_framev(void *arglim, uintptr_t pc, uint_t argc, const long *argv,
     const mdb_tgt_gregset_t *gregs)
 {
 	/*
@@ -546,7 +546,7 @@ kt_stack(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 int
 kt_stackv(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-	return (kt_stack_common(addr, flags, argc, argv, mdb_amd64_kvm_framev));
+	return (kt_stack_common(addr, flags, argc, argv, mdb_aarch64_kvm_framev));
 }
 
 const mdb_tgt_ops_t kt_aarch64_ops = {
