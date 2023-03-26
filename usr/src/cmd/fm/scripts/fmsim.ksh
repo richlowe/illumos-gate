@@ -34,6 +34,8 @@ if [[ $isa = sparc ]]; then
 	isa64=sparcv9
 elif [[ $isa = i386 ]]; then
 	isa64=amd64
+elif [[ $isa = aarch64 ]]; then
+	isa64=aarch64
 else
 	isa64=unknown
 fi
