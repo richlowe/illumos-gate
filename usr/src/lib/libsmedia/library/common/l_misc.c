@@ -50,12 +50,10 @@
 #include <utmpx.h>
 #include <limits.h>
 
-#ifdef _LP64
-#ifdef __sparc
+#if defined(_LP64) && defined(__sparc)
 #define	PATHNAME "/usr/lib/smedia/sparcv9"
-#else
+#elif defined(_LP64) && defined(__x86)
 #define	PATHNAME "/usr/lib/smedia/amd64"
-#endif
 #else
 #define	PATHNAME "/usr/lib/smedia"
 #endif
