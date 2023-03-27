@@ -148,7 +148,6 @@ COMMON_SUBDIRS=	\
 	fdetach		\
 	fdformat	\
 	fdisk		\
-	ficl		\
 	filesync	\
 	file		\
 	find		\
@@ -512,7 +511,8 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	ypcmd		\
 
 aarch64_SUBDIRS=	\
-	ahciem
+	ahciem		\
+	ficl
 
 i386_SUBDIRS=		\
 	acpi		\
@@ -525,6 +525,7 @@ i386_SUBDIRS=		\
 	biosdev		\
 	cxgbetool	\
 	diskscan	\
+	ficl		\
 	nvmeadm		\
 	pptadm		\
 	rdmsr		\

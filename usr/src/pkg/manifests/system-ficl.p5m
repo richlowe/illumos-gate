@@ -28,9 +28,7 @@ dir  path=usr group=sys
 dir  path=usr/bin group=bin
 $(not_aarch64)dir path=usr/bin/$(ARCH32) group=bin
 $(not_aarch64)file path=usr/bin/$(ARCH32)/ficl-sys group=sys mode=0555
-dir  path=usr/bin/$(ARCH64) group=bin
-file path=usr/bin/$(ARCH64)/ficl-sys group=sys mode=0555
-hardlink path=usr/bin/ficl-sys target=../../usr/lib/isaexec
+file path=usr/bin/ficl-sys group=sys mode=0555
 dir  path=usr/lib group=bin
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64) group=bin
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libficl-sys.so.4.1.0 group=sys \

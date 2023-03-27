@@ -83,7 +83,6 @@ MANFILES=	acctcom.1			\
 		crle.1				\
 		crontab.1			\
 		crypt.1				\
-		csh.1				\
 		csplit.1			\
 		ctfdiff.1			\
 		ctfdump.1			\
@@ -541,11 +540,13 @@ MANLINKS=	batch.1		\
 		zcat.1
 
 # Platforms with legacy ship /usr/has and links thereto
-i386_MANLINKS=	ctags.1		\
+i386_MANLINKS=	csh.1		\
+		ctags.1		\
 		edit.1		\
 		vedit.1
 
-sparc_MANLINKS=	ctags.1		\
+sparc_MANLINKS=	csh.1		\
+		ctags.1		\
 		edit.1		\
 		vedit.1
 
@@ -610,6 +611,8 @@ valyorn.1	:= LINKSRC = ckyorn.1
 
 uncompress.1	:= LINKSRC = compress.1
 zcat.1		:= LINKSRC = compress.1
+
+csh.1		:= LINKSRC = ../../../has/man/man1has/csh.1has
 
 ctags.1		:= LINKSRC = ../../../has/man/man1has/ctags.1has
 
