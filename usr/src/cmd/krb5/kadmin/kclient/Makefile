@@ -73,7 +73,7 @@ ksmb:=		LDFLAGS += -R/usr/lib/smbsrv
 kconf:=		LDFLAGS += $(KRUNPATH)
 
 KS_LDLIBS =	$(LDLIBS) $(KMECHLIB)
-KD_LDLIBS =	$(LDLIBS) -L$(ROOT)/usr/lib/smbsrv -lsmbns
+KD_LDLIBS =	$(LDLIBS) -L$(ROOT)/usr/lib/smbsrv -lsmbns -L$(ADJUNCT_PROTO)/usr/lib/mps
 KSMB_LDLIBS =	$(LDLIBS) -L$(ROOT)/usr/lib/smbsrv -lsmb
 KC_LDLIBS =	$(LDLIBS) $(KMECHLIB)
 

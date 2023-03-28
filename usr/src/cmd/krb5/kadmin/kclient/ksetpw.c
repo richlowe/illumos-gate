@@ -57,7 +57,8 @@ main(int argc, char **argv)
 	krb5_keytab kt = NULL;
 	krb5_kvno kvno = 1;
 	krb5_principal victim, salt = NULL;
-	char c, *vprincstr, *ktname, *token, *lasts, *newpw;
+	int c;
+	char *vprincstr, *ktname, *token, *lasts, *newpw;
 	int result_code, i, len, nflag = 0;
 	krb5_data result_code_string, result_string;
 
