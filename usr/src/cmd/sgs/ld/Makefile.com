@@ -41,7 +41,8 @@ SRCDIR =	$(SGSHOME)/ld
 MAPFILES =	$(SRCDIR)/common/mapfile-intf $(MAPFILE.NGB)
 MAPOPTS =	$(MAPFILES:%=-Wl,-M%)
 
-RPATH =		'-R$$ORIGIN/../../lib/$(MACH64)'
+$(NOT_AARCH64_BLD)RPATH =	'-R$$ORIGIN/../../lib/$(MACH64)'
+$(AARCH64_BLD)RPATH =		'-R$$ORIGIN/../lib/'
 
 LDFLAGS +=	$(VERSREF) $(MAPOPTS) $(RPATH)
 LDLIBS +=	-lumem $(LDLIBDIR64) -lld $(ELFLIBDIR64) -lelf \

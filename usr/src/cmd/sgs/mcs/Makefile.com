@@ -43,8 +43,9 @@ SGSCOMMONOBJ =	alist.o
 
 OBJS =		$(COMOBJS) $(SGSCOMMONOBJ)
 
-LLDFLAGS =	'-R$$ORIGIN/../../lib'
-LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
+LLDFLAGS =			'-R$$ORIGIN/../../lib'
+$(NOT_AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
+$(AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../lib'
 LDFLAGS +=	$(VERSREF) $(LLDFLAGS)
 LDLIBS +=	$(CONVLIBDIR) -lconv $(ELFLIBDIR) -lelf
 

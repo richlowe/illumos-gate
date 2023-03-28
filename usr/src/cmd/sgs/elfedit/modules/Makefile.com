@@ -93,8 +93,9 @@ MAPFILES = ../common/mapfile-vers
 
 CPPFLAGS +=	-I../../../include -I../../../include/$(MACH) \
 		-I$(SRC)/lib/libc/inc  -D_REENTRANT
-LLDFLAGS =	'-R$$ORIGIN/../../../lib'
-LLDFLAGS64 =	'-R$$ORIGIN/../../../../lib/$(MACH64)'
+LLDFLAGS =			'-R$$ORIGIN/../../../lib'
+$(NOT_AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../../../lib/$(MACH64)'
+$(AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../../lib'
 LDFLAGS +=	$(LLDFLAGS)
 DYNFLAGS +=	$(VERSREF)
 

@@ -43,7 +43,9 @@ MAPFILE=	$(MAPFILE.NGB)
 MAPOPTS=	$(MAPFILE:%=-Wl,-M%)
 
 CPPFLAGS +=	-I$(SRC)/lib/libc/inc
-LDFLAGS +=	$(VERSREF) $(MAPOPTS) '-R$$ORIGIN/../../lib/$(MACH64)'
+LDFLAGS +=	$(VERSREF) $(MAPOPTS)
+$(NOT_AARCH64_BLD)LDFLAGS += '-R$$ORIGIN/../../lib/$(MACH64)'
+$(AARCH64_BLD)LDFLAGS += '-R$$ORIGIN/../lib/'
 LDLIBS +=	$(LDDBGLIBDIR64) -llddbg $(ELFLIBDIR64) -lelf \
 		    $(CONVLIBDIR64) -lconv
 

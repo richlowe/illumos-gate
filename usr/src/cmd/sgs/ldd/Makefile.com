@@ -44,7 +44,9 @@ MAPOPTS=	$(MAPFILE:%=-Wl,-M%)
 CPPFLAGS +=	-I. -I../../include -I../../include/$(MACH) \
 		-I$(SRC)/uts/$(ARCH)/sys \
 		$(CPPFLAGS.master)
-LDFLAGS +=	$(VERSREF) $(MAPOPTS) '-R$$ORIGIN/../../lib/$(MACH64)'
+LDFLAGS +=	$(VERSREF) $(MAPOPTS)
+$(NOT_AARCH64_BLD)LDFLAGS +=	'-R$$ORIGIN/../../lib/$(MACH64)'
+$(AARCH64_BLD)LDFLAGS +=	'-R$$ORIGIN/../lib/'
 LDLIBS +=	$(CONVLIBDIR64) -lconv $(ELFLIBDIR64) -lelf
 
 SMOFF += or_vs_and

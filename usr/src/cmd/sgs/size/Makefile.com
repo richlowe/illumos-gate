@@ -40,7 +40,8 @@ CERRWARN +=	-_gcc=-Wno-unused-variable
 OBJS =		$(COMOBJS)
 .PARALLEL:	$(OBJS)
 
-RPATH =	'-R$$ORIGIN/../../lib/$(MACH64)'
+$(NOT_AARCH64_BLD)RPATH =	'-R$$ORIGIN/../../lib/$(MACH64)'
+$(AARCH64_BLD)RPATH =	'-R$$ORIGIN/../lib/'
 LDFLAGS +=	$(RPATH)
 
 LDLIBS +=	$(CONVLIBDIR64) -lconv $(ELFLIBDIR64) -lelf

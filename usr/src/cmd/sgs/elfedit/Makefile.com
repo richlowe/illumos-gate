@@ -47,7 +47,8 @@ CPPFLAGS=	-I. -I../common -I../../include -I../../include/$(MACH) \
 		-I$(SRC)/lib/libc/inc -I$(SRC)/uts/$(ARCH)/sys \
 		$(CPPFLAGS.master) -I$(ELFCAP)
 LLDFLAGS =	'-R$$ORIGIN/../../lib'
-LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
+$(NOT_AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
+$(AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../lib'
 LDFLAGS +=	$(VERSREF) -Wl,-M$(MAPFILE) $(LLDFLAGS)
 LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) -llddbg \
 		    $(CONVLIBDIR) -lconv -ltecla

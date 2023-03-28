@@ -37,8 +37,10 @@ BLTOBJ =	msg.o
 OBJS=		$(BLTOBJ:%=objs/%) $(COMOBJ:%=objs/%)
 XPG4OBJS=	$(BLTOBJ:%=objs.xpg4/%) $(COMOBJ:%=objs.xpg4/%)
 
-LLDFLAGS =	'-R$$ORIGIN/../../lib'
-LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
+LLDFLAGS =			'-R$$ORIGIN/../../lib'
+$(NOT_AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
+$(AARCH64_BLD)LLDFLAGS64 = 	'-R$$ORIGIN/../../lib'
+
 CPPFLAGS=	-I. -I../../include $(CPPFLAGS.master) -I$(ELFCAP)
 CFLAGS +=	$(CCVERBOSE)
 CSTD=	$(CSTD_GNU99)

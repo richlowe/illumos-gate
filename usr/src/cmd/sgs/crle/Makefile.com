@@ -47,8 +47,9 @@ SMATCH=off
 
 CPPFLAGS +=	-I$(SRC)/common/sgsrtcid -I$(SRC)/uts/$(ARCH)/sys \
 		-D__EXTENSIONS__
-LLDFLAGS =	'-R$$ORIGIN/../lib'
-LLDFLAGS64 =	'-R$$ORIGIN/../../lib/$(MACH64)'
+LLDFLAGS =			'-R$$ORIGIN/../lib'
+$(NOT_AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../lib/$(MACH64)'
+$(AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../lib'
 LDFLAGS +=	$(VERSREF) $(MAPOPT) $(LLDFLAGS) $(ZNOLAZYLOAD)
 LDLIBS +=	-lelf $(CONVLIBDIR) -lconv
 
