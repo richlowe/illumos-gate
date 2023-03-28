@@ -47,8 +47,10 @@ FIRST_SUBDIRS=		\
 	isaexec		\
 	platexec
 
-COMMON_SUBDIRS=	\
+COMMON_SUBDIRS=		\
 	allocate	\
+	lp		\
+	perl		\
 	Adm		\
 	adbgen		\
 	acct		\
@@ -221,21 +223,20 @@ COMMON_SUBDIRS=	\
 	loadkeys	\
 	locale		\
 	localedef	\
-	locator		\
 	lockstat	\
+	locator		\
 	lofiadm		\
 	logadm		\
 	logger		\
 	login		\
 	logins		\
 	logname		\
-	lp		\
 	look		\
 	ls		\
 	mach		\
 	mail		\
-	mailx		\
 	mailwrapper	\
+	mailx		\
 	make		\
 	makekey		\
 	man		\
@@ -283,20 +284,19 @@ COMMON_SUBDIRS=	\
 	pcidr		\
 	pcieadm		\
 	pcieb		\
-	perl		\
 	pfexec		\
 	pfexecd		\
-	pg		\
 	pginfo		\
 	pgstat		\
 	pgrep		\
 	picl		\
 	plimit		\
-	plockstat	\
 	policykit	\
 	pools		\
 	power		\
 	ppgsz		\
+	pg		\
+	plockstat	\
 	pr		\
 	prctl		\
 	print		\
@@ -326,8 +326,8 @@ COMMON_SUBDIRS=	\
 	rm		\
 	rmdir		\
 	rmmount		\
-	rmvolmgr	\
 	rmt		\
+	rmvolmgr	\
 	roles		\
 	rpcbind		\
 	rpcgen		\
@@ -435,9 +435,9 @@ COMMON_SUBDIRS=	\
 	zoneadmd	\
 	zonecfg		\
 	zonename	\
-	zonestat	\
-	zlook		\
 	zpool		\
+	zlook		\
+	zonestat	\
 	zstreamdump	\
 	ztest
 
