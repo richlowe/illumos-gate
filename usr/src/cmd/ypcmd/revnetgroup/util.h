@@ -48,11 +48,6 @@ extern "C" {
 	(dst = (char *) malloc((unsigned)(num) + 1),\
 	(void)strncpy(dst,src,num),(dst)[num] = EOS) 
 
-/*
-extern char *malloc();
-*/
-extern char *alloca();
-
 char *getaline();
 void fatal();
 

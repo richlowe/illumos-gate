@@ -41,7 +41,11 @@ ROOTDIRS =	$(NETSVC) $(NETYP)
 
 # include library definitions
 #LDLIBS +=	-lrpcsvc -lnsl -lcrypt -lintl -lgen
-LDLIBS +=	-lnsl -lnisdb -lc
+LDLIBS +=	-lnsl -lnisdb -lc -L$(ADJUNCT_PROTO)/usr/lib/mps
+
+# XXXARM: _Unwind_Resume
+$(AARCH64_BLD) LDLIBS += -lgcc
+
 MAPFILES =	$(MAPFILE.INT) $(MAPFILE.NGB)
 LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)
 

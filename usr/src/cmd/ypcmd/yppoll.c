@@ -90,8 +90,6 @@ static void getypserv();
 extern void exit();
 extern int getdomainname();
 extern int gethostname();
-extern unsigned int strlen();
-extern int strcmp();
 
 /*
  * This is the mainline for the yppoll process.

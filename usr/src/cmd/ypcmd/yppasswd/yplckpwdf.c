@@ -67,7 +67,7 @@ yplckpwdf()
 	flock.l_type = F_WRLCK;
 	(void) sigset(SIGALRM, almhdlr);
 	(void) alarm(S_WAITTIME);
-	retval = fcntl(fildes, F_SETLKW, (int)&flock);
+	retval = fcntl(fildes, F_SETLKW, &flock);
 	(void) alarm(0);
 	(void) sigset(SIGALRM, SIG_DFL);
 	return (retval);
@@ -84,7 +84,7 @@ ypulckpwdf()
 		return (-1);
 
 	flock.l_type = F_UNLCK;
-	(void) fcntl(fildes, F_SETLK, (int)&flock);
+	(void) fcntl(fildes, F_SETLK, &flock);
 	(void) close(fildes);
 	fildes = -1;
 	return (0);

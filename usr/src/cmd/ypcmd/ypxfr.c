@@ -88,6 +88,7 @@
 #include <rpcsvc/yp_prot.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <rpcsvc/nis.h>
 #include "ypdefs.h"
 #include "yp_b.h"
@@ -209,7 +210,7 @@ bool add_private_entries();
 bool new_mapfiles();
 void del_mapfiles();
 void set_output();
-void logprintf();
+void logprintf(const char *fmt, ...);
 bool send_ypclear();
 void xfr_exit();
 void send_callback();
@@ -343,13 +344,14 @@ set_output()
 		}
 	}
 }
+
 /*
  * This constructs a logging record.
  */
 void
-logprintf(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
-/*VARARGS*/
+logprintf(const char *fmt, ...)
 {
+	va_list va;
 	struct timeval t;
 
 	fseek(stderr, 0, 2);
@@ -357,8 +359,10 @@ logprintf(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
 		(void) gettimeofday(&t, NULL);
 		(void) fprintf(stderr, "%19.19s: ", ctime(&t.tv_sec));
 	}
-	(void) fprintf(stderr, (char *)arg1, arg2, arg3, arg4, arg5,
-				arg6, arg7);
+
+	va_start(va, fmt);
+	vfprintf(stderr, fmt, va);
+	va_end(va);
 	fflush(stderr);
 }
 
