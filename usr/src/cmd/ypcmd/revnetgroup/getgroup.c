@@ -24,11 +24,10 @@
  * Copyright (c) 1996, by Sun Microsystems, Inc.
  * All rights reserved.
  */
-							    
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SMI4.1 1.5 */
 
 #include <stdio.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include "table.h"
 #include "util.h"

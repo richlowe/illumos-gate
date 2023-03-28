@@ -34,24 +34,22 @@ set name=info.classification \
 set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 file path=etc/nsswitch.nis group=sys
-$(not_aarch64)file path=etc/publickey original_name=SUNWnis:etc/publickey \
-    preserve=true
+file path=etc/publickey original_name=SUNWnis:etc/publickey preserve=true
 dir  path=lib
 dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys
 dir  path=lib/svc/manifest/network group=sys
 dir  path=lib/svc/manifest/network/nis group=sys
-$(not_aarch64)file path=lib/svc/manifest/network/nis/client.xml group=sys \
-    mode=0444
+file path=lib/svc/manifest/network/nis/client.xml group=sys mode=0444
 dir  path=lib/svc/manifest/network/rpc group=sys
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/chkey group=sys mode=4555
 file path=usr/bin/ldaplist mode=0555
-$(not_aarch64)file path=usr/bin/ypcat group=other mode=0555
-$(not_aarch64)file path=usr/bin/ypmatch group=other mode=0555
+file path=usr/bin/ypcat group=other mode=0555
+file path=usr/bin/ypmatch group=other mode=0555
 file path=usr/bin/yppasswd mode=0555
-$(not_aarch64)file path=usr/bin/ypwhich group=other mode=0555
+file path=usr/bin/ypwhich group=other mode=0555
 dir  path=usr/lib
 dir  path=usr/lib/ldap
 file path=usr/lib/ldap/idsconfig mode=0555
@@ -60,19 +58,19 @@ link path=usr/lib/libnisdb.so target=./libnisdb.so.2
 file path=usr/lib/libnisdb.so.2
 dir  path=usr/lib/netsvc group=sys
 dir  path=usr/lib/netsvc/nis group=sys
-$(not_aarch64)dir path=usr/lib/netsvc/yp
-$(not_aarch64)file path=usr/lib/netsvc/yp/ypbind mode=0555
-$(not_aarch64)file path=usr/lib/netsvc/yp/ypstart mode=0555
-$(not_aarch64)file path=usr/lib/netsvc/yp/ypstop mode=0555
-$(not_aarch64)file path=usr/lib/netsvc/yp/ypxfr mode=0555
+dir  path=usr/lib/netsvc/yp
+file path=usr/lib/netsvc/yp/ypbind mode=0555
+file path=usr/lib/netsvc/yp/ypstart mode=0555
+file path=usr/lib/netsvc/yp/ypstop mode=0555
+file path=usr/lib/netsvc/yp/ypxfr mode=0555
 dir  path=usr/sbin
 file path=usr/sbin/ldapaddent mode=0555
 file path=usr/sbin/ldapclient mode=0555
 file path=usr/sbin/newkey group=sys mode=0555
-$(not_aarch64)file path=usr/sbin/ypalias mode=0555
-$(not_aarch64)file path=usr/sbin/ypinit mode=0555
-$(not_aarch64)file path=usr/sbin/yppoll mode=0555
-$(not_aarch64)file path=usr/sbin/ypset mode=0555
+file path=usr/sbin/ypalias mode=0555
+file path=usr/sbin/ypinit mode=0555
+file path=usr/sbin/yppoll mode=0555
+file path=usr/sbin/ypset mode=0555
 dir  path=usr/share/man
 dir  path=usr/share/man/man1
 file path=usr/share/man/man1/chkey.1
@@ -102,12 +100,11 @@ link path=usr/share/man/man8/ypxfr_1perhour.8 target=ypxfr.8
 link path=usr/share/man/man8/ypxfr_2perday.8 target=ypxfr.8
 dir  path=var group=sys
 dir  path=var/ldap group=sys
-$(not_aarch64)dir path=var/yp
-$(not_aarch64)file path=var/yp/aliases mode=0555 \
-    original_name=SUNWnis:var/yp/aliases preserve=true
-$(not_aarch64)dir path=var/yp/binding
-$(not_aarch64)file path=var/yp/nicknames \
-    original_name=SUNWnis:var/yp/nicknames preserve=true
+dir  path=var/yp
+file path=var/yp/aliases mode=0555 original_name=SUNWnis:var/yp/aliases \
+    preserve=true
+dir  path=var/yp/binding
+file path=var/yp/nicknames original_name=SUNWnis:var/yp/nicknames preserve=true
 legacy pkg=SUNWnisr \
     desc="configuration files and directories for the Network Information System (NIS)" \
     name="Network Information System, (Root)"

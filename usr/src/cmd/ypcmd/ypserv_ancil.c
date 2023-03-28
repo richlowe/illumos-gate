@@ -25,7 +25,7 @@
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * Portions of this source code were derived from Berkeley 4.3 BSD
@@ -37,6 +37,7 @@ static	char sccsid[] = "@(#)ypserv_ancil.c 1.13 88/02/08 Copyr 1984 Sun Micro";
 #endif
 
 #include <dirent.h>
+#include <stdlib.h>
 #include <syslog.h>
 #include "ypsym.h"
 #include "ypdefs.h"
@@ -46,10 +47,7 @@ USE_DBM
 #include "shim.h"
 #include "yptol.h"
 
-extern unsigned int strlen();
-extern int strcmp();
 extern int isvar_sysv();
-extern char *strncpy();
 extern int yp_getkey();
 
 /*
