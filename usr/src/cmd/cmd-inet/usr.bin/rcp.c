@@ -1825,30 +1825,11 @@ zclose(int fd)
 static int
 notzero(char *p, int n)
 {
-	register int result = 0;
+	while (n-- > 0)
+		if (*p++ != '\0')
+			return 1;
 
-	while ((int)p & 3 && --n >= 0)
-		result |= *p++;
-
-	while ((n -= 4 * sizeof (int)) >= 0) {
-		/* LINTED */
-		result |= ((int *)p)[0];
-		/* LINTED */
-		result |= ((int *)p)[1];
-		/* LINTED */
-		result |= ((int *)p)[2];
-		/* LINTED */
-		result |= ((int *)p)[3];
-		if (result)
-			return (result);
-		p += 4 * sizeof (int);
-	}
-	n += 4 * sizeof (int);
-
-	while (--n >= 0)
-		result |= *p++;
-
-	return (result);
+	return 0;
 }
 
 /*
