@@ -71,7 +71,7 @@ SMATCH=off
 
 LDFLAGS += $(KRUNPATH) $(KERBRUNPATH)
 LDLIBS += -L $(ROOT_KLIBDIR) -L $(KRB5LIB) -lkadm5srv -lkdb -lkdb_ldap \
-	-lmech_krb5
+	-lmech_krb5 -L$(ADJUNCT_PROTO)/usr/lib/mps
 
 .KEEP_STATE:
 

@@ -210,6 +210,7 @@ COMMON_SUBDIRS=		\
 	kbd		\
 	keyserv		\
 	killall		\
+	krb5		\
 	kvmstat		\
 	last		\
 	lastcomm	\
@@ -460,7 +461,6 @@ COMMON_SUBDIRS=		\
 # format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
 # isns - not 64bit clean
-# krb5 - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
 # nohup - not ported (header bits gone awry)
 # oawk - not 64bit clean?
@@ -488,7 +488,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	format		\
 	gss		\
 	isns		\
-	krb5		\
 	latencytop	\
 	luxadm		\
 	nohup		\

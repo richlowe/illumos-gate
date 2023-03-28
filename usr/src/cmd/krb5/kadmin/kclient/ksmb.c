@@ -58,7 +58,8 @@ usage()
 int
 main(int argc, char **argv)
 {
-	char c, fqdn[MAXHOSTNAMELEN], server[MAXHOSTNAMELEN];
+	int c;
+	char fqdn[MAXHOSTNAMELEN], server[MAXHOSTNAMELEN];
 	char *newpw;
 	int ret = 0;
 

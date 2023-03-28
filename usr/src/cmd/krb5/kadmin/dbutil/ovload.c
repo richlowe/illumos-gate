@@ -35,6 +35,8 @@
 #define LINESIZE	32768 /* XXX */
 #define PLURAL(count)	(((count) == 1) ? error_message(IMPORT_SINGLE_RECORD) : error_message(IMPORT_PLURAL_RECORDS))
 
+extern caddr_t xdralloc_getdata(XDR *xdrs);
+
 static int parse_pw_hist_ent(current, hist)
    char *current;
    osa_pw_hist_ent *hist;

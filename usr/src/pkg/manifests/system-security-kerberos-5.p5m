@@ -44,26 +44,25 @@ dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys
 dir  path=lib/svc/manifest/network group=sys
 dir  path=lib/svc/manifest/network/security group=sys
-$(not_aarch64)file path=lib/svc/manifest/network/security/krb5_prop.xml \
-    group=sys mode=0444
+file path=lib/svc/manifest/network/security/krb5_prop.xml group=sys mode=0444
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/krb5
 file path=usr/lib/krb5/README.db2 mode=0444
 link path=usr/lib/krb5/db2.so target=db2.so.1
 file path=usr/lib/krb5/db2.so.1
-$(not_aarch64)file path=usr/lib/krb5/kadmind mode=0500
-$(not_aarch64)file path=usr/lib/krb5/kconf mode=0555
-$(not_aarch64)file path=usr/lib/krb5/kdyndns mode=0555
+file path=usr/lib/krb5/kadmind mode=0500
+file path=usr/lib/krb5/kconf mode=0555
+file path=usr/lib/krb5/kdyndns mode=0555
 link path=usr/lib/krb5/kldap.so target=kldap.so.1
 file path=usr/lib/krb5/kldap.so.1
-$(not_aarch64)file path=usr/lib/krb5/klookup mode=0555
-$(not_aarch64)file path=usr/lib/krb5/kprop mode=0555
-$(not_aarch64)file path=usr/lib/krb5/kprop_script mode=0555
-$(not_aarch64)file path=usr/lib/krb5/kpropd mode=0555
-$(not_aarch64)file path=usr/lib/krb5/krb5kdc mode=0500
-$(not_aarch64)file path=usr/lib/krb5/ksetpw mode=0555
-$(not_aarch64)file path=usr/lib/krb5/ksmb mode=0555
+file path=usr/lib/krb5/klookup mode=0555
+file path=usr/lib/krb5/kprop mode=0555
+file path=usr/lib/krb5/kprop_script mode=0555
+file path=usr/lib/krb5/kpropd mode=0555
+file path=usr/lib/krb5/krb5kdc mode=0500
+file path=usr/lib/krb5/ksetpw mode=0555
+file path=usr/lib/krb5/ksmb mode=0555
 link path=usr/lib/krb5/libdb2.so target=libdb2.so.1
 file path=usr/lib/krb5/libdb2.so.1
 link path=usr/lib/krb5/libdyn.so target=libdyn.so.1
@@ -75,18 +74,18 @@ file path=usr/lib/krb5/libkdb.so.1
 link path=usr/lib/krb5/libkdb_ldap.so target=libkdb_ldap.so.1
 file path=usr/lib/krb5/libkdb_ldap.so.1
 dir  path=usr/lib/security
-$(not_aarch64)file path=usr/lib/security/pam_krb5_first mode=0444
-$(not_aarch64)file path=usr/lib/security/pam_krb5_only mode=0444
-$(not_aarch64)file path=usr/lib/security/pam_krb5_optional mode=0444
+file path=usr/lib/security/pam_krb5_first mode=0444
+file path=usr/lib/security/pam_krb5_only mode=0444
+file path=usr/lib/security/pam_krb5_optional mode=0444
 dir  path=usr/sbin
-$(not_aarch64)file path=usr/sbin/k5srvutil mode=0555
-$(not_aarch64)file path=usr/sbin/kadmin mode=0555
-$(not_aarch64)file path=usr/sbin/kadmin.local mode=0555
-$(not_aarch64)file path=usr/sbin/kclient mode=0555
-$(not_aarch64)file path=usr/sbin/kdb5_ldap_util mode=0555
-$(not_aarch64)file path=usr/sbin/kdb5_util mode=0555
-$(not_aarch64)file path=usr/sbin/kdcmgr mode=0555
-$(not_aarch64)file path=usr/sbin/kproplog mode=0555
+file path=usr/sbin/k5srvutil mode=0555
+file path=usr/sbin/kadmin mode=0555
+file path=usr/sbin/kadmin.local mode=0555
+file path=usr/sbin/kclient mode=0555
+file path=usr/sbin/kdb5_ldap_util mode=0555
+file path=usr/sbin/kdb5_util mode=0555
+file path=usr/sbin/kdcmgr mode=0555
+file path=usr/sbin/kproplog mode=0555
 dir  path=usr/share
 dir  path=usr/share/lib
 dir  path=usr/share/lib/ldif group=sys
