@@ -31,13 +31,10 @@
 include $(SRC)/Makefile.master
 
 PROG=		finger rdate ruptime rwho whois
-# XXXARM: Not 64bit clean, see also below
-$(NOT_AARCH64_BLD)SUIDPROG=	rcp rlogin rsh
+SUIDPROG=	rcp rlogin rsh
 ALL=		$(PROG) $(SUIDPROG)
 SRCS=		$(ALL:%=%.c)
-
-# XXXARM: not 64bit clean
-$(NOT_AARCH64_BLD)KCMDPROGS= rcp rlogin rsh
+KCMDPROGS=	rcp rlogin rsh
 
 SUBDIRS=	chat dns-sd ftp nc netstat \
 		pppdump pppstats rdist talk telnet tftp
