@@ -593,7 +593,7 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-if [[ -z $T_FLAG ]]; then 
+if [[ -z $T_FLAG ]]; then
 	export MACH=$(uname -p)
 	export NATIVE_MACH=${MACH}
 else
@@ -1059,8 +1059,7 @@ function logshuffle {
 	fi
 	rm -f $build_noise_file
 
-
-	print "==== Nightly build status ====\n\n${status_string}" >> \
+	print "\n==== Nightly build status ====\n\n${status_string}" >> \
 	      $mail_msg_file
 
 	#
