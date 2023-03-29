@@ -38,7 +38,10 @@ LIBS =		$(DYNLIB)
 
 CFLAGS	+=	$(CCVERBOSE)
 DYNFLAGS32 +=	-Wl,-f,/usr/platform/\$$PLATFORM/lib/$(DYNLIBPSR)
-DYNFLAGS64 +=	-Wl,-f,/usr/platform/\$$PLATFORM/lib/$(MACH64)/$(DYNLIBPSR)
+$(NOT_AARCH64_BLD)DYNFLAGS64 +=	\
+	-Wl,-f,/usr/platform/\$$PLATFORM/lib/$(MACH64)/$(DYNLIBPSR)
+$(AARCH64_BLD)DYNFLAGS64 +=	\
+	-Wl,-f,/usr/platform/\$$PLATFORM/lib/$(DYNLIBPSR)
 LDLIBS +=	-lelf -lc
 
 CPPFLAGS = -D_KMEMUSER -D_LARGEFILE64_SOURCE=1 -I.. $(CPPFLAGS.master)
