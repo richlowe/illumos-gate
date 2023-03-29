@@ -27,6 +27,6 @@ include ../Makefile.com
 include ../../../Makefile.lib.64
 include ../../mech_krb5/Makefile.mech_krb5
 
-LDLIBS64 += 	-lgss -lc -lmech_krb5 -L$(ROOT_KLIBDIR64) $(KRUNPATH64)
+LDLIBS64 += 	-lgss -lc -lmech_krb5 -L$(ROOT_KLIBDIR) $(KRUNPATH)
 
 install: all $(ROOTLIBS)
