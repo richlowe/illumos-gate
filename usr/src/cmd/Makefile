@@ -158,6 +158,7 @@ COMMON_SUBDIRS=	\
 	fmthard		\
 	fmtmsg		\
 	fold		\
+	format		\
 	fs.d		\
 	fstyp		\
 	fuser		\
@@ -457,7 +458,6 @@ COMMON_SUBDIRS=	\
 # csh - not 64bit clean
 # csplit - not 64bit clean
 # eqn - not 64bit clean
-# format - not 64bit clean (but just printf stuff)
 # gss - not 64bit clean
 # isns - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
@@ -484,7 +484,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	csh		\
 	csplit		\
 	eqn		\
-	format		\
 	gss		\
 	isns		\
 	latencytop	\

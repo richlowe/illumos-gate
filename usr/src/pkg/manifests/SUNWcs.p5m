@@ -95,8 +95,8 @@ file path=etc/dhcp/inittab6 group=sys preserve=true
 file path=etc/dumpdates group=sys mode=0664 preserve=true
 link path=etc/ff target=../usr/sbin/ff
 link path=etc/fmthard target=../usr/sbin/fmthard
-$(not_aarch64)link path=etc/format target=../usr/sbin/format
-$(not_aarch64)file path=etc/format.dat group=sys preserve=true
+link path=etc/format target=../usr/sbin/format
+file path=etc/format.dat group=sys preserve=true
 dir  path=etc/fs group=sys
 dir  path=etc/fs/dev group=sys
 file path=etc/fs/dev/mount mode=0555
@@ -1358,7 +1358,7 @@ link path=usr/sbin/fiocompress target=../../sbin/fiocompress
 link path=usr/sbin/flowadm target=../../sbin/flowadm
 link path=usr/sbin/flowstat target=../../sbin/flowstat
 file path=usr/sbin/fmthard group=sys mode=0555
-$(not_aarch64)file path=usr/sbin/format mode=0555
+file path=usr/sbin/format mode=0555
 file path=usr/sbin/fsck mode=0555
 link path=usr/sbin/fsdb target=./clri
 link path=usr/sbin/fsirand target=../lib/fs/ufs/fsirand

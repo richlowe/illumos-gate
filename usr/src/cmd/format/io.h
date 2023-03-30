@@ -103,7 +103,7 @@ typedef	char TOKEN[TOKEN_SIZE+1];		/* token type */
 char	*gettoken(char *inbuf);
 void	clean_token(char *cleantoken, char *token);
 int	geti(char *str, int *iptr, int *wild);
-uint64_t	input(int, char *, int, u_ioparam_t *, int *, int);
+intptr_t	input(int, char *, int, u_ioparam_t *, void *, int);
 int	find_value(slist_t *slist, char *match_str, int *match_value);
 char	*find_string(slist_t *slist, int match_value);
 void	fmt_print(char *format, ...) __PRINTFLIKE(1);
