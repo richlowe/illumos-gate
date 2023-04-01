@@ -31,7 +31,6 @@ include $(SRC)/Makefile.master.64
 include ../../Makefile.targ
 
 LDLIBS += -ltopo
-LDFLAGS += -L$(ROOT)/usr/lib/fm/
-LINTFLAGS += -L$(ROOT)/usr/lib/fm/
+LDFLAGS += -L$(ROOT)/usr/lib/fm/ -R/usr/lib/fm
 
 install: all $(ROOTPROG)
