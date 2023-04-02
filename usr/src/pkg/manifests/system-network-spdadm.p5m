@@ -33,7 +33,7 @@ set name=pkg.fmri value=pkg:/system/network/spdadm@$(PKGVERS)
 set name=pkg.summary value="Sun InfiniBand pseudo Sockets Direct Protocol Admin"
 set name=pkg.description value="Sun InfiniBand Sockets Direct Protocol Admin"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
+set name=variant.arch value=i386
 dir  path=usr group=sys
 dir  path=usr/lib
 $(not_aarch64)dir path=usr/lib/rcm

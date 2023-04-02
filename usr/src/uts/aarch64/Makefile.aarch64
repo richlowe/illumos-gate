@@ -479,7 +479,7 @@ DRV_KMODS	+= dcam1394
 #
 #	InfiniBand pseudo drivers
 #
-DRV_KMODS	+= ib ibp eibnx eoib sdp iser daplt hermon tavor sol_ucma sol_uverbs
+DRV_KMODS	+= ib ibp eibnx eoib iser daplt hermon tavor sol_ucma sol_uverbs
 DRV_KMODS	+= sol_umad
 #DRV_KMODS	+= rdsib
 
@@ -679,7 +679,6 @@ OVERLAY_KMODS	+= vxlan
 #
 SOCKET_KMODS	+= sockpfp
 SOCKET_KMODS	+= socksctp
-SOCKET_KMODS    += socksdp
 SOCKET_KMODS	+= sockrds
 
 #

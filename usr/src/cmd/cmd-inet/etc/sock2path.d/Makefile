@@ -28,8 +28,11 @@ SOCK2PATHFILES= \
     driver%2Fnetwork%2Fbpf \
     driver%2Fnetwork%2Frds \
     driver%2Fnetwork%2Frdsv3 \
-    driver%2Fnetwork%2Fsdp \
     system%2Fkernel
+
+i386_SOCK2PATHFILES=     driver%2Fnetwork%2Fsdp
+
+SOCK2PATHFILES += $($(MACH)_SOCK2PATHFILES)
 
 include ../../../Makefile.cmd
 

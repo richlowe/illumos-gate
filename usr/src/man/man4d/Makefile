@@ -111,7 +111,6 @@ MANFILES=	aac.4d		\
 		scsa1394.4d	\
 		scsa2usb.4d	\
 		sd.4d		\
-		sdp.4d		\
 		sdt.4d		\
 		ses.4d		\
 		sfe.4d		\
@@ -170,6 +169,7 @@ sparc_MANFILES=	audiocs.4d	\
 		pcipsy.4d	\
 		pcisch.4d	\
 		smbus.4d	\
+		sdp.4d		\
 		su.4d		\
 		todopl.4d	\
 		tsalarm.4d	\
@@ -235,6 +235,7 @@ i386_MANFILES=	ahci.4d		\
 		rwn.4d		\
 		sda.4d		\
 		sdhost.4d	\
+		sdp.4d		\
 		sfxge.4d	\
 		si3124.4d	\
 		skd.4d		\

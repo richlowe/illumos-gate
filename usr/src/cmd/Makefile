@@ -343,7 +343,6 @@ COMMON_SUBDIRS=	\
 	script		\
 	scsi		\
 	sdiff		\
-	sdpadm		\
 	sed		\
 	setfacl		\
 	setmnt		\
@@ -529,6 +528,7 @@ i386_SUBDIRS=		\
 	rdmsr		\
 	rsrvrctl	\
 	rtc		\
+	sdpadm		\
 	ucodeadm	\
 	xhci		\
 	xvm
@@ -544,6 +544,7 @@ sparc_SUBDIRS=		\
 	prtfru		\
 	scadm		\
 	sckmd		\
+	sdpadm		\
 	sf880drd	\
 	virtinfo	\
 	vntsd

@@ -427,7 +427,6 @@ MANFILES=	6to4relay.8		\
 		savecore.8		\
 		sbdadm.8		\
 		scadm.8			\
-		sdpadm.8		\
 		sendmail.8		\
 		share.8			\
 		share_nfs.8		\
@@ -546,9 +545,13 @@ i386_MANFILES=			\
 		acpixtract.8	\
 		bhyve.8		\
 		bhyvectl.8	\
+		sdpadm.8	\
 		nvmeadm.8	\
 		pptadm.8	\
 		rdmsr.8
+
+sparc_MANFILES=			\
+		sdpadm.8
 
 aarch64_MANFILES=		\
 		nvmeadm.8
