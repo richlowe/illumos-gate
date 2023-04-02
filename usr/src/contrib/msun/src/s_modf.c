@@ -77,3 +77,5 @@ modf(double x, double *iptr)
 	    }
 	}
 }
+
+__weak_reference(modf, _modf);

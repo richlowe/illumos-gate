@@ -81,3 +81,5 @@ __weak_reference(nextafter, nexttoward);
 __weak_reference(nextafter, nexttowardl);
 __weak_reference(nextafter, nextafterl);
 #endif
+
+__weak_reference(nextafter, _nextafter);

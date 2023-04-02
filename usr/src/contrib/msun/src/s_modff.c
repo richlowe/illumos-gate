@@ -55,3 +55,5 @@ modff(float x, float *iptr)
 	    return x;
 	}
 }
+
+__weak_reference(modff, _modff);

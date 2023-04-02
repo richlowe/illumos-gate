@@ -1939,12 +1939,20 @@ SYMBOL_VERSION SUNW_0.7 {	# SunOS 5.3 (Solaris 2.3)
 					  ALIAS = __ctype;
 					};
 				};
+$if aarch64
+	isnanf			{ TYPE = FUNCTION; FILTER = libm.so.0; };
+$else
 	isnanf			{ TYPE = FUNCTION; FILTER = libm.so.2; };
+$endif
 	lone			{ ASSERT = { TYPE = OBJECT; SIZE = 8; }; };
 	lten			{ ASSERT = { TYPE = OBJECT; SIZE = 8; }; };
 	lzero			{ ASSERT = { TYPE = OBJECT; SIZE = 8; }; };
 	memalign		{ FLAGS = NODIRECT; };
+$if aarch64
+	modff			{ TYPE = FUNCTION; FILTER = libm.so.0; };
+$else
 	modff			{ TYPE = FUNCTION; FILTER = libm.so.2; };
+$endif
 	nss_default_finders	{
 				  ASSERT = {
 					  TYPE = OBJECT;
@@ -2435,7 +2443,11 @@ $endif
 			  FLAGS = NODIRECT;
 			};
 	free		{ FLAGS = NODIRECT; };
+$if aarch64
+	frexp		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+$else
 	frexp		{ TYPE = FUNCTION; FILTER = libm.so.2; };
+$endif
 	getdate_err	{ ASSERT = { TYPE = OBJECT; SIZE = 4; }; };
 	_getdate_err	{
 			  ASSERT = {
@@ -2446,21 +2458,39 @@ $endif
 	getenv;
 	__huge_val	{ ASSERT = { TYPE = OBJECT; SIZE = 8; }; };
 	__iob		{ ASSERT = { BINDING = WEAK; ALIAS = _iob; }; };
+
+$if aarch64
+	isnan		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	_isnan		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	isnand		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	_isnand		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	ldexp		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	logb		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+$else
 	isnan		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	_isnan		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	isnand		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	_isnand		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	ldexp		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	logb		{ TYPE = FUNCTION; FILTER = libm.so.2; };
+$endif
 	malloc		{ FLAGS = NODIRECT; };
 	memcmp;
 	memcpy;
 	memmove;
 	memset;
+
+$if aarch64
+	modf		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	_modf		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	nextafter	{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	_nextafter	{ TYPE = FUNCTION; FILTER = libm.so.0; };
+$else
 	modf		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	_modf		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	nextafter	{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	_nextafter	{ TYPE = FUNCTION; FILTER = libm.so.2; };
+$endif
 	_numeric	{ ASSERT = { TYPE = OBJECT; SIZE = 2; }; };
 	optarg		{
 			  ASSERT = {
@@ -2472,8 +2502,14 @@ $endif
 	optind		{ ASSERT = { TYPE = OBJECT; SIZE = 4; }; };
 	optopt		{ ASSERT = { TYPE = OBJECT; SIZE = 4; }; };
 	realloc		{ FLAGS = NODIRECT; };
+
+$if aarch64
+	scalb		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+	_scalb		{ TYPE = FUNCTION; FILTER = libm.so.0; };
+$else
 	scalb		{ TYPE = FUNCTION; FILTER = libm.so.2; };
 	_scalb		{ TYPE = FUNCTION; FILTER = libm.so.2; };
+$endif
 	timezone	{
 			  ASSERT = {
 				  TYPE = OBJECT;
@@ -3205,7 +3241,11 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 				};
 	_isnanf			{
 				  TYPE = FUNCTION;
+$if aarch64
+				  FILTER = libm.so.0;
+$else
 				  FILTER = libm.so.2;
+$endif
 				};
 	__iswrune;
 	__libc_threaded		{
@@ -3223,7 +3263,11 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 				};
 	_logb			{
 				  TYPE = FUNCTION;
+$if aarch64
+				  FILTER = libm.so.0;
+$else
 				  FILTER = libm.so.2;
+$endif
 				};
 	_lone			{
 				  FLAGS = NODYNSORT;
@@ -3258,7 +3302,11 @@ SYMBOL_VERSION SUNWprivate_1.1 {
 	_memset;
 	_modff			{
 				  TYPE = FUNCTION;
+$if aarch64
+				  FILTER = libm.so.0;
+$else
 				  FILTER = libm.so.2;
+$endif
 				};
 	__nan_read		{
 				  ASSERT = {
