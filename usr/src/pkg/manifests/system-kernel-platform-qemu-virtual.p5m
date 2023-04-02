@@ -20,7 +20,8 @@ dir  path=platform/QEMU,virt-4.1
 file path=platform/QEMU,virt-4.1/inetboot.bin
 dir  path=platform/QEMU,virt-4.1/kernel
 dir  path=platform/QEMU,virt-4.1/kernel/aarch64
-file path=platform/QEMU,virt-4.1/kernel/aarch64/unix mode=0755
+file path=platform/QEMU,virt-4.1/kernel/aarch64/unix mode=0755 \
+    pkg.depend.bypass-generate=dtracestubs
 dir  path=platform/QEMU,virt-4.1/kernel/misc
 dir  path=platform/QEMU,virt-4.1/kernel/misc/aarch64
 file path=platform/QEMU,virt-4.1/kernel/misc/aarch64/virtio mode=0755

@@ -20,7 +20,8 @@ dir  path=platform/Amlogic,meson-gxbb
 file path=platform/Amlogic,meson-gxbb/inetboot
 dir  path=platform/Amlogic,meson-gxbb/kernel
 dir  path=platform/Amlogic,meson-gxbb/kernel/aarch64
-file path=platform/Amlogic,meson-gxbb/kernel/aarch64/unix mode=0755
+file path=platform/Amlogic,meson-gxbb/kernel/aarch64/unix mode=0755 \
+    pkg.depend.bypass-generate=dtracestubs
 dir  path=platform/Amlogic,meson-gxbb/kernel/drv
 dir  path=platform/Amlogic,meson-gxbb/kernel/drv/aarch64
 file path=platform/Amlogic,meson-gxbb/kernel/drv/aarch64/aml-sd-emmc
