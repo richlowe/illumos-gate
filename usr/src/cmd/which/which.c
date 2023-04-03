@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  * Copyright (c) 2000 Dan Papasian.  All rights reserved.
+ * Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,26 +27,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sys/fcntl.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <err.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-static void	usage(void);
-static int	print_matches(char *, char *);
+#define	EXIT_USAGE	2
 
-static int	silent;
-static int	allpaths;
+static void	usage(void) __NORETURN;
+static bool	print_matches(char *, const char *const);
+
+static bool	silent = false;
+static bool	allpaths = false;
 
 int
 main(int argc, char **argv)
 {
 	char *p, *path;
-	ssize_t pathlen;
+	size_t pathlen;
 	int opt, status;
 
 	status = EXIT_SUCCESS;
@@ -53,10 +58,10 @@ main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "as")) != -1) {
 		switch (opt) {
 		case 'a':
-			allpaths = 1;
+			allpaths = true;
 			break;
 		case 's':
-			silent = 1;
+			silent = true;
 			break;
 		default:
 			usage();
@@ -68,26 +73,51 @@ main(int argc, char **argv)
 	argc -= optind;
 
 	if (argc == 0)
-		usage();
+		exit(EXIT_SUCCESS);
 
 	if ((p = getenv("PATH")) == NULL)
-		exit(EXIT_FAILURE);
-	pathlen = strlen(p) + 1;
-	path = malloc(pathlen);
+		errx(EXIT_FAILURE, "Could not find PATH in environment");
+
+	pathlen = strlen(p);
+	path = strdup(p);
+
 	if (path == NULL)
-		err(EXIT_FAILURE, NULL);
+		err(EXIT_FAILURE, "Failed to duplicate PATH");
 
 	while (argc > 0) {
-		memcpy(path, p, pathlen);
+		memcpy(path, p, pathlen + 1);
 
-		if (strlen(*argv) >= FILENAME_MAX ||
-		    print_matches(path, *argv) == -1)
+		if (strlen(*argv) >= FILENAME_MAX) {
 			status = EXIT_FAILURE;
+
+			warnx("operand too long '%s'", *argv);
+		} else if (!print_matches(path, *argv)) {
+			status = EXIT_FAILURE;
+
+			if (!silent) {
+				(void) printf("no %s in", *argv);
+
+				if (pathlen > 0) {
+					char *q = path;
+					const char *d;
+
+					memcpy(q, p, pathlen + 1);
+
+					while ((d = strsep(&q, ":")) != NULL) {
+						(void) printf(" %s",
+						    *d == '\0' ? "." : d);
+					}
+				}
+
+				(void) printf("\n");
+			}
+		}
 
 		argv++;
 		argc--;
 	}
 
+	free(path);
 	exit(status);
 }
 
@@ -95,36 +125,36 @@ static void
 usage(void)
 {
 	(void) fprintf(stderr, "usage: which [-as] program ...\n");
-	exit(EXIT_FAILURE);
+	exit(EXIT_USAGE);
 }
 
-static int
-is_there(char *candidate)
+static bool
+is_there(const char *const candidate)
 {
 	struct stat fin;
 
-	if (access(candidate, X_OK) == 0 &&
+	if (faccessat(AT_FDCWD, candidate, X_OK, AT_EACCESS) == 0 &&
 	    stat(candidate, &fin) == 0 &&
-	    S_ISREG(fin.st_mode) &&
-	    (getuid() != 0 ||
-	    (fin.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)) {
+	    S_ISREG(fin.st_mode)) {
 		if (!silent)
 			printf("%s\n", candidate);
-		return (1);
+
+		return (true);
 	}
-	return (0);
+
+	return (false);
 }
 
-static int
-print_matches(char *path, char *filename)
+static bool
+print_matches(char *path, const char *const filename)
 {
 	char candidate[PATH_MAX];
 	const char *d;
-	int found;
+	bool found = false;
 
 	if (strchr(filename, '/') != NULL)
-		return (is_there(filename) ? 0 : -1);
-	found = 0;
+		return (is_there(filename));
+
 	while ((d = strsep(&path, ":")) != NULL) {
 		if (*d == '\0')
 			d = ".";
@@ -132,10 +162,11 @@ print_matches(char *path, char *filename)
 		    filename) >= (int)sizeof (candidate))
 			continue;
 		if (is_there(candidate)) {
-			found = 1;
+			found = true;
 			if (!allpaths)
 				break;
 		}
 	}
-	return (found ? 0 : -1);
+
+	return (found);
 }

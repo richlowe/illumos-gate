@@ -1,4 +1,3 @@
-.\" Manpage Copyright (c) 1995, Jordan Hubbard <jkh@FreeBSD.org>
 .\"
 .\" Redistribution and use in source and binary forms, with or without
 .\" modification, are permitted provided that the following conditions
@@ -27,8 +26,10 @@
 .\" (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 .\" OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\"
+.\" Manpage Copyright (c) 1995, Jordan Hubbard <jkh@FreeBSD.org>
+.\" Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
 .\"
-.Dd September 24, 2020
+.Dd March 15, 2023
 .Dt WHICH 1
 .Os
 .Sh NAME
@@ -37,7 +38,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Fl as
-.Ar program ...
+.Ar command ...
 .Sh DESCRIPTION
 The
 .Nm
@@ -45,65 +46,101 @@ utility
 takes a list of command names and searches the path for each executable
 file that would be run had these commands actually been invoked.
 .Pp
+Some shells may provide a built-in
+.Nm
+command which is similar or identical to this utility.
+.Sh OPTIONS
 The following options are available:
-.Bl -tag -width indent
+.Bl -tag -width Ar
 .It Fl a
-List all instances of executables found (instead of just the first one
-of each).
+List all instances of executables found
+.Pq instead of just the first one of each .
 .It Fl s
 No output, just return 0 if all of the executables are found, or 1 if
 some were not found.
 .El
-.Pp
-Some shells may provide a builtin
-.Nm
-command which is similar or identical to this utility.
-Consult the
-.Xr builtin 1
-manual page.
+.Sh OPERANDS
+The following operands are supported:
+.Bl -tag -width Ar
+.It Ar command
+The name of a command to be located.
+.El
+.Sh ENVIRONMENT
+See
+.Xr environ 7
+for descriptions of the following environment variables that affect the
+execution of
+.Nm :
+.Ev PATH .
+.Sh EXIT STATUS
+The following exit values are returned:
+.Bl -tag -width Sy
+.It Sy 0
+All of the provided operands were found in the path and would be executed if
+the commands were invoked.
+.It Sy 1
+One or more of the provided operands was not found in the path or would not
+be executed if the commands were invoked, or an error occurred.
+.It Sy 2
+Invalid command line options were specified.
+.El
 .Sh EXAMPLES
+.Sy Example 1
 Locate the
-.Xr ls 1
+.Sq ls
 and
-.Xr cp 1
-commands:
+.Sq cp
+commands.
 .Bd -literal -offset indent
 $ /usr/bin/which ls cp
-/bin/ls
-/bin/cp
+/usr/bin/ls
+/usr/bin/cp
 .Ed
 .Pp
-Same as above with a specific
+.Sy Example 2
+Use a specific
 .Ev PATH
-and showing all occurrences:
+and show all occurrences.
 .Bd -literal -offset indent
-$ PATH=/bin:/rescue /usr/bin/which -a ls cp
-/bin/ls
-/rescue/ls
-/bin/cp
-/rescue/cp
+$ PATH=/usr/bin:/usr/has/bin /usr/bin/which -a edit
+/usr/bin/edit
+/usr/has/bin/edit
 .Ed
 .Pp
-.Nm
-will show duplicates if the same executable is found more than once:
+.Sy Example 3
+Executable reported multiple times.
+.Pp
+If
+.Ev PATH
+contains repeated components, the same executable can be reported
+more than once:
 .Bd -literal -offset indent
-$ PATH=/bin:/bin /usr/bin/which -a ls
-/bin/ls
-/bin/ls
+$ PATH=/usr/bin:/usr/bin /usr/bin/which -a ls
+/usr/bin/ls
+/usr/bin/ls
 .Ed
 .Pp
+.Sy Example 4
 Do not show output.
+.Pp
 Just exit with an appropriate return code:
 .Bd -literal -offset indent
 $ /usr/bin/which -s ls cp
 $ echo $?
 0
-
 $ /usr/bin/which -s fakecommand
 $ echo $?
 1
 .Ed
+.Sh INTERFACE STABILITY
+The command line interface of
+.Nm
+is
+.Sy Committed .
+The output of
+.Nm
+is
+.Sy Committed .
 .Sh SEE ALSO
-.Xr builtin 1 ,
-.Xr csh 1 ,
-.Xr find 1
+.Xr find 1 ,
+.Xr environ 7
