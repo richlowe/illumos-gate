@@ -39,4 +39,4 @@ license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 license usr/src/test/test-runner/stf/contrib/LICENSE.Artistic \
     license=usr/src/test/test-runner/stf/contrib/LICENSE.Artistic
-$(not_aarch64)depend type=require fmri=security/sudo
+depend type=require fmri=security/sudo

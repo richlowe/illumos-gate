@@ -165,4 +165,4 @@ license lic_CDDL license=lic_CDDL
 license usr/src/cmd/backup/dump/THIRDPARTYLICENSE \
     license=usr/src/cmd/backup/dump/THIRDPARTYLICENSE
 $(not_aarch64)depend type=require fmri=developer/macro/cpp
-$(not_aarch64)depend type=require fmri=runtime/perl$(PERL_PKGVERS)
+depend type=require fmri=runtime/perl$(PERL_PKGVERS)

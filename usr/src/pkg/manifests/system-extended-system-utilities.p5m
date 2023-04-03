@@ -294,5 +294,5 @@ license usr/src/cmd/look/THIRDPARTYLICENSE \
     license=usr/src/cmd/look/THIRDPARTYLICENSE
 license usr/src/cmd/units/THIRDPARTYLICENSE \
     license=usr/src/cmd/units/THIRDPARTYLICENSE
-$(not_aarch64)depend type=require fmri=runtime/perl$(PERL_PKGVERS)
+depend type=require fmri=runtime/perl$(PERL_PKGVERS)
 depend type=require fmri=runtime/perl$(PERL_PKGVERS)/module/sun-solaris

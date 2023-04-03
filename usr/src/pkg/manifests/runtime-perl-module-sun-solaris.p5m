@@ -99,4 +99,4 @@ file path=usr/share/man/man3perl/Task.3perl
 license cr_Sun license=cr_Sun
 license usr/src/cmd/perl/THIRDPARTYLICENSE \
     license=usr/src/cmd/perl/THIRDPARTYLICENSE
-$(not_aarch64)depend type=require fmri=runtime/perl$(PERL_PKGVERS)
+depend type=require fmri=runtime/perl$(PERL_PKGVERS)

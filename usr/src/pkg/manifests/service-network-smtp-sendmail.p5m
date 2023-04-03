@@ -274,4 +274,4 @@ license lic_CDDL license=lic_CDDL
 # XXXARM: Because we don't actually build sendmail, we don't get the license
 $(not_aarch64)license usr/src/cmd/sendmail/THIRDPARTYLICENSE \
     license=usr/src/cmd/sendmail/THIRDPARTYLICENSE
-$(not_aarch64)depend type=require fmri=runtime/perl$(PERL_PKGVERS)
+depend type=require fmri=runtime/perl$(PERL_PKGVERS)

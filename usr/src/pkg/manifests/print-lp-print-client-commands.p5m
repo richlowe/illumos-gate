@@ -80,4 +80,4 @@ legacy pkg=SUNWpcu \
     name="Solaris Print - Client, (usr)" version=13.1,REV=2009.11.11
 license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
-$(not_aarch64)depend type=require fmri=runtime/perl$(PERL_PKGVERS)
+depend type=require fmri=runtime/perl$(PERL_PKGVERS)

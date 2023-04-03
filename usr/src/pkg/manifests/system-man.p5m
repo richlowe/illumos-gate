@@ -66,4 +66,4 @@ license usr/src/cmd/mandoc/THIRDPARTYLICENSE \
 #depend fmri=compress/gzip type=require
 # less is the default (per user environment) pager.  We really should just
 # import this into illumos-gate.
-$(not_aarch64)depend type=require fmri=text/less
+depend type=require fmri=text/less

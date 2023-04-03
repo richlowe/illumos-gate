@@ -1361,4 +1361,4 @@ $(not_aarch64)depend type=conditional \
 # libses.so needs to dlopen(3C) plugins from usr/lib/scsi/plugins/ses/vendor/,
 # a dependency which cannot be automatically derived
 #
-$(not_aarch64)depend type=require fmri=system/library/storage/scsi-plugins
+depend type=require fmri=system/library/storage/scsi-plugins
