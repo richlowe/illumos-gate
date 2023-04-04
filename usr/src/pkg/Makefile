@@ -43,8 +43,6 @@ SHELL= /usr/bin/ksh93
 # environment.
 #
 SUPPRESSPKGDEP= false
-# XXXARM: We need to teach pkgdepend about aarch64
-$(AARCH64_BLD)SUPPRESSPKGDEP= true
 
 #
 # Comment this line out or set "PKGDEBUG=" in your build environment
