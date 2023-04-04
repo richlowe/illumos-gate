@@ -59,6 +59,9 @@ tests = ['exclude-kmod', 'exclude-exec', 'exclude-so', 'include-reloc', 'unknown
 [/opt/elf-tests/tests/string-merge/]
 tests = ['simple']
 
+[/opt/elf-tests/tests/sysroot]
+tests = ['test-search']
+
 [/opt/elf-tests/tests/tls/optimization/amd64/ie]
 arch = i86pc
 tests = ['amd64-ie-test']

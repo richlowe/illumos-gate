@@ -60,9 +60,10 @@ Target		ld_targ;
  * part of the path processing.
  */
 #if	defined(_ELF64)
-static char	def_Plibpath[] = "/lib/64:/usr/lib/64";
+static char	def_Plibpath[] = "$SYSROOT/lib/64:$SYSROOT/usr/lib/64";
 #else
-static char	def_Plibpath[] = "/usr/ccs/lib:/lib:/usr/lib";
+static char	def_Plibpath[] = "$SYSROOT/usr/ccs/lib:$SYSROOT/lib:"
+	"$SYSROOT/usr/lib";
 #endif
 
 /*
@@ -186,6 +187,8 @@ ld_main(int argc, char **argv, Half mach)
 		return (1);
 	(void) strcpy(ofl->ofl_sgsid, MSG_ORIG(MSG_SGS_ID));
 	(void) strcat(ofl->ofl_sgsid, link_ver_string);
+
+	ofl->ofl_sysroot = "/";
 
 	/*
 	 * Argument pass one.  Get all the input flags (skip any files) and

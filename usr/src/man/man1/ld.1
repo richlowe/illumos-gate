@@ -6,7 +6,7 @@
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License. You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.
 .\"  See the License for the specific language governing permissions and limitations under the License. When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with
 .\" the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH LD 1 "Jan 28, 2022"
+.TH LD 1 "April 4, 2023"
 .SH NAME
 ld \- link-editor for object files
 .SH SYNOPSIS
@@ -34,9 +34,10 @@ ld \- link-editor for object files
 [\fB-z\fR nopartial] [\fB-z\fR noversion] [\fB-z\fR now] [\fB-z\fR origin]
 [\fB-z\fR preinitarray=\fIfunction\fR] [\fB-z\fR redlocsym] [\fB-z\fR relaxreloc]
 [\fB-z\fR rescan-now] [\fB-z\fR recan] [\fB-z\fR rescan-start \fI\&...\fR \fB-z\fR rescan-end]]
-[\fB-z\fR symbolcap] [\fB-z\fR target=sparc|x86] [\fB-z\fR text | textwarn | textoff]
-[\fB-z\fR type=\fIexec\fR|\fIkmod\fR|\fIreloc\fR|\fIshared\fR]
-[\fB-z\fR verbose] [\fB-z\fR wrap=\fIsymbol\fR] \fIfilename\fR...
+[\fB-z\fR symbolcap] [\fB-z\fR sysroot=dir] [\fB-z\fR target=sparc|x86]
+[\fB-z\fR text | textwarn | textoff]
+[\fB-z\fR type=\fIexec\fR|\fIkmod\fR|\fIreloc\fR|\fIshared\fR] [\fB-z\fR verbose]
+[\fB-z\fR wrap=\fIsymbol\fR] \fIfilename\fR...
 .fi
 
 .SH DESCRIPTION
@@ -545,6 +546,11 @@ in the standard directories. This option is useful only if the option precedes
 the \fB-l\fR options to which the \fB-L\fR option applies. See \fIDirectories
 Searched by the Link-Editor\fR in \fILinker and Libraries Guide\fR.
 .sp
+If path begins with the string \fI$SYSROOT/\fR (for compatibility with
+Solaris) or \fI=/\fR (for compatibility with GNU), this token is replaced with
+the system root specified with \fB-z\~sysroot\fR or the default, the root
+filesystem /.
+.sp
 The environment variable \fBLD_LIBRARY_PATH\fR can be used to supplement the
 library search path, however the \fB-L\fR option is recommended, as the
 environment variable is also interpreted by the runtime environment. See
@@ -788,6 +794,10 @@ Outputs a message giving information about the version of \fBld\fR being used.
 .RS 4n
 Changes the default directories used for finding libraries. \fIdirlist\fR is a
 colon-separated path list.
+.sp
+If the paths in this list begin with the string \fI$SYSROOT/\fR (for
+compatibility with Solaris) or \fI=/\fR (for compatibility with GNU), this
+token is replaced with the system root specified with \fB-z\~sysroot\fR or /.
 .RE
 
 .sp
@@ -1558,6 +1568,18 @@ system.
 .sp
 .ne 2
 .na
+\fB-z\fR \fBsysroot=dir\fR
+.ad
+.sp .6
+.RS 4n
+Specifies a directory to use as if it were the system root directory (/) when
+searching for libraries along the default search paths, or if specified to do
+so in the \fB-L\fR or \fB-YP\fR options.
+.RE
+
+.sp
+.ne 2
+.na
 \fB\fB-z\fR \fBtarget=sparc|x86\fR \fI\fR\fR
 .ad
 .sp .6
@@ -1896,9 +1918,13 @@ default output file.
 \fB\fILIBPATH\fR\fR
 .ad
 .RS 15n
-For 32-bit libraries, the default search path is \fB/usr/ccs/lib\fR, followed
-by \fB/lib\fR, and finally \fB/usr/lib\fR. For 64-bit libraries, the default
-search path is \fB/lib/64\fR, followed by \fB/usr/lib/64\fR.
+For 32-bit libraries, the default search path is \fB$SYSROOT/usr/ccs/lib\fR,
+followed by \fB$SYSROOT/lib\fR, and finally \fB$SYSROOT/usr/lib\fR. For 64-bit
+libraries, the default search path is \fB$SYSROOT/lib/64\fR, followed by
+\fB$SYSROOT/usr/lib/64\fR.
+.sp
+The \fB$SYSROOT\fR token is taken from the parameter to \fB-z\~sysroot=\fR and
+defaults to the root filesystem, /.
 .RE
 
 .sp
