@@ -18,13 +18,44 @@
 #
 # CDDL HEADER END
 #
+
 #
-# Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+# Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2020 Joyent, Inc.
 #
 
-include ../Makefile.com
+PROG =	svccfg
 
-install: all $(ROOTLIBS) $(ROOTLINKS)
+SRCS  =			\
+	svccfg_main.c		\
+	svccfg_engine.c		\
+	svccfg_internal.c	\
+	svccfg_libscf.c		\
+	svccfg_tmpl.c		\
+	svccfg_xml.c		\
+	svccfg_help.c
 
-include ../Makefile.targ
+OBJS =				\
+	$(SRCS:%.c=%.o)		\
+	svccfg_grammar.o	\
+	svccfg_lex.o		\
+	manifest_find.o		\
+	manifest_hash.o		\
+	notify_params.o		\
+
+include $(SRC)/cmd/Makefile.cmd
+
+# These are because of bugs in lex(1)/yacc(1) generated code
+CERRWARN +=	-_gcc=-Wno-unused-label
+CERRWARN +=	-_gcc=-Wno-unused-variable
+
+CERRWARN +=	-_gcc=-Wno-switch
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off
+
+LFLAGS = -t
+YFLAGS = -d
+
+CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h

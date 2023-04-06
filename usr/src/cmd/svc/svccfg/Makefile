@@ -24,24 +24,8 @@
 # Copyright 2020 Joyent, Inc.
 #
 
-PROG =	svccfg
-
-SRCS  =				\
-	svccfg_engine.c		\
-	svccfg_help.c		\
-	svccfg_internal.c	\
-	svccfg_libscf.c		\
-	svccfg_main.c		\
-	svccfg_tmpl.c		\
-	svccfg_xml.c
-
-OBJS =				\
-	$(SRCS:%.c=%.o)		\
-	manifest_find.o		\
-	manifest_hash.o		\
-	notify_params.o		\
-	svccfg_grammar.o	\
-	svccfg_lex.o
+include Makefile.shared.com
+include $(SRC)/cmd/Makefile.ctf
 
 POFILES =				\
 	$(SRCS:%.c=%.po)		\
@@ -50,8 +34,8 @@ POFILES =				\
 	../common/manifest_find.po	\
 	../common/manifest_hash.po
 
-include ../../Makefile.cmd
-include ../../Makefile.ctf
+SRCDIR = .
+COMDIR = ../common
 
 POFILE =	$(PROG)_all.po
 
@@ -64,23 +48,10 @@ MAPOPTS =	$(MAPFILES:%=-Wl,-M%)
 CPPFLAGS +=	-I ../common -I$(ADJUNCT_PROTO)/usr/include/libxml2
 LDFLAGS +=	$(MAPOPTS)
 
-# These are because of bugs in lex(1)/yacc(1) generated code
-CERRWARN +=	-_gcc=-Wno-unused-label
-CERRWARN +=	-_gcc=-Wno-unused-variable
-
-CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	$(CNOWARN_UNINIT)
-
-# not linted
-SMATCH=off
-
-LFLAGS = -t
-YFLAGS = -d
-
-CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h
-
 LDLIBS += -lxml2 -lscf -ll -luutil -lumem -lmd -lnvpair -ltecla
 ADJUNCT_LIBS += libxml2.so
+
+svccfg_lex.o svccfg_grammar.o := CCVERBOSE =
 
 svccfg_help.po := XGETFLAGS =	-a
 
@@ -100,24 +71,9 @@ $(POFILE): $(POFILES)
 
 install: all $(ROOTUSRSBINPROG)
 
-svccfg_lex.c: svccfg.l svccfg_grammar.h
-	$(LEX) $(LFLAGS) svccfg.l > $@
-
-svccfg_help.o: svccfg_grammar.h
-svccfg_help-native.o: svccfg_grammar.h
-
-svccfg_grammar.h svccfg_grammar.c: svccfg.y
-	$(YACC) $(YFLAGS) svccfg.y
-	@$(MV) y.tab.h svccfg_grammar.h
-	@$(MV) y.tab.c svccfg_grammar.c
-
 clean:
 	$(RM) $(OBJS)
 
-%.o: ../common/%.c
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
-	$(POST_PROCESS_O)
-
 include ../../Makefile.targ
+include Makefile.shared.targ
 
-FRC:

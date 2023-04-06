@@ -27,43 +27,15 @@
 # Copyright 2020 Joyent, Inc.
 #
 
-PROG = svc.configd
-OBJS =			\
-	backend.o	\
-	configd.o	\
-	client.o	\
-	file_object.o	\
-	maindoor.o	\
-	object.o	\
-	rc_node.o	\
-	snapshot.o
-
-include ../../Makefile.cmd
-include ../../Makefile.ctf
+include Makefile.shared.com
 
 CPPFLAGS += -I. -I../common -I$(SRC)/common/svc \
 	-I$(ROOT)/usr/include/sqlite-sys -D_REENTRANT
-CFLAGS	+= $(CCVERBOSE)
-CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-unused-label
-CERRWARN += -_gcc=-Wno-unused-variable
-CERRWARN += -_gcc=-Wno-unused-function
-CERRWARN += $(CNOWARN_UNINIT)
 
-# strange false positive
-SMOFF += free
-
-LDLIBS += -lumem -luutil -lsecdb -lbsm
+LDLIBS += -lsecdb -lbsm -lumem -luutil -lsqlite-sys
 
 SCRIPTFILE	= restore_repository
 ROOTSCRIPTFILE	= $(ROOTLIBSVCBIN)/$(SCRIPTFILE)
-
-DIRMODE = 0755
-FILEMODE = 0555
-
-LIBSQLITE = -lsqlite-sys
-
-LDLIBS += $(LIBSQLITE)
 
 .KEEP_STATE:
 .PARALLEL: $(OBJS)

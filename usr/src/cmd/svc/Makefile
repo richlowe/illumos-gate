@@ -25,21 +25,24 @@
 
 include ../Makefile.cmd
 
-SUBDIRS=		\
-	configd		\
+SUBDIR_CMD=		\
 	lsvcrun		\
 	mfstscan	\
-	milestone	\
-	profile		\
 	rootisramdisk	\
-	seed		\
 	servinfo	\
-	shell		\
-	startd		\
 	svcadm		\
 	svccfg		\
 	svcprop		\
 	svcs
+
+SUBDIRS=		\
+	configd		\
+	milestone	\
+	profile		\
+	seed		\
+	shell		\
+	startd		\
+	$(SUBDIR_CMD)
 
 all :=		TARGET = all
 install :=	TARGET = install

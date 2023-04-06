@@ -14,6 +14,9 @@
 include $(SRC)/lib/libsqlite/Makefile.com
 include $(SRC)/tools/Makefile.tools
 
+SRCDIR = $(SRC)/lib/libsqlite/src
+TOOLDIR = $(SRC)/lib/libsqlite/tool
+
 SQLITE_VERSION = 2.8.15-repcached
 ENCODING  = ISO8859
 
@@ -48,3 +51,4 @@ $(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
 		@$(RM) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
 		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
 
+include $(SRC)/lib/libsqlite/Makefile.targ

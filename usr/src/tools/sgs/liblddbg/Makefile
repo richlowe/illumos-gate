@@ -35,7 +35,6 @@ CPPFLAGS +=	-I$(SRC)/lib/libc/inc
 SGSMSGTARG +=	$(SGSMSG32)
 ADJUNCT_LIBS +=	libc.so
 LDLIBS +=	$(CONVLIBDIR) -lconv
-CW_LINKER =
 
 # A bootstrapping problem means we can't use the regular mapfile just yet
 MAPFILES =

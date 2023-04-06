@@ -30,7 +30,6 @@ include		../Makefile.com
 CONVLIBDIR =	-L../libconv
 SGSMSGTARG +=	$(SGSMSG32)
 ADJUNCT_LIBS +=	libc.so
-CW_LINKER =
 
 CPPFLAGS +=	-I$(SRC)/cmd/sgs/libelf/common
 LDLIBS +=	$(CONVLIBDIR) -lconv

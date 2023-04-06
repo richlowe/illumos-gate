@@ -18,8 +18,8 @@ OBJS	= elfcap_chk.o elfcap.o
 
 include	$(SRC)/Makefile.master
 include	$(SRC)/Makefile.master.64
-include $(SRC)/Makefile.native
-include ../Makefile.com
+include	$(SRC)/Makefile.native
+include	../Makefile.com
 
 CSTD =		$(GNU_C99)
 ADJUNCT_LIBS +=	libc.so

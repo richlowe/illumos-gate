@@ -78,7 +78,7 @@ AST_SH_ASSEMBLE= \
 	$(CHMOD) +x $@
 
 $(CTOOLS): $(OBJS)
-	$(LINK.c) $@.o -o $@ $(LDLIBS)
+	$(LINK.c) $@.o -o $@
 	$(POST_PROCESS)
 
 probe: $(C_ASTINIT)/C+probe $(C_ASTINIT)/make.probe

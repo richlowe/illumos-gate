@@ -38,7 +38,6 @@ include		../Makefile.com
 # area.
 #
 LDLIBS =
-CW_LINKER =
 
 CPPFLAGS +=  -DUSE_LIBLD_MALLOC -I$(SRC)/lib/libc/inc \
 		    -I$(SRC)/uts/common/krtld -I$(SRC)/uts/sparc \

@@ -23,46 +23,20 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-LIBRARY =	libscf.a
-VERS =		.1
-
-OBJECTS =		\
-	error.o		\
-	lowlevel.o	\
-	midlevel.o	\
-	notify_params.o	\
-	highlevel.o	\
-	scf_tmpl.o	\
-	scf_type.o
-
 include $(SRC)/lib/Makefile.lib
+include ../Makefile.shared.com
 include $(SRC)/lib/Makefile.rootfs
-
-LIBS =		$(DYNLIB)
 
 LDLIBS_i386 += -lsmbios
 LDLIBS +=	-luutil -lc -lgen -lnvpair
 LDLIBS +=	$(LDLIBS_$(MACH))
 
-SRCDIR =	$(SRC)/lib/libscf/common
-COMDIR =	$(SRC)/common/svc
-
-CFLAGS +=	$(CCVERBOSE)
-CPPFLAGS +=	-I../inc -I../../common/inc -I$(COMDIR) -I$(ROOTHDRDIR)
-$(NOT_RELEASE_BUILD) CPPFLAGS += -DFASTREBOOT_DEBUG
-
-CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-char-subscripts
-CERRWARN +=	-_gcc=-Wno-unused-label
-CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	$(CNOWARN_UNINIT)
+SRCDIR =	../common
+COMDIR =	../../../common/svc
 
 CPPFLAGS +=	-I$(SRC)/lib/libscf/inc -I$(SRC)/lib/libscf/common/inc \
 	-I$(COMDIR) -I$(ROOTHDRDIR)
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DFASTREBOOT_DEBUG
-
-# not linted
-SMATCH=off
 
 .KEEP_STATE:
 

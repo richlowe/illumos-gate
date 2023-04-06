@@ -32,7 +32,6 @@ include		../Makefile.com
 CPPFLAGS +=	-I$(SRC)/lib/libc/inc -I$(ELFCAP) \
 	-I$(SRC)/common/sgsrtcid \
 	-I$(SRC)/lib/libdemangle/common
-CW_LINKER =
 
 include		$(SRC)/Makefile.native
 include		$(SRC)/Makefile.master.64

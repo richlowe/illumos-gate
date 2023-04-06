@@ -56,12 +56,13 @@ FILEMODE=	0755
 
 ADJUNCT_LIBS +=	libc.so
 CSTD = $(CSTD_GNU99)
-CW_LINKER =
 
 # not linted
 SMATCH=		off
 
 include		$(SRC)/Makefile.native
+
+.KEEP_STATE:
 
 all: $(PROG)
 

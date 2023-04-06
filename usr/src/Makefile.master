@@ -40,11 +40,12 @@
 ROOT=		/proto
 
 #
-# Adjunct root, a system root image used to find headers, libraries, and files
-# for the target machine.  None of these files are valid to use on the build
-# machine.
+# Adjunct root, containing an additional proto area to be searched for headers
+# and libraries for the target environment, which may not necessarily function
+# in the build environment.
 #
 ADJUNCT_PROTO=
+
 # HAVE_ADJUNCT_PROTO - ADJUNCT_PROTO is set to a non-default value
 # NO_ADJUNCT_PROTO - ADJUNCT_PROTO is unset
 #
@@ -55,8 +56,9 @@ NO_ADJUNCT_PROTO=$(ADJUNCT_PROTO:%=$(POUND_SIGN))
 $(NO_ADJUNCT_PROTO)HAVE_ADJUNCT_PROTO=$(POUND_SIGN)
 
 #
-# Adjunct for building things that run on the build machine, none of these
-# files are valid to use for the target machine.
+# A separate area to be searched for native tools and libraries for use by the
+# build or the build machine.  These libraries are specific to the build
+# machine and may not work on the target machine.
 #
 NATIVE_ADJUNCT=	/usr
 
@@ -148,10 +150,13 @@ BLD_JAVA_11=	$(POUND_SIGN)
 
 i386_GNUC_ROOT=		/usr/gcc/10
 aarch64_GNUC_ROOT=	/usr/gcc/10
-NATIVE_GNUC_ROOT=	$($(NATIVE_MACH)_GNUC_ROOT)
 GNUC_ROOT=		$($(MACH)_GNUC_ROOT)
 GCCLIBDIR=		$(GNUC_ROOT)/lib
 GCCLIBDIR64=		$(GNUC_ROOT)/lib/$(MACH64)
+NATIVE_GCCLIBDIR=	$(NATIVE_GNUC_ROOT)/lib
+NATIVE_GCCLIBDIR64=	$(NATIVE_GNUC_ROOT)/lib/$(MACH64)
+
+NATIVE_GNUC_ROOT=	$($(NATIVE_MACH)_GNUC_ROOT)
 NATIVE_GCCLIBDIR=	$(NATIVE_GNUC_ROOT)/lib
 NATIVE_GCCLIBDIR64=	$(NATIVE_GNUC_ROOT)/lib/$(MACH64)
 
@@ -866,16 +871,14 @@ CW_LINKER=		--linker $(LD)
 CW=			$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw
 NATIVE_CW=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw
 
-BUILD_CC=		$(CW) $(CW_LINKER) $(CW_CC_COMPILERS) --
-BUILD_CCC=		$(CW) -C $(CW_LINKER) $(CW_CCC_COMPILERS) --
+BUILD_CC=		$(CW) --tag target $(CW_LINKER) $(CW_CC_COMPILERS) --
+BUILD_CCC=		$(CW) --tag target -C $(CW_LINKER) $(CW_CCC_COMPILERS) --
 BUILD_CPP=		/usr/lib/cpp
 BUILD_LD=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH64)/ld
 BUILD_AS=		$(BUILD_CC)
 
-NATIVEBUILD_CC=		$(NATIVE_CW) $(CW_LINKER) $(NATIVE_CW_CC_COMPILERS) --
-NATIVEBUILD_CCC=	$(NATIVE_CW) -C $(CW_LINKER) \
-			$(NATIVE_CW_CCC_COMPILERS) --
-# XXXARM: Need a cross-cpp build in tools
+NATIVEBUILD_CC=		$(NATIVE_CW) --tag native $(CW_LINKER) $(NATIVE_CW_CC_COMPILERS) --
+NATIVEBUILD_CCC=	$(NATIVE_CW) --tag native -C $(CW_LINKER) $(NATIVE_CW_CCC_COMPILERS) --
 NATIVEBUILD_CPP=	/usr/lib/cpp
 NATIVEBUILD_LD=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH64)/ld
 NATIVEBUILD_AS=		$(NATIVEBUILD_CC)

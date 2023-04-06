@@ -19,12 +19,36 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2015 RackTop Systems.
+# Copyright 2020 Joyent, Inc.
+#
 
-include ../Makefile.com
+PROG = svc.configd
+OBJS =			\
+	backend.o	\
+	configd.o	\
+	client.o	\
+	file_object.o	\
+	maindoor.o	\
+	object.o	\
+	rc_node.o	\
+	snapshot.o
 
-install: all $(ROOTLIBS) $(ROOTLINKS)
+include $(SRC)/cmd/Makefile.cmd
+include $(SRC)/cmd/Makefile.ctf
 
-include ../Makefile.targ
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += -_gcc=-Wno-type-limits
+CERRWARN += -_gcc=-Wno-unused-label
+CERRWARN += -_gcc=-Wno-unused-variable
+CERRWARN += -_gcc=-Wno-unused-function
+CERRWARN += $(CNOWARN_UNINIT)
+
+# strange false positive
+SMOFF += free
+
+DIRMODE = 0755
+FILEMODE = 0555
