@@ -25,9 +25,11 @@
 #
 #
 
-include		../Makefile.com
+include		$(SRC)/Makefile.master
 include		../../Makefile.tools
+include		../Makefile.com
 include		$(SGSHOME)/libld/Makefile.com
+include		$(SRC)/Makefile.native
 include		$(SRC)/Makefile.master.64
 
 .KEEP_STATE:
@@ -49,12 +51,8 @@ NATIVE_LIBS +=	libc.so
 
 DYNFLAGS +=	$(VERSREF) '-Wl,-R$$ORIGIN'
 
-# XXXARM: These have to be reset because of the Makefile ordering crud, ugh
-SYSROOT=
-CC=	$(NATIVECC)
-CC64=	$(NATIVECC)
-CFLAGS = $(NATIVE_CFLAGS) $(C_PICFLAGS)
-CFLAGS64 = $(NATIVE_CFLAGS) $(C_PICFLAGS)
+CFLAGS += $(C_PICFLAGS)
+CFLAGS64 += $(C_PICFLAGS)
 CERRWARN += -_gcc=-Wno-unused-but-set-variable
 
 all:		$(DYNLIB) $(LIBLINKS)

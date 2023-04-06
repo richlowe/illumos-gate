@@ -24,25 +24,22 @@
 # Use is subject to license terms.
 #
 
+include		$(SRC)/Makefile.master
+include		../../Makefile.tools
 include		../Makefile.com
 include		$(SGSHOME)/liblddbg/Makefile.com
-include		../../Makefile.tools
+include		$(SRC)/Makefile.native
 include		$(SRC)/Makefile.master.64
 
 .KEEP_STATE:
 
 CPPFLAGS =	$(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc
-CFLAGS =	$(NATIVE_CFLAGS)
-CFLAGS64 =	$(NATIVE_CFLAGS64)
 DYNFLAGS +=	-L../libconv
 SGSMSGTARG +=	$(SGSMSG32)
 SGSMSGDIR =	$(SGSHOME)/messages/$(NATIVE_MACH)
 NATIVE_LIBS +=	libc.so
 CW_LINKER =
 
-# XXXARM: These have to be reset because of the Makefile ordering crud, ugh
-SYSROOT=
-CC= 		$(NATIVECC)
 CFLAGS +=	$(C_PICFLAGS)
 CFLAGS64 +=	$(C_PICFLAGS)
 CONVLIBDIR=	-L../libconv
@@ -50,7 +47,7 @@ CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	$(CNOWARN_UNINIT)
-LDLIBS += 	$(CONVLIBDIR) -lconv
+LDLIBS +=	$(CONVLIBDIR) -lconv
 
 # A bootstrapping problem means we can't use the regular mapfile just yet
 MAPFILES =

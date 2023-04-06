@@ -25,6 +25,7 @@
 # Definitions common to tool source.
 #
 include $(SRC)/Makefile.master
+include $(SRC)/Makefile.native
 
 FILEMODE=	0555
 
@@ -48,11 +49,6 @@ ROOTONBLDETCABI=	$(ROOTONBLD)/etc/abi
 ROOTONBLDETCEXCEPT=	$(ROOTONBLD)/etc/exception_lists
 ROOTONBLDSHARE=		$(ROOTONBLD)/share
 
-CC =			$(NATIVECC)
-CCC =			$(NATIVECCC)
-AS =			$(NATIVEAS)
-LD =			$(NATIVELD)
-CFLAGS =		$(NATIVE_CFLAGS)
 CPPFLAGS=		-D_TS_ERRNO
 ELFSIGN_O=		$(TRUE)
 LDLIBS=
@@ -60,12 +56,8 @@ LDFLAGS=		$(MAPFILE.NES:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
 			    $(MAPFILE.PGA:%=-Wl,-M%) \
 			    $(BDIRECT)
 
-# We're building all native tools, don't set a sysroot even for a cross-build,
-# it will confuse things
-SYSROOT=
-
-# XXXARM: We shouldn't have to do this, but the makefile games in here are too much
-# (and all my fault)
+# XXXARM: We shouldn't have to do this, but the makefile games in here are too
+# much (and all my fault)
 BUILD.SO=	$(NATIVECC) $(CFLAGS) -o $@ $(GSHARED) $(DYNFLAGS) \
 		$(PICS) $(EXTPICS) $(LDLIBS)
 BUILD64.SO=	$(NATIVECC64) $(CFLAGS64) -o $@ $(GSHARED) $(DYNFLAGS) \

@@ -26,21 +26,14 @@ include		../Makefile.com
 include		../../Makefile.tools
 include		$(SGSHOME)/ld/Makefile.com
 include		$(SRC)/Makefile.master.64
+include		$(SRC)/Makefile.native
 
 LDLIBS =	-lumem -L../libconv -L$(ROOTONBLDLIBMACH64) -lld -lelf -lconv
 NATIVE_LIBS +=	libc.so libumem.so
-CPPFLAGS =	$(NATIVE_CPPFLAGS)
-CFLAGS =	$(NATIVE_CFLAGS)
-CFLAGS64 =	$(NATIVE_CFLAGS64)
 SGSMSGDIR =	$(SGSHOME)/messages/$(NATIVE_MACH)
 MAPFILES =	$(SRCDIR)/common/mapfile-intf
 RPATH =		'-R$$ORIGIN/../../lib/$(NATIVE_MACH)/64'
 CW_LINKER =
-
-# XXXARM: These have to be reset because of the Makefile ordering crud, ugh
-SYSROOT=
-CC=	$(NATIVECC)
-CC64=	$(NATIVECC)
 
 install: $(ROOTONBLDMACH64PROG)
 

@@ -24,28 +24,46 @@
 # Use is subject to license terms.
 #
 
-NOT_NATIVE = $(POUND_SIGN)		# tell Makefile.com we're native
+LIBRARY =	libuutil.a
+VERS =		.1
 
-include ../Makefile.com
+OBJECTS =		\
+	avl.o		\
+	uu_alloc.o	\
+	uu_avl.o	\
+	uu_dprintf.o	\
+	uu_ident.o	\
+	uu_list.o	\
+	uu_misc.o	\
+	uu_open.o	\
+	uu_pname.o	\
+	uu_string.o	\
+	uu_strtoint.o
 
-CC =		$(NATIVECC)
-LD =		$(NATIVELD)
-CFLAGS =	$(NATIVE_CFLAGS)
-CPPFLAGS =	-I. $(MY_NATIVE_CPPFLAGS)
-LDFLAGS =
-LDLIBS =	$(MY_NATIVE_LDLIBS)
+include $(SRC)/lib/Makefile.lib
+include $(SRC)/tools/Makefile.tools
+
+LIBS = $(DYNLIB)
+
+SRCDIR = $(SRC)/lib/libuutil/common
+
+CPPFLAGS +=	-I. -DNATIVE_BUILD -I$(SRCDIR)
 NATIVE_LIBS +=	libc.so
-SYSROOT=			#XXXARM: Native build no sysroot
+
+SMOFF += signed
 
 #
 # We must use the build's avl headers, to match the common avl.c
 #
-AVLHEADERS = sys/avl.h sys/avl_impl.h
+AVLDIR =	$(SRC)/common/avl
+AVLHEADERS =	sys/avl.h sys/avl_impl.h
 CLOBBERFILES += $(AVLHEADERS) $(LIBS)
+
+LIBLINKS =	libuutil.so
 
 all: $(LIBS)
 
-install: all
+install: all $(ROOTONBLDLIBMACH)/$(DYNLIB)  $(ROOTONBLDLIBMACH)/$(LIBLINKS)
 
 $(PICS): $(AVLHEADERS)
 
@@ -53,3 +71,19 @@ sys/%: $(SRC)/uts/common/sys/%
 	@mkdir -p sys
 	cp -f $< $@
 
+pics/%.o:	$(AVLDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
+pics/%.o:	$(SRCDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
+$(ROOTONBLDLIBMACH)/$(DYNLIB): $(ROOTONBLDLIBMACH) $(DYNLIB)
+	$(INS.file) $(DYNLIB)
+
+$(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
+		@$(RM) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
+
+include $(SRC)/lib/Makefile.targ

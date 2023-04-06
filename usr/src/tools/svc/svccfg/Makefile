@@ -43,26 +43,16 @@ OBJS =				\
 	svccfg_grammar.o	\
 	svccfg_lex.o
 
-POFILES =				\
-	$(SRCS:%.c=%.po)		\
-	svccfg_grammar.po		\
-	svccfg_lex.po			\
-	../common/manifest_find.po	\
-	../common/manifest_hash.po
+include $(SRC)/cmd/Makefile.cmd
+include $(SRC)/cmd/Makefile.ctf
+include	$(SRC)/tools/Makefile.tools
 
-include ../../Makefile.cmd
-include ../../Makefile.ctf
-
-POFILE =	$(PROG)_all.po
-
-# svccfg has a name clash with main() and libl.so.1.  However, svccfg must
-# still export a number of "yy*" (libl) interfaces.  Reduce all other symbols
-# to local scope.
-MAPFILES +=	$(MAPFILE.LEX) $(MAPFILE.NGB)
-MAPOPTS =	$(MAPFILES:%=-Wl,-M%)
-
-CPPFLAGS +=	-I ../common -I$(ADJUNCT_PROTO)/usr/include/libxml2
-LDFLAGS +=	$(MAPOPTS)
+CPPFLAGS +=	-I. -I$(SRC)/cmd/svc/svccfg -I$(SRC)/cmd/svc/common	\
+		-I$(NATIVE_ADJUNCT)/include/libxml2			\
+		-DNATIVE_BUILD						\
+		-I$(LIBSCF)/inc						\
+		-I$(LIBTECLA)						\
+		-I$(LIBUUTIL)/common
 
 CERRWARN +=	-_gcc=-Wno-unused-label
 CERRWARN +=	-_gcc=-Wno-switch
@@ -78,10 +68,19 @@ YFLAGS = -d
 
 CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h
 
-LDLIBS += -lxml2 -lscf -ll -luutil -lumem -lmd -lnvpair -ltecla
-NATIVE_LIBS += libxml2.so
+LIBTECLA	= $(SRC)/lib/libtecla		# just for the header
+LIBUUTIL	= $(SRC)/lib/libuutil
 
-svccfg_help.po := XGETFLAGS =	-a
+SVCCFG_EXTRA_LIBS += -lxml2 -lscf -ll -luutil -lumem -lmd \
+	-lnvpair
+NATIVE_LIBS += libxml2.so libl.so libumem.so libmd.so libnvpair.so libc.so
+
+CPPFLAGS +=
+
+LDLIBS += \
+	-L$(SRC)/tools/svc/libscf -R '$$ORIGIN/../../lib/$(NATIVE_MACH)' \
+	-L$(NATIVE_ADJUNCT)/lib -R$(NATIVE_ADJUNCT)/lib -L$(ROOTONBLDLIBMACH) \
+	$(SVCCFG_EXTRA_LIBS)
 
 .KEEP_STATE:
 .PARALLEL: $(OBJS)
@@ -92,28 +91,26 @@ $(PROG): $(OBJS) $(MAPFILES)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
-$(POFILES): svccfg_grammar.h
+install: all $(ROOTONBLDMACHPROG)
 
-$(POFILE): $(POFILES)
-	cat $(POFILES) > $(POFILE)
-
-install: all $(ROOTUSRSBINPROG)
-
-svccfg_lex.c: svccfg.l svccfg_grammar.h
-	$(LEX) $(LFLAGS) svccfg.l > $@
+svccfg_lex.c: $(SRC)/cmd/svc/svccfg/svccfg.l svccfg_grammar.h
+	$(LEX) $(LFLAGS) $(SRC)/cmd/svc/svccfg/svccfg.l > $@
 
 svccfg_help.o: svccfg_grammar.h
-svccfg_help-native.o: svccfg_grammar.h
 
-svccfg_grammar.h svccfg_grammar.c: svccfg.y
-	$(YACC) $(YFLAGS) svccfg.y
+svccfg_grammar.h svccfg_grammar.c: $(SRC)/cmd/svc/svccfg/svccfg.y
+	$(YACC) $(YFLAGS) $(SRC)/cmd/svc/svccfg/svccfg.y
 	@$(MV) y.tab.h svccfg_grammar.h
 	@$(MV) y.tab.c svccfg_grammar.c
 
 clean:
 	$(RM) $(OBJS)
 
-%.o: ../common/%.c
+%.o: $(SRC)/cmd/svc/svccfg/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
+%.o: $(SRC)/cmd/svc/common/%.c
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 	$(POST_PROCESS_O)
 

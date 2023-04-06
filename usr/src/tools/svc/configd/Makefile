@@ -23,7 +23,6 @@
 # Use is subject to license terms.
 #
 # Copyright 2015 RackTop Systems.
-#
 # Copyright 2020 Joyent, Inc.
 #
 
@@ -38,11 +37,21 @@ OBJS =			\
 	rc_node.o	\
 	snapshot.o
 
-include ../../Makefile.cmd
-include ../../Makefile.ctf
+include $(SRC)/cmd/Makefile.cmd
+include $(SRC)/cmd/Makefile.ctf
+include $(SRC)/tools/Makefile.tools
 
-CPPFLAGS += -I. -I../common -I$(SRC)/common/svc \
-	-I$(ROOT)/usr/include/sqlite-sys -D_REENTRANT
+LIBUUTIL	= $(SRC)/lib/libuutil
+LIBSCF		= $(SRC)/lib/libscf
+LIBSQLITE	= $(SRC)/lib/libsqlite
+
+CPPFLAGS += -I$(SRC)/cmd/svc/configd \
+	-I$(SRC)/cmd/svc/common -I$(SRC)/common/svc \
+	-I$(ROOT)/usr/include/sqlite-sys -D_REENTRANT \
+	-I$(LIBUUTIL)/common -I$(LIBSCF)/inc -I$(LIBSQLITE) \
+	-I$(SRC)/tools/svc/libsqlite \
+
+CPPFLAGS += -DNATIVE_BUILD
 CFLAGS	+= $(CCVERBOSE)
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-unused-label
@@ -53,17 +62,15 @@ CERRWARN += $(CNOWARN_UNINIT)
 # strange false positive
 SMOFF += free
 
-LDLIBS += -lumem -luutil -lsecdb -lbsm
+LDFLAGS += $(BDIRECT)
+LDLIBS	+= -L$(NATIVE_ADJUNCT)/usr/lib -R$(NATIVE_ADJUNCT)/usr/lib \
+	-lumem -L$(ROOTONBLDLIBMACH) \
+	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -lsqlite-sys -luutil
 
-SCRIPTFILE	= restore_repository
-ROOTSCRIPTFILE	= $(ROOTLIBSVCBIN)/$(SCRIPTFILE)
+NATIVE_LIBS += libumem.so libc.so
 
 DIRMODE = 0755
 FILEMODE = 0555
-
-LIBSQLITE = -lsqlite-sys
-
-LDLIBS += $(LIBSQLITE)
 
 .KEEP_STATE:
 .PARALLEL: $(OBJS)
@@ -74,16 +81,14 @@ $(PROG): $(OBJS)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
-$(ROOTLIBSVCBIN)/%: %.sh
-	$(INS.rename)
+%.o: $(SRC)/cmd/svc/configd/%.c
+	$(COMPILE.c) $<
+	$(POST_PROCESS_O)
 
-install: all $(ROOTLIBSVCBINPROG) $(ROOTVARSADMFILE) $(ROOTSCRIPTFILE)
+install: all $(ROOTONBLDMACHPROG)
 
 clean:
-	$(RM) $(OBJS)
 
 clobber: clean
 
 include $(SRC)/cmd/Makefile.targ
-
-FRC:

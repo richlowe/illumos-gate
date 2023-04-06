@@ -25,22 +25,18 @@
 #
 #
 
+include		$(SRC)/Makefile.master
+include		../../Makefile.tools
 include		../Makefile.com
 include		$(SGSHOME)/libconv/Makefile.com
-include		../../Makefile.tools
+include		$(SRC)/Makefile.native
 include		$(SRC)/Makefile.master.64
 
-CPPFLAGS =	 $(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc -I$(ELFCAP) \
+CPPFLAGS =	$(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc -I$(ELFCAP) \
 	-I$(SRC)/common/sgsrtcid \
 	-I$(SRC)/lib/libdemangle/common
-
-# XXXARM: These have to be reset because of the Makefile ordering crud, ugh
-SYSROOT=
-CC= 		$(NATIVECC)
-AS=		$(NATIVEAS)
 CERRWARN +=	-_gcc=-Wno-switch
-CFLAGS64 =	$(NATIVE_CFLAGS) $(C_PICFLAGS)
-ASFLAGS64 =	$(NATIVE_ASFLAGS)
+CFLAGS64 +=	$(C_PICFLAGS)
 AS_CPPFLAGS=	-D_ASM $(CPPFLAGS)
 CW_LINKER =
 

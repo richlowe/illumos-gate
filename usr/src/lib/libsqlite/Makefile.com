@@ -50,10 +50,10 @@ include $(SRC)/lib/Makefile.lib
 # install this library in the root filesystem
 include $(SRC)/lib/Makefile.rootfs
 
-SRCDIR = ../src
-TOOLDIR = ../tool
+SRCDIR = $(SRC)/lib/libsqlite/src
+TOOLDIR = $(SRC)/lib/libsqlite/tool
 $(DYNLIB) := LDLIBS += -lc
-LIBS = $(DYNLIB) $(NATIVERELOC)
+LIBS = $(DYNLIB)
 
 
 # generated sources
@@ -103,7 +103,7 @@ CERRWARN += -_gcc=-Wno-unused-label
 # not linted
 SMATCH=off
 
-MAPFILES = ../mapfile-sqlite
+MAPFILES = $(SRC)/lib/libsqlite/mapfile-sqlite
 
 # headers generated here
 GENHDR = opcodes.h parse.h
@@ -139,33 +139,11 @@ TESTOBJS = $(TESTSRC:$(SRCDIR)/%.c=%.o)
 
 TESTCLEAN = $(TESTOBJS) test.db test.tcl test1.bt test2.db testdb
 
-#
-# Native variant (needed by cmd/configd)
-#
-NATIVERELOC = libsqlite-native.o
-NATIVEPROGS = testfixture
-NATIVEOBJS = $(OBJS:%.o=%-native.o)
-
-NATIVETARGETS = $(NATIVEPROGS) $(NATIVEOBJS) $(NATIVERELOC)
-
-$(NATIVETARGETS) :=	CC = $(NATIVECC)
-$(NATIVETARGETS) :=	LD = $(NATIVELD)
-$(NATIVETARGETS) :=	CFLAGS = $(NATIVE_CFLAGS) $(NATIVE_CTF_FLAGS)
-$(NATIVETARGETS) :=	CPPFLAGS = $(MYCPPFLAGS)
-$(NATIVETARGETS) :=	LDFLAGS =
-$(NATIVETARGETS) :=	LDLIBS = -lc
-
-$(OBJS) :=		CFLAGS += $(CTF_FLAGS)
-$(OBJS) :=		CFLAGS64 += $(CTF_FLAGS)
-$(OBJS) :=		CTFCONVERT_POST = $(CTFCONVERT_O)
-$(NATIVEOBJS) :=	CFLAGS = $(NATIVE_CFLAGS) $(NATIVE_CTF_FLAGS)
-$(NATIVEOBJS) :=	CFLAGS64 = $(NATIVE_CFLAGS) $(NATIVE_CTF_FLAGS)
-$(NATIVEOBJS) :=	CTFCONVERT_POST = $(CTFCONVERT_O)
-
 TCLBASE = /usr/sfw
 TCLVERS = tcl8.3
 
 testfixture := MYCPPFLAGS += -I$(TCLBASE)/include -DTCLSH -DSQLITE_TEST=1
+
 #
 # work around compiler issues
 #
@@ -176,7 +154,6 @@ testfixture := CFLAGS += \
 testfixture := LDLIBS += -R$(TCLBASE)/lib -L$(TCLBASE)/lib -l$(TCLVERS) -lm -ldl
 
 CLEANFILES += \
-	$(NATIVETARGETS) \
 	$(TESTCLEAN)	\
 	lemon		\
 	lemon.o		\
@@ -192,30 +169,19 @@ CLEANFILES += \
 
 ENCODING  = ISO8859
 
-
-.PARALLEL: $(OBJS) $(OBJS:%.o=%-native.o)
+.PARALLEL: $(OBJS) $(PICS)
 .KEEP_STATE:
 
 # This is the default Makefile target.  The objects listed here
 # are what get build when you type just "make" with no arguments.
 #
 all:		$(LIBS)
-install:	all \
-		$(ROOTLIBDIR)/$(DYNLIB) \
-		$(ROOTLIBDIR)/$(NATIVERELOC)
-
+install:	all
 
 all_h: $(GENHDR)
 
-$(ROOTLIBDIR)/$(NATIVERELOC)	:= FILEMODE= 644
-
 $(ROOTLINK): $(ROOTLIBDIR) $(ROOTLIBDIR)/$(DYNLIB)
 	$(INS.liblink)
-
-native: $(NATIVERELOC)
-
-$(NATIVERELOC):	objs .WAIT $(OBJS:%.o=%-native.o)
-	$(LD) -r -o $(NATIVERELOC) $(OBJS:%.o=%-native.o)
 
 opcodes.h: $(SRCDIR)/vdbe.c
 	@echo "Generating $@"; \
@@ -260,18 +226,6 @@ parse.h parse.c : $(SRCDIR)/parse.y $(TOOLDIR)/lemon.c $(TOOLDIR)/lempar.c
 
 lemon: $(TOOLDIR)/lemon.c
 	$(NATIVECC) $(NATIVE_CFLAGS) -o $@ $(TOOLDIR)/lemon.c
-
-objs/%-native.o: $(SRCDIR)/%.c $(GENHDR)
-	$(COMPILE.c) -o $@ $<
-	$(POST_PROCESS_O)
-
-objs/%-native.o: %.c $(GENHDR)
-	$(COMPILE.c) -o $@ $<
-	$(POST_PROCESS_O)
-
-objs/parse-native.o: parse.c $(GENHDR)
-	$(COMPILE.c) -o $@ parse.c
-	$(POST_PROCESS_O)
 
 objs/%.o pics/%.o: $(SRCDIR)/%.c $(GENHDR)
 	$(COMPILE.c) -o $@ $<

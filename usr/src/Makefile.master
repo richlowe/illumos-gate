@@ -91,11 +91,6 @@ RELEASE_BUILD=				$(POUND_SIGN)
 $(RELEASE_BUILD)NOT_RELEASE_BUILD=	$(POUND_SIGN)
 PATCH_BUILD=				$(POUND_SIGN)
 
-# NATIVE_MACH defaults to MACH and can be overridden in the environment for
-# cross-builds.
-NATIVE_MACH=				$(MACH)
-NATIVE_MACH64=				$(MACH64)
-
 # SPARC_BLD is '#' for an Intel or aarch64 build.
 # INTEL_BLD is '#' for a Sparc or aarch64 build.
 # AARCH64_BLD is '#' for an Intel or Sparc build.
@@ -277,6 +272,8 @@ ZIC=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/zic
 OPENSSL=	/usr/bin/openssl
 CPCGEN=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cpcgen
 GENICONVTBL=	$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/geniconvtbl
+SVCCONFIGD=	$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/svc.configd
+SVCCFG=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/svccfg
 
 DEFAULT_CONSOLE_COLOR=					\
 	-DDEFAULT_ANSI_FOREGROUND=ANSI_COLOR_WHITE	\
@@ -315,8 +312,8 @@ MANIFEST_CHECK=	\
 	@$(ECHO) "checking $<"; \
 	SVCCFG_DTD=$(SRC)/cmd/svc/dtd/service_bundle.dtd.1 \
 	SVCCFG_REPOSITORY=$(SRC)/cmd/svc/seed/global.db \
-	SVCCFG_CONFIGD_PATH=$(SRC)/cmd/svc/configd/svc.configd-native \
-	$(SRC)/cmd/svc/svccfg/svccfg-native validate $<
+	SVCCFG_CONFIGD_PATH=$(SVCCONFIGD) \
+	$(SVCCFG) validate $<
 
 INS.file=	$(RM) $@; $(INS) -s -m $(FILEMODE) -f $(@D) $<
 INS.dir=	$(INS) -s -d -m $(DIRMODE) $@
@@ -970,7 +967,8 @@ $(__GNUC64)CCEXTNEEDED	= $(CCNEEDED64)
 # Libraries we expect to use natively on the build machine
 NATIVE_LIBS=
 
-# If we're doing a CROSS_BUILD, take a sysroot for GCC from the env file and use it.
+# If we're doing a CROSS_BUILD, take a sysroot for GCC from the env file and
+# use it.
 $(CROSS_BLD)SYSROOT=	-_gcc=--sysroot=$($(MACH)_SYSROOT)
 
 LDCHECKS		= $(ZASSERTDEFLIB) $(ZGUIDANCE) $(ZFATALWARNINGS)
@@ -984,12 +982,8 @@ LINK.cc=		$(CCC) $(SYSROOT) $(CCFLAGS) $(CPPFLAGS) $(NORUNPATH) \
 LINK64.cc=		$(CCC) $(SYSROOT) $(CCFLAGS64) $(CPPFLAGS) $(NORUNPATH) \
 			$(LDFLAGS) $(CCNEEDED64) $(LDCHECKS)
 
-# For some future builds, NATIVE_MACH and MACH might be different.
-# Therefore, NATIVE_MACH needs to be redefined in the
-# environment as `uname -p` to override this macro.
-#
-# For now at least, we cross-compile amd64 on i386 machines.
-NATIVE_MACH=	$(MACH:amd64=i386)
+
+NATIVE_MACH=		$(MACH:amd64=i386)
 i386_NATIVE_MACH64=	amd64
 sparc_NATIVE_MACH64=	sparcv9
 aarch64_NATIVE_MACH64=	aarch64

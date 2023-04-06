@@ -25,8 +25,6 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-include $(SRC)/Makefile.master
-
 .KEEP_STATE:
 .KEEP_STATE_FILE: .make.state.$(MACH)
 

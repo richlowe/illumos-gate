@@ -18,6 +18,7 @@ OBJS	= elfcap_chk.o elfcap.o
 
 include	$(SRC)/Makefile.master
 include	$(SRC)/Makefile.master.64
+include $(SRC)/Makefile.native
 include ../Makefile.com
 
 CSTD =		$(GNU_C99)
@@ -29,15 +30,8 @@ NATIVE_LIBS +=	libc.so
 # files they will need to rebuild that, but the same is true if we move
 # this into tools (and it becomes more annoying).
 #
-CPPFLAGS =	-I$(SRC)/tools/sgs/include $(CPPFLAGS.native)
-CFLAGS =	$(NATIVE_CFLAGS)
-CC =		$(NATIVECC)
-LDCHECKS =
-
-# XXXARM: native, no sysroot
-SYSROOT=
-
-CPPFLAGS += -I$(ELFCAP)
+CPPFLAGS =	-I$(SRC)/tools/sgs/include $(CPPFLAGS.native) -I$(ELFCAP)
+LDFLAGS += $(BDIRECT)
 
 # XXXARM: Native, no sysroot
 SYSROOT=
