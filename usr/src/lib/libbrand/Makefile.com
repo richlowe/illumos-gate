@@ -34,7 +34,7 @@ LIBS=		$(DYNLIB)
 LDLIBS +=	-lc
 CPPFLAGS +=	-I$(ADJUNCT_PROTO)/usr/include/libxml2 -I$(SRCDIR) -D_REENTRANT
 $(DYNLIB) :=	LDLIBS += -lxml2
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 SRCDIR=		../common
 

@@ -1193,7 +1193,7 @@ $(ASSYMDEP_OBJS:%=pics/%): assym.h
 # assym.h build rules
 
 GENASSYM_C = genassym.c
-LDFLAGS.native = $(LDASSERTS) $(BDIRECT)
+LDFLAGS.native = $(BDIRECT) $(NATIVE_LDCHECKS)
 
 genassym := NATIVE_LIBS += libc.so
 

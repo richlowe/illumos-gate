@@ -70,7 +70,7 @@ CFLAGS +=	$(CCGDEBUG) $(CCVERBOSE)
 CFLAGS64 +=	$(CCGDEBUG) $(CCVERBOSE)
 LDLIBS +=	-lcmdutils -lumem -lavl -lnvpair -lz -lc -lmd \
 		-lfakekernel -lzutil
-NATIVE_LIBS +=	libz.so
+ADJUNCT_LIBS +=	libz.so
 CPPFLAGS.first =	-I$(SRC)/lib/libfakekernel/common
 # The in-gate lz4 headers must take precedence over any that may appear in an
 # adjunct.

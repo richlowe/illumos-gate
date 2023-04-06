@@ -66,7 +66,7 @@ SMATCH=off
 CLOBBERFILES += $(DTRACE_HEADER)
 
 LDLIBS		+= -lsecdb -lsocket -lnsl -lscf -lxml2
-NATIVE_LIBS	+= libxml2.so
+ADJUNCT_LIBS	+= libxml2.so
 
 .KEEP_STATE:
 

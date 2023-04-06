@@ -44,7 +44,7 @@ POFILE= bootadm_cmd.po
 LDLIBS_i386= -lfdisk
 LDLIBS += -lficl-sys -lmd -lcryptoutil -lnvpair -lgen -ladm -lefi
 LDLIBS += -lscf -lz -lbe -lzfs -lofmt $(LDLIBS_$(MACH))
-NATIVE_LIBS += libz.so
+ADJUNCT_LIBS += libz.so
 
 CPPFLAGS +=	-D_FILE_OFFSET_BITS=64
 CPPFLAGS +=	-I$(SRC)/uts/common -I$(SRC)/common -I$(SRC)/common/ficl

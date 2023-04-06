@@ -91,7 +91,7 @@ $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 SMATCH=off
 
 LDLIBS +=	-lz
-NATIVE_LIBS += libz.so
+ADJUNCT_LIBS += libz.so
 
 SRCS=	$(OBJS_COMMON:%.o=$(SRCDIR)/%.c)	\
 	$(OBJS_SHARED:%.o=$(SRC)/common/zfs/%.c)

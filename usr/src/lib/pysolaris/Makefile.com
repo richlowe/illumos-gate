@@ -43,7 +43,7 @@ CSTD=		$(CSTD_GNU99)
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lc -lsec -lidmap -lpython$(PYVER)$(PYSUFFIX)
-NATIVE_LIBS +=	libpython$(PYVER)$(PYSUFFIX).so
+ADJUNCT_LIBS +=	libpython$(PYVER)$(PYSUFFIX).so
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-unused-variable
 CPPFLAGS +=	\

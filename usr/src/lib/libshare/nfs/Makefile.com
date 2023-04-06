@@ -41,7 +41,7 @@ LIBSRCS = $(LIBOBJS:%.o=$(SRCDIR)/%.c)
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lshare -lnsl -lscf -lumem -lc -lxml2
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 CSTD =		$(CSTD_GNU99)
 

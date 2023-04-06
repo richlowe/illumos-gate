@@ -51,7 +51,7 @@ LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
 LDFLAGS +=	$(VERSREF) -Wl,-M$(MAPFILE) $(LLDFLAGS)
 LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) -llddbg \
 		    $(CONVLIBDIR) -lconv -ltecla
-NATIVE_LIBS +=	libtecla.so
+ADJUNCT_LIBS +=	libtecla.so
 
 BLTDEFS =	msg.h
 BLTDATA =	msg.c

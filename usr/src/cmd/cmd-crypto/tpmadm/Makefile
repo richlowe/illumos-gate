@@ -35,7 +35,7 @@ POFILE = $(PROG)_msg.po
 MSGFILES = $(SRCS:%.c=%.i)
 
 LDLIBS += -ltspi -luuid
-NATIVE_LIBS += libtspi.so
+ADJUNCT_LIBS += libtspi.so
 
 CLOBBERFILES = $(POFILE) $(POFILES)
 

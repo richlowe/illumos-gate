@@ -59,7 +59,7 @@ CLEANFILES += $(STORAGE_SHAREDOBJS) $(STORAGE_OBJS) hal-storage-zpool.o
 include ../../Makefile.cmd
 include ../Makefile.hal
 
-NATIVE_LIBS +=		libdbus-1.so libdbus-glib-1.so libglib-2.0.so
+ADJUNCT_LIBS +=		libdbus-1.so libdbus-glib-1.so libglib-2.0.so
 $(HAL_PROG) :=		LDLIBS += -lc -ldbus-1 -lhal
 
 lshal :=		LDLIBS += -ldbus-glib-1 -lglib-2.0

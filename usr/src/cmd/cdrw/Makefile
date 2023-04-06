@@ -36,7 +36,7 @@ include ../hal/Makefile.hal
 SRCS= $(OBJS:.o=.c)
 
 LDLIBS +=	-lhal -lsecdb -ldbus-1
-NATIVE_LIBS +=	libdbus-1.so
+ADJUNCT_LIBS +=	libdbus-1.so
 CFLAGS +=	$(CCVERBOSE)
 CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses

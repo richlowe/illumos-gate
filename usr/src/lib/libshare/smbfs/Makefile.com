@@ -39,7 +39,7 @@ LIBSRCS = $(LIBOBJS:%.o=$(SRCDIR)/%.c)
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lshare -lscf -lumem -luuid -lc -lxml2 -lsmbfs
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-D_REENTRANT -I$(ADJUNCT_PROTO)/usr/include/libxml2 \

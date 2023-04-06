@@ -54,7 +54,7 @@ CFLAGS += $(CCVERBOSE) $(C_BIGPICFLAGS)
 CFLAGS64 += $(CCVERBOSE) $(C_BIGPICFLAGS)
 
 SNMPLIBS = -lnetsnmp -lnetsnmpagent
-NATIVE_LIBS += libnetsnmp.so libnetsnmpagent.so
+ADJUNCT_LIBS += libnetsnmp.so libnetsnmpagent.so
 
 LDLIBS += $(MACH_LDLIBS)
 LDLIBS += -lfmd_adm -luutil -lnvpair -ltopo

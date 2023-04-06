@@ -34,7 +34,7 @@ LDLIBS +=	-lc -lsocket -luuid -lnvpair -lsysevent -lsec -lbrand \
 		-lpool -lscf -lproc -luutil -lbsm -lsecdb
 # DYNLIB libraries do not have lint libs and are not linted
 $(DYNLIB) :=	LDLIBS += -lxml2
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 SRCDIR =	../common
 CPPFLAGS +=	-I$(ADJUNCT_PROTO)/usr/include/libxml2 -I$(SRCDIR) -D_REENTRANT

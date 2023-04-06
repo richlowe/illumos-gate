@@ -46,7 +46,7 @@ CSTD	= $(CSTD_GNU99)
 CFLAGS += $(CTF_FLAGS) $(CCVERBOSE)
 LDLIBS += -L$(ROOT)/usr/lib/fm -lnvpair -lfmevent -lfmd_msg -lfmnotify \
 	-lumem -lnetsnmp -lnetsnmpagent
-NATIVE_LIBS += libnetsnmp.so libnetsnmpagent.so
+ADJUNCT_LIBS += libnetsnmp.so libnetsnmpagent.so
 LDFLAGS += -R/usr/lib/fm
 
 CERRWARN += -_gcc=-Wno-parentheses

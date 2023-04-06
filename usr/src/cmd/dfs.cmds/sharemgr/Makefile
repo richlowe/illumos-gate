@@ -42,7 +42,7 @@ OBJS	= sharemgr_main.o commands.o shareutil.o
 CPPFLAGS += -I../../../lib/libfsmgt/common
 CPPFLAGS += -I$(ADJUNCT_PROTO)/usr/include/libxml2
 LDLIBS += -lshare -lscf -lsecdb -lumem -lxml2
-NATIVE_LIBS += libxml2.so
+ADJUNCT_LIBS += libxml2.so
 
 POFILES = $(OBJS:.o=.po)
 POFILE  = sharemgr.po

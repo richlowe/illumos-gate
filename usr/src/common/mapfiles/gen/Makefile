@@ -30,7 +30,7 @@ include		$(SRC)/Makefile.master
 
 FILES=	$(MACH)_gcc_map.noexeglobs
 
-NATIVE_LIBS	+= libc.so
+ADJUNCT_LIBS	+= libc.so
 LDFLAGS		+= $(BDIRECT)
 
 $(BUILD64)FILES += $(MACH64)_gcc_map.noexeglobs

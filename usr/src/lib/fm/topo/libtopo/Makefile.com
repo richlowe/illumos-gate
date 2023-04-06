@@ -86,7 +86,7 @@ CFLAGS64 += $(CCVERBOSE) $(C_BIGPICFLAGS)
 $(DYNLIB)  := LDLIBS += \
 	-lnvpair -lelf -lumem -lxml2 -lkstat -luuid -ldevinfo \
 	-lsmbios -lc -ldevid -lipmi -lscf -lpcidb
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 .KEEP_STATE:
 

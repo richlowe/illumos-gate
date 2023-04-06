@@ -99,7 +99,7 @@ include ../../Makefile.rootfs
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lelf -lc -lz
-NATIVE_LIBS +=	libz.so
+ADJUNCT_LIBS +=	libz.so
 
 SRCDIR =	../common
 CFLAGS64 +=	$(C_BIGPICFLAGS)

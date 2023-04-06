@@ -82,6 +82,8 @@ spellin1 hashmk1 := CPPFLAGS =
 spellin1 hashmk1 := LDLIBS =
 spellin1 hashmk1 := LDFLAGS = $(BDIRECT)
 spellin1 hashmk1 := NATIVE_LIBS = libc.so
+spellin1 hashmk1 := LDCHECKS = $(NATIVE_LDCHECKS)
+
 
 $(ROOTSPELLD)/% $(ROOTVARADMD)/% : %
 	$(INS.file)
