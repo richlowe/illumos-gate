@@ -1034,8 +1034,6 @@ CFLAGS64 += $(XSTRCONST)
 
 ALTPICS= $(TRACEOBJS:%=pics/%)
 
-# We're using ld directly, so clobber the sysroot (XXXARM: Probably not what we want)
-$(DYNLIB) := SYSROOT=
 $(DYNLIB) := BUILD.SO = $(LD) -o $@ $(GSHARED) $(DYNFLAGS) $(PICS) $(ALTPICS) $(EXTPICS)
 
 MAPFILES =	$(LIBCDIR)/port/mapfile-vers

@@ -127,7 +127,7 @@ SONAME=		$(DYNLIB)
 HSONAME=	-Wl,-h$(SONAME)
 DYNFLAGS=	$(HSONAME) $(ZTEXT) $(ZDEFS) $(BDIRECT) \
 		$(MAPFILES:%=-Wl,-M%) $(MAPFILE.PGA:%=-Wl,-M%) $(MAPFILE.NED:%=-Wl,-M%) \
-		$(LDCHECKS) $(SYSROOT)
+		$(LDCHECKS)
 
 LDLIBS=		$(LDLIBS.lib)
 
@@ -149,12 +149,10 @@ BUILD.SO=	$(CC) $(CFLAGS) -o $@ $(GSHARED) $(DYNFLAGS) \
 		$(PICS) $(EXTPICS) $(LDLIBS)
 BUILD64.SO=	$(CC64) $(CFLAGS64) -o $@ $(GSHARED) $(DYNFLAGS) \
 		$(PICS) $(EXTPICS) $(LDLIBS)
-# XXXARM: The use of SYSROOT here shouldn't be needed, but something is
-# clobbering it in C++ builds in a way I don't understand
 BUILDCCC.SO=	$(CCC) $(CCFLAGS) -o $@ $(GSHARED) $(DYNFLAGS) \
-		$(PICS) $(EXTPICS) $(LDLIBS) $(CCNEEDED) $(SYSROOT)
+		$(PICS) $(EXTPICS) $(LDLIBS) $(CCNEEDED)
 BUILDCCC64.SO=	$(CCC64) $(CCFLAGS64) -o $@ $(GSHARED) $(DYNFLAGS) \
-		$(PICS) $(EXTPICS) $(LDLIBS) $(CCNEEDED64) $(SYSROOT)
+		$(PICS) $(EXTPICS) $(LDLIBS) $(CCNEEDED64)
 
 # default dynamic library symlink
 INS.liblink=	-$(RM) $@; $(SYMLINK) $(LIBLINKPATH)$(LIBLINKS)$(VERS) $@

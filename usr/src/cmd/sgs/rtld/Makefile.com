@@ -58,9 +58,6 @@ PLAT_sparc =	sparc
 PLAT_aarch64 =	aarch64
 PLAT = $(PLAT_$(BASEPLAT))
 
-# XXXARM: We're linking with ld(1), so need to lose the sysroot
-SYSROOT=
-
 # DTrace needs an executable data segment.
 MAPFILE.NED=
 

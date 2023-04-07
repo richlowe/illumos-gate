@@ -29,9 +29,6 @@ CRTSRCS= ../../crt/aarch64
 include ../Makefile.com
 include ../../Makefile.lib.64
 
-# XXXARM: linked with ld, no SYSROOT
-SYSROOT=
-
 BUILD.SO= $(LD) -o $@ $(GSHARED) $(DYNFLAGS) $(PICS) $(LDLIBS)
 
 install: all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS) \

@@ -25,9 +25,6 @@
 LIBRARY =	libaio.a
 VERS =		.1
 
-# XXXARM: filter library, no sysroot
-SYSROOT=
-
 include		$(SRC)/lib/Makefile.rootfs
 
 DYNFLAGS +=	-F libc.so.1

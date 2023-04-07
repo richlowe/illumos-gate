@@ -55,7 +55,7 @@ clobber: clean
 
 LDLIBS			= -lc
 
-LDFLAGS = $(SYSROOT) $(DYNFLAGS) $(LDLIBS) $(CFLAG_OPT)
+LDFLAGS = $(DYNFLAGS) $(LDLIBS) $(CFLAG_OPT)
 
 # needs work
 SMATCH=off

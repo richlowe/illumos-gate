@@ -29,9 +29,6 @@ include		$(SRC)/lib/Makefile.lib.64
 
 DYNFLAGS +=	-F /usr/lib/ld.so.1
 
-# XXXARM: Filter library, no sysroot
-SYSROOT=
-
 install:	all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS) \
 	$(ROOTCOMPATLINKS)
 

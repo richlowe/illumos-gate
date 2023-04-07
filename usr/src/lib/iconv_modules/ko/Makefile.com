@@ -90,7 +90,7 @@ ALL_SOS   = $(E2I) $(I2E) $(E2J92) $(J922E) $(E2J) $(J2E) $(E2NB) $(NB2E) \
 	$(U2E) $(E2U) $(N2U) $(U2N) $(O2U) $(U2O) $(I2U) $(U2I) \
 	$(C9332U) $(U2C933)
 
-LDFLAGS = $(SYSROOT) $(DYNFLAGS) $(LDLIBS) $(CFLAG_OPT)
+LDFLAGS = $(DYNFLAGS) $(LDLIBS) $(CFLAG_OPT)
 CPPFLAGS += -I$(ICONV_COMMON) -I../inc
 
 # needs work
