@@ -23,14 +23,9 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# lib/pkcs11/libkcfd/i386/Makefile
-#
 
 include $(SRC)/lib/Makefile.filter.com
 include ../Makefile.com
-
-# XXXARM: filter, no sysroot
-SYSROOT=
 
 install: all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS)
 

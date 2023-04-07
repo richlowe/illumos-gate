@@ -33,9 +33,6 @@ ADJUNCT_LIBS +=	libc.so
 CPPFLAGS =	-I$(SRC)/tools/sgs/include $(CPPFLAGS.native) -I$(ELFCAP)
 LDFLAGS += $(BDIRECT)
 
-# XXXARM: Native, no sysroot
-SYSROOT=
-
 all: $(PROG)
 
 install: all

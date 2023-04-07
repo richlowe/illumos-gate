@@ -73,7 +73,7 @@ $(ICONV_DIR)/%: ../%
 	$(INS.file)
 
 %.so: %.o
-	$(CC) $(SYSROOT) $(CFLAGS) $(DYNFLAGS) $(LDLIBS) -o $@ $(@:%.so=%.o)
+	$(CC) $(CFLAGS) $(DYNFLAGS) $(LDLIBS) -o $@ $(@:%.so=%.o)
 	$(POST_PROCESS_SO)
 
 %.o: ../%.c

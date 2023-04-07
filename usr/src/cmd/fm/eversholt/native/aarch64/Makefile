@@ -26,6 +26,3 @@
 
 include ../../../../Makefile.cmd
 include ../Makefile.com
-
-# XXXARM: Native build, no sysroot
-SYSROOT=

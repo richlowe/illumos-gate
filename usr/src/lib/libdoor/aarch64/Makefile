@@ -26,9 +26,6 @@
 include		$(SRC)/lib/Makefile.filter.com
 include		../Makefile.com
 
-#XXXARM: filter library, no sysroot
-SYSROOT=
-
 install:	all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS) \
 	$(ROOTCOMPATLINKS)
 

@@ -76,8 +76,6 @@ $(ROOTVARADMF) :=	FILEMODE =	0666
 
 spellin1 hashmk1 := CC = $(NATIVECC)
 spellin1 hashmk1 := LD = $(NATIVELD)
-# XXXARM: Native no sysroot
-spellin1 hashmk1 := SYSROOT =
 spellin1 hashmk1 := CFLAGS = $(NATIVE_CFLAGS)
 spellin1 hashmk1 := POST_PROCESS =
 spellin1 hashmk1 := CPPFLAGS =

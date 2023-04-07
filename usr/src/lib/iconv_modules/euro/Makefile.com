@@ -42,7 +42,7 @@ all: $(ALL_SOS)
 
 include $(SRC)/lib/iconv_modules/Makefile.iconv
 
-LDFLAGS = $(SYSROOT) $(DYNFLAGS) $(LDLIBS)
+LDFLAGS = $(DYNFLAGS) $(LDLIBS)
 
 CFLAGS		+= $(XREGSFLAG) -D_REENTRANT
 
