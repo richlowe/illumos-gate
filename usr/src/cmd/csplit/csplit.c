@@ -357,6 +357,7 @@ getfile()
 	static int ctr;
 	FILE *opfil;
 	char tfile[15];
+	char tfiwidth[22];
 	char *delim;
 	char savedelim;
 
@@ -368,8 +369,10 @@ getfile()
 
 		/* check for suffix length overflow */
 		if (strlen(fptr) > fiwidth) {
-			fatal("Suffix longer than %ld chars; increase -n\n",
-			    (char *)fiwidth);
+			(void) snprintf(tfiwidth, sizeof (tfiwidth), "%ld",
+			    fiwidth);
+			fatal("Suffix longer than %s chars; increase -n\n",
+			    tfiwidth);
 		}
 
 		/* check for filename length overflow */
