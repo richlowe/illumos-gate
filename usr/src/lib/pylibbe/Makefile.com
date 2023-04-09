@@ -45,7 +45,7 @@ LDLIBS +=	-lbe -lnvpair -lc
 CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-D_FILE_OFFSET_BITS=64 -I../../libbe/common \
 	-I$(ADJUNCT_PROTO)/usr/include/python$(PYVER)$(PYSUFFIX)
-NATIVE_LIBS +=	libpython$(PYVER)$(PYSUFFIX).so
+ADJUNCT_LIBS +=	libpython$(PYVER)$(PYSUFFIX).so
 
 .KEEP_STATE:
 

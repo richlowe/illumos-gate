@@ -37,7 +37,7 @@ CPPFLAGS =	$(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc
 DYNFLAGS +=	-L../libconv
 SGSMSGTARG +=	$(SGSMSG32)
 SGSMSGDIR =	$(SGSHOME)/messages/$(NATIVE_MACH)
-NATIVE_LIBS +=	libc.so
+ADJUNCT_LIBS +=	libc.so
 CW_LINKER =
 
 CFLAGS +=	$(C_PICFLAGS)

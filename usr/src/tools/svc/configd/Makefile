@@ -67,7 +67,7 @@ LDLIBS	+= -L$(NATIVE_ADJUNCT)/usr/lib -R$(NATIVE_ADJUNCT)/usr/lib \
 	-lumem -L$(ROOTONBLDLIBMACH) \
 	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -lsqlite-sys -luutil
 
-NATIVE_LIBS += libumem.so libc.so
+ADJUNCT_LIBS += libumem.so libc.so
 
 DIRMODE = 0755
 FILEMODE = 0555

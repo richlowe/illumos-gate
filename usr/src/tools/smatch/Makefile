@@ -54,8 +54,8 @@ LDLIBS += $(ZLAZYLOAD) $(ZDIRECT) -lsqlite3 -lmd -lgcc -lm -lc
 LDFLAGS = $(MAPFILE.NES:%=-Wl,-M%)
 LDFLAGS += -L$(NATIVE_ADJUNCT)/lib -R$(NATIVE_ADJUNCT)/lib
 
-NATIVE_LIBS += libsqlite3.so libmd.so libm.so libc.so
-LDFLAGS += $(NATIVE_LIBS:%=$(ZASSERTDEFLIB)=%)
+ADJUNCT_LIBS += libsqlite3.so libmd.so libm.so libc.so
+LDFLAGS += $(ADJUNCT_LIBS:%=$(ZASSERTDEFLIB)=%)
 
 CPPFLAGS += -nostdinc
 CPPFLAGS += -Isrc/

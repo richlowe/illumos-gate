@@ -37,7 +37,7 @@ CFLAGS += -I$(INCDIRS)
 
 LDFLAGS += -L$(ROOT)/usr/lib/fm -R/usr/lib/fm
 LDLIBS += -luutil -lxml2 -L$(ROOTLIB)/fm -ltopo
-NATIVE_LIBS += libxml2.so
+ADJUNCT_LIBS += libxml2.so
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-switch

@@ -30,7 +30,7 @@ PROG	= chk4ubin
 
 DYNFLAGS += '-R$$ORIGIN/../../lib/$(MACH)'
 LDLIBS += -lelf
-NATIVE_LIBS += libelf.so
+ADJUNCT_LIBS += libelf.so
 
 .KEEP_STATE:
 

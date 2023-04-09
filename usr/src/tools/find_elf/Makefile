@@ -31,7 +31,7 @@ include $(SRC)/cmd/Makefile.ctf
 $(ROOTONBLDMAN1ONBLDFILES) := FILEMODE=	644
 
 LDLIBS = -lelf -lavl
-NATIVE_LIBS += libelf.so libc.so libavl.so
+ADJUNCT_LIBS += libelf.so libc.so libavl.so
 
 CPPFLAGS += -I$(CUSTRDIR)
 LDFLAGS = \

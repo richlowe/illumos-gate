@@ -56,7 +56,7 @@ SMATCH=off
 
 CFLAGS +=	$(CCVERBOSE)
 LDLIBS +=	-lcurses -ll
-NATIVE_LIBS +=	libcurses.so libl.so
+ADJUNCT_LIBS +=	libcurses.so libl.so
 
 .KEEP_STATE:
 

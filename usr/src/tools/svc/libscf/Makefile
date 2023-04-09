@@ -60,7 +60,7 @@ CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 		-I$(ROOTHDRDIR)
 LDLIBS +=	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
 		-luutil -lc -lgen -lnvpair -lsmbios
-NATIVE_LIBS +=	libsmbios.so libnvpair.so libgen.so libc.so
+ADJUNCT_LIBS +=	libsmbios.so libnvpair.so libgen.so libc.so
 
 all: $(LIBS)
 

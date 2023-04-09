@@ -1200,7 +1200,7 @@ $(ASSYMDEP_OBJS:%=pics/%): assym.h
 GENASSYM_C = genassym.c
 LDFLAGS.native = $(LDASSERTS) $(BDIRECT)
 
-genassym := NATIVE_LIBS += libc.so
+genassym := ADJUNCT_LIBS += libc.so
 
 genassym: $(GENASSYM_C)
 	$(NATIVECC) $(NATIVE_CFLAGS) -Iinc -I$(LIBCDIR)/inc $(CPPFLAGS.native) \

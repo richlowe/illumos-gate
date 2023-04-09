@@ -40,7 +40,7 @@ MYCPPFLAGS = -I../../../../lib/libfsmgt/common \
 		-I../..
 CPPFLAGS += $(MYCPPFLAGS)
 LDLIBS += -lshare -lscf -lsecdb -lumem
-NATIVE_LIBS += libxml2.so
+ADJUNCT_LIBS += libxml2.so
 
 all install := LDLIBS += -lxml2
 

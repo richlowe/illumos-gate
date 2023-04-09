@@ -53,7 +53,7 @@ OBJS=	assfail.o	\
 
 FILEMODE=	0755
 
-NATIVE_LIBS +=	libc.so
+ADJUNCT_LIBS +=	libc.so
 CSTD = $(CSTD_GNU99)
 
 # not linted

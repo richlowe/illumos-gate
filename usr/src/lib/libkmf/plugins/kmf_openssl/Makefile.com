@@ -39,7 +39,7 @@ BERLIB64=	$(BERLIB)
 OPENSSLLIBS=	$(BERLIB) -lcrypto -lcryptoutil -lc
 OPENSSLLIBS64=	$(BERLIB64) -lcrypto -lcryptoutil -lc
 
-NATIVE_LIBS +=	libcrypto.so
+ADJUNCT_LIBS +=	libcrypto.so
 
 SRCDIR=		../common
 INCDIR=		../../include

@@ -41,7 +41,7 @@ MAPFILES =
 
 DYNFLAGS += $(ZINTERPOSE)
 LDLIBS = -lc
-NATIVE_LIBS += libc.so
+ADJUNCT_LIBS += libc.so
 
 ASFLAGS += -D_ASM
 

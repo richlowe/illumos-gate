@@ -40,7 +40,7 @@ SRCS = $(LOCALOBJS:.o=.c) $(COMMONSRCS)
 CPPFLAGS += $(BASECPPFLAGS) -I../../esc/common
 CFLAGS += -DESC
 LDLIBS = -lumem
-NATIVE_LIBS = libumem.so libc.so
+ADJUNCT_LIBS = libumem.so libc.so
 
 all: $(PROG)
 

@@ -18,7 +18,7 @@ include ../../Makefile.ctf
 CSTD = $(CSTD_GNU99)
 CFLAGS += $(CCVERBOSE)
 LDLIBS += -lctf
-NATIVE_LIBS += libctf.so libc.so
+ADJUNCT_LIBS += libctf.so libc.so
 
 LDFLAGS = \
 	-L$(ROOTONBLDLIBMACH) \

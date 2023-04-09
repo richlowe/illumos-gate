@@ -52,7 +52,7 @@ INC_PATH	= -I$(STABS_SRC)
 CERRWARN	+= -_gcc=-Wno-clobbered
 
 LDLIBS		+= -lm
-NATIVE_LIBS	+= libm.so
+ADJUNCT_LIBS	+= libm.so
 
 #
 #       Default build targets.

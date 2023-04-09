@@ -34,7 +34,7 @@ include ../../Makefile.com
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lc -ldbus-1 -lhal
-NATIVE_LIBS +=	libdbus-1.so
+ADJUNCT_LIBS +=	libdbus-1.so
 
 SRCDIR =	../common
 

@@ -40,8 +40,9 @@
 ROOT=		/proto
 
 #
-# Adjunct root, containing an additional proto area to be used for headers
-# and libraries.
+# Adjunct root, a system root image used to find headers, libraries, and files
+# for the target machine.  None of these files are valid to use on the build
+# machine.
 #
 ADJUNCT_PROTO=
 # HAVE_ADJUNCT_PROTO - ADJUNCT_PROTO is set to a non-default value
@@ -54,7 +55,8 @@ NO_ADJUNCT_PROTO=$(ADJUNCT_PROTO:%=$(POUND_SIGN))
 $(NO_ADJUNCT_PROTO)HAVE_ADJUNCT_PROTO=$(POUND_SIGN)
 
 #
-# Adjunct for building things that run on the build machine.
+# Adjunct for building things that run on the build machine, none of these
+# files are valid to use for the target machine.
 #
 NATIVE_ADJUNCT=	/usr
 
@@ -964,15 +966,17 @@ $(__GNUC64)CCNEEDED64	= -L$(GCCLIBDIR) -lstdc++ -lgcc_s
 $(__GNUC64)NATIVECCNEEDED64 = -R$(GCCLIBDIR) -L$(GCCLIBDIR) -lstdc++ -lgcc_s
 $(__GNUC64)CCEXTNEEDED	= $(CCNEEDED64)
 
-# Libraries we expect to use natively on the build machine
-NATIVE_LIBS=
+# Libraries which we expect to reference via either the build machine or
+# ADJUNCT_PROTO, or, when building native components, the NATIVE_PROTO, rather
+# than our own proto area.
+ADJUNCT_LIBS=
 
 # If we're doing a CROSS_BUILD, take a sysroot for GCC from the env file and
 # use it.
 $(CROSS_BLD)SYSROOT=	-_gcc=--sysroot=$($(MACH)_SYSROOT)
 
 LDCHECKS		= $(ZASSERTDEFLIB) $(ZGUIDANCE) $(ZFATALWARNINGS)
-LDCHECKS		+= $(NATIVE_LIBS:%=$(ZASSERTDEFLIB)=%)
+LDCHECKS		+= $(ADJUNCT_LIBS:%=$(ZASSERTDEFLIB)=%)
 
 LINK.c=			$(CC) $(SYSROOT) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDCHECKS)
 LINK64.c=		$(CC) $(SYSROOT) $(CFLAGS64) $(CPPFLAGS) $(LDFLAGS) $(LDCHECKS)

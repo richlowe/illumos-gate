@@ -83,7 +83,7 @@ spellin1 hashmk1 := POST_PROCESS =
 spellin1 hashmk1 := CPPFLAGS =
 spellin1 hashmk1 := LDLIBS =
 spellin1 hashmk1 := LDFLAGS = $(BDIRECT)
-spellin1 hashmk1 := NATIVE_LIBS = libc.so
+spellin1 hashmk1 := ADJUNCT_LIBS = libc.so
 
 $(ROOTSPELLD)/% $(ROOTVARADMD)/% : %
 	$(INS.file)
