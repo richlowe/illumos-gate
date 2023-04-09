@@ -389,6 +389,7 @@ COMMON_SUBDIRS=	\
 	time		\
 	tip		\
 	touch		\
+	tput		\
 	tr		\
 	trapstat	\
 	true		\
@@ -469,7 +470,6 @@ COMMON_SUBDIRS=	\
 # sendmail - not 64bit clean (probably our build of it is hosed)
 # sh - not 64bit clean
 # srchtxt - not 64bit clean
-# tput - not 64bit clean
 # tbl - not 64bit clean
 # troff - not 64bit clean
 # tsol - not ported (or 64bit clean)
@@ -498,7 +498,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	sendmail	\
 	sh		\
 	srchtxt		\
-	tput		\
 	tbl		\
 	troff		\
 	tsol		\
