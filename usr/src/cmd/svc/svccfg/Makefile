@@ -79,7 +79,7 @@ YFLAGS = -d
 CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h
 
 LDLIBS += -lxml2 -lscf -ll -luutil -lumem -lmd -lnvpair -ltecla
-NATIVE_LIBS += libxml2.so
+ADJUNCT_LIBS += libxml2.so
 
 svccfg_help.po := XGETFLAGS =	-a
 

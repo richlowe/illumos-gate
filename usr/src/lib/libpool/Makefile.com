@@ -41,7 +41,7 @@ include ../../Makefile.lib
 # Adding -lxml2 to LDLIBS would cause lint to complain as there is no .ln file
 # for libxml2, so add it to DYNFLAGS
 DYNFLAGS +=	-lxml2
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lscf -lnvpair -lexacct -lc

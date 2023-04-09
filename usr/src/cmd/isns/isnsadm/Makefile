@@ -31,7 +31,7 @@ OBJS = $(SRCS:%.c=%.o)
 include ../../Makefile.cmd
 
 LDLIBS += -lxml2 -lscf -lc
-NATIVE_LIBS += libxml2.so
+ADJUNCT_LIBS += libxml2.so
 CFLAGS += $(CCVERBOSE)
 CPPFLAGS += -I. -I$(ADJUNCT_PROTO)/usr/include/libxml2 -I../isnsd
 POFILE = isnsadm_all.po

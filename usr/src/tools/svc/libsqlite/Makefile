@@ -17,7 +17,7 @@ include $(SRC)/tools/Makefile.tools
 SQLITE_VERSION = 2.8.15-repcached
 ENCODING  = ISO8859
 
-NATIVE_LIBS += libc.so
+ADJUNCT_LIBS += libc.so
 
 CPPFLAGS += $(MYCPPFLAGS)
 

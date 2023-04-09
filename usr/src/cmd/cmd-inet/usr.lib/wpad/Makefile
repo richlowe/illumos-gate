@@ -34,7 +34,7 @@ include	../../../Makefile.cmd
 ROOTMANIFESTDIR = $(ROOTSVCNETWORK)
 
 LDLIBS +=	-ldladm -ldlpi
-NATIVE_LIBS +=	libcrypto.so
+ADJUNCT_LIBS +=	libcrypto.so
 all install := LDLIBS += -lcrypto
 
 SMOFF += all_func_returns

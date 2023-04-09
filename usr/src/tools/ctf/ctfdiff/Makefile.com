@@ -16,7 +16,7 @@ include ../../Makefile.ctf
 
 CFLAGS += $(CCVERBOSE)
 LDLIBS += -lctf
-NATIVE_LIBS += libc.so
+ADJUNCT_LIBS += libc.so
 
 LDFLAGS = \
 	-L$(ROOTONBLDLIBMACH) \

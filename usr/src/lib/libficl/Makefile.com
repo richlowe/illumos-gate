@@ -41,7 +41,7 @@ CFLAGS += $(C_BIGPICFLAGS)
 CFLAGS64 += $(C_BIGPICFLAGS64)
 
 LDLIBS +=	-lumem -luuid -lz -lc -lm
-NATIVE_LIBS +=	libz.so
+ADJUNCT_LIBS +=	libz.so
 
 HEADERS= $(FICLDIR)/ficl.h $(FICLDIR)/ficltokens.h ../ficllocal.h \
 	$(FICLDIR)/ficlplatform/unix.h $(PNGLITE)/pnglite.h

@@ -36,7 +36,7 @@ include ../Makefile.com
 .KEEP_STATE:
 
 LDLIBS +=	-lz
-NATIVE_LIBS +=	libz.so
+ADJUNCT_LIBS +=	libz.so
 
 CFLAGS +=	-I../../../uts/common
 

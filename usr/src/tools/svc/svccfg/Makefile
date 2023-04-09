@@ -73,7 +73,7 @@ LIBUUTIL	= $(SRC)/lib/libuutil
 
 SVCCFG_EXTRA_LIBS += -lxml2 -lscf -ll -luutil -lumem -lmd \
 	-lnvpair
-NATIVE_LIBS += libxml2.so libl.so libumem.so libmd.so libnvpair.so libc.so
+ADJUNCT_LIBS += libxml2.so libl.so libumem.so libmd.so libnvpair.so libc.so
 
 CPPFLAGS +=
 

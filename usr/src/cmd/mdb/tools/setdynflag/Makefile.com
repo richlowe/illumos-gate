@@ -49,7 +49,7 @@ CFLAGS64 += $(CCVERBOSE)
 CERRWARN += $(CNOWARN_UNINIT)
 LDFLAGS += $(ZLAZYLOAD) $(BDIRECT)
 LDLIBS = -lelf
-NATIVE_LIBS += libelf.so libc.so
+ADJUNCT_LIBS += libelf.so libc.so
 
 install all: $(PROG)
 

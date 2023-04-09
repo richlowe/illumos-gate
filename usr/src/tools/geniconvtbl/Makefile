@@ -40,7 +40,7 @@ YFLAGS		+= -d
 CFLAGS		+= -D_FILE_OFFSET_BITS=64
 
 LDLIBS		+= -lgen -lc
-NATIVE_LIBS	+= libgen.so libc.so
+ADJUNCT_LIBS	+= libgen.so libc.so
 
 install: $(ROOTONBLDMACHPROG)
 

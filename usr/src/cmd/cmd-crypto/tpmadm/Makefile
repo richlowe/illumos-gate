@@ -36,7 +36,7 @@ MSGFILES=$(SRCS:%.c=%.i)
 
 CPPFLAGS += -xCC
 LDLIBS += -ltspi -luuid
-NATIVE_LIBS += libtspi.so
+ADJUNCT_LIBS += libtspi.so
 
 CLOBBERFILES = C.ln $(POFILE) $(POFILES)
 

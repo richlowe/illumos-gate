@@ -149,7 +149,7 @@ $(PROG) := LDLIBS += \
 	-luuid \
 	-lvmmapi \
 	-lz
-NATIVE_LIBS += libz.so libcrypto.so
+ADJUNCT_LIBS += libz.so libcrypto.so
 $(MEVENT_TEST_PROG) := LDLIBS += -lsocket
 $(PROG) := LDFLAGS += $(ZASLR)
 

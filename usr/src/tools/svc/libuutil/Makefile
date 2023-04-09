@@ -48,7 +48,7 @@ LIBS = $(DYNLIB)
 SRCDIR = $(SRC)/lib/libuutil/common
 
 CPPFLAGS +=	-I. -DNATIVE_BUILD -I$(SRCDIR)
-NATIVE_LIBS +=	libc.so
+ADJUNCT_LIBS +=	libc.so
 
 SMOFF += signed
 

@@ -52,7 +52,7 @@ $(AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../lib'
 LDFLAGS +=	$(VERSREF) -Wl,-M$(MAPFILE) $(LLDFLAGS)
 LDLIBS +=	$(ELFLIBDIR) -lelf $(LDDBGLIBDIR) -llddbg \
 		    $(CONVLIBDIR) -lconv -ltecla
-NATIVE_LIBS +=	libtecla.so
+ADJUNCT_LIBS +=	libtecla.so
 
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	$(CNOWARN_UNINIT)

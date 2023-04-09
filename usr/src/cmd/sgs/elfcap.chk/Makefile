@@ -22,7 +22,7 @@ include $(SRC)/Makefile.native
 include ../Makefile.com
 
 CSTD =		$(GNU_C99)
-NATIVE_LIBS +=	libc.so
+ADJUNCT_LIBS +=	libc.so
 #
 # We reach into the tools include area which provides us with a snapshot
 # of all of the data that we need. This does mean that if someone is in

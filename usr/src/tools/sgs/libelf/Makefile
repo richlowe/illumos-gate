@@ -32,7 +32,7 @@ include		$(SRC)/Makefile.master.64
 
 CONVLIBDIR =	-L../libconv
 SGSMSGTARG +=	$(SGSMSG32)
-NATIVE_LIBS +=	libc.so
+ADJUNCT_LIBS +=	libc.so
 CW_LINKER =
 
 CPPFLAGS += -I$(SRC)/cmd/sgs/libelf/common

@@ -38,7 +38,7 @@ LIBSRCS =	$(LIBOBJS:%.o=$(SRCDIR)/%.c)
 
 LIBS =		$(DYNLIB)
 LDLIBS +=	-lc -lnsl -lscf -lzfs -luuid -lxml2 -lnvpair
-NATIVE_LIBS +=	libxml2.so
+ADJUNCT_LIBS +=	libxml2.so
 
 #add nfs/lib directory as part of the include path
 CFLAGS +=	$(CCVERBOSE)
