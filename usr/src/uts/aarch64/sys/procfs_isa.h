@@ -77,6 +77,8 @@ typedef	uint32_t instr32_t;
 #define	R_PC	REG_PC
 #define	R_SP	REG_SP
 #define	R_FP	REG_FP
+#define	R_R0	REG_X0
+#define	R_R1	REG_X1
 
 #ifdef	__cplusplus
 }

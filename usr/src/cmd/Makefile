@@ -271,6 +271,7 @@ COMMON_SUBDIRS=	\
 	nice		\
 	nl		\
 	nlsadmin	\
+	nohup		\
 	nsadmin		\
 	nscd		\
 	oamuser		\
@@ -461,7 +462,6 @@ COMMON_SUBDIRS=	\
 # gss - not 64bit clean
 # isns - not 64bit clean
 # luxadm - super confused about platforms, and probably needs libs
-# nohup - not ported (header bits gone awry)
 # oawk - not 64bit clean?
 # prtdiag - not ported
 # refer - not 64bit clean
@@ -488,7 +488,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	isns		\
 	latencytop	\
 	luxadm		\
-	nohup		\
 	oawk		\
 	pcitool		\
 	powertop	\
