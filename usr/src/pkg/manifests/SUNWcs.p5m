@@ -1205,22 +1205,22 @@ file path=usr/lib/pci/pcidr_plugin.so
 file path=usr/lib/pci/pcieb mode=0555
 file path=usr/lib/pfexecd mode=0555
 file path=usr/lib/platexec mode=0555
-$(not_aarch64)dir path=usr/lib/rcm
-$(not_aarch64)dir path=usr/lib/rcm/modules
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_aggr_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_cluster_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_dump_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_filesys_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_ibpart_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_ip_anon_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_ip_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_mpxio_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_network_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_swap_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_vlan_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/modules/SUNW_vnic_rcm.so mode=0555
-$(not_aarch64)file path=usr/lib/rcm/rcm_daemon mode=0555
-$(not_aarch64)dir path=usr/lib/rcm/scripts
+dir  path=usr/lib/rcm
+dir  path=usr/lib/rcm/modules
+file path=usr/lib/rcm/modules/SUNW_aggr_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_cluster_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_dump_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_filesys_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_ibpart_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_ip_anon_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_ip_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_mpxio_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_network_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_swap_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_vlan_rcm.so mode=0555
+file path=usr/lib/rcm/modules/SUNW_vnic_rcm.so mode=0555
+file path=usr/lib/rcm/rcm_daemon mode=0555
+dir  path=usr/lib/rcm/scripts
 dir  path=usr/lib/reparse
 file path=usr/lib/reparse/reparsed group=sys mode=0555
 dir  path=usr/lib/saf

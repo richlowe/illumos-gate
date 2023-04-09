@@ -323,6 +323,7 @@ COMMON_SUBDIRS=	\
 	raidz_test	\
 	ramdiskadm	\
 	rcap		\
+	rcm_daemon	\
 	rctladm		\
 	regcmp		\
 	renice		\
@@ -466,7 +467,6 @@ COMMON_SUBDIRS=	\
 # oawk - not 64bit clean?
 # prtdiag - not ported
 # refer - not 64bit clean
-# rcm_daemon - not 64bit clean
 # sendmail - not 64bit clean (probably our build of it is hosed)
 # sh - not 64bit clean
 # srchtxt - not 64bit clean
@@ -493,7 +493,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	powertop	\
 	prtdiag		\
 	refer		\
-	rcm_daemon	\
 	rmformat	\
 	sendmail	\
 	sh		\
