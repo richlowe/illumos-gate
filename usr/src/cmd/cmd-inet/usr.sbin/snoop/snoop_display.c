@@ -75,12 +75,13 @@ void
 process_pkt(struct sb_hdr *hdrp, char *pktp, int num, int flags)
 {
 	int drops, pktlen;
-	struct timeval *tvp;
+	struct timeval32 *tvp;
+	time_t tv_sec;
 	struct tm *tm;
 	extern int x_offset;
 	extern int x_length;
 	int offset, length;
-	static struct timeval ptv;
+	static struct timeval32 ptv;
 
 	if (hdrp == NULL)
 		return;
@@ -96,7 +97,8 @@ process_pkt(struct sb_hdr *hdrp, char *pktp, int num, int flags)
 	/* set up externals */
 	dlc_header = pktp;
 	pi_frame = num;
-	tm = localtime(&tvp->tv_sec);
+	tv_sec = tvp->tv_sec;
+	tm = localtime(&tv_sec);
 	pi_time_hour = tm->tm_hour;
 	pi_time_min  = tm->tm_min;
 	pi_time_sec  = tm->tm_sec;

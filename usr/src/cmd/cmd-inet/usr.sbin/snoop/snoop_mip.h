@@ -101,7 +101,7 @@ typedef struct registration_request_str {
 #endif /* _BIT_FIELDS_HTOL */
 #endif /* __sparc */
 
-#ifdef __i386
+#if defined(__i386) || defined(__aarch64__)
 #ifdef _BIT_FIELDS_LTOH
 typedef struct registration_request_str {
 	uchar_t		type;		/* must be REG_TYPE_REQ */
@@ -121,7 +121,7 @@ typedef struct registration_request_str {
 	ident_t		identification;	/* for replay protection */
 } regreq_t;
 #endif /* _BIT_FIELDS_LTOH */
-#endif /* __i386 */
+#endif /* __i386 || __aarch64__ */
 
 /*
  * Registration Reply sent by a home agent to a mobile node in
@@ -297,7 +297,7 @@ typedef struct mobility_agt_adv_extension {
 #endif /* _BIT_FIELDS_HTOL */
 #endif /* __sparc */
 
-#ifdef __i386
+#if defined(_i386) || defined(__aarch64__)
 #ifdef _BIT_FIELDS_LTOH
 typedef struct mobility_agt_adv_extension {
 	uchar_t		type;
@@ -316,7 +316,7 @@ typedef struct mobility_agt_adv_extension {
 	uchar_t		reserved;
 } mobagtadvext_t;
 #endif /* _BIT_FIELDS_LTOH */
-#endif /* __i386 */
+#endif /* __i386 || __aarch64__ */
 
 #ifdef __cplusplus
 }

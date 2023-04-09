@@ -61,7 +61,7 @@ struct ohdr {
 	int	o_msglen;
 	int	o_totlen;
 	/* nit_head */
-	struct timeval o_time;
+	struct timeval32 o_time;
 	int	o_drops;
 	int	o_len;
 };
@@ -349,7 +349,7 @@ scan(char *buf, int len, int filter, int cap, int old, void (*proc)(),
 	volatile struct sb_hdr *hdrp;
 	volatile struct sb_hdr nhdr, *nhdrp;
 	volatile char *pktp;
-	volatile struct timeval last_timestamp;
+	volatile struct timeval32 last_timestamp;
 	volatile int header_okay;
 	extern int count, maxcount;
 	extern int snoop_nrecover;
@@ -640,7 +640,7 @@ cap_open_read(const char *name)
 
 	cap_buffp = mmap(0, cap_len, PROT_READ, MAP_PRIVATE, capfile_in, 0);
 	(void) close(capfile_in);
-	if ((int)cap_buffp == -1)
+	if ((intptr_t)cap_buffp == -1)
 		pr_err("couldn't mmap %s: %m", name);
 
 	/* Check if new snoop capture file format */
