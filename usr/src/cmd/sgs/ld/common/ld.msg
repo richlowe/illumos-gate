@@ -21,6 +21,7 @@
 
 #
 # Copyright (c) 1996, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2023 Oxide Computer Company
 #
 
 @ _START_
@@ -38,6 +39,7 @@
 
 @ MSG_ERR_BADTARG	"unknown target platform: %s"
 @ MSG_ERR_TARGNO32	"target platform '%s' has no 32-bit support"
+@ MSG_ERR_BADARG	"unknown argument: %c%s"
 
 # Generic error diagnostic labels
 
@@ -63,7 +65,7 @@
 @ MSG_ARG_TARGET	"target="
 
 @ MSG_LD_OPTIONS	"LD_OPTIONS"
-@ MSG_LD_ALTEXEC	"LD_ALTEXEC="
+@ MSG_LD_ALTEXEC	"LD_ALTEXEC"
 
 @ MSG_SUNW_OST_SGS	"SUNW_OST_SGS"
 
