@@ -81,14 +81,12 @@ SUBDIRS=	 libconv	\
 # lddstub - needs port
 # link_audit - needs port
 # ldprof - not ported
-# prof - not ported
 # tsort - not 64bit clean
 # demo_rdb - not ported
 $(NOT_AARCH64_BLD)SUBDIRS +=	\
 	lddstub		\
 	link_audit	\
 	ldprof		\
-	prof		\
 	tsort		\
 	.WAIT		\
 	demo_rdb

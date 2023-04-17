@@ -79,23 +79,17 @@ export CODEMGR_WS="`git rev-parse --show-toplevel`"
 #
 # To disable shadow compilation, unset SHADOW_* or set them to the empty string.
 #
-export sparc_GNUC_ROOT=/usr/gcc/7
-export sparc_PRIMARY_CC=gcc7,$sparc_GNUC_ROOT/bin/gcc,gnu
-export sparc_PRIMARY_CCC=gcc7,$sparc_GNUC_ROOT/bin/g++,gnu
-export sparc_SHADOW_CCS=gcc10,/usr/gcc/10/bin/gcc,gnu
-export sparc_SHADOW_CCCS=gcc10,/usr/gcc/10/bin/g++,gnu
+export i386_GNUC_ROOT=/usr/gcc/10
+export i386_PRIMARY_CC=gcc10,$i386_GNUC_ROOT/bin/gcc,gnu
+export i386_PRIMARY_CCC=gcc10,$i386_GNUC_ROOT/bin/g++,gnu
+export i386_SHADOW_CCS=gcc7,/usr/gcc/7/bin/gcc,gnu
+export i386_SHADOW_CCCS=gcc7,/usr/gcc/7/bin/g++,gnu
 
-export i386_GNUC_ROOT=/usr/gcc/7
-export i386_PRIMARY_CC=gcc7,$i386_GNUC_ROOT/bin/gcc,gnu
-export i386_PRIMARY_CCC=gcc7,$i386_GNUC_ROOT/bin/g++,gnu
-export i386_SHADOW_CCS=gcc10,/usr/gcc/10/bin/gcc,gnu
-export i386_SHADOW_CCCS=gcc10,/usr/gcc/10/bin/g++,gnu
-
-export aarch64_GNUC_ROOT=/usr/gcc/7
-export aarch64_PRIMARY_CC=gcc7,$aarch64_GNUC_ROOT/bin/gcc,gnu
-export aarch64_PRIMARY_CCC=gcc7,$aarch64_GNUC_ROOT/bin/g++,gnu
-export aarch64_SHADOW_CCS=gcc10,/usr/gcc/10/bin/gcc,gnu
-export aarch64_SHADOW_CCCS=gcc10,/usr/gcc/10/bin/g++,gnu
+export aarch64_GNUC_ROOT=/usr/gcc/10
+export aarch64_PRIMARY_CC=gcc10,$aarch64_GNUC_ROOT/bin/gcc,gnu
+export aarch64_PRIMARY_CCC=gcc10,$aarch64_GNUC_ROOT/bin/g++,gnu
+export aarch64_SHADOW_CCS=gcc7,/usr/gcc/7/bin/gcc,gnu
+export aarch64_SHADOW_CCCS=gcc7,/usr/gcc/7/bin/g++,gnu
 
 # comment to disable smatch
 export ENABLE_SMATCH=1

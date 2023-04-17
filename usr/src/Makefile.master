@@ -168,9 +168,8 @@ JAVA_ROOT=	/usr/java
 # string in the environment to override.
 BLD_JAVA_11=	$(POUND_SIGN)
 
-i386_GNUC_ROOT=		/usr/gcc/7
-sparc_GNUC_ROOT=	/usr/gcc/7
-aarch64_GNUC_ROOT=	/usr/gcc/7
+i386_GNUC_ROOT=		/usr/gcc/10
+aarch64_GNUC_ROOT=	/usr/gcc/10
 NATIVE_GNUC_ROOT=	$($(NATIVE_MACH)_GNUC_ROOT)
 GNUC_ROOT=		$($(MACH)_GNUC_ROOT)
 GCCLIBDIR=		$(GNUC_ROOT)/lib
@@ -1015,18 +1014,12 @@ OBJCOPY=	$(GNU_ROOT)/bin/gobjcopy
 MKIMAGE=	/usr/bin/mkimage
 DTC=		/usr/bin/dtc
 
-$(__GNUC)i386_PRIMARY_CC=	gcc7,$(i386_GNUC_ROOT)/bin/gcc,gnu
+$(__GNUC)i386_PRIMARY_CC=	gcc10,$(i386_GNUC_ROOT)/bin/gcc,gnu
 $(__SUNC)i386_PRIMARY_CC=	studio12,$(SPRO_VROOT)/bin/cc,sun
-$(__GNUC)i386_PRIMARY_CCC=	gcc7,$(i386_GNUC_ROOT)/bin/g++,gnu
+$(__GNUC)i386_PRIMARY_CCC=	gcc10,$(i386_GNUC_ROOT)/bin/g++,gnu
 $(__SUNC)i386_PRIMARY_CCC=	studio12,$(SPRO_VROOT)/bin/CC,sun
-
-$(__GNUC)sparc_PRIMARY_CC=	gcc7,$(sparc_GNUC_ROOT)/bin/gcc,gnu
-$(__SUNC)sparc_PRIMARY_CC=	studio12,$(SPRO_VROOT)/bin/cc,sun
-$(__GNUC)sparc_PRIMARY_CCC=	gcc7,$(sparc_GNUC_ROOT)/bin/g++,gnu
-$(__SUNC)sparc_PRIMARY_CCC=	studio12,$(SPRO_VROOT)/bin/CC,sun
-
-$(__GNUC)aarch64_PRIMARY_CC=	gcc7,$(aarch64_GNUC_ROOT)/bin/gcc,gnu
-$(__GNUC)aarch64_PRIMARY_CCC=	gcc7,$(aarch64_GNUC_ROOT)/bin/g++,gnu
+aarch64_PRIMARY_CC=	gcc10,$(aarch64_GNUC_ROOT)/bin/gcc,gnu
+aarch64_PRIMARY_CCC=	gcc10,$(aarch64_GNUC_ROOT)/bin/g++,gnu
 
 CW_CC_COMPILERS=	$($(MACH)_PRIMARY_CC:%=--primary %) \
 			$($(MACH)_SHADOW_CCS:%=--shadow %)
