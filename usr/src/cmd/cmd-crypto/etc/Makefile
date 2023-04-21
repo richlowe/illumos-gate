@@ -22,9 +22,9 @@
 # Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-ETCCRYPTOFILES = \
-	kcf.conf \
-	pkcs11.conf \
+ETCCRYPTOFILES =	\
+	kcf.conf	\
+	pkcs11.conf	\
 	kmf.conf
 
 include ../../Makefile.cmd
@@ -37,6 +37,9 @@ IETCCRYPTOFILES=	$(ETCCRYPTOFILES:%=$(ROOTCRYPTODIR)/%)
 
 $(ROOTCRYPTODIR)/%:	%
 			$(INS.file)
+
+$(ROOTCRYPTODIR)/%:	%.$(MACH)
+			$(INS.rename)
 
 $(IETCCRYPTOFILES):=	FILEMODE= 644
 
