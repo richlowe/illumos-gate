@@ -212,7 +212,7 @@ cpu_halt(void)
 	uint_t s;
 
 	/*
-	 * If this CPU is online then we should notate our halting
+	 * If this CPU is online then we should note our halting
 	 * by adding ourselves to the partition's halted CPU
 	 * bitset. This allows other CPUs to find/awaken us when
 	 * work becomes available.
@@ -257,9 +257,9 @@ cpu_halt(void)
 
 	/*
 	 * We're on our way to being halted.  Wait until something becomes
-	 * runnable locally or we are awaken (i.e. removed from the halt set).
-	 * Note that the call to hv_cpu_yield() can return even if we have
-	 * nothing to do.
+	 * runnable locally or we are awakened (i.e. removed from the halt
+	 * set).  Note that the call to hv_cpu_yield() can return even if we
+	 * have nothing to do.
 	 *
 	 * Disable interrupts now, so that we'll awaken immediately
 	 * after halting if someone tries to poke us between now and
@@ -294,7 +294,6 @@ cpu_halt(void)
 	while (*p == 0 &&
 	    ((hset_update && bitset_in_set(&cp->cp_haltset, cpu_sid)) ||
 	    (!hset_update && (CPU->cpu_flags & CPU_OFFLINE)))) {
-
 		__asm__ volatile("wfi");
 		write_daif(s);
 		s = read_daif();
@@ -376,14 +375,10 @@ mach_init()
 	cpuset_t cpumask;
 
 	slvltovect = mach_softlvl_to_vect;
-	/*
-	 * XXXARM: At present we have no smart idle or wakeup
-	 * we really could use them.
-	 */
-#if 0
+
 	idle_cpu = cpu_halt;
 	disp_enq_thread = cpu_wakeup;
-#endif
+
 	CPUSET_ZERO(cpumask);
 
 	/*
