@@ -20,19 +20,14 @@
 # CDDL HEADER END
 #
 #
-# Copyright 1994-2003 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
-PROG=		lddstub
-SRCS=		lddstub.s
-OBJS=		$(SRCS:%.s=%.o)
+include		../Makefile.com
 
-include		../../../Makefile.cmd
-include		../../Makefile.com
+.KEEP_STATE:
 
-INTERP=         -I'$$ORIGIN/ld.so.1'
+install:	all $(ROOTLIBPROG)
 
-ASFLAGS +=	-D_ASM
-LDFLAGS=	$(VERSREF) $(INTERP) $(CONVLIBDIR) -lconv -e stub \
-		$(LDFLAGS.cmd)
+include		../Makefile.targ

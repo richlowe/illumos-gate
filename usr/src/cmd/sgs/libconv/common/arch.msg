@@ -22,11 +22,10 @@
 #
 # CDDL HEADER END
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Message file for cmd/sgs/libconv/common/arch.c
 
 @ MSG_ARCH_SPARCV9	"sparcv9"
 @ MSG_ARCH_AMD64	"amd64"
+@ MSG_ARCH_AARCH64	"aarch64"
 @ MSG_LD_NOEXEC64	"LD_NOEXEC_64"
 @ MSG_STR_SLASH		"/"

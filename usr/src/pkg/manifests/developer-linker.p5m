@@ -95,7 +95,7 @@ file path=usr/lib/ld/map.noexbss mode=0444
 file path=usr/lib/ld/map.noexdata mode=0444
 file path=usr/lib/ld/map.noexstk mode=0444
 file path=usr/lib/ld/map.pagealign mode=0444
-$(not_aarch64)file path=usr/lib/lddstub mode=0555
+file path=usr/lib/lddstub mode=0555
 file path=usr/lib/libldstab.so.1
 dir  path=usr/lib/link_audit
 $(MULTILIB_ONLY)dir path=usr/lib/link_audit/$(ARCH64)

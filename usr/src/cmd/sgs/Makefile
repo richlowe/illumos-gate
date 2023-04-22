@@ -64,6 +64,7 @@ SUBDIRS=	 libconv	\
 		error		\
 		gprof		\
 		lari		\
+		lddstub		\
 		lex		\
 		lorder		\
 		m4		\
@@ -78,13 +79,11 @@ SUBDIRS=	 libconv	\
 
 
 # XXXARM: Not built on aarch64 yet
-# lddstub - needs port
 # link_audit - needs port
 # ldprof - not ported
 # tsort - not 64bit clean
 # demo_rdb - not ported
 $(NOT_AARCH64_BLD)SUBDIRS +=	\
-	lddstub		\
 	link_audit	\
 	ldprof		\
 	tsort		\

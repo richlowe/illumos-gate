@@ -26,16 +26,14 @@
 
 /*
  * Stub file for ldd(1).  Provides for preloading shared libraries.
- */
-	.file	"lddstub.s"
-
-	.set	EXIT,1
-#define	syscall	.byte 0xf, 0x5
+*/
+#include <sys/syscall.h>
+	.file	"lddstub.S"
 
 	.text
 	.globl	stub
 stub:
 	movq	$0, %rdi
-	movl	$EXIT, %eax
+	movl	$SYS_exit, %eax
 	syscall
 	hlt

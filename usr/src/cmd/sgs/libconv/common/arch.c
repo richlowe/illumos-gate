@@ -48,7 +48,8 @@ conv_sys_eclass(void)
 		return (ELFCLASS32);
 
 	if ((strstr(buf, MSG_ORIG(MSG_ARCH_SPARCV9)) != NULL) ||
-	    (strstr(buf, MSG_ORIG(MSG_ARCH_AMD64)) != NULL))
+	    (strstr(buf, MSG_ORIG(MSG_ARCH_AMD64)) != NULL) ||
+	    (strstr(buf, MSG_ORIG(MSG_ARCH_AARCH64)) != NULL))
 		return (ELFCLASS64);
 
 	return (ELFCLASS32);
