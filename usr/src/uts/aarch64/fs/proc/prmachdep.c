@@ -160,9 +160,8 @@ prsetprfpregs(klwp_t *lwp, prfpregset_t *pfp)
 /*
  * Does the system support extra register state?
  */
-/* ARGSUSED */
 int
-prhasx(proc_t *p)
+prhasx(proc_t *p __unused)
 {
 	return (0);
 }
@@ -170,9 +169,8 @@ prhasx(proc_t *p)
 /*
  * Get the size of the extra registers.
  */
-/* ARGSUSED */
-int
-prgetprxregsize(proc_t *p)
+size_t
+prgetprxregsize(proc_t *p __unused)
 {
 	return (0);
 }
@@ -180,9 +178,8 @@ prgetprxregsize(proc_t *p)
 /*
  * Get extra registers.
  */
-/*ARGSUSED*/
 void
-prgetprxregs(klwp_t *lwp, caddr_t prx)
+prgetprxregs(klwp_t *lwp __unused, prxregset_t *prx __unused)
 {
 	/* no extra registers */
 }
@@ -190,11 +187,11 @@ prgetprxregs(klwp_t *lwp, caddr_t prx)
 /*
  * Set extra registers.
  */
-/*ARGSUSED*/
-void
-prsetprxregs(klwp_t *lwp, caddr_t prx)
+int
+prsetprxregs(klwp_t *lwp __unused, prxregset_t *prx __unused)
 {
 	/* no extra registers */
+	return (0);
 }
 
 /*
@@ -435,3 +432,20 @@ pr_watch_emul(struct regs *rp, caddr_t addr, enum seg_rw rw)
 	return (0);
 }
 
+/*
+ * Return the minimum size that we need to determine the full size of a
+ * prxregset_t.
+ */
+boolean_t
+prwriteminxreg(size_t *sizep)
+{
+	*sizep = 0;
+	return (B_TRUE);
+}
+
+boolean_t
+prwritesizexreg(const void *argp __unused, size_t *sizep)
+{
+	*sizep = 0;
+	return (B_TRUE);
+}

@@ -176,6 +176,7 @@ getsetcontext(int flag, void *arg)
 		return (set_errno(EINVAL));
 
 	case GETCONTEXT:
+	case GETCONTEXT_EXTD:	/* We have no extended context on ARM as yet */
 		schedctl_finish_sigblock(curthread);
 		savecontext(&uc, &curthread->t_hold);
 		if (uc.uc_flags & UC_SIGMASK)
@@ -183,6 +184,7 @@ getsetcontext(int flag, void *arg)
 		if (copyout(&uc, arg, sizeof (uc)))
 			return (set_errno(EFAULT));
 		return (0);
+
 
 	case SETCONTEXT:
 		ucp = arg;
@@ -223,4 +225,3 @@ getsetcontext(int flag, void *arg)
 		return (0);
 	}
 }
-

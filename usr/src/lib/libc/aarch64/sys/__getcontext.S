@@ -34,3 +34,11 @@
 	SYSCERROR
 	RETC
 	SET_SIZE(__getcontext)
+
+	ENTRY(__getcontext_extd)
+	mov	x1, x0
+	mov	x0, #4
+	SYSTRAP_RVAL1(context)
+	SYSCERROR
+	RETC
+	SET_SIZE(__getcontext_extd)

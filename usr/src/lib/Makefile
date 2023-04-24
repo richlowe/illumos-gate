@@ -301,7 +301,6 @@ i386_SUBDIRS=		\
 	libvmmapi
 
 sparc_SUBDIRS=		\
-	efcode		\
 	libds		\
 	libdscp		\
 	libprtdiag	\

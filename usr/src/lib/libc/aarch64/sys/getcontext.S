@@ -50,6 +50,30 @@
 	ret
 	SET_SIZE(getcontext)
 
+	ENTRY(getcontext_extd)
+	cbnz	x1, 2f
+	sub	sp, sp, #(16 * 2)
+	stp	x29, x30, [sp, #(0 * 16)]
+	stp	x0, x1,   [sp, #(1 * 16)]
+	bl	__getcontext_extd
+	ldp	x1, x2,   [sp, #(1 * 16)]
+	ldp	x29, x30, [sp, #(0 * 16)]
+	add	sp, sp, #(16 * 2)
+	cbnz	x0, 1f
+
+	mov	x3, sp
+	str	x30, [x1, #(UC_MCONTEXT_GREGS + 8*REG_PC)]
+	str	x30, [x1, #(UC_MCONTEXT_GREGS + 8*REG_X30)]
+	str	x3,  [x1, #(UC_MCONTEXT_GREGS + 8*REG_SP)]
+	str	xzr, [x1, #(UC_MCONTEXT_GREGS + 8*REG_X0)]
+	ret
+
+1:	mov	x0, #-1
+	ret
+2:	mov	x0, #EINVAL
+	b	__cerror
+	SET_SIZE(getcontext_extd)
+
 	ANSI_PRAGMA_WEAK(swapcontext, function)
 	ENTRY(swapcontext)
 	sub	sp, sp, #(16 * 2)
@@ -72,3 +96,28 @@
 1:	mov	x0, #-1
 	ret
 	SET_SIZE(swapcontext)
+
+	ENTRY(swapcontext_extd)
+	cbnz	x0, 2f
+	sub	sp, sp, #(16 * 2)
+	stp	x29, x30, [sp, #(0 * 16)]
+	stp	x0, x1,   [sp, #(1 * 16)]
+	bl	__getcontext_extd
+	ldp	x1, x2,   [sp, #(1 * 16)]
+	ldp	x29, x30, [sp, #(0 * 16)]
+	add	sp, sp, #(16 * 2)
+	cbnz	x0, 1f
+
+	mov	x3, sp
+	str	x30, [x1, #(UC_MCONTEXT_GREGS + 8*REG_PC)]
+	str	x30, [x1, #(UC_MCONTEXT_GREGS + 8*REG_X30)]
+	str	x3,  [x1, #(UC_MCONTEXT_GREGS + 8*REG_SP)]
+	str	xzr, [x1, #(UC_MCONTEXT_GREGS + 8*REG_X0)]
+	mov	x0, x2
+	bl	setcontext
+
+1:	mov	x0, #-1
+	ret
+2:	mov	x0, #EINVAL
+	b __cerror
+	SET_SIZE(swapcontext_extd)

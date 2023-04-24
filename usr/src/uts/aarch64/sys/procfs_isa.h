@@ -78,6 +78,9 @@ typedef	uint32_t instr32_t;
 #define	R_SP	REG_SP
 #define	R_FP	REG_FP
 
+/* We currently do not have extended register information */
+typedef struct prxregset prxregset_t;
+
 #ifdef	__cplusplus
 }
 #endif

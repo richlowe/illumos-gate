@@ -26,8 +26,11 @@
 
 #include <sys/types.h>
 #include <sys/ucontext.h>
+
 #include <setjmp.h>
+#include <string.h>
 #include <ucontext.h>
+#include <upanic.h>
 
 extern void _siglongjmp(sigjmp_buf, int) __NORETURN;
 
@@ -35,6 +38,7 @@ extern void _siglongjmp(sigjmp_buf, int) __NORETURN;
 void
 siglongjmp(sigjmp_buf env, int val)
 {
+	const char *msg = "siglongjmp(): setcontext() returned";
 	ucontext_t *ucp = (ucontext_t *)env;
 
 	if (val)
@@ -42,5 +46,10 @@ siglongjmp(sigjmp_buf env, int val)
 	else
 		ucp->uc_mcontext.gregs[REG_X0] = 1;
 
+	/*
+	 * While unlikely, it is possible that setcontext() may fail for some
+	 * reason. If that happens, we will kill the process.
+	 */
 	(void) setcontext(ucp);
+	upanic(msg, strlen(msg) + 1);
 }

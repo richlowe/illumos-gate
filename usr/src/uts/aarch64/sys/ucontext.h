@@ -112,6 +112,7 @@ extern void ucontext_32ton(const ucontext32_t *src, ucontext_t *dest);
 #define	SETCONTEXT	1
 #define	GETUSTACK	2
 #define	SETUSTACK	3
+#define	GETCONTEXT_EXTD	4
 
 /*
  * values for uc_flags

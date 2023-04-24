@@ -19,7 +19,7 @@
 
 include $(SRC)/Makefile.master
 
-SUBDIRS_i386 = i386 imc zen_umc
+SUBDIRS_i386 = i386 imc zen_umc xsave
 
 SUBDIRS =       \
 		cores \
@@ -51,6 +51,7 @@ PROGS = \
 	clock_gettime \
 	eventfd \
 	odirectory \
+	getcontext_extd \
 	writev
 
 # XXXARM: Needs thread-local storage

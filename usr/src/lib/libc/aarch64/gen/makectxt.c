@@ -27,9 +27,12 @@
 
 #pragma weak _makecontext = makecontext
 
-#include <stdarg.h>
-#include <ucontext.h>
 #include <sys/stack.h>
+
+#include <errno.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <ucontext.h>
 #include <unistd.h>
 
 extern void __resumecontext(void);
@@ -94,4 +97,25 @@ makecontext(ucontext_t *ucp, void (*func)(), int argc, ...)
 	va_end(ap);
 
 	ucp->uc_mcontext.gregs[REG_X30] = (long)__resumecontext;
+}
+
+/*
+ * On ARM at present we have no extended save, and just need to allocate a
+ * ucontext_t.
+ */
+ucontext_t *
+ucontext_alloc(uint32_t flags)
+{
+	if (flags != 0) {
+		errno = EINVAL;
+		return (NULL);
+	}
+
+	return (calloc(1, sizeof (ucontext_t)));
+}
+
+void
+ucontext_free(ucontext_t *ucp)
+{
+	free(ucp);
 }
