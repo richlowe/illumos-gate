@@ -86,6 +86,3 @@ SRCS =		$(COMOBJ:%.o=../common/%.c) \
 		$(SGSCOMMONOBJ:%.o=$(SGSCOMMON)/%.c) $(BLTDATA)
 
 CLEANFILES +=	$(BLTFILES) gen_struct_layout
-
-# XXXARM: This went missing, and I don't know how
-$(ROOTPROG) := FILEMODE = 0555

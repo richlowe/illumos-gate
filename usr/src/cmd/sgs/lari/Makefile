@@ -33,9 +33,6 @@ include		$(SRC)/cmd/sgs/Makefile.com
 PSRC=		$(PROG).pl
 POFILE=		$(SGSMSGDIR)/$(PROG)
 
-# XXXARM: This went missing, and I don't know how
-$(ROOTPROG) := FILEMODE = 0555
-
 .KEEP_STATE:
 
 all:		$(PROG)

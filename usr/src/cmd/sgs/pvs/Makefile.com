@@ -68,6 +68,3 @@ SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA) \
 		$(SGSCOMMONOBJ:%.o=$(SGSCOMMON)/%.c)
 
 CLEANFILES +=	$(BLTFILES)
-
-# XXXARM: This went missing, and I don't know how
-$(ROOTPROG) := FILEMODE = 0555

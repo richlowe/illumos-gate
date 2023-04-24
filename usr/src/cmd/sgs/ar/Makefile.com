@@ -39,7 +39,7 @@ XPG4OBJS=	$(BLTOBJ:%=objs.xpg4/%) $(COMOBJ:%=objs.xpg4/%)
 
 LLDFLAGS =			'-R$$ORIGIN/../../lib'
 $(NOT_AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../../lib/$(MACH64)'
-$(AARCH64_BLD)LLDFLAGS64 = 	'-R$$ORIGIN/../../lib'
+$(AARCH64_BLD)LLDFLAGS64 =	'-R$$ORIGIN/../../lib'
 
 CPPFLAGS=	-I. -I../../include $(CPPFLAGS.master) -I$(ELFCAP)
 CFLAGS +=	$(CCVERBOSE)
@@ -68,9 +68,3 @@ SGSMSGFLAGS +=	-h $(BLTDEFS) -d $(BLTDATA) -m $(BLTMESG) -n ar_msg
 SRCS=		$(COMOBJ:%.o=../common/%.c) $(BLTDATA:%.o=$(SGSCOMMON)/%.c)
 
 CLEANFILES +=	$(BLTFILES)
-
-# XXXARM: This went missing, and I don't know how
-$(ROOTPROG) := FILEMODE = 0555
-$(ROOTPROG64) := FILEMODE = 0555
-$(ROOTXPG4PROG) := FILEMODE = 0555
-$(ROOTXPG4PROG64) := FILEMODE = 0555
