@@ -24,6 +24,8 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
+include $(SRC)/Makefile.master
+
 LIBRARY =	libslp.a
 VERS =		.1
 
@@ -31,8 +33,10 @@ OBJECTS =	SLPFindAttrs.o SLPFindSrvTypes.o SLPFindSrvs.o SLPOpen.o \
 		SLPReg.o SLPUtils.o SLPParseSrvURL.o SLPGetRefreshInterval.o \
 		slp_queue.o slp_utils.o slp_search.o slp_ua_common.o slp_net.o \
 		slp_net_utils.o slp_ipc.o slp_config.o slp_utf8.o \
-		slp_targets.o slp_da_cache.o slp_jni_support.o DAAdvert.o \
+		slp_targets.o slp_da_cache.o DAAdvert.o \
 		SAAdvert.o slp_auth.o
+
+$(NOT_AARCH64_BLD)OBJECTS +=  slp_jni_support.o
 
 include ../../Makefile.lib
 
@@ -42,8 +46,9 @@ LDLIBS +=	-lc -lnsl -lsocket
 SRCDIR =	../clib
 
 CFLAGS +=	$(CCVERBOSE)
-CPPFLAGS +=	-D_REENTRANT -I../clib -I$(JAVA_ROOT)/include \
-		-I$(JAVA_ROOT)/include/solaris
+CPPFLAGS +=	-D_REENTRANT -I../clib
+$(NOT_AARCH64_BLD)CPPFLAGS += -I$(JAVA_ROOT)/include
+$(NOT_AARCH64_BLD)CPPFLAGS += -I$(JAVA_ROOT)/include/solaris
 
 CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-parentheses

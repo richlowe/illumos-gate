@@ -61,7 +61,9 @@ SYMBOL_VERSION SUNW_1.1 {
 
 SYMBOL_VERSION SUNWprivate_1.1 {
     global:
+$if !_arm
 	Java_com_sun_slp_Syslog_syslog;
+$endif
     local:
 	*;
 };
