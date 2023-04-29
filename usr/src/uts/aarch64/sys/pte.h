@@ -90,7 +90,7 @@ typedef uint64_t pte_t;
 #define	PTE_TABLE_UXNT		(1ull << 60)
 #define	PTE_TABLE_PXNT		(1ull << 59)
 
-#define	PTE_PFN_MASK		0x000000fffffff000ull
+#define	PTE_PFN_MASK		0x0000fffffffff000ull
 
 #endif /* !_ASM */
 
