@@ -20,15 +20,21 @@
 #
 
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-# Copyright 2019 Peter Tribble.
-# Copyright 2022 Garrett D'Amore
+#
+# Copyright (c) 2018, Joyent, Inc.
 #
 
-i386_SUBDIRS	= i86pc
-aarch64_SUBDIRS	= armv8
+MODULE	= armv8pi
+ARCH	= armv8
+CLASS	= arch
 
-SUBDIRS = common $($(MACH)_SUBDIRS)
+TOPODIR		= ../../../libtopo/common
+MODULESRCS	= armv8pi.c
 
-include ../../Makefile.subdirs
+include ../../Makefile.plugin
+
+LDLIBS += -ldevinfo -luutil -lpcidb
+
+CPPFLAGS += -I. -I$(TOPODIR)

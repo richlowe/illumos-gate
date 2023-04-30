@@ -43,6 +43,8 @@ i386_SUBDIRS = i86pc \
 		SMCI,SSG-6049P-E1CR36L \
 		SMCI,SSG-2029P-ACR24L
 
+aarch64_SUBDIRS = armv8
+
 SUBDIRS = $($(MACH)_SUBDIRS)
 
 include ../../Makefile.subdirs

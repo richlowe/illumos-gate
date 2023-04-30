@@ -18,17 +18,19 @@
 #
 # CDDL HEADER END
 #
-
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-# Copyright 2019 Peter Tribble.
-# Copyright 2022 Garrett D'Amore
 #
 
-i386_SUBDIRS	= i86pc
-aarch64_SUBDIRS	= armv8
+ARCH = armv8
+CLASS = arch
+DTDFILE = topology.dtd.1
+TOPOFILE = armv8-hc-topology.xml armv8-legacy-hc-topology.xml
 
-SUBDIRS = common $($(MACH)_SUBDIRS)
+SRCDIR = ../armv8
 
-include ../../Makefile.subdirs
+PLATFORM = unused
+TOPOBASE = armv8-hc-topology.xml
+
+include ../Makefile.map

@@ -481,7 +481,20 @@ dir  path=usr/lib/mdb/proc group=sys
 #
 file path=usr/lib/mdb/proc/eft.so group=sys mode=0555
 file path=usr/lib/mdb/proc/fmd.so group=sys mode=0555
-$(not_aarch64)dir path=usr/platform group=sys
+dir  path=usr/platform group=sys
+$(aarch64_ONLY)dir path=usr/platform/armv8
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/fm
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/fm/topo
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/fm/topo/maps
+$(aarch64_ONLY)file \
+    path=usr/platform/armv8/lib/fm/topo/maps/armv8-hc-topology.xml mode=0444
+$(aarch64_ONLY)file \
+    path=usr/platform/armv8/lib/fm/topo/maps/armv8-legacy-hc-topology.xml \
+    mode=0444
+$(aarch64_ONLY)dir path=usr/platform/armv8/lib/fm/topo/plugins
+$(aarch64_ONLY)file path=usr/platform/armv8/lib/fm/topo/plugins/armv8pi.so \
+    mode=0555
 $(i386_ONLY)dir path=usr/platform/i86pc group=sys
 $(i386_ONLY)dir path=usr/platform/i86pc/lib
 $(i386_ONLY)dir path=usr/platform/i86pc/lib/fm
@@ -634,6 +647,7 @@ $(i386_ONLY)file path=usr/platform/i86pc/lib/fm/topo/plugins/hostbridge.so \
     mode=0555
 $(i386_ONLY)file path=usr/platform/i86pc/lib/fm/topo/plugins/pcibus.so mode=0555
 $(i386_ONLY)file path=usr/platform/i86pc/lib/fm/topo/plugins/x86pi.so mode=0555
+
 #
 # Some directories common to both global and non-global zones:
 #
@@ -651,9 +665,9 @@ dir  path=usr/share/lib/xml/dtd group=sys variant.opensolaris.zone=__NODEFAULT
 #
 # Topo DTDs are also common
 #
-$(not_aarch64)file path=usr/share/lib/xml/dtd/digraph-topology.dtd.1 \
+file path=usr/share/lib/xml/dtd/digraph-topology.dtd.1 \
     variant.opensolaris.zone=__NODEFAULT
-$(not_aarch64)file path=usr/share/lib/xml/dtd/topology.dtd.1 \
+file path=usr/share/lib/xml/dtd/topology.dtd.1 \
     variant.opensolaris.zone=__NODEFAULT
 dir  path=usr/share/man/man8
 file path=usr/share/man/man8/fmadm.8
