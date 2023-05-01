@@ -25,11 +25,10 @@
 
 /*
  * Stub file for ldd(1).  Provides for preloading shared libraries.
-*/
-
+ */
 #include <sys/syscall.h>
-	.file	"lddstub.S"
 
+	.file	"lddstub.S"
 	.text
 	.globl	stub
 
