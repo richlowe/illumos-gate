@@ -4351,7 +4351,7 @@ got(Cache *cache, Word shnum, Ehdr *ehdr, const char *file)
 	Cache		*gotcache = NULL, *symtab = NULL;
 	Addr		gotbgn, gotend;
 	Shdr		*gotshdr;
-	Word		cnt, gotents, gotndx;
+	Word		scnt, cnt, gotents, gotndx;
 	size_t		gentsize;
 	Got_info	*gottable;
 	char		*gotdata;
@@ -4362,217 +4362,230 @@ got(Cache *cache, Word shnum, Ehdr *ehdr, const char *file)
 	/*
 	 * First, find the got.
 	 */
-	for (cnt = 1; cnt < shnum; cnt++) {
-		if (strncmp(cache[cnt].c_name, MSG_ORIG(MSG_ELF_GOT),
-		    MSG_ELF_GOT_SIZE) == 0) {
-			gotcache = &cache[cnt];
-			break;
-		}
-	}
-	if (gotcache == NULL)
-		return;
-
-	/*
-	 * A got section within a relocatable object is suspicious.
-	 */
-	if (ehdr->e_type == ET_REL) {
-		(void) fprintf(stderr, MSG_INTL(MSG_GOT_UNEXPECTED), file,
-		    gotcache->c_name);
-	}
-
-	gotshdr = gotcache->c_shdr;
-	if (gotshdr->sh_size == 0) {
-		(void) fprintf(stderr, MSG_INTL(MSG_ERR_BADSZ),
-		    file, gotcache->c_name);
-		return;
-	}
-
-	gotbgn = gotshdr->sh_addr;
-	gotend = gotbgn + gotshdr->sh_size;
-
-	/*
-	 * Some architectures don't properly set the sh_entsize for the GOT
-	 * table.  If it's not set, default to a size of a pointer.
-	 */
-	if ((gentsize = gotshdr->sh_entsize) == 0)
-		gentsize = sizeof (Xword);
-
-	if ((gotcache->c_data == NULL) || (gotcache->c_data->d_buf == NULL))
-		return;
-
-	/* LINTED */
-	gotents = (Word)(gotshdr->sh_size / gentsize);
-	gotdata = gotcache->c_data->d_buf;
-
-	if ((gottable = calloc(gotents, sizeof (Got_info))) == 0) {
-		int err = errno;
-		(void) fprintf(stderr, MSG_INTL(MSG_ERR_MALLOC), file,
-		    strerror(err));
-		return;
-	}
-
-	/*
-	 * Now we scan through all the sections looking for any relocations
-	 * that may be against the GOT.  Since these may not be isolated to a
-	 * .rel[a].got section we check them all.
-	 * While scanning sections save the symbol table entry (a symtab
-	 * overriding a dynsym) so that we can lookup _GLOBAL_OFFSET_TABLE_.
-	 */
-	for (cnt = 1; cnt < shnum; cnt++) {
-		Word		type, symnum;
-		Xword		relndx, relnum, relsize;
-		void		*rels;
-		Sym		*syms;
-		Cache		*symsec, *strsec;
-		Cache		*_cache = &cache[cnt];
-		Shdr		*shdr;
-
-		shdr = _cache->c_shdr;
-		type = shdr->sh_type;
-
-		if ((symtab == 0) && (type == SHT_DYNSYM)) {
-			symtab = _cache;
+	for (scnt = 1; scnt < shnum; scnt++) {
+		/*
+		 * Because we strncmp, this catches .got.* too, as we would
+		 * prefer
+		 */
+		if (strncmp(cache[scnt].c_name, MSG_ORIG(MSG_ELF_GOT),
+		    MSG_ELF_GOT_SIZE) != 0)
 			continue;
-		}
-		if (type == SHT_SYMTAB) {
-			symtab = _cache;
-			continue;
-		}
-		if ((type != SHT_RELA) && (type != SHT_REL))
+
+		gotcache = &cache[scnt];
+		if (gotcache == NULL)
 			continue;
 
 		/*
-		 * Decide entry size.
+		 * A got section within a relocatable object is suspicious.
 		 */
-		if (((relsize = shdr->sh_entsize) == 0) ||
-		    (relsize > shdr->sh_size)) {
-			if (type == SHT_RELA)
-				relsize = sizeof (Rela);
-			else
-				relsize = sizeof (Rel);
+		if (ehdr->e_type == ET_REL) {
+			(void) fprintf(stderr, MSG_INTL(MSG_GOT_UNEXPECTED),
+			    file, gotcache->c_name);
 		}
 
-		/*
-		 * Determine the number of relocations available.
-		 */
-		if (shdr->sh_size == 0) {
+		gotshdr = gotcache->c_shdr;
+		if (gotshdr->sh_size == 0) {
 			(void) fprintf(stderr, MSG_INTL(MSG_ERR_BADSZ),
-			    file, _cache->c_name);
+			    file, gotcache->c_name);
 			continue;
 		}
-		if ((_cache->c_data == NULL) || (_cache->c_data->d_buf == NULL))
-			continue;
 
-		rels = _cache->c_data->d_buf;
-		relnum = shdr->sh_size / relsize;
+		gotbgn = gotshdr->sh_addr;
+		gotend = gotbgn + gotshdr->sh_size;
 
 		/*
-		 * Get the data buffer for the associated symbol table and
-		 * string table.
+		 * Some architectures don't properly set the sh_entsize for
+		 * the GOT table.  If it's not set, default to a size of a
+		 * pointer.
 		 */
-		if (stringtbl(cache, 1, cnt, shnum, file,
-		    &symnum, &symsec, &strsec) == 0)
-			continue;
+		if ((gentsize = gotshdr->sh_entsize) == 0)
+			gentsize = sizeof (Xword);
 
-		syms = symsec->c_data->d_buf;
+		if ((gotcache->c_data == NULL) ||
+		    (gotcache->c_data->d_buf == NULL)) {
+			continue;
+		}
+
+		gotents = (Word)(gotshdr->sh_size / gentsize);
+		gotdata = gotcache->c_data->d_buf;
+
+		if ((gottable = calloc(gotents, sizeof (Got_info))) == 0) {
+			int err = errno;
+			(void) fprintf(stderr, MSG_INTL(MSG_ERR_MALLOC), file,
+			    strerror(err));
+			continue;
+		}
 
 		/*
-		 * Loop through the relocation entries.
+		 * Now we scan through all the sections looking for any
+		 * relocations that may be against the GOT.  Since these may
+		 * not be isolated to a .rel[a].got section we check them all.
+		 * While scanning sections save the symbol table entry (a
+		 * symtab overriding a dynsym) so that we can lookup
+		 * _GLOBAL_OFFSET_TABLE_.
 		 */
-		for (relndx = 0; relndx < relnum; relndx++,
-		    rels = (void *)((char *)rels + relsize)) {
-			char		section[BUFSIZ];
-			Addr		offset;
-			Got_info	*gip;
-			Word		symndx, reltype;
-			Rela		*rela;
-			Rel		*rel;
+		for (cnt = 1; cnt < shnum; cnt++) {
+			Word		type, symnum;
+			Xword		relndx, relnum, relsize;
+			void		*rels;
+			Sym		*syms;
+			Cache		*symsec, *strsec;
+			Cache		*_cache = &cache[cnt];
+			Shdr		*shdr;
+
+			shdr = _cache->c_shdr;
+			type = shdr->sh_type;
+
+			if ((symtab == 0) && (type == SHT_DYNSYM)) {
+				symtab = _cache;
+				continue;
+			}
+			if (type == SHT_SYMTAB) {
+				symtab = _cache;
+				continue;
+			}
+			if ((type != SHT_RELA) && (type != SHT_REL))
+				continue;
 
 			/*
-			 * Unravel the relocation.
+			 * Decide entry size.
 			 */
-			if (type == SHT_RELA) {
-				rela = (Rela *)rels;
-				symndx = ELF_R_SYM(rela->r_info);
-				reltype = ELF_R_TYPE(rela->r_info,
-				    ehdr->e_machine);
-				offset = rela->r_offset;
-			} else {
-				rel = (Rel *)rels;
-				symndx = ELF_R_SYM(rel->r_info);
-				reltype = ELF_R_TYPE(rel->r_info,
-				    ehdr->e_machine);
-				offset = rel->r_offset;
+			if (((relsize = shdr->sh_entsize) == 0) ||
+			    (relsize > shdr->sh_size)) {
+				if (type == SHT_RELA)
+					relsize = sizeof (Rela);
+				else
+					relsize = sizeof (Rel);
 			}
 
 			/*
-			 * Only pay attention to relocations against the GOT.
+			 * Determine the number of relocations available.
 			 */
-			if ((offset < gotbgn) || (offset >= gotend))
-				continue;
-
-			if ((gotshdr->sh_entsize == 0) ||
-			    (gotshdr->sh_size == 0)) {
+			if (shdr->sh_size == 0) {
 				(void) fprintf(stderr, MSG_INTL(MSG_ERR_BADSZ),
-				    file, gotcache->c_name);
+				    file, _cache->c_name);
+				continue;
+			}
+			if ((_cache->c_data == NULL) ||
+			    (_cache->c_data->d_buf == NULL)) {
 				continue;
 			}
 
-			/* LINTED */
-			gotndx = (Word)((offset - gotbgn) /
-			    gotshdr->sh_entsize);
+			rels = _cache->c_data->d_buf;
+			relnum = shdr->sh_size / relsize;
+
+			/*
+			 * Get the data buffer for the associated symbol table
+			 * and string table.
+			 */
+			if (stringtbl(cache, 1, cnt, shnum, file,
+			    &symnum, &symsec, &strsec) == 0)
+				continue;
+
+			syms = symsec->c_data->d_buf;
+
+			/*
+			 * Loop through the relocation entries.
+			 */
+			for (relndx = 0; relndx < relnum; relndx++,
+			    rels = (void *)((char *)rels + relsize)) {
+				char		section[BUFSIZ];
+				Addr		offset;
+				Got_info	*gip;
+				Word		symndx, reltype;
+				Rela		*rela;
+				Rel		*rel;
+
+				/*
+				 * Unravel the relocation.
+				 */
+				if (type == SHT_RELA) {
+					rela = (Rela *)rels;
+					symndx = ELF_R_SYM(rela->r_info);
+					reltype = ELF_R_TYPE(rela->r_info,
+					    ehdr->e_machine);
+					offset = rela->r_offset;
+				} else {
+					rel = (Rel *)rels;
+					symndx = ELF_R_SYM(rel->r_info);
+					reltype = ELF_R_TYPE(rel->r_info,
+					    ehdr->e_machine);
+					offset = rel->r_offset;
+				}
+
+				/*
+				 * Only pay attention to relocations against
+				 * this GOT.
+				 */
+				if ((offset < gotbgn) || (offset >= gotend))
+					continue;
+
+				if ((gotshdr->sh_entsize == 0) ||
+				    (gotshdr->sh_size == 0)) {
+					(void) fprintf(stderr,
+					    MSG_INTL(MSG_ERR_BADSZ),
+					    file, gotcache->c_name);
+					continue;
+				}
+
+				gotndx = (Word)((offset - gotbgn) /
+				    gotshdr->sh_entsize);
+				gip = &gottable[gotndx];
+
+				if (gip->g_reltype != 0) {
+					(void) fprintf(stderr,
+					    MSG_INTL(MSG_GOT_MULTIPLE), file,
+					    EC_WORD(gotndx), EC_ADDR(offset));
+					continue;
+				}
+
+				if (symndx)
+					gip->g_symname = relsymname(cache,
+					    _cache, strsec, symndx, symnum,
+					    relndx, syms, section, BUFSIZ,
+					    file);
+				gip->g_reltype = reltype;
+				gip->g_rel = rels;
+			}
+		}
+
+		if (symlookup(MSG_ORIG(MSG_SYM_GOT), cache, shnum, &gotsym,
+		    NULL, symtab, file)) {
+			gotsymaddr = gotsym->st_value;
+		} else {
+			gotsymaddr = gotbgn;
+		}
+
+		dbg_print(0, MSG_ORIG(MSG_STR_EMPTY));
+		dbg_print(0, MSG_INTL(MSG_ELF_SCN_GOT), gotcache->c_name);
+		Elf_got_title(0);
+
+		sys_encoding = _elf_sys_encoding();
+		for (gotndx = 0; gotndx < gotents; gotndx++) {
+			Got_info	*gip;
+			Sword		gindex;
+			Addr		gaddr;
+			Xword		gotentry;
+
 			gip = &gottable[gotndx];
 
-			if (gip->g_reltype != 0) {
-				(void) fprintf(stderr,
-				    MSG_INTL(MSG_GOT_MULTIPLE), file,
-				    EC_WORD(gotndx), EC_ADDR(offset));
-				continue;
+			gaddr = gotbgn + (gotndx * gentsize);
+			gindex = (Sword)(gaddr - gotsymaddr) / (Sword)gentsize;
+
+			if (gentsize == sizeof (Word)) {
+				gotentry = (Xword)(*((Word *)(gotdata) +
+				    gotndx));
+			} else {
+				gotentry = *((Xword *)(gotdata) + gotndx);
 			}
 
-			if (symndx)
-				gip->g_symname = relsymname(cache, _cache,
-				    strsec, symndx, symnum, relndx, syms,
-				    section, BUFSIZ, file);
-			gip->g_reltype = reltype;
-			gip->g_rel = rels;
+			Elf_got_entry(0, gindex, gaddr, gotentry,
+			    ehdr->e_machine, ehdr->e_ident[EI_DATA],
+			    sys_encoding, gip->g_reltype, gip->g_rel,
+			    gip->g_symname);
 		}
+		free(gottable);
 	}
-
-	if (symlookup(MSG_ORIG(MSG_SYM_GOT), cache, shnum, &gotsym, NULL,
-	    symtab, file))
-		gotsymaddr = gotsym->st_value;
-	else
-		gotsymaddr = gotbgn;
-
-	dbg_print(0, MSG_ORIG(MSG_STR_EMPTY));
-	dbg_print(0, MSG_INTL(MSG_ELF_SCN_GOT), gotcache->c_name);
-	Elf_got_title(0);
-
-	sys_encoding = _elf_sys_encoding();
-	for (gotndx = 0; gotndx < gotents; gotndx++) {
-		Got_info	*gip;
-		Sword		gindex;
-		Addr		gaddr;
-		Xword		gotentry;
-
-		gip = &gottable[gotndx];
-
-		gaddr = gotbgn + (gotndx * gentsize);
-		gindex = (Sword)(gaddr - gotsymaddr) / (Sword)gentsize;
-
-		if (gentsize == sizeof (Word))
-			/* LINTED */
-			gotentry = (Xword)(*((Word *)(gotdata) + gotndx));
-		else
-			/* LINTED */
-			gotentry = *((Xword *)(gotdata) + gotndx);
-
-		Elf_got_entry(0, gindex, gaddr, gotentry, ehdr->e_machine,
-		    ehdr->e_ident[EI_DATA], sys_encoding,
-		    gip->g_reltype, gip->g_rel, gip->g_symname);
-	}
-	free(gottable);
 }
 
 void
