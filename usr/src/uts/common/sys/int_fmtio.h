@@ -372,6 +372,17 @@ extern "C" {
 #define	SCNuMAX			PRIuMAX
 #define	SCNXMAX			PRIXMAX
 
+/*
+ * The following macros define I/O formats for id_t
+ */
+#if !defined(_LP64)
+#define	PRIdID	"ld"
+#else
+#define	PRIdID	"d"
+#endif
+
+#define	SCNdID	PRIdID
+
 #ifdef __cplusplus
 }
 #endif

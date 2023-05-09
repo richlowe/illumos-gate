@@ -23,6 +23,8 @@ all install:    $(DYNLIB)
 
 include ../Makefile.com
 
+.KEEP_STATE:
+
 ASFLAGS +=	$(amd64_XARCH) -I$(SRC)/uts/common -I$(ROOT)/usr/include -D_ASM
 ASFLAGS64 +=	$(amd64_XARCH) -I$(SRC)/uts/common -I$(ROOT)/usr/include -D_ASM
 CFLAGS +=	-m64 -_gcc=-mtune=opteron $(CFLAGS64)

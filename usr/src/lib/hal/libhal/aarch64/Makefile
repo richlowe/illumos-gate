@@ -24,5 +24,7 @@
 #
 
 include ../Makefile.com
+include ../../../Makefile.lib.64
 
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLIBPC) $(ROOTMAJLINK)
+
