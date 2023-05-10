@@ -42,17 +42,18 @@ extern "C" {
 
 /*
  * Elf header information.
+ *
+ * Note that there is no actual 32bit support, we only provide valid
+ * constants here.
  */
-/* XXXARM There's no 32bit platform here  */
-/* #define	M_MACH_32		EM_386 */
+#define	M_MACH_32		EM_ARM
 #define	M_MACH_64		EM_AARCH64
 
 #ifdef _ELF64
 #define	M_MACH			EM_AARCH64
 #define	M_CLASS			ELFCLASS64
 #else
-/* XXXARM: A lie to simplify the build */
-#define	M_MACH			EM_AARCH64
+#define	M_MACH			EM_ARM
 #define	M_CLASS			ELFCLASS32
 #endif
 

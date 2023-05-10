@@ -493,10 +493,25 @@ getmore:
 	/*
 	 * ELFCLASS of output object: If we did not establish a class from a
 	 * command option, or from the first plain object, then use the class
-	 * from the first archive, and failing that, default to 32-bit.
+	 * from the first archive.
 	 */
-	if (class == ELFCLASSNONE)
-		class = ar_found ? ar_class : ELFCLASS32;
+	if ((class == ELFCLASSNONE) && ar_found)
+		class = ar_class;
+
+	/*
+	 * If we still don't know the class, the default is machine
+	 * specific
+	 */
+	if (class == ELFCLASSNONE) {
+#if defined(__x86) || defined(__sparc)
+		class = ELFCLASS32;
+#elif defined(__aarch64__)
+		class = ELFCLASS64;
+#else
+#error Unknown platform
+#endif
+	}
+
 	*class_ret = class;
 
 	/*
@@ -510,11 +525,7 @@ getmore:
 		if (ar_found) {
 			*mach = ar_mach;
 		} else {
-#if !defined(__aarch64__)	/* XXXARM: Eugh */
 			*mach = (class == ELFCLASS64) ? M_MACH_64 : M_MACH_32;
-#else
-			*mach = M_MACH_64;
-#endif
 		}
 	}
 
