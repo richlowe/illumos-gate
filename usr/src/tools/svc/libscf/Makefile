@@ -57,6 +57,8 @@ COMDIR =	$(SRC)/common/svc
 
 CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 		-I$(SRC)/lib/libscf/inc -I$(COMDIR) -I$(LIBUUTIL)/common \
+		-I$(SRC)/lib/libuutil/common -I$(SRC)/head \
+		-I$(SRC)/lib/libbrand/common \
 		-I$(ROOTHDRDIR)
 LDLIBS +=	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
 		-luutil -lc -lgen -lnvpair -lsmbios
