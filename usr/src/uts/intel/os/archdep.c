@@ -702,7 +702,7 @@ getpcstack(pc_t *pcstack, int pcstack_limit)
 
 /*
  * The following ELF header fields are defined as processor-specific
- * in the V8 ABI:
+ * in the intel ABI:
  *
  *	e_ident[EI_DATA]	encoding of the processor-specific
  *				data in the object file

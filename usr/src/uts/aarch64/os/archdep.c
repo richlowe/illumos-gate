@@ -413,7 +413,40 @@ getuserpc()
 int
 getpcstack(pc_t *pcstack, int pcstack_limit)
 {
-	return (0);
+	struct frame *fp = (struct frame *)getfp();
+	struct frame *nextfp, *minfp, *stacktop;
+	int depth = 0;
+	int on_intr;
+	uintptr_t pc;
+
+	if ((on_intr = CPU_ON_INTR(CPU)) != 0)
+		stacktop = (struct frame *)(CPU->cpu_intr_stack + SA(MINFRAME));
+	else
+		stacktop = (struct frame *)curthread->t_stk;
+	minfp = fp;
+
+	pc = ((struct regs *)fp)->r_pc;
+
+	while (depth < pcstack_limit) {
+		nextfp = (struct frame *)fp->fr_savfp;
+		pc = fp->fr_savpc;
+		if (nextfp <= minfp || nextfp >= stacktop) {
+			if (on_intr) {
+				/*
+				 * Hop from interrupt stack to thread stack.
+				 */
+				stacktop = (struct frame *)curthread->t_stk;
+				minfp = (struct frame *)curthread->t_stkbase;
+				on_intr = 0;
+				continue;
+			}
+			break;
+		}
+		pcstack[depth++] = (pc_t)pc;
+		fp = nextfp;
+		minfp = fp;
+	}
+	return (depth);
 }
 
 
@@ -520,7 +553,7 @@ setgregs(klwp_t *lwp, gregset_t grp)
 
 /*
  * The following ELF header fields are defined as processor-specific
- * in the V8 ABI:
+ * in the AArch64 ABI:
  *
  *	e_ident[EI_DATA]	encoding of the processor-specific
  *				data in the object file
