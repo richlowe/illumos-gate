@@ -54,6 +54,7 @@ SMATCH=off
 
 SRCDIR =	$(SRC)/lib/libscf/common
 COMDIR =	$(SRC)/common/svc
+LIBUUTIL =	$(SRC)/lib/libuutil
 
 CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 		-I$(SRC)/lib/libscf/inc -I$(COMDIR) -I$(LIBUUTIL)/common \
@@ -61,6 +62,8 @@ CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 LDLIBS +=	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
 		-luutil -lc -lgen -lnvpair -lsmbios
 ADJUNCT_LIBS +=	libsmbios.so libnvpair.so libgen.so libc.so
+
+.KEEP_STATE:
 
 all: $(LIBS)
 
