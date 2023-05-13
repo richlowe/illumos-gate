@@ -28,6 +28,8 @@ CERRWARN += -_gcc=-Wno-unused-label
 
 LIBLINKS = libsqlite-sys.so
 
+.KEEP_STATE:
+
 $(PICS): sqlite.h
 
 sqlite.h: $(SRCDIR)/sqlite.h.in
