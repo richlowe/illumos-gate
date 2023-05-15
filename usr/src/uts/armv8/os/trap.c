@@ -60,6 +60,8 @@
 #include <vm/hat_aarch64.h>
 #include <sys/frame.h>
 #include <sys/dtrace.h>
+#include <sys/x_call.h>
+#include <sys/spl.h>
 
 extern void print_msg_hwerr(ctid_t ct_id, proc_t *p);
 extern int dtrace_invop(uintptr_t addr, uintptr_t *stack, uintptr_t eax);
@@ -335,20 +337,21 @@ panic_savetrap(panic_data_t *pdp, struct panic_trap_info *tip)
 	panic_saveregs(pdp, tip->trap_regs);
 }
 
+/*
+ * XXXARM: usually we'd just raise the SPL here,
+ * but the old code disables interrupts and locks itself out
+ */
+lock_t showregs_lock;
+
 static void
 showregs(uint32_t type, const struct regs *rp, const caddr_t addr,
     uint64_t esr)
 {
 	static volatile int exclusion;
 	const char *trap_name = NULL, *trap_mnemonic = NULL;
+	ushort_t old;
 
-	/*
-	 * XXXARM: usually we'd just raise the SPL here,
-	 * but the old code disables interrupts and locks itself out
-	 */
-	uint64_t daif = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
-	while (__sync_lock_test_and_set(&exclusion, 1)) {}
+	lock_set_spl(&showregs_lock, ipltospl(XC_HI_PIL), &old);
 
 	if (PTOU(curproc)->u_comm[0])
 		printf("%s: ", PTOU(curproc)->u_comm);
@@ -386,8 +389,8 @@ showregs(uint32_t type, const struct regs *rp, const caddr_t addr,
 
 	dumpregs(rp);
 
-	__sync_lock_release(&exclusion);
-	write_daif(daif);
+	lock_clear(&showregs_lock);
+	splx(old);
 }
 
 static void

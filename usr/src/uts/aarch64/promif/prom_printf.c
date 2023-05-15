@@ -25,10 +25,12 @@
  */
 
 
+#include <sys/controlregs.h>
 #include <sys/promif.h>
 #include <sys/promimpl.h>
+#include <sys/spl.h>
 #include <sys/varargs.h>
-#include <sys/controlregs.h>
+#include <sys/x_call.h>
 
 static void _doprint(const char *, va_list, void (*)(char, char **), char **);
 static void _printn(uint64_t, int, int, int, void (*)(char, char **), char **);
@@ -51,39 +53,42 @@ _sput(char c, char **p)
 	*p += 1;
 }
 
-/*VARARGS1*/
-static volatile int exclusion;
+/*
+ * XXXARM: On other platforms this is unlocked, here it is very locked,
+ * this is not a design decision
+ */
+lock_t promprint_lock;
+
 void
 prom_printf(const char *fmt, ...)
 {
 	va_list adx;
-	uint64_t old = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
-	while (__sync_lock_test_and_set(&exclusion, 1)) {}
+	ushort_t old;
+
+	lock_set_spl(&promprint_lock, ipltospl(XC_HI_PIL), &old);
 
 	va_start(adx, fmt);
 	(void) _doprint(fmt, adx, _pput, (char **)0);
 	va_end(adx);
 
-	__sync_lock_release(&exclusion);
-	write_daif(old);
+	lock_clear(&promprint_lock);
+	splx(old);
 }
 
 void
 prom_vprintf(const char *fmt, va_list adx)
 {
 	va_list tadx;
+	ushort_t old;
 
-	uint64_t old = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
-	while (__sync_lock_test_and_set(&exclusion, 1)) {}
+	lock_set_spl(&promprint_lock, ipltospl(XC_HI_PIL), &old);
 
 	va_copy(tadx, adx);
 	(void) _doprint(fmt, tadx, _pput, (char **)0);
 	va_end(tadx);
 
-	__sync_lock_release(&exclusion);
-	write_daif(old);
+	lock_clear(&promprint_lock);
+	splx(old);
 }
 
 /*VARARGS2*/
