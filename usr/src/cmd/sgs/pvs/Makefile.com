@@ -49,9 +49,6 @@ $(AARCH64_BLD)LDFLAGS += '-R$$ORIGIN/../lib/'
 LDLIBS +=	$(LDDBGLIBDIR64) -llddbg $(ELFLIBDIR64) -lelf \
 		    $(CONVLIBDIR64) -lconv
 
-# not linted
-SMATCH=off
-
 BLTDEFS=	msg.h
 BLTDATA=	msg.c
 BLTMESG=	$(SGSMSGDIR)/pvs

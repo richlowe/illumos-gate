@@ -25,6 +25,10 @@
  */
 
 /*
+ * Copyright 2023 Oxide Computer Company
+ */
+
+/*
  * modctl system call for loadable module support.
  */
 
@@ -1242,7 +1246,6 @@ modctl_devid2paths(ddi_devid_t udevid, char *uminor_name, uint_t flag,
 	int		devid_len;
 	char		*minor_name = NULL;
 	dev_info_t	*dip = NULL;
-	int		circ;
 	struct ddi_minor_data	*dmdp;
 	char		*path = NULL;
 	int		ulens;
@@ -1329,7 +1332,7 @@ modctl_devid2paths(ddi_devid_t udevid, char *uminor_name, uint_t flag,
 			continue;
 
 		/* loop over all the minor nodes, skipping ones we don't want */
-		ndi_devi_enter(dip, &circ);
+		ndi_devi_enter(dip);
 		for (dmdp = DEVI(dip)->devi_minor; dmdp; dmdp = dmdp->next) {
 			if ((dmdp->ddm_dev != devlist[i]) ||
 			    (dmdp->type != DDM_MINOR))
@@ -1367,7 +1370,7 @@ modctl_devid2paths(ddi_devid_t udevid, char *uminor_name, uint_t flag,
 				upaths += len;
 			}
 		}
-		ndi_devi_exit(dip, circ);
+		ndi_devi_exit(dip);
 		ddi_release_devi(dip);
 		dip = NULL;
 	}
@@ -1381,7 +1384,7 @@ modctl_devid2paths(ddi_devid_t udevid, char *uminor_name, uint_t flag,
 	ret = 0;
 
 out:	if (dip) {
-		ndi_devi_exit(dip, circ);
+		ndi_devi_exit(dip);
 		ddi_release_devi(dip);
 	}
 	if (path)
@@ -4569,7 +4572,6 @@ dev_alias_minorperm(dev_info_t *dip, char *minor_name, mperm_t *rmp)
 	mperm_t			*mp;
 	char			*alias = NULL;
 	dev_info_t		*cdevi;
-	int			circ;
 	struct ddi_minor_data	*dmd;
 
 	major = ddi_name_to_major(minor_name);
@@ -4589,14 +4591,14 @@ dev_alias_minorperm(dev_info_t *dip, char *minor_name, mperm_t *rmp)
 	LOCK_DEV_OPS(&dnp->dn_lock);
 
 	if ((cdevi = dnp->dn_head) != NULL) {
-		ndi_devi_enter(cdevi, &circ);
+		ndi_devi_enter(cdevi);
 		for (dmd = DEVI(cdevi)->devi_minor; dmd; dmd = dmd->next) {
 			if (dmd->type == DDM_ALIAS) {
 				alias = i_ddi_strdup(dmd->ddm_name, KM_SLEEP);
 				break;
 			}
 		}
-		ndi_devi_exit(cdevi, circ);
+		ndi_devi_exit(cdevi);
 	}
 
 	UNLOCK_DEV_OPS(&dnp->dn_lock);
