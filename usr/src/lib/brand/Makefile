@@ -21,17 +21,28 @@
 #
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-# lib/brand/Makefile
-#
-# include global definitions
+
 include ../../Makefile.master
 
-#
-# Build everything in parallel; use .WAIT for dependencies
 .PARALLEL:
 
-SUBDIRS= shared .WAIT sn1 solaris10 ipkg labeled $($(MACH)_SUBDIRS)
-MSGSUBDIRS= solaris10 shared $($(MACH)_MSGSUBDIRS)
+SUBDIRS =	\
+	ipkg	\
+	shared
+
+# XXXARM: Actual brand support not yet ported (and only sn1 practical)
+i386_SUBDIRS += solaris10 labeled sn1
+sparc_SUBDIRS += solaris10 labeled sn1
+
+sn1: shared
+solaris10: shared
+ipkg: shared
+labeled: shared
+
+i386_MSGSUBDIRS = solaris10
+sparc_MSGSUBDIRS = solaris10
+
+MSGSUBDIRS= shared $($(MACH)_MSGSUBDIRS)
 
 all :=		TARGET= all
 install :=	TARGET= install

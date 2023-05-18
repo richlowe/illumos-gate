@@ -22,12 +22,12 @@
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-default: all
+include $(SRC)/Makefile.master
 
-# Build everything in parallel; use .WAIT for dependencies
-.PARALLEL:
+# XXXARM: Actual brand support not yet ported
+$(NOT_AARCH64_BLD)SUBDIRS = brand
 
-SUBDIRS =	brand zone
+SUBDIRS +=	zone
 MSGSUBDIRS =	zone
 
 all :=		TARGET= all

@@ -83,11 +83,9 @@ SUBDIRS +=		\
 #
 # libcpc -- not ported
 # libpctx -- part of cpc
-# brand -- not ported
 $(NOT_AARCH64_BLD)SUBDIRS += \
 	../cmd/sendmail/libmilter \
 	abi \
-	brand		\
 	c_synonyms	\
 	libadt_jni	\
 	libcpc		\
@@ -106,6 +104,7 @@ SUBDIRS +=				\
 	../cmd/sgs/librtld_db	\
 	../cmd/sgs/libelf	\
 	auditd_plugins	\
+	brand		\
 	cfgadm_plugins	\
 	crypt_modules	\
 	extendedFILE	\

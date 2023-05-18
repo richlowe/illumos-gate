@@ -32,15 +32,14 @@ set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys variant.opensolaris.zone=global
 dir  path=etc/brand group=sys variant.opensolaris.zone=global
 dir  path=etc/zones group=sys variant.opensolaris.zone=global
-$(not_aarch64)file path=etc/zones/SUNWblank.xml mode=0444 \
-    variant.opensolaris.zone=global
+file path=etc/zones/SUNWblank.xml mode=0444 variant.opensolaris.zone=global
 #
 # The SUNWdefault.xml file is marked as non-dehydratable so that is not removed
 # from an IPS image when `pkg dehydrate` is run on it.
 # This file must be retained so that `zoneadm` can determine the default brand
 # for the IPS image during subsequent rehydration.
 #
-$(not_aarch64)file path=etc/zones/SUNWdefault.xml mode=0444 dehydrate=false \
+file path=etc/zones/SUNWdefault.xml mode=0444 dehydrate=false \
     variant.opensolaris.zone=global
 file path=etc/zones/index group=sys original_name=SUNWzone:etc/zones/index \
     preserve=true variant.opensolaris.zone=global
@@ -74,12 +73,12 @@ $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libzonecfg.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libzonestat.so.1
 dir  path=usr/lib/brand
 dir  path=usr/lib/brand/ipkg group=bin
-$(not_aarch64)file path=usr/lib/brand/ipkg/config.xml mode=0444
-$(not_aarch64)file path=usr/lib/brand/ipkg/platform.xml mode=0444
+file path=usr/lib/brand/ipkg/config.xml mode=0444
+file path=usr/lib/brand/ipkg/platform.xml mode=0444
 dir  path=usr/lib/brand/shared group=sys
-$(not_aarch64)file path=usr/lib/brand/shared/common.ksh mode=0444
-$(not_aarch64)file path=usr/lib/brand/shared/query mode=0755
-$(not_aarch64)file path=usr/lib/brand/shared/uninstall.ksh mode=0444
+file path=usr/lib/brand/shared/common.ksh mode=0444
+file path=usr/lib/brand/shared/query mode=0755
+file path=usr/lib/brand/shared/uninstall.ksh mode=0444
 file path=usr/lib/libbrand.so.1
 file path=usr/lib/libzonecfg.so.1
 file path=usr/lib/libzonestat.so.1
