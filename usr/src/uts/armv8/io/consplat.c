@@ -59,13 +59,13 @@ plat_support_serial_kbd_and_ms()
 int
 plat_stdin_is_keyboard(void)
 {
-	return 0;
+	return (0);
 }
 
 int
 plat_stdout_is_framebuffer(void)
 {
-	return 0;
+	return (0);
 }
 
 char *
@@ -91,30 +91,34 @@ plat_ttypath(void)
 {
 	int len;
 	static char *ttypath;
+
 	if (ttypath != NULL)
-		return ttypath;
+		return (ttypath);
 
 	len = prom_getproplen(prom_chosennode(), "stdout-path");
 	if (len > 0) {
 		char *buf = kmem_alloc(len + 1, KM_SLEEP);
-		
+
 		prom_getprop(prom_chosennode(), "stdout-path", buf);
 		buf[len] = '\0';
+
 		char *p = strchr(buf, ':');
-		if (p)
+		if (p != NULL)
 			*p = '\0';
 
 		if (buf[0] != '/') {
 			pnode_t node = prom_finddevice("/aliases");
 			if (node <= 0) {
 				kmem_free(buf, len + 1);
-				return NULL;
+				return (NULL);
 			}
+
 			int nlen = prom_getproplen(node, buf);
 			if (nlen <= 0) {
 				kmem_free(buf, len + 1);
-				return NULL;
+				return (NULL);
 			}
+
 			char *b = kmem_alloc(nlen + 1, KM_SLEEP);
 			prom_getprop(node, buf, b);
 			kmem_free(buf, len + 1);
@@ -123,42 +127,50 @@ plat_ttypath(void)
 		}
 
 		dev_info_t *dip;
+
 		if (resolve_pathname(buf, &dip, NULL, NULL) == 0) {
 			static char path[MAXPATHLEN];
 			(void) ddi_pathname(dip, path);
+
 			char *bp = path + strlen(path);
-			(void) snprintf(bp, 3, ":%s", DEVI(dip)->devi_minor->ddm_name);
+			(void) snprintf(bp, 3, ":%s",
+			    DEVI(dip)->devi_minor->ddm_name);
+
 			ttypath = path;
-			return path;
+			kmem_free(buf, len + 1);
+
+			return (path);
 		}
+
+		kmem_free(buf, len + 1);
 	}
-	return NULL;
+
+	return (NULL);
 }
 
 char *
 plat_stdinpath(void)
 {
-	char *str = plat_ttypath();
-	return str;
+	return (plat_ttypath());
 }
 
 char *
 plat_stdoutpath(void)
 {
-	char *str = plat_ttypath();
-	return str;
+	return (plat_ttypath());
 }
 
 char *
 plat_diagpath(void)
 {
-	char *str = plat_stdoutpath();
-	return str;
+	return (plat_stdoutpath());
 }
+
 void
 plat_tem_get_colors(uint8_t *fg, uint8_t *bg)
 {
 }
+
 void
 plat_tem_get_inverses(int *inverse, int *inverse_screen)
 {
