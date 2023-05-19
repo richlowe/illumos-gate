@@ -559,6 +559,10 @@ extern "C" {
 #error "Both _ILP32 and _LP64 are defined"
 #endif
 
+#if defined(_CHAR_IS_SIGNED) && defined(_CHAR_IS_UNSIGNED)
+#error "Both _CHAR_IS_SIGNED and _CHAR_IS_UNSIGNED are defined"
+#endif
+
 #ifdef	__cplusplus
 }
 #endif
