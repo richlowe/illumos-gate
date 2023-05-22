@@ -760,7 +760,7 @@ ses_create_contract(topo_mod_t *mod, ses_enum_target_t *stp)
 	else if ((rval = ct_tmpl_create(tfd, &stp->set_ctid)) != 0)
 		topo_mod_dprintf(mod, "failed to create ctid rval = %d", rval);
 	else
-		topo_mod_dprintf(mod, "created ctid=%" PRIdID, stp->set_ctid);
+		topo_mod_dprintf(mod, "created ctid=%" _PRIdID, stp->set_ctid);
 	(void) close(tfd);
 }
 
@@ -779,10 +779,11 @@ ses_target_free(topo_mod_t *mod, ses_enum_target_t *stp)
 			int ctlfd;
 			char path[PATH_MAX];
 
-			topo_mod_dprintf(mod, "abandon old contract %" PRIdID,
+			topo_mod_dprintf(mod, "abandon old contract %" _PRIdID,
 			    stp->set_ctid);
 			(void) snprintf(path, PATH_MAX,
-			    CTFS_ROOT "/device/%" PRIdID "/ctl", stp->set_ctid);
+			    CTFS_ROOT "/device/%" _PRIdID "/ctl",
+			    stp->set_ctid);
 			ctlfd = open64(path, O_WRONLY);
 			(void) ct_ctl_abandon(ctlfd);
 			(void) close(ctlfd);
@@ -3234,8 +3235,8 @@ ses_init_chassis(topo_mod_t *mod, ses_enum_data_t *sdp, ses_enum_chassis_t *pcp,
 	if (flags & (SES_NEW_SUBCHASSIS | SES_DUP_SUBCHASSIS))
 		assert(pcp != NULL);
 
-	topo_mod_dprintf(mod, "ses_init_chassis: %s: index %" PRIu64 ", flags (%d)",
-	    sdp->sed_name, subchassis, flags);
+	topo_mod_dprintf(mod, "ses_init_chassis: %s: index %" PRIu64
+	    ", flags (%d)", sdp->sed_name, subchassis, flags);
 
 	if (flags & (SES_NEW_CHASSIS | SES_NEW_SUBCHASSIS)) {
 
@@ -3568,8 +3569,8 @@ ses_enum_gather(ses_node_t *np, void *data)
 			goto error;
 		}
 
-		topo_mod_dprintf(mod, "%s: adding node (%" PRIu64 ", %" PRIu64 ")",
-		    sdp->sed_name, type, instance);
+		topo_mod_dprintf(mod, "%s: adding node (%" PRIu64
+		    ", %" PRIu64 ")", sdp->sed_name, type, instance);
 		snp->sen_node = np;
 		snp->sen_type = type;
 		snp->sen_instance = instance;

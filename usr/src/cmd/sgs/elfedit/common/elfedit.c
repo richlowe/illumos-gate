@@ -1995,7 +1995,7 @@ elfedit_load_moddir(const char *dirpath, int must_exist, int abs_path)
 		/*NOTREACHED*/
 	}
 
-	while (dp = readdir(dir)) {
+	while ((dp = readdir(dir)) != NULL) {
 		if ((tail = path_is_so(dp->d_name)) != NULL) {
 			if (abs_path) {
 				(void) snprintf(path, sizeof (path),
@@ -2221,6 +2221,9 @@ dispatch_user_cmds()
 				 * clear the dirty bit.
 				 */
 				state.file.dirty = 0;
+				break;
+			case ELFEDIT_CMDRET_NONE:
+				break;
 			}
 		}
 		free_user_cmds();

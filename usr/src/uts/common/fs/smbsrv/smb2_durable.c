@@ -251,6 +251,7 @@ smb2_dh_new_ca_share(smb_server_t *sv, smb_kshare_t *shr)
 {
 	smb_kshare_t	*shr2;
 	smb_request_t	*sr;
+	taskqid_t	tqid;
 
 	ASSERT(STYPE_ISDSK(shr->shr_type));
 
@@ -285,9 +286,9 @@ smb2_dh_new_ca_share(smb_server_t *sv, smb_kshare_t *shr)
 	 * which releases it when it's done.
 	 */
 	sr->arg.tcon.si = shr;	/* hold from above */
-	(void) taskq_dispatch(
-	    sv->sv_worker_pool,
+	tqid = taskq_dispatch(sv->sv_worker_pool,
 	    smb2_dh_import_share, sr, TQ_SLEEP);
+	VERIFY(tqid != TASKQID_INVALID);
 
 	return (0);
 }
@@ -405,7 +406,7 @@ smb2_dh_import_share(void *arg)
 			of = NULL;
 		}
 		sr->fid_ofile = NULL;
-		smb_llist_flush(&sr->tid_tree->t_ofile_list);
+		smb_lavl_flush(&sr->tid_tree->t_ofile_list);
 
 	} while (!eof);
 
@@ -1418,9 +1419,9 @@ smb2_dh_reconnect(smb_request_t *sr)
 	of->f_tree = tree;
 	of->f_fid = fid;
 
-	smb_llist_enter(&tree->t_ofile_list, RW_WRITER);
-	smb_llist_insert_tail(&tree->t_ofile_list, of);
-	smb_llist_exit(&tree->t_ofile_list);
+	smb_lavl_enter(&tree->t_ofile_list, RW_WRITER);
+	smb_lavl_insert(&tree->t_ofile_list, of);
+	smb_lavl_exit(&tree->t_ofile_list);
 	atomic_inc_32(&tree->t_open_files);
 	atomic_inc_32(&sr->session->s_file_cnt);
 
