@@ -27,6 +27,7 @@ SUBDIRS =       \
 		definit \
 		file-locking \
 		ksensor \
+		ksid \
 		libtopo \
 		pf_key \
 		poll \
