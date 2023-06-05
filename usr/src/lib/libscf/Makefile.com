@@ -47,7 +47,10 @@ LDLIBS +=	$(LDLIBS_$(MACH))
 SRCDIR =	$(SRC)/lib/libscf/common
 COMDIR =	$(SRC)/common/svc
 
-CFLAGS +=	$(CCVERBOSE) -Wp,$(CSTD_GNU99)
+CFLAGS +=	$(CCVERBOSE)
+CPPFLAGS +=	-I../inc -I../../common/inc -I$(COMDIR) -I$(ROOTHDRDIR)
+$(NOT_RELEASE_BUILD) CPPFLAGS += -DFASTREBOOT_DEBUG
+
 CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-char-subscripts
 CERRWARN +=	-_gcc=-Wno-unused-label

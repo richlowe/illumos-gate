@@ -125,7 +125,6 @@ CFLAGS			+= $(CCMODE)
 CFLAGS			+= $(SPACEFLAG)
 CFLAGS			+= $(CCUNBOUND)
 CFLAGS			+= $(CFLAGS_uts)
-CFLAGS			+= -xstrconst
 CFLAGS			+= -_gcc=-fstack-protector
 
 INC_PATH		+= -I$(UTSBASE)/armv8

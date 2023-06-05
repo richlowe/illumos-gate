@@ -59,14 +59,6 @@ ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
 
 #
-# Inline functions, this probably needs to be changed when compiling with
-# -xO4.
-#
-CINLINES	= -xinline=tcp_set_ws_value,tcp_fill_header
-
-CFLAGS		+= $(CINLINES)
-
-#
 #	depends on ip, md5 and sockfs
 #
 LDFLAGS		+= -Ndrv/ip -Ncrypto/md5 -Nfs/sockfs

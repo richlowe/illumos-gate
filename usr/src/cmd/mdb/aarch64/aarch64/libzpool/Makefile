@@ -35,7 +35,6 @@ include ../../../../Makefile.cmd
 include ../../../../Makefile.cmd.64
 include ../../Makefile.aarch64
 include ../../../Makefile.module
-include ../../../common/modules/zfs/Makefile.zfs
 
 MODSRCS_DIR = ../../../common/modules/zfs
 GENUNIX_DIR = ../../../common/modules/genunix

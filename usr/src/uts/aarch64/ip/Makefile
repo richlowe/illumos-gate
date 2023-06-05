@@ -55,10 +55,6 @@ include $(UTSBASE)/aarch64/Makefile.aarch64
 ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
 
-CINLINEFLAGS = -xinline=tcp_set_ws_value
-
-CFLAGS		+= $(CINLINEFLAGS)
-
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-unused-function

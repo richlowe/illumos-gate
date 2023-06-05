@@ -41,7 +41,7 @@
  * If you modify this file, you must increment CW_VERSION.  This is a semver,
  * incompatible changes should bump the major, anything else the minor.
  */
-#define	CW_VERSION	"9.1"
+#define	CW_VERSION	"10.1"
 
 /*
  * -#		Verbose mode
@@ -56,16 +56,6 @@
  * -errtags=<a>	Display messages with tags a(no, yes)
  * -errwarn=<t>	Treats warnings specified by tags t(%none, %all, <tag list>)
  *		as errors
- * -fast	Optimize using a selection of options
- * -fd		Report old-style function definitions and declarations
- * -fnonstd	Initialize floating-point hardware to non-standard preferences
- * -fns[=<yes|no>] Select non-standard floating point mode
- * -fprecision=<p> Set FP rounding precision mode p(single, double, extended)
- * -fround=<r>	Select the IEEE rounding mode in effect at startup
- * -fsimple[=<n>] Select floating-point optimization preferences <n>
- * -fsingle	Use single-precision arithmetic (-Xt and -Xs modes only)
- * -ftrap=<t>	Select floating-point trapping mode in effect at startup
- * -fstore	force floating pt. values to target precision on assignment
  * -g		Compile for debugging
  * -H		Print path name of each file included during compilation
  * -h <name>	Assign <name> to generated dynamic shared library
@@ -74,19 +64,11 @@
  * -keeptmp	Keep temporary files created during compilation
  * -L<dir>	Pass to linker to add <dir> to the library search path
  * -l<name>	Link with library lib<name>.a or lib<name>.so
- * -mc		Remove duplicate strings from .comment section of output files
- * -mr		Remove all strings from .comment section of output files
- * -mr,"string"	Remove all strings and append "string" to .comment section
  * -mt		Specify options needed when compiling multi-threaded code
- * -native	Find available processor, generate code accordingly
- * -nofstore	Do not force floating pt. values to target precision
- *		on assignment
- * -norunpath	Do not build in a runtime path for shared libraries
  * -O		Use default optimization level (-xO2 or -xO3. Check man page.)
  * -o <outputfile> Set name of output file to <outputfile>
  * -P		Compile source through preprocessor only, output to .i  file
  * -p		Compile for profiling with prof
- * -Q[y|n]	Emit/don't emit identification info to output file
  * -R<dir[:dir]> Build runtime search path list into executable
  * -S		Compile and only generate assembly code (.s)
  * -s		Strip symbol table from the executable file
@@ -99,46 +81,11 @@
  * -Xa		Compile assuming ANSI C conformance, allow K & R extensions
  *		(default mode)
  * -Xs		Compile assuming (pre-ANSI) K & R C style code
- * -Xt		Compile assuming K & R conformance, allow ANSI C
  * -xarch=<a>	Specify target architecture instruction set
  * -xbuiltin[=<b>] When profitable inline, or substitute intrinisic functions
  *		for system functions, b={%all,%none}
- * -xCC		Accept C++ style comments
- * -xcrossfile[=<n>] Enable optimization and inlining across source files,
- *		n={0|1}
- * -xe		Perform only syntax/semantic checking, no code generation
- * -xF		Compile for later mapfile reordering or unused section
- *		elimination
- * -xhelp=<f>	Display on-line help information f(flags, readme, errors)
- * -xildoff	Cancel -xildon
- * -xildon	Enable use of the incremental linker, ild
- * -xinline=[<a>,...,<a>]  Attempt inlining of specified user routines,
- *		<a>={%auto,func,no%func}
- * -xlibmieee	Force IEEE 754 return values for math routines in
- *		exceptional cases
- * -xlibmil	Inline selected libm math routines for optimization
- * -xlic_lib=sunperf	Link in the Sun supplied performance libraries
- * -xlicinfo	Show license server information
- * -xmaxopt=[off,1,2,3,4,5] maximum optimization level allowed on #pragma opt
  * -xO<n>	Generate optimized code (n={1|2|3|4|5})
- * -xP		Print prototypes for function definitions
- * -xprofile=<p> Collect data for a profile or use a profile to optimize
- *		<p>={{collect,use}[:<path>],tcov}
- * -xs		Allow debugging without object (.o) files
- * -xsb		Compile for use with the WorkShop source browser
- * -xsbfast	Generate only WorkShop source browser info, no compilation
- * -xsfpconst	Represent unsuffixed floating point constants as single
- *		precision
- * -xspace	Do not do optimizations that increase code size
- * -xstrconst	Place string literals into read-only data segment
- * -xtemp=<dir>	Set directory for temporary files to <dir>
- * -xtime	Report the execution time for each compilation phase
- * -xunroll=n	Enable unrolling loops n times where possible
- * -Y<c>,<dir>	Specify <dir> for location of component <c> (a,l,m,p,0,h,i,u)
- * -YA,<dir>	Change default directory searched for components
- * -YI,<dir>	Change default directory searched for include files
- * -YP,<dir>	Change default directory for finding libraries files
- * -YS,<dir>	Change default directory for startup object files
+ * -YI,<dir>	Specify <dir> for location of headers
  */
 
 /*
@@ -153,19 +100,8 @@
  * -c				pass-thru
  * -D<name[=token]>		pass-thru
  * -E				pass-thru
- * -erroff=E_EMPTY_TRANSLATION_UNIT ignore
  * -errtags=%all		-Wall
  * -errwarn=%all		-Werror else -Wno-error
- * -fast			error
- * -fd				error
- * -fnonstd			error
- * -fns[=<yes|no>]		error
- * -fprecision=<p>		error
- * -fround=<r>			error
- * -fsimple[=<n>]		error
- * -fsingle[=<n>]		error
- * -ftrap=<t>			error
- * -fstore			error
  * -g				pass-thru
  * -H				pass-thru
  * -I<dir>			pass-thru
@@ -173,64 +109,30 @@
  * -keeptmp			-save-temps
  * -L<dir>			pass-thru
  * -l<name>			pass-thru
- * -mc				error
- * -mr				error
- * -mr,"string"			error
  * -mt				-D_REENTRANT
- * -native			error
- * -nofstore			error
  * -nolib			-nodefaultlibs
- * -norunpath			ignore
  * -O				-O1 (Check the man page to be certain)
  * -o <outputfile>		pass-thru
  * -P				-E -o filename.i (or error)
  * -p				pass-thru
- * -Q[y|n]			error
  * -R<dir[:dir]>		pass-thru
  * -S				pass-thru
  * -U<name>			pass-thru
  * -V				--version
  * -v				-Wall
  * -Wa,<arg>			pass-thru
- * -Wp,<arg>			pass-thru except -xc99=<a>
+ * -Wp,<arg>			pass-thru
  * -Wl,<arg>			pass-thru
- * -W{m,0,2,h,i,u>		error/ignore
+ * -xmodel=kernel		-ffreestanding -mcmodel=kernel -mno-red-zone
+ * -Wu,-save_args		-msave-args
  * -w				pass-thru
  * -Xa				-std=iso9899:199409 or -ansi
- * -Xt				error
  * -Xs				-traditional -std=c89
  * -xarch=<a>			table
  * -xbuiltin[=<b>]		-fbuiltin (-fno-builtin otherwise)
- * -xCC				ignore
- * -xcrossfile[=<n>]		ignore
- * -xe				error
- * -xF				error
- * -xhelp=<f>			error
- * -xildoff			ignore
- * -xildon			ignore
- * -xinline			ignore
- * -xlibmieee			error
- * -xlibmil			error
- * -xlic_lib=sunperf		error
- * -xmaxopt=[...]		error
  * -xO<n>			-O<n>
- * -xP				error
- * -xprofile=<p>		error
- * -xs				error
- * -xsb				error
- * -xsbfast			error
- * -xsfpconst			error
- * -xspace			ignore (-not -Os)
- * -xstrconst			ignore
- * -xtemp=<dir>			error
- * -xtime			error
  * -xtransition			-Wtransition
- * -xunroll=n			error
- * -Y<c>,<dir>			error
- * -YA,<dir>			error
  * -YI,<dir>			-nostdinc -I<dir>
- * -YP,<dir>			error
- * -YS,<dir>			error
  */
 
 #include <ctype.h>
@@ -549,25 +451,10 @@ do_gcc(cw_ictx_t *ctx)
 				newae(ctx->i_ae, strchr(arg, '=') + 1);
 				continue;
 			}
-			if (strncmp(arg, "-compat=", 8) == 0) {
-				/* discard -compat=4 and -compat=5 */
-				continue;
-			}
-			if (strcmp(arg, "-Qoption") == 0) {
-				/* discard -Qoption and its two arguments */
-				if (ctx->i_oldargc < 3)
-					error(arg);
-				ctx->i_oldargc -= 2;
-				ctx->i_oldargv += 2;
-				continue;
-			}
+
 			if (strcmp(arg, "-xwe") == 0) {
 				/* turn warnings into errors */
 				newae(ctx->i_ae, "-Werror");
-				continue;
-			}
-			if (strcmp(arg, "-norunpath") == 0) {
-				/* gcc has no corresponding option */
 				continue;
 			}
 			if (strcmp(arg, "-nolib") == 0) {
@@ -659,29 +546,7 @@ do_gcc(cw_ictx_t *ctx)
 			    strcmp(arg, "-D_BOOT") == 0)
 				newae(ctx->i_ae, "-ffreestanding");
 			break;
-		case 'd':
-			if (strcmp(arg, "-dalign") == 0) {
-				/*
-				 * -dalign forces alignment in some cases;
-				 * gcc does not need any flag to do this.
-				 */
-				break;
-			}
-			error(arg);
-			break;
 		case 'e':
-			if (strcmp(arg,
-			    "-erroff=E_EMPTY_TRANSLATION_UNIT") == 0) {
-				/*
-				 * Accept but ignore this -- gcc doesn't
-				 * seem to complain about empty translation
-				 * units
-				 */
-				break;
-			}
-			/* XX64 -- ignore all -erroff= options, for now */
-			if (strncmp(arg, "-erroff=", 8) == 0)
-				break;
 			if (strcmp(arg, "-errtags=yes") == 0) {
 				warnings(ctx->i_ae);
 				break;
@@ -760,71 +625,22 @@ do_gcc(cw_ictx_t *ctx)
 			error(arg);
 			break;
 		case 'W':
-			if (strncmp(arg, "-Wp,-xc99", 9) == 0) {
-				/*
-				 * gcc's preprocessor will accept c99
-				 * regardless, so accept and ignore.
-				 */
-				break;
-			}
 			if (strncmp(arg, "-Wa,", 4) == 0 ||
 			    strncmp(arg, "-Wp,", 4) == 0 ||
 			    strncmp(arg, "-Wl,", 4) == 0) {
 				newae(ctx->i_ae, arg);
 				break;
 			}
-			if (strcmp(arg, "-W0,-noglobal") == 0 ||
-			    strcmp(arg, "-W0,-xglobalstatic") == 0) {
-				/*
-				 * gcc doesn't prefix local symbols
-				 * in debug mode, so this is not needed.
-				 */
+
+#if defined(__x86)
+			if (strcmp(arg, "-Wu,-save_args") == 0) {
+				newae(ctx->i_ae, "-msave-args");
 				break;
 			}
-			if (strcmp(arg, "-W0,-Lt") == 0) {
-				/*
-				 * Generate tests at the top of loops.
-				 * There is no direct gcc equivalent, ignore.
-				 */
-				break;
-			}
-			if (strcmp(arg, "-W2,-xwrap_int") == 0) {
-				/*
-				 * Use the legacy behaviour (pre-SS11)
-				 * for integer wrapping.
-				 * gcc does not need this.
-				 */
-				break;
-			}
-			if (strcmp(arg, "-Wd,-xsafe=unboundsym") == 0) {
-				/*
-				 * Prevents optimizing away checks for
-				 * unbound weak symbol addresses.  gcc does
-				 * not do this, so it's not needed.
-				 */
-				break;
-			}
-			if (strncmp(arg, "-Wc,-Qiselect", 13) == 0) {
-				/*
-				 * Prevents insertion of register symbols.
-				 * gcc doesn't do this, so ignore it.
-				 */
-				break;
-			}
-			if (strcmp(arg, "-Wc,-Qassembler-ounrefsym=0") == 0) {
-				/*
-				 * Prevents optimizing away of static variables.
-				 * gcc does not do this, so it's not needed.
-				 */
-				break;
-			}
+#endif	/* __x86 */
 			error(arg);
 			break;
 		case 'X':
-			if (strcmp(arg, "-Xa") == 0 ||
-			    strcmp(arg, "-Xt") == 0) {
-				break;
-			}
 			if (strcmp(arg, "-Xs") == 0) {
 				Xsmode(ctx->i_ae);
 				break;
@@ -846,12 +662,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 'C':
-				/* Accept C++ style comments -- ignore */
-				if (strcmp(arg, "-xCC") == 0)
-					break;
-				error(arg);
-				break;
 			case 'c':
 				if (strncmp(arg, "-xc99=%all", 10) == 0) {
 					newae(ctx->i_ae, "-std=gnu99");
@@ -862,28 +672,6 @@ do_gcc(cw_ictx_t *ctx)
 					break;
 				}
 
-				if (strncmp(arg, "-xcrossfile", 11) == 0)
-					break;
-				error(arg);
-				break;
-			case 'F':
-				/*
-				 * Compile for mapfile reordering, or unused
-				 * section elimination, syntax can be -xF or
-				 * more complex, like -xF=%all -- ignore.
-				 */
-				if (strncmp(arg, "-xF", 3) == 0)
-					break;
-				error(arg);
-				break;
-			case 'i':
-				if (strncmp(arg, "-xinline", 8) == 0)
-					/* No inlining; ignore */
-					break;
-				if (strcmp(arg, "-xildon") == 0 ||
-				    strcmp(arg, "-xildoff") == 0)
-					/* No incremental linking; ignore */
-					break;
 				error(arg);
 				break;
 			case 'm':
@@ -922,18 +710,6 @@ do_gcc(cw_ictx_t *ctx)
 				}
 				error(arg);
 				break;
-			case 's':
-				if (strcmp(arg, "-xs") == 0 ||
-				    strcmp(arg, "-xspace") == 0 ||
-				    strcmp(arg, "-xstrconst") == 0)
-					break;
-				error(arg);
-				break;
-			case 'r':
-			case 't':
-			case 'e':
-			case 'h':
-			case 'l':
 			default:
 				error(arg);
 				break;
@@ -949,9 +725,6 @@ do_gcc(cw_ictx_t *ctx)
 			} else {
 				arg += 2;
 			}
-			/* Just ignore -YS,... for now */
-			if (strncmp(arg, "S,", 2) == 0)
-				break;
 			if (strncmp(arg, "I,", 2) == 0) {
 				char *s = strdup(arg);
 				s[0] = '-';
@@ -963,10 +736,6 @@ do_gcc(cw_ictx_t *ctx)
 			}
 			error(arg);
 			break;
-		case 'Q':
-			/*
-			 * We could map -Qy into -Wl,-Qy etc.
-			 */
 		default:
 			error(arg);
 			break;
@@ -1001,20 +770,13 @@ do_gcc(cw_ictx_t *ctx)
 
 	switch (mflag) {
 	case 0:
-		/* FALLTHROUGH */
 	case M32:
-		break;
 	case M64:
-		break;
 	case SS12:
-		break;
 	case SS11:
-		/* FALLTHROUGH */
 	case (SS11|M32):
 	case (SS11|M64):
-		break;
 	case (SS12|M32):
-		break;
 	case (SS12|M64):
 		break;
 	default:

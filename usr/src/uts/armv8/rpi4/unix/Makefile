@@ -98,7 +98,7 @@ CLOBBERFILES	= $(CLEANFILES) $(UNIX_BIN)
 # lint pass one enforcement 
 # Turn on doubleword alignment for 64 bit counter timer registers
 #
-CFLAGS += $(CCVERBOSE) -dalign
+CFLAGS += $(CCVERBOSE)
 
 #
 # For now, disable these lint checks; maintainers should endeavor
