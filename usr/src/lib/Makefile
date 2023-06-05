@@ -94,9 +94,6 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	libpctx		\
 	libresolv	\
 	libzfs_jni	\
-	pylibbe		\
-	pysolaris	\
-	pyzfs		\
 	smbclnt		\
 	libm1
 
@@ -278,6 +275,9 @@ SUBDIRS +=				\
 	pkcs11		\
 	policykit	\
 	print		\
+	pylibbe		\
+	pysolaris	\
+	pyzfs		\
 	raidcfg_plugins	\
 	rpcsec_gss	\
 	sasl_plugins	\
