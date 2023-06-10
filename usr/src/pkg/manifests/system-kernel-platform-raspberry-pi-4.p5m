@@ -26,6 +26,7 @@ dir  path=platform/RaspberryPi,4/kernel/drv
 dir  path=platform/RaspberryPi,4/kernel/drv/aarch64
 file path=platform/RaspberryPi,4/kernel/drv/aarch64/bcm2711-emmc2
 file path=platform/RaspberryPi,4/kernel/drv/aarch64/genet
+driver name=bcm2711-emmc2 perms="* 0666 root sys" alias=brcm,bcm2711-emmc2
 driver name=genet perms="* 0666 root sys" alias=brcm,bcm2711-genet-v5
 license lic_CDDL license=lic_CDDL
 # XXXARM: Hayashi's copyright
