@@ -42,7 +42,7 @@ SECTIONS
 	_LogBuf       = .;
 	. = . + 0x100000;
 	_BootScratch  = .;
-	. = . + 0x100000;
+	. = . + 0x03000000;
 	_RamdiskStart = .;
 	. = . + 0x0c000000;
 	_RamdiskEnd  = .;
