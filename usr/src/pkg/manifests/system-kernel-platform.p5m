@@ -198,11 +198,9 @@ $(i386_ONLY)driver name=evtchn perms="* 0666 root sys"
 $(i386_ONLY)driver name=isa class=sysbus alias=pciclass,060100
 $(i386_ONLY)driver name=npe alias=pciex_root_complex
 driver name=ns16550a perms="* 0666 root sys" perms="*,cu 0600 uucp uucp" \
-    alias=ns16550a
+    alias=arm,pl011
 $(i386_ONLY)driver name=pci class=pci
 $(i386_ONLY)driver name=pit_beep alias=SUNW,pit_beep
-driver name=pl011 perms="* 0666 root sys" perms="*,cu 0600 uucp uucp" \
-    alias=arm,pl011
 driver name=ppm
 $(i386_ONLY)driver name=privcmd perms="* 0666 root sys"
 $(i386_ONLY)driver name=rootnex
