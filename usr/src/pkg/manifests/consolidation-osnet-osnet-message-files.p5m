@@ -304,19 +304,11 @@ file path=usr/lib/locale/C/LC_MESSAGES/priv_names group=sys
 file path=usr/lib/locale/C/LC_MESSAGES/uxlibc.src group=sys
 dir  path=usr/lib/locale/C/LC_TIME
 file path=usr/lib/locale/C/LC_TIME/SUNW_OST_OSCMD.po group=sys
-dir  path=usr/share
-dir  path=usr/share/lib
+$(not_aarch64)dir path=usr/share
+$(not_aarch64)dir path=usr/share/lib
 $(not_aarch64)dir path=usr/share/lib/locale
 $(not_aarch64)dir path=usr/share/lib/locale/com
 $(not_aarch64)dir path=usr/share/lib/locale/com/sun
-$(not_aarch64)dir path=usr/share/lib/locale/com/sun/admin
-$(not_aarch64)dir path=usr/share/lib/locale/com/sun/admin/pm
-$(not_aarch64)dir path=usr/share/lib/locale/com/sun/admin/pm/client
-$(not_aarch64)file \
-    path=usr/share/lib/locale/com/sun/admin/pm/client/pmHelpResources.java \
-    group=lp
-$(not_aarch64)file \
-    path=usr/share/lib/locale/com/sun/admin/pm/client/pmResources.java group=lp
 $(not_aarch64)dir path=usr/share/lib/locale/com/sun/slp
 $(not_aarch64)file \
     path=usr/share/lib/locale/com/sun/slp/ClientLib_en.properties group=sys
