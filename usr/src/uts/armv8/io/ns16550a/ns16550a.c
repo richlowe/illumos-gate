@@ -27,6 +27,7 @@
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2012 Milan Jurik. All rights reserved.
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2023 Oxide Computer Company
  */
 
 #include <sys/param.h>
@@ -2052,6 +2053,8 @@ nsasync_txint(struct ns16550com *ns16550)
 {
 	struct nsasyncline *nsasync = ns16550->ns16550_priv;
 
+	ASSERT(MUTEX_HELD(&ns16550->ns16550_excl_hi));
+
 	/*
 	 * If NSASYNC_BREAK or NSASYNC_OUT_SUSPEND has been set, return to
 	 * ns16550intr()'s context to claim the interrupt without performing
@@ -2085,6 +2088,8 @@ nsasync_txint(struct ns16550com *ns16550)
 static void
 ns16550_ppsevent(struct ns16550com *ns16550, int msr)
 {
+	ASSERT(MUTEX_HELD(&ns16550->ns16550_excl_hi));
+
 	if (ns16550->ns16550_flags & NS16550_PPS_EDGE) {
 		/* Have seen leading edge, now look for and record drop */
 		if ((msr & DCD) == 0)
@@ -2156,6 +2161,8 @@ nsasync_rxint(struct ns16550com *ns16550, uchar_t lsr)
 	uchar_t c;
 	uint_t s, needsoft = 0;
 	tty_common_t *tp;
+
+	ASSERT(MUTEX_HELD(&ns16550->ns16550_excl_hi));
 
 	tp = &nsasync->nsasync_ttycommon;
 	if (!(tp->t_cflag & CREAD)) {
@@ -2267,8 +2274,9 @@ check_looplim:
 	}
 
 	if ((nsasync->nsasync_flags & NSASYNC_SERVICEIMM) || needsoft ||
-	    (RING_FRAC(nsasync)) || (nsasync->nsasync_polltid == 0))
+	    (RING_FRAC(nsasync)) || (nsasync->nsasync_polltid == 0)) {
 		NS16550SETSOFT(ns16550);	/* need a soft interrupt */
+	}
 }
 
 /*
@@ -2285,6 +2293,8 @@ nsasync_msint(struct ns16550com *ns16550)
 #ifdef DEBUG
 	int instance = UNIT(nsasync->nsasync_dev);
 #endif
+
+	ASSERT(MUTEX_HELD(&ns16550->ns16550_excl_hi));
 
 nsasync_msint_retry:
 	/* this resets the interrupt */
@@ -2602,12 +2612,13 @@ begin:
 	 * character as an argument. Let ldterm
 	 * figure out what to do with the error.
 	 */
-	if (cc) {
+	if (cc)
 		(void) putctl1(q, M_BREAK, c);
-		NS16550SETSOFT(nsasync->nsasync_common);	/* finish cc chars */
-	}
 	mutex_enter(&ns16550->ns16550_excl);
 	mutex_enter(&ns16550->ns16550_excl_hi);
+	if (cc) {
+		NS16550SETSOFT(nsasync->nsasync_common); /* finish cc chars */
+	}
 rv:
 	if ((RING_CNT(nsasync) < (RINGSIZE/4)) &&
 	    (nsasync->nsasync_inflow_source & IN_FLOW_RINGBUFF)) {
@@ -3394,10 +3405,12 @@ nsasync_ioctl(struct nsasyncline *nsasync, queue_t *wq, mblk_t *mp)
 				break;
 			}
 
+			mutex_enter(&ns16550->ns16550_excl_hi);
 			if (*(intptr_t *)mp->b_cont->b_rptr)
 				ns16550->ns16550_flags |= NS16550_CONSOLE;
 			else
 				ns16550->ns16550_flags &= ~NS16550_CONSOLE;
+			mutex_exit(&ns16550->ns16550_excl_hi);
 
 			mp->b_datap->db_type = M_IOCACK;
 			iocp->ioc_error = 0;
@@ -3438,12 +3451,17 @@ ns16550rsrv(queue_t *q)
 {
 	mblk_t *bp;
 	struct nsasyncline *nsasync;
+	struct ns16550com *ns16550;
 
 	nsasync = (struct nsasyncline *)q->q_ptr;
+	ns16550 = nsasync->nsasync_common;
 
 	while (canputnext(q) && (bp = getq(q)))
 		putnext(q, bp);
-	NS16550SETSOFT(nsasync->nsasync_common);
+
+	mutex_enter(&ns16550->ns16550_excl_hi);
+	NS16550SETSOFT(ns16550);
+	mutex_exit(&ns16550->ns16550_excl_hi);
 	nsasync->nsasync_polltid = 0;
 	return (0);
 }
