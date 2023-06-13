@@ -20,10 +20,11 @@
  */
 /*	Copyright (c) 1990, 1991 UNIX System Laboratories, Inc.	*/
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989, 1990 AT&T	*/
-/*	  All Rights Reserved 	*/
+/*	  All Rights Reserved	*/
 
 /*
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright 2023 Oxide Computer Company
  */
 
 #ifndef _IO_NS16550_H
@@ -44,16 +45,16 @@ extern "C" {
  */
 
 /* defined as offsets from the data register */
-#define	DAT		0 	/* receive/transmit data */
-#define	ICR		1  	/* interrupt control register */
-#define	ISR		2   	/* interrupt status register */
-#define	LCR		3   	/* line control register */
-#define	MCR		4   	/* modem control register */
-#define	LSR		5   	/* line status register */
-#define	MSR		6   	/* modem status register */
-#define	SCR		7   	/* scratch register */
-#define	DLL		0   	/* divisor latch (lsb) */
-#define	DLH		1   	/* divisor latch (msb) */
+#define	DAT		0	/* receive/transmit data */
+#define	ICR		1	/* interrupt control register */
+#define	ISR		2	/* interrupt status register */
+#define	LCR		3	/* line control register */
+#define	MCR		4	/* modem control register */
+#define	LSR		5	/* line status register */
+#define	MSR		6	/* modem status register */
+#define	SCR		7	/* scratch register */
+#define	DLL		0	/* divisor latch (lsb) */
+#define	DLH		1	/* divisor latch (msb) */
 #define	FIFOR		ISR	/* FIFO register for 16550 */
 #define	EFR		ISR	/* Enhanced feature register for 16650 */
 
@@ -67,15 +68,15 @@ extern "C" {
 #define	STB		0x04	/* number of stop bits */
 #define	PEN		0x08	/* parity enable */
 #define	EPS		0x10	/* even parity select */
-#define	SETBREAK 	0x40	/* break key */
+#define	SETBREAK	0x40	/* break key */
 #define	DLAB		0x80	/* divisor latch access bit */
-#define	RXLEN   	0x03   	/* # of data bits per received/xmitted char */
-#define	STOP1   	0x00
-#define	STOP2   	0x04
-#define	PAREN   	0x08
-#define	PAREVN  	0x10
-#define	PARMARK 	0x20
-#define	SNDBRK  	0x40
+#define	RXLEN		0x03	/* # of data bits per received/xmitted char */
+#define	STOP1		0x00
+#define	STOP2		0x04
+#define	PAREN		0x08
+#define	PAREVN		0x10
+#define	PARMARK		0x20
+#define	SNDBRK		0x40
 #define	EFRACCESS	0xBF	/* magic value for 16650 EFR access */
 
 #define	BITS5		0x00	/* 5 bits per char */
@@ -88,7 +89,7 @@ extern "C" {
 #define	OVRRUN		0x02	/* overrun error */
 #define	PARERR		0x04	/* parity error */
 #define	FRMERR		0x08	/* framing error */
-#define	BRKDET  	0x10	/* a break has arrived */
+#define	BRKDET		0x10	/* a break has arrived */
 #define	XHRE		0x20	/* tx hold reg is now empty */
 #define	XSRE		0x40	/* tx shift reg is now empty */
 #define	RFBE		0x80	/* rx FIFO Buffer error */
@@ -98,8 +99,8 @@ extern "C" {
 #define	NOINTERRUPT	0x01	/* no interrupt pending */
 #define	TxRDY		0x02	/* Transmitter Holding Register Empty */
 #define	RxRDY		0x04	/* Receiver Data Available */
-#define	FFTMOUT 	0x0c	/* FIFO timeout - 16550AF */
-#define	RSTATUS 	0x06	/* Receiver Line Status */
+#define	FFTMOUT		0x0c	/* FIFO timeout - 16550AF */
+#define	RSTATUS		0x06	/* Receiver Line Status */
 
 /* Interrupt Enable Register */
 #define	RIEN		0x01	/* Received Data Ready */
@@ -301,7 +302,7 @@ struct nsasyncline {
 	dev_t		nsasync_dev;	/* device major/minor numbers */
 	mblk_t		*nsasync_xmitblk;	/* transmit: active msg block */
 	struct ns16550com	*nsasync_common;	/* device common data */
-	tty_common_t 	nsasync_ttycommon; /* tty driver common data */
+	tty_common_t	nsasync_ttycommon; /* tty driver common data */
 	bufcall_id_t	nsasync_wbufcid;	/* id for pending write-side bufcall */
 	size_t		nsasync_wbufcds;	/* Buffer size requested in bufcall */
 	timeout_id_t	nsasync_polltid;	/* softint poll timeout id */
@@ -421,6 +422,7 @@ struct nsasyncline {
  */
 
 #define	NS16550SETSOFT(ns16550)	{			\
+	ASSERT(MUTEX_HELD(&ns16550->ns16550_excl_hi)); 		\
 	if (mutex_tryenter(&ns16550->ns16550_soft_lock)) {	\
 		ns16550->ns16550_flags |= NS16550_NEEDSOFT;		\
 		if (!ns16550->ns16550softpend) {		\
