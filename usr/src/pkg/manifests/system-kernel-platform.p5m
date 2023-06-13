@@ -52,11 +52,9 @@ $(aarch64_ONLY)file path=platform/armv8/kernel/dacf/aarch64/consconfig_dacf \
 $(aarch64_ONLY)dir path=platform/armv8/kernel/drv
 $(aarch64_ONLY)dir path=platform/armv8/kernel/drv/aarch64
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/ns16550a
-$(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/pl011
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/rootnex
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/simple-bus
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/ns16550a.conf
-$(aarch64_ONLY)file path=platform/armv8/kernel/drv/pl011.conf
 $(i386_ONLY)dir path=platform/i86pc group=sys
 $(i386_ONLY)dir path=platform/i86pc/$(ARCH64) group=sys
 $(i386_ONLY)dir path=platform/i86pc/kernel group=sys
@@ -198,11 +196,9 @@ $(i386_ONLY)driver name=evtchn perms="* 0666 root sys"
 $(i386_ONLY)driver name=isa class=sysbus alias=pciclass,060100
 $(i386_ONLY)driver name=npe alias=pciex_root_complex
 driver name=ns16550a perms="* 0666 root sys" perms="*,cu 0600 uucp uucp" \
-    alias=ns16550a
+    alias=arm,pl011
 $(i386_ONLY)driver name=pci class=pci
 $(i386_ONLY)driver name=pit_beep alias=SUNW,pit_beep
-driver name=pl011 perms="* 0666 root sys" perms="*,cu 0600 uucp uucp" \
-    alias=arm,pl011
 driver name=ppm
 $(i386_ONLY)driver name=privcmd perms="* 0666 root sys"
 $(i386_ONLY)driver name=rootnex

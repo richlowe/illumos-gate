@@ -24,10 +24,6 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/pl011/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
 $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/ns16550a/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

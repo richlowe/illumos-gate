@@ -29,20 +29,6 @@
  * Copyright 2017 Hayashi Naoyuki
  */
 
-/*
- * XXXARM:
- *
- * NB: This driver, while clearly derived from asy(4D) is an almost verbatim
- * copy of the ARM pl011 driver.
- *
- * It is not clear why they have diverged (or if they must), this requires
- * investigation.
- *
- * I have taken a big hammer to symbol and type names to avoid collisions when
- * debugging, for clean diffs v. asy(4D), translate ns16550 to asy, nsasync to
- * async.  for clean diffs v. pl011 translate ns16550 to pl011, nsasync to
- * plasync
- */
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/signal.h>
@@ -403,12 +389,12 @@ static int baudtable[] = {
 #define	N_SU_SPEEDS	(sizeof (baudtable)/sizeof (baudtable[0]))
 
 static void
-ns166550_reset_fifo(struct ns16550com *ns16550, uint8_t flush)
+ns16550_reset_fifo(struct ns16550com *ns16550, uint8_t flush)
 {
 }
 
 static void
-ns166550_put_char(struct ns16550com *ns16550, uint8_t val)
+ns16550_put_char(struct ns16550com *ns16550, uint8_t val)
 {
 	union uart_dr reg = {0};
 	reg.data = val;
@@ -416,7 +402,7 @@ ns166550_put_char(struct ns16550com *ns16550, uint8_t val)
 }
 
 static boolean_t
-ns166550_is_busy(struct ns16550com *ns16550)
+ns16550_is_busy(struct ns16550com *ns16550)
 {
 	union uart_fr reg;
 	reg.dw = REG_READ(ns16550, UARTFR);
@@ -424,7 +410,7 @@ ns166550_is_busy(struct ns16550com *ns16550)
 }
 
 static boolean_t
-ns166550_tx_is_ready(struct ns16550com *ns16550)
+ns16550_tx_is_ready(struct ns16550com *ns16550)
 {
 	union uart_fr reg;
 	reg.dw = REG_READ(ns16550, UARTFR);
@@ -432,7 +418,7 @@ ns166550_tx_is_ready(struct ns16550com *ns16550)
 }
 
 static boolean_t
-ns166550_rx_is_ready(struct ns16550com *ns16550)
+ns16550_rx_is_ready(struct ns16550com *ns16550)
 {
 	union uart_fr reg;
 	reg.dw = REG_READ(ns16550, UARTFR);
@@ -440,7 +426,7 @@ ns166550_rx_is_ready(struct ns16550com *ns16550)
 }
 
 static uint8_t
-ns166550_get_msr(struct ns16550com *ns16550)
+ns16550_get_msr(struct ns16550com *ns16550)
 {
 	union uart_fr reg;
 	reg.dw = REG_READ(ns16550, UARTFR);
@@ -457,7 +443,7 @@ ns166550_get_msr(struct ns16550com *ns16550)
 }
 
 static void
-ns166550_set_mcr(struct ns16550com *ns16550, uint8_t mcr)
+ns16550_set_mcr(struct ns16550com *ns16550, uint8_t mcr)
 {
 	union uart_cr reg;
 	reg.dw = REG_READ(ns16550, UARTCR);
@@ -470,7 +456,7 @@ ns166550_set_mcr(struct ns16550com *ns16550, uint8_t mcr)
 }
 
 static uint8_t
-ns166550_get_mcr(struct ns16550com *ns16550)
+ns16550_get_mcr(struct ns16550com *ns16550)
 {
 	union uart_cr reg;
 	reg.dw = REG_READ(ns16550, UARTCR);
@@ -489,7 +475,7 @@ ns166550_get_mcr(struct ns16550com *ns16550)
 }
 
 static void
-ns166550_set_icr(struct ns16550com *ns16550, uint8_t icr, uint8_t mask)
+ns16550_set_icr(struct ns16550com *ns16550, uint8_t icr, uint8_t mask)
 {
 	union uart_intr reg;
 	reg.dw = REG_READ(ns16550, UARTIMSC);
@@ -510,7 +496,7 @@ ns166550_set_icr(struct ns16550com *ns16550, uint8_t icr, uint8_t mask)
 }
 
 static uint8_t
-ns166550_get_icr(struct ns16550com *ns16550)
+ns16550_get_icr(struct ns16550com *ns16550)
 {
 	union uart_intr reg;
 	reg.dw = REG_READ(ns16550, UARTIMSC);
@@ -525,7 +511,7 @@ ns166550_get_icr(struct ns16550com *ns16550)
 }
 
 static uint8_t
-ns166550_get_lsr(struct ns16550com *ns16550)
+ns16550_get_lsr(struct ns16550com *ns16550)
 {
 	union uart_rsr rsr;
 	rsr.dw = REG_READ(ns16550, UARTRSR);
@@ -553,7 +539,7 @@ ns166550_get_lsr(struct ns16550com *ns16550)
 }
 
 static uint8_t
-ns166550_get_char(struct ns16550com *ns16550)
+ns16550_get_char(struct ns16550com *ns16550)
 {
 	union uart_dr reg;
 	reg.dw = REG_READ(ns16550, UARTDR);
@@ -561,7 +547,7 @@ ns166550_get_char(struct ns16550com *ns16550)
 }
 
 static void
-ns166550_set_lcr(struct ns16550com *ns16550, uint8_t lcr)
+ns16550_set_lcr(struct ns16550com *ns16550, uint8_t lcr)
 {
 	union uart_lcr_h reg;
 	reg.dw = REG_READ(ns16550, UARTLCR_H);
@@ -581,7 +567,7 @@ ns166550_set_lcr(struct ns16550com *ns16550, uint8_t lcr)
 }
 
 static void
-ns166550_set_break(struct ns16550com *ns16550, boolean_t on)
+ns16550_set_break(struct ns16550com *ns16550, boolean_t on)
 {
 	union uart_lcr_h reg;
 	reg.dw = REG_READ(ns16550, UARTLCR_H);
@@ -590,7 +576,7 @@ ns166550_set_break(struct ns16550com *ns16550, boolean_t on)
 }
 
 static uint8_t
-ns166550_get_lcr(struct ns16550com *ns16550)
+ns16550_get_lcr(struct ns16550com *ns16550)
 {
 	union uart_lcr_h reg;
 	reg.dw = REG_READ(ns16550, UARTLCR_H);
@@ -614,7 +600,7 @@ ns166550_get_lcr(struct ns16550com *ns16550)
 }
 
 static uint8_t
-ns166550_get_isr(struct ns16550com *ns16550)
+ns16550_get_isr(struct ns16550com *ns16550)
 {
 	union uart_intr reg;
 	reg.dw = REG_READ(ns16550, UARTRIS);
@@ -658,7 +644,7 @@ ns166550_get_isr(struct ns16550com *ns16550)
 }
 
 static void
-ns166550_reset(struct ns16550com *ns16550)
+ns16550_reset(struct ns16550com *ns16550)
 {
 	REG_WRITE(ns16550, UARTCR, 0);
 	REG_WRITE(ns16550, UARTECR, 0);
@@ -667,7 +653,7 @@ ns166550_reset(struct ns16550com *ns16550)
 
 	union uart_ifls ifls = {0};
 	ifls.txiflsel = 2;	// 1/2
-	ifls.rxiflsel = 0;	// 7/8
+	ifls.rxiflsel = 0;	// 1/8
 	REG_WRITE(ns16550, UARTIFLS, ifls.dw);
 
 	union uart_cr cr = {0};
@@ -683,7 +669,7 @@ ns166550_reset(struct ns16550com *ns16550)
 }
 
 static void
-ns166550_set_baud(struct ns16550com *ns16550, uint8_t bidx)
+ns16550_set_baud(struct ns16550com *ns16550, uint8_t bidx)
 {
 	ASSERT(bidx < N_SU_SPEEDS);
 	int baudrate;
@@ -1040,7 +1026,7 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	 * the system to hang if there was input available.
 	 */
 
-	ns166550_set_icr(ns16550, 0, 0xff);
+	ns16550_set_icr(ns16550, 0, 0xff);
 
 	/* establish default usage */
 	ns16550->ns16550_mcr |= RTS|DTR;		/* do use RTS/DTR after open */
@@ -1128,12 +1114,12 @@ ns16550attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	dev_t dev = makedevice(DDI_MAJOR_T_UNKNOWN, ns16550->ns16550_unit);
 	ddi_prop_update_string(dev, devi, "uart", ns16550_hw_name(ns16550));
 
-	ns166550_reset(ns16550);
+	ns16550_reset(ns16550);
 
 	/* Set the baud rate to 9600 */
-	ns166550_set_baud(ns16550, ns16550->ns16550_bidx);
-	ns166550_set_lcr(ns16550, ns16550->ns16550_lcr);
-	ns166550_set_mcr(ns16550, mcr);
+	ns16550_set_baud(ns16550, ns16550->ns16550_bidx);
+	ns16550_set_lcr(ns16550, ns16550->ns16550_lcr);
+	ns16550_set_mcr(ns16550, mcr);
 
 	mutex_exit(&ns16550->ns16550_excl_hi);
 	mutex_exit(&ns16550->ns16550_excl);
@@ -1439,8 +1425,8 @@ again:
 		mutex_enter(&ns16550->ns16550_excl_hi);
 	}
 
-	mcr = ns166550_get_mcr(ns16550);
-	ns166550_set_mcr(ns16550,
+	mcr = ns16550_get_mcr(ns16550);
+	ns16550_set_mcr(ns16550,
 	    mcr|(ns16550->ns16550_mcr&DTR));
 
 	DEBUGCONT3(NS16550_DEBUG_INIT,
@@ -1461,7 +1447,7 @@ again:
 	/*
 	 * Check carrier.
 	 */
-	ns16550->ns16550_msr = ns166550_get_msr(ns16550);
+	ns16550->ns16550_msr = ns16550_get_msr(ns16550);
 	DEBUGCONT3(NS16550_DEBUG_INIT, "ns16550%dopen: TS_SOFTCAR is %s, "
 	    "MSR & DCD is %s\n",
 	    unit,
@@ -1620,7 +1606,7 @@ ns16550close(queue_t *q, int flag, cred_t *credp)
 			nsasync->nsasync_utbrktid = 0;
 		}
 		mutex_enter(&ns16550->ns16550_excl_hi);
-		ns166550_set_break(ns16550, B_FALSE);
+		ns16550_set_break(ns16550, B_FALSE);
 		mutex_exit(&ns16550->ns16550_excl_hi);
 		nsasync->nsasync_flags &= ~NSASYNC_OUT_SUSPEND;
 		goto nodrain;
@@ -1706,11 +1692,11 @@ nodrain:
 			    ns16550->ns16550_flags & NS16550_IGNORE_CD,
 			    ns16550->ns16550_flags & NS16550_RTS_DTR_OFF);
 
-			ns166550_set_mcr(ns16550, ns16550->ns16550_mcr|OUT2);
+			ns16550_set_mcr(ns16550, ns16550->ns16550_mcr|OUT2);
 		} else {
 			DEBUGCONT1(NS16550_DEBUG_MODEM,
 			    "ns16550%dclose: Dropping DTR and RTS\n", instance);
-			ns166550_set_mcr(ns16550, ns16550->ns16550_mcr|OUT2);
+			ns16550_set_mcr(ns16550, ns16550->ns16550_mcr|OUT2);
 		}
 		nsasync->nsasync_dtrtid =
 		    timeout((void (*)())nsasync_dtr_free,
@@ -1720,7 +1706,7 @@ nodrain:
 	 * If nobody's using it now, turn off receiver interrupts.
 	 */
 	if ((nsasync->nsasync_flags & (NSASYNC_WOPEN|NSASYNC_ISOPEN)) == 0) {
-		ns166550_set_icr(ns16550, 0, RIEN);
+		ns16550_set_icr(ns16550, 0, RIEN);
 	}
 	mutex_exit(&ns16550->ns16550_excl_hi);
 out:
@@ -1763,7 +1749,7 @@ ns16550_isbusy(struct ns16550com *ns16550)
 /*
  * XXXX this should be recoded
  */
-	return ((nsasync->nsasync_ocnt > 0) || ns166550_is_busy(ns16550));
+	return ((nsasync->nsasync_ocnt > 0) || ns16550_is_busy(ns16550));
 }
 
 static void
@@ -1835,8 +1821,8 @@ ns16550_program(struct ns16550com *ns16550, int mode)
 
 	ocflags = ns16550->ns16550_ocflag;
 
-	ns166550_reset(ns16550);
-	ns16550->ns16550_msr = ns166550_get_msr(ns16550);
+	ns16550_reset(ns16550);
+	ns16550->ns16550_msr = ns16550_get_msr(ns16550);
 	/*
 	 * The device is programmed in the open sequence, if we
 	 * have to hardware handshake, then this is a good time
@@ -1869,12 +1855,12 @@ ns16550_program(struct ns16550com *ns16550, int mode)
 		nsasync->nsasync_flags &= ~NSASYNC_SW_OUT_FLW;
 
 	if (mode == NS16550_INIT)
-		while (ns166550_rx_is_ready(ns16550))
-			ns166550_get_char(ns16550);
+		while (ns16550_rx_is_ready(ns16550))
+			ns16550_get_char(ns16550);
 
 	if (ocflags != (c_flag & ~CLOCAL) || mode == NS16550_INIT) {
 		/* Set line control */
-		lcr = ns166550_get_lcr(ns16550);
+		lcr = ns16550_get_lcr(ns16550);
 		lcr &= ~(WLS0|WLS1|STB|PEN|EPS);
 
 		if (c_flag & CSTOPB)
@@ -1903,10 +1889,10 @@ ns16550_program(struct ns16550com *ns16550, int mode)
 
 		/* set the baud rate, unless it is "0" */
 		if (baudrate != 0)
-			ns166550_set_baud(ns16550, baudrate);
+			ns16550_set_baud(ns16550, baudrate);
 
 		/* set the line control modes */
-		ns166550_set_lcr(ns16550, lcr);
+		ns16550_set_lcr(ns16550, lcr);
 
 		/*
 		 * If we have a FIFO buffer, enable/flush
@@ -1915,17 +1901,17 @@ ns16550_program(struct ns16550com *ns16550, int mode)
 		 */
 		if ((ocflags & CREAD) == 0 && (c_flag & CREAD) ||
 		    mode == NS16550_INIT)
-			ns166550_reset_fifo(ns16550, FIFORXFLSH);
+			ns16550_reset_fifo(ns16550, FIFORXFLSH);
 
 		/* remember the new cflags */
 		ns16550->ns16550_ocflag = c_flag & ~CLOCAL;
 	}
 
 	if (baudrate == 0)
-		ns166550_set_mcr(ns16550,
+		ns16550_set_mcr(ns16550,
 		    (ns16550->ns16550_mcr & RTS) | OUT2);
 	else
-		ns166550_set_mcr(ns16550,
+		ns16550_set_mcr(ns16550,
 		    ns16550->ns16550_mcr | OUT2);
 
 	/*
@@ -1953,7 +1939,7 @@ ns16550_program(struct ns16550com *ns16550, int mode)
 	if (c_flag & CREAD)
 		icr |= RIEN;
 
-	ns166550_set_icr(ns16550, icr, 0xff);
+	ns16550_set_icr(ns16550, icr, 0xff);
 	DEBUGCONT1(NS16550_DEBUG_PROCS, "ns16550%d_program: done\n", instance);
 }
 
@@ -1987,7 +1973,7 @@ ns16550intr(caddr_t argns16550)
 	int			ret_status = DDI_INTR_UNCLAIMED;
 	uchar_t			interrupt_id, lsr;
 
-	interrupt_id = ns166550_get_isr(ns16550);
+	interrupt_id = ns16550_get_isr(ns16550);
 	nsasync = ns16550->ns16550_priv;
 	if ((nsasync == NULL) ||
 	    !(nsasync->nsasync_flags & (NSASYNC_ISOPEN|NSASYNC_WOPEN))) {
@@ -2000,9 +1986,9 @@ ns16550intr(caddr_t argns16550)
 			 *	reading any data from data status register
 			 *	reading modem status
 			 */
-			(void) ns166550_get_lsr(ns16550);
-			(void) ns166550_get_char(ns16550);
-			ns16550->ns16550_msr = ns166550_get_msr(ns16550);
+			(void) ns16550_get_lsr(ns16550);
+			(void) ns16550_get_char(ns16550);
+			ns16550->ns16550_msr = ns16550_get_msr(ns16550);
 			return (DDI_INTR_CLAIMED);
 		}
 	}
@@ -2020,7 +2006,7 @@ ns16550intr(caddr_t argns16550)
 	 */
 	/* CSTYLED */
 	for (;; interrupt_id =
-	    ns166550_get_isr(ns16550)) {
+	    ns16550_get_isr(ns16550)) {
 
 		if (interrupt_id & NOINTERRUPT)
 			break;
@@ -2028,7 +2014,7 @@ ns16550intr(caddr_t argns16550)
 
 		DEBUGCONT1(NS16550_DEBUG_INTR, "ns16550intr: interrupt_id = 0x%d\n",
 		    interrupt_id);
-		lsr = ns166550_get_lsr(ns16550);
+		lsr = ns16550_get_lsr(ns16550);
 		switch (interrupt_id) {
 		case RxRDY:
 		case RSTATUS:
@@ -2080,10 +2066,10 @@ nsasync_txint(struct ns16550com *ns16550)
 	if (!(nsasync->nsasync_flags &
 	    (NSASYNC_HW_OUT_FLW|NSASYNC_SW_OUT_FLW|NSASYNC_STOPPED))) {
 		while (nsasync->nsasync_ocnt > 0) {
-			if (!ns166550_tx_is_ready(ns16550)) {
+			if (!ns16550_tx_is_ready(ns16550)) {
 				break;
 			}
-			ns166550_put_char(ns16550, *nsasync->nsasync_optr++);
+			ns16550_put_char(ns16550, *nsasync->nsasync_optr++);
 			nsasync->nsasync_ocnt--;
 		}
 		nsasync->nsasync_flags |= NSASYNC_PROGRESS;
@@ -2174,8 +2160,8 @@ nsasync_rxint(struct ns16550com *ns16550, uchar_t lsr)
 	tp = &nsasync->nsasync_ttycommon;
 	if (!(tp->t_cflag & CREAD)) {
 		while (lsr & (RCA|PARERR|FRMERR|BRKDET|OVRRUN)) {
-			(void) ns166550_get_char(ns16550);
-			lsr = ns166550_get_lsr(ns16550);
+			(void) ns16550_get_char(ns16550);
+			lsr = ns16550_get_lsr(ns16550);
 		}
 		return; /* line is not open for read? */
 	}
@@ -2184,7 +2170,7 @@ nsasync_rxint(struct ns16550com *ns16550, uchar_t lsr)
 		c = 0;
 		s = 0;				/* reset error status */
 		if (lsr & RCA) {
-			c = ns166550_get_char(ns16550);
+			c = ns16550_get_char(ns16550);
 
 			/*
 			 * We handle XON/XOFF char if IXON is set,
@@ -2271,7 +2257,7 @@ nsasync_rxint(struct ns16550com *ns16550, uchar_t lsr)
 				else
 					nsasync->nsasync_sw_overrun = 1;
 check_looplim:
-		lsr = ns166550_get_lsr(ns16550);
+		lsr = ns16550_get_lsr(ns16550);
 	}
 	if ((RING_CNT(nsasync) > (RINGSIZE * 3)/4) &&
 	    !(nsasync->nsasync_inflow_source & IN_FLOW_RINGBUFF)) {
@@ -2302,7 +2288,7 @@ nsasync_msint(struct ns16550com *ns16550)
 
 nsasync_msint_retry:
 	/* this resets the interrupt */
-	msr = ns166550_get_msr(ns16550);
+	msr = ns16550_get_msr(ns16550);
 	DEBUGCONT10(NS16550_DEBUG_STATE,
 	    "ns16550nc%d_msint call #%d:\n"
 	    "   transition: %3s %3s %3s %3s\n"
@@ -2343,7 +2329,7 @@ nsasync_msint_retry:
 	 * status, we would miss a change of modem status event that occured
 	 * after we initiated a read MSR operation.
 	 */
-	msr = ns166550_get_msr(ns16550);
+	msr = ns16550_get_msr(ns16550);
 	if (STATES(msr) != STATES(ns16550->ns16550_msr))
 		goto	nsasync_msint_retry;
 }
@@ -2482,8 +2468,8 @@ begin:
 				 * not stopped, and send a hangup
 				 * notification upstream.
 				 */
-				val = ns166550_get_mcr(ns16550);
-				ns166550_set_mcr(ns16550, (val & ~DTR));
+				val = ns16550_get_mcr(ns16550);
+				ns16550_set_mcr(ns16550, (val & ~DTR));
 
 				if (nsasync->nsasync_flags & NSASYNC_BUSY) {
 					DEBUGCONT0(NS16550_DEBUG_BUSY,
@@ -2507,7 +2493,7 @@ begin:
 					 * Flush FIFO buffers
 					 * Any data left in there is invalid now
 					 */
-					ns166550_reset_fifo(ns16550, FIFOTXFLSH);
+					ns16550_reset_fifo(ns16550, FIFOTXFLSH);
 					/*
 					 * Flush our write queue if we have one.
 					 * If we're in the midst of close, then
@@ -2730,7 +2716,7 @@ nsasync_restart(void *arg)
 	if ((nsasync->nsasync_flags & NSASYNC_BREAK) &&
 	    !(nsasync->nsasync_flags & NSASYNC_OUT_SUSPEND)) {
 		mutex_enter(&ns16550->ns16550_excl_hi);
-		ns166550_set_break(ns16550, B_FALSE);
+		ns16550_set_break(ns16550, B_FALSE);
 		mutex_exit(&ns16550->ns16550_excl_hi);
 	}
 	nsasync->nsasync_flags &= ~(NSASYNC_DELAY|NSASYNC_BREAK);
@@ -2826,7 +2812,7 @@ nsasync_nstart(struct nsasyncline *nsasync, int mode)
 			 * the next message.
 			 */
 			mutex_enter(&ns16550->ns16550_excl_hi);
-			ns166550_set_break(ns16550, B_TRUE);
+			ns16550_set_break(ns16550, B_TRUE);
 			mutex_exit(&ns16550->ns16550_excl_hi);
 			nsasync->nsasync_flags |= NSASYNC_BREAK;
 			(void) timeout(nsasync_restart, (caddr_t)nsasync,
@@ -2906,9 +2892,9 @@ nsasync_nstart(struct nsasyncline *nsasync, int mode)
 	 */
 	didsome = B_FALSE;
 	while (cc > 0) {
-		if (!ns166550_tx_is_ready(ns16550))
+		if (!ns16550_tx_is_ready(ns16550))
 			break;
-		ns166550_put_char(ns16550, *xmit_addr++);
+		ns16550_put_char(ns16550, *xmit_addr++);
 		cc--;
 		didsome = B_TRUE;
 	}
@@ -2943,13 +2929,13 @@ nsasync_resume(struct nsasyncline *nsasync)
 	DEBUGCONT1(NS16550_DEBUG_PROCS, "nsasync%d_resume\n", instance);
 #endif
 
-	if (ns166550_tx_is_ready(ns16550)) {
+	if (ns16550_tx_is_ready(ns16550)) {
 		if (nsasync_flowcontrol_sw_input(ns16550, FLOW_CHECK, IN_FLOW_NULL))
 			return;
 		if (nsasync->nsasync_ocnt > 0 &&
 		    !(nsasync->nsasync_flags &
 		    (NSASYNC_HW_OUT_FLW|NSASYNC_SW_OUT_FLW|NSASYNC_OUT_SUSPEND))) {
-			ns166550_put_char(ns16550, *nsasync->nsasync_optr++);
+			ns16550_put_char(ns16550, *nsasync->nsasync_optr++);
 			nsasync->nsasync_ocnt--;
 			nsasync->nsasync_flags |= NSASYNC_PROGRESS;
 		}
@@ -2996,7 +2982,7 @@ nsasync_resume_utbrk(struct nsasyncline *nsasync)
 	 * really clean the HW break.
 	 */
 	if (!(nsasync->nsasync_flags & NSASYNC_BREAK)) {
-		ns166550_set_break(ns16550, B_FALSE);
+		ns16550_set_break(ns16550, B_FALSE);
 	}
 	nsasync->nsasync_flags &= ~NSASYNC_OUT_SUSPEND;
 	cv_broadcast(&nsasync->nsasync_flags_cv);
@@ -3273,7 +3259,7 @@ nsasync_ioctl(struct nsasyncline *nsasync, queue_t *wq, mblk_t *mp)
 				    nsasync->nsasync_ttycommon.t_cflag);
 				nsasync->nsasync_flags |= NSASYNC_BREAK;
 
-				while (ns166550_is_busy(ns16550)) {
+				while (ns16550_is_busy(ns16550)) {
 					mutex_exit(&ns16550->ns16550_excl_hi);
 					mutex_exit(&ns16550->ns16550_excl);
 					drv_usecwait(ns16550->ns16550_clock / baudtable[index] * 2);
@@ -3286,7 +3272,7 @@ nsasync_ioctl(struct nsasyncline *nsasync, queue_t *wq, mblk_t *mp)
 				 * it will turn the break bit off, and call
 				 * "nsasync_start" to grab the next message.
 				 */
-				ns166550_set_break(ns16550, B_TRUE);
+				ns16550_set_break(ns16550, B_TRUE);
 				mutex_exit(&ns16550->ns16550_excl_hi);
 				(void) timeout(nsasync_restart, (caddr_t)nsasync,
 				    drv_usectohz(1000000)/4);
@@ -3310,14 +3296,14 @@ nsasync_ioctl(struct nsasyncline *nsasync, queue_t *wq, mblk_t *mp)
 				nsasync->nsasync_flags |= NSASYNC_HOLD_UTBRK;
 				index = BAUDINDEX(
 				    nsasync->nsasync_ttycommon.t_cflag);
-				while (ns166550_is_busy(ns16550)) {
+				while (ns16550_is_busy(ns16550)) {
 					mutex_exit(&ns16550->ns16550_excl_hi);
 					mutex_exit(&ns16550->ns16550_excl);
 					drv_usecwait(ns16550->ns16550_clock / baudtable[index] * 2);
 					mutex_enter(&ns16550->ns16550_excl);
 					mutex_enter(&ns16550->ns16550_excl_hi);
 				}
-				ns166550_set_break(ns16550, B_TRUE);
+				ns16550_set_break(ns16550, B_TRUE);
 				mutex_exit(&ns16550->ns16550_excl_hi);
 				/* wait for 100ms to hold BREAK */
 				nsasync->nsasync_utbrktid =
@@ -3629,12 +3615,12 @@ ns16550wputdo(queue_t *q, mblk_t *mp, boolean_t wput)
 
 			if (NS16550WPUTDO_NOT_SUSP(nsasync, wput)) {
 				/* Flush FIFO buffers */
-				ns166550_reset_fifo(ns16550, FIFOTXFLSH);
+				ns16550_reset_fifo(ns16550, FIFOTXFLSH);
 			}
 			mutex_exit(&ns16550->ns16550_excl_hi);
 
 			/* Flush FIFO buffers */
-			ns166550_reset_fifo(ns16550, FIFOTXFLSH);
+			ns16550_reset_fifo(ns16550, FIFOTXFLSH);
 
 			/*
 			 * Flush our write queue.
@@ -3650,7 +3636,7 @@ ns16550wputdo(queue_t *q, mblk_t *mp, boolean_t wput)
 		if (*mp->b_rptr & FLUSHR) {
 			if (NS16550WPUTDO_NOT_SUSP(nsasync, wput)) {
 				/* Flush FIFO buffers */
-				ns166550_reset_fifo(ns16550, FIFORXFLSH);
+				ns16550_reset_fifo(ns16550, FIFORXFLSH);
 			}
 			flushq(RD(q), FLUSHDATA);
 			qreply(q, mp);	/* give the read queues a crack at it */
@@ -3897,13 +3883,13 @@ ns16550putchar(cons_polledio_arg_t arg, uchar_t c)
 	if (c == '\n')
 		ns16550putchar(arg, '\r');
 
-	while (!ns166550_tx_is_ready(ns16550)) {
+	while (!ns16550_tx_is_ready(ns16550)) {
 		/* wait for xmit to finish */
 		drv_usecwait(10);
 	}
 
 	/* put the character out */
-	ns166550_put_char(ns16550, c);
+	ns16550_put_char(ns16550, c);
 }
 
 /*
@@ -3915,7 +3901,7 @@ ns16550ischar(cons_polledio_arg_t arg)
 {
 	struct ns16550com *ns16550 = (struct ns16550com *)arg;
 
-	return ns166550_rx_is_ready(ns16550);
+	return ns16550_rx_is_ready(ns16550);
 }
 
 /*
@@ -3928,7 +3914,7 @@ ns16550getchar(cons_polledio_arg_t arg)
 
 	while (!ns16550ischar(arg))
 		drv_usecwait(10);
-	return (ns166550_get_char(ns16550));
+	return (ns16550_get_char(ns16550));
 }
 
 /*
@@ -3944,7 +3930,7 @@ ns16550mctl(struct ns16550com *ns16550, int bits, int how)
 	ASSERT(mutex_owned(&ns16550->ns16550_excl));
 
 	/* Read Modem Control Registers */
-	mcr_r = ns166550_get_mcr(ns16550);
+	mcr_r = ns16550_get_mcr(ns16550);
 
 	switch (how) {
 
@@ -3972,13 +3958,13 @@ ns16550mctl(struct ns16550com *ns16550, int bits, int how)
 		 * If modem interrupts are enabled, we return the
 		 * saved value of msr. We read MSR only in nsasync_msint()
 		 */
-		if (ns166550_get_icr(ns16550) & MIEN) {
+		if (ns16550_get_icr(ns16550) & MIEN) {
 			msr_r = ns16550->ns16550_msr;
 			DEBUGCONT2(NS16550_DEBUG_MODEM,
 			    "ns16550%dmctl: TIOCMGET, read msr_r = %x\n",
 			    instance, msr_r);
 		} else {
-			msr_r = ns166550_get_msr(ns16550);
+			msr_r = ns16550_get_msr(ns16550);
 			DEBUGCONT2(NS16550_DEBUG_MODEM,
 			    "ns16550%dmctl: TIOCMGET, read MSR = %x\n",
 			    instance, msr_r);
@@ -3988,7 +3974,7 @@ ns16550mctl(struct ns16550com *ns16550, int bits, int how)
 		return (ns16550todm(mcr_r, msr_r));
 	}
 
-	ns166550_set_mcr(ns16550, mcr_r);
+	ns16550_set_mcr(ns16550, mcr_r);
 
 	return (mcr_r);
 }
@@ -4337,8 +4323,8 @@ nsasync_flowcontrol_sw_input(struct ns16550com *ns16550, nsasync_flowc_action on
 		 * XON or XOFF char.
 		 */
 		nsasync->nsasync_flags = (nsasync->nsasync_flags & ~NSASYNC_SW_IN_NEEDED) | NSASYNC_BUSY;
-		while (!ns166550_tx_is_ready(ns16550)) {}
-		ns166550_put_char(ns16550, nsasync->nsasync_flags & NSASYNC_SW_IN_FLOW ?  nsasync->nsasync_stopc : nsasync->nsasync_startc);
+		while (!ns16550_tx_is_ready(ns16550)) {}
+		ns16550_put_char(ns16550, nsasync->nsasync_flags & NSASYNC_SW_IN_FLOW ?  nsasync->nsasync_stopc : nsasync->nsasync_startc);
 		rval = B_TRUE;
 	}
 	return (rval);
@@ -4433,11 +4419,11 @@ nsasync_flowcontrol_hw_input(struct ns16550com *ns16550, nsasync_flowc_action on
 	default:
 		break;
 	}
-	mcr = ns166550_get_mcr(ns16550);
+	mcr = ns16550_get_mcr(ns16550);
 	flag = (nsasync->nsasync_flags & NSASYNC_HW_IN_FLOW) ? 0 : RTS;
 
 	if (((mcr ^ flag) & RTS) != 0) {
-		ns166550_set_mcr(ns16550, (mcr ^ RTS));
+		ns16550_set_mcr(ns16550, (mcr ^ RTS));
 	}
 }
 
@@ -4508,10 +4494,10 @@ ns16550quiesce(dev_info_t *devi)
 		return (DDI_FAILURE);
 
 	/* disable all interrupts */
-	ns166550_set_icr(ns16550, 0, RIEN | TIEN);
+	ns16550_set_icr(ns16550, 0, RIEN | TIEN);
 
 	/* reset the FIFO */
-	ns166550_reset_fifo(ns16550, FIFOTXFLSH | FIFORXFLSH);
+	ns16550_reset_fifo(ns16550, FIFOTXFLSH | FIFORXFLSH);
 
 	return (DDI_SUCCESS);
 }

@@ -198,7 +198,6 @@ GENASSYM_DEFS	 = $(MACHINE_DEFS) $(OPTION_DEFS) \
 #
 DRV_KMODS += simple-bus
 DRV_KMODS += rootnex
-DRV_KMODS += pl011
 DRV_KMODS += ns16550a
 
 DACF_KMODS += consconfig_dacf
