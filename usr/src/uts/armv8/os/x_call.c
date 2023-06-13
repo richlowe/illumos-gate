@@ -67,15 +67,29 @@ extern cpuset_t	cpu_ready_set;
 
 static kmutex_t	xc_mbox_lock;
 static struct	xc_mbox xc_mbox;
-static uint_t xc_serv(caddr_t, caddr_t);
+static uint_t	xc_serv(caddr_t, caddr_t);
+static uint_t	xc_poke(caddr_t, caddr_t);
 
 void
 xc_init()
 {
 	ASSERT(xc_initialized == 0);
-	mutex_init(&xc_mbox_lock, NULL,  MUTEX_SPIN, (void *)ipltospl(XC_HI_PIL));
-	add_avintr((void *)NULL, XC_HI_PIL, xc_serv, "xc_intr", IRQ_IPI_HI, NULL, NULL, NULL, NULL);
+	mutex_init(&xc_mbox_lock, NULL,  MUTEX_SPIN,
+	    (void *)ipltospl(XC_HI_PIL));
+
+	add_avintr((void *)NULL, XC_HI_PIL, xc_serv, "xc_intr", IRQ_IPI_HI,
+	    NULL, NULL, NULL, NULL);
+	add_avintr((void *)NULL, XC_CPUPOKE_PIL, xc_poke, "xc_poke",
+	    IRQ_IPI_CPUPOKE, NULL, NULL, NULL, NULL);
+
 	xc_initialized = 1;
+}
+
+/* We do nothing except be poked */
+static uint_t
+xc_poke(caddr_t arg0, caddr_t arg1)
+{
+	return (DDI_INTR_CLAIMED);
 }
 
 static uint_t
@@ -240,8 +254,10 @@ xc_common(
 		struct cpu *cpup = cpu[cix];
 		if (cix != lcx) {
 			for (;;) {
-				if ((cpup->cpu_flags & CPU_READY) == 0 || cpup->cpu_m.xc_ack != 0 ||
-				    (op == XC_ASYNC_OP && cpup->cpu_m.xc_pend == 0)) {
+				if ((cpup->cpu_flags & CPU_READY) == 0 ||
+				    cpup->cpu_m.xc_ack != 0 ||
+				    (op == XC_ASYNC_OP &&
+				    cpup->cpu_m.xc_pend == 0)) {
 					cpup->cpu_m.xc_ack = 0;
 					break;
 				}
@@ -274,7 +290,8 @@ xc_common(
 		struct cpu *cpup = cpu[cix];
 		if (cix != lcx) {
 			for (;;) {
-				if ((cpup->cpu_flags & CPU_READY) == 0 || cpup->cpu_m.xc_ack != 0) {
+				if ((cpup->cpu_flags & CPU_READY) == 0 ||
+				    cpup->cpu_m.xc_ack != 0) {
 					cpup->cpu_m.xc_ack = 0;
 					break;
 				}
