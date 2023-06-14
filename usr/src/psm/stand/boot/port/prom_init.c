@@ -37,14 +37,13 @@
 
 #include <sys/dktp/fdisk.h>
 
-
 extern unsigned long unix_startblk;
 extern size_t unix_numblks;
 
 #define	PROMIF_CLNTNAMELEN	16
 char	promif_clntname[PROMIF_CLNTNAMELEN];
 
-#define PROM_MAXDEVS 8
+#define	PROM_MAXDEVS 8
 
 struct prom_ctrlblk {
 	int opened;
@@ -55,19 +54,21 @@ struct prom_ctrlblk {
 static struct prom_ctrlblk prom_cb[PROM_MAXDEVS];
 static const struct prom_dev *prom_devs[PROM_MAXDEVS];
 
-int prom_register(const struct prom_dev *dev)
+int
+prom_register(const struct prom_dev *dev)
 {
-	for (int i = 0; i < sizeof(prom_devs) / sizeof(prom_devs[0]); i++) {
+	for (int i = 0; i < sizeof (prom_devs) / sizeof (prom_devs[0]); i++) {
 		if (prom_devs[i] == NULL) {
 			prom_devs[i] = dev;
-			return 0;
+			return (0);
 		}
 	}
-	return -1;
+	return (-1);
 }
 
 static ihandle_t stdin_handle = -1;
 static ihandle_t stdout_handle = -1;
+
 void
 prom_init(char *pgmname, void *cookie)
 {
@@ -78,156 +79,300 @@ prom_init(char *pgmname, void *cookie)
 	stdout_handle = prom_open("stdout");
 }
 
-ihandle_t prom_stdin_ihandle(void) { return stdin_handle; }
-ihandle_t prom_stdout_ihandle(void) { return stdout_handle; }
-
-int prom_open(char *path)
+ihandle_t
+prom_stdin_ihandle(void)
 {
-	int index;
-	int fd;
+	return (stdin_handle);
+}
+
+ihandle_t
+prom_stdout_ihandle(void)
+{
+	return (stdout_handle);
+}
+
+static void
+hex(char **buf, int len, uint32_t val)
+{
+	static const char *hexstr = "0123456789abcdef";
+	char *p = *buf;
 	int i;
 
-	for (index = 0; index < sizeof(prom_cb) / sizeof(prom_cb[0]); index++) {
+	for (i = len - 1; i >= 0; i--) {
+		p[i] = hexstr[val & 0xf];
+		val >>= 4;
+	}
+	*buf = p + len;
+}
+
+static void
+prom_print_uuid(const char *tag, const struct uuid *u)
+{
+	char buf[37];
+	char *p = buf;
+
+	hex(&p, 8, u->time_low);
+	*p++ = '-';
+	hex(&p, 4, u->time_mid);
+	*p++ = '-';
+	hex(&p, 4, u->time_hi_and_version);
+	*p++ = '-';
+	hex(&p, 2, u->clock_seq_hi_and_reserved);
+	hex(&p, 2, u->clock_seq_low);
+	*p++ = '-';
+	hex(&p, 2, u->node_addr[0]);
+	hex(&p, 2, u->node_addr[1]);
+	hex(&p, 2, u->node_addr[2]);
+	hex(&p, 2, u->node_addr[3]);
+	hex(&p, 2, u->node_addr[4]);
+	hex(&p, 2, u->node_addr[5]);
+	*p++ = '\0';
+
+	prom_printf("%s: %s\n", tag, buf);
+}
+
+int
+prom_open(char *path)
+{
+	struct mboot bootblk;
+	struct ipart *iparts;
+	int index, fd, i;
+	ssize_t s;
+	boolean_t stdinout = strcmp(path, "stdout") == 0 ||
+	    strcmp(path, "stdin") == 0;
+
+	if (!stdinout)
+		prom_printf("prom_open(%s)\n", path);
+
+	for (index = 0;
+	    index < sizeof (prom_cb) / sizeof (prom_cb[0]); index++) {
 		if (prom_cb[index].opened == 0)
 			break;
 	}
-	if (index == sizeof(prom_cb) / sizeof(prom_cb[0]))
-	    return 0;
+	if (index == sizeof (prom_cb) / sizeof (prom_cb[0])) {
+		prom_printf("Too many open files\n");
+		return (0);
+	}
 
-	for (i = 0; i < sizeof(prom_devs) / sizeof(prom_devs[0]); i++) {
+	for (i = 0; i < sizeof (prom_devs) / sizeof (prom_devs[0]); i++) {
 		if (prom_devs[i] && prom_devs[i]->match(path))
 			break;
 	}
-	if (i == sizeof(prom_devs) / sizeof(prom_devs[0]))
-		return 0;
+	if (i == sizeof (prom_devs) / sizeof (prom_devs[0])) {
+		if (!stdinout)
+			prom_printf("No matching prom device\n");
+		return (0);
+	}
 
 	prom_cb[index].dev = prom_devs[i];
 	prom_cb[index].fd = 0;
-	if (prom_cb[index].dev->open) {
+	if (prom_cb[index].dev->open)
 		prom_cb[index].fd = prom_cb[index].dev->open(path);
-	}
+
 	if (prom_cb[index].fd < 0)
-		return 0;
+		return (0);
 
 	prom_cb[index].opened = 1;
 	fd = index + 1;
 
 	unix_startblk = 0;
 	unix_numblks = 0;
-	if (strcmp(path, "stdin") && strcmp(path, "stdout")) {
-		if (!is_netdev(path) && strcmp(prom_bootpath(), path) == 0) {
-			struct mboot bootblk;
-			if (prom_read(fd, (caddr_t)&bootblk, 0x200, 0, 0) == 0x200 && bootblk.signature == MBB_MAGIC) {
-				struct ipart *iparts = (struct ipart *)(uintptr_t)&bootblk.parts[0];
-				for (i = 0; i < FD_NUMPART; i++) {
-					if (iparts[i].systid == SUNIXOS2) {
-						uint64_t slice_start = iparts[i].relsect;
-						struct dk_label dkl;
-						if (prom_read(fd, (caddr_t)&dkl, 0x200, slice_start + DK_LABEL_LOC, 0) == 0x200) {
-							for (int j = 0; j < NDKMAP; j++) {
-								if (dkl.dkl_vtoc.v_part[j].p_tag == V_ROOT) {
-									unix_startblk = slice_start + dkl.dkl_vtoc.v_part[j].p_start;
-									unix_numblks = dkl.dkl_vtoc.v_part[j].p_size;
-									break;
-								}
-							}
-							if (unix_startblk == 0) {
-								for (int j = 0; j < NDKMAP; j++) {
-									if (dkl.dkl_vtoc.v_part[j].p_size != 0 &&
-									    dkl.dkl_vtoc.v_part[j].p_tag != V_ROOT &&
-									    dkl.dkl_vtoc.v_part[j].p_tag != V_BOOT) {
-										unix_startblk = slice_start + dkl.dkl_vtoc.v_part[j].p_start;
-										unix_numblks = dkl.dkl_vtoc.v_part[j].p_size;
-										break;
-									}
-								}
-							}
-						}
-						break;
-					}
-					if (iparts[i].systid == EFI_PMBR) {
-						efi_gpt_t gpt;
-						if (prom_read(fd, (caddr_t)&gpt, sizeof(gpt), iparts[i].relsect, 0) == sizeof(gpt)) {
-							if (gpt.efi_gpt_Signature == EFI_SIGNATURE && gpt.efi_gpt_SizeOfPartitionEntry == sizeof(efi_gpe_t)) {
-								efi_gpe_t gpeb[(0x200 / sizeof(efi_gpe_t))];
-								for (uint_t i = 0; i < gpt.efi_gpt_NumberOfPartitionEntries; i++) {
-									const efi_gpe_t *gpe = &gpeb[i % (0x200 / sizeof(efi_gpe_t))];
-									if ((i % (0x200 / sizeof(efi_gpe_t))) == 0) {
-										memset(gpeb, 0, sizeof(gpeb));
-										if (prom_read(fd, (caddr_t)gpeb, sizeof(gpeb), gpt.efi_gpt_PartitionEntryLBA + (i / (0x200 / sizeof(efi_gpe_t))), 0) != sizeof(gpeb)) {
-											break;
-										}
-									}
-									static const struct uuid efi_root = EFI_ROOT;
-									if (memcmp((void *)&gpe->efi_gpe_PartitionTypeGUID, &efi_root, sizeof(efi_root)) == 0) {
-										unix_startblk = gpe->efi_gpe_StartingLBA;
-										unix_numblks = (gpe->efi_gpe_EndingLBA - gpe->efi_gpe_StartingLBA + 1);
-										boot_partition = i;
-										break;
-									}
-								}
-							}
-						}
+
+	if (stdinout)
+		return (fd);
+
+	if (is_netdev(path))
+		return (fd);
+
+	if (strcmp(prom_bootpath(), path) != 0)
+		return (fd);
+
+	if (prom_read(fd, (caddr_t)&bootblk, 0x200, 0, 0) != 0x200) {
+		prom_printf("failed to read bootblk\n");
+		return (fd);
+	}
+
+	if (bootblk.signature != MBB_MAGIC) {
+		prom_printf("bootblk signature != magic: %x != %x\n",
+		    bootblk.signature, MBB_MAGIC);
+		return (fd);
+	}
+
+	iparts = (struct ipart *)(uintptr_t)&bootblk.parts[0];
+	for (i = 0; i < FD_NUMPART; i++) {
+		switch (iparts[i].systid) {
+		case SUNIXOS2: {
+			uint64_t slice_start = iparts[i].relsect;
+			struct dk_label dkl;
+
+			s = prom_read(fd, (caddr_t)&dkl, 0x200,
+			    slice_start + DK_LABEL_LOC, 0);
+			if (s != 0x200) {
+				prom_printf("short label read: %zd\n", s);
+				break;
+			}
+			for (int j = 0; j < NDKMAP; j++) {
+				if (dkl.dkl_vtoc.v_part[j].p_tag != V_ROOT)
+					continue;
+
+				unix_startblk = slice_start +
+				    dkl.dkl_vtoc.v_part[j].p_start;
+				unix_numblks = dkl.dkl_vtoc.v_part[j].p_size;
+
+				prom_printf(
+				    "Booting from slice %d (ROOT) (%lx+%x)\n",
+				    j, unix_startblk, unix_numblks);
+				break;
+			}
+			if (unix_startblk != 0)
+				break;
+
+			for (int j = 0; j < NDKMAP; j++) {
+				if (dkl.dkl_vtoc.v_part[j].p_size == 0 ||
+				    dkl.dkl_vtoc.v_part[j].p_tag == V_ROOT ||
+				    dkl.dkl_vtoc.v_part[j].p_tag == V_BOOT) {
+					continue;
+				}
+
+				unix_startblk = slice_start +
+				    dkl.dkl_vtoc.v_part[j].p_start;
+				unix_numblks = dkl.dkl_vtoc.v_part[j].p_size;
+
+				prom_printf(
+				    "Booting from slice %d (tag %x) (%lx+%x)\n",
+				    j, dkl.dkl_vtoc.v_part[j].p_tag,
+				    unix_startblk, unix_numblks);
+				break;
+			}
+			break;
+		}
+		case EFI_PMBR: {
+			efi_gpt_t gpt;
+			const size_t block = 0x200;
+			const size_t entries = block / sizeof (efi_gpe_t);
+			efi_gpe_t gpeb[entries];
+			static const struct uuid efi_root = EFI_ROOT;
+			static const struct uuid efi_usr = EFI_USR;
+
+			s = prom_read(fd, (caddr_t)&gpt, sizeof (gpt),
+			    iparts[i].relsect, 0);
+			if (s != sizeof (gpt)) {
+				prom_printf("short GPT read: %zd\n", s);
+				break;
+			}
+			if (gpt.efi_gpt_Signature != EFI_SIGNATURE) {
+				prom_printf("Bad signature %lx (want %lx)\n",
+				    gpt.efi_gpt_Signature, EFI_SIGNATURE);
+				break;
+			}
+			if (gpt.efi_gpt_SizeOfPartitionEntry !=
+			    sizeof (efi_gpe_t)) {
+				prom_printf("Bad partition table entry size\n");
+				break;
+			}
+
+			for (uint_t i = 0;
+			    i < gpt.efi_gpt_NumberOfPartitionEntries; i++) {
+				const efi_gpe_t *gpe = &gpeb[i % entries];
+				const struct uuid *uuid;
+
+				/* Read in more table entries if necessary */
+				if ((i % entries) == 0) {
+					memset(gpeb, 0, sizeof (gpeb));
+					s = prom_read(fd, (caddr_t)gpeb,
+					    sizeof (gpeb),
+					    gpt.efi_gpt_PartitionEntryLBA +
+					    (i / entries), 0);
+					if (s != sizeof (gpeb)) {
+						prom_printf("short partition "
+						    "table read\n");
 						break;
 					}
 				}
+
+				uuid = (struct uuid *)
+				    &gpe->efi_gpe_PartitionTypeGUID;
+
+				if (memcmp((void *)uuid,
+				    &efi_root, sizeof (efi_root)) != 0 &&
+				    memcmp((void *)uuid,
+				    &efi_usr, sizeof (efi_usr)) != 0) {
+					continue;
+				}
+
+				unix_startblk = gpe->efi_gpe_StartingLBA;
+				unix_numblks = gpe->efi_gpe_EndingLBA -
+				    gpe->efi_gpe_StartingLBA + 1;
+				boot_partition = i;
+
+				prom_printf("Booting from EFI partition %d\n",
+				    i);
+				prom_print_uuid("Partiton GUID", uuid);
+				break;
 			}
+		}
 		}
 	}
 
-	return fd;
+	return (fd);
 }
 
-int prom_close(int fd)
+int
+prom_close(int fd)
 {
 	if (fd <= 0)
-		return -1;
+		return (-1);
 	int index = fd - 1;
 	if (prom_cb[index].opened == 0)
-		return -1;
+		return (-1);
 
 	if (prom_cb[index].dev->close) {
 		prom_cb[index].dev->close(prom_cb[index].fd);
 	}
 	prom_cb[index].opened = 0;
 
-	return 0;
+	return (0);
 }
 
-ssize_t prom_read(ihandle_t fd, caddr_t buf, size_t len, uint_t startblk, char devtype)
+ssize_t
+prom_read(ihandle_t fd, caddr_t buf, size_t len, uint_t startblk, char devtype)
 {
 	if (fd <= 0)
-		return -1;
+		return (-1);
 	int index = fd - 1;
 	if (prom_cb[index].opened == 0 || prom_cb[index].dev->read == 0)
-		return -1;
-	return prom_cb[index].dev->read(prom_cb[index].fd, buf, len, startblk);
+		return (-1);
+	return (prom_cb[index].dev->read(prom_cb[index].fd, buf, len,
+	    startblk));
 }
 
-ssize_t prom_write(ihandle_t fd, caddr_t buf, size_t len, uint_t startblk, char devtype)
+ssize_t
+prom_write(ihandle_t fd, caddr_t buf, size_t len, uint_t startblk, char devtype)
 {
 	if (fd <= 0)
-		return -1;
+		return (-1);
 	int index = fd - 1;
 	if (prom_cb[index].opened == 0 || prom_cb[index].dev->write == 0)
-		return -1;
-	return prom_cb[index].dev->write(prom_cb[index].fd, buf, len, startblk);
+		return (-1);
+	return (prom_cb[index].dev->write(prom_cb[index].fd, buf, len,
+	    startblk));
 }
 
-int prom_seek(int fd, unsigned long long offset)
+int
+prom_seek(int fd, unsigned long long offset)
 {
-	return offset;
+	return (offset);
 }
 
 int
 prom_getmacaddr(ihandle_t fd, caddr_t ea)
 {
 	if (fd <= 0)
-		return -1;
+		return (-1);
 	int index = fd - 1;
 	if (prom_cb[index].opened == 0 || prom_cb[index].dev->getmacaddr == 0)
-		return -1;
-	return prom_cb[index].dev->getmacaddr(prom_cb[index].fd, ea);
+		return (-1);
+	return (prom_cb[index].dev->getmacaddr(prom_cb[index].fd, ea));
 }
 
 boolean_t
@@ -240,19 +385,19 @@ prom_is_netdev(char *devpath)
 			char *buf = __builtin_alloca(len);
 			prom_getprop(node, "model", buf);
 			if (strcmp(buf, "Ethernet controller") == 0) {
-				return B_TRUE;
+				return (B_TRUE);
 			}
 		}
 	}
 
 	int i;
-	for (i = 0; i < sizeof(prom_devs) / sizeof(prom_devs[0]); i++) {
+	for (i = 0; i < sizeof (prom_devs) / sizeof (prom_devs[0]); i++) {
 		if (prom_devs[i] && prom_devs[i]->match(devpath))
 			break;
 	}
-	if (i == sizeof(prom_devs) / sizeof(prom_devs[0]))
-		return B_FALSE;
+	if (i == sizeof (prom_devs) / sizeof (prom_devs[0]))
+		return (B_FALSE);
 	if (prom_devs[i]->getmacaddr)
-		return B_TRUE;
-	return B_FALSE;
+		return (B_TRUE);
+	return (B_FALSE);
 }
