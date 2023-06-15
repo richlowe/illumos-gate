@@ -35,11 +35,18 @@ clean clobber:
 
 package:
 	$(RM) $@
-	# The string returned by 'package' must match the value used by
-	# AT&T upstream, which is "i386" or "sun4", regardless of whether
-	# building 32- or 64-bit objects.
-	{ \
-		[[ $(MACH) == i386 ]] && arch=i386 || arch=sun4; \
+	# Generate a dummy 'package' command that does just enough to satisfy
+	# the build. This must output the same string as the real 'package'
+	# would. To find what that is, run:
+	#     sh usr/src/contrib/ast/src/cmd/INIT/package.sh
+	# from $CODEMGR_WS. The string is the same when building 32- or
+	# 64-bit objects.
+	{							\
+		case $(MACH) in					\
+			i386)		arch=i386 ;;		\
+			aarch64)	arch=arm ;;		\
+			*)		arch=sun4 ;;		\
+		esac;						\
 		print -e "#!/bin/sh\n\necho sol11.$$arch" > $@; \
 	}
 	$(CHMOD) +x $@

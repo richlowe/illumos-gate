@@ -25,6 +25,7 @@
 #define _lib_copysign	1	/* copysign() in default lib(s) */
 #define _lib_logb	1	/* logb() in default lib(s) */
 #define _lib_finite	1	/* finite() in default lib(s) */
+#define _lib_drem	1	/* drem() in default lib(s) */
 #define _lib_sqrt	1	/* sqrt() in default lib(s) */
 #define _lib_ilogb	1	/* ilogb() in default lib(s) */
 #define _lib_remainder	1	/* remainder() in default lib(s) */

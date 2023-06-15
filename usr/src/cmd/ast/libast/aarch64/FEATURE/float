@@ -73,6 +73,7 @@
 #define _lib_ldexp	1	/* ldexp() in default lib(s) */
 #define _lib_ldexpl	1	/* ldexpl() in default lib(s) */
 #define _lib_finite	1	/* finite() in default lib(s) */
+#define _lib_isinfl	1	/* isinfl() in default lib(s) */
 #define _lib_isnanl	1	/* isnanl() in default lib(s) */
 #define _lib_copysign	1	/* copysign() in default lib(s) */
 #define _lib_copysignl	1	/* copysignl() in default lib(s) */
@@ -129,10 +130,10 @@
 #define DBL_MIN_EXP (-1021)
 #endif
 #ifndef LDBL_DIG
-#define LDBL_DIG 18
+#define LDBL_DIG 33
 #endif
 #ifndef LDBL_MAX
-#define LDBL_MAX 1.1897314953572317650213E+4932L
+#define LDBL_MAX 1.189731495357231765085759326628007016E+4932L
 #endif
 #ifndef LDBL_MAX_10_EXP
 #define LDBL_MAX_10_EXP (+4932)
@@ -141,7 +142,7 @@
 #define LDBL_MAX_EXP (+16384)
 #endif
 #ifndef LDBL_MIN
-#define LDBL_MIN 3.3621031431120935062627E-4932L
+#define LDBL_MIN 3.362103143112093506262677817321752603E-4932L
 #endif
 #ifndef LDBL_MIN_10_EXP
 #define LDBL_MIN_10_EXP (-4931)
@@ -176,19 +177,9 @@
 #define DBL_LLONG_MIN		DBL_LONG_MIN
 #define DBL_INTMAX_MIN		DBL_LONG_MIN
 
-#define LDBL_ULONG_MAX		18446744073709551615.0L
-#define LDBL_ULLONG_MAX		LDBL_ULONG_MAX
-#define LDBL_UINTMAX_MAX	LDBL_ULONG_MAX
-#define LDBL_LONG_MAX		9223372036854775807.0L
-#define LDBL_LLONG_MAX		LDBL_LONG_MAX
-#define LDBL_INTMAX_MAX		LDBL_LONG_MAX
-#define LDBL_LONG_MIN		(-9223372036854775808.0L)
-#define LDBL_LLONG_MIN		LDBL_LONG_MIN
-#define LDBL_INTMAX_MIN		LDBL_LONG_MIN
-
-#define FLTMAX_UINTMAX_MAX	LDBL_UINTMAX_MAX
-#define FLTMAX_INTMAX_MAX	LDBL_INTMAX_MAX
-#define FLTMAX_INTMAX_MIN	LDBL_INTMAX_MIN
+#define FLTMAX_UINTMAX_MAX	DBL_UINTMAX_MAX
+#define FLTMAX_INTMAX_MAX	DBL_INTMAX_MAX
+#define FLTMAX_INTMAX_MIN	DBL_INTMAX_MIN
 
 typedef union _ast_dbl_exp_u
 {
@@ -199,11 +190,18 @@ typedef union _ast_dbl_exp_u
 #define _ast_dbl_exp_index	1
 #define _ast_dbl_exp_shift	20
 
-#define _ast_flt_unsigned_max_t	unsigned long long
+typedef union _fltmax_exp_u
+{
+	uint32_t		e[sizeof(_ast_fltmax_t)/4];
+	_ast_fltmax_t		f;
+} _ast_fltmax_exp_t;
+
+#define _ast_fltmax_exp_index	1
+#define _ast_fltmax_exp_shift	20
+
+#define _ast_flt_unsigned_max_t	unsigned long
 #define _ast_flt_nan_init	0xff,0xff,0xff,0x7f
 #define _ast_flt_inf_init	0x00,0x00,0x80,0x7f
 #define _ast_dbl_nan_init	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x7f
 #define _ast_dbl_inf_init	0x00,0x00,0x00,0x00,0x00,0x00,0xf0,0x7f
-#define _ast_ldbl_nan_init	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x7f,0x00,0x00,0x00,0x00,0x00,0x00
-#define _ast_ldbl_inf_init	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x80,0xff,0x7f,0x00,0x00,0x00,0x00,0x00,0x00
 #endif

@@ -76,7 +76,11 @@ $if _ELF64
 	_Sftable		{
 				  ASSERT = {
 					  TYPE = OBJECT;
+					$if _arm
+					  SIZE = 1168;
+					$else
 					  SIZE = 1296;
+					$endif
 					};
 				};
 	_Vmextern		{
