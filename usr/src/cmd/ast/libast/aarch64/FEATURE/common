@@ -153,8 +153,8 @@
 
 #define _ast_flt4_t		float
 #define _ast_flt8_t		double
-#define _ast_flt16_t		long double
-#define _ast_fltmax_t		_ast_flt16_t
+#define _ast_fltmax_t		_ast_flt8_t
+#define _ast_fltmax_double		1
 #define _typ_int8_t	1	/* int8_t is a type */
 #define _typ_uint8_t	1	/* uint8_t is a type */
 #define _typ_int16_t	1	/* int16_t is a type */

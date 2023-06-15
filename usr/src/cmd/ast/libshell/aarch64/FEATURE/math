@@ -77,7 +77,8 @@ static int local_fpclass __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a
 static int local_isfinite __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return isfinite(a1);}
 static int local_isgreater __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return isgreater(a1,a2);}
 static int local_isgreaterequal __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return isgreaterequal(a1,a2);}
-static int local_isinf __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return isinf(a1);}
+extern __MANGLE__ int isinfl __PROTO__((Sfdouble_t));
+static int local_isinfl __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return isinfl(a1);}
 static int local_isless __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return isless(a1,a2);}
 static int local_islessequal __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return islessequal(a1,a2);}
 static int local_islessgreater __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return islessgreater(a1,a2);}
@@ -85,7 +86,15 @@ static int local_isnormal __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t 
 static int local_issubnormal __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){ int q = fpclassify(a1); return q == FP_SUBNORMAL; }
 static int local_isunordered __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return isunordered(a1,a2);}
 static int local_iszero __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){ int q = fpclassify(a1); return q == FP_ZERO; }
+static Sfdouble_t local_j0 __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return j0(a1);}
+static Sfdouble_t local_j1 __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return j1(a1);}
+static Sfdouble_t local_jn __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return jn(a1,a2);}
+static Sfdouble_t local_scalb __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return scalb(a1,a2);}
 static int local_signbit __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return signbit(a1);}
+static Sfdouble_t local_tgamma __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return tgamma(a1);}
+static Sfdouble_t local_y0 __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return y0(a1);}
+static Sfdouble_t local_y1 __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a1;){return y1(a1);}
+static Sfdouble_t local_yn __PARAM__((Sfdouble_t a1,Sfdouble_t a2), (a1, a2)) __OTORP__(Sfdouble_t a1;Sfdouble_t a2;){return yn(a1,a2);}
 
 /*
  * first byte is two-digit octal number.  Last digit is number of args
@@ -93,7 +102,6 @@ static int local_signbit __PARAM__((Sfdouble_t a1), (a1)) __OTORP__(Sfdouble_t a
  */
 const struct mathtab shtab_math[] =
 {
-#ifndef __aarch64__
 	"\001acos",	(Math_f)(uintptr_t)acosl,
 	"\001acosh",	(Math_f)(uintptr_t)acoshl,
 	"\001asin",	(Math_f)(uintptr_t)asinl,
@@ -128,7 +136,7 @@ const struct mathtab shtab_math[] =
 	"\011isfinite",	(Math_f)(uintptr_t)local_isfinite,
 	"\012isgreater",	(Math_f)(uintptr_t)local_isgreater,
 	"\012isgreaterequal",	(Math_f)(uintptr_t)local_isgreaterequal,
-	"\011isinf",	(Math_f)(uintptr_t)local_isinf,
+	"\011isinf",	(Math_f)(uintptr_t)local_isinfl,
 	"\012isless",	(Math_f)(uintptr_t)local_isless,
 	"\012islessequal",	(Math_f)(uintptr_t)local_islessequal,
 	"\012islessgreater",	(Math_f)(uintptr_t)local_islessgreater,
@@ -137,9 +145,9 @@ const struct mathtab shtab_math[] =
 	"\011issubnormal",	(Math_f)(uintptr_t)local_issubnormal,
 	"\012isunordered",	(Math_f)(uintptr_t)local_isunordered,
 	"\011iszero",	(Math_f)(uintptr_t)local_iszero,
-	"\001j0",	(Math_f)(uintptr_t)j0l,
-	"\001j1",	(Math_f)(uintptr_t)j1l,
-	"\002jn",	(Math_f)(uintptr_t)jnl,
+	"\001j0",	(Math_f)(uintptr_t)local_j0,
+	"\001j1",	(Math_f)(uintptr_t)local_j1,
+	"\002jn",	(Math_f)(uintptr_t)local_jn,
 	"\042ldexp",	(Math_f)(uintptr_t)ldexpl,
 	"\001lgamma",	(Math_f)(uintptr_t)lgammal,
 	"\001log",	(Math_f)(uintptr_t)logl,
@@ -154,7 +162,7 @@ const struct mathtab shtab_math[] =
 	"\002remainder",	(Math_f)(uintptr_t)remainderl,
 	"\001rint",	(Math_f)(uintptr_t)rintl,
 	"\001round",	(Math_f)(uintptr_t)roundl,
-	"\002scalb",	(Math_f)(uintptr_t)scalbl,
+	"\002scalb",	(Math_f)(uintptr_t)local_scalb,
 	"\002scalbn",	(Math_f)(uintptr_t)scalbnl,
 	"\011signbit",	(Math_f)(uintptr_t)local_signbit,
 	"\001sin",	(Math_f)(uintptr_t)sinl,
@@ -162,12 +170,11 @@ const struct mathtab shtab_math[] =
 	"\001sqrt",	(Math_f)(uintptr_t)sqrtl,
 	"\001tan",	(Math_f)(uintptr_t)tanl,
 	"\001tanh",	(Math_f)(uintptr_t)tanhl,
-	"\001tgamma",	(Math_f)(uintptr_t)tgammal,
+	"\001tgamma",	(Math_f)(uintptr_t)local_tgamma,
 	"\001trunc",	(Math_f)(uintptr_t)truncl,
-	"\001y0",	(Math_f)(uintptr_t)y0l,
-	"\001y1",	(Math_f)(uintptr_t)y1l,
-	"\002yn",	(Math_f)(uintptr_t)ynl,
-#endif
+	"\001y0",	(Math_f)(uintptr_t)local_y0,
+	"\001y1",	(Math_f)(uintptr_t)local_y1,
+	"\002yn",	(Math_f)(uintptr_t)local_yn,
 	"",		(Math_f)0
 };
 #endif

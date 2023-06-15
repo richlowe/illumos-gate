@@ -158,6 +158,7 @@
 #define _UNIV_DEFAULT	"att"	/* default universe name */
 #define _std_cleanup	1	/* stuck with standard _cleanup */
 #define _std_strcoll	1	/* standard strcoll works */
+#define _std_strtold	1	/* stuck with standard strtold */
 #if !_AST_no_spawnveg
 #define _use_spawnveg	1
 #endif
