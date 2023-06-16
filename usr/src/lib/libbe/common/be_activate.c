@@ -1034,9 +1034,12 @@ be_do_installboot_helper(zpool_handle_t *zphp, nvlist_t *child, char *stage1,
 
 		(void) snprintf(install_cmd, sizeof (install_cmd),
 		    "%s %s %s %s", BE_INSTALL_BOOT, flag, stage2, diskname);
+	} else if (be_is_isa("aarch64")) {
+		/* XXXARM: Nothing to do yet for aarch64 */
+		return (BE_SUCCESS);
 	} else {
-		be_print_err(gettext("%s: unsupported architecture.\n"),
-		    __func__);
+		be_print_err(gettext("%s: unsupported architecture: %s.\n"),
+		    __func__, be_get_default_isa());
 		return (BE_ERR_BOOTFILE_INST);
 	}
 
@@ -1404,9 +1407,15 @@ be_do_installboot(be_transaction_data_t *bt, uint16_t flags)
 		(void) snprintf(stage2, sizeof (stage2),
 		    "%s/usr/platform/%s%s", tmp_mntpt,
 		    platform, BE_SPARC_BOOTBLK);
+	} else if (be_is_isa("aarch64")) {
+		/* XXXARM: Nothing to do yet for aarch64 */
+		if (be_mounted)
+			(void) _be_unmount(bt->obe_name, 0);
+		free(tmp_mntpt);
+		return (BE_SUCCESS);
 	} else {
-		be_print_err(gettext("%s: unsupported architecture.\n"),
-		    __func__);
+		be_print_err(gettext("%s: unsupported architecture: %s.\n"),
+		    __func__, be_get_default_isa());
 		return (BE_ERR_BOOTFILE_INST);
 	}
 
@@ -1446,7 +1455,6 @@ be_do_installboot(be_transaction_data_t *bt, uint16_t flags)
 	}
 
 done:
-	ZFS_CLOSE(zhp);
 	if (be_mounted)
 		(void) _be_unmount(bt->obe_name, 0);
 	zpool_close(zphp);
