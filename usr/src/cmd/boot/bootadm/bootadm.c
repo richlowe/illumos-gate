@@ -3400,6 +3400,10 @@ use_mkisofs()
 		return (B_TRUE);
 	}
 
+	 /* XXXARM: For complicated reasons, aarch64 _must_ use hsfs right now */
+	if (is_flag_on(IS_AARCH64_TARGET))
+		return (B_TRUE);
+
 	/* If working on an alt-root, do not use HSFS unless asked via -F */
 	if (bam_alt_root)
 		return (B_FALSE);
@@ -3408,9 +3412,6 @@ use_mkisofs()
 	 * Then check that the system/boot-archive config/format property
 	 * is "hsfs" or empty.
 	 */
-	 /* XXXARM: For complicated reasons, aarch64 _must_ use hsfs right now */
-	if (is_flag_on(IS_AARCH64_TARGET))
-		return (B_TRUE);
 	if ((prop = scf_simple_prop_get(NULL, BOOT_ARCHIVE_FMRI, SCF_PG_CONFIG,
 	    SCF_PROPERTY_FORMAT)) == NULL) {
 		/* Could not find property, use mkisofs */
