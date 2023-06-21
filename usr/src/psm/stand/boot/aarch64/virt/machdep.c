@@ -170,6 +170,27 @@ fixup_cpu(pnode_t node, void *arg)
 	prom_setprop(node, "enable-method", psci, sizeof(psci));
 }
 
+/*
+ * Remove -D and the path from the boot args, look for the next "-" char
+*/
+void
+fix_boot_args(char *str)
+{
+	char *s2;
+	char *s3;
+	int i;
+
+	s2 = strstr(str, "-D");
+	if (s2 != NULL) {
+		s3 = s2 + 2;
+		for (i = 0; s3[i] != 0 && s3[i] != '-'; i++)
+			;
+		s3 = s3 + i;
+		memmove(s2, s3, strlen(s3) + 1);
+	}
+}
+
+
 void
 init_physmem(void)
 {
@@ -199,7 +220,7 @@ void exitto(int (*entrypoint)())
 	}
 
 	uint64_t v;
-	const char *str;
+	char *str;
 
 	v = htonll((uint64_t)_RamdiskStart);
 	prom_setprop(prom_chosennode(), "ramdisk_start", (caddr_t)&v, sizeof(v));
@@ -218,9 +239,9 @@ void exitto(int (*entrypoint)())
 		prom_setprop(prom_chosennode(), "bootp-response", pktbuf, blen);
 	} else {
 	}
-	str = "";
+	str = prom_bootargs(); //pass the bootargs from u-boot to illumos
+	fix_boot_args(str);
 	prom_setprop(prom_chosennode(), "boot-args", (caddr_t)str, strlen(str) + 1);
-	str = "";
 	prom_setprop(prom_chosennode(), "bootargs", (caddr_t)str, strlen(str) + 1);
 	str = filename;
 	prom_setprop(prom_chosennode(), "whoami", (caddr_t)str, strlen(str) + 1);
