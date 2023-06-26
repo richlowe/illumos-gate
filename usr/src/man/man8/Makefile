@@ -91,7 +91,6 @@ MANFILES=	6to4relay.8		\
 		devattr.8		\
 		devfree.8		\
 		devfsadm.8		\
-		device_remap.8		\
 		devinfo.8		\
 		devlinks.8		\
 		devnm.8			\
@@ -135,7 +134,6 @@ MANFILES=	6to4relay.8		\
 		fmstat.8		\
 		fmthard.8		\
 		format.8		\
-		fruadm.8		\
 		fsck.8			\
 		fsck_pcfs.8		\
 		fsck_udfs.8		\
@@ -368,7 +366,6 @@ MANFILES=	6to4relay.8		\
 		prstat.8		\
 		prtconf.8		\
 		prtdiag.8		\
-		prtfru.8		\
 		prtpicl.8		\
 		prtvtoc.8		\
 		psradm.8		\
@@ -425,7 +422,6 @@ MANFILES=	6to4relay.8		\
 		sasinfo.8		\
 		savecore.8		\
 		sbdadm.8		\
-		scadm.8			\
 		sendmail.8		\
 		share.8			\
 		share_nfs.8		\
@@ -548,9 +544,6 @@ i386_MANFILES=			\
 		nvmeadm.8	\
 		pptadm.8	\
 		rdmsr.8
-
-sparc_MANFILES=			\
-		sdpadm.8
 
 aarch64_MANFILES=		\
 		nvmeadm.8
