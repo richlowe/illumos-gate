@@ -51,11 +51,7 @@ include ../Makefile.$(ARCHDIR)
 ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
-#
-#	Overrides and depends_on
-#
-MODSTUBS_DIR	 = $(OBJS_DIR)
-
+# Overrides
 INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/fca/qlge
 
 LDFLAGS		+= -Nmisc/mac -Ndrv/ip

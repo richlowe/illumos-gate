@@ -54,12 +54,6 @@ include $(UTSBASE)/aarch64/Makefile.aarch64
 ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
-#
-#	Overrides.
-#
-MODSTUBS_DIR	 = $(OBJS_DIR)
-$(MODSTUBS_O)	:= AS_CPPFLAGS += -DCONSCONFIG_MODULE
-CLEANFILES	+= $(MODSTUBS_O)
 LDFLAGS		+= -Ndacf/consconfig_dacf
 
 #
