@@ -34,7 +34,6 @@ SCRIPTS= \
 	nightly
 
 SHFILES= \
-	Install \
 	build_cscope \
 	checkpaths \
 	cstyle \
@@ -77,7 +76,6 @@ SCRIPTLINKS= \
 	git-nits
 
 MAN1ONBLDFILES= \
-	Install.1onbld \
 	bldenv.1onbld \
 	cddlchk.1onbld \
 	checkpaths.1onbld \

@@ -38,29 +38,16 @@ install_h		:=	TARGET= install_h
 install_h.prereq	:=	TARGET= install_h
 clean			:=	TARGET= clean
 clobber			:=	TARGET= clobber
-modlist			:=	TARGET= modlist
-modlist	modlist.aarch64 :=	NO_STATE= -K $$MODSTATE$$$$
 check			:=	TARGET= check
 
 .KEEP_STATE:
 
-.PARALLEL: $(PARALLEL_KMODS) $(XMODS) \
-	$(IMPLEMENTATIONS) \
-	modlist modlist.aarch64
+.PARALLEL: $(PARALLEL_KMODS) $(XMODS) $(IMPLEMENTATIONS)
 
 def all clean clobber: .WAIT \
 	$(KMODS) $(XMODS) $(IMPLEMENTATIONS)
 
 clobber: clobber.targ
-
-# list the modules under armv8.
-modlist: $(KMODS) $(XMODS) $(IMPLEMENTATIONS:.WAIT=)
-
-# list the modules for Install -k armv8.
-modlist.karch: modlist modlist.aarch64
-
-modlist.aarch64:
-	@cd $(SRC)/uts/aarch64; pwd; $(MAKE) $(NO_STATE) modlist
 
 install: install_platforms .WAIT $(KMODS) \
 	$(XMODS) $(IMPLEMENTATIONS)
