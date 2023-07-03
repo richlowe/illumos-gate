@@ -187,12 +187,6 @@ IPMI_OBJS +=	ipmi_main.o ipmi.o ipmi_kcs.o
 #
 SN1_BRAND_OBJS	=	sn1_brand.o sn1_brand_asm.o
 
-#
-#	special files
-#
-MODSTUB_OBJ +=		\
-	modstubs.o
-
 BOOTDEV_OBJS +=		\
 	bootdev.o
 

@@ -50,9 +50,8 @@ ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 
 #
-#	Overrides and depends_on
+#	Overrides
 #
-MODSTUBS_DIR	 = $(OBJS_DIR)
 LDFLAGS		+= -Ndrv/stmf -Nmisc/idm -Nfs/sockfs -Nmisc/md5 -Nmisc/ksocket
 
 CERRWARN	+= -_gcc=-Wno-switch

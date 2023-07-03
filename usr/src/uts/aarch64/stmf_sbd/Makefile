@@ -52,9 +52,8 @@ ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 
 #
-#	Overrides and depends_on
+#	Overrides
 #
-MODSTUBS_DIR	 = $(OBJS_DIR)
 LDFLAGS		+= -Ndrv/stmf -Nfs/zfs
 
 INC_PATH	+= -I$(UTSBASE)/common/fs/zfs
