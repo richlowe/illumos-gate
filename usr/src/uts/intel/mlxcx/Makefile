@@ -14,31 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE		= mlxcx
-OBJECTS		= $(MLXCX_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/mlxcx
-
-include $(UTSBASE)/intel/Makefile.intel
-
-CPPFLAGS	+= -I$(UTSBASE)/common/io/mlxcx
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-LDFLAGS		+= -N misc/mac
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/common/io/mlxcx/Makefile.com

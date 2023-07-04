@@ -14,18 +14,15 @@
 # Copyright 2023 Oxide Computer Company
 #
 
-#
-# This makefile drives the production of the Chelsio Terminator 4 10G Ethernet
-# (CXGBE) driver modules on x86 systems.
-#
-
-UTSBASE = ../..
-
-include $(UTSBASE)/intel/Makefile.intel
-
 .KEEP_STATE:
 
 SUBDIRS= t4nex cxgbe firmware
+
+def		:=	TARGET= def
+all		:=	TARGET= all
+install		:=	TARGET= install
+clean		:=	TARGET= clean
+clobber		:=	TARGET= clobber
 
 # Keep 'def' first as the default target
 def all clean clobber install: $(SUBDIRS)
@@ -34,8 +31,3 @@ $(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ

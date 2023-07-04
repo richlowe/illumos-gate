@@ -13,30 +13,7 @@
 # Copyright 2019 Joyent, Inc.
 #
 
+
 UTSBASE = ../..
-
-MODULE		= imc
-OBJECTS		= $(IMC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/imc
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-CPPFLAGS	+= -I$(CONF_SRCDIR)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/intel/io/imc/Makefile.com

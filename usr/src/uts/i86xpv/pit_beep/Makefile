@@ -24,49 +24,6 @@
 # Use is subject to license terms.
 #
 
-#
-# This makefile drives the production of the pit_beep driver.
-#
-# i86xpv implementation architecture dependent
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= pit_beep
-OBJECTS		= $(PIT_BEEP_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/intel/io/pit_beep
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-
-CFLAGS += $(CCVERBOSE)
-
-#
-#	Define targets
-#
-ALL_TARGET      = $(BINARY) $(CONFMOD)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets
-#
-include $(UTSBASE)/i86xpv/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86xpv
+include $(SRC)/uts/intel/io/pit_beep/Makefile.com

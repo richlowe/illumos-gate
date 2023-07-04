@@ -19,76 +19,26 @@
 # CDDL HEADER END
 #
 #
-# uts/i86pc/cpr/Makefile
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 # Copyright 2016, Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
-#	This makefile drives the production of the cpr misc kernel module.
-#
-#	i86pc implementation architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
+UTSBASE = ../..
+UTSMACH = i86pc
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= cpr
-#
-#
-OBJECTS		= $(CPR_IMPL_OBJS:%=$(OBJS_DIR)/%) \
-		  $(CPR_OBJS:%=$(OBJS_DIR)/%) \
-		  $(CPR_INTEL_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
+include $(SRC)/uts/common/cpr/Makefile.com
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86pc/Makefile.i86pc
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/ml/%.S
+	$(COMPILE.s) -o $@ $<
 
-#
-#	bootdev required as per previous inline commenting referencing symbol
-#	i_devname_to_promname(), which may only be necessary on SPARC. Removing
-#	this symbol may be sufficient to remove depedency.
-#
-LDFLAGS		+= -N misc/acpica -N misc/bootdev
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/os/%.c
+	$(COMPILE.c) -_gcc=-fno-stack-protector -o $@ $<
+	$(CTFCONVERT_O)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-CFLAGS += $(CCVERBOSE)
-
-CERRWARN	+= -_gcc=-Wno-unused-variable
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-$(OBJS_DIR)/cpr_impl.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86pc/Makefile.targ
+$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/os/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)

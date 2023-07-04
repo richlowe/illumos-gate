@@ -25,33 +25,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+#
 
-
-UTSBASE	= ../..
-
-MODULE = smbios
-OBJECTS	= $(OBJS_DIR)/smbios.o
-ROOTMODULE = $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR = $(UTSBASE)/common/io/smbios
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET = $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-# needs work
-SMOFF += signed_integer_overflow_check
-
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/smbios/Makefile.com

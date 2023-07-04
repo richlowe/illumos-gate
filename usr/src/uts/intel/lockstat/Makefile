@@ -25,34 +25,6 @@
 # Use is subject to license terms.
 #
 
-UTSBASE	= ../..
-
-MODULE		= lockstat
-OBJECTS		= $(LOCKSTAT_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/dtrace/lockstat
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
-
-include $(UTSBASE)/intel/Makefile.intel
-
-LDFLAGS		+= -Ndrv/dtrace
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_DTRACE_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/dtrace/lockstat/Makefile.com

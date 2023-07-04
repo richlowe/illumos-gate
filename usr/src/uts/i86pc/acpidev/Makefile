@@ -19,71 +19,13 @@
 # CDDL HEADER END
 #
 #
-# uts/i86pc/acpidev/Makefile
-#
 # Copyright (c) 2009, Intel Corporation.
 # All rights reserved.
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
-#	This makefile drives the production of the ACPI device configuration
-#	kernel module.
-#
-#	i86pc architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= acpidev
-OBJECTS		= $(ACPIDEV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86pc/Makefile.i86pc
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Depends on acpica ACPI CA interpreter
-#
-LDFLAGS		+= -N misc/acpica
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= -_gcc=-Wno-type-limits
-
-# needs work
-SMOFF += deref_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86pc/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86pc
+include $(SRC)/uts/i86pc/io/acpi/acpidev/Makefile.com

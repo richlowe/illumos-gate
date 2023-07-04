@@ -79,13 +79,8 @@ echo_file  usr/src/Makefile.psm.targ
 echo_file  usr/src/uts/Makefile
 echo_file  usr/src/uts/Makefile.targ
 echo_file  usr/src/uts/Makefile.uts
-echo_file  usr/src/uts/common/Makefile.files
-echo_file  usr/src/uts/common/Makefile.rules
 echo_file  usr/src/uts/common/sys/Makefile
-echo_file  usr/src/uts/sparc/req.flg
 echo_file  usr/src/uts/intel/Makefile
-echo_file  usr/src/uts/intel/Makefile.files
-echo_file  usr/src/uts/intel/Makefile.rules
 echo_file  usr/src/uts/intel/Makefile.intel
 echo_file  usr/src/uts/intel/Makefile.targ
 echo_file  usr/src/cmd/Makefile

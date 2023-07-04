@@ -23,73 +23,8 @@
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 # Copyright 2019 Joyent, Inc.
-
-
-#
-# uts/intel/sda/Makefile
-#
-#	This makefile drives the production of the sda "misc"
-#	kernel module.
-#
-#	intel architecture dependent
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= sda
-OBJECTS		= $(SDA_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-DEBUG_FLGS	=
-DEBUG_DEFS	+= $(DEBUG_FLGS)
-
-CFLAGS += $(CCVERBOSE)
-
-#
-# dependency on blkdev module, scope limiting mapfile
-#
-MAPFILE		= $(UTSBASE)/common/io/sdcard/impl/mapfile
-LDFLAGS		+= -Ndrv/blkdev $(BREDUCE) -M $(MAPFILE)
-
-# needs work
-SMOFF += all_func_returns
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/sdcard/impl/Makefile.com

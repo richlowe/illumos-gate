@@ -24,56 +24,6 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= mega_sas
-OBJECTS		= $(MEGA_SAS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/common/io/mega_sas
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS		+= -Nmisc/scsi
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-$(OBJS_DIR)/megaraid_sas.o := SMOFF += snprintf_overflow,all_func_returns,index_overflow
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/mega_sas/Makefile.com

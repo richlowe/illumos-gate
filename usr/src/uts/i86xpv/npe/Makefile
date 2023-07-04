@@ -25,70 +25,7 @@
 #
 # Copyright 2016 Joyent, Inc.
 #
-#	This makefile drives the production of the PCI-E nexus driver
-#
-#	i86xpv implementation architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= npe
-OBJECTS		= $(PCI_E_NEXUS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# depends on misc/acpica and misc/pcie
-#
-# acpica supplies ACPI access routines
-#
-# pcie supplies PCI Express fabric error support
-#
-LDFLAGS	+= -Nmisc/acpica -Nmisc/pcie
-
-#
-# Name of the module is needed by the source, to distinguish from other
-# PCI/PCI-express nexi
-#
-CFLAGS		+= -D_MODULE_NAME="\"$(MODULE)\""
-
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-function
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86xpv/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86xpv
+include $(SRC)/uts/i86pc/io/pciex/npe/Makefile.com

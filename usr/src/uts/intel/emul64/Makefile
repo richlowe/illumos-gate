@@ -20,73 +20,11 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# 
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
 #
-#	This makefile drives the production of the emul64 kernel
-#	driver to testing hotplugging operations
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= emul64
-OBJECTS		= $(EMUL64_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/emul64
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-CLOBBERFILES	+= $(MODULE)
-CFLAGS		+= $(CCVERBOSE)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CFLAGS		+= $(CCVERBOSE)
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-SMOFF += indenting,shift_to_zero
-
-#
-# Depends on scsi
-#
-LDFLAGS += -N misc/scsi
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/emul64/Makefile.com

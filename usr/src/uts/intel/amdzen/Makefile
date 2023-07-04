@@ -14,29 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE		= amdzen
-OBJECTS		= $(AMDZEN_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/amdzen/amdzen
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-INC_PATH	+= -I$(UTSBASE)/intel/io/amdzen
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/intel/io/amdzen/amdzen/Makefile.com

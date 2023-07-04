@@ -64,5 +64,4 @@ $(USR_HVM_DIR):
 #
 #	Include common targets.
 #
-include $(UTSBASE)/i86hvm/Makefile.rules
-include $(UTSBASE)/$(PLATFORM)/Makefile.targ
+include $(UTSBASE)/i86pc/Makefile.targ

@@ -19,81 +19,10 @@
 # CDDL HEADER END
 #
 #
-# uts/intel/sppptun/Makefile
-#
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
-#
-#	This makefile drives the production of the sppptun STREAMS pseudo-
-#	driver kernel module.
-#
-#	intel architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= sppptun
-OBJECTS		= $(SPPPTUN_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-ROOTLINK	= $(USR_STRMOD_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ppp/sppptun
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
-
-#
-#	Internal build definitions
-#
-CPPFLAGS	+= -DINTERNAL_BUILD -DSOL2
-
-#
-#	Overrides.
-#
-INC_PATH	+= -I$(UTSBASE)/common/io/ppp/common
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(USR_STRMOD_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/ppp/sppptun/Makefile.com

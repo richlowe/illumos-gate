@@ -23,57 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-ARCHDIR:sh = cd ..; basename `pwd`
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= fcoei
-OBJECTS		= $(FCOEI_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/fcoei
-
-# needs work
-SMOFF += all_func_returns
-
-#
-#	Include common rules.
-#
-include ../Makefile.$(ARCHDIR)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides and depends_on
-#
-LDFLAGS		+= -Nmisc/fctl -Ndrv/fcoe
-INC_PATH	+= -I$(UTSBASE)/common/io/fibre-channel/fca/fcoei
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include ../Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/fibre-channel/fca/fcoei/Makefile.com

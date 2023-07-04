@@ -1,0 +1,208 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the
+# Common Development and Distribution License (the "License").
+# You may not use this file except in compliance with the License.
+#
+# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+# or http://www.opensolaris.org/os/licensing.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each
+# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+# If applicable, add the following below this CDDL HEADER, with the
+# fields enclosed by brackets "[]" replaced with your own identifying
+# information: Portions Copyright [yyyy] [name of copyright owner]
+#
+# CDDL HEADER END
+#
+#
+# Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+#
+# Copyright 2013 Saso Kiselkov. All rights reserved.
+# Copyright (c) 2016 by Delphix. All rights reserved.
+# Copyright 2019 Joyent, Inc.
+
+
+amd64_ZFS_OBJS =		\
+	vdev_raidz_math_avx2.o	\
+	vdev_raidz_math_sse2.o	\
+	vdev_raidz_math_ssse3.o
+
+sparcv9_ZFS_OBJS =
+aarch64_ZFS_OBJS =
+
+# XXXMK: Should be sorted, but wsdiff
+ZFS_COMMON_OBJS =		\
+	$($(MACH64)_ZFS_OBJS)	\
+	abd.o			\
+	aggsum.o		\
+	arc.o			\
+	blkptr.o		\
+	bplist.o		\
+	bpobj.o			\
+	bptree.o		\
+	btree.o			\
+	bqueue.o		\
+	cityhash.o		\
+	dbuf.o			\
+	ddt.o			\
+	ddt_zap.o		\
+	dmu.o			\
+	dmu_diff.o		\
+	dmu_recv.o		\
+	dmu_send.o		\
+	dmu_object.o		\
+	dmu_objset.o		\
+	dmu_traverse.o		\
+	dmu_tx.o		\
+	dnode.o			\
+	dnode_sync.o		\
+	dsl_bookmark.o		\
+	dsl_dir.o		\
+	dsl_crypt.o		\
+	dsl_dataset.o		\
+	dsl_deadlist.o		\
+	dsl_destroy.o		\
+	dsl_pool.o		\
+	dsl_synctask.o		\
+	dsl_userhold.o		\
+	dmu_zfetch.o		\
+	dsl_deleg.o		\
+	dsl_prop.o		\
+	dsl_scan.o		\
+	zfeature.o		\
+	gzip.o			\
+	hkdf.o			\
+	lz4.o			\
+	lzjb.o			\
+	metaslab.o		\
+	mmp.o			\
+	multilist.o		\
+	range_tree.o		\
+	refcount.o		\
+	rrwlock.o		\
+	sa.o			\
+	sha256.o		\
+	edonr_zfs.o		\
+	skein_zfs.o		\
+	spa.o			\
+	spa_checkpoint.o	\
+	spa_config.o		\
+	spa_errlog.o		\
+	spa_history.o		\
+	spa_log_spacemap.o	\
+	spa_misc.o		\
+	space_map.o		\
+	space_reftree.o		\
+	txg.o			\
+	uberblock.o		\
+	unique.o		\
+	vdev.o			\
+	vdev_cache.o		\
+	vdev_file.o		\
+	vdev_indirect.o		\
+	vdev_indirect_births.o	\
+	vdev_indirect_mapping.o	\
+	vdev_initialize.o	\
+	vdev_label.o		\
+	vdev_mirror.o		\
+	vdev_missing.o		\
+	vdev_queue.o		\
+	vdev_raidz.o		\
+	vdev_raidz_math.o	\
+	vdev_raidz_math_scalar.o \
+	vdev_removal.o		\
+	vdev_root.o		\
+	vdev_trim.o		\
+	zap.o			\
+	zap_leaf.o		\
+	zap_micro.o		\
+	zcp.o			\
+	zcp_change_key.o	\
+	zcp_get.o		\
+	zcp_set.o		\
+	zcp_global.o		\
+	zcp_iter.o		\
+	zcp_synctask.o		\
+	zfs_byteswap.o		\
+	zfs_debug.o		\
+	zfs_fm.o		\
+	zfs_fuid.o		\
+	zfs_sa.o		\
+	zfs_znode.o		\
+	zil.o			\
+	zio.o			\
+	zio_checksum.o		\
+	zio_compress.o		\
+	zio_crypt.o		\
+	zio_inject.o		\
+	zle.o			\
+	zrlock.o		\
+	zthr.o
+
+amd64_ZFS_SHARED_OBJS +=	\
+	zfs_fletcher_avx512.o	\
+	zfs_fletcher_intel.o	\
+	zfs_fletcher_sse.o
+
+ZFS_SHARED_OBJS =			\
+	$($(MACH64)_ZFS_SHARED_OBJS)	\
+	zfeature_common.o		\
+	zfs_comutil.o			\
+	zfs_deleg.o			\
+	zfs_fletcher.o			\
+	zfs_fletcher_superscalar.o	\
+	zfs_fletcher_superscalar4.o	\
+	zfs_namecheck.o			\
+	zfs_prop.o			\
+	zpool_prop.o			\
+	zprop_common.o
+
+ZFS_OBJS =			\
+	$(ZFS_COMMON_OBJS)	\
+	$(ZFS_SHARED_OBJS)	\
+	vdev_disk.o		\
+	zfs_acl.o		\
+	zfs_ctldir.o		\
+	zfs_dir.o		\
+	zfs_ioctl.o		\
+	zfs_log.o		\
+	zfs_onexit.o		\
+	zfs_replay.o		\
+	zfs_rlock.o		\
+	zfs_vfsops.o		\
+	zfs_vnops.o		\
+	zvol.o
+
+LUA_OBJS =			\
+	ldo.o			\
+	lvm.o			\
+	lbitlib.o		\
+	lopcodes.o		\
+	lstring.o		\
+	ltable.o		\
+	ltm.o			\
+	lcorolib.o		\
+	lauxlib.o		\
+	ldebug.o		\
+	lstate.o		\
+	lgc.o			\
+	lmem.o			\
+	lctype.o		\
+	lfunc.o			\
+	ldump.o			\
+	lundump.o		\
+	lstrlib.o		\
+	ltablib.o		\
+	lapi.o			\
+	lobject.o		\
+	lbaselib.o		\
+	lcompat.o		\
+	lzio.o			\
+	lcode.o			\
+	llex.o			\
+	lparser.o

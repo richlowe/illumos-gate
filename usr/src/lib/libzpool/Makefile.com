@@ -28,8 +28,9 @@
 LIBRARY= libzpool.a
 VERS= .1
 
-# include the list of ZFS sources
-include ../../../uts/common/Makefile.files
+# Common definitions of object sets from the kernel module
+include $(SRC)/uts/common/fs/zfs/Makefile.zfs
+
 KERNEL_OBJS = kernel.o util.o
 DTRACE_OBJS = zfs.o
 
@@ -38,12 +39,6 @@ OBJECTS=$(LUA_OBJS) $(ZFS_COMMON_OBJS) $(ZFS_SHARED_OBJS) $(KERNEL_OBJS)
 # include library definitions
 include ../../Makefile.lib
 
-LUA_SRCS=		$(LUA_OBJS:%.o=../../../uts/common/fs/zfs/lua/%.c)
-ZFS_COMMON_SRCS=	$(ZFS_COMMON_OBJS:%.o=../../../uts/common/fs/zfs/%.c)
-ZFS_SHARED_SRCS=	$(ZFS_SHARED_OBJS:%.o=../../../common/zfs/%.c)
-KERNEL_SRCS=		$(KERNEL_OBJS:%.o=../common/%.c)
-
-SRCS=$(LUA_SRCS) $(ZFS_COMMON_SRCS) $(ZFS_SHARED_SRCS) $(KERNEL_SRCS)
 SRCDIR=		../common
 
 # There should be a mapfile here
@@ -84,6 +79,7 @@ CERRWARN +=	-_gcc=-Wno-unused-variable
 CERRWARN +=	-_gcc=-Wno-empty-body
 CERRWARN +=	-_gcc=-Wno-unused-function
 CERRWARN +=	-_gcc=-Wno-unused-label
+CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 
 # not linted
 SMATCH=off
@@ -114,6 +110,10 @@ pics/%.o: ../../../common/lz4/%.c ../common/zfs.h
 
 pics/%.o: ../common/%.d $(PICS)
 	$(COMPILE.d) -C -s $< -o $@ $(PICS)
+	$(POST_PROCESS_O)
+
+pics/%.o: $(SRC)/uts/$(MACH)/zfs/%.c
+	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
 
 ../common/%.h: ../common/%.d

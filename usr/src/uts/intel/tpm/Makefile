@@ -18,58 +18,14 @@
 #
 # CDDL HEADER END
 #
+#
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2021 Jason King
-
-UTSBASE	=	../..
-
 #
-#	Define the module and object file sets.
-#
-MODULE		= tpm
-OBJECTS		= $(TPM_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-# For now, TPM only delivers on x86/64 platforms, so only build
-# with the Intel rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-# This is for everything except /usr/include/tss/
-CPPFLAGS	+= -I$(ROOT)/usr/include
-
-# This is for /usr/include/tss/, which is not built in the ON consolidation
-CPPFLAGS	+= -I$(ADJUNCT_PROTO)/usr/include
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
-
-$(OBJECTS): $(OBJS_DIR)
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/tpm/Makefile.com

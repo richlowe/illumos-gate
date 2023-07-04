@@ -23,56 +23,6 @@
 # Use is subject to license terms.
 #
 
-#
-#	This makefile drives the production of the kiconv_emea kernel module.
-#
-#	intel architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= kiconv_emea
-OBJECTS		= $(KICONV_EMEA_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_KICONV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-CFLAGS		+= $(CCVERBOSE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/kiconv/kiconv_emea/Makefile.com

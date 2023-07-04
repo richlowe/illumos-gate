@@ -36,15 +36,15 @@
 #	Partially link .o files to generate the kmod. The fake dependency
 #	on modstubs simplifies things...
 #
-$(BINARY):		$(OBJECTS) $(DTRACE_MAPFILE) $(MAPFILE)
+$(BINARY):		$$(OBJECTS) $(DTRACE_MAPFILE) $(MAPFILE)
 	$(LD) -ztype=kmod $(LDFLAGS) -o $@ $(OBJECTS)
 	$(CTFMERGE_UNIQUIFY_AGAINST_GENUNIX)
 	$(POST_PROCESS)
 
 #
 # Since assym.h is a derived file, the dependency must be explicit for all
-# files including this file.  The actual lists are defined in
-# */Makefile.files.
+# files including this file.  The actual lists are defined in the module
+# Makefiles.
 #
 $(ASSYM_DEPS:%=$(OBJS_DIR)/%):	$(DSF_DIR)/$(OBJS_DIR)/assym.h
 

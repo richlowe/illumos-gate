@@ -22,59 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# This makefile drives the production of the oce driver kernel module.
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE		= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= oce
-OBJECTS		= $(OCE_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-ARCHDIR		= intel
-include ../Makefile.$(ARCHDIR)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides and depends_on
-#
-INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/fca/oce
-
-LDFLAGS		+= -Nmisc/mac
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include ../Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/fibre-channel/fca/oce/Makefile.com

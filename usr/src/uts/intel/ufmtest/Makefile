@@ -13,28 +13,6 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-UTSBASE	= ../..
-
-MODULE = ufmtest
-OBJECTS	= $(OBJS_DIR)/ufmtest.o
-ROOTMODULE = $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR = $(UTSBASE)/common/io/ufmtest
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET = $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/ufmtest/Makefile.com

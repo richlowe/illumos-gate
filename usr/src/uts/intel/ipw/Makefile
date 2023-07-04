@@ -23,63 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-# This makefile drives the production of the ipw driver kernel module.
-#
-# i86pc architecture dependent
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= ipw
-OBJECTS		= $(IPW_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-$(OBJS_DIR)/ipw2100.o := SMOFF += deref_check
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-CPPFLAGS	+= -I. -D_KERNEL
-LDFLAGS         += -Nmisc/mac -Nmisc/net80211 -Ndrv/random -Ndrv/ip
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/ipw/Makefile.com
