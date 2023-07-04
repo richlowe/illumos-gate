@@ -31,7 +31,7 @@
 #include <sys/stream.h>
 #include <sys/strsun.h>
 #include <sys/vuid_event.h>
-#include "vuidmice.h"
+#include <vuidmice.h>
 
 #define	LOGI_NUMBUTTONS		3		/* Number of buttons	*/
 

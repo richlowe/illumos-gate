@@ -19,85 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/intel/elfexec/Makefile
-#
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# 
 # Copyright 2019, Joyent, Inc.
 #
 
-#
-#	This makefile drives the production of the elfexec exec kernel
-#	module.
-#
-#	intel architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= elfexec
-ELFEXEC_OBJS_32	=
-ELFEXEC_OBJS_64	= elf32.o elf32_notes.o old32_notes.o
-ELFEXEC_OBJS	+= $(ELFEXEC_OBJS_$(CLASS))
-OBJECTS		= $(ELFEXEC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_EXEC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-INC_PATH	+= -I$(UTSBASE)/intel/ia32 -I$(SRC)/common/core
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
-
-$(OBJS_DIR)/elf32.o:	$(UTSBASE)/common/exec/elf/elf.c
-	$(COMPILE.c) -o $@ -D_ELF32_COMPAT $(UTSBASE)/common/exec/elf/elf.c
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/elf32_notes.o: $(UTSBASE)/common/exec/elf/elf_notes.c
-	$(COMPILE.c) -o $@ -D_ELF32_COMPAT $(UTSBASE)/common/exec/elf/elf_notes.c
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/old32_notes.o: $(UTSBASE)/common/exec/elf/old_notes.c
-	$(COMPILE.c) -o $@ -D_ELF32_COMPAT $(UTSBASE)/common/exec/elf/old_notes.c
-	$(CTFCONVERT_O)
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/exec/elf/Makefile.com

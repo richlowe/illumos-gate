@@ -19,7 +19,6 @@
 # CDDL HEADER END
 #
 #
-# uts/i86pc/pci/Makefile
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
@@ -27,71 +26,6 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-#
-#	This makefile drives the production of the PCI nexus driver
-#
-#	i86pc implementation architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= pci
-OBJECTS		= $(PCINEXUS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86pc/Makefile.i86pc
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# depends on misc/pci_autoconfig misc/pcihp
-#
-LDFLAGS		+= -Nmisc/pcihp
-
-#
-# Name of the module is needed by the source, to distinguish from other
-# PCI/PCI-express nexi
-#
-CFLAGS		+= -D_MODULE_NAME="\"$(MODULE)\""
-
-#
-# For now, disable these checks; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-unused-function
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86pc/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86pc
+include $(SRC)/uts/i86pc/io/pci/Makefile.com

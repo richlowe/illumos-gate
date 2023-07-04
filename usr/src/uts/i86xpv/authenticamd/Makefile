@@ -21,56 +21,6 @@
 # Use is subject to license terms.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
 UTSBASE = ../..
-
-#
-#       Define the module and object file sets.
-#
-MODULE		= cpu_ms.AuthenticAMD
-#
-OBJECTS		= $(CPU_AUTHAMD_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE      = $(ROOT_PSM_CPU_DIR)/$(MODULE)
-
-SRCDIR		= ../cpu/authenticamd
-
-#
-#       Include common rules.
-#
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-include $(UTSBASE)/i86pc/cpu/Makefile.files
-
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides and additions
-#
-CPPFLAGS	+= -I$(SRCDIR) -I$(OBJS_DIR)
-ASFLAGS		+= -I$(SRCDIR) -I$(OBJS_DIR)
-LDFLAGS		+= -N misc/acpica
-
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include ../Makefile.targ
+UTSMACH = i86xpv
+include $(SRC)/uts/i86pc/cpu/authenticamd/Makefile.com

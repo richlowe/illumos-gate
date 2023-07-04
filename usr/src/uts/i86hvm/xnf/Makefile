@@ -20,64 +20,12 @@
 #
 
 #
-# uts/i86pc/xnf/Makefile
-#
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
-#	This makefile drives the production of the xve
-#	network driver kernel module.
-#
-#	i86pc architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= xnf
-OBJECTS		= $(XNF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86hvm/Makefile.i86hvm
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Driver depends on MAC & IP
-#
-CPPFLAGS	+= -DHVMPV_XNF_VERS=1
-LDFLAGS		+= -Nmisc/mac -Ndrv/ip -Ndrv/xpvd -Ndrv/xpv
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86hvm/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86hvm
+include $(SRC)/uts/common/xen/io/xnf/Makefile.com

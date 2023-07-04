@@ -14,28 +14,5 @@
 #
 
 UTSBASE	= ../..
-
-MODULE		= mac_test
-OBJECTS		= $(MAC_TEST_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_KTEST_DIR)/$(MODULE)
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS		+= -N misc/mac -N drv/ktest
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/common/io/mac/test/Makefile.com

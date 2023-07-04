@@ -14,38 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE		= i40e
-OBJECTS		= $(I40E_OBJS:%=$(OBJS_DIR)/%) $(I40E_INTC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/i40e
-
-include $(UTSBASE)/intel/Makefile.intel
-
-CPPFLAGS	+= -I$(UTSBASE)/common/io/i40e
-CPPFLAGS	+= -I$(UTSBASE)/common/io/i40e/core
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-# 3rd party code
-SMOFF += all_func_returns
-
-LDFLAGS		+= -N misc/mac
-
-MAPFILES	+= ddi mac random
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/Makefile.mapfile
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/common/io/i40e/Makefile.com

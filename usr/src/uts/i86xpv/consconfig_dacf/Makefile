@@ -18,57 +18,19 @@
 #
 # CDDL HEADER END
 #
+#
 
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-
+# Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
-#	This makefile drives the production of the consconfig_dacf module.
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= consconfig_dacf
-OBJECTS		= $(CONSCONFIG_DACF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DACF_DIR)/$(MODULE)
+UTSBASE = ../..
+UTSMACH = i86xpv
+include $(SRC)/uts/common/io/consconfig_dacf/Makefile.com
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-LDFLAGS		+= -Nmisc/usbser
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include $(UTSBASE)/i86xpv/Makefile.targ
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/consconfig_dacf/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)

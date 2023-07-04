@@ -27,71 +27,8 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
-
 #
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-PLATFORM = i86pc
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= dr
-OBJECTS		= $(DR_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io/dr
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86pc/Makefile.i86pc
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-
-CFLAGS += $(CCVERBOSE)
-
-CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += $(CNOWARN_UNINIT)
-CERRWARN += -_gcc=-Wno-empty-body
-
-# needs work
-SMOFF += index_overflow
-
-#
-# module dependencies
-#
-LDFLAGS += -Nmisc/drmach_acpi
-
-CLEANFILES +=	$(DR_GENERR)
-CLEANFILES +=	$(DR_IO)/dr_err.c
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS) $(CONF_INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86pc/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86pc
+include $(SRC)/uts/i86pc/io/dr/Makefile.com

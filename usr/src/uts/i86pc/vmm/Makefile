@@ -15,34 +15,6 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-UTSBASE	= ../..
-
-MODULE		= vmm
-OBJECTS		= $(VMM_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-
-include $(UTSBASE)/i86pc//Makefile.i86pc
-include $(UTSBASE)/intel/io/vmm/Makefile.vmm
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-.PARALLEL:	$(OBJECTS)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/i86pc//Makefile.targ
-include $(UTSBASE)/intel/io/vmm/Makefile.rules
+UTSBASE = ../..
+UTSMACH = i86pc
+include $(SRC)/uts/intel/io/vmm/Makefile.com

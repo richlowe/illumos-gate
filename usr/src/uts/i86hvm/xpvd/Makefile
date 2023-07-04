@@ -26,57 +26,6 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-#
-#	This makefile drives the production of the xpvd nexus driver
-#
-#	i86pc implementation architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= xpvd
-OBJECTS		= $(XPVD_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/xen/io/xpvd
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86hvm/Makefile.i86hvm
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-CPPFLAGS	+= -DHVMPV_XPVD_VERS=1
-LDFLAGS		+= -Ndrv/xpv
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86hvm/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86hvm
+include $(SRC)/uts/common/xen/io/xpvd/Makefile.com

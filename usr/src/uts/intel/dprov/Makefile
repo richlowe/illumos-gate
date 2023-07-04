@@ -19,87 +19,12 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2014 Garrett D'Amore <garrett@damore.org>
-#
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-
-#
-#	This makefile drives the production of the dummy KEF provider.
-#
-#	intel implementation architecture dependent
+# Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COM_DIR = $(SRC)/common/crypto
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= dprov
-OBJECTS		= $(DPROV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-TARGET_32	= ../../kernel/drv/$(MODULE)
-TARGET_64	= ../../../kernel/drv/$(SUBDIR64)/$(MODULE)
-LINK_TARGET	= $(TARGET_$(CLASS))
-CONF_SRCDIR	= $(UTSBASE)/common/crypto/io/dprov
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
-
-#
-# Linkage dependencies
-#
-# Note that regular providers do not need to have an explicit dependency
-# on KCF. This is a special case since the test pseudo driver dprov
-# uses private KCF functions.
-#
-LDFLAGS += -Nmisc/kcf
-
-CFLAGS		+= $(CCVERBOSE) -I$(COM_DIR)
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-label
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_CRYPTO_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln -s $(LINK_TARGET) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/crypto/io/dprov/Makefile.com
