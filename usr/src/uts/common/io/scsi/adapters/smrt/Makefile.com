@@ -13,11 +13,8 @@
 # Copyright (c) 2017, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= smrt
+MOD_SRCDIR     = $(UTSBASE)/common/io/scsi/adapters/smrt
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -32,47 +29,11 @@ OBJS		=			\
 		smrt_physical.o		\
 		smrt_sata.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/common/io/scsi/adapters/smrt
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+DEPENDS_ON	= misc/scsi
 
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS		+= -Nmisc/scsi
-
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/scsi/adapters/smrt/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

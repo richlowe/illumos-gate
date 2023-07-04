@@ -23,11 +23,8 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pmcs8001fw
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs/fw
 
 OBJS		=		\
 		pmcs_fw_hdr.o	\
@@ -36,52 +33,16 @@ OBJS		=		\
 		firmware.o
 
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PMCS_FW_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs/fw
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
+
 include $(CONF_SRCDIR)/pmcs8001fw.version
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+CPPFLAGS	+=	-DPMCS_FIRMWARE_VERSION=$(PMCS_FW_VERSION) \
+	-DPMCS_FIRMWARE_VERSION_STRING=\"$(PMCS_FW_VERSION_STRING)\"
 
-#
-#	Extra flags
-#
-CPPFLAGS	+=	-DPMCS_FIRMWARE_VERSION=${PMCS_FW_VERSION} \
-	-DPMCS_FIRMWARE_VERSION_STRING=\"${PMCS_FW_VERSION_STRING}\"
-
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/scsi/adapters/pmcs/fw/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/scsi/adapters/pmcs/fw/%.bin
 	$(COMPILE.b) -o $@ $<

@@ -14,19 +14,13 @@
 # Copyright 2022 Garrett D'Amore
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= usbgem
-OBJS		= usbgem.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/io/usbgem
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
+
+DEPENDS_ON	= misc/mac drv/ip misc/usba
 
 #
 #	The USBGEM has support for various different features. We use
@@ -46,34 +40,4 @@ CERRWARN	+= -_gcc=-Wno-unused-function
 # needs work
 SMOFF += all_func_returns
 
-
-LDFLAGS		+= -N misc/mac -N drv/ip -N misc/usba
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usbgem/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

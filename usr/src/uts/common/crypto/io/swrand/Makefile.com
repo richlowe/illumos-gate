@@ -23,33 +23,19 @@
 # Use is subject to license terms.
 #
 
-COM_DIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= swrand
-OBJS		= swrand.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/swrand
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
 #
 #	Include common rules.
 #
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
+COM_DIR = $(COMMONBASE)/crypto
 CFLAGS		+= -I$(COM_DIR)
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf -Nmisc/sha1
+DEPENDS_ON = misc/kcf misc/sha1
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -58,26 +44,4 @@ LDFLAGS += -Nmisc/kcf -Nmisc/sha1
 #
 CERRWARN	+= -_gcc=-Wno-unused-function
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/swrand/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

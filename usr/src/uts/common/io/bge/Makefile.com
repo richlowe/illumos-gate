@@ -25,11 +25,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= bge
+MOD_SRCDIR	= $(UTSBASE)/common/io/bge
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -44,24 +41,9 @@ OBJS		=		\
 		bge_recv2.o	\
 		bge_mii_5906.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/bge
+include	$(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides
-#
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -71,37 +53,15 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN       += -_gcc=-Wno-unused-variable
-CERRWARN       += -_gcc=-Wno-unused-function
+CERRWARN	+= -_gcc=-Wno-unused-variable
+CERRWARN	+= -_gcc=-Wno-unused-function
 
 # 3rd party source
-SMOFF += all_func_returns
+SMOFF	+= all_func_returns
 
 #
 # Driver depends on MAC
 #
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/bge/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

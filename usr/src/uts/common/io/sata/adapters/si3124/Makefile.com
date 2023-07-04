@@ -25,32 +25,10 @@
 #
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= si3124
-OBJS		= si3124.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/common/io/sata/adapters/si3124
+MOD_SRCDIR     = $(UTSBASE)/common/io/sata/adapters/si3124
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-DEBUG_FLGS	=
-DEBUG_DEFS	+= $(DEBUG_FLGS)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -59,31 +37,6 @@ DEBUG_DEFS	+= $(DEBUG_FLGS)
 #
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#
-# we depend on the sata module
-LDFLAGS += -N misc/sata
+DEPENDS_ON	= misc/sata
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/sata/adapters/si3124/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

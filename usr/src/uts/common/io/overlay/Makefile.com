@@ -15,6 +15,7 @@
 
 
 MODULE          = overlay
+MOD_SRCDIR	= $(UTSBASE)/common/io/overlay
 
 OBJS		=			\
 		overlay.o		\
@@ -24,35 +25,16 @@ OBJS		=			\
 		overlay_prop.o		\
 		overlay_target.o
 
-OBJECTS         = $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE      = $(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET      += $(SRC_CONFFILE)
+INSTALL_TARGET  += $(ROOT_CONFFILE)
 
-ALL_TARGET      = $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/overlay
 MAPFILE		= $(UTSBASE)/common/io/overlay/overlay.mapfile
 
-LDFLAGS += -Nmisc/mac -Ndrv/dld -Nmisc/dls -Nmisc/ksocket
+DEPENDS_ON	= misc/mac drv/dld misc/dls misc/ksocket
 
 # needs work
 SMATCH=off
 
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/overlay/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

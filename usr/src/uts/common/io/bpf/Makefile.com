@@ -26,11 +26,9 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= bpf
+MOD_SRCDIR	= $(UTSBASE)/common/io/bpf
+ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=		\
@@ -40,23 +38,14 @@ OBJS		=		\
 		bpf_dlt.o	\
 		bpf_mac.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/bpf
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-LDFLAGS		+= -Nmisc/mac -Nmisc/dls -Ndrv/ipnet -Nmisc/neti
 INC_PATH	+= -I$(UTSBASE)/common/io/bpf
+
+DEPENDS_ON	= misc/mac misc/dls drv/ipnet misc/neti
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -69,26 +58,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/bpf.o := SMOFF += all_func_returns
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/bpf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

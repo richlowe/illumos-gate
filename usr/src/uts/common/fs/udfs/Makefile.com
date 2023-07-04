@@ -24,12 +24,10 @@
 #
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= udfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/udfs
 OBJS		=		\
 		udf_alloc.o	\
 		udf_bmap.o	\
@@ -38,24 +36,11 @@ OBJS		=		\
 		udf_subr.o	\
 		udf_vfsops.o	\
 		udf_vnops.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Define dependency on specfs
-#
-LDFLAGS += -N fs/specfs
+DEPENDS_ON = fs/specfs
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -70,26 +55,4 @@ CERRWARN	+= -_gcc=-Wno-type-limits
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/udfs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -22,57 +22,25 @@
 # Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-SN1_BASE =	$(UTSBASE)/common/brand/sn1
-
-#
-#	Define the module and object file sets.
-#
 MODULE =	sn1_brand
+MOD_SRCDIR =	$(UTSBASE)/common/brand/sn1
 OBJS =		sn1_brand.o sn1_brand_asm.o
-OBJECTS =	$(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE =	$(USR_BRAND_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET =		$(BINARY)
-INSTALL_TARGET =	$(BINARY) $(ROOTMODULE)
-
+include $(UTSBASE)/Makefile.kmod
 
 #
 #	Update compiler variables.
 #
-INC_PATH +=	-I$(SN1_BASE) -I$(OBJS_DIR)
-intel_INC_PATH +=	-I$(UTSBASE)/i86pc/genassym/$(OBJS_DIR)
-INC_PATH +=	$($(UTSMACH)_INC_PATH)
-LDFLAGS +=	-Nexec/elfexec
+intel_INC_PATH = -I$(UTSBASE)/i86pc/genassym/$(OBJS_DIR)
+INC_PATH +=	-I$(MOD_SRCDIR) -I$(OBJS_DIR)
+INC_PATH += 	$($(UTSMACH)_INC_PATH)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+DEPENDS_ON =	exec/elfexec
 
-def:		$(DEF_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/brand/sn1/%.S
+$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/brand/sn1/%.S
 	$(COMPILE.s) -o $@ $<
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/brand/sn1/%.c

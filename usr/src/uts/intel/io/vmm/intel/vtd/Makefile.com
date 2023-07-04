@@ -14,12 +14,13 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-
 MODULE		= vmm_vtd
 OBJS		= vtd.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/intel/io/vmm/intel/vtd
 ROOTMODULE	= $(USR_MISC_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm
+
+include $(UTSBASE)/Makefile.kmod
+
 MAPFILE		= $(UTSBASE)/intel/io/vmm/intel/vtd/vmm_vtd.mapfile
 
 PRE_INC_PATH	= \
@@ -31,33 +32,11 @@ PRE_INC_PATH	= \
 INC_PATH	+= -I$(UTSBASE)/intel/io/vmm -I$(UTSBASE)/intel/io/vmm/io
 INC_PATH	+= -I$(UTSBASE)/intel/io/vmm -I$(OBJS_DIR)
 
-LDFLAGS		+= -N drv/vmm -N misc/acpica -N misc/pcie
+DEPENDS_ON	= \
+	drv/vmm \
+	misc/acpica \
+	misc/pcie
+
 LDFLAGS		+= -M $(MAPFILE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-.PARALLEL:	$(OBJECTS)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/vmm/intel/vtd/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

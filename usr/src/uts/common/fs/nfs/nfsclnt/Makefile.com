@@ -25,12 +25,10 @@
 #
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= nfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/nfs/nfsclnt
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -70,25 +68,14 @@ OBJS		=			\
 		nfs_cmd.o		\
 		nfs4x_xdr.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SYS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+INSTALL_TARGET	+= $(ROOTLINK)
 
-#
-# Define dependencies on specfs, rpcmod, and rpcsec
-#
-LDFLAGS += -N fs/specfs -N strmod/rpcmod -N misc/rpcsec
+DEPENDS_ON = fs/specfs strmod/rpcmod misc/rpcsec
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -107,29 +94,7 @@ CERRWARN	+= -_gcc=-Wno-empty-body
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_SYS_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/nfs/nfsclnt/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

@@ -24,11 +24,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= hxge
+MOD_SRCDIR	= $(UTSBASE)/common/io/hxge
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -51,31 +48,19 @@ OBJS		=		\
 		hpi_vir.o	\
 		hpi_pfc.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/hxge
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Include hxge specific header files
-#
 INC_PATH	+= -I$(UTSBASE)/common/io/hxge
 
-CFLAGS += -DSOLARIS
+CPPFLAGS	+= -DSOLARIS
+
 #
 # Debug flags
 #
-# CFLAGS += -DHXGE_DEBUG -DHPI_DEBUG
+# CPPFLAGS += -DHXGE_DEBUG -DHPI_DEBUG
 #
 
 #
@@ -90,31 +75,6 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 
 SMOFF += deref_check,logical_instead_of_bitwise
 
-#
-#	Driver depends on mac & IP
-#
-LDFLAGS		+= -N misc/mac -N drv/ip
+DEPENDS_ON	= misc/mac drv/ip
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/hxge/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -26,59 +26,23 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= rts
+MOD_SRCDIR	= $(UTSBASE)/common/inet/ip/rts
 OBJS		= rtsddi.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SOCK_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/rts
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-#
-#	depends on ip and sockfs
-#
-LDFLAGS		+= -Ndrv/ip -Nfs/sockfs
+DEPENDS_ON	= drv/ip fs/sockfs
 
 # needs work
 $(OBJS_DIR)/rtsddi.o := SMOFF += index_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS) $(SISCHECK_DEPS)
-
-clean:		$(CLEAN_DEPS) $(SISCLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS) $(SISCLEAN_DEPS)
-
-install:	$(INSTALL_DEPS) $(SISCHECK_DEPS)
+include $(UTSBASE)/Makefile.sischeck
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_STRMOD_DIR) $(ROOT_SOCK_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ip/rts/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

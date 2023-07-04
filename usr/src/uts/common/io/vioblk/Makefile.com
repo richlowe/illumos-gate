@@ -14,56 +14,13 @@
 # Copyright 2019 Joyent, Inc.
 #
 
+MODULE		= vioblk
+MOD_SRCDIR	= $(UTSBASE)/common/io/vioblk
 
-#
-# Define the module and object file sets.
-#
-MODULE =		vioblk
-OBJS =			vioblk.o
-OBJECTS =		$(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE =		$(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INC_PATH	+= -I$(UTSBASE)/common/io/virtio
 
-#
-# Define targets
-#
-ALL_TARGET =		$(BINARY)
-INSTALL_TARGET =	$(BINARY) $(ROOTMODULE)
+DEPENDS_ON	=  misc/virtio drv/blkdev
 
-#
-# Overrides
-#
-INC_PATH +=		-I$(UTSBASE)/common/io/virtio
-
-#
-# Driver depends on virtio and blkdev
-#
-LDFLAGS +=		-N misc/virtio -N drv/blkdev
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/vioblk/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -15,40 +15,20 @@
 
 
 MODULE		= imc
-
+MOD_SRCDIR	= $(UTSBASE)/intel/io/imc
 OBJS		=		\
 		imc.o		\
 		imc_decode.o	\
 		imc_dump.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/imc
+include $(UTSBASE)/Makefile.kmod
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+INC_PATH	+= -I$(MOD_SRCDIR)
 
-CPPFLAGS	+= -I$(CONF_SRCDIR)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/imc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(SRC)/common/mc/imc/%.c
 	$(COMPILE.c) -o $@ $<

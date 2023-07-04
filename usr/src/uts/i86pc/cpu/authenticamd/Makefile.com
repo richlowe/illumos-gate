@@ -25,56 +25,16 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#       Define the module and object file sets.
-#
 MODULE		= cpu_ms.AuthenticAMD
+MOD_SRCDIR	= $(UTSBASE)/i86pc/cpu/authenticamd
 OBJS		= authamd_main.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE      = $(ROOT_PSM_CPU_DIR)/$(MODULE)
 
-SRCDIR		= $(SRC)/uts/i86pc/cpu/authenticamd
+include $(UTSBASE)/Makefile.kmod
 
-#
-#       Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+CPPFLAGS	+= -I$(MOD_SRCDIR) -I$(OBJS_DIR)
 
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
+i86xpv_DEPENDS_ON	= misc/acpica
+DEPENDS_ON		= $($(UTSMACH)_DEPENDS_ON)
 
-#
-#	Overrides and additions
-#
-CPPFLAGS	+= -I$(SRCDIR) -I$(OBJS_DIR)
-ASFLAGS		+= -I$(SRCDIR) -I$(OBJS_DIR)
-
-i86xpv_LDFLAGS	=	-N misc/acpica
-LDFLAGS		+=	$($(UTSMACH)_LDFLAGS)
-
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/cpu/authenticamd/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

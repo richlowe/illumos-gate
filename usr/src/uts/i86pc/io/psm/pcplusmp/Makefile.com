@@ -27,11 +27,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pcplusmp
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/psm/pcplusmp
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -44,50 +41,16 @@ OBJS		=			\
 		apic_common.o		\
 		apic_timer.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_MACH_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-DEBUG_FLGS      =
-$(NOT_RELEASE_BUILD)DEBUG_DEFS	+= $(DEBUG_FLGS)
-
-#
-# Depends on ACPI CA interpreter
-#
-LDFLAGS		+= -N misc/acpica
+DEPENDS_ON	= misc/acpica
 
 # needs work
 $(OBJS_DIR)/psm_common.o := SMOFF += deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/%.c
 	$(COMPILE.c) -o $@ $<

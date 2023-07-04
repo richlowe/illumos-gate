@@ -25,50 +25,12 @@
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= vgatext
-OBJS		= vgatext.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-GFX_DIR		= $(UTSBASE)/i86pc/io/gfx_private
-INC_PATH	+= -I$(GFX_DIR)
+MOD_SRCDIR	= $(UTSBASE)/intel/io/vgatext
 
-LDFLAGS +=	-Nmisc/gfx_private
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INC_PATH	+= -I$(UTSBASE)/i86pc/io/gfx_private
+DEPENDS_ON	= misc/gfx_private
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/vgatext/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

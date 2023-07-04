@@ -25,11 +25,8 @@
 # Copyright 2016 OmniTI Computer Consulting, Inc.  All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ixgbe
+MOD_SRCDIR	= $(UTSBASE)/common/io/ixgbe
 
 # illumos-specific
 OBJS		=			\
@@ -60,14 +57,7 @@ OBJS		+=			\
 		ixgbe_x540.o \
 		ixgbe_x550.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ixgbe
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I$(UTSBASE)/common/io/ixgbe
 INC_PATH	+= -I$(UTSBASE)/common/io/ixgbe/core
@@ -80,43 +70,14 @@ CERRWARN	+= -_gcc=-Wno-unused-value
 # 3rd party code
 SMOFF += all_func_returns
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-# Driver depends on MAC
-#
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 MAPFILES	+= ddi mac random kernel
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
 include $(UTSBASE)/Makefile.mapfile
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ixgbe/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ixgbe/core/%.c
 	$(COMPILE.c) -o $@ $<

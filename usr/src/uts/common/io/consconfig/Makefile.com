@@ -24,51 +24,12 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= consconfig
-OBJS		= consconfig.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/io/consconfig
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= dacf/consconfig_dacf
 
-#
-#	Overrides.
-#
-LDFLAGS		+= -Ndacf/consconfig_dacf
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/consconfig/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ipf
+MOD_SRCDIR	= $(UTSBASE)/common/inet/ipf
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=			\
@@ -51,25 +48,17 @@ OBJS		=			\
 		ip_nat6.o		\
 		drand48.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ipf
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 CPPFLAGS += -DIPFILTER_LKM -DIPFILTER_LOG -DIPFILTER_LOOKUP -DUSE_INET6
 CPPFLAGS += -DSUNDDI -DSOLARIS2=$(RELEASE_MINOR) -DIRE_ILL_CN
-LDFLAGS += -Ndrv/ip -Nmisc/md5 -Nmisc/neti -Nmisc/hook -Nmisc/kcf
-LDFLAGS += -Nmisc/mac
+
+DEPENDS_ON = drv/ip misc/md5 misc/neti misc/hook misc/kcf misc/mac
 
 INC_PATH += -I$(UTSBASE)/common/inet/ipf
 
@@ -88,26 +77,5 @@ CCWARNINLINE	=
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS) $(SISCHECK_DEPS)
-
-clean:		$(CLEAN_DEPS) $(SISCLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS) $(SISCLEAN_DEPS)
-
-install:	$(INSTALL_DEPS) $(SISCHECK_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ipf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.sischeck
+include $(UTSBASE)/Makefile.kmod.targ

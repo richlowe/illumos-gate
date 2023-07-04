@@ -27,11 +27,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pcie
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/pciex
 
 i86pc_OBJS	=  		\
 		pcie_acpi.o	\
@@ -51,26 +48,13 @@ OBJS		=			\
 		pci_props.o		\
 		pci_strings.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Dependency
-#
-LDFLAGS		+= -Nmisc/acpica -Nmisc/busra -Nmisc/pci_prd
+DEPENDS_ON	= misc/acpica misc/busra misc/pci_prd
 
 INC_PATH	+= -I$(SRC)/common/pci
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 CERRWARN	+= -_gcc=-Wno-unused-value
 CERRWARN	+= -_gcc=-Wno-unused-function # safe
@@ -78,29 +62,7 @@ CERRWARN	+= -_gcc=-Wno-unused-function # safe
 # needs work
 SMOFF += all_func_returns,deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pciex/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/pciex/%.c
 	$(COMPILE.c) -o $@ $<

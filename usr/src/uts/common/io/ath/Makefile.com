@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ath
+MOD_SRCDIR	= $(UTSBASE)/common/io/ath
 
 OBJS		=		\
 		ath_aux.o	\
@@ -38,24 +35,10 @@ OBJS		=		\
 		ath_osdep.o	\
 		ath_rate.o	\
 		hal.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Driver depends on GLDv3 & wifi kernel support module.
-#
-LDFLAGS		+= -Nmisc/mac -Nmisc/net80211
+DEPENDS_ON	= misc/mac misc/net80211
 
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= -_gcc=-Wno-unused-variable
@@ -64,29 +47,7 @@ CERRWARN	+= -_gcc=-Wno-empty-body
 # needs work
 $(OBJS_DIR)/ath_rate.o := SMOFF += index_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:               $(UTSBASE)/common/io/ath/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 #
 #	The amd64 version of this object has the .eh_frame section tagged

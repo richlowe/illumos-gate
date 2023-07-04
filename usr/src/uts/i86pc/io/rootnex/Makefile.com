@@ -28,11 +28,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= rootnex
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/rootnex
 
 OBJS		=		\
 		rootnex.o
@@ -47,31 +44,18 @@ i86pc_OBJS	=		\
 
 OBJS 		+= $($(UTSMACH)_OBJS)
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io/rootnex
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET		= $(BINARY)
-i86pc_ALL_TARGET	= $(SRC_CONFILE)
-INSTALL_TARGET		= $(BINARY) $(ROOTMODULE)
+i86pc_ALL_TARGET	= $(SRC_CONFFILE)
 i86pc_INSTALL_TARGET	= $(ROOT_CONFFILE)
 
 ALL_TARGET		+= $($(UTSMACH)_ALL_TARGET)
 INSTALL_TARGET		+= $($(UTSMACH)_INSTALL_TARGET)
 
-#
-# Define dependencies on iommulib and acpica
-#
-i86pc_LDFLAGS		= -N misc/iommulib -N misc/acpica
-LDFLAGS			+= $($(UTSMACH)_LDFLAGS)
+i86pc_DEPENDS_ON	= misc/iommulib misc/acpica
+DEPENDS_ON		= $($(UTSMACH)_DEPENDS_ON)
 
 #
 # For now, disable these checks; maintainers should endeavor
@@ -86,26 +70,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/immu_qinv.o := SMOFF += index_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS) $(CONF_INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/rootnex/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

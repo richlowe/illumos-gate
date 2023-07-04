@@ -23,52 +23,12 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= mac_6to4
-OBJS		= mac_6to4.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/io/mac/plugins/6to4
 ROOTMODULE	= $(ROOT_MAC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/mac mac/mac_ipv4
 
-#
-#	Overrides.
-#
-LDFLAGS		+= -Nmisc/mac -Nmac/mac_ipv4
-
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/mac/plugins/6to4/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

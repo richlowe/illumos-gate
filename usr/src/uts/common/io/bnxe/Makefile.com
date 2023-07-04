@@ -13,11 +13,8 @@
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= bnxe
+MOD_SRCDIR	= $(UTSBASE)/common/io/bnxe
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -76,21 +73,10 @@ OBJS		=			\
 		lm_stats.o		\
 		lm_util.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-SRCDIR		= $(UTSBASE)/common/io/bnxe
-CONF_SRCDIR	= $(SRCDIR)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 #
 #	Driver-specific flags
@@ -108,24 +94,26 @@ CPPFLAGS	+= -DLM_RXPKT_NON_CONTIGUOUS \
 		   -DILLUMOS \
 		   -DLITTLE_ENDIAN \
 		   -DLITTLE_ENDIAN_HOST \
-		   -D__LITTLE_ENDIAN \
-		   -I$(SRCDIR)/577xx/include \
-		   -I$(SRCDIR)/577xx/drivers/common/ecore \
-		   -I$(SRCDIR)/577xx/drivers/common/include \
-		   -I$(SRCDIR)/577xx/drivers/common/include/l4 \
-		   -I$(SRCDIR)/577xx/drivers/common/include/l5 \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/device \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/fw \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/include \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/l4 \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/l4/include \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/l5 \
-		   -I$(SRCDIR)/577xx/drivers/common/lm/l5/include \
-		   -I$(SRCDIR)/577xx/hsi/hw/include \
-		   -I$(SRCDIR)/577xx/hsi/mcp \
-		   -I$(SRCDIR)
+		   -D__LITTLE_ENDIAN
 
-LDFLAGS		+= -Ndrv/ip -Nmisc/mac
+INC_PATH	+= -I$(MOD_SRCDIR)/577xx/include \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/ecore \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/include \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/include/l4 \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/include/l5 \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/device \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/fw \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/include \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/l4 \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/l4/include \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/l5 \
+		   -I$(MOD_SRCDIR)/577xx/drivers/common/lm/l5/include \
+		   -I$(MOD_SRCDIR)/577xx/hsi/hw/include \
+		   -I$(MOD_SRCDIR)/577xx/hsi/mcp \
+		   -I$(MOD_SRCDIR)
+
+DEPENDS_ON	= drv/ip misc/mac
+
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
@@ -137,31 +125,7 @@ CERRWARN	+= -_gcc=-Wno-unused-but-set-variable
 # a whole mess
 SMATCH=off
 
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/bnxe/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/bnxe/577xx/common/%.c
 	$(COMPILE.c) -o $@ $<

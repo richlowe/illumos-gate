@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pcmcia
+MOD_SRCDIR	= $(UTSBASE)/common/pcmcia
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -41,29 +38,14 @@ OBJS		=		\
 		cis_handlers.o	\
 		cis_params.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+intel_INC_PATH	=  -I$(UTSBASE)/i86pc
+INC_PATH        += $($(UTSMACH)_INC_PATH)
 
-#
-#	Include i86pc specific header files
-#
-INC_PATH        += -I$(UTSBASE)/i86pc
-
-#
-#	dependency
-#
-LDFLAGS	+=	-Nmisc/busra -Nmisc/pci_autoconfig
+DEPENDS_ON	= misc/busra misc/pci_autoconfig
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -76,25 +58,7 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/pcmcia/cis/%.c
 	$(COMPILE.c) -o $@ $<

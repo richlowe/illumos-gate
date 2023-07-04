@@ -15,6 +15,7 @@
 
 
 MODULE		= qede
+MOD_SRCDIR	= $(UTSBASE)/common/io/qede
 
 # illumos-specific
 OBJS		=		\
@@ -45,11 +46,7 @@ OBJS		+=			\
 		ecore_l2.o		\
 		ecore_int.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/qede
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # Common definitions that are used by QLogic.
@@ -60,15 +57,12 @@ CPPFLAGS	+= -DILLUMOS
 CPPFLAGS	+= -DECORE_CONFIG_DIRECT_HWFN
 CPPFLAGS	+= -DCONFIG_ECORE_L2
 
-#
-# Includes that are needed
-#
-CPPFLAGS	+= -I$(UTSBASE)/common/io/qede
-CPPFLAGS	+= -I$(UTSBASE)/common/io/qede/579xx/drivers/ecore
-CPPFLAGS	+= -I$(UTSBASE)/common/io/qede/579xx/drivers/ecore/hsi_repository
-CPPFLAGS	+= -I$(UTSBASE)/common/io/qede/579xx/hsi/
-CPPFLAGS	+= -I$(UTSBASE)/common/io/qede/579xx/hsi/hw
-CPPFLAGS	+= -I$(UTSBASE)/common/io/qede/579xx/hsi/mcp
+INC_PATH	+= -I$(UTSBASE)/common/io/qede
+INC_PATH	+= -I$(UTSBASE)/common/io/qede/579xx/drivers/ecore
+INC_PATH	+= -I$(UTSBASE)/common/io/qede/579xx/drivers/ecore/hsi_repository
+INC_PATH	+= -I$(UTSBASE)/common/io/qede/579xx/hsi/
+INC_PATH	+= -I$(UTSBASE)/common/io/qede/579xx/hsi/hw
+INC_PATH	+= -I$(UTSBASE)/common/io/qede/579xx/hsi/mcp
 
 #
 # Temporarily gag these warnings for the moment. We'll work with
@@ -91,28 +85,12 @@ $(OBJS_DIR)/qede_gld.o := SMOFF += assign_vs_compare
 #
 STACKPROTECT=basic
 
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/qede/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/qede/579xx/drivers/ecore/%.c
 	$(COMPILE.c) -o $@ $<

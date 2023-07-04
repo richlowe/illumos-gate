@@ -27,58 +27,22 @@
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-COM_DIR = $(COMMONBASE)/crypto/arcfour
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= arcfour
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/arcfour
+
 # XXXMK: Could be in the client makefile if not for wsdiff
 intel_OBJS	= arcfour-x86_64.o
 OBJS		= $($(UTSMACH)_OBJS) arcfour.o arcfour_crypt.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+COM_DIR = $(COMMONBASE)/crypto/arcfour
 
-#
-# Overrides
-#
 CPPFLAGS	+= -I$(COM_DIR)
 CFLAGS		+= -xO4
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/arcfour/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/arcfour/%.c
 	$(COMPILE.c) -o $@ $<

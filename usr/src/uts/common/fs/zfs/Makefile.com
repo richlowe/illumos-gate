@@ -25,42 +25,33 @@
 # Copyright 2013 Saso Kiselkov. All rights reserved.
 # Copyright (c) 2016 by Delphix. All rights reserved.
 # Copyright 2019 Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= zfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/zfs
 
 # Object lists definitions are shared with libzpool in userland
 include		$(UTSBASE)/common/fs/zfs/Makefile.zfs
 
 intel_OBJS	= spa_boot.o
 aarch64_OBJS	= spa_boot.o
+OBJS		= $($(UTSMACH)_OBJS) $(ZFS_OBJS) $(LUA_OBJS)
 
-OBJECTS		= $($(UTSMACH)_OBJS:%=$(OBJS_DIR)/%) \
-		$(ZFS_OBJS:%=$(OBJS_DIR)/%) \
-		$(LUA_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_FS_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/fs/zfs
 
-#
-#	Include common rules.
-#
-include $(SRC)/uts/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-#
-#	Overrides
-#
-LDFLAGS		+= -Nfs/specfs -Ncrypto/swrand -Nmisc/idmap -Nmisc/sha2 \
-	-Nmisc/skein -Nmisc/edonr
+DEPENDS_ON	=	\
+	fs/specfs	\
+	crypto/swrand	\
+	misc/idmap	\
+	misc/sha2	\
+	misc/skein	\
+	misc/edonr
 
 intel_INC_PATH		+= -I$(UTSBASE)/i86pc
 aarch64_INC_PATH	+= -I$(UTSBASE)/armv8
@@ -94,34 +85,12 @@ $(OBJS_DIR)/zvol.o	:= SMOFF += deref_check,signed
 # false positive
 $(OBJS_DIR)/zfs_ctldir.o := SMOFF += strcpy_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_FS_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
 
-#
-#	Include common targets.
-#
-include $(SRC)/uts/$(UTSMACH)/Makefile.targ
-
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/zfs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/zfs/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 

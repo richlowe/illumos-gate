@@ -23,51 +23,20 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= uathfw
+MOD_SRCDIR	= $(UTSBASE)/common/io/uath/uath_fw
 OBJS		= uathfw_mod.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 FWOBJ		= $(OBJS_DIR)/$(MODULE).o
 
+include $(UTSBASE)/Makefile.kmod
+
 OBJECTS		+= $(FWOBJ)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS) $(FWOBJ)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
 # customized section for transforming firmware binary
-ELFWRAP		= elfwrap
-BINSRC		= $(UTSBASE)/common/io/uath/uath_fw
+BINSRC		= $(MOD_SRCDIR)
 BINDEST		= $(UTSBASE)/$(UTSMACH)/uathfw
 BINCOPY		= uathbin
 ORIGIN_SRC	= uathfw.bin
@@ -84,11 +53,4 @@ $(FWOBJ):
 
 CLOBBERFILES += $(BINDEST)/$(BINCOPY)
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/uath/uath_fw/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

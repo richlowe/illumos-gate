@@ -26,11 +26,8 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xge
+MOD_SRCDIR	= $(UTSBASE)/common/io/xge
 
 # HAL
 # XXXMK: Should be sorted, but wsdiff
@@ -51,19 +48,7 @@ OBJS +=		\
 	xge.o	\
 	xgell.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 #
 #	GENERAL PURPOUSE HAL FLAGS: Tuning HAL for Solaris specific modes
@@ -94,17 +79,16 @@ TRACE_CFLAGS	= -DXGE_DEBUG_MODULE_MASK=0x00003010 \
 		-DXGE_DEBUG_ERR_MASK=0x00003010
 
 XGE_CFLAGS	= $(HAL_CFLAGS) $(TRACE_CFLAGS) \
-		-I$(UTSBASE)/common/io/xge/hal/include \
-		-I$(UTSBASE)/common/io/xge/hal/xgehal \
-		-I$(UTSBASE)/common/io/xge/drv -DSOLARIS
+		-DSOLARIS
+
+INC_PATH	+= -I$(UTSBASE)/common/io/xge/hal/include \
+	-I$(UTSBASE)/common/io/xge/hal/xgehal \
+	-I$(UTSBASE)/common/io/xge/drv
 
 CFLAGS		+= $(XGE_CFLAGS) -xO4
 CFLAGS64	+= $(XGE_CFLAGS) -xO4
 
-#
-#	Driver depends on MAC & IP
-#
-LDFLAGS		+=  -N misc/mac -N drv/ip
+DEPENDS_ON	= misc/mac drv/ip
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-variable
@@ -113,31 +97,9 @@ CERRWARN	+= -_gcc=-Wno-empty-body
 CERRWARN	+= $(CNOWARN_UNINIT)
 
 # needs work
-SMOFF += indenting
-SMOFF += all_func_returns
-SMOFF += no_if_block
-SMOFF += allocating_enough_data
+SMOFF += indenting,all_func_returns,no_if_block,allocating_enough_data
 
-#
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/xge/drv/%.c
 	$(COMPILE.c) -o $@ $<

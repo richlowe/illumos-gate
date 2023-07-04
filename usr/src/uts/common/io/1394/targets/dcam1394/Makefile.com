@@ -23,11 +23,8 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= dcam1394
+MOD_SRCDIR	= $(UTSBASE)/common/io/1394/targets/dcam1394
 
 OBJS		=		\
 		dcam.o		\
@@ -36,23 +33,9 @@ OBJS		=		\
 		dcam_reg.o	\
 		dcam_ring_buff.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# depends on misc/s1394
-LDFLAGS		+= -Nmisc/s1394
+DEPENDS_ON	= misc/s1394
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -62,25 +45,4 @@ LDFLAGS		+= -Nmisc/s1394
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/1394/targets/dcam1394/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

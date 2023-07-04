@@ -16,61 +16,23 @@
 # Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= skd
-OBJS		= skd.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/skd
+MOD_SRCDIR	= $(UTSBASE)/common/io/skd
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-# Driver depends on blkdev
-#
-LDFLAGS		+= -N drv/blkdev
+DEPENDS_ON	= drv/blkdev
 
-#
-# Overrides
+
 #
 # For now, disable these compiler warnigns; maintainers should endeavor
 # to investigate and remove these for maximum coverage.
 # Please do not carry these forward to new Makefiles.
+#
 CERRWARN	+= -_gcc=-Wno-format
 CERRWARN	+= -_gcc=-Wno-format-extra-args
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/skd/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

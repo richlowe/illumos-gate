@@ -24,11 +24,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-# Define the module and object file sets
-#
 MODULE		= eoib
+MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/eoib
 
 OBJS		=		\
 		eib_adm.o	\
@@ -45,22 +42,8 @@ OBJS		=		\
 		eib_svc.o	\
 		eib_vnic.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Include common rules
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-# Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-# Module specific debug flag
-#
 CPPFLAGS += -DEIB_DEBUG
 
 #
@@ -74,31 +57,6 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/eib_ibt.o := SMOFF += deref_check
 
-#
-# Depends on misc/ibtl
-#
-LDFLAGS	+= -Nmisc/mac -Nmisc/ibtl -Nmisc/ibcm -Nmisc/ibmf
+DEPENDS_ON	= misc/mac misc/ibtl misc/ibcm misc/ibmf
 
-#
-# Default build targets
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ib/clients/eoib/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

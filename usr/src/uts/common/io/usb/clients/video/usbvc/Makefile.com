@@ -25,63 +25,23 @@
 #
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= usbvc
+MOD_SRCDIR	= $(UTSBASE)/common/io/usb/clients/video/usbvc
 OBJS		= usbvc.o usbvc_v4l2.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# depends on misc/usba
-#
-LDFLAGS		+= -Nmisc/usba
+DEPENDS_ON	= misc/usba
 
 #
 # Disable this because it is necessary for this driver
 # and it is surely safe
 #
-
 CERRWARN	+= $(CNOWARN_UNINIT)
 
 # needs work
 SMOFF += deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usb/clients/video/usbvc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

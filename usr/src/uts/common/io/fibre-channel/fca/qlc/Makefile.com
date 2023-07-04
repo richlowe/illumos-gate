@@ -23,12 +23,10 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= qlc
+MOD_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/qlc
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -45,31 +43,18 @@ OBJS		=		\
 		ql_xioctl.o	\
 		ql_fw_table.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/qlc
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	header file directories
-#
 INC_PATH	+= -I$(ROOT)/usr/include
 INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel
 INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/ulp
 INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/fca/qlc
 INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/impl
 
-LDFLAGS		+= -Nmisc/fctl
+DEPENDS_ON	= misc/fctl
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-type-limits
@@ -78,26 +63,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/fibre-channel/fca/qlc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

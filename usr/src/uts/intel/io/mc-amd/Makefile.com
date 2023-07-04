@@ -21,13 +21,10 @@
 # Use is subject to license terms.
 #
 
-
 include $(SRC)/common/mc/mc-amd/Makefile.mcamd
 
-#
-#       Define the module and object file sets.
-#
 MODULE		= mc-amd
+MOD_SRCDIR	= $(UTSBASE)/intel/io/mc-amd
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -43,51 +40,22 @@ OBJS		=		\
 	mcamd_subr.o		\
 	mcamd_pcicfg.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-SRCDIR		= $(UTSBASE)/intel/io/mc-amd
-CONF_SRCDIR	= $(SRCDIR)
+include $(UTSBASE)/Makefile.kmod
+
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
+
+INC_PATH	+= -I$(MOD_SRCDIR) -I$(OBJS_DIR) -I$(SRC)/common/mc/mc-amd
+INC_PATH	+= -I$(SRC)/common/util
 
 MCAMD_OFF_H	= $(OBJS_DIR)/mcamd_off.h
-MCAMD_OFF_SRC	= $(SRCDIR)/mcamd_off.in
+MCAMD_OFF_SRC	= $(MOD_SRCDIR)/mcamd_off.in
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides and additions
-#
-CPPFLAGS	+= -I$(SRCDIR) -I$(OBJS_DIR) -I$(SRC)/common/mc/mc-amd
-CPPFLAGS	+= -I$(SRC)/common/util
 CLEANFILES	+= $(MCAMD_OFF_H)
 CLOBBERFILES	+= $(MCAMD_OFF_H)
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
 
 $(OBJECTS): $(OBJS_DIR) $(MCAMD_OFF_H)
 
@@ -97,10 +65,7 @@ $(OBJECTS): $(OBJS_DIR) $(MCAMD_OFF_H)
 $(MCAMD_OFF_H): $(MCAMD_OFF_SRC)
 	$(OFFSETS_CREATE) <$(MCAMD_OFF_SRC) >$@
 
-#
-#       Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/mc-amd/%.c
 	$(COMPILE.c) -o $@ $<

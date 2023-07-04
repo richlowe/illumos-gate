@@ -13,8 +13,8 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-
 MODULE		= zen_umc
+MOD_SRCDIR	= $(UTSBASE)/intel/io/amdzen/umc
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -22,33 +22,12 @@ OBJS		=			\
 		zen_umc_decode.o	\
 		zen_umc_dump.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INC_PATH	+= -I$(UTSBASE)/intel/io/amdzen/umc -I$(UTSBASE)/intel/io/amdzen
+DEPENDS_ON	= drv/amdzen
 
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-CPPFLAGS	+= -I$(UTSBASE)/intel/io/amdzen/umc -I$(UTSBASE)/intel/io/amdzen
-LDFLAGS		+= -Ndrv/amdzen
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/amdzen/umc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(SRC)/common/mc/zen_umc/%.c
 	$(COMPILE.c) -o $@ $<

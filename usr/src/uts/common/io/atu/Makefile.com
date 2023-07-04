@@ -23,57 +23,18 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= atu
-OBJS		= atu.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/io/atu
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Driver depends on GLDv3 & wifi kernel support module.
-#
-LDFLAGS		+= -Nmisc/mac -Nmisc/net80211 -Nmisc/usba
+DEPENDS_ON	= misc/mac misc/net80211 misc/usba
 
 CERRWARN	+= -_gcc=-Wno-switch
 
 # needs work
 $(OBJS_DIR)/atu.o := SMOFF += all_func_returns
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:               $(UTSBASE)/common/io/atu/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

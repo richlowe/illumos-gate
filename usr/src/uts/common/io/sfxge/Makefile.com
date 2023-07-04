@@ -16,6 +16,7 @@
 
 
 MODULE		= sfxge
+MOD_SRCDIR	= $(UTSBASE)/common/io/sfxge
 
 # illumos specific source
 # XXXMK: Should be sorted, but wsdiff
@@ -82,20 +83,7 @@ OBJS		+=		\
 		hunt_nic.o \
 		hunt_phy.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-# Targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Overrides
-#
+include $(UTSBASE)/Makefile.kmod
 
 INC_PATH += -I$(UTSBASE)/common/io/sfxge -I$(UTSBASE)/common/io/sfxge/common
 
@@ -107,38 +95,13 @@ INC_PATH += -I$(UTSBASE)/common/io/sfxge -I$(UTSBASE)/common/io/sfxge/common
 #
 CPPFLAGS += -U_USE_MTU_UPDATE
 
-#
-# Driver depends on GLDv3 (mac)
-#
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 
 # needs work
 $(OBJS_DIR)/sfxge_ev.o := SMOFF += index_overflow
 SMOFF += all_func_returns
 
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/sfxge/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/sfxge/common/%.c
 	$(COMPILE.c) -o $@ $<

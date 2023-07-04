@@ -24,65 +24,23 @@
 # Use is subject to license terms.
 #
 
-
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= hubd
-OBJS		= hubd.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/io/usb/hubd
 
-SRCDIR		= $(UTSBASE)/common/io/usb/hubd
 CONFIGFILES	= config_map.conf
 ROOTETCUSB	= $(ROOT)/etc/usb
 
-SRCFILES	= $(CONFIGFILES:%=$(SRCDIR)/%)
 ROOTCONFIGFILES	= $(CONFIGFILES:%=$(ROOTETCUSB)/%)
 
 $(ROOTCONFIGFILES):=	FILEMODE = $(CFILEMODE)
 
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INSTALL_DEPS	+= $(ROOTCONFIGFILES)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/usba
 
-#
-# depends on misc/usba
-#
-LDFLAGS         += -Nmisc/usba
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS) $(ROOTCONFIGFILES)
-
-$(ROOTETCUSB)/%: $(ROOTETCUSB) $(SRCDIR)/%
+$(ROOTETCUSB)/%: $(ROOTETCUSB) $(MOD_SRCDIR)/%
 	$(INS.file)
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usb/hubd/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

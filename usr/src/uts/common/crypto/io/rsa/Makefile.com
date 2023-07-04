@@ -26,32 +26,17 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
+MODULE		= rsa
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/rsa
+OBJS		= rsa.o rsa_impl.o pkcs1.o
+ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
+
+include $(UTSBASE)/Makefile.kmod
+
 COM1_DIR = $(COMMONBASE)/bignum
 COM2_DIR = $(COMMONBASE)/crypto
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= rsa
-OBJS		= rsa.o rsa_impl.o pkcs1.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Linkage dependencies
-#
-LDFLAGS += -Ncrypto/md5 -Ncrypto/sha2 -Nmisc/bignum -Nmisc/kcf
+DEPENDS_ON = crypto/md5 crypto/sha2 misc/bignum misc/kcf
 
 CPPFLAGS	+= -I$(COM1_DIR) -I$(COM2_DIR)
 
@@ -63,29 +48,7 @@ CPPFLAGS	+= -I$(COM1_DIR) -I$(COM2_DIR)
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/rsa/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/padding/%.c
 	$(COMPILE.c) -o $@ $<

@@ -26,11 +26,8 @@
 # Copyright 2019, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= elfexec
+MOD_SRCDIR	= $(UTSBASE)/common/exec/elf
 
 intel_OBJS	= elf32.o elf32_notes.o old32_notes.o
 
@@ -42,19 +39,9 @@ OBJS		=			\
 		old_notes.o		\
 		core_shstrtab.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_EXEC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I$(SRC)/common/core
 
@@ -66,29 +53,7 @@ INC_PATH	+= -I$(SRC)/common/core
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/exec/elf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/core/%.c
 	$(COMPILE.c) -o $@ $<

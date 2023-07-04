@@ -15,20 +15,14 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-
 MODULE		= ppt
-OBJS		= ppt.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/intel/io/vmm/io/ppt
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm/io/ppt
-MAPFILE		= $(UTSBASE)/intel/io/vmm/io/ppt/ppt.mapfile
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTMODULE) $(ROOT_CONFFILE)
 
 PRE_INC_PATH	= \
 	-I$(COMPAT)/bhyve \
@@ -39,7 +33,9 @@ PRE_INC_PATH	= \
 INC_PATH	+= -I$(UTSBASE)/intel/io/vmm -I$(UTSBASE)/intel/io/vmm/io
 INC_PATH	+= -I$(UTSBASE)/intel/io/vmm -I$(OBJS_DIR)
 
-LDFLAGS		+= -N drv/vmm -N misc/pcie
+MAPFILE		= $(MOD_SRCDIR)/ppt.mapfile
+
+DEPENDS_ON	= drv/vmm misc/pcie
 LDFLAGS		+= -M $(MAPFILE)
 
 $(OBJS_DIR)/ppt.o := CERRWARN	+= -_gcc=-Wno-unused-variable
@@ -47,20 +43,4 @@ $(OBJS_DIR)/ppt.o := CERRWARN	+= -_gcc=-Wno-unused-variable
 # needs work
 SMOFF += all_func_returns
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/vmm/io/ppt/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

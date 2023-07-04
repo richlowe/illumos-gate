@@ -13,56 +13,21 @@
 # Copyright (c) 2014 Joyent, Inc.  All rights reserved.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= urf
+MOD_SRCDIR	= $(UTSBASE)/common/io/urf
 OBJS		= urf_usbgem.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-CPPFLAGS	+= -I$(UTSBASE)/common/io/usbgem
+INC_PATH	+= -I$(UTSBASE)/common/io/usbgem
 CPPFLAGS	+= -DVERSION=\"2.0.0\"
 CPPFLAGS	+= -DUSBGEM_CONFIG_GLDv3
-CERRWARN	+= $(CNOWARN_UNINIT)
-LDFLAGS		+= -N misc/mac -N drv/ip -N misc/usba -N misc/usbgem
 
+DEPENDS_ON	= misc/mac drv/ip misc/usba misc/usbgem
+
+CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= -_gcc=-Wno-unused-variable
 CERRWARN	+= -_gcc=-Wno-unused-label
 
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/urf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

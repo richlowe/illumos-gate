@@ -21,11 +21,8 @@
 # Use is subject to license terms.
 #
 
-
-#
-#       Define the module and object file sets.
-#
 MODULE		= intel_nhm
+MOD_SRCDIR	= $(UTSBASE)/intel/io/intel_nhm
 
 OBJS		=		\
 		nhm_init.o	\
@@ -35,46 +32,14 @@ OBJS		=		\
 		dimm_topo.o	\
 		intel_nhm.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE      = $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/intel_nhm
+include $(UTSBASE)/Makefile.kmod
 
-#
-#       Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-CPPFLAGS	+=  -I$(UTSBASE)/i86pc
-LDFLAGS		+= -N drv/smbios
+INC_PATH	+= -I$(UTSBASE)/i86pc
+DEPENDS_ON	= drv/smbios
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/intel_nhm/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

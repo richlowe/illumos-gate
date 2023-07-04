@@ -26,11 +26,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xpv
+MOD_SRCDIR	= $(UTSBASE)/i86hvm/io/xpv
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=		\
@@ -43,49 +40,19 @@ OBJS		=		\
 		xenbus_probe.o	\
 		xenbus_xs.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86hvm/io/xpv
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-CPPFLAGS	+= -DHVMPV_XPV_VERS=1
-LDFLAGS		+= -N mach/pcplusmp
+ALL_DEFS	+= -DHVMPV_XPV_VERS=1
+DEPENDS_ON	= mach/pcplusmp
 
 CERRWARN	+= -_gcc=-Wno-unused-label
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/xpv/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xenbus/%.c
 	$(COMPILE.c) -o $@ $<

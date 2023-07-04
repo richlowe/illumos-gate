@@ -26,66 +26,27 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xnf
-OBJS		= xnf.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/xen/io/xnf
 i86xpv_ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 i86hvm_ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
 ROOTMODULE		= $($(UTSMACH)_ROOTMODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 i86hvm_CPPFLAGS	= -DHVMPV_XNF_VERS=1
 CPPFLAGS	+= $($(UTSMACH)_CPPFLAGS)
 
-#
-# Driver depends on MAC & IP
-#
-LDFLAGS		+= -N misc/mac -N drv/ip
-i86hvm_LDFLAGS	= -Ndrv/xpvd -Ndrv/xpv
-LDFLAGS 	+= $($(UTSMACH)_LDFLAGS)
+DEPENDS_ON		= misc/mac drv/ip
+i86hvm_DEPENDS_ON	= drv/xpvd drv/xpv
+DEPENDS_ON	 	+= $($(UTSMACH)_DEPENDS_ON)
 
 #
 # use Solaris specific code in xen public header files
 #
-CFLAGS		+= -D_SOLARIS
+ALL_DEFS		+= -D_SOLARIS
 
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xnf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

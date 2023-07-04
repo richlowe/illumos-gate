@@ -25,11 +25,8 @@
 #
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= idmap
+MOD_SRCDIR	= $(UTSBASE)/common/idmap
 
 # XXXMK: Should be sorted but wsdiff
 OBJS		=		\
@@ -38,50 +35,16 @@ OBJS		=		\
 		idmap_xdr.o	\
 		idmap_cache.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
+
+DEPENDS_ON = sys/doorfs strmod/rpcmod
 
 #
-#	Module dependencies
-#
-LDFLAGS += -Nsys/doorfs -Nstrmod/rpcmod
-
 # Function variables unused for rpcgen-generated code
 # Constant conditions for do { } while (0) macros
 #
 CERRWARN	+= -_gcc=-Wno-unused-variable
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/idmap/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

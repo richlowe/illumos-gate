@@ -15,35 +15,16 @@
 
 
 MODULE		= ccid
+MOD_SRCDIR	= $(UTSBASE)/common/io/usb/clients/ccid
 OBJS		= ccid.o atr.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-CPPFLAGS	+= -I$(SRC)/common/ccid
+INC_PATH	+= -I$(SRC)/common/ccid
 
-LDFLAGS		+= -N misc/usba
+DEPENDS_ON	= misc/usba
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usb/clients/ccid/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/ccid/%.c
 	$(COMPILE.c) -o $@ $<

@@ -24,69 +24,33 @@
 #
 # Copyright (c) 2019, Joyent, Inc.
 
-
-COMDIR	= $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= sha2
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/sha2
+
 # XXXMK: could be in the client makefile were it not for wsdiff
 intel_OBJS	+= sha512-x86_64.o sha256-x86_64.o
 OBJS		=  $($(UTSMACH)_OBJS) sha2.o sha2_mod.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+COMDIR	= $(COMMONBASE)/crypto
+INSTALL_TARGET	+= $(ROOTLINK)
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
+DEPENDS_ON = misc/kcf
 
 CFLAGS += -I$(COMDIR)
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/sha2/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/sha2/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

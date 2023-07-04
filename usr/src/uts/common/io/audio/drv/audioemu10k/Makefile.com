@@ -26,14 +26,9 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= audioemu10k
-OBJS		= audioemu10k.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/io/audio/drv/audioemu10k/
+
 DSP_SRCDIR	= $(UTSBASE)/common/io/audio/drv/audioemu10k/dsp
 DSP_HNAMES	= emu10k_gpr.h emu10k1_dsp.h emu10k2_dsp.h
 DSP_HDRS	= $(DSP_HNAMES:%=$(OBJS_DIR)/%)
@@ -41,18 +36,9 @@ DSP_SNAMES	= emu10k.dsp emu10k1.mac emu10k2.mac
 DSP_SRCS	= $(DSP_SNAMES:%=$(DSP_SRCDIR)/%)
 ASM10K		= $(OBJS_DIR)/asm10k
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS		+= -Ndrv/audio -Nmisc/ac97
+DEPENDS_ON	= drv/audio misc/ac97
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
@@ -66,21 +52,6 @@ $(OBJS_DIR)/emu10k2_dsp.h	:= MODEL10K = SBLIVE
 $(OBJS_DIR)/emu10k2_dsp.h	:= ASM10KFLAGS = -v -2 -P emu10k2
 $(OBJS_DIR)/emu10k2_dsp.h	:= MODEL10K = AUDIGY
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
 $(BINARY):	$(OBJS_DIR)/asm10k $(DSP_HDRS)
 
 $(ASM10K):	$(DSP_SRCDIR)/asm10k.c
@@ -92,11 +63,4 @@ $(DSP_HDRS): $(ASM10K) $(DSP_SRCS)
 
 CLOBBERFILES += $(ASM10K) $(DSP_HDRS)
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/audio/drv/audioemu10k/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

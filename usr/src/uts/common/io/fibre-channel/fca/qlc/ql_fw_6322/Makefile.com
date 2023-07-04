@@ -1,4 +1,3 @@
-
 #
 # CDDL HEADER START
 #
@@ -19,55 +18,19 @@
 #
 # CDDL HEADER END
 #
+
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= qlc_fw_6322
+MOD_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/qlc/ql_fw_6322
 OBJS		= ql_fw_6322.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_QLC_FW_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/qlc/ql_fw_6322
 
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+DEPENDS_ON	= misc/fctl
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS		+= -Nmisc/fctl
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/fibre-channel/fca/qlc/ql_fw_6322/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -26,32 +26,17 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= keysock
+MOD_SRCDIR	= $(UTSBASE)/common/inet/ip/keysock
 OBJS		= keysockddi.o keysock.o keysock_opt_data.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_STRMOD_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/keysock
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Ndrv/ip
+DEPENDS_ON	= drv/ip
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -63,29 +48,8 @@ CERRWARN	+= -_gcc=-Wno-unused-variable
 # needs work
 $(OBJS_DIR)/keysockddi.o := SMOFF += index_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS) $(SISCHECK_DEPS)
-
-clean:		$(CLEAN_DEPS) $(SISCLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS) $(SISCLEAN_DEPS)
-
-install:	$(INSTALL_DEPS) $(SISCHECK_DEPS)
+include $(UTSBASE)/Makefile.sischeck
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_STRMOD_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ip/keysock/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

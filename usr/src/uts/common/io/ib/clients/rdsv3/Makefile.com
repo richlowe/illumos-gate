@@ -24,11 +24,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= rdsv3
+MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/rdsv3
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=			\
@@ -62,19 +59,18 @@ OBJS		=			\
 		rdma.o \
 		rdsv3_af_thr.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CFLAGS		+= $(_XPG4_2)
-
-LDFLAGS		+= -Nfs/sockfs -Nmisc/ksocket -Ndrv/ip -Nmisc/ibtl -Nmisc/ibcm \
-	-Nmisc/sol_ofs
-
-CONF_SRCDIR	= $(UTSBASE)/common/io/ib/clients/rdsv3
-
 #
 #	Include common rules.
 #
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
+
+DEPENDS_ON	=	\
+	fs/sockfs	\
+	misc/ksocket	\
+	drv/ip		\
+	misc/ibtl	\
+	misc/ibcm	\
+	misc/sol_ofs
 
 # CFLAGS		+= -DOFA_SOLARIS
 
@@ -93,32 +89,7 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 SMATCH=off
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ib/clients/rdsv3/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

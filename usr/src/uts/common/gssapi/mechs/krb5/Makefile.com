@@ -27,11 +27,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= kmech_krb5
+MOD_SRCDIR	= $(UTSBASE)/common/gssapi/mechs/krb5
 
 OBJS		= krb5mech.o
 
@@ -157,24 +154,11 @@ OBJS		+=		\
 		init_os_ctx.o	\
 		c_ustime.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_KGSS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Defined kgssapi and md5 as depdencies
-#
-LDFLAGS += -N misc/kgssapi -N misc/md5
+DEPENDS_ON	= misc/kgssapi misc/md5
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -189,98 +173,74 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 SMOFF += indenting
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-KGSSDFLAGS=-I $(UTSBASE)/common/gssapi/include
-KGSSDFLAGS += $(KRB5_DEFS)
-
 INC_PATH += \
+	-I$(UTSBASE)/common/gssapi/include \
 	-I$(UTSBASE)/common/gssapi \
 	-I$(UTSBASE)/common/gssapi/include \
 	-I$(UTSBASE)/common/gssapi/mechs/krb5/include \
 	-I$(SRC)/lib/gss_mechs/mech_krb5/include \
 	-I$(SRC)/lib/gss_mechs/mech_krb5/krb5/krb
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+CPPFLAGS  += $(KRB5_DEFS)
 
 KMECHKRB5_BASE=$(UTSBASE)/common/gssapi/mechs/krb5
 
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/crc32/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
-	$(CTFCONVERT_O)
-
-
-$(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/des/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/arcfour/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/dk/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/enc_provider/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/hash_provider/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/keyhash_provider/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/raw/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/old/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/krb5/krb/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/krb5/os/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/ser_sctx.o := CPPFLAGS += -DPROVIDE_KERNEL_IMPORT=1
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/mech/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/profile/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
+	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

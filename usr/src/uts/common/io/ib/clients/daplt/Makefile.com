@@ -26,36 +26,17 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= daplt
-OBJS		= daplt.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ib/clients/daplt
-LDFLAGS		+= -Nmisc/ibtl -Nmisc/ibcm
+MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/daplt
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+DEPENDS_ON	= misc/ibtl misc/ibcm
 
-#
-# path for header files
-#
-INCLUDE_PATH += -I$(UTSBASE)/common/sys/ib/clients/daplt
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#       Overrides.
-#
+INC_PATH += -I$(UTSBASE)/common/sys/ib/clients/daplt
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -70,26 +51,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/daplt.o := SMOFF += all_func_returns,deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ib/clients/daplt/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

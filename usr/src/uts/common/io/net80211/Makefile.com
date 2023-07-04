@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= net80211
+MOD_SRCDIR	= $(UTSBASE)/common/io/net80211
 
 # XXXMK: Should be sorted but wsdiff
 OBJS		=			\
@@ -48,24 +45,11 @@ OBJS		=			\
 		net80211_ht.o		\
 		net80211_amrr.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-LDFLAGS		+= -Nmisc/mac -Nmac/mac_wifi -Ndrv/ip
+DEPENDS_ON	= misc/mac mac/mac_wifi drv/ip
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -79,26 +63,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/net80211/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

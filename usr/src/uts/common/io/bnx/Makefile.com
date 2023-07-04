@@ -13,11 +13,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= bnx
+MOD_SRCDIR		= $(UTSBASE)/common/io/bnx
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -41,21 +38,10 @@ OBJS		=		\
 	 	bnx_lm_recv.o	\
 	 	bnx_lm_send.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-SRCDIR		= $(UTSBASE)/common/io/bnx
-CONF_SRCDIR	= $(SRCDIR)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 #
 #	Driver-specific flags
@@ -73,38 +59,16 @@ CPPFLAGS += \
 	-DLITTLE_ENDIAN_HOST \
 	-D__LITTLE_ENDIAN
 
-CPPFLAGS += \
-	-I$(SRCDIR) \
-	-I$(SRCDIR)/include \
-	-I$(SRCDIR)/570x/common/include \
-	-I$(SRCDIR)/570x/driver/common/lmdev
+INC_PATH += \
+	-I$(MOD_SRCDIR) \
+	-I$(MOD_SRCDIR)/include \
+	-I$(MOD_SRCDIR)/570x/common/include \
+	-I$(MOD_SRCDIR)/570x/driver/common/lmdev
 
 
-LDFLAGS		+= -Ndrv/ip -Nmisc/mac
+DEPENDS_ON	= drv/ip misc/mac
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/bnx/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/bnx/570x/driver/common/lmdev/%.c
 	$(COMPILE.c) -o $@ $<

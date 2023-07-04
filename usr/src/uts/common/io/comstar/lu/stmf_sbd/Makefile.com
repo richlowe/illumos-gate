@@ -23,11 +23,8 @@
 # Copyright (c) 2016 by Delphix. All rights reserved.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= stmf_sbd
+MOD_SRCDIR	= $(UTSBASE)/common/io/comstar/lu/stmf_sbd
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -37,25 +34,12 @@ OBJS		=		\
 		sbd_zvol.o	\
 		ats_copy_mgr.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/comstar/lu/stmf_sbd
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides and depends_on
-#
-LDFLAGS		+= -Ndrv/stmf -Nfs/zfs
+DEPENDS_ON	= drv/stmf fs/zfs
 
 INC_PATH	+= -I$(UTSBASE)/common/fs/zfs
 
@@ -68,26 +52,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/comstar/lu/stmf_sbd/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

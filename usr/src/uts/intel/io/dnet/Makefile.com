@@ -26,25 +26,11 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= dnet
+MOD_SRCDIR	= $(UTSBASE)/intel/io/dnet
 OBJS		= dnet.o dnet_mii.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -58,28 +44,6 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 $(OBJS_DIR)/dnet.o := SMOFF += index_overflow
 $(OBJS_DIR)/dnet_mii.o := SMOFF += all_func_returns
 
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/dnet/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

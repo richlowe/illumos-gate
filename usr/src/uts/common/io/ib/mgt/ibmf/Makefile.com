@@ -26,11 +26,9 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ibmf
+MOD_SRCDIR	= $(UTSBASE)/common/io/ib/mgt/ibmf
+ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -53,24 +51,9 @@ OBJS		=			\
 		ibmf_saa_utils.o \
 		ibmf_saa_events.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-LDFLAGS		+= -Nmisc/ibtl
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
+DEPENDS_ON	= misc/ibtl
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -82,26 +65,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ib/mgt/ibmf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

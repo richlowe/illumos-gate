@@ -25,66 +25,22 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= kmech_dummy
+MOD_SRCDIR	= $(UTSBASE)/common/gssapi/mechs/dummy
 OBJS		= dmech.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_KGSS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 
-#
-# Define dependency on kgssapi
-#
-LDFLAGS += -N misc/kgssapi
+DEPENDS_ON	= misc/kgssapi
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+INC_PATH +=	-I $(UTSBASE)/common/gssapi/include
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+# kmech_dummy is not installed, even in the proto area
+INSTALL_TARGET = $(BINARY)
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-
-#
-# Do not install the dummy GSS-API mechanism in the proto area
-# for a normal build
-#
-install:	def
-
-#
-# handy target to manually force the install
-#
-do_install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-KGSSDFLAGS=-I $(UTSBASE)/common/gssapi/include
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/gssapi/mechs/dummy/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

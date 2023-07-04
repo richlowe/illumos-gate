@@ -25,11 +25,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ipgpc
+MOD_SRCDIR	= $(UTSBASE)/common/ipp/ipgpc
 
 # XXXMK: Should be sorted but wsdiff
 OBJS		=		\
@@ -40,21 +37,11 @@ OBJS		=		\
 		table.o		\
 		ba_table.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_IPP_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS += -Ndrv/ip
+DEPENDS_ON	= drv/ip
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -66,26 +53,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/filters.o := SMOFF += deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/ipp/ipgpc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

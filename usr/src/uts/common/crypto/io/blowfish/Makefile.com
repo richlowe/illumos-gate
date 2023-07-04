@@ -28,31 +28,16 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-COM_DIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= blowfish
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/blowfish
 OBJS		= blowfish.o blowfish_impl.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+COM_DIR = $(COMMONBASE)/crypto
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
+DEPENDS_ON	= misc/kcf
 
 CPPFLAGS	+= -I$(COM_DIR)
 CPPFLAGS	+= -DCRYPTO_PROVIDER_NAME=\"$(MODULE)\"
@@ -68,30 +53,7 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 $(OBJS_DIR)/blowfish_impl.o := SMOFF += precedence
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/blowfish/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/blowfish/%.c
 	$(COMPILE.c) -o $@ $<

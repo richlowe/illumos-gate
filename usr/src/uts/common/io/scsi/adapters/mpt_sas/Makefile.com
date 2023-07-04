@@ -22,12 +22,10 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= mpt_sas
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/mpt_sas
 
 OBJS		=		\
 		mptsas.o	\
@@ -36,25 +34,12 @@ OBJS		=		\
 		mptsas_raid.o	\
 		mptsas_smhba.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/mpt_sas/
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS += -Nmisc/scsi -Ndrv/scsi_vhci -Nmisc/sata
+DEPENDS_ON	= misc/scsi drv/scsi_vhci misc/sata
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
@@ -62,26 +47,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 $(OBJS_DIR)/mptsas_raid.o := SMOFF += index_overflow
 $(OBJS_DIR)/mptsas.o := SMOFF += deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/scsi/adapters/mpt_sas/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

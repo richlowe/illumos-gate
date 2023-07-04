@@ -26,33 +26,20 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-# Define the module and object file sets.
-#
 MODULE		= dld
+MOD_SRCDIR	= $(UTSBASE)/common/io/dld
 OBJS		= dld_drv.o dld_proto.o dld_str.o dld_flow.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/dld
+
 ROOTDEVLINK	= $(ROOT)/dev/$(MODULE)
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-# Overrides
-#
-LDFLAGS		+= -N misc/dls -N misc/mac
 INC_PATH	+= -I$(UTSBASE)/common/io/bpf
+
+DEPENDS_ON	= misc/dls misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -67,29 +54,9 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 $(OBJS_DIR)/dld_proto.o := SMOFF += signed
 $(OBJS_DIR)/dld_drv.o := SMOFF += cast_assign
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
 install:	$(INSTALL_DEPS) $(ROOTDEVLINK)
 
 $(ROOTDEVLINK):
 	-$(RM) $@; $(SYMLINK) ../devices/pseudo/$(@F)@0:ctl $@
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/dld/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

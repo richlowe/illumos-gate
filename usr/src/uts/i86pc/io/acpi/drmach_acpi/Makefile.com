@@ -30,61 +30,21 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= drmach_acpi
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/acpi/drmach_acpi
 OBJS		= drmach_acpi.o dr_util.o drmach_err.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
+include $(UTSBASE)/Makefile.kmod
 
 $(OBJS_DIR)/drmach_acpi.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
 
-#
-# module dependencies
-#
-LDFLAGS += -Nmisc/acpica -Nmisc/acpidev
+DEPENDS_ON = misc/acpica misc/acpidev
 
 CLEANFILES +=	$(DRMACH_GENERR)
 CLEANFILES +=	$(DRMACH_IO)/drmach_err.c
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 SBD_IOCTL	= $(UTSBASE)/i86pc/sys/sbd_ioctl.h
 DR_IO		= $(UTSBASE)/i86pc/io/dr
@@ -100,11 +60,6 @@ $(DRMACH_IO)/drmach_err.c:	$(DRMACH_GENERR) $(SBD_IOCTL)
 	$(RM) $@
 	$(DRMACH_GENERR) EX86 < $(SBD_IOCTL) > $(DRMACH_IO)/drmach_err.c
 
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/acpi/drmach_acpi/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/dr/%.c
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/dr/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

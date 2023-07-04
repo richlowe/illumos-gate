@@ -25,29 +25,17 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
-COM_DIR = $(SRC)/common/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= dprov
-OBJS		= dprov.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/dprov
 ROOTLINK	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 LINK_TARGET	= ../../../kernel/drv/$(SUBDIR64)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/crypto/io/dprov
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+COM_DIR = $(SRC)/common/crypto
+
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
 #
 # Linkage dependencies
@@ -56,7 +44,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
 # on KCF. This is a special case since the test pseudo driver dprov
 # uses private KCF functions.
 #
-LDFLAGS += -Nmisc/kcf
+DEPENDS_ON = misc/kcf
 
 INC_PATH	+= -I$(COM_DIR)
 
@@ -69,29 +57,7 @@ CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_CRYPTO_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln -s $(LINK_TARGET) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/dprov/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
