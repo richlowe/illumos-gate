@@ -23,16 +23,18 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
+# XXXARM: This builds a different, qemu-specific mmio based virtio.  We need
+# to arrange to set this all up in the virtio/Makefile.com or have
+# virtio/Makefile.pci and virtio/Makefile.mmio or something like that.
+
 UTSBASE	= ../../..
 
 #
 #	Define the module and object file sets.
 #
 MODULE		= virtio
-OBJECTS		= $(PLATVIRTIO_OBJS:%=$(OBJS_DIR)/%)
+OBJS		= virtio_main.o virtio_dma.o virtio_mmio.o
+OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_VIRT_MISC_DIR)/$(MODULE)
 
 #
@@ -81,3 +83,8 @@ install:	$(INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/armv8/virt/Makefile.targ
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/virtio/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+

@@ -23,35 +23,6 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-UTSBASE	= ../..
-include $(UTSBASE)/../Makefile.master
-
-MODULE		= rootnex
-OBJECTS		= $(ROOTNEX_OBJS:%=$(OBJS_DIR)/%)
-GENASSYM_CF	= $(UTSBASE)/armv8/ml/genassym.cf
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-
-include ../Makefile.armv8
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-CERRWARN	+= -_gcc=-Wno-uninitialized
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= -_gcc=-Wno-unused-variable
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include ../Makefile.targ
+UTSBASE = ../..
+UTSMACH = armv8
+include $(SRC)/uts/armv8/io/rootnex/Makefile.com

@@ -23,72 +23,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
-#	This makefile drives the production of the xnbo
-#	network driver kernel module.
-#
-#	i86xpv architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= xnbo
-OBJECTS		= $(XNBO_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-
-#
-# Driver depends on xnb and mac.
-#
-LDFLAGS		+= -N misc/xnb -N misc/mac
-
-INC_PATH	+= -I$(UTSBASE)/common/xen/io/xnbo
-INC_PATH	+= -I$(UTSBASE)/common/xen/io/xnb
-
-#
-# use Solaris specific code in xen public header files
-#
-CFLAGS		+= -D_SOLARIS
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86xpv/Makefile.targ
-
+UTSBASE = ../..
+UTSMACH = i86xpv
+include $(SRC)/uts/common/xen/io/xnbo/Makefile.com

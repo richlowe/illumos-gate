@@ -24,60 +24,6 @@
 #
 # Copyright (c) 2019, Joyent, Inc.
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COMDIR	= $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= sha2
-OBJECTS		= $(SHA2_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
-
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
-
-CFLAGS += -I$(COMDIR)
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/crypto/io/sha2/Makefile.com

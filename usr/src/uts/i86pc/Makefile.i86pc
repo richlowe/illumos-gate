@@ -81,9 +81,11 @@ GENLIB		 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
 #	(Such as a machine specific optimization, which preserves the
 #	interfaces.)
 #
-include $(UTSBASE)/$(PLATFORM)/Makefile.files
-include $(UTSBASE)/intel/Makefile.files
-include $(UTSBASE)/common/Makefile.files
+
+ALL_DEFS	+= -Di86pc
+INC_PATH	+= -I$(UTSBASE)/i86pc -I$(SRC)/common
+INC_PATH	+= -I$(UTSBASE)/i86xpv -I$(UTSBASE)/common/xen
+INC_PATH	+= -I$(UTSBASE)/intel
 
 #
 #	Include machine independent rules. Note that this does not imply
@@ -122,7 +124,7 @@ ASFLAGS_XARCH		= $(ASFLAGS_XARCH_$(CLASS))
 ASFLAGS			= $(ASFLAGS_XARCH)
 ASFLAGS			+= $(ASFLAGS_uts)
 
-AS_INC_PATH		+= -I$(DSF_DIR)/$(OBJS_DIR)
+INC_PATH		+= -I$(DSF_DIR)/$(OBJS_DIR)
 
 #
 #	The following must be defined for all implementations:

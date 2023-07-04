@@ -24,66 +24,6 @@
 #
 # Copyright (c) 2019, Joyent, Inc.
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COM_DIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= kcf
-OBJECTS		= $(KCF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-CFLAGS		+= -I$(COM_DIR)
-AS_CPPFLAGS	+= -I../../$(PLATFORM)
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CFLAGS		+= $(CCVERBOSE)
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-label
-
-# needs work
-SMOFF += all_func_returns,signed_integer_overflow_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
-
-$(OBJS_DIR)/%.o: $(COM_DIR)/modes/amd64/%.s
-	$(COMPILE.s) -o $@ $(COM_DIR)/modes/amd64/${@F:.o=.s}
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/crypto/core/Makefile.com

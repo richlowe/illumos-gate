@@ -18,63 +18,15 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2014 Garrett D'Amore <garrett@damore.org>
+
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COM_DIR = $(COMMONBASE)/crypto/aes
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= aes
-OBJECTS		= $(AESPROV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
-
-CPPFLAGS	+= -I$(COM_DIR) -I$(COM_DIR)/..
-CPPFLAGS	+= -DCRYPTO_PROVIDER_NAME=\"$(MODULE)\"
-AS_CPPFLAGS	+= -I../../$(PLATFORM)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/crypto/io/aes/Makefile.com

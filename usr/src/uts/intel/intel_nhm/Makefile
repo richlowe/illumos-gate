@@ -21,57 +21,6 @@
 # Use is subject to license terms.
 #
 
-#
-# Intel Nehalem memory controller module
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
 UTSBASE = ../..
-
-#
-#       Define the module and object file sets.
-#
-MODULE		= intel_nhm
-#
-ROOTMODULE      = $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/intel_nhm
-
-#
-#       Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-OBJECTS		= $(INTEL_NHM_OBJS:%=$(OBJS_DIR)/%)
-
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-CPPFLAGS	+=  -I$(UTSBASE)/i86pc
-LDFLAGS		+= -N drv/smbios
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include ../Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/intel/io/intel_nhm/Makefile.com

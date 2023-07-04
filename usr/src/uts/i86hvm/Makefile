@@ -19,7 +19,7 @@
 # CDDL HEADER END
 #
 #
-# uts/i86hvm/Makefile
+# uts/i86pc/i86hvm/Makefile
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
@@ -33,7 +33,7 @@
 #
 #	Path to the base of the uts directory tree (usually /usr/src/uts).
 #
-UTSBASE	= ..
+UTSBASE	= $(SRC)/uts
 
 #
 #	Include common rules.

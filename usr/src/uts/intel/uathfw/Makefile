@@ -22,73 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-#
-#	This makefile drives the production of the hwa1480_fw kernel module.
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= uathfw
-OBJECTS		= $(UATHFW_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-FWOBJ		= $(OBJS_DIR)/$(MODULE).o
-
-OBJECTS		+= $(FWOBJ)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS) $(FWOBJ)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-# customized section for transforming firmware binary
-ELFWRAP		= elfwrap
-BINSRC		= $(UTSBASE)/common/io/uath/uath_fw
-BINDEST		= $(UTSBASE)/intel/uathfw
-BINCOPY		= uathbin
-ORIGIN_SRC	= uathfw.bin
-
-#get build type, 32/64
-WRAPTYPE	= $(CLASS:%=-%)
-
-#set elfwrap option
-WRAPOPT		= $(WRAPTYPE:-32=)
-
-$(FWOBJ):
-	cp $(BINSRC)/$(ORIGIN_SRC) $(BINDEST)/$(BINCOPY)
-	$(ELFWRAP) $(WRAPOPT) -o $@ $(BINDEST)/$(BINCOPY)
-
-CLOBBERFILES += $(BINDEST)/$(BINCOPY)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
-
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/uath/uath_fw/Makefile.com

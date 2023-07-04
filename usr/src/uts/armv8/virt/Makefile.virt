@@ -19,8 +19,6 @@ VIRT_KMODS	=	\
 	todpl031	\
 	virtio
 
-include $(UTSBASE)/armv8/virt/Makefile.files
-
 #
 #	Include common rules.
 #

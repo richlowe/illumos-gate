@@ -19,69 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/aarch64/md5/Makefile
-#
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COMDIR = $(COMMONBASE)/crypto/md5
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= md5
-OBJECTS		= $(MD5_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
-
-#
-# md5 depends on the kcf framework
-#
-LDFLAGS		+= -Nmisc/kcf
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
-
-md5_amd64.s: $(COMDIR)/amd64/md5_amd64.pl
-	$(PERL) $? $@
-
-$(OBJS_DIR)/md5_amd64.o: md5_amd64.s
-	$(COMPILE.s) -o $@ md5_amd64.s
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/crypto/io/md5/Makefile.com

@@ -14,33 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE          = overlay
-OBJECTS         = $(OVERLAY_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE      = $(ROOT_DRV_DIR)/$(MODULE)
-
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-ALL_TARGET      = $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/overlay
-MAPFILE		= $(UTSBASE)/common/io/overlay/overlay.mapfile
-
-LDFLAGS += -Nmisc/mac -Ndrv/dld -Nmisc/dls -Nmisc/ksocket
-
-# needs work
-SMATCH=off
-
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/overlay/Makefile.com

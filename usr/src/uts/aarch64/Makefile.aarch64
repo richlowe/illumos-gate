@@ -59,35 +59,6 @@ GENLIB		 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
 MODSTUBS_O	 = $(MODSTUBS_DIR)/$(OBJS_DIR)/modstubs.o
 
 #
-#	Include the makefiles which define build rule templates, the
-#	collection of files per module, and a few specific flags. Note
-#	that order is significant, just as with an include path. The
-#	first build rule template which matches the files name will be
-#	used. By including these in order from most machine dependent
-#	to most machine independent, we allow a machine dependent file
-#	to be used in preference over a machine independent version
-#	(Such as a machine specific optimization, which preserves the
-#	interfaces.)
-#
-include $(UTSBASE)/aarch64/Makefile.files
-include $(UTSBASE)/common/Makefile.files
-
-#
-# ----- TRANSITIONAL SECTION --------------------------------------------------
-#
-
-#
-#	Not everything which *should* be a module is a module yet. The
-#	following is a list of such objects which are currently part of
-#	genunix but which might someday become kmods.  This must be
-#	defined before we include Makefile.uts, or else genunix's build
-#	won't be as parallel as we might like.
-#
-NOT_YET_KMODS	 = $(OLDPTY_OBJS) $(PTY_OBJS) $(VCONS_CONF_OBJS) $(MOD_OBJS)
-
-#
-# ----- END OF TRANSITIONAL SECTION -------------------------------------------
-#
 #	Include machine independent rules. Note that this does not imply
 #	that the resulting module from rules in Makefile.uts is	machine
 #	independent. Only that the build rules are machine independent.
@@ -152,6 +123,8 @@ IF_DEBUG_OBJ		= $(DEBUG_COND_$(BUILD_TYPE))$(OBJS_DIR)/
 
 $(IF_DEBUG_OBJ)syscall.o	:=	DEBUG_DEFS	+= -DSYSCALLTRACE
 $(IF_DEBUG_OBJ)clock.o		:=	DEBUG_DEFS	+= -DKSLICE=1
+
+INC_PATH	+= -I$(UTSBASE)/aarch64
 
 #
 #	Collect the preprocessor definitions to be associated with *all*

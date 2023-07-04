@@ -23,59 +23,6 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= todpl031
-OBJECTS		= $(TODPL031_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_VIRT_TOD_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/armv8/virt/Makefile.virt
-
-#
-#       Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CFLAGS += $(CCVERBOSE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/armv8/virt/Makefile.targ
+UTSBASE = ../../..
+UTSMACH = armv8
+include $(SRC)/uts/armv8/virt/io/todpl031/Makefile.com

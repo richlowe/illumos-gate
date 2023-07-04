@@ -22,56 +22,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# uts/aarch64/audiovia823x/Makefile
-#
-#
-#	This makefile drives the production of the Via 823x audio driver
-#	(audiovia823x) kernel module.
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
+
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= audiovia823x
-OBJECTS		= $(AUDIOVIA823X_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Depends on drv/audio and misc/ac97
-#
-LDFLAGS		+= -Ndrv/audio -Nmisc/ac97
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/audio/drv/audiovia823x/Makefile.com

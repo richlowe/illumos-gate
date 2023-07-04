@@ -24,38 +24,6 @@
 # Use is subject to license terms.
 #
 
-UTSBASE	= ../..
-
-MODULE		= fasttrap
-OBJECTS		= $(FASTTRAP_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/dtrace
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
-
-CFLAGS		+= $(CCVERBOSE)
-CPPFLAGS	+= -I$(SRC)/common
-LDFLAGS		+= -Ndrv/dtrace
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_DTRACE_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/dtrace/fasttrap/Makefile.com

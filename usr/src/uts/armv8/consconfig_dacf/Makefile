@@ -23,30 +23,7 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
+UTSBASE = ../..
+UTSMACH = armv8
+include $(SRC)/uts/common/io/consconfig_dacf/Makefile.com
 
-UTSBASE	= ../..
-include $(UTSBASE)/../Makefile.master
-
-MODULE		= consconfig_dacf
-OBJECTS		= $(CONSCONFIG_DACF_OBJS:%=$(OBJS_DIR)/%)
-GENASSYM_CF	= $(UTSBASE)/armv8/ml/genassym.cf
-ROOTMODULE	= $(ROOT_PSM_DACF_DIR)/$(MODULE)
-
-include ../Makefile.armv8
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include ../Makefile.targ

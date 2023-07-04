@@ -14,34 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE		= ena
-OBJECTS		= $(ENA_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ena
-
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-CPPFLAGS	+= -I$(UTSBASE)/common/io/ena
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINBAR) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-LDFLAGS		+= -N misc/mac
-
-MAPFILES	+= ddi mac kernel
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/Makefile.mapfile
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/ena/Makefile.com

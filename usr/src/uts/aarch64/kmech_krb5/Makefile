@@ -22,87 +22,11 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
-#
 # Copyright (c) 2018, Joyent, Inc.
-
-#	This makefile drives the production of the gl_kmech_krb5 kernel module.
-#
-#	aarch64 implementation architecture dependent
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= kmech_krb5
-OBJECTS		= $(KGSS_KRB5_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_KGSS_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Defined kgssapi and md5 as depdencies
-#
-LDFLAGS += -N misc/kgssapi -N misc/md5
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
 #
 
-CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-# needs work
-SMOFF += indenting
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-KMECHKRB5_BASE=$(UTSBASE)/common/gssapi/mechs/krb5
-KGSSDFLAGS=-I $(UTSBASE)/common/gssapi/include
-KGSSDFLAGS += $(KRB5_DEFS)
-
-$(OBJS_DIR)/%.o:		$(KMECHKRB5_BASE)/crypto/crc32/%.c
-	$(COMPILE.c) $(KGSSDFLAGS) -o $@ $<
-	$(CTFCONVERT_O)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
-
-INC_PATH += \
-	-I$(UTSBASE)/common/gssapi \
-	-I$(UTSBASE)/common/gssapi/include \
-	-I$(UTSBASE)/common/gssapi/mechs/krb5/include \
-	-I$(SRC)/lib/gss_mechs/mech_krb5/include \
-	-I$(SRC)/lib/gss_mechs/mech_krb5/krb5/krb
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/gssapi/mechs/krb5/Makefile.com

@@ -19,61 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/intel/vgatext/Makefile
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# 
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 #
 
-#
-#	This makefile drives the production of the VGA text driver
-#
-#	intel implementation architecture independent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= vgatext
-OBJECTS		= $(VGATEXT_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-GFX_DIR		= $(UTSBASE)/i86pc/io/gfx_private
-INC_PATH	+= -I$(GFX_DIR)
-
-LDFLAGS +=	-Nmisc/gfx_private
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) # $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/intel/io/vgatext/Makefile.com

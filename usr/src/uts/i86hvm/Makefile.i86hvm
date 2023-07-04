@@ -43,7 +43,8 @@ HVM_DRV_KMODS=	cmdk rtls xdf xnf xpv xpvd
 HVM_MISC_KMODS=	hvm_bootstrap
 HVM_KMODS=	$(HVM_DRV_KMODS) $(HVM_MISC_KMODS)
 
-include $(UTSBASE)/i86hvm/Makefile.files
+INC_PATH +=	-I$(UTSBASE)/common/xen -I$(UTSBASE)/i86hvm
+
 #
 #       Include common rules.
 #

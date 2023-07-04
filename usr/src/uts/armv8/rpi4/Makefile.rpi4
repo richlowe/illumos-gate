@@ -43,8 +43,6 @@ RPI4_KMODS	=	\
 	genet		\
 	bcm2711-emmc2
 
-include $(UTSBASE)/armv8/rpi4/Makefile.files
-
 #
 #	Include common rules.
 #

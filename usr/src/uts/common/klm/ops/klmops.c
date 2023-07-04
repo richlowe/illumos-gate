@@ -28,7 +28,7 @@
 
 #include <nfs/lm.h>
 #include <rpcsvc/nlm_prot.h>
-#include "nlm_impl.h"
+#include "../nlm_impl.h"
 
 
 static struct modlmisc modlmisc = {

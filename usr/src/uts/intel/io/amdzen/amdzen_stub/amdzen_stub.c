@@ -25,7 +25,7 @@
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
 
-#include "amdzen.h"
+#include "../amdzen.h"
 
 static int
 amdzen_stub_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)

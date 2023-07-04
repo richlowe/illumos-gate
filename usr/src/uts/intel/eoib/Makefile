@@ -21,75 +21,9 @@
 
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
-#
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-# This makefile drives the production of the EoIB Nexus driver
-#
-# intel architecture dependent
 #
 
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts)
-#
-UTSBASE	= ../..
-
-#
-# Define the module and object file sets
-#
-MODULE		= eoib
-OBJECTS		= $(EOIB_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-# Include common rules
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-# Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-# Module specific debug flag
-#
-CPPFLAGS += -DEIB_DEBUG
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CFLAGS		+= $(CCVERBOSE)
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-$(OBJS_DIR)/eib_ibt.o := SMOFF += deref_check
-
-#
-# Depends on misc/ibtl
-#
-LDFLAGS	+= -Nmisc/mac -Nmisc/ibtl -Nmisc/ibcm -Nmisc/ibmf
-
-#
-# Default build targets
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/ib/clients/eoib/Makefile.com

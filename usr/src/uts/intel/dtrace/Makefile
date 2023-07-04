@@ -23,49 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-UTSBASE	= ../..
-
-MODULE		= dtrace
-OBJECTS		= $(DTRACE_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/dtrace/dtrace
-
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
 #
 
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-type-limits
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-$(OBJS_DIR)/dtrace.o := SMOFF += signed_integer_overflow_check,deref_check
-
-CPPFLAGS	+= -I$(SRC)/common/util
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-AS_INC_PATH	+= -I$(DSF_DIR)/$(OBJS_DIR)
-
-ASSYM_H		= $(DSF_DIR)/$(OBJS_DIR)/assym.h
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(BINARY):	$(ASSYM_H)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/dtrace/dtrace/Makefile.com

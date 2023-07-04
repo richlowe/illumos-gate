@@ -21,76 +21,11 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright 2016 OmniTI Computer Consulting, Inc.  All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
 #
-# uts/intel/ixgbe/Makefile
-#
-#	This makefile drives the production of the ixgbe
-#	network driver kernel module.
-#
-#	intel architecture dependent
-#
 
-#
-#	Paths to the base of the uts directory trees
-#
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= ixgbe
-OBJECTS		= $(IXGBE_OBJS:%=$(OBJS_DIR)/%)
-OBJECTS		+= $(IXGBE_INTC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ixgbe
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-INC_PATH	+= -I$(UTSBASE)/common/io/ixgbe
-INC_PATH	+= -I$(UTSBASE)/common/io/ixgbe/core
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-unused-value
-
-# 3rd party code
-SMOFF += all_func_returns
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Driver depends on MAC
-#
-LDFLAGS		+= -N misc/mac
-MAPFILES	+= ddi mac random kernel
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/Makefile.mapfile
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/common/io/ixgbe/Makefile.com

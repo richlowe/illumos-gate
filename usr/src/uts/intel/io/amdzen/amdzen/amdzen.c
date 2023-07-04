@@ -172,8 +172,8 @@
 #include <sys/cpuvar.h>
 
 #include <sys/amdzen/df.h>
-#include "amdzen_client.h"
-#include "amdzen.h"
+#include "../amdzen_client.h"
+#include "../amdzen.h"
 
 amdzen_t *amdzen_data;
 

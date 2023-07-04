@@ -20,63 +20,9 @@
 #
 #
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
-#
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
 #
 
-
-UTSBASE	= ../..
-
-ARCHDIR:sh = cd ..; basename `pwd`
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= srpt
-OBJECTS		= $(SRPT_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/comstar/port/srpt
-
-#
-#	Include common rules.
-#
-include ../Makefile.$(ARCHDIR)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides and depends_on
-#
-LDFLAGS		+= -Ndrv/stmf -Nmisc/ibtl -Nmisc/ibcm
-
-CERRWARN	+= -_gcc=-Wno-unused-label
-
-# needs work
-$(OBJS_DIR)/srpt_stp.o := SMOFF += all_func_returns
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include ../Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/comstar/port/srpt/Makefile.com

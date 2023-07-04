@@ -19,71 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/intel/vuidm3p/Makefile
-#
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-#	This makefile drives the production of the vuidm3p streams kernel
-#	module.
-#
-#	intel architecture dependent
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= vuidm3p
-OBJECTS		= $(VUIDM3P_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_STRMOD_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-INC_PATH	+= -I$(UTSBASE)/common/io/vuidmice
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-ALL_DEFS	+= -DVUIDM3P
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-SMOFF += deref_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/vuidmice/m3p/Makefile.com

@@ -23,73 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-# This makefile drives the production of the rwd driver kernel module.
-#
-# i86pc architecture dependent
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= mwl
-OBJECTS		= $(MWL_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Driver depends on GLDv3 & wifi kernel support module.
-#
-LDFLAGS		+= -Nmisc/mac -Nmisc/net80211
-
-#
-#	Overrides
-#
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-unused-value
-
-# needs work
-SMOFF += return_cast
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
-
-#
-#	If you have any special case that general
-#	Makefile rules don't serve for you, just do
-#	it yourself.
-#
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/mwl/Makefile.com

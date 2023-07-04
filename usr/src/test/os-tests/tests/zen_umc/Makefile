@@ -49,8 +49,8 @@ CSTD = $(CSTD_GNU99)
 # required (dependency of the zen_umc.h header).
 #
 CPPFLAGS += -DDEBUG
-CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen
 CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen/umc
+CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen
 CPPFLAGS += -I$(SRC)/uts/intel/
 
 CMDS = $(PROG:%=$(TESTDIR)/%)

@@ -19,67 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/i86pc/xpv/Makefile
-#
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-#
-#	This makefile drives the production of the xpv
-#	driver, which provides the necessary infrastructure for
-#	paravirtualized front-end drivers in HVM systems.
-#
-#	i86pc implementation architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= xpv
-OBJECTS		= $(XPV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86hvm/io/xpv
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86hvm/Makefile.i86hvm
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-CPPFLAGS	+= -DHVMPV_XPV_VERS=1
-LDFLAGS		+= -N mach/pcplusmp
-
-CERRWARN	+= -_gcc=-Wno-unused-label
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86hvm/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86hvm
+include $(SRC)/uts/i86hvm/io/xpv/Makefile.com

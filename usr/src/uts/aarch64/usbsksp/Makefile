@@ -25,51 +25,7 @@
 #
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
-# uts/aarch64/usbsksp/Makefile
 
-#
-#	This makefile drives the production of the Keyspan USB Serial
-#	Adapter driver.
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= usbsksp
-OBJECTS		= $(USBSER_KEYSPAN_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-LDFLAGS         += -Nmisc/usba -Nmisc/usbser -Nmisc/usbs49_fw
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
-
-CERRWARN	+= $(CNOWARN_UNINIT)
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/usb/clients/usbser/usbser_keyspan/Makefile.com

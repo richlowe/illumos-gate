@@ -22,63 +22,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# uts/intel/audiots/Makefile
-#
-#	This makefile drives the production of the T2 audio driver
-#	(audiots) kernel module.
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
+
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= audiots
-OBJECTS		= $(AUDIOTS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CFLAGS		+= $(CCVERBOSE)
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-#
-#	Depends on misc/ac97 and drv/audio
-#
-LDFLAGS		+= -N misc/ac97 -N drv/audio
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/common/io/audio/drv/audiots/Makefile.com

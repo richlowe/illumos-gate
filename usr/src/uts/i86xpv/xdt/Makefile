@@ -24,32 +24,6 @@
 # Use is subject to license terms.
 #
 
-UTSBASE	= ../..
-
-MODULE		= xdt
-OBJECTS		= $(XDT_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/xen/dtrace
-
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-LDFLAGS		+= -Ndrv/dtrace
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/i86xpv/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86xpv
+include $(SRC)/uts/common/xen/dtrace/Makefile.com

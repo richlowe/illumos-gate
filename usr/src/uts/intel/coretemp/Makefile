@@ -14,34 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE		= coretemp
-OBJECTS		= $(CORETEMP_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/coretemp
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Because we need to use cross calls directly, we must include the
-# definitions below. Once CMI rdmsr routines have been fixed, we can
-# remove this and move out of the platform specific driver world.
-#
-CPPFLAGS	+= -I$(UTSBASE)/i86pc/
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/intel/io/coretemp/Makefile.com
