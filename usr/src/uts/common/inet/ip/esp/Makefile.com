@@ -25,58 +25,22 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ipsecesp
+MOD_SRCDIR	= $(UTSBASE)/common/inet/ip/esp
 OBJS		= ipsecespddi.o ipsecesp.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_STRMOD_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/esp
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Ndrv/ip -Ndrv/ipsecah -Nmisc/kcf
+DEPENDS_ON	 = drv/ip drv/ipsecah misc/kcf
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS) $(SISCHECK_DEPS)
-
-clean:		$(CLEAN_DEPS) $(SISCLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS) $(SISCLEAN_DEPS)
-
-install:	$(INSTALL_DEPS) $(SISCHECK_DEPS)
+include $(UTSBASE)/Makefile.sischeck
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_STRMOD_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ip/esp/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

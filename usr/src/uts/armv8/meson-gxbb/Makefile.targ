@@ -26,42 +26,6 @@
 IMPLEMENTED_PLATFORM    = Amlogic,meson-gxbb
 
 #
-# Platform targets
-#
-$(ROOT_MESON_GXBB_DIR): $(ROOT_PLAT_DIR)
-	-$(INS.dir)
-
-$(ROOT_MESON_GXBB_MOD_DIR):
-	-$(INS.dir)
-
-$(ROOT_MESON_GXBB_KERN_DIR):
-	-$(INS.dir)
-
-$(ROOT_MESON_GXBB_DRV_DIR):
-	-$(INS.dir)
-
-$(ROOT_MESON_GXBB_MISC_DIR):
-	-$(INS.dir)
-
-$(ROOT_MESON_GXBB_TOD_DIR):
-	-$(INS.dir)
-
-$(ROOT_MESON_GXBB_MOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_MOD_DIR) FRC
-	$(INS.file)
-
-$(ROOT_MESON_GXBB_KERN_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_KERN_DIR) FRC
-	$(INS.file)
-
-$(ROOT_MESON_GXBB_MISC_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_MISC_DIR) FRC
-	$(INS.file)
-
-$(ROOT_MESON_GXBB_DRV_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_DRV_DIR) FRC
-	$(INS.file)
-
-$(ROOT_MESON_GXBB_TOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_TOD_DIR) FRC
-	$(INS.file)
-
-#
 #	Include common targets.
 #
 include $(UTSBASE)/armv8/Makefile.targ

@@ -18,7 +18,6 @@
 #
 # CDDL HEADER END
 #
-#
 
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
@@ -26,12 +25,10 @@
 #
 # Copyright 2016 Joyent, Inc.
 # Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= pci_autoconfig
+MOD_SRCDIR	= $(UTSBASE)/intel/io/pci/pci_autoconfig
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -40,50 +37,16 @@ OBJS		=			\
 		pcie_nvidia.o		\
 		pci_memlist.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
+
+include $(UTSBASE)/Makefile.kmod
+
 INC_PATH	+= -I$(UTSBASE)/i86pc
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+DEPENDS_ON	= misc/pcie misc/pci_prd
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Depends on the platform's resource discovery and PCI-E framework
-#
-LDFLAGS		+= -Nmisc/pcie -Nmisc/pci_prd
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/pciex/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/pci/pci_autoconfig/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

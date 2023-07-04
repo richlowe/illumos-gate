@@ -1,4 +1,3 @@
-
 #
 # CDDL HEADER START
 #
@@ -25,52 +24,13 @@
 # Use is subject to license terms.
 #
 
-
-
-#
-# Define the module and object file sets.
-#
 MODULE		= scsi_vhci_f_sym_hds
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/scsi_vhci/fops/sym_hds/
 OBJS		= sym_hds.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_SCSI_VHCI_DIR)/$(MODULE)
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Define targets.
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/scsi drv/scsi_vhci
 
-#
-# Note dependancy on misc/scsi.
-#
-LDFLAGS += -Nmisc/scsi -Ndrv/scsi_vhci
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/scsi/adapters/scsi_vhci/fops/sym_hds/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

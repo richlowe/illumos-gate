@@ -28,9 +28,6 @@
 UTSBASE	= ../../..
 include $(UTSBASE)/../Makefile.master
 
-#
-#	Define the module and object file sets.
-#
 UNIX		= unix
 
 # XXXARM: I might be mis-using this.  These are what would be the platmod, if

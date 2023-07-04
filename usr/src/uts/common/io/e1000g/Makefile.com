@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= e1000g
+MOD_SRCDIR	= $(UTSBASE)/common/io/e1000g
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=		\
@@ -48,14 +45,7 @@ include		$(SRC)/uts/common/io/e1000api/Makefile.com
 
 OBJS		+= $(E1000API_OBJS)
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/e1000g
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 CFLAGS += -D_KERNEL -Di386   -DNEWSTAT -DNOMUT -DRCVWORKAROUND \
 	  -DINTEL_IP \
@@ -71,43 +61,12 @@ CERRWARN	+= -_gcc=-Wno-unused-variable
 
 SMOFF += all_func_returns,indenting,shift_to_zero
 
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+DEPENDS_ON	= misc/mac
+MAPFILES	= ddi mac
 
-#
-# Driver depends on MAC
-#
-LDFLAGS		+= -N misc/mac
-MAPFILES	+= ddi mac
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
 include $(UTSBASE)/Makefile.mapfile
 include $(UTSBASE)/common/io/e1000api/Makefile.targ
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/e1000g/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

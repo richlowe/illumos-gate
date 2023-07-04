@@ -18,7 +18,6 @@
 #
 # CDDL HEADER END
 #
-#
 
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
@@ -27,59 +26,21 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pcieb
+MOD_SRCDIR	= $(UTSBASE)/common/io/pciex/pcieb
 
 intel_OBJS	= pcieb_x86.o
 OBJS		+= $($(UTSMACH)_OBJS) pcieb.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/pciex/pcieb
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+DEPENDS_ON	= misc/pcie
 
-#
-# depends on misc/pcie
-#
-LDFLAGS		+= -Nmisc/pcie
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/io/pciex/pcieb/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/pciex/pcieb/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

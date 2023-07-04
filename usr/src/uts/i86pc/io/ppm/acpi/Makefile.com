@@ -28,61 +28,24 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= acpippm
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/ppm/acpi
 OBJS		= acpippm.o acpisleep.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io/ppm/acpi
+
+include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I$(UTSBASE)/i86pc/sys/acpi
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 $(OBJS_DIR)/acpippm.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
 $(OBJS_DIR)/acpisleep.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
 
 CFLAGS += $(CCVERBOSE)
-
 CERRWARN	+= -_gcc=-Wno-unused-variable
 
-#
-# Declare dependency on misc/acpica
-#
-LDFLAGS += -N misc/acpica
+DEPENDS_ON	= misc/acpica
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS) $(CONF_INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/ppm/acpi/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

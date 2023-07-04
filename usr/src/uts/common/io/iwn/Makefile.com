@@ -14,6 +14,13 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
+MODULE		= iwn
+MOD_SRCDIR	= $(UTSBASE)/common/io/iwn
+OBJS		= if_iwn.o
+ROOTFIRMWARE	= $(FWFILES:%=$(ROOT_FIRMWARE_DIR)/$(MODULE)/%)
+
+include $(UTSBASE)/Makefile.kmod
+
 
 #
 #	Define firmware location & files
@@ -25,51 +32,11 @@ FWFILES	= iwlwifi-100-5.ucode iwlwifi-1000-3.ucode iwlwifi-105-6.ucode \
 	iwlwifi-6000-4.ucode iwlwifi-6000g2a-6.ucode iwlwifi-6000g2b-6.ucode \
 	iwlwifi-6050-5.ucode
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= iwn
-OBJS		= if_iwn.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-ROOTFIRMWARE	= $(FWFILES:%=$(ROOT_FIRMWARE_DIR)/$(MODULE)/%)
+INSTALL_TARGET	+= $(ROOTFIRMWARE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTFIRMWARE)
-
-LDFLAGS         += -Nmisc/mac -Nmisc/net80211 -Ndrv/random -Ndrv/ip
+DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
 
 # needs work
 SMOFF += all_func_returns
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:                $(UTSBASE)/common/io/iwn/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -26,61 +26,28 @@
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-COMDIR = $(COMMONBASE)/crypto/md5
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= md5
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/md5
+
 # XXXMK: Could be in the client makefile if not for wsdiff
 intel_OBJS	= md5_amd64.o
 OBJS		= $($(UTSMACH)_OBJS) md5.o md5_mod.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+COMDIR = $(COMMONBASE)/crypto/md5
 
-#
-# md5 depends on the kcf framework
-#
-LDFLAGS		+= -Nmisc/kcf
+INSTALL_TARGET	+= $(ROOTLINK)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+DEPENDS_ON	= misc/kcf
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/md5/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/md5/%.c
 	$(COMPILE.c) -o $@ $<

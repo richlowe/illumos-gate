@@ -827,3 +827,7 @@ opt/onbld		aarch64
 # The ipmi driver is not built or delivered, but we still need the header at
 # build time
 usr/include/sys/ipmi.h	aarch64
+
+# The dummy kgss mech is not shipped
+kernel/misc/kgss/amd64/kmech_dummy	i386
+kernel/misc/kgss/aarch64/kmech_dummy	aarch64

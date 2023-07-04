@@ -24,11 +24,8 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= objfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/objfs
 
 # XXXMK: should be sorted but wsdiff
 OBJS		=		\
@@ -38,23 +35,10 @@ OBJS		=		\
 		objfs_odir.o	\
 		objfs_data.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
 CFLAGS		+= $(CCVERBOSE)
 
 #
@@ -62,7 +46,6 @@ CFLAGS		+= $(CCVERBOSE)
 # to investigate and remove these for maximum coverage.
 # Please do not carry these forward to new Makefiles.
 #
-
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= $(CNOWARN_UNINIT)
@@ -70,26 +53,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/objfs_vfs.o := SMOFF += signed_integer_overflow_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/objfs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

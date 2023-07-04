@@ -26,11 +26,8 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= klmmod
+MOD_SRCDIR	= $(UTSBASE)/common/klm
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=			\
@@ -49,24 +46,11 @@ OBJS		=			\
 		sm_inter_clnt.o		\
 		sm_inter_xdr.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-LDFLAGS		+= -Nstrmod/rpcmod -Nfs/nfs
+DEPENDS_ON	= strmod/rpcmod fs/nfs
 LDFLAGS		+= -M $(UTSBASE)/common/klm/mapfile
 
 #
@@ -77,26 +61,4 @@ CERRWARN	+= -_gcc=-Wno-switch
 # needs work
 $(OBJS_DIR)/nlm_service.o := SMOFF += signed_integer_overflow_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/klm/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

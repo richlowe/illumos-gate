@@ -24,57 +24,20 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= mega_sas
+MOD_SRCDIR     = $(UTSBASE)/common/io/mega_sas
 OBJS		= megaraid_sas.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/common/io/mega_sas
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS		+= -Nmisc/scsi
+DEPENDS_ON	= misc/scsi
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
 # needs work
 $(OBJS_DIR)/megaraid_sas.o := SMOFF += snprintf_overflow,all_func_returns,index_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/mega_sas/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

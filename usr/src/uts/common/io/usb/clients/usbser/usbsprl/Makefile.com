@@ -25,47 +25,14 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= usbsprl
+MOD_SRCDIR	= $(UTSBASE)/common/io/usb/clients/usbser/usbsprl
 OBJS		= usbser_pl2303.o pl2303_dsd.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-LDFLAGS         += -Nmisc/usba -Nmisc/usbser
+DEPENDS_ON	= misc/usba misc/usbser
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usb/clients/usbser/usbsprl/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

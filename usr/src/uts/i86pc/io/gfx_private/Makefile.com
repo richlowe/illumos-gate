@@ -28,11 +28,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= gfx_private
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/gfx_private
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=		\
@@ -46,24 +43,11 @@ OBJS		=		\
 		gfxp_fb.o	\
 		gfxp_bitmap.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 
-#
-#	dependency
-#
-LDFLAGS	+=      -Nmisc/pci_autoconfig
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/pci_autoconfig
 
 #
 # For now, disable these checks; maintainers should endeavor
@@ -73,30 +57,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-# NB: This really is i86pc, not $(UTSMACH).  We build this on i86xpv as well
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/gfx_private/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/vga/%.c
 	$(COMPILE.c) -o $@ $<

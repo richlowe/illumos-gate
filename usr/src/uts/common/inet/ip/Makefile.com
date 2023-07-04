@@ -25,11 +25,8 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ip
+MOD_SRCDIR	= $(UTSBASE)/common/inet/ip
 
 # IP
 # XXXMK: should be sorted, but wsdiff
@@ -157,23 +154,19 @@ OBJS		+=		\
 OBJS		+=		\
 		inet_hash.o
 
-
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_STRMOD_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip
+
+include $(UTSBASE)/Makefile.kmod
+
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
+
 
 #
-#	Include common rules.
+# For now, disable these warnings; maintainers should endeavor
+# to investigate and remove these for maximum coverage.
+# Please do not carry these forward to new Makefiles.
 #
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
-
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-unused-function
@@ -201,55 +194,29 @@ INC_PATH	+= -I$(UTSBASE)/common/io/bpf
 # swrand as it needs random numbers early on during boot before
 # kCF subsystem can load swrand.
 #
-LDFLAGS		+= -Nmisc/md5 -Ncrypto/swrand -Nmisc/hook -Nmisc/neti
+DEPENDS_ON	= misc/md5 crypto/swrand misc/hook misc/neti
 
 #
 # Depends on the congestion control framework for TCP connections.
 # We make several different algorithms available by default.
 #
-LDFLAGS		+= -N misc/cc -N cc/cc_sunreno -N cc/cc_newreno -N cc/cc_cubic
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS) $(SISCHECK_DEPS)
-
-clean:		$(CLEAN_DEPS) $(SISCLEAN_DEPS)
+DEPENDS_ON	+= misc/cc cc/cc_sunreno cc/cc_newreno cc/cc_cubic
 
 # Need to clobber all build types due to ipctf.a
-clobber:	$(CLOBBER_DEPS) $(SISCLEAN_DEPS) \
-		clobber.obj64 clobber.debug64
+CLOBBER_DEPS	+= clobber.obj64 clobber.debug64
 
-
-install:	$(INSTALL_DEPS) $(SISCHECK_DEPS)
+include $(UTSBASE)/Makefile.sischeck
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_STRMOD_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ilb/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ip/%.c
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/inet/ilb/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 

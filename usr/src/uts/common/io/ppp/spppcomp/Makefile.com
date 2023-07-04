@@ -18,7 +18,7 @@
 #
 # CDDL HEADER END
 #
-#
+
 
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
@@ -28,11 +28,8 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= spppcomp
+MOD_SRCDIR	= $(UTSBASE)/common/io/ppp/spppcomp
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=		\
@@ -43,28 +40,14 @@ OBJS		=		\
 		vjcompress.o	\
 		zlib.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_STRMOD_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 #
 #	Internal build definitions
 #
 CPPFLAGS	+= -DINTERNAL_BUILD -DSOL2 -DMUX_FRAME
-
-#
-#	Additional compiler definitions
-#
 INC_PATH	+= -I$(UTSBASE)/common/io/ppp/common
 
 CERRWARN	+= -_gcc=-Wno-parentheses
@@ -73,31 +56,6 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 SMOFF += indenting,index_overflow
 
-#
-# Depends on sppp
-#
-LDFLAGS         += -N drv/sppp
+DEPENDS_ON	= drv/sppp
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ppp/spppcomp/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

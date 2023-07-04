@@ -54,7 +54,6 @@ ALL_TARGET	= $(ASSYM_H) $(KDI_ASSYM_H)
 #
 DSF_DIR		= .
 
-
 #
 #	Overrides
 #

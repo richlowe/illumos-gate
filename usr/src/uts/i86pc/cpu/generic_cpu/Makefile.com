@@ -23,11 +23,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#       Define the module and object file sets.
-#
 MODULE		= cpu.generic
+MOD_SRCDIR	= $(UTSBASE)/i86pc/cpu/generic_cpu
 
 OBJS		=		\
 		gcpu_main.o	\
@@ -38,44 +35,15 @@ i86pc_OBJS	= gcpu_poll_ntv.o
 i86xpv_OBJS	= gcpu_mca_xpv.o gcpu_poll_xpv.o
 
 OBJS		+= $($(UTSMACH)_OBJS)
-
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE      = $(ROOT_PSM_CPU_DIR)/$(MODULE)
 
-#
-#       Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 i86xpv_CERRWARN = -_gcc=-Wno-unused-variable
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= $($(UTSMACH)_CERRWARN)
 
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
-
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 # NB: This really is i86pc, not $(UTSMACH).  The i86xpv shares these sources
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/cpu/generic_cpu/%.c

@@ -27,11 +27,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pci
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/pci
 
 OBJS		=		\
 		pci.o		\
@@ -39,30 +36,17 @@ OBJS		=		\
 		pci_kstats.o	\
 		pci_tools.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# depends on misc/pci_autoconfig misc/pcihp
-#
-LDFLAGS		+= -Nmisc/pcihp
+DEPENDS_ON	= misc/pcihp
 
 #
 # Name of the module is needed by the source, to distinguish from other
 # PCI/PCI-express nexi
 #
-CFLAGS		+= -D_MODULE_NAME="\"$(MODULE)\""
+ALL_DEFS	+= -D_MODULE_NAME="\"$(MODULE)\""
 
 #
 # For now, disable these checks; maintainers should endeavor
@@ -73,26 +57,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-function
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pci/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

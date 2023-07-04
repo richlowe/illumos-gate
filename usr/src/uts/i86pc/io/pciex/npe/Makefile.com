@@ -27,11 +27,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= npe
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/pciex/npe
 
 OBJS		=		\
 		npe.o		\
@@ -40,29 +37,18 @@ OBJS		=		\
 		pci_kstats.o	\
 		pci_tools.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-i86xpv_LDFLAGS = -N misc/acpica
-LDFLAGS	+= $($(UTSMACH)_LDFLAGS) -Nmisc/pcie
-
+i86xpv_DEPENDS_ON = misc/acpica
+DEPENDS_ON	= $($(UTSMACH)_DEPENDS_ON) misc/pcie
 
 #
 # Name of the module is needed by the source, to distinguish from other
 # PCI/PCI-express nexi
 #
-CFLAGS		+= -D_MODULE_NAME="\"$(MODULE)\""
+ALL_DEFS	+= -D_MODULE_NAME="\"$(MODULE)\""
 
 #
 # For now, disable these checks; maintainers should endeavor
@@ -73,31 +59,8 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-unused-function
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+include $(UTSBASE)/Makefile.kmod.targ
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-# NB: This really is i86pc, not $(UTSMACH).  We build this on i86xpv as well
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pci/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pciex/npe/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

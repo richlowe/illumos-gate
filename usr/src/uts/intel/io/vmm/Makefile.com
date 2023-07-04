@@ -15,8 +15,8 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-
 MODULE		= vmm
+MOD_SRCDIR	= $(UTSBASE)/intel/io/vmm
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -57,38 +57,15 @@ OBJS		=			\
 	 	vmm_zsd.o		\
 	 	vmm_time_support.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
+include $(UTSBASE)/Makefile.kmod
 include $(UTSBASE)/intel/io/vmm/Makefile.vmm
 
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-.PARALLEL:	$(OBJECTS)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/vmm/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/vmm/amd/%.c
 	$(COMPILE.c) -o $@ $<

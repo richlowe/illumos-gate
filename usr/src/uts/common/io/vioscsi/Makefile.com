@@ -14,38 +14,14 @@
 # Copyright 2022 RackTop Systems, Inc.
 #
 
+MODULE		= vioscsi
+MOD_SRCDIR	= $(UTSBASE)/common/io/vioscsi
 
-MODULE=		vioscsi
-OBJS=		vioscsi.o
-OBJECTS=	$(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE=	$(ROOT_DRV_DIR)/$(MODULE)
+include		$(UTSBASE)/Makefile.kmod
 
-include		$(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+DEPENDS_ON	= misc/scsi misc/virtio
 
-ALL_TARGET=	$(BINARY)
-INSTALL_TARGET=	$(BINARY) $(ROOTMODULE)
+INC_PATH        += -I$(UTSBASE)/common/io/virtio \
+	-I$(UTSBASE)/common/io/vioscsi
 
-LDFLAGS	+=	-Nmisc/scsi -Nmisc/virtio
-
-#
-# Includes
-#
-INC_PATH        += -I$(UTSBASE)/common/io/virtio -I$(UTSBASE)/common/io/vioscsi
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include		$(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/vioscsi/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include		$(UTSBASE)/Makefile.kmod.targ

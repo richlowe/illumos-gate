@@ -13,34 +13,13 @@
 # Copyright 2015 Joyent, Inc.
 #
 
-
 MODULE          = vxlan
+MOD_SRCDIR	= $(UTSBASE)/common/io/overlay/plugins/vxlan
 OBJS		= overlay_vxlan.o
-OBJECTS         = $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE      = $(ROOT_OVERLAY_DIR)/$(MODULE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= drv/overlay drv/ip
 
-LDFLAGS += -Ndrv/overlay -Ndrv/ip
-
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/overlay/plugins/vxlan/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

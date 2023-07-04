@@ -24,63 +24,18 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xnbo
-OBJS		= xnbo.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/xen/io/xnbo
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-
-#
-# Driver depends on xnb and mac.
-#
-LDFLAGS		+= -N misc/xnb -N misc/mac
+DEPENDS_ON	= misc/xnb misc/mac
 
 #
 # use Solaris specific code in xen public header files
 #
-CFLAGS		+= -D_SOLARIS
+ALL_DEFS	+= -D_SOLARIS
 INC_PATH	+= -I$(SRC)/uts/common/xen/io/xnb
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xnbo/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

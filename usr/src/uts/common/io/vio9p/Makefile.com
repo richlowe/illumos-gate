@@ -13,56 +13,13 @@
 # Copyright 2022 Oxide Computer Company
 #
 
+MODULE		= vio9p
+MOD_SRCDIR	= $(UTSBASE)/common/io/vio9p
 
-#
-# Define the module and object file sets.
-#
-MODULE =		vio9p
-OBJS =			vio9p.o
-OBJECTS =		$(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE =		$(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INC_PATH	+= -I$(UTSBASE)/common/io/virtio
 
-#
-# Define targets
-#
-ALL_TARGET =		$(BINARY)
-INSTALL_TARGET =	$(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/virtio
 
-#
-# Overrides
-#
-INC_PATH +=		-I$(UTSBASE)/common/io/virtio
-
-#
-# Driver depends on virtio
-#
-LDFLAGS +=		-N misc/virtio
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/vio9p/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

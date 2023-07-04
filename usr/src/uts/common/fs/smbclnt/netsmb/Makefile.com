@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= nsmb
+MOD_SRCDIR	= $(UTSBASE)/common/fs/smbclnt/netsmb
 
 # XXXMK: should be sorted, but wsdiff
 OBJS		=		\
@@ -52,43 +49,21 @@ OBJS		=		\
 		subr_mchain.o	\
 		nsmb_sign_kcf.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/fs/smbclnt/netsmb
 OFFSETS_SRC	= $(CONF_SRCDIR)/offsets.in
 IOC_CHECK_H	= $(OBJS_DIR)/ioc_check.h
 
 #
 #	Include common rules.
 #
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(ALL_TARGET_$(OBJS_DIR))
-INSTALL_TARGET	= $(INSTALL_TARGET_$(OBJS_DIR))
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Overrides.
-#
-#	We need some unusual overrides here so we'll
-#	build ioc_check.h for both 32-bit/64-bit,
-#	but only build 64-bit binaries.
-#
-
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-ALL_TARGET_debug64	= $(BINARY) $(SRC_CONFILE)
-ALL_TARGET_obj64	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET_debug64	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-INSTALL_TARGET_obj64	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Now the normal overrides...
-#
 INC_PATH	+= -I$(UTSBASE)/common/fs/smbclnt
-LDFLAGS         += -Ncrypto/md4 -Ncrypto/md5 -Nmisc/tlimod
+
+DEPENDS_ON      = crypto/md4 crypto/md5 misc/tlimod
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -103,29 +78,7 @@ SMOFF += all_func_returns
 # needs work
 SMOFF += signed,deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/smbclnt/netsmb/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 #
 # Create ioc_check.h and compare with the saved

@@ -23,29 +23,14 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= emlxs_fw
-OBJS		= emlxs_fw.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/emlxs/fw
 ROOTMODULE	= $(ROOT_EMLXS_FW_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/emlxs
 
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-intel_EMLXS_FLAGS             = -DEMLXS_I386
+intel_EMLXS_FLAGS	= -DEMLXS_I386
+aarch64_EMLXS_FLAGS	= -DEMLXS_AARCH64
 EMLXS_FLAGS		+= $($(UTSMACH)_EMLXS_FLAGS)
 EMLXS_FLAGS             += -DS11
 EMLXS_FLAGS             += -DVERSION=\"11\"
@@ -56,28 +41,6 @@ CFLAGS	                += $(EMLXS_CFLAGS) -DEMLXS_ARCH=\"$(CLASS)\"
 
 INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/fca/emlxs
 
-LDFLAGS		+= -Nmisc/fctl
+DEPENDS_ON	= misc/fctl
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/fibre-channel/fca/emlxs/fw/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

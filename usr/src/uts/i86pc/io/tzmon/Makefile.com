@@ -27,34 +27,18 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= tzmon
-OBJS		= tzmon.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io/tzmon
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/tzmon
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEBUG_FLGS      =
-$(NOT_RELEASE_BUILD)DEBUG_DEFS	+= $(DEBUG_FLGS)
-
-CPPFLAGS	+= -DSUNDDI
+ALL_DEFS	+= -DSUNDDI
 CERRWARN	+= -_gcc=-Wno-unused-function
 
-LDFLAGS		+= -N misc/acpica
+DEPENDS_ON	= misc/acpica
 
 #
 # For now, disable these checks; maintainers should endeavor
@@ -63,26 +47,4 @@ LDFLAGS		+= -N misc/acpica
 #
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/tzmon/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

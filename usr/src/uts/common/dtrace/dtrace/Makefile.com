@@ -26,21 +26,17 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
 MODULE		= dtrace
+MOD_SRCDIR	= $(UTSBASE)/common/dtrace/dtrace
 OBJS		= dtrace.o dtrace_isa.o dtrace_asm.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/dtrace/dtrace
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # For now, disable these warnings; maintainers should endeavor
 # to investigate and remove these for maximum coverage.
 # Please do not carry these forward to new Makefiles.
 #
-
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-type-limits
 CERRWARN	+= $(CNOWARN_UNINIT)
@@ -50,27 +46,15 @@ $(OBJS_DIR)/dtrace.o := SMOFF += signed_integer_overflow_check,deref_check
 
 CPPFLAGS	+= -I$(SRC)/common/util
 
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-INC_PATH	+= -I$(DSF_DIR)/$(OBJS_DIR)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
+INC_PATH	+= -I$(DSF_DIR)/$(OBJS_DIR)
 ASSYM_H		= $(DSF_DIR)/$(OBJS_DIR)/assym.h
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(BINARY):	$(ASSYM_H)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/dtrace/%.c
 	$(COMPILE.c) -o $@ $<
@@ -78,7 +62,3 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/dtrace/%.c
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/dtrace/%.S
 	$(COMPILE.s) -o $@ $<
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/dtrace/dtrace/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

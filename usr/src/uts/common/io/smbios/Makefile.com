@@ -27,35 +27,15 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
 MODULE 		= smbios
-OBJS		= smbios.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE 	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR 	= $(UTSBASE)/common/io/smbios
+MOD_SRCDIR 	= $(UTSBASE)/common/io/smbios
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET = $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 # needs work
 SMOFF += signed_integer_overflow_check
 
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/smbios/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

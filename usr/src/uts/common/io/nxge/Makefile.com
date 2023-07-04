@@ -23,11 +23,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= nxge
+MOD_SRCDIR	= $(UTSBASE)/common/io/nxge
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -67,20 +64,10 @@ OBJS 		+=		\
 		npi_fflp.o	\
 		npi_vir.o
 
-OBJECTS		=  $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/nxge
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 #
 # Include nxge specific header files
@@ -90,7 +77,7 @@ INC_PATH	+= -I$(UTSBASE)/common/io/nxge/npi
 INC_PATH	+= -I$(UTSBASE)/common/sys/nxge
 # XXXARM: suspicious, but also true on intel
 INC_PATH	+= -I$(UTSBASE)/sun4v
-CFLAGS += -DSOLARIS
+CFLAGS 		+= -DSOLARIS
 
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-parentheses
@@ -101,34 +88,9 @@ CERRWARN	+= -_gcc=-Wno-type-limits
 $(OBJS_DIR)/nxge_hw.o := SMOFF += deref_check
 $(OBJS_DIR)/npi_txc.o := SMOFF += shift_to_zero
 
-#
-#	Driver depends on mac & IP
-#
-LDFLAGS		+= -N misc/mac -N drv/ip
+DEPENDS_ON	= misc/mac drv/ip
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/nxge/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/nxge/npi/%.c
 	$(COMPILE.c) -o $@ $<

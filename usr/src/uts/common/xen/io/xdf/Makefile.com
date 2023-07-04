@@ -24,32 +24,17 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xdf
-OBJS		= xdf.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/xen/io/xdf
 i86xpv_ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 i86hvm_ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
 ROOTMODULE		= $($(UTSMACH)_ROOTMODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-# Overrides
-LDFLAGS		+= -Nmisc/cmlb
-i86hvm_LDFLAGS	=  -Ndrv/xpvd -Ndrv/xpv
-LDFLAGS		+= $($(UTSMACH)_LDFLAGS)
+DEPENDS_ON		= misc/cmlb
+i86hvm_DEPENDS_ON	= drv/xpvd drv/xpv
+DEPENDS_ON		+= $($(UTSMACH)_DEPENDS_ON)
 
 i86hvm_CPPFLAGS = -DHVMPV_XDF_VERS=2
 CPPFLAGS	+= $($(UTSMACH)_CPPFLAGS)
@@ -59,27 +44,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $($(UTSMACH)_CERRWARN)
 
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xdf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

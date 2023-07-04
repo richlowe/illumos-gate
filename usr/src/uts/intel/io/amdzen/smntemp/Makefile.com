@@ -9,37 +9,12 @@
 # http://www.illumos.org/license/CDDL.
 #
 
-#
-# Copyright 2020 Oxide Computer company
-#
-
-
 MODULE		= smntemp
-OBJS		= smntemp.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/intel/io/amdzen/smntemp
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-CPPFLAGS	+= -I$(UTSBASE)/intel/io/amdzen
-LDFLAGS		+= -Ndrv/amdzen
+INC_PATH	+= -I$(UTSBASE)/intel/io/amdzen
+DEPENDS_ON	= drv/amdzen
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/amdzen/smntemp/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

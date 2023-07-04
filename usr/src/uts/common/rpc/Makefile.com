@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= rpcmod
+MOD_SRCDIR	= $(UTSBASE)/common/rpc
 
 # XXXMK: should be sorted but wsdiff
 OBJS		=		\
@@ -57,32 +54,20 @@ OBJS		=		\
 		rdma_subr.o	\
 		xdrrdma_sizeof.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_STRMOD_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SYS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+INSTALL_TARGET	+= $(ROOTLINK)
 
-#
-#	depends_on
-#
-LDFLAGS		+= -Nmisc/tlimod
+DEPENDS_ON	= misc/tlimod
 
 #
 # For now, disable these warnings; maintainers should endeavor
 # to investigate and remove these for maximum coverage.
 # Please do not carry these forward to new Makefiles.
 #
-
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-switch
@@ -93,29 +78,7 @@ CERRWARN	+= -_gcc=-Wno-unused-function
 # needs work
 SMOFF += all_func_returns,indenting,no_if_block,deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
 $(ROOTLINK):	$(ROOT_SYS_DIR) $(ROOTMODULE)
 		-$(RM) $@; ln $(ROOTMODULE) $@
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/rpc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
