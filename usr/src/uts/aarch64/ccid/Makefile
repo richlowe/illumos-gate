@@ -14,29 +14,5 @@
 #
 
 UTSBASE = ../..
-
-MODULE		= ccid
-OBJECTS		= $(CCID_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-CPPFLAGS	+= -I$(SRC)/common/ccid
-
-LDFLAGS		+= -N misc/usba
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/usb/clients/ccid/Makefile.com

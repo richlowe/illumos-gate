@@ -23,65 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
 #
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE		= ../..
-COMMON_BASE	= ../../../common
 
-
-ARCHDIR:sh = cd ..; basename `pwd`
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= qlge
-OBJECTS		= $(QLGE_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include ../Makefile.$(ARCHDIR)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides and depends_on
-#
-MODSTUBS_DIR	 = $(OBJS_DIR)
-
-INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/fca/qlge
-
-LDFLAGS		+= -Nmisc/mac -Ndrv/ip
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-$(OBJS_DIR)/qlge.o := SMOFF += deref_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include ../Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/fibre-channel/fca/qlge/Makefile.com

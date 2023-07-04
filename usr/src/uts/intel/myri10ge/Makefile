@@ -20,67 +20,9 @@
 #
 #
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
-#
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE		= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= myri10ge
-
-OBJECTS		+= $(MYRI10GE_OBJS:%=$(OBJS_DIR)/%)
-
-
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	    = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
-
-#
-# Overrides
 #
 
-# needs work
-SMATCH=off
-
-INC_PATH  += -I$(UTSBASE)/common/io/myri10ge -I$(UTSBASE)/common/io/myri10ge/firmware
-
-CFLAGS    += -DSOLARIS_S11
-
-#
-# Driver depends on MAC
-#
-LDFLAGS	  += -N misc/mac -N drv/ip
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		    $(DEF_DEPS)
-
-all:		    $(ALL_DEPS)
-
-clean:		  $(CLEAN_DEPS)
-
-clobber:	  $(CLOBBER_DEPS)
-
-install:	  $(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/myri10ge/Makefile.com

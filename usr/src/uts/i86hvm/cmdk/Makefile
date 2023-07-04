@@ -24,28 +24,8 @@
 # Use is subject to license terms.
 #
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+#
 
-UTSBASE=	../..
-
-MODULE=		cmdk
-OBJECTS=	$(PV_CMDK_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE=	$(ROOT_HVM_DRV_DIR)/$(MODULE)
-
-include		$(UTSBASE)/i86hvm/Makefile.i86hvm
-
-ALL_TARGET=	$(BINARY)
-INSTALL_TARGET=	$(BINARY) $(ROOTMODULE)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include		$(UTSBASE)/i86hvm/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86hvm
+include $(SRC)/uts/i86hvm/io/cmdk/Makefile.com

@@ -22,61 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# This makefile drives the production of emlxs_fw firmware module.
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= emlxs_fw
-OBJECTS		= $(EMLXS_FW_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_EMLXS_FW_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/emlxs
-
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/Makefile.uts
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-EMLXS_FLAGS             = -DEMLXS_I386
-EMLXS_FLAGS             += -DS11
-EMLXS_FLAGS             += -DVERSION=\"11\"
-EMLXS_FLAGS             += -DMACH=\"$(MACH)\"
-EMLXS_CFLAGS            = $(EMLXS_FLAGS)
-EMLXS_LFLAGS            = $(EMLXS_FLAGS)
-CFLAGS	                += $(EMLXS_CFLAGS) -DEMLXS_ARCH=\"$(CLASS)\"
-
-INC_PATH	+= -I$(UTSBASE)/common/sys/fibre-channel/fca/emlxs
-
-LDFLAGS		+= -Nmisc/fctl
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/fibre-channel/fca/emlxs/fw/Makefile.com

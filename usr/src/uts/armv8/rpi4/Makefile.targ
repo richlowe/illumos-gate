@@ -61,5 +61,4 @@ $(ROOT_RPI4_DRV_DIR)/%: $(OBJS_DIR)/% $(ROOT_RPI4_DRV_DIR) FRC
 #
 #	Include common targets.
 #
-include $(UTSBASE)/armv8/rpi4/Makefile.rules
 include $(UTSBASE)/armv8/Makefile.targ

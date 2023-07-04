@@ -19,22 +19,12 @@
 #
 # CDDL HEADER END
 #
-#
-# uts/armv8/Makefile.targ
+
 #
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-#	This Makefile defines the set of all required, target containing
-# included Makefiles for the aarch64 "implementation architecture".
-#
-
 #
 # Copyright 2017 Hayashi Naoyuki
 #
 
 include $(UTSBASE)/Makefile.targ
-
-include $(UTSBASE)/armv8/Makefile.rules
-include $(UTSBASE)/aarch64/Makefile.rules
-include $(UTSBASE)/common/Makefile.rules

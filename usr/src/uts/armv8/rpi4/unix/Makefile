@@ -25,9 +25,6 @@
 # Use is subject to license terms.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
 UTSBASE	= ../../..
 include $(UTSBASE)/../Makefile.master
 
@@ -35,6 +32,11 @@ include $(UTSBASE)/../Makefile.master
 #	Define the module and object file sets.
 #
 UNIX		= unix
+
+# XXXARM: I might be mis-using this.  These are what would be the platmod, if
+# we didn't need it so early for console I/O
+CORE_OBJS += rpi4.o rpi4_stubs.o
+
 OBJECTS		= $(SPECIAL_OBJS:%=$(OBJS_DIR)/%) \
 		  $(CORE_OBJS:%=$(OBJS_DIR)/%) \
 		  $(MACH_NOT_YET_KMODS:%=$(OBJS_DIR)/%)
@@ -66,11 +68,15 @@ CTFEXTRAOBJS	= $(OBJS_DIR)/vers.o
 #
 #	Include common rules.
 #
+include $(UTSBASE)/armv8/os/Makefile.unix.com
+include $(UTSBASE)/common/os/Makefile.unix.com
 include ../Makefile.rpi4
 
 GENASSYM_CF		= $(UTSBASE)/armv8/ml/genassym.cf
 ASSYM_H			= $(OBJS_DIR)/assym.h
-AS_INC_PATH		+= -I$(OBJS_DIR)
+INC_PATH		+= -I$(OBJS_DIR)
+INC_PATH		+= -I$(UTSBASE)/armv8/rpi4
+INC_PATH		+= -I$(SRC)/contrib/libfdt
 
 #
 #	Define targets
@@ -93,12 +99,6 @@ CLEANFILES	+= $(UNIX_O) $(MODSTUBS_O) $(KRTLD_O) $(KRTLD_OBJECTS) \
 		   $(ASSYM_H) $(ZLIB_OBJS:%=$(OBJS_DIR)/%)
 
 CLOBBERFILES	= $(CLEANFILES) $(UNIX_BIN)
-
-#
-# lint pass one enforcement 
-# Turn on doubleword alignment for 64 bit counter timer registers
-#
-CFLAGS += $(CCVERBOSE)
 
 #
 # For now, disable these lint checks; maintainers should endeavor
@@ -153,6 +153,155 @@ $(KRTLD_O):	$(KRTLD_OBJECTS)
 # $(PLATLIB):
 # 	?@(cd $(PLAT_DIR); pwd; $(MAKE) all.targ)
 # 	?@pwd
+
+$(OBJS_DIR)/dtracestubs.s:	$(UNIX_O) $(LIBS)
+	$(NM) -u $(UNIX_O) $(LIBS) | $(GREP) __dtrace_probe_ | $(SORT) | \
+	    $(UNIQ) | $(AWK) \
+	    '{ print "\t.globl "$$1"\n\t.type "$$1", @function\n"$$1":\n"}' \
+	    > $(OBJS_DIR)/dtracestubs.s
+
+$(DTRACESTUBS):	$(DTRACESTUBS_O)
+	$(BUILD.SO) $(DTRACESTUBS_O)
+
+$(ASSYM_H): $(GENASSYM_CF)
+	$(GENASSYM) -- $(CC) $(CPPFLAGS) < $(GENASSYM_CF) > $(ASSYM_H)
+
+#
+# NB: It is important these be sorted in specificity order, there are places
+# where patterns overlap (though thankfully they are rare).
+#
+# Remember, sort by specificity (machine, platform, arch, common), then by the
+# 2nd component.
+#
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/rpi4/os/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/conf/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/ml/%.S $(ASSYM_H)
+	$(COMPILE.s) -o $@ $<
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/os/%.c
+	$(COMPILE.c) -_gcc=-fno-stack-protector -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/vm/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/fs/proc/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/io/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/kdi/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/kdi/%.S $(ASSYM_H)
+	$(COMPILE.s) -o $@ $<
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/ml/%.S $(ASSYM_H)
+	$(COMPILE.s) -o $@ $<
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/os/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/aarch64/promif/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/conf/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/disp/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/os/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/vm/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/decompress.o := CPPFLAGS += -I$(SRC)/contrib/zlib
+$(OBJS_DIR)/zmod.o := CPPFLAGS += -I$(SRC)/contrib/zlib
+$(OBJS_DIR)/zmod_subr.o := CPPFLAGS += -I$(SRC)/contrib/zlib
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/zmod/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/zlib_obj.o:		$(ZLIB_OBJS:%=$(OBJS_DIR)/%)
+	$(LD) -r $(BREDUCE) -M$(UTSBASE)/common/zmod/mapfile -o $@ \
+	    $(ZLIB_OBJS:%=$(OBJS_DIR)/%)
+	$(CTFMERGE) $(CTFMRGFLAGS) -o $@ $(ZLIB_OBJS:%=$(OBJS_DIR)/%)
+
+$(OBJS_DIR)/%.o:		$(SRC)/contrib/zlib/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(COMMONBASE)/atomic/aarch64/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(COMMONBASE)/ilstr/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(COMMONBASE)/pci/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(COMMONBASE)/util/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+
+#
+# krtld compiled into unix
+#
+KRTLD_INC_PATH	= -I$(UTSBASE)/common/krtld -I$(UTSBASE)/aarch64/sys
+KRTLD_INC_PATH	+= -I$(UTSBASE)/aarch64/krtld
+
+KRTLD_CPPFLAGS	= -D_KRTLD -DELF_TARGET_AARCH64 -DMODDIR_SUFFIX=\"aarch64\"
+
+$(OBJS_DIR)/%.o:	$(UTSBASE)/aarch64/krtld/%.c
+	$(COMPILE.c) $(KRTLD_INC_PATH) $(KRTLD_CPPFLAGS) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:	$(UTSBASE)/aarch64/krtld/%.S
+	$(COMPILE.s) $(KRTLD_INC_PATH) $(KRTLD_CPPFLAGS) -o $@ $<
+
+$(OBJS_DIR)/%.o:	$(UTSBASE)/common/krtld/%.c
+	$(COMPILE.c) $(KRTLD_INC_PATH) $(KRTLD_CPPFLAGS) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:	$(SRC)/contrib/libfdt/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:	$(SRC)/common/fs/%.c
+	$(COMPILE.c) $(KRTLD_INC_PATH) $(KRTLD_CPPFLAGS) -o $@ $<
+	$(CTFCONVERT_O)
 
 #
 #	Include common targets.

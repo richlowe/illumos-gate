@@ -24,54 +24,6 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-
-#
-#	This makefile drives the production of the usbser kernel module.
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= usbser
-OBJECTS		= $(USBSER_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-# depends on misc/usba
-#
-LDFLAGS         += -Nmisc/usba
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-# needs work
-SMOFF += all_func_returns
-
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/usb/clients/usbser/Makefile.com

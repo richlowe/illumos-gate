@@ -23,73 +23,7 @@
 # Use is subject to license terms.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE		= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= bfe
-OBJECTS		= $(BFE_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	GENERAL PURPOUSE GEM FLAGS: Tuning GEM for Solaris specific modes
-#
-VFLAGS		= -DVERSION='"2.6.1"'
-AFLAGS		= -Darmv8
-DFLAGS		= -D"__INLINE__="
-CFGFLAGS	= -DGEM_CONFIG_POLLING -DGEM_CONFIG_GLDv3 -DGEM_CONFIG_VLAN \
-	-DGEM_CONFIG_CKSUM_OFFLOAD -DGEM_CONFIG_ND \
-	-DCONFIG_DP83815 -DCONFIG_SIS900 -DCONFIG_SIS7016 \
-	-DCONFIG_MAC_ADDR_SIS630E -DCONFIG_OPT_IO -UCONFIG_OO \
-	-DCONFIG_PATTERN_MATCH_DP83815
-#
-#	FAST PATH SECTION: Will activate usage of inlines as a regular functions
-#	on fast data path
-
-CPPFLAGS	+= $(VFLAGS) $(AFLAGS) $(DFLAGS) $(CFGFLAGS) $(CCVERBOSE) \
-	-I$(UTSBASE)/common/io/bfe
-
-CFLAGS		+= $(CPPFLAGS)
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-# Driver depends on MAC & IP
-#
-LDFLAGS		+= -N misc/mac -N drv/ip
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/bfe/Makefile.com

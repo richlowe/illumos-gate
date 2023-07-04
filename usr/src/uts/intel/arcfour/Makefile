@@ -18,68 +18,20 @@
 #
 # CDDL HEADER END
 #
+#
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2019, Joyent, Inc.
+#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COM_DIR = $(COMMONBASE)/crypto/arcfour
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/crypto/io/arcfour/Makefile.com
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= arcfour
-ARCFOURPROV_OBJS_32 =
-ARCFOURPROV_OBJS_64 = arcfour-x86_64.o
-ARCFOURPROV_OBJS += $(ARCFOURPROV_OBJS_$(CLASS))
-OBJECTS		= $(ARCFOURPROV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Overrides
-#
-CPPFLAGS	+= -I$(COM_DIR)
-CFLAGS		+= -xO4
-CLEANFILES	+= arcfour-x86_64.S arcfour-x86_64.s
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
-
-$(OBJS_DIR)/arcfour-x86_64.o: arcfour-x86_64.S
-	$(COMPILE.s) -o $@ ${@F:.o=.S}
+$(OBJS_DIR)/%.o: %.S
+	$(COMPILE.s) -o $@ $<
 
 arcfour-x86_64.S: $(COM_DIR)/amd64/arcfour-x86_64.pl
 	$(PERL) $? $@

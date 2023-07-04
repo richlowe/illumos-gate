@@ -32,6 +32,7 @@
 #include <sys/zio.h>
 #include <sys/spa.h>
 #include <sys/sunddi.h>
+
 extern int zfs_deadman_enabled;
 
 char *

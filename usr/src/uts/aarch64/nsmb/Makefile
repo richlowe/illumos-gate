@@ -19,95 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/aarch64/nsmb/Makefile
-#
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-#	aarch64 architecture dependent
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= nsmb
-OBJECTS		= $(NSMB_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/fs/smbclnt/netsmb
-OFFSETS_SRC	= $(CONF_SRCDIR)/offsets.in
-IOC_CHECK_H	= $(OBJS_DIR)/ioc_check.h
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(ALL_TARGET_$(OBJS_DIR))
-INSTALL_TARGET	= $(INSTALL_TARGET_$(OBJS_DIR))
-
-#
-#	Overrides.
-#
-#	We need some unusual overrides here so we'll
-#	build ioc_check.h for both 32-bit/64-bit,
-#	but only build 64-bit binaries.
-#
-
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-ALL_TARGET_debug64	= $(BINARY) $(SRC_CONFILE)
-ALL_TARGET_obj64	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET_debug64	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-INSTALL_TARGET_obj64	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Now the normal overrides...
-#
-INC_PATH	+= -I$(UTSBASE)/common/fs/smbclnt
-LDFLAGS         += -Ncrypto/md4 -Ncrypto/md5 -Nmisc/tlimod
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-# The mb_put/md_get functions are intentionally used with and without
-# return value checks, so filter those.
-SMOFF += all_func_returns
-
-# needs work
-SMOFF += signed,deref_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-# XXXARM: We can't do ioc_check, we have no 32bit
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/fs/smbclnt/netsmb/Makefile.com

@@ -33,10 +33,3 @@
 #	Targets for all implementations:
 #
 include $(UTSBASE)/Makefile.targ
-
-#
-#	Target set for aarch64 (order is not important, as it is with the
-# isomorphic Makefile.files set).
-#
-include $(UTSBASE)/aarch64/Makefile.rules
-include $(UTSBASE)/common/Makefile.rules

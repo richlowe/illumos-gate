@@ -24,71 +24,7 @@
 # Use is subject to license terms.
 #
 
-#
-#	This makefile drives the production of the hubd driver kernel module.
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-
-#
-#	Define the module and object file sets.
-#
-SRCDIR		= $(UTSBASE)/common/io/usb/hubd
-CONFIGFILES	= config_map.conf
-ROOTETCUSB	= $(ROOT)/etc/usb
-
-SRCFILES	= $(CONFIGFILES:%=$(SRCDIR)/%)
-ROOTCONFIGFILES	= $(CONFIGFILES:%=$(ROOTETCUSB)/%)
-
-$(ROOTCONFIGFILES):=	FILEMODE = $(CFILEMODE)
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= hubd
-OBJECTS		= $(HUBD_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# depends on misc/usba
-#
-LDFLAGS         += -Nmisc/usba
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS) $(ROOTCONFIGFILES)
-
-$(ROOTETCUSB)/%: $(ROOTETCUSB) $(SRCDIR)/%
-	$(INS.file)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
-
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/usb/hubd/Makefile.com

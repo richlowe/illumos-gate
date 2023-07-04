@@ -23,54 +23,6 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
 UTSBASE = ../..
-
-#
-#       Define the module and object file sets.
-#
-MODULE		= cpu_ms.GenuineIntel
-#
-OBJECTS		= $(CPU_GENINTEL_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE      = $(ROOT_PSM_CPU_DIR)/$(MODULE)
-
-SRCDIR		= ../cpu/genuineintel
-
-#
-#       Include common rules.
-#
-include ../cpu/Makefile.cpu
-
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides and additions
-#
-CPPFLAGS	+= -I$(SRCDIR) -I$(OBJS_DIR)
-ASFLAGS		+= -I$(SRCDIR) -I$(OBJS_DIR)
-
-#
-#       Default build targets.
-#
-.KEEP_STATE:
-
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include ../Makefile.targ
+UTSMACH = i86pc
+include $(SRC)/uts/i86pc/cpu/genuineintel/Makefile.com

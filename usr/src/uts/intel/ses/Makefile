@@ -18,64 +18,12 @@
 #
 # CDDL HEADER END
 #
-#
-# uts/intel/ses/Makefile
-#
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
-#	This makefile drives the production of the ses (SCSI enclosure
-#	services) driver kernel module.
-#
-#	intel implementation architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= ses
-OBJECTS		= $(SES_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/scsi/targets
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Depends on scsi
-#
-LDFLAGS         += -N misc/scsi
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/scsi/targets/ses/Makefile.com

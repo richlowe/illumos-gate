@@ -24,64 +24,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-# This makefile drives the production of SCSI vHCI Driver
-# aarch64 architecture dependent
 #
 
-#
-#	Paths to the base of the uts directory trees
-#
-UTSBASE   = ../..
-
-#
-# Define the module and object file sets.
-#
-MODULE		= scsi_vhci
-OBJECTS		= $(SCSI_VHCI_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/aarch64/io/scsi/adapters/scsi_vhci
-
-#
-# Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-unused-label
-
-# needs work
-SMATCH=off
-
-#
-# Define targets.
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Note dependancy on misc/scsi.
-#
-LDFLAGS += -Nmisc/scsi
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/scsi/adapters/scsi_vhci/Makefile.com

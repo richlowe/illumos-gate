@@ -22,58 +22,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
 #
-#	Paths to the base of the uts directory trees
-#
-UTSBASE   = ../../../../src/uts
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= mpt_sas
-OBJECTS		= $(MPTSAS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/mpt_sas/
-
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS += -Nmisc/scsi -Ndrv/scsi_vhci -Nmisc/sata
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-$(OBJS_DIR)/mptsas_raid.o := SMOFF += index_overflow
-$(OBJS_DIR)/mptsas.o := SMOFF += deref_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/scsi/adapters/mpt_sas/Makefile.com

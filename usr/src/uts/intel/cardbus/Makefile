@@ -23,74 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# 
 
-#
-#	This makefile drives the production of the cardbus kernel module.
-#
-#	intel architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE		= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= cardbus
-OBJECTS		= $(CARDBUS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Include sun4u specific header files
-#
-INC_PATH        += -I$(UTSBASE)/sun4u -I$(UTSBASE)/sun4 -I$(UTSBASE)/i86pc
-
-CPPFLAGS        +=      -DHOTPLUG
-
-#	dependency
-LDFLAGS	+=	-Nmisc/busra -Nmisc/pcmcia -Nmisc/hpcsvc
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-CFLAGS		+= $(CCVERBOSE)
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= -_gcc=-Wno-unused-variable
-
-SMOFF += indenting,no_if_block
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/cardbus/Makefile.com

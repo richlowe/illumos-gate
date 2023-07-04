@@ -14,64 +14,8 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2023 Oxide Computer Company
-
-#
-# This makefile drives the production of the Chelsio Terminator 4 10G Ethernet
-# (CXGBE) driver nexus modules on x86 systems.
 #
 
-#
-# Paths to the base of the uts directory trees
-#
 UTSBASE = ../../..
-
-#
-# Define the module and object file sets.
-#
-MODULE		= t4nex
-OBJECTS		= $(CXGBE_COM_OBJS:%=$(OBJS_DIR)/%) \
-		  $(CXGBE_NEX_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-# Include common rules
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-# Define targets
-#
-ALL_TARGET = $(BINARY)
-INSTALL_TARGET = $(BINARY) $(ROOTMODULE)
-
-CFLAGS += -I$(UTSBASE)/common/io/cxgbe -I$(UTSBASE)/common/io/cxgbe/common \
-	-I$(UTSBASE)/common/io/cxgbe/t4nex -I$(UTSBASE)/common/io/cxgbe/shared \
-	-I$(UTSBASE)/common/io/cxgbe/firmware
-
-#
-# Driver depends
-#
-LDFLAGS += -N misc/mac -N drv/ip
-
-# needs work
-SMOFF += all_func_returns,snprintf_overflow
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/common/io/cxgbe/t4nex/Makefile.com

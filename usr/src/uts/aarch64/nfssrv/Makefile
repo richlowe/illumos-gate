@@ -19,82 +19,12 @@
 # CDDL HEADER END
 #
 #
-# uts/aarch64/nfssrv/Makefile
-#
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-#
-#	This makefile drives the production of the nfs server-specific
-#	kernel module.
-#
-#	aarch64 implementation architecture dependent
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= nfssrv
-OBJECTS		= $(NFSSRV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-LDFLAGS         += -Nstrmod/rpcmod -Nfs/nfs -Nmisc/rpcsec
-LDFLAGS		+= -Nmisc/klmmod
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-type-limits
-CERRWARN	+= -_gcc=-Wno-unused-variable
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-switch
-
-# needs work
-SMATCH=off
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/fs/nfs/nfssrv/Makefile.com

@@ -12,33 +12,10 @@
 #
 # Copyright 2012 Joyent, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
 #
 
-UTSBASE	= ../..
-
-MODULE		= ipd
-OBJECTS		= $(IPD_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ipd
-
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-LDFLAGS += -Nmisc/neti -Nmisc/hook
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/inet/ipd/Makefile.com

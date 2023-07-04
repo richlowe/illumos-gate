@@ -22,88 +22,9 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
-#
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-BIGNUMDIR = $(COMMONBASE)/bignum
-CRYPTODIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= bignum
-OBJECTS		= $(BIGNUM_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
-
-CPPFLAGS	+= -I$(BIGNUMDIR) -I$(CRYPTODIR)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
-
-# Bignum configuration (BIGNUM_CFG):
-#   PSR_MUL:
-#       There is a processor-specific implementation bignum multiply functions
-#   HWCAP:
-#       There are multiple implementations of bignum functions, and the
-#	appropriate one must be chosen at run time, based on testing
-#	hardware capabilites.
-#
-# -DPSR_MUL:
-# For AMD64, there is a processor-specific implementation of
-# the bignum multiply functions, which takes advantage of the
-# 64x64->128 bit multiply instruction.
-#
-# -UHWCAP:
-# There is only one implementation, because the 128 bit multiply using
-# general-purpose registers is faster than any MMX or SSE2 implementation.
-
-BIGNUM_CFG = -DPSR_MUL
-CFLAGS	+= -xO4
-$(OBJS_DIR)/bignumimpl.o := CPPFLAGS += $(BIGNUM_CFG)
-$(OBJS_DIR)/bignum_amd64.o := CPPFLAGS += $(BIGNUM_CFG)
-
-$(OBJS_DIR)/bignum_amd64.o: $(BIGNUMDIR)/amd64/bignum_amd64.c
-	$(COMPILE.c) -o $@ $(BIGNUM_CFG) $(BIGNUMDIR)/amd64/bignum_amd64.c
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/bignum_amd64_asm.o: $(BIGNUMDIR)/amd64/bignum_amd64_asm.s
-	$(COMPILE.s) -P -o $@ $(BIGNUM_CFG) \
-		$(BIGNUMDIR)/amd64/bignum_amd64_asm.s
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/bignum/Makefile.com

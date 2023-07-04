@@ -14,55 +14,6 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE =		../..
-
-#
-# Define the module and object file sets.
-#
-MODULE =		vioif
-OBJECTS =		$(VIOIF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE =		$(ROOT_DRV_DIR)/$(MODULE)
-
-#
-# Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-# Define targets
-#
-ALL_TARGET =		$(BINARY)
-INSTALL_TARGET =	$(BINARY) $(ROOTMODULE)
-
-#
-# Overrides
-#
-INC_PATH +=		-I$(UTSBASE)/common/io/virtio
-
-#
-# Driver depends on virtio and mac
-#
-LDFLAGS +=		-N misc/virtio -N misc/mac
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/vioif/Makefile.com

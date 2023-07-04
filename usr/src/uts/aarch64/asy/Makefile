@@ -19,74 +19,10 @@
 # CDDL HEADER END
 #
 #
-# uts/aarch64/asy/Makefile
-#
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
-#
-#	This makefile drives the production of the asy `drv'
-#	kernel module.
-#
-#	aarch64 implementation architecture dependent
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= asy
-OBJECTS		= $(ASY_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/asy
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides.
-#
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-unused-variable
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/asy/Makefile.com

@@ -22,51 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# This makefile drives the production of qlc_fw_6322 firmware module.
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= qlc_fw_6322
-OBJECTS		= $(QLC_FW_6322_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_QLC_FW_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/qlc
-
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/Makefile.uts
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD) $(ITUMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS		+= -Nmisc/fctl
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/fibre-channel/fca/qlc/ql_fw_6322/Makefile.com

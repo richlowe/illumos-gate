@@ -25,38 +25,6 @@
 # Copyright 2018 Joyent, Inc.
 #
 
-UTSBASE	= ../..
-
-MODULE		= ctf
-OBJECTS		= $(CTF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-CPPFLAGS	+= -I$(SRC)/common/ctf -DCTF_OLD_VERSIONS
-LDFLAGS		+= $(BREDUCE) -M$(UTSBASE)/common/ctf/mapfile
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/ctf/Makefile.com

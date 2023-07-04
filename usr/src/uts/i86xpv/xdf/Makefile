@@ -20,61 +20,10 @@
 #
 
 #
-# uts/i86xpv/xdf/Makefile
-#
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
-#
-#	i86xpv architecture dependent
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= xdf
-OBJECTS		= $(XDF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86xpv/Makefile.i86xpv
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-# Overrides
-LDFLAGS		+= -Nmisc/cmlb
-
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-switch
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86xpv/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86xpv
+include $(SRC)/uts/common/xen/io/xdf/Makefile.com

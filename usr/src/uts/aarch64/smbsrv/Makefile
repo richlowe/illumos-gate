@@ -23,74 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
-#
 # Copyright (c) 2018, Joyent, Inc.
 
-#
-#	This makefile drives the production of the cifs server file system
-#	kernel module.
-#
-
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= smbsrv
-OBJECTS		= $(SMBSRV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/fs/smbsrv
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Module dependencies
-#
-#
-LDFLAGS += -Nfs/sockfs -Nmisc/ksocket -Ndrv/ip -Nstrmod/rpcmod -Nsys/doorfs
-LDFLAGS += -Nmisc/kcf
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
-
-#
-#	Overrides.
-#
-INC_PATH	+= -I$(SRC)/common
-
-CERRWARN	+= -_gcc=-Wno-switch
-
-# needs work
-SMATCH=off
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_SYS_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/fs/smbsrv/Makefile.com

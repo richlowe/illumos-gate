@@ -13,54 +13,6 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-#
-# Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-# Define the module and object file sets.
-#
-MODULE		= pci_prd
-OBJECTS		= $(PCI_PRD_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
-
-#
-# Include common rules.
-#
-include $(UTSBASE)/i86pc/Makefile.i86pc
-
-#
-# Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS		+= -Nmisc/acpica
-
-#
-# Overrides
-#
-
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86pc/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86pc
+include $(SRC)/uts/i86pc/io/pci/pci_prd/Makefile.com

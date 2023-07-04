@@ -18,74 +18,15 @@
 #
 # CDDL HEADER END
 #
+
 #
-# i86pc/uppc/Makefile
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
-#	This makefile drives the production of the uppc mach
-#	kernel module.
-#
-#	i86pc implementation architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= uppc
-OBJECTS		= $(UPPC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_MACH_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/i86pc/Makefile.i86pc
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-CERRWARN	+= -_gcc=-Wno-unused-function
-DEBUG_FLGS	=
-DEBUG_DEFS	+= $(DEBUG_FLGS)
-
-# needs work
-$(OBJS_DIR)/psm_common.o := SMOFF += deref_check
-
-#
-# Depends on ACPI CA interpreter
-#
-LDFLAGS		+= -N misc/acpica
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/i86pc/Makefile.targ
+UTSBASE = ../..
+UTSMACH = i86pc
+include $(SRC)/uts/i86pc/io/psm/uppc/Makefile.com

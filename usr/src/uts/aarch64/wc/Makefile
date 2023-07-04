@@ -25,56 +25,7 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
+UTSBASE = ../..
+UTSMACH = aarch64
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= wc
-OBJECTS		= $(WC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/wc
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides.
-#
-LDFLAGS		+= -Nmisc/tem -Ndacf/consconfig_dacf
-
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-# needs work
-SMOFF += deref_check
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+include $(SRC)/uts/common/io/wc/Makefile.com

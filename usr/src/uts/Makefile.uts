@@ -168,7 +168,7 @@ ALWAYS_DEFS		= $(ALWAYS_DEFS_$(CLASS))
 CPPFLAGS	= $(ALWAYS_DEFS) $(ALL_DEFS) $(CONFIG_DEFS) \
 		   $(INCLUDE_PATH) $(EXTRA_OPTIONS)
 AS_CPPFLAGS	= $(ALWAYS_DEFS) $(ALL_DEFS) $(CONFIG_DEFS) $(AS_DEFS) \
-		   $(AS_INC_PATH) $(EXTRA_OPTIONS)
+		   $(INCLUDE_PATH) $(EXTRA_OPTIONS)
 
 #
 #	Make it (relatively) easy to share compilation options between
@@ -633,5 +633,12 @@ PRIVS_DEF = $(SRC)/uts/common/os/priv_defs
 USBDEVS_AWK =	$(SRC)/uts/common/io/usb/usbdevs2h.awk
 USBDEVS_DATA =	$(SRC)/uts/common/io/usb/usbdevs
 
+#
+# Console font sources
+#
+FONT_DIR= $(SRC)/data/consfonts
+
 # XXXARM: needs a cross-smatch
 $(AARCH64_BLD)SMATCH=off
+
+INCLUDE_PATH    += $(PRE_INC_PATH) $(INC_PATH) $(CCYFLAG)$(UTSBASE)/common

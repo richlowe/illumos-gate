@@ -15,68 +15,7 @@
 #
 # Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 #
-# uts/aarch64/skd/Makefile
-#
-#	This makefile drives the production of the skd module, which supports
-#	the sTec S112x PCIe SSD card.
-#
-#	aarch64 architecture dependent
-#
 
-#
-#	Paths to the base of the uts directory trees
-#
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= skd
-OBJECTS		= $(SKD_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/skd
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Driver depends on blkdev
-#
-LDFLAGS		+= -N drv/blkdev
-
-#
-# Overrides
-#
-# For now, disable these compiler warnigns; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-CERRWARN	+= -_gcc=-Wno-format
-CERRWARN	+= -_gcc=-Wno-format-extra-args
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/skd/Makefile.com

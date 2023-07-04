@@ -19,80 +19,13 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2014 Garrett D'Amore <garrett@damore.org>
-#
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2018, Joyent, Inc.
-
 #
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COM1_DIR = $(COMMONBASE)/mpi
-COM2_DIR = $(COMMONBASE)/crypto
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= ecc
-OBJECTS		= $(ECCPROV_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
-
-CPPFLAGS	+= -I$(COM1_DIR) -I$(COM2_DIR)
-
-CFLAGS		+= -DMP_API_COMPATIBLE -DNSS_ECC_MORE_THAN_SUITE_B
-
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= $(CNOWARN_UNINIT)
-CERRWARN	+= -_gcc=-Wno-type-limits
-CERRWARN	+= -_gcc=-Wno-empty-body
-CERRWARN	+= -_gcc=-Wno-unused-variable
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-# false positive
-$(OBJS_DIR)/ecdecode.o := SMOFF += assign_vs_compare
-$(OBJS_DIR)/ec.o := SMOFF += assign_vs_compare
-
-SMOFF += indenting,all_func_returns
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
-
-include Makefile.$(CLASS)
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/crypto/io/ecc/Makefile.com

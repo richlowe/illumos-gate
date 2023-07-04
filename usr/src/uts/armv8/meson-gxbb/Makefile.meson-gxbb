@@ -51,8 +51,6 @@ MESON_GXBB_KMODS	=	\
 	mesonuart		\
 	todmeson
 
-include $(UTSBASE)/armv8/meson-gxbb/Makefile.files
-
 #
 #	Include common rules.
 #

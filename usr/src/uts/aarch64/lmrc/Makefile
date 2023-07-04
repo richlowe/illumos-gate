@@ -13,51 +13,6 @@
 # Copyright 2023 Racktop Systems, Inc.
 #
 
-#
-#	Paths to the base of the uts directory trees
-#
-UTSBASE   = ../../../../src/uts
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= lmrc
-OBJECTS		= $(LMRC_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/lmrc/
-
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS += -Nmisc/scsi -Ndrv/scsi_vhci -Nmisc/sata
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/scsi/adapters/lmrc/Makefile.com

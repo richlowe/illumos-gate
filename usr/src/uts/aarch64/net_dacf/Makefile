@@ -23,46 +23,6 @@
 # Use is subject to license terms.
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= net_dacf
-OBJECTS		= $(NET_DACF_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DACF_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-CFLAGS += $(CCVERBOSE)
-
-LDFLAGS += -Ndrv/softmac
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/net_dacf/Makefile.com

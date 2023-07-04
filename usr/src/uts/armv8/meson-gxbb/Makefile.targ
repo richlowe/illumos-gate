@@ -64,5 +64,4 @@ $(ROOT_MESON_GXBB_TOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_TOD_DIR) FRC
 #
 #	Include common targets.
 #
-include $(UTSBASE)/armv8/meson-gxbb/Makefile.rules
 include $(UTSBASE)/armv8/Makefile.targ

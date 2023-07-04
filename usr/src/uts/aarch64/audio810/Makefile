@@ -22,59 +22,7 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# uts/aarch64/audio810/Makefile
-#
-#
-#	This makefile drives the production of Metropolis audio driver
-#	(audio810) kernel module.
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
+
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= audio810
-OBJECTS		= $(AUDIO810_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/audio/drv/audio810
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Depends on drv/audio and misc/ac97
-#
-LDFLAGS		+= -Ndrv/audio -Nmisc/ac97
-
-CERRWARN	+= -_gcc=-Wno-switch
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/audio/drv/audio810/Makefile.com

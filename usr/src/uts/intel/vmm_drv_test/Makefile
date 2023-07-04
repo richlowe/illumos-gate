@@ -13,34 +13,6 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-UTSBASE	= ../..
-
-MODULE		= vmm_drv_test
-OBJECTS		= $(VMM_DRV_TEST_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm/drv_test
-
-include $(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-CFLAGS		+= $(CCVERBOSE)
-LDFLAGS		+= -Ndrv/vmm
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/intel/io/vmm/drv_test/Makefile.com

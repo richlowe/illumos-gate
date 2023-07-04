@@ -13,53 +13,6 @@
 # Copyright 2024 Michael van der Westhuizen
 #
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
 UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= gicv3
-OBJECTS		= $(GICV3_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/armv8/os/
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/armv8/Makefile.armv8
-
-#
-#       Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/armv8/Makefile.targ
+UTSMACH = armv8
+include $(UTSBASE)/armv8/io/gicv3/Makefile.com

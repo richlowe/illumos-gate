@@ -33,12 +33,3 @@
 #	Targets for all implementations:
 #
 include $(UTSBASE)/Makefile.targ
-
-#
-#	Target set for i86pc (order is not important, as it is with the
-# isomorphic Makefile.files set).
-#
-include $(UTSBASE)/i86pc/Makefile.rules
-include $(UTSBASE)/intel/Makefile.rules
-include $(UTSBASE)/common/Makefile.rules
-

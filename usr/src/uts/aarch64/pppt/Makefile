@@ -21,62 +21,7 @@
 #
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-#	This makefile drives the production of the pppt pseudo-driver for
-#	COMSTAR.
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-
-
-UTSBASE	= ../..
-
-ARCHDIR:sh = cd ..; basename `pwd`
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= pppt
-OBJECTS		= $(PPPT_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/comstar/port/pppt
-
-#
-#	Include common rules.
-#
-include ../Makefile.$(ARCHDIR)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides and depends_on
-#
-MODSTUBS_DIR	 = $(OBJS_DIR)
-LDFLAGS		+= -Ndrv/stmf
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include ../Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/comstar/port/pppt/Makefile.com

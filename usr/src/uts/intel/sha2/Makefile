@@ -24,74 +24,12 @@
 #
 # Copyright (c) 2019, Joyent, Inc.
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-COMDIR	= $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= sha2
-SHA2_OBJS_32    =
-SHA2_OBJS_64    = sha512-x86_64.o sha256-x86_64.o
-SHA2_OBJS       += $(SHA2_OBJS_$(CLASS))
-OBJECTS		= $(SHA2_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-#	Override defaults
-#
-CLEANFILES += sha512-x86_64.S sha256-x86_64.S sha512-x86_64.s sha256-x86_64.s
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
-
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
-
-CFLAGS += -I$(COMDIR)
-
-CERRWARN	+= -_gcc=-Wno-switch
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/crypto/io/sha2/Makefile.com
 
 $(OBJS_DIR)/%.o: %.S
-	$(COMPILE.s) -o $@ ${@F:.o=.S}
+	$(COMPILE.s) -o $@ $<
 
 sha512-x86_64.S: $(COMDIR)/sha2/amd64/sha512-x86_64.pl
 	$(PERL) $? $@

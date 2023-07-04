@@ -22,64 +22,7 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# uts/intel/vmxnet3s/Makefile
-#
-#	This makefile drives the production of the vmxnet3s
-#	network driver kernel module.
-#
-#	intel architecture dependent
-#
 
-#
-#	Paths to the base of the uts directory trees
-#
 UTSBASE = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= vmxnet3s
-OBJECTS		= $(VMXNET3S_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/vmxnet3s
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-INC_PATH	+= -I$(UTSBASE)/intel/io/vmxnet3s
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Driver depends on MAC
-#
-LDFLAGS		+= -N misc/mac
-
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSMACH = intel
+include $(SRC)/uts/intel/io/vmxnet3s/Makefile.com

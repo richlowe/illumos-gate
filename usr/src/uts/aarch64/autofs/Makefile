@@ -21,73 +21,10 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# 
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
-#	This makefile drives the production of the autofs file system
-#	kernel module.
-#
-#	aarch64 architecture dependent
-#
 
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= autofs
-OBJECTS		= $(AUTOFS_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_SYS_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
-
-#
-# Define dependency on rpcmod, rpcsec, and mntfs
-#
-LDFLAGS += -N strmod/rpcmod -N misc/rpcsec -N fs/mntfs
-
-#
-# For now, disable these warnings; maintainers should endeavor
-# to investigate and remove these for maximum coverage.
-# Please do not carry these forward to new Makefiles.
-#
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-CERRWARN	+= -_gcc=-Wno-unused-label
-CERRWARN	+= -_gcc=-Wno-unused-function
-CERRWARN	+= $(CNOWARN_UNINIT)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-$(ROOTLINK):	$(ROOT_SYS_DIR) $(ROOTMODULE)
-	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/fs/autofs/Makefile.com

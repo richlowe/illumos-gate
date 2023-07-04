@@ -21,62 +21,7 @@
 # Copyright 2018, Nexenta Systems, Inc. All Rights Reserved
 # Use is subject to license terms.
 #
-#	This makefile drives the production of the smartpqi driver kernel
-#	 module.
-#
-#	intel architecture dependent
-#
 
-#
-#	Paths to the base of the uts directory trees
-#
-UTSBASE   = ../..
-
-#
-#	Define the module and object file sets.
-#
-MODULE		= smartpqi
-OBJECTS		= $(SMARTPQI_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/smartpqi/
-
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS += -Nmisc/scsi -Ndrv/scsi_vhci -Nmisc/sata
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/intel/Makefile.intel
-
-#
-# Includes
-#
-INC_PATH	+= -I$(UTSBASE)/common/io/scsi/adapters/smartpqi
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/scsi/adapters/smartpqi/Makefile.com

@@ -14,34 +14,6 @@
 # Copyright 2022 RackTop Systems, Inc.
 #
 
-UTSBASE=	../..
-
-MODULE=		vioscsi
-OBJECTS=	$(VIOSCSI_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE=	$(ROOT_DRV_DIR)/$(MODULE)
-
-include		$(UTSBASE)/intel/Makefile.intel
-
-ALL_TARGET=	$(BINARY)
-INSTALL_TARGET=	$(BINARY) $(ROOTMODULE)
-
-LDFLAGS	+=	-Nmisc/scsi -Nmisc/virtio
-
-#
-# Includes
-#
-INC_PATH        += -I$(UTSBASE)/common/io/virtio -I$(UTSBASE)/common/io/vioscsi
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include		$(UTSBASE)/intel/Makefile.targ
+UTSBASE = ../..
+UTSMACH = intel
+include $(SRC)/uts/common/io/vioscsi/Makefile.com

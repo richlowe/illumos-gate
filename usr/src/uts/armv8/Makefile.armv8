@@ -85,21 +85,6 @@ GENLIB		 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
 MAPFILE		 = $(UTSBASE)/armv8/conf/Mapfile
 
 #
-#	Include the makefiles which define build rule templates, the
-#	collection of files per module, and a few specific flags. Note
-#	that order is significant, just as with an include path. The
-#	first build rule template which matches the files name will be
-#	used. By including these in order from most machine dependent
-#	to most machine independent, we allow a machine dependent file
-#	to be used in preference over a machine independent version
-#	(Such as a machine specific optimization, which preserves the
-#	interfaces.)
-#
-include $(UTSBASE)/armv8/Makefile.files
-include $(UTSBASE)/aarch64/Makefile.files
-include $(UTSBASE)/common/Makefile.files
-
-#
 #	Include machine independent rules. Note that this does not imply
 #	that the resulting module from rules in Makefile.uts is	machine
 #	independent. Only that the build rules are machine independent.
@@ -136,7 +121,7 @@ ASFLAGS_XARCH		= $($(MACH)_ASFLAGS)
 
 ASFLAGS			+= $(ASFLAGS_XARCH)
 
-AS_INC_PATH		+= -I$(DSF_DIR)/$(OBJS_DIR)
+INC_PATH		+= -I$(DSF_DIR)/$(OBJS_DIR)
 
 #
 #	The following must be defined for all implementations:

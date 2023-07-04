@@ -13,28 +13,6 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-UTSBASE	= ../..
-
-MODULE = ufm
-OBJECTS	= $(OBJS_DIR)/ufm.o
-ROOTMODULE = $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR = $(UTSBASE)/common/io/ufm
-
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-ALL_TARGET = $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET = $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/io/ufm/Makefile.com

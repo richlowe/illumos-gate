@@ -20,72 +20,12 @@
 # CDDL HEADER END
 #
 #
-# uts/aarch64/kmech_dummy/Makefile
-#
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+#
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
-#	This makefile drives the production of the kmech_dummy kernel module.
-#
-#	aarch64 implementation architecture dependent
-#
-#
-#	Path to the base of the uts directory tree (usually /usr/src/uts).
-#
-UTSBASE	= ../..
 
-#
-#	Define the module and object file sets.
-#
-MODULE		= kmech_dummy
-OBJECTS		= $(KGSS_DUMMY_OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_KGSS_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/aarch64/Makefile.aarch64
-
-CERRWARN	+= -_gcc=-Wno-parentheses
-
-#
-# Define dependency on kgssapi
-#
-LDFLAGS += -N misc/kgssapi
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-
-#
-# Do not install the dummy GSS-API mechanism in the proto area
-# for a normal build
-#
-install:	def
-
-#
-# handy target to manually force the install
-#
-do_install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/aarch64/Makefile.targ
+UTSBASE = ../..
+UTSMACH = aarch64
+include $(SRC)/uts/common/gssapi/mechs/dummy/Makefile.com
