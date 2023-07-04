@@ -25,43 +25,4 @@
 
 IMPLEMENTED_PLATFORM    = QEMU,virt-4.1
 
-#
-# Platform targets
-#
-$(ROOT_VIRT_DIR): $(ROOT_PLAT_DIR)
-	-$(INS.dir)
-
-$(ROOT_VIRT_MOD_DIR): $(ROOT_VIRT_DIR)
-	-$(INS.dir)
-
-$(ROOT_VIRT_KERN_DIR): $(ROOT_VIRT_DIR)
-	-$(INS.dir)
-
-$(ROOT_VIRT_DRV_DIR):
-	-$(INS.dir)
-
-$(ROOT_VIRT_MISC_DIR):
-	-$(INS.dir)
-
-$(ROOT_VIRT_TOD_DIR):
-	-$(INS.dir)
-
-$(ROOT_VIRT_MOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_MOD_DIR) FRC
-	$(INS.file)
-
-$(ROOT_VIRT_KERN_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_KERN_DIR) FRC
-	$(INS.file)
-
-$(ROOT_VIRT_MISC_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_MISC_DIR) FRC
-	$(INS.file)
-
-$(ROOT_VIRT_DRV_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_DRV_DIR) FRC
-	$(INS.file)
-
-$(ROOT_VIRT_TOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_TOD_DIR) FRC
-	$(INS.file)
-
-#
-#	Include common targets.
-#
 include $(UTSBASE)/armv8/Makefile.targ

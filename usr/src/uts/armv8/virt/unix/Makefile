@@ -91,9 +91,6 @@ INSTALL_TARGET	= $(UNIX_BIN) $(ROOTMODULE)
 #
 UNIX_DIR	= .
 
-#
-#	Overrides
-#
 CLEANFILES	+= $(UNIX_O) $(MODSTUBS_O) $(KRTLD_O) $(KRTLD_OBJECTS) \
 		   $(OBJS_DIR)/vers.c $(OBJS_DIR)/vers.o \
 		   $(CPU_OBJ) $(CPULIB) \

@@ -28,14 +28,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-COM1_DIR = $(COMMONBASE)/mpi
-COM2_DIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ecc
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/ecc
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -71,29 +65,18 @@ OBJS		=		\
 		ec2_test.o	\
 		ecp_test.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+COM1_DIR = $(COMMONBASE)/mpi
+COM2_DIR = $(COMMONBASE)/crypto
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
+DEPENDS_ON = misc/kcf
 
 CPPFLAGS	+= -I$(COM1_DIR) -I$(COM2_DIR)
 
 CFLAGS		+= -DMP_API_COMPATIBLE -DNSS_ECC_MORE_THAN_SUITE_B
-
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-label
@@ -109,29 +92,7 @@ $(OBJS_DIR)/ec.o := SMOFF += assign_vs_compare
 
 SMOFF += indenting,all_func_returns
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/ecc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/ecc/%.c
 	$(COMPILE.c) -o $@ $<

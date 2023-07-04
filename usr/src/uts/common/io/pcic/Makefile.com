@@ -26,32 +26,19 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= pcic
+MOD_SRCDIR	= $(UTSBASE)/common/io/pcic
 OBJS		= pcic.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/pcic
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-CPPFLAGS	+=	-DCARDBUS -DHOTPLUG -I$(SRC)/uts/common/io
-#
-#	Dependency
-#
-LDFLAGS		+= -Nmisc/busra -Nmisc/pcmcia -Nmisc/cardbus
+CPPFLAGS	+=	-DCARDBUS -DHOTPLUG
+INC_PATH	+= -I$(SRC)/uts/common/io
+
+DEPENDS_ON	= misc/busra misc/pcmcia misc/cardbus
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -66,26 +53,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 SMOFF += no_if_block,indenting,all_func_returns
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/pcic/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

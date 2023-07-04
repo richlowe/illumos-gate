@@ -5,11 +5,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= acpica
+MOD_SRCDIR	= $(UTSBASE)/intel/io/acpica
 
 # ACPICA objs
 # XXXMK: Should be sorted, but wsdiff
@@ -198,27 +195,13 @@ OBJS		+=		\
 		osl_ml.o	\
 		osl.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
+
+include $(UTSBASE)/Makefile.kmod
+
 INC_PATH        += -I$(UTSBASE)/intel/sys/acpi
 INC_PATH	+= -I$(UTSBASE)/i86pc
 INC_PATH	+= -I$(SRC)/common
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-DEBUG_DEFS	+= $(DEBUG_FLGS)
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -236,32 +219,7 @@ CFLAGS += -DPWRDMN -DACPI_USE_LOCAL_CACHE -DACPI_DEBUG_OUTPUT
 
 $(OBJS_DIR)/utdebug.o := CERRWARN += -_gcc12=-Wno-dangling-pointer
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/acpica/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/acpica/%.S
-	$(COMPILE.s) -o $@ $<
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(SRC)/common/acpica/disassembler/%.c
 	$(COMPILE.c) -o $@ $<

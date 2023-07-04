@@ -278,21 +278,11 @@ CFILEMODE	 = 644
 #	These are unique because they are not installed from the current
 #	working directory.
 #
-# Sigh.  Apparently at some time in the past there was a confusion on
-# whether the name is SRC_CONFFILE or SRC_CONFILE.  Consistency with the
-# other names would indicate SRC_CONFFILE, but the voting is >180 Makefiles
-# with SRC_CONFILE and about 11 with SRC_CONFFILE.  Software development
-# isn't a popularity contest, though, and so my inclination is to define
-# both names for now and incrementally convert to SRC_CONFFILE to be consistent
-# with the other names.
-#
 CONFFILE		= $(MODULE).conf
 SRC_CONFFILE		= $(CONF_SRCDIR)/$(CONFFILE)
-SRC_CONFILE		= $(SRC_CONFFILE)
 ROOT_CONFFILE_32	= $(ROOTMODULE).conf
 ROOT_CONFFILE_64	= $(ROOTMODULE:%/$(SUBDIR64)/$(MODULE)=%/$(MODULE)).conf
 ROOT_CONFFILE		= $(ROOT_CONFFILE_$(CLASS))
-
 
 INS.conffile= \
 	$(RM) $@; $(INS) -s -m $(CFILEMODE) -f $(@D) $(SRC_CONFFILE)

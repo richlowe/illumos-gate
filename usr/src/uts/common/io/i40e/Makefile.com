@@ -13,8 +13,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
 MODULE		= i40e
+MOD_SRCDIR	= $(UTSBASE)/common/io/i40e
 
 # illumos source
 # XXXMK: Should be sorted, but wsdiff
@@ -36,43 +36,22 @@ OBJS		+=		\
 		i40e_nvm.o	\
 		i40e_dcb.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/i40e
+include $(UTSBASE)/Makefile.kmod
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INC_PATH	+= -I$(UTSBASE)/common/io/i40e
+INC_PATH	+= -I$(UTSBASE)/common/io/i40e/core
 
-CPPFLAGS	+= -I$(UTSBASE)/common/io/i40e
-CPPFLAGS	+= -I$(UTSBASE)/common/io/i40e/core
-
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 # 3rd party code
 SMOFF += all_func_returns
 
-LDFLAGS		+= -N misc/mac
-
-MAPFILES	+= ddi mac random
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+DEPENDS_ON	= misc/mac
+MAPFILES	= ddi mac random
 
 include $(UTSBASE)/Makefile.mapfile
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/i40e/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/i40e/core/%.c
 	$(COMPILE.c) -o $@ $<

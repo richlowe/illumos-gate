@@ -25,11 +25,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= nge
+MOD_SRCDIR     = $(UTSBASE)/common/io/nge
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -43,32 +40,14 @@ OBJS		=		\
 		nge_tx.o	\
 		nge_xmii.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/common/io/nge
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+INC_PATH	+= -I$(MOD_SRCDIR)
 
-#
-#	Override defaults
-#
-INC_PATH	+= -I$(CONF_SRCDIR)
-
-# CFLAGS += $(CINLINEFLAGS)
-
-#
-# Driver depends on GLD
-#
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -81,26 +60,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 SMOFF += all_func_returns
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/nge/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

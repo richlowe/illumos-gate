@@ -14,33 +14,11 @@
 #
 
 
-MODULE=		pvscsi
-OBJS=		pvscsi.o
-OBJECTS=	$(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE=	$(ROOT_DRV_DIR)/$(MODULE)
+MODULE		= pvscsi
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pvscsi
 
-include		$(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include		$(UTSBASE)/Makefile.kmod
 
-ALL_TARGET=	$(BINARY)
-INSTALL_TARGET=	$(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/scsi
 
-LDFLAGS	+=	-N misc/scsi
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-include		$(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/scsi/adapters/pvscsi/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include		$(UTSBASE)/Makefile.kmod.targ

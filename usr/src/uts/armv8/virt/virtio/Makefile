@@ -48,12 +48,6 @@ include $(UTSBASE)/armv8/virt/Makefile.virt
 ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
 INC_PATH +=		-I$(UTSBASE)/common/io/virtio
 
 #

@@ -23,53 +23,10 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= todpl031
-OBJS		= todpl031.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/armv8/virt/io/todpl031
 ROOTMODULE	= $(ROOT_VIRT_TOD_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/armv8/virt/Makefile.virt
+include $(UTSBASE)/Makefile.kmod
 
-#
-#       Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/armv8/virt/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/virt/io/todpl031/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

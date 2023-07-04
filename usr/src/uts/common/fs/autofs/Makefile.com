@@ -25,11 +25,8 @@
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= autofs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/autofs
 
 # XXXMK: should be sorted but wsdiff
 OBJS		=		\
@@ -39,25 +36,14 @@ OBJS		=		\
 		auto_xdr.o	\
 		auto_sys.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SYS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+INSTALL_TARGET	+= $(ROOTLINK)
 
-#
-# Define dependency on rpcmod, rpcsec, and mntfs
-#
-LDFLAGS += -N strmod/rpcmod -N misc/rpcsec -N fs/mntfs
+DEPENDS_ON = strmod/rpcmod misc/rpcsec fs/mntfs
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -69,29 +55,7 @@ CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= -_gcc=-Wno-unused-function
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_SYS_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/autofs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

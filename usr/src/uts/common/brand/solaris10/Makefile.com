@@ -22,60 +22,20 @@
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-#
-#	Define the module and object file sets.
-#
 MODULE =	s10_brand
+MOD_SRCDIR =	$(UTSBASE)/common/brand/solaris10
 OBJS =		s10_brand.o s10_brand_asm.o
-OBJECTS =	$(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE =	$(USR_BRAND_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-S10_BASE =	$(UTSBASE)/common/brand/solaris10
-
-#
-#	Define targets
-#
-ALL_TARGET =		$(BINARY)
-INSTALL_TARGET =	$(BINARY) $(ROOTMODULE)
-
+include $(UTSBASE)/Makefile.kmod
 
 #
 #	Update compiler variables.
 #
-INC_PATH +=	-I$(S10_BASE) -I$(OBJS_DIR)
+INC_PATH +=	-I$(MOD_SRCDIR) -I$(OBJS_DIR)
 intel_INC_PATH = -I$(UTSBASE)/i86pc/genassym/$(OBJS_DIR)
 INC_PATH +=	$($(UTSMACH)_INC_PATH)
 
-LDFLAGS +=	-Nexec/elfexec
+DEPENDS_ON =	exec/elfexec
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/brand/solaris10/%.S
-	$(COMPILE.s) -o $@ $<
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/brand/solaris10/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

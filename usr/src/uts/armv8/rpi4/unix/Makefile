@@ -28,9 +28,6 @@
 UTSBASE	= ../../..
 include $(UTSBASE)/../Makefile.master
 
-#
-#	Define the module and object file sets.
-#
 UNIX		= unix
 
 # XXXARM: I might be mis-using this.  These are what would be the platmod, if
@@ -89,9 +86,6 @@ INSTALL_TARGET	= $(UNIX_BIN) $(ROOTMODULE)
 #
 UNIX_DIR	= .
 
-#
-#	Overrides
-#
 CLEANFILES	+= $(UNIX_O) $(MODSTUBS_O) $(KRTLD_O) $(KRTLD_OBJECTS) \
 		   $(OBJS_DIR)/vers.c $(OBJS_DIR)/vers.o \
 		   $(CPU_OBJ) $(CPULIB) \

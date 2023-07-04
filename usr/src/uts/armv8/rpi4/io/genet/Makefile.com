@@ -23,31 +23,11 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= genet
-OBJS		= genet.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/armv8/rpi4/io/genet
 ROOTMODULE	= $(ROOT_RPI4_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/armv8/rpi4/Makefile.rpi4
-
-#
-#       Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
+include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I$(SRC)/uts/armv8/rpi4/
 
@@ -59,30 +39,6 @@ INC_PATH	+= -I$(SRC)/uts/armv8/rpi4/
 CERRWARN += -_gcc=-Wno-unused-function
 CERRWARN += -_gcc=-Wno-unused-variable
 
-#	Dependency
-LDFLAGS += -Nmisc/mac -Nmisc/mii
+DEPENDS_ON = misc/mac misc/mii
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/armv8/rpi4/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/rpi4/io/genet/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -21,12 +21,10 @@
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2019 Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= sol_uverbs
+MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/of/sol_uverbs
 
 OBJS		=			\
 		sol_uverbs.o		\
@@ -35,21 +33,12 @@ OBJS		=			\
 		sol_uverbs_hca.o	\
 		sol_uverbs_qp.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-LDFLAGS		+= -Nmisc/ibtl -Nmisc/sol_ofs
-CONF_SRCDIR	= $(UTSBASE)/common/io/ib/clients/of/sol_uverbs
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+DEPENDS_ON	= misc/ibtl misc/sol_ofs
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -66,26 +55,4 @@ SMOFF += logical_instead_of_bitwise,or_vs_and
 # false positive
 SMOFF += signed
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ib/clients/of/sol_uverbs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

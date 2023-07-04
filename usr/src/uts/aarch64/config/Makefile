@@ -19,15 +19,10 @@
 # CDDL HEADER END
 #
 #
-# uts/aarch64/config/Makefile
 # Copyright 2010 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-#	This makefile drives the production of the kernel configuration files.
-#
-#	aarch64 architecture dependent
 #
 
 #
@@ -40,9 +35,6 @@ UTSBASE	= ../..
 #
 include $(UTSBASE)/aarch64/Makefile.aarch64
 
-#
-#	Define the module and object file sets.
-#
 SRCDIR		= $(UTSBASE)/aarch64/os
 PATH2INST	= path_to_inst
 CONFIGFILES	= name_to_major minor_perm driver_aliases name_to_sysnum \

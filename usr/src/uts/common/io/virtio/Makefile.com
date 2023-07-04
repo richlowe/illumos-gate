@@ -14,51 +14,13 @@
 # Copyright 2019 Joyent, Inc.
 #
 
+MODULE		= virtio
+MOD_SRCDIR	= $(UTSBASE)/common/io/virtio
+OBJS 		= virtio_main.o virtio_dma.o virtio_pci.o
+ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-# Define the module and object file sets.
-#
-MODULE =		virtio
-OBJS = 			virtio_main.o virtio_dma.o virtio_pci.o
-OBJECTS =		$(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE =		$(ROOT_MISC_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+INC_PATH	 += -I$(UTSBASE)/common/io/virtio
 
-#
-# Define targets
-#
-ALL_TARGET =		$(BINARY)
-INSTALL_TARGET =	$(BINARY) $(ROOTMODULE)
-
-#
-# Overrides
-#
-INC_PATH +=		-I$(UTSBASE)/common/io/virtio
-
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def: $(DEF_DEPS)
-
-all: $(ALL_DEPS)
-
-clean: $(CLEAN_DEPS)
-
-clobber: $(CLOBBER_DEPS)
-
-install: $(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/virtio/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

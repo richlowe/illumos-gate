@@ -26,35 +26,21 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= isa
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/isa
 OBJS		= isa.o dma_engine.o i8237A.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
+
+include $(UTSBASE)/Makefile.kmod
+
 INC_PATH        += -I$(UTSBASE)/i86pc/sys/acpi
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 $(OBJS_DIR)/isa.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
 
 # needs work
 $(OBJS_DIR)/i8237A.o := SMOFF += indenting
 
-#
-#       Dependency
-LDFLAGS         += -Nmisc/acpica -Nmisc/busra -Nmisc/pci_autoconfig
+DEPENDS_ON = misc/acpica misc/busra misc/pci_autoconfig
 
 #
 # Define our version of dma_engine and i8237A interfaces
@@ -98,30 +84,4 @@ $(OBJECTS) := CPPFLAGS += -Dd37A_read_count=$(MODULE)_d37A_read_count
 #
 CERRWARN	+= -_gcc=-Wno-unused-variable
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-
-#
-#	Section 1a: C object build rules
-#
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/isa/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

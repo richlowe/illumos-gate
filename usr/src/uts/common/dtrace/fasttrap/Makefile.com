@@ -26,43 +26,31 @@
 
 
 MODULE		= fasttrap
-OBJS		= fasttrap.o fasttrap_isa.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/dtrace/fasttrap
 CONF_SRCDIR	= $(UTSBASE)/$(UTSMACH)/dtrace
+OBJS		= fasttrap.o fasttrap_isa.o
+ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-INC_PATH	+= -I$(SRC)/common
-LDFLAGS		+= -Ndrv/dtrace
-
+#
+# For now, disable these warnings; maintainers should endeavor
+# to investigate and remove these for maximum coverage.
+# Please do not carry these forward to new Makefiles.
+#
 CERRWARN	+= $(CNOWARN_UNINIT)
+INC_PATH	+= -I$(SRC)/common
 
-.KEEP_STATE:
+DEPENDS_ON	= drv/dtrace
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_DTRACE_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
 $(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/dtrace/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/dtrace/fasttrap/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

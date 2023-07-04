@@ -25,12 +25,10 @@
 #
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= kgssapi
+MOD_SRCDIR	= $(UTSBASE)/common/gssapi
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -49,26 +47,15 @@ OBJS		=			\
 OBJS		+= \
 		gssd_xdr.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_KGSS_DIR)
+INSTALL_TARGET	+= $(ROOT_KGSS_DIR)
 
-#
-# Define dependencies on rpcmod, rpcsec, and tlimod
-#
-LDFLAGS += -N strmod/rpcmod -N misc/rpcsec -N misc/tlimod
+DEPENDS_ON = strmod/rpcmod misc/rpcsec misc/tlimod
 
-INCLUDE_PATH += -I$(UTSBASE)/common/gssapi/include
+INC_PATH += -I$(UTSBASE)/common/gssapi/include
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -81,26 +68,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/gssd_clnt_stubs.o := SMOFF += indenting,deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/gssapi/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

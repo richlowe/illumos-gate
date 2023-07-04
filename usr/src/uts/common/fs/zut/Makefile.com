@@ -18,36 +18,16 @@
 #
 # CDDL HEADER END
 #
-#
 # Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
-#
-#	This makefile drives the production of the zut file system
-#	kernel module.
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= zut
-OBJS		= zut.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/fs/zut
+MOD_SRCDIR	= $(UTSBASE)/common/fs/zut
 
-#
-#	Include common rules.
-#
-include $(SRC)/uts/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Overrides
-#
 INC_PATH	+= -I$(UTSBASE)/common/fs/zut
 INC_PATH	+= -I$(SRC)/common
 INC_PATH	+= -I$(COMMONBASE)/zut
@@ -60,26 +40,4 @@ INC_PATH	+= -I$(COMMONBASE)/zut
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(SRC)/uts/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/zut/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

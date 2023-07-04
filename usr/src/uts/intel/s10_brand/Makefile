@@ -25,3 +25,6 @@
 UTSBASE = ../..
 UTSMACH = intel
 include $(SRC)/uts/common/brand/solaris10/Makefile.com
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/brand/solaris10/%.S
+	$(COMPILE.s) -o $@ $<

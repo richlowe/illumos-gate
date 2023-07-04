@@ -25,27 +25,12 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= usb_as
-OBJS		= usb_as.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/io/usb/clients/audio/usb_as
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-LDFLAGS		+= -Nmisc/usba -Ndrv/usb_ac
+DEPENDS_ON	= misc/usba drv/usb_ac
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -54,26 +39,4 @@ LDFLAGS		+= -Nmisc/usba -Ndrv/usb_ac
 #
 CERRWARN	+= -_gcc=-Wno-unused-label
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usb/clients/audio/usb_as/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

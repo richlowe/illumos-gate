@@ -28,12 +28,10 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= dr
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/dr
 
 OBJS		=		\
 		dr.o		\
@@ -44,26 +42,12 @@ OBJS		=		\
 		dr_quiesce.o	\
 		dr_util.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io/dr
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += $(CNOWARN_UNINIT)
@@ -72,33 +56,12 @@ CERRWARN += -_gcc=-Wno-empty-body
 # needs work
 SMOFF += index_overflow
 
-#
-# module dependencies
-#
-LDFLAGS += -Nmisc/drmach_acpi
+DEPENDS_ON = misc/drmach_acpi
 
 CLEANFILES +=	$(DR_GENERR)
 CLEANFILES +=	$(DR_IO)/dr_err.c
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS) $(CONF_INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 SBD_IOCTL	= $(UTSBASE)/i86pc/sys/sbd_ioctl.h
 DR_IO		= $(UTSBASE)/i86pc/io/dr
@@ -112,7 +75,3 @@ $(DR_GENERR):			$(DR_IO)/sbdgenerr.pl
 $(DR_IO)/dr_err.c:		$(DR_GENERR) $(SBD_IOCTL)
 	$(RM) $@
 	$(DR_GENERR) ESBD < $(SBD_IOCTL) > $(DR_IO)/dr_err.c
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/dr/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

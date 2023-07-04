@@ -27,4 +27,110 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
+#
+# QEMU,virt targets
+#
+$(ROOT_VIRT_DIR): $(ROOT_PLAT_DIR)
+	-$(INS.dir)
+
+$(ROOT_VIRT_MOD_DIR): $(ROOT_VIRT_DIR)
+	-$(INS.dir)
+
+$(ROOT_VIRT_KERN_DIR): $(ROOT_VIRT_DIR)
+	-$(INS.dir)
+
+$(ROOT_VIRT_DRV_DIR):
+	-$(INS.dir)
+
+$(ROOT_VIRT_MISC_DIR):
+	-$(INS.dir)
+
+$(ROOT_VIRT_TOD_DIR):
+	-$(INS.dir)
+
+$(ROOT_VIRT_MOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_MOD_DIR) FRC
+	$(INS.file)
+
+$(ROOT_VIRT_KERN_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_KERN_DIR) FRC
+	$(INS.file)
+
+$(ROOT_VIRT_MISC_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_MISC_DIR) FRC
+	$(INS.file)
+
+$(ROOT_VIRT_DRV_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_DRV_DIR) FRC
+	$(INS.file)
+
+$(ROOT_VIRT_TOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_VIRT_TOD_DIR) FRC
+	$(INS.file)
+
+#
+# RaspberryPi,4 platform targets
+#
+$(ROOT_RPI4_DIR): $(ROOT_PLAT_DIR)
+	-$(INS.dir)
+
+$(ROOT_RPI4_MOD_DIR): $(ROOT_RPI4_DIR)
+	-$(INS.dir)
+
+$(ROOT_RPI4_KERN_DIR): $(ROOT_RPI4_DIR)
+	-$(INS.dir)
+
+$(ROOT_RPI4_DRV_DIR):
+	-$(INS.dir)
+
+$(ROOT_RPI4_MISC_DIR):
+	-$(INS.dir)
+
+$(ROOT_RPI4_CRYPTO_DIR):
+	-$(INS.dir)
+
+$(ROOT_RPI4_MOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_RPI4_MOD_DIR) FRC
+	$(INS.file)
+
+$(ROOT_RPI4_KERN_DIR)/%: $(OBJS_DIR)/% $(ROOT_RPI4_KERN_DIR) FRC
+	$(INS.file)
+
+$(ROOT_RPI4_MISC_DIR)/%: $(OBJS_DIR)/% $(ROOT_RPI4_MISC_DIR) FRC
+	$(INS.file)
+
+$(ROOT_RPI4_DRV_DIR)/%: $(OBJS_DIR)/% $(ROOT_RPI4_DRV_DIR) FRC
+	$(INS.file)
+
+#
+# Meson GXBB targets
+#
+$(ROOT_MESON_GXBB_DIR): $(ROOT_PLAT_DIR)
+	-$(INS.dir)
+
+$(ROOT_MESON_GXBB_MOD_DIR):
+	-$(INS.dir)
+
+$(ROOT_MESON_GXBB_KERN_DIR):
+	-$(INS.dir)
+
+$(ROOT_MESON_GXBB_DRV_DIR):
+	-$(INS.dir)
+
+$(ROOT_MESON_GXBB_MISC_DIR):
+	-$(INS.dir)
+
+$(ROOT_MESON_GXBB_TOD_DIR):
+	-$(INS.dir)
+
+$(ROOT_MESON_GXBB_MOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_MOD_DIR) FRC
+	$(INS.file)
+
+$(ROOT_MESON_GXBB_KERN_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_KERN_DIR) FRC
+	$(INS.file)
+
+$(ROOT_MESON_GXBB_MISC_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_MISC_DIR) FRC
+	$(INS.file)
+
+$(ROOT_MESON_GXBB_DRV_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_DRV_DIR) FRC
+	$(INS.file)
+
+$(ROOT_MESON_GXBB_TOD_DIR)/%: $(OBJS_DIR)/% $(ROOT_MESON_GXBB_TOD_DIR) FRC
+	$(INS.file)
+
+
 include $(UTSBASE)/Makefile.targ

@@ -26,54 +26,17 @@
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2021 Jason King
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= tpm
+MOD_SRCDIR	= $(UTSBASE)/common/io/tpm
 OBJS		= tpm.o tpm_hcall.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 # This is for everything except /usr/include/tss/
-CPPFLAGS	+= -I$(ROOT)/usr/include
-
-# This is for /usr/include/tss/, which is not built in the ON consolidation
-CPPFLAGS	+= -I$(ADJUNCT_PROTO)/usr/include
+INC_PATH	+= -I$(ROOT)/usr/include
+# This is for /usr/include/tss/, which is not built in illumos
+INC_PATH	+= -I$(ADJUNCT_PROTO)/usr/include
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/tpm/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/tpm/%.S
-	$(COMPILE.s) -o $@ $<
+include $(UTSBASE)/Makefile.kmod.targ

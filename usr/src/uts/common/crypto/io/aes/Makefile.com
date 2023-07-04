@@ -27,61 +27,25 @@
 # Copyright (c) 2019, Joyent, Inc.
 #
 
-COM_DIR = $(COMMONBASE)/crypto/aes
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= aes
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/aes
+
 # XXXMK: Could be in the client makefile, if not for wsdiff
 intel_OBJS	= aes_amd64.o aes_intel.o aeskey.o
 OBJS		= $($(UTSMACH)_OBJS) aes.o aes_impl.o aes_modes.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+COM_DIR = $(COMMONBASE)/crypto/aes
 
-#
-#	Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
+DEPENDS_ON = misc/kcf
 
 CPPFLAGS	+= -I$(COM_DIR) -I$(COM_DIR)/..
 CPPFLAGS	+= -DCRYPTO_PROVIDER_NAME=\"$(MODULE)\"
 AS_CPPFLAGS	+= -I../../$(PLATFORM)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:               $(UTSBASE)/common/crypto/io/aes/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/aes/%.c
 	$(COMPILE.c) -o $@ $<

@@ -25,11 +25,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= av1394
+MOD_SRCDIR	= $(UTSBASE)/common/io/1394/targets/av1394
 
 OBJS		= \
 		av1394.o		\
@@ -45,23 +42,7 @@ OBJS		= \
 		av1394_list.o		\
 		av1394_queue.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#       Overrides
-#
+include $(UTSBASE)/Makefile.kmod
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -75,29 +56,6 @@ CERRWARN	+= -_gcc=-Wno-type-limits
 # needs work
 $(OBJS_DIR)/av1394_isoch.o := SMOFF += signed
 
-#
-# depends on misc/s1394
-LDFLAGS		+= -Nmisc/s1394
+DEPENDS_ON	= misc/s1394
 
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/1394/targets/av1394/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

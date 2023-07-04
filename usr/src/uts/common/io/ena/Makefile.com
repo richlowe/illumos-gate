@@ -13,8 +13,8 @@
 # Copyright 2021 Oxide Computer Company
 #
 
-
 MODULE		= ena
+MOD_SRCDIR	= $(UTSBASE)/common/io/ena
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -30,36 +30,15 @@ OBJS		=		\
 		ena_rx.o	\
 		ena_watchdog.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ena
+include $(UTSBASE)/Makefile.kmod
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-CPPFLAGS	+= -I$(UTSBASE)/common/io/ena
+INC_PATH	+= -I$(MOD_SRCDIR)
 
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINBAR) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-LDFLAGS		+= -N misc/mac
-
-MAPFILES	+= ddi mac kernel
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+DEPENDS_ON	= misc/mac
+MAPFILES	= ddi mac kernel
 
 include $(UTSBASE)/Makefile.mapfile
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/ena/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

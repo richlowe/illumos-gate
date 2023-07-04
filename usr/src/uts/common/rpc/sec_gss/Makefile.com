@@ -26,11 +26,8 @@
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= rpcsec_gss
+MOD_SRCDIR	= $(UTSBASE)/common/rpc/sec_gss
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -40,24 +37,11 @@ OBJS		=			\
 		rpcsec_gss_utils.o	\
 		svc_rpcsec_gss.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Define dependency on rpcmod and kgssapi
-#
-LDFLAGS += -N strmod/rpcmod -N misc/kgssapi
+DEPENDS_ON	= strmod/rpcmod misc/kgssapi
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -66,27 +50,4 @@ LDFLAGS += -N strmod/rpcmod -N misc/kgssapi
 #
 CERRWARN	+= -_gcc=-Wno-parentheses
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/rpc/sec_gss/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

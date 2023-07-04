@@ -24,29 +24,11 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= myri10ge
+MOD_SRCDIR	= $(UTSBASE)/common/io/myri10ge/drv
 OBJS		= myri10ge.o myri10ge_lro.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-# Overrides
-#
+include $(UTSBASE)/Makefile.kmod
 
 # needs work
 SMATCH=off
@@ -54,33 +36,8 @@ SMATCH=off
 INC_PATH	+= -I$(UTSBASE)/common/io/myri10ge
 INC_PATH	+= -I$(UTSBASE)/common/io/myri10ge/firmware
 
-CFLAGS	+= -DSOLARIS_S11
+CPPFLAGS	+= -DSOLARIS_S11
 
-#
-# Driver depends on MAC
-#
-LDFLAGS	  += -N misc/mac -N drv/ip
+DEPENDS_ON	= misc/mac drv/ip
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/myri10ge/drv/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

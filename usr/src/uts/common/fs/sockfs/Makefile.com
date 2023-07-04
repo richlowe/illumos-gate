@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= sockfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/sockfs
 
 # XXXMK: Should be sorted but wsdiff
 OBJS		=			\
@@ -49,24 +46,11 @@ OBJS		=			\
 		sodirect.o		\
 		sockfilter.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
-LDFLAGS         += -Ndrv/ip
+DEPENDS_ON	= drv/ip
 
 #
 #	Derived file "nl7ctokgen.h" defines.
@@ -76,31 +60,9 @@ TOKGEN		 = $(SRCDIR)/nl7ctokgen
 DERIVED_FILES	 = nl7ctokgen.h
 CFLAGS		+= -I.
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+CLEANFILES	+= $(DERIVED_FILES)
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-		$(RM) $(DERIVED_FILES)
-
-clobber:	$(CLOBBER_DEPS)
-		$(RM) $(DERIVED_FILES)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/sockfs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 #
 #	Derived file gen.

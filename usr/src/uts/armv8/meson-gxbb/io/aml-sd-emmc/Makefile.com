@@ -23,31 +23,11 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= aml-sd-emmc
-OBJS		= aml-sd-emmc.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/armv8/meson-gxbb/io/aml-sd-emmc
 ROOTMODULE	= $(ROOT_MESON_GXBB_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/armv8/meson-gxbb/Makefile.meson-gxbb
-
-#
-#       Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
+include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I$(SRC)/uts/armv8/meson-gxbb/
 
@@ -58,30 +38,6 @@ INC_PATH	+= -I$(SRC)/uts/armv8/meson-gxbb/
 #
 CERRWARN += -_gcc=-Wno-unused-function
 
-#	Dependency
-LDFLAGS += -Ndrv/blkdev
+DEPENDS_ON = drv/blkdev
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/armv8/meson-gxbb/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/meson-gxbb/io/aml-sd-emmc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
