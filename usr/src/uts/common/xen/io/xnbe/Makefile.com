@@ -24,62 +24,15 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xnbe
-OBJS		= xnbe.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/xen/io/xnbe
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-
-#
-# Driver depends on MAC and IP.
-#
-#LDFLAGS		+= -N misc/mac -N drv/ip
+include $(UTSBASE)/Makefile.kmod
 
 #
 # use Solaris specific code in xen public header files
 #
 CFLAGS		+= -D_SOLARIS
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xnbe/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

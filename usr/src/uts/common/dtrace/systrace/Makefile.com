@@ -24,38 +24,18 @@
 # Use is subject to license terms.
 #
 
-
 MODULE		= systrace
-OBJS		= systrace.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+MOD_SRCDIR	= $(UTSBASE)/common/dtrace/systrace
 ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/dtrace/systrace
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-LDFLAGS		+= -Ndrv/dtrace
+DEPENDS_ON	= drv/dtrace
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_DTRACE_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/dtrace/systrace/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

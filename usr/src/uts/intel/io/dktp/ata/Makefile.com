@@ -26,11 +26,8 @@
 # Copyright (c) 2011 Bayard G. Bell. All rights reserved.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ata
+MOD_SRCDIR	= $(UTSBASE)/intel/io/dktp/ata
 
 # GHD
 # XXXMK: should be sorted but wsdiff
@@ -56,27 +53,11 @@ OBJS		+=		\
 		ata_debug.o	\
 		sil3xxx.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/dktp/ata
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-#	Overrides.
-#
-#DEBUG_FLGS	= -DATA_DEBUG -DGHD_DEBUG -DDEBUG
-DEBUG_FLGS	=
-DEBUG_DEFS	+= $(DEBUG_FLGS)
 INC_PATH	+= -I$(UTSBASE)/intel/io/dktp/ghd
 
 #
@@ -87,34 +68,9 @@ INC_PATH	+= -I$(UTSBASE)/intel/io/dktp/ghd
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-# Depends on scsi
-#
-LDFLAGS         += -N misc/scsi
+DEPENDS_ON	= misc/scsi
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/dktp/ata/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/dktp/ghd/%.c
 	$(COMPILE.c) -o $@ $<

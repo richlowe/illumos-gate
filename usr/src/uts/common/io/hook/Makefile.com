@@ -24,52 +24,20 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= hook
-OBJS		= hook.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
 # needs work
 $(OBJS_DIR)/hook.o := SMOFF += all_func_returns
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
-
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS) $(SISCHECK_DEPS)
-
-clean:		$(CLEAN_DEPS) $(SISCLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS) $(SISCLEAN_DEPS)
-
-install:	$(INSTALL_DEPS) $(SISCHECK_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.sischeck
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/hook/%.c
 	$(COMPILE.c) -o $@ $<

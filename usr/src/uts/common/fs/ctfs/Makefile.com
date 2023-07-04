@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= ctfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/ctfs
 
 OBJS		=		\
 		ctfs_all.o	\
@@ -43,19 +40,9 @@ OBJS		=		\
 		ctfs_tdir.o	\
 		ctfs_tmpl.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -67,26 +54,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 $(OBJS_DIR)/ctfs_root.o := SMOFF += signed_integer_overflow_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/ctfs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

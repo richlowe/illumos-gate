@@ -24,12 +24,8 @@
 #
 # Copyright (c) 2019, Joyent, Inc.
 
-COM_DIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= kcf
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/core
 
 # XXXMK: Could be added in the client makefile, if not for wsdiff
 intel_OBJS	= gcm_intel.o
@@ -68,19 +64,11 @@ OBJS		=			\
 		gcm.o			\
 		fips_random.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+COM_DIR = $(COMMONBASE)/crypto
 
 CFLAGS		+= -I$(COM_DIR)
 AS_CPPFLAGS	+= -I../../$(PLATFORM)
@@ -98,31 +86,9 @@ CERRWARN	+= -_gcc=-Wno-unused-label
 # needs work
 SMOFF += all_func_returns,signed_integer_overflow_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/api/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/core/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 

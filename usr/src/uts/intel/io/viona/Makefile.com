@@ -15,8 +15,8 @@
 # Copyright 2022 Oxide Computer Company
 #
 
-
 MODULE		= viona
+MOD_SRCDIR	= $(UTSBASE)/intel/io/viona
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -26,37 +26,22 @@ OBJS		=		\
 	 	viona_tx.o	\
 	 	viona_hook.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/viona
+
+include $(UTSBASE)/Makefile.kmod
+
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
+
 MAPFILE		= $(UTSBASE)/intel/io/viona/viona.mapfile
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
-
-LDFLAGS		+= -Ndrv/dld -Nmisc/mac -Nmisc/dls -Ndrv/vmm -Nmisc/neti
-LDFLAGS		+= -Nmisc/hook
+DEPENDS_ON	= \
+	drv/dld \
+	misc/mac \
+	misc/dls \
+	drv/vmm \
+	misc/neti \
+	misc/hook
 LDFLAGS		+= -M $(MAPFILE)
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/viona/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

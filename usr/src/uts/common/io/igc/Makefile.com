@@ -13,9 +13,8 @@
 # Copyright 2024 Oxide Computer Company
 #
 
-UTSBASE = ../..
-
 MODULE		= igc
+MOD_SRCDIR	= $(UTSBASE)/common/io/igc
 
 CORE_OBJS	=	\
 	igc_api.o	\
@@ -34,15 +33,10 @@ OBJS	=		\
 	igc_ring.o	\
 	igc_stat.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-CPPFLAGS	+= -I$(UTSBASE)/common/io/igc
-LDFLAGS		+= -N misc/mac
+INC_PATH	+= -I$(UTSBASE)/common/io/igc
+DEPENDS_ON	= misc/mac
 
 #
 # Smatch gags for the core code. We should consider fixing these and
@@ -56,24 +50,8 @@ $(OBJS_DIR)/igc_mac.o := SMOFF += all_func_returns
 $(OBJS_DIR)/igc_nvm.o := SMOFF += all_func_returns
 $(OBJS_DIR)/igc_phy.o := SMOFF += all_func_returns
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/igc/core/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/igc/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

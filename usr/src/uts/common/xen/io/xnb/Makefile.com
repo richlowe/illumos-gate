@@ -24,69 +24,24 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= xnb
-OBJS		= xnb.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+MOD_SRCDIR	= $(UTSBASE)/common/xen/io/xnb
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-DEF_BUILDS	= $(DEF_BUILDS64)
-ALL_BUILDS	= $(ALL_BUILDS64)
-
-#
-# Module depends on mac.
-#
-LDFLAGS		+= -N misc/mac
+DEPENDS_ON	= misc/mac
 
 #
 # use Solaris specific code in xen public header files
 #
 CFLAGS		+= -D_SOLARIS
 
-
 CERRWARN	+= $(CNOWARN_UNINIT)
 
 # needs work
 SMOFF += signed
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xnb/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

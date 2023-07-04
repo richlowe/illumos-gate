@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-# Define the module and object file sets.
-#
 MODULE		= iscsi
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/iscsi
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -61,31 +58,21 @@ OBJS		=			\
 		utils.o			\
 		kifconf.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/iscsi
+include $(UTSBASE)/Makefile.kmod
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-# Define targets.
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-# includes
 INC_PATH	+= -I$(UTSBASE)/common/io/scsi/adapters/iscsi
 INC_PATH	+= -I$(SRC)/common/hdcrc
 
-#
-# Note dependancy on misc/scsi.
-#
-LDFLAGS += -Nmisc/scsi -Nfs/sockfs -Nsys/doorfs -Nmisc/md5 -Nmisc/ksocket
-LDFLAGS += -Nmisc/idm
-
+DEPENDS_ON	=	\
+	misc/scsi	\
+	fs/sockfs	\
+	sys/doorfs	\
+	misc/md5	\
+	misc/ksocket	\
+	misc/idm
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-unused-function
@@ -96,29 +83,7 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 SMATCH=off
 
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/scsi/adapters/iscsi/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:                $(UTSBASE)/common/inet/kifconf/%.c
 	$(COMPILE.c) -o $@ $<

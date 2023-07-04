@@ -1,0 +1,108 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+# Copyright 2023 Richard Lowe
+
+#
+# MODULE specifies the name of the module to build, other things default based
+# on this, and it obviously takes no default value itself.  It should be
+# specified without the prefix of its canonical name (that is `bge` not
+# `drv/bge`)
+#
+# MODULE=
+
+#
+# MOD_SRCDIR specifies the default source directory for this module, where the
+# config file and sources may be found by default.
+#
+# Unfortunately, we cannot default it.
+#
+# MOD_SRCDIR=
+
+#
+# OBJS specifies the objects which are linked together to form this kernel
+# module.
+#
+# The default, which client Makefiles should override if necessary (and not
+# append to, to make things clear), is an object of the same name as the
+# resulting module.
+#
+# We do this with a little make trickery that sets $(NO_OBJS) if $(OBJS) is
+# non-empty.
+#
+NO_OBJS		= $(OBJS:%=$(POUND_SIGN))
+$(NO_OBJS)OBJS 	= $(MODULE).o
+
+#
+# OBJECTS is the path, including the object directory prefix.
+# Client Makefiles need not and should not change this.
+#
+OBJECTS	= $(OBJS:%=$(OBJS_DIR)/%)
+
+#
+# ROOTMODULE specifies where this module will be installed, override if
+# necessary but the default is as a regular driver object.
+#
+NO_ROOTMODULE	= $(ROOTMODULE:%=$(POUND_SIGN))
+$(NO_ROOTMODULE)ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+
+#
+# CONF_SRCDIR specifies the directory where $(MODULE).conf is located in the
+# source.  Such that $(ROOT_CONFFILE) may find it.
+#
+# We default it in a similar manner to OBJS, to $(MOD_SRCDIR)
+#
+NO_CONFDIR =  $(CONF_SRCDIR:%=$(POUND_SIGN))
+$(NO_CONFDIR)CONF_SRCDIR = $(MOD_SRCDIR)
+
+#
+# Include common platform rules in their customary place.
+#
+include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+
+#
+# Define targets
+#
+# ALL_TARGET is that run by `make all`, INSTALL_TARGET by `make install`, both
+# may be appended to as needed by client Makefiles, for instance to install
+# configuration files or additional links.
+#
+# Customary values include $(ROOT_CONFFILE) to install $(MODULE).conf,
+# and a user-specified $(ROOTLINKS) to install extra module links.
+#
+# NB: Because ordering here is potentially important, these do not default and
+# customization must be made _after_ including Makefile.kmod
+#
+ALL_TARGET	= $(BINARY)
+INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+
+#
+# Overrides for error checking.  Here in the framework there are none, but we
+# list things here for the sake of documenting them.
+#
+# CERRWARN is passed to the compilers, and should disable compiler warnings.
+# SMOFF is passed to smatch and should disable its warnings.
+# SMATCH is a binary toggle disabling smatch all together, set it to `off`
+#   to disable it.
+#
+# CERRWARN=
+# SMOFF=
+# SMATCH=
+#
+
+#
+# DEPENDS_ON specifies the modules on which this module depends. It takes as
+# its value a list of module canonical names (`misc/mac`), and is used to
+# augment LDFLAGS
+#
+# DEPENDS_ON=
+#
+LDFLAGS += $(DEPENDS_ON:%=-N %)

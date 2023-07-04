@@ -233,9 +233,6 @@ INSTALL_TARGET	= $(UNIX_BIN) $(ROOTMODULE)
 #
 UNIX_DIR	= .
 
-#
-#	Overrides
-#
 CLEANFILES	+=		\
 	$(UNIX_O) $(MODSTUBS_O)	\
 	$(OBJS_DIR)/vers.c \

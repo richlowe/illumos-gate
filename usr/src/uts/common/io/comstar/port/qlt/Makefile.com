@@ -22,12 +22,8 @@
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= qlt
+MOD_SRCDIR	= $(UTSBASE)/common/io/comstar/port/qlt
 OBJS		=	\
 	2400.o		\
 	2500.o		\
@@ -36,25 +32,13 @@ OBJS		=	\
 	8300fc.o	\
 	qlt.o		\
 	qlt_dma.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/comstar/port/qlt
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Overrides and depends_on
-#
-LDFLAGS		+= -Ndrv/fct -Ndrv/stmf
+DEPENDS_ON	= drv/fct drv/stmf
 CFLAGS		+= -DUNIQUE_FW_NAME
 
 #
@@ -63,26 +47,4 @@ CFLAGS		+= -DUNIQUE_FW_NAME
 #
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/comstar/port/qlt/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

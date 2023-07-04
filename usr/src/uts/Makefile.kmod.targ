@@ -1,0 +1,54 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+# Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2023 Richard Lowe
+
+#
+# This file exists solely to allow things such as Makefile.sischeck to be
+# included after Makefile.kmod but before any targets, so that it might modify
+# the _DEPS variables and have them expand to rule names in uts/Makefile.targ
+# correctly.
+#
+# If we can find a way to stop that, we can also not have this.
+#
+
+#
+# Default build targets.
+# Just a thing wrapper around concepts in the larger driving kernel Makefiles.
+#
+.KEEP_STATE:
+
+def:		$(DEF_DEPS)
+
+all:		$(ALL_DEPS)
+
+clean:		$(CLEAN_DEPS)
+
+clobber:	$(CLOBBER_DEPS)
+
+install:	$(INSTALL_DEPS)
+
+#
+# Include common platform targets in their customary place
+#
+include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+
+#
+# Extra targets, such as to find specific sources, should be added after the
+# inclusion of this Makefile.
+#
+$(OBJS_DIR)/%.o:		$(MOD_SRCDIR)/%.S
+	$(COMPILE.s) -o $@ $<
+
+$(OBJS_DIR)/%.o:		$(MOD_SRCDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)

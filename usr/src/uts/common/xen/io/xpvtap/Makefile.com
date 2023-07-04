@@ -24,64 +24,22 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= xpvtap
+MOD_SRCDIR	= $(UTSBASE)/common/xen/io/xpvtap
 OBJS		= xpvtap.o blk_common.o seg_mf.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#       Overrides
-#
-DEF_BUILDS      = $(DEF_BUILDS64)
-ALL_BUILDS      = $(ALL_BUILDS64)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # use Solaris specific code in xen public header files
 #
-CFLAGS		+= -D_SOLARIS
-
+ALL_DEFS	+= -D_SOLARIS
 
 CERRWARN	+= -_gcc=-Wno-unused-label
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+include $(UTSBASE)/Makefile.kmod.targ
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/$(UTSMACH)/vm/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/io/xpvtap/%.c
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86xpv/vm/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

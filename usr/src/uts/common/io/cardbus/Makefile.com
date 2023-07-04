@@ -23,36 +23,23 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= cardbus
+MOD_SRCDIR	= $(UTSBASE)/common/io/cardbus
 OBJS		= cardbus.o cardbus_hp.o cardbus_cfg.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 #
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Include sun4u specific header files
+#	Include sun4u specific header files.  This is obviously wrong
 #
 INC_PATH        += -I$(UTSBASE)/sun4u -I$(UTSBASE)/sun4 -I$(UTSBASE)/i86pc
 
 CPPFLAGS        +=      -DHOTPLUG
 
-#	dependency
-LDFLAGS	+=	-Nmisc/busra -Nmisc/pcmcia -Nmisc/hpcsvc
+DEPENDS_ON	=	misc/busra misc/pcmcia misc/hpcsvc
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -66,25 +53,4 @@ CERRWARN	+= -_gcc=-Wno-unused-variable
 
 SMOFF += indenting,no_if_block
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/cardbus/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

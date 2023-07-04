@@ -27,30 +27,9 @@
 #
 
 
-MODULE=		rtls
-OBJS=		rtls.o
-OBJECTS=	$(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE=	$(ROOT_HVM_DRV_DIR)/$(MODULE)
+MODULE		= rtls
+MOD_SRCDIR	= $(UTSBASE)/i86hvm/io/rtls
+ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
 
-include		$(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-ALL_TARGET=	$(BINARY)
-INSTALL_TARGET=	$(BINARY) $(ROOTMODULE)
-
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include		$(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86hvm/io/rtls/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include		$(UTSBASE)/Makefile.kmod
+include		$(UTSBASE)/Makefile.kmod.targ

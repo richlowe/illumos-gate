@@ -24,17 +24,8 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= tem
-
-aarch64_FONT		= 8x16
-aarch64_FONT_SRC	= ter-u16b
-
-FONT		= $($(UTSMACH)_FONT)
-FONT_SRC	= $($(UTSMACH)_FONT_SRC)
+MOD_SRCDIR	= $(UTSBASE)/common/io/tem
 
 aarch64_OBJS	=	\
 		font.o	\
@@ -45,41 +36,23 @@ OBJS		=		\
 		tem_safe.o	\
 		$($(UTSMACH)_OBJS)
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+aarch64_FONT		= 8x16
+aarch64_FONT_SRC	= ter-u16b
 
-LDFLAGS += -Ndacf/consconfig_dacf
+FONT		= $($(UTSMACH)_FONT)
+FONT_SRC	= $($(UTSMACH)_FONT_SRC)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
+DEPENDS_ON	= dacf/consconfig_dacf
 
-def:		$(DEF_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+$(OBJS_DIR)/%.o:		$(SRC)/common/font/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(OBJS_DIR)/%.c
 	$(COMPILE.c) -o $@ $<
@@ -87,11 +60,3 @@ $(OBJS_DIR)/%.o:		$(OBJS_DIR)/%.c
 
 $(OBJS_DIR)/$(FONT).c:	$(FONT_DIR)/$(FONT_SRC).bdf
 	$(VTFONTCVT) -f source -o $@ $(FONT_DIR)/$(FONT_SRC).bdf
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/tem/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(SRC)/common/font/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)

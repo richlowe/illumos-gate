@@ -27,14 +27,9 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
-COM_DIR = $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= des
+MOD_SRCDIR	= $(UTSBASE)/common/des
 OBJS		= des_crypt.o des_impl.o des_ks.o des_soft.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
 LINK_TARGET	= ../../../kernel/crypto/$(SUBDIR64)/$(MODULE)
@@ -42,18 +37,12 @@ LINK_TARGET	= ../../../kernel/crypto/$(SUBDIR64)/$(MODULE)
 #
 #	Include common rules.
 #
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+COM_DIR = $(COMMONBASE)/crypto
+INSTALL_TARGET	+= $(ROOTLINK)
 
-#
-# Linkage dependencies
-#
-LDFLAGS		+= -Nmisc/kcf
+DEPENDS_ON	= misc/kcf
 
 CPPFLAGS	+= -I$(COM_DIR)
 
@@ -65,32 +54,10 @@ CPPFLAGS	+= -I$(COM_DIR)
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln -s $(LINK_TARGET) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/des/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/des/%.c
 	$(COMPILE.c) -o $@ $<

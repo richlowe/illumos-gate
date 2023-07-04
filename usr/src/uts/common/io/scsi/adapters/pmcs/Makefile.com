@@ -21,12 +21,10 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= pmcs
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -40,34 +38,19 @@ OBJS		=		\
 		pmcs_subr.o \
 		pmcs_fwlog.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Kernel Module Dependencies
-#
-LDFLAGS += -Nmisc/scsi
+DEPENDS_ON	= misc/scsi
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY) $(CONFMOD)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-include $(CONF_SRCDIR)/fw/pmcs8001fw.version
+include $(MOD_SRCDIR)/fw/pmcs8001fw.version
 
-#
-# Add additional flags
-#
-PMCS_DRV_FLGS	= -DMODNAME=\"${MODULE}\"
+PMCS_DRV_FLGS	= -DMODNAME=\"$(MODULE)\"
 CPPFLAGS	+= $(PMCS_DRV_FLGS) \
-	-DPMCS_FIRMWARE_VERSION=${PMCS_FW_VERSION} \
-	-DPMCS_FIRMWARE_VERSION_STRING=\"${PMCS_FW_VERSION_STRING}\"
+	-DPMCS_FIRMWARE_VERSION=$(PMCS_FW_VERSION) \
+	-DPMCS_FIRMWARE_VERSION_STRING=\"$(PMCS_FW_VERSION_STRING)\"
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $(CNOWARN_UNINIT)
@@ -78,26 +61,4 @@ CERRWARN	+= -_gcc=-Wno-parentheses
 # needs work
 SMATCH=off
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/scsi/adapters/pmcs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -27,6 +27,7 @@
 
 
 MODULE		= ctf
+MOD_SRCDIR	= $(UTSBASE)/common/ctf
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -42,13 +43,9 @@ OBJS		=		\
 		ctf_subr.o \
 		ctf_mod.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 CPPFLAGS	+= -I$(SRC)/common/ctf -DCTF_OLD_VERSIONS
 LDFLAGS		+= $(BREDUCE) -M$(UTSBASE)/common/ctf/mapfile
@@ -60,23 +57,7 @@ LDFLAGS		+= $(BREDUCE) -M$(UTSBASE)/common/ctf/mapfile
 #
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/ctf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/ctf/%.c
 	$(COMPILE.c) -o $@ $<

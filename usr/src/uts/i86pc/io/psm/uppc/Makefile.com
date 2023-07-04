@@ -27,60 +27,21 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= uppc
+MOD_SRCDIR	= $(UTSBASE)/i86pc/io/psm/uppc
 OBJS		= uppc.o psm_common.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_MACH_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides.
-#
 CERRWARN	+= -_gcc=-Wno-unused-function
-DEBUG_FLGS	=
-DEBUG_DEFS	+= $(DEBUG_FLGS)
 
 # needs work
 $(OBJS_DIR)/psm_common.o := SMOFF += deref_check
 
-#
-# Depends on ACPI CA interpreter
-#
-LDFLAGS		+= -N misc/acpica
+DEPENDS_ON	= misc/acpica
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/psm/uppc/%.c
 	$(COMPILE.c) -o $@ $<

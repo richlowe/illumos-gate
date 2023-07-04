@@ -26,48 +26,14 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= usbsksp
+MOD_SRCDIR	= $(UTSBASE)/common/io/usb/clients/usbser/usbser_keyspan
 OBJS		= usbser_keyspan.o keyspan_dsd.o keyspan_pipe.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-LDFLAGS         += -Nmisc/usba -Nmisc/usbser -Nmisc/usbs49_fw
+DEPENDS_ON	= misc/usba misc/usbser misc/usbs49_fw
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-.KEEP_STATE:
-
-all:		$(ALL_DEPS)
-
-def:		$(DEF_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/usb/clients/usbser/usbser_keyspan/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

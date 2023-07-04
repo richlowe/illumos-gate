@@ -24,11 +24,8 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
-
-#
-#       Define the module and object file sets.
-#
 MODULE		= cpu_ms.AuthenticAMD.15
+MOD_SRCDIR	= $(UTSBASE)/i86pc/cpu/amd_opteron
 
 OBJS		=		\
 		ao_cpu.o	\
@@ -37,55 +34,22 @@ OBJS		=		\
 		ao_mca_disp.o	\
 		ao_poll.o
 
-
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE      = $(ROOT_PSM_CPU_DIR)/$(MODULE)
 
-SRCDIR		= $(UTSBASE)/i86pc/cpu/amd_opteron
-
 AO_MCA_DISP_C	= $(OBJS_DIR)/ao_mca_disp.c
-AO_MCA_DISP_SRC = $(SRCDIR)/ao_mca_disp.in
+AO_MCA_DISP_SRC = $(MOD_SRCDIR)/ao_mca_disp.in
 AO_GENDISP	= $(UTSBASE)/i86pc/cpu/scripts/ao_gendisp
 
-#
-#       Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#       Define targets
-#
-ALL_TARGET      = $(BINARY)
-INSTALL_TARGET  = $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides and additions
-#
 $(OBJS_DIR)/ao_mca.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
+
 CLEANFILES	+= $(AO_MCA_DISP_C)
-CPPFLAGS	+= -I$(SRCDIR) -I$(OBJS_DIR)
-ASFLAGS		+= -I$(SRCDIR) -I$(OBJS_DIR)
-LDFLAGS		+= -N misc/acpica
+CPPFLAGS	+= -I$(MOD_SRCDIR) -I$(OBJS_DIR)
 
-#
-#       Default build targets.
-#
-.KEEP_STATE:
+DEPENDS_ON	= misc/acpica
 
-def:            $(DEF_DEPS)
-
-all:            $(ALL_DEPS)
-
-clean:          $(CLEAN_DEPS)
-
-clobber:        $(CLOBBER_DEPS)
-
-install:        $(INSTALL_DEPS)
-
-#
-#       Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 #
 # Create ao_mca_disp.c
@@ -94,10 +58,5 @@ $(AO_MCA_DISP_C): $(AO_MCA_DISP_SRC) $(AO_GENDISP)
 	$(AO_GENDISP) $(AO_MCA_DISP_SRC) >$@
 
 $(OBJS_DIR)/%.o:		$(OBJS_DIR)/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-# NB: This really is i86pc, not $(UTSMACH).  We build this on i86xpv as well
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/cpu/amd_opteron/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

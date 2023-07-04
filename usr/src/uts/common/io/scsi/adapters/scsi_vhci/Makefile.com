@@ -26,20 +26,12 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-# Define the module and object file sets.
-#
 MODULE		= scsi_vhci
+MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/scsi_vhci
 OBJS		= scsi_vhci.o mpapi_impl.o scsi_vhci_tpgs.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/scsi_vhci
 
-#
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= $(CNOWARN_UNINIT)
@@ -48,37 +40,9 @@ CERRWARN	+= -_gcc=-Wno-unused-label
 # needs work
 SMATCH=off
 
-#
-# Define targets.
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-# Note dependancy on misc/scsi.
-#
-LDFLAGS += -Nmisc/scsi
+DEPENDS_ON	= misc/scsi
 
-#
-# Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-# Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/scsi/adapters/scsi_vhci/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

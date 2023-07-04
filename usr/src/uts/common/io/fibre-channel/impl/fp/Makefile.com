@@ -26,36 +26,16 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= fp
-OBJS		= fp.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/$(UTSMACH)/io/fibre-channel/impl/
+MOD_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/impl/fp
+CONF_SRCDIR     = $(UTSBASE)/$(UTSMACH)/io/fibre-channel/impl
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
+ALL_TARGET	+= $(BINARY) $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-#
-#	header file directories
-#
-INCS		+= -I$(SRC)/uts/common/
-
-#
-#	Overrides
-#
-LDFLAGS		+= -Ndrv/fcp -Nmisc/fctl -Nmisc/scsi
+DEPENDS_ON	= drv/fcp misc/fctl misc/scsi
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -68,26 +48,4 @@ CERRWARN	+= -_gcc=-Wno-unused-function
 # needs work
 $(OBJS_DIR)/fp.o := SMOFF += all_func_returns,deref_check
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/fibre-channel/impl/fp/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

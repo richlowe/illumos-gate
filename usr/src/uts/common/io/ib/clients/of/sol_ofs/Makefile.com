@@ -24,11 +24,8 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= sol_ofs
+MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/of/sol_ofs
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
@@ -38,21 +35,11 @@ OBJS		=			\
 		sol_ofs_debug_util.o	\
 		sol_ofs_gen_util.o	\
 		sol_kverbs.o
-
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
-LDFLAGS		+= -Nmisc/ibtl -Nmisc/ibcm
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+DEPENDS_ON	= misc/ibtl misc/ibcm
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -70,26 +57,4 @@ $(OBJS_DIR)/sol_cma.o := SMOFF += deref_check
 # false positive
 SMOFF += signed
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ib/clients/of/sol_ofs/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -23,61 +23,26 @@
 # Copyright 2013 Saso Kiselkov.  All rights reserved.
 #
 
-COMDIR	= $(COMMONBASE)/crypto
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= edonr
+MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/edonr
 OBJS		= edonr.o edonr_mod.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOTLINK)
+COMDIR	= $(COMMONBASE)/crypto
 
-#
-# Linkage dependencies
-#
-LDFLAGS += -Nmisc/kcf
+INSTALL_TARGET	+= $(ROOTLINK)
+
+DEPENDS_ON = misc/kcf
 
 CFLAGS += -I$(COMDIR)
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
 	-$(RM) $@; ln $(ROOTMODULE) $@
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/crypto/io/edonr/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/edonr/%.c
 	$(COMPILE.c) -o $@ $<

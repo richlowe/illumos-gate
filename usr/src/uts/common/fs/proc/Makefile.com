@@ -25,12 +25,10 @@
 #
 # Copyright 2019 Joyent, Inc.
 # Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
-
-
 #
-#	Define the module and object file sets.
-#
+
 MODULE		= procfs
+MOD_SRCDIR	= $(UTSBASE)/common/fs/proc
 
 OBJS		=		\
 		prcontrol.o	\
@@ -40,19 +38,9 @@ OBJS		=		\
 		prvfsops.o	\
 		prvnops.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -68,28 +56,6 @@ $(OBJS_DIR)/prsubr.o := SMOFF += all_func_returns
 $(OBJS_DIR)/prcontrol.o := SMOFF += all_func_returns
 $(OBJS_DIR)/prioctl.o := SMOFF += signed
 
-LDFLAGS         += -Nfs/namefs
+DEPENDS_ON	= fs/namefs
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/fs/proc/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

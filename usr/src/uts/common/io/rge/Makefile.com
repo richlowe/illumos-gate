@@ -26,11 +26,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= rge
+MOD_SRCDIR	= $(UTSBASE)/common/io/rge
 
 # XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
@@ -41,28 +38,9 @@ OBJS		=		\
 		rge_log.o	\
 		rge_rxtx.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
+include $(UTSBASE)/Makefile.kmod
 
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-
-#
-# Driver depends on GLD & IP
-#
-LDFLAGS		+= -N misc/mac -N drv/ip
+DEPENDS_ON	= misc/mac drv/ip
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -75,26 +53,4 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # looks like a real bug in rge_phy_update() !
 $(OBJS_DIR)/rge_chip.o := SMOFF += indenting
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/rge/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

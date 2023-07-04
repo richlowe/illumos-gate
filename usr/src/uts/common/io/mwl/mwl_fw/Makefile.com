@@ -23,48 +23,17 @@
 # Use is subject to license terms.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= mwlfw
+MOD_SRCDIR	= $(UTSBASE)/common/io/mwl/mwl_fw
 OBJS		= mwlfw_mode.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
+FWOBJ		= $(OBJS_DIR)/mwlfw.o
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-FWOBJ		= $(OBJS_DIR)/$(MODULE).o
+include $(UTSBASE)/Makefile.kmod
 
-OBJECTS		+= $(FWOBJ)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS) $(FWOBJ)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
+OBJECTS	+= $(FWOBJ)
 
 # customized section for transforming firmware binary
-ELFWRAP		= elfwrap
 BINSRC		= $(UTSBASE)/common/io/mwl/mwl_fw
 BINDEST		= $(UTSBASE)/$(UTSMACH)/mwlfw
 FWBINCOPY	= mw88W8363fw
@@ -72,10 +41,10 @@ BOOTBINCOPY	= mwlboot
 ORIGIN_FWBIN	= mw88W8363
 ORIGIN_BOOTBIN	= mwlboot
 
-#get build type, 32/64
+# get build type, 32/64
 WRAPTYPE	= $(CLASS:%=-%)
 
-#set elfwrap option
+# set elfwrap option
 WRAPOPT		= $(WRAPTYPE:-32=)
 
 $(FWOBJ):
@@ -86,11 +55,4 @@ $(FWOBJ):
 CLOBBERFILES	+= $(BINDEST)/$(FWBINCOPY)
 CLOBBERFILES	+= $(BINDEST)/$(BOOTBINCOPY)
 
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/mwl/mwl_fw/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

@@ -25,62 +25,29 @@
 # Copyright 2019 Joyent, Inc.
 #
 
-
-#
-# Define the module and object file sets.
-#
 MODULE		= simnet
+MOD_SRCDIR	= $(UTSBASE)/common/io/$(MODULE)
 OBJS		= simnet.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/$(MODULE)
+
+include $(UTSBASE)/Makefile.kmod
+
+ALL_TARGET	+= $(SRC_CONFFILE)
+INSTALL_TARGET	+= $(ROOT_CONFFILE)
+
+DEPENDS_ON	=	\
+	drv/dld		\
+	misc/mac	\
+	misc/dls	\
+	drv/random
 
 #
-# Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-# Define targets
-#
-ALL_TARGET	= $(BINARY) $(SRC_CONFILE)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-
-#
-# Overrides
-#
-LDFLAGS		+= -Ndrv/dld -Nmisc/mac -Nmisc/dls -Ndrv/random
-
-#
-# For now, disable these warnings as it is a generic STREAMS problem;
-# maintainers should endeavor to investigate and remove these for maximum
-# coverage.
+# For now, disable these warnings; maintainers should endeavor
+# to investigate and remove these for maximum coverage.
+# Please do not carry these forward to new Makefiles.
 #
 CERRWARN	+= -_gcc=-Wno-switch
 
 # needs work
 $(OBJS_DIR)/simnet.o := SMOFF += index_overflow
 
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/simnet/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
+include $(UTSBASE)/Makefile.kmod.targ

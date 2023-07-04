@@ -25,11 +25,8 @@
 # Copyright (c) 2018, Joyent, Inc.
 #
 
-
-#
-#	Define the module and object file sets.
-#
 MODULE		= chxge
+MOD_SRCDIR	= $(UTSBASE)/common/io/chxge
 
 # illumos specific objects
 OBJS		=	\
@@ -58,19 +55,7 @@ OBJS		+=		\
 		vsc7326.o	\
 		xpak.o
 
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
-ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-
-#
-#	Include common rules.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
-
-#
-#	Define targets
-#
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+include $(UTSBASE)/Makefile.kmod
 
 CFLAGS		+= -DC99_NOT_SUPPORTED -DCONFIG_CHELSIO_T1_1G \
 		-I$(UTSBASE)/common/io/chxge/ \
@@ -90,7 +75,7 @@ CFLAGS		+= -DSUN_KSTATS -DHOST_PAUSE -DTX_CKSUM_FIX -DTX_THREAD_RECLAIM
 #
 #	Driver depends on GLD, IP, and MAC
 #
-LDFLAGS		+= -N misc/gld -N drv/ip -N misc/mac
+DEPENDS_ON		= misc/gld drv/ip misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor
@@ -108,31 +93,8 @@ SMOFF += indenting,all_func_returns,no_if_block
 # needs work
 $(OBJS_DIR)/sge.o := SMOFF += index_overflow
 
-#
-#
-#	Default build targets.
-#
-.KEEP_STATE:
-
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-#
-#	Include common targets.
-#
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/chxge/com/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/chxge/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

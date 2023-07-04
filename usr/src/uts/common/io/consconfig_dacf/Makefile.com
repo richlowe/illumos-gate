@@ -17,7 +17,6 @@
 # information: Portions Copyright [yyyy] [name of copyright owner]
 #
 # CDDL HEADER END
-#
 
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
@@ -28,37 +27,25 @@
 #
 
 MODULE		= consconfig_dacf
+MOD_SRCDIR	= $(UTSBASE)/common/io/consconfig_dacf
 OBJS		= consconfig_dacf.o consplat.o
-OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DACF_DIR)/$(MODULE)
 
-include $(UTSBASE)/$(UTSMACH)/Makefile.$(UTSMACH)
+include $(UTSBASE)/Makefile.kmod
 
-ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
+#
+# For now, disable these warnings; maintainers should endeavor
+# to investigate and remove these for maximum coverage.
+# Please do not carry these forward to new Makefiles.
+#
 CERRWARN	+= -_gcc=-Wno-parentheses
 
-i86pc_LDFLAGS	+= -N misc/usbser
-i86xpv_LDFLAGS	+= -N misc/usbser
-LDFLAGS		+= $($(UTSMACH)_LDFLAGS)
+i86pc_DEPENDS_ON	= misc/usbser
+i86xpv_DEPENDS_ON	= misc/usbser
+DEPENDS_ON		= $($(UTSMACH)_DEPENDS_ON)
 
-def:		$(DEF_DEPS)
-
-all:		$(ALL_DEPS)
-
-clean:		$(CLEAN_DEPS)
-
-clobber:	$(CLOBBER_DEPS)
-
-install:	$(INSTALL_DEPS)
-
-include $(UTSBASE)/$(UTSMACH)/Makefile.targ
+include $(UTSBASE)/Makefile.kmod.targ
 
 $(OBJS_DIR)/%.o:	$(UTSBASE)/$(UTSMACH)/io/consconfig_dacf/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:	$(UTSBASE)/common/io/consconfig_dacf/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
