@@ -29,29 +29,28 @@
 MODULE		= rpcmod
 MOD_SRCDIR	= $(UTSBASE)/common/rpc
 
-# XXXMK: should be sorted but wsdiff
 OBJS		=		\
-		rpcmod.o	\
-		clnt_cots.o	\
 		clnt_clts.o 	\
+		clnt_cots.o	\
 		clnt_gen.o	\
 		clnt_perr.o	\
+		clnt_rdma.o	\
 		mt_rpcinit.o	\
+		rdma_subr.o	\
 		rpc_calmsg.o	\
 		rpc_prot.o	\
-		rpc_sztypes.o	\
 		rpc_subr.o	\
+		rpc_sztypes.o	\
 		rpcb_prot.o	\
+		rpcmod.o	\
+		rpcsys.o	\
 		svc.o		\
 		svc_clts.o	\
-		svc_gen.o	\
 		svc_cots.o	\
-		rpcsys.o	\
-		xdr_sizeof.o	\
-		clnt_rdma.o	\
+		svc_gen.o	\
 		svc_rdma.o	\
 		xdr_rdma.o	\
-		rdma_subr.o	\
+		xdr_sizeof.o	\
 		xdrrdma_sizeof.o
 
 ROOTMODULE	= $(ROOT_STRMOD_DIR)/$(MODULE)

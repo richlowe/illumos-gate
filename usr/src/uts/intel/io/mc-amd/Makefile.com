@@ -26,19 +26,18 @@ include $(SRC)/common/mc/mc-amd/Makefile.mcamd
 MODULE		= mc-amd
 MOD_SRCDIR	= $(UTSBASE)/intel/io/mc-amd
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
+	mcamd_dimmcfg.o		\
+	mcamd_drv.o		\
 	mcamd_err.o		\
 	mcamd_misc.o		\
 	mcamd_patounum.o	\
-	mcamd_unumtopa.o	\
-	mcamd_synd.o		\
-	mcamd_rowcol_tbl.o	\
+	mcamd_pcicfg.o		\
 	mcamd_rowcol.o		\
-	mcamd_drv.o		\
-	mcamd_dimmcfg.o		\
+	mcamd_rowcol_tbl.o	\
 	mcamd_subr.o		\
-	mcamd_pcicfg.o
+	mcamd_synd.o		\
+	mcamd_unumtopa.o
 
 include $(UTSBASE)/Makefile.kmod
 

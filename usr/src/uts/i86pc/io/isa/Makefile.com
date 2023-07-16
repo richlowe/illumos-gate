@@ -40,7 +40,10 @@ $(OBJS_DIR)/isa.o :=	CERRWARN	+= -_gcc=-Wno-unused-function
 # needs work
 $(OBJS_DIR)/i8237A.o := SMOFF += indenting
 
-DEPENDS_ON = misc/acpica misc/busra misc/pci_autoconfig
+DEPENDS_ON =		\
+	misc/acpica	\
+	misc/busra	\
+	misc/pci_autoconfig
 
 #
 # Define our version of dma_engine and i8237A interfaces

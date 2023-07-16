@@ -30,19 +30,18 @@ MODULE		= xge
 MOD_SRCDIR	= $(UTSBASE)/common/io/xge
 
 # HAL
-# XXXMK: Should be sorted, but wsdiff
 OBJS	=			\
-	xgehal-channel.o	\
-	xgehal-fifo.o		\
-	xgehal-ring.o		\
-	xgehal-config.o		\
-	xgehal-driver.o		\
-	xgehal-mm.o		\
-	xgehal-stats.o		\
-	xgehal-device.o		\
 	xge-queue.o		\
+	xgehal-channel.o	\
+	xgehal-config.o		\
+	xgehal-device.o		\
+	xgehal-driver.o		\
+	xgehal-fifo.o		\
 	xgehal-mgmt.o		\
-	xgehal-mgmtaux.o
+	xgehal-mgmtaux.o	\
+	xgehal-mm.o		\
+	xgehal-ring.o		\
+	xgehal-stats.o
 
 OBJS +=		\
 	xge.o	\

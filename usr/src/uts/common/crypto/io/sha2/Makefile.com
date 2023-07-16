@@ -27,9 +27,7 @@
 MODULE		= sha2
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/sha2
 
-# XXXMK: could be in the client makefile were it not for wsdiff
-intel_OBJS	+= sha512-x86_64.o sha256-x86_64.o
-OBJS		=  $($(UTSMACH)_OBJS) sha2.o sha2_mod.o
+OBJS		= sha2.o sha2_mod.o
 
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)

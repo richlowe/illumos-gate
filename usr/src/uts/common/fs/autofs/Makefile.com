@@ -28,13 +28,12 @@
 MODULE		= autofs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/autofs
 
-# XXXMK: should be sorted but wsdiff
 OBJS		=		\
+		auto_subr.o	\
+		auto_sys.o	\
 		auto_vfsops.o	\
 		auto_vnops.o	\
-		auto_subr.o	\
-		auto_xdr.o	\
-		auto_sys.o
+		auto_xdr.o
 
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SYS_DIR)/$(MODULE)
@@ -43,7 +42,10 @@ include $(UTSBASE)/Makefile.kmod
 
 INSTALL_TARGET	+= $(ROOTLINK)
 
-DEPENDS_ON = strmod/rpcmod misc/rpcsec fs/mntfs
+DEPENDS_ON =		\
+	fs/mntfs	\
+	misc/rpcsec	\
+	strmod/rpcmod
 
 #
 # For now, disable these warnings; maintainers should endeavor

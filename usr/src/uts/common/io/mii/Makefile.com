@@ -29,16 +29,15 @@
 MODULE		= mii
 MOD_SRCDIR	= $(UTSBASE)/common/io/mii
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		mii.o		\
 		mii_cicada.o	\
-		mii_natsemi.o	\
 		mii_intel.o	\
-		mii_qualsemi.o	\
 		mii_marvell.o	\
-		mii_realtek.o	\
-		mii_other.o
+		mii_natsemi.o	\
+		mii_other.o	\
+		mii_qualsemi.o	\
+		mii_realtek.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

@@ -29,53 +29,52 @@ MODULE		= ip
 MOD_SRCDIR	= $(UTSBASE)/common/inet/ip
 
 # IP
-# XXXMK: should be sorted, but wsdiff
 OBJS		=			\
+		conn_opt.o		\
 		igmp.o			\
-		ipmp.o			\
+		inet_common.o		\
 		ip.o			\
+		ip2mac.o		\
 		ip6.o			\
 		ip6_asp.o		\
 		ip6_if.o		\
+		ip6_input.o		\
 		ip6_ire.o		\
+		ip6_output.o		\
 		ip6_rts.o		\
+		ip_arp.o		\
+		ip_attr.o		\
+		ip_dce.o		\
+		ip_dummy.o		\
+		ip_ftable.o		\
+		ip_helper_stream.o	\
 		ip_if.o			\
+		ip_input.o		\
 		ip_ire.o		\
 		ip_listutils.o		\
 		ip_mroute.o		\
 		ip_multi.o		\
-		ip2mac.o		\
 		ip_ndp.o		\
+		ip_output.o		\
 		ip_rts.o		\
+		ip_sadb.o		\
+		ip_squeue.o		\
 		ip_srcid.o		\
+		ip_tunables.o		\
+		ipclassifier.o		\
 		ipddi.o			\
 		ipdrop.o		\
+		ipmp.o			\
+		ipsec_loader.o		\
 		mi.o			\
 		nd.o			\
-		tunables.o		\
 		optcom.o		\
-		snmpcom.o		\
-		ipsec_loader.o		\
-		spd.o			\
-		ipclassifier.o		\
-		inet_common.o		\
-		ip_squeue.o		\
-		squeue.o		\
-		ip_sadb.o		\
-		ip_ftable.o		\
 		proto_set.o		\
 		radix.o			\
-		ip_dummy.o		\
-		ip_helper_stream.o	\
-		ip_tunables.o		\
-		ip_output.o		\
-		ip_input.o		\
-		ip6_input.o		\
-		ip6_output.o		\
-		ip_arp.o		\
-		conn_opt.o		\
-		ip_attr.o		\
-		ip_dce.o
+		snmpcom.o		\
+		spd.o			\
+		squeue.o		\
+		tunables.o
 
 # ICMP
 OBJS		+=	\
@@ -88,68 +87,64 @@ OBJS		+=	\
 		rts_opt_data.o
 
 # TCP
-# XXXMK: should be sorted but wsdiff
 OBJS		+=		\
 		tcp.o		\
-		tcp_fusion.o	\
-		tcp_opt_data.o	\
-		tcp_sack.o	\
-		tcp_stats.o	\
-		tcp_misc.o	\
-		tcp_timers.o	\
-		tcp_time_wait.o \
-		tcp_tpi.o	\
-		tcp_output.o	\
-		tcp_input.o	\
-		tcp_socket.o	\
 		tcp_bind.o	\
 		tcp_cluster.o	\
-		tcp_tunables.o	\
-		tcp_sig.o
+		tcp_fusion.o	\
+		tcp_input.o	\
+		tcp_misc.o	\
+		tcp_opt_data.o	\
+		tcp_output.o	\
+		tcp_sack.o	\
+		tcp_sig.o	\
+		tcp_socket.o	\
+		tcp_stats.o	\
+		tcp_time_wait.o \
+		tcp_timers.o	\
+		tcp_tpi.o	\
+		tcp_tunables.o
 
 # UDP
-# XXXMK: should be sorted but wsdiff
 OBJS		+=		\
 		udp.o		\
 		udp_opt_data.o	\
-		udp_tunables.o	\
-		udp_stats.o
+		udp_stats.o	\
+		udp_tunables.o
 
 # SCTP
-# XXXMK: should be sorted but wsdiff
 OBJS		+=			\
+		ip_netinfo.o		\
 		sctp.o			\
-		sctp_opt_data.o		\
-		sctp_output.o		\
+		sctp_addr.o		\
+		sctp_asconf.o		\
+		sctp_bind.o		\
+		sctp_common.o		\
+		sctp_conn.o		\
+		sctp_cookie.o		\
+		sctp_error.o		\
+		sctp_hash.o		\
+		sctp_heartbeat.o	\
 		sctp_init.o		\
 		sctp_input.o		\
-		sctp_cookie.o		\
-		sctp_conn.o		\
-		sctp_error.o		\
-		sctp_snmp.o		\
-		sctp_tunables.o		\
-		sctp_shutdown.o		\
-		sctp_common.o		\
-		sctp_timer.o		\
-		sctp_heartbeat.o	\
-		sctp_hash.o		\
-		sctp_bind.o		\
+		sctp_misc.o		\
 		sctp_notify.o		\
-		sctp_asconf.o		\
-		sctp_addr.o		\
+		sctp_opt_data.o		\
+		sctp_output.o		\
+		sctp_shutdown.o		\
+		sctp_snmp.o		\
+		sctp_timer.o		\
+		sctp_tunables.o		\
 		tn_ipopt.o		\
-		tnet.o			\
-		ip_netinfo.o		\
-		sctp_misc.o
+		tnet.o
 
 # ILB
-# XXXMK: should be sorted, but wsdiff
 OBJS		+=		\
 		ilb.o		\
-		ilb_nat.o	\
-		ilb_conn.o	\
 		ilb_alg_hash.o	\
-		ilb_alg_rr.o
+		ilb_alg_rr.o	\
+		ilb_conn.o	\
+		ilb_nat.o
 
 # Common
 OBJS		+=		\
@@ -194,13 +189,21 @@ INC_PATH	+= -I$(UTSBASE)/common/io/bpf
 # swrand as it needs random numbers early on during boot before
 # kCF subsystem can load swrand.
 #
-DEPENDS_ON	= misc/md5 crypto/swrand misc/hook misc/neti
+DEPENDS_ON	=	\
+	crypto/swrand	\
+	misc/hook	\
+	misc/md5	\
+	misc/neti
 
 #
 # Depends on the congestion control framework for TCP connections.
 # We make several different algorithms available by default.
 #
-DEPENDS_ON	+= misc/cc cc/cc_sunreno cc/cc_newreno cc/cc_cubic
+DEPENDS_ON	+=	\
+	cc/cc_cubic	\
+	cc/cc_newreno	\
+	cc/cc_sunreno	\
+	misc/cc
 
 # Need to clobber all build types due to ipctf.a
 CLOBBER_DEPS	+= clobber.obj64 clobber.debug64

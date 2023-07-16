@@ -32,7 +32,10 @@ OBJS		= hba.o sbp2_driver.o sbp2_bus.o
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/scsi misc/s1394 misc/sbp2
+DEPENDS_ON	=	\
+	misc/s1394	\
+	misc/sbp2	\
+	misc/scsi
 
 #
 # For now, disable these warnings; maintainers should endeavor

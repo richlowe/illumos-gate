@@ -28,9 +28,9 @@ CORE_OBJS_FDT =			\
 	cpuinfo_fdt.o
 
 CORE_OBJS +=			\
-	arch_kdi.o		\
 	aarch64_mmu.o		\
 	aarch64_subr.o		\
+	arch_kdi.o		\
 	arch_timer.o		\
 	bcmp.o			\
 	bcopy.o			\
@@ -125,10 +125,10 @@ CORE_OBJS +=			\
 	prom_utils.o		\
 	prom_version.o
 
-CORE_OBJS +=	\
+CORE_OBJS +=		\
+	decompress.o	\
 	pci_strings.o	\
-	prmachdep.o	\
-	decompress.o
+	prmachdep.o
 
 #
 #	Kernel linker

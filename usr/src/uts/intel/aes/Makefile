@@ -31,6 +31,8 @@ UTSBASE = ../..
 UTSMACH = intel
 include $(SRC)/uts/common/crypto/io/aes/Makefile.com
 
+OBJS	+= aes_amd64.o aes_intel.o aeskey.o
+
 $(OBJS_DIR)/%.o:		$(COMMONBASE)/crypto/aes/amd64/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

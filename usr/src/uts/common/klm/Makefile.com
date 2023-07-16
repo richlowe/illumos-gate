@@ -29,18 +29,17 @@
 MODULE		= klmmod
 MOD_SRCDIR	= $(UTSBASE)/common/klm
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=			\
 		klmmod.o		\
-		nlm_impl.o		\
-		nlm_rpc_handle.o	\
-		nlm_dispatch.o		\
-		nlm_rpc_svc.o		\
 		nlm_client.o		\
-		nlm_service.o		\
+		nlm_dispatch.o		\
+		nlm_impl.o		\
 		nlm_prot_clnt.o		\
 		nlm_prot_xdr.o		\
 		nlm_rpc_clnt.o		\
+		nlm_rpc_handle.o	\
+		nlm_rpc_svc.o		\
+		nlm_service.o		\
 		nsm_addr_clnt.o		\
 		nsm_addr_xdr.o		\
 		sm_inter_clnt.o		\

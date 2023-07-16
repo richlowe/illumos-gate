@@ -29,7 +29,6 @@
 MODULE		= hermon
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/adapters/hermon
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=		\
 		hermon.o	\
 		hermon_agents.o \
@@ -38,6 +37,8 @@ OBJS		=		\
 		hermon_cmd.o	\
 		hermon_cq.o	\
 		hermon_event.o	\
+		hermon_fcoib.o	\
+		hermon_fm.o	\
 		hermon_ioctl.o	\
 		hermon_misc.o	\
 		hermon_mr.o	\
@@ -47,16 +48,17 @@ OBJS		=		\
 		hermon_srq.o	\
 		hermon_stats.o	\
 		hermon_umap.o	\
-		hermon_wr.o	\
-		hermon_fcoib.o	\
-		hermon_fm.o
+		hermon_wr.o
 
 #
 #	Include common rules.
 #
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= drv/ib misc/ibtl misc/ibmf
+DEPENDS_ON	=	\
+	drv/ib		\
+	misc/ibmf	\
+	misc/ibtl
 
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)

@@ -19,69 +19,68 @@ MODULE		= sfxge
 MOD_SRCDIR	= $(UTSBASE)/common/io/sfxge
 
 # illumos specific source
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		sfxge_err.o \
-		sfxge_ev.o \
-		sfxge_hash.o \
-		sfxge_intr.o \
-		sfxge_mac.o \
-		sfxge_gld_v3.o \
-		sfxge_mon.o \
-		sfxge_phy.o \
-		sfxge_sram.o \
-		sfxge_bar.o \
-		sfxge_pci.o \
-		sfxge_nvram.o \
-		sfxge_rx.o \
-		sfxge_tcp.o \
-		sfxge_tx.o \
-		sfxge_mcdi.o \
-		sfxge_vpd.o \
-		sfxge.o \
-		sfxge_dma.o
+		sfxge.o		\
+		sfxge_bar.o	\
+		sfxge_dma.o	\
+		sfxge_err.o	\
+		sfxge_ev.o	\
+		sfxge_gld_v3.o	\
+		sfxge_hash.o	\
+		sfxge_intr.o	\
+		sfxge_mac.o	\
+		sfxge_mcdi.o	\
+		sfxge_mon.o	\
+		sfxge_nvram.o	\
+		sfxge_pci.o	\
+		sfxge_phy.o	\
+		sfxge_rx.o	\
+		sfxge_sram.o	\
+		sfxge_tcp.o	\
+		sfxge_tx.o	\
+		sfxge_vpd.o
 
 # OS-independent sources
-# XXXMK: Should be sorted, but wsdiff
-OBJS		+=		\
-		efx_bootcfg.o \
-		efx_crc32.o \
-		efx_ev.o \
-		efx_filter.o \
-		efx_hash.o \
-		efx_intr.o \
-		efx_mac.o \
-		efx_mcdi.o \
-		efx_mon.o \
-		efx_nic.o \
-		efx_nvram.o \
-		efx_phy.o \
-		efx_port.o \
-		efx_rx.o \
-		efx_sram.o \
-		efx_tx.o \
-		efx_vpd.o \
-		efx_wol.o \
-		mcdi_mon.o \
-		siena_mac.o \
-		siena_mcdi.o \
-		siena_nic.o \
-		siena_nvram.o \
-		siena_phy.o \
-		siena_sram.o \
-		siena_vpd.o \
-		ef10_ev.o \
-		ef10_filter.o \
-		ef10_intr.o \
-		ef10_mac.o \
-		ef10_mcdi.o \
-		ef10_nic.o \
-		ef10_nvram.o \
-		ef10_phy.o \
-		ef10_rx.o ef10_tx.o \
-		ef10_vpd.o \
-		hunt_nic.o \
-		hunt_phy.o
+OBJS		+=			\
+		ef10_ev.o		\
+		ef10_filter.o		\
+		ef10_intr.o		\
+		ef10_mac.o		\
+		ef10_mcdi.o		\
+		ef10_nic.o		\
+		ef10_nvram.o		\
+		ef10_phy.o		\
+		ef10_rx.o 		\
+		ef10_tx.o		\
+		ef10_vpd.o		\
+		efx_bootcfg.o		\
+		efx_crc32.o		\
+		efx_ev.o		\
+		efx_filter.o		\
+		efx_hash.o		\
+		efx_intr.o		\
+		efx_mac.o		\
+		efx_mcdi.o		\
+		efx_mon.o		\
+		efx_nic.o		\
+		efx_nvram.o		\
+		efx_phy.o		\
+		efx_port.o		\
+		efx_rx.o		\
+		efx_sram.o		\
+		efx_tx.o		\
+		efx_vpd.o		\
+		efx_wol.o		\
+		hunt_nic.o		\
+		hunt_phy.o		\
+		mcdi_mon.o		\
+		siena_mac.o		\
+		siena_mcdi.o		\
+		siena_nic.o		\
+		siena_nvram.o		\
+		siena_phy.o		\
+		siena_sram.o		\
+		siena_vpd.o
 
 include $(UTSBASE)/Makefile.kmod
 

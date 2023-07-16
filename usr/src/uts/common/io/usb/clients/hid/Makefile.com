@@ -31,7 +31,10 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/usb/clients/hid
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/usba misc/hidparser dacf/consconfig_dacf
+DEPENDS_ON	=		\
+	dacf/consconfig_dacf	\
+	misc/hidparser		\
+	misc/usba
 
 #
 # For now, disable these warnings; maintainers should endeavor

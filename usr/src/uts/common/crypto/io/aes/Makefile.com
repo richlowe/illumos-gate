@@ -29,10 +29,7 @@
 
 MODULE		= aes
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/aes
-
-# XXXMK: Could be in the client makefile, if not for wsdiff
-intel_OBJS	= aes_amd64.o aes_intel.o aeskey.o
-OBJS		= $($(UTSMACH)_OBJS) aes.o aes_impl.o aes_modes.o
+OBJS		= aes.o aes_impl.o aes_modes.o
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod

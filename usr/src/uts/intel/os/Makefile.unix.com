@@ -72,7 +72,7 @@ CORE_OBJS +=		\
 	hma.o		\
 	hma_asm.o	\
 	hma_fpu.o	\
-	smt.o		\
+	smt.o
 
 #
 #	Decompression code
@@ -87,15 +87,15 @@ CORE_OBJS += microcode.o
 #
 #	Kernel linker
 #
-KRTLD_OBJS +=		\
-	bootfsops.o	\
-	bootrd.o	\
-	bootrd_cpio.o	\
-	ufsops.o	\
-	hsfs.o		\
-	doreloc.o	\
-	kobj_boot.o	\
-	kobj_convrelstr.o \
-	kobj_crt.o	\
-	kobj_isa.o	\
-	kobj_reloc.o
+KRTLD_OBJS +=			\
+	bootfsops.o		\
+	bootrd.o		\
+	bootrd_cpio.o		\
+	doreloc.o		\
+	hsfs.o			\
+	kobj_boot.o		\
+	kobj_convrelstr.o	\
+	kobj_crt.o		\
+	kobj_isa.o		\
+	kobj_reloc.o		\
+	ufsops.o

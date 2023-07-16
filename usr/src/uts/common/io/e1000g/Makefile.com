@@ -29,15 +29,14 @@
 MODULE		= e1000g
 MOD_SRCDIR	= $(UTSBASE)/common/io/e1000g
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
+		e1000g_alloc.o	\
 		e1000g_debug.o	\
 		e1000g_main.o	\
-		e1000g_alloc.o	\
-		e1000g_tx.o	\
+		e1000g_osdep.o	\
 		e1000g_rx.o	\
 		e1000g_stat.o	\
-		e1000g_osdep.o	\
+		e1000g_tx.o	\
 		e1000g_workarounds.o
 
 # Intel common code

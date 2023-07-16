@@ -27,18 +27,17 @@
 MODULE		= igb
 MOD_SRCDIR	= $(UTSBASE)/common/io/igb
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		igb_buf.o	\
 		igb_debug.o	\
 		igb_gld.o	\
 		igb_log.o	\
 		igb_main.o	\
-		igb_rx.o	\
-		igb_stat.o	\
-		igb_tx.o	\
 		igb_osdep.o	\
-		igb_sensor.o
+		igb_rx.o	\
+		igb_sensor.o	\
+		igb_stat.o	\
+		igb_tx.o
 
 # Intel common code
 include		$(SRC)/uts/common/io/e1000api/Makefile.com

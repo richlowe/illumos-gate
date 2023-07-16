@@ -26,7 +26,10 @@
 
 UTSBASE = ../..
 UTSMACH = intel
+
 include $(SRC)/uts/common/crypto/core/Makefile.com
+
+OBJS +=	gcm_intel.o
 
 $(OBJS_DIR)/%.o: $(COM_DIR)/modes/amd64/%.S
 	$(COMPILE.s) -o $@ $<

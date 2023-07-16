@@ -29,8 +29,11 @@
 MODULE		= nsmb
 MOD_SRCDIR	= $(UTSBASE)/common/fs/smbclnt/netsmb
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
+		nsmb_sign_kcf.o	\
+		smb2_rq.o	\
+		smb2_sign.o	\
+		smb2_smb.o	\
 		smb_conn.o	\
 		smb_dev.o	\
 		smb_iod.o	\
@@ -43,11 +46,7 @@ OBJS		=		\
 		smb_tran.o	\
 		smb_trantcp.o	\
 		smb_usr.o	\
-		smb2_rq.o	\
-		smb2_sign.o	\
-		smb2_smb.o	\
-		subr_mchain.o	\
-		nsmb_sign_kcf.o
+		subr_mchain.o
 
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 OFFSETS_SRC	= $(CONF_SRCDIR)/offsets.in
@@ -60,7 +59,10 @@ include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I$(UTSBASE)/common/fs/smbclnt
 
-DEPENDS_ON      = crypto/md4 crypto/md5 misc/tlimod
+DEPENDS_ON      = \
+	crypto/md4 \
+	crypto/md5 \
+	misc/tlimod
 
 #
 # For now, disable these warnings; maintainers should endeavor

@@ -37,29 +37,31 @@ i386_CORE_OBJS += \
 		avintr.o	\
 		pic.o
 
-aarch64_CORE_OBJS +=			\
-			atomic.o	\
-			avintr.o
+aarch64_CORE_OBJS +=		\
+		atomic.o	\
+		avintr.o
 
 CORE_OBJS +=				\
 		beep.o			\
 		bitset.o		\
 		bp_map.o		\
 		brand.o			\
-		cpucaps.o		\
+		cap_util.o		\
+		clock_tick.o		\
 		cmt.o			\
 		cmt_policy.o		\
 		cpu.o			\
-		cpu_uarray.o		\
 		cpu_event.o		\
 		cpu_intr.o		\
 		cpu_pm.o		\
+		cpu_uarray.o		\
+		cpucaps.o		\
 		cpupart.o		\
-		cap_util.o		\
 		disp.o			\
 		group.o			\
-		kstat_fr.o		\
+		ilstr.o			\
 		iscsiboot_prop.o	\
+		kstat_fr.o		\
 		lgrp.o			\
 		lgrp_topo.o		\
 		mmapobj.o		\
@@ -77,33 +79,31 @@ CORE_OBJS +=				\
 		softint.o		\
 		string.o		\
 		strtol.o		\
-		strtoul.o		\
 		strtoll.o		\
+		strtoul.o		\
 		strtoull.o		\
-		ilstr.o			\
 		thread_intr.o		\
 		vm_page.o		\
 		vm_pagelist.o		\
 		zlib_obj.o		\
-		clock_tick.o		\
 		$($(MACH)_CORE_OBJS)
 
 ZLIB_OBJS =			\
-		zutil.o		\
-		zmod.o		\
-		zmod_subr.o	\
 		adler32.o	\
 		crc32.o		\
 		deflate.o	\
 		inffast.o	\
 		inflate.o	\
 		inftrees.o	\
-		trees.o
+		trees.o		\
+		zmod.o		\
+		zmod_subr.o	\
+		zutil.o
 
 KRTLD_OBJS +=				\
-		kobj_bootflags.o	\
 		getoptstr.o		\
 		kobj.o			\
+		kobj_bootflags.o	\
 		kobj_kdi.o		\
 		kobj_lm.o		\
 		kobj_subr.o

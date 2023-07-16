@@ -28,18 +28,17 @@
 MODULE		= bge
 MOD_SRCDIR	= $(UTSBASE)/common/io/bge
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		bge_main2.o	\
+		bge_atomic.o	\
 		bge_chip2.o	\
 		bge_kstats.o	\
 		bge_log.o	\
-		bge_ndd.o	\
-		bge_atomic.o	\
+		bge_main2.o	\
 		bge_mii.o	\
-		bge_send.o	\
+		bge_mii_5906.o	\
+		bge_ndd.o	\
 		bge_recv2.o	\
-		bge_mii_5906.o
+		bge_send.o
 
 include	$(UTSBASE)/Makefile.kmod
 

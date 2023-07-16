@@ -18,17 +18,16 @@
 
 MODULE		= nvme
 
-# XXXMK: These should be sorted, but wsdiff
 OBJS	=		\
 	nvme.o		\
-	nvme_validate.o \
-	nvme_lock.o	\
 	nvme_feature.o	\
 	nvme_field.o	\
 	nvme_firmware.o \
 	nvme_format.o	\
 	nvme_identify.o \
+	nvme_lock.o	\
 	nvme_log.o	\
+	nvme_validate.o \
 	nvme_version.o	\
 	nvme_vuc.o
 

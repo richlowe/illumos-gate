@@ -28,35 +28,38 @@
 MODULE		= nfssrv
 MOD_SRCDIR	= $(UTSBASE)/common/fs/nfs/nfssrv
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		nfs_server.o		\
-		nfs_srv.o		\
 		nfs3_srv.o		\
+		nfs4_db.o		\
+		nfs4_deleg_ops.o	\
+		nfs4_dispatch.o		\
+		nfs4_srv.o		\
+		nfs4_srv_attr.o		\
+		nfs4_srv_deleg.o	\
+		nfs4_srv_ns.o		\
+		nfs4_srv_readdir.o	\
+		nfs4_state.o		\
+		nfs4x_dispatch.o	\
+		nfs4x_srv.o		\
+		nfs4x_state.o		\
 		nfs_acl_srv.o		\
 		nfs_auth.o		\
 		nfs_auth_xdr.o		\
 		nfs_export.o		\
 		nfs_log.o		\
 		nfs_log_xdr.o		\
-		nfs4_srv.o		\
-		nfs4_state.o		\
-		nfs4_srv_attr.o		\
-		nfs4_srv_ns.o		\
-		nfs4_db.o		\
-		nfs4_srv_deleg.o	\
-		nfs4_deleg_ops.o	\
-		nfs4_srv_readdir.o	\
-		nfs4_dispatch.o		\
-		nfs4x_srv.o		\
-		nfs4x_state.o		\
-		nfs4x_dispatch.o
+		nfs_server.o		\
+		nfs_srv.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= strmod/rpcmod fs/nfs misc/rpcsec misc/klmmod
+DEPENDS_ON	=		\
+		fs/nfs		\
+		misc/klmmod	\
+		misc/rpcsec	\
+		strmod/rpcmod
 
 #
 # For now, disable these warnings; maintainers should endeavor

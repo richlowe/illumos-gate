@@ -35,7 +35,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/udp drv/ip drv/ip6
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/ip6		\
+	drv/udp
 
 # needs work
 SMOFF += index_overflow

@@ -30,21 +30,20 @@
 MODULE		= smbfs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/smbclnt/smbfs
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
-		smbfs_vfsops.o	\
-		smbfs_vnops.o	\
-		smbfs_node.o	\
 		smbfs_acl.o	\
 		smbfs_client.o	\
+		smbfs_node.o	\
+		smbfs_ntacl.o	\
+		smbfs_rwlock.o	\
 		smbfs_smb.o	\
 		smbfs_smb1.o	\
 		smbfs_smb2.o	\
 		smbfs_subr.o	\
 		smbfs_subr2.o	\
-		smbfs_rwlock.o	\
-		smbfs_xattr.o	\
-		smbfs_ntacl.o
+		smbfs_vfsops.o	\
+		smbfs_vnops.o	\
+		smbfs_xattr.o
 
 ROOTMODULE	= $(USR_FS_DIR)/$(MODULE)
 

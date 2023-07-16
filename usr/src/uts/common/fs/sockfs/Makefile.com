@@ -29,22 +29,21 @@
 MODULE		= sockfs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/sockfs
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=			\
-		socksubr.o		\
-		sockvfsops.o		\
+		sock_notsupp.o		\
+		sockcommon.o		\
+		sockcommon_sops.o	\
+		sockcommon_subr.o	\
+		sockcommon_vnops.o	\
+		sockfilter.o		\
+		socknotify.o		\
 		sockparams.o		\
+		sockstr.o		\
+		socksubr.o		\
 		socksyscalls.o		\
 		socktpi.o		\
-		sockstr.o		\
-		sockcommon_vnops.o	\
-		sockcommon_subr.o	\
-		sockcommon_sops.o	\
-		sockcommon.o		\
-		sock_notsupp.o		\
-		socknotify.o		\
-		sodirect.o		\
-		sockfilter.o
+		sockvfsops.o		\
+		sodirect.o
 
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 

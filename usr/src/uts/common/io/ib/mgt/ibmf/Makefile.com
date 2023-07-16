@@ -30,26 +30,25 @@ MODULE		= ibmf
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/mgt/ibmf
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		ibmf.o \
-		ibmf_impl.o \
-		ibmf_dr.o \
-		ibmf_wqe.o \
-		ibmf_ud_dest.o \
-		ibmf_mod.o \
-		ibmf_send.o \
-		ibmf_recv.o \
-		ibmf_handlers.o \
-		ibmf_trans.o \
-		ibmf_timers.o \
-		ibmf_msg.o \
-		ibmf_utils.o \
-		ibmf_rmpp.o \
-		ibmf_saa.o \
-		ibmf_saa_impl.o \
-		ibmf_saa_utils.o \
-		ibmf_saa_events.o
+		ibmf.o			\
+		ibmf_dr.o		\
+		ibmf_handlers.o		\
+		ibmf_impl.o		\
+		ibmf_mod.o		\
+		ibmf_msg.o		\
+		ibmf_recv.o		\
+		ibmf_rmpp.o		\
+		ibmf_saa.o		\
+		ibmf_saa_events.o	\
+		ibmf_saa_impl.o		\
+		ibmf_saa_utils.o	\
+		ibmf_send.o		\
+		ibmf_timers.o		\
+		ibmf_trans.o		\
+		ibmf_ud_dest.o		\
+		ibmf_utils.o		\
+		ibmf_wqe.o
 
 include $(UTSBASE)/Makefile.kmod
 

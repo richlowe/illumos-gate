@@ -34,7 +34,11 @@ FWFILES	= iwlwifi-100-5.ucode iwlwifi-1000-3.ucode iwlwifi-105-6.ucode \
 
 INSTALL_TARGET	+= $(ROOTFIRMWARE)
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 # needs work
 SMOFF += all_func_returns

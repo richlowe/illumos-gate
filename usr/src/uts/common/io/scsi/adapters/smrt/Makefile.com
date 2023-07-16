@@ -16,16 +16,15 @@
 MODULE		= smrt
 MOD_SRCDIR     = $(UTSBASE)/common/io/scsi/adapters/smrt
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		smrt.o			\
-		smrt_device.o		\
-		smrt_interrupts.o	\
-		smrt_commands.o		\
-		smrt_logvol.o		\
-		smrt_hba.o		\
-		smrt_ciss_simple.o	\
 		smrt_ciss.o		\
+		smrt_ciss_simple.o	\
+		smrt_commands.o		\
+		smrt_device.o		\
+		smrt_hba.o		\
+		smrt_interrupts.o	\
+		smrt_logvol.o		\
 		smrt_physical.o		\
 		smrt_sata.o
 

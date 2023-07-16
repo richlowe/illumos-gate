@@ -29,27 +29,29 @@
 MODULE		= net80211
 MOD_SRCDIR	= $(UTSBASE)/common/io/net80211
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=			\
 		net80211.o		\
-		net80211_proto.o	\
-		net80211_input.o	\
-		net80211_output.o	\
-		net80211_node.o		\
+		net80211_amrr.o		\
 		net80211_crypto.o	\
-		net80211_crypto_none.o	\
-		net80211_crypto_wep.o	\
-		net80211_ioctl.o	\
-		net80211_crypto_tkip.o	\
 		net80211_crypto_ccmp.o	\
+		net80211_crypto_none.o	\
+		net80211_crypto_tkip.o	\
+		net80211_crypto_wep.o	\
 		net80211_ht.o		\
-		net80211_amrr.o
+		net80211_input.o	\
+		net80211_ioctl.o	\
+		net80211_node.o		\
+		net80211_output.o	\
+		net80211_proto.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac mac/mac_wifi drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	mac/mac_wifi	\
+	misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor

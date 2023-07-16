@@ -30,23 +30,15 @@
 MODULE		= cpr
 MOD_SRCDIR	= $(UTSBASE)/common/cpr
 
-# XXXMK: this object section is constructed to aid wsdiff, it need not be
-# this bad, and could be in intel/Makefile were it not for that.
-i86pc_OBJS	= cpr_impl.o cpr_wakecode.o
-i386_OBJS	= cpr_intel.o
-
-# XXXMK: Beware the difference between MACH and UTSMACH
 # Common
 OBJS		=			\
-		$($(UTSMACH)_OBJS)	\
 		cpr_driver.o		\
 		cpr_dump.o		\
 		cpr_main.o		\
 		cpr_misc.o		\
 		cpr_mod.o		\
 		cpr_stat.o		\
-		cpr_uthread.o		\
-		$($(MACH)_OBJS)
+		cpr_uthread.o
 
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 

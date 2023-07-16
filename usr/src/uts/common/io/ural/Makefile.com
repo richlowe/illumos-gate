@@ -30,7 +30,10 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/ural
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 misc/usba
+DEPENDS_ON	=	\
+	misc/mac	\
+	misc/net80211	\
+	misc/usba
 
 # needs work
 SMOFF += deref_check
