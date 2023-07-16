@@ -22,6 +22,6 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-UTSBASE = ../../../../src/uts
+UTSBASE = ../..
 UTSMACH = intel
 include $(SRC)/uts/common/io/scsi/adapters/pmcs/Makefile.com

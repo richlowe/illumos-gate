@@ -29,20 +29,20 @@
 MODULE		= dev
 MOD_SRCDIR	= $(UTSBASE)/common/fs/dev
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
+		sdev_comm.o	\
+		sdev_ipnetops.o	\
+		sdev_ncache.o	\
+		sdev_netops.o	\
+		sdev_plugin.o	\
+		sdev_profile.o	\
+		sdev_ptsops.o	\
 		sdev_subr.o	\
 		sdev_vfsops.o	\
 		sdev_vnops.o	\
-		sdev_ptsops.o	\
-		sdev_zvolops.o	\
-		sdev_comm.o	\
-		sdev_profile.o	\
-		sdev_ncache.o	\
-		sdev_netops.o	\
-		sdev_ipnetops.o	\
 		sdev_vtops.o	\
-		sdev_plugin.o
+		sdev_zvolops.o
+
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod

@@ -35,7 +35,10 @@ INSTALL_TARGET  += $(ROOT_CONFFILE)
 
 CFLAGS          += $(CCVERBOSE)
 
-DEPENDS_ON	= drv/ip misc/neti misc/hook
+DEPENDS_ON	=	\
+	drv/ip		\
+	misc/hook	\
+	misc/neti
 
 # To get the BPF header files
 INC_PATH += -I$(UTSBASE)/common/io/bpf

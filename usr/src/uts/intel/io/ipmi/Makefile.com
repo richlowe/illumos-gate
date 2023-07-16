@@ -24,11 +24,10 @@
 MODULE		= ipmi
 MOD_SRCDIR	= $(UTSBASE)/intel/io/ipmi
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
-		ipmi_main.o	\
 		ipmi.o		\
-		ipmi_kcs.o
+		ipmi_kcs.o	\
+		ipmi_main.o
 
 ROOTMODULE      = $(USR_DRV_DIR)/$(MODULE)
 

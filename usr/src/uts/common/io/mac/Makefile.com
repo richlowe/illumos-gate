@@ -27,7 +27,6 @@
 MODULE		= mac
 MOD_SRCDIR	= $(UTSBASE)/common/io/mac
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		mac.o			\
 		mac_bcast.o		\
@@ -37,9 +36,9 @@ OBJS		=			\
 		mac_hio.o		\
 		mac_mod.o		\
 		mac_ndd.o		\
+		mac_protect.o		\
 		mac_provider.o		\
 		mac_sched.o		\
-		mac_protect.o		\
 		mac_soft_ring.o		\
 		mac_stat.o		\
 		mac_util.o

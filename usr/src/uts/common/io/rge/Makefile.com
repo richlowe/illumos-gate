@@ -29,13 +29,12 @@
 MODULE		= rge
 MOD_SRCDIR	= $(UTSBASE)/common/io/rge
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		rge_main.o	\
 		rge_chip.o	\
-		rge_ndd.o	\
 		rge_kstats.o	\
 		rge_log.o	\
+		rge_main.o	\
+		rge_ndd.o	\
 		rge_rxtx.o
 
 include $(UTSBASE)/Makefile.kmod

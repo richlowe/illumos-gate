@@ -29,24 +29,23 @@
 MODULE		= ipf
 MOD_SRCDIR	= $(UTSBASE)/common/inet/ipf
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=			\
-		ip_fil_solaris.o	\
+		drand48.o		\
 		fil.o			\
-		solaris.o		\
-		ip_state.o		\
-		ip_frag.o		\
-		ip_nat.o		\
-		ip_proxy.o		\
 		ip_auth.o		\
-		ip_pool.o		\
-		ip_htable.o		\
-		ip_lookup.o		\
-		ip_log.o		\
-		misc.o			\
 		ip_compat.o		\
+		ip_fil_solaris.o	\
+		ip_frag.o		\
+		ip_htable.o		\
+		ip_log.o		\
+		ip_lookup.o		\
+		ip_nat.o		\
 		ip_nat6.o		\
-		drand48.o
+		ip_pool.o		\
+		ip_proxy.o		\
+		ip_state.o		\
+		misc.o			\
+		solaris.o
 
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 
@@ -58,7 +57,13 @@ INSTALL_TARGET	+= $(ROOT_CONFFILE)
 CPPFLAGS += -DIPFILTER_LKM -DIPFILTER_LOG -DIPFILTER_LOOKUP -DUSE_INET6
 CPPFLAGS += -DSUNDDI -DSOLARIS2=$(RELEASE_MINOR) -DIRE_ILL_CN
 
-DEPENDS_ON = drv/ip misc/md5 misc/neti misc/hook misc/kcf misc/mac
+DEPENDS_ON =		\
+	drv/ip		\
+	misc/hook	\
+	misc/kcf	\
+	misc/mac	\
+	misc/md5	\
+	misc/neti
 
 INC_PATH += -I$(UTSBASE)/common/inet/ipf
 

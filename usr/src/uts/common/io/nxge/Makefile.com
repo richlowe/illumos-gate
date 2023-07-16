@@ -26,43 +26,41 @@
 MODULE		= nxge
 MOD_SRCDIR	= $(UTSBASE)/common/io/nxge
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		nxge_mac.o		\
-		nxge_ipp.o		\
-		nxge_rxdma.o		\
-		nxge_txdma.o		\
-		nxge_txc.o		\
-		nxge_main.o		\
-		nxge_hw.o		\
-		nxge_fzc.o		\
-		nxge_virtual.o		\
-		nxge_send.o		\
 		nxge_classify.o		\
+		nxge_espc.o		\
 		nxge_fflp.o		\
 		nxge_fflp_hash.o	\
-		nxge_ndd.o		\
-		nxge_kstats.o		\
-		nxge_zcp.o		\
 		nxge_fm.o		\
-		nxge_espc.o		\
-		nxge_hv.o		\
+		nxge_fzc.o		\
 		nxge_hio.o		\
 		nxge_hio_guest.o	\
-		nxge_intr.o
+		nxge_hv.o		\
+		nxge_hw.o		\
+		nxge_intr.o		\
+		nxge_ipp.o		\
+		nxge_kstats.o		\
+		nxge_mac.o		\
+		nxge_main.o		\
+		nxge_ndd.o		\
+		nxge_rxdma.o		\
+		nxge_send.o		\
+		nxge_txc.o		\
+		nxge_txdma.o		\
+		nxge_virtual.o		\
+		nxge_zcp.o
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS 		+=		\
 		npi.o		\
-		npi_mac.o	\
-		npi_ipp.o	\
-		npi_txdma.o	\
-		npi_rxdma.o	\
-		npi_txc.o	\
-		npi_zcp.o	\
 		npi_espc.o	\
 		npi_fflp.o	\
-		npi_vir.o
+		npi_ipp.o	\
+		npi_mac.o	\
+		npi_rxdma.o	\
+		npi_txc.o	\
+		npi_txdma.o	\
+		npi_vir.o	\
+		npi_zcp.o
 
 include $(UTSBASE)/Makefile.kmod
 

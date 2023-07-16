@@ -26,13 +26,12 @@
 MODULE		= stmf_sbd
 MOD_SRCDIR	= $(UTSBASE)/common/io/comstar/lu/stmf_sbd
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
+		ats_copy_mgr.o	\
 		sbd.o		\
-		sbd_scsi.o	\
 		sbd_pgr.o	\
-		sbd_zvol.o	\
-		ats_copy_mgr.o
+		sbd_scsi.o	\
+		sbd_zvol.o
 
 include $(UTSBASE)/Makefile.kmod
 

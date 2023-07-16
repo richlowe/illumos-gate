@@ -26,7 +26,6 @@
 MODULE		= vmxnet3s
 MOD_SRCDIR	= $(UTSBASE)/intel/io/vmxnet3s
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		vmxnet3_main.o	\
 		vmxnet3_rx.o	\

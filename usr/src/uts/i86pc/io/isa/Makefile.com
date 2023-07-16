@@ -42,7 +42,10 @@ $(OBJS_DIR)/i8237A.o := SMOFF += indenting
 
 CFLAGS += $(CCVERBOSE)
 
-DEPENDS_ON = misc/acpica misc/busra misc/pci_autoconfig
+DEPENDS_ON =		\
+	misc/acpica	\
+	misc/busra	\
+	misc/pci_autoconfig
 
 #
 # Define our version of dma_engine and i8237A interfaces

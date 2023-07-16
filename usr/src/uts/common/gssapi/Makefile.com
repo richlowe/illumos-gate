@@ -30,17 +30,16 @@
 MODULE		= kgssapi
 MOD_SRCDIR	= $(UTSBASE)/common/gssapi
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
+		gen_oids.o		\
+		gss_display_name.o	\
+		gss_import_name.o	\
+		gss_release_buffer.o	\
+		gss_release_name.o	\
+		gss_release_oid_set.o	\
 		gssd_clnt_stubs.o	\
 		gssd_handle.o		\
 		gssd_prot.o		\
-		gss_display_name.o	\
-		gss_release_name.o	\
-		gss_import_name.o	\
-		gss_release_buffer.o	\
-		gss_release_oid_set.o	\
-		gen_oids.o		\
 		gssdmod.o
 
 # Derived
@@ -53,7 +52,10 @@ include $(UTSBASE)/Makefile.kmod
 
 INSTALL_TARGET	+= $(ROOT_KGSS_DIR)
 
-DEPENDS_ON = strmod/rpcmod misc/rpcsec misc/tlimod
+DEPENDS_ON =		\
+	misc/rpcsec	\
+	misc/tlimod	\
+	strmod/rpcmod
 
 INC_PATH += -I$(UTSBASE)/common/gssapi/include
 

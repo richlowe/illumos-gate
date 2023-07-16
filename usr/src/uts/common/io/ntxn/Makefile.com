@@ -29,16 +29,15 @@
 MODULE		= ntxn
 MOD_SRCDIR	= $(UTSBASE)/common/io/ntxn
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		unm_nic_init.o	\
+		niu.o		\
 		unm_gem.o	\
-		unm_nic_hw.o	\
 		unm_ndd.o	\
-		unm_nic_main.o	\
-		unm_nic_isr.o	\
 		unm_nic_ctx.o	\
-		niu.o
+		unm_nic_hw.o	\
+		unm_nic_init.o	\
+		unm_nic_isr.o	\
+		unm_nic_main.o
 
 include $(UTSBASE)/Makefile.kmod
 

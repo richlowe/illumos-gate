@@ -33,24 +33,23 @@ MOD_SRCDIR	= $(UTSBASE)/common/gssapi/mechs/krb5
 OBJS		= krb5mech.o
 
 # Mech
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=			\
 		delete_sec_context.o	\
-		import_sec_context.o	\
 		gssapi_krb5.o		\
+		import_sec_context.o	\
 		k5seal.o		\
-		k5unseal.o		\
 		k5sealv3.o		\
+		k5unseal.o		\
 		ser_sctx.o		\
 		sign.o			\
 		util_crypt.o		\
-		util_validate.o		\
 		util_ordering.o		\
+		util_seed.o		\
 		util_seqnum.o		\
 		util_set.o		\
-		util_seed.o		\
-		wrap_size_limit.o	\
-		verify.o
+		util_validate.o		\
+		verify.o		\
+		wrap_size_limit.o
 
 # Seal
 OBJS		+=	\
@@ -61,35 +60,33 @@ OBJS		+=	\
 OBJS		+= util_token.o
 
 # crypto
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=			\
+		block_size.o		\
+		checksum_length.o	\
 		cksumtypes.o		\
 		decrypt.o		\
+		default_state.o		\
 		encrypt.o		\
 		encrypt_length.o	\
 		etypes.o		\
-		nfold.o			\
-		verify_checksum.o	\
-		prng.o			\
-		block_size.o		\
-		make_checksum.o		\
-		checksum_length.o	\
 		hmac.o			\
-		default_state.o		\
-		mandatory_sumtype.o
+		make_checksum.o		\
+		mandatory_sumtype.o	\
+		nfold.o			\
+		prng.o			\
+		verify_checksum.o
 
 # crypto/des
-# XXXMK: Should be sorted but wsdiff
 OBJS		+=		\
+		d3_cbc.o	\
+		ef_crypto.o	\
 		f_cbc.o		\
 		f_cksum.o	\
 		f_parity.o	\
-		weak_key.o	\
-		d3_cbc.o	\
-		ef_crypto.o
+		weak_key.o
 
 # crypto/dk
-OBJS		+= \
+OBJS		+=		\
 		checksum.o	\
 		derive.o	\
 		dk_decrypt.o	\
@@ -99,19 +96,17 @@ OBJS		+= \
 OBJS		+= k5_arcfour.o
 
 # crypto/enc_provider
-# XXXMK: Should be sorted, but wsdiff
-OBJS		+= \
-		des.o			\
-		des3.o			\
+OBJS		+=			\
+		aes_provider.o		\
 		arcfour_provider.o	\
-		aes_provider.o
+		des.o			\
+		des3.o
 
 # crypto/hash_provider
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=			\
+		hash_crc32.o		\
 		hash_kef_generic.o	\
 		hash_kmd5.o		\
-		hash_crc32.o		\
 		hash_ksha1.o
 
 # crytpo/keyhash_provider
@@ -130,12 +125,12 @@ OBJS		+= old_decrypt.o old_encrypt.o
 OBJS		+= raw_decrypt.o raw_encrypt.o
 
 # krb
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=		\
-		kfree.o		\
 		copy_key.o	\
-		parse.o		\
 		init_ctx.o	\
+		kfree.o		\
+		parse.o		\
+		ser_actx.o	\
 		ser_adata.o	\
 		ser_addr.o	\
 		ser_auth.o	\
@@ -143,16 +138,14 @@ OBJS		+=		\
 		ser_key.o	\
 		ser_princ.o	\
 		serialize.o	\
-		unparse.o	\
-		ser_actx.o
+		unparse.o
 
 # OS
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=		\
-		timeofday.o	\
-		toffset.o	\
+		c_ustime.o	\
 		init_os_ctx.o	\
-		c_ustime.o
+		timeofday.o	\
+		toffset.o
 
 ROOTMODULE	= $(ROOT_KGSS_DIR)/$(MODULE)
 

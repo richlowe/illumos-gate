@@ -31,7 +31,13 @@ ROOTMODULE	= $(USR_SOCK_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON = fs/sockfs misc/dls misc/mac drv/bpf drv/ip
+DEPENDS_ON =		\
+	drv/bpf		\
+	drv/ip		\
+	fs/sockfs	\
+	misc/dls	\
+	misc/mac
+
 INC_PATH += -I$(UTSBASE)/common/inet/sockmods -I$(UTSBASE)/common/io/bpf
 
 #

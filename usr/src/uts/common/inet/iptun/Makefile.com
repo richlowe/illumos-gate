@@ -35,7 +35,11 @@ INSTALL_TARGET	+= $(ROOT_CONFFILE)
 CFLAGS		+= $(CCVERBOSE)
 INC_PATH        += -I$(UTSBASE)/common/io/bpf
 
-DEPENDS_ON	= drv/dld misc/dls misc/mac drv/ip
+DEPENDS_ON	=	\
+	drv/dld		\
+	drv/ip		\
+	misc/dls	\
+	misc/mac
 
 
 CERRWARN	+= -_gcc=-Wno-unused-label

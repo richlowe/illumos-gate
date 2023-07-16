@@ -29,10 +29,9 @@
 MODULE		= s1394
 MOD_SRCDIR	= $(UTSBASE)/common/io/1394
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		t1394.o			\
-		t1394_errmsg.o		\
+		h1394.o			\
+		nx1394.o		\
 		s1394.o			\
 		s1394_addr.o		\
 		s1394_asynch.o		\
@@ -45,8 +44,8 @@ OBJS		=			\
 		s1394_hotplug.o		\
 		s1394_isoch.o		\
 		s1394_misc.o		\
-		h1394.o			\
-		nx1394.o
+		t1394.o			\
+		t1394_errmsg.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

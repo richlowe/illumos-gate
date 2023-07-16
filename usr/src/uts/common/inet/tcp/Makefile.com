@@ -36,7 +36,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/ip crypto/md5 fs/sockfs
+DEPENDS_ON	=	\
+	crypto/md5	\
+	drv/ip		\
+	fs/sockfs
 
 # needs work
 $(OBJS_DIR)/tcpddi.o := SMOFF += index_overflow

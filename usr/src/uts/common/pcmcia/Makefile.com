@@ -29,14 +29,13 @@
 MODULE		= pcmcia
 MOD_SRCDIR	= $(UTSBASE)/common/pcmcia
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		pcmcia.o	\
-		cs.o		\
 		cis.o		\
 		cis_callout.o	\
 		cis_handlers.o	\
-		cis_params.o
+		cis_params.o	\
+		cs.o		\
+		pcmcia.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

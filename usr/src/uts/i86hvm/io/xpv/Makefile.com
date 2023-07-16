@@ -29,16 +29,15 @@
 MODULE		= xpv
 MOD_SRCDIR	= $(UTSBASE)/i86hvm/io/xpv
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
-		xpv_support.o	\
-		xvdi.o		\
-		gnttab.o	\
 		evtchn.o	\
-		xenbus_comms.o	\
+		gnttab.o	\
 		xenbus_client.o \
+		xenbus_comms.o	\
 		xenbus_probe.o	\
-		xenbus_xs.o
+		xenbus_xs.o	\
+		xpv_support.o	\
+		xvdi.o
 
 ROOTMODULE	= $(ROOT_HVM_DRV_DIR)/$(MODULE)
 

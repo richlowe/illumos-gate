@@ -17,20 +17,19 @@
 MODULE		= xhci
 MOD_SRCDIR	= $(UTSBASE)/common/io/usb/hcd/xhci
 
-# XXXMK: Should be sorted, but wsdiff
-OBJS		=	\
-		xhci.o \
-		xhci_quirks.o \
-		xhci_dma.o \
-		xhci_context.o \
-		xhci_intr.o \
-		xhci_ring.o \
-		xhci_command.o \
-		xhci_event.o \
-		xhci_usba.o \
+OBJS		=		\
+		xhci.o		\
+		xhci_command.o	\
+		xhci_context.o	\
+		xhci_dma.o	\
 		xhci_endpoint.o \
-		xhci_hub.o \
-		xhci_polled.o
+		xhci_event.o	\
+		xhci_hub.o	\
+		xhci_intr.o	\
+		xhci_polled.o	\
+		xhci_quirks.o	\
+		xhci_ring.o	\
+		xhci_usba.o
 
 include $(UTSBASE)/Makefile.kmod
 

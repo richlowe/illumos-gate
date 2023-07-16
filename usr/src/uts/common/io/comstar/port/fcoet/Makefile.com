@@ -30,7 +30,10 @@ OBJS		= fcoet.o fcoet_eth.o fcoet_fc.o
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= drv/stmf drv/fct drv/fcoe
+DEPENDS_ON	=	\
+	drv/fcoe	\
+	drv/fct		\
+	drv/stmf
 
 # needs work
 SMOFF += all_func_returns,shift_to_zero

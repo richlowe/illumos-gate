@@ -29,15 +29,14 @@
 MODULE		= hsfs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/hsfs
 
-# XXXMK: Should be sorted but wsdiff
-OBJS		=		\
-		hsfs_node.o	\
-		hsfs_subr.o	\
-		hsfs_vfsops.o	\
-		hsfs_vnops.o	\
-		hsfs_susp.o	\
-		hsfs_rrip.o	\
-		hsfs_susp_subr.o
+OBJS		=			\
+		hsfs_node.o		\
+		hsfs_rrip.o		\
+		hsfs_subr.o		\
+		hsfs_susp.o		\
+		hsfs_susp_subr.o	\
+		hsfs_vfsops.o		\
+		hsfs_vnops.o
 
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 

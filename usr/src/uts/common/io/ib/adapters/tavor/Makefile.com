@@ -50,7 +50,10 @@ OBJS 		=		\
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= drv/ib misc/ibtl misc/ibmf
+DEPENDS_ON	=	\
+	drv/ib		\
+	misc/ibmf	\
+	misc/ibtl
 
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)

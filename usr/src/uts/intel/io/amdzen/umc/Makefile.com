@@ -16,11 +16,10 @@
 MODULE		= zen_umc
 MOD_SRCDIR	= $(UTSBASE)/intel/io/amdzen/umc
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
+		zen_fabric_utils.o	\
 		zen_umc.o		\
 		zen_umc_decode.o	\
-		zen_fabric_utils.o	\
 		zen_umc_dump.o
 
 include $(UTSBASE)/Makefile.kmod

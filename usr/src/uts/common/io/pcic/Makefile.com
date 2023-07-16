@@ -38,7 +38,10 @@ INSTALL_TARGET	+= $(ROOT_CONFFILE)
 CPPFLAGS	+=	-DCARDBUS -DHOTPLUG
 INC_PATH	+= -I$(SRC)/uts/common/io
 
-DEPENDS_ON	= misc/busra misc/pcmcia misc/cardbus
+DEPENDS_ON	=	\
+	misc/busra	\
+	misc/cardbus	\
+	misc/pcmcia
 
 #
 # For now, disable these warnings; maintainers should endeavor

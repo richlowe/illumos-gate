@@ -31,6 +31,9 @@ include $(UTSBASE)/Makefile.kmod
 
 CFLAGS += $(CCVERBOSE)
 
-DEPENDS_ON = fs/sockfs drv/ip drv/rdsv3
+DEPENDS_ON =		\
+	drv/ip		\
+	drv/rdsv3	\
+	fs/sockfs
 
 include $(UTSBASE)/Makefile.kmod.targ

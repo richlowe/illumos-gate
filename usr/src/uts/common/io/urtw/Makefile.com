@@ -30,7 +30,10 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/urtw
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 misc/usba
+DEPENDS_ON	= 	\
+	misc/mac	\
+	misc/net80211	\
+	misc/usba
 
 CERRWARN	+= -_gcc=-Wno-parentheses
 CERRWARN	+= -_gcc=-Wno-switch

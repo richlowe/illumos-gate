@@ -18,13 +18,12 @@
 MODULE		= viona
 MOD_SRCDIR	= $(UTSBASE)/intel/io/viona
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
+	 	viona_hook.o	\
 	 	viona_main.o	\
 	 	viona_ring.o	\
 	 	viona_rx.o	\
-	 	viona_tx.o	\
-	 	viona_hook.o
+	 	viona_tx.o
 
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 

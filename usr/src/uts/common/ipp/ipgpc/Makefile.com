@@ -28,14 +28,13 @@
 MODULE		= ipgpc
 MOD_SRCDIR	= $(UTSBASE)/common/ipp/ipgpc
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=		\
-		classifierddi.o \
+		ba_table.o	\
 		classifier.o	\
+		classifierddi.o \
 		filters.o	\
-		trie.o		\
 		table.o		\
-		ba_table.o
+		trie.o
 
 ROOTMODULE	= $(ROOT_IPP_DIR)/$(MODULE)
 

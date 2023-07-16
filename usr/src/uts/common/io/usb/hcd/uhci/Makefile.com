@@ -26,13 +26,12 @@
 MODULE		= uhci
 MOD_SRCDIR	= $(UTSBASE)/common/io/usb/hcd/uhci
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		uhci.o		\
-		uhciutil.o	\
-		uhcitgt.o	\
 		uhcihub.o	\
-		uhcipolled.o
+		uhcipolled.o	\
+		uhcitgt.o	\
+		uhciutil.o
 
 include $(UTSBASE)/Makefile.kmod
 

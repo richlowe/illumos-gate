@@ -19,29 +19,27 @@ MODULE		= t4nex
 MOD_SRCDIR	= $(UTSBASE)/common/io/cxgbe/t4nex
 
 # Common
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		t4_hw.o		\
-		common.o
+		common.o	\
+		t4_hw.o
 
 
 # Nexus
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=			\
-		t4_nexus.o \
-		t4_sge.o \
-		t4_mac.o \
-		t4_ioctl.o \
-		shared.o \
-		t4_l2t.o \
-		osdep.o \
-		cudbg_lib.o \
-		cudbg_wtp.o \
-		fastlz.o \
-		fastlz_api.o \
-		cudbg_common.o \
-		cudbg_flash_utils.o \
-		cudbg.o
+		cudbg.o			\
+		cudbg_common.o		\
+		cudbg_flash_utils.o	\
+		cudbg_lib.o		\
+		cudbg_wtp.o		\
+		fastlz.o		\
+		fastlz_api.o		\
+		osdep.o			\
+		shared.o		\
+		t4_ioctl.o		\
+		t4_l2t.o		\
+		t4_mac.o		\
+		t4_nexus.o		\
+		t4_sge.o
 
 include $(UTSBASE)/Makefile.kmod
 

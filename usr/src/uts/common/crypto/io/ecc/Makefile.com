@@ -31,39 +31,38 @@
 MODULE		= ecc
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/ecc
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		ecc.o		\
 		ec.o		\
 		ec2_163.o	\
-		ec2_mont.o	\
-		ecdecode.o	\
-		ecl_mult.o	\
-		ecp_384.o	\
-		ecp_jac.o	\
 		ec2_193.o	\
-		ecl.o		\
-		ecp_192.o	\
-		ecp_521.o	\
-		ecp_jm.o	\
 		ec2_233.o	\
-		ecl_curve.o	\
-		ecp_224.o	\
-		ecp_aff.o	\
-		ecp_mont.o	\
 		ec2_aff.o	\
+		ec2_mont.o	\
+		ec2_test.o	\
 		ec_naf.o	\
+		ecc.o		\
+		ecdecode.o	\
+		ecl.o		\
+		ecl_curve.o	\
 		ecl_gf.o	\
+		ecl_mult.o	\
+		ecp_192.o	\
+		ecp_224.o	\
 		ecp_256.o	\
+		ecp_384.o	\
+		ecp_521.o	\
+		ecp_aff.o	\
+		ecp_jac.o	\
+		ecp_jm.o	\
+		ecp_mont.o	\
+		ecp_test.o	\
 		mp_gf2m.o	\
 		mpi.o		\
 		mplogic.o	\
 		mpmontg.o	\
 		mpprime.o	\
 		oid.o		\
-		secitem.o	\
-		ec2_test.o	\
-		ecp_test.o
+		secitem.o
 
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 

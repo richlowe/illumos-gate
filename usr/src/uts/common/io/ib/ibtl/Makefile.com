@@ -29,22 +29,21 @@
 MODULE		= ibtl
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/ibtl
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		ibtl_impl.o	\
-		ibtl_util.o	\
-		ibtl_mem.o	\
-		ibtl_handlers.o \
-		ibtl_qp.o	\
-		ibtl_cq.o	\
-		ibtl_wr.o	\
-		ibtl_hca.o	\
 		ibtl_chan.o	\
 		ibtl_cm.o	\
-		ibtl_mcg.o	\
+		ibtl_cq.o	\
+		ibtl_handlers.o \
+		ibtl_hca.o	\
 		ibtl_ibnex.o	\
+		ibtl_impl.o	\
+		ibtl_mcg.o	\
+		ibtl_mem.o	\
+		ibtl_part.o	\
+		ibtl_qp.o	\
 		ibtl_srq.o	\
-		ibtl_part.o
+		ibtl_util.o	\
+		ibtl_wr.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

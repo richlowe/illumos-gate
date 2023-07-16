@@ -28,22 +28,21 @@
 MODULE		= usba
 MOD_SRCDIR	= $(UTSBASE)/common/io/usb/usba
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
+		genconsole.o		\
 		hcdi.o			\
-		usba.o			\
-		usbai.o			\
 		hubdi.o			\
 		parser.o		\
-		genconsole.o		\
-		usbai_pipe_mgmt.o	\
-		usbai_req.o		\
-		usbai_util.o		\
-		usbai_register.o	\
-		usba_devdb.o		\
+		usba.o			\
 		usba10_calls.o		\
+		usba_bos.o		\
+		usba_devdb.o		\
 		usba_ugen.o		\
-		usba_bos.o
+		usbai.o			\
+		usbai_pipe_mgmt.o	\
+		usbai_register.o	\
+		usbai_req.o		\
+		usbai_util.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

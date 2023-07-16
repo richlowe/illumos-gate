@@ -28,14 +28,13 @@
 MODULE		= nge
 MOD_SRCDIR     = $(UTSBASE)/common/io/nge
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		nge_main.o	\
 		nge_atomic.o	\
 		nge_chip.o	\
-		nge_ndd.o	\
 		nge_kstats.o	\
 		nge_log.o	\
+		nge_main.o	\
+		nge_ndd.o	\
 		nge_rx.o	\
 		nge_tx.o	\
 		nge_xmii.o

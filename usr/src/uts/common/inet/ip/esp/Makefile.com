@@ -35,7 +35,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOTLINK) $(ROOT_CONFFILE)
 
-DEPENDS_ON	 = drv/ip drv/ipsecah misc/kcf
+DEPENDS_ON	 =	\
+	drv/ip		\
+	drv/ipsecah	\
+	misc/kcf
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 

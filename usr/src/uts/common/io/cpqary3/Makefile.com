@@ -16,18 +16,17 @@
 MODULE		= cpqary3
 MOD_SRCDIR     = $(UTSBASE)/common/io/cpqary3
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		cpqary3.o		\
-		cpqary3_noe.o		\
-		cpqary3_talk2ctlr.o	\
-		cpqary3_isr.o		\
-		cpqary3_transport.o	\
-		cpqary3_mem.o		\
-		cpqary3_scsi.o		\
-		cpqary3_util.o		\
+		cpqary3_bd.o		\
 		cpqary3_ioctl.o		\
-		cpqary3_bd.o
+		cpqary3_isr.o		\
+		cpqary3_mem.o		\
+		cpqary3_noe.o		\
+		cpqary3_scsi.o		\
+		cpqary3_talk2ctlr.o	\
+		cpqary3_transport.o	\
+		cpqary3_util.o
 
 include $(UTSBASE)/Makefile.kmod
 

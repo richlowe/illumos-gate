@@ -31,17 +31,16 @@ MODULE		= ata
 MOD_SRCDIR	= $(UTSBASE)/intel/io/dktp/controller/ata
 
 # GHD
-# XXXMK: should be sorted but wsdiff
 OBJS		=		\
 		ghd.o		\
 		ghd_debug.o	\
 		ghd_dma.o	\
+		ghd_gcmd.o	\
 		ghd_queue.o	\
 		ghd_scsa.o	\
 		ghd_scsi.o	\
 		ghd_timer.o	\
-		ghd_waitq.o	\
-		ghd_gcmd.o
+		ghd_waitq.o
 
 # ATA
 OBJS		+=		\

@@ -30,19 +30,18 @@
 MODULE		= pcie
 MOD_SRCDIR	= $(UTSBASE)/i86pc/io/pciex
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		pcie_acpi.o	\
-		pciehpc_acpi.o	\
-		pcie_x86.o	\
+		pci_strings.o	\
 		pcie.o		\
+		pcie_acpi.o	\
 		pcie_fault.o	\
 		pcie_hp.o	\
-		pciehpc.o	\
-		pcishpc.o	\
 		pcie_pwr.o	\
+		pcie_x86.o	\
+		pciehpc.o	\
+		pciehpc_acpi.o	\
 		pciev.o		\
-		pci_strings.o
+		pcishpc.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

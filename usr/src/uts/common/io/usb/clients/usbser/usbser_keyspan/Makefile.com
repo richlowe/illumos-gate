@@ -32,7 +32,10 @@ OBJS		= usbser_keyspan.o keyspan_dsd.o keyspan_pipe.o
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/usba misc/usbser misc/usbs49_fw
+DEPENDS_ON	=	\
+	misc/usba	\
+	misc/usbs49_fw	\
+	misc/usbser
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 

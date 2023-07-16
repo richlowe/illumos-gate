@@ -34,6 +34,10 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 INC_PATH	+= -I.
 CPPFLAGS	+= -D_KERNEL
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 include $(UTSBASE)/Makefile.kmod.targ

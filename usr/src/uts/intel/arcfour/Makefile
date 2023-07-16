@@ -30,6 +30,8 @@ UTSBASE = ../..
 UTSMACH = intel
 include $(SRC)/uts/common/crypto/io/arcfour/Makefile.com
 
+OBJS += arcfour-x86_64.o
+
 $(OBJS_DIR)/%.o: %.S
 	$(COMPILE.s) -o $@ $<
 

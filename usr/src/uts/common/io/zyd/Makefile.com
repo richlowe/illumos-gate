@@ -29,7 +29,10 @@ OBJS		= zyd.o zyd_usb.o zyd_hw.o zyd_fw.o
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 misc/usba
+DEPENDS_ON	=	\
+	misc/mac	\
+	misc/net80211	\
+	misc/usba
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 

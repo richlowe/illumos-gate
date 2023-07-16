@@ -29,15 +29,16 @@
 MODULE		= elfexec
 MOD_SRCDIR	= $(UTSBASE)/common/exec/elf
 
+# Platforms which support 32bit executables require ELF32 versions of these
+# objects.
 intel_OBJS	= elf32.o elf32_notes.o old32_notes.o
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=			\
 		$($(UTSMACH)_OBJS)	\
+		core_shstrtab.o		\
 		elf.o			\
 		elf_notes.o		\
-		old_notes.o		\
-		core_shstrtab.o
+		old_notes.o
 
 ROOTMODULE	= $(ROOT_EXEC_DIR)/$(MODULE)
 

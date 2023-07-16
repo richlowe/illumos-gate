@@ -26,6 +26,7 @@
 MODULE		= pmcs8001fw
 MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs/fw
 
+# NB: The ordering of objects here is important
 OBJS		=		\
 		pmcs_fw_hdr.o	\
 		SPCBoot.o	\

@@ -29,36 +29,35 @@
 MODULE		= ufs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/ufs
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
+		lufs.o		\
+		lufs_debug.o	\
+		lufs_log.o	\
+		lufs_map.o	\
+		lufs_thread.o	\
+		lufs_top.o	\
+		quota.o		\
+		quota_ufs.o	\
+		quotacalls.o	\
+		ufs_acl.o	\
 		ufs_alloc.o	\
 		ufs_bmap.o	\
 		ufs_dir.o	\
-		ufs_xattr.o	\
+		ufs_directio.o	\
+		ufs_extvnops.o	\
+		ufs_filio.o	\
 		ufs_inode.o	\
+		ufs_lockfs.o	\
+		ufs_log.o	\
+		ufs_panic.o	\
+		ufs_snap.o	\
 		ufs_subr.o	\
 		ufs_tables.o	\
-		ufs_vfsops.o	\
-		ufs_vnops.o	\
-		quota.o		\
-		quotacalls.o	\
-		quota_ufs.o	\
-		ufs_filio.o	\
-		ufs_lockfs.o	\
 		ufs_thread.o	\
 		ufs_trans.o	\
-		ufs_acl.o	\
-		ufs_panic.o	\
-		ufs_directio.o	\
-		ufs_log.o	\
-		ufs_extvnops.o	\
-		ufs_snap.o	\
-		lufs.o		\
-		lufs_thread.o	\
-		lufs_log.o	\
-		lufs_map.o	\
-		lufs_top.o	\
-		lufs_debug.o
+		ufs_vfsops.o	\
+		ufs_vnops.o	\
+		ufs_xattr.o
 
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 

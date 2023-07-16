@@ -35,7 +35,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/ip drv/ip6 drv/icmp
+DEPENDS_ON	=	\
+	drv/icmp	\
+	drv/ip		\
+	drv/ip6
 
 # needs work
 $(OBJS_DIR)/icmp6ddi.o := SMOFF += index_overflow

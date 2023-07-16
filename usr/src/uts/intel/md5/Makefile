@@ -29,6 +29,8 @@ UTSBASE = ../..
 UTSMACH = intel
 include $(SRC)/uts/common/crypto/io/md5/Makefile.com
 
+OBJS += md5_amd64.o
+
 md5_amd64.S: $(COMDIR)/amd64/md5_amd64.pl
 	$(PERL) $? $@
 

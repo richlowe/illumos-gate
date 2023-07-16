@@ -30,6 +30,10 @@ include $(UTSBASE)/Makefile.kmod
 
 INC_PATH	+= -I.
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 include $(UTSBASE)/Makefile.kmod.targ

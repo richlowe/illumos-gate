@@ -26,15 +26,14 @@
 MODULE		= softmac
 MOD_SRCDIR	= $(UTSBASE)/common/io/softmac
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		softmac_main.o	\
-		softmac_ctl.o	\
 		softmac_capab.o \
+		softmac_ctl.o	\
 		softmac_dev.o	\
-		softmac_stat.o	\
+		softmac_fp.o	\
+		softmac_main.o	\
 		softmac_pkt.o	\
-		softmac_fp.o
+		softmac_stat.o
 
 include $(UTSBASE)/Makefile.kmod
 

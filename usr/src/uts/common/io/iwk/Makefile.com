@@ -34,7 +34,11 @@ include $(UTSBASE)/Makefile.kmod
 INC_PATH	+= -I.
 CPPFLAGS	+= -D_KERNEL -DIWL=4965
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= $(CNOWARN_UNINIT)

@@ -32,7 +32,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= misc/dadk misc/strategy misc/cmlb
+DEPENDS_ON	=	\
+	misc/cmlb	\
+	misc/dadk	\
+	misc/strategy
 
 # Larger than 1TB VTOC support
 ALL_DEFS	+= -D_EXTVTOC

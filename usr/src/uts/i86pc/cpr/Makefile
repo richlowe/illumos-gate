@@ -32,6 +32,11 @@ UTSMACH = i86pc
 
 include $(SRC)/uts/common/cpr/Makefile.com
 
+OBJS += 		\
+	cpr_impl.o 	\
+	cpr_intel.o	\
+	cpr_wakecode.o
+
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/ml/%.S
 	$(COMPILE.s) -o $@ $<
 
