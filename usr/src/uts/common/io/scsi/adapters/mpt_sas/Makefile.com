@@ -36,7 +36,10 @@ OBJS		=		\
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/scsi drv/scsi_vhci misc/sata
+DEPENDS_ON	=	\
+	drv/scsi_vhci	\
+	misc/sata	\
+	misc/scsi
 
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)

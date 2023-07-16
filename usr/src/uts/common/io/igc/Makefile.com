@@ -24,12 +24,11 @@ CORE_OBJS	=	\
 	igc_nvm.o	\
 	igc_phy.o
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS	=		\
 	$(CORE_OBJS)	\
 	igc.o		\
-	igc_osdep.o	\
 	igc_gld.o	\
+	igc_osdep.o	\
 	igc_ring.o	\
 	igc_stat.o
 

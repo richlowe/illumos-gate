@@ -28,11 +28,11 @@
 MODULE		= qlc
 MOD_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/fca/qlc
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		ql_api.o	\
 		ql_debug.o	\
 		ql_fm.o		\
+		ql_fw_table.o	\
 		ql_hba_fru.o	\
 		ql_init.o	\
 		ql_iocb.o	\
@@ -40,8 +40,7 @@ OBJS		=		\
 		ql_isr.o	\
 		ql_mbx.o	\
 		ql_nx.o		\
-		ql_xioctl.o	\
-		ql_fw_table.o
+		ql_xioctl.o
 
 include $(UTSBASE)/Makefile.kmod
 

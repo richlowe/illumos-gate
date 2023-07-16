@@ -30,43 +30,42 @@
 MODULE		= nfs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/nfs/nfsclnt
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		nfs_client.o		\
-		nfs_common.o		\
-		nfs_dump.o		\
-		nfs_subr.o		\
-		nfs_vfsops.o		\
-		nfs_vnops.o		\
-		nfs_xdr.o		\
-		nfs_sys.o		\
-		nfs_strerror.o		\
 		nfs3_vfsops.o		\
 		nfs3_vnops.o		\
 		nfs3_xdr.o		\
-		nfs_acl_vnops.o		\
-		nfs_acl_xdr.o		\
+		nfs4_acache.o		\
+		nfs4_acl.o		\
+		nfs4_attr.o		\
+		nfs4_callback.o		\
+		nfs4_client.o		\
+		nfs4_client_debug.o	\
+		nfs4_client_secinfo.o	\
+		nfs4_client_state.o	\
+		nfs4_common.o		\
+		nfs4_idmap.o		\
+		nfs4_recovery.o		\
+		nfs4_rnode.o		\
+		nfs4_shadow.o		\
+		nfs4_stub_vnops.o	\
+		nfs4_subr.o		\
 		nfs4_vfsops.o		\
 		nfs4_vnops.o		\
 		nfs4_xdr.o		\
-		nfs4_idmap.o		\
-		nfs4_shadow.o		\
-		nfs4_subr.o		\
-		nfs4_attr.o		\
-		nfs4_rnode.o		\
-		nfs4_client.o		\
-		nfs4_acache.o		\
-		nfs4_common.o		\
-		nfs4_client_state.o	\
-		nfs4_callback.o		\
-		nfs4_recovery.o		\
-		nfs4_client_secinfo.o	\
-		nfs4_client_debug.o	\
-		nfs_stats.o		\
-		nfs4_acl.o		\
-		nfs4_stub_vnops.o	\
+		nfs4x_xdr.o		\
+		nfs_acl_vnops.o		\
+		nfs_acl_xdr.o		\
+		nfs_client.o		\
 		nfs_cmd.o		\
-		nfs4x_xdr.o
+		nfs_common.o		\
+		nfs_dump.o		\
+		nfs_stats.o		\
+		nfs_strerror.o		\
+		nfs_subr.o		\
+		nfs_sys.o		\
+		nfs_vfsops.o		\
+		nfs_vnops.o		\
+		nfs_xdr.o
 
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SYS_DIR)/$(MODULE)
@@ -75,7 +74,10 @@ include $(UTSBASE)/Makefile.kmod
 
 INSTALL_TARGET	+= $(ROOTLINK)
 
-DEPENDS_ON = fs/specfs strmod/rpcmod misc/rpcsec
+DEPENDS_ON =		\
+	fs/specfs	\
+	misc/rpcsec	\
+	strmod/rpcmod
 
 #
 # For now, disable these warnings; maintainers should endeavor

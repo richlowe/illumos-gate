@@ -28,12 +28,11 @@
 MODULE		= idmap
 MOD_SRCDIR	= $(UTSBASE)/common/idmap
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=		\
-		idmap_mod.o	\
+		idmap_cache.o	\
 		idmap_kapi.o	\
-		idmap_xdr.o	\
-		idmap_cache.o
+		idmap_mod.o	\
+		idmap_xdr.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

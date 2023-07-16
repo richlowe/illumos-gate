@@ -28,6 +28,9 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/uath
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 misc/usba
+DEPENDS_ON	=	\
+	misc/mac	\
+	misc/net80211	\
+	misc/usba
 
 include $(UTSBASE)/Makefile.kmod.targ

@@ -27,13 +27,12 @@
 MODULE		= intel_nb5000
 MOD_SRCDIR	= $(UTSBASE)/intel/io/intel_nb5000
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
+		dimm_addr.o	\
 		intel_nb5000.o	\
 		intel_nbdrv.o	\
-		dimm_addr.o	\
-		nb_pci_cfg.o	\
-		nb5000_init.o
+		nb5000_init.o	\
+		nb_pci_cfg.o
 
 include $(UTSBASE)/Makefile.kmod
 

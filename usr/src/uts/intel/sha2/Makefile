@@ -28,6 +28,8 @@ UTSBASE = ../..
 UTSMACH = intel
 include $(SRC)/uts/common/crypto/io/sha2/Makefile.com
 
+OBJS += sha512-x86_64.o sha256-x86_64.o
+
 $(OBJS_DIR)/%.o: %.S
 	$(COMPILE.s) -o $@ $<
 

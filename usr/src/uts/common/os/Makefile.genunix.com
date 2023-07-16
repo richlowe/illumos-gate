@@ -35,12 +35,12 @@ GENUNIX = $(OBJS_DIR)/$(MODULE)
 
 aarch64_OBJS	=	\
 	archdep.o	\
-	syscall.o	\
-	fpu.o		\
 	float.o		\
+	fpu.o		\
 	getcontext.o	\
 	install_utrap.o	\
-	kdi_svc.o
+	kdi_svc.o	\
+	syscall.o
 
 intel_OBJS	=	\
 	archdep.o	\
@@ -54,8 +54,8 @@ intel_OBJS	=	\
 
 # 'PROM' routines
 intel_OBJS	+=	\
-	prom_env.o	\
 	prom_emul.o	\
+	prom_env.o	\
 	prom_getchar.o	\
 	prom_init.o	\
 	prom_node.o	\
@@ -71,12 +71,12 @@ OBJS	=			\
 	acl.o			\
 	acl_common.o		\
 	adjtime.o		\
-	alarm.o			\
 	aio_subr.o		\
-	auditsys.o		\
+	alarm.o			\
 	audit_core.o		\
-	audit_zone.o		\
 	audit_memory.o		\
+	audit_zone.o		\
+	auditsys.o		\
 	autoconf.o		\
 	avl.o			\
 	bdev_dsort.o		\
@@ -87,12 +87,12 @@ OBJS	=			\
 	bootbanner.o		\
 	brandsys.o		\
 	bz2blocksort.o		\
-	bz2compress.o		\
-	bz2decompress.o		\
-	bz2randtable.o		\
 	bz2bzlib.o		\
+	bz2compress.o		\
 	bz2crctable.o		\
+	bz2decompress.o		\
 	bz2huffman.o		\
+	bz2randtable.o		\
 	callb.o			\
 	callout.o		\
 	chdir.o			\
@@ -116,12 +116,11 @@ OBJS	=			\
 	corectl.o		\
 	cred.o			\
 	cs_stubs.o		\
+	cyclic.o		\
 	dacf.o			\
 	dacf_clnt.o		\
 	damap.o			\
-	cyclic.o		\
 	ddi.o			\
-	ddifm.o			\
 	ddi_hp_impl.o		\
 	ddi_hp_ndi.o		\
 	ddi_intr.o		\
@@ -130,8 +129,9 @@ OBJS	=			\
 	ddi_nodeid.o		\
 	ddi_periodic.o		\
 	ddi_ufm.o		\
-	devcfg.o		\
+	ddifm.o			\
 	devcache.o		\
+	devcfg.o		\
 	device.o		\
 	devid.o			\
 	devid_cache.o		\
@@ -142,9 +142,9 @@ OBJS	=			\
 	dkioc_free_util.o	\
 	dnlc.o			\
 	driver.o		\
-	dumpsubr.o		\
 	driver_lyr.o		\
 	dtrace_subr.o		\
+	dumpsubr.o		\
 	errorq.o		\
 	etheraddr.o		\
 	evchannels.o		\
@@ -162,8 +162,8 @@ OBJS	=			\
 	firmload.o		\
 	flock.o			\
 	fm.o			\
+	fnvpair.o		\
 	fork.o			\
-	vpm.o			\
 	fs_reparse.o		\
 	fs_subr.o		\
 	fsflush.o		\
@@ -173,8 +173,8 @@ OBJS	=			\
 	getloadavg.o		\
 	getpagesizes.o		\
 	getpid.o		\
+	getrandom.o		\
 	gfs.o			\
-	rusagesys.o		\
 	gid.o			\
 	groups.o		\
 	grow.o			\
@@ -185,8 +185,8 @@ OBJS	=			\
 	instance.o		\
 	ioctl.o			\
 	ip_cksum.o		\
-	issetugid.o		\
 	ippconf.o		\
+	issetugid.o		\
 	kcpc.o			\
 	kdi.o			\
 	kiconv.o		\
@@ -196,6 +196,7 @@ OBJS	=			\
 	ksyms_snapshot.o	\
 	l_strplumb.o		\
 	labelsys.o		\
+	lgrpsys.o		\
 	link.o			\
 	list.o			\
 	lockstat_subr.o		\
@@ -212,33 +213,30 @@ OBJS	=			\
 	lwp_timer.o		\
 	lwpsys.o		\
 	main.o			\
-	mmapobjsys.o		\
 	memcntl.o		\
 	memstr.o		\
-	lgrpsys.o		\
 	mkdir.o			\
 	mknod.o			\
+	mmapobjsys.o		\
 	mount.o			\
 	move.o			\
 	msacct.o		\
 	nbmlock.o		\
 	ndifm.o			\
-	nice.o			\
 	netstack.o		\
+	nice.o			\
 	ntptime.o		\
 	nvpair.o		\
-	nvpair_alloc_system.o	\
 	nvpair_alloc_fixed.o	\
-	fnvpair.o		\
+	nvpair_alloc_system.o	\
 	octet.o			\
 	open.o			\
 	p_online.o		\
 	pathconf.o		\
 	pathname.o		\
 	pause.o			\
-	serializer.o		\
-	pci_intr_lib.o		\
 	pci_cap.o		\
+	pci_intr_lib.o		\
 	pcifm.o			\
 	pgrp.o			\
 	pgrpsys.o		\
@@ -255,14 +253,14 @@ OBJS	=			\
 	priv.o			\
 	priv_const.o		\
 	proc.o			\
-	psecflags.o		\
-	procset.o		\
+	process.o		\
 	processor_bind.o	\
 	processor_info.o	\
+	procset.o		\
 	profil.o		\
 	project.o		\
+	psecflags.o		\
 	qsort.o			\
-	getrandom.o		\
 	rctl.o			\
 	rctlsys.o		\
 	readlink.o		\
@@ -271,16 +269,15 @@ OBJS	=			\
 	rename.o		\
 	resolvepath.o		\
 	retire_store.o		\
-	process.o		\
 	rlimit.o		\
 	rmap.o			\
+	rusagesys.o		\
 	rw.o			\
 	rwstlock.o		\
 	sad_conf.o		\
-	sid.o			\
-	sidsys.o		\
 	sched.o			\
 	schedctl.o		\
+	scsi_confdata.o		\
 	sctp_crc32.o		\
 	secflags.o		\
 	seg_dev.o		\
@@ -288,14 +285,17 @@ OBJS	=			\
 	seg_kp.o		\
 	seg_kpm.o		\
 	seg_map.o		\
-	seg_vn.o		\
 	seg_spt.o		\
 	seg_umap.o		\
+	seg_vn.o		\
 	semaphore.o		\
 	sendfile.o		\
+	serializer.o		\
 	session.o		\
 	share.o			\
 	shuttle.o		\
+	sid.o			\
+	sidsys.o		\
 	sig.o			\
 	sigaction.o		\
 	sigaltstack.o		\
@@ -323,11 +323,11 @@ OBJS	=			\
 	strsun.o		\
 	subr.o			\
 	sunddi.o		\
+	sundlpi.o		\
 	sunmdi.o		\
 	sunndi.o		\
 	sunpci.o		\
 	sunpm.o			\
-	sundlpi.o		\
 	suntpi.o		\
 	swap_subr.o		\
 	swap_vnops.o		\
@@ -341,14 +341,14 @@ OBJS	=			\
 	task.o			\
 	taskq.o			\
 	tasksys.o		\
+	thread.o		\
 	time.o			\
 	timer.o			\
-	times.o			\
 	timers.o		\
-	thread.o		\
+	times.o			\
 	tlabel.o		\
-	turnstile.o		\
 	tty_common.o		\
+	turnstile.o		\
 	u8_textprep.o		\
 	uadmin.o		\
 	uconv.o			\
@@ -366,7 +366,6 @@ OBJS	=			\
 	uucopy.o		\
 	vfs.o			\
 	vfs_conf.o		\
-	vmem.o			\
 	vm_anon.o		\
 	vm_as.o			\
 	vm_meter.o		\
@@ -377,35 +376,36 @@ OBJS	=			\
 	vm_subr.o		\
 	vm_swap.o		\
 	vm_usage.o		\
+	vmem.o			\
 	vnode.o			\
+	vpm.o			\
 	vuid_queue.o		\
 	vuid_store.o		\
 	waitq.o			\
 	watchpoint.o		\
-	yield.o			\
-	scsi_confdata.o		\
 	xattr.o			\
 	xattr_common.o		\
-	xdr_mblk.o		\
-	xdr_mem.o		\
 	xdr.o			\
 	xdr_array.o		\
+	xdr_mblk.o		\
+	xdr_mem.o		\
 	xdr_refer.o		\
+	yield.o			\
 	zone.o
 
 # Common objects that are "not yet" kmods, in a deeply historical sense.
 OBJS	+=		\
-	tty_ptyconf.o	\
 	ptms_conf.o	\
+	tty_ptyconf.o	\
 	vcons_conf.o
 
 # 'Module' objects (support for modules, not actual modules)
 OBJS	+=		\
-	modctl.o	\
-	modsubr.o	\
-	modsysfile.o	\
 	modconf.o	\
-	modhash.o
+	modctl.o	\
+	modhash.o	\
+	modsubr.o	\
+	modsysfile.o
 
 OBJECTS		= $(OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_KERN_DIR)/$(MODULE)

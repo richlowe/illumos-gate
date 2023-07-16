@@ -30,21 +30,20 @@
 MODULE		= rpcsec
 MOD_SRCDIR	= $(UTSBASE)/common/rpc/sec
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		secmod.o	\
-		sec_clnt.o	\
-		sec_svc.o	\
-		sec_gen.o	\
 		auth_des.o	\
 		auth_kern.o	\
-		auth_none.o	\
 		auth_loopb.o	\
+		auth_none.o	\
 		authdesprt.o	\
 		authdesubr.o	\
 		authu_prot.o	\
 		key_call.o	\
 		key_prot.o	\
+		sec_clnt.o	\
+		sec_gen.o	\
+		sec_svc.o	\
+		secmod.o	\
 		svc_authu.o	\
 		svcauthdes.o
 

@@ -16,18 +16,17 @@
 MODULE		= ena
 MOD_SRCDIR	= $(UTSBASE)/common/io/ena
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		ena.o		\
 		ena_admin.o	\
-		ena_dma.o	\
 		ena_aenq.o	\
+		ena_dma.o	\
 		ena_gld.o	\
 		ena_hw.o	\
 		ena_intr.o	\
+		ena_rx.o	\
 		ena_stats.o	\
 		ena_tx.o	\
-		ena_rx.o	\
 		ena_watchdog.o
 
 include $(UTSBASE)/Makefile.kmod

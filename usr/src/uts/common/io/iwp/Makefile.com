@@ -28,7 +28,11 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/iwp
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 #
 # For now, disable these warnings; maintainers should endeavor

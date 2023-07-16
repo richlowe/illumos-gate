@@ -75,7 +75,10 @@ CFLAGS		+= -DSUN_KSTATS -DHOST_PAUSE -DTX_CKSUM_FIX -DTX_THREAD_RECLAIM
 #
 #	Driver depends on GLD, IP, and MAC
 #
-DEPENDS_ON		= misc/gld drv/ip misc/mac
+DEPENDS_ON	=	\
+	drv/ip		\
+	misc/gld	\
+	misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor

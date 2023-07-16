@@ -23,7 +23,11 @@ INC_PATH	+= -I$(UTSBASE)/common/io/usbgem
 CPPFLAGS	+= -DVERSION=\"2.0.0\"
 CPPFLAGS	+= -DUSBGEM_CONFIG_GLDv3
 
-DEPENDS_ON	= misc/mac drv/ip misc/usba misc/usbgem
+DEPENDS_ON	= 	\
+	drv/ip		\
+	misc/mac	\
+	misc/usba	\
+	misc/usbgem
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-function

@@ -27,9 +27,7 @@
 MODULE		= sha1
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/sha1
 
-# XXXMK: Could be in the client makefile if not for wsdiff
-intel_OBJS	= sha1-x86_64.o
-OBJS		= $($(UTSMACH)_OBJS) sha1.o sha1_mod.o
+OBJS		= sha1.o sha1_mod.o
 
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)

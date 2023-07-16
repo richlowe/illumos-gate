@@ -28,12 +28,11 @@
 MODULE		= amd_iommu
 MOD_SRCDIR     = $(UTSBASE)/i86pc/io/amd_iommu
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		amd_iommu.o		\
-		amd_iommu_impl.o	\
 		amd_iommu_acpi.o	\
 		amd_iommu_cmd.o		\
+		amd_iommu_impl.o	\
 		amd_iommu_log.o		\
 		amd_iommu_page_tables.o
 

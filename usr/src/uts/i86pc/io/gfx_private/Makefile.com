@@ -31,17 +31,16 @@
 MODULE		= gfx_private
 MOD_SRCDIR	= $(UTSBASE)/i86pc/io/gfx_private
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
 		gfx_private.o	\
+		gfxp_bitmap.o	\
+		gfxp_devmap.o	\
+		gfxp_fb.o	\
 		gfxp_pci.o	\
 		gfxp_segmap.o	\
-		gfxp_devmap.o	\
 		gfxp_vgatext.o	\
 		gfxp_vm.o	\
-		vgasubr.o	\
-		gfxp_fb.o	\
-		gfxp_bitmap.o
+		vgasubr.o
 
 ROOTMODULE	= $(ROOT_PSM_MISC_DIR)/$(MODULE)
 

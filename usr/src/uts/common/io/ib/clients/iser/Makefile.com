@@ -39,7 +39,10 @@ OBJS		= \
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/ibtl misc/ibcm misc/idm
+DEPENDS_ON	=	\
+	misc/ibcm	\
+	misc/ibtl	\
+	misc/idm
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 

@@ -35,7 +35,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(BINARY) $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/fcp misc/fctl misc/scsi
+DEPENDS_ON	=	\
+	drv/fcp		\
+	misc/fctl	\
+	misc/scsi
 
 #
 # For now, disable these warnings; maintainers should endeavor

@@ -41,6 +41,10 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= -_gcc=-Wno-parentheses
 
-DEPENDS_ON	= misc/mac misc/dls drv/dld fs/dev
+DEPENDS_ON	=	\
+	drv/dld		\
+	fs/dev		\
+	misc/dls	\
+	misc/mac
 
 include $(UTSBASE)/Makefile.kmod.targ

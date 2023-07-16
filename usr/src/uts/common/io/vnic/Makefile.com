@@ -34,7 +34,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/dld misc/mac misc/dls
+DEPENDS_ON	=	\
+	drv/dld		\
+	misc/dls	\
+	misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor

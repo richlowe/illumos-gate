@@ -29,12 +29,11 @@
 MODULE		= rpcsec_gss
 MOD_SRCDIR	= $(UTSBASE)/common/rpc/sec_gss
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		rpcsec_gssmod.o		\
 		rpcsec_gss.o		\
 		rpcsec_gss_misc.o	\
 		rpcsec_gss_utils.o	\
+		rpcsec_gssmod.o		\
 		svc_rpcsec_gss.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)

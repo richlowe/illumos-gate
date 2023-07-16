@@ -27,14 +27,14 @@
 MODULE		= sol_ofs
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/of/sol_ofs
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		sol_cma.o		\
 		sol_ib_cma.o		\
-		sol_uobj.o		\
+		sol_kverbs.o		\
 		sol_ofs_debug_util.o	\
 		sol_ofs_gen_util.o	\
-		sol_kverbs.o
+		sol_uobj.o
+
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod

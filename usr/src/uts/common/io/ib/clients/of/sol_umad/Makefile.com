@@ -28,7 +28,10 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/of/sol_umad
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/sol_ofs misc/ibmf misc/ibtl
+DEPENDS_ON	=	\
+	misc/ibmf	\
+	misc/ibtl	\
+	misc/sol_ofs
 
 CERRWARN	+= $(CNOWARN_UNINIT)
 

@@ -17,24 +17,22 @@ MODULE		= i40e
 MOD_SRCDIR	= $(UTSBASE)/common/io/i40e
 
 # illumos source
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
+		i40e_gld.o		\
+		i40e_intr.o		\
 		i40e_main.o		\
 		i40e_osdep.o		\
-		i40e_intr.o		\
-		i40e_transceiver.o	\
 		i40e_stats.o		\
-		i40e_gld.o
+		i40e_transceiver.o
 
 # Intel source
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=		\
 		i40e_adminq.o	\
 		i40e_common.o	\
+		i40e_dcb.o	\
 		i40e_hmc.o	\
 		i40e_lan_hmc.o	\
-		i40e_nvm.o	\
-		i40e_dcb.o
+		i40e_nvm.o
 
 include $(UTSBASE)/Makefile.kmod
 
