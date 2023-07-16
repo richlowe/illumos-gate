@@ -197,10 +197,11 @@ GENASSYM_DEFS	 = $(MACHINE_DEFS) $(OPTION_DEFS) \
 #
 #	Machine Specific Driver Modules (/kernel/drv):
 #
-DRV_KMODS += simple-bus
-DRV_KMODS += rootnex
-DRV_KMODS += ns16550a
-DRV_KMODS += gicv2
-DRV_KMODS += gicv3
+DRV_KMODS +=		\
+	gicv2		\
+	gicv3		\
+	ns16550a	\
+	rootnex		\
+	simple-bus
 
 DACF_KMODS += consconfig_dacf

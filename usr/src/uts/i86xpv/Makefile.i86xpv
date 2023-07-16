@@ -216,71 +216,51 @@ MACH_NOT_YET_KMODS	= $(AUTOCONF_OBJS)
 #
 #	Machine Specific Driver Modules (/kernel/drv):
 #	DRV_KMODS are built both 32-bit and 64-bit
-#	DRV_KMODS_32 are built only 32-bit
-#	DRV_KMODS_64 are built only 64-bit
 #
 
-DRV_KMODS	+= rootnex
-DRV_KMODS	+= ioat
-DRV_KMODS	+= isa
-DRV_KMODS	+= pci
-DRV_KMODS	+= pit_beep
-DRV_KMODS	+= npe
-DRV_KMODS	+= pci-ide
-DRV_KMODS	+= xsvc
-DRV_KMODS	+= xenbus
-DRV_KMODS	+= xencons
-DRV_KMODS	+= xpvd
-DRV_KMODS	+= xnbe
-DRV_KMODS	+= xnbo
-DRV_KMODS	+= xnbu
-DRV_KMODS	+= xnf
-DRV_KMODS	+= xdb
-DRV_KMODS	+= xdf
-DRV_KMODS	+= privcmd
-DRV_KMODS	+= domcaps
-DRV_KMODS	+= evtchn
-DRV_KMODS	+= balloon
-DRV_KMODS	+= xpvtap
-DRV_KMODS	+= xdt
+DRV_KMODS	+=	\
+	balloon		\
+	domcaps		\
+	evtchn		\
+	ioat		\
+	isa		\
+	npe		\
+	pci		\
+	pci-ide		\
+	pit_beep	\
+	privcmd		\
+	rootnex		\
+	xdb		\
+	xdf		\
+	xdt		\
+	xenbus		\
+	xencons		\
+	xnbe		\
+	xnbo		\
+	xnbu		\
+	xnf		\
+	xpvd		\
+	xpvtap		\
+	xsvc
 
 #
 #	CPU Modules
 #
-CPU_KMODS	+= generic_cpu
-CPU_KMODS	+= amd_opteron
-CPU_KMODS	+= genuineintel
-CPU_KMODS	+= authenticamd
-
-#
-#	Exec Class Modules (/kernel/exec):
-#
-EXEC_KMODS	+=
-
-#
-#	Scheduling Class Modules (/kernel/sched):
-#
-SCHED_KMODS	+=
-
-#
-#	File System Modules (/kernel/fs):
-#
-FS_KMODS	+=
-
-#
-#	Streams Modules (/kernel/strmod):
-#
-STRMOD_KMODS	+=
-
-#
-#	'System' Modules (/kernel/sys):
-#
-SYS_KMODS	+=
+CPU_KMODS	+= 	\
+	amd_opteron	\
+	authenticamd	\
+	generic_cpu	\
+	genuineintel
 
 #
 #	'Misc' Modules (/kernel/misc):
 #
-MISC_KMODS	+= xpv_autoconfig gfx_private xnb pcie pci_prd
+MISC_KMODS	+=	\
+	gfx_private	\
+	pcie		\
+	pci_prd		\
+	xnb		\
+	xpv_autoconfig
 
 #	'Dacf' modules (/kernel/dacf)
 #

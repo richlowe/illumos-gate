@@ -34,8 +34,6 @@ include Makefile.aarch64
 # a directory.
 BINARY=
 
-DRV_KMODS	+= dprov
-
 #
 #
 def		:=	TARGET= def
