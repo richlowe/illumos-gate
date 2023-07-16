@@ -29,19 +29,18 @@
 MODULE		= ctf
 MOD_SRCDIR	= $(UTSBASE)/common/ctf
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		ctf_create.o \
-		ctf_decl.o \
-		ctf_error.o \
-		ctf_hash.o \
-		ctf_labels.o \
-		ctf_lookup.o \
-		ctf_open.o \
-		ctf_types.o \
-		ctf_util.o \
-		ctf_subr.o \
-		ctf_mod.o
+		ctf_create.o	\
+		ctf_decl.o	\
+		ctf_error.o	\
+		ctf_hash.o	\
+		ctf_labels.o	\
+		ctf_lookup.o	\
+		ctf_mod.o	\
+		ctf_open.o	\
+		ctf_subr.o	\
+		ctf_types.o	\
+		ctf_util.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

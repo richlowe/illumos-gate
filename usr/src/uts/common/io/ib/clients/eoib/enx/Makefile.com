@@ -27,16 +27,15 @@
 MODULE		= eibnx
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/eoib/enx
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=		\
-		enx_main.o	\
+		enx_ctl.o	\
+		enx_fip.o	\
 		enx_hdlrs.o	\
 		enx_ibt.o	\
 		enx_log.o	\
-		enx_fip.o	\
+		enx_main.o	\
 		enx_misc.o	\
-		enx_q.o		\
-		enx_ctl.o
+		enx_q.o
 
 include $(UTSBASE)/Makefile.kmod
 

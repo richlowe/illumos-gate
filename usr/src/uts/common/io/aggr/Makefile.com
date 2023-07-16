@@ -30,21 +30,23 @@
 MODULE		= aggr
 MOD_SRCDIR	= $(UTSBASE)/common/io/aggr
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		aggr_dev.o	\
 		aggr_ctl.o	\
+		aggr_dev.o	\
 		aggr_grp.o	\
+		aggr_lacp.o	\
 		aggr_port.o	\
-		aggr_send.o	\
 		aggr_recv.o	\
-		aggr_lacp.o
+		aggr_send.o
 
 include $(UTSBASE)/Makefile.kmod
 
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/dld misc/mac misc/dls
+DEPENDS_ON	=	\
+	drv/dld		\
+	misc/dls	\
+	misc/mac
 
 include $(UTSBASE)/Makefile.kmod.targ

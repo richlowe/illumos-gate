@@ -30,16 +30,15 @@
 MODULE		= pcplusmp
 MOD_SRCDIR	= $(UTSBASE)/i86pc/io/psm/pcplusmp
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		apic.o			\
-		apic_regops.o		\
-		psm_common.o		\
+		apic_common.o		\
 		apic_introp.o		\
+		apic_regops.o		\
+		apic_timer.o		\
 		mp_platform_common.o	\
 		mp_platform_misc.o	\
-		apic_common.o		\
-		apic_timer.o
+		psm_common.o
 
 ROOTMODULE	= $(ROOT_PSM_MACH_DIR)/$(MODULE)
 

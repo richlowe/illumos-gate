@@ -27,12 +27,13 @@
 MODULE		= kcf
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/core
 
-# XXXMK: Could be added in the client makefile, if not for wsdiff
-intel_OBJS	= gcm_intel.o
-
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		$($(UTSMACH)_OBJS)	\
+		cbc.o			\
+		ccm.o			\
+		ctr.o			\
+		ecb.o			\
+		fips_random.o		\
+		gcm.o			\
 		kcf.o			\
 		kcf_callprov.o		\
 		kcf_cbufcall.o		\
@@ -50,19 +51,13 @@ OBJS		=			\
 		kcf_policy.o		\
 		kcf_prov_lib.o		\
 		kcf_prov_tabs.o		\
+		kcf_random.o		\
 		kcf_sched.o		\
 		kcf_session.o		\
 		kcf_sign.o		\
 		kcf_spi.o		\
 		kcf_verify.o		\
-		kcf_random.o		\
-		modes.o			\
-		ecb.o			\
-		cbc.o			\
-		ctr.o			\
-		ccm.o			\
-		gcm.o			\
-		fips_random.o
+		modes.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

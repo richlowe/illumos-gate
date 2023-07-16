@@ -32,7 +32,6 @@ MOD_SRCDIR	= $(UTSBASE)/common/fs/smbsrv
 # See also: $SRC/lib/smbsrv/libfksmbsrv/Makefile.com
 
 # Shared
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		smb_cfg_util.o		\
 		smb_door_legacy.o	\
@@ -51,8 +50,48 @@ OBJS		=			\
 		smb_xdr.o
 
 # Not shared
-# XXXMK: Should be sorted, but wsdiff
 OBJS		 +=				\
+		smb2_aapl.o			\
+		smb2_cancel.o			\
+		smb2_change_notify.o		\
+		smb2_close.o			\
+		smb2_create.o			\
+		smb2_dispatch.o			\
+		smb2_durable.o			\
+		smb2_echo.o			\
+		smb2_flush.o			\
+		smb2_fsctl_copychunk.o		\
+		smb2_fsctl_fs.o			\
+		smb2_fsctl_odx.o		\
+		smb2_fsctl_sparse.o		\
+		smb2_ioctl.o			\
+		smb2_lease.o			\
+		smb2_lock.o			\
+		smb2_logoff.o			\
+		smb2_negotiate.o		\
+		smb2_ofile.o			\
+		smb2_oplock.o			\
+		smb2_qinfo_file.o		\
+		smb2_qinfo_fs.o			\
+		smb2_qinfo_quota.o		\
+		smb2_qinfo_sec.o		\
+		smb2_query_dir.o		\
+		smb2_query_info.o		\
+		smb2_read.o			\
+		smb2_session_setup.o		\
+		smb2_set_info.o			\
+		smb2_setinfo_file.o		\
+		smb2_setinfo_fs.o		\
+		smb2_setinfo_quota.o		\
+		smb2_setinfo_sec.o		\
+		smb2_signing.o			\
+		smb2_tree_connect.o		\
+		smb2_tree_disconn.o		\
+		smb2_write.o			\
+		smb31_preauth.o			\
+		smb3_encrypt.o			\
+		smb3_encrypt_kcf.o		\
+		smb3_kdf.o			\
 		smb_acl.o			\
 		smb_alloc.o			\
 		smb_authenticate.o		\
@@ -120,57 +159,16 @@ OBJS		 +=				\
 		smb_signing.o			\
 		smb_srv_oplock.o		\
 		smb_thread.o			\
-		smb_tree.o			\
 		smb_trans2_create_directory.o	\
 		smb_trans2_dfs.o		\
 		smb_trans2_find.o		\
+		smb_tree.o			\
 		smb_tree_connect.o		\
 		smb_unlock_byte_range.o		\
 		smb_user.o			\
 		smb_vops.o			\
 		smb_vss.o			\
-		smb_write.o			\
-		smb2_aapl.o			\
-		smb2_dispatch.o			\
-		smb2_durable.o			\
-		smb2_cancel.o			\
-		smb2_change_notify.o		\
-		smb2_close.o			\
-		smb2_create.o			\
-		smb2_echo.o			\
-		smb2_flush.o			\
-		smb2_fsctl_copychunk.o		\
-		smb2_fsctl_fs.o			\
-		smb2_fsctl_odx.o		\
-		smb2_fsctl_sparse.o		\
-		smb2_ioctl.o			\
-		smb2_lease.o			\
-		smb2_lock.o			\
-		smb2_logoff.o			\
-		smb2_negotiate.o		\
-		smb2_ofile.o			\
-		smb2_oplock.o			\
-		smb2_qinfo_file.o		\
-		smb2_qinfo_fs.o			\
-		smb2_qinfo_sec.o		\
-		smb2_qinfo_quota.o		\
-		smb2_query_dir.o		\
-		smb2_query_info.o		\
-		smb2_read.o			\
-		smb2_session_setup.o		\
-		smb2_set_info.o			\
-		smb2_setinfo_file.o		\
-		smb2_setinfo_fs.o		\
-		smb2_setinfo_quota.o		\
-		smb2_setinfo_sec.o		\
-		smb2_signing.o			\
-		smb2_tree_connect.o		\
-		smb2_tree_disconn.o		\
-		smb2_write.o			\
-		smb3_encrypt.o			\
-		smb3_encrypt_kcf.o		\
-		smb3_kdf.o			\
-		smb31_preauth.o
+		smb_write.o
 
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 

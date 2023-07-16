@@ -17,13 +17,12 @@
 MODULE		= mlxcx
 MOD_SRCDIR	= $(UTSBASE)/common/io/mlxcx
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
 		mlxcx.o		\
-		mlxcx_dma.o	\
 		mlxcx_cmd.o	\
-		mlxcx_intr.o	\
+		mlxcx_dma.o	\
 		mlxcx_gld.o	\
+		mlxcx_intr.o	\
 		mlxcx_ring.o	\
 		mlxcx_sensor.o
 

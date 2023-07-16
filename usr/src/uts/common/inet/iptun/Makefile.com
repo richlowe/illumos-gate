@@ -34,7 +34,11 @@ INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 INC_PATH        += -I$(UTSBASE)/common/io/bpf
 
-DEPENDS_ON	= drv/dld misc/dls misc/mac drv/ip
+DEPENDS_ON	=	\
+	drv/dld		\
+	drv/ip		\
+	misc/dls	\
+	misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor

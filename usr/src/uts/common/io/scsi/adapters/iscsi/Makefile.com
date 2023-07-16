@@ -29,34 +29,33 @@
 MODULE		= iscsi
 MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/iscsi
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		chap.o			\
-		iscsi_io.o		\
-		iscsi_thread.o		\
-		iscsi_ioctl.o		\
-		iscsid.o		\
 		iscsi.o			\
-		iscsi_login.o		\
-		isns_client.o		\
 		iscsiAuthClient.o	\
-		iscsi_lun.o		\
 		iscsiAuthClientGlue.o	\
-		iscsi_net.o		\
-		nvfile.o		\
 		iscsi_cmd.o		\
-		iscsi_queue.o		\
-		persistent.o		\
 		iscsi_conn.o		\
-		iscsi_sess.o		\
-		radius_auth.o		\
 		iscsi_crc.o		\
-		iscsi_stats.o		\
-		radius_packet.o		\
 		iscsi_doorclt.o		\
+		iscsi_io.o		\
+		iscsi_ioctl.o		\
+		iscsi_login.o		\
+		iscsi_lun.o		\
+		iscsi_net.o		\
+		iscsi_queue.o		\
+		iscsi_sess.o		\
+		iscsi_stats.o		\
 		iscsi_targetparam.o	\
-		utils.o			\
-		kifconf.o
+		iscsi_thread.o		\
+		iscsid.o		\
+		isns_client.o		\
+		kifconf.o		\
+		nvfile.o		\
+		persistent.o		\
+		radius_auth.o		\
+		radius_packet.o		\
+		utils.o
 
 include $(UTSBASE)/Makefile.kmod
 

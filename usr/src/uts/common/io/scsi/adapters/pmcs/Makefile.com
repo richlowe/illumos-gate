@@ -26,17 +26,16 @@
 MODULE		= pmcs
 MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		pmcs_attach.o \
-		pmcs_ds.o \
-		pmcs_intr.o \
-		pmcs_nvram.o \
-		pmcs_sata.o \
-		pmcs_scsa.o \
-		pmcs_smhba.o \
-		pmcs_subr.o \
-		pmcs_fwlog.o
+		pmcs_attach.o	\
+		pmcs_ds.o	\
+		pmcs_fwlog.o	\
+		pmcs_intr.o	\
+		pmcs_nvram.o	\
+		pmcs_sata.o	\
+		pmcs_scsa.o	\
+		pmcs_smhba.o	\
+		pmcs_subr.o
 
 include $(UTSBASE)/Makefile.kmod
 

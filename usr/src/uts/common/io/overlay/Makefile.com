@@ -32,7 +32,11 @@ INSTALL_TARGET  += $(ROOT_CONFFILE)
 
 MAPFILE		= $(UTSBASE)/common/io/overlay/overlay.mapfile
 
-DEPENDS_ON	= misc/mac drv/dld misc/dls misc/ksocket
+DEPENDS_ON	=	\
+	drv/dld		\
+	misc/dls	\
+	misc/ksocket	\
+	misc/mac
 
 # needs work
 SMATCH=off

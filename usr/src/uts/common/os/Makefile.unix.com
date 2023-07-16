@@ -37,9 +37,9 @@ i386_CORE_OBJS += \
 		avintr.o	\
 		pic.o
 
-aarch64_CORE_OBJS +=			\
-			atomic.o	\
-			avintr.o
+aarch64_CORE_OBJS +=		\
+		atomic.o	\
+		avintr.o
 
 CORE_OBJS +=				\
 		beep.o			\
@@ -90,21 +90,21 @@ CORE_OBJS +=				\
 		$($(MACH)_CORE_OBJS)
 
 ZLIB_OBJS =			\
-		zutil.o		\
-		zmod.o		\
-		zmod_subr.o	\
 		adler32.o	\
 		crc32.o		\
 		deflate.o	\
 		inffast.o	\
 		inflate.o	\
 		inftrees.o	\
-		trees.o
+		trees.o		\
+		zmod.o		\
+		zmod_subr.o	\
+		zutil.o
 
 KRTLD_OBJS +=				\
-		kobj_bootflags.o	\
 		getoptstr.o		\
 		kobj.o			\
+		kobj_bootflags.o	\
 		kobj_kdi.o		\
 		kobj_lm.o		\
 		kobj_subr.o

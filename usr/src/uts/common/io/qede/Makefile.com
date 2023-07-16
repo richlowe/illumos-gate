@@ -29,22 +29,21 @@ OBJS		=		\
 		qede_osal.o
 
 # OS-independent
-# XXXMK: Should be sorted, but wsdiff
 OBJS		+=			\
-		ecore_hw.o		\
 		ecore_cxt.o		\
-		ecore_selftest.o	\
-		ecore_init_ops.o	\
-		ecore_init_fw_funcs.o	\
-		ecore_sp_commands.o	\
-		ecore_dcbx.o		\
 		ecore_dbg_fw_funcs.o	\
-		ecore_mcp.o		\
-		ecore_spq.o		\
-		ecore_phy.o		\
+		ecore_dcbx.o		\
 		ecore_dev.o		\
+		ecore_hw.o		\
+		ecore_init_fw_funcs.o	\
+		ecore_init_ops.o	\
+		ecore_int.o		\
 		ecore_l2.o		\
-		ecore_int.o
+		ecore_mcp.o		\
+		ecore_phy.o		\
+		ecore_selftest.o	\
+		ecore_sp_commands.o	\
+		ecore_spq.o
 
 include $(UTSBASE)/Makefile.kmod
 

@@ -31,12 +31,11 @@
 MODULE		= spppcomp
 MOD_SRCDIR	= $(UTSBASE)/common/io/ppp/spppcomp
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
+		bsd-comp.o	\
+		deflate.o	\
 		spppcomp.o	\
 		spppcomp_mod.o	\
-		deflate.o	\
-		bsd-comp.o	\
 		vjcompress.o	\
 		zlib.o
 

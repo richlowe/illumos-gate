@@ -29,9 +29,7 @@
 MODULE		= tlimod
 MOD_SRCDIR	= $(UTSBASE)/common/ktli
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		tlimod.o	\
 		t_kalloc.o	\
 		t_kbind.o	\
 		t_kclose.o	\
@@ -44,7 +42,8 @@ OBJS		=		\
 		t_ksndudat.o	\
 		t_kspoll.o	\
 		t_kunbind.o	\
-		t_kutil.o
+		t_kutil.o	\
+		tlimod.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

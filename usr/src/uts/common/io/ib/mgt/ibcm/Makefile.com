@@ -29,15 +29,14 @@
 MODULE		= ibcm
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/mgt/ibcm
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		ibcm_impl.o \
-		ibcm_sm.o \
-		ibcm_ti.o \
-		ibcm_utils.o \
-		ibcm_path.o \
-		ibcm_arp.o \
-		ibcm_arp_link.o
+		ibcm_arp.o	\
+		ibcm_arp_link.o	\
+		ibcm_impl.o	\
+		ibcm_path.o	\
+		ibcm_sm.o	\
+		ibcm_ti.o	\
+		ibcm_utils.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
@@ -59,6 +58,9 @@ CERRWARN	+= -_gcc=-Wno-unused-value
 # needs work
 SMATCH=off
 
-DEPENDS_ON	= misc/ibtl misc/ibmf drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	misc/ibmf	\
+	misc/ibtl
 
 include $(UTSBASE)/Makefile.kmod.targ

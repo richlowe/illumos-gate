@@ -27,26 +27,25 @@
 MODULE		= hxge
 MOD_SRCDIR	= $(UTSBASE)/common/io/hxge
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		hxge_main.o	\
-		hxge_vmac.o	\
-		hxge_send.o	\
-		hxge_txdma.o	\
-		hxge_rxdma.o	\
-		hxge_virtual.o	\
+		hpi.o		\
+		hpi_pfc.o	\
+		hpi_rxdma.o	\
+		hpi_txdma.o	\
+		hpi_vir.o	\
+		hpi_vmac.o	\
 		hxge_fm.o	\
 		hxge_fzc.o	\
 		hxge_hw.o	\
 		hxge_kstats.o	\
+		hxge_main.o	\
 		hxge_ndd.o	\
 		hxge_pfc.o	\
-		hpi.o		\
-		hpi_vmac.o	\
-		hpi_rxdma.o	\
-		hpi_txdma.o	\
-		hpi_vir.o	\
-		hpi_pfc.o
+		hxge_rxdma.o	\
+		hxge_send.o	\
+		hxge_txdma.o	\
+		hxge_virtual.o	\
+		hxge_vmac.o
 
 include $(UTSBASE)/Makefile.kmod
 

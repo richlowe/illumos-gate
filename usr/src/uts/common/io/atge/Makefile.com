@@ -26,13 +26,12 @@
 MODULE		= atge
 MOD_SRCDIR	= $(UTSBASE)/common/io/atge
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
-		atge_main.o	\
-		atge_l1e.o	\
-		atge_mii.o	\
 		atge_l1.o	\
-		atge_l1c.o
+		atge_l1c.o	\
+		atge_l1e.o	\
+		atge_main.o	\
+		atge_mii.o
 
 include $(UTSBASE)/Makefile.kmod
 

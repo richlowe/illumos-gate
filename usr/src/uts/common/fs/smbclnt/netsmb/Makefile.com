@@ -30,11 +30,14 @@
 MODULE		= nsmb
 MOD_SRCDIR	= $(UTSBASE)/common/fs/smbclnt/netsmb
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=			\
 		nsmb_crypt_kcf.o	\
 		nsmb_kdf.o		\
 		nsmb_sign_kcf.o		\
+		smb2_rq.o		\
+		smb2_sign.o		\
+		smb2_smb.o		\
+		smb3_crypt.o		\
 		smb_conn.o		\
 		smb_dev.o		\
 		smb_iod.o		\
@@ -47,10 +50,6 @@ OBJS		=			\
 		smb_tran.o		\
 		smb_trantcp.o		\
 		smb_usr.o		\
-		smb2_rq.o		\
-		smb2_sign.o		\
-		smb2_smb.o		\
-		smb3_crypt.o		\
 		subr_mchain.o
 
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
@@ -68,7 +67,12 @@ MAPFILE_EXT	= $(MOD_SRCDIR)/nsmb_ext.mapfile
 MAPFILES	+= tlimod ddi
 
 INC_PATH	+= -I$(UTSBASE)/common/fs/smbclnt
-DEPENDS_ON	= crypto/md4 crypto/md5 misc/kcf misc/tlimod
+DEPENDS_ON      =	\
+	crypto/md4	\
+	crypto/md5	\
+	misc/kcf	\
+	misc/tlimod
+
 LDFLAGS		+= -M $(MAPFILE) -M $(MAPFILE_EXT)
 
 #

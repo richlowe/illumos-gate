@@ -27,13 +27,12 @@
 MODULE		= objfs
 MOD_SRCDIR	= $(UTSBASE)/common/fs/objfs
 
-# XXXMK: should be sorted but wsdiff
 OBJS		=		\
-		objfs_vfs.o	\
-		objfs_root.o	\
 		objfs_common.o	\
+		objfs_data.o	\
 		objfs_odir.o	\
-		objfs_data.o
+		objfs_root.o	\
+		objfs_vfs.o
 
 ROOTMODULE	= $(ROOT_FS_DIR)/$(MODULE)
 

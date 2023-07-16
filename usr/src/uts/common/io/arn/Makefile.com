@@ -29,20 +29,19 @@
 MODULE		= arn
 MOD_SRCDIR	= $(UTSBASE)/common/io/arn
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		arn_hw.o	\
-		arn_eeprom.o	\
-		arn_mac.o	\
-		arn_calib.o	\
 		arn_ani.o	\
-		arn_phy.o	\
-		arn_regd.o	\
 		arn_beacon.o	\
+		arn_calib.o	\
+		arn_eeprom.o	\
+		arn_hw.o	\
+		arn_mac.o	\
 		arn_main.o	\
+		arn_phy.o	\
+		arn_rc.o	\
 		arn_recv.o	\
-		arn_xmit.o	\
-		arn_rc.o
+		arn_regd.o	\
+		arn_xmit.o
 
 include $(UTSBASE)/Makefile.kmod
 

@@ -16,13 +16,20 @@
 MODULE		= bnxe
 MOD_SRCDIR	= $(UTSBASE)/common/io/bnxe
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
+		57710_init_values.o	\
+		57711_init_values.o	\
+		57712_init_values.o	\
 		bnxe_cfg.o		\
-		bnxe_fcoe.o		\
+		bnxe_clc.o		\
+		bnxe_context.o		\
 		bnxe_debug.o		\
+		bnxe_fcoe.o		\
+		bnxe_fw_funcs.o		\
 		bnxe_gld.o		\
 		bnxe_hw.o		\
+		bnxe_hw_debug.o		\
+		bnxe_illumos.o		\
 		bnxe_intr.o		\
 		bnxe_kstat.o		\
 		bnxe_lock.o		\
@@ -35,28 +42,21 @@ OBJS		=			\
 		bnxe_timer.o		\
 		bnxe_tx.o		\
 		bnxe_workq.o		\
-		bnxe_clc.o		\
-		bnxe_illumos.o		\
 		ecore_sp_verbs.o	\
-		bnxe_context.o		\
-		57710_init_values.o	\
-		57711_init_values.o	\
-		57712_init_values.o	\
-		bnxe_fw_funcs.o		\
-		bnxe_hw_debug.o		\
-		lm_l4fp.o		\
-		lm_l4rx.o		\
-		lm_l4sp.o		\
-		lm_l4tx.o		\
-		lm_l5.o			\
-		lm_l5sp.o		\
 		lm_dcbx.o		\
+		lm_dcbx_mp.o		\
 		lm_devinfo.o		\
 		lm_dmae.o		\
 		lm_er.o			\
 		lm_hw_access.o		\
 		lm_hw_attn.o		\
 		lm_hw_init_reset.o	\
+		lm_l4fp.o		\
+		lm_l4rx.o		\
+		lm_l4sp.o		\
+		lm_l4tx.o		\
+		lm_l5.o			\
+		lm_l5sp.o		\
 		lm_main.o		\
 		lm_mcp.o		\
 		lm_niv.o		\
@@ -68,7 +68,6 @@ OBJS		=			\
 		lm_sb.o			\
 		lm_send.o		\
 		lm_sp.o			\
-		lm_dcbx_mp.o		\
 		lm_sp_req_mgr.o		\
 		lm_stats.o		\
 		lm_util.o

@@ -30,17 +30,16 @@
 MODULE		= acpidev
 MOD_SRCDIR	= $(UTSBASE)/i86pc/io/acpi/acpidev
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		acpidev_drv.o		\
-		acpidev_scope.o		\
-		acpidev_device.o	\
 		acpidev_container.o	\
 		acpidev_cpu.o		\
+		acpidev_device.o	\
 		acpidev_dr.o		\
+		acpidev_drv.o		\
 		acpidev_memory.o	\
 		acpidev_pci.o		\
 		acpidev_resource.o	\
+		acpidev_scope.o		\
 		acpidev_usbport.o	\
 		acpidev_util.o
 

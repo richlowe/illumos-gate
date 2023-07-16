@@ -30,9 +30,7 @@
 MODULE		= arcfour
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/arcfour
 
-# XXXMK: Could be in the client makefile if not for wsdiff
-intel_OBJS	= arcfour-x86_64.o
-OBJS		= $($(UTSMACH)_OBJS) arcfour.o arcfour_crypt.o
+OBJS		= arcfour.o arcfour_crypt.o
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod

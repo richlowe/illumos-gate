@@ -29,17 +29,16 @@
 MODULE		= c2audit
 MOD_SRCDIR	= $(UTSBASE)/common/c2
 
-# XXXMK: Should be sorted but wsdiff
 OBJS		=			\
 		adr.o			\
 		audit.o			\
 		audit_event.o		\
 		audit_io.o		\
+		audit_mem.o		\
 		audit_path.o		\
 		audit_start.o		\
 		audit_syscalls.o	\
-		audit_token.o		\
-		audit_mem.o
+		audit_token.o
 
 ROOTMODULE	= $(ROOT_SYS_DIR)/$(MODULE)
 

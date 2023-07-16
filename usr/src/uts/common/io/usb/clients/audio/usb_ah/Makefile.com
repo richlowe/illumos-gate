@@ -29,7 +29,10 @@ ROOTMODULE	= $(ROOT_STRMOD_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/usba misc/hidparser drv/usb_ac
+DEPENDS_ON	=	\
+	drv/usb_ac	\
+	misc/hidparser	\
+	misc/usba
 
 #
 # For now, disable these warnings; maintainers should endeavor

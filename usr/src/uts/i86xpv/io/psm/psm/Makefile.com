@@ -29,14 +29,13 @@
 MODULE		= xpv_psm
 MOD_SRCDIR	= $(UTSBASE)/i86xpv/io/psm/psm
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		xpv_psm.o		\
+		apic_regops.o		\
 		mp_platform_common.o	\
 		mp_platform_xpv.o	\
-		apic_regops.o		\
 		psm_common.o		\
-		xpv_intr.o
+		xpv_intr.o		\
+		xpv_psm.o
 
 ROOTMODULE	= $(ROOT_PSM_MACH_DIR)/$(MODULE)
 

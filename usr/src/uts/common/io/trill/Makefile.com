@@ -32,7 +32,11 @@ ROOTMODULE	= $(ROOT_SOCK_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= drv/bridge misc/mac misc/dls fs/sockfs
+DEPENDS_ON	=	\
+	drv/bridge	\
+	fs/sockfs	\
+	misc/dls	\
+	misc/mac
 
 #
 # For now, disable these warnings; maintainers should endeavor

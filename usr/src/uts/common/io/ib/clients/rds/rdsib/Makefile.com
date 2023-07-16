@@ -26,19 +26,22 @@
 MODULE		= rdsib
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/rds/rdsib
 
-# XXXMK: Should be sorted, but wsdiff
-OBJS		= \
-		rdsib.o \
-		rdsib_ib.o \
-		rdsib_cm.o \
-		rdsib_ep.o \
-		rdsib_buf.o \
-		rdsib_debug.o \
+OBJS		=		\
+		rdsib.o		\
+		rdsib_buf.o	\
+		rdsib_cm.o	\
+		rdsib_debug.o	\
+		rdsib_ep.o	\
+		rdsib_ib.o	\
 		rdsib_sc.o
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= drv/rds misc/ibtl misc/ibcm drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/rds		\
+	misc/ibcm	\
+	misc/ibtl
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $(CNOWARN_UNINIT)

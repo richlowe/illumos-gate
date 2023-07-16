@@ -38,6 +38,9 @@ include $(UTSBASE)/Makefile.kmod
 CERRWARN	+= -_gcc=-Wno-unused-label
 CERRWARN	+= $(CNOWARN_UNINIT)
 
-DEPENDS_ON 	= fs/sockfs drv/ip drv/sdpib
+DEPENDS_ON 	=	\
+	drv/ip		\
+	drv/sdpib	\
+	fs/sockfs
 
 include $(UTSBASE)/Makefile.kmod.targ

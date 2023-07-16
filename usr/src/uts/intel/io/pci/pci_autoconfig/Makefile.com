@@ -30,12 +30,11 @@
 MODULE		= pci_autoconfig
 MOD_SRCDIR	= $(UTSBASE)/intel/io/pci/pci_autoconfig
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		pci_autoconfig.o	\
 		pci_boot.o		\
-		pcie_nvidia.o		\
-		pci_memlist.o
+		pci_memlist.o		\
+		pcie_nvidia.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

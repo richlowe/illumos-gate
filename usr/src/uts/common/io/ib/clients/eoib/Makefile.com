@@ -57,6 +57,10 @@ CERRWARN	+= $(CNOWARN_UNINIT)
 # needs work
 $(OBJS_DIR)/eib_ibt.o := SMOFF += deref_check
 
-DEPENDS_ON	= misc/mac misc/ibtl misc/ibcm misc/ibmf
+DEPENDS_ON	=	\
+	misc/ibcm	\
+	misc/ibmf	\
+	misc/ibtl	\
+	misc/mac
 
 include $(UTSBASE)/Makefile.kmod.targ

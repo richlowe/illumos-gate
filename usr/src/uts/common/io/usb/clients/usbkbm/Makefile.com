@@ -29,6 +29,9 @@ ROOTMODULE	= $(ROOT_STRMOD_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/usba misc/kbtrans misc/hidparser
+DEPENDS_ON	=	\
+	misc/hidparser	\
+	misc/kbtrans	\
+	misc/usba
 
 include $(UTSBASE)/Makefile.kmod.targ

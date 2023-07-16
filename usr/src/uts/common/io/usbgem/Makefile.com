@@ -20,7 +20,10 @@ ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac drv/ip misc/usba
+DEPENDS_ON	=	\
+	drv/ip		\
+	misc/mac	\
+	misc/usba
 
 #
 #	The USBGEM has support for various different features. We use

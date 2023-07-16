@@ -27,12 +27,11 @@
 MODULE		= srpt
 MOD_SRCDIR	= $(UTSBASE)/common/io/comstar/port/srpt
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		srpt_mod.o	\
 		srpt_ch.o	\
 		srpt_cm.o	\
 		srpt_ioc.o	\
+		srpt_mod.o	\
 		srpt_stp.o
 
 include $(UTSBASE)/Makefile.kmod
@@ -40,7 +39,10 @@ include $(UTSBASE)/Makefile.kmod
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/stmf misc/ibtl misc/ibcm
+DEPENDS_ON	=	\
+	drv/stmf	\
+	misc/ibcm	\
+	misc/ibtl
 
 CERRWARN	+= -_gcc=-Wno-unused-label
 

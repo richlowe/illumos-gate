@@ -32,7 +32,11 @@ ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= strmod/rpcmod fs/nfs misc/klmmod
+DEPENDS_ON	=	\
+	fs/nfs		\
+	misc/klmmod	\
+	strmod/rpcmod
+
 LDFLAGS		+= -M $(UTSBASE)/common/klm/ops/mapfile
 
 include $(UTSBASE)/Makefile.kmod.targ

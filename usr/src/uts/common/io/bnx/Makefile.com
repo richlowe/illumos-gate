@@ -14,29 +14,28 @@
 #
 
 MODULE		= bnx
-MOD_SRCDIR		= $(UTSBASE)/common/io/bnx
+MOD_SRCDIR	= $(UTSBASE)/common/io/bnx
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=		\
-		bnxmod.o	\
 		bnxcfg.o	\
+		bnxmod.o	\
+	 	bnx_hw_cpu.o	\
+	 	bnx_hw_misc.o	\
+	 	bnx_hw_nvram.o	\
+	 	bnx_hw_phy.o	\
+	 	bnx_hw_reset.o	\
+	 	bnx_kstat.o	\
+	 	bnx_lm_main.o	\
+	 	bnx_lm_recv.o	\
+	 	bnx_lm_send.o	\
+	 	bnx_mm.o	\
 	 	bnxdbg.o	\
 	 	bnxgldv3.o	\
 	 	bnxhwi.o	\
 	 	bnxint.o	\
 	 	bnxrcv.o	\
 	 	bnxsnd.o	\
-	 	bnxtmr.o	\
-	 	bnx_kstat.o	\
-	 	bnx_mm.o	\
-	 	bnx_hw_cpu.o	\
-	 	bnx_hw_misc.o	\
-	 	bnx_hw_nvram.o	\
-	 	bnx_hw_phy.o	\
-	 	bnx_hw_reset.o	\
-	 	bnx_lm_main.o	\
-	 	bnx_lm_recv.o	\
-	 	bnx_lm_send.o
+	 	bnxtmr.o
 
 include $(UTSBASE)/Makefile.kmod
 

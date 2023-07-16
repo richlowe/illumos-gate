@@ -25,15 +25,14 @@
 MODULE		= smartpqi
 MOD_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/smartpqi/
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS 		=		\
-		smartpqi_main.o \
-		smartpqi_intr.o \
 		smartpqi_hba.o	\
-		smartpqi_util.o \
 		smartpqi_hw.o	\
 		smartpqi_init.o \
-		smartpqi_sis.o
+		smartpqi_intr.o \
+		smartpqi_main.o \
+		smartpqi_sis.o	\
+		smartpqi_util.o
 
 include $(UTSBASE)/Makefile.kmod
 

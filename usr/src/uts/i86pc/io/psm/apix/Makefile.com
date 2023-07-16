@@ -28,18 +28,17 @@
 MODULE		= apix
 MOD_SRCDIR	= $(UTSBASE)/i86pc/io/psm/apix
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		apix.o			\
-		apic_regops.o		\
-		psm_common.o		\
-		apix_intr.o		\
-		apix_utils.o		\
-		apix_irm.o		\
-		mp_platform_common.o	\
 		apic_common.o		\
+		apic_regops.o		\
 		apic_timer.o		\
-		apix_regops.o
+		apix.o			\
+		apix_intr.o		\
+		apix_irm.o		\
+		apix_regops.o		\
+		apix_utils.o		\
+		mp_platform_common.o	\
+		psm_common.o
 
 ROOTMODULE	= $(ROOT_PSM_MACH_DIR)/$(MODULE)
 

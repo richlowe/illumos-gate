@@ -16,7 +16,6 @@
 MODULE		= zen_umc
 MOD_SRCDIR	= $(UTSBASE)/intel/io/amdzen/umc
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
 		zen_umc.o		\
 		zen_umc_decode.o	\

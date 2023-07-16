@@ -29,14 +29,13 @@
 MODULE		= idm
 MOD_SRCDIR	= $(UTSBASE)/common/io/idm
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
 		base64.o	\
 		idm.o		\
-		idm_impl.o	\
-		idm_text.o	\
 		idm_conn_sm.o	\
-		idm_so.o
+		idm_impl.o	\
+		idm_so.o	\
+		idm_text.o
 
 ROOTMODULE	= $(ROOT_MISC_DIR)/$(MODULE)
 

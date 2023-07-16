@@ -29,16 +29,15 @@
 MODULE		= ehci
 MOD_SRCDIR	= $(UTSBASE)/common/io/usb/hcd/ehci
 
-# XXXMK: Should be sorted, but wsdiff
-OBJS		=		\
-		ehci.o		\
-		ehci_hub.o	\
-		ehci_xfer.o	\
-		ehci_intr.o	\
-		ehci_util.o	\
-		ehci_polled.o	\
-		ehci_isoch.o	\
-		ehci_isoch_util.o
+OBJS		=			\
+		ehci.o			\
+		ehci_hub.o		\
+		ehci_intr.o		\
+		ehci_isoch.o		\
+		ehci_isoch_util.o	\
+		ehci_polled.o		\
+		ehci_util.o		\
+		ehci_xfer.o
 
 include $(UTSBASE)/Makefile.kmod
 

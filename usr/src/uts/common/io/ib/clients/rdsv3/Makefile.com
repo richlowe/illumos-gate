@@ -27,37 +27,36 @@
 MODULE		= rdsv3
 MOD_SRCDIR	= $(UTSBASE)/common/io/ib/clients/rdsv3
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=			\
-		af_rds.o \
-		rdsv3_ddi.o \
-		bind.o \
-		loop.o \
-		threads.o \
-		connection.o \
-		transport.o \
-		cong.o \
-		sysctl.o \
-		message.o \
-		rds_recv.o \
-		send.o \
-		stats.o \
-		info.o \
-		page.o \
-		rdma_transport.o \
-		ib_ring.o \
-		ib_rdma.o \
-		ib_recv.o \
-		ib.o \
-		ib_send.o \
-		ib_sysctl.o \
-		ib_stats.o \
-		ib_cm.o \
-		rdsv3_sc.o \
-		rdsv3_debug.o \
-		rdsv3_impl.o \
-		rdma.o \
-		rdsv3_af_thr.o
+		af_rds.o		\
+		bind.o			\
+		cong.o			\
+		connection.o		\
+		ib.o			\
+		ib_cm.o			\
+		ib_rdma.o		\
+		ib_recv.o		\
+		ib_ring.o		\
+		ib_send.o		\
+		ib_stats.o		\
+		ib_sysctl.o		\
+		info.o			\
+		loop.o			\
+		message.o		\
+		page.o			\
+		rdma.o			\
+		rdma_transport.o	\
+		rds_recv.o		\
+		rdsv3_af_thr.o		\
+		rdsv3_ddi.o		\
+		rdsv3_debug.o		\
+		rdsv3_impl.o		\
+		rdsv3_sc.o		\
+		send.o			\
+		stats.o			\
+		sysctl.o		\
+		threads.o		\
+		transport.o
 
 #
 #	Include common rules.

@@ -26,26 +26,30 @@
 MODULE		= iscsit
 MOD_SRCDIR	= $(UTSBASE)/common/io/comstar/port/iscsit
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-		iscsit_common.o	\
-		iscsit.o \
-		iscsit_tgt.o \
-		iscsit_sess.o \
-		iscsit_login.o \
-		iscsit_text.o \
-		iscsit_isns.o \
-		iscsit_radiusauth.o \
-		iscsit_radiuspacket.o \
-		iscsit_auth.o \
-		iscsit_authclient.o
+		iscsit.o		\
+		iscsit_auth.o		\
+		iscsit_authclient.o	\
+		iscsit_common.o		\
+		iscsit_isns.o		\
+		iscsit_login.o		\
+		iscsit_radiusauth.o	\
+		iscsit_radiuspacket.o	\
+		iscsit_sess.o		\
+		iscsit_text.o		\
+		iscsit_tgt.o
 
 include $(UTSBASE)/Makefile.kmod
 
 ALL_TARGET	+= $(SRC_CONFFILE)
 INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
-DEPENDS_ON	= drv/stmf misc/idm fs/sockfs misc/md5 misc/ksocket
+DEPENDS_ON	=	\
+	drv/stmf	\
+	fs/sockfs	\
+	misc/idm	\
+	misc/ksocket	\
+	misc/md5
 
 CERRWARN	+= -_gcc=-Wno-switch
 CERRWARN	+= $(CNOWARN_UNINIT)

@@ -31,7 +31,11 @@ OBJS		= ipw2200_hw.o ipw2200.o
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 # needs work
 $(OBJS_DIR)/ipw2200.o := SMOFF += deref_check

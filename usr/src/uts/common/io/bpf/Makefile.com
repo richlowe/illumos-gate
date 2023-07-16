@@ -30,13 +30,12 @@ MODULE		= bpf
 MOD_SRCDIR	= $(UTSBASE)/common/io/bpf
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 
-# XXXMK: should be sorted, but wsdiff
 OBJS		=		\
 		bpf.o		\
-		bpf_filter.o 	\
-		bpf_mod.o	\
 		bpf_dlt.o	\
-		bpf_mac.o
+		bpf_filter.o 	\
+		bpf_mac.o	\
+		bpf_mod.o
 
 include $(UTSBASE)/Makefile.kmod
 
@@ -45,7 +44,11 @@ INSTALL_TARGET	+= $(ROOT_CONFFILE)
 
 INC_PATH	+= -I$(UTSBASE)/common/io/bpf
 
-DEPENDS_ON	= misc/mac misc/dls drv/ipnet misc/neti
+DEPENDS_ON	=	\
+	drv/ipnet	\
+	misc/dls	\
+	misc/mac	\
+	misc/neti
 
 #
 # For now, disable these warnings; maintainers should endeavor

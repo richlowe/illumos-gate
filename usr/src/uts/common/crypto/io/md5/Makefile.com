@@ -29,9 +29,7 @@
 MODULE		= md5
 MOD_SRCDIR	= $(UTSBASE)/common/crypto/io/md5
 
-# XXXMK: Could be in the client makefile if not for wsdiff
-intel_OBJS	= md5_amd64.o
-OBJS		= $($(UTSMACH)_OBJS) md5.o md5_mod.o
+OBJS		= md5.o md5_mod.o
 
 ROOTMODULE	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_MISC_DIR)/$(MODULE)

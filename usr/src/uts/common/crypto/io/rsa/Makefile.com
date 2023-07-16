@@ -36,7 +36,11 @@ include $(UTSBASE)/Makefile.kmod
 COM1_DIR = $(COMMONBASE)/bignum
 COM2_DIR = $(COMMONBASE)/crypto
 
-DEPENDS_ON = crypto/md5 crypto/sha2 misc/bignum misc/kcf
+DEPENDS_ON =		\
+	crypto/md5	\
+	crypto/sha2	\
+	misc/bignum	\
+	misc/kcf
 
 CPPFLAGS	+= -I$(COM1_DIR) -I$(COM2_DIR)
 

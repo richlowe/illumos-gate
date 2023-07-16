@@ -18,44 +18,43 @@
 MODULE		= vmm
 MOD_SRCDIR	= $(UTSBASE)/intel/io/vmm
 
-# XXXMK: Should be sorted, but wsdiff
 OBJS		=			\
-	 	vmm.o			\
-	 	vmm_sol_dev.o		\
-	 	vmm_host.o		\
-	 	vmm_instruction_emul.o	\
-	 	vmm_ioport.o		\
-	 	vmm_lapic.o		\
-	 	vmm_stat.o		\
-	 	vmm_util.o		\
-	 	vmm_cpuid.o		\
-	 	x86.o			\
 	 	iommu.o			\
+	 	seg_vmm.o		\
+	 	svm.o			\
+	 	svm_msr.o		\
+	 	svm_support.o		\
 	 	vatpic.o		\
 	 	vatpit.o		\
 	 	vhpet.o			\
 	 	vioapic.o		\
 	 	vlapic.o		\
-	 	vrtc.o			\
-	 	vpmtmr.o		\
-	 	vmcs.o			\
-	 	vmx_msr.o		\
-	 	vmx.o			\
-	 	vmx_support.o		\
-	 	svm.o			\
-	 	svm_msr.o		\
 	 	vmcb.o			\
-	 	svm_support.o		\
+	 	vmcs.o			\
+	 	vmm.o			\
+	 	vmm_cpuid.o		\
 	 	vmm_gpt.o		\
-	 	seg_vmm.o		\
+	 	vmm_host.o		\
+	 	vmm_instruction_emul.o	\
+	 	vmm_ioport.o		\
+	 	vmm_lapic.o		\
 	 	vmm_reservoir.o		\
-	 	vmm_sol_glue.o		\
+	 	vmm_sol_dev.o		\
 	 	vmm_sol_ept.o		\
+	 	vmm_sol_glue.o		\
 	 	vmm_sol_rvi.o		\
+	 	vmm_stat.o		\
 	 	vmm_support.o		\
+	 	vmm_time_support.o	\
+	 	vmm_util.o		\
 	 	vmm_vm.o		\
 	 	vmm_zsd.o		\
-	 	vmm_time_support.o
+	 	vmx.o			\
+	 	vmx_msr.o		\
+	 	vmx_support.o		\
+	 	vpmtmr.o		\
+	 	vrtc.o			\
+	 	x86.o
 
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
 

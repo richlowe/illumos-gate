@@ -28,6 +28,10 @@ MOD_SRCDIR	= $(UTSBASE)/common/io/wpi
 
 include $(UTSBASE)/Makefile.kmod
 
-DEPENDS_ON	= misc/mac misc/net80211 drv/random drv/ip
+DEPENDS_ON	=	\
+	drv/ip		\
+	drv/random	\
+	misc/mac	\
+	misc/net80211
 
 include $(UTSBASE)/Makefile.kmod.targ
