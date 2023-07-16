@@ -133,11 +133,6 @@ ASFLAGS_XARCH		= $(ASFLAGS_XARCH_$(CLASS))
 ASFLAGS			+= $(ASFLAGS_XARCH)
 
 #
-#	Define the base directory for installation.
-#
-BASE_INS_DIR	= $(ROOT)
-
-#
 #	Debugging level
 #
 #	Special knowledge of which special debugging options affect which
@@ -167,485 +162,444 @@ ALL_DEFS	 = $(DEBUG_DEFS) $(OPTION_DEFS)
 #
 #	TCP congestion control modules (/kernel/cc)
 #
-MISC_KMODS	+= cc
-CC_KMODS	+= cc_newreno cc_cubic cc_sunreno
+CC_KMODS	+=	\
+	cc_cubic	\
+	cc_newreno	\
+	cc_sunreno
 
-#
-#	The kernels modules which are "implementation architecture"
-#	specific for this machine are enumerated below. Note that most
-#	of these modules must exist (in one form or another) for each
-#	architecture.
-#
-#	Common Drivers (usually pseudo drivers) (/kernel/drv)
-#
-DRV_KMODS	+= aac
-DRV_KMODS	+= aggr
-DRV_KMODS	+= ahci
-DRV_KMODS	+= arn
-DRV_KMODS	+= arp
-DRV_KMODS	+= asy
-DRV_KMODS	+= atu
-DRV_KMODS	+= audio
-DRV_KMODS	+= audio1575
-DRV_KMODS	+= audio810
-DRV_KMODS	+= audiocmi
-DRV_KMODS	+= audiocmihd
-DRV_KMODS	+= audioemu10k
-DRV_KMODS	+= audioens
-DRV_KMODS	+= audiohd
-DRV_KMODS	+= audioixp
-DRV_KMODS	+= audiols
-DRV_KMODS	+= audiop16x
-DRV_KMODS	+= audiopci
-DRV_KMODS	+= audiosolo
-DRV_KMODS	+= audiots
-DRV_KMODS	+= audiovia823x
-DRV_KMODS	+= bge
-DRV_KMODS	+= bl
-DRV_KMODS	+= blkdev
-DRV_KMODS	+= bofi
-DRV_KMODS	+= bpf
-DRV_KMODS	+= bridge
-DRV_KMODS	+= chxge
-DRV_KMODS	+= clone
-DRV_KMODS	+= cn
-DRV_KMODS	+= conskbd
-DRV_KMODS	+= consms
-DRV_KMODS	+= cpuid
-DRV_KMODS	+= crypto
-DRV_KMODS	+= cryptoadm
-DRV_KMODS	+= dca
-DRV_KMODS	+= devinfo
-DRV_KMODS	+= dld
-DRV_KMODS	+= dlpistub
-DRV_KMODS	+= dump
-DRV_KMODS	+= eventfd
-DRV_KMODS	+= fm
-DRV_KMODS	+= fssnap
-DRV_KMODS	+= icmp
-DRV_KMODS	+= icmp6
-DRV_KMODS	+= ip
-DRV_KMODS	+= ip6
-DRV_KMODS	+= ipd
-DRV_KMODS	+= ipf
-DRV_KMODS	+= ipnet
-DRV_KMODS	+= ippctl
-DRV_KMODS	+= ipsecah
-DRV_KMODS	+= ipsecesp
-DRV_KMODS	+= iptun
-DRV_KMODS	+= ipw
-DRV_KMODS	+= iscsit
-DRV_KMODS	+= iwh
-DRV_KMODS	+= iwi
-DRV_KMODS	+= iwk
-DRV_KMODS	+= iwn
-DRV_KMODS	+= iwp
-DRV_KMODS	+= iwscn
-DRV_KMODS	+= keysock
-DRV_KMODS	+= kmdb
-DRV_KMODS	+= kstat
-DRV_KMODS	+= ksyms
-DRV_KMODS	+= llc1
-DRV_KMODS	+= lmrc
-DRV_KMODS	+= lofi
-DRV_KMODS	+= log
-DRV_KMODS	+= logindmux
-DRV_KMODS	+= mega_sas
-DRV_KMODS	+= mm
-DRV_KMODS	+= mpt_sas
-DRV_KMODS	+= mr_sas
-DRV_KMODS	+= nsmb
-DRV_KMODS	+= ntxn
-DRV_KMODS	+= nulldriver
-DRV_KMODS	+= nvme
-DRV_KMODS	+= nxge
-DRV_KMODS	+= oce
-DRV_KMODS	+= openeepr
-DRV_KMODS	+= physmem
-DRV_KMODS	+= pm
-DRV_KMODS	+= poll
-DRV_KMODS	+= pool
-DRV_KMODS	+= pppt
-DRV_KMODS	+= pseudo
-DRV_KMODS	+= ptc
-DRV_KMODS	+= ptm
-DRV_KMODS	+= pts
-DRV_KMODS	+= ptsl
-DRV_KMODS	+= qlge
-DRV_KMODS	+= ral
-DRV_KMODS	+= ramdisk
-DRV_KMODS	+= random
-DRV_KMODS	+= rds
-DRV_KMODS	+= rdsv3
-DRV_KMODS	+= rpcib
-DRV_KMODS	+= rsm
-DRV_KMODS	+= rts
-DRV_KMODS	+= rtw
-DRV_KMODS	+= rum
-DRV_KMODS	+= rwd
-DRV_KMODS	+= rwn
-DRV_KMODS	+= sad
-DRV_KMODS	+= sd
-DRV_KMODS	+= sdhost
-DRV_KMODS	+= sgen
-DRV_KMODS	+= si3124
-DRV_KMODS	+= signalfd
-DRV_KMODS	+= simnet
-DRV_KMODS	+= skd
-DRV_KMODS	+= smartpqi
-DRV_KMODS	+= smbios
-DRV_KMODS	+= smbsrv
-DRV_KMODS	+= smp
-DRV_KMODS	+= softmac
-DRV_KMODS	+= spdsock
-DRV_KMODS	+= sppp
-DRV_KMODS	+= sppptun
-DRV_KMODS	+= srn
-DRV_KMODS	+= st
-DRV_KMODS	+= stmf
-DRV_KMODS	+= stmf_sbd
-DRV_KMODS	+= sy
-DRV_KMODS	+= sysevent
-DRV_KMODS	+= sysmsg
-DRV_KMODS	+= tcp
-DRV_KMODS	+= tcp6
-DRV_KMODS	+= timerfd
-DRV_KMODS	+= tl
-DRV_KMODS	+= trill
-DRV_KMODS	+= uath
-DRV_KMODS	+= udp
-DRV_KMODS	+= udp6
-DRV_KMODS	+= ufm
-DRV_KMODS	+= ufmtest
-DRV_KMODS	+= ural
-DRV_KMODS	+= urtw
-DRV_KMODS	+= vnic
-DRV_KMODS	+= vscan
-DRV_KMODS	+= wc
-DRV_KMODS	+= winlock
-DRV_KMODS	+= wpi
-DRV_KMODS	+= xge
-DRV_KMODS	+= yge
-DRV_KMODS	+= zcons
-DRV_KMODS	+= zyd
-#DRV_KMODS	+= ata
-#DRV_KMODS	+= conskbd
-#DRV_KMODS	+= consms
-#DRV_KMODS	+= cpqary3
-#DRV_KMODS	+= cpunex
-#DRV_KMODS	+= cxgbe
-#DRV_KMODS	+= dnet
-#DRV_KMODS	+= ecpp
-#DRV_KMODS	+= emlxs
-#DRV_KMODS	+= fcoe
-#DRV_KMODS	+= fcoei
-#DRV_KMODS	+= fcoet
-#DRV_KMODS	+= fct
-#DRV_KMODS	+= fd
-#DRV_KMODS	+= fdc
-#DRV_KMODS	+= hxge
-#DRV_KMODS	+= i8042
-#DRV_KMODS	+= kb8042
-#DRV_KMODS	+= kmdb
-#DRV_KMODS	+= mlxcx
-#DRV_KMODS	+= mouse8042
-#DRV_KMODS	+= myri10ge
-#DRV_KMODS	+= nv_sata
-#DRV_KMODS	+= pci_pci
-#DRV_KMODS	+= pit_beep
-#DRV_KMODS	+= power
-#DRV_KMODS	+= qlt
-#DRV_KMODS	+= srpt
-#DRV_KMODS	+= tpm
-#DRV_KMODS	+= vgatext
-
-#
-# Common code drivers
-#
-DRV_KMODS	+= afe
-DRV_KMODS	+= atge
-DRV_KMODS	+= bfe
-DRV_KMODS	+= bnx
-DRV_KMODS	+= bnxe
-DRV_KMODS	+= dmfe
-DRV_KMODS	+= e1000g
-DRV_KMODS	+= efe
-DRV_KMODS	+= elxl
-DRV_KMODS	+= ena
-DRV_KMODS	+= hme
-DRV_KMODS	+= igb
-DRV_KMODS	+= igc
-DRV_KMODS	+= iprb
-DRV_KMODS	+= ixgbe
-DRV_KMODS	+= mxfe
-DRV_KMODS	+= nge
-DRV_KMODS	+= pcn
-DRV_KMODS	+= qede
-DRV_KMODS	+= rge
-DRV_KMODS	+= rtls
-DRV_KMODS	+= sfe
-DRV_KMODS	+= sfxge
-DRV_KMODS	+= vr
-#DRV_KMODS	+= i40e
-
-#
-# Virtio drivers
-#
-DRV_KMODS	+= virtio
-DRV_KMODS	+= vioblk
-DRV_KMODS	+= vioif
-DRV_KMODS	+= vio9p
-DRV_KMODS	+= viorand
-
-#
-#	DTrace and DTrace Providers
-#
-#DRV_KMODS	+= dtrace
-#DRV_KMODS	+= fbt
-#DRV_KMODS	+= lockstat
-#DRV_KMODS	+= profile
-#DRV_KMODS	+= sdt
-#DRV_KMODS	+= systrace
-#DRV_KMODS	+= fasttrap
-#DRV_KMODS	+= dcpc
-
-#
-#	I/O framework test drivers
-#
-DRV_KMODS	+= pshot
-DRV_KMODS	+= gen_drv
-DRV_KMODS	+= tvhci tphci tclient
-DRV_KMODS	+= emul64
-
-#
-#	Machine Specific Driver Modules (/kernel/drv):
-#
-DRV_KMODS	+= iscsi
-DRV_KMODS	+= options
-DRV_KMODS	+= qlc
-DRV_KMODS	+= scsi_vhci
-#DRV_KMODS	+= pmcs
-#DRV_KMODS	+= pmcs8001fw
-#DRV_KMODS	+= fcp
-#DRV_KMODS	+= fcip
-#DRV_KMODS	+= fcsm
-#DRV_KMODS	+= fp
-
-
-#
-#	SCSI Enclosure Services driver
-#
-DRV_KMODS	+= ses
-
-#
-#	USB specific modules
-#
-DRV_KMODS	+= ccid
-DRV_KMODS	+= hid
-DRV_KMODS	+= hubd
-DRV_KMODS	+= uhci
-DRV_KMODS	+= ehci
-DRV_KMODS	+= ohci
-DRV_KMODS	+= usb_mid
-DRV_KMODS	+= usb_ia
-DRV_KMODS	+= scsa2usb
-DRV_KMODS	+= usbprn
-DRV_KMODS	+= ugen
-DRV_KMODS	+= usbser
-DRV_KMODS	+= usbsacm
-DRV_KMODS	+= usbsksp
-DRV_KMODS	+= usbsprl
-DRV_KMODS	+= usb_ac
-DRV_KMODS	+= usb_as
-DRV_KMODS	+= usbskel
-DRV_KMODS	+= usbvc
-DRV_KMODS	+= usbftdi
-DRV_KMODS	+= usbecm
-DRV_KMODS	+= xhci
-
-#
-#	USBGEM modules
-#
-DRV_KMODS	+= usbgem
-DRV_KMODS	+= axf
-DRV_KMODS	+= udmf
-DRV_KMODS	+= upf
-DRV_KMODS	+= urf
-
-#
-#	1394 modules
-#
-MISC_KMODS	+= s1394 sbp2
-DRV_KMODS	+= hci1394 scsa1394
-DRV_KMODS	+= av1394
-DRV_KMODS	+= dcam1394
-
-#
-#	InfiniBand pseudo drivers
-#
-DRV_KMODS	+= ib ibp eibnx eoib iser daplt hermon tavor sol_ucma sol_uverbs
-DRV_KMODS	+= sol_umad
-#DRV_KMODS	+= rdsib
-
-#
-#	Brand modules
-#
-#BRAND_KMODS	+= sn1_brand
+# Driver modules (/kernel/drv)
+DRV_KMODS	+=	\
+	aac		\
+	afe		\
+	aggr		\
+	ahci		\
+	arn		\
+	arp		\
+	asy		\
+	atge		\
+	atu		\
+	audio		\
+	audio1575	\
+	audio810	\
+	audiocmi	\
+	audiocmihd	\
+	audioemu10k	\
+	audioens	\
+	audiohd		\
+	audioixp	\
+	audiols		\
+	audiop16x	\
+	audiopci	\
+	audiosolo	\
+	audiots		\
+	audiovia823x	\
+	av1394		\
+	axf		\
+	bfe		\
+	bge		\
+	bl		\
+	blkdev		\
+	bnx		\
+	bnxe		\
+	bofi		\
+	bpf		\
+	bridge		\
+	ccid		\
+	chxge		\
+	clone		\
+	cn		\
+	conskbd		\
+	consms		\
+	cpuid		\
+	crypto		\
+	cryptoadm	\
+	daplt		\
+	dca		\
+	dcam1394	\
+	devinfo		\
+	dld		\
+	dlpistub	\
+	dmfe		\
+	dprov		\
+	dump		\
+	e1000g		\
+	efe		\
+	ehci		\
+	eibnx		\
+	elxl		\
+	emul64		\
+	ena		\
+	eoib		\
+	eventfd		\
+	fm		\
+	fssnap		\
+	gen_drv		\
+	hci1394		\
+	hermon		\
+	hid		\
+	hme		\
+	hubd		\
+	ib		\
+	ibp		\
+	icmp		\
+	icmp6		\
+	igb		\
+	igc		\
+	ip		\
+	ip6		\
+	ipd		\
+	ipf		\
+	ipnet		\
+	ippctl		\
+	iprb		\
+	ipsecah		\
+	ipsecesp	\
+	iptun		\
+	ipw		\
+	iscsi		\
+	iscsit		\
+	iser		\
+	iwh		\
+	iwi		\
+	iwk		\
+	iwn		\
+	iwp		\
+	iwscn		\
+	ixgbe		\
+	keysock		\
+	kmdb		\
+	ksensor		\
+	ksensor_test	\
+	kstat		\
+	ksyms		\
+	llc1		\
+	lmrc		\
+	lofi		\
+	log		\
+	logindmux	\
+	mega_sas	\
+	mm		\
+	mpt_sas		\
+	mr_sas		\
+	mxfe		\
+	nge		\
+	nsmb		\
+	ntxn		\
+	nulldriver	\
+	nvme		\
+	nxge		\
+	oce		\
+	ohci		\
+	openeepr	\
+	options		\
+	overlay		\
+	pcn		\
+	physmem		\
+	pm		\
+	poll		\
+	pool		\
+	pppt		\
+	pseudo		\
+	pshot		\
+	ptc		\
+	ptm		\
+	pts		\
+	ptsl		\
+	qede		\
+	qlc		\
+	qlge		\
+	ral		\
+	ramdisk		\
+	random		\
+	rds		\
+	rdsv3		\
+	rge		\
+	rpcib		\
+	rsm		\
+	rtls		\
+	rts		\
+	rtw		\
+	rum		\
+	rwd		\
+	rwn		\
+	sad		\
+	scsa1394	\
+	scsa2usb	\
+	scsi_vhci	\
+	sd		\
+	sdhost		\
+	ses		\
+	sfe		\
+	sfxge		\
+	sgen		\
+	si3124		\
+	signalfd	\
+	simnet		\
+	skd		\
+	smartpqi	\
+	smbios		\
+	smbsrv		\
+	smp		\
+	softmac		\
+	sol_ucma	\
+	sol_umad	\
+	sol_uverbs	\
+	spdsock		\
+	sppp		\
+	sppptun		\
+	srn		\
+	st		\
+	stmf		\
+	stmf_sbd	\
+	sy		\
+	sysevent	\
+	sysmsg		\
+	tavor		\
+	tclient		\
+	tcp		\
+	tcp6		\
+	timerfd		\
+	tl		\
+	tphci		\
+	trill		\
+	tvhci		\
+	uath		\
+	udmf		\
+	udp		\
+	udp6		\
+	ufm		\
+	ufmtest		\
+	ugen		\
+	uhci		\
+	upf		\
+	ural		\
+	urf		\
+	urtw		\
+	usb_ac		\
+	usb_as		\
+	usb_ia		\
+	usb_mid		\
+	usbecm		\
+	usbftdi		\
+	usbgem		\
+	usbprn		\
+	usbsacm		\
+	usbser		\
+	usbskel		\
+	usbsksp		\
+	usbsprl		\
+	usbvc		\
+	vio9p		\
+	vioblk		\
+	vioif		\
+	viorand		\
+	virtio		\
+	vnic		\
+	vr		\
+	vscan		\
+	wc		\
+	winlock		\
+	wpi		\
+	xge		\
+	xhci		\
+	yge		\
+	zcons		\
+	zyd		\
 
 #
 #	Exec Class Modules (/kernel/exec):
 #
-EXEC_KMODS	+= elfexec intpexec shbinexec
-#EXEC_KMODS	+= javaexec
+EXEC_KMODS	+=	\
+	elfexec		\
+	intpexec	\
+	shbinexec
 
 #
 #	Scheduling Class Modules (/kernel/sched):
 #
-SCHED_KMODS	+= IA RT TS RT_DPTBL TS_DPTBL FSS FX FX_DPTBL SDC
+SCHED_KMODS	+=	\
+	FSS		\
+	FX		\
+	FX_DPTBL	\
+	IA		\
+	RT		\
+	RT_DPTBL	\
+	SDC		\
+	TS		\
+	TS_DPTBL
 
 #
 #	File System Modules (/kernel/fs):
 #
-FS_KMODS	+= autofs ctfs dcfs dev devfs fdfs fifofs hsfs lofs
-FS_KMODS	+= mntfs namefs nfs objfs zfs zut
-FS_KMODS	+= pcfs procfs sockfs specfs tmpfs udfs ufs sharefs
-FS_KMODS	+= smbfs bootfs
+FS_KMODS	+=	\
+	autofs		\
+	bootfs		\
+	ctfs		\
+	dcfs		\
+	dev		\
+	devfs		\
+	fdfs		\
+	fifofs		\
+	hsfs		\
+	lofs		\
+	mntfs		\
+	namefs		\
+	nfs		\
+	objfs		\
+	pcfs		\
+	procfs		\
+	sharefs		\
+	smbfs		\
+	sockfs		\
+	specfs		\
+	tmpfs		\
+	udfs		\
+	ufs		\
+	zfs		\
+	zut
 
 #
 #	Streams Modules (/kernel/strmod):
 #
-STRMOD_KMODS	+= bufmod connld dedump ldterm pckt pfmod pipemod
-STRMOD_KMODS	+= ptem redirmod rpcmod rlmod telmod timod
-STRMOD_KMODS	+= spppasyn spppcomp
-STRMOD_KMODS	+= tirdwr ttcompat
-STRMOD_KMODS	+= usbkbm
-STRMOD_KMODS	+= usbms
-STRMOD_KMODS	+= usbwcm
-STRMOD_KMODS	+= usb_ah
-STRMOD_KMODS	+= drcompat
-STRMOD_KMODS	+= cryptmod
-#STRMOD_KMODS	+= vuid2ps2
-#STRMOD_KMODS	+= vuid3ps2
-#STRMOD_KMODS	+= vuidm3p
-#STRMOD_KMODS	+= vuidm4p
-#STRMOD_KMODS	+= vuidm5p
+STRMOD_KMODS	+=	\
+	bufmod		\
+	connld		\
+	cryptmod	\
+	dedump		\
+	drcompat	\
+	ldterm		\
+	pckt		\
+	pfmod		\
+	pipemod		\
+	ptem		\
+	redirmod	\
+	rlmod		\
+	rpcmod		\
+	spppasyn	\
+	spppcomp	\
+	telmod		\
+	timod		\
+	tirdwr		\
+	ttcompat	\
+	usb_ah		\
+	usbkbm		\
+	usbms		\
+	usbwcm
 
 #
 #	'System' Modules (/kernel/sys):
 #
-SYS_KMODS	+= c2audit
-SYS_KMODS	+= doorfs
-SYS_KMODS	+= exacctsys
-SYS_KMODS	+= inst_sync
-SYS_KMODS	+= kaio
-SYS_KMODS	+= msgsys
-SYS_KMODS	+= pipe
-SYS_KMODS	+= portfs
-SYS_KMODS	+= pset
-SYS_KMODS	+= semsys
-SYS_KMODS	+= shmsys
-SYS_KMODS	+= sysacct
-SYS_KMODS	+= acctctl
+SYS_KMODS	+=	\
+	acctctl		\
+	c2audit		\
+	doorfs		\
+	exacctsys	\
+	inst_sync	\
+	kaio		\
+	msgsys		\
+	pipe		\
+	portfs		\
+	pset		\
+	semsys		\
+	shmsys		\
+	sysacct
 
 #
 #	'Misc' Modules (/kernel/misc)
-MISC_KMODS	+= ac97
-MISC_KMODS	+= bignum
-MISC_KMODS	+= busra
-MISC_KMODS	+= cmlb
-MISC_KMODS	+= consconfig
-MISC_KMODS	+= ctf
-MISC_KMODS	+= dls
-MISC_KMODS	+= emlxs_fw
-MISC_KMODS	+= fctl
-MISC_KMODS	+= fssnap_if
-MISC_KMODS	+= gld
-MISC_KMODS	+= hidparser
-MISC_KMODS	+= hook
-MISC_KMODS	+= ibcm
-MISC_KMODS	+= ibdm
-MISC_KMODS	+= ibdma
-MISC_KMODS	+= ibmf
-MISC_KMODS	+= ibtl
-MISC_KMODS	+= idm
-MISC_KMODS	+= idmap
-MISC_KMODS	+= ipc
-MISC_KMODS	+= kbtrans
-MISC_KMODS	+= kcf
-MISC_KMODS	+= kgssapi
-MISC_KMODS	+= kmech_dummy
-MISC_KMODS	+= kmech_krb5
-MISC_KMODS	+= ksocket
-MISC_KMODS	+= mac
-MISC_KMODS	+= mii
-MISC_KMODS	+= net80211
-MISC_KMODS	+= neti
-MISC_KMODS	+= nfs_dlboot
-MISC_KMODS	+= nfssrv
-MISC_KMODS	+= qlc_fw_2200
-MISC_KMODS	+= qlc_fw_2300
-MISC_KMODS	+= qlc_fw_2400
-MISC_KMODS	+= qlc_fw_2500
-MISC_KMODS	+= qlc_fw_2700
-MISC_KMODS	+= qlc_fw_6322
-MISC_KMODS	+= qlc_fw_8100
-MISC_KMODS	+= qlc_fw_8301fc
-MISC_KMODS	+= rpcsec
-MISC_KMODS	+= rpcsec_gss
-MISC_KMODS	+= rsmops
-MISC_KMODS	+= sata
-MISC_KMODS	+= scsi
-MISC_KMODS	+= scsi_vhci_f_sym
-MISC_KMODS	+= scsi_vhci_f_sym_hds
-MISC_KMODS	+= scsi_vhci_f_tape
-MISC_KMODS	+= scsi_vhci_f_tpgs
-MISC_KMODS	+= scsi_vhci_f_tpgs_tape
-MISC_KMODS	+= sda
-MISC_KMODS	+= sol_ofs
-MISC_KMODS	+= strplumb
-MISC_KMODS	+= tem
-MISC_KMODS	+= tlimod
-MISC_KMODS	+= usba usba10 usbs49_fw
-#MISC_KMODS	+= iommulib
-#MISC_KMODS	+= acpica
-#MISC_KMODS	+= bootdev
-#MISC_KMODS	+= dadk
-#MISC_KMODS	+= gda
-#MISC_KMODS	+= hpcsvc
-# XXXARM: Needs cross-elfwrap, probably
-#MISC_KMODS	+= mwlfw
-#XXXARM: Needs a cross elfwrap
-#MISC_KMODS	+= uathfw
-
-
-MISC_KMODS	+= klmmod klmops
+MISC_KMODS	+=		\
+	ac97			\
+	bignum			\
+	busra			\
+	cc			\
+	cmlb			\
+	consconfig		\
+	ctf			\
+	dls			\
+	emlxs_fw		\
+	fctl			\
+	fssnap_if		\
+	gld			\
+	hidparser		\
+	hook			\
+	ibcm			\
+	ibdm			\
+	ibdma			\
+	ibmf			\
+	ibtl			\
+	idm			\
+	idmap			\
+	ipc			\
+	kbtrans			\
+	kcf			\
+	kgssapi			\
+	klmmod			\
+	klmops			\
+	kmech_dummy		\
+	kmech_krb5		\
+	ksocket			\
+	mac			\
+	mii			\
+	net80211		\
+	neti			\
+	nfs_dlboot		\
+	nfssrv			\
+	qlc_fw_2200		\
+	qlc_fw_2300		\
+	qlc_fw_2400		\
+	qlc_fw_2500		\
+	qlc_fw_2700		\
+	qlc_fw_6322		\
+	qlc_fw_8100		\
+	qlc_fw_8301fc		\
+	rpcsec			\
+	rpcsec_gss		\
+	rsmops			\
+	s1394			\
+	sata			\
+	sbp2			\
+	scsi			\
+	scsi_vhci_f_sym		\
+	scsi_vhci_f_sym_hds	\
+	scsi_vhci_f_tape	\
+	scsi_vhci_f_tpgs	\
+	scsi_vhci_f_tpgs_tape	\
+	sda			\
+	sol_ofs			\
+	strplumb		\
+	tem			\
+	tlimod			\
+	usba			\
+	usba10			\
+	usbs49_fw
 
 #
 #	Software Cryptographic Providers (/kernel/crypto):
 #
-CRYPTO_KMODS	+= aes
-CRYPTO_KMODS	+= arcfour
-CRYPTO_KMODS	+= blowfish
-CRYPTO_KMODS	+= des
-CRYPTO_KMODS	+= ecc
-CRYPTO_KMODS	+= edonr
-CRYPTO_KMODS	+= md4
-CRYPTO_KMODS	+= md5
-CRYPTO_KMODS	+= rsa
-CRYPTO_KMODS	+= sha1
-CRYPTO_KMODS	+= sha2
-CRYPTO_KMODS	+= skein
-CRYPTO_KMODS	+= swrand
+CRYPTO_KMODS	+=	\
+	aes		\
+	arcfour		\
+	blowfish	\
+	des		\
+	ecc		\
+	edonr		\
+	md4		\
+	md5		\
+	rsa		\
+	sha1		\
+	sha2		\
+	skein		\
+	swrand
 
 #
 #	IP Policy Modules (/kernel/ipp)
 #
-IPP_KMODS	+= dlcosmk
-IPP_KMODS	+= flowacct
-IPP_KMODS	+= ipgpc
-IPP_KMODS	+= dscpmk
-IPP_KMODS	+= tokenmt
-IPP_KMODS	+= tswtclmt
+IPP_KMODS	+=	\
+	dlcosmk		\
+	dscpmk		\
+	flowacct	\
+	ipgpc		\
+	tokenmt		\
+	tswtclmt
 
 #
 #	generic-unix module (/kernel/genunix):
@@ -653,52 +607,39 @@ IPP_KMODS	+= tswtclmt
 GENUNIX_KMODS	+= genunix
 
 #
-#	Modules eXcluded from the product:
-#
-
-#
-#	'Dacf' Modules (/kernel/dacf):
-#
-
-#
-#	Performance Counter BackEnd modules (/usr/kernel/pcbe)
-#
-
-#
 #	MAC-Type Plugin Modules (/kernel/mac)
 #
-MAC_KMODS	+= mac_6to4
-MAC_KMODS	+= mac_ether
-MAC_KMODS	+= mac_ipv4
-MAC_KMODS	+= mac_ipv6
-MAC_KMODS	+= mac_wifi
-#MAC_KMODS	+= mac_ib
+MAC_KMODS	+=	\
+	mac_6to4	\
+	mac_ether	\
+	mac_ipv4	\
+	mac_ipv6	\
+	mac_wifi
 
 #
 #	Overlay related modules (/kernel/overlay)
 #
-DRV_KMODS	+= overlay
 OVERLAY_KMODS	+= vxlan
 
 #
 # socketmod (kernel/socketmod)
 #
-SOCKET_KMODS	+= sockpfp
-SOCKET_KMODS	+= socksctp
-SOCKET_KMODS	+= sockrds
+SOCKET_KMODS	+= \
+	sockpfp	\
+	socksctp	\
+	sockrds
 
 #
 #	kiconv modules (/kernel/kiconv):
 #
-KICONV_KMODS	+= kiconv_emea kiconv_ja kiconv_ko kiconv_sc kiconv_tc
+KICONV_KMODS	+=	\
+	kiconv_emea	\
+	kiconv_ja	\
+	kiconv_ko	\
+	kiconv_sc	\
+	kiconv_tc
 
 #
 #	'Dacf' Modules (/kernel/dacf):
 #
 DACF_KMODS	+= net_dacf
-
-#
-#	Sensor related drivers
-#
-DRV_KMODS	+= ksensor
-DRV_KMODS	+= ksensor_test

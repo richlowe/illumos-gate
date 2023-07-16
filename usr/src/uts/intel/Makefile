@@ -35,11 +35,6 @@ include Makefile.intel
 BINARY=
 
 #
-# dprov is delivered in the SUNWcryptoint package.
-#
-DRV_KMODS	+= dprov
-
-#
 #
 def		:=	TARGET= def
 def.prereq	:=	TARGET= def
