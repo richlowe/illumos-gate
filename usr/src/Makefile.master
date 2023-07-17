@@ -463,7 +463,7 @@ sparcv9_STAND_FLAGS=	-_gcc=-ffreestanding
 NO_SIMD=		-_gcc=-mno-mmx -_gcc=-mno-sse
 i386_STAND_FLAGS=	-_gcc=-ffreestanding $(NO_SIMD)
 amd64_STAND_FLAGS=	-_gcc=-ffreestanding -_gcc=-mno-red-zone \
-	-_gcc=-mcmodel=kernel
+	-_gcc=-mcmodel=kernel $(NO_SIMD)
 aarch64_STAND_FLAGS=	-_gcc=-ffreestanding -_gcc=-mgeneral-regs-only \
 	-_gcc=-mstrict-align
 
