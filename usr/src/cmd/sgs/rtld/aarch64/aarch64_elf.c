@@ -264,7 +264,6 @@ elf_reloc(Rt_map *lmp, uint_t plt, int *in_nfavl, APlist **textrel)
 	Rela		*rel;
 	uint_t		binfo, pbinfo;
 	APlist		*bound = NULL;
-	int		i;
 
 	/*
 	 * Although only necessary for lazy binding, initialize the first
