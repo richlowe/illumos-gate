@@ -38,7 +38,7 @@ include ../Makefile.master
 #
 sparc_ARCHITECTURES = sun4v sun4u sparc
 
-i386_ARCHITECTURES = i86pc i86xpv intel
+i386_ARCHITECTURES = i86pc i86xpv i86hvm intel
 
 #
 # For i386 all architectures can be compiled in parallel.

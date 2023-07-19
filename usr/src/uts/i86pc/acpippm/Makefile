@@ -44,7 +44,7 @@ UTSBASE	= ../..
 MODULE		= acpippm
 OBJECTS		= $(ACPIPPM_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io
+CONF_SRCDIR	= $(UTSBASE)/i86pc/io/ppm/acpi
 INC_PATH	+= -I$(UTSBASE)/i86pc/sys/acpi
 
 #

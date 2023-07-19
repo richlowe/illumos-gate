@@ -39,4 +39,3 @@ clobber:	$(CLOBBER_DEPS)
 install:	$(INSTALL_DEPS)
 
 include $(UTSBASE)/intel/Makefile.targ
-

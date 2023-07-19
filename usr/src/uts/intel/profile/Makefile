@@ -30,7 +30,7 @@ MODULE		= profile
 OBJECTS		= $(PROFILE_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/dtrace
+CONF_SRCDIR	= $(UTSBASE)/common/dtrace/profile
 
 include $(UTSBASE)/intel/Makefile.intel
 

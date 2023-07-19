@@ -41,7 +41,7 @@ UTSBASE	= ../..
 MODULE		= rpcib
 OBJECTS		= $(RPCIB_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/rpc
+CONF_SRCDIR	= $(UTSBASE)/common/rpc/rpcib
 
 #
 #	Include common rules.

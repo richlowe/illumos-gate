@@ -58,7 +58,7 @@ ROOTMODULE	= $(USR_PCBE_DIR)/$(MODULE)
 #
 include $(UTSBASE)/intel/Makefile.intel
 
-CPPFLAGS	+= -I$(UTSBASE)/intel/opteron_pcbe
+CPPFLAGS	+= -I$(UTSBASE)/intel/opteron_pcbe -I$(UTSBASE)/intel/pcbe/opteron
 CLEANFILES	+= $(CPCGEN_SRCS)
 
 #

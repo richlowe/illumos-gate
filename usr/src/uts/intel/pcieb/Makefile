@@ -37,7 +37,7 @@ UTSBASE	= ../..
 MODULE		= pcieb
 OBJECTS		= $(PCIEB_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/pciex
+CONF_SRCDIR	= $(UTSBASE)/common/io/pciex/pcieb
 
 #
 #	Include common rules.

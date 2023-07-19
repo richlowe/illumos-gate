@@ -24,7 +24,7 @@ include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
 LDLIBS += -lnvpair
-CFLAGS += -I$(SRC)/uts/common/io/
+CFLAGS += -I$(SRC)/uts/common/io/ufmtest
 CSTD= $(CSTD_GNU99)
 
 CMDS = $(PROGS:%=$(TESTDIR)/%)

@@ -134,16 +134,6 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/intel/io/pciex/hotplug/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pcplusmp/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pcplusmp/%.S
-	$(COMPILE.s) -o $@ $<
-
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/apix/%.c
-	$(COMPILE.c) -o $@ $<
-	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/ppm/%.c
 	$(COMPILE.c) -o $@ $<
@@ -156,8 +146,17 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/psm/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
-$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/psm/%.S
-	$(COMPILE.s) -o $@ $<
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/psm/apix/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/psm/pcplusmp/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/psm/uppc/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/tzmon/%.c
 	$(COMPILE.c) -o $@ $<
@@ -219,6 +218,35 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/common/xen/os/%.c
 	$(CTFCONVERT_O)
 
 $(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/dboot/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/isa/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pciex/npe/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/rootnex/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/consconfig_dacf/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/ppm/acpi/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/cpudrv/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/i86pc/io/pci/pci_prd/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 

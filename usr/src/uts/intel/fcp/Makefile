@@ -37,7 +37,7 @@ ARCHDIR:sh = cd ..; basename `pwd`
 MODULE		= fcp
 OBJECTS		= $(FCP_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR     = $(UTSBASE)/common/io/fibre-channel/ulp
+CONF_SRCDIR     = $(UTSBASE)/common/io/fibre-channel/ulp/fcp
 
 #
 #	Include common rules.

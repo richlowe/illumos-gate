@@ -45,7 +45,7 @@ CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/pmcs
 #	Include common rules.
 #
 include $(UTSBASE)/intel/Makefile.intel
-include $(CONF_SRCDIR)/pmcs8001fw.version
+include $(CONF_SRCDIR)/fw/pmcs8001fw.version
 
 #
 #	Define targets

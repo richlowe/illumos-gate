@@ -42,7 +42,7 @@ MODULE		= cpc
 OBJECTS		= $(CPC_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_PSM_SYS_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/cpc
 
 #
 #	Include common rules.

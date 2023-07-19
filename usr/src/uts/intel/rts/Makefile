@@ -38,7 +38,7 @@ MODULE		= rts
 OBJECTS		= $(RTS_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_SOCK_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip
+CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/rts
 
 #
 #	Include common rules.

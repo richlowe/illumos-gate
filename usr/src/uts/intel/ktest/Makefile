@@ -40,3 +40,8 @@ clobber:	$(CLOBBER_DEPS)
 install:	$(INSTALL_DEPS)
 
 include $(UTSBASE)/intel/Makefile.targ
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ktest/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+

@@ -50,7 +50,7 @@
 #include <inet/mi.h>
 #include <fs/sockfs/socktpi_impl.h>
 #include <net/bridge_impl.h>
-#include <io/trill_impl.h>
+#include <io/trill/trill_impl.h>
 #include <sys/mac_impl.h>
 
 #define	ADDR_V6_WIDTH	23

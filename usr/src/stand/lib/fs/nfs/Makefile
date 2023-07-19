@@ -39,7 +39,7 @@ OBJECTS = $(LOCOBJS) $(RPC_CMNOBJS) $(CMNOBJS)
 include ../Makefile.com
 
 RPC_CMNDIR = $(TOPDIR)/uts/common/rpc
-CMNDIR = $(TOPDIR)/uts/common/fs/nfs
+CMNDIR = $(TOPDIR)/uts/common/fs/nfs/nfs_dlboot
 SRCS	= $(LOCOBJS:%.o=$(SRCDIR)/%.c) $(RPC_CMNOBJS:%.o=$(RPC_CMNDIR)/%.c) \
 		$(CMNOBJS:%.o=$(CMNDIR)/%.c)
 

@@ -44,7 +44,7 @@ MODULE		= ipsecesp
 OBJECTS		= $(IPSECESP_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_STRMOD_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip
+CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/esp
 
 #
 #	Include common rules.

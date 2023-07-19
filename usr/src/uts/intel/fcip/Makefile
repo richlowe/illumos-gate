@@ -36,7 +36,7 @@ UTSBASE	= ../..
 MODULE		= fcip
 OBJECTS		= $(FCIP_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/ulp/
+CONF_SRCDIR	= $(UTSBASE)/common/io/fibre-channel/ulp/fcip
 
 #
 #	Include common rules.

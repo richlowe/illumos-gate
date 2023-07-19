@@ -86,7 +86,7 @@
 #include "vmm_stat.h"
 #include "vmm_lapic.h"
 
-#include "io/ppt.h"
+#include "io/ppt/ppt.h"
 #include "io/iommu.h"
 
 struct vlapic;
