@@ -20,7 +20,7 @@ MODULE		= vmm_vtd
 OBJECTS		= $(VMM_VTD_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_MISC_DIR)/$(MODULE)
 CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm
-MAPFILE		= $(UTSBASE)/intel/io/vmm/vmm_vtd.mapfile
+MAPFILE		= $(UTSBASE)/intel/io/vmm/intel/vtd/vmm_vtd.mapfile
 
 PRE_INC_PATH	= \
 	-I$(COMPAT)/bhyve \

@@ -29,7 +29,9 @@ ROOTPROG = $(ROOTLIBFMD)/$(PROG)
 
 $(NOT_RELEASE_BUILD)CPPFLAGS += -DDEBUG
 CPPFLAGS += -I$(SRC)/uts/intel/io/imc
-CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen -I$(SRC)/uts/intel
+CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen/umc
+CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen
+CPPFLAGS += -I$(SRC)/uts/intel
 LDLIBS += -lnvpair
 
 CSTD = $(CSTD_GNU99)

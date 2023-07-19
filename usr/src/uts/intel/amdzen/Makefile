@@ -18,13 +18,14 @@ UTSBASE = ../..
 MODULE		= amdzen
 OBJECTS		= $(AMDZEN_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/amdzen
+CONF_SRCDIR	= $(UTSBASE)/intel/io/amdzen/amdzen
 
 include $(UTSBASE)/intel/Makefile.intel
 
 ALL_TARGET	= $(BINARY) $(CONFMOD)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
-CPPFLAGS	+= -I$(CONF_SRCDIR)
+
+INC_PATH	+= -I$(UTSBASE)/intel/io/amdzen
 
 .KEEP_STATE:
 

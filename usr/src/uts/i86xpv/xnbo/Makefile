@@ -64,6 +64,9 @@ ALL_BUILDS	= $(ALL_BUILDS64)
 #
 LDFLAGS		+= -N misc/xnb -N misc/mac
 
+INC_PATH	+= -I$(UTSBASE)/common/xen/io/xnbo
+INC_PATH	+= -I$(UTSBASE)/common/xen/io/xnb
+
 #
 # use Solaris specific code in xen public header files
 #

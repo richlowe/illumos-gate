@@ -44,7 +44,7 @@ UTSBASE	= ../..
 MODULE		= dca
 OBJECTS		= $(DCA_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/crypto/io
+CONF_SRCDIR	= $(UTSBASE)/common/crypto/io/dca
 
 #
 #	Include common rules.

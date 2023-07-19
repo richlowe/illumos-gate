@@ -21,7 +21,7 @@ include ../Makefile.cmd
 ROOTCMDDIR = $(ROOTLIB)/pci
 
 CFLAGS += $(CCVERBOSE)
-CPPFLAGS += -I$(SRC)/uts/common/io/pciex/
+CPPFLAGS += -I$(SRC)/uts/common/io/pciex/pcieb
 
 .KEEP_STATE:
 

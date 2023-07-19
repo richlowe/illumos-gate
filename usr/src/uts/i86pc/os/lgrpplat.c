@@ -2556,9 +2556,9 @@ lgrp_plat_probe_time(int to, cpu_node_map_t *cpu_node, int cpu_node_nentries,
  *
  * NOTE: This code assumes that CPU IDs are assigned in order that they appear
  *       in in cpu_apicid_array boot property which is based on and follows
- *	 same ordering as processor list in ACPI MADT.  If the code in
- *	 usr/src/uts/i86pc/io/pcplusmp/apic.c that reads MADT and assigns
- *	 CPU IDs ever changes, then this code will need to change too....
+ *       same ordering as processor list in ACPI MADT.  If the code in
+ *       usr/src/uts/i86pc/io/psm/pcplusmp/apic.c that reads MADT and assigns
+ *       CPU IDs ever changes, then this code will need to change too....
  */
 static int
 lgrp_plat_process_cpu_apicids(cpu_node_map_t *cpu_node)
