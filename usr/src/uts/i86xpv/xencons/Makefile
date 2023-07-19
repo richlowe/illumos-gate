@@ -44,7 +44,7 @@ UTSBASE	= ../..
 MODULE		= xencons
 OBJECTS		= $(XENCONS_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/xen/io
+CONF_SRCDIR	= $(UTSBASE)/common/xen/io/xencons
 
 #
 #	Include common rules.

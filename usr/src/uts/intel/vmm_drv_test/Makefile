@@ -18,7 +18,7 @@ UTSBASE	= ../..
 MODULE		= vmm_drv_test
 OBJECTS		= $(VMM_DRV_TEST_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm
+CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm/drv_test
 
 include $(UTSBASE)/intel/Makefile.intel
 

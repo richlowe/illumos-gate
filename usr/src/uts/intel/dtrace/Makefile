@@ -29,7 +29,7 @@ UTSBASE	= ../..
 MODULE		= dtrace
 OBJECTS		= $(DTRACE_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/dtrace
+CONF_SRCDIR	= $(UTSBASE)/common/dtrace/dtrace
 
 include $(UTSBASE)/intel/Makefile.intel
 

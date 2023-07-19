@@ -39,6 +39,10 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/meson-gxbb/io/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/meson-gxbb/io/todmeson/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
 $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/meson-gxbb/os/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

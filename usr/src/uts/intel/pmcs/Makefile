@@ -50,7 +50,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #	Include common rules.
 #
 include $(UTSBASE)/intel/Makefile.intel
-include $(CONF_SRCDIR)/pmcs8001fw.version
+include $(CONF_SRCDIR)/fw/pmcs8001fw.version
 
 #
 # Add additional flags

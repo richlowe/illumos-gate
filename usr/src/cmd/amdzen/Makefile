@@ -18,6 +18,8 @@ PROG= usmn udf
 include ../Makefile.cmd
 
 ROOTCMDDIR = $(ROOTLIB)
+CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen/udf
+CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen/usmn
 CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen
 CFLAGS += $(CCVERBOSE)
 

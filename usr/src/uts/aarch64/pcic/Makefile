@@ -43,7 +43,7 @@ UTSBASE		= ../..
 MODULE		= pcic
 OBJECTS		= $(PCIC_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/pcic
 
 #
 #	Include common rules.

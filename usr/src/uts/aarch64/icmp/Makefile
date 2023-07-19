@@ -42,7 +42,7 @@ MODULE		= icmp
 OBJECTS		= $(ICMP_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_STRMOD_DIR)/$(MODULE) $(ROOT_SOCK_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip
+CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/icmp
 
 #
 #	Include common rules.

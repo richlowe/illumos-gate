@@ -25,6 +25,7 @@ ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 LDFLAGS		+= -Ndrv/imc
+INC_PATH	+= -I$(UTSBASE)/intel/io/imc
 
 .KEEP_STATE:
 

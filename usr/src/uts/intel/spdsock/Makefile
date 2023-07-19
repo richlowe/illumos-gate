@@ -36,7 +36,7 @@ UTSBASE	= ../..
 MODULE		= spdsock
 OBJECTS		= $(SPDSOCK_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/ip
+CONF_SRCDIR	= $(UTSBASE)/common/inet/ip/spdsock
 
 #
 #	Include common rules.

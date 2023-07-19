@@ -64,6 +64,9 @@ ALL_BUILDS	= $(ALL_BUILDS64)
 #
 LDFLAGS		+= -N misc/xnb -N misc/mac
 
+INC_PATH	+= -I$(UTSBASE)/common/xen/io/xnbo
+INC_PATH	+= -I$(UTSBASE)/common/xen/io/xnb
+
 #
 # use Solaris specific code in xen public header files
 #
@@ -88,3 +91,4 @@ install:	$(INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/i86xpv/Makefile.targ
+

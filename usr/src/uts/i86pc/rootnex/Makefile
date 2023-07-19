@@ -38,7 +38,7 @@ UTSBASE	= ../..
 MODULE		= rootnex
 OBJECTS		= $(ROOTNEX_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io
+CONF_SRCDIR	= $(UTSBASE)/i86pc/io/rootnex
 
 #
 #	Include common rules.

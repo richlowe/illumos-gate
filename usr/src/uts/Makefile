@@ -37,7 +37,7 @@ include ../Makefile.master
 #
 sparc_ARCHITECTURES = sun4v sun4u sparc
 
-i386_ARCHITECTURES = i86pc i86xpv intel
+i386_ARCHITECTURES = i86pc i86xpv i86hvm intel
 
 aarch64_ARCHITECTURES = armv8 aarch64
 

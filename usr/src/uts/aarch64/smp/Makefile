@@ -40,7 +40,7 @@ UTSBASE   = ../..
 MODULE		= smp
 OBJECTS		= $(SMP_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/targets
+CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/targets/smp
 
 #
 # Include common rules.

@@ -41,7 +41,7 @@ UTSBASE	= ../..
 MODULE		= eibnx
 OBJECTS		= $(EIBNX_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ib/clients/eoib
+CONF_SRCDIR	= $(UTSBASE)/common/io/ib/clients/eoib/enx
 
 #
 # Include common rules

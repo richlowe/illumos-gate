@@ -50,6 +50,8 @@ ROOTMODULE	= $(ROOT_STRMOD_DIR)/$(MODULE)
 #
 include $(UTSBASE)/intel/Makefile.intel
 
+INC_PATH	+= -I$(UTSBASE)/common/io/vuidmice
+
 #
 #	Define targets
 #

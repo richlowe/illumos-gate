@@ -51,7 +51,7 @@ UNAME_M		= $(PLATFORM)
 # these platforms to have their own Makefiles to define ROOT_PLAT_DIRS,
 # USR_PLAT_DIRS, etc.
 #
-IMPLEMENTATIONS	= i86hvm
+IMPLEMENTATIONS	=
 
 #
 #	Everybody needs to know how to build modstubs.o and to locate unix.o

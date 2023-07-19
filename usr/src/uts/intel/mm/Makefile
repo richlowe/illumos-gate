@@ -42,7 +42,7 @@ UTSBASE	= ../..
 MODULE		= mm
 OBJECTS		= $(MM_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/mm
 
 #
 #	Include common rules.

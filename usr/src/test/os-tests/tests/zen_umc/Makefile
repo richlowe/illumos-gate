@@ -50,6 +50,7 @@ CSTD = $(CSTD_GNU99)
 #
 CPPFLAGS += -DDEBUG
 CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen
+CPPFLAGS += -I$(SRC)/uts/intel/io/amdzen/umc
 CPPFLAGS += -I$(SRC)/uts/intel/
 
 CMDS = $(PROG:%=$(TESTDIR)/%)

@@ -39,7 +39,7 @@ UTSBASE	= ../..
 MODULE		= sysevent
 OBJECTS		= $(SYSEVENT_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/sysevent
 
 #
 #	Include common rules.

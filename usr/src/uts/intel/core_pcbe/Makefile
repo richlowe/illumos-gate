@@ -130,7 +130,7 @@ include $(UTSBASE)/intel/Makefile.intel
 CERRWARN	+= $(CNOWARN_UNINIT)
 CERRWARN	+= -_gcc=-Wno-unused-variable
 
-CPPFLAGS	+= -I$(UTSBASE)/intel/core_pcbe
+CPPFLAGS	+= -I$(UTSBASE)/intel/pcbe/core -I.
 CLEANFILES	+= $(CPCGEN_SRCS)
 
 #

@@ -39,7 +39,7 @@ UTSBASE	= ../..
 MODULE		= ippctl
 OBJECTS		= $(IPP_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/ipp
+CONF_SRCDIR	= $(UTSBASE)/common/ipp/ippctl
 
 #
 #	Include common rules.

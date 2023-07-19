@@ -24,7 +24,7 @@ UTSBASE	= ../..
 MODULE		= signalfd
 OBJECTS		= $(SIGNALFD_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/signalfd
 
 #
 #	Include common rules.

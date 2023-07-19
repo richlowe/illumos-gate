@@ -28,7 +28,7 @@ UTSBASE	= ../..
 MODULE		= ucode
 OBJECTS		= $(UCODE_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io
+CONF_SRCDIR	= $(UTSBASE)/intel/io/ucode
 
 INC_PATH	+= -I$(SRC)/common/
 

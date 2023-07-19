@@ -23,7 +23,7 @@ include $(UTSBASE)/intel/Makefile.intel
 
 ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-CPPFLAGS	+= -I$(UTSBASE)/intel/io/amdzen
+CPPFLAGS	+= -I$(UTSBASE)/intel/io/amdzen -I$(UTSBASE)/intel/io/amdzen/usmn
 LDFLAGS		+= -Ndrv/amdzen
 
 .KEEP_STATE:

@@ -25,6 +25,7 @@ ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 
 LDFLAGS		+= -Ndrv/amdzen
+INC_PATH	+= -I$(UTSBASE)/intel/io/amdzen
 
 .KEEP_STATE:
 

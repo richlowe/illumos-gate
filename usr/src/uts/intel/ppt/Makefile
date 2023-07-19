@@ -20,8 +20,8 @@ UTSBASE	= ../..
 MODULE		= ppt
 OBJECTS		= $(PPT_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm/io
-MAPFILE		= $(UTSBASE)/intel/io/vmm/io/ppt.mapfile
+CONF_SRCDIR	= $(UTSBASE)/intel/io/vmm/io/ppt
+MAPFILE		= $(UTSBASE)/intel/io/vmm/io/ppt/ppt.mapfile
 
 include $(UTSBASE)/intel/Makefile.intel
 
