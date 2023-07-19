@@ -53,7 +53,9 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #	Overrides.
 #
 LDFLAGS		+= -Nstrmod/rpcmod -Nfs/nfs -Nmisc/klmmod
-LDFLAGS		+= -M $(UTSBASE)/common/klm/mapfile-ops
+LDFLAGS		+= -M $(UTSBASE)/common/klm/ops/mapfile
+
+INC_PATH	+= -I$(UTSBASE)/common/klm
 
 #
 #	Default build targets.

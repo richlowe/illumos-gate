@@ -56,7 +56,7 @@
 #include <sys/hotplug/pci/pcie_hp.h>
 #include <sys/hotplug/pci/pciehpc.h>
 #include <sys/hotplug/pci/pcishpc.h>
-#include <io/pciex/pcieb.h>
+#include <io/pciex/pcieb/pcieb.h>
 
 /* Local functions prototype */
 static int pcie_hp_list_occupants(dev_info_t *dip, void *arg);

@@ -609,8 +609,8 @@ license usr/src/common/crypto/skein/THIRDPARTYLICENSE \
     license=usr/src/common/crypto/skein/THIRDPARTYLICENSE
 license usr/src/uts/common/inet/cc/THIRDPARTYLICENSE \
     license=usr/src/uts/common/inet/cc/THIRDPARTYLICENSE
-license usr/src/uts/common/inet/ip/THIRDPARTYLICENSE.rts \
-    license=usr/src/uts/common/inet/ip/THIRDPARTYLICENSE.rts
+license usr/src/uts/common/inet/ip/rts/THIRDPARTYLICENSE.rts \
+    license=usr/src/uts/common/inet/ip/rts/THIRDPARTYLICENSE.rts
 license usr/src/uts/common/inet/tcp/THIRDPARTYLICENSE \
     license=usr/src/uts/common/inet/tcp/THIRDPARTYLICENSE
 license usr/src/uts/common/io/THIRDPARTYLICENSE.etheraddr \

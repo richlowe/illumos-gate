@@ -44,7 +44,7 @@ UTSBASE	= ../..
 MODULE		= llc1
 OBJECTS		= $(LLC1_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/llc1
 
 #
 #	Include common rules.

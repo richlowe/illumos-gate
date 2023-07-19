@@ -18,7 +18,7 @@ UTSBASE	= ../..
 MODULE = ufmtest
 OBJECTS	= $(OBJS_DIR)/ufmtest.o
 ROOTMODULE = $(USR_DRV_DIR)/$(MODULE)
-CONF_SRCDIR = $(UTSBASE)/common/io
+CONF_SRCDIR = $(UTSBASE)/common/io/ufmtest
 
 include $(UTSBASE)/aarch64/Makefile.aarch64
 

@@ -41,7 +41,7 @@ UTSBASE	= ../..
 MODULE		= pseudo
 OBJECTS		= $(PSEUDO_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io
+CONF_SRCDIR	= $(UTSBASE)/common/io/pseudo
 
 #
 #	Include common rules.
