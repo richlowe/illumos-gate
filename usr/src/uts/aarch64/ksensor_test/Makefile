@@ -18,7 +18,7 @@ UTSBASE = ../..
 MODULE		= ksensor_test
 OBJECTS		= $(KSENSOR_TEST_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/ksensor
+CONF_SRCDIR	= $(UTSBASE)/common/io/ksensor/test
 
 include $(UTSBASE)/aarch64/Makefile.aarch64
 

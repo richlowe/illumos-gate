@@ -41,7 +41,7 @@ UTSBASE	= ../..
 MODULE		= cmdk
 OBJECTS		= $(CMDK_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/dktp/disk
+CONF_SRCDIR	= $(UTSBASE)/intel/io/dktp/cmdk
 
 #
 #	Include common rules.

@@ -43,7 +43,7 @@ FWIMAGES        += 6322
 FWIMAGES        += 8100
 FWIMAGES        += 8301fc
 
-FWMODULES_SRC    = $(FWIMAGES:%=ql_fw_%.c)
+FWMODULES_SRC    = $(FWIMAGES:%=ql_fw_%/ql_fw_%.c)
 
 all_h install_h : $(FWTABLE)
 

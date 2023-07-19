@@ -41,7 +41,7 @@ UTSBASE	= ../..
 MODULE		= cryptoadm
 OBJECTS		= $(CRYPTOADM_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/crypto/io
+CONF_SRCDIR	= $(UTSBASE)/common/crypto/io/cryptoadm
 
 #
 #	Include common rules.

@@ -42,7 +42,7 @@ UTSBASE	  = ../..
 MODULE		= ata
 OBJECTS		= $(ATA_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/io/dktp/controller/ata
+CONF_SRCDIR	= $(UTSBASE)/intel/io/dktp/ata
 
 #
 #	Include common rules.
@@ -61,7 +61,7 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 #DEBUG_FLGS	= -DATA_DEBUG -DGHD_DEBUG -DDEBUG
 DEBUG_FLGS	=
 DEBUG_DEFS	+= $(DEBUG_FLGS)
-INC_PATH	+= -I$(UTSBASE)/intel/io/dktp/hba/ghd
+INC_PATH	+= -I$(UTSBASE)/intel/io/dktp/ghd
 
 #
 # For now, disable these warnings; maintainers should endeavor

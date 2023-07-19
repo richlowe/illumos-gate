@@ -27,6 +27,10 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/virt/io/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/virt/io/todpl031/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
 $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/virt/os/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)

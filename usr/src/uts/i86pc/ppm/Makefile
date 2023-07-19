@@ -45,7 +45,7 @@ UTSBASE	= ../..
 MODULE		= ppm
 OBJECTS		= $(PPM_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/i86pc/io
+CONF_SRCDIR	= $(UTSBASE)/i86pc/io/ppm
 
 #
 #	Include common rules.

@@ -47,7 +47,7 @@ ROOTLINK	= $(ROOT_CRYPTO_DIR)/$(MODULE)
 TARGET_32	= ../../kernel/drv/$(MODULE)
 TARGET_64	= ../../../kernel/drv/$(SUBDIR64)/$(MODULE)
 LINK_TARGET	= $(TARGET_$(CLASS))
-CONF_SRCDIR	= $(UTSBASE)/common/crypto/io
+CONF_SRCDIR	= $(UTSBASE)/common/crypto/io/dprov
 
 #
 #	Include common rules.

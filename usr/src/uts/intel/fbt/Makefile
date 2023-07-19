@@ -29,7 +29,7 @@ MODULE		= fbt
 OBJECTS		= $(FBT_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
 ROOTLINK	= $(ROOT_DTRACE_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/intel/dtrace
+CONF_SRCDIR	= $(UTSBASE)/intel/dtrace/fbt
 
 include $(UTSBASE)/intel/Makefile.intel
 

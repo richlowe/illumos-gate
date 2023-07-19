@@ -36,7 +36,7 @@ UTSBASE	= ../..
 MODULE		= tcp6
 OBJECTS		= $(TCP6_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/inet/tcp
+CONF_SRCDIR	= $(UTSBASE)/common/inet/tcp6
 
 # needs work
 SMOFF += index_overflow

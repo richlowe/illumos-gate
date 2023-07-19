@@ -32,6 +32,18 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
 
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/rootnex/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/simple-bus/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
+$(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/io/consconfig_dacf/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)
+
 # XXXARM: We disable the stack protector, somewhat heavy-handedly, to protect
 # the call stack up to ssp_init() itself.
 $(OBJS_DIR)/%.o:		$(UTSBASE)/armv8/os/%.c

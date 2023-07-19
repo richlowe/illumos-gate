@@ -49,7 +49,7 @@
 
 #include <vm/seg_dev.h>
 
-#include "io/ppt.h"
+#include "io/ppt/ppt.h"
 #include "io/vatpic.h"
 #include "io/vioapic.h"
 #include "io/vrtc.h"

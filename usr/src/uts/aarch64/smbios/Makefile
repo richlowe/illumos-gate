@@ -32,7 +32,7 @@ UTSBASE	= ../..
 MODULE = smbios
 OBJECTS	= $(OBJS_DIR)/smbios.o
 ROOTMODULE = $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR = $(UTSBASE)/common/io
+CONF_SRCDIR = $(UTSBASE)/common/io/smbios
 
 include $(UTSBASE)/aarch64/Makefile.aarch64
 

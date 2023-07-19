@@ -40,7 +40,7 @@ UTSBASE   = ../..
 MODULE		= sgen
 OBJECTS		= $(SGEN_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/targets
+CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/targets/sgen
 
 #
 # Include common rules.
