@@ -3187,9 +3187,6 @@ nsasync_ioctl(struct nsasyncline *nsasync, queue_t *wq, mblk_t *mp)
 			 */
 			mblk_t *bp;
 			void *buf;
-#ifdef _SYSCALL32_IMPL
-			struct ppsclockev32 p32;
-#endif
 			struct ppsclockev ppsclockev;
 
 			if (mp->b_cont != NULL) {
@@ -3207,18 +3204,8 @@ nsasync_ioctl(struct nsasyncline *nsasync, queue_t *wq, mblk_t *mp)
 			ppsclockev = ns16550_ppsev;
 			mutex_exit(&ns16550->ns16550_excl_hi);
 
-#ifdef _SYSCALL32_IMPL
-			if ((iocp->ioc_flag & IOC_MODELS) != IOC_NATIVE) {
-				TIMEVAL_TO_TIMEVAL32(&p32.tv, &ppsclockev.tv);
-				p32.serial = ppsclockev.serial;
-				buf = &p32;
-				iocp->ioc_count = sizeof (struct ppsclockev32);
-			} else
-#endif
-			{
-				buf = &ppsclockev;
-				iocp->ioc_count = sizeof (struct ppsclockev);
-			}
+			buf = &ppsclockev;
+			iocp->ioc_count = sizeof (struct ppsclockev);
 
 			if ((bp = allocb(iocp->ioc_count, BPRI_HI)) == NULL) {
 				error = ENOMEM;

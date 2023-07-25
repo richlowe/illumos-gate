@@ -48,12 +48,6 @@ extern void getgregs(klwp_t *, gregset_t);
 extern void setfpregs(klwp_t *, fpregset_t *);
 extern void getfpregs(klwp_t *, fpregset_t *);
 
-#if defined(_SYSCALL32_IMPL)
-extern void getgregs32(klwp_t *, gregset32_t);
-extern void setfpregs32(klwp_t *, fpregset32_t *);
-extern void getfpregs32(klwp_t *, fpregset32_t *);
-#endif
-
 extern int getpil(void);
 extern void tenmicrosec(void);
 extern void bind_hwcap(void);

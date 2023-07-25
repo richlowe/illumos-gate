@@ -315,8 +315,7 @@ audit_finish(
 			}
 
 			/* Add a return token */
-/* XXXARM: only because aarch64 breaks _SYSCALL32_IMPL */
-#if defined(_SYSCALL32_IMPL) && defined(_MULTI_DATAMODEL)
+#if defined(_SYSCALL32_IMPL)
 			if (lwp_getdatamodel(ttolwp(curthread)) ==
 			    DATAMODEL_NATIVE) {
 				sy_flags = sysent[scid].sy_flags & SE_RVAL_MASK;
@@ -324,7 +323,7 @@ audit_finish(
 				sy_flags =
 				    sysent32[scid].sy_flags & SE_RVAL_MASK;
 			}
-#else	/* _SYSCALL64_IMPL */
+#else	/* !_SYSCALL32_IMPL */
 			sy_flags = sysent[scid].sy_flags & SE_RVAL_MASK;
 #endif   /* _SYSCALL32_IMPL */
 

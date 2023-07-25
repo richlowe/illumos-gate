@@ -312,12 +312,6 @@ fcnname##_info:								\
 	NO_UNLOAD_STUB(sockfs, send,  		nomod_zero);
 	NO_UNLOAD_STUB(sockfs, sendmsg,  	nomod_zero);
 	NO_UNLOAD_STUB(sockfs, sendto,  	nomod_zero);
-#ifdef _SYSCALL32_IMPL
-	NO_UNLOAD_STUB(sockfs, recv32,		nomod_zero);
-	NO_UNLOAD_STUB(sockfs, recvfrom32,	nomod_zero);
-	NO_UNLOAD_STUB(sockfs, send32,		nomod_zero);
-	NO_UNLOAD_STUB(sockfs, sendto32,	nomod_zero);
-#endif	/* _SYSCALL32_IMPL */
 	NO_UNLOAD_STUB(sockfs, getpeername,  	nomod_zero);
 	NO_UNLOAD_STUB(sockfs, getsockname,  	nomod_zero);
 	NO_UNLOAD_STUB(sockfs, getsockopt,  	nomod_zero);
@@ -325,9 +319,6 @@ fcnname##_info:								\
 	NO_UNLOAD_STUB(sockfs, sockconfig,  	nomod_zero);
 	NO_UNLOAD_STUB(sockfs, sock_getmsg,  	nomod_zero);
 	NO_UNLOAD_STUB(sockfs, sock_putmsg,  	nomod_zero);
-#ifdef _SYSCALL32_IMPL
-	NO_UNLOAD_STUB(sockfs, sosendfile64,  	nomod_zero);
-#endif	/* _SYSCALL32_IMPL */
 	NO_UNLOAD_STUB(sockfs, snf_segmap,  	nomod_einval);
 	NO_UNLOAD_STUB(sockfs, sock_getfasync,  nomod_zero);
 	NO_UNLOAD_STUB(sockfs, sotpi_sototpi,  nomod_zero);
@@ -525,16 +516,6 @@ fcnname##_info:								\
 	NO_UNLOAD_STUB(procfs, prgetlwpsinfo,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, oprgetstatus,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, oprgetpsinfo,	nomod_zero);
-#ifdef _SYSCALL32_IMPL
-	NO_UNLOAD_STUB(procfs, prgetstatus32,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, prgetlwpstatus32, nomod_zero);
-	NO_UNLOAD_STUB(procfs, prgetpsinfo32,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, prgetlwpsinfo32,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, oprgetstatus32,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, oprgetpsinfo32,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, psinfo_kto32,	nomod_zero);
-	NO_UNLOAD_STUB(procfs, lwpsinfo_kto32,	nomod_zero);
-#endif	/* _SYSCALL32_IMPL */
 	NO_UNLOAD_STUB(procfs, prnotify,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prexecstart,	nomod_zero);
 	NO_UNLOAD_STUB(procfs, prexecend,	nomod_zero);
