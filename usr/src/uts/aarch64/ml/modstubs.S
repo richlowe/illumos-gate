@@ -651,6 +651,9 @@ fcnname##_info:								\
  */
 #ifndef BOOTDEV_MODULE
 	MODULE(bootdev,misc);
+/*
+ * XXXARM: Not implemented
+ */
 	STUB(bootdev, i_promname_to_devname, 0);
 	STUB(bootdev, i_convert_boot_device_name, 0);
 	END_MODULE(bootdev);
@@ -882,6 +885,12 @@ fcnname##_info:								\
 #endif
 
 /*
+ * NB: Cluster will never exist on ARM, but it's cosy relationships
+ * with common code mean that all these stubs must exist, so they may
+ * fail when common code uses them.
+ */
+
+/*
  * Clustering: stubs for bootstrapping.
  */
 #ifndef CL_BOOTSTRAP
@@ -1095,7 +1104,9 @@ fcnname##_info:								\
 #endif
 
 /*
- * Stubs for dcopy, for Intel IOAT KAPIs
+ * Stubs for dcopy, for Intel IOAT KAPIs.
+ * This will never exist on ARM but common code needs these functions
+ * to exist and fail.
  */
 #ifndef DCOPY_MODULE
 	MODULE(dcopy,misc);
@@ -1188,15 +1199,6 @@ fcnname##_info:								\
 	STUB(elfexec, elfexec,      	nomod_einval);
 	STUB(elfexec, mapexec_brand,	nomod_einval);
 	END_MODULE(elfexec);
-#endif
-
-/*
- * Stub(s) for APIX module.
- */
-#ifndef APIX_MODULE
-	MODULE(apix,mach);
-	WSTUB(apix, apix_loaded, nomod_zero);
-	END_MODULE(apix);
 #endif
 
 	ENTRY_NP(stubs_end)
