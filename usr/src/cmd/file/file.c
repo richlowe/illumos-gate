@@ -77,20 +77,19 @@
  */
 #define	OLD_DUMP_MAGIC	0x8FCA0102
 
+#define	SPARC_ISA	"SPARC"
+#define	INTEL_ISA	"Intel"
+
 #if defined(__sparc)
-#define	NATIVE_ISA	"SPARC"
-#define	OTHER_ISA	"Intel"
+#define	NATIVE_ISA	SPARC_ISA
+#define	OTHER_ISA	INTEL_ISA
 #else
-#define	NATIVE_ISA	"Intel"
-#define	OTHER_ISA	"SPARC"
+#define	NATIVE_ISA	INTEL_ISA
+#define	OTHER_ISA	SPARC_ISA
 #endif
 
 /* Assembly language comment char */
-#ifdef pdp11
-#define	ASCOMCHAR '/'
-#else
 #define	ASCOMCHAR '!'
-#endif
 
 #pragma	align	16(fbuf)
 static char	fbuf[FBSZ];
@@ -173,8 +172,7 @@ static int elf_check(char *file);
 static int get_door_target(char *, char *, size_t);
 static int zipfile(char *, int);
 static int is_crash_dump(const char *, int);
-static void print_dumphdr(const int, const dumphdr_t *, uint32_t (*)(uint32_t),
-    const char *);
+static void print_dumphdr(const int, const dumphdr_t *, uint32_t (*)(uint32_t));
 static uint32_t swap_uint32(uint32_t);
 static uint32_t return_uint32(uint32_t);
 static void usage(void);
@@ -1695,11 +1693,9 @@ is_crash_dump(const char *buf, int fd)
 	 * greater than or equal to 9.
 	 */
 	if (dhp->dump_magic == DUMP_MAGIC) {
-		print_dumphdr(fd, dhp, return_uint32, NATIVE_ISA);
-
+		print_dumphdr(fd, dhp, return_uint32);
 	} else if (dhp->dump_magic == swap_uint32(DUMP_MAGIC)) {
-		print_dumphdr(fd, dhp, swap_uint32, OTHER_ISA);
-
+		print_dumphdr(fd, dhp, swap_uint32);
 	} else if (dhp->dump_magic == OLD_DUMP_MAGIC ||
 	    dhp->dump_magic == swap_uint32(OLD_DUMP_MAGIC)) {
 		char *isa = (dhp->dump_magic == OLD_DUMP_MAGIC ?
@@ -1714,9 +1710,9 @@ is_crash_dump(const char *buf, int fd)
 }
 
 static void
-print_dumphdr(const int fd, const dumphdr_t *dhp, uint32_t (*swap)(uint32_t),
-    const char *isa)
+print_dumphdr(const int fd, const dumphdr_t *dhp, uint32_t (*swap)(uint32_t))
 {
+	const char *isa = NULL;
 	dumphdr_t dh;
 
 	/*
@@ -1730,12 +1726,35 @@ print_dumphdr(const int fd, const dumphdr_t *dhp, uint32_t (*swap)(uint32_t),
 		const char *l = swap(dh.dump_flags) & DF_LIVE ?
 		    "live" : "crash";
 
+		/*
+		 * We translate dumps from intel and sparc machines to more
+		 * generic strings for dubious compatibility reasons.  Other
+		 * machines are left alone.
+		 */
+		if (strncmp(dh.dump_utsname.machine, "i86", 3) == 0)
+			isa = INTEL_ISA;
+		else if (strncmp(dh.dump_utsname.machine, "sun4", 4) == 0)
+			isa = SPARC_ISA;
+		else
+			isa = dh.dump_utsname.machine;
+
 		(void) printf(gettext(
 		    "%s %s %s %u-bit %s %s%s dump from '%s'\n"),
 		    dh.dump_utsname.sysname, dh.dump_utsname.release,
 		    dh.dump_utsname.version, swap(dh.dump_wordsize), isa,
 		    c, l, dh.dump_utsname.nodename);
 	} else {
+		/*
+		 * We have no utsname so we can only check the endianness of
+		 * the dump.  We know, because we have no utsname, that this
+		 * must either be SPARC or Intel however, and we know it's a
+		 * dump of one kind or another because we reached this code.
+		 */
+		if (dhp->dump_magic == DUMP_MAGIC)
+			isa = NATIVE_ISA;
+		else
+			isa = OTHER_ISA;
+
 		(void) printf(gettext("SunOS %u-bit %s crash dump\n"),
 		    swap(dhp->dump_wordsize), isa);
 	}
