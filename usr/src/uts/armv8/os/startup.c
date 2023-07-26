@@ -260,6 +260,7 @@ static void startup_modules(void);
 static void startup_vm(void);
 static void startup_end(void);
 static void layout_kernel_va(void);
+extern void ssp_init(void);
 
 static void
 getl2cacheinfo(int *csz, int *lsz, int *assoc)
@@ -349,6 +350,7 @@ startup(void)
 
 	CPUSET_ONLY(cpu_ready_set, 0);	/* cpu 0 is boot cpu */
 
+	ssp_init();
 	startup_init();
 	startup_memlist();
 	startup_kmem();
@@ -1563,11 +1565,6 @@ void
 post_startup(void)
 {
 	extern void cpu_event_init_cpu(cpu_t *);
-
-	/*
-	 * Complete CPU module initialization
-	 */
-	//cmi_post_startup();
 
 	/*
 	 * Perform forceloading tasks for /etc/system.

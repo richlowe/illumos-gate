@@ -76,7 +76,7 @@ SYM_MOD		= $(OBJS_DIR)/unix.sym
 
 UNIX_O		 = $(UNIX_DIR)/$(OBJS_DIR)/unix.o
 MODSTUBS_O	 = $(MODSTUBS_DIR)/$(OBJS_DIR)/modstubs.o
-GENLIB	 	 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
+GENLIB		 = $(GENLIB_DIR)/$(OBJS_DIR)/libgenunix.so
 # XXXARM: We have no platmods as yet, but this is left here so we remember how
 # they work.
 #PLATMOD		 = platmod
@@ -125,7 +125,7 @@ CFLAGS			+= $(CCMODE)
 CFLAGS			+= $(SPACEFLAG)
 CFLAGS			+= $(CCUNBOUND)
 CFLAGS			+= $(CFLAGS_uts)
-CFLAGS			+= -_gcc=-fstack-protector
+CFLAGS			+= $(STACKPROTECT_$(STACKPROTECT))
 
 INC_PATH		+= -I$(UTSBASE)/armv8
 INC_PATH		+= -I$(UTSBASE)/$(MACH)
