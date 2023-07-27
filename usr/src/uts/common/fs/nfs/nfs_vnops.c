@@ -241,15 +241,6 @@ const fs_operation_def_t nfs_vnodeops_template[] = {
 	NULL,			NULL
 };
 
-/*
- * XXX:  This is referenced in modstubs.S
- */
-struct vnodeops *
-nfs_getvnodeops(void)
-{
-	return (nfs_vnodeops);
-}
-
 /* ARGSUSED */
 static int
 nfs_open(vnode_t **vpp, int flag, cred_t *cr, caller_context_t *ct)

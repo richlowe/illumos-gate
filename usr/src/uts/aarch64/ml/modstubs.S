@@ -373,11 +373,9 @@ fcnname##_info:								\
 
 /*
  * Stubs for nfs common code.
- * XXX nfs_getvnodeops should go away with removal of kludge in vnode.c
  */
 #ifndef NFS_MODULE
 	MODULE(nfs,fs);
-	WSTUB(nfs,	nfs_getvnodeops,	nomod_zero);
 	WSTUB(nfs,	nfs_perror,		nomod_zero);
 	WSTUB(nfs,	nfs_cmn_err,		nomod_zero);
 	WSTUB(nfs,	clcleanup_zone,		nomod_zero);
@@ -541,18 +539,6 @@ fcnname##_info:								\
 	STUB(fifofs, fifo_getinfo,	0);
 	STUB(fifofs, fifo_vfastoff,	0);
 	END_MODULE(fifofs);
-#endif
-
-/*
- * Stubs for ufs
- *
- * This is needed to support the old quotactl system call.
- * When the old sysent stuff goes away, this will need to be revisited.
- */
-#ifndef UFS_MODULE
-	MODULE(ufs,fs);
-	STUB(ufs, quotactl, nomod_minus_one);
-	END_MODULE(ufs);
 #endif
 
 /*
