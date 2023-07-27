@@ -2278,13 +2278,6 @@ post_startup(void)
 	 * Perform forceloading tasks for /etc/system.
 	 */
 	(void) mod_sysctl(SYS_FORCELOAD, NULL);
-
-	/*
-	 * ON4.0: Force /proc module in until clock interrupt handle fixed
-	 * ON4.0: This must be fixed or restated in /etc/systems.
-	 */
-	(void) modload("fs", "procfs");
-
 	(void) i_ddi_attach_hw_nodes("pit_beep");
 
 	maxmem = freemem;

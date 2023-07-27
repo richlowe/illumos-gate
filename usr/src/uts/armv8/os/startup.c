@@ -1571,12 +1571,6 @@ post_startup(void)
 	 */
 	(void) mod_sysctl(SYS_FORCELOAD, NULL);
 
-	/*
-	 * ON4.0: Force /proc module in until clock interrupt handle fixed
-	 * ON4.0: This must be fixed or restated in /etc/systems.
-	 */
-	(void) modload("fs", "procfs");
-
 	maxmem = freemem;
 
 	cpu_event_init_cpu(CPU);

@@ -237,7 +237,7 @@ const fs_operation_def_t nfs_vnodeops_template[] = {
 	VOPNAME_SETSECATTR,	{ .vop_setsecattr = nfs_setsecattr },
 	VOPNAME_GETSECATTR,	{ .vop_getsecattr = nfs_getsecattr },
 	VOPNAME_SHRLOCK,	{ .vop_shrlock = nfs_shrlock },
-	VOPNAME_VNEVENT, 	{ .vop_vnevent = fs_vnevent_support },
+	VOPNAME_VNEVENT,	{ .vop_vnevent = fs_vnevent_support },
 	NULL,			NULL
 };
 
