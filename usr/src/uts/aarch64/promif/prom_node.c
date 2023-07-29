@@ -62,7 +62,7 @@ prom_findnode_by_phandle(phandle_t phandle)
 int
 prom_getprop(pnode_t nodeid, const char *name, caddr_t value)
 {
-	int offset = fdt_node_offset_by_phandle(fdtp, (pnode_t)nodeid);
+	int offset = fdt_node_offset_by_phandle(fdtp, nodeid);
 
 	if (offset < 0)
 		return -1;
@@ -70,89 +70,44 @@ prom_getprop(pnode_t nodeid, const char *name, caddr_t value)
 	int len;
 	const void *prop = fdt_getprop(fdtp, offset, name, &len);
 
-	if (prop == NULL) {
-		if (strcmp(name, "name") == 0) {
-			const char *name_ptr = fdt_get_name(fdtp, offset, &len);
-			const char *p = strchr(name_ptr, '@');
-
-			if (!name_ptr)
-				return -1;
-
-			if (p) {
-				len = p - name_ptr;
-			} else {
-				len = strlen(name_ptr);
-			}
-			memcpy(value, name_ptr, len);
-			value[len] = '\0';
-
-			return len + 1;
-		}
-		if (strcmp(name, "addr") == 0) {
-			const char *name_ptr = fdt_get_name(fdtp, offset, &len);
-			const char *p = strchr(name_ptr, '@');
-			if (p) {
-				p++;
-				len = strlen(p);
-			} else {
-				return -1;
-			}
-			if (len == 0)
-				return -1;
-			memcpy(value, p, len);
-			value[len] = '\0';
-			return len + 1;
-		}
-		return -1;
-	}
+	if (prop == NULL)
+		return (-1);
 
 	memcpy(value, prop, len);
 	return len;
 }
 
-int
-prom_setprop(pnode_t nodeid, const char *name, const caddr_t value, int len)
+static int
+_prom_setprop(pnode_t nodeid, const char *name, const caddr_t value, int len)
 {
-	int offset = fdt_node_offset_by_phandle(fdtp, (pnode_t)nodeid);
+	int offset = fdt_node_offset_by_phandle(fdtp, nodeid);
+	int r;
+
 	if (offset < 0)
 		return -1;
 
-	int r;
-	if (strcmp(name, "name") == 0) {
-		if (strchr(value, '@')) {
-			r = fdt_set_name(fdtp, offset, value);
-		} else {
-			const char *name_ptr = fdt_get_name(fdtp, offset, &len);
-			const char *p = strchr(name_ptr, '@');
-			if (p) {
-				const char *addr = p + 1;
-				char *buf = __builtin_alloca(strlen(value) + 1 + strlen(addr) + 1);
-				strcpy(buf, value);
-				strcat(buf, "@");
-				strcat(buf, addr);
-				r = fdt_set_name(fdtp, offset, buf);
-			} else {
-				r = fdt_set_name(fdtp, offset, value);
-			}
-		}
-	} else if (strcmp(name, "addr") == 0) {
-		int name_len = prom_getproplen(nodeid, "name");
-		char *buf = __builtin_alloca(name_len  + 1 + strlen(value) + 1);
-		prom_getprop(nodeid, "name", buf);
-		strcat(buf, "@");
-		strcat(buf, value);
-		r = fdt_set_name(fdtp, offset, buf);
-	} else {
-		r = fdt_setprop(fdtp, offset, name, value, len);
-	}
+	r = fdt_setprop(fdtp, offset, name, value, len);
 
-	return r == 0?len:-1;
+	return (r == 0 ? len : -1);
+}
+
+/*
+ * The "name" and "unit-address" properties are special, do not allow higher
+ * level code to alter them.
+ */
+int
+prom_setprop(pnode_t nodeid, const char *name, const caddr_t value, int len)
+{
+	ASSERT3S(strcmp(name, "name"), !=, 0);
+	ASSERT3S(strcmp(name, "unit-address"), !=, 0);
+
+	return (_prom_setprop(nodeid, name, value, len));
 }
 
 int
 prom_getproplen(pnode_t nodeid, const char *name)
 {
-	int offset = fdt_node_offset_by_phandle(fdtp, (pnode_t)nodeid);
+	int offset = fdt_node_offset_by_phandle(fdtp, nodeid);
 
 	if (offset < 0)
 		return -1;
@@ -160,38 +115,8 @@ prom_getproplen(pnode_t nodeid, const char *name)
 	int len;
 	const struct fdt_property *prop = fdt_get_property(fdtp, offset, name, &len);
 
-	if (prop == NULL) {
-		if (strcmp(name, "name") == 0) {
-			const char *name_ptr = fdt_get_name(fdtp, offset, &len);
-			if (!name_ptr)
-				return -1;
-			const char *p = strchr(name_ptr, '@');
-			if (p) {
-				len = p - name_ptr;
-			} else {
-				len = strlen(name_ptr);
-			}
-
-			return len + 1;
-		}
-		if (strcmp(name, "addr") == 0) {
-			const char *name_ptr = fdt_get_name(fdtp, offset, &len);
-			if (!name_ptr)
-				return -1;
-			const char *p = strchr(name_ptr, '@');
-			if (p) {
-				p++;
-				len = strlen(p);
-			} else {
-				return -1;
-			}
-			if (len == 0)
-				return -1;
-			return len + 1;
-		}
-
-		return  -1;
-	}
+	if (prop == NULL)
+		return  (-1);
 
 	return len;
 }
@@ -396,7 +321,8 @@ prom_init(char *pgmname, void *cookie)
 			fdt_add_subnode(fdtp, fdt_node_offset_by_phandle(fdtp, prom_rootnode()), "chosen");
 		}
 	} else {
-		fdtp = 0;
+		fdtp = NULL;
+		return;
 	}
 }
 
@@ -422,10 +348,51 @@ prom_dump_peers(dev_info_t *dip)
 	}
 }
 
+/*
+ * Initialize "name" and "unit-address" properties from the FDT node names, to
+ * match the expectations of common code which expects a 1275-like structure.
+ */
+static void
+prom_init_pseudo_props(pnode_t nodeid, void *arg)
+{
+	const char *fdt_name;
+	char f[OBP_MAXPATHLEN] = {0};
+	int offset, len;
+
+	if ((offset = fdt_node_offset_by_phandle(fdtp, nodeid)) < 0)
+		panic("No FDT offset for node %u\n", nodeid);
+
+	fdt_name = fdt_get_name(fdtp, offset, &len);
+
+	strlcpy(f, fdt_name, OBP_MAXPATHLEN);
+
+	char *p = strchr(f, '@');
+
+	if (p != NULL) {
+		*p++ = '\0';
+	}
+
+	if (_prom_setprop(nodeid, "name", f, strlen(f) + 1) < 0) {
+		panic("Setting name pseudo prop on %u to '%s' failed",
+		    nodeid, f);
+	}
+
+	if ((p != NULL) && (*p != '\0')) {
+		if (_prom_setprop(nodeid, "unit-address", p, strlen(p) + 1) < 0) {
+			panic("Setting unit-address pseudo prop on %u to '%s' failed",
+			    nodeid, f);
+		}
+	}
+}
+
+/*
+ * Set up the PROM tree to look more like a 1275 tree, for the benefit of
+ * common code.
+ */
 void
 prom_setup(void)
 {
-	//prom_dump_peers(ddi_root_node());
+	prom_walk(prom_init_pseudo_props, NULL);
 }
 
 static void

@@ -1265,25 +1265,17 @@ startup_modules(void)
 		*cp = 0;
 	}
 
-	/*
-	 * Create a kernel device tree. First, create rootnex and
-	 * then invoke bus specific code to probe devices.
-	 */
-	setup_ddi();
-
-	/*
-	 * Set up the CPU module subsystem for the boot cpu in the native
-	 * case, and all physical cpu resource in the xpv dom0 case.
-	 * Modifies the device tree, so this must be done after
-	 * setup_ddi().
-	 */
-	/*
-	 * Fake a prom tree such that /dev/openprom continues to work
-	 */
 	PRM_POINT("startup_modules: calling prom_setup...");
 	prom_setup();
 
 	PRM_POINT("startup_modules() done");
+
+	/*
+	 * Create the kernel device tree. First, create rootnex and then invoke
+	 * bus specific code to probe devices.  Must happen after prom_setup()
+	 * which inserts properties into the tree.
+	 */
+	setup_ddi();
 }
 
 /*
