@@ -1265,9 +1265,6 @@ startup_modules(void)
 		*cp = 0;
 	}
 
-	/* Read cluster configuration data. */
-	clconf_init();
-
 	/*
 	 * Create a kernel device tree. First, create rootnex and
 	 * then invoke bus specific code to probe devices.

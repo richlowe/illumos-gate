@@ -885,7 +885,6 @@ fcnname##_info:								\
 	NO_UNLOAD_WSTUB(cl_bootstrap, clboot_loadrootmodules, nomod_zero);
 	NO_UNLOAD_WSTUB(cl_bootstrap, clboot_rootconf, nomod_zero);
 	NO_UNLOAD_WSTUB(cl_bootstrap, clboot_mountroot, nomod_zero);
-	NO_UNLOAD_WSTUB(cl_bootstrap, clconf_init, nomod_zero);
 	NO_UNLOAD_WSTUB(cl_bootstrap, clconf_get_nodeid, nomod_zero);
 	NO_UNLOAD_WSTUB(cl_bootstrap, clconf_maximum_nodeid, nomod_zero);
 	NO_UNLOAD_WSTUB(cl_bootstrap, cluster, nomod_zero);
