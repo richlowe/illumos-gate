@@ -23,12 +23,13 @@
  * Copyright 2017 Hayashi Naoyuki
  */
 
-#include <libfdt.h>
+#include <sys/bootconf.h>
 #include <sys/promif.h>
 #include <sys/promimpl.h>
-#include <sys/systm.h>
 #include <sys/sunddi.h>
+#include <sys/systm.h>
 
+#include <libfdt.h>
 
 static struct fdt_header *fdtp;
 
@@ -392,7 +393,25 @@ prom_init_pseudo_props(pnode_t nodeid, void *arg)
 void
 prom_setup(void)
 {
+	pnode_t node;
+	char platform[SYS_NMLN];
+	size_t platsz;
+
 	prom_walk(prom_init_pseudo_props, NULL);
+
+	if ((node = prom_rootnode()) == OBP_NONODE)
+		panic("Prom has no root node");
+
+	/*
+	 * Set the name of the root node to the platform, to match 1275
+	 * expectations.  We have to take this from impl-arch-name (upon which
+	 * we rely in general), as setup_ddi has not yet happened to name the
+	 * root devinfo node.
+	 */
+	(void) BOP_GETPROP(bootops, "impl-arch-name", platform);
+	if (_prom_setprop(node, "name", platform, strlen(platform) + 1) < 0)
+		panic("Setting name pseudo prop on / failed");
+
 }
 
 static void
