@@ -931,9 +931,9 @@ impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 	pnode_t node = ddi_get_nodeid(child);
 	if (node > 0) {
 		char buf[MAXNAMELEN] = {0};
-		int len = prom_getproplen(node, "addr");
+		int len = prom_getproplen(node, "unit-address");
 		if (0 < len && len < MAXNAMELEN) {
-			prom_getprop(node, "addr", buf);
+			prom_getprop(node, "unit-address", buf);
 			if (strlen(buf) < namelen)
 				strcpy(name, buf);
 		}
