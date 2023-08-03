@@ -88,9 +88,17 @@ typedef	phandle_t pnode_t;
 /*
  * Max size of a path component and a property name (not value)
  * These are standard definitions.
+ *
+ * In both P1275 and devicetree these are limited to 32 bytes, however in the
+ * wild on ARM we have seen longer values.  These are set higher and warnings
+ * issued from the PROM layer when such properties are seen.
+ *
+ * XXXARM: At least for right now.
  */
-#define	OBP_MAXDRVNAME		32	/* defined in P1275 */
-#define	OBP_MAXPROPNAME		32	/* defined in P1275 */
+#define	OBP_MAXDRVNAME		64
+#define	OBP_MAXPROPNAME		64
+
+#define	OBP_STANDARD_MAXPROPNAME	32
 
 /*
  *
