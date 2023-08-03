@@ -50,6 +50,19 @@
 
 static struct fdt_header *fdtp;
 
+/*
+ * This exists to keep us from trying to check for over-long property names
+ * before the system can support us doing it.
+ *
+ * Can be tuned _to 0_ to prevent any warnings.  Tuning to 1 is absolutely
+ * fatal.
+ */
+#ifdef DEBUG
+int prom_propname_warn = -1;
+#else
+int prom_propname_warn = 0;
+#endif
+
 static phandle_t
 get_phandle(int offset)
 {
@@ -84,10 +97,45 @@ prom_findnode_by_phandle(phandle_t phandle)
 	return ((pnode_t)phandle);
 }
 
+static void
+prom_check_overlong_property(pnode_t nodeid, const char *name)
+{
+	/*
+	 * We are called very early in boot, in limited circumstances.  So
+	 * early we can't actually tell anyone we've failed.  Bail out if
+	 * we're unready, or have been tuned off.
+	 */
+	if (prom_propname_warn <= 0)
+		return;
+
+	if ((strlen(name) + 1) > OBP_STANDARD_MAXPROPNAME) {
+		int offset = fdt_node_offset_by_phandle(fdtp, nodeid);
+		const char *nodename = NULL;
+		int len;
+
+		if (offset < 0)
+			goto no_name;
+
+		nodename = fdt_get_name(fdtp, offset, &len);
+		if ((nodename == NULL) || nodename[0] == '\0')
+			goto no_name;
+
+		cmn_err(CE_WARN, "PROM node '%s' request for over long property '%s'",
+		    nodename, name);
+		return;
+
+no_name:
+		cmn_err(CE_WARN, "PROM node %u request for over long property '%s'",
+		    nodeid, name);
+	}
+}
+
 int
 prom_getprop(pnode_t nodeid, const char *name, caddr_t value)
 {
 	int offset = fdt_node_offset_by_phandle(fdtp, nodeid);
+
+	prom_check_overlong_property(nodeid, name);
 
 	if (offset < 0)
 		return (-1);
@@ -151,6 +199,8 @@ prom_setprop(pnode_t nodeid, const char *name, const caddr_t value, int len)
 	ASSERT3U(strcmp(name, "name"), !=, 0);
 	ASSERT3U(strcmp(name, "unit-address"), !=, 0);
 
+	prom_check_overlong_property(nodeid, name);
+
 	int r = fdt_setprop(fdtp, offset, name, value, len);
 
 	return (r == 0 ? len : -1);
@@ -163,6 +213,8 @@ prom_getproplen(pnode_t nodeid, const char *name)
 
 	if (offset < 0)
 		return (-1);
+
+	prom_check_overlong_property(nodeid, name);
 
 	int len;
 	const struct fdt_property *prop = fdt_get_property(fdtp, offset, name,
@@ -261,7 +313,7 @@ prom_nextprop(pnode_t nodeid, const char *name, char *next)
 	 * The first time we're called, present the "name" pseudo-property
 	 */
 	if (name[0] == '\0') {
-		strcpy(next, "name");
+		strlcpy(next, "name", OBP_MAXPROPNAME);
 		return (next);
 	}
 
@@ -274,7 +326,7 @@ prom_nextprop(pnode_t nodeid, const char *name, char *next)
 		const char *fullname = fdt_get_name(fdtp, offset, &len);
 
 		if (strchr(fullname, '@') != NULL) {
-			strcpy(next, "unit-address");
+			strlcpy(next, "unit-address", OBP_MAXPROPNAME);
 			return (next);
 		}
 
@@ -299,7 +351,7 @@ prom_nextprop(pnode_t nodeid, const char *name, char *next)
 			 */
 			if ((strcmp(name, "name") == 0) ||
 			    (strcmp(name, "unit-address") == 0)) {
-				strcpy(next, name0);
+				strlcpy(next, name0, OBP_MAXPROPNAME);
 				return (next);
 			}
 			if (strcmp(name, name0) == 0)
@@ -315,7 +367,8 @@ prom_nextprop(pnode_t nodeid, const char *name, char *next)
 		return (next);
 	}
 	data = fdt_get_property_by_offset(fdtp, offset, NULL);
-	strcpy(next, (char *)fdt_string(fdtp, fdt32_to_cpu(data->nameoff)));
+	strlcpy(next, (char *)fdt_string(fdtp, fdt32_to_cpu(data->nameoff)),
+		OBP_MAXPROPNAME);
 	return (next);
 }
 
@@ -468,6 +521,8 @@ prom_dump_peers(dev_info_t *dip)
 void
 prom_setup(void)
 {
+	if (prom_propname_warn == -1)
+		prom_propname_warn = 1;
 }
 
 static void

@@ -1187,7 +1187,19 @@ oprom_copyprop(pnode_t nodeid, uint_t flag, nvlist_t *nvl)
 	while (propname = (char *)prom_nextprop(nodeid, buf1, buf2)) {
 		if (strlen(propname) == 0)
 			break;		/* end of prop list */
-		(void) strcpy(buf1, propname);
+
+		/*
+		 * We have witnessed some firmware get this wrong and the prom
+		 * layer does not necessarily cope, on DEBUG we assert they're
+		 * ok, on non-DEBUG truncate and issue a warning.
+		 */
+		ASSERT3U(strlen(propname), <, OBP_MAXPROPNAME);
+
+		if (strlcpy(buf1, propname, OBP_MAXPROPNAME) >=
+		    OBP_MAXPROPNAME) {
+			cmn_err(CE_WARN, "PROM property name '%s' on node %u"
+			    " truncated to fit", propname, nodeid);
+		}
 
 		proplen = prom_getproplen(nodeid, propname);
 		if (proplen == 0) {
