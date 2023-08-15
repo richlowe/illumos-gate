@@ -22,7 +22,7 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2017 Nexenta Systems, Inc.  All rights reserved.
+# Copyright 2013-2021 Tintri by DDN, Inc. All rights reserved.
 #
 
 include $(SRC)/Makefile.master
@@ -31,7 +31,7 @@ SUBDIRS = smbadm smbd smbstat dtrace bind-helper \
 	nvlprint
 
 # XXXARM: No fksmb yet
-$(NOT_AARCH64_BLD)SUBDIRS += fksmbd testoplock test-msgbuf
+$(NOT_AARCH64_BLD)SUBDIRS += fksmbd testoplock test-crypt test-msgbuf
 
 MSGSUBDIRS = smbadm smbstat
 
