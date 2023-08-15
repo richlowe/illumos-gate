@@ -628,6 +628,7 @@ DSRCS=								\
 	predicates/err.D_SYNTAX.operr.d				\
 	predicates/tst.argsnotcached.d				\
 	predicates/tst.basics.d					\
+	predicates/tst.bignum.d					\
 	predicates/tst.complex.d				\
 	preprocessor/err.D_IDENT_UNDEF.afterprobe.d		\
 	preprocessor/err.D_PRAGCTL_INVAL.tabdefine.d		\
@@ -1811,6 +1812,7 @@ TSTS=								\
 	misc/tst.macroglob.ksh.out				\
 	misc/tst.roch.d						\
 	misc/tst.schrock.ksh					\
+	misc/tst.wtf.d						\
 	multiaggs/err.D_PRINTA_AGGKEY.d				\
 	multiaggs/err.D_PRINTA_AGGPROTO.d			\
 	multiaggs/tst.many.d					\
@@ -1940,6 +1942,7 @@ TSTS=								\
 	predicates/tst.argsnotcached.d				\
 	predicates/tst.basics.d					\
 	predicates/tst.basics.d.out				\
+	predicates/tst.bignum.d					\
 	predicates/tst.complex.d				\
 	predicates/tst.complex.d.out				\
 	preprocessor/err.D_IDENT_UNDEF.afterprobe.d		\
