@@ -1366,8 +1366,8 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_ABS16:
 	case R_AARCH64_PREL16:
 		if ((signextend64(*value, 16) != *value) ||
-		    ((*value >> 16) != 0) &&
-		    ((*value >> 16) != 0xffffffffffff)) {
+		    (((*value >> 16) != 0) &&
+		    ((*value >> 16) != 0xffffffffffff))) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
 		}
 		uvalue = *value;
@@ -1380,7 +1380,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_ABS32:
 	case R_AARCH64_PREL32:
 		if ((signextend64(*value, 32) != *value) ||
-		    ((*value >> 32) != 0) && ((*value >> 32) != 0xffffffff)) {
+		    (((*value >> 32) != 0) && ((*value >> 32) != 0xffffffff))) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
 		}
 		uvalue = *value;
