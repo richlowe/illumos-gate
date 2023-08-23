@@ -22,22 +22,22 @@
  *   o main thread can grab an alternate thread's info.
  *   o custom guard size is honored
  *   o detach state
- *   	- detached	1
- *   	- joinable		2
- *   	- changing		2
+ *	- detached	1
+ *	- joinable		2
+ *	- changing		2
  *   o daemon state
- *   	- enabled	1
- *   	- disabled		2
+ *	- enabled	1
+ *	- disabled		2
  *   o scope
- *   	- system	1
- *   	- process		2
+ *	- system	1
+ *	- process		2
  *   o inheritable
- *   	- inherit	1
- *   	- explicit		2
+ *	- inherit	1
+ *	- explicit		2
  *   o priority
- *   	- honors change		2
+ *	- honors change		2
  *   o policy
- *   	- honours change	2
+ *	- honours change	2
  *
  *
  * For each of the cases above we explicitly go through and create the set of
@@ -86,7 +86,7 @@ pgn_verif_thr_stack(pthread_attr_t *attr)
 	size_t stksz;
 	void *stk;
 	ucontext_t ctx;
-	uint32_t sp;
+	uintptr_t sp;
 
 	VERIFY0(getcontext(&ctx));
 	VERIFY0(pthread_attr_getstack(attr, &stk, &stksz));

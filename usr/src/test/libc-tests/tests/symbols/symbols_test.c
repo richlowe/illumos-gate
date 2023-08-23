@@ -48,7 +48,7 @@ static char *compilation = "compilation.cfg";
 #if defined(_LP64)
 #define	MFLAG "-m64"
 #elif defined(_ILP32)
-#define	MFLAG "-m32"
+#define	MFLAG	"-m32"
 #endif
 
 const char *compilers[] = {
