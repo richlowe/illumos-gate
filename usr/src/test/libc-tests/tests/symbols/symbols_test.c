@@ -45,8 +45,10 @@ static int full_count = 0;
 static int extra_debug = 0;
 static char *compilation = "compilation.cfg";
 
-#if defined(_LP64)
-#define	MFLAG "-m64"
+#if defined(_LP64) && defined(__aarch64__)
+#define	MFLAG	 ""		/* ARM is not multi-arch, so no flag */
+#elif defined(_LP64)
+#define	MFLAG	 "-m64"
 #elif defined(_ILP32)
 #define	MFLAG	"-m32"
 #endif
