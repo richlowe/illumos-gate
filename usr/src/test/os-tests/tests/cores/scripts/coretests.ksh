@@ -27,6 +27,8 @@
 unalias -a
 set -o pipefail
 
+mach=$(mach)
+
 core_arg0="$(basename $0)"
 core_dir="$(dirname $0)"
 core_dumper32="$core_dir/dumper.32"
@@ -70,7 +72,7 @@ core_dump_one()
 	$prog "$cont" "$kpath" &
 	pid=$!
 	if (( $? != 0 )); then
-		warn "failed to spawn $core_dumper32: $cont $kpath"
+		warn "failed to spawn $prog: $cont $kpath"
 		return 1
 	fi
 
@@ -107,9 +109,18 @@ core_dump_one()
 	fi
 }
 
-if [[ ! -x "$core_dumper32" || ! -x "$core_dumper64" || \
-     ! -f "$core_checker" ]]; then
-	warn "missing expected files"
+if [[ $mach != "aarch64" && ! -x "$core_dumper32" ]]; then
+	warn "missing $core_dumper32"
+	exit $core_exit
+fi
+
+if [[ ! -x "$core_dumper64" ]]; then
+	warn "missing $core_dumper64"
+	exit $core_exit
+fi
+
+if [[ ! -f "$core_checker" ]]; then
+	warn "missing $core_checker"
 	exit $core_exit
 fi
 
@@ -122,7 +133,9 @@ for c in $core_contents; do
 	kpattern="$core_tmpdir/%f.kernel.$c.%p"
 	gpattern="$core_tmpdir/%f.gcore.$c"
 
-	core_dump_one "$core_dumper32" "$c" "$kpattern" "$gpattern"
+	if [[ $mach != "aarch64" ]]; then
+		core_dump_one "$core_dumper32" "$c" "$kpattern" "$gpattern"
+	fi
 	core_dump_one "$core_dumper64" "$c" "$kpattern" "$gpattern"
 
 done
