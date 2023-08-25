@@ -3805,7 +3805,15 @@ scan:
 			 * leftover buffer.
 			 */
 			if (*buf != '\0') {
-				(void) strlcpy(lo_buf, buf, sizeof (lo_buf));
+				/*
+				 * NB: buf may point into lo_buf if we are
+				 * reading leftovers, thus we must use
+				 * memmove as there may be overlap.
+				 */
+				size_t len = MIN(strlen(buf) + 1,
+				    sizeof (lo_buf));
+
+				memmove(lo_buf, buf, len);
 				*leftover = lo_buf;
 			} else {
 				*leftover = NULL;
@@ -3929,8 +3937,16 @@ ret:
 				 * leftover buffer if any.
 				 */
 				if (*buf != '\0') {
-					(void) strlcpy(lo_buf, buf,
+					/*
+					 * NB: buf may point into lo_buf if we
+					 * are reading leftovers, thus we must
+					 * use memmove as there may be
+					 * overlap.
+					 */
+					size_t len = MIN(strlen(buf) + 1,
 					    sizeof (lo_buf));
+
+					memmove(lo_buf, buf, len);
 					*leftover = lo_buf;
 				} else {
 					*leftover = NULL;
@@ -3994,8 +4010,17 @@ ret:
 					 * leftover buffer.
 					 */
 					if (*buf != '\0') {
-						(void) strlcpy(lo_buf, buf,
+						/*
+						 * NB: buf may point into
+						 * lo_buf if we are reading
+						 * leftovers, thus we must use
+						 * memmove as there may be
+						 * overlap.
+						 */
+						size_t len = MIN(strlen(buf) + 1,
 						    sizeof (lo_buf));
+
+						memmove(lo_buf, buf, len);
 						*leftover = lo_buf;
 					} else {
 						*leftover = NULL;
