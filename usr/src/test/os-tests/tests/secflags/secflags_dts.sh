@@ -40,20 +40,34 @@ main(int argc, char **argv)
 }
 EOF
 
-gcc -m32 -o tester-aslr.32 tester.c -Wl,-z,aslr=enabled
-gcc -m32 -o tester-noaslr.32 tester.c -Wl,-z,aslr=disabled
-gcc -m64 -o tester-aslr.64 tester.c -Wl,-z,aslr=enabled
-gcc -m64 -o tester-noaslr.64 tester.c -Wl,-z,aslr=disabled
+mach=$(mach)
+
+if [[ $mach == "aarch64" ]]; then
+	gcc -o tester-aslr.64 tester.c -Wl,-z,aslr=enabled
+	gcc -o tester-noaslr.64 tester.c -Wl,-z,aslr=disabled
+else
+	gcc -m32 -o tester-aslr.32 tester.c -Wl,-z,aslr=enabled
+	gcc -m32 -o tester-noaslr.32 tester.c -Wl,-z,aslr=disabled
+	gcc -m64 -o tester-aslr.64 tester.c -Wl,-z,aslr=enabled
+	gcc -m64 -o tester-noaslr.64 tester.c -Wl,-z,aslr=disabled
+fi
 
 # This is the easiest way I've found to get many many DTs, but it's gross
-gcc -m32 -o many-dts-aslr.32 tester.c -Wl,-z,aslr=enabled \
-    $(for elt in /usr/lib/lib*.so; do echo -Wl,-N,$(basename $elt); done)
-gcc -m32 -o many-dts-noaslr.32 tester.c -Wl,-z,aslr=disabled \
-    $(for elt in /usr/lib/lib*.so; do echo -Wl,-N,$(basename $elt); done)
-gcc -m64 -o many-dts-aslr.64 tester.c -Wl,-z,aslr=enabled \
-    $(for elt in /usr/lib/64/lib*.so; do echo -Wl,-N,$(basename $elt); done)
-gcc -m64 -o many-dts-noaslr.64 tester.c -Wl,-z,aslr=disabled \
-    $(for elt in /usr/lib/64/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+if [[ $mach == "aarch64" ]]; then
+	gcc -o many-dts-aslr.64 tester.c -Wl,-z,aslr=enabled \
+	    $(for elt in /usr/lib/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+	gcc -o many-dts-noaslr.64 tester.c -Wl,-z,aslr=disabled \
+	    $(for elt in /usr/lib/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+else
+	gcc -m32 -o many-dts-aslr.32 tester.c -Wl,-z,aslr=enabled \
+	    $(for elt in /usr/lib/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+	gcc -m32 -o many-dts-noaslr.32 tester.c -Wl,-z,aslr=disabled \
+	    $(for elt in /usr/lib/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+	gcc -m64 -o many-dts-aslr.64 tester.c -Wl,-z,aslr=enabled \
+	    $(for elt in /usr/lib/64/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+	gcc -m64 -o many-dts-noaslr.64 tester.c -Wl,-z,aslr=disabled \
+	    $(for elt in /usr/lib/64/lib*.so; do echo -Wl,-N,$(basename $elt); done)
+fi
 
 check() {
     bin=$1
@@ -76,11 +90,14 @@ fail() {
 }
 
 psecflags -s none $$
-check ./tester-aslr.32 0 E || fail "DT_SUNW_ASLR 1 failed (32-bit)"
-check ./many-dts-aslr.32 0 E || fail \
-    "DT_SUNW_ASLR 1 with many DTs failed (32-bit)"
-check ./tester-aslr.32 1 I || fail \
-    "DT_SUNW_ASLR 1 incorrectly set the inheritable flag (32-bit)"
+if [[ $mach != "aarch64" ]]; then
+	check ./tester-aslr.32 0 E || fail "DT_SUNW_ASLR 1 failed (32-bit)"
+	check ./many-dts-aslr.32 0 E || fail \
+	     "DT_SUNW_ASLR 1 with many DTs failed (32-bit)"
+	check ./tester-aslr.32 1 I || fail \
+	     "DT_SUNW_ASLR 1 incorrectly set the inheritable flag (32-bit)"
+fi
+
 check ./tester-aslr.64 0 E || fail "DT_SUNW_ASLR 1 failed (64-bit)"
 check ./many-dts-aslr.64 0 E || fail \
     "DT_SUNW_ASLR 1 with many DTs failed (64-bit)"
@@ -88,9 +105,12 @@ check ./tester-aslr.64 1 I || fail \
     "DT_SUNW_ASLR 1 incorrectly set the inheritable flag (64-bit)"
 
 psecflags -s aslr $$
-check ./tester-noaslr.32 1 E || fail "DT_SUNW_ASLR 0 failed (32-bit)"
-check ./many-dts-noaslr.32 1 E || fail  \
-    "DT_SUNW_ASLR 0 with many DTs failed (32-bit)"
+if [[ $mach != "aarch64" ]]; then
+	check ./tester-noaslr.32 1 E || fail "DT_SUNW_ASLR 0 failed (32-bit)"
+	check ./many-dts-noaslr.32 1 E || fail  \
+	    "DT_SUNW_ASLR 0 with many DTs failed (32-bit)"
+fi
+
 check ./tester-noaslr.64 1 E || fail "DT_SUNW_ASLR 0 failed (64-bit)"
 check ./many-dts-noaslr.64 1 E || fail \
     "DT_SUNW_ASLR 0 with many DTs failed (64-bit)"
