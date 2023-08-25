@@ -274,31 +274,31 @@ typedef struct ips_conf_s {
 	struct in6_addr	ips_src_mask_v6;
 	struct in6_addr	ips_dst_addr_v6;
 	struct in6_addr	ips_dst_mask_v6;
-	uint8_t 		ips_src_mask_len;
-	uint8_t 		ips_dst_mask_len;
-	in_port_t		ips_src_port_min;
-	in_port_t		ips_src_port_max;
-	in_port_t		ips_dst_port_min;
-	in_port_t		ips_dst_port_max;
-	uint8_t			ips_icmp_type;
-	uint8_t			ips_icmp_type_end;
-	uint8_t			ips_icmp_code;
-	uint8_t			ips_icmp_code_end;
-	uint8_t			ips_ulp_prot;
-	uint8_t			ips_ipsec_prot;
-	uint8_t			ips_isv4;
+	uint8_t		ips_src_mask_len;
+	uint8_t		ips_dst_mask_len;
+	in_port_t	ips_src_port_min;
+	in_port_t	ips_src_port_max;
+	in_port_t	ips_dst_port_min;
+	in_port_t	ips_dst_port_max;
+	uint8_t		ips_icmp_type;
+	uint8_t		ips_icmp_type_end;
+	uint8_t		ips_icmp_code;
+	uint8_t		ips_icmp_code_end;
+	uint8_t		ips_ulp_prot;
+	uint8_t		ips_ipsec_prot;
+	uint8_t		ips_isv4;
 	/*
 	 * SPD_RULE_FLAG_INBOUND		0x0001
 	 * SPD_RULE_FLAG_OUTBOUND		0x0002
 	 */
-	uint8_t			ips_dir;
+	uint8_t		ips_dir;
 	/*
 	 * Keep track of tunnel separately due to explosion of ways to set
 	 * inbound/outbound.
 	 */
-	boolean_t		ips_tunnel;
-	uint64_t		ips_policy_index;
-	uint32_t		ips_act_cnt;
+	boolean_t	ips_tunnel;
+	uint64_t	ips_policy_index;
+	uint32_t	ips_act_cnt;
 	ips_act_props_t	*ips_acts;
 } ips_conf_t;
 
@@ -376,35 +376,35 @@ static alginfo_t known_algs[3][256];
 #define	TOK_dport	4
 #define	TOK_smask	5
 #define	TOK_dmask	6
-#define	TOK_ulp	7
+#define	TOK_ulp		7
 #define	TOK_local	8
 #define	TOK_lport	9
 #define	TOK_remote	10
 #define	TOK_rport	11
-#define	TOK_dir 	12
+#define	TOK_dir		12
 #define	TOK_type	13
 #define	TOK_code	14
 #define	TOK_negotiate	15
 #define	TOK_tunnel	16
 
-#define	IPS_SA SPD_ATTR_END
-#define	IPS_DIR SPD_ATTR_EMPTY
-#define	IPS_NEG SPD_ATTR_NOP
+#define	IPS_SA	SPD_ATTR_END
+#define	IPS_DIR	SPD_ATTR_EMPTY
+#define	IPS_NEG	SPD_ATTR_NOP
 
 
 static str_tval_t pattern_table[] = {
-	{"saddr", 		TOK_saddr,		SPD_EXT_LCLADDR},
+	{"saddr",		TOK_saddr,		SPD_EXT_LCLADDR},
 	{"src",			TOK_saddr,		SPD_EXT_LCLADDR},
 	{"srcaddr",		TOK_saddr,		SPD_EXT_LCLADDR},
-	{"daddr", 		TOK_daddr,		SPD_EXT_REMADDR},
+	{"daddr",		TOK_daddr,		SPD_EXT_REMADDR},
 	{"dst",			TOK_daddr,		SPD_EXT_REMADDR},
 	{"dstaddr",		TOK_daddr,		SPD_EXT_REMADDR},
-	{"sport", 		TOK_sport,		SPD_EXT_LCLPORT},
-	{"dport", 		TOK_dport,		SPD_EXT_REMPORT},
-	{"smask", 		TOK_smask,		IPS_SRC_MASK},
-	{"dmask", 		TOK_dmask,		IPS_DST_MASK},
-	{"ulp", 		TOK_ulp,		SPD_EXT_PROTO},
-	{"proto", 		TOK_ulp,		SPD_EXT_PROTO},
+	{"sport",		TOK_sport,		SPD_EXT_LCLPORT},
+	{"dport",		TOK_dport,		SPD_EXT_REMPORT},
+	{"smask",		TOK_smask,		IPS_SRC_MASK},
+	{"dmask",		TOK_dmask,		IPS_DST_MASK},
+	{"ulp",			TOK_ulp,		SPD_EXT_PROTO},
+	{"proto",		TOK_ulp,		SPD_EXT_PROTO},
 	{"local",		TOK_local,		SPD_EXT_LCLADDR},
 	{"laddr",		TOK_local,		SPD_EXT_LCLADDR},
 	{"lport",		TOK_lport,		SPD_EXT_LCLPORT},
@@ -416,7 +416,7 @@ static str_tval_t pattern_table[] = {
 	{"code",		TOK_code,		SPD_EXT_ICMP_TYPECODE},
 	{"negotiate",		TOK_negotiate,		IPS_NEG},
 	{"tunnel",		TOK_tunnel,		SPD_EXT_TUN_NAME},
-	{NULL, 			0,				0},
+	{NULL,			0,				0},
 };
 
 #define	TOK_apply	1
@@ -427,19 +427,19 @@ static str_tval_t pattern_table[] = {
 #define	TOK_or		6
 
 static str_tval_t action_table[] = {
-	{"apply", 		TOK_apply,		SPD_ACTTYPE_IPSEC},
-	{"permit", 		TOK_permit,		SPD_ACTTYPE_IPSEC},
-	{"ipsec", 		TOK_ipsec,		SPD_ACTTYPE_IPSEC},
-	{"bypass", 		TOK_bypass,		SPD_ACTTYPE_PASS},
-	{"pass", 		TOK_bypass,		SPD_ACTTYPE_PASS},
-	{"drop", 		TOK_drop,		SPD_ACTTYPE_DROP},
+	{"apply",		TOK_apply,		SPD_ACTTYPE_IPSEC},
+	{"permit",		TOK_permit,		SPD_ACTTYPE_IPSEC},
+	{"ipsec",		TOK_ipsec,		SPD_ACTTYPE_IPSEC},
+	{"bypass",		TOK_bypass,		SPD_ACTTYPE_PASS},
+	{"pass",		TOK_bypass,		SPD_ACTTYPE_PASS},
+	{"drop",		TOK_drop,		SPD_ACTTYPE_DROP},
 	{"or",			TOK_or,			0},
-	{NULL, 			0,				0},
+	{NULL,			0,				0},
 };
 
 static str_val_t property_table[] = {
-	{"auth_algs", 		SPD_ATTR_AH_AUTH},
-	{"encr_algs", 		SPD_ATTR_ESP_ENCR},
+	{"auth_algs",		SPD_ATTR_AH_AUTH},
+	{"encr_algs",		SPD_ATTR_ESP_ENCR},
 	{"encr_auth_algs",	SPD_ATTR_ESP_AUTH},
 	{"sa",				IPS_SA},
 	{"dir",				IPS_DIR},
@@ -464,7 +464,7 @@ static str_val_t icmp_type_table[] = {
 	{"pkttoobig6",	ICMP6_PACKET_TOO_BIG},
 	{"timex6",	ICMP6_TIME_EXCEEDED},
 	{"paramprob6",	ICMP6_PARAM_PROB},
-	{"echo6", 	ICMP6_ECHO_REQUEST},
+	{"echo6",	ICMP6_ECHO_REQUEST},
 	{"echorep6",	ICMP6_ECHO_REPLY},
 	{"router-sol6",	ND_ROUTER_SOLICIT},
 	{"router-ad6",	ND_ROUTER_ADVERT},
@@ -505,6 +505,24 @@ static str_val_t icmp_code_table[] = {
 
 static sigset_t set, oset;
 
+/* An overlap-safe strlcpy(3C), derived from its libc implementation */
+static size_t
+strlmove(char *dst, const char *src, size_t len)
+{
+	size_t slen = strlen(src);
+	size_t copied;
+
+	if (len == 0)
+		return (slen);
+
+	if (slen >= len)
+		copied = len - 1;
+	else
+		copied = slen;
+	(void) memmove(dst, src, copied);
+	dst[copied] = '\0';
+	return (slen);
+}
 
 static boolean_t
 add_index(int index)
@@ -3805,7 +3823,7 @@ scan:
 			 * leftover buffer.
 			 */
 			if (*buf != '\0') {
-				(void) strlcpy(lo_buf, buf, sizeof (lo_buf));
+				(void) strlmove(lo_buf, buf, sizeof (lo_buf));
 				*leftover = lo_buf;
 			} else {
 				*leftover = NULL;
@@ -3929,7 +3947,7 @@ ret:
 				 * leftover buffer if any.
 				 */
 				if (*buf != '\0') {
-					(void) strlcpy(lo_buf, buf,
+					(void) strlmove(lo_buf, buf,
 					    sizeof (lo_buf));
 					*leftover = lo_buf;
 				} else {
@@ -3994,7 +4012,7 @@ ret:
 					 * leftover buffer.
 					 */
 					if (*buf != '\0') {
-						(void) strlcpy(lo_buf, buf,
+						strlmove(lo_buf, buf,
 						    sizeof (lo_buf));
 						*leftover = lo_buf;
 					} else {
