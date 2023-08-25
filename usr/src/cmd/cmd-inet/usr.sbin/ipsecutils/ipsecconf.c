@@ -505,6 +505,24 @@ static str_val_t icmp_code_table[] = {
 
 static sigset_t set, oset;
 
+/* An overlap-safe strlcpy(3C), derived from its libc implementation */
+static size_t
+strlmove(char *dst, const char *src, size_t len)
+{
+	size_t slen = strlen(src);
+	size_t copied;
+
+	if (len == 0)
+		return (slen);
+
+	if (slen >= len)
+		copied = len - 1;
+	else
+		copied = slen;
+	(void) memmove(dst, src, copied);
+	dst[copied] = '\0';
+	return (slen);
+}
 
 static boolean_t
 add_index(int index)
@@ -3805,15 +3823,7 @@ scan:
 			 * leftover buffer.
 			 */
 			if (*buf != '\0') {
-				/*
-				 * NB: buf may point into lo_buf if we are
-				 * reading leftovers, thus we must use
-				 * memmove as there may be overlap.
-				 */
-				size_t len = MIN(strlen(buf) + 1,
-				    sizeof (lo_buf));
-
-				memmove(lo_buf, buf, len);
+				(void) strlmove(lo_buf, buf, sizeof (lo_buf));
 				*leftover = lo_buf;
 			} else {
 				*leftover = NULL;
@@ -3937,16 +3947,8 @@ ret:
 				 * leftover buffer if any.
 				 */
 				if (*buf != '\0') {
-					/*
-					 * NB: buf may point into lo_buf if we
-					 * are reading leftovers, thus we must
-					 * use memmove as there may be
-					 * overlap.
-					 */
-					size_t len = MIN(strlen(buf) + 1,
+					(void) strlmove(lo_buf, buf,
 					    sizeof (lo_buf));
-
-					memmove(lo_buf, buf, len);
 					*leftover = lo_buf;
 				} else {
 					*leftover = NULL;
@@ -4010,17 +4012,8 @@ ret:
 					 * leftover buffer.
 					 */
 					if (*buf != '\0') {
-						/*
-						 * NB: buf may point into
-						 * lo_buf if we are reading
-						 * leftovers, thus we must use
-						 * memmove as there may be
-						 * overlap.
-						 */
-						size_t len = MIN(strlen(buf) + 1,
+						strlmove(lo_buf, buf,
 						    sizeof (lo_buf));
-
-						memmove(lo_buf, buf, len);
 						*leftover = lo_buf;
 					} else {
 						*leftover = NULL;
