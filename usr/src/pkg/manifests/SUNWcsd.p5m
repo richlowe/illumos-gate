@@ -63,8 +63,8 @@ file path=etc/iu.ap group=sys preserve=true
 file path=etc/minor_perm group=sys preserve=true
 file path=etc/name_to_major group=sys preserve=true
 file path=etc/path_to_inst group=root mode=0444 preserve=true
-$(not_aarch64)dir path=etc/rcm group=sys
-$(not_aarch64)dir path=etc/rcm/scripts group=sys
+dir  path=etc/rcm group=sys
+dir  path=etc/rcm/scripts group=sys
 dir  path=etc/security group=sys
 file path=etc/security/device_policy group=sys preserve=true
 file path=etc/security/extra_privs group=sys preserve=true

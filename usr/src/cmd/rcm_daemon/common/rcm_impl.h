@@ -47,10 +47,13 @@ extern "C" {
 #include <syslog.h>
 #include <thread.h>
 #include <unistd.h>
+
+#include <sys/containerof.h>
 #include <sys/mman.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
 #include <librcm.h>
 #include <librcm_impl.h>
 
@@ -99,9 +102,8 @@ typedef struct rcm_queue {
 	struct rcm_queue	*prev;
 } rcm_queue_t;
 
-#define	RCM_STRUCT_BASE_ADDR(struct_type, x, y)		\
-	((struct_type *) ((void *)(((char *)(x)) -	\
-			(int)(&((struct_type *)0)->y))))
+#define	RCM_STRUCT_BASE_ADDR(struct_type, x, y)	\
+	__containerof(x, struct_type, y)
 
 /*
  * Struct for client loadable module
