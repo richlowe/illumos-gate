@@ -19,13 +19,15 @@
 mkdir /tmp/secflags-test.$$
 cd /tmp/secflags-test.$$
 
+ulimit -c unlimited
+
 /usr/bin/psecflags -s aslr -e sleep 100000 &
 pid=$!
 # Make sure we generate a kernel core we can find
 coreadm -p core $pid
 enabled=$(/usr/bin/svcprop -p config_params/process_enabled coreadm)
 coreadm_restore=""
-if [[ "$enabled" = "false" ]]; then
+if [[ "$enabled" == "false" ]]; then
     coreadm_restore="/usr/bin/coreadm -d process"
     coreadm -e process
 fi
