@@ -15,6 +15,10 @@
 # Copyright 2019 Joyent, Inc.
 #
 
+# All the network management commands are in /sbin or /usr/sbin, neither of
+# which is in the default $PATH
+export PATH=/sbin:/usr/sbin:$PATH
+
 # we can't presume /usr/bin/timeout is there
 timeout_cmd() {
     $* &
@@ -37,6 +41,12 @@ fi
 
 # NOTE: If multihomed, this may fail in interesting ways...
 MY_IP=`netstat -in -f inet | egrep -v "Name|lo0" | awk '{print $4}' | head -1`
+
+if [[ -z $MY_IP ]]; then
+    echo "Error: could not determine local network address." >&2
+    exit 255
+fi
+
 TEST_REMOTE_DST1=10.90.1.25
 TEST_REMOTE_DST2=10.19.84.2
 TEST_REMOTE_DST3=10.19.84.3
