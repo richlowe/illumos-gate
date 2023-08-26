@@ -833,7 +833,7 @@ check_dev_dir(int force)
 /*ARGSUSED1*/
 static int
 dev_node(const char *node, const struct stat *node_stat, int flags,
-	struct FTW *ftw_info)
+    struct FTW *ftw_info)
 {
 	char linkbuf[MAXPATHLEN];
 	struct dev_list *ptr;
@@ -947,7 +947,7 @@ correct_location(char *drv_path, char **drvelf_desc, int *drvelf_type_ptr)
  * Creates a two-element linked list of isa-specific subdirectories to
  * search for each driver, which is is used by the function
  * module_not_found() to convert the isa-independent modpath into an
- * isa-specific path .  The list is ordered depending on the machine
+ * isa-specific path.  The list is ordered depending on the machine
  * architecture and instruction set architecture, corresponding to the
  * order in which module_not_found() will search for the driver.  This
  * routine relies on an architecture not having more than two
@@ -984,6 +984,11 @@ isaspec_drvmod_discovery()
 			(void) strcpy(moddir->next->direc, DRVDIR64);
 		}
 		moddir->next->next = NULL;
+		return (NOERR);
+	} else if (strcmp(arch, "aarch64") == 0) {
+		(void) strcpy(moddir->direc, DRVDIR64);
+
+		moddir->next = NULL;
 		return (NOERR);
 	} else {
 		(void) fprintf(stderr, gettext(ERR_ARCH_NOT_SUPPORTED), arch);
