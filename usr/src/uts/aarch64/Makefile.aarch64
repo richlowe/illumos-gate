@@ -693,4 +693,5 @@ DACF_KMODS	+= net_dacf
 #
 #	Sensor related drivers
 #
+DRV_KMODS	+= ksensor
 DRV_KMODS	+= ksensor_test

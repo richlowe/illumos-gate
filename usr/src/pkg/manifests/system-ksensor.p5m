@@ -20,9 +20,9 @@ set name=pkg.description value="Kernel Sensor Framework"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
 set name=variant.arch value=$(ARCH)
 dir  path=kernel/drv group=sys
-$(not_aarch64)dir path=kernel/drv/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/drv/$(ARCH64)/ksensor group=sys
-$(not_aarch64)file path=kernel/drv/ksensor.conf group=sys
+dir  path=kernel/drv/$(ARCH64) group=sys
+file path=kernel/drv/$(ARCH64)/ksensor group=sys
+file path=kernel/drv/ksensor.conf group=sys
 dir  path=usr/include
 dir  path=usr/include/sys
 file path=usr/include/sys/sensors.h mode=0644
