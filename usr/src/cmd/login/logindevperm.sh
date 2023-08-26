@@ -73,25 +73,25 @@ EOM
 
 case "$MACH" in
     "i386" )
-	# 
+	#
 	# These are the x86 specific entries
-	# It depends on the build machine being an x86
+	# They depend on the build machine being an x86
 	#
 	cat <<-EOM
 	EOM
 	;;
     "sparc" )
-	# 
+	#
 	# These are the sparc specific entries
-	# It depends on the build machine being a sparc
+	# They depend on the build machine being a sparc
 	#
 	cat <<-EOM
 	EOM
 	;;
     "aarch64" )
-	# 
-	# These are the sparc specific entries
-	# It depends on the build machine being a sparc
+	#
+	# These are the AArch64 specific entries
+	# They depend on the build machine being an AArch64
 	#
 	cat <<-EOM
 	EOM

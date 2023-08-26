@@ -23,18 +23,14 @@
 # Copyright (c) 1998, 2000 by Sun Microsystems, Inc.
 # All rights reserved.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
+
 #
 # This is the script that generates the devlink.tab file. It is
-# architecture-aware, and dumps different stuff for x86 and sparc.
+# architecture-aware, and dumps different stuff for aarch64, sparc, and x86.
 # There is a lot of common entries, which are dumped first.
-#
-# the SID of this script, and the SID of the dumped script are
-# always the same.
 #
 
 cat <<EOM
-#ident   "%Z%%M% %I%     %E% SMI"
 #
 # Copyright (c) 1998 by Sun Microsystems, Inc.
 #
@@ -99,10 +95,10 @@ cat <<EOM
 EOM
 
 case "$MACH" in
-  "i386" ) 
-	# 
+  "i386" )
+	#
 	# These are the x86 specific entries
-	# It depends on the build machine being an x86
+	# They depend on the build machine being an x86
 	#
 	cat <<-EOM
 	EOM
@@ -110,15 +106,15 @@ case "$MACH" in
   "sparc" )
 	#
 	# These are the sparc specific entries
-	# It depends on the build machine being an sparc
+	# They depend on the build machine being a sparc
 	#
 	cat <<-EOM
 	EOM
 	;;
   "aarch64" )
 	#
-	# These are the sparc specific entries
-	# It depends on the build machine being an sparc
+	# These are the AArch64 specific entries
+	# They depend on the build machine being an AArch64
 	#
 	cat <<-EOM
 	EOM
