@@ -54,14 +54,11 @@ SMATCH=off
 
 SRCDIR =	$(SRC)/lib/libscf/common
 COMDIR =	$(SRC)/common/svc
-HEADDIR =	$(SRC)/head
 LIBUUTIL =	$(SRC)/lib/libuutil
-# needed by libzonecfg.h
-LIBBRAND =	$(SRC)/lib/libbrand
 
 CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 		-I$(SRC)/lib/libscf/inc -I$(COMDIR) -I$(LIBUUTIL)/common \
-		-I$(LIBBRAND)/common -I$(HEADDIR)
+		-I$(ROOTHDRDIR)
 LDLIBS +=	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
 		-luutil -lc -lgen -lnvpair -lsmbios
 ADJUNCT_LIBS +=	libsmbios.so libnvpair.so libgen.so libc.so
