@@ -109,6 +109,8 @@ core_dump_one()
 	fi
 }
 
+ulimit -c unlimited
+
 if [[ $mach != "aarch64" && ! -x "$core_dumper32" ]]; then
 	warn "missing $core_dumper32"
 	exit $core_exit

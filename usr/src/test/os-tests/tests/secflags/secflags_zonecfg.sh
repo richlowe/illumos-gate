@@ -14,7 +14,8 @@
 # Copyright 2015, Richard Lowe.
 
 # Verify that zones can be configured with security-flags
-LC_ALL=C                        # Collation is important
+export LC_ALL=C                        # Collation is important
+export PATH=/usr/bin:/sbin:/usr/sbin   # zonecfg(8) is not in the default PATH
 
 expect_success() {
     name=$1
@@ -30,11 +31,11 @@ expect_success() {
 
     zonecfg -z $name.$$ delete -F
 
-    if (($r != 0)); then
+    if ((r != 0)); then
         printf "%s: FAIL\n" $name
         cat out.$$
         rm out.$$
-        return 1 
+        return 1
     else
         rm out.$$
         printf  "%s: PASS\n" $name
@@ -59,7 +60,7 @@ expect_fail() {
     zonecfg -z $name.$$ delete -F >/dev/null 2>&1
 
 
-    if (($r == 0)); then
+    if ((r == 0)); then
         printf "%s: FAIL (succeeded)\n" $name
         rm out.$$
         return 1

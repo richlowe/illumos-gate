@@ -119,8 +119,8 @@ process_event(int cmd, int seq_num, nvlist_t *nvl, nvlist_t **ret)
 	pid_t pid;
 	uint32_t flag = (uint32_t)0;
 	uint64_t pid64 = (uint64_t)0;
-	size_t buflen = 0;
-	size_t interval_size = 0;
+	uint_t buflen = 0;
+	uint_t interval_size = 0;
 	timespec_t *interval = NULL;
 	nvlist_t *change_data = NULL;
 	nvlist_t *event_data = NULL;
