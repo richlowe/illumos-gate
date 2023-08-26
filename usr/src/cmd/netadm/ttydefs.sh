@@ -25,6 +25,9 @@
 #
 # Copyright 2017 Hayashi Naoyuki
 
+
+# XXXARM: The only difference between these two stanzas is the baudrate of the
+# console, it would be better to commonize everything.
 case "$MACH" in
   "u3b2"|"sparc"|"i386"|"ppc" )
 	echo "# VERSION=1
