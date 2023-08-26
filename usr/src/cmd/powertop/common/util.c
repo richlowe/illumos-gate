@@ -47,9 +47,9 @@
 #include <errno.h>
 #include "powertop.h"
 
-static char 	PROG_FMT[] = "%s: ";
-static char 	ERR_FMT[] = ": %s";
-static char 	*progname;
+static char	PROG_FMT[] = "%s: ";
+static char	ERR_FMT[] = ": %s";
+static char	*progname;
 
 void
 pt_set_progname(char *name)
@@ -61,7 +61,7 @@ pt_set_progname(char *name)
 void
 pt_error(char *format, ...)
 {
-	int 	err = errno;
+	int	err = errno;
 	va_list alist;
 
 	if (g_gui)
@@ -88,7 +88,7 @@ pt_enumerate_cpus(void)
 	int	max, cpus_conf;
 	uint_t	ncpus = 0;
 
-	max 		= sysconf(_SC_CPUID_MAX);
+	max		= sysconf(_SC_CPUID_MAX);
 	cpus_conf	= sysconf(_SC_NPROCESSORS_CONF);
 
 	/* Fall back to one CPU if any of the sysconf calls above failed */
@@ -144,7 +144,8 @@ pt_get_bit_depth(void)
 	if (strcmp(buf, "sparc") == 0 || strcmp(buf, "i386") == 0)
 		return (32);
 
-	if (strcmp(buf, "sparcv9") == 0 || strcmp(buf, "amd64") == 0)
+	if (strcmp(buf, "sparcv9") == 0 || strcmp(buf, "amd64") == 0 ||
+	    strcmp(buf, "aarch64") == 0)
 		return (64);
 
 	return (-3);
