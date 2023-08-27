@@ -780,12 +780,6 @@ usr/lib/amd64/lib9p.so			i386
 usr/lib/lib9p.so		aarch64
 
 #
-# We're not quite ready to ship ctfconvert and ctfmerge
-#
-usr/bin/ctfconvert
-usr/bin/ctfmerge
-
-#
 # libjedec is private
 #
 usr/include/libjedec.h
