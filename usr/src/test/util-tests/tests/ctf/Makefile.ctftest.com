@@ -43,15 +43,17 @@
 #	OBJS_M_64	64-bit merge objects
 #
 
+MACH:sh = mach
+
 CONV32 =	$(BUILDDIR)/$(TEST)-32c
 CONV64 =	$(BUILDDIR)/$(TEST)-64c
 MERGE32 =	$(BUILDDIR)/$(TEST)-32m
 MERGE64 =	$(BUILDDIR)/$(TEST)-64m
 
-BINS =		$(CONV32) \
-		$(CONV64) \
-		$(MERGE32) \
-		$(MERGE64)
+
+COMMON_BINS =	$(CONV64) $(MERGE64)
+i386_BINS =	$(CONV32) $(MERGE32)
+BINS =		$(COMMON_BINS) $($(MACH)_BINS)
 
 build: $(BINS)
 
@@ -85,8 +87,17 @@ $(MERGE64): $(OBJS_M_64)
 	$(CC) $(CFLAGS64) $(TEST_CFLAGS64) $(DEBUGFLAGS) -o $@ $(OBJS_M_64)
 	$(CTFMERGE) -t -o $@ $(OBJS_M_64)
 
-run-test:
+run-test.32: $(CHECK32) $(CONV32) $(MERGE32)
 	$(CHECK32) $(CONV32)
-	$(CHECK64) $(CONV64)
 	$(CHECK32) $(MERGE32)
+
+run-test.64: $(CHECK64) $(CONV64) $(MERGE64)
+	$(CHECK64) $(CONV64)
 	$(CHECK64) $(MERGE64)
+
+COMMON_TESTS=	run-test.64
+i386_TESTS=	run-test.32
+
+TESTS= $(COMMON_TESTS) $($(MACH)_TESTS)
+
+run-test: $(TESTS)

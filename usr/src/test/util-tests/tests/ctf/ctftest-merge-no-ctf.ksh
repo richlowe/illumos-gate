@@ -18,14 +18,6 @@ result=0
 
 progname=$(basename $0)
 
-#
-# The assembler and compiler may not end up using the same architecture
-# (e.g. 32-bit or 64-bit) by default. So we force this to always be
-# consistent.
-#
-cflags="-m64"
-asflags="--64"
-
 fail()
 {
 	echo "Failed: $*" 2>&1
@@ -38,7 +30,7 @@ fail_no_ctf()
 	set +e
 	out=$($cmd 2>&1)
 
-	if [[ $? -eq 0 ]]; then
+	if (( $? == 0 )); then
 		fail "$cmd succeeded but should have failed"
 		set -e
 		return;
@@ -87,8 +79,6 @@ cat <<EOF >file4.s
 .globl caller
 .type caller,@function
 caller:
-	movl 4(%ebp), %eax
-	ret
 EOF
 
 echo "$progname: ctfmerge should fail if one C-source lacks CTF"
@@ -115,7 +105,7 @@ ld -r -o files.o file1.o file3.o
 $ctf_merge -m -o files.o file1.o file3.o
 
 echo "$progname: ctfmerge should allow an .s file to lack CTF"
-$ctf_as $asflags -o file4.o file4.s
+$ctf_cc -c -o file4.o file4.s
 ld -r -o files.o file4.o file1.o
 $ctf_merge -o files.o file4.o file1.o
 ld -r -o files.o file4.o file1.o

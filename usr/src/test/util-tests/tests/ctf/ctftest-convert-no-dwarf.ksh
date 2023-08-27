@@ -18,14 +18,6 @@ result=0
 
 progname=$(basename $0)
 
-#
-# The assembler and compiler may not end up using the same architecture
-# (e.g. 32-bit or 64-bit) by default. So we force this to always be
-# consistent.
-#
-cflags="-m64"
-asflags="--64"
-
 fail()
 {
 	echo "Failed: $*" 2>&1
@@ -83,8 +75,6 @@ cat <<EOF >file4.s
 .globl caller
 .type caller,@function
 caller:
-	movl 4(%ebp), %eax
-	ret
 EOF
 
 echo "$progname: An empty file should fail conversion due to no DWARF"
@@ -136,7 +126,7 @@ has_ctf files.o
 echo "$progname: One .s file missing DWARF should pass"
 $ctf_cc $cflags $ctf_debugflags -c -o file1.o file1.c
 $ctf_cc $cflags $ctf_debugflags -c -o file2.o file2.c
-$ctf_as $asflags -o file4.o file4.s
+$ctf_cc $cflags -c -o file4.o file4.s
 $ctf_cc $cflags -o mybin file1.o file2.o file4.o
 $ctf_convert mybin
 has_ctf mybin

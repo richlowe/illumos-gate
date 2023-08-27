@@ -32,12 +32,16 @@ ctf_root=$(cd $(dirname $0) && echo $PWD)
 ctf_tests=
 ctf_cc="gcc"
 ctf_cxx="g++"
-ctf_as="gas"
 ctf_convert="ctfconvert"
 ctf_merge="ctfmerge"
 ctf_debugflags="-gdwarf-2 "
-ctf_mach32="-m32"
-ctf_mach64="-m64"
+ctf_mach=$(mach)
+ctf_mach32flag="-m32"
+
+if [[ $ctf_mach != "aarch64" ]]; then
+	ctf_mach64flag="-m64"
+fi
+
 ctf_temp="$TMPDIR/ctftest.$$.o"
 ctf_makefile="Makefile.ctftest"
 ctf_nerrs=0
@@ -122,13 +126,14 @@ Beginning CTF tests with the following settings:
 cc:		$(which $ctf_cc)
 detected:	$ctf_cc_type $ctf_cc_version
 CC:		$(which $ctf_cxx)
-as:		$(which $ctf_as)
 ctfconvert:	$(which $ctf_convert)
 ctfmerge:	$(which $ctf_merge)
-32-bit CFLAGS:	$ctf_32cflags
-64-bit CFLAGS:	$ctf_64cflags
-
 EOF
+if [[ $ctf_mach != "aarch64" ]]; then
+	echo "32-bit CFLAGS:	$ctf_32cflags"
+fi
+echo "64-bit CFLAGS:	$ctf_64cflags"
+echo
 }
 
 run_one()
@@ -177,8 +182,8 @@ run_dir()
 	if ! make -C $dir -f Makefile.ctftest \
 	    BUILDDIR="$outdir" \
 	    CC="$ctf_cc" \
-	    CFLAGS32="$ctf_mach32" \
-	    CFLAGS64="$ctf_mach64" \
+	    CFLAGS32="$ctf_mach32flag" \
+	    CFLAGS64="$ctf_mach64flag" \
 	    DEBUGFLAGS="$ctf_debugflags" \
 	    CTFCONVERT="$ctf_convert" \
 	    CTFMERGE="$ctf_merge" \
@@ -214,11 +219,15 @@ run_tests()
 		base=$(basename "$t" .c)
 		check=$(echo "$base" | sed s/test-/check-/)
 		if [[ -f "$ctf_root/$check" ]]; then
-			run_one $t "$ctf_root/$check" "$ctf_32cflags"
+			if [[ $ctf_mach != "aarch64" ]]; then
+				run_one $t "$ctf_root/$check" "$ctf_32cflags"
+			fi
 			run_one $t "$ctf_root/$check" "$ctf_64cflags"
 		elif [[ -f "$ctf_root/$check-32" && \
 		    -f "$ctf_root/$check-64" ]]; then
-			run_one $t "$ctf_root/$check-32" "$ctf_32cflags"
+			if [[ $ctf_mach != "aarch64" ]]; then
+				run_one $t "$ctf_root/$check-32" "$ctf_32cflags"
+			fi
 			run_one $t "$ctf_root/$check-64" "$ctf_64cflags"
 		else
 			test_fail "missing checker for $t"
@@ -252,7 +261,7 @@ run_tests()
 
 		(cd $outdir && $f)
 
-		if [[ $? -ne 0 ]]; then
+		if (( $? != 0 )); then
 			test_fail "$f failed"
 		else
 			echo "TEST PASSED: $f"
@@ -262,11 +271,8 @@ run_tests()
 	done
 }
 
-while getopts ":a:C:c:g:m:t:" c $@; do
+while getopts ":C:c:g:m:t:" c $@; do
 	case "$c" in
-	a)
-		ctf_as=$OPTARG
-		;;
 	C)
 		ctf_cxx=$OPTARG
 		;;
@@ -291,20 +297,20 @@ while getopts ":a:C:c:g:m:t:" c $@; do
 	esac
 done
 
-ctf_32cflags="$ctf_mach32 $ctf_debugflags"
-ctf_64cflags="$ctf_mach64 $ctf_debugflags"
+ctf_32cflags="$ctf_mach32flag $ctf_debugflags"
+ctf_64cflags="$ctf_mach64flag $ctf_debugflags"
 
 determine_compiler
 
-export ctf_as ctf_cc ctf_cxx ctf_debugflags ctf_merge ctf_convert
+export ctf_cc ctf_cxx ctf_debugflags ctf_merge ctf_convert
 export ctf_cc_type ctf_cc_version
 
 announce
 
 run_tests
 
-if [[ $ctf_nerrs -ne 0 ]]; then
-	if [[ $ctf_nerrs -eq 1 ]]; then
+if (( ctf_nerrs != 0 )); then
+	if (( ctf_nerrs == 1 )); then
 		printf "\n%s: %u test failed\n" "$ctf_arg0" "$ctf_nerrs"
 	else
 		printf "\n%s: %u tests failed\n" "$ctf_arg0" "$ctf_nerrs"

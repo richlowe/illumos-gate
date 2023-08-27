@@ -32,6 +32,8 @@
 #	CHECK64		Program to check 64-bit output
 #
 
+MACH:sh = mach
+
 OBJS_C_32 =	$(BUILDDIR)/test-global.32.c.o \
 		$(BUILDDIR)/test-scoped.32.c.o
 
@@ -44,10 +46,13 @@ OBJS_M_32 =	$(BUILDDIR)/test-global.32.m.o \
 OBJS_M_64 =	$(BUILDDIR)/test-global.64.m.o \
 		$(BUILDDIR)/test-scoped.64.m.o
 
-BINS =		$(BUILDDIR)/test-merge-reduction-32c.so.1 \
-		$(BUILDDIR)/test-merge-reduction-32m.so.1 \
-		$(BUILDDIR)/test-merge-reduction-64c.so.1 \
+COMMON_BINS =	$(BUILDDIR)/test-merge-reduction-64c.so.1 \
 		$(BUILDDIR)/test-merge-reduction-64m.so.1 \
+
+i386_BINS =	$(BUILDDIR)/test-merge-reduction-32c.so.1 \
+		$(BUILDDIR)/test-merge-reduction-32m.so.1 \
+
+BINS = $(COMMON_BINS) $($(MACH)_BINS)
 
 CFLAGS = -fPIC
 LDFLAGS = -shared -Wl,-Mmapfile-vers -Wl,-ztext -Wl,-zdefs \
@@ -85,8 +90,16 @@ $(BUILDDIR)/test-merge-reduction-64m.so.1: $(OBJS_M_64)
 	$(CC) $(CFLAGS64) $(CFLAGS) $(LDFLAGS) $(DEBUGFLAGS) -o $@ $(OBJS_M_64)
 	$(CTFMERGE) -t -o $@ $(OBJS_M_64)
 
-run-test:
+run-test.32: $(CHECK32)
 	$(CHECK32) $(BUILDDIR)/test-merge-reduction-32c.so.1
-	$(CHECK64) $(BUILDDIR)/test-merge-reduction-64c.so.1
 	$(CHECK32) $(BUILDDIR)/test-merge-reduction-32m.so.1
+
+run-test.64: $(CHECK64)
+	$(CHECK64) $(BUILDDIR)/test-merge-reduction-64c.so.1
 	$(CHECK64) $(BUILDDIR)/test-merge-reduction-64m.so.1
+
+COMMON_TESTS = run-test.64
+i386_TESTS = run-test.32
+TESTS = $(COMMON_TESTS) $($(MACH)_TESTS)
+
+run-test: $(TESTS)

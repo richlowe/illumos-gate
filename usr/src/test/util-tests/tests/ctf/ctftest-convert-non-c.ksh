@@ -30,7 +30,7 @@ fail_non_c()
 	set +e
 	out=$($ctf_convert $cmd 2>&1)
 
-	if [[ $? -eq 0 ]]; then
+	if (( $? == 0 )); then
 		fail "$cmd succeeded but should have failed"
 		set -e
 		return;
@@ -71,8 +71,6 @@ cat <<EOF >file3.s
 .globl caller
 .type caller,@function
 caller:
-	movl 4(%ebp), %eax
-	ret
 EOF
 
 echo "$progname: ctfconvert should fail on a .cc-derived object"
@@ -87,9 +85,9 @@ $ctf_convert -i file2.o
 no_ctf file2.o
 
 echo "$progname: ctfconvert should fail on a .s-derived object"
-$ctf_as -o file3.o file3.s
+$ctf_cc -c -o file3.o file3.s
 fail_non_c file3.o
-$ctf_as -o file3.o file3.s
+$ctf_cc -c -o file3.o file3.s
 $ctf_convert -i file3.o
 no_ctf file3.o
 

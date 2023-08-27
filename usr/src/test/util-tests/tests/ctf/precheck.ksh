@@ -29,7 +29,6 @@ check_env()
 	}
 }
 
-check_env gas
 check_env ctfconvert
 check_env ctfmerge
 check_env elfdump

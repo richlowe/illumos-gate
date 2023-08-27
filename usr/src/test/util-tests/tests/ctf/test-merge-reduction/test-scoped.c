@@ -14,7 +14,7 @@
  */
 
 #include <sys/types.h>
-#include <limits.h>
+#include <inttypes.h>
 
 int data;
 
