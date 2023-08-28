@@ -1518,11 +1518,10 @@ overlay_target_open(dev_t *devp, int flags, int otype, cred_t *credp)
 	if (otype & OTYP_BLK)
 		return (EINVAL);
 
-	if (flags & ~(FREAD | FWRITE | FEXCL))
+	if (flags & ~(FREAD | FWRITE | FEXCL | FOFFMAX))
 		return (EINVAL);
 
-	if ((flags & FWRITE) &&
-	    !(flags & FEXCL))
+	if ((flags & FWRITE) && !(flags & FEXCL))
 		return (EINVAL);
 
 	if (!(flags & FREAD) && !(flags & FWRITE))
