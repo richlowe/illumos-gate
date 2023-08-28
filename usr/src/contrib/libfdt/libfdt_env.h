@@ -11,7 +11,7 @@
 #include <sys/null.h>
 #include <sys/types.h>
 
-#ifdef _KERNEL
+#if defined(_KERNEL) && !defined(_BOOT)
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
 #else

@@ -60,28 +60,17 @@ extern struct tm *localtime(const time_t *);
  * Since <tzfile.h> is not a documented header, it seemed better to just
  * inline them here rather than having a full-blown <tzfile.h> of our own.
  */
-/* XXXARM: On arm, these cause re-definitions deep in the header stew */
-#undef EPOCH_YEAR
 #define	EPOCH_YEAR		1970
-#undef EPOCH_WDAY
 #define	EPOCH_WDAY		4
-#undef SECS_PER_MIN
 #define	SECS_PER_MIN		60
-#undef DAYS_PER_WEEK
 #define	DAYS_PER_WEEK		7
-#undef DAYS_PER_NYEAR
 #define	DAYS_PER_NYEAR		365
-#undef DAYS_PER_LYEAR
 #define	DAYS_PER_LYEAR		366
-#undef MONS_PER_YEAR
 #define	MONS_PER_YEAR		12
-#undef SECS_PER_HOUR
 #define	SECS_PER_HOUR		(SECS_PER_MIN * 60)
-#undef SECS_PER_DAY
 #define	SECS_PER_DAY		(SECS_PER_HOUR * 24)
 #define	TM_YEAR_BASE		1900
 
-#undef isleap
 #define	isleap(y) (((y) % 4) == 0 && (((y) % 100) != 0 || ((y) % 400) == 0))
 
 #ifdef __cplusplus
