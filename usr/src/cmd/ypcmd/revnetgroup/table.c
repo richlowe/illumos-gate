@@ -29,8 +29,6 @@
 #include "util.h"
 #include "table.h"
 
-
-
 /*
  * Hash table manager. Store/lookup strings, keyed by string
  */

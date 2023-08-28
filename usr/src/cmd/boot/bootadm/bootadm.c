@@ -27,6 +27,7 @@
  * Copyright 2017 Nexenta Systems, Inc.
  * Copyright 2017 Hayashi Naoyuki
  * Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
+ * Copyright 2023 Oxide Computer Company
  */
 
 /*
@@ -73,10 +74,6 @@
 #include <deflt.h>
 #if defined(__x86) || defined(__aarch64__)
 #include <libfdisk.h>
-#endif
-
-#if defined(__x86)
-#include <sys/ucode.h>
 #endif
 
 #include <pwd.h>
@@ -299,10 +296,6 @@ static char *get_machine(void);
 static void append_to_flist(filelist_t *, char *);
 static int ufs_add_to_sign_list(char *sign);
 static error_t synchronize_BE_menu(void);
-
-#if defined(__x86)
-static void ucode_install();
-#endif
 
 /* Menu related sub commands */
 static subcmd_defn_t menu_subcmds[] = {
@@ -1635,10 +1628,6 @@ bam_archive(
 
 	if (strcmp(subcmd, "update_all") == 0)
 		bam_update_all = 1;
-
-#if defined(__x86)
-	ucode_install(bam_root);
-#endif
 
 	ret = f(bam_root, opt);
 
@@ -10383,50 +10372,3 @@ append_to_flist(filelist_t *flistp, char *s)
 		flistp->tail->next = lp;
 	flistp->tail = lp;
 }
-
-#if defined(__x86)
-
-UCODE_VENDORS;
-
-/*ARGSUSED*/
-static void
-ucode_install(char *root)
-{
-	int i;
-
-	for (i = 0; ucode_vendors[i].filestr != NULL; i++) {
-		int cmd_len = PATH_MAX + 256;
-		char cmd[PATH_MAX + 256];
-		char file[PATH_MAX];
-		char timestamp[PATH_MAX];
-		struct stat fstatus, tstatus;
-		struct utimbuf u_times;
-
-		(void) snprintf(file, PATH_MAX, "%s/%s/%s-ucode.%s",
-		    bam_root, UCODE_INSTALL_PATH, ucode_vendors[i].filestr,
-		    ucode_vendors[i].extstr);
-
-		if (stat(file, &fstatus) != 0 || !(S_ISREG(fstatus.st_mode)))
-			continue;
-
-		(void) snprintf(timestamp, PATH_MAX, "%s.ts", file);
-
-		if (stat(timestamp, &tstatus) == 0 &&
-		    fstatus.st_mtime <= tstatus.st_mtime)
-			continue;
-
-		(void) snprintf(cmd, cmd_len, "/usr/sbin/ucodeadm -i -R "
-		    "%s/%s/%s %s > /dev/null 2>&1", bam_root,
-		    UCODE_INSTALL_PATH, ucode_vendors[i].vendorstr, file);
-		if (system(cmd) != 0)
-			return;
-
-		if (creat(timestamp, S_IRUSR | S_IWUSR) == -1)
-			return;
-
-		u_times.actime = fstatus.st_atime;
-		u_times.modtime = fstatus.st_mtime;
-		(void) utime(timestamp, &u_times);
-	}
-}
-#endif

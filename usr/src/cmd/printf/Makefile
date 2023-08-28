@@ -22,7 +22,7 @@ $(AARCH64_BLD)LDLIBS += -lgcc
 
 .KEEP_STATE:
 
-all: $(PROG) 
+all: $(PROG)
 
 install: all $(ROOTPROG)
 

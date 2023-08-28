@@ -32,7 +32,7 @@ include ../Makefile.cmd
 # non-sparc platforms.  These need to get installed on x86 and arm64
 # which is why we do this in a $MACH subdir.
 
-sparc_SUBDIRS = 
+sparc_SUBDIRS =
 i386_SUBDIRS = smf
 aarch64_SUBDIRS = smf
 

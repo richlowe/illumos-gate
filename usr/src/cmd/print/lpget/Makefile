@@ -44,7 +44,7 @@ LDLIBS +=	$(LIBNPRT) -L$(ADJUNCT_PROTO)/usr/lib/mps
 
 all:		$(PROG)
 
-install:	all $(ROOTBIN) $(ROOTBINPROG) 
+install:	all $(ROOTBIN) $(ROOTBINPROG)
 
 $(ROOTBIN):
 	$(INS.dir)

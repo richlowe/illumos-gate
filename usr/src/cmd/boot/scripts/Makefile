@@ -23,15 +23,6 @@
 # Use is subject to license terms.
 #
 
-i386_SUBDIRS=           \
-	i386
-
-sparc_SUBDIRS=		\
-	sparc
-
-aarch64_SUBDIRS=	\
-	aarch64
-
 all:=		TARGET= all
 install:=	TARGET= install
 clean:=		TARGET= clean
@@ -40,7 +31,7 @@ check:=		TARGET= check
 
 .KEEP_STATE:
 
-SUBDIRS = $(COMMON_SUBDIRS) $($(MACH)_SUBDIRS)
+SUBDIRS = $(MACH)
 
 all clean clobber check: $(SUBDIRS)
 
