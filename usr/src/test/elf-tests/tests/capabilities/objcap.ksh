@@ -1,6 +1,5 @@
 #!/usr/bin/ksh
 #
-#
 # This file and its contents are supplied under the terms of the
 # Common Development and Distribution License ("CDDL"), version 1.0.
 # You may only use this file in accordance with the terms of version
@@ -126,19 +125,25 @@ EOF
 		fatal "failed to write out $mapfile_hw3"
 	fi
 
-	if ! gcc -m64 -o $oc_prog_nocap $cfile; then
+	if [[ $(mach) != "aarch64" ]]; then
+		mflag="-m64"
+	else
+		mflag=
+	fi
+
+	if ! gcc $mflag -o $oc_prog_nocap $cfile; then
 		fatal "failed to create $oc_prog_nocap"
 	fi
 
-	if ! gcc -m64 -o $oc_prog_hw1 $cfile -Wl,-M$mapfile_hw1; then
+	if ! gcc $mflag -o $oc_prog_hw1 $cfile -Wl,-M$mapfile_hw1; then
 		fatal "failed to create $oc_prog_hw1"
 	fi
 
-	if ! gcc -m64 -o $oc_prog_hw3 $cfile -Wl,-M$mapfile_hw3; then
+	if ! gcc $mflag -o $oc_prog_hw3 $cfile -Wl,-M$mapfile_hw3; then
 		fatal "failed to create $oc_prog_hw1"
 	fi
 
-	if ! gcc -m64 -o $oc_prog_hw123 $cfile -Wl,-M$mapfile_hw123; then
+	if ! gcc $mflag -o $oc_prog_hw123 $cfile -Wl,-M$mapfile_hw123; then
 		fatal "failed to create $oc_prog_hw1"
 	fi
 }

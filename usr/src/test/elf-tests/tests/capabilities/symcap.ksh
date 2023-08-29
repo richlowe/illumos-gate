@@ -120,6 +120,12 @@ EOF
 
 	tolink="$sc_tmpdir/main.c"
 
+	if [[ $(mach) != "aarch64" ]]; then
+		mflag="-m64"
+	else
+		mflag=
+	fi
+
 	for (( i = 0; i < ${#sc_obj_hw1[@]}; i++)); do
 		typeset in="$sc_tmpdir/$i.c"
 		typeset map="$sc_tmpdir/$i.map"
@@ -158,7 +164,7 @@ EOF
 		# we use a mapfile to add the object caps, while reducing
 		# visibility. Then we turn the object cap into a symbol cap.
 		#
-		if ! gcc -m64 -o $ofile -c $in; then
+		if ! gcc $mflag -o $ofile -c $in; then
 			fatal "failed to create object file $ofile"
 		fi
 
@@ -183,7 +189,7 @@ EOF
 		tolink="$tolink $sym"
 	done
 
-	if ! gcc -m64 -o $sc_prog $tolink; then
+	if ! gcc $mflag -o $sc_prog $tolink; then
 		fatal "failed to create $sc_prog"
 	fi
 }
