@@ -35,20 +35,25 @@ if [[ -n $PROTO ]]; then
 fi
 
 ret=0
+mach=$(mach)
 
 function should_succeed {
 	mapfile=$1
 	msg=$2
 
-	if gcc -m32 -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
-	    -o object.so; then
-		echo "pass (32): $msg"
-	else
-		echo "FAIL (32): $msg"
-		ret=1
+	if [[ $mach != "aarch64" ]]; then
+		if gcc -m32 -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
+		       -o object.so; then
+			echo "pass (32): $msg"
+		else
+			echo "FAIL (32): $msg"
+			ret=1
+		fi
 	fi
 
-	if gcc -m64 -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
+	[[ $mach != "aarch64" ]] && mflag=-m64
+
+	if gcc $mflag -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
 	    -o object.so; then
 		echo "pass (64): $msg"
 	else
@@ -62,15 +67,19 @@ function should_fail {
 	msg=$2
 	error=$3
 
-	if gcc -m32 -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
-	    -o object.so 2>&1 | /usr/bin/grep -Eq "$error"; then
-		echo "pass (32): $msg"
-	else
-		echo "FAIL (32): $msg"
-		ret=1
+	if [[ $mach != "aarch64" ]]; then
+		if gcc -m32 -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
+		       -o object.so 2>&1 | /usr/bin/grep -Eq "$error"; then
+			echo "pass (32): $msg"
+		else
+			echo "FAIL (32): $msg"
+			ret=1
+		fi
 	fi
 
-	if gcc -m64 -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
+	[[ $mach != "aarch64" ]] && mflag=-m64
+
+	if gcc $mflag -shared -Wl,-M,${TESTDIR}/$mapfile ${TESTDIR}/object.c \
 	    -o object.so 2>&1 | /usr/bin/grep -Eq "$error"; then
 		echo "pass (64): $msg"
 	else

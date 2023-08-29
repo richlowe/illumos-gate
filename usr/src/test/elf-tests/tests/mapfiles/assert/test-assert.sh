@@ -34,6 +34,8 @@ if [[ -n $PROTO ]]; then
 	export LD_ALTEXEC=$PROTO/bin/ld
 fi
 
+mach=$(mach)
+
 LDFLAGS="-Wl,-zguidance -Wl,-zfatal-warnings -Wl,-zdirect -Wl,-zlazyload"
 ret=0
 
@@ -41,15 +43,19 @@ function should_succeed {
 	mapfile=$1
 	msg=$2
 
-	if gcc -m32 -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
-	    ${TESTDIR}/object.c -o object.so; then
-		echo "pass (32): $msg"
-	else
-		echo "FAIL (32): $msg"
-		ret=1
+	if [[ $mach != "aarch64" ]]; then
+		if gcc -m32 -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
+		       ${TESTDIR}/object.c -o object.so; then
+			echo "pass (32): $msg"
+		else
+			echo "FAIL (32): $msg"
+			ret=1
+		fi
 	fi
 
-	if gcc -m64 -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
+	[[ $mach != "aarch64" ]] && mflag=-m64
+
+	if gcc $mflag -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
 	    ${TESTDIR}/object.c -o object.so; then
 		echo "pass (64): $msg"
 	else
@@ -63,16 +69,20 @@ function should_fail {
 	msg=$2
 	error=$3
 
-	if gcc -m32 -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
-	    ${TESTDIR}/object.c -o object.so 2>&1 | \
-		   /usr/bin/grep -Eq "$error"; then
-		echo "pass (32): $msg"
-	else
-		echo "FAIL (32): $msg"
-		ret=1
+	if [[ $mach != "aarch64" ]]; then
+		if gcc -m32 -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
+		       ${TESTDIR}/object.c -o object.so 2>&1 | \
+				/usr/bin/grep -Eq "$error"; then
+			echo "pass (32): $msg"
+		else
+			echo "FAIL (32): $msg"
+			ret=1
+		fi
 	fi
 
-	if gcc -m64 -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
+	[[ $mach != "aarch64" ]] && mflag=-m64
+
+	if gcc $mflag -shared $LDFLAGS -Wl,-M,${TESTDIR}/$mapfile \
 	    ${TESTDIR}/object.c -o object.so 2>&1 | \
 		   /usr/bin/grep -Eq "$error"; then
 		echo "pass (64): $msg"
