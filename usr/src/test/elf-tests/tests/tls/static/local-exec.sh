@@ -34,7 +34,14 @@ if [[ -n $PROTO ]]; then
 	export LD_ALTEXEC=$PROTO/bin/ld
 fi
 
-gcc -m64 -Wall -Wextra -Werror ${TESTDIR}/bin.c -DMODEL='"local-exec"' \
+mach=$(mach)
+if [[ $mach != "aarch64" ]]; then
+	cflags64=-m64
+else
+	cflags64="-mtls-dialect=trad"
+fi
+
+gcc $cflags64 -Wall -Wextra -Werror ${TESTDIR}/bin.c -DMODEL='"local-exec"' \
     -o local-exec.64
 if (( $? != 0 )); then
 	print -u2 "Couldn't compile ${TESTDIR}/bin.c (local-exec.64)"
@@ -48,7 +55,7 @@ if (( $? != 0 )); then
 fi
 
 # no 32bit support
-if [[ $(uname -p) == "aarch64" ]]; then
+if [[ $mach == "aarch64" ]]; then
 	exit 0;
 fi
 
