@@ -93,12 +93,12 @@ extern int __flt_rounds;
 	(!defined(_STRICT_STDC) && !defined(__XOPEN_OR_POSIX))
 #if defined(__sparc)
 #define	DECIMAL_DIG	36
-/* XXXARM: Really? */
-#elif defined(__i386) || defined(__amd64) || defined(__aarch64__)
+#elif defined(__i386) || defined(__amd64)
 #define	DECIMAL_DIG	21
+#elif defined(__aarch64__)
+#define	DECIMAL_DIG	17
 #endif
 #endif /* defined(__EXTENSIONS__) || defined(_STDC_C99)... */
-
 
 #if defined(__i386) || defined(__amd64)
 
@@ -127,17 +127,16 @@ extern int __flt_rounds;
 #define	LDBL_MAX_10_EXP	(+4932)
 
 #elif defined(__aarch64__)
-/* XXXARM: We should verify these against the compiler builtins */
 
 /* Follows IEEE standards for 128-bit floating point */
 #define	LDBL_MANT_DIG	113
-#define	LDBL_EPSILON	1.925929944387235853055977942584927319E-34L
+#define	LDBL_EPSILON	1.92592994438723585305597794258492732E-34L
 #define	LDBL_DIG	33
 #define	LDBL_MIN_EXP	(-16381)
-#define	LDBL_MIN	3.362103143112093506262677817321752603E-4932L
+#define	LDBL_MIN	3.36210314311209350626267781732175260E-4932L
 #define	LDBL_MIN_10_EXP	(-4931)
 #define	LDBL_MAX_EXP	(+16384)
-#define	LDBL_MAX	1.189731495357231765085759326628007016E+4932L
+#define	LDBL_MAX	1.18973149535723176508575932662800702E+4932L
 #define	LDBL_MAX_10_EXP	(+4932)
 
 #else
@@ -145,7 +144,6 @@ extern int __flt_rounds;
 #error "Unknown architecture!"
 
 #endif
-
 
 #ifdef	__cplusplus
 }
