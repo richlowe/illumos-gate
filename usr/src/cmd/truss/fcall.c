@@ -820,6 +820,8 @@ find_stack(uintptr_t sp)
 	prgreg_t tref = Lsp->pr_reg[REG_FS];
 #elif defined(__i386)
 	prgreg_t tref = Lsp->pr_reg[GS];
+#elif defined(__aarch64__)
+	prgreg_t tref = Lsp->pr_reg[REG_TP];
 #endif
 	struct callstack *Stk = NULL;
 	td_thrhandle_t th;
@@ -933,6 +935,8 @@ get_tid(struct callstack *Stk)
 	    Lsp->pr_reg[REG_FS] : Lsp->pr_reg[REG_GS];
 #elif defined(__i386)
 	prgreg_t tref = Lsp->pr_reg[GS];
+#elif defined(__aarch64__)
+	prgreg_t tref = Lsp->pr_reg[REG_TP];
 #endif
 	td_thrhandle_t th;
 	td_thrinfo_t thrinfo;
@@ -1175,7 +1179,7 @@ reestablish_traps(void)
 
 void
 show_function_call(private_t *pri,
-	struct callstack *Stk, struct dynlib *Dp, struct bkpt *Bp)
+    struct callstack *Stk, struct dynlib *Dp, struct bkpt *Bp)
 {
 	long arg[8];
 	int narg;
@@ -1206,7 +1210,7 @@ show_function_call(private_t *pri,
 /* ARGSUSED */
 void
 show_function_return(private_t *pri, long rval, int stret,
-	struct callstack *Stk, struct dynlib *Dp, struct bkpt *Bp)
+    struct callstack *Stk, struct dynlib *Dp, struct bkpt *Bp)
 {
 	int i;
 
@@ -1533,6 +1537,7 @@ function_return(private_t *pri, struct callstack *Stk)
 		for (j = 0; i < 0 && j < 8; j++) {	/* up to 8 args */
 			sp -= 4;
 			for (i = Stk->ncall - 1; i >= 0; i--) {
+
 				if (sp <= Stk->stack[i].sp &&
 				    fp > Stk->stack[i].sp) {
 					Stk->ncall = i;
@@ -1555,6 +1560,10 @@ function_return(private_t *pri, struct callstack *Stk)
 #define	FPADJUST	8
 #elif defined(__i386)
 #define	FPADJUST	4
+#elif defined(__aarch64__)
+#define	FPADJUST	8
+#else
+#error Unknown architecture
 #endif
 
 void
@@ -1741,7 +1750,7 @@ get_arguments(long *argp)
 
 #endif	/* __sparc */
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 
 uintptr_t
 previous_fp(uintptr_t fp, uintptr_t *rpc)
@@ -1909,3 +1918,42 @@ get_arguments(long *argp)
 }
 
 #endif	/* __amd64 || __i386 */
+
+#if defined(__aarch64__)
+int
+get_arguments(long *argp)
+{
+	private_t *pri = get_private();
+	const lwpstatus_t *Lsp = pri->lwpstat;
+
+	/*
+	 * As on amd64 we don't know how many arguments are passed, and so
+	 * take all those that are register-passed
+	 */
+	argp[0] = Lsp->pr_reg[REG_X0];
+	argp[1] = Lsp->pr_reg[REG_X1];
+	argp[2] = Lsp->pr_reg[REG_X2];
+	argp[3] = Lsp->pr_reg[REG_X3];
+	argp[4] = Lsp->pr_reg[REG_X4];
+	argp[5] = Lsp->pr_reg[REG_X5];
+	argp[6] = Lsp->pr_reg[REG_X6];
+	argp[7] = Lsp->pr_reg[REG_X7];
+	return (8);
+}
+
+uintptr_t
+get_return_address(uintptr_t *psp)
+{
+	private_t *pri = get_private();
+	const lwpstatus_t *Lsp = pri->lwpstat;
+	uintptr_t rpc;
+
+	rpc = (uintptr_t)Lsp->pr_reg[REG_LR];
+
+	/*
+	 * XXXARM: We don't cope with structure return, if the ABI ever does
+	 * that.
+	 */
+	return (rpc);
+}
+#endif	/* __aarch64__ */

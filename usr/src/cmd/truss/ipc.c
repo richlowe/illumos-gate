@@ -25,7 +25,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -405,6 +405,9 @@ checkproc(private_t *pri)
 #elif defined(__i386)
 		(void) Lgetareg(Lwp, R_PC, &pc);
 		(void) Lputareg(Lwp, EAX, (prgreg_t)what);
+#elif defined(__aarch64__)
+		(void) Lgetareg(Lwp, R_PC, &pc);
+		(void) Lputareg(Lwp, REG_X0, (prgreg_t)what);
 #else
 #error "unrecognized architecture"
 #endif

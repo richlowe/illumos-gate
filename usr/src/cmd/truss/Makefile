@@ -42,11 +42,7 @@ lint	:=	TARGET = lint
 
 all:	$(SUBDIRS)
 
-clean clobber lint:	$(SUBDIRS)
-
-install:	$(SUBDIRS)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
+clean clobber lint install:	$(SUBDIRS)
 
 $(SUBDIRS):	FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)

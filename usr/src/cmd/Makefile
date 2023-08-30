@@ -392,6 +392,7 @@ COMMON_SUBDIRS=	\
 	tr		\
 	trapstat	\
 	true		\
+	truss		\
 	tty		\
 	ttymon		\
 	tzreload	\
@@ -473,7 +474,6 @@ COMMON_SUBDIRS=	\
 # tbl - not 64bit clean
 # troff - not 64bit clean
 # tsol - not ported (or 64bit clean)
-# truss - not ported
 # vi - not 64bit clean / not ported
 $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
@@ -502,7 +502,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	tbl		\
 	troff		\
 	tsol		\
-	truss		\
 	vi		\
 
 aarch64_SUBDIRS=	\
