@@ -41,7 +41,7 @@ UTSBASE   = ../..
 MODULE		= scsi_vhci
 OBJECTS		= $(SCSI_VHCI_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/common/io/scsi/adapters/scsi_vhci
+CONF_SRCDIR	= $(UTSBASE)/intel/io/scsi/adapters/scsi_vhci
 
 #
 # Include common rules.
