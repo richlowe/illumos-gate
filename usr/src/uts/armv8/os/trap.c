@@ -1086,8 +1086,10 @@ static uint64_t fasttrap_gethrvtime(void)
 	kthread_t *ct = curthread;
 	klwp_t *lwp = ttolwp(ct);
 	hrt -= lwp->lwp_mstate.ms_state_start;
-	hrt += lwp->lwp_mstate.ms_acct[LWP_USER];
+	hrt += lwp->lwp_mstate.ms_acct[LMS_USER];
+
 	scalehrtime(&hrt);
+
 	return ((uint64_t)hrt);
 }
 
