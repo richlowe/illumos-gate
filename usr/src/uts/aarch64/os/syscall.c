@@ -176,7 +176,8 @@ pre_syscall()
 
 		if (auditing & AU_AUDIT_MASK) {
 			int error;
-			if (error = audit_start(T_SYSCALL, code, auditing, 0, lwp)) {
+			if (error = audit_start(T_SYSCALL, code, auditing,
+			    0, lwp)) {
 				t->t_pre_sys = 1;	/* repost anyway */
 				(void) set_errno(error);
 				return (1);
@@ -295,6 +296,7 @@ post_syscall(long rval1, long rval2)
 	 */
 	if (PTOU(p)->u_systrap) {
 		if (prismember(&PTOU(p)->u_exitmask, code)) {
+			(void) save_syscall_args();
 			proc_stop = 1;
 		}
 		repost = 1;
@@ -414,7 +416,7 @@ sig_check:
 
 		/*
 		 * The following check is legal for the following reasons:
-		 *	1) The thread we are checking, is ourselves, so there is
+		 *	1) The thread we are checking is ourselves, so there is
 		 *	   no way the proc can go away.
 		 *	2) The only time we need to be protected by the
 		 *	   lock is if the binding is changed.
@@ -422,9 +424,8 @@ sig_check:
 		 *	Note we will still take the lock and check the binding
 		 *	if the condition was true without the lock held.  This
 		 *	prevents lock contention among threads owned by the
-		 * 	same proc.
+		 *	same proc.
 		 */
-
 		if (curthread->t_proc_flag & TP_CHANGEBIND) {
 			mutex_enter(&p->p_lock);
 			if (curthread->t_proc_flag & TP_CHANGEBIND) {
@@ -488,7 +489,8 @@ sig_check:
 		if (lwp->lwp_pcb.pcb_flags & REQUEST_STEP) {
 			lwp->lwp_pcb.pcb_flags &= ~REQUEST_STEP;
 			rp->r_spsr |= PSR_SS;
-			write_mdscr_el1(read_mdscr_el1() | (MDSCR_MDE | MDSCR_SS));
+			write_mdscr_el1(read_mdscr_el1() |
+			    (MDSCR_MDE | MDSCR_SS));
 		}
 		if (lwp->lwp_pcb.pcb_flags & REQUEST_NOSTEP) {
 			lwp->lwp_pcb.pcb_flags &= ~REQUEST_NOSTEP;
@@ -1023,9 +1025,18 @@ get_syscall_args(klwp_t *lwp, long *argp, int *nargsp)
 	long	*ap;
 	int	nargs;
 
+	/*
+	 * The thread lock must be held while looking at the arguments to ensure
+	 * they don't go away via post_syscall().
+	 * get_syscall_args() is the only routine to read them which is callable
+	 * outside the LWP in question and hence the only one that must be
+	 * synchronized in this manner.
+	 */
 	thread_lock(t);
+
 	code = t->t_sysnum;
 	ap = lwp->lwp_ap;
+
 	thread_unlock(t);
 
 	if (code != 0 && code < NSYSCALL) {
