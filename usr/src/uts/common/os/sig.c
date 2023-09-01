@@ -26,7 +26,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -155,7 +155,7 @@ signal_is_blocked(kthread_t *t, int sig)
  *	the signal is being ignored
  *	the process is single-threaded
  *	the signal is not being traced by /proc
- * 	the signal is not blocked by the process
+ *	the signal is not blocked by the process
  *	the signal is not being accepted via sigwait()
  */
 static int
@@ -1270,8 +1270,8 @@ utstop_timedwait(clock_t ticks)
 /*
  * Perform the action specified by the current signal.
  * The usual sequence is:
- * 	if (issig())
- * 		psig();
+ *	if (issig())
+ *		psig();
  * The signal bit has already been cleared by issig(),
  * the current signal number has been stored in lwp_cursig,
  * and the current siginfo is now referenced by lwp_curinfo.
@@ -1441,12 +1441,8 @@ psig(void)
 
 		if (p->p_model == DATAMODEL_NATIVE)
 			rc = sendsig(sig, sip, func);
-/*
- * XXXARM:
- * _MULTI_DATAMODEL is only necessary because SYSCALL32_IMPL is wrong on aarch64
- * for the present
- */
-#if defined(_SYSCALL32_IMPL) && defined(_MULTI_DATAMODEL)
+
+#if defined(_SYSCALL32_IMPL)
 		else
 			rc = sendsig32(sig, sip, func);
 #endif	/* _SYSCALL32_IMPL */
@@ -2089,7 +2085,7 @@ sigaddqins(proc_t *p, kthread_t *t, sigqueue_t *sigqp)
 	ASSERT(sig >= 1 && sig < NSIG);
 	if (t != NULL)	/* directed to a thread */
 		psqp = &t->t_sigqueue;
-	else 		/* directed to a process */
+	else		/* directed to a process */
 		psqp = &p->p_sigqueue;
 	if (SI_CANQUEUE(sigqp->sq_info.si_code) &&
 	    sigismember(&p->p_siginfo, sig)) {
@@ -2683,11 +2679,8 @@ realsigprof_fast(int sysnum, int nsysarg, int error)
 	lwp->lwp_ru.nsignals++;
 	if (p->p_model == DATAMODEL_NATIVE)
 		rc = sendsig(SIGPROF, sip, func);
-/*
- * XXXARM:
- * _MULTI_DATAMODEL is only necessary because aarch64 gets _SYSCALL32_IMPL wrong
- */
-#if defined(_SYSCALL32_IMPL) && defined(_MULTI_DATAMODEL)
+
+#if defined(_SYSCALL32_IMPL)
 	else
 		rc = sendsig32(SIGPROF, sip, func);
 #endif	/* _SYSCALL32_IMPL */

@@ -759,11 +759,7 @@ struct sysent sysent[NSYSCALL] =
 	/* 255 */ SYSENT_CI("umount2",		umount2,	2)
 };
 
-/*
- * XXXARM:
- * _MULTI_DATAMODEL is only necessary because aarch64 gets _SYSCALL32_IMPL wrong
- */
-#if defined(_SYSCALL32_IMPL) && defined(_MULTI_DATAMODEL)
+#if defined(_SYSCALL32_IMPL)
 
 extern int ulimit32(int, int);
 extern ssize_t read32(int32_t, caddr32_t, size32_t);

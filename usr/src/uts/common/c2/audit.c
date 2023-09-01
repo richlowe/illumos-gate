@@ -1573,8 +1573,7 @@ add_return_token(caddr_t *ad, unsigned int scid, int err, int rval)
 {
 	unsigned int sy_flags;
 
-/* XXXARM: Only 'cos aarch64 breaks SYSCALL32_IMPL */
-#if defined(_SYSCALL32_IMPL) && defined(_MULTI_DATAMODEL)
+#if defined(_SYSCALL32_IMPL)
 	/*
 	 * Guard against t_lwp being NULL when this function is called
 	 * from a kernel queue instead of from a direct system call.

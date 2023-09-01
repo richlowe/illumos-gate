@@ -272,8 +272,8 @@ mod_setup(void)
 #endif
 		}
 	}
-/* XXXARM: only because aarch64 breaks _SYSCALL32_IMPL */
-#if defined(_SYSCALL32_IMPL) && defined(_MULTI_DATAMODEL)
+
+#if defined(_SYSCALL32_IMPL)
 	/*
 	 * Allocate loadable system call locks for 32-bit compat syscalls
 	 */
