@@ -32,6 +32,8 @@
 #ifndef _SYS_PROCFS_H
 #define	_SYS_PROCFS_H
 
+#include <sys/isa_defs.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -690,7 +692,7 @@ typedef struct prupanic {
 	uint8_t pru_data[PRUPANIC_BUFLEN];
 } prupanic_t;
 
-#if defined(_SYSCALL32)
+#if defined(_SYSCALL32) && defined(_MULTI_DATAMODEL)
 
 /*
  * dev32_t version of PRNODEV
@@ -979,7 +981,7 @@ typedef struct prheader32 {
 	int32_t	pr_entsize;	/* size of each entry, in bytes */
 } prheader32_t;
 
-#endif	/* _SYSCALL32 */
+#endif	/* _SYSCALL32 && _MULTI_DATAMODEL */
 
 #endif	/* !_KERNEL && _STRUCTURED_PROC == 0 */
 

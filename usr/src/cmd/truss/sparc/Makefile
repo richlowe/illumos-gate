@@ -20,14 +20,12 @@
 # CDDL HEADER END
 #
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
-#
 # Copyright (c) 1989-2001 by Sun Microsystems, Inc.
 # All rights reserved.
 #
-# cmd/truss/sparc/Makefile
-#
 
 include ../Makefile.com
+
+CPPFLAGS += -D_SYSCALL32
 
 install: all $(ROOTPROG32)

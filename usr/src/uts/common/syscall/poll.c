@@ -677,13 +677,16 @@ pollsys(pollfd_t *fds, nfds_t nfds, timespec_t *timeoutp, sigset_t *setp)
 		if (datamodel == DATAMODEL_NATIVE) {
 			if (copyin(timeoutp, &ts, sizeof (ts)))
 				return (set_errno(EFAULT));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			timespec32_t ts32;
 
 			if (copyin(timeoutp, &ts32, sizeof (ts32)))
 				return (set_errno(EFAULT));
 			TIMESPEC32_TO_TIMESPEC(&ts, &ts32)
 		}
+#endif
 
 		if (itimerspecfix(&ts))
 			return (set_errno(EINVAL));

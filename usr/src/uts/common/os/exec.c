@@ -1809,7 +1809,9 @@ stk_copyout(uarg_t *args, char *usrstack, void **auxvpp, user_t *up)
 			if (args->emulator != NULL)
 				ADDAUX(*a,
 				    AT_SUN_EMULATOR, (long)&ustrp[*--offp])
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			auxv32_t **a = (auxv32_t **)auxvpp;
 			ADDAUX(*a,
 			    AT_SUN_PLATFORM, (int)(uintptr_t)&ustrp[*--offp])
@@ -1822,6 +1824,7 @@ stk_copyout(uarg_t *args, char *usrstack, void **auxvpp, user_t *up)
 				ADDAUX(*a, AT_SUN_EMULATOR,
 				    (int)(uintptr_t)&ustrp[*--offp])
 		}
+#endif	/* _SYSCALL32_IMPL */
 	}
 
 	return (0);

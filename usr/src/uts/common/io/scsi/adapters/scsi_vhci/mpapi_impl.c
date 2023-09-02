@@ -132,7 +132,9 @@ static mpapi_item_list_t *vhci_mpapi_get_tpg_item(struct scsi_vhci *,
     uint32_t, void *, char *, void *);
 static mpapi_list_header_t *vhci_mpapi_create_list_head();
 static int vhci_get_mpiocdata(const void *, mp_iocdata_t *, int);
+#ifdef _SYSCALL32_IMPL
 static int vhci_is_model_type32(int);
+#endif
 static int vhci_mpapi_copyout_iocdata(void *, void *, int);
 static int vhci_mpapi_chk_last_path(mdi_pathinfo_t *);
 static int vhci_mpapi_sync_lu_oid_list(struct scsi_vhci *);
@@ -216,11 +218,6 @@ static int
 vhci_mpapi_validate(void *udata, mp_iocdata_t *mpioc, int mode, cred_t *credp)
 {
 	int		rval = 0, olen = 0;
-	int		mode32 = 0;
-
-	if (vhci_is_model_type32(mode) == 1) {
-		mode32 = 1;
-	}
 
 	switch (mpioc->mp_cmd) {
 
@@ -460,11 +457,16 @@ vhci_mpapi_validate(void *udata, mp_iocdata_t *mpioc, int mode, cred_t *credp)
 			rval = EPERM;
 			break;
 		}
-		if (mode32 == 1) {
+#ifdef _SYSCALL32_IMPL
+		if (vhci_is_model_type32(mode) == 1) {
 			olen = sizeof (struct uscsi_cmd32);
 		} else {
 			olen = sizeof (struct uscsi_cmd);
 		}
+#else
+		olen = sizeof (struct uscsi_cmd);
+#endif	/* _SYSCALL32_IMPL */
+
 		/* oid is in the ibuf and the uscsi cmd is in the obuf */
 		if ((mpioc->mp_ilen != sizeof (uint64_t)) ||
 		    (mpioc->mp_ibuf == NULL) ||
@@ -3838,21 +3840,18 @@ vhci_get_mpiocdata(const void *data, mp_iocdata_t *mpioc, int mode)
 	return (retval);
 }
 
-/* ARGSUSED */
+#ifdef _SYSCALL32_IMPL
 static int
 vhci_is_model_type32(int mode)
 {
-#ifdef  _MULTI_DATAMODEL
 	switch (ddi_model_convert_from(mode & FMODELS)) {
 		case DDI_MODEL_ILP32:
 			return (1);
 		default:
 			return (0);
 	}
-#else   /* _MULTI_DATAMODEL */
-	return (0);
-#endif  /* _MULTI_DATAMODEL */
 }
+#endif	/* _SYSCALL32_IMPL */
 
 /*
  * Convenience routine to copy mp_iocdata(32) to user land
@@ -3863,6 +3862,7 @@ vhci_mpapi_copyout_iocdata(void *mpioc, void *udata, int mode)
 {
 	int	rval = 0;
 
+#ifdef _SYSCALL32_IMPL
 	if (vhci_is_model_type32(mode)) {
 		mp_iocdata32_t	*mpioc32;
 
@@ -3889,7 +3889,9 @@ vhci_mpapi_copyout_iocdata(void *mpioc, void *udata, int mode)
 			rval = EFAULT;
 		}
 		kmem_free(mpioc32, sizeof (mp_iocdata32_t));
-	} else {
+	} else
+#endif	/* _SYSCALL32_IMPL */
+	{
 		/* 64-bit ddicopyout */
 		if (ddi_copyout(mpioc, udata, sizeof (mp_iocdata_t), mode)
 		    != 0) {

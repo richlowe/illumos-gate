@@ -31,10 +31,8 @@ stty			31
 gtty			32
 access			33
 nice			34
-statfs			35
 syssync			36
 kill			37
-fstatfs			38
 setpgrp			39
 uucopystr		40
 pipe			42
@@ -61,9 +59,7 @@ ulimit			63
 renameat		64
 unlinkat		65
 fstatat			66
-fstatat64		67
 openat			68
-openat64		69
 tasksys			70
 acctctl			71
 exacctsys		72
@@ -162,7 +158,6 @@ lwp_cond_signal		171
 lwp_cond_broadcast	172
 pread			173
 pwrite			174
-llseek			175
 inst_sync		176
 brandsys		177
 kaio			178
@@ -199,18 +194,6 @@ resolvepath		209
 lwp_mutex_timedlock	210
 lwp_sema_timedwait	211
 lwp_rwlock_sys		212
-getdents64		213
-mmap64			214
-stat64			215
-lstat64			216
-fstat64			217
-statvfs64		218
-fstatvfs64		219
-setrlimit64		220
-getrlimit64		221
-pread64			222
-pwrite64		223
-open64			225
 rpcmod			226
 zone			227
 autofs			228

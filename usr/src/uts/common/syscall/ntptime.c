@@ -88,7 +88,9 @@ ntp_gettime(struct ntptimeval *tp)
 	if (datamodel == DATAMODEL_NATIVE) {
 		if (copyout(&ntv, tp, sizeof (ntv)))
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		struct ntptimeval32 ntv32;
 
 		if (TIMEVAL_OVERFLOW(&ntv.time))
@@ -102,6 +104,7 @@ ntp_gettime(struct ntptimeval *tp)
 		if (copyout(&ntv32, tp, sizeof (ntv32)))
 			return (set_errno(EFAULT));
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	/*
 	 * Status word error decode. If any of these conditions

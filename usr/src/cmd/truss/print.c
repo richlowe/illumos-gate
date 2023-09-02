@@ -31,8 +31,6 @@
 
 /* Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved. */
 
-#define	_SYSCALL32	/* make 32-bit compat headers visible */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -321,7 +319,7 @@ prt_ioa(private_t *pri, int raw, long val)	/* print ioctl argument */
 	/* kstat ioctl()s */
 	case KSTAT_IOC_READ:
 	case KSTAT_IOC_WRITE:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (data_model == PR_MODEL_ILP32)
 			prt_stg(pri, raw,
 			    val + offsetof(kstat32_t, ks_name[0]));
@@ -1733,7 +1731,7 @@ prt_mif(private_t *pri, int raw, long val)
 {
 	struct meminfo	minfo;
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model == PR_MODEL_ILP32) {
 		struct meminfo32 minfo32;
 

@@ -644,9 +644,12 @@ typedef	unsigned long	ulong;
 
 #ifndef NODEV
 #define	NODEV	(dev_t)(-1l)
-#ifdef _SYSCALL32
+
+#if defined(_KERNEL) || defined(_SYSCALL32)
+/* XXXARM: Could just be under _SYSCALL32 except for DEVCMPL() macrology */
 #define	NODEV32	(dev32_t)(-1)
-#endif	/* _SYSCALL32 */
+#endif	/* _KERNEL */
+
 #endif	/* NODEV */
 
 /*

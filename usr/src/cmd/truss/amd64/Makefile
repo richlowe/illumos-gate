@@ -27,6 +27,8 @@
 include ../Makefile.com
 include ../../Makefile.cmd.64
 
+CPPFLAGS += -D_SYSCALL32
+
 install: all $(ROOTPROG64)
 	-$(RM) $(ROOTPROG)
 	-$(LN) $(ISAEXEC) $(ROOTPROG)

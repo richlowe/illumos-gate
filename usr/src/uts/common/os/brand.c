@@ -511,7 +511,7 @@ brand_solaris_cmd(int cmd, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 			if (copyin((void *)arg1, &reg, sizeof (reg)) != 0)
 				return (EFAULT);
 		}
-#if defined(_LP64)
+#if defined(_SYSCALL32_IMPL)
 		else {
 			brand_common_reg32_t reg32;
 
@@ -533,7 +533,7 @@ brand_solaris_cmd(int cmd, uintptr_t arg1, uintptr_t arg2, uintptr_t arg3,
 			    sizeof (brand_elf_data_t)) != 0)
 				return (EFAULT);
 		}
-#if defined(_LP64)
+#if defined(_SYSCALL32_IMPL)
 		else {
 			brand_elf_data32_t sed32;
 
@@ -889,7 +889,7 @@ brand_solaris_elfexec(vnode_t *vp, execa_t *uap, uarg_t *args,
 		    sizeof (auxflags_auxv)) != 0)
 			return (EFAULT);
 	}
-#if defined(_LP64)
+#if defined(_SYSCALL32_IMPL)
 	else {
 		auxv32_t	auxflags_auxv32;
 
@@ -921,7 +921,7 @@ brand_solaris_elfexec(vnode_t *vp, execa_t *uap, uarg_t *args,
 		    sizeof (brand_auxv)) != 0)
 			return (EFAULT);
 	}
-#if defined(_LP64)
+#if defined(_SYSCALL32_IMPL)
 	else {
 		auxv32_t brand_auxv32[] = {
 		    { AT_SUN_BRAND_AUX1, 0 },

@@ -62,18 +62,6 @@ typedef	uint32_t instr_t;
 #define	prfpregset	fpu
 #define	prfpregset_t	fpregset_t
 
-#if defined(_SYSCALL32)
-/*
- * kernel view of the 32bit register set(don't use)
- */
-typedef	uint32_t instr32_t;
-#define	NPRGREG32	_NGREG32
-#define	prgreg32_t	greg32_t
-#define	prgregset32_t	gregset32_t
-#define	prfpregset32	fpu32
-#define	prfpregset32_t	fpregset32_t
-#endif	/* _SYSCALL32 */
-
 #define	R_PC	REG_PC
 #define	R_SP	REG_SP
 #define	R_FP	REG_FP

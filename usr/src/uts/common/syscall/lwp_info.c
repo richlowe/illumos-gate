@@ -60,7 +60,9 @@ lwp_info(timestruc_t *tvp)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyout(tv, tvp, sizeof (tv)))
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		timestruc32_t tv32[2];
 
 		if (TIMESPEC_OVERFLOW(&tv[0]) ||
@@ -73,5 +75,6 @@ lwp_info(timestruc_t *tvp)
 		if (copyout(tv32, tvp, sizeof (tv32)))
 			return (set_errno(EFAULT));
 	}
+#endif	/* _SYSCALL32_IMPL */
 	return (0);
 }

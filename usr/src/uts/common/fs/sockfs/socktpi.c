@@ -5079,6 +5079,7 @@ sotpi_getsockopt(struct sonode *so, int level, int option_name,
 			break;
 		case SO_RCVTIMEO:
 		case SO_SNDTIMEO:
+			/* Kernel processes are DATAMODEL_NONE */
 			if (get_udatamodel() == DATAMODEL_NONE ||
 			    get_udatamodel() == DATAMODEL_NATIVE) {
 				if (maxlen < sizeof (struct timeval)) {
@@ -5261,6 +5262,7 @@ sotpi_getsockopt(struct sonode *so, int level, int option_name,
 				val = drv_hztousec(so->so_sndtimeo);
 			tmo_val.tv_sec = val / (1000 * 1000);
 			tmo_val.tv_usec = val % (1000 * 1000);
+			/* Kernel processes are DATAMODEL_NONE */
 			if (get_udatamodel() == DATAMODEL_NONE ||
 			    get_udatamodel() == DATAMODEL_NATIVE) {
 				option = &tmo_val;
@@ -5462,6 +5464,7 @@ done:
 			break;
 		case SO_SNDTIMEO:
 		case SO_RCVTIMEO:
+			/* Kernel processes are DATAMODEL_NONE */
 			if (get_udatamodel() == DATAMODEL_NONE ||
 			    get_udatamodel() == DATAMODEL_NATIVE) {
 				if (optlen != sizeof (struct timeval)) {
@@ -5578,13 +5581,18 @@ done:
 			struct timeval tl;
 			clock_t val;
 
-			if (get_udatamodel() == DATAMODEL_NONE ||
-			    get_udatamodel() == DATAMODEL_NATIVE)
+			/* Kernel processes are DATAMODEL_NONE */
+			if ((get_udatamodel() == DATAMODEL_NONE) ||
+			    (get_udatamodel() == DATAMODEL_NATIVE)) {
 				bcopy(&tl, (struct timeval *)optval,
 				    sizeof (struct timeval));
-			else
+			}
+#ifdef _SYSCALL32_IMPL
+			else {
 				TIMEVAL32_TO_TIMEVAL(&tl,
 				    (struct timeval32 *)optval);
+			}
+#endif	/* _SYSCALL32_IMPL */
 			val = tl.tv_sec * 1000 * 1000 + tl.tv_usec;
 			if (option_name == SO_RCVTIMEO)
 				so->so_rcvtimeo = drv_usectohz(val);

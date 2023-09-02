@@ -24,7 +24,7 @@
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * Portions of this source code were derived from Berkeley 4.3 BSD
@@ -124,7 +124,9 @@ get_timespec_vattr(timespec_t *tsptr, struct vattr *vattr, int *flags)
 		if (get_udatamodel() == DATAMODEL_NATIVE) {
 			if (copyin(tsptr, ts, sizeof (ts)))
 				return (EFAULT);
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			timespec32_t ts32[2];
 
 			if (copyin(tsptr, ts32, sizeof (ts32)))
@@ -132,6 +134,7 @@ get_timespec_vattr(timespec_t *tsptr, struct vattr *vattr, int *flags)
 			TIMESPEC32_TO_TIMESPEC(&ts[0], &ts32[0]);
 			TIMESPEC32_TO_TIMESPEC(&ts[1], &ts32[1]);
 		}
+#endif	/* _SYSCALL32_IMPL */
 		if (ts[0].tv_nsec == UTIME_NOW || ts[1].tv_nsec == UTIME_NOW)
 			gethrestime(&now);
 		mask = 0;

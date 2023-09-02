@@ -39,69 +39,71 @@ extern "C" {
 #endif
 
 typedef struct aiocb {
-	int 		aio_fildes;
+	int		aio_fildes;
 	volatile void	*aio_buf;		/* buffer location */
-	size_t 		aio_nbytes;		/* length of transfer */
-	off_t 		aio_offset;		/* file offset */
+	size_t		aio_nbytes;		/* length of transfer */
+	off_t		aio_offset;		/* file offset */
 	int		aio_reqprio;		/* request priority offset */
 	struct sigevent	aio_sigevent;		/* notification type */
-	int 		aio_lio_opcode;		/* listio operation */
+	int		aio_lio_opcode;		/* listio operation */
 	aio_result_t	aio_resultp;		/* results */
-	int 		aio_state;		/* state flag for List I/O */
+	int		aio_state;		/* state flag for List I/O */
 	int		aio__pad[1];		/* extension padding */
 } aiocb_t;
 
 #ifdef _LARGEFILE64_SOURCE
 #if	!defined(_KERNEL)
 typedef struct aiocb64 {
-	int 		aio_fildes;
+	int		aio_fildes;
 	volatile void	*aio_buf;		/* buffer location */
-	size_t 		aio_nbytes;		/* length of transfer */
+	size_t		aio_nbytes;		/* length of transfer */
 	off64_t		aio_offset;		/* file offset */
 	int		aio_reqprio;		/* request priority offset */
 	struct sigevent	aio_sigevent;		/* notification type */
-	int 		aio_lio_opcode;		/* listio operation */
+	int		aio_lio_opcode;		/* listio operation */
 	aio_result_t	aio_resultp;		/* results */
-	int 		aio_state;		/* state flag for List I/O */
+	int		aio_state;		/* state flag for List I/O */
 	int		aio__pad[1];		/* extension padding */
 } aiocb64_t;
 #else
 
+#ifdef _SYSCALL32
 #if _LONG_LONG_ALIGNMENT == 8 && _LONG_LONG_ALIGNMENT_32 == 4
 #pragma pack(4)
-#endif
+#endif	/* _LONG_LONG_ALIGNMENT */
 
 typedef struct aiocb64_32 {
-	int 		aio_fildes;
+	int		aio_fildes;
 	caddr32_t	aio_buf;		/* buffer location */
-	uint32_t 	aio_nbytes;		/* length of transfer */
-	off64_t 	aio_offset;		/* file offset */
+	uint32_t	aio_nbytes;		/* length of transfer */
+	off64_t		aio_offset;		/* file offset */
 	int		aio_reqprio;		/* request priority offset */
 	struct sigevent32 aio_sigevent;		/* notification type */
-	int 		aio_lio_opcode;		/* listio operation */
+	int		aio_lio_opcode;		/* listio operation */
 	aio_result32_t	aio_resultp;		/* results */
-	int 		aio_state;		/* state flag for List I/O */
+	int		aio_state;		/* state flag for List I/O */
 	int		aio__pad[1];		/* extension padding */
 } aiocb64_32_t;
 
 #if _LONG_LONG_ALIGNMENT == 8 && _LONG_LONG_ALIGNMENT_32 == 4
 #pragma pack()
-#endif
+#endif	/* _LONG_LONG_ALIGNMENT */
+#endif	/* _SYSCALL32 */
 
 #endif /* !defined(_KERNEL) */
 #endif /* _LARGEFILE64_SOURCE */
 
 #ifdef	_SYSCALL32
 typedef struct aiocb32 {
-	int 		aio_fildes;
+	int		aio_fildes;
 	caddr32_t	aio_buf;		/* buffer location */
 	uint32_t	aio_nbytes;		/* length of transfer */
 	uint32_t	aio_offset;		/* file offset */
 	int		aio_reqprio;		/* request priority offset */
 	struct sigevent32 aio_sigevent;		/* notification type */
-	int 		aio_lio_opcode;		/* listio operation */
+	int		aio_lio_opcode;		/* listio operation */
 	aio_result32_t	aio_resultp;		/* results */
-	int 		aio_state;		/* state flag for List I/O */
+	int		aio_state;		/* state flag for List I/O */
 	int		aio__pad[1];		/* extension padding */
 } aiocb32_t;
 

@@ -788,15 +788,18 @@ so_setsockopt(struct sonode *so, int level, int option_name,
 			 */
 			clock_t t_usec;
 
-			if (get_udatamodel() == DATAMODEL_NONE ||
-			    get_udatamodel() == DATAMODEL_NATIVE) {
+			/* Kernel processes are DATAMODEL_NONE */
+			if ((get_udatamodel() == DATAMODEL_NONE) ||
+			    (get_udatamodel() == DATAMODEL_NATIVE)) {
 				if (optlen != sizeof (struct timeval)) {
 					error = EINVAL;
 					goto done;
 				}
 				bcopy((struct timeval *)optval, &tl,
 				    sizeof (struct timeval));
-			} else {
+			}
+#ifdef _SYSCALL32_IMPL
+			else {
 				if (optlen != sizeof (struct timeval32)) {
 					error = EINVAL;
 					goto done;
@@ -804,6 +807,7 @@ so_setsockopt(struct sonode *so, int level, int option_name,
 				TIMEVAL32_TO_TIMEVAL(&tl,
 				    (struct timeval32 *)optval);
 			}
+#endif	/* _SYSCALL32_IMPL */
 			opt = &tl;
 			optlen = sizeof (tl);
 			t_usec = tl.tv_sec * 1000 * 1000 + tl.tv_usec;

@@ -65,18 +65,23 @@ struct timeval {
 	(tv)->tv_usec = (tv32)->tv_usec;	\
 }
 
+#endif	/* _SYSCALL32 */
+
+#if defined(_KERNEL) || defined(_SYSCALL32)
+/* XXXARM: Needed for ufs(4D) */
+#define	TIMEVAL_OVERFLOW(tv)	\
+	((tv)->tv_sec < TIME32_MIN || (tv)->tv_sec > TIME32_MAX)
+
+/* XXXARM: Needed for uniqtime32(), though that needs to change for 2038  */
 #define	TIMEVAL_TO_TIMEVAL32(tv32, tv)	{		\
 	(tv32)->tv_sec = (time32_t)(tv)->tv_sec;	\
 	(tv32)->tv_usec = (int32_t)(tv)->tv_usec;	\
 }
 
+/* XXXARM: Needed because ntp_gettime() only takes 32bit time even 64bit */
 #define	TIME32_MAX	INT32_MAX
 #define	TIME32_MIN	INT32_MIN
-
-#define	TIMEVAL_OVERFLOW(tv)	\
-	((tv)->tv_sec < TIME32_MIN || (tv)->tv_sec > TIME32_MAX)
-
-#endif	/* _SYSCALL32 */
+#endif	/* _KERNEL || _SYSCALL32 */
 
 #endif	/* _ASM */
 #endif	/* !defined(__XOPEN_OR_POSIX) || defined(_XPG4_2) ... */

@@ -470,7 +470,9 @@ lwp_park(timespec_t *timeoutp, id_t lwpid)
 				error = EFAULT;
 				goto out;
 			}
-		} else {
+		}
+#ifdef _SYCALL32_IMPL
+		else {
 			timespec32_t timeout32;
 
 			if (copyin(timeoutp, &timeout32, sizeof (timeout32))) {
@@ -479,6 +481,7 @@ lwp_park(timespec_t *timeoutp, id_t lwpid)
 			}
 			TIMESPEC32_TO_TIMESPEC(&rqtime, &timeout32)
 		}
+#endif	/* _SYSCALL32_IMPL */
 
 		if (itimerspecfix(&rqtime)) {
 			error = EINVAL;
@@ -524,13 +527,16 @@ lwp_park(timespec_t *timeoutp, id_t lwpid)
 		if (datamodel == DATAMODEL_NATIVE) {
 			if (copyout(&rmtime, timeoutp, sizeof (rmtime)))
 				error = EFAULT;
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			timespec32_t rmtime32;
 
 			TIMESPEC_TO_TIMESPEC32(&rmtime32, &rmtime);
 			if (copyout(&rmtime32, timeoutp, sizeof (rmtime32)))
 				error = EFAULT;
 		}
+#endif		/* _SYSCALL32_IMPL */
 	}
 out:
 	schedctl_unpark();

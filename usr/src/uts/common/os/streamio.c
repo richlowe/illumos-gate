@@ -3099,12 +3099,15 @@ strwsrv(queue_t *q)
 static int
 strcopyin_strioctl(void *from, void *to, int flag, int copyflag)
 {
+#ifdef _SYSCALL32_IMPL
 	struct	strioctl32 strioc32;
+#endif
 	struct	strioctl *striocp;
 
 	if (copyflag & U_TO_K) {
 		ASSERT((copyflag & K_TO_K) == 0);
 
+#ifdef _SYSCALL32_IMPL
 		if ((flag & FMODELS) == DATAMODEL_ILP32) {
 			if (copyin(from, &strioc32, sizeof (strioc32)))
 				return (EFAULT);
@@ -3115,7 +3118,9 @@ strcopyin_strioctl(void *from, void *to, int flag, int copyflag)
 			striocp->ic_len	= strioc32.ic_len;
 			striocp->ic_dp	= (char *)(uintptr_t)strioc32.ic_dp;
 
-		} else { /* NATIVE data model */
+		} else
+#endif	  /* _SYSCALL32_IMPL */
+		{ /* NATIVE data model */
 			if (copyin(from, to, sizeof (struct strioctl))) {
 				return (EFAULT);
 			} else {
@@ -3132,12 +3137,15 @@ strcopyin_strioctl(void *from, void *to, int flag, int copyflag)
 static int
 strcopyout_strioctl(void *from, void *to, int flag, int copyflag)
 {
+#ifdef _SYSCALL32_IMPL
 	struct	strioctl32 strioc32;
+#endif
 	struct	strioctl *striocp;
 
 	if (copyflag & U_TO_K) {
 		ASSERT((copyflag & K_TO_K) == 0);
 
+#ifdef _SYSCALL32_IMPL
 		if ((flag & FMODELS) == DATAMODEL_ILP32) {
 			striocp = (struct strioctl *)from;
 			strioc32.ic_cmd	= striocp->ic_cmd;
@@ -3150,7 +3158,9 @@ strcopyout_strioctl(void *from, void *to, int flag, int copyflag)
 			if (copyout(&strioc32, to, sizeof (strioc32)))
 				return (EFAULT);
 
-		} else { /* NATIVE data model */
+		} else
+#endif	/* _SYSCALL_32_IMPL */
+		{ /* NATIVE data model */
 			if (copyout(from, to, sizeof (struct strioctl))) {
 				return (EFAULT);
 			} else {

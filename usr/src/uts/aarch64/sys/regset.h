@@ -129,24 +129,6 @@ typedef struct {
 } mcontext_t;
 
 #if !defined(_XPG4_2) || defined(__EXTENSIONS__)
-#if defined(_SYSCALL32)
-#define	_NGREG32	_NGREG
-#define	_NGREG64	_NGREG
-typedef int32_t	greg32_t;
-typedef int64_t	greg64_t;
-typedef greg32_t gregset32_t[_NGREG32];
-typedef greg64_t gregset64_t[_NGREG64];
-typedef struct fpu32 {
-	fpreg_t			__d_fpregs[32];
-	uint32_t		__fp_cr;
-	uint32_t		__fp_sr;
-} fpregset32_t;
-typedef struct {
-	gregset32_t	__gregs;	/* general register set */
-	fpregset32_t	__fpregs;	/* floating point register set */
-} mcontext32_t;
-#endif	/* _SYSCALL32 */
-
 /*
  * Kernel's FPU save area
  */

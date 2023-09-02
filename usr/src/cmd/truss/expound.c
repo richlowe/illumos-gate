@@ -29,8 +29,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved	*/
 
-#define	_SYSCALL32
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -167,7 +165,9 @@ show_utimens(private_t *pri, long offset)
 		if (Pread(Proc, &utimbuf, sizeof (utimbuf), offset)
 		    != sizeof (utimbuf))
 			return;
-	} else {
+	}
+#if defined(_MULTI_DATAMODEL)
+	else {
 		struct {
 			timespec32_t atime;
 			timespec32_t mtime;
@@ -180,6 +180,7 @@ show_utimens(private_t *pri, long offset)
 		TIMESPEC32_TO_TIMESPEC(&utimbuf.atime, &utimbuf32.atime);
 		TIMESPEC32_TO_TIMESPEC(&utimbuf.mtime, &utimbuf32.mtime);
 	}
+#endif	/* _MULTI_DATAMODEL */
 
 	/* print access and modification times */
 	if (utimbuf.atime.tv_nsec == UTIME_OMIT)
@@ -209,7 +210,9 @@ show_timeofday(private_t *pri)
 		if (Pread(Proc, &tod, sizeof (tod), offset)
 		    != sizeof (tod))
 			return;
-	} else {
+	}
+#if defined(_MULTI_DATAMODEL)
+	else {
 		struct timeval32 tod32;
 
 		if (Pread(Proc, &tod32, sizeof (tod32), offset)
@@ -218,6 +221,7 @@ show_timeofday(private_t *pri)
 
 		TIMEVAL32_TO_TIMEVAL(&tod, &tod32);
 	}
+#endif	/* _MULTI_DATAMODEL */
 
 	prtimeval(pri, "time: ", &tod);
 }
@@ -234,7 +238,9 @@ show_itimerval(private_t *pri, long offset, const char *name)
 		if (Pread(Proc, &itimerval, sizeof (itimerval), offset)
 		    != sizeof (itimerval))
 			return;
-	} else {
+	}
+#if defined(_MULTI_DATAMODEL)
+	else {
 		struct itimerval32 itimerval32;
 
 		if (Pread(Proc, &itimerval32, sizeof (itimerval32), offset)
@@ -243,6 +249,7 @@ show_itimerval(private_t *pri, long offset, const char *name)
 
 		ITIMERVAL32_TO_ITIMERVAL(&itimerval, &itimerval32);
 	}
+#endif	/* _MULTI_DATAMODEL */
 
 	(void) printf(
 	    "%s\t%s:  interval: %4ld.%6.6ld sec  value: %4ld.%6.6ld sec\n",
@@ -266,7 +273,9 @@ show_timeval(private_t *pri, long offset, const char *name)
 		if (Pread(Proc, &timeval, sizeof (timeval), offset)
 		    != sizeof (timeval))
 			return;
-	} else {
+	}
+#if defined(_MULTI_DATAMODEL)
+	else {
 		struct timeval32 timeval32;
 
 		if (Pread(Proc, &timeval32, sizeof (timeval32), offset)
@@ -275,6 +284,7 @@ show_timeval(private_t *pri, long offset, const char *name)
 
 		TIMEVAL32_TO_TIMEVAL(&timeval, &timeval32);
 	}
+#endif	/* _MULTI_DATAMODEL */
 
 	(void) printf(
 	    "%s\t%s: %ld.%6.6ld sec\n",
@@ -296,7 +306,9 @@ show_timestruc(private_t *pri, long offset, const char *name)
 		if (Pread(Proc, &timestruc, sizeof (timestruc), offset)
 		    != sizeof (timestruc))
 			return;
-	} else {
+	}
+#if defined(_MULTI_DATAMODEL)
+	else {
 		timestruc32_t timestruc32;
 
 		if (Pread(Proc, &timestruc32, sizeof (timestruc32), offset)
@@ -305,6 +317,7 @@ show_timestruc(private_t *pri, long offset, const char *name)
 
 		TIMESPEC32_TO_TIMESPEC(&timestruc, &timestruc32);
 	}
+#endif	/* _MULTI_DATAMODEL */
 
 	(void) printf(
 	    "%s\t%s: %ld.%9.9ld sec\n",
@@ -337,7 +350,9 @@ show_times(private_t *pri)
 		if (Pread(Proc, &tms, sizeof (tms), offset)
 		    != sizeof (tms))
 			return;
-	} else {
+	}
+#if defined(_MULTI_DATAMODEL)
+	else {
 		struct tms32 tms32;
 
 		if (Pread(Proc, &tms32, sizeof (tms32), offset)
@@ -355,6 +370,7 @@ show_times(private_t *pri)
 		tms.tms_cutime = (unsigned)tms32.tms_cutime;
 		tms.tms_cstime = (unsigned)tms32.tms_cstime;
 	}
+#endif	/* _MULTI_DATAMODEL */
 
 	(void) printf(
 	    "%s\tutim=%-6lu stim=%-6lu cutim=%-6lu cstim=%-6lu (HZ=%ld)\n",
@@ -411,7 +427,7 @@ show_ustat(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#if defined(_MULTI_DATAMODEL)
 void
 show_ustat32(private_t *pri, long offset)
 {
@@ -428,7 +444,7 @@ show_ustat32(private_t *pri, long offset)
 		    ubuf.f_fpack);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_fusers(private_t *pri, long offset, long nproc)
@@ -477,7 +493,7 @@ show_utssys(private_t *pri, long r0)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_utssys32(private_t *pri, long r0)
 {
@@ -495,7 +511,7 @@ show_utssys32(private_t *pri, long r0)
 		}
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_cladm(private_t *pri, int code, int function, long offset)
@@ -825,7 +841,7 @@ show_strioctl(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_strioctl32(private_t *pri, long offset)
 {
@@ -847,7 +863,7 @@ show_strioctl32(private_t *pri, long offset)
 		--pri->recur;
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 print_strbuf(private_t *pri, struct strbuf *sp, const char *name, int dump)
@@ -884,7 +900,7 @@ print_strbuf(private_t *pri, struct strbuf *sp, const char *name, int dump)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 print_strbuf32(private_t *pri, struct strbuf32 *sp, const char *name, int dump)
 {
@@ -919,7 +935,7 @@ print_strbuf32(private_t *pri, struct strbuf32 *sp, const char *name, int dump)
 			showbuffer(pri, (long)sp->buf, (long)sp->len);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 /* strpeek and strfdinsert flags word */
 const char *
@@ -959,7 +975,7 @@ show_strpeek(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_strpeek32(private_t *pri, long offset)
 {
@@ -976,7 +992,7 @@ show_strpeek32(private_t *pri, long offset)
 		    strflags(pri, strpeek.flags));
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_strfdinsert(private_t *pri, long offset)
@@ -997,7 +1013,7 @@ show_strfdinsert(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_strfdinsert32(private_t *pri, long offset)
 {
@@ -1016,7 +1032,7 @@ show_strfdinsert32(private_t *pri, long offset)
 		    strfdinsert.offset);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_strrecvfd(private_t *pri, long offset)
@@ -1063,7 +1079,7 @@ show_strlist(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_strlist32(private_t *pri, long offset)
 {
@@ -1092,7 +1108,7 @@ show_strlist32(private_t *pri, long offset)
 		}
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_jwinsize(private_t *pri, long offset)
@@ -1312,13 +1328,12 @@ show_audio_info(private_t *pri, long offset)
 void
 show_ioctl(private_t *pri, int code, long offset)
 {
+#ifdef _MULTI_DATAMODEL
 	int lp64 = (data_model == PR_MODEL_LP64);
+#endif
 	int err = pri->Errno;	/* don't display output parameters */
 				/* for a failed system call */
-#ifndef _LP64
-	if (lp64)
-		return;
-#endif
+
 	if (offset == 0)
 		return;
 
@@ -1423,7 +1438,7 @@ show_ioctl(private_t *pri, int code, long offset)
 		break;
 		/* these all point to structures */
 	case I_STR:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_strioctl(pri, offset);
 		else
@@ -1433,7 +1448,7 @@ show_ioctl(private_t *pri, int code, long offset)
 #endif
 		break;
 	case I_PEEK:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_strpeek(pri, offset);
 		else
@@ -1443,7 +1458,7 @@ show_ioctl(private_t *pri, int code, long offset)
 #endif
 		break;
 	case I_FDINSERT:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_strfdinsert(pri, offset);
 		else
@@ -1460,7 +1475,7 @@ show_ioctl(private_t *pri, int code, long offset)
 	case I_LIST:
 		if (err)
 			break;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_strlist(pri, offset);
 		else
@@ -1553,7 +1568,7 @@ show_statvfs(private_t *pri)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_statvfs32(private_t *pri)
 {
@@ -1598,8 +1613,9 @@ show_statvfs32(private_t *pri)
 		    statvfs.f_fstr);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
+#ifdef _MULTI_DATAMODEL
 void
 show_statvfs64(private_t *pri)
 {
@@ -1644,6 +1660,7 @@ show_statvfs64(private_t *pri)
 		    statvfs.f_fstr);
 	}
 }
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_statfs(private_t *pri)
@@ -1670,7 +1687,7 @@ show_statfs(private_t *pri)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_statfs32(private_t *pri)
 {
@@ -1695,8 +1712,9 @@ show_statfs32(private_t *pri)
 		    statfs.f_fpack);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
+#if defined(_MULTI_DATAMODEL) || defined(_ILP32)
 void
 show_flock32(private_t *pri, long offset)
 {
@@ -1737,6 +1755,7 @@ show_flock32(private_t *pri, long offset)
 		    flock.l_pid);
 	}
 }
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_flock64(private_t *pri, long offset)
@@ -1878,10 +1897,14 @@ show_fcntl(private_t *pri)
 	case F_OFD_SETLKW:
 	case F_FLOCK:
 	case F_FLOCKW:
+#ifdef _MULTI_DATAMODEL
 		if (data_model == PR_MODEL_LP64)
 			show_flock64(pri, offset);
 		else
 			show_flock32(pri, offset);
+#else
+		show_flock64(pri, offset);
+#endif
 		break;
 	case 33:	/* F_GETLK64 */
 	case 34:	/* F_SETLK64 */
@@ -1935,7 +1958,7 @@ show_strbuf(private_t *pri, long offset, const char *name, int dump)
 		print_strbuf(pri, &strbuf, name, dump);
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_strbuf32(private_t *pri, long offset, const char *name, int dump)
 {
@@ -1944,7 +1967,7 @@ show_strbuf32(private_t *pri, long offset, const char *name, int dump)
 	if (Pread(Proc, &strbuf, sizeof (strbuf), offset) == sizeof (strbuf))
 		print_strbuf32(pri, &strbuf, name, dump);
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_gp_msg(private_t *pri, int what)
@@ -1970,7 +1993,7 @@ show_gp_msg(private_t *pri, int what)
 	if (dump)
 		Eserialize();
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (pri->sys_nargs >= 2 && (offset = pri->sys_args[1]) != 0) {
 		if (data_model == PR_MODEL_LP64)
 			show_strbuf(pri, offset, "ctl", dump);
@@ -2168,7 +2191,7 @@ show_perm(private_t *pri, struct ipc_perm *ip)
 	    ip->key);
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_perm32(private_t *pri, struct ipc_perm32 *ip)
 {
@@ -2183,7 +2206,7 @@ show_perm32(private_t *pri, struct ipc_perm32 *ip)
 	    ip->seq,
 	    ip->key);
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 static void
 show_msgctl64(private_t *pri, long offset)
@@ -2232,7 +2255,7 @@ show_msgctl(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_msgctl32(private_t *pri, long offset)
 {
@@ -2256,7 +2279,7 @@ show_msgctl32(private_t *pri, long offset)
 		prtime(pri, "    ct = ", msgq.msg_ctime);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_msgbuf(private_t *pri, long offset, long msgsz)
@@ -2282,7 +2305,7 @@ show_msgbuf(private_t *pri, long offset, long msgsz)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_msgbuf32(private_t *pri, long offset, long msgsz)
 {
@@ -2306,9 +2329,9 @@ show_msgbuf32(private_t *pri, long offset, long msgsz)
 			Xserialize();
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_msgsys(private_t *pri, long msgsz)
 {
@@ -2364,7 +2387,7 @@ show_msgsys(private_t *pri, long msgsz)
 		break;
 	}
 }
-#else	/* _LP64 */
+#else	/* _MULTI_DATAMODEL */
 void
 show_msgsys(private_t *pri, long msgsz)
 {
@@ -2406,7 +2429,7 @@ show_msgsys(private_t *pri, long msgsz)
 		break;
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 static void
 show_semctl64(private_t *pri, long offset)
@@ -2442,7 +2465,7 @@ show_semctl(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_semctl32(private_t *pri, long offset)
 {
@@ -2460,7 +2483,7 @@ show_semctl32(private_t *pri, long offset)
 		prtime(pri, "    ct = ", semds.sem_ctime);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_semop(private_t *pri, long offset, long nsops, long timeout)
@@ -2507,7 +2530,7 @@ show_semsys(private_t *pri)
 					break;
 				/*FALLTHROUGH*/
 			case IPC_SET:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 				if (data_model == PR_MODEL_LP64)
 					show_semctl(pri,
 					    (long)pri->sys_args[4]);
@@ -2595,7 +2618,7 @@ show_shmctl(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_shmctl32(private_t *pri, long offset)
 {
@@ -2619,7 +2642,7 @@ show_shmctl32(private_t *pri, long offset)
 		prtime(pri, "    ct = ", shmds.shm_ctime);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_shmsys(private_t *pri)
@@ -2635,7 +2658,7 @@ show_shmsys(private_t *pri)
 					break;
 				/*FALLTHROUGH*/
 			case IPC_SET:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 				if (data_model == PR_MODEL_LP64)
 					show_shmctl(pri,
 					    (long)pri->sys_args[3]);
@@ -2721,7 +2744,7 @@ show_sigset(private_t *pri, long offset, const char *name)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_sigaltstack32(private_t *pri, long offset, const char *name)
 {
@@ -2738,14 +2761,14 @@ show_sigaltstack32(private_t *pri, long offset, const char *name)
 		    altstack.ss_flags);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_sigaltstack(private_t *pri, long offset, const char *name)
 {
 	struct sigaltstack altstack;
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model != PR_MODEL_LP64) {
 		show_sigaltstack32(pri, offset, name);
 		return;
@@ -2763,7 +2786,7 @@ show_sigaltstack(private_t *pri, long offset, const char *name)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_sigaction32(private_t *pri, long offset, const char *name, long odisp)
 {
@@ -2784,14 +2807,14 @@ show_sigaction32(private_t *pri, long offset, const char *name, long odisp)
 		    sigaction.sa_flags);
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_sigaction(private_t *pri, long offset, const char *name, long odisp)
 {
 	struct sigaction sigaction;
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model != PR_MODEL_LP64) {
 		show_sigaction32(pri, offset, name, odisp);
 		return;
@@ -2813,7 +2836,7 @@ show_sigaction(private_t *pri, long offset, const char *name, long odisp)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 print_siginfo32(private_t *pri, const siginfo32_t *sip)
 {
@@ -2968,7 +2991,7 @@ print_siginfo32(private_t *pri, const siginfo32_t *sip)
 
 	(void) fputc('\n', stdout);
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 print_siginfo(private_t *pri, const siginfo_t *sip)
@@ -3127,7 +3150,7 @@ print_siginfo(private_t *pri, const siginfo_t *sip)
 	(void) fputc('\n', stdout);
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_siginfo32(private_t *pri, long offset)
 {
@@ -3137,14 +3160,14 @@ show_siginfo32(private_t *pri, long offset)
 	    Pread(Proc, &siginfo, sizeof (siginfo), offset) == sizeof (siginfo))
 		print_siginfo32(pri, &siginfo);
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_siginfo(private_t *pri, long offset)
 {
 	struct siginfo siginfo;
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model != PR_MODEL_LP64) {
 		show_siginfo32(pri, offset);
 		return;
@@ -3186,7 +3209,7 @@ show_bool(private_t *pri, long offset, int count)
 		Xserialize();
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_iovec32(private_t *pri, long offset, int niov, int showbuf, long count)
 {
@@ -3225,7 +3248,7 @@ show_iovec32(private_t *pri, long offset, int niov, int showbuf, long count)
 			Xserialize();
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_iovec(private_t *pri, long offset, long niov, int showbuf, long count)
@@ -3235,7 +3258,7 @@ show_iovec(private_t *pri, long offset, long niov, int showbuf, long count)
 	long nb;
 	int serial = (count > MYBUFSIZ / 4 && showbuf);
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model != PR_MODEL_LP64) {
 		show_iovec32(pri, offset, niov, showbuf, count);
 		return;
@@ -3272,6 +3295,7 @@ show_iovec(private_t *pri, long offset, long niov, int showbuf, long count)
 	}
 }
 
+#if defined(_MULTI_DATAMODEL) || defined(_ILP32)
 void
 show_dents32(private_t *pri, long offset, long count)
 {
@@ -3329,6 +3353,7 @@ show_dents32(private_t *pri, long offset, long count)
 	if (serial)
 		Xserialize();
 }
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_dents64(private_t *pri, long offset, long count)
@@ -3388,6 +3413,7 @@ show_dents64(private_t *pri, long offset, long count)
 		Xserialize();
 }
 
+#ifdef _MULTI_DATAMODEL
 void
 show_rlimit32(private_t *pri, long offset)
 {
@@ -3426,6 +3452,7 @@ show_rlimit32(private_t *pri, long offset)
 		}
 	}
 }
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_rlimit64(private_t *pri, long offset)
@@ -3586,7 +3613,7 @@ show_msghdr(private_t *pri, long offset)
 
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_msghdr32(private_t *pri, long offset)
 {
@@ -3622,7 +3649,7 @@ show_msghdr32(private_t *pri, long offset)
 	show_iovec32(pri, (long)msg.msg_iov, msg.msg_iovlen, showbuf, nb);
 
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 static void
 show_doorargs(private_t *pri, long offset)
@@ -3752,7 +3779,7 @@ show_doorparam(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 
 static void
 show_doorargs32(private_t *pri, long offset)
@@ -3787,14 +3814,14 @@ show_doorparam32(private_t *pri, long offset)
 	}
 }
 
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 static void
 show_doors(private_t *pri)
 {
 	switch (pri->sys_args[5]) {
 	case DOOR_CALL:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (data_model == PR_MODEL_LP64)
 			show_doorargs(pri, (long)pri->sys_args[1]);
 		else
@@ -3813,7 +3840,7 @@ show_doors(private_t *pri)
 		break;
 	case DOOR_GETPARAM:
 		if (!pri->Errno) {
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 			if (data_model == PR_MODEL_LP64)
 				show_doorparam(pri, (long)pri->sys_args[2]);
 			else
@@ -3844,7 +3871,7 @@ show_portargs(private_t *pri, long offset)
 }
 
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 
 static void
 show_portargs32(private_t *pri, long offset)
@@ -3863,14 +3890,14 @@ show_portargs32(private_t *pri, long offset)
 	}
 }
 
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 static void
 show_ports(private_t *pri)
 {
 	switch (pri->sys_args[0]) {
 	case PORT_GET:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (data_model == PR_MODEL_LP64)
 			show_portargs(pri, (long)pri->sys_args[2]);
 		else
@@ -3884,7 +3911,7 @@ show_ports(private_t *pri)
 
 #define	MAX_SNDFL_PRD 16
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 
 static void
 show_ksendfilevec32(private_t *pri, int fd,
@@ -3972,7 +3999,7 @@ show_ksendfilevec64(private_t *pri, int fd,
 	Xserialize();
 }
 
-#endif /* _LP64 */
+#endif /* _MULTI_DATAMODEL */
 
 /*ARGSUSED*/
 static void
@@ -3981,7 +4008,7 @@ show_sendfilevec(private_t *pri, int fd, sendfilevec_t *sndvec, int sfvcnt)
 	sendfilevec_t *snd_ptr, snd[MAX_SNDFL_PRD];
 	size_t cpy_rqst;
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model != PR_MODEL_LP64) {
 		show_ksendfilevec32(pri, fd,
 		    (ksendfilevec32_t *)sndvec, sfvcnt);
@@ -4030,7 +4057,7 @@ show_sendfilevec64(private_t *pri, int fd, sendfilevec64_t *sndvec, int sfvcnt)
 	sendfilevec64_t *snd_ptr, snd[MAX_SNDFL_PRD];
 	size_t cpy_rqst;
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model != PR_MODEL_LP64) {
 		show_ksendfilevec64(pri, fd,
 		    (ksendfilevec64_t *)sndvec, sfvcnt);
@@ -4103,7 +4130,7 @@ show_memcntl_mha(private_t *pri, long offset)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 
 static void
 show_memcntl_mha32(private_t *pri, long offset)
@@ -4130,7 +4157,7 @@ show_memcntl_mha32(private_t *pri, long offset)
 	}
 }
 
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 static void
 show_memcntl(private_t *pri)
@@ -4138,7 +4165,7 @@ show_memcntl(private_t *pri)
 
 	if ((int)pri->sys_args[2] != MC_HAT_ADVISE)
 		return;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 	if (data_model == PR_MODEL_LP64)
 		show_memcntl_mha(pri, (long)pri->sys_args[3]);
 	else
@@ -4198,7 +4225,9 @@ show_ntp_gettime(private_t *pri)
 		if (Pread(Proc, &ntv, sizeof (ntv), offset)
 		    != sizeof (ntv))
 			return;
-	} else {
+	}
+#ifdef _MULTI_DATAMODEL
+	else {
 		struct ntptimeval32 ntv32;
 
 		if (Pread(Proc, &ntv32, sizeof (ntv32), offset)
@@ -4209,6 +4238,7 @@ show_ntp_gettime(private_t *pri)
 		ntv.maxerror = ntv32.maxerror;
 		ntv.esterror = ntv32.esterror;
 	}
+#endif
 
 	(void) printf("\ttime:     %ld.%6.6ld sec\n",
 	    ntv.time.tv_sec, ntv.time.tv_usec);
@@ -4362,7 +4392,7 @@ show_getrusage(long offset)
 	    r.ru_nivcsw);
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 void
 show_getrusage32(long offset)
 {
@@ -4524,7 +4554,7 @@ show_zone_create_args(private_t *pri, long offset)
 }
 
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 
 static void
 show_zone_create_args32(private_t *pri, long offset)
@@ -4614,7 +4644,7 @@ show_zones(private_t *pri)
 {
 	switch (pri->sys_args[0]) {
 	case ZONE_CREATE:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (data_model == PR_MODEL_LP64)
 			show_zone_create_args(pri, (long)pri->sys_args[1]);
 		else
@@ -4747,7 +4777,7 @@ show_utimesys(private_t *pri)
 	}
 }
 
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 static void
 show_sockconfig_filter_prop32(private_t *pri, long addr)
 {
@@ -4799,7 +4829,8 @@ show_sockconfig_filter_prop32(private_t *pri, long addr)
 			}
 	}
 }
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
+
 static void
 show_sockconfig_filter_prop(private_t *pri, long addr)
 {
@@ -4857,7 +4888,7 @@ show_sockconfig(private_t *pri)
 {
 	switch (pri->sys_args[0]) {
 	case SOCKCONFIG_ADD_FILTER:
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (data_model == PR_MODEL_LP64)
 			show_sockconfig_filter_prop(pri,
 			    (long)pri->sys_args[2]);
@@ -5142,15 +5173,13 @@ void
 expound(private_t *pri, long r0, int raw)
 {
 	const lwpstatus_t *Lsp = pri->lwpstat;
+#ifdef _MULTI_DATAMODEL
 	int lp64 = (data_model == PR_MODEL_LP64);
+#endif
 	int what = Lsp->pr_what;
 	int err = pri->Errno;		/* don't display output parameters */
 					/* for a failed system call */
-#ifndef _LP64
-	/* We are a 32-bit truss; we can't grok a 64-bit process */
-	if (lp64)
-		return;
-#endif
+
 	/* for reporting sleeping system calls */
 	if (what == 0 && (Lsp->pr_flags & (PR_ASLEEP|PR_VFORKP)))
 		what = Lsp->pr_syscall;
@@ -5183,7 +5212,7 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_utssys:
 		if (err)
 			break;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_utssys(pri, r0);
 		else
@@ -5201,27 +5230,31 @@ expound(private_t *pri, long r0, int raw)
 		if (!err && pri->sys_nargs >= 3)
 			show_stat(pri, (long)pri->sys_args[2]);
 		break;
+#ifdef _MULTI_DATAMODEL
 	case SYS_fstatat64:
 		if (!err && pri->sys_nargs >= 3)
 			show_stat64_32(pri, (long)pri->sys_args[2]);
 		break;
+#endif
 	case SYS_stat:
 	case SYS_fstat:
 	case SYS_lstat:
 		if (!err && pri->sys_nargs >= 2)
 			show_stat(pri, (long)pri->sys_args[1]);
 		break;
+#ifdef _MULTI_DATAMODEL
 	case SYS_stat64:
 	case SYS_fstat64:
 	case SYS_lstat64:
 		if (!err && pri->sys_nargs >= 2)
 			show_stat64_32(pri, (long)pri->sys_args[1]);
 		break;
+#endif
 	case SYS_statvfs:
 	case SYS_fstatvfs:
 		if (err)
 			break;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (!lp64) {
 			show_statvfs32(pri);
 			break;
@@ -5229,17 +5262,19 @@ expound(private_t *pri, long r0, int raw)
 #endif
 		show_statvfs(pri);
 		break;
+#ifdef _MULTI_DATAMODEL
 	case SYS_statvfs64:
 	case SYS_fstatvfs64:
 		if (err)
 			break;
 		show_statvfs64(pri);
 		break;
+#endif
 	case SYS_statfs:
 	case SYS_fstatfs:
 		if (err)
 			break;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_statfs(pri);
 		else
@@ -5263,11 +5298,13 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_getdents:
 		if (err || pri->sys_nargs <= 1 || r0 <= 0)
 			break;
-#ifdef _LP64
+#if defined(_LP64)
+#if defined(_MULTI_DATAMODEL)
 		if (!lp64) {
 			show_dents32(pri, (long)pri->sys_args[1], r0);
 			break;
 		}
+#endif
 #else
 		show_dents32(pri, (long)pri->sys_args[1], r0);
 		break;
@@ -5390,13 +5427,13 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_setrlimit:
 		if (pri->sys_nargs <= 1)
 			break;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_rlimit64(pri, (long)pri->sys_args[1]);
 		else
 			show_rlimit32(pri, (long)pri->sys_args[1]);
 #else
-		show_rlimit32(pri, (long)pri->sys_args[1]);
+		show_rlimit64(pri, (long)pri->sys_args[1]);
 #endif
 		break;
 	case SYS_getrlimit64:
@@ -5541,7 +5578,7 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_sendmsg:
 		if (pri->sys_nargs <= 2)
 			break;
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 		if (lp64)
 			show_msghdr(pri, pri->sys_args[1]);
 		else
@@ -5594,7 +5631,7 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_rusagesys:
 		if (!err)
 			if (pri->sys_args[0] == _RUSAGESYS_GETRUSAGE) {
-#ifdef _LP64
+#ifdef _MULTI_DATAMODEL
 				if (!lp64)
 					show_getrusage32(pri->sys_args[1]);
 				else

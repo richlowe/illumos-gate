@@ -25,9 +25,6 @@
  */
 /*
  * Copyright 2017 Hayashi Naoyuki
- */
-
-/*
  * Copyright (c) 2018, Joyent, Inc.
  */
 
@@ -114,8 +111,6 @@ static int aio_cancel(int, void *, long	*, int);
 static int arw(int, int, char *, int, offset_t, aio_result_t *, int);
 static int aiorw(int, void *, int, int);
 
-static int aio_req_setupLF(aio_req_t **, aio_t *, aiocb64_32_t *,
-    aio_result_t *, vnode_t *, int);
 static int driver_aio_write(vnode_t *vp, struct aio_req *aio, cred_t *cred_p);
 static int driver_aio_read(vnode_t *vp, struct aio_req *aio, cred_t *cred_p);
 
@@ -124,6 +119,8 @@ static int alioLF(int, void *, int, void *);
 static int alio32(int, void *, int, void *);
 static void aiocb_LFton(aiocb64_32_t *, aiocb_t *);
 void	aiocb_32ton(aiocb32_t *, aiocb_t *);
+static int aio_req_setupLF(aio_req_t **, aio_t *, aiocb64_32_t *,
+    aio_result_t *, vnode_t *, int);
 #endif /* _SYSCALL32_IMPL */
 
 /*
@@ -908,10 +905,15 @@ aiosuspend(void	*aiocb, int nent, struct timespec *timout, int flag,
 	caddr_t		cbplist = NULL;
 	aiocb_t		*cbp, **ucbp;
 #ifdef	_SYSCALL32_IMPL
+	aiocb64_32_t	*cbp64;
 	aiocb32_t	*cbp32;
 	caddr32_t	*ucbp32;
 #endif  /* _SYSCALL32_IMPL */
+
+#ifndef _LP64
 	aiocb64_32_t	*cbp64;
+#endif
+
 	int		rv;
 	int		i;
 	size_t		ssize;
@@ -991,14 +993,17 @@ aiosuspend(void	*aiocb, int nent, struct timespec *timout, int flag,
 				if (model == DATAMODEL_NATIVE) {
 					if ((cbp = *ucbp++) == NULL)
 						continue;
-					if (run_mode != AIO_LARGEFILE)
+					if (run_mode != AIO_LARGEFILE) {
 						reqp = aio_req_done(
 						    &cbp->aio_resultp);
+					}
+#ifndef _LP64
 					else {
 						cbp64 = (aiocb64_32_t *)cbp;
 						reqp = aio_req_done(
 						    &cbp64->aio_resultp);
 					}
+#endif	/* _LP64 */
 				}
 #ifdef	_SYSCALL32_IMPL
 				else {
@@ -1618,9 +1623,11 @@ aliowait(
 			 */
 			if ((cbp = *ucbp++) == NULL)
 				continue;
-			if (run_mode != AIO_LARGEFILE)
+			if (run_mode != AIO_LARGEFILE) {
 				if (head = aio_list_get(&cbp->aio_resultp))
 					break;
+			}
+#ifndef _LP64
 			else {
 				/*
 				 * This is a case when largefile call is
@@ -1632,6 +1639,7 @@ aliowait(
 				    &(((aiocb64_32_t *)cbp)->aio_resultp)))
 					break;
 			}
+#endif	/* _LP64 */
 		}
 #ifdef	_SYSCALL32_IMPL
 		else {
@@ -1735,21 +1743,28 @@ alio_cleanup(aio_t *aiop, aiocb_t **cbp, int nent, int run_mode)
 	int i;
 	aio_req_t *reqp;
 	aio_result_t *resultp;
+#ifndef _LP64
 	aiocb64_32_t *aiocb_64;
+#endif
 
 	for (i = 0; i < nent; i++) {
 		if (get_udatamodel() == DATAMODEL_NATIVE) {
 			if (cbp[i] == NULL)
 				continue;
+#ifndef _LP64
 			if (run_mode == AIO_LARGEFILE) {
 				aiocb_64 = (aiocb64_32_t *)cbp[i];
 				resultp = (aio_result_t *)
 				    &aiocb_64->aio_resultp;
 			} else
+#endif	/* _LP64 */
+			{
 				resultp = &cbp[i]->aio_resultp;
+			}
 		}
 #ifdef	_SYSCALL32_IMPL
 		else {
+			aiocb64_32_t *aiocb_64;
 			aiocb32_t *aiocb_32;
 			caddr32_t *cbp32;
 
@@ -1802,20 +1817,25 @@ aioerror(void *cb, int run_mode)
 		return (EINVAL);
 
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
-		if (run_mode == AIO_LARGEFILE)
+#ifndef _LP64
+		if (run_mode == AIO_LARGEFILE) {
 			resultp = (aio_result_t *)&((aiocb64_32_t *)cb)->
 			    aio_resultp;
-		else
+		} else
+#endif
+		{
 			resultp = &((aiocb_t *)cb)->aio_resultp;
+		}
 	}
 #ifdef	_SYSCALL32_IMPL
 	else {
-		if (run_mode == AIO_LARGEFILE)
+		if (run_mode == AIO_LARGEFILE) {
 			resultp = (aio_result_t *)&((aiocb64_32_t *)cb)->
 			    aio_resultp;
-		else if (run_mode == AIO_32)
+		} else if (run_mode == AIO_32) {
 			resultp = (aio_result_t *)&((aiocb32_t *)cb)->
 			    aio_resultp;
+		}
 	}
 #endif  /* _SYSCALL32_IMPL */
 	/*
@@ -1877,11 +1897,15 @@ aio_cancel(int fildes, void *cb, long *rval, int run_mode)
 	mutex_enter(&aiop->aio_mutex);
 	if (cb != NULL) {
 		if (get_udatamodel() == DATAMODEL_NATIVE) {
-			if (run_mode == AIO_LARGEFILE)
+#ifndef _LP64
+			if (run_mode == AIO_LARGEFILE) {
 				resultp = (aio_result_t *)&((aiocb64_32_t *)cb)
 				    ->aio_resultp;
-			else
-				resultp = &((aiocb_t *)cb)->aio_resultp;
+			} else
+#endif
+			{
+					resultp = &((aiocb_t *)cb)->aio_resultp;
+			}
 		}
 #ifdef	_SYSCALL32_IMPL
 		else {
@@ -2043,10 +2067,15 @@ aiorw(
 {
 #ifdef _SYSCALL32_IMPL
 	aiocb32_t	aiocb32;
+	aiocb64_32_t	aiocb64;
 	struct	sigevent32 *sigev32;
 	port_notify32_t	pntfy32;
 #endif
+
+#ifndef _LP64
 	aiocb64_32_t	aiocb64;
+#endif
+
 	aiocb_t		aiocb;
 	file_t		*fp;
 	int		error, fd;
@@ -2066,6 +2095,10 @@ aiorw(
 	if (aiop == NULL)
 		return (EINVAL);
 
+#if defined(_LP64) && !defined(_SYSCALL32_IMPL)
+	ASSERT(run_mode != AIO_LARGEFILE);
+#endif
+
 	if (model == DATAMODEL_NATIVE) {
 		if (run_mode != AIO_LARGEFILE) {
 			if (copyin(aiocb_arg, &aiocb, sizeof (aiocb_t)))
@@ -2076,7 +2109,9 @@ aiorw(
 				return (EBADF);
 			}
 			sigev = &aiocb.aio_sigevent;
-		} else {
+		}
+#ifndef _LP64
+		else {
 			/*
 			 * We come here only when we make largefile
 			 * call on 32 bit kernel using 32 bit library.
@@ -2090,6 +2125,7 @@ aiorw(
 				return (EBADF);
 			sigev = (struct sigevent *)&aiocb64.aio_sigevent;
 		}
+#endif	/* _LP64 */
 
 		if (sigev->sigev_notify == SIGEV_PORT) {
 			if (copyin((void *)sigev->sigev_value.sival_ptr,
@@ -2171,9 +2207,12 @@ aiorw(
 		releasef(fd);
 		return (EBADFD);
 	}
+
+#ifdef _SYSCALL32_IMPL
 	if (run_mode == AIO_LARGEFILE)
 		error = aio_req_setupLF(&reqp, aiop, &aiocb64, resultp, vp, 0);
 	else
+#endif	/* _SYSCALL32_IMPL */
 		error = aio_req_setup(&reqp, aiop, &aiocb, resultp, vp, 0);
 
 	if (error) {
@@ -3281,6 +3320,7 @@ aiocb_LFton(aiocb64_32_t *src, aiocb_t *dest)
  * This function is used only for largefile calls made by
  * 32 bit applications.
  */
+#ifdef _SYSCALL32_IMPL
 static int
 aio_req_setupLF(
 	aio_req_t	**reqpp,
@@ -3360,7 +3400,6 @@ aio_req_setupLF(
 	return (0);
 }
 
-#ifdef _SYSCALL32_IMPL
 /*
  * This routine is called when a non largefile call is made by a 32bit
  * process on a ILP32 or LP64 kernel.

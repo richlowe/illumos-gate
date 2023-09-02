@@ -59,8 +59,12 @@ typedef struct  timespec {		/* definition per POSIX.4 */
 	long		tv_nsec;	/* and nanoseconds */
 } timespec_t;
 
-#if defined(_SYSCALL32)
 
+#if defined(_KERNEL) || defined(_SYSCALL32)
+/*
+ * XXXARM: udfs(4FS) deals explicitly in 32bit time, or these could only be
+ * _SYSCALL32
+ */
 #include <sys/types32.h>
 
 #define	TIMESPEC32_TO_TIMESPEC(ts, ts32)	{	\
@@ -76,7 +80,7 @@ typedef struct  timespec {		/* definition per POSIX.4 */
 #define	TIMESPEC_OVERFLOW(ts)		\
 	((ts)->tv_sec < TIME32_MIN || (ts)->tv_sec > TIME32_MAX)
 
-#endif	/* _SYSCALL32 */
+#endif	/* _KERNEL || _SYSCALL32 */
 
 typedef struct timespec timestruc_t;	/* definition per SVr4 */
 

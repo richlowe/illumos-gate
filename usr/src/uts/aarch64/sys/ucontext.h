@@ -29,7 +29,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 #ifndef	_SYS_UCONTEXT_H
 #define	_SYS_UCONTEXT_H
@@ -83,29 +83,10 @@ struct	__ucontext {
 #endif
 	unsigned long	uc_flags;
 	ucontext_t	*uc_link;
-	sigset_t   	uc_sigmask;
-	stack_t 	uc_stack;
-	mcontext_t 	uc_mcontext;
-};
-
-#if defined(_SYSCALL32)
-
-/* Kernel view of user ILP32 ucontext structure */
-
-typedef struct ucontext32 {
-	uint32_t	uc_flags;
-	caddr32_t	uc_link;
 	sigset_t	uc_sigmask;
-	stack32_t	uc_stack;
-	mcontext32_t	uc_mcontext;
-} ucontext32_t;
-
-#if defined(_KERNEL)
-extern void ucontext_nto32(const ucontext_t *src, ucontext32_t *dest);
-extern void ucontext_32ton(const ucontext32_t *src, ucontext_t *dest);
-#endif
-
-#endif	/* _SYSCALL32 */
+	stack_t		uc_stack;
+	mcontext_t	uc_mcontext;
+};
 
 #if !defined(_XPG4_2) || defined(__EXTENSIONS__)
 #define	GETCONTEXT	0
@@ -139,10 +120,6 @@ extern void ucontext_32ton(const ucontext32_t *src, ucontext_t *dest);
 #ifdef _KERNEL
 void savecontext(ucontext_t *, const k_sigset_t *);
 void restorecontext(ucontext_t *);
-
-#ifdef _SYSCALL32
-extern void savecontext32(ucontext32_t *, const k_sigset_t *);
-#endif
 #endif
 
 #ifdef	__cplusplus

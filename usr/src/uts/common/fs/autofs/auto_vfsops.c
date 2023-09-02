@@ -409,7 +409,9 @@ auto_mount(vfs_t *vfsp, vnode_t *vp, struct mounta *uap, cred_t *cr)
 			if (datalen != sizeof (args))
 				return (EINVAL);
 			error = copyin(data, &args, sizeof (args));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			struct autofs_args32 args32;
 
 			if (datalen != sizeof (args32))
@@ -428,6 +430,7 @@ auto_mount(vfs_t *vfsp, vnode_t *vp, struct mounta *uap, cred_t *cr)
 			args.rpc_to = args32.rpc_to;
 			args.direct = args32.direct;
 		}
+#endif	/* _SYSCALL32_IMPL */
 	}
 	if (error)
 		return (EFAULT);

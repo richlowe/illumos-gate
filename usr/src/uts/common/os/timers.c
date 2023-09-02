@@ -146,6 +146,7 @@ uniqtime(struct timeval *tv)
 	tv->tv_usec = usec;
 }
 
+
 /*
  * Timestamps are exported from the kernel in several places.
  * Such timestamps are commonly used for either uniqueness or for
@@ -171,7 +172,9 @@ gettimeofday(struct timeval *tp)
 		if (get_udatamodel() == DATAMODEL_NATIVE) {
 			if (copyout(&atv, tp, sizeof (atv)))
 				return (set_errno(EFAULT));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			struct timeval32 tv32;
 
 			if (TIMEVAL_OVERFLOW(&atv))
@@ -181,6 +184,7 @@ gettimeofday(struct timeval *tp)
 			if (copyout(&tv32, tp, sizeof (tv32)))
 				return (set_errno(EFAULT));
 		}
+#endif	/* _SYSCALL32_IMPL */
 	}
 	return (0);
 }
@@ -190,8 +194,10 @@ getitimer(uint_t which, struct itimerval *itv)
 {
 	int error;
 
-	if (get_udatamodel() == DATAMODEL_NATIVE)
+	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		error = xgetitimer(which, itv, 0);
+	}
+#ifdef _SYSCALL32_IMPL
 	else {
 		struct itimerval kitv;
 
@@ -207,6 +213,7 @@ getitimer(uint_t which, struct itimerval *itv)
 			}
 		}
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	return (error ? (set_errno(error)) : 0);
 }
@@ -312,8 +319,10 @@ setitimer(uint_t which, struct itimerval *itv, struct itimerval *oitv)
 	if (itv == NULL)
 		return (0);
 
-	if (get_udatamodel() == DATAMODEL_NATIVE)
+	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		error = xsetitimer(which, itv, 0);
+	}
+#ifdef _SYSCALL32_IMPL
 	else {
 		struct itimerval32 itv32;
 		struct itimerval kitv;
@@ -323,6 +332,7 @@ setitimer(uint_t which, struct itimerval *itv, struct itimerval *oitv)
 		ITIMERVAL32_TO_ITIMERVAL(&kitv, &itv32);
 		error = xsetitimer(which, &kitv, 1);
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	return (error ? (set_errno(error)) : 0);
 }
@@ -1235,6 +1245,7 @@ ts2hrt(const timestruc_t *tsp)
 #endif /* defined(__x86) */
 }
 
+#ifdef _SYSCALL32_IMPL
 /*
  * For the various 32-bit "compatibility" paths in the system.
  */
@@ -1246,6 +1257,7 @@ hrt2ts32(hrtime_t hrt, timestruc32_t *ts32p)
 	hrt2ts(hrt, &ts);
 	TIMESPEC_TO_TIMESPEC32(ts32p, &ts);
 }
+#endif	/* _SYSCALL32_IMPL */
 
 /*
  * If this ever becomes performance critical (ha!), we can borrow the
@@ -1321,13 +1333,16 @@ nanosleep(timespec_t *rqtp, timespec_t *rmtp)
 	if (datamodel == DATAMODEL_NATIVE) {
 		if (copyin(rqtp, &rqtime, sizeof (rqtime)))
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		timespec32_t rqtime32;
 
 		if (copyin(rqtp, &rqtime32, sizeof (rqtime32)))
 			return (set_errno(EFAULT));
 		TIMESPEC32_TO_TIMESPEC(&rqtime, &rqtime32);
 	}
+#endif	/* SYSCALL32_IMPL */
 
 	if (rqtime.tv_sec < 0 || rqtime.tv_nsec < 0 ||
 	    rqtime.tv_nsec >= NANOSEC)
@@ -1362,13 +1377,16 @@ nanosleep(timespec_t *rqtp, timespec_t *rmtp)
 		if (datamodel == DATAMODEL_NATIVE) {
 			if (copyout(&rmtime, rmtp, sizeof (rmtime)))
 				return (set_errno(EFAULT));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			timespec32_t rmtime32;
 
 			TIMESPEC_TO_TIMESPEC32(&rmtime32, &rmtime);
 			if (copyout(&rmtime32, rmtp, sizeof (rmtime32)))
 				return (set_errno(EFAULT));
 		}
+#endif	/* _SYSCALL32_IMPL */
 	}
 
 	if (ret == 0)
