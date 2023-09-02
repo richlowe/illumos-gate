@@ -3572,6 +3572,7 @@ lofi_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *credp,
 		fake_disk_vtoc(lsp, &vt);
 
 		switch (ddi_model_convert_from(flag & FMODELS)) {
+#ifdef _SYSCALL32_IMPL
 		case DDI_MODEL_ILP32: {
 			struct vtoc32 vtoc32;
 
@@ -3580,8 +3581,8 @@ lofi_ioctl(dev_t dev, int cmd, intptr_t arg, int flag, cred_t *credp,
 			    sizeof (struct vtoc32), flag))
 				return (EFAULT);
 			break;
-			}
-
+		}
+#endif	/* _SYSCALL32_IMPL */
 		case DDI_MODEL_NONE:
 			if (ddi_copyout(&vt, (void *)arg,
 			    sizeof (struct vtoc), flag))

@@ -441,7 +441,6 @@ iscsit_drv_ioctl(dev_t drv, int cmd, intptr_t argp, int flag, cred_t *cred,
     int *retval)
 {
 	iscsit_ioc_set_config_t		setcfg;
-	iscsit_ioc_set_config32_t	setcfg32;
 	char				*cfg_pnvlist = NULL;
 	nvlist_t			*cfg_nvlist = NULL;
 	it_config_t			*cfg = NULL;
@@ -500,7 +499,10 @@ iscsit_drv_ioctl(dev_t drv, int cmd, intptr_t argp, int flag, cred_t *cred,
 	case ISCSIT_IOC_SET_CONFIG:
 		/* Any errors must set state back to ISE_ENABLED */
 		switch (ddi_model_convert_from(flag & FMODELS)) {
-		case DDI_MODEL_ILP32:
+#ifdef _SYSCALL32_IMPL
+		case DDI_MODEL_ILP32: {
+			iscsit_ioc_set_config32_t	setcfg32;
+
 			if (ddi_copyin((void *)argp, &setcfg32,
 			    sizeof (iscsit_ioc_set_config32_t), flag) != 0) {
 				rc = EFAULT;
@@ -513,6 +515,8 @@ iscsit_drv_ioctl(dev_t drv, int cmd, intptr_t argp, int flag, cred_t *cred,
 			setcfg.set_cfg_pnvlist_len =
 			    setcfg32.set_cfg_pnvlist_len;
 			break;
+		}
+#endif	/* _SYSCALL32_IMPL */
 		case DDI_MODEL_NONE:
 			if (ddi_copyin((void *)argp, &setcfg,
 			    sizeof (iscsit_ioc_set_config_t), flag) != 0) {

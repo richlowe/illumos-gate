@@ -34,6 +34,9 @@ include ../Makefile.ctf
 
 LDLIBS += -lproject
 
+i386_CPPFLAGS += -D_SYSCALL32
+CPPFLAGS += $($(MACH)_CPPFLAGS)
+
 XGETFLAGS += -a -x ps.xcl
 
 DCFILE= $(PROG).dc

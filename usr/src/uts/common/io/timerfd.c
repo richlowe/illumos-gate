@@ -206,7 +206,9 @@ timerfd_copyin(uintptr_t addr, itimerspec_t *dest)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyin((void *)addr, dest, sizeof (itimerspec_t)) != 0)
 			return (EFAULT);
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		itimerspec32_t dest32;
 
 		if (copyin((void *)addr, &dest32, sizeof (itimerspec32_t)) != 0)
@@ -214,6 +216,7 @@ timerfd_copyin(uintptr_t addr, itimerspec_t *dest)
 
 		ITIMERSPEC32_TO_ITIMERSPEC(dest, &dest32);
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	if (itimerspecfix(&dest->it_value) ||
 	    (itimerspecfix(&dest->it_interval) &&
@@ -230,7 +233,9 @@ timerfd_copyout(itimerspec_t *src, uintptr_t addr)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyout(src, (void *)addr, sizeof (itimerspec_t)) != 0)
 			return (EFAULT);
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		itimerspec32_t src32;
 
 		if (ITIMERSPEC_OVERFLOW(src))
@@ -241,6 +246,7 @@ timerfd_copyout(itimerspec_t *src, uintptr_t addr)
 		if (copyout(&src32, (void *)addr, sizeof (itimerspec32_t)) != 0)
 			return (EFAULT);
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	return (0);
 }

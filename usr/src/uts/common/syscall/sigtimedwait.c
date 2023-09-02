@@ -114,13 +114,16 @@ sigtimedwait(sigset_t *setp, siginfo_t *siginfop, timespec_t *timeoutp)
 			if (copyin(timeoutp, &sig_timeout,
 			    sizeof (sig_timeout)))
 				return (set_errno(EFAULT));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			timespec32_t timeout32;
 
 			if (copyin(timeoutp, &timeout32, sizeof (timeout32)))
 				return (set_errno(EFAULT));
 			TIMESPEC32_TO_TIMESPEC(&sig_timeout, &timeout32)
 		}
+#endif	/* _SYSCALL32_IMPL */
 
 		if (itimerspecfix(&sig_timeout))
 			return (set_errno(EINVAL));

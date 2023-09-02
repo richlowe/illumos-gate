@@ -531,7 +531,9 @@ door_call(int did, void *args)
 		if (datamodel == DATAMODEL_NATIVE) {
 			if (copyin(args, &ct->d_args, sizeof (door_arg_t)) != 0)
 				return (set_errno(EFAULT));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			door_arg32_t    da32;
 
 			if (copyin(args, &da32, sizeof (door_arg32_t)) != 0)
@@ -546,6 +548,7 @@ door_call(int did, void *args)
 			    (char *)(uintptr_t)da32.rbuf;
 			ct->d_args.rsize = da32.rsize;
 		}
+#endif	/* _SYSCALL32_IMPL */
 	} else {
 		/* No arguments, and no results allowed */
 		ct->d_noresults = 1;
@@ -881,7 +884,9 @@ results:
 		if (copyout_nowatch(&ct->d_args, args,
 		    sizeof (door_arg_t)) != 0)
 			error = EFAULT;
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		door_arg32_t    da32;
 
 		da32.data_ptr = (caddr32_t)(uintptr_t)ct->d_args.data_ptr;
@@ -894,6 +899,7 @@ results:
 			error = EFAULT;
 		}
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 out:
 	ct->d_noresults = 0;

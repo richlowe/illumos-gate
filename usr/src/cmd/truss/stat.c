@@ -27,8 +27,6 @@
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
 /*	  All Rights Reserved	*/
 
-#define	_SYSCALL32
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -42,23 +40,22 @@
 #include "proto.h"
 
 void	show_stat32(private_t *, long);
-#ifdef _LP64
 void	show_stat64(private_t *, long);
-#endif
 
 void
 show_stat(private_t *pri, long offset)
 {
-#ifdef _LP64
-	if (data_model == PR_MODEL_LP64)
+	if (data_model == PR_MODEL_LP64) {
 		show_stat64(pri, offset);
-	else
+	}
+#ifdef _MULTI_DATAMODEL
+	else {
 		show_stat32(pri, offset);
-#else
-	show_stat32(pri, offset);
+	}
 #endif
 }
 
+#if defined(_MULTI_DATAMODEL) || !defined(_LP64)
 void
 show_stat32(private_t *pri, long offset)
 {
@@ -147,8 +144,8 @@ show_stat64_32(private_t *pri, long offset)
 		    statb.st_fstype);
 	}
 }
+#endif
 
-#ifdef _LP64
 void
 show_stat64(private_t *pri, long offset)
 {
@@ -189,4 +186,3 @@ show_stat64(private_t *pri, long offset)
 		    statb.st_fstype);
 	}
 }
-#endif	/* _LP64 */

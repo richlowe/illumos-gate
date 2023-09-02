@@ -26,13 +26,12 @@
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * Portions of this source code were derived from Berkeley 4.3 BSD
  * under license from the Regents of the University of California.
  */
-
 
 #include <sys/param.h>
 #include <sys/isa_defs.h>
@@ -78,7 +77,9 @@ fcntl(int fdes, int cmd, intptr_t arg)
 	struct flock sbf;
 	struct flock64 bf;
 	struct o_flock obf;
+#ifdef _SYSCALL32_IMPL
 	struct flock64_32 bf64_32;
+#endif
 	struct fshare fsh;
 	struct shrlock shr;
 	struct shr_locowner shr_own;
@@ -562,9 +563,11 @@ fcntl(int fdes, int cmd, intptr_t arg)
 		}
 #endif /* defined(_LP64) */
 
-#if !defined(_LP64) || defined(_SYSCALL32_IMPL)
+#ifdef _SYSCALL32_IMPL
 		if (datamodel == DATAMODEL_ILP32 &&
 		    (cmd == F_ALLOCSP64 || cmd == F_FREESP64)) {
+			struct flock64_32 bf64_32;
+
 			if (copyin((void *)arg, &bf64_32, sizeof (bf64_32))) {
 				error = EFAULT;
 				break;
@@ -587,7 +590,7 @@ fcntl(int fdes, int cmd, intptr_t arg)
 				bf.l_pid = (pid_t)bf64_32.l_pid;
 			}
 		}
-#endif /* !defined(_LP64) || defined(_SYSCALL32_IMPL) */
+#endif /* _SYSCALL32_IMPL */
 
 		if (cmd == F_ALLOCSP || cmd == F_FREESP)
 			error = flock_check(vp, &bf, offset, maxoffset);

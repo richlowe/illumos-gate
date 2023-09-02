@@ -3028,18 +3028,16 @@ prgetattr(vnode_t *vp, vattr_t *vap, int flags, cred_t *cr,
 	 * This ugly bit of code allows us to keep both versions of this
 	 * function from the same source.
 	 */
-#ifdef _LP64
+#if defined(_SYSCALL32_IMPL)
 	int iam32bit = (curproc->p_model == DATAMODEL_ILP32);
 #define	PR_OBJSIZE(obj32, obj64)	\
 	(iam32bit ? sizeof (obj32) : sizeof (obj64))
 #define	PR_OBJSPAN(obj32, obj64)	\
 	(iam32bit ? LSPAN32(obj32) : LSPAN(obj64))
 #else
-#define	PR_OBJSIZE(obj32, obj64)	\
-	(sizeof (obj64))
-#define	PR_OBJSPAN(obj32, obj64)	\
-	(LSPAN(obj64))
-#endif
+#define	PR_OBJSIZE(obj32, obj64)	(sizeof (obj64))
+#define	PR_OBJSPAN(obj32, obj64)	(LSPAN(obj64))
+#endif /* _SYSCALL32_IMPL */
 
 	/*
 	 * Return all the attributes.  Should be refined

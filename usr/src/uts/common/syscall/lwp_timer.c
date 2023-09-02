@@ -106,7 +106,9 @@ lwp_timer_copyin(lwp_timer_t *lwptp, timespec_t *tsp)
 			error = EFAULT;
 			goto err;
 		}
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		timespec32_t ts32;
 		if (copyin(tsp, &ts32, sizeof (timespec32_t))) {
 			error = EFAULT;
@@ -114,6 +116,7 @@ lwp_timer_copyin(lwp_timer_t *lwptp, timespec_t *tsp)
 		}
 		TIMESPEC32_TO_TIMESPEC(&lwptp->lwpt_rqtime, &ts32);
 	}
+#endif	/* _SYSCALL32_IMPL */
 	if (itimerspecfix(&lwptp->lwpt_rqtime)) {
 		error = EINVAL;
 		goto err;
@@ -214,13 +217,16 @@ lwp_timer_copyout(lwp_timer_t *lwptp, int error)
 	if (curproc->p_model == DATAMODEL_NATIVE) {
 		if (copyout(&rmtime, lwptp->lwpt_tsp, sizeof (timespec_t)))
 			error = EFAULT;
-	} else {
+	}
+#ifdef _SYCALL32_IMPL
+	else {
 		timespec32_t rmtime32;
 
 		TIMESPEC_TO_TIMESPEC32(&rmtime32, &rmtime);
 		if (copyout(&rmtime32, lwptp->lwpt_tsp, sizeof (timespec32_t)))
 			error = EFAULT;
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	return (error);
 }

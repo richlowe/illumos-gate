@@ -305,7 +305,9 @@ clock_settime(clockid_t clock, timespec_t *tp)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyin(tp, &t, sizeof (timespec_t)) != 0)
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		timespec32_t t32;
 
 		if (copyin(tp, &t32, sizeof (timespec32_t)) != 0)
@@ -313,6 +315,7 @@ clock_settime(clockid_t clock, timespec_t *tp)
 
 		TIMESPEC32_TO_TIMESPEC(&t, &t32);
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	if (itimerspecfix(&t))
 		return (set_errno(EINVAL));
@@ -343,7 +346,9 @@ clock_gettime(clockid_t clock, timespec_t *tp)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyout(&t, tp, sizeof (timespec_t)) != 0)
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		timespec32_t t32;
 
 		if (TIMESPEC_OVERFLOW(&t))
@@ -353,6 +358,7 @@ clock_gettime(clockid_t clock, timespec_t *tp)
 		if (copyout(&t32, tp, sizeof (timespec32_t)) != 0)
 			return (set_errno(EFAULT));
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	return (0);
 }
@@ -383,7 +389,9 @@ clock_getres(clockid_t clock, timespec_t *tp)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyout(&t, tp, sizeof (timespec_t)) != 0)
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		timespec32_t t32;
 
 		if (TIMESPEC_OVERFLOW(&t))
@@ -393,6 +401,7 @@ clock_getres(clockid_t clock, timespec_t *tp)
 		if (copyout(&t32, tp, sizeof (timespec32_t)) != 0)
 			return (set_errno(EFAULT));
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	return (0);
 }
@@ -820,7 +829,9 @@ timer_gettime(timer_t tid, itimerspec_t *val)
 		if (get_udatamodel() == DATAMODEL_NATIVE) {
 			if (copyout(&when, val, sizeof (itimerspec_t)))
 				error = EFAULT;
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			if (ITIMERSPEC_OVERFLOW(&when))
 				error = EOVERFLOW;
 			else {
@@ -831,6 +842,7 @@ timer_gettime(timer_t tid, itimerspec_t *val)
 					error = EFAULT;
 			}
 		}
+#endif	/* _SYSCALL32_IMPL */
 	}
 
 	return (error ? set_errno(error) : 0);
@@ -852,7 +864,9 @@ timer_settime(timer_t tid, int flags, itimerspec_t *val, itimerspec_t *oval)
 	if (get_udatamodel() == DATAMODEL_NATIVE) {
 		if (copyin(val, &when, sizeof (itimerspec_t)))
 			return (set_errno(EFAULT));
-	} else {
+	} else
+#ifdef _SYSCALL32_IMPL
+		{
 		itimerspec32_t w32;
 
 		if (copyin(val, &w32, sizeof (itimerspec32_t)))
@@ -860,6 +874,7 @@ timer_settime(timer_t tid, int flags, itimerspec_t *val, itimerspec_t *oval)
 
 		ITIMERSPEC32_TO_ITIMERSPEC(&when, &w32);
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	if (itimerspecfix(&when.it_value) ||
 	    (itimerspecfix(&when.it_interval) &&

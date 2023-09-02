@@ -67,15 +67,17 @@
 #include <inet/ip6.h>
 #include <inet/tcp.h>
 
+#ifdef _SYSCALL32_IMPL
 extern int sosendfile64(file_t *, file_t *, const struct ksendfilevec64 *,
 		ssize32_t *);
+#endif
 extern int snf_segmap(file_t *, vnode_t *, u_offset_t, u_offset_t, ssize_t *,
 		boolean_t);
 extern sotpi_info_t *sotpi_sototpi(struct sonode *);
 
 #define	SEND_MAX_CHUNK	16
 
-#if defined(_SYSCALL32_IMPL) || defined(_ILP32)
+#if defined(_SYSCALL32_IMPL)
 /*
  * 64 bit offsets for 32 bit applications only running either on
  * 64 bit kernel or 32 bit kernel. For 32 bit apps, we can't transfer
@@ -1199,7 +1201,7 @@ sendfilev(int opcode, int fildes, const struct sendfilevec *vec, int sfvcnt,
 	switch (opcode) {
 	case SENDFILEV :
 		break;
-#if defined(_SYSCALL32_IMPL) || defined(_ILP32)
+#if defined(_SYSCALL32_IMPL)
 	case SENDFILEV64 :
 		return (sendvec64(fp, (struct ksendfilevec64 *)vec, sfvcnt,
 		    (size32_t *)xferred, fildes));

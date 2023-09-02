@@ -70,7 +70,7 @@ sigaltstack(struct sigaltstack *ssp, struct sigaltstack *oss)
 	return (0);
 }
 
-#ifdef _LP64
+#ifdef _SYSCALL32_IMPL
 int
 sigaltstack32(struct sigaltstack32 *ssp, struct sigaltstack32 *oss)
 {
@@ -115,4 +115,4 @@ sigaltstack32(struct sigaltstack32 *ssp, struct sigaltstack32 *oss)
 
 	return (0);
 }
-#endif /* _LP64 */
+#endif /* _SYSCALL32_IMPL */

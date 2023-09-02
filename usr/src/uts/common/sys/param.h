@@ -110,7 +110,7 @@ extern "C" {
 #define	FAMOUS_PID_PAGEOUT	2
 #define	FAMOUS_PID_FSFLUSH	3
 #define	FAMOUS_PIDS		4
-#endif
+#endif	/* _KERNEL */
 
 #ifdef DEBUG
 #define	DEFAULT_MAXPID	999999
@@ -249,17 +249,20 @@ extern "C" {
 #define	MAXBSIZE	8192
 #define	DEV_BSIZE	512
 #define	DEV_BSHIFT	9		/* log2(DEV_BSIZE) */
-#define	MAXFRAG 	8
-#ifdef	_SYSCALL32
+#define	MAXFRAG		8
+
+#if defined(_KERNEL) || defined(_SYSCALL32)
+/* XXXARM: Could be under _SYSCALL32 if not for OFFSET_MAX macrology */
 #define	MAXOFF32_T	0x7fffffff
-#endif
+#endif	/* _KERNEL */
+
 #ifdef	_LP64
 #define	MAXOFF_T	0x7fffffffffffffffl
 #define	MAXOFFSET_T	0x7fffffffffffffffl
 #else
 #define	MAXOFF_T	0x7fffffffl
 #ifdef _LONGLONG_TYPE
-#define	MAXOFFSET_T 	0x7fffffffffffffffLL
+#define	MAXOFFSET_T	0x7fffffffffffffffLL
 #else
 #define	MAXOFFSET_T	0x7fffffff
 #endif
@@ -279,9 +282,11 @@ extern "C" {
 #ifndef _ASM	/* Avoid typedef headaches for assembly files */
 #ifndef NODEV
 #define	NODEV	(dev_t)(-1l)
-#ifdef _SYSCALL32
+
+#if defined(_KERNEL) || defined(_SYSCALL32)
+/* XXXARM: Could just be under _SYSCALL32 except for DEVCMPL() macrology */
 #define	NODEV32	(dev32_t)(-1)
-#endif	/* _SYSCALL32 */
+#endif	/* _KERNEL || _SYSCALL32 */
 #endif	/* NODEV */
 #endif	/* _ASM */
 

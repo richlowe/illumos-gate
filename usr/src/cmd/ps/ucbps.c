@@ -41,8 +41,6 @@
  * ps -- print things about processes.
  */
 
-#define	_SYSCALL32
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -572,7 +570,7 @@ preadargs(int pfd, psinfo_t *psinfo, char *psargs)
 	off_t argoff;
 	off_t nextargoff;
 	int i;
-#ifdef _LP64
+#if defined(_MULTI_DATAMODEL)
 	caddr32_t argv32[NARG];
 	int is32 = (psinfo->pr_dmodel != PR_MODEL_LP64);
 #endif
@@ -587,7 +585,7 @@ preadargs(int pfd, psinfo_t *psinfo, char *psargs)
 	while (bsize > 0) {
 		if (narg == NARG) {
 			(void) memset(argv, 0, sizeof (argv));
-#ifdef _LP64
+#if defined(_MULTI_DATAMODEL)
 			if (is32) {
 				if ((i = pread(pfd, argv32, sizeof (argv32),
 				    argvoff)) <= 0) {
@@ -620,7 +618,7 @@ preadargs(int pfd, psinfo_t *psinfo, char *psargs)
 		*psa++ = ' ';
 		bsize -= len + 1;
 		nextargoff = argoff + len + 1;
-#ifdef _LP64
+#if defined(_MULTI_DATAMODEL)
 		argvoff += is32? sizeof (caddr32_t) : sizeof (caddr_t);
 #else
 		argvoff += sizeof (caddr_t);

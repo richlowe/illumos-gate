@@ -24,7 +24,7 @@
  */
 
 /*	Copyright (c) 1983, 1984, 1985, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  * Portions of this source code were derived from Berkeley 4.3 BSD
@@ -74,6 +74,7 @@
  * Common routines for statvfs and fstatvfs.
  */
 
+#ifdef _SYSCALL32_IMPL
 static int
 cstatvfs32(struct vfs *vfsp, struct statvfs32 *ubp)
 {
@@ -136,6 +137,7 @@ cstatvfs32(struct vfs *vfsp, struct statvfs32 *ubp)
 		return (EFAULT);
 	return (0);
 }
+#endif	/* _SYSCALL32_IMPL */
 
 static int
 cstatvfs64(struct vfs *vfsp, struct statvfs64 *ubp)

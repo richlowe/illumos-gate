@@ -55,13 +55,16 @@ adjtime(const struct timeval *delta, struct timeval *olddelta)
 	if (datamodel == DATAMODEL_NATIVE) {
 		if (copyin(delta, &atv, sizeof (atv)))
 			return (set_errno(EFAULT));
-	} else {
+	}
+#ifdef _SYSCALL32_IMPL
+	else {
 		struct timeval32 atv32;
 
 		if (copyin(delta, &atv32, sizeof (atv32)))
 			return (set_errno(EFAULT));
 		TIMEVAL32_TO_TIMEVAL(&atv, &atv32);
 	}
+#endif	/* _SYSCALL32_IMPL */
 
 	if (atv.tv_usec <= -MICROSEC || atv.tv_usec >= MICROSEC)
 		return (set_errno(EINVAL));
@@ -90,7 +93,9 @@ adjtime(const struct timeval *delta, struct timeval *olddelta)
 		if (datamodel == DATAMODEL_NATIVE) {
 			if (copyout(&oatv, olddelta, sizeof (oatv)))
 				return (set_errno(EFAULT));
-		} else {
+		}
+#ifdef _SYSCALL32_IMPL
+		else {
 			struct timeval32 oatv32;
 
 			if (TIMEVAL_OVERFLOW(&oatv))
@@ -101,6 +106,7 @@ adjtime(const struct timeval *delta, struct timeval *olddelta)
 			if (copyout(&oatv32, olddelta, sizeof (oatv32)))
 				return (set_errno(EFAULT));
 		}
+#endif	/* _SYSCALL32_IMPL */
 	}
 	return (0);
 }

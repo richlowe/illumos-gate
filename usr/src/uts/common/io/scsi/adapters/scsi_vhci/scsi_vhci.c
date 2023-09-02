@@ -6681,9 +6681,10 @@ vhci_ioc_send_pathinfo(sv_path_info_t *upibuf, sv_path_info_t *kpibuf,
 {
 	int			retval = 0, index;
 	sv_path_info_t		*upi_ptr;
-	sv_path_info32_t	*upi32_ptr;
 
 #ifdef  _MULTI_DATAMODEL
+	sv_path_info32_t	*upi32_ptr;
+
 	switch (ddi_model_convert_from(mode & FMODELS)) {
 	case DDI_MODEL_ILP32:
 		goto copy_32bit;
@@ -6758,6 +6759,7 @@ copy_normal:
 
 	return (retval);
 
+#ifdef _SYSCALL32_IMPL
 copy_32bit:
 	/*
 	 * Copy path information and path properties to user land.
@@ -6816,6 +6818,7 @@ copy_32bit:
 #endif
 
 	return (retval);
+#endif	/* _SYSCALL32_IMPL */
 }
 
 

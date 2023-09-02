@@ -60,7 +60,7 @@ extern "C" {
  *	See  dklabel.h, read_vtoc(), and write_vtoc().
  */
 
-#define	V_NUMPAR 	NDKMAP		/* The number of partitions */
+#define	V_NUMPAR	NDKMAP		/* The number of partitions */
 					/* (from dkio.h) */
 
 #define	VTOC_SANE	0x600DDEEE	/* Indicates a sane VTOC */
@@ -217,7 +217,10 @@ struct extvtoc {
 	}
 #endif /* _KERNEL */
 
-#if defined(_SYSCALL32)
+/*
+ * These may appear to be 32-bit compatibility in the _SYSCALL32 sense, but
+ * they are not.  We need to read the 32bit types for on-disk compatibility
+ */
 struct partition32	{
 	uint16_t	p_tag;		/* ID tag of partition */
 	uint16_t	p_flag;		/* permission flags */
@@ -311,7 +314,7 @@ struct vtoc32 {
 	for (i = 0; i < V_NUMPAR; i++) {		\
 		if (v.timestamp[i] > TIME32_MAX)	\
 			v32.timestamp[i] = TIME32_MAX;	\
-		else 					\
+		else					\
 			v32.timestamp[i] = (time32_t)v.timestamp[i];	\
 	}						\
 	bcopy(v.v_asciilabel, v32.v_asciilabel, LEN_DKL_ASCII);		\
@@ -340,14 +343,11 @@ struct vtoc32 {
 	for (i = 0; i < V_NUMPAR; i++) {		\
 		if (extv.timestamp[i] > TIME32_MAX)	\
 			v32.timestamp[i] = TIME32_MAX;	\
-		else 					\
+		else					\
 			v32.timestamp[i] = (time32_t)extv.timestamp[i];	\
 	}						\
 	bcopy(extv.v_asciilabel, v32.v_asciilabel, LEN_DKL_ASCII);	\
 	}
-
-
-#endif /* _SYSCALL32 */
 
 /*
  * These defines are the mode parameter for the checksum routines.
