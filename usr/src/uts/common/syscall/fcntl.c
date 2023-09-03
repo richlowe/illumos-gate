@@ -87,11 +87,7 @@ fcntl(int fdes, int cmd, intptr_t arg)
 	model_t datamodel;
 	int fdres;
 
-#if defined(_ILP32) && !defined(lint) && defined(_SYSCALL32)
-	ASSERT(sizeof (struct flock) == sizeof (struct flock32));
-	ASSERT(sizeof (struct flock64) == sizeof (struct flock64_32));
-#endif
-#if defined(_LP64) && !defined(lint) && defined(_SYSCALL32)
+#if defined(_SYSCALL32)
 	ASSERT(sizeof (struct flock) == sizeof (struct flock64_64));
 	ASSERT(sizeof (struct flock64) == sizeof (struct flock64_64));
 #endif
@@ -530,7 +526,7 @@ fcntl(int fdes, int cmd, intptr_t arg)
 			break;
 		}
 
-#if defined(_ILP32) || defined(_SYSCALL32_IMPL)
+#if defined(_SYSCALL32_IMPL)
 		if (datamodel == DATAMODEL_ILP32 &&
 		    (cmd == F_ALLOCSP || cmd == F_FREESP)) {
 			struct flock32 sbf32;
@@ -551,9 +547,8 @@ fcntl(int fdes, int cmd, intptr_t arg)
 				bf.l_pid = sbf32.l_pid;
 			}
 		}
-#endif /* _ILP32 || _SYSCALL32_IMPL */
+#endif /* _SYSCALL32_IMPL */
 
-#if defined(_LP64)
 		if (datamodel == DATAMODEL_LP64 &&
 		    (cmd == F_ALLOCSP || cmd == F_FREESP)) {
 			if (copyin((void *)arg, &bf, sizeof (bf))) {
@@ -561,13 +556,10 @@ fcntl(int fdes, int cmd, intptr_t arg)
 				break;
 			}
 		}
-#endif /* defined(_LP64) */
 
 #ifdef _SYSCALL32_IMPL
 		if (datamodel == DATAMODEL_ILP32 &&
 		    (cmd == F_ALLOCSP64 || cmd == F_FREESP64)) {
-			struct flock64_32 bf64_32;
-
 			if (copyin((void *)arg, &bf64_32, sizeof (bf64_32))) {
 				error = EFAULT;
 				break;
@@ -642,7 +634,7 @@ fcntl(int fdes, int cmd, intptr_t arg)
 
 		break;
 
-#if !defined(_LP64) || defined(_SYSCALL32_IMPL)
+#if defined(_SYSCALL32_IMPL)
 	case F_GETLK64:
 	case F_SETLK64:
 	case F_SETLKW64:
@@ -788,7 +780,7 @@ fcntl(int fdes, int cmd, intptr_t arg)
 				error = EFAULT;
 		}
 		break;
-#endif /* !defined(_LP64) || defined(_SYSCALL32_IMPL) */
+#endif /* defined(_SYSCALL32_IMPL) */
 
 	case F_SHARE:
 	case F_SHARE_NBMAND:
