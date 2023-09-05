@@ -48,7 +48,7 @@ $(PROG): $(OBJS)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
 
-$(ROOTUCBPROG):
+$(ROOTUCBPROG): FRC
 	-$(RM) $(ROOTUCBPROG)
 	-$(LN) $(ROOTPROG) $(ROOTUCBPROG)
 
@@ -67,3 +67,5 @@ $(DCFILE): $(PROG).c
 	$(RM) messages.po
 
 include ../Makefile.targ
+
+FRC:
