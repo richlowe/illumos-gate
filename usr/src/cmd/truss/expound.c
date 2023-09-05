@@ -1714,7 +1714,7 @@ show_statfs32(private_t *pri)
 }
 #endif	/* _MULTI_DATAMODEL */
 
-#if defined(_MULTI_DATAMODEL) || defined(_ILP32)
+#if defined(_MULTI_DATAMODEL)
 void
 show_flock32(private_t *pri, long offset)
 {
@@ -1885,7 +1885,6 @@ show_fcntl(private_t *pri)
 		return;
 
 	switch (pri->sys_args[1]) {
-#ifdef _LP64
 	case F_GETLK:
 	case F_SETLK:
 	case F_SETLKW:
@@ -1897,14 +1896,14 @@ show_fcntl(private_t *pri)
 	case F_OFD_SETLKW:
 	case F_FLOCK:
 	case F_FLOCKW:
-#ifdef _MULTI_DATAMODEL
-		if (data_model == PR_MODEL_LP64)
+		if (data_model == PR_MODEL_LP64) {
 			show_flock64(pri, offset);
-		else
+		}
+#if defined(_MULTI_DATAMODEL)
+		else {
 			show_flock32(pri, offset);
-#else
-		show_flock64(pri, offset);
-#endif
+		}
+#endif	/* _MULTI_DATAMODEL */
 		break;
 	case 33:	/* F_GETLK64 */
 	case 34:	/* F_SETLK64 */
@@ -1919,29 +1918,6 @@ show_fcntl(private_t *pri)
 	case 56:	/* F_FLOCKW64 */
 		show_flock64(pri, offset);
 		break;
-#else	/* _LP64 */
-	case F_GETLK:
-	case F_SETLK:
-	case F_SETLKW:
-	case F_FREESP:
-	case F_ALLOCSP:
-	case F_SETLK_NBMAND:
-		show_flock32(pri, offset);
-		break;
-	case F_GETLK64:
-	case F_SETLK64:
-	case F_SETLKW64:
-	case F_FREESP64:
-	case F_ALLOCSP64:
-	case F_SETLK64_NBMAND:
-	case F_OFD_GETLK64:
-	case F_OFD_SETLK64:
-	case F_OFD_SETLKW64:
-	case F_FLOCK64:
-	case F_FLOCKW64:
-		show_flock64(pri, offset);
-		break;
-#endif	/* _LP64 */
 	case F_SHARE:
 	case F_UNSHARE:
 		show_share(pri, offset);
@@ -3295,7 +3271,7 @@ show_iovec(private_t *pri, long offset, long niov, int showbuf, long count)
 	}
 }
 
-#if defined(_MULTI_DATAMODEL) || defined(_ILP32)
+#if defined(_MULTI_DATAMODEL)
 void
 show_dents32(private_t *pri, long offset, long count)
 {
@@ -4078,13 +4054,8 @@ show_sendfilevec64(private_t *pri, int fd, sendfilevec64_t *sndvec, int sfvcnt)
 
 		while (cpy_rqst) {
 			(void) printf(
-#ifdef _LP64
 			    "sfv_fd=%d\tsfv_flag=0x%x\t"
 			    "sfv_off=%ld\tsfv_len=%lu\n",
-#else
-			    "sfv_fd=%d\tsfv_flag=0x%x\t"
-			    "sfv_off=%lld\tsfv_len=%lu\n",
-#endif
 			    snd_ptr->sfv_fd,
 			    snd_ptr->sfv_flag,
 			    snd_ptr->sfv_off,
@@ -4708,15 +4679,9 @@ show_rctlblk(private_t *pri, long _rctlblk)
 			    pri->pname, s);
 		}
 
-#ifdef _LP64
 		(void) printf("%s\t\t Recipient PID: %d\n",
 		    pri->pname,
 		    rctlblk_get_recipient_pid(blk));
-#else
-		(void) printf("%s\t\t Recipient PID: %ld\n",
-		    pri->pname,
-		    rctlblk_get_recipient_pid(blk));
-#endif
 		(void) printf("%s\t\t   Firing Time: %lld\n",
 		    pri->pname,
 		    rctlblk_get_firing_time(blk));
@@ -5298,16 +5263,15 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_getdents:
 		if (err || pri->sys_nargs <= 1 || r0 <= 0)
 			break;
-#if defined(_LP64)
+		/*
+		 * Be wary of the fall through to ...dents64 here for native
+		 * 64bit
+		 */
 #if defined(_MULTI_DATAMODEL)
-		if (!lp64) {
+		if (data_model == PR_MODEL_ILP32) {
 			show_dents32(pri, (long)pri->sys_args[1], r0);
 			break;
 		}
-#endif
-#else
-		show_dents32(pri, (long)pri->sys_args[1], r0);
-		break;
 #endif
 		/* FALLTHROUGH */
 	case SYS_getdents64:
@@ -5427,13 +5391,14 @@ expound(private_t *pri, long r0, int raw)
 	case SYS_setrlimit:
 		if (pri->sys_nargs <= 1)
 			break;
-#ifdef _MULTI_DATAMODEL
-		if (lp64)
+
+		if (data_model == PR_MODEL_NATIVE) {
 			show_rlimit64(pri, (long)pri->sys_args[1]);
-		else
+		}
+#if defined(_MULTI_DATAMODEL)
+		else {
 			show_rlimit32(pri, (long)pri->sys_args[1]);
-#else
-		show_rlimit64(pri, (long)pri->sys_args[1]);
+		}
 #endif
 		break;
 	case SYS_getrlimit64:
