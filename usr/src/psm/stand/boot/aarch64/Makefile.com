@@ -96,8 +96,8 @@ CMNNETDIR =	$(SRC)/common/net
 CMNDIR =	$(SRC)/common
 CMNUTILDIR =	$(SRC)/common/util
 SYSDIR	=	$(SRC)/uts
-CPPDEFS	=	-D$(MACH) -D_BOOT -D_KERNEL -D_MACHDEP -D_ELF64_SUPPORT \
-	-D_SYSCALL32
+CPPDEFS	=	-D$(MACH) -D_BOOT -D_KERNEL -D_MACHDEP
+
 # XXXARM: fs/zfs is a vague attempt to get yet another cdefs.h
 CPPINCS	=	-I$(PORT_DIR) \
 		-I$(PSMSTANDDIR) \
