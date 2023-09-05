@@ -55,7 +55,7 @@ show_stat(private_t *pri, long offset)
 #endif
 }
 
-#if defined(_MULTI_DATAMODEL) || !defined(_LP64)
+#if defined(_MULTI_DATAMODEL)
 void
 show_stat32(private_t *pri, long offset)
 {
@@ -144,7 +144,7 @@ show_stat64_32(private_t *pri, long offset)
 		    statb.st_fstype);
 	}
 }
-#endif
+#endif	/* _MULTI_DATAMODEL */
 
 void
 show_stat64(private_t *pri, long offset)
