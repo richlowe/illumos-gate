@@ -203,8 +203,6 @@ driver name=ppm
 $(i386_ONLY)driver name=privcmd perms="* 0666 root sys"
 $(i386_ONLY)driver name=rootnex
 $(aarch64_ONLY)driver name=rootnex
-
-# simple-bus, all platforms
 $(aarch64_ONLY)driver name=simple-bus alias=simple-bus
 $(i386_ONLY)driver name=xdb
 $(i386_ONLY)driver name=xdf
