@@ -44,12 +44,13 @@
 #include <sys/gic.h>
 #include <sys/promif.h>
 
-static int
-smpl_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *, off_t, off_t, caddr_t *);
-static int
-smpl_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t, void *, void *);
-static int
-smpl_intr_ops(dev_info_t *, dev_info_t *, ddi_intr_op_t, ddi_intr_handle_impl_t *, void *);
+static int smpl_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *, off_t,
+    off_t, caddr_t *);
+static int smpl_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t, void *,
+    void *);
+static int smpl_intr_ops(dev_info_t *, dev_info_t *, ddi_intr_op_t,
+    ddi_intr_handle_impl_t *, void *);
+static int smpl_attach(dev_info_t *, ddi_attach_cmd_t);
 
 struct bus_ops smpl_bus_ops = {
 	BUSO_REV,
@@ -82,9 +83,6 @@ struct bus_ops smpl_bus_ops = {
 	NULL,		/* (*bus_power)(); */
 	smpl_intr_ops	/* (*bus_intr_op)(); */
 };
-
-
-static int smpl_attach(dev_info_t *devi, ddi_attach_cmd_t cmd);
 
 /*
  * Internal isa ctlops support routines
@@ -164,17 +162,18 @@ smpl_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 
 	ddi_report_dev(devi);
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 }
 
-static int get_address_cells(pnode_t node)
+static int
+get_address_cells(pnode_t node)
 {
 	int address_cells = 0;
 
 	while (node > 0) {
 		int len = prom_getproplen(node, "#address-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#address-cells", (caddr_t)&prop);
 			address_cells = ntohl(prop);
@@ -182,17 +181,18 @@ static int get_address_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return address_cells;
+	return (address_cells);
 }
 
-static int get_size_cells(pnode_t node)
+static int
+get_size_cells(pnode_t node)
 {
 	int size_cells = 0;
 
 	while (node > 0) {
 		int len = prom_getproplen(node, "#size-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#size-cells", (caddr_t)&prop);
 			size_cells = ntohl(prop);
@@ -200,17 +200,18 @@ static int get_size_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return size_cells;
+	return (size_cells);
 }
 
-static int get_interrupt_cells(pnode_t node)
+static int
+get_interrupt_cells(pnode_t node)
 {
 	int interrupt_cells = 0;
 
 	while (node > 0) {
 		int len = prom_getproplen(node, "#interrupt-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
 			interrupt_cells = ntohl(prop);
@@ -218,7 +219,7 @@ static int get_interrupt_cells(pnode_t node)
 		}
 		len = prom_getproplen(node, "interrupt-parent");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
 			node = prom_findnode_by_phandle(ntohl(prop));
@@ -226,20 +227,22 @@ static int get_interrupt_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return interrupt_cells;
+	return (interrupt_cells);
 }
 
 static int
-smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset, off_t len, caddr_t *vaddrp)
+smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
+    off_t len, caddr_t *vaddrp)
 {
 	ddi_map_req_t mr;
 	int error;
 
-	int addr_cells = get_address_cells(ddi_get_nodeid(dip));
-	int size_cells = get_size_cells(ddi_get_nodeid(dip));
+	int addr_cells = get_address_cells(ddi_get_nodeid(rdip));
+	int size_cells = get_size_cells(ddi_get_nodeid(rdip));
+	int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
 
-	int parent_addr_cells = get_address_cells(ddi_get_nodeid(ddi_get_parent(dip)));
-	int parent_size_cells = get_size_cells(ddi_get_nodeid(ddi_get_parent(dip)));
+	int parent_addr_cells = get_address_cells(ddi_get_nodeid(dip));
+	int parent_size_cells = get_size_cells(ddi_get_nodeid(dip));
 
 	ASSERT(addr_cells == 1 || addr_cells == 2);
 	ASSERT(size_cells == 1 || size_cells == 2);
@@ -248,11 +251,20 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	ASSERT(parent_size_cells == 1 || parent_size_cells == 2);
 
 	int *regs;
+	int range_index = 0;
 	struct regspec reg = {0};
 	struct rangespec range = {0};
 
 	uint32_t *rangep;
 	int rangelen;
+
+	boolean_t parent_has_ranges = B_FALSE;
+	if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_get_parent(dip), DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) == DDI_SUCCESS) {
+		parent_has_ranges = B_TRUE;
+		if (rangelen) {
+			kmem_free(rangep, rangelen);
+		}
+	}
 
 	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) != DDI_SUCCESS || rangelen == 0) {
 		rangelen = 0;
@@ -271,8 +283,8 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
-		int n = reglen / (sizeof(uint32_t) * (addr_cells + size_cells));
-		ASSERT(reglen % (sizeof(uint32_t) * (addr_cells + size_cells)) == 0);
+		int n = reglen / (sizeof (uint32_t) * (addr_cells + size_cells));
+		ASSERT(reglen % (sizeof (uint32_t) * (addr_cells + size_cells)) == 0);
 
 		if (rnumber < 0 || rnumber >= n) {
 			if (rangep) {
@@ -285,9 +297,17 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		uint64_t addr = 0;
 		uint64_t size = 0;
 
-		for (int i = 0; i < addr_cells; i++) {
-			addr <<= 32;
-			addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+		if (rangep) {
+			range_index = ntohl(rp[(addr_cells + size_cells) * rnumber + 0]);
+			for (int i = 1; i < addr_cells; i++) {
+				addr <<= 32;
+				addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i - 1]);
+			}
+		} else {
+			for (int i = 0; i < addr_cells; i++) {
+				addr <<= 32;
+				addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+			}
 		}
 		for (int i = 0; i < size_cells; i++) {
 			size <<= 32;
@@ -295,52 +315,51 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		}
 		kmem_free(rp, reglen);
 		ASSERT((addr & 0xffff000000000000ul) == 0);
-		ASSERT((size & 0xffff000000000000ul) == 0);
-		reg.regspec_bustype = ((addr >> 32) & 0xffff);
+		ASSERT((size & 0xfffff00000000000ul) == 0);
+		reg.regspec_bustype = (addr >> 32);
 		reg.regspec_bustype |= (((size >> 32)) << 16);
 		reg.regspec_addr    = (addr & 0xffffffff);
 		reg.regspec_size    = (size & 0xffffffff);
 	} else if (mp->map_type == DDI_MT_REGSPEC) {
 		reg = *mp->map_obj.rp;
-		uint64_t rel_addr = (reg.regspec_bustype & 0xffff);
-		rel_addr <<= 32;
-		rel_addr |= (reg.regspec_addr & 0xffffffff);
+		range_index = (reg.regspec_bustype >> 28);
 	} else {
 		return (DDI_ME_INVAL);
 	}
 
 	if (rangep) {
 		int i;
-		int ranges_cells = (addr_cells + parent_addr_cells + size_cells);
-		int n = rangelen / ranges_cells;
+		int n = rangelen / (addr_cells + parent_addr_cells + size_cells);
 		for (i = 0; i < n; i++) {
-			uint64_t base = 0;
-			uint64_t target = 0;
-			uint64_t rsize = 0;
-			for (int j = 0; j < addr_cells; j++) {
-				base <<= 32;
-				base += htonl(rangep[ranges_cells * i + j]);
-			}
-			for (int j = 0; j < parent_addr_cells; j++) {
-				target <<= 32;
-				target += htonl(rangep[ranges_cells * i + addr_cells + j]);
-			}
-			for (int j = 0; j < size_cells; j++) {
-				rsize <<= 32;
-				rsize += htonl(rangep[ranges_cells * i + addr_cells + parent_addr_cells + j]);
-			}
+			if (rangep[(addr_cells + parent_addr_cells + size_cells) * i + 0] == range_index) {
+				uint64_t addr = 0;
+				uint64_t regspec_addr = reg.regspec_addr;
+				regspec_addr |= (((uint64_t)(reg.regspec_bustype & 0xffff)) << 32);
+				for (int j = 1; j < addr_cells; j++) {
+					addr <<= 32;
+					addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + j]);
+				}
+				regspec_addr += addr;
 
-			uint64_t rel_addr = (reg.regspec_bustype & 0xffff);
-			rel_addr <<= 32;
-			rel_addr |= (reg.regspec_addr & 0xffffffff);
+				addr = 0;
+				if (parent_has_ranges) {
+					reg.regspec_bustype &= ~0xf0000000;
+					reg.regspec_bustype |= (ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells]) << 28);
+					for (int j = 1; j < parent_addr_cells; j++) {
+						addr <<= 32;
+						addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j - 1]);
+					}
+				} else {
+					for (int j = 0; j < parent_addr_cells; j++) {
+						addr <<= 32;
+						addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j]);
+					}
+				}
+				regspec_addr += addr;
 
-			if (base <= rel_addr && rel_addr <= base + rsize - 1) {
-				rel_addr = (rel_addr - base) + target;
-
+				reg.regspec_addr = regspec_addr & 0xffffffff;
 				reg.regspec_bustype &= ~0xffff;
-				reg.regspec_bustype |= ((rel_addr >> 32) & 0xffff);
-				reg.regspec_addr    = (rel_addr & 0xffffffff);
-
+				reg.regspec_bustype |= ((regspec_addr >> 32) & 0xffff);
 				break;
 			}
 		}
@@ -354,28 +373,24 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	mr.map_type = DDI_MT_REGSPEC;
 	mr.map_obj.rp = &reg;
 	mp = &mr;
-	int ret = ddi_map(dip, mp, offset, 0, vaddrp);
-	return ret;
+	return (ddi_map(dip, mp, offset, 0, vaddrp));
 }
 
 static int
 smpl_ctlops(dev_info_t *dip, dev_info_t *rdip,
-	ddi_ctl_enum_t ctlop, void *arg, void *result)
+    ddi_ctl_enum_t ctlop, void *arg, void *result)
 {
 	struct regspec *child_rp;
 	uint_t reglen;
 	int nreg;
-	int ret;
 
 	switch (ctlop) {
 	case DDI_CTLOPS_INITCHILD:
-		ret = impl_ddi_sunbus_initchild((dev_info_t *)arg);
-		break;
+		return (impl_ddi_sunbus_initchild((dev_info_t *)arg));
 
 	case DDI_CTLOPS_UNINITCHILD:
 		impl_ddi_sunbus_removechild((dev_info_t *)arg);
-		ret = DDI_SUCCESS;
-		break;
+		return (DDI_SUCCESS);
 
 	case DDI_CTLOPS_REPORTDEV:
 		if (rdip == (dev_info_t *)0)
@@ -383,14 +398,11 @@ smpl_ctlops(dev_info_t *dip, dev_info_t *rdip,
 		cmn_err(CE_CONT, "?%s%d at %s%d",
 		    ddi_driver_name(rdip), ddi_get_instance(rdip),
 		    ddi_driver_name(dip), ddi_get_instance(dip));
-		ret = DDI_SUCCESS;
-		break;
+		return (DDI_SUCCESS);
 
 	default:
-		ret = ddi_ctlops(dip, rdip, ctlop, arg, result);
-		break;
+		return (ddi_ctlops(dip, rdip, ctlop, arg, result));
 	}
-	return ret;
 }
 
 static int
@@ -479,7 +491,7 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", (caddr_t)&irupts_prop, &irupts_len) != DDI_SUCCESS || irupts_len == 0) {
 				return (DDI_FAILURE);
 			}
-			if (interrupt_cells * hdlp->ih_inum >= irupts_len * sizeof(int)) {
+			if (interrupt_cells * hdlp->ih_inum >= irupts_len * sizeof (int)) {
 				kmem_free(irupts_prop, irupts_len);
 				return (DDI_FAILURE);
 			}
@@ -524,8 +536,8 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			}
 
 			if (!add_avintr((void *)hdlp, hdlp->ih_pri,
-				    hdlp->ih_cb_func, DEVI(rdip)->devi_name, hdlp->ih_vector,
-				    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip))
+			    hdlp->ih_cb_func, DEVI(rdip)->devi_name, hdlp->ih_vector,
+			    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip))
 				return (DDI_FAILURE);
 		}
 		break;
@@ -543,7 +555,7 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			int irupts_len;
 			if (interrupt_cells != 0 &&
 			    ddi_getproplen(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len / (interrupt_cells * sizeof(int));
+				*(int *)result = irupts_len / (interrupt_cells * sizeof (int));
 			} else {
 				return (DDI_FAILURE);
 			}
@@ -555,7 +567,7 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			int irupts_len;
 			if (interrupt_cells != 0 &&
 			    ddi_getproplen(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len / (interrupt_cells * sizeof(int));
+				*(int *)result = irupts_len / (interrupt_cells * sizeof (int));
 			} else {
 				return (DDI_FAILURE);
 			}
