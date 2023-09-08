@@ -67,6 +67,11 @@ global:
 	__sinf;
 	__tanf;
 
+	# gdb consumes these three symbols so they need to stay around
+	__frexpl;
+	__ldexpl;
+	__powl;
+
 	acos;
 	acosf;
 	acosh;
