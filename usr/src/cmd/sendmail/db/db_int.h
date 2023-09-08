@@ -10,6 +10,8 @@
 #ifndef _DB_INTERNAL_H_
 #define	_DB_INTERNAL_H_
 
+#include <stddef.h>
+
 #include "db.h"				/* Standard DB include file. */
 #include "queue.h"
 #include "shqueue.h"
@@ -67,10 +69,10 @@
  * an array.
  */
 #undef	SSZ
-#define SSZ(name, field)	((int)&(((name *)0)->field))
+#define SSZ(name, field)	offsetof(name, field)
 
 #undef	SSZA
-#define SSZA(name, field)	((int)&(((name *)0)->field[0]))
+#define SSZA(name, field)	offsetof(name, field)
 
 /* Macros to return per-process address, offsets based on shared regions. */
 #define	R_ADDR(base, offset)	((void *)((u_int8_t *)((base)->addr) + offset))

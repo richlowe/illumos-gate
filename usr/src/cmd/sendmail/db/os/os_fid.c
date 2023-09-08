@@ -45,8 +45,13 @@ __os_fileid(dbenv, fname, timestamp, fidp)
 	memset(fidp, 0, DB_FILE_ID_LEN);
 
 	/* Check for the unthinkable. */
+	/*
+	 * illumos addition: note that we use explicitly 32bit time, and spell
+	 * it uint32_t.  time_t is 64bit on 64bit platforms, but the file id
+	 * must still be the same size.
+	 */
 	if (sizeof(sb.st_ino) +
-	    sizeof(sb.st_dev) + sizeof(time_t) > DB_FILE_ID_LEN)
+	    sizeof(sb.st_dev) + sizeof(uint32_t) > DB_FILE_ID_LEN)
 		return (EINVAL);
 
 	/* On UNIX, use a dev/inode pair. */
@@ -66,10 +71,14 @@ __os_fileid(dbenv, fname, timestamp, fidp)
 	    sizeof(sb.st_dev), i = 0; i < sizeof(sb.st_dev); ++i)
 		*fidp++ = *--p;
 
+	/* illumos addition: We must explicitly use 32bit time */
 	if (timestamp) {
+		uint32_t t32;
+
 		(void)time(&now);
-		for (p = (u_int8_t *)&now +
-		    sizeof(now), i = 0; i < sizeof(now); ++i)
+		t32 = (uint32_t)now;
+		for (p = (u_int8_t *)&t32 +
+		    sizeof(t32), i = 0; i < sizeof(t32); ++i)
 			*fidp++ = *--p;
 	}
 	return (0);
