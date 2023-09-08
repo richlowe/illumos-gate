@@ -69,10 +69,8 @@ SUBDIRS +=		\
 # are built in parallel.
 
 # XXXARM: Things not built for AArch64 right now
-# libmilter -- seems 32bit and not 64bit clean
 # abi -- not ported/necessary
 # c_synonyms -- not ported/necessary
-# pylibbe, pysolaris, pyzfs -- no python yet
 # libdtrace_jni -- java
 # libzfs_jni -- java
 # libadt_jni -- java
@@ -84,7 +82,6 @@ SUBDIRS +=		\
 # libcpc -- not ported
 # libpctx -- part of cpc
 $(NOT_AARCH64_BLD)SUBDIRS += \
-	../cmd/sendmail/libmilter \
 	abi \
 	c_synonyms	\
 	libadt_jni	\
@@ -98,6 +95,7 @@ $(NOT_AARCH64_BLD)SUBDIRS += \
 	libm1
 
 SUBDIRS +=				\
+	../cmd/sendmail/libmilter \
 	../cmd/sgs/librtld_db	\
 	../cmd/sgs/libelf	\
 	auditd_plugins	\
@@ -389,6 +387,7 @@ i386_MSGSUBDIRS= libfdisk
 aarch64_MSGSUBDIRS= libfdisk
 
 HDRSUBDIRS=		\
+	../cmd/sendmail/libmilter	\
 	auditd_plugins	\
 	fm		\
 	hal		\
@@ -530,7 +529,6 @@ sparc_HDRSUBDIRS=	\
 	storage
 
 $(NOT_AARCH64_BLD)HDRSUBDIRS +=		\
-	../cmd/sendmail/libmilter	\
 	libcpc				\
 	libdtrace_jni			\
 	libpctx				\

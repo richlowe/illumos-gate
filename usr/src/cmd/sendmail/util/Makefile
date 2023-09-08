@@ -44,6 +44,9 @@ OBJS=		$(PROG:%=%.o)
 
 SRCS=		$(PROG:%=%.c)
 
+# This is fine for aarch64 and not, as everyone else is 32bit
+LDFLAGS += -L$(ADJUNCT_PROTO)/usr/lib/mps
+
 editmap :=	LDLIBS += -lldap
 mail.local :=	LDLIBS += -lsocket -lnsl -lmail -lldap
 mailq :=	LDLIBS += -lsecdb
@@ -65,7 +68,7 @@ CPPFLAGS =	$(INCPATH) $(ENVDEF) $(SUNENVDEF) $(DBMDEF) $(CPPFLAGS.sm)
 
 # Nearly every support application provides sleep().  This isn't incompatible
 # with libc, but can be confined to the applications themselves.
-LDFLAGS +=	$(MAPFILE.NGB:%=-Wl,-M%)
+LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
 
 .KEEP_STATE:
 

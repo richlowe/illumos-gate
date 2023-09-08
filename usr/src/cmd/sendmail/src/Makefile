@@ -41,6 +41,9 @@ OBJS= alias.o arpadate.o bf.o collect.o conf.o control.o convtime.o daemon.o \
 
 SRCS=	$(OBJS:%.o=%.c)
 
+# This is fine for aarch64 and not, as everyone else is 32bit
+LDFLAGS += -L$(ADJUNCT_PROTO)/usr/lib/mps
+
 MAPFILES =	$(MAPFILE.INT) $(MAPFILE.NGB)
 LDFLAGS +=	$(MAPFILES:%=-Wl,-M%)
 
