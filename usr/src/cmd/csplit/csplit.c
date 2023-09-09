@@ -95,7 +95,8 @@ static void usage(void);
 int
 main(int argc, char **argv)
 {
-	int ch, mode;
+	int ch;
+	int mode = LINMODE;
 	char *ptr;
 
 	(void) setlocale(LC_ALL, "");
@@ -117,7 +118,7 @@ main(int argc, char **argv)
 			case 'n':		/* POSIX.2 */
 				for (ptr = optarg; *ptr != '\0'; ptr++)
 					if (!isdigit((int)*ptr))
-						fatal("-n num\n", NULL);
+						fatal("-n num\n");
 				fiwidth = atoi(optarg);
 				break;
 			case 'k':
@@ -140,7 +141,7 @@ main(int argc, char **argv)
 		infile = tmpfile();
 
 		while (fread(tmpbuf, 1, BUFSIZ, stdin) != 0) {
-			if (fwrite(tmpbuf, 1, BUFSIZ, infile) == 0)
+			if (fwrite(tmpbuf, 1, BUFSIZ, infile) == 0) {
 				if (errno == ENOSPC) {
 					(void) fprintf(stderr, "csplit: ");
 					(void) fprintf(stderr, gettext(
@@ -153,6 +154,7 @@ main(int argc, char **argv)
 					    "file\n"));
 					exit(1);
 				}
+			}
 
 	/* clear the buffer to get correct size when writing buffer */
 
