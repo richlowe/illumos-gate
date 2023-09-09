@@ -37,6 +37,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
@@ -79,7 +80,7 @@ offset_t curline;		/* Current line in input file */
 
 static int asc_to_ll(char *, long long *);
 static void closefile(void);
-static void fatal(char *, char *);
+static void fatal(char *, ...);
 static offset_t findline(char *, offset_t);
 static void flush(void);
 static FILE *getfile(void);
@@ -262,16 +263,20 @@ closefile()
  */
 
 static void
-fatal(char *string, char *arg)
+fatal(char *string, ...)
 {
 	char *fls;
 	int num;
+	va_list ap;
+
+	va_start(ap, string);
 
 	(void) fprintf(stderr, "csplit: ");
 
 	/* gettext dynamically replaces string */
 
-	(void) fprintf(stderr, gettext(string), arg);
+	(void) vfprintf(stderr, gettext(string), ap);
+	va_end(ap);
 	if (!keep) {
 		if (outfile) {
 			(void) fclose(outfile);
@@ -369,7 +374,7 @@ getfile()
 		/* check for suffix length overflow */
 		if (strlen(fptr) > fiwidth) {
 			fatal("Suffix longer than %ld chars; increase -n\n",
-			    (char *)fiwidth);
+			    fiwidth);
 		}
 
 		/* check for filename length overflow */

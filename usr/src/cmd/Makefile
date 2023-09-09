@@ -93,6 +93,7 @@ COMMON_SUBDIRS=	\
 	cpio		\
 	cron		\
 	crypt		\
+	csplit		\
 	ctfconvert	\
 	ctfdiff		\
 	ctfdump		\
@@ -458,7 +459,6 @@ COMMON_SUBDIRS=	\
 # bc - not 64bit clean
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
-# csplit - not 64bit clean
 # eqn - not 64bit clean
 # gss - not 64bit clean
 # isns - not 64bit clean
@@ -482,7 +482,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	bc		\
 	cpc		\
 	csh		\
-	csplit		\
 	eqn		\
 	gss		\
 	isns		\
