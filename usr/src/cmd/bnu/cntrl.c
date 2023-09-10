@@ -504,15 +504,13 @@ top:
 
 			    sprintf(fsize, "0x%lx", startp);
 			    W_POINT = fsize; /* set start point in vector */
-			    if (lseek(fileno(fp), startp, 0) == -1) {
+			    if (fseek(fp, startp, SEEK_SET) == -1) {
 				WMESG(SNDFILE, EM_SEEK);
 				logent("CAN'T SEEK", "DENIED");
 				CDEBUG(1, "Failed, Can't seek in Dfile\n%s", "");
 				unlinkdf(Dfile);
 				goto top;
 		    	    }
-		    	    fp->_cnt = 0;
-		    	    fp->_ptr = fp->_base;
 			}
 
 			Seqn++;
@@ -667,15 +665,13 @@ process:
 
 				logent(tbuf, "RESTART");
 				errno = 0;
-				if (lseek(fileno(fp), startp, 0) == -1) {
+				if (fseek(fp, startp, SEEK_SET) == -1) {
 				    logent(strerror(errno), "FSEEK ERROR");
 				    (void) fclose(fp);
 				    (*Turnoff)();
 		    		    Seqn++;
 				    return(FAIL);
 				}
-				fp->_cnt = 0;
-				fp->_ptr = fp->_base;
 			    }
 			}
 			(void) millitick();	/* start msec timer */
@@ -857,7 +853,7 @@ process:
 		    }
 
 		    sprintf(tbuf, "%s 0x%lx", YES, startp);
-		    if (lseek(fileno(fp), startp, 0) == -1) {
+		    if (fseek(fp, startp, SEEK_SET) == -1) {
 			WMESG(SNDFILE, EM_SEEK);
 			logent("CAN'T SEEK", "DENIED");
 			CDEBUG(1, "Failed, Can't seek in Dfile\n%s", "");
@@ -865,8 +861,6 @@ process:
 			Seqn++;
 			goto top;
 		    }
-		    fp->_cnt = 0;
-		    fp->_ptr = fp->_base;
 		    CDEBUG(1," restart msg %s\n", tbuf);
 		    WMESG(SNDFILE, tbuf);
 		}
@@ -1251,14 +1245,13 @@ process:
 		    if (startp = strtol(W_POINT, (char **) 0, FLENRADIX)) {
 			CDEBUG(1,"Restart point=0x%lx\n", startp);
 			errno = 0;
-			if (lseek(fileno(fp), startp, 0) == -1) {
+			if (fseek(fp, startp, SEEK_SET) == -1) {
 			    WMESG(RCVFILE, EM_SEEK);
 			    logent(strerror(errno), "FSEEK ERROR");
 			    (void) fclose(fp);
 			    goto top;
 			}
-			fp->_cnt = 0;
-			fp->_ptr = fp->_base;
+
 			if(startp < 0)
 			    sprintf(tbuf,"start=0x%lx", startp);
 			else

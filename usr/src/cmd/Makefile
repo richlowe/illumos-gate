@@ -67,6 +67,7 @@ COMMON_SUBDIRS=	\
 	basename	\
 	bdiff		\
 	beadm		\
+	bnu		\
 	boot		\
 	busstat		\
 	cal		\
@@ -451,7 +452,6 @@ COMMON_SUBDIRS=	\
 # XXXARM: Things not built on AArch64 yet
 # abi - not interesting
 # availdevs - needs libzfs (and libzfs_jni!?) (and not interesting)
-# bnu - uses FILE internals not available to LP64
 # latencytop - needs glib
 # pcitool - not ported
 # powertop - not ported
@@ -478,7 +478,6 @@ COMMON_SUBDIRS=	\
 $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
 	availdevs	\
-	bnu		\
 	bc		\
 	cpc		\
 	csh		\

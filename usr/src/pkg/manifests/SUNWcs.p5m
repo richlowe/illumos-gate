@@ -1581,7 +1581,7 @@ dir  path=var/spool/cron/atjobs group=sys
 dir  path=var/spool/cron/crontabs group=sys
 file path=var/spool/cron/crontabs/adm group=sys mode=0600 preserve=true
 file path=var/spool/cron/crontabs/root group=sys mode=0600 preserve=true
-$(not_aarch64)dir path=var/spool/locks owner=uucp group=uucp
+dir  path=var/spool/locks owner=uucp group=uucp
 dir  path=var/svc group=sys
 dir  path=var/svc/log group=sys
 dir  path=var/svc/manifest group=sys

@@ -50,6 +50,11 @@
 #endif
 #include <lastlog.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <security/pam_appl.h>
 
 static int uucp_conv();
