@@ -29,7 +29,7 @@ PROG = luxadm
 COBJS = adm.o fchba.o lux_util.o fabric_conf.o
 OBJS_sparc= g_adm.o diag.o fcalupdate.o hotplug.o qlgcupdate.o setboot.o
 OBJS_i386 = x86_adm.o errormsgs.o
-OBJS_aarch64 = g_adm.o errormsgs.o
+OBJS_aarch64 = x86_adm.o errormsgs.o
 OBJS = $(OBJS_$(MACH)) $(COBJS)
 
 SRCS = $(OBJS:%.o=%.c)

@@ -235,6 +235,7 @@ COMMON_SUBDIRS=	\
 	lp		\
 	look		\
 	ls		\
+	luxadm		\
 	mach		\
 	mail		\
 	mailx		\
@@ -463,7 +464,6 @@ COMMON_SUBDIRS=	\
 # eqn - not 64bit clean
 # gss - not 64bit clean
 # isns - not 64bit clean
-# luxadm - super confused about platforms, and probably needs libs
 # nohup - not ported (header bits gone awry)
 # oawk - not 64bit clean?
 # prtdiag - not ported
@@ -486,7 +486,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	gss		\
 	isns		\
 	latencytop	\
-	luxadm		\
 	nohup		\
 	oawk		\
 	pcitool		\

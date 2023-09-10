@@ -44,7 +44,7 @@ static int parse_line(char *line, char *path, char *wwn, char *filename);
 static int create_ap_instance(char *ap_id, char *wwn_string,
 	char *filename, char *line);
 static void log_error(char *msg_id, char *input_tmplt, ...);
-static char ctoi(char c);
+static int ctoi(char c);
 
 /*
  *  Simple wrapper for syslog error messages.
@@ -224,7 +224,7 @@ parse_line(char *line, char *path, char *wwn, char *filename)
 	return (0);
 }
 
-static char
+static int
 ctoi(char c)
 {
 	if ((c >= '0') && (c <= '9'))
@@ -257,8 +257,7 @@ ctoi(char c)
 static int
 string_to_wwn(const uchar_t *string, uchar_t *port_wwn)
 {
-	int	i;
-	char	c, c1;
+	int	i, c, c1;
 	uchar_t	*wwnp;
 
 	wwnp = port_wwn;
