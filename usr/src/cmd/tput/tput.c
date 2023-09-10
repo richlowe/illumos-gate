@@ -26,7 +26,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  *	tput - print terminal attribute
@@ -60,17 +60,21 @@
 #include <unistd.h>
 #include <locale.h>
 
-/* externs from libcurses */
-extern int tigetnum();
+
+struct delay
+{
+    int d_delay;
+    int d_bits;
+};
 
 static int outputcap(char *cap, int argc, char **argv);
 static int allnumeric(char *string);
 static int getpad(char *cap);
-static void setdelay();
-static void settabs();
+static void setdelay(int, struct delay *, int, tcflag_t *);
+static void settabs(void);
 static void cat(char *file);
-static void initterm();
-static void reset_term();
+static void initterm(void);
+static void reset_term(void);
 
 static char *progname;		/* argv[0] */
 static int CurrentBaudRate;	/* current baud rate */
@@ -228,18 +232,22 @@ outputcap(char *cap, int argc, char **argv)
 		if (!thisstr) {
 			return (1);
 		}
-		for (parmset = 0; optind < argc; optind++, parmset++)
-			if (allnumeric(argv[optind]))
-				parm[parmset] = atoi(argv[optind]);
-			else
-				parm[parmset] = (int)argv[optind];
 
-		if (parmset)
+		for (parmset = 0; optind < argc; optind++, parmset++) {
+			if (allnumeric(argv[optind])) {
+				parm[parmset] = atoi(argv[optind]);
+			} else {
+				parm[parmset] = (long)argv[optind];
+			}
+		}
+
+		if (parmset) {
 			putp(tparm(thisstr,
 			    parm[0], parm[1], parm[2], parm[3],
 			    parm[4], parm[5], parm[6], parm[7], parm[8]));
-		else
+		} else {
 			putp(thisstr);
+		}
 		return (0);
 	}
 
@@ -284,12 +292,6 @@ allnumeric(char *string)
  *	Some of this was taken from tset(1).
  */
 
-struct delay
-{
-    int d_delay;
-    int d_bits;
-};
-
 /* The appropriate speeds for various termio settings. */
 static int speeds[] = {
 	0,		/* B0		*/
@@ -327,11 +329,7 @@ static int speeds[] = {
 	0
 };
 
-#if defined(SYSV) || defined(USG)
-/*	Unix 3.0 on up */
-
 /*    Carriage Return delays	*/
-
 static int	CRbits = CRDLY;
 static struct delay	CRdelay[] =
 {
@@ -384,51 +382,6 @@ static struct delay	FFdelay[] =
 	-1
 };
 
-#else	/* BSD */
-
-/*	Carriage Return delays	*/
-
-int	CRbits = CRDELAY;
-struct delay	CRdelay[] =
-{
-	0,	CR0,
-	9,	CR3,
-	80,	CR1,
-	160,	CR2,
-	-1
-};
-
-/*	New Line delays	*/
-
-int	NLbits = NLDELAY;
-struct delay	NLdelay[] =
-{
-	0,	NL0,
-	66,	NL1,		/* special M37 delay */
-	100,	NL2,
-	-1
-};
-
-/*	Tab delays	*/
-
-int	TBbits = TBDELAY;
-struct delay	TBdelay[] =
-{
-	0,	TAB0,
-	11,	TAB1,		/* special M37 delay */
-	-1
-};
-
-/*	Form Feed delays	*/
-
-int	FFbits = VTDELAY;
-struct delay	FFdelay[] =
-{
-	0,	FF0,
-	2000,	FF1,
-	-1
-};
-#endif	/* BSD */
 
 /*
  *  Initterm, a.k.a. reset_term, does terminal specific initialization. In
@@ -478,15 +431,7 @@ getpad(char *cap)
  *  the given delay.
  */
 static void
-setdelay(delay, delaytable, bits, flags)
-register int delay;
-struct delay delaytable[];
-int bits;
-#ifdef SYSV
-tcflag_t *flags;
-#else	/* SYSV */
-unsigned short *flags;
-#endif	/* SYSV */
+setdelay(int delay, struct delay *delaytable, int bits, tcflag_t *flags)
 {
 	register struct delay  *p;
 	register struct delay  *lastdelay;
@@ -514,7 +459,7 @@ unsigned short *flags;
  */
 
 static void
-settabs()
+settabs(void)
 {
 	register int c;
 
@@ -556,8 +501,7 @@ settabs()
  */
 
 static void
-cat(file)
-char *file;				/* File to copy. */
+cat(char *file)
 {
 	register int fd;			/* File descriptor. */
 	register ssize_t i;			/* Number characters read. */
@@ -580,10 +524,9 @@ char *file;				/* File to copy. */
  */
 
 static void
-initterm()
+initterm(void)
 {
 	register int filedes;		/* File descriptor for ioctl's. */
-#if defined(SYSV) || defined(USG)
 	struct termio termmode;		/* To hold terminal settings. */
 	struct termios termmodes;	/* To hold terminal settings. */
 	int i;
@@ -596,25 +539,15 @@ initterm()
 #define	SPEED(mode)	(mode.c_cflag & CBAUD)
 #define	SPEEDS(mode)	(cfgetospeed(&mode))
 #define	OFLAG(mode)	mode.c_oflag
-#else	/* BSD */
-	struct sgttyb termmode;		/* To hold terminal settings. */
-#define	GTTY(fd, mode)	gtty(fd, mode)
-#define	STTY(fd, mode)	stty(fd, mode)
-#define	SPEED(mode)	(mode.sg_ospeed & 017)
-#define	OFLAG(mode)	mode.sg_flags
-#define	TAB3		XTABS
-#endif
 
 	/* Get the terminal settings. */
 	/* First try standard output, then standard error, */
 	/* then standard input, then /dev/tty. */
-#ifdef SYSV
 	if ((filedes = 1, GTTYS(filedes, &termmodes) < 0) ||
 	    (filedes = 2, GTTYS(filedes, &termmodes) < 0) ||
 	    (filedes = 0, GTTYS(filedes, &termmodes) < 0) ||
 	    (filedes = open("/dev/tty", O_RDWR),
 	    GTTYS(filedes, &termmodes) < 0)) {
-#endif	/* SYSV */
 		if ((filedes = 1, GTTY(filedes, &termmode) == -1) ||
 		    (filedes = 2, GTTY(filedes, &termmode) == -1) ||
 		    (filedes = 0, GTTY(filedes, &termmode) == -1) ||
@@ -624,7 +557,6 @@ initterm()
 			CurrentBaudRate = speeds[B1200];
 		} else
 			CurrentBaudRate = speeds[SPEED(termmode)];
-#ifdef SYSV
 		termmodes.c_lflag = termmode.c_lflag;
 		termmodes.c_oflag = termmode.c_oflag;
 		termmodes.c_iflag = termmode.c_iflag;
@@ -633,18 +565,11 @@ initterm()
 			termmodes.c_cc[i] = termmode.c_cc[i];
 	} else
 		CurrentBaudRate = speeds[SPEEDS(termmodes)];
-#endif	/* SYSV */
 
 	if (xon_xoff) {
-#ifdef SYSV
 		OFLAG(termmodes) &=
 		    ~(NLbits | CRbits | BSbits | FFbits | TBbits);
-#else	/* SYSV */
-		OFLAG(termmode) &=
-		    ~(NLbits | CRbits | BSbits | FFbits | TBbits);
-#endif	/* SYSV */
 	} else {
-#ifdef SYSV
 		setdelay(getpad(carriage_return),
 		    CRdelay, CRbits, &OFLAG(termmodes));
 		setdelay(getpad(scroll_forward),
@@ -655,37 +580,16 @@ initterm()
 		    FFdelay, FFbits, &OFLAG(termmodes));
 		setdelay(getpad(tab),
 		    TBdelay, TBbits, &OFLAG(termmodes));
-#else	/* SYSV */
-		setdelay(getpad(carriage_return),
-		    CRdelay, CRbits, &OFLAG(termmode));
-		setdelay(getpad(scroll_forward),
-		    NLdelay, NLbits, &OFLAG(termmode));
-		setdelay(getpad(cursor_left),
-		    BSdelay, BSbits, &OFLAG(termmode));
-		setdelay(getpad(form_feed),
-		    FFdelay, FFbits, &OFLAG(termmode));
-		setdelay(getpad(tab),
-		    TBdelay, TBbits, &OFLAG(termmode));
-#endif	/* SYSV */
 	}
 
 	/* If tabs can be sent to the tty, turn off their expansion. */
-	if (tab && set_tab || init_tabs == 8) {
-#ifdef SYSV
+	if ((tab && set_tab) || init_tabs == 8) {
 		OFLAG(termmodes) &= ~(TAB3);
-#else	/* SYSV */
-		OFLAG(termmode) &= ~(TAB3);
-#endif	/* SYSV */
 	} else {
-#ifdef SYSV
 		OFLAG(termmodes) |= TAB3;
-#else	/* SYSV */
-		OFLAG(termmode) |= TAB3;
-#endif	/* SYSV */
 	}
 
 	/* Do the changes to the terminal settings */
-#ifdef SYSV
 	if (istermios < 0) {
 		int i;
 
@@ -699,9 +603,6 @@ initterm()
 	} else
 		(void) STTYS(filedes, &termmodes);
 
-#else	/* SYSV */
-	(void) STTY(filedes, &termmode);
-#endif	/* SYSV */
 
 	/* Send first initialization strings. */
 	if (init_prog)
@@ -756,7 +657,7 @@ initterm()
 }
 
 static void
-reset_term()
+reset_term(void)
 {
 	reset++;
 	initterm();
