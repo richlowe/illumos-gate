@@ -22,12 +22,8 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/nohup/sparcv9/Makefile
-#
 
 include ../Makefile.com
 include ../../Makefile.cmd.64
 
-lint := LINTFLAGS64 = $(LINTFLAGS) -m64
-
-install: all $(ROOTPROG64)
+install: $(ROOTPROG) $(ROOTXPG4PROG)
