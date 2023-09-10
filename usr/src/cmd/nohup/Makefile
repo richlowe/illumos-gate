@@ -31,22 +31,16 @@ include ../Makefile.cmd
 
 .KEEP_STATE:
 
-$(BUILD32)SUBDIRS = $(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+SUBDIRS += $(MACH64)
 
 all	:=	TARGET = all
 install	:=	TARGET = install
 clean	:=	TARGET = clean
 clobber	:=	TARGET = clobber
-lint	:=	TARGET = lint
 
 all: $(SUBDIRS)
 
-clean clobber lint: $(SUBDIRS)
-
-install: $(SUBDIRS)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
+clean clobber install: $(SUBDIRS)
 
 $(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)

@@ -539,7 +539,6 @@ file path=usr/bin/$(ARCH32)/digest mode=0555
 hardlink path=usr/bin/$(ARCH32)/encrypt target=decrypt
 hardlink path=usr/bin/$(ARCH32)/mac target=digest
 $(i386_ONLY)file path=usr/bin/$(ARCH32)/newtask group=sys mode=4555
-$(i386_ONLY)file path=usr/bin/$(ARCH32)/nohup mode=0555
 $(i386_ONLY)file path=usr/bin/$(ARCH32)/prctl mode=0555
 $(i386_ONLY)file path=usr/bin/$(ARCH32)/prstat mode=0555
 $(not_aarch64)file path=usr/bin/$(ARCH32)/savecore mode=0555
@@ -553,7 +552,6 @@ $(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/ls mode=0555
 $(MULTILIB_ONLY)hardlink path=usr/bin/$(ARCH64)/mac target=digest
 $(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/moe mode=0555
 file path=usr/bin/$(ARCH64)/newtask group=sys mode=4555
-$(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/nohup mode=0555
 file path=usr/bin/$(ARCH64)/prctl mode=0555
 file path=usr/bin/$(ARCH64)/prstat mode=0555
 file path=usr/bin/$(ARCH64)/savecore mode=0555
@@ -683,7 +681,7 @@ file path=usr/bin/netstat mode=0555
 file path=usr/bin/newgrp group=sys mode=4755
 hardlink path=usr/bin/newtask target=../../usr/lib/isaexec
 file path=usr/bin/nice mode=0555
-$(not_aarch64)hardlink path=usr/bin/nohup target=../../usr/lib/isaexec
+file path=usr/bin/nohup mode=0555
 file path=usr/bin/optisa mode=0555
 hardlink path=usr/bin/page target=../../usr/bin/more
 file path=usr/bin/pagesize mode=0555
