@@ -43,6 +43,8 @@
 #include <sys/avintr.h>
 #include <sys/gic.h>
 #include <sys/promif.h>
+#include <stdbool.h>
+
 
 static int
 smpl_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *, off_t, off_t, caddr_t *);
@@ -235,11 +237,12 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	ddi_map_req_t mr;
 	int error;
 
-	int addr_cells = get_address_cells(ddi_get_nodeid(dip));
-	int size_cells = get_size_cells(ddi_get_nodeid(dip));
+	int addr_cells = get_address_cells(ddi_get_nodeid(rdip));
+	int size_cells = get_size_cells(ddi_get_nodeid(rdip));
+	int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
 
-	int parent_addr_cells = get_address_cells(ddi_get_nodeid(ddi_get_parent(dip)));
-	int parent_size_cells = get_size_cells(ddi_get_nodeid(ddi_get_parent(dip)));
+	int parent_addr_cells = get_address_cells(ddi_get_nodeid(dip));
+	int parent_size_cells = get_size_cells(ddi_get_nodeid(dip));
 
 	ASSERT(addr_cells == 1 || addr_cells == 2);
 	ASSERT(size_cells == 1 || size_cells == 2);
@@ -248,11 +251,20 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	ASSERT(parent_size_cells == 1 || parent_size_cells == 2);
 
 	int *regs;
+	int range_index = 0;
 	struct regspec reg = {0};
 	struct rangespec range = {0};
 
 	uint32_t *rangep;
 	int rangelen;
+
+	bool parent_has_ranges = false;
+	if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_get_parent(dip), DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) == DDI_SUCCESS) {
+		parent_has_ranges = true;
+		if (rangelen) {
+			kmem_free(rangep, rangelen);
+		}
+	}
 
 	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) != DDI_SUCCESS || rangelen == 0) {
 		rangelen = 0;
@@ -285,9 +297,17 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		uint64_t addr = 0;
 		uint64_t size = 0;
 
-		for (int i = 0; i < addr_cells; i++) {
-			addr <<= 32;
-			addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+		if (rangep) {
+			range_index = ntohl(rp[(addr_cells + size_cells) * rnumber + 0]);
+			for (int i = 1; i < addr_cells; i++) {
+				addr <<= 32;
+				addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i - 1]);
+			}
+		} else {
+			for (int i = 0; i < addr_cells; i++) {
+				addr <<= 32;
+				addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+			}
 		}
 		for (int i = 0; i < size_cells; i++) {
 			size <<= 32;
@@ -295,52 +315,51 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		}
 		kmem_free(rp, reglen);
 		ASSERT((addr & 0xffff000000000000ul) == 0);
-		ASSERT((size & 0xffff000000000000ul) == 0);
-		reg.regspec_bustype = ((addr >> 32) & 0xffff);
+		ASSERT((size & 0xfffff00000000000ul) == 0);
+		reg.regspec_bustype = (addr >> 32) ;
 		reg.regspec_bustype |= (((size >> 32)) << 16);
 		reg.regspec_addr    = (addr & 0xffffffff);
 		reg.regspec_size    = (size & 0xffffffff);
 	} else if (mp->map_type == DDI_MT_REGSPEC) {
 		reg = *mp->map_obj.rp;
-		uint64_t rel_addr = (reg.regspec_bustype & 0xffff);
-		rel_addr <<= 32;
-		rel_addr |= (reg.regspec_addr & 0xffffffff);
+		range_index = (reg.regspec_bustype >> 28);
 	} else {
 		return (DDI_ME_INVAL);
 	}
 
 	if (rangep) {
 		int i;
-		int ranges_cells = (addr_cells + parent_addr_cells + size_cells);
-		int n = rangelen / ranges_cells;
+		int n = rangelen / (addr_cells + parent_addr_cells + size_cells);
 		for (i = 0; i < n; i++) {
-			uint64_t base = 0;
-			uint64_t target = 0;
-			uint64_t rsize = 0;
-			for (int j = 0; j < addr_cells; j++) {
-				base <<= 32;
-				base += htonl(rangep[ranges_cells * i + j]);
-			}
-			for (int j = 0; j < parent_addr_cells; j++) {
-				target <<= 32;
-				target += htonl(rangep[ranges_cells * i + addr_cells + j]);
-			}
-			for (int j = 0; j < size_cells; j++) {
-				rsize <<= 32;
-				rsize += htonl(rangep[ranges_cells * i + addr_cells + parent_addr_cells + j]);
-			}
+			if (rangep[(addr_cells + parent_addr_cells + size_cells) * i + 0] == range_index) {
+				uint64_t addr = 0;
+				uint64_t regspec_addr = reg.regspec_addr;
+				regspec_addr |= (((uint64_t)(reg.regspec_bustype & 0xffff)) << 32);
+				for (int j = 1; j < addr_cells; j++) {
+					addr <<= 32;
+					addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + j]);
+				}
+				regspec_addr += addr;
 
-			uint64_t rel_addr = (reg.regspec_bustype & 0xffff);
-			rel_addr <<= 32;
-			rel_addr |= (reg.regspec_addr & 0xffffffff);
+				addr = 0;
+				if (parent_has_ranges) {
+					reg.regspec_bustype &= ~0xf0000000;
+					reg.regspec_bustype |= (ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells]) << 28);
+					for (int j = 1; j < parent_addr_cells; j++) {
+						addr <<= 32;
+						addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j - 1]);
+					}
+				} else {
+					for (int j = 0; j < parent_addr_cells; j++) {
+						addr <<= 32;
+						addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j]);
+					}
+				}
+				regspec_addr += addr;
 
-			if (base <= rel_addr && rel_addr <= base + rsize - 1) {
-				rel_addr = (rel_addr - base) + target;
-
+				reg.regspec_addr = regspec_addr & 0xffffffff;
 				reg.regspec_bustype &= ~0xffff;
-				reg.regspec_bustype |= ((rel_addr >> 32) & 0xffff);
-				reg.regspec_addr    = (rel_addr & 0xffffffff);
-
+				reg.regspec_bustype |= ((regspec_addr >> 32) & 0xffff);
 				break;
 			}
 		}
@@ -516,10 +535,10 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			cfg &= 0xFF;
 			switch (cfg) {
 			case 1:
-				gic_config_irq(hdlp->ih_vector, B_TRUE);
+				gic_config_irq(hdlp->ih_vector, true);
 				break;
 			default:
-				gic_config_irq(hdlp->ih_vector, B_FALSE);
+				gic_config_irq(hdlp->ih_vector, false);
 				break;
 			}
 
