@@ -72,8 +72,8 @@ extern int Pissyscall_text(struct ps_prochandle *, const void *buf,
 #define	PSTACK_ALIGN32(sp)	((sp) & ~(2 * sizeof (int32_t) - 1))
 #define	PSTACK_ALIGN64(sp)	((sp) & ~(2 * sizeof (int64_t) - 1))
 #elif defined(__aarch64__)
-#define	PSTACK_ALIGN32(sp)	(sp)
-#define	PSTACK_ALIGN64(sp)	(sp)
+#define	PSTACK_ALIGN32(sp)	((sp) & ~(2 * sizeof (int64_t) - 1))
+#define	PSTACK_ALIGN64(sp)	((sp) & ~(2 * sizeof (int64_t) - 1))
 #else
 #error	Unknown ISA
 #endif
