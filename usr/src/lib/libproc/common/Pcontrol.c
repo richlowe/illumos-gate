@@ -63,6 +63,7 @@
 #include "Pcontrol.h"
 #include "Putil.h"
 #include "P32ton.h"
+#include "Pisadep.h"
 
 int	_libproc_debug;		/* set non-zero to enable debugging printfs */
 int	_libproc_no_qsort;	/* set non-zero to inhibit sorting */
@@ -1969,7 +1970,7 @@ Pstopstatus(struct ps_prochandle *P,
 	switch (P->status.pr_lwp.pr_why) {
 	case PR_SYSENTRY:
 	case PR_SYSEXIT:
-		if (Pissyscall_prev(P, P->status.pr_lwp.pr_reg[R_PC],
+		if (Pissyscall_prev_indirect(P, P->status.pr_lwp.pr_reg[R_PC],
 		    &P->sysaddr) == 0)
 			P->sysaddr = P->status.pr_lwp.pr_reg[R_PC];
 		break;

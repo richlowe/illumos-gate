@@ -115,6 +115,12 @@ Pissyscall(struct ps_prochandle *P, uintptr_t addr)
 }
 
 int
+Pissyscall_indirect(struct ps_prochandle *P, uintptr_t addr)
+{
+	return (Pissyscall(P, addr));
+}
+
+int
 Pissyscall_prev(struct ps_prochandle *P, uintptr_t addr, uintptr_t *dst)
 {
 	int ret;
@@ -135,6 +141,13 @@ Pissyscall_prev(struct ps_prochandle *P, uintptr_t addr, uintptr_t *dst)
 	}
 
 	return (0);
+}
+
+int
+Pissyscall_prev_indirect(struct ps_prochandle *P, uintptr_t addr,
+    uintptr_t *dst)
+{
+	return (Pissyscall_prev(P, addr, dst));
 }
 
 int

@@ -40,7 +40,8 @@
 #define	BLKSIZE	(8 * 1024)
 
 /*
- * Look for a SYSCALL instruction in the process's address space.
+ * Look for a system call instruction for the sysindex syscall in the
+ * process's address space.
  */
 int
 Pscantext(struct ps_prochandle *P)
@@ -63,14 +64,17 @@ Pscantext(struct ps_prochandle *P)
 	/* try the most recently-seen syscall address */
 	syspri = 0;
 	sysaddr = 0;
+
 	if (P->sysaddr != 0 &&
-	    (syspri = Pissyscall(P, P->sysaddr)))
+	    (syspri = Pissyscall_indirect(P, P->sysaddr))) {
 		sysaddr = P->sysaddr;
+	}
 
 	/* try the previous instruction */
-	if (sysaddr == 0 || syspri != 1)
-		syspri = Pissyscall_prev(P, P->status.pr_lwp.pr_reg[R_PC],
-		    &sysaddr);
+	if (sysaddr == 0 || syspri != 1) {
+		syspri = Pissyscall_prev_indirect(P,
+		    P->status.pr_lwp.pr_reg[R_PC], &sysaddr);
+	}
 
 	if (sysaddr != 0 && syspri == 1) {
 		P->sysaddr = sysaddr;
@@ -155,15 +159,15 @@ Pscantext(struct ps_prochandle *P)
 				if ((nbytes = n2bytes) <= 0)
 					break;
 				(void) memcpy(buf,
-					&buf[BLKSIZE / sizeof (buf[0])],
-					nbytes);
+				    &buf[BLKSIZE / sizeof (buf[0])],
+				    nbytes);
 				n2bytes = 0;
 				p = (uchar_t *)buf;
 				if (nbytes == BLKSIZE &&
 				    offset + BLKSIZE < endoff)
 					n2bytes = read(P->asfd,
-						&buf[BLKSIZE / sizeof (buf[0])],
-						BLKSIZE);
+					    &buf[BLKSIZE / sizeof (buf[0])],
+					    BLKSIZE);
 			}
 
 			if (syspri = Pissyscall_text(P, p, nbytes))

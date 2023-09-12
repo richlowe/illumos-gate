@@ -56,8 +56,15 @@ extern int Pissyscall(struct ps_prochandle *, uintptr_t);
 /*
  * Works the same way as Pissyscall(), except operates on an in-memory buffer.
  */
-extern int Pissyscall_text(struct ps_prochandle *, const void *buf,
-    size_t buflen);
+extern int Pissyscall_text(struct ps_prochandle *, const void *, size_t);
+
+/*
+ * These mirror the Pissyscall and Pissyscall_prev but explicitly check for
+ * indirect system calls, usable for Psyscall()
+ */
+extern int Pissyscall_indirect(struct ps_prochandle *, uintptr_t);
+extern int Pissyscall_prev_indirect(struct ps_prochandle *, uintptr_t,
+    uintptr_t *);
 
 #if defined(__amd64)
 /* amd64 stack doubleword aligned, unaligned in 32-bit mode  */
