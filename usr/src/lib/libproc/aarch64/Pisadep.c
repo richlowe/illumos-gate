@@ -81,10 +81,21 @@ Pissyscall(struct ps_prochandle *P, uintptr_t addr)
 	if (Pread(P, &instr, sizeof (instr), addr) != sizeof (instr))
 		return (0);
 
-	if ((instr & 0xFE00001F) == 0xD4000001)
+	if ((instr & 0xFE00001F) == 0xD4000001) /* svc <imm16> */
 		return (1);
 
 	return (0);
+}
+
+int
+Pissyscall_indirect(struct ps_prochandle *P, uintptr_t addr)
+{
+	uint32_t instr;
+
+	if (Pread(P, &instr, sizeof (instr), addr) != sizeof (instr))
+		return (0);
+
+	return (instr == 0xd4000001);
 }
 
 int
@@ -93,7 +104,7 @@ Pissyscall_prev(struct ps_prochandle *P, uintptr_t addr, uintptr_t *dst)
 	int ret;
 
 	if (ret = Pissyscall(P, addr - sizeof (uint32_t))) {
-		if (dst)
+		if (dst != NULL)
 			*dst = addr - sizeof (uint32_t);
 		return (ret);
 	}
@@ -101,7 +112,26 @@ Pissyscall_prev(struct ps_prochandle *P, uintptr_t addr, uintptr_t *dst)
 	return (0);
 }
 
-/* ARGSUSED */
+
+int
+Pissyscall_prev_indirect(struct ps_prochandle *P, uintptr_t addr, uintptr_t *dst)
+{
+	int ret;
+
+	if (ret = Pissyscall_indirect(P, addr - sizeof (uint32_t))) {
+		if (dst != NULL)
+			*dst = addr - sizeof (uint32_t);
+		return (ret);
+	}
+
+	return (0);
+}
+
+/*
+ * This, unlike the Pissyscall(3PROC) family, must check specifically for the
+ * indirect system call via a `svc #0` instruction, because we're going to
+ * jump to this instruction (with our own register set) to make system calls.
+ */
 int
 Pissyscall_text(struct ps_prochandle *P, const void *buf, size_t buflen)
 {
@@ -110,7 +140,7 @@ Pissyscall_text(struct ps_prochandle *P, const void *buf, size_t buflen)
 
 	const uint32_t *instr = buf;
 
-	if ((*instr & 0xFE00001F) == 0xD4000001)
+	if (*instr == 0xd4000001) /* svc #0 */
 		return (1);
 
 	return (0);
@@ -221,12 +251,18 @@ Pstack_iter(struct ps_prochandle *P, const prgregset_t regs,
 	return (rv);
 }
 
+/*
+ * Set up our registers to make an indirect system call to `sysindex`,
+ * That is set %sp to `sp`, %pc to the address of an indirect system call found by `Pscantext()`,
+ * and the system call number `sysindex` in %x9.
+ */
 uintptr_t
 Psyscall_setup(struct ps_prochandle *P, int nargs, int sysindex, uintptr_t sp)
 {
 	P->status.pr_lwp.pr_reg[REG_X9] = sysindex;
 	P->status.pr_lwp.pr_reg[REG_PC] = P->sysaddr;
 	P->status.pr_lwp.pr_reg[REG_SP] = sp;
+
 	return (sp);
 }
 

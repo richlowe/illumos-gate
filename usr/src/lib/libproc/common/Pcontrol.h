@@ -212,7 +212,7 @@ struct ps_prochandle {
 	pstatus_t orig_status;	/* remembered status on Pgrab() */
 	pstatus_t status;	/* status when stopped */
 	psinfo_t psinfo;	/* psinfo_t from last Ppsinfo() request */
-	uintptr_t sysaddr;	/* address of most recent syscall instruction */
+	uintptr_t sysaddr;	/* address of indirect syscall insn */
 	pid_t	pid;		/* process-ID */
 	int	state;		/* state of the process, see "libproc.h" */
 	uint_t	flags;		/* see defines below */
@@ -242,7 +242,7 @@ struct ps_prochandle {
 	uintptr_t map_missing;	/* first missing mapping in core due to sig */
 	siginfo_t killinfo;	/* signal that interrupted core dump */
 	psinfo_t spymaster;	/* agent LWP's spymaster, if any */
-	void *data;		/* private data */
+	void *data;		/* target-specific private data */
 };
 
 /* flags */

@@ -40,7 +40,8 @@
 #define	BLKSIZE	(8 * 1024)
 
 /*
- * Look for a SYSCALL instruction in the process's address space.
+ * Look for a system call instruction for the sysindex syscall in the
+ * process's address space.
  */
 int
 Pscantext(struct ps_prochandle *P)
@@ -63,13 +64,14 @@ Pscantext(struct ps_prochandle *P)
 	/* try the most recently-seen syscall address */
 	syspri = 0;
 	sysaddr = 0;
+
 	if (P->sysaddr != 0 &&
-	    (syspri = Pissyscall(P, P->sysaddr)))
+	    (syspri = Pissyscall_indirect(P, P->sysaddr)))
 		sysaddr = P->sysaddr;
 
 	/* try the previous instruction */
 	if (sysaddr == 0 || syspri != 1)
-		syspri = Pissyscall_prev(P, P->status.pr_lwp.pr_reg[R_PC],
+		syspri = Pissyscall_prev_indirect(P, P->status.pr_lwp.pr_reg[R_PC],
 		    &sysaddr);
 
 	if (sysaddr != 0 && syspri == 1) {

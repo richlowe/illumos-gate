@@ -428,8 +428,8 @@ Psyscall(struct ps_prochandle *P,
 	 * Execute the syscall instruction and stop on syscall entry.
 	 */
 	if (execute(P, sysindex) != 0 ||
-	    (!Pissyscall(P, P->status.pr_lwp.pr_reg[R_PC]) &&
-	    !Pissyscall_prev(P, P->status.pr_lwp.pr_reg[R_PC], NULL)))
+	    (!Pissyscall_indirect(P, P->status.pr_lwp.pr_reg[R_PC]) &&
+	    !Pissyscall_prev_indirect(P, P->status.pr_lwp.pr_reg[R_PC], NULL)))
 		goto bad10;
 
 	dprintf("Psyscall(): copying arguments\n");
@@ -483,8 +483,8 @@ Psyscall(struct ps_prochandle *P,
 	if (P->status.pr_lwp.pr_what != sysindex)
 		goto bad23;
 
-	if (!Pissyscall_prev(P, P->status.pr_lwp.pr_reg[R_PC], NULL)) {
-		dprintf("Pissyscall_prev() failed\n");
+	if (!Pissyscall_prev_indirect(P, P->status.pr_lwp.pr_reg[R_PC], NULL)) {
+		dprintf("Pissyscall_prev_indirect() failed\n");
 		goto bad24;
 	}
 
