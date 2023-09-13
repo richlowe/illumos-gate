@@ -1628,6 +1628,8 @@ ld_targ_init_x86(void)
 			.m_word_align = M_WORD_ALIGN,
 			.m_def_interp = MSG_ORIG(MSG_PTH_RTLD_AMD64),
 
+			.m_needs_gotplt = FALSE,
+
 			/* Relocation type codes */
 			.m_r_arrayaddr = M_R_ARRAYADDR,
 			.m_r_copy = M_R_COPY,

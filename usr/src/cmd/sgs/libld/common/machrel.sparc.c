@@ -2170,6 +2170,8 @@ ld_targ_init_sparc(void)
 			.m_def_interp = MSG_ORIG(MSG_PTH_RTLD),
 #endif
 
+			.m_needs_gotplt = FALSE,
+
 			/* Relocation type codes */
 			.m_r_arrayaddr = M_R_ARRAYADDR,
 			.m_r_copy = M_R_COPY,

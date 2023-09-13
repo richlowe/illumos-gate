@@ -71,6 +71,8 @@ typedef struct {
 	Word		m_word_align;	/* alignment to use for Word sections */
 	const char	*m_def_interp;	/* Def. interpreter for dyn objects */
 
+	Boolean		m_needs_gotplt; /* Target needs a separate .got.plt */
+
 	/* Relocation type codes */
 	Word		m_r_arrayaddr;
 	Word		m_r_copy;
