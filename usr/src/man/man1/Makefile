@@ -265,7 +265,6 @@ MANFILES=	acctcom.1			\
 		passwd.1			\
 		paste.1				\
 		pathchk.1			\
-		pax.1				\
 		pfexec.1			\
 		pg.1				\
 		pgrep.1				\
@@ -415,6 +414,8 @@ MANFILES=	acctcom.1			\
 		zlogin.1			\
 		zonename.1			\
 		zonestat.1
+
+$(HAVE_CLOSED_BINS)MANFILES += pax.1
 
 MANLINKS=	batch.1		\
 		bg.1		\

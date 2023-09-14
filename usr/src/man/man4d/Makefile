@@ -167,7 +167,6 @@ i386_MANFILES=	ahci.4d		\
 		audioixp.4d	\
 		audiosolo.4d	\
 		audiovia823x.4d \
-		bcm_sata.4d	\
 		bfe.4d		\
 		cmdk.4d		\
 		coretemp.4d	\
@@ -207,7 +206,6 @@ i386_MANFILES=	ahci.4d		\
 		rwn.4d		\
 		sda.4d		\
 		sdhost.4d	\
-		sdp.4d		\
 		sfxge.4d	\
 		si3124.4d	\
 		skd.4d		\
@@ -227,6 +225,10 @@ i386_MANFILES=	ahci.4d		\
 		xhci.4d		\
 		zen_udf.4d	\
 		zyd.4d
+
+$(HAVE_CLOSED_BINS)i386_MANFILES +=	\
+	bcm_sata.4d			\
+	sdp.4d
 
 aarch64_MANFILES=	ahci.4d		\
 			arn.4d		\

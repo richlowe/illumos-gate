@@ -33,6 +33,7 @@ set name=pkg.fmri value=pkg:/driver/storage/marvell88sx@$(PKGVERS)
 set name=pkg.summary value="Marvell 88sx sata driver"
 set name=pkg.description value="Marvell 88sx sata driver"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Ports
+set name=org.illumos.closed-only value=true
 set name=org.illumos.for-arch value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys

@@ -72,7 +72,7 @@ file path=usr/xpg4/bin/link mode=0555
 hardlink path=usr/xpg4/bin/ln target=../../../usr/xpg4/bin/cp
 file path=usr/xpg4/bin/ls mode=0555
 file path=usr/xpg4/bin/m4 mode=0555
-$(not_aarch64)file path=usr/xpg4/bin/more mode=0555
+$(CLOSED_ONLY)file path=usr/xpg4/bin/more mode=0555
 hardlink path=usr/xpg4/bin/mv target=../../../usr/xpg4/bin/cp
 file path=usr/xpg4/bin/nice mode=0555
 file path=usr/xpg4/bin/nl mode=0555

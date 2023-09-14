@@ -24,5 +24,6 @@
 #
 set name=pkg.fmri value=pkg:/system/network/spdadm@$(PKGVERS)
 set name=pkg.renamed value=true
+set name=org.illumos.closed-only value=true
 set name=org.illumos.for-arch value=i386
 depend type=require fmri=pkg:/driver/network/sdp

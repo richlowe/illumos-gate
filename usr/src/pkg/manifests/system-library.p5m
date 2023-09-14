@@ -551,7 +551,6 @@ $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libhotplug.so.1
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libidmap.so target=./libidmap.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libidmap.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libidspace.so.1
-$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libike.so.1
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libinetutil.so.1 \
     target=../../../lib/$(ARCH64)/libinetutil.so.1
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libintl.so \
@@ -889,7 +888,6 @@ file path=usr/lib/libhotplug.so.1
 link path=usr/lib/libidmap.so target=./libidmap.so.1
 file path=usr/lib/libidmap.so.1
 file path=usr/lib/libidspace.so.1
-$(not_aarch64)file path=usr/lib/libike.so.1
 file path=usr/lib/libinetsvc.so.1
 link path=usr/lib/libinetutil.so.1 target=../../lib/libinetutil.so.1
 link path=usr/lib/libintl.so target=../../lib/libintl.so.1
@@ -1044,11 +1042,7 @@ link path=usr/lib/nss_user.so.1 target=../../lib/nss_user.so.1
 file path=usr/lib/passwdutil.so.1
 dir  path=usr/lib/pkgconfig group=other
 file path=usr/lib/pkgconfig/uuid.pc mode=0444
-$(not_aarch64)dir path=usr/lib/raidcfg
-$(MULTILIB_ONLY)dir path=usr/lib/raidcfg/$(ARCH64)
-$(MULTILIB_ONLY)file path=usr/lib/raidcfg/$(ARCH64)/mpt.so.1
-$(not_aarch64)file path=usr/lib/raidcfg/mpt.so.1
-$(not_aarch64)dir path=usr/lib/scsi
+dir  path=usr/lib/scsi
 $(MULTILIB_ONLY)dir path=usr/lib/scsi/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/scsi/$(ARCH64)/libscsi.so \
     target=./libscsi.so.1

@@ -72,12 +72,6 @@ $(i386_ONLY)file \
     mode=0755
 $(i386_ONLY)file path=platform/i86pc/kernel/cpu/$(ARCH64)/cpu_ms.GenuineIntel \
     group=sys mode=0755
-$(i386_ONLY)file \
-    path=platform/i86pc/kernel/cpu/$(ARCH64)/cpu_ms.GenuineIntel.6.46 \
-    group=sys mode=0755
-$(i386_ONLY)hardlink \
-    path=platform/i86pc/kernel/cpu/$(ARCH64)/cpu_ms.GenuineIntel.6.47 \
-    target=cpu_ms.GenuineIntel.6.46
 $(i386_ONLY)dir path=platform/i86pc/kernel/dacf group=sys
 $(i386_ONLY)dir path=platform/i86pc/kernel/dacf/$(ARCH64) group=sys
 $(i386_ONLY)file path=platform/i86pc/kernel/dacf/$(ARCH64)/consconfig_dacf \
@@ -243,5 +237,7 @@ license usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode \
     license=usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode
 $(i386_ONLY)license usr/src/uts/intel/THIRDPARTYLICENSE \
     license=usr/src/uts/intel/THIRDPARTYLICENSE
+# Nehalem-EX was moved from here, and this is necessary for upgrade
+$(CLOSED_ONLY)depend type=require fmri=driver/cpu/intel/nehalem-ex
 $(i386_ONLY)depend type=require fmri=system/microcode/amd
 $(i386_ONLY)depend type=require fmri=system/microcode/intel

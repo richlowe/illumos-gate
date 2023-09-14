@@ -177,15 +177,12 @@ MANFILES=	6to4relay.8		\
 		if_mpadm.8		\
 		ifconfig.8		\
 		ifparse.8		\
-		ikeadm.8		\
-		ikecert.8		\
 		in.chargend.8		\
 		in.comsat.8		\
 		in.daytimed.8		\
 		in.discardd.8		\
 		in.echod.8		\
 		in.fingerd.8		\
-		in.iked.8		\
 		in.lpd.8		\
 		in.mpathd.8		\
 		in.ndpd.8		\
@@ -535,12 +532,17 @@ MANFILES=	6to4relay.8		\
 		zstreamdump.8		\
 		ztest.8
 
+$(HAVE_CLOSED_BINS)MANFILES +=	\
+		ikeadm.8	\
+		ikecert.8	\
+		in.iked.8	\
+		sdpadm.8
+
 i386_MANFILES=			\
 		acpidump.8	\
 		acpixtract.8	\
 		bhyve.8		\
 		bhyvectl.8	\
-		sdpadm.8	\
 		nvmeadm.8	\
 		pptadm.8	\
 		rdmsr.8

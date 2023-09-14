@@ -302,6 +302,7 @@ DIRS=							\
 	/usr/lib/inet					\
 	/usr/lib/inet/ilb				\
 	/usr/lib/krb5					\
+	/usr/lib/link_audit				\
 	/usr/lib/locale					\
 	/usr/lib/locale/C				\
 	/usr/lib/locale/C/LC_COLLATE			\
@@ -310,7 +311,6 @@ DIRS=							\
 	/usr/lib/locale/C/LC_MONETARY			\
 	/usr/lib/locale/C/LC_NUMERIC			\
 	/usr/lib/locale/C/LC_TIME			\
-	/usr/lib/link_audit				\
 	/usr/lib/lwp					\
 	/usr/lib/mdb					\
 	/usr/lib/mdb/kvm				\
@@ -508,21 +508,21 @@ DIRS64=						\
 # macros for symbolic links
 SYM.DIRS=			\
 	/bin			\
+	/dev/stderr		\
 	/dev/stdin		\
 	/dev/stdout		\
-	/dev/stderr		\
 	/etc/log		\
 	/usr/adm		\
-	/usr/spool		\
-	/usr/lib/tmac		\
 	/usr/ccs/lib/link_audit \
-	/usr/lib/locale/POSIX 	\
-	/usr/news		\
-	/usr/preserve		\
 	/usr/lib/cron		\
+	/usr/lib/locale/POSIX	\
+	/usr/lib/tmac		\
 	/usr/mail		\
 	/usr/man		\
+	/usr/news		\
+	/usr/preserve		\
 	/usr/pub		\
+	/usr/spool		\
 	/usr/src		\
 	/usr/tmp
 
@@ -621,35 +621,36 @@ $(ROOT)/system/object:=		DIRMODE= 555
 
 # symlink assignments, LINKDEST is the value of the symlink
 #
-$(ROOT)/usr/lib/cron:=			LINKDEST=../../etc/cron.d
 $(ROOT)/bin:=				LINKDEST=usr/bin
+$(ROOT)/dev/stderr:=			LINKDEST=fd/2
+$(ROOT)/dev/stdin:=			LINKDEST=fd/0
+$(ROOT)/dev/stdout:=			LINKDEST=fd/1
+$(ROOT)/etc/log:=			LINKDEST=../var/adm/log
 $(ROOT)/lib/32:=			LINKDEST=.
 $(ROOT)/lib/crypto/32:=			LINKDEST=.
 $(ROOT)/lib/secure/32:=			LINKDEST=.
-$(ROOT)/dev/stdin:=			LINKDEST=fd/0
-$(ROOT)/dev/stdout:=			LINKDEST=fd/1
-$(ROOT)/dev/stderr:=			LINKDEST=fd/2
-$(ROOT)/usr/pub:=			LINKDEST=share/lib/pub
-$(ROOT)/usr/man:=			LINKDEST=share/man
-$(ROOT)/usr/src:=			LINKDEST=share/src
 $(ROOT)/usr/adm:=			LINKDEST=../var/adm
-$(ROOT)/etc/log:=			LINKDEST=../var/adm/log
-$(ROOT)/usr/mail:=			LINKDEST=../var/mail
-$(ROOT)/usr/news:=			LINKDEST=../var/news
-$(ROOT)/usr/preserve:=			LINKDEST=../var/preserve
-$(ROOT)/usr/spool:=			LINKDEST=../var/spool
-$(ROOT)/usr/tmp:=			LINKDEST=../var/tmp
-$(ROOT)/usr/lib/tmac:=			LINKDEST=../share/lib/tmac
+$(ROOT)/usr/ccs/lib/link_audit:=	LINKDEST=../../lib/link_audit
 $(ROOT)/usr/lib/32:=			LINKDEST=.
+$(ROOT)/usr/lib/cron:=			LINKDEST=../../etc/cron.d
 $(ROOT)/usr/lib/elfedit/32:=		LINKDEST=.
+$(ROOT)/usr/lib/link_audit/32:=		LINKDEST=.
 $(ROOT)/usr/lib/locale/POSIX:=		LINKDEST=./C
 $(ROOT)/usr/lib/lwp/32:=		LINKDEST=.
-$(ROOT)/usr/lib/link_audit/32:=		LINKDEST=.
 $(ROOT)/usr/lib/secure/32:=		LINKDEST=.
-$(ROOT)/usr/ccs/lib/link_audit:=	LINKDEST=../../lib/link_audit
+$(ROOT)/usr/lib/tmac:=			LINKDEST=../share/lib/tmac
+$(ROOT)/usr/mail:=			LINKDEST=../var/mail
+$(ROOT)/usr/man:=			LINKDEST=share/man
+$(ROOT)/usr/news:=			LINKDEST=../var/news
+$(ROOT)/usr/preserve:=			LINKDEST=../var/preserve
+$(ROOT)/usr/pub:=			LINKDEST=share/lib/pub
+$(ROOT)/usr/spool:=			LINKDEST=../var/spool
+$(ROOT)/usr/src:=			LINKDEST=share/src
+$(ROOT)/usr/tmp:=			LINKDEST=../var/tmp
+$(ROOT)/usr/lib/locale/POSIX:=		LINKDEST=./C
 $(ROOT)/var/ld/32:=			LINKDEST=.
-$(NOT_AARCH64_BLD)$(ROOT)/usr/ucblib/32:=			LINKDEST=.
 
+$(NOT_AARCH64_BLD)$(ROOT)/usr/ucblib/32:=			LINKDEST=.
 
 $(BUILD64) $(ROOT)/lib/64:=		LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/lib/crypto/64:=	LINKDEST=$(MACH64)

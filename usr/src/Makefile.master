@@ -1097,6 +1097,14 @@ PKGARCHIVE=$(SRC)/../../packages/$(MACH)/nightly$(PKGARCHIVESUFFIX)
 PKGPUBLISHER_REDIST=	on-nightly
 PKGPUBLISHER_NONREDIST=	on-extra
 
+# Indicate whether a given platform has OpenSolaris closed binaries This is
+# not intended to be user-facing build configuration, but may be used that way
+# for testing.
+i386_HAVE_CLOSED_BINS=
+sparc_HAVE_CLOSED_BINS=
+aarch64_HAVE_CLOSED_BINS=$(POUND_SIGN)
+HAVE_CLOSED_BINS=$($(MACH)_HAVE_CLOSED_BINS)
+
 # Allow suffix rules like the below for .S as well as .s
 .SUFFIXES: .S
 

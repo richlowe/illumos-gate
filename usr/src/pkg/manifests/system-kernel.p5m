@@ -51,6 +51,7 @@
 <include system-kernel.man9f.inc>
 <include system-kernel.man9p.inc>
 <include system-kernel.man9s.inc>
+$(CLOSED_ONLY)$(i386_ONLY)file path=kernel/drv/$(ARCH64)/acpi_toshiba group=sys
 set name=pkg.fmri value=pkg:/system/kernel@$(PKGVERS)
 set name=pkg.summary value="Core Solaris Kernel"
 set name=pkg.description \
@@ -111,7 +112,6 @@ file path=kernel/dacf/$(ARCH64)/net_dacf group=sys mode=0755
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys
 $(i386_ONLY)file path=kernel/drv/$(ARCH64)/acpi_drv group=sys
-$(i386_ONLY)file path=kernel/drv/$(ARCH64)/acpi_toshiba group=sys
 file path=kernel/drv/$(ARCH64)/aggr group=sys
 file path=kernel/drv/$(ARCH64)/arp group=sys
 file path=kernel/drv/$(ARCH64)/bl group=sys
@@ -132,7 +132,6 @@ file path=kernel/drv/$(ARCH64)/icmp group=sys
 file path=kernel/drv/$(ARCH64)/icmp6 group=sys
 $(i386_ONLY)file path=kernel/drv/$(ARCH64)/intel_nb5000 group=sys
 $(i386_ONLY)file path=kernel/drv/$(ARCH64)/intel_nhm group=sys
-$(i386_ONLY)file path=kernel/drv/$(ARCH64)/intel_nhmex group=sys
 file path=kernel/drv/$(ARCH64)/ip group=sys
 file path=kernel/drv/$(ARCH64)/ip6 group=sys
 file path=kernel/drv/$(ARCH64)/ipnet group=sys
@@ -150,7 +149,6 @@ file path=kernel/drv/$(ARCH64)/log group=sys
 $(i386_ONLY)file path=kernel/drv/$(ARCH64)/mc-amd group=sys
 file path=kernel/drv/$(ARCH64)/mm group=sys
 $(not_aarch64)file path=kernel/drv/$(ARCH64)/mouse8042 group=sys
-$(i386_ONLY)file path=kernel/drv/$(ARCH64)/mpt group=sys
 file path=kernel/drv/$(ARCH64)/nulldriver group=sys
 file path=kernel/drv/$(ARCH64)/openeepr group=sys
 file path=kernel/drv/$(ARCH64)/options group=sys
@@ -207,7 +205,6 @@ file path=kernel/drv/icmp.conf group=sys
 file path=kernel/drv/icmp6.conf group=sys
 $(i386_ONLY)file path=kernel/drv/intel_nb5000.conf group=sys
 $(i386_ONLY)file path=kernel/drv/intel_nhm.conf group=sys
-$(i386_ONLY)file path=kernel/drv/intel_nhmex.conf group=sys
 file path=kernel/drv/ip.conf group=sys
 file path=kernel/drv/ip6.conf group=sys
 file path=kernel/drv/ipnet.conf group=sys
@@ -224,8 +221,6 @@ file path=kernel/drv/log.conf group=sys \
     original_name=SUNWckr:kernel/drv/log.conf preserve=true
 $(i386_ONLY)file path=kernel/drv/mc-amd.conf group=sys
 file path=kernel/drv/mm.conf group=sys
-$(i386_ONLY)file path=kernel/drv/mpt.conf group=sys \
-    original_name=SUNWckr:kernel/drv/mpt.conf preserve=true
 file path=kernel/drv/openeepr.conf group=sys
 file path=kernel/drv/options.conf group=sys
 $(not_aarch64)file path=kernel/drv/pcieb.conf group=sys
@@ -359,12 +354,12 @@ file path=kernel/misc/$(ARCH64)/tem group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/tlimod group=sys mode=0755
 dir  path=kernel/misc/scsi_vhci group=sys
 dir  path=kernel/misc/scsi_vhci/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_asym_emc \
+$(CLOSED_ONLY)file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_asym_emc \
     group=sys mode=0755
-$(not_aarch64)file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_asym_lsi \
+$(CLOSED_ONLY)file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_asym_lsi \
     group=sys mode=0755
 file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_sym group=sys mode=0755
-$(not_aarch64)file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_sym_emc \
+$(CLOSED_ONLY)file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_sym_emc \
     group=sys mode=0755
 file path=kernel/misc/scsi_vhci/$(ARCH64)/scsi_vhci_f_sym_hds group=sys \
     mode=0755
@@ -504,7 +499,6 @@ $(i386_ONLY)driver name=intel_nb5000 \
 $(i386_ONLY)driver name=intel_nhm \
     alias=pci8086,3423 \
     alias=pci8086,372a
-$(i386_ONLY)driver name=intel_nhmex alias=pci8086,3438
 driver name=ip perms="ip 0666 root sys" \
     policy="read_priv_set=net_rawaccess write_priv_set=net_rawaccess"
 driver name=ip6 perms="ip6 0666 root sys" \
@@ -536,16 +530,6 @@ driver name=mm perms="allkmem 0600 root sys" perms="full 0666 root sys" \
     policy="kmem read_priv_set=none write_priv_set=all" \
     policy="mem read_priv_set=none write_priv_set=all"
 driver name=mouse8042 alias=pnpPNP,f03
-$(i386_ONLY)driver name=mpt class=scsi \
-    alias=pci1000,30 \
-    alias=pci1000,50 \
-    alias=pci1000,54 \
-    alias=pci1000,56 \
-    alias=pci1000,58 \
-    alias=pci1000,62 \
-    alias=pciex1000,56 \
-    alias=pciex1000,58 \
-    alias=pciex1000,62
 driver name=nulldriver \
     alias=scsa,nodev \
     alias=scsa,probe
@@ -623,8 +607,6 @@ $(i386_ONLY)license usr/src/common/crypto/md5/amd64/THIRDPARTYLICENSE \
     license=usr/src/common/crypto/md5/amd64/THIRDPARTYLICENSE
 license usr/src/common/crypto/skein/THIRDPARTYLICENSE \
     license=usr/src/common/crypto/skein/THIRDPARTYLICENSE
-license usr/src/common/mpi/THIRDPARTYLICENSE \
-    license=usr/src/common/mpi/THIRDPARTYLICENSE
 license usr/src/uts/common/inet/cc/THIRDPARTYLICENSE \
     license=usr/src/uts/common/inet/cc/THIRDPARTYLICENSE
 license usr/src/uts/common/inet/ip/THIRDPARTYLICENSE.rts \
@@ -641,3 +623,7 @@ license usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode \
     license=usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode
 $(i386_ONLY)license usr/src/uts/intel/io/acpica/THIRDPARTYLICENSE \
     license=usr/src/uts/intel/io/acpica/THIRDPARTYLICENSE
+# Used to be delivered partially from here, and necessary for upgrade
+$(CLOSED_ONLY)depend type=require fmri=driver/cpu/intel/nehalem-ex
+# Used to be delivered from here, and necessary for upgrade
+$(CLOSED_ONLY)depend type=require fmri=driver/storage/mpt

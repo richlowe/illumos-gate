@@ -51,8 +51,10 @@ _msg:=		TARGET= _msg
 all clean clobber lint: $(SUBDIRS)
 
 install: $(SUBDIRS)
-# Closed bin, doesn't exist on AArch64
-$(NOT_AARCH64_BLD)install: $(ROOTLIBINET)/in.iked
+
+# in.iked is closed, but the link to isaexec was historically installed from
+# here not usr/closed, only do it if we have closed-bins.
+$(HAVE_CLOSED_BINS)install: $(ROOTLIBINET)/in.iked
 
 $(ROOTLIBINET)/in.iked:
 	$(RM) $(ROOTLIBINET)/in.iked

@@ -1,0 +1,46 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+# Copyright 2023 Richard Lowe
+
+set name=pkg.fmri value=pkg:/system/network/ike@$(PKGVERS)
+set name=pkg.summary value="IPsec Internet Key Exchange (IKE) Daemon"
+set name=pkg.description value="IPsec Internet Key Exchange (IKE) Daemon"
+set name=info.classification value=org.opensolaris.category.2008:System/Security
+# Some large portions are open source, but they require the closed in.iked and
+# libike.so to function usefully
+set name=org.illumos.closed-only value=true
+dir  path=etc/inet/ike group=sys
+file path=etc/inet/ike/config.sample group=sys mode=0444
+dir  path=etc/inet/ike/crls group=sys
+dir  path=etc/inet/ike/publickeys group=sys
+file path=etc/inet/secret/ike.preshared group=sys mode=0600 \
+    original_name=SUNWcnetr:etc/inet/secret/ike.preshared preserve=true
+dir  path=etc/inet/secret/ike.privatekeys group=sys mode=0700
+file path=lib/svc/manifest/network/ipsec/ike.xml group=sys mode=0444
+$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libike.so.1
+file path=usr/lib/inet/$(ARCH64)/in.iked mode=0555
+file path=usr/lib/inet/certdb mode=0555
+file path=usr/lib/inet/certlocal mode=0555
+file path=usr/lib/inet/certrldb mode=0555
+hardlink path=usr/lib/inet/in.iked target=../../../usr/lib/isaexec
+file path=usr/lib/libike.so.1
+file path=usr/sbin/ikeadm mode=0555
+file path=usr/sbin/ikecert mode=0555
+file path=usr/share/man/man5/ike.config.5
+file path=usr/share/man/man5/ike.preshared.5
+file path=usr/share/man/man8/ikeadm.8
+file path=usr/share/man/man8/ikecert.8
+file path=usr/share/man/man8/in.iked.8
+license cr_Sun license=cr_Sun
+license lic_CDDL license=lic_CDDL
+license lic_OSBL license=lic_OSBL
+license lic_OSBL_preamble license=lic_OSBL_preamble
