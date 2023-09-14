@@ -172,15 +172,21 @@ PM_TRANSFORMS= common_actions publish restart_fmri facets defaults \
 PM_FINAL_TRANSFORMS= strip_dependinfo
 PM_INC= transforms manifests
 
+# Only deliver this file when using a specific java version.
 JAVA_8_ONLY=
 JAVA_11_ONLY=
 $(BLD_JAVA_11)JAVA_8_ONLY=$(POUND_SIGN)
 $(JAVA_8_ONLY)JAVA_11_ONLY=$(POUND_SIGN)
 
+# Only deliver this file on platforms supporting 32/64bit multi-lib
 i386_MULTILIB_ONLY=
 aarch64_MULTILIB_ONLY=$(POUND_SIGN)
 MULTILIB_ONLY=$($(PKGMACH)_MULTILIB_ONLY)
-$(MULTILIB_ONLY)NOT_MULTILIB=$(POUND_SIGN)
+$(MULTILIB_ONLY)NOT_MULTILIB=$(POUND_SIGN) # Or not
+
+# A negated $(CLOSED_ONLY), used for publishing selection
+NOT_CLOSED=
+$(HAVE_CLOSED_BINS)NOT_CLOSED=$(POUND_SIGN)
 
 PKGMOG_DEFINES= \
 	i386_ONLY=$(POUND_SIGN) \
@@ -189,6 +195,8 @@ PKGMOG_DEFINES= \
 	not_i386= \
 	not_aarch64= \
 	not_$(PKGMACH)=$(POUND_SIGN) \
+	CLOSED_ONLY=$(HAVE_CLOSED_BINS) \
+	NOT_CLOSED=$(NOT_CLOSED) \
 	MULTILIB_ONLY=$(MULTILIB_ONLY) \
 	NOT_MULTILIB=$(NOT_MULTILIB) \
 	ARCH=$(PKGMACH) \

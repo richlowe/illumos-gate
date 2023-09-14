@@ -183,7 +183,7 @@ link path=usr/share/man/man1/page.1 target=more.1
 file path=usr/share/man/man1/pagesize.1
 file path=usr/share/man/man1/passwd.1
 file path=usr/share/man/man1/pathchk.1
-file path=usr/share/man/man1/pax.1
+$(CLOSED_ONLY)file path=usr/share/man/man1/pax.1
 link path=usr/share/man/man1/pcred.1 target=proc.1
 link path=usr/share/man/man1/pfcsh.1 target=pfexec.1
 file path=usr/share/man/man1/pfexec.1

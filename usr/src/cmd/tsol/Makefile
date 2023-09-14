@@ -33,7 +33,6 @@ SUBDIRS =		\
 	demo		\
 	misc		\
 	zones		\
-	labeld		\
 	updatehome	\
 	plabel		\
 	setlabel	\
@@ -46,6 +45,9 @@ SUBDIRS =		\
 	hextoalabel	\
 	lslabels
 
+# labeld itself is a closed binary, this directory only delivers the SMF
+# service, which is useless without the closed binary.
+$(HAVE_CLOSED_BINS)SUBDIRS += labeld
 
 MSGSUBDIRS =		\
 	getlabel	\

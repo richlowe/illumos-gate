@@ -22,7 +22,7 @@ include		$(SRC)/Makefile.master
 
 MANSECT=	5
 
-_MANFILES=	Intro.5				\
+MANFILES=	Intro.5				\
 		NISLDAPmapping.5		\
 		a.out.5				\
 		admin.5				\
@@ -81,8 +81,6 @@ _MANFILES=	Intro.5				\
 		hosts_access.5			\
 		hosts_options.5			\
 		ib.5				\
-		ike.config.5			\
-		ike.preshared.5			\
 		ipf.5				\
 		ipmon.5				\
 		ipnat.5				\
@@ -198,11 +196,15 @@ _MANFILES=	Intro.5				\
 		ypserv.5			\
 		zoneinfo.5
 
+$(HAVE_CLOSED_BINS)MANFILES +=	\
+		ike.config.5	\
+		ike.preshared.5
+
 i386_MANFILES=	bhyve_config.5			\
 		loader.conf.5			\
 		sysbus.5
 
-_MANLINKS=	addresses.5			\
+MANLINKS=	addresses.5			\
 		devid_cache.5			\
 		devname_cache.5			\
 		dir.5				\
@@ -233,8 +235,8 @@ _MANLINKS=	addresses.5			\
 
 i386_MANLINKS=	isa.5
 
-MANFILES=	$(_MANFILES) $($(MACH)_MANFILES)
-MANLINKS=	$(_MANLINKS) $($(MACH)_MANLINKS)
+MANFILES +=	$($(MACH)_MANFILES)
+MANLINKS +=	$($(MACH)_MANLINKS)
 
 intro.5				:= LINKSRC = Intro.5
 

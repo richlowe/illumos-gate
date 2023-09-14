@@ -34,6 +34,7 @@ set name=pkg.summary value="Intel(R) PRO/10G Server Adapter Driver"
 set name=pkg.description value="Intel(R) PRO/10G Server Adapter Driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
+set name=org.illumos.closed-only value=true
 set name=org.illumos.for-arch value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys

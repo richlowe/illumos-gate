@@ -24,10 +24,16 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-PROG=		ikeadm ipsecalgs ipsecconf ipseckey ikecert
+include $(SRC)/Makefile.master
+
+PROG=		ipsecalgs ipsecconf ipseckey
 SOCKETPROG=	ipsecalgs ipsecconf ipseckey
 TSOLPROG=	ipseckey
-SRCS=           ikeadm.c ipsecalgs.c ipsecconf.c ipseckey.c
+SRCS=           ipsecalgs.c ipsecconf.c ipseckey.c
+
+# Though open source, these are not useful without the closed in.iked/libike.so
+$(HAVE_CLOSED_BINS)PROG += ikeadm ikecert
+$(HAVE_CLOSED_BINS)SRCS += ikeadm.c
 
 include ../../../Makefile.cmd
 

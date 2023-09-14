@@ -47,17 +47,17 @@ file path=etc/security/lib/wdwwrapper group=sys mode=0555
 dir  path=etc/security/tsol group=sys
 file path=etc/security/tsol/devalloc_defaults group=sys \
     original_name=SUNWtsg:etc/security/tsol/devalloc_defaults preserve=true
-$(not_aarch64)file path=etc/security/tsol/label_encodings group=sys mode=0400 \
+$(CLOSED_ONLY)file path=etc/security/tsol/label_encodings group=sys mode=0400 \
     original_name=SUNWtsg:etc/security/tsol/label_encodings preserve=renamenew
-$(not_aarch64)file path=etc/security/tsol/label_encodings.example group=sys \
+$(CLOSED_ONLY)file path=etc/security/tsol/label_encodings.example group=sys \
     mode=0444
-$(not_aarch64)file path=etc/security/tsol/label_encodings.gfi.multi group=sys \
+$(CLOSED_ONLY)file path=etc/security/tsol/label_encodings.gfi.multi group=sys \
     mode=0444
-$(not_aarch64)file path=etc/security/tsol/label_encodings.gfi.single group=sys \
+$(CLOSED_ONLY)file path=etc/security/tsol/label_encodings.gfi.single group=sys \
     mode=0444
-$(not_aarch64)file path=etc/security/tsol/label_encodings.multi group=sys \
+$(CLOSED_ONLY)file path=etc/security/tsol/label_encodings.multi group=sys \
     mode=0444
-$(not_aarch64)file path=etc/security/tsol/label_encodings.single group=sys \
+$(CLOSED_ONLY)file path=etc/security/tsol/label_encodings.single group=sys \
     mode=0444
 $(not_aarch64)file path=etc/security/tsol/relabel group=sys mode=0755 \
     original_name=SUNWtsg:etc/security/tsol/relabel preserve=renamenew
@@ -76,9 +76,9 @@ dir  path=lib/svc/manifest/network group=sys
 $(not_aarch64)file path=lib/svc/manifest/network/tnctl.xml group=sys mode=0444
 $(not_aarch64)file path=lib/svc/manifest/network/tnd.xml group=sys mode=0444
 dir  path=lib/svc/manifest/system group=sys
-$(not_aarch64)file path=lib/svc/manifest/system/labeld.xml group=sys mode=0444
+$(CLOSED_ONLY)file path=lib/svc/manifest/system/labeld.xml group=sys mode=0444
 dir  path=lib/svc/method
-$(not_aarch64)file path=lib/svc/method/svc-labeld mode=0555
+$(CLOSED_ONLY)file path=lib/svc/method/svc-labeld mode=0555
 $(not_aarch64)file path=lib/svc/method/svc-tnctl mode=0555
 $(not_aarch64)file path=lib/svc/method/svc-tnd mode=0555
 dir  path=usr/share/man/man8

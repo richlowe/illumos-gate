@@ -21,12 +21,14 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# cmd/cmd-inet/etc/secret/Makefile
-#
+
+include $(SRC)/Makefile.master
 
 SECRETDIR=	secret
-PRIVATEKEYDIR=	ike.privatekeys
-ETCPROG=	ike.preshared ipseckeys.sample
+$(HAVE_CLOSED_BINS)PRIVATEKEYDIR=	ike.privatekeys
+ETCPROG=	 ipseckeys.sample
+$(HAVE_CLOSED_BINS)ETCPROG += ike.preshared
+
 
 include ../../../Makefile.cmd
 
@@ -58,4 +60,4 @@ $(ETCINETPRIVATEKEYDIR):
 
 FRC:
 
-clean clobber lint:
+clean clobber:

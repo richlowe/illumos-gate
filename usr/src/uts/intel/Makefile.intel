@@ -504,8 +504,11 @@ DRV_KMODS	+= dcam1394
 #
 #	InfiniBand pseudo drivers
 #
-DRV_KMODS	+= ib ibp eibnx eoib rdsib sdp iser daplt hermon tavor sol_ucma sol_uverbs
+DRV_KMODS	+= ib ibp eibnx eoib rdsib iser daplt hermon tavor sol_ucma sol_uverbs
 DRV_KMODS	+= sol_umad
+
+# Open code, but with a hard dependency on the closed sdpib(4D)
+$(HAVE_CLOSED_BINS)DRV_KMODS += sdp
 
 #
 #	Brand modules
@@ -710,8 +713,10 @@ OVERLAY_KMODS	+= vxlan
 #
 SOCKET_KMODS	+= sockpfp
 SOCKET_KMODS	+= socksctp
-SOCKET_KMODS    += socksdp
 SOCKET_KMODS	+= sockrds
+
+# Open code, but with a hard dependency on the closed sdpib(4D)
+$(HAVE_CLOSED_BINS)SOCKET_KMODS    += socksdp
 
 #
 #	kiconv modules (/kernel/kiconv):

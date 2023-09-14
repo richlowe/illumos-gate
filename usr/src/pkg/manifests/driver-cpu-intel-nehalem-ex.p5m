@@ -1,0 +1,32 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+#
+# Copyright 2023 Richard Lowe
+#
+
+<include global_zone_only_component>
+set name=pkg.fmri value=pkg:/driver/cpu/intel/nehalem-ex@$(PKGVERS)
+set name=pkg.summary value="Intel Nehalem-EX Drivers"
+set name=pkg.description value="Intel Nehalem-EX Drivers"
+set name=info.classification value=org.opensolaris.category.2008:System/Hardware
+set name=org.illumos.closed-only value=true
+set name=org.illumos.for-arch value=i386
+file path=kernel/drv/$(ARCH64)/intel_nhmex group=sys
+file path=kernel/drv/intel_nhmex.conf group=sys
+file path=platform/i86pc/kernel/cpu/$(ARCH64)/cpu_ms.GenuineIntel.6.46 \
+    group=sys mode=0755
+hardlink path=platform/i86pc/kernel/cpu/$(ARCH64)/cpu_ms.GenuineIntel.6.47 \
+    target=cpu_ms.GenuineIntel.6.46
+driver name=intel_nhmex alias=pci8086,3438
+license cr_Sun license=cr_Sun
+license lic_OSBL license=lic_OSBL
+license lic_OSBL_preamble license=lic_OSBL_preamble

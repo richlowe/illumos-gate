@@ -21,8 +21,8 @@
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2022 Garrett D'Amore
 #
-# cmd/cmd-inet/etc/sock2path.d/Makefile
-#
+
+include $(SRC)/Makefile.master
 
 SOCK2PATHFILES= \
     driver%2Fnetwork%2Fbpf \
@@ -30,9 +30,7 @@ SOCK2PATHFILES= \
     driver%2Fnetwork%2Frdsv3 \
     system%2Fkernel
 
-i386_SOCK2PATHFILES=     driver%2Fnetwork%2Fsdp
-
-SOCK2PATHFILES += $($(MACH)_SOCK2PATHFILES)
+$(HAVE_CLOSED_BINS)SOCK2PATHFILES +=     driver%2Fnetwork%2Fsdp
 
 include ../../../Makefile.cmd
 

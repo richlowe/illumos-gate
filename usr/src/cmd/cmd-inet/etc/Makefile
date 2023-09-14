@@ -21,6 +21,8 @@
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2022 Garrett D'Amore
 
+include $(SRC)/Makefile.master
+
 SYMPROG= hosts inetd.conf networks protocols services netmasks
 
 # New /etc/inet files shouldn't have /etc entries.
@@ -28,7 +30,10 @@ EDITPROG= ipaddrsel.conf ipsecalgs
 PROG= datemsk.ndpd ipsecinit.sample ipqosconf.1.sample ipqosconf.2.sample \
     ipqosconf.3.sample
 ETCPROG= $(SYMPROG) $(EDITPROG) $(PROG)
-SUBDIRS= default dhcp init.d ike ppp secret sock2path.d
+SUBDIRS= default dhcp init.d ppp secret sock2path.d
+
+# Not useful without the closed in.iked/libike.so
+$(HAVE_CLOSED_BINS)SUBDIRS += ike
 
 include ../../Makefile.cmd
 

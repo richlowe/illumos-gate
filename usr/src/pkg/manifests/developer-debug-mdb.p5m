@@ -53,7 +53,6 @@ $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/logindmux group=sys mode=0555
 $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/mac group=sys mode=0555
 $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/mdb_ds group=sys mode=0555
 $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/mm group=sys mode=0555
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/mpt group=sys mode=0555
 $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/mpt_sas group=sys mode=0555
 $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/mr_sas group=sys mode=0555
 $(not_aarch64)file path=kernel/kmdb/$(ARCH64)/neti group=sys mode=0555
@@ -136,7 +135,6 @@ file path=usr/lib/mdb/kvm/$(ARCH64)/mac.so group=sys mode=0555
 $(i386_ONLY)file path=usr/lib/mdb/kvm/$(ARCH64)/mdb_kb.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/mdb_ks.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/mm.so group=sys mode=0555
-$(not_aarch64)file path=usr/lib/mdb/kvm/$(ARCH64)/mpt.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/mpt_sas.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/mr_sas.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/neti.so group=sys mode=0555

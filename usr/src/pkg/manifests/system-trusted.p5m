@@ -87,7 +87,7 @@ dir  path=usr/lib/help/profiles/locale/C
 file path=usr/lib/help/profiles/locale/C/RtInfoSec.html
 file path=usr/lib/help/profiles/locale/C/RtObjectLabelMngmnt.html
 file path=usr/lib/help/profiles/locale/C/RtOutsideAccred.html
-$(not_aarch64)file path=usr/lib/labeld mode=0555
+$(CLOSED_ONLY)file path=usr/lib/labeld mode=0555
 $(not_aarch64)dir path=usr/lib/lp group=lp
 $(not_aarch64)dir path=usr/lib/lp/bin group=lp
 file path=usr/lib/lp/bin/lp.tsol_separator group=lp mode=0555
@@ -109,7 +109,7 @@ $(not_aarch64)file path=usr/lib/zones/zoneunshare group=sys mode=0555
 dir  path=usr/sbin
 file path=usr/sbin/add_allocatable mode=0555
 $(not_aarch64)file path=usr/sbin/atohexlabel group=sys mode=0555
-$(not_aarch64)file path=usr/sbin/chk_encodings group=sys mode=0555
+$(CLOSED_ONLY)file path=usr/sbin/chk_encodings group=sys mode=0555
 $(not_aarch64)file path=usr/sbin/hextoalabel group=sys mode=0555
 hardlink path=usr/sbin/remove_allocatable target=add_allocatable
 $(not_aarch64)file path=usr/sbin/tnchkdb group=sys mode=0555

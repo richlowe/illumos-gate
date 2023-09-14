@@ -499,6 +499,8 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	tsol		\
 	vi		\
 
+$(HAVE_CLOSED_BINS)COMMON_SUBDIRS += sdpadm
+
 aarch64_SUBDIRS=	\
 	ahciem		\
 	ficl
@@ -520,7 +522,6 @@ i386_SUBDIRS=		\
 	rdmsr		\
 	rsrvrctl	\
 	rtc		\
-	sdpadm		\
 	ucodeadm	\
 	xhci		\
 	xvm
@@ -536,7 +537,6 @@ sparc_SUBDIRS=		\
 	prtfru		\
 	scadm		\
 	sckmd		\
-	sdpadm		\
 	sf880drd	\
 	virtinfo	\
 	vntsd
@@ -718,7 +718,6 @@ MSGSUBDIRS=		\
 	script		\
 	scsi		\
 	sdiff		\
-	sdpadm		\
 	sgs		\
 	sh		\
 	smbsrv		\
@@ -776,6 +775,8 @@ MSGSUBDIRS=		\
 	zonename	\
 	zpool		\
 	zonestat
+
+$(HAVE_CLOSED_BINS)MSGSUBDIRS += sdpadm
 
 sparc_MSGSUBDIRS=	\
 	fruadm		\

@@ -46,6 +46,12 @@
 # variant.arch should always be for _this_ arch alone.
 set name=variant.arch value=$(ARCH)
 
+# if there's an org.illumos.closed-only property, this should only build when
+# closed-bins are available.  If we're not doing a such a build and see a
+# closed-only attribute, don't publish.
+$(NOT_CLOSED)<transform set name=org.illumos.closed-only -> abort>
+<transform set name=org.illumos.closed-only -> drop>
+
 #
 # Catch don't-publish settings from manifest-embedded transforms
 #

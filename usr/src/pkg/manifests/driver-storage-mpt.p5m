@@ -1,0 +1,46 @@
+#
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
+#
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
+#
+
+# Copyright 2023 Richard Lowe
+
+#
+# The default for payload-bearing actions in this package is to appear in the
+# global zone only.  See the include file for greater detail, as well as
+# information about overriding the defaults.
+#
+<include global_zone_only_component>
+set name=pkg.fmri value=pkg:/driver/storage/mpt@$(PKGVERS)
+set name=pkg.summary value="LSI 53C1030 (MPT) SCSI HBA Driver"
+set name=pkg.description value="LSI 53C1030 (MPT) SCSI HBA Driver"
+set name=info.classification value=org.opensolaris.category.2008:Drivers/Storage
+set name=org.illumos.closed-only value=true
+file path=kernel/drv/$(ARCH64)/mpt group=sys
+file path=kernel/drv/mpt.conf group=sys \
+    original_name=SUNWckr:kernel/drv/mpt.conf preserve=true
+file path=kernel/kmdb/$(ARCH64)/mpt group=sys mode=0555
+file path=usr/lib/mdb/kvm/$(ARCH64)/mpt.so group=sys mode=0555
+dir  path=usr/lib/raidcfg
+$(MULTILIB_ONLY)dir path=usr/lib/raidcfg/$(ARCH64)
+$(MULTILIB_ONLY)file path=usr/lib/raidcfg/$(ARCH64)/mpt.so.1
+file path=usr/lib/raidcfg/mpt.so.1
+driver name=mpt class=scsi \
+    alias=pci1000,30 \
+    alias=pci1000,50 \
+    alias=pci1000,54 \
+    alias=pci1000,56 \
+    alias=pci1000,58 \
+    alias=pci1000,62 \
+    alias=pciex1000,56 \
+    alias=pciex1000,58 \
+    alias=pciex1000,62
+license cr_Sun license=cr_Sun
+license lic_OSBL license=lic_OSBL
+license lic_OSBL_preamble license=lic_OSBL_preamble

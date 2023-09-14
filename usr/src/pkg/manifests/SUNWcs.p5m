@@ -333,8 +333,6 @@ file path=lib/svc/manifest/network/forwarding.xml group=sys mode=0444
 file path=lib/svc/manifest/network/inetd-upgrade.xml group=sys mode=0444
 file path=lib/svc/manifest/network/inetd.xml group=sys mode=0444
 dir  path=lib/svc/manifest/network/ipsec group=sys
-$(not_aarch64)file path=lib/svc/manifest/network/ipsec/ike.xml group=sys \
-    mode=0444
 file path=lib/svc/manifest/network/ipsec/ipsecalgs.xml group=sys mode=0444
 file path=lib/svc/manifest/network/ipsec/manual-key.xml group=sys mode=0444
 file path=lib/svc/manifest/network/ipsec/policy.xml group=sys mode=0444
@@ -680,7 +678,7 @@ hardlink path=usr/bin/page target=../../usr/bin/more
 file path=usr/bin/pagesize mode=0555
 file path=usr/bin/passwd group=sys mode=6555
 file path=usr/bin/pathchk mode=0555
-$(not_aarch64)file path=usr/bin/pax mode=0555
+$(CLOSED_ONLY)file path=usr/bin/pax mode=0555
 hardlink path=usr/bin/pfbash target=../../usr/bin/pfexec
 hardlink path=usr/bin/pfcsh target=../../usr/bin/pfexec
 file path=usr/bin/pfexec mode=0555
@@ -1141,11 +1139,6 @@ file path=usr/lib/hotplugd mode=0555
 file path=usr/lib/idmapd mode=0555
 dir  path=usr/lib/inet
 $(MULTILIB_ONLY)dir path=usr/lib/inet/$(ARCH64)
-$(MULTILIB_ONLY)file path=usr/lib/inet/$(ARCH64)/in.iked mode=0555
-$(not_aarch64)file path=usr/lib/inet/certdb mode=0555
-$(not_aarch64)file path=usr/lib/inet/certlocal mode=0555
-$(not_aarch64)file path=usr/lib/inet/certrldb mode=0555
-$(not_aarch64)hardlink path=usr/lib/inet/in.iked target=../../../usr/lib/isaexec
 file path=usr/lib/inet/inetd mode=0555
 file path=usr/lib/intrd mode=0555
 file path=usr/lib/isaexec mode=0555
@@ -1352,8 +1345,6 @@ file path=usr/sbin/hotplug mode=0555
 file path=usr/sbin/idmap mode=0555
 file path=usr/sbin/if_mpadm mode=0555
 link path=usr/sbin/ifconfig target=../../sbin/ifconfig
-file path=usr/sbin/ikeadm mode=0555
-file path=usr/sbin/ikecert mode=0555
 file path=usr/sbin/inetadm mode=0555
 file path=usr/sbin/inetconv mode=0555
 link path=usr/sbin/inetd target=../lib/inet/inetd
@@ -1682,6 +1673,10 @@ depend type=require fmri=system/data/terminfo
 # Depend on zoneinfo data.
 #
 depend type=require fmri=system/data/zoneinfo
+#
+# in.iked was moved out of here, and a dependency is required for upgrade
+#
+$(CLOSED_ONLY)depend type=require fmri=system/network/ike
 #
 # The mailx binary calls /usr/lib/sendmail provided by mailwrapper
 #
