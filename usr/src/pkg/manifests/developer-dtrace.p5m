@@ -29,6 +29,8 @@
 # Copyright (c) 2012 by Delphix. All rights reserved.
 #
 
+$(JAVA_ONLY)$(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libdtrace_jni.so target=libdtrace_jni.so.1
+$(JAVA_ONLY)$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libdtrace_jni.so.1
 set name=pkg.fmri value=pkg:/developer/dtrace@$(PKGVERS)
 set name=pkg.summary value="DTrace Clients"
 set name=pkg.description value="Dynamic Tracing (DTrace) Clients"
@@ -149,9 +151,6 @@ dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libdtrace.so target=libdtrace.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libdtrace.so.1
-$(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libdtrace_jni.so \
-    target=libdtrace_jni.so.1
-$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libdtrace_jni.so.1
 dir  path=usr/lib/devfsadm group=sys
 dir  path=usr/lib/devfsadm/linkmod group=sys
 file path=usr/lib/devfsadm/linkmod/SUNW_dtrace_link.so group=sys
@@ -182,8 +181,8 @@ file path=usr/lib/dtrace/udp.d mode=0444
 file path=usr/lib/dtrace/unistd.d mode=0444
 link path=usr/lib/libdtrace.so target=libdtrace.so.1
 file path=usr/lib/libdtrace.so.1
-$(not_aarch64)link path=usr/lib/libdtrace_jni.so target=libdtrace_jni.so.1
-$(not_aarch64)file path=usr/lib/libdtrace_jni.so.1
+$(JAVA_ONLY)link path=usr/lib/libdtrace_jni.so target=libdtrace_jni.so.1
+$(JAVA_ONLY)file path=usr/lib/libdtrace_jni.so.1
 dir  path=usr/lib/mdb group=sys
 dir  path=usr/lib/mdb/kvm group=sys
 dir  path=usr/lib/mdb/kvm/$(ARCH64) group=sys
@@ -209,8 +208,8 @@ hardlink path=usr/sbin/lockstat target=../../usr/lib/isaexec
 hardlink path=usr/sbin/plockstat target=../../usr/lib/isaexec
 dir  path=usr/share
 dir  path=usr/share/lib
-$(not_aarch64)dir path=usr/share/lib/java group=sys
-$(not_aarch64)file path=usr/share/lib/java/dtrace.jar group=sys
+$(JAVA_ONLY)dir path=usr/share/lib/java group=sys
+$(JAVA_ONLY)file path=usr/share/lib/java/dtrace.jar group=sys
 dir  path=usr/share/man/man3lib
 file path=usr/share/man/man3lib/libdtrace.3lib
 dir  path=usr/share/man/man8

@@ -128,9 +128,14 @@ $(CROSS_BLD)NATIVE_BLD=	$(POUND_SIGN)
 # uncomment things in the lower Makefiles to enable the feature.
 ENABLE_SMB_PRINTING=	$(POUND_SIGN)
 
+# Enable Java components.  Set to $(POUND_SIGN) to disable, for eg. on
+# platforms where Java is unavailable.  This is not intended to be a
+# user-customizable toggle.
+ENABLE_JAVA=
+$(AARCH64_BLD)ENABLE_JAVA = $(POUND_SIGN)
+
 # BUILD_TOOLS is the root of all tools including compilers.
 # ONBLD_TOOLS is the root of all the tools that are part of SUNWonbld.
-
 BUILD_TOOLS=		/ws/onnv-tools
 ONBLD_TOOLS=		$(BUILD_TOOLS)/onbld
 

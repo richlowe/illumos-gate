@@ -450,10 +450,12 @@ COMMON_SUBDIRS=	\
 	zstreamdump	\
 	ztest
 
+JAVA_SUBDIRS = availdevs	# Uses libzfs_jni, for some reason
+
+$(ENABLE_JAVA)COMMON_SUBDIRS += $(JAVA_SUBDIRS)
 
 # XXXARM: Things not built on AArch64 yet
 # abi - not interesting
-# availdevs - needs libzfs (and libzfs_jni!?) (and not interesting)
 # bnu - uses FILE internals not available to LP64
 # latencytop - needs glib
 # pcitool - not ported
@@ -477,7 +479,6 @@ COMMON_SUBDIRS=	\
 # vi - not 64bit clean / not ported
 $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
-	availdevs	\
 	bnu		\
 	cpc		\
 	csh		\

@@ -310,10 +310,10 @@ MANFILES=	6to4relay.8		\
 		ncheck.8		\
 		ncheck_ufs.8		\
 		ndd.8			\
-		ndp.8			\
 		ndmpadm.8		\
 		ndmpd.8			\
 		ndmpstat.8		\
+		ndp.8			\
 		netstat.8		\
 		netstrategy.8		\
 		newaliases.8		\
@@ -344,7 +344,6 @@ MANFILES=	6to4relay.8		\
 		pooladm.8		\
 		poolbind.8		\
 		poolcfg.8		\
-		poold.8			\
 		poolstat.8		\
 		ports.8			\
 		powerd.8		\
@@ -521,8 +520,8 @@ MANFILES=	6to4relay.8		\
 		ypxfr.8			\
 		zdb.8			\
 		zdump.8			\
-		zfs.8			\
 		zfs-program.8		\
+		zfs.8			\
 		zic.8			\
 		zoneadm.8		\
 		zoneadmd.8		\
@@ -549,6 +548,8 @@ i386_MANFILES=			\
 
 aarch64_MANFILES=		\
 		nvmeadm.8
+
+$(ENABLE_JAVA)MANFILES += poold.8
 
 MANLINKS=	acctcon1.8			\
 		acctcon2.8			\
