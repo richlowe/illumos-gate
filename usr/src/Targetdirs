@@ -319,7 +319,6 @@ DIRS=							\
 	/usr/lib/varpd					\
 	/usr/net					\
 	/usr/net/servers				\
-	/usr/lib/pool					\
 	/usr/lib/rcap					\
 	/usr/lib/sa					\
 	/usr/lib/saf					\
@@ -442,6 +441,8 @@ DIRS=							\
 	/var/tmp					\
 	/var/tsol					\
 	/var/tsol/doors
+
+$(ENABLE_JAVA)DIRS += 	/usr/lib/pool
 
 sparcv9_DIRS64=				\
 	/platform/sun4u			\

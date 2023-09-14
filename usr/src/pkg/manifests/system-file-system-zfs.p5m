@@ -27,6 +27,8 @@
 # Copyright 2020 Joyent, Inc.
 #
 
+$(JAVA_ONLY)$(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libzfs_jni.so target=libzfs_jni.so.1
+$(JAVA_ONLY)$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libzfs_jni.so.1
 set name=pkg.fmri value=pkg:/system/file-system/zfs@$(PKGVERS)
 set name=pkg.summary value=ZFS
 set name=pkg.description value="ZFS libraries and commands"
@@ -82,8 +84,6 @@ $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libzfs_core.so \
     target=../../../lib/$(ARCH64)/libzfs_core.so.1
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libzfs_core.so.1 \
     target=../../../lib/$(ARCH64)/libzfs_core.so.1
-$(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libzfs_jni.so target=libzfs_jni.so.1
-$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libzfs_jni.so.1
 $(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libzfsbootenv.so \
     target=libzfsbootenv.so.1
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libzfsbootenv.so.1
@@ -107,8 +107,8 @@ link path=usr/lib/libzfs.so target=../../lib/libzfs.so.1
 link path=usr/lib/libzfs.so.1 target=../../lib/libzfs.so.1
 link path=usr/lib/libzfs_core.so target=../../lib/libzfs_core.so.1
 link path=usr/lib/libzfs_core.so.1 target=../../lib/libzfs_core.so.1
-$(not_aarch64)link path=usr/lib/libzfs_jni.so target=libzfs_jni.so.1
-$(not_aarch64)file path=usr/lib/libzfs_jni.so.1
+$(JAVA_ONLY)link path=usr/lib/libzfs_jni.so target=libzfs_jni.so.1
+$(JAVA_ONLY)file path=usr/lib/libzfs_jni.so.1
 link path=usr/lib/libzfsbootenv.so target=libzfsbootenv.so.1
 file path=usr/lib/libzfsbootenv.so.1
 link path=usr/lib/libzpool.so target=libzpool.so.1
@@ -127,7 +127,7 @@ dir  path=usr/lib/sysevent
 dir  path=usr/lib/sysevent/modules
 file path=usr/lib/sysevent/modules/zfs_mod.so group=sys
 dir  path=usr/lib/zfs
-$(not_aarch64)file path=usr/lib/zfs/availdevs mode=0555
+$(JAVA_ONLY)file path=usr/lib/zfs/availdevs mode=0555
 dir  path=usr/sbin
 $(i386_ONLY)dir path=usr/sbin/$(ARCH32)
 dir  path=usr/sbin/$(ARCH64)

@@ -30,7 +30,7 @@ SVCMETHOD=	svc-pools
 include ../Makefile.cmd
 
 SUBDIRS=	pooladm poolbind poolcfg poolstat
-$(NOT_AARCH64_BLD)SUBDIRS += poold
+$(ENABLE_JAVA)SUBDIRS += poold
 
 ROOTMANIFESTDIR=	$(ROOTSVCSYSTEM)
 

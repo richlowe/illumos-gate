@@ -71,9 +71,6 @@ SUBDIRS +=		\
 # XXXARM: Things not built for AArch64 right now
 # abi -- not ported/necessary
 # c_synonyms -- not ported/necessary
-# libdtrace_jni -- java
-# libzfs_jni -- java
-# libadt_jni -- java
 # libmvec -- not built because AArch64 has a special libm right now
 # libresolv -- libresolv.so.1 for binary compat, not needed
 # libm1 -- not built because AArch64 has a special libm right now
@@ -84,13 +81,10 @@ SUBDIRS +=		\
 $(NOT_AARCH64_BLD)SUBDIRS += \
 	abi \
 	c_synonyms	\
-	libadt_jni	\
 	libcpc		\
-	libdtrace_jni	\
 	libmvec		\
 	libpctx		\
 	libresolv	\
-	libzfs_jni	\
 	smbclnt		\
 	libm1
 
@@ -313,6 +307,13 @@ aarch64_SUBDIRS=	\
 	lib9p		\
 	libfdisk
 
+JAVA_SUBDIRS =		\
+	libadt_jni	\
+	libdtrace_jni	\
+	libzfs_jni
+
+$(ENABLE_JAVA)SUBDIRS += $(JAVA_SUBDIRS)
+
 #
 # Create a special version of $(SUBDIRS) with no .WAIT's, for use with the
 # clean and clobber targets (for more information, see those targets, below).
@@ -528,11 +529,13 @@ sparc_HDRSUBDIRS=	\
 	libv12n		\
 	storage
 
+$(ENABLE_JAVA)HDRSUBDIRS +=	\
+	libdtrace_jni		\
+	libzfs_jni
+
 $(NOT_AARCH64_BLD)HDRSUBDIRS +=		\
 	libcpc				\
-	libdtrace_jni			\
-	libpctx				\
-	libzfs_jni
+	libpctx
 
 all :=		TARGET= all
 check :=	TARGET= check

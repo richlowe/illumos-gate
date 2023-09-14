@@ -52,6 +52,12 @@ set name=variant.arch value=$(ARCH)
 $(NOT_CLOSED)<transform set name=org.illumos.closed-only -> abort>
 <transform set name=org.illumos.closed-only -> drop>
 
+# if there's an org.illumos.java-only attribute, this should only build when
+# Java is enabled.  If we're not doing a java-enabled build and see a
+# java-only attribute, don't publish.
+$(NO_JAVA)<transform set name=org.illumos.java-only -> abort>
+<transform set name=org.illumos.java-only -> drop>
+
 #
 # Catch don't-publish settings from manifest-embedded transforms
 #

@@ -43,11 +43,11 @@ file path=opt/SUNWdtrt/bin/chkargs mode=0555
 file path=opt/SUNWdtrt/bin/dstyle mode=0555
 file path=opt/SUNWdtrt/bin/dtest mode=0555
 file path=opt/SUNWdtrt/bin/dtfailures mode=0555
-$(not_aarch64)file path=opt/SUNWdtrt/bin/exception.lst mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/bin/jdtrace mode=0555
-$(not_aarch64)dir path=opt/SUNWdtrt/lib
-$(not_aarch64)dir path=opt/SUNWdtrt/lib/java
-$(not_aarch64)file path=opt/SUNWdtrt/lib/java/jdtrace.jar
+$(JAVA_ONLY)file path=opt/SUNWdtrt/bin/exception.lst mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/bin/jdtrace mode=0555
+$(JAVA_ONLY)dir path=opt/SUNWdtrt/lib
+$(JAVA_ONLY)dir path=opt/SUNWdtrt/lib/java
+$(JAVA_ONLY)file path=opt/SUNWdtrt/lib/java/jdtrace.jar
 dir  path=opt/SUNWdtrt/tst
 $(not_aarch64)dir path=opt/SUNWdtrt/tst/$(ARCH)
 $(not_aarch64)dir path=opt/SUNWdtrt/tst/$(ARCH)/arrays
@@ -853,61 +853,60 @@ file path=opt/SUNWdtrt/tst/common/ip/tst.localtcpstate.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/ip/tst.localtcpstate.ksh.out mode=0444
 file path=opt/SUNWdtrt/tst/common/ip/tst.remotetcpstate.ksh mode=0444
 file path=opt/SUNWdtrt/tst/common/ip/tst.remotetcpstate.ksh.out mode=0444
-$(not_aarch64)dir path=opt/SUNWdtrt/tst/common/java_api
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/test.jar
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh.out \
+$(JAVA_ONLY)dir path=opt/SUNWdtrt/tst/common/java_api
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/test.jar
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Abort.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh.out \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Bean.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh.out \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Close.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh.out \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Drop.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.Enable.ksh.out \
-    mode=0444
-$(not_aarch64)file \
-    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.exe mode=0555
-$(not_aarch64)file \
-    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh mode=0444
-$(not_aarch64)file \
-    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh.out mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.GetAggregate.ksh \
-    mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh \
-    mode=0444
-$(not_aarch64)file \
-    path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh.out mode=0444
-$(not_aarch64)file \
-    path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh mode=0444
-$(not_aarch64)file \
-    path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh.out mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.exe \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.exe \
     mode=0555
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh.out \
+$(JAVA_ONLY)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.FunctionLookup.ksh.out mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.GetAggregate.ksh \
     mode=0444
-$(not_aarch64)file \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh \
+    mode=0444
+$(JAVA_ONLY)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.MaxConsumers.ksh.out mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh \
+    mode=0444
+$(JAVA_ONLY)file \
+    path=opt/SUNWdtrt/tst/common/java_api/tst.MultiAggPrinta.ksh.out mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.exe \
+    mode=0555
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh \
+    mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeData.ksh.out \
+    mode=0444
+$(JAVA_ONLY)file \
     path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeDescription.ksh mode=0444
-$(not_aarch64)file \
+$(JAVA_ONLY)file \
     path=opt/SUNWdtrt/tst/common/java_api/tst.ProbeDescription.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh \
     mode=0444
-$(not_aarch64)file \
+$(JAVA_ONLY)file \
     path=opt/SUNWdtrt/tst/common/java_api/tst.StateMachine.ksh.out mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh.out \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.StopLock.ksh.out \
     mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d mode=0444
-$(not_aarch64)file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d.out \
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d mode=0444
+$(JAVA_ONLY)file path=opt/SUNWdtrt/tst/common/java_api/tst.printa.d.out \
     mode=0444
 dir  path=opt/SUNWdtrt/tst/common/json
 file path=opt/SUNWdtrt/tst/common/json/tst.general.d mode=0444
@@ -2080,6 +2079,5 @@ legacy pkg=SUNWdtrt category=internal \
 license cr_Sun license=cr_Sun
 license lic_CDDL license=lic_CDDL
 depend type=require fmri=diagnostic/cpu-counters
-#XXXARM: No java -- and shouldn't pkgdepend deal with these?
-$(not_aarch64)depend type=require fmri=runtime/java
-$(not_aarch64)depend type=require fmri=runtime/java/runtime64
+$(JAVA_ONLY)depend type=require fmri=runtime/java
+$(JAVA_ONLY)depend type=require fmri=runtime/java/runtime64

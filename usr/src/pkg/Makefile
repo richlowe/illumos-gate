@@ -178,6 +178,11 @@ JAVA_11_ONLY=
 $(BLD_JAVA_11)JAVA_8_ONLY=$(POUND_SIGN)
 $(JAVA_8_ONLY)JAVA_11_ONLY=$(POUND_SIGN)
 
+JAVA_ONLY=$(POUND_SIGN)
+NO_JAVA=
+$(ENABLE_JAVA)JAVA_ONLY=		# Don't deliver this file if there's no java
+$(ENABLE_JAVA)NO_JAVA=$(POUND_SIGN)	# Only deliver this if there's not java
+
 # Only deliver this file on platforms supporting 32/64bit multi-lib
 i386_MULTILIB_ONLY=
 aarch64_MULTILIB_ONLY=$(POUND_SIGN)
@@ -218,7 +223,9 @@ PKGMOG_DEFINES= \
 	PYTHON3b_PKGVERS=$(PYTHON3b_PKGVERS) \
 	python3b_ONLY=$(BUILDPY3b) \
 	JAVA_11_ONLY=$(JAVA_11_ONLY) \
-	JAVA_8_ONLY=$(JAVA_8_ONLY)
+	JAVA_8_ONLY=$(JAVA_8_ONLY) \
+	JAVA_ONLY=$(JAVA_ONLY) \
+	NO_JAVA=$(NO_JAVA)
 
 PKGDEP_TOKENS_i386=		\
 	'PLATFORM=i86hvm'	\

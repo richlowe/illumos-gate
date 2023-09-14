@@ -78,8 +78,7 @@ $(NOT_AARCH64_BLD)CSRCS +=	\
 	usdt/tst.forker.c	\
 	usdt/tst.lazyprobe.c
 
-# XXXARM: no java
-$(NOT_AARCH64_BLD)CSRCS +=		\
+$(ENABLE_JAVA)CSRCS +=		\
 	java_api/tst.FunctionLookup.c	\
 	java_api/tst.ProbeData.c
 
@@ -1121,8 +1120,7 @@ DSRCS=								\
 	vars/tst.walltimestamp.d				\
 	version/tst.1.0.d					\
 
-# XXXARM: no java
-$(NOT_AARCH64_BLD)DSRCS +=	\
+$(ENABLE_JAVA)DSRCS +=	\
 	java_api/tst.printa.d	\
 
 TSTS=								\
@@ -2636,8 +2634,7 @@ TSTS=								\
 	version/tst.1.0.d					\
 
 
-# XXXARM: no java
-$(NOT_AARCH64_BLD)TSTS +=			\
+$(ENABLE_JAVA)TSTS +=			\
 	java_api/tst.Abort.ksh			\
 	java_api/tst.Abort.ksh.out		\
 	java_api/tst.Bean.ksh			\
@@ -2712,8 +2709,7 @@ EXES=						\
 	ustack/tst.bigstack.exe			\
 	ustack/tst.spin.exe
 
-# XXXARM: no java
-$(NOT_AARCH64_BLD)EXES +=		\
+$(ENABLE_JAVA)EXES +=		\
 	java_api/tst.FunctionLookup.exe	\
 	java_api/tst.ProbeData.exe
 
@@ -2851,7 +2847,6 @@ usdt/tst.lazyprobe.o: usdt/lazyprobe.h
 usdt/lazyprobe.h: usdt/lazyprobe.d
 	$(DTRACE) -h -s usdt/lazyprobe.d -o usdt/lazyprobe.h
 
-# XXXARM: No java
-$(NOT_AARCH64_BLD)SUBDIRS = java_api
+$(ENABLE_JAVA)SUBDIRS = java_api
 
 include ../../Makefile.subdirs

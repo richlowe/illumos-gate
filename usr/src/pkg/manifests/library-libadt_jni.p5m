@@ -24,6 +24,9 @@
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
 #
 
+$(JAVA_ONLY)$(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
+$(JAVA_ONLY)$(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libadt_jni.so target=./libadt_jni.so.1
+$(JAVA_ONLY)$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libadt_jni.so.1
 set name=pkg.fmri value=pkg:/library/libadt_jni@$(PKGVERS)
 set name=pkg.summary value="AuditService Implementation"
 set name=pkg.description \
@@ -33,14 +36,10 @@ set name=info.classification \
 set name=org.illumos.for-arch value=i386
 dir  path=usr group=sys
 dir  path=usr/lib
-$(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
-$(MULTILIB_ONLY)link path=usr/lib/$(ARCH64)/libadt_jni.so \
-    target=./libadt_jni.so.1
-$(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libadt_jni.so.1
-dir  path=usr/lib/audit
-file path=usr/lib/audit/Audit.jar
-link path=usr/lib/libadt_jni.so target=./libadt_jni.so.1
-file path=usr/lib/libadt_jni.so.1
+$(JAVA_ONLY)dir path=usr/lib/audit
+$(JAVA_ONLY)file path=usr/lib/audit/Audit.jar
+$(JAVA_ONLY)link path=usr/lib/libadt_jni.so target=./libadt_jni.so.1
+$(JAVA_ONLY)file path=usr/lib/libadt_jni.so.1
 legacy pkg=SUNWaudit \
     desc="Java Solaris Auditing interface / AuditService Implementation" \
     name="AuditService Implementation"
