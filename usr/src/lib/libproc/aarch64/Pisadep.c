@@ -73,6 +73,16 @@ Ppltdest(struct ps_prochandle *P, uintptr_t pltaddr)
 	return (NULL);
 }
 
+/*
+ * See Arm® A64 Instruction Set for A-profile architecture
+ *	DDI 0596 (ID070623)
+ *	pp. 831
+ */
+#define	SVC_INSN	0xd4000001 /* svc #<imm16> */
+#define	SVC_SYSN_SHIFT	5	   /* the immediate value */
+#define	SVC_SYSN_MASK	(0xffff << SVC_SYSN_SHIFT)
+#define	SVC_SYSN(x)	((x & SVC_SYSN_MASK) >> SVC_SYSN_SHIFT)
+
 int
 Pissyscall(struct ps_prochandle *P, uintptr_t addr)
 {
@@ -81,7 +91,7 @@ Pissyscall(struct ps_prochandle *P, uintptr_t addr)
 	if (Pread(P, &instr, sizeof (instr), addr) != sizeof (instr))
 		return (0);
 
-	if ((instr & 0xFE00001F) == 0xD4000001) /* svc <imm16> */
+	if ((instr & ~SVC_SYSN_MASK) == SVC_INSN) /* svc <imm16> */
 		return (1);
 
 	return (0);
@@ -95,7 +105,8 @@ Pissyscall_indirect(struct ps_prochandle *P, uintptr_t addr)
 	if (Pread(P, &instr, sizeof (instr), addr) != sizeof (instr))
 		return (0);
 
-	return (instr == 0xd4000001);
+	return (((instr & ~SVC_SYSN_MASK) == SVC_INSN) &&
+	    (SVC_SYSN(instr) == 0));
 }
 
 int
