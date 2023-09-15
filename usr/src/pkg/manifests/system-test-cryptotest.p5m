@@ -22,7 +22,6 @@ set name=pkg.summary value="KCF/PKCS Unit Test Suite"
 set name=pkg.description value="Miscellaneous KCF/PKCS Unit Tests"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/crypto-tests
 file path=opt/crypto-tests/README mode=0444
 dir  path=opt/crypto-tests/bin

@@ -28,7 +28,6 @@ set name=pkg.summary value="Solaris Kernel Packet"
 set name=pkg.description value="BPF/PF_PACKET kernel packet modules"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/sock2path.d group=sys
 file path=etc/sock2path.d/driver%2Fnetwork%2Fbpf group=sys

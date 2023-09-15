@@ -19,7 +19,7 @@ set name=pkg.summary value="Intel 710/722 Ethernet Driver"
 set name=pkg.description value="Intel 710/722 Ethernet Driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

@@ -35,7 +35,6 @@ set name=pkg.description \
     value="Path Administration Utility for a Solaris Multipathing device"
 set name=info.classification \
     value="org.opensolaris.category.2008:Applications/System Utilities"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/sbin
 file path=usr/sbin/mpathadm mode=0555

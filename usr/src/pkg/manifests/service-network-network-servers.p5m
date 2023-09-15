@@ -29,7 +29,6 @@ set name=pkg.summary value="Remote Network Server Commands"
 set name=pkg.description \
     value="Remote Network Server Commands (includes finger, talk, rwho commands)"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 link path=etc/rmt target=../usr/sbin/rmt
 dir  path=lib

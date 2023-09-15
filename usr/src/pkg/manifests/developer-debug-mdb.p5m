@@ -31,7 +31,6 @@ set name=pkg.summary value="Modular Debugger"
 set name=pkg.description value="Modular Debugger (MDB)"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 $(not_aarch64)dir path=kernel/kmdb group=sys
 $(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys

@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/system/trusted@$(PKGVERS)
 set name=pkg.summary value="Trusted Extensions"
 set name=pkg.description value="Solaris Trusted Extensions"
 set name=info.classification value=org.opensolaris.category.2008:System/Trusted
-set name=variant.arch value=$(ARCH)
 dir  path=lib
 dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys

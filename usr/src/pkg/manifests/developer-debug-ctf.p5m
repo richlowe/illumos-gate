@@ -18,7 +18,6 @@ set name=pkg.summary value="CTF Tools"
 set name=pkg.description value="Compact C Type Format (CTF) Tools"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/ctfconvert mode=0555

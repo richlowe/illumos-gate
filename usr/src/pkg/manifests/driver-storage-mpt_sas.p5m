@@ -35,7 +35,6 @@ set name=pkg.fmri value=pkg:/driver/storage/mpt_sas@$(PKGVERS)
 set name=pkg.summary value="LSI MPT SAS 2.0/2.5 Controller HBA Driver"
 set name=pkg.description value="LSI MPT SAS 2.0/2.5 Controller HBA Driver"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Storage
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

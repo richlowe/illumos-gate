@@ -37,7 +37,6 @@ set name=pkg.summary value="Fault Management Daemon and Utilities"
 set name=pkg.description value="Fault Management Daemon and Utilities"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 #
 # Start by describing our directory structure.
 #

@@ -31,7 +31,6 @@ set name=pkg.description \
     value="Common Library based on SNIA MP API specification"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 file path=etc/mpapi.conf original_name=SUNWmpapi:etc/mpapi.conf preserve=true
 dir  path=lib

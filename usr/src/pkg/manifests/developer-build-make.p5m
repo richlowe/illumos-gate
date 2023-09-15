@@ -16,7 +16,6 @@ set name=pkg.summary value="Parallel make(1) build tool"
 set name=pkg.description value="Parallel make(1) build tool"
 set name=info.classification \
     value="org.opensolaris.category.2008:Development/Source Code Management"
-set name=variant.arch value=$(ARCH)
 link path=usr/bin/dmake target=make
 file path=usr/bin/make mode=0555
 link path=usr/ccs/bin/make target=../../bin/make

@@ -28,7 +28,6 @@ set name=pkg.summary value="Sun IEEE1394 Framework Header Files"
 set name=pkg.description value="Sun IEEE1394 Header Files"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/sys

@@ -34,7 +34,6 @@ set name=pkg.summary value="RSMPI Operations Registration Module"
 set name=pkg.description \
     value="Support for network specific implementations of RSMPI"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys

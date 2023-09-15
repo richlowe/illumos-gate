@@ -30,4 +30,4 @@
 #
 set name=pkg.fmri value=pkg:/driver/audio/audiovia97@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386

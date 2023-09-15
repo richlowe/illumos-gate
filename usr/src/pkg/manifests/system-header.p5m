@@ -37,7 +37,6 @@ set name=pkg.summary value="SunOS Header Files"
 set name=pkg.description \
     value="SunOS C/C++ header files for general development of software"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 $(i386_ONLY)dir path=usr/include/$(ARCH64)

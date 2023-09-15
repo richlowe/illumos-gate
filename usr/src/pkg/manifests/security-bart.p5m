@@ -28,7 +28,6 @@ set name=pkg.summary value="Basic Audit Reporting Tool"
 set name=pkg.description value="Basic Audit Reporting Tool (BART)"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/bart mode=0555

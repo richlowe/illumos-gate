@@ -15,4 +15,3 @@
 
 set name=pkg.fmri value=pkg:/system/library/python/solaris-27@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

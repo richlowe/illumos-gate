@@ -28,7 +28,6 @@ set name=pkg.summary value="IP Filter utilities"
 set name=pkg.description value="IP Filter Utilities"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/ipf group=sys
 file path=etc/ipf/ipf.conf group=sys original_name=SUNWipf:etc/ipf/ipf.conf \

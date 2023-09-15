@@ -31,4 +31,3 @@
 <include global_zone_only_component>
 set name=pkg.fmri value=pkg:/driver/network/arbel@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

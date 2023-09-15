@@ -34,7 +34,7 @@ set name=pkg.summary value="xVM PV IP address agent"
 set name=pkg.description value="xVM PV IP address agent"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Virtualization
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=lib
 dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys

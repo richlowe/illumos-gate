@@ -29,7 +29,6 @@ set name=pkg.summary value="Solaris Print - LP Server"
 set name=pkg.description \
     value="client configuration files and utilities for the print service"
 set name=info.classification value=org.opensolaris.category.2008:System/Printing
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/lp owner=lp group=lp mode=0775
 dir  path=etc/lp/classes owner=lp group=lp mode=0775

@@ -39,7 +39,6 @@ set name=pkg.summary value="Core Solaris Kernel Architecture"
 set name=pkg.description \
     value="core kernel software for a specific hardware platform group"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=platform group=sys
 
 # XXXARM: Wow, this package is a mess

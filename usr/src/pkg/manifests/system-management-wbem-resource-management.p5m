@@ -30,4 +30,3 @@
 set name=pkg.fmri \
     value=pkg:/system/management/wbem/resource-management@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

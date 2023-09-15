@@ -30,7 +30,6 @@ set name=pkg.description \
     value="localization utilities and C locale (POSIX default) definitions"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Localizations
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/gencat mode=0555

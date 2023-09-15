@@ -30,7 +30,6 @@ set name=pkg.summary value="DTrace Test Suite"
 set name=pkg.description value="DTrace Test Suite Internal Distribution"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/SUNWdtrt group=sys
 file path=opt/SUNWdtrt/README mode=0444
 dir  path=opt/SUNWdtrt/bin

@@ -30,7 +30,6 @@ set name=pkg.summary value="Storage media management library"
 set name=pkg.description value="Storage media management library"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=lib
 dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys

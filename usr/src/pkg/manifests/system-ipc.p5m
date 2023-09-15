@@ -28,7 +28,6 @@ set name=pkg.summary value="Interprocess Communications"
 set name=pkg.description \
     value="utilities to monitor or remove messages, semaphores, or shared memory for interprocess communication"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/ipcrm mode=0555

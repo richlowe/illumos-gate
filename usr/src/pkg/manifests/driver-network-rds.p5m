@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/driver/network/rds@$(PKGVERS)
 set name=pkg.summary value="Sun Reliable Datagram Sockets"
 set name=pkg.description value="Sun Reliable Datagram Sockets"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/sock2path.d group=sys
 file path=etc/sock2path.d/driver%2Fnetwork%2Frds group=sys

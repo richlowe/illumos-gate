@@ -19,7 +19,6 @@ set name=pkg.summary value="PC/SC compatible library for Smart Card access"
 set name=pkg.description value="PC/SC compatible library for Smart Card access"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 file path=usr/include/winscard.h

@@ -33,7 +33,7 @@ set name=info.classification \
 # support and test it, but you need a PCIe based SPARC.  For now just
 # don't deliver it until someone shows up to do this.
 #
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.build-on value=aarch64 value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

@@ -29,7 +29,6 @@ set name=pkg.summary value="Terminal Information"
 set name=pkg.description \
     value="extensive terminfo database entries describing capabilities of terminals and pseudoterminals"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 link path=usr/lib/tabset target=../share/lib/tabset

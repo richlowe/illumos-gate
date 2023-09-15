@@ -29,7 +29,6 @@ set name=pkg.description \
     value="Appcert utility for application ABI stability checking"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Software Management"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 $(not_aarch64)file path=usr/bin/appcert mode=0555

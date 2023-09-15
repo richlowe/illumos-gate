@@ -31,7 +31,6 @@ set name=pkg.summary value=Sendmail
 set name=pkg.description value="Sendmail Utilities"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
 set name=org.opensolaris.noincorp value=true
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 link path=etc/aliases target=./mail/aliases mediator=mta \
     mediator-implementation=sendmail

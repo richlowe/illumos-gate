@@ -19,7 +19,6 @@ set name=pkg.summary value="Unit Test Framework"
 set name=pkg.description value="Test Runner"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/test-runner
 dir  path=opt/test-runner/bin
 # In python2, the module is "ConfigParser" and in python3 it's "configparser"

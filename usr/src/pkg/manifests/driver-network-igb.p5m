@@ -36,7 +36,6 @@ set name=pkg.summary value="Intel 82575 1Gb PCI Express NIC Driver"
 set name=pkg.description value="Intel 82575 1Gb PCI Express NIC Driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

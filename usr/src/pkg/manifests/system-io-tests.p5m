@@ -29,7 +29,6 @@ set name=pkg.summary value="I/O test utilities and drivers"
 set name=pkg.description value="I/O test utilities and drivers"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/sys

@@ -29,7 +29,6 @@ set name=pkg.summary value="FRU ID Platform Modules"
 set name=pkg.description value="FRU ID platform data module and access library"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 $(i386_ONLY)dir path=usr/lib
 $(i386_ONLY)dir path=usr/lib/picl group=sys

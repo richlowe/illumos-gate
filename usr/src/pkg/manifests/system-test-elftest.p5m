@@ -16,7 +16,6 @@ set name=pkg.summary value="ELF Test Suite"
 set name=pkg.description value="ELF Unit Tests"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/elf-tests
 file path=opt/elf-tests/README mode=0444
 dir  path=opt/elf-tests/bin

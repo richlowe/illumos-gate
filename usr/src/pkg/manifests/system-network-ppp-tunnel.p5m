@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/system/network/ppp/tunnel@$(PKGVERS)
 set name=pkg.summary value="Solaris PPP Tunneling"
 set name=pkg.description value="Extensions implementing PPP tunneling protocols"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/inet

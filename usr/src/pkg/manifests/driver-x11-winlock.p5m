@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/driver/x11/winlock@$(PKGVERS)
 set name=pkg.summary value="X Windows System Window Drivers"
 set name=pkg.description value="kernel device drivers for X Windows System"
 set name=info.classification value=org.opensolaris.category.2008:System/X11
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/kernel group=sys
 dir  path=usr/kernel/drv group=sys

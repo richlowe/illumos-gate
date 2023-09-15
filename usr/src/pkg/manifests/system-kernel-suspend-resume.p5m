@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/system/kernel/suspend-resume@$(PKGVERS)
 set name=pkg.summary value="Suspend, Resume package"
 set name=pkg.description value="Suspend, Resume package"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 $(not_sparc)dir path=kernel group=sys
 $(not_sparc)dir path=kernel/drv group=sys
 $(not_sparc)dir path=kernel/drv/$(ARCH64) group=sys

@@ -30,7 +30,6 @@ set name=pkg.summary value="Source Compatibility"
 set name=pkg.description \
     value="utilities for user interface and source build compatibility with SunOS 4.x"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 link path=etc/chroot target=../usr/sbin/chroot
 link path=etc/fuser target=../usr/sbin/fuser

@@ -31,7 +31,6 @@ set name=pkg.description \
     value="Simple Authentication and Security Layer (SASL) v2 shared library and plugins"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)

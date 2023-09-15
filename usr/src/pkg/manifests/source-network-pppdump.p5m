@@ -26,4 +26,3 @@
 
 set name=pkg.fmri value=pkg:/source/network/pppdump@0.5.11,5.11-0.148
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

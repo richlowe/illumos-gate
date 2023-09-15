@@ -28,7 +28,7 @@ set name=pkg.fmri value=pkg:/system/boot/real-mode@$(PKGVERS)
 set name=pkg.summary value="Realmode Modules"
 set name=pkg.description value="Realmode Modules"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.for-arch value=aarch64 value=i386
 dir  path=boot group=sys
 dir  path=boot/solaris group=sys
 $(i386_ONLY)hardlink path=boot/solaris.xpm target=splashimage.xpm

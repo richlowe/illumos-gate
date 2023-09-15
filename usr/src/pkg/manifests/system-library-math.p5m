@@ -22,7 +22,6 @@ set name=pkg.description value="Math Libraries"
 set name=description value="Math Libraries"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=lib
 $(MULTILIB_ONLY)dir path=lib/$(ARCH64)
 $(MULTILIB_ONLY)link path=lib/$(ARCH64)/libm.so target=libm.so.2

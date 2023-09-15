@@ -33,7 +33,7 @@ set name=pkg.fmri value=pkg:/driver/i86pc/fipe@$(PKGVERS)
 set name=pkg.summary value="Intel 5000/7300 memory power management driver"
 set name=pkg.description value="Intel 5000/7300 memory power management driver"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=platform group=sys
 dir  path=platform/i86pc group=sys
 dir  path=platform/i86pc/kernel group=sys

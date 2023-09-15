@@ -40,8 +40,8 @@ set name=pkg.fmri \
 set name=pkg.summary value="Microcode for AMD CPUs"
 set name=pkg.description value="Microcode for AMD CPUs"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
+set name=org.illumos.for-arch value=i386
 set name=org.opensolaris.incorp-facet value=true
-set name=variant.arch value=i386
 dir  path=platform group=sys
 dir  path=platform/i86pc group=sys
 dir  path=platform/i86pc/ucode group=sys

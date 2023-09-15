@@ -18,7 +18,6 @@ set name=pkg.summary value="Libmlrpc Unit Test Suite"
 set name=pkg.description value="Unit Tests for libmlrpc and its consumers"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/libmlrpc-tests
 file path=opt/libmlrpc-tests/README mode=0444
 dir  path=opt/libmlrpc-tests/bin

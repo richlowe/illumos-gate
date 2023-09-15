@@ -32,7 +32,6 @@ set name=pkg.fmri \
 set name=pkg.summary value="Perl $(PERL_VERSION) Sun::Solaris Modules"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/Perl
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/perl5
 dir  path=usr/perl5/$(PERL_VERSION)

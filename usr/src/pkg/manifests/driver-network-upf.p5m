@@ -19,7 +19,7 @@ set name=pkg.summary value="ADMtek USB to Fast Ethernet Driver"
 set name=pkg.description value="ADMtek USB to Fast Ethernet Driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.for-arch value=aarch64 value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

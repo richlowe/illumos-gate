@@ -26,4 +26,4 @@
 <include global_zone_only_component>
 set name=pkg.fmri value=pkg:/system/management/intel-amt@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386

@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/service/storage/media-volume-manager@$(PKGVERS)
 set name=pkg.summary value="Removable volume manager"
 set name=pkg.description value="Non-graphical removable volume manager"
 set name=info.classification value=org.opensolaris.category.2008:System/Media
-set name=variant.arch value=$(ARCH)
 dir  path=lib variant.opensolaris.zone=global
 dir  path=lib/svc variant.opensolaris.zone=global
 dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global

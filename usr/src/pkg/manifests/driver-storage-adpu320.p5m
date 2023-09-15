@@ -33,7 +33,7 @@ set name=pkg.fmri value=pkg:/driver/storage/adpu320@$(PKGVERS)
 set name=pkg.summary value="Adaptec Ultra320 Driver"
 set name=pkg.description value="Adaptec 7902 SCSI Driver"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Ports
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

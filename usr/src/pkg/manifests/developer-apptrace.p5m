@@ -29,7 +29,6 @@ set name=pkg.description \
     value="Apptrace utility for application tracing, including shared objects"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 $(not_aarch64)file path=usr/bin/apptrace mode=0555

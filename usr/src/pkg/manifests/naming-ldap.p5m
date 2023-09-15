@@ -30,7 +30,6 @@ set name=pkg.description \
     value="Ldap libraries in for software development of dynamically linked executables"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 hardlink path=usr/bin/ldapadd target=./ldapmodify

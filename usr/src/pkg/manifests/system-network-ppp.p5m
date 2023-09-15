@@ -29,7 +29,6 @@ set name=pkg.description \
     value="Device drivers implementing point-to-point protocol (PPP)"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/init.d group=sys
 file path=etc/init.d/pppd group=sys mode=0744 \

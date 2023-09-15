@@ -29,7 +29,6 @@ set name=pkg.summary value="Solaris Install Internal Files"
 set name=pkg.description value="Solaris Install internal files"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 file path=usr/include/instzones_api.h

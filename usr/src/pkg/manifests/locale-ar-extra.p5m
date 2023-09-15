@@ -20,4 +20,3 @@
 
 set name=pkg.fmri value=pkg:/locale/ar-extra@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

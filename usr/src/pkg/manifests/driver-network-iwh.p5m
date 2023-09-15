@@ -34,7 +34,7 @@ set name=pkg.summary value="Intel(R) WiFi Link 5100/5300 driver"
 set name=pkg.description value="Intel(R) WiFi Link 5100/5300 driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.for-arch value=aarch64 value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

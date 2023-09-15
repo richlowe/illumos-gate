@@ -16,4 +16,3 @@ set name=pkg.fmri \
 set name=pkg.obsolete value=true
 # Don't incorporate, as we were one and that would get deeply confusing
 set name=org.opensolaris.noincorp value=true
-set name=variant.arch value=$(ARCH)

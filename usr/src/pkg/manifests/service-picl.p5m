@@ -31,7 +31,6 @@ set name=pkg.summary value="PICL Libraries, and Plugin Modules"
 set name=pkg.description \
     value="PICL Daemon, Libraries, prtpicl client and plug-in modules"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=lib variant.opensolaris.zone=global
 dir  path=lib/svc variant.opensolaris.zone=global
 dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global

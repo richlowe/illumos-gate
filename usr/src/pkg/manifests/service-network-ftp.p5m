@@ -27,4 +27,3 @@
 set name=pkg.fmri value=pkg:/service/network/ftp@$(PKGVERS)
 set name=pkg.obsolete value=true
 set name=org.opensolaris.noincorp value=true
-set name=variant.arch value=$(ARCH)

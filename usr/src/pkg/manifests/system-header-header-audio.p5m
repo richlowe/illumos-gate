@@ -28,7 +28,6 @@ set name=pkg.summary value="Audio Header Files"
 set name=pkg.description \
     value="SunOS C/C++ header files for audio drivers and applications"
 set name=info.classification value=org.opensolaris.category.2008:System/Media
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/audio

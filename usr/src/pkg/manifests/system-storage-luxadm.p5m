@@ -29,7 +29,6 @@ set name=pkg.description \
     value="Sun Enterprise Network Array firmware and utilities"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Enterprise Management"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/sbin
 $(not_aarch64)file path=usr/sbin/luxadm mode=0555 \

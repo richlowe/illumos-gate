@@ -15,7 +15,7 @@
 set name=pkg.fmri value=pkg:/system/kernel/platform/meson-gxbb@$(PKGVERS)
 set name=pkg.summary value="Support for Meson GXBB"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=aarch64
+set name=org.illumos.for-arch value=aarch64
 dir  path=platform/Amlogic,meson-gxbb
 file path=platform/Amlogic,meson-gxbb/inetboot
 dir  path=platform/Amlogic,meson-gxbb/kernel

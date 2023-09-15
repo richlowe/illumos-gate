@@ -28,7 +28,6 @@ set name=pkg.summary value="SCSI/SES plugins"
 set name=pkg.description value="Vendor specific SCSI and SES plugins"
 set name=info.classification \
     value="org.opensolaris.category.2008:Applications/Plug-ins and Run-times"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/scsi

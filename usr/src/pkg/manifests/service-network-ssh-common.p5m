@@ -19,7 +19,6 @@ set name=pkg.description \
     value="Provides SMF service for the Secure Shell (SSH) service which creates RSA and DSA host keys if they are not available and start or stop the sshd (Secure Shell daemon)."
 set name=info.classification value=org.opensolaris.category.2008:System/Security
 set name=org.opensolaris.noincorp value=true
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/ssh group=sys
 file path=etc/ssh/ssh_config group=sys \

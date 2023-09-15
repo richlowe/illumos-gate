@@ -30,7 +30,6 @@ set name=pkg.description \
     value="Common Fibre Channel HBA API Library based on the T11 FC-MI specification"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 file path=etc/hba.conf original_name=SUNWcfcl:etc/hba.conf preserve=true
 dir  path=usr group=sys

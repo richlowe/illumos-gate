@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/system/kernel/cpu-counters@$(PKGVERS)
 set name=pkg.summary value="CPU Performance Counter driver"
 set name=pkg.description value="Kernel support for CPU Performance Counters"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=platform group=sys
 $(i386_ONLY)dir path=platform/i86pc group=sys
 $(i386_ONLY)dir path=platform/i86pc/kernel group=sys

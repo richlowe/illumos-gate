@@ -29,7 +29,6 @@ set name=pkg.fmri value=pkg:/install/beadm@$(PKGVERS)
 set name=pkg.summary value="beadm utility"
 set name=pkg.description value="Boot Environment Management Tool"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=sbin group=sys
 file path=sbin/beadm mode=0555
 dir  path=usr group=sys

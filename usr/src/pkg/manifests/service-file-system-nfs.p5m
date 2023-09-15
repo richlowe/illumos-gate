@@ -29,7 +29,6 @@ set name=pkg.summary value="Network File System (NFS) server support"
 set name=pkg.description value="Network File System (NFS) server support"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/File System"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/default group=sys
 file path=etc/default/nfslogd group=sys \

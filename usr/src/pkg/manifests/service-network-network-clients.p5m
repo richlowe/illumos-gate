@@ -30,7 +30,6 @@ set name=pkg.summary value="Remote Network Client Commands"
 set name=pkg.description \
     value="Remote Network Client Commands (rsh, rlogin, rcp, rsh, ...)"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/filesync mode=0555

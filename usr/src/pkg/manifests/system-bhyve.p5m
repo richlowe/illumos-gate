@@ -30,7 +30,7 @@ set name=pkg.summary value="BSD hypervisor"
 set name=pkg.description value="BSD hypervisor"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Virtualization
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=kernel group=sys
 dir  path=usr group=sys
 dir  path=usr/kernel/drv group=sys

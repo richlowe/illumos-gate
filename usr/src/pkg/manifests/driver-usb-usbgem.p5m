@@ -18,7 +18,7 @@ set name=pkg.fmri value=pkg:/driver/usb/usbgem@$(PKGVERS)
 set name=pkg.summary value="USB General Ethernet Module"
 set name=pkg.description value="USB General Ethernet Module"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Ports
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.for-arch value=aarch64 value=i386
 dir  path=kernel group=sys
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys

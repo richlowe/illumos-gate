@@ -23,7 +23,6 @@ set name=pkg.summary value="CCID driver"
 set name=pkg.description \
     value="Driver for USB Chip Card Interface Devices (CCID)"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys variant.opensolaris.zone=global
 dir  path=kernel/drv group=sys variant.opensolaris.zone=global
 dir  path=kernel/drv/$(ARCH64) group=sys variant.opensolaris.zone=global

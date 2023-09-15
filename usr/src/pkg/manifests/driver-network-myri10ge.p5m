@@ -35,7 +35,7 @@ set name=pkg.description value="Myricom 10 Gigabit Ethernet Adapter Driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
 # XXXARM
-set name=variant.arch value=i386 value=sparc
+set name=org.illumos.for-arch value=i386 value=sparc
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

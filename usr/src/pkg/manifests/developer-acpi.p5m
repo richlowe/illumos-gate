@@ -17,7 +17,7 @@ set name=pkg.summary value="ACPI utilities"
 set name=pkg.description value="ACPI utilities"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 file path=usr/sbin/acpidump mode=0555
 file path=usr/sbin/acpixtract mode=0555
 file path=usr/sbin/iasl mode=0555

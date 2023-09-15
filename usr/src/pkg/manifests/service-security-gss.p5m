@@ -29,7 +29,6 @@ set name=pkg.summary value="GSSAPI CONFIG V2"
 set name=pkg.description \
     value="Generic Security Service Application Program Interface, Version 2 - config"
 set name=info.classification value=org.opensolaris.category.2008:System/Security
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/gss group=sys
 $(not_aarch64)file path=etc/gss/gsscred.conf group=sys \

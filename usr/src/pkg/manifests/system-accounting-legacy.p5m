@@ -30,7 +30,6 @@ set name=pkg.description \
     value="utilities for accounting and reporting of system activity"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/acct owner=adm group=adm
 file path=etc/acct/holidays original_name=SUNWacc:etc/acct/holidays \

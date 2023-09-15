@@ -26,5 +26,5 @@
 set name=pkg.fmri \
     value=pkg:/system/storage/parted@1.8.8,$(PKGVERS_BUILTON)-$(PKGVERS_BRANCH)
 set name=pkg.obsolete value=true
+set name=org.illumos.for-arch value=i386
 set name=org.opensolaris.noincorp value=true
-set name=variant.arch value=i386

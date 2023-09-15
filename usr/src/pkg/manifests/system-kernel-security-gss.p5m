@@ -34,7 +34,6 @@ set name=pkg.summary value="kernel GSSAPI V2"
 set name=pkg.description \
     value="Generic Security Service Application Program Interface, Version 2 - kernel"
 set name=info.classification value=org.opensolaris.category.2008:System/Security
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys

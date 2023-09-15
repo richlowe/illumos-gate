@@ -28,7 +28,6 @@ set name=pkg.summary value="LatencyTOP tool"
 set name=pkg.description value="LatencyTOP tool"
 set name=info.classification \
     value="org.opensolaris.category.2008:Applications/System Utilities"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 $(i386_ONLY)dir path=usr/bin/$(ARCH32)

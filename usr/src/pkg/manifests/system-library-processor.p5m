@@ -25,4 +25,3 @@
 
 set name=pkg.fmri value=pkg:/system/library/processor@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)
