@@ -36,7 +36,6 @@ set name=pkg.fmri value=pkg:/driver/usb@$(PKGVERS)
 set name=pkg.summary value="USB Device Drivers"
 set name=pkg.description value="USBA (USB framework) and USB Device Drivers"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Ports
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/usb group=sys
 file path=etc/usb/config_map.conf group=sys \

@@ -25,4 +25,3 @@
 
 set name=pkg.fmri value=pkg:/print/lp/ipp/ipp-listener@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

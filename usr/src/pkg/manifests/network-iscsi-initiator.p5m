@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/network/iscsi/initiator@$(PKGVERS)
 set name=pkg.summary value="Sun iSCSI Management Utilities"
 set name=pkg.description value="Sun iSCSI Management Utilities"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys variant.opensolaris.zone=global
 dir  path=etc/iscsi group=sys variant.opensolaris.zone=global
 dir  path=etc/security group=sys variant.opensolaris.zone=global

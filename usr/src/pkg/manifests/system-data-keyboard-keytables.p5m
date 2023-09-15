@@ -28,7 +28,6 @@ set name=pkg.summary value="Keyboard configuration tables"
 set name=pkg.description \
     value="Configuration tables that specify keyboard attributes such as localized meanings for individual keys"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 file path=usr/lib/set_keyboard_layout mode=0555

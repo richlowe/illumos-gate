@@ -30,7 +30,6 @@ set name=pkg.summary value="ZFS unbundled utilities"
 set name=pkg.description value="ZFS test commands"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/service/storage/virus-scan@$(PKGVERS)
 set name=pkg.summary value="Virus Scan Service Kernel"
 set name=pkg.description value="Virus Scan Service Kernel Root Components"
 set name=info.classification value=org.opensolaris.category.2008:System/Services
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

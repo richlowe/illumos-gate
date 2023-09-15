@@ -33,4 +33,3 @@
 <include global_zone_only_component>
 set name=pkg.fmri value=pkg:/system/kernel/ultra-wideband@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/system/network/ipqos/ipqos-config@$(PKGVERS)
 set name=pkg.summary value="IP QoS"
 set name=pkg.description value="Solaris IP Quality of Service"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/inet group=sys
 file path=etc/inet/ipqosconf.1.sample group=sys mode=0444

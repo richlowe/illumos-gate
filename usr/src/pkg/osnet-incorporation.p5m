@@ -32,7 +32,6 @@ set name=pkg.description \
     value="This incorporation constrains packages from the OS/Net consolidation."
 set name=pkg.depend.install-hold value=core-os.osnet
 set name=pkg.linted.opensolaris.manifest001.1 value=True
-set name=variant.arch value=$(ARCH)
 <include packages.redist.current>
 <include packages.redist.renamed>
 <include packages.redist.obsolete>

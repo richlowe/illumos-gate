@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/system/library/security/gss/spnego@$(PKGVERS)
 set name=pkg.summary value="SPNEGO GSS-API Mechanism"
 set name=pkg.description value="SPNEGO GSS-API Mechanism"
 set name=info.classification value=org.opensolaris.category.2008:System/Security
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)

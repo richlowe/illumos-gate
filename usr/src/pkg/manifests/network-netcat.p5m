@@ -28,7 +28,6 @@ set name=pkg.summary value="Netcat Command"
 set name=pkg.description value="Netcat Command"
 set name=info.classification \
     value=org.opensolaris.category.2008:Applications/Internet
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 file path=usr/bin/nc mode=0555

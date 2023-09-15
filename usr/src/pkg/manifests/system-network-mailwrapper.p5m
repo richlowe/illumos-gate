@@ -19,7 +19,6 @@ set name=pkg.description \
     value="utility to invoke appropriate MTA software based on configuration file"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/mail group=mail
 file path=etc/mailer.conf group=sys preserve=true

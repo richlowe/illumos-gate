@@ -17,4 +17,3 @@ set name=pkg.fmri value=pkg:/consolidation/l10n/l10n-incorporation@$(PKGVERS)
 set name=pkg.linted value=True
 # Don't incorporate, as we were one and that would get deeply confusing
 set name=org.opensolaris.noincorp value=true
-set name=variant.arch value=$(ARCH)

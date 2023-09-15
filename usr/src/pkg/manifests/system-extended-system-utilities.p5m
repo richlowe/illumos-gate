@@ -31,7 +31,6 @@ set name=pkg.summary value="Extended System Utilities"
 set name=pkg.description \
     value="additional UNIX system utilities, including awk, bc, cal, compress, diff, dos2unix, last, rup, sort, spell, uniq, and uuencode"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 $(i386_ONLY)dir path=usr/bin/$(ARCH32)

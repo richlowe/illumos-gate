@@ -25,7 +25,7 @@ set name=pkg.summary value="Virtio SCSI"
 set name=pkg.description value="Virtio SCSI driver"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Storage
 # XXXARM
-set name=variant.arch value=i386 value=sparc
+set name=org.illumos.for-arch value=i386 value=sparc
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

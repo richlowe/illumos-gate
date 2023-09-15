@@ -19,7 +19,6 @@ set name=pkg.summary value="py_libbe module, python $(PYTHON3_VERSION)"
 set name=pkg.description value="Boot Environment Management Python3 Module"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/python$(PYTHON3_VERSION)

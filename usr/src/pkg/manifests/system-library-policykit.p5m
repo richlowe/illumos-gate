@@ -30,7 +30,6 @@ set name=pkg.description \
     value="Toolkit for controlling privileges (freedesktop.org)"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 link path=usr/lib/libpolkit.so target=./libpolkit.so.0.0.0

@@ -30,7 +30,6 @@ set name=pkg.summary value="Sun Common Multiprotocol SCSI Target"
 set name=pkg.description \
     value="Sun Common Multiprotocol SCSI Target device drivers"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

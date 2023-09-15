@@ -31,7 +31,6 @@ set name=pkg.description \
     value="utilities for the Network Information System (NIS)"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 file path=etc/nsswitch.nis group=sys
 file path=etc/publickey original_name=SUNWnis:etc/publickey preserve=true

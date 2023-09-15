@@ -31,7 +31,6 @@ set name=pkg.description \
     value="ASCII databases describing various PCI, USB and other hardware"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
 set name=org.opensolaris.incorp-facet value=true
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/share
 dir  path=usr/share/hwdata group=sys

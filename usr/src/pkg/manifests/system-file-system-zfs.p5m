@@ -32,7 +32,6 @@ set name=pkg.summary value=ZFS
 set name=pkg.description value="ZFS libraries and commands"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/File System"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/fs group=sys
 dir  path=etc/fs/zfs group=sys

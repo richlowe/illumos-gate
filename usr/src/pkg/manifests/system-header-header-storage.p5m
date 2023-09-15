@@ -30,7 +30,7 @@ set name=pkg.description \
 set name=info.classification \
     value="org.opensolaris.category.2008:Drivers/Other Peripherals"
 # XXXARM: Probably not really
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.for-arch value=aarch64 value=i386
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/sys

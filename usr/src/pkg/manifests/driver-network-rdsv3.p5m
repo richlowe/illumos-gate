@@ -34,7 +34,6 @@ set name=pkg.summary value="Solaris Reliable Datagram Sockets"
 set name=pkg.description \
     value="The RDS driver is an implementation of the Reliable Datagram Sockets API. It provides reliable, in-order datagram and RDMA data delivery between sockets."
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/sock2path.d group=sys
 file path=etc/sock2path.d/driver%2Fnetwork%2Frdsv3 group=sys

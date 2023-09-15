@@ -29,7 +29,7 @@ set name=pkg.summary value="Solaris 10 Containers: solaris10 brand support"
 set name=pkg.description value="Support for the 'Solaris10' Brand"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Virtualization
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=etc group=sys
 dir  path=etc/brand group=sys
 dir  path=etc/brand/solaris10 group=sys

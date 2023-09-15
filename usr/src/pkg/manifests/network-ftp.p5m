@@ -30,7 +30,6 @@ set name=pkg.description \
     value="The ftp command is the user interface to the Internet standard File Transfer Protocol (FTP)"
 set name=info.classification \
     value="org.opensolaris.category.2008:Applications/System Utilities"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/default group=sys
 file path=etc/default/ftp group=sys original_name=SUNWbip:etc/default/ftp \

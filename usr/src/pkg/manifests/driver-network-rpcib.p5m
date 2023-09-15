@@ -34,7 +34,6 @@ set name=pkg.summary value="InfiniBand plugin to RPC over RDMA"
 set name=pkg.description \
     value="InfiniBand plugin implementation of RPC over RDMA"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

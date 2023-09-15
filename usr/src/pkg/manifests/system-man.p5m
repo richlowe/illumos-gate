@@ -21,7 +21,6 @@ set name=pkg.description \
     value="utilities for display and formatting of reference manual pages"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Text Tools"
-set name=variant.arch value=$(ARCH)
 dir  path=lib/svc
 dir  path=lib/svc/manifest group=sys
 dir  path=lib/svc/manifest/system group=sys

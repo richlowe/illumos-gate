@@ -34,7 +34,6 @@ set name=pkg.summary value="Trusted Extensions global"
 set name=pkg.description \
     value="Solaris Trusted Extensions, globalzone-only files"
 set name=info.classification value=org.opensolaris.category.2008:System/Trusted
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/security group=sys
 dir  path=etc/security/audio group=sys

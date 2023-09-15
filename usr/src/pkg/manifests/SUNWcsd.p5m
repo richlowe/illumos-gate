@@ -35,7 +35,6 @@ set name=pkg.summary value="Core Solaris Devices"
 set name=pkg.description \
     value="core entries for /dev and /devices needed for the initial boot of Solaris"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=dev group=sys
 dir  path=dev/dsk group=sys
 dir  path=dev/fd group=root mode=0555

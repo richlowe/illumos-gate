@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/system/header/header-ugen@$(PKGVERS)
 set name=pkg.summary value="UGEN Headers"
 set name=pkg.description value="UGEN Headers"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/sys

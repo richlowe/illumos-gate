@@ -23,7 +23,6 @@ set name=pkg.summary value="ZFS Functional and Stress Tests"
 set name=pkg.description value="ZFS Test Suite"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/zfs-tests
 file path=opt/zfs-tests/README mode=0444
 dir  path=opt/zfs-tests/bin

@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/service/network/telnet@$(PKGVERS)
 set name=pkg.summary value="Telnet Server Daemon"
 set name=pkg.description value="Telnet Server Daemon"
 set name=info.classification value=org.opensolaris.category.2008:System/Services
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/default group=sys
 file path=etc/default/telnetd group=sys \

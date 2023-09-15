@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/system/zones@$(PKGVERS)
 set name=pkg.summary value="Solaris Zones"
 set name=pkg.description value="Solaris Zones Configuration and Administration"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys variant.opensolaris.zone=global
 dir  path=etc/brand group=sys variant.opensolaris.zone=global
 dir  path=etc/zones group=sys variant.opensolaris.zone=global

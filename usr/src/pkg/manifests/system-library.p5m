@@ -81,7 +81,6 @@ set name=pkg.summary value="Core Solaris, (Shared Libs)"
 set name=pkg.description \
     value="core shared libraries for a specific instruction-set architecture"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 $(i386_ONLY)dir path=etc group=sys
 $(i386_ONLY)dir path=etc/flash group=sys
 $(i386_ONLY)dir path=etc/flash/postcreation group=sys mode=0700

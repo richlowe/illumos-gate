@@ -33,7 +33,7 @@ set name=pkg.fmri value=pkg:/driver/x11/xsvc@$(PKGVERS)
 set name=pkg.summary value="Sun Xserver pseudo driver"
 set name=pkg.description value="Sun Xserver pseudo driver"
 set name=info.classification value=org.opensolaris.category.2008:System/X11
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=platform group=sys
 dir  path=platform/i86pc group=sys
 dir  path=platform/i86pc/kernel group=sys

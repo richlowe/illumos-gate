@@ -20,7 +20,6 @@ set name=pkg.fmri value=pkg:/system/library/c-runtime@$(PKGVERS)
 set name=pkg.summary value="C Runtime"
 set name=pkg.description value="C runtime objects"
 set name=info.classification value=org.opensolaris.category.2008:Development/C
-set name=variant.arch value=$(ARCH)
 link path=usr/ccs/lib/values-Xa.o target=../../lib/values-Xa.o
 link path=usr/ccs/lib/values-Xc.o target=../../lib/values-Xc.o
 link path=usr/ccs/lib/values-Xs.o target=../../lib/values-Xs.o

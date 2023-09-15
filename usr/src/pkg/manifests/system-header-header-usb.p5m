@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/system/header/header-usb@$(PKGVERS)
 set name=pkg.summary value="USB Headers"
 set name=pkg.description value="USB Headers"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/sys

@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/system/scheduler/fss@$(PKGVERS)
 set name=pkg.summary value="Fair Share Scheduler"
 set name=pkg.description value="core software for the fair share scheduler"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/kernel group=sys
 dir  path=usr/kernel/sched group=sys

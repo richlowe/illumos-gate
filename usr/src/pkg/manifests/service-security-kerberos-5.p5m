@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/service/security/kerberos-5@$(PKGVERS)
 set name=pkg.summary value="Kerberos version 5 support"
 set name=pkg.description value="Kerberos version 5 support"
 set name=info.classification value=org.opensolaris.category.2008:System/Security
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 $(not_aarch64)dir path=etc/krb5 group=sys
 $(not_aarch64)file path=etc/krb5/krb5.conf group=sys \

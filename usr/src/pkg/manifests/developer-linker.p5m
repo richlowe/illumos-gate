@@ -29,7 +29,6 @@ set name=pkg.description \
     value="utilities for software development, including ld, ldd, od, and truss"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 $(MULTILIB_ONLY)dir path=usr/bin/$(ARCH32)

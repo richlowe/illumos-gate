@@ -34,7 +34,6 @@ set name=pkg.summary value="DTrace Clients"
 set name=pkg.description value="Dynamic Tracing (DTrace) Clients"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/demo
 dir  path=usr/demo/dtrace

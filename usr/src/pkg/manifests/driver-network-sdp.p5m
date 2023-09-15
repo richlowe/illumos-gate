@@ -33,7 +33,7 @@ set name=pkg.fmri value=pkg:/driver/network/sdp@$(PKGVERS)
 set name=pkg.summary value="Sun InfiniBand layered Sockets Direct Protocol"
 set name=pkg.description value="Sun InfiniBand layered Sockets Direct Protocol"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=etc group=sys
 file path=etc/sdp.conf group=sys original_name=SUNWibsdp:etc/sdp.conf \
     preserve=true

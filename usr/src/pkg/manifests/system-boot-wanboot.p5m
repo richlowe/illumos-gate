@@ -27,4 +27,3 @@
 
 set name=pkg.fmri value=pkg:/system/boot/wanboot@$(PKGVERS)
 set name=pkg.obsolete value=true
-set name=variant.arch value=$(ARCH)

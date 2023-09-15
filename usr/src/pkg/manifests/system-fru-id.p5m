@@ -29,7 +29,6 @@ set name=pkg.summary value="FRU ID Utility and Library"
 set name=pkg.description value="FRU ID prtfru command and libfru library"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)

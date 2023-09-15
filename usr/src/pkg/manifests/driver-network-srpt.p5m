@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/driver/network/srpt@$(PKGVERS)
 set name=pkg.summary value="Sun SRP COMSTAR Port Provider"
 set name=pkg.description value="Sun SRP COMSTAR Port Provider"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Storage
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

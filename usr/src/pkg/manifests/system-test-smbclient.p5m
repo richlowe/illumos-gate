@@ -19,7 +19,6 @@ set name=pkg.summary \
 set name=pkg.description value="SMB Client Test Suite"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/smbclient-tests
 file path=opt/smbclient-tests/README mode=0444
 dir  path=opt/smbclient-tests/bin

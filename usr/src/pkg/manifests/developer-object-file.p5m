@@ -30,7 +30,6 @@ set name=pkg.summary value="CCS tools bundled with SunOS"
 set name=pkg.description \
     value="software development utilities, including ar, dis, dump, elfdump, elfedit, lex, lorder, mcs, nm, ranlib, rpcgen, size, strip, tsort, and yacc"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 $(MULTILIB_ONLY)dir path=usr/bin/$(ARCH64)

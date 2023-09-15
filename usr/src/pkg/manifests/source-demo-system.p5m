@@ -29,7 +29,6 @@ set name=pkg.summary value="OS demo source"
 set name=pkg.description \
     value="Source code to demonstrate the use of OS interfaces: ELF"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/demo
 $(not_aarch64)dir path=usr/demo/ELF

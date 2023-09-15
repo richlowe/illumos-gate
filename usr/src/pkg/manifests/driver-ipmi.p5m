@@ -24,7 +24,7 @@ set name=pkg.fmri value=pkg:/driver/ipmi@$(PKGVERS)
 set name=pkg.summary \
     value="Intelligent Platform Management Interface baseboard driver"
 set name=info.classification value=org.opensolaris.category.2008:Drivers/Ports
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=usr/include
 dir  path=usr/include/sys
 dir  path=usr/include/sys

@@ -34,7 +34,6 @@ set name=pkg.summary value="DTrace Providers"
 set name=pkg.description value="Dynamic Tracing (DTrace) Providers"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 $(not_aarch64)dir path=kernel/drv/$(ARCH64) group=sys

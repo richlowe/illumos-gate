@@ -24,7 +24,6 @@ set name=pkg.summary value="System Console Unicode fonts"
 set name=pkg.description \
     value="System Console Unicode bitmap fonts, including Gallant and Terminus"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=boot group=sys
 dir  path=boot/fonts group=sys
 file path=boot/fonts/10x18.fnt owner=root group=bin mode=0444

@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/system/network/ipqos@$(PKGVERS)
 set name=pkg.summary value="IP QoS"
 set name=pkg.description value="Solaris IP Quality of Service"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/ipp

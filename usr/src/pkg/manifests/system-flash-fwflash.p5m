@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/system/flash/fwflash@$(PKGVERS)
 set name=pkg.summary value="Sun Firmware Flash Update Tool (fwflash)"
 set name=pkg.description value="Sun Firmware Flash Update Tool (fwflash)"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/fwflash

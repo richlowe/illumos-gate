@@ -28,7 +28,6 @@ set name=pkg.summary value="Solaris VRRP protocol"
 set name=pkg.description value="Solaris VRRP protocol service"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/inet group=sys
 file path=etc/inet/vrrp.conf group=sys

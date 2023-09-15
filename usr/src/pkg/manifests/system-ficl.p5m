@@ -23,7 +23,6 @@ set name=pkg.fmri \
 set name=pkg.summary value="FICL Forth Implementation"
 set name=pkg.description value="Forth Inspired Command Language"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin group=bin
 $(not_aarch64)dir path=usr/bin/$(ARCH32) group=bin

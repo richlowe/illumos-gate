@@ -29,7 +29,6 @@ set name=pkg.fmri value=pkg:/system/security/kerberos-5@$(PKGVERS)
 set name=pkg.summary value="Kerberos V5 Master KDC (user)"
 set name=pkg.description value="Kerberos V5 Master KDC (user)"
 set name=info.classification value=org.opensolaris.category.2008:System/Security
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/inet group=sys
 $(not_aarch64)dir path=etc/krb5 group=sys

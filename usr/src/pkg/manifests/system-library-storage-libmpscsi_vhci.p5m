@@ -34,7 +34,6 @@ set name=pkg.summary value="Sun MP API library for the scsi_vhci driver"
 set name=pkg.description \
     value="SNIA MP API plugin library for the scsi_vhci driver"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=lib
 $(MULTILIB_ONLY)dir path=lib/$(ARCH64)

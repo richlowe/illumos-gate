@@ -28,7 +28,6 @@ set name=pkg.summary value="Core Solaris Network Infrastructure"
 set name=pkg.description \
     value="core software for network infrastructure configuration"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/default group=sys
 file path=etc/default/dhcpagent group=sys \

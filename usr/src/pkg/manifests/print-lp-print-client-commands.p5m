@@ -29,7 +29,6 @@ set name=pkg.summary value="Solaris Print - Client"
 set name=pkg.description \
     value="client configuration files and utilities for the print service"
 set name=info.classification value=org.opensolaris.category.2008:System/Printing
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
 link path=usr/bin/cancel target=../sbin/print-service

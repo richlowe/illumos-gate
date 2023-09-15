@@ -34,7 +34,6 @@ set name=pkg.summary value="IP Filter header files"
 set name=pkg.description value="C header files for IP Filter"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/include
 dir  path=usr/include/netinet

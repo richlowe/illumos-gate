@@ -15,7 +15,7 @@
 set name=pkg.fmri value=pkg:/system/kernel/platform/raspberry-pi-4@$(PKGVERS)
 set name=pkg.summary value="Support for Raspberry Pi 4"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=aarch64
+set name=org.illumos.for-arch value=aarch64
 dir  path=platform/RaspberryPi,4
 file path=platform/RaspberryPi,4/inetboot
 dir  path=platform/RaspberryPi,4/kernel

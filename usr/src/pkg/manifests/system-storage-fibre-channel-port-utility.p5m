@@ -29,7 +29,6 @@ set name=pkg.fmri \
 set name=pkg.summary value="Fibre Channel HBA Port utility"
 set name=pkg.description value="Utility for Fibre Channel Host Bus Adapters"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=lib variant.opensolaris.zone=global
 dir  path=lib/svc variant.opensolaris.zone=global
 dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global

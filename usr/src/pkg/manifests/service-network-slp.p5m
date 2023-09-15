@@ -30,7 +30,6 @@ set name=pkg.summary value=SLP
 set name=pkg.description \
     value="Usr filesystem portion of the Service Location Protocol (SLP) framework. Included are C and Java developer libraries and a daemon which can act as a directory agent (DA)."
 set name=info.classification value=org.opensolaris.category.2008:System/Services
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/inet group=sys
 file path=etc/inet/slp.conf.example group=sys

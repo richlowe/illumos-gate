@@ -29,7 +29,6 @@ set name=pkg.summary value="NIS Server for Solaris"
 set name=pkg.description value="NIS Server for Solaris 2.6 and up"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/default group=sys
 file path=etc/default/yppasswdd group=sys \

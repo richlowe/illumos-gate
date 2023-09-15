@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/system/remote-shared-memory@$(PKGVERS)
 set name=pkg.summary value="Remote Shared Memory"
 set name=pkg.description value="Remote Shared Memory API Library, Driver"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/kernel group=sys
 dir  path=usr/kernel/drv group=sys

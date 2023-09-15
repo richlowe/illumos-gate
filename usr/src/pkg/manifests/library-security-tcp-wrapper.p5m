@@ -31,7 +31,6 @@ set name=pkg.summary \
 set name=pkg.description \
     value="tcpd - access control facility for internet services"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/sbin
 file path=usr/sbin/safe_finger mode=0555

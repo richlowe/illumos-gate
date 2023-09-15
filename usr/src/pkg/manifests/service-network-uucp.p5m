@@ -28,7 +28,6 @@ set name=pkg.fmri value=pkg:/service/network/uucp@$(PKGVERS)
 set name=pkg.summary value="Networking UUCP Utilities"
 set name=pkg.description value="UUCP utilities and daemon"
 set name=info.classification value=org.opensolaris.category.2008:System/Services
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/init.d group=sys
 file path=etc/init.d/uucp group=sys mode=0744 \

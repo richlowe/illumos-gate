@@ -17,7 +17,6 @@ set name=pkg.fmri value=pkg:/network/snoop@$(PKGVERS)
 set name=pkg.summary value=snoop
 set name=pkg.description value="snoop - capture and inspect network packets"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/sbin
 file path=usr/sbin/snoop mode=0555

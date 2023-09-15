@@ -34,7 +34,6 @@ set name=pkg.summary value="Sun Tavor HCA driver"
 set name=pkg.description value="Tavor HCA driver"
 set name=info.classification \
     value="org.opensolaris.category.2008:Drivers/Other Peripherals"
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

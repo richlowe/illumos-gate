@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/driver/network/eoib@$(PKGVERS)
 set name=pkg.summary value="Solaris Ethernet over InfiniBand"
 set name=pkg.description value="Solaris Drivers for Ethernet over InfiniBand"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys

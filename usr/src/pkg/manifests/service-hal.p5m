@@ -30,7 +30,6 @@ set name=pkg.summary value="Hardware Abstraction Layer"
 set name=pkg.description \
     value="Hardware Abstraction Layer, HAL (freedesktop.org)"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys variant.opensolaris.zone=global
 dir  path=etc/dbus-1 variant.opensolaris.zone=global
 dir  path=etc/dbus-1/system.d variant.opensolaris.zone=global

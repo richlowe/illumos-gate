@@ -399,12 +399,10 @@ build, 150.
         # Was renamed to system/foobar, both now obsolete.
         set name=pkg.fmri value=pkg:/SUNWfoobar@0.5.11,5.11-0.150
         set name=pkg.obsolete value=true
-        set name=variant.arch value=$(ARCH)
 
     system-foobar.p5m:
 	set name=pkg.fmri value=pkg:/system/foobar@0.5.11,5.11-0.150
 	set name=pkg.obsolete value=true
-	set name=variant.arch value=$(ARCH)
 
 Creating a Package
 ------------------
@@ -425,9 +423,6 @@ The following actions are required for all packages in ON.
 	    Every package must have a one-sentence description of
 	    its purpose.
 
-	set name=variant.arch
-	    Every package must specify which architectures it delivers.
-
 	set name=info.classification
 	    Every package must specify a category for the packaging GUI.
 	    You must use an existing category, and may not invent new ones.
@@ -436,6 +431,12 @@ The following actions are required for all packages in ON.
 
 	license
 	    All packages must specify a set of license actions.
+
+If your package should only be built on a specific platform or platforms
+	set name=org.illumos.for-arch value=... value=...
+	Where each value is a platform for which to build this package.
+	variant.arch is taken care of automatically, and should no longer be
+	used explicitly.
 
 You don't need to set the following.  They're taken care of for all OS/Net
 packages in the transforms/common_actions file.

@@ -30,7 +30,6 @@ set name=pkg.description \
     value="SNIA iSCSI Managment API plugin library for iSCSI adapters"
 set name=info.classification \
     value="org.opensolaris.category.2008:Applications/Plug-ins and Run-times"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=usr group=sys
 dir  path=usr/lib

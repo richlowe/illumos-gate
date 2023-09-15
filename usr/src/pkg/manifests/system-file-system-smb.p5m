@@ -29,7 +29,6 @@ set name=pkg.summary value="SMB/CIFS File System client support"
 set name=pkg.description value="SMB/CIFS File System client support"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/File System"
-set name=variant.arch value=$(ARCH)
 file path=etc/security/exec_attr.d/SUNWsmbfs mode=0644 \
     restart_fmri=svc:/system/rbac:default
 dir  path=lib

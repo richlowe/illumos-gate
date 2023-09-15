@@ -28,7 +28,6 @@ set name=pkg.summary value="wifi config tool"
 set name=pkg.description value="wifi config tool"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/Administration and Configuration"
-set name=variant.arch value=$(ARCH)
 dir  path=sbin group=sys
 file path=sbin/wificonfig mode=4755
 dir  path=usr group=sys

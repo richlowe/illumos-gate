@@ -35,7 +35,7 @@ set name=pkg.description \
     value="DTrace provider for tracing events in the xVM hypervisor"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=i386
+set name=org.illumos.for-arch value=i386
 dir  path=platform group=sys
 dir  path=platform/i86xpv group=sys
 dir  path=platform/i86xpv/kernel group=sys

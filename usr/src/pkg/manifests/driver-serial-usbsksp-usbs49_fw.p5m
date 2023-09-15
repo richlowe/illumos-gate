@@ -33,7 +33,6 @@ set name=pkg.fmri value=pkg:/driver/serial/usbsksp/usbs49_fw@$(PKGVERS)
 set name=pkg.summary value="USA49WLC firmware for USB Keyspan serial driver"
 set name=pkg.description value="USA49WLC firmware for USB Keyspan serial driver"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=variant.arch value=$(ARCH)
 dir  path=kernel group=sys
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys

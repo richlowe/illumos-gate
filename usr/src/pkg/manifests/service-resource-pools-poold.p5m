@@ -27,7 +27,6 @@ set name=pkg.fmri value=pkg:/service/resource-pools/poold@$(PKGVERS)
 set name=pkg.summary value="Dynamic Resource Pools"
 set name=pkg.description value="core software for dynamic resource pools"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
-set name=variant.arch value=$(ARCH)
 dir  path=lib variant.opensolaris.zone=global
 dir  path=lib/svc variant.opensolaris.zone=global
 dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global

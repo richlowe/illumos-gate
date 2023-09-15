@@ -28,7 +28,6 @@ set name=pkg.summary value="Fake Solaris N-1 Brand"
 set name=pkg.description value="Support for the Fake Solaris N-1 Brand"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Virtualization
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 dir  path=etc/zones group=sys
 $(not_aarch64)file path=etc/zones/SUNWsn1.xml mode=0444

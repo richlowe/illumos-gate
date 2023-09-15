@@ -23,7 +23,7 @@ set name=pkg.description value="BSD hypervisor (libraries)"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Virtualization
 # XXXARM: This is because lib9p isn't in its own package
-set name=variant.arch value=aarch64 value=i386
+set name=org.illumos.for-arch value=aarch64 value=i386
 dir  path=lib group=bin
 $(MULTILIB_ONLY)dir path=lib/$(ARCH64) group=bin
 $(MULTILIB_ONLY)file path=lib/$(ARCH64)/libvmm.so.1

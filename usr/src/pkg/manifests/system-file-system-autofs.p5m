@@ -29,7 +29,6 @@ set name=pkg.description \
     value="utilities and a daemon (automountd) for the AutoFS filesystem"
 set name=info.classification \
     value="org.opensolaris.category.2008:System/File System"
-set name=variant.arch value=$(ARCH)
 dir  path=etc group=sys
 file path=etc/auto_home original_name=SUNWatfs:etc/auto_home preserve=true
 file path=etc/auto_master original_name=SUNWatfs:etc/auto_master preserve=true

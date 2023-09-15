@@ -24,7 +24,6 @@ set name=pkg.summary value="C Library Unit Test Suite"
 set name=pkg.description value="C library Unit Tests"
 set name=info.classification \
     value=org.opensolaris.category.2008:Development/System
-set name=variant.arch value=$(ARCH)
 dir  path=opt/libc-tests
 file path=opt/libc-tests/README mode=0444
 dir  path=opt/libc-tests/bin
