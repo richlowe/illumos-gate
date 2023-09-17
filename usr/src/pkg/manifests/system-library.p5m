@@ -1357,8 +1357,7 @@ license usr/src/man/man3c/THIRDPARTYLICENSE.getentropy \
     license=usr/src/man/man3c/THIRDPARTYLICENSE.getentropy
 license usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode \
     license=usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode
-$(not_aarch64)depend type=conditional \
-    fmri=system/library/python/solaris$(PYTHON3_PKGVERS) \
+depend type=conditional fmri=system/library/python/solaris$(PYTHON3_PKGVERS) \
     predicate=runtime/python$(PYTHON3_PKGVERS)
 
 #

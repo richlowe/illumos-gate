@@ -35,4 +35,4 @@ file path=opt/smbsrv-tests/tests/smbtorture/runst-rpc mode=0555
 file path=opt/smbsrv-tests/tests/smbtorture/runst-smb2 mode=0555
 license lic_CDDL license=lic_CDDL
 depend type=optional fmri=service/network/samba
-$(not_aarch64)depend type=require fmri=runtime/python$(PYTHON3_PKGVERS)
+depend type=require fmri=runtime/python$(PYTHON3_PKGVERS)

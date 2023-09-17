@@ -365,6 +365,7 @@ MSGSUBDIRS=		\
 	libzonecfg	\
 	madv		\
 	mpss		\
+	pyzfs		\
 	rpcsec_gss	\
 	$($(MACH)_MSGSUBDIRS)
 
@@ -377,7 +378,6 @@ $(NOT_AARCH64_BLD)MSGSUBDIRS += \
 	libldap5	\
 	libsldap	\
 	pam_modules	\
-	pyzfs		\
 
 sparc_MSGSUBDIRS=	\
 	libprtdiag	\
