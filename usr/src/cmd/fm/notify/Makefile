@@ -25,11 +25,9 @@
 
 include $(SRC)/Makefile.master
 
-SUBDIRS = \
-	smtp-notify \
-
-# XXXARM: No net-snmp
-$(NOT_AARCH64_BLD)SUBDIRS += 	snmp-notify
+SUBDIRS =		\
+	smtp-notify	\
+	snmp-notify
 
 include ./Makefile.subdirs
 include ../../Makefile.cmd

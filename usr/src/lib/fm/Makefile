@@ -33,6 +33,7 @@ SUBDIRS =		\
 	libfmd_adm	\
 	libfmd_log	\
 	libfmd_msg	\
+	libfmd_snmp	\
 	libfmevent	\
 	libfmnotify	\
 	.WAIT		\
@@ -40,11 +41,7 @@ SUBDIRS =		\
 
 # XXXARM:
 # libfm_agent - not ported
-# libfmd_snmp - needs net snmp
-$(NOT_AARCH64_BLD)SUBDIRS += 	\
-	libfmd_agent		\
-	libfmd_snmp
-
+$(NOT_AARCH64_BLD)SUBDIRS += libfmd_agent
 
 libfmd_snmp: libfmd_adm topo
 libfmevent: topo

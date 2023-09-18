@@ -58,16 +58,15 @@ file path=etc/logadm.d/fmd.logadm.conf group=sys mode=0444 \
     variant.opensolaris.zone=__NODEFAULT
 dir  path=etc/net-snmp variant.opensolaris.zone=__NODEFAULT
 dir  path=etc/net-snmp/snmp variant.opensolaris.zone=__NODEFAULT
-$(not_aarch64)dir path=etc/net-snmp/snmp/mibs \
-    variant.opensolaris.zone=__NODEFAULT
+dir  path=etc/net-snmp/snmp/mibs variant.opensolaris.zone=__NODEFAULT
 #
 # Now for our file and link payloads
 #
 # snmp MIBs are common to both global and non-global zones
 #
-$(not_aarch64)file path=etc/net-snmp/snmp/mibs/SUN-FM-MIB.mib \
+file path=etc/net-snmp/snmp/mibs/SUN-FM-MIB.mib \
     variant.opensolaris.zone=__NODEFAULT
-$(not_aarch64)file path=etc/net-snmp/snmp/mibs/SUN-IREPORT-MIB.mib \
+file path=etc/net-snmp/snmp/mibs/SUN-IREPORT-MIB.mib \
     variant.opensolaris.zone=__NODEFAULT
 #
 # Our kernel driver is global zone only
@@ -142,7 +141,7 @@ file path=usr/include/fm/fmd_api.h
 file path=usr/include/fm/fmd_fmri.h
 file path=usr/include/fm/fmd_log.h
 file path=usr/include/fm/fmd_msg.h
-$(not_aarch64)file path=usr/include/fm/fmd_snmp.h
+file path=usr/include/fm/fmd_snmp.h
 file path=usr/include/fm/libdiskstatus.h
 file path=usr/include/fm/libfmevent.h
 file path=usr/include/fm/libfmevent_ruleset.h
@@ -401,10 +400,9 @@ file path=usr/lib/fm/libfmd_log.so.1 variant.opensolaris.zone=__NODEFAULT
 link path=usr/lib/fm/libfmd_msg.so target=libfmd_msg.so.1 \
     variant.opensolaris.zone=__NODEFAULT
 file path=usr/lib/fm/libfmd_msg.so.1 variant.opensolaris.zone=__NODEFAULT
-$(not_aarch64)link path=usr/lib/fm/libfmd_snmp.so target=libfmd_snmp.so.1 \
+link path=usr/lib/fm/libfmd_snmp.so target=libfmd_snmp.so.1 \
     variant.opensolaris.zone=__NODEFAULT
-$(not_aarch64)file path=usr/lib/fm/libfmd_snmp.so.1 \
-    variant.opensolaris.zone=__NODEFAULT
+file path=usr/lib/fm/libfmd_snmp.so.1 variant.opensolaris.zone=__NODEFAULT
 link path=usr/lib/fm/libfmevent.so target=../../../lib/fm/libfmevent.so.1 \
     variant.opensolaris.zone=__NODEFAULT
 link path=usr/lib/fm/libfmevent.so.1 target=../../../lib/fm/libfmevent.so.1 \
