@@ -501,15 +501,11 @@ static char line[256];		/* line to be logged accumulated here */
 static char *linep;
 
 void
-log_packet(p, len, prefix, level)
-    u_char *p;
-    int len;
-    const char *prefix;
-    int level;
+log_packet(uchar_t *p, int len, const char *prefix, int level)
 {
     (void) strlcpy(line, prefix, sizeof(line));
     linep = line + strlen(line);
-    format_packet(p, len, pr_log, (void *)level);
+    format_packet(p, len, pr_log, (void *)(intptr_t)level);
     if (linep != line)
 	syslog(level, "%s", line);
 }
@@ -564,21 +560,13 @@ pr_log __V((void *arg, const char *fmt, ...))
     va_list pvar;
     char buf[256];
 
-#if defined(__STDC__)
     va_start(pvar, fmt);
-#else
-    void *arg;
-    const char *fmt;
-    va_start(pvar);
-    arg = va_arg(pvar, void *);
-    fmt = va_arg(pvar, const char *);
-#endif
 
     n = vslprintf(buf, sizeof(buf), fmt, pvar);
     va_end(pvar);
 
     if (linep + n + 1 > line + sizeof(line)) {
-	syslog((int)arg, "%s", line);
+        syslog((int)(intptr_t)arg, "%s", line);
 	linep = line;
     }
     (void) strlcpy(linep, buf, line + sizeof(line) - linep);

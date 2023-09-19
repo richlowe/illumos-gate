@@ -36,10 +36,20 @@ ALL=		$(PROG) $(SUIDPROG)
 SRCS=		$(ALL:%=%.c)
 KCMDPROGS=	rcp rlogin rsh
 
-SUBDIRS=	chat dns-sd ftp nc netstat \
-		pppdump pppstats rdist talk telnet tftp
-# XXXARM: Not 64bit clean
-$(NOT_AARCH64_BLD)SUBDIRS += pppd
+SUBDIRS=		\
+	chat		\
+	dns-sd		\
+	ftp		\
+	nc		\
+	netstat		\
+	pppd		\
+	pppdump		\
+	pppstats	\
+	rdist		\
+	talk		\
+	telnet		\
+	tftp
+
 SUBDIR1=	talk
 MSGSUBDIRS=	talk
 

@@ -64,12 +64,28 @@ K5RSHDOBJS=	in.rshd.o
 K5TELNETOBJS=	in.telnetd.o
 SRCS=		$(PROGSRCS) $(OTHERSRC)
 
-SUBDIRS=	ifconfig ilbadm in.rdisc in.routed \
-		in.talkd inetadm inetconv ipadm ipmpstat ipqosconf ipsecutils \
-		nwamadm nwamcfg ping routeadm \
-		traceroute wificonfig
+SUBDIRS=		\
+	ifconfig	\
+	ilbadm		\
+	in.rdisc	\
+	in.routed	\
+	in.talkd	\
+	inetadm		\
+	inetconv	\
+	ipadm		\
+	ipmpstat	\
+	ipqosconf	\
+	ipsecutils	\
+	nwamadm		\
+	nwamcfg		\
+	ping		\
+	routeadm	\
+	sppptun		\
+	traceroute	\
+	wificonfig
+
 # XXXARM: not 64bit clean
-$(NOT_AARCH64_BLD)SUBDIRS += snoop sppptun
+$(NOT_AARCH64_BLD)SUBDIRS += snoop
 
 MSGSUBDIRS=	ifconfig ilbadm in.routed in.talkd \
 		inetadm inetconv ipadm ipmpstat ipqosconf ipsecutils \

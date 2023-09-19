@@ -1253,3 +1253,4 @@ usr/src/uts/intel/sys/vmm.h
 usr/src/uts/intel/sys/vmm_dev.h
 usr/src/lib/lib9p/common/*
 usr/src/cmd/sendmail/*
+usr/src/cmd/cmd-inet/usr.bin/pppd/*
