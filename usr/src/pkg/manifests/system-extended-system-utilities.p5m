@@ -88,7 +88,7 @@ file path=usr/bin/asa mode=0555
 file path=usr/bin/awk mode=0555
 file path=usr/bin/banner mode=0555
 file path=usr/bin/batch mode=0555
-$(not_aarch64)file path=usr/bin/bc mode=0555
+file path=usr/bin/bc mode=0555
 file path=usr/bin/bdiff mode=0755
 file path=usr/bin/cal mode=0555
 file path=usr/bin/col mode=0555

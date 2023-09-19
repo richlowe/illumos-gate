@@ -27,7 +27,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 %{
 #include <stdio.h>
@@ -38,7 +38,7 @@
 #include <signal.h>
 
 static void getout(int)	__NORETURN;
-static int *bundle(int, ...);
+static intptr_t *bundle(int, ...);
 static void usage(void);
 
 int	cpeek(char, int, char, int, char);
@@ -46,7 +46,7 @@ void	yyerror(char *);
 
 %}
 %union {
-	int *iptr;
+	intptr_t *iptr;
 	char *cptr;
 	int cc;
 	}
@@ -83,7 +83,7 @@ int	rcrs = '0';		/* reset crs */
 int	bindx = 0;
 int	lev = 0;			/* current scope level */
 int	ln;				/* line number of current file */
-int	*ttp;
+intptr_t *ttp;
 char	*ss;				/* current input source */
 int	bstack[10] = { 0 };
 char	*numb[15] = {
@@ -91,7 +91,7 @@ char	*numb[15] = {
 	" 6", " 7", " 8", " 9", " 10", " 11",
 	" 12", " 13", " 14"
 };
-int	*pre, *post;
+intptr_t *pre, *post;
 int	interact = 0;			/* talking to a tty? */
 %}
 %%
@@ -105,7 +105,7 @@ start	:
 			ttp = bundle(6, pre, $7, post, "0", numb[lev], "Q");
 			conout(ttp, (char *)$2);
 			rcrs = crs;
-			output((int *)"");
+			output((intptr_t *)"");
 			lev = bindx = 0;
 		}
 	;
@@ -416,8 +416,8 @@ CRS	:
 def	: _DEFINE LETTER '('
 		= {
 			$$ = getf($2);
-			pre = (int *)"";
-			post = (int *)"";
+			pre = (intptr_t *)"";
+			post = (intptr_t *)"";
 			lev = 1;
 			bstack[bindx = 0] = 0;
 		}
@@ -728,16 +728,16 @@ loop:
 }
 
 #define	b_sp_max	5000
-int b_space[b_sp_max];
-int *b_sp_nxt = { b_space };
+intptr_t b_space[b_sp_max];
+intptr_t *b_sp_nxt = b_space;
 
 int	bdebug = 0;
 
-static int *
+static intptr_t *
 bundle(int i, ...)
 {
 	va_list ap;
-	int *q;
+	intptr_t *q;
 
 	va_start(ap, i);
 	q = b_sp_nxt;
@@ -746,29 +746,29 @@ bundle(int i, ...)
 	while (i-- > 0) {
 		if (b_sp_nxt >= & b_space[b_sp_max])
 			yyerror("bundling space exceeded");
-		*b_sp_nxt++ = va_arg(ap, int);
+		*b_sp_nxt++ = va_arg(ap, intptr_t);
 	}
-	* b_sp_nxt++ = 0;
+	*b_sp_nxt++ = 0;
 	yyval.iptr = q;
 	va_end(ap);
 	return (q);
 }
 
 void
-routput(int *p)
+routput(intptr_t *p)
 {
 	if (bdebug) printf("routput(%o)\n", p);
 	if (p >= &b_space[0] && p < &b_space[b_sp_max]) {
 		/* part of a bundle */
 		while (*p != 0)
-			routput((int *)*p++);
+			routput((intptr_t *)*p++);
 	}
 	else
 		printf((char *)p);	 /* character string */
 }
 
 void
-output(int *p)
+output(intptr_t *p)
 {
 	routput(p);
 	b_sp_nxt = & b_space[0];
@@ -779,7 +779,7 @@ output(int *p)
 }
 
 void
-conout(int *p, char *s)
+conout(intptr_t *p, char *s)
 {
 	printf("[");
 	routput(p);
@@ -819,7 +819,7 @@ checkbuffer(void)
 }
 
 void
-pp(int *s)
+pp(intptr_t *s)
 {
 	/* puts the relevant stuff on pre and post for the letter s */
 
@@ -830,7 +830,7 @@ pp(int *s)
 }
 
 void
-tp(int *s)
+tp(intptr_t *s)
 {		/* same as pp, but for temps */
 	bundle(3, "0S", s, pre);
 	pre = yyval.iptr;
@@ -870,16 +870,16 @@ getout(int code)
 	exit(code);
 }
 
-int *
+intptr_t *
 getf(char *p)
 {
-	return ((int *) &funtab[2*(*p -0141)]);
+	return ((intptr_t *)&funtab[2*(*p -0141)]);
 }
 
-int *
+intptr_t *
 geta(char *p)
 {
-	return ((int *) &atab[2*(*p - 0141)]);
+	return ((intptr_t *)&atab[2*(*p - 0141)]);
 }
 
 int
@@ -890,7 +890,7 @@ main(int argc, char **argv)
 	int	lflag = 0;
 	int	flag = 0;
 	char	**av;
-	int 	filecounter = 0;
+	int	filecounter = 0;
 
 	(void) setlocale(LC_ALL, "");
 #if !defined(TEXT_DOMAIN)		/* Should be defined by cc -D */

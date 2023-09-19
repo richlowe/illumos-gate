@@ -33,7 +33,7 @@ set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/xpg6
 dir  path=usr/xpg6/bin
-$(not_aarch64)file path=usr/xpg6/bin/bc mode=0555
+file path=usr/xpg6/bin/bc mode=0555
 file path=usr/xpg6/bin/crontab mode=4555
 file path=usr/xpg6/bin/dc mode=0555
 file path=usr/xpg6/bin/ed mode=0555

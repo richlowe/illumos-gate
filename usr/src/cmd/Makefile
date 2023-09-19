@@ -65,6 +65,7 @@ COMMON_SUBDIRS=	\
 	banner		\
 	bart		\
 	basename	\
+	bc		\
 	bdiff		\
 	beadm		\
 	boot		\
@@ -459,7 +460,6 @@ COMMON_SUBDIRS=	\
 # powertop - not ported
 # rmformat - not ported (or useful?)
 #
-# bc - not 64bit clean
 # cpc - not ported (nor libcpc)
 # csh - not 64bit clean
 # eqn - not 64bit clean
@@ -479,7 +479,6 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 	abi		\
 	availdevs	\
 	bnu		\
-	bc		\
 	cpc		\
 	csh		\
 	eqn		\

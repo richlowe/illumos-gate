@@ -812,7 +812,7 @@ file path=usr/lib/cfgadm/usb.so.1
 $(not_aarch64)file path=usr/lib/extendedFILE.so.1
 file path=usr/lib/getloginx.so.1
 $(MULTILIB_ONLY)dir path=usr/lib/iconv/$(ARCH64)
-$(not_aarch64)file path=usr/lib/lib.b mode=0444
+file path=usr/lib/lib.b mode=0444
 link path=usr/lib/libadm.so target=../../lib/libadm.so.1
 link path=usr/lib/libadm.so.1 target=../../lib/libadm.so.1
 link path=usr/lib/libads.so target=./libads.so.1
