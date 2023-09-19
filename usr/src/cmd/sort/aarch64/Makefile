@@ -27,5 +27,4 @@
 include ../Makefile.com
 include ../../Makefile.cmd.64
 
-# doesn't install ROOTXPG4PROG64 yet, no such place
-install : all $(ROOTPROG64)
+install : all $(ROOTPROG64) $(ROOTXPG4PROG)
