@@ -54,7 +54,6 @@ LDLIBS += -ldhcputil -ldlpi -lsocket -lnsl -ltsol
 LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
 
 CERRWARN += -_gcc=-Wno-switch
-CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += $(CNOWARN_UNINIT)
 CERRWARN += -_gcc=-Wno-clobbered
 CERRWARN += -_gcc=-Wno-unused-value

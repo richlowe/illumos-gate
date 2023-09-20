@@ -48,6 +48,7 @@
 #include <netdb.h>
 #include <rpc/rpc.h>
 #include <setjmp.h>
+#include <arpa/inet.h>
 
 #include <sys/pfmod.h>
 #include "snoop.h"

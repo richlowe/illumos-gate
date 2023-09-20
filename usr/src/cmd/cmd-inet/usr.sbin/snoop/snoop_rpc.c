@@ -25,6 +25,7 @@
 
 #include <sys/types.h>
 #include <sys/errno.h>
+#include <sys/sysmacros.h>
 #include <setjmp.h>
 
 #include <netinet/in.h>
@@ -545,17 +546,17 @@ struct rpcnames {
 };
 
 int
-compare(struct rpcnames *a, struct rpcnames *b)
+compare(const void *a, const void *b)
 {
-	return (a->rp_prog - b->rp_prog);
+	return (((struct rpcnames *)a)->rp_prog -
+	    ((struct rpcnames *)b)->rp_prog);
 }
 
 char *
 nameof_prog(int prog)
 {
 	struct rpcnames *r;
-	struct rpcnames *bsearch();
-	int elems = sizeof (rpcnames) / sizeof (*r);
+	int elems = ARRAY_SIZE(rpcnames);
 
 	r = bsearch(&prog, rpcnames, elems, sizeof (*r), compare);
 	if (r)

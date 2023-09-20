@@ -80,12 +80,10 @@ SUBDIRS=		\
 	nwamcfg		\
 	ping		\
 	routeadm	\
+	snoop		\
 	sppptun		\
 	traceroute	\
 	wificonfig
-
-# XXXARM: not 64bit clean
-$(NOT_AARCH64_BLD)SUBDIRS += snoop
 
 MSGSUBDIRS=	ifconfig ilbadm in.routed in.talkd \
 		inetadm inetconv ipadm ipmpstat ipqosconf ipsecutils \

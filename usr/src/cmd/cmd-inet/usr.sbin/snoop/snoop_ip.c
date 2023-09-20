@@ -247,16 +247,15 @@ interpret_ip(int flags, const struct ip *ip, int fraglen)
 				break;
 			case IPPROTO_ENCAP:
 				(void) interpret_ip(flags,
-				    /* LINTED: alignment */
 				    (const struct ip *)data, fraglen);
 				break;
 			case IPPROTO_ICMP:
 				(void) interpret_icmp(flags,
-				    /* LINTED: alignment */
 				    (struct icmp *)data, iplen, fraglen);
 				break;
 			case IPPROTO_IGMP:
-				interpret_igmp(flags, data, iplen, fraglen);
+				interpret_igmp(flags, (struct igmp *)data,
+				    iplen, fraglen);
 				break;
 			case IPPROTO_GGP:
 				break;
@@ -275,7 +274,8 @@ interpret_ip(int flags, const struct ip *ip, int fraglen)
 				break;
 
 			case IPPROTO_OSPF:
-				interpret_ospf(flags, data, iplen, fraglen);
+				interpret_ospf(flags, (struct ospfhdr *)data,
+				    iplen, fraglen);
 				break;
 
 			case IPPROTO_EGP:
@@ -435,12 +435,12 @@ interpret_ipv6(int flags, const ip6_t *ip6h, int fraglen)
 			    fraglen);
 			break;
 		case IPPROTO_ICMPV6:
-			/* LINTED: alignment */
 			(void) interpret_icmpv6(flags, (icmp6_t *)data, iplen,
 			    fraglen);
 			break;
 		case IPPROTO_IGMP:
-			interpret_igmp(flags, data, iplen, fraglen);
+			interpret_igmp(flags, (struct igmp *)data,
+			    iplen, fraglen);
 			break;
 		case IPPROTO_GGP:
 			break;
@@ -476,7 +476,8 @@ interpret_ipv6(int flags, const ip6_t *ip6h, int fraglen)
 			    iplen, fraglen);
 			break;
 		case IPPROTO_OSPF:
-			interpret_ospf6(flags, data, iplen, fraglen);
+			interpret_ospf6(flags, (struct ospf6hdr *)data,
+			    iplen, fraglen);
 			break;
 		}
 	}

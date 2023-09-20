@@ -599,7 +599,8 @@ interpret_ospf6(int flags, struct ospf6hdr *ospf, int iplen, int fraglen)
 			if (flags & F_DTAIL)
 				snprintf(get_line(0, 0), get_line_remain(),
 				    "ospfv2 packet in ipv6 header");
-			return (interpret_ospf(flags, ospf, iplen, fraglen));
+			return (interpret_ospf(flags, (struct ospfhdr *)ospf,
+			    iplen, fraglen));
 		} else  {
 			return (fraglen);
 		}

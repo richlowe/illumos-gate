@@ -47,7 +47,7 @@ extern char *dlc_header;
 static char *sum_line;
 
 char *ospf_types[] = {
-	"umd", 		/* 0 */
+	"umd",		/* 0 */
 	"Hello",	/* 1 */
 	"DD",		/* 2 */
 	"LSReq",	/* 3 */
@@ -56,7 +56,7 @@ char *ospf_types[] = {
 };
 
 static char *ospf_authtypes[] = {
-	"None", 	/* 0 */
+	"None",		/* 0 */
 	"simple",	/* 1 */
 	"md5",		/* 2 */
 };
@@ -66,14 +66,14 @@ const struct bits ospf_rla_flag_bits[] = {
 	{ RLA_FLAG_E,		"E" },
 	{ RLA_FLAG_V,		"V" },
 	{ RLA_FLAG_W,		"W" },
-	{ 0, 			NULL }
+	{ 0,			NULL }
 };
 
 const struct bits ospf_db_flags_bits[] = {
 	{ OSPF_DB_INIT,		"I" },
 	{ OSPF_DB_MORE,		"M" },
 	{ OSPF_DB_MASTER,	"MS" },
-	{ 0, 			NULL }
+	{ 0,			NULL }
 };
 
 const struct bits ospf_option_bits[] = {
@@ -415,7 +415,7 @@ interpret_ospf_lsa(int flags, struct lsa *lsa, uchar_t *fragend)
 				    ntohs(rl->link_tos0metric));
 			}
 			tosp = (struct tos_metric *)(
-				(uchar_t *)rl + sizeof (rl->link_tos0metric));
+			    (uchar_t *)rl + sizeof (rl->link_tos0metric));
 			for (k = 0; k > (int)rl->link_toscount; ++k, ++tosp) {
 				if (TRUNC(tosp))
 					return (-1);
@@ -607,7 +607,8 @@ interpret_ospf(int flags, struct ospfhdr *ospf, int iplen, int fraglen)
 			if (flags & F_DTAIL)
 				snprintf(get_line(0, 0), get_line_remain(),
 				    "ospfv3 packet in ipv4 header");
-			return (interpret_ospf6(flags, ospf, iplen, fraglen));
+			return (interpret_ospf6(flags, (struct ospf6hdr *)ospf,
+			    iplen, fraglen));
 		} else  {
 			return (fraglen);
 		}

@@ -37,6 +37,7 @@
 #include <arpa/inet.h>
 #include <protocols/routed.h>
 #include <protocols/ripngd.h>
+#include <strings.h>
 #include "snoop.h"
 
 extern char *dlc_header;
@@ -127,8 +128,7 @@ interpret_rip6(int flags, struct rip6 *rip6, int fraglen)
 }
 
 static char *
-show_cmd6(c)
-	int c;
+show_cmd6(int c)
 {
 	switch (c) {
 	case RIPCMD6_REQUEST:	return ("route request");

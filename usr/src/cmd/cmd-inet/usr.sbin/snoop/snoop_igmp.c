@@ -46,11 +46,10 @@ static void interpret_igmpv3rpt(struct igmp *, int);
 
 /*ARGSUSED*/
 void
-interpret_igmp(int flags, char *data, int iplen, int ilen)
+interpret_igmp(int flags, struct igmp *igmp, int iplen, int ilen)
 {
 	const char *pt;
 	char *line;
-	struct igmp *igmp = (struct igmp *)data;
 	char addrstr[INET_ADDRSTRLEN];
 
 	if (ilen < IGMP_MINLEN) {

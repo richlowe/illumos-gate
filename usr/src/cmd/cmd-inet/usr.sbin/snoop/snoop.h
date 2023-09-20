@@ -49,6 +49,10 @@
 #include <libdlpi.h>
 #include <note.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -305,6 +309,18 @@ extern char *printether(struct ether_addr *);
 extern char *print_ethertype(int);
 extern const char *arp_htype(int);
 extern int valid_rpc(char *, int);
+
+struct ospfhdr;
+struct ospf6hdr;
+struct igmp;
+extern void interpret_igmp(int, struct igmp *, int, int);
+extern int interpret_ospf(int, struct ospfhdr *, int, int);
+extern int interpret_ospf6(int, struct ospf6hdr *, int, int);
+extern int interpret_rpc(int, char *, int, int);
+
+extern void extract_rpcsec_gss_cred_info(int);
+
+extern int reservedport(int, int);
 
 /*
  * Describes characteristics of the Media Access Layer.
