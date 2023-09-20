@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SunOS	*/
-
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <setjmp.h>
@@ -61,10 +59,8 @@ static char *procnames_long[] = {
 #define	MAXPROC	2
 
 void
-interpret_rstat(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_rstat(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 
@@ -129,7 +125,7 @@ interpret_rstat(flags, type, xid, vers, proc, data, len)
 }
 
 void
-detail_stats()
+detail_stats(void)
 {
 	show_space();
 	(void) sprintf(get_line(0, 0), "CPU Times:");
@@ -158,7 +154,7 @@ detail_stats()
 }
 
 void
-detail_statsswtch()
+detail_statsswtch(void)
 {
 	show_space();
 	(void) sprintf(get_line(0, 0), "CPU Times:");
@@ -194,7 +190,7 @@ detail_statsswtch()
 }
 
 void
-detail_statstime()
+detail_statstime(void)
 {
 	show_space();
 	(void) sprintf(get_line(0, 0), "CPU Times:");
@@ -231,7 +227,7 @@ detail_statstime()
 }
 
 void
-detail_statsvar()
+detail_statsvar(void)
 {
 	int i, n;
 

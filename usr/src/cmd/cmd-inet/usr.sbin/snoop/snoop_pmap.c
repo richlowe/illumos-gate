@@ -54,10 +54,8 @@ static void interpret_pmap_4(int, int, int, int, int, char *, int);
 static void stash_callit(ulong_t, int, int, int, int);
 
 void
-interpret_pmap(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_pmap(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	switch (vers) {
 	case 2:	interpret_pmap_2(flags, type, xid, vers, proc, data, len);
@@ -95,14 +93,12 @@ static char *procnames_long_2[] = {
 #define	MAXPROC_2	5
 
 void
-interpret_pmap_2(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_pmap_2(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
-	unsigned port, proto;
-	unsigned iprog, ivers, iproc, ilen;
+	unsigned int port, proto;
+	unsigned int iprog, ivers, iproc, ilen;
 	extern int pi_frame;
 	struct cache_struct *x, *find_callit();
 	int trailer_done = 0;
@@ -273,7 +269,7 @@ interpret_pmap_2(flags, type, xid, vers, proc, data, len)
 }
 
 char *
-sum_pmaplist()
+sum_pmaplist(void)
 {
 	int maps = 0;
 	static char buff[16];
@@ -296,9 +292,9 @@ sum_pmaplist()
 }
 
 void
-show_pmaplist()
+show_pmaplist(void)
 {
-	unsigned prog, vers, proto, port;
+	unsigned int prog, vers, proto, port;
 	int maps = 0;
 
 	if (setjmp(xdr_err)) {
@@ -381,13 +377,11 @@ static char *procnames_long_4[] = {
 #define	RPCBPROC_NULL		0
 
 void
-interpret_pmap_4(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_pmap_4(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
-	unsigned prog, ver;
+	unsigned int prog, ver;
 	char buff1[MAXSTRINGLEN + 1];
 	int iprog, ivers, iproc, ilen;
 	extern int pi_frame;
@@ -609,7 +603,7 @@ interpret_pmap_4(flags, type, xid, vers, proc, data, len)
 }
 
 char *
-sum_rpcblist()
+sum_rpcblist(void)
 {
 	int maps = 0;
 	static char buff[MAXSTRINGLEN + 1];
@@ -633,9 +627,9 @@ sum_rpcblist()
 }
 
 void
-show_rpcblist()
+show_rpcblist(void)
 {
-	unsigned prog, vers;
+	unsigned int prog, vers;
 	char netid[MAXSTRINGLEN + 1], uaddr[MAXSTRINGLEN + 1];
 	char owner[MAXSTRINGLEN + 1];
 	int maps = 0;
@@ -669,7 +663,7 @@ show_rpcblist()
 }
 
 char *
-sum_rpcb_entry_list()
+sum_rpcb_entry_list(void)
 {
 	int maps = 0;
 	static char buff[MAXSTRINGLEN + 1];
@@ -695,11 +689,11 @@ sum_rpcb_entry_list()
 char *semantics_strs[] = {"", "CLTS", "COTS", "COTS-ORD", "RAW"};
 
 void
-show_rpcb_entry_list()
+show_rpcb_entry_list(void)
 {
 	char maddr[MAXSTRINGLEN + 1], netid[MAXSTRINGLEN + 1];
 	char protofmly[MAXSTRINGLEN + 1], proto[MAXSTRINGLEN + 1];
-	unsigned sem;
+	unsigned int sem;
 	int maps = 0;
 
 	if (setjmp(xdr_err)) {
@@ -737,8 +731,7 @@ struct cache_struct *cxcp	= &cxid_cache[0];
 struct cache_struct *cxcplast   = &cxid_cache[CXID_CACHE_SIZE - 1];
 
 struct cache_struct *
-find_callit(xid)
-	ulong_t xid;
+find_callit(ulong_t xid)
 {
 	struct cache_struct *x;
 
@@ -752,9 +745,7 @@ find_callit(xid)
 }
 
 static void
-stash_callit(xid, frame, prog, vers, proc)
-	ulong_t xid;
-	int frame, prog, vers, proc;
+stash_callit(ulong_t xid, int frame, int prog, int vers, int proc)
 {
 	struct cache_struct *x;
 

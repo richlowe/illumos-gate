@@ -437,10 +437,7 @@ interpret_icmp(int flags, struct icmp *icmp, int iplen, int ilen)
 
 /*ARGSUSED*/
 void
-interpret_icmpv6(flags, icmp6, iplen, ilen)
-	int flags;
-	icmp6_t *icmp6;
-	int iplen, ilen;
+interpret_icmpv6(int flags, icmp6_t *icmp6, int iplen, int ilen)
 {
 	char *pt, *pc;
 	char *line;
@@ -774,9 +771,7 @@ interpret_icmpv6(flags, icmp6, iplen, ilen)
 }
 
 static void
-interpret_options(optc, ilen)
-	char *optc;
-	int ilen;
+interpret_options(char *optc, int ilen)
 {
 #define	PREFIX_OPTION_LENGTH    4
 #define	MTU_OPTION_LENGTH	1

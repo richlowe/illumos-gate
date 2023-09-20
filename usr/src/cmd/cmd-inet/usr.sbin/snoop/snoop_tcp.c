@@ -62,9 +62,9 @@ static const struct {
 	unsigned int	tf_flag;
 	const char	*tf_name;
 } tcp_flags[] = {
-	{ TH_SYN, 	"Syn"	},
-	{ TH_FIN, 	"Fin"	},
-	{ TH_RST, 	"Rst"	},
+	{ TH_SYN,	"Syn"	},
+	{ TH_FIN,	"Fin"	},
+	{ TH_RST,	"Rst"	},
 	{ TH_PUSH,	"Push"	},
 	{ TH_ECE,	"ECE"	},
 	{ TH_CWR,	"CWR"	},
@@ -222,9 +222,7 @@ interpret_tcp(int flags, struct tcphdr *tcp, int iplen, int fraglen)
 }
 
 static void
-print_tcpoptions(opt, optlen)
-	uchar_t *opt;
-	int optlen;
+print_tcpoptions(uchar_t *opt, int optlen)
 {
 	int	 len;
 	char	 *line;

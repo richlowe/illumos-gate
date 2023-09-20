@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SunOS	*/
-
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <setjmp.h>
@@ -93,10 +91,8 @@ static char *procnames_long[] = {
 #define	MAXPROC	7
 
 void
-interpret_mount(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_mount(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 	char buff[MNTPATHLEN + 1];
@@ -204,8 +200,7 @@ interpret_mount(flags, type, xid, vers, proc, data, len)
  */
 
 static void
-mountcall(proc, vers)
-	int proc, vers;
+mountcall(int proc, int vers)
 {
 
 	switch (proc) {
@@ -240,8 +235,7 @@ mountcall(proc, vers)
  */
 
 static void
-mountreply(proc, vers)
-	int proc, vers;
+mountreply(int proc, int vers)
 {
 
 	switch (proc) {
@@ -281,8 +275,7 @@ mountreply(proc, vers)
 }
 
 static void
-sum_mountstat(line)
-	char *line;
+sum_mountstat(char *line)
 {
 	ulong_t status;
 	char *str;
@@ -299,7 +292,7 @@ sum_mountstat(line)
 }
 
 static int
-detail_mountstat()
+detail_mountstat(void)
 {
 	ulong_t status;
 	char *str;
@@ -316,7 +309,7 @@ detail_mountstat()
 }
 
 char *
-sum_mountfh()
+sum_mountfh(void)
 {
 	int fh;
 	static char buff[8];
@@ -327,7 +320,7 @@ sum_mountfh()
 }
 
 static void
-detail_mountfh()
+detail_mountfh(void)
 {
 	int pos;
 	int fh;
@@ -340,7 +333,7 @@ detail_mountfh()
 }
 
 static char *
-print_auth()
+print_auth(void)
 {
 	int i, auth, flavors;
 	char *p;
@@ -376,8 +369,7 @@ print_auth()
 }
 
 static void
-sum_mountstat3(line)
-	char *line;
+sum_mountstat3(char *line)
 {
 	ulong_t status;
 
@@ -391,7 +383,7 @@ sum_mountstat3(line)
 }
 
 static void
-detail_mountstat3()
+detail_mountstat3(void)
 {
 	ulong_t status;
 
@@ -406,7 +398,7 @@ detail_mountstat3()
 }
 
 char *
-sum_mountfh3()
+sum_mountfh3(void)
 {
 	int len;
 	int fh;
@@ -419,7 +411,7 @@ sum_mountfh3()
 }
 
 static void
-detail_mountfh3()
+detail_mountfh3(void)
 {
 	int pos;
 	int i, l, len;
@@ -439,7 +431,7 @@ detail_mountfh3()
 }
 
 static char *
-sum_exports()
+sum_exports(void)
 {
 	static char buff[MNTPATHLEN + 1];
 	int entries = 0;
@@ -462,7 +454,7 @@ sum_exports()
 }
 
 static void
-detail_exports()
+detail_exports(void)
 {
 	int entries = 0;
 	char *dirpath, *grpname;
@@ -487,7 +479,7 @@ detail_exports()
 }
 
 static char *
-sum_mounts()
+sum_mounts(void)
 {
 	int entries = 0;
 	static char buff[MNTPATHLEN + 1];
@@ -508,7 +500,7 @@ sum_mounts()
 }
 
 static void
-detail_mounts()
+detail_mounts(void)
 {
 	int entries = 0;
 	char *hostname, *directory;
@@ -532,8 +524,7 @@ detail_mounts()
 }
 
 char *
-statusmsg3(status)
-	ulong_t status;
+statusmsg3(ulong_t status)
 {
 
 	switch (status) {

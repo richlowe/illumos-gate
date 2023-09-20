@@ -116,12 +116,7 @@ typedef oidelmT *oidelmTp;
  */
 
 void
-interpret_ldap(flags, data, fraglen, src, dst)
-int flags;
-char *data;
-int fraglen;
-int src;
-int dst;
+interpret_ldap(int flags, char *data, int fraglen, int src, int dst)
 {
 
 	if (!ldap) {
@@ -309,7 +304,7 @@ static A uclass[] = {	/* universal tag assignment */
 (A)"Reserved",				/* 28 */
 (A)"Reserved",				/* 29 */
 (A)"Reserved",				/* 30 */
-(A)"Reserved" 				/* 31 */
+(A)"Reserved"				/* 31 */
 };
 
 static A MHSaclass[] = {	/* mhs application tag assignment */
@@ -344,7 +339,7 @@ static A MHSaclass[] = {	/* mhs application tag assignment */
 (A)"",					/* 28 */
 (A)"",					/* 29 */
 (A)"",					/* 30 */
-(A)"" 					/* 31 */
+(A)""					/* 31 */
 };
 
 
@@ -380,7 +375,7 @@ static A DFTaclass[] = {	/* Default Application Tag Assignment */
 (A)"",				/* 28 */
 (A)"",				/* 29 */
 (A)"",				/* 30 */
-(A)"" 				/* 31 */
+(A)""				/* 31 */
 };
 
 typedef struct asndefS {
@@ -788,9 +783,7 @@ static int getnext(int ctxnum)
 /*
  * Skip everything that is not an LDAPMessage
  */
-static char *skipjunk(len, pdu)
-int len;
-char *pdu;
+static char *skipjunk(int len, char *pdu)
 {
 	int tag;
 	char *buf = pdu;
@@ -1398,7 +1391,7 @@ decpdu(int pdulen, asndefTp ASNDESC, int ctxnum)
 /* it is called one-time (in snoop_filter.c) only. */
 
 void
-init_ldap()
+init_ldap(void)
 {
 	int i;
 

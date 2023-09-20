@@ -75,7 +75,7 @@ interpret_rpc(int flags, char *rpc, int fraglen, int type)
 	int rpcvers, prog, vers, proc;
 	int status, astat, rstat, why;
 	char *lp;
-	unsigned recmark;
+	unsigned int recmark;
 	int markpos;
 	extern int pi_frame;
 	int lo, hi;

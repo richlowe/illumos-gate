@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SunOS	*/
-
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <setjmp.h>
@@ -62,10 +60,8 @@ static char *procnames_long[] = {
 #define	MAXPROC	2
 
 void
-interpret_bparam(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_bparam(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 	char buff[MAX_PATH_LEN + 1];
@@ -175,7 +171,7 @@ interpret_bparam(flags, type, xid, vers, proc, data, len)
 }
 
 static char *
-sum_address()
+sum_address(void)
 {
 	struct in_addr host;
 	extern char *inet_ntoa();
@@ -194,8 +190,7 @@ sum_address()
 }
 
 static void
-show_address(label)
-	char *label;
+show_address(char *label)
 {
 	struct in_addr host;
 	extern char *inet_ntoa();

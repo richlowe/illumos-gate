@@ -100,10 +100,8 @@ static char *procnames_long[] = {
 
 /* ARGSUSED */
 void
-interpret_nfs(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nfs(int flags, int type, int xid, int vers, int proc,
+    char * data, int len)
 {
 
 	if (vers == 2) {
@@ -123,10 +121,8 @@ interpret_nfs(flags, type, xid, vers, proc, data, len)
 }
 
 static void
-interpret_nfs2(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nfs2(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 	char buff[NFS_MAXPATHLEN + 1];
@@ -285,8 +281,7 @@ interpret_nfs2(flags, type, xid, vers, proc, data, len)
  *  Print out version 2 NFS call packets
  */
 static void
-nfscall2(proc)
-	int proc;
+nfscall2(int proc)
 {
 	switch (proc) {
 	case NFSPROC_GETATTR:
@@ -347,8 +342,7 @@ nfscall2(proc)
  *  Print out version 2 NFS reply packets
  */
 static void
-nfsreply2(proc)
-	int proc;
+nfsreply2(int proc)
 {
 	switch (proc) {
 	    case NFSPROC_GETATTR:
@@ -410,7 +404,7 @@ nfsreply2(proc)
 }
 
 static void
-detail_diroparg()
+detail_diroparg(void)
 {
 	detail_nfsfh();
 	(void) showxdr_string(NFS_MAXPATHLEN, "File name = %s");
@@ -423,8 +417,7 @@ detail_diroparg()
  * them correctly.
  */
 static char *
-statusmsg(status)
-	ulong_t status;
+statusmsg(ulong_t status)
 {
 	switch (status) {
 	case NFS_OK: return ("OK");
@@ -455,8 +448,7 @@ statusmsg(status)
 }
 
 int
-sum_nfsstat(line)
-	char *line;
+sum_nfsstat(char *line)
 {
 	ulong_t status;
 
@@ -466,7 +458,7 @@ sum_nfsstat(line)
 }
 
 int
-detail_nfsstat()
+detail_nfsstat(void)
 {
 	ulong_t status;
 	int pos;
@@ -481,8 +473,7 @@ detail_nfsstat()
 }
 
 int
-sum_filehandle(len)
-	int len;
+sum_filehandle(int len)
 {
 	int i, l;
 	int fh = 0;
@@ -496,7 +487,7 @@ sum_filehandle(len)
 }
 
 char *
-sum_nfsfh()
+sum_nfsfh(void)
 {
 	int fh;
 	static char buff[16];
@@ -507,7 +498,7 @@ sum_nfsfh()
 }
 
 void
-detail_nfsfh()
+detail_nfsfh(void)
 {
 	int pos;
 	int fh;
@@ -520,8 +511,7 @@ detail_nfsfh()
 }
 
 static void
-detail_mode(mode)
-	int mode;
+detail_mode(int mode)
 {
 	char *str;
 
@@ -552,7 +542,7 @@ detail_mode(mode)
 }
 
 void
-detail_fattr()
+detail_fattr(void)
 {
 	int fltype, mode, nlinks, uid, gid, size, blksz;
 	int rdev, blocks, fsid, fileid;
@@ -588,7 +578,7 @@ detail_fattr()
 }
 
 static void
-detail_sattr()
+detail_sattr(void)
 {
 	int mode;
 
@@ -602,8 +592,7 @@ detail_sattr()
 }
 
 static char *
-filetype(n)
-	int n;
+filetype(int n)
 {
 	switch (n) {
 	    case NFREG: return ("Regular File");
@@ -616,8 +605,7 @@ filetype(n)
 }
 
 static char *
-perms(n)
-	int n;
+perms(int n)
 {
 	static char buff[4];
 
@@ -629,7 +617,7 @@ perms(n)
 }
 
 static char *
-sum_readdirres()
+sum_readdirres(void)
 {
 	static char buff[NFS_MAXNAMLEN + 1];
 	int entries = 0;
@@ -652,7 +640,7 @@ sum_readdirres()
 }
 
 static void
-detail_readdirres()
+detail_readdirres(void)
 {
 	ulong_t fileid, cookie;
 	int entries = 0;
@@ -682,7 +670,7 @@ detail_readdirres()
 }
 
 void
-skip_fattr()
+skip_fattr(void)
 {
 
 	xdr_skip(17 * 4);	/* XDR sizeof nfsfattr */

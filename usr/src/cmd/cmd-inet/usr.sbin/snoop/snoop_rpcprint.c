@@ -44,11 +44,8 @@ int rpcsec_gss_pre_proto(int type, int flags, int xid,
 void rpcsec_gss_post_proto(int flags, int xid);
 
 void
-protoprint(flags, type, xid, prog, vers, proc, data, len)
-	ulong_t xid;
-	int flags, type, prog, vers, proc;
-	char *data;
-	int len;
+protoprint(int flags, int type, ulong_t xid, int prog, int vers, int proc,
+    char *data, int len)
 {
 	char *name;
 	void (*interpreter)(int, int, int, int, int, char *, int);

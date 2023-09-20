@@ -24,8 +24,6 @@
  * All rights reserved.
  */
 
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SunOS	*/
-
 #include <sys/types.h>
 #include <sys/errno.h>
 #include <setjmp.h>
@@ -61,10 +59,8 @@ static char *procnames_long[] = {
 static void show_quota(void);
 
 void
-interpret_rquota(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_rquota(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 	char buff[RQ_PATHLEN + 1];
@@ -141,7 +137,7 @@ interpret_rquota(flags, type, xid, vers, proc, data, len)
 }
 
 static void
-show_quota()
+show_quota(void)
 {
 	int active;
 

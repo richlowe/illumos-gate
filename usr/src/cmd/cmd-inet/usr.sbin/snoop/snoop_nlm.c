@@ -84,10 +84,8 @@ static char *sum_notify();
 static char *sum_share();
 
 void
-interpret_nlm(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nlm(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	switch (vers) {
 	case 1:	interpret_nlm_1(flags, type, xid, vers, proc, data, len);
@@ -145,10 +143,8 @@ static char *procnames_long_1[] = {
 
 /* ARGSUSED */
 static void
-interpret_nlm_1(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nlm_1(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 
@@ -319,7 +315,7 @@ interpret_nlm_1(flags, type, xid, vers, proc, data, len)
  * are skipped.
  */
 static void
-skip_netobj()
+skip_netobj(void)
 {
 	int sz = getxdr_u_long();
 
@@ -327,8 +323,7 @@ skip_netobj()
 }
 
 static char *
-sum_netobj(handle)
-	char *handle;
+sum_netobj(char *handle)
 {
 	int i, l, sz;
 	int sum = 0;
@@ -344,8 +339,7 @@ sum_netobj(handle)
 }
 
 static void
-show_netobj(fmt)
-	char *fmt;
+show_netobj(char *fmt)
 {
 	int sz, chunk;
 	char *p;
@@ -376,7 +370,7 @@ show_netobj(fmt)
 }
 
 static char *
-sum_lock()
+sum_lock(void)
 {
 	static char buff[LM_MAXSTRLEN + 1];
 	char *cp = buff;
@@ -395,7 +389,7 @@ sum_lock()
 }
 
 static void
-show_lock()
+show_lock(void)
 {
 	showxdr_string(LM_MAXSTRLEN, "Caller = %s");
 	show_netobj("Filehandle = %s");
@@ -406,7 +400,7 @@ show_lock()
 }
 
 static void
-show_cancargs()
+show_cancargs(void)
 {
 	show_netobj("Cookie = %s");
 	showxdr_bool("Block = %s");
@@ -415,7 +409,7 @@ show_cancargs()
 }
 
 static void
-show_lockargs()
+show_lockargs(void)
 {
 	show_netobj("Cookie = %s");
 	showxdr_bool("Block = %s");
@@ -426,14 +420,14 @@ show_lockargs()
 }
 
 static void
-show_unlockargs()
+show_unlockargs(void)
 {
 	show_netobj("Cookie = %s");
 	show_lock();
 }
 
 static void
-show_testargs()
+show_testargs(void)
 {
 	show_netobj("Cookie = %s");
 	showxdr_bool("Exclusive = %s");
@@ -441,15 +435,14 @@ show_testargs()
 }
 
 static void
-show_res()
+show_res(void)
 {
 	show_netobj("Cookie = %s");
 	(void) show_stat();
 }
 
 static char *
-nameof_stat(s)
-	ulong_t s;
+nameof_stat(ulong_t s)
 {
 	switch ((enum nlm_stats) s) {
 	case nlm_granted:	return ("granted");
@@ -463,7 +456,7 @@ nameof_stat(s)
 }
 
 static enum nlm_stats
-show_stat()
+show_stat(void)
 {
 	enum nlm_stats s;
 
@@ -476,7 +469,7 @@ show_stat()
 }
 
 static void
-show_testres()
+show_testres(void)
 {
 	show_netobj("Cookie = %s");
 	if (show_stat() == nlm_denied) {
@@ -509,10 +502,8 @@ static char *procnames_long_3[] = {
 #define	MAXPROC_3	23
 
 static void
-interpret_nlm_3(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nlm_3(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line, *pl;
 	ulong_t i;
@@ -624,8 +615,7 @@ interpret_nlm_3(flags, type, xid, vers, proc, data, len)
 }
 
 static char *
-nameof_mode(m)
-	uint_t m;
+nameof_mode(uint_t m)
 {
 	switch ((enum fsh_mode) m) {
 	case fsm_DN:	return ("deny none");
@@ -637,8 +627,7 @@ nameof_mode(m)
 }
 
 static char *
-nameof_access(a)
-	uint_t a;
+nameof_access(uint_t a)
 {
 	switch ((enum fsh_access) a) {
 	case fsa_NONE:	return ("?");
@@ -650,7 +639,7 @@ nameof_access(a)
 }
 
 static void
-show_nlm_mode()
+show_nlm_mode(void)
 {
 	enum fsh_mode m;
 
@@ -661,7 +650,7 @@ show_nlm_mode()
 }
 
 static void
-show_nlm_access()
+show_nlm_access(void)
 {
 	enum fsh_access a;
 
@@ -672,7 +661,7 @@ show_nlm_access()
 }
 
 static char *
-sum_share()
+sum_share(void)
 {
 	static char buff[LM_MAXSTRLEN + 1];
 	char *cp = buff;
@@ -689,7 +678,7 @@ sum_share()
 }
 
 static void
-show_share()
+show_share(void)
 {
 	showxdr_string(LM_MAXSTRLEN, "Caller = %s");
 	show_netobj("Filehandle = %s");
@@ -699,7 +688,7 @@ show_share()
 }
 
 static void
-show_shareargs()
+show_shareargs(void)
 {
 	show_netobj("Cookie = %s");
 	show_share();
@@ -707,7 +696,7 @@ show_shareargs()
 }
 
 static void
-show_shareres()
+show_shareres(void)
 {
 	show_netobj("Cookie = %s");
 	(void) show_stat();
@@ -715,7 +704,7 @@ show_shareres()
 }
 
 static void
-show_notify()
+show_notify(void)
 {
 	showxdr_string(LM_MAXNAMELEN, "Name = %s");
 	showxdr_long("State = %d");
@@ -724,7 +713,7 @@ show_notify()
 #define	NOTIFY_PAD	(sizeof (" State=-2147483648") + 1)
 
 static char *
-sum_notify()
+sum_notify(void)
 {
 	static char buff[LM_MAXNAMELEN + NOTIFY_PAD];
 	char *cp = buff;
@@ -798,10 +787,8 @@ static char *procnames_long_4[] = {
 
 /* ARGSUSED */
 static void
-interpret_nlm_4(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nlm_4(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 	char *pl;
@@ -1011,7 +998,7 @@ interpret_nlm_4(flags, type, xid, vers, proc, data, len)
 }
 
 static char *
-sum_lock4()
+sum_lock4(void)
 {
 	static char buff[LM_MAXSTRLEN + 1];
 	char *cp = buff;
@@ -1030,7 +1017,7 @@ sum_lock4()
 }
 
 static void
-show_lock4()
+show_lock4(void)
 {
 	showxdr_string(LM_MAXSTRLEN, "Caller = %s");
 	show_netobj("Filehandle = %s");
@@ -1041,7 +1028,7 @@ show_lock4()
 }
 
 static void
-show_cancargs4()
+show_cancargs4(void)
 {
 	show_netobj("Cookie = %s");
 	showxdr_bool("Block = %s");
@@ -1050,7 +1037,7 @@ show_cancargs4()
 }
 
 static void
-show_lockargs4()
+show_lockargs4(void)
 {
 	show_netobj("Cookie = %s");
 	showxdr_bool("Block = %s");
@@ -1061,14 +1048,14 @@ show_lockargs4()
 }
 
 static void
-show_unlockargs4()
+show_unlockargs4(void)
 {
 	show_netobj("Cookie = %s");
 	show_lock4();
 }
 
 static void
-show_testargs4()
+show_testargs4(void)
 {
 	show_netobj("Cookie = %s");
 	showxdr_bool("Exclusive = %s");
@@ -1076,15 +1063,14 @@ show_testargs4()
 }
 
 static void
-show_res4()
+show_res4(void)
 {
 	show_netobj("Cookie = %s");
 	(void) show_stat4();
 }
 
 static char *
-nameof_stat4(s)
-	ulong_t s;
+nameof_stat4(ulong_t s)
 {
 	switch ((enum nlm4_stats) s) {
 	case nlm4_granted:	return ("granted");
@@ -1102,7 +1088,7 @@ nameof_stat4(s)
 }
 
 static enum nlm4_stats
-show_stat4()
+show_stat4(void)
 {
 	enum nlm4_stats s;
 
@@ -1115,7 +1101,7 @@ show_stat4()
 }
 
 static void
-show_testres4()
+show_testres4(void)
 {
 	show_netobj("Cookie = %s");
 	if (show_stat() == nlm_denied) {
@@ -1128,7 +1114,7 @@ show_testres4()
 }
 
 static void
-show_shareres4()
+show_shareres4(void)
 {
 	show_netobj("Cookie = %s");
 	(void) show_stat4();

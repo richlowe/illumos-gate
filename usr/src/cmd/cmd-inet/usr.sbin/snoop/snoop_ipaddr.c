@@ -44,8 +44,10 @@
 #include "snoop.h"
 
 static sigjmp_buf nisjmp;
-static hrtime_t snoop_lastwarn;		/* Last time NS warning fired */
-static unsigned snoop_warninter = 60;	/* Time in seconds between warnings */
+/* Last time NS warning fired */
+static hrtime_t snoop_lastwarn;
+/* Time in seconds between warnings */
+static unsigned int snoop_warninter = 60;
 
 #define	MAXHASH 1024  /* must be a power of 2 */
 

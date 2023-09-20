@@ -168,10 +168,8 @@ static char *procnames_long_v4[] = {
 
 /* ARGSUSED */
 void
-interpret_nfs_acl(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nfs_acl(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 
 	if (vers == 2) {
@@ -436,7 +434,7 @@ sum_nfsstat4(char *line)
 }
 
 int
-detail_nfsstat4()
+detail_nfsstat4(void)
 {
 	ulong_t status;
 	char buff[64];
@@ -455,8 +453,7 @@ detail_nfsstat4()
  * Print out version 2 NFS_ACL call packets
  */
 static void
-aclcall2(proc)
-	int proc;
+aclcall2(int proc)
 {
 
 	switch (proc) {
@@ -484,8 +481,7 @@ aclcall2(proc)
  * Print out version 2 NFS_ACL reply packets
  */
 static void
-aclreply2(proc)
-	int proc;
+aclreply2(int proc)
 {
 
 	switch (proc) {
@@ -518,8 +514,7 @@ aclreply2(proc)
  * Print out version 3 NFS_ACL call packets
  */
 static void
-aclcall3(proc)
-	int proc;
+aclcall3(int proc)
 {
 
 	switch (proc) {
@@ -540,8 +535,7 @@ aclcall3(proc)
  * Print out version 3 NFS_ACL reply packets
  */
 static void
-aclreply3(proc)
-	int proc;
+aclreply3(int proc)
 {
 
 	switch (proc) {
@@ -564,8 +558,7 @@ aclreply3(proc)
  * Print out version 4 NFS_ACL call packets
  */
 static void
-aclcall4(proc)
-	int proc;
+aclcall4(int proc)
 {
 
 	switch (proc) {
@@ -586,8 +579,7 @@ aclcall4(proc)
  * Print out version 4 NFS_ACL reply packets
  */
 static void
-aclreply4(proc)
-	int proc;
+aclreply4(int proc)
 {
 
 	switch (proc) {
@@ -607,7 +599,7 @@ aclreply4(proc)
 }
 
 static void
-detail_access2()
+detail_access2(void)
 {
 	uint_t bits;
 
@@ -627,7 +619,7 @@ detail_access2()
 }
 
 static char *
-sum_access2()
+sum_access2(void)
 {
 	int bits;
 	static char buff[22];
@@ -654,7 +646,7 @@ sum_access2()
 }
 
 static void
-detail_mask()
+detail_mask(void)
 {
 	ulong_t mask;
 
@@ -670,7 +662,7 @@ detail_mask()
 }
 
 static void
-detail_secattr()
+detail_secattr(void)
 {
 
 	detail_mask();
@@ -681,7 +673,7 @@ detail_secattr()
 }
 
 static void
-detail_aclent()
+detail_aclent(void)
 {
 	int count;
 	int type;

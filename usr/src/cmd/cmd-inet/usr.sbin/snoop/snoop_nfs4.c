@@ -4804,7 +4804,7 @@ utf8localize(utf8string *utf8str)
 }
 
 static void
-utf8free()
+utf8free(void)
 {
 	cur_utf_buf = 0;
 }

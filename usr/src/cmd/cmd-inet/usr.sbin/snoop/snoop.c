@@ -589,7 +589,7 @@ click(int len)
 
 /* Display a count of packets */
 void
-show_count()
+show_count(void)
 {
 	static int prev = -1;
 

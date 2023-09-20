@@ -24,9 +24,6 @@
  * All rights reserved.
  */
 
-#ident	"%Z%%M%	%I%	%E% SMI"	/* SunOS	*/
-
-#include <sys/types.h>
 #include <sys/errno.h>
 #include <sys/tiuser.h>
 #include <setjmp.h>
@@ -155,10 +152,8 @@ static char *procnames_long[] = {
 #define	MAXPROC	21
 
 void
-interpret_nfs3(flags, type, xid, vers, proc, data, len)
-	int flags, type, xid, vers, proc;
-	char *data;
-	int len;
+interpret_nfs3(int flags, int type, int xid, int vers, int proc,
+    char *data, int len)
 {
 	char *line;
 	char buff[NFS_MAXPATHLEN + 1];	/* protocol allows longer */
@@ -388,8 +383,7 @@ interpret_nfs3(flags, type, xid, vers, proc, data, len)
  *  Print out version 3 NFS call packets
  */
 static void
-nfscall3(proc)
-	int proc;
+nfscall3(int proc)
 {
 	int h;
 
@@ -497,8 +491,7 @@ nfscall3(proc)
  *  Print out version 3 NFS reply packets
  */
 static void
-nfsreply3(proc)
-	int proc;
+nfsreply3(int proc)
 {
 	int bits;
 
@@ -677,7 +670,7 @@ nfsreply3(proc)
 }
 
 static void
-detail_diropargs3()
+detail_diropargs3(void)
 {
 
 	detail_nfsfh3();
@@ -685,8 +678,7 @@ detail_diropargs3()
 }
 
 int
-sum_nfsstat3(line)
-	char *line;
+sum_nfsstat3(char *line)
 {
 	ulong_t status;
 	char *p;
@@ -730,7 +722,7 @@ sum_nfsstat3(line)
 }
 
 int
-detail_nfsstat3()
+detail_nfsstat3(void)
 {
 	ulong_t status;
 	char buff[64];
@@ -746,7 +738,7 @@ detail_nfsstat3()
 }
 
 static void
-skip_postop()
+skip_postop(void)
 {
 
 	if (getxdr_bool())
@@ -754,7 +746,7 @@ skip_postop()
 }
 
 static void
-skip_wcc_data()
+skip_wcc_data(void)
 {
 
 	if (getxdr_bool() > 0)
@@ -763,7 +755,7 @@ skip_wcc_data()
 }
 
 static void
-skip_sattr3()
+skip_sattr3(void)
 {
 
 	if (getxdr_bool() > 0)
@@ -781,7 +773,7 @@ skip_sattr3()
 }
 
 char *
-sum_nfsfh3()
+sum_nfsfh3(void)
 {
 	int len;
 	int fh;
@@ -794,7 +786,7 @@ sum_nfsfh3()
 }
 
 void
-detail_nfsfh3()
+detail_nfsfh3(void)
 {
 	int pos;
 	int i, l, len;
@@ -814,7 +806,7 @@ detail_nfsfh3()
 }
 
 static char *
-sum_access()
+sum_access(void)
 {
 	int bits;
 	static char buff[64];
@@ -841,7 +833,7 @@ sum_access()
 }
 
 static void
-detail_access()
+detail_access(void)
 {
 	uint_t bits;
 
@@ -861,8 +853,7 @@ detail_access()
 }
 
 static void
-detail_mode(mode)
-	int mode;
+detail_mode(int mode)
 {
 
 	(void) sprintf(get_line(0, 0), "  Mode = 0%o", mode);
@@ -880,7 +871,7 @@ detail_mode(mode)
 }
 
 static void
-detail_fattr3()
+detail_fattr3(void)
 {
 	uint_t fltype, mode, nlinks, uid, gid;
 	uint_t major, minor;
@@ -892,7 +883,7 @@ detail_fattr3()
 	uid	= getxdr_u_long();
 	gid	= getxdr_u_long();
 	size	= getxdr_u_longlong();
-	used 	= getxdr_u_longlong();
+	used	= getxdr_u_longlong();
 	major	= getxdr_u_long();
 	minor	= getxdr_u_long();
 	fsid	= getxdr_u_longlong();
@@ -921,7 +912,7 @@ detail_fattr3()
 }
 
 static void
-detail_sattr3()
+detail_sattr3(void)
 {
 	int t;
 
@@ -963,8 +954,7 @@ detail_sattr3()
 }
 
 static char *
-filetype(n)
-	int n;
+filetype(int n)
 {
 
 	switch (n) {
@@ -989,8 +979,7 @@ filetype(n)
 }
 
 static char *
-perms(n)
-	int n;
+perms(int n)
 {
 	static char buff[4];
 
@@ -1002,7 +991,7 @@ perms(n)
 }
 
 static void
-detail_wcc_attr()
+detail_wcc_attr(void)
 {
 
 	(void) showxdr_u_longlong("  Size = %llu bytes");
@@ -1012,8 +1001,7 @@ detail_wcc_attr()
 }
 
 static void
-detail_pre_op_attr(str)
-	char *str;
+detail_pre_op_attr(char *str)
 {
 
 	if (getxdr_bool()) {
@@ -1026,8 +1014,7 @@ detail_pre_op_attr(str)
 }
 
 void
-detail_post_op_attr(str)
-	char *str;
+detail_post_op_attr(char *str)
 {
 
 	if (getxdr_bool()) {
@@ -1040,8 +1027,7 @@ detail_post_op_attr(str)
 }
 
 static void
-detail_wcc_data(str)
-	char *str;
+detail_wcc_data(char *str)
 {
 
 	detail_pre_op_attr(str);
@@ -1049,7 +1035,7 @@ detail_wcc_data(str)
 }
 
 static char *
-sum_readdirres()
+sum_readdirres(void)
 {
 	static char buff[NFS_MAXNAMLEN + 1]; /* protocol allows longer names */
 	static int entries;
@@ -1074,7 +1060,7 @@ sum_readdirres()
 }
 
 static char *
-sum_readdirplusres()
+sum_readdirplusres(void)
 {
 	static char buff[NFS_MAXNAMLEN + 1]; /* protocol allows longer */
 	static int entries;
@@ -1105,7 +1091,7 @@ sum_readdirplusres()
 }
 
 static void
-detail_readdirres()
+detail_readdirres(void)
 {
 	static int entries;
 	u_longlong_t fileid, cookie;
@@ -1139,7 +1125,7 @@ detail_readdirres()
 }
 
 static void
-detail_readdirplusres()
+detail_readdirplusres(void)
 {
 	static int entries;
 
@@ -1176,7 +1162,7 @@ detail_readdirplusres()
 }
 
 static char *
-sum_createhow()
+sum_createhow(void)
 {
 	long how;
 
@@ -1195,7 +1181,7 @@ sum_createhow()
 }
 
 static char *
-sum_stablehow()
+sum_stablehow(void)
 {
 	long stable;
 

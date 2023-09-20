@@ -981,7 +981,7 @@ pf_emit_load_offset(uint_t offset)
  *           nothing.
  */
 static void
-pf_clear_offset_register()
+pf_clear_offset_register(void)
 {
 	if (last_offset_operation != (void*)pf_clear_offset_register) {
 		pf_emit_load_offset(0);
@@ -1165,7 +1165,7 @@ pf_matchfn(const char *proto)
 }
 
 static void
-pf_primary()
+pf_primary(void)
 {
 	for (;;) {
 		if (tokentype == FIELD)
@@ -1469,7 +1469,7 @@ pf_primary()
 }
 
 static void
-pf_alternation()
+pf_alternation(void)
 {
 	int s = opstack;
 
@@ -1486,7 +1486,7 @@ pf_alternation()
 }
 
 static void
-pf_expression()
+pf_expression(void)
 {
 	pf_alternation();
 	while (EQ("or") || EQ(",")) {

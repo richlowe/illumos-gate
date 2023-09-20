@@ -356,7 +356,7 @@ ip_hdr_len(uchar_t *ip)
 }
 
 static void
-codeprint()
+codeprint(void)
 {
 	uint_t *op;
 
@@ -438,12 +438,12 @@ optimize(uint_t *oplistp)
  */
 
 struct xid_entry {
-	unsigned	x_xid;		/* The XID (32 bits) */
-	unsigned	x_dir;		/* CALL or REPLY */
-	unsigned	x_rpcvers;	/* Protocol version (2) */
-	unsigned	x_prog;		/* RPC program number */
-	unsigned	x_vers;		/* RPC version number */
-	unsigned	x_proc;		/* RPC procedure number */
+	unsigned int	x_xid;		/* The XID (32 bits) */
+	unsigned int	x_dir;		/* CALL or REPLY */
+	unsigned int	x_rpcvers;	/* Protocol version (2) */
+	unsigned int	x_prog;		/* RPC program number */
+	unsigned int	x_vers;		/* RPC version number */
+	unsigned int	x_proc;		/* RPC procedure number */
 };
 static struct xid_entry	xe_table[XID_CACHE_SIZE];
 static struct xid_entry	*xe_first = &xe_table[0];
@@ -1162,7 +1162,7 @@ static const char *namechars =
 static const char *numchars = "0123456789abcdefABCDEFXx:.";
 
 void
-next()
+next(void)
 {
 	static int savechar;
 	char *p;
@@ -2089,7 +2089,7 @@ rpc_match_prog(enum direction which, char *progname, int vers, int proc)
  *	ip[2:2]		The second 16 bit field of the IP header
  */
 static void
-load_field()
+load_field(void)
 {
 	int size = 1;
 	int s;
@@ -2138,7 +2138,7 @@ checkstack(int numargs)
 }
 
 static void
-primary()
+primary(void)
 {
 	int m, m2, s;
 
@@ -2657,7 +2657,7 @@ find_op(char *tok, struct optable *table)
 }
 
 static void
-expr_mul()
+expr_mul(void)
 {
 	int op;
 	int s = opstack;
@@ -2673,7 +2673,7 @@ expr_mul()
 }
 
 static void
-expr_add()
+expr_add(void)
 {
 	int op, s = opstack;
 
@@ -2688,7 +2688,7 @@ expr_add()
 }
 
 static void
-expr_compare()
+expr_compare(void)
 {
 	int op, s = opstack;
 
@@ -2710,7 +2710,7 @@ expr_compare()
  * no value is added to the opstack.
  */
 static void
-alternation()
+alternation(void)
 {
 	int m = 0;
 	int s = opstack;
@@ -2732,7 +2732,7 @@ alternation()
 }
 
 static void
-expression()
+expression(void)
 {
 	int m = 0;
 	int s = opstack;

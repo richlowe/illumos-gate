@@ -36,10 +36,7 @@ static void put_socks4_res(char *cp, int code);
 static void put_socks5_res(char *cp, int code);
 
 int
-interpret_socks_call(flags, line, fraglen)
-	int flags;
-	char *line;
-	int fraglen;
+interpret_socks_call(int flags, char *line, int fraglen)
 {
 	unsigned char	*buf = (unsigned char *)line;
 	char		*cp;
@@ -248,10 +245,7 @@ out:
 }
 
 int
-interpret_socks_reply(flags, line, fraglen)
-	int flags;
-	char *line;
-	int fraglen;
+interpret_socks_reply(int flags, char *line, int fraglen)
 {
 	unsigned char	*buf = (unsigned char *)line;
 	char		*cp;

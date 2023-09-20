@@ -228,7 +228,7 @@ show_printf(char *fmt, ...)
 }
 
 char
-getxdr_char()
+getxdr_char(void)
 {
 	char s;
 
@@ -250,7 +250,7 @@ showxdr_char(char *fmt)
 }
 
 uchar_t
-getxdr_u_char()
+getxdr_u_char(void)
 {
 	uchar_t s;
 
@@ -273,7 +273,7 @@ showxdr_u_char(char *fmt)
 }
 
 short
-getxdr_short()
+getxdr_short(void)
 {
 	short s;
 
@@ -295,7 +295,7 @@ showxdr_short(char *fmt)
 }
 
 ushort_t
-getxdr_u_short()
+getxdr_u_short(void)
 {
 	ushort_t s;
 
@@ -318,7 +318,7 @@ showxdr_u_short(char *fmt)
 }
 
 long
-getxdr_long()
+getxdr_long(void)
 {
 	long l;
 
@@ -340,7 +340,7 @@ showxdr_long(char *fmt)
 }
 
 ulong_t
-getxdr_u_long()
+getxdr_u_long(void)
 {
 	ulong_t l;
 
@@ -363,7 +363,7 @@ showxdr_u_long(char *fmt)
 }
 
 longlong_t
-getxdr_longlong()
+getxdr_longlong(void)
 {
 	longlong_t l;
 
@@ -385,7 +385,7 @@ showxdr_longlong(char *fmt)
 }
 
 u_longlong_t
-getxdr_u_longlong()
+getxdr_u_longlong(void)
 {
 	u_longlong_t l;
 
@@ -407,7 +407,7 @@ showxdr_u_longlong(char *fmt)
 }
 
 bool_t
-getxdr_bool()
+getxdr_bool(void)
 {
 	bool_t b;
 
@@ -520,7 +520,7 @@ showxdr_context(char *fmt)
 }
 
 enum_t
-getxdr_enum()
+getxdr_enum(void)
 {
 	enum_t e;
 
@@ -546,7 +546,7 @@ xdr_skip(int delta)
 }
 
 int
-getxdr_pos()
+getxdr_pos(void)
 {
 	return (xdr_getpos(&xdrm));
 }
@@ -558,19 +558,19 @@ setxdr_pos(int pos)
 }
 
 void
-show_space()
+show_space(void)
 {
 	(void) get_line(0, 0);
 }
 
 void
-show_trailer()
+show_trailer(void)
 {
 	show_space();
 }
 
 char *
-getxdr_date()
+getxdr_date(void)
 {
 	time_t sec;
 	int  usec;
@@ -668,7 +668,7 @@ showxdr_date_ns(char *fmt)
 }
 
 char *
-getxdr_time()
+getxdr_time(void)
 {
 	time_t sec;
 	static char buff[64];
