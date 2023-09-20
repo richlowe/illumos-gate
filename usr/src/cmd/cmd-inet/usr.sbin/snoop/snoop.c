@@ -608,12 +608,13 @@ show_count()
  * line display.
  */
 void
-show_pktinfo(int flags, int num, char *src, char *dst, struct timeval *ptvp,
-    struct timeval *tvp, int drops, int len)
+show_pktinfo(int flags, int num, char *src, char *dst,
+    const struct timeval *ptvp, const struct timeval *tvp, int drops, int len)
 {
 	struct tm *tm;
 	static struct timeval tvp0;
 	int sec, usec;
+	time_t t;
 	char *lp = line;
 	int i, start;
 
@@ -621,7 +622,8 @@ show_pktinfo(int flags, int num, char *src, char *dst, struct timeval *ptvp,
 		(void) sprintf(lp, "%3d ", num);
 		lp += strlen(lp);
 	}
-	tm = localtime(&tvp->tv_sec);
+	t = tvp->tv_sec;
+	tm = localtime(&t);
 
 	if (flags & F_TIME) {
 		if (flags & F_ATIME) {

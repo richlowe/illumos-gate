@@ -60,14 +60,15 @@ struct timeval {
 
 #include <sys/types32.h>
 
+#endif	/* _SYSCALL32 */
+
+#if defined(_KERNEL) || defined(_SYSCALL32)
+
 #define	TIMEVAL32_TO_TIMEVAL(tv, tv32)	{	\
 	(tv)->tv_sec = (time_t)(tv32)->tv_sec;	\
 	(tv)->tv_usec = (tv32)->tv_usec;	\
 }
 
-#endif	/* _SYSCALL32 */
-
-#if defined(_KERNEL) || defined(_SYSCALL32)
 /* XXXARM: Needed for ufs(4D) */
 #define	TIMEVAL_OVERFLOW(tv)	\
 	((tv)->tv_sec < TIME32_MIN || (tv)->tv_sec > TIME32_MAX)

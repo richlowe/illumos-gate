@@ -310,7 +310,7 @@ interpret_ospf6_lsa_hdr(int flags, struct lsa6_hdr *lsah)
 
 }
 
-#define	TRUNC(addr)	((uchar_t *)(addr) > fragend)
+#define	TRUNC(addr)	((uintptr_t)(addr) > (uintptr_t)fragend)
 static int
 interpret_ospf6_lsa(int flags, struct lsa6 *lsa, uchar_t *fragend)
 {
@@ -437,7 +437,7 @@ interpret_ospf6_lsa(int flags, struct lsa6 *lsa, uchar_t *fragend)
 				    get_line_remain(), " metric = %d",
 				    ntohs(rl->link_metric));
 			}
-			if (flags & F_SUM) { 			/* { (ctags) */
+			if (flags & F_SUM) {
 				sprintf(sum_line,  " }");
 				sum_line += strlen(sum_line);
 			}

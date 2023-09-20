@@ -49,9 +49,10 @@ HDRS=	snoop.h snoop_mip.h at.h snoop_ospf.h snoop_ospf6.h
 include	../../../Makefile.cmd
 
 CPPFLAGS += -I. -I$(SRC)/common/net/dhcp \
-	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+	-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_SYSCALL32
 LDLIBS += -ldhcputil -ldlpi -lsocket -lnsl -ltsol
 LDFLAGS += $(MAPFILE.NGB:%=-Wl,-M%)
+
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += $(CNOWARN_UNINIT)

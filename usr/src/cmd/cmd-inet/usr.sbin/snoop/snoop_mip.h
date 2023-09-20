@@ -68,7 +68,7 @@ typedef struct {
 #define	SA_HMAC_MD5		3
 
 /*
- * 	R E G I S T R A T I O N    P R O T O C O L
+ *	R E G I S T R A T I O N	   P R O T O C O L
  */
 
 #define	REG_TYPE_REQ	1
@@ -84,14 +84,14 @@ typedef struct ident_str {
 typedef struct registration_request_str {
 	uchar_t		type;		/* must be REG_TYPE_REQ */
 	uchar_t
-		Simultaneous_registration : 	1,
-		Broadcasts_desired : 		1,
-		Decapsulation_done_locally : 	1, /* ...by the popup MN */
-		Minimal_encap_desired : 	1,
-		GRE_encap_desired : 		1,
-		VJ_compression_desired : 	1,
-		BiDirectional_Tunnel_desired : 	1,
-		reserved : 			1;
+		Simultaneous_registration :	1,
+		Broadcasts_desired :		1,
+		Decapsulation_done_locally :	1, /* ...by the popup MN */
+		Minimal_encap_desired :		1,
+		GRE_encap_desired :		1,
+		VJ_compression_desired :	1,
+		BiDirectional_Tunnel_desired :	1,
+		reserved :			1;
 	ushort_t	lifetime;	/* 0 = dereg; 0xffff = infinity */
 	in_addr_t	home_addr;	/* address of the MN */
 	in_addr_t	home_agent_addr; /* address of a HA */
@@ -101,19 +101,19 @@ typedef struct registration_request_str {
 #endif /* _BIT_FIELDS_HTOL */
 #endif /* __sparc */
 
-#ifdef __i386
+#if defined(__i386) || defined(__aarch64__)
 #ifdef _BIT_FIELDS_LTOH
 typedef struct registration_request_str {
 	uchar_t		type;		/* must be REG_TYPE_REQ */
 	uchar_t
-		reserved : 			1,
-		BiDirectional_Tunnel_desired : 	1,
-		VJ_compression_desired : 	1,
-		GRE_encap_desired : 		1,
-		Minimal_encap_desired : 	1,
-		Decapsulation_done_locally : 	1, /* ...by the popup MN */
-		Broadcasts_desired : 		1,
-		Simultaneous_registration : 	1;
+		reserved :			1,
+		BiDirectional_Tunnel_desired :	1,
+		VJ_compression_desired :	1,
+		GRE_encap_desired :		1,
+		Minimal_encap_desired :		1,
+		Decapsulation_done_locally :	1, /* ...by the popup MN */
+		Broadcasts_desired :		1,
+		Simultaneous_registration :	1;
 	ushort_t	lifetime;	/* 0 = dereg; 0xffff = infinity */
 	in_addr_t	home_addr;	/* address of the MN */
 	in_addr_t	home_agent_addr; /* address of a HA */
@@ -245,11 +245,11 @@ typedef struct registration_reply_str {
  * G	GRE encapsulation.  This agent implements receiving
  * tunneled datagrams that use GRE encapsulation [8].
  *
- * V 	Van Jacobson header compression.  This agent supports use
+ * V	Van Jacobson header compression.  This agent supports use
  * of Van Jacobson header compression [10] over the link
  * with any registered mobile node.
  *
- * reserved 	sent as zero; ignored on reception.
+ * reserved	sent as zero; ignored on reception.
  *
  * Care-of Address(es)
  * The advertised foreign agent care-of address(es) provided
@@ -297,7 +297,7 @@ typedef struct mobility_agt_adv_extension {
 #endif /* _BIT_FIELDS_HTOL */
 #endif /* __sparc */
 
-#ifdef __i386
+#if defined(__i386) || defined(__aarch64__)
 #ifdef _BIT_FIELDS_LTOH
 typedef struct mobility_agt_adv_extension {
 	uchar_t		type;

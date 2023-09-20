@@ -62,7 +62,7 @@ struct ohdr {
 	int	o_msglen;
 	int	o_totlen;
 	/* nit_head */
-	struct timeval o_time;
+	struct timeval32 o_time;
 	int	o_drops;
 	int	o_len;
 };
@@ -483,7 +483,8 @@ scan(char *buf, int len, int filter, int cap, int old, void (*proc)(),
 
 			snoop_nrecover = 0;			/* success */
 			(void) snoop_alarm(0, NULL);
-			last_timestamp = hdrp->sbh_timestamp;	/* save stamp */
+			TIMEVAL32_TO_TIMEVAL(&last_timestamp,
+			    &hdrp->sbh_timestamp);
 		}
 		continue;
 err:
@@ -725,7 +726,7 @@ cap_open_read(const char *name)
 
 	cap_buffp = mmap(0, cap_len, PROT_READ, MAP_PRIVATE, capfile_in, 0);
 	(void) close(capfile_in);
-	if ((int)cap_buffp == -1)
+	if (cap_buffp == MAP_FAILED)
 		pr_err("couldn't mmap %s: %m", name);
 
 	/* Check if new snoop capture file format */
@@ -849,7 +850,7 @@ convert_old(struct ohdr *ohdrp)
 	nhdr.sbh_msglen  = ohdrp->o_msglen;
 	nhdr.sbh_totlen  = ohdrp->o_totlen;
 	nhdr.sbh_drops   = ohdrp->o_drops;
-	nhdr.sbh_timestamp = ohdrp->o_time;
+	TIMEVAL32_TO_TIMEVAL(&nhdr.sbh_timestamp, &ohdrp->o_time);
 
 	*(struct sb_hdr *)ohdrp = nhdr;
 }

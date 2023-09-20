@@ -595,7 +595,7 @@ want_packet(uchar_t *pkt, int len, int origlen)
 			/*
 			 * Handle 3 possible alignments
 			 */
-			switch ((((unsigned)base) + off) % sizeof (uint_t)) {
+			switch ((((uintptr_t)base) + off) % sizeof (uint_t)) {
 			case 0:
 				*sp = *(uint_t *)(base + off);
 				break;

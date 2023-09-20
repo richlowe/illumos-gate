@@ -223,8 +223,8 @@ extern void init_datalink(dlpi_handle_t, ulong_t, ulong_t, struct timeval *,
     struct Pf_ext_packetfilt *);
 extern void net_read(dlpi_handle_t, size_t, int, void (*)(), int);
 extern void click(int);
-extern void show_pktinfo(int, int, char *, char *, struct timeval *,
-		struct timeval *, int, int);
+extern void show_pktinfo(int, int, char *, char *, const struct timeval *,
+		const struct timeval *, int, int);
 extern void show_line(char *);
 /*PRINTFLIKE1*/
 extern void show_printf(char *fmt, ...)

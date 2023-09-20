@@ -75,19 +75,21 @@ void
 process_pkt(struct sb_hdr *hdrp, char *pktp, int num, int flags)
 {
 	int drops, pktlen;
-	struct timeval *tvp;
+	struct timeval tvp;
+	static struct timeval ptv;
 	struct tm *tm;
+	time_t t;
 	extern int x_offset;
 	extern int x_length;
 	int offset, length;
-	static struct timeval ptv;
 
 	if (hdrp == NULL)
 		return;
 
-	tvp = &hdrp->sbh_timestamp;
+	TIMEVAL32_TO_TIMEVAL(&tvp, &hdrp->sbh_timestamp);
+
 	if (ptv.tv_sec == 0)
-		ptv = *tvp;
+		ptv = tvp;
 	drops  = hdrp->sbh_drops;
 	pktlen = hdrp->sbh_msglen;
 	if (pktlen <= 0)
@@ -96,11 +98,12 @@ process_pkt(struct sb_hdr *hdrp, char *pktp, int num, int flags)
 	/* set up externals */
 	dlc_header = pktp;
 	pi_frame = num;
-	tm = localtime(&tvp->tv_sec);
+	t = tvp.tv_sec;
+	tm = localtime(&t);
 	pi_time_hour = tm->tm_hour;
 	pi_time_min  = tm->tm_min;
 	pi_time_sec  = tm->tm_sec;
-	pi_time_usec = tvp->tv_usec;
+	pi_time_usec = tvp.tv_usec;
 
 	src_name = "?";
 	dst_name = "*";
@@ -110,7 +113,7 @@ process_pkt(struct sb_hdr *hdrp, char *pktp, int num, int flags)
 	(*interface->interpreter)(flags, dlc_header, hdrp->sbh_msglen,
 	    hdrp->sbh_origlen);
 
-	show_pktinfo(flags, num, src_name, dst_name, &ptv, tvp, drops,
+	show_pktinfo(flags, num, src_name, dst_name, &ptv, &tvp, drops,
 	    hdrp->sbh_origlen);
 
 	if (x_offset >= 0) {
@@ -121,7 +124,7 @@ process_pkt(struct sb_hdr *hdrp, char *pktp, int num, int flags)
 		hexdump(dlc_header + offset, length);
 	}
 
-	ptv = *tvp;
+	ptv = tvp;
 }
 
 
@@ -437,7 +440,7 @@ getxdr_opaque(char *p, int len)
 
 char *
 getxdr_string(char *p, /* len+1 bytes or longer */
-	int len)
+    int len)
 {
 	if (xdr_string(&xdrm, &p, len))
 		return (p);
@@ -447,7 +450,7 @@ getxdr_string(char *p, /* len+1 bytes or longer */
 
 char *
 showxdr_string(int len, /* XDR length */
-	char *fmt)
+    char *fmt)
 {
 	static int buff_len = 0;
 	static char *buff = NULL;
@@ -782,8 +785,6 @@ hexdump(char *data, int datalen)
 	printf("\n");
 }
 
-char *
-show_string(const char *str, int dlen, int maxlen)
 /*
  *   Prints len bytes from str enclosed in quotes.
  *   If len is negative, length is taken from strlen(str).
@@ -792,6 +793,8 @@ show_string(const char *str, int dlen, int maxlen)
  *   Non-printing characters are converted to C-style escape
  *   codes or octal digits.
  */
+char *
+show_string(const char *str, int dlen, int maxlen)
 {
 #define	TBSIZE	256
 	static char tbuff[TBSIZE];
@@ -816,8 +819,8 @@ show_string(const char *str, int dlen, int maxlen)
 				printable++;
 			} else {
 				(void) snprintf(pp, TBSIZE - (pp - tbuff),
-					isdigit(*(p + 1)) ?
-					"\\%03o" : "\\%o", c);
+				    isdigit(*(p + 1)) ?
+				    "\\%03o" : "\\%o", c);
 				pp += strlen(pp);
 			}
 			break;

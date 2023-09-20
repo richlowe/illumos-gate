@@ -95,27 +95,28 @@ interpret_ntp(int flags, struct ntpdata *ntp_pkt, int fraglen)
 		case MODE_CLIENT:
 		case MODE_SERVER:
 		case MODE_BROADCAST:
-		    (void) sprintf(get_sum_line(),
-			"NTP  %s [st=%hd] (%s)",
-			show_mode(ntp->li_vn_mode & NTPMODEMASK),
-			ntp->stratum,
-			show_time(ntp->xmt));
-		    break;
+			(void) sprintf(get_sum_line(),
+			    "NTP  %s [st=%hd] (%s)",
+			    show_mode(ntp->li_vn_mode & NTPMODEMASK),
+			    ntp->stratum,
+			    show_time(ntp->xmt));
+			break;
 		case MODE_CONTROL:
-		    (void) sprintf(get_sum_line(),
-			"NTP  %s "
-			"(Flags/op=0x%02x Seq=%hu Status=0x%04hx Assoc=%hu)",
-			show_mode(ntpc->li_vn_mode & NTPMODEMASK),
-			ntpc->r_m_e_op,
-			ntohs(ntpc->sequence),
-			ntohs(ntpc->status),
-			ntohs(ntpc->associd));
-		    break;
+			(void) sprintf(get_sum_line(),
+			    "NTP  %s "
+			    "(Flags/op=0x%02x Seq=%hu Status=0x%04hx "
+			    "Assoc=%hu)",
+			    show_mode(ntpc->li_vn_mode & NTPMODEMASK),
+			    ntpc->r_m_e_op,
+			    ntohs(ntpc->sequence),
+			    ntohs(ntpc->status),
+			    ntohs(ntpc->associd));
+			break;
 		default:
-		    (void) sprintf(get_sum_line(),
-			"NTP  %s",
-			show_mode(ntpp->rm_vn_mode & NTPMODEMASK));
-		    break;
+			(void) sprintf(get_sum_line(),
+			    "NTP  %s",
+			    show_mode(ntpp->rm_vn_mode & NTPMODEMASK));
+			break;
 		}
 	}
 
@@ -130,241 +131,252 @@ interpret_ntp(int flags, struct ntpdata *ntp_pkt, int fraglen)
 		case MODE_CLIENT:
 		case MODE_SERVER:
 		case MODE_BROADCAST:
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),
-			"Leap    = 0x%x (%s)",
-			(int)(ntp->li_vn_mode & LEAPMASK) >> 6,
-			show_leap(ntp->li_vn_mode & LEAPMASK));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),
-			"Version = %lu", proto_version);
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),
-			"Mode    = %hu (%s)",
-			ntp->li_vn_mode & NTPMODEMASK,
-			show_mode(ntp->li_vn_mode & NTPMODEMASK));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->stratum -
-			dlc_header, 1),
-			"Stratum = %d (%s)",
-			ntp->stratum,
-			ntp->stratum == 0 ? "unspecified" :
-			ntp->stratum == 1 ? "primary reference" :
-			"secondary reference");
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->ppoll -
-			dlc_header, 1),	"Poll    = %hu", ntp->ppoll);
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->precision -
-			dlc_header, 1),
-			"Precision = %d seconds",
-			ntp->precision);
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntp->distance.int_part -
-			dlc_header, 1),
-			"Synchronizing distance   = 0x%04x.%04x  (%f)",
-			ntohs(ntp->distance.int_part),
-			ntohs(ntp->distance.fraction),
-			s_fixed_to_double(&ntp->distance));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntp->dispersion.int_part -
-			dlc_header, 1),
-			"Synchronizing dispersion = 0x%04x.%04x  (%f)",
-			ntohs(ntp->dispersion.int_part),
-			ntohs(ntp->dispersion.fraction),
-			s_fixed_to_double(&ntp->dispersion));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->refid -
-			dlc_header, 1), "Reference clock = %s",
-			show_ref(ntp->stratum, ntp->refid));
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Leap    = 0x%x (%s)",
+			    (int)(ntp->li_vn_mode & LEAPMASK) >> 6,
+			    show_leap(ntp->li_vn_mode & LEAPMASK));
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Version = %lu", proto_version);
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Mode    = %hu (%s)",
+			    ntp->li_vn_mode & NTPMODEMASK,
+			    show_mode(ntp->li_vn_mode & NTPMODEMASK));
+			(void) sprintf(get_line((uintptr_t)ntp->stratum -
+			    (uintptr_t)dlc_header, 1),
+			    "Stratum = %d (%s)",
+			    ntp->stratum,
+			    ntp->stratum == 0 ? "unspecified" :
+			    ntp->stratum == 1 ? "primary reference" :
+			    "secondary reference");
+			(void) sprintf(get_line((uintptr_t)ntp->ppoll -
+			    (uintptr_t)dlc_header, 1),
+			    "Poll    = %hu", ntp->ppoll);
+			(void) sprintf(get_line((uintptr_t)ntp->precision -
+			    (uintptr_t)dlc_header, 1),
+			    "Precision = %d seconds",
+			    ntp->precision);
+			(void) sprintf(get_line(
+			    (uintptr_t)ntp->distance.int_part -
+			    (uintptr_t)dlc_header, 1),
+			    "Synchronizing distance   = 0x%04x.%04x  (%f)",
+			    ntohs(ntp->distance.int_part),
+			    ntohs(ntp->distance.fraction),
+			    s_fixed_to_double(&ntp->distance));
+			(void) sprintf(get_line(
+			    (uintptr_t)ntp->dispersion.int_part -
+			    (uintptr_t)dlc_header, 1),
+			    "Synchronizing dispersion = 0x%04x.%04x  (%f)",
+			    ntohs(ntp->dispersion.int_part),
+			    ntohs(ntp->dispersion.fraction),
+			    s_fixed_to_double(&ntp->dispersion));
+			(void) sprintf(get_line((uintptr_t)ntp->refid -
+			    (uintptr_t)dlc_header, 1), "Reference clock = %s",
+			    show_ref(ntp->stratum, ntp->refid));
 
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntp->reftime.int_part - dlc_header,
-			1), "Reference time = 0x%08lx.%08lx (%s)",
-			ntohl(ntp->reftime.int_part),
-			ntohl(ntp->reftime.fraction),
-			show_time(ntp->reftime));
+			(void) sprintf(get_line(
+			    (uintptr_t)ntp->reftime.int_part -
+			    (uintptr_t)dlc_header, 1),
+			    "Reference time = 0x%08lx.%08lx (%s)",
+			    ntohl(ntp->reftime.int_part),
+			    ntohl(ntp->reftime.fraction),
+			    show_time(ntp->reftime));
 
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntp->org.int_part - dlc_header, 1),
-			"Originate time = 0x%08lx.%08lx (%s)",
-			ntohl(ntp->org.int_part),
-			ntohl(ntp->org.fraction),
-			show_time(ntp->org));
+			(void) sprintf(get_line(
+			    (uintptr_t)ntp->org.int_part -
+			    (uintptr_t)dlc_header, 1),
+			    "Originate time = 0x%08lx.%08lx (%s)",
+			    ntohl(ntp->org.int_part),
+			    ntohl(ntp->org.fraction),
+			    show_time(ntp->org));
 
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntp->rec.int_part - dlc_header, 1),
-			"Receive   time = 0x%08lx.%08lx (%s)",
-			ntohl(ntp->rec.int_part),
-			ntohl(ntp->rec.fraction),
-			show_time(ntp->rec));
+			(void) sprintf(get_line(
+			    (uintptr_t)ntp->rec.int_part -
+			    (uintptr_t)dlc_header, 1),
+			    "Receive   time = 0x%08lx.%08lx (%s)",
+			    ntohl(ntp->rec.int_part),
+			    ntohl(ntp->rec.fraction),
+			    show_time(ntp->rec));
 
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntp->xmt.int_part - dlc_header, 1),
-			"Transmit  time = 0x%08lx.%08lx (%s)",
-			ntohl(ntp->xmt.int_part),
-			ntohl(ntp->xmt.fraction),
-			show_time(ntp->xmt));
+			(void) sprintf(get_line(
+			    (uintptr_t)ntp->xmt.int_part -
+			    (uintptr_t)dlc_header, 1),
+			    "Transmit  time = 0x%08lx.%08lx (%s)",
+			    ntohl(ntp->xmt.int_part),
+			    ntohl(ntp->xmt.fraction),
+			    show_time(ntp->xmt));
 
-		    if (proto_version > 3 ||
-			fraglen < (LEN_PKT_NOMAC + MAC_OCTETS_MIN)) {
+			if (proto_version > 3 ||
+			    fraglen < (LEN_PKT_NOMAC + MAC_OCTETS_MIN)) {
 				/*
 				 * A newer protocol version we can't parse,
 				 * or v3 packet with no valid authentication.
 				 */
 				break;
-		    }
-		    (void) sprintf(get_line((char *)ntp->keyid -
-			dlc_header, 1),
-			"Key ID  = %8lu", ntohl(ntp->keyid));
+			}
+			(void) sprintf(get_line((uintptr_t)ntp->keyid -
+			    (uintptr_t)dlc_header, 1),
+			    "Key ID  = %8lu", ntohl(ntp->keyid));
 
-		    macbytes = fraglen - (LEN_PKT_NOMAC + sizeof (uint32_t));
+			macbytes = fraglen - (LEN_PKT_NOMAC +
+			    sizeof (uint32_t));
 
-		    for (i = 0, j = 0; i < macbytes; i++) {
-			    hbuf[j++] = hexstr[ntp->mac[i] >> 4 & 0x0f];
-			    hbuf[j++] = hexstr[ntp->mac[i] & 0x0f];
-		    }
-		    hbuf[j] = '\0';
-		    (void) sprintf(get_line((char *)ntp->mac -
-			dlc_header, 1),
-			"Authentication code = %s", hbuf);
-		    break;
+			for (i = 0, j = 0; i < macbytes; i++) {
+				hbuf[j++] = hexstr[ntp->mac[i] >> 4 & 0x0f];
+				hbuf[j++] = hexstr[ntp->mac[i] & 0x0f];
+			}
+			hbuf[j] = '\0';
+			(void) sprintf(get_line((uintptr_t)ntp->mac -
+			    (uintptr_t)dlc_header, 1),
+			    "Authentication code = %s", hbuf);
+			break;
 
 		case MODE_CONTROL:
-		    /* NTP Control Message, mode 6 */
+			/* NTP Control Message, mode 6 */
 
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),
-			"Leap    = 0x%x (%s)",
-			(int)(ntp->li_vn_mode & LEAPMASK) >> 6,
-			show_leap(ntp->li_vn_mode & LEAPMASK));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),
-			"Version = %lu", proto_version);
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),
-			"Mode    = %hu (%s)",
-			ntp->li_vn_mode & NTPMODEMASK,
-			show_mode(ntp->li_vn_mode & NTPMODEMASK));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->r_m_e_op -
-			dlc_header, 1),
-			"Flags and operation code = 0x%02x",
-			ntpc->r_m_e_op);
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->r_m_e_op -
-			dlc_header, 1),
-			"      %s",
-			getflag(ntpc->r_m_e_op, CTL_RESPONSE, "response",
-			"request"));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->r_m_e_op -
-			dlc_header, 1),
-			"      %s",
-			getflag(ntpc->r_m_e_op, CTL_ERROR, "error",
-			"success"));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->r_m_e_op -
-			dlc_header, 1),
-			"      %s",
-			getflag(ntpc->r_m_e_op, CTL_MORE, "more",
-			"no more"));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->r_m_e_op -
-			dlc_header, 1),
-			"      ...x xxxx = %hd (%s)",
-			ntpc->r_m_e_op & CTL_OP_MASK,
-			show_operation(ntpc->r_m_e_op & CTL_OP_MASK));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->sequence -
-			dlc_header, 1),
-			"Sequence = %hu",
-			ntohs(ntpc->sequence));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->status -
-			dlc_header, 1),
-			"Status = 0x%04hx",
-			ntohs(ntpc->status));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->associd -
-			dlc_header, 1),
-			"Assoc ID = %hu",
-			ntohs(ntpc->associd));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->offset -
-			dlc_header, 1),
-			"Data offset = %hu",
-			ntohs(ntpc->offset));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpc->count -
-			dlc_header, 1),
-			"Data bytes = %hu",
-			ntohs(ntpc->count));
-		    datalen = ntohs(ntpc->count);
-		    if (datalen == 0) {
-			    break;
-		    } else if (datalen > NTPC_DATA_MAXLEN) {
-			    datalen = NTPC_DATA_MAXLEN;
-		    }
-		    show_space();
-		    datap = (char *)ntpc->data;
-		    do {
-			    (void) sprintf(get_line(datap -
-				dlc_header, 1),
-				"\"%s\"",
-				show_string(datap, linelen, datalen));
-			    sofar += linelen;
-			    datap += linelen;
-			    if ((sofar + linelen) > datalen) {
-				    linelen = datalen - sofar;
-			    }
-		    } while (sofar < datalen);
-		    show_trailer();
-		    break;
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Leap    = 0x%x (%s)",
+			    (int)(ntp->li_vn_mode & LEAPMASK) >> 6,
+			    show_leap(ntp->li_vn_mode & LEAPMASK));
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Version = %lu", proto_version);
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Mode    = %hu (%s)",
+			    ntp->li_vn_mode & NTPMODEMASK,
+			    show_mode(ntp->li_vn_mode & NTPMODEMASK));
+			(void) sprintf(get_line((uintptr_t)ntpc->r_m_e_op -
+			    (uintptr_t)dlc_header, 1),
+			    "Flags and operation code = 0x%02x",
+			    ntpc->r_m_e_op);
+			(void) sprintf(get_line((uintptr_t)ntpc->r_m_e_op -
+			    (uintptr_t)dlc_header, 1),
+			    "      %s",
+			    getflag(ntpc->r_m_e_op, CTL_RESPONSE, "response",
+			    "request"));
+			(void) sprintf(get_line((uintptr_t)ntpc->r_m_e_op -
+			    (uintptr_t)dlc_header, 1),
+			    "      %s",
+			    getflag(ntpc->r_m_e_op, CTL_ERROR, "error",
+			    "success"));
+			(void) sprintf(get_line((uintptr_t)ntpc->r_m_e_op -
+			    (uintptr_t)dlc_header, 1),
+			    "      %s",
+			    getflag(ntpc->r_m_e_op, CTL_MORE, "more",
+			    "no more"));
+			(void) sprintf(get_line((uintptr_t)ntpc->r_m_e_op -
+			    (uintptr_t)dlc_header, 1),
+			    "      ...x xxxx = %hd (%s)",
+			    ntpc->r_m_e_op & CTL_OP_MASK,
+			    show_operation(ntpc->r_m_e_op & CTL_OP_MASK));
+			(void) sprintf(get_line((uintptr_t)ntpc->sequence -
+			    (uintptr_t)dlc_header, 1),
+			    "Sequence = %hu",
+			    ntohs(ntpc->sequence));
+			(void) sprintf(get_line((uintptr_t)ntpc->status -
+			    (uintptr_t)dlc_header, 1),
+			    "Status = 0x%04hx",
+			    ntohs(ntpc->status));
+			(void) sprintf(get_line((uintptr_t)ntpc->associd -
+			    (uintptr_t)dlc_header, 1),
+			    "Assoc ID = %hu",
+			    ntohs(ntpc->associd));
+			(void) sprintf(get_line((uintptr_t)ntpc->offset -
+			    (uintptr_t)dlc_header, 1),
+			    "Data offset = %hu",
+			    ntohs(ntpc->offset));
+			(void) sprintf(get_line((uintptr_t)ntpc->count -
+			    (uintptr_t)dlc_header, 1),
+			    "Data bytes = %hu",
+			    ntohs(ntpc->count));
+			datalen = ntohs(ntpc->count);
+			if (datalen == 0) {
+				break;
+			} else if (datalen > NTPC_DATA_MAXLEN) {
+				datalen = NTPC_DATA_MAXLEN;
+			}
+			show_space();
+			datap = (char *)ntpc->data;
+			do {
+				(void) sprintf(get_line(datap -
+				    dlc_header, 1),
+				    "\"%s\"",
+				    show_string(datap, linelen, datalen));
+				sofar += linelen;
+				datap += linelen;
+				if ((sofar + linelen) > datalen) {
+					linelen = datalen - sofar;
+				}
+			} while (sofar < datalen);
+			show_trailer();
+			break;
 
 		case MODE_PRIVATE:
-		    /* NTP Private Message, mode 7 */
+			/* NTP Private Message, mode 7 */
 
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->rm_vn_mode - dlc_header, 1),
-			"Version = %hu", INFO_VERSION(ntpp->rm_vn_mode));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->rm_vn_mode - dlc_header, 1),
-			"Mode    = %hu (%s)", INFO_MODE(ntpp->rm_vn_mode),
-			show_mode(INFO_MODE(ntpp->rm_vn_mode)));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->rm_vn_mode - dlc_header, 1),
-			"Flags = 0x%02hx", ntpp->rm_vn_mode);
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->rm_vn_mode - dlc_header, 1),
-			"      %s",
-			getflag(ntpp->rm_vn_mode, RESP_BIT, "response",
-			"request"));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->rm_vn_mode - dlc_header, 1),
-			"      %s",
-			getflag(ntpp->rm_vn_mode, MORE_BIT, "more", "no more"));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpp->auth_seq -
-			dlc_header, 1),
-			"Authentication and sequence = 0x%02x", ntpp->auth_seq);
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpp->auth_seq -
-			dlc_header, 1),
-			"      %s",
-			getflag(ntpp->auth_seq, AUTH_BIT, "authenticated",
-			"unauthenticated"));
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpp->auth_seq -
-			dlc_header, 1),
-			"      .xxx xxxx = %hu (sequence number)",
-			INFO_SEQ(ntpp->auth_seq));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->implementation - dlc_header,
-			1), "Implementation = %hu", ntpp->implementation);
-		    (void) sprintf(get_line((char *)(uintptr_t)ntpp->request -
-			dlc_header, 1), "Request = %hu", ntpp->request);
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->err_nitems - dlc_header, 1),
-			"Error = %hu", INFO_ERR(ntpp->err_nitems));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->err_nitems - dlc_header, 1),
-			"Items = %hu", INFO_NITEMS(ntpp->err_nitems));
-		    (void) sprintf(get_line(
-			(char *)(uintptr_t)ntpp->mbz_itemsize - dlc_header, 1),
-			"Item size = %hu", INFO_ITEMSIZE(ntpp->mbz_itemsize));
-		    break;
+			(void) sprintf(get_line((uintptr_t)ntpp->rm_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Version = %hu", INFO_VERSION(ntpp->rm_vn_mode));
+			(void) sprintf(get_line((uintptr_t)ntpp->rm_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Mode    = %hu (%s)", INFO_MODE(ntpp->rm_vn_mode),
+			    show_mode(INFO_MODE(ntpp->rm_vn_mode)));
+			(void) sprintf(get_line((uintptr_t)ntpp->rm_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "Flags = 0x%02hx", ntpp->rm_vn_mode);
+			(void) sprintf(get_line((uintptr_t)ntpp->rm_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "      %s",
+			    getflag(ntpp->rm_vn_mode, RESP_BIT, "response",
+			    "request"));
+			(void) sprintf(get_line((uintptr_t)ntpp->rm_vn_mode -
+			    (uintptr_t)dlc_header, 1),
+			    "      %s",
+			    getflag(ntpp->rm_vn_mode, MORE_BIT, "more",
+			    "no more"));
+			(void) sprintf(get_line((uintptr_t)ntpp->auth_seq -
+			    (uintptr_t)dlc_header, 1),
+			    "Authentication and sequence = 0x%02x",
+			    ntpp->auth_seq);
+			(void) sprintf(get_line((uintptr_t)ntpp->auth_seq -
+			    (uintptr_t)dlc_header, 1),
+			    "      %s",
+			    getflag(ntpp->auth_seq, AUTH_BIT, "authenticated",
+			    "unauthenticated"));
+			(void) sprintf(get_line((uintptr_t)ntpp->auth_seq -
+			    (uintptr_t)dlc_header, 1),
+			    "      .xxx xxxx = %hu (sequence number)",
+			    INFO_SEQ(ntpp->auth_seq));
+			(void) sprintf(
+			    get_line((uintptr_t)ntpp->implementation -
+			    (uintptr_t)dlc_header, 1),
+			    "Implementation = %hu", ntpp->implementation);
+			(void) sprintf(get_line((uintptr_t)ntpp->request -
+			    (uintptr_t)dlc_header, 1),
+			    "Request = %hu", ntpp->request);
+			(void) sprintf(get_line((uintptr_t)ntpp->err_nitems -
+			    (uintptr_t)dlc_header, 1),
+			    "Error = %hu", INFO_ERR(ntpp->err_nitems));
+			(void) sprintf(get_line((uintptr_t)ntpp->err_nitems -
+			    (uintptr_t)dlc_header, 1),
+			    "Items = %hu", INFO_NITEMS(ntpp->err_nitems));
+			(void) sprintf(get_line((uintptr_t)ntpp->mbz_itemsize -
+			    (uintptr_t)dlc_header, 1),
+			    "Item size = %hu",
+			    INFO_ITEMSIZE(ntpp->mbz_itemsize));
+			break;
 
 		default:
-		    /* Unknown mode */
-		    (void) sprintf(get_line((char *)(uintptr_t)ntp->li_vn_mode -
-			dlc_header, 1),	"Mode    = %hu (%s)",
-			ntp->li_vn_mode & NTPMODEMASK,
-			show_mode(ntp->li_vn_mode & NTPMODEMASK));
-		    break;
+			/* Unknown mode */
+			(void) sprintf(get_line((uintptr_t)ntp->li_vn_mode -
+			    (uintptr_t)dlc_header, 1),	"Mode    = %hu (%s)",
+			    ntp->li_vn_mode & NTPMODEMASK,
+			    show_mode(ntp->li_vn_mode & NTPMODEMASK));
+			break;
 		}
 	}
 
