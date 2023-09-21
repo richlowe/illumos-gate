@@ -24,9 +24,8 @@
 # Use is subject to license terms.
 #
 
-# This Makefile is only to produce 64-bit yacc shared library liby.so.1
-# and not for building 64-bit yacc itself.
-#
+include	../../../Makefile.cmd
+include	../../../Makefile.cmd.64
 include ../Makefile.com
 include ../../../../lib/Makefile.lib.64
 
@@ -35,15 +34,15 @@ POFILE=
 
 .KEEP_STATE:
 
+all: $(PROG)
+
 all_lib: $(LIBS)
+
+install:	all $(ROOTPROG) $(ROOTYACCPAR) $(ROOTCCSBINLINK)
+		$(RM) $(ROOTCCSBIN)/yaccpar
+		$(SYMLINK) ../../share/lib/ccs/yaccpar $(ROOTCCSBIN)/yaccpar
 
 install_lib: all_lib $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)
 
 include ../Makefile.targ
 include ../../../Makefile.targ
-
-all:	FRC
-
-install:	FRC
-
-FRC:
