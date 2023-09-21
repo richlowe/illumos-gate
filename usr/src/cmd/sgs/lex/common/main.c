@@ -362,7 +362,7 @@ free3core(void)
 }
 #endif
 
-BYTE *
+void *
 myalloc(int a, int b)
 {
 	BYTE *i;

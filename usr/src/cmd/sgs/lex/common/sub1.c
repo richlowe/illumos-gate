@@ -720,7 +720,7 @@ mn2(int a, int d, int c)
 }
 
 int
-mn1(int a, int d)
+mn1(int a, intptr_t d)
 {
 	if (tptr >= treesize) {
 		tptr++;

@@ -31,12 +31,11 @@
  * Copyright (c) 2018, Joyent, Inc.
  */
 
-#include "stdio.h"
-
-extern void exit();
+#include <stdio.h>
+#include <stdlib.h>
 
 #pragma weak yylex
-extern int  yylex();
+extern int  yylex(void);
 
 int
 main(int argc __unused, char **argv __unused)

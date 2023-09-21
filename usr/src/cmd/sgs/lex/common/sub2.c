@@ -86,7 +86,7 @@ cfoll(int v)
 				if (pcptr > pchar + pchlen)
 					error(
 					"Too many packed character classes");
-				left[v] = (int)p;
+				left[v] = (intptr_t)p;
 				name[v] = RCCL;	/* RNCCL eliminated */
 #ifdef DEBUG
 				if (debug && *p) {

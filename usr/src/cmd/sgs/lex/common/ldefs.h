@@ -189,8 +189,8 @@ extern int prev;	/* previous input character */
 extern int pres;	/* present input character */
 extern int peek;	/* next input character */
 extern int *name;
-extern int *left;
-extern int *right;
+extern intptr_t *left;
+extern intptr_t *right;
 extern int *parent;
 extern Boolean *nullstr;
 extern int tptr;
@@ -240,8 +240,8 @@ extern int optim;
 extern int *verify, *advance, *stoff;
 extern int scon;
 extern CHR *psave;
-extern CHR *getl();
-extern BYTE *myalloc();
+extern CHR *getl(CHR *);
+extern void *myalloc(int, int);
 
 void phead1(void);
 void phead2(void);
@@ -275,7 +275,7 @@ int lookup(CHR *s, CHR **t);
 int usescape(int c);
 int alpha(int c);
 int mn2(int a, int d, int c);
-int mn1(int a, int d);
+int mn1(int, intptr_t);
 int mn0(int a);
 int dupl(int n);
 

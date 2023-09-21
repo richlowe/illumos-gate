@@ -26,7 +26,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 
 %{
@@ -96,7 +96,7 @@ static wchar_t  L_PctLoT[]= {'%', 't', 0};
 static wchar_t  L_PctCbr[]= {'%', '}', 0};
 %}
 acc	:	lexinput
-	={	
+	={
 # ifdef DEBUG
 		if(debug) sect2dump();
 # endif
@@ -284,7 +284,7 @@ r:	CHAR
 	={	$$.i = mn0(RNULLS); }
 
 	/* XCU4: add ARRAY and POINTER */
-	| ARRAY 
+	| ARRAY
 	={ isArray = 1; };
 	|     POINTER
 	={ isArray = 0; };
@@ -298,7 +298,8 @@ yylex(void)
 	int  i;
 	CHR *xp;
 	int lex_startcond_lookupval;
-	CHR  *t, c;
+	CHR  *t;
+	intptr_t c;
 	int n, j = 0, k, x;
 	CHR ch;
 	static int sectbegin;
@@ -336,20 +337,15 @@ yylex(void)
 						sectbegin = TRUE;
 						i = treesize*(sizeof(*name)+sizeof(*left)+
 							sizeof(*right)+sizeof(*nullstr)+sizeof(*parent))+ALITTLEEXTRA;
-						c = (int)myalloc(i,1);
-						if(c == 0)
+						p = myalloc(i,1);
+						if (p == NULL)
 							error("Too little core for parse tree");
-						p = (CHR *)c;
 						free(p);
-						/*LINTED: E_BAD_PTR_CAST_ALIGN*/
-						name = (int *)myalloc(treesize,sizeof(*name));
-						/*LINTED: E_BAD_PTR_CAST_ALIGN*/
-						left = (int *)myalloc(treesize,sizeof(*left));
-						/*LINTED: E_BAD_PTR_CAST_ALIGN*/
-						right = (int *)myalloc(treesize,sizeof(*right));
+						name = myalloc(treesize,sizeof(*name));
+						left = myalloc(treesize,sizeof(*left));
+						right = myalloc(treesize,sizeof(*right));
 						nullstr = myalloc(treesize,sizeof(*nullstr));
-						/*LINTED: E_BAD_PTR_CAST_ALIGN*/
-						parent = (int *)myalloc(treesize,sizeof(*parent));
+						parent = myalloc(treesize,sizeof(*parent));
 						if(name == 0 || left == 0 || right == 0 || parent == 0 || nullstr == 0)
 							error("Too little core for parse tree");
 						return(freturn(DELIM));
@@ -429,7 +425,7 @@ yylex(void)
 						pchar=pcptr=(CHR *)myalloc(pchlen, sizeof(*pchar));
 						if (report==2) report=1;
 						continue;
-					case 't': case 'T': 	/* character set specifier */
+					case 't': case 'T':	/* character set specifier */
 						if(handleeuc)
 							error("\
 Character table (%t) is supported only in ASCII compatibility mode.\n");
@@ -732,7 +728,7 @@ start:
 						error("definition %ws not found",token);
 					else
 						munput('s',(CHR *)(subs[i]));
-            				if (peek == '^')
+					if (peek == '^')
                                                 peekon = 1;
 					continue;
 					}
@@ -843,7 +839,7 @@ start:
 					/* range specified */
 						if (light) {
 							c = gch();
-							if(c == '\\') 
+							if(c == '\\')
 								c=usescape(c=gch());
 							remch(c);
 							k = c;
@@ -858,8 +854,8 @@ Character range specified between different codesets.");
 								}
 							if(!handleeuc)
 							if(!(('A'<=j && k<='Z') ||
-						     	     ('a'<=j && k<='z') ||
-						     	     ('0'<=j && k<='9')))
+							     ('a'<=j && k<='z') ||
+							     ('0'<=j && k<='9')))
 								warning("Non-portable Character Class");
 							token[i++] = RANGE;
 							token[i++] = j;
@@ -950,9 +946,9 @@ Character range specified between different codesets.");
 # endif
 
 	if(getl(buf) && !eof) {
-  		if (sargv[optind] == NULL)
+		if (sargv[optind] == NULL)
 			(void) fprintf(fout, "\n# line %d\n", yyline-1);
-		else	
+		else
 			(void) fprintf(fout,
 				"\n# line %d \"%s\"\n", yyline-1, sargv[optind]);
 		(void) fprintf(fout,WSFMT("%ws\n"),buf);

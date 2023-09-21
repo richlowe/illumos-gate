@@ -52,7 +52,7 @@ file path=usr/bin/elfedit mode=0555
 file path=usr/bin/error mode=0555
 file path=usr/bin/gprof mode=0555
 file path=usr/bin/lari mode=0555
-$(not_aarch64)file path=usr/bin/lex mode=0555
+file path=usr/bin/lex mode=0555
 file path=usr/bin/lorder mode=0555
 file path=usr/bin/mcs mode=0555
 file path=usr/bin/nm mode=0555
@@ -88,7 +88,7 @@ link path=usr/ccs/bin/elfdump target=../../bin/elfdump
 link path=usr/ccs/bin/error target=../../bin/error
 link path=usr/ccs/bin/gprof target=../../bin/gprof
 link path=usr/ccs/bin/lari target=../../bin/lari
-$(not_aarch64)link path=usr/ccs/bin/lex target=../../bin/lex
+link path=usr/ccs/bin/lex target=../../bin/lex
 link path=usr/ccs/bin/lorder target=../../bin/lorder
 link path=usr/ccs/bin/mcs target=../../bin/mcs
 link path=usr/ccs/bin/nm target=../../bin/nm
@@ -129,9 +129,9 @@ dir  path=usr/share/lib
 dir  path=usr/share/lib/ccs
 file path=usr/share/lib/ccs/gprof.callg.blurb mode=0444
 file path=usr/share/lib/ccs/gprof.flat.blurb mode=0444
-$(not_aarch64)file path=usr/share/lib/ccs/nceucform
-$(not_aarch64)file path=usr/share/lib/ccs/ncform
-$(not_aarch64)file path=usr/share/lib/ccs/nrform
+file path=usr/share/lib/ccs/nceucform
+file path=usr/share/lib/ccs/ncform
+file path=usr/share/lib/ccs/nrform
 $(not_aarch64)file path=usr/share/lib/ccs/yaccpar
 dir  path=usr/share/man/man1
 file path=usr/share/man/man1/ar.1
