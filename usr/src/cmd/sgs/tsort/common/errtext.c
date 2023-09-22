@@ -26,7 +26,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  *	Routines to print and adjust options on
@@ -64,7 +64,7 @@ __errtext(int severity, char *format, va_list ap)
 	}
 	if (Err.vsource) {
 		if (Err.envsource ||
-			(Err.envsource = getenv("ERRSOURCE"))) {
+		    (Err.envsource = getenv("ERRSOURCE"))) {
 			(void) fprintf(stderr, "%s: ", Err.envsource);
 		}
 	}
@@ -83,7 +83,7 @@ __errtext(int severity, char *format, va_list ap)
 	}
 
 	if (Err.vtext) {
-		if (Err.vsyserr && ((int)format == EERRNO)) {
+		if (Err.vsyserr && ((intptr_t)format == EERRNO)) {
 			(void) fflush(stderr);
 			perror("");
 			puterrno = 1;
@@ -93,7 +93,7 @@ __errtext(int severity, char *format, va_list ap)
 		}
 	}
 
-	if ((errno && ((int)format != EERRNO)) &&
+	if ((errno && ((intptr_t)format != EERRNO)) &&
 	    (Err.vsyserr == EYES || (Err.vsyserr ==  EDEF &&
 	    (Err.severity == EHALT || Err.severity == EERROR)))) {
 		(void) fputc('\t', stderr);
@@ -165,7 +165,7 @@ errverb(char *s)
 		return;
 	(void) strcpy(buf, s);
 	for (token = errstrtok(buf, space);  token;
-		token = errstrtok((char *)0, space)) {
+	    token = errstrtok((char *)0, space)) {
 		if (strcmp(token, "nochange") == 0) {
 			Err.vbell   =  ENO;
 			Err.vtext   =  EYES;

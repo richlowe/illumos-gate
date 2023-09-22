@@ -75,25 +75,26 @@ SUBDIRS=	 libconv	\
 		size		\
 		symorder	\
 		unifdef		\
+		tsort		\
 		yacc
 
 
 # XXXARM: Not built on aarch64 yet
 # link_audit - needs port
 # ldprof - not ported
-# tsort - not 64bit clean
 # demo_rdb - not ported
 $(NOT_AARCH64_BLD)SUBDIRS +=	\
 	link_audit	\
 	ldprof		\
-	tsort		\
 	.WAIT		\
 	demo_rdb
+
 # Messaging support
-#
-POSUBDIRS=	m4		nm		yacc
-# XXXARM
-$(NOT_AARCH64_BLD)POSUBDIRS += tsort
+POSUBDIRS=	\
+	m4	\
+	nm	\
+	tsort	\
+	yacc
 
 POFILE=		sgs.po
 POFILES=	$(POSUBDIRS:%=%/%.po)

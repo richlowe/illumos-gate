@@ -61,7 +61,7 @@ file path=usr/bin/rpcgen mode=0555
 file path=usr/bin/size mode=0555
 hardlink path=usr/bin/strip target=../bin/mcs
 file path=usr/bin/symorder mode=0555
-$(not_aarch64)file path=usr/bin/tsort mode=0555
+file path=usr/bin/tsort mode=0555
 file path=usr/bin/unifdef mode=0555
 file path=usr/bin/yacc mode=0555
 dir  path=usr/ccs
@@ -96,7 +96,7 @@ link path=usr/ccs/bin/ranlib target=../../bin/ranlib
 link path=usr/ccs/bin/size target=../../bin/size
 link path=usr/ccs/bin/strip target=../../bin/strip
 link path=usr/ccs/bin/symorder target=../../bin/symorder
-$(not_aarch64)link path=usr/ccs/bin/tsort target=../../bin/tsort
+link path=usr/ccs/bin/tsort target=../../bin/tsort
 link path=usr/ccs/bin/unifdef target=../../bin/unifdef
 link path=usr/ccs/bin/yacc target=../../bin/yacc
 link path=usr/ccs/bin/yaccpar target=../../share/lib/ccs/yaccpar
