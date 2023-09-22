@@ -138,14 +138,11 @@ $(PROG): $$(OBJS)
 # Install the ptool, symlinking it into /usr/proc/bin if PTOOL_TYPE is set
 # to LEGACY.
 #
-install: all $(ROOTISAPROG) $(ROOTISALN) $(ROOTBINLN)
-	-$(RM) $(ROOTBINPROG)
-	-$(LN) $(ISAEXEC) $(ROOTBINPROG)
+install: all $(ROOTPROG) $(ROOTISAPROG) $(ROOTISALN) $(ROOTBINLN)
 	-$(INSTALL_$(PTOOL_TYPE))
 
-$(ROOTBINLN): $(ROOTISAPROG)
-	-$(RM) $@
-	-$(LN) $(ISAEXEC) $@
+$(ROOTISAPROG):
+	$(RM) $@; $(SYMLINK) ../$(@F) $@
 
 $(ROOTISALN): $(ROOTISAPROG)
 	-$(RM) $@
@@ -157,6 +154,3 @@ $(LN_$(PROG)): $(PROG)
 
 clean:
 	$(RM) $(OBJS)
-
-lint:
-	$(LINT.c) $(SRCS) $(LDLIBS)
