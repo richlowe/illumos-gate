@@ -45,14 +45,14 @@ extern "C" {
 #include <sys/param.h>
 #include <sys/memnode.h>
 #include <sys/atomic.h>
-#include <sys/controlregs.h>
+#include <sys/arch_timer.h>
 
 
 /*
  * WARNING: vm_dep.h is included by files in common.
  */
 
-#define	GETTICK()	read_cntpct()
+#define	GETTICK()	arch_timer_count()
 /*
  * Do not use this function for obtaining clock tick.  This
  * is called by callers who do not need to have a guarenteed

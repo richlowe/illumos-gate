@@ -29,6 +29,7 @@
 #include <sys/byteorder.h>
 #include <sys/sysmacros.h>
 #include <sys/controlregs.h>
+#include <sys/arch_timer.h>
 #include <sys/platmod.h>
 #include <sys/platform.h>
 #include <sys/miiregs.h>
@@ -63,11 +64,7 @@ static struct genet_sc *genet_dev[3];
 static void
 genet_usecwait(int usec)
 {
-	uint64_t cnt = (read_cntpct() / (read_cntfrq() / 1000000)) + usec + 2;
-	for (;;) {
-		if ((read_cntpct() / (read_cntfrq() / 1000000)) > cnt)
-			break;
-	}
+	arch_timer_udelay(usec);
 }
 
 static void

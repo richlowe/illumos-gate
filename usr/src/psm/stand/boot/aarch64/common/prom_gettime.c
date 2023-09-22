@@ -24,10 +24,9 @@
 
 #include <sys/promif.h>
 #include <sys/sysmacros.h>
-#include <sys/controlregs.h>
+#include <sys/arch_timer.h>
 
 u_int prom_gettime(void)
 {
-	return read_cntpct() * 10000 / read_cntfrq();
+	return arch_timer_count() * 10000 / arch_timer_freq();
 }
-

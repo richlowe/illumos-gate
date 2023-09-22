@@ -45,6 +45,8 @@
 #include <netinet/inetutil.h>
 #include <sys/bootvfs.h>
 #include <sys/psci.h>
+#include <sys/arch_timer.h>
+#include "arch_timer_private.h"
 #include "ramdisk.h"
 #include "boot_plat.h"
 #include "virtnet.h"
@@ -441,6 +443,7 @@ void init_machdev(void)
 	prom_getprop(prom_rootnode(), "compatible", compatible + strlen(str) + 1);
 	prom_setprop(prom_rootnode(), "compatible", compatible, namelen);
 
+	init_arch_timer(TMR_PHYS);
 	init_virtnet();
 	init_virtblk();
 }

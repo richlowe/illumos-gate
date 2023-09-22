@@ -42,6 +42,7 @@
 #include <sys/irq.h>
 #include <sys/archsystm.h>
 #include <sys/promif.h>
+#include <sys/arch_timer.h>
 
 static int cbe_ticks = 0;
 
@@ -95,7 +96,7 @@ cbe_fire_master(void)
 	cpu_t *cpu = CPU;
 	processorid_t me = cpu->cpu_id, i;
 
-	write_cntp_cval(0xfffffffffffffffful);
+	arch_timer_set_cval(CNT_CVAL_MAX);
 
 	cyclic_fire(cpu);
 
@@ -150,7 +151,7 @@ cbe_reprogram(void *arg, hrtime_t time)
 {
 	hrtime_t val;
 	val = unscalehrtime(time + cbe_timer_resolution);
-	write_cntp_cval(val);
+	arch_timer_set_cval(val);
 }
 
 /*ARGSUSED*/
@@ -246,8 +247,8 @@ cbe_enable(void *arg)
 
 	ASSERT((me == 0) || !CPU_IN_SET(cbe_enabled, me));
 	CPUSET_ADD(cbe_enabled, me);
-	write_cntp_cval(0xfffffffffffffffful);
-	write_cntp_ctl((0u << 1) | (1u << 0));
+	arch_timer_set_cval(CNT_CVAL_MAX);
+	arch_timer_unmask_irq();
 }
 
 void
@@ -257,7 +258,7 @@ cbe_disable(void *arg)
 
 	ASSERT(CPU_IN_SET(cbe_enabled, me));
 	CPUSET_DEL(cbe_enabled, me);
-	write_cntp_ctl((1u << 1) | (1u << 0));
+	arch_timer_mask_irq();
 }
 
 /*
@@ -286,8 +287,10 @@ void
 cbe_init_pre(void)
 {
 	CPUSET_ZERO(cbe_enabled);
-	write_cntp_cval(0xfffffffffffffffful);
-	write_cntp_ctl((0u << 1) | (1u << 0));
+
+	arch_timer_set_cval(CNT_CVAL_MAX);
+	arch_timer_unmask_irq();
+	arch_timer_enable();
 }
 
 static int
@@ -313,6 +316,7 @@ get_interrupt_cell(void)
 static int
 get_cbe_vector(void)
 {
+	cpu_t *cpu = CPU;
 	pnode_t timer = prom_finddevice("/timer");
 	int irq = -1;
 
@@ -341,6 +345,13 @@ get_cbe_vector(void)
 					uint32_t *interrupts = __builtin_alloca(len);
 					prom_getprop(timer, "interrupts", (caddr_t)interrupts);
 					int index = (num > 1)? 1: 0;
+					/*
+					 * Select the timer interrupt index from the boot EL.
+					 * If booted at EL1, use the virtual timer interrupt.
+					 * If booted at EL2, fall back to the physical timer interrupt.
+					 */
+					if (index == 1 && cpu->cpu_m.mcpu_boot_el == 1)
+						index += 1;
 					int type = htonl(interrupts[interrupt_cell * index + 0]);
 					irq = htonl(interrupts[interrupt_cell * index + 1]);
 					int attr = htonl(interrupts[interrupt_cell * index + 2]);

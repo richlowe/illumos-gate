@@ -30,6 +30,7 @@
 #include <sys/byteorder.h>
 #include <sys/sysmacros.h>
 #include <sys/controlregs.h>
+#include <sys/arch_timer.h>
 #include <sys/dditypes.h>
 #include <sys/devops.h>
 #include <sys/sdcard/sda.h>
@@ -68,17 +69,13 @@ static struct mmc_sc *mmc_dev[3];
 static void
 usecwait(int usec)
 {
-	uint64_t cnt = (read_cntpct() / (read_cntfrq() / 1000000)) + usec + 2;
-	for (;;) {
-		if ((read_cntpct() / (read_cntfrq() / 1000000)) > cnt)
-			break;
-	}
+	arch_timer_udelay(usec);
 }
 
 static uint64_t
 get_usec()
 {
-	return (read_cntpct() / (read_cntfrq() / 1000000));
+	return (arch_timer_count() / (arch_timer_freq() / 1000000));
 }
 
 static void

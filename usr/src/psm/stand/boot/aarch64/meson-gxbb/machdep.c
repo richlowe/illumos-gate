@@ -46,6 +46,8 @@
 #include <sys/bootvfs.h>
 #include <sys/psci.h>
 #include <sys/gxbb_smc.h>
+#include <sys/arch_timer.h>
+#include "arch_timer_private.h"
 #include "ramdisk.h"
 #include "dwmac.h"
 #include "boot_plat.h"
@@ -327,6 +329,7 @@ void init_machdev(void)
 	prom_getprop(prom_rootnode(), "compatible", compatible + strlen(str) + 1);
 	prom_setprop(prom_rootnode(), "compatible", compatible, namelen);
 
+	init_arch_timer(TMR_PHYS);
 	init_dwmac();
 	init_mmc();
 }

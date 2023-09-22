@@ -53,6 +53,7 @@
 #include <sys/controlregs.h>
 #include <sys/x_call.h>
 #include <sys/consdev.h>
+#include <sys/arch_timer.h>
 
 int maxphys = MMU_PAGESIZE * 16;	/* 128k */
 int klustsize = MMU_PAGESIZE * 16;	/* 128k */
@@ -118,7 +119,7 @@ console_exit(int busy, int spl)
 u_longlong_t
 randtick(void)
 {
-	return (read_cntpct());
+	return (arch_timer_count());
 }
 
 void
@@ -131,11 +132,11 @@ tenmicrosec(void)
 		while (gethrtime() < end)
 			SMT_PAUSE();
 	} else {
-		uint64_t timer_freq = read_cntfrq();
-		uint64_t end_count = read_cntpct() + timer_freq /
+		uint64_t timer_freq = arch_timer_freq();
+		uint64_t end_count = arch_timer_count() + timer_freq /
 		    (MICROSEC / 10);
 
-		while (read_cntpct() < end_count)
+		while (arch_timer_count() < end_count)
 			SMT_PAUSE();
 	}
 }

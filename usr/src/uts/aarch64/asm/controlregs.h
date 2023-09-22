@@ -165,6 +165,14 @@ read_cntpct(void)
 }
 
 static inline uint64_t
+read_cntvct(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, cntvct_el0":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline uint64_t
 read_cntfrq(void)
 {
 	uint64_t reg;
@@ -206,6 +214,48 @@ read_cntp_tval(void)
 	uint64_t reg;
 	__asm__ __volatile__("mrs %0, cntp_tval_el0":"=r"(reg)::"memory");
 	return (reg);
+}
+
+static inline uint64_t
+read_cntv_ctl(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, cntv_ctl_el0":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline void
+write_cntv_ctl(uint64_t reg)
+{
+	__asm__ __volatile__("msr cntv_ctl_el0, %0"::"r"(reg):"memory");
+}
+
+static inline uint64_t
+read_cntv_cval(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, cntv_cval_el0":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline void
+write_cntv_cval(uint64_t reg)
+{
+	__asm__ __volatile__("msr cntv_cval_el0, %0"::"r"(reg):"memory");
+}
+
+static inline uint64_t
+read_cntv_tval(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, cntv_tval_el0":"=r"(reg)::"memory");
+	return (reg);
+}
+
+static inline void
+write_cntv_tval(uint64_t reg)
+{
+	__asm__ __volatile__("msr cntv_tval_el0, %0"::"r"(reg):"memory");
 }
 
 static inline void
@@ -434,7 +484,6 @@ write_cpacr_el1(uint64_t reg)
 #define	DAIF_IRQ	(1 << 7)
 #define	DAIF_SERROR	(1 << 8)
 #define	DAIF_DEBUG	(1 << 9)
-
 
 static inline uint64_t
 read_daif(void)

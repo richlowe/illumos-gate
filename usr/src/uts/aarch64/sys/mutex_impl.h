@@ -100,7 +100,7 @@ typedef union mutex_impl {
 			}
 
 /* low overhead clock read */
-#define	MUTEX_GETTICK()	read_cntpct()
+#define	MUTEX_GETTICK()	arch_timer_count()
 extern void null_xcall(void);
 #define	MUTEX_SYNC()	{	\
 			cpuset_t set;   \

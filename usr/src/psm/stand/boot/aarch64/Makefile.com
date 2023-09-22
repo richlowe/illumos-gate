@@ -39,6 +39,7 @@ DTC_BASE	= $(EXTRA)/dtc
 SRT0_O = srt0.o
 OBJS +=				\
 	aarch64_subr.o		\
+	arch_timer.o		\
 	assfail.o		\
 	bitext.o		\
 	boot_aarch64.o		\
