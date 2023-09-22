@@ -62,6 +62,8 @@ struct	machcpu {
 	char		*mcpu_revision;
 	uint64_t	mcpu_midr;
 	uint64_t	mcpu_revidr;
+
+	uint64_t	mcpu_boot_el;
 };
 
 #ifndef NINTR_THREADS

@@ -74,7 +74,7 @@
 #include <sys/cmn_err.h>
 #include <sys/time.h>
 #include <sys/note.h>
-#include <sys/controlregs.h>
+#include <sys/arch_timer.h>
 
 /*
  * The symbol __stack_chk_guard contains the magic guard value used
@@ -107,7 +107,7 @@ __stack_chk_fail(void)
 
 static void salsa_hash(unsigned int *);
 
-#define	SSP_GET_TICK read_cntpct
+#define	SSP_GET_TICK arch_timer_count
 
 /* called from os/startup.c */
 void

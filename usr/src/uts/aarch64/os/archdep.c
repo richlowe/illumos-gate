@@ -50,6 +50,7 @@
 #include <sys/kobj.h>
 #include <sys/promif.h>
 #include <sys/sysmacros.h>
+#include <sys/arch_timer.h>
 
 uint_t adj_shift;
 
@@ -209,11 +210,11 @@ gethrtime_waitfree(void)
 hrtime_t
 gethrtime(void)
 {
-	uint64_t pct = read_cntpct();
-	uint64_t timer_freq = read_cntfrq();
+	uint64_t ct = arch_timer_count();
+	uint64_t timer_freq = arch_timer_freq();
 
-	uint64_t x = pct / timer_freq;
-	uint64_t y = pct % timer_freq;
+	uint64_t x = ct / timer_freq;
+	uint64_t y = ct % timer_freq;
 	hrtime_t nsec = x * NANOSEC + y * NANOSEC / timer_freq;
 	return (nsec);
 }
@@ -221,14 +222,14 @@ gethrtime(void)
 hrtime_t
 gethrtime_unscaled(void)
 {
-	return (hrtime_t)read_cntpct();
+	return (hrtime_t)arch_timer_count();
 }
 
 void
 scalehrtime(hrtime_t *hrt)
 {
 	hrtime_t pct = *hrt;
-	uint64_t timer_freq = read_cntfrq();
+	uint64_t timer_freq = arch_timer_freq();
 
 	uint64_t x = pct / timer_freq;
 	uint64_t y = pct % timer_freq;
@@ -239,7 +240,7 @@ scalehrtime(hrtime_t *hrt)
 uint64_t
 unscalehrtime(hrtime_t nsec)
 {
-	uint64_t timer_freq = read_cntfrq();
+	uint64_t timer_freq = arch_timer_freq();
 
 	uint64_t x = nsec / NANOSEC;
 	uint64_t y = nsec % NANOSEC;
@@ -256,11 +257,11 @@ gethrestime(timespec_t *tp)
 hrtime_t
 dtrace_gethrtime(void)
 {
-	uint64_t pct = read_cntpct();
-	uint64_t timer_freq = read_cntfrq();
+	uint64_t ct = arch_timer_count();
+	uint64_t timer_freq = arch_timer_freq();
 
-	uint64_t x = pct / timer_freq;
-	uint64_t y = pct % timer_freq;
+	uint64_t x = ct / timer_freq;
+	uint64_t y = ct % timer_freq;
 	hrtime_t nsec = x * NANOSEC + y * NANOSEC / timer_freq;
 	return (nsec);
 }

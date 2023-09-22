@@ -63,6 +63,9 @@
 #include <sys/bootinfo.h>
 #include <sys/bootconf.h>	/* for bootops */
 
+#include <sys/controlregs.h>
+#include <sys/arch_timer.h>
+
 /*
  * called immediately from _start to stich the
  * primary modules together
@@ -157,6 +160,17 @@ mlsetup(struct regs *rp)
 	CPU->cpu_id = 0;
 	CPU->cpu_m.affinity = read_mpidr() & MPIDR_AFF_MASK;
 	CPU->cpu_dispatch_pri = t0.t_pri;
+
+	/*
+	 * Save the boot EL. Bits [3:2] hold the value, so we
+	 * shift the bits over to get the integer form.
+	 */
+	CPU->cpu_m.mcpu_boot_el = ((read_CurrentEL() >> 2) & 0x3);
+
+	/*
+	 * Select the system timer. Use the phys timer only if EL2.
+	 */
+	arch_timer_select((CPU->cpu_m.mcpu_boot_el == 2) ? TMR_PHYS : TMR_VIRT);
 
 	/*
 	 * Initialize thread/cpu microstate accounting

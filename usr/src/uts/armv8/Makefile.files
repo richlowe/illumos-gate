@@ -67,7 +67,8 @@ CORE_OBJS +=			\
 	notes.o			\
 	hold_page.o		\
 	ssp.o			\
-	psci.o
+	psci.o			\
+	arch_timer.o
 
 CORE_OBJS += $(PCI_STRING_OBJS)
 

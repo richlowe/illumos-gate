@@ -53,6 +53,7 @@
 #include <sys/promif.h>
 #include <sys/gic.h>
 #include <sys/x_call.h>
+#include <sys/arch_timer.h>
 
 /*
  * This is the equivalent of the x86 instruction BSRW.  We return the index
@@ -94,7 +95,7 @@ hilevel_intr_prolog(struct cpu *cpu, uint_t pil, uint_t oldpil, struct regs *rp)
 	struct machcpu *mcpu = &cpu->cpu_m;
 	uint_t mask;
 	hrtime_t intrtime;
-	hrtime_t now = read_cntpct();
+	hrtime_t now = arch_timer_count();
 
 	ASSERT(pil > LOCK_LEVEL);
 
@@ -178,7 +179,7 @@ hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint_t vecnum)
 	struct machcpu *mcpu = &cpu->cpu_m;
 	uint_t mask;
 	hrtime_t intrtime;
-	hrtime_t now = read_cntpct();
+	hrtime_t now = arch_timer_count();
 
 	ASSERT(mcpu->mcpu_pri == pil);
 
@@ -246,7 +247,7 @@ intr_thread_prolog(struct cpu *cpu, caddr_t stackptr, uint_t pil)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	kthread_t *t, *volatile it;
-	hrtime_t now = read_cntpct();
+	hrtime_t now = arch_timer_count();
 
 	ASSERT(pil > 0);
 	ASSERT((cpu->cpu_intr_actv & (1 << pil)) == 0);
@@ -316,7 +317,7 @@ intr_thread_epilog(struct cpu *cpu, uint_t vec, uint_t oldpil)
 	kthread_t *it = cpu->cpu_thread;	/* curthread */
 	uint_t pil, basespl;
 	hrtime_t intrtime;
-	hrtime_t now = read_cntpct();
+	hrtime_t now = arch_timer_count();
 
 	pil = it->t_pil;
 	cpu->cpu_stats.sys.intr[pil - 1]++;
@@ -465,7 +466,7 @@ intr_get_time(void)
 	ASSERT(pil != 0);
 	ASSERT(t->t_intr_start != 0);
 
-	time = read_cntpct();
+	time = arch_timer_count();
 	delta = time - t->t_intr_start;
 	t->t_intr_start = time;
 
@@ -530,7 +531,7 @@ top:
 	mcpu->mcpu_pri = pil;
 	setlvlx(pil, -1);
 
-	now = read_cntpct();
+	now = arch_timer_count();
 
 	/*
 	 * Get set to run interrupt thread.
@@ -595,7 +596,7 @@ dosoftint_epilog(struct cpu *cpu, uint_t oldpil)
 	kthread_t *t, *it;
 	uint_t pil, basespl;
 	hrtime_t intrtime;
-	hrtime_t now = read_cntpct();
+	hrtime_t now = arch_timer_count();
 
 	it = cpu->cpu_thread;
 	pil = it->t_pil;
@@ -770,7 +771,7 @@ cpu_intr_swtch_enter(kthread_id_t t)
 	if (t->t_intr_start) {
 		do {
 			start = t->t_intr_start;
-			interval = read_cntpct() - start;
+			interval = arch_timer_count() - start;
 		} while (atomic_cas_64(&t->t_intr_start, start, 0) != start);
 		cpu = CPU;
 		cpu->cpu_m.intrstat[t->t_pil][0] += interval;
@@ -795,7 +796,7 @@ cpu_intr_swtch_exit(kthread_id_t t)
 
 	do {
 		ts = t->t_intr_start;
-	} while (atomic_cas_64(&t->t_intr_start, ts, read_cntpct()) != ts);
+	} while (atomic_cas_64(&t->t_intr_start, ts, arch_timer_count()) != ts);
 }
 
 int

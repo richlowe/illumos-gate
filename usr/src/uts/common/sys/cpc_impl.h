@@ -208,19 +208,8 @@ enum dcpc_mask_attr {
 extern uint64_t ultra_gettick(void);
 #define	KCPC_GET_TICK ultra_gettick
 #elif defined(__aarch64__)
-/*
- * XXXARM: this is _wrong_ - the OS should only read the CNTVCT, phys is
- * (mostly) for type 2 hypervisors.
- *
- * In a processor that doesn't support the virtualization extensions, CNTVCT is
- * identical to CNTPCT.
- *
- * Why not CNTPCT?
- * ... Is always accessible from PL1 modes. However, if hypervisor extensions
- * are supported accesses to CNTPCT will generate a hyp-trap from PL1 unless
- * CNTHCTL.PL1PCTEN is set to 1.
- */
-#define	KCPC_GET_TICK read_cntpct
+extern uint64_t arch_timer_count(void);
+#define	KCPC_GET_TICK arch_timer_count
 #else
 extern hrtime_t tsc_read(void);
 #define	KCPC_GET_TICK tsc_read

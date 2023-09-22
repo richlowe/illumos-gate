@@ -180,7 +180,7 @@
 	ldrh	w0, [x19, #T_FLAG]
 	ands	w0, w0, #T_INTR_THREAD
 	b.eq	1f
-	mrs	x0, cntpct_el0
+	bl	arch_timer_count
 	str	x0, [x19, #T_INTR_START]
 1:
 	bl	__dtrace_probe___sched_on__cpu
@@ -289,7 +289,7 @@
 	ldrh	w0, [x19, #T_FLAG]
 	ands	w0, w0, #T_INTR_THREAD
 	b.eq	1f
-	mrs	x0, cntpct_el0
+	bl	arch_timer_count
 	str	x0, [x19, #T_INTR_START]
 1:
 	bl	__dtrace_probe___sched_on__cpu

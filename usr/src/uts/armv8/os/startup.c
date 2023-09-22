@@ -85,6 +85,7 @@
 #include <sys/gic.h>
 #include <sys/psci.h>
 #include <sys/controlregs.h>
+#include <sys/arch_timer.h>
 
 extern void brand_init(void);
 extern void pcf_init(void);
@@ -1107,7 +1108,7 @@ set_soft_hostid(void)
 			(void) modunload(i);
 		}
 		if (hostid == HW_INVALID_HOSTID) {
-			tsc = read_cntpct();
+			tsc = arch_timer_count();
 			hostid = (int32_t)tsc & 0x0CFFFFF;
 		}
 	} else {
