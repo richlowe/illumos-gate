@@ -105,8 +105,8 @@ file path=usr/bin/$(ARCH32)/mdb mode=0555
 dir  path=usr/bin/$(ARCH64)
 hardlink path=usr/bin/$(ARCH64)/adb target=../../../usr/bin/$(ARCH64)/mdb
 file path=usr/bin/$(ARCH64)/mdb mode=0555
-hardlink path=usr/bin/adb target=../../usr/lib/isaexec
-hardlink path=usr/bin/mdb target=../../usr/lib/isaexec
+hardlink path=usr/bin/adb target=../../usr/bin/$(ARCH64)/adb
+hardlink path=usr/bin/mdb target=../../usr/bin/$(ARCH64)/mdb
 dir  path=usr/include
 dir  path=usr/include/sys
 file path=usr/include/sys/mdb_modapi.h

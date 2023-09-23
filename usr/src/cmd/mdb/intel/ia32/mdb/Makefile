@@ -42,8 +42,4 @@ include ../../../Makefile.mdb
 
 CPPFLAGS += -I../../mdb
 
-install: all $(ISAEXEC) $(ROOTPROG32) $(ROOTLINK32)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
-	-$(RM) $(ROOTLINK)
-	-$(LN) $(ISAEXEC) $(ROOTLINK)
+install: all $(ROOTPROG32) $(ROOTLINK32)
