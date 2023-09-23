@@ -22,35 +22,53 @@
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
-#
 
-PROG= decrypt
+PROG = decrypt
+
+ROOTLINK64= $(ROOTBIN64)/encrypt
 ROOTLINK= $(ROOTBIN)/encrypt
+ROOTDECLINK = $(PROG:%=$(ROOTBIN64)/%)
+
 DCFILE=$(PROG).dc
 
+OBJS = decrypt.o
+
 include ../../Makefile.cmd
+include ../../Makefile.cmd.64
 
-SUBDIRS= $(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+CFLAGS += $(CCVERBOSE)
+CPPFLAGS += -D_FILE_OFFSET_BITS=64
 
-all	:=	TARGET = all
-install	:=	TARGET = install
-clean	:=	TARGET = clean
-clobber	:=	TARGET = clobber
-lint	:=	TARGET = lint
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += $(CNOWARN_UNINIT)
+
+LDLIBS += -lkmf -lpkcs11 -lcryptoutil
 
 .KEEP_STATE:
 
-all clean clobber lint:	$(SUBDIRS)
+all:    $(PROG)
 
-install:	$(SUBDIRS)
-	-$(RM) $(ROOTPROG) $(ROOTLINK)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTLINK)
+install: $(ROOTPROG) $(ROOTLINK) $(ROOTLINK64) $(ROOTDECLINK)
 
-$(SUBDIRS):	FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
+%.o:	%.c
+	$(COMPILE.c) $<
+
+$(PROG): $(OBJS)
+	$(LINK.c) $(OBJS) -o $@ $(LDLIBS) $(DYNFLAGS)
+	$(POST_PROCESS)
+
+$(ROOTDECLINK):
+	$(RM) $@; $(SYMLINK) ../$(@F) $@
+
+$(ROOTLINK): $(ROOTPROG)
+	$(RM) $@; $(LN) $(ROOTPROG) $@
+
+$(ROOTLINK64): $(ROOTPROG64)
+	$(RM) $@
+	$(LN) $(ROOTPROG64) $@
+
+clean:
+	$(RM) $(PROG) $(OBJS)
 
 $(DCFILE):
 	$(RM) messages.po
