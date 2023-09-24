@@ -33,6 +33,21 @@
 extern "C" {
 #endif
 
+/*
+ * Insert ISBs after writes to system registers and before reads
+ * from system registers that are not self-syncronized. This is done
+ * to ensure that reads and writes always occur in-order.
+ *
+ * To quote ARM DDI 0487J.a Glossary - Context Synchronization event:
+ * "All direct and indirect writes to System registers that are made
+ * before the Context synchronization event affect any instruction,
+ * including a direct read, that appears in program order after the
+ * instruction causing the Context synchronization event."
+ *
+ * XXXARM: Apply this to all relevant register reads and writes
+ *         so we can avoid repetitive explicit calls to isb().
+ */
+
 static inline uint64_t
 read_actlr(void)
 {
@@ -160,7 +175,12 @@ static inline uint64_t
 read_cntpct(void)
 {
 	uint64_t reg;
-	__asm__ __volatile__("mrs %0, cntpct_el0":"=r"(reg)::"memory");
+	__asm__ __volatile__(
+	    "isb;"
+	    "mrs %0, cntpct_el0;"
+	    : "=r" (reg)
+	    : /* no input */
+	    : "memory");
 	return (reg);
 }
 
@@ -168,7 +188,12 @@ static inline uint64_t
 read_cntvct(void)
 {
 	uint64_t reg;
-	__asm__ __volatile__("mrs %0, cntvct_el0":"=r"(reg)::"memory");
+	__asm__ __volatile__(
+	    "isb;"
+	    "mrs %0, cntvct_el0;"
+	    : "=r" (reg)
+	    : /* no input */
+	    : "memory");
 	return (reg);
 }
 
@@ -191,7 +216,12 @@ read_cntp_ctl(void)
 static inline void
 write_cntp_ctl(uint64_t reg)
 {
-	__asm__ __volatile__("msr cntp_ctl_el0, %0"::"r"(reg):"memory");
+	__asm__ __volatile__(
+	    "msr cntp_ctl_el0, %0;"
+	    "isb;"
+	    : /* no output */
+	    : "r" (reg)
+	    : "memory");
 }
 
 static inline uint64_t
@@ -205,7 +235,12 @@ read_cntp_cval(void)
 static inline void
 write_cntp_cval(uint64_t reg)
 {
-	__asm__ __volatile__("msr cntp_cval_el0, %0"::"r"(reg):"memory");
+	__asm__ __volatile__(
+	    "msr cntp_cval_el0, %0;"
+	    "isb;"
+	    : /* no output */
+	    : "r" (reg)
+	    : "memory");
 }
 
 static inline uint64_t
@@ -227,7 +262,12 @@ read_cntv_ctl(void)
 static inline void
 write_cntv_ctl(uint64_t reg)
 {
-	__asm__ __volatile__("msr cntv_ctl_el0, %0"::"r"(reg):"memory");
+	__asm__ __volatile__(
+	    "msr cntv_ctl_el0, %0;"
+	    "isb;"
+	    : /* no output */
+	    : "r" (reg)
+	    : "memory");
 }
 
 static inline uint64_t
@@ -241,7 +281,12 @@ read_cntv_cval(void)
 static inline void
 write_cntv_cval(uint64_t reg)
 {
-	__asm__ __volatile__("msr cntv_cval_el0, %0"::"r"(reg):"memory");
+	__asm__ __volatile__(
+	    "msr cntv_cval_el0, %0;"
+	    "isb;"
+	    : /* no output */
+	    : "r" (reg)
+	    : "memory");
 }
 
 static inline uint64_t
@@ -255,13 +300,23 @@ read_cntv_tval(void)
 static inline void
 write_cntv_tval(uint64_t reg)
 {
-	__asm__ __volatile__("msr cntv_tval_el0, %0"::"r"(reg):"memory");
+	__asm__ __volatile__(
+	    "msr cntv_tval_el0, %0;"
+	    "isb;"
+	    : /* no output */
+	    : "r" (reg)
+	    : "memory");
 }
 
 static inline void
 write_cntp_tval(uint64_t reg)
 {
-	__asm__ __volatile__("msr cntp_tval_el0, %0"::"r"(reg):"memory");
+	__asm__ __volatile__(
+	    "msr cntp_tval_el0, %0;"
+	    "isb;"
+	    : /* no output */
+	    : "r" (reg)
+	    : "memory");
 }
 
 static inline void
