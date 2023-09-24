@@ -249,6 +249,7 @@ cbe_enable(void *arg)
 	CPUSET_ADD(cbe_enabled, me);
 	arch_timer_set_cval(CNT_CVAL_MAX);
 	arch_timer_unmask_irq();
+	arch_timer_enable();
 }
 
 void
@@ -258,6 +259,7 @@ cbe_disable(void *arg)
 
 	ASSERT(CPU_IN_SET(cbe_enabled, me));
 	CPUSET_DEL(cbe_enabled, me);
+	arch_timer_disable();
 	arch_timer_mask_irq();
 }
 
