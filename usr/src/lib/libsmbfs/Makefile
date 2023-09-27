@@ -50,6 +50,22 @@ clobber :=	TARGET= clobber
 MSGFILES =	`$(GREP) -l gettext smb/*.[ch]`
 POFILE =	libsmbfs.po
 
+
+TYPECHECK_LIB = libsmbfs.so.1
+
+TYPELIST =			\
+	smbioc_ntcreate_t	\
+	smbioc_oshare_t		\
+	smbioc_ossn_t		\
+	smbioc_pk_t		\
+	smbioc_printjob_t	\
+	smbioc_rw_t		\
+	smbioc_sockaddr_t	\
+	smbioc_ssn_ident_t	\
+	smbioc_ssn_work_t	\
+	smbioc_tcon_t		\
+	smbioc_xnp_t
+
 .KEEP_STATE:
 
 all install clean clobber:  $(SUBDIRS)
@@ -60,7 +76,7 @@ $(POFILE):	pofile_MSGFILES
 
 install_h: $(ROOTHDRDIR) $(ROOTHDRS)
 
-check: $(CHECKHDRS)
+check: $(CHECKHDRS) $(TYPECHECK)
 
 $(ROOTHDRDIR)/%: %
 	$(INS.file)
