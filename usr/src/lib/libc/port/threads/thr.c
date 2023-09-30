@@ -225,8 +225,9 @@ hash_out(ulwp_t *ulwp, uberdata_t *udp)
 }
 
 /*
- * Retain stack information for thread structures that are being recycled for
- * new threads.  All other members of the thread structure should be zeroed.
+ * Retain stack information (and on variant 1, the TCB) for thread structures
+ * that are being recycled for new threads.  All other members of the thread
+ * structure should be zeroed.
  */
 static void
 ulwp_clean(ulwp_t *ulwp)
@@ -236,6 +237,9 @@ ulwp_clean(ulwp_t *ulwp)
 	size_t guardsize = ulwp->ul_guardsize;
 	uintptr_t stktop = ulwp->ul_stktop;
 	size_t stksiz = ulwp->ul_stksiz;
+#if _TLS_VARIANT == 1
+	tcb_t tcb = ulwp->ul_tcb;
+#endif
 
 	(void) memset(ulwp, 0, sizeof (*ulwp));
 
@@ -244,6 +248,9 @@ ulwp_clean(ulwp_t *ulwp)
 	ulwp->ul_guardsize = guardsize;
 	ulwp->ul_stktop = stktop;
 	ulwp->ul_stksiz = stksiz;
+#if _TLS_VARIANT == 1
+	ulwp->ul_tcb = tcb;
+#endif
 }
 
 static int stackprot;

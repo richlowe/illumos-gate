@@ -316,7 +316,7 @@ locdata_get(int category, const char *locname)
 	int len;
 	int i;
 
-	if (locname == NULL || *locname == 0) {
+	if (locname == NULL || *locname == '\0') {
 		locname = get_locale_env(category);
 	}
 
