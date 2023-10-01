@@ -591,7 +591,7 @@ read_fpsr(void)
 static inline void
 write_fpsr(uint32_t reg)
 {
-	__asm__ __volatile__("msr fpsr, %0":"=r"(reg)::"memory");
+	__asm__ __volatile__("msr fpsr, %0"::"r"(reg):"memory");
 }
 
 static inline uint32_t
@@ -605,7 +605,7 @@ read_fpcr(void)
 static inline void
 write_fpcr(uint32_t reg)
 {
-	__asm__ __volatile__("msr fpcr, %0":"=r"(reg)::"memory");
+	__asm__ __volatile__("msr fpcr, %0"::"r"(reg):"memory");
 }
 
 static inline uint64_t

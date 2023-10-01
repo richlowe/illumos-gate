@@ -49,7 +49,7 @@
 int	__flt_rounds;		/* ANSI rounding mode */
 
 void
-__fpstart()
+__fpstart(void)
 {
 	int _fp_hw;		/* default: bss: 0 == no hardware */
 
