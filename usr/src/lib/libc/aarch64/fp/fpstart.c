@@ -29,7 +29,7 @@
 #pragma weak _fpstart = __fpstart
 
 void
-__fpstart()
+__fpstart(void)
 {
 	write_fpcr(FPCR_RM_RN << FPCR_RM_SHIFT);
 	write_fpsr(0);

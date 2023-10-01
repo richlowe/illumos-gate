@@ -63,7 +63,7 @@ int	__flt_rounds;		/* ANSI rounding mode */
 #define	UPANIC_MSG	"32-bit FPU init failed!"
 
 void
-__fpstart()
+__fpstart(void)
 {
 	/*
 	 * query OS for HW status and ensure the x87 and (optional)
