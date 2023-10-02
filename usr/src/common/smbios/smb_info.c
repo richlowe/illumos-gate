@@ -22,7 +22,7 @@
 /*
  * Copyright 2015 OmniTI Computer Consulting, Inc.  All rights reserved.
  * Copyright 2019 Joyent, Inc.
- * Copyright 2022 Oxide Computer Company
+ * Copyright 2023 Oxide Computer Company
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
@@ -1219,6 +1219,27 @@ smbios_info_memdevice(smbios_hdl_t *shp, id_t id, smbios_memdevice_t *mdp)
 		}
 	}
 
+	/*
+	 * The unknown key for missing revision information for the RCD and
+	 * PMIC0 is not all zeros. As such, we need to look if the device SMBIOS
+	 * table is not 3.7 then we need to fix up the bits that we copied.
+	 * After that we need to go back and check the consumer's version to
+	 * actually place this data there.
+	 */
+	if (!smb_gteq(shp, SMB_VERSION_37)) {
+		m.smbmdev_pmic0mfgid = SMB_MD_MFG_UNKNOWN;
+		m.smbmdev_pmic0rev = SMB_MD_REV_UNKNOWN;
+		m.smbmdev_rcdmfgid = SMB_MD_MFG_UNKNOWN;
+		m.smbmdev_rcdrev = SMB_MD_REV_UNKNOWN;
+	}
+
+	if (smb_libgteq(shp, SMB_VERSION_37)) {
+		mdp->smbmd_pmic0_mfgid = m.smbmdev_pmic0mfgid;
+		mdp->smbmd_pmic0_rev = m.smbmdev_pmic0rev;
+		mdp->smbmd_rcd_mfgid = m.smbmdev_rcdmfgid;
+		mdp->smbmd_rcd_rev = m.smbmdev_rcdrev;
+	}
+
 	return (0);
 }
 
@@ -1558,10 +1579,59 @@ smbios_info_extmemdevice(smbios_hdl_t *shp, id_t id,
 
 	emdp->smbmdeve_md = exmd.smbmdeve_mdev;
 	emdp->smbmdeve_drch = exmd.smbmdeve_dchan;
-	emdp->smbmdeve_ncs  = exmd.smbmdeve_ncs;
-	emdp->smbmdeve_cs = exmd.smbmdeve_cs;
+	emdp->smbmdeve_ncs = exmd.smbmdeve_ncs;
 
 	return (0);
+}
+
+int
+smbios_info_extmemdevice_cs(smbios_hdl_t *shp, id_t id, uint_t *ncsp,
+    uint8_t **csp)
+{
+	const smb_struct_t *stp = smb_lookup_id(shp, id);
+	smb_memdevice_ext_t exmd;
+	size_t size;
+	void *buf;
+
+	if (stp == NULL)
+		return (-1); /* errno is set for us */
+
+	if (stp->smbst_hdr->smbh_type != SUN_OEM_EXT_MEMDEVICE)
+		return (smb_set_errno(shp, ESMB_TYPE));
+
+	smb_info_bcopy(stp->smbst_hdr, &exmd, sizeof (exmd));
+	if (exmd.smbmdeve_ncs == 0) {
+		*ncsp = 0;
+		*csp = NULL;
+		return (0);
+	}
+
+	size = exmd.smbmdeve_ncs * sizeof (*exmd.smbmdeve_cs);
+
+	if (stp->smbst_hdr->smbh_len < sizeof (exmd) + size)
+		return (smb_set_errno(shp, ESMB_SHORT));
+
+	buf = smb_alloc(size);
+	if (buf == NULL)
+		return (smb_set_errno(shp, ESMB_NOMEM));
+	smb_info_bcopy_offset(stp->smbst_hdr, buf, size, sizeof (exmd));
+
+	*ncsp = exmd.smbmdeve_ncs;
+	*csp = buf;
+	return (0);
+}
+
+void
+smbios_info_extmemdevice_cs_free(smbios_hdl_t *shp __unused, uint_t ncs,
+    uint8_t *csp)
+{
+	size_t size = ncs * sizeof (uint8_t);
+
+	if (size == 0) {
+		ASSERT3P(csp, ==, NULL);
+		return;
+	}
+	smb_free(csp, size);
 }
 
 int
