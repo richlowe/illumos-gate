@@ -28,7 +28,7 @@
  */
 
 /*	Copyright (c) 1988 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  *	_doprnt: common code for printf, fprintf, sprintf
@@ -528,7 +528,7 @@ _ndoprnt(const char *format, va_list in_args, FILE *iop, int prflag)
 	ssize_t	prefixlength, suffixlength;
 
 	/* Combined length of leading zeroes, trailing zeroes, and suffix */
-	ssize_t 	otherlength;
+	ssize_t		otherlength;
 
 	/* The value being converted, if integer */
 	ssize_t	val;
@@ -1020,7 +1020,7 @@ _ndoprnt(const char *format, va_list in_args, FILE *iop, int prflag)
 				if (flagword & SHORT)
 					val = (short)val;
 				else if (flagword & CHAR)
-					val = (char)val;
+					val = (int8_t)val;
 
 				/* If signed conversion, make sign */
 				if (val < 0) {
