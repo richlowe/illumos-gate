@@ -258,6 +258,8 @@ extern int prom_get_prop_index(pnode_t node, const char *prop_name,
     const char *name);
 extern void prom_driver_register(const struct prom_compat *data);
 extern boolean_t prom_is_compatible(pnode_t node, const char *name);
+extern pnode_t prom_find_compatible(pnode_t node, const char *compatible);
+extern boolean_t prom_has_compatible(const char *compatible);
 extern void prom_walk(void(*func)(pnode_t, void*), void *arg);
 extern int prom_get_reg_address(pnode_t node, int index, uint64_t *reg);
 extern int prom_get_reg_size(pnode_t node, int index, uint64_t *regsize);

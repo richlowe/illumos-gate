@@ -21,6 +21,7 @@
  */
 /*
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2023 Michael van der Westhuizen
  */
 
 #ifndef _SYS_GIC_H
@@ -402,11 +403,48 @@ struct gic_cpuif {
 void gic_mask_level_irq(int irq);
 void gic_unmask_level_irq(int irq);
 
-void gic_send_ipi(cpuset_t cpuset, uint32_t irq);
+void gic_send_ipi(cpuset_t cpuset, int irq);
+int gic_init(void);
 void gic_init_primary(void);
 void gic_init_secondary(int);
 void gic_config_irq(uint32_t irq, bool is_edge);
 int gic_num_cpus(void);
+
+/*
+ * Types and data structure filled by GIC implementation modukles
+ */
+typedef void (*mask_level_irq_t)(int irq);
+typedef void (*unmask_level_irq_t)(int irq);
+typedef void (*send_ipi_t)(cpuset_t cpuset, int irq);
+typedef void (*init_primary_t)(void);
+typedef void (*init_secondary_t)(int id);
+typedef void (*config_irq_t)(uint32_t irq, bool is_edge);
+typedef int (*num_cpus_t)(void);
+typedef int (*addspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
+typedef int (*delspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
+typedef int (*setlvl_t)(int irq);
+typedef void (*setlvlx_t)(int ipl, int irq);
+
+typedef struct gic_ops {
+	mask_level_irq_t	mask_level_irq;
+	unmask_level_irq_t	unmask_level_irq;
+	send_ipi_t		send_ipi;
+	init_primary_t		init_primary;
+	init_secondary_t	init_secondary;
+	config_irq_t		config_irq;
+	num_cpus_t		num_cpus;
+	addspl_t		addspl;
+	delspl_t		delspl;
+	setlvl_t		setlvl;
+	setlvlx_t		setlvlx;
+} gic_ops_t;
+
+extern gic_ops_t gic_ops;
+
+/*
+ * Populated when MMIO access to the CPU interface is needed.
+ */
+extern volatile struct gic_cpuif *gic_cpuif;
 
 #ifdef __cplusplus
 }
