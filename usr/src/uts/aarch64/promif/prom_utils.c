@@ -275,3 +275,37 @@ prom_is_compatible(pnode_t node, const char *name)
 	}
 	return (B_FALSE);
 }
+
+pnode_t
+prom_find_compatible(pnode_t node, const char *compatible)
+{
+	pnode_t child;
+
+	if (prom_is_compatible(node, compatible))
+		return (node);
+
+	child = prom_childnode(node);
+
+	while (child > 0) {
+		node = prom_find_compatible(child, compatible);
+		if (node > 0)
+			return (node);
+
+		child = prom_nextnode(child);
+	}
+
+	return (OBP_NONODE);
+}
+
+boolean_t
+prom_has_compatible(const char *compatible)
+{
+	pnode_t node;
+
+	node = prom_find_compatible(prom_rootnode(), compatible);
+
+	if (node == OBP_NONODE)
+		return (B_FALSE);
+
+	return (B_TRUE);
+}

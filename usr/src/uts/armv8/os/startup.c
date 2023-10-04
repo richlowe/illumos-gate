@@ -406,9 +406,6 @@ startup_init(void)
 	 */
 	get_system_configuration();
 
-	/* Set up the interrupt controller for the primary CPU */
-	gic_init_primary();
-
 	PRM_POINT("startup_init() done");
 }
 
@@ -1232,6 +1229,12 @@ startup_modules(void)
 	 * Initialize segment management stuff.
 	 */
 	seg_init();
+
+	/*
+	 * Set up the interrupt controller for the primary CPU
+	 */
+	if (gic_init() != 0)
+		halt("Can't initialize GIC");
 
 	if (modload("fs", "specfs") == -1)
 		halt("Can't load specfs");
