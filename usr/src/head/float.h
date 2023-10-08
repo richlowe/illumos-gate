@@ -91,12 +91,12 @@ extern int __flt_rounds;
 /* Introduced in ISO/IEC 9899:1999 standard */
 #if defined(__EXTENSIONS__) || defined(_STDC_C99) || \
 	(!defined(_STRICT_STDC) && !defined(__XOPEN_OR_POSIX))
-#if defined(__sparc)
+#if defined(__sparc) || defined(__aarch64__)
 #define	DECIMAL_DIG	36
 #elif defined(__i386) || defined(__amd64)
 #define	DECIMAL_DIG	21
-#elif defined(__aarch64__)
-#define	DECIMAL_DIG	17
+#else
+#error Unknown platform
 #endif
 #endif /* defined(__EXTENSIONS__) || defined(_STDC_C99)... */
 
