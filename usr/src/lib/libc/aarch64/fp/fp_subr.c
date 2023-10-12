@@ -33,6 +33,10 @@ _QgetRD(void)
 	return (FPCR_RM(read_fpcr()));
 }
 
+/*
+ * Returns IEEE mode/status and
+ * sets up standard environment for base conversion.
+ */
 void
 __get_ieee_flags(__ieee_flags_type *b)
 {
@@ -42,6 +46,8 @@ __get_ieee_flags(__ieee_flags_type *b)
 	b->mode = fpcr;
 	b->status = fpsr;
 
+	/* The defaults as from __fpstart */
+	write_fpcr(FPCR_RM_RN << FPCR_RM_SHIFT);
 	write_fpsr(0);
 }
 
