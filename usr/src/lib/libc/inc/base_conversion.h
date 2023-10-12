@@ -224,7 +224,8 @@ typedef struct {
 
 /* structure for storing IEEE modes and status flags */
 typedef struct {
-	int	status, mode;
+	int	status;
+	int	mode;
 } __ieee_flags_type;
 
 

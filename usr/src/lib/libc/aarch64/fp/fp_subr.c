@@ -67,9 +67,14 @@ __mul_set(double x, double y, int *pe)
 	write_fpcr(fpcr & FPCR_RM_MASK);
 	write_fpsr(0);
 
-	double z = x * y;
+	/*
+	 * This must happen explicitly in program order, if it is re-ordered
+	 * by the compiler the flag checks may not take place _after_ the
+	 * multiplication.
+	 */
+	volatile double z = x * y;
 
-	uint32_t fpsr_new = read_fpsr();
+	volatile uint32_t fpsr_new = read_fpsr();
 
 	write_fpsr(fpsr);
 	write_fpcr(fpcr);

@@ -277,7 +277,7 @@ __fast_double_to_decimal(double *dd, decimal_mode *pm, decimal_record *pd,
 		__get_ieee_flags(&fb);
 		dds = __dabs(dd);
 		esum = 0;
-		if (pm->ndigits) {
+		if (pm->ndigits != 0) {
 			/* scale by a positive power of ten */
 			if (pm->ndigits > __TBL_TENS_EXACT) {
 				dds *= __tbl_tens[pm->ndigits];
@@ -299,7 +299,7 @@ __fast_double_to_decimal(double *dd, decimal_mode *pm, decimal_record *pd,
 			return (1);
 		}
 		if (dds == 0.0) {
-			is = (pm->ndigits > 0)? pm->ndigits : 1;
+			is = (pm->ndigits > 0) ? pm->ndigits : 1;
 			for (i = 0; i < is; i++)
 				pd->ds[i] = '0';
 			pd->ds[is] = '\0';
