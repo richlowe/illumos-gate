@@ -22,16 +22,23 @@
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
+/*
+ * Copyright 2023 Michael van der Westhuizen
+ */
 
 
 #include <sys/promif.h>
 #include <sys/promimpl.h>
 #include <sys/frame.h>
 #include <sys/controlregs.h>
+#include <sys/kobj.h>
+#include <sys/modctl.h>
 
 void
 prom_panic(char *s)
 {
+	ulong_t off;
+	char *sym;
 	const char fmt[] = "%s: prom_panic: %s\n";
 
 	if (s == NULL)
@@ -48,7 +55,13 @@ prom_panic(char *s)
 		uint64_t par = read_par_el1();
 		if (par & 1)
 			break;
-		prom_printf("    0x%lx\n", (uintptr_t)fp->fr_savpc);
+		if ((sym = kobj_getsymname(fp->fr_savpc, &off)) != NULL) {
+			prom_printf("%016lx %s:%s+%lx\n", (uintptr_t)fp,
+			    mod_containing_pc((caddr_t)fp->fr_savpc), sym, off);
+		} else {
+			prom_printf("%016lx %lx\n",
+			    (uintptr_t)fp, fp->fr_savpc);
+		}
 		fp = (struct frame *)fp->fr_savfp;
 	}
 
