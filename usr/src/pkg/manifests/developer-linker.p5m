@@ -32,28 +32,26 @@ set name=info.classification \
 set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
-dir  path=usr/bin/$(ARCH32)
-file path=usr/bin/$(ARCH32)/gcore mode=0555
-$(i386_ONLY)file path=usr/bin/$(ARCH32)/plimit mode=0555
-file path=usr/bin/$(ARCH32)/strings mode=0555
+$(MULTILIB_ONLY)dir path=usr/bin/$(ARCH32)
+$(MULTILIB_ONLY)file path=usr/bin/$(ARCH32)/strings mode=0555
 dir  path=usr/bin/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/elfwrap mode=0555
-$(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/gcore mode=0555
+$(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/gcore target=../../bin/gcore
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/ld target=../../bin/ld
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/ldd target=../../bin/ldd
-file path=usr/bin/$(ARCH64)/plimit mode=0555
+$(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/plimit target=../../bin/plimit
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/pvs target=../../bin/pvs
-$(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/strings mode=0555
+file path=usr/bin/$(ARCH64)/strings mode=0555
 $(not_aarch64)link path=usr/bin/ctags target=../has/bin/ctags mediator=ctags \
     mediator-implementation=illumos
 file path=usr/bin/elfsign mode=0555
 file path=usr/bin/elfwrap mode=0555
 file path=usr/bin/exstr mode=0555
-hardlink path=usr/bin/gcore target=../../usr/lib/isaexec
+file path=usr/bin/gcore mode=0555
 file path=usr/bin/ld mode=0755
 file path=usr/bin/ldd mode=0555
 file path=usr/bin/od mode=0555
-hardlink path=usr/bin/plimit target=../../usr/lib/isaexec
+file path=usr/bin/plimit mode=0555
 file path=usr/bin/pvs mode=0555
 file path=usr/bin/regcmp mode=0555
 $(not_aarch64)file path=usr/bin/sotruss mode=0755

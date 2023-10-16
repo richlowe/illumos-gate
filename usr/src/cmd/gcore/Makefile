@@ -19,38 +19,31 @@
 #
 # CDDL HEADER END
 #
-
 #
-# Copyright (c) 1989,1997 by Sun Microsystems, Inc.
-# All rights reserved.
+# Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
 #
 
 PROG=	gcore
 
 include ../Makefile.cmd
+include ../Makefile.cmd.64
 
-$(BUILD32)SUBDIRS = $(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+$(NOT_AARCH64_BLD)ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
 
-all	:=	TARGET = all
-install	:=	TARGET = install
-clean	:=	TARGET = clean
-clobber	:=	TARGET = clobber
-lint	:=	TARGET = lint
+CFLAGS	+= $(CCVERBOSE)
+
+LDLIBS	+= -lproc
 
 .KEEP_STATE:
 
-all:	$(SUBDIRS)
+all: $(PROG)
 
-clean clobber lint:	$(SUBDIRS)
+install: all $(ROOTPROG) $(ROOTLINK)
 
-install:	$(SUBDIRS)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
+$(ROOTLINK):
+	$(RM) $@; $(SYMLINK) ../../bin/$(@F) $@
 
-$(SUBDIRS):	FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
+clean:
 
 include ../Makefile.targ

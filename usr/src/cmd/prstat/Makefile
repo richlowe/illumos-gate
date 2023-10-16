@@ -20,47 +20,51 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
 PROG = prstat
-OBJS = prstat.o prtable.o prsort.o prutil.o prfile.o
-POFILES = $(OBJS:.o=.po)
-CLOBBERFILES = $(POFILE) $(POFILES)
+OBJS = prstat.o prfile.o prtable.o prsort.o prutil.o
 
 include ../Makefile.cmd
+include ../Makefile.cmd.64
 
 XGETFLAGS = -a -x prstat.xcl
 POFILE = pprstat.po
+POFILES = $(OBJS:.o=.po)
+
+$(NOT_AARCH64_BLD)ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
+
+CLOBBERFILES += $(POFILE) $(POFILES)
+
+CSTD = $(CSTD_GNU99)
+CFLAGS += $(CCVERBOSE)
+CERRWARN += -_gcc=-Wno-parentheses
+LDLIBS += -lcurses -lproject
+
+FILEMODE = 0555
 
 .KEEP_STATE:
 
-$(BUILD32)SUBDIRS = $(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+.PARALLEL : $(OBJS)
 
-all	:=	TARGET = all
-install	:=	TARGET = install
-clean	:=	TARGET = clean
-clobber	:=	TARGET = clobber
-lint	:=	TARGET = lint
+all: $(PROG)
 
-all:		$(SUBDIRS)
-clean:		$(SUBDIRS)
-clobber:	$(SUBDIRS)
-lint:		$(SUBDIRS)
+clean:
+	$(RM) $(OBJS)
+
+$(PROG): $(OBJS)
+	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
+	$(POST_PROCESS)
 
 $(POFILE): $(POFILES)
 	$(RM) $@
 	$(CAT) $(POFILES) > $@
 
-install: $(SUBDIRS)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
+install: all $(ROOTPROG) $(ROOTLINK)
 
-$(SUBDIRS):	FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
+$(ROOTLINK):
+	$(RM) $@; $(SYMLINK) ../../bin/$(@F) $@
 
 include ../Makefile.targ

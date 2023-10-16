@@ -29,9 +29,6 @@ include ../../../Makefile.cmd.64
 
 CFLAGS64 += $(CCVERBOSE)
 
-ROOTISAPROG=$(ROOTBIN)/$(MACH64)/$(PROG)
-ROOTISALN=$(LN_$(PROG):%=$(ROOTBIN)/$(MACH64)/%)
-
 # XXXARM: needs a cross-smatch
 SMATCH=off
 include ../../Makefile.bld

@@ -20,36 +20,41 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
 
 PROG=	prctl
+OBJS=	prctl.o utils.o
 
 include ../Makefile.cmd
+include ../Makefile.cmd.64
 
-$(BUILD32)SUBDIRS= $(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+CFLAGS	+= $(CCVERBOSE)
+CERRWARN += -_gcc=-Wno-parentheses
+CERRWARN += $(CNOWARN_UNINIT)
 
-all	:=	TARGET = all
-install	:=	TARGET = install
-clean	:=	TARGET = clean
-clobber	:=	TARGET = clobber
-lint	:=	TARGET = lint
+# not linted
+SMATCH=off
+
+LDLIBS	+= -lproc -lproject
+
+$(NOT_AARCH64_BLD)ROOTBINLINK = $(PROG:%=$(ROOTBIN64)/%)
 
 .KEEP_STATE:
 
-all:	$(SUBDIRS)
+all: $(PROG)
 
-clean clobber lint:	$(SUBDIRS)
+install: all $(ROOTPROG) $(ROOTBINLINK)
 
-install:	$(SUBDIRS)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
+$(PROG): $(OBJS)
+	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
+	$(POST_PROCESS)
 
-$(SUBDIRS):	FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
+$(ROOTBINLINK):
+	$(RM) $@; $(SYMLINK) ../../bin/$(@F) $@
 
-FRC:
+clean:
+	$(RM) $(OBJS)
 
 include ../Makefile.targ

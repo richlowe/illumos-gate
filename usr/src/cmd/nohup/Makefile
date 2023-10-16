@@ -20,31 +20,53 @@
 # CDDL HEADER END
 #
 #
-# Copyright (c) 1989, 2001 by Sun Microsystems, Inc.
-# All rights reserved.
+# Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
 #
 
 XPG4PROG = nohup
 PROG = nohup
+OBJS = nohup.o
+XPG4OBJS = $(OBJS:%.o=xpg4_%.o)
 
 include ../Makefile.cmd
+include ../Makefile.cmd.64
+
+CLEANFILES += $(OBJS) $(XPG4OBJS)
+
+CFLAGS += $(CCVERBOSE)
+
+$(XPG4) := CPPFLAGS += -DXPG4
+
+# not needed for xpg4/nohup
+EXTRALIBS = -lproc
+
+$(NOT_AARCH64_BLD)ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
 
 .KEEP_STATE:
 
-SUBDIRS += $(MACH64)
+.PARALLEL: $(OBJS) $(XPG4OBJS)
 
-all	:=	TARGET = all
-install	:=	TARGET = install
-clean	:=	TARGET = clean
-clobber	:=	TARGET = clobber
+all: $(PROG) $(XPG4)
 
-all: $(SUBDIRS)
+install: all $(ROOTPROG) $(ROOTXPG4PROG) $(ROOTLINK)
 
-clean clobber install: $(SUBDIRS)
+clean:
+	$(RM) $(CLEANFILES)
 
-$(SUBDIRS): FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
+$(ROOTLINK):
+	$(RM) $@; $(SYMLINK) ../../bin/$(@F) $@
 
-FRC:
+$(PROG): $(OBJS)
+	$(LINK.c) -o $@ $(OBJS) $(LDLIBS) $(EXTRALIBS)
+	$(POST_PROCESS)
+
+$(XPG4): $(XPG4OBJS)
+	$(LINK.c) -o $@ $(XPG4OBJS) $(LDLIBS)
+	$(POST_PROCESS)
+
+xpg4_%.o: %.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
 
 include ../Makefile.targ
