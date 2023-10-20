@@ -28,7 +28,7 @@ set name=pkg.summary value="Qlogic Fibre Channel Adapter Utilities"
 set name=pkg.description \
     value="Utilties associated with the Qlogic Fibre Channel Adapter"
 set name=info.classification value=org.opensolaris.category.2008:System/Hardware
-set name=org.illumos.for-arch value=i386 value=sparc
+set name=org.illumos.for-arch value=i386
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/mdb group=sys

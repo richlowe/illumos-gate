@@ -56,14 +56,14 @@ file path=kernel/drv/$(ARCH64)/usb_as group=sys
 file path=kernel/drv/$(ARCH64)/usb_ia group=sys
 file path=kernel/drv/$(ARCH64)/usb_mid group=sys
 file path=kernel/drv/$(ARCH64)/usbprn group=sys
-$(not_sparc)file path=kernel/drv/$(ARCH64)/xhci group=sys
+file path=kernel/drv/$(ARCH64)/xhci group=sys
 file path=kernel/drv/ehci.conf group=sys
 file path=kernel/drv/ohci.conf group=sys
 file path=kernel/drv/scsa2usb.conf group=sys \
     original_name=SUNWusb:kernel/drv/scsa2usb.conf preserve=true
 file path=kernel/drv/uhci.conf group=sys
 file path=kernel/drv/usb_ac.conf group=sys
-$(not_sparc)file path=kernel/drv/xhci.conf group=sys
+file path=kernel/drv/xhci.conf group=sys
 $(i386_ONLY)dir path=kernel/kmdb group=sys
 $(i386_ONLY)dir path=kernel/kmdb/$(ARCH64) group=sys
 $(i386_ONLY)file path=kernel/kmdb/$(ARCH64)/xhci group=sys mode=0555

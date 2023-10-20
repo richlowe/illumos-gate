@@ -83,8 +83,8 @@ dir  path=etc/sock2path.d group=sys
 file path=etc/sock2path.d/system%2Fkernel group=sys
 file path=etc/system group=sys original_name=SUNWckr:etc/system preserve=true
 dir  path=kernel group=sys
-$(not_sparc)dir path=kernel/$(ARCH64) group=sys
-$(not_sparc)file path=kernel/$(ARCH64)/genunix group=sys mode=0755
+dir  path=kernel/$(ARCH64) group=sys
+file path=kernel/$(ARCH64)/genunix group=sys mode=0755
 dir  path=kernel/cc group=sys
 dir  path=kernel/cc/$(ARCH64) group=sys
 file path=kernel/cc/$(ARCH64)/cc_cubic group=sys mode=0755
@@ -170,7 +170,7 @@ file path=kernel/drv/$(ARCH64)/scsi_vhci group=sys
 file path=kernel/drv/$(ARCH64)/sd group=sys
 file path=kernel/drv/$(ARCH64)/sgen group=sys
 file path=kernel/drv/$(ARCH64)/simnet group=sys
-$(not_sparc)file path=kernel/drv/$(ARCH64)/smbios group=sys
+file path=kernel/drv/$(ARCH64)/smbios group=sys
 file path=kernel/drv/$(ARCH64)/softmac group=sys
 file path=kernel/drv/$(ARCH64)/spdsock group=sys
 file path=kernel/drv/$(ARCH64)/st group=sys
@@ -241,12 +241,12 @@ file path=kernel/drv/rts.conf group=sys
 file path=kernel/drv/sad.conf group=sys
 file path=kernel/drv/scsi_vhci.conf group=sys \
     original_name=SUNWckr:kernel/drv/scsi_vhci.conf preserve=true
-$(not_sparc)file path=kernel/drv/sd.conf group=sys \
+file path=kernel/drv/sd.conf group=sys \
     original_name=SUNWos86r:kernel/drv/sd.conf preserve=true
 file path=kernel/drv/sgen.conf group=sys \
     original_name=SUNWckr:kernel/drv/sgen.conf preserve=true
 file path=kernel/drv/simnet.conf group=sys
-$(not_sparc)file path=kernel/drv/smbios.conf group=sys
+file path=kernel/drv/smbios.conf group=sys
 file path=kernel/drv/softmac.conf group=sys
 file path=kernel/drv/spdsock.conf group=sys
 file path=kernel/drv/st.conf group=sys \
@@ -339,7 +339,7 @@ file path=kernel/misc/$(ARCH64)/mac group=sys mode=0755
 hardlink path=kernel/misc/$(ARCH64)/md5 \
     target=../../../kernel/crypto/$(ARCH64)/md5
 file path=kernel/misc/$(ARCH64)/mii group=sys mode=0755
-$(not_sparc)file path=kernel/misc/$(ARCH64)/net80211 group=sys mode=0755
+file path=kernel/misc/$(ARCH64)/net80211 group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/neti group=sys mode=0755
 $(i386_ONLY)file path=kernel/misc/$(ARCH64)/pci_autoconfig group=sys mode=0755
 $(i386_ONLY)file path=kernel/misc/$(ARCH64)/pcicfg group=sys mode=0755

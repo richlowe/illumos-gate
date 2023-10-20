@@ -28,12 +28,6 @@ set name=pkg.summary value="Solarflare Ethernet Driver"
 set name=pkg.description value="Solarflare Ethernet Network Adapter Driver"
 set name=info.classification \
     value=org.opensolaris.category.2008:Drivers/Networking
-#
-# The driver should work on SPARC if anyone wants to add the Makefile
-# support and test it, but you need a PCIe based SPARC.  For now just
-# don't deliver it until someone shows up to do this.
-#
-set name=org.illumos.build-on value=aarch64 value=i386
 dir  path=kernel group=sys
 dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys
