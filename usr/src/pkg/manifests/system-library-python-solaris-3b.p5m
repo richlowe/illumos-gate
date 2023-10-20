@@ -19,8 +19,7 @@ set name=pkg.summary value="solaris module, python $(PYTHON3b_VERSION)"
 set name=pkg.description value="Solaris Python3 Module"
 set name=info.classification \
     value=org.opensolaris.category.2008:System/Libraries
-# XXXARM
-set name=variant.arch value=i386 value=sparc
+set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/lib
 dir  path=usr/lib/python$(PYTHON3b_VERSION)
