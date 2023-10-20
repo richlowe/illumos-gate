@@ -154,11 +154,11 @@ file path=usr/lib/mdb/kvm/$(ARCH64)/sockfs.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/specfs.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/sppp.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/ufs.so group=sys mode=0555
-$(not_sparc)file path=usr/lib/mdb/kvm/$(ARCH64)/uhci.so group=sys mode=0555
+file path=usr/lib/mdb/kvm/$(ARCH64)/uhci.so group=sys mode=0555
 file path=usr/lib/mdb/kvm/$(ARCH64)/usba.so group=sys mode=0555
 $(aarch64_ONLY)file path=usr/lib/mdb/kvm/aarch64/unix.so group=sys mode=0555
 dir  path=usr/lib/mdb/proc group=sys
-$(not_sparc)dir path=usr/lib/mdb/proc/$(ARCH64)
+dir  path=usr/lib/mdb/proc/$(ARCH64)
 file path=usr/lib/mdb/proc/$(ARCH64)/ld.so group=sys mode=0555
 file path=usr/lib/mdb/proc/$(ARCH64)/libavl.so group=sys mode=0555
 file path=usr/lib/mdb/proc/$(ARCH64)/libc.so group=sys mode=0555
@@ -175,7 +175,7 @@ file path=usr/lib/mdb/proc/$(ARCH64)/libumem.so group=sys mode=0555
 file path=usr/lib/mdb/proc/$(ARCH64)/libuutil.so group=sys mode=0555
 file path=usr/lib/mdb/proc/$(ARCH64)/list.so group=sys mode=0555
 file path=usr/lib/mdb/proc/$(ARCH64)/mdb_ds.so group=sys mode=0555
-$(not_sparc)file path=usr/lib/mdb/proc/$(ARCH64)/mdb_test.so group=sys mode=0555
+file path=usr/lib/mdb/proc/$(ARCH64)/mdb_test.so group=sys mode=0555
 $(aarch64_ONLY)file path=usr/lib/mdb/proc/$(ARCH64)/svc.configd.so group=sys \
     mode=0555
 $(aarch64_ONLY)file path=usr/lib/mdb/proc/$(ARCH64)/svc.startd.so group=sys \
@@ -195,11 +195,9 @@ $(MULTILIB_ONLY)file path=usr/lib/mdb/proc/mdb_ds.so group=sys mode=0555
 $(MULTILIB_ONLY)file path=usr/lib/mdb/proc/svc.configd.so group=sys mode=0555
 $(MULTILIB_ONLY)file path=usr/lib/mdb/proc/svc.startd.so group=sys mode=0555
 $(i386_ONLY)dir path=usr/lib/mdb/raw group=sys
-$(not_sparc)dir path=usr/lib/mdb/raw/$(ARCH64) group=sys
-$(not_sparc)file path=usr/lib/mdb/raw/$(ARCH64)/disk_label.so group=sys \
-    mode=0555
-# XXXARM: This should be $(MULTILIB_ONLY)$(not_sparc) but that breaks pkgfmt
-$(i386_ONLY)file path=usr/lib/mdb/raw/disk_label.so group=sys mode=0555
+dir  path=usr/lib/mdb/raw/$(ARCH64) group=sys
+file path=usr/lib/mdb/raw/$(ARCH64)/disk_label.so group=sys mode=0555
+$(MULTILIB_ONLY)file path=usr/lib/mdb/raw/disk_label.so group=sys mode=0555
 dir  path=usr/platform group=sys
 $(i386_ONLY)dir path=usr/platform/i86pc group=sys
 $(i386_ONLY)dir path=usr/platform/i86pc/lib

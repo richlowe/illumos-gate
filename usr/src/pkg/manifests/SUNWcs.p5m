@@ -387,7 +387,7 @@ file path=lib/svc/manifest/system/filesystem/local-fs.xml group=sys mode=0444
 file path=lib/svc/manifest/system/filesystem/minimal-fs.xml group=sys mode=0444
 file path=lib/svc/manifest/system/filesystem/root-fs.xml group=sys mode=0444
 file path=lib/svc/manifest/system/filesystem/usr-fs.xml group=sys mode=0444
-$(not_sparc)file path=lib/svc/manifest/system/hostid.xml group=sys mode=0444
+file path=lib/svc/manifest/system/hostid.xml group=sys mode=0444
 file path=lib/svc/manifest/system/hotplug.xml group=sys mode=0444
 file path=lib/svc/manifest/system/identity.xml group=sys mode=0444
 file path=lib/svc/manifest/system/idmap.xml group=sys mode=0444
@@ -449,7 +449,7 @@ file path=lib/svc/method/svc-consadm mode=0555
 file path=lib/svc/method/svc-cron mode=0555
 file path=lib/svc/method/svc-dlmgmtd mode=0555
 file path=lib/svc/method/svc-forwarding mode=0555
-$(not_sparc)file path=lib/svc/method/svc-hostid mode=0555
+file path=lib/svc/method/svc-hostid mode=0555
 file path=lib/svc/method/svc-hotplug mode=0555
 file path=lib/svc/method/svc-legacy-routing mode=0555
 file path=lib/svc/method/svc-nscd mode=0555

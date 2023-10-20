@@ -291,8 +291,8 @@ file path=lib/libelf.so.1
 link path=lib/libelfsign.so target=libelfsign.so.1
 file path=lib/libelfsign.so.1
 file path=lib/libfakekernel.so.1
-$(not_sparc)link path=lib/libfdisk.so target=libfdisk.so.1
-$(not_sparc)file path=lib/libfdisk.so.1
+link path=lib/libfdisk.so target=libfdisk.so.1
+file path=lib/libfdisk.so.1
 link path=lib/libgen.so target=libgen.so.1
 file path=lib/libgen.so.1
 file path=lib/libinetutil.so.1
@@ -876,8 +876,8 @@ link path=usr/lib/libelf.so.1 target=../../lib/libelf.so.1
 link path=usr/lib/libexacct.so target=./libexacct.so.1
 file path=usr/lib/libexacct.so.1
 link path=usr/lib/libfakekernel.so.1 target=../../lib/libfakekernel.so.1
-$(not_sparc)link path=usr/lib/libfdisk.so target=../../lib/libfdisk.so.1
-$(not_sparc)link path=usr/lib/libfdisk.so.1 target=../../lib/libfdisk.so.1
+link path=usr/lib/libfdisk.so target=../../lib/libfdisk.so.1
+link path=usr/lib/libfdisk.so.1 target=../../lib/libfdisk.so.1
 link path=usr/lib/libform.so target=./libform.so.1
 file path=usr/lib/libform.so.1
 link path=usr/lib/libfstyp.so target=./libfstyp.so.1

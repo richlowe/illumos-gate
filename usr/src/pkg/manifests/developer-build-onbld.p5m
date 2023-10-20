@@ -35,10 +35,11 @@ set name=pkg.summary value="OS-Net Build Tools"
 set name=pkg.description value="tools used to build the OS-Net consolidation"
 set name=info.classification \
     value="org.opensolaris.category.2008:Development/Distribution Tools"
-# XXXARM: This is built and packaged native for the build machine
-# which obviously doesn't work for aarch64 right now
-set name=org.illumos.for-arch value=i386 value=sparc
-
+# XXXARM: This is built and packaged native for the build machine which
+# obviously doesn't work for aarch64 right now.  We need to do something
+# smarter here (it is in fact whether we're cross-building that matters, not
+# whether we're aarch64)
+set name=org.illumos.for-arch value=i386
 #
 # This package should not be incorporated.  This allows the tools
 # to be upgraded without upgrading the entire system.
