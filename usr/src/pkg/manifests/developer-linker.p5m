@@ -32,8 +32,6 @@ set name=info.classification \
 set name=variant.arch value=$(ARCH)
 dir  path=usr group=sys
 dir  path=usr/bin
-$(MULTILIB_ONLY)dir path=usr/bin/$(ARCH32)
-$(MULTILIB_ONLY)file path=usr/bin/$(ARCH32)/strings mode=0555
 dir  path=usr/bin/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/elfwrap mode=0555
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/gcore target=../../bin/gcore
@@ -41,7 +39,7 @@ $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/ld target=../../bin/ld
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/ldd target=../../bin/ldd
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/plimit target=../../bin/plimit
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/pvs target=../../bin/pvs
-file path=usr/bin/$(ARCH64)/strings mode=0555
+$(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/strings target=../../bin/strings
 $(not_aarch64)link path=usr/bin/ctags target=../has/bin/ctags mediator=ctags \
     mediator-implementation=illumos
 file path=usr/bin/elfsign mode=0555
@@ -55,7 +53,7 @@ file path=usr/bin/plimit mode=0555
 file path=usr/bin/pvs mode=0555
 file path=usr/bin/regcmp mode=0555
 $(not_aarch64)file path=usr/bin/sotruss mode=0755
-hardlink path=usr/bin/strings target=../../usr/lib/isaexec
+file path=usr/bin/strings mode=0555
 file path=usr/bin/truss mode=0555
 $(not_aarch64)file path=usr/bin/whocalls mode=0755
 dir  path=usr/ccs
