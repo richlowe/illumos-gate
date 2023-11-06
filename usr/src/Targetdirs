@@ -302,6 +302,14 @@ DIRS=							\
 	/usr/lib/inet					\
 	/usr/lib/inet/ilb				\
 	/usr/lib/krb5					\
+	/usr/lib/locale					\
+	/usr/lib/locale/C				\
+	/usr/lib/locale/C/LC_COLLATE			\
+	/usr/lib/locale/C/LC_CTYPE			\
+	/usr/lib/locale/C/LC_MESSAGES			\
+	/usr/lib/locale/C/LC_MONETARY			\
+	/usr/lib/locale/C/LC_NUMERIC			\
+	/usr/lib/locale/C/LC_TIME			\
 	/usr/lib/link_audit				\
 	/usr/lib/lwp					\
 	/usr/lib/mdb					\
@@ -508,6 +516,7 @@ SYM.DIRS=			\
 	/usr/spool		\
 	/usr/lib/tmac		\
 	/usr/ccs/lib/link_audit \
+	/usr/lib/locale/POSIX 	\
 	/usr/news		\
 	/usr/preserve		\
 	/usr/lib/cron		\
@@ -633,6 +642,7 @@ $(ROOT)/usr/tmp:=			LINKDEST=../var/tmp
 $(ROOT)/usr/lib/tmac:=			LINKDEST=../share/lib/tmac
 $(ROOT)/usr/lib/32:=			LINKDEST=.
 $(ROOT)/usr/lib/elfedit/32:=		LINKDEST=.
+$(ROOT)/usr/lib/locale/POSIX:=		LINKDEST=./C
 $(ROOT)/usr/lib/lwp/32:=		LINKDEST=.
 $(ROOT)/usr/lib/link_audit/32:=		LINKDEST=.
 $(ROOT)/usr/lib/secure/32:=		LINKDEST=.
