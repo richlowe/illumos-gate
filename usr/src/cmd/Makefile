@@ -501,7 +501,8 @@ $(NOT_AARCH64_BLD)COMMON_SUBDIRS +=	\
 
 aarch64_SUBDIRS=	\
 	ahciem		\
-	ficl
+	ficl		\
+	xhci
 
 i386_SUBDIRS=		\
 	acpi		\

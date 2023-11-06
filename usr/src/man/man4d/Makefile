@@ -272,6 +272,7 @@ aarch64_MANFILES=	ahci.4d		\
 			vioif.4d	\
 			virtio.4d	\
 			wpi.4d		\
+			xhci.4d		\
 			zyd.4d
 
 MANLINKS=	1394.4d		\

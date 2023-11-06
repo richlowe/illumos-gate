@@ -64,9 +64,9 @@ file path=kernel/drv/scsa2usb.conf group=sys \
 file path=kernel/drv/uhci.conf group=sys
 file path=kernel/drv/usb_ac.conf group=sys
 file path=kernel/drv/xhci.conf group=sys
-$(i386_ONLY)dir path=kernel/kmdb group=sys
-$(i386_ONLY)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(i386_ONLY)file path=kernel/kmdb/$(ARCH64)/xhci group=sys mode=0555
+$(not_aarch64)dir path=kernel/kmdb group=sys
+$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
+$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/xhci group=sys mode=0555
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys
 file path=kernel/misc/$(ARCH64)/hidparser group=sys mode=0755
@@ -89,9 +89,9 @@ dir  path=usr/lib
 dir  path=usr/lib/mdb group=sys
 dir  path=usr/lib/mdb/kvm group=sys
 dir  path=usr/lib/mdb/kvm/$(ARCH64) group=sys
-$(i386_ONLY)file path=usr/lib/mdb/kvm/$(ARCH64)/xhci.so group=sys mode=0555
-$(i386_ONLY)dir path=usr/lib/xhci group=sys
-$(i386_ONLY)file path=usr/lib/xhci/xhci_portsc group=sys mode=0555
+file path=usr/lib/mdb/kvm/$(ARCH64)/xhci.so group=sys mode=0555
+dir  path=usr/lib/xhci group=sys
+file path=usr/lib/xhci/xhci_portsc group=sys mode=0555
 dir  path=usr/share
 dir  path=usr/share/man
 file path=usr/share/man/man4d/ehci.4d
@@ -107,7 +107,7 @@ file path=usr/share/man/man4d/usb_ia.4d
 file path=usr/share/man/man4d/usb_mid.4d
 file path=usr/share/man/man4d/usba.4d
 file path=usr/share/man/man4d/usbprn.4d
-$(i386_ONLY)file path=usr/share/man/man4d/xhci.4d
+file path=usr/share/man/man4d/xhci.4d
 dir  path=usr/share/man/man4m
 file path=usr/share/man/man4m/usb_ah.4m
 file path=usr/share/man/man4m/usbkbm.4m
@@ -263,7 +263,7 @@ driver name=usb_as perms="* 0600 root sys" alias=usbif,class1.2
 driver name=usb_ia alias=usb,ia
 driver name=usb_mid alias=usb,device
 driver name=usbprn perms="* 0666 root sys" alias=usbif,class7.1
-$(i386_ONLY)driver name=xhci perms="* 0644 root sys" alias=pciclass,0c0330
+driver name=xhci perms="* 0644 root sys" alias=pciclass,0c0330
 legacy pkg=SUNWusb desc="USBA (USB framework) and USB Device Drivers" \
     name="USB Device Drivers"
 license cr_Sun license=cr_Sun

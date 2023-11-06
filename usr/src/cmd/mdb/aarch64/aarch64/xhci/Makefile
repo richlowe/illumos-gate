@@ -13,6 +13,15 @@
 # Copyright 2016 Joyent, Inc.
 #
 
-include $(SRC)/Makefile.master
-$(BUILD64)SUBDIRS += 	$(MACH64)
-include ../../../Makefile.subdirs
+
+MODULE = xhci.so
+MDBTGT = kvm
+
+MODSRCS = xhci.c
+
+include ../../../../Makefile.cmd
+include ../../../../Makefile.cmd.64
+include ../../Makefile.aarch64
+include ../../../Makefile.module
+
+CPPFLAGS += -I$(SRC)/uts/common
