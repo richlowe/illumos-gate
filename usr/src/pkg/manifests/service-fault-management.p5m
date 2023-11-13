@@ -206,6 +206,10 @@ $(MULTILIB_ONLY)link path=usr/lib/fm/$(ARCH64)/libtopo.so target=libtopo.so.1 \
     variant.opensolaris.zone=__NODEFAULT
 $(MULTILIB_ONLY)file path=usr/lib/fm/$(ARCH64)/libtopo.so.1 \
     variant.opensolaris.zone=__NODEFAULT
+$(MULTILIB_ONLY)link path=usr/lib/fm/64 target=$(ARCH64) \
+    variant.opensolaris.zone=__NODEFAULT
+$(NOT_MULTILIB)link path=usr/lib/fm/64 target=. \
+    variant.opensolaris.zone=__NODEFAULT
 dir  path=usr/lib/fm/dict variant.opensolaris.zone=__NODEFAULT
 #
 # Dictionaries, whether they are hardware-specific or not, are

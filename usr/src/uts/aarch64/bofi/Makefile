@@ -65,9 +65,6 @@ MODSTUBS_DIR	 = $(OBJS_DIR)
 $(MODSTUBS_O)	:= AS_CPPFLAGS += -DBOFI_MODULE
 CLEANFILES	+= $(MODSTUBS_O)
 
-# XXXARM: Suspicious, but also true on intel
-CPPFLAGS	+= -I../../sun4
-
 CERRWARN	+= $(CNOWARN_UNINIT)
 
 # needs work

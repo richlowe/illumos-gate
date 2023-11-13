@@ -554,6 +554,7 @@ SYM.DIRS64= \
 	/usr/lib/64			\
 	/usr/lib/brand/sn1/64		\
 	/usr/lib/elfedit/64		\
+	/usr/lib/fm/64 \
 	/usr/lib/link_audit/64		\
 	/usr/lib/lwp/64			\
 	/usr/lib/secure/64		\
@@ -659,6 +660,7 @@ $(BUILD64) $(ROOT)/usr/lib/64:=		LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/usr/lib/elfedit/64:=	LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/usr/lib/brand/sn1/64:=	LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/usr/lib/brand/solaris10/64:=	LINKDEST=$(MACH64)
+$(BUILD64) $(ROOT)/usr/lib/fm/64 := LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/usr/lib/lwp/64:=	LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/usr/lib/link_audit/64:=	LINKDEST=$(MACH64)
 $(BUILD64) $(ROOT)/usr/lib/secure/64:=	LINKDEST=$(MACH64)
@@ -676,6 +678,7 @@ $(AARCH64_BLD) $(ROOT)/usr/lib/64:=		LINKDEST=.
 $(AARCH64_BLD) $(ROOT)/usr/lib/elfedit/64:=	LINKDEST=.
 $(AARCH64_BLD) $(ROOT)/usr/lib/brand/sn1/64:=	LINKDEST=.
 $(AARCH64_BLD) $(ROOT)/usr/lib/brand/solaris10/64:=	LINKDEST=.
+$(AARCH64_BLD) $(ROOT)/usr/lib/fm/64 :=	LINKDEST=.
 $(AARCH64_BLD) $(ROOT)/usr/lib/lwp/64:=	LINKDEST=.
 $(AARCH64_BLD) $(ROOT)/usr/lib/link_audit/64:=	LINKDEST=.
 $(AARCH64_BLD) $(ROOT)/usr/lib/secure/64:=	LINKDEST=.
