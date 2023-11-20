@@ -79,3 +79,19 @@ fm_get_paddr(nvlist_t *nvl, uint64_t *paddr)
 	*paddr = pa;
 	return (0);
 }
+
+/*
+ * Gather all of the different per-CPU leaves and return them as a series of
+ * nvlists.
+ *
+ * XXXARM: We don't have this info, currently
+ */
+int
+fm_ioctl_cache_info(int cmd, nvlist_t *invl, nvlist_t **onvlp)
+{
+	if (cmd != FM_IOC_CACHE_INFO) {
+		return (ENOTTY);
+	}
+
+	return (ENOTSUP);
+}

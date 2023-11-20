@@ -28,6 +28,7 @@
 include $(SRC)/Makefile.master
 
 SUBDIRS =		\
+	dimm		\
 	disk		\
 	fac_prov_ahci	\
 	fac_prov_ipmi	\

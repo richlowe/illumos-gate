@@ -22,11 +22,15 @@
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
+# Copyright 2023 OmniOS Community Edition (OmniOSce) Association.
+#
+
 SUBDIRS = mdb_kb \
 	i40e \
 	generic_cpu \
 	amd_opteron \
 	sata \
-	smbios
+	smbios \
+	vmm
 
 include ../../Makefile.subdirs
