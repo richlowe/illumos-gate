@@ -205,7 +205,7 @@ $(i386_ONLY)driver name=rootnex
 $(aarch64_ONLY)driver name=rootnex
 
 # simple-bus, all platforms
-$(aarch64_ONLY)driver name=simple-bus alias=simple-bus
+$(aarch64_ONLY)driver name=simple-bus
 $(i386_ONLY)driver name=xdb
 $(i386_ONLY)driver name=xdf
 $(i386_ONLY)driver name=xenbus perms="* 0666 root sys"
