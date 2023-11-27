@@ -129,7 +129,7 @@ gic_addspl(int irq, int ipl, int min_ipl, int max_ipl)
 static int
 gic_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
-	return (gic_ops.addspl(irq, ipl, min_ipl, max_ipl));
+	return (gic_ops.delspl(irq, ipl, min_ipl, max_ipl));
 }
 
 int (*addspl)(int, int, int, int) = gic_addspl;
