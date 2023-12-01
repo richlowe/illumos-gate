@@ -899,8 +899,6 @@ load_tod_module(char *todmod)
 		halt("Can't load TOD module");
 }
 
-extern void exception_vector(void);
-
 /*
  * XXXARM: This enables more than just IRQs
  * Not a great name
@@ -920,8 +918,6 @@ startup_end(void)
 	extern void cpu_event_init(void);
 
 	PRM_POINT("startup_end() starting...");
-
-	write_vbar((uintptr_t)exception_vector);
 
 	/*
 	 * Perform tasks that get done after most of the VM
