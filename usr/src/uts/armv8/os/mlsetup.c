@@ -160,7 +160,6 @@ mlsetup(struct regs *rp)
 	CPU->cpu_id = 0;
 	CPU->cpu_m.affinity = read_mpidr() & MPIDR_AFF_MASK;
 	CPU->cpu_dispatch_pri = t0.t_pri;
-
 	/*
 	 * Save the boot EL. Bits [3:2] hold the value, so we
 	 * shift the bits over to get the integer form.
@@ -171,6 +170,13 @@ mlsetup(struct regs *rp)
 	 * Select the system timer. Use the phys timer only if EL2.
 	 */
 	arch_timer_select((CPU->cpu_m.mcpu_boot_el == 2) ? TMR_PHYS : TMR_VIRT);
+
+	/*
+	 * Switch to our own exception vector as early as possible.
+	 * We need the concept of time, so that's now.
+	 */
+	extern void exception_vector(void);
+	write_vbar((uintptr_t)exception_vector);
 
 	/*
 	 * Initialize thread/cpu microstate accounting
