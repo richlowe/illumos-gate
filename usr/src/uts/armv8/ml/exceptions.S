@@ -47,59 +47,73 @@
 #define THREADP(tp_reg)			\
 	   mrs tp_reg, tpidr_el1
 
+/* Each entry in the exception vector is 128 bytes / 32 instruction long */
+#define VECTOR_ENTRY_SIZE	128
+
+/* Fail the assembly if a vector entry is too large */
+#define	CHECK_VECTOR_ENTRY(name)		\
+	.if (. - name) > VECTOR_ENTRY_SIZE;	\
+	.err;					\
+	.endif
 
 	.balign	2048
 	ENTRY(exception_vector)
 	/*
 	 * From Current Exception level with SP_EL0
 	 */
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_sp0_sync:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_current_el_sp0_sync)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_sp0_irq:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_current_el_sp0_irq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_sp0_fiq:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_current_el_sp0_fiq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_sp0_error:
 0:	b	0b
-
+	CHECK_VECTOR_ENTRY(from_current_el_sp0_error)
 
 	/*
 	 * From Current Exception level with SP_ELx
 	 */
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_sync:
 	clrex
 	__SAVE_REGS
 	__SAVE_FRAME
 	b	from_current_el_sync_handler
+	CHECK_VECTOR_ENTRY(from_current_el_sync)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_irq:
 	clrex
 	__SAVE_REGS
 	__SAVE_FRAME
 	b	irq_handler
+	CHECK_VECTOR_ENTRY(from_current_el_irq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_fiq:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_current_el_fiq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_current_el_error:
 0:	b	0b
-
+	CHECK_VECTOR_ENTRY(from_current_el_error)
 
 	/*
 	 * From Lower Exception level using aarch64
 	 */
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch64_sync:
 	clrex
 	__SAVE_REGS
@@ -114,43 +128,49 @@ from_lower_el_aarch64_sync:
 
 	bl	trap
 	b	user_rtt
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch64_sync)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch64_irq:
 	clrex
 	__SAVE_REGS
 	__TERMINATE_FRAME
 	b	irq_handler
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch64_irq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch64_fiq:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch64_fiq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch64_error:
 0:	b	0b
-
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch64_error)
 
 	/*
 	 * From Lower Exception level using aarch32
 	 */
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch32_sync:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch32_sync)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch32_irq:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch32_irq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch32_fiq:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch32_fiq)
 
-	.balign	0x80
+	.balign	VECTOR_ENTRY_SIZE
 from_lower_el_aarch32_error:
 0:	b	0b
+	CHECK_VECTOR_ENTRY(from_lower_el_aarch32_error)
 
-	.balign	0x80
 	SET_SIZE(exception_vector)
 
 	ENTRY(from_current_el_sync_handler)
