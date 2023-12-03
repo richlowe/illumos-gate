@@ -3034,7 +3034,13 @@ out:
 zoneid_t
 getzoneid(void)
 {
-	return (curproc->p_zone->zone_id);
+	proc_t *p = curproc;
+
+	/* This may happen for p0 during early boot, but not otherwise */
+	if (p->p_zone == NULL)
+		return (GLOBAL_ZONEID);
+
+	return (p->p_zone->zone_id);
 }
 
 /*
