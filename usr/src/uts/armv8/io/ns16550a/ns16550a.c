@@ -1969,18 +1969,17 @@ ns16550_baudok(struct ns16550com *ns16550)
 uint_t
 ns16550intr(caddr_t argns16550)
 {
-	struct ns16550com		*ns16550 = (struct ns16550com *)argns16550;
-	struct nsasyncline	*nsasync;
+	struct ns16550com	*ns16550 = (struct ns16550com *)argns16550;
+	struct nsasyncline	*nsasync = ns16550->ns16550_priv;
 	int			ret_status = DDI_INTR_UNCLAIMED;
-	uchar_t			interrupt_id, lsr;
 
-	interrupt_id = ns16550_get_isr(ns16550);
-	nsasync = ns16550->ns16550_priv;
 	if ((nsasync == NULL) ||
 	    !(nsasync->nsasync_flags & (NSASYNC_ISOPEN|NSASYNC_WOPEN))) {
-		if (interrupt_id & NOINTERRUPT)
+		const uint8_t intr_id = ns16550_get_isr(ns16550);
+
+		if (intr_id & NOINTERRUPT) {
 			return (DDI_INTR_UNCLAIMED);
-		else {
+		} else {
 			/*
 			 * reset the device by:
 			 *	reading line status
@@ -2005,33 +2004,56 @@ ns16550intr(caddr_t argns16550)
 	 * We will loop until the interrupt line is pulled low. ns16550
 	 * interrupt is edge triggered.
 	 */
-	/* CSTYLED */
-	for (;; interrupt_id =
-	    ns16550_get_isr(ns16550)) {
+	for (;;) {
+		const uint8_t intr_id = ns16550_get_isr(ns16550);
 
-		if (interrupt_id & NOINTERRUPT)
+		if (intr_id & NOINTERRUPT)
 			break;
 		ret_status = DDI_INTR_CLAIMED;
 
-		DEBUGCONT1(NS16550_DEBUG_INTR, "ns16550intr: interrupt_id = 0x%d\n",
-		    interrupt_id);
-		lsr = ns16550_get_lsr(ns16550);
-		switch (interrupt_id) {
+		DEBUGCONT1(NS16550_DEBUG_INTR, "ns16550intr: intr_id = 0x%d\n",
+		    intr_id);
+
+		const uint8_t lsr = ns16550_get_lsr(ns16550);
+
+		switch (intr_id) {
+		case TxRDY:
+			/*
+			 * The transmit-ready interrupt implies an empty
+			 * transmit-hold register (or FIFO).  Check that it is
+			 * present before attempting to transmit more data.
+			 */
+			if ((lsr & XHRE) == 0) {
+				/*
+				 * Taking a TxRDY interrupt only to find XHRE
+				 * absent would be a surprise, except for a
+				 * racing ns16550putchar(), which ignores the
+				 * excl_hi mutex when writing to the device.
+				 */
+				continue;
+			}
+
+			nsasync_txint(ns16550);
+
+			/*
+			 * Unlike the other interrupts which fall through to
+			 * attempting to fill the output register/FIFO, TxRDY
+			 * has no need having just done so.
+			 */
+			continue;
 		case RxRDY:
 		case RSTATUS:
 		case FFTMOUT:
 			/* receiver interrupt or receiver errors */
 			nsasync_rxint(ns16550, lsr);
 			break;
-		case TxRDY:
-			/* transmit interrupt */
-			nsasync_txint(ns16550);
-			continue;
 		case MSTATUS:
 			/* modem status interrupt */
 			nsasync_msint(ns16550);
 			break;
 		}
+
+		/* Refill the output FIFO if it has gone empty */
 		if ((lsr & XHRE) && (nsasync->nsasync_flags & NSASYNC_BUSY) &&
 		    (nsasync->nsasync_ocnt > 0))
 			nsasync_txint(ns16550);
