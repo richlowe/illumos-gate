@@ -3037,8 +3037,10 @@ getzoneid(void)
 	proc_t *p = curproc;
 
 	/* This may happen for p0 during early boot, but not otherwise */
-	if (p->p_zone == NULL)
+	if (p->p_zone == NULL) {
+		ASSERT3P(p, ==, &p0);
 		return (GLOBAL_ZONEID);
+	}
 
 	return (p->p_zone->zone_id);
 }
