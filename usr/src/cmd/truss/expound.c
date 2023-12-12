@@ -1982,12 +1982,12 @@ show_gp_msg(private_t *pri, int what)
 		else
 			show_strbuf32(pri, offset, "dat", dump);
 	}
-#else	/* _LP64 */
+#else  /* _MULTI_DATAMODEL */
 	if (pri->sys_nargs >= 2 && (offset = pri->sys_args[1]) != 0)
 		show_strbuf(pri, offset, "ctl", dump);
 	if (pri->sys_nargs >= 3 && (offset = pri->sys_args[2]) != 0)
 		show_strbuf(pri, offset, "dat", dump);
-#endif	/* _LP64 */
+#endif	/* _MULTI_DATAMODEL */
 
 	/* exit region of lengthy output */
 	if (dump)
@@ -2796,6 +2796,7 @@ show_sigaction(private_t *pri, long offset, const char *name, long odisp)
 		return;
 	}
 #endif
+
 	if (offset != 0 &&
 	    Pread(Proc, &sigaction, sizeof (sigaction), offset) ==
 	    sizeof (sigaction)) {
@@ -3240,6 +3241,7 @@ show_iovec(private_t *pri, long offset, long niov, int showbuf, long count)
 		return;
 	}
 #endif
+
 	if (niov > 16)		/* is this the real limit? */
 		niov = 16;
 
@@ -3756,7 +3758,6 @@ show_doorparam(private_t *pri, long offset)
 }
 
 #ifdef _MULTI_DATAMODEL
-
 static void
 show_doorargs32(private_t *pri, long offset)
 {
@@ -3789,7 +3790,6 @@ show_doorparam32(private_t *pri, long offset)
 		    val);
 	}
 }
-
 #endif	/* _MULTI_DATAMODEL */
 
 static void
@@ -3848,7 +3848,6 @@ show_portargs(private_t *pri, long offset)
 
 
 #ifdef _MULTI_DATAMODEL
-
 static void
 show_portargs32(private_t *pri, long offset)
 {
@@ -3865,7 +3864,6 @@ show_portargs32(private_t *pri, long offset)
 		    args.portev_user);
 	}
 }
-
 #endif	/* _MULTI_DATAMODEL */
 
 static void
@@ -3888,7 +3886,6 @@ show_ports(private_t *pri)
 #define	MAX_SNDFL_PRD 16
 
 #ifdef _MULTI_DATAMODEL
-
 static void
 show_ksendfilevec32(private_t *pri, int fd,
     ksendfilevec32_t *sndvec, int sfvcnt)
@@ -3974,7 +3971,6 @@ show_ksendfilevec64(private_t *pri, int fd,
 	}
 	Xserialize();
 }
-
 #endif /* _MULTI_DATAMODEL */
 
 /*ARGSUSED*/
@@ -4102,7 +4098,6 @@ show_memcntl_mha(private_t *pri, long offset)
 }
 
 #ifdef _MULTI_DATAMODEL
-
 static void
 show_memcntl_mha32(private_t *pri, long offset)
 {
@@ -4127,7 +4122,6 @@ show_memcntl_mha32(private_t *pri, long offset)
 			    mha32.mha_pagesize);
 	}
 }
-
 #endif	/* _MULTI_DATAMODEL */
 
 static void
@@ -4136,6 +4130,7 @@ show_memcntl(private_t *pri)
 
 	if ((int)pri->sys_args[2] != MC_HAT_ADVISE)
 		return;
+
 #ifdef _MULTI_DATAMODEL
 	if (data_model == PR_MODEL_LP64)
 		show_memcntl_mha(pri, (long)pri->sys_args[3]);
@@ -4526,7 +4521,6 @@ show_zone_create_args(private_t *pri, long offset)
 
 
 #ifdef _MULTI_DATAMODEL
-
 static void
 show_zone_create_args32(private_t *pri, long offset)
 {
@@ -4607,7 +4601,6 @@ show_zone_create_args32(private_t *pri, long offset)
 			free(zone_zfs);
 	}
 }
-
 #endif
 
 static void
@@ -5600,8 +5593,10 @@ expound(private_t *pri, long r0, int raw)
 				if (!lp64)
 					show_getrusage32(pri->sys_args[1]);
 				else
-#endif
 					show_getrusage(pri->sys_args[1]);
+#else
+				show_getrusage(pri->sys_args[1]);
+#endif
 			}
 		break;
 	case SYS_port:

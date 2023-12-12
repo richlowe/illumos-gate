@@ -39,6 +39,7 @@ $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/ldd target=../../bin/ldd
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/plimit target=../../bin/plimit
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/pvs target=../../bin/pvs
 $(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/strings target=../../bin/strings
+$(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/truss target=../../bin/truss
 $(not_aarch64)link path=usr/bin/ctags target=../has/bin/ctags mediator=ctags \
     mediator-implementation=illumos
 file path=usr/bin/elfsign mode=0555

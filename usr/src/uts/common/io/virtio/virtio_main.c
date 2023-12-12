@@ -187,7 +187,7 @@ virtio_fini(virtio_t *vio, boolean_t failed)
 		/*
 		 * Signal to the host that device setup failed.
 		 */
-		virtio_set_status(vio, VIRTIO_STATUS_FAILED);
+		virtio_set_status_locked(vio, VIRTIO_STATUS_FAILED);
 	} else {
 		virtio_device_reset_locked(vio);
 	}

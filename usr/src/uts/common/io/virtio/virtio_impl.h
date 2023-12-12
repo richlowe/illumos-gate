@@ -61,6 +61,7 @@ void virtio_put32(virtio_t *, uintptr_t, uint32_t);
 /* XXXARM: Defined in the backend-specific sources */
 virtio_t *virtio_init(dev_info_t *, uint64_t, boolean_t);
 void virtio_set_status(virtio_t *, uint8_t);
+void virtio_set_status_locked(virtio_t *, uint8_t);
 void virtio_device_reset_locked(virtio_t *);
 virtio_queue_t *virtio_queue_alloc(virtio_t *, uint16_t, const char *,
     ddi_intr_handler_t *, void *, boolean_t, uint_t);

@@ -114,15 +114,20 @@ virtio_init(dev_info_t *dip, uint64_t driver_features, boolean_t allow_indirect)
  * constants for "status".  To zero the status field use virtio_device_reset().
  */
 void
-virtio_set_status(virtio_t *vio, uint8_t status)
+virtio_set_status_locked(virtio_t *vio, uint8_t status)
 {
 	VERIFY3U(status, !=, 0);
-
-	mutex_enter(&vio->vio_mutex);
+	VERIFY(MUTEX_HELD(&vio->vio_mutex));
 
 	uint8_t old = virtio_get32(vio, VIRTIO_MMIO_STATUS);
 	virtio_put32(vio, VIRTIO_MMIO_STATUS, status | old);
+}
 
+void
+virtio_set_status(virtio_t *vio, uint8_t status)
+{
+	mutex_enter(&vio->vio_mutex);
+	virtio_set_status_locked(vio, status);
 	mutex_exit(&vio->vio_mutex);
 }
 
