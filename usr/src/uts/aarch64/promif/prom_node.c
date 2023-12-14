@@ -21,6 +21,7 @@
  */
 /*
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2023 Michael van der Westhuizen
  */
 
 #include <libfdt.h>
@@ -120,12 +121,14 @@ prom_check_overlong_property(pnode_t nodeid, const char *name)
 		if ((nodename == NULL) || nodename[0] == '\0')
 			goto no_name;
 
-		cmn_err(CE_WARN, "PROM node '%s' request for over long property '%s'",
+		cmn_err(CE_WARN,
+		    "PROM node '%s' request for over long property '%s'",
 		    nodename, name);
 		return;
 
 no_name:
-		cmn_err(CE_WARN, "PROM node %u request for over long property '%s'",
+		cmn_err(CE_WARN,
+		    "PROM node %u request for over long property '%s'",
 		    nodeid, name);
 	}
 }
@@ -368,7 +371,7 @@ prom_nextprop(pnode_t nodeid, const char *name, char *next)
 	}
 	data = fdt_get_property_by_offset(fdtp, offset, NULL);
 	strlcpy(next, (char *)fdt_string(fdtp, fdt32_to_cpu(data->nameoff)),
-		OBP_MAXPROPNAME);
+	    OBP_MAXPROPNAME);
 	return (next);
 }
 
@@ -541,4 +544,22 @@ void
 prom_walk(void(*func)(pnode_t, void*), void *arg)
 {
 	prom_walk_dev(prom_rootnode(), func, arg);
+}
+
+boolean_t
+prom_node_has_property(pnode_t nodeid, const char *name)
+{
+	int offset;
+	int len;
+	const struct fdt_property *prop;
+
+	offset = fdt_node_offset_by_phandle(fdtp, nodeid);
+	if (offset < 0)
+		return (B_FALSE);
+
+	prop = fdt_get_property(fdtp, offset, name, &len);
+	if (prop == NULL)
+		return (B_FALSE);
+
+	return (B_TRUE);
 }

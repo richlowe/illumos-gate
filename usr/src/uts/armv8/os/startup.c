@@ -20,6 +20,7 @@
  */
 
 /*
+ * Copyright 2023 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  */
@@ -86,6 +87,7 @@
 #include <sys/psci.h>
 #include <sys/controlregs.h>
 #include <sys/arch_timer.h>
+#include <sys/cpuinfo.h>
 
 extern void brand_init(void);
 extern void pcf_init(void);
@@ -1225,6 +1227,12 @@ startup_modules(void)
 	 * Initialize segment management stuff.
 	 */
 	seg_init();
+
+	/*
+	 * Gather CPU information
+	 */
+	if (cpuinfo_init() != 0)
+		halt("Can't initialize CPU information");
 
 	/*
 	 * Set up the interrupt controller for the primary CPU

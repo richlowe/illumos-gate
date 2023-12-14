@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2022 Michael van der Westhuizen
+ * Copyright 2023 Michael van der Westhuizen
  */
 
 #ifndef	_ASM_CONTROLREGS_H
@@ -366,6 +366,26 @@ read_par_el1(void)
 	__asm__ __volatile__("mrs %0, par_el1":"=r"(reg)::"memory");
 	return (reg);
 }
+
+#define	PAR_EL1_F		0x0000000000000001ull
+
+/*
+ * ... when PAR_EL1.F == 0
+ */
+#define	PAR_EL1_ATTR		0xFF00000000000000ull
+#define	PAR_EL1_PA_HI		0x000F000000000000ull
+#define	PAR_EL1_PA		0x0000FFFFFFFFF000ull
+#define	PAR_EL1_NSE		0x0000000000000800ull
+#define	PAR_EL1_NS		0x0000000000000200ull
+#define	PAR_EL1_SH		0x0000000000000180ull
+
+/*
+ * and when PAR_EL1.F == 1
+ */
+#define	PAR_EL1_S		0x0000000000000200ull
+#define	PAR_EL1_PTW		0x0000000000000100ull
+#define	PAR_EL1_FST		0x000000000000007Eull
+
 
 #define	dmb(_option_) do {				\
 	__asm__ __volatile__("dmb " #_option_ :::"memory");	\

@@ -30,6 +30,7 @@
  * Copyright (c) 2012, Joyent, Inc.  All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2023 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -77,6 +78,7 @@
 #include <sys/irq.h>
 #include <sys/psci.h>
 #include <sys/arm_features.h>
+#include <sys/cpuinfo.h>
 
 
 struct cpu	cpus[1];			/* CPU data */
@@ -262,111 +264,81 @@ cpu_enable_intr(struct cpu *cp)
 {
 	ASSERT(MUTEX_HELD(&cpu_lock));
 	cp->cpu_flags |= CPU_ENABLE;
-}
-
-
-static uint64_t
-get_cpu_affinity(pnode_t node)
-{
-	uint32_t reg[2] = {0};
-	uint64_t affinity = 0;
-	int address_cells = prom_get_address_cells(node);
-	ASSERT(address_cells == 1 || address_cells == 2);
-	if (address_cells == 1) {
-		prom_getprop(node, "reg", (caddr_t)reg);
-		affinity |= ntohl(reg[0]);
-	} else if (address_cells == 2) {
-		prom_getprop(node, "reg", (caddr_t)reg);
-		affinity |= ((uint64_t)ntohl(reg[0]) << 32);
-		affinity |= ((uint64_t)ntohl(reg[1]));
-	}
-	return (affinity);
-}
-
-static pnode_t
-get_cpu_node(int cpun, uint64_t ignore_affinity)
-{
-	pnode_t cpus = prom_finddevice("/cpus");
-	if (cpus <= 0)
-		return (cpus);
-
-	pnode_t node = prom_childnode(cpus);
-	int id = 1;
-	for (;;) {
-		if (node <= 0)
-			return (node);
-		if (cpun == 0) {
-			if (get_cpu_affinity(node) == ignore_affinity)
-				return (node);
-		} else if (get_cpu_affinity(node) != ignore_affinity) {
-			if (id == cpun)
-				return (node);
-			id++;
-		}
-		node = prom_nextnode(node);
-	}
+	ncpus_intr_enabled++;
 }
 
 static int
-wakeup_cpu(int who, uint64_t ignore_affinity)
+translate_to_pa(uint64_t va, uint64_t *pa)
 {
-	pnode_t node = get_cpu_node(who, ignore_affinity);
-	if (node <= 0) {
-		cmn_err(CE_WARN,
-		    "cpu%d prom node not found", who);
+	uint64_t p;
+	write_s1e1r(va);
+	isb();
+	p = read_par_el1();
+	if (p & PAR_EL1_F)
 		return (-1);
-	}
-
-	int len = prom_getproplen(node, "enable-method");
-	if (len <= 0) {
-		cmn_err(CE_WARN,
-		    "cpu%d enable-method error", who);
-		return (-1);
-	}
-	char *methodname = __builtin_alloca(len);
-	prom_getprop(node, "enable-method", (caddr_t)methodname);
-	if (strcmp(methodname, "spin-table") == 0) {
-		uint32_t cpu_release_addr[2] = {0};
-		prom_getprop(node, "cpu-release-addr",
-		    (caddr_t)cpu_release_addr);
-		cpu_release_addr[0] = ntohl(cpu_release_addr[0]);
-		cpu_release_addr[1] = ntohl(cpu_release_addr[1]);
-		uint64_t rel_addr = ((uint64_t)cpu_release_addr[0] << 32) |
-		    cpu_release_addr[1];
-
-		write_s1e1r((uint64_t)BOOT_VEC_BASE);
-		isb();
-		uint64_t pa = (read_par_el1() & MMU_PAGEMASK) &
-		    ((1ul << 48) - 1);
-		*(uint64_t *)(SEGKPM_BASE + rel_addr) = pa;
-		flush_data_cache(SEGKPM_BASE + rel_addr);
-		dsb(ish);
-		__asm__ volatile("sev":::"memory");
-	} else if (strcmp(methodname, "psci") == 0) {
-		write_s1e1r((uint64_t)BOOT_VEC_BASE);
-		isb();
-		uint64_t pa = (read_par_el1() & MMU_PAGEMASK) &
-		    ((1ul << 48) - 1);
-		uint32_t reg[2] = {0};
-		uint64_t target_cpu = 0;
-		int address_cells = prom_get_address_cells(node);
-		ASSERT(address_cells == 1 || address_cells == 2);
-		if (address_cells == 1) {
-			prom_getprop(node, "reg", (caddr_t)reg);
-			target_cpu |= ntohl(reg[0]);
-		} else if (address_cells == 2) {
-			prom_getprop(node, "reg", (caddr_t)reg);
-			target_cpu |= ((uint64_t)ntohl(reg[0]) << 32);
-			target_cpu |= ((uint64_t)ntohl(reg[1]));
-		}
-		psci_cpu_on(target_cpu, pa, 0);
-	} else {
-		cmn_err(CE_WARN,
-		    "cpu%d unknown enable-method %s", who, methodname);
-		return (-1);
-	}
-
+	*pa = (p & (PAR_EL1_PA_HI|PAR_EL1_PA)) | (va & MMU_PAGEOFFSET);
 	return (0);
+}
+
+/*
+ * Awaken a CPU using a simple release address write to the parked address and
+ * a SEV (send-event) instruction.
+ *
+ * This is the style of CPU parking implemented by U-boot.
+ */
+static int
+wakeup_cpu_spin_table_simple(cpu_t *cp)
+{
+	uint64_t addr;
+	uint64_t pa;
+
+	if (translate_to_pa(BOOT_VEC_BASE, &pa) != 0)
+		return (-1);
+	addr = cp->cpu_m.mcpu_ci->ci_parked_addr;
+
+	/*
+	 * XXXARM: This is sketchy.  We're far enough along that we should use
+	 * the VM subsystem properly.
+	 */
+	*(uint64_t *)(SEGKPM_BASE + addr) = pa;
+	flush_data_cache(SEGKPM_BASE + addr);
+	dsb(ish);
+
+	__asm__ volatile("sev":::"memory");
+	return (0);
+}
+
+/*
+ * Awaken a CPU using a CPU_ON PSCI call.
+ */
+static int
+wakeup_cpu_psci(cpu_t *cp)
+{
+	uint64_t pa;
+
+	if (translate_to_pa(BOOT_VEC_BASE, &pa) != 0)
+		return (-1);
+
+	psci_cpu_on(cp->cpu_m.affinity, pa, 0);
+	return (0);
+}
+
+static int
+wakeup_cpu(cpu_t *cp)
+{
+	switch (cp->cpu_m.mcpu_ci->ci_ppver) {
+	case CPUINFO_ENABLE_METHOD_PSCI:
+		return (wakeup_cpu_psci(cp));
+	case CPUINFO_ENABLE_METHOD_SPINTABLE_SIMPLE:
+		return (wakeup_cpu_spin_table_simple(cp));
+	default:
+		cmn_err(CE_PANIC, "cpu%d: unknown enable-method %u",
+		    cp->cpu_id, cp->cpu_m.mcpu_ci->ci_ppver);
+		break;
+	}
+
+	/* UNREACHED */
+	return (-1);
 }
 
 static void
@@ -486,38 +458,41 @@ mp_startup_boot(void)
 	/*NOTREACHED*/
 }
 
-static struct cpu *
-mp_cpu_configure_common(int cpun, uint64_t ignore_affinity)
+static void
+mp_cpu_configure_common(struct cpuinfo *ci)
 {
 	ASSERT(MUTEX_HELD(&cpu_lock));
-	ASSERT(cpun < NCPU && cpu[cpun] == NULL);
+	ASSERT(ci->ci_id < NCPU && cpu[ci->ci_id] == NULL);
 	extern void idle();
 
-	pnode_t node = get_cpu_node(cpun, ignore_affinity);
-	if (node <= 0) {
-		return (NULL);
-	}
-
-	uint64_t affinity = get_cpu_affinity(node);
-
 	struct cpu *cp;
-
 	kthread_id_t tp;
 	caddr_t	sp;
-	proc_t *procp;
 
+	/*
+	 * CPU structure basics.
+	 */
 	cp = kmem_zalloc(sizeof (*cp), KM_SLEEP);
+	cp->cpu_id = ci->ci_id;
+	cp->cpu_self = cp;
+	cp->cpu_lwp = NULL;
+	cp->cpu_m.mcpu_ci = ci;
+	cp->cpu_m.affinity = ci->ci_mpidr;
+	cp->cpu_base_spl = ipltospl(LOCK_LEVEL);
 
-	cp->cpu_m.affinity = affinity;
-
-	procp = &p0;
-
+	/*
+	 * Hook into the scheduler and VM subsystem.
+	 */
 	disp_cpu_init(cp);
 	cpu_vm_data_init(cp);
-	tp = thread_create(NULL, 0, NULL, NULL, 0, procp, TS_STOPPED,
-	    maxclsyspri);
 
+	/*
+	 * Set up the startup thread for this CPU.
+	 */
+	tp = thread_create(NULL, 0, NULL, NULL, 0, &p0, TS_STOPPED,
+	    maxclsyspri);
 	THREAD_ONPROC(tp, cp);
+
 	tp->t_preempt = 1;
 	tp->t_bound_cpu = cp;
 	tp->t_affinitycnt = 1;
@@ -529,17 +504,17 @@ mp_cpu_configure_common(int cpun, uint64_t ignore_affinity)
 	tp->t_sp -= STACK_ENTRY_ALIGN;		/* fake a call */
 	tp->t_pc = (uintptr_t)mp_startup_boot;
 
-	cp->cpu_id = cpun;
-	cp->cpu_self = cp;
+	/*
+	 * Hook the startup thread up as the current thread.
+	 */
 	cp->cpu_thread = tp;
-	cp->cpu_lwp = NULL;
 	cp->cpu_dispthread = tp;
 	cp->cpu_dispatch_pri = DISP_PRIO(tp);
 
-	cp->cpu_base_spl = ipltospl(LOCK_LEVEL);
-
-	tp = thread_create(NULL, PAGESIZE, idle, NULL, 0, procp, TS_ONPROC, -1);
-
+	/*
+	 * Set up the idle thread for this CPU.
+	 */
+	tp = thread_create(NULL, PAGESIZE, idle, NULL, 0, &p0, TS_ONPROC, -1);
 	cp->cpu_idle_thread = tp;
 
 	tp->t_preempt = 1;
@@ -548,29 +523,33 @@ mp_cpu_configure_common(int cpun, uint64_t ignore_affinity)
 	tp->t_cpu = cp;
 	tp->t_disp_queue = cp->cpu_disp;
 
+	/*
+	 * Finish CPU hookup.
+	 */
 	pg_cpu_bootstrap(cp);
-
 	kcpc_hw_init(cp);
-
 	cpu_intr_alloc(cp, NINTR_THREADS);
-
 	cp->cpu_flags = CPU_OFFLINE | CPU_QUIESCED | CPU_POWEROFF;
 	cpu_set_state(cp);
 
+	/*
+	 * Finally, add the CPU to the CPU array.
+	 *
+	 * This is added at index cp->cpu_id, which corresponds to the
+	 * ci->ci_id value in the passed-in cpuinfo.
+	 */
 	cpu_add_unit(cp);
-
-	return (cp);
 }
 
 int
 mach_cpucontext_init(void)
 {
+	uint64_t pa;
 	extern void secondary_vec_start();
 	extern void secondary_vec_end();
 
-	write_s1e1r((uint64_t)secondary_vec_start);
-	isb();
-	uint64_t pa = (read_par_el1() & MMU_PAGEMASK) & ((1ul << 48) - 1);
+	if (translate_to_pa((uint64_t)secondary_vec_start, &pa) != 0)
+		return (-1);
 
 	hat_devload(kas.a_hat,
 	    (caddr_t)(uintptr_t)BOOT_VEC_BASE, MMU_PAGESIZE,
@@ -597,7 +576,7 @@ mach_cpucontext_init(void)
 }
 
 static int
-mp_start_cpu_common(cpu_t *cp, uint64_t ignore_affinity)
+mp_start_cpu_common(cpu_t *cp)
 {
 	void *ctx;
 	int delays;
@@ -608,7 +587,7 @@ mp_start_cpu_common(cpu_t *cp, uint64_t ignore_affinity)
 	ASSERT(cp != NULL);
 	cpuid = cp->cpu_id;
 
-	error = wakeup_cpu(cpuid, ignore_affinity);
+	error = wakeup_cpu(cp);
 	if (error != 0) {
 		cmn_err(CE_WARN,
 		    "cpu%d: failed to start, error %d", cp->cpu_id, error);
@@ -651,22 +630,21 @@ mp_start_cpu_common(cpu_t *cp, uint64_t ignore_affinity)
 }
 
 static int
-start_cpu(processorid_t who, uint64_t ignore_affinity)
+start_cpu(struct cpuinfo *ci)
 {
-	cpu_t *cp;
 	int error = 0;
 	cpuset_t tempset;
 
-	ASSERT(who != 0);
+	ASSERT(ci->ci_id != 0);
 
-	error = mp_start_cpu_common(cpu[who], ignore_affinity);
+	error = mp_start_cpu_common(cpu[ci->ci_id]);
 	if (error != 0) {
 		return (error);
 	}
 
 	mutex_exit(&cpu_lock);
 	tempset = cpu_ready_set;
-	while (!CPU_IN_SET(tempset, who)) {
+	while (!CPU_IN_SET(tempset, ci->ci_id)) {
 		drv_usecwait(1);
 		tempset = *((volatile cpuset_t *)&cpu_ready_set);
 	}
@@ -676,7 +654,7 @@ start_cpu(processorid_t who, uint64_t ignore_affinity)
 }
 
 void
-start_other_cpus(int cprboot)
+start_other_cpus(int flag __unused)
 {
 	/*
 	 * XXXARM: Note that while we're `start_other_cpus` we're running on
@@ -695,10 +673,10 @@ start_other_cpus(int cprboot)
 	write_oslar_el1(0);
 	write_cntkctl(read_cntkctl() | 0x3);
 
-	uint_t bootcpuid = 0;
+	processorid_t bootcpu = CPU->cpu_id;
 
-	CPUSET_DEL(mp_cpus, bootcpuid);
-	CPUSET_ADD(cpu_ready_set, bootcpuid);
+	CPUSET_DEL(mp_cpus, bootcpu);
+	CPUSET_ADD(cpu_ready_set, bootcpu);
 
 	cpu_pause_init();
 
@@ -710,28 +688,33 @@ start_other_cpus(int cprboot)
 	affinity_set(CPU_CURRENT);
 
 	mutex_enter(&cpu_lock);
-	for (int who = 0; who < NCPU; who++) {
-		if (!CPU_IN_SET(mp_cpus, who))
-			continue;
-		cpu_t *cp;
-		cp = mp_cpu_configure_common(who, CPU->cpu_m.affinity);
-		ASSERT(cp != NULL);
-	}
-	for (int who = 0; who < NCPU; who++) {
-		if (!CPU_IN_SET(mp_cpus, who))
-			continue;
-		ASSERT(who != bootcpuid);
 
-		if (start_cpu(who, CPU->cpu_m.affinity) != 0)
-			CPUSET_DEL(mp_cpus, who);
-		cpu_state_change_notify(who, CPU_SETUP);
+	/*
+	 * Set up CPU structures for each CPU we're going to start.
+	 */
+	for (struct cpuinfo *ci = cpuinfo_first_enabled();
+	    ci != cpuinfo_end(); ci = cpuinfo_next_enabled(ci)) {
+		if (ci->ci_id == bootcpu || !CPU_IN_SET(mp_cpus, ci->ci_id))
+			continue;
+		mp_cpu_configure_common(ci);
+	}
+
+	/*
+	 * Start any enabled non-boot CPUs.
+	 */
+	for (struct cpuinfo *ci = cpuinfo_first_enabled();
+	    ci != cpuinfo_end(); ci = cpuinfo_next_enabled(ci)) {
+		if (ci->ci_id == bootcpu || !CPU_IN_SET(mp_cpus, ci->ci_id))
+			continue;
+		/*
+		 * XXXARM: The error path here needs to be tightened up, as
+		 * when this fails we will crash shortly thereafter.
+		 */
+		if (start_cpu(ci) != 0)
+			CPUSET_DEL(mp_cpus, ci->ci_id);
+		cpu_state_change_notify(ci->ci_id, CPU_SETUP);
 		mutex_exit(&cpu_lock);
 		mutex_enter(&cpu_lock);
-	}
-	for (int who = 0; who < NCPU; who++) {
-		if (!CPU_IN_SET(mp_cpus, who))
-			continue;
-		cpu_t *cp = cpu[who];
 	}
 
 	mutex_exit(&cpu_lock);

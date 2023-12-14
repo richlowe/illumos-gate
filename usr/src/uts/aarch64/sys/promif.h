@@ -24,6 +24,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2023 Michael van der Westhuizen
  */
 
 #ifndef _SYS_PROMIF_H
@@ -266,6 +267,7 @@ extern int prom_get_reg_size(pnode_t node, int index, uint64_t *regsize);
 extern void prom_power_off(void);
 extern int prom_get_bus_address(pnode_t node, uint64_t phys_addr,
     uint64_t *bus_addr);
+extern boolean_t prom_node_has_property(pnode_t nodeid, const char *name);
 
 #endif	/* _KERNEL */
 

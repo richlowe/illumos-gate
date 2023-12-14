@@ -20,6 +20,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2023 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  */
@@ -51,6 +52,7 @@
 #include <sys/gic.h>
 #include <sys/controlregs.h>
 #include <sys/irq.h>
+#include <sys/cpuinfo.h>
 
 static void
 return_instr(void)
@@ -379,19 +381,14 @@ mach_init()
 	idle_cpu = cpu_halt;
 	disp_enq_thread = cpu_wakeup;
 
+	/*
+	 * Add all enabled CPUs to the mp_cpus cpuset.
+	 */
 	CPUSET_ZERO(cpumask);
 
-	/*
-	 * XXXARM: This is wrong in two ways:
-	 *
-	 * 1) it's taking the number of cpus the PIC can deliver interrupts
-	 *    to, not the number which exist.
-	 *
-	 * 2) this is the number we can deliver to without affinity
-	 *    distribution, which caps the system at 8 cores
-	 */
-	for (int cpu_id = 0; cpu_id < gic_num_cpus(); cpu_id++) {
-		CPUSET_ADD(cpumask, cpu_id);
+	for (struct cpuinfo *ci = cpuinfo_first_enabled();
+	    ci != cpuinfo_end(); ci = cpuinfo_next_enabled(ci)) {
+		CPUSET_ADD(cpumask, ci->ci_id);
 	}
 
 	mp_cpus = cpumask;
