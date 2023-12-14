@@ -25,6 +25,7 @@
  *
  * Copyright 2011 Joyent, Inc. All rights reserved.
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2023 Michael van der Westhuizen
  */
 
 #ifndef _SYS_MACHCPUVAR_H
@@ -64,6 +65,8 @@ struct	machcpu {
 	uint64_t	mcpu_revidr;
 
 	uint64_t	mcpu_boot_el;
+
+	struct cpuinfo	*mcpu_ci;
 };
 
 #ifndef NINTR_THREADS
