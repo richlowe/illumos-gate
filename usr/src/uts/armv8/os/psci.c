@@ -19,6 +19,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2023 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -28,13 +29,14 @@
 #include <sys/promif.h>
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
+#include <sys/psciinfo.h>
 
 static uint32_t pcsi_version_id = 0x84000000;
-static uint32_t psci_cpu_suspend_id = 0xc4000001;
-static uint32_t psci_cpu_off_id = 0x84000002;
-static uint32_t psci_cpu_on_id = 0xc4000003;
+static uint32_t psci_cpu_suspend_id = PSCI_CPU_SUSPEND_ID;
+static uint32_t psci_cpu_off_id = PSCI_CPU_OFF_ID;
+static uint32_t psci_cpu_on_id = PSCI_CPU_ON_ID;
 static uint32_t psci_affinity_info_id = 0xc4000004;
-static uint32_t psci_migrate_id = 0xc4000005;
+static uint32_t psci_migrate_id = PSCI_MIGRATE_ID;
 static uint32_t psci_migrate_info_type_id = 0x84000006;
 static uint32_t psci_migrate_info_up_cpu_id = 0xc4000007;
 static uint32_t psci_system_off_id = 0x84000008;
@@ -88,6 +90,16 @@ psci_hvc64(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)
 }
 
 static uint64_t
+psci_call_raw(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)
+{
+	if (pcsi_method_is_hvc) {
+		return (psci_hvc64(a0, a1, a2, a3));
+	}
+
+	return (psci_smc64(a0, a1, a2, a3));
+}
+
+static uint64_t
 psci_call(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)
 {
 	/*
@@ -101,45 +113,38 @@ psci_call(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)
 		prom_printf("ERROR: attempted PSCI call before "
 		    "it's initialized\n");
 		return (0);
-	} else if (pcsi_method_is_hvc) {
-		return (psci_hvc64(a0, a1, a2, a3));
 	} else {
-		return (psci_smc64(a0, a1, a2, a3));
+		return (psci_call_raw(a0, a1, a2, a3));
 	}
-}
-
-static void
-find_psci(pnode_t node, void *arg)
-{
-	if (!prom_is_compatible(node, "arm,psci"))
-		return;
-	*(pnode_t *)arg = node;
 }
 
 void
 psci_init(void)
 {
-	pnode_t node = 0;
-	prom_walk(find_psci, &node);
-	if (node > 0) {
-		int len;
-		len = prom_getproplen(node, "method");
-		if (len > 0) {
-			char *method = __builtin_alloca(len + 1);
-			memset(method, 0, len + 1);
-			prom_getprop(node, "method", method);
-			if (strcmp(method, "hvc") == 0)
-				pcsi_method_is_hvc = B_TRUE;
-		}
-		psci_cpu_suspend_id = (uint32_t)prom_get_prop_int(node,
-		    "cpu_suspend", (int)psci_cpu_suspend_id);
-		psci_cpu_off_id = (uint32_t)prom_get_prop_int(node,
-		    "cpu_off", (int)psci_cpu_off_id);
-		psci_cpu_on_id = (uint32_t)prom_get_prop_int(node,
-		    "cpu_on", (int)psci_cpu_on_id);
-		psci_migrate_id = (uint32_t)prom_get_prop_int(node,
-		    "migrate", (int)psci_migrate_id);
+	const struct psciinfo *pi;
+
+	pi = psciinfo_get();
+	VERIFY(pi != NULL);
+
+	if (pi->pi_version == PSCI_NOT_IMPLEMENTED) {
+		prom_printf("WARNING: PSCI not implemented\n");
+		psci_initialized = B_FALSE;
+		return;
 	}
+
+	switch (pi->pi_conduit) {
+	case PSCI_CONDUIT_SMC:
+		pcsi_method_is_hvc = B_FALSE;
+		break;
+	case PSCI_CONDUIT_HVC:
+		pcsi_method_is_hvc = B_TRUE;
+		break;
+	}
+
+	psci_cpu_suspend_id = pi->pi_cpu_suspend_id;
+	psci_cpu_off_id = pi->pi_cpu_off_id;
+	psci_cpu_on_id = pi->pi_cpu_on_id;
+	psci_migrate_id = pi->pi_migrate_id;
 
 	psci_initialized = B_TRUE;
 }

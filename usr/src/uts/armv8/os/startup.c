@@ -1193,8 +1193,6 @@ startup_modules(void)
 	if (&set_platform_defaults)
 		set_platform_defaults();
 
-	psci_init();
-
 	/*
 	 * Read the GMT lag from /etc/rtc_config.
 	 */

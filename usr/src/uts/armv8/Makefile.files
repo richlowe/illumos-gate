@@ -25,7 +25,8 @@
 #
 
 CORE_OBJS_FDT =			\
-	cpuinfo_fdt.o
+	cpuinfo_fdt.o		\
+	psciinfo_fdt.o
 
 CORE_OBJS +=			\
 	aarch64_subr.o		\

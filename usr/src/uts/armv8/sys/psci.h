@@ -20,11 +20,12 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2023 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  */
 
 #ifndef _SYS_PSCI_H
-#define _SYS_PSCI_H
+#define	_SYS_PSCI_H
 
 #include <sys/types.h>
 
@@ -45,25 +46,30 @@ enum {
 	PSCI_INVALID_ADDRESS	= -9,
 };
 
-void psci_init(void);
-uint32_t psci_version(void);
-int32_t psci_cpu_suspend(uint32_t power_state, uint64_t entry_point_address, uint64_t context_id);
-int32_t psci_cpu_off(void);
-int32_t psci_cpu_on(uint64_t target_cpu, uint64_t entry_point_address, uint64_t context_id);
-int32_t psci_affinity_info(uint64_t target_affinity, uint32_t lowest_affinity_level);
-int32_t psci_migrate(uint64_t target_cpu);
-int32_t psci_migrate_info_type(void);
-uint64_t psci_migrate_info_up_cpu(void);
-void psci_system_off(void);
-void psci_system_reset(void);
-int32_t psci_features(uint32_t psci_func_id);
-int32_t psci_cpu_freeze(void);
-int32_t psci_cpu_default_suspend(uint64_t entry_point_address, uint64_t context_id);
-int32_t psci_node_hw_state(uint64_t target_cpu, uint32_t power_level);
-int32_t psci_system_suspend(uint64_t entry_point_address, uint64_t context_id);
-int32_t psci_set_suspend_mode(uint32_t mode);
-uint64_t psci_stat_residency(uint64_t target_cpu, uint32_t power_state);
-uint64_t psci_stat_count(uint64_t target_cpu, uint32_t power_state);
+extern void psci_init(void);
+extern uint32_t psci_version(void);
+extern int32_t psci_cpu_suspend(uint32_t power_state,
+	uint64_t entry_point_address, uint64_t context_id);
+extern int32_t psci_cpu_off(void);
+extern int32_t psci_cpu_on(uint64_t target_cpu,
+	uint64_t entry_point_address, uint64_t context_id);
+extern int32_t psci_affinity_info(uint64_t target_affinity,
+	uint32_t lowest_affinity_level);
+extern int32_t psci_migrate(uint64_t target_cpu);
+extern int32_t psci_migrate_info_type(void);
+extern uint64_t psci_migrate_info_up_cpu(void);
+extern void psci_system_off(void);
+extern void psci_system_reset(void);
+extern int32_t psci_features(uint32_t psci_func_id);
+extern int32_t psci_cpu_freeze(void);
+extern int32_t psci_cpu_default_suspend(uint64_t entry_point_address,
+	uint64_t context_id);
+extern int32_t psci_node_hw_state(uint64_t target_cpu, uint32_t power_level);
+extern int32_t psci_system_suspend(uint64_t entry_point_address,
+	uint64_t context_id);
+extern int32_t psci_set_suspend_mode(uint32_t mode);
+extern uint64_t psci_stat_residency(uint64_t target_cpu, uint32_t power_state);
+extern uint64_t psci_stat_count(uint64_t target_cpu, uint32_t power_state);
 
 #ifdef	__cplusplus
 }

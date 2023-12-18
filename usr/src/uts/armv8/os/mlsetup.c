@@ -53,6 +53,8 @@
 #include <sys/kdi.h>
 #include <sys/cpupart.h>
 #include <sys/cpuinfo.h>
+#include <sys/psciinfo.h>
+#include <sys/psci.h>
 
 #include <sys/debug.h>
 
@@ -198,6 +200,12 @@ mlsetup(struct regs *rp)
 	/* Get value of boot_ncpus. */
 	boot_ncpus = NCPU;
 	max_ncpus = boot_max_ncpus = boot_ncpus;
+
+	/*
+	 * Gather PSCI configuration from the firmware and initialize PSCI.
+	 */
+	psciinfo_init();
+	psci_init();
 
 	/*
 	 * Initialise CPU info for the boot processor and fill in accurate
