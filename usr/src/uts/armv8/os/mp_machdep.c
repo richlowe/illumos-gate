@@ -54,10 +54,7 @@
 #include <sys/irq.h>
 #include <sys/cpuinfo.h>
 
-static void
-return_instr(void)
-{
-}
+extern void return_instr(void);
 
 uint_t cp_haltset_fanout = 0;
 int (*addintr)(void *, int, avfunc, char *, int, caddr_t, caddr_t, uint64_t *,
