@@ -87,6 +87,8 @@ $(MOUNT):=	LDLIBS += -lscf
 $(TYPEPROG) :=	LDLIBS += -lrpcsvc -lsocket -lnsl -lsldap -lkstat -lscf \
     -L$(ADJUNCT_PROTO)/usr/lib/mps
 
+CSTD=		$(CSTD_GNU99)
+
 CFLAGS +=	$(CCVERBOSE) -D_FILE_OFFSET_BITS=64
 CPPFLAGS=	-I. -I.. -I../nfs/lib $(CPPFLAGS.master) -D_REENTRANT  \
 			$(MALLOC_DEBUG)
@@ -208,11 +210,6 @@ $(POFILE):
 	$(XGETTEXT) $(XGETFLAGS) -
 	$(SED) -e '/^# msg/d' -e '/^domain/d' < messages.po > $@
 	$(RM) messages.po
-
-lint:
-	$(LINT.c) $(AUTOSRCS)
-	$(LINT.c) $(MOUNTSRCS)
-	$(LINT.c) $(TYPESRCS)
 
 clean:	clean_dump
 	$(RM) $(OBJS) webnfs_xdr.c webnfs_client.c webnfs.h webnfs.x
