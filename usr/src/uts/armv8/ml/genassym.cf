@@ -2,6 +2,7 @@ include <sys/modctl.h>
 include <sys/cpu.h>
 include <sys/thread.h>
 include <sys/cpuvar.h>
+include <sys/cpu_event.h>
 include <sys/ontrap.h>
 include <sys/lockstat.h>
 include <sys/rwlock_impl.h>
@@ -15,9 +16,9 @@ include <sys/dditypes.h>
 include <sys/ddi.h>
 include <sys/ddi_isa.h>
 include <sys/systm.h>
-include <sys/gic.h>
 include <sys/dtrace.h>
 include <sys/privregs.h>
+include <asm/controlregs.h>
 
 define	MODS_SIZE		sizeof(struct mod_stub_info)
 define	MODS_INSTFCN		offsetof(struct mod_stub_info, mods_func_adr)
@@ -36,6 +37,8 @@ define	CPU_STATS_SYS_CPUMIGRATE	offsetof(cpu_t, cpu_stats.sys.cpumigrate)
 define	CPU_PRI			offsetof(cpu_t, cpu_pri)
 define	CPU_INTR_STACK		offsetof(cpu_t, cpu_intr_stack)
 define	CPU_SOFTINFO		offsetof(cpu_t, cpu_softinfo.st_pending)
+
+define	CPU_IDLE_CB_FLAG_INTR	CPU_IDLE_CB_FLAG_INTR
 
 define	OT_PROT			offsetof(struct on_trap_data, ot_prot)
 define	OT_TRAP			offsetof(struct on_trap_data, ot_trap)
@@ -169,12 +172,6 @@ define	CPACR_FPEN_EN		CPACR_FPEN_EN
 define	CPACR_FPEN_DIS		CPACR_FPEN_DIS
 
 define	LOCK_LEVEL		LOCK_LEVEL
-
-define	GIC_CPUIF_IAR		offsetof(struct gic_cpuif, iar)
-define	GIC_CPUIF_EOIR		offsetof(struct gic_cpuif, eoir)
-
-define	GIC_INTID_MIN_SPECIAL	GIC_INTID_MIN_SPECIAL
-define	GICC_IAR_INTID_MASK	GICC_IAR_INTID_MASK
 
 define	MMU_PAGESHIFT	MMU_PAGESHIFT
 define	DEFAULTSTKSZ	DEFAULTSTKSZ

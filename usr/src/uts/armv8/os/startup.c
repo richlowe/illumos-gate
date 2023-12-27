@@ -963,10 +963,6 @@ startup_end(void)
 	mach_init();
 
 	PRM_POINT("Enabling interrupts");
-#if 0
-	(*picinitf)();
-	sti();
-#endif
 	set_base_spl();
 	enable_irq();
 

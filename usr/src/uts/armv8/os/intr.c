@@ -20,6 +20,7 @@
  */
 
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, Joyent, Inc.  All rights reserverd.
@@ -174,7 +175,7 @@ hilevel_intr_prolog(struct cpu *cpu, uint_t pil, uint_t oldpil, struct regs *rp)
  * Called with interrupts masked
  */
 int
-hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint_t vecnum)
+hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint32_t ack)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	uint_t mask;
@@ -232,7 +233,8 @@ hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint_t vecnum)
 	}
 
 	mcpu->mcpu_pri = oldpil;
-	setlvlx(oldpil, vecnum);
+	gic_deactivate(ack);
+	setlvlx(oldpil);
 
 	return ((int)mask);
 }
@@ -310,7 +312,7 @@ int intr_thread_cnt;
  * Called with interrupts disabled
  */
 void
-intr_thread_epilog(struct cpu *cpu, uint_t vec, uint_t oldpil)
+intr_thread_epilog(struct cpu *cpu, uint32_t ack, uint_t oldpil)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	kthread_t *t;
@@ -358,7 +360,8 @@ intr_thread_epilog(struct cpu *cpu, uint_t vec, uint_t oldpil)
 		set_base_spl();
 		basespl = cpu->cpu_base_spl;
 		mcpu->mcpu_pri = basespl;
-		setlvlx(basespl, vec);
+		gic_deactivate(ack);
+		setlvlx(basespl);
 		(void) splhigh();
 		clear_daif(DAIF_SETCLEAR_IRQ);
 
@@ -383,7 +386,8 @@ intr_thread_epilog(struct cpu *cpu, uint_t vec, uint_t oldpil)
 	basespl = cpu->cpu_base_spl;
 	pil = MAX(oldpil, basespl);
 	mcpu->mcpu_pri = pil;
-	setlvlx(pil, vec);
+	gic_deactivate(ack);
+	setlvlx(pil);
 	t->t_intr_start = now;
 	write_tpidr_el1((uintptr_t)t);
 	cpu->cpu_thread = t;
@@ -529,7 +533,7 @@ top:
 	    ~(1 << pil));
 
 	mcpu->mcpu_pri = pil;
-	setlvlx(pil, -1);
+	setlvlx(pil);
 
 	now = arch_timer_count();
 
@@ -639,7 +643,7 @@ dosoftint_epilog(struct cpu *cpu, uint_t oldpil)
 	basespl = cpu->cpu_base_spl;
 	pil = MAX(oldpil, basespl);
 	mcpu->mcpu_pri = pil;
-	setlvlx(pil, -1);
+	setlvlx(pil);
 }
 
 
@@ -821,7 +825,7 @@ do_splx(int newpri)
 	if (newpri < basepri)
 		newpri = basepri;
 	cpu->cpu_m.mcpu_pri = newpri;
-	setlvlx(newpri, -1);
+	setlvlx(newpri);
 
 	write_daif(old);
 	return (curpri);
@@ -846,7 +850,7 @@ splr(int newpri)
 		if (newpri < basepri)
 			newpri = basepri;
 		cpu->cpu_m.mcpu_pri = newpri;
-		setlvlx(newpri, -1);
+		setlvlx(newpri);
 	}
 
 	write_daif(old);

@@ -10,18 +10,19 @@
  */
 
 /*
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
 #include <sys/gic.h>
+#include <sys/gic_reg.h>
 #include <sys/cmn_err.h>
 #include <sys/promif.h>
 #include <sys/errno.h>
 #include <sys/modctl.h>
 
 static void stub_not_config(void);
-static void stub_setlvlx(int ipl, int irq);
+static void stub_setlvlx(int ipl);
 
 /*
  * Used by implementations to ensure that they only fill in gic_ops when
@@ -29,27 +30,20 @@ static void stub_setlvlx(int ipl, int irq);
  */
 char *gic_module_name = NULL;
 
-/*
- * This is terrible, The interrupt trap code needs the GIC
- * CPU interface base address for GICv2. In implementations
- * that implement the system register interface we have to
- * leave this NULL so that the code in ml/exceptions.S can
- * identify the right thing to do.
- */
-volatile struct gic_cpuif *gic_cpuif = NULL;
-
 gic_ops_t gic_ops = {
-	.mask_level_irq		= (mask_level_irq_t)stub_not_config,
-	.unmask_level_irq	= (mask_level_irq_t)stub_not_config,
-	.send_ipi		= (send_ipi_t)stub_not_config,
-	.init_primary		= (init_primary_t)stub_not_config,
-	.init_secondary		= (init_secondary_t)stub_not_config,
-	.config_irq		= (config_irq_t)stub_not_config,
-	.num_cpus		= (num_cpus_t)stub_not_config,
-	.addspl			= (addspl_t)stub_not_config,
-	.delspl			= (delspl_t)stub_not_config,
-	.setlvl			= (setlvl_t)stub_not_config,
-	.setlvlx		= stub_setlvlx
+	.go_send_ipi		= (gic_send_ipi_t)stub_not_config,
+	.go_init		= (gic_init_t)stub_not_config,
+	.go_cpu_init		= (gic_cpu_init_t)stub_not_config,
+	.go_config_irq		= (gic_config_irq_t)stub_not_config,
+	.go_addspl		= (gic_addspl_t)stub_not_config,
+	.go_delspl		= (gic_delspl_t)stub_not_config,
+	.go_setlvl		= (gic_setlvl_t)stub_not_config,
+	.go_setlvlx		= stub_setlvlx,
+	.go_acknowledge		= (gic_acknowledge_t)stub_not_config,
+	.go_ack_to_vector	= (gic_ack_to_vector_t)stub_not_config,
+	.go_eoi			= (gic_eoi_t)stub_not_config,
+	.go_deactivate		= (gic_deactivate_t)stub_not_config,
+	.go_vector_is_special	= (gic_vector_is_special_t)NULL
 };
 
 static void
@@ -59,7 +53,7 @@ stub_not_config(void)
 }
 
 static void
-stub_setlvlx(int ipl, int irq)
+stub_setlvlx(int ipl __unused)
 {
 	/*
 	 * Nothing to do here.
@@ -73,63 +67,39 @@ stub_setlvlx(int ipl, int irq)
 	 * interrupts are completely disabled. Locking is also unnecessary,
 	 * since only one CPU is running. However, avoiding these calls in this
 	 * case would overly complicate the general case of running the system,
-	 * so we just allow to calls to be no-ops prior to loading a GIC
+	 * so we just allow the calls to be no-ops prior to loading a GIC
 	 * implementation module.
 	 */
 }
 
 void
-gic_mask_level_irq(int irq)
-{
-	gic_ops.mask_level_irq(irq);
-}
-
-void
-gic_unmask_level_irq(int irq)
-{
-	gic_ops.unmask_level_irq(irq);
-}
-
-void
 gic_send_ipi(cpuset_t cpuset, int irq)
 {
-	gic_ops.send_ipi(cpuset, irq);
+	gic_ops.go_send_ipi(cpuset, irq);
 }
 
 void
-gic_init_primary(void)
+gic_cpu_init(cpu_t *cp)
 {
-	gic_ops.init_primary();
-}
-
-void
-gic_init_secondary(int id)
-{
-	gic_ops.init_secondary(id);
+	gic_ops.go_cpu_init(cp);
 }
 
 void
 gic_config_irq(uint32_t irq, bool is_edge)
 {
-	gic_ops.config_irq(irq, is_edge);
-}
-
-int
-gic_num_cpus(void)
-{
-	return (gic_ops.num_cpus());
+	gic_ops.go_config_irq(irq, is_edge);
 }
 
 static int
 gic_addspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
-	return (gic_ops.addspl(irq, ipl, min_ipl, max_ipl));
+	return (gic_ops.go_addspl(irq, ipl, min_ipl, max_ipl));
 }
 
 static int
 gic_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
-	return (gic_ops.delspl(irq, ipl, min_ipl, max_ipl));
+	return (gic_ops.go_delspl(irq, ipl, min_ipl, max_ipl));
 }
 
 int (*addspl)(int, int, int, int) = gic_addspl;
@@ -138,13 +108,49 @@ int (*delspl)(int, int, int, int) = gic_delspl;
 int
 setlvl(int irq)
 {
-	return (gic_ops.setlvl(irq));
+	return (gic_ops.go_setlvl(irq));
 }
 
 void
-setlvlx(int ipl, int irq)
+setlvlx(int ipl)
 {
-	gic_ops.setlvlx(ipl, irq);
+	gic_ops.go_setlvlx(ipl);
+}
+
+uint32_t
+gic_acknowledge(void)
+{
+	return (gic_ops.go_acknowledge());
+}
+
+uint32_t
+gic_ack_to_vector(uint32_t ack)
+{
+	return (gic_ops.go_ack_to_vector(ack));
+}
+
+void
+gic_eoi(uint32_t ack)
+{
+	gic_ops.go_eoi(ack);
+}
+
+void
+gic_deactivate(uint32_t ack)
+{
+	gic_ops.go_deactivate(ack);
+}
+
+int
+gic_vector_is_special(uint32_t intid)
+{
+	if (gic_ops.go_vector_is_special != NULL)
+		return (gic_ops.go_vector_is_special(intid));
+
+	if (GIC_INTID_IS_SPECIAL(intid))
+		return (1);
+
+	return (0);
 }
 
 /*
@@ -179,13 +185,8 @@ gic_init(void)
 	if (modload("drv", gic_module_name) == -1)
 		return (ENOENT);
 
-	/*
-	 * XXXARM: separate CPU initialisation from general initialisation
-	 *
-	 * This is where we would call:
-	 * - gic_ops.init()
-	 * - gic_ops_init_cpu(...)
-	 */
-	gic_ops.init_primary();
+	if (gic_ops.go_init() != 0)
+		return (-1);
+
 	return (0);
 }
