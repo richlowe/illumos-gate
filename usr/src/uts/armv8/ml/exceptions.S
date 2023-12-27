@@ -23,6 +23,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/asm_linkage.h>
@@ -66,11 +67,12 @@ unexpected_exception:	.asciz "unexpected exception type"
 	bl panic
 
 /*
- * This is the AArch64 exception vector used by the hardware, each entry is 128 byte
- * aligned, and 32 instructions (128 bytes) long.
+ * This is the AArch64 exception vector used by the hardware, each entry is
+ * 128 byte aligned, and 32 instructions (128 bytes) long.
  *
- * We represent this as a single large function (exception_vector), which we can put in VBAR,
- * and a nested function per-entry to make things easier to refer to while debugging.
+ * We represent this as a single large function (exception_vector), which we
+ * can put in VBAR, and a nested function per-entry to make things easier to
+ * refer to while debugging.
  *
  * It is important that ALTENTRY is used, so alignment is not altered, and the
  * vector keeps it specified shape.
@@ -480,140 +482,225 @@ _sys_rtt_preempt:
 
 	/*
 	 * IRQ Handler
+	 *
+	 * This routine uses [wx]19-[wx]26 to keep state, as these are
+	 * callee-saved registers and will be restored by the called C code
+	 * prior to returning.
+	 *
+	 * Assignment is as follows:
+	 * - x19: CPU
+	 * - w20: old pri
+	 * - w21: new pri
+	 * - w22: INTID (vector)
+	 * - w23: IAR value (to use for priority drop and deactivation)
+	 * - x24: old SP (when switching stacks)
+	 * - w25: st_pending (used in softint processing)
+	 * - w26: used temporarily (for new pri) in priority drop
+	 *
+	 * This is all eerily similar to do_interrupt in
+	 * usr/src/uts/i86pc/os/intr.c, but it's done in assembly so we can
+	 * fully unwind the stack between calls to C code. There's some dubious
+	 * passing of the regs struct that's later used as a stack pointer
+	 * where needed, and I don't have the brain power to determine if
+	 * that's safe or it'll trash the (in use, in C) stack.
+	 *
+	 * NOTE: we're still missing a way to implement fakesoftint processing
+	 * in do_splx and splr as is done in i86pc. This could be useful, but
+	 * would require some refactoring here (and possibly reserving a fake
+	 * vector to trigger that path).
 	 */
 	ENTRY(irq_handler)
-	CPUP(x19)				// x19 <- CPU
-	ldr	w20, [x19, #CPU_PRI]		// x20 <- old pri
+	mov	w0, #CPU_IDLE_CB_FLAG_INTR
+	bl	cpu_idle_exit
 
-	ldr	x21, =gic_cpuif			// x21 <- gic_cpuif
-	ldr	x21, [x21]
-	ldr	w23, [x21, #GIC_CPUIF_IAR]	// x23 <- IAR, acknowledge receipt
-	and	w22, w23, #GICC_IAR_INTID_MASK	// x22 <- irq
-	// On receipt of a "special" interrupt, just return
-	// See ARM® Generic Interrupt Controller Architecture Specification
-	//    GIC architecture version 3.0 and version 4.0 §2.2.1 Special INTIDs
-	//
-	// XXXARM: This code needs changing to support LPIs in GICv3 and above
-	cmp	w22, #GIC_INTID_MIN_SPECIAL
-	b.ge	_sys_rtt
+	CPUP(x19)				/* x19 <- CPU */
+	ldr	w20, [x19, #CPU_PRI]		/* x20 <- old (current) pri */
 
-	// irq mask (Clear Enable)
-	mov	w0, w22
-	bl	gic_mask_level_irq
+	bl	gic_acknowledge			/* read interrupt acknowledge */
+	mov	w23, w0				/* w23 <- acked IRQ */
+	bl	gic_ack_to_vector		/* extract vector (INTID) */
+	mov	w22, w0				/* x22 <- vector */
 
-	// write the full GICC_IAR back to GICC_EOIR to acknowledge end of interrupt
-	str	w23, [x21, #GIC_CPUIF_EOIR]
+	/*
+	 * If we get a "special" interrupt it means that the highest priority
+	 * pending interrupt is for the other (secure) world, and we're
+	 * supposed to just return.
+	 *
+	 * See IHI0048, 1.4.4 Spurious interrupts and
+	 * IHI0048, 3.2.5 Special interrupt numbers
+	 */
+	bl	gic_vector_is_special		/* w0 is the still the vector */
+	cbnz	w0, _sys_rtt			/* non-zero means special */
 
-	// set pri
-	mov	w0, w22
-	bl	setlvl
-	cbnz	w0, 1f
+	/*
+	 * Set our priority to that of the interrupt.
+	 *
+	 * The running priority has been set for us by the hardware, and can
+	 * be found in the running priority register (GICC_RPR, ICC_RPR). The
+	 * idea is that the priority mask of the CPU interface is:
+	 *   MAX(GICC_PMR, GICC_RPR)
+	 * Since we're doing split end-of-interrupt to safely support threaded
+	 * interrupts we need to do the running priority drop (caused by EOI)
+	 * early.
+	 *
+	 * To make this safe, we first set our priority mask register (via
+	 * setlvl) to that of the received interrupt, then send the EOI (which
+	 * drops the running priority). This ensures that we don't leave a
+	 * window where the distributor might determine that an inapproriate
+	 * interrupt should be forwarded to us.
+	 *
+	 * If setlvl returns zero we've hit a race, where somebody else has
+	 * disestablished the interrupt while we're processing it. In this case
+	 * we deactivate the interrupt and skip to softint processing. Note
+	 * that in this case we just leave the priority as-is (as setlvl will
+	 * have refused to change the priority mask register).
+	 *
+	 * In the nominal case the hardware interrupt processing is responsible
+	 * for deactivating the interrupt in the relevant epilog function.
+	 */
+	mov	w0, w22				/* slew to the irq prio */
+	bl	setlvl				/* returns new_prio in w0 */
+	mov	w26, w0				/* stash new-pri temporarily */
+	mov	w0, w23
+	bl	gic_eoi				/* priority drop */
+	cbnz	w26, 1f				/* skip to normal processing */
 
-	// If ipl == 0
-	mov	w0, w22
-	bl	gic_unmask_level_irq
+	/*
+	 * In the "skip to softint" case we deactivate the interrupt and skip
+	 * the hardware interrupt processing.
+	 */
+	mov	w0, w23
+	bl	gic_deactivate			/* deactivate the interrupt */
 	b	check_softint
 
-	// Else (ipl != 0)
 1:
-	mov	w21, w0				// x21 <- new pri
-	str	w21, [x19, #CPU_PRI]
+	mov	w21, w26			/* w21 <- new pri */
+	str	w21, [x19, #CPU_PRI]		/* update our CPU's pri */
 
 	cmp	w21, #LOCK_LEVEL
-	b.le	intr_thread
+	b.le	intr_thread			/* threaded interrupt needed */
 
-	//	x19: CPU
-	//	x20: old pri
-	//	x21: new pri
-	//	x22: irq
+	/*
+	 * High-level interrupt handling is as one might expect:
+	 * - Call the prolog
+	 * - If the prolog indicated that a stack switch is necessary, do it
+	 * - allow interrupts
+	 * - dispatch the vector
+	 * - disable interrupts
+	 * - restore the stack
+	 * - call the epilog, which deactivates the interrupt
+	 * - move on to softint processing
+	 *
+	 * Note that high-level interrupts restore the stack pointer *before*
+	 * calling the epilog, as they cannot switch away.
+	 */
+	mov	x0, x19				/* CPU */
+	mov	w1, w21				/* new pri */
+	mov	w2, w20				/* old pri */
+	mov	x3, sp				/* regs */
+	bl	hilevel_intr_prolog		/* returns new stack in x0 */
+	mov	x24, sp				/* x24 <- old sp */
+	cbnz	x0, 2f				/* need to switch stacks? */
 
-	mov	x0, x19
-	mov	w1, w21
-	mov	w2, w20
-	mov	x3, sp
-	bl	hilevel_intr_prolog
-	cbnz	x0, 2f
-
-	mov	x23, sp				// x23 <- old sp
-	ldr	x0, [x19, #CPU_INTR_STACK]
-	mov	sp, x0
+	ldr	x0, [x19, #CPU_INTR_STACK]	/* load up the irq stack */
+	mov	sp, x0				/* switch the the new stack */
 2:
-
-	/* Dispatch interrupt handler. */
-	msr	DAIFClr, #DAIF_SETCLEAR_IRQ
-	mov	w0, w22
+	msr	DAIFClr, #DAIF_SETCLEAR_IRQ	/* unmask interrupts */
+	mov	w0, w22				/* vector <- w22 */
 	bl	av_dispatch_autovect
-	msr	DAIFSet, #DAIF_SETCLEAR_IRQ
+	msr	DAIFSet, #DAIF_SETCLEAR_IRQ	/* mask interrupts */
 
-	mov	x0, x19
-	mov	w1, w21
-	mov	w2, w20
-	mov	w3, w22
-	bl	hilevel_intr_epilog
-	cbnz	x0, check_softint
+	mov	sp, x24				/* restore sp (maybe noop) */
+	mov	x0, x19				/* CPU */
+	mov	w1, w21				/* new pri */
+	mov	w2, w20				/* old pri */
+	mov	w3, w23				/* acknowledge value */
+	bl	hilevel_intr_epilog		/* sends eoi */
+	b	check_softint			/* process softints */
 
-	mov	sp, x23
-	b	check_softint
-
+	/*
+	 * Threaded interrupt handling is slightly different:
+	 * - Call the prolog, this returns the stack pointer to use
+	 * - Switch to the new stack
+	 * - allow interrupts
+	 * - dispatch the vector (will switch away if needed and resume here)
+	 * - disable interrupts
+	 * - call the epilog, which deactivates the interrupt
+	 * - restore the stack
+	 * - move on to softint processing
+	 *
+	 * Note that threaded interrupts restore the stack pointer *after*
+	 * calling the epilog, as they may have switched away.
+	 */
 intr_thread:
-	//	x19: CPU
-	//	x20: old pri
-	//	x21: new pri
-	//	x22: irq
+	mov	x0, x19				/* CPU */
+	mov	x1, sp				/* stackptr */
+	mov	w2, w21				/* new pri */
+	bl	intr_thread_prolog		/* returns new stack in x0 */
+	mov	x24, sp				/* x24 <- old sp */
+	mov	sp, x0				/* switch the the new stack */
 
-	mov	x0, x19
-	mov	x1, sp
-	mov	w2, w21
-	bl	intr_thread_prolog
-	mov	x23, sp				// x23 <- old sp
-	mov	sp, x0
-
-	/* Dispatch interrupt handler. */
-	msr	DAIFClr, #DAIF_SETCLEAR_IRQ
-	mov	w0, w22
+	msr	DAIFClr, #DAIF_SETCLEAR_IRQ	/* unmask interrupts */
+	mov	w0, w22				/* vector <- w22 */
 	bl	av_dispatch_autovect
-	msr	DAIFSet, #DAIF_SETCLEAR_IRQ
+	msr	DAIFSet, #DAIF_SETCLEAR_IRQ	/* mask interrupts */
 
-	mov	x0, x19
-	mov	x1, x22
-	mov	x2, x20
+	mov	x0, x19				/* CPU */
+	mov	w1, w23				/* acknowledge value */
+	mov	w2, w20				/* old pri */
 	bl	intr_thread_epilog
+	mov	sp, x24				/* restore sp (after epilog) */
+						/* fall through to softints */
 
-	mov	sp, x23
-
+	/*
+	 * This label simply drives processing of softints - if st_pending
+	 * is non-zero we run the softints logic, which keeps coming back here.
+	 *
+	 * If/when st_pending gets to 0, we're done - return from the trap.
+	 */
 check_softint:
-	ldr	w22, [x19, #CPU_SOFTINFO]
-	cbnz	w22, dosoftint
-	b	_sys_rtt
+	ldr	w25, [x19, #CPU_SOFTINFO]	/* load fresh st_pending */
+	cbnz	w25, dosoftint			/* work to do, get to it */
+	b	_sys_rtt			/* no work, we're done */
 
+	/*
+	 * Soft interrupt handling is, again, different:
+	 * - Call the prolog, this returns the stack pointer to use or NULL
+	 * - If the prolog returned NULL there are no softints of suitable
+	 *   priority available, so we're done (return from the trap)
+	 * - Switch to the new stack
+	 * - allow interrupts
+	 * - dispatch the softints for the pil
+	 * - disable interrupts
+	 * - call the epilog (tweaks the pil)
+	 * - restore the stack
+	 * - check for more softints (see the check_softint label above)
+	 *
+	 * Note that soft interrupts restore the stack pointer *after* calling
+	 * the epilog as they may have switched away.
+	 */
 dosoftint:
-	//	x19: CPU
-	//	x20: old pri
-	//	x21: new pri
-	//	x22: st_pending
+	mov	x0, x19				/* CPU */
+	mov	x1, sp				/* stackptr */
+	mov	w2, w25				/* st_pending */
+	mov	w3, w20				/* old pri */
+	bl	dosoftint_prolog		/* x0 == 0 iff none suitable */
+	cbz	x0, _sys_rtt			/* no more? we're done */
 
-	mov	x0, x19
-	mov	x1, sp
-	mov	w2, w22
-	mov	w3, w20
-	bl	dosoftint_prolog
-	cbz	x0, _sys_rtt
+	mov	x24, sp				/* x24 <- old sp */
+	mov	sp, x0				/* switch the the new stack */
 
-	mov	x23, sp				// x23 <- old sp
-	mov	sp, x0
-
-	msr	DAIFClr, #DAIF_SETCLEAR_IRQ
+	msr	DAIFClr, #DAIF_SETCLEAR_IRQ	/* unmask interrupts */
 	THREADP(x0)
-	ldrb	w0, [x0, #T_PIL]
-	bl	av_dispatch_softvect
-	msr	DAIFSet, #DAIF_SETCLEAR_IRQ
+	ldrb	w0, [x0, #T_PIL]		/* load up the PIL */
+	bl	av_dispatch_softvect		/* run the softints */
+	msr	DAIFSet, #DAIF_SETCLEAR_IRQ	/* mask interrupts */
 
-	mov	x0, x19
-	mov	w1, w20
+	mov	x0, x19				/* CPU */
+	mov	w1, w20				/* old pri */
 	bl	dosoftint_epilog
-
-	mov	sp, x23
-	b	check_softint
+	mov	sp, x24				/* restore sp (after epilog) */
+	b	check_softint			/* check for more work */
 	SET_SIZE(irq_handler)
 
 

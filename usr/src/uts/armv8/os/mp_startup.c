@@ -30,7 +30,7 @@
  * Copyright (c) 2012, Joyent, Inc.  All rights reserved.
  * Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -352,10 +352,12 @@ mp_startup_boot(void)
 	/* Let the control CPU continue into tsc_sync_master() */
 	mp_startup_signal(&procset_slave, cp->cpu_id);
 
-	/* Set up the GIC for the new additional CPU */
-	gic_init_secondary(cp->cpu_id);
+	/* Set our exception vector base */
 	write_vbar((uintptr_t)exception_vector);
 	isb();
+
+	/* Set up the GIC for the new additional CPU */
+	gic_cpu_init(cp);
 
 	/*
 	 * Enable interrupts with spl set to LOCK_LEVEL. LOCK_LEVEL is the

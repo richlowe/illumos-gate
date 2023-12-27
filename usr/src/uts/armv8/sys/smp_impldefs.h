@@ -20,6 +20,7 @@
  */
 
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1993, 2010, Oracle and/or its affiliates. All rights reserved.
  */
@@ -36,30 +37,14 @@
 extern "C" {
 #endif
 
-#define	WARM_RESET_VECTOR	0x467	/* the ROM/BIOS vector for 	*/
-					/* starting up secondary cpu's	*/
-/* timer modes for clkinitf */
-#define	TIMER_ONESHOT		0x1
-#define	TIMER_PERIODIC		0x2
-
 /*
  *	External Reference Functions
  */
-extern void (*psminitf)();	/* psm init entry point			*/
-extern void (*picinitf)();	/* pic init entry point			*/
-extern int (*clkinitf)(int, int *);	/* clock init entry point	*/
-extern int (*ap_mlsetup)(); 	/* completes init of starting cpu	*/
-extern void (*send_dirintf)();	/* send interprocessor intr		*/
-extern hrtime_t (*gethrtimef)(); /* get high resolution timer value	*/
-extern hrtime_t (*gethrtimeunscaledf)(); /* get high res timer unscaled value */
-
-extern int (*slvltovect)(int);	/* ipl interrupt priority level		*/
-extern int setlvl(int); /* set intr pri represented by vect	*/
-extern void setlvlx(int, int); /* set intr pri to specified level	*/
-extern void (*setspl)(int);	/* mask intr below or equal given ipl	*/
-extern int (*addspl)(int, int, int, int); /* add intr mask of vector 	*/
-extern int (*delspl)(int, int, int, int); /* delete intr mask of vector */
-extern int (*get_pending_spl)(void);	/* get highest pending ipl */
+extern int (*slvltovect)(int);	/* ipl interrupt priority level */
+extern int setlvl(int);	/* set intr pri represented by vect */
+extern void setlvlx(int);	/* set intr pri to specified level */
+extern int (*addspl)(int, int, int, int);	/* add intr mask of vector  */
+extern int (*delspl)(int, int, int, int);	/* delete intr mask of vector */
 extern int (*addintr)(void *, int, avfunc, char *, int, caddr_t, caddr_t,
     uint64_t *, dev_info_t *);	/* replacement of add_avintr */
 extern void (*remintr)(void *, int, avfunc, int); /* replace of rem_avintr */
@@ -72,7 +57,6 @@ extern void (*kdisetsoftint)(int, struct av_softinfo *);
 
 extern void av_set_softint_pending();	/* set software interrupt pending */
 extern void kdi_av_set_softint_pending(); /* kmdb private entry point */
-extern void microfind(void);	/* initialize tenmicrosec		*/
 
 /* map physical address							*/
 
@@ -87,9 +71,6 @@ extern caddr_t psm_map_phys_new(paddr_t, size_t, int);
 
 /* unmap the physical address given in psm_map_phys() from the addr	*/
 extern void psm_unmap_phys(caddr_t, size_t);
-extern void psm_modloadonly(void);
-extern void psm_install(void);
-extern void psm_modload(void);
 
 /*
  *	External Reference Data
