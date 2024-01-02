@@ -1184,6 +1184,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_TLSGD_ADR_PAGE21:
 		if (signextend64(*value, 33) != *value) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 
 		/* FALLTHROUGH */
@@ -1207,6 +1208,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 
 		if (signextend64(*value, 21) != *value) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 
 		uvalue = (base & ~mask) | lo | hi;
@@ -1230,6 +1232,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	{
 		if (!IS_P2ALIGNED(*value, 8)) {
 			REL_ERR_VALNONALIGN(lml, file, sym, rtype, off);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1243,6 +1246,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		if ((signextend64(*value, 16) != *value) ||
 		    ((*value >> 16) != 0)) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 		/* FALLTHROUGH */
 	case R_AARCH64_MOVW_UABS_G0_NC:
@@ -1255,6 +1259,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		if ((signextend64(*value, 32) != *value) ||
 		    ((*value >> 32) != 0)) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 		/* FALLTHROUGH */
 	case R_AARCH64_MOVW_UABS_G1_NC:
@@ -1267,6 +1272,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		if ((signextend64(*value, 48) != *value) ||
 		    ((*value >> 48) != 0)) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 		/* FALLTHROUGH */
 	case R_AARCH64_MOVW_UABS_G2_NC:
@@ -1300,6 +1306,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_LD64_GOTPAGE_LO15:
 		if (!IS_P2ALIGNED(*value, 8)) {
 			REL_ERR_VALNONALIGN(lml, file, sym, rtype, off);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1312,6 +1319,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_TLSLE_LDST128_TPREL_LO12_NC:
 		if (!IS_P2ALIGNED(*value, 16)) {
 			REL_ERR_VALNONALIGN(lml, file, sym, rtype, off);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1324,6 +1332,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
 		if (!IS_P2ALIGNED(*value, 2)) {
 			REL_ERR_VALNONALIGN(lml, file, sym, rtype, off);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1336,10 +1345,12 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_CONDBR19:
 		if (!IS_P2ALIGNED(*value, 4)) {
 			REL_ERR_VALNONALIGN(lml, file, sym, rtype, off);
+			return (0);
 		}
 
 		if (signextend64(*value, 21) != *value) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1352,6 +1363,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 	case R_AARCH64_CALL26:
 		if (signextend64(*value, 28) != *value) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1369,6 +1381,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		    (((*value >> 16) != 0) &&
 		    ((*value >> 16) != 0xffffffffffff))) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 		uvalue = *value;
 		break;
@@ -1382,6 +1395,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		if ((signextend64(*value, 32) != *value) ||
 		    (((*value >> 32) != 0) && ((*value >> 32) != 0xffffffff))) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 		uvalue = *value;
 		break;
@@ -1390,6 +1404,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		if ((signextend64(*value, 24) != *value) ||
 		    ((*value >> 24) != 0)) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 
 		uvalue = *value;
@@ -1402,6 +1417,7 @@ do_reloc_rtld(Word rtype, uchar_t *off, Xword *value, const char *sym,
 		if ((signextend64(*value, 12) != *value) ||
 		    ((*value >> 12) != 0)) {
 			REL_ERR_NOFIT(lml, file, sym, rtype, *value);
+			return (0);
 		}
 		/* FALLTHROUGH */
 	case R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
