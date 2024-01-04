@@ -127,6 +127,7 @@ extern "C" {
  */
 #define	GICD_CTLR				0x0000
 #define	GICD_CTLR_RWP				0x80000000
+#define	GICD_CTLR_DS				0x80000040	/* secure */
 #define	GICD_CTLR_ARE_NS			0x00000010
 #define	GICD_CTLR_EnableGrp1A			0x00000002
 #define	GICD_CTLR_EnableGrp1			0x00000001
@@ -216,15 +217,30 @@ extern "C" {
 						(GICD_IPRIORITY_REGVAL((n), \
 						(v))))
 /*
- * We only support a GIC that has at least 32 levels of priority, as the
- * non-secure world (where we run) will then have 16 levels available.
+ * When GICv3 has a single security state the minimum required number of bits
+ * of priority is 4, yielding 16 priority levels (240-0 in steps of 16).
  *
- * See §4.8 Interrupt Prioritization
- * for a description of how these priorities are arranged within a byte
+ * When GICv3 supports two security states the minimum required number of bits
+ * of priority is 5, yielding 32 priority levels (248-0 in steps of 8), but
+ * priorities with the top bit (0x80) clear are reserved for the secure world.
+ * This leaves 16 priority levels (248-128 in steps of 8) available for the
+ * non-secure world, which is exactly what we need.
  *
- * In short, we count down from 248 (ipl 0) to 128 (ipl 15) in steps of 8.
+ * When we have only four bits of priority, use GIC_IPL_TO_PRIO16 to calculate
+ * priority values from IPL values. When five or more bits are available, use
+ * GIC_IPL_TO_PRIO.
+ *
+ * See §4.8 Interrupt Prioritization.
+ *
+ * GICv2 implementations use a lookup table approach to deriving PMR and
+ * interrupt priority values from IPL, since v2 might have only 16 priority
+ * levels when supporting two security states. In this case, sub-priority bits
+ * are used to prioritise interrupts delivery, while the priority mask is more
+ * coarse-grained than we'd like (as only 8 levels are available to the
+ * non-secure world).
  */
 #define	GIC_IPL_TO_PRIO(ipl)			(0xF8 - ((ipl) << 3))
+#define	GIC_IPL_TO_PRIO16(ipl)			(0xF0 - ((ipl) << 4))
 
 #define	GICD_ITARGETSRn(n)			(0x0800+(4*(n)))
 #define	GICD_ITARGETSR_REGMASK			0xFF
@@ -329,8 +345,10 @@ extern "C" {
 #define	GICD_IGRPMODRnE(n)			(0x3400+(4*(n)))
 #define	GICD_NSACRnE(n)				(0x3600+(4*(n)))
 #define	GICD_INMIRnE(n)				(0x3b00+(4*(n)))
+
 #define	GICD_IROUTERn(n)			(0x6100+(8*(n)))
 #define	GICD_IROUTERnE(n)			(0x8000+(8*(n)))
+#define	GICD_IROUTER_Interrupt_Routing_Mode	0x0000000080000000
 
 #define	GICD_PIDR2				0xffe8
 #define	GICD_PIDR2_ArchRev			0x000000F0
@@ -374,6 +392,18 @@ extern "C" {
 #define	GICR_TYPER_Dirty			0x00000004
 #define	GICR_TYPER_VLPIS			0x00000002
 #define	GICR_TYPER_PLPIS			0x00000001
+
+/*
+ * Transform a redistributor typer affinity value to a normalized affinity
+ * value.
+ *
+ * In GICR_TYPER the affinity 3-0 values are in bits [63:32], while the
+ * normalized format has them in bits [31:0], so just mask them out and shift
+ * them into place.
+ */
+#define	AFF_GICR_TYPER_TO_PACKED(v)		(((v) & \
+						(GICR_TYPER_Affinity_Value)) \
+						>> 32)
 
 #define	GICR_STATUSR				0x0010
 #define	GICR_STATUSR_WROD			0x00000008
@@ -430,7 +460,10 @@ extern "C" {
 
 #define	GICR_IGROUPR0				0x0080
 #define	GICR_IGROUPRnE(n)			(0x0084+(4*(n)))
+
 #define	GICR_ISENABLER0				0x0100
+#define	GICR_IENABLER_REGBIT(v)			(GICD_IENABLER_REGBIT((v)))
+
 #define	GICR_ISENABLERnE(n)			(0x0104+(4*(n)))
 #define	GICR_ICENABLERnE(n)			(0x0184+(4*(n)))
 #define	GICR_ICENABLER0				0x0180
@@ -442,11 +475,23 @@ extern "C" {
 #define	GICR_ISACTIVERnE(n)			(0x0304+(4*(n)))
 #define	GICR_ICACTIVER0				0x0380
 #define	GICR_ICACTIVERnE(n)			(0x0384+(4*(n)))
+
 #define	GICR_IPRIORITYRn(n)			(0x0400+(4*(n)))
+#define	GICR_IPRIORITY_REGMASK			GICD_IPRIORITY_REGMASK
+#define	GICR_IPRIORITY_REGNUM(n)		(GICD_IPRIORITY_REGNUM((n)))
+#define	GICR_IPRIORITY_REGVAL(n, v)		(GICD_IPRIORITY_REGVAL((n), \
+						(v)))
+
 #define	GICR_IPRIORITYRnE(n)			(0x0420+(4*(n)))
+
 #define	GICR_ICFGR0				0x0c00
 #define	GICR_ICFGR1				0x0c04
 #define	GICR_ICFGRn(n)				((GICR_ICFGR0)+(4*(n)))
+#define	GICR_ICFGR_REGVAL(irq, v)		(GICD_ICFGR_REGVAL((irq), (v)))
+#define	GICR_ICFGR_INT_CONFIG_MASK		GICD_ICFGR_INT_CONFIG_MASK
+#define	GICR_ICFGR_INT_CONFIG_LEVEL		GICD_ICFGR_INT_CONFIG_LEVEL
+#define	GICR_ICFGR_INT_CONFIG_EDGE		GICD_ICFGR_INT_CONFIG_EDGE
+
 #define	GICR_ICFGRnE(n)				(0x0c08+(4*(n)))
 #define	GICR_IGRPMODR0				0x0d00
 #define	GICR_IGRPMODRnE(n)			(0x0d04+(4*(n)))
@@ -587,6 +632,14 @@ extern "C" {
 #define	ICC_CTLR_EL1_EOImode			0x0000000000000002
 #define	ICC_CTLR_EL1_CBPR			0x0000000000000001
 
+/*
+ * ICC_CTLR_EL1.PRIbits contains the number of bits of priority supported, less
+ * one.
+ */
+#define	ICC_CTLR_NUM_PRI_BITS(v)		((((v) & \
+						(ICC_CTLR_EL1_PRIbits)) >> 8) \
+						+ 1)
+
 #define	ICC_SGI0R_EL1_Aff3			0x00ff000000000000
 #define	ICC_SGI0R_EL1_RS			0x0000f00000000000
 #define	ICC_SGI0R_EL1_IRM			0x0000010000000000
@@ -603,6 +656,44 @@ extern "C" {
 #define	ICC_SGI1R_EL1_Aff1			0x0000000000ff0000
 #define	ICC_SGI1R_EL1_TargetList		0x000000000000ffff
 
+/*
+ * Transform a normalized affinity value (affinity 3-0 in bits [31:0]) to a
+ * software generated interrupt routing format. The SGI routing format is:
+ * [55:48]: Aff3
+ * [47:44]: RS (this is Aff0/16)
+ * [39:32]: Aff2
+ * [27:24]: INTID (filled in later)
+ * [23:16]: Aff1
+ * [15:0] : TargetList (this has bit Aff0%16 set)
+ *
+ * TargetList has a set bit for the value of Aff0 MOD 16. This is scaled by
+ * the value of RS (range selector) using the formula:
+ *   TARGET = (RS*16)+BITPOS
+ * This approach means that a single SGI register write can target up to 16
+ * CPUs, with value ranges in sets of 16 (0-15, 16-31, ..., 240-255).
+ */
+#define	AFF_PACKED_TO_ICC_SGInR_EL1(v)			\
+	((((v) & 0x00000000FF000000ul) << 24) |		\
+	((((v) & 0x00000000000000FFul) >> 4) << 44) |	\
+	(((v) & 0x0000000000FF0000ul) << 16) |		\
+	(((v) & 0x000000000000FF00ul) << 8) |		\
+	(1UL << ((v) & 0x000000000000000F)))
+/*
+ * Transform an INTID (interrupt vector) to a value suitable for ORing into
+ * an SGI trigger write.
+ *
+ * The vector is typically a (signed) integer, but is cast to an unsigned value
+ * here.
+ */
+#define	ICC_SGInR_EL1_MAKE_INTID(v)		(((uint64_t)((v) & 0xF)) << 24)
+/*
+ * Check whether the range selector field of an SGI trigger value has been set.
+ *
+ * When ICC_CTLR_EL1.RSS=0 a write to ICC_SGInR_EL1 can only write zeroes
+ * to the RS field (limiting Aff0 values to 0-15).
+ */
+#define	ICC_SGInR_EL1_HAS_RS(v)			(((v) & (0xFul << 44)) != 0)
+
 #define	ICC_SRE_EL1_DIB				0x0000000000000004
 #define	ICC_SRE_EL1_DFB				0x0000000000000002
 #define	ICC_SRE_EL1_SRE				0x0000000000000001
@@ -610,6 +701,8 @@ extern "C" {
 #define	ICC_IGRPEN0_EL1_Enable			0x0000000000000001
 
 #define	ICC_IGRPEN1_EL1_Enable			0x0000000000000001
+
+#define	ICC_IAR1_INTID				0x0000000000FFFFFF
 
 /*
  * GIC Virtual CPU Interface

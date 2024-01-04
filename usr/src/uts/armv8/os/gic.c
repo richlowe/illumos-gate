@@ -165,12 +165,10 @@ set_gic_module_name(void)
 		return;
 	}
 
-#if XXXARM
 	if (prom_has_compatible("arm,gic-v3")) {
 		gic_module_name = "gicv3";
 		return;
 	}
-#endif
 
 	gic_module_name = NULL;
 }

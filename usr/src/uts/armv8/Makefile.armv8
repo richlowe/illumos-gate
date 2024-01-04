@@ -20,6 +20,7 @@
 #
 
 #
+# Copyright 2024 Michael van der Westhuizen
 # Copyright 2017 Hayashi Naoyuki
 # Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2013 Andrew Stormont.  All rights reserved.
@@ -200,5 +201,6 @@ DRV_KMODS += simple-bus
 DRV_KMODS += rootnex
 DRV_KMODS += ns16550a
 DRV_KMODS += gicv2
+DRV_KMODS += gicv3
 
 DACF_KMODS += consconfig_dacf
