@@ -67,6 +67,7 @@
 #include <sys/smp_impldefs.h>
 #include <sys/sunddi.h>
 #include <sys/promif.h>
+#include <sys/smp_impldefs.h>
 
 extern char *gic_module_name;
 
@@ -492,6 +493,23 @@ gicv2_deactivate(uint32_t ack)
 	gicc_write(&conf, GICC_DIR, ack);
 }
 
+/*
+ * Return the target representing the current cpu from the GIC point of view
+ * by reading the target field of a target specific interrupt.
+ *
+ * This sets the Nth bit for target N
+ */
+static uint_t
+gicv2_get_target(void)
+{
+	GICV2_ASSERT_GICD_LOCK_HELD();
+	return (1U << __builtin_ctz(
+	    gicd_read(&conf, GICD_ITARGETSRn(0)) & 0xFF));
+}
+
+/*
+ * Return the GICv2 PROM node, or OBP_NONODE if none was found.
+ */
 static pnode_t
 find_gic(pnode_t nodeid, int depth)
 {
@@ -517,27 +535,18 @@ find_gic(pnode_t nodeid, int depth)
 }
 
 /*
- * Return the target representing the current cpu from the GIC point of view
- * by reading the target field of a target specific interrupt.
- *
- * This sets the Nth bit for target N
- */
-static uint_t
-gicv2_get_target(void)
-{
-	GICV2_ASSERT_GICD_LOCK_HELD();
-	return (1U << __builtin_ctz(
-	    gicd_read(&conf, GICD_ITARGETSRn(0)) & 0xFF));
-}
-
-/*
- * XXXARM: Use proper mapping logic, including register sizes.
+ * Map the GICv2 distributor and CPU interface MMIO regions into the device
+ * arena.
  */
 static int
 gicv2_map(void)
 {
 	pnode_t		node;
-	uint64_t	base;
+	uint64_t	gicd_base;
+	uint64_t	gicd_size;
+	uint64_t	gicc_base;
+	uint64_t	gicc_size;
+	caddr_t		addr;
 
 	GICV2_ASSERT_GICD_LOCK_HELD();
 
@@ -545,17 +554,31 @@ gicv2_map(void)
 	if (node <= 0)
 		return (-1);
 
-	if (prom_get_reg_address(node, 0, &base) != 0)
+	if (prom_get_reg_address(node, 0, &gicd_base) != 0)
 		return (-1);
 
-	conf.gc_gicd = (void *)(uintptr_t)(base + SEGKPM_BASE);
+	if (prom_get_reg_size(node, 0, &gicd_size) != 0)
+		return (-1);
 
-	if (prom_get_reg_address(node, 1, &base) != 0) {
+	if (prom_get_reg_address(node, 1, &gicc_base) != 0)
+		return (-1);
+
+	if (prom_get_reg_size(node, 1, &gicc_size) != 0)
+		return (-1);
+
+	addr = psm_map_phys(gicd_base, gicd_size, PROT_READ|PROT_WRITE);
+	if (addr == NULL)
+		return (-1);
+	conf.gc_gicd = (void *)addr;
+
+	addr = psm_map_phys(gicc_base, gicc_size, PROT_READ|PROT_WRITE);
+	if (addr == NULL) {
+		psm_unmap_phys((caddr_t)conf.gc_gicd, gicd_size);
 		conf.gc_gicd = NULL;
 		return (-1);
 	}
+	conf.gc_gicc = (void *)addr;
 
-	conf.gc_gicc = (void *)(uintptr_t)(base + SEGKPM_BASE);
 	return (0);
 }
 
