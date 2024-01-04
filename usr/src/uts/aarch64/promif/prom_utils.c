@@ -162,11 +162,13 @@ int prom_get_size_cells(pnode_t node)
 	return prom_get_prop_int(prom_parentnode(node), "#size-cells", 2);
 }
 
-int prom_get_reg(pnode_t node, int index, uint64_t *base)
+static int
+prom_get_reg_bounds(pnode_t node, int index, uint64_t *base, uint64_t *size)
 {
+	size_t off;
 	int len = prom_getproplen(node, "reg");
 	if (len <= 0)
-		return -1;
+		return (-1);
 
 	uint32_t *regs = __builtin_alloca(len);
 	prom_getprop(node, "reg", (caddr_t)regs);
@@ -174,23 +176,57 @@ int prom_get_reg(pnode_t node, int index, uint64_t *base)
 	int address_cells = prom_get_address_cells(node);
 	int size_cells = prom_get_size_cells(node);
 
-	if (((address_cells + size_cells) * index + address_cells) * sizeof(uint32_t) > len)
-		return -1;
+	if (((address_cells + size_cells) * index + address_cells + size_cells)
+	    * sizeof(uint32_t) > len)
+		return (-1);
 
+	if (address_cells < 1 || address_cells > 2 ||
+	    size_cells < 1 || size_cells > 2)
+		return (-1);
+
+	off = (address_cells + size_cells) * index;
 	switch (address_cells) {
 	case 1:
-		*base = htonl(regs[(address_cells + size_cells) * index]);
+		*base = htonl(regs[off]);
 		break;
 	case 2:
-		*base = htonl(regs[(address_cells + size_cells) * index]);
+		*base = htonl(regs[off]);
 		*base <<= 32;
-		*base |= htonl(regs[(address_cells + size_cells) * index + 1]);
+		*base |= htonl(regs[off + 1]);
 		break;
 	default:
-		return -1;
+		return (-1);
 	}
 
-	return 0;
+	off += address_cells;
+	switch (size_cells) {
+	case 1:
+		*size = htonl(regs[off]);
+		break;
+	case 2:
+		*size = htonl(regs[off]);
+		*size <<= 32;
+		*size |= htonl(regs[off + 1]);
+		break;
+	default:
+		return (-1);
+	}
+
+	return (0);
+}
+
+int
+prom_get_reg(pnode_t node, int index, uint64_t *base)
+{
+	uint64_t size;
+	return (prom_get_reg_bounds(node, index, base, &size));
+}
+
+int
+prom_get_reg_size(pnode_t node, int index, uint64_t *size)
+{
+	uint64_t base;
+	return (prom_get_reg_bounds(node, index, &base, size));
 }
 
 int
