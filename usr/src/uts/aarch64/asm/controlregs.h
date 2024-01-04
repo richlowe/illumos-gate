@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #ifndef	_ASM_CONTROLREGS_H
@@ -865,6 +865,96 @@ read_far_el1(void)
 	__asm__ __volatile__("mrs %0, far_el1":"=r"(reg)::"memory");
 	return (reg);
 }
+
+/*
+ * GIC CPU Interface System Registers (GICv3+)
+ */
+extern __GNU_INLINE uint64_t
+read_icc_sre_el1(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, icc_sre_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+extern __GNU_INLINE void
+write_icc_sre_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_sre_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE uint64_t
+read_icc_pmr_el1(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, icc_pmr_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+extern __GNU_INLINE void
+write_icc_pmr_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_pmr_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE void
+write_icc_bpr0_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_bpr0_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE void
+write_icc_bpr1_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_bpr1_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE uint64_t
+read_icc_ctlr_el1(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, icc_ctlr_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+extern __GNU_INLINE void
+write_icc_ctlr_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_ctlr_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE void
+write_icc_igrpen1_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_igrpen1_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE void
+write_icc_sgi1r_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_sgi1r_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE uint64_t
+read_icc_iar1_el1(void)
+{
+	uint64_t reg;
+	__asm__ __volatile__("mrs %0, icc_iar1_el1":"=r"(reg)::"memory");
+	return (reg);
+}
+
+extern __GNU_INLINE void
+write_icc_eoir1_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_eoir1_el1, %0"::"r"(reg):"memory");
+}
+
+extern __GNU_INLINE void
+write_icc_dir_el1(uint64_t reg)
+{
+	__asm__ __volatile__("msr icc_dir_el1, %0"::"r"(reg):"memory");
+}
+
 #ifdef __cplusplus
 }
 #endif

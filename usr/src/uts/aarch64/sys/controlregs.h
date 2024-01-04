@@ -21,7 +21,7 @@
 
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2022 Michal van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #ifndef _SYS_CONTROLREGS_H
@@ -169,6 +169,21 @@
 #define	MPIDR_AFF3_MASK	(0x000000FF00000000ul)
 #define	MPIDR_AFF_MASK	(MPIDR_AFF0_MASK | MPIDR_AFF1_MASK | \
 			MPIDR_AFF2_MASK | MPIDR_AFF3_MASK)
+
+/*
+ * Transform an MPIDR-style affinity to/from a normalized representation,
+ * which is defined as:
+ * [63:32]: Reserved (0)
+ * [31:24]: Affinity level 3
+ * [23:16]: Affinity level 2
+ * [15:8]: Affinity level 1
+ * [7:0]: Affinity level 0
+ */
+#define	AFF_MPIDR_TO_PACKED(v)	((((v) & MPIDR_AFF3_MASK) >> 8) | \
+				((v) & (MPIDR_AFF2_MASK | MPIDR_AFF1_MASK | \
+				MPIDR_AFF0_MASK)))
+#define	AFF_PACKED_TO_MPIDR(v)	((((v) & 0x00000000FF000000) << 8) | \
+				((v) & 0x0000000000FFFFFF))
 
 #define	MAIR_ATTR_IWB_OWB	(0xFFul)
 #define	MAIR_ATTR_IWT_OWT	(0xBBul)

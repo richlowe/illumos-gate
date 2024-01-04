@@ -51,6 +51,7 @@ $(aarch64_ONLY)file path=platform/armv8/kernel/dacf/aarch64/consconfig_dacf \
 $(aarch64_ONLY)dir path=platform/armv8/kernel/drv
 $(aarch64_ONLY)dir path=platform/armv8/kernel/drv/aarch64
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/gicv2
+$(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/gicv3
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/ns16550a
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/rootnex
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/simple-bus
