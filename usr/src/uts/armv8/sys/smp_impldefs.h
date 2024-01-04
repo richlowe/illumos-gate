@@ -59,16 +59,7 @@ extern void av_set_softint_pending();	/* set software interrupt pending */
 extern void kdi_av_set_softint_pending(); /* kmdb private entry point */
 
 /* map physical address							*/
-
-/*
- * XX64: Changing psm_map_phys() to take a paddr_t rather than a uint32_t
- * will be a flag day.  Other drivers in the WOS use the psm_map()
- * interface, so we need this hack to get them to coexist for
- * pre-integration testing.
- */
-extern caddr_t psm_map_phys_new(paddr_t, size_t, int);
-#define	psm_map_phys psm_map_phys_new
-
+extern caddr_t psm_map_phys(paddr_t, size_t, int);
 /* unmap the physical address given in psm_map_phys() from the addr	*/
 extern void psm_unmap_phys(caddr_t, size_t);
 
