@@ -560,7 +560,7 @@ write_cpacr_el1(uint64_t reg)
 #define	DAIF_SERROR	(1 << 8)
 #define	DAIF_DEBUG	(1 << 9)
 
-static inline uint64_t
+extern __GNU_INLINE uint64_t
 read_daif(void)
 {
 	uint64_t reg;
@@ -568,19 +568,19 @@ read_daif(void)
 	return (reg);
 }
 
-static inline void
+extern __GNU_INLINE void
 write_daif(uint64_t reg)
 {
 	__asm__ __volatile__("msr daif, %0"::"r"(reg):"memory");
 }
 
-static inline void
+extern __GNU_INLINE void
 set_daif(uint64_t val)
 {
 	__asm__ __volatile__("msr DAIFSet, %0"::"I"(val):"memory");
 }
 
-static inline void
+extern __GNU_INLINE void
 clear_daif(uint64_t val)
 {
 	__asm__ __volatile__("msr DAIFClr, %0"::"I"(val):"memory");
