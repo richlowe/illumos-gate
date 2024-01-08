@@ -68,6 +68,7 @@
 #include <sys/sunddi.h>
 #include <sys/promif.h>
 #include <sys/smp_impldefs.h>
+#include <sys/archsystm.h>
 
 extern char *gic_module_name;
 
@@ -187,14 +188,12 @@ static uint32_t gicv2_prio_pmr_mask;
 #undef GIC_IPL_TO_PRIO
 #define	GIC_IPL_TO_PRIO(v)		(gicv2_prio_map[((v) & 0xF)])
 
-#define	GICV2_GICD_LOCK_INIT_HELD()	uint64_t old_daif = read_daif(); \
-					set_daif(DAIF_SETCLEAR_IRQ); \
+#define	GICV2_GICD_LOCK_INIT_HELD()	uint64_t __s = disable_interrupts(); \
 					LOCK_INIT_HELD(&conf.gc_lock)
-#define	GICV2_GICD_LOCK()		uint64_t old_daif = read_daif(); \
-					set_daif(DAIF_SETCLEAR_IRQ); \
+#define	GICV2_GICD_LOCK()		uint64_t __s = disable_interrupts(); \
 					lock_set(&conf.gc_lock)
 #define	GICV2_GICD_UNLOCK()		lock_clear(&conf.gc_lock); \
-					write_daif(old_daif)
+					restore_interrupts(__s)
 #define	GICV2_ASSERT_GICD_LOCK_HELD()	ASSERT(LOCK_HELD(&conf.gc_lock))
 
 static inline uint32_t

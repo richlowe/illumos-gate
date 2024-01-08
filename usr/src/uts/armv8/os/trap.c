@@ -23,6 +23,7 @@
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, Joyent, Inc.  All rights reserverd.
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/cpuvar.h>
@@ -482,7 +483,7 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 	/*
 	 * XXXARM: Why are these DTrace bits handled here?
 	 */
-	ASSERT((read_daif() & DAIF_IRQ) != 0);
+	ASSERT(interrupts_disabled());
 
 	if (DTRACE_CPUFLAG_ISSET(CPU_DTRACE_NOFAULT)) {
 		ASSERT(!USERMODE(rp->r_spsr));
@@ -516,7 +517,7 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		}
 	}
 
-	clear_daif(DAIF_SETCLEAR_IRQ);
+	(void) enable_interrupts();
 
 	ASSERT_STACK_ALIGNED();
 
@@ -1051,7 +1052,7 @@ kpreempt(int asyncspl)
 			kpreempt_cnts.kpc_prilevel++;
 			return;
 		}
-		if (!interrupts_enabled()) {
+		if (interrupts_disabled()) {
 			/*
 			 * Can't preempt while running with ints disabled
 			 */

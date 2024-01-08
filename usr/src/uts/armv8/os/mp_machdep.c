@@ -20,7 +20,7 @@
  * CDDL HEADER END
  */
 /*
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  */
@@ -288,21 +288,19 @@ cpu_halt(void)
 	 * which returns useful cycles to the peer hardware strand
 	 * that shares the pipeline.
 	 */
-	s = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
+	s = disable_interrupts();
 	while (*p == 0 &&
 	    ((hset_update && bitset_in_set(&cp->cp_haltset, cpu_sid)) ||
 	    (!hset_update && (CPU->cpu_flags & CPU_OFFLINE)))) {
 		__asm__ volatile("wfi");
-		write_daif(s);
-		s = read_daif();
-		set_daif(DAIF_SETCLEAR_IRQ);
+		restore_interrupts(s);
+		s = disable_interrupts();
 	}
 
 	/*
 	 * We're no longer halted
 	 */
-	write_daif(s);
+	restore_interrupts(s);
 	if (hset_update) {
 		cpup->cpu_disp_flags &= ~CPU_DISP_HALTED;
 		bitset_atomic_del(&cp->cp_haltset, cpu_sid);

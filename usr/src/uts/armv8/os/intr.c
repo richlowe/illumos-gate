@@ -363,7 +363,7 @@ intr_thread_epilog(struct cpu *cpu, uint32_t ack, uint_t oldpil)
 		gic_deactivate(ack);
 		setlvlx(basespl);
 		(void) splhigh();
-		clear_daif(DAIF_SETCLEAR_IRQ);
+		(void) enable_interrupts();
 
 		it->t_state = TS_FREE;
 		/*
@@ -459,8 +459,7 @@ intr_get_time(void)
 	uint64_t time, delta, ret;
 	uint_t pil;
 
-	uint64_t old = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
+	uint64_t s = disable_interrupts();
 	cpu = CPU;
 	mcpu = &cpu->cpu_m;
 	t = cpu->cpu_thread;
@@ -480,7 +479,7 @@ intr_get_time(void)
 	mcpu->intrstat[pil][1] = time;
 	cpu->cpu_intracct[cpu->cpu_mstate] += delta;
 
-	write_daif(old);
+	restore_interrupts(s);
 	return (ret);
 }
 
@@ -628,7 +627,7 @@ dosoftint_epilog(struct cpu *cpu, uint_t oldpil)
 		it->t_link = cpu->cpu_intr_thread;
 		cpu->cpu_intr_thread = it;
 		(void) splhigh();
-		clear_daif(DAIF_SETCLEAR_IRQ);
+		(void) enable_interrupts();
 		swtch();
 		/*NOTREACHED*/
 		panic("dosoftint_epilog: swtch returned");
@@ -806,18 +805,16 @@ cpu_intr_swtch_exit(kthread_id_t t)
 int
 getpil(void)
 {
-	uint64_t old = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
+	uint64_t s = disable_interrupts();
 	int pil = CPU->cpu_m.mcpu_pri;
-	write_daif(old);
+	restore_interrupts(s);
 	return (pil);
 }
 
 static int
 do_splx(int newpri)
 {
-	uint64_t old = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
+	uint64_t s = disable_interrupts();
 
 	cpu_t *cpu = CPU;
 	int curpri = cpu->cpu_m.mcpu_pri;
@@ -827,7 +824,7 @@ do_splx(int newpri)
 	cpu->cpu_m.mcpu_pri = newpri;
 	setlvlx(newpri);
 
-	write_daif(old);
+	restore_interrupts(s);
 	return (curpri);
 }
 
@@ -840,8 +837,7 @@ splx(int newpri)
 int
 splr(int newpri)
 {
-	uint64_t old = read_daif();
-	set_daif(DAIF_SETCLEAR_IRQ);
+	uint64_t s = disable_interrupts();
 
 	cpu_t *cpu = CPU;
 	int curpri = cpu->cpu_m.mcpu_pri;
@@ -853,7 +849,7 @@ splr(int newpri)
 		setlvlx(newpri);
 	}
 
-	write_daif(old);
+	restore_interrupts(s);
 	return (curpri);
 }
 
@@ -897,12 +893,6 @@ int
 spl8(void)
 {
 	return (splr(15));
-}
-
-int
-interrupts_enabled(void)
-{
-	return ((read_daif() & DAIF_IRQ) == 0);
 }
 
 int
