@@ -294,9 +294,9 @@ ctftest_check_descent(const char *symbol, ctf_file_t *fp,
 
 		if (tid != base) {
 			if (!quiet) {
-				warnx("type mismatch at layer %u: found id %ld, "
-				    "but expecting type id %ld for type %s, "
-				    "symbol %s", layer, base, tid,
+				warnx("type mismatch at layer %u: found "
+				    "id %ld, but expecting type id %ld for "
+				    "type %s, symbol %s", layer, base, tid,
 				    tests->cd_tname, symbol);
 			}
 			return (B_FALSE);
