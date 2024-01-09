@@ -43,10 +43,10 @@ extern void gic_config_irq(uint32_t irq, bool is_edge);
 /*
  * For interrupt handling.
  */
-extern uint32_t gic_acknowledge(void);
-extern uint32_t gic_ack_to_vector(uint32_t ack);
-extern void gic_eoi(uint32_t ack);
-extern void gic_deactivate(uint32_t ack);
+extern uint64_t gic_acknowledge(void);
+extern uint32_t gic_ack_to_vector(uint64_t ack);
+extern void gic_eoi(uint64_t ack);
+extern void gic_deactivate(uint64_t ack);
 extern int gic_vector_is_special(uint32_t intid);
 
 /*
@@ -60,10 +60,10 @@ typedef int (*gic_addspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
 typedef int (*gic_delspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
 typedef int (*gic_setlvl_t)(int irq);
 typedef void (*gic_setlvlx_t)(int ipl);
-typedef uint32_t (*gic_acknowledge_t)(void);
-typedef uint32_t (*gic_ack_to_vector_t)(uint32_t ack);
-typedef void (*gic_eoi_t)(uint32_t ack);
-typedef void (*gic_deactivate_t)(uint32_t ack);
+typedef uint64_t (*gic_acknowledge_t)(void);
+typedef uint32_t (*gic_ack_to_vector_t)(uint64_t ack);
+typedef void (*gic_eoi_t)(uint64_t ack);
+typedef void (*gic_deactivate_t)(uint64_t ack);
 typedef int (*gic_vector_is_special_t)(uint32_t intid);
 
 typedef struct gic_ops {

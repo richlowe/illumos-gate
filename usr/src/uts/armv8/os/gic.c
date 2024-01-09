@@ -117,26 +117,26 @@ setlvlx(int ipl)
 	gic_ops.go_setlvlx(ipl);
 }
 
-uint32_t
+uint64_t
 gic_acknowledge(void)
 {
 	return (gic_ops.go_acknowledge());
 }
 
 uint32_t
-gic_ack_to_vector(uint32_t ack)
+gic_ack_to_vector(uint64_t ack)
 {
 	return (gic_ops.go_ack_to_vector(ack));
 }
 
 void
-gic_eoi(uint32_t ack)
+gic_eoi(uint64_t ack)
 {
 	gic_ops.go_eoi(ack);
 }
 
 void
-gic_deactivate(uint32_t ack)
+gic_deactivate(uint64_t ack)
 {
 	gic_ops.go_deactivate(ack);
 }

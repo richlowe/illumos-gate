@@ -469,28 +469,28 @@ gicv2_send_ipi(cpuset_t cpuset, int irq)
 	GICV2_GICD_UNLOCK();
 }
 
-static uint32_t
+static uint64_t
 gicv2_acknowledge(void)
 {
-	return (gicc_read(&conf, GICC_IAR));
+	return ((uint64_t)gicc_read(&conf, GICC_IAR));
 }
 
 static uint32_t
-gicv2_ack_to_vector(uint32_t ack)
+gicv2_ack_to_vector(uint64_t ack)
 {
-	return (ack & GICC_IAR_INTID_NO_ARE);
+	return ((uint32_t)(ack & GICC_IAR_INTID_NO_ARE));
 }
 
 static void
-gicv2_eoi(uint32_t ack)
+gicv2_eoi(uint64_t ack)
 {
-	gicc_write(&conf, GICC_EOIR, ack);
+	gicc_write(&conf, GICC_EOIR, (uint32_t)(ack & 0xFFFFFFFF));
 }
 
 static void
-gicv2_deactivate(uint32_t ack)
+gicv2_deactivate(uint64_t ack)
 {
-	gicc_write(&conf, GICC_DIR, ack);
+	gicc_write(&conf, GICC_DIR, (uint32_t)(ack & 0xFFFFFFFF));
 }
 
 /*
