@@ -19,6 +19,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -70,6 +71,34 @@ prom_get_prop_int(pnode_t node, const char *name, int def)
 		node = prom_parentnode(node);
 	}
 	return value;
+}
+
+uint64_t
+prom_get_prop_u64(pnode_t node, const char *name, uint64_t def)
+{
+	uint64_t prop;
+	uint64_t value = def;
+
+	if (node > 0 && prom_getproplen(node, name) == sizeof(uint64_t)) {
+		prom_getprop(node, name, (caddr_t)&prop);
+		value = ntohll(prop);
+	}
+
+	return (value);
+}
+
+uint32_t
+prom_get_prop_u32(pnode_t node, const char *name, uint32_t def)
+{
+	uint32_t prop;
+	uint32_t value = def;
+
+	if (node > 0 && prom_getproplen(node, name) == sizeof(uint32_t)) {
+		prom_getprop(node, name, (caddr_t)&prop);
+		value = ntohl(prop);
+	}
+
+	return (value);
 }
 
 int prom_get_reset(pnode_t node, int index, struct prom_hwreset *reset)
