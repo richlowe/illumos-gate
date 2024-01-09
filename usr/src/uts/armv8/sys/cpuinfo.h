@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #ifndef _CPUINFO_H
@@ -131,6 +131,8 @@ extern struct cpuinfo *cpuinfo_first_enabled(void);
 extern struct cpuinfo *cpuinfo_next(struct cpuinfo *ci);
 extern struct cpuinfo *cpuinfo_next_enabled(struct cpuinfo *ci);
 extern struct cpuinfo *cpuinfo_end(void);
+
+extern struct cpuinfo *cpuinfo_for_affinity(uint64_t affinity);
 
 #ifdef __cplusplus
 }
