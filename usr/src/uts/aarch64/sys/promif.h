@@ -24,7 +24,7 @@
  * Use is subject to license terms.
  *
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #ifndef _SYS_PROMIF_H
@@ -245,6 +245,8 @@ struct prom_compat {
 };
 
 extern int prom_get_prop_int(pnode_t node, const char *name, int def);
+extern uint64_t prom_get_prop_u64(pnode_t node, const char *name, uint64_t def);
+extern uint32_t prom_get_prop_u32(pnode_t node, const char *name, uint32_t def);
 extern int prom_get_reg(pnode_t node, int index, uint64_t *base);
 extern int prom_get_reg_by_name(pnode_t node, const char *name, uint64_t *base);
 extern int prom_get_address_cells(pnode_t node);
