@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -265,6 +265,22 @@ cpuinfo_next_enabled(struct cpuinfo *ci)
 struct cpuinfo *
 cpuinfo_end(void)
 {
+	return (NULL);
+}
+
+/*
+ * Returns the cpuinfo matching the requested affinity (in MPIDR format), or
+ * NULL when none was found.
+ */
+struct cpuinfo *
+cpuinfo_for_affinity(uint64_t affinity)
+{
+	struct cpuinfo *ci;
+
+	for (ci = cpuinfo_first(); ci != cpuinfo_end(); ci = cpuinfo_next(ci))
+		if (ci->ci_mpidr == affinity)
+			return (ci);
+
 	return (NULL);
 }
 
