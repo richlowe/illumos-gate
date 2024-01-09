@@ -175,7 +175,7 @@ hilevel_intr_prolog(struct cpu *cpu, uint_t pil, uint_t oldpil, struct regs *rp)
  * Called with interrupts masked
  */
 int
-hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint32_t ack)
+hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint64_t ack)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	uint_t mask;
@@ -312,7 +312,7 @@ int intr_thread_cnt;
  * Called with interrupts disabled
  */
 void
-intr_thread_epilog(struct cpu *cpu, uint32_t ack, uint_t oldpil)
+intr_thread_epilog(struct cpu *cpu, uint64_t ack, uint_t oldpil)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	kthread_t *t;

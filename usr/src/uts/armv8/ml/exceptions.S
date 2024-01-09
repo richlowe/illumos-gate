@@ -492,7 +492,7 @@ _sys_rtt_preempt:
 	 * - w20: old pri
 	 * - w21: new pri
 	 * - w22: INTID (vector)
-	 * - w23: IAR value (to use for priority drop and deactivation)
+	 * - x23: IAR value (to use for priority drop and deactivation)
 	 * - x24: old SP (when switching stacks)
 	 * - w25: st_pending (used in softint processing)
 	 * - w26: used temporarily (for new pri) in priority drop
@@ -517,7 +517,7 @@ _sys_rtt_preempt:
 	ldr	w20, [x19, #CPU_PRI]		/* x20 <- old (current) pri */
 
 	bl	gic_acknowledge			/* read interrupt acknowledge */
-	mov	w23, w0				/* w23 <- acked IRQ */
+	mov	x23, x0				/* x23 <- acked IRQ */
 	bl	gic_ack_to_vector		/* extract vector (INTID) */
 	mov	w22, w0				/* x22 <- vector */
 
@@ -561,7 +561,7 @@ _sys_rtt_preempt:
 	mov	w0, w22				/* slew to the irq prio */
 	bl	setlvl				/* returns new_prio in w0 */
 	mov	w26, w0				/* stash new-pri temporarily */
-	mov	w0, w23
+	mov	x0, x23
 	bl	gic_eoi				/* priority drop */
 	cbnz	w26, 1f				/* skip to normal processing */
 
@@ -569,7 +569,7 @@ _sys_rtt_preempt:
 	 * In the "skip to softint" case we deactivate the interrupt and skip
 	 * the hardware interrupt processing.
 	 */
-	mov	w0, w23
+	mov	x0, x23
 	bl	gic_deactivate			/* deactivate the interrupt */
 	b	check_softint
 
@@ -614,7 +614,7 @@ _sys_rtt_preempt:
 	mov	x0, x19				/* CPU */
 	mov	w1, w21				/* new pri */
 	mov	w2, w20				/* old pri */
-	mov	w3, w23				/* acknowledge value */
+	mov	x3, x23				/* acknowledge value */
 	bl	hilevel_intr_epilog		/* sends eoi */
 	b	check_softint			/* process softints */
 
@@ -646,7 +646,7 @@ intr_thread:
 	msr	DAIFSet, #DAIF_SETCLEAR_IRQ	/* mask interrupts */
 
 	mov	x0, x19				/* CPU */
-	mov	w1, w23				/* acknowledge value */
+	mov	x1, x23				/* acknowledge value */
 	mov	w2, w20				/* old pri */
 	bl	intr_thread_epilog
 	mov	sp, x24				/* restore sp (after epilog) */
