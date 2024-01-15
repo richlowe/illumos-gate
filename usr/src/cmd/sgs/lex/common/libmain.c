@@ -42,7 +42,4 @@ main(int argc __unused, char **argv __unused)
 {
 	(void) yylex();
 	exit(0);
-
-	/*NOTREACHED*/
-	return (0);
 }

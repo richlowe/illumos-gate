@@ -1962,7 +1962,7 @@ page_create_io(
 	 * nothing to do.
 	 */
 	if (nscan < desscan && freemem < minfree) {
-		cv_signal(&proc_pageout->p_cv);
+		WAKE_PAGEOUT_SCANNER(page__create__io);
 	}
 
 	if (flags & PG_PHYSCONTIG) {
