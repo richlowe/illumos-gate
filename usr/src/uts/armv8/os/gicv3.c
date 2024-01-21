@@ -1169,7 +1169,7 @@ _init(void)
 		/*
 		 * Explicitly use the default "is special" handler.
 		 */
-		gic_ops.go_vector_is_special = (gic_vector_is_special_t)NULL;
+		gic_ops.go_is_spurious = (gic_is_spurious_t)NULL;
 	}
 
 	return (mod_install(&modlinkage));

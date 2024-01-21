@@ -529,7 +529,7 @@ _sys_rtt_preempt:
 	 * See IHI0048, 1.4.4 Spurious interrupts and
 	 * IHI0048, 3.2.5 Special interrupt numbers
 	 */
-	bl	gic_vector_is_special		/* w0 is the still the vector */
+	bl	gic_is_spurious			/* w0 is the still the vector */
 	cbnz	w0, _sys_rtt			/* non-zero means special */
 
 	/*
