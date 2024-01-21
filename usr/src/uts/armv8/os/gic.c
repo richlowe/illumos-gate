@@ -43,7 +43,7 @@ gic_ops_t gic_ops = {
 	.go_ack_to_vector	= (gic_ack_to_vector_t)stub_not_config,
 	.go_eoi			= (gic_eoi_t)stub_not_config,
 	.go_deactivate		= (gic_deactivate_t)stub_not_config,
-	.go_vector_is_special	= (gic_vector_is_special_t)NULL
+	.go_is_spurious		= (gic_is_spurious_t)NULL
 };
 
 static void
@@ -142,10 +142,10 @@ gic_deactivate(uint64_t ack)
 }
 
 int
-gic_vector_is_special(uint32_t intid)
+gic_is_spurious(uint32_t intid)
 {
-	if (gic_ops.go_vector_is_special != NULL)
-		return (gic_ops.go_vector_is_special(intid));
+	if (gic_ops.go_is_spurious != NULL)
+		return (gic_ops.go_is_spurious(intid));
 
 	if (GIC_INTID_IS_SPECIAL(intid))
 		return (1);
