@@ -60,8 +60,8 @@ extern void tenmicrosec(void);
 extern void bind_hwcap(void);
 extern void av_dispatch_autovect(uint_t);
 extern void av_dispatch_softvect(uint_t);
-extern void switch_sp_and_call(void *, void (*)(uint_t, uint_t),
-    uint_t, uint_t);
+extern void switch_sp_and_call(uint64_t, uint64_t,
+    void (*)(uint64_t, uint64_t), void *);
 extern void fakesoftint(void);
 
 extern void __adj_hrestime(void);
