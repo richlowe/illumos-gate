@@ -19,6 +19,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -316,3 +317,27 @@
 	b.gt	0b
 4:	ret
 	SET_SIZE(clean_data_cache_all)
+
+	/*
+	 * void
+	 * switch_sp_and_call(uint64_t a0, uint64_t a1,
+	 *     void (*func)(uint64_t a0, uint64_t a1), void *newsp);
+	 */
+	ENTRY(switch_sp_and_call)
+	stp	fp, lr, [sp, #-16]!
+	mov	fp, sp
+	/*
+	 * Set up the new stack - the old is in fp.
+	 */
+	mov	sp, x3
+	/*
+	 * Call the function
+	 *
+	 * argument a0 is already in x0
+	 * argument a1 is already in x1
+	 */
+	blr	x2
+	mov	sp, fp
+	ldp	fp, lr, [sp], #16
+	ret
+	SET_SIZE(switch_sp_and_call)

@@ -802,6 +802,169 @@ cpu_intr_swtch_exit(kthread_id_t t)
 	} while (atomic_cas_64(&t->t_intr_start, ts, arch_timer_count()) != ts);
 }
 
+/*
+ * Dispatch a high-level hardware interrupt.
+ */
+static void
+dispatch_hilevel(uint64_t vector, uint64_t arg2 __unused)
+{
+	(void) enable_interrupts();
+	av_dispatch_autovect(vector);
+	(void) disable_interrupts();
+}
+
+/*
+ * Dispatch a threaded hardware interrupt.
+ */
+static void
+dispatch_hardint(uint64_t ack, uint64_t oldipl)
+{
+	uint_t vector = (uint_t)gic_ack_to_vector(ack);
+	struct cpu *cpu = CPU;
+
+	(void) enable_interrupts();
+	av_dispatch_autovect(vector);
+	(void) disable_interrupts();
+
+	/*
+	 * Must run intr_thread_epilog() on the interrupt thread stack, since
+	 * there may not be a return from it if the interrupt thread blocked.
+	 */
+	intr_thread_epilog(cpu, ack, oldipl);
+}
+
+/*
+ * Dispatch a software interrupt.
+ */
+static void
+dispatch_softint(uint64_t oldpil, uint64_t arg2 __unused)
+{
+	struct cpu *cpu = CPU;
+
+	(void) enable_interrupts();
+	av_dispatch_softvect((int)cpu->cpu_thread->t_pil);
+	(void) disable_interrupts();
+
+	/*
+	 * Must run softint_epilog() on the interrupt thread stack, since
+	 * there may not be a return from it if the interrupt thread blocked.
+	 */
+	dosoftint_epilog(cpu, oldpil);
+}
+
+/*
+ * Deliver any softints the current interrupt priority allows.
+ *
+ * Called with interrupts disabled.
+ */
+void
+dosoftint(struct regs *regs)
+{
+	struct cpu *cpu = CPU;
+	int oldipl;
+	caddr_t newsp;
+
+	while (cpu->cpu_softinfo.st_pending) {
+		oldipl = cpu->cpu_pri;
+		newsp = dosoftint_prolog(cpu, (caddr_t)regs,
+		    cpu->cpu_softinfo.st_pending, oldipl);
+		/*
+		 * If returned stack pointer is NULL, priority is too high
+		 * to run any of the pending softints now.
+		 * Break out and they will be run later.
+		 */
+		if (newsp == NULL)
+			break;
+		switch_sp_and_call(oldipl, 0, dispatch_softint, newsp);
+	}
+}
+
+/*
+ * Interrupt service routine, called with interrupts disabled.
+ */
+void
+do_interrupt(struct regs *rp)
+{
+	struct cpu *cpu = CPU;
+	int newipl, oldipl = cpu->cpu_pri;
+	uint_t vector;
+	caddr_t newsp;
+	uint64_t ack;
+
+	ASSERT(interrupts_disabled());
+
+	cpu_idle_exit(CPU_IDLE_CB_FLAG_INTR);
+
+	ack = gic_acknowledge();
+	vector = (uint_t)gic_ack_to_vector(ack);
+
+	if (gic_is_spurious(vector))
+		goto softints;
+
+	/*
+	 * Slew the interrupt priority and perform the running priority drop.
+	 */
+	newipl = (*setlvl)(vector);
+	gic_eoi(ack);
+
+	/*
+	 * If the new IPL is 0 we've hit a race, and there's no longer an
+	 * interrupt handler registered for this vector, so we deactivate the
+	 * interrupt and proceed to softints.
+	 */
+	if (newipl == 0) {
+		gic_deactivate(ack);
+		goto softints;
+	}
+
+	/*
+	 * We have a valid hardware interrupt, process it.
+	 */
+	cpu->cpu_pri = newipl;
+
+	if (newipl > LOCK_LEVEL) {
+		/*
+		 * High priority interrupts run on this cpu's interrupt stack.
+		 *
+		 * If we're not already on the interrupt stack, switch to it
+		 * for the duration of the call.
+		 *
+		 * If we're not already on the interrupt stack we've
+		 * interrupted a kernel thread, a user process while in
+		 * userspace or a user process while in kernel space.
+		 *
+		 * If we're already on the interrupt stack we've preempted
+		 * a lower level high-level hardware exception handler.
+		 */
+		if (hilevel_intr_prolog(cpu, newipl, oldipl, rp) == 0) {
+			newsp = cpu->cpu_intr_stack;
+			switch_sp_and_call(vector, 0, dispatch_hilevel, newsp);
+		} else {
+			dispatch_hilevel(vector, 0);
+		}
+		(void) hilevel_intr_epilog(cpu, newipl, oldipl, ack);
+	} else {
+		/*
+		 * Run this interrupt in a separate thread.
+		 *
+		 * The stack used for running the handler is the interrupt
+		 * thread's stack.  If the interrupt thread blocks it will
+		 * never return here.
+		 */
+		newsp = intr_thread_prolog(cpu, (caddr_t)rp, newipl);
+		switch_sp_and_call(ack, oldipl, dispatch_hardint, newsp);
+	}
+
+softints:
+	/*
+	 * Deliver any pending soft interrupts.
+	 */
+	if (cpu->cpu_softinfo.st_pending) {
+		dosoftint(rp);
+		ASSERT(interrupts_disabled());
+	}
+}
+
 int
 getpil(void)
 {
