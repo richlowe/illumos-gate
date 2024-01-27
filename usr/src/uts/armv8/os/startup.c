@@ -88,6 +88,7 @@
 #include <sys/controlregs.h>
 #include <sys/arch_timer.h>
 #include <sys/cpuinfo.h>
+#include <sys/prom_debug.h>
 
 extern void brand_init(void);
 extern void pcf_init(void);
@@ -197,11 +198,6 @@ static char *prm_dbg_str[] = {
 };
 
 int prom_debug = 0;
-
-#define	PRM_DEBUG(q)	if (prom_debug)		\
-	prom_printf(prm_dbg_str[sizeof (q) >> 3], "startup.c", __LINE__, #q, q);
-#define	PRM_POINT(q)	if (prom_debug)		\
-	prom_printf("%s:%d: %s\n", "startup.c", __LINE__, q);
 
 #define	ROUND_UP_PAGE(x)	\
 	((uintptr_t)P2ROUNDUP((uintptr_t)(x), (uintptr_t)MMU_PAGESIZE))
