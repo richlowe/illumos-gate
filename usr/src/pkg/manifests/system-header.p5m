@@ -1504,7 +1504,6 @@ file path=usr/include/sys/wait.h
 file path=usr/include/sys/waitq.h
 file path=usr/include/sys/watchpoint.h
 $(i386_ONLY)file path=usr/include/sys/x86_archext.h
-$(aarch64_ONLY)file path=usr/include/sys/x_call.h
 $(i386_ONLY)file path=usr/include/sys/xen_errno.h
 file path=usr/include/sys/xti_inet.h
 file path=usr/include/sys/xti_osi.h
@@ -1603,6 +1602,8 @@ $(aarch64_ONLY)file path=usr/platform/armv8/include/sys/sbd_ioctl.h
 $(aarch64_ONLY)file path=usr/platform/armv8/include/sys/smp_impldefs.h
 $(aarch64_ONLY)file path=usr/platform/armv8/include/sys/smt.h
 $(aarch64_ONLY)file path=usr/platform/armv8/include/sys/vm_machparam.h
+$(aarch64_ONLY)file path=usr/platform/armv8/include/sys/x_call.h
+$(aarch64_ONLY)file path=usr/platform/armv8/include/sys/xc_levels.h
 $(i386_ONLY)dir path=usr/platform/i86pc group=sys
 $(i386_ONLY)dir path=usr/platform/i86pc/include
 $(i386_ONLY)dir path=usr/platform/i86pc/include/sys

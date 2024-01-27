@@ -30,6 +30,7 @@
 #include <sys/cyclic_impl.h>
 #include <sys/spl.h>
 #include <sys/x_call.h>
+#include <sys/xc_levels.h>
 #include <sys/kmem.h>
 #include <sys/machsystm.h>
 #include <sys/smp_impldefs.h>

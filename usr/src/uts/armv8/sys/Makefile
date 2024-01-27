@@ -45,7 +45,9 @@ HDRS= \
 	smp_impldefs.h \
 	smt.h \
 	ddi_subrdefs.h \
-	vm_machparam.h
+	vm_machparam.h \
+	x_call.h \
+	xc_levels.h
 
 ROOTHDRS= $(HDRS:%=$(USR_PSM_ISYS_DIR)/%)
 

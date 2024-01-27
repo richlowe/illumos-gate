@@ -52,6 +52,7 @@
 #include <sys/callb.h>
 #include <sys/controlregs.h>
 #include <sys/x_call.h>
+#include <sys/xc_levels.h>
 #include <sys/consdev.h>
 #include <sys/arch_timer.h>
 

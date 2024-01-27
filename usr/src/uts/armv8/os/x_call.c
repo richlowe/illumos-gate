@@ -30,6 +30,7 @@
 #include <sys/thread.h>
 #include <sys/cpuvar.h>
 #include <sys/x_call.h>
+#include <sys/xc_levels.h>
 #include <sys/cpu.h>
 #include <sys/psw.h>
 #include <sys/sunddi.h>

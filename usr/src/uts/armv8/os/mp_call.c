@@ -32,6 +32,7 @@
 #include <sys/irq.h>
 #include <sys/spl.h>
 #include <sys/x_call.h>
+#include <sys/xc_levels.h>
 #include <sys/machsystm.h>
 
 void
