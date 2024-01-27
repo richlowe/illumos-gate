@@ -54,6 +54,7 @@
 #include <sys/promif.h>
 #include <sys/gic.h>
 #include <sys/x_call.h>
+#include <sys/xc_levels.h>
 #include <sys/arch_timer.h>
 
 /*

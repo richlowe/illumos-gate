@@ -62,6 +62,7 @@
 #include <sys/frame.h>
 #include <sys/dtrace.h>
 #include <sys/x_call.h>
+#include <sys/xc_levels.h>
 #include <sys/spl.h>
 
 extern void print_msg_hwerr(ctid_t ct_id, proc_t *p);

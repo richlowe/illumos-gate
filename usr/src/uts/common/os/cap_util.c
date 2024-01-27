@@ -124,7 +124,7 @@
 #include <sys/archsystm.h>
 #include <sys/promif.h>
 
-#if defined(__x86)
+#if defined(__x86) || defined(__aarch64__)
 #include <sys/xc_levels.h>
 #endif
 

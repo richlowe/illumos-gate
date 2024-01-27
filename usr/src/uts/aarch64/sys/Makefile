@@ -69,8 +69,7 @@ HDRS	=			\
 	trap.h			\
 	ucontext.h		\
 	utrap.h			\
-	vmparam.h		\
-	x_call.h
+	vmparam.h
 
 ROOTDIR=	$(ROOT)/usr/include/sys
 SCSIDIR=	$(ROOTDIR)/scsi

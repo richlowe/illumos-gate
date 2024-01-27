@@ -46,6 +46,8 @@
 #include <sys/cap_util.h>
 #if defined(__x86)
 #include <asm/clock.h>
+#endif
+#if defined(__x86) || defined(__aarch64__)
 #include <sys/xc_levels.h>
 #endif
 

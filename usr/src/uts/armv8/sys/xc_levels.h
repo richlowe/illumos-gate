@@ -24,10 +24,8 @@
  * Use is subject to license terms.
  */
 
-#ifndef _SYS_X_CALL_H
-#define	_SYS_X_CALL_H
-
-#include <sys/cpuvar.h>
+#ifndef _SYS_XC_LEVELS_H
+#define	_SYS_XC_LEVELS_H
 
 #ifdef	__cplusplus
 extern "C" {
@@ -39,32 +37,8 @@ extern "C" {
 #define	XC_HI_PIL	15	/* cross call with service function */
 #define	XCALL_PIL	XC_HI_PIL /* alias for XC_HI_PIL */
 
-#ifndef _ASM
-
-typedef uintptr_t xc_arg_t;
-typedef int (*xc_func_t)(xc_arg_t, xc_arg_t, xc_arg_t);
-
-/*
- * Cross-call routines.
- */
-#if defined(_KERNEL)
-
-#if defined(_MACHDEP)
-/* XXXARM: this whole file needs to be closer to Intel */
-#define	CPUSET2BV(set)	(set)
-extern void	xc_init(void);
-extern void	xc_call(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
-extern void	xc_sync(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set, xc_func_t);
-extern void	xc_call_nowait(xc_arg_t, xc_arg_t, xc_arg_t, cpuset_t set,
-    xc_func_t);
-#endif
-
-#endif	/* _KERNEL */
-
-#endif	/* !_ASM */
-
 #ifdef	__cplusplus
 }
 #endif
 
-#endif	/* _SYS_X_CALL_H */
+#endif	/* _SYS_XC_LEVELS_H */
