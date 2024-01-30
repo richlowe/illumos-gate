@@ -26,7 +26,7 @@
 # Copyright 2020 Joyent, Inc.
 # Copyright (c) 2013, OmniTI Computer Consulting, Inc. All rights reserved.
 # Copyright (c) 2013 Gary Mills
-# Copyright 2014 Garrett D'Amore <garrett@damore.org>
+# Copyright 2015 Garrett D'Amore <garrett@damore.org>
 # Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2023 Oxide Computer Company
 #
@@ -84,6 +84,12 @@ $endif
 $if _arm && _ELF64
 $add aarch64
 $endif
+
+SYMBOL_VERSION ILLUMOS_0.43 {
+    protected:
+	execvex;
+	fexecve;
+} ILLUMOS_0.42;
 
 SYMBOL_VERSION ILLUMOS_0.42 {
     protected:
@@ -349,13 +355,13 @@ SYMBOL_VERSION ILLUMOS_0.12 {	# arc4random and friends
 	getentropy;
 } ILLUMOS_0.11;
 
-SYMBOL_VERSION ILLUMOS_0.11 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.11 {	# illumos additions
     protected:
 	iswxdigit_l;
 	isxdigit_l;
 } ILLUMOS_0.10;
 
-SYMBOL_VERSION ILLUMOS_0.10 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.10 {	# illumos additions
     protected:
 	preadv;
 	pwritev;
@@ -454,13 +460,13 @@ SYMBOL_VERSION ILLUMOS_0.8 {	# POSIX 2008 newlocale and friends
 	wcwidth_l;
 } ILLUMOS_0.7;
 
-SYMBOL_VERSION ILLUMOS_0.7 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.7 {	# illumos additions
     protected:
 	_glob_ext;
 	_globfree_ext;
 } ILLUMOS_0.6;
 
-SYMBOL_VERSION ILLUMOS_0.6 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.6 {	# illumos additions
     protected:
 	getloginx;
 	getloginx_r;
@@ -473,7 +479,7 @@ SYMBOL_VERSION ILLUMOS_0.5 {	# common C++ ABI exit handlers
 	__cxa_finalize;
 } ILLUMOS_0.4;
 
-SYMBOL_VERSION ILLUMOS_0.4 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.4 {	# illumos additions
     protected:
 	pipe2;
 	dup3;
@@ -486,17 +492,17 @@ $if lf64
 $endif
 } ILLUMOS_0.3;
 
-SYMBOL_VERSION ILLUMOS_0.3 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.3 {	# illumos additions
     protected:
 	assfail3;
 } ILLUMOS_0.2;
 
-SYMBOL_VERSION ILLUMOS_0.2 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.2 {	# illumos additions
     protected:
 	posix_spawn_pipe_np;
 } ILLUMOS_0.1;
 
-SYMBOL_VERSION ILLUMOS_0.1 {	# Illumos additions
+SYMBOL_VERSION ILLUMOS_0.1 {	# illumos additions
     protected:
 	timegm;
 } SUNW_1.23;

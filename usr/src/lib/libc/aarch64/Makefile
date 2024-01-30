@@ -172,6 +172,7 @@ COMSYSOBJS=			\
 	cladm.o			\
 	close.o			\
 	execve.o		\
+	execvex.o		\
 	exit.o			\
 	facl.o			\
 	fchdir.o		\
@@ -877,6 +878,7 @@ PORTSYS=			\
 	execv.o			\
 	eventfd.o		\
 	fcntl.o			\
+	fexecve.o		\
 	getpagesizes.o		\
 	getpeerucred.o		\
 	inst_sync.o		\

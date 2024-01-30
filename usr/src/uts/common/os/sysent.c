@@ -71,7 +71,7 @@ int	chown(char *, uid_t, gid_t);
 int	chroot(char *);
 int	cladm(int, int, void *);
 int	close(int);
-int	exece(const char *, const char **, const char **);
+int	exece(const char *, const char **, const char **, int);
 int	faccessat(int, char *, int, int);
 int	fchmodat(int, char *, int, int);
 int	fchownat(int, char *, uid_t, gid_t, int);
@@ -490,7 +490,7 @@ struct sysent sysent[NSYSCALL] =
 	[56]	= SYSENT_CI("fchownat",		fchownat,	5),
 	[57]	= SYSENT_2CI("utssys",		utssys64,	4),
 	[58]	= SYSENT_CI("fdsync",		fdsync,		2),
-	[59]	= SYSENT_CI("exece",		exece,		3),
+	[59]	= SYSENT_CI("exece",		exece,		4),
 	[60]	= SYSENT_CI("umask",		umask,		1),
 	[61]	= SYSENT_CI("chroot",		chroot,		1),
 	[62]	= SYSENT_CI("fcntl",		fcntl,		3),
@@ -820,7 +820,7 @@ struct sysent sysent32[NSYSCALL] =
 	[56]	= SYSENT_CI("fchownat",		fchownat,	5),
 	[57]	= SYSENT_2CI("utssys",		utssys32,	4),
 	[58]	= SYSENT_CI("fdsync",		fdsync,		2),
-	[59]	= SYSENT_CI("exece",		exece,		3),
+	[59]	= SYSENT_CI("exece",		exece,		4),
 	[60]	= SYSENT_CI("umask",		umask,		1),
 	[61]	= SYSENT_CI("chroot",		chroot,		1),
 	[62]	= SYSENT_CI("fcntl",		fcntl,		3),
