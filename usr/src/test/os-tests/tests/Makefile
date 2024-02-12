@@ -14,7 +14,7 @@
 # Copyright 2020 Joyent, Inc.
 # Copyright 2021 Tintri by DDN, Inc. All rights reserved.
 # Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
-# Copyright 2023 Oxide Computer Company
+# Copyright 2024 Oxide Computer Company
 #
 
 include $(SRC)/Makefile.master
@@ -25,6 +25,7 @@ SUBDIRS =       \
 		cores \
 		ddi_ufm \
 		definit \
+		execvpe \
 		file-locking \
 		ilstr \
 		ksensor \
