@@ -154,7 +154,7 @@ const mdb_tgt_regdesc_t mdb_aarch64_kregs[] = {
 int
 kt_regs(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-	mdb_tgt_gregset_t *grs = (mdb_tgt_gregset_t *)addr;
+	const kreg_t *grs = &((mdb_tgt_gregset_t *)addr)->kregs[0];
 
 	mdb_printf("%%x0 = 0x%0?p\t%%x1 = 0x%0?p\n",
 	    grs[KREG_X0], grs[KREG_X1]);
@@ -483,8 +483,8 @@ mdb_aarch64_kvm_frame(void *arglim, uintptr_t pc, uint_t argc, const long *argv,
 }
 
 int
-mdb_aarch64_kvm_framev(void *arglim, uintptr_t pc, uint_t argc, const long *argv,
-    const mdb_tgt_gregset_t *gregs)
+mdb_aarch64_kvm_framev(void *arglim, uintptr_t pc, uint_t argc,
+    const long *argv, const mdb_tgt_gregset_t *gregs)
 {
 	/*
 	 * Historically adb limited stack trace argument display to a fixed-
@@ -546,7 +546,8 @@ kt_stack(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 int
 kt_stackv(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
-	return (kt_stack_common(addr, flags, argc, argv, mdb_aarch64_kvm_framev));
+	return (kt_stack_common(addr, flags, argc, argv,
+	    mdb_aarch64_kvm_framev));
 }
 
 const mdb_tgt_ops_t kt_aarch64_ops = {
