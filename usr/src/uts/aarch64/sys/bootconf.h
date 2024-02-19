@@ -20,6 +20,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  */
 
@@ -41,6 +42,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define	BP_MAX_STRLEN	32
 
 /*
  * masks to hand to bsys_alloc memory allocator
@@ -90,7 +93,7 @@ typedef struct bootops {
 	/*
 	 * to find the size of the buffer to allocate
 	 */
-	int	(*bsys_getproplen)(struct bootops *, const char *);
+	ssize_t	(*bsys_getproplen)(struct bootops *, const char *);
 
 	/*
 	 * get the value associated with this name
@@ -106,7 +109,7 @@ typedef struct bootops {
 	/*
 	 * print formatted output
 	 */
-	void	(*bsys_printf)(void *, const char *, ...);
+	void	(*bsys_printf)(void *, const char *, ...) __PRINTFLIKE(2);
 
 	/* end of bootops which exist if (bootops-extensions >= 1) */
 } bootops_t;
@@ -190,9 +193,9 @@ extern char *netdev_path;
 
 extern void bop_no_more_mem(void);
 
-extern void bop_printf(void *, const char *, ...);
-extern void vbop_printf(void *ops, const char *fmt, va_list);
-extern void bop_panic(const char *, ...);
+extern void bop_printf(void *, const char *, ...) __PRINTFLIKE(2);
+extern void vbop_printf(void *ops, const char *fmt, va_list) __VPRINTFLIKE(2);
+extern void bop_panic(const char *, ...) __PRINTFLIKE(1);
 
 extern void read_bootenvrc(void);
 
@@ -200,8 +203,9 @@ extern int bootprop_getval(const char *, u_longlong_t *);
 struct xboot_info;
 void bop_init(struct xboot_info *xbp);
 
-extern int do_bsys_getproplen(bootops_t *, const char *);
+extern ssize_t do_bsys_getproplen(bootops_t *, const char *);
 extern int do_bsys_getprop(bootops_t *, const char *, void *);
+extern int do_bsys_getproptype(bootops_t *, const char *);
 
 #endif /* _KERNEL && !_BOOT */
 

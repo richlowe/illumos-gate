@@ -20,9 +20,17 @@
  */
 
 /*
- * Copyright 2017 Hayashi Naoyuki
+ * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
+ *
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ *
+ * Copyright 2012 Garrett D'Amore <garrett@damore.org>
+ * Copyright 2014 Pluribus Networks, Inc.
+ * Copyright 2016 Nexenta Systems, Inc.
+ * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2018 Joyent, Inc.
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -95,566 +103,840 @@ uint8_t
 i_ddi_get8(ddi_acc_impl_t *hdlp, uint8_t *addr)
 {
 	uint8_t x;
-	__asm__ volatile ("ldrb %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return x;
+	__asm__ volatile("ldrb %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
+	return (x);
 }
 
 uint16_t
 i_ddi_get16(ddi_acc_impl_t *hdlp, uint16_t *addr)
 {
 	uint16_t x;
-	__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return x;
+	__asm__ volatile("ldrh %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
+	return (x);
 }
 
 uint32_t
 i_ddi_get32(ddi_acc_impl_t *hdlp, uint32_t *addr)
 {
 	uint32_t x;
-	__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return x;
+	__asm__ volatile("ldr %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
+	return (x);
 }
 
 uint64_t
 i_ddi_get64(ddi_acc_impl_t *hdlp, uint64_t *addr)
 {
 	uint64_t x;
-	__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return x;
+	__asm__ volatile("ldr %0, %1" : "=r" (x) : "Q" (*addr) : "memory");
+	return (x);
 }
 
 void
 i_ddi_put8(ddi_acc_impl_t *hdlp, uint8_t *addr, uint8_t value)
 {
-	__asm__ volatile ("strb %w1, %0" : "=Q" (*addr) : "r"(value) : "memory");
+	__asm__ volatile("strb %w1, %0" : "=Q" (*addr) : "r"(value) : "memory");
 }
 
 void
 i_ddi_put16(ddi_acc_impl_t *hdlp, uint16_t *addr, uint16_t value)
 {
-	__asm__ volatile ("strh %w1, %0" : "=Q" (*addr) : "r"(value) : "memory");
+	__asm__ volatile("strh %w1, %0" : "=Q" (*addr) : "r"(value) : "memory");
 }
 
 void
 i_ddi_put32(ddi_acc_impl_t *hdlp, uint32_t *addr, uint32_t value)
 {
-	__asm__ volatile ("str %w1, %0" : "=Q" (*addr) : "r"(value) : "memory");
+	__asm__ volatile("str %w1, %0" : "=Q" (*addr) : "r"(value) : "memory");
 }
 
 void
 i_ddi_put64(ddi_acc_impl_t *hdlp, uint64_t *addr, uint64_t value)
 {
-	__asm__ volatile ("str %1, %0" : "=Q" (*addr) : "r"(value) : "memory");
+	__asm__ volatile("str %1, %0" : "=Q" (*addr) : "r"(value) : "memory");
 }
 
 void
-i_ddi_rep_get8(ddi_acc_impl_t *hdlp, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_get8(ddi_acc_impl_t *hdlp, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldrb %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldrb %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldrb %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldrb %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, const uint_t flags)
+i_ddi_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr,
+    size_t repcount, const uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldr %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldr %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldr %0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldr %0, %1" : "=r" (*(host_addr++)) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_rep_put8(ddi_acc_impl_t *hdlp, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_put8(ddi_acc_impl_t *hdlp, uint8_t *host_addr, uint8_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("strb %w1, %0" : "=Q" (*(dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strb %w1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("strb %w1, %0" : "=Q" (*(dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strb %w1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 void
-i_ddi_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 void
-i_ddi_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 void
-i_ddi_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr,
+    size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 uint16_t
 i_ddi_swap_get16(ddi_acc_impl_t *hdlp, uint16_t *addr)
 {
 	uint16_t x;
-	__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return __builtin_bswap16(x);
+	__asm__ volatile("ldrh %w0, %1"
+	    : "=r" (x)
+	    : "Q" (*addr)
+	    : "memory");
+	return (__builtin_bswap16(x));
 }
 
 uint32_t
 i_ddi_swap_get32(ddi_acc_impl_t *hdlp, uint32_t *addr)
 {
 	uint32_t x;
-	__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return __builtin_bswap32(x);
+	__asm__ volatile("ldr %w0, %1"
+	    : "=r" (x)
+	    : "Q" (*addr)
+	    : "memory");
+	return (__builtin_bswap32(x));
 }
 
 uint64_t
 i_ddi_swap_get64(ddi_acc_impl_t *hdlp, uint64_t *addr)
 {
 	uint64_t x;
-	__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*addr) : "memory");
-	return __builtin_bswap64(x);
+	__asm__ volatile("ldr %0, %1"
+	    : "=r" (x)
+	    : "Q" (*addr)
+	    : "memory");
+	return (__builtin_bswap64(x));
 }
 
 void
 i_ddi_swap_put16(ddi_acc_impl_t *hdlp, uint16_t *addr, uint16_t value)
 {
-	__asm__ volatile ("strh %w1, %0" : "=Q" (*addr) : "r"(__builtin_bswap16(value)) : "memory");
+	__asm__ volatile("strh %w1, %0"
+	    : "=Q" (*addr)
+	    : "r"(__builtin_bswap16(value))
+	    : "memory");
 }
 
 void
 i_ddi_swap_put32(ddi_acc_impl_t *hdlp, uint32_t *addr, uint32_t value)
 {
-	__asm__ volatile ("str %w1, %0" : "=Q" (*addr) : "r"(__builtin_bswap32(value)) : "memory");
+	__asm__ volatile("str %w1, %0"
+	    : "=Q" (*addr)
+	    : "r"(__builtin_bswap32(value))
+	    : "memory");
 }
 
 void
 i_ddi_swap_put64(ddi_acc_impl_t *hdlp, uint64_t *addr, uint64_t value)
 {
-	__asm__ volatile ("str %1, %0" : "=Q" (*addr) : "r"(__builtin_bswap64(value)) : "memory");
+	__asm__ volatile("str %1, %0"
+	    : "=Q" (*addr)
+	    : "r"(__builtin_bswap64(value))
+	    : "memory");
 }
 
 void
-i_ddi_swap_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, const uint_t flags)
+i_ddi_swap_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, const uint_t flags)
 {
 	uint16_t x;
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--) {
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 			*host_addr++ = __builtin_bswap16(x);
 		}
 	else
 		while (repcount--) {
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(dev_addr))
+			    : "memory");
 			*host_addr++ = __builtin_bswap16(x);
 		}
 }
 
 void
-i_ddi_swap_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_swap_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
 	uint32_t x;
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--) {
-			__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 			*host_addr++ = __builtin_bswap32(x);
 		}
 	else
 		while (repcount--) {
-			__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(dev_addr))
+			    : "memory");
 			*host_addr++ = __builtin_bswap32(x);
 		}
 }
 
 void
-i_ddi_swap_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_swap_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
 	uint64_t x;
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--) {
-			__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*(dev_addr++)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (x)
+			    : "Q" (*(dev_addr++))
+			    : "memory");
 			*host_addr++ = __builtin_bswap64(x);
 		}
 	else
 		while (repcount--) {
-			__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*(dev_addr)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (x)
+			    : "Q" (*(dev_addr))
+			    : "memory");
 			*host_addr++ = __builtin_bswap64(x);
 		}
 }
 
 void
-i_ddi_swap_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_swap_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(dev_addr++)) : "r"(__builtin_bswap16(*(host_addr++))) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(__builtin_bswap16(*(host_addr++)))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(dev_addr)) : "r"(__builtin_bswap16(*(host_addr++))) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(__builtin_bswap16(*(host_addr++)))
+			    : "memory");
 }
 
 void
-i_ddi_swap_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_swap_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(dev_addr++)) : "r"(__builtin_bswap32(*(host_addr++))) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(__builtin_bswap32(*(host_addr++)))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(dev_addr)) : "r"(__builtin_bswap32(*(host_addr++))) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(__builtin_bswap32(*(host_addr++)))
+			    : "memory");
 }
 
 void
-i_ddi_swap_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_swap_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(dev_addr++)) : "r"(__builtin_bswap64(*(host_addr++))) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(dev_addr++))
+			    : "r"(__builtin_bswap64(*(host_addr++)))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(dev_addr)) : "r"(__builtin_bswap64(*(host_addr++))) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(dev_addr))
+			    : "r"(__builtin_bswap64(*(host_addr++)))
+			    : "memory");
 }
 
 uint8_t
 i_ddi_io_get8(ddi_acc_impl_t *hdlp, uint8_t *addr)
 {
-	uint8_t *io_addr = (uint8_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint8_t *io_addr =
+	    (uint8_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint8_t x;
-	__asm__ volatile ("ldrb %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return x;
+	__asm__ volatile("ldrb %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
+	return (x);
 }
 
 uint16_t
 i_ddi_io_get16(ddi_acc_impl_t *hdlp, uint16_t *addr)
 {
-	uint16_t *io_addr = (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint16_t *io_addr =
+	    (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint16_t x;
-	__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return x;
+	__asm__ volatile("ldrh %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
+	return (x);
 }
 
 uint32_t
 i_ddi_io_get32(ddi_acc_impl_t *hdlp, uint32_t *addr)
 {
-	uint32_t *io_addr = (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint32_t *io_addr =
+	    (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint32_t x;
-	__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return x;
+	__asm__ volatile("ldr %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
+	return (x);
 }
 
 uint64_t
 i_ddi_io_get64(ddi_acc_impl_t *hdlp, uint64_t *addr)
 {
-	uint64_t *io_addr = (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint64_t *io_addr =
+	    (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint64_t x;
-	__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return x;
+	__asm__ volatile("ldr %0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
+	return (x);
 }
 
 void
 i_ddi_io_put8(ddi_acc_impl_t *hdlp, uint8_t *addr, uint8_t value)
 {
-	uint8_t *io_addr = (uint8_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("strb %w1, %0" : "=Q" (*io_addr) : "r"(value) : "memory");
+	uint8_t *io_addr =
+	    (uint8_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("strb %w1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(value)
+	    : "memory");
 }
 
 void
 i_ddi_io_put16(ddi_acc_impl_t *hdlp, uint16_t *addr, uint16_t value)
 {
-	uint16_t *io_addr = (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("strh %w1, %0" : "=Q" (*io_addr) : "r"(value) : "memory");
+	uint16_t *io_addr =
+	    (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("strh %w1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(value)
+	    : "memory");
 }
 
 void
 i_ddi_io_put32(ddi_acc_impl_t *hdlp, uint32_t *addr, uint32_t value)
 {
-	uint32_t *io_addr = (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("str %w1, %0" : "=Q" (*io_addr) : "r"(value) : "memory");
+	uint32_t *io_addr =
+	    (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("str %w1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(value)
+	    : "memory");
 }
 
 void
 i_ddi_io_put64(ddi_acc_impl_t *hdlp, uint64_t *addr, uint64_t value)
 {
-	uint64_t *io_addr = (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("str %1, %0" : "=Q" (*io_addr) : "r"(value) : "memory");
+	uint64_t *io_addr =
+	    (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("str %1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(value)
+	    : "memory");
 }
 
 void
-i_ddi_io_rep_get8(ddi_acc_impl_t *hdlp, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_get8(ddi_acc_impl_t *hdlp, uint8_t *host_addr,
+    uint8_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint8_t *io_dev_addr = (uint8_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint8_t *io_dev_addr =
+	    (uint8_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldrb %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldrb %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldrb %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldrb %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, const uint_t flags)
+i_ddi_io_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, const uint_t flags)
 {
-	uint16_t *io_dev_addr = (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint16_t *io_dev_addr =
+	    (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint32_t *io_dev_addr = (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint32_t *io_dev_addr =
+	    (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldr %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldr %w0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint64_t *io_dev_addr = (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint64_t *io_dev_addr =
+	    (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("ldr %0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("ldr %0, %1" : "=r" (*(host_addr++)) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (*(host_addr++))
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_put8(ddi_acc_impl_t *hdlp, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_put8(ddi_acc_impl_t *hdlp, uint8_t *host_addr,
+    uint8_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint8_t *io_dev_addr = (uint8_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint8_t *io_dev_addr =
+	    (uint8_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("strb %w1, %0" : "=Q" (*(io_dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strb %w1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("strb %w1, %0" : "=Q" (*(io_dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strb %w1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint16_t *io_dev_addr = (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint16_t *io_dev_addr =
+	    (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(io_dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(io_dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint32_t *io_dev_addr = (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint32_t *io_dev_addr =
+	    (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(io_dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(io_dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 void
-i_ddi_io_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint64_t *io_dev_addr = (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint64_t *io_dev_addr =
+	    (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(io_dev_addr++)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(*(host_addr++))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(io_dev_addr)) : "r"(*(host_addr++)) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(*(host_addr++))
+			    : "memory");
 }
 
 uint16_t
 i_ddi_io_swap_get16(ddi_acc_impl_t *hdlp, uint16_t *addr)
 {
-	uint16_t *io_addr = (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint16_t *io_addr =
+	    (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint16_t x;
-	__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return __builtin_bswap16(x);
+	__asm__ volatile("ldrh %w0, %1"
+	    : "=r" (x)
+	    : "Q" (*io_addr)
+	    : "memory");
+	return (__builtin_bswap16(x));
 }
 
 uint32_t
 i_ddi_io_swap_get32(ddi_acc_impl_t *hdlp, uint32_t *addr)
 {
-	uint32_t *io_addr = (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint32_t *io_addr =
+	    (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint32_t x;
-	__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return __builtin_bswap32(x);
+	__asm__ volatile("ldr %w0, %1"
+	    : "=r" (x)
+	    : "Q" (*io_addr)
+	    : "memory");
+	return (__builtin_bswap32(x));
 }
 
 uint64_t
 i_ddi_io_swap_get64(ddi_acc_impl_t *hdlp, uint64_t *addr)
 {
-	uint64_t *io_addr = (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	uint64_t *io_addr =
+	    (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
 	uint64_t x;
-	__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*io_addr) : "memory");
-	return __builtin_bswap64(x);
+	__asm__ volatile("ldr %0, %1"
+	    : "=r" (x)
+	    : "Q" (*io_addr)
+	    : "memory");
+	return (__builtin_bswap64(x));
 }
 
 void
 i_ddi_io_swap_put16(ddi_acc_impl_t *hdlp, uint16_t *addr, uint16_t value)
 {
-	uint16_t *io_addr = (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("strh %w1, %0" : "=Q" (*io_addr) : "r"(__builtin_bswap16(value)) : "memory");
+	uint16_t *io_addr =
+	    (uint16_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("strh %w1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(__builtin_bswap16(value))
+	    : "memory");
 }
 
 void
 i_ddi_io_swap_put32(ddi_acc_impl_t *hdlp, uint32_t *addr, uint32_t value)
 {
-	uint32_t *io_addr = (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("str %w1, %0" : "=Q" (*io_addr) : "r"(__builtin_bswap32(value)) : "memory");
+	uint32_t *io_addr =
+	    (uint32_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("str %w1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(__builtin_bswap32(value))
+	    : "memory");
 }
 
 void
 i_ddi_io_swap_put64(ddi_acc_impl_t *hdlp, uint64_t *addr, uint64_t value)
 {
-	uint64_t *io_addr = (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
-	__asm__ volatile ("str %1, %0" : "=Q" (*io_addr) : "r"(__builtin_bswap64(value)) : "memory");
+	uint64_t *io_addr =
+	    (uint64_t *)((uintptr_t)addr + hdlp->ahi_io_port_base);
+	__asm__ volatile("str %1, %0"
+	    : "=Q" (*io_addr)
+	    : "r"(__builtin_bswap64(value))
+	    : "memory");
 }
 
 void
-i_ddi_io_swap_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, const uint_t flags)
+i_ddi_io_swap_rep_get16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, const uint_t flags)
 {
-	uint16_t *io_dev_addr = (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint16_t *io_dev_addr =
+	    (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	uint16_t x;
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--) {
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 			*host_addr++ = __builtin_bswap16(x);
 		}
 	else
 		while (repcount--) {
-			__asm__ volatile ("ldrh %w0, %1" : "=r" (x) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldrh %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 			*host_addr++ = __builtin_bswap16(x);
 		}
 }
 
 void
-i_ddi_io_swap_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_swap_rep_get32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint32_t *io_dev_addr = (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint32_t *io_dev_addr =
+	    (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	uint32_t x;
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--) {
-			__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 			*host_addr++ = __builtin_bswap32(x);
 		}
 	else
 		while (repcount--) {
-			__asm__ volatile ("ldr %w0, %1" : "=r" (x) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldr %w0, %1"
+			    : "=r" (x)
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 			*host_addr++ = __builtin_bswap32(x);
 		}
 }
 
 void
-i_ddi_io_swap_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_swap_rep_get64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint64_t *io_dev_addr = (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint64_t *io_dev_addr =
+	    (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	uint64_t x;
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--) {
-			__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*(io_dev_addr++)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (x)
+			    : "Q" (*(io_dev_addr++))
+			    : "memory");
 			*host_addr++ = __builtin_bswap64(x);
 		}
 	else
 		while (repcount--) {
-			__asm__ volatile ("ldr %0, %1" : "=r" (x) : "Q" (*(io_dev_addr)) : "memory");
+			__asm__ volatile("ldr %0, %1"
+			    : "=r" (x)
+			    : "Q" (*(io_dev_addr))
+			    : "memory");
 			*host_addr++ = __builtin_bswap64(x);
 		}
 }
 
 void
-i_ddi_io_swap_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_swap_rep_put16(ddi_acc_impl_t *hdlp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint16_t *io_dev_addr = (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint16_t *io_dev_addr =
+	    (uint16_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(io_dev_addr++)) : "r"(__builtin_bswap16(*(host_addr++))) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(__builtin_bswap16(*(host_addr++)))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("strh %w1, %0" : "=Q" (*(io_dev_addr)) : "r"(__builtin_bswap16(*(host_addr++))) : "memory");
+			__asm__ volatile("strh %w1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(__builtin_bswap16(*(host_addr++)))
+			    : "memory");
 }
 
 void
-i_ddi_io_swap_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_swap_rep_put32(ddi_acc_impl_t *hdlp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint32_t *io_dev_addr = (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint32_t *io_dev_addr =
+	    (uint32_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(io_dev_addr++)) : "r"(__builtin_bswap32(*(host_addr++))) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(__builtin_bswap32(*(host_addr++)))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %w1, %0" : "=Q" (*(io_dev_addr)) : "r"(__builtin_bswap32(*(host_addr++))) : "memory");
+			__asm__ volatile("str %w1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(__builtin_bswap32(*(host_addr++)))
+			    : "memory");
 }
 
 void
-i_ddi_io_swap_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_io_swap_rep_put64(ddi_acc_impl_t *hdlp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
-	uint64_t *io_dev_addr = (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
+	uint64_t *io_dev_addr =
+	    (uint64_t *)((uintptr_t)dev_addr + hdlp->ahi_io_port_base);
 	if (flags == DDI_DEV_AUTOINCR)
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(io_dev_addr++)) : "r"(__builtin_bswap64(*(host_addr++))) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(io_dev_addr++))
+			    : "r"(__builtin_bswap64(*(host_addr++)))
+			    : "memory");
 	else
 		while (repcount--)
-			__asm__ volatile ("str %1, %0" : "=Q" (*(io_dev_addr)) : "r"(__builtin_bswap64(*(host_addr++))) : "memory");
+			__asm__ volatile("str %1, %0"
+			    : "=Q" (*(io_dev_addr))
+			    : "r"(__builtin_bswap64(*(host_addr++)))
+			    : "memory");
 }
 
 static void
-i_ddi_caut_getput_ctlops(ddi_acc_impl_t *hp, uint64_t host_addr, uint64_t dev_addr, size_t size, size_t repcount, uint_t flags, ddi_ctl_enum_t cmd)
+i_ddi_caut_getput_ctlops(ddi_acc_impl_t *hp, uint64_t host_addr,
+    uint64_t dev_addr, size_t size, size_t repcount,
+    uint_t flags, ddi_ctl_enum_t cmd)
 {
 	peekpoke_ctlops_t	cautacc_ctlops_arg;
 
@@ -665,14 +947,16 @@ i_ddi_caut_getput_ctlops(ddi_acc_impl_t *hp, uint64_t host_addr, uint64_t dev_ad
 	cautacc_ctlops_arg.repcount = repcount;
 	cautacc_ctlops_arg.flags = flags;
 
-	(void) ddi_ctlops(hp->ahi_common.ah_dip, hp->ahi_common.ah_dip, cmd, &cautacc_ctlops_arg, NULL);
+	(void) ddi_ctlops(hp->ahi_common.ah_dip, hp->ahi_common.ah_dip,
+	    cmd, &cautacc_ctlops_arg, NULL);
 }
 
 uint8_t
 i_ddi_caut_get8(ddi_acc_impl_t *hp, uint8_t *addr)
 {
 	uint8_t value;
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint8_t), 1, 0, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint8_t), 1, 0, DDI_CTLOPS_PEEK);
 
 	return (value);
 }
@@ -681,7 +965,8 @@ uint16_t
 i_ddi_caut_get16(ddi_acc_impl_t *hp, uint16_t *addr)
 {
 	uint16_t value;
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint16_t), 1, 0, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint16_t), 1, 0, DDI_CTLOPS_PEEK);
 
 	return (value);
 }
@@ -690,7 +975,8 @@ uint32_t
 i_ddi_caut_get32(ddi_acc_impl_t *hp, uint32_t *addr)
 {
 	uint32_t value;
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint32_t), 1, 0, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint32_t), 1, 0, DDI_CTLOPS_PEEK);
 
 	return (value);
 }
@@ -699,7 +985,8 @@ uint64_t
 i_ddi_caut_get64(ddi_acc_impl_t *hp, uint64_t *addr)
 {
 	uint64_t value;
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint64_t), 1, 0, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint64_t), 1, 0, DDI_CTLOPS_PEEK);
 
 	return (value);
 }
@@ -707,73 +994,93 @@ i_ddi_caut_get64(ddi_acc_impl_t *hp, uint64_t *addr)
 void
 i_ddi_caut_put8(ddi_acc_impl_t *hp, uint8_t *addr, uint8_t value)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint8_t), 1, 0, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint8_t), 1, 0, DDI_CTLOPS_POKE);
 }
 
 void
 i_ddi_caut_put16(ddi_acc_impl_t *hp, uint16_t *addr, uint16_t value)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint16_t), 1, 0, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint16_t), 1, 0, DDI_CTLOPS_POKE);
 }
 
 void
 i_ddi_caut_put32(ddi_acc_impl_t *hp, uint32_t *addr, uint32_t value)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint32_t), 1, 0, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint32_t), 1, 0, DDI_CTLOPS_POKE);
 }
 
 void
 i_ddi_caut_put64(ddi_acc_impl_t *hp, uint64_t *addr, uint64_t value)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr, sizeof (uint64_t), 1, 0, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)&value, (uintptr_t)addr,
+	    sizeof (uint64_t), 1, 0, DDI_CTLOPS_POKE);
 }
 
 void
-i_ddi_caut_rep_get8(ddi_acc_impl_t *hp, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_get8(ddi_acc_impl_t *hp, uint8_t *host_addr,
+    uint8_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint8_t), repcount, flags, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint8_t), repcount, flags, DDI_CTLOPS_PEEK);
 }
 
 void
-i_ddi_caut_rep_get16(ddi_acc_impl_t *hp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_get16(ddi_acc_impl_t *hp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint16_t), repcount, flags, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint16_t), repcount, flags, DDI_CTLOPS_PEEK);
 }
 
 void
-i_ddi_caut_rep_get32(ddi_acc_impl_t *hp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_get32(ddi_acc_impl_t *hp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint32_t), repcount, flags, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint32_t), repcount, flags, DDI_CTLOPS_PEEK);
 }
 
 void
-i_ddi_caut_rep_get64(ddi_acc_impl_t *hp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_get64(ddi_acc_impl_t *hp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint64_t), repcount, flags, DDI_CTLOPS_PEEK);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint64_t), repcount, flags, DDI_CTLOPS_PEEK);
 }
 
 void
-i_ddi_caut_rep_put8(ddi_acc_impl_t *hp, uint8_t *host_addr, uint8_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_put8(ddi_acc_impl_t *hp, uint8_t *host_addr,
+    uint8_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint8_t), repcount, flags, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint8_t), repcount, flags, DDI_CTLOPS_POKE);
 }
 
 void
-i_ddi_caut_rep_put16(ddi_acc_impl_t *hp, uint16_t *host_addr, uint16_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_put16(ddi_acc_impl_t *hp, uint16_t *host_addr,
+    uint16_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint16_t), repcount, flags, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint16_t), repcount, flags, DDI_CTLOPS_POKE);
 }
 
 void
-i_ddi_caut_rep_put32(ddi_acc_impl_t *hp, uint32_t *host_addr, uint32_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_put32(ddi_acc_impl_t *hp, uint32_t *host_addr,
+    uint32_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint32_t), repcount, flags, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint32_t), repcount, flags, DDI_CTLOPS_POKE);
 }
 
 void
-i_ddi_caut_rep_put64(ddi_acc_impl_t *hp, uint64_t *host_addr, uint64_t *dev_addr, size_t repcount, uint_t flags)
+i_ddi_caut_rep_put64(ddi_acc_impl_t *hp, uint64_t *host_addr,
+    uint64_t *dev_addr, size_t repcount, uint_t flags)
 {
-	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr, sizeof (uint64_t), repcount, flags, DDI_CTLOPS_POKE);
+	i_ddi_caut_getput_ctlops(hp, (uintptr_t)host_addr, (uintptr_t)dev_addr,
+	    sizeof (uint64_t), repcount, flags, DDI_CTLOPS_POKE);
 }
 
 int
@@ -862,9 +1169,10 @@ i_ddi_get_intx_nintrs(dev_info_t *dip)
 	    DDI_PROP_CANSLEEP,
 	    "interrupts", (caddr_t)&ip, &intrlen) == DDI_SUCCESS) {
 
-		intr_sz = ddi_getprop(DDI_DEV_T_ANY, dip, 0, "#interrupt-cells", 1);
+		intr_sz = ddi_getprop(DDI_DEV_T_ANY, dip,
+		    0, "#interrupt-cells", 1);
 		/* adjust for number of bytes */
-		intr_sz *= sizeof(int32_t);
+		intr_sz *= sizeof (int32_t);
 
 		ret = intrlen / intr_sz;
 
@@ -876,7 +1184,9 @@ i_ddi_get_intx_nintrs(dev_info_t *dip)
 
 void
 i_ddi_intr_redist_all_cpus()
-{}
+{
+	/* nothing (yet) */
+}
 
 uint_t
 impl_assign_instance(dev_info_t *dip)
@@ -903,8 +1213,11 @@ impl_check_cpu(dev_info_t *devi)
 }
 
 void
-impl_fix_props(dev_info_t *dip, dev_info_t *ch_dip, char *name, int len, caddr_t buffer)
-{}
+impl_fix_props(dev_info_t *dip, dev_info_t *ch_dip, char *name,
+    int len, caddr_t buffer)
+{
+	/* nothing (yet) */
+}
 
 static int
 get_prop_int_array(dev_info_t *di, char *pname, int **pval, uint_t *plen)
@@ -924,7 +1237,8 @@ impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 {
 	name[0] = '\0';
 	if (ddi_get_parent_data(child) == NULL) {
-		struct ddi_parent_private_data *pdptr = kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
+		struct ddi_parent_private_data *pdptr =
+		    kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
 		ddi_set_parent_data(child, pdptr);
 	}
 
@@ -939,7 +1253,7 @@ impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 		}
 	}
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 }
 
 int
@@ -989,40 +1303,64 @@ impl_ddi_sunbus_removechild(dev_info_t *dip)
 	impl_rem_dev_props(dip);
 }
 
+/*
+ * Copy name to property_name, since name
+ * is in the low address range below kernelbase.
+ */
+static void
+copy_boot_str(const char *boot_str, char *kern_str, int len)
+{
+	int i = 0;
+
+	while (i < len - 1 && boot_str[i] != '\0') {
+		kern_str[i] = boot_str[i];
+		i++;
+	}
+
+	kern_str[i] = 0;	/* null terminate */
+	if (boot_str[i] != '\0')
+		cmn_err(CE_WARN,
+		    "boot property string is truncated to %s", kern_str);
+}
+
 static void
 get_boot_properties(void)
 {
 	extern char hw_provider[];
 	dev_info_t *devi;
 	char *name;
-	int length;
-	char property_name[OBP_MAXPROPNAME], property_val[50];
+	int length, flags;
+	char property_name[50], property_val[50];
 	void *bop_staging_area;
 
 	bop_staging_area = kmem_zalloc(MMU_PAGESIZE, KM_NOSLEEP);
 
+	/*
+	 * Import "root" properties from the boot.
+	 *
+	 * We do this by invoking BOP_NEXTPROP until the list
+	 * is completely copied in.
+	 */
+
 	devi = ddi_root_node();
-	property_name[0] = '\0';
-	for (name = BOP_NEXTPROP(bootops, property_name);	/* get first */
-	    name && strlen(name) > 0;				/* NULL => DONE */
-	    name = BOP_NEXTPROP(bootops, property_name)) {	/* get next */
+	for (name = BOP_NEXTPROP(bootops, "");		/* get first */
+	    name;					/* NULL => DONE */
+	    name = BOP_NEXTPROP(bootops, name)) {	/* get next */
 
-		if (strlen(name) >= OBP_MAXPROPNAME) {
-			cmn_err(CE_NOTE,
-			    "boot property name %s longer than 0x%lx\n",
-			    name, sizeof(property_name));
-			break;
-		}
+		/* copy string to memory above kernelbase */
+		copy_boot_str(name, property_name, 50);
 
-		strcpy(property_name, name);
-
+		/*
+		 * Skip vga properties. They will be picked up later
+		 * by get_vga_properties.
+		 */
 		if (strcmp(property_name, "display-edif-block") == 0 ||
 		    strcmp(property_name, "display-edif-id") == 0) {
 			continue;
 		}
 
 		length = BOP_GETPROPLEN(bootops, property_name);
-		if (length == 0)
+		if (length < 0)
 			continue;
 		if (length > MMU_PAGESIZE) {
 			cmn_err(CE_NOTE,
@@ -1031,31 +1369,85 @@ get_boot_properties(void)
 			continue;
 		}
 		BOP_GETPROP(bootops, property_name, bop_staging_area);
+		flags = do_bsys_getproptype(bootops, property_name);
 
-		if (strcmp(property_name, "si-machine") == 0) {
-			(void) strncpy(utsname.machine, bop_staging_area, SYS_NMLN);
-			utsname.machine[SYS_NMLN - 1] = 0;
-		} else if (strcmp(property_name, "si-hw-provider") == 0) {
+		/*
+		 * special properties:
+		 * si-machine, si-hw-provider
+		 *	goes to kernel data structures.
+		 * bios-boot-device and stdout
+		 *	goes to hardware property list so it may show up
+		 *	in the prtconf -vp output. This is needed by
+		 *	Install/Upgrade. Once we fix install upgrade,
+		 *	this can be taken out.
+		 * XXXARM: It's unclear whether we need bios-boot-device.
+		 */
+		if (strcmp(name, "si-machine") == 0) {
+			(void) strncpy(utsname.machine, bop_staging_area,
+			    SYS_NMLN);
+			utsname.machine[SYS_NMLN - 1] = '\0';
+			continue;
+		}
+		if (strcmp(name, "si-hw-provider") == 0) {
 			(void) strncpy(hw_provider, bop_staging_area, SYS_NMLN);
-			hw_provider[SYS_NMLN - 1] = 0;
-		} else if (strcmp(property_name, "bios-boot-device") == 0) {
-			if (length >= sizeof(property_val)) {
-				cmn_err(CE_NOTE,
-				    "boot property %s longer than 0x%lx, ignored\n",
-				    property_name, MMU_PAGESIZE);
-			}
-			bcopy(bop_staging_area, property_val, length);
+			hw_provider[SYS_NMLN - 1] = '\0';
+			continue;
+		}
+		if (strcmp(name, "bios-boot-device") == 0) {
+			copy_boot_str(bop_staging_area, property_val, 50);
 			(void) ndi_prop_update_string(DDI_DEV_T_NONE, devi,
 			    property_name, property_val);
-		} else if (strcmp(property_name, "stdout") == 0) {
+			continue;
+		}
+		if (strcmp(name, "stdout") == 0) {
 			(void) ndi_prop_update_int(DDI_DEV_T_NONE, devi,
 			    property_name, *((int *)bop_staging_area));
-		} else if (strcmp(property_name, "ramdisk_start") == 0) {
-		} else if (strcmp(property_name, "ramdisk_end") == 0) {
-		} else if (strcmp(property_name, "ramdisk_end") == 0) {
-		} else {
+			continue;
+		}
+
+		/* Boolean property */
+		if (length == 0) {
+			(void) e_ddi_prop_create(DDI_DEV_T_NONE, devi,
+			    DDI_PROP_CANSLEEP, property_name, NULL, 0);
+			continue;
+		}
+
+		/* Now anything else based on type. */
+		switch (flags) {
+		case DDI_PROP_TYPE_INT:
+			if (length == sizeof (int)) {
+				(void) e_ddi_prop_update_int(DDI_DEV_T_NONE,
+				    devi, property_name,
+				    *((int *)bop_staging_area));
+			} else {
+				(void) e_ddi_prop_update_int_array(
+				    DDI_DEV_T_NONE, devi, property_name,
+				    bop_staging_area, length / sizeof (int));
+			}
+			break;
+		case DDI_PROP_TYPE_STRING:
+			(void) e_ddi_prop_update_string(DDI_DEV_T_NONE, devi,
+			    property_name, bop_staging_area);
+			break;
+		case DDI_PROP_TYPE_BYTE:
+			(void) e_ddi_prop_update_byte_array(DDI_DEV_T_NONE,
+			    devi, property_name, bop_staging_area, length);
+			break;
+		case DDI_PROP_TYPE_INT64:
+			if (length == sizeof (int64_t)) {
+				(void) e_ddi_prop_update_int64(DDI_DEV_T_NONE,
+				    devi, property_name,
+				    *((int64_t *)bop_staging_area));
+			} else {
+				(void) e_ddi_prop_update_int64_array(
+				    DDI_DEV_T_NONE, devi, property_name,
+				    bop_staging_area,
+				    length / sizeof (int64_t));
+			}
+			break;
+		default:
 			/* Property type unknown, use old prop interface */
-			e_ddi_prop_create(DDI_DEV_T_NONE, devi,
+			(void) e_ddi_prop_create(DDI_DEV_T_NONE, devi,
 			    DDI_PROP_CANSLEEP, property_name, bop_staging_area,
 			    length);
 		}
@@ -1071,11 +1463,10 @@ impl_setup_ddi(void)
 	rd_existing_t rd_mem_prop;
 	int err;
 
-	ndi_devi_alloc_sleep(ddi_root_node(), "ramdisk", (pnode_t)DEVI_SID_NODEID, &xdip);
+	ndi_devi_alloc_sleep(
+	    ddi_root_node(), "ramdisk", (pnode_t)DEVI_SID_NODEID, &xdip);
 	(void) BOP_GETPROP(bootops, "ramdisk_start", (void *)&ramdisk_start);
 	(void) BOP_GETPROP(bootops, "ramdisk_end", (void *)&ramdisk_end);
-	ramdisk_start = ntohll(ramdisk_start);
-	ramdisk_end = ntohll(ramdisk_end);
 
 	rd_mem_prop.phys = ramdisk_start;
 	rd_mem_prop.size = ramdisk_end - ramdisk_start + 1;
@@ -1529,7 +1920,7 @@ contig_free(void *addr, size_t size)
  */
 static void *
 kalloca(size_t size, size_t align, int cansleep, int physcontig,
-	ddi_dma_attr_t *attr)
+    ddi_dma_attr_t *attr)
 {
 	size_t *addr, *raddr, rsize;
 	size_t hdrsize = 4 * sizeof (size_t);	/* must be power of 2 */
@@ -1713,7 +2104,7 @@ get_address_cells(pnode_t node)
 	while (node > 0) {
 		int len = prom_getproplen(node, "#address-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#address-cells", (caddr_t)&prop);
 			address_cells = ntohl(prop);
@@ -1721,7 +2112,7 @@ get_address_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return address_cells;
+	return (address_cells);
 }
 
 static int
@@ -1732,7 +2123,7 @@ get_size_cells(pnode_t node)
 	while (node > 0) {
 		int len = prom_getproplen(node, "#size-cells");
 		if (len > 0) {
-			ASSERT(len == sizeof(int));
+			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "#size-cells", (caddr_t)&prop);
 			size_cells = ntohl(prop);
@@ -1740,7 +2131,7 @@ get_size_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return size_cells;
+	return (size_cells);
 }
 
 struct dma_range
@@ -1778,7 +2169,9 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 
 		parent = prom_parentnode(node);
 		if (parent <= 0) {
-			cmn_err(CE_WARN, "%s: root node has a dma-ranges property.", __func__);
+			cmn_err(CE_WARN,
+			    "%s: root node has a dma-ranges property.",
+			    __func__);
 			goto err_exit;
 		}
 
@@ -1787,27 +2180,34 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 		parent_address_cells = get_address_cells(parent);
 
 		int len = prom_getproplen(node, "dma-ranges");
-		if (len % (sizeof(uint32_t) * (bus_address_cells + parent_address_cells + bus_size_cells)) != 0) {
-			cmn_err(CE_WARN, "%s: dma-ranges property length is invalid\n"
+		if (len % (sizeof (uint32_t) * (bus_address_cells +
+		    parent_address_cells + bus_size_cells)) != 0) {
+			cmn_err(CE_WARN,
+			    "%s: dma-ranges property length is invalid\n"
 			    "bus_address_cells %d\n"
 			    "parent_address_cells %d\n"
 			    "bus_size_cells %d\n"
-			    "len %d\n"
-			    , __func__, bus_address_cells, parent_address_cells, bus_size_cells, len);
+			    "len %d\n",
+			    __func__, bus_address_cells, parent_address_cells,
+			    bus_size_cells, len);
 			ret = DDI_FAILURE;
 			goto err_exit;
 		}
-		int num = len / (sizeof(uint32_t) * (bus_address_cells + parent_address_cells + bus_size_cells));
+		int num = len / (sizeof (uint32_t) * (
+		    bus_address_cells + parent_address_cells + bus_size_cells));
 		uint32_t *cells = __builtin_alloca(len);
 		prom_getprop(node, "dma-ranges", (caddr_t)cells);
 
 		boolean_t first = (dma_ranges == NULL);
 		if (first) {
 			dma_range_num = num;
-			dma_ranges = kmem_zalloc(sizeof(struct dma_range) * dma_range_num, KM_SLEEP);
-			update = kmem_zalloc(sizeof(boolean_t) * dma_range_num, KM_SLEEP);
+			dma_ranges = kmem_zalloc(
+			    sizeof (struct dma_range) * dma_range_num,
+			    KM_SLEEP);
+			update = kmem_zalloc(
+			    sizeof (boolean_t) * dma_range_num, KM_SLEEP);
 		} else {
-			memset(update, 0, sizeof(boolean_t) * dma_range_num);
+			memset(update, 0, sizeof (boolean_t) * dma_range_num);
 		}
 
 		for (int i = 0; i < num; i++) {
@@ -1816,15 +2216,23 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 			uint64_t bus_size = 0;
 			for (int j = 0; j < bus_address_cells; j++) {
 				bus_address <<= 32;
-				bus_address += ntohl(cells[(bus_address_cells + parent_address_cells + bus_size_cells) * i + j]);
+				bus_address += ntohl(cells[(
+				    bus_address_cells + parent_address_cells +
+				    bus_size_cells) * i + j]);
 			}
 			for (int j = 0; j < parent_address_cells; j++) {
 				parent_address <<= 32;
-				parent_address += ntohl(cells[(bus_address_cells + parent_address_cells + bus_size_cells) * i + bus_address_cells + j]);
+				parent_address += ntohl(
+				    cells[(bus_address_cells +
+				    parent_address_cells + bus_size_cells) *
+				    i + bus_address_cells + j]);
 			}
 			for (int j = 0; j < bus_size_cells; j++) {
 				bus_size <<= 32;
-				bus_size += ntohl(cells[(bus_address_cells + parent_address_cells + bus_size_cells) * i + bus_address_cells + parent_address_cells + j]);
+				bus_size += ntohl(cells[(bus_address_cells +
+				    parent_address_cells + bus_size_cells) *
+				    i + bus_address_cells +
+				    parent_address_cells + j]);
 			}
 
 			if (first) {
@@ -1834,8 +2242,14 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 				update[i] = B_TRUE;
 			} else {
 				for (int j = 0; j < dma_range_num; j++) {
-					if (bus_address <= dma_ranges[j].cpu_addr && dma_ranges[j].cpu_addr + dma_ranges[j].size - 1 <= bus_address + bus_size - 1) {
-						dma_ranges[j].cpu_addr += (parent_address - bus_address);
+					if (bus_address <=
+					    dma_ranges[j].cpu_addr &&
+					    dma_ranges[j].cpu_addr +
+					    dma_ranges[j].size - 1 <=
+					    bus_address + bus_size - 1) {
+						dma_ranges[j].cpu_addr +=
+						    (parent_address -
+						    bus_address);
 						update[j] = B_TRUE;
 						break;
 					}
@@ -1844,7 +2258,9 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 		}
 		for (int i = 0; i < dma_range_num; i++) {
 			if (!update[i]) {
-				cmn_err(CE_WARN, "%s: dma-ranges property is invalid", __func__);
+				cmn_err(CE_WARN,
+				    "%s: dma-ranges property is invalid",
+				    __func__);
 				ret = DDI_FAILURE;
 				goto err_exit;
 			}
@@ -1855,44 +2271,54 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 	*range = dma_ranges;
 err_exit:
 	if (ret != DDI_SUCCESS && dma_ranges) {
-		kmem_free(dma_ranges, sizeof(struct dma_range) * dma_range_num);
+		kmem_free(
+		    dma_ranges, sizeof (struct dma_range) * dma_range_num);
 	}
 	if (update) {
-		kmem_free(update, sizeof(boolean_t) * dma_range_num);
+		kmem_free(update, sizeof (boolean_t) * dma_range_num);
 	}
-	return ret;
+	return (ret);
 }
 
 int
-i_ddi_convert_dma_attr(ddi_dma_attr_t *dst, dev_info_t *dip, const ddi_dma_attr_t *src)
+i_ddi_convert_dma_attr(
+    ddi_dma_attr_t *dst, dev_info_t *dip, const ddi_dma_attr_t *src)
 {
 	*dst = *src;
 
 	int dma_range_num = 0;
 	struct dma_range *dma_ranges = NULL;
-	int ret= get_dma_ranges(dip, &dma_ranges, &dma_range_num);
+	int ret = get_dma_ranges(dip, &dma_ranges, &dma_range_num);
 	if (ret != DDI_SUCCESS)
-		return DDI_FAILURE;
+		return (DDI_FAILURE);
 
 	if (dma_range_num > 0) {
 		int i;
 		for (i = 0; i < dma_range_num; i++) {
-			if (dma_ranges[i].bus_addr <= dst->dma_attr_addr_lo && dst->dma_attr_addr_hi <= dma_ranges[i].bus_addr + dma_ranges[i].size - 1) {
-				dst->dma_attr_addr_lo += (dma_ranges[i].cpu_addr - dma_ranges[i].bus_addr);
-				dst->dma_attr_addr_hi += (dma_ranges[i].cpu_addr - dma_ranges[i].bus_addr);
+			if (dma_ranges[i].bus_addr <= dst->dma_attr_addr_lo &&
+			    dst->dma_attr_addr_hi <=
+			    dma_ranges[i].bus_addr + dma_ranges[i].size - 1) {
+				dst->dma_attr_addr_lo +=
+				    (dma_ranges[i].cpu_addr -
+				    dma_ranges[i].bus_addr);
+				dst->dma_attr_addr_hi +=
+				    (dma_ranges[i].cpu_addr -
+				    dma_ranges[i].bus_addr);
 				break;
 			}
 		}
 		if (i == dma_range_num) {
-			cmn_err(CE_WARN, "%s: ddi_dma_attr_t is invalid range", __func__);
+			cmn_err(CE_WARN,
+			    "%s: ddi_dma_attr_t is invalid range", __func__);
 			ret = DDI_FAILURE;
 		}
 	}
 
 	if (dma_ranges) {
-		kmem_free(dma_ranges, sizeof(struct dma_range) * dma_range_num);
+		kmem_free(
+		    dma_ranges, sizeof (struct dma_range) * dma_range_num);
 	}
-	return ret;
+	return (ret);
 }
 
 int
@@ -1900,29 +2326,33 @@ i_ddi_update_dma_attr(dev_info_t *dip, ddi_dma_attr_t *attr)
 {
 	int dma_range_num = 0;
 	struct dma_range *dma_ranges = NULL;
-	int ret= get_dma_ranges(dip, &dma_ranges, &dma_range_num);
+	int ret = get_dma_ranges(dip, &dma_ranges, &dma_range_num);
 	if (ret != DDI_SUCCESS)
-		return DDI_FAILURE;
+		return (DDI_FAILURE);
 
 	if (dma_range_num > 0) {
 		int dma_range_index = 0;
 		for (int i = 0; i < dma_range_num; i++) {
-			if (dma_ranges[i].cpu_addr < dma_ranges[dma_range_index].cpu_addr) {
+			if (dma_ranges[i].cpu_addr <
+			    dma_ranges[dma_range_index].cpu_addr) {
 				dma_range_index = i;
 			}
 		}
 
 		attr->dma_attr_addr_lo = dma_ranges[dma_range_index].bus_addr;
-		attr->dma_attr_addr_hi = dma_ranges[dma_range_index].bus_addr + dma_ranges[dma_range_index].size - 1;
+		attr->dma_attr_addr_hi =
+		    dma_ranges[dma_range_index].bus_addr +
+		    dma_ranges[dma_range_index].size - 1;
 	} else {
 		ret = DDI_FAILURE;
 	}
 
 	if (dma_ranges) {
-		kmem_free(dma_ranges, sizeof(struct dma_range) * dma_range_num);
+		kmem_free(
+		    dma_ranges, sizeof (struct dma_range) * dma_range_num);
 	}
 
-	return ret;
+	return (ret);
 }
 
 /*
@@ -1937,9 +2367,9 @@ i_ddi_update_dma_attr(dev_info_t *dip, ddi_dma_attr_t *attr)
 /*ARGSUSED*/
 int
 i_ddi_mem_alloc(dev_info_t *dip, ddi_dma_attr_t *oattr,
-	size_t length, int cansleep, int flags,
-	ddi_device_acc_attr_t *accattrp, caddr_t *kaddrp,
-	size_t *real_length, ddi_acc_hdl_t *ap)
+    size_t length, int cansleep, int flags,
+    ddi_device_acc_attr_t *accattrp, caddr_t *kaddrp,
+    size_t *real_length, ddi_acc_hdl_t *ap)
 {
 	caddr_t a;
 	int iomin;
@@ -2272,19 +2702,23 @@ poke_mem(peekpoke_ctlops_t *in_args)
 	if (!on_trap(&otd, OT_DATA_ACCESS)) {
 		switch (in_args->size) {
 		case sizeof (uint8_t):
-			*(uint8_t *)(in_args->dev_addr) = *(uint8_t *)in_args->host_addr;
+			*(uint8_t *)(in_args->dev_addr) =
+			    *(uint8_t *)in_args->host_addr;
 			break;
 
 		case sizeof (uint16_t):
-			*(uint16_t *)(in_args->dev_addr) = *(uint16_t *)in_args->host_addr;
+			*(uint16_t *)(in_args->dev_addr) =
+			    *(uint16_t *)in_args->host_addr;
 			break;
 
 		case sizeof (uint32_t):
-			*(uint32_t *)(in_args->dev_addr) = *(uint32_t *)in_args->host_addr;
+			*(uint32_t *)(in_args->dev_addr) =
+			    *(uint32_t *)in_args->host_addr;
 			break;
 
 		case sizeof (uint64_t):
-			*(uint64_t *)(in_args->dev_addr) = *(uint64_t *)in_args->host_addr;
+			*(uint64_t *)(in_args->dev_addr) =
+			    *(uint64_t *)in_args->host_addr;
 			break;
 
 		default:
@@ -2309,19 +2743,23 @@ peek_mem(peekpoke_ctlops_t *in_args)
 	if (!on_trap(&otd, OT_DATA_ACCESS)) {
 		switch (in_args->size) {
 		case sizeof (uint8_t):
-			*(uint8_t *)in_args->host_addr = *(uint8_t *)in_args->dev_addr;
+			*(uint8_t *)in_args->host_addr =
+			    *(uint8_t *)in_args->dev_addr;
 			break;
 
 		case sizeof (uint16_t):
-			*(uint16_t *)in_args->host_addr = *(uint16_t *)in_args->dev_addr;
+			*(uint16_t *)in_args->host_addr =
+			    *(uint16_t *)in_args->dev_addr;
 			break;
 
 		case sizeof (uint32_t):
-			*(uint32_t *)in_args->host_addr = *(uint32_t *)in_args->dev_addr;
+			*(uint32_t *)in_args->host_addr =
+			    *(uint32_t *)in_args->dev_addr;
 			break;
 
 		case sizeof (uint64_t):
-			*(uint64_t *)in_args->host_addr = *(uint64_t *)in_args->dev_addr;
+			*(uint64_t *)in_args->host_addr =
+			    *(uint64_t *)in_args->dev_addr;
 			break;
 
 		default:
@@ -2379,8 +2817,8 @@ print_dip(dev_info_t *dip, void *arg)
 {
 	char *model_str;
 	prom_printf("%s: dip=%p\n", __FUNCTION__, dip);
-	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, 0,
-		    "name", &model_str) != DDI_SUCCESS)
+	if (ddi_prop_lookup_string(
+	    DDI_DEV_T_ANY, dip, 0, "name", &model_str) != DDI_SUCCESS)
 		return (DDI_WALK_CONTINUE);
 	prom_printf("%s: name=%s\n", __FUNCTION__, model_str);
 	ddi_prop_free(model_str);

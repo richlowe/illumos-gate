@@ -19,9 +19,12 @@
  * CDDL HEADER END
  */
 /*
- * Copyright 2017 Hayashi Naoyuki
  * Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ */
+/*
+ * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2017 Hayashi Naoyuki
  */
 
 #include <sys/param.h>
@@ -66,6 +69,7 @@ extern	struct	bootops bootops;
 extern	void exitto(int (*entrypoint)());
 extern	int openfile(char *filename);
 extern int determine_fstype_and_mountroot(char *);
+extern void prom_node_late_init(void);
 
 int pagesize = PAGESIZE;
 char filename[MAXPATHLEN];
@@ -159,7 +163,7 @@ init_bootargs()
 	char *str;
 	static char buf[OBP_MAXPATHLEN];
 	int len = prom_getproplen(chosen, "bootargs");
-	if (0 < len && len < sizeof(buf)) {
+	if (0 < len && len < sizeof (buf)) {
 		prom_getprop(chosen, "bootargs", buf);
 		struct gos_params params;
 		params.gos_opts = "D:";
@@ -169,9 +173,11 @@ init_bootargs()
 		while ((c = getoptstr(&params)) != -1) {
 			switch (c) {
 			case 'D':
-				buf[params.gos_optargp - buf + params.gos_optarglen] = 0;
+				buf[params.gos_optargp - buf +
+				    params.gos_optarglen] = 0;
 				str = &buf[params.gos_optargp - buf];
-				prom_setprop(chosen, "__bootpath", (caddr_t)str, strlen(str) + 1);
+				prom_setprop(chosen, "__bootpath",
+				    (caddr_t)str, strlen(str) + 1);
 				break;
 			default:
 				break;
@@ -180,7 +186,8 @@ init_bootargs()
 	}
 	if (prom_getproplen(chosen, "__bootpath") <= 0) {
 		str = get_default_bootpath();
-		prom_setprop(chosen, "__bootpath", (caddr_t)str, strlen(str) + 1);
+		prom_setprop(chosen, "__bootpath",
+		    (caddr_t)str, strlen(str) + 1);
 	}
 }
 
@@ -200,6 +207,7 @@ main()
 	init_memlists();
 	prom_node_init();
 	init_memory();
+	prom_node_late_init();
 
 	init_machdev();
 	init_ramdisk();
@@ -210,11 +218,12 @@ main()
 	prom_printf("bootargs=%s\n", bargs);
 	prom_printf("bootpath=%s\n", bpath);
 
-	caddr_t virt = create_ramdisk(RD_ROOTFS, (uintptr_t)_RamdiskEnd - (uintptr_t)_RamdiskStart, NULL);
+	caddr_t virt = create_ramdisk(RD_ROOTFS,
+	    (uintptr_t)_RamdiskEnd - (uintptr_t)_RamdiskStart, NULL);
 	load_ramdisk(virt, def_boot_archive);
 
 	if (determine_fstype_and_mountroot(RD_ROOTFS) != VFS_SUCCESS) {
-		return -1;
+		return (-1);
 	}
 
 	dprintf("\nboot: V%d /boot interface.\n", BO_VERSION);
@@ -224,5 +233,5 @@ main()
 	strcpy(filename, kernname);
 	post_mountroot(filename);
 
-	return 0;
+	return (0);
 }

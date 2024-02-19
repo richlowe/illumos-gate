@@ -67,6 +67,7 @@ CORE_OBJS +=			\
 	dtrace_subr.o		\
 	mach_sysconfig.o	\
 	fakebop.o		\
+	boot_console.o		\
 	cpc_subr.o		\
 	ibft.o			\
 	mp_call.o		\
