@@ -74,6 +74,7 @@
 #define	DATUM
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
@@ -210,7 +211,7 @@ bool add_private_entries();
 bool new_mapfiles();
 void del_mapfiles();
 void set_output();
-void logprintf(const char *fmt, ...);
+void logprintf(char *, ...);
 bool send_ypclear();
 void xfr_exit();
 void send_callback();
@@ -349,20 +350,20 @@ set_output()
  * This constructs a logging record.
  */
 void
-logprintf(const char *fmt, ...)
+logprintf(char *fmt, ...)
 {
-	va_list va;
 	struct timeval t;
+	va_list ap;
 
+	va_start(ap, fmt);
 	fseek(stderr, 0, 2);
 	if (logging) {
 		(void) gettimeofday(&t, NULL);
 		(void) fprintf(stderr, "%19.19s: ", ctime(&t.tv_sec));
 	}
 
-	va_start(va, fmt);
-	vfprintf(stderr, fmt, va);
-	va_end(va);
+	(void) vfprintf(stderr, fmt, ap);
+	va_end(ap);
 	fflush(stderr);
 }
 
