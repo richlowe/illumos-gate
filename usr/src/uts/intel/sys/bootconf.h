@@ -167,7 +167,7 @@ typedef struct bootops {
 #define	BOP_EALLOC(bop, virthint, size, align, flags)\
 		((bop)->bsys_ealloc)(bop, virthint, size, align, flags)
 
-#define	BOP_PUTSARG(bop, msg, arg)	((bop)->bsys_printf)(bop, msg, arg)
+#define	BOP_PUTSARG(bop, ...)	((bop)->bsys_printf)(bop, __VA_ARGS__)
 
 #if defined(_KERNEL) && !defined(_BOOT)
 

@@ -24,6 +24,11 @@
  * Use is subject to license terms.
  */
 
+/*
+ * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2020 Joyent, Inc.
+ */
+
 #ifndef	_SYS_BOOTINFO_H
 #define	_SYS_BOOTINFO_H
 
@@ -33,19 +38,44 @@ extern "C" {
 
 #define	MAX_BOOT_MODULES	99
 
+typedef enum boot_module_type {
+	BMT_ROOTFS,
+	BMT_FILE,
+	BMT_HASH,
+	BMT_ENV,
+	BMT_FONT
+} boot_module_type_t;
+
 /*
  * The kernel needs to know how to find its modules.
  */
 struct boot_modules {
-	uint64_t	bm_addr;
-	uint64_t	bm_size;
+	uint64_t		bm_addr;
+	uint64_t		bm_name;
+	uint64_t		bm_hash;
+	uint64_t		bm_size;
+	boot_module_type_t	bm_type;
 };
+
+/* To help to identify UEFI system. */
+typedef enum uefi_arch_type {
+	XBI_UEFI_ARCH_NONE,
+	XBI_UEFI_ARCH_32,
+	XBI_UEFI_ARCH_64
+} uefi_arch_type_t;
 
 /*
  *
  */
 struct xboot_info {
-	uint64_t	bi_fdt;
+	uint64_t		bi_fdt;
+	uint64_t		bi_cmdline;
+	uint64_t		bi_modules;
+	uint64_t		bi_phys_avail;
+	uint64_t		bi_phys_installed;
+	uint64_t		bi_boot_scratch;
+	uint32_t		bi_module_cnt;
+	uint32_t		bi_pad1;
 };
 
 #ifdef	__cplusplus

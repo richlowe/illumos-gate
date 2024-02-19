@@ -20,6 +20,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  */
 #include <libfdt.h>
@@ -31,6 +32,90 @@
 #include <sys/bootvfs.h>
 #include "boot_plat.h"
 #include <sys/platnames.h>
+
+#define	FDT_FIX_PHANDLE_SUCCESS	0
+#define	FDT_FIX_PHANDLE_AGAIN	1
+#define	FDT_FIX_PHANDLE_FAILURE	2
+
+static int
+i_prom_fdt_fix_phandle(void *fdtp, int node)
+{
+	int err;
+	uint32_t phandle;
+
+	phandle = fdt_get_phandle(fdtp, node);
+	if (phandle > 0)
+		return (FDT_FIX_PHANDLE_SUCCESS);
+
+	err = fdt_generate_phandle(fdtp, &phandle);
+	if (err != 0)
+		return (FDT_FIX_PHANDLE_FAILURE);
+
+	err = fdt_setprop_u32(fdtp, node, "phandle", phandle);
+	if (err != 0)
+		return (FDT_FIX_PHANDLE_FAILURE);
+
+	return (FDT_FIX_PHANDLE_AGAIN);
+}
+
+static int
+prom_fdt_fix_phandle(void *fdtp, int node)
+{
+	int err;
+	int offset;
+
+	err = i_prom_fdt_fix_phandle(fdtp, node);
+	if (err != FDT_FIX_PHANDLE_SUCCESS)
+		return (err);
+
+	fdt_for_each_subnode(offset, fdtp, node) {
+		err = prom_fdt_fix_phandle(fdtp, offset);
+		if (err != FDT_FIX_PHANDLE_SUCCESS)
+			return (err);
+	}
+
+	return (FDT_FIX_PHANDLE_SUCCESS);
+}
+
+static void
+prom_fdt_fix_phandles(void *fdtp)
+{
+	int err;
+	int offset;
+
+again:
+	fdt_for_each_subnode(offset, fdtp, 0) {
+		err = prom_fdt_fix_phandle(fdtp, offset);
+		if (err == FDT_FIX_PHANDLE_AGAIN)
+			goto again;
+		else if (err != FDT_FIX_PHANDLE_SUCCESS)
+			return;
+	}
+}
+
+static void
+prom_fdt_ensure_node(void *fdtp, const char *name)
+{
+	int offset;
+
+	fdt_for_each_subnode(offset, fdtp, 0) {
+		const char *n = fdt_get_name(fdtp, offset, NULL);
+		if (n && strcmp(n, name) == 0)
+			return;
+	}
+
+	fdt_add_subnode(fdtp, 0, name);
+}
+
+void
+prom_node_late_init(void)
+{
+	void *fdtp = get_fdtp();
+	prom_fdt_fix_phandles(fdtp);
+	prom_fdt_ensure_node(fdtp, "chosen");
+	prom_fdt_ensure_node(fdtp, "options");
+	prom_fdt_ensure_node(fdtp, "alias");
+}
 
 void
 prom_node_init(void)

@@ -19,6 +19,7 @@
  * CDDL HEADER END
  */
 /*
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  */
 #include <libfdt.h>
@@ -49,10 +50,37 @@ extern uint64_t boot_args[];
 extern char _BootStart[];
 extern char _BootEnd[];
 
+#define	ENVBLOCK_SIZE	4096
+char envblock[ENVBLOCK_SIZE] = {0};
+size_t envblock_len = 0;
+
+void
+setenv(const char *name, const char *value)
+{
+	char *ptr;
+	int needed;
+	int written;
+
+	ptr = envblock + envblock_len;
+	needed = snprintf(ptr, 0, "%s=%s", name, value);
+	if (needed < 0)
+		prom_panic("setenv: snprintf failed\n");
+	needed += 2;
+	if (ENVBLOCK_SIZE - envblock_len < needed)
+		prom_panic("setenv: no space\n");
+	written = snprintf(ptr, needed, "%s=%s", name, value);
+	if (written != needed - 2)
+		prom_panic("setenv: write failed\n");
+	ptr[written] = '\0';
+	ptr[written + 1] = '\0';
+	envblock_len += written;
+	envblock_len++; /* include the NUL */
+}
+
 boolean_t
 is_netdev(char *devpath)
 {
-	return prom_is_netdev(devpath);
+	return (prom_is_netdev(devpath));
 }
 
 void
@@ -67,26 +95,28 @@ fiximp(void)
 	psci_init();
 
 	if ((4u << ((read_ctr_el0() >> 16) & 0xF)) != DCACHE_LINE) {
-		prom_printf("CTR_EL0=%08x DCACHE_LINE=%ld\n", (uint32_t)read_ctr_el0(), DCACHE_LINE);
+		prom_printf("CTR_EL0=%08x DCACHE_LINE=%ld\n",
+		    (uint32_t)read_ctr_el0(), DCACHE_LINE);
 		prom_reset();
 	}
 
 }
 
-void dump_exception(uint64_t *regs)
+void
+dump_exception(uint64_t *regs)
 {
 	uint64_t pc;
 	uint64_t esr;
 	uint64_t far;
-	__asm__ volatile ("mrs %0, elr_el1":"=r"(pc));
-	__asm__ volatile ("mrs %0, esr_el1":"=r"(esr));
-	__asm__ volatile ("mrs %0, far_el1":"=r"(far));
+	__asm__ volatile("mrs %0, elr_el1":"=r"(pc));
+	__asm__ volatile("mrs %0, esr_el1":"=r"(esr));
+	__asm__ volatile("mrs %0, far_el1":"=r"(far));
 	prom_printf("%s\n", __func__);
 	prom_printf("pc  = %016lx\n",  pc);
 	prom_printf("esr = %016lx\n",  esr);
 	prom_printf("far = %016lx\n",  far);
 	for (int i = 0; i < 31; i++)
-		prom_printf("x%d%s = %016lx\n", i, ((i >= 10)?" ":""),regs[i]);
+		prom_printf("x%d%s = %016lx\n", i, ((i >= 10)?" ":""), regs[i]);
 	prom_reset();
 }
 
@@ -98,7 +128,8 @@ add_memory(uint64_t addr, uint64_t size)
 	    begin < roundup(addr + size, install_memory_size);
 	    begin += install_memory_size) {
 		if (memlist_find(pinstalledp, begin) == NULL) {
-			memlist_add_span(begin, install_memory_size, &pinstalledp);
+			memlist_add_span(
+			    begin, install_memory_size, &pinstalledp);
 		}
 	}
 
@@ -145,42 +176,53 @@ init_physmem_common(void)
 	}
 
 	int len;
-	const volatile uint32_t *reg = fdt_getprop(_dtb_start, nodeoffset, "reg", &len);
-	for (int i = 0; i < len / (sizeof(uint32_t) * (address_cells + size_cells)); i++) {
+	const volatile uint32_t *reg =
+	    fdt_getprop(_dtb_start, nodeoffset, "reg", &len);
+	for (int i = 0;
+	    i < len / (sizeof (uint32_t) * (address_cells + size_cells));
+	    i++) {
 		uint64_t addr = 0;
 		uint64_t size = 0;
 		if (address_cells == 2) {
-			addr = ((uint64_t)(ntohl(*reg)) << 32) | ntohl(*(reg + 1));
+			addr =
+			    ((uint64_t)(ntohl(*reg)) << 32) | ntohl(*(reg + 1));
 			reg += 2;
 		} else {
 			addr = ntohl(*reg);
 			reg += 1;
 		}
 		if (size_cells == 2) {
-			size = ((uint64_t)(ntohl(*reg)) << 32) | ntohl(*(reg + 1));
+			size =
+			    ((uint64_t)(ntohl(*reg)) << 32) | ntohl(*(reg + 1));
 			reg += 2;
 		} else {
 			size = ntohl(*reg);
 			reg += 1;
 		}
 		if (size != 0) {
-			prom_printf("phys memory add %016lx - %016lx\n", addr, addr + size - 1);
+			prom_printf("phys memory add %016lx - %016lx\n",
+			    addr, addr + size - 1);
 			add_memory(addr, size);
 		}
 	}
-	for (int i = 0;; i++) {
+	for (int i = 0; ; i++) {
 		uint64_t addr;
 		uint64_t size;
 		fdt_get_mem_rsv(_dtb_start, i, &addr, &size);
 		if (size == 0)
 			break;
-		if ((uintptr_t)fdtp == addr && size == roundup(total_size, MMU_PAGESIZE)) {
-			prom_printf("memory resv %016lx - %016lx (skip for dtb)\n", addr, addr + size - 1);
+		if ((uintptr_t)fdtp == addr &&
+		    size == roundup(total_size, MMU_PAGESIZE)) {
+			prom_printf(
+			    "memory resv %016lx - %016lx (skip for dtb)\n",
+			    addr, addr + size - 1);
 			continue;
 		}
-		size = roundup(addr + size, MMU_PAGESIZE) - rounddown(addr, MMU_PAGESIZE);
+		size = roundup(addr + size, MMU_PAGESIZE) -
+		    rounddown(addr, MMU_PAGESIZE);
 		addr = rounddown(addr, MMU_PAGESIZE);
-		prom_printf("memory resv %016lx - %016lx\n", addr, addr + size - 1);
+		prom_printf("memory resv %016lx - %016lx\n",
+		    addr, addr + size - 1);
 		if (memlist_find(pfreelistp, addr))
 			memlist_delete_span(addr, size, &pfreelistp);
 		if (memlist_find(plinearlistp, addr))
@@ -191,40 +233,57 @@ init_physmem_common(void)
 		int child = fdt_first_subnode(_dtb_start, nodeoffset);
 		while (child > 0) {
 			reg = fdt_getprop(_dtb_start, child, "reg", &len);
-			if (reg != NULL) {
-				for (int i = 0; i < len / (sizeof(uint32_t) * (address_cells + size_cells)); i++) {
-					uint64_t addr = 0;
-					uint64_t size = 0;
-					if (address_cells == 2) {
-						addr = ((uint64_t)(ntohl(*reg)) << 32) | ntohl(*(reg + 1));
-						reg += 2;
-					} else {
-						addr = ntohl(*reg);
-						reg += 1;
-					}
-					if (size_cells == 2) {
-						size = ((uint64_t)(ntohl(*reg)) << 32) | ntohl(*(reg + 1));
-						reg += 2;
-					} else {
-						size = ntohl(*reg);
-						reg += 1;
-					}
-					if (size != 0) {
-						size = roundup(addr + size, MMU_PAGESIZE) - rounddown(addr, MMU_PAGESIZE);
-						addr = rounddown(addr, MMU_PAGESIZE);
-						prom_printf("memory resv %016lx - %016lx\n", addr, addr + size - 1);
-						if (memlist_find(pfreelistp, addr))
-							memlist_delete_span(addr, size, &pfreelistp);
-						if (memlist_find(plinearlistp, addr))
-							memlist_delete_span(addr, size, &plinearlistp);
-					}
+			if (reg == NULL) {
+				child = fdt_next_subnode(_dtb_start, child);
+				continue;
+			}
+
+			for (int i = 0; i < len / (sizeof (uint32_t) *
+			    (address_cells + size_cells)); i++) {
+				uint64_t addr = 0;
+				uint64_t size = 0;
+				if (address_cells == 2) {
+					addr =
+					    ((uint64_t)(ntohl(*reg)) << 32) |
+					    ntohl(*(reg + 1));
+					reg += 2;
+				} else {
+					addr = ntohl(*reg);
+					reg += 1;
+				}
+				if (size_cells == 2) {
+					size =
+					    ((uint64_t)(ntohl(*reg)) << 32) |
+					    ntohl(*(reg + 1));
+					reg += 2;
+				} else {
+					size = ntohl(*reg);
+					reg += 1;
+				}
+				if (size != 0) {
+					size =
+					    roundup(addr + size, MMU_PAGESIZE) -
+					    rounddown(addr, MMU_PAGESIZE);
+					addr = rounddown(addr, MMU_PAGESIZE);
+					prom_printf(
+					    "memory resv %016lx - %016lx\n",
+					    addr, addr + size - 1);
+					if (memlist_find(pfreelistp, addr))
+						memlist_delete_span(
+						    addr, size, &pfreelistp);
+					if (memlist_find(plinearlistp, addr))
+						memlist_delete_span(
+						    addr, size, &plinearlistp);
 				}
 			}
 			child = fdt_next_subnode(_dtb_start, child);
 		}
 	}
-	memlist_delete_span((uintptr_t)_BootStart, (uintptr_t)_BootEnd - (uintptr_t)_BootStart, &pfreelistp);
-	memlist_add_span   ((uintptr_t)_BootStart, (uintptr_t)_BootEnd - (uintptr_t)_BootStart, &pscratchlistp);
+	memlist_delete_span((uintptr_t)_BootStart,
+	    (uintptr_t)_BootEnd - (uintptr_t)_BootStart, &pfreelistp);
+	memlist_add_span((uintptr_t)_BootStart,
+	    (uintptr_t)_BootEnd - (uintptr_t)_BootStart, &pscratchlistp);
 	if (BOOT_TMP_MAP_SIZE > 0)
-		memlist_add_span(BOOT_TMP_MAP_BASE, BOOT_TMP_MAP_SIZE, &ptmplistp);
+		memlist_add_span(
+		    BOOT_TMP_MAP_BASE, BOOT_TMP_MAP_SIZE, &ptmplistp);
 }

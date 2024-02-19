@@ -175,12 +175,6 @@ kobj_boot_mountroot()
 		return (-1);
 	}
 
-	/* XXXARM: Why do this, and not just not swap it in the first place? */
-#if defined(__aarch64__)
-	rd_start = ntohll(rd_start);
-	rd_end = ntohll(rd_end);
-#endif
-
 #ifdef KOBJ_DEBUG
 	_kobj_printf(ops,
 	    "ramdisk range: 0x%llx-%llx\n", rd_start, rd_end);

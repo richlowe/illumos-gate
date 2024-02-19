@@ -51,9 +51,9 @@ kctl_vprintf(int code, const char *format, va_list ap)
 		char buf[128];
 
 		if (code == CE_WARN)
-			BOP_PUTSARG(kctl.kctl_boot_ops, "WARNING: ", NULL);
+			BOP_PUTSARG(kctl.kctl_boot_ops, "WARNING: ");
 		else if (code == CE_NOTE)
-			BOP_PUTSARG(kctl.kctl_boot_ops, "NOTE: ", NULL);
+			BOP_PUTSARG(kctl.kctl_boot_ops, "NOTE: ");
 
 		(void) vsnprintf(buf, sizeof (buf), format, ap);
 		BOP_PUTSARG(kctl.kctl_boot_ops, "%s\n", buf);
