@@ -63,3 +63,8 @@ $(DTRACESTUBS):	$(DTRACESTUBS_O)
 	$(BUILD.SO) $(DTRACESTUBS_O)
 
 install_h:
+
+
+$(OBJS_DIR)/%.o:		$(SRC)/common/atomic/aarch64/%.c
+	$(COMPILE.c) -o $@ $<
+	$(CTFCONVERT_O)

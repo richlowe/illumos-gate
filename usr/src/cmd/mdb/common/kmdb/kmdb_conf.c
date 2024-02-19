@@ -53,6 +53,8 @@ mdb_conf_isa(void)
 	return ("amd64");
 #elif defined(__i386)
 	return ("i386");
+#elif defined(__aarch64__)
+	return ("aarch64");
 #else
 #error	"unknown ISA"
 #endif

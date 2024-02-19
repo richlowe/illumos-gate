@@ -65,6 +65,7 @@ ASFLAGS64 += -D_ASM $(INCDIRS:%=-I%) $(ARCHOPTS)
 STACKPROTECT = none
 
 SUBDIR64_i386		= amd64
+SUBDIR64_aarch64	= aarch64
 SUBDIR64		= $(SUBDIR64_$(MACH))
 
 #
@@ -140,7 +141,8 @@ $(VERSTGTS) := CPPFLAGS += -DKMDB_VERSION='$(KMDB_VERSION)'
 $(KCTLTGTS) := CPPFLAGS += -D_KERNEL
 $(KCTLTGTS) := ASFLAGS += -D_KERNEL
 
-ffs.o ffs.ln := CPPFLAGS += -Dffs=mdb_ffs
+ffs.o := CPPFLAGS += -Dffs=mdb_ffs
+fls.o := CPPFLAGS += -Dfls=mdb_fls
 
 $(ROOTMISC) $(ROOTMISC64) := FILEMODE = 0755
 

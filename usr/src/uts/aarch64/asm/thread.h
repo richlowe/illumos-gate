@@ -37,21 +37,25 @@ extern "C" {
 
 struct _kthread;
 
-static inline struct _kthread *threadp(void)
+extern __GNU_INLINE struct _kthread *
+threadp(void)
 {
 	uint64_t tpidr_el1;
-	__asm__ __volatile__("mrs %0, TPIDR_EL1":"=r"(tpidr_el1)::"memory");
+	__asm__ __volatile__("mrs %0, TPIDR_EL1"
+	    :"=r"(tpidr_el1)
+	    :
+	    :"memory");
 	return ((struct _kthread *)tpidr_el1);
 }
 
 /* XXXARM: These should be done properly, and not be here */
-static inline caddr_t
+extern __GNU_INLINE caddr_t
 caller(void)
 {
 	return (__builtin_return_address(0));
 }
 
-static inline caddr_t
+extern __GNU_INLINE caddr_t
 callee(void)
 {
 	return (__builtin_return_address(0));

@@ -29,6 +29,7 @@
 #define	_SYS_PRIVREGS_H
 
 #include <sys/controlregs.h>
+#include <sys/kdi_regs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,8 +46,11 @@ extern "C" {
  * This is NOT the structure to use for general purpose debugging;
  * see /proc for that.  This is NOT the structure to use to decode
  * the ucontext or grovel about in a core file; see <sys/regset.h>.
+ *
+ * This structure has repercussions in other parts of the system.  Note
+ * especially that the KDI register sets must remain compatible with this
+ * definition.
  */
-
 struct regs {
 	/*
 	 * Extra frame for debuggers to follow through high level interrupts
@@ -93,6 +97,15 @@ struct regs {
 	greg_t	r_sp;
 	greg_t	r_pc;
 	greg_t	r_spsr;
+
+	/*
+	 * The following are not required for correctness in save/restore, but
+	 * are essential for debugging
+	 */
+	greg_t r_tp;
+	greg_t r_esr;
+	greg_t r_far;
+	greg_t r_trapno;
 };
 
 #ifdef _KERNEL
@@ -105,7 +118,7 @@ struct regs {
 
 #if defined(_MACHDEP)
 
-#define	__SAVE_REGS				\
+#define	__SAVE_REGS_EL0				\
 	sub	sp, sp, #REG_FRAME;		\
 	stp	x0, x1, [sp, #REGOFF_X0];	\
 	stp	x2, x3, [sp, #REGOFF_X2];	\
@@ -129,6 +142,36 @@ struct regs {
 	stp	x17, x18, [sp, #REGOFF_PC];	\
 	stp	fp, x17, [sp, #REGOFF_SAVFP];
 
+#define	__SAVE_REGS_EL1				\
+	sub	sp, sp, #REG_FRAME;		\
+	stp	x0, x1, [sp, #REGOFF_X0];	\
+	stp	x2, x3, [sp, #REGOFF_X2];	\
+	stp	x4, x5, [sp, #REGOFF_X4];	\
+	stp	x6, x7, [sp, #REGOFF_X6];	\
+	stp	x8, x9, [sp, #REGOFF_X8];	\
+	stp	x10, x11, [sp, #REGOFF_X10];	\
+	stp	x12, x13, [sp, #REGOFF_X12];	\
+	stp	x14, x15, [sp, #REGOFF_X14];	\
+	stp	x16, x17, [sp, #REGOFF_X16];	\
+	stp	x18, x19, [sp, #REGOFF_X18];	\
+	stp	x20, x21, [sp, #REGOFF_X20];	\
+	stp	x22, x23, [sp, #REGOFF_X22];	\
+	stp	x24, x25, [sp, #REGOFF_X24];	\
+	stp	x26, x27, [sp, #REGOFF_X26];	\
+	stp	x28, x29, [sp, #REGOFF_X28];	\
+	add	x16, sp, #REG_FRAME;		\
+	stp	x30, x16, [sp, #REGOFF_X30];	\
+	mrs	x17, elr_el1;			\
+	mrs	x18, spsr_el1;			\
+	stp	x17, x18, [sp, #REGOFF_PC];	\
+	stp	fp, x17, [sp, #REGOFF_SAVFP];	\
+	mrs	x17, tpidr_el1;			\
+	mrs	x18, esr_el1;			\
+	stp	x17, x18, [sp, #REGOFF_TP];	\
+	mrs	x17, far_el1;			\
+	lsr	w18, w18, #ESR_EC_SHIFT;	\
+	stp	x17, x18, [sp, #REGOFF_FAR];
+
 #define	__SAVE_FRAME		\
 	mrs	x17, elr_el1;	\
 	stp	fp, x17, [sp, #REGOFF_SAVFP];
@@ -136,7 +179,7 @@ struct regs {
 #define	__TERMINATE_FRAME	\
 	stp	xzr, xzr, [sp, #REGOFF_SAVFP];
 
-#define	__RESTORE_REGS			\
+#define	__RESTORE_REGS_EL0			\
 	ldp	x17, x18, [sp, #REGOFF_PC];	\
 	msr	elr_el1, x17;			\
 	msr	spsr_el1, x18;			\
@@ -159,39 +202,29 @@ struct regs {
 	ldp	x28, x29, [sp, #REGOFF_X28];	\
 	add	sp, sp, #REG_FRAME
 
-#define	__SAVE_SVC_REGS				\
-	sub	sp, sp, #REG_FRAME;		\
-	stp	x0, x1, [sp, #REGOFF_X0];	\
-	stp	x2, x3, [sp, #REGOFF_X2];	\
-	stp	x4, x5, [sp, #REGOFF_X4];	\
-	stp	x6, x7, [sp, #REGOFF_X6];	\
-	stp	x20, x21, [sp, #REGOFF_X20];	\
-	mrs	x0, sp_el0;			\
-	stp	x30, x0, [sp, #REGOFF_X30];	\
-	mrs	x1, elr_el1;			\
-	mrs	x2, spsr_el1;			\
-	stp	x1, x2, [sp, #REGOFF_PC];	\
-	stp	fp, x1, [sp, #REGOFF_SAVFP];
-
-#define	__SAVE_EXC_REGS			\
-	stp	x8, x9, [sp, #REGOFF_X8];	\
-	stp	x10, x11, [sp, #REGOFF_X10];	\
-	stp	x12, x13, [sp, #REGOFF_X12];	\
-	stp	x14, x15, [sp, #REGOFF_X14];	\
-	stp	x16, x17, [sp, #REGOFF_X16];	\
-	stp	x18, x19, [sp, #REGOFF_X18];	\
-	stp	x22, x23, [sp, #REGOFF_X22];	\
-	stp	x24, x25, [sp, #REGOFF_X24];	\
-	stp	x26, x27, [sp, #REGOFF_X26];	\
-	stp	x28, x29, [sp, #REGOFF_X28]
+#define	__RESTORE_REGS_EL1			\
+	ldp	x17, x18, [sp, #REGOFF_PC];	\
+	msr	elr_el1, x17;			\
+	msr	spsr_el1, x18;			\
+	ldp	x30, xzr, [sp, #REGOFF_X30];	\
+	ldp	x0, x1, [sp, #REGOFF_X0];	\
+	ldp	x2, x3, [sp, #REGOFF_X2];	\
+	ldp	x4, x5, [sp, #REGOFF_X4];	\
+	ldp	x6, x7, [sp, #REGOFF_X6];	\
+	ldp	x8, x9, [sp, #REGOFF_X8];	\
+	ldp	x10, x11, [sp, #REGOFF_X10];	\
+	ldp	x12, x13, [sp, #REGOFF_X12];	\
+	ldp	x14, x15, [sp, #REGOFF_X14];	\
+	ldp	x16, x17, [sp, #REGOFF_X16];	\
+	ldp	x18, x19, [sp, #REGOFF_X18];	\
+	ldp	x20, x21, [sp, #REGOFF_X20];	\
+	ldp	x22, x23, [sp, #REGOFF_X22];	\
+	ldp	x24, x25, [sp, #REGOFF_X24];	\
+	ldp	x26, x27, [sp, #REGOFF_X26];	\
+	ldp	x28, x29, [sp, #REGOFF_X28];	\
+	add	sp, sp, #REG_FRAME
 
 #endif	/* _MACHDEP */
-
-/*
- * Used to set rflags to known values at the head of an
- * interrupt gate handler, i.e. interrupts are -already- disabled.
- */
-#define	INTGATE_INIT_KERNEL_FLAGS
 
 #endif	/* !_ASM */
 

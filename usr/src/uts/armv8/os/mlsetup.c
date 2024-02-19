@@ -55,6 +55,7 @@
 #include <sys/cpuinfo.h>
 #include <sys/psciinfo.h>
 #include <sys/psci.h>
+#include <sys/bootsvcs.h>
 
 #include <sys/debug.h>
 
@@ -71,7 +72,7 @@
 #include <sys/arch_timer.h>
 
 /*
- * called immediately from _start to stich the
+ * called immediately from _start to stitch the
  * primary modules together
  */
 void
@@ -89,7 +90,7 @@ kobj_start(struct xboot_info *xbp)
 		bootaux[i].ba_val = 0;
 
 	bootaux[BA_PAGESZ].ba_val = MMU_PAGESIZE;
-	kobj_init(NULL, NULL, bootops, bootaux);
+	kobj_init(sysp, NULL, bootops, bootaux);
 }
 
 /*
@@ -178,9 +179,15 @@ mlsetup(struct regs *rp)
 	/*
 	 * Switch to our own exception vector as early as possible.
 	 * We need the concept of time, so that's now.
+	 *
+	 * If we booted with kmdb, its trap table may already have been set
+	 * when it loaded in load_kmdb() -- prior to mlsetup()! -- don't
+	 * overwrite it with ours.
 	 */
-	extern void exception_vector(void);
-	write_vbar((uintptr_t)exception_vector);
+	if (!(boothowto & RB_KMDB)) {
+		extern void exception_vector(void);
+		write_vbar((uintptr_t)exception_vector);
+	}
 
 	/*
 	 * Initialize thread/cpu microstate accounting
@@ -192,6 +199,9 @@ mlsetup(struct regs *rp)
 	 * Initialize lists of available and active CPUs.
 	 */
 	cpu_list_init(CPU);
+
+	if (boothowto & RB_DEBUGENTER)
+		kmdb_enter();
 
 	cpu_vm_data_init(CPU);
 
@@ -218,6 +228,13 @@ mlsetup(struct regs *rp)
 	 * to devices being mapped.
 	 */
 	lgrp_init(LGRP_INIT_STAGE1);
+
+	if (boothowto & RB_HALT) {
+		prom_printf("unix: kernel halted by -h flag\n");
+		prom_enter_mon();
+	}
+
+	ASSERT_STACK_ALIGNED();
 }
 
 void

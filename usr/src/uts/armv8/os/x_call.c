@@ -340,3 +340,26 @@ xc_call_nowait(
 	xc_common(func, arg0, arg1, arg2, set, XC_ASYNC_OP);
 	mutex_exit(&xc_mbox_lock);
 }
+
+/*
+ * Wrapper for kmdb to capture other CPUs, causing them to enter the debugger.
+ */
+void
+kdi_xc_others(int this_cpu, void (*func)(void))
+{
+	extern int IGNORE_KERNEL_PREEMPTION;
+	int save_kernel_preemption;
+	cpuset_t set;
+
+	if (!xc_initialized)
+		return;
+
+	save_kernel_preemption = IGNORE_KERNEL_PREEMPTION;
+	IGNORE_KERNEL_PREEMPTION = 1;
+	CPUSET_ALL_BUT(set, this_cpu);
+	/*
+	 * XXXKDI: I think this should wait, but our xcall facilities are poor
+	 */
+	xc_call_nowait(0, 0, 0, set, (xc_func_t)func);
+	IGNORE_KERNEL_PREEMPTION = save_kernel_preemption;
+}

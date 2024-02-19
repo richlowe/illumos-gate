@@ -86,7 +86,7 @@ typedef struct kmdb_auxv {
 	size_t		kav_tba_native_sz;	/* kmdb's trap table size */
 #endif
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 	kmdb_auxv_nv_t	*kav_pcache;		/* Copies of common props */
 	int		kav_nprops;		/* Size of prop cache */
 #endif

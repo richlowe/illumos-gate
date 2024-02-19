@@ -34,6 +34,8 @@
 extern "C" {
 #endif
 
+#include <mdb/mdb_io.h>
+
 extern mdb_io_t *kmdb_promio_create(char *);
 
 extern char kmdb_getchar(void);

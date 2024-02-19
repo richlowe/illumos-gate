@@ -31,6 +31,9 @@ CORE_OBJS_FDT =			\
 CORE_OBJS +=			\
 	aarch64_subr.o		\
 	ddi_aarch64.o		\
+	kdi_asm.o		\
+	kdi_exceptions.o	\
+	kdi_util.o		\
 	lock_prim.o		\
 	copy.o			\
 	mem_config_stubs.o	\
@@ -92,6 +95,8 @@ ASSYM_DEPS +=			\
 	aarch64_subr.o		\
 	copy.o			\
 	exceptions.o		\
+	kdi_asm.o		\
+	kdi_exceptions.o	\
 	lock_prim.o		\
 	locore.o		\
 	swtch.o			\

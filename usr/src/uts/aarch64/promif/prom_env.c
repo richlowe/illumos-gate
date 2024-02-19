@@ -27,6 +27,7 @@
 
 #include <sys/promif.h>
 #include <sys/promimpl.h>
+#include <sys/null.h>
 
 /*
  * This function is installed for both pre and post output during cpr to keep

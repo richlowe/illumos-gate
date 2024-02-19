@@ -1736,10 +1736,10 @@ mdb_io_t *
 mdb_nullio_create(void)
 {
 	static mdb_io_t null_io = {
-		&null_ops,
-		NULL,
-		NULL,
-		1
+		.io_ops = &null_ops,
+		.io_data = NULL,
+		.io_next = NULL,
+		.io_refcnt = 1,
 	};
 
 	return (&null_io);

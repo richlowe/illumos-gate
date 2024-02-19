@@ -74,8 +74,8 @@ _ischar()
 	return (!(UARTFR & UARTFR_RXFE));
 }
 
-static void _reset(bool poff) __NORETURN;
-static void _reset(bool poff)
+void __NORETURN
+_reset(bool poff)
 {
 	if (poff)
 		psci_system_off();

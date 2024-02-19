@@ -30,6 +30,7 @@
 
 KMDBSRCS += \
 	ffs.c \
+	fls.c \
 	kaif_start.c \
 	mdb.c \
 	mdb_addrvec.c \

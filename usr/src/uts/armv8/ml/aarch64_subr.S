@@ -341,3 +341,9 @@
 	ldp	fp, lr, [sp], #16
 	ret
 	SET_SIZE(switch_sp_and_call)
+
+	/* NB: kmdb requires an out-of-line threadp */
+	ENTRY_NP(threadp)
+	mrs	x0, tpidr_el1
+	ret
+	SET_SIZE(threadp)

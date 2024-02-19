@@ -36,6 +36,7 @@
 #	Core (unix) objects
 #
 CORE_OBJS +=			\
+	arch_kdi.o		\
 	bcmp.o			\
 	bcopy.o			\
 	bitmap_arch.o		\
@@ -65,13 +66,17 @@ GENUNIX_OBJS +=		\
 	fpu.o		\
 	float.o		\
 	getcontext.o	\
-	install_utrap.o
+	install_utrap.o	\
+	kdi_svc.o
 
 #
 #	PROM Routines,
 #
 #	XXXARM: called earlier in boot than usual and so in 'unix'
-#	it'd be nice if they weren't, but I doubt that's possible right now
+#	it'd be nice if they weren't, but I doubt that's possible right now.
+#
+#	On the other hand, on systems with some form of actual monitor, this
+#	is usefully platform-specific
 #
 CORE_OBJS +=		\
 	prom_node.o	\
@@ -82,6 +87,7 @@ CORE_OBJS +=		\
 	prom_version.o	\
 	prom_reboot.o	\
 	prom_panic.o	\
+	prom_enter.o	\
 	prom_exit.o	\
 	prom_utils.o	\
 	fdt.o		\
@@ -197,6 +203,3 @@ BOOTDEV_OBJS +=		\
 	bootdev.o
 
 INC_PATH	+= -I$(UTSBASE)/aarch64
-
-# XXXARM: We're not hooked into genassym properly at all
-ASSYM_DEPS += float.o

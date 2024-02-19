@@ -175,11 +175,12 @@ master_loop:
 		kaif_slave_cmd = KAIF_SLAVE_CMD_SPIN;
 		break;
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 	case KMDB_DPI_CMD_REBOOT:
 		/*
-		 * Reboot must be initiated by CPU 0.  I could ask why, but I'm
-		 * afraid that I don't want to know the answer.
+		 * On at least intel, reboot must be initiated by CPU 0.  I
+		 * could ask why, but I'm afraid that I don't want to know the
+		 * answer.
 		 */
 		if (cpusave->krs_cpu_id == 0)
 			kmdb_kdi_reboot();

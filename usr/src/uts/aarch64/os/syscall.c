@@ -489,13 +489,10 @@ sig_check:
 		if (lwp->lwp_pcb.pcb_flags & REQUEST_STEP) {
 			lwp->lwp_pcb.pcb_flags &= ~REQUEST_STEP;
 			rp->r_spsr |= PSR_SS;
-			write_mdscr_el1(read_mdscr_el1() |
-			    (MDSCR_MDE | MDSCR_SS));
 		}
 		if (lwp->lwp_pcb.pcb_flags & REQUEST_NOSTEP) {
 			lwp->lwp_pcb.pcb_flags &= ~REQUEST_NOSTEP;
 			rp->r_spsr &= ~PSR_SS;
-			write_mdscr_el1(read_mdscr_el1() & ~(MDSCR_SS));
 		}
 	}
 

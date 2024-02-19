@@ -89,7 +89,7 @@ _ischar()
 	return (!(UART_STATUS & UART_STATUS_RFIFO_EMPTY));
 }
 
-static void __NORETURN
+void __NORETURN
 _reset(bool poff)
 {
 	if (poff)

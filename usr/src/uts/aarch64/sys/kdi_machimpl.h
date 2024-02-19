@@ -57,8 +57,6 @@ typedef struct kdi_mach {
 
 	uintptr_t (*mkdi_get_userlimit)(void);
 
-	int (*mkdi_get_cpuinfo)(uint_t *, uint_t *, uint_t *);
-
 	void (*mkdi_stop_slaves)(int, int);
 
 	void (*mkdi_start_slaves)(void);
@@ -68,6 +66,11 @@ typedef struct kdi_mach {
 	void (*mkdi_memrange_add)(caddr_t, size_t);
 
 	void (*mkdi_reboot)(void);
+
+	void (*mkdi_set_exception_vector)(kdi_cpusave_t *);
+	size_t (*mkdi_num_wapts)(void);
+	void (*mkdi_update_waptreg)(kdi_waptreg_t *);
+	void (*mkdi_read_waptreg)(int, kdi_waptreg_t *);
 } kdi_mach_t;
 
 #define	mkdi_activate			kdi_mach.mkdi_activate
@@ -79,12 +82,15 @@ typedef struct kdi_mach {
 #define	mkdi_slave_wait			kdi_mach.mkdi_slave_wait
 #define	mkdi_memrange_add		kdi_mach.mkdi_memrange_add
 #define	mkdi_reboot			kdi_mach.mkdi_reboot
+#define	mkdi_update_waptreg		kdi_mach.mkdi_update_waptreg
+#define	mkdi_read_waptreg		kdi_mach.mkdi_read_waptreg
+#define	mkdi_num_wapts			kdi_mach.mkdi_num_wapts
+#define	mkdi_set_exception_vector	kdi_mach.mkdi_set_exception_vector
 
 extern void hat_kdi_init(void);
 
 extern void kdi_cpu_debug_init(kdi_cpusave_t *);
 
-extern void kdi_cpu_init(void);
 extern void kdi_xc_others(int, void (*)(void));
 extern void kdi_start_slaves(void);
 extern void kdi_slave_wait(void);
@@ -94,6 +100,8 @@ extern void kdi_deactivate(void);
 extern void kdi_stop_slaves(int, int);
 extern void kdi_memrange_add(caddr_t, size_t);
 extern void kdi_reboot(void);
+
+extern void kmdb_enter(void);
 
 #ifdef __cplusplus
 }

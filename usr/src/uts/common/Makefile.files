@@ -42,6 +42,9 @@ i386_CORE_OBJS += \
 		avintr.o	\
 		pic.o
 
+aarch64_CORE_OBJS += \
+		atomic.o
+
 sparc_CORE_OBJS +=
 
 COMMON_CORE_OBJS +=		\
@@ -1673,7 +1676,7 @@ i386_FONT_SRC		= ter-u16b
 sparc_FONT		= 12x22
 sparc_FONT_SRC		= Gallant19
 aarch64_FONT		= 0x16
-aarch64_FONT_SRC 	= ter-u16b
+aarch64_FONT_SRC	= ter-u16b
 FONT=$($(MACH)_FONT)
 FONT_SRC=$($(MACH)_FONT_SRC)
 FONT_DIR= $(SRC)/data/consfonts

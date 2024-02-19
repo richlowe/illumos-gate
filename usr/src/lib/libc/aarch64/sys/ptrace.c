@@ -336,7 +336,7 @@ again:
 			ps->pr_lwp.pr_reg[REG_X30] = cp->user.u_reg[REG_X30];
 			ps->pr_lwp.pr_reg[REG_SP] = cp->user.u_reg[REG_SP];
 			ps->pr_lwp.pr_reg[REG_PC] = cp->user.u_reg[REG_PC];
-			ps->pr_lwp.pr_reg[REG_PSR] = cp->user.u_reg[REG_PSR];
+			ps->pr_lwp.pr_reg[REG_SPSR] = cp->user.u_reg[REG_SPSR];
 			ps->pr_lwp.pr_reg[REG_TP] = cp->user.u_reg[REG_TP];
 			cmd = PCSREG;
 			iov[0].iov_base = (caddr_t)&cmd;
@@ -669,7 +669,7 @@ ProcUpdate(cstatus_t *cp)
 		ps->pr_lwp.pr_reg[REG_X30] = cp->user.u_reg[REG_X30];
 		ps->pr_lwp.pr_reg[REG_SP] = cp->user.u_reg[REG_SP];
 		ps->pr_lwp.pr_reg[REG_PC] = cp->user.u_reg[REG_PC];
-		ps->pr_lwp.pr_reg[REG_PSR] = cp->user.u_reg[REG_PSR];
+		ps->pr_lwp.pr_reg[REG_SPSR] = cp->user.u_reg[REG_SPSR];
 		ps->pr_lwp.pr_reg[REG_TP] = cp->user.u_reg[REG_TP];
 		cmd = PCSREG;
 		iov[0].iov_base = (caddr_t)&cmd;
@@ -736,7 +736,7 @@ MakeUser(cstatus_t *cp)
 	cp->user.u_reg[REG_X30] = ps->pr_lwp.pr_reg[REG_X30];
 	cp->user.u_reg[REG_SP] = ps->pr_lwp.pr_reg[REG_SP];
 	cp->user.u_reg[REG_PC] = ps->pr_lwp.pr_reg[REG_PC];
-	cp->user.u_reg[REG_PSR] = ps->pr_lwp.pr_reg[REG_PSR];
+	cp->user.u_reg[REG_SPSR] = ps->pr_lwp.pr_reg[REG_SPSR];
 	cp->user.u_reg[REG_TP] = ps->pr_lwp.pr_reg[REG_TP];
 
 	cp->user.u_ar0 = (greg_t *)REGADDR;

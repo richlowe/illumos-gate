@@ -410,7 +410,7 @@ usr/include/sys/scsi/adapters/mpapi_scsi_vhci.h
 # This library is installed in the proto area by the build of libdisasm, and is
 # only used when building the KMDB disasm module.
 #
-usr/lib/libstanddisasm.so		i386 sparc
+usr/lib/libstanddisasm.so		i386 sparc aarch64
 usr/lib/amd64/libstanddisasm.so		i386
 #
 # TSol: tsol doesn't ship lint source, and tsnet isn't for customers at all.
@@ -610,13 +610,18 @@ usr/lib/smbfs/libfknsmb.so		i386 sparc
 usr/lib/smbfs/libfknsmb.so.1		i386 sparc
 usr/lib/smbfs/libfksmbfs.so		i386 sparc
 usr/lib/smbfs/libfksmbfs.so.1		i386 sparc
+
 #
 # FC related files
 kernel/kmdb/amd64/fcip		i386
 kernel/kmdb/amd64/fcp		i386
 kernel/kmdb/amd64/fctl		i386
 kernel/kmdb/amd64/qlc		i386
+kernel/kmdb/aarch64/fcip	aarch64
+kernel/kmdb/aarch64/fcp		aarch64
+kernel/kmdb/aarch64/fctl	aarch64
 usr/include/sys/fibre-channel
+
 #
 # These files are used by the iSCSI initiator only.
 # No reason to ship them.

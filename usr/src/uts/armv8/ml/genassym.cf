@@ -18,6 +18,10 @@ include <sys/ddi_isa.h>
 include <sys/systm.h>
 include <sys/dtrace.h>
 include <sys/privregs.h>
+include <sys/kdi_machimpl.h>
+include <sys/kdi_regs.h>
+include <sys/kdi_svc.h>
+
 include <asm/controlregs.h>
 
 define	MODS_SIZE		sizeof(struct mod_stub_info)
@@ -134,6 +138,7 @@ define	CP_PHYSIO		offsetof(struct copyops, cp_physio)
 define	PSR_M_MASK		PSR_M_MASK
 define	PSR_M_EL0t		PSR_M_EL0t
 define	PSR_C			PSR_C
+define	PSR_SS_BIT		PSR_SS_BIT
 define	LMS_SYSTEM		LMS_SYSTEM
 define	LMS_USER		LMS_USER
 define	NSYSCALL		NSYSCALL
@@ -260,8 +265,36 @@ define	REGOFF_LR	offsetof(struct regs, r_x30)
 define	REGOFF_SP	offsetof(struct regs, r_sp)
 define	REGOFF_PC	offsetof(struct regs, r_pc)
 define	REGOFF_SPSR	offsetof(struct regs, r_spsr)
+define	REGOFF_TP	offsetof(struct regs, r_tp)
+define	REGOFF_TRAPNO	offsetof(struct regs, r_trapno)
+define	REGOFF_FAR	offsetof(struct regs, r_far)
+define	REGOFF_ESR	offsetof(struct regs, r_esr)
 
 define	ESR_EC_SHIFT	ESR_EC_SHIFT
 define	ESR_ISS_MASK	ESR_ISS_MASK
 define	T_SVC		T_SVC
 define	T_AST		T_AST
+
+define	KDISVC_SIZE	sizeof(kdi_svc_t)
+define	KS_CALL		offsetof(kdi_svc_t, ks_call)
+define	NKDISVCS	NKDISVCS
+
+define	KDISVC_KMDB_TRAP	KDISVC_KMDB_TRAP
+
+define	KRS_SIZE	sizeof(kdi_cpusave_t)
+define	KRS_GREGS	offsetof(kdi_cpusave_t, krs_gregs)
+define	KRS_EXCEPTION_VECTOR	offsetof(kdi_cpusave_t, krs_exception_vector)
+define	KRS_CPU_STATE	offsetof(kdi_cpusave_t, krs_cpu_state)
+define	KRS_CURCRUMB	offsetof(kdi_cpusave_t, krs_curcrumb)
+
+define	KRM_CPU_STATE	offsetof(kdi_crumb_t, krm_cpu_state)
+define	KRM_PC		offsetof(kdi_crumb_t, krm_pc)
+define	KRM_SP		offsetof(kdi_crumb_t, krm_sp)
+define	KRM_TRAPNO	offsetof(kdi_crumb_t, krm_trapno)
+define	KRM_FLAG	offsetof(kdi_crumb_t, krm_flag)
+
+define	MR_BASE		offsetof(kdi_memrange_t, mr_base)
+define	MR_LIM		offsetof(kdi_memrange_t, mr_lim)
+define	MR_SIZE		sizeof(kdi_memrange_t)
+
+define	MDSCR_SS	MDSCR_SS

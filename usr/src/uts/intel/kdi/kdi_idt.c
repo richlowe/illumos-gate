@@ -365,8 +365,10 @@ kdi_deactivate(void)
  * can prove to us that the kernel is prepared to handle the trap, we'll assume
  * there's a problem and will give the user a chance to debug it.
  *
- * If we return 2, then the calling code should restore the trap-time %cr3: that
- * is, it really is a kernel-originated trap.
+ * If we return false, handle this trap ourselves.
+ * If we return true, pass this trap to the kernel
+ * If we return 2, ... also the calling code should restore the trap-time %cr3:
+ *     that is, it really is a kernel-originated trap.
  */
 int
 kdi_trap_pass(kdi_cpusave_t *cpusave)

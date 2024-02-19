@@ -119,6 +119,7 @@
 #define	PSR_C		(1u<<29)
 #define	PSR_V		(1u<<28)
 #define	PSR_SS		(1u<<21)
+#define	PSR_SS_BIT	21
 #define	PSR_IL		(1u<<20)
 #define	PSR_D		(1u<<9)
 #define	PSR_A		(1u<<8)

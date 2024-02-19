@@ -64,9 +64,9 @@ file path=kernel/drv/scsa2usb.conf group=sys \
 file path=kernel/drv/uhci.conf group=sys
 file path=kernel/drv/usb_ac.conf group=sys
 file path=kernel/drv/xhci.conf group=sys
-$(not_aarch64)dir path=kernel/kmdb group=sys
-$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/xhci group=sys mode=0555
+dir  path=kernel/kmdb group=sys
+dir  path=kernel/kmdb/$(ARCH64) group=sys
+file path=kernel/kmdb/$(ARCH64)/xhci group=sys mode=0555
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys
 file path=kernel/misc/$(ARCH64)/hidparser group=sys mode=0755

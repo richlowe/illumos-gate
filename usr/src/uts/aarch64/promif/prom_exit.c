@@ -25,11 +25,16 @@
 
 #include <sys/promif.h>
 #include <sys/promimpl.h>
+#include <sys/reboot.h>
+#include <sys/kdi_machimpl.h>
 
 void
 prom_exit_to_mon(void)
 {
+#if !defined(_KMDB)
+	if (boothowto & RB_DEBUG)
+		kmdb_enter();
+#endif	/* !_KMDB */
 	prom_reboot_prompt();
 	prom_reboot(NULL);
 }
-

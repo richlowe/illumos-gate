@@ -142,7 +142,7 @@ file path=kernel/drv/$(ARCH64)/iptun group=sys
 file path=kernel/drv/$(ARCH64)/iwscn group=sys
 $(not_aarch64)file path=kernel/drv/$(ARCH64)/kb8042 group=sys
 file path=kernel/drv/$(ARCH64)/keysock group=sys
-$(not_aarch64)file path=kernel/drv/$(ARCH64)/kmdb group=sys
+file path=kernel/drv/$(ARCH64)/kmdb group=sys
 file path=kernel/drv/$(ARCH64)/llc1 group=sys
 file path=kernel/drv/$(ARCH64)/lofi group=sys
 file path=kernel/drv/$(ARCH64)/log group=sys
@@ -214,7 +214,7 @@ file path=kernel/drv/ipsecesp.conf group=sys
 file path=kernel/drv/iptun.conf group=sys
 file path=kernel/drv/iwscn.conf group=sys
 file path=kernel/drv/keysock.conf group=sys
-$(not_aarch64)file path=kernel/drv/kmdb.conf group=sys
+file path=kernel/drv/kmdb.conf group=sys
 file path=kernel/drv/llc1.conf group=sys
 file path=kernel/drv/lofi.conf group=sys
 file path=kernel/drv/log.conf group=sys \
@@ -328,7 +328,7 @@ $(i386_ONLY)file path=kernel/misc/$(ARCH64)/iommulib group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/ipc group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/kbtrans group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/kcf group=sys mode=0755
-$(i386_ONLY)file path=kernel/misc/$(ARCH64)/kmdbmod group=sys mode=0755
+file path=kernel/misc/$(ARCH64)/kmdbmod group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/ksocket group=sys mode=0755
 file path=kernel/misc/$(ARCH64)/mac group=sys mode=0755
 hardlink path=kernel/misc/$(ARCH64)/md5 \

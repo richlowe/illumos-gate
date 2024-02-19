@@ -43,10 +43,10 @@ file path=kernel/drv/pppt.conf group=sys
 $(not_aarch64)file path=kernel/drv/qlt.conf group=sys
 file path=kernel/drv/stmf.conf group=sys
 file path=kernel/drv/stmf_sbd.conf group=sys
-$(not_aarch64)dir path=kernel/kmdb group=sys
-$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/stmf group=sys mode=0555
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/stmf_sbd group=sys mode=0555
+dir  path=kernel/kmdb group=sys
+dir  path=kernel/kmdb/$(ARCH64) group=sys
+file path=kernel/kmdb/$(ARCH64)/stmf group=sys mode=0555
+file path=kernel/kmdb/$(ARCH64)/stmf_sbd group=sys mode=0555
 dir  path=lib variant.opensolaris.zone=global
 dir  path=lib/svc variant.opensolaris.zone=global
 dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global

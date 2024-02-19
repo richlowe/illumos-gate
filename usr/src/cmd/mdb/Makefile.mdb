@@ -35,6 +35,7 @@
 
 SRCS += \
 	ffs.c \
+	fls.c \
 	mdb.c \
 	mdb_addrvec.c \
 	mdb_argvec.c \
@@ -150,7 +151,8 @@ mdb_conf.o := CPPFLAGS += -DMDB_VERSION='$(MDB_VERSION)'
 
 inet_ntop.o := CPPFLAGS += -Dsnprintf=mdb_snprintf
 
-ffs.o ffs.ln := CPPFLAGS += -Dffs=mdb_ffs
+ffs.o := CPPFLAGS += -Dffs=mdb_ffs
+fls.o := CPPFLAGS += -Dfls=mdb_fls
 
 %.o: ../../../common/mdb/%.c
 	$(COMPILE.c) $<

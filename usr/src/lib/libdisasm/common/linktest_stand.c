@@ -29,6 +29,8 @@
  * haven't changed in a way that'll break things that use it.
  */
 
+void mdb_ffs(void) {}
+void mdb_fls(void) {}
 void mdb_free(void) {}
 void mdb_snprintf(void) {}
 void mdb_iob_vsnprintf(void) {}
@@ -40,3 +42,4 @@ void strncpy(void) {}
 void strncmp(void) {}
 void memcpy(void) {}
 void _memcpy(void) {}
+void bzero(void) {}

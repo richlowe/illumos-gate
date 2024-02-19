@@ -39,9 +39,9 @@ $(not_aarch64)file path=kernel/drv/$(ARCH64)/emlxs group=sys
 file path=kernel/drv/$(ARCH64)/oce group=sys
 $(not_aarch64)file path=kernel/drv/emlxs.conf group=sys \
     original_name=SUNWemlxs:kernel/drv/emlxs.conf preserve=true
-$(not_aarch64)dir path=kernel/kmdb group=sys
-$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/emlxs group=sys mode=0555
+dir  path=kernel/kmdb group=sys
+dir  path=kernel/kmdb/$(ARCH64) group=sys
+file path=kernel/kmdb/$(ARCH64)/emlxs group=sys mode=0555
 $(not_aarch64)dir path=kernel/misc group=sys
 dir  path=kernel/misc/emlxs group=sys
 dir  path=kernel/misc/emlxs/$(ARCH64) group=sys

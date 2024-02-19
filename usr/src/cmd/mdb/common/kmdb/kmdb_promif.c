@@ -43,6 +43,8 @@
 #include <mdb/mdb_string.h>
 #include <mdb/mdb.h>
 
+#include <alloca.h>
+
 #define	KMDB_PROM_DEF_CONS_MODE	"9600,n,1,-,-"
 
 #define	KMDB_PROM_READBUF_SIZE	1024
@@ -788,7 +790,7 @@ kmdb_prom_init_begin(char *pgmname, kmdb_auxv_t *kav)
 	/* Initialize the interrupt ring buffer */
 	kmdb_prom_readbuf_head = kmdb_prom_readbuf_tail;
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 	kmdb_sysp = kav->kav_romp;
 #endif
 }

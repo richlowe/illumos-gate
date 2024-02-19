@@ -33,6 +33,8 @@
 #include <sys/controlregs.h>
 #include <sys/kobj.h>
 #include <sys/modctl.h>
+#include <sys/reboot.h>
+#include <sys/kdi_machimpl.h>
 
 void
 prom_panic(char *s)
@@ -44,7 +46,15 @@ prom_panic(char *s)
 	if (s == NULL)
 		s = "unknown panic";
 
+#if defined(_KMDB)
+	prom_printf(fmt, "kmdb", s);
+#elif defined(_KERNEL)
 	prom_printf(fmt, "kernel", s);
+	if (boothowto & RB_DEBUG)
+		kmdb_enter();
+#else
+#error	"configuration error"
+#endif
 
 	prom_printf("Call Stack\n");
 	struct frame *fp = (struct frame *)__builtin_frame_address(0);

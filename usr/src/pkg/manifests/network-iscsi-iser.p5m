@@ -38,9 +38,9 @@ dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys
 file path=kernel/drv/$(ARCH64)/iser group=sys
 file path=kernel/drv/iser.conf group=sys
-$(not_aarch64)dir path=kernel/kmdb group=sys
-$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/idm group=sys mode=0555
+dir  path=kernel/kmdb group=sys
+dir  path=kernel/kmdb/$(ARCH64) group=sys
+file path=kernel/kmdb/$(ARCH64)/idm group=sys mode=0555
 dir  path=kernel/misc group=sys
 dir  path=kernel/misc/$(ARCH64) group=sys
 file path=kernel/misc/$(ARCH64)/idm group=sys mode=0755

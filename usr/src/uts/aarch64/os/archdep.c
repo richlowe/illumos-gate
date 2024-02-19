@@ -51,6 +51,7 @@
 #include <sys/promif.h>
 #include <sys/sysmacros.h>
 #include <sys/arch_timer.h>
+#include <sys/trap.h>
 
 uint_t adj_shift;
 
@@ -307,6 +308,7 @@ void
 panic_saveregs(panic_data_t *pdp, struct regs *rp)
 {
 	panic_nv_t *pnv = PANICNVGET(pdp);
+	uint64_t esr = read_esr_el1();
 
 	PANICNVADD(pnv, "x0", rp->r_x0);
 	PANICNVADD(pnv, "x1", rp->r_x1);
@@ -342,6 +344,11 @@ panic_saveregs(panic_data_t *pdp, struct regs *rp)
 	PANICNVADD(pnv, "sp", rp->r_sp);
 	PANICNVADD(pnv, "pc", rp->r_pc);
 	PANICNVADD(pnv, "spsr", rp->r_spsr);
+	PANICNVADD(pnv, "tp", read_tpidr_el1());
+	PANICNVADD(pnv, "esr", esr);
+	PANICNVADD(pnv, "far", read_far_el1());
+	PANICNVADD(pnv, "trapno", ESR_EC(esr));
+
 	PANICNVADD(pnv, "tpidr_el0", read_tpidr_el0());
 	PANICNVADD(pnv, "tpidr_el1", read_tpidr_el1());
 	PANICNVADD(pnv, "ttbr0", read_ttbr0());
@@ -492,7 +499,7 @@ getgregs(klwp_t *lwp, gregset_t grp)
 	grp[REG_X30] = rp->r_x30;
 	grp[REG_SP] = rp->r_sp;
 	grp[REG_PC] = rp->r_pc;
-	grp[REG_PSR] = rp->r_spsr;
+	grp[REG_SPSR] = rp->r_spsr;
 
 	if (ttolwp(curthread) == lwp) {
 		grp[REG_TP] = read_tpidr_el0();
@@ -543,7 +550,7 @@ setgregs(klwp_t *lwp, gregset_t grp)
 	rp->r_sp = grp[REG_SP];
 	rp->r_pc = grp[REG_PC];
 	rp->r_spsr = (rp->r_spsr & ~PSR_USERMASK) |
-	    (grp[REG_PSR] & PSR_USERMASK);
+	    (grp[REG_SPSR] & PSR_USERMASK);
 
 	if (ttolwp(curthread) == lwp) {
 		write_tpidr_el0(grp[REG_TP]);

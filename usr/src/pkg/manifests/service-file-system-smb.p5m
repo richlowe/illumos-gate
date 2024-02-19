@@ -43,9 +43,9 @@ dir  path=usr/kernel/drv group=sys
 dir  path=usr/kernel/drv/$(ARCH64) group=sys
 file path=usr/kernel/drv/$(ARCH64)/smbsrv group=sys
 file path=usr/kernel/drv/smbsrv.conf group=sys
-$(not_aarch64)dir path=usr/kernel/kmdb group=sys
-$(not_aarch64)dir path=usr/kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=usr/kernel/kmdb/$(ARCH64)/smbsrv group=sys mode=0555
+dir  path=usr/kernel/kmdb group=sys
+dir  path=usr/kernel/kmdb/$(ARCH64) group=sys
+file path=usr/kernel/kmdb/$(ARCH64)/smbsrv group=sys mode=0555
 dir  path=usr/lib
 dir  path=usr/lib/fs group=sys
 dir  path=usr/lib/fs/smb group=sys

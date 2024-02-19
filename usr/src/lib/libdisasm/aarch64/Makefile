@@ -28,9 +28,9 @@ ISASRCDIR=../$(MACH)/
 include ../Makefile.com
 include ../../Makefile.lib.64
 
-# XXXARM: The standalone won't build because the module uses inappropriate functions
-# must be fixed
-TYPES=library #standalone
+TYPES=library standalone
+
+CPPFLAGS_standalone += -Dffs=mdb_ffs -Dfls=mdb_fls
 
 INSTALL_DEPS_library = $(ROOTLINKS) $(ROOTLIBS)
 INSTALL_DEPS_standalone = $(ROOTLIBS)

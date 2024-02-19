@@ -26,6 +26,7 @@ extern "C" {
 typedef uint64_t kreg_t;
 #endif	/* !_ASM */
 
+/* See sys/kdi_regs.h, and sys/privregs.h, which must all agree */
 #define	KREG_SAVFP	KDIREG_SAVFP
 #define	KREG_SAVPC	KDIREG_SAVPC
 #define	KREG_X0		KDIREG_X0
@@ -63,8 +64,11 @@ typedef uint64_t kreg_t;
 #define	KREG_LR		KDIREG_LR
 #define	KREG_SP		KDIREG_SP
 #define	KREG_PC		KDIREG_PC
-#define	KREG_PSR	KDIREG_PSR
+#define	KREG_SPSR	KDIREG_SPSR
 #define	KREG_TP		KDIREG_TP
+#define	KREG_TRAPNO	KDIREG_TRAPNO
+#define	KREG_FAR	KDIREG_FAR
+#define	KREG_ESR	KDIREG_ESR
 
 #define	KREG_NGREG	KDIREG_NGREG
 

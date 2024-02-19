@@ -51,7 +51,7 @@ struct kdi_debugvec {
 	void	(*dv_mod_loaded)(struct modctl *);
 	void	(*dv_mod_unloading)(struct modctl *);
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 	void	(*dv_handle_fault)(greg_t, greg_t, greg_t, int);
 #endif
 #if defined(__sparc)
