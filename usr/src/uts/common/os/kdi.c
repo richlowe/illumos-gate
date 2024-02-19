@@ -52,7 +52,7 @@ kdi_dvec_memavail(void)
 	kdi_dvec->dv_kctl_memavail();
 }
 
-#if defined(__x86)
+#if defined(__x86) || defined(__aarch64__)
 void
 kdi_dvec_handle_fault(greg_t trapno, greg_t pc, greg_t sp, int cpuid)
 {

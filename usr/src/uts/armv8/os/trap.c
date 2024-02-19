@@ -172,7 +172,8 @@ static const char *trap_type[] = {
 	[T_SOFTWARE_BREAKPOINT] = "Software breakpoint",
 	[T_PMU] = "PMU exception",
 };
-#define	TRAP_TYPES	(sizeof (trap_type) / sizeof (trap_type)[0])
+
+#define	TRAP_TYPES	ARRAY_SIZE(trap_type)
 
 /*
  * XXXARM: A lot of this could be shared with the instruction side, but we're
@@ -228,7 +229,7 @@ static const char *dfsc_name[] = {
 	[ISS_DABORT_DFSC_LOCKDOWN] = "Lockdown",
 	[ISS_DABORT_DFSC_ATOMIC] = "Unsupported exclusive/atomic access",
 };
-#define	DFSC_NAMES	(sizeof (dfsc_name) / sizeof (dfsc_name)[0])
+#define	DFSC_NAMES	ARRAY_SIZE(dfsc_name)
 
 static const char *ifsc_name[] = {
 	[ISS_IABORT_IFSC_ADDRSIZE_LN2] = "Address size fault (level -2)",
@@ -274,7 +275,7 @@ static const char *ifsc_name[] = {
 	[ISS_IABORT_IFSC_ATOMIC_HW_UNSUP] =
 	    "Unsupported atomic hardware update",
 };
-#define	IFSC_NAMES	(sizeof (ifsc_name) / sizeof (ifsc_name)[0])
+#define	IFSC_NAMES	ARRAY_SIZE(ifsc_name)
 
 static void
 print_dabort_esr(uint64_t esr, caddr_t addr)
@@ -502,6 +503,7 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		rp->r_pc += 4;
 		return (0);
 	}
+
 	if (!USERMODE(rp->r_spsr)) {
 		if ((ec == T_SOFTWARE_BREAKPOINT) &&
 		    (ISS_BREAKPOINT_COMMENT(iss) == 0x11)) {
@@ -778,7 +780,6 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 		case T_SOFTWARE_STEP: {
 			pcb_t *pcb = &lwp->lwp_pcb;
 			rp->r_spsr &= ~PSR_SS;
-			write_mdscr_el1(read_mdscr_el1() & ~(MDSCR_SS));
 
 			if ((fault = undo_watch_step(&siginfo)) == 0 &&
 			    ((pcb->pcb_flags & NORMAL_STEP) ||
@@ -861,13 +862,10 @@ trap(uint16_t ec, uint64_t esr, caddr_t addr, struct regs *rp)
 			if (lwp->lwp_pcb.pcb_flags & REQUEST_STEP) {
 				lwp->lwp_pcb.pcb_flags &= ~REQUEST_STEP;
 				rp->r_spsr |= PSR_SS;
-				write_mdscr_el1(read_mdscr_el1() |
-				    (MDSCR_MDE | MDSCR_SS));
 			}
 			if (lwp->lwp_pcb.pcb_flags & REQUEST_NOSTEP) {
 				lwp->lwp_pcb.pcb_flags &= ~REQUEST_NOSTEP;
 				rp->r_spsr &= ~PSR_SS;
-				write_mdscr_el1(read_mdscr_el1() & ~(MDSCR_SS));
 			}
 		}
 out:

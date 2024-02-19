@@ -63,7 +63,7 @@ static kmdb_wr_path_t	*kctl_dmod_path;
  * chairs before we go.
  */
 static kmdb_wr_load_t	*kctl_dmod_loads;
-static kmutex_t 	kctl_dmod_loads_lock;
+static kmutex_t		kctl_dmod_loads_lock;
 
 static int
 kctl_find_module(char *modname, char *fullname, size_t fullnamelen)

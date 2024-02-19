@@ -37,8 +37,7 @@ MODULES += disk_label uhci
 # XXXARM: Not ported
 #MODULES += libsmbios
 
-#SUBDIRS = kmdb libstandctf libstand .WAIT $(MODULES)
-SUBDIRS = mdb mdb_ks $(MODULES)
+SUBDIRS = mdb mdb_ks kmdb libstand libstandctf .WAIT $(MODULES)
 
 include ../../Makefile.subdirs
 

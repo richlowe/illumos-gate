@@ -25,7 +25,7 @@
 #
 
 SRCS += \
-	setjmp.s
+	setjmp.S
 
 include ../../../../Makefile.cmd
 include ../../../../Makefile.cmd.64
@@ -38,5 +38,5 @@ CPPFLAGS += -I.
 	$(COMPILE.c) $<
 	$(CTFCONVERT_O)
 
-%.o: %.s
+%.o: %.S
 	$(COMPILE.s) $<

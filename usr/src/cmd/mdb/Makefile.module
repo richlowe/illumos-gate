@@ -83,8 +83,7 @@ TARGETS			= $(TARGETS_$(MDBTGT))
 
 # Where should we install that which we've built?
 ROOTTGTS_kvm_type	= $(TARGETS_kvm_type)	# overridden by mdb_ks
-# XXXARM: No in-situ kmdb yet
-$(NOT_AARCH64_BLD)ROOTTGTS_kvm_kmdb	= $(ROOTKMOD)/$(KMODULE)
+ROOTTGTS_kvm_kmdb	= $(ROOTKMOD)/$(KMODULE)
 ROOTTGTS_kvm_mdb	= $(ROOTMOD)/$(MODULE)
 ROOTTGTS_kvm_both	= $(ROOTTGTS_kvm_mdb) $(ROOTTGTS_kvm_kmdb)
 ROOTTGTS_kvm		= $(ROOTTGTS_kvm_$(ROOTTGTS_kvm_type))
@@ -175,7 +174,6 @@ $(MODFILE): dmod .WAIT $(MODOBJS) $$(MAPFILE-EXT)
 #
 LINKTESTOBJ = $(KMDBDIR)/kmdb_modlinktest.o
 
-# XXXARM: No in-situ kmdb
 $(NOT_AARCH64_BLD)KMDB_LINKTEST = \
 	$(LD) $(ZDEFS) -ztype=kmod -o $@.linktest $(KMODOBJS) \
 	$(STANDOBJS) $(LINKTESTOBJ) && \

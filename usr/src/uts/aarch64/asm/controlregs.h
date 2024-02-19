@@ -48,7 +48,7 @@ extern "C" {
  *         so we can avoid repetitive explicit calls to isb().
  */
 
-static inline uint64_t
+static __inline__ uint64_t
 read_actlr(void)
 {
 	uint64_t reg;
@@ -56,19 +56,19 @@ read_actlr(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_actlr(uint64_t reg)
 {
 	__asm__ __volatile__("msr actlr_el1, %0"::"r"(reg):"memory");
 }
 
-static inline void
+static __inline__ void
 write_mair(uint64_t reg)
 {
 	__asm__ __volatile__("msr mair_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_mair(void)
 {
 	uint64_t reg;
@@ -76,7 +76,7 @@ read_mair(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_tcr(void)
 {
 	uint64_t reg;
@@ -84,13 +84,13 @@ read_tcr(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_tcr(uint64_t reg)
 {
 	__asm__ __volatile__("msr tcr_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_ttbr0(void)
 {
 	uint64_t reg;
@@ -98,13 +98,13 @@ read_ttbr0(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_ttbr0(uint64_t reg)
 {
 	__asm__ __volatile__("msr ttbr0_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_ttbr1(void)
 {
 	uint64_t reg;
@@ -112,19 +112,19 @@ read_ttbr1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_ttbr1(uint64_t reg)
 {
 	__asm__ __volatile__("msr ttbr1_el1, %0"::"r"(reg):"memory");
 }
 
-static inline void
+static __inline__ void
 write_sctlr(uint64_t reg)
 {
 	__asm__ __volatile__("msr sctlr_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_sctlr(void)
 {
 	uint64_t reg;
@@ -132,13 +132,13 @@ read_sctlr(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 tlbi_allis(void)
 {
 	__asm__ __volatile__("tlbi vmalle1is":::"memory");
 }
 
-static inline void
+static __inline__ void
 tlbi_mva(uint64_t addr)
 {
 	/*
@@ -149,7 +149,7 @@ tlbi_mva(uint64_t addr)
 	    ::"r"((addr >> 12) & ((1ul << 44) - 1)):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_revidr(void)
 {
 	uint64_t reg;
@@ -157,7 +157,7 @@ read_revidr(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntkctl(void)
 {
 	uint64_t reg;
@@ -165,13 +165,13 @@ read_cntkctl(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cntkctl(uint64_t reg)
 {
 	__asm__ __volatile__("msr cntkctl_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntpct(void)
 {
 	uint64_t reg;
@@ -184,7 +184,7 @@ read_cntpct(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntvct(void)
 {
 	uint64_t reg;
@@ -197,7 +197,7 @@ read_cntvct(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntfrq(void)
 {
 	uint64_t reg;
@@ -205,7 +205,7 @@ read_cntfrq(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntp_ctl(void)
 {
 	uint64_t reg;
@@ -213,7 +213,7 @@ read_cntp_ctl(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cntp_ctl(uint64_t reg)
 {
 	__asm__ __volatile__(
@@ -224,7 +224,7 @@ write_cntp_ctl(uint64_t reg)
 	    : "memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntp_cval(void)
 {
 	uint64_t reg;
@@ -232,7 +232,7 @@ read_cntp_cval(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cntp_cval(uint64_t reg)
 {
 	__asm__ __volatile__(
@@ -243,7 +243,7 @@ write_cntp_cval(uint64_t reg)
 	    : "memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntp_tval(void)
 {
 	uint64_t reg;
@@ -251,7 +251,7 @@ read_cntp_tval(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntv_ctl(void)
 {
 	uint64_t reg;
@@ -259,7 +259,7 @@ read_cntv_ctl(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cntv_ctl(uint64_t reg)
 {
 	__asm__ __volatile__(
@@ -270,7 +270,7 @@ write_cntv_ctl(uint64_t reg)
 	    : "memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntv_cval(void)
 {
 	uint64_t reg;
@@ -278,7 +278,7 @@ read_cntv_cval(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cntv_cval(uint64_t reg)
 {
 	__asm__ __volatile__(
@@ -289,7 +289,7 @@ write_cntv_cval(uint64_t reg)
 	    : "memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cntv_tval(void)
 {
 	uint64_t reg;
@@ -297,7 +297,7 @@ read_cntv_tval(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cntv_tval(uint64_t reg)
 {
 	__asm__ __volatile__(
@@ -308,7 +308,7 @@ write_cntv_tval(uint64_t reg)
 	    : "memory");
 }
 
-static inline void
+static __inline__ void
 write_cntp_tval(uint64_t reg)
 {
 	__asm__ __volatile__(
@@ -319,13 +319,13 @@ write_cntp_tval(uint64_t reg)
 	    : "memory");
 }
 
-static inline void
+static __inline__ void
 write_tpidr_el1(uint64_t reg)
 {
 	__asm__ __volatile__("msr tpidr_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_tpidr_el1(void)
 {
 	uint64_t reg;
@@ -333,13 +333,13 @@ read_tpidr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_tpidr_el0(uint64_t reg)
 {
 	__asm__ __volatile__("msr tpidr_el0, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_tpidr_el0(void)
 {
 	uint64_t reg;
@@ -347,19 +347,19 @@ read_tpidr_el0(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_s1e1r(uint64_t reg)
 {
 	__asm__ __volatile__("at s1e1r, %0"::"r"(reg):"memory");
 }
 
-static inline void
+static __inline__ void
 write_s1e1w(uint64_t reg)
 {
 	__asm__ __volatile__("at s1e1w, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_par_el1(void)
 {
 	uint64_t reg;
@@ -395,79 +395,79 @@ read_par_el1(void)
 	__asm__ __volatile__("dsb " #_option_ :::"memory");	\
 } while (0)
 
-static inline void
+static __inline__ void
 isb(void)
 {
 	__asm__ __volatile__("isb":::"memory");
 }
 
-static inline void
+static __inline__ void
 flush_data_cache_by_sw(uint64_t reg)
 {
 	__asm__ __volatile__("dc cisw, %0"::"r"(reg):"memory");
 }
 
-static inline void
+static __inline__ void
 clean_data_cache_by_sw(uint64_t reg)
 {
 	__asm__ __volatile__("dc csw, %0"::"r"(reg):"memory");
 }
 
-static inline void
+static __inline__ void
 invalidate_data_cache_by_sw(uint64_t reg)
 {
 	__asm__ __volatile__("dc isw, %0"::"r"(reg):"memory");
 }
 
-static inline void
+static __inline__ void
 flush_data_cache(uint64_t addr)
 {
 	__asm__ __volatile__("dc civac, %0"::"r"(addr):"memory");
 }
 
-static inline void
+static __inline__ void
 clean_data_cache_poc(uint64_t addr)
 {
 	__asm__ __volatile__("dc cvac, %0"::"r"(addr):"memory");
 }
 
-static inline void
+static __inline__ void
 clean_data_cache_pou(uint64_t addr)
 {
 	__asm__ __volatile__("dc cvau, %0"::"r"(addr):"memory");
 }
 
-static inline void
+static __inline__ void
 invalidate_data_cache(uint64_t addr)
 {
 	__asm__ __volatile__("dc ivac, %0"::"r"(addr):"memory");
 }
 
-static inline void
+static __inline__ void
 data_cache_zero(uint64_t addr)
 {
 	__asm__ __volatile__("dc zva, %0"::"r"(addr):"memory");
 }
 
-static inline void
+static __inline__ void
 invalidate_instruction_cache(uint64_t addr)
 {
 	__asm__ __volatile__("ic ivau, %0"::"r"(addr):"memory");
 }
 
-static inline void
+static __inline__ void
 invalidate_instruction_cache_all(void)
 {
 	__asm__ __volatile__("ic iallu":::"memory");
 }
 
-static inline void
+static __inline__ void
 invalidate_instruction_cache_allis(void)
 {
 	__asm__ __volatile__("ic ialluis":::"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_ccsidr_el1(void)
 {
 	uint64_t reg;
@@ -475,7 +475,7 @@ read_ccsidr_el1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_clidr_el1(void)
 {
 	uint64_t reg;
@@ -483,13 +483,13 @@ read_clidr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_csselr_el1(uint64_t reg)
 {
 	__asm__ __volatile__("msr csselr_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_csselr_el1(void)
 {
 	uint64_t reg;
@@ -497,7 +497,7 @@ read_csselr_el1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_ctr_el0(void)
 {
 	uint64_t reg;
@@ -505,7 +505,7 @@ read_ctr_el0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_mpidr(void)
 {
 	uint64_t reg;
@@ -513,7 +513,7 @@ read_mpidr(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_midr(void)
 {
 	uint64_t reg;
@@ -521,7 +521,7 @@ read_midr(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cpacr_el1(void)
 {
 	uint64_t reg;
@@ -529,7 +529,7 @@ read_cpacr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cpacr_el1(uint64_t reg)
 {
 	__asm__ __volatile__("msr cpacr_el1, %0"::"r"(reg):"memory");
@@ -586,13 +586,13 @@ clear_daif(uint64_t val)
 	__asm__ __volatile__("msr DAIFClr, %0"::"I"(val):"memory");
 }
 
-static inline void
+static __inline__ void
 write_vbar(uint64_t reg)
 {
 	__asm__ __volatile__("msr vbar_el1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_CurrentEL(void)
 {
 	uint64_t reg;
@@ -600,7 +600,7 @@ read_CurrentEL(void)
 	return (reg);
 }
 
-static inline uint32_t
+static __inline__ uint32_t
 read_fpsr(void)
 {
 	uint32_t reg;
@@ -608,13 +608,13 @@ read_fpsr(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_fpsr(uint32_t reg)
 {
 	__asm__ __volatile__("msr fpsr, %0"::"r"(reg):"memory");
 }
 
-static inline uint32_t
+static __inline__ uint32_t
 read_fpcr(void)
 {
 	uint32_t reg;
@@ -622,13 +622,13 @@ read_fpcr(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_fpcr(uint32_t reg)
 {
 	__asm__ __volatile__("msr fpcr, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cpuactlr_el1(void)
 {
 	uint64_t reg;
@@ -636,13 +636,13 @@ read_cpuactlr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cpuactlr_el1(uint64_t reg)
 {
 	__asm__ __volatile__("msr s3_1_c15_c2_0, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_cpuectlr_el1(void)
 {
 	uint64_t reg;
@@ -650,13 +650,13 @@ read_cpuectlr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_cpuectlr_el1(uint64_t reg)
 {
 	__asm__ __volatile__("msr s3_1_c15_c2_1, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_l2actlr_el1(void)
 {
 	uint64_t reg;
@@ -664,13 +664,13 @@ read_l2actlr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_l2actlr_el1(uint64_t reg)
 {
 	__asm__ __volatile__("msr s3_1_c15_c0_0, %0"::"r"(reg):"memory");
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64pfr0(void)
 {
 	uint64_t reg;
@@ -678,7 +678,7 @@ read_id_aa64pfr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64pfr1(void)
 {
 	uint64_t reg;
@@ -686,7 +686,7 @@ read_id_aa64pfr1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64afr0(void)
 {
 	uint64_t reg;
@@ -694,7 +694,7 @@ read_id_aa64afr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64afr1(void)
 {
 	uint64_t reg;
@@ -702,7 +702,7 @@ read_id_aa64afr1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64dfr0(void)
 {
 	uint64_t reg;
@@ -710,7 +710,7 @@ read_id_aa64dfr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64dfr1(void)
 {
 	uint64_t reg;
@@ -718,7 +718,7 @@ read_id_aa64dfr1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64isar0(void)
 {
 	uint64_t reg;
@@ -726,7 +726,7 @@ read_id_aa64isar0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64isar1(void)
 {
 	uint64_t reg;
@@ -734,7 +734,7 @@ read_id_aa64isar1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64isar2(void)
 {
 	uint64_t reg;
@@ -742,7 +742,7 @@ read_id_aa64isar2(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64mmfr0(void)
 {
 	uint64_t reg;
@@ -750,7 +750,7 @@ read_id_aa64mmfr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64mmfr1(void)
 {
 	uint64_t reg;
@@ -758,7 +758,7 @@ read_id_aa64mmfr1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64mmfr2(void)
 {
 	uint64_t reg;
@@ -766,7 +766,7 @@ read_id_aa64mmfr2(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64mmfr3(void)
 {
 	uint64_t reg;
@@ -774,7 +774,7 @@ read_id_aa64mmfr3(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64zfr0(void)
 {
 	uint64_t reg;
@@ -782,7 +782,7 @@ read_id_aa64zfr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_id_aa64smfr0(void)
 {
 	uint64_t reg;
@@ -790,7 +790,7 @@ read_id_aa64smfr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_pmmir(void)
 {
 	uint64_t reg;
@@ -798,7 +798,7 @@ read_pmmir(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_mvfr0(void)
 {
 	uint64_t reg;
@@ -806,7 +806,7 @@ read_mvfr0(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_mvfr1(void)
 {
 	uint64_t reg;
@@ -814,7 +814,7 @@ read_mvfr1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_mvfr2(void)
 {
 	uint64_t reg;
@@ -822,7 +822,7 @@ read_mvfr2(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_mdscr_el1(void)
 {
 	uint64_t reg;
@@ -830,19 +830,14 @@ read_mdscr_el1(void)
 	return (reg);
 }
 
-static inline void
+static __inline__ void
 write_mdscr_el1(uint64_t reg)
 {
-	__asm__ __volatile__("msr mdscr_el1, %0"::"r"(reg):"memory");
+	__asm__ __volatile__("msr mdscr_el1, %0\n\t"::"r"(reg):"memory");
+	isb();
 }
 
-static inline void
-write_oslar_el1(uint64_t reg)
-{
-	__asm__ __volatile__("msr oslar_el1, %0"::"r"(reg):"memory");
-}
-
-static inline uint64_t
+static __inline__ uint64_t
 read_oslsr_el1(void)
 {
 	uint64_t reg;
@@ -850,7 +845,7 @@ read_oslsr_el1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_esr_el1(void)
 {
 	uint64_t reg;
@@ -858,7 +853,7 @@ read_esr_el1(void)
 	return (reg);
 }
 
-static inline uint64_t
+static __inline__ uint64_t
 read_far_el1(void)
 {
 	uint64_t reg;

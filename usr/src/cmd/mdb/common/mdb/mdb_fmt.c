@@ -798,6 +798,11 @@ mdb_fmt_print(mdb_tgt_t *t, mdb_tgt_as_t as,
 				rvalue = u.i4;
 				break;
 			case 8:
+				/*
+				 * XXXKDI: cannot even refer to floating point
+				 * types here on ARM without FPU.
+				 */
+#if !defined(__aarch64__) || !defined(_KMDB)
 				if (fp->f_float) {
 					mdb_iob_printf(mdb.m_out, fp->f_ptr,
 					    u.d);
@@ -805,6 +810,10 @@ mdb_fmt_print(mdb_tgt_t *t, mdb_tgt_as_t as,
 					mdb_iob_printf(mdb.m_out, fp->f_ptr,
 					    u.i8);
 				}
+#else
+				mdb_iob_printf(mdb.m_out, fp->f_ptr,
+				    u.i8);
+#endif
 				rvalue = u.i8;
 				break;
 			default:

@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <sys/regset.h>
 #include <sys/privregs.h>
+#include <sys/stack.h>
 #endif
 
 
@@ -42,15 +43,6 @@ extern "C" {
 #define	KDI_CPU_STATE_NONE		0
 #define	KDI_CPU_STATE_MASTER		1
 #define	KDI_CPU_STATE_SLAVE		2
-
-#define	KDIREG_DRCTL_WPALLEN_MASK	0x000000ff
-#define	KDIREG_DRSTAT_RESERVED		0xffff0ff0
-#define	KDIREG_DRCTL_RESERVED		0x00000700
-
-#define	KDI_MSR_READ		0x1	/* read during entry (unlimited) */
-#define	KDI_MSR_WRITE		0x2	/* write during exit (unlimited) */
-#define	KDI_MSR_WRITEDELAY	0x4	/* write after last branch (<= 1) */
-#define	KDI_MSR_CLEARENTRY	0x3	/* clear before 1st branch (<= 1) */
 
 #ifndef _ASM
 
@@ -67,29 +59,6 @@ typedef struct kdi_crumb {
 	greg_t krm_flag;	/* KAIF_CRUMB_F_* */
 } kdi_crumb_t;
 
-#define	KDI_MAXWPIDX	3
-
-/*
- * Storage for %dr0-3, %dr6, and %dr7.
- */
-typedef struct kdi_drreg {
-	greg_t			dr_ctl;
-	greg_t			dr_stat;
-	greg_t			dr_addr[KDI_MAXWPIDX + 1];
-} kdi_drreg_t;
-
-typedef struct kdi_msr {
-	uint_t		msr_num;
-	uint_t		msr_type;
-	union {
-		uint64_t *_msr_valp;
-		uint64_t _msr_val;
-	} _u;
-} kdi_msr_t;
-
-#define	kdi_msr_val	_u._msr_val
-#define	kdi_msr_valp	_u._msr_valp
-
 /*
  * Data structure used to hold all of the state for a given CPU.
  */
@@ -100,11 +69,60 @@ typedef struct kdi_cpusave {
 	uint_t			krs_cpu_flushed; /* Have caches been flushed? */
 	uint_t			krs_cpu_id;	/* this CPU's ID */
 
+	uintptr_t		krs_exception_vector;
+
 	/* Bread crumb ring buffer */
 	ulong_t			krs_curcrumbidx; /* Current krs_crumbs idx */
 	kdi_crumb_t		*krs_curcrumb;	/* Pointer to current crumb */
 	kdi_crumb_t		krs_crumbs[KDI_NCRUMBS]; /* Crumbs */
 } kdi_cpusave_t;
+
+#define	WCR_MASK_SHIFT	24
+#define	WCR_MASK_MASK	0x1f
+
+#define	WCR_MASK(x) ((x & WCR_MASK_MASK) << WCR_MASK_SHIFT)
+
+#define	WCR_TYPE_SHIFT	20
+#define	WCR_TYPE_MASK	0x1
+
+#define	WCR_LBN_SHIFT	16
+#define	WCR_LBN_MASK	0xf
+
+#define	WCR_SSC_SHIFT	14
+#define	WCR_SSC_MASK	0x3
+
+#define	WCR_HMC_SHIFT	13
+#define	WCR_HMC_MASK	0x1
+
+#define	WCR_BAS_SHIFT	5
+#define	WCR_BAS_MASK	0xff
+
+#define	WCR_BAS(x)	((x & WCR_BAS_MASK) << WCR_BAS_SHIFT)
+
+#define	WCR_LSC_SHIFT	3
+#define	WCR_LSC_MASK	0x3
+
+#define	WCR_LSC_LOAD		0x1
+#define	WCR_LSC_STORE		0x2
+
+#define	WCR_LSC(x)	((x & WCR_LSC_MASK) << WCR_LSC_SHIFT)
+
+#define	WCR_PAC_SHIFT	1
+#define	WCR_PAC_MASK	0x3
+
+#define	WCR_PAC(x)	((x & WCR_PAC_MASK) << WCR_PAC_SHIFT)
+
+#define	WCR_E_SHIFT	0
+#define	WCR_E_MASK	0x1
+
+#define	WCR_DISABLE	0x0
+#define	WCR_ENABLE	0x1
+
+typedef struct {
+	uintptr_t kw_addr;	/* watched address */
+	uint64_t kw_ctl;	/* control */
+	uint_t kw_hwid;		/* hardware watchpoint ID used */
+} kdi_waptreg_t;
 
 #endif /* !_ASM */
 
@@ -113,10 +131,8 @@ typedef struct kdi_cpusave {
 #endif
 
 /*
- * A modified version of struct regs layout.
- * XXXARM: Not actually yet modified.  I don't know what this should look like.
+ * This describes the `struct regs` layout.  They are directly compatible
  */
-
 #define	KDIREG_SAVFP	0
 #define	KDIREG_SAVPC	1
 #define	KDIREG_X0	2
@@ -154,10 +170,12 @@ typedef struct kdi_cpusave {
 #define	KDIREG_LR	KDIREG_X30
 #define	KDIREG_SP	33
 #define	KDIREG_PC	34
-#define	KDIREG_PSR	35
+#define	KDIREG_SPSR	35
 #define	KDIREG_TP	36
+#define	KDIREG_ESR	37
+#define	KDIREG_FAR	38
+#define	KDIREG_TRAPNO	39
 
-#define	KDIREG_NGREG (KDIREG_TP + 1)
-
+#define	KDIREG_NGREG	(KDIREG_TRAPNO + 1)
 
 #endif /* _SYS_KDI_REGS_H */

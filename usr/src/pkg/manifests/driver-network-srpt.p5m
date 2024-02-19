@@ -33,9 +33,9 @@ dir  path=kernel/drv group=sys
 dir  path=kernel/drv/$(ARCH64) group=sys
 $(not_aarch64)file path=kernel/drv/$(ARCH64)/srpt group=sys
 $(not_aarch64)file path=kernel/drv/srpt.conf group=sys
-$(not_aarch64)dir path=kernel/kmdb group=sys
-$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/srpt group=sys mode=0555
+dir  path=kernel/kmdb group=sys
+dir  path=kernel/kmdb/$(ARCH64) group=sys
+file path=kernel/kmdb/$(ARCH64)/srpt group=sys mode=0555
 dir  path=lib variant.opensolaris.zone=global
 dir  path=lib/svc variant.opensolaris.zone=global
 dir  path=lib/svc/manifest group=sys variant.opensolaris.zone=global

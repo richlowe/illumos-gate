@@ -85,7 +85,7 @@ _ischar()
 	return (!(UARTFR & UARTFR_RXFE));
 }
 
-static void __NORETURN
+void __NORETURN
 _reset(bool poff)
 {
 	if (poff)

@@ -141,7 +141,7 @@ const mdb_tgt_regdesc_t pt_regdesc[] = {
 	{ "w30", REG_X30, MDB_TGT_R_EXPORT | MDB_TGT_R_32 },
 	{ "sp", REG_SP, MDB_TGT_R_EXPORT },
 	{ "pc", REG_PC, MDB_TGT_R_EXPORT },
-	{ "psr", REG_PSR, MDB_TGT_R_EXPORT },
+	{ "spsr", REG_SPSR, MDB_TGT_R_EXPORT },
 	{ "tp", REG_TP, MDB_TGT_R_EXPORT },
 	{ NULL, 0, 0 },
 };
@@ -437,8 +437,8 @@ print_regs:
 
 	mdb_printf("%%sp = 0x%0?p\t%%pc = 0x%0?p\n",
 	    grs[REG_SP], grs[REG_PC]);
-	mdb_printf("%%tp = 0x%0?p\t%%psr = 0x%0?p\n",
-	    grs[REG_TP], grs[REG_PSR]);
+	mdb_printf("%%tp = 0x%0?p\t%%spsr = 0x%0?p\n",
+	    grs[REG_TP], grs[REG_SPSR]);
 
 	return (DCMD_OK);
 }

@@ -83,7 +83,7 @@ gcore_getgregs(mdb_klwp_t *lwp, gregset_t grp)
 	grp[REG_X30] = regs.r_x30;
 	grp[REG_SP] = regs.r_sp;
 	grp[REG_PC] = regs.r_pc;
-	grp[REG_PSR] = regs.r_spsr;
+	grp[REG_SPSR] = regs.r_spsr;
 }
 
 int

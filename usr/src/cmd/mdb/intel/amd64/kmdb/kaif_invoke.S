@@ -53,7 +53,7 @@ copyargs:
 
 	/*
 	 * This is going to be fun.  We were called with the function pointer
-	 * in in %rsi, argc in %rdx, and a pointer to an array of uintptr_t's
+	 * in %rsi, argc in %rdx, and a pointer to an array of uintptr_t's
 	 * (the arguments to be passed) in %rcx.  In the worst case, we need
 	 * to move the first six arguments from the array to %rdi, %rsi, %rdx,
 	 * %rcx, %r8, and %r9.  The remaining arguments need to be copied from

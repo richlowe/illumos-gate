@@ -53,9 +53,9 @@ file path=kernel/drv/zfs.conf group=sys
 dir  path=kernel/fs group=sys
 dir  path=kernel/fs/$(ARCH64) group=sys
 hardlink path=kernel/fs/$(ARCH64)/zfs target=../../../kernel/drv/$(ARCH64)/zfs
-$(not_aarch64)dir path=kernel/kmdb group=sys
-$(not_aarch64)dir path=kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=kernel/kmdb/$(ARCH64)/zfs group=sys mode=0555
+dir  path=kernel/kmdb group=sys
+dir  path=kernel/kmdb/$(ARCH64) group=sys
+file path=kernel/kmdb/$(ARCH64)/zfs group=sys mode=0555
 dir  path=lib
 $(MULTILIB_ONLY)dir path=lib/$(ARCH64)
 $(MULTILIB_ONLY)link path=lib/$(ARCH64)/libzfs.so target=libzfs.so.1

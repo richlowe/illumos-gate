@@ -242,6 +242,7 @@ DRV_KMODS	+= iwn
 DRV_KMODS	+= iwp
 DRV_KMODS	+= iwscn
 DRV_KMODS	+= keysock
+DRV_KMODS	+= kmdb
 DRV_KMODS	+= kstat
 DRV_KMODS	+= ksyms
 DRV_KMODS	+= llc1

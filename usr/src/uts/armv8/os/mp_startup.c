@@ -341,6 +341,15 @@ wakeup_cpu(cpu_t *cp)
 	return (-1);
 }
 
+void
+unlock_oslock(void)
+{
+	__asm__ __volatile__("msr oslar_el1, %0"
+	    :
+	    :"r" (0)
+	    :"memory");
+}
+
 static void
 mp_startup_boot(void)
 {
@@ -348,12 +357,25 @@ mp_startup_boot(void)
 
 	extern void cpu_event_init_cpu(cpu_t *);
 	extern void exception_vector(void);
+	extern void kdi_exception_vector(void);
+	extern void kdi_restore_debugging_state(void);
+	extern void kdi_cpu_init(void);
 
 	/* Let the control CPU continue into tsc_sync_master() */
 	mp_startup_signal(&procset_slave, cp->cpu_id);
 
-	/* Set our exception vector base */
-	write_vbar((uintptr_t)exception_vector);
+	/*
+	 * If kmdb is loaded we have to do the equivalent of
+	 * kdi_cpu_activate() to each appearing CPU, and sync the debug
+	 * registers.
+	 */
+	if (boothowto & RB_KMDB) {
+		kdi_cpu_init();
+		kdi_restore_debugging_state();
+	} else {
+		write_vbar((uintptr_t)exception_vector);
+	}
+
 	isb();
 
 	/* Set up the GIC for the new additional CPU */
@@ -449,7 +471,7 @@ mp_startup_boot(void)
 	cmn_err(CE_CONT, "?cpu%d initialization complete - online\n",
 	    cp->cpu_id);
 
-	write_oslar_el1(0);
+	unlock_oslock();
 	write_cntkctl(read_cntkctl() | 0x3);
 
 	/*
@@ -672,7 +694,7 @@ start_other_cpus(int flag __unused)
 	cmn_err(CE_CONT, "?cpu%d: %s\n", CPU->cpu_id, CPU->cpu_brandstr);
 	print_arm_features(arm_features);
 
-	write_oslar_el1(0);
+	unlock_oslock();
 	write_cntkctl(read_cntkctl() | 0x3);
 
 	processorid_t bootcpu = CPU->cpu_id;

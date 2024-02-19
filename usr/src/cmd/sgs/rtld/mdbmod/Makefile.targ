@@ -41,8 +41,14 @@ $(BLTDATA) + \
 $(BLTMESG):	$(SGSMSGALL)
 		$(SGSMSG) $(SGSMSGFLAGS) $(SGSMSGALL)
 
-$(ROOTMDBLIB)/%: %
+$(ROOTMDBLIB)/%: % $(ROOTMDBLIB)
 		$(INS.file)
 
-$(ROOTMDBLIB64)/%: %
+$(ROOTMDBLIB64)/%: % $(ROOTMDBLIB64)
 		$(INS.file)
+
+$(ROOTMDBLIB):
+	$(INS.dir)
+
+$(ROOTMDBLIB64):
+	$(INS.dir)

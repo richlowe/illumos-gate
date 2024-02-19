@@ -58,12 +58,12 @@
 	.endif
 
 	.data
-unexpected_exception:	.asciz "unexpected exception type"
+.unexpected_exception:	.asciz "unexpected exception type"
 
 #define UNEXPECTED()				\
 	clrex;					\
-	adrp x0, unexpected_exception;		\
-	add x0, x0, :lo12:unexpected_exception;	\
+	adrp x0, .unexpected_exception;		\
+	add x0, x0, :lo12:.unexpected_exception;	\
 	bl panic
 
 /*
@@ -113,7 +113,7 @@ SET_SIZE(from_current_el_sp0_error)
 	.balign	VECTOR_ENTRY_SIZE
 ALTENTRY(from_current_el_sync)
 	clrex
-	__SAVE_REGS
+	__SAVE_REGS_EL1
 	__SAVE_FRAME
 	b	from_current_el_sync_handler
 	CHECK_VECTOR_ENTRY(from_current_el_sync)
@@ -122,14 +122,9 @@ SET_SIZE(from_current_el_sync)
 	.balign	VECTOR_ENTRY_SIZE
 ALTENTRY(from_current_el_irq)
 	clrex
-	__SAVE_REGS
-	__SAVE_FRAME
-	mov	x0, sp
-	bl	do_interrupt
-	b	_sys_rtt
+	b	from_current_el_irq_handler
 	CHECK_VECTOR_ENTRY(from_current_el_irq)
-SET_SIZE(from_current_el_irq)
-
+	SET_SIZE(from_current_el_irq)
 	.balign	VECTOR_ENTRY_SIZE
 ALTENTRY(from_current_el_fiq)
 	UNEXPECTED()
@@ -148,26 +143,27 @@ SET_SIZE(from_current_el_error)
 	.balign	VECTOR_ENTRY_SIZE
 ALTENTRY(from_lower_el_aarch64_sync)
 	clrex
-	__SAVE_REGS
+	__SAVE_REGS_EL0
 	__TERMINATE_FRAME
-	mrs	x1, esr_el1
-	lsr	w0, w1, #ESR_EC_SHIFT	// w0 <- EC, no need to mask
-	cmp	w0, #T_SVC
-	b.eq	svc_handler
 
-	mrs	x2, far_el1
-	mov	x3, sp
-
-	bl	trap
-	b	user_rtt
+	b from_lower_el_aarch64_sync_handler
 	CHECK_VECTOR_ENTRY(from_lower_el_aarch64_sync)
 SET_SIZE(from_lower_el_aarch64_sync)
 
 	.balign	VECTOR_ENTRY_SIZE
 ALTENTRY(from_lower_el_aarch64_irq)
 	clrex
-	__SAVE_REGS
+	__SAVE_REGS_EL0
 	__TERMINATE_FRAME
+
+	// Disable single-stepping when coming back from userland
+	mrs	x1, mdscr_el1
+	and	x1, x1, #~MDSCR_SS
+	msr	mdscr_el1, x1
+
+	// Enable debug exceptions
+	msr DAIFClr, #DAIF_SETCLEAR_DEBUG
+
 	mov	x0, sp
 	bl	do_interrupt
 	b	_sys_rtt
@@ -227,14 +223,43 @@ SET_SIZE(from_lower_el_aarch32_error)
 	cbz	x0, 1f
 	b	_sys_rtt
 1:
-	__RESTORE_REGS
+	__RESTORE_REGS_EL1
 	eret
 	SET_SIZE(from_current_el_sync_handler)
 
+	ENTRY(from_current_el_irq_handler)
+	__SAVE_REGS_EL1
+	__SAVE_FRAME
+	mov	x0, sp
+	bl	do_interrupt
+	b	_sys_rtt
+	SET_SIZE(from_current_el_irq_handler)
+
+	ENTRY_NP(from_lower_el_aarch64_sync_handler)
+	// Disable single-stepping when coming back from userland
+	mrs	x1, mdscr_el1
+	and	x1, x1, #~MDSCR_SS
+	msr	mdscr_el1, x1
+
+	// Enable debug exceptions
+	msr DAIFClr, #DAIF_SETCLEAR_DEBUG
+
+	mrs	x1, esr_el1
+	lsr	w0, w1, #ESR_EC_SHIFT	// w0 <- EC, no need to mask
+	cmp	w0, #T_SVC
+	b.eq	syscall_handler
+
+	mrs	x2, far_el1
+	mov	x3, sp
+
+	bl	trap
+	b	user_rtt
+	SET_SIZE(from_lower_el_aarch64_sync_handler)
+
 	/*
-	 * System call Handler From AArch64 EL0
+	 * Supervisor call Handler From AArch64 EL0 (system calls)
 	 */
-	ENTRY(svc_handler)
+	ENTRY(syscall_handler)
 	// w0: ESR_EL1.EC
 	// w1: ESR_EL1
 
@@ -322,16 +347,24 @@ _syscall_invoke:
 	stp	x22, x23, [sp, #REGOFF_X0]
 	strh	wzr, [x21, #T_SYSNUM]
 
-	__RESTORE_REGS
+	__RESTORE_REGS_EL0
 	eret
 
 _user_rtt:
-	msr	DAIFSet, #DAIF_SETCLEAR_IRQ
+	msr	DAIFSet, #(DAIF_SETCLEAR_IRQ | DAIF_SETCLEAR_DEBUG)
 
-	ldrb	w9, [x21, #T_ASTFLAG]
+	// if we've been requested to single-step in user-land, set this now
+	// that debug exceptions are masked and won't be taken in the kernel
+	ldr	x0, [sp, #REGOFF_SPSR]
+	tbz	x0, PSR_SS_BIT, 1f
+	mrs	x0, mdscr_el1
+	orr	x0, x0, MDSCR_SS
+	msr	mdscr_el1, x0
+
+1:	ldrb	w9, [x21, #T_ASTFLAG]
 	cbnz	w9, 3f
 
-	__RESTORE_REGS
+	__RESTORE_REGS_EL0
 	eret
 
 3:
@@ -414,7 +447,7 @@ _fasttrap:
 	mov	x0, sp
 	mov	w1, w20
 	b	dtrace_user_probe
-	SET_SIZE(svc_handler)
+	SET_SIZE(syscall_handler)
 
 	ENTRY(getlgrp)
 	CPUP_THREADP(x3, x2)
@@ -463,7 +496,7 @@ _sys_rtt_preempt_ret:
 	cmp	x3, x2
 	b.lo	2f
 1:
-	__RESTORE_REGS
+	__RESTORE_REGS_EL0
 	eret
 
 2:	str	x1, [sp, #REGOFF_PC]

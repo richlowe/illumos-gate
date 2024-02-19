@@ -275,6 +275,7 @@ extern void mdb_warn(const char *, ...);
 extern void mdb_flush(void);
 
 extern int mdb_ffs(uintmax_t);
+extern int mdb_fls(uintmax_t);
 
 extern void mdb_nhconvert(void *, const void *, size_t);
 

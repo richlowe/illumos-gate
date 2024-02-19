@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-#if defined(__i386) || defined(__amd64)
+#if defined(__i386) || defined(__amd64) || defined(__aarch64__)
 struct boot_syscalls;
 extern struct boot_syscalls *kmdb_sysp;
 #endif

@@ -104,7 +104,8 @@ psci_call(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)
 {
 	/*
 	 * We may get here very early if panicking, attempt to be useful, and
-	 * not panic recursively
+	 * not panic recursively.  Unfortunately, we may also get here from
+	 * `$q` under kmdb and panic rather than rebooting.
 	 */
 	if (!panicstr)
 		VERIFY(psci_initialized);

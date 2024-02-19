@@ -50,10 +50,10 @@ file path=usr/kernel/drv/nsmb.conf group=sys
 dir  path=usr/kernel/fs group=sys
 dir  path=usr/kernel/fs/$(ARCH64) group=sys
 file path=usr/kernel/fs/$(ARCH64)/smbfs group=sys mode=0755
-$(not_aarch64)dir path=usr/kernel/kmdb group=sys
-$(not_aarch64)dir path=usr/kernel/kmdb/$(ARCH64) group=sys
-$(not_aarch64)file path=usr/kernel/kmdb/$(ARCH64)/nsmb group=sys mode=0555
-$(not_aarch64)file path=usr/kernel/kmdb/$(ARCH64)/smbfs group=sys mode=0555
+dir  path=usr/kernel/kmdb group=sys
+dir  path=usr/kernel/kmdb/$(ARCH64) group=sys
+file path=usr/kernel/kmdb/$(ARCH64)/nsmb group=sys mode=0555
+file path=usr/kernel/kmdb/$(ARCH64)/smbfs group=sys mode=0555
 dir  path=usr/lib
 $(MULTILIB_ONLY)dir path=usr/lib/$(ARCH64)
 $(MULTILIB_ONLY)file path=usr/lib/$(ARCH64)/libsmbfs.so.1

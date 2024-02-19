@@ -55,6 +55,10 @@
 #include <sys/xc_levels.h>
 #include <sys/consdev.h>
 #include <sys/arch_timer.h>
+#include <sys/reboot.h>
+#include <sys/kdi_machimpl.h>
+
+#include <c2/audit.h>
 
 int maxphys = MMU_PAGESIZE * 16;	/* 128k */
 int klustsize = MMU_PAGESIZE * 16;	/* 128k */
@@ -152,8 +156,14 @@ debug_enter(char *msg)		/* message to print, possibly NULL */
 	if (dtrace_debugger_init != NULL)
 		(*dtrace_debugger_init)();
 
-	if (msg)
+	if (msg != NULL || (boothowto & RB_DEBUG))
+		prom_printf("\n");
+
+	if (msg != NULL)
 		prom_printf("%s\n", msg);
+
+	if (boothowto & RB_DEBUG)
+		kmdb_enter();
 
 	if (dtrace_debugger_fini != NULL)
 		(*dtrace_debugger_fini)();
@@ -543,9 +553,10 @@ mach_cpu_halt(xc_arg_t arg1 __unused, xc_arg_t arg2 __unused,
     xc_arg_t arg3 __unused)
 {
 	/*
-	 * XXXARM: As in panic_idle is a hack because our xcalls are not great right now.
-	 * If we kick a cpu into a function which spins (like this), we never
-	 * get chance to ack the xcall, and the caller waits for us forever.
+	 * XXXARM: As in panic_idle is a hack because our xcalls are not great
+	 * right now.  If we kick a cpu into a function which spins (like
+	 * this), we never get chance to ack the xcall, and the caller waits
+	 * for us forever.
 	 *
 	 * To break free of this, for right now, we ack the xcall ourselves as
 	 * we know this will always happen to us.
@@ -690,8 +701,19 @@ kadb_uses_kernel()
 void
 abort_sequence_enter(char *msg)
 {
+	if (abort_enable == 0) {
+		if (AU_ZONE_AUDITING(GET_KCTX_GZ))
+			audit_enterprom(0);
+		return;
+	}
+
+	if (AU_ZONE_AUDITING(GET_KCTX_GZ))
+		audit_enterprom(1);
+
 	debug_enter(msg);
-	prom_panic("");
+
+	if (AU_ZONE_AUDITING(GET_KCTX_GZ))
+		audit_exitprom(1);
 }
 
 void

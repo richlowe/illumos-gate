@@ -26,9 +26,9 @@
  */
 
 /*
- * The debugger/"PROM" interface layer
+ * The debugger/"PROM debugger" interface layer
  *
- * It makes more sense on SPARC. In reality, these interfaces deal with three
+ * It made more sense on SPARC. In reality, these interfaces deal with three
  * things: setting break/watchpoints, stepping, and interfacing with the KDI to
  * set up kmdb's IDT handlers.
  */
@@ -786,15 +786,15 @@ kaif_handle_fault(greg_t trapno, greg_t pc, greg_t sp, int cpuid)
 }
 
 static kdi_debugvec_t kaif_dvec = {
-	NULL,			/* dv_kctl_vmready */
-	NULL,			/* dv_kctl_memavail */
-	NULL,			/* dv_kctl_modavail */
-	NULL,			/* dv_kctl_thravail */
-	kaif_vmready,
-	kaif_memavail,
-	kaif_mod_loaded,
-	kaif_mod_unloading,
-	kaif_handle_fault
+	.dv_kctl_vmready = NULL,
+	.dv_kctl_memavail = NULL,
+	.dv_kctl_modavail = NULL,
+	.dv_kctl_thravail = NULL,
+	.dv_vmready = kaif_vmready,
+	.dv_memavail = kaif_memavail,
+	.dv_mod_loaded = kaif_mod_loaded,
+	.dv_mod_unloading = kaif_mod_unloading,
+	.dv_handle_fault = kaif_handle_fault
 };
 
 void

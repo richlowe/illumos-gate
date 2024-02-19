@@ -61,8 +61,8 @@ static mdb_list_t kmt_defbp_list;	/* List of current deferred bp's */
 static int kmt_defbp_lock;		/* For list, running kernel holds */
 static uint_t kmt_defbp_modchg_isload;	/* Whether mod change is load/unload */
 static struct modctl *kmt_defbp_modchg_modctl; /* modctl for defbp checking */
-static uint_t kmt_defbp_num;		/* Number of referenced def'd bp's */
-static int kmt_defbp_bpspec;		/* vespec for def'd bp activation bp */
+static uint_t kmt_defbp_num;	/* Number of referenced def'd bp's */
+static int kmt_defbp_bpspec;	/* vespec for def'd bp activation bp */
 
 static const mdb_se_ops_t kmt_brkpt_ops;
 static const mdb_se_ops_t kmt_wapt_ops;
@@ -663,10 +663,9 @@ static const mdb_nv_disc_t kmt_reg_disc = {
 	.disc_set = kmt_reg_disc_set
 };
 
-/*ARGSUSED*/
 static int
-kmt_getareg(mdb_tgt_t *t, mdb_tgt_tid_t tid, const char *rname,
-    mdb_tgt_reg_t *rp)
+kmt_getareg(mdb_tgt_t *t __unused, mdb_tgt_tid_t tid __unused,
+    const char *rname, mdb_tgt_reg_t *rp)
 {
 	kreg_t val;
 
@@ -2080,9 +2079,8 @@ static const mdb_se_ops_t kmt_wapt_ops = {
 	.se_match = kmt_wapt_match,
 };
 
-/*ARGSUSED*/
 static int
-kmt_trap_ctor(mdb_tgt_t *t, mdb_sespec_t *sep, void *args)
+kmt_trap_ctor(mdb_tgt_t *t __unused, mdb_sespec_t *sep, void *args)
 {
 	sep->se_data = args; /* trap number */
 

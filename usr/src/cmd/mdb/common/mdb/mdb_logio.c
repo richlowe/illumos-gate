@@ -104,7 +104,7 @@ static const mdb_io_ops_t logio_ops = {
 	.io_unlink = no_io_unlink,
 	.io_setattr = no_io_setattr,
 	.io_suspend = no_io_suspend,
-	.io_resume = no_io_resume
+	.io_resume = no_io_resume,
 };
 
 mdb_io_t *

@@ -28,6 +28,7 @@
 include ../../../Makefile.master
 
 HDRS	=			\
+	arch_timer.h		\
 	archsystm.h		\
 	asm_linkage.h		\
 	bootconf.h		\
@@ -45,6 +46,7 @@ HDRS	=			\
 	inline.h		\
 	kdi_machimpl.h		\
 	kdi_regs.h		\
+	kdi_svc.h		\
 	machlock.h		\
 	machsig.h		\
 	machtypes.h		\

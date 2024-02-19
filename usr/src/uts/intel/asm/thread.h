@@ -46,8 +46,8 @@ struct _kthread;
  * Yuck.
  */
 
-extern __GNU_INLINE struct _kthread
-*threadp(void)
+extern __GNU_INLINE struct _kthread *
+threadp(void)
 {
 	struct _kthread *__value;
 

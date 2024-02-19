@@ -4706,7 +4706,6 @@ pt_auxv(mdb_tgt_t *t, const auxv_t **auxvp)
 	return (set_errno(EMDB_NOPROC));
 }
 
-
 static const mdb_tgt_ops_t proc_ops = {
 	.t_setflags = pt_setflags,
 	.t_setcontext = (int (*)())(uintptr_t)mdb_tgt_notsup,

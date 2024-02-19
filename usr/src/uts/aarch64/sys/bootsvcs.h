@@ -42,8 +42,13 @@ typedef struct boot_syscalls {
 	void	(*bsvc_reset)(bool) __NORETURN;
 } boot_syscalls_t;
 
+#ifdef _KMDB
+extern boot_syscalls_t *kmdb_sysp;
+#define	SYSP	kmdb_sysp
+#else /* !_KMDB */
 extern boot_syscalls_t *sysp;
 #define	SYSP	sysp
+#endif
 
 #define	BSVC_GETCHAR(sysp)		(((sysp)->bsvc_getchar)())
 #define	BSVC_PUTCHAR(sysp, c)		(((sysp)->bsvc_putchar)(c))
