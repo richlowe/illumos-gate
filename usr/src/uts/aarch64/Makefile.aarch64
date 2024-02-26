@@ -373,6 +373,7 @@ DRV_KMODS	+= elxl
 DRV_KMODS	+= ena
 DRV_KMODS	+= hme
 DRV_KMODS	+= igb
+DRV_KMODS	+= igc
 DRV_KMODS	+= iprb
 DRV_KMODS	+= ixgbe
 DRV_KMODS	+= mxfe

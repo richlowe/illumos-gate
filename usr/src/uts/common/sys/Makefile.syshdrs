@@ -107,6 +107,9 @@ idm/%.check:		idm/%.h
 iscsit/%.check:		iscsit/%.h
 	$(DOT_H_CHECK)
 
+nvme/%.check:		nvme/%.h
+	$(DOT_H_CHECK)
+
 scsi/%.check:		scsi/%.h
 	$(DOT_H_CHECK)
 
@@ -217,6 +220,7 @@ ROOTDIRS=			\
 	$(ROOTDIR)/ib/clients/of/sol_ucma	\
 	$(ROOTDIR)/idm		\
 	$(ROOTDIR)/iscsit	\
+	$(ROOTDIR)/nvme		\
 	$(ROOTDIR)/scsi		\
 	$(ROOTDIR)/scsi/adapters	\
 	$(ROOTDIR)/scsi/conf	\
@@ -284,6 +288,8 @@ ROOTFMIOHDRS= $(FMIOHDRS:%=$(ROOTDIR)/fm/io/%)
 ROOTFMFSHDRS= $(FMFSHDRS:%=$(ROOTDIR)/fm/fs/%)
 
 ROOTFSHDRS= $(FSHDRS:%=$(ROOTDIR)/fs/%)
+
+ROOTNVMEHDRS= $(NVMEHDRS:%=$(ROOTDIR)/nvme/%)
 
 ROOTSCSIHDRS= $(SCSIHDRS:%=$(ROOTDIR)/scsi/%)
 ROOTSATAGENHDRS= $(SATAGENHDRS:%=$(ROOTDIR)/sata/%)

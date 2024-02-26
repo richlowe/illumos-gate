@@ -393,10 +393,10 @@ libdisasm_destroy(mdb_disasm_t *dp)
 }
 
 static const mdb_dis_ops_t libdisasm_ops = {
-	libdisasm_destroy,
-	libdisasm_ins2str,
-	libdisasm_previns,
-	libdisasm_nextins
+	.dis_destroy = libdisasm_destroy,
+	.dis_ins2str = libdisasm_ins2str,
+	.dis_previns = libdisasm_previns,
+	.dis_nextins = libdisasm_nextins
 };
 
 /*
@@ -557,10 +557,10 @@ defdis_nextins(mdb_disasm_t *dp, mdb_tgt_t *t, mdb_tgt_as_t as,
 }
 
 static const mdb_dis_ops_t defdis_ops = {
-	defdis_destroy,
-	defdis_ins2str,
-	defdis_previns,
-	defdis_nextins
+	.dis_destroy = defdis_destroy,
+	.dis_ins2str = defdis_ins2str,
+	.dis_previns = defdis_previns,
+	.dis_nextins = defdis_nextins,
 };
 
 static int

@@ -14,7 +14,7 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2019 Joyent, Inc.
 # Copyright 2021 Tintri by DDN, Inc. All rights reserved.
-# Copyright 2022 Oxide Computer Company
+# Copyright 2024 Oxide Computer Company
 #
 
 include $(SRC)/Makefile.master
@@ -27,12 +27,13 @@ SUBDIRS =		\
 	libc-tests	\
 	libmlrpc-tests	\
 	net-tests	\
+	nvme-tests	\
 	os-tests	\
 	smbclient-tests \
 	smbsrv-tests	\
 	test-runner	\
 	util-tests	\
-	zfs-tests	\
+	zfs-tests
 
 SUBDIRS_i386 = bhyve-tests
 SUBDIRS += $(SUBDIRS_$(MACH))
