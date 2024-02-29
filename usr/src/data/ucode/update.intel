@@ -14,7 +14,7 @@
 
 # A simple update script that extracts an Intel microcode download file
 # into the intel/ directory, and updates the hardlinks in the
-# system/kernel/platform manifest.
+# system/microcode/intel manifest.
 
 function errexit {
 	echo "$@" >&2

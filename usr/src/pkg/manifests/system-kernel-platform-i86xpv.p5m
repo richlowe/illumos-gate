@@ -1,0 +1,131 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the
+# Common Development and Distribution License (the "License").
+# You may not use this file except in compliance with the License.
+#
+# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+# or http://www.opensolaris.org/os/licensing.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each
+# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+# If applicable, add the following below this CDDL HEADER, with the
+# fields enclosed by brackets "[]" replaced with your own identifying
+# information: Portions Copyright [yyyy] [name of copyright owner]
+#
+# CDDL HEADER END
+#
+
+#
+# Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2012 Nexenta Systems, Inc. All rights reserved.
+# Copyright 2014 Gary Mills
+# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Peter Tribble.
+# Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
+#
+
+#
+# The default for payload-bearing actions in this package is to appear in the
+# global zone only.  See the include file for greater detail, as well as
+# information about overriding the defaults.
+#
+<include global_zone_only_component>
+set name=pkg.fmri value=pkg:/system/kernel/platform/i86xpv@$(PKGVERS)
+set name=pkg.summary value="Core Kernel Architecture for i86xpv"
+set name=pkg.description \
+    value="core kernel software for a specific hardware platform group"
+set name=info.classification value=org.opensolaris.category.2008:System/Core
+set name=variant.arch value=i386
+dir  path=platform group=sys
+dir  path=platform/i86xpv group=sys
+dir  path=platform/i86xpv/kernel group=sys
+dir  path=platform/i86xpv/kernel/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/$(ARCH64)/unix group=sys mode=0755 \
+    pkg.depend.bypass-generate=dtracestubs
+dir  path=platform/i86xpv/kernel/cpu group=sys
+dir  path=platform/i86xpv/kernel/cpu/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/cpu/$(ARCH64)/cpu.generic group=sys mode=0755
+file path=platform/i86xpv/kernel/cpu/$(ARCH64)/cpu_ms.AuthenticAMD group=sys \
+    mode=0755
+file path=platform/i86xpv/kernel/cpu/$(ARCH64)/cpu_ms.AuthenticAMD.15 \
+    group=sys mode=0755
+file path=platform/i86xpv/kernel/cpu/$(ARCH64)/cpu_ms.GenuineIntel group=sys \
+    mode=0755
+dir  path=platform/i86xpv/kernel/dacf group=sys
+dir  path=platform/i86xpv/kernel/dacf/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/dacf/$(ARCH64)/consconfig_dacf group=sys \
+    mode=0755
+dir  path=platform/i86xpv/kernel/drv group=sys
+dir  path=platform/i86xpv/kernel/drv/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/balloon group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/domcaps group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/evtchn group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/isa group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/npe group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/pci group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/pit_beep group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/privcmd group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/rootnex group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xdb group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xdf group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xenbus group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xencons group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xnbe group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xnbo group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xnbu group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xnf group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xpvd group=sys
+file path=platform/i86xpv/kernel/drv/$(ARCH64)/xpvtap group=sys
+file path=platform/i86xpv/kernel/drv/pit_beep.conf group=sys
+file path=platform/i86xpv/kernel/drv/xencons.conf group=sys
+dir  path=platform/i86xpv/kernel/mach group=sys
+dir  path=platform/i86xpv/kernel/mach/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/mach/$(ARCH64)/xpv_psm group=sys mode=0755
+file path=platform/i86xpv/kernel/mach/$(ARCH64)/xpv_uppc group=sys mode=0755
+dir  path=platform/i86xpv/kernel/misc group=sys
+dir  path=platform/i86xpv/kernel/misc/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/misc/$(ARCH64)/gfx_private group=sys mode=0755
+file path=platform/i86xpv/kernel/misc/$(ARCH64)/pci_prd group=sys mode=0755
+file path=platform/i86xpv/kernel/misc/$(ARCH64)/pcie group=sys mode=0755
+file path=platform/i86xpv/kernel/misc/$(ARCH64)/xnb group=sys mode=0755
+file path=platform/i86xpv/kernel/misc/$(ARCH64)/xpv_autoconfig group=sys \
+    mode=0755
+dir  path=platform/i86xpv/kernel/tod group=sys
+dir  path=platform/i86xpv/kernel/tod/$(ARCH64) group=sys
+file path=platform/i86xpv/kernel/tod/$(ARCH64)/xpvtod group=sys mode=0755
+driver name=balloon perms="* 0444 root sys"
+driver name=domcaps perms="* 0444 root sys"
+driver name=evtchn perms="* 0666 root sys"
+driver name=privcmd perms="* 0666 root sys"
+driver name=xdb
+driver name=xdf
+driver name=xenbus perms="* 0666 root sys"
+driver name=xencons
+driver name=xnbe alias=xnb,ioemu
+driver name=xnbo \
+    alias=xnb \
+    alias=xnb,SUNW_mac
+driver name=xnbu alias=xnb,netfront
+driver name=xnf
+driver name=xpvd
+driver name=xpvtap perms="* 0666 root sys"
+legacy pkg=SUNWcakrx.i arch=$(ARCH).i86pc \
+    desc="core kernel software for the i86xpv virtual hardware platform" \
+    name="Core Kernel Architecture i86xpv, (Root)"
+license cr_Sun license=cr_Sun
+license lic_CDDL license=lic_CDDL
+license usr/src/cmd/mdb/common/libstand/THIRDPARTYLICENSE \
+    license=usr/src/cmd/mdb/common/libstand/THIRDPARTYLICENSE
+license usr/src/common/bzip2/LICENSE license=usr/src/common/bzip2/LICENSE
+license usr/src/contrib/zlib/THIRDPARTYLICENSE \
+    license=usr/src/contrib/zlib/THIRDPARTYLICENSE
+license usr/src/uts/common/krtld/THIRDPARTYLICENSE.bootrd_cpio \
+    license=usr/src/uts/common/krtld/THIRDPARTYLICENSE.bootrd_cpio
+license usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode \
+    license=usr/src/uts/common/sys/THIRDPARTYLICENSE.unicode
+license usr/src/uts/intel/THIRDPARTYLICENSE \
+    license=usr/src/uts/intel/THIRDPARTYLICENSE
