@@ -87,12 +87,18 @@ void
 fiximp(void)
 {
 	extern int use_align;
+	extern boolean_t psci_initialized;
 
 	use_align = 1;
 
 	write_vbar((uint64_t)&exception_vector);
 
 	psci_init();
+
+	if (!psci_initialized) {
+		prom_printf("PSCI did not initialize successfully\n");
+		for (;;) {}	/* we can't reset if PSCI is not up */
+	}
 
 	if ((4u << ((read_ctr_el0() >> 16) & 0xF)) != DCACHE_LINE) {
 		prom_printf("CTR_EL0=%08x DCACHE_LINE=%ld\n",

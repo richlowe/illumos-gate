@@ -88,6 +88,11 @@ extern	void init_physmem_common(void);
 extern void setenv(const char *name, const char *value);
 extern char envblock[];
 extern size_t envblock_len;
+extern uint32_t psci_cpu_suspend_id;
+extern uint32_t psci_cpu_off_id;
+extern uint32_t psci_cpu_on_id;
+extern uint32_t psci_migrate_id;
+extern boolean_t pcsi_method_is_hvc;
 
 #define	SI_HW_PROVIDER	"QEMU"
 #define	IMPL_ARCH_NAME	"QEMU,virt-4.1"
@@ -276,6 +281,15 @@ exitto(int (*entrypoint)())
 	    (caddr_t)str, strlen(str) + 1);
 
 	xboot_info.bi_fdt = SEGKPM_BASE + (uint64_t)get_fdtp();
+
+	xboot_info.bi_psci_version = psci_version();
+	if (xboot_info.bi_psci_version & 0x80000000)
+		prom_panic("Failed to get PSCI version\n");
+	xboot_info.bi_psci_conduit_hvc = pcsi_method_is_hvc;
+	xboot_info.bi_psci_cpu_suspend_id = psci_cpu_suspend_id;
+	xboot_info.bi_psci_cpu_off_id = psci_cpu_off_id;
+	xboot_info.bi_psci_cpu_on_id = psci_cpu_on_id;
+	xboot_info.bi_psci_migrate_id = psci_migrate_id;
 
 	/*
 	 * No calling setenv once our modules are set up.

@@ -38,6 +38,12 @@ extern "C" {
 
 #define	MAX_BOOT_MODULES	99
 
+typedef enum {
+	BI_PSCI_CONDUIT_UNKNOWN,
+	BI_PSCI_CONDUIT_HVC,
+	BI_PSCI_CONDUIT_SMC,
+} bi_psci_conduit;
+
 typedef enum boot_module_type {
 	BMT_ROOTFS,
 	BMT_FILE,
@@ -75,6 +81,12 @@ struct xboot_info {
 	uint64_t		bi_phys_installed;
 	uint64_t		bi_boot_scratch;
 	uint32_t		bi_module_cnt;
+	uint32_t		bi_psci_version;
+	uint32_t		bi_psci_conduit_hvc;
+	uint32_t		bi_psci_cpu_suspend_id;
+	uint32_t		bi_psci_cpu_off_id;
+	uint32_t		bi_psci_cpu_on_id;
+	uint32_t		bi_psci_migrate_id;
 	uint32_t		bi_pad1;
 };
 

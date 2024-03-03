@@ -19,17 +19,19 @@
  * CDDL HEADER END
  */
 /*
- * Copyright 2023 Michael van der Westhuizen
- * Copyright 2017 Hayashi Naoyuki
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ */
+/*
+ * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2017 Hayashi Naoyuki
  */
 #include <sys/types.h>
 #include <sys/psci.h>
 #include <sys/promif.h>
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
-#include <sys/psciinfo.h>
+#include <sys/bootinfo.h>
 
 static uint32_t pcsi_version_id = 0x84000000;
 static uint32_t psci_cpu_suspend_id = PSCI_CPU_SUSPEND_ID;
@@ -120,32 +122,38 @@ psci_call(uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)
 }
 
 void
-psci_init(void)
+psci_init(struct xboot_info *xbp)
 {
-	const struct psciinfo *pi;
-
-	pi = psciinfo_get();
-	VERIFY(pi != NULL);
-
-	if (pi->pi_version == PSCI_NOT_IMPLEMENTED) {
-		prom_printf("WARNING: PSCI not implemented\n");
-		psci_initialized = B_FALSE;
+	if (psci_initialized == B_TRUE)
 		return;
-	}
 
-	switch (pi->pi_conduit) {
-	case PSCI_CONDUIT_SMC:
-		pcsi_method_is_hvc = B_FALSE;
-		break;
-	case PSCI_CONDUIT_HVC:
-		pcsi_method_is_hvc = B_TRUE;
-		break;
-	}
+	/*
+	 * The version field is:
+	 * - [30:16]: Major version
+	 * - [15:0] : Minor version
+	 *
+	 * If bit 31 is set, then the version represents an error value (and
+	 * should not have been passed to UNIX).
+	 */
+	if (xbp == NULL || xbp->bi_psci_version & 0x80000000)
+		return;
 
-	psci_cpu_suspend_id = pi->pi_cpu_suspend_id;
-	psci_cpu_off_id = pi->pi_cpu_off_id;
-	psci_cpu_on_id = pi->pi_cpu_on_id;
-	psci_migrate_id = pi->pi_migrate_id;
+	pcsi_method_is_hvc = xbp->bi_psci_conduit_hvc ? B_TRUE : B_FALSE;
+
+	/*
+	 * Identifier overrides are only valid (and are optional) prior
+	 * to PSCI 1.0.
+	 */
+	if (((xbp->bi_psci_version & 0x7FFF0000) >> 16) == 0) {
+		if (xbp->bi_psci_cpu_suspend_id != 0)
+			psci_cpu_suspend_id = xbp->bi_psci_cpu_suspend_id;
+		if (xbp->bi_psci_cpu_off_id != 0)
+			psci_cpu_off_id = xbp->bi_psci_cpu_off_id;
+		if (xbp->bi_psci_cpu_on_id != 0)
+			psci_cpu_on_id = xbp->bi_psci_cpu_on_id;
+		if (xbp->bi_psci_migrate_id != 0)
+			psci_migrate_id = xbp->bi_psci_migrate_id;
+	}
 
 	psci_initialized = B_TRUE;
 }
