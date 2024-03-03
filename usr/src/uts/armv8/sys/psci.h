@@ -20,7 +20,7 @@
  * CDDL HEADER END
  */
 /*
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2024 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  */
 
@@ -32,6 +32,11 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+
+#define	PSCI_CPU_SUSPEND_ID	0xC4000001
+#define	PSCI_CPU_OFF_ID		0x84000002
+#define	PSCI_CPU_ON_ID		0xC4000003
+#define	PSCI_MIGRATE_ID		0xC4000005
 
 enum {
 	PSCI_SUCCESS		= 0,
@@ -46,7 +51,13 @@ enum {
 	PSCI_INVALID_ADDRESS	= -9,
 };
 
+#if defined(_BOOT)
 extern void psci_init(void);
+#else
+struct xboot_info;
+
+extern void psci_init(struct xboot_info *xbp);
+#endif
 extern uint32_t psci_version(void);
 extern int32_t psci_cpu_suspend(uint32_t power_state,
 	uint64_t entry_point_address, uint64_t context_id);

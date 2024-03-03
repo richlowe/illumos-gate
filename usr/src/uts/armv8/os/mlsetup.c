@@ -19,10 +19,12 @@
  * CDDL HEADER END
  */
 /*
- * Copyright 2023 Michael van der Westhuizen
- * Copyright 2017 Hayashi Naoyuki
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ */
+/*
+ * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2017 Hayashi Naoyuki
  */
 
 #include <sys/types.h>
@@ -53,7 +55,6 @@
 #include <sys/kdi.h>
 #include <sys/cpupart.h>
 #include <sys/cpuinfo.h>
-#include <sys/psciinfo.h>
 #include <sys/psci.h>
 #include <sys/bootsvcs.h>
 
@@ -85,6 +86,7 @@ kobj_start(struct xboot_info *xbp)
 	int i;
 	extern int moddebug;
 
+	psci_init(xbp);
 	bop_init(xbp);
 	for (i = 0; i < BA_NUM; i++)
 		bootaux[i].ba_val = 0;
@@ -210,12 +212,6 @@ mlsetup(struct regs *rp)
 	/* Get value of boot_ncpus. */
 	boot_ncpus = NCPU;
 	max_ncpus = boot_max_ncpus = boot_ncpus;
-
-	/*
-	 * Gather PSCI configuration from the firmware and initialize PSCI.
-	 */
-	psciinfo_init();
-	psci_init();
 
 	/*
 	 * Initialise CPU info for the boot processor and fill in accurate
