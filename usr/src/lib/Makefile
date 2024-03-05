@@ -306,7 +306,8 @@ sparc_SUBDIRS=		\
 
 aarch64_SUBDIRS=	\
 	lib9p		\
-	libfdisk
+	libfdisk	\
+	libsaveargs
 
 JAVA_SUBDIRS =		\
 	libadt_jni	\
@@ -522,7 +523,8 @@ i386_HDRSUBDIRS=	\
 
 aarch64_HDRSUBDIRS=	\
 	lib9p		\
-	libfdisk
+	libfdisk	\
+	libsaveargs
 
 sparc_HDRSUBDIRS=	\
 	libds		\

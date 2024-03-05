@@ -19,38 +19,16 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 #
-# Copyright 2019 Joyent, Inc.
-#
 
-SRCS =	proc_aarch64dep.c	\
-	kvm_isadep.c		\
-	kvm_aarch64dep.c	\
-	mdb_aarch64util.c
+include ../Makefile.com
+include ../../Makefile.lib.64
 
-%.o: %.c
-	$(COMPILE.c) $<
-	$(CTFCONVERT_O)
+TYPES=library standalone
 
-%.o: ../../mdb/%.c
-	$(COMPILE.c) $<
-	$(CTFCONVERT_O)
+INSTALL_DEPS_library = $(ROOTLINKS) $(ROOTLIBS)
+INSTALL_DEPS_standalone = $(ROOTLIBS)
 
-include $(SRC)/cmd/Makefile.cmd
-include $(SRC)/cmd/Makefile.cmd.64
-include $(SRC)/cmd/mdb/aarch64/Makefile.aarch64
-include $(SRC)/cmd/mdb/Makefile.mdb
-include $(SRC)/Makefile.psm
-
-CPPFLAGS += -I../../mdb
-
-# XXXARM: intrinsics
-LDLIBS += -lgcc -lsaveargs
-
-install: all $(ISAEXEC) $(ROOTPROG64) $(ROOTLINK64)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
-	-$(RM) $(ROOTLINK)
-	-$(LN) $(ISAEXEC) $(ROOTLINK)
+include ../Makefile.targ

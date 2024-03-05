@@ -969,6 +969,7 @@ link path=usr/lib/librt.so.1 target=../../lib/librt.so.1
 link path=usr/lib/librtld.so.1 target=../../lib/librtld.so.1
 link path=usr/lib/librtld_db.so target=../../lib/librtld_db.so.1
 link path=usr/lib/librtld_db.so.1 target=../../lib/librtld_db.so.1
+$(aarch64_ONLY)file path=usr/lib/libsaveargs.so.1
 link path=usr/lib/libscf.so target=../../lib/libscf.so.1
 link path=usr/lib/libscf.so.1 target=../../lib/libscf.so.1
 link path=usr/lib/libsched.so target=./libsched.so.1
