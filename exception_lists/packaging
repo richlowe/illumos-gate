@@ -718,9 +718,11 @@ usr/include/libbe_priv.h		i386 sparc aarch64
 #
 # libsaveargs is private
 #
-usr/include/saveargs.h			i386
+usr/include/saveargs.h			i386 aarch64
 usr/lib/amd64/libsaveargs.so		i386
 usr/lib/amd64/libstandsaveargs.so	i386
+usr/lib/libsaveargs.so			aarch64
+usr/lib/libstandsaveargs.so		aarch64
 
 #
 # libpcidb is private

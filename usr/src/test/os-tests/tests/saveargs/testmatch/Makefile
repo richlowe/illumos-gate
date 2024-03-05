@@ -1,4 +1,3 @@
-
 #
 # This file and its contents are supplied under the terms of the
 # Common Development and Distribution License ("CDDL"), version 1.0.
@@ -10,45 +9,10 @@
 # http://www.illumos.org/license/CDDL.
 #
 
-#
-# Copyright 2012, Richard Lowe.
-#
+# Copyright 2024 Richard Lowe.
 
-include $(SRC)/cmd/Makefile.cmd
-include $(SRC)/Makefile.master.64
+include $(SRC)/Makefile.master
 
-.KEEP_STATE:
+SUBDIRS = $(MACH64)
 
-OBJECTS = testmatch.o data.o
-PROG = testmatch
-
-LDLIBS += -lsaveargs
-
-AS_CPPFLAGS += -D_ASM
-
-ROOTOPTPKG = $(ROOT)/opt/os-tests
-TESTDIR = $(ROOTOPTPKG)/tests/saveargs/testmatch
-
-CMDS = $(PROG:%=$(TESTDIR)/%)
-$(CMDS) := FILEMODE = 0555
-
-$(PROG): $(OBJECTS)
-	$(LINK.c) -o $@ $(OBJECTS) $(LDLIBS)
-	$(POST_PROCESS)
-
-clean:
-	$(RM) $(OBJECTS) $(PROG)
-
-clobber: clean
-
-all: $(PROG)
-
-install: $(CMDS)
-
-$(CMDS): $(TESTDIR) $(PROG)
-
-$(TESTDIR):
-	$(INS.dir)
-
-$(TESTDIR)/%: %
-	$(INS.file)
+include $(SRC)/test/Makefile.com

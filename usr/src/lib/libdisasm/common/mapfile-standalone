@@ -19,38 +19,39 @@
 # CDDL HEADER END
 #
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
-#
-# Copyright 2019 Joyent, Inc.
+# Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-SRCS =	proc_aarch64dep.c	\
-	kvm_isadep.c		\
-	kvm_aarch64dep.c	\
-	mdb_aarch64util.c
+#
+# MAPFILE HEADER START
+#
+# WARNING:  STOP NOW.  DO NOT MODIFY THIS FILE.
+# Object versioning must comply with the rules detailed in
+#
+#	usr/src/lib/README.mapfiles
+#
+# You should not be making modifications here until you've read the most current
+# copy of that file. If you need help, contact a gatekeeper for guidance.
+#
+# MAPFILE HEADER END
+#
 
-%.o: %.c
-	$(COMPILE.c) $<
-	$(CTFCONVERT_O)
+$mapfile_version 2
 
-%.o: ../../mdb/%.c
-	$(COMPILE.c) $<
-	$(CTFCONVERT_O)
-
-include $(SRC)/cmd/Makefile.cmd
-include $(SRC)/cmd/Makefile.cmd.64
-include $(SRC)/cmd/mdb/aarch64/Makefile.aarch64
-include $(SRC)/cmd/mdb/Makefile.mdb
-include $(SRC)/Makefile.psm
-
-CPPFLAGS += -I../../mdb
-
-# XXXARM: intrinsics
-LDLIBS += -lgcc -lsaveargs
-
-install: all $(ISAEXEC) $(ROOTPROG64) $(ROOTLINK64)
-	-$(RM) $(ROOTPROG)
-	-$(LN) $(ISAEXEC) $(ROOTPROG)
-	-$(RM) $(ROOTLINK)
-	-$(LN) $(ISAEXEC) $(ROOTLINK)
+SYMBOL_SCOPE {
+    global:
+	dis_disassemble;
+	dis_errno;
+	dis_handle_create;
+	dis_handle_destroy;
+	dis_instrlen;
+	dis_max_instrlen;
+	dis_min_instrlen;
+	dis_previnstr;
+	dis_set_data;
+	dis_flags_set;
+	dis_flags_clear;
+	dis_strerror;
+    local:
+	*;
+};

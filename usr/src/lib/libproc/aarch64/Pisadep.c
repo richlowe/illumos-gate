@@ -34,6 +34,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <saveargs.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -164,6 +165,97 @@ ucontext_n_to_prgregs(const ucontext_t *src, prgregset_t dst)
 	(void) memcpy(dst, src->uc_mcontext.gregs, sizeof (gregset_t));
 }
 
+
+/*
+ * Read arguments from the frame indicated by regs into args, return the
+ * number of arguments successfully read
+ */
+static int
+read_args(struct ps_prochandle *P, uintptr_t fp, uintptr_t pc, prgreg_t *args,
+    size_t argsize)
+{
+	GElf_Sym sym;
+	ctf_file_t *ctfp = NULL;
+	ctf_funcinfo_t finfo;
+	prsyminfo_t si = {0};
+	uint8_t ins[SAVEARGS_INSN_SEQ_LEN];
+	size_t insnsize;
+	int argc = 0;
+	int args_style = 0;
+	int i;
+	ctf_id_t args_types[5];
+
+	if (Pxlookup_by_addr(P, pc, NULL, 0, &sym, &si) != 0)
+		return (0);
+
+	if ((ctfp = Paddr_to_ctf(P, pc)) == NULL)
+		return (0);
+
+	if (ctf_func_info(ctfp, si.prs_id, &finfo) == CTF_ERR)
+		return (0);
+
+	argc = finfo.ctc_argc;
+
+	if (argc == 0)
+		return (0);
+
+	/*
+	 * If any of the first 7 arguments are a structure less than 16 bytes
+	 * in size, it will be passed spread across two argument registers,
+	 * and we will not cope.
+	 */
+	if (ctf_func_args(ctfp, si.prs_id, 7, args_types) == CTF_ERR)
+		return (0);
+
+	for (i = 0; i < MIN(7, finfo.ctc_argc); i++) {
+		int t = ctf_type_kind(ctfp, args_types[i]);
+
+		if (((t == CTF_K_STRUCT) || (t == CTF_K_UNION)) &&
+		    ctf_type_size(ctfp, args_types[i]) <= 16)
+			return (0);
+	}
+
+	/*
+	 * The number of instructions to search for argument saving is limited
+	 * such that only instructions prior to %pc are considered and we
+	 * never read arguments from a function where the saving code has not
+	 * in fact yet executed.
+	 */
+	insnsize = MIN(MIN(sym.st_size, SAVEARGS_INSN_SEQ_LEN),
+	    pc - sym.st_value);
+
+	if (Pread(P, ins, insnsize, sym.st_value) != insnsize)
+		return (0);
+
+	if ((argc != 0) &&
+	    ((args_style = saveargs_has_args(ins, insnsize, argc,
+	    0)) != SAVEARGS_NO_ARGS)) {
+		int regargs = MIN(8, argc);
+		size_t size = regargs * sizeof (long);
+
+		if (Pread(P, args, size, fp + (2 * sizeof (long))) != size)
+			return (0);
+
+		/*
+		 * XXXARM:
+		 *
+		 * Due to the ARM ABI dumping stacked args is a bit
+		 * cumbersome.  The first stacked argument will be stored at
+		 * %sp (at call time).
+		 *
+		 * We will then reserve some stack space (in an arbitrary
+		 * manner), but even in the common case we have to disassemble
+		 * the initial
+		 *	stp x29, x30, [sp, #-128]!  to determine the
+		 * immediate to subtract from %fp to find them on the stack.
+		 */
+
+		return (regargs);
+	} else {
+		return (0);
+	}
+}
+
 int
 Pstack_iter(struct ps_prochandle *P, const prgregset_t regs,
     proc_stack_f *func, void *arg)
@@ -223,12 +315,8 @@ Pstack_iter(struct ps_prochandle *P, const prgregset_t regs,
 					argc = 0;
 				}
 			} else {
-#if 0				/* XXXARM: No saveargs yet */
 				argc = read_args(P, fp, pc, args,
 				    sizeof (args));
-#else
-				argc = 0;
-#endif
 			}
 		} else {
 			(void) memset(&frame, 0, sizeof (frame));

@@ -48,7 +48,7 @@ all.standalone.targ: $(STANDLIBRARY)
 $(STANDLIBRARY): $(OBJS) $(LINKTEST_OBJ)
 	$(LD) $(BREDUCE) $(ZDEFS) $(LDFLAGS) -o $@.linktest $(OBJS) $(LINKTEST_OBJ)
 	rm $@.linktest
-	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+	$(LD) $(LDFLAGS) $(MAPFILES:%=-Wl,-M%) -o $@ $(OBJS)
 
 clobber: $(TYPES:%=clobber.%)
 

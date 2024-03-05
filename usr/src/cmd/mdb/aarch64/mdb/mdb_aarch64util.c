@@ -20,6 +20,8 @@
 
 #include <sys/errno.h>
 
+#include <saveargs.h>
+
 const mdb_tgt_regdesc_t mdb_aarch64_kregs[] = {
 	{ "savfp", KREG_SAVFP, MDB_TGT_R_EXPORT },
 	{ "savpc", KREG_SAVPC, MDB_TGT_R_EXPORT },
@@ -170,7 +172,6 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 	int got_pc = (gsp->kregs[KREG_PC] != 0);
 	uint_t argc, reg_argc;
 	long fr_argv[32];
-	int start_index; /* index to save_instr where to start comparison */
 	int err;
 	int i;
 
@@ -184,9 +185,7 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 
 	ssize_t size;
 	ssize_t insnsize;
-#if 0				/* XXXARM: No saveargs */
 	uint8_t ins[SAVEARGS_INSN_SEQ_LEN];
-#endif
 
 	GElf_Sym s;
 	mdb_syminfo_t sip;
@@ -237,35 +236,21 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 		if ((mdb_tgt_lookup_by_addr(t, pc, MDB_TGT_SYM_FUZZY,
 		    NULL, 0, &s, &sip) == 0) &&
 		    (mdb_ctf_func_info(&s, &sip, &mfp) == 0)) {
-#if 0				/* XXXARM: No saveargs */
 			int return_type = mdb_ctf_type_kind(mfp.mtf_return);
 			mdb_ctf_id_t args_types[5];
 
 			argc = mfp.mtf_argc;
 
 			/*
-			 * If the function returns a structure or union
-			 * greater than 16 bytes in size %rdi contains the
-			 * address in which to store the return value rather
-			 * than for an argument.
-			 */
-			if ((return_type == CTF_K_STRUCT ||
-			    return_type == CTF_K_UNION) &&
-			    mdb_ctf_type_size(mfp.mtf_return) > 16)
-				start_index = 1;
-			else
-				start_index = 0;
-
-			/*
-			 * If any of the first 5 arguments are a structure
+			 * If any of the first 7 arguments are a structure
 			 * less than 16 bytes in size, it will be passed
 			 * spread across two argument registers, and we will
 			 * not cope.
 			 */
-			if (mdb_ctf_func_args(&mfp, 5, args_types) == CTF_ERR)
+			if (mdb_ctf_func_args(&mfp, 7, args_types) == CTF_ERR)
 				argc = 0;
 
-			for (i = 0; i < MIN(5, argc); i++) {
+			for (i = 0; i < MIN(7, argc); i++) {
 				int t = mdb_ctf_type_kind(args_types[i]);
 
 				if (((t == CTF_K_STRUCT) ||
@@ -275,17 +260,13 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 					break;
 				}
 			}
-#else
-			argc = 0;
-#endif
 		} else {
 			argc = 0;
 		}
 
-#if 0				/* XXXARM: No saveargs */
 		/*
 		 * The number of instructions to search for argument saving is
-		 * limited such that only instructions prior to %pc are
+		 * limited so that only instructions prior to %pc are
 		 * considered such that we never read arguments from a
 		 * function where the saving code has not in fact yet
 		 * executed.
@@ -299,51 +280,36 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 
 		if ((argc != 0) &&
 		    ((args_style = saveargs_has_args(ins, insnsize, argc,
-		    start_index)) != SAVEARGS_NO_ARGS)) {
-			/* Up to 6 arguments are passed via registers */
-			reg_argc = MIN((6 - start_index), mfp.mtf_argc);
-			size = reg_argc * sizeof (long);
-
-			/*
-			 * If Studio pushed a structure return address as an
-			 * argument, we need to read one more argument than
-			 * actually exists (the addr) to make everything line
-			 * up.
-			 */
-			if (args_style == SAVEARGS_STRUCT_ARGS)
-				size += sizeof (long);
+		    0)) != SAVEARGS_NO_ARGS)) {
+			/* Up to 8 arguments are passed via registers */
+			reg_argc = MIN(8, argc);
+			size = reg_argc * sizeof (uint64_t);
 
 			if (mdb_tgt_aread(t, MDB_TGT_AS_VIRT_S, fr_argv, size,
-			    (fp - size)) != size)
+			    (fp + sizeof (fr))) != size)
 				return (-1);	/* errno has been set for us */
 
+
 			/*
-			 * Arrange the arguments in the right order for
-			 * printing.
+			 * XXXARM:
+			 *
+			 * Due to the ARM ABI dumping stacked args is a bit
+			 * cumbersome.  The first stacked argument will be
+			 * stored at %sp (at call time).
+			 *
+			 * We will then reserve some stack space (in an
+			 * arbitrary manner), but even in the common case we
+			 * have to disassemble the initial
+			 *
+			 *	stp x29, x30, [sp, #-128]!
+			 *
+			 * to determine the immediate to subtract from %fp to
+			 * find them on the stack.
 			 */
-			for (i = 0; i < (reg_argc / 2); i++) {
-				long t = fr_argv[i];
-
-				fr_argv[i] = fr_argv[reg_argc - i - 1];
-				fr_argv[reg_argc - i - 1] = t;
-			}
-
-			if (argc > reg_argc) {
-				size = MIN((argc - reg_argc) * sizeof (long),
-				    sizeof (fr_argv) -
-				    (reg_argc * sizeof (long)));
-
-				if (mdb_tgt_aread(t, MDB_TGT_AS_VIRT_S,
-				    &fr_argv[reg_argc], size,
-				    fp + sizeof (fr)) != size)
-					return (-1); /* errno has been set */
-			}
+			argc = reg_argc;
 		} else {
 			argc = 0;
 		}
-#else
-		argc = 0;
-#endif
 
 		if (got_pc && func(arg, pc, argc, fr_argv, &gregs) != 0)
 			break;

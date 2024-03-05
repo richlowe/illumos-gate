@@ -31,6 +31,8 @@
 # current flavor being built.
 #
 
+include $(SRC)/Makefile.master
+
 LIBRARY=	libsaveargs.a
 STANDLIBRARY=	libstandsaveargs.so
 VERS=		.1
@@ -43,13 +45,14 @@ CURTYPE=	library
 COMDIR=		$(SRC)/lib/libsaveargs/common
 
 OBJECTS_common_amd64	= saveargs.o
-SRCS_common_amd64	= $(OBJECTS_common_amd64:%.o=../amd64/%.c)
+OBJECTS_common_aarch64	= saveargs.o bitext.o
 
-OBJECTS= $(OBJECTS_common_$(MACH)) $(OBJECTS_common_$(MACH64)) $(OBJECTS_common_common)
+OBJECTS= $(OBJECTS_common_$(MACH64)) $(OBJECTS_common_common)
+$(BUILD32)OBJECTS +=  $(OBJECTS_common_$(MACH))
 
 include $(SRC)/lib/Makefile.lib
 
-SRCS=	$(SRCS_common_$(MACH)) $(SRCS_common_$(MACH64)) $(SRC_common_common)
+CSTD = $(CSTD_GNU99)
 
 #
 # Used to verify that the standalone doesn't have any unexpected external
@@ -72,7 +75,8 @@ LIBS = $(LIBS_$(CURTYPE))
 
 MAPFILES =	$(COMDIR)/mapfile-vers
 
-LDLIBS +=	-lc -ldisasm
+LDLIBS_i386 =	-ldisasm
+LDLIBS +=	-lc $(LDLIBS_$(MACH))
 
 LDFLAGS_standalone = $(ZNOVERSION) $(BREDUCE) -dy -r
 LDFLAGS = $(LDFLAGS_$(CURTYPE))

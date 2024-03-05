@@ -27,4 +27,6 @@ CMNOBJS64 =	Psymtab_machelf64.o
 
 include ../Makefile.com
 
+LDLIBS += -lsaveargs
+
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT) $(ROOTCOMPATLINKS)
