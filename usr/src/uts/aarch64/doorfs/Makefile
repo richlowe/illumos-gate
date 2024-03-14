@@ -61,7 +61,6 @@ INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
 #	Overrides.
 #
 MODSTUBS_DIR	 = $(OBJS_DIR)
-CLEANFILES	+= $(MODSTUBS_O)
 
 #
 # For now, disable these warnings; maintainers should endeavor
