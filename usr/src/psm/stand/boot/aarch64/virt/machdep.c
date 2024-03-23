@@ -474,7 +474,7 @@ init_machdev(void)
 	    prom_rootnode(), "compatible", compatible + strlen(str) + 1);
 	prom_setprop(prom_rootnode(), "compatible", compatible, namelen);
 
-	init_arch_timer(TMR_PHYS);
+	init_arch_timer(TMR_VIRT);
 	init_virtnet();
 	init_virtblk();
 }
