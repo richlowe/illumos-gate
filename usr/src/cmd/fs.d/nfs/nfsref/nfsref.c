@@ -320,8 +320,7 @@ int
 main(int argc, char *argv[])
 {
 	char *command, *sl_path, *svc_type;
-	int c;
-	int type_set, err;
+	int c, type_set, err;
 
 	(void) setlocale(LC_ALL, "");
 	(void) textdomain(TEXT_DOMAIN);

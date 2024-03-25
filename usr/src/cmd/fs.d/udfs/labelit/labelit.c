@@ -87,7 +87,7 @@ char *labelit_subopts[] = {
 int
 main(int32_t argc, char *argv[])
 {
-	int32_t		opt = 0;
+	int		opt = 0;
 	int32_t		flags = 0;
 	int32_t		ret = 0;
 	char		*options = NULL;

@@ -277,9 +277,8 @@ filter_bootargs(zlog_t *zlogp, const char *inargs, char *outargs,
     char *init_file, char *badarg)
 {
 	int argc = 0, argc_save;
-	int i;
+	int i, c;
 	int err;
-	int c;
 	char *arg, *lasts, **argv = NULL, **argv_save;
 	char zonecfg_args[BOOTARGS_MAX];
 	char scratchargs[BOOTARGS_MAX], *sargs;

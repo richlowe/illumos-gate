@@ -58,10 +58,9 @@ usage()
 int
 main(int argc, char **argv)
 {
-	int c;
 	char fqdn[MAXHOSTNAMELEN], server[MAXHOSTNAMELEN];
 	char *newpw;
-	int ret = 0;
+	int c, ret = 0;
 
 	(void) setlocale(LC_ALL, "");
 

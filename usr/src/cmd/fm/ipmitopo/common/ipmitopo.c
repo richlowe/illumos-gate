@@ -134,8 +134,7 @@ main(int argc, char **argv)
 	char *errmsg;
 	uint_t xport_type;
 	char *host = NULL, *user = NULL, *passwd = NULL;
-	int c;
-	int err;
+	int c, err;
 	nvlist_t *params = NULL;
 
 	pname = argv[0];
