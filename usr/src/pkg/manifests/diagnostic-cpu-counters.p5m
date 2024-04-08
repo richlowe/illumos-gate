@@ -32,11 +32,8 @@ set name=pkg.description value="CPU Performance Counter libraries and utilities"
 set name=info.classification value=org.opensolaris.category.2008:System/Core
 dir  path=usr group=sys
 dir  path=usr/bin
-$(i386_ONLY)dir path=usr/bin/$(ARCH32)
-$(i386_ONLY)file path=usr/bin/$(ARCH32)/cputrack mode=0555
-dir  path=usr/bin/$(ARCH64)
-$(MULTILIB_ONLY)file path=usr/bin/$(ARCH64)/cputrack mode=0555
-$(not_aarch64)hardlink path=usr/bin/cputrack target=../lib/isaexec
+$(MULTILIB_ONLY)link path=usr/bin/$(ARCH64)/cputrack target=../../bin/cputrack
+$(not_aarch64)file path=usr/bin/cputrack mode=0555
 dir  path=usr/include
 $(not_aarch64)file path=usr/include/libcpc.h
 $(not_aarch64)file path=usr/include/libpctx.h
