@@ -87,12 +87,18 @@ extern "C" {
 #define	P_PPC		201
 #define	P_PREP		202
 
+/* aarch64 values */
+#define	P_AARCH64	301
+#define	P_ARMV8		302
+
 #if defined(sparc)
 #define	P_ISA		P_SPARC
 #elif defined(i386)
 #define	P_ISA		P_I386
 #elif defined(__ppc)
 #define	P_ISA		P_PPC
+#elif defined(__aarch64__)
+#define	P_ISA		P_AARCH64
 #else
 #error "Unknown instruction set"
 #endif

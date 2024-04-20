@@ -73,6 +73,11 @@ assign_arch(const char *architecture)
 		arch = P_PPC;
 	else if (strcmp(architecture, "ppc.prep") == 0)
 		arch = P_PREP;
+#elif defined(__aarch64__)
+	if (strcmp(architecture, "aarch64") == 0)
+		arch = P_AARCH64;
+	else if (strcmp(architecture, "all") == 0)
+		arch = P_AARCH64;
 #else
 #error "Unknown instruction set"
 #endif

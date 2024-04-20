@@ -30,6 +30,8 @@
 #define	PROTO_EXT "_sparc"
 #elif defined(__ppc)
 #define	PROTO_EXT "_ppc"
+#elif defined(__aarch64__)
+#define	PROTO_EXT "_aarch64"
 #else
 #error "Unknown instruction set"
 #endif
