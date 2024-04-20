@@ -217,6 +217,9 @@ parse_line(char **v, elem *e)
 #elif defined(__ppc)
 			if (strncmp(e->symsrc, "prep/", 5) == 0)
 				e->arch = P_PREP;
+#elif defined(__aarch64__)
+			if (strncmp(e->symsrc, "aarch64/", 8) == 0)
+				e->arch = P_ARMV8;
 #else
 #error "Unknown instruction set"
 #endif

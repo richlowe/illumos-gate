@@ -127,6 +127,7 @@ static char *suffix_list[] = {
 	".m",
 	".u",
 	".v",
+#elif defined(__aarch64__)
 #else
 #error "Unknown architecture."
 #endif

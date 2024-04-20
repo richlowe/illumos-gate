@@ -32,6 +32,8 @@
 #define	EXCEPTION_FILE "/opt/onbld/etc/exception_list_i386"
 #elif defined(__ppc)
 #define	EXCEPTION_FILE "/opt/onbld/etc/exception_list_ppc"
+#elif defined(__aarch64__)
+#define	EXCEPTION_FILE "/opt/onbld/etc/exception_list_aarch64"
 #else
 #error "Unknown instruction set"
 #endif
