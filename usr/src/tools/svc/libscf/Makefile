@@ -59,7 +59,11 @@ LIBUUTIL =	$(SRC)/lib/libuutil
 CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 		-I$(SRC)/lib/libscf/inc -I$(COMDIR) -I$(LIBUUTIL)/common
 LDLIBS +=	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
-		-luutil -lc -lgen -lnvpair -lsmbios
+		-luutil -lc -lgen -lnvpair
+
+i386_LDLIBS += -lsmbios
+LDLIBS += $($(NATIVE_MACH)_LDLIBS)
+
 ADJUNCT_LIBS +=	libsmbios.so libnvpair.so libgen.so libc.so
 
 .KEEP_STATE:
