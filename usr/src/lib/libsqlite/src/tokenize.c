@@ -402,14 +402,14 @@ int sqliteRunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
   int tokenType;
   int lastTokenParsed = -1;
   sqlite *db = pParse->db;
-  extern void *sqliteParserAlloc(void*(*)(int));
+  extern void *sqliteParserAlloc(void*(*)(size_t));
   extern void sqliteParserFree(void*, void(*)(void*));
   extern int sqliteParser(void*, int, Token, Parse*);
 
   db->flags &= ~SQLITE_Interrupt;
   pParse->rc = SQLITE_OK;
   i = 0;
-  pEngine = sqliteParserAlloc((void*(*)(int))malloc);
+  pEngine = sqliteParserAlloc((void*(*)(size_t))malloc);
   if( pEngine==0 ){
     sqliteSetString(pzErrMsg, "out of memory", (char*)0);
     return 1;
