@@ -31,7 +31,7 @@ aarch64_CC = $($(NATIVE_MACH)_GNUC_ROOT)/bin/gcc
 # sparc doesn't recognise -msave-args
 i386_SMATCHFLAGS = -m64 -msave-args
 sparc_SMATCHFLAGS = -m64
-aarch64_SMATCHFLAGS = -m64
+aarch64_SMATCHFLAGS =
 
 NATIVECC = $($(NATIVE_MACH)_CC)
 
