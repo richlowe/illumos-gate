@@ -270,7 +270,7 @@ chd1(void)
 	if (handleeuc)
 		(void) fprintf(fout, "extern wchar_t *yysptr, yysbuf[];\n");
 	else
-		(void) fprintf(fout, "extern char *yysptr, yysbuf[];\n");
+		(void) fprintf(fout, "extern signed char *yysptr, yysbuf[];\n");
 	(void) fprintf(fout, "int yytchar;\n");
 	(void) fprintf(fout, "FILE *yyin = {stdin}, *yyout = {stdout};\n");
 	(void) fprintf(fout, "extern int yylineno;\n");

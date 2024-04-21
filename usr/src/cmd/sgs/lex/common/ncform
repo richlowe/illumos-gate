@@ -44,7 +44,7 @@ yylook(void)
 # ifdef LEXDEBUG
 	int debug;
 # endif
-	signed char *yylastch;
+	char *yylastch;
 	/* start off machines */
 # ifdef LEXDEBUG
 	debug = 0;
