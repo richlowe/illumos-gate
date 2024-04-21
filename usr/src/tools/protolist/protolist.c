@@ -85,6 +85,8 @@ visit_dir(const char *path, const struct stat *st,
 #define	ARCH_STR "i86"
 #elif defined(__ppc)
 #define	ARCH_STR "prep"
+#elif defined(__aarch64__)
+#define	ARCH_STR "aarch64"
 #else
 #error "Unknown instruction set"
 #endif
