@@ -1061,7 +1061,7 @@ d3(re_re *r, PATTERN *pat)
 			    (Expr *)NULL);
 		} else {
 			e = newexpr(Charclass, '[', (Expr *)NULL, (Expr *)NULL);
-			e->l = (Expr *)count;	/* number of chars */
+			e->l = (Expr *)(intptr_t)count;	/* number of chars */
 			e->r = (Expr *)tab;	/* bitmap of chars */
 		}
 		lex(r, pat);
