@@ -33,7 +33,10 @@ include ../../Makefile.cmd
 include ../../Makefile.ctf
 include ../Makefile.smbsrv.defs
 
-LDLIBS += -L$(ROOT)/usr/lib/smbsrv -lsmb -lsmbns -lsecdb -lumem
+OBJS=	smbadm.o smbinfo.o
+
+LDLIBS += -L$(ROOT)/usr/lib/smbsrv -lsmb -lsmbns \
+		 -lsecdb -lofmt -lcmdutils -lumem
 LDLIBS += -L$(ADJUNCT_PROTO)/usr/lib/mps
 LDFLAGS += -R/usr/lib/smbsrv
 
