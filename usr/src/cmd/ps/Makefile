@@ -69,6 +69,8 @@ $(DCFILE): $(PROG).c
 	$(SED) -e '/^domain/d' messages.po > $@
 	$(RM) messages.po
 
+SMOFF += indenting
+
 include ../Makefile.targ
 
 FRC:

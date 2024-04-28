@@ -173,7 +173,7 @@ aarch64_el_name(uint_t el)
 		[PSR_M_EL0t] = "0t"
 	};
 
-	if ((el > ARRAY_SIZE(elnames)) || elnames[el] == NULL)
+	if ((el >= ARRAY_SIZE(elnames)) || elnames[el] == NULL)
 		return ("unknown");
 
 	return (elnames[el]);

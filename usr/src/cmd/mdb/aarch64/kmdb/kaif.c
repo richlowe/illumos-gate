@@ -415,7 +415,7 @@ kaif_wapt_match(kmdb_wapt_t *wp)
 
 	ASSERT(BT_TEST(&kaif_waptmap, hwid));
 
-	kmdb_dpi_get_register("far", &far);
+	(void) kmdb_dpi_get_register("far", &far);
 
 	for (i = 0; i < kmdb_kdi_num_wapts(); i++) {
 		kdi_waptreg_t kw;
@@ -440,14 +440,14 @@ kaif_step(void)
 	 * set single-step, disable interrupts, and clear PSTATE.D when we
 	 * resume.
 	 */
-	kmdb_dpi_get_register("spsr", &spsr);
-	kmdb_dpi_set_register("spsr", (spsr | PSR_SS | PSR_I) & ~PSR_D);
+	(void) kmdb_dpi_get_register("spsr", &spsr);
+	(void) kmdb_dpi_set_register("spsr", (spsr | PSR_SS | PSR_I) & ~PSR_D);
 	write_mdscr_el1(read_mdscr_el1() | MDSCR_SS);
 
 	kmdb_dpi_resume_master(); /* Run the next instruction and come back */
 
 	/* restore the single step setting and mask settings */
-	kmdb_dpi_set_register("spsr", spsr);
+	(void) kmdb_dpi_set_register("spsr", spsr);
 	write_mdscr_el1(read_mdscr_el1() & ~MDSCR_SS);
 
 	return (0);
