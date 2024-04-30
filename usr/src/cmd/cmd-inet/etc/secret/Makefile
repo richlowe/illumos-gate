@@ -26,7 +26,7 @@ include $(SRC)/Makefile.master
 
 SECRETDIR=	secret
 $(HAVE_CLOSED_BINS)PRIVATEKEYDIR=	ike.privatekeys
-ETCPROG=	 ipseckeys.sample
+ETCPROG=	 ipseckeys.sample tcpkeys.sample
 $(HAVE_CLOSED_BINS)ETCPROG += ike.preshared
 
 

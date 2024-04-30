@@ -57,6 +57,7 @@ CSRCS = \
 	raise/tst.raise2.c \
 	raise/tst.raise3.c \
 	sdt/tst.sdtargs.c \
+	sdt/tst.sdtargs_tail_call.c \
 	stop/tst.stop1.c \
 	stop/tst.stop2.c \
 	syscall/tst.args.c \
@@ -856,6 +857,7 @@ DSRCS=								\
 	scripting/tst.trace.d					\
 	scripting/tst.uid.d					\
 	sdt/tst.sdtargs.d					\
+	sdt/tst.sdtargs_tail_call.d				\
 	sizeof/err.D_IDENT_BADREF.SizeofAssoc.d			\
 	sizeof/err.D_IDENT_UNDEF.UnknownSymbol.d		\
 	sizeof/err.D_SIZEOF_TYPE.badstruct.d			\
@@ -2285,6 +2287,7 @@ TSTS=								\
 	scripting/tst.uid.d					\
 	scripting/tst.uid.ksh					\
 	sdt/tst.sdtargs.d					\
+	sdt/tst.sdtargs_tail_call.d				\
 	sizeof/err.D_IDENT_BADREF.SizeofAssoc.d			\
 	sizeof/err.D_IDENT_UNDEF.UnknownSymbol.d		\
 	sizeof/err.D_SIZEOF_TYPE.badstruct.d			\

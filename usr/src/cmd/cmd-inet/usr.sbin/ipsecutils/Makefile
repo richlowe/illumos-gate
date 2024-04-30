@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2024 Oxide Computer Company
 
 include $(SRC)/Makefile.master
 
@@ -34,14 +35,19 @@ SRCS=           ipsecalgs.c ipsecconf.c ipseckey.c
 # Though open source, these are not useful without the closed in.iked/libike.so
 $(HAVE_CLOSED_BINS)PROG += ikeadm ikecert
 $(HAVE_CLOSED_BINS)SRCS += ikeadm.c
+SBINLINKS=	tcpkey
 
 include ../../../Makefile.cmd
 
-MANIFEST=	ipsecalgs.xml policy.xml manual-key.xml
+MANIFEST=	ipsecalgs.xml policy.xml manual-key.xml tcpkey.xml
+SVCMETHOD=	net-tcpkey
 
 ROOTMANIFESTDIR=	$(ROOTSVCNETWORKIPSEC)
 $(ROOTMANIFEST)		:= FILEMODE= 444
 include ../../Makefile.cmd-inet
+
+ROOTUSRSBINLINKS = $(SBINLINKS:%=$(ROOTUSRSBIN)/%)
+$(ROOTUSRSBIN)/tcpkey := INSLINKTARGET = $(ROOTUSRSBIN)/ipseckey
 
 COMMONSRCS=	$(CMDINETCOMMONDIR)/$(COMMONOBJS:.o=.c)
 SRCS+=		$(COMMONSRCS)
@@ -60,7 +66,7 @@ clobber:=	TARGET= clobber
 CLOBBERFILES +=	$(PROG) $(POFILES)
 CLEANFILES += $(PROG) $(POFILES)
 
-CPPFLAGS +=     -DSYSV -DBSD_COMP -I$(CMDINETCOMMONDIR) -I.
+CPPFLAGS +=	-DSYSV -DBSD_COMP -I$(CMDINETCOMMONDIR) -I.
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	$(CNOWARN_UNINIT)
 CERRWARN +=	-_gcc=-Wno-switch
@@ -73,7 +79,7 @@ LDLIBS += -lipsecutil -lnsl
 LAZYLIBS = $(ZLAZYLOAD) -ltsol $(ZNOLAZYLOAD)
 
 $(TSOLPROG)	:=	LDLIBS += $(LAZYLIBS)
-$(SOCKETPROG)	:=      LDLIBS += -lsocket
+$(SOCKETPROG)	:=	LDLIBS += -lsocket
 
 .KEEP_STATE:
 
@@ -94,11 +100,12 @@ $(POFILE): $(POFILES)
 $(COMMONOBJS): $(COMMONSRCS)
 	$(COMPILE.c) $(COMMONSRCS)
 
-$(ROOTUSRSBINLINKS):
-	-$(RM) $@; $(SYMLINK) ../../sbin/$(@F) $@
+$(ROOTUSRSBINLINKS): $(ROOTUSRSBINPROG)
+	$(INS.link)
 
 install: $(PROG) $(ROOTFS_PROG) .WAIT $(ROOTUSRSBINPROG) \
-	 $(ROOTUSRSBINLINKS) $(ROOTETCDEFAULTFILES) $(ROOTMANIFEST)
+	 $(ROOTUSRSBINLINKS) $(ROOTETCDEFAULTFILES) $(ROOTMANIFEST) \
+	 $(ROOTSVCMETHOD) $(ROOTUSRSBINLINKS)
 
 check:	$(CHKMANIFEST)
 

@@ -31,6 +31,7 @@ SUBDIRS =       \
 		ksensor \
 		ksid \
 		libtopo \
+		minttl \
 		pf_key \
 		poll \
 		portfs \
@@ -43,6 +44,7 @@ SUBDIRS =       \
 		spoof-ras \
 		stress \
 		syscall \
+		tcpsig \
 		timer \
 		uccid \
 		$(SUBDIRS_$(MACH))
