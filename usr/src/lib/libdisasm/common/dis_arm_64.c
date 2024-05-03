@@ -9,11 +9,15 @@
  */
 /*
  * Copyright (c) 2017, Joyent, Inc.  All rights reserved.
+ * Copyright 2024 OmniOS Community Edition (OmniOSce) Association.
  */
 
 /*
  * This provides support for disassembling AArch64 instructions, derived from
- * the ARMv8 reference manual, chapters C1-C6.
+ * the ARMv8 Architecture Reference Manual, ARMv8, for ARMv8-A architecture
+ * profile, version A.a dated September 2013, chapters C1-C6.
+ *
+ * XXX Update cross reference for newer versions that renumbered things.
  *
  * All instructions come in as uint32_t's.
  */
@@ -23,12 +27,18 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <strings.h>
+#include <stdbool.h>
 #include <sys/byteorder.h>
+#include <sys/bitext.h>
 
 #include "libdisasm_impl.h"
 
 extern size_t strlen(const char *);
 extern size_t strlcat(char *, const char *, size_t);
+
+/* Generates a 32-bit mask with bits [l,h] set, given 31 >= h >= l >= 0 */
+#define	BITS(h, l) (((unsigned) -1 >> (31 - (h))) & ~((1U << (l)) - 1))
+#define	BIT(b) (1U << b)
 
 /*
  * AArch64 instructions are not uniformly encoded, so we are left with little
@@ -39,54 +49,53 @@ extern size_t strlcat(char *, const char *, size_t);
  *
  * Thus, while it is not ideal, the clearest way to refer to sections XXX
  */
-#define	A64_BIT_31_MASK		0x80000000
+#define	A64_BIT_31_MASK		BIT(31)
 #define	A64_BIT_31_SHIFT	31
-#define	A64_BIT_30_MASK		0x40000000
+#define	A64_BIT_30_MASK		BIT(30)
 #define	A64_BIT_30_SHIFT	30
-#define	A64_BIT_29_MASK		0x20000000
+#define	A64_BIT_29_MASK		BIT(29)
 #define	A64_BIT_29_SHIFT	29
-#define	A64_BIT_28_MASK		0x10000000
+#define	A64_BIT_28_MASK		BIT(28)
 #define	A64_BIT_28_SHIFT	28
-#define	A64_BIT_27_MASK		0x08000000
+#define	A64_BIT_27_MASK		BIT(27)
 #define	A64_BIT_27_SHIFT	27
-#define	A64_BIT_26_MASK		0x04000000
+#define	A64_BIT_26_MASK		BIT(26)
 #define	A64_BIT_26_SHIFT	26
-#define	A64_BIT_25_MASK		0x02000000
+#define	A64_BIT_25_MASK		BIT(25)
 #define	A64_BIT_25_SHIFT	25
-#define	A64_BIT_24_MASK		0x01000000
+#define	A64_BIT_24_MASK		BIT(24)
 #define	A64_BIT_24_SHIFT	24
-#define	A64_BIT_23_MASK		0x00800000
+#define	A64_BIT_23_MASK		BIT(23)
 #define	A64_BIT_23_SHIFT	23
-#define	A64_BIT_22_MASK		0x00400000
+#define	A64_BIT_22_MASK		BIT(22)
 #define	A64_BIT_22_SHIFT	22
-#define	A64_BIT_21_MASK		0x00200000
+#define	A64_BIT_21_MASK		BIT(21)
 #define	A64_BIT_21_SHIFT	21
-#define	A64_BIT_20_MASK		0x00100000
+#define	A64_BIT_20_MASK		BIT(20)
 #define	A64_BIT_20_SHIFT	20
-#define	A64_BIT_19_MASK		0x00080000
+#define	A64_BIT_19_MASK		BIT(19)
 #define	A64_BIT_19_SHIFT	19
-#define	A64_BIT_16_MASK		0x00010000
+#define	A64_BIT_16_MASK		BIT(16)
 #define	A64_BIT_16_SHIFT	16
-#define	A64_BIT_12_MASK		0x00001000
+#define	A64_BIT_12_MASK		BIT(12)
 #define	A64_BIT_12_SHIFT	12
-#define	A64_BIT_11_MASK		0x00000800
+#define	A64_BIT_11_MASK		BIT(11)
 #define	A64_BIT_11_SHIFT	11
 #define	A64_BIT_10_SHIFT	10
 #define	A64_BIT_5_SHIFT		5
 #define	A64_BIT_0_SHIFT		0
 
-#define	A64_BITS_29_23_MASK		0x3f800000
-#define	A64_BITS_23_22_MASK		0x00c00000
-#define	A64_BITS_22_19_MASK		0x00780000
-#define	A64_BITS_20_16_MASK		0x001f0000
-#define	A64_BITS_18_16_MASK		0x00070000
-#define	A64_BITS_15_12_MASK		0x0000f000
-#define	A64_BITS_15_13_MASK		0x0000e000
-#define	A64_BITS_14_11_MASK		0x00007800
-#define	A64_BITS_11_10_MASK		0x00000c00
-#define	A64_BITS_9_5_MASK		0x000003e0
-#define	A64_BITS_4_0_MASK		0x0000001f
-
+#define	A64_BITS_29_23_MASK	BITS(29, 23)
+#define	A64_BITS_23_22_MASK	BITS(23, 22)
+#define	A64_BITS_22_19_MASK	BITS(22, 19)
+#define	A64_BITS_20_16_MASK	BITS(20, 16)
+#define	A64_BITS_18_16_MASK	BITS(18, 16)
+#define	A64_BITS_15_12_MASK	BITS(15, 12)
+#define	A64_BITS_15_13_MASK	BITS(15, 13)
+#define	A64_BITS_14_11_MASK	BITS(14, 11)
+#define	A64_BITS_11_10_MASK	BITS(11, 10)
+#define	A64_BITS_9_5_MASK	BITS(9, 5)
+#define	A64_BITS_4_0_MASK	BITS(4, 0)
 
 /*
  * Definitions for the Data Processing Instruction groups.
@@ -299,6 +308,7 @@ static const char *a64_prefetch_ops[] = {
  * pointer or the zero register.  We default to the zero register, and support
  * printing it as the stack pointer via DPI_SPREGS*.
  */
+#define	A64_NUM_REGS	32
 static const struct {
 	const char *r32name;
 	const char *r64name;
@@ -426,9 +436,8 @@ typedef struct a64_reg {
 } a64_reg_t;
 
 typedef struct dis_handle_arm_64 {
-	uint64_t	dha_adrp_addr;
-	uint64_t	dha_adrp_imm;
-	a64_reg_t	dha_adrp_reg;
+	uint64_t	dha_adrp_addr[A64_NUM_REGS];
+	uint64_t	dha_adrp_imm[A64_NUM_REGS];
 } dis_handle_arm_64_t;
 
 static const char *
@@ -1398,7 +1407,7 @@ a64_dis_dataproc_movimm(uint32_t in, a64_dataproc_t *dpi)
 static void
 a64_dis_dataproc_pcrel(dis_handle_t *dhp, uint32_t in, a64_dataproc_t *dpi)
 {
-	uint32_t immhi;
+	uint32_t immhi, imm;
 	uint8_t immlo;
 
 	immhi = (in & A64_DPI_IMMHI_MASK) >> A64_DPI_IMMHI_SHIFT;
@@ -1408,16 +1417,21 @@ a64_dis_dataproc_pcrel(dis_handle_t *dhp, uint32_t in, a64_dataproc_t *dpi)
 		dis_handle_arm_64_t *dhx = dhp->dh_arch_private;
 
 		dpi->opcode = DPI_OP_ADRP;
-		dpi->dpimm_imm = (immlo + (immhi << 2)) << 12;
-		if (dpi->dpimm_imm != 0) {
-			dpi->dpimm_imm += dhp->dh_addr & ~0xfff;
-			dhx->dha_adrp_addr = dhp->dh_addr;
-			dhx->dha_adrp_imm = dpi->dpimm_imm;
-			dhx->dha_adrp_reg = dpi->rd;
-		}
+		imm = (immlo + (immhi << 2)) << 12;
+		dpi->dpimm_imm = (int)imm;
+		dpi->dpimm_imm += dhp->dh_addr & ~0xfff;
+
+		/*
+		 * Cache information in the disassembly handle so that it can
+		 * be cross referenced with an upcoming 'add' in order to
+		 * try and annotate it with a symbol label.
+		 */
+		dhx->dha_adrp_addr[dpi->rd.id] = dhp->dh_addr;
+		dhx->dha_adrp_imm[dpi->rd.id] = dpi->dpimm_imm;
 	} else {
 		dpi->opcode = DPI_OP_ADR;
-		dpi->dpimm_imm = (immlo + (immhi << 2));
+		imm = (immlo + (immhi << 2));
+		dpi->dpimm_imm = (int)imm;
 		dpi->dpimm_imm += dhp->dh_addr;
 		/*
 		 * Set the sfbit so that the register argument is interpreted
@@ -1818,6 +1832,7 @@ a64_dis_dataproc(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 {
 	a64_dataproc_opcode_entry_t *dop;
 	a64_dataproc_t dpi;
+	const char *opname;
 	uint64_t imm;
 	size_t len;
 
@@ -1889,6 +1904,16 @@ a64_dis_dataproc(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 	 * based on its a64_dataproc_opcodes entry.
 	 */
 	dop = &a64_dataproc_opcodes[dpi.opcode];
+	opname = dop->name;
+
+	/*
+	 * C5.6.199 SUBS (shifted register)
+	 * CMP is preferred when Rd == '11111'
+	 */
+	if ((dop->regs & DPI_REGS_d) && dpi.rd.id == 0x1f &&
+	    strcmp(opname, "negs") == 0) {
+		opname = "cmp";
+	}
 
 	/*
 	 * Determine ZR|SP and width for each valid register.  In order of
@@ -1951,32 +1976,32 @@ a64_dis_dataproc(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 	 * Print opcode and register arguments.
 	 */
 	if (dop->regs == DPI_REGS_d) {
-		len = dis_snprintf(buf, buflen, "%s %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s", opname,
 		    a64_reg_name(dpi.rd));
 	} else if (dop->regs == DPI_REGS_dn) {
-		len = dis_snprintf(buf, buflen, "%s %s, %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s, %s", opname,
 		    a64_reg_name(dpi.rd),
 		    a64_reg_name(dpi.rn));
 	} else if (dop->regs == DPI_REGS_dnm) {
-		len = dis_snprintf(buf, buflen, "%s %s, %s, %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s, %s, %s", opname,
 		    a64_reg_name(dpi.rd),
 		    a64_reg_name(dpi.rn),
 		    a64_reg_name(dpi.rm));
 	} else if (dop->regs == DPI_REGS_dnma) {
-		len = dis_snprintf(buf, buflen, "%s %s, %s, %s, %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s, %s, %s, %s", opname,
 		    a64_reg_name(dpi.rd),
 		    a64_reg_name(dpi.rn),
 		    a64_reg_name(dpi.rm),
 		    a64_reg_name(dpi.ra));
 	} else if (dop->regs == DPI_REGS_dm) {
-		len = dis_snprintf(buf, buflen, "%s %s, %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s, %s", opname,
 		    a64_reg_name(dpi.rd),
 		    a64_reg_name(dpi.rm));
 	} else if (dop->regs == DPI_REGS_n) {
-		len = dis_snprintf(buf, buflen, "%s %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s", opname,
 		    a64_reg_name(dpi.rn));
 	} else if (dop->regs == DPI_REGS_nm) {
-		len = dis_snprintf(buf, buflen, "%s %s, %s", dop->name,
+		len = dis_snprintf(buf, buflen, "%s %s, %s", opname,
 		    a64_reg_name(dpi.rn),
 		    a64_reg_name(dpi.rm));
 	}
@@ -2016,19 +2041,27 @@ a64_dis_dataproc(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 			    ", #0x%" PRIx64 ", lsl #12", imm);
 			break;
 		}
-		if ((dop->flags & DPI_ADRP_F) != 0) {
+		if ((dop->flags & DPI_ADRP_F) != 0 &&
+		    dpi.rd.width == A64_REGWIDTH_64) {
 			dis_handle_arm_64_t *dhx = dhp->dh_arch_private;
+			uint_t i = dpi.rd.id;
 
-			if (dhx->dha_adrp_imm != 0 &&
-			    dpi.rd.id == dhx->dha_adrp_reg.id &&
-			    dpi.rd.id == dpi.rn.id &&
-			    dhp->dh_addr == dhx->dha_adrp_addr +
-			    sizeof (uint32_t)) {
+			/*
+			 * If we recently (in the last 10 instructions - this
+			 * is pretty arbitrary) saw an `adrp` on this register,
+			 * then assume that the result after this `add` is to
+			 * set up an address of a symbol and try to print the
+			 * label.
+			 */
+			if (dhx->dha_adrp_imm[i] != 0 &&
+			    dhp->dh_addr > dhx->dha_adrp_addr[i] &&
+			    dhp->dh_addr - dhx->dha_adrp_addr[i] <
+			    sizeof (uint32_t) * 10) {
 				a64_dis_addlabel(dhp,
-				    dpi.dpimm_imm + dhx->dha_adrp_imm,
+				    dpi.dpimm_imm + dhx->dha_adrp_imm[i],
 				    buf + len, buflen - len);
 			}
-			dhx->dha_adrp_imm = 0;
+			dhx->dha_adrp_imm[i] = 0;
 		}
 
 		break;
@@ -2038,7 +2071,7 @@ a64_dis_dataproc(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 		if (dpi.imm_inv)
 			imm = ~imm;
 		if (dpi.sfbit) {
-			len = dis_snprintf(buf, buflen, ", #0x%" PRIx64 "",
+			len = dis_snprintf(buf, buflen, ", #0x%" PRIx64,
 			    imm);
 		} else {
 			len = dis_snprintf(buf, buflen, ", #0x%" PRIx32,
@@ -2081,10 +2114,11 @@ a64_dis_dataproc(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 				len = dis_snprintf(buf, buflen, ", %s",
 				    a64_dataproc_extends[dpi.xreg_type]);
 			}
-		} else
+		} else {
 			len = dis_snprintf(buf, buflen, ", %s #%d",
 			    a64_dataproc_extends[dpi.xreg_type],
 			    dpi.xreg_imm);
+		}
 		break;
 	case DPI_OPTYPE_COND:
 		len = dis_snprintf(buf, buflen, ", %s",
@@ -3177,7 +3211,8 @@ a64_dis_branch(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 	}
 	/* All addresses are encoded as imm * 4 */
 	addr <<= 2;
-	len = dis_snprintf(buf, buflen, " %" PRIx64, dhp->dh_addr + (int)addr);
+	len = dis_snprintf(buf, buflen, " 0x%" PRIx64,
+	    dhp->dh_addr + (int)addr);
 	if (len >= buflen)
 		return (-1);
 #if 0
@@ -3396,7 +3431,7 @@ static a64_system_opcode_entry_t a64_system_opcodes[] = {
 	{0x003ff0ff,	0x0003309f,	"dsb",		A64_SYS_TYPE_IMMOPT},	/* DSB <option>|#<imm> (CRm) */
 	{0x003ff0ff,	0x000330bf,	"dmb",		A64_SYS_TYPE_IMMOPT},	/* DMB <option>|#<imm> (CRm) */
 	{0x003ff0ff,	0x000330df,	"isb",		A64_SYS_TYPE_IMM2},	/* ISB {<option>|#<imm>} (CRm) */
-	/* SYS has at/dc/ic/tlbi aliases which are lookup up in a64_system_sysaliases */
+	/* SYS has at/dc/ic/tlbi aliases which are looked up in a64_system_sysaliases */
 	{0x00380000,	0x00080000,	"sys",		A64_SYS_TYPE_SYS},	/* SYS #<op1>, <Cn>, <Cm>, #<op2>{, <Xt>} */
 	{0x00300000,	0x00100000,	"msr",		A64_SYS_TYPE_MSR},	/* MSR <systemreg>, <Xt> (o0:op1:CRn:CRm:op2) */
 	{0x00380000,	0x00280000,	"sysl",		A64_SYS_TYPE_SYSL},	/* SYSL <Xt>, #<op1>, <Cn>, <Cm>, #<op2> */
@@ -3759,7 +3794,6 @@ a64_dis_system(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 		len = dis_snprintf(buf, buflen, "nope");
 		return (0);
 	}
-		// return (-1);
 
 	/* Extract sections used by most operation types. */
 	op0 = (in & A64_SYS_OP0_MASK) >> A64_SYS_OP0_SHIFT;
@@ -4115,18 +4149,19 @@ a64_dis_ldstr_simd(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 	if (op->name == NULL)
 		return (-1);
 
-	q = (in & A64_BIT_30_MASK) >> A64_BIT_30_SHIFT;
-	s = (in & A64_BIT_12_MASK) >> A64_BIT_12_SHIFT;
-	size = (in & A64_BITS_11_10_MASK) >> A64_BIT_10_SHIFT;
-	rm.id = (in & A64_BITS_20_16_MASK) >> A64_BIT_16_SHIFT;
-	rn.id = (in & A64_BITS_9_5_MASK) >> A64_BIT_5_SHIFT;
-	v.id = (in & A64_BITS_4_0_MASK) >> A64_BIT_0_SHIFT;
+	q = bitx32(in, 30, 30);
+	s = bitx32(in, 12, 12);
+	size = bitx32(in, 11, 10);
+	rm.id = bitx32(in, 20, 16);
+	rn.id = bitx32(in, 9, 5);
+	v.id = bitx32(in, 4, 0);
+
 	rm.width = rn.width = A64_REGWIDTH_64;
 	rm.flags = rn.flags = A64_REGFLAGS_SP;
 	v.width = A64_REGWIDTH_SIMD_V;
 
 	/*
-	 * Lookup arrangement type and calculate index.
+	 * Look up arrangement type and calculate index.
 	 */
 	if (op->flags & A64_LDSTR_SIMD_IX8) {
 		v.arr = A64_REG_ARR_B;
@@ -4265,201 +4300,2385 @@ a64_dis_ldstr_simd(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
  *	sf 0 S 11110 type 1 rmode opcode 000000 Rn Rd
  */
 
-#define	A64_SIMD_Q_MASK		A64_BIT_30_MASK
-#define	A64_SIMD_Q_SHIFT	A64_BIT_30_SHIFT
-#define	A64_SIMD_U_MASK		A64_BIT_29_MASK
-#define	A64_SIMD_U_SHIFT	A64_BIT_29_SHIFT
-#define	A64_SIMD_OP2_MASK	A64_BITS_23_22_MASK
-#define	A64_SIMD_OP2_SHIFT	A64_BIT_22_SHIFT
-#define	A64_SIMD_SIZE_MASK	A64_BITS_23_22_MASK
-#define	A64_SIMD_SIZE_SHIFT	A64_BIT_22_SHIFT
-#define	A64_SIMD_IMMH_MASK	A64_BITS_22_19_MASK
-#define	A64_SIMD_IMMH_SHIFT	A64_BIT_19_SHIFT
-#define	A64_SIMD_IMMB_MASK	A64_BITS_18_16_MASK
-#define	A64_SIMD_IMMB_SHIFT	A64_BIT_16_SHIFT
-#define	A64_SIMD_RM_MASK	A64_BITS_20_16_MASK
-#define	A64_SIMD_RM_SHIFT	A64_BIT_16_SHIFT
-#define	A64_SIMD_ABC_MASK	A64_BITS_18_16_MASK
-#define	A64_SIMD_ABC_SHIFT	A64_BIT_16_SHIFT
-#define	A64_SIMD_CMODE_MASK	A64_BITS_15_12_MASK
-#define	A64_SIMD_CMODE_SHIFT	A64_BIT_12_SHIFT
-#define	A64_SIMD_IMM5_MASK	A64_SIMD_RM_MASK
-#define	A64_SIMD_IMM5_SHIFT	A64_SIMD_RM_SHIFT
-#define	A64_SIMD_IMM4_MASK	A64_BITS_14_11_MASK
-#define	A64_SIMD_IMM4_SHIFT	A64_BIT_11_SHIFT
-#define	A64_SIMD_RN_MASK	A64_BITS_9_5_MASK
-#define	A64_SIMD_RN_SHIFT	A64_BIT_5_SHIFT
-#define	A64_SIMD_DEFGH_MASK	A64_SIMD_RN_MASK
-#define	A64_SIMD_DEFGH_SHIFT	A64_SIMD_RN_SHIFT
-#define	A64_SIMD_RD_MASK	A64_BITS_4_0_MASK
-#define	A64_SIMD_RD_SHIFT	A64_BIT_0_SHIFT
+/* VFPExpandImm */
+static uint64_t
+a64_vfp_expand_imm(uint8_t imm8, a64_reg_width_t width)
+{
+	uint64_t result = 0;
+	uint8_t bit6 = bitx32(imm8, 6, 6);
 
-typedef enum a64_simd_type {
-	SIMD_T_EXT,
-	SIMD_T_TBL,
-	SIMD_T_TRN,	/* Transpose vectors */
-	SIMD_T_ACR,	/* Across lanes */
-	SIMD_T_CPY1,	/* Copy (variants) */
-	SIMD_T_CPY2,
-	SIMD_T_CPY3,
-	SIMD_T_CPY4,
-	SIMD_T_CPY5,
-	SIMD_T_CPY6,	/* Scalar copy */
-	SIMD_T_MIM,	/* Modified immediate */
-	SIMD_T_MIM1,	/* Modified immediate (shifted ones) */
-	SIMD_T_SCP,	/* Scalar copy */
-	SIMD_T_SPR,	/* Scalar pair */
-	SIMD_T_SSH,	/* Scalar shift */
-} a64_simd_type_t;
+	if (width == A64_REGWIDTH_SIMD_32) {
+		result = bitx32(imm8, 7, 7) << 31 | bitx32(imm8, 5, 0) << 19;
+		if (bit6)
+			result |= 0x1f << 25;
+		else
+			result |= 0x1 << 30;
+	} else if (width == A64_REGWIDTH_SIMD_64) {
+		result = (uint64_t)bitx32(imm8, 7, 7) << 63 |
+		    (uint64_t)bitx32(imm8, 5, 0) << 48;
+		if (bit6)
+			result |= 0xffULL << 54;
+		else
+			result |= 0x1ULL << 62;
+	}
+
+	return (result);
+}
+
+static uint64_t
+a64_simd_float(uint64_t imm, a64_reg_width_t width, char *buf, size_t buflen)
+{
+#ifdef DIS_STANDALONE
+	return (dis_snprintf(buf, buflen, "<FP value>"));
+#else
+	double val;
+
+	if (width == A64_REGWIDTH_SIMD_32)
+		val = (double)*(float *)&imm;
+	else
+		val = *(double *)&imm;
+
+	return (dis_snprintf(buf, buflen, "%.8f", val));
+#endif
+}
 
 typedef enum a64_simd_flags {
-	SIMD_F_1REG = 0x00001,
-	SIMD_F_2REG = 0x00002,
-	SIMD_F_3REG = 0x00004,
-	SIMD_F_4REG = 0x00008,
-	SIMD_F_REGM = 0x0000f,	/* reg mask */
-	SIMD_F_B    = 0x00010,
-	SIMD_F_H    = 0x00020,
-	SIMD_F_S    = 0x00040,
-	SIMD_F_D    = 0x00080,
-	SIMD_F_RW1  = 0x00100,	/* reg width B/H/S */
-	SIMD_F_RW2  = 0x00200,	/* reg width H/S/D */
-	SIMD_F_RW3  = 0x00400,	/* reg width S */
+	SIMD_F_SKIP	= BIT(0),
+	SIMD_F_VAR1	= BIT(1),
+	SIMD_F_VAR2	= BIT(2),
+	SIMD_F_VAR3	= BIT(3),
+	SIMD_F_VAR4	= BIT(4),
+	SIMD_F_VAR5	= BIT(5),
+	SIMD_F_VAR6	= BIT(6),
+	SIMD_F_B	= BIT(7),
+	SIMD_F_H	= BIT(8),
+	SIMD_F_S	= BIT(9),
+	SIMD_F_D	= BIT(10),
+	SIMD_F_MIM	= BIT(11),
+	SIMD_F_MIM1	= BIT(12),
+	SIMD_F_ZERO	= BIT(13),
 } a64_simd_flags_t;
 
+/* Don't care value, short so it fits into the tables */
+#define	DC	UINT32_MAX
+
+typedef struct a64_simd_class a64_simd_class_t;
+typedef struct a64_simd_opcode_entry a64_simd_opcode_entry_t;
+typedef struct a64_simd_data a64_simd_data_t;
+typedef int (*a64_simd_handler_f)(const dis_handle_t *,
+    const a64_simd_class_t *, const a64_simd_opcode_entry_t *,
+    a64_simd_data_t *, uint32_t, char *, size_t);
+
 typedef struct a64_simd_opcode_entry {
-	uint32_t mask;			/* opcode mask */
-	uint32_t targ;			/* target value */
-	const char *name;		/* opcode name */
-	a64_simd_type_t type;
-	a64_simd_flags_t flags;
+	uint32_t			d1v;
+	uint32_t			d2v;
+	uint32_t			d3v;
+	uint32_t			d4v;
+	uint32_t			d5v;
+	const char			*name;
+	a64_simd_flags_t		flags;
+	a64_simd_handler_f		handler;
 } a64_simd_opcode_entry_t;
 
-static a64_simd_opcode_entry_t a64_simd_opcodes[] = {
-	/* C3.6.1 AdvSIMD EXT */
-	{0xbfe08400, 0x2e000000, "ext",		SIMD_T_EXT,	0},
-	/* C3.6.2 AdvSIMD TBL/TBX */
-	{0xbfe0fc00, 0x0e000000, "tbl",		SIMD_T_TBL,	SIMD_F_1REG},
-	{0xbfe0fc00, 0x0e001000, "tbx",		SIMD_T_TBL,	SIMD_F_1REG},
-	{0xbfe0fc00, 0x0e002000, "tbl",		SIMD_T_TBL,	SIMD_F_2REG},
-	{0xbfe0fc00, 0x0e003000, "tbx",		SIMD_T_TBL,	SIMD_F_2REG},
-	{0xbfe0fc00, 0x0e004000, "tbl",		SIMD_T_TBL,	SIMD_F_3REG},
-	{0xbfe0fc00, 0x0e005000, "tbx",		SIMD_T_TBL,	SIMD_F_3REG},
-	{0xbfe0fc00, 0x0e006000, "tbl",		SIMD_T_TBL,	SIMD_F_4REG},
-	{0xbfe0fc00, 0x0e007000, "tbx",		SIMD_T_TBL,	SIMD_F_4REG},
-	/* C3.6.3 AdvSIMD ZIP/UZP/TRN */
-	{0xbf20fc00, 0x0e001800, "uzp1",	SIMD_T_TRN,	0},
-	{0xbf20fc00, 0x0e002800, "trn1",	SIMD_T_TRN,	0},
-	{0xbf20fc00, 0x0e003800, "zip1",	SIMD_T_TRN,	0},
-	{0xbf20fc00, 0x0e005800, "uzp2",	SIMD_T_TRN,	0},
-	{0xbf20fc00, 0x0e006800, "trn2",	SIMD_T_TRN,	0},
-	{0xbf20fc00, 0x0e007800, "zip2",	SIMD_T_TRN,	0},
-	/* C3.6.4 AdvSIMD across lanes */
-	{0xbf3ffc00, 0x0e303800, "saddlv",	SIMD_T_ACR,	SIMD_F_RW2},
-	{0xbf3ffc00, 0x0e30a800, "smaxv",	SIMD_T_ACR,	SIMD_F_RW1},
-	{0xbf3ffc00, 0x0e31a800, "sminv",	SIMD_T_ACR,	SIMD_F_RW1},
-	{0xbf3ffc00, 0x0e31b800, "addv",	SIMD_T_ACR,	SIMD_F_RW1},
-	{0xbf3ffc00, 0x2e303800, "uaddlv",	SIMD_T_ACR,	SIMD_F_RW2},
-	{0xbf3ffc00, 0x2e30a800, "umaxv",	SIMD_T_ACR,	SIMD_F_RW1},
-	{0xbf3ffc00, 0x2e31a800, "uminv",	SIMD_T_ACR,	SIMD_F_RW1},
-	{0xbfbffc00, 0x2e30c800, "fmaxnmv",	SIMD_T_ACR,	SIMD_F_RW3},
-	{0xbfbffc00, 0x2e30f800, "fmaxv",	SIMD_T_ACR,	SIMD_F_RW3},
-	{0xbfbffc00, 0x2eb0c800, "fminnmv",	SIMD_T_ACR,	SIMD_F_RW3},
-	{0xbfbffc00, 0x2eb0f800, "fminv",	SIMD_T_ACR,	SIMD_F_RW3},
-	/* C3.6.5 AdvSIMD copy */
-	{0xbfe0fc00, 0x0e000400, "dup",		SIMD_T_CPY1,	0},
-	{0xbfe0fc00, 0x0e000c00, "dup",		SIMD_T_CPY2,	0},
-	{0xffe0fc00, 0x0e002c00, "smov",	SIMD_T_CPY3,	0},
-	/* Handle quirky alias case for 32-bit UMOV first */
-	{0xffe7fc00, 0x0e043c00, "mov",		SIMD_T_CPY3,	0},
-	{0xffe0fc00, 0x0e003c00, "umov",	SIMD_T_CPY3,	0},
-	{0xffe0fc00, 0x4e001c00, "mov",		SIMD_T_CPY4,	0},
-	{0xffe0fc00, 0x4e002c00, "smov",	SIMD_T_CPY3,	0},
-	{0xffe0fc00, 0x4e003c00, "mov",		SIMD_T_CPY3,	0},
-	{0xffe08400, 0x6e000400, "mov",		SIMD_T_CPY5,	0},
-	/* C3.6.6 AdvSIMD modified immediate */
-	{0xbff89c00, 0x0f000400, "movi",	SIMD_T_MIM,	SIMD_F_S},
-	{0xbff89c00, 0x0f001400, "orr",		SIMD_T_MIM,	SIMD_F_S},
-	{0xbff8dc00, 0x0f008400, "movi",	SIMD_T_MIM,	SIMD_F_H},
-	{0xbff8dc00, 0x0f009400, "orr",		SIMD_T_MIM,	SIMD_F_H},
-	{0xbff8ec00, 0x0f00c400, "movi",	SIMD_T_MIM1,	SIMD_F_S},
-	{0xbff8fc00, 0x0f00e400, "movi",	SIMD_T_MIM,	SIMD_F_B},
-	{0xbff8fc00, 0x0f00f400, "fmov",	SIMD_T_MIM,	0},
-	{0xbff89c00, 0x2f000400, "mvni",	SIMD_T_MIM,	SIMD_F_S},
-	{0xbff89c00, 0x2f001400, "bic",		SIMD_T_MIM,	SIMD_F_S},
-	{0xbff8dc00, 0x2f008400, "mvni",	SIMD_T_MIM,	SIMD_F_H},
-	{0xbff8dc00, 0x2f009400, "bic",		SIMD_T_MIM,	SIMD_F_H},
-	{0xbff8ec00, 0x2f00c400, "mvni",	SIMD_T_MIM1,	SIMD_F_S},
-	{0xfff8fc00, 0x2f00e400, "movi",	SIMD_T_MIM,	SIMD_F_D},
-	{0xfff8fc00, 0x6f00e400, "movi",	SIMD_T_MIM,	SIMD_F_D},
-	{0xfff8fc00, 0x6f00f400, "fmov",	SIMD_T_MIM,	0},
-	/* C3.6.7 AdvSIMD scalar copy */
-	{0xffe0fc00, 0x5e000400, "mov",		SIMD_T_CPY6,	0},
-	/* C3.6.8 AdvSIMD scalar pairwise */
-	{0xff3ffc00, 0x5e31b800, "addp",	SIMD_T_SPR,	0},
-	{0xffbffc00, 0x7e30c800, "fmaxnmp",	SIMD_T_SPR,	0},
-	{0xffbffc00, 0x7e30d800, "faddp",	SIMD_T_SPR,	0},
-	{0xffbffc00, 0x7e30f800, "fmaxp",	SIMD_T_SPR,	0},
-	{0xffbffc00, 0x7eb0c800, "fminnmp",	SIMD_T_SPR,	0},
-	{0xffbffc00, 0x7eb0f800, "fminp",	SIMD_T_SPR,	0},
+typedef struct a64_simd_data {
+	a64_reg_t			rm;
+	a64_reg_t			rn;
+	a64_reg_t			rd;
+	uint8_t				q;
+	uint8_t				size;
+} a64_simd_data_t;
+
+typedef struct a64_simd_class {
+	uint32_t			mask;
+	uint32_t			targ;
+	const a64_simd_opcode_entry_t	*entries;
+	a64_simd_handler_f		handler;
 	/*
-	 * C3.6.9 AdvSIMD scalar shift by immediate.  Note that we ignore the
-	 * "immh != 0" check mandated by the manual to support the mask check,
-	 * and we simply abort later.
+	 * Discriminator masks and shifts, used to distinguish between
+	 * instructions in this class.
 	 */
-	{0xff80fc00, 0x5f000400, "sshr",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f001400, "ssra",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f002400, "srshr",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f003400, "srsra",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f005400, "shl",		SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f007400, "sqshl",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f009400, "sqshrn",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f009c00, "sqrshrn",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f00e400, "scvtf",	SIMD_T_SSH,	0},
-	{0xff80fc00, 0x5f00ec00, "fcvtzs",	SIMD_T_SSH,	0},
-	/* last */
-	{0xffffffff, 0xffffffff, NULL,	0,			0}
+	uint32_t			d1m;
+	uint32_t			d2m;
+	uint32_t			d3m;
+	uint32_t			d4m;
+	uint32_t			d5m;
+	uint8_t				d1s;
+	uint8_t				d2s;
+	uint8_t				d3s;
+	uint8_t				d4s;
+	uint8_t				d5s;
+} a64_simd_class_t;
+
+/* 3.6.1 AdvSIMD EXT */
+static int
+a64_simd_handle_ext(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	uint8_t imm4 = bitx32(in, 14, 11);
+	const char *arr = a64_simd_arrange[data->q][0];
+	size_t len;
+
+	if (data->q == 0 && (imm4 & 0x8))
+		return (-1);
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s, #%d",
+	    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr,
+	    a64_reg_name(data->rm), arr, imm4);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.2 AdvSIMD TBL/TBX */
+static int
+a64_simd_handle_tbltbx(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	uint8_t nregs;
+	size_t len;
+
+	data->rd.arr = data->q ? A64_REG_ARR_16B : A64_REG_ARR_8B;
+	data->rm.arr = data->rd.arr;
+	data->rn.arr = A64_REG_ARR_16B;
+
+	nregs = bitx32(in, 14, 13) + 1;
+
+	/* <Vd>.<Ta> */
+	if ((len = dis_snprintf(buf, buflen, " %s.%s, ",
+	    a64_reg_name(data->rd),
+	    a64_reg_arr_names[data->rd.arr])) >= buflen) {
+		return (-1);
+	}
+	buflen -= len;
+	buf += len;
+
+	/* {<Vn>.16B ... } */
+	if ((len = a64_print_vregs(buf, buflen, data->rn, nregs)) >= buflen)
+		return (-1);
+	buflen -= len;
+	buf += len;
+
+	/* <Vm>.<Ta> */
+	len = dis_snprintf(buf, buflen, ", %s.%s", a64_reg_name(data->rm),
+	    a64_reg_arr_names[data->rm.arr]);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.3 AdvSIMD ZIP/UZP/TRN */
+static int
+a64_simd_handle_trn(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	const char *arr = a64_simd_arrange[data->q][data->size];
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr,
+	    a64_reg_name(data->rm), arr);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.4 ADVSIMD across lanes */
+static int
+a64_simd_handle_acr(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	data->rn.arr = data->q ? A64_REG_ARR_16B : A64_REG_ARR_8B;
+	data->rn.arr += data->size;
+	if (op->flags & SIMD_F_VAR1)
+		data->rd.width = A64_REGWIDTH_SIMD_8 + data->size;
+	else if (op->flags & SIMD_F_VAR2)
+		data->rd.width = A64_REGWIDTH_SIMD_16 + data->size;
+	else if (op->flags & SIMD_F_VAR3) {
+		data->rd.width = A64_REGWIDTH_SIMD_32;
+		data->rn.arr = A64_REG_ARR_4S;
+	}
+	len = dis_snprintf(buf, buflen, " %s, %s.%s",
+	    a64_reg_name(data->rd),
+	    a64_reg_name(data->rn), a64_reg_arr_names[data->rn.arr]);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.5 AdvSIMD copy */
+/* 3.6.7 AdvSIMD scalar copy */
+static int
+a64_simd_handle_cpy(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t i, idx, imm4, imm5;
+
+	imm4 = bitx32(in, 14, 11);
+	imm5 = bitx32(in, 20, 16);
+
+	/*
+	 * Output formats are based on first set bit in imm5.  We use
+	 * this to compute the offsets in our register tables.
+	 */
+	i = ffs(imm5);
+
+	if (op->flags & SIMD_F_VAR1) {
+		/* <Vd>.<T>, <Vn>.<Ts>[<index>] */
+		data->rd.arr = data->q ? A64_REG_ARR_16B + (i - 1)
+		    : A64_REG_ARR_8B + (i - 1);
+		data->rn.arr = A64_REG_ARR_B + (i - 1);
+		idx = (imm5 >> i);
+		len = dis_snprintf(buf, buflen, " %s.%s, %s.%s[%d]",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    a64_reg_name(data->rn),
+		    a64_reg_arr_names[data->rn.arr], idx);
+	} else if (op->flags & SIMD_F_VAR2) {
+		/* <Vd>.<T>, <R><n> */
+		data->rd.arr = data->q ? A64_REG_ARR_16B + (i - 1)
+		    : A64_REG_ARR_8B + (i - 1);
+		data->rn.width = (i > 3) ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
+		len = dis_snprintf(buf, buflen, " %s.%s, %s",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    a64_reg_name(data->rn));
+	} else if (op->flags & SIMD_F_VAR3) {
+		/* <Rd>, <Vn>.<Ts>[<index>] */
+		data->rd.width = data->q ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
+		data->rn.arr = A64_REG_ARR_B + (i - 1);
+		idx = (imm5 >> i);
+		len = dis_snprintf(buf, buflen, " %s, %s.%s[%d]",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn),
+		    a64_reg_arr_names[data->rn.arr], idx);
+	} else if (op->flags & SIMD_F_VAR4) {
+		/* <Vd>.<Ts>[<index>], <R><n> */
+		data->rd.arr = A64_REG_ARR_B + (i - 1);
+		data->rn.width = (i > 3) ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
+		idx = (imm5 >> i);
+		len = dis_snprintf(buf, buflen, " %s.%s[%d], %s",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    idx, a64_reg_name(data->rn));
+	} else if (op->flags & SIMD_F_VAR5) {
+		/* <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>] */
+		data->rd.arr = data->rn.arr = A64_REG_ARR_B + (i - 1);
+		idx = (imm5 >> i);
+		len = dis_snprintf(buf, buflen, " %s.%s[%d], %s.%s[%d]",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    idx,
+		    a64_reg_name(data->rn), a64_reg_arr_names[data->rn.arr],
+		    (imm4 >> i));
+	} else if (op->flags & SIMD_F_VAR6) {
+		/* <V><d>, <Vn>.<T>[<index>] */
+		data->rd.width = A64_REGWIDTH_SIMD_8 + (i - 1);
+		data->rn.arr = A64_REG_ARR_B + (i - 1);
+		idx = (imm5 >> i);
+		len = dis_snprintf(buf, buflen, " %s, %s.%s[%d]",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn),
+		    a64_reg_arr_names[data->rn.arr], idx);
+	}
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.6 AdvSIMD modified immediate */
+static int
+a64_simd_handle_mmi(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	/* Shift a:b:c into position to make up a:b:c:d:e:f:g:h */
+	uint8_t imm8 = bitx32(in, 18, 16) << 5 | bitx32(in, 9, 5);
+	uint8_t cmode = bitx32(in, 15, 12);
+	uint8_t shift = 0;
+
+	if (op->flags & SIMD_F_B) {
+		data->rd.arr = data->q ? A64_REG_ARR_16B : A64_REG_ARR_8B;
+		shift = 0;
+	} else if (op->flags & SIMD_F_H) {
+		data->rd.arr = data->q ? A64_REG_ARR_8H : A64_REG_ARR_4H;
+		shift = (cmode & 0x2) ? 8 : 0;
+	} else if (op->flags & SIMD_F_S) {
+		data->rd.arr = data->q ? A64_REG_ARR_4S : A64_REG_ARR_2S;
+		if (op->flags & SIMD_F_MIM1)
+			shift = 8 << (cmode & 0x1);
+		else
+			shift = 8 * ((cmode & 0x6) >> 1);
+	} else if (op->flags & SIMD_F_D) {
+		/*
+		 * Build imm based on imm8, where "a:b:c:d:e:f:g:h"
+		 * becomes "aaaaaaaa:bbbbbbbb:cccccccc:...".  No doubt
+		 * there is a fancier way to compute this.
+		 */
+		uint64_t imm = 0;
+
+		for (uint8_t i = 0; i < 8; i++) {
+			imm |= ((imm8 & 0x01) ? 1ULL : 0) << i;
+			imm |= ((imm8 & 0x02) ? 1ULL : 0) << i + 8;
+			imm |= ((imm8 & 0x04) ? 1ULL : 0) << i + 16;
+			imm |= ((imm8 & 0x08) ? 1ULL : 0) << i + 24;
+			imm |= ((imm8 & 0x10) ? 1ULL : 0) << i + 32;
+			imm |= ((imm8 & 0x20) ? 1ULL : 0) << i + 40;
+			imm |= ((imm8 & 0x40) ? 1ULL : 0) << i + 48;
+			imm |= ((imm8 & 0x80) ? 1ULL : 0) << i + 56;
+		}
+		/* Special formats, handle and exit early. */
+		if (data->q) {
+			data->rd.arr = A64_REG_ARR_2D;
+			len = dis_snprintf(buf, buflen,
+			    " %s.%s, #0x%" PRIx64 "",
+			    a64_reg_name(data->rd),
+			    a64_reg_arr_names[data->rd.arr], imm);
+		} else {
+			data->rd.width = A64_REGWIDTH_SIMD_64;
+			len = dis_snprintf(buf, buflen,
+			    " %s, #0x%" PRIx64 "",
+			    a64_reg_name(data->rd), imm);
+		}
+		return (len < buflen ? 0 : -1);
+	} else {
+		uint64_t imm;
+
+		data->rd.arr = data->q ? A64_REG_ARR_4S : A64_REG_ARR_2S;
+		len = dis_snprintf(buf, buflen, " %s.%s, #",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    imm8);
+
+		if (len >= buflen)
+			return (-1);
+		buf += len;
+		buflen -= len;
+
+		imm = a64_vfp_expand_imm(imm8, data->rd.width);
+		len = a64_simd_float(imm, data->rd.width, buf, buflen);
+	}
+	if (shift != 0) {
+		len = dis_snprintf(buf, buflen, " %s.%s, #0x%x, %s #%d",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    imm8, op->flags & SIMD_F_MIM1 ? "msl" : "lsl", shift);
+	} else {
+		len = dis_snprintf(buf, buflen, " %s.%s, #0x%x",
+		    a64_reg_name(data->rd), a64_reg_arr_names[data->rd.arr],
+		    imm8);
+	}
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.8 AdvSIMD scalar pairwise */
+static int
+a64_simd_handle_spr(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t sz = data->size & 0x1;
+
+	data->rd.width = sz ? A64_REGWIDTH_SIMD_64 : A64_REGWIDTH_SIMD_32;
+	data->rn.arr = sz ? A64_REG_ARR_2D : A64_REG_ARR_2S;
+	len = dis_snprintf(buf, buflen, " %s, %s.%s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_arr_names[data->rn.arr]);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.9 AdvSIMD scalar shift by immediate */
+static int
+a64_simd_handle_ssh(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	uint8_t shift;
+	size_t len;
+	int i;
+
+	uint8_t immh = bitx32(in, 22, 19);
+	uint8_t immb = bitx32(in, 18, 16);
+	uint8_t imm = immh << 3 | immb;
+
+	/*
+	 * Output formats are based on the last set bit in immh. We use
+	 * this to compute the offsets in our register tables.
+	 */
+	i = fls(immh);
+
+	data->rd.width = data->rn.width = A64_REGWIDTH_SIMD_8 + (i - 1);
+	if (op->flags & SIMD_F_VAR1) {
+		shift = imm - (1 << (i + 2));
+	} else if (op->flags & SIMD_F_VAR2) {
+		data->rn.width++;
+		shift = (1 << (i + 3)) - imm;
+	} else {
+		shift = (1 << (i + 3)) - imm;
+	}
+
+	len = dis_snprintf(buf, buflen, " %s, %s, #%d",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn), shift);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.10 AdvSIMD scalar three different */
+static int
+a64_simd_handle_astd(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	if ((data->size & 1) == 1) {
+		data->rd.width = A64_REGWIDTH_SIMD_32;
+		data->rn.width = A64_REGWIDTH_SIMD_16;
+	} else {
+		data->rd.width = A64_REGWIDTH_SIMD_64;
+		data->rn.width = A64_REGWIDTH_SIMD_32;
+	}
+	data->rm.width = data->rn.width;
+
+	len = dis_snprintf(buf, buflen, " %s, %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_name(data->rm));
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.11 AdvSIMD scalar three same */
+static int
+a64_simd_handle_asts(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	/*
+	 * Some instructions in this group have only a 1 bit size. In those
+	 * cases we must index into the register table as if the top bit is
+	 * set. We can derive this from our opcode table by looking at whether
+	 * the top bit is ignored.
+	 */
+	if (op->d2v != DC)
+		data->size |= 2;
+
+	data->rn.width = A64_REGWIDTH_SIMD_8 + data->size;
+	data->rd.width = data->rm.width = data->rn.width;
+
+	len = dis_snprintf(buf, buflen, " %s, %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_name(data->rm));
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.12 AdvSIMD scalar two-reg misc */
+static int
+a64_simd_handle_astrm(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t sz = bitx32(in, 22, 22);
+
+	data->rn.width = data->rd.width = sz == 0 ? A64_REGWIDTH_SIMD_32 :
+	    A64_REGWIDTH_SIMD_64;
+	len = dis_snprintf(buf, buflen, " %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn));
+
+	if (len >= buflen)
+		return (-1);
+	buflen -= len;
+	buf += len;
+
+	if (op->flags & SIMD_F_ZERO)
+		len = dis_snprintf(buf, buflen, ", #0");
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.13 AdvSIMD scalar x indexed element */
+static int
+a64_simd_handle_sxie(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t idx;
+
+	uint8_t h = bitx32(in, 11, 11);
+	uint8_t l = bitx32(in, 21, 21);
+	uint8_t sz = bitx32(in, 22, 22);
+
+	if (sz == 0) {
+		data->rm.width = A64_REGWIDTH_SIMD_32;
+		data->rm.arr = A64_REG_ARR_S;
+		idx = h << 1 | l;
+	} else {
+		data->rm.width = A64_REGWIDTH_SIMD_64;
+		data->rm.arr = A64_REG_ARR_D;
+		idx = h;
+	}
+	data->rd.width = data->rn.width = data->rm.width;
+
+	/* <V><d>, <V><n>, <Vm>.<Ts>[<index>] */
+	len = dis_snprintf(buf, buflen, " %s, %s, %s.%s[%d]",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_name(data->rm), a64_reg_arr_names[data->rm.arr], idx);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.14 AdvSIMD shift by immediate */
+static int
+a64_simd_handle_asbi(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	const char *arr1, *arr2;
+	uint8_t shift;
+	size_t len;
+	int i;
+
+	uint8_t immh = bitx32(in, 22, 19);
+	uint8_t immb = bitx32(in, 18, 16);
+	uint8_t imm = immh << 3 | immb;
+
+	/*
+	 * Output formats are based on the last set bit in immh. We use
+	 * this to compute the offsets in our arrangement tables.
+	 */
+	i = fls(immh);
+
+	/*
+	 * If no bits are set, then this is an AdvSIMD modified immediate
+	 * instruction that should not have matched this class.
+	 */
+	if (i == 0)
+		return (-1);
+
+	if (op->flags & SIMD_F_VAR3) {
+		arr1 = a64_simd_arrange[1][i];
+		arr2 = a64_simd_arrange[data->q][i - 1];
+		shift = imm - (1 << (i + 2));
+	} else if (op->flags & SIMD_F_VAR2) {
+		arr1 = a64_simd_arrange[data->q][i - 1];
+		arr2 = a64_simd_arrange[1][i];
+		shift = (1 << (i + 3)) - imm;
+	} else if (op->flags & SIMD_F_VAR1) {
+		arr1 = arr2 = a64_simd_arrange[data->q][i - 1];
+		shift = imm - (1 << (i + 2));
+	} else {
+		arr1 = arr2 = a64_simd_arrange[data->q][i - 1];
+		shift = (1 << (i + 3)) - imm;
+	}
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, #%d",
+	    a64_reg_name(data->rd), arr1, a64_reg_name(data->rn), arr2,
+	    shift);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.15 AdvSIMD three different */
+static int
+a64_simd_handle_atd(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	const char *arra = a64_reg_arr_names[data->size + A64_REG_ARR_8H];
+	const char *arrb = a64_simd_arrange[data->q][data->size];
+	const char *arr1, *arr2, *arr3;
+
+	if (op->flags & SIMD_F_VAR1) {
+		arr1 = arr2 = arra;
+		arr3 = arrb;
+	} else if (op->flags & SIMD_F_VAR2) {
+		arr1 = arrb;
+		arr2 = arr3 = arra;
+	} else {
+		arr1 = arra;
+		arr2 = arr3 = arrb;
+	}
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr1, a64_reg_name(data->rn), arr2,
+	    a64_reg_name(data->rm), arr3);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.16 AdvSIMD three same */
+static int
+a64_simd_handle_ats(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	const char *arr;
+	size_t len;
+
+	/*
+	 * Some instructions in this group have only a 1 bit size. In those
+	 * cases we must index into the arrangement table as if the top bit is
+	 * set. We can derive this from our opcode table by looking at whether
+	 * the bottom bit is ignored when the top one is not.
+	 */
+	if (op->d3v == DC && op->d2v != DC)
+		data->size |= 2;
+
+	/*
+	 * Special case for the opcodes where both bits of 'size' are used for
+	 * 'opc2' - we always need to index from zero.
+	 */
+	if (op->d3v != DC && op->d2v != DC)
+		data->size = 0;
+
+	arr = a64_simd_arrange[data->q][data->size];
+
+	/*
+	 * As a special case, "orr" should be replaced with "mov" if
+	 * Rm == Rn
+	 */
+	if (op->d1v == 0 && op->d2v == 1 && op->d3v == 0 && op->d4v == 3 &&
+	    data->rm.id == data->rn.id) {
+		buf -= 3;
+		buflen += 3;
+
+		len = dis_snprintf(buf, buflen, "mov %s.%s, %s.%s",
+		    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr);
+	} else {
+		/* <Vd>.<T>, <Vn>.<T>, <Vm>.<T> */
+		len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s",
+		    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr,
+		    a64_reg_name(data->rm), arr);
+	}
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.17 AdvSIMD two-reg misc */
+static int
+a64_simd_handle_atrm(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	const char *arr;
+	size_t len;
+
+	/*
+	 * This group is a bit of a grab bag; I suppose the "misc" should have
+	 * been a clue. The good news is that these are all vector operations
+	 * that use rd and rn in that order and the following general rules
+	 * cover most of the instructions in this group:
+	 *
+	 * - If there are two size bits available, the arrangement is indexed
+	 *   from 8B, in the usual [q][size] way.
+	 * - If there is only one size bit available, the arrangement is
+	 *   indexed as if the top bit is set. That's convenient.
+	 *
+	 * The exceptions are then these few remaining instructions which use
+	 * two different arrangements. shll also has an extra #shift argument.
+	 * These have separate handlers below this function.
+	 */
+
+	/* size[0] DC && size[1] != DC */
+	if (op->d3v == DC && op->d2v != DC)
+		data->size |= 2;
+
+	arr = a64_simd_arrange[data->q][data->size];
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr,
+	    a64_reg_name(data->rn), arr);
+
+	if (len >= buflen)
+		return (-1);
+	buflen -= len;
+	buf += len;
+
+	if (op->flags & SIMD_F_ZERO)
+		len = dis_snprintf(buf, buflen, ", #0");
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_atrm_4h8b(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	if (data->size > 2)
+		return (-1);
+
+	const char *arr1 = a64_simd_arrange[data->q][data->size + 1];
+	const char *arr2 = a64_simd_arrange[data->q][data->size];
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr1,
+	    a64_reg_name(data->rn), arr2);
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_atrm_8b8h(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	if (data->size > 2)
+		return (-1);
+
+	const char *arr1 = a64_simd_arrange[data->q][data->size];
+	const char *arr2 = a64_simd_arrange[1][data->size + 1];
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr1,
+	    a64_reg_name(data->rn), arr2);
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_atrm_shll(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	if (data->size > 2)
+		return (-1);
+
+	const char *arr1 = a64_simd_arrange[1][data->size + 1];
+	const char *arr2 = a64_simd_arrange[data->q][data->size];
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, #%d",
+	    a64_reg_name(data->rd), arr1,
+	    a64_reg_name(data->rn), arr2,
+	    8 << data->size);
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_atrm_fcvt(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	const char *arr1, *arr2;
+	uint8_t size = bitx32(in, 22, 22);
+	size_t len;
+
+	switch (op->name[4]) {
+	case 'n':
+	case 'x':
+		/* fcvtn[2]	4H	4S */
+		/* fcvtxn[2]	4H	4S */
+		arr1 = a64_simd_arrange[data->q][size + 1];
+		arr2 = a64_simd_arrange[1][size + 2];
+		break;
+	case 'l':
+		/* fcvtl[2]	4S	4H */
+		arr1 = a64_simd_arrange[1][size + 2];
+		arr2 = a64_simd_arrange[data->q][size + 1];
+		break;
+	default:
+		return (-1);
+	}
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr1,
+	    a64_reg_name(data->rn), arr2);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.18 AdvSIMD vector x indexed element */
+static int
+a64_simd_handle_avxie(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	/*
+	 * There are three groups of instructions in this class. There doesn't
+	 * appear to be a way of detecting which group a particular instruction
+	 * is in from the instruction fields so we default to group 3 and
+	 * select the others based on SIMD_F_VAR variant flags attached to the
+	 * opcodes.
+	 *
+	 * 1. The fused multiply instructions
+	 *	<Vd>.<T>, <Vn>.<T>, <Vm>.<Ts>[<index>]
+	 * with the same arrangement for Vd and Vn and Rm is always 20:16
+	 *
+	 * 2. The remaining multiply instructions
+	 *	<Vd>.<T>, <Vn>.<T>, <Vm>.<Ts>[<index>]
+	 * with the same arrangement for Vd and Vn, but differently calculated,
+	 * and Rm is either 20:16 or 19:16 depending on what is in bit 23.
+	 *
+	 * 3. This is the largest group
+	 *	<Vd>.<Ta>, <Vn>.<Tb>, <Vm>.<Ts>[<index>]
+	 * with two different arrangments for Vd and Vn and the value for Rm is
+	 * either 20:16 or 19:16 depending on what is in bit 23.
+	 *
+	 * In the end, we can collapse groups 1 and 2 because bit 23 is always
+	 * set for group 1, meaning that the usual 2-bit size field can be used
+	 * for naturally indexing into the arrangements.
+	 */
+
+	uint8_t h = bitx32(in, 11, 11);
+	uint8_t m = bitx32(in, 20, 20);
+	uint8_t l = bitx32(in, 21, 21);
+
+	const char *arr1, *arr2;
+	const char *ts;
+	uint8_t idx;
+
+	if (op->flags != 0)	/* Group 1 or 2 */
+		arr1 = a64_simd_arrange[data->q][data->size];
+	else
+		arr1 = a64_simd_arrange[1][data->size + 1];
+
+	arr2 = a64_simd_arrange[data->q][data->size];
+	ts = a64_reg_arr_names[data->size];
+
+	if ((data->size & 0x10) != 0) {
+		idx = h << 1 | l;
+	} else {
+		data->rm.id = bitx32(in, 19, 16);
+		idx = h << 2 | l << 1 | m;
+	}
+
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s[%d]",
+	    a64_reg_name(data->rd), arr1, a64_reg_name(data->rn), arr2,
+	    a64_reg_name(data->rm), ts, idx);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.19 Crypto AES */
+static int
+a64_simd_handle_aes(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	const char *arr;
+	size_t len;
+
+	/* <Vd>.16B, <Vn>.16B */
+
+	arr = a64_reg_arr_names[A64_REG_ARR_16B];
+	len = dis_snprintf(buf, buflen, " %s.%s, %s.%s",
+	    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.20 Crypto three-reg SHA */
+static int
+a64_simd_handle_3rsha(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	const char *arr = a64_reg_arr_names[A64_REG_ARR_4S];
+	size_t len;
+
+	if (op->flags & SIMD_F_VAR2) {
+		/* <Vd>.4S, <Vn>.4S, <Vm>.4S */
+
+		len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s",
+		    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr,
+		    a64_reg_name(data->rm), arr);
+	} else {
+		/* <Qd>, <Sn>, <Vm>.4S */
+		data->rd.width = A64_REGWIDTH_SIMD_128;
+		data->rn.width = A64_REGWIDTH_SIMD_32;
+
+		if (op->flags & SIMD_F_VAR1) {
+			/* <Qd>, <Qn>, <Vm>.4S */
+			data->rn.width = A64_REGWIDTH_SIMD_128;
+		}
+
+		len = dis_snprintf(buf, buflen, " %s, %s, %s.%s",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn),
+		    a64_reg_name(data->rm), arr);
+	}
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.21 Crypto two-reg SHA */
+static int
+a64_simd_handle_2rsha(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	if (op->flags & SIMD_F_VAR1) {
+		/* <Sd>, <Sn> */
+		data->rd.width = data->rn.width = A64_REGWIDTH_SIMD_32;
+
+		len = dis_snprintf(buf, buflen, " %s, %s",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn));
+	} else {
+		/* <Vd>.4S, <Vn>.4S */
+		const char *arr = a64_reg_arr_names[A64_REG_ARR_4S];
+
+		len = dis_snprintf(buf, buflen, " %s.%s, %s.%s",
+		    a64_reg_name(data->rd), arr, a64_reg_name(data->rn), arr);
+	}
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.22 Floating-point compare */
+static int
+a64_simd_handle_fpc(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	uint8_t opcode2 = bitx32(in, 4, 0);
+	bool dbl = (data->size & 0x1) != 0;
+	bool zero = bitx8(opcode2, 3, 3) == 1;
+	size_t len;
+
+	data->rn.width = dbl ? A64_REGWIDTH_SIMD_64 : A64_REGWIDTH_SIMD_32;
+	data->rm.width = data->rn.width;
+	if (zero) {
+		len = dis_snprintf(buf, buflen, " %s, #0.0",
+		    a64_reg_name(data->rn));
+	} else {
+		len = dis_snprintf(buf, buflen, " %s, %s",
+		    a64_reg_name(data->rn), a64_reg_name(data->rm));
+	}
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.22 Floating-point conditional compare */
+static int
+a64_simd_handle_fpcc(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	bool dbl = (data->size & 0x1) != 0;
+	uint8_t nzcv = bitx32(in, 3, 0);
+	uint8_t cond = bitx32(in, 15, 12);
+	size_t len;
+
+	data->rn.width = dbl ? A64_REGWIDTH_SIMD_64 : A64_REGWIDTH_SIMD_32;
+	data->rm.width = data->rn.width;
+
+	/*
+	 * <Sn>, <Sm>, #<nzcv>, <cond>
+	 * <Dn>, <Dm>, #<nzcv>, <cond>
+	 */
+	len = dis_snprintf(buf, buflen, " %s, %s, #%d, %s",
+	    a64_reg_name(data->rn), a64_reg_name(data->rm),
+	    nzcv, a64_cond_names[cond]);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.23 Floating-point conditional select */
+static int
+a64_simd_handle_fpcs(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	bool dbl = (data->size & 0x1) != 0;
+	uint8_t cond = bitx32(in, 15, 12);
+	size_t len;
+
+	data->rn.width = dbl ? A64_REGWIDTH_SIMD_64 : A64_REGWIDTH_SIMD_32;
+	data->rd.width = data->rm.width = data->rn.width;
+
+	/* <Sd>, <Sn>, <Sm>, <cond> */
+	len = dis_snprintf(buf, buflen, " %s, %s, %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_name(data->rm), a64_cond_names[cond]);
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.25 Floating-point data-processing (1 source) */
+static int
+a64_simd_handle_fpdp1s(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	switch (data->size) {
+	case 0:	/* single-precision */
+		data->rd.width = data->rn.width = A64_REGWIDTH_SIMD_32;
+		break;
+	case 1: /* double-precision */
+		data->rd.width = data->rn.width = A64_REGWIDTH_SIMD_64;
+		break;
+	default:
+		return (-1);
+	}
+
+	len = dis_snprintf(buf, buflen, " %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn));
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_fpdp1s_fcvt(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	const a64_reg_width_t map[] = {
+		[0] = A64_REGWIDTH_SIMD_32,
+		[1] = A64_REGWIDTH_SIMD_64,
+		[3] = A64_REGWIDTH_SIMD_16,
+	};
+	uint8_t opc = bitx32(in, 16, 15);
+
+	if (data->size == 2 || opc == 2)
+		return (-1);
+
+	data->rn.width = map[data->size];
+	data->rd.width = map[opc];
+
+	len = dis_snprintf(buf, buflen, " %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn));
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.26 Floating-point data-processing (2 source) */
+static int
+a64_simd_handle_fpdp2s(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+
+	switch (data->size) {
+	case 0:	/* single-precision */
+		data->rd.width = A64_REGWIDTH_SIMD_32;
+		break;
+	case 1: /* double-precision */
+		data->rd.width = A64_REGWIDTH_SIMD_64;
+		break;
+	default:
+		return (-1);
+	}
+
+	data->rn.width = data->rm.width = data->rd.width;
+
+	len = dis_snprintf(buf, buflen, " %s, %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_name(data->rm));
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.27 Floating-point data-processing (3 source) */
+static int
+a64_simd_handle_fpdp3s(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	a64_reg_t ra;
+
+	ra.id = bitx32(in, 14, 10);
+
+	switch (data->size) {
+	case 0:	/* single-precision */
+		data->rd.width = A64_REGWIDTH_SIMD_32;
+		break;
+	case 1: /* double-precision */
+		data->rd.width = A64_REGWIDTH_SIMD_64;
+		break;
+	default:
+		return (-1);
+	}
+
+	data->rn.width = data->rm.width = ra.width = data->rd.width;
+
+	len = dis_snprintf(buf, buflen, " %s, %s, %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn),
+	    a64_reg_name(data->rm), a64_reg_name(ra));
+
+	return (len < buflen ? 0 : -1);
+}
+
+/* 3.6.28 Floating-point immediate */
+static int
+a64_simd_handle_fpi(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t imm8 = bitx32(in, 20, 13);
+	uint64_t imm;
+
+	switch (data->size) {
+	case 0:	/* single-precision */
+		data->rd.width = A64_REGWIDTH_SIMD_32;
+		break;
+	case 1: /* double-precision */
+		data->rd.width = A64_REGWIDTH_SIMD_64;
+		break;
+	default:
+		return (-1);
+	}
+
+	imm = a64_vfp_expand_imm(imm8, data->rd.width);
+
+	len = dis_snprintf(buf, buflen, " %s, #",
+	    a64_reg_name(data->rd));
+	if (len >= buflen)
+		return (-1);
+	buf += len;
+	buflen -= len;
+
+	len = a64_simd_float(imm, data->rd.width, buf, buflen);
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_fpfxpc(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t sf = bitx32(in, 31, 31);
+	uint8_t rmode = bitx32(in, 20, 19);
+	uint8_t scale = bitx32(in, 15, 10);
+	a64_reg_t *ireg, *fpreg;
+	uint8_t fbits;
+
+	if (rmode == 0) {
+		ireg = &data->rn;
+		fpreg = &data->rd;
+	} else {
+		ireg = &data->rd;
+		fpreg = &data->rn;
+	}
+
+	fpreg->width = data->size == 0 ? A64_REGWIDTH_SIMD_32 :
+	    A64_REGWIDTH_SIMD_64;
+	ireg->width = sf == 1 ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
+	fbits = 64 - scale;
+
+	len = dis_snprintf(buf, buflen, " %s, %s, #%d",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn), fbits);
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_fpic(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t sf = bitx32(in, 31, 31);
+	uint8_t rmode = bitx32(in, 20, 19);
+	uint8_t opcode = bitx32(in, 18, 16);
+	a64_reg_t *ireg, *fpreg;
+
+	if ((opcode & 6) == 2 && rmode == 0) {
+		ireg = &data->rn;
+		fpreg = &data->rd;
+	} else {
+		ireg = &data->rd;
+		fpreg = &data->rn;
+	}
+
+	ireg->width = sf == 1 ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
+	fpreg->width = data->size == 0 ? A64_REGWIDTH_SIMD_32 :
+	    A64_REGWIDTH_SIMD_64;
+
+	len = dis_snprintf(buf, buflen, " %s, %s",
+	    a64_reg_name(data->rd), a64_reg_name(data->rn));
+
+	return (len < buflen ? 0 : -1);
+}
+
+static int
+a64_simd_handle_fpic_fmov(const dis_handle_t *dhp,
+    const a64_simd_class_t *class, const a64_simd_opcode_entry_t *op,
+    a64_simd_data_t *data, uint32_t in, char *buf, size_t buflen)
+{
+	size_t len;
+	uint8_t sf = bitx32(in, 31, 31);
+	uint8_t rmode = bitx32(in, 20, 19);
+	uint8_t opcode = bitx32(in, 18, 16);
+	a64_reg_t *ireg, *fpreg;
+
+	if (opcode & 1) {
+		ireg = &data->rn;
+		fpreg = &data->rd;
+	} else {
+		ireg = &data->rd;
+		fpreg = &data->rn;
+	}
+
+	ireg->width = sf == 1 ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
+	switch (data->size) {
+	case 0:
+		fpreg->width = A64_REGWIDTH_SIMD_32;
+		break;
+	case 1:
+		fpreg->width = A64_REGWIDTH_SIMD_64;
+		break;
+	case 2:
+		fpreg->width = A64_REGWIDTH_SIMD_V;
+		break;
+	default:
+		return (-1);
+	}
+
+	if (rmode == 0) {
+		len = dis_snprintf(buf, buflen, " %s, %s",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn));
+	} else if (opcode & 1) {
+		len = dis_snprintf(buf, buflen, " %s.d[1], %s",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn));
+	} else {
+		len = dis_snprintf(buf, buflen, " %s, %s.d[1]",
+		    a64_reg_name(data->rd), a64_reg_name(data->rn));
+	}
+
+	return (len < buflen ? 0 : -1);
+}
+
+#define	F_VAR1	SIMD_F_VAR1
+#define	F_VAR2	SIMD_F_VAR2
+#define	F_VAR3	SIMD_F_VAR3
+#define	F_VAR4	SIMD_F_VAR4
+#define	F_VAR5	SIMD_F_VAR5
+#define	F_VAR6	SIMD_F_VAR6
+
+/* 3.6.1 AdvSIMD EXT */
+static const a64_simd_opcode_entry_t a64_simd_ext[] = {
+	{ .name = "ext" },
+	{ .name = NULL }
+};
+
+/* 3.6.2 AdvSIMD TBL/TBX */
+static const a64_simd_opcode_entry_t a64_simd_tbltbx[] = {
+	/*                op      */
+	{ .name = "tbl", .d1v = 0 },
+	{ .name = "tbx", .d1v = 1 },
+	{ .name = NULL }
+};
+
+/* 3.6.3 AdvSIMD ZIP/UZP/TRN */
+static const a64_simd_opcode_entry_t a64_simd_trn[] = {
+	/*                 opcode  */
+	{ .name = "uzp1", .d1v = 1 },
+	{ .name = "trn1", .d1v = 2 },
+	{ .name = "zip1", .d1v = 3 },
+	{ .name = "uzp2", .d1v = 5 },
+	{ .name = "trn2", .d1v = 6 },
+	{ .name = "zip2", .d1v = 7 },
+	{ .name = NULL }
+};
+
+/* 3.6.4 ADVSIMD across lanes */
+static const a64_simd_opcode_entry_t a64_simd_acr[] = {
+	/*                    U         size[1]    opcode  */
+	{ .name = "saddlv",  .d1v = 0, .d2v = DC, .d3v = 3,  .flags = F_VAR2 },
+	{ .name = "smaxv",   .d1v = 0, .d2v = DC, .d3v = 10, .flags = F_VAR1 },
+	{ .name = "sminv",   .d1v = 0, .d2v = DC, .d3v = 26, .flags = F_VAR1 },
+	{ .name = "addv",    .d1v = 0, .d2v = DC, .d3v = 27, .flags = F_VAR1 },
+	{ .name = "uaddlv",  .d1v = 1, .d2v = DC, .d3v = 3,  .flags = F_VAR2 },
+	{ .name = "umaxv",   .d1v = 1, .d2v = DC, .d3v = 10, .flags = F_VAR1 },
+	{ .name = "uminv",   .d1v = 1, .d2v = DC, .d3v = 26, .flags = F_VAR1 },
+	{ .name = "fmaxnmv", .d1v = 1, .d2v = 0,  .d3v = 12, .flags = F_VAR3 },
+	{ .name = "fmaxv",   .d1v = 1, .d2v = 0,  .d3v = 15, .flags = F_VAR3 },
+	{ .name = "fminnmv", .d1v = 1, .d2v = 1,  .d3v = 12, .flags = F_VAR3 },
+	{ .name = "fminv",   .d1v = 1, .d2v = 1,  .d3v = 15, .flags = F_VAR3 },
+	{ .name = NULL }
+};
+
+/* 3.6.5 AdvSIMD copy */
+static const a64_simd_opcode_entry_t a64_simd_cpy[] = {
+	/*                 Q          op        imm4 */
+	{ .name = "dup",  .d1v = DC, .d2v = 0, .d3v = 0,  .flags = F_VAR1 },
+	{ .name = "dup",  .d1v = DC, .d2v = 0, .d3v = 1,  .flags = F_VAR2 },
+	{ .name = "smov", .d1v = 0,  .d2v = 0, .d3v = 5,  .flags = F_VAR3 },
+	{ .name = "mov",  .d1v = 0,  .d2v = 0, .d3v = 7,  .flags = F_VAR3 },
+	{ .name = "mov",  .d1v = 1,  .d2v = 0, .d3v = 3,  .flags = F_VAR4 },
+	{ .name = "smov", .d1v = 1,  .d2v = 0, .d3v = 5,  .flags = F_VAR3 },
+	{ .name = "mov",  .d1v = 1,  .d2v = 0, .d3v = 7,  .flags = F_VAR3 },
+	{ .name = "mov",  .d1v = 1,  .d2v = 1, .d3v = DC, .flags = F_VAR5 },
+	{ .name = NULL }
+};
+
+/* 3.6.6 AdvSIMD modified immediate */
+#define	F_MIM		SIMD_F_MIM
+#define	F_MIM_S		(SIMD_F_MIM | SIMD_F_S)
+#define	F_MIM_H		(SIMD_F_MIM | SIMD_F_H)
+#define	F_MIM_B		(SIMD_F_MIM | SIMD_F_B)
+#define	F_MIM_D		(SIMD_F_MIM | SIMD_F_D)
+#define	F_MIM1_S	(SIMD_F_MIM1 | SIMD_F_S)
+static const a64_simd_opcode_entry_t a64_simd_mmi[] = {
+	/*                 Q          op        cmode */
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 0,  .flags = F_MIM_S },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 2,  .flags = F_MIM_S },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 4,  .flags = F_MIM_S },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 6,  .flags = F_MIM_S },
+	{ .name = "orr",  .d1v = DC, .d2v = 0, .d3v = 1,  .flags = F_MIM_S },
+	{ .name = "orr",  .d1v = DC, .d2v = 0, .d3v = 3,  .flags = F_MIM_S },
+	{ .name = "orr",  .d1v = DC, .d2v = 0, .d3v = 5,  .flags = F_MIM_S },
+	{ .name = "orr",  .d1v = DC, .d2v = 0, .d3v = 7,  .flags = F_MIM_S },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 8,  .flags = F_MIM_H },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 10, .flags = F_MIM_H },
+	{ .name = "orr",  .d1v = DC, .d2v = 0, .d3v = 9,  .flags = F_MIM_H },
+	{ .name = "orr",  .d1v = DC, .d2v = 0, .d3v = 11, .flags = F_MIM_H },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 12, .flags = F_MIM1_S },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 13, .flags = F_MIM1_S },
+	{ .name = "movi", .d1v = DC, .d2v = 0, .d3v = 14, .flags = F_MIM_B },
+	{ .name = "fmov", .d1v = DC, .d2v = 0, .d3v = 15, .flags = F_MIM },
+	{ .name = "mvni", .d1v = DC,  .d2v = 1, .d3v = 0,  .flags = F_MIM_S },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 2,  .flags = F_MIM_S },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 4,  .flags = F_MIM_S },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 6,  .flags = F_MIM_S },
+	{ .name = "bic",  .d1v = DC, .d2v = 1, .d3v = 1,  .flags = F_MIM_S },
+	{ .name = "bic",  .d1v = DC, .d2v = 1, .d3v = 3,  .flags = F_MIM_S },
+	{ .name = "bic",  .d1v = DC, .d2v = 1, .d3v = 5,  .flags = F_MIM_S },
+	{ .name = "bic",  .d1v = DC, .d2v = 1, .d3v = 7,  .flags = F_MIM_S },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 8,  .flags = F_MIM_H },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 10, .flags = F_MIM_H },
+	{ .name = "bic",  .d1v = DC, .d2v = 1, .d3v = 9,  .flags = F_MIM_H },
+	{ .name = "bic",  .d1v = DC, .d2v = 1, .d3v = 11, .flags = F_MIM_H },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 12, .flags = F_MIM1_S },
+	{ .name = "mvni", .d1v = DC, .d2v = 1, .d3v = 13, .flags = F_MIM1_S },
+	{ .name = "movi", .d1v = 0,  .d2v = 1, .d3v = 14, .flags = F_MIM_D },
+	{ .name = "movi", .d1v = 1,  .d2v = 1, .d3v = 14, .flags = F_MIM_D },
+	{ .name = "fmov", .d1v = 1,  .d2v = 1, .d3v = 15, .flags = F_MIM },
+	{ .name = NULL }
+};
+
+/* 3.6.7 AdvSIMD scalar copy */
+static const a64_simd_opcode_entry_t a64_simd_scpy[] = {
+	{ .name = "mov", .flags = SIMD_F_VAR6 },
+	{ .name = NULL }
+};
+
+/* 3.6.8 AdvSIMD scalar pairwise */
+static const a64_simd_opcode_entry_t a64_simd_spr[] = {
+	/*                    U         size[1]    opcode */
+	{ .name = "addp",    .d1v = 0, .d2v = DC, .d3v = 27 },
+	{ .name = "fmaxnmp", .d1v = 1, .d2v = 0,  .d3v = 12 },
+	{ .name = "faddp",   .d1v = 1, .d2v = 0,  .d3v = 13 },
+	{ .name = "fmaxp",   .d1v = 1, .d2v = 0,  .d3v = 15 },
+	{ .name = "fminnmp", .d1v = 1, .d2v = 1,  .d3v = 12 },
+	{ .name = "fminp",   .d1v = 1, .d2v = 1,  .d3v = 15 },
+	{ .name = NULL }
+};
+
+/* 3.6.9 AdvSIMD scalar shift by immediate */
+static const a64_simd_opcode_entry_t a64_simd_ssh[] = {
+	/*                    U          immh       opcode */
+	/* If immh is 0, we must skip the decode */
+	{ .name = "SKIP",    .d1v = DC, .d2v = 0,  .d3v = DC,
+		.flags = SIMD_F_SKIP },
+	{ .name = "sshr",     .d1v = 0,  .d2v = DC, .d3v = 0 },
+	{ .name = "ssra",     .d1v = 0,  .d2v = DC, .d3v = 2 },
+	{ .name = "srshr",    .d1v = 0,  .d2v = DC, .d3v = 4 },
+	{ .name = "srsra",    .d1v = 0,  .d2v = DC, .d3v = 6 },
+	{ .name = "shl",      .d1v = 0,  .d2v = DC, .d3v = 10,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshl",    .d1v = 0,  .d2v = DC, .d3v = 14,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshrn",   .d1v = 0,  .d2v = DC, .d3v = 18,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqrshrn",  .d1v = 0,  .d2v = DC, .d3v = 19,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "scvtf",    .d1v = 0,  .d2v = DC, .d3v = 28 },
+	{ .name = "fcvtzs",   .d1v = 0,  .d2v = DC, .d3v = 31 },
+	{ .name = "ushr",     .d1v = 1,  .d2v = DC, .d3v = 0 },
+	{ .name = "usra",     .d1v = 1,  .d2v = DC, .d3v = 2 },
+	{ .name = "urshr",    .d1v = 1,  .d2v = DC, .d3v = 4 },
+	{ .name = "ursra",    .d1v = 1,  .d2v = DC, .d3v = 6 },
+	{ .name = "sri",      .d1v = 1,  .d2v = DC, .d3v = 8 },
+	{ .name = "sli",      .d1v = 1,  .d2v = DC, .d3v = 10,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshlu",   .d1v = 1,  .d2v = DC, .d3v = 12,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "uqshl",    .d1v = 1,  .d2v = DC, .d3v = 14,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshrun",  .d1v = 1,  .d2v = DC, .d3v = 16,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqrshrun", .d1v = 1,  .d2v = DC, .d3v = 17,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "uqshrn",   .d1v = 1,  .d2v = DC, .d3v = 18,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "ucvtf",    .d1v = 1,  .d2v = DC, .d3v = 28 },
+	{ .name = "fcvtzu",   .d1v = 1,  .d2v = DC, .d3v = 31 },
+	{ .name = NULL }
+};
+
+/* 3.6.10 AdvSIMD scalar three different */
+static const a64_simd_opcode_entry_t a64_simd_astd[] = {
+	/*                    U         opcode */
+	{ .name = "sqdmlal", .d1v = 0, .d2v = 9 },
+	{ .name = "sqdmlsl", .d1v = 0, .d2v = 11 },
+	{ .name = "sqdmull", .d1v = 0, .d2v = 13 },
+	{ .name = NULL }
+};
+
+/* 3.6.11 AdvSIMD scalar three same */
+static const a64_simd_opcode_entry_t a64_simd_asts[] = {
+	/*                     U         size[1]    opcode */
+	{ .name = "sqadd",    .d1v = 0, .d2v = DC, .d3v = 1 },
+	{ .name = "sqsub",    .d1v = 0, .d2v = DC, .d3v = 5 },
+	{ .name = "cmgt",     .d1v = 0, .d2v = DC, .d3v = 6 },
+	{ .name = "cmge",     .d1v = 0, .d2v = DC, .d3v = 7 },
+	{ .name = "sshl",     .d1v = 0, .d2v = DC, .d3v = 8 },
+	{ .name = "sqshl",    .d1v = 0, .d2v = DC, .d3v = 9 },
+	{ .name = "srshl",    .d1v = 0, .d2v = DC, .d3v = 10 },
+	{ .name = "sqrshl",   .d1v = 0, .d2v = DC, .d3v = 11 },
+	{ .name = "add",      .d1v = 0, .d2v = DC, .d3v = 16 },
+	{ .name = "cmtst",    .d1v = 0, .d2v = DC, .d3v = 17 },
+	{ .name = "sqdmulh",  .d1v = 0, .d2v = DC, .d3v = 22 },
+	{ .name = "fmulx",    .d1v = 0, .d2v = 0,  .d3v = 27 },
+	{ .name = "fcmeq",    .d1v = 0, .d2v = 0,  .d3v = 28 },
+	{ .name = "frecps",   .d1v = 0, .d2v = 0,  .d3v = 31 },
+	{ .name = "frsqrts",  .d1v = 0, .d2v = 1,  .d3v = 31 },
+	{ .name = "uqadd",    .d1v = 1, .d2v = DC, .d3v = 1 },
+	{ .name = "uqsub",    .d1v = 1, .d2v = DC, .d3v = 5 },
+	{ .name = "cmhi",     .d1v = 1, .d2v = DC, .d3v = 6 },
+	{ .name = "cmhs",     .d1v = 1, .d2v = DC, .d3v = 7 },
+	{ .name = "ushl",     .d1v = 1, .d2v = DC, .d3v = 8},
+	{ .name = "uqshl",    .d1v = 1, .d2v = DC, .d3v = 9 },
+	{ .name = "urshl",    .d1v = 1, .d2v = DC, .d3v = 10 },
+	{ .name = "uqrshl",   .d1v = 1, .d2v = DC, .d3v = 11 },
+	{ .name = "sub",      .d1v = 1, .d2v = DC, .d3v = 16 },
+	{ .name = "cmeq",     .d1v = 1, .d2v = DC, .d3v = 17 },
+	{ .name = "sqrdmulh", .d1v = 1, .d2v = DC, .d3v = 22 },
+	{ .name = "fcmge",   .d1v = 1, .d2v = 0,   .d3v = 28 },
+	{ .name = "facge",   .d1v = 1, .d2v = 0,   .d3v = 29 },
+	{ .name = "fabd",    .d1v = 1, .d2v = 1,   .d3v = 26 },
+	{ .name = "fcmgt",   .d1v = 1, .d2v = 1,   .d3v = 28 },
+	{ .name = "facgt",   .d1v = 1, .d2v = 1,   .d3v = 29 },
+	{ .name = NULL }
+};
+
+/* 3.6.12 AdvSIMD scalar two-reg misc */
+static const a64_simd_opcode_entry_t a64_simd_astrm[] = {
+	/*                    U         size[1]    opcode */
+	{ .name = "suqadd",  .d1v = 0, .d2v = DC, .d3v = 3 },
+	{ .name = "sqabs",   .d1v = 0, .d2v = DC, .d3v = 7 },
+	{ .name = "cmgt",    .d1v = 0, .d2v = DC, .d3v = 8,
+		.flags = SIMD_F_ZERO },
+	{ .name = "cmeq",    .d1v = 0, .d2v = DC, .d3v = 9,
+		.flags = SIMD_F_ZERO },
+	{ .name = "cmlt",    .d1v = 0, .d2v = DC, .d3v = 10,
+		.flags = SIMD_F_ZERO },
+	{ .name = "abs",     .d1v = 0, .d2v = DC, .d3v = 11 },
+	{ .name = "sqxtn",   .d1v = 0, .d2v = DC, .d3v = 20 },
+	{ .name = "fcvtns",  .d1v = 0, .d2v = 0,  .d3v = 26 },
+	{ .name = "fcvtms",  .d1v = 0, .d2v = 0,  .d3v = 27 },
+	{ .name = "fcvtas",  .d1v = 0, .d2v = 0,  .d3v = 28 },
+	{ .name = "scvtf",   .d1v = 0, .d2v = 0,  .d3v = 29 },
+	{ .name = "fcmgt",   .d1v = 0, .d2v = 1,  .d3v = 12,
+		.flags = SIMD_F_ZERO },
+	{ .name = "fcmeq",   .d1v = 0, .d2v = 1,  .d3v = 13,
+		.flags = SIMD_F_ZERO },
+	{ .name = "fcmlt",   .d1v = 0, .d2v = 1,  .d3v = 14,
+		.flags = SIMD_F_ZERO },
+	{ .name = "fcvtps",  .d1v = 0, .d2v = 1,  .d3v = 26 },
+	{ .name = "fcvtzs",  .d1v = 0, .d2v = 1,  .d3v = 27 },
+	{ .name = "frecpe",  .d1v = 0, .d2v = 1,  .d3v = 29 },
+	{ .name = "frecpx",  .d1v = 0, .d2v = 1,  .d3v = 31 },
+	{ .name = "usqadd",  .d1v = 1, .d2v = DC, .d3v = 3 },
+	{ .name = "sqneg",   .d1v = 1, .d2v = DC, .d3v = 7 },
+	{ .name = "cmge",    .d1v = 1, .d2v = DC, .d3v = 8,
+		.flags = SIMD_F_ZERO },
+	{ .name = "cmle",    .d1v = 1, .d2v = DC, .d3v = 9,
+		.flags = SIMD_F_ZERO },
+	{ .name = "neg",     .d1v = 1, .d2v = DC, .d3v = 11 },
+	{ .name = "sqxtun",  .d1v = 1, .d2v = DC, .d3v = 18 },
+	{ .name = "uqxtn",   .d1v = 1, .d2v = DC, .d3v = 20 },
+	{ .name = "fcvtxn",  .d1v = 1, .d2v = 0,  .d3v = 22 },
+	{ .name = "fcvtnu",  .d1v = 1, .d2v = 0,  .d3v = 26 },
+	{ .name = "fcvtmu",  .d1v = 1, .d2v = 0,  .d3v = 27 },
+	{ .name = "fcvtau",  .d1v = 1, .d2v = 0,  .d3v = 28 },
+	{ .name = "ucvtf",   .d1v = 1, .d2v = 0,  .d3v = 29 },
+	{ .name = "fcmge",   .d1v = 1, .d2v = 1,  .d3v = 12,
+		.flags = SIMD_F_ZERO },
+	{ .name = "fcmle",   .d1v = 1, .d2v = 1,  .d3v = 13,
+		.flags = SIMD_F_ZERO },
+	{ .name = "fcvtpu",  .d1v = 1, .d2v = 1,  .d3v = 26 },
+	{ .name = "fcvtzu",  .d1v = 1, .d2v = 1,  .d3v = 27 },
+	{ .name = "frsqrte", .d1v = 1, .d2v = 1,  .d3v = 29 },
+	{ .name = NULL }
+};
+
+/* 3.6.13 AdvSIMD scalar x indexed element */
+static const a64_simd_opcode_entry_t a64_simd_sxie[] = {
+	/*                     U         size[1]    opcode */
+	{ .name = "sqdmlal",  .d1v = 0, .d2v = DC, .d3v = 3 },
+	{ .name = "sqdmlsl",  .d1v = 0, .d2v = DC, .d3v = 7 },
+	{ .name = "sqdmull",  .d1v = 0, .d2v = DC, .d3v = 11 },
+	{ .name = "sqdmulh",  .d1v = 0, .d2v = DC, .d3v = 12 },
+	{ .name = "sqrdmulh", .d1v = 0, .d2v = DC, .d3v = 13 },
+	{ .name = "fmla",     .d1v = 0, .d2v = 1,  .d3v = 1 },
+	{ .name = "fmls",     .d1v = 0, .d2v = 1,  .d3v = 5 },
+	{ .name = "fmul",     .d1v = 0, .d2v = 1,  .d3v = 9 },
+	{ .name = "fmulx",    .d1v = 1, .d2v = 1,  .d3v = 9 },
+	{ .name = NULL }
+};
+
+/* 3.6.14 AdvSIMD shift by immediate */
+static const a64_simd_opcode_entry_t a64_simd_asbi[] = {
+	/*                      U         opcode     Q */
+	{ .name = "sshr",      .d1v = 0, .d2v = 0,  .d3v = DC },
+	{ .name = "ssra",      .d1v = 0, .d2v = 2,  .d3v = DC },
+	{ .name = "srshr",     .d1v = 0, .d2v = 4,  .d3v = DC },
+	{ .name = "srsra",     .d1v = 0, .d2v = 6,  .d3v = DC },
+	{ .name = "shl",       .d1v = 0, .d2v = 10, .d3v = DC,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshl",     .d1v = 0, .d2v = 14, .d3v = DC,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "shrn",      .d1v = 0, .d2v = 16, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "shrn2",     .d1v = 0, .d2v = 16, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "rshrn",     .d1v = 0, .d2v = 17, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "rshrn2",    .d1v = 0, .d2v = 17, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqshrn",    .d1v = 0, .d2v = 18, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqshrn2",   .d1v = 0, .d2v = 18, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqrshrn",   .d1v = 0, .d2v = 19, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqrshrn2",  .d1v = 0, .d2v = 19, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sshll",     .d1v = 0, .d2v = 20, .d3v = 0,
+		.flags = SIMD_F_VAR3 },
+	{ .name = "sshll2",    .d1v = 0, .d2v = 20, .d3v = 1,
+		.flags = SIMD_F_VAR3 },
+	{ .name = "scvtf",     .d1v = 0, .d2v = 28, .d3v = DC },
+	{ .name = "fcvtzs",    .d1v = 0, .d2v = 31, .d3v = DC },
+	{ .name = "ushr",      .d1v = 1, .d2v = 0,  .d3v = DC },
+	{ .name = "usra",      .d1v = 1, .d2v = 2,  .d3v = DC },
+	{ .name = "urshr",     .d1v = 1, .d2v = 4,  .d3v = DC },
+	{ .name = "ursra",     .d1v = 1, .d2v = 6,  .d3v = DC },
+	{ .name = "sri",       .d1v = 1, .d2v = 8,  .d3v = DC },
+	{ .name = "sli",       .d1v = 1, .d2v = 10, .d3v = DC,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshlu",    .d1v = 1, .d2v = 12, .d3v = DC,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "uqshl",     .d1v = 1, .d2v = 14, .d3v = DC,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "sqshrun",   .d1v = 1, .d2v = 16, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqshrun2",  .d1v = 1, .d2v = 16, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqrshrun",  .d1v = 1, .d2v = 17, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sqrshrun2", .d1v = 1, .d2v = 17, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "uqshrn",    .d1v = 1, .d2v = 18, .d3v = DC,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "uqrshrn",   .d1v = 1, .d2v = 19, .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "uqrshrn2",  .d1v = 1, .d2v = 19, .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "ushll",     .d1v = 1, .d2v = 20, .d3v = 0,
+		.flags = SIMD_F_VAR3 },
+	{ .name = "ushll2",    .d1v = 1, .d2v = 20, .d3v = 1,
+		.flags = SIMD_F_VAR3 },
+	{ .name = "ucvtf",     .d1v = 1, .d2v = 28, .d3v = DC },
+	{ .name = "fcvtzu",    .d1v = 1, .d2v = 31, .d3v = DC },
+	{ .name = NULL }
+};
+
+/* 3.6.15 AdvSIMD three different */
+static const a64_simd_opcode_entry_t a64_simd_atd[] = {
+	/*                     U         opcode     Q */
+	{ .name = "saddl",    .d1v = 0, .d2v = 0,  .d3v = 0 },
+	{ .name = "saddl2",   .d1v = 0, .d2v = 0,  .d3v = 1 },
+	{ .name = "saddw",    .d1v = 0, .d2v = 1,  .d3v = 0,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "saddw2",   .d1v = 0, .d2v = 1,  .d3v = 1,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "ssubl",    .d1v = 0, .d2v = 2,  .d3v = 0 },
+	{ .name = "ssubl2",   .d1v = 0, .d2v = 2,  .d3v = 1 },
+	{ .name = "ssubw",    .d1v = 0, .d2v = 3,  .d3v = 0,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "ssubw2",   .d1v = 0, .d2v = 3,  .d3v = 1,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "addhn",    .d1v = 0, .d2v = 4,  .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "addhn2",   .d1v = 0, .d2v = 4,  .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sabal",    .d1v = 0, .d2v = 5,  .d3v = 0 },
+	{ .name = "sabal2",   .d1v = 0, .d2v = 5,  .d3v = 1 },
+	{ .name = "subhn",    .d1v = 0, .d2v = 6,  .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "subhn2",   .d1v = 0, .d2v = 6,  .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "sabdl",    .d1v = 0, .d2v = 7,  .d3v = 0 },
+	{ .name = "sabdl2",   .d1v = 0, .d2v = 7,  .d3v = 1 },
+	{ .name = "smlal",    .d1v = 0, .d2v = 8,  .d3v = 0 },
+	{ .name = "smlal2",   .d1v = 0, .d2v = 8,  .d3v = 1 },
+	{ .name = "sqdmlal",  .d1v = 0, .d2v = 9,  .d3v = 0 },
+	{ .name = "sqdmlal2", .d1v = 0, .d2v = 9,  .d3v = 1 },
+	{ .name = "smlsl",    .d1v = 0, .d2v = 10, .d3v = 0 },
+	{ .name = "smlsl2",   .d1v = 0, .d2v = 10, .d3v = 1 },
+	{ .name = "sqdmlsl",  .d1v = 0, .d2v = 11, .d3v = 0 },
+	{ .name = "sqdmlsl2", .d1v = 0, .d2v = 11, .d3v = 1 },
+	{ .name = "smull",    .d1v = 0, .d2v = 12, .d3v = 0 },
+	{ .name = "smull2",   .d1v = 0, .d2v = 12, .d3v = 1 },
+	{ .name = "sqdmull",  .d1v = 0, .d2v = 13, .d3v = 0 },
+	{ .name = "sqdmull2", .d1v = 0, .d2v = 13, .d3v = 1 },
+	{ .name = "pmull",    .d1v = 0, .d2v = 14, .d3v = 0 },
+	{ .name = "pmull2",   .d1v = 0, .d2v = 14, .d3v = 1 },
+	{ .name = "uaddl",    .d1v = 1, .d2v = 0,  .d3v = 0 },
+	{ .name = "uaddl2",   .d1v = 1, .d2v = 0,  .d3v = 1 },
+	{ .name = "uaddw",    .d1v = 1, .d2v = 1,  .d3v = 0,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "uaddw2",   .d1v = 1, .d2v = 1,  .d3v = 1,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "usubl",    .d1v = 1, .d2v = 2,  .d3v = 0 },
+	{ .name = "usubl2",   .d1v = 1, .d2v = 2,  .d3v = 1 },
+	{ .name = "usubw",    .d1v = 1, .d2v = 3,  .d3v = 0,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "usubw2",   .d1v = 1, .d2v = 3,  .d3v = 1,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "raddhn",   .d1v = 1, .d2v = 4,  .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "raddhn2",  .d1v = 1, .d2v = 4,  .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "uabal",    .d1v = 1, .d2v = 5,  .d3v = 0 },
+	{ .name = "uabal2",   .d1v = 1, .d2v = 5,  .d3v = 1 },
+	{ .name = "rsubhn",   .d1v = 1, .d2v = 6,  .d3v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "rsubhn2",  .d1v = 1, .d2v = 6,  .d3v = 1,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "uabdl",    .d1v = 1, .d2v = 7,  .d3v = 0 },
+	{ .name = "uabdl2",   .d1v = 1, .d2v = 7,  .d3v = 1 },
+	{ .name = "umlal",    .d1v = 1, .d2v = 8,  .d3v = 0 },
+	{ .name = "umlal2",   .d1v = 1, .d2v = 8,  .d3v = 1 },
+	{ .name = "umlsl",    .d1v = 1, .d2v = 11, .d3v = 0 },
+	{ .name = "umlsl2",   .d1v = 1, .d2v = 11, .d3v = 1 },
+	{ .name = "umull",    .d1v = 1, .d2v = 12, .d3v = 0 },
+	{ .name = "umull2",   .d1v = 1, .d2v = 12, .d3v = 1 },
+	{ .name = NULL }
+};
+
+/* 3.6.16 AdvSIMD three same */
+static const a64_simd_opcode_entry_t a64_simd_ats[] = {
+	/*                     U         size[1]    size[0]    opcode  */
+	{ .name = "shadd",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 0 },
+	{ .name = "sqadd",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 1 },
+	{ .name = "srhadd",   .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 2 },
+	{ .name = "shsub",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 4 },
+	{ .name = "sqsub",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 5 },
+	{ .name = "cmgt",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 6 },
+	{ .name = "cmge",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 7 },
+	{ .name = "sshl",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 8 },
+	{ .name = "sqshl",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 9 },
+	{ .name = "srshl",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 10 },
+	{ .name = "sqrshl",   .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 11 },
+	{ .name = "smax",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 12 },
+	{ .name = "smin",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 13 },
+	{ .name = "sabd",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 14 },
+	{ .name = "saba",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 15 },
+	{ .name = "add",      .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 16 },
+	{ .name = "cmtst",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 17 },
+	{ .name = "mla",      .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 18 },
+	{ .name = "mul",      .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 19 },
+	{ .name = "smaxp",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 20 },
+	{ .name = "sminp",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 21 },
+	{ .name = "sqdmulh",  .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 22 },
+	{ .name = "addp",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 23 },
+	{ .name = "fmaxnm",   .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 24 },
+	{ .name = "fmla",     .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 25 },
+	{ .name = "fadd",     .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 26 },
+	{ .name = "fmulx",    .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 27 },
+	{ .name = "fcmeq",    .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 28 },
+	{ .name = "fmax",     .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 30 },
+	{ .name = "frecps",   .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 31 },
+	{ .name = "and",      .d1v = 0, .d2v = 0,  .d3v = 0,  .d4v = 3 },
+	{ .name = "bic",      .d1v = 0, .d2v = 0,  .d3v = 1,  .d4v = 3 },
+	{ .name = "fminnm",   .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 24 },
+	{ .name = "fmls",     .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 25 },
+	{ .name = "fsub",     .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 26 },
+	{ .name = "fmin",     .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 30 },
+	{ .name = "frsqrts",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 31 },
+	{ .name = "orr",      .d1v = 0, .d2v = 1,  .d3v = 0,  .d4v = 3 },
+	{ .name = "orn",      .d1v = 0, .d2v = 1,  .d3v = 1,  .d4v = 3 },
+	{ .name = "uhadd",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 0 },
+	{ .name = "uqadd",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 1 },
+	{ .name = "urhadd",   .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 2 },
+	{ .name = "uhsub",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 4 },
+	{ .name = "uqsub",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 5 },
+	{ .name = "cmhi",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 6 },
+	{ .name = "cmhs",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 7 },
+	{ .name = "ushl",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 8 },
+	{ .name = "uqshl",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 9 },
+	{ .name = "urshl",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 10 },
+	{ .name = "uqrshl",   .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 11 },
+	{ .name = "umax",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 12 },
+	{ .name = "umin",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 13 },
+	{ .name = "uabd",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 14 },
+	{ .name = "uaba",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 15 },
+	{ .name = "sub",      .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 16 },
+	{ .name = "cmeq",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 17 },
+	{ .name = "mls",      .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 18 },
+	{ .name = "pmul",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 19 },
+	{ .name = "umaxp",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 20 },
+	{ .name = "uminp",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 21 },
+	{ .name = "sqrdmulh", .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 22 },
+	{ .name = "fmaxnmp",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 24 },
+	{ .name = "faddp",    .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 26 },
+	{ .name = "fmul",     .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 27 },
+	{ .name = "fcmge",    .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 28 },
+	{ .name = "facge",    .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 29 },
+	{ .name = "fmaxp",    .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 30 },
+	{ .name = "fdiv",     .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 31 },
+	{ .name = "eor",      .d1v = 1, .d2v = 0,  .d3v = 0,  .d4v = 3 },
+	{ .name = "bsl",      .d1v = 1, .d2v = 0,  .d3v = 1,  .d4v = 3 },
+	{ .name = "fminnmp",  .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = 24 },
+	{ .name = "fabd",     .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = 26 },
+	{ .name = "fcmgt",    .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = 28 },
+	{ .name = "facgt",    .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = 29 },
+	{ .name = "fminp",    .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = 30 },
+	{ .name = "bit",      .d1v = 1, .d2v = 1,  .d3v = 0,  .d4v = 3 },
+	{ .name = "bif",      .d1v = 1, .d2v = 1,  .d3v = 1,  .d4v = 3 },
+	{ .name = NULL }
+};
+
+/* 3.6.17 AdvSIMD two-reg misc */
+static const a64_simd_opcode_entry_t a64_simd_atrm[] = {
+	/*       opcode       U         size[1]    size[0]    Q */
+	{ .name = "rev64",   .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 0 },
+	{ .name = "rev16",   .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 1 },
+	{ .name = "saddlp",  .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 2, .handler = a64_simd_handle_atrm_4h8b },
+	{ .name = "suqadd",  .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 3 },
+	{ .name = "cls",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 4 },
+	{ .name = "cnt",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 5 },
+	{ .name = "sadalp",  .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 6, .handler = a64_simd_handle_atrm_4h8b },
+	{ .name = "sqabs",   .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 7 },
+	{ .name = "cmgt",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 8, .flags = SIMD_F_ZERO },
+	{ .name = "cmeq",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 9, .flags = SIMD_F_ZERO },
+	{ .name = "cmlt",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 10, .flags = SIMD_F_ZERO },
+	{ .name = "abs",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 11 },
+	{ .name = "xtn",     .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 0,
+		.d5v = 18, .handler = a64_simd_handle_atrm_8b8h },
+	{ .name = "xtn2",    .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 1,
+		.d5v = 18, .handler = a64_simd_handle_atrm_8b8h },
+	{ .name = "sqxtn",   .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 0,
+		.d5v = 20, .handler = a64_simd_handle_atrm_8b8h },
+	{ .name = "sqxtn2",  .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 1,
+		.d5v = 20, .handler = a64_simd_handle_atrm_8b8h },
+	{ .name = "fcvtn",   .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 0,
+		.d5v = 22, .handler = a64_simd_handle_atrm_fcvt },
+	{ .name = "fcvtn2",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 1,
+		.d5v = 22, .handler = a64_simd_handle_atrm_fcvt },
+	{ .name = "fcvtl",   .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 0,
+		.d5v = 23, .handler = a64_simd_handle_atrm_fcvt },
+	{ .name = "fcvtl2",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = 1,
+		.d5v = 23, .handler = a64_simd_handle_atrm_fcvt },
+	{ .name = "frintn",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 24 },
+	{ .name = "frintm",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 25 },
+	{ .name = "fcvtns",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 26 },
+	{ .name = "fcvtms",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 27 },
+	{ .name = "fcvtas",  .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 28 },
+	{ .name = "scvtf",   .d1v = 0, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 29 },
+	{ .name = "fcmgt",   .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 12, .flags = SIMD_F_ZERO },
+	{ .name = "fcmeq",   .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 13, .flags = SIMD_F_ZERO },
+	{ .name = "fcmlt",   .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 14, .flags = SIMD_F_ZERO },
+	{ .name = "fabs",    .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 15 },
+	{ .name = "frintp",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 24 },
+	{ .name = "frintz",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 25 },
+	{ .name = "fcvtps",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 26 },
+	{ .name = "fcvtzs",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 27 },
+	{ .name = "urecpe",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 28 },
+	{ .name = "frecpe",  .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 29 },
+	{ .name = "rev32",   .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 0 },
+	{ .name = "uaddlp",  .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 2, .handler = a64_simd_handle_atrm_4h8b },
+	{ .name = "usqadd",  .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 3 },
+	{ .name = "clz",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 4 },
+	{ .name = "uadalp",  .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 6, .handler = a64_simd_handle_atrm_4h8b },
+	{ .name = "sqneg",   .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 7 },
+	{ .name = "cmge",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 8, .flags = SIMD_F_ZERO },
+	{ .name = "cmle",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 9, .flags = SIMD_F_ZERO },
+	{ .name = "neg",     .d1v = 1, .d2v = DC, .d3v = DC, .d4v = DC,
+		.d5v = 11 },
+	{ .name = "sqxtun",  .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 0,
+		.d5v = 18 },
+	{ .name = "sqxtun2", .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 1,
+		.d5v = 18 },
+	{ .name = "shll",    .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 0,
+		.d5v = 19, .handler = a64_simd_handle_atrm_shll },
+	{ .name = "shll2",   .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 1,
+		.d5v = 19, .handler = a64_simd_handle_atrm_shll },
+	{ .name = "uqxtn",   .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 0,
+		.d5v = 20, .handler = a64_simd_handle_atrm_8b8h },
+	{ .name = "uqxtn2",  .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 1,
+		.d5v = 20, .handler = a64_simd_handle_atrm_8b8h },
+	{ .name = "fcvtxn",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 0,
+		.d5v = 22, .handler = a64_simd_handle_atrm_fcvt },
+	{ .name = "fcvtxn2", .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = 1,
+		.d5v = 22, .handler = a64_simd_handle_atrm_fcvt },
+	{ .name = "frinta",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 24 },
+	{ .name = "frintx",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 25 },
+	{ .name = "fcvtnu",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 26 },
+	{ .name = "fcvtmu",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 27 },
+	{ .name = "fcvtau",  .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 28 },
+	{ .name = "ucvtf",   .d1v = 1, .d2v = 0,  .d3v = DC, .d4v = DC,
+		.d5v = 29 },
+	{ .name = "mvn",     .d1v = 1, .d2v = 0,  .d3v = 0,  .d4v = DC,
+		.d5v = 5 },
+	{ .name = "rbit",    .d1v = 1, .d2v = 0,  .d3v = 1,  .d4v = DC,
+		.d5v = 5 },
+	{ .name = "fcmge",   .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 12 },
+	{ .name = "fcmle",   .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 13 },
+	{ .name = "fneg",    .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 15 },
+	{ .name = "frinti",  .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 25 },
+	{ .name = "fcvtpu",  .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 26 },
+	{ .name = "fcvtzu",  .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 27 },
+	{ .name = "ursqrte", .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 28 },
+	{ .name = "frsqrte", .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 29 },
+	{ .name = "fsqrt",   .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = DC,
+		.d5v = 31 },
+	{ .name = NULL }
+};
+
+/* 3.6.18 AdvSIMD vector x indexed element */
+static const a64_simd_opcode_entry_t a64_simd_avxie[] = {
+	/*                     U         size[1]    Q          opcode */
+	{ .name = "smlal",    .d1v = 0, .d2v = DC, .d3v = 0,  .d4v = 2 },
+	{ .name = "smlal2",   .d1v = 0, .d2v = DC, .d3v = 1,  .d4v = 2 },
+	{ .name = "sqdmlal",  .d1v = 0, .d2v = DC, .d3v = 0,  .d4v = 3 },
+	{ .name = "sqdmlal2", .d1v = 0, .d2v = DC, .d3v = 1,  .d4v = 3 },
+	{ .name = "smlsl",    .d1v = 0, .d2v = DC, .d3v = 0,  .d4v = 6 },
+	{ .name = "smlsl2",   .d1v = 0, .d2v = DC, .d3v = 1,  .d4v = 6 },
+	{ .name = "sqdmlsl",  .d1v = 0, .d2v = DC, .d3v = 0,  .d4v = 7 },
+	{ .name = "sqdmlsl2", .d1v = 0, .d2v = DC, .d3v = 1,  .d4v = 7 },
+	{ .name = "mul",      .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 8,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "smull",    .d1v = 0, .d2v = DC, .d3v = 0,  .d4v = 10 },
+	{ .name = "smull2",   .d1v = 0, .d2v = DC, .d3v = 1,  .d4v = 10 },
+	{ .name = "sqdmull",  .d1v = 0, .d2v = DC, .d3v = 0,  .d4v = 11 },
+	{ .name = "sqdmull2", .d1v = 0, .d2v = DC, .d3v = 1,  .d4v = 11 },
+	{ .name = "sqdmulh",  .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 12 },
+	{ .name = "sqrdmulh", .d1v = 0, .d2v = DC, .d3v = DC, .d4v = 12,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "fmla",     .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 1,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "fmls",     .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 5,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "fmul",     .d1v = 0, .d2v = 1,  .d3v = DC, .d4v = 9,
+		.flags = SIMD_F_VAR1 },
+	{ .name = "mla",      .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 0,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "umlal",    .d1v = 1, .d2v = DC, .d3v = 0,  .d4v = 2 },
+	{ .name = "umlal2",   .d1v = 1, .d2v = DC, .d3v = 1,  .d4v = 2 },
+	{ .name = "mls",      .d1v = 1, .d2v = DC, .d3v = DC, .d4v = 4,
+		.flags = SIMD_F_VAR2 },
+	{ .name = "umlsl",    .d1v = 1, .d2v = DC, .d3v = 0,  .d4v = 6 },
+	{ .name = "umlsl2",   .d1v = 1, .d2v = DC, .d3v = 1,  .d4v = 6 },
+	{ .name = "umull",    .d1v = 1, .d2v = DC, .d3v = 0,  .d4v = 10 },
+	{ .name = "umull2",   .d1v = 1, .d2v = DC, .d3v = 1,  .d4v = 10 },
+	{ .name = "fmulx",    .d1v = 1, .d2v = 1,  .d3v = DC, .d4v = 9,
+		.flags = SIMD_F_VAR1 },
+	{ .name = NULL }
+};
+
+/* 3.6.19 Crypto AES */
+static const a64_simd_opcode_entry_t a64_simd_aes[] = {
+	/*                   opcode */
+	{ .name = "aese",   .d1v = 4 },
+	{ .name = "aesd",   .d1v = 5 },
+	{ .name = "aesmc",  .d1v = 6 },
+	{ .name = "aesimc", .d1v = 7 },
+	{ .name = NULL }
+};
+
+/* 3.6.20 Crypto three-reg SHA */
+static const a64_simd_opcode_entry_t a64_simd_3rsha[] = {
+	/*                      opcode */
+	{ .name = "sha1c",     .d1v = 0 },
+	{ .name = "sha1p",     .d1v = 1 },
+	{ .name = "sha1m",     .d1v = 2 },
+	{ .name = "sha1su0",   .d1v = 3, .flags = SIMD_F_VAR2 },
+	{ .name = "sha256h",   .d1v = 4, .flags = SIMD_F_VAR1 },
+	{ .name = "sha256h2",  .d1v = 5, .flags = SIMD_F_VAR1 },
+	{ .name = "sha256su1", .d1v = 6, .flags = SIMD_F_VAR2 },
+	{ .name = NULL }
+};
+
+/* 3.6.21 Crypto two-reg SHA */
+static const a64_simd_opcode_entry_t a64_simd_2rsha[] = {
+	/*                      opcode */
+	{ .name = "sha1h",     .d1v = 0, .flags = SIMD_F_VAR1 },
+	{ .name = "sha1su1",   .d1v = 1 },
+	{ .name = "sha256su0", .d1v = 2 },
+	{ .name = NULL }
+};
+
+/* 3.6.22 Floating-point compare */
+static const a64_simd_opcode_entry_t a64_simd_fpc[] = {
+	/*                  opcode2[4] */
+	{ .name = "fcmp",  .d1v = 0 },
+	{ .name = "fcmpe", .d1v = 1 },
+	{ .name = NULL }
+};
+
+/* 3.6.23 Floating-point conditional compare */
+static const a64_simd_opcode_entry_t a64_simd_fpcc[] = {
+	/*                   op */
+	{ .name = "fccmp",  .d1v = 0 },
+	{ .name = "fccmpe", .d1v = 1 },
+	{ .name = NULL }
+};
+
+/* 3.6.24 Floating-point conditional select */
+static const a64_simd_opcode_entry_t a64_simd_fpcs[] = {
+	{ .name = "fcsel" },
+	{ .name = NULL }
+};
+
+/* 3.6.25 Floating-point data-processing (1 source) */
+static const a64_simd_opcode_entry_t a64_simd_fpdp1s[] = {
+	/*                   type      opcode */
+	{ .name = "fmov",   .d1v = 0, .d2v = 0 },
+	{ .name = "fabs",   .d1v = 0, .d2v = 1 },
+	{ .name = "fneg",   .d1v = 0, .d2v = 2 },
+	{ .name = "fsqrt",  .d1v = 0, .d2v = 4 },
+	{ .name = "fcvt",   .d1v = 0, .d2v = 5,
+		.handler = a64_simd_handle_fpdp1s_fcvt },
+	{ .name = "fcvt",   .d1v = 0, .d2v = 7,
+		.handler = a64_simd_handle_fpdp1s_fcvt },
+	{ .name = "frintn", .d1v = 0, .d2v = 8 },
+	{ .name = "frintp", .d1v = 0, .d2v = 9 },
+	{ .name = "frintm", .d1v = 0, .d2v = 10 },
+	{ .name = "frintz", .d1v = 0, .d2v = 11 },
+	{ .name = "frinta", .d1v = 0, .d2v = 12 },
+	{ .name = "frintx", .d1v = 0, .d2v = 14 },
+	{ .name = "frinti", .d1v = 0, .d2v = 15 },
+	{ .name = "fmov",   .d1v = 1, .d2v = 0 },
+	{ .name = "fabs",   .d1v = 1, .d2v = 1 },
+	{ .name = "fneg",   .d1v = 1, .d2v = 2 },
+	{ .name = "fsqrt",  .d1v = 1, .d2v = 3 },
+	{ .name = "fcvt",   .d1v = 1, .d2v = 4,
+		.handler = a64_simd_handle_fpdp1s_fcvt },
+	{ .name = "fcvt",   .d1v = 1, .d2v = 7,
+		.handler = a64_simd_handle_fpdp1s_fcvt },
+	{ .name = "frintn", .d1v = 1, .d2v = 8 },
+	{ .name = "frintp", .d1v = 1, .d2v = 9 },
+	{ .name = "frintm", .d1v = 1, .d2v = 10 },
+	{ .name = "frintz", .d1v = 1, .d2v = 11 },
+	{ .name = "frinta", .d1v = 1, .d2v = 12 },
+	{ .name = "frintx", .d1v = 1, .d2v = 14 },
+	{ .name = "frinti", .d1v = 1, .d2v = 15 },
+	{ .name = "fcvt",   .d1v = 3, .d2v = 4,
+		.handler = a64_simd_handle_fpdp1s_fcvt },
+	{ .name = "fcvt",   .d1v = 3, .d2v = 5,
+		.handler = a64_simd_handle_fpdp1s_fcvt },
+	{ .name = NULL }
+};
+
+/* 3.6.26 Floating-point data-processing (2 source) */
+static const a64_simd_opcode_entry_t a64_simd_fpdp2s[] = {
+	/*                   opcode */
+	{ .name = "fmul",   .d1v = 0 },
+	{ .name = "fdiv",   .d1v = 1 },
+	{ .name = "fadd",   .d1v = 2 },
+	{ .name = "fsub",   .d1v = 3 },
+	{ .name = "fmax",   .d1v = 4 },
+	{ .name = "fmin",   .d1v = 5 },
+	{ .name = "fmaxnm", .d1v = 6 },
+	{ .name = "fminnm", .d1v = 7 },
+	{ .name = "fnmul",  .d1v = 8 },
+	{ .name = NULL }
+};
+
+/* 3.6.27 Floating-point data-processing (3 source) */
+static const a64_simd_opcode_entry_t a64_simd_fpdp3s[] = {
+	/*                   o1        o0 */
+	{ .name = "fmadd",  .d1v = 0, .d2v = 0 },
+	{ .name = "fmsub",  .d1v = 0, .d2v = 1 },
+	{ .name = "fnmadd", .d1v = 1, .d2v = 0 },
+	{ .name = "fnmsub", .d1v = 1, .d2v = 1 },
+	{ .name = NULL }
+};
+
+/* 3.6.28 Floating-point immediate */
+static const a64_simd_opcode_entry_t a64_simd_fpi[] = {
+	{ .name = "fmov" },
+	{ .name = NULL }
+};
+
+/* 3.6.29 Floating-point<->fixed-point conversions */
+static const a64_simd_opcode_entry_t a64_simd_fpfxpc[] = {
+	/*                   opcode */
+	{ .name = "scvtf",  .d1v = 2 },
+	{ .name = "ucvtf",  .d1v = 3 },
+	{ .name = "fcvtzs", .d1v = 0 },
+	{ .name = "fcvtzu", .d1v = 1 },
+	{ .name = NULL }
+};
+
+/* 3.6.30 Floating-point<->integer conversions */
+static const a64_simd_opcode_entry_t a64_simd_fpic[] = {
+	/*                   rmode      opcode */
+	{ .name = "fcvtns", .d1v = 0,  .d2v = 0 },
+	{ .name = "fcvtnu", .d1v = 0,  .d2v = 1 },
+	{ .name = "scvtf",  .d1v = 0,  .d2v = 2 },
+	{ .name = "ucvtf",  .d1v = 0,  .d2v = 3 },
+	{ .name = "fcvtas", .d1v = 0,  .d2v = 4 },
+	{ .name = "fcvtau", .d1v = 0,  .d2v = 5 },
+	{ .name = "fmov",   .d1v = DC, .d2v = 6,
+		.handler = a64_simd_handle_fpic_fmov },
+	{ .name = "fmov",   .d1v = DC, .d2v = 7,
+		.handler = a64_simd_handle_fpic_fmov },
+	{ .name = "fcvtps", .d1v = 1,  .d2v = 0 },
+	{ .name = "fcvtpu", .d1v = 1,  .d2v = 1 },
+	{ .name = "fcvtms", .d1v = 2,  .d2v = 0 },
+	{ .name = "fcvtmu", .d1v = 2,  .d2v = 1 },
+	{ .name = "fcvtzs", .d1v = 3,  .d2v = 0 },
+	{ .name = "fcvtzu", .d1v = 3,  .d2v = 1 },
+	{ .name = NULL }
+};
+
+static const a64_simd_class_t a64_simd_classes[] = {
+	{	/* 3.6.1 AdvSIMD EXT */
+		.mask = BIT(31) | BITS(29, 24) | BIT(21) | BIT(15) | BIT(10),
+		.targ = BIT(29) | BITS(27, 25),
+		.handler = a64_simd_handle_ext,
+		.entries = a64_simd_ext
+	}, {	/* 3.6.2 AdvSIMD TBL/TBX */
+		.mask =
+		    BIT(31) | BITS(29, 24) | BIT(21) | BIT(15) | BITS(11, 10),
+		.targ = BITS(27, 25),
+		.handler = a64_simd_handle_tbltbx,
+		.entries = a64_simd_tbltbx,
+		.d1m = BIT(12), .d1s = 12	/* op */
+	}, {	/* 3.6.3 AdvSIMD ZIP/UZP/TRN */
+		.mask =
+		    BIT(31) | BITS(29, 24) | BIT(21) | BIT(15) | BITS(11, 10),
+		.targ = BITS(27, 25) | BIT(11),
+		.handler = a64_simd_handle_trn,
+		.entries = a64_simd_trn,
+		.d1m = BITS(14, 12), .d1s = 12	/* opcode */
+	}, {	/* 3.6.4 ADVSIMD across lanes */
+		.mask = BIT(31) | BITS(28, 24) | BITS(21, 17) | BITS(11, 10),
+		.targ = BITS(27, 25) | BITS(21, 20) | BIT(11),
+		.handler = a64_simd_handle_acr,
+		.entries = a64_simd_acr,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BITS(16, 12), .d3s = 12	/* opcode */
+	}, {	/* 3.6.5 AdvSIMD copy */
+		.mask = BIT(31) | BITS(28, 21) | BIT(15) | BIT(10),
+		.targ = BITS(27, 25) | BIT(10),
+		.handler = a64_simd_handle_cpy,
+		.entries = a64_simd_cpy,
+		.d1m = BIT(30), .d1s = 30,	/* Q */
+		.d2m = BIT(29), .d2s = 29,	/* op */
+		.d3m = BITS(14, 11), .d3s = 11	/* imm4 */
+	}, {	/* 3.6.6 AdvSIMD modified immediate */
+		.mask = BIT(31) | BITS(28, 19) | BIT(10),
+		.targ = BITS(27, 24) | BIT(10),
+		.handler = a64_simd_handle_mmi,
+		.entries = a64_simd_mmi,
+		.d1m = BIT(30), .d1s = 30,	/* Q */
+		.d2m = BIT(29), .d2s = 29,	/* op */
+		.d3m = BITS(15, 12), .d3s = 12	/* cmode */
+	}, {	/* 3.6.7 AdvSIMD scalar copy */
+		.mask = BITS(31, 30) | BITS(28, 21) | BIT(15) | BIT(10),
+		.targ = BIT(30) | BITS(28, 25) | BIT(10),
+		.handler = a64_simd_handle_cpy,
+		.entries = a64_simd_scpy
+	}, {	/* 3.6.8 AdvSIMD scalar pairwise */
+		.mask =
+		    BITS(31, 30) | BITS(28, 24) | BITS(21, 17) | BITS(11, 10),
+		.targ = BIT(30) | BITS(28, 25) | BITS(21, 20) | BIT(11),
+		.handler = a64_simd_handle_spr,
+		.entries = a64_simd_spr,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BITS(16, 12), .d3s = 12	/* opcode */
+	}, {	/* 3.6.9 AdvSIMD scalar shift by immediate */
+		.mask = BITS(31, 30) | BITS(28, 23) | BIT(10),
+		.targ = BIT(30) | BITS(28, 24) | BIT(10),
+		.handler = a64_simd_handle_ssh,
+		.entries = a64_simd_ssh,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BITS(22, 19), .d2s = 19,	/* immh */
+		.d3m = BITS(15, 11), .d3s = 11	/* opcode */
+	}, {	/* 3.6.10 AdvSIMD scalar three different */
+		.mask = BITS(31, 30) | BITS(28, 24) | BIT(21) | BITS(11, 10),
+		.targ = BIT(30) | BITS(28, 25) | BIT(21),
+		.handler = a64_simd_handle_astd,
+		.entries = a64_simd_astd,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BITS(15, 12), .d2s = 12	/* opcode */
+	}, {	/* 3.6.11 AdvSIMD scalar three same */
+		.mask = BITS(31, 30) | BITS(28, 24) | BIT(21) | BIT(10),
+		.targ = BIT(30) | BITS(28, 25) | BIT(21) | BIT(10),
+		.handler = a64_simd_handle_asts,
+		.entries = a64_simd_asts,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BITS(15, 11), .d3s = 11	/* opcode */
+	}, {	/* 3.6.12 AdvSIMD scalar two-reg misc */
+		.mask =
+		    BITS(31, 30) | BITS(28, 24) | BITS(21, 17) | BITS(11, 10),
+		.targ = BIT(30) | BITS(28, 25) | BIT(21) | BIT(11),
+		.handler = a64_simd_handle_astrm,
+		.entries = a64_simd_astrm,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BITS(16, 12), .d3s = 12	/* opcode */
+	}, {	/* 3.6.13 AdvSIMD scalar x indexed element */
+		.mask = BITS(31, 30) | BITS(28, 24) | BIT(10),
+		.targ = BIT(30) | BITS(28, 24),
+		.handler = a64_simd_handle_sxie,
+		.entries = a64_simd_sxie,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BITS(15, 12), .d3s = 12	/* opcode */
+	}, {	/* 3.6.14 AdvSIMD shift by immediate */
+		.mask = BIT(31) | BITS(28, 23) | BIT(10),
+		.targ = BITS(27, 24) | BIT(10),
+		.handler = a64_simd_handle_asbi,
+		.entries = a64_simd_asbi,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BITS(15, 11), .d2s = 11,	/* opcode */
+		.d3m = BIT(30), .d3s = 30	/* Q */
+	}, {	/* 3.6.15 AdvSIMD three different */
+		.mask = BIT(31) | BITS(28, 24) | BIT(21) | BITS(11, 10),
+		.targ = BITS(27, 25) | BIT(21),
+		.handler = a64_simd_handle_atd,
+		.entries = a64_simd_atd,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BITS(15, 12), .d2s = 12,	/* opcode */
+		.d3m = BIT(30), .d3s = 30	/* Q */
+	}, {	/* 3.6.16 AdvSIMD three same */
+		.mask = BIT(31) | BITS(28, 24) | BIT(21) | BIT(10),
+		.targ = BITS(27, 25) | BIT(21) | BIT(10),
+		.handler = a64_simd_handle_ats,
+		.entries = a64_simd_ats,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BIT(22), .d3s = 22,	/* size[0] */
+		.d4m = BITS(15, 11), .d4s = 11	/* opcode */
+	}, {	/* 3.6.17 AdvSIMD two-reg misc */
+		.mask = BIT(31) | BITS(28, 24) | BITS(21, 17) | BITS(11, 10),
+		.targ = BITS(27, 25) | BIT(21) | BIT(11),
+		.handler = a64_simd_handle_atrm,
+		.entries = a64_simd_atrm,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BIT(22), .d3s = 22,	/* size[0] */
+		.d4m = BIT(30), .d4s = 30,	/* Q */
+		.d5m = BITS(16, 12), .d5s = 12	/* opcode */
+	}, {	/* 3.6.18 AdvSIMD vector x indexed element */
+		.mask = BIT(31) | BITS(28, 24) | BIT(10),
+		.targ = BITS(27, 24),
+		.handler = a64_simd_handle_avxie,
+		.entries = a64_simd_avxie,
+		.d1m = BIT(29), .d1s = 29,	/* U */
+		.d2m = BIT(23), .d2s = 23,	/* size[1] */
+		.d3m = BIT(30), .d3s = 30,	/* Q */
+		.d4m = BITS(15, 12), .d4s = 12	/* opcode */
+	}, {	/* 3.6.19 Crypto AES */
+		.mask = BITS(31, 24) | BITS(21, 17) | BITS(11, 10),
+		.targ = BIT(30) | BITS(27, 25) | BIT(21) | BIT(11),
+		.handler = a64_simd_handle_aes,
+		.entries = a64_simd_aes,
+		.d1m = BITS(16, 12), .d1s = 12	/* opcode */
+	}, {	/* 3.6.20 Crypto three-reg SHA */
+		.mask = BITS(31, 24) | BIT(21) | BIT(15) | BITS(11, 10),
+		.targ = BIT(30) | BITS(28, 25),
+		.handler = a64_simd_handle_3rsha,
+		.entries = a64_simd_3rsha,
+		.d1m = BITS(14, 12), .d1s = 12	/* opcode */
+	}, {	/* 3.6.21 Crypto two-reg SHA */
+		.mask = BITS(31, 24) | BITS(21, 17) | BITS(11, 10),
+		.targ = BIT(30) | BITS(28, 25) | BIT(21) | BIT(19) | BIT(11),
+		.handler = a64_simd_handle_2rsha,
+		.entries = a64_simd_2rsha,
+		.d1m = BITS(16, 12), .d1s = 12	/* opcode */
+	}, {	/* 3.6.22 Floating-point compare */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(13, 10),
+		.targ = BITS(28, 25) | BIT(21) | BIT(13),
+		.handler = a64_simd_handle_fpc,
+		.entries = a64_simd_fpc,
+		.d1m = BIT(4), .d1s = 4		/* opcode2[4], fcmp/fcmpe bit */
+	}, {	/* 3.6.23 Floating-point conditional compare */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(11, 10),
+		.targ = BITS(28, 25) | BIT(21) | BIT(10),
+		.handler = a64_simd_handle_fpcc,
+		.entries = a64_simd_fpcc,
+		.d1m = BIT(4), .d1s = 4		/* op */
+	}, {	/* 3.6.24 Floating-point conditional select */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(11, 10),
+		.targ = BITS(28, 25) | BIT(21) | BITS(11, 10),
+		.handler = a64_simd_handle_fpcs,
+		.entries = a64_simd_fpcs
+	}, {	/* 3.6.25 Floating-point data-processing (1 source) */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(14, 10),
+		.targ = BITS(28, 25) | BIT(21) | BIT(14),
+		.handler = a64_simd_handle_fpdp1s,
+		.entries = a64_simd_fpdp1s,
+		.d1m = BITS(23, 22), .d1s = 22,	/* type */
+		.d2m = BITS(20, 15), .d2s = 15	/* opcode */
+	}, {	/* 3.6.26 Floating-point data-processing (2 source) */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(11, 10),
+		.targ = BITS(28, 25) | BIT(21) | BIT(11),
+		.handler = a64_simd_handle_fpdp2s,
+		.entries = a64_simd_fpdp2s,
+		.d1m = BITS(15, 12), .d1s = 12	/* opcode */
+	}, {	/* 3.6.27 Floating-point data-processing (3 source) */
+		.mask = BIT(30) | BITS(28, 24),
+		.targ = BITS(28, 24),
+		.handler = a64_simd_handle_fpdp3s,
+		.entries = a64_simd_fpdp3s,
+		.d1m = BIT(21), .d1s = 21,	/* o1 */
+		.d2m = BIT(15), .d2s = 15	/* o0 */
+	}, {	/* 3.6.28 Floating-point immediate */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(12, 10),
+		.targ = BITS(28, 25) | BIT(21) | BIT(12),
+		.handler = a64_simd_handle_fpi,
+		.entries = a64_simd_fpi
+	}, {	/* 3.6.29 Floating-point<->fixed-point conversions */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21),
+		.targ = BITS(28, 25),
+		.handler = a64_simd_handle_fpfxpc,
+		.entries = a64_simd_fpfxpc,
+		.d1m = BITS(18, 16), .d1s = 16	/* opcode */
+	}, {	/* 3.6.30 Floating-point<->integer conversions */
+		.mask = BIT(30) | BITS(28, 24) | BIT(21) | BITS(15, 10),
+		.targ = BITS(28, 25) | BIT(21),
+		.handler = a64_simd_handle_fpic,
+		.entries = a64_simd_fpic,
+		.d1m = BITS(20, 19), .d1s = 19,	/* rmode */
+		.d2m = BITS(18, 16), .d2s = 16	/* opcode */
+	}
 };
 
 static int
 a64_dis_simd(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 {
-	a64_simd_opcode_entry_t *op;
-	a64_reg_t rm, rn, rd;
-	uint64_t imm;
-	uint8_t cmode, imm4, imm5, imm8, immb, immh;
-	uint8_t i, idx, nregs, q, shift, size;
+	const a64_simd_opcode_entry_t *op = NULL;
+	const a64_simd_class_t *class = NULL;
+	a64_simd_data_t data;
 	size_t len;
 
-	bzero(&rm, sizeof (rm));
-	bzero(&rn, sizeof (rn));
-	bzero(&rd, sizeof (rd));
+	for (uint8_t i = 0; i < ARRAY_SIZE(a64_simd_classes); i++) {
+		class = &a64_simd_classes[i];
 
-	for (op = a64_simd_opcodes; op->mask != 0xffffffff; op++) {
-		if ((in & op->mask) == op->targ)
+		if ((in & class->mask) == class->targ) {
+			op = class->entries;
 			break;
+		}
 	}
-	if (op->name == NULL)
+	if (op == NULL)
+		return (-1);
+
+	for (; op->name != NULL; op++) {
+		if (op->d1v != DC &&
+		    ((in & class->d1m) >> class->d1s) != op->d1v) {
+			continue;
+		}
+		if (op->d2v != DC &&
+		    ((in & class->d2m) >> class->d2s) != op->d2v) {
+			continue;
+		}
+		if (op->d3v != DC &&
+		    ((in & class->d3m) >> class->d3s) != op->d3v) {
+			continue;
+		}
+		if (op->d4v != DC &&
+		    ((in & class->d4m) >> class->d4s) != op->d4v) {
+			continue;
+		}
+		if (op->d5v != DC &&
+		    ((in & class->d5m) >> class->d5s) != op->d5v) {
+			continue;
+		}
+		break;
+	}
+
+	if (op->name == NULL || (op->flags & SIMD_F_SKIP))
 		return (-1);
 
 	/* Extract commonly-used sections */
-	rm.id = (in & A64_SIMD_RM_MASK) >> A64_SIMD_RM_SHIFT;
-	rn.id = (in & A64_SIMD_RN_MASK) >> A64_SIMD_RN_SHIFT;
-	rd.id = (in & A64_SIMD_RD_MASK) >> A64_SIMD_RD_SHIFT;
-	q = (in & A64_SIMD_Q_MASK) >> A64_SIMD_Q_SHIFT;
-	imm4 = (in & A64_SIMD_IMM4_MASK) >> A64_SIMD_IMM4_SHIFT;
-	imm5 = (in & A64_SIMD_IMM5_MASK) >> A64_SIMD_IMM5_SHIFT;
-	size = (in & A64_SIMD_SIZE_MASK) >> A64_SIMD_SIZE_SHIFT;
-	rm.width = rn.width = rd.width = A64_REGWIDTH_SIMD_V;
-
-	if (op->flags & SIMD_F_1REG)
-		nregs = 1;
-	else if (op->flags & SIMD_F_2REG)
-		nregs = 2;
-	else if (op->flags & SIMD_F_3REG)
-		nregs = 3;
-	else if (op->flags & SIMD_F_4REG)
-		nregs = 4;
+	bzero(&data, sizeof (data));
+	data.q = bitx32(in, 30, 30);
+	data.size = bitx32(in, 23, 22);
+	data.rm.id = bitx32(in, 20, 16);
+	data.rn.id = bitx32(in, 9, 5);
+	data.rd.id = bitx32(in, 4, 0);
+	data.rm.width = data.rn.width = data.rd.width = A64_REGWIDTH_SIMD_V;
 
 	/*
 	 * Print operand.
@@ -4469,307 +6688,17 @@ a64_dis_simd(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 	buflen -= len;
 	buf += len;
 
-	switch (op->type) {
-	case SIMD_T_EXT:
-		if (q == 0 && imm4 & 0x8)
-			return (-1);
-		len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s, #%d",
-		    a64_reg_name(rd), a64_simd_arrange[q][0],
-		    a64_reg_name(rn), a64_simd_arrange[q][0],
-		    a64_reg_name(rm), a64_simd_arrange[q][0],
-		    imm4);
-		break;
-	case SIMD_T_TBL:
-		rd.arr = rm.arr = q ? A64_REG_ARR_16B : A64_REG_ARR_8B;
-		rn.arr = A64_REG_ARR_16B;
-		/* <Vd>.<Ta> */
-		if ((len = dis_snprintf(buf, buflen, " %s.%s, ",
-		    a64_reg_name(rd), a64_reg_arr_names[rd.arr])) >= buflen) {
-			return (-1);
-		}
-		buflen -= len;
-		buf += len;
-		/* {<Vn>.16B ... } */
-		if ((len = a64_print_vregs(buf, buflen, rn, nregs)) >= buflen)
-			return (-1);
-		buflen -= len;
-		buf += len;
-		/* <Vm>.<Ta> */
-		len = dis_snprintf(buf, buflen, ", %s.%s", a64_reg_name(rm),
-		    a64_reg_arr_names[rm.arr]);
-		break;
-	case SIMD_T_TRN:
-		rd.arr = rn.arr = rm.arr = q ? A64_REG_ARR_16B + size
-		    : A64_REG_ARR_8B + size;
-		len = dis_snprintf(buf, buflen, " %s.%s, %s.%s, %s.%s",
-		    a64_reg_name(rd), a64_reg_arr_names[rd.arr],
-		    a64_reg_name(rn), a64_reg_arr_names[rn.arr],
-		    a64_reg_name(rm), a64_reg_arr_names[rm.arr]);
-		break;
-	case SIMD_T_ACR:
-		rn.arr = q ? A64_REG_ARR_16B + size : A64_REG_ARR_8B + size;
-		if (op->flags & SIMD_F_RW1)
-			rd.width = A64_REGWIDTH_SIMD_8 + size;
-		else if (op->flags & SIMD_F_RW2)
-			rd.width = A64_REGWIDTH_SIMD_16 + size;
-		else if (op->flags & SIMD_F_RW3) {
-			rd.width = A64_REGWIDTH_SIMD_32;
-			rn.arr = A64_REG_ARR_4S;
-		}
-		len = dis_snprintf(buf, buflen, " %s, %s.%s",
-		    a64_reg_name(rd),
-		    a64_reg_name(rn), a64_reg_arr_names[rn.arr]);
-		break;
-	case SIMD_T_CPY1:
-	case SIMD_T_CPY2:
-	case SIMD_T_CPY3:
-	case SIMD_T_CPY4:
-	case SIMD_T_CPY5:
-	case SIMD_T_CPY6:
-		/*
-		 * Output formats are based on first set bit in imm5.  We use
-		 * this to compute the offsets in our register tables.
-		 */
-		i = ffs(imm5);
-		/*
-		 * <Vd>.<T>, <Vn>.<Ts>[<index>]
-		 */
-		if (op->type == SIMD_T_CPY1) {
-			rd.arr = q ? A64_REG_ARR_16B + (i - 1)
-			    : A64_REG_ARR_8B + (i - 1);
-			rn.arr = A64_REG_ARR_B + (i - 1);
-			idx = (imm5 >> i);
-			len = dis_snprintf(buf, buflen, " %s.%s, %s.%s[%d]",
-			    a64_reg_name(rd), a64_reg_arr_names[rd.arr],
-			    a64_reg_name(rn), a64_reg_arr_names[rn.arr], idx);
-		}
-		/*
-		 * <Vd>.<T>, <R><n>
-		 */
-		else if (op->type == SIMD_T_CPY2) {
-			rd.arr = q ? A64_REG_ARR_16B + (i - 1)
-			    : A64_REG_ARR_8B + (i - 1);
-			rn.width = (i > 3) ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
-			len = dis_snprintf(buf, buflen, " %s.%s, %s",
-			    a64_reg_name(rd), a64_reg_arr_names[rd.arr],
-			    a64_reg_name(rn));
-		}
-		/*
-		 * <Rd>, <Vn>.<Ts>[<index>]
-		 */
-		else if (op->type == SIMD_T_CPY3) {
-			rd.width = q ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
-			rn.arr = A64_REG_ARR_B + (i - 1);
-			idx = (imm5 >> i);
-			len = dis_snprintf(buf, buflen, " %s, %s.%s[%d]",
-			    a64_reg_name(rd), a64_reg_name(rn),
-			    a64_reg_arr_names[rn.arr], idx);
-		}
-		/*
-		 * <Vd>.<Ts>[<index>], <R><n>
-		 */
-		else if (op->type == SIMD_T_CPY4) {
-			rd.arr = A64_REG_ARR_B + (i - 1);
-			rn.width = (i > 3) ? A64_REGWIDTH_64 : A64_REGWIDTH_32;
-			idx = (imm5 >> i);
-			len = dis_snprintf(buf, buflen, " %s.%s[%d], %s",
-			    a64_reg_name(rd), a64_reg_arr_names[rd.arr], idx,
-			    a64_reg_name(rn));
-		}
-		/*
-		 * <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>]
-		 */
-		else if (op->type == SIMD_T_CPY5) {
-			rd.arr = rn.arr = A64_REG_ARR_B + (i - 1);
-			idx = (imm5 >> i);
-			len = dis_snprintf(buf, buflen, " %s.%s[%d], %s.%s[%d]",
-			    a64_reg_name(rd), a64_reg_arr_names[rd.arr], idx,
-			    a64_reg_name(rn), a64_reg_arr_names[rn.arr],
-			    (imm4 >> i));
-		}
-		/*
-		 * <V><d>, <Vn>.<T>[<index>]
-		 */
-		else if (op->type == SIMD_T_CPY6) {
-			rd.width = A64_REGWIDTH_SIMD_8 + (i - 1);
-			rn.arr = A64_REG_ARR_B + (i - 1);
-			idx = (imm5 >> i);
-			len = dis_snprintf(buf, buflen, " %s, %s.%s[%d]",
-			    a64_reg_name(rd), a64_reg_name(rn),
-			    a64_reg_arr_names[rn.arr], idx);
-		}
-		break;
-	case SIMD_T_MIM:
-	case SIMD_T_MIM1:
-		/* Shift a:b:c into position to make up a:b:c:d:e:f:g:h */
-		imm8 = (in & A64_SIMD_DEFGH_MASK) >> A64_SIMD_DEFGH_SHIFT;
-		imm8 |= (in & A64_SIMD_ABC_MASK) >> (A64_SIMD_ABC_SHIFT - 5);
-		cmode = (in & A64_SIMD_CMODE_MASK) >> A64_SIMD_CMODE_SHIFT;
-		if (op->flags & SIMD_F_B) {
-			rd.arr = q ? A64_REG_ARR_16B : A64_REG_ARR_8B;
-			shift = 0;
-		} else if (op->flags & SIMD_F_H) {
-			rd.arr = q ? A64_REG_ARR_8H : A64_REG_ARR_4H;
-			shift = (cmode & 0x2) ? 8 : 0;
-		} else if (op->flags & SIMD_F_S) {
-			rd.arr = q ? A64_REG_ARR_4S : A64_REG_ARR_2S;
-			if (op->type == SIMD_T_MIM1)
-				shift = 8 << (cmode & 0x1);
-			else
-				shift = 8 * ((cmode & 0x6) >> 1);
-		} else if (op->flags & SIMD_F_D) {
-			/*
-			 * Build imm based on imm8, where "a:b:c:d:e:f:g:h"
-			 * becomes "aaaaaaaa:bbbbbbbb:cccccccc:...".  No doubt
-			 * there is a fancier way to compute this.
-			 */
-			imm = 0;
-			for (i = 0; i < 8; i++) {
-				imm |= ((imm8 & 0x01) ? 1ULL : 0) << i;
-				imm |= ((imm8 & 0x02) ? 1ULL : 0) << i + 8;
-				imm |= ((imm8 & 0x04) ? 1ULL : 0) << i + 16;
-				imm |= ((imm8 & 0x08) ? 1ULL : 0) << i + 24;
-				imm |= ((imm8 & 0x10) ? 1ULL : 0) << i + 32;
-				imm |= ((imm8 & 0x20) ? 1ULL : 0) << i + 40;
-				imm |= ((imm8 & 0x40) ? 1ULL : 0) << i + 48;
-				imm |= ((imm8 & 0x80) ? 1ULL : 0) << i + 56;
-			}
-			/* Special formats, handle and exit early. */
-			if (q) {
-				rd.arr = A64_REG_ARR_2D;
-				len = dis_snprintf(buf, buflen,
-				    " %s.%s, #0x%" PRIx64 "",
-				    a64_reg_name(rd), a64_reg_arr_names[rd.arr],
-				    imm);
-			} else {
-				rd.width = A64_REGWIDTH_SIMD_64;
-				len = dis_snprintf(buf, buflen,
-				    " %s, #0x%" PRIx64 "",
-				    a64_reg_name(rd), imm);
-			}
-			break;
-		} else {
-			/* fmov XXX: fix fp calculations */
-			rd.arr = q ? A64_REG_ARR_4S : A64_REG_ARR_2S;
-			len = dis_snprintf(buf, buflen, " %s.%s, #%.18e",
-			    a64_reg_name(rd), a64_reg_arr_names[rd.arr], imm8);
-			break;
-		}
-		if (shift)
-		len = dis_snprintf(buf, buflen, " %s.%s, #0x%x, %s #%d",
-		    a64_reg_name(rd), a64_reg_arr_names[rd.arr], imm8,
-		    (op->type == SIMD_T_MIM1) ? "msl" : "lsl", shift);
-		else
-		len = dis_snprintf(buf, buflen, " %s.%s, #0x%x",
-		    a64_reg_name(rd), a64_reg_arr_names[rd.arr], imm8);
-		break;
-	case SIMD_T_SPR: {
-		uint8_t sz = (size & 0x1);
-		rd.width = sz ? A64_REGWIDTH_SIMD_64 : A64_REGWIDTH_SIMD_32;
-		rn.arr = sz ? A64_REG_ARR_2D : A64_REG_ARR_2S;
-		len = dis_snprintf(buf, buflen, " %s, %s.%s",
-		    a64_reg_name(rd), a64_reg_name(rn),
-		    a64_reg_arr_names[rn.arr]);
-		break;
+	if (op->handler != NULL)
+		return (op->handler)(dhp, class, op, &data, in, buf, buflen);
+
+	if (class->handler == NULL) {
+		len = dis_snprintf(buf, buflen, "<TODO>");
+		return (len < buflen ? 0 : -1);
 	}
-	case SIMD_T_SSH:
-		immb = (in & A64_SIMD_IMMB_MASK) >> A64_SIMD_IMMB_SHIFT;
-		immh = (in & A64_SIMD_IMMH_MASK) >> A64_SIMD_IMMH_SHIFT;
-		/*
-		 * Handle invalid opcodes here as we can't easily do so in our
-		 * lookup table.
-		 */
-		if (immh == 0)
-			return (-1);
-		rd.width = rn.width = A64_REGWIDTH_SIMD_64;
-		len = dis_snprintf(buf, buflen, " %s, %s, #%d",
-		    a64_reg_name(rd), a64_reg_name(rn),
-		    128 - (immb + (immh << 3)));
-		break;
-	default:
-		break;
-	}
-	return (len < buflen ? 0 : -1);
+
+	return (class->handler)(dhp, class, op, &data, in, buf, buflen);
 }
 
-/*
- * 0 Q 101110 op2 0 Rm 0 imm4 0 Rn Rd
- *
- *
- * EXT <Vd>.<T>, <Vn>.<T>, <Vm>.<T>, #<index>
- *
- * TBL <Vd>.<Ta>, { <Vn>.16B ... }, <Vm>.<Ta>
- * TBX <Vd>.<Ta>, { <Vn>.16B ... }, <Vm>.<Ta>
- *
- * UZP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
- * TRN1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
- * ZIP1 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
- * UZP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
- * TRN2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
- * ZIP2 <Vd>.<T>, <Vn>.<T>, <Vm>.<T>
- *
- * SADDLV <V><d>, <Vn>.<T>
- * SMAXV <V><d>, <Vn>.<T>
- * SMINV <V><d>, <Vn>.<T>
- * ADDV <V><d>, <Vn>.<T>
- * UADDLV <V><d>, <Vn>.<T>
- * UMAXV <V><d>, <Vn>.<T>
- * UMINV <V><d>, <Vn>.<T>
- * FMAXNMV <V><d>, <Vn>.<T>
- * FMAXV <V><d>, <Vn>.<T>
- * FMINNMV <V><d>, <Vn>.<T>
- * FMINV <V><d>, <Vn>.<T>
- *
- * mov aliases preferred for some of these:
- * DUP <V><d>, <Vn>.<T>[<index>]
- * MOV <V><d>, <Vn>.<T>[<index>]
- * DUP <Vd>.<T>, <Vn>.<Ts>[<index>]
- * SMOV <Wd>, <Vn>.<Ts>[<index>]
- * UMOV <Wd>, <Vn>.<Ts>[<index>]
- * MOV <Wd>, <Vn>.S[<index>]
- * INS <Vd>.<Ts>[<index>], <R><n>
- * MOV <Vd>.<Ts>[<index>], <R><n>
- * INS <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>]
- * MOV <Vd>.<Ts>[<index1>], <Vn>.<Ts>[<index2>]
- *
- * MOVI <Vd>.<T>, #<imm8>{, LSL #0}
- * MOVI <Vd>.<T>, #<imm8>{, LSL #<amount>}
- * MOVI <Vd>.<T>, #<imm8>, MSL #<amount>
- * MOVI <Dd>, #<imm>
- * MOVI <Vd>.2D, #<imm>
- * ORR <Vd>.<T>, #<imm8>{, LSL #<amount>}
- * FMOV <Vd>.<T>, #<imm>
- * MVNI <Vd>.<T>, #<imm8>{, LSL #<amount>}
- * MVNI <Vd>.<T>, #<imm8>, MSL #<amount>
- * BIC <Vd>.<T>, #<imm8>{, LSL #<amount>}
- *
- * DUP <V><d>, <Vn>.<T>[<index>]
- *
- * ADDP <V><d>, <Vn>.<T>
- * FMAXNMP <V><d>, <Vn>.<T>
- * FADDP <V><d>, <Vn>.<T>
- * FMAXP <V><d>, <Vn>.<T>
- * FMINNMP <V><d>, <Vn>.<T>
- * FMINP <V><d>, <Vn>.<T>
- *
- * SSHR <V><d>, <V><n>, #<shift>
- * SSRA <V><d>, <V><n>, #<shift>
- * SRSHR <V><d>, <V><n>, #<shift>
- * SRSRA <V><d>, <V><n>, #<shift>
- * SHL <V><d>, <V><n>, #<shift>
- * SQSHL <V><d>, <V><n>, #<shift>
- * SQSHRN <Vb><d>, <Va><n>, #<shift>
- * ...lots...
- *
- * SQDMLAL <Va><d>, <Vb><n>, <Vb><m>
- * ...
- *
- * SQADD <V><d>, <V><n>, <V><m>
- * ...
- *
- * SUQADD <V><d>, <V><n>
- *
- */
 static int
 a64_dis(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 {
@@ -4809,8 +6738,9 @@ a64_dis(dis_handle_t *dhp, uint32_t in, char *buf, size_t buflen)
 	 * C3.5 Data processing - register
 	 */
 	if ((in & A64_ENCGRP_DPIMM_MASK) == A64_ENCGRP_DPIMM_TARG ||
-	    (in & A64_ENCGRP_DPREG_MASK) == A64_ENCGRP_DPREG_TARG)
+	    (in & A64_ENCGRP_DPREG_MASK) == A64_ENCGRP_DPREG_TARG) {
 		return (a64_dis_dataproc(dhp, in, buf, buflen));
+	}
 
 	/*
 	 * C3.6 Data processing - SIMD and floating point
@@ -4879,7 +6809,7 @@ dis_a64_previnstr(dis_handle_t *dhp, uint64_t pc, int n)
 	if (n <= 0)
 		return (pc);
 
-	return (pc - n*4);
+	return (pc - n * 4);
 }
 
 /*
