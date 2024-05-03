@@ -47,22 +47,11 @@ COMDIR=		$(SRC)/lib/libdisasm/common
 #
 # Architecture-independent files
 #
-SRCS_common=		$(COMDIR)/libdisasm.c
-OBJECTS_common=		libdisasm.o
+OBJECTS_common=		libdisasm.o bitext.o
 
 #
 # Architecture-dependent disassembly files
 #
-SRCS_i386=		$(COMDIR)/dis_i386.c \
-			$(SRC)/common/dis/i386/dis_tables.c
-SRCS_sparc=		$(COMDIR)/dis_sparc.c \
-			$(COMDIR)/dis_sparc_fmt.c \
-			$(COMDIR)/dis_sparc_instr.c
-SRCS_s390x=		$(COMDIR)/dis_s390x.c
-SRCS_riscv=		$(COMDIR)/dis_riscv.c
-SRCS_arm=		$(COMDIR)/dis_arm_32.c \
-			$(COMDIR)/dis_arm_64.c
-
 OBJECTS_i386=		dis_i386.o \
 			dis_tables.o
 OBJECTS_sparc=		dis_sparc.o \
@@ -90,17 +79,6 @@ OBJECTS_standalone=	$(OBJECTS_common) \
 OBJECTS=		$(OBJECTS_$(CURTYPE))
 
 include $(SRC)/lib/Makefile.lib
-
-SRCS_library=		$(SRCS_common) \
-			$(SRCS_i386) \
-			$(SRCS_sparc) \
-			$(SRCS_s390x) \
-			$(SRCS_riscv) \
-			$(SRCS_arm) \
-			$(SRCS_aarch64) \
-SRCS_standalone=	$(SRCS_common) \
-			$(SRCS_$(MACH))
-SRCS=			$(SRCS_$(CURTYPE))
 
 #
 # Used to verify that the standalone doesn't have any unexpected external
