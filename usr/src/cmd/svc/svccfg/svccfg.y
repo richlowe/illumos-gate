@@ -27,9 +27,6 @@
 
 #include <libintl.h>
 #include "svccfg.h"
-#include "svccfg_libscf.h"
-#include "svccfg_engine.h"
-#include "svccfg_lxml.h"
 
 uu_list_pool_t *string_pool;
 
@@ -164,8 +161,8 @@ import_cmd : SCC_IMPORT string_list terminator
 	}
 	| SCC_IMPORT error terminator	{ synerr(SCC_IMPORT); return(0); }
 
-cleanup_cmd : SCC_CLEANUP terminator	
-	{ 
+cleanup_cmd : SCC_CLEANUP terminator
+	{
 		engine_cleanup(0);
 	}
 	| SCC_CLEANUP SCV_WORD terminator
@@ -577,7 +574,7 @@ delnotify_cmd : SCC_DELNOTIFY SCV_WORD terminator
 listnotify_cmd : SCC_LISTNOTIFY terminator
 	{
 		lscf_listnotify("all", 0);
-	}	
+	}
 	| SCC_LISTNOTIFY SCV_WORD terminator
 	{
 		if (strcmp($2, "-g") == 0) {

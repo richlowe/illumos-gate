@@ -64,10 +64,11 @@ MAPOPTS =	$(MAPFILES:%=-Wl,-M%)
 CPPFLAGS +=	-I ../common -I$(ADJUNCT_PROTO)/usr/include/libxml2
 LDFLAGS +=	$(MAPOPTS)
 
+# These are because of bugs in lex(1)/yacc(1) generated code
 CERRWARN +=	-_gcc=-Wno-unused-label
-CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-parentheses
+
+CERRWARN +=	-_gcc=-Wno-switch
 CERRWARN +=	$(CNOWARN_UNINIT)
 
 # not linted
