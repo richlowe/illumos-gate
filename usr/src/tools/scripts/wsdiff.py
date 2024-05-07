@@ -20,7 +20,7 @@
 # CDDL HEADER END
 #
 # Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
-# Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2024 OmniOS Community Edition (OmniOSce) Association.
 #
 
 #
@@ -112,9 +112,6 @@ wsdiff_path = [ "/usr/bin",
 #
 wsdiff_exceptions = [
 ]
-
-# Path to genunix, used for finding the proto root, and for CTF diff
-genunix = "kernel/amd64/genunix"
 
 if PY3:
 	def getoutput(cmd):
@@ -1381,6 +1378,9 @@ def main() :
 	# Essentially "uname -p"
 	global arch
 
+	# Path to genunix, used for finding the proto root, and for CTF diff
+	global genunix
+
 	# changed files for worker thread processing
 	global changedFiles
 
@@ -1435,6 +1435,7 @@ def main() :
 	#
 	rc, arch = getoutput("uname -p")
 	arch = arch.rstrip()
+	genunix = f"kernel/{arch}/genunix"
 	if localTools :
 		try:
 			src = os.environ['SRC']
