@@ -333,13 +333,6 @@ ld_perform_outreloc(Rel_desc *orsp, Ofl_desc *ofl, Boolean *remain_seen)
 	value = sdp->sd_sym->st_value;
 
 	if (orsp->rel_flags & FLG_REL_GOT) {
-		/*
-		 * Note: for GOT relative relocations on AArch64
-		 *	 we discard the addend.  It was relevant
-		 *	 to the reference - not to the data item
-		 *	 being referenced (ie: that -4 thing).
-		 */
-		raddend = 0;
 		osp = ofl->ofl_osgot;
 		roffset = ld_calc_got_offset(orsp, ofl);
 	} else if (orsp->rel_flags & FLG_REL_PLT) {
