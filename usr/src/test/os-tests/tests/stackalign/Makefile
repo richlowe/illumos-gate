@@ -14,14 +14,17 @@
 # Copyright 2021 Tintri by DDN, Inc. All rights reserved.
 #
 
+include $(SRC)/Makefile.master
+
 PROGS = stackalign
 
-PROGS32 = $(PROGS:%=%.32)
+$(NOT_AARCH64_BLD)PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
 
 OBJS = $(PROGS32:%=%.o) $(PROGS64:%=%.o)
-$(INTEL_BLD)OBJS += stack_i386.o stack_amd64.o
-$(SPARC_BLD)OBJS += stack_sparc.o stack_sparcv9.o
+$(INTEL_BLD)OBJS += stack_i86.o stack_amd64.o
+$(SPARC_BLD)OBJS += stack_sparcv7.o stack_sparcv9.o
+$(AARCH64_BLD)OBJS += stack_aarch64.o
 
 ROOTOPTDIR = $(ROOT)/opt/os-tests/tests
 ROOTOPTSTACK = $(ROOTOPTDIR)/stackalign
@@ -32,8 +35,7 @@ include $(SRC)/cmd/Makefile.cmd
 ASFLAGS += -D_ASM
 ASFLAGS64 += -D_ASM
 CFLAGS += -D_REENTRANT
-$(INTEL_BLD)LDFLAGS += -Wl,-zinitarray=get_stack_at_init
-$(SPARC_BLD)LDFLAGS += -Wl,-zinitarray=get_stack_at_init
+LDFLAGS += -Wl,-zinitarray=get_stack_at_init
 
 .KEEP_STATE:
 
@@ -61,7 +63,7 @@ $(ROOTOPTSTACK)/%: %
 %.32.o: %.c
 	$(COMPILE.c) $< -o $@
 
-stack_$(MACH).o: stack_$(MACH).S
+stack_$(MACH32).o: stack_$(MACH32).S
 	$(COMPILE.s) $< -o $@
 
 stack_$(MACH64).o: stack_$(MACH64).S
@@ -71,7 +73,7 @@ stack_$(MACH64).o: stack_$(MACH64).S
 	$(LINK64.c) -o $@ $^ $(LDLIBS64)
 	$(POST_PROCESS)
 
-%.32: %.32.o stack_$(MACH).o
+%.32: %.32.o stack_$(MACH32).o
 	$(LINK.c) -o $@ $^ $(LDLIBS)
 	$(POST_PROCESS)
 

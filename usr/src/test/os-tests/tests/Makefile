@@ -42,15 +42,13 @@ SUBDIRS =       \
 		sigqueue \
 		sockfs \
 		spoof-ras \
+		stackalign \
 		stress \
 		syscall \
 		tcpsig \
 		timer \
 		uccid \
 		$(SUBDIRS_$(MACH))
-
-# XXXARM: Not ported
-$(NOT_AARCH64_BLD)SUBDIRS +=	stackalign
 
 PROGS = \
 	clock_gettime \
