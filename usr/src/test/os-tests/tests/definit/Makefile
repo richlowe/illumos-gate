@@ -16,7 +16,8 @@
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-PROG = definit_test.32 definit_test.64
+PROG = definit_test.64
+$(NOT_AARCH64_BLD)PROG += definit_test.32
 
 OBJS = definit.o definit_test.o
 OBJS32 = $(OBJS:.o=.32.o)

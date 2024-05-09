@@ -16,16 +16,13 @@
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-OBJECTS=util.o runtests.32.o runtests.64.o acquire-lock.32.o acquire-lock.64.o
-
 PROGS = \
 	runtests \
 	acquire-lock
 
 CSTD = $(CSTD_GNU99)
 
-SRCS = $(PROGS:%=%.c) $(UTILS:%.o=%.c)
-PROGS32 = $(PROGS:%=%.32)
+$(NOT_AARCH64_BLD)PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
 
 ROOTOPTDIR = $(ROOT)/opt/os-tests/tests/file-locking

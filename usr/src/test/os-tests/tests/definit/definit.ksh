@@ -23,7 +23,13 @@ trap 'rm -f $tf' EXIT
 
 integer exitval=0
 
-for b in 32 64; do
+case $(mach) in
+	i386) bits=(32 64);;
+	aarch64) bits=(64);;
+	*) print -u 2 "Unknown machine type"; exit 1;;
+esac
+
+for b in ${bits[@]}; do
 	typeset bin=definit_test.$b
 	print "Testing $bin"
 	if ! $dir/$bin $dir/init.data > $tf; then

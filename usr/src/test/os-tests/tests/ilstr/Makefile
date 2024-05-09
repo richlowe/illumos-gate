@@ -13,10 +13,12 @@
 # Copyright 2023 Oxide Computer Company
 #
 
+include $(SRC)/Makefile.master
+
 PROGS = \
 	ilstr_basic
 
-PROGS32 = $(PROGS:%=%.32)
+$(NOT_AARCH64_BLD)PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
 
 COMOBJS = ilstr.o
