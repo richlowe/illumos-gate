@@ -55,13 +55,11 @@ PROGS = \
 	eventfd \
 	odirectory \
 	getcontext_extd \
+	ucontext \
 	writev
 
-# XXXARM: Needs thread-local storage
-$(NOT_AARCH64_BLD)PROGS +=	ucontext
-
 CPPFLAGS += -D_REENTRANT
-PROGS32 = $(PROGS:%=%.32)
+$(NOT_AARCH64_BLD)PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
 
 ROOTOPTDIR = $(ROOT)/opt/os-tests/tests

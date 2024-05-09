@@ -20,7 +20,8 @@
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-PROG =	ksid.32 ksid.64
+PROG =	ksid.64
+$(NOT_AARCH64_BLD)PROG += ksid.32
 
 LDLIBS += -lfakekernel
 LDLIBS64 += -lfakekernel

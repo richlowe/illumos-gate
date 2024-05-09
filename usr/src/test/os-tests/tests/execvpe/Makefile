@@ -13,6 +13,8 @@
 # Copyright 2024 Oxide Computer Company
 #
 
+include $(SRC)/Makefile.master
+
 PROGS = \
 	execvpe-test
 
@@ -20,7 +22,7 @@ DATA = \
 	execvpe-script \
 	execvpe-noperm
 
-PROGS32 = $(PROGS:%=%.32)
+$(NOT_AARCH64_BLD)PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
 
 ROOTOPTDIR = $(ROOT)/opt/os-tests/tests

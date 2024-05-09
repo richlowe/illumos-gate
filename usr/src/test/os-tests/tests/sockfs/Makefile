@@ -19,11 +19,13 @@
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-# These test programs are built as both 32- and 64-bit variants
+# These test programs are potentially built as both 32- and 64-bit variants
 PROGDA = rights recvmsg
 
 PROG =	conn dgram drop_priv nosignal sockpair \
-	$(PROGDA:%=%.32) $(PROGDA:%=%.64)
+	$(PROGDA:%=%.64)
+
+$(NOT_AARCH64_BLD)PROG += $(PROGDA:%=%.32)
 
 LDLIBS += -lsocket
 LDLIBS64 += -lsocket

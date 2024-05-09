@@ -13,6 +13,8 @@
 # Copyright 2020 Oxide Computer Company
 #
 
+include $(SRC)/Makefile.master
+
 PROGS = \
 	ksensor_basic \
 	ksensor_err \
@@ -24,7 +26,7 @@ SCRIPTS = \
 	ksensor_stress \
 	ksensor_unload
 
-PROGS32 = $(PROGS:%=%.32)
+$(NOT_AARCH64_BLD)PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
 
 ROOTOPTDIR = $(ROOT)/opt/os-tests/tests

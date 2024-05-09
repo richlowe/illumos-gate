@@ -37,12 +37,12 @@
 
 /*
  * We need regular files on a regular filesystem for fs_poll to be called.
- * Assume that we can find some in our own tests dir.
+ * Since we open them read-only, use the ready supply in /usr/lib.
  *
  * As for repetitions, this is not especially consistent, so really hammer
  * things out of brute force.
  */
-#define	FILE_SRC	"/opt/os-tests/tests"
+#define	FILE_SRC	"/usr/lib"
 #define	FILE_COUNT	10
 #define	TEST_REPEAT	10000
 
