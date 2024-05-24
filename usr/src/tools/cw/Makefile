@@ -31,10 +31,7 @@ MAN1ONBLDFILES=	cw.1onbld
 include ../Makefile.tools
 
 # Bootstrap problem -- we have to build cw before we can use it
-i386_CC=	$(NATIVE_GNUC_ROOT)/bin/gcc
-sparc_CC=	$(NATIVE_GNUC_ROOT)/bin/gcc
-aarch64_CC=	$(NATIVE_GNUC_ROOT)/bin/gcc
-NATIVECC=		$($(NATIVE_MACH)_CC)
+NATIVECC=	$(NATIVE_GNUC_ROOT)/bin/gcc
 
 CFLAGS += $(CCVERBOSE)
 

@@ -11,10 +11,8 @@
 
 # Copyright 2019, Richard Lowe.
 
-include $(SRC)/cmd/sgs/Makefile.com
-
 # XXXARM: Always build debug even though tools usually aren't.
-NATIVE_CPPFLAGS =	-I. -I$(SRCDIR) -I$(SRCDIR)/common \
+CPPFLAGS =	-I. -I$(SRCDIR) -I$(SRCDIR)/common \
 	-I$(SGSHOME)/include -I$(SGSHOME)/include/$(NATIVE_MACH) \
 	-I../include $(CPPFLAGS.native) -I$(ELFCAP) -DNATIVE_BUILD -DDEBUG
 
