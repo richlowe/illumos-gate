@@ -24,33 +24,23 @@
 # Use is subject to license terms.
 #
 
-include		$(SRC)/Makefile.master
 include		../../Makefile.tools
+include		$(SRC)/cmd/sgs/liblddbg/Makefile.com
 include		../Makefile.com
-include		$(SGSHOME)/liblddbg/Makefile.com
-include		$(SRC)/Makefile.native
-include		$(SRC)/Makefile.master.64
 
 .KEEP_STATE:
 
-CPPFLAGS =	$(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc
-DYNFLAGS +=	-L../libconv
-SGSMSGTARG +=	$(SGSMSG32)
-SGSMSGDIR =	$(SGSHOME)/messages/$(NATIVE_MACH)
-ADJUNCT_LIBS +=	libc.so
-CW_LINKER =
-
-CFLAGS +=	$(C_PICFLAGS)
-CFLAGS64 +=	$(C_PICFLAGS)
 CONVLIBDIR=	-L../libconv
-CERRWARN +=	-_gcc=-Wno-unused-value
-CERRWARN +=	-_gcc=-Wno-unused-variable
-CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	$(CNOWARN_UNINIT)
+CPPFLAGS +=	-I$(SRC)/lib/libc/inc
+SGSMSGTARG +=	$(SGSMSG32)
+ADJUNCT_LIBS +=	libc.so
 LDLIBS +=	$(CONVLIBDIR) -lconv
 
 # A bootstrapping problem means we can't use the regular mapfile just yet
 MAPFILES =
+
+include		$(SRC)/Makefile.native
+include		$(SRC)/Makefile.master.64
 
 all:		$(DYNLIB) $(LIBLINKS)
 

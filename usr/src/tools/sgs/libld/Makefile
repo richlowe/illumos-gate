@@ -25,12 +25,9 @@
 #
 #
 
-include		$(SRC)/Makefile.master
 include		../../Makefile.tools
+include		$(SRC)/cmd/sgs/libld/Makefile.com
 include		../Makefile.com
-include		$(SGSHOME)/libld/Makefile.com
-include		$(SRC)/Makefile.native
-include		$(SRC)/Makefile.master.64
 
 .KEEP_STATE:
 
@@ -41,9 +38,8 @@ include		$(SRC)/Makefile.master.64
 # area.
 #
 LDLIBS =
-CW_LINKER =
 
-CPPFLAGS = $(NATIVE_CPPFLAGS) -DUSE_LIBLD_MALLOC -I$(SRC)/lib/libc/inc \
+CPPFLAGS +=  -DUSE_LIBLD_MALLOC -I$(SRC)/lib/libc/inc \
 		    -I$(SRC)/uts/common/krtld -I$(SRC)/uts/sparc \
 		    -I$(SRC)/uts/common
 LDLIBS +=	-L../libconv -lconv -L$(ROOTONBLDLIBMACH64) -llddbg -lelf -lc
@@ -51,9 +47,10 @@ ADJUNCT_LIBS +=	libc.so
 
 DYNFLAGS +=	$(VERSREF) '-Wl,-R$$ORIGIN'
 
-CFLAGS += $(C_PICFLAGS)
-CFLAGS64 += $(C_PICFLAGS)
 CERRWARN += -_gcc=-Wno-unused-but-set-variable
+
+include		$(SRC)/Makefile.native
+include		$(SRC)/Makefile.master.64
 
 all:		$(DYNLIB) $(LIBLINKS)
 

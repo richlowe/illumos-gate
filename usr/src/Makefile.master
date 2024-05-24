@@ -40,11 +40,12 @@
 ROOT=		/proto
 
 #
-# Adjunct root, a system root image used to find headers, libraries, and files
-# for the target machine.  None of these files are valid to use on the build
-# machine.
+# Adjunct root, containing an additional proto area to be searched for headers
+# and libraries for the target environment, which may not necessarily function
+# in the build environment.
 #
 ADJUNCT_PROTO=
+
 # HAVE_ADJUNCT_PROTO - ADJUNCT_PROTO is set to a non-default value
 # NO_ADJUNCT_PROTO - ADJUNCT_PROTO is unset
 #
@@ -55,8 +56,9 @@ NO_ADJUNCT_PROTO=$(ADJUNCT_PROTO:%=$(POUND_SIGN))
 $(NO_ADJUNCT_PROTO)HAVE_ADJUNCT_PROTO=$(POUND_SIGN)
 
 #
-# Adjunct for building things that run on the build machine, none of these
-# files are valid to use for the target machine.
+# A separate area to be searched for native tools and libraries for use by the
+# build or the build machine.  These libraries are specific to the build
+# machine and may not work on the target machine.
 #
 NATIVE_ADJUNCT=	/usr
 
@@ -148,10 +150,15 @@ BLD_JAVA_11=	$(POUND_SIGN)
 
 i386_GNUC_ROOT=		/usr/gcc/10
 aarch64_GNUC_ROOT=	/usr/gcc/10
-NATIVE_GNUC_ROOT=	$($(NATIVE_MACH)_GNUC_ROOT)
 GNUC_ROOT=		$($(MACH)_GNUC_ROOT)
 GCCLIBDIR=		$(GNUC_ROOT)/lib
 GCCLIBDIR64=		$(GNUC_ROOT)/lib/$(MACH64)
+NATIVE_GCCLIBDIR=	$(NATIVE_GNUC_ROOT)/lib
+NATIVE_GCCLIBDIR64=	$(NATIVE_GNUC_ROOT)/lib/$(MACH64)
+
+NATIVE_GNUC_ROOT=	$($(NATIVE_MACH)_GNUC_ROOT)
+NATIVE_GCCLIBDIR=	$(NATIVE_GNUC_ROOT)/lib
+NATIVE_GCCLIBDIR64=	$(NATIVE_GNUC_ROOT)/lib/$(MACH64)
 
 DOCBOOK_XSL_ROOT=	/usr/share/sgml/docbook/xsl-stylesheets
 
@@ -578,11 +585,11 @@ CTF_FLAGS_sparcv9	= $(CTF_FLAGS_sparc)
 CTF_FLAGS_amd64		= $(CTF_FLAGS_i386) $(SAVEARGS)
 CTF_FLAGS_aarch64	= $(CCGDEBUG) $(CSTD)
 
-CTF_FLAGS_32	= $(CTF_FLAGS_$(MACH))
-CTF_FLAGS_64	= $(CTF_FLAGS_$(MACH64))
-CTF_FLAGS	= $(CTF_FLAGS_32)
-NATIVE_CTF_FLAGS= $(CTF_FLAGS_$(NATIVE_MACH))
-NATIVE_CTF_FLAGS64= $(CTF_FLAGS_$(NATIVE_MACH64))
+CTF_FLAGS_32	=	$(CTF_FLAGS_$(MACH))
+CTF_FLAGS_64	=	$(CTF_FLAGS_$(MACH64))
+CTF_FLAGS	=	$(CTF_FLAGS_32)
+NATIVE_CTF_FLAGS=	$(CTF_FLAGS_$(NATIVE_MACH))
+NATIVE_CTF_FLAGS_64=	$(CTF_FLAGS_$(NATIVE_MACH64))
 
 #
 # Flags used with genoffsets
@@ -797,10 +804,10 @@ COMPILE.java=	$(JAVAC) $(JAVAFLAGS) -classpath $(CLASSPATH)
 #
 CCNEEDED	= -L$(GCCLIBDIR) -lstdc++ -lgcc_s
 CCEXTNEEDED	= $(CCNEEDED)
-NATIVECCNEEDED	= -R$(GCCLIBDIR) -L$(GCCLIBDIR) -lstdc++ -lgcc_s
+NATIVECCNEEDED	= -R$(NATIVE_GCCLIBDIR) -L$(NATIVE_GCCLIBDIR) -lstdc++ -lgcc_s
 
 CCNEEDED64	= -L$(GCCLIBDIR) -lstdc++ -lgcc_s
-NATIVECCNEEDED64 = -R$(GCCLIBDIR) -L$(GCCLIBDIR) -lstdc++ -lgcc_s
+NATIVECCNEEDED64 = -R$(NATIVE_GCCLIBDIR) -L$(NATIVE_GCCLIBDIR) -lstdc++ -lgcc_s
 CCEXTNEEDED	= $(CCNEEDED64)
 
 # Libraries which we expect to reference via either the build machine or
@@ -864,15 +871,15 @@ CW_LINKER=		--linker $(LD)
 CW=			$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw
 NATIVE_CW=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH)/cw
 
-BUILD_CC=		$(CW) $(CW_LINKER) $(CW_CC_COMPILERS) --
-NATIVEBUILD_CC=		$(NATIVE_CW) $(CW_LINKER) $(NATIVE_CW_CC_COMPILERS) --
-BUILD_CCC=		$(CW) -C $(CW_LINKER) $(CW_CCC_COMPILERS) --
-NATIVEBUILD_CCC=	$(NATIVE_CW) -C $(CW_LINKER) \
-			$(NATIVE_CW_CCC_COMPILERS) --
+BUILD_CC=		$(CW) --tag target $(CW_LINKER) $(CW_CC_COMPILERS) --
+BUILD_CCC=		$(CW) --tag target -C $(CW_LINKER) $(CW_CCC_COMPILERS) --
 BUILD_CPP=		/usr/lib/cpp
-# XXXARM: Need a cross-cpp build in tools
-NATIVEBUILD_CPP=	/usr/lib/cpp
 BUILD_LD=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH64)/ld
+BUILD_AS=		$(BUILD_CC)
+
+NATIVEBUILD_CC=		$(NATIVE_CW) --tag native $(CW_LINKER) $(NATIVE_CW_CC_COMPILERS) --
+NATIVEBUILD_CCC=	$(NATIVE_CW) --tag native -C $(CW_LINKER) $(NATIVE_CW_CCC_COMPILERS) --
+NATIVEBUILD_CPP=	/usr/lib/cpp
 NATIVEBUILD_LD=		$(ONBLD_TOOLS)/bin/$(NATIVE_MACH64)/ld
 NATIVEBUILD_AS=		$(NATIVEBUILD_CC)
 
@@ -880,18 +887,18 @@ $(MACH)_CC=		$(BUILD_CC)
 $(MACH)_CCC=		$(BUILD_CCC)
 $(MACH)_CPP=		$(BUILD_CPP)
 $(MACH)_LD=		$(BUILD_LD)
-$(MACH)_AS=		$(BUILD_CC)
+$(MACH)_AS=		$(BUILD_AS)
 $(MACH64)_CC=		$(BUILD_CC)
 $(MACH64)_CCC=		$(BUILD_CCC)
 $(MACH64)_CPP=		$(BUILD_CPP)
 $(MACH64)_LD=		$(BUILD_LD)
-$(MACH64)_AS=		$(BUILD_CC)
+$(MACH64)_AS=		$(BUILD_AS)
 
 NATIVECC=		$(NATIVEBUILD_CC)
 NATIVECCC=		$(NATIVEBUILD_CCC)
 NATIVECPP=		$(NATIVEBUILD_CPP)
 NATIVEAS=		$(NATIVEBUILD_AS)
-NATIVELD=		$(BUILD_LD)
+NATIVELD=		$(NATIVEBUILD_LD)
 
 NATIVECC64=		$(NATIVEBUILD_CC)
 NATIVECCC64=		$(NATIVEBUILD_CCC)
@@ -908,11 +915,11 @@ CPP=			$($(MACH)_CPP)
 AS=			$($(MACH)_AS)
 LD=			$($(MACH)_LD)
 
-CC64=			$($(MACH)_CC)
-CCC64=			$($(MACH)_CCC)
-CPP64=			$($(MACH)_CPP)
-AS64=			$($(MACH)_AS)
-LD64=			$($(MACH)_LD)
+CC64=			$($(MACH64)_CC)
+CCC64=			$($(MACH64)_CCC)
+CPP64=			$($(MACH64)_CPP)
+AS64=			$($(MACH64)_AS)
+LD64=			$($(MACH64)_LD)
 
 # Pass -Y flag to cpp (method of which is release-dependent)
 CCYFLAG=		-Y I,

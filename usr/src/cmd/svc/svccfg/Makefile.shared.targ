@@ -18,13 +18,27 @@
 #
 # CDDL HEADER END
 #
+
 #
-# Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+# Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2020 Joyent, Inc.
 #
 
-include ../Makefile.com
+svccfg_lex.c: $(SRCDIR)/svccfg.l svccfg_grammar.h
+	$(LEX) $(LFLAGS) $(SRCDIR)/svccfg.l > $@
 
-install: all $(ROOTLIBS) $(ROOTLINKS)
+svccfg_help.o: svccfg_grammar.h
+svccfg_help-native.o: svccfg_grammar.h
 
-include ../Makefile.targ
+svccfg_grammar.h svccfg_grammar.c: $(SRCDIR)/svccfg.y
+	$(YACC) $(YFLAGS) $(SRCDIR)/svccfg.y
+	@$(MV) y.tab.h svccfg_grammar.h
+	@$(MV) y.tab.c svccfg_grammar.c
+
+%.o: $(SRCDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
+%.o: $(COMDIR)/%.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+	$(POST_PROCESS_O)

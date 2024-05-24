@@ -26,20 +26,8 @@
 # Copyright 2020 Joyent, Inc.
 #
 
-PROG = svc.configd
-OBJS =			\
-	backend.o	\
-	configd.o	\
-	client.o	\
-	file_object.o	\
-	maindoor.o	\
-	object.o	\
-	rc_node.o	\
-	snapshot.o
-
-include $(SRC)/cmd/Makefile.cmd
-include $(SRC)/cmd/Makefile.ctf
 include $(SRC)/tools/Makefile.tools
+include $(SRC)/cmd/svc/configd/Makefile.shared.com
 
 LIBUUTIL	= $(SRC)/lib/libuutil
 LIBSCF		= $(SRC)/lib/libscf
@@ -47,30 +35,19 @@ LIBSQLITE	= $(SRC)/lib/libsqlite
 
 CPPFLAGS += -I$(SRC)/cmd/svc/configd \
 	-I$(SRC)/cmd/svc/common -I$(SRC)/common/svc \
-	-I$(ROOT)/usr/include/sqlite-sys -D_REENTRANT \
-	-I$(LIBUUTIL)/common -I$(LIBSCF)/inc -I$(LIBSQLITE) \
+	-D_REENTRANT -I$(LIBUUTIL)/common -I$(LIBSCF)/inc -I$(LIBSQLITE) \
 	-I$(SRC)/tools/svc/libsqlite \
 
 CPPFLAGS += -DNATIVE_BUILD
-CFLAGS	+= $(CCVERBOSE)
-CERRWARN += -_gcc=-Wno-parentheses
-CERRWARN += -_gcc=-Wno-unused-label
-CERRWARN += -_gcc=-Wno-unused-variable
-CERRWARN += -_gcc=-Wno-unused-function
-CERRWARN += $(CNOWARN_UNINIT)
-
-# strange false positive
-SMOFF += free
 
 LDFLAGS += $(BDIRECT)
-LDLIBS	+= -L$(NATIVE_ADJUNCT)/usr/lib -R$(NATIVE_ADJUNCT)/usr/lib \
+LDLIBS	+= -L$(NATIVE_ADJUNCT)/lib -R$(NATIVE_ADJUNCT)/lib \
 	-lumem -L$(ROOTONBLDLIBMACH) \
 	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -lsqlite-sys -luutil
 
 ADJUNCT_LIBS += libumem.so libc.so
 
-DIRMODE = 0755
-FILEMODE = 0555
+include $(SRC)/Makefile.native
 
 .KEEP_STATE:
 .PARALLEL: $(OBJS)

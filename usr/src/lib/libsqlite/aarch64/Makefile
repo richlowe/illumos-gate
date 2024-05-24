@@ -31,3 +31,5 @@ CERRWARN += -_gcc=-Wno-cast-function-type
 LDLIBS += -lgcc			#XXXARM: Intrinsics
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+include ../Makefile.targ

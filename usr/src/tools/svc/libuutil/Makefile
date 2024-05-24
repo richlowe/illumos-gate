@@ -24,33 +24,16 @@
 # Use is subject to license terms.
 #
 
-LIBRARY =	libuutil.a
-VERS =		.1
-
-OBJECTS =		\
-	avl.o		\
-	uu_alloc.o	\
-	uu_avl.o	\
-	uu_dprintf.o	\
-	uu_ident.o	\
-	uu_list.o	\
-	uu_misc.o	\
-	uu_open.o	\
-	uu_pname.o	\
-	uu_string.o	\
-	uu_strtoint.o
-
-include $(SRC)/lib/Makefile.lib
 include $(SRC)/tools/Makefile.tools
-
-LIBS = $(DYNLIB)
+include $(SRC)/lib/libuutil/Makefile.shared.com
 
 SRCDIR = $(SRC)/lib/libuutil/common
 
-CPPFLAGS +=	-I. -DNATIVE_BUILD -I$(SRCDIR)
+# This must be re-set to avoid proto area references
+LDLIBS =	-lc
 ADJUNCT_LIBS +=	libc.so
 
-SMOFF += signed
+CPPFLAGS +=	-I. -DNATIVE_BUILD
 
 #
 # We must use the build's avl headers, to match the common avl.c
@@ -60,6 +43,8 @@ AVLHEADERS =	sys/avl.h sys/avl_impl.h
 CLOBBERFILES += $(AVLHEADERS) $(LIBS)
 
 LIBLINKS =	libuutil.so
+
+include $(SRC)/Makefile.native
 
 .KEEP_STATE:
 
@@ -73,10 +58,6 @@ sys/%: $(SRC)/uts/common/sys/%
 	@mkdir -p sys
 	cp -f $< $@
 
-pics/%.o:	$(AVLDIR)/%.c
-	$(COMPILE.c) -o $@ $<
-	$(POST_PROCESS_O)
-
 pics/%.o:	$(SRCDIR)/%.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
@@ -89,3 +70,4 @@ $(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
 		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
 
 include $(SRC)/lib/Makefile.targ
+include $(SRC)/lib/libuutil/Makefile.shared.targ

@@ -48,7 +48,6 @@ install: all
 
 $(PROG): $(OBJS)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
-	$(CTFMRG)
 	$(POST_PROCESS)
 
 clean:
@@ -61,4 +60,4 @@ esclex.o: escparse.o
 
 %.o: ../../esc/common/%.c
 	$(COMPILE.c) $<
-	$(CTFCONVO)
+	$(POST_PROCESS_O)

@@ -25,25 +25,16 @@
 #
 #
 
-include		$(SRC)/Makefile.master
 include		../../Makefile.tools
+include		$(SRC)/cmd/sgs/libconv/Makefile.com
 include		../Makefile.com
-include		$(SGSHOME)/libconv/Makefile.com
-include		$(SRC)/Makefile.native
-include		$(SRC)/Makefile.master.64
 
-CPPFLAGS =	$(NATIVE_CPPFLAGS) -I$(SRC)/lib/libc/inc -I$(ELFCAP) \
+CPPFLAGS +=	-I$(SRC)/lib/libc/inc -I$(ELFCAP) \
 	-I$(SRC)/common/sgsrtcid \
 	-I$(SRC)/lib/libdemangle/common
-CERRWARN +=	-_gcc=-Wno-switch
-CFLAGS64 +=	$(C_PICFLAGS)
-AS_CPPFLAGS=	-D_ASM $(CPPFLAGS)
-CW_LINKER =
 
-#
-# Tell bld_vernote that we need to use the native build.
-#
-BLDVERNOTE_TARGET_ARGS= -n
+include		$(SRC)/Makefile.native
+include		$(SRC)/Makefile.master.64
 
 .PARALLEL:	$(PICS)
 .KEEP_STATE:

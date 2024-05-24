@@ -9,13 +9,20 @@
 # http://www.illumos.org/license/CDDL.
 #
 
+#
 # Copyright 2023 Richard Lowe
+#
 
 # Configure make to run the native tools with the native paths
 # Similar in spirit to Makefile.master.64.
 
 GNUC_ROOT=	$(NATIVE_GNUC_ROOT)
+GCCLIBDIR=	$(NATIVE_GCCLIBDIR)
+GCCLIBDIR64=	$(NATIVE_GCCLIBDIR64)
+
 CTF_FLAGS=	$(NATIVE_CTF_FLAGS)
+CTF_FLAGS_64=	$(NATIVE_CTF_FLAGS_64)
+
 CFLAGS=		$(NATIVE_CFLAGS)
 ASFLAGS=	$(NATIVE_ASFLAGS)
 CCFLAGS=	$(NATIVE_CCFLAGS)
@@ -41,8 +48,12 @@ CPP=	$(NATIVECPP)
 AS=	$(NATIVEAS)
 LD=	$(NATIVELD)
 
-CC64=	$(NATIVECC)
-CCC64=	$(NATIVECCC)
-CPP64=	$(NATIVECPP)
-AS64=	$(NATIVEAS)
-LD64=	$(NATIVELD)
+CC64=	$(NATIVECC64)
+CCC64=	$(NATIVECCC64)
+CPP64=	$(NATIVECPP64)
+AS64=	$(NATIVEAS64)
+LD64=	$(NATIVELD64)
+
+# If we're building for the build machine, we should use the build-machine
+# link-editor just in case
+CW_LINKER=

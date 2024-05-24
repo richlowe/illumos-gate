@@ -9,9 +9,27 @@
 # http://www.illumos.org/license/CDDL.
 #
 
-# Copyright 2019, Richard Lowe.
+LIBRARY =	libscf.a
+VERS =		.1
 
-# XXXARM: Always build debug even though tools usually aren't.
-CPPFLAGS =	-I. -I$(SRCDIR) -I$(SRCDIR)/common \
-	-I$(SGSHOME)/include -I$(SGSHOME)/include/$(NATIVE_MACH) \
-	-I../include $(CPPFLAGS.native) -I$(ELFCAP) -DNATIVE_BUILD -DDEBUG
+OBJECTS =		\
+	error.o		\
+	lowlevel.o	\
+	midlevel.o	\
+	notify_params.o	\
+	highlevel.o	\
+	scf_tmpl.o	\
+	scf_type.o
+
+include $(SRC)/lib/Makefile.lib
+
+LIBS = $(DYNLIB)
+
+CERRWARN +=	-_gcc=-Wno-switch
+CERRWARN +=	-_gcc=-Wno-char-subscripts
+CERRWARN +=	-_gcc=-Wno-unused-label
+CERRWARN +=	-_gcc=-Wno-parentheses
+CERRWARN +=	$(CNOWARN_UNINIT)
+
+# not linted
+SMATCH=off

@@ -34,13 +34,14 @@
 # Note, these tools are not part of the product.
 #
 
-include		$(SRC)/Makefile.master
 include		../../Makefile.tools
+include		$(SRC)/cmd/sgs/Makefile.com
 include		$(SRC)/cmd/Makefile.cmd
 include		../Makefile.com
-include		$(SRC)/Makefile.native
 
 PROG=	sgsmsg
+
+SRCDIR=	$(SRC)/tools/sgs/sgsmsg
 
 MAN1ONBLDFILES =	sgsmsg.1onbld
 $(ROOTONBLDMAN1ONBLDFILES) := FILEMODE=	644
@@ -58,6 +59,10 @@ CSTD = $(CSTD_GNU99)
 
 # not linted
 SMATCH=		off
+
+include		$(SRC)/Makefile.native
+
+.KEEP_STATE:
 
 all: $(PROG)
 

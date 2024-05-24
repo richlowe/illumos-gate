@@ -23,43 +23,19 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 
-LIBRARY =	libuutil.a
-VERS =		.1
-
-OBJECTS =		\
-	avl.o		\
-	uu_alloc.o	\
-	uu_avl.o	\
-	uu_dprintf.o	\
-	uu_ident.o	\
-	uu_list.o	\
-	uu_misc.o	\
-	uu_open.o	\
-	uu_pname.o	\
-	uu_string.o	\
-	uu_strtoint.o
-
-include $(SRC)/lib/Makefile.lib
+include ../Makefile.shared.com
 include $(SRC)/lib/Makefile.rootfs
-
-LIBS =		$(DYNLIB)
 
 SRCDIR =	../common
 LDLIBS +=	-lc
 
 AVLDIR =	$(SRC)/common/avl
 
-CFLAGS +=	$(CCVERBOSE)
 CPPFLAGS +=	-I$(SRCDIR) -I../../common/inc
-
-SMOFF += signed
 
 .KEEP_STATE:
 
 all: $(LIBS)
 
-pics/%.o:	$(AVLDIR)/%.c
-	$(COMPILE.c) -o $@ $<
-	$(POST_PROCESS_O)
-
 include $(SRC)/lib/Makefile.targ
+include ../Makefile.shared.targ

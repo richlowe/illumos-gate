@@ -25,46 +25,22 @@
 #
 
 include $(SRC)/tools/Makefile.tools
-
-LIBRARY =	libscf.a
-VERS =		.1
-
-OBJECTS =		\
-	error.o		\
-	lowlevel.o	\
-	midlevel.o	\
-	notify_params.o	\
-	highlevel.o	\
-	scf_tmpl.o	\
-	scf_type.o
-
-include $(SRC)/lib/Makefile.lib
-include $(SRC)/tools/Makefile.tools
-
-LIBS = $(DYNLIB)
-
-CERRWARN +=	-_gcc=-Wno-switch
-CERRWARN +=	-_gcc=-Wno-char-subscripts
-CERRWARN +=	-_gcc=-Wno-unused-label
-CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	$(CNOWARN_UNINIT)
-
-# not linted
-SMATCH=off
+include $(SRC)/lib/libscf/Makefile.shared.com
 
 SRCDIR =	$(SRC)/lib/libscf/common
 COMDIR =	$(SRC)/common/svc
-LIBUUTIL =	$(SRC)/lib/libuutil
+LIBUUTIL =	../libuutil
 
 CPPFLAGS +=	-DNATIVE_BUILD $(DTEXTDOM) \
 		-I$(SRC)/lib/libscf/inc -I$(COMDIR) -I$(LIBUUTIL)/common
-LDLIBS +=	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
+LDLIBS =	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -L$(ROOTONBLDLIBMACH) \
 		-luutil -lc -lgen -lnvpair
-
-i386_LDLIBS += -lsmbios
-LDLIBS += $($(NATIVE_MACH)_LDLIBS)
+i386_LDLIBS	+= -lsmbios
+LDLIBS		+= $($(NATIVE_MACH)_LDLIBS)
 
 ADJUNCT_LIBS +=	libsmbios.so libnvpair.so libgen.so libc.so
+
+include $(SRC)/Makefile.native
 
 .KEEP_STATE:
 
@@ -80,4 +56,3 @@ $(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
 		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
 
 include $(SRC)/lib/Makefile.targ
-

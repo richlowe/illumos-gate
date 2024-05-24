@@ -25,15 +25,11 @@ SPARSE_VERSION = 0.6.1-rc1-il-7
 include ../Makefile.tools
 
 # We have to build smatch before we can use cw
-i386_CC = $($(NATIVE_MACH)_GNUC_ROOT)/bin/gcc
-sparc_CC = $($(NATIVE_MACH)_GNUC_ROOT)/bin/gcc
-aarch64_CC = $($(NATIVE_MACH)_GNUC_ROOT)/bin/gcc
+NATIVECC = $(NATIVE_GNUC_ROOT)/bin/gcc
 # sparc doesn't recognise -msave-args
 i386_SMATCHFLAGS = -m64 -msave-args
 sparc_SMATCHFLAGS = -m64
 aarch64_SMATCHFLAGS =
-
-NATIVECC = $($(NATIVE_MACH)_CC)
 
 # When we use builtins, then ld's -zguidance will complain that libm is
 # unused on x86 because the compiler will replace ceil(3M) with its own copy.

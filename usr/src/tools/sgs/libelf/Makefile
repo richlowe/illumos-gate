@@ -23,24 +23,19 @@
 # Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 #
 
-include		$(SRC)/Makefile.master
 include		../../Makefile.tools
-include		../Makefile.com
 include		$(SRC)/cmd/sgs/libelf/Makefile.com
-include		$(SRC)/Makefile.native
-include		$(SRC)/Makefile.master.64
+include		../Makefile.com
 
 CONVLIBDIR =	-L../libconv
 SGSMSGTARG +=	$(SGSMSG32)
 ADJUNCT_LIBS +=	libc.so
-CW_LINKER =
 
-CPPFLAGS += -I$(SRC)/cmd/sgs/libelf/common
-CFLAGS +=	$(C_PICFLAGS)
-CONVLIBDIR=	-L../libconv
-CERRWARN +=	-_gcc=-Wno-parentheses
-CERRWARN +=	$(CNOWARN_UNINIT)
+CPPFLAGS +=	-I$(SRC)/cmd/sgs/libelf/common
 LDLIBS +=	$(CONVLIBDIR) -lconv
+
+include		$(SRC)/Makefile.native
+include		$(SRC)/Makefile.master.64
 
 # As a bootstrapping issue, we can't use the real mapfile because we build
 # early in tools and thus don't have support for assertions.
