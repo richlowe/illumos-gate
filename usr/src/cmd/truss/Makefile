@@ -38,6 +38,7 @@ OBJS=			\
 	actions.o	\
 	expound.o	\
 	codes.o		\
+	codes_bhyve.o	\
 	print.o		\
 	ramdata.o	\
 	systable.o	\
@@ -72,6 +73,12 @@ CPPFLAGS += -I$(SRC)/uts/common
 # XXXARM: AArch64 is not multilib
 $(NOT_AARCH64_BLD)CPPFLAGS += -D_SYSCALL32
 $(NOT_AARCH64_BLD)ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
+
+codes_bhyve.o := CPPFLAGS += -I$(SRC)/compat/bhyve
+codes_bhyve.o := CPPFLAGS += -I$(SRC)/compat/bhyve/amd64
+codes_bhyve.o := CPPFLAGS += -I$(SRC)/uts/intel
+
+ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
 
 .KEEP_STATE:
 
