@@ -78,8 +78,6 @@ codes_bhyve.o := CPPFLAGS += -I$(SRC)/compat/bhyve
 codes_bhyve.o := CPPFLAGS += -I$(SRC)/compat/bhyve/amd64
 codes_bhyve.o := CPPFLAGS += -I$(SRC)/uts/intel
 
-ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
-
 .KEEP_STATE:
 
 %.o:	%.c
