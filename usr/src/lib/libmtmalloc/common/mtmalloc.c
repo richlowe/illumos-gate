@@ -110,9 +110,10 @@
  * malloc'ed address.
  */
 
-#if defined(__i386) || defined(__amd64)
-#include <arpa/inet.h>	/* for htonl() */
-#endif
+
+#include <sys/types.h>	/* for htonl() */
+#include <netinet/in.h>
+#include <inttypes.h>
 
 static void * morecore(size_t);
 static void create_cache(cache_t *, size_t bufsize, uint_t hunks);
@@ -136,13 +137,6 @@ oversize_t *ovsz_hashtab[NUM_BUCKETS];
 
 #define	ALIGN(x, a)	((((uintptr_t)(x) + ((uintptr_t)(a) - 1)) \
 			& ~((uintptr_t)(a) - 1)))
-
-/* need this to deal with little endianess of x86 */
-#if defined(__i386) || defined(__amd64)
-#define	FLIP_EM(x)	htonl((x))
-#else
-#define	FLIP_EM(x)	(x)
-#endif
 
 #define	INSERT_ONLY			0
 #define	COALESCE_LEFT			0x00000001
@@ -990,7 +984,7 @@ reinit_cache(cache_t *thiscache)
 	while (freeblocks < (uint32_t *)thiscache->mt_arena) {
 		if (*freeblocks & 0xffffffff) {
 			for (i = 0; i < 32; i++) {
-				if (FLIP_EM(*freeblocks) & (0x80000000 >> i)) {
+				if (htonl(*freeblocks) & (0x80000000 >> i)) {
 					n = (uintptr_t)(((freeblocks -
 					    (uint32_t *)thiscache->mt_freelist)
 					    << 5) + i) * thiscache->mt_size;
@@ -1107,19 +1101,18 @@ malloc_internal(size_t size, percpu_t *cpuptr)
 	 * of the bitmask. n is the offset.
 	 */
 	for (i = 0; i < 32; ) {
-		if (FLIP_EM(*freeblocks) & (0x80000000 >> i++))
+		if (htonl(*freeblocks) & (0x80000000 >> i++))
 			break;
-		if (FLIP_EM(*freeblocks) & (0x80000000 >> i++))
+		if (htonl(*freeblocks) & (0x80000000 >> i++))
 			break;
-		if (FLIP_EM(*freeblocks) & (0x80000000 >> i++))
+		if (htonl(*freeblocks) & (0x80000000 >> i++))
 			break;
-		if (FLIP_EM(*freeblocks) & (0x80000000 >> i++))
+		if (htonl(*freeblocks) & (0x80000000 >> i++))
 			break;
 	}
 	index = 0x80000000 >> --i;
 
-
-	*freeblocks &= FLIP_EM(~index);
+	*freeblocks &= htonl(~index);
 
 	thiscache->mt_nfree--;
 
