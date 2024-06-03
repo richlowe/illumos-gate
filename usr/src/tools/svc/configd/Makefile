@@ -35,8 +35,7 @@ LIBSQLITE	= $(SRC)/lib/libsqlite
 
 CPPFLAGS += -I$(SRC)/cmd/svc/configd \
 	-I$(SRC)/cmd/svc/common -I$(SRC)/common/svc \
-	-I$(ROOT)/usr/include/sqlite-sys -D_REENTRANT \
-	-I$(LIBUUTIL)/common -I$(LIBSCF)/inc -I$(LIBSQLITE) \
+	-D_REENTRANT -I$(LIBUUTIL)/common -I$(LIBSCF)/inc -I$(LIBSQLITE) \
 	-I$(SRC)/tools/svc/libsqlite \
 
 CPPFLAGS += -DNATIVE_BUILD
