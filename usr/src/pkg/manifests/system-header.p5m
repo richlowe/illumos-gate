@@ -27,8 +27,8 @@
 # Copyright 2018 Nexenta Systems, Inc.
 # Copyright 2019 Peter Tribble.
 # Copyright 2020 Joyent, Inc.
-# Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2022 Garrett D'Amore
+# Copyright 2024 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2023 Oxide Computer company
 #
 
@@ -1990,6 +1990,7 @@ dir  path=usr/xpg4
 dir  path=usr/xpg4/include
 file path=usr/xpg4/include/curses.h
 file path=usr/xpg4/include/term.h
+file path=usr/xpg4/include/termcap.h
 file path=usr/xpg4/include/unctrl.h
 legacy pkg=SUNWhea \
     desc="SunOS C/C++ header files for general development of software" \
