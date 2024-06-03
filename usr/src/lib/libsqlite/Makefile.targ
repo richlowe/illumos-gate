@@ -9,28 +9,28 @@
 
 opcodes.h: $(SRCDIR)/vdbe.c
 	@echo "Generating $@"; \
-	 $(RM) -f $@ ; \
-	 echo '/* Automatically generated file.  Do not edit */' > $@ ; \
-	 grep '^case OP_' $(SRCDIR)/vdbe.c | \
-	    sed -e 's/://' | \
+	$(RM) -f $@ ; \
+	echo '/* Automatically generated file.  Do not edit */' > $@ ; \
+	$(GREP) '^case OP_' $(SRCDIR)/vdbe.c | \
+	    $(SED) -e 's/://' | \
 	    $(AWK) '{printf "#define %-30s %3d\n", $$2, ++cnt}' >> $@
 
 opcodes.c: $(SRCDIR)/vdbe.c
 	@echo "Generating $@"; \
-	 $(RM) -f $@ ; \
-	 echo '/* Automatically generated file.  Do not edit */' > $@ ; \
-	 echo 'char *sqliteOpcodeNames[] = { "???", ' >> $@ ; \
-	 grep '^case OP_' $(SRCDIR)/vdbe.c | \
-	    sed -e 's/^.*OP_/  "/' -e 's/:.*$$/", /' >> $@ ; \
-	 echo '};' >> $@
+	$(RM) -f $@ ; \
+	$(ECHO) '/* Automatically generated file.  Do not edit */' > $@ ; \
+	$(ECHO) 'char *sqliteOpcodeNames[] = { "???", ' >> $@ ; \
+	$(GREP) '^case OP_' $(SRCDIR)/vdbe.c | \
+	    $(SED) -e 's/^.*OP_/  "/' -e 's/:.*$$/", /' >> $@ ; \
+	 $(ECHO) '};' >> $@
 
 testfixture: FRC
 	@if [ -f $(TCLBASE)/include/tcl.h ]; then \
 		unset SUNPRO_DEPENDENCIES; \
-		echo $(LINK.c) -o testfixture $(TESTSRC) $(LIBRARY) $(LDLIBS) ;\
+		$(ECHO) $(LINK.c) -o testfixture $(TESTSRC) $(LIBRARY) $(LDLIBS) ;\
 		exec $(LINK.c) -o testfixture $(TESTSRC) $(LIBRARY) $(LDLIBS) ;\
 	else \
-		echo "$(TCLBASE)/include/tcl.h: not found."; \
+		$(ECHO) "$(TCLBASE)/include/tcl.h: not found."; \
 		exit 1; \
 	fi
 
