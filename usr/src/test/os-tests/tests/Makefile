@@ -34,6 +34,7 @@ SUBDIRS =       \
 		poll \
 		portfs \
 		regression \
+		saveargs \
 		sdevfs \
 		secflags \
 		signalfd \
