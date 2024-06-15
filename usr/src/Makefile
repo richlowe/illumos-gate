@@ -252,12 +252,14 @@ cc-version:
 cc64-version:
 
 java-version:
-	@if [ -x "$(JAVAC)" ]; then			\
-		$(ECHO) $(JAVAC);			\
+	@if [ "$(ENABLE_JAVA)" == "$(POUND_SIGN)" ]; then		\
+		:;							\
+	elif [ -x "$(JAVAC)" ]; then					\
+		$(ECHO) $(JAVAC);					\
 		$(JAVA_ROOT)/bin/java -fullversion 2>&1 | head -1;	\
-	else						\
-		$(ECHO) No Java compiler found;		\
-		exit 1;					\
+	else								\
+		$(ECHO) No Java compiler found;				\
+		exit 1;							\
 	fi
 
 openssl-version:
