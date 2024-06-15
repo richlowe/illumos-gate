@@ -41,7 +41,7 @@ CPPFLAGS += -I$(SRC)/cmd/svc/configd \
 CPPFLAGS += -DNATIVE_BUILD
 
 LDFLAGS += $(BDIRECT)
-LDLIBS	+= -L$(NATIVE_ADJUNCT)/usr/lib -R$(NATIVE_ADJUNCT)/usr/lib \
+LDLIBS	+= -L$(NATIVE_ADJUNCT)/lib -R$(NATIVE_ADJUNCT)/lib \
 	-lumem -L$(ROOTONBLDLIBMACH) \
 	-R '$$ORIGIN/../../lib/$(NATIVE_MACH)' -lsqlite-sys -luutil
 
