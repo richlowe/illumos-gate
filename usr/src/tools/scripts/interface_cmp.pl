@@ -82,8 +82,8 @@ use vars  qw(@AddSymList @DelSymList @EmptyTopVerList);
 # note:
 #	We expand strings of the form MACH(dir) to match the given
 #	directory as well as any 64-bit architecture subdirectory that
-#	might be present (i.e. amd64, sparcv9).
-# 
+#	might be present (i.e. aarch64, amd64, sparcv9).
+#
 sub LoadExceptions {
 	my $file;
 	my $Line;
@@ -114,7 +114,7 @@ sub LoadExceptions {
 		# it relative to the script location given by $0.
 		$file = dirname($0) . "/../etc/exception_lists/interface_cmp";
 		last FILE if (-f $file);
-		
+
 		# No exception file was found.
 		return;
 	}
@@ -122,9 +122,9 @@ sub LoadExceptions {
 	open (EFILE, $file) ||
 		die "$Prog: unable to open exceptions file: $file";
 	while ($Line = onbld_elfmod::GetLine(\*EFILE, \$LineNum)) {
-		
+
 		# Expand MACH()
-		$Line =~ s/MACH\(([^)]+)\)/$1(\/amd64|\/sparcv9)?/g;
+		$Line =~ s/MACH\(([^)]+)\)/$1(\/aarch64|\/amd64|\/sparcv9)?/g;
 
 		if ($Line =~ /^DELSYM\s+/) {
 		    my ($item, $sym_re, $ver_re, $obj_re) =
@@ -340,7 +340,7 @@ sub ReadInterface {
 
 			die "$file: SYMBOL not expected on line $LineNum: $Line\n"
 			    if !$sym_ok;
-			
+
 			$cur_version->[1]++;
 			$cur_version->[2]++;
 			$cur_version->[3]{$sym} = 'NEW';
@@ -538,7 +538,7 @@ sub compare {
 			# For a given <PREFIX>x.y[.z], valid sucessors would
 			# be <PREFIX>x.(y+1) or <PREFIX>x.y.(z+1), where z is
 			# assumed to be 0 if not present.
-			#			
+			#
 			# This check only makes sense when the new interface
 			# is a direct decendent of the old one, as specified
 			# via the -d option. If the two interfaces are more

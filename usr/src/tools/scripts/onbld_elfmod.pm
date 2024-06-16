@@ -79,7 +79,7 @@ sub GetLine {
 			}
 		}
 
-		# If our result string is still null, act as if a 
+		# If our result string is still null, act as if a
 		# continuation is present and read another line.
 		$cont = 1 if ($ret_line eq '');
 	}
@@ -123,8 +123,8 @@ sub GetLine {
 # note:
 #	We expand strings of the form MACH(dir) to match the given
 #	directory as well as any 64-bit architecture subdirectory that
-#	might be present (i.e. amd64, sparcv9).
-# 
+#	might be present (i.e. aarch64, amd64, sparcv9).
+#
 sub LoadExceptionsToEXRE {
 	my $name = $_[0];
 	my $file;
@@ -175,7 +175,7 @@ sub LoadExceptionsToEXRE {
 		die "$name: unable to open exceptions file: $file";
 	while ($Line = onbld_elfmod::GetLine(\*EFILE, \$LineNum)) {
 		# Expand MACH()
-		$Line =~ s/MACH\(([^)]+)\)/$1(\/amd64|\/sparcv9)?/;
+		$Line =~ s/MACH\(([^)]+)\)/$1(\/aarch64|\/amd64|\/sparcv9)?/g;
 
 		# %except_re is a hash indexed by regular expression variable
 		# name, with a value that contains the corresponding regular
