@@ -29,9 +29,10 @@
 
 SHELL=/usr/bin/ksh93
 
-SCRIPTS= \
-	bldenv \
-	nightly
+SCRIPTS=	\
+	bldenv	\
+	nightly \
+	which_scm
 
 SHFILES= \
 	build_cscope \
@@ -44,7 +45,6 @@ SHFILES= \
 	onu \
 	protocmp.terse \
 	webrev \
-	which_scm \
 	ws \
 	xref
 
