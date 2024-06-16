@@ -98,12 +98,15 @@ SUBDIRS=			\
 
 include Makefile.tools
 
+# Only i386 has a 64bit ISA subdirectory
+ROOTDIRS_i386= \
+	$(ROOTONBLD)/bin/$(NATIVE_MACH64)
+
 ROOTDIRS=					\
 	$(ROOTOPT)				\
 	$(ROOTONBLD)				\
 	$(ROOTONBLD)/bin			\
 	$(ROOTONBLD)/bin/$(NATIVE_MACH)		\
-	$(ROOTONBLD)/bin/$(NATIVE_MACH64)	\
 	$(ROOTONBLD)/lib			\
 	$(ROOTONBLD)/lib/$(NATIVE_MACH)		\
 	$(ROOTONBLD)/lib/$(NATIVE_MACH)/64	\
@@ -115,7 +118,7 @@ ROOTDIRS=					\
 	$(ROOTONBLD)/man			\
 	$(ROOTONBLD)/man/man1onbld
 
-ROOTDIRS +=							\
+ROOTDIRS +=									\
 	$(ROOTONBLD)/lib/python$(PYTHON3_VERSION)				\
 	$(ROOTONBLD)/lib/python$(PYTHON3_VERSION)/onbld				\
 	$(ROOTONBLD)/lib/python$(PYTHON3_VERSION)/onbld/__pycache__		\
@@ -123,6 +126,8 @@ ROOTDIRS +=							\
 	$(ROOTONBLD)/lib/python$(PYTHON3_VERSION)/onbld/Checks/__pycache__	\
 	$(ROOTONBLD)/lib/python$(PYTHON3_VERSION)/onbld/Scm			\
 	$(ROOTONBLD)/lib/python$(PYTHON3_VERSION)/onbld/Scm/__pycache__
+
+ROOTDIRS += $(ROOTDIRS_$(NATIVE_MACH))
 
 all :=		TARGET= install
 install :=	TARGET= install
