@@ -217,6 +217,19 @@ NOSYMSORT	usr/MACH(lib)/libsun_fc\.so\.1			# C++
 NOSYMSORT	usr/MACH(lib)/libfru\.so\.1			# C++
 NOSYMSORT	usr/lib/libnisdb\.so\.2				# C++
 
+# XXXARM: Certain objects make use of the GCC runtime, at least during
+# development, and also need exceptions here.
+#
+# By convention, they use the static libgcc, and do not need to be excepted
+# from the dependency check as well.
+NOSYMSORT	lib/libm.so.0
+NOSYMSORT	lib/libsqlite-sys.so.2.8.15
+NOSYMSORT	usr/bin/sleep
+NOSYMSORT	usr/bin/vmstat
+NOSYMSORT	usr/lib/libdtrace.so.1
+NOSYMSORT	usr/lib/libzonecfg.so.1
+NOSYMSORT	usr/sbin/ping
+
 # The majority of illumos deliverables should not depend on the GCC runtime
 # (any necessary runtime symbol should be provided by libc.so, instead).
 # However, the GNU C++ runtime requires the GCC runtime, so certain objects
