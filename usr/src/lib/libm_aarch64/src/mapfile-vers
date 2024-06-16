@@ -58,7 +58,7 @@ global:
 	__atan2f;
 	__floorf;
 	__frexpf;
-	__ldexpf;
+	__ldexpf { FLAGS = NODYNSORT };
 	__log10f;
 	__cosf;
 	__expf;
@@ -69,7 +69,7 @@ global:
 
 	# gdb consumes these three symbols so they need to stay around
 	__frexpl;
-	__ldexpl;
+	__ldexpl { FLAGS = NODYNSORT };
 	__powl;
 
 	acos;
@@ -291,10 +291,10 @@ global:
 	nearbyintl;
 	nextafter;
 	nextafterf;
-	nextafterl;
+	nextafterl { FLAGS = NODYNSORT };
 	nexttoward;
 	nexttowardf;
-	nexttowardl;
+	nexttowardl { FLAGS = NODYNSORT };
 	pow;
 	powf;
 	powl;
@@ -352,5 +352,8 @@ global:
 	yn;
 	ynf;
 local:
+	_isnand { FLAGS = NODYNSORT };
+	_isnan { FLAGS = NODYNSORT };
+	_isnanf { FLAGS = NODYNSORT };
 	*;
 };
