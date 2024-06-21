@@ -2122,7 +2122,18 @@ $endif
 	_assert;
 	atoll;
 	brk;
-#	__builtin_alloca;  #XXXARM: We need the stub definition, for those with no builtin
+#
+# This is a concrete out-of-line definition of __builtin_alloca.  This seems
+# to have been to support compilers which did not in fact have alloca (a
+# dubious prospect) and in the way of all things became the kind of temporary
+# that lasts.
+#
+# Unfortunately on x86 and SPARC this became public, here, in Solaris 2.3. It
+# should not be added to further platforms.
+#
+$if _x86 || _sparc
+	__builtin_alloca;
+$endif
 	cftime;
 	closelog;
 	csetcol;
