@@ -172,7 +172,6 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 	int got_pc = (gsp->kregs[KREG_PC] != 0);
 	uint_t argc, reg_argc;
 	long fr_argv[32];
-	int start_index; /* index to save_instr where to start comparison */
 	int err;
 	int i;
 
@@ -281,7 +280,7 @@ mdb_aarch64_kvm_stack_iter(mdb_tgt_t *t, const mdb_tgt_gregset_t *gsp,
 
 		if ((argc != 0) &&
 		    ((args_style = saveargs_has_args(ins, insnsize, argc,
-		    start_index)) != SAVEARGS_NO_ARGS)) {
+		    0)) != SAVEARGS_NO_ARGS)) {
 			/* Up to 8 arguments are passed via registers */
 			reg_argc = MIN(8, argc);
 			size = reg_argc * sizeof (uint64_t);
