@@ -19,7 +19,12 @@
 
 include $(SRC)/Makefile.master
 
-SUBDIRS_i386 = i386 imc zen_umc xsave
+SUBDIRS_i386 =		\
+	i386		\
+	imc		\
+	saveargs	\
+	xsave		\
+	zen_umc
 
 SUBDIRS =       \
 		cores \
