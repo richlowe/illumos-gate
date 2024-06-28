@@ -643,20 +643,6 @@ write_cpuactlr_el1(uint64_t reg)
 }
 
 static __inline__ uint64_t
-read_cpuectlr_el1(void)
-{
-	uint64_t reg;
-	__asm__ __volatile__("mrs %0, s3_1_c15_c2_1":"=r"(reg)::"memory");
-	return (reg);
-}
-
-static __inline__ void
-write_cpuectlr_el1(uint64_t reg)
-{
-	__asm__ __volatile__("msr s3_1_c15_c2_1, %0"::"r"(reg):"memory");
-}
-
-static __inline__ uint64_t
 read_l2actlr_el1(void)
 {
 	uint64_t reg;

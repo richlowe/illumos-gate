@@ -58,25 +58,40 @@ t0:
 
 	SET_SIZE(_start)
 
-	.text
 	.balign 4096
-	.globl secondary_vec_start
-secondary_vec_start:
-	// disable smp
+	ENTRY(secondary_vec_start)
+	// enable SMP cache affinity
 	mrs	x0, midr_el1
 	mov	w0, w0
-	lsr	w1, w0, #24
-	cmp	w1, #0x41
-	b.ne	.Lnot_arm_core
+	lsr	w1, w0, #24	// Implementator
+	cmp	w1, #MIDR_IMPL_ARM
+	b.ne	not_cortex_1
+	ubfx	w1, w0, #16, #4	// Architecture
+	cmp	w1, #0xF
+	b.ne	not_cortex_1
+	ubfx	w1, w0, #4, #12	// Part
+	// XXXARM: The -A72 TRM is wishy washy about whether this is
+	// necessary, but it is _possible_.
+	cmp	w1, #MIDR_PART_ARM_CORTEX_A72
+	b.eq	cortex_a72_1
+	cmp	w1, #MIDR_PART_ARM_CORTEX_A57
+	b.eq	cortex_a57_1
+	// NB: Explicitly _not_ A55
+	cmp	w1, #MIDR_PART_ARM_CORTEX_A53
+	b.eq	cortex_a53_1
+	b	not_cortex_1
 
-	// cpuectlr SMPEN -> 1
+cortex_a72_1:
+cortex_a57_1:
+cortex_a53_1:
+	// CPUECTLR_EL1.SMPEN -> 1
 	mrs	x0, s3_1_c15_c2_1
-	tbnz	x0, #6, .Lnot_arm_core
-	orr	x1, x0, #(1 << 6)
+	tbnz	x0, #6, not_cortex_1
+	orr	x0, x0, #(1<<6)
 	msr	s3_1_c15_c2_1, x0
+	dsb	sy
 	isb
-
-.Lnot_arm_core:
+not_cortex_1:
 	// invalidate cache (data/inst)
 	bl	dcache_invalidate_all
 	ic	iallu
@@ -230,6 +245,5 @@ dcache_invalidate_all:
 
 	.globl secondary_vec_end
 secondary_vec_end:
-
 	.balign 4096
-	.size	secondary_vec_start, [.-secondary_vec_start]
+SET_SIZE(secondary_vec_start)
