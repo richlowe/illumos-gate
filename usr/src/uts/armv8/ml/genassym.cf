@@ -21,6 +21,7 @@ include <sys/privregs.h>
 include <sys/kdi_machimpl.h>
 include <sys/kdi_regs.h>
 include <sys/kdi_svc.h>
+include <sys/cpuid.h>
 
 include <asm/controlregs.h>
 
@@ -181,6 +182,11 @@ define	LOCK_LEVEL		LOCK_LEVEL
 define	MMU_PAGESHIFT	MMU_PAGESHIFT
 define	DEFAULTSTKSZ	DEFAULTSTKSZ
 define	MMU_PAGESIZE	MMU_PAGESIZE
+
+define	MIDR_IMPL_ARM			MIDR_IMPL_ARM
+define	MIDR_PART_ARM_CORTEX_A53	MIDR_PART_ARM_CORTEX_A53
+define	MIDR_PART_ARM_CORTEX_A57	MIDR_PART_ARM_CORTEX_A57
+define	MIDR_PART_ARM_CORTEX_A72	MIDR_PART_ARM_CORTEX_A72
 
 define	TIMESPEC_SIZE	sizeof(timespec_t)
 define	TV_SEC		offsetof(timespec_t, tv_sec)

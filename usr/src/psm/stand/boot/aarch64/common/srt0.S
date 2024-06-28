@@ -102,22 +102,22 @@ el2:
 
 	mrs	x0, midr_el1
 	mov	w0, w0
-	lsr	w1, w0, #24
-	cmp	w1, #0x41
+	lsr	w1, w0, #24	// Implementor
+	cmp	w1, #0x41	// ARM
 	b.ne	not_cortex_0
-	lsl	w1, w0, #(32 - (16 + 4))
-	lsr	w1, w1, #((32 - (16 + 4)) + 16)
+	ubfx	w1, w0, #16, #4	// Architecture
 	cmp	w1, #0xF
 	b.ne	not_cortex_0
-	lsl	w1, w0, #(32 - (4 + 12))
-	lsr	w1, w1, #((32 - (4 + 12)) + 4)
-	ldr	w2, =0xD07
-	cmp	w1, w2
+	ubfx	w1, w0, #4, #12	// Part
+	cmp	w1, #0xD08	// -A72
+	b.eq	cortex_a72_0
+	cmp	w1, #0xD07	// -A57
 	b.eq	cortex_a57_0
-	ldr	w2, =0xD03
-	cmp	w1, w2
+				// *not* -A55
+	cmp	w1, #0xD03	// -A53
 	b.eq	cortex_a53_0
 	b	not_cortex_0
+cortex_a72_0:
 cortex_a57_0:
 cortex_a53_0:
 	// access L2ACTLR L2ECTLR L2CTLR CPUECTLR CPUACTLR
@@ -147,29 +147,31 @@ el1:
 	dsb	sy
 	isb
 
-	// enable smp
+	// enable cache coherence on Cortex-A5x
 	mrs	x0, midr_el1
 	mov	w0, w0
-	lsr	w1, w0, #24
-	cmp	w1, #0x41
+	lsr	w1, w0, #24	// Implementor
+	cmp	w1, #0x41	// ARM Inc.
 	b.ne	not_cortex_1
-	lsl	w1, w0, #(32 - (16 + 4))
-	lsr	w1, w1, #((32 - (16 + 4)) + 16)
+	ubfx	w1, w0, #16, #4	// Architecture
 	cmp	w1, #0xF
 	b.ne	not_cortex_1
-	lsl	w1, w0, #(32 - (4 + 12))
-	lsr	w1, w1, #((32 - (4 + 12)) + 4)
-	ldr	w2, =0xD07
-	cmp	w1, w2
+	ubfx	w1, w0, #4, #12	// Part
+	// XXXARM: The -A72 TRM is wishy washy about whether this is
+	// necessary, but it is _possible_.
+	cmp	w1, #0xD08	// Cortex-A72
+	b.eq	cortex_a72_1
+	cmp	w1, #0xD07	// Cortex-A57
 	b.eq	cortex_a57_1
-	ldr	w2, =0xD03
-	cmp	w1, w2
+	// NB: Explicitly _not_ A55
+	cmp	w1, #0xD03	// Cortex-A53
 	b.eq	cortex_a53_1
 	b	not_cortex_1
+
+cortex_a72_1:
 cortex_a57_1:
 cortex_a53_1:
-
-	// cpuectlr SMPEN -> 0
+	// CPUECTLR_EL1.SMPEN -> 1 (enable cache coherence)
 	mrs	x0, s3_1_c15_c2_1
 	tbnz	x0, #6, not_cortex_1
 	orr	x0, x0, #(1<<6)
@@ -422,4 +424,3 @@ from_current_el_sync_handle:
 	bl	dump_exception
 0:	b	0b
 	SET_SIZE(exception_vector)
-
