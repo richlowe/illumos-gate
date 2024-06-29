@@ -29,6 +29,7 @@
 #include <sys/thread.h>
 #include <sys/cpuvar.h>
 #include <sys/cpu.h>
+#include <sys/cpuid.h>
 #include <sys/t_lock.h>
 #include <sys/param.h>
 #include <sys/proc.h>
@@ -89,6 +90,7 @@
 #include <sys/arch_timer.h>
 #include <sys/cpuinfo.h>
 #include <sys/prom_debug.h>
+#include <sys/bitext.h>
 
 extern void brand_init(void);
 extern void pcf_init(void);
@@ -264,14 +266,25 @@ extern void ssp_init(void);
 static void
 getl2cacheinfo(int *csz, int *lsz, int *assoc)
 {
-	write_csselr_el1((1u << 1) | 0);
-	uint64_t ccsidr = read_ccsidr_el1();
+	uint64_t num_sets, ccsidr;
 
-	size_t num_set = ((ccsidr >> 13) & ((1u << 15) - 1)) + 1;
+	write_csselr_el1(1u << 1); /* CCSIDR_EL1 should reflect L2$ */
+	ccsidr = read_ccsidr_el1();
 
-	l2cache_linesz = (1u << (4 + (ccsidr & 0x7)));
-	l2cache_assoc = ((ccsidr >> 3) & ((1u << 10) - 1)) + 1;
-	l2cache_sz = l2cache_linesz * l2cache_assoc * num_set;
+	/*
+	 * We need ID_AA64MMFR2.CCIDX prior to cpu features being detected
+	 * because the fields in CCSIDR change incompatibly.
+	 */
+	if (MMFR2_CCIDX(read_id_aa64mmfr2()) == 0) {
+		num_sets = bitx64(ccsidr, 27, 13) + 1;
+		l2cache_assoc = bitx64(ccsidr, 12, 3) + 1;
+	} else {
+		num_sets = bitx64(ccsidr, 55, 32) + 1;
+		l2cache_assoc = bitx64(ccsidr, 23, 3) + 1;
+	}
+
+	l2cache_linesz = (1u << (4 + bitx64(ccsidr, 2, 0)));
+	l2cache_sz = l2cache_linesz * l2cache_assoc * num_sets;
 }
 
 void
