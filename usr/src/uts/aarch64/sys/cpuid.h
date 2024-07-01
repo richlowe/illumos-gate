@@ -38,14 +38,19 @@ extern "C" {
 #define	MIDR_IMPL_CAVIUM	0x43	/* Cavium Inc. */
 #define	MIDR_IMPL_DEC		0x44	/* Digital Equipment Corporation */
 #define	MIDR_IMPL_FUJITSU	0x46	/* Fujitsu Ltd. */
+#define	MIDR_IMPL_HISILICON	0x48	/* HiSilicon */
 #define	MIDR_IMPL_INFINEON	0x49	/* Infineon Technologies AG */
 #define	MIDR_IMPL_MOTOROLA	0x4D	/* Motorola/Freescale Semiconductor. */
 #define	MIDR_IMPL_NVIDIA	0x4E	/* NVIDIA Corporation */
 #define	MIDR_IMPL_AMC		0x50	/* Applied Micro Circuits Corporation */
 #define	MIDR_IMPL_QUALCOMM	0x51	/* Qualcomm Inc. */
+#define	MIDR_IMPL_SAMSUNG	0x53	/* Samsung */
 #define	MIDR_IMPL_MARVELL	0x56	/* Marvell International Ltd. */
 #define	MIDR_IMPL_APPLE		0x61	/* Apple Computer */
+#define	MIDR_IMPL_FARADAY	0x66	/* Faraday */
 #define	MIDR_IMPL_INTEL		0x69	/* Intel Corporation */
+#define	MIDR_IMPL_MICROSOFT	0x6d	/* Microsoft Corporation */
+#define	MIDR_IMPL_PHYTIUM	0x70	/* Phytium */
 #define	MIDR_IMPL_AMPERE	0xC0	/* Ampere Computing */
 
 #define	MIDR_PART(midr)		bitx64(midr, 15, 4)
@@ -142,6 +147,9 @@ extern "C" {
 
 /* Ampere */
 #define	MIDR_PART_AMPERE_AMPERE1	0xac3
+
+/* Microsoft */
+#define	MIDR_PART_MICROSOFT_AZURE_COBALT_100	0xd49
 
 /* Software */
 #define	MIDR_PART_SOFTWARE_QEMUMAX	0x051 /* "Q" */

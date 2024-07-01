@@ -152,6 +152,12 @@ static const struct cpu_partno cpu_parts_software[] = {
 	{ 0x0, NULL }
 };
 
+
+static const struct cpu_partno cpu_parts_microsoft[] = {
+	{ MIDR_PART_MICROSOFT_AZURE_COBALT_100, "Azure Cobalt 100" },
+	{ 0x0, NULL }
+};
+
 /* NB: MIDR_IMPL_SOFTWARE is 0x0, use the impl_name as a sentinel */
 static const struct cpu_impl cpu_impls[] = {
 	{ MIDR_IMPL_SOFTWARE,	"Software",	cpu_parts_software },
@@ -161,14 +167,19 @@ static const struct cpu_impl cpu_impls[] = {
 	{ MIDR_IMPL_CAVIUM,	"Cavium",	cpu_parts_cavium },
 	{ MIDR_IMPL_DEC,	"DEC",		NULL },
 	{ MIDR_IMPL_FUJITSU,	"Fujitsu",	cpu_parts_fujitsu },
+	{ MIDR_IMPL_HISILICON,	"HiSilicon",	NULL },
 	{ MIDR_IMPL_INFINEON,	"Infineon",	NULL },
 	{ MIDR_IMPL_MOTOROLA,	"Motorola",	NULL },
 	{ MIDR_IMPL_NVIDIA,	"Nvidia",	cpu_parts_nvidia },
 	{ MIDR_IMPL_AMC,	"AMC",		cpu_parts_amc },
+	{ MIDR_IMPL_SAMSUNG,	"Samsung",	NULL },
 	{ MIDR_IMPL_QUALCOMM,	"Qualcomm",	cpu_parts_qualcomm },
 	{ MIDR_IMPL_MARVELL,	"Marvell",	NULL },
 	{ MIDR_IMPL_APPLE,	"Apple",	cpu_parts_apple },
+	{ MIDR_IMPL_FARADAY,	"Faraday",	NULL },
 	{ MIDR_IMPL_INTEL,	"Intel",	NULL },
+	{ MIDR_IMPL_MICROSOFT,	"Microsoft",	cpu_parts_microsoft },
+	{ MIDR_IMPL_PHYTIUM,	"Phytium",	NULL },
 	{ 0x0,	NULL, NULL },
 };
 
