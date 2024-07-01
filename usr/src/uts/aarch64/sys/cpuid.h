@@ -32,6 +32,7 @@ extern "C" {
  */
 #define	MIDR_IMPL(midr)		bitx64(midr, 31, 24)
 
+#define	MIDR_IMPL_SOFTWARE	0x00	/* Reserved for software use */
 #define	MIDR_IMPL_ARM		0x41	/* Arm Limited */
 #define	MIDR_IMPL_BROADCOM	0x42	/* Broadcom Corporation */
 #define	MIDR_IMPL_CAVIUM	0x43	/* Cavium Inc. */
@@ -141,6 +142,9 @@ extern "C" {
 
 /* Ampere */
 #define	MIDR_PART_AMPERE_AMPERE1	0xac3
+
+/* Software */
+#define	MIDR_PART_SOFTWARE_QEMUMAX	0x051 /* "Q" */
 
 #define	MIDR_REVISION(midr)	bitx64(midr, 3, 0)
 

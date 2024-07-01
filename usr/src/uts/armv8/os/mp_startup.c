@@ -161,8 +161,8 @@ init_cpu_info(struct cpu *cp)
 	cp->cpu_implementer = kmem_zalloc(16, KM_SLEEP);
 	cpuid_implementer(cp, cp->cpu_implementer, 16);
 
-	cp->cpu_partname = kmem_zalloc(16, KM_SLEEP);
-	cpuid_partname(cp, cp->cpu_partname, 16);
+	cp->cpu_partname = kmem_zalloc(32, KM_SLEEP);
+	cpuid_partname(cp, cp->cpu_partname, 32);
 
 	cp->cpu_revision = kmem_zalloc(16, KM_SLEEP);
 	sprintf(cp->cpu_revision, "%ld", MIDR_REVISION(cp->cpu_m.mcpu_midr));

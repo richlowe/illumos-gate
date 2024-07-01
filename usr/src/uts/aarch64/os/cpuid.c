@@ -147,7 +147,14 @@ static const struct cpu_partno cpu_parts_ampere[] = {
 	{ 0x0, NULL }
 };
 
+static const struct cpu_partno cpu_parts_software[] = {
+	{ MIDR_PART_SOFTWARE_QEMUMAX,	"QEMU Max" },
+	{ 0x0, NULL }
+};
+
+/* NB: MIDR_IMPL_SOFTWARE is 0x0, use the impl_name as a sentinel */
 static const struct cpu_impl cpu_impls[] = {
+	{ MIDR_IMPL_SOFTWARE,	"Software",	cpu_parts_software },
 	{ MIDR_IMPL_AMPERE,	"Ampere",	cpu_parts_ampere },
 	{ MIDR_IMPL_ARM,	"ARM",		cpu_parts_arm },
 	{ MIDR_IMPL_BROADCOM,	"Broadcom",	cpu_parts_broadcom },
@@ -171,14 +178,15 @@ cpuid_implementer(const cpu_t *cpu, char *s, size_t n)
 	uint8_t impl = MIDR_IMPL(cpu->cpu_m.mcpu_midr);
 	char *vendor = NULL;
 
-	for (const struct cpu_impl *ci = cpu_impls; ci->impl_id != 0x0; ci++) {
+	for (const struct cpu_impl *ci = cpu_impls;
+	    ci->impl_name != NULL; ci++) {
 		if (ci->impl_id == impl) {
 			strlcat(s, ci->impl_name, n);
 			return;
 		}
 	}
 
-	snprintf(s, n, "Unknown [%x]", impl);
+	snprintf(s, n, "Unknown [0x%x]", impl);
 }
 
 void
@@ -190,7 +198,7 @@ cpuid_partname(const cpu_t *cpu, char *s, size_t n)
 	const struct cpu_partno *cp;
 	char *part = NULL;
 
-	for (ci = cpu_impls; ci->impl_id != 0x0; ci++) {
+	for (ci = cpu_impls; ci->impl_name != NULL; ci++) {
 		if ((ci->impl_id != impl) || (ci->impl_part == NULL))
 			continue;
 
@@ -202,7 +210,7 @@ cpuid_partname(const cpu_t *cpu, char *s, size_t n)
 		}
 	}
 
-	snprintf(s, n, "Unknown [%x]", partid);
+	snprintf(s, n, "Unknown [0x%x]", partid);
 }
 
 void
@@ -214,9 +222,16 @@ cpuid_brandstr(const cpu_t *cpu, char *s, size_t n)
 	const struct cpu_partno *cp;
 	char *part = NULL;
 
-	for (ci = cpu_impls; ci->impl_id != 0x0; ci++) {
-		if ((ci->impl_id != impl) || (ci->impl_part == NULL))
+	for (ci = cpu_impls; ci->impl_name != NULL; ci++) {
+		if (ci->impl_id != impl)
 			continue;
+
+		if (ci->impl_part == NULL) {
+			snprintf(s, n, "%s Unknown [0x%x] @ %ld MHz",
+			    ci->impl_name, partid,
+			    cpu->cpu_curr_clock / 1000 / 1000);
+			return;
+		}
 
 		for (cp = ci->impl_part; cp->part_name != NULL; cp++) {
 			if (cp->part_id == partid) {
@@ -227,9 +242,13 @@ cpuid_brandstr(const cpu_t *cpu, char *s, size_t n)
 			}
 		}
 
-		snprintf(s, n, "%s Unknown [%x] @ %ld MHz", ci->impl_name,
+		snprintf(s, n, "%s Unknown [0x%x] @ %ld MHz", ci->impl_name,
 		    partid, cpu->cpu_curr_clock / 1000 / 1000);
+		return;
 	}
+
+	snprintf(s, n, "Unknown [0x%x, 0x%x] @ %ld MHz", impl,
+	    partid, cpu->cpu_curr_clock / 1000 / 1000);
 }
 
 static const char *arm_feature_names[NUM_ARM_FEATURES] = {
