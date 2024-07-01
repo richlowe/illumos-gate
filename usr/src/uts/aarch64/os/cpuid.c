@@ -67,6 +67,13 @@ static const struct cpu_partno cpu_parts_arm[] = {
 	{ MIDR_PART_ARM_CORTEX_A715,	"Cortex-A715" },
 	{ MIDR_PART_ARM_CORTEX_X3,	"Cortex-X3" },
 	{ MIDR_PART_ARM_NEOVERSE_V2,	"Neoverse-V2" },
+	{ MIDR_PART_ARM_CORTEX_A520,	"Cortex-A520" },
+	{ MIDR_PART_ARM_CORTEX_A720,	"Cortex-A720" },
+	{ MIDR_PART_ARM_CORTEX_X4,	"Cortex-X4" },
+	{ MIDR_PART_ARM_NEOVERSE_V3,	"Neoverse-V3" },
+	{ MIDR_PART_ARM_CORTEX_X925,	"Cortex-X925" },
+	{ MIDR_PART_ARM_CORTEX_A725,	"Cortex-A725" },
+	{ MIDR_PART_ARM_NEOVERSE_N3,	"Neoverse-N3" },
 	{ 0x0, NULL }
 };
 
@@ -126,6 +133,12 @@ static const struct cpu_partno cpu_parts_apple[] = {
 	{ MIDR_PART_APPLE_M1_FIRESTORM_MAX,	"M1 Max (Firestorm)" },
 	{ MIDR_PART_APPLE_M2_BLIZZARD,		"M2 (Blizzard)" },
 	{ MIDR_PART_APPLE_M2_AVALANCHE,		"M2 (Avalanche)" },
+	{ MIDR_PART_APPLE_M2_BLIZZARD_PRO,	"M2 Pro (Blizzard)" },
+	{ MIDR_PART_APPLE_M2_AVALANCHE_PRO,	"M2 Pro (Avalanche)" },
+	{ MIDR_PART_APPLE_M2_BLIZZARD_MAX,	"M2 Max (Blizzard)" },
+	{ MIDR_PART_APPLE_M2_AVALANCHE_MAX,	"M2 Max (Avalanche)" },
+	{ MIDR_PART_APPLE_M3_SAWTOOTH,		"M3 (Sawtooth)" },
+	{ MIDR_PART_APPLE_M3_EVEREST,		"M3 (Everest)" },
 	{ 0x0, NULL }
 };
 
