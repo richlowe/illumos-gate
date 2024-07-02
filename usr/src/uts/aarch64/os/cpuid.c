@@ -1079,20 +1079,13 @@ cpuid_gather_arm_features(void *features)
 	cpuid_regs.mmfr3 = 0;
 #endif
 
-#if 0				/* XXXARM: base CPU doesn't support these */
-	cpuid_regs.zfr0 = read_id_aa64zfr0();
-	cpuid_regs.smfr0 = read_id_aa64smfr0();
-#else
+	/* These are initialized later based on FEAT_SVE, and FEAT_SME */
 	cpuid_regs.zfr0 = 0;
 	cpuid_regs.smfr0 = 0;
-#endif
 
-#if 0				/* XXXARM: base CPU doesn't support these */
-	uint64_t pmmir = read_pmmir();
-#else
-	uint64_t pmmir = 0;
-#endif
-
+	/*
+	 * Pass 1: Features which don't imply the existence of feature registers
+	 */
 	cpuid_features_from_idregs(features, feature_specs,
 	    ARRAY_SIZE(feature_specs), &cpuid_regs);
 
@@ -1103,11 +1096,16 @@ cpuid_gather_arm_features(void *features)
 	/*
 	 * A2.11 The Armv8.8 architecture extension
 	 * pp. A2-116 et seq.
+	 *
+	 * XXXARM: As with SME/SVE, we can't read the pmmir just yet.
 	 */
-	if (has_arm_feature(features, ARM_FEAT_PMUv3p4) &&
-	    (PMMIR_THWIDTH(pmmir) != 0)) {
-		add_arm_feature(features, ARM_FEAT_PMUv3_TH);
+#if 0
+	if (has_arm_feature(features, ARM_FEAT_PMUv3p4)) {
+		if (PMMIR_THWIDTH(read_pmmir()) != 0) {
+			add_arm_feature(features, ARM_FEAT_PMUv3_TH);
+		}
 	}
+#endif
 
 	/* A2.13 The Reliability, Availability, and Serviceability Extension */
 	/* if PFR0.RAS == 1, PFR1.RAS_frac is meaningful */
@@ -1151,16 +1149,29 @@ cpuid_gather_arm_features(void *features)
 	/*
 	 * A3.1 Armv9-A architecture extensions
 	 * pp. A3-128 et seq.
+	 *
+	 * XXXARM: We can't handle these just yet because we can't read the
+	 * registers (by name, in the assembler), and we can't let the C
+	 * compiler try to use these, we just want the assembler to let us
+	 * refer to the registers.
 	 */
+#if 0
 	if (has_arm_feature(features, ARM_FEAT_SVE)) {
+		/* We know we have SVE, so we can read this */
+		cpuid_regs.zfr0 = read_id_aa64zfr0();
+
 		cpuid_features_from_idregs(features, sve_feature_specs,
 		    ARRAY_SIZE(sve_feature_specs), &cpuid_regs);
 	}
 
 	if (has_arm_feature(features, ARM_FEAT_SME)) {
+		/* We know we have SME, so we can read this */
+		cpuid_regs.smfr0 = read_id_aa64smfr0();
+
 		cpuid_features_from_idregs(features, sme_feature_specs,
 		    ARRAY_SIZE(sme_feature_specs), &cpuid_regs);
 	}
+#endif
 }
 
 /*
