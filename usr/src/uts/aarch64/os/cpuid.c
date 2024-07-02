@@ -1015,7 +1015,7 @@ cpuid_features_from_idregs(void *features, const struct feature_spec *specs,
 			reg = &cpuid_regs->mmfr2;
 			break;
 		case ARM_REG_MMFR3:
-			reg = &cpuid_regs->mmfr2;
+			reg = &cpuid_regs->mmfr3;
 			break;
 		case ARM_REG_PFR0:
 			reg = &cpuid_regs->pfr0;
