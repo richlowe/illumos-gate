@@ -985,7 +985,6 @@ static void
 cpuid_features_from_idregs(void *features, const struct feature_spec *specs,
     size_t nspecs, struct cpuid_regs *cpuid_regs)
 {
-
 	for (size_t i = 0; i < nspecs; i++) {
 		uint64_t *reg;
 
@@ -1031,8 +1030,7 @@ cpuid_features_from_idregs(void *features, const struct feature_spec *specs,
 			break;
 		}
 
-		uint64_t val = bitx64(*reg, feature_specs[i].fs_high,
-		    feature_specs[i].fs_low);
+		uint64_t val = bitx64(*reg, specs[i].fs_high, specs[i].fs_low);
 
 		/*
 		 * XXXARM: I don't think they're really _signed_ just that
