@@ -640,15 +640,15 @@ static const elfcap_desc_t hw1_aarch64[ELFCAP_NUM_HW1_AARCH64] = {
 	},
 	{						/* 0x20000000 */
 		AV_AARCH64_PACA, STRDESC("AV_AARCH64_PACA"),
-		STRDESC("paca"), STRDESC("paca"),
+		STRDESC("PACA"), STRDESC("paca"),
 	},
 	{						/* 0x40000000 */
 		AV_AARCH64_PACG, STRDESC("AV_AARCH64_PACG"),
-		STRDESC("pacg"), STRDESC("pacg"),
+		STRDESC("PACG"), STRDESC("pacg"),
 	},
 	{						/* 0x80000000 */
 		AV_AARCH64_DIT, STRDESC("AV_AARCH64_DIT"),
-		STRDESC("dit"), STRDESC("dit"),
+		STRDESC("DIT"), STRDESC("dit"),
 	},
 };
 
@@ -658,115 +658,123 @@ static const elfcap_desc_t hw2_aarch64[ELFCAP_NUM_HW2_AARCH64] = {
 		STRDESC("FLAGM"), STRDESC("flagm"),
 	},
 	{						/* 0x00000002 */
+		AV_AARCH64_2_ILRCPC, STRDESC("AV_AARCH64_2_ILRCPC"),
+		STRDESC("ILRCPC"), STRDESC("ilrcpc"),
+	},
+	{						/* 0x00000004 */
+		AV_AARCH64_2_LSE2, STRDESC("AV_AARCH64_2_LSE2"),
+		STRDESC("LSE2"), STRDESC("lse2"),
+	},
+	{						/* 0x00000008 */
+		AV_AARCH64_2_FLAGM2, STRDESC("AV_AARCH64_2_FLAGM2"),
+		STRDESC("FLAGM2"), STRDESC("flagm2"),
+	},
+	{						/* 0x00000010 */
 		AV_AARCH64_2_FRINTTS, STRDESC("AV_AARCH64_2_FRINTTS"),
 		STRDESC("FRINTTS"), STRDESC("frintts"),
 	},
-	{						/* 0x00000004 */
+	{						/* 0x00000020 */
 		AV_AARCH64_2_BTI, STRDESC("AV_AARCH64_2_BTI"),
 		STRDESC("BTI"), STRDESC("bti"),
 	},
-	{						/* 0x00000008 */
+	{						/* 0x00000040 */
 		AV_AARCH64_2_RNG, STRDESC("AV_AARCH64_2_RNG"),
 		STRDESC("RNG"), STRDESC("rng"),
 	},
-	{						/* 0x00000010 */
+	{						/* 0x00000080 */
 		AV_AARCH64_2_MTE, STRDESC("AV_AARCH64_2_MTE"),
 		STRDESC("MTE"), STRDESC("mte"),
 	},
-	{						/* 0x00000020 */
+	{						/* 0x00000100 */
 		AV_AARCH64_2_MTE3, STRDESC("AV_AARCH64_2_MTE3"),
 		STRDESC("MTE3"), STRDESC("mte3"),
 	},
-	{						/* 0x00000040 */
+	{						/* 0x00000200 */
 		AV_AARCH64_2_ECV, STRDESC("AV_AARCH64_2_ECV"),
 		STRDESC("ECV"), STRDESC("ecv"),
 	},
-	{						/* 0x00000080 */
+	{						/* 0x00000400 */
 		AV_AARCH64_2_AFP, STRDESC("AV_AARCH64_2_AFP"),
 		STRDESC("AFP"), STRDESC("afp"),
 	},
-	{						/* 0x00000100 */
+	{						/* 0x00000800 */
 		AV_AARCH64_2_RPRES, STRDESC("AV_AARCH64_2_RPRES"),
 		STRDESC("RPRES"), STRDESC("rpres"),
 	},
-	{						/* 0x00000200 */
-		AV_AARCH64_2_RPRES, STRDESC("AV_AARCH64_2_RPRES"),
-		STRDESC("RPRES"), STRDESC("rpres"),
-	},
-	{						/* 0x00000400 */
+	{						/* 0x00001000 */
 		AV_AARCH64_2_LD64B, STRDESC("AV_AARCH64_2_LD64B"),
 		STRDESC("LD64B"), STRDESC("ld64b"),
 	},
-	{						/* 0x00000800 */
+	{						/* 0x00002000 */
 		AV_AARCH64_2_ST64BV, STRDESC("AV_AARCH64_2_ST64BV"),
 		STRDESC("ST64BV"), STRDESC("st64bv"),
 	},
-	{						/* 0x00001000 */
+	{						/* 0x00004000 */
 		AV_AARCH64_2_ST64BV0, STRDESC("AV_AARCH64_2_ST64BV0"),
 		STRDESC("ST64BV0"), STRDESC("st64bv0"),
 	},
-	{						/* 0x00002000 */
+	{						/* 0x00008000 */
 		AV_AARCH64_2_WFXT, STRDESC("AV_AARCH64_2_WFXT"),
 		STRDESC("WFXT"), STRDESC("wxft"),
 	},
-	{						/* 0x00004000 */
+	{						/* 0x00010000 */
 		AV_AARCH64_2_MOPS, STRDESC("AV_AARCH64_2_MOPS"),
 		STRDESC("MOPS"), STRDESC("mops"),
 	},
-	{						/* 0x00008000 */
+	{						/* 0x00020000 */
 		AV_AARCH64_2_HBC, STRDESC("AV_AARCH64_2_HBC"),
 		STRDESC("HBC"), STRDESC("hbc"),
 	},
-	{						/* 0x00010000 */
+	{						/* 0x00040000 */
 		AV_AARCH64_2_CMOW, STRDESC("AV_AARCH64_2_CMOW"),
 		STRDESC("CMOW"), STRDESC("cmow"),
 	},
-	{						/* 0x00020000 */
+	{						/* 0x00080000 */
 		AV_AARCH64_2_SVE2, STRDESC("AV_AARCH64_2_SVE2"),
 		STRDESC("SVE2"), STRDESC("sve2"),
 	},
-	{						/* 0x00040000 */
+	{						/* 0x00100000 */
 		AV_AARCH64_2_SVE2_AES, STRDESC("AV_AARCH64_2_SVE2_AES"),
 		STRDESC("SVE2_AES"), STRDESC("sve2_aes"),
 	},
-	{						/* 0x00080000 */
+	{						/* 0x00200000 */
 		AV_AARCH64_2_SVE2_BITPERM, STRDESC("AV_AARCH64_2_SVE2_BITPERM"),
 		STRDESC("SVE2_BITPERM"), STRDESC("sve2_bitperm"),
 	},
-	{						/* 0x00100000 */
+	{						/* 0x00400000 */
 		AV_AARCH64_2_SVE2_PMULL128,
 		STRDESC("AV_AARCH64_2_SVE2_PMULL128"),
 		STRDESC("SVE2_PMULL128"), STRDESC("sve2_pmull128"),
 	},
-	{						/* 0x00200000 */
+	{						/* 0x00800000 */
 		AV_AARCH64_2_SVE2_SHA3, STRDESC("AV_AARCH64_2_SVE2_SHA3"),
 		STRDESC("SVE2_SHA3"), STRDESC("sve2_sha3"),
 	},
-	{						/* 0x00400000 */
+	{						/* 0x01000000 */
 		AV_AARCH64_2_SVE2_SM4, STRDESC("AV_AARCH64_2_SVE2_SM4"),
 		STRDESC("SVE2_SM4"), STRDESC("sve2_sm4"),
 	},
-	{						/* 0x00800000 */
+	{						/* 0x02000000 */
 		AV_AARCH64_2_TME, STRDESC("AV_AARCH64_2_TME"),
 		STRDESC("SVE2_SM4"), STRDESC("sve2_sm4"),
 	},
-	{						/* 0x01000000 */
+	{						/* 0x04000000 */
 		AV_AARCH64_2_SME, STRDESC("AV_AARCH64_2_SME"),
 		STRDESC("SME"), STRDESC("sme"),
 	},
-	{						/* 0x02000000 */
+	{						/* 0x08000000 */
 		AV_AARCH64_2_SME_FA64, STRDESC("AV_AARCH64_2_SME_FA64"),
 		STRDESC("SME_FA64"), STRDESC("sme_fa64"),
 	},
-	{						/* 0x04000000 */
+	{						/* 0x10000000 */
 		AV_AARCH64_2_EBF16, STRDESC("AV_AARCH64_2_EBF16"),
 		STRDESC("EBF16"), STRDESC("ebf16"),
 	},
-	{						/* 0x08000000 */
+	{						/* 0x20000000 */
 		AV_AARCH64_2_SME_F64F64, STRDESC("AV_AARCH64_2_SME_F64F64"),
 		STRDESC("SME_F64F64"), STRDESC("sme_f64f64"),
 	},
-	{						/* 0x08000000 */
+	{						/* 0x40000000 */
 		AV_AARCH64_2_SME_I16I64, STRDESC("AV_AARCH64_2_SME_I16I64"),
 		STRDESC("SME_i16i64"), STRDESC("sme_i16i64"),
 	},
