@@ -1038,7 +1038,7 @@ cpuid_features_from_idregs(void *features, const struct feature_spec *specs,
 		 * 0xe is not -2, for eg.
 		 */
 		if (specs[i].fs_signed && (val == 0xf))
-			break;
+			continue;
 
 		if (val >= specs[i].fs_value) {
 			add_arm_feature(features, specs[i].fs_feature);
