@@ -109,7 +109,7 @@ ALL_BUILDS		= $(ALL_BUILDS64)
 #	kernel-specific optimizations; override default in Makefile.master
 #
 
-CFLAGS_XARCH_32		= $(i386_CFLAGS) # mmm...
+CFLAGS_XARCH_32		=
 CFLAGS_XARCH_64		= $(aarch64_CFLAGS)
 CFLAGS_XARCH		= $(CFLAGS_XARCH_$(CLASS))
 
@@ -126,7 +126,7 @@ CFLAGS			+= $(CCUNBOUND)
 CFLAGS			+= $(CFLAGS_uts)
 CFLAGS			+= $(STACKPROTECT_$(STACKPROTECT))
 
-ASFLAGS_XARCH_32	= $(i386_ASFLAGS) # mmm...
+ASFLAGS_XARCH_32	=
 ASFLAGS_XARCH_64	= $(aarch64_ASFLAGS)
 ASFLAGS_XARCH		= $(ASFLAGS_XARCH_$(CLASS))
 
