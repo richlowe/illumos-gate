@@ -126,36 +126,10 @@ ASSYM_DEPS +=		\
 #
 #	Driver modules
 #
-ARCMSR_OBJS += arcmsr.o
-ATA_OBJS += $(GHD_OBJS) ata_blacklist.o ata_common.o ata_disk.o \
-	ata_dma.o atapi.o atapi_fsm.o ata_debug.o \
-	sil3xxx.o
 CMLB_OBJS += cmlb.o
-CPUNEX_OBJS += cpunex.o
-DADK_OBJS += dadk.o
-DCOPY_OBJS += dcopy.o
-DNET_OBJS += dnet.o dnet_mii.o
-FD_OBJS += fd.o
-GDA_OBJS += gda.o
-GHD_OBJS += ghd.o ghd_debug.o ghd_dma.o ghd_queue.o ghd_scsa.o \
-	ghd_scsi.o ghd_timer.o ghd_waitq.o ghd_gcmd.o
-I915_OBJS += i915_dma.o i915_drv.o i915_irq.o i915_mem.o \
-	i915_gem.o i915_gem_debug.o i915_gem_tiling.o
-NSKERN_OBJS += nsc_asm.o
-PCICFG_OBJS += pcicfg.o
-PCI_PCINEXUS_OBJS += pci_pci.o
-PCIEB_OBJS +=
-PIT_BEEP_OBJS += pit_beep.o
-POWER_OBJS += power.o
-PCI_AUTOCONFIG_OBJS += pci_autoconfig.o pci_boot.o pcie_nvidia.o \
-			pci_memlist.o pci_resource.o
-RADEON_OBJS += r300_cmdbuf.o radeon_cp.o radeon_drv.o \
-			radeon_state.o radeon_irq.o radeon_mem.o
 SD_OBJS += sd.o sd_xbuf.o
 
 STRATEGY_OBJS += strategy.o
-UCODE_OBJS += ucode_drv.o
-VGATEXT_OBJS += vgatext.o
 
 #
 #	Kernel linker
@@ -171,35 +145,10 @@ KRTLD_OBJS +=			\
 	kobj_reloc.o		\
 	ufsops.o
 
-FBT_OBJS += fbt.o
-SDT_OBJS += sdt.o
-
-#
-#	AMD8111 NIC driver module
-#
-AMD8111S_OBJS += amd8111s_main.o amd8111s_hw.o
-
-#
-#	AMR module
-#
-AMR_OBJS = amr.o
-
-#
-#	IPMI module
-IPMI_OBJS +=	ipmi_main.o ipmi.o ipmi_kcs.o
-
-#
-#	Brand modules
-#
-SN1_BRAND_OBJS	=	sn1_brand.o sn1_brand_asm.o
-
 #
 #	special files
 #
 MODSTUB_OBJ +=		\
 	modstubs.o
-
-BOOTDEV_OBJS +=		\
-	bootdev.o
 
 INC_PATH	+= -I$(UTSBASE)/aarch64
