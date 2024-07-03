@@ -172,7 +172,7 @@ typedef union {
 	char				buf[CONV_CAP_VAL_HW1_BUFSIZE];
 } Conv_cap_val_hw1_buf_t;
 
-#define	CONV_CAP_VAL_HW2_BUFSIZE	656
+#define	CONV_CAP_VAL_HW2_BUFSIZE	693
 typedef union {
 	Conv_inv_buf_t			inv_buf;
 	char				buf[CONV_CAP_VAL_HW2_BUFSIZE];

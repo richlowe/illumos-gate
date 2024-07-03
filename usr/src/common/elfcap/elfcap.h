@@ -130,7 +130,7 @@ typedef enum {
  */
 #define	ELFCAP_SF1_BUFSIZE	73
 #define	ELFCAP_HW1_BUFSIZE	588
-#define	ELFCAP_HW2_BUFSIZE	656
+#define	ELFCAP_HW2_BUFSIZE	693
 #define	ELFCAP_HW3_BUFSIZE	66
 
 /*
