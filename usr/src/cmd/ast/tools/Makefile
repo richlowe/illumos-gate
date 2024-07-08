@@ -25,7 +25,7 @@ include $(SRC)/cmd/Makefile.cmd
 include ../Makefile.ast
 include $(SRC)/Makefile.native
 
-ADJUNCT_LIBS=libc.so
+ADJUNCT_LIBS += libc.so
 
 all install install_h: $(TOOLS)
 _msg _feature:

@@ -47,6 +47,8 @@ ADJUNCT_LIBS +=	libc.so
 
 DYNFLAGS +=	$(VERSREF) '-Wl,-R$$ORIGIN'
 
+# Necessary because we're a non-debug build in a debug environment, because
+# of being in src/tools
 CERRWARN += -_gcc=-Wno-unused-but-set-variable
 
 include		$(SRC)/Makefile.native

@@ -36,7 +36,7 @@ ADJUNCT_LIBS += libelf.so libc.so libavl.so
 CPPFLAGS += -I$(CUSTRDIR)
 LDFLAGS = \
 	-L$(ROOTONBLDLIBMACH) \
-	'-R$$ORIGIN/../../lib/$(MACH)' \
+	'-R$$ORIGIN/../../lib/$(NATIVE_MACH)' \
 	$(BDIRECT) $(ZLAZYLOAD)
 
 CSTD = $(CSTD_GNU99)
