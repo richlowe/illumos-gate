@@ -429,8 +429,8 @@ struct prop_ispec {
 };
 
 /*
- * For the x86, we're prepared to claim that the interrupt string
- * is in the form of a list of <ipl,vec> specifications.
+ * For the x86, we're prepared to claim that the interrupt string is in the
+ * form of a list of <ipl,vec> specifications, or <vec> specifications.
  */
 
 #define	VEC_MIN	1

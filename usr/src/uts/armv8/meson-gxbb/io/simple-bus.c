@@ -298,20 +298,20 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		uint64_t size = 0;
 
 		if (rangep) {
-			range_index = ntohl(rp[(addr_cells + size_cells) * rnumber + 0]);
+			range_index = rp[(addr_cells + size_cells) * rnumber + 0];
 			for (int i = 1; i < addr_cells; i++) {
 				addr <<= 32;
-				addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i - 1]);
+				addr |= rp[(addr_cells + size_cells) * rnumber + i - 1];
 			}
 		} else {
 			for (int i = 0; i < addr_cells; i++) {
 				addr <<= 32;
-				addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+				addr |= rp[(addr_cells + size_cells) * rnumber + i];
 			}
 		}
 		for (int i = 0; i < size_cells; i++) {
 			size <<= 32;
-			size |= ntohl(rp[(addr_cells + size_cells) * rnumber + addr_cells + i]);
+			size |= rp[(addr_cells + size_cells) * rnumber + addr_cells + i];
 		}
 		kmem_free(rp, reglen);
 		ASSERT((addr & 0xffff000000000000ul) == 0);
@@ -337,22 +337,22 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 				regspec_addr |= (((uint64_t)(reg.regspec_bustype & 0xffff)) << 32);
 				for (int j = 1; j < addr_cells; j++) {
 					addr <<= 32;
-					addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + j]);
+					addr |= rangep[(addr_cells + parent_addr_cells + size_cells) * i + j];
 				}
 				regspec_addr += addr;
 
 				addr = 0;
 				if (parent_has_ranges) {
 					reg.regspec_bustype &= ~0xf0000000;
-					reg.regspec_bustype |= (ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells]) << 28);
+					reg.regspec_bustype |= ((rangep[addr_cells + parent_addr_cells + size_cells) * i + addr_cells] << 28);
 					for (int j = 1; j < parent_addr_cells; j++) {
 						addr <<= 32;
-						addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j - 1]);
+						addr |= rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j - 1];
 					}
 				} else {
 					for (int j = 0; j < parent_addr_cells; j++) {
 						addr <<= 32;
-						addr |= ntohl(rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j]);
+						addr |= rangep[(addr_cells + parent_addr_cells + size_cells) * i + addr_cells + j];
 					}
 				}
 				regspec_addr += addr;
@@ -485,13 +485,13 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	case DDI_INTROP_ENABLE:
 		{
 			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
-			switch (interrupt_cells) {
-			case 1:
-			case 3:
-				break;
-			default:
-				return (DDI_FAILURE);
-			}
+
+			/*
+			 * XXXROOTNEX:
+			 * 1 == illumos normal, <vec>
+			 * 3 == arm,gic, <type, vec, flags>
+			 */
+			VERIFY(interrupt_cells == 1 || interrupt_cells == 3);
 
 			int *irupts_prop;
 			int irupts_len;
@@ -509,13 +509,13 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			switch (interrupt_cells) {
 			case 1:
 				grp = 0;
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
+				vec = (uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0];
 				cfg = 4;
 				break;
 			case 3:
-				grp = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 1]);
-				cfg = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 2]);
+				grp = (uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0];
+				vec = (uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 1];
+				cfg = (uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 2];
 				break;
 			default:
 				kmem_free(irupts_prop, irupts_len);

@@ -95,7 +95,7 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT,
-	    "i_ddi_bus_map: <%s,%s> <0x%x, 0x%x, 0x%d> "
+	    "i_ddi_bus_map: <%s,%s> <0x%x, 0x%x, %d> "
 	    "offset %d len %d handle 0x%x\n",
 	    ddi_get_name(dip), ddi_get_name(rdip),
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size,
@@ -135,7 +135,7 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT,
-	    "               <%s,%s> <0x%x, 0x%x, 0x%d> "
+	    "               <%s,%s> <0x%x, 0x%x, %d> "
 	    "offset %d len %d\n",
 	    ddi_get_name(dip), ddi_get_name(rdip),
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size,
@@ -288,7 +288,8 @@ i_ddi_map_fault(dev_info_t *dip, dev_info_t *rdip,
  * representation, which is big-endian, with no particular alignment
  * guarantees.  intp points to the OBP data, and n the number of bytes.
  *
- * Byte-swapping is needed on intel.
+ * Note that byteswapping is not needed here as the "PROM" on intel is (unlike
+ * 1275) storing integers little-endian.
  */
 int
 impl_ddi_prop_int_from_prom(uchar_t *intp, int n)

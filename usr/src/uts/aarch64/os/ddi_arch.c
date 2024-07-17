@@ -40,6 +40,18 @@
  * DDI Mapping
  */
 
+
+/*
+ * Enable DDI_MAP_DEBUG for map debugging messages...
+ * (c.f. rootnex.c)
+ * #define	DDI_MAP_DEBUG
+ */
+
+#ifdef	DDI_MAP_DEBUG
+int ddi_map_debug_flag = 1;
+#define	ddi_map_debug	if (ddi_map_debug_flag) printf
+#endif	/* DDI_MAP_DEBUG */
+
 /*
  * i_ddi_bus_map:
  * Generic bus_map entry point, for byte addressable devices
@@ -49,7 +61,7 @@
 
 int
 i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
-	off_t offset, off_t len, caddr_t *vaddrp)
+    off_t offset, off_t len, caddr_t *vaddrp)
 {
 	struct regspec tmp_reg, *rp;
 	ddi_map_req_t mr = *mp;		/* Get private copy of request */
@@ -97,8 +109,8 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT,
-	    "i_ddi_bus_map: <%s,%s> <0x%x, 0x%x, 0x%d> "
-	    "offset %d len %d handle 0x%x\n",
+	    "i_ddi_bus_map: <%s,%s> <0x%x, 0x%x, 0x%x> "
+	    "offset %ld len %ld handle 0x%p\n",
 	    ddi_get_name(dip), ddi_get_name(rdip),
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size,
 	    offset, len, mp->map_handlep);
@@ -137,8 +149,8 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT,
-	    "               <%s,%s> <0x%x, 0x%x, 0x%d> "
-	    "offset %d len %d\n",
+	    "               <%s,%s> <0x%x, 0x%x, %d> "
+	    "offset %ld len %ld\n",
 	    ddi_get_name(dip), ddi_get_name(rdip),
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size,
 	    offset, len);
@@ -270,8 +282,8 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
  */
 int
 i_ddi_map_fault(dev_info_t *dip, dev_info_t *rdip,
-	struct hat *hat, struct seg *seg, caddr_t addr,
-	struct devpage *dp, pfn_t pfn, uint_t prot, uint_t lock)
+    struct hat *hat, struct seg *seg, caddr_t addr,
+    struct devpage *dp, pfn_t pfn, uint_t prot, uint_t lock)
 {
 	dev_info_t *pdip;
 
@@ -290,7 +302,8 @@ i_ddi_map_fault(dev_info_t *dip, dev_info_t *rdip,
  * representation, which is big-endian, with no particular alignment
  * guarantees.  intp points to the OBP data, and n the number of bytes.
  *
- * Byte-swapping is needed on intel.
+ * Byte-swapping is needed on ARM, since the devicetree is bigendian and the
+ * CPU is not.
  */
 int
 impl_ddi_prop_int_from_prom(uchar_t *intp, int n)
@@ -304,9 +317,8 @@ impl_ddi_prop_int_from_prom(uchar_t *intp, int n)
 		i = (i << 8) | *(--intp);
 	}
 
-	return (i);
+	return (ntohl(i));
 }
-
 
 int drv_usec_coarse_timing = 0;
 

@@ -304,16 +304,17 @@ get_interrupt_cell(void)
 	int interrupt_cell = 3;
 	if (len > 0) {
 		pnode_t gic;
-		gic = prom_findnode_by_phandle(htonl(gic));
+		gic = prom_findnode_by_phandle(ntohl(gic));
 		if (gic > 0) {
 			len = prom_getproplen(gic, "#interrupt-cells");
 			if (len > 0) {
-				prom_getprop(gic, "#interrupt-cells", (caddr_t)&interrupt_cell);
-				interrupt_cell = htonl(interrupt_cell);
+				prom_getprop(gic, "#interrupt-cells",
+				    (caddr_t)&interrupt_cell);
+				interrupt_cell = ntohl(interrupt_cell);
 			}
 		}
 	}
-	return interrupt_cell;
+	return (interrupt_cell);
 }
 
 static int
@@ -331,7 +332,8 @@ get_cbe_vector(void)
 			prom_getprop(timer, "compatible", compatible);
 			int offeset = 0;
 			while (offeset < len) {
-				if (strcmp(compatible, "arm,armv8-timer") == 0) {
+				if (strcmp(compatible,
+				    "arm,armv8-timer") == 0) {
 					found = B_TRUE;
 					break;
 				}
@@ -341,6 +343,7 @@ get_cbe_vector(void)
 
 		if (found) {
 			len = prom_getproplen(timer, "interrupts");
+			/* XXXROOTNEX: More of this, but this might be happening before the DDI is set up? */
 			if (len > 0) {
 				int interrupt_cell = get_interrupt_cell();
 				int num = len / (4 * interrupt_cell);
@@ -355,9 +358,9 @@ get_cbe_vector(void)
 					 */
 					if (index == 1 && cpu->cpu_m.mcpu_boot_el == 1)
 						index += 1;
-					int type = htonl(interrupts[interrupt_cell * index + 0]);
-					irq = htonl(interrupts[interrupt_cell * index + 1]);
-					int attr = htonl(interrupts[interrupt_cell * index + 2]);
+					int type = ntohl(interrupts[interrupt_cell * index + 0]);
+					irq = ntohl(interrupts[interrupt_cell * index + 1]);
+					int attr = ntohl(interrupts[interrupt_cell * index + 2]);
 					if (type == 0) {
 						// SPI
 						irq += 32;

@@ -181,6 +181,7 @@ IF_DEBUG_OBJ		= $(DEBUG_COND_$(BUILD_TYPE))$(OBJS_DIR)/
 #
 ALL_DEFS	 = $(MACHINE_DEFS) $(DEBUG_DEFS) \
 		   $(OPTION_DEFS)
+ALL_DEFS += -DDDI_MAP_DEBUG	#XXXROOTNEX
 GENASSYM_DEFS	 = $(MACHINE_DEFS) $(OPTION_DEFS) \
 			-_gcc=-fno-eliminate-unused-debug-symbols \
 			-_gcc=-fno-eliminate-unused-debug-types

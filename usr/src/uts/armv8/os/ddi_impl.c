@@ -1168,11 +1168,10 @@ i_ddi_get_intx_nintrs(dev_info_t *dip)
 	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS |
 	    DDI_PROP_CANSLEEP,
 	    "interrupts", (caddr_t)&ip, &intrlen) == DDI_SUCCESS) {
-
 		intr_sz = ddi_getprop(DDI_DEV_T_ANY, dip,
 		    0, "#interrupt-cells", 1);
 		/* adjust for number of bytes */
-		intr_sz *= sizeof (int32_t);
+		intr_sz = CELLS_1275_TO_BYTES(intr_sz);
 
 		ret = intrlen / intr_sz;
 
@@ -1227,30 +1226,400 @@ get_prop_int_array(dev_info_t *di, char *pname, int **pval, uint_t *plen)
 	if ((ret = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, di,
 	    DDI_PROP_DONTPASS, pname, pval, plen))
 	    == DDI_PROP_SUCCESS) {
-		*plen = (*plen) * (sizeof (int));
+		*plen = CELLS_1275_TO_BYTES(*plen);
 	}
 	return (ret);
+}
+
+
+static int
+get_address_cells(pnode_t node)
+{
+	int address_cells = 0;
+
+	while (node > 0) {
+		int len = prom_getproplen(node, "#address-cells");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "#address-cells", (caddr_t)&prop);
+			address_cells = ntohl(prop);
+			break;
+		}
+		node = prom_parentnode(node);
+	}
+	return (address_cells);
+}
+
+static int
+get_size_cells(pnode_t node)
+{
+	int size_cells = 0;
+
+	while (node > 0) {
+		int len = prom_getproplen(node, "#size-cells");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "#size-cells", (caddr_t)&prop);
+			size_cells = ntohl(prop);
+			break;
+		}
+		node = prom_parentnode(node);
+	}
+	return (size_cells);
+}
+
+/*
+ * init_regspec_64:
+ *
+ * If the parent #size-cells is 2, convert the upa-style or
+ * safari-style reg property from 2-size cells to 1 size cell
+ * format, ignoring the size_hi, which must be zero for devices.
+ * (It won't be zero in the memory list properties in the memory
+ * nodes, but that doesn't matter here.)
+ *
+ * While we have no UPA or Safari, we do have roots with #size-cells == 2,
+ * notably QEMU's "virt" machine.
+ */
+struct ddi_parent_private_data *
+init_regspec_64(dev_info_t *dip)
+{
+	struct ddi_parent_private_data *pd;
+	dev_info_t *parent;
+	int size_cells;
+
+	/*
+	 * If there are no "reg"s in the child node, return.
+	 */
+	pd = ddi_get_parent_data(dip);
+	if ((pd == NULL) || (pd->par_nreg == 0)) {
+		return (pd);
+	}
+	parent = ddi_get_parent(dip);
+
+	size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    DDI_PROP_DONTPASS, "#size-cells", 1);
+
+	if (size_cells != 1)  {
+		int n, j;
+		struct regspec *irp;
+		struct reg_64 {
+			uint_t addr_hi, addr_lo, size_hi, size_lo;
+		};
+		struct reg_64 *r64_rp;
+		struct regspec *rp;
+		uint_t len = 0;
+		int *reg_prop;
+
+		VERIFY(size_cells == 2);
+
+		/*
+		 * We already looked the property up once before if
+		 * pd is non-NULL.
+		 */
+		(void) ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+		    DDI_PROP_DONTPASS, OBP_REG, &reg_prop, &len);
+
+		VERIFY(len != 0);
+
+		n = BYTES_TO_1275_CELLS(sizeof (struct reg_64));
+		n = len / n;
+
+		/*
+		 * We're allocating a buffer the size of the PROM's property,
+		 * but we're only using a smaller portion when we assign it
+		 * to a regspec.  We do this so that in the
+		 * impl_ddi_sunbus_removechild function, we will
+		 * always free the right amount of memory.
+		 */
+		irp = rp = (struct regspec *)reg_prop;
+		r64_rp = (struct reg_64 *)pd->par_reg;
+
+		cmn_err(CE_CONT, "Smooshing %d entries from %p into %p\n", n,
+		    r64_rp, rp);
+
+		for (j = 0; j < n; ++j, ++rp, ++r64_rp) {
+			if (r64_rp->size_hi != 0) {
+				cmn_err(CE_WARN, "%s%d on / requires "
+				    "64-bit addressing",
+				    ddi_get_name(dip), ddi_get_instance(dip));
+			}
+			rp->regspec_bustype = r64_rp->addr_hi;
+			rp->regspec_addr = r64_rp->addr_lo;
+			rp->regspec_size = r64_rp->size_lo;
+		}
+
+		ddi_prop_free(pd->par_reg);
+		pd->par_nreg = n;
+		pd->par_reg = irp;
+	}
+	return (pd);
+}
+
+static int
+get_interrupt_cells(pnode_t node)
+{
+	int interrupt_cells = 0;
+
+	while (node > 0) {
+		int len = prom_getproplen(node, "#interrupt-cells");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
+			interrupt_cells = ntohl(prop);
+			break;
+		}
+		len = prom_getproplen(node, "interrupt-parent");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
+			node = prom_findnode_by_phandle(ntohl(prop));
+			continue;
+		}
+		node = prom_parentnode(node);
+	}
+	return (interrupt_cells);
+}
+
+/*
+ * For armv8, we're prepared to claim that the interrupt string is either in
+ * the form of a list of <vec> specifications
+ *
+ * or the arm,gic format: a list of <type, vec, flags> specifications
+ */
+
+#define	VEC_MIN	0
+#define	VEC_MAX	987
+
+static int
+impl_xlate_intrs(dev_info_t *child, int *in,
+    struct ddi_parent_private_data *pdptr)
+{
+	size_t size;
+	int n;
+	struct intrspec *new;
+	caddr_t got_prop;
+	int *inpri = NULL;
+	int got_len;
+
+	static char bad_intr_fmt[] =
+	    "bad interrupt spec from %s%d - ipl %d, irq %d\n";
+
+
+	int interrupt_cells =
+	    get_interrupt_cells(ddi_get_nodeid(child));
+
+	/*
+	 * XXXROOTNEX:
+	 * 1 == normal <vec>
+	 * 3 == arm,gic <type, vec, flags>
+	 *
+	 * There's no reason, I don't think, that someone couldn't use a 1 or
+	 * 3-tuple to a different end.  We should probably be checking the
+	 * node more carefully.
+	 */
+	VERIFY(interrupt_cells == 1 || interrupt_cells == 3);
+
+	/*
+	 * We only support output of the "new style" property, a list of <vec>
+	 */
+
+	/*
+	 * The input list consists of elements a vector of multiples of
+	 * #interrupt-cells, with the total number of vector elements in [0].
+	 */
+	if ((n = (*in++)) < 1)
+		return (DDI_FAILURE);
+
+	/* ...though it isn't aware of #interrupt-cells */
+	n /= interrupt_cells;
+
+	pdptr->par_nintr = n;
+	size = n * sizeof (struct intrspec);
+	new = pdptr->par_intr = kmem_zalloc(size, KM_SLEEP);
+
+	if (ddi_getlongprop(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
+	    "interrupt-priorities", (caddr_t)&got_prop, &got_len)
+	    == DDI_PROP_SUCCESS) {
+		if (n != BYTES_TO_1275_CELLS(got_len)) {
+			cmn_err(CE_CONT,
+			    "bad interrupt-priorities length"
+			    " from %s%d: expected %d, got %d\n",
+			    DEVI(child)->devi_name,
+			    DEVI(child)->devi_instance, n,
+			    (int)BYTES_TO_1275_CELLS(got_len));
+			goto broken;
+		}
+		inpri = (int *)got_prop;
+	}
+
+	while (n--) {
+		uint32_t type, vec, flags;
+		uint32_t level = 5;
+
+		if (interrupt_cells == 3) {
+			type = *in++;
+			vec = *in++;
+			flags = *in++;
+		} else {
+			type = 0;
+			vec = *in++;
+			flags = 4;
+		}
+
+		switch (type) {
+		case 0:
+			vec = 32 + vec;
+			break;
+		case 1:
+			vec = 16 + vec;
+			break;
+		default:
+			dev_err(child, CE_PANIC, "Unknown interrupts entry "
+			    "type 0x%x\n", type);
+		}
+
+		if (inpri == NULL)
+			level = 5;
+		else
+			level = *inpri++;
+
+		if (level < 1 || level > MAXIPL ||
+		    vec < VEC_MIN || vec > VEC_MAX) {
+			cmn_err(CE_CONT, bad_intr_fmt,
+			    DEVI(child)->devi_name,
+			    DEVI(child)->devi_instance, level, vec);
+			goto broken;
+		}
+
+		new->intrspec_pri = level;
+		new->intrspec_vec = vec;
+		new->intrspec_cfg = flags;
+		new++;
+	}
+
+	if (inpri != NULL)
+		kmem_free(got_prop, got_len);
+	return (DDI_SUCCESS);
+
+broken:
+	kmem_free(pdptr->par_intr, size);
+	pdptr->par_intr = NULL;
+	pdptr->par_nintr = 0;
+	if (inpri != NULL)
+		kmem_free(got_prop, got_len);
+
+	return (DDI_FAILURE);
+}
+
+/*
+ * Create a ddi_parent_private_data structure from the ddi properties of
+ * the dev_info node.
+ *
+ * The "reg" and "interrupts" properties are required
+ * if the driver wishes to create mappings or field interrupts on behalf
+ * of the device.
+ *
+ * The "reg" property is in a firmware-defined shape, and converted into
+ * `struct regspec`.
+ *
+ * The "interrupts" property is in firmware-defined shap, and converted into
+ * `struct intrspec`
+ */
+void
+make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
+{
+	struct ddi_parent_private_data *pdptr;
+	int n;
+	int *reg_prop, *rng_prop, *irupts_prop;
+	uint_t reg_len, rng_len, irupts_len;
+
+	*ppd = pdptr = kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
+
+	/*
+	 * Handle the 'reg' property.
+	 *
+	 * XXXROOTNEX: The information here is invalid until `init_regspec_64`
+	 * has done its thing.  I have to confess I don't understand why this
+	 * is done in two passes, but the approach I've taken is from SPARC.
+	 */
+	if ((get_prop_int_array(child, "reg", &reg_prop, &reg_len) ==
+	    DDI_PROP_SUCCESS) && (reg_len != 0)) {
+		pdptr->par_nreg = reg_len / sizeof (struct regspec);
+		pdptr->par_reg = (struct regspec *)reg_prop;
+	}
+
+	/*
+	 * If we have a ranges property, take it as a `struct rangespec` even
+	 * though it has every chance of not being one, and us doing no
+	 * translation (cf. "regs" and "interrupts")
+	 *
+	 * XXXROOTNEX: This appears to be true of x86 too, but nobody seems
+	 * to use this bit of the parent data
+	 */
+	if (get_prop_int_array(child, "ranges", &rng_prop, &rng_len)
+	    == DDI_PROP_SUCCESS) {
+		pdptr->par_nrng = rng_len / (sizeof (struct rangespec));
+		pdptr->par_rng = (struct rangespec *)rng_prop;
+	}
+
+	/*
+	 * Handle the 'interrupts' property
+	 */
+	if (get_prop_int_array(child, "interrupts", &irupts_prop,
+	    &irupts_len) != DDI_PROP_SUCCESS) {
+		irupts_len = 0;
+	}
+
+	if ((n = irupts_len) != 0) {
+		size_t size;
+		int *out;
+
+		/*
+		 * Translate the 'interrupts' property into an array
+		 * of intrspecs for the rest of the DDI framework to
+		 * toy with.  Only our ancestors really know how to
+		 * do this, so ask 'em.  We massage the 'interrupts'
+		 * property so that it is pre-pended by a count of
+		 * the number of integers in the argument.
+		 */
+		size = n + sizeof (int);
+		out = kmem_alloc(size, KM_SLEEP);
+		*out = BYTES_TO_1275_CELLS(n);
+		bcopy(irupts_prop, out + 1, (size_t)n);
+		ddi_prop_free((void *)irupts_prop);
+		if (impl_xlate_intrs(child, out, pdptr) != DDI_SUCCESS) {
+			cmn_err(CE_CONT,
+			    "Unable to translate 'interrupts' for %s%d\n",
+			    DEVI(child)->devi_binding_name,
+			    DEVI(child)->devi_instance);
+		}
+		kmem_free(out, size);
+	}
 }
 
 static int
 impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 {
-	name[0] = '\0';
+	/*
+	 * Fill in parent-private data and this function returns to us
+	 * an indication if it used "registers" to fill in the data.
+	 */
 	if (ddi_get_parent_data(child) == NULL) {
-		struct ddi_parent_private_data *pdptr =
-		    kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
+		struct ddi_parent_private_data *pdptr;
+		make_ddi_ppd(child, &pdptr);
 		ddi_set_parent_data(child, pdptr);
 	}
 
-	pnode_t node = ddi_get_nodeid(child);
-	if (node > 0) {
-		char buf[MAXNAMELEN] = {0};
-		int len = prom_getproplen(node, "unit-address");
-		if (0 < len && len < MAXNAMELEN) {
-			prom_getprop(node, "unit-address", buf);
-			if (strlen(buf) < namelen)
-				strcpy(name, buf);
-		}
+	name[0] = '\0';
+
+	if (sparc_pd_getnreg(child) > 0) {
+		(void) snprintf(name, namelen, "%x,%x",
+		    (uint_t)sparc_pd_getreg(child, 0)->regspec_bustype,
+		    (uint_t)sparc_pd_getreg(child, 0)->regspec_addr);
 	}
 
 	return (DDI_SUCCESS);
@@ -1270,6 +1639,9 @@ impl_ddi_sunbus_initchild(dev_info_t *child)
 		impl_ddi_sunbus_removechild(child);
 		return (DDI_FAILURE);
 	}
+
+	(void) init_regspec_64(child);
+
 	return (DDI_SUCCESS);
 }
 
@@ -1422,7 +1794,8 @@ get_boot_properties(void)
 			} else {
 				(void) e_ddi_prop_update_int_array(
 				    DDI_DEV_T_NONE, devi, property_name,
-				    bop_staging_area, length / sizeof (int));
+				    bop_staging_area,
+				    BYTES_TO_1275_CELLS(length));
 			}
 			break;
 		case DDI_PROP_TYPE_STRING:
@@ -2094,44 +2467,6 @@ i_ddi_cacheattr_to_hatacc(uint_t flags, uint_t *hataccp)
 		cmn_err(CE_WARN, "%s: cache_attr=0x%x is ignored.",
 		    fname, cache_attr);
 	}
-}
-
-static int
-get_address_cells(pnode_t node)
-{
-	int address_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#address-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#address-cells", (caddr_t)&prop);
-			address_cells = ntohl(prop);
-			break;
-		}
-		node = prom_parentnode(node);
-	}
-	return (address_cells);
-}
-
-static int
-get_size_cells(pnode_t node)
-{
-	int size_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#size-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#size-cells", (caddr_t)&prop);
-			size_cells = ntohl(prop);
-			break;
-		}
-		node = prom_parentnode(node);
-	}
-	return (size_cells);
 }
 
 struct dma_range
