@@ -1046,7 +1046,7 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	}
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("at virtual 0x%x\n", *vaddrp);
+	ddi_map_debug(" at virtual 0x%x\n", *vaddrp);
 #endif	/* DDI_MAP_DEBUG */
 	return (DDI_SUCCESS);
 }

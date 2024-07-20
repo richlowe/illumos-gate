@@ -1336,14 +1336,11 @@ init_regspec_64(dev_info_t *dip)
 		irp = rp = (struct regspec *)reg_prop;
 		r64_rp = (struct reg_64 *)pd->par_reg;
 
-		cmn_err(CE_CONT, "Smooshing %d entries from %p into %p\n", n,
-		    r64_rp, rp);
-
 		for (j = 0; j < n; ++j, ++rp, ++r64_rp) {
 			if (r64_rp->size_hi != 0) {
-				cmn_err(CE_WARN, "%s%d on / requires "
-				    "64-bit addressing",
-				    ddi_get_name(dip), ddi_get_instance(dip));
+				/* XXXROOTNEX */
+				dev_err(dip, CE_WARN, "requires "
+				    "64-bit register size");
 			}
 			rp->regspec_bustype = r64_rp->addr_hi;
 			rp->regspec_addr = r64_rp->addr_lo;
@@ -1536,6 +1533,9 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 	int n;
 	int *reg_prop, *rng_prop, *irupts_prop;
 	uint_t reg_len, rng_len, irupts_len;
+	dev_info_t *parent;
+	int parent_addr_cells, parent_size_cells;
+	int child_addr_cells, child_size_cells;
 
 	*ppd = pdptr = kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
 
@@ -1550,20 +1550,6 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 	    DDI_PROP_SUCCESS) && (reg_len != 0)) {
 		pdptr->par_nreg = reg_len / sizeof (struct regspec);
 		pdptr->par_reg = (struct regspec *)reg_prop;
-	}
-
-	/*
-	 * If we have a ranges property, take it as a `struct rangespec` even
-	 * though it has every chance of not being one, and us doing no
-	 * translation (cf. "regs" and "interrupts")
-	 *
-	 * XXXROOTNEX: This appears to be true of x86 too, but nobody seems
-	 * to use this bit of the parent data
-	 */
-	if (get_prop_int_array(child, "ranges", &rng_prop, &rng_len)
-	    == DDI_PROP_SUCCESS) {
-		pdptr->par_nrng = rng_len / (sizeof (struct rangespec));
-		pdptr->par_rng = (struct rangespec *)rng_prop;
 	}
 
 	/*
@@ -1592,12 +1578,48 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 		bcopy(irupts_prop, out + 1, (size_t)n);
 		ddi_prop_free((void *)irupts_prop);
 		if (impl_xlate_intrs(child, out, pdptr) != DDI_SUCCESS) {
-			cmn_err(CE_CONT,
-			    "Unable to translate 'interrupts' for %s%d\n",
-			    DEVI(child)->devi_binding_name,
-			    DEVI(child)->devi_instance);
+			dev_err(child, CE_CONT,
+			    "Unable to translate 'interrupts'\n");
 		}
 		kmem_free(out, size);
+	}
+
+	/*
+	 * root node has no parent ranges
+	 * XXXROOTNEX: Triple check we don't have to initial /'s ppd by hand
+	 */
+	if ((parent = ddi_get_parent(child)) == NULL) {
+		dev_err(child, CE_CONT, "skipping root node's ranges\n");
+		return;
+	}
+
+	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, "#address-cells", 2);
+	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, "#size-cells", 1);
+	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    DDI_PROP_DONTPASS, "#address-cells", 2);
+	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    DDI_PROP_DONTPASS, "#size-cells", 1);
+
+	if (get_prop_int_array(child, "ranges", &rng_prop, &rng_len)
+	    == DDI_PROP_SUCCESS) {
+		if (child_addr_cells != 2 || parent_addr_cells != 2 ||
+		    child_size_cells != 1 || parent_size_cells != 1) {
+			/*
+			 * XXXROOTNEX: This was much quieter on other platforms
+			 */
+			dev_err(child, CE_WARN, "ranges not made in parent data; "
+			    "#address-cells or #size-cells have non-default values\n"
+			    "\tparent: #address-cells = %d, #size-cells = %d\n"
+			    "\tchild: #address-cells = %d, #size-cells = %d",
+			    parent_addr_cells, parent_size_cells,
+			    child_addr_cells, child_size_cells);
+			return;
+		}
+
+		pdptr->par_nrng = rng_len / (sizeof (struct rangespec));
+		pdptr->par_rng = (struct rangespec *)rng_prop;
 	}
 }
 

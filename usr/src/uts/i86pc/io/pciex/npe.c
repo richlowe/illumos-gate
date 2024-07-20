@@ -771,7 +771,6 @@ npe_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 	if (len != 0)
 		reg.regspec_size = len;
 
-
 	mp->map_obj.rp = (struct regspec *)&reg;
 	mp->map_flags |= DDI_MF_EXT_REGSPEC;
 	retval = ddi_map(dip, mp, (off_t)0, (off_t)0, vaddrp);
