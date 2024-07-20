@@ -50,7 +50,7 @@ all.standalone.targ: $(STANDLIBRARY)
 $(STANDLIBRARY): $(OBJS) $(LINKTEST_OBJ)
 	$(LD) $(BREDUCE) $(ZDEFS) $(LDFLAGS) -o $@.linktest $(OBJS) $(LINKTEST_OBJ)
 	rm $@.linktest
-	$(LD) $(LDFLAGS) -o $@ $(OBJS)
+	$(LD) $(LDFLAGS) $(MAPFILES:%=-Wl,-M%) -o $@ $(OBJS)
 
 clobber: $(TYPES:%=clobber.%)
 
@@ -68,4 +68,8 @@ $(OBJS): objs
 
 objs/%.o pics/%.o: $(COMDIR)/%.c
 	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
+pics/%.o objs/%.o: $(SRC)/common/bitext/%.c
+	$(COMPILE.c) $< -o $@
 	$(POST_PROCESS_O)

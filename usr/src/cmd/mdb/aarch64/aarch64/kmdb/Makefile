@@ -49,9 +49,7 @@ include ../../Makefile.aarch64
 include ../../../Makefile.kmdb
 
 STANDLIBS += $(ROOT)/usr/lib/libstanddisasm.so
-
-# XXXARM: We don't have saveargs yet
-#STANDLIBS += $(ROOT)/usr/lib/libstandsaveargs.so
+STANDLIBS += $(ROOT)/usr/lib/libstandsaveargs.so
 
 INCDIRS += $(SRC)/uts/armv8
 
