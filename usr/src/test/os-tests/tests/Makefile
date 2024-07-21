@@ -22,7 +22,6 @@ include $(SRC)/Makefile.master
 SUBDIRS_i386 =		\
 	i386		\
 	imc		\
-	saveargs	\
 	xsave		\
 	zen_umc
 
