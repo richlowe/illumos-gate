@@ -254,6 +254,97 @@ smpl_bus_regno_to_offset(int regno, int addr_cells, int size_cells)
 	return (regno * (addr_cells + size_cells));
 }
 
+/*
+ * Apply our ranges property to the child's reg property and return addresses
+ * in the parent bus's space
+ *
+ * XXXROOTNEX: We can't use `i_ddi_apply_range` since there are no ranges in
+ * the parent data, because we can't guarantee the address and size formats
+ *
+ * XXXROOTNEX: We should probably look like `i_ddi_apply_range` API wise, but
+ * let's not right now.
+ */
+static int
+smpl_bus_apply_range(dev_info_t *dip, dev_info_t *rdip,
+    struct regspec64 *out)
+{
+	uint32_t *rangep;
+	int rangelen;
+	int parent_addr_cells, parent_size_cells;
+	int child_addr_cells, child_size_cells;
+
+	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+	    DDI_PROP_DONTPASS, "#address-cells", 0);
+	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+	    DDI_PROP_DONTPASS, "#size-cells", 0);
+	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "#address-cells", 0);
+	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "#size-cells", 0);
+
+	VERIFY3S(parent_addr_cells, !=, 0);
+	VERIFY3S(parent_size_cells, !=, 0);
+	VERIFY3S(child_addr_cells, !=, 0);
+	VERIFY3S(child_size_cells, !=, 0);
+
+	/* If there's no ranges we have nothing to do (bit of a surprise though) */
+	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "ranges",
+	    (caddr_t)&rangep, &rangelen) != DDI_SUCCESS) {
+		dev_err(dip, CE_WARN, "error reading ranges property");
+		return (DDI_SUCCESS);
+	} else if (rangelen == 0) {
+		ddi_prop_free(rangep);
+		dev_err(dip, CE_WARN, "0-length ranges property");
+		return (DDI_SUCCESS);
+	}
+
+	int i;
+	int ranges_cells = (child_addr_cells + parent_addr_cells +
+	    child_size_cells);
+	int n = rangelen / ranges_cells;
+
+	for (i = 0; i < n; i++) {
+		uint64_t base = 0;
+		uint64_t target = 0;
+		uint64_t rsize = 0;
+		for (int j = 0; j < child_addr_cells; j++) {
+			base <<= 32;
+			base += rangep[ranges_cells * i + j];
+		}
+		for (int j = 0; j < parent_addr_cells; j++) {
+			target <<= 32;
+			target += rangep[ranges_cells * i +
+			    child_addr_cells + j];
+		}
+		for (int j = 0; j < child_size_cells; j++) {
+			rsize <<= 32;
+			rsize += rangep[ranges_cells * i + child_addr_cells +
+			    parent_addr_cells + j];
+		}
+
+		uint64_t rel_addr = out->regspec_addr;
+		uint64_t rel_offset = out->regspec_addr - base;
+
+		if (base <= rel_addr && rel_addr <= base + rsize - 1) {
+			out->regspec_addr = rel_offset + target;
+			out->regspec_size = MIN(out->regspec_size, (rsize -
+			    rel_offset));
+			break;
+		}
+
+		ddi_prop_free(rangep);
+
+		/* Not found */
+		if (i == n) {
+			dev_err(dip, CE_WARN, "specified register bounds "
+			    "are outside range");
+			return (DDI_FAILURE);
+		}
+	}
+
+	return (DDI_SUCCESS);
+}
+
 static int
 smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
     off_t len, caddr_t *vaddrp)
@@ -349,17 +440,29 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	if (len)
 		reg.regspec_size = len;
 
-#if 0
-	/* Rephrase our register into the parent's address ranges */
-	if ((error = i_ddi_apply_range64(dip, rdip, &reg)) != 0)
-		return (error);
-#endif
+
+#ifdef	DDI_MAP_DEBUG
+	dev_err(dip, CE_CONT, "<%s,%s> <0x%lx, 0x%lx, %ld> "
+	    "offset %ld len %ld handle 0x%p\n", ddi_get_name(dip),
+	    ddi_get_name(rdip), reg.regspec_bustype, reg.regspec_addr,
+	    reg.regspec_size, offset, len, mp->map_handlep);
+#endif	/* DDI_MAP_DEBUG */
+
+	if ((error = smpl_bus_apply_range(dip, rdip, &reg)) != DDI_SUCCESS)
+		return (DDI_SUCCESS);
 
 	mr = *mp;
 	mr.map_type = DDI_MT_REGSPEC;
 	mr.map_obj.rp = (struct regspec *)&reg;
 	mr.map_flags |= DDI_MF_EXT_REGSPEC;
 	mp = &mr;
+#ifdef	DDI_MAP_DEBUG
+	cmn_err(CE_CONT, "             <%s,%s> <0x%" PRIx64 ", 0x%" PRIx64
+	    ", %" PRId64 "> offset %ld len %ld handle 0x%p\n",
+	    ddi_get_name(dip), ddi_get_name(rdip), reg.regspec_bustype,
+	    reg.regspec_addr, reg.regspec_size, offset, len, mp->map_handlep);
+#endif	/* DDI_MAP_DEBUG */
+
 	return (ddi_map(dip, mp, 0, 0, vaddrp));
 }
 

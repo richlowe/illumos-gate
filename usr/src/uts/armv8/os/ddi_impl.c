@@ -1615,6 +1615,7 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 			    "\tchild: #address-cells = %d, #size-cells = %d",
 			    parent_addr_cells, parent_size_cells,
 			    child_addr_cells, child_size_cells);
+			ddi_prop_free(rng_prop);
 			return;
 		}
 

@@ -221,25 +221,6 @@ reg_is_enclosed_in_range(struct regspec *rp, struct rangespec *rangep)
 	return (0);
 }
 
-static int
-reg64_is_enclosed_in_range(struct regspec64 *rp, struct rangespec *rangep)
-{
-	if (rp->regspec_bustype != rangep->rng_cbustype)
-		return (0);
-
-	if (rp->regspec_addr < rangep->rng_coffset)
-		return (0);
-
-	if (rangep->rng_size == 0)
-		return (1);	/* size is really 2**(bits_per_word) */
-
-	if ((rp->regspec_addr + rp->regspec_size - 1) <=
-	    (rangep->rng_coffset + rangep->rng_size - 1))
-		return (1);
-
-	return (0);
-}
-
 /*
  * i_ddi_apply_range:
  * Apply range of dp to struct regspec *rp, if applicable.
@@ -289,62 +270,6 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 
 #ifdef	DDI_MAP_DEBUG
 	ddi_map_debug("    Return: %x.%x.%x\n", rp->regspec_bustype,
-	    rp->regspec_addr, rp->regspec_size);
-#endif	/* DDI_MAP_DEBUG */
-
-	return (0);
-}
-
-
-/*
- * i_ddi_apply_range64:
- * Apply range of dp to struct regspec64 *rp, if applicable.
- * If there's any range defined, it gets applied.
- */
-int
-i_ddi_apply_range64(dev_info_t *dp, dev_info_t *rdip, struct regspec64 *rp)
-{
-	int nrange, b;
-	struct rangespec *rangep;
-	static char *out_of_range =
-	    "Out of range register specification from device node <%s>\n";
-
-	nrange = sparc_pd_getnrng(dp);
-	if (nrange == 0)  {
-#ifdef	DDI_MAP_DEBUG
-		ddi_map_debug("    No range.\n");
-#endif	/* DDI_MAP_DEBUG */
-		return (0);
-	}
-
-	/*
-	 * Find a match, making sure the regspec is within the range
-	 * of the parent, noting that a size of zero in a range spec
-	 * really means a size of 2**(bitsperword).
-	 */
-
-	for (b = 0, rangep = sparc_pd_getrng(dp, 0); b < nrange; ++b, ++rangep)
-		if (reg64_is_enclosed_in_range(rp, rangep))
-			break;		/* found a match */
-
-	if (b == nrange)  {
-		cmn_err(CE_WARN, out_of_range, ddi_get_name(rdip));
-		return (DDI_ME_REGSPEC_RANGE);
-	}
-
-#ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("    Input:  %lx.%lx.%lx\n", rp->regspec_bustype,
-	    rp->regspec_addr, rp->regspec_size);
-	ddi_map_debug("    Range:  %x.%x %x.%x %x\n",
-	    rangep->rng_cbustype, rangep->rng_coffset,
-	    rangep->rng_bustype, rangep->rng_offset, rangep->rng_size);
-#endif	/* DDI_MAP_DEBUG */
-
-	rp->regspec_bustype = rangep->rng_bustype;
-	rp->regspec_addr += rangep->rng_offset - rangep->rng_coffset;
-
-#ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("    Return: %lx.%lx.%lx\n", rp->regspec_bustype,
 	    rp->regspec_addr, rp->regspec_size);
 #endif	/* DDI_MAP_DEBUG */
 
