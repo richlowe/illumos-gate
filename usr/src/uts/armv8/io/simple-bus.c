@@ -265,21 +265,21 @@ smpl_bus_regno_to_offset(int regno, int addr_cells, int size_cells)
  * let's not right now.
  */
 static int
-smpl_bus_apply_range(dev_info_t *dip, dev_info_t *rdip,
-    struct regspec64 *out)
+smpl_bus_apply_range(dev_info_t *dip, struct regspec64 *out)
 {
+	dev_info_t *parent = ddi_get_parent(dip);
 	uint32_t *rangep;
 	int rangelen;
 	int parent_addr_cells, parent_size_cells;
 	int child_addr_cells, child_size_cells;
 
-	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, "#address-cells", 0);
-	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, "#size-cells", 0);
-	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
 	    DDI_PROP_DONTPASS, "#address-cells", 0);
-	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
 	    DDI_PROP_DONTPASS, "#size-cells", 0);
 
 	VERIFY3S(parent_addr_cells, !=, 0);
@@ -355,13 +355,13 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	int error, addr_cells, size_cells;;
 	uint32_t *cregs;
 
-	if ((addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS,
+	if ((addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    "#address-cells", 0)) == 0) {
 		dev_err(rdip, CE_WARN, "couldn't read #address-cells");
 		return (DDI_ME_INVAL); /* XXXROOTNEX */
 	}
 
-	if ((size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS,
+	if ((size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    "#size-cells", 0)) == 0) {
 		dev_err(rdip, CE_WARN, "couldn't read #size-cells");
 		return (DDI_ME_INVAL); /* XXXROOTNEX */
@@ -448,7 +448,7 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	    reg.regspec_size, offset, len, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
 
-	if ((error = smpl_bus_apply_range(dip, rdip, &reg)) != DDI_SUCCESS)
+	if ((error = smpl_bus_apply_range(dip, &reg)) != DDI_SUCCESS)
 		return (DDI_SUCCESS);
 
 	mr = *mp;
