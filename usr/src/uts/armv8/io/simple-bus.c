@@ -241,11 +241,11 @@ smpl_bus_cook_regs(uint32_t *regs, smpl_bus_regs_t *out, int addr_cells,
 
 	if (addr_cells == 1 && size_cells == 1)
 		out->sbr_type = SBR_REGS_1x1;
-	if (addr_cells == 1 && size_cells == 2)
+	else if (addr_cells == 1 && size_cells == 2)
 		out->sbr_type = SBR_REGS_1x2;
-	if (addr_cells == 2 && size_cells == 1)
+	else if (addr_cells == 2 && size_cells == 1)
 		out->sbr_type = SBR_REGS_2x1;
-	if (addr_cells == 2 && size_cells == 1)
+	else if (addr_cells == 2 && size_cells == 2)
 		out->sbr_type = SBR_REGS_2x2;
 }
 
