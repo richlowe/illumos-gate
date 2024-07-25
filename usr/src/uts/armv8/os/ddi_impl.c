@@ -1436,11 +1436,14 @@ broken:
  * if the driver wishes to create mappings or field interrupts on behalf
  * of the device.
  *
- * The "reg" property is in a firmware-defined shape, and converted into
+ * The "reg" property is in a firmware-defined shape and converted into
  * `struct regspec`.
  *
- * The "interrupts" property is in firmware-defined shap, and converted into
+ * The "interrupts" property is in firmware-defined shape and converted into
  * `struct intrspec`
+ *
+ * XXXROOTNEX: "ranges" is currently left alone, unless it is of a
+ * pre-determined shape shape.
  */
 void
 make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
@@ -1462,42 +1465,38 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 	}
 
 	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
-	    DDI_PROP_DONTPASS, "#address-cells", 2);
+	    0, "#address-cells", 0);
 	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
-	    DDI_PROP_DONTPASS, "#size-cells", 1);
+	    0, "#size-cells", 0);
 	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    DDI_PROP_DONTPASS, "#address-cells", 2);
+	    0, "#address-cells", 0);
 	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    DDI_PROP_DONTPASS, "#size-cells", 1);
+	    0, "#size-cells", 0);
+
+	ASSERT3U(child_addr_cells, !=, 0);
+	ASSERT3U(child_size_cells, !=, 0);
+	ASSERT3U(parent_addr_cells, !=, 0);
+	ASSERT3U(parent_size_cells, !=, 0);
 
 	/*
 	 * Handle the 'reg' property.
 	 *
 	 * ROOTNEX: We translate 2 or 1 address cells and 2 or 1 size cells,
-	 * into a sruct regspec, in the same memory.  This is basically what
-	 * SPARC did, but done sooner so it gets done before devices are
-	 * named.
-	 *
-	 * Note that if we had a regspec64 in pardata this wouldn't work, as
-	 * the output might be larger than the input.
+	 * into a sruct regspec, basically as SPARC did, although we do it
+	 * here upfront, and in our own memory.
 	 */
 	if ((get_prop_int_array(child, "reg", &reg_prop, &reg_len) ==
 	    DDI_PROP_SUCCESS) && (reg_len != 0)) {
-		/*
-		 * We're using a buffer the size of the PROM's property,
-		 * but we're only using a smaller portion when we assign it
-		 * to a regspec.  We do this so that in the
-		 * impl_ddi_sunbus_removechild function, we will
-		 * always free the right amount of memory.
-		 *
-		 * XXXROOTNEX: This pre-supposes regspec is smaller than any
-		 * real layout.  True of a 32bit regspec, false of a  64bit one.
-		 */
 		uint32_t *ip = (uint32_t *)reg_prop;
-		struct regspec *orp = (struct regspec *)reg_prop;
+		struct regspec *orp = NULL;
 		struct regspec rp = {0};
 		int i = 0;
 		int n = reg_len /= sizeof (uint32_t);
+		int nregs = reg_len / (parent_addr_cells + parent_size_cells);
+
+		pdptr->par_reg = kmem_zalloc(nregs * sizeof (struct regspec),
+		    KM_SLEEP);
+		orp = pdptr->par_reg;
 
 		while (i < n) {
 			if (parent_addr_cells == 2) {
@@ -1533,8 +1532,7 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 			*orp++ = rp;
 			pdptr->par_nreg++;
 		}
-
-		pdptr->par_reg = (struct regspec *)reg_prop;
+		ddi_prop_free(reg_prop);
 	}
 
 	/*
@@ -1655,8 +1653,9 @@ impl_free_ddi_ppd(dev_info_t *dip)
 	if ((n = (size_t)pdptr->par_nrng) != 0)
 		ddi_prop_free((void *)pdptr->par_rng);
 
-	if ((n = pdptr->par_nreg) != 0)
-		ddi_prop_free((void *)pdptr->par_reg);
+	if ((n = pdptr->par_nreg) != 0) {
+		kmem_free(pdptr->par_reg, n * sizeof (struct regspec));
+	}
 
 	kmem_free(pdptr, sizeof (*pdptr));
 	ddi_set_parent_data(dip, NULL);
