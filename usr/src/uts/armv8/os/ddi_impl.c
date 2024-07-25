@@ -1270,90 +1270,6 @@ get_size_cells(pnode_t node)
 	return (size_cells);
 }
 
-/*
- * init_regspec_64:
- *
- * If the parent #size-cells is 2, convert the upa-style or
- * safari-style reg property from 2-size cells to 1 size cell
- * format, ignoring the size_hi, which must be zero for devices.
- * (It won't be zero in the memory list properties in the memory
- * nodes, but that doesn't matter here.)
- *
- * While we have no UPA or Safari, we do have roots with #size-cells == 2,
- * notably QEMU's "virt" machine.
- */
-struct ddi_parent_private_data *
-init_regspec_64(dev_info_t *dip)
-{
-	struct ddi_parent_private_data *pd;
-	dev_info_t *parent;
-	int size_cells;
-
-	/*
-	 * If there are no "reg"s in the child node, return.
-	 */
-	pd = ddi_get_parent_data(dip);
-	if ((pd == NULL) || (pd->par_nreg == 0)) {
-		return (pd);
-	}
-	parent = ddi_get_parent(dip);
-
-	size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    DDI_PROP_DONTPASS, "#size-cells", 1);
-
-	if (size_cells != 1)  {
-		int n, j;
-		struct regspec *irp;
-		struct reg_64 {
-			uint_t addr_hi, addr_lo, size_hi, size_lo;
-		};
-		struct reg_64 *r64_rp;
-		struct regspec *rp;
-		uint_t len = 0;
-		int *reg_prop;
-
-		VERIFY(size_cells == 2);
-
-		/*
-		 * We already looked the property up once before if
-		 * pd is non-NULL.
-		 */
-		(void) ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
-		    DDI_PROP_DONTPASS, OBP_REG, &reg_prop, &len);
-
-		VERIFY(len != 0);
-
-		n = BYTES_TO_1275_CELLS(sizeof (struct reg_64));
-		n = len / n;
-
-		/*
-		 * We're allocating a buffer the size of the PROM's property,
-		 * but we're only using a smaller portion when we assign it
-		 * to a regspec.  We do this so that in the
-		 * impl_ddi_sunbus_removechild function, we will
-		 * always free the right amount of memory.
-		 */
-		irp = rp = (struct regspec *)reg_prop;
-		r64_rp = (struct reg_64 *)pd->par_reg;
-
-		for (j = 0; j < n; ++j, ++rp, ++r64_rp) {
-			if (r64_rp->size_hi != 0) {
-				/* XXXROOTNEX */
-				dev_err(dip, CE_WARN, "requires "
-				    "64-bit register size");
-			}
-			rp->regspec_bustype = r64_rp->addr_hi;
-			rp->regspec_addr = r64_rp->addr_lo;
-			rp->regspec_size = r64_rp->size_lo;
-		}
-
-		ddi_prop_free(pd->par_reg);
-		pd->par_nreg = n;
-		pd->par_reg = irp;
-	}
-	return (pd);
-}
-
 static int
 get_interrupt_cells(pnode_t node)
 {
@@ -1539,16 +1455,85 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 
 	*ppd = pdptr = kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
 
+	if ((parent = ddi_get_parent(child)) == NULL) {
+		/* XXXROOTNEX: Is this ok? */
+		dev_err(child, CE_CONT, "skipping root node's ppd\n");
+		return;
+	}
+
+	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, "#address-cells", 2);
+	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, "#size-cells", 1);
+	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    DDI_PROP_DONTPASS, "#address-cells", 2);
+	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    DDI_PROP_DONTPASS, "#size-cells", 1);
+
 	/*
 	 * Handle the 'reg' property.
 	 *
-	 * XXXROOTNEX: The information here is invalid until `init_regspec_64`
-	 * has done its thing.  I have to confess I don't understand why this
-	 * is done in two passes, but the approach I've taken is from SPARC.
+	 * ROOTNEX: We translate 2 or 1 address cells and 2 or 1 size cells,
+	 * into a sruct regspec, in the same memory.  This is basically what
+	 * SPARC did, but done sooner so it gets done before devices are
+	 * named.
+	 *
+	 * Note that if we had a regspec64 in pardata this wouldn't work, as
+	 * the output might be larger than the input.
 	 */
 	if ((get_prop_int_array(child, "reg", &reg_prop, &reg_len) ==
 	    DDI_PROP_SUCCESS) && (reg_len != 0)) {
-		pdptr->par_nreg = reg_len / sizeof (struct regspec);
+		/*
+		 * We're using a buffer the size of the PROM's property,
+		 * but we're only using a smaller portion when we assign it
+		 * to a regspec.  We do this so that in the
+		 * impl_ddi_sunbus_removechild function, we will
+		 * always free the right amount of memory.
+		 *
+		 * XXXROOTNEX: This pre-supposes regspec is smaller than any
+		 * real layout.  True of a 32bit regspec, false of a  64bit one.
+		 */
+		uint32_t *ip = (uint32_t *)reg_prop;
+		struct regspec *orp = (struct regspec *)reg_prop;
+		struct regspec rp = {0};
+		int i = 0;
+		int n = reg_len /= sizeof (uint32_t);
+
+		while (i < n) {
+			if (parent_addr_cells == 2) {
+				if (ip[i] != 0) {
+					dev_err(child, CE_PANIC,
+					    "needs 64bit addressing");
+				}
+				rp.regspec_addr = ip[i + 1];
+				i += 2;
+			} else if (parent_addr_cells == 1) {
+				rp.regspec_addr = ip[i];
+				i += 1;
+			} else {
+				dev_err(child, CE_PANIC, "unexpected parent "
+				    "#address-cells %d", child_addr_cells);
+			}
+
+			if (parent_size_cells == 2) {
+				if (ip[i] != 0) {
+					dev_err(child, CE_PANIC,
+					    "needs 64-bit sizing");
+				}
+				rp.regspec_size = ip[i + 1];
+				i += 2;
+			} else if (parent_size_cells == 1) {
+				rp.regspec_size = ip[i];
+				i += 1;
+			} else {
+				dev_err(child, CE_PANIC, "unexpected parent "
+				    "#size-cells %d", child_addr_cells);
+			}
+
+			*orp++ = rp;
+			pdptr->par_nreg++;
+		}
+
 		pdptr->par_reg = (struct regspec *)reg_prop;
 	}
 
@@ -1576,7 +1561,7 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 		out = kmem_alloc(size, KM_SLEEP);
 		*out = BYTES_TO_1275_CELLS(n);
 		bcopy(irupts_prop, out + 1, (size_t)n);
-		ddi_prop_free((void *)irupts_prop);
+		ddi_prop_free(irupts_prop);
 		if (impl_xlate_intrs(child, out, pdptr) != DDI_SUCCESS) {
 			dev_err(child, CE_CONT,
 			    "Unable to translate 'interrupts'\n");
@@ -1585,23 +1570,10 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 	}
 
 	/*
-	 * root node has no parent ranges
-	 * XXXROOTNEX: Triple check we don't have to initial /'s ppd by hand
+	 * Ranges, of of which we only handle certain shapes.
+	 * XXXROOTNEX: Genericize, like we do regs and interrupts?
+	 * XXXROOTNEX: Who uses this data?
 	 */
-	if ((parent = ddi_get_parent(child)) == NULL) {
-		dev_err(child, CE_CONT, "skipping root node's ranges\n");
-		return;
-	}
-
-	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
-	    DDI_PROP_DONTPASS, "#address-cells", 2);
-	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
-	    DDI_PROP_DONTPASS, "#size-cells", 1);
-	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    DDI_PROP_DONTPASS, "#address-cells", 2);
-	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    DDI_PROP_DONTPASS, "#size-cells", 1);
-
 	if (get_prop_int_array(child, "ranges", &rng_prop, &rng_len)
 	    == DDI_PROP_SUCCESS) {
 		if (child_addr_cells != 2 || parent_addr_cells != 2 ||
@@ -1609,8 +1581,10 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 			/*
 			 * XXXROOTNEX: This was much quieter on other platforms
 			 */
-			dev_err(child, CE_WARN, "ranges not made in parent data; "
-			    "#address-cells or #size-cells have non-default values\n"
+			dev_err(child, CE_WARN,
+			    "ranges not made in parent data; "
+			    "#address-cells or #size-cells have "
+			    "non-default values\n"
 			    "\tparent: #address-cells = %d, #size-cells = %d\n"
 			    "\tchild: #address-cells = %d, #size-cells = %d",
 			    parent_addr_cells, parent_size_cells,
@@ -1662,8 +1636,6 @@ impl_ddi_sunbus_initchild(dev_info_t *child)
 		impl_ddi_sunbus_removechild(child);
 		return (DDI_FAILURE);
 	}
-
-	(void) init_regspec_64(child);
 
 	return (DDI_SUCCESS);
 }

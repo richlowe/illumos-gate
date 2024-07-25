@@ -343,10 +343,13 @@ get_cbe_vector(void)
 
 		if (found) {
 			len = prom_getproplen(timer, "interrupts");
-			/* XXXROOTNEX: More of this, but this might be happening before the DDI is set up? */
+			/*
+			 * XXXROOTNEX: Unfortunately, this is before DDI is
+			 * setup, so everything has to happen manually.
+			 */
 			if (len > 0) {
 				int interrupt_cell = get_interrupt_cell();
-				int num = len / (4 * interrupt_cell);
+				int num = len / CELLS_1275_TO_BYTES(interrupt_cell);
 				if (num > 0) {
 					uint32_t *interrupts = __builtin_alloca(len);
 					prom_getprop(timer, "interrupts", (caddr_t)interrupts);
@@ -361,6 +364,12 @@ get_cbe_vector(void)
 					int type = ntohl(interrupts[interrupt_cell * index + 0]);
 					irq = ntohl(interrupts[interrupt_cell * index + 1]);
 					int attr = ntohl(interrupts[interrupt_cell * index + 2]);
+
+					/*
+					 * XXXROOTNEX: This knowledge needs to
+					 * be somewhere, it's in the rootnex
+					 * too
+					 */
 					if (type == 0) {
 						// SPI
 						irq += 32;
@@ -373,7 +382,7 @@ get_cbe_vector(void)
 		}
 	}
 
-	return irq;
+	return (irq);
 }
 
 void
@@ -409,8 +418,9 @@ cbe_init(void)
 	int cbe_vector = get_cbe_vector();
 	if (cbe_vector > 0) {
 		/* XXXARM */
-		(void) add_avintr(NULL, CBE_HIGH_PIL, (avfunc)(uintptr_t)cbe_fire_master,
-		    "cbe_fire_master", cbe_vector, 0, NULL, NULL, NULL);
+		(void) add_avintr(NULL, CBE_HIGH_PIL,
+		    (avfunc)(uintptr_t)cbe_fire_master, "cbe_fire_master",
+		    cbe_vector, 0, NULL, NULL, NULL);
 	}
 
 	/* XXXARM */

@@ -357,17 +357,17 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	smpl_bus_regs_t child_rp;
 	ddi_map_req_t mr;
 	struct regspec64 reg = {0};
-	int error, addr_cells, size_cells;;
+	int error, addr_cells, size_cells;
 	uint32_t *cregs = NULL;
 
-	if ((addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "#address-cells", 0)) == 0) {
+	if ((addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "#address-cells", 0)) == 0) {
 		dev_err(rdip, CE_WARN, "couldn't read #address-cells");
 		return (DDI_ME_INVAL); /* XXXROOTNEX */
 	}
 
-	if ((size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "#size-cells", 0)) == 0) {
+	if ((size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "#size-cells", 0)) == 0) {
 		dev_err(rdip, CE_WARN, "couldn't read #size-cells");
 		return (DDI_ME_INVAL); /* XXXROOTNEX */
 	}
@@ -382,8 +382,8 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		int rnumber = mp->map_obj.rnumber;
 
 		if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
-		    DDI_PROP_DONTPASS, "reg", (int **)&cregs, &n) != DDI_SUCCESS) ||
-		    (n == 0)) {
+		    DDI_PROP_DONTPASS, "reg", (int **)&cregs, &n) !=
+		    DDI_SUCCESS) || (n == 0)) {
 			dev_err(rdip, CE_WARN,
 			    "couldn't read reg property\n");
 			return (DDI_ME_RNUMBER_RANGE);
@@ -593,8 +593,8 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			uint_t irupts_len;
 			if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
 			    DDI_PROP_DONTPASS, "interrupts",
-			    (int **)&irupts_prop, &irupts_len) != DDI_SUCCESS) ||
-			    (irupts_len == 0)) {
+			    (int **)&irupts_prop, &irupts_len) !=
+			    DDI_SUCCESS) || (irupts_len == 0)) {
 				return (DDI_FAILURE);
 			}
 
