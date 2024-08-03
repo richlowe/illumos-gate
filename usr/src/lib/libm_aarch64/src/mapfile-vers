@@ -72,6 +72,9 @@ global:
 	__ldexpl { FLAGS = NODYNSORT };
 	__powl;
 
+	# LLVM consumes this symbol so it needs to stay around
+	__logl;
+
 	acos;
 	acosf;
 	acosh;
