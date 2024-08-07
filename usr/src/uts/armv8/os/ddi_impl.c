@@ -2397,7 +2397,7 @@ kfreea(void *addr)
 
 /*ARGSUSED*/
 void
-i_ddi_devacc_to_hatacc(ddi_device_acc_attr_t *devaccp, uint_t *hataccp)
+i_ddi_devacc_to_hatacc(const ddi_device_acc_attr_t *devaccp, uint_t *hataccp)
 {
 }
 
@@ -2697,7 +2697,7 @@ i_ddi_update_dma_attr(dev_info_t *dip, ddi_dma_attr_t *attr)
 int
 i_ddi_mem_alloc(dev_info_t *dip, ddi_dma_attr_t *oattr,
     size_t length, int cansleep, int flags,
-    ddi_device_acc_attr_t *accattrp, caddr_t *kaddrp,
+    const ddi_device_acc_attr_t *accattrp, caddr_t *kaddrp,
     size_t *real_length, ddi_acc_hdl_t *ap)
 {
 	caddr_t a;

@@ -23,7 +23,8 @@ include $(SRC)/test/Makefile.com
 PROGDA = rights recvmsg
 
 PROG =	conn dgram drop_priv nosignal sockpair \
-	$(PROGDA:%=%.64)
+	$(PROGDA:%=%.64) \
+	so_protocol
 
 $(NOT_AARCH64_BLD)PROG += $(PROGDA:%=%.32)
 
