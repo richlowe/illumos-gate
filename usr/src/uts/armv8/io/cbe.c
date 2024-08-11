@@ -297,11 +297,11 @@ cbe_init_pre(void)
 }
 
 static int
-get_interrupt_cell(void)
+get_interrupt_cells(void)
 {
 	pnode_t root = prom_rootnode();
 	int len = prom_getproplen(root, "interrupt-parent");
-	int interrupt_cell = 3;
+	int interrupt_cells = 3;
 	if (len > 0) {
 		pnode_t gic;
 		gic = prom_findnode_by_phandle(ntohl(gic));
@@ -309,12 +309,12 @@ get_interrupt_cell(void)
 			len = prom_getproplen(gic, "#interrupt-cells");
 			if (len > 0) {
 				prom_getprop(gic, "#interrupt-cells",
-				    (caddr_t)&interrupt_cell);
-				interrupt_cell = ntohl(interrupt_cell);
+				    (caddr_t)&interrupt_cells);
+				interrupt_cells = ntohl(interrupt_cells);
 			}
 		}
 	}
-	return (interrupt_cell);
+	return (interrupt_cells);
 }
 
 static int
@@ -330,14 +330,14 @@ get_cbe_vector(void)
 		if (len > 0) {
 			char *compatible = __builtin_alloca(len);
 			prom_getprop(timer, "compatible", compatible);
-			int offeset = 0;
-			while (offeset < len) {
+			int offset = 0;
+			while (offset < len) {
 				if (strcmp(compatible,
 				    "arm,armv8-timer") == 0) {
 					found = B_TRUE;
 					break;
 				}
-				offeset += strlen(compatible + offeset) + 1;
+				offset += strlen(compatible + offset) + 1;
 			}
 		}
 
@@ -348,8 +348,8 @@ get_cbe_vector(void)
 			 * setup, so everything has to happen manually.
 			 */
 			if (len > 0) {
-				int interrupt_cell = get_interrupt_cell();
-				int num = len / CELLS_1275_TO_BYTES(interrupt_cell);
+				int interrupt_cells = get_interrupt_cells();
+				int num = len / CELLS_1275_TO_BYTES(interrupt_cells);
 				if (num > 0) {
 					uint32_t *interrupts = __builtin_alloca(len);
 					prom_getprop(timer, "interrupts", (caddr_t)interrupts);
@@ -361,9 +361,9 @@ get_cbe_vector(void)
 					 */
 					if (index == 1 && cpu->cpu_m.mcpu_boot_el == 1)
 						index += 1;
-					int type = ntohl(interrupts[interrupt_cell * index + 0]);
-					irq = ntohl(interrupts[interrupt_cell * index + 1]);
-					int attr = ntohl(interrupts[interrupt_cell * index + 2]);
+					int type = ntohl(interrupts[interrupt_cells * index + 0]);
+					irq = ntohl(interrupts[interrupt_cells * index + 1]);
+					int attr = ntohl(interrupts[interrupt_cells * index + 2]);
 
 					/*
 					 * XXXROOTNEX: This knowledge needs to

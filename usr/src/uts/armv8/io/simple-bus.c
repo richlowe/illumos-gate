@@ -34,6 +34,7 @@
 #include <sys/kmem.h>
 #include <sys/ddidmareq.h>
 #include <sys/ddi_impldefs.h>
+#include <sys/ddi_subrdefs.h>
 #include <sys/dma_engine.h>
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
@@ -170,83 +171,28 @@ smpl_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	return (DDI_SUCCESS);
 }
 
-static int
-get_interrupt_cells(pnode_t node)
-{
-	int interrupt_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#interrupt-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
-		}
-		len = prom_getproplen(node, "interrupt-parent");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
-			node = prom_findnode_by_phandle(ntohl(prop));
-			continue;
-		}
-		node = prom_parentnode(node);
-	}
-	return (interrupt_cells);
-}
-
-typedef struct {
-	enum {
-		SBR_REGS_1x1,
-		SBR_REGS_1x2,
-		SBR_REGS_2x1,
-		SBR_REGS_2x2,
-	} sbr_type;
-	union {
-		uint32_t sbr_raw[4];
-		struct {
-			uint32_t addr;
-			uint32_t size;
-		} sbr_1x1;
-		struct {
-			uint32_t addr;
-			uint32_t size_hi;
-			uint32_t size_lo;
-		} sbr_1x2;
-		struct {
-			uint32_t addr_hi;
-			uint32_t addr_lo;
-			uint32_t size;
-		} sbr_2x1;
-		struct {
-			uint32_t addr_hi;
-			uint32_t addr_lo;
-			uint32_t size_hi;
-			uint32_t size_lo;
-		} sbr_2x2;
-	};
-} smpl_bus_regs_t;
-
 void
-smpl_bus_cook_regs(uint32_t *regs, smpl_bus_regs_t *out, int addr_cells,
+smpl_bus_cook_regs(uint32_t *regs, struct regspec64 *out, int addr_cells,
     int size_cells)
 {
+	uint64_t addr = 0;
+	uint64_t size = 0;
+
+	/* XXXROOTNEX: Can we just sparc_pd_getregs() */
+
 	ASSERT(addr_cells == 1 || addr_cells == 2);
 	ASSERT(size_cells == 1 || size_cells == 2);
 
-	bcopy(regs, out->sbr_raw,
-	    CELLS_1275_TO_BYTES(addr_cells + size_cells));
+	for (int i = 0; i < addr_cells; i++) {
+		addr = (addr << 32) | regs[i];
+	}
 
-	if (addr_cells == 1 && size_cells == 1)
-		out->sbr_type = SBR_REGS_1x1;
-	else if (addr_cells == 1 && size_cells == 2)
-		out->sbr_type = SBR_REGS_1x2;
-	else if (addr_cells == 2 && size_cells == 1)
-		out->sbr_type = SBR_REGS_2x1;
-	else if (addr_cells == 2 && size_cells == 2)
-		out->sbr_type = SBR_REGS_2x2;
+	for (int i = 0; i < size_cells; i++) {
+		size = (size << 32) | regs[addr_cells + i];
+	}
+
+	out->regspec_addr = addr;
+	out->regspec_size = size;
 }
 
 static inline int
@@ -354,7 +300,6 @@ static int
 smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
     off_t len, caddr_t *vaddrp)
 {
-	smpl_bus_regs_t child_rp;
 	ddi_map_req_t mr;
 	struct regspec64 reg = {0};
 	int error, addr_cells, size_cells;
@@ -374,7 +319,7 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 	switch (mp->map_type) {
 	case DDI_MT_REGSPEC:
-		smpl_bus_cook_regs((uint32_t *)mp->map_obj.rp, &child_rp,
+		smpl_bus_cook_regs((uint32_t *)mp->map_obj.rp, &reg,
 		    addr_cells, size_cells);
 		break;
 	case DDI_MT_RNUMBER: {
@@ -398,41 +343,13 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 		int off = smpl_bus_regno_to_offset(rnumber, addr_cells,
 		    size_cells);
-		smpl_bus_cook_regs(&cregs[off], &child_rp,
+		smpl_bus_cook_regs(&cregs[off], &reg,
 		    addr_cells, size_cells);
 
 		break;
 	}
 	default:
 		return (DDI_ME_INVAL);
-	}
-
-	/* Convert our child regspec into our parents */
-	switch (child_rp.sbr_type) {
-	case SBR_REGS_1x1:
-		reg.regspec_bustype = 0;
-		reg.regspec_addr = child_rp.sbr_1x1.addr;
-		reg.regspec_size = child_rp.sbr_1x1.size;
-		break;
-	case SBR_REGS_1x2:
-		reg.regspec_bustype = 0;
-		reg.regspec_addr = child_rp.sbr_1x2.addr;
-		reg.regspec_size = ((uint64_t)child_rp.sbr_1x2.size_hi << 32) |
-		    child_rp.sbr_1x2.size_lo;
-		break;
-	case SBR_REGS_2x1:
-		reg.regspec_bustype = 0;
-		reg.regspec_addr = ((uint64_t)child_rp.sbr_2x1.addr_hi << 32) |
-		    child_rp.sbr_2x1.addr_lo;
-		reg.regspec_size = child_rp.sbr_2x1.size;
-		break;
-	case SBR_REGS_2x2:
-		reg.regspec_bustype = 0;
-		reg.regspec_addr = ((uint64_t)child_rp.sbr_2x2.addr_hi << 32) |
-		    child_rp.sbr_2x2.addr_lo;
-		reg.regspec_size = ((uint64_t)child_rp.sbr_2x2.size_hi << 32) |
-		    child_rp.sbr_2x2.size_lo;
-		break;
 	}
 
 	if (cregs != NULL)
@@ -476,7 +393,6 @@ static int
 smpl_ctlops(dev_info_t *dip, dev_info_t *rdip,
     ddi_ctl_enum_t ctlop, void *arg, void *result)
 {
-	struct regspec *child_rp;
 	uint_t reglen;
 	int nreg;
 	int ret;
@@ -518,27 +434,30 @@ get_pil(dev_info_t *rdip)
 		{"Ethernet controller",		6},
 		{ NULL}
 	};
-	const char *type_name[] = {
+	char *type_name[] = {
 		"device_type",
 		"model",
 		NULL
 	};
 
-	pnode_t node = ddi_get_nodeid(rdip);
-	for (int i = 0; type_name[i]; i++) {
-		int len = prom_getproplen(node, type_name[i]);
-		if (len <= 0) {
+	for (int i = 0; type_name[i] != NULL; i++) {
+		char *name;
+
+		if (ddi_prop_lookup_string(DDI_DEV_T_ANY, rdip,
+		    DDI_PROP_DONTPASS, type_name[i], &name) != DDI_SUCCESS) {
 			continue;
 		}
-		char *name = __builtin_alloca(len);
-		prom_getprop(node, type_name[i], name);
 
 		for (int j = 0; name_to_pil[j].name; j++) {
 			if (strcmp(name_to_pil[j].name, name) == 0) {
+				ddi_prop_free(name);
 				return (name_to_pil[j].pil);
 			}
 		}
+
+		ddi_prop_free(name);
 	}
+
 	return (5);
 }
 
@@ -559,11 +478,8 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 
 	case DDI_INTROP_GETPRI:
-		if (hdlp->ih_pri == 0) {
-			hdlp->ih_pri = get_pil(rdip);
-		}
-
-		*(int *)result = hdlp->ih_pri;
+		*(int *)result = hdlp->ih_pri ?
+		    hdlp->ih_pri : get_pil(rdip);
 		break;
 	case DDI_INTROP_SETPRI:
 		if (*(int *)result > LOCK_LEVEL)
@@ -579,8 +495,9 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_ENABLE:
 		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
+			dev_info_t *ip = i_ddi_interrupt_parent(rdip);
+			int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ip, DDI_PROP_DONTPASS, "#interrupt-cells", -1);
 
 			/*
 			 * XXXROOTNEX:
@@ -667,8 +584,10 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		return (DDI_FAILURE);
 	case DDI_INTROP_NAVAIL:
 		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
+			dev_info_t *ip = i_ddi_interrupt_parent(rdip);
+			int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ip, DDI_PROP_DONTPASS, "#interrupt-cells", -1);
+
 			int irupts_len;
 			if (interrupt_cells != 0 &&
 			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
@@ -683,9 +602,11 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_NINTRS:
 		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
+			dev_info_t *ip = i_ddi_interrupt_parent(rdip);
+			int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ip, DDI_PROP_DONTPASS, "#interrupt-cells", -1);
 			int irupts_len;
+
 			if (interrupt_cells != 0 &&
 			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
 			    DDI_PROP_DONTPASS, "interrupts",

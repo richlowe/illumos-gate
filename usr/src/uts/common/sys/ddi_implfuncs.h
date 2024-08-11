@@ -41,7 +41,6 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/task.h>
 #include <sys/project.h>
-#include <sys/ddi_impldefs.h>
 
 #ifdef	_KERNEL
 
@@ -53,10 +52,6 @@ extern int i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
     off_t offset, off_t len, caddr_t *vaddrp);
 extern int i_ddi_apply_range(dev_info_t *dip, dev_info_t *rdip,
     struct regspec *rp);
-#if defined(__aarch64__)
-extern int i_ddi_apply_range64(dev_info_t *dip, dev_info_t *rdip,
-    struct regspec64 *rp);
-#endif
 extern struct regspec *i_ddi_rnumber_to_regspec(dev_info_t *dip, int rnumber);
 extern int i_ddi_map_fault(dev_info_t *dip, dev_info_t *rdip,
     struct hat *hat, struct seg *seg, caddr_t addr,

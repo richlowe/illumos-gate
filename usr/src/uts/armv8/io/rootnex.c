@@ -702,43 +702,6 @@ rootnex_ctl_reportdev(dev_info_t *dev)
  *  map related code
  * ******************
  */
-static int
-get_address_cells(pnode_t node)	/* XXXPCI: Why do we need this, here? */
-{
-	int address_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#address-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#address-cells", (caddr_t)&prop);
-			address_cells = ntohl(prop);
-			break;
-		}
-		node = prom_parentnode(node);
-	}
-	return (address_cells);
-}
-
-static int
-get_size_cells(pnode_t node)	/* XXXPCI: Why do we need this here? */
-{
-	int size_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#size-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#size-cells", (caddr_t)&prop);
-			size_cells = ntohl(prop);
-			break;
-		}
-		node = prom_parentnode(node);
-	}
-	return (size_cells);
-}
 
 /*
  * rootnex_map()
@@ -864,9 +827,6 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	 * that is the case.
 	 */
 	ASSERT0(sparc_pd_getnrng(dip));
-
-	if ((error = i_ddi_apply_range(dip, rdip, mp->map_obj.rp)) != 0)
-		return (error);
 
 	switch (mp->map_op)  {
 	case DDI_MO_MAP_LOCKED:
@@ -1168,20 +1128,7 @@ rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
 	if (rp->regspec_size == 0)
 		return (DDI_ME_INVAL);
 
-#ifdef __xpv
-	/*
-	 * If we're dom0, we're using a real device so we need to translate
-	 * the MA to a PA.
-	 */
-	if (DOMAIN_IS_INITDOMAIN(xen_info)) {
-		pbase = pfn_to_pa(xen_assign_pfn(mmu_btop(rbase))) |
-		    (rbase & MMU_PAGEOFFSET);
-	} else {
-		pbase = rbase;
-	}
-#else
 	pbase = rbase;
-#endif
 
 	hp->ah_pfn = mmu_btop(pbase);
 	hp->ah_pnum = mmu_btopr(rp->regspec_size + pgoffset);
@@ -1241,7 +1188,9 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		 * XXXROOTNEX: And is another case where we modified the
 		 * handle, but x86 only the ispec
 		 */
-		ASSERT(0 && "This never worked, did it ever happen?");
+
+		/* update the ispec with the new priority */
+		ispec->intrspec_pri =  *(int *)result;
 		break;
 
 	case DDI_INTROP_ADDISR:

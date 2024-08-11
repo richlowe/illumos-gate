@@ -90,62 +90,49 @@ static char *
 plat_ttypath(void)
 {
 	int len;
-	static char *ttypath;
+	static char *ttypath = NULL;
+	char buf[MAXPATHLEN];
 
 	if (ttypath != NULL)
 		return (ttypath);
 
 	len = prom_getproplen(prom_chosennode(), "stdout-path");
-	if (len > 0) {
-		char *buf = kmem_alloc(len + 1, KM_SLEEP);
+	if (len <= 0)
+		return (NULL);
 
-		prom_getprop(prom_chosennode(), "stdout-path", buf);
-		buf[len] = '\0';
 
-		char *p = strchr(buf, ':');
-		if (p != NULL)
-			*p = '\0';
+	prom_getprop(prom_chosennode(), "stdout-path", buf);
+	buf[len] = '\0';
 
-		if (buf[0] != '/') {
-			pnode_t node = prom_finddevice("/aliases");
-			if (node <= 0) {
-				kmem_free(buf, len + 1);
-				return (NULL);
-			}
+	char *p = strchr(buf, ':');
+	if (p != NULL)
+		*p = '\0';
 
-			int nlen = prom_getproplen(node, buf);
-			if (nlen <= 0) {
-				kmem_free(buf, len + 1);
-				return (NULL);
-			}
-
-			char *b = kmem_alloc(nlen + 1, KM_SLEEP);
-			prom_getprop(node, buf, b);
-			kmem_free(buf, len + 1);
-			buf = b;
-			len = nlen;
+	/* If the path appears relative, it refers to an alias */
+	if (buf[0] != '/') {
+		pnode_t node = prom_finddevice("/aliases");
+		if (node <= 0) {
+			return (NULL);
 		}
 
-		dev_info_t *dip;
-
-		if (resolve_pathname(buf, &dip, NULL, NULL) == 0) {
-			static char path[MAXPATHLEN];
-			(void) ddi_pathname(dip, path);
-
-			char *bp = path + strlen(path);
-			(void) snprintf(bp, 3, ":%s",
-			    DEVI(dip)->devi_minor->ddm_name);
-
-			ttypath = path;
-			kmem_free(buf, len + 1);
-
-			return (path);
+		int nlen = prom_getproplen(node, buf);
+		if (nlen <= 0) {
+			return (NULL);
 		}
 
-		kmem_free(buf, len + 1);
+		char b[MAXPATHLEN];
+		prom_getprop(node, buf, b);
+		bcopy(b, buf, MAXPATHLEN);
+		len = nlen;
 	}
 
-	return (NULL);
+	ttypath = kmem_zalloc(MAXPATHLEN, KM_SLEEP);
+	if (i_ddi_prompath_to_devfspath(buf, ttypath) != DDI_SUCCESS) {
+		kmem_free(ttypath, MAXPATHLEN);
+		return (NULL);
+	}
+
+	return (ttypath);
 }
 
 char *

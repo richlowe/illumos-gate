@@ -49,7 +49,7 @@
 #include <sys/prom_plat.h>
 #include <sys/sunndi.h>
 #include <sys/ndi_impldefs.h>
-#include <sys/ddi_impldefs.h>
+
 #include <sys/sysmacros.h>
 #include <sys/systeminfo.h>
 #include <sys/utsname.h>
@@ -1270,22 +1270,19 @@ get_size_cells(pnode_t node)
 	return (size_cells);
 }
 
-static int
-get_interrupt_cells(pnode_t node)
+dev_info_t *
+i_ddi_interrupt_parent(dev_info_t *pdip)
 {
-	int interrupt_cells = 0;
+	int len;
+	pnode_t node = ddi_get_nodeid(pdip);
 
 	while (node > 0) {
-		int len = prom_getproplen(node, "#interrupt-cells");
-		if (len > 0) {
+		if ((len = prom_getproplen(node, "#interrupt-cells")) > 0) {
 			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
+			return (e_ddi_nodeid_to_dip(node));
 		}
-		len = prom_getproplen(node, "interrupt-parent");
-		if (len > 0) {
+
+		if ((len = prom_getproplen(node, "interrupt-parent")) > 0) {
 			ASSERT(len == sizeof (int));
 			int prop;
 			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
@@ -1294,7 +1291,8 @@ get_interrupt_cells(pnode_t node)
 		}
 		node = prom_parentnode(node);
 	}
-	return (interrupt_cells);
+
+	return (NULL);
 }
 
 /*
@@ -1303,27 +1301,25 @@ get_interrupt_cells(pnode_t node)
  *
  * or the arm,gic format: a list of <type, vec, flags> specifications
  */
-
 #define	VEC_MIN	0
 #define	VEC_MAX	987
 
 static int
-impl_xlate_intrs(dev_info_t *child, int *in,
+impl_xlate_intrs(dev_info_t *child, uint32_t *in, size_t in_len,
     struct ddi_parent_private_data *pdptr)
 {
-	size_t size;
-	int n;
+	dev_info_t *iparent = i_ddi_interrupt_parent(child);
 	struct intrspec *new;
 	caddr_t got_prop;
+	int n;
 	int *inpri = NULL;
 	int got_len;
 
-	static char bad_intr_fmt[] =
+	int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY, iparent,
+	    DDI_PROP_DONTPASS, "#interrupt-cells", -1);
+
+	static const char bad_intr_fmt[] =
 	    "bad interrupt spec from %s%d - ipl %d, irq %d\n";
-
-
-	int interrupt_cells =
-	    get_interrupt_cells(ddi_get_nodeid(child));
 
 	/*
 	 * XXXROOTNEX:
@@ -1339,20 +1335,10 @@ impl_xlate_intrs(dev_info_t *child, int *in,
 	/*
 	 * We only support output of the "new style" property, a list of <vec>
 	 */
-
-	/*
-	 * The input list consists of elements a vector of multiples of
-	 * #interrupt-cells, with the total number of vector elements in [0].
-	 */
-	if ((n = (*in++)) < 1)
-		return (DDI_FAILURE);
-
-	/* ...though it isn't aware of #interrupt-cells */
-	n /= interrupt_cells;
-
+	n = BYTES_TO_1275_CELLS(in_len) / interrupt_cells;
 	pdptr->par_nintr = n;
-	size = n * sizeof (struct intrspec);
-	new = pdptr->par_intr = kmem_zalloc(size, KM_SLEEP);
+	new = pdptr->par_intr = kmem_zalloc(n * sizeof (struct intrspec),
+	    KM_SLEEP);
 
 	if (ddi_getlongprop(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
 	    "interrupt-priorities", (caddr_t)&got_prop, &got_len)
@@ -1369,7 +1355,8 @@ impl_xlate_intrs(dev_info_t *child, int *in,
 		inpri = (int *)got_prop;
 	}
 
-	while (n--) {
+
+	for (int i = 0; i < n; i++) {
 		uint32_t type, vec, flags;
 		uint32_t level = 5;
 
@@ -1419,13 +1406,85 @@ impl_xlate_intrs(dev_info_t *child, int *in,
 	return (DDI_SUCCESS);
 
 broken:
-	kmem_free(pdptr->par_intr, size);
+	kmem_free(pdptr->par_intr, pdptr->par_nintr * sizeof (struct intrspec));
 	pdptr->par_intr = NULL;
 	pdptr->par_nintr = 0;
 	if (inpri != NULL)
 		kmem_free(got_prop, got_len);
 
 	return (DDI_FAILURE);
+}
+
+/*
+ * We're prepared for either 2 or 1 address cells and 2 or 1 size cells
+ */
+static int
+impl_xlate_regs(dev_info_t *child, uint32_t *in, size_t in_len,
+    struct ddi_parent_private_data *pdptr)
+{
+	struct regspec *rp = NULL;
+	dev_info_t *parent = NULL;
+	int n = BYTES_TO_1275_CELLS(in_len);
+
+	parent = ddi_get_parent(child);
+
+	if (parent == NULL) {
+		return (-1);
+	}
+
+	int parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    0, "#address-cells", 0);
+	int parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
+	    0, "#size-cells", 0);
+
+	if (parent_size_cells < 1 || parent_size_cells > 2) {
+		dev_err(child, CE_WARN, "unsupported size cells %d",
+		    parent_size_cells);
+		return (1);
+	}
+
+	if (parent_addr_cells < 1 || parent_addr_cells > 2) {
+		dev_err(child, CE_WARN, "unsupported addr cells %d",
+		    parent_addr_cells);
+		return (1);
+	}
+
+	int reg_size = parent_addr_cells + parent_size_cells;
+	int nregs = n / reg_size;
+
+	ASSERT3U(n, >=, 1);
+
+	rp = pdptr->par_reg = kmem_zalloc(nregs * sizeof (struct regspec),
+	    KM_SLEEP);
+	pdptr->par_nreg = nregs;
+
+	for (int i = 0; i < nregs; i++, rp++) {
+		uint64_t addr = 0;
+		uint64_t size = 0;
+
+		for (int j = 0; j < parent_addr_cells; j++) {
+			addr = (addr << 32) | in[(reg_size * i) + j];
+		}
+
+		for (int j = 0; j < parent_size_cells; j++) {
+			size = (size << 32) | in[(reg_size * i) +
+			    (parent_addr_cells + j)];
+		}
+
+		if (addr > UINT32_MAX) {
+			dev_err(child, CE_WARN, "regspec %d needs 64bit "
+			    "addressing", i);
+		}
+		if (size > UINT32_MAX) {
+			dev_err(child, CE_WARN, "regspec %d needs 64bit "
+			    "sizing", i);
+		}
+
+		rp->regspec_addr = addr;
+		rp->regspec_size = size;
+	}
+
+	return (0);
 }
 
 /*
@@ -1443,7 +1502,7 @@ broken:
  * `struct intrspec`
  *
  * XXXROOTNEX: "ranges" is currently left alone, unless it is of a
- * pre-determined shape shape.
+ * pre-determined shape.
  */
 void
 make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
@@ -1458,10 +1517,44 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 
 	*ppd = pdptr = kmem_zalloc(sizeof (*pdptr), KM_SLEEP);
 
-	if ((parent = ddi_get_parent(child)) == NULL) {
-		/* XXXROOTNEX: Is this ok? */
-		dev_err(child, CE_CONT, "skipping root node's ppd\n");
+	/* The root node has no PPD */
+	if ((parent = ddi_get_parent(child)) == NULL)
 		return;
+
+	/*
+	 * Handle the 'reg' property.
+	 */
+	if ((get_prop_int_array(child, "reg", &reg_prop, &reg_len) ==
+	    DDI_PROP_SUCCESS) && (reg_len != 0)) {
+		if (impl_xlate_regs(child, (uint32_t *)reg_prop, reg_len,
+		    pdptr) != 0) {
+			dev_err(child, CE_WARN, "couldn't initialize regs in "
+			    "parent data");
+		}
+
+		ddi_prop_free(reg_prop);
+	}
+
+	/*
+	 * Handle the 'interrupts' property
+	 */
+	if ((get_prop_int_array(child, "interrupts", &irupts_prop,
+	    &irupts_len) == DDI_PROP_SUCCESS) && (irupts_len != 0)) {
+		/*
+		 * Translate the 'interrupts' property into an array
+		 * of intrspecs for the rest of the DDI framework to
+		 * toy with.  Only our ancestors really know how to
+		 * do this, so ask 'em.  We massage the 'interrupts'
+		 * property so that it is pre-pended by a count of
+		 * the number of integers in the argument.
+		 */
+		if (impl_xlate_intrs(child, (uint32_t *)irupts_prop, irupts_len,
+		    pdptr) != DDI_SUCCESS) {
+			dev_err(child, CE_CONT,
+			    "Unable to translate 'interrupts'\n");
+		}
+
+		ddi_prop_free(irupts_prop);
 	}
 
 	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
@@ -1477,95 +1570,6 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 	ASSERT3U(child_size_cells, !=, 0);
 	ASSERT3U(parent_addr_cells, !=, 0);
 	ASSERT3U(parent_size_cells, !=, 0);
-
-	/*
-	 * Handle the 'reg' property.
-	 *
-	 * ROOTNEX: We translate 2 or 1 address cells and 2 or 1 size cells,
-	 * into a sruct regspec, basically as SPARC did, although we do it
-	 * here upfront, and in our own memory.
-	 */
-	if ((get_prop_int_array(child, "reg", &reg_prop, &reg_len) ==
-	    DDI_PROP_SUCCESS) && (reg_len != 0)) {
-		uint32_t *ip = (uint32_t *)reg_prop;
-		struct regspec *orp = NULL;
-		struct regspec rp = {0};
-		int i = 0;
-		int n = reg_len /= sizeof (uint32_t);
-		int nregs = reg_len / (parent_addr_cells + parent_size_cells);
-
-		pdptr->par_reg = kmem_zalloc(nregs * sizeof (struct regspec),
-		    KM_SLEEP);
-		orp = pdptr->par_reg;
-
-		while (i < n) {
-			if (parent_addr_cells == 2) {
-				if (ip[i] != 0) {
-					dev_err(child, CE_PANIC,
-					    "needs 64bit addressing");
-				}
-				rp.regspec_addr = ip[i + 1];
-				i += 2;
-			} else if (parent_addr_cells == 1) {
-				rp.regspec_addr = ip[i];
-				i += 1;
-			} else {
-				dev_err(child, CE_PANIC, "unexpected parent "
-				    "#address-cells %d", child_addr_cells);
-			}
-
-			if (parent_size_cells == 2) {
-				if (ip[i] != 0) {
-					dev_err(child, CE_PANIC,
-					    "needs 64-bit sizing");
-				}
-				rp.regspec_size = ip[i + 1];
-				i += 2;
-			} else if (parent_size_cells == 1) {
-				rp.regspec_size = ip[i];
-				i += 1;
-			} else {
-				dev_err(child, CE_PANIC, "unexpected parent "
-				    "#size-cells %d", child_addr_cells);
-			}
-
-			*orp++ = rp;
-			pdptr->par_nreg++;
-		}
-		ddi_prop_free(reg_prop);
-	}
-
-	/*
-	 * Handle the 'interrupts' property
-	 */
-	if (get_prop_int_array(child, "interrupts", &irupts_prop,
-	    &irupts_len) != DDI_PROP_SUCCESS) {
-		irupts_len = 0;
-	}
-
-	if ((n = irupts_len) != 0) {
-		size_t size;
-		int *out;
-
-		/*
-		 * Translate the 'interrupts' property into an array
-		 * of intrspecs for the rest of the DDI framework to
-		 * toy with.  Only our ancestors really know how to
-		 * do this, so ask 'em.  We massage the 'interrupts'
-		 * property so that it is pre-pended by a count of
-		 * the number of integers in the argument.
-		 */
-		size = n + sizeof (int);
-		out = kmem_alloc(size, KM_SLEEP);
-		*out = BYTES_TO_1275_CELLS(n);
-		bcopy(irupts_prop, out + 1, (size_t)n);
-		ddi_prop_free(irupts_prop);
-		if (impl_xlate_intrs(child, out, pdptr) != DDI_SUCCESS) {
-			dev_err(child, CE_CONT,
-			    "Unable to translate 'interrupts'\n");
-		}
-		kmem_free(out, size);
-	}
 
 	/*
 	 * Ranges, of of which we only handle certain shapes.
@@ -1599,10 +1603,7 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 static int
 impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 {
-	/*
-	 * Fill in parent-private data and this function returns to us
-	 * an indication if it used "registers" to fill in the data.
-	 */
+	/* Fill in parent-private data */
 	if (ddi_get_parent_data(child) == NULL) {
 		struct ddi_parent_private_data *pdptr;
 		make_ddi_ppd(child, &pdptr);
@@ -1612,8 +1613,11 @@ impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 	name[0] = '\0';
 
 	if (sparc_pd_getnreg(child) > 0) {
-		(void) snprintf(name, namelen, "%x,%x",
-		    (uint_t)sparc_pd_getreg(child, 0)->regspec_bustype,
+		/*
+		 * XXXARM: Note that unlike other platforms, we don't include
+		 * the bustype, to match practice in devicetree.
+		 */
+		(void) snprintf(name, namelen, "%x",
 		    (uint_t)sparc_pd_getreg(child, 0)->regspec_addr);
 	}
 
@@ -2509,8 +2513,8 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 		parent_address_cells = get_address_cells(parent);
 
 		int len = prom_getproplen(node, "dma-ranges");
-		if (len % (sizeof (uint32_t) * (bus_address_cells +
-		    parent_address_cells + bus_size_cells)) != 0) {
+		if (len % CELLS_1275_TO_BYTES(bus_address_cells +
+		    parent_address_cells + bus_size_cells) != 0) {
 			cmn_err(CE_WARN,
 			    "%s: dma-ranges property length is invalid\n"
 			    "bus_address_cells %d\n"
@@ -2522,8 +2526,8 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 			ret = DDI_FAILURE;
 			goto err_exit;
 		}
-		int num = len / (sizeof (uint32_t) * (
-		    bus_address_cells + parent_address_cells + bus_size_cells));
+		int num = len / CELLS_1275_TO_BYTES(bus_address_cells +
+		    parent_address_cells + bus_size_cells);
 		uint32_t *cells = __builtin_alloca(len);
 		prom_getprop(node, "dma-ranges", (caddr_t)cells);
 
@@ -3141,18 +3145,6 @@ static struct bus_probe {
 } *bus_probes;
 void
 impl_bus_add_probe(void (*func)(int));
-static int
-print_dip(dev_info_t *dip, void *arg)
-{
-	char *model_str;
-	prom_printf("%s: dip=%p\n", __FUNCTION__, dip);
-	if (ddi_prop_lookup_string(
-	    DDI_DEV_T_ANY, dip, 0, "name", &model_str) != DDI_SUCCESS)
-		return (DDI_WALK_CONTINUE);
-	prom_printf("%s: name=%s\n", __FUNCTION__, model_str);
-	ddi_prop_free(model_str);
-	return (DDI_WALK_CONTINUE);
-}
 
 /*
  * impl_bus_initialprobe
@@ -3172,8 +3164,6 @@ impl_bus_initialprobe(void)
 		(*probe->probe)(0);
 		probe = probe->next;
 	}
-
-//	ddi_walk_devs(ddi_root_node(), print_dip, (void *)0);
 }
 
 void

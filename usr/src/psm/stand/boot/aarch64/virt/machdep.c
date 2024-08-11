@@ -276,7 +276,7 @@ exitto(int (*entrypoint)())
 	setenv("ttya-mode", "115200,8,n,1,-");
 	setenv("ttyb-mode", "115200,8,n,1,-");
 
-	str = "/pl011@0,9000000:115200n8";	/* qemu */
+	str = "/pl011@9000000:115200n8";	/* qemu */
 	prom_setprop(prom_chosennode(), "stdout-path",
 	    (caddr_t)str, strlen(str) + 1);
 

@@ -301,7 +301,7 @@ i_ddi_map_fault(dev_info_t *dip, dev_info_t *rdip,
  * representation, which is big-endian, with no particular alignment
  * guarantees.  intp points to the OBP data, and n the number of bytes.
  *
- * Byte-swapping is needed on ARM, since the devicetree is bigendian and the
+ * Byte-swapping is needed on ARM, since devicetree is big-endian and the
  * CPU is not.
  */
 int
