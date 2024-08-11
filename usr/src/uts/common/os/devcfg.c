@@ -4181,7 +4181,7 @@ i_ddi_prompath_to_devfspath(char *prompath, char *devfspath)
 	error = resolve_pathname(prompath, &dip, &devt, &spectype);
 	if (error)
 		return (DDI_FAILURE);
-	ASSERT(dip && devt != NODEV);
+	ASSERT(dip != NULL && devt != NODEV);
 
 	/*
 	 * Get in-kernel devfs pathname
@@ -4190,9 +4190,10 @@ i_ddi_prompath_to_devfspath(char *prompath, char *devfspath)
 
 	ndi_devi_enter(dip);
 	minor_name = i_ddi_devtspectype_to_minorname(dip, devt, spectype);
-	if (minor_name) {
-		(void) strcat(devfspath, ":");
-		(void) strcat(devfspath, minor_name);
+
+	if (minor_name != NULL) {
+		(void) strlcat(devfspath, ":", MAXPATHLEN);
+		(void) strlcat(devfspath, minor_name, MAXPATHLEN);
 	} else {
 		/*
 		 * If minor_name is NULL, we have an alias minor node.
