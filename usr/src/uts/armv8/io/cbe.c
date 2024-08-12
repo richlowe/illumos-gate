@@ -44,6 +44,7 @@
 #include <sys/archsystm.h>
 #include <sys/promif.h>
 #include <sys/arch_timer.h>
+#include <sys/gic.h>
 
 static int cbe_ticks = 0;
 
@@ -364,15 +365,9 @@ get_cbe_vector(void)
 					if (index == 1 && cpu->cpu_m.mcpu_boot_el == 1)
 						index += 1;
 					int type = htonl(interrupts[interrupt_cells * index + 0]);
-					irq = htonl(interrupts[interrupt_cells * index + 1]);
+					irq = GIC_VEC_TO_IRQ(type,
+					    htonl(interrupts[interrupt_cells * index + 1]));
 					int attr = htonl(interrupts[interrupt_cells * index + 2]);
-					if (type == 0) {
-						// SPI
-						irq += 32;
-					} else {
-						// PPI
-						irq += 16;
-					}
 				}
 			}
 		}

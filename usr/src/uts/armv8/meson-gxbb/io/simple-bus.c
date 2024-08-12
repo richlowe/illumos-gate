@@ -523,15 +523,8 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 				return (DDI_FAILURE);
 			}
 			kmem_free(irupts_prop, irupts_len);
-			switch (grp) {
-			case 1:
-				hdlp->ih_vector = vec + 16;
-				break;
-			case 0:
-			default:
-				hdlp->ih_vector = vec + 32;
-				break;
-			}
+
+			hdlp->ih_vector = GIC_VEC_TO_IRQ(grp, vec);
 
 			cfg &= 0xFF;
 			switch (cfg) {

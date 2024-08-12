@@ -35,6 +35,12 @@
 extern "C" {
 #endif
 
+#define	GIC_PPI_TO_IRQ(vec)	(vec + 16)
+#define	GIC_SPI_TO_IRQ(vec)	(vec + 32)
+
+#define	GIC_VEC_TO_IRQ(type, vec) \
+	((type == 0) ? GIC_SPI_TO_IRQ(vec) : GIC_PPI_TO_IRQ(vec))
+
 extern int gic_init(void);
 extern void gic_cpu_init(cpu_t *cp);
 extern void gic_send_ipi(cpuset_t cpuset, int irq);
