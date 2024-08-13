@@ -297,23 +297,31 @@ cbe_init_pre(void)
 }
 
 static int
-get_interrupt_cell(void)
+get_interrupt_cells(pnode_t node)
 {
-	pnode_t root = prom_rootnode();
-	int len = prom_getproplen(root, "interrupt-parent");
-	int interrupt_cell = 3;
-	if (len > 0) {
-		pnode_t gic;
-		gic = prom_findnode_by_phandle(htonl(gic));
-		if (gic > 0) {
-			len = prom_getproplen(gic, "#interrupt-cells");
-			if (len > 0) {
-				prom_getprop(gic, "#interrupt-cells", (caddr_t)&interrupt_cell);
-				interrupt_cell = htonl(interrupt_cell);
-			}
+	int interrupt_cells = 0;
+
+	while (node > 0) {
+		int len = prom_getproplen(node, "#interrupt-cells");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
+			interrupt_cells = ntohl(prop);
+			break;
 		}
+		len = prom_getproplen(node, "interrupt-parent");
+		if (len > 0) {
+			ASSERT(len == sizeof (int));
+			int prop;
+			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
+			node = prom_findnode_by_phandle(ntohl(prop));
+			continue;
+		}
+		node = prom_parentnode(node);
 	}
-	return (interrupt_cell);
+
+	return (interrupt_cells);
 }
 
 static int
@@ -342,8 +350,8 @@ get_cbe_vector(void)
 		if (found) {
 			len = prom_getproplen(timer, "interrupts");
 			if (len > 0) {
-				int interrupt_cell = get_interrupt_cell();
-				int num = len / (4 * interrupt_cell);
+				int interrupt_cells = get_interrupt_cells(timer);
+				int num = len / CELLS_1275_TO_BYTES(interrupt_cells);
 				if (num > 0) {
 					uint32_t *interrupts = __builtin_alloca(len);
 					prom_getprop(timer, "interrupts", (caddr_t)interrupts);
@@ -355,9 +363,9 @@ get_cbe_vector(void)
 					 */
 					if (index == 1 && cpu->cpu_m.mcpu_boot_el == 1)
 						index += 1;
-					int type = htonl(interrupts[interrupt_cell * index + 0]);
-					irq = htonl(interrupts[interrupt_cell * index + 1]);
-					int attr = htonl(interrupts[interrupt_cell * index + 2]);
+					int type = htonl(interrupts[interrupt_cells * index + 0]);
+					irq = htonl(interrupts[interrupt_cells * index + 1]);
+					int attr = htonl(interrupts[interrupt_cells * index + 2]);
 					if (type == 0) {
 						// SPI
 						irq += 32;
