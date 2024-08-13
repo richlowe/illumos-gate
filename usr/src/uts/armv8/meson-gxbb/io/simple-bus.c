@@ -283,8 +283,9 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
-		int n = reglen / (sizeof(uint32_t) * (addr_cells + size_cells));
-		ASSERT(reglen % (sizeof(uint32_t) * (addr_cells + size_cells)) == 0);
+		int n = reglen / CELLS_1275_TO_BYTES(addr_cells + size_cells);
+		ASSERT(reglen % CELLS_1275_TO_BYTES(addr_cells +
+		    size_cells) == 0);
 
 		if (rnumber < 0 || rnumber >= n) {
 			if (rangep) {
@@ -420,7 +421,7 @@ get_pil(dev_info_t *rdip)
 		int pil;
 	} name_to_pil[] = {
 		{"serial",			12},
-		{"Ethernet controller", 	6},
+		{"Ethernet controller",		6},
 		{ NULL}
 	};
 	const char *type_name[] = {
@@ -498,7 +499,7 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", (caddr_t)&irupts_prop, &irupts_len) != DDI_SUCCESS || irupts_len == 0) {
 				return (DDI_FAILURE);
 			}
-			if (interrupt_cells * hdlp->ih_inum >= irupts_len * sizeof(int)) {
+			if (interrupt_cells * hdlp->ih_inum >= CELLS_1275_TO_BYTES(irupts_len)) {
 				kmem_free(irupts_prop, irupts_len);
 				return (DDI_FAILURE);
 			}
@@ -561,8 +562,10 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
 			int irupts_len;
 			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len / (interrupt_cells * sizeof(int));
+			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
+				DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
+				*(int *)result = irupts_len /
+				    CELLS_1275_TO_BYTES(interrupt_cells);
 			} else {
 				return (DDI_FAILURE);
 			}
@@ -573,8 +576,10 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
 			int irupts_len;
 			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len / (interrupt_cells * sizeof(int));
+			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
+				DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
+				*(int *)result = irupts_len /
+				    CELLS_1275_TO_BYTES(interrupt_cells);
 			} else {
 				return (DDI_FAILURE);
 			}

@@ -802,10 +802,9 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
-		int n = reglen / (sizeof (uint32_t) *
-		    (addr_cells + size_cells));
-		ASSERT(reglen % (sizeof (uint32_t) *
-		    (addr_cells + size_cells)) == 0);
+		int n = reglen / CELLS_1275_TO_BYTES(addr_cells + size_cells);
+		ASSERT(reglen % CELLS_1275_TO_BYTES(addr_cells +
+		    size_cells) == 0);
 
 		if (rnumber < 0 || rnumber >= n) {
 			kmem_free(rp, reglen);
@@ -1179,7 +1178,7 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 				return (DDI_FAILURE);
 			}
 			if (interrupt_cells * hdlp->ih_inum >=
-			    irupts_len * sizeof (int)) {
+			    CELLS_1275_TO_BYTES(irupts_len)) {
 				kmem_free(irupts_prop, irupts_len);
 				return (DDI_FAILURE);
 			}
@@ -1258,7 +1257,7 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			    DDI_PROP_DONTPASS, "interrupts", &irupts_len) ==
 			    DDI_SUCCESS) {
 				*(int *)result = irupts_len /
-				    (interrupt_cells * sizeof (int));
+				    CELLS_1275_TO_BYTES(interrupt_cells);
 			} else {
 				return (DDI_FAILURE);
 			}
@@ -1274,7 +1273,7 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			    DDI_PROP_DONTPASS, "interrupts",
 			    &irupts_len) == DDI_SUCCESS) {
 				*(int *)result = irupts_len /
-				    (interrupt_cells * sizeof (int));
+				    CELLS_1275_TO_BYTES(interrupt_cells);
 			} else {
 				return (DDI_FAILURE);
 			}

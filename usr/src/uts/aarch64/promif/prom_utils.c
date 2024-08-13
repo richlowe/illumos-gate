@@ -120,9 +120,9 @@ prom_get_reset(pnode_t node, int index, struct prom_hwreset *reset)
 	if (reset_cells != 1)
 		return (-1);
 
-	if ((len % (sizeof (uint32_t) * (reset_cells + 1))) != 0)
+	if ((len % CELLS_1275_TO_BYTES(reset_cells + 1)) != 0)
 		return (-1);
-	if (len <= index * (sizeof (uint32_t) * (reset_cells + 1)))
+	if (len <= index * CELLS_1275_TO_BYTES(reset_cells + 1))
 		return (-1);
 
 	reset_node =
@@ -164,9 +164,9 @@ prom_get_clock(pnode_t node, int index, struct prom_hwclock *clock)
 	if (clock_cells != 0 && clock_cells != 1)
 		return (-1);
 
-	if ((len % (sizeof (uint32_t) * (clock_cells + 1))) != 0)
+	if (len % (CELLS_1275_TO_BYTES(clock_cells + 1)) != 0)
 		return (-1);
-	if (len <= index * (sizeof (uint32_t) * (clock_cells + 1)))
+	if (len <= index * CELLS_1275_TO_BYTES(clock_cells + 1))
 		return (-1);
 
 	clock_node =
@@ -216,9 +216,10 @@ prom_get_reg_bounds(pnode_t node, int index, uint64_t *base, uint64_t *size)
 	int address_cells = prom_get_address_cells(node);
 	int size_cells = prom_get_size_cells(node);
 
-	if (((address_cells + size_cells) * index + address_cells + size_cells)
-	    * sizeof (uint32_t) > len)
+	if (CELLS_1275_TO_BYTES((address_cells + size_cells) *
+	    index + address_cells + size_cells) > len) {
 		return (-1);
+	}
 
 	if (address_cells < 1 || address_cells > 2 ||
 	    size_cells < 1 || size_cells > 2)
@@ -295,8 +296,8 @@ prom_get_reg_address(pnode_t node, int index, uint64_t *reg)
 		int parent_address_cells = prom_get_prop_int(
 		    prom_parentnode(parent), "#address-cells", 2);
 
-		if ((len % (sizeof (uint32_t) * (
-		    address_cells + parent_address_cells + size_cells))) != 0) {
+		if ((len % CELLS_1275_TO_BYTES(address_cells +
+		    parent_address_cells + size_cells)) != 0) {
 			parent = prom_parentnode(parent);
 			continue;
 		}
@@ -307,7 +308,7 @@ prom_get_reg_address(pnode_t node, int index, uint64_t *reg)
 		    (address_cells + parent_address_cells + size_cells);
 
 		for (int i = 0;
-		    i < len / (sizeof (uint32_t) * ranges_cells); i++) {
+		    i < len / CELLS_1275_TO_BYTES(ranges_cells); i++) {
 			uint64_t base = 0;
 			uint64_t target = 0;
 			uint64_t size = 0;
