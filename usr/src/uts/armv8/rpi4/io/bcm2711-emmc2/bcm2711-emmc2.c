@@ -78,9 +78,9 @@ init_gpio_regulator(pnode_t node, struct gpio_regulator *regulator)
 	int len;
 
 	len = prom_getproplen(node, "gpios");
-	if (len == 0 || len % (sizeof (uint32_t) * 3) != 0)
+	if (len == 0 || (len % CELLS_1275_TO_BYTES(3)) != 0)
 		goto err_exit;
-	regulator->ngpios = len / (sizeof (uint32_t) * 3);
+	regulator->ngpios = len / CELLS_1275_TO_BYTES(3);
 	regulator->gpios = kmem_alloc(sizeof (struct gpio_ctrl) *
 	    regulator->ngpios, KM_SLEEP);
 	uint32_t *gpios = __builtin_alloca(len);
@@ -93,9 +93,9 @@ init_gpio_regulator(pnode_t node, struct gpio_regulator *regulator)
 	}
 
 	len = prom_getproplen(node, "states");
-	if (len == 0 || len % (sizeof (uint32_t) * 2) != 0)
+	if (len == 0 || len % CELLS_1275_TO_BYTES(2) != 0)
 		goto err_exit;
-	regulator->nstates = len / (sizeof (uint32_t) * 2);
+	regulator->nstates = len / CELLS_1275_TO_BYTES(2);
 	regulator->states = kmem_alloc(sizeof (struct regulator_state) *
 	    regulator->nstates, KM_SLEEP);
 	uint32_t *states = __builtin_alloca(len);

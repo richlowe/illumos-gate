@@ -330,12 +330,12 @@ get_reg_addr(pnode_t node, int index, uint64_t *reg)
 				int size_cells = prom_get_prop_int(parent, "#size-cells", 2);
 				int parent_address_cells  = prom_get_prop_int(prom_parentnode(parent), "#address-cells", 2);
 
-				if ((len % (sizeof(uint32_t) * (address_cells + parent_address_cells + size_cells))) == 0) {
+				if ((len % CELLS_1275_TO_BYTES(address_cells + parent_address_cells + size_cells)) == 0) {
 					uint32_t *ranges = __builtin_alloca(len);
 					prom_getprop(parent, "ranges", (caddr_t)ranges);
 					int ranges_cells = (address_cells + parent_address_cells + size_cells);
 
-					for (int i = 0; i < len / (sizeof(uint32_t) * ranges_cells); i++) {
+					for (int i = 0; i < len / CELLS_1275_TO_BYTES(ranges_cells); i++) {
 						uint64_t base = 0;
 						uint64_t target = 0;
 						uint64_t size = 0;

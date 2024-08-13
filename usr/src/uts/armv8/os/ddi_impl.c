@@ -1171,9 +1171,8 @@ i_ddi_get_intx_nintrs(dev_info_t *dip)
 
 		intr_sz = ddi_getprop(DDI_DEV_T_ANY, dip,
 		    0, "#interrupt-cells", 1);
-		/* adjust for number of bytes */
-		intr_sz *= sizeof (int32_t);
 
+		intr_sz = CELLS_1275_TO_BYTES(intr_sz);
 		ret = intrlen / intr_sz;
 
 		kmem_free(ip, intrlen);
@@ -1441,8 +1440,7 @@ get_boot_properties(void)
 			} else {
 				(void) e_ddi_prop_update_int64_array(
 				    DDI_DEV_T_NONE, devi, property_name,
-				    bop_staging_area,
-				    length / sizeof (int64_t));
+				    bop_staging_area, length / sizeof (int64_t));
 			}
 			break;
 		default:
@@ -2180,8 +2178,8 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 		parent_address_cells = get_address_cells(parent);
 
 		int len = prom_getproplen(node, "dma-ranges");
-		if (len % (sizeof (uint32_t) * (bus_address_cells +
-		    parent_address_cells + bus_size_cells)) != 0) {
+		if (len % CELLS_1275_TO_BYTES(bus_address_cells +
+		    parent_address_cells + bus_size_cells) != 0) {
 			cmn_err(CE_WARN,
 			    "%s: dma-ranges property length is invalid\n"
 			    "bus_address_cells %d\n"
@@ -2193,8 +2191,8 @@ get_dma_ranges(dev_info_t *dip, struct dma_range **range, int *nrange)
 			ret = DDI_FAILURE;
 			goto err_exit;
 		}
-		int num = len / (sizeof (uint32_t) * (
-		    bus_address_cells + parent_address_cells + bus_size_cells));
+		int num = len / CELLS_1275_TO_BYTES(bus_address_cells +
+		    parent_address_cells + bus_size_cells);
 		uint32_t *cells = __builtin_alloca(len);
 		prom_getprop(node, "dma-ranges", (caddr_t)cells);
 
