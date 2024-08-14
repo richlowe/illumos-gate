@@ -313,7 +313,7 @@ get_interrupt_cell(void)
 			}
 		}
 	}
-	return interrupt_cell;
+	return (interrupt_cell);
 }
 
 static int
@@ -370,7 +370,7 @@ get_cbe_vector(void)
 		}
 	}
 
-	return irq;
+	return (irq);
 }
 
 void

@@ -40,8 +40,8 @@
 
 #include "bcm2711-emmc2.h"
 
-#define MMC_BUFFER_SIZE 0x10000
-#define MMC_REQUESTS_MAX 0x20
+#define	MMC_BUFFER_SIZE		0x10000
+#define	MMC_REQUESTS_MAX	0x20
 
 struct mmc_request
 {
@@ -78,51 +78,60 @@ init_gpio_regulator(pnode_t node, struct gpio_regulator *regulator)
 	int len;
 
 	len = prom_getproplen(node, "gpios");
-	if (len == 0 || len % (sizeof(uint32_t) * 3) != 0)
+	if (len == 0 || len % (sizeof (uint32_t) * 3) != 0)
 		goto err_exit;
-	regulator->ngpios = len / (sizeof(uint32_t) * 3);
-	regulator->gpios = kmem_alloc(sizeof(struct gpio_ctrl) * regulator->ngpios, 0);
+	regulator->ngpios = len / (sizeof (uint32_t) * 3);
+	regulator->gpios = kmem_alloc(sizeof (struct gpio_ctrl) *
+	    regulator->ngpios, KM_SLEEP);
 	uint32_t *gpios = __builtin_alloca(len);
 	prom_getprop(node, "gpios", (caddr_t)gpios);
 	for (int i = 0; i < regulator->ngpios; i++) {
-		regulator->gpios[i].node = prom_findnode_by_phandle(htonl(gpios[3 * i + 0]));
+		regulator->gpios[i].node =
+		    prom_findnode_by_phandle(htonl(gpios[3 * i + 0]));
 		regulator->gpios[i].pin = htonl(gpios[3 * i + 1]);
 		regulator->gpios[i].flags = htonl(gpios[3 * i + 2]);
 	}
 
 	len = prom_getproplen(node, "states");
-	if (len == 0 || len % (sizeof(uint32_t) * 2) != 0)
+	if (len == 0 || len % (sizeof (uint32_t) * 2) != 0)
 		goto err_exit;
-	regulator->nstates = len / (sizeof(uint32_t) * 2);
-	regulator->states = kmem_alloc(sizeof(struct regulator_state) * regulator->nstates, 0);
+	regulator->nstates = len / (sizeof (uint32_t) * 2);
+	regulator->states = kmem_alloc(sizeof (struct regulator_state) *
+	    regulator->nstates, KM_SLEEP);
 	uint32_t *states = __builtin_alloca(len);
 	prom_getprop(node, "states", (caddr_t)states);
 	for (int i = 0; i < regulator->nstates; i++) {
 		regulator->states[i].microvolt = htonl(states[2 * i + 0]);
 		regulator->states[i].val = htonl(states[2 * i + 1]);
 	}
-	regulator->min_volt = prom_get_prop_int(node, "regulator-min-microvolt", -1);
-	regulator->max_volt = prom_get_prop_int(node, "regulator-max-microvolt", -1);
+	regulator->min_volt = prom_get_prop_int(node,
+	    "regulator-min-microvolt", -1);
+	regulator->max_volt = prom_get_prop_int(node,
+	    "regulator-max-microvolt", -1);
 
-	return 0;
+	return (0);
 err_exit:
-	if (regulator->ngpios && regulator->gpios) {
-		kmem_free(regulator->gpios, sizeof(struct gpio_ctrl) * regulator->ngpios);
+	if ((regulator->ngpios != 0) && (regulator->gpios != NULL)) {
+		kmem_free(regulator->gpios, sizeof (struct gpio_ctrl) *
+		    regulator->ngpios);
 	}
-	if (regulator->nstates && regulator->states) {
-		kmem_free(regulator->states, sizeof(struct regulator_state) * regulator->nstates);
+	if ((regulator->nstates != 0) && (regulator->states != NULL)) {
+		kmem_free(regulator->states, sizeof (struct regulator_state) *
+		    regulator->nstates);
 	}
-	return -1;
+	return (-1);
 }
 
 static void
 fini_gpio_regulator(struct gpio_regulator *regulator)
 {
-	if (regulator->ngpios && regulator->gpios) {
-		kmem_free(regulator->gpios, sizeof(struct gpio_ctrl) * regulator->ngpios);
+	if ((regulator->ngpios > 0) && (regulator->gpios != NULL)) {
+		kmem_free(regulator->gpios, sizeof (struct gpio_ctrl) *
+		    regulator->ngpios);
 	}
-	if (regulator->nstates && regulator->states) {
-		kmem_free(regulator->states, sizeof(struct regulator_state) * regulator->nstates);
+	if ((regulator->nstates > 0) && (regulator->states != NULL)) {
+		kmem_free(regulator->states, sizeof (struct regulator_state) *
+		    regulator->nstates);
 	}
 }
 
@@ -137,8 +146,8 @@ set_gpio_regulator(uint32_t microvolt, struct gpio_regulator *regulator)
 			break;
 	}
 	if (i == regulator->nstates)
-		return -1;
-	return plat_gpio_set(&regulator->gpios[0], regulator->states[i].val);
+		return (-1);
+	return (plat_gpio_set(&regulator->gpios[0], regulator->states[i].val));
 }
 
 static int
@@ -148,16 +157,16 @@ get_gpio_regulator(uint32_t *microvolt, struct gpio_regulator *regulator)
 	ASSERT(regulator->nstates == 2);
 	int val = plat_gpio_get(&regulator->gpios[0]);
 	if (val < 0)
-		return -1;
+		return (-1);
 	int i;
 	for (i = 0; i < regulator->nstates; i++) {
 		if (val == regulator->states[i].val)
 			break;
 	}
 	if (i == regulator->nstates)
-		return -1;
+		return (-1);
 	*microvolt = regulator->states[i].microvolt;
-	return 0;
+	return (0);
 }
 
 static uint32_t
@@ -169,7 +178,7 @@ mmc_extract_bits(uint32_t *bits, int hi, int len)
 		val = (val << 1) | (((bits[i / 32]) >> (i % 32)) & 1);
 	}
 
-	return val;
+	return (val);
 }
 
 static void
@@ -182,7 +191,7 @@ static uint32_t
 mmc_reg_read(struct mmc_sc *sc, size_t offset)
 {
 	uint32_t val = *(volatile uint32_t *)(sc->base + offset);
-	return val;
+	return (val);
 }
 
 static void
@@ -253,9 +262,10 @@ mmc_wait_intr(struct mmc_sc *sc, uint32_t mask, uint64_t usec)
 				break;
 
 			if (cv_timedwait_hires(&sc->waitcv,
-				    &sc->intrlock, timeout, USEC2NSEC(1),
-				    CALLOUT_FLAG_ABSOLUTE) < 0)
+			    &sc->intrlock, timeout, USEC2NSEC(1),
+			    CALLOUT_FLAG_ABSOLUTE) < 0) {
 				timeout_occurred = B_TRUE;
+			}
 		}
 
 		sc->interrupted &= ~val;
@@ -268,7 +278,7 @@ mmc_wait_intr(struct mmc_sc *sc, uint32_t mask, uint64_t usec)
 		mmc_soft_reset(sc);
 		val = 0;
 	}
-	return val;
+	return (val);
 }
 
 static int
@@ -278,14 +288,14 @@ mmc_wait_state_idle(struct mmc_sc *sc, uint32_t mask, uint64_t usec)
 	for (;;) {
 		boolean_t timeout_occurred = (gethrtime() > timeout);
 		if ((mmc_reg_read(sc, EMMC_STATUS) & mask) == 0)
-			return 0;
+			return (0);
 		if (timeout_occurred)
 			break;
 		usecwait(200);
 	}
 
 	mmc_soft_reset(sc);
-	return -1;
+	return (-1);
 }
 
 static int
@@ -300,7 +310,7 @@ mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 		status_mask.dat_inhibit = 1;
 
 	if (mmc_wait_state_idle(sc, status_mask.dw, 1000000) != 0)
-		return -1;
+		return (-1);
 
 	union emmc_cmdtm1 cmdtm1 = { 0 };
 	cmdtm1.cmd_type = ((cmd->sc_index == CMD_STOP_TRANSMIT)? 3: 0);
@@ -353,14 +363,16 @@ mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 		mmc_reg_write(sc, EMMC_BLKSIZECNT, blksizecnt.dw);
 		if (cmd->sc_ndmac) {
 			ASSERT(cmd->sc_ndmac == 1);
-			mmc_reg_write(sc, EMMC_ARG2, (uint32_t)cmd->sc_dmac.dmac_address);
+			mmc_reg_write(sc, EMMC_ARG2,
+			    (uint32_t)cmd->sc_dmac.dmac_address);
 			cmdtm1.tm_dma_en = 1;
 		}
 		cmdtm1.cmd_isdata = 1;
 		cmdtm1.tm_blkcnt_en = 1;
 		if (cmd->sc_flags & SDA_CMDF_READ)
 			cmdtm1.tm_dat_dir = 1;
-		if (cmd->sc_index == CMD_READ_MULTI || cmd->sc_index == CMD_WRITE_MULTI) {
+		if (cmd->sc_index == CMD_READ_MULTI ||
+		    cmd->sc_index == CMD_WRITE_MULTI) {
 			cmdtm1.tm_multi_block = 1;
 			cmdtm1.tm_auto_cmd_en = 1;
 		}
@@ -368,7 +380,7 @@ mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 	mmc_reg_write(sc, EMMC_ARG1, cmd->sc_argument);
 	mmc_reg_write(sc, EMMC_CMDTM1, cmdtm1.dw);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -377,7 +389,7 @@ mmc_wait_cmd_done(struct mmc_sc *sc, struct sda_cmd *cmd)
 	union emmc_interrupt cmd_done = {0};
 	cmd_done.cmd_done = 1;
 	if (mmc_wait_intr(sc, cmd_done.dw, 1000000) == 0)
-		return -1;
+		return (-1);
 
 	switch (cmd->sc_rtype) {
 	case R0:
@@ -388,9 +400,12 @@ mmc_wait_cmd_done(struct mmc_sc *sc, struct sda_cmd *cmd)
 		cmd->sc_response[2] = mmc_reg_read(sc, EMMC_RESP2);
 		cmd->sc_response[3] = mmc_reg_read(sc, EMMC_RESP3);
 
-		cmd->sc_response[3] = (cmd->sc_response[3] << 8) | (cmd->sc_response[2] >> 24);
-		cmd->sc_response[2] = (cmd->sc_response[2] << 8) | (cmd->sc_response[1] >> 24);
-		cmd->sc_response[1] = (cmd->sc_response[1] << 8) | (cmd->sc_response[0] >> 24);
+		cmd->sc_response[3] = (cmd->sc_response[3] << 8) |
+		    (cmd->sc_response[2] >> 24);
+		cmd->sc_response[2] = (cmd->sc_response[2] << 8) |
+		    (cmd->sc_response[1] >> 24);
+		cmd->sc_response[1] = (cmd->sc_response[1] << 8) |
+		    (cmd->sc_response[0] >> 24);
 		cmd->sc_response[0] = (cmd->sc_response[0] << 8);
 		break;
 	default:
@@ -398,22 +413,26 @@ mmc_wait_cmd_done(struct mmc_sc *sc, struct sda_cmd *cmd)
 		break;
 	}
 
-	if ((cmd->sc_rtype & Rb) || (cmd->sc_flags & (SDA_CMDF_READ | SDA_CMDF_WRITE))) {
+	if ((cmd->sc_rtype & Rb) ||
+	    (cmd->sc_flags & (SDA_CMDF_READ | SDA_CMDF_WRITE))) {
 		for (;;) {
 			union emmc_interrupt data_done = {0};
 			data_done.data_done = 1;
 			data_done.dma = 1;
-			union emmc_interrupt result = { mmc_wait_intr(sc, data_done.dw, 10000000) };
+			union emmc_interrupt result = { mmc_wait_intr(sc,
+			    data_done.dw, 10000000) };
+
 			if (result.dw == 0)
-				return -1;
+				return (-1);
 			if (result.data_done)
 				break;
-			mmc_reg_write(sc, EMMC_ARG2, mmc_reg_read(sc, EMMC_ARG2));
+			mmc_reg_write(sc, EMMC_ARG2,
+			    mmc_reg_read(sc, EMMC_ARG2));
 		}
 		mmc_reg_write(sc, EMMC_ARG2, 0);
 	}
 
-	return 0;
+	return (0);
 }
 
 static void
@@ -485,47 +504,47 @@ mmc_set_clock(struct mmc_sc *sc, int mode)
 
 	if (mode == 0 && sc->vdd == 3300000) {
 		control0.hctl_hs_en = 0;
-		control1.clk_freq8 =    preset_value.default_speed.div;
+		control1.clk_freq8 = preset_value.default_speed.div;
 		control1.clk_freq_ms2 = preset_value.default_speed.div >> 8;
-		control1.clk_gensel =   preset_value.default_speed.clk_gensel;
-		control2.drv_typ =      preset_value.default_speed.strengthsel;
+		control1.clk_gensel = preset_value.default_speed.clk_gensel;
+		control2.drv_typ = preset_value.default_speed.strengthsel;
 	}
 	if (mode == 0 && sc->vdd == 1800000) {
 		control0.hctl_hs_en = 1;
-		control1.clk_freq8 =    preset_value.sdr12.div;
+		control1.clk_freq8 = preset_value.sdr12.div;
 		control1.clk_freq_ms2 = preset_value.sdr12.div >> 8;
-		control1.clk_gensel =   preset_value.sdr12.clk_gensel;
-		control2.drv_typ =      preset_value.sdr12.strengthsel;
+		control1.clk_gensel = preset_value.sdr12.clk_gensel;
+		control2.drv_typ = preset_value.sdr12.strengthsel;
 	}
 	if (mode == 1 && sc->vdd == 3300000) {
-		control1.clk_freq8 =    preset_value.high_speed.div;
+		control1.clk_freq8 = preset_value.high_speed.div;
 		control1.clk_freq_ms2 = preset_value.high_speed.div >> 8;
-		control1.clk_gensel =   preset_value.high_speed.clk_gensel;
-		control2.drv_typ =      preset_value.high_speed.strengthsel;
+		control1.clk_gensel = preset_value.high_speed.clk_gensel;
+		control2.drv_typ = preset_value.high_speed.strengthsel;
 	}
 	if (mode == 1 && sc->vdd == 1800000) {
-		control1.clk_freq8 =    preset_value.sdr25.div;
+		control1.clk_freq8 = preset_value.sdr25.div;
 		control1.clk_freq_ms2 = preset_value.sdr25.div >> 8;
-		control1.clk_gensel =   preset_value.sdr25.clk_gensel;
-		control2.drv_typ =      preset_value.sdr25.strengthsel;
+		control1.clk_gensel = preset_value.sdr25.clk_gensel;
+		control2.drv_typ = preset_value.sdr25.strengthsel;
 	}
 	if (mode == 2) {
-		control1.clk_freq8 =    preset_value.sdr50.div;
+		control1.clk_freq8 = preset_value.sdr50.div;
 		control1.clk_freq_ms2 = preset_value.sdr50.div >> 8;
-		control1.clk_gensel =   preset_value.sdr50.clk_gensel;
-		control2.drv_typ =      preset_value.sdr50.strengthsel;
+		control1.clk_gensel = preset_value.sdr50.clk_gensel;
+		control2.drv_typ = preset_value.sdr50.strengthsel;
 	}
 	if (mode == 3) {
-		control1.clk_freq8 =    preset_value.sdr104.div;
+		control1.clk_freq8 = preset_value.sdr104.div;
 		control1.clk_freq_ms2 = preset_value.sdr104.div >> 8;
-		control1.clk_gensel =   preset_value.sdr104.clk_gensel;
-		control2.drv_typ =      preset_value.sdr104.strengthsel;
+		control1.clk_gensel = preset_value.sdr104.clk_gensel;
+		control2.drv_typ = preset_value.sdr104.strengthsel;
 	}
 	if (mode == 4) {
-		control1.clk_freq8 =    preset_value.ddr50.div;
+		control1.clk_freq8 = preset_value.ddr50.div;
 		control1.clk_freq_ms2 = preset_value.ddr50.div >> 8;
-		control1.clk_gensel =   preset_value.ddr50.clk_gensel;
-		control2.drv_typ =      preset_value.ddr50.strengthsel;
+		control1.clk_gensel = preset_value.ddr50.clk_gensel;
+		control2.drv_typ = preset_value.ddr50.strengthsel;
 	}
 	mmc_reg_write(sc, EMMC_CONTROL0, control0.dw);
 	mmc_reg_write(sc, EMMC_CONTROL1, control1.dw);
@@ -535,12 +554,13 @@ mmc_set_clock(struct mmc_sc *sc, int mode)
 }
 
 static int
-mmc_set_voltage(struct mmc_sc *sc, struct gpio_regulator *regulator, uint32_t voltage)
+mmc_set_voltage(struct mmc_sc *sc, struct gpio_regulator *regulator,
+    uint32_t voltage)
 {
 	union emmc_control0 control0;
 
 	if (voltage != 3300000 && voltage != 1800000)
-		return -1;
+		return (-1);
 
 	mmc_set_sd_clock(sc, 0);
 
@@ -553,15 +573,15 @@ mmc_set_voltage(struct mmc_sc *sc, struct gpio_regulator *regulator, uint32_t vo
 	mmc_reg_write(sc, EMMC_CONTROL0, control0.dw);
 
 	if (set_gpio_regulator(voltage, regulator) < 0)
-		return -1;
+		return (-1);
 
 	usecwait(5000);
 
 	uint32_t microvolt;
 	if (get_gpio_regulator(&microvolt, regulator) < 0)
-		return -1;
+		return (-1);
 	if (voltage != microvolt)
-		return -1;
+		return (-1);
 
 	control0.vol_sel_vdd1 = (voltage == 1800000? 0x5: 0x7);
 	control0.power_vdd1 = 1;
@@ -571,18 +591,18 @@ mmc_set_voltage(struct mmc_sc *sc, struct gpio_regulator *regulator, uint32_t vo
 
 	control2.dw = mmc_reg_read(sc, EMMC_CONTROL2);
 	if (control2.vdd180 != (voltage == 1800000? 1: 0))
-		return -1;
+		return (-1);
 
 	mmc_set_sd_clock(sc, 1);
 	usecwait(1000);
 
-	return 0;
+	return (0);
 }
 
 static void
 mmc_reset_tune(struct mmc_sc *sc)
 {
-	union emmc_control2 control2 = { mmc_reg_read(sc, EMMC_CONTROL2)} ;
+	union emmc_control2 control2 = { mmc_reg_read(sc, EMMC_CONTROL2)};
 	control2.tuneon = 0;
 	control2.tuned = 0;
 	mmc_reg_write(sc, EMMC_CONTROL2, control2.dw);
@@ -591,7 +611,7 @@ mmc_reset_tune(struct mmc_sc *sc)
 static void
 mmc_start_tune(struct mmc_sc *sc)
 {
-	union emmc_control2 control2 = { mmc_reg_read(sc, EMMC_CONTROL2)} ;
+	union emmc_control2 control2 = { mmc_reg_read(sc, EMMC_CONTROL2)};
 	control2.tuneon = 1;
 	mmc_reg_write(sc, EMMC_CONTROL2, control2.dw);
 }
@@ -611,8 +631,7 @@ mmc_retune(struct mmc_sc *sc)
 	mmc_reg_write(sc, EMMC_IRPT_EN, interrupt.dw);
 
 	union emmc_control2 control2;
-	for (int i = 0; i < 150; i++)
-	{
+	for (int i = 0; i < 150; i++) {
 		if (mmc_send_tuning_block(sc) != 0)
 			goto err_exit;
 
@@ -630,14 +649,14 @@ mmc_retune(struct mmc_sc *sc)
 	interrupt.read_rdy = 0;
 	mmc_reg_write(sc, EMMC_IRPT_MASK, interrupt.dw);
 	mmc_reg_write(sc, EMMC_IRPT_EN, interrupt.dw);
-	return 0;
+	return (0);
 
 err_exit:
 	mmc_reset_tune(sc);
 	interrupt.read_rdy = 0;
 	mmc_reg_write(sc, EMMC_IRPT_MASK, interrupt.dw);
 	mmc_reg_write(sc, EMMC_IRPT_EN, interrupt.dw);
-	return -1;
+	return (-1);
 }
 
 static int mmc_stop_transmission(struct mmc_sc *);
@@ -661,12 +680,13 @@ mmc_send_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 	if (cmd->sc_index == CMD_STOP_TRANSMIT)
 		mmc_soft_reset(sc);
 
-	return 0;
+	return (0);
 err_exit:
-	if (cmd->sc_index == CMD_READ_MULTI || cmd->sc_index == CMD_WRITE_MULTI) {
+	if (cmd->sc_index == CMD_READ_MULTI ||
+	    cmd->sc_index == CMD_WRITE_MULTI) {
 		mmc_stop_transmission(sc);
 	}
-	return -1;
+	return (-1);
 }
 
 static int
@@ -677,8 +697,8 @@ mmc_go_idle_state(struct mmc_sc *sc)
 		.sc_rtype = R0,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
-	return 0;
+		return (-1);
+	return (0);
 }
 
 static int
@@ -690,10 +710,10 @@ mmc_send_if_cond(struct mmc_sc *sc)
 		.sc_argument = ((!!(sc->ocr_avail & OCR_HI_MASK)) << 8) | 0xaa,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 	if ((cmd.sc_response[0] & 0xff) != 0xaa)
-		return -1;
-	return 0;
+		return (-1);
+	return (0);
 }
 
 
@@ -705,12 +725,22 @@ mmc_sd_send_ocr(struct mmc_sc *sc)
 		.sc_rtype = R1,
 	};
 	if (mmc_send_cmd(sc, &acmd) != 0)
-		return -1;
+		return (-1);
 
 	uint32_t ocr = (sc->ocr_avail & OCR_HI_MASK) | OCR_CCS;
 
-	union emmc_capabilities caps = {{ mmc_reg_read(sc, EMMC_CAPABILITIES), mmc_reg_read(sc, EMMC_CAPABILITIES + 4)}};
-	union emmc_max_current max_current = {{ mmc_reg_read(sc, EMMC_MAX_CURRENT), mmc_reg_read(sc, EMMC_MAX_CURRENT + 4)}};
+	union emmc_capabilities caps = {
+		{
+			mmc_reg_read(sc, EMMC_CAPABILITIES),
+			mmc_reg_read(sc, EMMC_CAPABILITIES + 4)
+		}
+	};
+	union emmc_max_current max_current = {
+		{
+			mmc_reg_read(sc, EMMC_MAX_CURRENT),
+			mmc_reg_read(sc, EMMC_MAX_CURRENT + 4)
+		}
+	};
 	uint32_t max_current_180 = max_current.for_180_vdd1 * 4;
 	uint32_t max_current_330 = max_current.for_330_vdd1 * 4;
 
@@ -727,11 +757,11 @@ mmc_sd_send_ocr(struct mmc_sc *sc)
 		.sc_argument = ocr,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 	if (cmd.sc_response[0] & OCR_POWER_UP)
 		sc->ocr = cmd.sc_response[0];
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -742,16 +772,16 @@ mmc_voltage_switch(struct mmc_sc *sc, struct gpio_regulator *regulator)
 		.sc_rtype = R1,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
 	usecwait(1000);
 
 	if (mmc_set_voltage(sc, regulator, 1800000) < 0)
-		return -1;
+		return (-1);
 
 	sc->vdd = 1800000;
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -762,11 +792,11 @@ mmc_all_send_cid(struct mmc_sc *sc)
 		.sc_rtype = R2,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
-	memcpy(sc->cid, cmd.sc_response, sizeof(sc->cid));
+	memcpy(sc->cid, cmd.sc_response, sizeof (sc->cid));
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -777,11 +807,11 @@ mmc_send_relative_addr(struct mmc_sc *sc)
 		.sc_rtype = R6,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
 	sc->rca = (cmd.sc_response[0] >> 16) & 0xffff;
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -793,11 +823,11 @@ mmc_send_csd(struct mmc_sc *sc)
 		.sc_argument = sc->rca << 16,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
-	memcpy(sc->csd, cmd.sc_response, sizeof(sc->csd));
+	memcpy(sc->csd, cmd.sc_response, sizeof (sc->csd));
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -809,9 +839,9 @@ mmc_select_card(struct mmc_sc *sc)
 		.sc_argument = sc->rca << 16,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -823,7 +853,7 @@ mmc_send_scr(struct mmc_sc *sc)
 		.sc_argument = sc->rca << 16,
 	};
 	if (mmc_send_cmd(sc, &acmd) != 0)
-		return -1;
+		return (-1);
 
 	struct sda_cmd cmd = {
 		.sc_index = ACMD_SEND_SCR,
@@ -837,14 +867,16 @@ mmc_send_scr(struct mmc_sc *sc)
 		.sc_dmac = sc->buf_dmac,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
-	ddi_dma_sync(sc->buf_dmah, 0, sizeof(sc->scr), DDI_DMA_SYNC_FORKERNEL);
+	ddi_dma_sync(sc->buf_dmah, 0, sizeof (sc->scr), DDI_DMA_SYNC_FORKERNEL);
 
-	for (int i = 0; i < ARRAY_SIZE(sc->scr); i++)
-		sc->scr[i] = ntohl(*(uint32_t *)(sc->buffer + sizeof(sc->scr) * (ARRAY_SIZE(sc->scr) - 1 - i)));
+	for (int i = 0; i < ARRAY_SIZE(sc->scr); i++) {
+		sc->scr[i] = ntohl(*(uint32_t *)(sc->buffer + sizeof (sc->scr) *
+		    (ARRAY_SIZE(sc->scr) - 1 - i)));
+	}
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -863,14 +895,18 @@ mmc_swtch_func(struct mmc_sc *sc, uint32_t argument)
 		.sc_dmac = sc->buf_dmac,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
-	ddi_dma_sync(sc->buf_dmah, 0, sizeof(sc->func_status), DDI_DMA_SYNC_FORKERNEL);
+	ddi_dma_sync(sc->buf_dmah, 0, sizeof (sc->func_status),
+	    DDI_DMA_SYNC_FORKERNEL);
 
-	for (int i = 0; i < ARRAY_SIZE(sc->func_status); i++)
-		sc->func_status[i] = ntohl(*(uint32_t *)(sc->buffer + sizeof(sc->func_status[0]) * (ARRAY_SIZE(sc->func_status) - 1 - i)));
+	for (int i = 0; i < ARRAY_SIZE(sc->func_status); i++) {
+		sc->func_status[i] = ntohl(*(uint32_t *)(sc->buffer +
+		    sizeof (sc->func_status[0]) *
+		    (ARRAY_SIZE(sc->func_status) - 1 - i)));
+	}
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -881,8 +917,8 @@ mmc_stop_transmission(struct mmc_sc *sc)
 		.sc_rtype = R1b,
 	};
 	if (mmc_send_cmd(sc, &cmd) != 0)
-		return -1;
-	return 0;
+		return (-1);
+	return (0);
 }
 
 static int
@@ -898,14 +934,14 @@ mmc_send_tuning_block(struct mmc_sc *sc)
 	};
 
 	if (mmc_start_cmd(sc, &cmd) != 0)
-		return -1;
+		return (-1);
 
 	union emmc_interrupt interrupt_mask = {0};
 	interrupt_mask.read_rdy = 1;
 	if (mmc_wait_intr(sc, interrupt_mask.dw, 150000) == 0)
-		return -1;
+		return (-1);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -918,7 +954,7 @@ mmc_set_bus_width(struct mmc_sc *sc, int width)
 		.sc_argument = sc->rca << 16,
 	};
 	if (mmc_send_cmd(sc, &acmd) < 0)
-		return -1;
+		return (-1);
 
 	struct sda_cmd cmd = {
 		.sc_index = ACMD_SET_BUS_WIDTH,
@@ -926,14 +962,14 @@ mmc_set_bus_width(struct mmc_sc *sc, int width)
 		.sc_argument = (width == 1? 0: 2),
 	};
 	if (mmc_send_cmd(sc, &cmd) < 0)
-		return -1;
+		return (-1);
 
 	union emmc_control0 control0 = { mmc_reg_read(sc, EMMC_CONTROL0) };
 	control0.hctl_dwidth = (width == 1? 0: 1);
 	control0.hctl_8bit = 0;
 	mmc_reg_write(sc, EMMC_CONTROL0, control0.dw);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -947,9 +983,9 @@ mmc_set_blocklen(struct mmc_sc *sc, int len)
 		.sc_argument = len,
 	};
 	if (mmc_send_cmd(sc, &cmd) < 0)
-		return -1;
+		return (-1);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -960,18 +996,18 @@ mmc_init(struct mmc_sc *sc)
 	// clock
 	struct prom_hwclock clock;
 	if (prom_get_clock(node, 0, &clock) != 0)
-		return -1;
+		return (-1);
 
 	// regulator
 	struct gpio_regulator regulator = {0};
 	phandle_t phandle = prom_get_prop_int(node, "vqmmc-supply", -1);
 	if (phandle < 0)
-		return -1;
+		return (-1);
 	pnode_t vqmmc_node = prom_findnode_by_phandle(phandle);
 	if (vqmmc_node < 0)
-		return -1;
+		return (-1);
 	if (init_gpio_regulator(vqmmc_node, &regulator) < 0)
-		return -1;
+		return (-1);
 
 	if (get_gpio_regulator(&sc->vdd, &regulator) != 0)
 		goto err_exit;
@@ -995,8 +1031,18 @@ mmc_init(struct mmc_sc *sc)
 		mmc_reg_write(sc, EMMC_IRPT_EN, interrupt.dw);
 	}
 
-	union emmc_capabilities caps = {{ mmc_reg_read(sc, EMMC_CAPABILITIES), mmc_reg_read(sc, EMMC_CAPABILITIES + 4)}};
-	union emmc_max_current max_current = {{ mmc_reg_read(sc, EMMC_MAX_CURRENT), mmc_reg_read(sc, EMMC_MAX_CURRENT + 4)}};
+	union emmc_capabilities caps = {
+		{
+			mmc_reg_read(sc, EMMC_CAPABILITIES),
+			mmc_reg_read(sc, EMMC_CAPABILITIES + 4)
+		}
+	};
+	union emmc_max_current max_current = {
+		{
+			mmc_reg_read(sc, EMMC_MAX_CURRENT),
+			mmc_reg_read(sc, EMMC_MAX_CURRENT + 4)
+		}
+	};
 
 	uint32_t max_current_180 = max_current.for_180_vdd1 * 4;
 	uint32_t max_current_330 = max_current.for_330_vdd1 * 4;
@@ -1028,7 +1074,8 @@ mmc_init(struct mmc_sc *sc)
 	if (i >= 1000)
 		goto err_exit;
 
-	uint32_t max_current_ = (sc->vdd == 3300000? max_current_330: max_current_180);
+	uint32_t max_current_ = (sc->vdd == 3300000 ? max_current_330 :
+	    max_current_180);
 
 	if ((sc->ocr & OCR_CCS) && (sc->ocr & OCR_S18A)) {
 		if (mmc_voltage_switch(sc, &regulator) != 0)
@@ -1075,63 +1122,76 @@ mmc_init(struct mmc_sc *sc)
 			mmc_reg_read(sc, EMMC_PRESET_VALUE + 0xc),
 		};
 		// group 4
-		if (max_current_ >= 800 && (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 3))) {
+		if ((max_current_ >= 800) &&
+		    (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 3))) {
 			argument &= ~(0xf << ((4 - 1) * 4));
 			argument |= (0x3 << ((4 - 1) * 4));
-		}
-		else if (max_current_ >= 600 && (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 2))) {
+		} else if ((max_current_ >= 600) &&
+		    (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 2))) {
 			argument &= ~(0xf << ((4 - 1) * 4));
 			argument |= (0x2 << ((4 - 1) * 4));
-		}
-		else if (max_current_ >= 400 && (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 1))) {
+		} else if ((max_current_ >= 400) &&
+		    (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 1))) {
 			argument &= ~(0xf << ((4 - 1) * 4));
 			argument |= (0x1 << ((4 - 1) * 4));
-		}
-		else if (max_current_ >= 200 && (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 0))) {
+		} else if ((max_current_ >= 200) &&
+		    (mmc_extract_bits(sc->func_status, 463, 16) & (1u << 0))) {
 			argument &= ~(0xf << ((4 - 1) * 4));
 			argument |= (0x0 << ((4 - 1) * 4));
 		}
 		// group 3
-		if (caps.sup_sdr104 && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 3))) {
+		if (caps.sup_sdr104 &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 3))) {
 			argument &= ~(0xf << ((3 - 1) * 4));
-			argument |= (preset_value.sdr104.strengthsel << ((3 - 1) * 4));
-		}
-		else if (caps.sup_ddr50 && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 4))) {
+			argument |= (preset_value.sdr104.strengthsel <<
+			    ((3 - 1) * 4));
+		} else if (caps.sup_ddr50 &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 4))) {
 			argument &= ~(0xf << ((3 - 1) * 4));
-			argument |= (preset_value.ddr50.strengthsel << ((3 - 1) * 4));
-		}
-		else if (caps.sup_sdr50 && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 2))) {
+			argument |= (preset_value.ddr50.strengthsel <<
+			    ((3 - 1) * 4));
+		} else if (caps.sup_sdr50 &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 2))) {
 			argument &= ~(0xf << ((3 - 1) * 4));
-			argument |= (preset_value.sdr50.strengthsel << ((3 - 1) * 4));
-		}
-		else if (caps.sup_hispeed && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 1))) {
+			argument |= (preset_value.sdr50.strengthsel <<
+			    ((3 - 1) * 4));
+		} else if (caps.sup_hispeed &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 1))) {
 			argument &= ~(0xf << ((3 - 1) * 4));
-			if (sc->vdd == 1800000)
-				argument |= (preset_value.sdr25.strengthsel << ((3 - 1) * 4));
-			else
-				argument |= (preset_value.high_speed.strengthsel << ((3 - 1) * 4));
-		}
-		else {
+			if (sc->vdd == 1800000) {
+				argument |= (preset_value.sdr25.strengthsel <<
+				    ((3 - 1) * 4));
+			} else {
+				argument |=
+				    (preset_value.high_speed.strengthsel <<
+				    ((3 - 1) * 4));
+			}
+		} else {
 			argument &= ~(0xf << ((3 - 1) * 4));
-			if (sc->vdd == 1800000)
-				argument |= (preset_value.sdr12.strengthsel << ((3 - 1) * 4));
-			else
-				argument |= (preset_value.default_speed.strengthsel << ((3 - 1) * 4));
+			if (sc->vdd == 1800000) {
+				argument |= (preset_value.sdr12.strengthsel <<
+				    ((3 - 1) * 4));
+			} else {
+				argument |=
+				    (preset_value.default_speed.strengthsel <<
+				    ((3 - 1) * 4));
+			}
 		}
 		// group 1
-		if (caps.sup_sdr104 && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 3))) {
+		if (caps.sup_sdr104 &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 3))) {
 			argument &= ~(0xf << ((1 - 1) * 4));
 			argument |= (0x3 << ((1 - 1) * 4));
-		}
-		else if (caps.sup_ddr50 && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 4))) {
+		} else if (caps.sup_ddr50 &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 4))) {
 			argument &= ~(0xf << ((1 - 1) * 4));
 			argument |= (0x4 << ((1 - 1) * 4));
-		}
-		else if (caps.sup_sdr50 && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 2))) {
+		} else if (caps.sup_sdr50 &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 2))) {
 			argument &= ~(0xf << ((1 - 1) * 4));
 			argument |= (0x2 << ((1 - 1) * 4));
-		}
-		else if (caps.sup_hispeed && (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 1))) {
+		} else if (caps.sup_hispeed &&
+		    (mmc_extract_bits(sc->func_status, 415, 16) & (1u << 1))) {
 			argument &= ~(0xf << ((1 - 1) * 4));
 			argument |= (0x1 << ((1 - 1) * 4));
 		}
@@ -1162,11 +1222,11 @@ mmc_init(struct mmc_sc *sc)
 	}
 
 	fini_gpio_regulator(&regulator);
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 
 err_exit:
 	fini_gpio_regulator(&regulator);
-	return DDI_FAILURE;
+	return (DDI_FAILURE);
 }
 
 static void
@@ -1187,7 +1247,8 @@ mmc_read_block(void *arg)
 	int r = EIO;
 	if (!detach) {
 		struct sda_cmd cmd = {
-			.sc_index = (xfer->x_nblks == 1? CMD_READ_SINGLE: CMD_READ_MULTI),
+			.sc_index = (xfer->x_nblks == 1 ? CMD_READ_SINGLE :
+			    CMD_READ_MULTI),
 			.sc_rtype = R1,
 			.sc_nblks = xfer->x_nblks,
 			.sc_blksz = DEV_BSIZE,
@@ -1204,8 +1265,10 @@ mmc_read_block(void *arg)
 		}
 
 		if (mmc_send_cmd(sc, &cmd) == 0) {
-			ddi_dma_sync(sc->buf_dmah, 0, xfer->x_nblks * DEV_BSIZE,  DDI_DMA_SYNC_FORKERNEL);
-			memcpy(xfer->x_kaddr, sc->buffer, xfer->x_nblks * DEV_BSIZE);
+			ddi_dma_sync(sc->buf_dmah, 0, xfer->x_nblks * DEV_BSIZE,
+			    DDI_DMA_SYNC_FORKERNEL);
+			memcpy(xfer->x_kaddr, sc->buffer,
+			    xfer->x_nblks * DEV_BSIZE);
 			r = 0;
 		}
 	}
@@ -1236,10 +1299,12 @@ mmc_write_block(void *arg)
 	int r = EIO;
 	if (!detach) {
 		memcpy(sc->buffer, xfer->x_kaddr, xfer->x_nblks * DEV_BSIZE);
-		ddi_dma_sync(sc->buf_dmah, 0, xfer->x_nblks * DEV_BSIZE, DDI_DMA_SYNC_FORDEV);
+		ddi_dma_sync(sc->buf_dmah, 0, xfer->x_nblks * DEV_BSIZE,
+		    DDI_DMA_SYNC_FORDEV);
 
 		struct sda_cmd cmd = {
-			.sc_index = (xfer->x_nblks == 1? CMD_WRITE_SINGLE: CMD_WRITE_MULTI),
+			.sc_index = (xfer->x_nblks == 1 ?
+			    CMD_WRITE_SINGLE : CMD_WRITE_MULTI),
 			.sc_rtype = R1,
 			.sc_nblks = xfer->x_nblks,
 			.sc_blksz = DEV_BSIZE,
@@ -1290,14 +1355,15 @@ mmc_bd_read(void *arg, bd_xfer_t *xfer)
 	}
 	mutex_exit(&sc->lock);
 	if (req) {
-		if (ddi_taskq_dispatch(sc->tq, mmc_read_block, req, DDI_SLEEP) != DDI_SUCCESS) {
+		if (ddi_taskq_dispatch(sc->tq, mmc_read_block, req,
+		    DDI_SLEEP) != DDI_SUCCESS) {
 			mutex_enter(&sc->lock);
 			list_insert_head(&sc->free_request, req);
 			mutex_exit(&sc->lock);
 			r = EIO;
 		}
 	}
-	return r;
+	return (r);
 }
 
 static int
@@ -1324,14 +1390,15 @@ mmc_bd_write(void *arg, bd_xfer_t *xfer)
 	}
 	mutex_exit(&sc->lock);
 	if (req) {
-		if (ddi_taskq_dispatch(sc->tq, mmc_write_block, req, DDI_SLEEP) != DDI_SUCCESS) {
+		if (ddi_taskq_dispatch(sc->tq, mmc_write_block, req,
+		    DDI_SLEEP) != DDI_SUCCESS) {
 			mutex_enter(&sc->lock);
 			list_insert_head(&sc->free_request, req);
 			mutex_exit(&sc->lock);
 			r = EIO;
 		}
 	}
-	return r;
+	return (r);
 }
 
 static void
@@ -1388,12 +1455,11 @@ mmc_bd_mediainfo(void *arg, bd_media_t *media)
 		uint32_t cmult = mmc_extract_bits(sc->csd, 49, 3);
 		uint32_t read_bl_len = mmc_extract_bits(sc->csd, 83, 4);
 		size = ((csz + 1) * (1 << (cmult + 2))) * read_bl_len;
-	}
-	else if (mmc_extract_bits(sc->csd, 127, 2) == 1) {
+	} else if (mmc_extract_bits(sc->csd, 127, 2) == 1) {
 		uint64_t csz = mmc_extract_bits(sc->csd, 69, 22);
 		size = (csz + 1) * (512 * 1024);
 	} else {
-		return -1;
+		return (-1);
 	}
 
 	media->m_nblks = size / 512;
@@ -1471,7 +1537,7 @@ mmc_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 	ddi_set_driver_private(sc->dip, NULL);
 	mmc_destroy(sc);
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 }
 
 static int
@@ -1479,7 +1545,7 @@ mmc_quiesce(dev_info_t *dip)
 {
 	cmn_err(CE_WARN, "%s%d: mmc_quiesce is not implemented",
 	    ddi_driver_name(dip), ddi_get_instance(dip));
-	return DDI_FAILURE;
+	return (DDI_FAILURE);
 }
 
 static int
@@ -1492,7 +1558,7 @@ mmc_probe(dev_info_t *dip)
 		return (DDI_PROBE_FAILURE);
 
 	len = prom_getproplen(node, "status");
-	if (len <= 0 || len >= sizeof(buf))
+	if (len <= 0 || len >= sizeof (buf))
 		return (DDI_PROBE_FAILURE);
 
 	prom_getprop(node, "status", (caddr_t)buf);
@@ -1520,7 +1586,7 @@ mmc_intr(caddr_t arg1, caddr_t arg2)
 
 	mutex_exit(&sc->intrlock);
 
-	return status;
+	return (status);
 }
 
 static ddi_device_acc_attr_t reg_acc_attr = {
@@ -1562,7 +1628,7 @@ mmc_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
-	struct mmc_sc *sc = kmem_zalloc(sizeof(struct mmc_sc), KM_SLEEP);
+	struct mmc_sc *sc = kmem_zalloc(sizeof (struct mmc_sc), KM_SLEEP);
 	ddi_set_driver_private(dip, sc);
 
 	sc->dip = dip;
@@ -1570,10 +1636,12 @@ mmc_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	mutex_init(&sc->lock, NULL, MUTEX_DRIVER, NULL);
 	mutex_init(&sc->intrlock, NULL, MUTEX_DRIVER, NULL);
 	cv_init(&sc->waitcv, NULL, CV_DRIVER, NULL);
-	list_create(&sc->free_request, sizeof(struct mmc_request), offsetof(struct mmc_request, node));
+	list_create(&sc->free_request, sizeof (struct mmc_request),
+	    offsetof(struct mmc_request, node));
 
 	int rv;
-	rv = ddi_regs_map_setup(sc->dip, 0, (caddr_t*)&sc->base, 0, 0, &reg_acc_attr, &sc->handle);
+	rv = ddi_regs_map_setup(sc->dip, 0, (caddr_t *)&sc->base, 0, 0,
+	    &reg_acc_attr, &sc->handle);
 	if (rv != DDI_SUCCESS) {
 		cmn_err(CE_WARN, "ddi_regs_map_setup failed (%d)!", rv);
 		sc->handle = 0;
@@ -1585,9 +1653,11 @@ mmc_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		cmn_err(CE_WARN, "i_ddi_update_dma_attr failed (%d)!", rv);
 		goto err_exit;
 	}
-	dma_attr.dma_attr_count_max = dma_attr.dma_attr_addr_hi - dma_attr.dma_attr_addr_lo;
+	dma_attr.dma_attr_count_max = dma_attr.dma_attr_addr_hi -
+	    dma_attr.dma_attr_addr_lo;
 
-	rv = ddi_dma_alloc_handle(dip, &dma_attr, DDI_DMA_SLEEP, NULL, &sc->buf_dmah);
+	rv = ddi_dma_alloc_handle(dip, &dma_attr, DDI_DMA_SLEEP,
+	    NULL, &sc->buf_dmah);
 	if (rv != DDI_SUCCESS) {
 		cmn_err(CE_WARN, "ddi_dma_alloc_handle failed (%d)!", rv);
 		sc->buf_dmah = 0;
@@ -1627,7 +1697,8 @@ mmc_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	}
 
 	int actual;
-	rv = ddi_intr_alloc(sc->dip, &sc->ihandle, DDI_INTR_TYPE_FIXED, 0, 1, &actual, DDI_INTR_ALLOC_STRICT);
+	rv = ddi_intr_alloc(sc->dip, &sc->ihandle, DDI_INTR_TYPE_FIXED, 0, 1,
+	    &actual, DDI_INTR_ALLOC_STRICT);
 	if (rv != DDI_SUCCESS) {
 		cmn_err(CE_WARN, "ddi_intr_alloc failed (%d)!", rv);
 		sc->ihandle = 0;
@@ -1675,7 +1746,7 @@ mmc_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		goto err_exit;
 	}
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 err_exit:
 	mmc_destroy(sc);
 	return (DDI_FAILURE);
