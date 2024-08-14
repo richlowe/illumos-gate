@@ -86,7 +86,7 @@ static uint32_t
 genet_reg_read(struct genet_sc *sc, uint32_t offset)
 {
 	void *addr = sc->reg.addr + offset;
-	return ddi_get32(sc->reg.handle, addr);
+	return (ddi_get32(sc->reg.handle, addr));
 }
 
 static void
@@ -98,7 +98,7 @@ genet_usecwait(int usec)
 static pnode_t
 genet_get_node(struct genet_sc *sc)
 {
-	return ddi_get_nodeid(sc->dip);
+	return (ddi_get_nodeid(sc->dip));
 }
 
 static void
@@ -131,10 +131,10 @@ get_phynode(pnode_t node)
 {
 	int len = prom_getproplen(node, "phy-handle");
 	if (len <= 0)
-		return -1;
+		return (-1);
 	phandle_t phandle;
 	prom_getprop(node, "phy-handle", (caddr_t)&phandle);
-	return prom_findnode_by_phandle(htonl(phandle));
+	return (prom_findnode_by_phandle(htonl(phandle)));
 }
 
 static void
@@ -142,32 +142,40 @@ genet_gmac_reset(struct genet_sc *sc)
 {
 	pnode_t node = genet_get_node(sc);
 
-	if (is_rgmii(node))
-		genet_reg_write(sc, GENET_SYS_PORT_CTRL, GENET_SYS_PORT_MODE_EXT_GPHY);
+	if (is_rgmii(node)) {
+		genet_reg_write(sc, GENET_SYS_PORT_CTRL,
+		    GENET_SYS_PORT_MODE_EXT_GPHY);
+	}
 
 	genet_reg_write(sc, GENET_SYS_RBUF_FLUSH_CTRL, 0);
 	genet_usecwait(10);
 
 	genet_reg_write(sc, GENET_UMAC_CMD, 0);
 	genet_usecwait(10);
-	genet_reg_write(sc, GENET_UMAC_CMD, GENET_UMAC_CMD_LCL_LOOP_EN | GENET_UMAC_CMD_SW_RESET);
+	genet_reg_write(sc, GENET_UMAC_CMD,
+	    GENET_UMAC_CMD_LCL_LOOP_EN | GENET_UMAC_CMD_SW_RESET);
 	genet_usecwait(10);
 
-	genet_reg_write(sc, GENET_SYS_RBUF_FLUSH_CTRL, GENET_SYS_RBUF_FLUSH_RESET);
+	genet_reg_write(sc, GENET_SYS_RBUF_FLUSH_CTRL,
+	    GENET_SYS_RBUF_FLUSH_RESET);
 	genet_usecwait(10);
 	genet_reg_write(sc, GENET_SYS_RBUF_FLUSH_CTRL, 0);
 
 	genet_reg_write(sc, GENET_UMAC_CMD, 0);
 	genet_usecwait(10);
-	genet_reg_write(sc, GENET_UMAC_CMD, GENET_UMAC_CMD_LCL_LOOP_EN | GENET_UMAC_CMD_SW_RESET);
+	genet_reg_write(sc, GENET_UMAC_CMD,
+	    GENET_UMAC_CMD_LCL_LOOP_EN | GENET_UMAC_CMD_SW_RESET);
 	genet_usecwait(10);
 	genet_reg_write(sc, GENET_UMAC_CMD, 0);
 
-	genet_reg_write(sc, GENET_UMAC_MIB_CTRL, GENET_UMAC_MIB_RESET_RUNT | GENET_UMAC_MIB_RESET_RX | GENET_UMAC_MIB_RESET_TX);
+	genet_reg_write(sc, GENET_UMAC_MIB_CTRL,
+	    GENET_UMAC_MIB_RESET_RUNT | GENET_UMAC_MIB_RESET_RX |
+	    GENET_UMAC_MIB_RESET_TX);
 	genet_reg_write(sc, GENET_UMAC_MIB_CTRL, 0);
 
 	genet_reg_write(sc, GENET_UMAC_MAX_FRAME_LEN, GENET_DMA_BUFFER_SIZE);
-	genet_reg_write(sc, GENET_RBUF_CTRL, genet_reg_read(sc, GENET_RBUF_CTRL) | GENET_RBUF_ALIGN_2B);
+	genet_reg_write(sc, GENET_RBUF_CTRL,
+	    genet_reg_read(sc, GENET_RBUF_CTRL) | GENET_RBUF_ALIGN_2B);
 	genet_reg_write(sc, GENET_RBUF_TBUF_SIZE_CTRL, 1);
 }
 
@@ -183,49 +191,76 @@ genet_gmac_init(struct genet_sc *sc)
 	// setup tx
 	genet_reg_write(sc, GENET_TX_DMA_RING_CFG, 0);
 	genet_reg_write(sc, GENET_TX_SCB_BURST_SIZE, 0x08);
-	genet_reg_write(sc, GENET_TX_DMA_START_ADDR_LO(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_TX_DMA_START_ADDR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_TX_DMA_READ_PTR_LO(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_TX_DMA_READ_PTR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_TX_DMA_WRITE_PTR_LO(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_TX_DMA_WRITE_PTR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
+	genet_reg_write(sc, GENET_TX_DMA_START_ADDR_LO(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_TX_DMA_START_ADDR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_TX_DMA_READ_PTR_LO(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_TX_DMA_READ_PTR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_TX_DMA_WRITE_PTR_LO(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_TX_DMA_WRITE_PTR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
 	genet_reg_write(sc, GENET_TX_DMA_END_ADDR_LO(GENET_DMA_DEFAULT_QUEUE),
 	    GENET_DMA_DESC_COUNT * GENET_DMA_DESC_SIZE / 4 - 1);
-	genet_reg_write(sc, GENET_TX_DMA_END_ADDR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
-	sc->tx_ring.c_index = sc->tx_ring.p_index = genet_reg_read(sc, GENET_TX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE)) & GENET_TX_DMA_PROD_CONS_MASK;
-	genet_reg_write(sc, GENET_TX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE), sc->tx_ring.c_index);
-	genet_reg_write(sc, GENET_TX_DMA_MBUF_DONE_THRES(GENET_DMA_DEFAULT_QUEUE), 1);
-	genet_reg_write(sc, GENET_TX_DMA_FLOW_PERIOD(GENET_DMA_DEFAULT_QUEUE), 0);
+	genet_reg_write(sc, GENET_TX_DMA_END_ADDR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	sc->tx_ring.c_index = sc->tx_ring.p_index = genet_reg_read(sc,
+	    GENET_TX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE)) &
+	    GENET_TX_DMA_PROD_CONS_MASK;
+	genet_reg_write(sc, GENET_TX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE),
+	    sc->tx_ring.c_index);
+	genet_reg_write(sc,
+	    GENET_TX_DMA_MBUF_DONE_THRES(GENET_DMA_DEFAULT_QUEUE), 1);
+	genet_reg_write(sc, GENET_TX_DMA_FLOW_PERIOD(GENET_DMA_DEFAULT_QUEUE),
+	    0);
 	genet_reg_write(sc, GENET_TX_DMA_RING_BUF_SIZE(GENET_DMA_DEFAULT_QUEUE),
 	    (GENET_DMA_DESC_COUNT << GENET_TX_DMA_RING_BUF_SIZE_DESC_SHIFT) |
 	    (GENET_DMA_BUFFER_SIZE & GENET_TX_DMA_RING_BUF_SIZE_BUF_LEN_MASK));
 
-	genet_reg_write(sc, GENET_TX_DMA_RING_CFG, __BIT(GENET_DMA_DEFAULT_QUEUE));
+	genet_reg_write(sc, GENET_TX_DMA_RING_CFG,
+	    __BIT(GENET_DMA_DEFAULT_QUEUE));
 
 	// setup rx
 	genet_reg_write(sc, GENET_RX_DMA_RING_CFG, 0);
 	genet_reg_write(sc, GENET_RX_SCB_BURST_SIZE, 0x08);
-	genet_reg_write(sc, GENET_RX_DMA_START_ADDR_LO(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_RX_DMA_START_ADDR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_RX_DMA_READ_PTR_LO(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_RX_DMA_READ_PTR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_RX_DMA_WRITE_PTR_LO(GENET_DMA_DEFAULT_QUEUE), 0);
-	genet_reg_write(sc, GENET_RX_DMA_WRITE_PTR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
+	genet_reg_write(sc, GENET_RX_DMA_START_ADDR_LO(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_RX_DMA_START_ADDR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_RX_DMA_READ_PTR_LO(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_RX_DMA_READ_PTR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_RX_DMA_WRITE_PTR_LO(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	genet_reg_write(sc, GENET_RX_DMA_WRITE_PTR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
 	genet_reg_write(sc, GENET_RX_DMA_END_ADDR_LO(GENET_DMA_DEFAULT_QUEUE),
 	    GENET_DMA_DESC_COUNT * GENET_DMA_DESC_SIZE / 4 - 1);
-	genet_reg_write(sc, GENET_RX_DMA_END_ADDR_HI(GENET_DMA_DEFAULT_QUEUE), 0);
-	sc->rx_ring.c_index = genet_reg_read(sc, GENET_RX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE)) & GENET_RX_DMA_PROD_CONS_MASK;
-	genet_reg_write(sc, GENET_RX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE), sc->rx_ring.c_index);
+	genet_reg_write(sc, GENET_RX_DMA_END_ADDR_HI(GENET_DMA_DEFAULT_QUEUE),
+	    0);
+	sc->rx_ring.c_index = genet_reg_read(sc,
+	    GENET_RX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE)) &
+	    GENET_RX_DMA_PROD_CONS_MASK;
+	genet_reg_write(sc, GENET_RX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE),
+	    sc->rx_ring.c_index);
 	genet_reg_write(sc, GENET_RX_DMA_RING_BUF_SIZE(GENET_DMA_DEFAULT_QUEUE),
 	    (GENET_DMA_DESC_COUNT << GENET_RX_DMA_RING_BUF_SIZE_DESC_SHIFT) |
 	    (GENET_DMA_BUFFER_SIZE & GENET_RX_DMA_RING_BUF_SIZE_BUF_LEN_MASK));
-	genet_reg_write(sc, GENET_RX_DMA_XON_XOFF_THRES(GENET_DMA_DEFAULT_QUEUE),
-	    (5 << GENET_RX_DMA_XON_XOFF_THRES_LO_SHIFT) | (GENET_DMA_DESC_COUNT >> 4));
+	genet_reg_write(sc,
+	    GENET_RX_DMA_XON_XOFF_THRES(GENET_DMA_DEFAULT_QUEUE),
+	    (5 << GENET_RX_DMA_XON_XOFF_THRES_LO_SHIFT) |
+	    (GENET_DMA_DESC_COUNT >> 4));
 
-	genet_reg_write(sc, GENET_RX_DMA_RING_CFG, __BIT(GENET_DMA_DEFAULT_QUEUE));
+	genet_reg_write(sc, GENET_RX_DMA_RING_CFG,
+	    __BIT(GENET_DMA_DEFAULT_QUEUE));
 
 	// interrupt enable
-	genet_reg_write(sc, GENET_INTRL2_CPU_CLEAR_MASK, GENET_IRQ_TXDMA_DONE | GENET_IRQ_RXDMA_DONE);
+	genet_reg_write(sc, GENET_INTRL2_CPU_CLEAR_MASK,
+	    GENET_IRQ_TXDMA_DONE | GENET_IRQ_RXDMA_DONE);
 }
 
 static void
@@ -255,23 +290,33 @@ genet_gmac_update(struct genet_sc *sc)
 static void
 genet_gmac_enable(struct genet_sc *sc)
 {
-	genet_reg_write(sc, GENET_TX_DMA_CTRL, GENET_TX_DMA_CTRL_RBUF_EN(GENET_DMA_DEFAULT_QUEUE) | GENET_TX_DMA_CTRL_EN);
-	genet_reg_write(sc, GENET_RX_DMA_CTRL, GENET_RX_DMA_CTRL_RBUF_EN(GENET_DMA_DEFAULT_QUEUE) | GENET_RX_DMA_CTRL_EN);
+	genet_reg_write(sc, GENET_TX_DMA_CTRL,
+	    GENET_TX_DMA_CTRL_RBUF_EN(GENET_DMA_DEFAULT_QUEUE) |
+	    GENET_TX_DMA_CTRL_EN);
+	genet_reg_write(sc, GENET_RX_DMA_CTRL,
+	    GENET_RX_DMA_CTRL_RBUF_EN(GENET_DMA_DEFAULT_QUEUE) |
+	    GENET_RX_DMA_CTRL_EN);
 
-	genet_reg_write(sc, GENET_UMAC_CMD, genet_reg_read(sc, GENET_UMAC_CMD) | GENET_UMAC_CMD_TXEN | GENET_UMAC_CMD_RXEN);
+	genet_reg_write(sc, GENET_UMAC_CMD,
+	    genet_reg_read(sc, GENET_UMAC_CMD) | GENET_UMAC_CMD_TXEN |
+	    GENET_UMAC_CMD_RXEN);
 }
 
 static void
 genet_gmac_disable(struct genet_sc *sc)
 {
 	// stop rx
-	genet_reg_write(sc, GENET_UMAC_CMD, genet_reg_read(sc, GENET_UMAC_CMD) & ~GENET_UMAC_CMD_RXEN);
+	genet_reg_write(sc, GENET_UMAC_CMD,
+	    genet_reg_read(sc, GENET_UMAC_CMD) & ~GENET_UMAC_CMD_RXEN);
 	// stop rx dma
-	genet_reg_write(sc, GENET_RX_DMA_CTRL, genet_reg_read(sc, GENET_RX_DMA_CTRL) & ~GENET_RX_DMA_CTRL_EN);
+	genet_reg_write(sc, GENET_RX_DMA_CTRL,
+	    genet_reg_read(sc, GENET_RX_DMA_CTRL) & ~GENET_RX_DMA_CTRL_EN);
 	// stop tx dma
-	genet_reg_write(sc, GENET_TX_DMA_CTRL, genet_reg_read(sc, GENET_TX_DMA_CTRL) & ~GENET_TX_DMA_CTRL_EN);
+	genet_reg_write(sc, GENET_TX_DMA_CTRL,
+	    genet_reg_read(sc, GENET_TX_DMA_CTRL) & ~GENET_TX_DMA_CTRL_EN);
 	// stop tx
-	genet_reg_write(sc, GENET_UMAC_CMD, genet_reg_read(sc, GENET_UMAC_CMD) & ~GENET_UMAC_CMD_TXEN);
+	genet_reg_write(sc, GENET_UMAC_CMD,
+	    genet_reg_read(sc, GENET_UMAC_CMD) & ~GENET_UMAC_CMD_TXEN);
 	// flush tx fifo
 	genet_reg_write(sc, GENET_UMAC_TX_FLUSH, 1);
 	genet_usecwait(10);
@@ -292,7 +337,8 @@ genet_free_packet(struct genet_packet *pkt)
 {
 	struct genet_sc *sc = pkt->sc;
 	if (sc->running && sc->rx_pkt_num < RX_PKT_NUM_MAX) {
-		pkt->mp = desballoc((unsigned char *)pkt->dma.addr, GENET_DMA_BUFFER_SIZE, BPRI_MED, &pkt->free_rtn);
+		pkt->mp = desballoc((unsigned char *)pkt->dma.addr,
+		    GENET_DMA_BUFFER_SIZE, BPRI_MED, &pkt->free_rtn);
 	} else {
 		pkt->mp = NULL;
 	}
@@ -300,9 +346,10 @@ genet_free_packet(struct genet_packet *pkt)
 		ddi_dma_unbind_handle(pkt->dma.dma_handle);
 		ddi_dma_mem_free(&pkt->dma.mem_handle);
 		ddi_dma_free_handle(&pkt->dma.dma_handle);
-		kmem_free(pkt, sizeof(struct genet_packet));
+		kmem_free(pkt, sizeof (struct genet_packet));
 	} else {
-		ddi_dma_sync(pkt->dma.dma_handle, 0, pkt->dma.size, DDI_DMA_SYNC_FORDEV);
+		ddi_dma_sync(pkt->dma.dma_handle, 0, pkt->dma.size,
+		    DDI_DMA_SYNC_FORDEV);
 
 		mutex_enter(&sc->rx_pkt_lock);
 		pkt->next = sc->rx_pkt_free;
@@ -328,57 +375,72 @@ genet_alloc_packet(struct genet_sc *sc)
 	mutex_exit(&sc->rx_pkt_lock);
 
 	if (pkt == NULL) {
-		pkt = (struct genet_packet *)kmem_zalloc(sizeof(struct genet_packet), KM_NOSLEEP);
+		pkt = kmem_zalloc(sizeof (struct genet_packet), KM_NOSLEEP);
 		if (pkt) {
-			if (ddi_dma_alloc_handle(sc->dip, &pkt_dma_attr, DDI_DMA_SLEEP, 0, &pkt->dma.dma_handle) != DDI_SUCCESS) {
-				kmem_free(pkt, sizeof(struct genet_packet));
-				pkt= NULL;
+			if (ddi_dma_alloc_handle(sc->dip, &pkt_dma_attr,
+			    DDI_DMA_SLEEP, 0,
+			    &pkt->dma.dma_handle) != DDI_SUCCESS) {
+				kmem_free(pkt, sizeof (struct genet_packet));
+				pkt = NULL;
 			}
 		}
 
 		if (pkt) {
-			if (ddi_dma_mem_alloc(pkt->dma.dma_handle, GENET_DMA_BUFFER_SIZE, &mem_acc_attr, DDI_DMA_CONSISTENT, DDI_DMA_SLEEP, 0,
-				    &pkt->dma.addr, &pkt->dma.size, &pkt->dma.mem_handle)) {
+			if (ddi_dma_mem_alloc(pkt->dma.dma_handle,
+			    GENET_DMA_BUFFER_SIZE, &mem_acc_attr,
+			    DDI_DMA_CONSISTENT, DDI_DMA_SLEEP, 0,
+			    &pkt->dma.addr, &pkt->dma.size,
+			    &pkt->dma.mem_handle)) {
 				ddi_dma_free_handle(&pkt->dma.dma_handle);
-				kmem_free(pkt, sizeof(struct genet_packet));
-				pkt= NULL;
+				kmem_free(pkt, sizeof (struct genet_packet));
+				pkt = NULL;
 			} else {
 				ASSERT(pkt->dma.size >= GENET_DMA_BUFFER_SIZE);
-	 		}
+			}
 		}
 
 		if (pkt) {
 			ddi_dma_cookie_t cookie;
 			uint_t ccount;
-			int result = ddi_dma_addr_bind_handle(pkt->dma.dma_handle, NULL, pkt->dma.addr, pkt->dma.size, DDI_DMA_RDWR | DDI_DMA_CONSISTENT,
+			int result;
+
+			result = ddi_dma_addr_bind_handle(pkt->dma.dma_handle,
+			    NULL, pkt->dma.addr, pkt->dma.size,
+			    DDI_DMA_RDWR | DDI_DMA_CONSISTENT,
 			    DDI_DMA_SLEEP, NULL, &cookie, &ccount);
+
 			if (result == DDI_DMA_MAPPED) {
 				ASSERT(ccount == 1);
 				pkt->dma.dmac_addr = cookie.dmac_laddress;
-				ASSERT((cookie.dmac_laddress & (DCACHE_LINE - 1)) == 0);
-				ASSERT(cookie.dmac_size <= GENET_DMA_BUFFER_SIZE);
+				ASSERT((cookie.dmac_laddress &
+				    (DCACHE_LINE - 1)) == 0);
+				ASSERT(cookie.dmac_size <=
+				    GENET_DMA_BUFFER_SIZE);
 				pkt->sc = sc;
 				pkt->free_rtn.free_func = genet_free_packet;
 				pkt->free_rtn.free_arg = (char *)pkt;
 
-				pkt->mp = desballoc((unsigned char *)pkt->dma.addr, GENET_DMA_BUFFER_SIZE, BPRI_MED, &pkt->free_rtn);
+				pkt->mp = desballoc((uint8_t *)pkt->dma.addr,
+				    GENET_DMA_BUFFER_SIZE, BPRI_MED,
+				    &pkt->free_rtn);
 				if (pkt->mp == NULL) {
 					ddi_dma_unbind_handle(pkt->dma.dma_handle);
 					ddi_dma_mem_free(&pkt->dma.mem_handle);
 					ddi_dma_free_handle(&pkt->dma.dma_handle);
-					kmem_free(pkt, sizeof(struct genet_packet));
-					pkt= NULL;
+					kmem_free(pkt,
+					    sizeof (struct genet_packet));
+					pkt = NULL;
 				}
 			} else {
 				ddi_dma_mem_free(&pkt->dma.mem_handle);
 				ddi_dma_free_handle(&pkt->dma.dma_handle);
-				kmem_free(pkt, sizeof(struct genet_packet));
-				pkt= NULL;
+				kmem_free(pkt, sizeof (struct genet_packet));
+				pkt = NULL;
 			}
 		}
 	}
 
-	return pkt;
+	return (pkt);
 }
 
 static boolean_t
@@ -392,8 +454,10 @@ genet_alloc_buffer(struct genet_sc *sc)
 			return (B_FALSE);
 		sc->rx_ring.pkt[index] = pkt;
 
-		genet_reg_write(sc, GENET_RX_DESC_ADDRESS_LO(index), (uint32_t)pkt->dma.dmac_addr);
-		genet_reg_write(sc, GENET_RX_DESC_ADDRESS_HI(index), (uint32_t)(pkt->dma.dmac_addr >> 32));
+		genet_reg_write(sc, GENET_RX_DESC_ADDRESS_LO(index),
+		    (uint32_t)pkt->dma.dmac_addr);
+		genet_reg_write(sc, GENET_RX_DESC_ADDRESS_HI(index),
+		    (uint32_t)(pkt->dma.dmac_addr >> 32));
 	}
 
 	for (int index = 0; index < GENET_DMA_DESC_COUNT; index++) {
@@ -402,8 +466,10 @@ genet_alloc_buffer(struct genet_sc *sc)
 			return (B_FALSE);
 		sc->tx_ring.pkt[index] = pkt;
 
-		genet_reg_write(sc, GENET_TX_DESC_ADDRESS_LO(index), (uint32_t)pkt->dma.dmac_addr);
-		genet_reg_write(sc, GENET_TX_DESC_ADDRESS_HI(index), (uint32_t)(pkt->dma.dmac_addr >> 32));
+		genet_reg_write(sc, GENET_TX_DESC_ADDRESS_LO(index),
+		    (uint32_t)pkt->dma.dmac_addr);
+		genet_reg_write(sc, GENET_TX_DESC_ADDRESS_HI(index),
+		    (uint32_t)(pkt->dma.dmac_addr >> 32));
 	}
 
 	return (B_TRUE);
@@ -423,7 +489,7 @@ genet_free_buffer(struct genet_sc *sc)
 
 	for (int i = 0; i < GENET_DMA_DESC_COUNT; i++) {
 		struct genet_packet *pkt = sc->rx_ring.pkt[i];
-		if (pkt) {
+		if (pkt != NULL) {
 			freemsg(pkt->mp);
 			sc->rx_ring.pkt[i] = NULL;
 		}
@@ -448,7 +514,8 @@ genet_get_macaddr(struct genet_sc *sc)
 {
 	pnode_t node = ddi_get_nodeid(sc->dip);
 	int len = prom_getproplen(node, "local-mac-address");
-	if (len != sizeof(sc->dev_addr))
+
+	if (len != sizeof (sc->dev_addr))
 		return (B_FALSE);
 
 	prom_getprop(node, "local-mac-address", (caddr_t)sc->dev_addr);
@@ -513,18 +580,25 @@ genet_mii_write(void *arg, uint8_t phy, uint8_t reg, uint16_t value)
 
 	genet_mutex_enter(sc);
 	if ((genet_reg_read(sc, GENET_MDIO_CMD) & GENET_MDIO_START_BUSY) == 0) {
-		genet_reg_write(sc, GENET_MDIO_CMD, GENET_MDIO_WRITE | (phy << GENET_MDIO_ADDR_SHIFT) | (reg << GENET_MDIO_REG_SHIFT) | (value & GENET_MDIO_VAL_MASK));
-		genet_reg_write(sc, GENET_MDIO_CMD, genet_reg_read(sc, GENET_MDIO_CMD) | GENET_MDIO_START_BUSY);
+		genet_reg_write(sc, GENET_MDIO_CMD,
+		    GENET_MDIO_WRITE | (phy << GENET_MDIO_ADDR_SHIFT) |
+		    (reg << GENET_MDIO_REG_SHIFT) |
+		    (value & GENET_MDIO_VAL_MASK));
+		genet_reg_write(sc, GENET_MDIO_CMD,
+		    genet_reg_read(sc, GENET_MDIO_CMD) | GENET_MDIO_START_BUSY);
 
 		int retry;
 		for (retry = MII_BUSY_RETRY; retry > 0; retry--) {
-			if ((genet_reg_read(sc, GENET_MDIO_CMD) & GENET_MDIO_START_BUSY) == 0)
+			if ((genet_reg_read(sc, GENET_MDIO_CMD) &
+			    GENET_MDIO_START_BUSY) == 0) {
 				break;
+			}
 			genet_usecwait(10);
 		}
 		if (retry == 0)
 			cmn_err(CE_WARN, "%s%d: MII write failed (timeout)",
-			    ddi_driver_name(sc->dip), ddi_get_instance(sc->dip));
+			    ddi_driver_name(sc->dip),
+			    ddi_get_instance(sc->dip));
 	} else {
 		cmn_err(CE_WARN, "%s%d: MII write failed (busy)",
 		    ddi_driver_name(sc->dip), ddi_get_instance(sc->dip));
@@ -542,8 +616,11 @@ genet_mii_read(void *arg, uint8_t phy, uint8_t reg)
 	genet_mutex_enter(sc);
 
 	if ((genet_reg_read(sc, GENET_MDIO_CMD) & GENET_MDIO_START_BUSY) == 0) {
-		genet_reg_write(sc, GENET_MDIO_CMD, GENET_MDIO_READ | (phy << GENET_MDIO_ADDR_SHIFT) | (reg << GENET_MDIO_REG_SHIFT));
-		genet_reg_write(sc, GENET_MDIO_CMD, genet_reg_read(sc, GENET_MDIO_CMD) | GENET_MDIO_START_BUSY);
+		genet_reg_write(sc, GENET_MDIO_CMD, GENET_MDIO_READ |
+		    (phy << GENET_MDIO_ADDR_SHIFT) |
+		    (reg << GENET_MDIO_REG_SHIFT));
+		genet_reg_write(sc, GENET_MDIO_CMD,
+		    genet_reg_read(sc, GENET_MDIO_CMD) | GENET_MDIO_START_BUSY);
 
 		int retry;
 		for (retry = MII_BUSY_RETRY; retry > 0; retry--) {
@@ -558,7 +635,8 @@ genet_mii_read(void *arg, uint8_t phy, uint8_t reg)
 		}
 		if (retry == 0)
 			cmn_err(CE_WARN, "%s%d: MII read failed (timeout)",
-			    ddi_driver_name(sc->dip), ddi_get_instance(sc->dip));
+			    ddi_driver_name(sc->dip),
+			    ddi_get_instance(sc->dip));
 	} else {
 		cmn_err(CE_WARN, "%s%d: MII read failed (busy)",
 		    ddi_driver_name(sc->dip), ddi_get_instance(sc->dip));
@@ -566,7 +644,7 @@ genet_mii_read(void *arg, uint8_t phy, uint8_t reg)
 
 	genet_mutex_exit(sc);
 
-	return data;
+	return (data);
 }
 
 static int
@@ -579,7 +657,7 @@ genet_probe(dev_info_t *dip)
 		return (DDI_PROBE_FAILURE);
 
 	len = prom_getproplen(node, "status");
-	if (len <= 0 || len >= sizeof(buf))
+	if (len <= 0 || len >= sizeof (buf))
 		return (DDI_PROBE_FAILURE);
 
 	prom_getprop(node, "status", (caddr_t)buf);
@@ -649,16 +727,18 @@ genet_phy_install(struct genet_sc *sc)
 	if (sc->mii_handle == NULL) {
 		return (DDI_FAILURE);
 	}
-	//mii_set_pauseable(sc->mii_handle, B_FALSE, B_FALSE);
+	// mii_set_pauseable(sc->mii_handle, B_FALSE, B_FALSE);
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 }
 
 static mblk_t *
 genet_send(struct genet_sc *sc, mblk_t *mp)
 {
-	if (((sc->tx_ring.p_index - sc->tx_ring.c_index + GENET_DMA_DESC_COUNT) % GENET_DMA_DESC_COUNT) == (GENET_DMA_DESC_COUNT - 8)) {
-		return mp;
+	if (((sc->tx_ring.p_index - sc->tx_ring.c_index +
+	    GENET_DMA_DESC_COUNT) % GENET_DMA_DESC_COUNT) ==
+	    (GENET_DMA_DESC_COUNT - 8)) {
+		return (mp);
 	}
 
 	int index = sc->tx_ring.p_index % GENET_DMA_DESC_COUNT;
@@ -676,18 +756,20 @@ genet_send(struct genet_sc *sc, mblk_t *mp)
 		mblen += frag_len;
 	}
 	if (mblen < 0x40)
-		mblen=0x40;
+		mblen = 0x40;
 
 	ddi_dma_sync(pkt->dma.dma_handle, 0, mblen, DDI_DMA_SYNC_FORDEV);
 
 	uint32_t length_status = GENET_TX_DESC_STATUS_QTAG_MASK;
-	length_status |= GENET_TX_DESC_STATUS_SOP | GENET_TX_DESC_STATUS_EOP | GENET_TX_DESC_STATUS_CRC;
+	length_status |= GENET_TX_DESC_STATUS_SOP |
+	    GENET_TX_DESC_STATUS_EOP | GENET_TX_DESC_STATUS_CRC;
 	length_status |= mblen << GENET_TX_DESC_STATUS_BUFLEN_SHIFT;
 	genet_reg_write(sc, GENET_TX_DESC_STATUS(index), length_status);
 
 	uint32_t prod = sc->tx_ring.p_index;
 	prod = (prod + 1) & GENET_TX_DMA_PROD_CONS_MASK;
-	genet_reg_write(sc, GENET_TX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE), prod);
+	genet_reg_write(sc, GENET_TX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE),
+	    prod);
 
 	sc->tx_ring.p_index = prod;
 
@@ -727,16 +809,24 @@ genet_rx_intr(struct genet_sc *sc)
 	mblk_t *mblk_head = NULL;
 	mblk_t **mblk_tail = &mblk_head;
 
-	uint32_t prod = genet_reg_read(sc, GENET_RX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE)) & GENET_RX_DMA_PROD_CONS_MASK;
+	uint32_t prod = genet_reg_read(sc,
+	    GENET_RX_DMA_PROD_INDEX(GENET_DMA_DEFAULT_QUEUE)) &
+	    GENET_RX_DMA_PROD_CONS_MASK;
 	int index = sc->rx_ring.c_index % GENET_DMA_DESC_COUNT;
-	uint32_t num = (prod - sc->rx_ring.c_index) & GENET_RX_DMA_PROD_CONS_MASK;
+	uint32_t num = (prod - sc->rx_ring.c_index) &
+	    GENET_RX_DMA_PROD_CONS_MASK;
 
 	for (int i = 0; i < num; i++) {
 		int len = 0;
-		uint32_t status = genet_reg_read(sc, GENET_RX_DESC_STATUS(index));
+		uint32_t status = genet_reg_read(sc,
+		    GENET_RX_DESC_STATUS(index));
 
-		if ((status & (GENET_RX_DESC_STATUS_SOP | GENET_RX_DESC_STATUS_EOP | GENET_RX_DESC_STATUS_RX_ERROR)) == (GENET_RX_DESC_STATUS_SOP | GENET_RX_DESC_STATUS_EOP)) {
-			len = (status & GENET_RX_DESC_STATUS_BUFLEN_MASK) >> GENET_RX_DESC_STATUS_BUFLEN_SHIFT;
+		if ((status & (GENET_RX_DESC_STATUS_SOP |
+		    GENET_RX_DESC_STATUS_EOP |
+		    GENET_RX_DESC_STATUS_RX_ERROR)) ==
+		    (GENET_RX_DESC_STATUS_SOP | GENET_RX_DESC_STATUS_EOP)) {
+			len = (status & GENET_RX_DESC_STATUS_BUFLEN_MASK) >>
+			    GENET_RX_DESC_STATUS_BUFLEN_SHIFT;
 		}
 
 		if (len > 2) {
@@ -745,7 +835,8 @@ genet_rx_intr(struct genet_sc *sc)
 				mblk_t *mp = sc->rx_ring.pkt[index]->mp;
 				*mblk_tail = mp;
 				mblk_tail = &mp->b_next;
-				ddi_dma_sync(sc->rx_ring.pkt[index]->dma.dma_handle, 0, len, DDI_DMA_SYNC_FORKERNEL);
+				ddi_dma_sync(sc->rx_ring.pkt[index]->dma.dma_handle,
+				    0, len, DDI_DMA_SYNC_FORKERNEL);
 				mp->b_rptr += 2;
 				mp->b_wptr += len;
 				sc->rx_ring.pkt[index] = pkt;
@@ -754,8 +845,10 @@ genet_rx_intr(struct genet_sc *sc)
 
 		{
 			struct genet_packet *pkt = sc->rx_ring.pkt[index];
-			genet_reg_write(sc, GENET_RX_DESC_ADDRESS_LO(index), (uint32_t)pkt->dma.dmac_addr);
-			genet_reg_write(sc, GENET_RX_DESC_ADDRESS_HI(index), (uint32_t)(pkt->dma.dmac_addr >> 32));
+			genet_reg_write(sc, GENET_RX_DESC_ADDRESS_LO(index),
+			    (uint32_t)pkt->dma.dmac_addr);
+			genet_reg_write(sc, GENET_RX_DESC_ADDRESS_HI(index),
+			    (uint32_t)(pkt->dma.dmac_addr >> 32));
 		}
 
 		index = ((index + 1) % GENET_DMA_DESC_COUNT);
@@ -763,17 +856,21 @@ genet_rx_intr(struct genet_sc *sc)
 
 	if (num > 0) {
 		sc->rx_ring.c_index = prod;
-		genet_reg_write(sc, GENET_RX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE), sc->rx_ring.c_index);
+		genet_reg_write(sc,
+		    GENET_RX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE),
+		    sc->rx_ring.c_index);
 	}
 
-	return mblk_head;
+	return (mblk_head);
 }
 
 
 static int
 genet_tx_intr(struct genet_sc *sc)
 {
-	int cons = genet_reg_read(sc, GENET_TX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE)) & GENET_TX_DMA_PROD_CONS_MASK;
+	int cons = genet_reg_read(sc,
+	    GENET_TX_DMA_CONS_INDEX(GENET_DMA_DEFAULT_QUEUE)) &
+	    GENET_TX_DMA_PROD_CONS_MASK;
 	int num = (cons - sc->tx_ring.c_index) & GENET_TX_DMA_PROD_CONS_MASK;
 
 	int index = sc->tx_ring.c_index % GENET_DMA_DESC_COUNT;
@@ -782,7 +879,7 @@ genet_tx_intr(struct genet_sc *sc)
 		index = (index + 1) % GENET_DMA_DESC_COUNT;
 	}
 	sc->tx_ring.c_index = cons;
-	return num;
+	return (num);
 }
 
 static uint_t
@@ -797,8 +894,10 @@ genet_intr(caddr_t arg, caddr_t unused)
 		status &= ~genet_reg_read(sc, GENET_INTRL2_CPU_STAT_MASK);
 		genet_reg_write(sc, GENET_INTRL2_CPU_CLEAR, status);
 
-		if ((status & (GENET_IRQ_RXDMA_DONE | GENET_IRQ_TXDMA_DONE)) == 0)
+		if ((status & (GENET_IRQ_RXDMA_DONE |
+		    GENET_IRQ_TXDMA_DONE)) == 0) {
 			break;
+		}
 
 		if (sc->running == 0)
 			break;
@@ -857,7 +956,7 @@ genet_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 
 	genet_destroy(sc);
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 }
 
 static int
@@ -865,25 +964,29 @@ genet_quiesce(dev_info_t *dip)
 {
 	cmn_err(CE_WARN, "%s%d: genet_quiesce is not implemented",
 	    ddi_driver_name(dip), ddi_get_instance(dip));
-	return DDI_FAILURE;
+	return (DDI_FAILURE);
 }
 
 static void
 genet_set_mdf(struct genet_sc *sc, int index, const uint8_t *addr)
 {
-	genet_reg_write(sc, GENET_UMAC_MDF_ADDR0(index), addr[0] << 8 | addr[1]);
-	genet_reg_write(sc, GENET_UMAC_MDF_ADDR1(index), addr[2] << 24 | addr[3] << 16 | addr[4] << 8 | addr[5]);
+	genet_reg_write(sc, GENET_UMAC_MDF_ADDR0(index),
+	    addr[0] << 8 | addr[1]);
+	genet_reg_write(sc, GENET_UMAC_MDF_ADDR1(index), addr[2] << 24 |
+	    addr[3] << 16 | addr[4] << 8 | addr[5]);
 }
 
 static void
 genet_update_filter(struct genet_sc *sc)
 {
 	int num = 2;
-	for (struct genet_mcast *mc = list_head(&sc->mcast); mc; mc = list_next(&sc->mcast, mc)) {
-		num++;
-	}
 	uint32_t cmd = genet_reg_read(sc, GENET_UMAC_CMD);
 	uint32_t mdf_ctrl = 0;
+
+	for (struct genet_mcast *mc = list_head(&sc->mcast); mc != NULL;
+	    mc = list_next(&sc->mcast, mc)) {
+		num++;
+	}
 
 	if (num > GENET_MAX_MDF_FILTER || sc->promisc) {
 		cmd |= GENET_UMAC_CMD_PROMISC;
@@ -895,10 +998,12 @@ genet_update_filter(struct genet_sc *sc)
 		genet_set_mdf(sc, index++, ba);
 		genet_set_mdf(sc, index++, sc->dev_addr);
 
-		for (struct genet_mcast *mc = list_head(&sc->mcast); mc; mc = list_next(&sc->mcast, mc)) {
+		for (struct genet_mcast *mc = list_head(&sc->mcast); mc != NULL;
+		    mc = list_next(&sc->mcast, mc)) {
 			genet_set_mdf(sc, index++, mc->addr);
 		}
-		mdf_ctrl = __BITS(GENET_MAX_MDF_FILTER - 1, GENET_MAX_MDF_FILTER - index);
+		mdf_ctrl = __BITS(GENET_MAX_MDF_FILTER - 1,
+		    GENET_MAX_MDF_FILTER - index);
 	}
 	genet_reg_write(sc, GENET_UMAC_CMD, cmd);
 	genet_reg_write(sc, GENET_UMAC_MDF_CTRL, mdf_ctrl);
@@ -919,7 +1024,7 @@ genet_m_setpromisc(void *a, boolean_t b)
 
 	genet_mutex_exit(sc);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -934,14 +1039,15 @@ genet_m_multicst(void *a, boolean_t b, const uint8_t *c)
 		mc = kmem_alloc(sizeof (*mc), KM_NOSLEEP);
 		if (!mc) {
 			genet_mutex_exit(sc);
-			return ENOMEM;
+			return (ENOMEM);
 		}
 
-		memcpy(mc->addr, c, sizeof(mc->addr));
+		memcpy(mc->addr, c, sizeof (mc->addr));
 		list_insert_head(&sc->mcast, mc);
 	} else {
-		for (mc = list_head(&sc->mcast); mc; mc = list_next(&sc->mcast, mc)) {
-			if (memcmp(mc->addr, c, sizeof(mc->addr)) == 0) {
+		for (mc = list_head(&sc->mcast); mc != NULL;
+		    mc = list_next(&sc->mcast, mc)) {
+			if (memcmp(mc->addr, c, sizeof (mc->addr)) == 0) {
 				list_remove(&sc->mcast, mc);
 				kmem_free(mc, sizeof (*mc));
 				break;
@@ -952,14 +1058,15 @@ genet_m_multicst(void *a, boolean_t b, const uint8_t *c)
 	genet_update_filter(sc);
 
 	genet_mutex_exit(sc);
-	return 0;
+	return (0);
 }
 
 static void
 genet_write_hwaddr(struct genet_sc *sc)
 {
 	uint8_t *addr = sc->dev_addr;
-	genet_reg_write(sc, GENET_UMAC_MAC0, addr[0] << 24 | addr[1] << 16 | addr[2] << 8 | addr[3]);
+	genet_reg_write(sc, GENET_UMAC_MAC0, addr[0] << 24 | addr[1] << 16 |
+	    addr[2] << 8 | addr[3]);
 	genet_reg_write(sc, GENET_UMAC_MAC1, addr[4] << 8 | addr[5]);
 }
 
@@ -970,14 +1077,14 @@ genet_m_unicst(void *arg, const uint8_t *dev_addr)
 
 	genet_mutex_enter(sc);
 
-	memcpy(sc->dev_addr, dev_addr, sizeof(sc->dev_addr));
+	memcpy(sc->dev_addr, dev_addr, sizeof (sc->dev_addr));
 
 	genet_write_hwaddr(sc);
 	genet_update_filter(sc);
 
 	genet_mutex_exit(sc);
 
-	return 0;
+	return (0);
 }
 
 static int
@@ -989,7 +1096,7 @@ genet_m_start(void *arg)
 
 	if (!genet_alloc_buffer(sc)) {
 		genet_mutex_exit(sc);
-		return ENOMEM;
+		return (ENOMEM);
 	}
 	genet_gmac_init(sc);
 	genet_write_hwaddr(sc);
@@ -1003,14 +1110,14 @@ genet_m_start(void *arg)
 		genet_gmac_disable(sc);
 		genet_free_buffer(sc);
 		genet_mutex_exit(sc);
-		return EIO;
+		return (EIO);
 	}
 
 	genet_mutex_exit(sc);
 
 	mii_start(sc->mii_handle);
 
-	return 0;
+	return (0);
 }
 
 static void
@@ -1035,25 +1142,28 @@ static int
 genet_m_getstat(void *arg, uint_t stat, uint64_t *val)
 {
 	struct genet_sc *sc = arg;
-	return mii_m_getstat(sc->mii_handle, stat, val);
+	return (mii_m_getstat(sc->mii_handle, stat, val));
 }
 
 static int
-genet_m_setprop(void *arg, const char *name, mac_prop_id_t num, uint_t sz, const void *val)
+genet_m_setprop(void *arg, const char *name, mac_prop_id_t num, uint_t sz,
+    const void *val)
 {
 	struct genet_sc *sc = arg;
-	return mii_m_setprop(sc->mii_handle, name, num, sz, val);
+	return (mii_m_setprop(sc->mii_handle, name, num, sz, val));
 }
 
 static int
-genet_m_getprop(void *arg, const char *name, mac_prop_id_t num, uint_t sz, void *val)
+genet_m_getprop(void *arg, const char *name, mac_prop_id_t num,
+    uint_t sz, void *val)
 {
 	struct genet_sc *sc = arg;
-	return mii_m_getprop(sc->mii_handle, name, num, sz, val);
+	return (mii_m_getprop(sc->mii_handle, name, num, sz, val));
 }
 
 static void
-genet_m_propinfo(void *arg, const char *name, mac_prop_id_t num, mac_prop_info_handle_t prh)
+genet_m_propinfo(void *arg, const char *name, mac_prop_id_t num,
+    mac_prop_info_handle_t prh)
 {
 	struct genet_sc *sc = arg;
 	mii_m_propinfo(sc->mii_handle, name, num, prh);
@@ -1114,15 +1224,17 @@ genet_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
-	struct genet_sc *sc = kmem_zalloc(sizeof(struct genet_sc), KM_SLEEP);
+	struct genet_sc *sc = kmem_zalloc(sizeof (struct genet_sc), KM_SLEEP);
 	ddi_set_driver_private(dip, sc);
 	sc->dip = dip;
 
 	mutex_init(&sc->intrlock, NULL, MUTEX_DRIVER, NULL);
 	mutex_init(&sc->rx_pkt_lock, NULL, MUTEX_DRIVER, NULL);
-	list_create(&sc->mcast, sizeof (struct genet_mcast), offsetof(struct genet_mcast, node));
+	list_create(&sc->mcast, sizeof (struct genet_mcast),
+	    offsetof(struct genet_mcast, node));
 
-	if (ddi_regs_map_setup(sc->dip, 0, &sc->reg.addr, 0, 0, &reg_acc_attr, &sc->reg.handle) != DDI_SUCCESS) {
+	if (ddi_regs_map_setup(sc->dip, 0, &sc->reg.addr, 0, 0,
+	    &reg_acc_attr, &sc->reg.handle) != DDI_SUCCESS) {
 		goto err_exit;
 	}
 
@@ -1159,17 +1271,19 @@ genet_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	}
 
 	int actual;
-	if (ddi_intr_alloc(dip, &sc->intr_handle, DDI_INTR_TYPE_FIXED, 0, 1, &actual, DDI_INTR_ALLOC_STRICT) != DDI_SUCCESS) {
+	if (ddi_intr_alloc(dip, &sc->intr_handle, DDI_INTR_TYPE_FIXED, 0, 1,
+	    &actual, DDI_INTR_ALLOC_STRICT) != DDI_SUCCESS) {
 		goto err_exit;
 	}
 
-	if (ddi_intr_add_handler(sc->intr_handle, genet_intr, sc, NULL) != DDI_SUCCESS) {
+	if (ddi_intr_add_handler(sc->intr_handle,
+	    genet_intr, sc, NULL) != DDI_SUCCESS) {
 		ddi_intr_free(sc->intr_handle);
 		sc->intr_handle = 0;
 		goto err_exit;
 	}
 
-	return DDI_SUCCESS;
+	return (DDI_SUCCESS);
 err_exit:
 	genet_destroy(sc);
 	return (DDI_FAILURE);
