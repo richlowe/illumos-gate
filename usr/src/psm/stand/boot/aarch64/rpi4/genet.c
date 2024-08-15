@@ -289,7 +289,7 @@ get_phynode(pnode_t node)
 		return -1;
 	phandle_t phandle;
 	prom_getprop(node, "phy-handle", (caddr_t)&phandle);
-	return prom_findnode_by_phandle(htonl(phandle));
+	return prom_findnode_by_phandle(ntohl(phandle));
 }
 
 static void
@@ -476,7 +476,7 @@ genet_open(const char *name)
 		if (prom_getproplen(phy_node, "reg") != sizeof(phy_id))
 			return -1;
 		prom_getprop(phy_node, "reg", (caddr_t)&phy_id);
-		sc->phy_id = htonl(phy_id);
+		sc->phy_id = ntohl(phy_id);
 	}
 
 	genet_reset(sc, node);
@@ -610,4 +610,3 @@ void init_genet(void)
 {
 	prom_register(&genet_prom_dev);
 }
-

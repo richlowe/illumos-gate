@@ -59,15 +59,15 @@ get_reg_addr(pnode_t node, int index, uint64_t *reg)
 						uint64_t size = 0;
 						for (int j = 0; j < address_cells; j++) {
 							base <<= 32;
-							base += htonl(ranges[ranges_cells * i + j]);
+							base += ntohl(ranges[ranges_cells * i + j]);
 						}
 						for (int j = 0; j < parent_address_cells; j++) {
 							target <<= 32;
-							target += htonl(ranges[ranges_cells * i + address_cells + j]);
+							target += ntohl(ranges[ranges_cells * i + address_cells + j]);
 						}
 						for (int j = 0; j < size_cells; j++) {
 							size <<= 32;
-							size += htonl(ranges[ranges_cells * i + address_cells + parent_address_cells + j]);
+							size += ntohl(ranges[ranges_cells * i + address_cells + parent_address_cells + j]);
 						}
 
 						if (base <= addr && addr <= base + size - 1) {
