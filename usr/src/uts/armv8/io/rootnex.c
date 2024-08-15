@@ -1177,8 +1177,7 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			    (irupts_len == 0)) {
 				return (DDI_FAILURE);
 			}
-			if (interrupt_cells * hdlp->ih_inum >=
-			    CELLS_1275_TO_BYTES(irupts_len)) {
+			if ((interrupt_cells * hdlp->ih_inum) >= irupts_len) {
 				kmem_free(irupts_prop, irupts_len);
 				return (DDI_FAILURE);
 			}
