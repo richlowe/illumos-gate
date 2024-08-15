@@ -364,10 +364,10 @@ get_cbe_vector(void)
 					 */
 					if (index == 1 && cpu->cpu_m.mcpu_boot_el == 1)
 						index += 1;
-					int type = htonl(interrupts[interrupt_cells * index + 0]);
+					int type = ntohl(interrupts[interrupt_cells * index + 0]);
 					irq = GIC_VEC_TO_IRQ(type,
-					    htonl(interrupts[interrupt_cells * index + 1]));
-					int attr = htonl(interrupts[interrupt_cells * index + 2]);
+					    ntohl(interrupts[interrupt_cells * index + 1]));
+					int attr = ntohl(interrupts[interrupt_cells * index + 2]);
 				}
 			}
 		}

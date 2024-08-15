@@ -129,7 +129,7 @@ emac_pinmux(pnode_t node, const char *pinname)
 	uint32_t pinctrl;
 	prom_getprop(node, buf, (caddr_t)&pinctrl);
 	pnode_t pinctrl_node;
-	pinctrl_node = prom_findnode_by_phandle(htonl(pinctrl));
+	pinctrl_node = prom_findnode_by_phandle(ntohl(pinctrl));
 	if (pinctrl_node < 0)
 		return -1;
 

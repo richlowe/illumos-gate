@@ -331,16 +331,16 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			uint64_t rsize = 0;
 			for (int j = 0; j < addr_cells; j++) {
 				base <<= 32;
-				base += htonl(rangep[ranges_cells * i + j]);
+				base += ntohl(rangep[ranges_cells * i + j]);
 			}
 			for (int j = 0; j < parent_addr_cells; j++) {
 				target <<= 32;
-				target += htonl(rangep[ranges_cells * i +
+				target += ntohl(rangep[ranges_cells * i +
 				    addr_cells + j]);
 			}
 			for (int j = 0; j < size_cells; j++) {
 				rsize <<= 32;
-				rsize += htonl(rangep[ranges_cells * i +
+				rsize += ntohl(rangep[ranges_cells * i +
 				    addr_cells + parent_addr_cells + j]);
 			}
 

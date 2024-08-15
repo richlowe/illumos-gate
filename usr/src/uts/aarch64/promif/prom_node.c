@@ -76,7 +76,7 @@ get_phandle(int offset)
 	 */
 	if (prop == NULL || len != sizeof (uint32_t)) {
 		uint32_t phandle = fdt_get_max_phandle(fdtp) + 1;
-		uint32_t v = htonl(phandle);
+		uint32_t v = ntohl(phandle);
 		int r = fdt_setprop(fdtp, offset, "phandle", &v,
 		    sizeof (uint32_t));
 		if (r != 0)

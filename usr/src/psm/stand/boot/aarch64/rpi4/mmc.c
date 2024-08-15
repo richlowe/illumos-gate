@@ -121,9 +121,9 @@ init_gpio_regulator(pnode_t node, struct gpio_regulator *regulator)
 	uint32_t *gpios = __builtin_alloca(len);
 	prom_getprop(node, "gpios", (caddr_t)gpios);
 	for (int i = 0; i < regulator->ngpios; i++) {
-		regulator->gpios[i].node = prom_findnode_by_phandle(htonl(gpios[3 * i + 0]));
-		regulator->gpios[i].pin = htonl(gpios[3 * i + 1]);
-		regulator->gpios[i].flags = htonl(gpios[3 * i + 2]);
+		regulator->gpios[i].node = prom_findnode_by_phandle(ntohl(gpios[3 * i + 0]));
+		regulator->gpios[i].pin = ntohl(gpios[3 * i + 1]);
+		regulator->gpios[i].flags = ntohl(gpios[3 * i + 2]);
 	}
 
 	len = prom_getproplen(node, "states");
@@ -134,8 +134,8 @@ init_gpio_regulator(pnode_t node, struct gpio_regulator *regulator)
 	uint32_t *states = __builtin_alloca(len);
 	prom_getprop(node, "states", (caddr_t)states);
 	for (int i = 0; i < regulator->nstates; i++) {
-		regulator->states[i].microvolt = htonl(states[2 * i + 0]);
-		regulator->states[i].val = htonl(states[2 * i + 1]);
+		regulator->states[i].microvolt = ntohl(states[2 * i + 0]);
+		regulator->states[i].val = ntohl(states[2 * i + 1]);
 	}
 	regulator->min_volt = prom_get_prop_int(node, "regulator-min-microvolt", -1);
 	regulator->max_volt = prom_get_prop_int(node, "regulator-max-microvolt", -1);

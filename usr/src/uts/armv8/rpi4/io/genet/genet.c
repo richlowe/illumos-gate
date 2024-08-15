@@ -134,7 +134,7 @@ get_phynode(pnode_t node)
 		return (-1);
 	phandle_t phandle;
 	prom_getprop(node, "phy-handle", (caddr_t)&phandle);
-	return (prom_findnode_by_phandle(htonl(phandle)));
+	return (prom_findnode_by_phandle(ntohl(phandle)));
 }
 
 static void

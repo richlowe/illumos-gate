@@ -112,7 +112,7 @@ prom_get_reset(pnode_t node, int index, struct prom_hwreset *reset)
 	prom_getprop(node, "resets", (caddr_t)resets);
 
 	pnode_t reset_node;
-	reset_node = prom_findnode_by_phandle(htonl(resets[0]));
+	reset_node = prom_findnode_by_phandle(ntohl(resets[0]));
 	if (reset_node < 0)
 		return (-1);
 
@@ -126,11 +126,11 @@ prom_get_reset(pnode_t node, int index, struct prom_hwreset *reset)
 		return (-1);
 
 	reset_node =
-	    prom_findnode_by_phandle(htonl(resets[index * (reset_cells + 1)]));
+	    prom_findnode_by_phandle(ntohl(resets[index * (reset_cells + 1)]));
 	if (reset_node < 0)
 		return (-1);
 	reset->node = reset_node;
-	reset->id = htonl(resets[index * (reset_cells + 1) + 1]);
+	reset->id = ntohl(resets[index * (reset_cells + 1) + 1]);
 
 	return (0);
 }
@@ -156,7 +156,7 @@ prom_get_clock(pnode_t node, int index, struct prom_hwclock *clock)
 	prom_getprop(node, "clocks", (caddr_t)clocks);
 
 	pnode_t clock_node;
-	clock_node = prom_findnode_by_phandle(htonl(clocks[0]));
+	clock_node = prom_findnode_by_phandle(ntohl(clocks[0]));
 	if (clock_node < 0)
 		return (-1);
 
@@ -170,12 +170,12 @@ prom_get_clock(pnode_t node, int index, struct prom_hwclock *clock)
 		return (-1);
 
 	clock_node =
-	    prom_findnode_by_phandle(htonl(clocks[index * (clock_cells + 1)]));
+	    prom_findnode_by_phandle(ntohl(clocks[index * (clock_cells + 1)]));
 	if (clock_node < 0)
 		return (-1);
 	clock->node = clock_node;
 	clock->id = (clock_cells == 0 ? 0:
-	    htonl(clocks[index * (clock_cells + 1) + 1]));
+	    ntohl(clocks[index * (clock_cells + 1) + 1]));
 
 	return (0);
 }
@@ -228,12 +228,12 @@ prom_get_reg_bounds(pnode_t node, int index, uint64_t *base, uint64_t *size)
 	off = (address_cells + size_cells) * index;
 	switch (address_cells) {
 	case 1:
-		*base = htonl(regs[off]);
+		*base = ntohl(regs[off]);
 		break;
 	case 2:
-		*base = htonl(regs[off]);
+		*base = ntohl(regs[off]);
 		*base <<= 32;
-		*base |= htonl(regs[off + 1]);
+		*base |= ntohl(regs[off + 1]);
 		break;
 	default:
 		return (-1);
@@ -242,12 +242,12 @@ prom_get_reg_bounds(pnode_t node, int index, uint64_t *base, uint64_t *size)
 	off += address_cells;
 	switch (size_cells) {
 	case 1:
-		*size = htonl(regs[off]);
+		*size = ntohl(regs[off]);
 		break;
 	case 2:
-		*size = htonl(regs[off]);
+		*size = ntohl(regs[off]);
 		*size <<= 32;
-		*size |= htonl(regs[off + 1]);
+		*size |= ntohl(regs[off + 1]);
 		break;
 	default:
 		return (-1);
@@ -314,16 +314,16 @@ prom_get_reg_address(pnode_t node, int index, uint64_t *reg)
 			uint64_t size = 0;
 			for (int j = 0; j < address_cells; j++) {
 				base <<= 32;
-				base += htonl(ranges[ranges_cells * i + j]);
+				base += ntohl(ranges[ranges_cells * i + j]);
 			}
 			for (int j = 0; j < parent_address_cells; j++) {
 				target <<= 32;
-				target += htonl(ranges[
+				target += ntohl(ranges[
 				    ranges_cells * i + address_cells + j]);
 			}
 			for (int j = 0; j < size_cells; j++) {
 				size <<= 32;
-				size += htonl(ranges[
+				size += ntohl(ranges[
 				    ranges_cells * i + address_cells +
 				    parent_address_cells + j]);
 			}

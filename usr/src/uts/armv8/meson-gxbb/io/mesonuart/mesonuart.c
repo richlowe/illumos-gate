@@ -775,7 +775,7 @@ mesonuartattach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	if (len > 0) {
 		uint32_t *clocks = __builtin_alloca(len);
 		prom_getprop(ddi_get_nodeid(devi), "clocks", (caddr_t)clocks);
-		clock_node = prom_findnode_by_phandle(htonl(clocks[0]));
+		clock_node = prom_findnode_by_phandle(ntohl(clocks[0]));
 	}
 
 	if (prom_getproplen(clock_node, "clock-frequency") == sizeof(uint_t)) {
