@@ -330,7 +330,7 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 	if (rangep) {
 		int i;
-		int n = rangelen / (addr_cells + parent_addr_cells + size_cells);
+		int n = BYTES_TO_1275_CELLS(rangelen) / (addr_cells + parent_addr_cells + size_cells);
 		for (i = 0; i < n; i++) {
 			if (rangep[(addr_cells + parent_addr_cells + size_cells) * i + 0] == range_index) {
 				uint64_t addr = 0;
@@ -499,7 +499,7 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", (caddr_t)&irupts_prop, &irupts_len) != DDI_SUCCESS || irupts_len == 0) {
 				return (DDI_FAILURE);
 			}
-			if (interrupt_cells * hdlp->ih_inum >= CELLS_1275_TO_BYTES(irupts_len)) {
+			if ((interrupt_cells * hdlp->ih_inum) >= irupts_len) {
 				kmem_free(irupts_prop, irupts_len);
 				return (DDI_FAILURE);
 			}
