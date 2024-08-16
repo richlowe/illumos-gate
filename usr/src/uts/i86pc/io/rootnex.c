@@ -886,8 +886,8 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	 */
 
 #ifdef	DDI_MAP_DEBUG
-	cmn_err(CE_CONT, "rootnex: <%s,%s> <0x%x, 0x%x, 0x%d> offset %d len %d "
-	    "handle 0x%x\n", ddi_get_name(dip), ddi_get_name(rdip),
+	cmn_err(CE_CONT, "rootnex: <%s,%s> <0x%lx, 0x%lx, %ld> offset %ld, "
+	    "len %ld handle 0x%p\n", ddi_get_name(dip), ddi_get_name(rdip),
 	    rp.regspec_bustype, rp.regspec_addr, rp.regspec_size, offset,
 	    len, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
@@ -925,7 +925,7 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT, "             <%s,%s> <0x%" PRIx64 ", 0x%" PRIx64
-	    ", 0x%" PRId64 "> offset %d len %d handle 0x%x\n",
+	    ", %" PRId64 "> offset %" PRId64 "len %" PRId64 ", handle 0x%p\n",
 	    ddi_get_name(dip), ddi_get_name(rdip), rp.regspec_bustype,
 	    rp.regspec_addr, rp.regspec_size, offset, len, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
@@ -979,7 +979,7 @@ rootnex_map_fault(dev_info_t *dip, dev_info_t *rdip, struct hat *hat,
 {
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("rootnex_map_fault: address <%x> pfn <%x>", addr, pfn);
+	ddi_map_debug("rootnex_map_fault: address <%p> pfn <%lx>", addr, pfn);
 	ddi_map_debug(" Seg <%s>\n",
 	    seg->s_ops == &segdev_ops ? "segdev" :
 	    seg == &kvseg ? "segkmem" : "NONE!");
@@ -1036,7 +1036,7 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 
 #ifdef	DDI_MAP_DEBUG
 	ddi_map_debug(
-	    "rootnex_map_regspec: <0x%x 0x%x 0x%x> handle 0x%x\n",
+	    "rootnex_map_regspec: <0x%lx 0x%lx 0x%lx> handle 0x%p\n",
 	    rp->regspec_bustype, rp->regspec_addr,
 	    rp->regspec_size, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
@@ -1100,7 +1100,7 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 
 #ifdef	DDI_MAP_DEBUG
 		ddi_map_debug(
-	    "rootnex_map_regspec: \"Mapping\" %d bytes I/O space at 0x%x\n",
+	    "rootnex_map_regspec: \"Mapping\" %ld bytes I/O space at 0x%p\n",
 		    rp->regspec_size, *vaddrp);
 #endif	/* DDI_MAP_DEBUG */
 		return (DDI_SUCCESS);
@@ -1172,8 +1172,8 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 		npages = mmu_btopr(rp->regspec_size + pgoffset);
 
 #ifdef	DDI_MAP_DEBUG
-		ddi_map_debug("rootnex_map_regspec: Mapping %d pages "
-		    "physical %llx", npages, pbase);
+		ddi_map_debug("rootnex_map_regspec: Mapping %ld pages "
+		    "physical 0x%lx", npages, pbase);
 #endif	/* DDI_MAP_DEBUG */
 
 		cvaddr = device_arena_alloc(ptob(npages), VM_NOSLEEP);
@@ -1197,7 +1197,7 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	}
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("at virtual 0x%x\n", *vaddrp);
+	ddi_map_debug("at virtual 0x%p\n", *vaddrp);
 #endif	/* DDI_MAP_DEBUG */
 	return (DDI_SUCCESS);
 }
@@ -1268,7 +1268,7 @@ rootnex_map_handle(ddi_map_req_t *mp)
 
 #ifdef	DDI_MAP_DEBUG
 	ddi_map_debug(
-	    "rootnex_map_handle: <0x%x 0x%x 0x%x> handle 0x%x\n",
+	    "rootnex_map_handle: <0x%lx, 0x%lx, %ld> handle 0x%p\n",
 	    rp->regspec_bustype, rp->regspec_addr,
 	    rp->regspec_size, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
