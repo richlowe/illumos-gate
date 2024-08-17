@@ -266,6 +266,7 @@ aarch64_MANFILES=	ahci.4d		\
 			sdhost.4d	\
 			sfxge.4d	\
 			si3124.4d	\
+			simple-bus.4d	\
 			skd.4d		\
 			uath.4d		\
 			ural.4d		\

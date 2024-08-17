@@ -18,6 +18,7 @@ file path=usr/share/man/man5/cardbus.5
 link path=usr/share/man/man5/dir.5 target=dir_ufs.5
 file path=usr/share/man/man5/dir_ufs.5
 file path=usr/share/man/man5/driver.conf.5
+$(aarch64_ONLY)file path=usr/share/man/man5/fdt.5
 file path=usr/share/man/man5/pci.5
 link path=usr/share/man/man5/pcie.5 target=pci.5
 file path=usr/share/man/man5/priv_names.5

@@ -1,0 +1,39 @@
+.\"
+.\" This file and its contents are supplied under the terms of the
+.\" Common Development and Distribution License ("CDDL"), version 1.0.
+.\" You may only use this file in accordance with the terms of version
+.\" 1.0 of the CDDL.
+.\"
+.\" A full copy of the text of the CDDL should have accompanied this
+.\" source.  A copy of the CDDL is also available via the Internet at
+.\" http://www.illumos.org/license/CDDL.
+.\"
+.\"
+.\" Copyright 2024 Richard Lowe
+.\"
+.Dd August 5, 2024
+.Dt SIMPLE-BUS 4D
+.Os
+.Sh NAME
+.Nm simple-bus
+.Nd simple-bus nexus driver
+.Sh DESCRIPTION
+The
+.Nm
+driver supports the generic simple-bus used as part of the Flat Device Tree
+specification.
+.Pp
+This is not a specific hardware part, but rather a simple mapping between
+address spaces used to simplify the devicetree.
+Devices behind this bus will
+usually be on-CPU peripherals or peripherals integrated with the CPU on a
+given SoC.
+.Sh FILES
+.Bl -tag -width Pa
+.It Pa /kernel/drv/aarch64/simple-bus
+Device driver (aarch64)
+.El
+.Sh SEE ALSO
+.Xr fdt 5 ,
+.br
+.Lk http://devicetree.org The Devicetree Specification

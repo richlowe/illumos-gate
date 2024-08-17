@@ -1,0 +1,50 @@
+.\"
+.\" This file and its contents are supplied under the terms of the
+.\" Common Development and Distribution License ("CDDL"), version 1.0.
+.\" You may only use this file in accordance with the terms of version
+.\" 1.0 of the CDDL.
+.\"
+.\" A full copy of the text of the CDDL should have accompanied this
+.\" source.  A copy of the CDDL is also available via the Internet at
+.\" http://www.illumos.org/license/CDDL.
+.\"
+.\"
+.\" Copyright 2024 Richard Lowe
+.\"
+.Dd August 5, 2024
+.Dt FDT 5
+.Os
+.Sh NAME
+.Nm fdt
+.Nd Flattened Device Tree
+.Sh DESCRIPTION
+The Flattened Device Tree
+.Po
+.Em fdt
+.Pc
+is a mechanism to statically describe the hardware resources of a give system.
+It provides the
+.Sy PROM
+device tree on some ARM platforms.
+Stylistically it is similar, but not identical, to IEEE 1275 OpenFirmware.
+Nodes have a name and address, and nest to form a hierarchy of devices where
+each device has logical control of any children it may have.
+.Pp
+The device tree is built from Device Tree Source
+.Po
+.Pa .dts
+.Pc
+files which are human-created and human-readable textual
+versions of the device tree, and compiled and combined into the Device Tree Blob
+.Po
+.Pa .dtb
+.Pc
+files used by the system by the devicetree compiler
+.Xr dtc 1 .
+.Pp
+The precise mechanism by which the system loads and presents the devicetree
+blob to the kernel varies from system to system.
+.Sh SEE ALSO
+.Xr dtc 1 ,
+.br
+.Lk http://devicetree.org The Devicetree Specification
