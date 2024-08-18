@@ -291,11 +291,11 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 		for (int i = 0; i < addr_cells; i++) {
 			addr <<= 32;
-			addr |= ntohl(rp[(addr_cells + size_cells) * rnumber + i]);
+			addr |= rp[(addr_cells + size_cells) * rnumber + i];
 		}
 		for (int i = 0; i < size_cells; i++) {
 			size <<= 32;
-			size |= ntohl(rp[(addr_cells + size_cells) * rnumber + addr_cells + i]);
+			size |= rp[(addr_cells + size_cells) * rnumber + addr_cells + i];
 		}
 
 		ddi_prop_free(rp);
@@ -502,13 +502,17 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			switch (interrupt_cells) {
 			case 1:
 				grp = 0;
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
+				vec = irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 0];
 				cfg = 4;
 				break;
 			case 3:
-				grp = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 1]);
-				cfg = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 2]);
+				grp = irupts_prop[(interrupt_cells *
+				    hdlp->ih_inum) + 0];
+				vec = irupts_prop[(interrupt_cells *
+				    hdlp->ih_inum) + 1];
+				cfg = irupts_prop[(interrupt_cells * hdlp->ih_inum)
+				    + 2];
 				break;
 			default:
 				ddi_prop_free(irupts_prop);
