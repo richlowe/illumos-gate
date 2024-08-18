@@ -787,7 +787,7 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	}
 
 	if (mp->map_type == DDI_MT_RNUMBER)  {
-		int reglen;
+		uint_t reglen;
 		int rnumber = mp->map_obj.rnumber;
 		uint32_t *rp;
 		int addr_cells = get_address_cells(ddi_get_nodeid(dip));
@@ -796,18 +796,17 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		ASSERT(addr_cells == 1 || addr_cells == 2);
 		ASSERT(size_cells == 1 || size_cells == 2);
 
-		if ((ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS,
-		    "reg", (caddr_t)&rp, &reglen) != DDI_SUCCESS) ||
+		if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS,
+		    "reg", (int **)&rp, &reglen) != DDI_SUCCESS) ||
 		    reglen == 0) {
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
-		int n = reglen / CELLS_1275_TO_BYTES(addr_cells + size_cells);
-		ASSERT(reglen % CELLS_1275_TO_BYTES(addr_cells +
-		    size_cells) == 0);
+		int n = reglen / addr_cells + size_cells;
+		ASSERT(reglen % (addr_cells + size_cells) == 0);
 
 		if (rnumber < 0 || rnumber >= n) {
-			kmem_free(rp, reglen);
+			ddi_prop_free(rp);
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
@@ -824,7 +823,9 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			size |= ntohl(rp[(addr_cells + size_cells) *
 			    rnumber + addr_cells + i]);
 		}
-		kmem_free(rp, reglen);
+
+		ddi_prop_free(rp);
+
 		ASSERT((addr & 0xffff000000000000ul) == 0);
 		ASSERT((size & 0xffff000000000000ul) == 0);
 		reg.regspec_bustype = ((addr >> 32) & 0xffff);
@@ -1169,16 +1170,16 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 			}
 
 			int *irupts_prop;
-			int irupts_len;
-			if ((ddi_getlongprop(DDI_DEV_T_ANY, rdip,
+			uint_t irupts_len;
+			if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
 			    DDI_PROP_DONTPASS, "interrupts",
-			    (caddr_t)&irupts_prop,
+			    &irupts_prop,
 			    &irupts_len) != DDI_SUCCESS) ||
 			    (irupts_len == 0)) {
 				return (DDI_FAILURE);
 			}
 			if ((interrupt_cells * hdlp->ih_inum) >= irupts_len) {
-				kmem_free(irupts_prop, irupts_len);
+				ddi_prop_free(irupts_prop);
 				return (DDI_FAILURE);
 			}
 
@@ -1205,11 +1206,11 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 				    hdlp->ih_inum + 2]);
 				break;
 			default:
-				kmem_free(irupts_prop, irupts_len);
+				ddi_prop_free(irupts_prop);
 				return (DDI_FAILURE);
 			}
 
-			kmem_free(irupts_prop, irupts_len);
+			ddi_prop_free(irupts_prop);
 
 			hdlp->ih_vector = GIC_VEC_TO_IRQ(grp, vec);
 
