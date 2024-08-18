@@ -259,14 +259,18 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	int rangelen;
 
 	bool parent_has_ranges = false;
-	if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_get_parent(dip), DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) == DDI_SUCCESS) {
+	if (ddi_prop_get_int_array(DDI_DEV_T_ANY, ddi_get_parent(dip),
+	    DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) ==
+	    DDI_SUCCESS) {
 		parent_has_ranges = true;
 		if (rangelen) {
-			kmem_free(rangep, rangelen);
+			ddi_prop_free(rangep);
 		}
 	}
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) != DDI_SUCCESS || rangelen == 0) {
+	if (ddi_prop_get_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "ranges", (caddr_t)&rangep, &rangelen) !=
+	    DDI_SUCCESS || rangelen == 0) {
 		rangelen = 0;
 		rangep = NULL;
 	}
@@ -276,21 +280,22 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		int rnumber = mp->map_obj.rnumber;
 		uint32_t *rp;
 
-		if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "reg", (caddr_t)&rp, &reglen) != DDI_SUCCESS || reglen == 0) {
-			if (rangep) {
-				kmem_free(rangep, rangelen);
+		if (ddi_prop_get_int_array(DDI_DEV_T_ANY, rdip,
+		    DDI_PROP_DONTPASS, "reg", (caddr_t)&rp, &reglen) !=
+		    DDI_SUCCESS || reglen == 0) {
+			if (rangep != NULL) {
+				ddi_prop_free(rangep);
 			}
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
-		int n = reglen / (sizeof(uint32_t) * (addr_cells + size_cells));
-		ASSERT(reglen % (sizeof(uint32_t) * (addr_cells + size_cells)) == 0);
+		ASSERT((reglen % (addr_cells + size_cells)) == 0);
 
 		if (rnumber < 0 || rnumber >= n) {
-			if (rangep) {
-				kmem_free(rangep, rangelen);
+			if (rangep != NULL) {
+				ddi_prop_free(rangep);
 			}
-			kmem_free(rp, reglen);
+			ddi_prop_free(rp);
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
@@ -313,7 +318,9 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			size <<= 32;
 			size |= ntohl(rp[(addr_cells + size_cells) * rnumber + addr_cells + i]);
 		}
-		kmem_free(rp, reglen);
+
+		ddi_prop_free(rp);
+
 		ASSERT((addr & 0xffff000000000000ul) == 0);
 		ASSERT((size & 0xfffff00000000000ul) == 0);
 		reg.regspec_bustype = (addr >> 32) ;
@@ -363,7 +370,7 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 				break;
 			}
 		}
-		kmem_free(rangep, rangelen);
+		ddi_prop_free(rangep);
 		if (i == n) {
 			return (DDI_FAILURE);
 		}
@@ -495,11 +502,14 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 
 			int *irupts_prop;
 			int irupts_len;
-			if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS, "interrupts", (caddr_t)&irupts_prop, &irupts_len) != DDI_SUCCESS || irupts_len == 0) {
+			if (ddi_prop_get_int_array(DDI_DEV_T_ANY, rdip,
+			    DDI_PROP_DONTPASS, "interrupts",
+			    (caddr_t)&irupts_prop, &irupts_len) !=
+			    DDI_SUCCESS || irupts_len == 0) {
 				return (DDI_FAILURE);
 			}
-			if (interrupt_cells * hdlp->ih_inum >= irupts_len * sizeof(int)) {
-				kmem_free(irupts_prop, irupts_len);
+			if (interrupt_cells * hdlp->ih_inum >= irupts_len) {
+				ddi_prop_free(irupts_prop);
 				return (DDI_FAILURE);
 			}
 
@@ -513,15 +523,20 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 				cfg = 4;
 				break;
 			case 3:
-				grp = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 0]);
-				vec = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 1]);
-				cfg = ntohl((uint32_t)irupts_prop[interrupt_cells * hdlp->ih_inum + 2]);
+				grp = irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 0];
+				vec = irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 1];
+				cfg = irupts_prop[interrupt_cells *
+				    hdlp->ih_inum + 2];
 				break;
 			default:
-				kmem_free(irupts_prop, irupts_len);
+				ddi_prop_free(irupts_prop);
 				return (DDI_FAILURE);
 			}
-			kmem_free(irupts_prop, irupts_len);
+
+			ddi_prop_free(irupts_prop);
+
 			switch (grp) {
 			case 1:
 				hdlp->ih_vector = vec + 16;

@@ -1160,23 +1160,20 @@ i_ddi_free_intr_phdl(ddi_intr_handle_impl_t *hdlp)
 int
 i_ddi_get_intx_nintrs(dev_info_t *dip)
 {
-	int intrlen;
+	uint_t intrlen;
 	int intr_sz;
 	int *ip;
 	int ret = 0;
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS |
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS |
 	    DDI_PROP_CANSLEEP,
-	    "interrupts", (caddr_t)&ip, &intrlen) == DDI_SUCCESS) {
-
-		intr_sz = ddi_getprop(DDI_DEV_T_ANY, dip,
+	    "interrupts", &ip, &intrlen) == DDI_SUCCESS) {
+		intr_sz = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 		    0, "#interrupt-cells", 1);
-		/* adjust for number of bytes */
-		intr_sz *= sizeof (int32_t);
 
 		ret = intrlen / intr_sz;
 
-		kmem_free(ip, intrlen);
+		ddi_prop_free(ip);
 	}
 
 	return (ret);
