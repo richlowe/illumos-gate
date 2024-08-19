@@ -54,6 +54,7 @@ SUBDIRS =       \
 		tcpsig \
 		timer \
 		uccid \
+		vfs \
 		$(SUBDIRS_$(MACH))
 
 PROGS = \
