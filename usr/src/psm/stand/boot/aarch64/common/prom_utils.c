@@ -37,12 +37,12 @@ prom_get_prop_index(pnode_t node, const char *prop_name, const char *name)
 	if (len > 0) {
 		char *prop = __builtin_alloca(len);
 		prom_getprop(node, prop_name, prop);
-		int offeset = 0;
+		int offset = 0;
 		int index = 0;
-		while (offeset < len) {
-			if (strcmp(name, prop + offeset) == 0)
+		while (offset < len) {
+			if (strcmp(name, prop + offset) == 0)
 				return index;
-			offeset += strlen(prop + offeset) + 1;
+			offset += strlen(prop + offset) + 1;
 			index++;
 		}
 	}
@@ -331,11 +331,11 @@ boolean_t prom_is_compatible(pnode_t node, const char *name)
 	char *prop = __builtin_alloca(len);
 	prom_getprop(node, prop_name, prop);
 
-	int offeset = 0;
-	while (offeset < len) {
-		if (strcmp(name, prop + offeset) == 0)
+	int offset = 0;
+	while (offset < len) {
+		if (strcmp(name, prop + offset) == 0)
 			return (B_TRUE);
-		offeset += strlen(prop + offeset) + 1;
+		offset += strlen(prop + offset) + 1;
 	}
 	return (B_FALSE);
 }

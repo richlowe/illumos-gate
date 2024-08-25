@@ -338,13 +338,13 @@ get_cbe_vector(void)
 		if (len > 0) {
 			char *compatible = __builtin_alloca(len);
 			prom_getprop(timer, "compatible", compatible);
-			int offeset = 0;
-			while (offeset < len) {
+			int offset = 0;
+			while (offset < len) {
 				if (strcmp(compatible, "arm,armv8-timer") == 0) {
 					found = B_TRUE;
 					break;
 				}
-				offeset += strlen(compatible + offeset) + 1;
+				offset += strlen(compatible + offset) + 1;
 			}
 		}
 
