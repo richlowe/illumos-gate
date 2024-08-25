@@ -796,9 +796,9 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		ASSERT(addr_cells == 1 || addr_cells == 2);
 		ASSERT(size_cells == 1 || size_cells == 2);
 
-		if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip, DDI_PROP_DONTPASS,
-		    "reg", (int **)&rp, &reglen) != DDI_SUCCESS) ||
-		    reglen == 0) {
+		if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
+		    DDI_PROP_DONTPASS, "reg", (int **)&rp,
+		    &reglen) != DDI_SUCCESS) || (reglen == 0)) {
 			return (DDI_ME_RNUMBER_RANGE);
 		}
 
@@ -1297,33 +1297,6 @@ static struct intrspec *
 rootnex_get_ispec(dev_info_t *rdip, int inum)
 {
 	struct ddi_parent_private_data *pdp = ddi_get_parent_data(rdip);
-
-	/*
-	 * Special case handling for drivers that provide their own
-	 * intrspec structures instead of relying on the DDI framework.
-	 *
-	 * A broken hardware driver in ON could potentially provide its
-	 * own intrspec structure, instead of relying on the hardware.
-	 * If these drivers are children of 'rootnex' then we need to
-	 * continue to provide backward compatibility to them here.
-	 *
-	 * Following check is a special case for 'pcic' driver which
-	 * was found to have broken hardwre andby provides its own intrspec.
-	 *
-	 * Verbatim comments from this driver are shown here:
-	 * "Don't use the ddi_add_intr since we don't have a
-	 * default intrspec in all cases."
-	 *
-	 * Since an 'ispec' may not be always created for it,
-	 * check for that and create one if so.
-	 *
-	 * NOTE: Currently 'pcic' is the only driver found to do this.
-	 */
-	if (!pdp->par_intr && strcmp(ddi_get_name(rdip), "pcic") == 0) {
-		pdp->par_nintr = 1;
-		pdp->par_intr = kmem_zalloc(sizeof (struct intrspec) *
-		    pdp->par_nintr, KM_SLEEP);
-	}
 
 	/* Validate the interrupt number */
 	if (inum >= pdp->par_nintr)
