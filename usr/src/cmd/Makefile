@@ -212,6 +212,7 @@ COMMON_SUBDIRS=	\
 	keyserv		\
 	killall		\
 	krb5		\
+	ktest		\
 	kvmstat		\
 	last		\
 	lastcomm	\

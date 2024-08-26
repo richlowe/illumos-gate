@@ -28,7 +28,10 @@
 #define	_SYS_SDT_H
 
 #include <sys/stdint.h>
+
+#ifndef __aarch64__
 #include <fksmb_dt.h>
+#endif
 
 #ifdef	__cplusplus
 extern "C" {
