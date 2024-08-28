@@ -205,41 +205,19 @@ static int get_size_cells(pnode_t node)
 	return size_cells;
 }
 
-static int get_interrupt_cells(pnode_t node)
-{
-	int interrupt_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#interrupt-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof(int));
-			int prop;
-			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
-		}
-		len = prom_getproplen(node, "interrupt-parent");
-		if (len > 0) {
-			ASSERT(len == sizeof(int));
-			int prop;
-			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
-			node = prom_findnode_by_phandle(ntohl(prop));
-			continue;
-		}
-		node = prom_parentnode(node);
-	}
-	return interrupt_cells;
-}
-
 static int
 smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset, off_t len, caddr_t *vaddrp)
 {
 	ddi_map_req_t mr;
+	dev_info_t *ipar = i_ddi_interrupt_parent(rdip);
 	int error;
 
 	int addr_cells = get_address_cells(ddi_get_nodeid(rdip));
 	int size_cells = get_size_cells(ddi_get_nodeid(rdip));
-	int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
+
+	ASSERT3P(ipar, !=, NULL);
+	int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY, ipar, 0,
+	    "#interrupt-cells", 1);
 
 	int parent_addr_cells = get_address_cells(ddi_get_nodeid(dip));
 	int parent_size_cells = get_size_cells(ddi_get_nodeid(dip));
@@ -497,7 +475,12 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_ENABLE:
 		{
-			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
+			dev_info_t *ipar = i_ddi_interrupt_parent(rdip);
+
+			ASSERT3P(ipar, !=, NULL);
+			int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ipar, 0, "#interrupt-cells", 1);
+
 			switch (interrupt_cells) {
 			case 1:
 			case 3:
@@ -571,35 +554,14 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	case DDI_INTROP_GETPENDING:
 		return (DDI_FAILURE);
 	case DDI_INTROP_NAVAIL:
-		{
-			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
-			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-				DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
 	case DDI_INTROP_NINTRS:
-		{
-			int interrupt_cells = get_interrupt_cells(ddi_get_nodeid(rdip));
-			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-				DDI_PROP_DONTPASS, "interrupts", &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
+		*(int *)result = i_ddi_get_intx_nintrs(rdip);
+		break;
 		break;
 	case DDI_INTROP_SUPPORTED_TYPES:
-		*(int *)result = DDI_INTR_TYPE_FIXED;	/* Always ... */
+		/* Only fixed interrupts on simple-bus (XXXARM?) */
+		*(int *)result = i_ddi_get_intx_nintrs(rdip) ?
+		    DDI_INTR_TYPE_FIXED : 0;
 		break;
 	default:
 		return (DDI_FAILURE);

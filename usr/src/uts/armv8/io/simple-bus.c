@@ -34,6 +34,7 @@
 #include <sys/kmem.h>
 #include <sys/ddidmareq.h>
 #include <sys/ddi_impldefs.h>
+#include <sys/ddi_subrdefs.h>
 #include <sys/dma_engine.h>
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
@@ -206,33 +207,6 @@ get_size_cells(pnode_t node)
 }
 
 static int
-get_interrupt_cells(pnode_t node)
-{
-	int interrupt_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#interrupt-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
-		}
-		len = prom_getproplen(node, "interrupt-parent");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
-			node = prom_findnode_by_phandle(ntohl(prop));
-			continue;
-		}
-		node = prom_parentnode(node);
-	}
-	return (interrupt_cells);
-}
-
-static int
 smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
     off_t len, caddr_t *vaddrp)
 {
@@ -323,7 +297,8 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 
 	if (rangep != NULL) {
 		int i;
-		int ranges_cells = (addr_cells + parent_addr_cells + size_cells);
+		int ranges_cells = (addr_cells + parent_addr_cells +
+		    size_cells);
 		int n = rangelen / ranges_cells;
 
 		for (i = 0; i < n; i++) {
@@ -336,11 +311,13 @@ smpl_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 			}
 			for (int j = 0; j < parent_addr_cells; j++) {
 				target <<= 32;
-				target += rangep[ranges_cells * i + addr_cells + j];
+				target += rangep[(ranges_cells * i) +
+				    (addr_cells + j)];
 			}
 			for (int j = 0; j < size_cells; j++) {
 				rsize <<= 32;
-				rsize += rangep[ranges_cells * i + addr_cells + parent_addr_cells + j];
+				rsize += rangep[(ranges_cells * i) +
+				    (addr_cells + parent_addr_cells + j)];
 			}
 
 			uint64_t rel_addr = (reg.regspec_bustype & 0xffff);
@@ -480,8 +457,12 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_ENABLE:
 		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
+			dev_info_t *ipar = i_ddi_interrupt_parent(rdip);
+
+			ASSERT3P(ipar, !=, NULL);
+			int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ipar, 0, "#interrupt-cells", 1);
+
 			switch (interrupt_cells) {
 			case 1:
 			case 3:
@@ -519,8 +500,8 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 				    hdlp->ih_inum) + 0];
 				vec = irupts_prop[(interrupt_cells *
 				    hdlp->ih_inum) + 1];
-				cfg = irupts_prop[(interrupt_cells * hdlp->ih_inum)
-				    + 2];
+				cfg = irupts_prop[(interrupt_cells *
+				    hdlp->ih_inum) + 2];
 				break;
 			default:
 				ddi_prop_free(irupts_prop);
@@ -559,39 +540,13 @@ smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	case DDI_INTROP_GETPENDING:
 		return (DDI_FAILURE);
 	case DDI_INTROP_NAVAIL:
-		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
-			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, "interrupts",
-			    &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
 	case DDI_INTROP_NINTRS:
-		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
-			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, "interrupts",
-			    &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
+		*(int *)result = i_ddi_get_intx_nintrs(rdip);
 		break;
 	case DDI_INTROP_SUPPORTED_TYPES:
-		*(int *)result = DDI_INTR_TYPE_FIXED;	/* Always ... */
+		/* Only fixed interrupts on simple-bus (XXXARM?) */
+		*(int *)result = i_ddi_get_intx_nintrs(rdip) ?
+		    DDI_INTR_TYPE_FIXED : 0;
 		break;
 	default:
 		return (DDI_FAILURE);

@@ -1054,34 +1054,6 @@ rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
  *  interrupt related code
  * ************************
  */
-
-static int
-get_interrupt_cells(pnode_t node)
-{
-	int interrupt_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, "#interrupt-cells");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "#interrupt-cells", (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
-		}
-		len = prom_getproplen(node, "interrupt-parent");
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, "interrupt-parent", (caddr_t)&prop);
-			node = prom_findnode_by_phandle(ntohl(prop));
-			continue;
-		}
-		node = prom_parentnode(node);
-	}
-	return (interrupt_cells);
-}
-
 static int
 get_pil(dev_info_t *rdip)
 {
@@ -1159,8 +1131,12 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 		break;
 	case DDI_INTROP_ENABLE:
 		{
-			int interrupt_cells =
-			    get_interrupt_cells(ddi_get_nodeid(rdip));
+			dev_info_t *ipar = i_ddi_interrupt_parent(rdip);
+
+			ASSERT3P(ipar, !=, NULL);
+			int interrupt_cells = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ipar, 0, "#interrupt-cells", 1);
+
 			switch (interrupt_cells) {
 			case 1:
 			case 3:
@@ -1238,39 +1214,13 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	case DDI_INTROP_GETPENDING:
 		return (DDI_FAILURE);
 	case DDI_INTROP_NAVAIL:
-		{
-			int interrupt_cells =
-			    get_interrupt_cells(ddi_get_nodeid(rdip));
-			int irupts_len;
-			if ((interrupt_cells != 0) &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, "interrupts", &irupts_len) ==
-			    DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
 	case DDI_INTROP_NINTRS:
-		{
-			int interrupt_cells =
-			    get_interrupt_cells(ddi_get_nodeid(rdip));
-			int irupts_len;
-			if ((interrupt_cells != 0) &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, "interrupts",
-			    &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
+		*(int *)result = i_ddi_get_intx_nintrs(rdip);
 		break;
 	case DDI_INTROP_SUPPORTED_TYPES:
-		*(int *)result = DDI_INTR_TYPE_FIXED;	/* Always ... */
+		/* Root nexus driver supports only fixed interrupts */
+		*(int *)result = i_ddi_get_intx_nintrs(rdip) ?
+		    DDI_INTR_TYPE_FIXED : 0;
 		break;
 	default:
 		return (DDI_FAILURE);
