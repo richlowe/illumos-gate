@@ -390,7 +390,7 @@ smpl_ctlops(dev_info_t *dip, dev_info_t *rdip,
 	case DDI_CTLOPS_REPORTDEV:
 		if (rdip == (dev_info_t *)0)
 			return (DDI_FAILURE);
-		cmn_err(CE_CONT, "?%s%d at %s%d",
+		cmn_err(CE_CONT, "?%s%d at %s%d\n",
 		    ddi_driver_name(rdip), ddi_get_instance(rdip),
 		    ddi_driver_name(dip), ddi_get_instance(dip));
 		ret = DDI_SUCCESS;

@@ -695,7 +695,7 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 		}
 		pri = INT_IPL(sparc_pd_getintr(dev, i)->intrspec_pri);
 		f_len += snprintf(buf + len, REPORTDEV_BUFSIZE - len,
-		    " sparc ipl %d", pri);
+		    " processor ipl %d", pri);
 		len = strlen(buf);
 	}
 #ifdef DEBUG
