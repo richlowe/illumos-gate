@@ -1922,6 +1922,7 @@ vdev_get_label_asize(nvlist_t *nvl)
 
 	asize += VDEV_LABEL_START_SIZE + VDEV_LABEL_END_SIZE;
 done:
+	nvlist_destroy(vdevs);
 	return (asize);
 }
 
