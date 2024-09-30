@@ -24,6 +24,7 @@
  * All rights reserved.
  *
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2024 MNX Cloud, Inc.
  */
 
 #ifndef _PCFS_BPB_H
@@ -33,6 +34,7 @@
 extern "C" {
 #endif
 
+extern size_t bpsec;
 /*
  * Common Bios Parameter Block definitions for the pcfs user-level utilities
  *
@@ -40,7 +42,8 @@ extern "C" {
  * need to be separated out of mkfs_pcfs.h and then it should reference this
  * file.
  */
-#define	BPSEC		512	/* Assumed # of bytes per sector */
+#define	MINBPS		512
+#define	MAXBPS		4096
 
 #define	OPCODE1		0xE9
 #define	OPCODE2		0xEB
@@ -221,7 +224,7 @@ typedef union _ubso {
 	struct _boot_sector	bs;
 	struct _boot_sector32	bs32;
 	struct mboot		mb;
-	uchar_t			buf[BPSEC];
+	uchar_t			buf[MAXBPS];
 } boot_sector_t;
 
 #ifdef __cplusplus
