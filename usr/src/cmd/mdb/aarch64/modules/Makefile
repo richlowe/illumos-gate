@@ -21,7 +21,7 @@
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 #
-SUBDIRS = \
+SUBDIRS =	\
 	unix
 
 include ../../Makefile.subdirs

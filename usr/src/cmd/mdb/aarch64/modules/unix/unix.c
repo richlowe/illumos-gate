@@ -12,11 +12,15 @@
 /* Copyright 2023 Richard Lowe */
 
 #include <mdb/mdb_modapi.h>
+#include <mdb/mdb_ks.h>
 #include <sys/arm_features.h>
 #include <sys/bitmap.h>
+#include <sys/gic.h>
+#include <sys/gic_reg.h>
+#include <sys/modctl.h>
+#include <sys/sunddi.h>
 
-static
-int
+static int
 arm_features_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 {
 	void *fset;
@@ -77,9 +81,113 @@ arm_features_dcmd(uintptr_t addr, uint_t flags, int argc, const mdb_arg_t *argv)
 	return (DCMD_OK);
 }
 
+static const char *
+gic_vec_to_type(uint_t vec)
+{
+	if (GIC_INTID_IS_SGI(vec)) {
+		return ("SGI");
+	} else if (GIC_INTID_IS_ANY_PPI(vec)) {
+		return ("PPI");
+	} else if (GIC_INTID_IS_ANY_SPI(vec)) {
+		return ("SPI");
+	} else if (GIC_INTID_IS_LPI(vec)) {
+		return ("LPI");
+	} else {
+		return ("???");
+	}
+}
+
+
+static int
+gic_print_vec(uintptr_t state_addr, const void *aw_buff, void *arg)
+{
+	gic_intr_state_t state;
+	struct av_head *avec_tbl = arg;
+	struct autovec av;
+
+	if (mdb_vread(&state, sizeof (state), state_addr) != sizeof (state)) {
+		return (WALK_ERR);
+	}
+
+	uintptr_t av_addr = (uintptr_t)avec_tbl[state.gi_vector].avh_link;
+
+	while (av_addr != 0x0) {
+		if (mdb_vread(&av, sizeof (struct autovec), av_addr) == -1) {
+			mdb_warn("Failed to read autovec %p for vec %d",
+			    av_addr, state.gi_vector);
+			break;
+		}
+
+		/*
+		 * NB: Should match the format header in `gic_interrupts_dcmd`
+		 */
+		mdb_printf("%-8d  %-8s  %-8s  %-8d  ", state.gi_vector,
+		    gic_vec_to_type(state.gi_vector),
+		    state.gi_edge_triggered ? "edge" : "level",
+		    state.gi_prio);
+
+		if (av.av_dip != 0) {
+			char driv[MODMAXNAMELEN + 1];
+			struct dev_info di;
+
+			if (mdb_devinfo2driver((uintptr_t)av.av_dip, driv,
+			    sizeof (driv)) == 0) {
+				(void) mdb_vread(&di,
+				    sizeof (struct dev_info),
+				    (uintptr_t)av.av_dip);
+
+				mdb_printf("%-28A  %s#%d\n",
+				    av.av_vector, driv,
+				    di.devi_instance);
+			} else {
+				mdb_printf("%-28A  - \n",
+				    av.av_vector);
+			}
+		} else {
+			mdb_printf("%-28A  - \n", av.av_vector);
+		}
+
+		av_addr = (uintptr_t)av.av_link;
+	}
+
+	return (WALK_NEXT);
+}
+
+static int
+gic_interrupts_dcmd(uintptr_t addr, uint_t flags, int argc,
+    const mdb_arg_t *argv)
+{
+	/*
+	 * XXXARM: This is the true size of the avec tbl, which in general
+	 * needs to be larger on ARM.
+	 */
+	struct av_head avec_tbl[MAX_VECT] = {0};
+
+	if (mdb_readvar(&avec_tbl, "autovect") == -1) {
+		mdb_warn("failed to read autovect");
+		return (DCMD_ERR);
+	}
+
+	GElf_Sym sym;
+	if (mdb_lookup_by_name("gic_intrs", &sym) == -1) {
+		mdb_warn("failed to lookup up gic_intrs");
+		return (DCMD_ERR);
+	}
+
+	mdb_printf("%<u>%-8s  %-8s  %-8s  %-8s  %-28s  %s%</u>\n",
+	    "Vector",  "Type", "Trigger", "Priority", "ISR", "Instance");
+
+	if (mdb_pwalk("avl", gic_print_vec, avec_tbl, sym.st_value) == -1)
+		return (DCMD_ERR);
+
+	return (DCMD_OK);
+}
+
+
 static const mdb_dcmd_t dcmds[] = {
 	{ "arm_features", ":", "dump the arm_features vector",
 	    arm_features_dcmd },
+	{ "interrupts", "", "print interrupts", gic_interrupts_dcmd },
 	{ NULL },
 };
 

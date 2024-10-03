@@ -82,7 +82,7 @@ struct autovec {
 #define	AV_PENTRY_LEVEL	0x8000	/* level-triggered interrupt */
 
 struct av_head {
-	struct 	autovec	*avh_link;
+	struct	autovec	*avh_link;
 	ushort_t	avh_hi_pri;
 	ushort_t	avh_lo_pri;
 };

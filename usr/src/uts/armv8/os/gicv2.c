@@ -70,6 +70,8 @@
 #include <sys/smp_impldefs.h>
 #include <sys/archsystm.h>
 
+extern void gic_remove_state(int);
+
 extern char *gic_module_name;
 
 typedef struct {
@@ -419,29 +421,21 @@ gicv2_addspl(int irq, int ipl, int min_ipl, int max_ipl)
 }
 
 /*
- * XXXARM: Comment taken verbatim from
- *         i86pc/io/mp_platform_misc.c:apic_delspl_common)
+ * Disable an interrupt and reset it's priority
  *
- * Recompute mask bits for the given interrupt vector.
- * If there is no interrupt servicing routine for this
- * vector, this function should disable interrupt vector
- * from happening at all IPLs. If there are still
- * handlers using the given vector, this function should
- * disable the given vector from happening below the lowest
- * IPL of the remaining handlers.
+ * The generic GIC layer has taken care of checking if there are still
+ * handlers, so this is really just deletion.
  */
 static int
 gicv2_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
-	if (autovect[irq].avh_hi_pri == 0) {
-		GICV2_GICD_LOCK();
-		gicv2_disable_irq((uint32_t)irq);
-		gicv2_set_ipl((uint32_t)irq, 0);
-		if (GIC_INTID_IS_PPI(irq) && CPU->cpu_id == 0) {
-			conf.gc_enabled_local &= ~(1U << irq);
-		}
-		GICV2_GICD_UNLOCK();
+	GICV2_GICD_LOCK();
+	gicv2_disable_irq((uint32_t)irq);
+	gicv2_set_ipl((uint32_t)irq, 0);
+	if (GIC_INTID_IS_PPI(irq) && CPU->cpu_id == 0) {
+		conf.gc_enabled_local &= ~(1U << irq);
 	}
+	GICV2_GICD_UNLOCK();
 
 	return (0);
 }

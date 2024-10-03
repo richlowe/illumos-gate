@@ -90,6 +90,17 @@ typedef struct gic_ops {
 
 extern gic_ops_t gic_ops;
 
+/*
+ * The state of each vector known to us and the GIC.
+ * For the benefit of the debugger.
+ */
+typedef struct {
+	avl_node_t gi_node;
+	uint_t	gi_vector;
+	uint32_t gi_prio;
+	boolean_t gi_edge_triggered;
+} gic_intr_state_t;
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,16 +13,33 @@
  * Copyright 2024 Michael van der Westhuizen
  */
 
-#include <sys/types.h>
+#include <sys/avl.h>
+#include <sys/cmn_err.h>
+#include <sys/errno.h>
 #include <sys/gic.h>
 #include <sys/gic_reg.h>
-#include <sys/cmn_err.h>
-#include <sys/promif.h>
-#include <sys/errno.h>
 #include <sys/modctl.h>
+#include <sys/promif.h>
+#include <sys/smp_impldefs.h>
+#include <sys/sysmacros.h>
+#include <sys/types.h>
 
 static void stub_not_config(void);
 static void stub_setlvlx(int ipl);
+
+/*
+ * State we track for debugging, such as mdb's `::interrupts`
+ *
+ * We store an AVL keyed on vector (since our space is far too sparse for
+ * tables).  `gic_intrs_lock` protects the tree and the entries in the tree.
+ *
+ * Effort is taken such that people consuming `gic_intrs_lock` receive a
+ * consistent view (that is, `gic_intrs_lock` is held until the state changes
+ * are in hardware).  This is a courtesy as long as the state is only observed
+ * by a debugger, as intended.
+ */
+kmutex_t gic_intrs_lock;
+avl_tree_t gic_intrs;
 
 /*
  * Used by implementations to ensure that they only fill in gic_ops when
@@ -72,6 +89,54 @@ stub_setlvlx(int ipl __unused)
 	 */
 }
 
+static int
+gic_intr_state_cmp(const void *l, const void *r)
+{
+	const gic_intr_state_t *li = l;
+	const gic_intr_state_t *ri = r;
+
+	if (li->gi_vector > ri->gi_vector)
+		return (1);
+	if (li->gi_vector < ri->gi_vector)
+		return (-1);
+	return (0);
+}
+
+gic_intr_state_t *
+gic_get_state(int irq)
+{
+	gic_intr_state_t lookup, *new;
+	avl_index_t where = 0;
+
+	lookup.gi_vector = irq;
+
+	mutex_enter(&gic_intrs_lock);
+
+	if ((new = avl_find(&gic_intrs, &lookup, &where)) == NULL) {
+		new = kmem_zalloc(sizeof (*new), KM_SLEEP);
+		new->gi_vector = irq;
+		avl_insert(&gic_intrs, new, where);
+	} else {
+		new->gi_vector = irq;
+	}
+
+
+	return (new);
+}
+
+void
+gic_remove_state(int irq)
+{
+	gic_intr_state_t lookup, *st;
+
+	lookup.gi_vector = irq;
+	st = avl_find(&gic_intrs, &lookup, NULL);
+	VERIFY3P(st, !=, NULL);
+
+	avl_remove(&gic_intrs, st);
+	kmem_free(st, sizeof (gic_intr_state_t));
+}
+
 void
 gic_send_ipi(cpuset_t cpuset, int irq)
 {
@@ -87,20 +152,57 @@ gic_cpu_init(cpu_t *cp)
 void
 gic_config_irq(uint32_t irq, bool is_edge)
 {
+	gic_intr_state_t *state = gic_get_state(irq);
+	VERIFY3P(state, !=, NULL);
+
+	state->gi_edge_triggered = is_edge;
+
 	gic_ops.go_config_irq(irq, is_edge);
+	mutex_exit(&gic_intrs_lock);
 }
 
 static int
 gic_addspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
-	return (gic_ops.go_addspl(irq, ipl, min_ipl, max_ipl));
+	gic_intr_state_t *state = gic_get_state(irq);
+	int ret;
+
+	VERIFY3P(state, !=, NULL);
+
+	state->gi_prio = ipl;
+	ret = gic_ops.go_addspl(irq, ipl, min_ipl, max_ipl);
+	mutex_exit(&gic_intrs_lock);
+	return (ret);
 }
 
+/*
+ * XXXARM: Comment taken verbatim from
+ *         i86pc/io/mp_platform_misc.c:apic_delspl_common)
+ *
+ * Recompute mask bits for the given interrupt vector.
+ * If there is no interrupt servicing routine for this
+ * vector, this function should disable interrupt vector
+ * from happening at all IPLs. If there are still
+ * handlers using the given vector, this function should
+ * disable the given vector from happening below the lowest
+ * IPL of the remaining handlers.
+ */
 static int
 gic_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
 	ASSERT3S(irq, <, MAX_VECT);
-	return (gic_ops.go_delspl(irq, ipl, min_ipl, max_ipl));
+
+	if (autovect[irq].avh_hi_pri == 0) {
+		int ret = 0;
+		mutex_enter(&gic_intrs_lock);
+		gic_remove_state(irq);
+
+		ret = gic_ops.go_delspl(irq, ipl, min_ipl, max_ipl);
+		mutex_exit(&gic_intrs_lock);
+		return (ret);
+	}
+
+	return (0);
 }
 
 int (*addspl)(int, int, int, int) = gic_addspl;
@@ -186,6 +288,10 @@ gic_init(void)
 
 	if (gic_ops.go_init() != 0)
 		return (-1);
+
+	mutex_init(&gic_intrs_lock, NULL, MUTEX_DEFAULT, NULL);
+	avl_create(&gic_intrs, gic_intr_state_cmp, sizeof (gic_intr_state_t),
+	    offsetof(gic_intr_state_t, gi_node));
 
 	return (0);
 }

@@ -74,6 +74,8 @@
 #include <sys/sysmacros.h>
 #include <sys/archsystm.h>
 
+extern void gic_remove_state(int);
+
 extern char *gic_module_name;
 
 /*
@@ -569,18 +571,21 @@ gicv3_delspl_percpu(gicv3_redistributor_t *r, uint32_t irq,
 	    GICR_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(0)));
 }
 
-/* Disable an interrupt and reset it's priority */
+/*
+ * Disable an interrupt and reset it's priority
+ *
+ * The generic GIC layer has taken care of checking if there are still
+ * handlers, so this is really just deletion.
+ */
 static int
 gicv3_delspl(int irq, int ipl __unused,
     int min_ipl __unused, int max_ipl __unused)
 {
-	if (autovect[irq].avh_hi_pri == 0) {
-		if (GIC_INTID_IS_PERCPU(irq)) {
-			gicv3_for_each_gicr(&conf,
-			    gicv3_delspl_percpu, (uint32_t)irq, 0);
-		} else if (GIC_INTID_IS_SPI(irq)) {
-			gicv3_delspl_spi(&conf, (uint32_t)irq);
-		}
+	if (GIC_INTID_IS_PERCPU(irq)) {
+		gicv3_for_each_gicr(&conf,
+		    gicv3_delspl_percpu, (uint32_t)irq, 0);
+	} else if (GIC_INTID_IS_SPI(irq)) {
+		gicv3_delspl_spi(&conf, (uint32_t)irq);
 	}
 
 	return (0);

@@ -37,3 +37,4 @@ include ../../../Makefile.module
 CPPFLAGS += -DMP -D_MACHDEP
 CPPFLAGS += -I../../../../common
 CPPFLAGS += -I$(SRC)/uts/aarch64
+CPPFLAGS += -I$(SRC)/uts/armv8
