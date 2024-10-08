@@ -75,12 +75,6 @@ static char multilevel2[] =
 	"conflicts with another device using the same vector %d with an IPL\n"
 	"of %d. Reconfigure the conflicting devices to use different vectors.";
 
-#ifdef __xpv
-#define	MAX_VECT	NR_IRQS
-#else
-#define	MAX_VECT	256
-#endif
-
 struct autovec *nmivect = NULL;
 struct av_head autovect[MAX_VECT];
 struct av_head softvect[LOCK_LEVEL + 1];
@@ -689,6 +683,8 @@ av_dispatch_autovect(uint_t vec)
 	struct autovec *av;
 
 	ASSERT_STACK_ALIGNED();
+
+	ASSERT3U(vec, <, MAX_VECT);
 
 	while ((av = autovect[vec].avh_link) != NULL) {
 		uint_t numcalled = 0;

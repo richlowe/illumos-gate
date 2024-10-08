@@ -406,6 +406,9 @@ static int
 gicv3_setlvl(int irq)
 {
 	int new_ipl;
+
+	ASSERT3S(irq, <, MAX_VECT);
+
 	new_ipl = autovect[irq].avh_hi_pri;
 
 	if (new_ipl != 0) {

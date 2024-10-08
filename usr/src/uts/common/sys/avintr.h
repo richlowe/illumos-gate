@@ -35,6 +35,13 @@
 extern "C" {
 #endif
 
+/* XXXARM: This is way too low on ARM */
+#ifdef __xpv
+#define	MAX_VECT	NR_IRQS
+#else
+#define	MAX_VECT	256
+#endif
+
 /*
  * Period of autovector structures (add this in to get the next level).
  */

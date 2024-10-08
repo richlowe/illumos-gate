@@ -99,6 +99,7 @@ gic_addspl(int irq, int ipl, int min_ipl, int max_ipl)
 static int
 gic_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
+	ASSERT3S(irq, <, MAX_VECT);
 	return (gic_ops.go_delspl(irq, ipl, min_ipl, max_ipl));
 }
 
