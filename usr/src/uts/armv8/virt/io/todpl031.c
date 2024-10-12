@@ -23,58 +23,59 @@
  * Copyright 2017 Hayashi Naoyuki
  */
 
-#include <sys/param.h>
-#include <sys/time.h>
 #include <sys/clock.h>
+#include <sys/param.h>
+#include <sys/promif.h>
 #include <sys/rtc.h>
-#include <sys/sysmacros.h>
+#include <sys/smp_impldefs.h>
 #include <sys/stat.h>
 #include <sys/sunddi.h>
-#include <sys/promif.h>
-#include <sys/platmod.h>
+#include <sys/sysmacros.h>
+#include <sys/time.h>
 
-static pnode_t rtc_node = -1;
-static uint64_t rtc_phys;
+typedef struct {
+	void	*tod_base;
+	size_t  tod_size;
+} todpl031_conf_t;
 
-#define RTCDR (*(volatile uint32_t *)(SEGKPM_BASE + rtc_phys + 0x00))
-#define RTCLR (*(volatile uint32_t *)(SEGKPM_BASE + rtc_phys + 0x08))
-#define RTCCR (*(volatile uint32_t *)(SEGKPM_BASE + rtc_phys + 0x0c))
+static todpl031_conf_t todpl031_conf;
 
-static pnode_t
-find_compatible_node(pnode_t node, const char *compatible)
-{
-	if (prom_is_compatible(node, compatible)) {
-		return node;
-	}
-
-	pnode_t child = prom_childnode(node);
-	while (child > 0) {
-		node = find_compatible_node(child, compatible);
-		if (node > 0)
-			return node;
-		child = prom_nextnode(child);
-	}
-	return OBP_NONODE;
-}
+#define	RTCDR	(*(volatile uint32_t *)(todpl031_conf.tod_base))
+#define	RTCLR	(*(volatile uint32_t *)(todpl031_conf.tod_base + 0x08))
+#define	RTCCR	(*(volatile uint32_t *)(todpl031_conf.tod_base + 0x0c))
 
 static void
 init_rtc(void)
 {
-	if (rtc_node > 0)
+	ASSERT(MUTEX_HELD(&tod_lock));
+
+	/* Already configured */
+	if (todpl031_conf.tod_base != 0)
 		return;
 
-	pnode_t node;
+	pnode_t node = prom_find_compatible(prom_rootnode(), "arm,pl031");
+	if (node <= 0)
+		return;
 
-	node = find_compatible_node(prom_rootnode(), "arm,pl031");
-	if (node > 0) {
-		uint64_t base;
-		if (prom_get_reg(node, 0, &base) == 0) {
-			rtc_phys = base;
-			rtc_node = node;
-			if ((RTCCR & 0x1) == 0)
-				RTCCR |= 0x1;
-		}
+	uint64_t tod_base, tod_size;
+	if (prom_get_reg(node, 0, &tod_base) != 0) {
+		prom_panic("arm,pl031 with no registers?");
 	}
+
+	if (prom_get_reg_size(node, 0, &tod_size) != 0) {
+		prom_panic("arm,pl031 with no registers?");
+	}
+
+	caddr_t addr = psm_map_phys(tod_base, tod_size, PROT_READ|PROT_WRITE);
+	if (addr == NULL) {
+		prom_panic("failed to map todpl031");
+	}
+
+	todpl031_conf.tod_base = addr;
+	todpl031_conf.tod_size = tod_size;
+
+	if ((RTCCR & 0x1) == 0)
+		RTCCR |= 0x1;
 }
 
 static void
@@ -84,7 +85,7 @@ todpl031_set(timestruc_t ts)
 
 	init_rtc();
 
-	if (rtc_node < 0)
+	if (todpl031_conf.tod_base == 0)
 		return;
 
 	uint32_t sec = ts.tv_sec - ggmtl();
@@ -98,7 +99,7 @@ todpl031_get(void)
 
 	init_rtc();
 
-	if (rtc_node < 0) {
+	if (todpl031_conf.tod_base == 0) {
 		timestruc_t ts = {0};
 		tod_status_set(TOD_GET_FAILED);
 		return (ts);
@@ -108,8 +109,8 @@ todpl031_get(void)
 
 	uint32_t sec = RTCDR;
 
-	timestruc_t ts = { .tv_sec = sec + ggmtl(), .tv_nsec = 0};
-	return ts;
+	timestruc_t ts = { .tv_sec = sec + ggmtl(), .tv_nsec = 0 };
+	return (ts);
 }
 
 static struct modlmisc modlmisc = {
@@ -133,7 +134,7 @@ _init(void)
 		tod_ops.tod_clear_power_alarm = NULL;
 	}
 
-	return mod_install(&modlinkage);
+	return (mod_install(&modlinkage));
 }
 
 int
