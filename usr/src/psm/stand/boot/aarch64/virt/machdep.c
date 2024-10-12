@@ -230,7 +230,6 @@ init_iolist(void)
 {
 	prom_walk(add_iomap, "arm,pl011");
 	prom_walk(add_iomap, "arm,pl031");
-	prom_walk(add_iomap, "arm,cortex-a15-gic");
 	prom_walk(add_iomap, "virtio,mmio");
 	prom_walk(fixup_virtio, NULL);
 }
