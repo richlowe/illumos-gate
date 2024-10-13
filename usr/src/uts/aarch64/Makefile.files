@@ -78,25 +78,28 @@ GENUNIX_OBJS +=		\
 #	On the other hand, on systems with some form of actual monitor, this
 #	is usefully platform-specific
 #
-CORE_OBJS +=		\
-	prom_node.o	\
-	prom_env.o	\
-	prom_printf.o	\
-	prom_putchar.o	\
-	prom_getchar.o	\
-	prom_version.o	\
-	prom_reboot.o	\
-	prom_panic.o	\
-	prom_enter.o	\
-	prom_exit.o	\
-	prom_utils.o	\
-	fdt.o		\
-	fdt_ro.o	\
-	fdt_strerror.o	\
-	fdt_wip.o	\
-	fdt_empty_tree.o \
-	fdt_rw.o	\
-	fdt_sw.o
+CORE_OBJS +=			\
+	prom_node.o		\
+	prom_env.o		\
+	prom_printf.o		\
+	prom_putchar.o		\
+	prom_getchar.o		\
+	prom_version.o		\
+	prom_reboot.o		\
+	prom_panic.o		\
+	prom_enter.o		\
+	prom_exit.o		\
+	prom_utils.o		\
+	fdt.o			\
+	fdt_ro.o		\
+	fdt_wip.o		\
+	fdt_sw.o		\
+	fdt_rw.o		\
+	fdt_strerror.o		\
+	fdt_empty_tree.o	\
+	fdt_addresses.o		\
+	fdt_overlay.o		\
+	fdt_check.o
 
 #
 #	file system modules

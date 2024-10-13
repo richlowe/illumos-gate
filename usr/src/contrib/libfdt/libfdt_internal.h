@@ -181,7 +181,7 @@ enum {
  * @mask: Mask to check (ASSUME_...)
  * @return true if that assumption is enabled, else false
  */
-static inline boolean_t can_assume_(int mask)
+static inline bool can_assume_(int mask)
 {
 	return FDT_ASSUME_MASK & mask;
 }

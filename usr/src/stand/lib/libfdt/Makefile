@@ -25,18 +25,24 @@
 #
 
 LIBRARY = libfdt.a
-OBJECTS = \
-	  fdt.o fdt_ro.o fdt_strerror.o fdt_wip.o fdt_empty_tree.o \
-	  fdt_rw.o fdt_sw.o fdt_addresses.o
+OBJECTS =			\
+	fdt.o			\
+	fdt_ro.o		\
+	fdt_wip.o		\
+	fdt_sw.o		\
+	fdt_rw.o		\
+	fdt_strerror.o		\
+	fdt_empty_tree.o	\
+	fdt_addresses.o		\
+	fdt_overlay.o		\
+	fdt_check.o
 
 include ../Makefile.com
 
 CPPFLAGS += -I$(SRC)/contrib/libfdt
-CERRWARN += -_gcc=-Wno-override-init
 
 include ../Makefile.targ
 
 objs/%.o: $(SRC)/contrib/libfdt/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
-
 
