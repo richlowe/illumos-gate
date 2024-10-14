@@ -15,6 +15,7 @@
 #include <sys/ddi.h>
 #include <sys/sunddi.h>
 #else
+#include <stdlib.h>
 #include <string.h>
 #endif
 
