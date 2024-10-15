@@ -23,7 +23,7 @@
 # Copyright 2017 Hayashi Naoyuki
 #
 
-IMPLEMENTED_PLATFORM    = QEMU,virt-4.1
+IMPLEMENTED_PLATFORM    = QEMU,virt
 
 #
 # Platform targets

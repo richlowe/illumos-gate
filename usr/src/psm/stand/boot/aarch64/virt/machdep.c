@@ -95,7 +95,7 @@ extern uint32_t psci_migrate_id;
 extern boolean_t pcsi_method_is_hvc;
 
 #define	SI_HW_PROVIDER	"QEMU"
-#define	IMPL_ARCH_NAME	"QEMU,virt-4.1"
+#define	IMPL_ARCH_NAME	"QEMU,virt"
 #define	MFG_NAME	IMPL_ARCH_NAME
 
 static struct boot_modules boot_modules[MAX_BOOT_MODULES] = {

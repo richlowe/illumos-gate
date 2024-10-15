@@ -27,7 +27,7 @@ OBJS += virtnet.o virtblk.o
 BOARD=	virt
 
 include ../Makefile.com
-ROOT_PSM_DIR=$(ROOT_PLAT_DIR)/QEMU,virt-4.1
+ROOT_PSM_DIR=$(ROOT_PLAT_DIR)/QEMU,virt
 
 .KEEP_STATE:
 

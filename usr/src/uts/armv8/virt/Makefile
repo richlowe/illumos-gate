@@ -49,7 +49,7 @@ check		:=	TARGET= check
 
 def all clean clobber: unix $(VIRT_KMODS)
 
-IMPLEMENTED_PLATFORM	= QEMU,virt-4.1
+IMPLEMENTED_PLATFORM	= QEMU,virt
 
 install:	$(ROOT_VIRT_DIR) .WAIT unix $(VIRT_KMODS)
 
