@@ -19,7 +19,7 @@ int fdt_check_full(const void *fdt, size_t bufsize)
 	unsigned int depth = 0;
 	const void *prop;
 	const char *propname;
-	boolean_t expect_end = B_FALSE;
+	bool expect_end = false;
 
 	if (bufsize < FDT_V1_SIZE)
 		return -FDT_ERR_TRUNCATED;
@@ -79,7 +79,7 @@ int fdt_check_full(const void *fdt, size_t bufsize)
 				return -FDT_ERR_BADSTRUCTURE;
 			depth--;
 			if (depth == 0)
-				expect_end = B_TRUE;
+				expect_end = true;
 			break;
 
 		case FDT_PROP:

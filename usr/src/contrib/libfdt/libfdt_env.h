@@ -10,6 +10,7 @@
 #include <sys/inttypes.h>
 #include <sys/null.h>
 #include <sys/types.h>
+#include <sys/stdbool.h>
 
 #if defined(_KERNEL) && !defined(_BOOT)
 #include <sys/ddi.h>

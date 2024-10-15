@@ -116,7 +116,7 @@ int fdt_find_max_phandle(const void *fdt, uint32_t *phandle)
 	uint32_t max = 0;
 	int offset = -1;
 
-	for (;;) {
+	while (true) {
 		uint32_t value;
 
 		offset = fdt_next_node(fdt, offset, NULL);
