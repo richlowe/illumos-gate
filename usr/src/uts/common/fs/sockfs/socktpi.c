@@ -5582,7 +5582,7 @@ done:
 			/* Kernel processes are DATAMODEL_NONE */
 			if ((get_udatamodel() == DATAMODEL_NONE) ||
 			    (get_udatamodel() == DATAMODEL_NATIVE)) {
-				bcopy(&tl, (struct timeval *)optval,
+				bcopy((struct timeval *)optval, &tl,
 				    sizeof (struct timeval));
 			}
 #ifdef _SYSCALL32_IMPL
