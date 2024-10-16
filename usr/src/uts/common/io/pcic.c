@@ -727,9 +727,9 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	pcic->pc_numpower = sizeof (pcic_power)/sizeof (pcic_power[0]);
 	pcic->pc_power = pcic_power;
 
-	pci_ctrn = ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_CANSLEEP,
+	pci_ctrn = ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0,
 	    "pci-control-reg-number", pci_control_reg_num);
-	pci_cfrn = ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_CANSLEEP,
+	pci_cfrn = ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0,
 	    "pci-config-reg-number", pci_config_reg_num);
 
 	ddi_set_driver_private(dip, pcic_nexus);
@@ -738,7 +738,7 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	 * pcic->pc_irq is really the IPL level we want to run at
 	 * set the default values here and override from intr spec
 	 */
-	pcic->pc_irq = ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_CANSLEEP,
+	pcic->pc_irq = ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0,
 	    "interrupt-priorities", -1);
 
 	if (pcic->pc_irq == -1) {
@@ -795,9 +795,8 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
-	if ((pcic->bus_speed = ddi_getprop(DDI_DEV_T_ANY, ddi_get_parent(dip),
-	    DDI_PROP_CANSLEEP,
-	    "clock-frequency", 0)) == 0) {
+	if ((pcic->bus_speed = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    ddi_get_parent(dip), 0, "clock-frequency", 0)) == 0) {
 		if (pcic->pc_flags & PCF_PCIBUS)
 			pcic->bus_speed = PCIC_PCI_DEF_SYSCLK;
 		else
@@ -862,9 +861,8 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 			return (DDI_FAILURE);
 		} /* ddi_regs_map_setup */
 
-		class_code = ddi_getprop(DDI_DEV_T_ANY, dip,
-		    DDI_PROP_CANSLEEP|DDI_PROP_DONTPASS,
-		    "class-code", -1);
+		class_code = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+		    DDI_PROP_DONTPASS, "class-code", -1);
 #ifdef  PCIC_DEBUG
 		if (pcic_debug) {
 			cmn_err(CE_CONT, "pcic_attach class_code=%x\n",
@@ -1096,9 +1094,8 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		case PCIC_CL_PD6730:
 		case PCIC_CL_PD6729:
 			pcic->pc_intr_mode = PCIC_INTR_MODE_PCI_1;
-			cfg = ddi_getprop(DDI_DEV_T_ANY, dip,
-			    DDI_PROP_CANSLEEP,
-			    "interrupts", 0);
+			cfg = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+			    0, "interrupts", 0);
 			/* if not interrupt pin then must use ISA style IRQs */
 			if (cfg == 0 || iline == 0xFF)
 				pcic->pc_intr_mode = PCIC_INTR_MODE_ISA;
@@ -1276,7 +1273,7 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 		smi = 0xff;	/* no more override */
 
-		if (ddi_getprop(DDI_DEV_T_NONE, dip,
+		if (ddi_prop_get_int(DDI_DEV_T_NONE, dip,
 		    DDI_PROP_DONTPASS, "need-mult-irq",
 		    0xffff) != 0xffff)
 			pcic->pc_flags |= PCF_MULT_IRQ;
@@ -1339,11 +1336,11 @@ pcic_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	cv_init(&pcic->pm_cv, NULL, CV_DRIVER, NULL);
 
-	if (!ddi_getprop(DDI_DEV_T_NONE, dip, DDI_PROP_DONTPASS,
+	if (!ddi_prop_get_int(DDI_DEV_T_NONE, dip, DDI_PROP_DONTPASS,
 	    "disable-audio", 0))
 		pcic->pc_flags |= PCF_AUDIO;
 
-	if (ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_CANSLEEP,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0,
 	    "disable-cardbus", 0))
 		pcic->pc_flags &= ~PCF_CARDBUS;
 
@@ -5269,11 +5266,11 @@ pcic_find_pci_type(pcicdev_t *pcic)
 {
 	uint32_t vend, device;
 
-	vend = ddi_getprop(DDI_DEV_T_ANY, pcic->dip,
-	    DDI_PROP_CANSLEEP|DDI_PROP_DONTPASS,
+	vend = ddi_prop_get_int(DDI_DEV_T_ANY, pcic->dip,
+	    DDI_PROP_DONTPASS,
 	    "vendor-id", -1);
-	device = ddi_getprop(DDI_DEV_T_ANY, pcic->dip,
-	    DDI_PROP_CANSLEEP|DDI_PROP_DONTPASS,
+	device = ddi_prop_get_int(DDI_DEV_T_ANY, pcic->dip,
+	    DDI_PROP_DONTPASS,
 	    "device-id", -1);
 
 	device = PCI_ID(vend, device);

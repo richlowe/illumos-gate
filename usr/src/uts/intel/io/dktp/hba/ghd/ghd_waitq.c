@@ -35,12 +35,12 @@
 /*ARGSUSED*/
 gtgt_t *
 ghd_target_init(dev_info_t	*hba_dip,
-		dev_info_t	*tgt_dip,
-		ccc_t		*cccp,
-		size_t		 tgt_private_size,
-		void		*hba_private,
-		ushort_t	 target,
-		uchar_t		 lun)
+    dev_info_t	*tgt_dip,
+    ccc_t	*cccp,
+    size_t	 tgt_private_size,
+    void	*hba_private,
+    ushort_t	 target,
+    uchar_t	 lun)
 {
 	_NOTE(ARGUNUSED(hba_dip))
 	gtgt_t	*gtgtp;
@@ -65,7 +65,8 @@ ghd_target_init(dev_info_t	*hba_dip,
 	 * set the queue's maxactive to 1 if
 	 * property not specified on target or hba devinfo node
 	 */
-	maxactive = ddi_getprop(DDI_DEV_T_ANY, tgt_dip, 0, "ghd-maxactive", 1);
+	maxactive = ddi_prop_get_int(DDI_DEV_T_ANY, tgt_dip,
+	    0, "ghd-maxactive", 1);
 	gtgtp->gt_maxactive = maxactive;
 
 	/* initialize the linked list pointers */
@@ -134,9 +135,9 @@ foundit:
 /*ARGSUSED*/
 void
 ghd_target_free(dev_info_t	*hba_dip,
-		dev_info_t	*tgt_dip,
-		ccc_t		*cccp,
-		gtgt_t		*gtgtp)
+    dev_info_t	*tgt_dip,
+    ccc_t	*cccp,
+    gtgt_t	*gtgtp)
 {
 	_NOTE(ARGUNUSED(hba_dip,tgt_dip))
 

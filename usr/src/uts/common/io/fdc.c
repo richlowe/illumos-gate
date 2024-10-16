@@ -214,7 +214,7 @@ struct bus_ops fdc_bus_ops = {
 	BUSO_REV,
 	nullbusmap,
 	0,	/* ddi_intrspec_t (*bus_get_intrspec)(); */
-	0,	/* int 	(*bus_add_intrspec)(); */
+	0,	/* int	(*bus_add_intrspec)(); */
 	0,	/* void (*bus_remove_intrspec)(); */
 	i_ddi_map_fault,
 	0,
@@ -354,7 +354,7 @@ static int
 fdc_bus_ctl(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
     void *arg, void *result)
 {
-	struct 	fdcntlr *fcp;
+	struct	fdcntlr *fcp;
 	struct	fcu_obj *fjp;
 
 	_NOTE(ARGUNUSED(result));

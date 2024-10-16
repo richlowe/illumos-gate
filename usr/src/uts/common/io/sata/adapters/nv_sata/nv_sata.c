@@ -6471,7 +6471,7 @@ nv_sgp_led_init(nv_ctl_t *nvc, ddi_acc_handle_t pci_conf_handle)
 	 * Only try to initialize SGPIO LED support if this property
 	 * indicates it should be.
 	 */
-	if (ddi_getprop(DDI_DEV_T_ANY, nvc->nvc_dip, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, nvc->nvc_dip, DDI_PROP_DONTPASS,
 	    "enable-sgpio-leds", 0) != 1)
 		return;
 

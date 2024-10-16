@@ -1248,8 +1248,8 @@ mptsas_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	/*
 	 * Initialize FMA
 	 */
-	mpt->m_fm_capabilities = ddi_getprop(DDI_DEV_T_ANY, mpt->m_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "fm-capable",
+	mpt->m_fm_capabilities = ddi_prop_get_int(DDI_DEV_T_ANY, mpt->m_dip,
+	    DDI_PROP_DONTPASS, "fm-capable",
 	    DDI_FM_EREPORT_CAPABLE | DDI_FM_ACCCHK_CAPABLE |
 	    DDI_FM_DMACHK_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 

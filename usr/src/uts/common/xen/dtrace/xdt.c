@@ -2050,7 +2050,7 @@ xdt_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
-	val = ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
 	    "xdt_poll_nsec", XDT_POLL_DEFAULT);
 	xdt_poll_nsec = MAX(val, XDT_POLL_MIN);
 

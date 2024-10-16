@@ -2107,7 +2107,7 @@ sata_scsi_tgt_init(dev_info_t *hba_dip, dev_info_t *tgt_dip,
 	 * attach(9F) function.
 	 */
 	if ((sdinfo->satadrv_type == SATA_DTYPE_ATADISK) &&
-	    (ddi_getprop(DDI_DEV_T_ANY, hba_dip, DDI_PROP_DONTPASS,
+	    (ddi_prop_get_int(DDI_DEV_T_ANY, hba_dip, DDI_PROP_DONTPASS,
 	    "use-cmdk-devid-format", 0) == 1)) {
 		/* register a legacy devid for this target node */
 		sata_target_devid_register(tgt_dip, sdinfo);
@@ -2235,7 +2235,7 @@ sata_scsi_tgt_free(dev_info_t *hba_dip, dev_info_t *tgt_dip,
 	 * sd(4D) driver (i.e during detach(9F)) then do it here.
 	 */
 	if ((sdinfo->satadrv_type == SATA_DTYPE_ATADISK) &&
-	    (ddi_getprop(DDI_DEV_T_ANY, hba_dip, DDI_PROP_DONTPASS,
+	    (ddi_prop_get_int(DDI_DEV_T_ANY, hba_dip, DDI_PROP_DONTPASS,
 	    "use-cmdk-devid-format", 0) == 1) &&
 	    (ddi_devid_get(tgt_dip, &devid) == DDI_SUCCESS)) {
 		ddi_devid_unregister(tgt_dip);

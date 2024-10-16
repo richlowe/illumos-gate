@@ -608,7 +608,7 @@ dnet_attach(dev_info_t *devinfo, ddi_attach_cmd_t cmd)
 	 * Get the BNC/TP indicator from the conf file for 21040
 	 */
 	dnetp->bnc_indicator =
-	    ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	    ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    "bncaui", -1);
 
 	/*
@@ -617,10 +617,10 @@ dnet_attach(dev_info_t *devinfo, ddi_attach_cmd_t cmd)
 	 * with what's in the conf file
 	 */
 	dnetp->speed =
-	    ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	    ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    speed_propname, 0);
 	dnetp->full_duplex =
-	    ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	    ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    duplex_propname, -1);
 
 	if (dnetp->speed == 100) {
@@ -655,7 +655,7 @@ dnet_attach(dev_info_t *devinfo, ddi_attach_cmd_t cmd)
 
 	dnet_parse_srom(dnetp, &dnetp->sr, vendor_info);
 
-	if (ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    printsrom_propname, 0))
 		dnet_print_srom(&dnetp->sr);
 
@@ -676,7 +676,7 @@ dnet_attach(dev_info_t *devinfo, ddi_attach_cmd_t cmd)
 	    (dnetp->board_type == DEVICE_ID_21143 && revid <= 0x30)) ? 1 : 0;
 
 	dnetp->overrun_workaround =
-	    ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	    ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    ofloprob_propname, dnetp->overrun_workaround);
 
 	/*
@@ -2097,7 +2097,7 @@ set_sia(struct dnetinstance *dnetp)
 			    block->un.sia.csr14,
 			    block->un.sia.csr15);
 #endif
-		sia_delay = ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+		sia_delay = ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 		    DDI_PROP_DONTPASS, "sia-delay", 10000);
 
 		ddi_put32(dnetp->io_handle,
@@ -2808,7 +2808,7 @@ dnet_read_srom(dev_info_t *devinfo, int board_type, ddi_acc_handle_t io_handle,
 	 * If the dumpsrom property is present in the conf file, print
 	 * the contents of the SROM to the console
 	 */
-	if (ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    "dumpsrom", 0))
 		dnet_dumpbin("SROM", vi, 1, maxlen);
 
@@ -2837,7 +2837,7 @@ dnet_read21040addr(dev_info_t *dip, ddi_acc_handle_t io_handle, caddr_t io_reg,
 	int		i;
 
 	/* No point reading more than the ethernet address */
-	*len = ddi_getprop(DDI_DEV_T_ANY, dip,
+	*len = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS, macoffset_propname, 0) + ETHERADDRL;
 
 	/* Reset ROM pointer */
@@ -2997,7 +2997,7 @@ get_alternative_srom_image(dev_info_t *devinfo, uchar_t *vi, int len)
 	int		devnum;
 	int		primary_devnum;
 
-	primary_devnum = ddi_getprop(DDI_DEV_T_ANY, devinfo, 0,
+	primary_devnum = ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, 0,
 	    "DNET_DEVNUM", -1);
 	if (primary_devnum == -1)
 		return (1);	/* XXX NEEDSWORK -- We have no better idea */
@@ -3165,7 +3165,7 @@ find_active_media(struct dnetinstance *dnetp)
 		dnetp->selected_media_block = leaf->mii_block;
 		setup_block(dnetp);
 
-		if (ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 		    DDI_PROP_DONTPASS, "portmon", 1)) {
 			/* XXX return value ignored */
 			(void) mii_start_portmon(dnetp->mii, dnet_mii_link_cb,
@@ -3357,10 +3357,10 @@ dnet_link_sense(struct dnetinstance *dnetp)
 		return (0);
 	}
 
-	delay_100 = ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+	delay_100 = ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 	    DDI_PROP_DONTPASS, "autosense-delay-100", 2000);
 
-	delay_10 = ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+	delay_10 = ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 	    DDI_PROP_DONTPASS, "autosense-delay-10", 400);
 
 	/*
@@ -3424,10 +3424,10 @@ send_test_packet(struct dnetinstance *dnetp)
 	 * required. This is done if the media type is TP
 	 */
 	if (media_code == MEDIA_TP || media_code == MEDIA_TP_FD) {
-		packet_delay = ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+		packet_delay = ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 		    DDI_PROP_DONTPASS, "test_packet_delay_tp", 1300000);
 	} else {
-		packet_delay = ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+		packet_delay = ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 		    DDI_PROP_DONTPASS, "test_packet_delay", 300000);
 	}
 	delay(drv_usectohz(packet_delay));
@@ -3538,7 +3538,7 @@ dnet_hack_interrupts(struct dnetinstance *dnetp, int secondary)
 	dev_info_t *devinfo = dnetp->devinfo;
 	uint32_t oui = 0;	/* Organizationally Unique ID */
 
-	if (ddi_getprop(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, devinfo, DDI_PROP_DONTPASS,
 	    "no_INTA_workaround", 0) != 0)
 		return (0);
 
@@ -3578,7 +3578,7 @@ dnet_hack_interrupts(struct dnetinstance *dnetp, int secondary)
 		 * a multiport card, but a second card on the same PCI bus.
 		 * BUGID: 4057747
 		 */
-		if (ddi_getprop(DDI_DEV_T_ANY, ddi_get_parent(devinfo),
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, ddi_get_parent(devinfo),
 		    DDI_PROP_DONTPASS, hackintr_propname, 0) != 0)
 			return (0);
 				/* ... Primary not part of a multiport device */
@@ -3633,7 +3633,7 @@ dnet_hack_interrupts(struct dnetinstance *dnetp, int secondary)
 		/* Add the dnetp for this secondary device to the table */
 
 		hackintr_inf = (struct hackintr_inf *)(uintptr_t)
-		    ddi_getprop(DDI_DEV_T_ANY, ddi_get_parent(devinfo),
+		    ddi_prop_get_int(DDI_DEV_T_ANY, ddi_get_parent(devinfo),
 		    DDI_PROP_DONTPASS, hackintr_propname, 0);
 
 		if (hackintr_inf == NULL)
@@ -3705,7 +3705,7 @@ dnet_detach_hacked_interrupt(dev_info_t *devinfo)
 	    ddi_get_driver_private(devinfo);
 
 	hackintr_inf = (struct hackintr_inf *)(uintptr_t)
-	    ddi_getprop(DDI_DEV_T_ANY, ddi_get_parent(devinfo),
+	    ddi_prop_get_int(DDI_DEV_T_ANY, ddi_get_parent(devinfo),
 	    DDI_PROP_DONTPASS, hackintr_propname, 0);
 
 	/*
@@ -3992,7 +3992,7 @@ dnet_parse_srom(struct dnetinstance *dnetp, SROM_FORMAT *sr, uchar_t *vi)
 	int i;
 	uchar_t *p;
 
-	if (!ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
+	if (!ddi_prop_get_int(DDI_DEV_T_ANY, dnetp->devinfo,
 	    DDI_PROP_DONTPASS, "no_sromconfig", 0))
 		dnetp->sr.init_from_srom = check_srom_valid(vi);
 
@@ -4049,8 +4049,8 @@ dnet_parse_srom(struct dnetinstance *dnetp, SROM_FORMAT *sr, uchar_t *vi)
 		 * Assume vendor info contains ether address in first six bytes
 		 */
 
-		uchar_t *mac = vi + ddi_getprop(DDI_DEV_T_ANY, dnetp->devinfo,
-		    DDI_PROP_DONTPASS, macoffset_propname, 0);
+		uchar_t *mac = vi + ddi_prop_get_int(DDI_DEV_T_ANY,
+		    dnetp->devinfo, DDI_PROP_DONTPASS, macoffset_propname, 0);
 
 		for (i = 0; i < 6; i++)
 			sr->netaddr[i] = mac[i];

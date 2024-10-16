@@ -6999,7 +6999,7 @@ sd_unit_attach(dev_info_t *devi)
 	if (un->un_f_is_fibre == TRUE) {
 		un->un_f_allow_bus_device_reset = TRUE;
 	} else {
-		if (ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
 		    "allow-bus-device-reset", 1) != 0) {
 			un->un_f_allow_bus_device_reset = TRUE;
 			SD_INFO(SD_LOG_ATTACH_DETACH, un,
@@ -7271,7 +7271,7 @@ sd_unit_attach(dev_info_t *devi)
 		 */
 		if (SD_IS_SERIAL(un)) {
 			un->un_max_xfer_size =
-			    ddi_getprop(DDI_DEV_T_ANY, devi, 0,
+			    ddi_prop_get_int(DDI_DEV_T_ANY, devi, 0,
 			    sd_max_xfer_size, SD_MAX_XFER_SIZE);
 			SD_INFO(SD_LOG_ATTACH_DETACH, un,
 			    "sd_unit_attach: un:0x%p max transfer "
@@ -7304,7 +7304,7 @@ sd_unit_attach(dev_info_t *devi)
 			 */
 			if (un->un_saved_throttle == sd_max_throttle) {
 				un->un_max_xfer_size =
-				    ddi_getprop(DDI_DEV_T_ANY, devi, 0,
+				    ddi_prop_get_int(DDI_DEV_T_ANY, devi, 0,
 				    sd_max_xfer_size, SD_MAX_XFER_SIZE);
 				SD_INFO(SD_LOG_ATTACH_DETACH, un,
 				    "sd_unit_attach: un:0x%p max transfer "
@@ -7320,7 +7320,7 @@ sd_unit_attach(dev_info_t *devi)
 		}
 	} else {
 		un->un_tagflags = FLAG_STAG;
-		un->un_max_xfer_size = ddi_getprop(DDI_DEV_T_ANY,
+		un->un_max_xfer_size = ddi_prop_get_int(DDI_DEV_T_ANY,
 		    devi, 0, sd_max_xfer_size, SD_MAX_XFER_SIZE);
 	}
 
@@ -7621,22 +7621,22 @@ sd_unit_attach(dev_info_t *devi)
 	 * per instance variable is preferable to match the capabilities of
 	 * different underlying hba's (4402600)
 	 */
-	sd_retry_on_reservation_conflict = ddi_getprop(DDI_DEV_T_ANY, devi,
+	sd_retry_on_reservation_conflict = ddi_prop_get_int(DDI_DEV_T_ANY, devi,
 	    DDI_PROP_DONTPASS, "retry-on-reservation-conflict",
 	    sd_retry_on_reservation_conflict);
 	if (sd_retry_on_reservation_conflict != 0) {
-		sd_retry_on_reservation_conflict = ddi_getprop(DDI_DEV_T_ANY,
-		    devi, DDI_PROP_DONTPASS, sd_resv_conflict_name,
-		    sd_retry_on_reservation_conflict);
+		sd_retry_on_reservation_conflict =
+		    ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+		    sd_resv_conflict_name, sd_retry_on_reservation_conflict);
 	}
 
 	/* Set up options for QFULL handling. */
-	if ((rval = ddi_getprop(DDI_DEV_T_ANY, devi, 0,
+	if ((rval = ddi_prop_get_int(DDI_DEV_T_ANY, devi, 0,
 	    "qfull-retries", -1)) != -1) {
 		(void) scsi_ifsetcap(SD_ADDRESS(un), "qfull-retries",
 		    rval, 1);
 	}
-	if ((rval = ddi_getprop(DDI_DEV_T_ANY, devi, 0,
+	if ((rval = ddi_prop_get_int(DDI_DEV_T_ANY, devi, 0,
 	    "qfull-retry-interval", -1)) != -1) {
 		(void) scsi_ifsetcap(SD_ADDRESS(un), "qfull-retry-interval",
 		    rval, 1);

@@ -548,7 +548,7 @@ pcmcia_ctlops(dev_info_t *dip, dev_info_t *rdip,
 			    ddi_driver_name(dip),
 			    ddi_get_name_addr(dip),
 			    CS_GET_SOCKET_NUMBER(
-			    ddi_getprop(DDI_DEV_T_NONE, rdip,
+			    ddi_prop_get_int(DDI_DEV_T_NONE, rdip,
 			    DDI_PROP_DONTPASS,
 			    PCM_DEV_SOCKET, -1)));
 
@@ -1673,7 +1673,7 @@ pcm_find_devinfo(dev_info_t *pdip, struct pcm_device_info *info, int socket)
 		    "(instance=%d, socket=%d, name=%s)\n",
 		    (void *)dip, socket, info->pd_bind_name,
 		    ddi_get_instance(dip),
-		    ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+		    ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 		    PCM_DEV_SOCKET, -1),
 		    ddi_get_name(dip));
 #endif
@@ -3173,7 +3173,7 @@ pcmcia_init_devinfo(dev_info_t *pdip, struct pcm_device_info *info)
 	unit = CS_MAKE_SOCKET_NUMBER(info->pd_socket, info->pd_function);
 
 	dip = pcm_find_devinfo(pdip, info, unit);
-	if ((dip != NULL) && (ddi_getprop(DDI_DEV_T_NONE, dip,
+	if ((dip != NULL) && (ddi_prop_get_int(DDI_DEV_T_NONE, dip,
 	    DDI_PROP_DONTPASS, PCM_DEV_SOCKET, -1) != -1)) {
 		/* it already exist but isn't a .conf file */
 
@@ -3953,13 +3953,13 @@ pcmcia_create_device(ss_make_device_node_t *init)
 		    PCM_EVENT_MORE : 0;
 		device.type = init->spec_type;
 		device.op = SS_CSINITDEV_CREATE_DEVICE;
-		device.socket = ddi_getprop(DDI_DEV_T_ANY, init->dip,
-		    DDI_PROP_CANSLEEP, PCM_DEV_SOCKET,
+		device.socket = ddi_prop_get_int(DDI_DEV_T_ANY, init->dip,
+		    0, PCM_DEV_SOCKET,
 		    -1);
 	} else if (init->flags & SS_CSINITDEV_REMOVE_DEVICE) {
 		device.op = SS_CSINITDEV_REMOVE_DEVICE;
-		device.socket = ddi_getprop(DDI_DEV_T_ANY, init->dip,
-		    DDI_PROP_CANSLEEP, PCM_DEV_SOCKET,
+		device.socket = ddi_prop_get_int(DDI_DEV_T_ANY, init->dip,
+		    0, PCM_DEV_SOCKET,
 		    -1);
 		if (init->name != NULL)
 			(void) strcpy(device.path, init->name);
@@ -4000,7 +4000,7 @@ pcmcia_get_minors(dev_info_t *dip, struct pcm_make_dev **minors)
 	major_t major;
 	struct dev_ops *ops;
 
-	socket = ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	socket = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    PCM_DEV_SOCKET, -1);
 	ndi_devi_enter(dip);
 	if (DEVI(dip)->devi_minor != (struct ddi_minor_data *)NULL) {
@@ -4072,7 +4072,7 @@ pcmcia_dump_minors(dev_info_t *dip)
 	int unit, major;
 	dev_info_t *np;
 
-	unit = ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	unit = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    PCM_DEV_SOCKET, -1);
 	cmn_err(CE_CONT,
 	    "pcmcia_dump_minors: dip=%p, socket=%d\n", (void *)dip, unit);
@@ -4520,8 +4520,7 @@ is_subtractv(dev_info_t *dip)
 
 	if (dip == NULL)
 		return (B_FALSE);
-	class = ddi_getprop(DDI_DEV_T_ANY, dip,
-	    DDI_PROP_CANSLEEP|DDI_PROP_DONTPASS,
+	class = ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    "class-code", 0xff);
 	if (class == PPB_SUBTRACTIVE) {
 		return (B_TRUE);
@@ -5053,7 +5052,7 @@ pcmcia_intr_get_ispec(dev_info_t *rdip, int inum,
 	struct intrspec			*intrspec;
 	struct pcmcia_parent_private	*ppd;
 
-	if ((int)inum > 0 || (ddi_getprop(DDI_DEV_T_ANY, rdip,
+	if ((int)inum > 0 || (ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
 	    DDI_PROP_DONTPASS, "interrupts", -1) < 0))
 		return (NULL);
 

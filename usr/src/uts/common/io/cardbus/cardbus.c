@@ -1017,24 +1017,24 @@ cardbus_ctlops(dev_info_t *dip, dev_info_t *rdip,
 				    bus, device, function);
 				ptr = &ptr[strlen(ptr)];
 
-				val32 = ddi_getprop(DDI_DEV_T_ANY, rdip,
-				    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+				val32 = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+				    DDI_PROP_DONTPASS,
 				    "vendor-id", -1);
 				if (val32 != -1) {
 					(void) sprintf(ptr, " Vendor 0x%04x",
 					    val32);
 					ptr = &ptr[strlen(ptr)];
 				}
-				val32 = ddi_getprop(DDI_DEV_T_ANY, rdip,
-				    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+				val32 = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+				    DDI_PROP_DONTPASS,
 				    "device-id", -1);
 				if (val32 != -1) {
 					(void) sprintf(ptr, " Device 0x%04x",
 					    val32);
 					ptr = &ptr[strlen(ptr)];
 				}
-				val32 = ddi_getprop(DDI_DEV_T_ANY, rdip,
-				    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+				val32 = ddi_prop_get_int(DDI_DEV_T_ANY, rdip,
+				    DDI_PROP_DONTPASS,
 				    "class-code", -1);
 				if (val32 != -1) {
 					const char	*name;
@@ -1161,7 +1161,7 @@ cardbus_init_child_regs(dev_info_t *child)
 	/*
 	 * Initialize cache-line-size configuration register if needed.
 	 */
-	if (ddi_getprop(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
 	    "cache-line-size", 0) == 0) {
 
 		pci_config_put8(config_handle, PCI_CONF_CACHE_LINESZ,
@@ -1175,7 +1175,7 @@ cardbus_init_child_regs(dev_info_t *child)
 	/*
 	 * Initialize latency timer registers if needed.
 	 */
-	if (ddi_getprop(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
 	    "latency-timer", 0) == 0) {
 
 		if ((header_type & PCI_HEADER_TYPE_M) == PCI_HEADER_ONE) {
@@ -1279,7 +1279,7 @@ cardbus_initchild(dev_info_t *rdip, dev_info_t *dip, dev_info_t *child,
 		(ppd->ppd.par_intr)->intrspec_func = (uint_t (*)()) 0;
 #endif
 
-		if (ddi_getprop(DDI_DEV_T_NONE, child, DDI_PROP_DONTPASS,
+		if (ddi_prop_get_int(DDI_DEV_T_NONE, child, DDI_PROP_DONTPASS,
 		    "interrupts", -1) != -1)
 			ppd->ppd.par_nintr = 1;
 

@@ -461,7 +461,7 @@ impl_xlate_intrs(dev_info_t *child, int *in,
 	 * "interrupts" property.
 	 */
 	inpri = NULL;
-	if ((ddi_getprop(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
+	if ((ddi_prop_get_int(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
 	    "ignore-hardware-nodes", -1) != -1) || ignore_hardware_nodes) {
 		/* the old style "interrupts" property... */
 
@@ -2130,7 +2130,7 @@ x86_old_bootpath_name_addr_match(dev_info_t *cdip, char *caddr, char *naddr)
 
 	if ((ddi_getlongprop(DDI_DEV_T_ANY, cdip, DDI_PROP_DONTPASS,
 	    "devconf-addr", (caddr_t)&daddr, &dlen) == DDI_PROP_SUCCESS) &&
-	    (ddi_getprop(DDI_DEV_T_ANY, cdip, DDI_PROP_DONTPASS,
+	    (ddi_prop_get_int(DDI_DEV_T_ANY, cdip, DDI_PROP_DONTPASS,
 	    "ignore-hardware-nodes", -1) != -1)) {
 		if (strcmp(daddr, caddr) == 0) {
 			return (DDI_SUCCESS);
@@ -2252,7 +2252,7 @@ x86_old_bootpath_name_addr_match(dev_info_t *cdip, char *caddr, char *naddr)
 	if (((lkupname = ddi_get_name(cdip)) != NULL) &&
 	    (strcmp(bootdev_module, lkupname) == 0 ||
 	    strcmp(bootdev_oldmod, lkupname) == 0) &&
-	    ((ddi_getprop(DDI_DEV_T_ANY, cdip, DDI_PROP_DONTPASS,
+	    ((ddi_prop_get_int(DDI_DEV_T_ANY, cdip, DDI_PROP_DONTPASS,
 	    "ignore-hardware-nodes", -1) != -1) ||
 	    ignore_hardware_nodes) &&
 	    strcmp(bootdev_newaddr, caddr) == 0 &&

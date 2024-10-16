@@ -519,14 +519,14 @@ mlxcx_load_model_props(mlxcx_t *mlxp)
 
 	mlxcx_load_prop_defaults(mlxp);
 
-	p->mldp_cq_size_shift = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "cq_size_shift",
+	p->mldp_cq_size_shift = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "cq_size_shift",
 	    p->mldp_cq_size_shift_default);
-	p->mldp_sq_size_shift = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "sq_size_shift",
+	p->mldp_sq_size_shift = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "sq_size_shift",
 	    p->mldp_sq_size_shift_default);
-	p->mldp_rq_size_shift = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "rq_size_shift",
+	p->mldp_rq_size_shift = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "rq_size_shift",
 	    p->mldp_rq_size_shift_default);
 }
 
@@ -535,63 +535,63 @@ mlxcx_load_props(mlxcx_t *mlxp)
 {
 	mlxcx_drv_props_t *p = &mlxp->mlx_props;
 
-	p->mldp_eq_size_shift = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "eq_size_shift",
+	p->mldp_eq_size_shift = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "eq_size_shift",
 	    MLXCX_EQ_SIZE_SHIFT_DFLT);
-	p->mldp_cqemod_period_usec = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "cqemod_period_usec",
+	p->mldp_cqemod_period_usec = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "cqemod_period_usec",
 	    MLXCX_CQEMOD_PERIOD_USEC_DFLT);
-	p->mldp_cqemod_count = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "cqemod_count",
+	p->mldp_cqemod_count = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "cqemod_count",
 	    MLXCX_CQEMOD_COUNT_DFLT);
-	p->mldp_intrmod_period_usec = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "intrmod_period_usec",
+	p->mldp_intrmod_period_usec = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "intrmod_period_usec",
 	    MLXCX_INTRMOD_PERIOD_USEC_DFLT);
 
-	p->mldp_tx_ngroups = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "tx_ngroups",
+	p->mldp_tx_ngroups = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "tx_ngroups",
 	    MLXCX_TX_NGROUPS_DFLT);
-	p->mldp_tx_nrings_per_group = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "tx_nrings_per_group",
+	p->mldp_tx_nrings_per_group = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "tx_nrings_per_group",
 	    MLXCX_TX_NRINGS_PER_GROUP_DFLT);
 
-	p->mldp_rx_ngroups_large = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "rx_ngroups_large",
+	p->mldp_rx_ngroups_large = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "rx_ngroups_large",
 	    MLXCX_RX_NGROUPS_LARGE_DFLT);
-	p->mldp_rx_ngroups_small = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "rx_ngroups_small",
+	p->mldp_rx_ngroups_small = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "rx_ngroups_small",
 	    MLXCX_RX_NGROUPS_SMALL_DFLT);
-	p->mldp_rx_nrings_per_large_group = ddi_getprop(DDI_DEV_T_ANY,
-	    mlxp->mlx_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	p->mldp_rx_nrings_per_large_group = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS,
 	    "rx_nrings_per_large_group", MLXCX_RX_NRINGS_PER_LARGE_GROUP_DFLT);
-	p->mldp_rx_nrings_per_small_group = ddi_getprop(DDI_DEV_T_ANY,
-	    mlxp->mlx_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	p->mldp_rx_nrings_per_small_group = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS,
 	    "rx_nrings_per_small_group", MLXCX_RX_NRINGS_PER_SMALL_GROUP_DFLT);
 
-	p->mldp_ftbl_root_size_shift = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "ftbl_root_size_shift",
+	p->mldp_ftbl_root_size_shift = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "ftbl_root_size_shift",
 	    MLXCX_FTBL_ROOT_SIZE_SHIFT_DFLT);
 
-	p->mldp_tx_bind_threshold = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "tx_bind_threshold",
+	p->mldp_tx_bind_threshold = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "tx_bind_threshold",
 	    MLXCX_TX_BIND_THRESHOLD_DFLT);
 
-	p->mldp_ftbl_vlan_size_shift = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "ftbl_vlan_size_shift",
+	p->mldp_ftbl_vlan_size_shift = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS, "ftbl_vlan_size_shift",
 	    MLXCX_FTBL_VLAN_SIZE_SHIFT_DFLT);
 
-	p->mldp_eq_check_interval_sec = ddi_getprop(DDI_DEV_T_ANY,
-	    mlxp->mlx_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	p->mldp_eq_check_interval_sec = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS,
 	    "eq_check_interval_sec", MLXCX_EQ_CHECK_INTERVAL_SEC_DFLT);
-	p->mldp_cq_check_interval_sec = ddi_getprop(DDI_DEV_T_ANY,
-	    mlxp->mlx_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	p->mldp_cq_check_interval_sec = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS,
 	    "cq_check_interval_sec", MLXCX_CQ_CHECK_INTERVAL_SEC_DFLT);
-	p->mldp_wq_check_interval_sec = ddi_getprop(DDI_DEV_T_ANY,
-	    mlxp->mlx_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	p->mldp_wq_check_interval_sec = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS,
 	    "wq_check_interval_sec", MLXCX_WQ_CHECK_INTERVAL_SEC_DFLT);
 
-	p->mldp_rx_per_cq = ddi_getprop(DDI_DEV_T_ANY, mlxp->mlx_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "rx_limit_per_completion",
+	p->mldp_rx_per_cq = ddi_prop_get_int(DDI_DEV_T_ANY, mlxp->mlx_dip,
+	    DDI_PROP_DONTPASS, "rx_limit_per_completion",
 	    MLXCX_RX_PER_CQ_DEFAULT);
 
 	if (p->mldp_rx_per_cq < MLXCX_RX_PER_CQ_MIN ||
@@ -603,8 +603,8 @@ mlxcx_load_props(mlxcx_t *mlxp)
 		p->mldp_rx_per_cq = MLXCX_RX_PER_CQ_DEFAULT;
 	}
 
-	p->mldp_rx_p50_loan_min_size = ddi_getprop(DDI_DEV_T_ANY,
-	    mlxp->mlx_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	p->mldp_rx_p50_loan_min_size = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    mlxp->mlx_dip, DDI_PROP_DONTPASS,
 	    "rx_p50_loan_min_size", MLXCX_P50_LOAN_MIN_SIZE_DFLT);
 }
 

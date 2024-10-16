@@ -645,7 +645,7 @@ old_driver(dev_info_t *dip)
 	if (ndi_dev_is_persistent_node(dip)) {
 		if (ignore_hardware_nodes)
 			return (1);
-		if (ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 		    "ignore-hardware-nodes", -1) != -1)
 			return (1);
 	}

@@ -80,10 +80,10 @@ static void postreset_NS83840(mii_handle_t mac, int phy);
  */
 
 int
-mii_create(dev_info_t *dip,		/* Passed to read/write functions */
-	    mii_writefunc_t writefunc, 	/* How to write to a MII register */
-	    mii_readfunc_t readfunc,	/* How to read from a MII regster */
-	    mii_handle_t *macp)
+mii_create(dev_info_t *dip,	/* Passed to read/write functions */
+    mii_writefunc_t writefunc,	/* How to write to a MII register */
+    mii_readfunc_t readfunc,	/* How to read from a MII regster */
+    mii_handle_t *macp)
 {
 	mii_handle_t mac;
 
@@ -172,11 +172,11 @@ mii_init_phy(mii_handle_t mac, int phy)
 
 	/* Override speed and duplex mode from conf-file if present */
 	phydata->fix_duplex =
-	    ddi_getprop(DDI_DEV_T_NONE,
+	    ddi_prop_get_int(DDI_DEV_T_NONE,
 	    mac->mii_dip, DDI_PROP_DONTPASS, "full-duplex", 0);
 
 	phydata->fix_speed =
-	    ddi_getprop(DDI_DEV_T_NONE,
+	    ddi_prop_get_int(DDI_DEV_T_NONE,
 	    mac->mii_dip, DDI_PROP_DONTPASS, "speed", 0);
 
 	status = mac->mii_read(dip, phy, MII_STATUS);
@@ -277,7 +277,7 @@ mii_init_phy(mii_handle_t mac, int phy)
 	/* Do all post-reset hacks and user settings */
 	(void) mii_sync(mac, phy);
 
-	if (ddi_getprop(DDI_DEV_T_NONE, mac->mii_dip, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_NONE, mac->mii_dip, DDI_PROP_DONTPASS,
 	    "dump-phy", 0))
 		(void) mii_dump_phy(mac, phy);
 

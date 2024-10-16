@@ -179,8 +179,8 @@ void
 pcieb_plat_initchild(dev_info_t *child)
 {
 	struct ddi_parent_private_data *pdptr;
-	if (ddi_getprop(DDI_DEV_T_NONE, child, DDI_PROP_DONTPASS, "interrupts",
-	    -1) != -1) {
+	if (ddi_prop_get_int(DDI_DEV_T_NONE, child, DDI_PROP_DONTPASS,
+	    "interrupts", -1) != -1) {
 		pdptr = kmem_zalloc((sizeof (struct ddi_parent_private_data) +
 		    sizeof (struct intrspec)), KM_SLEEP);
 		pdptr->par_intr = (struct intrspec *)(pdptr + 1);

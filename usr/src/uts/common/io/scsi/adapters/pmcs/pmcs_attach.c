@@ -626,8 +626,8 @@ pmcs_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	pwp->iqp_dma_attr = pwp->oqp_dma_attr =
 	    pwp->regdump_dma_attr = pwp->cip_dma_attr =
 	    pwp->fwlog_dma_attr = pmcs_dattr;
-	pwp->fm_capabilities = ddi_getprop(DDI_DEV_T_ANY, pwp->dip,
-	    DDI_PROP_NOTPROM | DDI_PROP_DONTPASS, "fm-capable",
+	pwp->fm_capabilities = ddi_prop_get_int(DDI_DEV_T_ANY, pwp->dip,
+	    DDI_PROP_NOTPROM, "fm-capable",
 	    DDI_FM_EREPORT_CAPABLE | DDI_FM_ACCCHK_CAPABLE |
 	    DDI_FM_DMACHK_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 	pmcs_fm_init(pwp);

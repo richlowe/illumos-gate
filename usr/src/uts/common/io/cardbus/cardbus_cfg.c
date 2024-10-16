@@ -303,13 +303,12 @@ cardbus_validate_iline(dev_info_t *dip, ddi_acc_handle_t handle)
 	if (pci_config_get8(handle, PCI_CONF_IPIN)) {
 	intline = pci_config_get8(handle, PCI_CONF_ILINE);
 	if ((intline == 0) || (intline == 0xff)) {
-		intline = ddi_getprop(DDI_DEV_T_ANY, dip,
-		    DDI_PROP_CANSLEEP|DDI_PROP_DONTPASS,
+		intline = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+		    DDI_PROP_DONTPASS,
 		    "interrupt-line", 0xff);
 		if (intline == (uint8_t)0xff) {
-			intline = ddi_getprop(DDI_DEV_T_ANY,
-			    ddi_get_parent(dip),
-			    DDI_PROP_CANSLEEP /* |DDI_PROP_DONTPASS */,
+			intline = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    ddi_get_parent(dip), 0,
 			    "interrupt-line", 0xb);
 		}
 

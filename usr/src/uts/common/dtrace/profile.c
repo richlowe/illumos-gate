@@ -474,7 +474,7 @@ profile_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 
-	profile_max = ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+	profile_max = ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
 	    "profile-max-probes", PROFILE_MAX_DEFAULT);
 
 	ddi_report_dev(devi);

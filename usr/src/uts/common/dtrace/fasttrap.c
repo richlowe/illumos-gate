@@ -2149,14 +2149,14 @@ fasttrap_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	dtrace_fasttrap_exit_ptr = &fasttrap_exec_exit;
 	dtrace_fasttrap_exec_ptr = &fasttrap_exec_exit;
 
-	fasttrap_max = ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+	fasttrap_max = ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
 	    "fasttrap-max-probes", FASTTRAP_MAX_DEFAULT);
 	fasttrap_total = 0;
 
 	/*
 	 * Conjure up the tracepoints hashtable...
 	 */
-	nent = ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+	nent = ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
 	    "fasttrap-hash-size", FASTTRAP_TPOINTS_DEFAULT_SIZE);
 
 	if (nent == 0 || nent > 0x1000000)

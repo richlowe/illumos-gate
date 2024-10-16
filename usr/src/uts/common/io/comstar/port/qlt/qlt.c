@@ -3808,7 +3808,7 @@ qlt_msix_resp_handler(caddr_t arg, caddr_t arg2)
 {
 	qlt_state_t	*qlt = (qlt_state_t *)arg;
 	uint32_t	risc_status;
-	uint16_t 	qi = 0;
+	uint16_t	qi = 0;
 
 	risc_status = REG_RD32(qlt, REG_RISC_STATUS);
 	if (qlt->qlt_mq_enabled) {
@@ -9505,8 +9505,8 @@ qlt_el_msg(qlt_state_t *qlt, const char *fn, int ce, ...)
 static int
 qlt_read_int_prop(qlt_state_t *qlt, char *prop, int defval)
 {
-	return (ddi_getprop(DDI_DEV_T_ANY, qlt->dip,
-	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, prop, defval));
+	return (ddi_prop_get_int(DDI_DEV_T_ANY, qlt->dip,
+	    DDI_PROP_DONTPASS, prop, defval));
 }
 
 static int

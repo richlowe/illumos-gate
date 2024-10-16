@@ -893,7 +893,8 @@ st_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 
 	switch (cmd) {
 		case DDI_ATTACH:
-			if (ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+			if (ddi_prop_get_int(DDI_DEV_T_ANY, devi,
+			    DDI_PROP_DONTPASS,
 			    "tape-command-recovery-disable", 0) != 0) {
 				st_recov_sz = sizeof (pkt_info);
 			}
@@ -1037,7 +1038,7 @@ st_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 	 *	has gone away.
 	 */
 	if (un->un_arq_enabled && un->un_untagged_qing) {
-		if (ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
 		    "tape-driver-buffering", 0) != 0) {
 			scsi_log(ST_DEVINFO, st_label, CE_NOTE,
 			    "Write Data Buffering has been depricated. Your "

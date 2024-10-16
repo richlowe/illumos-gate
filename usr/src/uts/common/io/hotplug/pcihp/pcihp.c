@@ -2913,8 +2913,8 @@ pcihp_event_handler(caddr_t slot_arg, uint_t event_mask)
 		else
 			hint = SE_OUTGOING_RES;
 
-		if (ddi_getprop(DDI_DEV_T_ANY, pcihp_p->dip, DDI_PROP_DONTPASS,
-		    "inkernel-autoconfig", 0) == 0) {
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, pcihp_p->dip,
+		    DDI_PROP_DONTPASS, "inkernel-autoconfig", 0) == 0) {
 			pcihp_gen_sysevent(slotinfop->name, PCIHP_DR_REQ, hint,
 			    pcihp_p->dip, KM_SLEEP);
 			break;

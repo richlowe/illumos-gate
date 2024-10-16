@@ -729,8 +729,8 @@ dca_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	(void) mutex_init(&dca->dca_intrlock, NULL, MUTEX_DRIVER, ibc);
 
 	/* use RNGSHA1 by default */
-	if (ddi_getprop(DDI_DEV_T_ANY, dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "rngdirect", 0) == 0) {
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "rngdirect", 0) == 0) {
 		dca->dca_flags |= DCA_RNGSHA1;
 	}
 
@@ -1168,14 +1168,14 @@ dca_init(dca_t *dca)
 	wlp = WORKLIST(dca, MCR1);
 	(void) sprintf(wlp->dwl_name, "dca%d:mcr1",
 	    ddi_get_instance(dca->dca_dip));
-	wlp->dwl_lowater = ddi_getprop(DDI_DEV_T_ANY,
-	    dca->dca_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	wlp->dwl_lowater = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    dca->dca_dip, DDI_PROP_DONTPASS,
 	    "mcr1_lowater", MCR1LOWATER);
-	wlp->dwl_hiwater = ddi_getprop(DDI_DEV_T_ANY,
-	    dca->dca_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	wlp->dwl_hiwater = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    dca->dca_dip, DDI_PROP_DONTPASS,
 	    "mcr1_hiwater", MCR1HIWATER);
-	wlp->dwl_reqspermcr = min(ddi_getprop(DDI_DEV_T_ANY,
-	    dca->dca_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	wlp->dwl_reqspermcr = min(ddi_prop_get_int(DDI_DEV_T_ANY,
+	    dca->dca_dip, DDI_PROP_DONTPASS,
 	    "mcr1_maxreqs", MCR1MAXREQS), MAXREQSPERMCR);
 	wlp->dwl_dca = dca;
 	wlp->dwl_mcr = MCR1;
@@ -1189,14 +1189,14 @@ dca_init(dca_t *dca)
 	wlp = WORKLIST(dca, MCR2);
 	(void) sprintf(wlp->dwl_name, "dca%d:mcr2",
 	    ddi_get_instance(dca->dca_dip));
-	wlp->dwl_lowater = ddi_getprop(DDI_DEV_T_ANY,
-	    dca->dca_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	wlp->dwl_lowater = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    dca->dca_dip, DDI_PROP_DONTPASS,
 	    "mcr2_lowater", MCR2LOWATER);
-	wlp->dwl_hiwater = ddi_getprop(DDI_DEV_T_ANY,
-	    dca->dca_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	wlp->dwl_hiwater = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    dca->dca_dip, DDI_PROP_DONTPASS,
 	    "mcr2_hiwater", MCR2HIWATER);
-	wlp->dwl_reqspermcr = min(ddi_getprop(DDI_DEV_T_ANY,
-	    dca->dca_dip, DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS,
+	wlp->dwl_reqspermcr = min(ddi_prop_get_int(DDI_DEV_T_ANY,
+	    dca->dca_dip, DDI_PROP_DONTPASS,
 	    "mcr2_maxreqs", MCR2MAXREQS), MAXREQSPERMCR);
 	wlp->dwl_dca = dca;
 	wlp->dwl_mcr = MCR2;
@@ -4772,8 +4772,8 @@ dca_fma_init(dca_t *dca)
 	    DDI_FM_ERRCB_CAPABLE;
 
 	/* Read FMA capabilities from dca.conf file (if present) */
-	dca->fm_capabilities = ddi_getprop(DDI_DEV_T_ANY, dca->dca_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "fm-capable",
+	dca->fm_capabilities = ddi_prop_get_int(DDI_DEV_T_ANY, dca->dca_dip,
+	    DDI_PROP_DONTPASS, "fm-capable",
 	    fm_capabilities);
 
 	DBG(dca, DWARN, "dca->fm_capabilities = 0x%x", dca->fm_capabilities);

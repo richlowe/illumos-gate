@@ -6956,8 +6956,8 @@ aac_fm_init(struct aac_softstate *softs)
 	 */
 	ddi_iblock_cookie_t fm_ibc;
 
-	softs->fm_capabilities = ddi_getprop(DDI_DEV_T_ANY, softs->devinfo_p,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "fm-capable",
+	softs->fm_capabilities = ddi_prop_get_int(DDI_DEV_T_ANY,
+	    softs->devinfo_p, DDI_PROP_DONTPASS, "fm-capable",
 	    DDI_FM_EREPORT_CAPABLE | DDI_FM_ACCCHK_CAPABLE |
 	    DDI_FM_DMACHK_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 

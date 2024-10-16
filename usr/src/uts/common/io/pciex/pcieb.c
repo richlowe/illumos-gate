@@ -2151,7 +2151,7 @@ pcieb_set_pci_perf_parameters(dev_info_t *dip, ddi_acc_handle_t cfg_hdl)
 	uint_t	n;
 
 	/* Initialize cache-line-size configuration register if needed */
-	if (ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    "cache-line-size", 0) == 0) {
 		pci_config_put8(cfg_hdl, PCI_CONF_CACHE_LINESZ,
 		    PCIEB_CACHE_LINE_SIZE);
@@ -2163,7 +2163,7 @@ pcieb_set_pci_perf_parameters(dev_info_t *dip, ddi_acc_handle_t cfg_hdl)
 	}
 
 	/* Initialize latency timer configuration registers if needed */
-	if (ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    "latency-timer", 0) == 0) {
 		uchar_t	min_gnt, latency_timer;
 		uchar_t header_type;

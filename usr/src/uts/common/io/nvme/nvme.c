@@ -4918,8 +4918,8 @@ nvme_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	/*
 	 * Set up FMA support.
 	 */
-	nvme->n_fm_cap = ddi_getprop(DDI_DEV_T_ANY, dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "fm-capable",
+	nvme->n_fm_cap = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "fm-capable",
 	    DDI_FM_EREPORT_CAPABLE | DDI_FM_ACCCHK_CAPABLE |
 	    DDI_FM_DMACHK_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 

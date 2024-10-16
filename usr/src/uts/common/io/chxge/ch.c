@@ -144,11 +144,11 @@ static	struct module_info ch_minfo = {
  */
 
 static struct qinit ch_rinit = {
-	(int (*)()) NULL, 	/* qi_putp */
+	(int (*)()) NULL,	/* qi_putp */
 	gld_rsrv,		/* qi_srvp */
 	gld_open,		/* qi_qopen */
 	gld_close,		/* qi_qclose */
-	(int (*)()) NULL, 	/* qi_qadmin */
+	(int (*)()) NULL,	/* qi_qadmin */
 	&ch_minfo,		/* qi_minfo */
 	NULL			/* qi_mstat */
 };
@@ -162,9 +162,9 @@ static struct qinit ch_rinit = {
 static struct qinit ch_winit = {
 	gld_wput,		/* qi_putp */
 	gld_wsrv,		/* qi_srvp */
-	(int (*)()) NULL, 	/* qi_qopen */
-	(int (*)()) NULL, 	/* qi_qclose */
-	(int (*)()) NULL, 	/* qi_qadmin */
+	(int (*)()) NULL,	/* qi_qopen */
+	(int (*)()) NULL,	/* qi_qclose */
+	(int (*)()) NULL,	/* qi_qadmin */
 	&ch_minfo,		/* qi_minfo */
 	NULL			/* qi_mstat */
 };
@@ -880,7 +880,7 @@ ch_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 
 void *
 ch_alloc_dma_mem(ch_t *chp, int type, int flags, int size, uint64_t *paddr,
-	ulong_t *dh, ulong_t *ah)
+    ulong_t *dh, ulong_t *ah)
 {
 	ddi_dma_attr_t ch_dma_attr;
 	ddi_dma_cookie_t cookie;
@@ -1108,7 +1108,7 @@ ch_free_dma_handles(ch_t *chp)
 
 uint32_t
 ch_bind_dma_handle(ch_t *chp, int size, caddr_t vaddr, cmdQ_ce_t *cmp,
-	uint32_t cnt)
+    uint32_t cnt)
 {
 	ddi_dma_cookie_t cookie;
 	ddi_dma_handle_t ch_dh;
@@ -1296,7 +1296,7 @@ ch_free_dvma_handles(ch_t *chp)
 
 uint32_t
 ch_bind_dvma_handle(ch_t *chp, int size, caddr_t vaddr, cmdQ_ce_t *cmp,
-	uint32_t cnt)
+    uint32_t cnt)
 {
 	ddi_dma_cookie_t cookie;
 	ddi_dma_handle_t ch_dh;
@@ -1917,21 +1917,21 @@ ch_get_prop(ch_t *chp)
 	uint32_t *prop_val = NULL;
 	uint32_t prop_len = 0;
 
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "enable_dvma", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "enable-dvma", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "enable-dvma", -1);
 	if (val != -1) {
 		if (val != 0)
 			chp->ch_config.enable_dvma = 1;
 	}
 
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "amd_bug_workaround", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "amd-bug-workaround", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "amd-bug-workaround", -1);
 
 	if (val != -1) {
 		if (val == 0) {
@@ -2056,11 +2056,11 @@ fail_exit:
 	 * in chxge.conf
 	 */
 
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "pci_burstsize", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "pci-burstsize", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "pci-burstsize", -1);
 
 	if (val != -1) {
 
@@ -2094,11 +2094,11 @@ fail_exit:
 	/*
 	 * set transaction count
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "pci_split_transaction_cnt", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "pci-split-transaction-cnt", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "pci-split-transaction-cnt", -1);
 
 	if (val != -1) {
 		switch (val) {
@@ -2156,11 +2156,11 @@ fail_exit:
 	/*
 	 * set relaxed ordering bit?
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "pci_relaxed_ordering_on", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "pci-relaxed-ordering-on", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "pci-relaxed-ordering-on", -1);
 
 	/*
 	 * default is to use system default value.
@@ -2172,11 +2172,11 @@ fail_exit:
 			chp->ch_config.relaxed_ordering = 1;
 	}
 
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "enable_latency_timer", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "enable-latency-timer", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "enable-latency-timer", -1);
 	if (val != -1)
 		enable_latency_timer = (val == 0)? 0: 1;
 
@@ -2184,11 +2184,11 @@ fail_exit:
 	 * default maximum Jumbo Frame size.
 	 */
 	chp->ch_maximum_mtu = 9198;	/* tunable via chxge.conf */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "maximum_mtu", -1);
 	if (val == -1) {
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "maximum-mtu", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "maximum-mtu", -1);
 	}
 	if (val != -1) {
 		if (val > 9582) {
@@ -2212,11 +2212,11 @@ fail_exit:
 	 */
 	chp->ch_mtu = ETHERMTU;
 
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "accept_jumbo", -1);
 	if (val == -1) {
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "accept-jumbo", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "accept-jumbo", -1);
 	}
 	if (val != -1) {
 		if (val)
@@ -2251,11 +2251,11 @@ fail_exit:
 #endif
 	chp->ch_config.cksum_enabled = 1;
 
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "enable_checksum_offload", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "enable-checksum-offload", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "enable-checksum-offload", -1);
 	if (val != -1) {
 		if (val == 0)
 			chp->ch_config.cksum_enabled = 0;
@@ -2264,11 +2264,11 @@ fail_exit:
 	/*
 	 * Provides a tuning capability for the command queue 0 size.
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "sge_cmdq0_cnt", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "sge-cmdq0-cnt", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "sge-cmdq0-cnt", -1);
 	if (val != -1) {
 		if (val > 10)
 			sge_cmdq0_cnt = val;
@@ -2285,11 +2285,11 @@ fail_exit:
 	/*
 	 * Provides a tuning capability for the command queue 1 size.
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "sge_cmdq1_cnt", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "sge-cmdq1-cnt", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "sge-cmdq1-cnt", -1);
 	if (val != -1) {
 		if (val > 10)
 			sge_cmdq1_cnt = val;
@@ -2305,11 +2305,11 @@ fail_exit:
 	/*
 	 * Provides a tuning capability for the free list 0 size.
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "sge_flq0_cnt", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "sge-flq0-cnt", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "sge-flq0-cnt", -1);
 	if (val != -1) {
 		if (val > 512)
 			sge_flq0_cnt = val;
@@ -2327,11 +2327,11 @@ fail_exit:
 	/*
 	 * Provides a tuning capability for the free list 1 size.
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "sge_flq1_cnt", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "sge-flq1-cnt", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "sge-flq1-cnt", -1);
 	if (val != -1) {
 		if (val > 512)
 			sge_flq1_cnt = val;
@@ -2349,11 +2349,11 @@ fail_exit:
 	/*
 	 * Provides a tuning capability for the responce queue size.
 	 */
-	val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
+	val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
 	    "sge_respq_cnt", -1);
 	if (val == -1)
-		val = ddi_getprop(DDI_DEV_T_ANY, chp->ch_dip, DDI_PROP_DONTPASS,
-		    "sge-respq-cnt", -1);
+		val = ddi_prop_get_int(DDI_DEV_T_ANY, chp->ch_dip,
+		    DDI_PROP_DONTPASS, "sge-respq-cnt", -1);
 	if (val != -1) {
 		if (val > 30)
 			sge_respq_cnt = val;

@@ -3451,9 +3451,9 @@ ahci_fm_init(ahci_ctl_t *ahci_ctlp)
 	 */
 	ddi_iblock_cookie_t fm_ibc;
 
-	ahci_ctlp->ahcictl_fm_cap = ddi_getprop(DDI_DEV_T_ANY,
+	ahci_ctlp->ahcictl_fm_cap = ddi_prop_get_int(DDI_DEV_T_ANY,
 	    ahci_ctlp->ahcictl_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "fm-capable",
+	    DDI_PROP_DONTPASS, "fm-capable",
 	    DDI_FM_EREPORT_CAPABLE | DDI_FM_ACCCHK_CAPABLE |
 	    DDI_FM_DMACHK_CAPABLE | DDI_FM_ERRCB_CAPABLE);
 

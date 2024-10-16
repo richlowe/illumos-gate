@@ -315,7 +315,7 @@ cs_deinit()
 
 #if defined(CS_DEBUG)
 	if (cs_debug > 1)
-	    cmn_err(CE_CONT, "CS: cs_deinit\n");
+		cmn_err(CE_CONT, "CS: cs_deinit\n");
 #endif
 
 	/*
@@ -3611,9 +3611,8 @@ cs_card_for_client(client_t *client)
 	 *	that is currently in the socket.  This is a boolean
 	 *	property managed by Socket Services.
 	 */
-	if (ddi_getprop(DDI_DEV_T_ANY, client->dip,    (DDI_PROP_CANSLEEP |
-							DDI_PROP_NOTPROM),
-							PCM_DEV_ACTIVE, 0)) {
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, client->dip, DDI_PROP_NOTPROM,
+	    PCM_DEV_ACTIVE, 0)) {
 #ifdef	CS_DEBUG
 	    if (cs_debug > 1) {
 		cmn_err(CE_CONT, "cs_card_for_client: client handle 0x%x "

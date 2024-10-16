@@ -188,8 +188,8 @@ mm_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		kstat_install(ksp);
 	}
 
-	mm_kmem_io_access = ddi_getprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
-	    "kmem_io_access", 0);
+	mm_kmem_io_access = ddi_prop_get_int(DDI_DEV_T_ANY, devi,
+	    DDI_PROP_DONTPASS, "kmem_io_access", 0);
 
 	return (DDI_SUCCESS);
 }

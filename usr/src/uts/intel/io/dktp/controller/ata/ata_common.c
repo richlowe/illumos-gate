@@ -3333,7 +3333,7 @@ ata_check_revert_to_defaults(
 	prop_buf[j] = '\0';
 
 	/* look for a disk-specific "revert" property" */
-	propval = ddi_getprop(DDI_DEV_T_ANY, ata_ctlp->ac_dip,
+	propval = ddi_prop_get_int(DDI_DEV_T_ANY, ata_ctlp->ac_dip,
 	    DDI_PROP_DONTPASS, prop_buf, -1);
 	if (propval == 0)
 		return (FALSE);
@@ -3341,7 +3341,7 @@ ata_check_revert_to_defaults(
 		return (TRUE);
 
 	/* look for a global "revert" property" */
-	propval = ddi_getprop(DDI_DEV_T_ANY, ata_ctlp->ac_dip,
+	propval = ddi_prop_get_int(DDI_DEV_T_ANY, ata_ctlp->ac_dip,
 	    0, ATA_REVERT_PROP_GLOBAL, -1);
 	if (propval == 0)
 		return (FALSE);
@@ -3502,7 +3502,7 @@ static void
 ata_init_pm(dev_info_t *dip)
 {
 	int		instance;
-	ata_ctl_t 	*ata_ctlp;
+	ata_ctl_t	*ata_ctlp;
 #ifdef	ATA_USE_AUTOPM
 	char		pmc_name[16];
 	char		*pmc[] = {
@@ -3592,7 +3592,7 @@ static int
 ata_resume(dev_info_t *dip)
 {
 	int		instance;
-	ata_ctl_t 	*ata_ctlp;
+	ata_ctl_t	*ata_ctlp;
 	ddi_acc_handle_t io_hdl2;
 	caddr_t		ioaddr2;
 
@@ -3626,7 +3626,7 @@ static int
 ata_suspend(dev_info_t *dip)
 {
 	int		instance;
-	ata_ctl_t 	*ata_ctlp;
+	ata_ctl_t	*ata_ctlp;
 	ddi_acc_handle_t io_hdl2;
 
 	instance = ddi_get_instance(dip);
@@ -3656,7 +3656,7 @@ static int
 ata_power(dev_info_t *dip, int component, int level)
 {
 	int		instance;
-	ata_ctl_t 	*ata_ctlp;
+	ata_ctl_t	*ata_ctlp;
 	uint8_t		cmd;
 
 	ADBG_TRACE(("ata_power entered, component = %d, level = %d\n",

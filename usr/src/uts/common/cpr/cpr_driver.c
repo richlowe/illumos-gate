@@ -41,7 +41,7 @@
 extern int devi_detach(dev_info_t *, int);
 extern int devi_attach(dev_info_t *, int);
 
-static char 	*devi_string(dev_info_t *, char *);
+static char	*devi_string(dev_info_t *, char *);
 static int	cpr_is_real_device(dev_info_t *);
 /*
  * Xen uses this code to suspend _all_ drivers quickly and easily.

@@ -1758,8 +1758,8 @@ cardbus_dump_pci_node(dev_info_t *dip)
 	for (next = ddi_get_child(dip); next;
 	    next = ddi_get_next_sibling(next)) {
 
-		VendorId = ddi_getprop(DDI_DEV_T_ANY, next,
-		    DDI_PROP_CANSLEEP|DDI_PROP_DONTPASS,
+		VendorId = ddi_prop_get_int(DDI_DEV_T_ANY, next,
+		    DDI_PROP_DONTPASS,
 		    "vendor-id", -1);
 		if (VendorId == -1) {
 			/* not a pci device */

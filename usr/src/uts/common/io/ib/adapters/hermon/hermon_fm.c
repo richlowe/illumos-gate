@@ -348,7 +348,7 @@ hermon_fm_init(hermon_state_t *state)
 	 * Check the "fm_disable" property. If it's defined,
 	 * use the Solaris FMA default action for Hermon.
 	 */
-	if (ddi_getprop(DDI_DEV_T_NONE, state->hs_dip, DDI_PROP_DONTPASS,
+	if (ddi_prop_get_int(DDI_DEV_T_NONE, state->hs_dip, DDI_PROP_DONTPASS,
 	    "fm_disable", 0) != 0) {
 		state->hs_fm_disable = 1;
 	}
@@ -775,8 +775,8 @@ error:
  */
 int
 hermon_regs_map_setup(hermon_state_t *state, uint_t rnumber, caddr_t *addrp,
-	offset_t offset, offset_t len, ddi_device_acc_attr_t *accattrp,
-	ddi_acc_handle_t *handle)
+    offset_t offset, offset_t len, ddi_device_acc_attr_t *accattrp,
+    ddi_acc_handle_t *handle)
 {
 	if (state->hs_fm_disable) {
 		return (ddi_regs_map_setup(state->hs_dip, rnumber, addrp,

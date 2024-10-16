@@ -171,7 +171,7 @@ typedef struct cisregister_t {
  *
  * CS_MAX_CIS is one greater than CIS_MAX_FUNCTIONS since the CIS parser
  *	puts the global CIS chain on the CS_GLOBAL_CIS function index as
- * 	follows:
+ *	follows:
  *
  *	For single-function cards:
  *	    sp->cis[0] - CIS chain
@@ -249,9 +249,8 @@ typedef struct cisregister_t {
  *	the passed dip.  If the property can't be found, then the default
  *	value of cs_globals.max_socket_num is returned.
  */
-#define	DIP2SOCKET_NUM(dip)		ddi_getprop(DDI_DEV_T_NONE, dip,\
-						(DDI_PROP_CANSLEEP |	\
-							DDI_PROP_NOTPROM), \
+#define	DIP2SOCKET_NUM(dip)		ddi_prop_get_int(DDI_DEV_T_NONE, dip,\
+						DDI_PROP_NOTPROM, \
 						PCM_DEV_SOCKET,		\
 						cs_globals.max_socket_num)
 

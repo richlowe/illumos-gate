@@ -2456,7 +2456,7 @@ cmlb_read_fdisk(struct cmlb_lun *cl, diskaddr_t capacity, void *tg_cookie)
 	 * First, check for lba-access-ok on root node (or prom root node)
 	 * if present there, don't need to search fdisk table.
 	 */
-	if (ddi_getprop(DDI_DEV_T_ANY, ddi_root_node(), 0,
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, ddi_root_node(), 0,
 	    "lba-access-ok", 0) != 0) {
 		/* All drives do LBA; don't search fdisk table */
 		lba = 1;
@@ -2471,7 +2471,7 @@ cmlb_read_fdisk(struct cmlb_lun *cl, diskaddr_t capacity, void *tg_cookie)
 	if (lba != 0) {
 		dev_t dev = cmlb_make_device(cl);
 
-		if (ddi_getprop(dev, CMLB_DEVINFO(cl), DDI_PROP_DONTPASS,
+		if (ddi_prop_get_int(dev, CMLB_DEVINFO(cl), DDI_PROP_DONTPASS,
 		    "lba-access-ok", 0) == 0) {
 			/* not found; create it */
 			if (ddi_prop_create(dev, CMLB_DEVINFO(cl), 0,

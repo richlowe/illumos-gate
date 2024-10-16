@@ -80,8 +80,8 @@ log_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
 		return (DDI_FAILURE);
 	}
 	log_devi = devi;
-	log_msgid = ddi_getprop(DDI_DEV_T_ANY, log_devi,
-	    DDI_PROP_CANSLEEP, "msgid", 1);
+	log_msgid = ddi_prop_get_int(DDI_DEV_T_ANY, log_devi,
+	    0, "msgid", 1);
 	return (DDI_SUCCESS);
 }
 

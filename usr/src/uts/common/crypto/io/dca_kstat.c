@@ -48,8 +48,8 @@ dca_ksinit(dca_t *dca)
 	char	buf[64];
 	int	instance;
 
-	if (ddi_getprop(DDI_DEV_T_ANY, dca->dca_dip,
-	    DDI_PROP_CANSLEEP | DDI_PROP_DONTPASS, "nostats", 0) != 0) {
+	if (ddi_prop_get_int(DDI_DEV_T_ANY, dca->dca_dip,
+	    DDI_PROP_DONTPASS, "nostats", 0) != 0) {
 		/*
 		 * sysadmin has explicity disabled stats to prevent
 		 * covert channel.

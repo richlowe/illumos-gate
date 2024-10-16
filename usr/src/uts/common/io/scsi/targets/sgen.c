@@ -615,8 +615,8 @@ sgen_do_attach(dev_info_t *dip)
 	 * sgen_diag setting by setting sg_state's sgen_diag value.  If the
 	 * user gave a value out of range, default to '0'.
 	 */
-	sg_state->sgen_diag = ddi_getprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "sgen-diag", -1);
+	sg_state->sgen_diag = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "sgen-diag", -1);
 
 	if (sg_state->sgen_diag != -1) {
 		if (sg_state->sgen_diag < 0 || sg_state->sgen_diag > 3)
