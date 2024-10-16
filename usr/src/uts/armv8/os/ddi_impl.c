@@ -1157,21 +1157,49 @@ i_ddi_free_intr_phdl(ddi_intr_handle_impl_t *hdlp)
 	hdlp->ih_private = NULL;
 }
 
+
+dev_info_t *
+i_ddi_interrupt_parent(dev_info_t *pdip)
+{
+	int len;
+
+	while (pdip != NULL) {
+		phandle_t ph;
+
+		if (ddi_prop_get_int(DDI_DEV_T_ANY, pdip, 0,
+		    "#interrupt-cells", -1) != -1) {
+			return (pdip);
+		}
+
+		if ((ph = ddi_prop_get_int(DDI_DEV_T_ANY, pdip, 0,
+		    "interrupt-parent", -1)) != -1) {
+			pnode_t node = prom_findnode_by_phandle(ph);
+			pdip = e_ddi_nodeid_to_dip(node);
+			continue;
+		}
+
+		pdip = ddi_get_parent(pdip);
+	}
+
+	return (NULL);
+}
+
 int
 i_ddi_get_intx_nintrs(dev_info_t *dip)
 {
+	dev_info_t *ipar = i_ddi_interrupt_parent(dip);
 	uint_t intrlen;
 	int intr_sz;
 	int *ip;
 	int ret = 0;
 
-	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS |
-	    DDI_PROP_CANSLEEP,
+	VERIFY3P(ipar, !=, NULL);
+
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    "interrupts", &ip, &intrlen) == DDI_SUCCESS) {
-		intr_sz = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+		intr_sz = ddi_prop_get_int(DDI_DEV_T_ANY, ipar,
 		    0, "#interrupt-cells", 1);
 
-		intr_sz = CELLS_1275_TO_BYTES(intr_sz);
 		ret = intrlen / intr_sz;
 
 		ddi_prop_free(ip);
@@ -1439,7 +1467,8 @@ get_boot_properties(void)
 			} else {
 				(void) e_ddi_prop_update_int64_array(
 				    DDI_DEV_T_NONE, devi, property_name,
-				    bop_staging_area, length / sizeof (int64_t));
+				    bop_staging_area,
+				    length / sizeof (int64_t));
 			}
 			break;
 		default:

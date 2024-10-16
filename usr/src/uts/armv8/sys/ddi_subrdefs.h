@@ -46,6 +46,8 @@ extern int i_ddi_convert_dma_attr(ddi_dma_attr_t *, dev_info_t *,
     const ddi_dma_attr_t *);
 extern int i_ddi_update_dma_attr(dev_info_t *, ddi_dma_attr_t *);
 
+extern dev_info_t *i_ddi_interrupt_parent(dev_info_t *);
+
 #endif	/* _KERNEL */
 
 #ifdef	__cplusplus
