@@ -970,12 +970,12 @@ scsa1394_scsi_tgt_init(dev_info_t *dip, dev_info_t *cdip, scsi_hba_tran_t *tran,
 {
 	scsa1394_state_t *sp = (scsa1394_state_t *)tran->tran_hba_private;
 	int		lun;
-	int		plen = sizeof (int);
 	int		ret = DDI_FAILURE;
 
-	if (ddi_prop_op(DDI_DEV_T_ANY, cdip, PROP_LEN_AND_VAL_BUF,
-	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, SCSI_ADDR_PROP_LUN,
-	    (caddr_t)&lun, &plen) != DDI_PROP_SUCCESS) {
+	lun = ddi_prop_get_int(DDI_DEV_T_ANY, cdip,
+	    DDI_PROP_DONTPASS, SCSI_ADDR_PROP_LUN, -1);
+
+	if (lun == -1) {
 		return (DDI_FAILURE);
 	}
 
@@ -1013,15 +1013,15 @@ scsa1394_scsi_tgt_free(dev_info_t *dip, dev_info_t *cdip, scsi_hba_tran_t *tran,
 {
 	scsa1394_state_t *sp = (scsa1394_state_t *)tran->tran_hba_private;
 	int		lun;
-	int		plen = sizeof (int);
 
 	if (!scsa1394_is_my_child(cdip)) {
 		return;
 	}
 
-	if (ddi_prop_op(DDI_DEV_T_ANY, cdip, PROP_LEN_AND_VAL_BUF,
-	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, SCSI_ADDR_PROP_LUN,
-	    (caddr_t)&lun, &plen) != DDI_PROP_SUCCESS) {
+	lun = ddi_prop_get_int(DDI_DEV_T_ANY, cdip,
+	    DDI_PROP_DONTPASS, SCSI_ADDR_PROP_LUN, -1);
+
+	if (lun == -1) {
 		return;
 	}
 

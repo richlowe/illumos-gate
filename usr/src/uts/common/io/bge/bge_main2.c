@@ -3104,8 +3104,11 @@ bge_find_mac_address(bge_t *bgep, chip_id_t *cidp)
 	 */
 	nelts = sizeof (propbuf);
 	bzero(propbuf, nelts--);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	err = ddi_getlongprop_buf(DDI_DEV_T_ANY, bgep->devinfo,
 	    DDI_PROP_CANSLEEP, localmac_boolname, propbuf, (int *)&nelts);
+#pragma GCC diagnostic pop
 
 	/*
 	 * Now, if the address still isn't set from the hardware (SEEPROM)

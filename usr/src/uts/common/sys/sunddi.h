@@ -871,9 +871,24 @@ ddi_prop_op_nblocks_blksize(dev_t dev, dev_info_t *dip, ddi_prop_op_t prop_op,
  *		DDI_PROP_NO_MEMORY:	Prop found, but unable to alloc mem.
  */
 
+/*
+ * XXXARM: Because the cpu and FDT properties have different endian-ness,
+ * un-typed access to integer properties sourced from the "PROM" will return
+ * bogus data.
+ *
+ * To try to get a handle on this with an audit, rather than attrition, we
+ * _temporarily_ mark the problematic DDI property accessors as deprecated so
+ * that builds fail if they are used.
+ */
+#if defined(__aarch64__)
+#define	__arm_deprecate	__attribute__((deprecated))
+#else
+#define	__arm_deprecate
+#endif	/* __aarch64___ */
+
 int
 ddi_getlongprop(dev_t dev, dev_info_t *dip, int flags,
-    char *name, caddr_t valuep, int *lengthp);
+    char *name, caddr_t valuep, int *lengthp) __arm_deprecate;
 
 /*
  *
@@ -901,7 +916,7 @@ ddi_getlongprop(dev_t dev, dev_info_t *dip, int flags,
 
 int
 ddi_getlongprop_buf(dev_t dev, dev_info_t *dip, int flags,
-    char *name, caddr_t valuep, int *lengthp);
+    char *name, caddr_t valuep, int *lengthp)  __arm_deprecate;
 
 /*
  * Integer/boolean sized props.
@@ -915,7 +930,8 @@ ddi_getlongprop_buf(dev_t dev, dev_info_t *dip, int flags,
  */
 
 int
-ddi_getprop(dev_t dev, dev_info_t *dip, int flags, char *name, int defvalue);
+ddi_getprop(dev_t dev, dev_info_t *dip, int flags,
+    char *name, int defvalue) __arm_deprecate;
 
 /*
  * Get prop length interface: flags are 0 or DDI_PROP_DONTPASS

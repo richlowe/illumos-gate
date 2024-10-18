@@ -523,6 +523,8 @@ ql_nvram_config(ql_adapter_state_t *ha)
 		idpromlen = 32;
 
 		/*LINTED [Solaris DDI_DEV_T_ANY Lint warning]*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored	"-Wdeprecated-declarations"
 		if (ddi_getlongprop_buf(DDI_DEV_T_ANY, ha->dip,
 		    DDI_PROP_CANSLEEP, "idprom", (caddr_t)idprombuf,
 		    &idpromlen) != DDI_PROP_SUCCESS) {
@@ -548,6 +550,7 @@ ql_nvram_config(ql_adapter_state_t *ha)
 			nv->port_name[0] = (uint8_t)
 			    (NAA_ID_IEEE_EXTENDED << 4 | ha->instance);
 		}
+#pragma GCC diagnostic pop
 
 		/* Don't print nvram message if it's an on-board 2200 */
 		if (!(CFG_IST(ha, CFG_CTRL_22XX)) &&
@@ -1007,6 +1010,8 @@ ql_nvram_24xx_config(ql_adapter_state_t *ha)
 		idpromlen = 32;
 
 		/*LINTED [Solaris DDI_DEV_T_ANY Lint warning]*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		if (rval = ddi_getlongprop_buf(DDI_DEV_T_ANY, ha->dip,
 		    DDI_PROP_CANSLEEP, "idprom", (caddr_t)idprombuf,
 		    &idpromlen) != DDI_PROP_SUCCESS) {
@@ -1029,6 +1034,7 @@ ql_nvram_24xx_config(ql_adapter_state_t *ha)
 			nv->port_name[0] = (uint8_t)
 			    (NAA_ID_IEEE_EXTENDED << 4 | ha->instance);
 		}
+#pragma GCC diagnostic pop
 
 		cmn_err(CE_WARN, "%s(%d): Unreliable HBA NVRAM, using default "
 		    "HBA parameters and temporary "

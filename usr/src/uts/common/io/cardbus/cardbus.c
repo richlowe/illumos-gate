@@ -1279,8 +1279,8 @@ cardbus_initchild(dev_info_t *rdip, dev_info_t *dip, dev_info_t *child,
 		(ppd->ppd.par_intr)->intrspec_func = (uint_t (*)()) 0;
 #endif
 
-		if (ddi_prop_get_int(DDI_DEV_T_NONE, child, DDI_PROP_DONTPASS,
-		    "interrupts", -1) != -1)
+		if (ddi_prop_exists(DDI_DEV_T_NONE, child, DDI_PROP_DONTPASS,
+		    "interrupts"))
 			ppd->ppd.par_nintr = 1;
 
 		ppd->code = CB_PPD_CODE;

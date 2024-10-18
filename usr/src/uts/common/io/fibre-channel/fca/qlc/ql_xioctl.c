@@ -898,6 +898,8 @@ ql_qry_hba_node(ql_adapter_state_t *ha, EXT_IOCTL *cmd, int mode)
 
 	/* FCode version. */
 	/*LINTED [Solaris DDI_DEV_T_ANY Lint error]*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY, ha->dip, PROP_LEN_AND_VAL_ALLOC |
 	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "version", (caddr_t)&bufp,
 	    (int *)&len) == DDI_PROP_SUCCESS) {
@@ -913,6 +915,7 @@ ql_qry_hba_node(ql_adapter_state_t *ha, EXT_IOCTL *cmd, int mode)
 	} else {
 		(void) sprintf((char *)tmp_node.OptRomVersion, "0");
 	}
+#pragma GCC diagnostic pop
 	tmp_node.PortCount = 1;
 	tmp_node.InterfaceType = EXT_DEF_FC_INTF_TYPE;
 
@@ -7142,7 +7145,7 @@ ql_check_pci(ql_adapter_state_t *ha, ql_fcache_t *fcache, uint32_t *nextpos)
 
 	if (CFG_IST(ha, CFG_SBUS_CARD)) {
 		caddr_t	bufp;
-		uint_t	len;
+
 
 		if (pciinfo[0] != SBUS_CODE_FCODE) {
 			EL(ha, "failed, unable to detect sbus fcode\n");
@@ -7151,14 +7154,12 @@ ql_check_pci(ql_adapter_state_t *ha, ql_fcache_t *fcache, uint32_t *nextpos)
 		fcache->type = FTYPE_FCODE;
 
 		/*LINTED [Solaris DDI_DEV_T_ANY Lint error]*/
-		if (ddi_getlongprop(DDI_DEV_T_ANY, ha->dip,
-		    PROP_LEN_AND_VAL_ALLOC | DDI_PROP_DONTPASS |
-		    DDI_PROP_CANSLEEP, "version", (caddr_t)&bufp,
-		    (int *)&len) == DDI_PROP_SUCCESS) {
-
+		if (ddi_prop_lookup_string(DDI_DEV_T_ANY, ha->dip,
+		    DDI_PROP_DONTPASS, "version",
+		    &bufp) == DDI_PROP_SUCCESS) {
 			(void) snprintf(fcache->verstr,
 			    FCHBA_OPTION_ROM_VERSION_LEN, "%s", bufp);
-			kmem_free(bufp, len);
+			ddi_prop_free(bufp);
 		}
 
 		*nextpos = 0xffffffff;

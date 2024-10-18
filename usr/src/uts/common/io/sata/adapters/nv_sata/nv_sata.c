@@ -574,10 +574,6 @@ nv_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	nv_ctl_t *nvc;
 	uint8_t subclass;
 	uint32_t reg32;
-#ifdef SGPIO_SUPPORT
-	pci_regspec_t *regs;
-	int rlen;
-#endif
 
 	switch (cmd) {
 
@@ -744,13 +740,16 @@ nv_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		}
 
 #ifdef SGPIO_SUPPORT
+		pci_regspec_t *regs;
+		uint_t rlen;
+
 		/*
 		 * save off the controller number
 		 */
-		(void) ddi_getlongprop(DDI_DEV_T_NONE, dip, DDI_PROP_DONTPASS,
-		    "reg", (caddr_t)&regs, &rlen);
+		(void) ddi_prop_lookup_int_array(DDI_DEV_T_NONE, dip,
+		    DDI_PROP_DONTPASS, "reg", (int **)&regs, &rlen);
 		nvc->nvc_ctlr_num = PCI_REG_FUNC_G(regs->pci_phys_hi);
-		kmem_free(regs, rlen);
+		ddi_prop_free(regs);
 
 		/*
 		 * initialize SGPIO

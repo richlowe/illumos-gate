@@ -2471,8 +2471,8 @@ cmlb_read_fdisk(struct cmlb_lun *cl, diskaddr_t capacity, void *tg_cookie)
 	if (lba != 0) {
 		dev_t dev = cmlb_make_device(cl);
 
-		if (ddi_prop_get_int(dev, CMLB_DEVINFO(cl), DDI_PROP_DONTPASS,
-		    "lba-access-ok", 0) == 0) {
+		if (!ddi_prop_exists(dev, CMLB_DEVINFO(cl), DDI_PROP_DONTPASS,
+		    "lba-access-ok")) {
 			/* not found; create it */
 			if (ddi_prop_create(dev, CMLB_DEVINFO(cl), 0,
 			    "lba-access-ok", (caddr_t)NULL, 0) !=

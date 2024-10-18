@@ -4361,9 +4361,12 @@ ql_port_manage(opaque_t fca_handle, fc_fca_pm_t *cmd)
 
 		i0 = 0;
 		/*LINTED [Solaris DDI_DEV_T_ANY Lint warning]*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		rval2 = ddi_getlongprop(DDI_DEV_T_ANY, ha->dip,
 		    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "version",
 		    (caddr_t)&fcode_ver_buf, &i0);
+#pragma GCC diagnostic pop
 		length = (uint_t)i0;
 
 		if (rval2 != DDI_PROP_SUCCESS) {
@@ -18343,7 +18346,7 @@ cmd_text(cmd_table_t *entry, int cmd)
 
 /*
  * ql_els_24xx_iocb
- * 	els request indication.
+ *	els request indication.
  *
  * Input:
  *	ha:	adapter state pointer.

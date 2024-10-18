@@ -3261,7 +3261,8 @@ get_unit(dev_info_t *dip, int *cntrl_num)
 static int
 get_ioaddr(dev_info_t *dip, int *ioaddr)
 {
-	int reglen, nregs, i;
+	int nregs, i;
+	uint_t reglen;
 	int status = DDI_FAILURE;
 	struct {
 		int bustype;
@@ -3269,12 +3270,13 @@ get_ioaddr(dev_info_t *dip, int *ioaddr)
 		int size;
 	} *reglist;
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "reg", (caddr_t)&reglist, &reglen) != DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "reg", (int **)&reglist, &reglen) != DDI_PROP_SUCCESS) {
 		cmn_err(CE_WARN, "fdc: reg property not found");
 		return (DDI_FAILURE);
 	}
 
+	reglen = CELLS_1275_TO_BYTES(reglen);
 	nregs = reglen / sizeof (*reglist);
 	for (i = 0; i < nregs; i++) {
 		if (reglist[i].bustype == 1) {
@@ -3283,7 +3285,7 @@ get_ioaddr(dev_info_t *dip, int *ioaddr)
 			break;
 		}
 	}
-	kmem_free(reglist, reglen);
+	ddi_prop_free(reglist);
 
 	if (status == DDI_SUCCESS) {
 		if (*ioaddr == 0x3f2 || *ioaddr == 0x372) {

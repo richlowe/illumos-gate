@@ -685,6 +685,8 @@ ldtermopen(queue_t *q, dev_t *devp, int oflag, int sflag, cred_t *crp)
 	 * Get termios defaults.  These are stored as
 	 * a property in the "options" node.
 	 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_root_node(), DDI_PROP_NOTPROM,
 	    "ttymodes", (caddr_t)&termiosp, &len) == DDI_PROP_SUCCESS &&
 	    len == sizeof (struct termios)) {
@@ -697,6 +699,7 @@ ldtermopen(queue_t *q, dev_t *devp, int oflag, int sflag, cred_t *crp)
 		 */
 		cmn_err(CE_WARN, "ldterm: Couldn't get ttymodes property!");
 	}
+#pragma GCC diagnostic pop
 	bzero(&tp->t_dmodes, sizeof (struct termios));
 
 	tp->t_state = 0;

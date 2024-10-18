@@ -1367,15 +1367,19 @@ again:
 		 */
 		mutex_exit(&ns16550->ns16550_excl_hi);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_root_node(),
 		    0, "ttymodes",
 		    (caddr_t)&termiosp, &len) == DDI_PROP_SUCCESS &&
 		    len == sizeof (struct termios)) {
 			nsasync->nsasync_ttycommon.t_cflag = termiosp->c_cflag;
 			kmem_free(termiosp, len);
-		} else
+		} else {
 			cmn_err(CE_WARN,
 			    "ns16550: couldn't get ttymodes property!");
+		}
+#pragma GCC diagnostic pop
 		mutex_enter(&ns16550->ns16550_excl_hi);
 
 		/* eeprom mode support - respect properties */

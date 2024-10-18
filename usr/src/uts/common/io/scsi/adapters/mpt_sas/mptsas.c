@@ -2545,18 +2545,20 @@ mptsas_ioc_check_rev(mptsas_t *mpt)
 static void
 mptsas_find_mem_bar(mptsas_t *mpt)
 {
-	int		i, rcount;
 	pci_regspec_t	*reg_data;
-	int		reglen;
+	int		i;
+	uint_t		reglen, rcount;
 
 	mpt->m_mem_bar = MEM_SPACE; /* old default */
 	/*
 	 * Lookup the 'reg' property.
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, mpt->m_dip,
-	    DDI_PROP_DONTPASS, "reg", (caddr_t)&reg_data, &reglen) ==
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, mpt->m_dip,
+	    DDI_PROP_DONTPASS, "reg", (int **)&reg_data, &reglen) ==
 	    DDI_PROP_SUCCESS) {
+		reglen = CELLS_1275_TO_BYTES(reglen);
 		rcount = reglen / sizeof (pci_regspec_t);
+
 		for (i = 0; i < rcount; i++) {
 			if (PCI_REG_ADDR_G(reg_data[i].pci_phys_hi) ==
 			    PCI_REG_ADDR_G(PCI_ADDR_MEM64)) {
@@ -2565,6 +2567,7 @@ mptsas_find_mem_bar(mptsas_t *mpt)
 			}
 		}
 	}
+	ddi_prop_free(reg_data);
 }
 
 

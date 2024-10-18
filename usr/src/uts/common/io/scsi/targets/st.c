@@ -2105,11 +2105,14 @@ st_get_conf_from_st_dot_conf(struct scsi_tape *un, char *vidpid,
 	 * checking the vendor ids of the earlier inquiry command and
 	 * comparing those with vids in tape-config-list defined in st.conf
 	 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY, ST_DEVINFO, DDI_PROP_DONTPASS,
 	    "tape-config-list", (caddr_t)&config_list, &config_list_len)
 	    != DDI_PROP_SUCCESS) {
 		return (found);
 	}
+#pragma GCC diagnostic pop
 
 	ST_DEBUG6(ST_DEVINFO, st_label, SCSI_DEBUG,
 	    "st_get_conf_from_st_dot_conf(): st.conf has tape-config-list\n");
@@ -2157,6 +2160,8 @@ st_get_conf_from_st_dot_conf(struct scsi_tape *un, char *vidpid,
 		/*
 		 * get the data list
 		 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		if (ddi_getlongprop(DDI_DEV_T_ANY, ST_DEVINFO, 0,
 		    datanameptr, (caddr_t)&data_list,
 		    &data_list_len) != DDI_PROP_SUCCESS) {
@@ -2169,6 +2174,7 @@ st_get_conf_from_st_dot_conf(struct scsi_tape *un, char *vidpid,
 			    datanameptr);
 			continue;
 		}
+#pragma GCC diagnostic pop
 
 		/*
 		 * now initialize the st_drivetype struct

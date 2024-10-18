@@ -415,9 +415,9 @@ typedef struct pcie_bus {
 	uint16_t	bus_ecc_ver;		/* PCIX ecc version */
 	pci_bus_range_t	bus_bus_range;		/* pci bus-range property */
 	ppb_ranges_t	*bus_addr_ranges;	/* pci range property */
-	int		bus_addr_entries;	/* number of range prop */
+	uint_t		bus_addr_entries;	/* number of range prop */
 	pci_regspec_t	*bus_assigned_addr;	/* "assigned-address" prop */
-	int		bus_assigned_entries;	/* number of prop entries */
+	uint_t		bus_assigned_entries;	/* number of prop entries */
 
 	/* Cache of last fault data */
 	pf_data_t	*bus_pfd;

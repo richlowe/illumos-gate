@@ -214,6 +214,8 @@ ptemopen(
 	 * Get termios defaults.  These are stored as
 	 * a property in the "options" node.
 	 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_root_node(), 0, "ttymodes",
 	    (caddr_t)&termiosp, &len) == DDI_PROP_SUCCESS &&
 	    len == sizeof (struct termios)) {
@@ -226,6 +228,7 @@ ptemopen(
 		 */
 		cmn_err(CE_WARN, "ptem: Couldn't get ttymodes property!");
 	}
+#pragma GCC diagnostic pop
 	ntp->wsz.ws_row = 0;
 	ntp->wsz.ws_col = 0;
 	ntp->wsz.ws_xpixel = 0;

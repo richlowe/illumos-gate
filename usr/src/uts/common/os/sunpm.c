@@ -4762,17 +4762,16 @@ void
 e_pm_props(dev_info_t *dip)
 {
 	char *pp;
-	int len;
 	int flags = 0;
-	int propflag = DDI_PROP_DONTPASS|DDI_PROP_CANSLEEP;
+	int propflag = DDI_PROP_DONTPASS;
 
 	/*
 	 * It doesn't matter if we do this more than once, we should always
 	 * get the same answers, and if not, then the last one in is the
 	 * best one.
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, propflag, "pm-hardware-state",
-	    (caddr_t)&pp, &len) == DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, propflag,
+	    "pm-hardware-state", &pp) == DDI_PROP_SUCCESS) {
 		if (strcmp(pp, "needs-suspend-resume") == 0) {
 			flags = PMC_NEEDS_SR;
 		} else if (strcmp(pp, "no-suspend-resume") == 0) {
@@ -4784,7 +4783,7 @@ e_pm_props(dev_info_t *dip)
 			    "%s property value '%s'", PM_NAME(dip),
 			    PM_ADDR(dip), "pm-hardware-state", pp);
 		}
-		kmem_free(pp, len);
+		ddi_prop_free(pp);
 	}
 	/*
 	 * This next segment (PMC_WANTS_NOTIFY) is in
@@ -4803,8 +4802,8 @@ e_pm_props(dev_info_t *dip)
 	/*
 	 * Is the device a CPU device?
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, propflag, "pm-class",
-	    (caddr_t)&pp, &len) == DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, propflag, "pm-class",
+	    &pp) == DDI_PROP_SUCCESS) {
 		if (strcmp(pp, "CPU") == 0) {
 			flags |= PMC_CPU_DEVICE;
 		} else {
@@ -4812,7 +4811,7 @@ e_pm_props(dev_info_t *dip)
 			    "%s property value '%s'", PM_NAME(dip),
 			    PM_ADDR(dip), "pm-class", pp);
 		}
-		kmem_free(pp, len);
+		ddi_prop_free(pp);
 	}
 	/* devfs single threads us */
 	DEVI(dip)->devi_pm_flags |= flags;

@@ -1782,8 +1782,11 @@ ql_adm_adapter_info(ql_adapter_state_t *ha, ql_adm_op_t *dop, int mode)
 	bzero(hba.fcode_ver, sizeof (hba.fcode_ver));
 
 	/*LINTED [Solaris DDI_DEV_T_ANY Lint warning]*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	rval = ddi_getlongprop(DDI_DEV_T_ANY, ha->dip,
 	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "version", (caddr_t)&dp, &i);
+#pragma GCC diagnostic pop
 	length = i;
 	if (rval != DDI_PROP_SUCCESS) {
 		EL(ha, "failed, ddi_getlongprop=%xh\n", rval);

@@ -1916,7 +1916,7 @@ pcie_init_bus(dev_info_t *dip, pcie_req_id_t bdf, uint8_t flags)
 {
 	uint16_t	status, base, baseptr, num_cap;
 	uint32_t	capid;
-	int		range_size;
+	uint_t		range_size;
 	pcie_bus_t	*bus_p = NULL;
 	dev_info_t	*rcdip;
 	dev_info_t	*pdip;
@@ -2105,15 +2105,17 @@ initial_done:
 	/* Save the Range information if device is a switch/bridge */
 	if (PCIE_IS_BDG(bus_p)) {
 		/* get "bus_range" property */
-		range_size = sizeof (pci_bus_range_t);
-		if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-		    "bus-range", (caddr_t)&bus_p->bus_bus_range, &range_size)
+		int *br;
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+		    DDI_PROP_DONTPASS, "bus-range", &br, &range_size)
 		    != DDI_PROP_SUCCESS) {
 			errstr = "Cannot find \"bus-range\" property";
 			cmn_err(CE_WARN,
 			    "PCIE init err info failed BDF 0x%x:%s\n",
 			    bus_p->bus_bdf, errstr);
 		}
+		memcpy(&bus_p->bus_bus_range, br, sizeof (pci_bus_range_t));
+		ddi_prop_free(br);
 
 		/* get secondary bus number */
 		rcdip = pcie_get_rc_dip(dip);
@@ -2123,20 +2125,28 @@ initial_done:
 		    bus_p->bus_bdf, PCI_BCNF_SECBUS);
 
 		/* Get "ranges" property */
-		if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-		    "ranges", (caddr_t)&bus_p->bus_addr_ranges,
-		    &bus_p->bus_addr_entries) != DDI_PROP_SUCCESS)
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+		    DDI_PROP_DONTPASS, "ranges",
+		    (int **)&bus_p->bus_addr_ranges,
+		    &bus_p->bus_addr_entries) != DDI_PROP_SUCCESS) {
 			bus_p->bus_addr_entries = 0;
-		bus_p->bus_addr_entries /= sizeof (ppb_ranges_t);
+		} else {
+			bus_p->bus_addr_entries =
+			    CELLS_1275_TO_BYTES(bus_b->bus_addr_entries);
+			bus_p->bus_addr_entries /= sizeof (ppb_ranges_t);
+		}
 	}
 
 	/* save "assigned-addresses" property array, ignore failues */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "assigned-addresses", (caddr_t)&bus_p->bus_assigned_addr,
-	    &bus_p->bus_assigned_entries) == DDI_PROP_SUCCESS)
-		bus_p->bus_assigned_entries /= sizeof (pci_regspec_t);
-	else
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "assigned-addresses", (int **)&bus_p->bus_assigned_addr,
+	    &bus_p->bus_assigned_entries) != DDI_PROP_SUCCESS) {
 		bus_p->bus_assigned_entries = 0;
+	} else {
+		bus_p->bus_assigned_entries =
+		    CELLS_1275_TO_BYTES(bus_p->bus_assigned_entries);
+		bus_p->bus_assigned_entries /= sizeof (pci_regspec_t);
+	}
 
 	pcie_init_pfd(dip);
 
@@ -2178,10 +2188,8 @@ pcie_fini_bus(dev_info_t *dip, uint8_t flags)
 			bus_p->bus_fab = NULL;
 		}
 
-		kmem_free(bus_p->bus_assigned_addr,
-		    (sizeof (pci_regspec_t) * bus_p->bus_assigned_entries));
-		kmem_free(bus_p->bus_addr_ranges,
-		    (sizeof (ppb_ranges_t) * bus_p->bus_addr_entries));
+		ddi_prop_free(bus_p->bus_assigned_addr);
+		ddi_prop_free(bus_p->bus_addr_ranges);
 		/* zero out the fields that have been destroyed */
 		bus_p->bus_assigned_addr = NULL;
 		bus_p->bus_addr_ranges = NULL;

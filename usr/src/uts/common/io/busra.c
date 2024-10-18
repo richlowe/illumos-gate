@@ -763,7 +763,7 @@ isa_resource_setup()
 		uint32_t	len;
 	} *memrange;
 	uint32_t *irq;
-	int proplen;
+	uint_t proplen;
 	int i, len;
 	int maxrange;
 	ndi_ra_request_t req;
@@ -796,9 +796,11 @@ isa_resource_setup()
 
 	(void) ndi_ra_free(usedpdip, 0, 0xffff + 1,  NDI_RA_TYPE_IO, 0);
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, used, DDI_PROP_DONTPASS,
-	    "io-space", (caddr_t)&iorange, &proplen) == DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, used, DDI_PROP_DONTPASS,
+	    "io-space", (int **)&iorange, &proplen) == DDI_SUCCESS) {
+		proplen = CELLS_1275_TO_BYTES(proplen);
 		maxrange = proplen / sizeof (struct iorange);
+
 		/* remove the "used" I/O resources */
 		for (i = 0; i < maxrange; i++) {
 			bzero((caddr_t)&req, sizeof (req));
@@ -809,7 +811,7 @@ isa_resource_setup()
 			    NDI_RA_TYPE_IO, 0);
 		}
 
-		kmem_free((caddr_t)iorange, proplen);
+		ddi_prop_free(iorange);
 	}
 
 	if (ndi_ra_map_setup(usedpdip, NDI_RA_TYPE_MEM) == NDI_FAILURE) {
@@ -820,9 +822,11 @@ isa_resource_setup()
 	(void) ndi_ra_free(usedpdip, 0, ((uint64_t)((uint32_t)~0)) + 1,
 	    NDI_RA_TYPE_MEM, 0);
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, used, DDI_PROP_DONTPASS,
-	    "device-memory", (caddr_t)&memrange, &proplen) == DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, used, DDI_PROP_DONTPASS,
+	    "device-memory", (int **)&memrange, &proplen) == DDI_SUCCESS) {
+		proplen = CELLS_1275_TO_BYTES(proplen);
 		maxrange = proplen / sizeof (struct memrange);
+
 		/* remove the "used" memory resources */
 		for (i = 0; i < maxrange; i++) {
 			bzero((caddr_t)&req, sizeof (req));
@@ -833,7 +837,7 @@ isa_resource_setup()
 			    NDI_RA_TYPE_MEM, 0);
 		}
 
-		kmem_free((caddr_t)memrange, proplen);
+		ddi_prop_free(memrange);
 	}
 
 	if (ndi_ra_map_setup(usedpdip, NDI_RA_TYPE_INTR) == NDI_FAILURE) {
@@ -860,10 +864,11 @@ isa_resource_setup()
 	    NDI_RA_TYPE_INTR, 0);
 #endif
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, used, DDI_PROP_DONTPASS,
-	    "interrupts", (caddr_t)&irq, &proplen) == DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, used, DDI_PROP_DONTPASS,
+	    "interrupts", (int **)&irq, &proplen) == DDI_SUCCESS) {
 		/* Initialize available interrupts by negating the used */
-		len = (proplen / sizeof (uint32_t));
+		proplen = CELLS_1275_TO_BYTES(proplen);
+		len = proplen / sizeof (uint32_t);
 		for (i = 0; i < len; i++) {
 			bzero((caddr_t)&req, sizeof (req));
 			req.ra_addr = (uint64_t)irq[i];
@@ -872,7 +877,7 @@ isa_resource_setup()
 			(void) ndi_ra_alloc(usedpdip, &req, &retbase, &retlen,
 			    NDI_RA_TYPE_INTR, 0);
 		}
-		kmem_free((caddr_t)irq, proplen);
+		ddi_prop_free(irq);
 	}
 
 #ifdef BUSRA_DEBUG
@@ -944,7 +949,8 @@ int
 pci_resource_setup(dev_info_t *dip)
 {
 	pci_regspec_t *regs;
-	int rlen, rcount, i;
+	uint_t rlen;
+	int rcount, i;
 	char bus_type[16] = "(unknown)";
 	int len;
 	struct busnum_ctrl ctrl;
@@ -1028,8 +1034,8 @@ pci_resource_setup(dev_info_t *dip)
 	}
 
 	/* read the "available" property if it is available */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "available", (caddr_t)&regs, &rlen) == DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "available", (int **)&regs, &rlen) == DDI_SUCCESS) {
 		/*
 		 * Remove "available" property as the entries will be
 		 * re-created in ndi_ra_free() below, note prom based
@@ -1041,6 +1047,7 @@ pci_resource_setup(dev_info_t *dip)
 		 * create the available resource list for both memory and
 		 * io space
 		 */
+		rlen = CELLS_1275_TO_BYTES(rlen);
 		rcount = rlen / sizeof (pci_regspec_t);
 		for (i = 0; i < rcount; i++) {
 			switch (PCI_REG_ADDR_G(regs[i].pci_phys_hi)) {
@@ -1080,17 +1087,21 @@ pci_resource_setup(dev_info_t *dip)
 				break;
 			}
 		}
-		kmem_free(regs, rlen);
+		ddi_prop_free(regs);
 	}
 
 	/*
 	 * update resource map for available bus numbers if the node
 	 * has available-bus-range or bus-range property.
 	 */
-	len = sizeof (struct bus_range);
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "available-bus-range", (caddr_t)&pci_bus_range, &len) ==
-	    DDI_SUCCESS) {
+	int *abr;
+	uint_t abrlen;
+
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "available-bus-range", &abr, &abrlen) == DDI_SUCCESS) {
+		memcpy(&pci_bus_range, abr, sizeof (struct bus_range));
+		ddi_prop_free(abr);
+
 		/*
 		 * Add bus numbers in the range to the free list.
 		 */
@@ -1106,10 +1117,12 @@ pci_resource_setup(dev_info_t *dip)
 		 * are any of those bus numbers already in use. If so, we can
 		 * reclaim them.
 		 */
-		len = sizeof (struct bus_range);
-		if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip,
-		    DDI_PROP_DONTPASS, "bus-range", (caddr_t)&pci_bus_range,
-		    &len) == DDI_SUCCESS) {
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+		    DDI_PROP_DONTPASS, "bus-range", &abr,
+		    &abrlen) == DDI_SUCCESS) {
+			memcpy(&pci_bus_range, abr, sizeof (struct bus_range));
+			ddi_prop_free(abr);
+
 			if (pci_bus_range.lo != pci_bus_range.hi) {
 				/*
 				 * Add bus numbers other than the secondary
@@ -1178,9 +1191,14 @@ claim_pci_busnum(dev_info_t *dip, void *arg)
 		return (DDI_WALK_PRUNECHILD);
 
 	/* look for the bus-range property */
-	len = sizeof (struct bus_range);
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "bus-range", (caddr_t)&pci_bus_range, &len) == DDI_SUCCESS) {
+	uint_t arblen;
+	int *arb;
+
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "bus-range", &arb, &arblen) == DDI_SUCCESS) {
+		memcpy(&pci_bus_range, arb, sizeof (struct bus_range));
+		ddi_prop_free(arb);
+
 		if ((pci_bus_range.lo >= ctrl->range->lo) &&
 		    (pci_bus_range.hi <= ctrl->range->hi)) {
 
@@ -1329,8 +1347,8 @@ pci_get_available_prop(dev_info_t *dip, uint64_t base, uint64_t len,
     char *busra_type)
 {
 	pci_regspec_t	*regs, *newregs;
-	uint_t		status;
-	int		rlen, rcount;
+	uint_t		status, rlen;
+	int		rcount;
 	int		i, j, k;
 	uint64_t	dlen;
 	boolean_t	found = B_FALSE;
@@ -1344,9 +1362,11 @@ pci_get_available_prop(dev_info_t *dip, uint64_t base, uint64_t len,
 	if (!is_pcie_fabric(dip))
 		return (DDI_SUCCESS);
 
-	status = ddi_getlongprop(DDI_DEV_T_ANY, dip,
+	status = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS | DDI_PROP_NOTPROM,
-	    "available", (caddr_t)&regs, &rlen);
+	    "available", (int **)&regs, &rlen);
+
+	rlen = CELLS_1275_TO_BYTES(rlen);
 
 	ASSERT(status == DDI_SUCCESS);
 	if (status != DDI_SUCCESS)
@@ -1444,7 +1464,7 @@ done:
 		    "resource from dip %p : base 0x%" PRIx64 ", len 0x%" PRIX64
 		    ", type 0x%x\n", (void *)dip, base, len, type);
 		kmem_free(newregs, rlen + sizeof (pci_regspec_t));
-		kmem_free(regs, rlen);
+		ddi_prop_free(regs);
 
 		return (DDI_FAILURE);
 	}
@@ -1467,7 +1487,7 @@ done:
 	}
 
 	kmem_free(newregs, rlen + sizeof (pci_regspec_t));
-	kmem_free(regs, rlen);
+	ddi_prop_free(regs);
 
 	return (DDI_SUCCESS);
 }
@@ -1480,8 +1500,8 @@ pci_put_available_prop(dev_info_t *dip, uint64_t base, uint64_t len,
     char *busra_type)
 {
 	pci_regspec_t	*regs, *newregs;
-	uint_t		status;
-	int		rlen, rcount;
+	uint_t		status, rlen;
+	int		rcount;
 	int		i, j, k;
 	int		matched = 0;
 	uint64_t	orig_base = base;
@@ -1496,9 +1516,11 @@ pci_put_available_prop(dev_info_t *dip, uint64_t base, uint64_t len,
 	if (!is_pcie_fabric(dip))
 		return (DDI_SUCCESS);
 
-	status = ddi_getlongprop(DDI_DEV_T_ANY, dip,
+	status = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
 	    DDI_PROP_DONTPASS | DDI_PROP_NOTPROM,
-	    "available", (caddr_t)&regs, &rlen);
+	    "available", (int **)&regs, &rlen);
+
+	rlen = CELLS_1275_TO_BYTES(rlen);
 
 	switch (status) {
 		case DDI_PROP_NOT_FOUND:
@@ -1659,7 +1681,7 @@ copy_entry:
 	    (j * sizeof (pci_regspec_t)) / sizeof (int));
 
 	kmem_free(newregs, rlen + sizeof (pci_regspec_t));
-	kmem_free(regs, rlen);
+	ddi_prop_free(regs);
 	return (DDI_SUCCESS);
 
 not_found:
@@ -1688,7 +1710,7 @@ not_found:
 
 failure:
 	kmem_free(newregs, rlen + sizeof (pci_regspec_t));
-	kmem_free(regs, rlen);
+	ddi_prop_free(regs);
 	return (DDI_FAILURE);
 }
 

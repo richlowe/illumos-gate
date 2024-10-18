@@ -757,8 +757,8 @@ cpqary3_update_ctlrdetails(cpqary3_t *cpqary3p, uint32_t *cleanstatus)
 	uint8_t			mem_64_bar0_set = 0;
 	uint8_t			mem_bar1_set = 0;
 	uint8_t			mem_64_bar1_set = 0;
-	int32_t			reglen;
-	uint32_t		*regp;
+	uint_t			reglen;
+	int			*regp;
 	uint32_t		mem_bar0 = 0;
 	uint32_t		mem_64_bar0;
 	uint32_t		mem_bar1 = 0;
@@ -790,11 +790,13 @@ cpqary3_update_ctlrdetails(cpqary3_t *cpqary3p, uint32_t *cleanstatus)
 	 * Get the HW Configuration
 	 * Get Bus #, Dev # and Func # for this device
 	 * Free the memory that regp points towards after the
-	 * ddi_getlongprop() call
+	 * ddi_prop_lookup_int_array() call
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_NONE, cpqary3p->dip, DDI_PROP_DONTPASS,
-	    "reg", (caddr_t)&regp, &reglen) != DDI_PROP_SUCCESS)
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_NONE, cpqary3p->dip,
+	    DDI_PROP_DONTPASS, "reg", &regp, &reglen) != DDI_PROP_SUCCESS)
 		return (CPQARY3_FAILURE);
+
+	reglen = CELLS_1275_TO_BYTES(reglen);
 
 	cpqary3p->bus = PCI_REG_BUS_G(*regp);
 	cpqary3p->dev = PCI_REG_DEV_G(*regp);
@@ -830,7 +832,7 @@ cpqary3_update_ctlrdetails(cpqary3_t *cpqary3p, uint32_t *cleanstatus)
 	mem_bar0 = mem_64_bar0;
 	mem_bar1 = mem_64_bar1;
 
-	MEM_SFREE(regp, reglen);
+	ddi_prop_free(regp);
 
 	/*
 	 * Setup resources to access the Local PCI Bus

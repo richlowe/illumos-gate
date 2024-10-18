@@ -1919,10 +1919,12 @@ consconfig_setmodes(dev_t dev, struct termios *termiosp)
 	(void) strcpy(name, "ttya-mode");	/* name of option we want */
 	name[3] = 'a' + i;			/* Adjust to correct line */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, ddi_root_node(), 0, name,
 	    buf, &len) != DDI_PROP_SUCCESS)
 		return (1);	/* if no such option, just return */
-
+#pragma GCC diagnostic pop
 	/*
 	 * The IEEE 1275 standard specifies that /aliases string property
 	 * values should be null-terminated.  Unfortunately the reality

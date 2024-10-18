@@ -913,10 +913,8 @@ fp_init_symbolic_names(fc_local_port_t *port)
 static int
 fp_attach_handler(dev_info_t *dip)
 {
-	int			rval;
 	int			instance;
 	int			port_num;
-	int			port_len;
 	char			name[30];
 	char			i_pwwn[17];
 	fp_cmd_t		*pkt;
@@ -928,11 +926,11 @@ fp_attach_handler(dev_info_t *dip)
 	char pwwn[17], nwwn[17];
 
 	instance = ddi_get_instance(dip);
-	port_len = sizeof (port_num);
-	rval = ddi_prop_op(DDI_DEV_T_ANY, dip, PROP_LEN_AND_VAL_BUF,
-	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "port",
-	    (caddr_t)&port_num, &port_len);
-	if (rval != DDI_SUCCESS) {
+
+	port_num = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "port", -1);
+
+	if (port_num == -1) {
 		cmn_err(CE_WARN, "fp(%d): No port property in devinfo",
 		    instance);
 		return (DDI_FAILURE);
@@ -7581,14 +7579,12 @@ fp_fciocmd(fc_local_port_t *port, intptr_t data, int mode, fcio_t *fcio)
 		} else {
 			fc_local_port_t *nextport = tmpport->fp_port_next;
 			fc_local_port_t *prevport = tmpport->fp_port_prev;
-			int portlen, portindex, ret;
+			int portindex;
 
-			portlen = sizeof (portindex);
-			ret = ddi_prop_op(DDI_DEV_T_ANY,
-			    tmpport->fp_port_dip, PROP_LEN_AND_VAL_BUF,
-			    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "port",
-			    (caddr_t)&portindex, &portlen);
-			if (ret != DDI_SUCCESS) {
+			portindex = ddi_prop_get_int(DDI_DEV_T_ANY,
+			    tmpport->fp_port_dip, DDI_PROP_DONTPASS, "port",
+			    -1);
+			if (portindex == -1) {
 				rval = EFAULT;
 				break;
 			}

@@ -691,7 +691,7 @@ pcieb_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
     void *arg, void *result)
 {
 	pci_regspec_t *drv_regp;
-	int	reglen;
+	uint_t	reglen;
 	int	rn;
 	int	totreg;
 	pcieb_devstate_t *pcieb = ddi_get_soft_state(pcieb_state,
@@ -819,10 +819,13 @@ pcieb_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 	}
 
 	*(int *)result = 0;
-	if (ddi_getlongprop(DDI_DEV_T_ANY, rdip,
-	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "reg", (caddr_t)&drv_regp,
+
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
+	    DDI_PROP_DONTPASS, "reg", (int **)&drv_regp,
 	    &reglen) != DDI_SUCCESS)
 		return (DDI_FAILURE);
+
+	reglen = CELLS_1275_TO_BYTES(reglen);
 
 	totreg = reglen / sizeof (pci_regspec_t);
 	if (ctlop == DDI_CTLOPS_NREGS)
@@ -830,7 +833,7 @@ pcieb_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 	else if (ctlop == DDI_CTLOPS_REGSIZE) {
 		rn = *(int *)arg;
 		if (rn >= totreg) {
-			kmem_free(drv_regp, reglen);
+			ddi_prop_free(drv_regp);
 			return (DDI_FAILURE);
 		}
 
@@ -838,7 +841,7 @@ pcieb_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
 		    ((uint64_t)drv_regp[rn].pci_size_hi << 32);
 	}
 
-	kmem_free(drv_regp, reglen);
+	ddi_prop_free(drv_regp);
 	return (DDI_SUCCESS);
 }
 

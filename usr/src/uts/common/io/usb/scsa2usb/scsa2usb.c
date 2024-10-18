@@ -2292,12 +2292,11 @@ scsa2usb_scsi_tgt_init(dev_info_t *dip, dev_info_t *cdip,
 	scsa2usb_state_t *scsa2usbp = (scsa2usb_state_t *)
 	    tran->tran_hba_private;
 	int lun;
-	int t_len = sizeof (lun);
 
-	if (ddi_prop_op(DDI_DEV_T_ANY, cdip, PROP_LEN_AND_VAL_BUF,
-	    DDI_PROP_DONTPASS|DDI_PROP_CANSLEEP, "lun", (caddr_t)&lun,
-	    &t_len) != DDI_PROP_SUCCESS) {
+	lun = ddi_prop_get_int(DDI_DEV_T_ANY, cdip,
+	    DDI_PROP_DONTPASS, "lun", -1);
 
+	if (lun == -1) {
 		return (DDI_FAILURE);
 	}
 
@@ -2361,18 +2360,16 @@ scsa2usb_scsi_tgt_free(dev_info_t *hba_dip, dev_info_t *cdip,
 	scsa2usb_state_t *scsa2usbp = (scsa2usb_state_t *)
 	    tran->tran_hba_private;
 	int lun;
-	int t_len = sizeof (lun);
 
 	/* is this our child? */
 	if (scsa2usb_is_usb(cdip) == 0) {
-
 		return;
 	}
 
-	if (ddi_prop_op(DDI_DEV_T_ANY, cdip, PROP_LEN_AND_VAL_BUF,
-	    DDI_PROP_DONTPASS|DDI_PROP_CANSLEEP, "lun", (caddr_t)&lun,
-	    &t_len) != DDI_PROP_SUCCESS) {
+	lun = ddi_prop_get_int(DDI_DEV_T_ANY, cdip,
+	    DDI_PROP_DONTPASS, "lun", -1);
 
+	if (lun == -1) {
 		return;
 	}
 

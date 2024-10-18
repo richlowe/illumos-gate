@@ -202,7 +202,7 @@ static	uint_t hmeintr(caddr_t);
 static	void hmereclaim(struct hme *);
 static	int hmeinit(struct hme *);
 static	void hmeuninit(struct hme *hmep);
-static 	mblk_t *hmeread(struct hme *, hmebuf_t *, uint32_t);
+static	mblk_t *hmeread(struct hme *, hmebuf_t *, uint32_t);
 static	void hmesavecntrs(struct hme *);
 static	void hme_fatal_err(struct hme *, uint_t);
 static	void hme_nonfatal_err(struct hme *, uint_t);
@@ -402,7 +402,7 @@ static struct modlinkage modlinkage = {
 
 #define	BMAC_DEFAULT_JAMSIZE	(0x04)		/* jamsize equals 4 */
 #define	BMAC_LONG_JAMSIZE	(0x10)		/* jamsize equals 0x10 */
-static	int 	jamsize = BMAC_DEFAULT_JAMSIZE;
+static	int	jamsize = BMAC_DEFAULT_JAMSIZE;
 
 
 /*
@@ -937,7 +937,7 @@ hme_get_vpd_props(dev_info_t *dip)
  */
 
 typedef struct {
-	struct hme 		*hmep;
+	struct hme		*hmep;
 	dev_info_t		*parent;
 	uint8_t			bus, dev;
 	ddi_acc_handle_t	acch;
@@ -1163,9 +1163,8 @@ hmeattach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
 	struct hme *hmep;
 	mac_register_t *macp = NULL;
-	int 	regno;
+	int	regno;
 	int hm_rev = 0;
-	int prop_len = sizeof (int);
 	ddi_acc_handle_t cfg_handle;
 	struct {
 		uint16_t vendorid;
@@ -1206,7 +1205,7 @@ hmeattach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	 * Might as well set up elements of data structure
 	 */
 	hmep->dip =		dip;
-	hmep->instance = 	ddi_get_instance(dip);
+	hmep->instance =	ddi_get_instance(dip);
 	hmep->pagesize =	ddi_ptob(dip, (ulong_t)1); /* IOMMU PSize */
 
 	/*
@@ -1384,9 +1383,8 @@ hmeattach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 
 	/* NEW routine to get the properties */
 
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, hmep->dip, 0, "hm-rev",
-	    (caddr_t)&hm_rev, &prop_len) == DDI_PROP_SUCCESS) {
-
+	if ((hm_rev = ddi_prop_get_int(DDI_DEV_T_ANY, hmep->dip, 0, "hm-rev",
+	    -1)) != -1) {
 		hmep->asic_rev = hm_rev;
 		hmeget_hm_rev_property(hmep);
 	} else {
@@ -1676,7 +1674,6 @@ hmeinit_xfer_params(struct hme *hmep)
 {
 	int hme_ipg1_conf, hme_ipg2_conf;
 	int hme_ipg0_conf, hme_lance_mode_conf;
-	int prop_len = sizeof (int);
 	dev_info_t *dip;
 
 	dip = hmep->dip;
@@ -1693,23 +1690,23 @@ hmeinit_xfer_params(struct hme *hmep)
 	/*
 	 * Get the parameter values configured in .conf file.
 	 */
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, 0, "ipg1",
-	    (caddr_t)&hme_ipg1_conf, &prop_len) == DDI_PROP_SUCCESS) {
+	if ((hme_ipg1_conf = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    0, "ipg1", 0)) != 0) {
 		hmep->hme_ipg1 = hme_ipg1_conf & HME_MASK_8BIT;
 	}
 
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, 0, "ipg2",
-	    (caddr_t)&hme_ipg2_conf, &prop_len) == DDI_PROP_SUCCESS) {
+	if ((hme_ipg2_conf = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    0, "ipg2", 0)) != 0) {
 		hmep->hme_ipg2 = hme_ipg2_conf & HME_MASK_8BIT;
 	}
 
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, 0, "ipg0",
-	    (caddr_t)&hme_ipg0_conf, &prop_len) == DDI_PROP_SUCCESS) {
+	if ((hme_ipg0_conf = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    0, "ipg0", 0)) != 0) {
 		hmep->hme_ipg0 = hme_ipg0_conf & HME_MASK_5BIT;
 	}
 
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip, 0, "lance_mode",
-	    (caddr_t)&hme_lance_mode_conf, &prop_len) == DDI_PROP_SUCCESS) {
+	if ((hme_lance_mode_conf = ddi_prop_get_int(DDI_DEV_T_ANY, dip,
+	    0, "lance_mode", 0)) != 0) {
 		hmep->hme_lance_mode = hme_lance_mode_conf & HME_MASK_1BIT;
 	}
 
@@ -3565,8 +3562,8 @@ hmesavecntrs(struct hme *hmep)
 static void
 hme_setup_mac_address(struct hme *hmep, dev_info_t *dip)
 {
-	char	*prop;
-	int	prop_len = sizeof (int);
+	uchar_t	*prop;
+	uint_t	prop_len;
 
 	hmep->hme_addrflags = 0;
 
@@ -3575,9 +3572,8 @@ hme_setup_mac_address(struct hme *hmep, dev_info_t *dip)
 	 * If it is present, save it as the "factory-address"
 	 * for this adapter.
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "local-mac-address",
-	    (caddr_t)&prop, &prop_len) == DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_byte_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "local-mac-address", &prop, &prop_len) == DDI_PROP_SUCCESS) {
 		if (prop_len == ETHERADDRL) {
 			hmep->hme_addrflags = HME_FACTADDR_PRESENT;
 			ether_bcopy(prop, &hmep->hme_factaddr);
@@ -3585,21 +3581,21 @@ hme_setup_mac_address(struct hme *hmep, dev_info_t *dip)
 			    "Local Ethernet address = %s",
 			    ether_sprintf(&hmep->hme_factaddr));
 		}
-		kmem_free(prop, prop_len);
+		ddi_prop_free(prop);
 	}
 
 	/*
 	 * Check if the adapter has published "mac-address" property.
 	 * If it is present, use it as the mac address for this device.
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "mac-address", (caddr_t)&prop, &prop_len) == DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_byte_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "mac-address", &prop, &prop_len) == DDI_PROP_SUCCESS) {
 		if (prop_len >= ETHERADDRL) {
 			ether_bcopy(prop, &hmep->hme_ouraddr);
-			kmem_free(prop, prop_len);
+			ddi_prop_free(prop);
 			return;
 		}
-		kmem_free(prop, prop_len);
+		ddi_prop_free(prop);
 	}
 
 #ifdef	__sparc

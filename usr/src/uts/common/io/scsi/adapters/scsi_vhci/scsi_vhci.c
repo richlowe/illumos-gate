@@ -4539,11 +4539,13 @@ vhci_parse_mpxio_lb_options(dev_info_t *dip, dev_info_t *cdip,
 	int			region_size = -1;
 	client_lb_t		load_balance;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, datanameptr,
 	    (caddr_t)&config_list, &config_list_len) != DDI_PROP_SUCCESS) {
 		return;
 	}
-
+#pragma GCC diagnostic pop
 	list_len = config_list_len;
 	next_entry = config_list;
 	while (config_list_len > 0) {
@@ -4678,6 +4680,8 @@ vhci_get_device_type_mpxio_options(dev_info_t *dip, dev_info_t *cdip,
 	 * with those vids in the list if there is a match, lookup
 	 * the mpxio-options value
 	 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    MPXIO_OPTIONS_LIST,
 	    (caddr_t)&config_list, &config_list_len) == DDI_PROP_SUCCESS) {
@@ -4723,6 +4727,7 @@ vhci_get_device_type_mpxio_options(dev_info_t *dip, dev_info_t *cdip,
 			kmem_free(config_list, config_list_len);
 		}
 	}
+#pragma GCC diagnostic pop
 }
 
 static int

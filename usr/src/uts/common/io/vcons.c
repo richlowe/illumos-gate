@@ -174,6 +174,8 @@ vt_init_ttycommon(tty_common_t *pcommon)
 	 * These are stored as a property in the
 	 * "options" node.
 	 */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 	if (ddi_getlongprop(DDI_DEV_T_ANY,
 	    ddi_root_node(), 0, "ttymodes",
 	    (caddr_t)&termiosp, &len) == DDI_PROP_SUCCESS) {
@@ -192,7 +194,7 @@ vt_init_ttycommon(tty_common_t *pcommon)
 		cmn_err(CE_WARN,
 		    "wc: Couldn't get ttymodes property!");
 	}
-
+#pragma GCC diagnostic pop
 	pcommon->t_iocpending = NULL;
 }
 

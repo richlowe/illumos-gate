@@ -298,14 +298,12 @@ ql_populate_hba_fru_details(ql_adapter_state_t *ha,
 
 	if (strlen(attrs->option_rom_version) == 0) {
 		int		rval = -1;
-		uint32_t	i = 0;
-		caddr_t		fcode_ver_buf = NULL;
+		char		*fcode_ver_buf = NULL;
 
 		if (CFG_IST(ha, CFG_CTRL_22XX)) {
 			/*LINTED [Solaris DDI_DEV_T_ANY Lint warning]*/
-			rval = ddi_getlongprop(DDI_DEV_T_ANY, ha->dip,
-			    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "version",
-			    (caddr_t)&fcode_ver_buf, (int32_t *)&i);
+			rval = ddi_prop_lookup_string(DDI_DEV_T_ANY, ha->dip,
+			    DDI_PROP_DONTPASS, "version", &fcode_ver_buf);
 		}
 
 		(void) snprintf(attrs->option_rom_version,
@@ -314,9 +312,8 @@ ql_populate_hba_fru_details(ql_adapter_state_t *ha,
 		    "No boot image detected"));
 
 		if (fcode_ver_buf != NULL) {
-			kmem_free(fcode_ver_buf, (size_t)i);
+			ddi_prop_free(fcode_ver_buf);
 		}
-
 	}
 
 	attrs->vendor_specific_id = ha->adapter_features;
@@ -622,7 +619,7 @@ ql_get_basedev_len(ql_adapter_state_t *ha, uint32_t *basedev_len,
  *	ha instance has same base device path as input's.
  *
  * Input:
- *	myha 		= current adapter state pointer.
+ *	myha		= current adapter state pointer.
  *	mybasedev_len	= Length of the base device in the
  *			  device path name.
  *

@@ -273,7 +273,7 @@ static int
 cpr_is_real_device(dev_info_t *dip)
 {
 	struct regspec *regbuf;
-	int length;
+	uint_t length;
 	int rc;
 
 	if (ddi_get_driver(dip) == NULL)
@@ -290,13 +290,13 @@ cpr_is_real_device(dev_info_t *dip)
 	/*
 	 * now the general case
 	 */
-	rc = ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "reg",
-	    (caddr_t)&regbuf, &length);
+	rc = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, "reg", (int **)&regbuf, &length);
 	ASSERT(rc != DDI_PROP_NO_MEMORY);
 	if (rc != DDI_PROP_SUCCESS) {
 		return (0);
 	} else {
-		kmem_free((caddr_t)regbuf, length);
+		ddi_prop_free(regbuf);
 		return (1);
 	}
 }

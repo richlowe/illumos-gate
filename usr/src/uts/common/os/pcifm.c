@@ -407,7 +407,7 @@ pci_ereport_setup(dev_info_t *dip)
 	uint8_t pci_hdr_type;
 	uint16_t pci_status;
 	pci_regspec_t *pci_rp;
-	int32_t len;
+	uint_t len;
 	uint32_t phys_hi;
 
 	/*
@@ -455,10 +455,10 @@ pci_ereport_setup(dev_info_t *dip)
 		    sizeof (pci_bdg_error_regs_t), KM_SLEEP);
 	}
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "reg",
-	    (caddr_t)&pci_rp, &len) == DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "reg", (int **)&pci_rp, &len) == DDI_SUCCESS) {
 		phys_hi = pci_rp->pci_phys_hi;
-		kmem_free(pci_rp, len);
+		ddi_prop_free(pci_rp);
 
 		erpt_p->pe_bdf = (uint16_t)(PCI_REG_BDFR_G(phys_hi) >>
 		    PCI_REG_FUNC_SHIFT);
@@ -1213,7 +1213,7 @@ pci_fm_ereport_post(dev_info_t *dip, const char *error_class, uint64_t ena,
 static int
 pci_check_regs(dev_info_t *dip, void *arg)
 {
-	int reglen;
+	uint_t reglen;
 	int rn;
 	int totreg;
 	pci_regspec_t *drv_regp;
@@ -1225,10 +1225,13 @@ pci_check_regs(dev_info_t *dip, void *arg)
 		 * is a valid config space address for this device - based
 		 * on pci_phys_hi of the config space entry in reg property.
 		 */
-		if (ddi_getlongprop(DDI_DEV_T_NONE, dip, DDI_PROP_DONTPASS,
-		    "reg", (caddr_t)&drv_regp, &reglen) != DDI_SUCCESS)
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_NONE, dip,
+		    DDI_PROP_DONTPASS, "reg", (int **)&drv_regp,
+		    &reglen) != DDI_SUCCESS) {
 			return (DDI_WALK_CONTINUE);
+		}
 
+		reglen = CELLS_1275_TO_BYTES(reglen);
 		totreg = reglen / sizeof (pci_regspec_t);
 		for (rn = 0; rn < totreg; rn++) {
 			if (tgt_err->tgt_pci_space ==
@@ -1238,21 +1241,24 @@ pci_check_regs(dev_info_t *dip, void *arg)
 			    (drv_regp[rn].pci_phys_hi & (PCI_REG_BUS_M |
 			    PCI_REG_DEV_M | PCI_REG_FUNC_M))) {
 				tgt_err->tgt_dip = dip;
-				kmem_free(drv_regp, reglen);
+				ddi_prop_free(drv_regp);
 				return (DDI_WALK_TERMINATE);
 			}
 		}
-		kmem_free(drv_regp, reglen);
+		ddi_prop_free(drv_regp);
 	} else {
 		/*
 		 * for non config space, need to check reg to look
 		 * for any non-relocable mapping, otherwise check
 		 * assigned-addresses.
 		 */
-		if (ddi_getlongprop(DDI_DEV_T_NONE, dip, DDI_PROP_DONTPASS,
-		    "reg", (caddr_t)&drv_regp, &reglen) != DDI_SUCCESS)
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_NONE, dip,
+		    DDI_PROP_DONTPASS, "reg", (int **)&drv_regp,
+		    &reglen) != DDI_SUCCESS) {
 			return (DDI_WALK_CONTINUE);
+		}
 
+		reglen = CELLS_1275_TO_BYTES(reglen);
 		totreg = reglen / sizeof (pci_regspec_t);
 		for (rn = 0; rn < totreg; rn++) {
 			if ((drv_regp[rn].pci_phys_hi & PCI_RELOCAT_B) &&
@@ -1268,17 +1274,19 @@ pci_check_regs(dev_info_t *dip, void *arg)
 			    (uint64_t)drv_regp[rn].pci_size_low +
 			    ((uint64_t)drv_regp[rn].pci_size_hi << 32))) {
 				tgt_err->tgt_dip = dip;
-				kmem_free(drv_regp, reglen);
+				ddi_prop_free(drv_regp);
 				return (DDI_WALK_TERMINATE);
 			}
 		}
-		kmem_free(drv_regp, reglen);
+		ddi_prop_free(drv_regp);
 
-		if (ddi_getlongprop(DDI_DEV_T_NONE, dip, DDI_PROP_DONTPASS,
-		    "assigned-addresses", (caddr_t)&drv_regp, &reglen) !=
-		    DDI_SUCCESS)
+		if (ddi_prop_lookup_int_array(DDI_DEV_T_NONE, dip,
+		    DDI_PROP_DONTPASS, "assigned-addresses",
+		    (int **)&drv_regp, &reglen) != DDI_SUCCESS) {
 			return (DDI_WALK_CONTINUE);
+		}
 
+		reglen = CELLS_1275_TO_BYTES(reglen);
 		totreg = reglen / sizeof (pci_regspec_t);
 		for (rn = 0; rn < totreg; rn++) {
 			if ((tgt_err->tgt_pci_space == TGT_PCI_SPACE_UNKNOWN ||
@@ -1293,11 +1301,11 @@ pci_check_regs(dev_info_t *dip, void *arg)
 			    (uint64_t)drv_regp[rn].pci_size_low +
 			    ((uint64_t)drv_regp[rn].pci_size_hi << 32))) {
 				tgt_err->tgt_dip = dip;
-				kmem_free(drv_regp, reglen);
+				ddi_prop_free(drv_regp);
 				return (DDI_WALK_TERMINATE);
 			}
 		}
-		kmem_free(drv_regp, reglen);
+		ddi_prop_free(drv_regp);
 	}
 	return (DDI_WALK_CONTINUE);
 }
@@ -1338,10 +1346,11 @@ pci_check_ranges(dev_info_t *dip, void *arg)
 	uint32_t range_offset;
 	pci_ranges_t *pci_ranges, *rangep;
 	pci_bus_range_t *pci_bus_rangep;
-	int pci_ranges_length;
+	uint_t pci_ranges_length, size;
 	int nrange;
 	pci_target_err_t *tgt_err = (pci_target_err_t *)arg;
-	int i, size;
+	int i;
+
 	if (strcmp(ddi_node_name(dip), "pci") != 0 &&
 	    strcmp(ddi_node_name(dip), "pciex") != 0)
 		return (DDI_WALK_CONTINUE);
@@ -1351,8 +1360,8 @@ pci_check_ranges(dev_info_t *dip, void *arg)
 	 * node (hostbridge) which has a ranges property of type pci_ranges_t
 	 * not at pci-pci bridges.
 	 */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS, "ranges",
-	    (caddr_t)&pci_ranges, &pci_ranges_length) != DDI_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    "ranges", (int **)&pci_ranges, &pci_ranges_length) != DDI_SUCCESS) {
 		/*
 		 * no ranges property - no translation needed
 		 */
@@ -1371,6 +1380,7 @@ pci_check_ranges(dev_info_t *dip, void *arg)
 			return (DDI_WALK_TERMINATE);
 		return (DDI_WALK_PRUNECHILD);
 	}
+	pci_ranges_length = CELLS_1275_TO_BYTES(pci_ranges_length);
 	nrange = pci_ranges_length / sizeof (pci_ranges_t);
 	rangep = pci_ranges;
 
@@ -1395,9 +1405,9 @@ pci_check_ranges(dev_info_t *dip, void *arg)
 			range_offset = tgt_err->tgt_err_addr -
 			    range_parent_begin;
 			bus_num = PCI_REG_BUS_G(range_offset);
-			if (ddi_getlongprop(DDI_DEV_T_ANY, dip,
+			if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip,
 			    DDI_PROP_DONTPASS, "bus-range",
-			    (caddr_t)&pci_bus_rangep, &size) != DDI_SUCCESS) {
+			    (int **)&pci_bus_rangep, &size) != DDI_SUCCESS) {
 				continue;
 			}
 			if ((bus_num < pci_bus_rangep->lo) ||
@@ -1406,10 +1416,10 @@ pci_check_ranges(dev_info_t *dip, void *arg)
 				 * Bus number not appropriate for this
 				 * pci nexus.
 				 */
-				kmem_free(pci_bus_rangep, size);
+				ddi_prop_free(pci_bus_rangep);
 				continue;
 			}
-			kmem_free(pci_bus_rangep, size);
+			ddi_prop_free(pci_bus_rangep);
 		}
 
 		/* We have a match if we get here - compute pci address */
@@ -1428,11 +1438,11 @@ pci_check_ranges(dev_info_t *dip, void *arg)
 			ndi_devi_exit(dip);
 		}
 		if (tgt_err->tgt_dip != NULL) {
-			kmem_free(pci_ranges, pci_ranges_length);
+			ddi_prop_free(pci_ranges);
 			return (DDI_WALK_TERMINATE);
 		}
 	}
-	kmem_free(pci_ranges, pci_ranges_length);
+	ddi_prop_free(pci_ranges);
 	return (DDI_WALK_PRUNECHILD);
 }
 

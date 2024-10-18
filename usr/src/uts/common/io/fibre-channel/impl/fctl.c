@@ -2138,13 +2138,10 @@ fctl_initchild(dev_info_t *fca_dip, dev_info_t *port_dip)
 {
 	int		rval;
 	int		port_no;
-	int		port_len;
 	char		name[20];
 	fc_fca_tran_t	*tran;
 	dev_info_t	*dip;
 	int		portprop;
-
-	port_len = sizeof (port_no);
 
 	/* physical port do not has this property */
 	portprop = ddi_prop_get_int(DDI_DEV_T_ANY, port_dip,
@@ -2161,11 +2158,10 @@ fctl_initchild(dev_info_t *fca_dip, dev_info_t *port_dip)
 		return (DDI_FAILURE);
 	}
 
-	rval = ddi_prop_op(DDI_DEV_T_ANY, port_dip, PROP_LEN_AND_VAL_BUF,
-	    DDI_PROP_DONTPASS | DDI_PROP_CANSLEEP, "port",
-	    (caddr_t)&port_no, &port_len);
+	port_no = ddi_prop_get_int(DDI_DEV_T_ANY, port_dip,
+	    DDI_PROP_DONTPASS, "port", -1);
 
-	if (rval != DDI_SUCCESS) {
+	if (rval == -1) {
 		return (DDI_FAILURE);
 	}
 

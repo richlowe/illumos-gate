@@ -1231,7 +1231,7 @@ uint32_t
 pci_class_to_val(dev_info_t *rdip, char *property_name, pci_class_val_t *rec_p,
     int nrec, uint32_t default_val)
 {
-	int property_len;
+	uint_t property_len;
 	uint32_t class_code;
 	pci_class_val_t *conf;
 	uint32_t val = default_val;
@@ -1251,14 +1251,16 @@ pci_class_to_val(dev_info_t *rdip, char *property_name, pci_class_val_t *rec_p,
 
 
 	/* see if there is a more specific property specified value */
-	if (ddi_getlongprop(DDI_DEV_T_ANY, rdip, DDI_PROP_NOTPROM,
-	    property_name, (caddr_t)&conf, &property_len))
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip, DDI_PROP_NOTPROM,
+	    property_name, (int **)&conf, &property_len) != DDI_SUCCESS)
 			return (val);
+
+	property_len = CELLS_1275_TO_BYTES(property_len);
 
 	if ((property_len % sizeof (pci_class_val_t)) == 0)
 		val = pci_match_class_val(class_code, conf,
 		    property_len / sizeof (pci_class_val_t), val);
-	kmem_free(conf, property_len);
+	ddi_prop_free(conf);
 	return (val);
 }
 

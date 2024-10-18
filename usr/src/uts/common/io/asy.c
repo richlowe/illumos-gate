@@ -935,18 +935,19 @@ asy_get_bus_type(dev_info_t *devinfo)
 static int
 asy_get_io_regnum_pci(dev_info_t *devi, struct asycom *asy)
 {
-	int reglen, nregs;
-	int regnum, i;
+	uint_t reglen;
+	int regnum, i, nregs;
 	uint64_t size;
 	struct pci_phys_spec *reglist;
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
-	    "reg", (caddr_t)&reglist, &reglen) != DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+	    "reg", (int **)&reglist, &reglen) != DDI_PROP_SUCCESS) {
 		dev_err(devi, CE_WARN, "!%s: reg property"
 		    " not found in devices property list", __func__);
 		return (-1);
 	}
 
+	reglen = CELLS_1275_TO_BYTES(reglen);
 	regnum = -1;
 	nregs = reglen / sizeof (*reglist);
 	for (i = 0; i < nregs; i++) {
@@ -968,7 +969,7 @@ asy_get_io_regnum_pci(dev_info_t *devi, struct asycom *asy)
 		if (size < 8)
 			regnum = -1;
 	}
-	kmem_free(reglist, reglen);
+	ddi_prop_free(reglist);
 	return (regnum);
 }
 
@@ -976,20 +977,22 @@ static int
 asy_get_io_regnum_isa(dev_info_t *devi, struct asycom *asy)
 {
 	int regnum = -1;
-	int reglen, nregs;
+	uint_t reglen;
+	int nregs;
 	struct {
 		uint_t bustype;
 		int base;
 		int size;
 	} *reglist;
 
-	if (ddi_getlongprop(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
-	    "reg", (caddr_t)&reglist, &reglen) != DDI_PROP_SUCCESS) {
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, devi, DDI_PROP_DONTPASS,
+	    "reg", (int **)&reglist, &reglen) != DDI_PROP_SUCCESS) {
 		dev_err(devi, CE_WARN, "!%s: reg property not found "
 		    "in devices property list", __func__);
 		return (-1);
 	}
 
+	reglen = CELLS_1275_TO_BYTES(reglen);
 	nregs = reglen / sizeof (*reglist);
 
 	/*
@@ -1006,7 +1009,7 @@ asy_get_io_regnum_isa(dev_info_t *devi, struct asycom *asy)
 	if ((regnum < 0) || (reglist[regnum].size < 8))
 		regnum = -1;
 
-	kmem_free(reglist, reglen);
+	ddi_prop_free(reglist);
 
 	return (regnum);
 }
@@ -2264,6 +2267,8 @@ again:
 		 */
 		mutex_exit(&asy->asy_excl_hi);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		if (ddi_getlongprop(DDI_DEV_T_ANY, ddi_root_node(),
 		    0, "ttymodes",
 		    (caddr_t)&termiosp, &len) == DDI_PROP_SUCCESS &&
@@ -2274,6 +2279,7 @@ again:
 			asyerror(asy, CE_WARN,
 			    "couldn't get ttymodes property");
 		}
+#pragma GCC diagnostic pop
 		mutex_enter(&asy->asy_excl_hi);
 
 		/* eeprom mode support - respect properties */

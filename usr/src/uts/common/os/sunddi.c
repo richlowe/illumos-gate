@@ -9465,9 +9465,8 @@ sid_node_create(dev_info_t *pdip, devi_branch_t *bp, dev_info_t **rdipp)
 		goto fail;
 	}
 
-	len = OBP_MAXDRVNAME;
-	if (ddi_getlongprop_buf(DDI_DEV_T_ANY, dip,
-	    DDI_PROP_DONTPASS | DDI_PROP_NOTPROM, "name", nbuf, &len)
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS | DDI_PROP_NOTPROM, "name", &nbuf)
 	    != DDI_PROP_SUCCESS) {
 		cmn_err(CE_WARN, "e_ddi_branch_create: devinfo node %p has"
 		    "no name property", (void *)dip);
@@ -9478,10 +9477,11 @@ sid_node_create(dev_info_t *pdip, devi_branch_t *bp, dev_info_t **rdipp)
 	if (ndi_devi_set_nodename(dip, nbuf, 0) != NDI_SUCCESS) {
 		cmn_err(CE_WARN, "e_ddi_branch_create: cannot set name (%s)"
 		    " for devinfo node %p", nbuf, (void *)dip);
+
 		goto fail;
 	}
 
-	kmem_free(nbuf, OBP_MAXDRVNAME);
+	ddi_prop_free(nbuf);
 
 	/*
 	 * Ignore bind failures just like boot does
@@ -9553,7 +9553,7 @@ sid_node_create(dev_info_t *pdip, devi_branch_t *bp, dev_info_t **rdipp)
 	return (rv);
 fail:
 	(void) ndi_devi_free(dip);
-	kmem_free(nbuf, OBP_MAXDRVNAME);
+	ddi_prop_free(nbuf);
 	return (DDI_WALK_ERROR);
 }
 

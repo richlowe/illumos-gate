@@ -291,7 +291,6 @@ usba_bus_ctl(
 		char			name[32];
 		int			*data;
 		int			rval;
-		int			len = sizeof (usb_addr);
 
 		usba_hcdi	= usba_hcdi_get_hcdi(dip);
 		usba_hcdi_ops	= usba_hcdi->hcdi_ops;
@@ -312,10 +311,9 @@ usba_bus_ctl(
 		}
 
 		/* the dip should have an address and reg property */
-		if (ddi_prop_op(DDI_DEV_T_NONE, child_dip, PROP_LEN_AND_VAL_BUF,
-		    DDI_PROP_DONTPASS |	DDI_PROP_CANSLEEP, "assigned-address",
-		    (caddr_t)&usb_addr,	&len) != DDI_SUCCESS) {
 
+		if ((usb_addr = ddi_prop_get_int(DDI_DEV_T_NONE, child_dip,
+		    DDI_PROP_DONTPASS, "assigned-address", -1)) == -1) {
 			USB_DPRINTF_L2(DPRINT_MASK_USBA, hubdi_log_handle,
 			    "usba_bus_ctl:\n\t"
 			    "%s%d %s%d op=%d rdip = 0x%p dip = 0x%p",
