@@ -171,8 +171,6 @@ global:
 	ctanh;
 	ctanhf;
 #	ctanhl;
-	drem;
-	dremf;
 	erf;
 	erfc;
 	erfcf;

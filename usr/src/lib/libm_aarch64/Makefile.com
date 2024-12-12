@@ -49,7 +49,7 @@ OBJECTS= b_tgamma.o \
 	s_signgam.o s_significand.o s_significandf.o s_sin.o \
 	s_sincos.o s_sincosf.o s_sinf.o \
 	s_tan.o s_tanf.o s_tanh.o s_tanhf.o s_tgammaf.o s_trunc.o s_truncf.o \
-	w_cabs.o w_cabsf.o w_drem.o w_dremf.o s_sinpi.o
+	w_cabs.o w_cabsf.o s_sinpi.o
 
 OBJECTS += \
 	  s_copysignl.o s_fabsl.o s_llrintl.o s_lrintl.o s_modfl.o
