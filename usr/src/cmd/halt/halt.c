@@ -100,7 +100,9 @@
 #define	CUR_ELFDATA	ELFDATA2LSB
 #endif
 
+#ifndef __aarch64__		/* No fastreboot */
 static libzfs_handle_t *g_zfs;
+#endif
 
 extern int audit_halt_setup(int, char **);
 extern int audit_halt_success(void);
@@ -143,8 +145,10 @@ static char *fbarg_used;
 static int fbarg_entnum = BE_ENTRY_DEFAULT;
 #endif	/* __x86 */
 
+#ifndef __aarch64__		/* No fastreboot */
 static int validate_ufs_disk(char *, char *);
 static int validate_zfs_pool(char *, char *);
+#endif	/* __aarch64__ */
 
 static pid_t
 get_initpid()
@@ -593,7 +597,7 @@ check_zones_haltedness()
 	} while ((t < 30) && (t_prog < 5));
 }
 
-
+#ifndef __aarch64__		/* No fast boot */
 /*
  * Validate that this is a root disk or dataset
  * Returns 0 if it is a root disk or dataset;
@@ -917,6 +921,7 @@ err_out:
 	}
 	return (-1);
 }
+#endif
 
 static int
 halt_exec(const char *path, ...)
@@ -961,6 +966,7 @@ halt_exec(const char *path, ...)
 	return (st);
 }
 
+#ifndef __aarch64__ // No fastreboot
 /*
  * Mount the specified BE.
  *
@@ -1239,6 +1245,7 @@ parse_fastboot_args(char *bootargs_buf, size_t buf_size,
 
 	return (rc);
 }
+#endif	/* __aarch64__ */
 
 #define	MAXARGS		5
 
@@ -1438,8 +1445,7 @@ main(int argc, char *argv[])
 		    cmdname);
 		return (EINVAL);
 	}
-#endif
-
+#else
 	/*
 	 * If fast reboot, do some sanity check on the argument
 	 */
@@ -1475,6 +1481,7 @@ main(int argc, char *argv[])
 		if (strlen(bootargs_buf) != 0)
 			mdep = (uintptr_t)bootargs_buf;
 	}
+#endif	/* __aarch64__ */
 
 #if 0	/* For debugging */
 	if (mdep != NULL)

@@ -49,8 +49,8 @@ CPPFLAGS += -I../../lib/libzpool/common
 CPPFLAGS += -I../../lib/libscf/inc
 CPPFLAGS += -I../../uts/common/fs/zfs
 
-LDLIBS += -lbsm -lscf -lzfs -lgen
-LDLIBS_i386 +=	-lbe
+LDLIBS += -lbsm -lscf
+LDLIBS_i386 +=	-lbe -lzfs -lgen
 LDLIBS +=	$(LDLIBS_$(MACH))
 
 CLOBBERFILES += $(ROOTLINKS) $(ROOTSYMLINKS)

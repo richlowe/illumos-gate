@@ -271,9 +271,9 @@ pcie_bus_power(dev_info_t *dip, void *impl_arg, pm_bus_power_op_t op,
 	int *child_counters; /* per child dip counters */
 	pm_bp_child_pwrchg_t *bpc;
 	pm_bp_has_changed_t *bphc;
-	dev_info_t *cdip;
-	int new_level;
-	int old_level;
+	dev_info_t *cdip = NULL;
+	int new_level = 0;
+	int old_level = 0;
 	int rv = DDI_SUCCESS;
 	int level_allowed, comp;
 
