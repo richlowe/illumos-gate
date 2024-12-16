@@ -405,7 +405,7 @@ gicv3_config_irq(uint32_t irq, bool is_edge)
  * Mask interrupts of priority lower than, or equal to, IRQ.
  */
 static int
-gicv3_setlvl(int irq)
+gicv3_intr_enter(int irq)
 {
 	int new_ipl;
 
@@ -424,7 +424,7 @@ gicv3_setlvl(int irq)
  * Mask interrupts of priority lower than or equal to IPL.
  */
 static void
-gicv3_setlvlx(int ipl)
+gicv3_intr_exit(int ipl)
 {
 	write_icc_pmr_el1(GIC_IPL_TO_PRI(ipl));
 }
@@ -1168,8 +1168,8 @@ _init(void)
 		gic_ops.go_config_irq = gicv3_config_irq;
 		gic_ops.go_addspl = gicv3_addspl;
 		gic_ops.go_delspl = gicv3_delspl;
-		gic_ops.go_setlvl = gicv3_setlvl;
-		gic_ops.go_setlvlx = gicv3_setlvlx;
+		gic_ops.go_intr_enter = gicv3_intr_enter;
+		gic_ops.go_intr_exit = gicv3_intr_exit;
 		gic_ops.go_acknowledge = gicv3_acknowledge;
 		gic_ops.go_ack_to_vector = gicv3_ack_to_vector;
 		gic_ops.go_eoi = gicv3_eoi;

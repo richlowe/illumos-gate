@@ -41,8 +41,27 @@ extern "C" {
  *	External Reference Functions
  */
 extern int (*slvltovect)(int);	/* ipl interrupt priority level */
-extern int setlvl(int);	/* set intr pri represented by vect */
-extern void setlvlx(int);	/* set intr pri to specified level */
+
+/*
+ * Enter the context of the interrupt vector specified as the parameter.
+ *
+ * set interrupt priority to that of the interrupt vector parameter, and
+ * return the old interrupt priority.
+ */
+extern int intr_enter(int);
+
+/*
+ * Exit the context of an interrupt.
+ *
+ * Set the interrupt priority to the parameter, assumed to be the value
+ * returned from a call to intr_enter()
+ */
+extern void intr_exit(int);
+
+/*
+ * These functions, with traditional names, are callbacks from the
+ * auto-vectored interrupt framework (avintr.c)
+ */
 extern int (*addspl)(int, int, int, int);	/* add intr mask of vector  */
 extern int (*delspl)(int, int, int, int);	/* delete intr mask of vector */
 extern int (*addintr)(void *, int, avfunc, char *, int, caddr_t, caddr_t,

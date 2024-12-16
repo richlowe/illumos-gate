@@ -235,7 +235,7 @@ hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint64_t ack)
 
 	mcpu->mcpu_pri = oldpil;
 	gic_deactivate(ack);
-	setlvlx(oldpil);
+	intr_exit(oldpil);
 
 	return ((int)mask);
 }
@@ -362,7 +362,7 @@ intr_thread_epilog(struct cpu *cpu, uint64_t ack, uint_t oldpil)
 		basespl = cpu->cpu_base_spl;
 		mcpu->mcpu_pri = basespl;
 		gic_deactivate(ack);
-		setlvlx(basespl);
+		intr_exit(basespl);
 		(void) splhigh();
 		(void) enable_interrupts();
 
@@ -388,7 +388,7 @@ intr_thread_epilog(struct cpu *cpu, uint64_t ack, uint_t oldpil)
 	pil = MAX(oldpil, basespl);
 	mcpu->mcpu_pri = pil;
 	gic_deactivate(ack);
-	setlvlx(pil);
+	intr_exit(pil);
 	t->t_intr_start = now;
 	write_tpidr_el1((uintptr_t)t);
 	cpu->cpu_thread = t;
@@ -533,7 +533,7 @@ top:
 	    ~(1 << pil));
 
 	mcpu->mcpu_pri = pil;
-	setlvlx(pil);
+	intr_exit(pil);
 
 	now = arch_timer_count();
 
@@ -643,7 +643,7 @@ dosoftint_epilog(struct cpu *cpu, uint_t oldpil)
 	basespl = cpu->cpu_base_spl;
 	pil = MAX(oldpil, basespl);
 	mcpu->mcpu_pri = pil;
-	setlvlx(pil);
+	intr_exit(pil);
 }
 
 
@@ -905,7 +905,7 @@ do_interrupt(struct regs *rp)
 	/*
 	 * Slew the interrupt priority and perform the running priority drop.
 	 */
-	newipl = (*setlvl)(vector);
+	newipl = intr_enter(vector);
 	gic_eoi(ack);
 
 	/*
@@ -986,7 +986,7 @@ do_splx(int newpri)
 	if (newpri < basepri)
 		newpri = basepri;
 	cpu->cpu_m.mcpu_pri = newpri;
-	setlvlx(newpri);
+	intr_exit(newpri);
 
 	restore_interrupts(s);
 	return (curpri);
@@ -1010,7 +1010,7 @@ splr(int newpri)
 		if (newpri < basepri)
 			newpri = basepri;
 		cpu->cpu_m.mcpu_pri = newpri;
-		setlvlx(newpri);
+		intr_exit(newpri);
 	}
 
 	restore_interrupts(s);

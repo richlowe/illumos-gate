@@ -25,7 +25,7 @@
 #include <sys/types.h>
 
 static void stub_not_config(void);
-static void stub_setlvlx(int ipl);
+static void stub_intr_exit(int ipl);
 
 /*
  * State we track for debugging, such as mdb's `::interrupts`
@@ -54,8 +54,8 @@ gic_ops_t gic_ops = {
 	.go_config_irq		= (gic_config_irq_t)stub_not_config,
 	.go_addspl		= (gic_addspl_t)stub_not_config,
 	.go_delspl		= (gic_delspl_t)stub_not_config,
-	.go_setlvl		= (gic_setlvl_t)stub_not_config,
-	.go_setlvlx		= stub_setlvlx,
+	.go_intr_enter		= (gic_intr_enter_t)stub_not_config,
+	.go_intr_exit		= stub_intr_exit,
 	.go_acknowledge		= (gic_acknowledge_t)stub_not_config,
 	.go_ack_to_vector	= (gic_ack_to_vector_t)stub_not_config,
 	.go_eoi			= (gic_eoi_t)stub_not_config,
@@ -70,15 +70,15 @@ stub_not_config(void)
 }
 
 static void
-stub_setlvlx(int ipl __unused)
+stub_intr_exit(int ipl __unused)
 {
 	/*
 	 * Nothing to do here.
 	 *
-	 * setlvlx is called while locking and printing in the early kmem_init
-	 * path (console_{enter,exit}, putq, cprintf) and in startup (cmn_err
-	 * and mod_setup, reaching many of the same locks as in the kmem_init
-	 * path).
+	 * inter_exit() is called while locking and printing in the early
+	 * kmem_init path (console_{enter,exit}, putq, cprintf) and in startup
+	 * (cmn_err and mod_setup, reaching many of the same locks as in the
+	 * kmem_init path).
 	 *
 	 * Adjusting the priority level this early is unnecessary, since
 	 * interrupts are completely disabled. Locking is also unnecessary,
@@ -209,15 +209,15 @@ int (*addspl)(int, int, int, int) = gic_addspl;
 int (*delspl)(int, int, int, int) = gic_delspl;
 
 int
-setlvl(int irq)
+intr_enter(int irq)
 {
-	return (gic_ops.go_setlvl(irq));
+	return (gic_ops.go_intr_enter(irq));
 }
 
 void
-setlvlx(int ipl)
+intr_exit(int ipl)
 {
-	gic_ops.go_setlvlx(ipl);
+	gic_ops.go_intr_exit(ipl);
 }
 
 uint64_t
