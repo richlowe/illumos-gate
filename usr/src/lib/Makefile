@@ -229,6 +229,7 @@ SUBDIRS +=				\
 	libsmbios	\
 	libsmedia	\
 	libsqlite	\
+	libsqlite3	\
 	libsrpt		\
 	libstmf		\
 	libstmfproxy	\

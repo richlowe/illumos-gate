@@ -360,6 +360,7 @@ file path=lib/libsendfile.so.1
 link path=lib/libsocket.so target=libsocket.so.1
 file path=lib/libsocket.so.1
 file path=lib/libsqlite-sys.so.2.8.15
+file path=lib/libsqlite3-sys.so.3.47.2
 link path=lib/libsysevent.so target=./libsysevent.so.1
 file path=lib/libsysevent.so.1
 link path=lib/libtermcap.so target=libtermcap.so.1

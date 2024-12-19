@@ -1,0 +1,10 @@
+SRCDIR=$(SRC)/common/sqlite3
+
+objs/%.o pics/%.o: $(SRCDIR)/%.c
+	$(COMPILE.c) -o $@ $<
+	$(POST_PROCESS_O)
+
+include $(SRC)/lib/Makefile.targ
+
+debug:
+	echo ${SRCDIR}
