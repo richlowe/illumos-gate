@@ -1247,10 +1247,20 @@ i_ddi_intr_get_pool(dev_info_t *dip, int type)
 	hdl.ih_dip = dip;
 	hdl.ih_type = type;
 
-	if (i_ddi_intr_ops(dip, dip, DDI_INTROP_GETPOOL,
-	    &hdl, (void *)&pool_p) == DDI_SUCCESS)
-		return (pool_p);
+	/*
+	 * Take the lock, even though this handle is impossible to share, so
+	 * that we can make global assertions about locking
+	 */
+	rw_init(&hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+	rw_enter(&hdl.ih_rwlock, RW_WRITER);
 
+	if (i_ddi_intr_ops(dip, dip, DDI_INTROP_GETPOOL,
+	    &hdl, (void *)&pool_p) == DDI_SUCCESS) {
+		rw_exit(&hdl.ih_rwlock);
+		return (pool_p);
+	}
+
+	rw_exit(&hdl.ih_rwlock);
 	return (NULL);
 }
 

@@ -63,9 +63,13 @@ ddi_intr_get_supported_types(dev_info_t *dip, int *typesp)
 
 	bzero(&hdl, sizeof (ddi_intr_handle_impl_t));
 	hdl.ih_dip = dip;
+	rw_init(&hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+	rw_enter(&hdl.ih_rwlock, RW_WRITER);
 
 	ret = i_ddi_intr_ops(dip, dip, DDI_INTROP_SUPPORTED_TYPES, &hdl,
 	    (void *)typesp);
+
+	rw_exit(&hdl.ih_rwlock);
 
 	if (ret != DDI_SUCCESS)
 		return (DDI_INTR_NOTFOUND);
@@ -279,10 +283,18 @@ ddi_intr_alloc(dev_info_t *dip, ddi_intr_handle_t *h_array, int type, int inum,
 	tmp_hdl.ih_scratch2 = (void *)(uintptr_t)behavior;
 	tmp_hdl.ih_dip = dip;
 
+	/*
+	 * Take the lock, even though this handle is impossible to share, so
+	 * that we make can global assertions about locking
+	 */
+	rw_init(&tmp_hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+	rw_enter(&tmp_hdl.ih_rwlock, RW_WRITER);
+
 	if (i_ddi_intr_ops(dip, dip, DDI_INTROP_ALLOC,
 	    &tmp_hdl, (void *)actualp) != DDI_SUCCESS) {
 		DDI_INTR_APIDBG((CE_CONT, "ddi_intr_alloc: allocation "
 		    "failed\n"));
+		rw_exit(&tmp_hdl.ih_rwlock);
 		i_ddi_intr_devi_fini(dip);
 		return (*actualp ? DDI_EAGAIN : DDI_INTR_NOTFOUND);
 	}
@@ -316,6 +328,7 @@ ddi_intr_alloc(dev_info_t *dip, ddi_intr_handle_t *h_array, int type, int inum,
 		hdlp = (ddi_intr_handle_impl_t *)kmem_zalloc(
 		    (sizeof (ddi_intr_handle_impl_t)), KM_SLEEP);
 		rw_init(&hdlp->ih_rwlock, NULL, RW_DRIVER, NULL);
+		rw_enter(&hdlp->ih_rwlock, RW_WRITER);
 		h_array[i] = (struct __ddi_intr_handle *)hdlp;
 		hdlp->ih_type = type;
 		hdlp->ih_pri = pri;
@@ -328,7 +341,7 @@ ddi_intr_alloc(dev_info_t *dip, ddi_intr_handle_t *h_array, int type, int inum,
 		if (type & DDI_INTR_TYPE_FIXED)
 			i_ddi_set_intr_handle(dip, hdlp->ih_inum,
 			    (ddi_intr_handle_t)hdlp);
-
+		rw_exit(&hdlp->ih_rwlock);
 		DDI_INTR_APIDBG((CE_CONT, "ddi_intr_alloc: hdlp = 0x%p\n",
 		    (void *)h_array[i]));
 	}
@@ -338,6 +351,7 @@ ddi_intr_alloc(dev_info_t *dip, ddi_intr_handle_t *h_array, int type, int inum,
 fail:
 	(void) i_ddi_intr_ops(tmp_hdl.ih_dip, tmp_hdl.ih_dip,
 	    DDI_INTROP_FREE, &tmp_hdl, NULL);
+	rw_exit(&tmp_hdl.ih_rwlock);
 	i_ddi_intr_devi_fini(dip);
 
 	return (ret);
@@ -369,7 +383,6 @@ ddi_intr_free(ddi_intr_handle_t h)
 	ret = i_ddi_intr_ops(hdlp->ih_dip, hdlp->ih_dip,
 	    DDI_INTROP_FREE, hdlp, NULL);
 
-	rw_exit(&hdlp->ih_rwlock);
 	if (ret == DDI_SUCCESS) {
 		/* This would be the dup vector */
 		if (hdlp->ih_flags & DDI_INTR_MSIX_DUP)
@@ -393,6 +406,7 @@ ddi_intr_free(ddi_intr_handle_t h)
 			i_ddi_intr_devi_fini(hdlp->ih_dip);
 			i_ddi_free_intr_phdl(hdlp);
 		}
+		rw_exit(&hdlp->ih_rwlock);
 		rw_destroy(&hdlp->ih_rwlock);
 		kmem_free(hdlp, sizeof (ddi_intr_handle_impl_t));
 	}
@@ -451,7 +465,8 @@ ddi_intr_get_cap(ddi_intr_handle_t h, int *flagsp)
 	if (hdlp == NULL)
 		return (DDI_EINVAL);
 
-	rw_enter(&hdlp->ih_rwlock, RW_READER);
+	/* We store to ih_cap, even though we're a reading API  */
+	rw_enter(&hdlp->ih_rwlock, RW_WRITER);
 
 	if (hdlp->ih_cap) {
 		*flagsp = hdlp->ih_cap & ~DDI_INTR_FLAG_MSI64;
@@ -544,7 +559,9 @@ ddi_intr_get_pri(ddi_intr_handle_t h, uint_t *prip)
 	if (hdlp == NULL)
 		return (DDI_EINVAL);
 
-	rw_enter(&hdlp->ih_rwlock, RW_READER);
+	/* We store *ih_pri, even though we're a reading API */
+	rw_enter(&hdlp->ih_rwlock, RW_WRITER);
+
 	/* Already initialized, just return that */
 	if (hdlp->ih_pri) {
 		*prip = hdlp->ih_pri;
@@ -660,7 +677,8 @@ ddi_intr_dup_handler(ddi_intr_handle_t org, int dup_inum,
 		return (DDI_EINVAL);
 	}
 
-	rw_enter(&hdlp->ih_rwlock, RW_READER);
+	/* We write scratch values */
+	rw_enter(&hdlp->ih_rwlock, RW_WRITER);
 
 	/* Do some input argument checking */
 	if ((hdlp->ih_state == DDI_IHDL_STATE_ALLOC) ||	/* intr handle alloc? */
@@ -980,7 +998,11 @@ ddi_intr_get_pending(ddi_intr_handle_t h, int *pendingp)
 	if (hdlp == NULL)
 		return (DDI_EINVAL);
 
-	rw_enter(&hdlp->ih_rwlock, RW_READER);
+	/*
+	 * We have to take the write lock, we don't know what nexus operations
+	 * may do
+	 */
+	rw_enter(&hdlp->ih_rwlock, RW_WRITER);
 	if (!(hdlp->ih_cap & DDI_INTR_FLAG_PENDING)) {
 		rw_exit(&hdlp->ih_rwlock);
 		return (DDI_EINVAL);
@@ -1121,14 +1143,18 @@ ddi_intr_trigger_softint(ddi_softint_handle_t h, void *arg2)
 	if (hdlp == NULL)
 		return (DDI_EINVAL);
 
+	rw_enter(&hdlp->ih_rwlock, RW_WRITER);
+
 	if ((ret = i_ddi_trigger_softint(hdlp, arg2)) != DDI_SUCCESS) {
 		DDI_INTR_APIDBG((CE_CONT, "ddi_intr_trigger_softint: failed, "
 		    " ret 0%x\n", ret));
-
+		rw_exit(&hdlp->ih_rwlock);
 		return (ret);
 	}
 
 	hdlp->ih_cb_arg2 = arg2;
+	rw_exit(&hdlp->ih_rwlock);
+
 	return (DDI_SUCCESS);
 }
 

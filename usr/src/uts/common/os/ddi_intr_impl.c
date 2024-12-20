@@ -112,8 +112,17 @@ i_ddi_intr_get_supported_types(dev_info_t *dip)
 	bzero(&hdl, sizeof (ddi_intr_handle_impl_t));
 	hdl.ih_dip = dip;
 
+	/*
+	 * Take the lock, even though this handle is impossible to share, so
+	 * that we can make global assertions about locking
+	 */
+	rw_init(&hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+	rw_enter(&hdl.ih_rwlock, RW_WRITER);
+
 	ret = i_ddi_intr_ops(dip, dip, DDI_INTROP_SUPPORTED_TYPES, &hdl,
 	    (void *)&intr_types);
+
+	rw_exit(&hdl.ih_rwlock);
 
 	return ((ret == DDI_SUCCESS) ? intr_types : 0);
 }
@@ -145,8 +154,17 @@ i_ddi_intr_get_supported_nintrs(dev_info_t *dip, int intr_type)
 	hdl.ih_dip = dip;
 	hdl.ih_type = intr_type;
 
+	/*
+	 * Take the lock, even though this handle is impossible to share, so
+	 * that we can make global assertions about locking
+	 */
+	rw_init(&hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+	rw_enter(&hdl.ih_rwlock, RW_WRITER);
+
 	ret = i_ddi_intr_ops(dip, dip, DDI_INTROP_NINTRS, &hdl,
 	    (void *)&nintrs);
+
+	rw_exit(&hdl.ih_rwlock);
 
 	return ((ret == DDI_SUCCESS) ? nintrs : 0);
 }
@@ -278,9 +296,21 @@ i_ddi_intr_get_limit(dev_info_t *dip, int type, ddi_irm_pool_t *pool_p)
 		bzero(&hdl, sizeof (ddi_intr_handle_impl_t));
 		hdl.ih_dip = dip;
 		hdl.ih_type = type;
+
+		/*
+		 * Take the lock, even though this handle is impossible to
+		 * share, so that we can make global assertions about locking
+		 */
+		rw_init(&hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+		rw_enter(&hdl.ih_rwlock, RW_WRITER);
+
 		if (i_ddi_intr_ops(dip, dip, DDI_INTROP_NAVAIL, &hdl,
-		    (void *)&limit) != DDI_SUCCESS)
+		    (void *)&limit) != DDI_SUCCESS) {
+			rw_exit(&hdl.ih_rwlock);
 			return (0);
+		}
+
+		rw_exit(&hdl.ih_rwlock);
 	}
 
 	/* Get maximum supported by the device */
@@ -491,7 +521,8 @@ get_intr_affinity(ddi_intr_handle_t h, processorid_t *tgt_p)
 	if ((hdlp == NULL) || (tgt_p == NULL))
 		return (DDI_EINVAL);
 
-	rw_enter(&hdlp->ih_rwlock, RW_READER);
+	/* nexus interrupt operations need write access to the handle */
+	rw_enter(&hdlp->ih_rwlock, RW_WRITER);
 	if (hdlp->ih_state != DDI_IHDL_STATE_ENABLE) {
 		rw_exit(&hdlp->ih_rwlock);
 		return (DDI_EINVAL);

@@ -1085,6 +1085,8 @@ i_ddi_add_softint(ddi_softint_hdl_impl_t *hdlp)
 {
 	int ret;
 
+	ASSERT(RW_LOCK_HELD(&hdlp->ih_rwlock));
+
 	ret = add_avsoftintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func,
 	    DEVI(hdlp->ih_dip)->devi_name, hdlp->ih_cb_arg1, hdlp->ih_cb_arg2);
 	return (ret ? DDI_SUCCESS : DDI_FAILURE);
@@ -1093,6 +1095,7 @@ i_ddi_add_softint(ddi_softint_hdl_impl_t *hdlp)
 void
 i_ddi_remove_softint(ddi_softint_hdl_impl_t *hdlp)
 {
+	ASSERT(RW_LOCK_HELD(&hdlp->ih_rwlock));
 	(void) rem_avsoftintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func);
 }
 
@@ -1120,6 +1123,8 @@ extern boolean_t av_check_softint_pending(struct av_softinfo *, boolean_t);
 int
 i_ddi_trigger_softint(ddi_softint_hdl_impl_t *hdlp, void *arg2)
 {
+	ASSERT(RW_LOCK_HELD(&hdlp->ih_rwlock));
+
 	if (av_check_softint_pending(hdlp->ih_pending, B_FALSE))
 		return (DDI_EPENDING);
 
@@ -1134,6 +1139,8 @@ i_ddi_set_softint_pri(ddi_softint_hdl_impl_t *hdlp, uint_t old_pri)
 {
 	int ret;
 
+	ASSERT(RW_LOCK_HELD(&hdlp->ih_rwlock));
+
 	if (av_check_softint_pending(hdlp->ih_pending, B_TRUE))
 		return (DDI_FAILURE);
 
@@ -1144,12 +1151,14 @@ i_ddi_set_softint_pri(ddi_softint_hdl_impl_t *hdlp, uint_t old_pri)
 void
 i_ddi_alloc_intr_phdl(ddi_intr_handle_impl_t *hdlp)
 {
-	hdlp->ih_private = (void *)kmem_zalloc(sizeof (ihdl_plat_t), KM_SLEEP);
+	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
+	hdlp->ih_private = kmem_zalloc(sizeof (ihdl_plat_t), KM_SLEEP);
 }
 
 void
 i_ddi_free_intr_phdl(ddi_intr_handle_impl_t *hdlp)
 {
+	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
 	kmem_free(hdlp->ih_private, sizeof (ihdl_plat_t));
 	hdlp->ih_private = NULL;
 }
