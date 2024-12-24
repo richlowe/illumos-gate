@@ -1838,7 +1838,14 @@ get_size_cells(pnode_t node)
 }
 
 /*
- * We're prepared for either 2 or 1 address cells and 2 or 1 size cells
+ * We're prepared for either 2 or 1 address cells and 2 or 1 size cells.
+ *
+ * The derived address is expected to fit into 56 bits (the LPA2 maximum), as
+ * is the derived size.
+ *
+ * We warn separately for >56-bit values (exceeding architectural maximums
+ * for physical address-space) and >48-bit sizes (exceeding current
+ * illumos limitations for physical address-space).
  */
 static int
 impl_xlate_regs(dev_info_t *child, uint32_t *in, size_t in_len,
@@ -1859,23 +1866,24 @@ impl_xlate_regs(dev_info_t *child, uint32_t *in, size_t in_len,
 	    0, OBP_SIZE_CELLS, 0);
 
 	if (parent_size_cells < 1 || parent_size_cells > 2) {
-		dev_err(child, CE_WARN, "unsupported size cells %d",
+		dev_err(child, CE_WARN, "regspec: unsupported size cells %d",
 		    parent_size_cells);
 		return (1);
 	}
 
 	if (parent_addr_cells < 1 || parent_addr_cells > 2) {
-		dev_err(child, CE_WARN, "unsupported addr cells %d",
+		dev_err(child, CE_WARN, "regspec: unsupported addr cells %d",
 		    parent_addr_cells);
 		return (1);
 	}
 
 	int reg_size = parent_addr_cells + parent_size_cells;
+	ASSERT(in_len % reg_size == 0);
 	int nregs = in_len / reg_size;
 
 	if (nregs > 0) {
-		rp = pdptr->par_reg = kmem_zalloc(nregs * sizeof (struct regspec),
-		    KM_SLEEP);
+		rp = pdptr->par_reg =
+		    kmem_zalloc(nregs * sizeof (struct regspec), KM_SLEEP);
 		pdptr->par_nreg = nregs;
 
 		for (int i = 0; i < nregs; i++, rp++) {
@@ -1891,13 +1899,20 @@ impl_xlate_regs(dev_info_t *child, uint32_t *in, size_t in_len,
 				    (parent_addr_cells + j)];
 			}
 
-			if (addr > UINT32_MAX) {
-				dev_err(child, CE_WARN, "regspec %d needs 64bit "
-				    "addressing", i);
+			if ((addr & 0x00fffffffffffffful) != addr) {
+				dev_err(child, CE_WARN, "regspec %d needs "
+				    ">56bit addressing", i);
+			} else if ((addr & 0x0000fffffffffffful) != addr) {
+				dev_err(child, CE_WARN, "regspec %d needs "
+				    ">48bit addressing", i);
 			}
-			if (size > UINT32_MAX) {
-				dev_err(child, CE_WARN, "regspec %d needs 64bit "
-				    "sizing", i);
+
+			if ((size & 0x00fffffffffffffful) != size) {
+				dev_err(child, CE_WARN, "regspec %d needs "
+				    ">56bit sizing", i);
+			} else if ((size & 0x0000fffffffffffful) != size) {
+				dev_err(child, CE_WARN, "regspec %d needs "
+				    ">48bit sizing", i);
 			}
 
 			rp->regspec_addr = addr;
@@ -1905,6 +1920,157 @@ impl_xlate_regs(dev_info_t *child, uint32_t *in, size_t in_len,
 		}
 	}
 
+	return (0);
+}
+
+/*
+ * We're prepared for 3, 2 or 1 address cells and 2 or 1 size cells.
+ *
+ * We only support 3 address cells when the child format is known to contain
+ * the 64-bit address in the last two address cells.
+ *
+ * The derived addresses are expected to fit into 56 bits (the LPA2 maximum),
+ * while the derived sizes are expected to fit into 32 bits.
+ *
+ * We warn separately for >56-bit addressing (exceeding architectural maximums
+ * for physical address-space) and >48-bit addressing (exceeding current
+ * illumos limitations for physical address-space).
+ */
+static int
+impl_xlate_ranges(dev_info_t *child, uint32_t *in, size_t in_len,
+    struct ddi_parent_private_data *pdptr)
+{
+	dev_info_t		*pdip;
+	struct rangespec	*data;	/* normalised data */
+	int			dlen;	/* length of normalised data */
+	int			cac;	/* child #address-cells */
+	int			pac;	/* parent #address-cells */
+	int			csc;	/* child #size-cells */
+	int			n;
+	int			i;
+	uint64_t		caddr;
+	uint64_t		paddr;
+	uint64_t		size;
+	char			**compats;
+	int			ncompats;
+	int			max_cac = 2;
+	static const char	*known_3cell[] = {
+		"pciex_root_complex",
+	};
+	static const int	num_known_3cell =
+	    (int)(sizeof (known_3cell) / sizeof (known_3cell[0]));
+
+	if (in_len == 0)
+		return (0);
+
+	VERIFY3P(child, !=, NULL);
+	if (child == ddi_root_node())
+		return (1);	/* ranges on the root node make no sense */
+	pdip = ddi_get_parent(child);
+	VERIFY3P(pdip, !=, NULL);
+
+	/*
+	 * Explicitly allow children with a known 3 address-cell format, such
+	 * as PCIe root complexes. Our code will just shift the extra data off
+	 * the end of the child address.
+	 */
+	if (ddi_prop_lookup_string_array(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, OBP_COMPATIBLE,
+	    &compats, (uint_t *)&ncompats) == DDI_PROP_SUCCESS) {
+		for (n = 0; n < ncompats; ++n) {
+			for (i = 0; i < num_known_3cell; ++i) {
+				if (strcmp(compats[n], known_3cell[i]) == 0) {
+					max_cac = 3;
+					break;
+				}
+
+				if (max_cac == 3)
+					break;
+			}
+		}
+
+		ddi_prop_free(compats);
+	}
+
+	pac = ddi_prop_get_int(DDI_DEV_T_ANY, pdip, 0, OBP_ADDRESS_CELLS, 0);
+	cac = ddi_prop_get_int(DDI_DEV_T_ANY, child, 0, OBP_ADDRESS_CELLS, 0);
+	csc = ddi_prop_get_int(DDI_DEV_T_ANY, child, 0, OBP_SIZE_CELLS, 0);
+
+	if (csc < 1 || csc > 2) {
+		dev_err(child, CE_WARN,
+		    "rangespec: unsupported child size cells %d", csc);
+		return (1);
+	}
+
+	if (cac < 1 || cac > max_cac) {
+		dev_err(child, CE_WARN,
+		    "rangespec: unsupported child addr cells %d", cac);
+		return (1);
+	}
+
+	if (pac < 1 || pac > 2) {
+		dev_err(pdip, CE_WARN,
+		    "rangespec: unsupported parent addr cells %d", pac);
+		return (1);
+	}
+
+	if (in_len % (cac + pac + csc) != 0) {
+		dev_err(child, CE_WARN, "invalid ranges data");
+		return (1);
+	}
+
+	dlen = in_len / (cac + pac + csc);
+	data = kmem_zalloc(sizeof (struct rangespec) * dlen, KM_SLEEP);
+
+	for (n = 0; n < dlen; ++n) {
+		caddr = paddr = size = 0;
+
+		for (i = 0; i < cac; ++i) {
+			caddr <<= 32;
+			caddr |= in[((cac + pac + csc) * n) + i];
+		}
+
+		for (i = 0; i < pac; ++i) {
+			paddr <<= 32;
+			paddr |= in[((cac + pac + csc) * n) + cac + i];
+		}
+
+		for (i = 0; i < csc; ++i) {
+			size <<= 32;
+			size |= in[((cac + pac + csc) * n) + cac + pac + i];
+		}
+
+		if ((caddr & 0x00fffffffffffffful) != caddr) {
+			dev_err(child, CE_WARN, "rangespec %d needs >56bit "
+			    "child addressing", n);
+		} else if ((caddr & 0x0000fffffffffffful) != caddr) {
+			dev_err(child, CE_WARN, "rangespec %d needs >48bit "
+			    "child addressing", n);
+		}
+
+		if ((paddr & 0x00fffffffffffffful) != paddr) {
+			dev_err(child, CE_WARN, "rangespec %d needs >56bit "
+			    "parent addressing", n);
+		} else if ((paddr & 0x0000fffffffffffful) != paddr) {
+			dev_err(child, CE_WARN, "rangespec %d needs >48bit "
+			    "parent addressing", n);
+		}
+
+		if ((size & 0x00fffffffffffffful) != size) {
+			dev_err(child, CE_WARN, "rangespec %d needs >56bit "
+			    "sizing", n);
+		} else if ((size & 0x0000fffffffffffful) != size) {
+			dev_err(child, CE_WARN, "rangespec %d needs >48bit "
+			    "sizing", n);
+		}
+
+		data[n].rng_coffset = caddr;
+		data[n].rng_offset = paddr;
+		data[n].rng_size = size;
+	}
+
+	pdptr->par_rng = data;
+	pdptr->par_nrng = dlen;
 	return (0);
 }
 
@@ -1919,9 +2085,8 @@ impl_xlate_regs(dev_info_t *child, uint32_t *in, size_t in_len,
  * The "reg" property is in a firmware-defined shape and converted into
  * `struct regspec`.
  *
- * XXXROOTNEX: "ranges" is currently left alone, unless it is of a
- * pre-determined shape.  This matches behaviour on SPARC (for eg), but we
- * easily could genericize it if we had a 64bit range structure to use.
+ * The "ranges" property is in a firmware-defined shape and converted into
+ * `struct rangespec`.
  */
 void
 make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
@@ -1955,49 +2120,20 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 		ddi_prop_free(reg_prop);
 	}
 
-	child_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
-	    0, OBP_ADDRESS_CELLS, 0);
-	child_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, child,
-	    0, OBP_SIZE_CELLS, 0);
-	parent_addr_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    0, OBP_ADDRESS_CELLS, 0);
-	parent_size_cells = ddi_prop_get_int(DDI_DEV_T_ANY, parent,
-	    0, OBP_SIZE_CELLS, 0);
-
-	ASSERT3U(child_addr_cells, !=, 0);
-	ASSERT3U(child_size_cells, !=, 0);
-	ASSERT3U(parent_addr_cells, !=, 0);
-	ASSERT3U(parent_size_cells, !=, 0);
-
 	/*
 	 * Ranges, of of which we only handle certain shapes.
-	 *
-	 * XXXROOTNEX: Genericize, like we do regs?
-	 *
-	 * This is only used in relation to `i_ddi_apply_range` so we easily
-	 * _could_, though we'd then run into the same 32bit assumptions as
-	 * with "regs"
 	 */
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, child,
 	    DDI_PROP_DONTPASS, OBP_RANGES, &rng_prop, &rng_len)
 	    == DDI_PROP_SUCCESS) {
-		if (child_addr_cells != 2 || parent_addr_cells != 2 ||
-		    child_size_cells != 1 || parent_size_cells != 1) {
-			NDI_CONFIG_DEBUG((CE_NOTE,
-			    "!ranges not made in parent data; "
-			    "#address-cells or #size-cells have "
-			    "non-default values\n"
-			    "\tparent: #address-cells = %d, #size-cells = %d\n"
-			    "\tchild: #address-cells = %d, #size-cells = %d",
-			    parent_addr_cells, parent_size_cells,
-			    child_addr_cells, child_size_cells));
-			ddi_prop_free(rng_prop);
-			return;
+		if (impl_xlate_ranges(child, (uint32_t *)rng_prop, rng_len,
+		    pdptr) != 0) {
+			dev_err(child, CE_WARN, "couldn't initialize ranges in "
+			    "parent data");
 		}
 
-		pdptr->par_nrng = CELLS_1275_TO_BYTES(rng_len) /
-		    (sizeof (struct rangespec));
-		pdptr->par_rng = (struct rangespec *)rng_prop;
+		if (rng_prop)
+			ddi_prop_free(rng_prop);
 	}
 }
 
@@ -2018,8 +2154,8 @@ impl_sunbus_name_child(dev_info_t *child, char *name, int namelen)
 		 * Note that unlike other platforms, we don't include the
 		 * bustype, to match practice in devicetree.
 		 */
-		(void) snprintf(name, namelen, "%x",
-		    (uint_t)sparc_pd_getreg(child, 0)->regspec_addr);
+		(void) snprintf(name, namelen, "%lx",
+		    sparc_pd_getreg(child, 0)->regspec_addr);
 	}
 
 	return (DDI_SUCCESS);
@@ -2053,7 +2189,7 @@ impl_free_ddi_ppd(dev_info_t *dip)
 		return;
 
 	if ((n = (size_t)pdptr->par_nrng) != 0)
-		ddi_prop_free((void *)pdptr->par_rng);
+		kmem_free(pdptr->par_rng, n * sizeof (struct rangespec));
 
 	if ((n = pdptr->par_nreg) != 0) {
 		kmem_free(pdptr->par_reg, n * sizeof (struct regspec));

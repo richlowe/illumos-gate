@@ -109,7 +109,7 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT,
-	    "i_ddi_bus_map: <%s,%s> <0x%x, 0x%x, 0x%x> "
+	    "i_ddi_bus_map: <%s,%s> <0x%lx, 0x%lx, 0x%lx> "
 	    "offset %ld len %ld handle 0x%p\n",
 	    ddi_get_name(dip), ddi_get_name(rdip),
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size,
@@ -121,35 +121,20 @@ i_ddi_bus_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp,
 	 *
 	 *	<bustype=0, addr=x, len=x>: memory
 	 *	<bustype=1, addr=x, len=x>: i/o
-	 *	<bustype>1, addr=0, len=x>: x86-compatibility i/o
 	 */
 
-	if (rp->regspec_bustype > 1 && rp->regspec_addr != 0) {
-		cmn_err(CE_WARN, "<%s,%s>: invalid register spec"
-		    " <0x%x, 0x%x, 0x%x>\n", ddi_get_name(dip),
-		    ddi_get_name(rdip), rp->regspec_bustype,
-		    rp->regspec_addr, rp->regspec_size);
-		return (DDI_ME_INVAL);
-	}
-
-	if (rp->regspec_bustype > 1 && rp->regspec_addr == 0) {
-		/*
-		 * compatibility i/o mapping
-		 */
-		rp->regspec_bustype += (uint_t)offset;
-	} else {
-		/*
-		 * Normal memory or i/o mapping
-		 */
-		rp->regspec_addr += (uint_t)offset;
-	}
+	/* No compatability I/O on aarch64 */
+	ASSERT((rp->regspec_bustype == 0 ||
+	    (rp->regspec_bustype == 1 && rp->regspec_addr > 0)));
+	/* Normal memory or i/o mapping */
+	rp->regspec_addr += (uint_t)offset;
 
 	if (len != 0)
 		rp->regspec_size = (uint_t)len;
 
 #ifdef	DDI_MAP_DEBUG
 	cmn_err(CE_CONT,
-	    "               <%s,%s> <0x%x, 0x%x, %d> "
+	    "               <%s,%s> <0x%lx, 0x%lx, %ld> "
 	    "offset %ld len %ld\n",
 	    ddi_get_name(dip), ddi_get_name(rdip),
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size,
@@ -259,9 +244,9 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 	}
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("    Input:  %x.%x.%x\n", rp->regspec_bustype,
+	ddi_map_debug("    Input:  %lx.%lx.%lx\n", rp->regspec_bustype,
 	    rp->regspec_addr, rp->regspec_size);
-	ddi_map_debug("    Range:  %x.%x %x.%x %x\n",
+	ddi_map_debug("    Range:  %lx.%lx %lx.%lx %lx\n",
 	    rangep->rng_cbustype, rangep->rng_coffset,
 	    rangep->rng_bustype, rangep->rng_offset, rangep->rng_size);
 #endif	/* DDI_MAP_DEBUG */
@@ -270,7 +255,7 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 	rp->regspec_addr += rangep->rng_offset - rangep->rng_coffset;
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("    Return: %x.%x.%x\n", rp->regspec_bustype,
+	ddi_map_debug("    Return: %lx.%lx.%lx\n", rp->regspec_bustype,
 	    rp->regspec_addr, rp->regspec_size);
 #endif	/* DDI_MAP_DEBUG */
 

@@ -150,18 +150,30 @@ static void
 obio_printregs(struct regspec *rp, int ilev)
 {
 	indent_to_level(ilev);
+#if defined(__aarch64__)
+	(void) printf("    Bus Type=0x%lx, Address=0x%lx, Size=0x%lx\n",
+	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size);
+#else
 	(void) printf("    Bus Type=0x%x, Address=0x%x, Size=0x%x\n",
 	    rp->regspec_bustype, rp->regspec_addr, rp->regspec_size);
+#endif
 }
 
 static void
 obio_printranges(struct rangespec *rp, int ilev)
 {
 	indent_to_level(ilev);
+#if defined(__aarch64__)
+	(void) printf("    Ch: %.2lx,%.16lx Pa: %.2lx,%.16lx, Sz: %lx\n",
+	    rp->rng_cbustype, rp->rng_coffset,
+	    rp->rng_bustype, rp->rng_offset,
+	    rp->rng_size);
+#else
 	(void) printf("    Ch: %.2x,%.8x Pa: %.2x,%.8x, Sz: %x\n",
 	    rp->rng_cbustype, rp->rng_coffset,
 	    rp->rng_bustype, rp->rng_offset,
 	    rp->rng_size);
+#endif
 }
 
 static void

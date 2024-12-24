@@ -304,7 +304,7 @@ static void rootnex_add_props(dev_info_t *);
 static int rootnex_ctl_reportdev(dev_info_t *dip);
 static int rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp);
 static int rootnex_unmap_regspec(ddi_map_req_t *mp, caddr_t *vaddrp);
-static int rootnex_map_handle(ddi_map_req_t *mp, off_t offset);
+static int rootnex_map_handle(ddi_map_req_t *mp);
 static void rootnex_clean_dmahdl(ddi_dma_impl_t *hp);
 static int rootnex_valid_alloc_parms(ddi_dma_attr_t *attr, uint_t maxsegsize);
 static int rootnex_valid_bind_parms(ddi_dma_req_t *dmareq,
@@ -666,7 +666,7 @@ rootnex_ctl_reportdev(dev_info_t *dev)
 		len = strlen(buf);
 
 		f_len += snprintf(buf + len, REPORTDEV_BUFSIZE - len,
-		    "space 0x%x offset 0x%x",
+		    "space 0x%lx offset 0x%lx",
 		    rp->regspec_bustype, rp->regspec_addr);
 		len = strlen(buf);
 	}
@@ -770,25 +770,11 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 	    rp.regspec_size, offset, len, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
 
-	if (rp.regspec_bustype > 1 && rp.regspec_addr != 0) {
-		cmn_err(CE_WARN, "<%s,%s> invalid register spec"
-		    " <0x%" PRIx64 ", 0x%" PRIx64 ", 0x%" PRIx64 ">",
-		    ddi_get_name(dip), ddi_get_name(rdip), rp.regspec_bustype,
-		    rp.regspec_addr, rp.regspec_size);
-		return (DDI_ME_INVAL);
-	}
-
-	if (rp.regspec_bustype > 1 && rp.regspec_addr == 0) {
-		/*
-		 * compatibility i/o mapping
-		 */
-		rp.regspec_bustype += offset;
-	} else {
-		/*
-		 * Normal memory or i/o mapping
-		 */
-		rp.regspec_addr += offset;
-	}
+	/* no compatibility i/o on aarch64 */
+	ASSERT((rp.regspec_bustype == 0 ||
+	    (rp.regspec_bustype == 1 && rp.regspec_addr > 0)));
+	/* Normal memory or i/o mapping */
+	rp.regspec_addr += offset;
 
 	if (len != 0)
 		rp.regspec_size = len;
@@ -816,7 +802,7 @@ rootnex_map(dev_info_t *dip, dev_info_t *rdip, ddi_map_req_t *mp, off_t offset,
 		return (rootnex_unmap_regspec(mp, vaddrp));
 
 	case DDI_MO_MAP_HANDLE:
-		return (rootnex_map_handle(mp, offset));
+		return (rootnex_map_handle(mp));
 	case DDI_MO_MAP_UNLOCKED:
 	case DDI_MO_UNLOCK:
 		return (DDI_ME_UNIMPLEMENTED);
@@ -840,7 +826,7 @@ rootnex_map_fault(dev_info_t *dip, dev_info_t *rdip, struct hat *hat,
 {
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug("rootnex_map_fault: address <%x> pfn <%x>", addr, pfn);
+	ddi_map_debug("rootnex_map_fault: address <%p> pfn <%x>", addr, pfn);
 	ddi_map_debug(" Seg <%s>\n",
 	    seg->s_ops == &segdev_ops ? "segdev" :
 	    seg == &kvseg ? "segkmem" : "NONE!");
@@ -897,7 +883,7 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 
 #ifdef	DDI_MAP_DEBUG
 	ddi_map_debug(
-	    "rootnex_map_regspec: <0x%x 0x%x 0x%x> handle 0x%x\n",
+	    "rootnex_map_regspec: <0x%lx 0x%lx 0x%lx> handle 0x%p\n",
 	    rp->regspec_bustype, rp->regspec_addr,
 	    rp->regspec_size, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
@@ -907,7 +893,6 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	 *
 	 *	<bustype=0, addr=x, len=x>: memory
 	 *	<bustype=1, addr=x, len=x>: i/o
-	 *	<bustype>1, addr=0, len=x>: x86-compatibility i/o
 	 */
 
 	/*
@@ -990,7 +975,7 @@ rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	}
 
 #ifdef	DDI_MAP_DEBUG
-	ddi_map_debug(" at virtual 0x%x\n", *vaddrp);
+	ddi_map_debug(" at virtual 0x%p\n", *vaddrp);
 #endif	/* DDI_MAP_DEBUG */
 	return (DDI_SUCCESS);
 }
@@ -1021,7 +1006,6 @@ rootnex_unmap_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 	 *
 	 *	<bustype=0, addr=x, len=x>: memory
 	 *	<bustype=1, addr=x, len=x>: i/o
-	 *	<bustype>1, addr=0, len=x>: x86-compatibility i/o
 	 *
 	 * As above in the map path, an I/O mapping should never reach the
 	 * root
@@ -1045,7 +1029,7 @@ rootnex_unmap_regspec(ddi_map_req_t *mp, caddr_t *vaddrp)
 }
 
 static int
-rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
+rootnex_map_handle(ddi_map_req_t *mp)
 {
 	rootnex_addr_t rbase;
 	ddi_acc_hdl_t *hp;
@@ -1053,11 +1037,12 @@ rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
 	struct regspec64 *rp;
 	paddr_t pbase;
 
+	ASSERT(mp->map_flags & DDI_MF_EXT_REGSPEC);
 	rp = (struct regspec64 *)mp->map_obj.rp;
 
 #ifdef	DDI_MAP_DEBUG
 	ddi_map_debug(
-	    "rootnex_map_handle: <0x%x 0x%x 0x%x> handle 0x%x\n",
+	    "rootnex_map_handle: <0x%lx 0x%lx 0x%lx> handle 0x%p\n",
 	    rp->regspec_bustype, rp->regspec_addr,
 	    rp->regspec_size, mp->map_handlep);
 #endif	/* DDI_MAP_DEBUG */
@@ -1067,7 +1052,6 @@ rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
 	 *
 	 *	<bustype=0, addr=x, len=x>: memory
 	 *	<bustype=1, addr=x, len=x>: i/o
-	 *	<bustype>1, addr=0, len=x>: x86-compatibility i/o
 	 *
 	 * I/O mappings should never reach the root on ARM
 	 */

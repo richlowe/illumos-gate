@@ -639,9 +639,15 @@ int	i_ddi_set_devi_class(dev_info_t *, const char *, int);
  * device. It is used in an array for devices with multiple address windows.
  */
 struct regspec {
+#if defined(__aarch64__)
+	uint64_t regspec_bustype;	/* cookie for bus type it's on */
+	uint64_t regspec_addr;		/* address of reg relative to bus */
+	uint64_t regspec_size;		/* size of this register set */
+#else
 	uint_t regspec_bustype;		/* cookie for bus type it's on */
 	uint_t regspec_addr;		/* address of reg relative to bus */
 	uint_t regspec_size;		/* size of this register set */
+#endif
 };
 
 /*
@@ -661,11 +667,19 @@ struct regspec64 {
  * to define the childs offsets in the parents bus space.
  */
 struct rangespec {
+#if defined(__aarch64__)
+	uint64_t rng_cbustype;		/* Child's address, hi order */
+	uint64_t rng_coffset;		/* Child's address, lo order */
+	uint64_t rng_bustype;		/* Parent's address, hi order */
+	uint64_t rng_offset;		/* Parent's address, lo order */
+	uint64_t rng_size;		/* size of space for this entry */
+#else
 	uint_t rng_cbustype;		/* Child's address, hi order */
 	uint_t rng_coffset;		/* Child's address, lo order */
 	uint_t rng_bustype;		/* Parent's address, hi order */
 	uint_t rng_offset;		/* Parent's address, lo order */
 	uint_t rng_size;		/* size of space for this entry */
+#endif
 };
 
 #ifdef _KERNEL

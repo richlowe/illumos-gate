@@ -36,10 +36,6 @@
 #include "virtio.h"
 #include "virtio_impl.h"
 
-static int viommionex_ddi_map(dev_info_t *pdip, dev_info_t *dp,
-    ddi_map_req_t *mp, off_t offset, off_t len, caddr_t *addrp);
-static int viommionex_intr_op(dev_info_t *pdip, dev_info_t *rdip,
-    ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result);
 static int viommionex_ctlops(dev_info_t *dip, dev_info_t *rdip,
     ddi_ctl_enum_t ctlop, void *arg, void *result);
 static int viommionex_attach(dev_info_t *dip, ddi_attach_cmd_t cmd);
@@ -50,7 +46,7 @@ static int viommionex_bus_unconfig(dev_info_t *parent, uint_t flags,
 
 static struct bus_ops viommionex_bus_ops = {
 	.busops_rev		= BUSO_REV,
-	.bus_map		= viommionex_ddi_map,
+	.bus_map		= i_ddi_bus_map,
 	.bus_get_intrspec	= NULL, /* obsolete */
 	.bus_add_intrspec	= NULL, /* obsolete */
 	.bus_remove_intrspec	= NULL, /* obsolete */
@@ -77,7 +73,7 @@ static struct bus_ops viommionex_bus_ops = {
 	.bus_fm_access_enter	= NULL,
 	.bus_fm_access_exit	= NULL,
 	.bus_power		= NULL,
-	.bus_intr_op		= viommionex_intr_op,
+	.bus_intr_op		= i_ddi_intr_ops,
 	.bus_hp_op		= NULL
 };
 
@@ -138,20 +134,6 @@ _info(struct modinfo *modinfop)
 /*
  * Nexus implementation
  */
-
-static int
-viommionex_ddi_map(dev_info_t *pdip, dev_info_t *dp __unused,
-    ddi_map_req_t *mp, off_t offset, off_t len, caddr_t *addrp)
-{
-	return (ddi_map(pdip, mp, offset, len, addrp));
-}
-
-static int
-viommionex_intr_op(dev_info_t *pdip, dev_info_t *rdip __unused,
-    ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result)
-{
-	return (i_ddi_intr_ops(pdip, rdip, intr_op, hdlp, result));
-}
 
 static int
 viommionex_ctlops(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
