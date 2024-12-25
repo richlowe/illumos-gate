@@ -40,8 +40,10 @@ file path=platform/armv8/kernel/drv/$(ARCH)/gictwo
 file path=platform/armv8/kernel/drv/$(ARCH)/ns16550a
 file path=platform/armv8/kernel/drv/$(ARCH)/rootnex
 file path=platform/armv8/kernel/drv/$(ARCH)/simple-bus
+file path=platform/armv8/kernel/drv/$(ARCH64)/arm_gtmr group=sys mode=0755
 file path=platform/armv8/kernel/drv/ns16550a.conf
 file path=usr/share/man/man4d/simple-bus.4d
+driver name=arm_gtmr alias=arm,armv8-timer
 driver name=gicthree alias=arm,gic-v3
 driver name=gictwo \
     alias=arm,cortex-a15-gic \
