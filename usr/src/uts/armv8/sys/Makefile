@@ -31,6 +31,7 @@ FILEMODE = 644
 
 HDRS= \
 	clock.h \
+	gic.h \
 	irq.h \
 	mach_intr.h \
 	machbrand.h \

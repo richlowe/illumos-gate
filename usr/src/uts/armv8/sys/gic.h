@@ -59,7 +59,6 @@ extern int gic_is_spurious(uint32_t intid);
  * Types and data structure filled by GIC implementation modules
  */
 typedef void (*gic_send_ipi_t)(cpuset_t cpuset, int irq);
-typedef int (*gic_init_t)(void);
 typedef void (*gic_cpu_init_t)(cpu_t *cp);
 typedef void (*gic_config_irq_t)(uint32_t irq, bool is_edge);
 typedef int (*gic_addspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
@@ -74,7 +73,6 @@ typedef int (*gic_is_spurious_t)(uint32_t intid);
 
 typedef struct gic_ops {
 	gic_send_ipi_t		go_send_ipi;
-	gic_init_t		go_init;
 	gic_cpu_init_t		go_cpu_init;
 	gic_config_irq_t	go_config_irq;
 	gic_addspl_t		go_addspl;

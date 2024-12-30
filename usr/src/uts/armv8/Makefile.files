@@ -92,6 +92,7 @@ ROOTNEX_OBJS += rootnex.o
 
 NS16550A_OBJS += ns16550a.o
 
+ARM_GTMR_OBJS += arm_gtmr.o
 GICTWO_OBJS += gictwo.o
 GICTHREE_OBJS += gicthree.o
 

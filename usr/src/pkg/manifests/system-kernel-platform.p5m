@@ -49,6 +49,8 @@ $(aarch64_ONLY)dir path=platform/armv8/kernel/dacf/aarch64
 $(aarch64_ONLY)file path=platform/armv8/kernel/dacf/aarch64/consconfig_dacf \
     mode=0755
 $(aarch64_ONLY)dir path=platform/armv8/kernel/drv
+$(aarch64_ONLY)file path=platform/armv8/kernel/drv/$(ARCH64)/arm_gtmr \
+    group=sys mode=0755
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/$(ARCH64)/npe group=sys
 $(aarch64_ONLY)dir path=platform/armv8/kernel/drv/aarch64
 $(aarch64_ONLY)file path=platform/armv8/kernel/drv/aarch64/gicthree
@@ -198,6 +200,7 @@ $(i386_ONLY)driver name=acpippm
 $(i386_ONLY)driver name=amd_iommu perms="* 0644 root sys" \
     alias=pci1002,5a23 \
     alias=pci1022,11ff
+$(aarch64_ONLY)driver name=arm_gtmr alias=arm,armv8-timer
 $(i386_ONLY)driver name=balloon perms="* 0444 root sys"
 $(i386_ONLY)driver name=cpudrv alias=cpu
 $(i386_ONLY)driver name=domcaps perms="* 0444 root sys"

@@ -69,13 +69,10 @@
 #include <sys/avintr.h>
 #include <sys/smp_impldefs.h>
 #include <sys/sunddi.h>
-#include <sys/promif.h>
 #include <sys/cpuinfo.h>
 #include <sys/sysmacros.h>
 #include <sys/archsystm.h>
 #include <sys/mach_intr.h>
-
-extern char *gic_module_name;
 
 /*
  * A redistributor region is a block of redistributor MMIO space. One finds
@@ -88,8 +85,9 @@ extern char *gic_module_name;
  * regions.
  */
 typedef struct {
-	void		*base;
-	uint64_t	size;
+	/* Base address of, and handle to, the redistributor region */
+	caddr_t			base;
+	ddi_acc_handle_t	hdl;
 } gicv3_redist_region_t;
 
 /*
@@ -105,20 +103,18 @@ typedef struct {
  */
 typedef struct {
 	lock_t			gr_lock;
-	void			*gr_rd_base;
-	void			*gr_sgi_base;
-	void			*gr_vlpi_base;
+	ddi_acc_handle_t	gr_hdlp;
+	caddr_t			gr_rd_base;
+	caddr_t			gr_sgi_base;
+	caddr_t			gr_vlpi_base;
 	uint64_t		gr_typer;
 	uint64_t		gr_sgir;
 } gicv3_redistributor_t;
 
 typedef struct {
-	/* Base address of the CPU interface */
-	void			*gc_gicc;
-	/* Base address of the distributor */
-	void			*gc_gicd;
-	/* Size of the distributor mapping */
-	uint64_t		gc_gicd_size;
+	/* Base address of, and handle to, the distributor */
+	caddr_t			gc_gicd;
+	ddi_acc_handle_t	gc_gicd_regh;
 	/* Shadow copy of the distributor type register */
 	uint32_t		gc_gicd_typer;
 	/* Number of interrupt sources in the traditional interrupt space */
@@ -144,90 +140,70 @@ typedef struct {
 	/* A flag indicating that we have 32 (or more) priority levels */
 	uint32_t		gc_pri32;
 	/* Protect access the distributor */
-	lock_t		gc_dist_lock;
+	lock_t			gc_dist_lock;
 	/*
 	 * CPUs for which we have initialized the GIC.  Used to limit IPIs to
 	 * only those CPUs we can target.
 	 */
-	cpuset_t	gc_cpuset;
+	cpuset_t		gc_cpuset;
 } gicv3_conf_t;
 
-static gicv3_conf_t	conf;
+static gicv3_conf_t	*conf;
+static void		*gicv3_soft_state;
 
 #define	GICR_FRAME_SIZE		(64 * 1024)
 
-#define	GIC_IPL_TO_PRI(ipl)	(conf.gc_pri32 ? (GIC_IPL_TO_PRIO((ipl))) : \
+#define	GIC_IPL_TO_PRI(ipl)	(conf->gc_pri32 ? (GIC_IPL_TO_PRIO((ipl))) : \
 				(GIC_IPL_TO_PRIO16((ipl))))
 
 #define	GICD_LOCK_INIT_HELD()	uint64_t __s = disable_interrupts(); \
-				LOCK_INIT_HELD(&conf.gc_dist_lock)
+				LOCK_INIT_HELD(&conf->gc_dist_lock)
 #define	GICD_LOCK()		uint64_t __s = disable_interrupts(); \
-				lock_set(&conf.gc_dist_lock)
-#define	GICD_UNLOCK()		lock_clear(&conf.gc_dist_lock); \
+				lock_set(&conf->gc_dist_lock)
+#define	GICD_UNLOCK()		lock_clear(&conf->gc_dist_lock); \
 				restore_interrupts(__s)
 
 static inline uint32_t
-reg_read_raw4(void *base, uint32_t reg)
-{
-	return (i_ddi_get32(NULL, (uint32_t *)(base + reg)));
-}
-
-static inline void
-reg_write_raw4(void *base, uint32_t reg, uint32_t val)
-{
-	i_ddi_put32(NULL, (uint32_t *)(base + reg), val);
-}
-
-static inline uint32_t
-reg_rmw_raw4(void *base, uint32_t reg, uint32_t clrbits, uint32_t setbits)
+reg_rmw4(ddi_acc_handle_t hdl, caddr_t base,
+    uint32_t reg, uint32_t clrbits, uint32_t setbits)
 {
 	uint32_t val;
-	val = (reg_read_raw4(base, reg) & (~clrbits)) | setbits;
-	reg_write_raw4(base, reg, val);
+	val = (ddi_get32(hdl, (uint32_t *)(base + reg)) & (~clrbits)) | setbits;
+	ddi_put32(hdl, (uint32_t *)(base + reg), val);
 	return (val);
 }
 
 static inline void
-reg_await_clear4(void *base, uint32_t reg, uint32_t mask)
+reg_await_clear4(ddi_acc_handle_t hdl, caddr_t base,
+    uint32_t reg, uint32_t mask)
 {
-	while (reg_read_raw4(base, reg) & mask)
+	while (ddi_get32(hdl, (uint32_t *)(base + reg)) & mask)
 		;
-}
-
-static inline uint64_t
-reg_read_raw8(void *base, uint32_t reg)
-{
-	return (i_ddi_get64(NULL, (uint64_t *)(base + reg)));
-}
-
-static inline void
-reg_write_raw8(void *base, uint32_t reg, uint64_t val)
-{
-	i_ddi_put64(NULL, (uint64_t *)(base + reg), val);
 }
 
 static inline uint32_t
 gicd_read4(gicv3_conf_t *gic, uint32_t reg)
 {
-	return (reg_read_raw4(gic->gc_gicd, reg));
+	return (ddi_get32(gic->gc_gicd_regh, (uint32_t *)(gic->gc_gicd + reg)));
 }
 
 static inline void
 gicd_write4(gicv3_conf_t *gic, uint32_t reg, uint32_t val)
 {
-	reg_write_raw4(gic->gc_gicd, reg, val);
+	ddi_put32(gic->gc_gicd_regh, (uint32_t *)(gic->gc_gicd + reg), val);
 }
 
 static inline void
 gicd_write8(gicv3_conf_t *gic, uint32_t reg, uint64_t val)
 {
-	reg_write_raw8(gic->gc_gicd, reg, val);
+	ddi_put64(gic->gc_gicd_regh, (uint64_t *)(gic->gc_gicd + reg), val);
 }
 
 static inline uint32_t
 gicd_rmw4(gicv3_conf_t *gic, uint32_t reg, uint32_t clrbits, uint32_t setbits)
 {
-	return (reg_rmw_raw4(gic->gc_gicd, reg, clrbits, setbits));
+	return (reg_rmw4(gic->gc_gicd_regh, gic->gc_gicd,
+	    reg, clrbits, setbits));
 }
 
 /*
@@ -241,20 +217,21 @@ gicd_rmw4(gicv3_conf_t *gic, uint32_t reg, uint32_t clrbits, uint32_t setbits)
 static void
 gicd_drain_writes(gicv3_conf_t *gic)
 {
-	reg_await_clear4(gic->gc_gicd, GICD_CTLR, GICD_CTLR_RWP);
+	reg_await_clear4(gic->gc_gicd_regh, gic->gc_gicd,
+	    GICD_CTLR, GICD_CTLR_RWP);
 }
 
 static inline uint32_t
 gicr_rd_read4(gicv3_redistributor_t *r, uint32_t reg)
 {
-	return (reg_read_raw4(r->gr_rd_base, reg));
+	return (ddi_get32(r->gr_hdlp, (uint32_t *)(r->gr_rd_base + reg)));
 }
 
 static inline uint32_t
 gicr_rd_rmw4(gicv3_redistributor_t *r,
     uint32_t reg, uint32_t clrbits, uint32_t setbits)
 {
-	return (reg_rmw_raw4(r->gr_rd_base, reg, clrbits, setbits));
+	return (reg_rmw4(r->gr_hdlp, r->gr_rd_base, reg, clrbits, setbits));
 }
 
 /*
@@ -271,26 +248,27 @@ gicr_rd_rmw4(gicv3_redistributor_t *r,
 static void
 gicr_drain_writes(gicv3_redistributor_t *r)
 {
-	reg_await_clear4(r->gr_rd_base, GICR_CTLR, GICR_CTLR_RWP);
+	reg_await_clear4(r->gr_hdlp, r->gr_rd_base, GICR_CTLR, GICR_CTLR_RWP);
 }
 
 static inline uint32_t
 gicr_sgi_read4(gicv3_redistributor_t *r, uint32_t reg)
 {
-	return (reg_read_raw4(r->gr_sgi_base, reg));
+	return (ddi_get32(r->gr_hdlp, (uint32_t *)(r->gr_sgi_base + reg)));
 }
 
 static inline void
 gicr_sgi_write4(gicv3_redistributor_t *r, uint32_t reg, uint32_t val)
 {
-	reg_write_raw4(r->gr_sgi_base, reg, val);
+	ddi_put32(r->gr_hdlp, (uint32_t *)(r->gr_sgi_base + reg), val);
 }
 
 static inline uint32_t
 gicr_sgi_rmw4(gicv3_redistributor_t *r,
     uint32_t reg, uint32_t clrbits, uint32_t setbits)
 {
-	return (reg_rmw_raw4(r->gr_sgi_base, reg, clrbits, setbits));
+	return (reg_rmw4(r->gr_hdlp, r->gr_sgi_base,
+	    reg, clrbits, setbits));
 }
 
 /*
@@ -312,7 +290,8 @@ gicv3_awaken_cpu(gicv3_conf_t *gc, cpu_t *cp)
 	s = disable_interrupts();
 	lock_set(&r->gr_lock);
 	gicr_rd_rmw4(r, GICR_WAKER, GICR_WAKER_ProcessorSleep, 0x0);
-	reg_await_clear4(r->gr_rd_base, GICR_WAKER, GICR_WAKER_ChildrenAsleep);
+	reg_await_clear4(r->gr_hdlp, r->gr_rd_base,
+	    GICR_WAKER, GICR_WAKER_ChildrenAsleep);
 	lock_clear(&r->gr_lock);
 	restore_interrupts(s);
 }
@@ -403,10 +382,10 @@ gicv3_config_irq(uint32_t irq, bool is_edge)
 	if (GIC_INTID_IS_SGI(irq)) {
 		/* SGIs are not configurable */
 	} else if (GIC_INTID_IS_PPI(irq)) {
-		gicv3_for_each_gicr(&conf,
+		gicv3_for_each_gicr(conf,
 		    gicv3_config_irq_percpu, irq, v);
 	} else if (GIC_INTID_IS_SPI(irq)) {
-		gicv3_config_irq_spi(&conf, irq, v);
+		gicv3_config_irq_spi(conf, irq, v);
 	}
 }
 
@@ -476,7 +455,7 @@ gicv3_addspl_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t ipl)
 	/*
 	 * Set the target CPU.
 	 */
-	if ((conf.gc_gicd_typer & GICD_TYPER_No1N) == 0)
+	if ((gc->gc_gicd_typer & GICD_TYPER_No1N) == 0)
 		gicd_write8(gc, GICD_IROUTERn(irq),
 		    GICD_IROUTER_Interrupt_Routing_Mode);
 	else
@@ -514,10 +493,10 @@ static int
 gicv3_addspl(int irq, int ipl, int min_ipl __unused, int max_ipl __unused)
 {
 	if (GIC_INTID_IS_PERCPU(irq)) {
-		gicv3_for_each_gicr(&conf,
+		gicv3_for_each_gicr(conf,
 		    gicv3_addspl_percpu, (uint32_t)irq, (uint32_t)ipl);
 	} else if (GIC_INTID_IS_SPI(irq)) {
-		gicv3_addspl_spi(&conf, (uint32_t)irq, (uint32_t)ipl);
+		gicv3_addspl_spi(conf, (uint32_t)irq, (uint32_t)ipl);
 	}
 
 	return (0);
@@ -591,10 +570,10 @@ gicv3_delspl(int irq, int ipl __unused,
     int min_ipl __unused, int max_ipl __unused)
 {
 	if (GIC_INTID_IS_PERCPU(irq)) {
-		gicv3_for_each_gicr(&conf,
+		gicv3_for_each_gicr(conf,
 		    gicv3_delspl_percpu, (uint32_t)irq, 0);
 	} else if (GIC_INTID_IS_SPI(irq)) {
-		gicv3_delspl_spi(&conf, (uint32_t)irq);
+		gicv3_delspl_spi(conf, (uint32_t)irq);
 	}
 
 	return (0);
@@ -625,12 +604,12 @@ gicv3_send_ipi(cpuset_t cpuset, int irq)
 	 *
 	 * However, this is obviously correct, which will do for now.
 	 */
-	CPUSET_AND(cpuset, conf.gc_cpuset);
+	CPUSET_AND(cpuset, conf->gc_cpuset);
 	CPUSET_DEL(cpuset, CPU->cpu_id);
 	while (!CPUSET_ISNULL(cpuset)) {
 		uint_t cpun;
 		CPUSET_FIND(cpuset, cpun);
-		sgir = conf.gc_redist[cpun].gr_sgir;
+		sgir = conf->gc_redist[cpun].gr_sgir;
 		if (!has_rss && ICC_SGInR_EL1_HAS_RS(sgir)) {
 			panic("cpu%d: Need range selector support to target "
 			    "cpu%d with an SGI", CPU->cpu_id, cpun);
@@ -682,130 +661,6 @@ gicv3_deactivate(uint64_t ack)
 }
 
 /*
- * Private helper function to deallocate and unmap any allocated GIC
- * configuration.
- *
- * This function is only used for cleanup in error paths.
- */
-static void
-gicv3_clear_conf(gicv3_conf_t *gc)
-{
-	uint32_t i;
-
-	if (gc->gc_num_redist && gc->gc_redist) {
-		kmem_free(gc->gc_redist,
-		    sizeof (gicv3_redistributor_t) * gc->gc_num_redist);
-	}
-
-	gc->gc_redist = NULL;
-	gc->gc_num_redist = 0;
-
-	if (gc->gc_num_redist_regions && gc->gc_redist_regions) {
-		for (i = 0; i < gc->gc_num_redist_regions; ++i) {
-			if (gc->gc_redist_regions[i].size) {
-				psm_unmap_phys(
-				    (caddr_t)gc->gc_redist_regions[i].base,
-				    gc->gc_redist_regions[i].size);
-			}
-			gc->gc_redist_regions[i].base = NULL;
-			gc->gc_redist_regions[i].size = 0;
-		}
-
-		kmem_free(gc->gc_redist_regions,
-		    sizeof (gicv3_redist_region_t) * gc->gc_num_redist_regions);
-	}
-
-	gc->gc_redist_regions = NULL;
-	gc->gc_num_redist_regions = 0;
-
-	if (gc->gc_gicd && gc->gc_gicd_size)
-		psm_unmap_phys((caddr_t)gc->gc_gicd, gc->gc_gicd_size);
-
-	gc->gc_gicd = NULL;
-	gc->gc_gicd_size = 0;
-}
-
-/*
- * Return the GICv3 PROM node, or OBP_NONODE if none was found.
- */
-static pnode_t
-find_gic(pnode_t nodeid, int depth)
-{
-	pnode_t	node;
-	pnode_t	child;
-
-	if (prom_is_compatible(nodeid, "arm,gic-v3"))
-		return (nodeid);
-
-	child = prom_childnode(nodeid);
-	while (child > 0) {
-		node = find_gic(child, depth + 1);
-		if (node > 0)
-			return (node);
-		child = prom_nextnode(child);
-	}
-
-	return (OBP_NONODE);
-}
-
-/*
- * Map the GICv3 distributor and redistributor MMIO regions into the device
- * arena.
- */
-static int
-gicv3_map(gicv3_conf_t *gc)
-{
-	pnode_t			node;
-	uint32_t		i;
-	uint64_t		gicd_base;
-	uint64_t		gicd_size;
-	uint64_t		gicrr_base;
-	uint64_t		gicrr_size;
-	uint32_t		num_redist_regions;
-	caddr_t			addr;
-
-	node = find_gic(prom_rootnode(), 0);
-	if (node <= 0)
-		return (-1);
-
-	if (prom_get_reg_address(node, 0, &gicd_base) != 0)
-		return (-1);
-
-	if (prom_get_reg_size(node, 0, &gicd_size) != 0)
-		return (-1);
-
-	addr = psm_map_phys(gicd_base, gicd_size, PROT_READ|PROT_WRITE);
-	if (addr == NULL)
-		return (-1);
-	gc->gc_gicd = (void *)addr;
-	gc->gc_gicd_size = gicd_size;
-
-	gc->gc_redist_stride =
-	    prom_get_prop_u64(node, "redistributor-stride", 0);
-	num_redist_regions =
-	    prom_get_prop_u32(node, "#redistributor-regions", 1);
-	gc->gc_redist_regions = kmem_zalloc(
-	    sizeof (gicv3_redist_region_t) * num_redist_regions, KM_SLEEP);
-	gc->gc_num_redist_regions = num_redist_regions;
-
-	for (i = 0; i < gc->gc_num_redist_regions; ++i) {
-		if (prom_get_reg_address(node, 1 + i, &gicrr_base) != 0 ||
-		    prom_get_reg_size(node, 1 + i, &gicrr_size) != 0)
-			return (-1);
-
-		addr = psm_map_phys(gicrr_base, gicrr_size,
-		    PROT_READ|PROT_WRITE);
-		if (addr == NULL)
-			return (-1);
-
-		gc->gc_redist_regions[i].base = (void *)addr;
-		gc->gc_redist_regions[i].size = gicrr_size;
-	}
-
-	return (0);
-}
-
-/*
  * Discover redistributors in all redistributor regions and assign them to CPUs
  * by CPU ID.
  */
@@ -816,11 +671,11 @@ gicv3_assign_redistributors(gicv3_conf_t *gc)
 	uint64_t		gicr_typer;
 	uint32_t		num_redistributors;
 	uint64_t		affinity;
-	void			*gicr_rd_base;
-	void			*gicr_sgi_base;
-	void			*gicr_vlpi_base;
-	void			*cursor;
-	void			*ptr;
+	caddr_t			gicr_rd_base;
+	caddr_t			gicr_sgi_base;
+	caddr_t			gicr_vlpi_base;
+	caddr_t			cursor;
+	caddr_t			ptr;
 	struct cpuinfo		*ci;
 
 	/*
@@ -832,7 +687,8 @@ gicv3_assign_redistributors(gicv3_conf_t *gc)
 		cursor = gc->gc_redist_regions[i].base;
 		do {
 			ptr = cursor;
-			gicr_typer = reg_read_raw8(cursor, GICR_TYPER);
+			gicr_typer = ddi_get64(gc->gc_redist_regions[i].hdl,
+			    (uint64_t *)(cursor + GICR_TYPER));
 			/* skip over the rd and sgi frames */
 			cursor += (GICR_FRAME_SIZE * 2);
 			/* skip over the vlpi and reserved frames if present */
@@ -865,8 +721,8 @@ gicv3_assign_redistributors(gicv3_conf_t *gc)
 		cursor = gc->gc_redist_regions[i].base;
 		do {
 			ptr = cursor;
-			gicr_typer = reg_read_raw8(cursor, GICR_TYPER);
-
+			gicr_typer = ddi_get64(gc->gc_redist_regions[i].hdl,
+			    (uint64_t *)(cursor + GICR_TYPER));
 			gicr_rd_base = cursor;
 			cursor += GICR_FRAME_SIZE;
 			gicr_sgi_base = cursor;
@@ -890,6 +746,8 @@ gicv3_assign_redistributors(gicv3_conf_t *gc)
 			 * Initialize the redistributor record.
 			 */
 			LOCK_INIT_CLEAR(&gc->gc_redist[ci->ci_id].gr_lock);
+			gc->gc_redist[ci->ci_id].gr_hdlp =
+			    gc->gc_redist_regions[i].hdl;
 			gc->gc_redist[ci->ci_id].gr_rd_base = gicr_rd_base;
 			gc->gc_redist[ci->ci_id].gr_sgi_base = gicr_sgi_base;
 			gc->gc_redist[ci->ci_id].gr_vlpi_base = gicr_vlpi_base;
@@ -973,13 +831,13 @@ gicv3_enable_system_register_access(void)
  * function once the distributor and redistributors have been configured.
  */
 static void
-gicv3_cpu_init(cpu_t *cp)
+gicv3_cpu_init_raw(gicv3_conf_t *gc, cpu_t *cp)
 {
 	/*
 	 * Tell the hardware that this CPU is awake and wait for the wakeup to
 	 * complete.
 	 */
-	gicv3_awaken_cpu(&conf, cp);
+	gicv3_awaken_cpu(gc, cp);
 
 	/*
 	 * CPU Interface Configuration
@@ -1017,7 +875,13 @@ gicv3_cpu_init(cpu_t *cp)
 	/*
 	 * Finally, tell the world we're ready.
 	 */
-	CPUSET_ADD(conf.gc_cpuset, cp->cpu_id);
+	CPUSET_ADD(gc->gc_cpuset, cp->cpu_id);
+}
+
+static void
+gicv3_cpu_init(cpu_t *cp)
+{
+	gicv3_cpu_init_raw(conf, cp);
 }
 
 /*
@@ -1028,40 +892,25 @@ gicv3_cpu_init(cpu_t *cp)
  * Returns non-zero on error.
  */
 static int
-gicv3_init(void)
+gicv3_init(gicv3_conf_t *gc)
 {
 	uint32_t	n;
-
-	if (gicv3_enable_system_register_access() != 0)
-		prom_panic("cpu0: Failed to enable the GIC system register "
-		    "interface.");
 
 	/*
 	 * Global initialization involves the distributor, so lock it.
 	 */
 	GICD_LOCK_INIT_HELD();
-	gicv3_clear_conf(&conf);
-
-	/*
-	 * Map redistributor regions.
-	 */
-	if (gicv3_map(&conf) != 0) {
-		gicv3_clear_conf(&conf);
-		GICD_UNLOCK();
-		return (-1);
-	}
 
 	/*
 	 * Allocate redistributors and assign pointers to them.
 	 */
-	if (gicv3_assign_redistributors(&conf) != 0) {
-		gicv3_clear_conf(&conf);
+	if (gicv3_assign_redistributors(gc) != 0) {
 		GICD_UNLOCK();
-		return (-1);
+		return (DDI_FAILURE);
 	}
 
-	conf.gc_gicd_typer = gicd_read4(&conf, GICD_TYPER);
-	conf.gc_maxsources = GICD_TYPER_LINES(conf.gc_gicd_typer);
+	gc->gc_gicd_typer = gicd_read4(gc, GICD_TYPER);
+	gc->gc_maxsources = GICD_TYPER_LINES(gc->gc_gicd_typer);
 
 	/*
 	 * Disable the distributor and drain writes. This is done is pieces
@@ -1074,13 +923,13 @@ gicv3_init(void)
 	 * In an implementation that only supports one security state, ARE
 	 * is the same bit as ARE_NS, so this logic holds.
 	 */
-	(void) gicd_rmw4(&conf, GICD_CTLR,
+	(void) gicd_rmw4(gc, GICD_CTLR,
 	    GICD_CTLR_RWP|GICD_CTLR_EnableGrp1A|GICD_CTLR_EnableGrp1, 0x0);
-	gicd_drain_writes(&conf);
-	(void) gicd_rmw4(&conf, GICD_CTLR,
+	gicd_drain_writes(gc);
+	(void) gicd_rmw4(gc, GICD_CTLR,
 	    GICD_CTLR_RWP|GICD_CTLR_ARE_NS, GICD_CTLR_ARE_NS);
-	gicd_drain_writes(&conf);
-	VERIFY((gicd_read4(&conf, GICD_CTLR) & GICD_CTLR_ARE_NS) ==
+	gicd_drain_writes(gc);
+	VERIFY((gicd_read4(gc, GICD_CTLR) & GICD_CTLR_ARE_NS) ==
 	    GICD_CTLR_ARE_NS);
 
 	/*
@@ -1100,40 +949,40 @@ gicv3_init(void)
 	 * single security state is 4. If two states are implemented the
 	 * minimum is 5.
 	 */
-	conf.gc_pri32 =
+	gc->gc_pri32 =
 	    ((ICC_CTLR_NUM_PRI_BITS(read_icc_ctlr_el1()) >= 5) ? 1 : 0);
 
 	/*
 	 * Disable all SPIs.
 	 */
-	for (n = 32; n < conf.gc_maxsources; n += 32)
-		gicd_write4(&conf, GICD_ICENABLERn(n >> 5), 0xFFFFFFFF);
-	gicd_drain_writes(&conf);
+	for (n = 32; n < gc->gc_maxsources; n += 32)
+		gicd_write4(gc, GICD_ICENABLERn(n >> 5), 0xFFFFFFFF);
+	gicd_drain_writes(gc);
 
 	/*
 	 * Move all SPIs to non-secure group 1.
 	 */
-	for (n = 32; n < conf.gc_maxsources; n += 32) {
-		gicd_write4(&conf, GICD_IGROUPRn(n >> 5), 0xFFFFFFFF);
-		gicd_write4(&conf, GICD_IGRPMODRn(n >> 5), 0x0);
+	for (n = 32; n < gc->gc_maxsources; n += 32) {
+		gicd_write4(gc, GICD_IGROUPRn(n >> 5), 0xFFFFFFFF);
+		gicd_write4(gc, GICD_IGRPMODRn(n >> 5), 0x0);
 	}
 
 	/*
 	 * Drop all SPIs to the lowest priority.
 	 */
-	for (n = 32; n < conf.gc_maxsources; n += 4)
-		gicd_write4(&conf, GICD_IPRIORITYRn(n >> 2), 0xFFFFFFFF);
+	for (n = 32; n < gc->gc_maxsources; n += 4)
+		gicd_write4(gc, GICD_IPRIORITYRn(n >> 2), 0xFFFFFFFF);
 
 	/*
 	 * Make all SPIs level-sensitive.
 	 */
-	for (n = 32; n < conf.gc_maxsources; n += 16)
-		gicd_write4(&conf, GICD_ICFGRn(n >> 4), 0x0);
+	for (n = 32; n < gc->gc_maxsources; n += 16)
+		gicd_write4(gc, GICD_ICFGRn(n >> 4), 0x0);
 
 	/*
 	 * Enable the distributor.
 	 */
-	(void) gicd_rmw4(&conf, GICD_CTLR, GICD_CTLR_RWP,
+	(void) gicd_rmw4(gc, GICD_CTLR, GICD_CTLR_RWP,
 	    GICD_CTLR_EnableGrp1A);
 
 	/*
@@ -1144,24 +993,129 @@ gicv3_init(void)
 	/*
 	 * Reset all of the redistributors.
 	 */
-	gicv3_for_each_gicr(&conf, gicv3_init_gicr, 0, 0);
+	gicv3_for_each_gicr(gc, gicv3_init_gicr, 0, 0);
 
 	/*
 	 * No CPUs have been configured yet.
 	 */
-	CPUSET_ZERO(conf.gc_cpuset);
+	CPUSET_ZERO(gc->gc_cpuset);
 
 	/*
 	 * Initialize the boot processor.
 	 */
-	gicv3_cpu_init(CPU);
-	return (0);
+	gicv3_cpu_init_raw(gc, CPU);
+	return (DDI_SUCCESS);
 }
 
 static int
-gicv3_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
+gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
-	ddi_report_dev(devi);
+	int ret;
+	int nregs;
+	int instance;
+	int i;
+	int j;
+	uint32_t num_redist_regions;
+	gicv3_conf_t *gc;
+
+	ddi_device_acc_attr_t gicv3_reg_acc_attr = {
+		.devacc_attr_version		= DDI_DEVICE_ATTR_V0,
+		.devacc_attr_endian_flags	= DDI_STRUCTURE_LE_ACC,
+		.devacc_attr_dataorder		= DDI_STRICTORDER_ACC
+	};
+
+	switch (cmd) {
+	case DDI_ATTACH:
+		break;
+	case DDI_RESUME:	/* fallthrough */
+	case DDI_PM_RESUME:
+		return (DDI_SUCCESS);
+	default:
+		return (DDI_FAILURE);
+	}
+
+	ASSERT3U(cmd, ==, DDI_ATTACH);
+	instance = ddi_get_instance(dip);
+
+	if (gicv3_enable_system_register_access() != 0) {
+		dev_err(dip, CE_PANIC, "Failed to enable the GIC system "
+		    "register interface for the boot processor.");
+	}
+
+	if ((ret = ddi_dev_nregs(dip, &nregs)) != DDI_SUCCESS)
+		return (ret);
+	if (nregs < 2)	/* need at least a distributor and redistributor */
+		return (DDI_FAILURE);
+
+	if ((ret = ddi_soft_state_zalloc(
+	    gicv3_soft_state, instance)) != DDI_SUCCESS)
+		return (ret);
+	gc = ddi_get_soft_state(gicv3_soft_state, instance);
+	VERIFY3P(gc, !=, NULL);
+
+	if ((ret = ddi_regs_map_setup(dip, 0, &gc->gc_gicd, 0, 0,
+	    &gicv3_reg_acc_attr, &gc->gc_gicd_regh)) != DDI_SUCCESS) {
+		ddi_soft_state_free(gicv3_soft_state, instance);
+		return (ret);
+	}
+
+	gc->gc_redist_stride =
+	    ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0, "redistributor-stride", 0);
+
+	num_redist_regions = ddi_prop_get_int(
+	    DDI_DEV_T_ANY, dip, 0, "#redistributor-regions", 1);
+
+	gc->gc_redist_regions = kmem_zalloc(
+	    sizeof (gicv3_redist_region_t) * num_redist_regions, KM_SLEEP);
+	gc->gc_num_redist_regions = num_redist_regions;
+
+	for (i = 0; i < gc->gc_num_redist_regions; ++i) {
+		if ((ret = ddi_regs_map_setup(dip, 1 + i,
+		    &gc->gc_redist_regions[i].base, 0, 0, &gicv3_reg_acc_attr,
+		    &gc->gc_redist_regions[i].hdl)) != DDI_SUCCESS) {
+			for (j = 0; j < i; ++j)
+				ddi_regs_map_free(
+				    &gc->gc_redist_regions[j].hdl);
+			kmem_free(gc->gc_redist_regions,
+			    sizeof (gicv3_redist_region_t) *
+			    gc->gc_num_redist_regions);
+			ddi_regs_map_free(&gc->gc_gicd_regh);
+			ddi_soft_state_free(gicv3_soft_state, instance);
+			return (ret);
+		}
+	}
+
+	conf = gc;
+
+	if ((ret = gicv3_init(gc)) != DDI_SUCCESS) {
+		if (gc->gc_num_redist && gc->gc_redist)
+			kmem_free(gc->gc_redist,
+			    sizeof (gicv3_redistributor_t) * gc->gc_num_redist);
+		for (i = 0; i < gc->gc_num_redist_regions; ++i)
+			ddi_regs_map_free(&gc->gc_redist_regions[i].hdl);
+		kmem_free(gc->gc_redist_regions,
+		    sizeof (gicv3_redist_region_t) *
+		    gc->gc_num_redist_regions);
+		ddi_regs_map_free(&gc->gc_gicd_regh);
+		ddi_soft_state_free(gicv3_soft_state, instance);
+		conf = NULL;
+		return (ret);
+	}
+
+	gic_ops.go_send_ipi = gicv3_send_ipi;
+	gic_ops.go_cpu_init = gicv3_cpu_init;
+	gic_ops.go_config_irq = gicv3_config_irq;
+	gic_ops.go_addspl = gicv3_addspl;
+	gic_ops.go_delspl = gicv3_delspl;
+	gic_ops.go_intr_enter = gicv3_intr_enter;
+	gic_ops.go_intr_exit = gicv3_intr_exit;
+	gic_ops.go_acknowledge = gicv3_acknowledge;
+	gic_ops.go_ack_to_vector = gicv3_ack_to_vector;
+	gic_ops.go_eoi = gicv3_eoi;
+	gic_ops.go_deactivate = gicv3_deactivate;
+	gic_ops.go_is_spurious = (gic_is_spurious_t)NULL;
+
+	ddi_report_dev(dip);
 	return (DDI_SUCCESS);
 }
 
@@ -1173,6 +1127,36 @@ gicv3_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
 	 * but there's no reason to try.
 	 */
 	return (DDI_FAILURE);
+}
+
+static int
+gicv3_bus_ctl(dev_info_t *dip, dev_info_t *rdip, ddi_ctl_enum_t ctlop,
+    void *arg, void *result)
+{
+	int ret;
+
+	switch (ctlop) {
+	case DDI_CTLOPS_INITCHILD:
+		ret = impl_ddi_sunbus_initchild(arg);
+		break;
+	case DDI_CTLOPS_UNINITCHILD:
+		impl_ddi_sunbus_removechild(arg);
+		ret = DDI_SUCCESS;
+		break;
+	case DDI_CTLOPS_REPORTDEV:
+		if (rdip == NULL)
+			return (DDI_FAILURE);
+		cmn_err(CE_CONT, "?%s%d at %s%d\n",
+		    ddi_driver_name(rdip), ddi_get_instance(rdip),
+		    ddi_driver_name(dip), ddi_get_instance(dip));
+		ret = DDI_SUCCESS;
+		break;
+	default:
+		ret = ddi_ctlops(dip, rdip, ctlop, arg, result);
+		break;
+	}
+
+	return (ret);
 }
 
 /*
@@ -1206,7 +1190,8 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		 * Always 3+ interrupt cells in the gicv3 binding (but this is
 		 * FDT specific, and needs to be better)
 		 */
-		uint32_t *p = &priv->ip_unitintr->ui_v[priv->ip_unitintr->ui_addrcells];
+		uint32_t *p = &priv->ip_unitintr->ui_v[
+		    priv->ip_unitintr->ui_addrcells];
 		const uint32_t cfg = *p++;
 		const uint32_t vector = *p++;
 		const uint32_t sense = *p++;
@@ -1217,6 +1202,11 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 
 		hdlp->ih_vector = GIC_VEC_TO_IRQ(cfg, vector);
 
+		/*
+		 * bits[3:0] trigger type and level flags:
+		 * - 1 = edge triggered
+		 * - 4 = level-sensitive
+		 */
 		if ((sense & 0xff) == 1)
 			gic_config_irq(hdlp->ih_vector, true);
 		else
@@ -1242,7 +1232,8 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		 * Here we don't use the sense, we asserted in the enable path
 		 * that any fields present but not understood are 0.
 		 */
-		uint32_t *p = &priv->ip_unitintr->ui_v[priv->ip_unitintr->ui_addrcells];
+		uint32_t *p = &priv->ip_unitintr->ui_v[
+		    priv->ip_unitintr->ui_addrcells];
 		const uint32_t cfg = *p++;
 		const uint32_t vector = *p++;
 
@@ -1286,11 +1277,12 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 
 static struct bus_ops gicv3_bus_ops = {
 	.busops_rev = BUSO_REV,
-	.bus_map = nullbusmap,
+	.bus_map = i_ddi_bus_map,
 	.bus_map_fault = i_ddi_map_fault,
 	.bus_dma_map = ddi_no_dma_map,
 	.bus_dma_allochdl = ddi_no_dma_allochdl,
-	.bus_intr_op = &gicv3_intr_ops,
+	.bus_ctl = gicv3_bus_ctl,
+	.bus_intr_op = gicv3_intr_ops,
 };
 
 static struct modlmisc modlmisc = {
@@ -1326,39 +1318,30 @@ static struct modlinkage modlinkage = {
 int
 _init(void)
 {
-	/*
-	 * If the early-system has probed GIC v3, configure ourselves for
-	 * early operations.
-	 *
-	 * This is necessary because the clock _must_ tick prior to normal
-	 * autoconfiguration taking place, or even being possible.
-	 */
-	if (strcmp(gic_module_name, "gicthree") == 0) {
-		gic_ops.go_send_ipi = gicv3_send_ipi;
-		gic_ops.go_init = gicv3_init;
-		gic_ops.go_cpu_init = gicv3_cpu_init;
-		gic_ops.go_config_irq = gicv3_config_irq;
-		gic_ops.go_addspl = gicv3_addspl;
-		gic_ops.go_delspl = gicv3_delspl;
-		gic_ops.go_intr_enter = gicv3_intr_enter;
-		gic_ops.go_intr_exit = gicv3_intr_exit;
-		gic_ops.go_acknowledge = gicv3_acknowledge;
-		gic_ops.go_ack_to_vector = gicv3_ack_to_vector;
-		gic_ops.go_eoi = gicv3_eoi;
-		gic_ops.go_deactivate = gicv3_deactivate;
-		/*
-		 * Explicitly use the default "is special" handler.
-		 */
-		gic_ops.go_is_spurious = (gic_is_spurious_t)NULL;
+	int err;
+
+	if ((err = ddi_soft_state_init(&gicv3_soft_state,
+	    sizeof (gicv3_conf_t), 1)) != 0)
+		return (err);
+
+	if ((err = mod_install(&modlinkage)) != 0) {
+		ddi_soft_state_fini(&gicv3_soft_state);
+		return (err);
 	}
 
-	return (mod_install(&modlinkage));
+	return (err);
 }
 
 int
 _fini(void)
 {
-	return (EBUSY);
+	int err;
+
+	if ((err = mod_remove(&modlinkage)))
+		return (err);
+
+	ddi_soft_state_fini(&gicv3_soft_state);
+	return (err);
 }
 
 int

@@ -19,7 +19,6 @@
 #include <sys/gic.h>
 #include <sys/gic_reg.h>
 #include <sys/modctl.h>
-#include <sys/promif.h>
 #include <sys/smp_impldefs.h>
 #include <sys/sysmacros.h>
 #include <sys/types.h>
@@ -41,15 +40,8 @@ static void stub_intr_exit(int ipl);
 kmutex_t gic_intrs_lock;
 avl_tree_t gic_intrs;
 
-/*
- * Used by implementations to ensure that they only fill in gic_ops when
- * appropriate.
- */
-char *gic_module_name = NULL;
-
 gic_ops_t gic_ops = {
 	.go_send_ipi		= (gic_send_ipi_t)stub_not_config,
-	.go_init		= (gic_init_t)stub_not_config,
 	.go_cpu_init		= (gic_cpu_init_t)stub_not_config,
 	.go_config_irq		= (gic_config_irq_t)stub_not_config,
 	.go_addspl		= (gic_addspl_t)stub_not_config,
@@ -66,7 +58,7 @@ gic_ops_t gic_ops = {
 static void
 stub_not_config(void)
 {
-	prom_panic("GIC not configured\n");
+	panic("GIC not configured\n");
 }
 
 static void
@@ -258,39 +250,9 @@ gic_is_spurious(uint32_t intid)
 	return (0);
 }
 
-/*
- * GIC Initialisation
- */
-static void
-set_gic_module_name(void)
-{
-	if (prom_has_compatible("arm,gic-400") ||
-	    prom_has_compatible("arm,cortex-a15-gic")) {
-		gic_module_name = "gictwo";
-		return;
-	}
-
-	if (prom_has_compatible("arm,gic-v3")) {
-		gic_module_name = "gicthree";
-		return;
-	}
-
-	gic_module_name = NULL;
-}
-
 int
 gic_init(void)
 {
-	set_gic_module_name();
-	if (gic_module_name == NULL)
-		return (ENOTSUP);
-
-	if (modload("drv", gic_module_name) == -1)
-		return (ENOENT);
-
-	if (gic_ops.go_init() != 0)
-		return (-1);
-
 	mutex_init(&gic_intrs_lock, NULL, MUTEX_DEFAULT, NULL);
 	avl_create(&gic_intrs, gic_intr_state_cmp, sizeof (gic_intr_state_t),
 	    offsetof(gic_intr_state_t, gi_node));
