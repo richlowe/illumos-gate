@@ -996,30 +996,42 @@ mmc_init(struct mmc_sc *sc)
 
 	// clock
 	struct prom_hwclock clock;
-	if (prom_get_clock(node, 0, &clock) != 0)
+	if (prom_get_clock(node, 0, &clock) != 0) {
+		panic("mmc_init: failed to get clock");
 		return (-1);
+	}
 
 	// regulator
 	struct gpio_regulator regulator = {0};
 	phandle_t phandle = prom_get_prop_int(node, "vqmmc-supply", -1);
-	if (phandle < 0)
+	if (phandle < 0) {
+		panic("mmc_init: failed to get vqmmc-supply");
 		return (-1);
+	}
 	pnode_t vqmmc_node = prom_findnode_by_phandle(phandle);
-	if (vqmmc_node < 0)
+	if (vqmmc_node < 0) {
+		panic("mmc_init: failed to get vqmmc node");
 		return (-1);
-	if (init_gpio_regulator(vqmmc_node, &regulator) < 0)
+	}
+	if (init_gpio_regulator(vqmmc_node, &regulator) < 0) {
+		panic("mmc_init: failed to init gpio regulator");
 		return (-1);
+	}
 
-	if (get_gpio_regulator(&sc->vdd, &regulator) != 0)
+	if (get_gpio_regulator(&sc->vdd, &regulator) != 0) {
+		panic("mmc_init: failed to get gpio regulator");
 		goto err_exit;
+	}
 
 	// reset
 	mmc_reset(sc);
 
 	mmc_init_clock(sc);
 
-	if (mmc_set_voltage(sc, &regulator, sc->vdd) < 0)
+	if (mmc_set_voltage(sc, &regulator, sc->vdd) < 0) {
+		panic("mmc_init: failed to set mmc voltage");
 		goto err_exit;
+	}
 
 	{
 		union emmc_interrupt interrupt = {0};
@@ -1057,62 +1069,88 @@ mmc_init(struct mmc_sc *sc)
 		sc->ocr_avail |= OCR_18_19V;
 
 	int i;
-	if (mmc_go_idle_state(sc) != 0)
+	if (mmc_go_idle_state(sc) != 0) {
+		panic("mmc_init: mmc_go_idle_state failed");
 		goto err_exit;
+	}
 
-	if (mmc_send_if_cond(sc) != 0)
+	if (mmc_send_if_cond(sc) != 0) {
+		panic("mmc_init: mmc_send_if_cond failed");
 		goto err_exit;
+	}
 
 	for (i = 0; i < 1000; i++) {
-		if (mmc_sd_send_ocr(sc) != 0)
+		if (mmc_sd_send_ocr(sc) != 0) {
+			panic("mmc_init: failed mmc_sd_send_ocr");
 			goto err_exit;
+		}
 
 		if (sc->ocr & OCR_POWER_UP)
 			break;
 
 		usecwait(1000);
 	}
-	if (i >= 1000)
+	if (i >= 1000) {
+		panic("mmc_init: timeout");
 		goto err_exit;
+	}
 
 	uint32_t max_current_ = (sc->vdd == 3300000 ? max_current_330 :
 	    max_current_180);
 
 	if ((sc->ocr & OCR_CCS) && (sc->ocr & OCR_S18A)) {
-		if (mmc_voltage_switch(sc, &regulator) != 0)
+		if (mmc_voltage_switch(sc, &regulator) != 0) {
+			panic("mmc_init: mmc_voltage_switch failed");
 			goto err_exit;
+		}
 	}
 
-	if (mmc_all_send_cid(sc) != 0)
+	if (mmc_all_send_cid(sc) != 0) {
+		panic("mmc_init: mmc_all_send_cid failed");
 		goto err_exit;
+	}
 
-	if (mmc_send_relative_addr(sc) != 0)
+	if (mmc_send_relative_addr(sc) != 0) {
+		panic("mmc_init: mmc_send_relative_addr failed");
 		goto err_exit;
+	}
 
-	if (mmc_send_csd(sc) != 0)
+	if (mmc_send_csd(sc) != 0) {
+		panic("mmc_init: mmc_send_csd failed");
 		goto err_exit;
+	}
 
-	if (mmc_select_card(sc) != 0)
+	if (mmc_select_card(sc) != 0) {
+		panic("mmc_init: mmc_select_card failed");
 		goto err_exit;
+	}
 
 	for (i = 0; i < 3; i++) {
 		if (mmc_send_scr(sc) == 0)
 			break;
 	}
-	if (i >= 3)
+	if (i >= 3) {
+		panic("mmc_init: mmc_send_scr timeout");
 		goto err_exit;
+	}
 
-	if (mmc_swtch_func(sc, 0) != 0)
+	if (mmc_swtch_func(sc, 0) != 0) {
+		panic("mmc_init: mmc_swtch_func failed");
 		goto err_exit;
+	}
 
 	// 4bit
 	if (mmc_extract_bits(sc->scr, 51, 4) & (1 << 2)) {
-		if (mmc_set_bus_width(sc, 4) < 0)
+		if (mmc_set_bus_width(sc, 4) < 0) {
+			panic("mmc_init: mmc_set_bus_width failed");
 			goto err_exit;
+		}
 	}
 
-	if (mmc_set_blocklen(sc, DEV_BSIZE) != 0)
+	if (mmc_set_blocklen(sc, DEV_BSIZE) != 0) {
+		panic("mmc_init: mmc_set_blocklen failed");
 		goto err_exit;
+	}
 
 	{
 		uint32_t argument = (1u << 31) | 0xffffff;
@@ -1197,8 +1235,10 @@ mmc_init(struct mmc_sc *sc)
 			argument |= (0x1 << ((1 - 1) * 4));
 		}
 
-		if (mmc_swtch_func(sc, argument) != 0)
+		if (mmc_swtch_func(sc, argument) != 0) {
+			panic("mmc_init: mmc_swtch_func failed");
 			goto err_exit;
+		}
 	}
 
 	mmc_set_clock(sc, mmc_extract_bits(sc->func_status, 379, 4));
@@ -1218,8 +1258,10 @@ mmc_init(struct mmc_sc *sc)
 
 	if (sc->tuning_enable) {
 		mmc_reset_tune(sc);
-		if (mmc_retune(sc) != 0)
+		if (mmc_retune(sc) != 0) {
+			panic("mmc_init: mmc_retune failed");
 			goto err_exit;
+		}
 	}
 
 	fini_gpio_regulator(&regulator);
