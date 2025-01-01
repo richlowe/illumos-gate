@@ -1548,23 +1548,23 @@ mmc_quiesce(dev_info_t *dip)
 	return (DDI_FAILURE);
 }
 
+/* Check the device is not disabled */
 static int
 mmc_probe(dev_info_t *dip)
 {
-	int len;
-	char buf[80];
-	pnode_t node = ddi_get_nodeid(dip);
-	if (node < 0)
-		return (DDI_PROBE_FAILURE);
+	char *buf;
 
-	len = prom_getproplen(node, "status");
-	if (len <= 0 || len >= sizeof (buf))
-		return (DDI_PROBE_FAILURE);
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, 0,
+	    OBP_STATUS, &buf) != DDI_SUCCESS) {
+		return (DDI_PROBE_SUCCESS);
+	}
 
-	prom_getprop(node, "status", (caddr_t)buf);
-	if (strcmp(buf, "ok") != 0 && (strcmp(buf, "okay") != 0))
+	if (strcmp(buf, "ok") != 0 && strcmp(buf, "okay") != 0) {
+		ddi_prop_free(buf);
 		return (DDI_PROBE_FAILURE);
+	}
 
+	ddi_prop_free(buf);
 	return (DDI_PROBE_SUCCESS);
 }
 

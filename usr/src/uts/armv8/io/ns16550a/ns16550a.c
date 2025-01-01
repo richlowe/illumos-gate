@@ -928,33 +928,23 @@ ns16550detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
 	return (DDI_SUCCESS);
 }
 
-/*
- * ns16550probe
- * We don't bother probing for the hardware, as since Solaris 2.6, device
- * nodes are only created for auto-detected hardware or nodes explicitly
- * created by the user, e.g. via the DCA. However, we should check the
- * device node is at least vaguely usable, i.e. we have a block of 8 i/o
- * ports. This prevents attempting to attach to bogus serial ports which
- * some BIOSs still partially report when they are disabled in the BIOS.
- */
+/* Check the device is not disabled  */
 static int
 ns16550probe(dev_info_t *dip)
 {
-	char buf[80];
-	pnode_t node = ddi_get_nodeid(dip);
-	if (node < 0)
-		return (DDI_PROBE_FAILURE);
+	char *buf;
 
-	int len = prom_getproplen(node, "status");
-	if (len <= 0)
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, 0,
+	    OBP_STATUS, &buf) != DDI_SUCCESS) {
 		return (DDI_PROBE_SUCCESS);
-	if (len >= sizeof(buf))
-		return (DDI_PROBE_FAILURE);
+	}
 
-	prom_getprop(node, "status", (caddr_t)buf);
-	if (strcmp(buf, "ok") != 0 && strcmp(buf, "okay") != 0)
+	if (strcmp(buf, "ok") != 0 && strcmp(buf, "okay") != 0) {
+		ddi_prop_free(buf);
 		return (DDI_PROBE_FAILURE);
+	}
 
+	ddi_prop_free(buf);
 	return (DDI_PROBE_SUCCESS);
 }
 
