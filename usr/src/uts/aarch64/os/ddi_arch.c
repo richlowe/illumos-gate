@@ -252,7 +252,8 @@ i_ddi_apply_range(dev_info_t *dp, dev_info_t *rdip, struct regspec *rp)
 #endif	/* DDI_MAP_DEBUG */
 
 	rp->regspec_bustype = rangep->rng_bustype;
-	rp->regspec_addr += rangep->rng_offset - rangep->rng_coffset;
+	rp->regspec_addr =
+	    (rp->regspec_addr - rangep->rng_coffset) + rangep->rng_offset;
 
 #ifdef	DDI_MAP_DEBUG
 	ddi_map_debug("    Return: %lx.%lx.%lx\n", rp->regspec_bustype,

@@ -1960,8 +1960,13 @@ impl_xlate_ranges(dev_info_t *child, uint32_t *in, size_t in_len,
 	static const int	num_known_3cell =
 	    (int)(sizeof (known_3cell) / sizeof (known_3cell[0]));
 
-	if (in_len == 0)
+	/* zero-length input means identity mapping */
+	if (in_len == 0) {
+		pdptr->par_rng = kmem_zalloc(
+		    sizeof (struct rangespec) * 1, KM_SLEEP);
+		pdptr->par_nrng = 1;
 		return (0);
+	}
 
 	VERIFY3P(child, !=, NULL);
 	if (child == ddi_root_node())
@@ -2108,9 +2113,9 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 	/*
 	 * Handle the 'reg' property.
 	 */
-	if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, child, DDI_PROP_DONTPASS,
-	    OBP_REG, &reg_prop, &reg_len) == DDI_PROP_SUCCESS) &&
-	    (reg_len != 0)) {
+	if (((n = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, OBP_REG, &reg_prop, &reg_len))
+	    == DDI_PROP_SUCCESS) && (reg_len != 0)) {
 		if (impl_xlate_regs(child, (uint32_t *)reg_prop, reg_len,
 		    pdptr) != 0) {
 			dev_err(child, CE_WARN, "couldn't initialize regs in "
@@ -2118,13 +2123,18 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 		}
 
 		ddi_prop_free(reg_prop);
+	} else {
+		if (n != DDI_PROP_NOT_FOUND && n != DDI_PROP_UNDEFINED) {
+			dev_err(child, CE_WARN,
+			    "unable to read %s property: %d", OBP_REG, n);
+		}
 	}
 
 	/*
 	 * Ranges, of of which we only handle certain shapes.
 	 */
-	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, child,
-	    DDI_PROP_DONTPASS, OBP_RANGES, &rng_prop, &rng_len)
+	if ((n = ddi_prop_lookup_int_array(DDI_DEV_T_ANY, child,
+	    DDI_PROP_DONTPASS, OBP_RANGES, &rng_prop, &rng_len))
 	    == DDI_PROP_SUCCESS) {
 		if (impl_xlate_ranges(child, (uint32_t *)rng_prop, rng_len,
 		    pdptr) != 0) {
@@ -2134,6 +2144,17 @@ make_ddi_ppd(dev_info_t *child, struct ddi_parent_private_data **ppd)
 
 		if (rng_prop)
 			ddi_prop_free(rng_prop);
+	} else {
+		if (n == DDI_PROP_END_OF_DATA) {
+			/* empty ranges property means identity mapping */
+			if (impl_xlate_ranges(child, NULL, 0, pdptr) != 0) {
+				dev_err(child, CE_WARN, "couldn't initialize "
+				    "ranges in parent data");
+			}
+		} else if (n != DDI_PROP_NOT_FOUND && n != DDI_PROP_UNDEFINED) {
+			dev_err(child, CE_WARN,
+			    "unable to read %s property: %d", OBP_RANGES, n);
+		}
 	}
 }
 
