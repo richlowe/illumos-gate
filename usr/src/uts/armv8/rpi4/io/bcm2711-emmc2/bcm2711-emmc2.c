@@ -294,6 +294,7 @@ mmc_wait_state_idle(struct mmc_sc *sc, uint32_t mask, uint64_t usec)
 			break;
 		usecwait(200);
 	}
+	panic("mmc_wait_state_idle timed out");
 
 	mmc_soft_reset(sc);
 	return (-1);
@@ -310,8 +311,10 @@ mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 	else if (cmd->sc_rtype & Rb)
 		status_mask.dat_inhibit = 1;
 
-	if (mmc_wait_state_idle(sc, status_mask.dw, 1000000) != 0)
+	if (mmc_wait_state_idle(sc, status_mask.dw, 1000000) != 0) {
+		panic("mmc_start_cmd: mmc_wait_state_idle failed");
 		return (-1);
+	}
 
 	union emmc_cmdtm1 cmdtm1 = { 0 };
 	cmdtm1.cmd_type = ((cmd->sc_index == CMD_STOP_TRANSMIT)? 3: 0);
@@ -389,8 +392,11 @@ mmc_wait_cmd_done(struct mmc_sc *sc, struct sda_cmd *cmd)
 {
 	union emmc_interrupt cmd_done = {0};
 	cmd_done.cmd_done = 1;
-	if (mmc_wait_intr(sc, cmd_done.dw, 1000000) == 0)
+
+	if (mmc_wait_intr(sc, cmd_done.dw, 1000000) == 0) {
+		panic("mmc_wait_cmd_done: mmc_wait_intr failed");
 		return (-1);
+	}
 
 	switch (cmd->sc_rtype) {
 	case R0:
@@ -423,8 +429,10 @@ mmc_wait_cmd_done(struct mmc_sc *sc, struct sda_cmd *cmd)
 			union emmc_interrupt result = { mmc_wait_intr(sc,
 			    data_done.dw, 10000000) };
 
-			if (result.dw == 0)
+			if (result.dw == 0) {
+				panic("mmc_wait_cmd_done: command failed");
 				return (-1);
+			}
 			if (result.data_done)
 				break;
 			mmc_reg_write(sc, EMMC_ARG2,
@@ -672,11 +680,15 @@ mmc_send_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 			mmc_retune(sc);
 	}
 
-	if (mmc_start_cmd(sc, cmd) != 0)
+	if (mmc_start_cmd(sc, cmd) != 0) {
+		panic("mmc_send_cmd: mmc_start_cmd failed");
 		goto err_exit;
+	}
 
-	if (mmc_wait_cmd_done(sc, cmd) != 0)
+	if (mmc_wait_cmd_done(sc, cmd) != 0) {
+		panic("mmc_send_cmd: mmc_wait_cmd_done failed");
 		goto err_exit;
+	}
 
 	if (cmd->sc_index == CMD_STOP_TRANSMIT)
 		mmc_soft_reset(sc);
