@@ -184,9 +184,9 @@ gic_addspl(int irq, int ipl, int min_ipl, int max_ipl)
 static int
 gic_delspl(int irq, int ipl, int min_ipl, int max_ipl)
 {
-	ASSERT3S(irq, <, MAX_VECT);
+	int pri = -1;
 
-	if (autovect[irq].avh_hi_pri == 0) {
+	if (av_get_vec_lvl(irq, &pri) == 0 || pri == 0) {
 		int ret = 0;
 		mutex_enter(&gic_intrs_lock);
 		gic_remove_state(irq);

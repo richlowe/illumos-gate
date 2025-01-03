@@ -395,13 +395,9 @@ gicv3_config_irq(uint32_t irq, bool is_edge)
 static int
 gicv3_intr_enter(int irq)
 {
-	int new_ipl;
+	int new_ipl = 0;
 
-	ASSERT3S(irq, <, MAX_VECT);
-
-	new_ipl = autovect[irq].avh_hi_pri;
-
-	if (new_ipl != 0) {
+	if (av_get_vec_lvl(irq, &new_ipl) && new_ipl != 0) {
 		write_icc_pmr_el1(GIC_IPL_TO_PRI(new_ipl));
 	}
 

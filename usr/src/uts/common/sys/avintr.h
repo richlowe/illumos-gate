@@ -58,6 +58,7 @@ struct autovec {
 	 */
 
 	struct autovec *av_link;	/* pointer to next on in chain */
+	uint_t av_vecnum;
 	uint_t	(*av_vector)();
 	caddr_t	av_intarg1;
 	caddr_t	av_intarg2;
@@ -108,6 +109,7 @@ extern void update_avsoftintr_args(void *intr_id, int lvl, caddr_t arg2);
 extern void rem_avintr(void *intr_id, int lvl, avfunc xxintr, int vect);
 extern void wait_till_seen(int ipl);
 extern uint_t softlevel1(caddr_t, caddr_t);
+extern int av_get_vec_lvl(uint_t vect, int *lvl);
 
 #endif	/* _KERNEL */
 

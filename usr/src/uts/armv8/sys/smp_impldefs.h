@@ -85,7 +85,6 @@ extern void psm_unmap_phys(caddr_t, size_t);
 /*
  *	External Reference Data
  */
-extern struct av_head autovect[]; /* array of auto intr vectors		*/
 extern uint32_t rm_platter_pa;	/* phy addr realmode startup storage	*/
 extern caddr_t rm_platter_va;	/* virt addr realmode startup storage	*/
 extern cpuset_t mp_cpus;	/* bit map of possible cpus found	*/

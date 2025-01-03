@@ -47,12 +47,14 @@
 #include <sys/evtchn_impl.h>
 #endif
 
+#define	NO_VECT	((uint_t)-1)
+
 typedef struct av_softinfo {
 	cpuset_t	av_pending;	/* pending bitmasks */
 } av_softinfo_t;
 
-static void insert_av(void *intr_id, struct av_head *vectp, avfunc f,
-	caddr_t arg1, caddr_t arg2, uint64_t *ticksp, int pri_level,
+static void insert_av(void *intr_id, struct av_head *vectp, uint_t vecnum,
+	avfunc f, caddr_t arg1, caddr_t arg2, uint64_t *ticksp, int pri_level,
 	dev_info_t *dip);
 static void remove_av(void *intr_id, struct av_head *vectp, avfunc f,
 	int pri_level, int vect);
@@ -98,6 +100,16 @@ ddi_softint_hdl_impl_t softlevel_hdl[DDI_IPL_10] = {
 };
 ddi_softint_hdl_impl_t softlevel1_hdl =
 	{0, 0, NULL, NULL, 0, NULL, NULL, NULL};
+
+static __GNU_INLINE int
+av_vector_match(struct autovec *av, uint_t vect)
+{
+#if defined(__aarch64__)
+	return (av->av_vecnum == vect);
+#else
+	return (1);
+#endif
+}
 
 /*
  * clear/check softint pending flag corresponding for
@@ -258,7 +270,7 @@ add_avintr(void *intr_id, int lvl, avfunc xxintr, char *name, int vect,
 			cmn_err(CE_NOTE, multilevel, vect);
 	}
 
-	insert_av(intr_id, vecp, f, arg1, arg2, ticksp, lvl, dip);
+	insert_av(intr_id, vecp, vect, f, arg1, arg2, ticksp, lvl, dip);
 	s = splhi();
 	/*
 	 * do what ever machine specific things are necessary
@@ -270,6 +282,39 @@ add_avintr(void *intr_id, int lvl, avfunc xxintr, char *name, int vect,
 	splx(s);
 	return (1);
 
+}
+
+int
+av_get_vec_lvl(uint_t vect, int *lvl)
+{
+	struct av_head *vecp;
+	struct autovec *p;
+	int vectindex;
+
+	vectindex = vect % MAX_VECT;
+	vecp = &autovect[vectindex];
+
+#if defined(__aarch64__)
+	/*
+	 * avh_hi_pri of 0 means there are no entries in this bucket
+	 */
+	if (vecp->avh_hi_pri == 0)
+		return (0);
+
+	for (p = vecp->avh_link; p != NULL; p = p->av_link) {
+		if (p->av_vector != NULL && av_vector_match(p, vect)) {
+			if (lvl != NULL)
+				*lvl = p->av_prilevel;
+			return (1);
+		}
+	}
+
+	return (0);
+#else
+	if (lvl != NULL)
+		*lvl = p->av_prilevel;
+	return (vecp->avh_hi_pri != 0);
+#endif
 }
 
 void
@@ -327,7 +372,8 @@ add_avsoftintr(void *intr_id, int lvl, avfunc xxintr, char *name,
 		    kmem_zalloc(sizeof (av_softinfo_t), KM_SLEEP);
 	}
 
-	insert_av(intr_id, &softvect[lvl], xxintr, arg1, arg2, NULL, lvl, NULL);
+	insert_av(intr_id, &softvect[lvl], NO_VECT,
+	    xxintr, arg1, arg2, NULL, lvl, NULL);
 
 	return (1);
 }
@@ -337,8 +383,9 @@ add_avsoftintr(void *intr_id, int lvl, avfunc xxintr, char *name,
  * to low
  */
 static void
-insert_av(void *intr_id, struct av_head *vectp, avfunc f, caddr_t arg1,
-    caddr_t arg2, uint64_t *ticksp, int pri_level, dev_info_t *dip)
+insert_av(void *intr_id, struct av_head *vectp, uint_t vecnum, avfunc f,
+    caddr_t arg1, caddr_t arg2, uint64_t *ticksp, int pri_level,
+    dev_info_t *dip)
 {
 	/*
 	 * Protect rewrites of the list
@@ -346,6 +393,7 @@ insert_av(void *intr_id, struct av_head *vectp, avfunc f, caddr_t arg1,
 	struct autovec *p, *prep, *mem;
 
 	mem = kmem_zalloc(sizeof (struct autovec), KM_SLEEP);
+	mem->av_vecnum = vecnum;
 	mem->av_vector = f;
 	mem->av_intarg1 = arg1;
 	mem->av_intarg2 = arg2;
@@ -391,6 +439,7 @@ insert_av(void *intr_id, struct av_head *vectp, avfunc f, caddr_t arg1,
 			 * To prevent calling service routine before args
 			 * and ticksp are ready fill in vector last.
 			 */
+			p->av_vecnum = vecnum;
 			p->av_vector = f;
 			mutex_exit(&av_lock);
 			kmem_free(mem, sizeof (struct autovec));
@@ -550,7 +599,8 @@ remove_av(void *intr_id, struct av_head *vectp, avfunc f, int pri_level,
 	lo_pri = MAXIPL;
 	hi_pri = 0;
 	for (p = vectp->avh_link; p; p = p->av_link) {
-		if ((p->av_vector == f) && (p->av_intr_id == intr_id)) {
+		if ((p->av_vector == f) && (p->av_intr_id == intr_id) &&
+		    av_vector_match(p, vect)) {
 			/* found the handler */
 			target = p;
 			continue;
@@ -577,6 +627,7 @@ remove_av(void *intr_id, struct av_head *vectp, avfunc f, int pri_level,
 	 * still executing.
 	 */
 	target->av_vector = NULL;
+	target->av_vecnum = NO_VECT;
 	/*
 	 * There is a race where we could be just about to pick up the ticksp
 	 * pointer to increment it after returning from the service routine
@@ -681,12 +732,14 @@ void
 av_dispatch_autovect(uint_t vec)
 {
 	struct autovec *av;
+	uint_t vectindex = vec % MAX_VECT;
+#if !defined(__aarch64__)
+	ASSERT3U(vec, <, MAX_VECT);
+#endif
 
 	ASSERT_STACK_ALIGNED();
 
-	ASSERT3U(vec, <, MAX_VECT);
-
-	while ((av = autovect[vec].avh_link) != NULL) {
+	while ((av = autovect[vectindex].avh_link) != NULL) {
 		uint_t numcalled = 0;
 		uint_t claimed = 0;
 
@@ -702,6 +755,13 @@ av_dispatch_autovect(uint_t vec)
 			 * may be anywhere in the chain.
 			 */
 			if (intr == NULL)
+				continue;
+
+			/*
+			 * Skip over entries that do not match the interrupting
+			 * vector. Only applies to aarch64.
+			 */
+			if (!av_vector_match(av, vec))
 				continue;
 
 			DTRACE_PROBE4(interrupt__start, dev_info_t *, dip,
