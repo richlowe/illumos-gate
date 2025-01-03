@@ -561,7 +561,11 @@ enumerate_root_cb(dev_info_t *dip, void *arg)
 				VERIFY3U(busrng_sz, ==, 2);
 				bus_def[0] = busrng[0];
 				bus_def[1] = busrng[1];
+				ddi_prop_free(busrng);
 			}
+
+			cmn_err(CE_NOTE, "PCI enumerating %s [%d, %d]",
+			    ddi_node_name(dip), bus_def[0], bus_def[1]);
 
 			/*
 			 * XXXPCI: This would be the time hang something (a
@@ -573,27 +577,24 @@ enumerate_root_cb(dev_info_t *dip, void *arg)
 			num_root_bus++;
 
 			/*
-			 * The first bus is the _our_ bus, others in the range
+			 * The first bus is _our_ bus, others in the range
 			 * are available to subordinate bridges.
 			 */
 			pci_bus_res[bus_def[0]].dip = dip;
+			pci_bus_res[bus_def[0]].root_addr = (*root_bus_addr)++;
 
-			for (int i = bus_def[0]; i <= bus_def[1]; i++) {
-				pci_bus_res[i].root_addr = (*root_bus_addr)++;
-
-				if (create_pcie_root_bus(i, dip) == B_FALSE) {
-					/* Undo (most of) what create_pcie_root_bus did, while failing */
-					(void) ndi_prop_update_string(DDI_DEV_T_NONE, dip,
-					    OBP_DEVICETYPE, "pci");
-				}
-
-				(void) ndi_devi_bind_driver(dip, 0);
-
-				enumerate_bus_devs(i, CONFIG_INFO);
+			if (create_pcie_root_bus(bus_def[0], dip) == B_FALSE) {
+				/* Undo (most of) what create_pcie_root_bus did, while failing */
+				(void) ndi_prop_update_string(DDI_DEV_T_NONE, dip,
+				    OBP_DEVICETYPE, "pci");
 			}
 
-			if (busrng_sz != 0)
-				ddi_prop_free(busrng);
+			(void) ndi_devi_bind_driver(dip, 0);
+
+			/* XXX: Really here, that's a weird choice? */
+			for (int i = bus_def[0]; i <= bus_def[1]; i++) {
+				enumerate_bus_devs(i, CONFIG_INFO);
+			}
 
 			/*
 			 * The firmware may or may not have given us some
