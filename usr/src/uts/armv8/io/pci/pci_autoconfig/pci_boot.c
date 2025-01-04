@@ -548,6 +548,8 @@ enumerate_root_cb(dev_info_t *dip, void *arg)
 	char *devtype;
 	uint_t *root_bus_addr = arg;
 
+	cmn_err(CE_CONT, "enumerate_root_cb: %s\n", ddi_node_name(dip));
+
 	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    OBP_DEVICETYPE, &devtype) == DDI_SUCCESS) {
 		if (strcmp(devtype, "pci") == 0) {
