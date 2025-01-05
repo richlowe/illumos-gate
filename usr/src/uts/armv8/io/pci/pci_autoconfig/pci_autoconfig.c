@@ -52,16 +52,6 @@ extern dev_info_t *pci_boot_bus_to_dip(uint32_t);
 boolean_t
 create_pcie_root_bus(uchar_t bus, dev_info_t *dip)
 {
-
-	/*
-	 * XXXPCI: This is a horrible way to do this, but I'm not seeing any
-	 * better options than this, or just assuming anything we see here in
-	 * the future is going to be PCIe.  At least this -- nominally,
-	 * vaguely -- allows for plain PCI still.
-	 */
-	if (strcmp(ddi_node_name(dip), "pcie") != 0)
-		return (B_FALSE);
-
 	(void) ndi_prop_update_string(DDI_DEV_T_NONE, dip,
 	    OBP_DEVICETYPE, "pciex");
 	(void) ndi_prop_update_string(DDI_DEV_T_NONE, dip,
