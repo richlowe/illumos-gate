@@ -386,6 +386,9 @@ init_machdev(void)
 	    prom_rootnode(), "compatible", compatible + strlen(str) + 1);
 	prom_setprop(prom_rootnode(), "compatible", compatible, namelen);
 
+	if (prom_finddevice("/cpus/pci") != OBP_BADNODE)
+		prom_printf("*** /cpus/pci already exists ***\n");
+
 	init_arch_timer(TMR_PHYS);
 	init_genet();
 	init_mmc();
