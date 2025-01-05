@@ -548,6 +548,15 @@ enumerate_root_cb(dev_info_t *dip, void *arg)
 	char *devtype;
 	uint_t *root_bus_addr = arg;
 
+	/*
+	 * XXXPCI: This is a horrible way to do this, but I'm not seeing any
+	 * better options than this, or just assuming anything we see here in
+	 * the future is going to be PCIe.  At least this -- nominally,
+	 * vaguely -- allows for plain PCI still.
+	 */
+	if (strcmp(ddi_node_name(dip), "pcie") != 0)
+		return (DDI_WALK_CONTINUE);
+
 	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
 	    OBP_DEVICETYPE, &devtype) == DDI_SUCCESS) {
 		if (strcmp(devtype, "pci") == 0) {
@@ -581,7 +590,9 @@ enumerate_root_cb(dev_info_t *dip, void *arg)
 			 * are available to subordinate bridges.
 			 */
 			pci_bus_res[bus_def[0]].dip = dip;
-			pci_bus_res[bus_def[0]].root_addr = (*root_bus_addr)++;
+			pci_bus_res[bus_def[0]].root_addr = *root_bus_addr;
+
+			*root_bus_addr += 1;
 
 			if (create_pcie_root_bus(bus_def[0], dip) == B_FALSE) {
 				/* Undo (most of) what create_pcie_root_bus did, while failing */
