@@ -40,7 +40,7 @@
 #include <sys/pci_impl.h>
 #include <sys/debug.h>
 
-int pci_memlist_debug = 1;
+int pci_memlist_debug;
 #define	dprintf if (pci_memlist_debug) printf
 
 void
