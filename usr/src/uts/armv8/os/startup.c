@@ -20,7 +20,7 @@
  */
 
 /*
- * Copyright 2023 Michael van der Westhuizen
+ * Copyright 2025 Michael van der Westhuizen
  * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
  */
@@ -84,7 +84,8 @@
 #include <vm/hat_aarch64.h>
 #include <sys/sysconf.h>
 #include <sys/sunndi.h>
-#include <sys/gic.h>
+#include <sys/syspic.h>
+#include <sys/syspic_impl.h>
 #include <sys/psci.h>
 #include <sys/controlregs.h>
 #include <sys/arch_timer.h>
@@ -1238,10 +1239,11 @@ startup_modules(void)
 		halt("Can't initialize CPU information");
 
 	/*
-	 * Set up the interrupt controller for the primary CPU
+	 * Initialise the system programmable interrupt controller
+	 * functionality.
 	 */
-	if (gic_init() != 0)
-		halt("Can't initialize GIC");
+	if (syspic_init() != 0)
+		halt("Can't initialize syspic");
 
 	/*
 	 * Setup access to PCI-e configuration space

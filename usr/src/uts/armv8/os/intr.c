@@ -20,10 +20,10 @@
  */
 
 /*
- * Copyright 2024 Michael van der Westhuizen
- * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 2012, Joyent, Inc.  All rights reserverd.
+ * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2025 Michael van der Westhuizen
  */
 
 #include <sys/cpuvar.h>
@@ -52,7 +52,7 @@
 #include <sys/machsystm.h>
 #include <sys/ontrap.h>
 #include <sys/promif.h>
-#include <sys/gic.h>
+#include <sys/syspic.h>
 #include <sys/x_call.h>
 #include <sys/xc_levels.h>
 #include <sys/arch_timer.h>
@@ -91,7 +91,7 @@ set_base_spl(void)
  * Called with interrupts masked.
  * The 'pil' is already set to the appropriate level for rp->r_trapno.
  */
-int
+static int
 hilevel_intr_prolog(struct cpu *cpu, uint_t pil, uint_t oldpil, struct regs *rp)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
@@ -175,8 +175,9 @@ hilevel_intr_prolog(struct cpu *cpu, uint_t pil, uint_t oldpil, struct regs *rp)
  *
  * Called with interrupts masked
  */
-int
-hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint64_t ack)
+static int
+hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil,
+    intr_cookie_t ack)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	uint_t mask;
@@ -234,8 +235,8 @@ hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint64_t ack)
 	}
 
 	mcpu->mcpu_pri = oldpil;
-	gic_deactivate(ack);
-	intr_exit(oldpil);
+	syspic_intr_deactivate(ack);
+	syspic_intr_exit(oldpil);
 
 	return ((int)mask);
 }
@@ -245,7 +246,7 @@ hilevel_intr_epilog(struct cpu *cpu, uint_t pil, uint_t oldpil, uint64_t ack)
  * executing an interrupt thread.  The new stack pointer of the
  * interrupt thread (which *must* be switched to) is returned.
  */
-caddr_t
+static caddr_t
 intr_thread_prolog(struct cpu *cpu, caddr_t stackptr, uint_t pil)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
@@ -312,8 +313,8 @@ int intr_thread_cnt;
 /*
  * Called with interrupts disabled
  */
-void
-intr_thread_epilog(struct cpu *cpu, uint64_t ack, uint_t oldpil)
+static void
+intr_thread_epilog(struct cpu *cpu, intr_cookie_t ack, uint_t oldpil)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
 	kthread_t *t;
@@ -361,8 +362,8 @@ intr_thread_epilog(struct cpu *cpu, uint64_t ack, uint_t oldpil)
 		set_base_spl();
 		basespl = cpu->cpu_base_spl;
 		mcpu->mcpu_pri = basespl;
-		gic_deactivate(ack);
-		intr_exit(basespl);
+		syspic_intr_deactivate(ack);
+		syspic_intr_exit(basespl);
 		(void) splhigh();
 		(void) enable_interrupts();
 
@@ -387,8 +388,8 @@ intr_thread_epilog(struct cpu *cpu, uint64_t ack, uint_t oldpil)
 	basespl = cpu->cpu_base_spl;
 	pil = MAX(oldpil, basespl);
 	mcpu->mcpu_pri = pil;
-	gic_deactivate(ack);
-	intr_exit(pil);
+	syspic_intr_deactivate(ack);
+	syspic_intr_exit(pil);
 	t->t_intr_start = now;
 	write_tpidr_el1((uintptr_t)t);
 	cpu->cpu_thread = t;
@@ -484,7 +485,7 @@ intr_get_time(void)
 	return (ret);
 }
 
-caddr_t
+static caddr_t
 dosoftint_prolog(
 	struct cpu *cpu,
 	caddr_t stackptr,
@@ -533,7 +534,7 @@ top:
 	    ~(1 << pil));
 
 	mcpu->mcpu_pri = pil;
-	intr_exit(pil);
+	syspic_intr_exit(pil);
 
 	now = arch_timer_count();
 
@@ -593,7 +594,7 @@ top:
 	return (it->t_stk);
 }
 
-void
+static void
 dosoftint_epilog(struct cpu *cpu, uint_t oldpil)
 {
 	struct machcpu *mcpu = &cpu->cpu_m;
@@ -643,7 +644,7 @@ dosoftint_epilog(struct cpu *cpu, uint_t oldpil)
 	basespl = cpu->cpu_base_spl;
 	pil = MAX(oldpil, basespl);
 	mcpu->mcpu_pri = pil;
-	intr_exit(pil);
+	syspic_intr_exit(pil);
 }
 
 
@@ -818,13 +819,13 @@ dispatch_hilevel(uint64_t vector, uint64_t arg2 __unused)
  * Dispatch a threaded hardware interrupt.
  */
 static void
-dispatch_hardint(uint64_t ack, uint64_t oldipl)
+dispatch_hardint(intr_cookie_t ack, uint64_t oldipl)
 {
-	uint_t vector = (uint_t)gic_ack_to_vector(ack);
+	intr_intid_t vector = syspic_cookie_to_intid(ack);
 	struct cpu *cpu = CPU;
 
 	(void) enable_interrupts();
-	av_dispatch_autovect(vector);
+	av_dispatch_autovect((uint_t)vector);
 	(void) disable_interrupts();
 
 	/*
@@ -888,25 +889,25 @@ do_interrupt(struct regs *rp)
 {
 	struct cpu *cpu = CPU;
 	int newipl, oldipl = cpu->cpu_pri;
-	uint_t vector;
+	intr_intid_t vector;
 	caddr_t newsp;
-	uint64_t ack;
+	intr_cookie_t ack;
 
 	ASSERT(interrupts_disabled());
 
 	cpu_idle_exit(CPU_IDLE_CB_FLAG_INTR);
 
-	ack = gic_acknowledge();
-	vector = (uint_t)gic_ack_to_vector(ack);
+	ack = syspic_iack();
+	vector = syspic_cookie_to_intid(ack);
 
-	if (gic_is_spurious(vector))
+	if (syspic_is_spurious(vector))
 		goto softints;
 
 	/*
 	 * Slew the interrupt priority and perform the running priority drop.
 	 */
-	newipl = intr_enter(vector);
-	gic_eoi(ack);
+	newipl = syspic_intr_enter(vector);
+	syspic_eoi(ack);
 
 	/*
 	 * If the new IPL is 0 we've hit a race, and there's no longer an
@@ -914,7 +915,7 @@ do_interrupt(struct regs *rp)
 	 * interrupt and proceed to softints.
 	 */
 	if (newipl == 0) {
-		gic_deactivate(ack);
+		syspic_intr_deactivate(ack);
 		goto softints;
 	}
 
@@ -986,7 +987,7 @@ do_splx(int newpri)
 	if (newpri < basepri)
 		newpri = basepri;
 	cpu->cpu_m.mcpu_pri = newpri;
-	intr_exit(newpri);
+	syspic_intr_exit(newpri);
 
 	restore_interrupts(s);
 	return (curpri);
@@ -1010,7 +1011,7 @@ splr(int newpri)
 		if (newpri < basepri)
 			newpri = basepri;
 		cpu->cpu_m.mcpu_pri = newpri;
-		intr_exit(newpri);
+		syspic_intr_exit(newpri);
 	}
 
 	restore_interrupts(s);
@@ -1068,10 +1069,5 @@ spl_xcall(void)
 void
 send_dirint(int cpuid, int irq)
 {
-	cpuset_t cpuset;
-
-	CPUSET_ZERO(cpuset);
-	CPUSET_ADD(cpuset, cpuid);
-
-	gic_send_ipi(cpuset, irq);
+	syspic_send_ipi_one_id(cpuid, (intr_intid_t)irq);
 }

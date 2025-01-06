@@ -21,6 +21,7 @@
 
 #
 # Copyright 2017 Hayashi Naoyuki
+# Copyright 2025 Michael van der Westhuizen
 #
 
 UTSBASE=../..
@@ -32,6 +33,8 @@ FILEMODE = 644
 HDRS= \
 	clock.h \
 	gic.h \
+	syspic.h \
+	syspic_impl.h \
 	irq.h \
 	mach_intr.h \
 	machbrand.h \

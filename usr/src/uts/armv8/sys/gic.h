@@ -21,83 +21,21 @@
  */
 /*
  * Copyright 2017 Hayashi Naoyuki
- * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2025 Michael van der Westhuizen
  */
 
 #ifndef _SYS_GIC_H
 #define	_SYS_GIC_H
 
-#include <sys/types.h>
-#include <sys/cpuvar.h>
-#include <sys/stdbool.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define	GIC_PPI_TO_IRQ(vec)	(vec + 16)
-#define	GIC_SPI_TO_IRQ(vec)	(vec + 32)
+#define	GIC_FDT_PPI_TO_IRQ(vec)	((vec) + 16)
+#define	GIC_FDT_SPI_TO_IRQ(vec)	((vec) + 32)
 
-#define	GIC_VEC_TO_IRQ(type, vec) \
-	((type == 0) ? GIC_SPI_TO_IRQ(vec) : GIC_PPI_TO_IRQ(vec))
-
-extern int gic_init(void);
-extern void gic_cpu_init(cpu_t *cp);
-extern void gic_send_ipi(cpuset_t cpuset, int irq);
-extern void gic_config_irq(uint32_t irq, bool is_edge);
-
-/*
- * For interrupt handling.
- */
-extern uint64_t gic_acknowledge(void);
-extern uint32_t gic_ack_to_vector(uint64_t ack);
-extern void gic_eoi(uint64_t ack);
-extern void gic_deactivate(uint64_t ack);
-extern int gic_is_spurious(uint32_t intid);
-
-/*
- * Types and data structure filled by GIC implementation modules
- */
-typedef void (*gic_send_ipi_t)(cpuset_t cpuset, int irq);
-typedef void (*gic_cpu_init_t)(cpu_t *cp);
-typedef void (*gic_config_irq_t)(uint32_t irq, bool is_edge);
-typedef int (*gic_addspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
-typedef int (*gic_delspl_t)(int irq, int ipl, int min_ipl, int max_ipl);
-typedef int (*gic_intr_enter_t)(int irq);
-typedef void (*gic_intr_exit_t)(int ipl);
-typedef uint64_t (*gic_acknowledge_t)(void);
-typedef uint32_t (*gic_ack_to_vector_t)(uint64_t ack);
-typedef void (*gic_eoi_t)(uint64_t ack);
-typedef void (*gic_deactivate_t)(uint64_t ack);
-typedef int (*gic_is_spurious_t)(uint32_t intid);
-
-typedef struct gic_ops {
-	gic_send_ipi_t		go_send_ipi;
-	gic_cpu_init_t		go_cpu_init;
-	gic_config_irq_t	go_config_irq;
-	gic_addspl_t		go_addspl;
-	gic_delspl_t		go_delspl;
-	gic_intr_enter_t	go_intr_enter;
-	gic_intr_exit_t		go_intr_exit;
-	gic_acknowledge_t	go_acknowledge;
-	gic_ack_to_vector_t	go_ack_to_vector;
-	gic_eoi_t		go_eoi;
-	gic_deactivate_t	go_deactivate;
-	gic_is_spurious_t	go_is_spurious;
-} gic_ops_t;
-
-extern gic_ops_t gic_ops;
-
-/*
- * The state of each vector known to us and the GIC.
- * For the benefit of the debugger.
- */
-typedef struct {
-	avl_node_t gi_node;
-	uint_t	gi_vector;
-	uint32_t gi_prio;
-	boolean_t gi_edge_triggered;
-} gic_intr_state_t;
+#define	GIC_FDT_VEC_TO_IRQ(type, vec) \
+	(((type) == 0) ? GIC_FDT_SPI_TO_IRQ((vec)) : GIC_FDT_PPI_TO_IRQ((vec)))
 
 #ifdef __cplusplus
 }

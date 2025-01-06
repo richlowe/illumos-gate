@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright 2024 Michael van der Westhuizen
+ * Copyright 2025 Michael van der Westhuizen
  */
 
 /*
@@ -64,6 +64,8 @@
  */
 
 #include <sys/types.h>
+#include <sys/syspic.h>
+#include <sys/syspic_impl.h>
 #include <sys/gic.h>
 #include <sys/gic_reg.h>
 #include <sys/avintr.h>
@@ -101,8 +103,11 @@ typedef struct {
  *
  * Redistributor structures are stored in an array, indexed by CPU ID.
  */
+struct gicv3_conf;
+
 typedef struct {
 	lock_t			gr_lock;
+	struct gicv3_conf	*gr_gc;
 	ddi_acc_handle_t	gr_hdlp;
 	caddr_t			gr_rd_base;
 	caddr_t			gr_sgi_base;
@@ -111,7 +116,7 @@ typedef struct {
 	uint64_t		gr_sgir;
 } gicv3_redistributor_t;
 
-typedef struct {
+typedef struct gicv3_conf {
 	/* Base address of, and handle to, the distributor */
 	caddr_t			gc_gicd;
 	ddi_acc_handle_t	gc_gicd_regh;
@@ -146,22 +151,31 @@ typedef struct {
 	 * only those CPUs we can target.
 	 */
 	cpuset_t		gc_cpuset;
+
+	/*
+	 * System programmable interrupt controller registration control
+	 *
+	 * A GICv3 is always the system PIC.
+	 */
+	syspic_ops_t		gc_syspic;
 } gicv3_conf_t;
 
-static gicv3_conf_t	*conf;
-static void		*gicv3_soft_state;
+#define	TO_CONF(__c)		((gicv3_conf_t *)(__c))
 
-#define	GICR_FRAME_SIZE		(64 * 1024)
+static void			*gicv3_soft_state;
 
-#define	GIC_IPL_TO_PRI(ipl)	(conf->gc_pri32 ? (GIC_IPL_TO_PRIO((ipl))) : \
-				(GIC_IPL_TO_PRIO16((ipl))))
+#define	GICR_FRAME_SIZE			(64 * 1024)
 
-#define	GICD_LOCK_INIT_HELD()	uint64_t __s = disable_interrupts(); \
-				LOCK_INIT_HELD(&conf->gc_dist_lock)
-#define	GICD_LOCK()		uint64_t __s = disable_interrupts(); \
-				lock_set(&conf->gc_dist_lock)
-#define	GICD_UNLOCK()		lock_clear(&conf->gc_dist_lock); \
-				restore_interrupts(__s)
+#define	GIC_IPL_TO_PRI(__sc, ipl)	((__sc)->gc_pri32 ? \
+					(GIC_IPL_TO_PRIO((ipl))) : \
+					(GIC_IPL_TO_PRIO16((ipl))))
+
+#define	GICD_LOCK_INIT_HELD(__sc)	uint64_t __s = disable_interrupts(); \
+					LOCK_INIT_HELD(&(__sc)->gc_dist_lock)
+#define	GICD_LOCK(__sc)			uint64_t __s = disable_interrupts(); \
+					lock_set(&(__sc)->gc_dist_lock)
+#define	GICD_UNLOCK(__sc)		lock_clear(&(__sc)->gc_dist_lock); \
+					restore_interrupts(__s)
 
 static inline uint32_t
 reg_rmw4(ddi_acc_handle_t hdl, caddr_t base,
@@ -348,7 +362,7 @@ gicv3_config_irq_percpu(gicv3_redistributor_t *r, uint32_t irq, uint32_t v)
 static void
 gicv3_config_irq_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t v)
 {
-	GICD_LOCK();
+	GICD_LOCK(gc);
 	/*
 	 * §12.9.9 Changing Int_config when the interrupt is
 	 * individually enabled is UNPREDICTABLE.
@@ -370,11 +384,11 @@ gicv3_config_irq_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t v)
 		    GICD_ICFGR_REGVAL(irq, GICD_ICFGR_INT_CONFIG_MASK),
 		    GICD_ICFGR_REGVAL(irq, v));
 	}
-	GICD_UNLOCK();
+	GICD_UNLOCK(gc);
 }
 
 static void
-gicv3_config_irq(uint32_t irq, bool is_edge)
+gicv3_config_irq(gicv3_conf_t *gc, uint32_t irq, boolean_t is_edge)
 {
 	const uint32_t v = (is_edge ?
 	    GICD_ICFGR_INT_CONFIG_EDGE : GICD_ICFGR_INT_CONFIG_LEVEL);
@@ -382,10 +396,10 @@ gicv3_config_irq(uint32_t irq, bool is_edge)
 	if (GIC_INTID_IS_SGI(irq)) {
 		/* SGIs are not configurable */
 	} else if (GIC_INTID_IS_PPI(irq)) {
-		gicv3_for_each_gicr(conf,
+		gicv3_for_each_gicr(gc,
 		    gicv3_config_irq_percpu, irq, v);
 	} else if (GIC_INTID_IS_SPI(irq)) {
-		gicv3_config_irq_spi(conf, irq, v);
+		gicv3_config_irq_spi(gc, irq, v);
 	}
 }
 
@@ -393,12 +407,16 @@ gicv3_config_irq(uint32_t irq, bool is_edge)
  * Mask interrupts of priority lower than, or equal to, IRQ.
  */
 static int
-gicv3_intr_enter(int irq)
+gicv3_intr_enter(spo_ctx_t ctx, intr_intid_t intid)
 {
+	gicv3_conf_t *gc;
 	int new_ipl = 0;
 
-	if (av_get_vec_lvl(irq, &new_ipl) && new_ipl != 0) {
-		write_icc_pmr_el1(GIC_IPL_TO_PRI(new_ipl));
+	gc = TO_CONF(ctx);
+	VERIFY3P(gc, !=, NULL);
+
+	if (av_get_vec_lvl(intid, &new_ipl) && new_ipl != 0) {
+		write_icc_pmr_el1(GIC_IPL_TO_PRI(gc, new_ipl));
 	}
 
 	return (new_ipl);
@@ -408,9 +426,14 @@ gicv3_intr_enter(int irq)
  * Mask interrupts of priority lower than or equal to IPL.
  */
 static void
-gicv3_intr_exit(int ipl)
+gicv3_intr_exit(spo_ctx_t ctx, intr_ipl_t ipl)
 {
-	write_icc_pmr_el1(GIC_IPL_TO_PRI(ipl));
+	gicv3_conf_t *gc;
+
+	gc = TO_CONF(ctx);
+	VERIFY3P(gc, !=, NULL);
+
+	write_icc_pmr_el1(GIC_IPL_TO_PRI(gc, ipl));
 }
 
 /*
@@ -438,7 +461,7 @@ gicv3_intr_exit(int ipl)
 static void
 gicv3_addspl_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t ipl)
 {
-	GICD_LOCK();
+	GICD_LOCK(gc);
 
 	/*
 	 * Set the priority.
@@ -446,7 +469,7 @@ gicv3_addspl_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t ipl)
 	(void) gicd_rmw4(gc,
 	    GICD_IPRIORITYRn(GICD_IPRIORITY_REGNUM(irq)),
 	    GICD_IPRIORITY_REGVAL(irq, GICD_IPRIORITY_REGMASK),
-	    GICD_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(ipl)));
+	    GICD_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(gc, ipl)));
 
 	/*
 	 * Set the target CPU.
@@ -463,7 +486,7 @@ gicv3_addspl_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t ipl)
 	gicd_write4(gc, GICD_ISENABLERn(GICD_IENABLER_REGNUM(irq)),
 	    GICD_IENABLER_REGBIT(irq));
 
-	GICD_UNLOCK();
+	GICD_UNLOCK(gc);
 }
 
 /* Add SPL for per-CPU interrupts */
@@ -476,7 +499,7 @@ gicv3_addspl_percpu(gicv3_redistributor_t *r, uint32_t irq, uint32_t ipl)
 	(void) gicr_sgi_rmw4(r,
 	    GICR_IPRIORITYRn(GICR_IPRIORITY_REGNUM(irq)),
 	    GICR_IPRIORITY_REGVAL(irq, GICR_IPRIORITY_REGMASK),
-	    GICR_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(ipl)));
+	    GICR_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(r->gr_gc, ipl)));
 
 	/*
 	 * Enable the interrupt.
@@ -486,13 +509,34 @@ gicv3_addspl_percpu(gicv3_redistributor_t *r, uint32_t irq, uint32_t ipl)
 
 /* Enable an interrupt and set it's priority */
 static int
-gicv3_addspl(int irq, int ipl, int min_ipl __unused, int max_ipl __unused)
+gicv3_addspl(spo_ctx_t ctx, intr_intid_t intid, intr_ipl_t ipl,
+    intr_ipl_t min_ipl __unused, intr_ipl_t max_ipl __unused)
 {
-	if (GIC_INTID_IS_PERCPU(irq)) {
-		gicv3_for_each_gicr(conf,
-		    gicv3_addspl_percpu, (uint32_t)irq, (uint32_t)ipl);
-	} else if (GIC_INTID_IS_SPI(irq)) {
-		gicv3_addspl_spi(conf, (uint32_t)irq, (uint32_t)ipl);
+	gicv3_conf_t *gc;
+	syspic_intr_state_t *state = NULL;
+
+	gc = TO_CONF(ctx);
+	ASSERT3P(gc, !=, NULL);
+
+	if (GIC_INTID_IS_SGI(intid)) {
+		ASSERT(!MUTEX_HELD(&syspic_intrs_lock));
+		state = syspic_get_state(intid);
+		VERIFY3P(state, !=, NULL);
+		state->si_edge_triggered = B_TRUE;
+		state->si_prio = ipl;
+	}
+
+	ASSERT(MUTEX_HELD(&syspic_intrs_lock));
+
+	if (GIC_INTID_IS_PERCPU(intid)) {
+		gicv3_for_each_gicr(gc,
+		    gicv3_addspl_percpu, (uint32_t)intid, (uint32_t)ipl);
+	} else if (GIC_INTID_IS_SPI(intid)) {
+		gicv3_addspl_spi(gc, (uint32_t)intid, (uint32_t)ipl);
+	}
+
+	if (state != NULL) {
+		mutex_exit(&syspic_intrs_lock);
 	}
 
 	return (0);
@@ -515,7 +559,7 @@ gicv3_addspl(int irq, int ipl, int min_ipl __unused, int max_ipl __unused)
 static void
 gicv3_delspl_spi(gicv3_conf_t *gc, uint32_t irq)
 {
-	GICD_LOCK();
+	GICD_LOCK(gc);
 
 	/*
 	 * Disable the IRQ and drain writes.
@@ -530,9 +574,9 @@ gicv3_delspl_spi(gicv3_conf_t *gc, uint32_t irq)
 	(void) gicd_rmw4(gc,
 	    GICD_IPRIORITYRn(GICD_IPRIORITY_REGNUM(irq)),
 	    GICD_IPRIORITY_REGVAL(irq, GICD_IPRIORITY_REGMASK),
-	    GICD_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(0)));
+	    GICD_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(gc, 0)));
 
-	GICD_UNLOCK();
+	GICD_UNLOCK(gc);
 }
 
 /* Delete SPL for per-CPU interrupts */
@@ -552,7 +596,7 @@ gicv3_delspl_percpu(gicv3_redistributor_t *r, uint32_t irq,
 	(void) gicr_sgi_rmw4(r,
 	    GICR_IPRIORITYRn(GICR_IPRIORITY_REGNUM(irq)),
 	    GICR_IPRIORITY_REGVAL(irq, GICR_IPRIORITY_REGMASK),
-	    GICR_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(0)));
+	    GICR_IPRIORITY_REGVAL(irq, GIC_IPL_TO_PRI(r->gr_gc, 0)));
 }
 
 /*
@@ -562,14 +606,27 @@ gicv3_delspl_percpu(gicv3_redistributor_t *r, uint32_t irq,
  * handlers, so this is really just deletion.
  */
 static int
-gicv3_delspl(int irq, int ipl __unused,
-    int min_ipl __unused, int max_ipl __unused)
+gicv3_delspl(spo_ctx_t ctx, intr_intid_t intid, intr_ipl_t ipl __unused,
+    intr_ipl_t min_ipl __unused, intr_ipl_t max_ipl __unused)
 {
-	if (GIC_INTID_IS_PERCPU(irq)) {
-		gicv3_for_each_gicr(conf,
-		    gicv3_delspl_percpu, (uint32_t)irq, 0);
-	} else if (GIC_INTID_IS_SPI(irq)) {
-		gicv3_delspl_spi(conf, (uint32_t)irq);
+	gicv3_conf_t *gc;
+	int pri = -1;
+
+	gc = TO_CONF(ctx);
+	ASSERT3P(gc, !=, NULL);
+
+	if (av_get_vec_lvl(intid, &pri) == 0 || pri == 0) {
+		mutex_enter(&syspic_intrs_lock);
+		syspic_remove_state(intid);
+
+		if (GIC_INTID_IS_PERCPU(intid)) {
+			gicv3_for_each_gicr(gc,
+			    gicv3_delspl_percpu, (uint32_t)intid, 0);
+		} else if (GIC_INTID_IS_SPI(intid)) {
+			gicv3_delspl_spi(gc, (uint32_t)intid);
+		}
+
+		mutex_exit(&syspic_intrs_lock);
 	}
 
 	return (0);
@@ -586,10 +643,14 @@ gicv3_delspl(int irq, int ipl __unused,
  * 0 to align with the SGI target list capability." We assert this.
  */
 static void
-gicv3_send_ipi(cpuset_t cpuset, int irq)
+gicv3_send_ipi(spo_ctx_t ctx, cpuset_t cpuset, intr_intid_t intid)
 {
+	gicv3_conf_t *gc;
 	boolean_t has_rss;
 	uint64_t sgir;
+
+	gc = TO_CONF(ctx);
+	ASSERT3P(gc, !=, NULL);
 
 	has_rss = (read_icc_ctlr_el1() & ICC_CTLR_EL1_RSS) ? B_TRUE : B_FALSE;
 	dsb(ish);
@@ -600,17 +661,17 @@ gicv3_send_ipi(cpuset_t cpuset, int irq)
 	 *
 	 * However, this is obviously correct, which will do for now.
 	 */
-	CPUSET_AND(cpuset, conf->gc_cpuset);
+	CPUSET_AND(cpuset, gc->gc_cpuset);
 	CPUSET_DEL(cpuset, CPU->cpu_id);
 	while (!CPUSET_ISNULL(cpuset)) {
 		uint_t cpun;
 		CPUSET_FIND(cpuset, cpun);
-		sgir = conf->gc_redist[cpun].gr_sgir;
+		sgir = gc->gc_redist[cpun].gr_sgir;
 		if (!has_rss && ICC_SGInR_EL1_HAS_RS(sgir)) {
 			panic("cpu%d: Need range selector support to target "
 			    "cpu%d with an SGI", CPU->cpu_id, cpun);
 		}
-		write_icc_sgi1r_el1(sgir | ICC_SGInR_EL1_MAKE_INTID(irq));
+		write_icc_sgi1r_el1(sgir | ICC_SGInR_EL1_MAKE_INTID(intid));
 		CPUSET_DEL(cpuset, cpun);
 	}
 }
@@ -624,7 +685,7 @@ gicv3_send_ipi(cpuset_t cpuset, int irq)
  * To extract the INTID (vector), use gicv3_ack_to_vector.
  */
 static uint64_t
-gicv3_acknowledge(void)
+gicv3_acknowledge(spo_ctx_t ctx __unused)
 {
 	return (read_icc_iar1_el1());
 }
@@ -633,27 +694,36 @@ gicv3_acknowledge(void)
  * Extract the interrupt vector from an acknowledged IRQ.
  */
 static uint32_t
-gicv3_ack_to_vector(uint64_t ack)
+gicv3_ack_to_vector(spo_ctx_t ctx __unused, intr_cookie_t cookie)
 {
-	return (ack & ICC_IAR1_INTID);
+	return (cookie & ICC_IAR1_INTID);
+}
+
+static boolean_t
+gicv3_is_spurious(spo_ctx_t ctx __unused, intr_intid_t intid)
+{
+	if (GIC_INTID_IS_SPECIAL(intid))
+		return (B_TRUE);
+
+	return (B_FALSE);
 }
 
 /*
  * Invoke the running priority drop during interrupt processing.
  */
 static void
-gicv3_eoi(uint64_t ack)
+gicv3_eoi(spo_ctx_t ctx __unused, intr_cookie_t cookie)
 {
-	write_icc_eoir1_el1(ack);
+	write_icc_eoir1_el1(cookie);
 }
 
 /*
  * Deactivate an interrupt at the end of interrupt processing.
  */
 static void
-gicv3_deactivate(uint64_t ack)
+gicv3_deactivate(spo_ctx_t ctx __unused, intr_cookie_t cookie)
 {
-	write_icc_dir_el1(ack);
+	write_icc_dir_el1(cookie);
 }
 
 /*
@@ -742,6 +812,7 @@ gicv3_assign_redistributors(gicv3_conf_t *gc)
 			 * Initialize the redistributor record.
 			 */
 			LOCK_INIT_CLEAR(&gc->gc_redist[ci->ci_id].gr_lock);
+			gc->gc_redist[ci->ci_id].gr_gc = gc;
 			gc->gc_redist[ci->ci_id].gr_hdlp =
 			    gc->gc_redist_regions[i].hdl;
 			gc->gc_redist[ci->ci_id].gr_rd_base = gicr_rd_base;
@@ -855,7 +926,7 @@ gicv3_cpu_init_raw(gicv3_conf_t *gc, cpu_t *cp)
 	 * Configure the priority mask register to leave us at LOCK_LEVEL once
 	 * initialized.
 	 */
-	write_icc_pmr_el1(GIC_IPL_TO_PRI(LOCK_LEVEL));
+	write_icc_pmr_el1(GIC_IPL_TO_PRI(gc, LOCK_LEVEL));
 
 	/*
 	 * Ensure the use of split-EOI.
@@ -875,9 +946,9 @@ gicv3_cpu_init_raw(gicv3_conf_t *gc, cpu_t *cp)
 }
 
 static void
-gicv3_cpu_init(cpu_t *cp)
+gicv3_cpu_init(spo_ctx_t ctx, cpu_t *cp)
 {
-	gicv3_cpu_init_raw(conf, cp);
+	gicv3_cpu_init_raw(TO_CONF(ctx), cp);
 }
 
 /*
@@ -895,13 +966,13 @@ gicv3_init(gicv3_conf_t *gc)
 	/*
 	 * Global initialization involves the distributor, so lock it.
 	 */
-	GICD_LOCK_INIT_HELD();
+	GICD_LOCK_INIT_HELD(gc);
 
 	/*
 	 * Allocate redistributors and assign pointers to them.
 	 */
 	if (gicv3_assign_redistributors(gc) != 0) {
-		GICD_UNLOCK();
+		GICD_UNLOCK(gc);
 		return (DDI_FAILURE);
 	}
 
@@ -984,7 +1055,7 @@ gicv3_init(gicv3_conf_t *gc)
 	/*
 	 * Done touching the distributor.
 	 */
-	GICD_UNLOCK();
+	GICD_UNLOCK(gc);
 
 	/*
 	 * Reset all of the redistributors.
@@ -1038,6 +1109,12 @@ gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		    "register interface for the boot processor.");
 	}
 
+	if (!ddi_prop_exists(DDI_DEV_T_ANY, dip,
+	    DDI_PROP_DONTPASS, OBP_INTERRUPT_CONTROLLER)) {
+		dev_err(dip, CE_PANIC, "GICv3 must have the %s property.",
+		    OBP_INTERRUPT_CONTROLLER);
+	}
+
 	if ((ret = ddi_dev_nregs(dip, &nregs)) != DDI_SUCCESS)
 		return (ret);
 	if (nregs < 2)	/* need at least a distributor and redistributor */
@@ -1081,8 +1158,6 @@ gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		}
 	}
 
-	conf = gc;
-
 	if ((ret = gicv3_init(gc)) != DDI_SUCCESS) {
 		if (gc->gc_num_redist && gc->gc_redist)
 			kmem_free(gc->gc_redist,
@@ -1094,22 +1169,25 @@ gicv3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 		    gc->gc_num_redist_regions);
 		ddi_regs_map_free(&gc->gc_gicd_regh);
 		ddi_soft_state_free(gicv3_soft_state, instance);
-		conf = NULL;
 		return (ret);
 	}
 
-	gic_ops.go_send_ipi = gicv3_send_ipi;
-	gic_ops.go_cpu_init = gicv3_cpu_init;
-	gic_ops.go_config_irq = gicv3_config_irq;
-	gic_ops.go_addspl = gicv3_addspl;
-	gic_ops.go_delspl = gicv3_delspl;
-	gic_ops.go_intr_enter = gicv3_intr_enter;
-	gic_ops.go_intr_exit = gicv3_intr_exit;
-	gic_ops.go_acknowledge = gicv3_acknowledge;
-	gic_ops.go_ack_to_vector = gicv3_ack_to_vector;
-	gic_ops.go_eoi = gicv3_eoi;
-	gic_ops.go_deactivate = gicv3_deactivate;
-	gic_ops.go_is_spurious = (gic_is_spurious_t)NULL;
+	gc->gc_syspic.spo_cpu_init = gicv3_cpu_init;
+	gc->gc_syspic.spo_intr_enter = gicv3_intr_enter;
+	gc->gc_syspic.spo_intr_exit = gicv3_intr_exit;
+	gc->gc_syspic.spo_iack = gicv3_acknowledge;
+	gc->gc_syspic.spo_cookie_to_intid = gicv3_ack_to_vector;
+	gc->gc_syspic.spo_is_spurious = gicv3_is_spurious;
+	gc->gc_syspic.spo_eoi = gicv3_eoi;
+	gc->gc_syspic.spo_deactivate = gicv3_deactivate;
+	gc->gc_syspic.spo_send_ipi = gicv3_send_ipi;
+	gc->gc_syspic.spo_addspl = gicv3_addspl;
+	gc->gc_syspic.spo_delspl = gicv3_delspl;
+
+	if (!syspic_register_syspic(gc, &gc->gc_syspic)) {
+		dev_err(dip, CE_PANIC, "Failed to register GIC as the "
+		    "system programmable interrupt controller.");
+	}
 
 	ddi_report_dev(dip);
 	return (DDI_SUCCESS);
@@ -1178,9 +1256,13 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 
 	case DDI_INTROP_ENABLE: {
 		ihdl_plat_t *priv = hdlp->ih_private;
+		gicv3_conf_t *gc =
+		    ddi_get_soft_state(gicv3_soft_state, ddi_get_instance(dip));
+		syspic_intr_state_t *state = NULL;
 
 		VERIFY3P(priv, !=, NULL);
 		VERIFY3P(priv->ip_unitintr, !=, NULL);
+		VERIFY3P(gc, !=, NULL);
 
 		/*
 		 * Always 3+ interrupt cells in the gicv3 binding (but this is
@@ -1196,23 +1278,30 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 			ASSERT3U(*p++, ==, 0);
 		}
 
-		hdlp->ih_vector = GIC_VEC_TO_IRQ(cfg, vector);
+		hdlp->ih_vector = GIC_FDT_VEC_TO_IRQ(cfg, vector);
+
+		state = syspic_get_state(hdlp->ih_vector);
+		VERIFY3P(state, !=, NULL);
 
 		/*
 		 * bits[3:0] trigger type and level flags:
 		 * - 1 = edge triggered
 		 * - 4 = level-sensitive
 		 */
-		if ((sense & 0xff) == 1)
-			gic_config_irq(hdlp->ih_vector, true);
-		else
-			gic_config_irq(hdlp->ih_vector, false);
+		state->si_edge_triggered =
+		    ((sense & 0xff) == 1) ? B_TRUE : B_FALSE;
+		gicv3_config_irq(gc, hdlp->ih_vector, state->si_edge_triggered);
+		state->si_prio = hdlp->ih_pri;
 
 		/* Add the interrupt handler */
 		if (!add_avintr((void *)hdlp, hdlp->ih_pri,
 		    hdlp->ih_cb_func, DEVI(rdip)->devi_name, hdlp->ih_vector,
-		    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip))
+		    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip)) {
+			mutex_exit(&syspic_intrs_lock);
 			return (DDI_FAILURE);
+		}
+
+		mutex_exit(&syspic_intrs_lock);
 		break;
 	}
 	case DDI_INTROP_DISABLE: {
@@ -1233,7 +1322,7 @@ gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		const uint32_t cfg = *p++;
 		const uint32_t vector = *p++;
 
-		hdlp->ih_vector = GIC_VEC_TO_IRQ(cfg, vector);
+		hdlp->ih_vector = GIC_FDT_VEC_TO_IRQ(cfg, vector);
 
 		/* Remove the interrupt handler */
 		rem_avintr((void *)hdlp, hdlp->ih_pri,
