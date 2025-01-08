@@ -385,18 +385,17 @@ prom_nextnode(pnode_t nodeid)
 	if (offset < 0)
 		return (OBP_BADNODE);
 
-	int depth = 1;
-	for (;;) {
-		offset = fdt_next_node(fdtp, offset, &depth);
-		if (offset < 0)
-			return (OBP_NONODE);
-		if (depth == 1)
-			break;
+	int child = fdt_next_subnode(fdtp, offset);
+	if (child == -FDT_ERR_NOTFOUND) {
+		return (OBP_NONODE);
+	} else if (child < 0) {
+		return (OBP_BADNODE);
 	}
 
-	phandle_t phandle = get_phandle(offset);
+	phandle_t phandle = get_phandle(child);
 	if (phandle < 0)
 		return (OBP_NONODE);
+
 	return ((pnode_t)phandle);
 }
 
@@ -410,17 +409,14 @@ prom_childnode(pnode_t nodeid)
 	if (offset < 0)
 		return (OBP_NONODE);
 
-	int depth = 0;
-	for (;;) {
-		offset = fdt_next_node(fdtp, offset, &depth);
-		if (offset < 0)
-			return (OBP_NONODE);
-		if (depth == 0)
-			return (OBP_NONODE);
-		if (depth == 1)
-			break;
+	int child = fdt_first_subnode(fdtp, offset);
+	if (child == -FDT_ERR_NOTFOUND) {
+		return (OBP_NONODE);
+	} else if (child < 0) {
+		return (OBP_BADNODE);
 	}
-	phandle_t phandle = get_phandle(offset);
+
+	phandle_t phandle = get_phandle(child);
 	if (phandle < 0)
 		return (OBP_NONODE);
 	return ((pnode_t)phandle);
