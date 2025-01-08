@@ -1592,6 +1592,44 @@ map_interrupt_map(dev_info_t *dip, ddi_intr_handle_impl_t *hdlp)
 	return (NULL);
 }
 
+#define DDI_INTR_DEBUG
+
+#ifdef DDI_INTR_DEBUG
+#include <sys/ilstr.h>
+
+static void
+fmt_unitintr(unit_intr_t *ui, char *buf, size_t buflen)
+{
+	ilstr_t ist;
+
+	ilstr_init_prealloc(&ist, buf, buflen);
+
+	*buf = '\0';
+	if (ui == NULL) {
+		ilstr_append_str(&ist, "<null>");
+		ilstr_fini(&ist);
+		return;
+	}
+
+	ilstr_append_str(&ist, "unit: <");
+	for (int i = 0; i < ui->ui_addrcells; i++) {
+		ilstr_aprintf(&ist, "0x%x ", ui->ui_v[i],
+		    (i != (ui->ui_addrcells - 1)) ? ", " : "");
+	}
+
+	ilstr_append_str(&ist, "> ");
+	ilstr_append_str(&ist, "interrupt: <");
+
+	for (int i = 0; i < ui->ui_intrcells; i++) {
+		ilstr_aprintf(&ist, "0x%x%s", ui->ui_v[ui->ui_addrcells + i],
+		    (i != (ui->ui_intrcells - 1)) ? ", " : "");
+	}
+	ilstr_append_str(&ist, ">");
+
+	ilstr_fini(&ist);
+}
+#endif
+
 /*
  * Map the interrupt described by hdlp, through the device in dip, updating
  * hdlp and returning the new interrupt domain.
@@ -1618,8 +1656,12 @@ map_interrupt(dev_info_t *dip, ddi_intr_handle_impl_t *hdlp)
 	 * information to the interrupt controller.  It is cleaned up in
 	 * i_ddi_intr_ops().
 	 */
-	if (priv->ip_unitintr == NULL)
+	if (priv->ip_unitintr == NULL) {
+#ifdef DDI_INTR_DEBUG
+		dev_err(hdlp->ih_dip, CE_CONT, "-----------------------\n");
+#endif
 		priv->ip_unitintr = i_ddi_unitintr(dip, hdlp->ih_inum);
+	}
 
 	dev_info_t *par = NULL;
 
@@ -1629,6 +1671,14 @@ map_interrupt(dev_info_t *dip, ddi_intr_handle_impl_t *hdlp)
 	} else {
 		par = map_interrupt_parent(dip, hdlp);
 	}
+
+#ifdef DDI_INTR_DEBUG
+	char uibuf[1024];
+	fmt_unitintr(priv->ip_unitintr, uibuf, sizeof (uibuf));
+	dev_err(hdlp->ih_dip, CE_CONT, "mapped interrupt %d through %s%d onto %s%d: %s\n",
+	    hdlp->ih_inum, ddi_node_name(dip), ddi_get_instance(dip),
+	    ddi_node_name(par), ddi_get_instance(par), uibuf);
+#endif
 
 	if (i_ddi_attach_node_hierarchy(par) != DDI_SUCCESS) {
 		ndi_rele_devi(par);
