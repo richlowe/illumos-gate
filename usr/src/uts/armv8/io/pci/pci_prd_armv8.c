@@ -73,11 +73,19 @@ pci_prd_find_resource(uint32_t bus, pci_prd_rsrc_t rsrc)
 
 		pnode_t node = prom_finddevice("/pcie");
 
-		pci_ranges_t *ranges;
-		int length =
-		    prom_getproplen(node, OBP_RANGES) / sizeof (*ranges);
+		if (node < 0) {
+			return (NULL);
+		}
 
-		ranges = kmem_zalloc(length * sizeof (*ranges), KM_SLEEP);
+		pci_ranges_t *ranges;
+		int length = prom_getproplen(node, OBP_RANGES);
+
+		if (length <= 0) {
+			return (NULL);
+		}
+
+		ranges = kmem_zalloc(length, KM_SLEEP);
+		length /= sizeof (*ranges);
 
 		if (prom_getprop(node, "ranges", (caddr_t)ranges) <= 0) {
 			cmn_err(CE_PANIC, "No ranges property found for /pcie");
