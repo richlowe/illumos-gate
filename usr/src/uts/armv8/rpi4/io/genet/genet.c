@@ -20,6 +20,7 @@
  */
 /*
  * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2025 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/promif.h>
@@ -45,31 +46,31 @@
 
 #define	GENET_DMA_BUFFER_SIZE	1536
 
-static ddi_device_acc_attr_t mem_acc_attr = {
-	DDI_DEVICE_ATTR_V0,
-	DDI_NEVERSWAP_ACC,
-	DDI_STORECACHING_OK_ACC,
+static const ddi_device_acc_attr_t mem_acc_attr = {
+	.devacc_attr_version = DDI_DEVICE_ATTR_V1,
+	.devacc_attr_endian_flags = DDI_NEVERSWAP_ACC,
+	.devacc_attr_dataorder = DDI_STORECACHING_OK_ACC,
 };
 
-static ddi_device_acc_attr_t reg_acc_attr = {
-	DDI_DEVICE_ATTR_V0,
-	DDI_NEVERSWAP_ACC,
-	DDI_STRICTORDER_ACC,
+static const ddi_device_acc_attr_t reg_acc_attr = {
+	.devacc_attr_version = DDI_DEVICE_ATTR_V1,
+	.devacc_attr_endian_flags = DDI_NEVERSWAP_ACC,
+	.devacc_attr_dataorder = DDI_STRICTORDER_ACC,
 };
 
-static ddi_dma_attr_t dma_attr = {
-	DMA_ATTR_V0,			/* dma_attr_version	*/
-	0x0000000000000000ull,		/* dma_attr_addr_lo	*/
-	0x00000000FFFFFFFFull,		/* dma_attr_addr_hi	*/
-	0x00000000FFFFFFFFull,		/* dma_attr_count_max	*/
-	0x0000000000000001ull,		/* dma_attr_align	*/
-	0x00000FFF,			/* dma_attr_burstsizes	*/
-	0x00000001,			/* dma_attr_minxfer	*/
-	0x00000000FFFFFFFFull,		/* dma_attr_maxxfer	*/
-	0x00000000FFFFFFFFull,		/* dma_attr_seg		*/
-	1,				/* dma_attr_sgllen	*/
-	0x00000001,			/* dma_attr_granular	*/
-	DDI_DMA_FLAGERR			/* dma_attr_flags	*/
+static const ddi_dma_attr_t dma_attr = {
+	.dma_attr_version = DMA_ATTR_V0,
+	.dma_attr_addr_lo = 0x0000000000000000ull,
+	.dma_attr_addr_hi = 0x00000000FFFFFFFFull,
+	.dma_attr_count_max = 0x00000000FFFFFFFFull,
+	.dma_attr_align = DCACHE_LINE,
+	.dma_attr_burstsizes = 0x00000FFF,
+	.dma_attr_minxfer = 0x00000001,
+	.dma_attr_maxxfer = 0x00000000FFFFFFFFull,
+	.dma_attr_seg = 0x00000000FFFFFFFFull,
+	.dma_attr_sgllen = 1,
+	.dma_attr_granular = 0x00000001,
+	.dma_attr_flags = DDI_DMA_FLAGERR,
 };
 
 static void genet_destroy(struct genet_sc *sc);
@@ -95,12 +96,6 @@ genet_usecwait(int usec)
 	drv_usecwait(usec);
 }
 
-static pnode_t
-genet_get_node(struct genet_sc *sc)
-{
-	return (ddi_get_nodeid(sc->dip));
-}
-
 static void
 genet_mutex_enter(struct genet_sc *sc)
 {
@@ -114,35 +109,28 @@ genet_mutex_exit(struct genet_sc *sc)
 }
 
 static boolean_t
-is_rgmii(pnode_t node)
+is_rgmii(dev_info_t *dip)
 {
-	int len = prom_getproplen(node, "phy-mode");
-	if (len > 0) {
-		caddr_t mode = __builtin_alloca(len);
-		prom_getprop(node, "phy-mode", mode);
-		if (strncmp(mode, "rgmii", strlen("rgmii")) == 0)
-			return (B_TRUE);
-	}
-	return (B_FALSE);
-}
+	char *mode;
 
-static pnode_t
-get_phynode(pnode_t node)
-{
-	int len = prom_getproplen(node, "phy-handle");
-	if (len <= 0)
-		return (-1);
-	phandle_t phandle;
-	prom_getprop(node, "phy-handle", (caddr_t)&phandle);
-	return (prom_findnode_by_phandle(ntohl(phandle)));
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, 0,
+	    "phy-mode", &mode) != DDI_SUCCESS) {
+		return (B_FALSE);
+	}
+
+	if (strcmp(mode, "rgmii") == 0) {
+		ddi_prop_free(mode);
+		return (B_TRUE);
+	}
+
+	ddi_prop_free(mode);
+	return (B_FALSE);
 }
 
 static void
 genet_gmac_reset(struct genet_sc *sc)
 {
-	pnode_t node = genet_get_node(sc);
-
-	if (is_rgmii(node)) {
+	if (is_rgmii(sc->dip)) {
 		genet_reg_write(sc, GENET_SYS_PORT_CTRL,
 		    GENET_SYS_PORT_MODE_EXT_GPHY);
 	}
@@ -363,8 +351,6 @@ static struct genet_packet *
 genet_alloc_packet(struct genet_sc *sc)
 {
 	struct genet_packet *pkt;
-	ddi_dma_attr_t pkt_dma_attr = dma_attr;
-	pkt_dma_attr.dma_attr_align = DCACHE_LINE;
 
 	mutex_enter(&sc->rx_pkt_lock);
 	pkt = sc->rx_pkt_free;
@@ -377,7 +363,7 @@ genet_alloc_packet(struct genet_sc *sc)
 	if (pkt == NULL) {
 		pkt = kmem_zalloc(sizeof (struct genet_packet), KM_NOSLEEP);
 		if (pkt) {
-			if (ddi_dma_alloc_handle(sc->dip, &pkt_dma_attr,
+			if (ddi_dma_alloc_handle(sc->dip, &dma_attr,
 			    DDI_DMA_SLEEP, 0,
 			    &pkt->dma.dma_handle) != DDI_SUCCESS) {
 				kmem_free(pkt, sizeof (struct genet_packet));
@@ -395,7 +381,7 @@ genet_alloc_packet(struct genet_sc *sc)
 				kmem_free(pkt, sizeof (struct genet_packet));
 				pkt = NULL;
 			} else {
-				ASSERT(pkt->dma.size >= GENET_DMA_BUFFER_SIZE);
+				ASSERT3U(pkt->dma.size, >=, GENET_DMA_BUFFER_SIZE);
 			}
 		}
 
@@ -410,11 +396,11 @@ genet_alloc_packet(struct genet_sc *sc)
 			    DDI_DMA_SLEEP, NULL, &cookie, &ccount);
 
 			if (result == DDI_DMA_MAPPED) {
-				ASSERT(ccount == 1);
+				ASSERT3U(ccount, ==, 1);
 				pkt->dma.dmac_addr = cookie.dmac_laddress;
-				ASSERT((cookie.dmac_laddress &
-				    (DCACHE_LINE - 1)) == 0);
-				ASSERT(cookie.dmac_size <=
+				ASSERT3U((cookie.dmac_laddress &
+				    (DCACHE_LINE - 1)), ==, 0);
+				ASSERT3U(cookie.dmac_size, <=,
 				    GENET_DMA_BUFFER_SIZE);
 				pkt->sc = sc;
 				pkt->free_rtn.free_func = genet_free_packet;
@@ -512,13 +498,21 @@ genet_free_buffer(struct genet_sc *sc)
 static boolean_t
 genet_get_macaddr(struct genet_sc *sc)
 {
-	pnode_t node = ddi_get_nodeid(sc->dip);
-	int len = prom_getproplen(node, "local-mac-address");
+	uchar_t *buf;
+	uint_t len;
 
-	if (len != sizeof (sc->dev_addr))
+	if (ddi_prop_lookup_byte_array(DDI_DEV_T_ANY, sc->dip, 0,
+	    "local-mac-address", &buf, &len) != DDI_PROP_SUCCESS) {
 		return (B_FALSE);
+	}
 
-	prom_getprop(node, "local-mac-address", (caddr_t)sc->dev_addr);
+	if (len != sizeof (sc->dev_addr)) {
+		ddi_prop_free(buf);
+		return (B_FALSE);
+	}
+
+	bcopy(buf, sc->dev_addr, sizeof (sc->dev_addr));
+	ddi_prop_free(buf);
 	return (B_TRUE);
 }
 
@@ -650,20 +644,19 @@ genet_mii_read(void *arg, uint8_t phy, uint8_t reg)
 static int
 genet_probe(dev_info_t *dip)
 {
-	int len;
-	char buf[80];
-	pnode_t node = ddi_get_nodeid(dip);
-	if (node < 0)
-		return (DDI_PROBE_FAILURE);
+	char *buf;
 
-	len = prom_getproplen(node, "status");
-	if (len <= 0 || len >= sizeof (buf))
-		return (DDI_PROBE_FAILURE);
+	if (ddi_prop_lookup_string(DDI_DEV_T_ANY, dip, 0,
+	    OBP_STATUS, &buf) != DDI_SUCCESS) {
+		return (DDI_PROBE_SUCCESS);
+	}
 
-	prom_getprop(node, "status", (caddr_t)buf);
-	if (strcmp(buf, "ok") != 0 && (strcmp(buf, "okay") != 0))
+	if (strcmp(buf, "ok") != 0 && strcmp(buf, "okay") != 0) {
+		ddi_prop_free(buf);
 		return (DDI_PROBE_FAILURE);
+	}
 
+	ddi_prop_free(buf);
 	return (DDI_PROBE_SUCCESS);
 }
 
