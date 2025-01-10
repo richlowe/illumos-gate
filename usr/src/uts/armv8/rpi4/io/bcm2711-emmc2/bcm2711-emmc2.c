@@ -20,6 +20,7 @@
  */
 /*
  * Copyright 2019 Hayashi Naoyuki
+ * Copyright 2025 OmniOS Community Edition (OmniOSce) Association.
  */
 
 #include <sys/promif.h>
@@ -42,6 +43,35 @@
 
 #define	MMC_BUFFER_SIZE		0x10000
 #define	MMC_REQUESTS_MAX	0x20
+
+static const ddi_device_acc_attr_t reg_acc_attr = {
+	.devacc_attr_version = DDI_DEVICE_ATTR_V1,
+	.devacc_attr_endian_flags = DDI_STRUCTURE_LE_ACC,
+	.devacc_attr_dataorder = DDI_STRICTORDER_ACC,
+	.devacc_attr_access = DDI_DEFAULT_ACC,
+};
+
+static const ddi_device_acc_attr_t buf_acc_attr = {
+	.devacc_attr_version = DDI_DEVICE_ATTR_V1,
+	.devacc_attr_endian_flags = DDI_NEVERSWAP_ACC,
+	.devacc_attr_dataorder = DDI_STORECACHING_OK_ACC,
+	.devacc_attr_access = DDI_DEFAULT_ACC,
+};
+
+static ddi_dma_attr_t dma_attr = {
+	.dma_attr_version = DMA_ATTR_V0,
+	.dma_attr_addr_lo = 0x0000000000000000ull,
+	.dma_attr_addr_hi = 0x000000003FFFFFFFull,
+	.dma_attr_count_max = 0x000000003FFFFFFFull,
+	.dma_attr_align = 0x0000000000000001ull,
+	.dma_attr_burstsizes = 0x00000FFF,
+	.dma_attr_minxfer = 0x00000001,
+	.dma_attr_maxxfer = 0x000000000FFFFFFFull,
+	.dma_attr_seg = 0x000000000FFFFFFFull,
+	.dma_attr_sgllen = 1,
+	.dma_attr_granular = 0x00000001,
+	.dma_attr_flags = DDI_DMA_FLAGERR,
+};
 
 struct mmc_request
 {
@@ -73,52 +103,80 @@ struct gpio_regulator
 };
 
 static int
-init_gpio_regulator(pnode_t node, struct gpio_regulator *regulator)
+init_gpio_regulator(dev_info_t *dip, struct gpio_regulator *regulator)
 {
-	int len;
+	int *buf;
+	uint_t len;
 
-	len = prom_getproplen(node, "gpios");
-	if (len == 0 || (len % CELLS_1275_TO_BYTES(3)) != 0)
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, 0,
+	    "gpios", &buf, &len) != DDI_PROP_SUCCESS) {
 		goto err_exit;
-	regulator->ngpios = len / CELLS_1275_TO_BYTES(3);
+	}
+
+	if (len == 0 || len % 3 != 0) {
+		ddi_prop_free(buf);
+		goto err_exit;
+	}
+
+	regulator->ngpios = len / 3;
 	regulator->gpios = kmem_alloc(sizeof (struct gpio_ctrl) *
 	    regulator->ngpios, KM_SLEEP);
-	uint32_t *gpios = __builtin_alloca(len);
-	prom_getprop(node, "gpios", (caddr_t)gpios);
+
 	for (int i = 0; i < regulator->ngpios; i++) {
-		regulator->gpios[i].node =
-		    prom_findnode_by_phandle(ntohl(gpios[3 * i + 0]));
-		regulator->gpios[i].pin = ntohl(gpios[3 * i + 1]);
-		regulator->gpios[i].flags = ntohl(gpios[3 * i + 2]);
+		regulator->gpios[i].node = buf[3 * i + 0];
+		regulator->gpios[i].pin = buf[3 * i + 1];
+		regulator->gpios[i].flags = buf[3 * i + 2];
 	}
 
-	len = prom_getproplen(node, "states");
-	if (len == 0 || len % CELLS_1275_TO_BYTES(2) != 0)
+	ddi_prop_free(buf);
+
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, 0,
+	    "states", &buf, &len) != DDI_PROP_SUCCESS) {
 		goto err_exit;
-	regulator->nstates = len / CELLS_1275_TO_BYTES(2);
+	}
+
+	if (len == 0 || len % 2 != 0) {
+		ddi_prop_free(buf);
+		goto err_exit;
+	}
+
+	regulator->nstates = len / 2;
 	regulator->states = kmem_alloc(sizeof (struct regulator_state) *
 	    regulator->nstates, KM_SLEEP);
-	uint32_t *states = __builtin_alloca(len);
-	prom_getprop(node, "states", (caddr_t)states);
+
 	for (int i = 0; i < regulator->nstates; i++) {
-		regulator->states[i].microvolt = ntohl(states[2 * i + 0]);
-		regulator->states[i].val = ntohl(states[2 * i + 1]);
+		regulator->states[i].microvolt = buf[2 * i + 0];
+		regulator->states[i].val = buf[2 * i + 1];
 	}
-	regulator->min_volt = prom_get_prop_int(node,
-	    "regulator-min-microvolt", -1);
-	regulator->max_volt = prom_get_prop_int(node,
-	    "regulator-max-microvolt", -1);
+
+	ddi_prop_free(buf);
+
+	int prop;
+	if ((prop = ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0,
+	    "regulator-min-microvolt", -1)) == -1) {
+		goto err_exit;
+	}
+	regulator->min_volt = prop;
+
+	if ((prop = ddi_prop_get_int(DDI_DEV_T_ANY, dip, 0,
+	    "regulator-max-microvolt", -1)) == -1) {
+		goto err_exit;
+	}
+	regulator->max_volt = prop;
 
 	return (0);
+
 err_exit:
-	if ((regulator->ngpios != 0) && (regulator->gpios != NULL)) {
+	if (regulator->ngpios != 0 && regulator->gpios != NULL) {
 		kmem_free(regulator->gpios, sizeof (struct gpio_ctrl) *
 		    regulator->ngpios);
 	}
-	if ((regulator->nstates != 0) && (regulator->states != NULL)) {
+
+	if (regulator->nstates != 0 && regulator->states != NULL) {
 		kmem_free(regulator->states, sizeof (struct regulator_state) *
 		    regulator->nstates);
 	}
+
 	return (-1);
 }
 
@@ -138,8 +196,8 @@ fini_gpio_regulator(struct gpio_regulator *regulator)
 static int
 set_gpio_regulator(uint32_t microvolt, struct gpio_regulator *regulator)
 {
-	ASSERT(regulator->ngpios == 1);
-	ASSERT(regulator->nstates == 2);
+	ASSERT3S(regulator->ngpios, ==, 1);
+	ASSERT3S(regulator->nstates, ==, 2);
 	int i;
 	for (i = 0; i < regulator->nstates; i++) {
 		if (microvolt == regulator->states[i].microvolt)
@@ -153,8 +211,8 @@ set_gpio_regulator(uint32_t microvolt, struct gpio_regulator *regulator)
 static int
 get_gpio_regulator(uint32_t *microvolt, struct gpio_regulator *regulator)
 {
-	ASSERT(regulator->ngpios == 1);
-	ASSERT(regulator->nstates == 2);
+	ASSERT3S(regulator->ngpios, ==, 1);
+	ASSERT3S(regulator->nstates, ==, 2);
 	int val = plat_gpio_get(&regulator->gpios[0]);
 	if (val < 0)
 		return (-1);
@@ -299,7 +357,7 @@ mmc_wait_state_idle(struct mmc_sc *sc, uint32_t mask, uint64_t usec)
 }
 
 static int
-mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
+mmc_start_cmd(struct mmc_sc *sc, sda_cmd_t *cmd)
 {
 	// check
 	union emmc_status status_mask = { 0 };
@@ -362,7 +420,7 @@ mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 		blksizecnt.blkcnt = cmd->sc_nblks;
 		mmc_reg_write(sc, EMMC_BLKSIZECNT, blksizecnt.dw);
 		if (cmd->sc_ndmac) {
-			ASSERT(cmd->sc_ndmac == 1);
+			ASSERT3U(cmd->sc_ndmac, ==, 1);
 			mmc_reg_write(sc, EMMC_ARG2,
 			    (uint32_t)cmd->sc_dmac.dmac_address);
 			cmdtm1.tm_dma_en = 1;
@@ -384,7 +442,7 @@ mmc_start_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
 }
 
 static int
-mmc_wait_cmd_done(struct mmc_sc *sc, struct sda_cmd *cmd)
+mmc_wait_cmd_done(struct mmc_sc *sc, sda_cmd_t *cmd)
 {
 	union emmc_interrupt cmd_done = {0};
 	cmd_done.cmd_done = 1;
@@ -662,7 +720,7 @@ err_exit:
 static int mmc_stop_transmission(struct mmc_sc *);
 
 static int
-mmc_send_cmd(struct mmc_sc *sc, struct sda_cmd *cmd)
+mmc_send_cmd(struct mmc_sc *sc, sda_cmd_t *cmd)
 {
 	if (sc->tuning_enable) {
 		// check retune
@@ -692,7 +750,7 @@ err_exit:
 static int
 mmc_go_idle_state(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_GO_IDLE,
 		.sc_rtype = R0,
 	};
@@ -704,7 +762,7 @@ mmc_go_idle_state(struct mmc_sc *sc)
 static int
 mmc_send_if_cond(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_SEND_IF_COND,
 		.sc_rtype = R7,
 		.sc_argument = ((!!(sc->ocr_avail & OCR_HI_MASK)) << 8) | 0xaa,
@@ -720,7 +778,7 @@ mmc_send_if_cond(struct mmc_sc *sc)
 static int
 mmc_sd_send_ocr(struct mmc_sc *sc)
 {
-	struct sda_cmd acmd = {
+	sda_cmd_t acmd = {
 		.sc_index = CMD_APP_CMD,
 		.sc_rtype = R1,
 	};
@@ -751,7 +809,7 @@ mmc_sd_send_ocr(struct mmc_sc *sc)
 	if (caps.sup_180)
 		ocr |= OCR_S18R;
 
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = ACMD_SD_SEND_OCR,
 		.sc_rtype = R3,
 		.sc_argument = ocr,
@@ -767,7 +825,7 @@ mmc_sd_send_ocr(struct mmc_sc *sc)
 static int
 mmc_voltage_switch(struct mmc_sc *sc, struct gpio_regulator *regulator)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_VOLTAGE_SWITCH,
 		.sc_rtype = R1,
 	};
@@ -787,7 +845,7 @@ mmc_voltage_switch(struct mmc_sc *sc, struct gpio_regulator *regulator)
 static int
 mmc_all_send_cid(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_BCAST_CID,
 		.sc_rtype = R2,
 	};
@@ -802,7 +860,7 @@ mmc_all_send_cid(struct mmc_sc *sc)
 static int
 mmc_send_relative_addr(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_SEND_RCA,
 		.sc_rtype = R6,
 	};
@@ -817,7 +875,7 @@ mmc_send_relative_addr(struct mmc_sc *sc)
 static int
 mmc_send_csd(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_SEND_CSD,
 		.sc_rtype = R2,
 		.sc_argument = sc->rca << 16,
@@ -833,7 +891,7 @@ mmc_send_csd(struct mmc_sc *sc)
 static int
 mmc_select_card(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_SELECT_CARD,
 		.sc_rtype = R1,
 		.sc_argument = sc->rca << 16,
@@ -847,7 +905,7 @@ mmc_select_card(struct mmc_sc *sc)
 static int
 mmc_send_scr(struct mmc_sc *sc)
 {
-	struct sda_cmd acmd = {
+	sda_cmd_t acmd = {
 		.sc_index = CMD_APP_CMD,
 		.sc_rtype = R1,
 		.sc_argument = sc->rca << 16,
@@ -855,7 +913,7 @@ mmc_send_scr(struct mmc_sc *sc)
 	if (mmc_send_cmd(sc, &acmd) != 0)
 		return (-1);
 
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = ACMD_SEND_SCR,
 		.sc_rtype = R1,
 
@@ -882,7 +940,7 @@ mmc_send_scr(struct mmc_sc *sc)
 static int
 mmc_swtch_func(struct mmc_sc *sc, uint32_t argument)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_SWITCH_FUNC,
 		.sc_rtype = R1,
 		.sc_argument = argument,
@@ -912,7 +970,7 @@ mmc_swtch_func(struct mmc_sc *sc, uint32_t argument)
 static int
 mmc_stop_transmission(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = CMD_STOP_TRANSMIT,
 		.sc_rtype = R1b,
 	};
@@ -924,7 +982,7 @@ mmc_stop_transmission(struct mmc_sc *sc)
 static int
 mmc_send_tuning_block(struct mmc_sc *sc)
 {
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = 19,
 		.sc_rtype = R1,
 
@@ -948,7 +1006,7 @@ static int
 mmc_set_bus_width(struct mmc_sc *sc, int width)
 {
 	ASSERT(width == 1 || width == 4);
-	struct sda_cmd acmd = {
+	sda_cmd_t acmd = {
 		.sc_index = CMD_APP_CMD,
 		.sc_rtype = R1,
 		.sc_argument = sc->rca << 16,
@@ -956,7 +1014,7 @@ mmc_set_bus_width(struct mmc_sc *sc, int width)
 	if (mmc_send_cmd(sc, &acmd) < 0)
 		return (-1);
 
-	struct sda_cmd cmd = {
+	sda_cmd_t cmd = {
 		.sc_index = ACMD_SET_BUS_WIDTH,
 		.sc_rtype = R1,
 		.sc_argument = (width == 1? 0: 2),
@@ -975,8 +1033,8 @@ mmc_set_bus_width(struct mmc_sc *sc, int width)
 static int
 mmc_set_blocklen(struct mmc_sc *sc, int len)
 {
-	ASSERT(len == DEV_BSIZE);
-	struct sda_cmd cmd = {
+	ASSERT3S(len, ==, DEV_BSIZE);
+	sda_cmd_t cmd = {
 		.sc_index = CMD_SET_BLOCKLEN,
 		.sc_rtype = R1,
 
@@ -991,23 +1049,25 @@ mmc_set_blocklen(struct mmc_sc *sc, int len)
 static int
 mmc_init(struct mmc_sc *sc)
 {
-	pnode_t node = ddi_get_nodeid(sc->dip);
-
-	// clock
-	struct prom_hwclock clock;
-	if (prom_get_clock(node, 0, &clock) != 0)
-		return (-1);
-
 	// regulator
 	struct gpio_regulator regulator = {0};
-	phandle_t phandle = prom_get_prop_int(node, "vqmmc-supply", -1);
-	if (phandle < 0)
+	phandle_t ph;
+
+	if ((ph = ddi_prop_get_int(DDI_DEV_T_ANY, sc->dip, 0,
+	    "vqmmc-supply", -1)) == -1) {
 		return (-1);
-	pnode_t vqmmc_node = prom_findnode_by_phandle(phandle);
-	if (vqmmc_node < 0)
+	}
+
+	dev_info_t *vqmmc_dip = e_ddi_nodeid_to_dip(ph);
+	if (vqmmc_dip == NULL)
 		return (-1);
-	if (init_gpio_regulator(vqmmc_node, &regulator) < 0)
+
+	if (init_gpio_regulator(vqmmc_dip, &regulator) < 0) {
+		ndi_rele_devi(vqmmc_dip);
 		return (-1);
+	}
+
+	ndi_rele_devi(vqmmc_dip);
 
 	if (get_gpio_regulator(&sc->vdd, &regulator) != 0)
 		goto err_exit;
@@ -1235,9 +1295,9 @@ mmc_read_block(void *arg)
 	struct mmc_sc *sc = ((struct mmc_request *)arg)->sc;
 	bd_xfer_t *xfer = ((struct mmc_request *)arg)->xfer;
 
-	ASSERT(xfer->x_dmah == 0);
-	ASSERT(xfer->x_kaddr != NULL);
-	ASSERT(xfer->x_nblks * DEV_BSIZE <= MMC_BUFFER_SIZE);
+	ASSERT3P(xfer->x_dmah, ==, NULL);
+	ASSERT3P(xfer->x_kaddr, !=, NULL);
+	ASSERT3U(xfer->x_nblks * DEV_BSIZE, <=, MMC_BUFFER_SIZE);
 
 	boolean_t detach;
 	mutex_enter(&sc->lock);
@@ -1246,7 +1306,7 @@ mmc_read_block(void *arg)
 
 	int r = EIO;
 	if (!detach) {
-		struct sda_cmd cmd = {
+		sda_cmd_t cmd = {
 			.sc_index = (xfer->x_nblks == 1 ? CMD_READ_SINGLE :
 			    CMD_READ_MULTI),
 			.sc_rtype = R1,
@@ -1287,9 +1347,9 @@ mmc_write_block(void *arg)
 	struct mmc_sc *sc = ((struct mmc_request *)arg)->sc;
 	bd_xfer_t *xfer = ((struct mmc_request *)arg)->xfer;
 
-	ASSERT(xfer->x_dmah == 0);
-	ASSERT(xfer->x_kaddr != NULL);
-	ASSERT(xfer->x_nblks * DEV_BSIZE <= MMC_BUFFER_SIZE);
+	ASSERT3P(xfer->x_dmah, ==, NULL);
+	ASSERT3P(xfer->x_kaddr, !=, NULL);
+	ASSERT3U(xfer->x_nblks * DEV_BSIZE, <=, MMC_BUFFER_SIZE);
 
 	boolean_t detach;
 	mutex_enter(&sc->lock);
@@ -1302,7 +1362,7 @@ mmc_write_block(void *arg)
 		ddi_dma_sync(sc->buf_dmah, 0, xfer->x_nblks * DEV_BSIZE,
 		    DDI_DMA_SYNC_FORDEV);
 
-		struct sda_cmd cmd = {
+		sda_cmd_t cmd = {
 			.sc_index = (xfer->x_nblks == 1 ?
 			    CMD_WRITE_SINGLE : CMD_WRITE_MULTI),
 			.sc_rtype = R1,
@@ -1588,35 +1648,6 @@ mmc_intr(caddr_t arg1, caddr_t arg2)
 
 	return (status);
 }
-
-static ddi_device_acc_attr_t reg_acc_attr = {
-	DDI_DEVICE_ATTR_V0,	/* devacc_attr_version */
-	DDI_STRUCTURE_LE_ACC,	/* devacc_attr_endian_flags */
-	DDI_STRICTORDER_ACC,	/* devacc_attr_dataorder */
-	DDI_DEFAULT_ACC,	/* devacc_attr_access */
-};
-
-static ddi_device_acc_attr_t buf_acc_attr = {
-	DDI_DEVICE_ATTR_V0,		/* devacc_attr_version */
-	DDI_NEVERSWAP_ACC,		/* devacc_attr_endian_flags */
-	DDI_STORECACHING_OK_ACC,	/* devacc_attr_dataorder */
-	DDI_DEFAULT_ACC,		/* devacc_attr_access */
-};
-
-static ddi_dma_attr_t dma_attr = {
-	DMA_ATTR_V0,			/* dma_attr_version	*/
-	0x0000000000000000ull,		/* dma_attr_addr_lo	*/
-	0x000000003FFFFFFFull,		/* dma_attr_addr_hi	*/
-	0x000000003FFFFFFFull,		/* dma_attr_count_max	*/
-	0x0000000000000001ull,		/* dma_attr_align	*/
-	0x00000FFF,			/* dma_attr_burstsizes	*/
-	0x00000001,			/* dma_attr_minxfer	*/
-	0x000000000FFFFFFFull,		/* dma_attr_maxxfer	*/
-	0x000000000FFFFFFFull,		/* dma_attr_seg		*/
-	1,				/* dma_attr_sgllen	*/
-	0x00000001,			/* dma_attr_granular	*/
-	DDI_DMA_FLAGERR			/* dma_attr_flags	*/
-};
 
 static int
 mmc_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
