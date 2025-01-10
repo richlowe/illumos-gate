@@ -290,53 +290,6 @@ plat_hwclock_get_rate(struct prom_hwclock *clk)
 }
 
 int
-plat_hwclock_set_rate(struct prom_hwclock *clk, int rate)
-{
-	if (!prom_is_compatible(clk->node, "brcm,bcm2711-cprman"))
-		return (-1);
-
-	int id;
-	switch (clk->id) {
-	case 19: id = VCPROP_CLK_UART; break;
-	case 28: id = VCPROP_CLK_EMMC; break;
-	case 51: id = VCPROP_CLK_EMMC2; break;
-	default: return -1;
-	}
-
-	struct {
-		struct vcprop_buffer_hdr	vb_hdr;
-		struct vcprop_tag_clockrate	vbt_clockrate;
-		struct vcprop_tag end;
-	} vb = {
-		.vb_hdr = {
-			.vpb_len = sizeof (vb),
-			.vpb_rcode = VCPROP_PROCESS_REQUEST,
-		},
-		.vbt_clockrate = {
-			.tag = {
-				.vpt_tag = VCPROPTAG_SET_CLOCKRATE,
-				.vpt_len = VCPROPTAG_LEN(vb.vbt_clockrate),
-				.vpt_rcode = VCPROPTAG_REQUEST,
-			},
-			.id = id,
-			.rate = rate,
-		},
-		.end = {
-			.vpt_tag = VCPROPTAG_NULL
-		},
-	};
-
-	mbox_prop_send(&vb, sizeof (vb));
-
-	if (!vcprop_buffer_success_p(&vb.vb_hdr))
-		return (-1);
-	if (!vcprop_tag_success_p(&vb.vbt_clockrate.tag))
-		return (-1);
-
-	return (0);
-}
-
-int
 plat_gpio_get(struct gpio_ctrl *gpio)
 {
 	int offset;

@@ -24,15 +24,11 @@
  */
 
 #include <sys/types.h>
+#include <sys/byteorder.h>
 #include <sys/machclock.h>
-#include <sys/platform.h>
-#include <sys/modctl.h>
+#include <sys/cmn_err.h>
 #include <sys/platmod.h>
 #include <sys/promif.h>
-#include <sys/errno.h>
-#include <sys/byteorder.h>
-#include <sys/cmn_err.h>
-#include <sys/bootsvcs.h>
 
 void
 set_platform_defaults(void)
@@ -54,5 +50,24 @@ plat_get_cpu_clock(int cpu_no)
 			return (ntohl(clock));
 		}
 	}
+
 	return (1000 * 1000 * 1000);
+}
+
+int
+plat_hwclock_get_rate(struct prom_hwclock *clk __unused)
+{
+	return -1;
+}
+
+int
+plat_gpio_get(struct gpio_ctrl *gpio __unused)
+{
+	return -1;
+}
+
+int
+plat_gpio_set(struct gpio_ctrl *gpio __unused, int value __unused)
+{
+	return -1;
 }

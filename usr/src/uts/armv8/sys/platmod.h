@@ -33,27 +33,22 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/promif.h>
 
+/*
+ * Called in mp_startup.c from init_cpu_info (twice).
+ */
 extern uint64_t plat_get_cpu_clock(int cpu_no);
-extern int plat_pinmux_set(pnode_t);
 
+/*
+ * Called in bcm2711-emmc2.c to drive the GPIO regulator when switching to 1v8.
+ */
 struct gpio_ctrl;
-extern int plat_gpio_direction_output(struct gpio_ctrl *, int);
-extern int plat_gpio_direction_input(struct gpio_ctrl *);
 extern int plat_gpio_get(struct gpio_ctrl *);
 extern int plat_gpio_set(struct gpio_ctrl *, int);
-extern int plat_gpio_set_pullup(struct gpio_ctrl *, int);
 
-extern int plat_hwreset_assert(struct prom_hwreset *);
-extern int plat_hwreset_deassert(struct prom_hwreset *);
-extern int plat_hwreset_is_asserted(struct prom_hwreset *, boolean_t *);
-
-extern int plat_hwclock_enable(struct prom_hwclock *);
-extern int plat_hwclock_disable(struct prom_hwclock *);
-extern int plat_hwclock_is_enabled(struct prom_hwclock *, boolean_t *);
+/*
+ * Called in ns16550a.c to get the clock frequency driving the UART.
+ */
 extern int plat_hwclock_get_rate(struct prom_hwclock *);
-extern int plat_hwclock_get_max_rate(struct prom_hwclock *);
-extern int plat_hwclock_get_min_rate(struct prom_hwclock *);
-extern int plat_hwclock_set_rate(struct prom_hwclock *, int rate);
 
 #ifdef	__cplusplus
 }
