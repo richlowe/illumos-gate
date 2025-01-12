@@ -1400,8 +1400,9 @@ i_ddi_update_unitintr_unit(unit_intr_t *ui, dev_info_t *dip)
 		}
 
 		/* Use the same interrupt specifier as before. */
-		memcpy(new->ui_v + new->ui_addrcells, ui->ui_v +
-		    ui->ui_addrcells, new->ui_intrcells);
+		memcpy(new->ui_v + new->ui_addrcells,
+		    ui->ui_v + ui->ui_addrcells,
+		    CELLS_1275_TO_BYTES(new->ui_intrcells));
 		i_ddi_free_unitintr(ui);
 		return (new);
 	}
@@ -1604,7 +1605,6 @@ fmt_unitintr(unit_intr_t *ui, char *buf, size_t buflen)
 
 	ilstr_init_prealloc(&ist, buf, buflen);
 
-	*buf = '\0';
 	if (ui == NULL) {
 		ilstr_append_str(&ist, "<null>");
 		ilstr_fini(&ist);
@@ -1613,7 +1613,7 @@ fmt_unitintr(unit_intr_t *ui, char *buf, size_t buflen)
 
 	ilstr_append_str(&ist, "unit: <");
 	for (int i = 0; i < ui->ui_addrcells; i++) {
-		ilstr_aprintf(&ist, "0x%x ", ui->ui_v[i],
+		ilstr_aprintf(&ist, "0x%x%s", ui->ui_v[i],
 		    (i != (ui->ui_addrcells - 1)) ? ", " : "");
 	}
 
