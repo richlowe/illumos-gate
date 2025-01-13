@@ -35,4 +35,9 @@ LOADER_VERSION = 1.1
 # Use date like formatting here, YYYY.MM.DD.XX, without leading zeroes.
 # The version is processed from left to right, the version number can only
 # be increased.
-BOOT_VERSION = $(LOADER_VERSION)-2025.03.13.2
+#
+# XXXARM: we control aarch64 loader versioning separately to i386, allowing us
+# to evolve and mature the aarch64 loader without affecting existing platforms.
+i386_BOOT_VERSION = $(LOADER_VERSION)-2025.03.13.2
+aarch64_BOOT_VERSION = $(LOADER_VERSION)-2025.03.28.1
+BOOT_VERSION = $($(MACH)_BOOT_VERSION)
