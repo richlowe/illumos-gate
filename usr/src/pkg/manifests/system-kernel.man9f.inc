@@ -697,6 +697,19 @@ file path=usr/share/man/man9f/id_space.9f
 link path=usr/share/man/man9f/id_space_create.9f target=id_space.9f
 link path=usr/share/man/man9f/id_space_destroy.9f target=id_space.9f
 link path=usr/share/man/man9f/id_space_extend.9f target=id_space.9f
+file path=usr/share/man/man9f/ilstr.9f
+link path=usr/share/man/man9f/ilstr_append_char.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_append_str.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_aprintf.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_cstr.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_errno.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_errstr.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_fini.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_init.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_init_prealloc.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_len.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_reset.9f target=ilstr.9f
+link path=usr/share/man/man9f/ilstr_vaprintf.9f target=ilstr.9f
 file path=usr/share/man/man9f/inb.9f
 link path=usr/share/man/man9f/inl.9f target=inb.9f
 file path=usr/share/man/man9f/insq.9f

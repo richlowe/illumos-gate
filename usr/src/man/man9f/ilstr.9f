@@ -1,0 +1,250 @@
+.\"
+.\" This file and its contents are supplied under the terms of the
+.\" Common Development and Distribution License ("CDDL"), version 1.0.
+.\" You may only use this file in accordance with the terms of version
+.\" 1.0 of the CDDL.
+.\"
+.\" A full copy of the text of the CDDL should have accompanied this
+.\" source.  A copy of the CDDL is also available via the Internet at
+.\" http://www.illumos.org/license/CDDL.
+.\"
+.\"
+.\" Copyright 2025 Richard Lowe
+.\"
+.Dd January 14, 2025
+.Dt ILSTR 9F
+.Os
+.Sh NAME
+.Nm ilstr_append_char ,
+.Nm ilstr_append_str ,
+.Nm ilstr_aprintf ,
+.Nm ilstr_cstr ,
+.Nm ilstr_errno ,
+.Nm ilstr_errstr ,
+.Nm ilstr_fini ,
+.Nm ilstr_init ,
+.Nm ilstr_init_prealloc ,
+.Nm ilstr_len ,
+.Nm ilstr_reset ,
+.Nm ilstr_vaprintf
+.Nd indeterminate length string builder
+.Sh SYNOPSIS
+.In sys/ilstr.h
+.Ft void
+.Fo ilstr_append_char
+.Fa "ilstr_t *ils"
+.Fa "char c"
+.Fc
+.Ft void
+.Fo ilstr_append_str
+.Fa "ilstr_t *ils"
+.Fa "const char *s"
+.Fc
+.Ft void
+.Fo ilstr_aprintf
+.Fa "ilstr_t *ils"
+.Fa "const char *fmt"
+.Fa ...
+.Fc
+.Ft "const char *"
+.Fo ilstr_cstr
+.Fa "ilstr_t *ils"
+.Fc
+.Ft ilstr_errno_t
+.Fo ilstr_errno
+.Fa "ilstr_t *ils"
+.Fc
+.Ft "const char *"
+.Fo ilstr_errstr
+.Fa "ilstr_t *ils"
+.Fc
+.Ft void
+.Fo ilstr_fini
+.Fa "ilstr_t *ils"
+.Fc
+.Ft void
+.Fo ilstr_init
+.Fa "ilstr_t *ils"
+.Fa "int kmflag"
+.Fc
+.Ft void
+.Fo ilstr_init_prealloc
+.Fa "ilstr_t *ils"
+.Fa "char *buf"
+.Fa "size_t buflen"
+.Fc
+.Ft size_t
+.Fo ilstr_len
+.Fa "ilstr_t *ils"
+.Fc
+.Ft void
+.Fo ilstr_reset
+.Fa "ilstr_t *ils"
+.Fc
+.Ft void
+.Fo ilstr_vaprintf
+.Fa "ilstr_t *ils"
+.Fa "const char *fmt"
+.Fa "va_list ap"
+.Fc
+.Sh INTERFACE LEVEL
+.Sy Volatile
+.Sh PARAMETERS
+.Bl -tag -width Fa
+.It Fa ilstr_t *ils
+The indeterminate length string being operated on.
+Should be considered opaque by callers.
+.It Fa char c
+A character to be appended to this string
+.It Fa const char *s
+A NUL-terminated string to be appended to this string
+.It Fa const char *fmt
+A
+.Xr cmn_err 9f
+style format string.
+.It Fa int kmflag
+Flags as passed to
+.Xr kmem_alloc 9f .
+Most specifically:
+.Bl -tag -width Dv
+.It Dv KM_SLEEP
+The default, memory allocations may sleep and will never fail (though they may
+sleep forever).
+.It Dv KM_NOSLEEP
+Allocations which would sleep should instead return failure
+.El
+.It Fa char *buf
+A character buffer to be used internally by
+.Nm ilstr
+in place of allocating its own.
+.It Fa size_t buflen
+The length of the character buffer provided in
+.Fa buf .
+.El
+.Sh DESCRIPTION
+The
+.Nm ilstr
+interfaces provide a builder to build and operation on
+indeterminate length strings more safely and ergonomically than via the
+.Xr string 9f
+interfaces.
+.Pp
+Callers create and manipulate opaque
+.Vt ilstr_t
+objects which (except
+.Fn ilstr_init_prealloc )
+grow to arbitrary length as necessary to contain the string
+being constructed.
+.Pp
+.Vt ilstr_t
+strings are conceptually never NULL, only empty.
+.Ss Initialization
+.Fn ilstr_init
+and
+.Fn ilstr_init_prealloc
+each create an
+.Vt ilstr_t
+(which may be on the stack).
+The difference between them is that
+.Fn ilstr_init
+allocates memory from the heap as necessary to contain the string being built,
+whereas
+.Fn ilstr_init_prealloc
+uses a pre-existing fixed-sized buffer in which to build the string (which may
+fail due to
+.Dv ILSTR_ERROR_OVERFLOW ) .
+This can be useful when building, for example, error messages in fixed size
+stack buffers.
+.Pp
+The initial string is empty and of 0 length.
+.Pp
+The
+.Fn ilstr_reset
+function resets an existing
+.Vt ilstr_t
+to a newly created state.
+This does not free associated memory, only empties the string.
+.Ss Construction
+The
+.Fn ilstr_append_char ,
+.Fn ilstr_append_str ,
+.Fn ilstr_aprintf ,
+and
+.Fn ilstr_vaprintf
+functions append characters, strings and formatted strings to the
+.Vt ilstr_t
+respectively.
+.Ss Retrieval
+.Fn ilstr_cstr
+returns the string representation of this
+.Vt ilstr_t
+as a NUL-terminated "C" string.
+This can never be
+.Dv NULL
+but may be the empty string "".
+.Fn ilstr_len
+returns the length in bytes of the string this
+.Vt ilstr_t
+represents.
+.Ss Error handling
+.Fn ilstr_errno
+and
+.Fn ilstr_errstr
+provide access to the error number and a descriptive error string
+respectively.
+.Fn ilstr_errno
+should be checked to determine the success of prior string building
+operations, prior to making use of the string.
+.Ss Disposal
+.Fn ilstr_fini
+should be called to dispose of the
+.Vt ilstr_t .
+This will free any associated memory, and fully dispose of the string.
+.Sh CONTEXT
+These interfaces may always be used from
+.Sy user
+or
+.Sy kernel
+context.
+Additionally,
+.Vt ilstr_t
+initialized using
+.Fn ilstr_init_prealloc
+or with
+.Dv KM_NOSLEEP
+may be manipulated in
+.Sy interrupt
+context.
+.Vt ilstr_t
+initialized with
+.Dv KM_NOSLEEP
+may be used during early boot prior to
+.Xr kmem_alloc 9f
+being available.
+.Sh ERRORS
+Errors should be checked using the
+.Fn ilstr_errno
+interface, which returns an
+.Vt ilstr_errno_t .
+.Bl -tag -width Er
+.It Er ILSTR_ERROR_OK
+No errors have occurred
+.It Er ILSTR_ERROR_NOMEM
+The operation on this
+.Vt ilstr_t
+requires more memory, allocation failed, and this
+.Vt ilstr_t
+was allocated using
+.Dv KM_NOSLEEP .
+.It Er ILSTR_ERROR_OVERFLOW
+The string being constructed has a length not representable by
+.Vt size_t .
+.It Er ILSTR_ERROR_PRINTF
+.Fn ilstr_aprintf
+or
+.Fn ilstr_vaprintf
+received invalid format arguments.
+.El
+.Sh SEE ALSO
+.Xr kmem_alloc 9f ,
+.Xr string 9f

@@ -293,6 +293,7 @@ MANFILES=	ASSERT.9f				\
 		hook_free.9f				\
 		id32_alloc.9f				\
 		id_space.9f				\
+		ilstr.9f				\
 		inb.9f					\
 		insq.9f					\
 		kiconv.9f				\
@@ -968,6 +969,18 @@ MANLINKS=	AVL_NEXT.9f					\
 		id_space_create.9f				\
 		id_space_destroy.9f				\
 		id_space_extend.9f				\
+		ilstr_append_char.9f				\
+		ilstr_append_str.9f				\
+		ilstr_aprintf.9f				\
+		ilstr_cstr.9f					\
+		ilstr_errno.9f					\
+		ilstr_errstr.9f					\
+		ilstr_fini.9f					\
+		ilstr_init.9f					\
+		ilstr_init_prealloc.9f				\
+		ilstr_len.9f					\
+		ilstr_reset.9f					\
+		ilstr_vaprintf.9f				\
 		inl.9f						\
 		intro.9f					\
 		inw.9f						\
@@ -1865,6 +1878,19 @@ id32_lookup.9f				:= LINKSRC = id32_alloc.9f
 
 inl.9f					:= LINKSRC = inb.9f
 inw.9f					:= LINKSRC = inb.9f
+
+ilstr_append_char.9f			:= LINKSRC = ilstr.9f
+ilstr_append_str.9f			:= LINKSRC = ilstr.9f
+ilstr_aprintf.9f			:= LINKSRC = ilstr.9f
+ilstr_cstr.9f				:= LINKSRC = ilstr.9f
+ilstr_errno.9f				:= LINKSRC = ilstr.9f
+ilstr_errstr.9f				:= LINKSRC = ilstr.9f
+ilstr_fini.9f				:= LINKSRC = ilstr.9f
+ilstr_init.9f				:= LINKSRC = ilstr.9f
+ilstr_init_prealloc.9f			:= LINKSRC = ilstr.9f
+ilstr_len.9f				:= LINKSRC = ilstr.9f
+ilstr_reset.9f				:= LINKSRC = ilstr.9f
+ilstr_vaprintf.9f			:= LINKSRC = ilstr.9f
 
 kmem_free.9f				:= LINKSRC = kmem_alloc.9f
 kmem_zalloc.9f				:= LINKSRC = kmem_alloc.9f
