@@ -118,7 +118,8 @@ is_rgmii(dev_info_t *dip)
 		return (B_FALSE);
 	}
 
-	if (strcmp(mode, "rgmii") == 0) {
+	/* only check whether we match the rgmii prefix */
+	if (strncmp(mode, "rgmii", strlen("rgmii")) == 0) {
 		ddi_prop_free(mode);
 		return (B_TRUE);
 	}
