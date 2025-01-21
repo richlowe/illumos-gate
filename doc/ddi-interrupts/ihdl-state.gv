@@ -1,0 +1,18 @@
+digraph ihdl_state {
+	fontname="Helvetica,Arial,sans-serif"
+	node [fontname="Helvetica,Arial,sans-serif"]
+	edge [fontname="Helvetica,Arial,sans-serif"]
+	rankdir=TB;
+
+	NULL -> DDI_IHDL_STATE_ALLOC [label = "ddi_intr_alloc(9F)"]
+
+	DDI_IHDL_STATE_ALLOC -> DDI_IHDL_STATE_ADDED [label = "ddi_intr_add_handler(9F)"]
+
+	DDI_IHDL_STATE_ADDED -> DDI_IHDL_STATE_ENABLE [label = "ddi_intr_enable(9F)"]
+
+	DDI_IHDL_STATE_ENABLE -> DDI_IHDL_STATE_ADDED [label = "ddi_intr_disable(9F)"]
+
+	DDI_IHDL_STATE_ADDED -> DDI_IHDL_STATE_ALLOC [label = "ddi_intr_remove_handler(9F)"]
+
+	// Note that there is no path from DDI_IHDL_STATE_ALLOC -> NULL
+}

@@ -23,13 +23,6 @@
  * and compatible string, then creates a child node per that information,
  * allowing the kernel to attach the correct driver.
  *
- * The nexus does not copy resource information (registers and interrupts) to
- * the child node, as the interpretation of this information is
- * firmware-specific. Instead, the nexus implements the `bus_map' and
- * `bus_intr_op' operations by calling the nexus-parent with the nexus device
- * information pointer as the resource dip, allowing DDI to find the correct
- * resources.
- *
  * The nexus unconditionally sets the `virtio-is-mmio' property, instructing
  * the virtio library module to use the MMIO transport.
  */
@@ -45,8 +38,6 @@
 
 static int viommionex_ddi_map(dev_info_t *pdip, dev_info_t *dp,
     ddi_map_req_t *mp, off_t offset, off_t len, caddr_t *addrp);
-static int viommionex_intr_op(dev_info_t *pdip, dev_info_t *rdip,
-    ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result);
 static int viommionex_ctlops(dev_info_t *dip, dev_info_t *rdip,
     ddi_ctl_enum_t ctlop, void *arg, void *result);
 static int viommionex_attach(dev_info_t *dip, ddi_attach_cmd_t cmd);
@@ -84,7 +75,7 @@ static struct bus_ops viommionex_bus_ops = {
 	.bus_fm_access_enter	= NULL,
 	.bus_fm_access_exit	= NULL,
 	.bus_power		= NULL,
-	.bus_intr_op		= viommionex_intr_op,
+	.bus_intr_op		= i_ddi_intr_ops,
 	.bus_hp_op		= NULL
 };
 
@@ -151,13 +142,6 @@ viommionex_ddi_map(dev_info_t *pdip, dev_info_t *dp __unused,
     ddi_map_req_t *mp, off_t offset, off_t len, caddr_t *addrp)
 {
 	return (ddi_map(pdip, mp, offset, len, addrp));
-}
-
-static int
-viommionex_intr_op(dev_info_t *pdip, dev_info_t *rdip __unused,
-    ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result)
-{
-	return (i_ddi_intr_ops(pdip, pdip, intr_op, hdlp, result));
 }
 
 static int
@@ -261,7 +245,7 @@ viommionex_bus_config(dev_info_t *dip, uint_t flags,
 	ddi_prop_free(driver);
 
 	compatible[0] = (char *)compat;
-	if (ddi_prop_update_string_array(DDI_DEV_T_NONE, rdip,
+	if (ndi_prop_update_string_array(DDI_DEV_T_NONE, rdip,
 	    "compatible", compatible, 1) != DDI_PROP_SUCCESS) {
 		ddi_prop_free(compat);
 		(void) ndi_devi_offline(rdip, NDI_DEVI_REMOVE);
@@ -269,6 +253,39 @@ viommionex_bus_config(dev_info_t *dip, uint_t flags,
 		return (DDI_FAILURE);
 	}
 	ddi_prop_free(compat);
+
+	/*
+	 * Copy the "reg" and "interrupts" properties, so we appear as a
+	 * sufficiently normal device for the 1275 interrupt mapping
+	 * algorithm.
+	 */
+	int *reg;
+	uint_t reg_cells;
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    OBP_REG, &reg, &reg_cells) == DDI_SUCCESS) {
+		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, rdip,
+		    OBP_REG, reg, reg_cells) != DDI_PROP_SUCCESS) {
+			(void) ndi_devi_offline(rdip, NDI_DEVI_REMOVE);
+			ddi_prop_free(reg);
+			ndi_devi_exit(dip);
+			return (DDI_FAILURE);
+		}
+	}
+	ddi_prop_free(reg);
+
+	int *intr;
+	uint_t intr_cells;
+	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
+	    OBP_INTERRUPTS, &intr, &intr_cells) == DDI_SUCCESS) {
+		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, rdip,
+		    OBP_INTERRUPTS, intr, intr_cells) != DDI_PROP_SUCCESS) {
+			(void) ndi_devi_offline(rdip, NDI_DEVI_REMOVE);
+			ddi_prop_free(intr);
+			ndi_devi_exit(dip);
+			return (DDI_FAILURE);
+		}
+	}
+	ddi_prop_free(intr);
 
 	if (ndi_devi_bind_driver(rdip, 0) != NDI_SUCCESS) {
 		(void) ndi_devi_offline(rdip, NDI_DEVI_REMOVE);

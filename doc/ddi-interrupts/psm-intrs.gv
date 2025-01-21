@@ -1,0 +1,12 @@
+digraph psm_intrs {
+	fontname="Helvetica,Arial,sans-serif"
+	node [fontname="Helvetica,Arial,sans-serif"]
+	edge [fontname="Helvetica,Arial,sans-serif"]
+	rankdir=TB
+    "PCI Device" -> "PCI Bridge" -> "PCI Host Bridge" -> "PSM"
+    "ISA Device" -> "ISA Nexus"
+    "Onboard Thing" -> "rootnex" -> "PSM"
+    PSM -> "Interrupt Controller"
+    "ISA Nexus" -> "rootnex" [style=dotted,label="when pseudo_isa"]
+    "ISA Nexus" -> "PSM" [style=dotted, label="unless pseudo_isa"]
+}

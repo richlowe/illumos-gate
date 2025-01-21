@@ -52,7 +52,6 @@
 #include <vm/hat.h>
 #include <vm/as.h>
 #include <vm/page.h>
-#include <sys/avintr.h>
 #include <sys/errno.h>
 #include <sys/modctl.h>
 #include <sys/ddi_impldefs.h>
@@ -67,7 +66,6 @@
 #include <sys/ddifm.h>
 #include <sys/ddi_isa.h>
 #include <sys/ddi_subrdefs.h>
-#include <sys/gic.h>
 #include <sys/spl.h>
 #include <sys/controlregs.h>
 
@@ -298,14 +296,12 @@ extern void impl_ddi_sunbus_removechild(dev_info_t *dip);
 extern void *device_arena_alloc(size_t size, int vm_flag);
 extern void device_arena_free(void * vaddr, size_t size);
 
-
 /*
  *  Internal functions
  */
 static int rootnex_dma_init();
 static void rootnex_add_props(dev_info_t *);
 static int rootnex_ctl_reportdev(dev_info_t *dip);
-static struct intrspec *rootnex_get_ispec(dev_info_t *rdip, int inum);
 static int rootnex_map_regspec(ddi_map_req_t *mp, caddr_t *vaddrp);
 static int rootnex_unmap_regspec(ddi_map_req_t *mp, caddr_t *vaddrp);
 static int rootnex_map_handle(ddi_map_req_t *mp, off_t offset);
@@ -715,6 +711,8 @@ rootnex_ctl_reportdev(dev_info_t *dev)
  *  map related code
  * ******************
  */
+
+
 static int
 get_address_cells(pnode_t node)
 {
@@ -1055,73 +1053,18 @@ rootnex_map_handle(ddi_map_req_t *mp, off_t offset)
  * ************************
  */
 
-static int
-get_interrupt_cells(pnode_t node)
-{
-	int interrupt_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, OBP_INTERRUPT_CELLS);
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, OBP_INTERRUPT_CELLS, (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
-		}
-		len = prom_getproplen(node, OBP_INTERRUPT_PARENT);
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, OBP_INTERRUPT_PARENT, (caddr_t)&prop);
-			node = prom_findnode_by_phandle(ntohl(prop));
-			continue;
-		}
-		node = prom_parentnode(node);
-	}
-	return (interrupt_cells);
-}
-
-static int
-get_pil(dev_info_t *rdip)
-{
-	static struct {
-		const char *name;
-		int pil;
-	} name_to_pil[] = {
-		{"serial",			12},
-		{"Ethernet controller",		6},
-		{ NULL}
-	};
-	const char *type_name[] = {
-		"device_type",
-		"model",
-		NULL
-	};
-
-	pnode_t node = ddi_get_nodeid(rdip);
-	for (int i = 0; type_name[i]; i++) {
-		int len = prom_getproplen(node, type_name[i]);
-		if (len <= 0) {
-			continue;
-		}
-		char *name = __builtin_alloca(len);
-		prom_getprop(node, type_name[i], name);
-
-		for (int j = 0; name_to_pil[j].name; j++) {
-			if (strcmp(name_to_pil[j].name, name) == 0) {
-				return (name_to_pil[j].pil);
-			}
-		}
-	}
-	return (5);
-}
-
 /*
  * rootnex_intr_ops()
- *	bus_intr_op() function for interrupt support
+ *
+ * The function of the root nexus and interrupts is a bit complicated on ARM.
+ * We may reach the root nexus in two cases:
+ *
+ * 1.  Operations which are verbs not of the interrupt controllers but of the
+ *     system, in which we are authoritative and directly answer.
+ *
+ * 2.  Operations that are verbs of interrupt controllers between which we are
+ *     in the path, these must be passed on toward an interrupt controller.
  */
-/* ARGSUSED */
 static int
 rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
     ddi_intr_handle_impl_t *hdlp, void *result)
@@ -1129,11 +1072,24 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
 
 	switch (intr_op) {
+	case DDI_INTROP_NAVAIL:
+	case DDI_INTROP_NINTRS:
+		*(int *)result = i_ddi_get_intx_nintrs(rdip);
+		break;
+	case DDI_INTROP_SUPPORTED_TYPES:
+		/*
+		 * XXXARM: We have no MSI support yet, so this always filters
+		 * the types supported by the child down to just FIXED, or
+		 * returns that it itself only supports FIXED however you want
+		 * to look at it.
+		 */
+		*(int *)result = DDI_INTR_TYPE_FIXED;
+		break;
 	case DDI_INTROP_GETCAP:
 		*(int *)result = DDI_INTR_FLAG_LEVEL;
 		break;
-
 	case DDI_INTROP_ALLOC:
+		hdlp->ih_pri = i_ddi_get_intr_pri(rdip, hdlp->ih_inum);
 		*(int *)result = hdlp->ih_scratch1;
 		break;
 
@@ -1142,7 +1098,7 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 
 	case DDI_INTROP_GETPRI:
 		if (hdlp->ih_pri == 0) {
-			hdlp->ih_pri = get_pil(rdip);
+			hdlp->ih_pri = i_ddi_get_intr_pri(rdip, hdlp->ih_inum);
 		}
 
 		*(int *)result = hdlp->ih_pri;
@@ -1150,162 +1106,34 @@ rootnex_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
 	case DDI_INTROP_SETPRI:
 		if (*(int *)result > LOCK_LEVEL)
 			return (DDI_FAILURE);
+
 		hdlp->ih_pri = *(int *)result;
 		break;
 
 	case DDI_INTROP_ADDISR:
-		break;
 	case DDI_INTROP_REMISR:
-		if (hdlp->ih_type != DDI_INTR_TYPE_FIXED)
-			return (DDI_FAILURE);
-		break;
 	case DDI_INTROP_ENABLE:
-		{
-			int interrupt_cells =
-			    get_interrupt_cells(ddi_get_nodeid(rdip));
-			switch (interrupt_cells) {
-			case 1:
-			case 3:
-				break;
-			default:
-				return (DDI_FAILURE);
-			}
-
-			int *irupts_prop;
-			uint_t irupts_len;
-			if ((ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, OBP_INTERRUPTS,
-			    &irupts_prop,
-			    &irupts_len) != DDI_SUCCESS) ||
-			    (irupts_len == 0)) {
-				return (DDI_FAILURE);
-			}
-			if ((interrupt_cells * hdlp->ih_inum) >= irupts_len) {
-				ddi_prop_free(irupts_prop);
-				return (DDI_FAILURE);
-			}
-
-			int vec;
-			int grp;
-			int cfg;
-			switch (interrupt_cells) {
-			case 1:
-				grp = 0;
-				vec = irupts_prop[interrupt_cells *
-				    hdlp->ih_inum + 0];
-				cfg = 4;
-				break;
-			case 3:
-				grp = irupts_prop[interrupt_cells *
-				    hdlp->ih_inum + 0];
-				vec = irupts_prop[interrupt_cells *
-				    hdlp->ih_inum + 1];
-				cfg = irupts_prop[interrupt_cells *
-				    hdlp->ih_inum + 2];
-				break;
-			default:
-				ddi_prop_free(irupts_prop);
-				return (DDI_FAILURE);
-			}
-
-			ddi_prop_free(irupts_prop);
-
-			hdlp->ih_vector = GIC_VEC_TO_IRQ(grp, vec);
-
-			cfg &= 0xFF;
-			switch (cfg) {
-			case 1:
-				gic_config_irq(hdlp->ih_vector, true);
-				break;
-			default:
-				gic_config_irq(hdlp->ih_vector, false);
-				break;
-			}
-
-			if (!add_avintr((void *)hdlp, hdlp->ih_pri,
-			    hdlp->ih_cb_func, DEVI(rdip)->devi_name,
-			    hdlp->ih_vector,
-			    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip)) {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
-
 	case DDI_INTROP_DISABLE:
-		rem_avintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func,
-		    hdlp->ih_vector);
-		break;
+	case DDI_INTROP_GETTARGET:
+	case DDI_INTROP_SETTARGET:
+	case DDI_INTROP_BLOCKENABLE:
+	case DDI_INTROP_BLOCKDISABLE:
+		return (i_ddi_intr_ops(pdip, rdip, intr_op, hdlp, result));
+
+	/*
+	 * XXXGIC: These seem like they would need to reach an interrupt
+	 * controller to be supported, but they did not (inherently) on SPARC.
+	 */
 	case DDI_INTROP_SETMASK:
 	case DDI_INTROP_CLRMASK:
 	case DDI_INTROP_GETPENDING:
 		return (DDI_FAILURE);
-	case DDI_INTROP_NAVAIL:
-		{
-			int interrupt_cells =
-			    get_interrupt_cells(ddi_get_nodeid(rdip));
-			int irupts_len;
-			if ((interrupt_cells != 0) &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, OBP_INTERRUPTS, &irupts_len) ==
-			    DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
-	case DDI_INTROP_NINTRS:
-		{
-			int interrupt_cells =
-			    get_interrupt_cells(ddi_get_nodeid(rdip));
-			int irupts_len;
-			if ((interrupt_cells != 0) &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, OBP_INTERRUPTS,
-			    &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
-	case DDI_INTROP_SUPPORTED_TYPES:
-		*(int *)result = DDI_INTR_TYPE_FIXED;	/* Always ... */
-		break;
+
 	default:
 		return (DDI_FAILURE);
 	}
 
 	return (DDI_SUCCESS);
-}
-
-/*
- * rootnex_get_ispec()
- *	convert an interrupt number to an interrupt specification.
- *	The interrupt number determines which interrupt spec will be
- *	returned if more than one exists.
- *
- *	Look into the parent private data area of the 'rdip' to find out
- *	the interrupt specification.  First check to make sure there is
- *	one that matchs "inumber" and then return a pointer to it.
- *
- *	Return NULL if one could not be found.
- *
- *	NOTE: This is needed for rootnex_intr_ops()
- */
-static struct intrspec *
-rootnex_get_ispec(dev_info_t *rdip, int inum)
-{
-	struct ddi_parent_private_data *pdp = ddi_get_parent_data(rdip);
-
-	/* Validate the interrupt number */
-	if (inum >= pdp->par_nintr)
-		return (NULL);
-
-	/* Get the interrupt structure pointer and return that */
-	return ((struct intrspec *)&pdp->par_intr[inum]);
 }
 
 /*

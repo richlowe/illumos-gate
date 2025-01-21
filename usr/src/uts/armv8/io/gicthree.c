@@ -73,8 +73,7 @@
 #include <sys/cpuinfo.h>
 #include <sys/sysmacros.h>
 #include <sys/archsystm.h>
-
-extern void gic_remove_state(int);
+#include <sys/mach_intr.h>
 
 extern char *gic_module_name;
 
@@ -375,13 +374,23 @@ gicv3_config_irq_spi(gicv3_conf_t *gc, uint32_t irq, uint32_t v)
 	 * §12.9.9 Changing Int_config when the interrupt is
 	 * individually enabled is UNPREDICTABLE.
 	 */
-	ASSERT(((gicd_read4(gc,
+	if ((gicd_read4(gc,
 	    GICD_ISENABLERn(GICD_IENABLER_REGNUM(irq))) &
-	    GICD_IENABLER_REGBIT(irq)) == 0));
-	(void) gicd_rmw4(gc,
-	    GICD_ICFGRn(GICD_ICFGR_REGNUM(irq)),
-	    GICD_ICFGR_REGVAL(irq, GICD_ICFGR_INT_CONFIG_MASK),
-	    GICD_ICFGR_REGVAL(irq, v));
+	    GICD_IENABLER_REGBIT(irq)) != 0) {
+
+		if (gicd_read4(gc, GICD_ICFGRn(GICD_ICFGR_REGNUM(irq))) !=
+		    GICD_ICFGR_REGVAL(irq, v)) {
+			cmn_err(CE_WARN, "gicthree: vector %d already "
+			    "configured differently", irq);
+			return;
+		}
+
+	} else {
+		(void) gicd_rmw4(gc,
+		    GICD_ICFGRn(GICD_ICFGR_REGNUM(irq)),
+		    GICD_ICFGR_REGVAL(irq, GICD_ICFGR_INT_CONFIG_MASK),
+		    GICD_ICFGR_REGVAL(irq, v));
+	}
 	GICD_UNLOCK();
 }
 
@@ -1145,19 +1154,184 @@ gicv3_init(void)
 	return (0);
 }
 
+static int
+gicv3_attach(dev_info_t *devi, ddi_attach_cmd_t cmd)
+{
+	ddi_report_dev(devi);
+	return (DDI_SUCCESS);
+}
+
+static int
+gicv3_detach(dev_info_t *devi, ddi_detach_cmd_t cmd)
+{
+	/*
+	 * It is in theory possible we could evacuate an interrupt controller,
+	 * but there's no reason to try.
+	 */
+	return (DDI_FAILURE);
+}
+
+/*
+ * Field interrupt operation requests to program this interrupt controller.
+ *
+ * We only handle the subset of requests that are routed toward an interrupt
+ * controller by the system.
+ *
+ * Operations not intended for us should have been routed away from us and to
+ * the root nexus by the DDI implementation.
+ */
+static int
+gicv3_intr_ops(dev_info_t *dip, dev_info_t *rdip,
+    ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result)
+{
+	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
+
+	switch (intr_op) {
+	case DDI_INTROP_ADDISR:
+		break;
+	case DDI_INTROP_REMISR:
+		break;
+
+	case DDI_INTROP_ENABLE: {
+		ihdl_plat_t *priv = hdlp->ih_private;
+
+		VERIFY3P(priv, !=, NULL);
+		VERIFY3P(priv->ip_unitintr, !=, NULL);
+
+		/*
+		 * Always 3+ interrupt cells in the gicv3 binding (but this is
+		 * FDT specific, and needs to be better)
+		 */
+		unit_intr_t *ui = priv->ip_unitintr;
+		uint32_t *p = &ui->ui_v[ui->ui_addrcells];
+		const uint32_t cfg = *p++;
+		const uint32_t vector = *p++;
+		const uint32_t sense = *p++;
+
+		for (int i = 3; i < priv->ip_unitintr->ui_intrcells; i++) {
+			ASSERT3U(*p++, ==, 0);
+		}
+
+		hdlp->ih_vector = GIC_VEC_TO_IRQ(cfg, vector);
+
+		if ((sense & 0xff) == 1)
+			gic_config_irq(hdlp->ih_vector, true);
+		else
+			gic_config_irq(hdlp->ih_vector, false);
+
+		/* Add the interrupt handler */
+		if (!add_avintr((void *)hdlp, hdlp->ih_pri,
+		    hdlp->ih_cb_func, DEVI(rdip)->devi_name, hdlp->ih_vector,
+		    hdlp->ih_cb_arg1, hdlp->ih_cb_arg2, NULL, rdip))
+			return (DDI_FAILURE);
+		break;
+	}
+	case DDI_INTROP_DISABLE: {
+		ihdl_plat_t *priv = hdlp->ih_private;
+
+		VERIFY3P(priv, !=, NULL);
+		VERIFY3P(priv->ip_unitintr, !=, NULL);
+
+		/*
+		 * Always 3+ interrupt cells in the gicv3 binding (but this is
+		 * FDT specific, and needs to be better).
+		 *
+		 * Here we don't use the sense, we asserted in the enable path
+		 * that any fields present but not understood are 0.
+		 */
+		unit_intr_t *ui = priv->ip_unitintr;
+		uint32_t *p = &ui->ui_v[ui->ui_addrcells];
+		const uint32_t cfg = *p++;
+		const uint32_t vector = *p++;
+
+		hdlp->ih_vector = GIC_VEC_TO_IRQ(cfg, vector);
+
+		/* Remove the interrupt handler */
+		rem_avintr((void *)hdlp, hdlp->ih_pri,
+		    hdlp->ih_cb_func, hdlp->ih_vector);
+		break;
+	}
+
+	/* Operations that are valid for us, but unimplemented */
+	case DDI_INTROP_BLOCKDISABLE:
+	case DDI_INTROP_BLOCKENABLE:
+		return (DDI_FAILURE);
+
+	/* Operations which should never have reached us */
+	case DDI_INTROP_ALLOC:
+	case DDI_INTROP_CLRMASK:
+	case DDI_INTROP_DUPVEC:
+	case DDI_INTROP_FREE:
+	case DDI_INTROP_GETCAP:
+	case DDI_INTROP_GETPENDING:
+	case DDI_INTROP_GETPOOL:
+	case DDI_INTROP_GETPRI:
+	case DDI_INTROP_GETTARGET:
+	case DDI_INTROP_NAVAIL:
+	case DDI_INTROP_NINTRS:
+	case DDI_INTROP_SETCAP:
+	case DDI_INTROP_SETMASK:
+	case DDI_INTROP_SETPRI:
+	case DDI_INTROP_SETTARGET:
+	case DDI_INTROP_SUPPORTED_TYPES:
+		dev_err(dip, CE_WARN, "unexpected introp %d for %s%d\n",
+		    intr_op, ddi_node_name(rdip), ddi_get_instance(rdip));
+		return (DDI_FAILURE);
+	}
+
+	return (DDI_SUCCESS);
+}
+
+static struct bus_ops gicv3_bus_ops = {
+	.busops_rev = BUSO_REV,
+	.bus_map = nullbusmap,
+	.bus_map_fault = i_ddi_map_fault,
+	.bus_dma_map = ddi_no_dma_map,
+	.bus_dma_allochdl = ddi_no_dma_allochdl,
+	.bus_intr_op = &gicv3_intr_ops,
+};
+
 static struct modlmisc modlmisc = {
 	&mod_miscops,
-	"Generic Interrupt Controller v3"
+	"Generic Interrupt Controller v3 (misc)"
+};
+
+static struct dev_ops gicv3_ops = {
+	.devo_rev = DEVO_REV,
+	.devo_refcnt = 0,
+	.devo_getinfo = NULL,
+	.devo_identify = nulldev,
+	.devo_attach = gicv3_attach,
+	.devo_detach = gicv3_detach,
+	.devo_reset = nulldev,
+	.devo_cb_ops = NULL,
+	.devo_bus_ops = &gicv3_bus_ops,
+	.devo_power = nulldev,
+	.devo_quiesce = ddi_quiesce_not_supported,
+};
+
+static struct modldrv modldrv = {
+	&mod_driverops,
+	"Generic Interrupt Controller v3 (device)",
+	&gicv3_ops,
 };
 
 static struct modlinkage modlinkage = {
-	MODREV_1, (void *)&modlmisc, NULL
+	.ml_rev = MODREV_1,
+	.ml_linkage = { &modlmisc, &modldrv, NULL }
 };
 
 int
 _init(void)
 {
-	if (strcmp(gic_module_name, "gicv3") == 0) {
+	/*
+	 * If the early-system has probed GIC v3, configure ourselves for
+	 * early operations.
+	 *
+	 * This is necessary because the clock _must_ tick prior to normal
+	 * autoconfiguration taking place, or even being possible.
+	 */
+	if (strcmp(gic_module_name, "gicthree") == 0) {
 		gic_ops.go_send_ipi = gicv3_send_ipi;
 		gic_ops.go_init = gicv3_init;
 		gic_ops.go_cpu_init = gicv3_cpu_init;

@@ -129,6 +129,8 @@ gic_remove_state(int irq)
 {
 	gic_intr_state_t lookup, *st;
 
+	ASSERT(MUTEX_HELD(&gic_intrs_lock));
+
 	lookup.gi_vector = irq;
 	st = avl_find(&gic_intrs, &lookup, NULL);
 	VERIFY3P(st, !=, NULL);
@@ -264,12 +266,12 @@ set_gic_module_name(void)
 {
 	if (prom_has_compatible("arm,gic-400") ||
 	    prom_has_compatible("arm,cortex-a15-gic")) {
-		gic_module_name = "gicv2";
+		gic_module_name = "gictwo";
 		return;
 	}
 
 	if (prom_has_compatible("arm,gic-v3")) {
-		gic_module_name = "gicv3";
+		gic_module_name = "gicthree";
 		return;
 	}
 

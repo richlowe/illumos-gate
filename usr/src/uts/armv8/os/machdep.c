@@ -38,7 +38,6 @@
 #include <sys/stack.h>
 #include <sys/systm.h>
 #include <sys/panic.h>
-#include <sys/gic.h>
 #include <sys/irq.h>
 #include <sys/privregs.h>
 #include <sys/dumphdr.h>

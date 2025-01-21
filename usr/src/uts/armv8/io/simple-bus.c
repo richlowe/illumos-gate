@@ -20,8 +20,12 @@
  */
 
 /*
- * Copyright 2017 Hayashi Naoyuki
  * Copyright (c) 1992, 2011, Oracle and/or its affiliates. All rights reserved.
+ */
+
+/*
+ * Copyright 2017 Hayashi Naoyuki
+ * Copyright 2024 Michael van der Westhuizen
  */
 
 #include <sys/types.h>
@@ -50,60 +54,54 @@ static int smpl_bus_map(dev_info_t *, dev_info_t *, ddi_map_req_t *, off_t,
     off_t, caddr_t *);
 static int smpl_ctlops(dev_info_t *, dev_info_t *, ddi_ctl_enum_t,
     void *, void *);
-static int smpl_intr_ops(dev_info_t *, dev_info_t *, ddi_intr_op_t,
-    ddi_intr_handle_impl_t *, void *);
-
-struct bus_ops smpl_bus_ops = {
-	BUSO_REV,
-	smpl_bus_map,
-	NULL,
-	NULL,
-	NULL,
-	i_ddi_map_fault,
-	NULL,
-	ddi_dma_allochdl,
-	ddi_dma_freehdl,
-	ddi_dma_bindhdl,
-	ddi_dma_unbindhdl,
-	ddi_dma_flush,
-	ddi_dma_win,
-	ddi_dma_mctl,
-	smpl_ctlops,
-	ddi_bus_prop_op,
-	NULL,		/* (*bus_get_eventcookie)();	*/
-	NULL,		/* (*bus_add_eventcall)();	*/
-	NULL,		/* (*bus_remove_eventcall)();	*/
-	NULL,		/* (*bus_post_event)();		*/
-	NULL,		/* (*bus_intr_ctl)(); */
-	NULL,		/* (*bus_config)(); */
-	NULL,		/* (*bus_unconfig)(); */
-	NULL,		/* (*bus_fm_init)(); */
-	NULL,		/* (*bus_fm_fini)(); */
-	NULL,		/* (*bus_fm_access_enter)(); */
-	NULL,		/* (*bus_fm_access_exit)(); */
-	NULL,		/* (*bus_power)(); */
-	smpl_intr_ops	/* (*bus_intr_op)(); */
-};
-
-
 static int smpl_attach(dev_info_t *devi, ddi_attach_cmd_t cmd);
 
-/*
- * Internal isa ctlops support routines
- */
-struct dev_ops smpl_ops = {
-	DEVO_REV,		/* devo_rev, */
-	0,			/* refcnt  */
-	ddi_no_info,		/* info */
-	nulldev,		/* identify */
-	nulldev,		/* probe */
-	smpl_attach,	/* attach */
-	nulldev,		/* detach */
-	nodev,			/* reset */
-	(struct cb_ops *)0,	/* driver operations */
-	&smpl_bus_ops,	/* bus operations */
-	NULL,			/* power */
-	ddi_quiesce_not_needed,	/* quiesce */
+static struct bus_ops smpl_bus_ops = {
+	.busops_rev		= BUSO_REV,
+	.bus_map		= smpl_bus_map,
+	.bus_get_intrspec	= NULL,	/* obsolete */
+	.bus_add_intrspec	= NULL,	/* obsolete */
+	.bus_remove_intrspec	= NULL,	/* obsolete */
+	.bus_map_fault		= i_ddi_map_fault,
+	.bus_dma_map		= NULL,
+	.bus_dma_allochdl	= ddi_dma_allochdl,
+	.bus_dma_freehdl	= ddi_dma_freehdl,
+	.bus_dma_bindhdl	= ddi_dma_bindhdl,
+	.bus_dma_unbindhdl	= ddi_dma_unbindhdl,
+	.bus_dma_flush		= ddi_dma_flush,
+	.bus_dma_win		= ddi_dma_win,
+	.bus_dma_ctl		= ddi_dma_mctl,
+	.bus_ctl		= smpl_ctlops,
+	.bus_prop_op		= ddi_bus_prop_op,
+	.bus_get_eventcookie	= NULL,
+	.bus_add_eventcall	= NULL,
+	.bus_remove_eventcall	= NULL,
+	.bus_post_event		= NULL,
+	.bus_intr_ctl		= NULL,	/* obsolete */
+	.bus_config		= NULL,
+	.bus_unconfig		= NULL,
+	.bus_fm_init		= NULL,
+	.bus_fm_fini		= NULL,
+	.bus_fm_access_enter	= NULL,
+	.bus_fm_access_exit	= NULL,
+	.bus_power		= NULL,
+	.bus_intr_op		= i_ddi_intr_ops,
+	.bus_hp_op		= NULL
+};
+
+static struct dev_ops smpl_ops = {
+	.devo_rev		= DEVO_REV,
+	.devo_refcnt		= 0,
+	.devo_getinfo		= ddi_no_info,
+	.devo_identify		= nulldev,
+	.devo_probe		= nulldev,
+	.devo_attach		= smpl_attach,
+	.devo_detach		= nulldev,
+	.devo_reset		= nodev,
+	.devo_cb_ops		= NULL,
+	.devo_bus_ops		= &smpl_bus_ops,
+	.devo_power		= NULL,
+	.devo_quiesce		= ddi_quiesce_not_needed,
 };
 
 /*
@@ -111,37 +109,26 @@ struct dev_ops smpl_ops = {
  */
 
 static struct modldrv modldrv = {
-	&mod_driverops, /* Type of module.  This is simple-bus bus driver */
-	"simple-bus nexus driver",
-	&smpl_ops,	/* driver ops */
+	.drv_modops		= &mod_driverops,
+	.drv_linkinfo		= "simple-bus nexus driver",
+	.drv_dev_ops		= &smpl_ops,
 };
 
 static struct modlinkage modlinkage = {
-	MODREV_1,
-	&modldrv,
-	NULL
+	.ml_rev			= MODREV_1,
+	.ml_linkage		= { &modldrv, NULL }
 };
 
 int
 _init(void)
 {
-	int	err;
-
-	if ((err = mod_install(&modlinkage)) != 0)
-		return (err);
-
-	return (0);
+	return (mod_install(&modlinkage));
 }
 
 int
 _fini(void)
 {
-	int	err;
-
-	if ((err = mod_remove(&modlinkage)) != 0)
-		return (err);
-
-	return (0);
+	return (mod_remove(&modlinkage));
 }
 
 int
@@ -205,33 +192,6 @@ get_size_cells(pnode_t node)
 		node = prom_parentnode(node);
 	}
 	return (size_cells);
-}
-
-static int
-get_interrupt_cells(pnode_t node)
-{
-	int interrupt_cells = 0;
-
-	while (node > 0) {
-		int len = prom_getproplen(node, OBP_INTERRUPT_CELLS);
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, OBP_INTERRUPT_CELLS, (caddr_t)&prop);
-			interrupt_cells = ntohl(prop);
-			break;
-		}
-		len = prom_getproplen(node, OBP_INTERRUPT_PARENT);
-		if (len > 0) {
-			ASSERT(len == sizeof (int));
-			int prop;
-			prom_getprop(node, OBP_INTERRUPT_PARENT, (caddr_t)&prop);
-			node = prom_findnode_by_phandle(ntohl(prop));
-			continue;
-		}
-		node = prom_parentnode(node);
-	}
-	return (interrupt_cells);
 }
 
 static int
@@ -407,199 +367,6 @@ smpl_ctlops(dev_info_t *dip, dev_info_t *rdip,
 		ret = ddi_ctlops(dip, rdip, ctlop, arg, result);
 		break;
 	}
+
 	return (ret);
-}
-
-static int
-get_pil(dev_info_t *rdip)
-{
-	static struct {
-		const char *name;
-		int pil;
-	} name_to_pil[] = {
-		{"serial",			12},
-		{"Ethernet controller",		6},
-		{ NULL}
-	};
-	const char *type_name[] = {
-		"device_type",
-		"model",
-		NULL
-	};
-
-	pnode_t node = ddi_get_nodeid(rdip);
-	for (int i = 0; type_name[i]; i++) {
-		int len = prom_getproplen(node, type_name[i]);
-		if (len <= 0) {
-			continue;
-		}
-		char *name = __builtin_alloca(len);
-		prom_getprop(node, type_name[i], name);
-
-		for (int j = 0; name_to_pil[j].name; j++) {
-			if (strcmp(name_to_pil[j].name, name) == 0) {
-				return (name_to_pil[j].pil);
-			}
-		}
-	}
-	return (5);
-}
-
-static int
-smpl_intr_ops(dev_info_t *pdip, dev_info_t *rdip, ddi_intr_op_t intr_op,
-    ddi_intr_handle_impl_t *hdlp, void *result)
-{
-	ASSERT(RW_WRITE_HELD(&hdlp->ih_rwlock));
-
-	switch (intr_op) {
-	case DDI_INTROP_GETCAP:
-		*(int *)result = DDI_INTR_FLAG_LEVEL;
-		break;
-
-	case DDI_INTROP_ALLOC:
-		*(int *)result = hdlp->ih_scratch1;
-		break;
-
-	case DDI_INTROP_FREE:
-		break;
-
-	case DDI_INTROP_GETPRI:
-		if (hdlp->ih_pri == 0) {
-			hdlp->ih_pri = get_pil(rdip);
-		}
-
-		*(int *)result = hdlp->ih_pri;
-		break;
-	case DDI_INTROP_SETPRI:
-		if (*(int *)result > LOCK_LEVEL)
-			return (DDI_FAILURE);
-		hdlp->ih_pri = *(int *)result;
-		break;
-
-	case DDI_INTROP_ADDISR:
-		break;
-	case DDI_INTROP_REMISR:
-		if (hdlp->ih_type != DDI_INTR_TYPE_FIXED)
-			return (DDI_FAILURE);
-		break;
-	case DDI_INTROP_ENABLE:
-		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
-			switch (interrupt_cells) {
-			case 1:
-			case 3:
-				break;
-			default:
-				return (DDI_FAILURE);
-			}
-
-			int *irupts_prop;
-			uint_t irupts_len;
-			if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, OBP_INTERRUPTS,
-			    (int **)&irupts_prop, &irupts_len) != DDI_SUCCESS ||
-			    irupts_len == 0) {
-				return (DDI_FAILURE);
-			}
-			if ((interrupt_cells * hdlp->ih_inum) >= irupts_len) {
-				ddi_prop_free(irupts_prop);
-				return (DDI_FAILURE);
-			}
-
-			int vec;
-			int grp;
-			int cfg;
-			off_t off = interrupt_cells * hdlp->ih_inum;
-			switch (interrupt_cells) {
-			case 1:
-				grp = 0;
-				vec = irupts_prop[interrupt_cells *
-				    hdlp->ih_inum + 0];
-				cfg = 4;
-				break;
-			case 3:
-				grp = irupts_prop[(interrupt_cells *
-				    hdlp->ih_inum) + 0];
-				vec = irupts_prop[(interrupt_cells *
-				    hdlp->ih_inum) + 1];
-				cfg = irupts_prop[(interrupt_cells * hdlp->ih_inum)
-				    + 2];
-				break;
-			default:
-				ddi_prop_free(irupts_prop);
-				return (DDI_FAILURE);
-			}
-
-			ddi_prop_free(irupts_prop);
-
-			hdlp->ih_vector = GIC_VEC_TO_IRQ(grp, vec);
-
-			cfg &= 0xFF;
-			switch (cfg) {
-			case 1:
-				gic_config_irq(hdlp->ih_vector, B_TRUE);
-				break;
-			default:
-				gic_config_irq(hdlp->ih_vector, B_FALSE);
-				break;
-			}
-
-			if (!add_avintr((void *)hdlp, hdlp->ih_pri,
-			    hdlp->ih_cb_func, DEVI(rdip)->devi_name,
-			    hdlp->ih_vector, hdlp->ih_cb_arg1, hdlp->ih_cb_arg2,
-			    NULL, rdip)) {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
-
-	case DDI_INTROP_DISABLE:
-		rem_avintr((void *)hdlp, hdlp->ih_pri, hdlp->ih_cb_func,
-		    hdlp->ih_vector);
-		break;
-	case DDI_INTROP_SETMASK:
-	case DDI_INTROP_CLRMASK:
-	case DDI_INTROP_GETPENDING:
-		return (DDI_FAILURE);
-	case DDI_INTROP_NAVAIL:
-		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
-			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, OBP_INTERRUPTS,
-			    &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
-	case DDI_INTROP_NINTRS:
-		{
-			pnode_t node = ddi_get_nodeid(rdip);
-			int interrupt_cells = get_interrupt_cells(node);
-			int irupts_len;
-			if (interrupt_cells != 0 &&
-			    ddi_getproplen(DDI_DEV_T_ANY, rdip,
-			    DDI_PROP_DONTPASS, OBP_INTERRUPTS,
-			    &irupts_len) == DDI_SUCCESS) {
-				*(int *)result = irupts_len /
-				    CELLS_1275_TO_BYTES(interrupt_cells);
-			} else {
-				return (DDI_FAILURE);
-			}
-		}
-		break;
-	case DDI_INTROP_SUPPORTED_TYPES:
-		*(int *)result = DDI_INTR_TYPE_FIXED;	/* Always ... */
-		break;
-	default:
-		return (DDI_FAILURE);
-	}
-
-	return (DDI_SUCCESS);
 }

@@ -1,0 +1,22 @@
+digraph dev_tree_intr_parent {
+        fontname="Helvetica,Arial,sans-serif"
+        node [fontname="Helvetica,Arial,sans-serif"]
+        edge [fontname="Helvetica,Arial,sans-serif"]
+        rankdir=TB
+
+        rootnex [ label = "{<f0> rootnex | <f1> interrupt-parent}", shape="record"]
+        pci [ label = "{<f0> pci | <f1> interrupt-parent}", shape="record" ]
+        "interrupt-controller"
+        isa -> rootnex
+        pci:f0 -> rootnex
+        upa -> rootnex
+        kbd -> isa
+        hba -> pci
+        "pci-bridge" -> pci
+        nic0 -> "pci-bridge"
+        nic1 -> "pci-bridge"
+        nic2 -> "pci-bridge"
+        framebuffer -> upa
+        "pci":f1 -> "interrupt-controller" [style=dashed]
+        "rootnex":f1 -> "interrupt-controller" [style=dashed]
+}

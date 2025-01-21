@@ -1,0 +1,17 @@
+digraph finite_state_machine {
+	fontname="Helvetica,Arial,sans-serif"
+	node [fontname="Helvetica,Arial,sans-serif"]
+	edge [fontname="Helvetica,Arial,sans-serif"]
+	rankdir=TB
+	rootnex
+	isa -> rootnex
+	pci -> rootnex
+	upa -> rootnex
+	kbd -> isa
+	hba -> pci
+	"pci-bridge" -> pci
+	nic0 -> "pci-bridge"
+	nic1 -> "pci-bridge"
+	nic2 -> "pci-bridge"
+	framebuffer -> upa
+}

@@ -89,8 +89,8 @@ ROOTNEX_OBJS += rootnex.o
 
 NS16550A_OBJS += ns16550a.o
 
-GICV2_OBJS += gicv2.o
-GICV3_OBJS += gicv3.o
+GICTWO_OBJS += gictwo.o
+GICTHREE_OBJS += gicthree.o
 
 ASSYM_DEPS +=			\
 	aarch64_subr.o		\

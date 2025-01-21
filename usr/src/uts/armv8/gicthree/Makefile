@@ -10,7 +10,7 @@
 #
 
 #
-# Copyright 2023 Michael van der Westhuizen
+# Copyright 2024 Michael van der Westhuizen
 #
 
 #
@@ -21,10 +21,9 @@ UTSBASE	= ../..
 #
 #	Define the module and object file sets.
 #
-MODULE		= gicv2
-OBJECTS		= $(GICV2_OBJS:%=$(OBJS_DIR)/%)
+MODULE		= gicthree
+OBJECTS		= $(GICTHREE_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_PSM_DRV_DIR)/$(MODULE)
-CONF_SRCDIR	= $(UTSBASE)/armv8/os/
 
 #
 #	Include common rules.
@@ -36,12 +35,6 @@ include $(UTSBASE)/armv8/Makefile.armv8
 #
 ALL_TARGET	= $(BINARY)
 INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
-
-#
-#	Overrides
-#
-ALL_BUILDS	= $(ALL_BUILDSONLY64)
-DEF_BUILDS	= $(DEF_BUILDSONLY64)
 
 #
 #	Default build targets.

@@ -49,7 +49,6 @@
 #include <sys/param.h>
 #include <sys/promif.h>
 #include <sys/cpu_pm.h>
-#include <sys/gic.h>
 #include <sys/controlregs.h>
 #include <sys/irq.h>
 #include <sys/cpuinfo.h>

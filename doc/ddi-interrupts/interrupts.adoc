@@ -1,0 +1,2150 @@
+= DDI Interrupt Framework
+Richard Lowe <richlowe@richlowe.net>
+:toc:
+:doctype: article
+
+== Introduction
+
+This is an attempt to explain the DDI interrupt framework as it
+currently exists, attempt to explain how we got here, and to document
+the choices made for the AArch64 port (which are not set in stone, this
+is a living document).
+
+Some or all of this content should be transplanted to act as big theory
+comments in the relevant sources, or parts of the manual, but as things are
+still up in the air it is better to have a single – consistent – document, and
+to piece it out to match the implementation when that has become firmer. We
+hope.
+
+NOTE: illumos support for the SPARC platform is obsolete, but its DDI interrupt
+implementation is described here because it is so different from that on
+Intel, and potentially so similar to that on AArch64.
+
+NOTE: When surveying drivers implementations we have intentionally stuck with
+busses in active use (at least up until the hardware itself was not).  That
+is, the PCMCIA, Cardbus, SBus, etc. implementations were not inspected.
+
+== Terminology
+
+Interrupt:: The general concept of a device alerting the CPU that it needs service.
+
+Vector::
+  The identifying aspect of an interrupt at the current layer of the
+  device tree.  The first interrupt on device A maybe has vector 8 on the bridge A
+  it is connected to, and vector 73 at the interrupt controller.  The system
+  assumes at times that this is representable as a single 32bit value.
+
+Interrupt Domain::
+  The subgraphs of the device tree with a shared interrupt representation.
+  Transitioning between interrupt domains will usually require that the vector
+  be translated into a value in the new domain.
+
+Interrupt Controller::
+  A device which receives interrupts from a subordinate device, and generates
+  interrupts on a superior device.  There maybe a single interrupt controller
+  fielding all interrupts in a system and passing them to CPU cores, there may
+  be a hierarchy of them.
+
+Interrupt Hierarchy::
+  A path from a peripheral device to the root interrupt controller, passing
+  through each device that needs to be involved in programming the interrupt.
+
+Nexus::
+  A non-leaf illumos device driver, performing bus operations on behalf
+  of its children.
+
+Root Nexus::
+  The nexus driver at the root of the device tree, the `rootnex` driver.  The
+  tree node is conventionally named for the hardware platform. **i86pc**,
+  **Oxide,Gimlet**, **SUNW,Sun-Fire-T200**, **RaspberryPi,4** etc.  Note that
+  the root nexus is only the root of the device tree _it may not be the root
+  of the interrupt hierarchy_.
+
+Device Tree::
+  The illumos abstraction over the hardware that exists in a
+  system and its topology.  A tree of `dev_info_t`.  Note that throughout this
+  document we refer to "the device tree" in this context, separate from the
+  <<devicetree-org, Devicetree>> specification , which it superficially
+  resembles due to their shared ancestry in <<1275-ofw, 1275 OpenFirmware>>.
+
+== State of the World and its History
+
+There are two interrupt frameworks in the DDI, one of them obsolete and based
+on <<struct-intrspec, `struct intrspec`>> which survives, at all levels of the
+framework, on one platform, though it is fairly clear that is leftover
+code from prior the first framework being obsolete, which became convenient
+mechanism on top of which implement the second framework.
+
+It is probable, based on the PSARC history reflected in <<References>> that
+what we simplify here as "the first obsolete DDI framework" is in fact several
+evolutions that were at the time thought distinct.  There are also
+evolutionary predecessors of DDI2 that were added to DDI1 and then obsoleted
+by the introduction of DDI2.  These are not described.
+
+NOTE: A lot of this history is reconstructed from what evidence remains.
+We've done our best.
+
+In the beginning there is Motorola 68000, and following that there is SPARC.
+Up until the late 90's interrupt hardware on these platforms was fully in
+Sun's control and it, by design, followed the device tree without a separate
+interrupt hierarchy.  In the late 90's Sun wanted to use off-the-shelf
+hardware for stuff like USB, and with that came interrupt hardware that does
+not follow the device tree.  Sun used the OpenFirmware additions originally
+from IBM/Apple/Motorola for PowerPC hardware to support this.  In the early
+2000's MSI/X become critical, and DDI2 is implemented.  By this time, Intel is
+a first-class platform.
+
+Along side these platforms appears Intel, in the early 1990s. It presents a
+number of problems.
+
+. The interrupt hierarchy is nothing like the device hierarchy
+. There are a variety of low-level hardware implementations of multi-processor
+  support, which does not officially yet exist from Intel.  These necessarily
+  include different interrupt implementations, CPU interfaces, etc.
+
+[sidebar]
+.The _Kernel Binary Interface_ (KBI)
+--
+At this time (the early 90's) it became apparent that shipping a `unix` binary
+per platform was unwieldy (on SPARC), especially for providing binary software
+patches.  On the Intel platform it is even more unweildy because as mentioned
+before, multi-processor support at this time was machine specific at deeply
+low levels.  Each such machine would require its own `unix` like SPARC, but
+that makes it nearly impossible for 3rd parties to support their own machine.
+
+The solution was several projects under the umbrella of a Kernel Binary
+Interface project, which attempted to restructure the kernel to solve these
+(and other) problems.  It did a lot, but was never fully completed.
+--
+
+The implementation for Intel added the concept of a _Platform Support Module_
+(PSM) which appears among what appear to be a burst of PSARC cases relating to
+x86 coming to life.  Filesystem support, the x86 DDI, the booting system, and
+the filesystem all appear in a single block of cases here.  Nothing survives
+to tell us why they thought the DDI1 interrupt interfaces were a bad match for
+these systems but we can guess -- the same reasons it was a bad match for
+late-90's and early-2000's SPARC.  "Weird" interrupt hierarchies, cascaded
+controllers, etc., with the additional problem in the larger platform of the
+entirely different multi-processor implementations.  The PSM is added as a
+temporary solution until KBI solves the problem.  KBI didn't solve the
+problem.  The PSM interface goes from temporary to carefully versioned
+architecture over the next handful of years.
+
+Now, perhaps as something of a surprise is PowerPC.  Sun briefly added support
+for PReP-based PowerPC systems, and by chance some of <<psarc-ppc, this case>>
+is available to us.  They describe wanting to use the PSM-style interfaces for
+simplicity, because the "real" KBI is far away, and because of the hardware
+similarity (this is presumed to be, again, the "weird" interrupt hierarchy and
+cascading, only this time with OpenPIC.  I can't think of what other
+similarity there could possibly be).  They were also waiting -- with the
+benefit of hindsight -- for CHRP, in which 1275 OpenFirmware was finally
+implemented.  PowerPC support didn't last long enough to see any future
+relevant interrupt changes.
+
+== Interrupts as they exist
+
+Interrupts are generated by devices and sent ultimately to a core to be
+serviced.
+
+_Fixed interrupts_ are traditional interrupts that were originally wired to
+interrupt pins on the CPU core, but are now wired to one (or more) interrupt
+controllers (which may be part of the CPU), and may at the hardware level in
+fact be entirely emulated (such as with PCIe INTx interrupts, which emulate
+the PCI INTA#-INTD# pins via messages at the PCIe level but appear as
+traditional fixed interrupts outside of the PCIe domain, or UltraSPARC Mondos
+which are effectively message signalled, and may carry data).
+
+Fixed interrupts may require per-device handling at any stage between the device
+generating the interrupt and the CPU core handling it.  This may include
+translating the interrupt vector into the domain of the parent device,
+programming an intervening interrupt controller (as may be the case with
+GPIO), or simple bookkeeping tasks.
+
+Fixed interrupts may be shared between devices, and in a typical PCI or PCIe
+system could be shared extensively.  x86 systems in particular have a greatly
+limited number of fixed interrupt signals available at the CPU.
+
+_Message Signalled Interrupts_ were optionally added by PCI specification, and
+made mandatory by PCI Express.  A controller exists in the system (perhaps
+part of the PCIe host bridge) which provides one or more memory-mapped
+mailboxes.  A write to a given mailbox with a given value generates an
+interrupt on the CPU perhaps translating that MSI into the native platform
+interrupt format (as often on AArch64 and SPARC), or posting the interrupt
+directly and transparently (Intel).
+
+MSI are by definition not shared, and the mailbox/value uniquely identify a
+given interrupt of a given device.
+
+PCI functions may have up to 32 MSI, though the system may allocate fewer for
+them and software must be capable of receiving fewer interrupts than
+requested.  An extension, MSI-X, allows each function to have up to 2048
+interrupts.  MSI-X _may_ be shared, after a fashion, using the same
+mailbox/value pair, to handle the case where the system provides fewer
+interrupts than were requested.
+
+The allocation and management of MSI is at the limit, the purpose of the
+<<resource-manager>>.  Fixed interrupts have no (hardware resource) allocation
+phase.
+
+=== The First Framework (henceforth DDI1)
+
+`struct bus_ops` entry points <<bus-get-intrspec, `.bus_get_intrspec`>>,
+<<bus-add-intrspec, `.bus_add_intrspec`>>, <<bus-remove-intrspec,
+`.bus_remove_intrspec`>> and <<bus-intr-ctl, `.bus_intr_ctl`>>
+
+These are never used, and are `NULL` throughout the current
+implementation. The `xxx_get_intrspec` functions in some nexuses used for
+bookkeeping were initially the implementation of `.bus_get_intrspec` and
+survived into the implementation of the second framework.
+
+This is the working theory as to why the relationships between
+<<struct-intrspec, `intrspec`>> and <<interrupt-handle,
+`ddi_intr_handle_impl_t`>> are so hazy (see the descriptions of DDI1 and DDI2
+compatibility, in the <<platform-implementations>> section).
+
+The client API from this framework is preserved:
+**ddi_get_iblock_cookie(9F)**, **ddi_add_intr(9F)**, **ddi_remove_intr(9F)**
+**ddi_dev_nintrs(9F)**, **ddi_get_soft_iblock_cookie(9F)**, **ddi_add_softintr(9F)**
+**ddi_remove_softintr(9F)**, **ddi_trigger_softintr(9F)**, **ddi_idevice_cookie(9S)**
+**ddi_iblock_cookie(9S)**, **ddi_intr_hilevel(9F)**, and is called out here to
+make clear these are obsolete entry points, not sources of inspiration.
+
+[#struct-intrspec]
+==== `struct intrspec`
+
+An interrupt specifier, an opaque `ddi_intrspec_t` is used for what public and
+semi-public interfaces still exist.
+
+There are also bus-specific `intrspec` structures on SPARC, `sbbc_intrspec`
+(serengeti boot bus controller, used on the Fire 15K family).  and
+`fhcintrspec` (firehose controller, used on Enterprise xx00).  Neither is
+referenced, but there is the suggestion that bus-specific structures could be
+used in place of this structure in the framework.
+
+`uint_t intrspec_pri`:: The interrupt priority, equivalent to `ih_pri` in DDI2.
+`uint_t intrspec_vec`:: The interrupt vector, equivalent to `ih_vector` in DDI2.
+`uint_t (*intrspec_func())`::
+  The interrupt handler, if `0` the interrupt is unconfigured, if `1` (**XXX I
+  think this is about fasttraps or "fast interrupts" but the comment stops short**)
+
+==== `ddi_iblock_cookie_t`
+
+An _interrupt block cookie_.  This is the virtual interrupt priority as would
+used when initializing locks.
+
+==== `ddi_idevice_cookie_t`
+
+Interrupt priority and vector information for a device.  See
+**ddi_idevice_cookie(9S)**.  We do not know what the use for this was.
+
+[#bus-get-intrspec]
+==== `ddi_intrspec_t .bus_get_intrspec(dev_info_t *dip, dev_into_t *rdip, uint_t inumber)`
+
+Return the interrupt specifier for `rdip`s `inumber`th interrupt.
+
+Constructed by `make_ddi_ppd()` and stored in the _parent private data_ (ppd,
+`struct ddi_parent_private_data`) of `rdip`.  This is hypothesized to be the
+mechanism by which the bus-specific `intrspec`s come into use.
+
+Bus-specific versions of the parent private data may exist, such as that
+created by `pci_common_set_parent_private_data()`.  Bus-specific accessors of
+this information may exist such as `pci_intx_get_ispec()`.
+
+[#bus-add-intrspec]
+==== `int (*bus_add_intrspec)(dev_info_t *dip, dev_info_t *rdip, ddi_intrspec_t intrspec, ddi_iblock_cookie_t *ibcp, ddi_idevice_cookie_t *idcp, uint_t (*int_handler)(caddr_t intr_handler_arg), caddr_t intr_handler_arg, int kind)`
+
+Set `int_handler` to handle the interrupt `intrspec` and enable it.  This was
+the implementation of **ddi_add_intr(9F)**
+
+[#bus-remove-intrspec]
+==== `void (*bus_remove_intrspec)(dev_info_t *dip, dev_info_t *rdip, ddi_intrspec_t intrspec, ddi_iblock_cookie_t iblock_cookie)`
+
+Cease handling the interrupt of `rdip` represented by `intrspec`.  This was the
+implementation of **ddi_remove_intr(9F)**.
+
+[#bus-intr-ctl]
+==== `int (*bus_intr_ctl)(dev_info_t *dip, dev_info_t *rdip, ddi_intr_ctlop_t ctlop, void *arg, void *result)`
+
+This was part of an initial operation-based interface, dispatched on
+`ddi_intr_ctlop_t ctlop`.  Unfortunately, the removal of this interface also
+removed the names of these operations.  It is hypothesized that these provided
+the initial mechanism to support "unnatural" interrupts on SPARC.  That is,
+interrupts that deviate from the device tree hierarchy.
+
+NOTE: It is very likely that the bugs related to **"#interrupt-cells"** were
+either introduced here, or this code handled this correctly and then DDI2 once
+again made the vector a single `uint32_t`.
+
+=== The Second Framework (henceforth DDI2)
+
+Appeared in the <<psarc-ddi2, early 2000's as part of adding support for
+Message Signalled Interrupts (MSI/MSI-X)>>.  Adding both the notion of
+different <<interrupt-types, types>> of interrupt, and facilities for the
+increased management needs (capability, resource, priority management).  The
+resource management facilities were -- we think -- overtaken by the
+<<resource-manager, Interrupt Resource Manager>>.
+
+- Client drivers have an <<interrupt-handle, _interrupt handle_>>
+`ddi_intr_handle_t` which is entirely opaque (the framework has the concrete
+`ddi_intr_handle_impl_t`), and make requests based on this handle.
+
+- Nexus drivers implement the <<bus-intr-op, `.bus_intr_op()`>> entry point,
+which dispatches based on its <<interrupt-operations, `ddi_intr_op_t
+intr_op`>> argument.
+
+A client driver makes requests via indirectly `i_ddi_intr_ops()` with its own
+dip as both `pdip` and `rdip`.  These requests recurse up the device tree
+allowing the system to program intervening devices or coordinate on the
+availability of resources.  The precise manner of this is system specific and
+described <<platform-implementations, elsewhere>>.
+
+Client drivers were not converted to the DDI2 interfaces (and many remain
+unconverted 20 years later).  Nexus drivers were.
+
+[#bus-intr-op]
+==== `.bus_intr_op(dev_info_t *dip, dev_info_t *rdip, ddi_intr_op_t intr_op, ddi_intr_handle_impl_t *hdlp, void *result)`
+
+`dev_info_t *dip`::
+  Usually called `pdip` in implementations, the dip of us, the bus.
+  Logically `pdip` a parent (actually ancestor) dip of the child,
+  unfortunately this is not truly an ancestor in the device tree, but only the
+  interrupt hierarchy.
+
+`dev_info_t *rdip`::
+  The dip of the leaf device, the one that ultimately generates the
+  interrupts we are managing.  It's been suggested at times that the `r`
+  indicates "responsible", "requesting", or "resource".  It is possible for
+  `dip` and `rdip` to be the same, in cases of bridges with their own
+  interrupts.  There is not necessary a familial relationship between `dip` and
+  `rdip` in the device tree, only the interrupt tree.  Parent data associated
+  with `rdip` cannot be assumed to be in any specific format, and properties
+  must be interpreted in the correct domain.
+
+`ddi_intr_op_t intr_op`::
+  See <<interrupt-operations>>
+
+`ddi_intr_handle_impl_t *hdlp`::
+  The interrupt handle provided by the driver. See the description of <<interrupt-handle, interrupt handles>>.
+  This may have been previously allocated via <<ddi-introp-alloc,
+  `DDI_INTROP_ALLOC`>> but may not, depending on the operation.  There may be
+  inconsistencies between the way a nexus would initialize a handle of its
+  own, and the handle that way reach it from child nexuses.  These are bugs.
+
+`void *result`::
+  An arbitrary extra return value, of arbitrary meaning to the
+  operations. Sometimes used internally to pass information across levels of
+  the interrupt hierarchy.  We attempt to describe its use per-operation.
+
+[#interrupt-operations]
+==== Interrupt Operations (`ddi_intr_op_t`)
+
+This describes, as best as can be determined, the meaning of the DDI2
+interrupt operations. In places where there actual implementation is
+known to contradict this meaning – or at least appear to – we note it
+here as well.
+
+[#ddi-introp-supported-types]
+===== `DDI_INTROP_SUPPORTED_TYPES`
+
+- type of `result`: `int *`
+- initial state of `result`: undefined NOTE: aarch64 potentially proposes to
+  define it
+- final state of `result`: a bitmask of <<interrupt-types, interrupt types>>
+
+This is the implementation of **ddi_intr_get_supported_types(9F)**, the value
+of `result` if `DDI_SUCCESS` is returned.  Otherwise the framework invokes
+this itself prior to <<ddi-introp-nintrs, `DDI_INTROP_NINTRS`>>,
+<<ddi-introp-navail, `DDI_INTROP_NAVAIL`>>, <<ddi-introp-alloc,
+`DDI_INTROP_ALLOC`>> to check whether the type requested is supported.
+
+WARNING: Via the implementation of `i_ddi_intr_get_supported_types()`, which
+appears to be used as some sort of shortcut, this may be called with a
+fictitious `hdlp` which has not been fully initialized, and contains no
+`ih_private`.
+
+The return value of this is -- implicitly -- expected to be constant for the
+lifetime of `rdip`.
+
+[#ddi-introp-nintrs]
+===== `DDI_INTROP_NINTRS`
+- type of `result`: `int *`
+- initial content of `result`: undefined
+- final content of `result`: the total number of interrupts supported by `rdip`
+
+This is the implementation of **ddi_intr_get_nintrs(9F)** and returns the number
+of interrupts of the given type supported by a given device.
+
+`ih_type` is guaranteed to be supported by `rdip` as claimed by <<ddi-introp-supported-types, `DDI_INTROP_SUPPORTED_TYPES`>>
+
+The return value of this is -- implicitly -- expected to be constant for the
+lifetime of `rdip`.
+
+NOTE: it is incorrect -- but not asserted -- to return `DDI_SUCCESS` but store
+`0` in `result`.
+
+WARNING: this is different from <<ddi-introp-navail, `DDI_INTROP_NAVAIL`>>
+although only for MSI/X.  Even then we can't find an implementation that acts
+differently.
+
+[#ddi-introp-alloc]
+===== `DDI_INTROP_ALLOC`
+- type of `result`: `int *`
+- initial content of `result`: undefined
+- final content of `result`: the number of interrupts actually allocated
+  (v. that requested)
+
+Allocate an interrupt handle `hdlp`, based on `ih_inum` and `rdip`. The
+specifics of what this entails are interrupt type specific. MSI and MSIX
+vectors may actually be allocated and assigned here by programming the
+interrupt controller (PCI on Intel).
+
+`ih_scratch1` is the offset into the requested range of interrupts.
+`ih_scratch2` is used for the flags described by **ddi_intr_alloc(9F)**
+
+The framework guarantees that `ih_type` is valid per
+<<ddi-introp-supported-types, `DDI_INTROP_SUPPORTED_TYPES`>> and that
+`ih_inum` + `ih_scratch1` is valid per <<ddi-introp-nintrs,
+`DDI_INTROP_NINTRS`>>.
+
+WARNING: The `hdlp` used here is temporary with only the `ih_type`, `ih_inum`
+and `ih_dip`, `ih_scratch1` and `ih_scratch2` fields valid.  The nexus may
+modify `hdlp` but it does not survive.
+
+[#ddi-introp-getpri]
+===== `DDI_INTROP_GETPRI`
+- type of `result`: `uint_t *`
+- initial content of `result`: undefined
+- final content of `result`: the interrupt priority level
+
+Return the interrupt priority level of the interrupt described by `hdlp`.
+`ih_pri` may be invalid -- 0 -- and need to be established by the
+implementation, which should also set `ih_pri`.  The framework may or may not
+call this while `ih_pri` is already non-0.
+
+WARNING: `ih_dip`, `ih_type`, `ih_inum` and fields set by <<ddi-introp-alloc,
+`DDI_INTROP_ALLOC`>> are valid, others are not (this is used in the
+**ddi_intr_alloc(9F)** path, on partially constructed handles).
+
+[#ddi-introp-setpri]
+===== `DDI_INTROP_SETPRI`
+- type of `result`:  `uint_t *`
+- initial content of `result`: the desired priority level
+- final content of `result`: the actual priority level set
+
+Set the interrupt priority level of the interrupt associated with `hdlp`.
+`hdlp` can be relied upon to be fully initialized.
+
+[#ddi-introp-addisr]
+===== `DDI_INTROP_ADDISR`
+- type of `result`: void
+
+Add a handler for the interrupt described by `hdlp`. The specifics of what
+happens here is implementation specific. It might be as much as programming
+the interrupt controller, or as little as nothing at all.  This is the
+implementation of **ddi_intr_add_handler(9F)**.  This will not be invoked
+again for an interrupt for which it has already succeeded.
+
+[#ddi-introp-dupvec]
+===== `DDI_INTROP_DUPVEC`
+- type of `result`: void
+
+Duplicate the interrupt handler. This is implemented only by the PCIe nexus on
+SPARC. This is the implementation of *ddi_intr_dup_handler(9f)*, which is
+only used by the QLogic fibre-channel driver *qlc(4D)*.
+
+`hdlp` can be assumed to be fully valid
+`ih_scratch1`: contains the interrupt vector into which to duplicate `hdlp`.
+
+NOTE: Absent a compelling reason to implement this (and the entire feature
+behind it), just return `DDI_FAILURE`.
+
+[#ddi-introp-enable]
+===== `DDI_INTROP_ENABLE`
+- type of `result`: void
+
+Enable the interrupt described by `hdlp`. This is implementation
+dependent and might do as little as nothing (the SPARC root nexus), or some
+book-keeping (SPARC PCIe), to as much as adding the ISR and
+programming the interrupt-controller (the i86 root nexus, i86 PCI).
+
+`hdlp` can be assumed to be valid, and that <<ddi-introp-addisr,
+`DDI_INTROP_ADDISR`>> has been succeeded at least once.
+
+if `ih_cap` includes `DDI_INTR_FLAG_BLOCK` this operation is not used and
+<<ddi-introp-blockenable, `DDI_INTROP_BLOCKENABLE`>> is.
+
+The DDI1 **ddi_add_intr(9F)** will reach here.
+
+[#ddi-introp-blockenable]
+===== `DDI_INTROP_BLOCKENABLE`::
+- type of `result`: void
+
+Enable a block of interrupts, the implementation of
+**ddi_intr_block_enable(9F)**.
+
+`hdlp` is the first of the block allocated via the <<ddi-introp-alloc,
+`DDI_INTROP_ALLOC`>> path.
+`ih_scratch1` is the number of interrupts in the block,
+`ih_scratch2` is pointer to the array of handles comprising the block.
+
+This is only used for interrupts with the `DDI_INTR_FLAG_BLOCK`
+<<interrupt-capabilities, capability>>, where it is used in place of
+<<ddi-introp-enable, `DDI_INTROP_ENABLE`>>.
+
+WARNING: The implementation of this entry point _may itself use_
+<<ddi-introp-enable, `DDI_INTROP_ENABLE`>>.
+
+[#ddi-introp-blockdisable]
+===== `DDI_INTROP_BLOCKDISABLE`
+- type of `result`: `void`
+
+Disable a block of interrupts, the implementation of
+**ddi_intr_block_disable(9F)**
+
+`hdlp` is the first of the block from the <<ddi-introp-alloc,
+`DDI_INTROP_ALLOC`>> operation, `ih_scratch1` is the number of interrupts in
+the block, `ih_scratch2` is a pointer to an array of handles comprising the
+block.
+
+Will not be called on interrupts that have not previously been enabled.
+
+Only used for interrupts with the `DDI_INTR_FLAG_BLOCK`
+<<interrupt-capabilities, interrupt capability], where it
+should be used in place of <<ddi-introp-disable, `DDI_INTROP_DISABLE`>>
+
+WARNING: The implementation of this entry _may itself use_
+<<ddi-introp-enable, `DDI_INTROP_ENABLE`>>
+
+[#ddi-introp-disable]
+===== `DDI_INTROP_DISABLE`
+- type of `result`: `void`
+
+Disable the interrupt described by `hdlp`.  Might update the `ispec` and
+de-program the interrupt controller for this interrupt (i86 rootnex, PCI),
+mask the interrupt (SPARC PCIe), or do nothing at all (SPARC rootnex).
+
+`hdlp` is fully valid.
+Will not be invoked for interrupts that have not previously been enabled.
+
+[#ddi-introp-remisr]
+===== `DDI_INTROP_REMISR`
+- type of `result`: `void`:
+
+The implementation of **ddi_intr_add_handler(9F)**.  Remove the handler
+associated with `hdlp`.  Might do as little as setting the function in the
+`intrspec` to NULL not affecting processing at all (i86 rootnex), doing some
+additional bookkeeping too (i86 PCI), actually removing and de-programming the
+interrupt (SPARC rootnex), and removing and de-programming the interrupt only
+_harder_ (SPARC PCIe).
+
+`hdlp` is fully valid.
+
+Will not be invoked unless a previous <<ddi-introp-addisr,
+`DDI_INTROP_ADDISR`>> has succeeded, and a previous call to this interface has
+_not_ succeeded.
+
+[#ddi-introp-free]
+===== `DDI_INTROP_FREE`
+- type of `result`: `void`
+
+Deallocate an interrupt handle `hdlp`.  The specifics of this are
+implementation-specific.  This may de-program the vector (MSI i86 rootnex on
+apix, i86 MSI PCI, i86 FIXED on apix) or do nothing (SPARC rootnex, PCIe).  If
+this does nothing, code comments suggest that the actual freeing is done in
+<<ddi-introp-disable, `DDI_INTROP_DISABLE`>> or *ddi_intr_disable(9F)*, and
+that this is the "old" style.
+
+Will only be invoked for which <<ddi-introp-alloc, `DDI_INTROP_ALLOC`>> has
+succeeded, and have either never had an handler attached with
+<<ddi-introp-addisr, `DDI_INTROP_ADDISR`>>, or has had the handler removed
+by <<ddi-introp-remisr, `DDI_INTROP_REMISR`>>
+
+WARNING: `ih_scratch1` always has the value 1, even for blocks of
+interrupts. A bug?
+
+[#ddi-introp-getcap]
+===== `DDI_INTROP_GETCAP`
+- type of `result`: `int *`
+- initial content of `result`: 0
+- final content of `result`: A mask of <<interrupt-capabilities, interrupt capabilities>>
+
+Return in `result` the <<interrupt-capabilities, capabilities>> of the
+interrupt described by `hdlp`.  the implementation of
+**ddi_intr_get_cap(9F)**.  `hdlp` may either be a temporary handle or a real
+handle, but will always have had a successful <<ddi-introp-alloc,
+`DDI_INTROP_ALLOC`>> and <<ddi-introp-getpri, `DDI_INTROP_GETPRI`>> performed
+on it.
+
+The i86pc rootnex and pci ask the system, the SPARC rootnex says all
+interrupts are level-triggered, SPARC PCIe asks the system.
+
+WARNING: `ih_cap` is not necessarily valid, and should not be used unless this
+implementation has initialized it.
+
+[#ddi-introp-setcap]
+===== `DDI_INTROP_SETCAP`
+- type of `result`: `int *`
+- initial content of `result`: the desired mask of <<interrupt-capabilities, interrupt capabilities>>
+- final content of `result`: ignored
+
+Set the capabilities specified, the implementation of
+**ddi_intr_set_cap(9F)**.
+
+`hdlp` may either be a temporary handle or a
+real handle, but will always have had a successful <<ddi-introp-alloc,
+`DDI_INTROP_ALLOC`>> and <<ddi-introp-getpri, `DDI_INTROP_GETPRI`>> performed
+on it.
+
+WARNING: The desired capabilities may include any capabilities, included those
+indicated to be read-only.
+
+WARNING: This is rarely implemented, and where it is implemented only the
+edge/level capability are writable.  The i86 rootnex implements this.
+
+[#ddi-introp-setmask]
+===== `DDI_INTROP_SETMASK`
+- type of `result`: `void`
+
+Set masking of the interrupt described by `hdlp`.  This is the implementation
+of **ddi_intr_set_mask(9F)**.  For MSI/X this updates the mask bits in the
+hardware.  For other interrupts either ask the system (i86), or fail (SPARC).
+
+`hdlp` refers to a valid enabled interrupt which has the
+`DDI_INTR_FLAG_MASKABLE` <<interrupt-capabilities, capability>>
+
+[#ddi-introp-clrmask]
+===== `DDI_INTROP_CLRMASK`
+- type of result `void`
+
+Clear masking of the interrupt described by `hdlp`.  This is the
+implementation of **ddi_intr_clr_mask(9F)**.  For MSI/X this updates the mask
+bits in the hardware.  For other interrupts either ask the system (i86), or
+fail (SPARC).
+
+`hdlp` refers to a valid enabled interrupt which has the
+`DDI_INTR_FLAG_MASKABLE` <<interrupt-capabilities, capability>>
+
+[#ddi-introp-getpending]
+===== `DDI_INTROP_GETPENDING`
+- type of `result`: `int *`
+- initial content of `result`: undefined
+` final content of `result` on defined: non-0 if an interrupt is pending
+
+Determine if an interrupt described by `hdlp` is pending.  For PCI MSI/X
+fetches the pending bit from the hardware, for other interrupts is either
+not supported or, on i86, asks the system.
+
+WARNING: In practice, nobody consumes this interface.  The states at which it
+may be called is unknown
+
+[#ddi-introp-navail]
+===== `DDI_INTROP_NAVAIL`
+- type of `result`: `uint_t *`
+- initial content of `result`: undefined
+- final content of `result`: the number of interrupts available for allocation
+  for `rdip`
+
+Return in `*result` the number of interrupts _available_ to `rdip`.  This is
+the implementation of **ddi_intr_get_navail(9F)**.
+
+`hdlp` may be real of temporary, only the `ih_type` and `ih_dip` can be
+relied on.
+
+WARNING: this is different from <<ddi-introp-navail, `DDI_INTROP_NINTRS`> in
+the MSI/X case, although we can't find an implementation that acts
+differently.
+
+[#ddi-introp-getpool]
+===== `DDI_INTROP_GETPOOL`
+- type of `result`: `ddi_irm_pool_t **`
+- initial content of `result`: undefined
+- final content of `result`: a pointer to the <<irm-pool, IRM pool>>
+  governing this interrupt
+
+Return the resource management pool associated with (the `ih_dip` of) `hdlp`.
+This is part of the Interrupt Resource Management interfaces used
+exclusively by the x86 and SPARC PCI drivers.  Return `NULL` and
+`DDI_ENOTSUP` if no such mapping exists.  This is the implementation of
+`i_ddi_intr_get_pool()`.
+
+`hdlp` may be real of temporary, only `ih_dip` and `ih_type` can be relied
+upon.
+
+[#ddi-introp-gettarget]
+===== `DDI_INTROP_GETTARGET`
+- type of `result`: `processorid_t *`
+- initial content of `result`: undefined
+- final content of `result`: the CPU to which this interrupt is directed
+
+Get the target CPU of the interrupt described by `hdlp`.  These are the
+interrupt affinity interfaces, and are only implemented on busses for which
+this is worthwhile (PCI and the bus on which sun4v native network interfaces
+live).
+
+`hdlp` can be fully trusted, but see below.
+
+WARNING: This is the implementation of `get_intr_affinity()` but nobody uses that
+
+[#ddi-introp-settarget]
+===== `DDI_INTROP_SETTARGET`
+- type of `result`: `processorid_t *`
+- initial content of `result`: the target CPU identifier
+- finial content of `result`: The actual new target CPU
+
+`hdlp` can be fully trusted, and must be enabled.
+
+[#interrupt-types]
+==== Interrupt Types
+
+`DDI_INTR_TYPE_FIXED`:: Traditional interrupts (including PCIe INTx)
+`DDI_INTR_TYPE_MSI`:: Message Signalled Interrupts
+`DDI_INTR_TYPE_MSIX`:: Extended Message Signalled Interrupts
+
+These have values such that they may be used in a bitmask to indicate which
+types a device supports (`DDI_INTROP_SUPPORTED_TYPES`).
+
+[#interrupt-handle]
+==== Interrupt Handle (`ddi_intr_handle_impl_t`)
+
+Client drivers refer to interrupts (or blocks of them) via an opaque
+`ddi_intr_handle_t` which is actually a `ddi_intr_handle_impl_t` in the
+implementation.
+
+`dev_info_t *ih_dip`::
+  dip of the device associated with this handle.  The `rdip` of the interrupt
+  operation (it is assumed, but never asserted).
+
+`uint16_t ih_type`::
+  The <<interrupt-types, interrupt type>>.
+  NOTE: because these are arranged so as to be usable as a bitmask, the maximum type number is 16 here not `USHORT_MAX`.
+
+`ushort_t ih_inum`::
+  The _interrupt number_.  This is the `inum` in the old interfaces.  For
+  fixed interrupts this is a 0-based index into the interrupts supported by
+  `ih_dip` (in device tree terms, this is the index into the *"interrupts"*
+  property).  For MSI this is the "relative interrupt number", across the
+  whole range of MSI supported by the device.
+
+`uint32_t ih_vector`::
+  The interrupt vector.  This is initially derived from `ih_inum` but updated as
+  interrupt requests move through the device tree to ultimately contain the
+  vector from the point of view of the main interrupt controller.  On SPARC
+  and AArch64 this is re-set between requests, so that interrupts maybe
+  re-mapped.  Intel need not do this because the PSM sets <<interrupt-flags,
+  flags>> indicating the domain of `ih_vector`.  AArch64 does not use this
+  field, because a single `uint32_t` cannot represent an interrupt, and
+  because determining which field of an interrupt description is the vector is
+  bus-specific.
+
+`uint16_t ih_ver`::
+  Interrupt handle version.  `DDI_INTR_VERSION`.  NOTE: this is the 5th
+  element in the structure.  Its offset must be maintained for the version
+  checking it allows for to remain possible.  This is also used by the
+  <<psm-intr-op-apic-type, `PSM_INTR_OP_APIC_TYPE`>> operation in Intel PSMs
+  to return the APIC version.
+
+`uint_t ih_state`::
+  The <<interrupt-state, interrupt state>>
+
+`uint_t ih_cap`::
+  The <<interrupt-capabilities, interrupt capabilities>> of this interrupt.  Initialized on
+  interrupt allocation, and also during **ddi_intr_get_cap(9F)*.  These seem
+  to be the maximal capabilities of this interrupt on this device, and not
+  those potentially affected by **ddi_intr_set_cap(9F)**.
+
+`uint_t ih_pri`::
+  The interrupt virtual priority.  This has a bus-dependent meaning, and like
+  `ih_vector` maybe be updated during interrupt processing.  Unlike
+  `ih_vector` it is not re-set between requests.  This is described as being
+  in the range `DDI_INTR_PRI_MIN` and `DDI_INTR_PRI_MAX` for "most drivers".
+  May be used directly for lock initialization.
+
+`krwlock_t ih_rwlock`::
+  reader/writer lock protecting the members of this handle.
+
+`uint_t (*ih_cb_func)(caddr_t, caddr_t)`::
+  The interrupt handler.
+
+`void *ih_cb_arg1`::
+  The first argument to be passed to the interrupt handler.
+
+`void *ih_cb_arg2`::
+  The second argument to be passed to the interrupt handler.
+
+`uint_t ih_flags`::
+  Flags used in MSIX support, see the descriptions of <<interrupt-flags, interrupt flags>>
+
+`uint_t ih_dup_cnt`::
+  The number of duplicated MSI-X vectors.  Used to prevent vectors which have
+  been duplicated from having their handler removed.  It is not clear what
+  this is allowing for which <<ddi-intr-msix-dup, `DDI_INTR_MSIX_DUP`>> is
+  not, since all current checks are of non-0.
+
+`struct ddi_intr_handle_impl *ih_main`::
+  The handle from which this handle was duplicated.
+
+`void *ih_private`::
+  Private platform-specific data.  Allegedly but not actually unused on SPARC.
+  This is usually an `ihdl_plat_t` (<<intel-ihdl-plat, intel>>, <<aarch64-ihdl-plat,
+  aarch64>>), but is also used for other purposes on some platforms.
+  See the <<psm-intr-op-set-cpu, `PSM_INTR_OP_SET_CPU`>>,
+  <<psm-intr-op-get-intr, `PSM_INTR_OP_GET_INTR`>>,
+  <<psm-intr-op-grp-set-cpu, `PSM_INTR_OP_GRP_SET_CPU`>> and
+  <<psm-intr-op-apic-type, `PSM_INTR_OP_APIC_TYPE`>> <<psm-operations, PSM
+  operations>> on Intel.  SPARC only uses this field for soft interrupts.
+
+`uint_t ih_scratch1`::
+  Used to hold the number of interrupts in the interrupt array for
+  <<ddi-introp-blockenable, `DDI_INTROP_BLOCKENABLE`>>/`DDI_INTROP_BLOCKDISABLE`.  Used to hold the number
+  of interrupts actually allocated for <<ddi-introp-alloc, `DDI_INTROP_ALLOC`>> to return in `*return`.
+
+`void *ih_scratch2`::
+  The array of interrupt handles for
+  <<ddi-introp-blockenable, `DDI_INTROP_BLOCKENABLE`>>/`DDI_INTROP_BLOCKDISABLE`, or the flags passed when
+  allocating MSI vectors.  "behaviour" information is stored here when for
+  <<ddi-introp-alloc, `DDI_INTROP_ALLOC`>> in the PCI implementation on Intel.
+
+`processorid_t ih_target`::
+  The processor the interrupt targets.  Only set or updated during
+  **ddi_intr_add_handler(9F)** and by `set_intr_affinity()`.
+
+[#interrupt-state]
+==== Interrupt State
+
+`DDI_IHDL_STATE_ALLOC`:: Handle allocated, **ddi_intr_alloc(9F)** called.
+`DDI_IHDL_STATE_ADDED`:: Interrupt handler added, **ddi_intr_add_handler(9F)** called.
+`DDI_IHDL_STATE_ENABLE`:: Enabled. **ddi_intr_enable(9F)** called.
+
+image::ihdl-state.svg[]
+
+WARNING: There is no path from the allocated to the unallocated state, maybe that's a bug.
+
+[#interrupt-flags]
+==== Interrupt Flags
+
+NOTE: These are values used with the `ih_flags` member of <<interrupt-handle,
+the interrupt handle>>, not those named `DDI_INTR_FLAG_` which are
+<<interrupt-capabilities, interrupt capabilities>>
+
+[#ddi-intr-msix-dup]
+`DDI_INTR_MSIX_DUP`::
+   This `hdlp` is one from **ddi_intr_dup_handler(9F)**.  This allows
+   duplicate handles to be treated specially in the framework to preserve them
+   as duplicates, and the system to assert their properties match those of
+   their `ih_main`.
+
+[#psmgi-intrby-vec]
+`PSMGI_INTRBY_VEC`::
+   Used by PSMs on Intel platforms.  `ih_vector` contains a vector, and
+   interrupt processing should translate it to an IRQ as necessary.
+
+[#psmgi-intrby-irq]
+`PSMGI_INTRBY_IRQ`::
+   Used by PSMs on Intel platforms.  `ih_vector` contains an IRQ and
+   translation is not necessary.
+
+[#psmgi-intrby-default]
+`PSMGI_INTRBY_DEFAULT`::
+   Used by PSMs on Intel platforms.  `ih_vector` contains a PSM-specific
+   default kind of value, and PSMs should do with it what is necessary.
+
+[#interrupt-capabilities]
+==== Interrupt Capabilities
+
+`DDI_INTR_FLAG_LEVEL`:: Device/Host support level trigger (usable with **ddi_intr_set_cap(9F)**
+`DDI_INTR_FLAG_EDGE`:: Device/Host support Edge trigger (usable with **ddi_intr_set_cap(9F)**
+`DDI_INTR_FLAG_MASKABLE`:: May be masked at (or near) the source
+`DDI_INTR_FLAG_PENDING`:: Supports checking for pending interrupts
+`DDI_INTR_FLAG_BLOCK`:: Requires block enable, interrupts not individually maskable.
+`DDI_INTR_FLAG_MSI64`:: Supports 64bit MSI mailboxes.
+
+==== Compatibility with DDI1
+
+The <<struct-intrspec, `struct intrspec`>> array in the parent private data is still created, and
+nexus drivers attempt to keep them up to date, although the manner and
+direction in which this happens is haphazard in practice.
+
+The only uses of this information I have found so far are either internal to
+the nexuses (as part of attempting to maintain this compatibility), or
+**prtconf(8)** which knows how to print this information for various busses
+(further reinforcing the theory that bus-specific <<struct-intrspec, `struct
+intrspec`>> took part in the framework).  It is not clear if there's value in
+the information here, it appears to exist for a minority of busses, and like
+all DDI1 interfaces only covers fixed interrupts.
+
+The general access for this information are `sparc_pd_getintr()` and
+`sparc_pd_getnintr()`.  These are only used by device reporting on Intel and
+AArch64.
+
+Access via the private pointers is actually more common. The majority of uses
+are nexuses maintaining this information, and perhaps later handing it out
+(the `pci_intx_get_ispec()` does this, for example).
+
+<<struct-intrspec, `struct intrspec`>> itself is used in the implementation of
+nexuses across 2 of 3 platforms, and all 3 Intel PSMs.  To the extent the
+inability to fully represent an interrupt is a problem, further solutions must
+be found in common code.
+
+[#resource-manager]
+==== Interrupt Resource Manager
+
+The <<psarc-irm, _Interrupt Resource Manager_ (IRM)>> provides a framework
+whereby drivers have a variable number of interrupts available to them over
+time, according to overall resource demand.  Interrupts are allocated in a
+balanced manner, and rebalanced as devices come and go in the system.
+
+Drivers request an initial number of interrupts via **ddi_intr_alloc(9F)**.
+
+Instances of device drivers which do not take part in resource management
+receive a fixed and immutable number of interrupts over their lifetime.  They
+still receive a limited number of vectors, although this number is now managed
+per-nexus and tuned by the IRM, and so a more appropriate number than
+previously (where it was 2).
+
+Drivers which take part in resource management register callback functions
+using **ddi_cb_register(9F)** which allow them to respond to interrupts being
+made available or unavailable, and may request a different number of
+interrupts via **ddi_intr_set_nreq(9F)**.
+
+Each supply of interrupts is described via a <<irm-pool, `ddi_irm_pool_t`>>,
+which is shared by multiple devices.  These are managed by the MSI controllers
+(the interrupt controller hardware in general, on Intel.  The PCIe roots on
+SPARC).
+
+For each device driver that interacts with the IRM, a <<irm-request,
+`ddi_irm_req_t`>> is maintained by the framework to track the number of
+vectors it has requested, and received.
+
+When interrupts operations are performed on a device, nexus drivers maybe be
+asked to map device instances to interrupt pools.  This is the
+`DDI_INTROP_GETPOOL` operation.
+
+[#irm-pool]
+===== IRM Pool (`ddi_irm_pool_t`)
+
+WARNING: The pools are suprisingly not of fixed size.  The APIX PSM on intel
+resizes its pool during normal interrupt operations.
+
+Created by <<ndi-irm-create, `ndi_irm_create()`>>
+
+`int ipool_flags`::
+  <<irm-pool-flags, flags>> associated with this pool.
+
+`int ipool_types`::
+  The <<interrupt-types, types>> of interrupt managed by this pool.
+
+`int ipool_policy`::
+  The <<irm-pool-policy, policy>> associated with this pool.
+
+`uint_t ipool_totsz`::
+  The total size of this pool.  May alter during the lifetime of the pool.
+
+`uint_t ipool_defsz`::
+  The header describes this as the default allocation _size_, the code in
+  places as the default allocation _limit_.
+
+`uint_t ipool_minno`::
+  The minimum number consumed.  We think this is a count of interrupts used
+  from this pool, but it is not exactly what this means. (**XXX**)
+
+`uint_t ipool_reqno`:: The total number of interrupts requested of this pool.
+
+`uint_t ipool_resno`:: The total number of interrupts reserved in this pool.
+
+`kmutex_t ipool_lock`:: Protect the contents of this `ddi_irm_pool_t`.
+
+`kmutex_t ipool_navail_lock`::
+  Protect the `ireq_navail` of <<irm-request, requests>> associated with this
+  pool, during rebalancing of the pool.
+
+`kcondvar_t ipool_cv`::
+  Threads which are `DDI_IRM_FLAG_WAITERS` are sleeping on this condition
+  variable.
+
+`kthread_t *ipool_thread`:: The long-lived balance thread for this pool
+
+`dev_info_t *ipool_owner`:: The device which created and owns this pool
+
+`list_t ipool_req_list`:: All <<irm-request, requests>> in this pool
+
+`list_t ipool_scratch_list`::
+  <<irm-request, Requests>> being reduced by balancing operations
+
+`list_node_t ipool_link`::  Link in the global list of all IRM pools.
+
+[#irm-request]
+===== IRM Request (`ddi_irm_req_t`)
+
+`int ireq_flags`:: Request <<irm-pool-flags, flags>>.
+`int ireq_type`:: <<interrupt-types, Type>> of interrupt in this request.
+`uint_t ireq_nreq`:: Number of interrupts requested
+`uint_t ireq_navail`:: Number of interrupts available
+
+`uint_t ireq_scratch`::
+  A scratch value in the structure used to communicate the prior `ireq_navail`
+  during rebalancing
+
+`dev_info_t *ireq_dip`::  The device requesting these interrupts
+
+`ddi_irm_pool_t *ireq_pool_p`::
+  The <<irm-pool, pool>> to which this request is made
+
+`list_node_t ireq_link`:: The link in the list of requests against this pool (`ipool_req_list`)
+
+`list_node_t ireq_scratch_link`::
+  The link through the scratch list of requests in this pool (`ipool_scratch_list`)
+
+[#irm-pool-flags]
+===== IRM Pool Flags
+
+A set of flags, arranged such as to be usable in  a bitmask.
+NOTE: These flags though in one namespace, cover both <<irm-pool, pool>> and
+<<irm-request, request>> flags.
+
+`DDI_IRM_FLAG_ACTIVE`:: Pool is active (pool flag)
+`DDI_IRM_FLAG_QUEUED`:: Pool is queued for (re-)balancing (pool flag)
+`DDI_IRM_FLAG_WAITERS`:: Pool has threads waiting for (re-)balancing (pool flag)
+`DDI_IRM_FLAG_EXIT`:: Cause (re-)balance thread exit (pool flag?)
+`DDI_IRM_FLAG_NEW`:: Request is new (request flag)
+`DDI_IRM_FLAG_CALLBACK`:: Request has an associated callback
+
+[#irm-pool-policy]
+===== IRM Pool Policies
+
+WARNING: I can't find real description of what these mean in practice.  In the
+implementation the "even" possible is implemented in terms of !large.
+
+`DDI_IRM_POLICY_LARGE`:: This is the default, interrupts balanced based on `ireq_navail`
+`DDI_IRM_POLICY_EVEN`:: Interrupts are balanced based on `ipool_defsz`
+
+[#irm-params]
+===== IRM Pool Paramaters
+
+Parameters used when creating an IRM pool.
+
+`int iparams_types`::
+  <<interrupt-types,Types>> of interrupts that will be in this pool.  Note
+  that there may be multiple to the extent that makes sense (such as both MSI
+  and MSIX).
+
+`int iparams_total`::
+  The total number of interrupts in this pool
+
+WARNING: the <<psarc-irm, PSARC case>> mentions an additional field specifying
+the default allocation limit.  This is not in the code.
+
+WARNING: this structure may expand, and consumers are advised to fully 0 it. That doesn't actually solve the ABI problem though.
+
+[#ndi-irm-create]
+===== `ndi_irm_create(dev_info_t *dip, ddi_irm_params_t *paramsp, ddi_irm_pool_t **pool_retp)`
+
+Create an IRM pool for `dip` with the <<irm-params, parameters>> `*paramsp`,
+and return it in `**pool_retp`.  This is the interface by which nexus drivers
+or interrupt controller drivers create an IRM pool to manage their interrupts.
+Returns `NDI_SUCCESS` on success, or `NDI_FAILURE` if invalid operations are
+specified.
+
+===== `ndi_irm_destroy(ddi_irm_pool_t *pool)`
+
+Destroy the IRM pool `pool`.  May not be called until the pool is fully unused
+(no device is consuming interrupts in this pool).  Returns `NDI_SUCCESS` on
+success, `NDI_FAILURE` if `pool` is invalid, or `NDI_BUSY` if the interrupt
+pool is still in use.
+
+[#platform-implementations]
+== Platform Implementations
+
+=== Intel
+
+Each interrupt domain speaks directly to the primary interrupt controller via
+a _Platform Support Module_ (PSM).  These exist per-style of interrupt
+controller:
+
+uppc:: The original uni-processor PC with an 8259 PIC
+pcplusmp:: The _Advanced Programmable Interrupt Controller_ (APIC)
+apix:: The X2 APIC
+
+The PSM provides a global operation vector `struct psm_ops *psmops` which each
+nexus driver representing an interrupt domain uses to program the interrupt
+controller.  Some (but not all) functions are also exposed via global symbols
+of their own.
+
+The control flow is that we move from the device to its interrupt domain and
+the <<bus-intr-op, `.bus_intr_op`>> in the nexus driver uses the PSM
+interfaces to establish interrupts.  There is no movement between interrupt
+domains (unless `pseudo_isa` is true, which it is not by default, in which
+case **isa(4D)** will defer to the root nexus).
+
+image:psm-intrs.svg[]
+
+NOTE: Control never moves between child interrupt domains and the root nexus,
+except in the nondefault `pseudo_isa == 0` case.
+
+[#psm-ops-vector]
+==== PSM operation vector
+
+NOTE: The PSM provides support for other platform-specific operations.  Only
+those potentially relevant to interrupts are described here.
+
+`int (*psm_probe)(void)`::
+  Called by `psm_install()` during boot to determine which PSM should be used,
+  analogous to **identify(9E)**.
+
+`void (*psm_softinit)(void)`::
+   Perform self-initialization of the PSM module, analogous to (half of) **attach(9E)**.
+
+`void (*psm_picinit)(void)`::
+   Perform initialization of the interrupt controller hardware, analogous to
+   (the other half of) **attach(9E)**
+
+`int (*psm_intr_enter)(int ipl, int *vectorp)`::
+  Begin handling an interrupt, prior to calling the interrupt handler.  Called
+  as `setlvl()` rather than via the vector.  Masks interrupts at or below
+  priority level `ipl`, and perform other tasks preparatory
+  to handling the interrupt described by `vectorp`.  Return the previous
+  interrupt priority level.
+
+`void (*psm_intr_exit)(int ipl, int irqno)`::
+  End interrupt handling, after calling the interrupt handler.  Called as
+  `setlvlx()` rather than via the vector.  Mask interrupts
+  at or below `ipl` (expected to be the level returned from `.psm_intr_enter`)
+  and perform other tasks necessary after finishing handling interrupts.
+
+`void (*psm_setspl)(int ipl)`::
+  Mask all interrupts at or below `ipl`
+
+`int (*psm_addspl)(int irqno, int ipl, int min_ipl, int max_ipl)`::
+  Configure interrupt hardware for `irqno` (actually a vector), masked at or
+  above `ipl`, unmasked below `ipl`.  This must handle shared vectors.
+  `min_ipl` is used only by the uppc PSM which asserts it is equal to `irqno`.
+  `max_ipl` seems entirely unused and its meaning is unclear.  Returns
+  `PSM_FAILURE` on error, `PSM_SUCCESS` otherwise
+
+`int (*psm_delspl)(int irqno, int ipl, int min_ipl, int max_ipl)`::
+  Deconfigure interrupt handware for `irqno` (actually a vector), disable it and
+  reset the priority.  Must account for interrupt sharing.  The `min_ipl` and
+  `max_ipl` parameters are used by the uppc PSM.  I'm having trouble
+  determining the effect they have there.  It is perhaps related to handling
+  sharing.
+
+`int (*psm_disable_intr)(processorid_t cpun)`::
+  **OPTIONAL** Try to evacuate all interrupts from core `cpun`, and make it
+  unavailable for interrupt processing.  Assign vectors to other cores, unless
+  called for Suspend/Resume.  This is the implementation of
+  `cpu_intr_disable()` and `cpu_disable_intr()`, one of which seems specific
+  to **cpr(4)** Suspend/Resume, the other to Dynamic Reconfiguration.
+
+`void (*psm_enable_intr)(processorid_t cpun)`::
+  **OPTIONAL** Allow the core `cpun` to once again take part in interrupt
+  processing
+
+`int (*psm_softlvl_to_irq)(int ipl)`::
+  **OPTIONAL** Never implemented or called.  Obsolete?
+
+`void (*psm_set_softintr)(int ipl)`::
+  **OPTIONAL** Never implemented or called.  Obsolete?
+
+`void (*psm_set_idlecpu)(processorid_t cpun)`::
+  **OPTIONAL**  Implementation of `set_idle_cpu()`, called when the core
+  `cpun` enters the idle loop.  I haven't found functional implementations of this.
+
+`void (*psm_unset_idlecpu)(processorid_t cpun)`::
+  **OPTIONAL** Implementation of `unset_idle_cpu()`, called when the core
+  `cpun` leaves the idle loop.  I haven't found functional implementations of this.
+
+`void (*psm_clkinit)(int hertz)`::
+  Configure the clock interrupt to fire at `hertz`.  If `hertz` is 0,
+  configure for one-shot.
+
+`int (*psm_get_clockirq)(int ipl)`::
+  Return the vector of the clock interrupt.
+
+`int (*psm_get_ipivect)(int ipl, int type)`::
+   Allocate a vector for inter-processor interrupts at priority `ipl`.
+
+`void (*psm_send_ipi)(processorid_t cpun, int ipl)`::
+   Send an IPI of priority `ipl` to `cpun`.
+
+`int (*psm_translate_irq)(dev_info_t *dip, int irqno)`::
+   Translate `irqno` into a vector.  If PCI actually do translation, if not,
+   set IRQ to ISA mode.  Returns `irqno` untranslated on failure.  NOTE: there
+   is also an irq tranlation implementation in the interrupt operations.
+
+`int (*psm_intr_ops)(dev_info_t *dip, ddi_intr_handle_impl_t *handle, psm_intr_op_t op, int *result)`::
+   This is spiritually very similar to the DDI2 interrupt entry point,
+   although with <<psm-operations, different operations>> (of different granularity).
+   `dip` is the child device whos interrupts we are operating
+   on, `handle` is the interrupt handle, the operation is dispatched on `op`,
+   and `*result` is available to return further result information.
+
+`int (*psm_get_pir_ipivect)(void)`::
+   Return the vector used for the _Posted Interrupt Request_ (PIR) IPI, used
+   for virtualization.
+
+`void (*psm_send_pir_ipi)(processorid_t cpu)`::
+   Send a PIR IPI to core `cpu`
+
+`void (*psm_cmci_setup)(processorid_t cpu, boolean_t enable)`::
+  Enable the _Corrected Machine Check Interrupt_ (CMCI) on `cpu` if `enable` is
+  true, disable it otherwise.
+
+[#psm-operations]
+==== PSM Interrupt Operations (`psm_intr_op_t`)
+
+[#psm-intr-op-alloc-vectors]
+`PSM_INTR_OP_ALLOC_VECTORS`::
+   Allocate interrupt vectors.  Return the number actually allocated in
+   `*result`.  `mach_intr_ops` does nothing but succeeds.  apic/apix actually
+   allocate vectors for `hdlp`.
+
+[#psm-intr-op-free-vectors]
+`PSM_INTR_OP_FREE_VECTORS`::
+   Free interrupt vectors.  `mach_intr_ops` does nothing, apic/x actually frees
+   the vectors (but apic does nothing for fixed interrupts, in lower code).
+
+[#psm-intr-op-navail-vectors]
+`PSM_INTR_OP_NAVAIL_VECTORS`::
+   Return the number of available vectors in *result.  1 for fixed, 0
+   otherwise in `mach_intr_ops`, apic/x returns the number of vectors availble
+   at the `ih_pri` priority.
+
+[#psm-intr-op-xlate-vector]
+`PSM_INTR_OP_XLATE_VECTOR`::
+  Translate the vector in `hdlp` into the global
+  vector for PSM, and return it in *result.  Calls into `.psm_translate_irq()`
+  and the op vector interface for fixed interrupts.  These both use an
+  `intrspec` among the `ihdl_private` data.
+
+[#psm-intr-op-get-pending]
+`PSM_INTR_OP_GET_PENDING`::
+  Get pending information.  Fail in `mach_intr_ops`,
+  lookup up from the hardware on apic/x.
+
+[#psm-intr-op-clear-mask]
+`PSM_INTR_OP_CLEAR_MASK`::
+  Clear the interrupt mask.  Fail in `mac_intr_ops`, work for fixed interrupts
+  in apic/x, but not msi/x
+
+[#psm-intr-op-set-mask]
+`PSM_INTR_OP_SET_MASK`::
+  Set the interrupt mask.  Fail in `mac_intr_ops`, work for fixed interrupts
+  in apic/x, but not msi/x
+
+[#psm-intr-op-get-cap]
+`PSM_INTR_OP_GET_CAP`::
+  Return capabilities of `dip` in `*result`.  0 from `mach_intr_ops`,
+  `PENDING` from apic/x (and `MASKABLE` in addition, for fixed interrupts).
+
+[#psm-intr-op-set-cap]
+`PSM_INTR_OP_SET_CAP`::
+  Set the capabilities of `dip`.  Fail in `mach_intr_ops`, and apic, and apix.
+
+[#psm-intr-op-set-pri]
+`PSM_INTR_OP_SET_PRI`::
+  Set the priority of the interrupt.  Succeeds doing nothing with fixed
+  interrupts, apic tears down and allocates new handles at the new priority.
+  apix doesn't seem to do anything.
+
+[#psm-intr-op-get-shared]
+`PSM_INTR_OP_GET_SHARED`::
+  Return non-0 in `*return` if the `ih_vector` is
+  shared with another interrupt.  Only applicable to fixed interrupts.  The
+  sharing count is tracked by the PSM implementations in their private
+  metadata.  Fails in `mach_intr_ops`.
+
+[#psm-intr-op-check-msi]
+`PSM_INTR_OP_CHECK_MSI`::
+  Return in `*result` whether `dip` supports MSI/X.  `*result` is a bitmask of
+  <<interrupt-types, interrupt types>>
+
+[#psm-intr-op-set-cpu]
+`PSM_INTR_OP_SET_CPU`::
+  Set the cpu to which the vector in `hdlp` should be
+  delivered. `hdlp` is specific to this command, and bears a target cpuid as
+  `ih_private`.  Fails in `mach_intr_ops`.
+
+[#psm-intr-op-get-intr]
+`PSM_INTR_OP_GET_INTR`::
+  Get information about the interrupt vector in `hdlp`.  `hdlp` is specific to
+  this command and carries an <<apic-get-intr, `apic_get_intr_t *`>> as its `ih_private`, into
+  which it returns.  Fails in `mach_intr_ops`.
+
+[#psm-intr-op-grp-set-cpu]
+`PSM_INTR_OP_GRP_SET_CPU`::
+  Set the cpu to which all vectors on `dip` should be delivered.  `hdlp` is
+  specific to this command, and bears a target cpuid as `ih_private`.  Fails
+  in `mach_intr_ops`.  This happens atomicly and apparently was necessary to
+  keep interrupt bookkeeping information correct, as the hardware only
+  supports doing this atomicly.  See <<psarc-2007-302, the ARC case>>
+
+[#psm-intr-op-apic-type]
+`PSM_INTR_OP_APIC_TYPE`::
+  Returns information about the APIC.  `hdlp` is specific to this command and
+  carries an <<apic-get-type, `apic_get_type_t *`>> as its `ih_private`, into which this command
+  returns information about the APIC.  The apic version is surprisingly returned in the hdlp `ih_ver`.
+
+[#intel-ihdl-plat]
+==== Interrupt Handle Platform Data (`ihdl_plat_t`)
+
+Platform-specific data associated with an <<interrupt-handle, interrupt handle>>.
+
+`struct intrspec *ip_ispecp`::
+  The <<struct-intrspec, `intrspec`>> associated with this handle.  Used by
+  PSMs and maintained by the nexus drivers.
+
+`kstat_t *ip_ksp`::
+  **kstat(3kstat)** statistics for this interrupt handle, used by the PCI
+  nexuses.
+
+`uint64_t ip_ticks`::
+  The number of ticks spent fielding this device's interrupts.
+
+[#apic-get-intr]
+==== APIC Interrupt Information (`apic_get_intr_t`)
+
+More detailed information associated with an interrupt, used by the
+<<psm-intr-op-get-intr, `PSM_INTR_OP_GET_INTR`>> operation.
+
+`uint16_t avgi_req_flags`::
+  Request flags affecting which of the other fields are filled in
+
+`uint8_t avgi_num_devs`::
+  Number of devices using this interrupt
+
+`uint8_t avgi_vector`::
+  Interrupt vector
+
+`uint32_t avgi_cpu_id`::
+  The CPU which will service this interrupt
+
+`dev_info_t **avgi_dip_list`::
+  A devinfo for each of `avgi_num_devs` devices using this interrupt
+
+[#apic-get-type]
+==== APIC Type Information (`apic_get_type_t`)
+
+Information about the APIC hardware.
+
+`char *avgi_type`:: The platform type as a string
+`uint32_t avgi_num_intr`:: Maximum interrupt number
+`uint32_t avgi_num_cpu`:: Maximum CPU number
+
+==== Relationship Between DDI1 and DDI2 and PSM
+
+`DDI_INTROP_GETCAP`::
+  Entirely implemented by <<psm-intr-op-get-cap, `PSM_INTR_OP_GET_CAP`>> in the
+  root nexus and ISA nexus.  PCI asks the PCI hardware what it supports, and
+  then filters that based on the what the PSM operation returns.
+
+`DDI_INTROP_SETCAP`::
+  Entirely implemented by <<psm-intr-op-set-cap, `PSM_INTR_OP_SET_CAP`>> in the
+  root nexus, PCI, and ISA nexuses.
+
+`DDI_INTROP_ALLOC`::
+  - The root nexus only deals in fixed interrupts.  The implementation uses
+   <<psm-intr-op-alloc-vectors, `PSM_INTR_OP_ALLOC_VECTORS`>> if the apix PSM
+   is in use.  The `intrspec` is updated in `ip_ispecp`.  In the non-apix
+   case, `ih_pri` is initalized _from_ the `intrspec`.
+  - The ISA nexus acts in the same manner as the root nexus
+  - The PCI implementation does PCI-specific work then uses
+   <<psm-intr-op-alloc-vectors, `PSM_INTR_OP_ALLOC_VECTORS`>>.  in the case of
+   MSI/X `intrspec` is updated.  the `intrspec_pri` is updated _from_ the
+   `ih_pri`. In the fixed case the `intrspec` is not updated.
+
+`DDI_INTROP_FREE`::
+  - The root nexus only deals in fixed interrupts.  In the apix case
+    <<psm-intr-op-free-vectors, `PSM_INTR_OP_FREE_VECTORS`>> is used to free
+    the vector.  Otherwise nothing happens except a distateful aside into
+    PCMCIA.
+  - ISA does the same as the root nexus, but without the PCMCIA aside.
+  - PCI does PCI-specific work then uses <<psm-intr-op-free-vectors,
+    `PSM_INTR_OP_FREE_VECTORS`.>>
+
+`DDI_INTROP_GETPRI`::
+  - The root nexus handles MSI/X as well as fixed.  The `intrspec` is the
+    source of the priority which is returned.
+  - The ISA nexus works in the same way as the root nexus.
+  - The PCI code gets (or builds) an `intrspec` in a PCI-specific way, and
+    returns the `intrspec_pri`.
+
+`DDI_INTROP_SETPRI`::
+  - The root nexus handles MSI/X as well as fixed.  It validates the priority,
+    and calls <<psm-intr-op-set-pri, `PSM_INTR_OP_SET_PRI`>>.  `intrspec_pri`
+    is updated.
+  - The ISA nexus works in the same way as the root nexus.
+  - The PCI nexus works in the same way as the root nexus.
+
+`DDI_INTROP_ADDISR`::
+  - The root nexus handles MSI/X as well as fixed.  It updates `intrspec_func`
+    _from_ the `ih_cb_func`.
+  - The ISA nexus works in the same way as the root nexus.
+  - The PCI nexus works in the same way as the root nexus, but additionally
+    creates the kstats in `ip_ksp`.
+
+`DDI_INTROP_REMISR`::
+  - The root nexus handles MSI/X as well as fixed.  It sets `intrspec_func` to
+    `NULL`.
+  - The ISA code works in the same way as the root nexus, but fails for
+    non-fixed interrupts.
+  - The PCI nexus works in the same way as the root nexus, but also delete's
+    the `ip_ksp` kstates.
+
+`DDI_INTROP_ENABLE`::
+  - The root nexus translates the vector via <<psm-intr-op-xlate-vector,
+    `PSM_INTR_OP_XLATE_VECTOR`>>, and stores the result in `ih_vector`, then
+    adds the interrupt using the `intrspec_pri`, but the `ih_cb_func` and
+    parameters.
+  - The ISA nexus works like the root nexus, but with a hack for the Xen
+    console.
+  - The PCI nexus, for MSI, sets `intrspec_vec` _from_ `ih_inum` and
+    `intrspec_pri` _from_ `ih_pri`. <<psm-intr-op-xlate-vector,
+    `PSM_INTR_OP_XLATE_VECTOR`>> translates the vector and `ih_vector` is
+    updated.  The interrupt is added using `ih_pri`, `ih_vector`, and
+    `ih_cb_func` and its parameters.
+
+`DDI_INTROP_DISABLE`::
+  - The root nexus translates the vector with <<psm-intr-op-xlate-vector,
+    `PSM_INTR_OP_XLATE_VECTOR`>>, and updates `ih_vector`, then removes the
+    interrupt using `intrspec_pri` but `ib_cb_func` and `ih_vector`.
+  - The ISA nexus works in the same way as the root nexus.
+  - The PCI code, for MSI, sets `intrspec_vec` _from_ `ih_inum` and
+    `intrspec_pri` _from_ `ih_pri`, translates the vector with
+    <<psm-intr-op-xlate-vector, `PSM_INTR_OP_XLATE_VECTOR`>> but **does not**
+    update `ih_vector`, then removes the interrupt using `ih_pri` and
+    `ih_cb_func`.
+
+`DDI_INTROP_SETMASK`::
+  - The root nexus is implemented entirely via <<psm-intr-op-set-mask, `PSM_INTR_OP_SET_MASK`>>
+  - The ISA nexus works the same way as the root nexus
+  - The PCI code masks the interrupt in PCI hardware, and in the MSI/X case is
+    finished.  In the fixed case it checks <<psm-intr-op-get-shared,
+    `PSM_INTR_OP_GET_SHARED`>> and fails if the interrupt is shared, then uses
+    <<psm-intr-op-set-mask, `PSM_INTR_OP_SET_MASK`>>.
+
+`DDI_INTROP_CLRMASK`::
+  - The root nexus is implemented entirely by <<psm-intr-op-clear-mask, `PSM_INTR_OP_CLEAR_MASK`>>
+  - The ISA nexus works the same way as the root nexus
+  - The PCI code masks the interrupt in PCI hardware, and in the MSI/X case is
+    finished.  In the fixed case it checks <<psm-intr-op-get-shared, `PSM_INTR_OP_GET_SHARED`>> and fails
+    if the interrupt is shared, then uses <<psm-intr-op-clear-mask, `PSM_INTR_OP_CLEAR_MASK`>>.  This is
+    implemented in the same code paths as <<ddi-introp-setmask, `DDI_INTROP_SETMASK`>>.
+
+`DDI_INTROP_GETPENDING`::
+  - The root nexus is implemented entirely by <<psm-intr-op-get-pending, `PSM_INTR_OP_GET_PENDING`>>
+  - The ISA nexus works the same way as the root nexus
+  - The PCI code checks the PCI hardware for a pending bit and if that fails
+    tries <<psm-intr-op-get-pending, `PSM_INTR_OP_GET_PENDING`>>.
+
+`DDI_INTROP_NAVAIL`::
+  - The root nexus returns the number of fixed interrupts on the device, which
+    a hack for PCMCIA.  The implementation is the same as that for
+    <<ddi-introp-nintrs, `DDI_INTROP_NINTRS`>>.
+  - The ISA nexus (which is implicated in the PCMCIA hack in the root nexus)
+    returns the number of fixed interrupts on the device.  The implementation
+    is the same as that for <<ddi-introp-nintrs, `DDI_INTROP_NINTRS`>>.
+  - The PCI code returns the number of fixed interrupts on the device, for
+    fixed interrupts or the number of MSI/X the device could possibly support
+    (regardless of resource management).  The implementation is the same as `DDI_INTROP_NINTRS`.
+
+`DDI_INTROP_NINTRS`::
+  See `DDI_INTROP_NAVAIL`, which uses the same implementation on all 3 nexuses
+
+`DDI_INTROP_SUPPORTED_TYPES`::
+  - The root nexus supports fixed interrupts only
+  - The ISA nexus supports fixed interrupts only
+  - The PCI code supports fixed interrupts, checks the PCI hardware for
+    interrupt capabilities, and the system with <<psm-intr-op-check-msi,
+    `PSM_INTR_OP_CHECK_MSI`>>, and depending on these results adds MSI and
+    MSIX support
+
+`DDI_INTROP_DUPVEC`::  Not supported by any Intel nexus
+
+`DDI_INTROP_BLOCKENABLE`::
+  - Not supported by the root nexus
+  - Not supported by the ISA nexus
+  - The PCI code enables all interrupts in the block one-by-one (and should
+    any fail, disables them all again).  This is done in the same manner as
+    individual <<ddi-introp-enable, `DDI_INTROP_ENABLE`>>, per-handle.
+
+`DDI_INTROP_BLOCKDISABLE`::
+  - Not supported by the root nexus
+  - Not supported by the ISA nexus
+  - The PCI code disables all interrupts in the block one-by-one.  This is
+    done in the same manner as individual <<ddi-introp-disable, `DDI_INTROP_DISABLE`>>, per-handle.
+
+`DDI_INTROP_GETPOOL`::
+  - Not supported by the root nexus
+  - Not supported by the ISA nexus
+  - The PCI code returns the global apix pool when the apix PSM is in use.
+
+`DDI_INTROP_GETTARGET`::
+  - Not supported by the root nexus
+  - Not support by the ISA nexus
+  - The PCI code uses <<psm-intr-op-get-intr, `PSM_INTR_OP_GET_INTR`>>
+
+`DDI_INTROP_SETTARGET`::
+  - Not supported by the root nexus
+  - Not support by the ISA nexus
+  - The PCI code uses <<psm-intr-op-set-cpu, `PSM_INTR_OP_SET_CPU`>>
+
+[#psm-ddi2-comparison]
+===== Comparison between PSM and DDI2 operations
+
+[cols="1,1"]
+|===
+| PSM | DDI2
+
+| <<psm-intr-op-alloc-vectors, `PSM_INTR_OP_ALLOC_VECTORS`>>
+| <<ddi-introp-alloc, `DDI_INTROP_ALLOC`>>
+
+| <<psm-intr-op-free-vectors, `PSM_INTR_OP_FREE_VECTORS`>>
+| <<ddi-introp-free, `DDI_INTROP_FREE`>>
+
+| <<psm-intr-op-navail-vectors, `PSM_INTR_OP_NAVAIL_VECTORS`>>
+| <<ddi-introp-navail, `DDI_INTROP_NAVAIL`>>
+
+| <<psm-intr-op-xlate-vector, `PSM_INTR_OP_XLATE_VECTOR`>>
+| A side-effect of following the interrupt hierarchy through `i_ddi_intr_ops()`
+
+| <<psm-intr-op-get-pending, `PSM_INTR_OP_GET_PENDING`>>
+| <<ddi-introp-getpending, `DDI_INTROP_GETPENDING`>>
+
+| <<psm-intr-op-clear-mask, `PSM_INTR_OP_CLEAR_MASK`>>
+| <<ddi-introp-clrmask, `DDI_INTROP_CLRMASK`>>
+
+| <<psm-intr-op-set-mask, `PSM_INTR_OP_SET_MASK`>>
+| <<ddi-introp-setmask, `DDI_INTROP_SETMASK`>>
+
+| <<psm-intr-op-get-cap, `PSM_INTR_OP_GET_CAP`>>
+| <<ddi-introp-getcap, `DDI_INTROP_GETCAP`>>
+
+| <<psm-intr-op-set-cap, `PSM_INTR_OP_SET_CAP`>>
+| <<ddi-introp-setcap, `DDI_INTROP_SETCAP`>>
+
+| <<psm-intr-op-set-pri, `PSM_INTR_OP_SET_PRI`>>
+| <<ddi-introp-setpri, `DDI_INTROP_SETPRI`>>
+
+|
+| <<ddi-introp-getpri, `DDI_INTROP_GETPRI`>>
+
+| <<psm-intr-op-get-shared, `PSM_INTR_OP_GET_SHARED`>>
+| **???** Only need be known by fixed interrupt controller drivers?
+
+| <<psm-intr-op-check-msi, `PSM_INTR_OP_CHECK_MSI`>>
+| <<ddi-introp-supported-types, `DDI_INTROP_SUPPORTED_TYES`>>
+
+| <<psm-intr-op-set-cpu, `PSM_INTR_OP_SET_CPU`>>
+| <<ddi-introp-settarget, `DDI_INTROP_SETTARGET`>>
+
+| <<psm-intr-op-get-intr, `PSM_INTR_OP_GET_INTR`>>
+| <<ddi-introp-gettarget, `DDI_INTROP_GETTARGET`>> (in effect)
+
+| <<psm-intr-op-grp-set-cpu, `PSM_INTR_OP_GRP_SET_CPU`>>
+| **???** (requires a new interface to preserve the atomicity of the PSM interface)
+
+| <<psm-intr-op-apic-type, `PSM_INTR_OP_APIC_TYPE`>>
+| implicit in the interrupt hierarchy
+
+|
+| <<ddi-introp-getpool, `DDI_INTROP_GETPOOL`>>
+|===
+
+=== SPARC
+
+Interrupt operations follow the interrupt hierarchy expressed in the device
+tree, described by <<1275-ofw, IEEE 1275 OpenFirmware>>, its <<1275-busses,
+bus-specific bindings>>, and the <<1275-imap, "imap" interrupt mapping
+extension>>.
+
+Operations may be passed up the hierarchy, or implemented in each nexus to
+program the hardware (the interrupt scheme on SPARC is simple, and this is
+done directly, rather than via a PSM-like interface).
+
+There are 3 distinct mechanisms for expressing the interrupt hierarchy of
+fixed interrupts.  MSI/X interrupts are fully described by <<1275-msi, properties on the
+host bridge>> and directly following the device tree is sufficient.
+
+==== Directly following the parent/child relationship of the device tree
+
+The earliest method, the interrupt hierarchy and the device tree match.  A
+devices interrupt ancestry and its device tree (physical) ancestry are the
+same.
+
+image:dev-tree-parent.svg[]
+
+NOTE: This applies to fixed interrupts absent other schemes, and is the only
+method for MSI/X
+
+==== Explicitly specified interrupt parent
+
+Device hierarchy and interrupt hierarchy are orthogonal, nodes contain an
+explicit reference to their interrupt domain, either via an
+**interrupt-parent** property.
+
+image:dev-tree-intr-parent.svg[]
+
+NOTE: This applies to fixed interrupts only
+
+NOTE: Support for this exists in the SPARC code, but it is not obvious that any
+shipping platform ever made use of it.
+
+==== General Interrupt Mapping
+
+Device hierarchy and interrupt hierarchy are orthogonal, further the several
+interrupts of a given device may be fielded by distinct interrupt controllers,
+the mapping between child and parent vector and unit number may be expressed.
+
+It is not clear whether the expression of unit number here is relevant for
+anything other than processing multiple levels of interrupt mapping (where the
+result of one is the input to the next).
+
+This is done via the <<1275-imap, **"interrupt-map"**>>
+property which is better explained by the standard document than by us.
+
+NOTE: Support for this with fixed interrupts exists in the SPARC code and
+shipping platforms have made use of it, however the implementation maps
+directly to the root-most interrupt controller without making any stops on the
+way
+
+NOTE: Support for this with fixed interrupts in the SPARC code is broken
+should any device have `#interrupt-cells` greater than 1.
+
+==== Implementation
+
+<<interrupt-operations, Interrupt operations>> follow two distinct paths through the
+hierarchy.
+
+1. MSI interrupts always follow the parent/child relationships of the device tree
+  hierarchy itself.
+
+2. The **DDI_INTROP_ADDISR**, **DDI_INTROP_REMISR**, **DDI_INTROP_ENABLE**,
+  **DDI_INTROP_DISABLE**, **DDI_INTROP_BLOCKENABLE**,
+  **DDI_INTROP_BLOCKDISABLE** operations take part in the full range of
+  interrupt mapping described above, and are mapped through the interrupt
+  hierarchy, rather than the device hierarchy.
+
+3. All other operations on fixed interrupts follow the device tree hierarchy
+
+In a survey of the current implementation busses handle #1 and #3 themselves,
+without any actual movement through the hierarchy.  #2 is mapped directly onto
+the root-most interrupt parent and handled there.
+
+==== Relationship between DDI1 and DDI2
+
+`DDI_INTROP_GETCAP`::  Implemented in each nexus
+
+`DDI_INTROP_SETCAP`::  Not implemented
+
+`DDI_INTROP_ALLOC`::
+  Implemented in each nexus.  No `intrspec` updates, unlike Intel.
+
+`DDI_INTROP_FREE`::
+  - root nexus does nothing
+  - NIU mux does nothing, but seems worried about it
+  - PCIe frees in hardware, making use of `ih_scratch`, there are no
+    `intrspec` updates
+  - PCI does the same as the root nexus (nothing).
+
+`DDI_INTROP_GETPRI`::
+  - The root nexus on sun4v returns `ih_pri`.  The root nexus on sun4u
+    returns `ih_pri` modulo a hack for UPA.  Neither use an `intrspec`, unlike Intel.
+  - The NIU mux returns a static default priority, neither an `intrspec` nor
+    the `hdlp` are updated or consulted.
+  - The PCI code returns `ih_pri` if it is non-0, and otherwise generates one
+    from the PCI class code.  neither an `intrspec` nor `hdlp` are updated.
+  - The PCIe code acts in the same way as the PCI code
+
+`DDI_INTROP_SETPRI`::
+  Neither `intrspec` or `hdlp` are ever updated
+  - The root nexus does nothing
+  - The NIU mux returns `EDDI_ENOTSUP`
+  - The PCI code does nothing
+  - The PCIe code does nothing
+
+`DDI_INTROP_ADDISR`::
+  - The sun4v root nexus implementation is just `i_ddi_add_ivintr()`
+  - The sun4u root nexus implementation sets `ih_pri` and translates and updates
+    `ih_vector` for UPA devices with certain properties, then uses
+    `i_ddi_add_ivintr()`
+  - The NIU mux translates the interrupt, but takes all `hdlp` fields as
+    canonical. `ih_pri` is updated if unset.  CPU affinity is handled
+  - The PCI code treats `hdlp` as canonical, but translates the vector,
+    `ih_pri` is updated from the class code if unset. CPU affinity is handled
+  - The PCIe code works (for our purposes) like the PCI code
+
+`DDI_INTROP_REMISR`::
+  - The sun4v root nexus implementation is just `i_ddi_rem_ivintr()`
+  - The sun4u root nexus implementation translates and updates `ih_vector`
+  - The NIU mux implementation treats `hdlp` as canonical (or its own metadata
+    looked up from there).  `ih_vector` is reset.
+  - The PCI code maps and updates `ih_vector` but otherwise treats `hdlp` as
+    canonical
+  - The PCIe code works (for our purposes) like the PCI code
+
+`DDI_INTROP_ENABLE`::
+  The `hdlp` is the canonical source of information.
+  - The root nexus does nothing
+  - other nexuses enable the interrupt in their own hardware
+
+`DDI_INTROP_DISABLE`::
+  The `hdlp` is the canonical source of information.
+  - The root nexus does nothing
+  - other nexuses disable the interrupt in their own hardware
+
+`DDI_INTROP_SETMASK`::
+  No interaction with `hdlp`
+
+`DDI_INTROP_CLRMASK`::
+  No interaction with `hdlp`
+
+`DDI_INTROP_GETPENDING`::
+  Usually no interaction with `hdlp`.  In PCIe code it is the canonical source
+  of information.
+
+`DDI_INTROP_NAVAIL`::
+  `hdlp` is the canonical source of information where it is used in the PCIe
+  code, elsewhere it is unused.
+
+`DDI_INTROP_NINTRS`::
+  Implemented in the same code as `DDI_INTROP_NAVAIL` throughout.
+
+`DDI_INTROP_SUPPORTED_TYPES`::
+  - The root nexus checks whether `rdip` has interrupts, and returns
+    `DDI_INTR_TYPE_FIXED` if there are any.
+  - The NIU mux just says `DDI_INTR_TYPE_FIXED`
+  - PCI acts in the same way as the root nexus
+  - PCIe does not implement
+
+=== AArch64
+
+WARNING: The implementation described here is not the current implementation,
+and exists only prototypically.
+
+AArch64 systems are broken into two major categories based on their firmware
+device tree implementation.
+
+SBSA::
+  <<arm-sbsa, The ARM Server Base System Architecture>> which is <<uefi-acpi,
+  ACPI>> based.  An illumos device tree is built from information provided by
+  the platform ACPI implementation, UEFI is mandatory.
+
+Flat Device Tree (FDT)::
+  The platform provides us with a <<devicetree-org, devicetree>> blob, which is superficially
+  similar to and derived from an <<1275-ofw, IEEE 1275 OpenFirmware>> device
+  tree, and the illumos device tree directly reflects this.  This may be
+  provided by a boot-loader or statically in ROM.  The <<arm-ebbr,  ARM
+  Embedded Base Boot Requirements>> describe platforms with UEFI but with FDT
+  rather than ACPI.
+
+Interrupt operations follow the interrupt hierarchy as described to us by the
+firmware.  We assume that aside from the mechanism of discovering this
+hierarchy, our journey through it will be equivalent for both implementations.
+
+For the FDT cases the device tree reflects an exact interrupt hierarchy of
+arbitrary complexity, which we have to understand how to follow.  For the ACPI
+cases the device tree reflects a simpler scheme because of the limits from the
+<<uefi-acpi, ACPI>> and <<arm-sbsa, SBSA>> specifications, but the hierarchy
+must be added to the tree ourselves.  The simplicity then works out in our
+favour (we don't, for instance, have to craft arbitrarily complicated
+**"interrupt-map"** to describe the relationships, because such relationships
+aren't possible).
+
+==== SBSA
+
+The interrupt hierarchy is described by <<uefi-acpi, ACPI>>.
+
+In the DSDT nodes there may be at least:
+- `_PRT` describing PCI interrupt routing
+- `_CRS` describing the "Current Resource Settings"
+- `_PRS` describing the "Possible Resource Settings"
+
+There are cases where hardware is also described in other tables, and via
+other methods.
+
+The information necessary here will be added into the device tree when it is
+built, assigning **"interrupts"**, **"interrupt-parent"**, as necessary to
+describe the hardware and hierarchy.  This is basically what happens on Intel
+(except as mentioned, Intel has no need for interrupt parent information).
+
+ACPI systems support one root interrupt controller (they can't describe more).
+
+==== FDT
+
+The device tree contains the interrupt hierarchy, expressed via a superset of
+the mechanisms used on SPARC.
+
+There is an <<devicetree-interrupts-extended, additional mechanism>> for fixed
+interrupts, and an <<devicetree-msi, entirely different>> method of
+handling MSI.
+
+In this case we definitely see cascaded fixed interrupt controllers below the
+root controller.  In cases like the serial on RaspberryPi,4 or the GPIO on
+many bits hardware, we have a single interrupt shared between multiple
+hardware functions behind a piece of hardware we can use to check for whom the
+interrupt was intended, or use to mask/route/control the interrupt.
+
+It is possible -- in theory, the implementation would be a lot -- to demux
+these and give each device its own vector, rather than sharing the vector as
+with otherwise shared (but not truly multiplexed) fixed interrupts.  Without
+strong motivation (one such motivation would be if in practice we see devices
+which storm interrupts on shared vectors, and affect performance).
+
+[#devicetree-interrupts-extended]
+===== "interrupts-extended"
+
+Rather than an **"interrupts"** property, a list of interrupt vectors, an
+**"interrupts-extended"** property is used which is a list of pairs `<vector,
+controller>` specifying the vector and the controller on which it is
+relevant.
+
+This allows describing a device which spreads its interrupts to separate
+controllers, but without requiring the full mapping of **"interrupt-map"**.
+
+NOTE: illumos does not currently support this mechanism, as we haven't seen it
+in use.
+
+[#devicetree-msi]
+===== Devicetree MSI
+
+The devicetree.org specification has a mechanism for expressing MSI that is
+entirely distinct from that adopted by OpenFirmware on SPARC.
+
+The **"msi-parent"** property is a list of `<RID, controller>` pairs, where
+the RID may be absent if **"#msi-cells"** is 0.  This list is not ordered, and
+software may use any combination in any order.
+
+For MSI on PCI there is an **"msi-map"** property, which maps ranges of RID
+to MSI specifiers on specific controllers.
+
+NOTE: illumos does not currently support this mechanism, as MSI support on
+AArch64 does not yet exist
+
+==== Message Signalled Interrupts
+
+WARNING: the prototype does not implement MSI/X at all, this is all thoroughly
+pre-implementation thinking
+
+There are several ways MSI/X are implement on AArch64
+
+1. A GIC v2m device alongside GIC version 2, which maps MSI onto a range of
+  vectors shared with fixed interrupts.  The GIC controls affinity.
+
+2. A GIC v3 device directly receives messages and maps MSI onto a range of
+  vectors shared with fixed interrupts. (Message Based SPIs).  For FDT the
+  mapping is expressed in the devicetree or device binding, ACPI cannot
+  express this.
+
+3. ... the above, but level-triggered.  illumos has no concept of a
+  level-triggered MSI, and one would probably need to be added, if we were to
+  implement this.
+
+4. A GIC v3 redistributor device directly receives messages and raises
+  _locality-specific peripheral interrupts_ (LPIs).  This is basically #2 but
+  without mapping onto vectors shared with fixed interrupts, the vector is now
+  in a specific (very broad) range..  affinity is implicit in the choice of
+  redistributor device.  This is mutually exclusive with #5
+
+5. _Interrupt Translation Service_ (ITS) devices receive messages which raises
+  LPIs like #4.  Affinity is handled by the ITS.
+
+6. Devices like RaspberryPi,4 which has a GIC version 2 with no v2m, and
+  handles MSI in the PCIe host (which is basically how SPARC hardware seemed
+  to work).
+
+This appears to fit with the scheme described, whereby we attach drivers that
+field these interrupts as we would any other.  Some drivers need to handle
+both fixed and MSI/X, some only one or the other.
+
+Of the methods above, it seems like we have no reason to implement #3.
+Whether to implement #4 depends on how commonly used it is compared to #5 (and
+vice-versa).
+
+#6 is either very simple and transparent to us, or requires that the
+downstream nexus be an interrupt controller for our purposes.
+
+==== Implementation
+
+[#no-intrspec]
+===== `struct intrspec`-free operation
+
+Given `struct intrspec` is insufficient to describe interrupts on the GIC, it
+is to our advantage of nothing in the AArch64 support treated an intrspec as
+canonical.  Common nexuses that uses them in there implementation is fine
+because we can guarantee that they represent an interrupt domain with an
+interrupt representation that the intrspec is sufficient for.
+
+The problem area is interrupts that directly target the GIC (those passing
+through the root nexus and the interrupt controller drivers themselves), or
+any AArch64-specific devices with bindings that `struct intrspec` cannot
+represent.
+
+SPARC is almost entirely free of `struct intrspec`, which suggests this is
+not only practical but desirable -- it must have been removed from the SPARC
+code already.
+
+===== Early use
+
+Interrupt controllers in the path between the system clock and the CPU must
+provide a limited interface to allow this clock interrupt to be established.
+
+This is to avoid an unfortunate chicken-and-egg situation where we need the
+clock interrupt to build the device tree, and the device tree to establish the
+clock interrupt via the DDI interfaces.  The intel platform does this via
+calling into the PSM, which the current AArch64 scheme does not have (or
+probably need).
+
+===== Structure
+
+====== Interrupt Establishing Operations
+
+As on SPARC, we expect at least the relevant subset of interrupt operations
+(**DDI_INTROP_ADDISR**, **DDI_INTROP_REMISR**, **DDI_INTROP_ENABLE**,
+**DDI_INTROP_DISABLE**, **DDI_INTROP_BLOCKENABLE**,
+**DDI_INTROP_BLOCKDISABLE**) to be mapped to a driver attached to hardware
+functioning as an interrupt controller.  On SPARC these would be host bridge
+drivers, which would then establish their interrupts directly.  The actual
+root-most interrupt hardware is part of the basic platform.
+
+On AArch64 we have several possible root-most interrupt controllers, 3
+possible versions of the ARM Generic Interrupt Controller (GIC), and several
+methods of transmitting MSI/X to the root controller, and cannot practically
+follow this scheme as-is, since the actual establishment of the interrupt in
+hardware is interrupt-controller dependent.
+
+The Intel platform uses the PSM to abstract over this, in a manner not
+entirely dissimilar from the way the DDI2 implementation abstracts over
+interrupt operations.  See <<psm-ddi2-comparison, the comparison>> for how
+they line up.
+
+On AArch64 the interrupt controllers available to us are present in the device
+tree directly, and the mapping between hardware and interrupt controllers is
+clearly expressed there (or in the case of ACPI, can be expressed there in a
+well known way) we choose to attach distinct drivers to these controllers, and
+allow those drivers to handle the low-level establishment of interrupts.  In
+spirit, if not entirely in fact, the PSM operation called "on" the interrupt
+controller is replaced with the matching DDI2 operation mapped up the
+interrupt hieararchy.
+
+This means that the system has full device drivers, rather than misc modules
+attaching to any GIC v2 or GIC v3 interrupt controllers, and in the future,
+drivers for the GIC v2m frame, and GIC ITS MSI to GIC translation hardware.
+
+All busses are expected to call `i_ddi_intr_ops()` to pass the request to
+higher levels of the interrupt hierarchy, and to the correct instance of the
+drivers attached to the interrupt controllers.
+
+NOTE: While it may seem surprising, it is a valid topology for the rootnex to
+have an **"interrupt-parent"** that actually fields the interrupts, rather than each
+bus pointing to the interrupt controller.  That is, the root nexus is the root
+of the device tree _but not necessarily the interrupt hieararchy_.  This is
+how QEMU,virt works and is also the most convenient way to establish a default
+**"interrupt-parent"** for ACPI systems.
+
+====== Other Interrupt Operations
+
+Other operations may be handled directly by nexus drivers, or passed up the
+device tree hierarchy to refine their results.
+
+WARNING: This is a weak point in the scheme described here.
+
+Why do these operations follow a different hierarchy, and get direct answers
+from busses, except for this was how things work on SPARC? (where the
+hierarchies are almost always, we think, isomorphic).
+
+Why do busses answer on their own behalf, does the root system not have any
+say in resource availability, etc?
+
+The answer in the current prototype is that this is how SPARC worked, and that
+is directly analogous to how interrupts are structured for us too.
+
+It would be nice if:
+
+. All operations that can follow the interrupt hierarchy, did.  Even if this
+  meant temporary handles have to be more completely allocated.
+. It were clear and documented which operations follow which hieararchy, and
+  whom we expect to be ultimately responsible.
+
+===== Rationale
+
+The approach used in our Intel codebase is usually the more attractive,
+because that code base is actively maintained.  In this case though the nature
+of interrupts on the platform, such as the potential for arbitrary cascading
+of interrupt controllers make the approach of having each nexus directly
+establish interrupts via a PSM seem unworkable.  We may have to program
+multiple controllers on the way through the hierarchy, at which we would at
+best be emulating the journey through the interrupt hierarchy of the device
+tree.  Further, the PSM operations interface and the DDI2 interface are
+<<psm-ddi2-comparison, so similar>>, it's not obvious what benefit there would be
+
+The approach used on SPARC seems to fit our needs, and in fact the prototype
+is very SPARC-y with the exception that interrupt establishing operations pass
+each node up the tree, rather than directly going to the uppermost.  This
+seems to be because the SPARC platform has a simple interrupt programming
+interface, here `add_ivintr()` registers a handler in an interrupt vector used
+for vectored interrupts, and mondo interrupts are effectively message based,
+queued in hardware and de-queued in software.
+
+The SPARC approach though is also somewhat dissatisfying.  Why must we take
+two distinct paths through the device tree depending on the interrupt
+operation?  With the exception of <<ddi-introp-supported-types,
+`DDI_INTROP_SUPPORTED_TYPES`>> which cannot reach an interrupt controller
+(would it go to the fixed or MSI controller?).
+
+It would be nice to have a simpler scheme where the path through the tree was
+not split like this, where each operation is expected to call its parent via
+`i_ddi_intr_ops()` either to provide the information, or to provide further
+filtering to the value in `*result`.
+
+The addition of MSI support on ARM will present a departure from the SPARC
+scheme. On SPARC it is assumed that a direct ancestor of our device will be a
+host bridge device which will handle translating MSIs to Mondos (or whatever
+ends up happening), the same assumption as used to exist for fixed
+interrupts, too.  Whereas on ARM we have potentially several such devices
+appearing discretely and handling MSI/X for different subsets of devices in
+the system, to which they may (and usually do) have no familial relation in
+the device tree.
+
+===== Problems
+
+A major outstanding wart in the prototype is that on real platforms, we can
+take several paths through the interrupt tree depending on the device and its
+position in the device tree.  This means that there is no single global place
+to provide book-keeping at the DDI level.  Much of this bookkeeping is at
+present maintaining the `struct intrspec` compatibility pieces in the parent
+private data, and would go away if and when that does, but I am not convinced
+it is all the global bookkeeping we would ever want.  Counter to my instincts
+is the fact that interrupt support on SPARC makes this work without shared
+bookkeeping.
+
+Another wart is that a full conversion to this scheme is an unfortunate amount
+of work to the extent that a lot of our machine dependent drivers are more
+Intel-derived than SPARC derived, so their interrupt operations must be
+refactored, perhaps substantially, and retested.
+
+This sounds bad, but <<psm-ddi2-comparison, the comparison>> between
+<<psm-operations, PSM operations>> and <<interrupt-operations, DDI2
+operations>> shows a lot of overlap where calls to PSM operations would be
+directly replaced with `i_ddi_intr_ops()` calls.  Other operations are either
+unnecessary in this scheme (vector translation) or not currently implementable
+on AArch64, but with the appearance we could implement these in the same manner.
+
+Because `uint32_t ih_vector` cannot represent an interrupt in most cases, we
+use `ip_unitintr` to hold this data.
+
+Because the data in `ip_unitintr` is only intelligible by the bus, `ih_vector`
+isn't kept up-to-date.  We would require an operation to ask the bus for the
+vector given a descriptor.  We haven't added such an operation (private or
+otherwise) because it doesn't, so far, seem we need one.  It would be easy
+to add.
+
+====== Vastly increased interrupt vector space
+
+The autovectoring interrupt support in illumos currently has a maximum of 256
+vectors.  The vector space on AArch64 is vastly larger than this, although
+sparse.
+
+WARNING: The implementation of autovectoring is also inconsistent about what
+happens to vectors > 256.  `add_avintr()` and `rem_avintr()` will take the
+vector modulo `MAX_VECT` as the index into the table, `av_dispatch_autovect()`
+will not do this, and assert the vector itself is lower than `MAX_VECT`.  All
+other code on all other platforms will just overrun `autovect[MAX_VECT]`.
+
+The apix PSM has a problem not unlike ours, and solves it using the `addintr`
+and `remintr` function pointers, which if non-NULL entirely replace the
+implementation of `add_avintr()` and `rem_avintr()`.  The metadata tracked in
+the GIC implementations just keeps an AVL of active vectors, rather than a
+huge sparse table.  This is problematic in interrupt context though.
+
+[#aarch64-ihdl-plat]
+==== Interrupt Handle Platform Data (`ihdl_plat_t`)
+
+Platform-specific data associated with an <<interrupt-handle, interrupt
+handle>>.  This is currently as it is on Intel but incompletely used, and with
+some additional fields
+
+`kstat_t *ip_ksp`::
+  **kstat(3kstat)** statistics for this interrupt handle, used by the PCI
+  nexuses.  Currently unused in the PCI prototype, but expected.
+
+`uint64_t ip_ticks`::
+  The number of ticks spent fielding this device's interrupts.
+
+`unit_intr_t *ip_unitintr`::
+  A device-tree unit interrupt descriptor (the combination of unit address and
+  interrupt descriptor).  Used by interrupt mapping internal to the AArch64
+  DDI implementation.  This is actually specific to the FDT implementation,
+  but should exist in a usable manner given a devicetree constructed from
+  ACPI.  This is opaque (actually, impossible to correctly interpret) to
+  anyone not the interrupt-controller currently processing `hdlp` and the DDI
+  implementation.  This is used in place of `ih_vector` which cannot represent
+  an interrupt completely.
+
+== References
+
+This is intended to be a complete list of documents that both you may want to
+refer to (if they're available) or that you might see _referred_ to
+(regardless of availability).  Some are only useful in that they provide a
+sense of progression through time of the code we're left with.
+
+- PSARC/1997/018 Processor Interrupt Participation
+
+- PSARC/1999/127 DDI Interrupt Re-architecture
+
+- PSARC/2001/604 Nexus Interrupt Distribution Interface
+
+- PSARC/2003/566 Message Signaled Interrupts (MSI) Framework
+
+[#psarc-ddi2]
+- link:https://illumos.org/opensolaris/ARChive/PSARC/2004/253/[PSARC/2004/253 Advanced DDI Interrupt Framework]
+
+- PSARC/2005/561 Obsolete DDI Interrupt Interfaces
+
+- PSARC/2006/037 PCI Express Hotplug Framework Interrupt Interfaces
+
+[#psarc-2007-302]
+- link:https://illumos.org/opensolaris/ARChive/PSARC/2007/302/[PSARC/2007/302 PSM_INTR_OPS extensions for handling groups of interrupt vectors]
+
+- link:https://illumos.org/opensolaris/ARChive/PSARC/2007/453/[PSARC/2007/453 MSI-X interrupt limit override]
+
+[#psarc-irm]
+- link:https://illumos.org/opensolaris/ARChive/PSARC/2008/628/[PSARC/2008/628 Interrupt Resource Management]
+
+- link:https://illumos.org/opensolaris/ARChive/PSARC/2009/340/[PSARC/2009/340 Interrupt Affinity Interfaces and PCITool Enhancements]
+
+- link:https://illumos.org/opensolaris/ARChive/PSARC/2010/172/[PSARC/2010/172 Renaming interrupt affinity interfaces]
+
+[#psarc-ppc]
+- link:https://illumos.org/opensolaris/ARChive/PSARC/1994/188/[PSARC/1994/188 Power PC Kernel Port]
+
+- illumos DDI interrupt manual pages
+  `man -k ddi.*intr`
+
+[#devicetree-org]
+- link:https://www.devicetree.org[The Devicetree specification]
+
+[#1275-ofw]
+- link:https://www.openbios.org/data/docs/of1275.pdf[IEEE 1275-1994 Open Firmware]
+
+[#1275-busses]
+- link:https://openfirmware.info/Bindings[IEEE 1275-1994 Open Firmware Bindings] _(bus, device, and CPU specifics)_
+
+[#1275-imap]
+- link:https://www.devicetree.org/open-firmware/practice/imap/imap0_9d.html[OpenFirmware Recommended Practice: Interrupt Mapping]
+
+[#1275-msi]
+- link:https://illumos.org/opensolaris/ARChive/FWARC/2005/030/[FWARC/2005/030 MSI related-properties for "fire" based host bridges]
+
+- link:https://www.kernel.org/doc/Documentation/devicetree/bindings/interrupt-controller/msi.txt[Devicetree MSI interrupt-controller binding]
+
+- link:https://www.kernel.org/doc/Documentation/devicetree/bindings/pci/pci-msi.txt[Devicetree PCI MSI binding]
+
+[#arm-sbsa]
+- link:https://developer.arm.com/documentation/den0029/latest/[ARM Server Base System Architecture]
+
+[#uefi-acpi]
+- link:https://uefi.org/htmlspecs/ACPI_Spec_6_4_html[Advanced Configuration and Power Interface (ACPI)]
+
+- link:https://github.com/oxidecomputer/illumos-gate/blob/stlouis/usr/src/uts/common/sys/ddi_intr_impl.h[ddi_intr_op_t comments currently specific to the Oxide implementation]
+
+[#arm-ebbr]
+- link:https://github.com/ARM-software/ebbr/releases[ARM Embedded Base Boot Requirements]
