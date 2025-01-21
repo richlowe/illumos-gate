@@ -1206,7 +1206,8 @@ i_ddi_get_intr_pri(dev_info_t *dip, uint_t inumber)
 {
 	int	*intr_prio_p;
 	uint_t	intr_prio_num;
-	uint32_t	pri = 0;
+	/* XXXARM: hard-code the default interrupt-priorities property to 5 */
+	uint32_t	pri = 5;
 
 	/*
 	 * Use the "interrupt-priorities" property to determine the

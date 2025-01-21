@@ -34,6 +34,7 @@ UTSBASE	= ../../..
 MODULE		= bcm2711-emmc2
 OBJECTS		= $(BRCM2711_EMMC2_OBJS:%=$(OBJS_DIR)/%)
 ROOTMODULE	= $(ROOT_RPI4_DRV_DIR)/$(MODULE)
+CONF_SRCDIR	= $(UTSBASE)/armv8/rpi4/io/$(MODULE)/
 
 #
 #	Include common rules.
@@ -44,7 +45,7 @@ include $(UTSBASE)/armv8/rpi4/Makefile.rpi4
 #       Define targets
 #
 ALL_TARGET	= $(BINARY)
-INSTALL_TARGET	= $(BINARY) $(ROOTMODULE)
+INSTALL_TARGET	= $(BINARY) $(ROOTMODULE) $(ROOT_CONFFILE)
 
 #
 #	Overrides
