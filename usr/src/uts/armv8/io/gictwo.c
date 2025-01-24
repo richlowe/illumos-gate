@@ -975,8 +975,8 @@ gicv2_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		 * Always 3 interrupt cells in the gicv2 binding (but this is
 		 * FDT specific, and needs to be better)
 		 */
-		uint32_t *p = &priv->ip_unitintr->ui_v[
-		    priv->ip_unitintr->ui_addrcells];
+		unit_intr_t *ui = priv->ip_unitintr;
+		uint32_t *p = &ui->ui_v[ui->ui_addrcells];
 		const uint32_t cfg = *p++;
 		const uint32_t vector = *p++;
 		const uint32_t sense = *p++;
@@ -1022,8 +1022,8 @@ gicv2_intr_ops(dev_info_t *dip, dev_info_t *rdip,
 		 *
 		 * Here we don't use the sense
 		 */
-		uint32_t *p = &priv->ip_unitintr->ui_v[
-		    priv->ip_unitintr->ui_addrcells];
+		unit_intr_t *ui = priv->ip_unitintr;
+		uint32_t *p = &ui->ui_v[ui->ui_addrcells];
 		const uint32_t cfg = *p++;
 		const uint32_t vector = *p++;
 

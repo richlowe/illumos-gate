@@ -110,8 +110,17 @@ ddi_intr_get_nintrs(dev_info_t *dip, int type, int *nintrsp)
 	hdl.ih_dip = dip;
 	hdl.ih_type = type;
 
+	/*
+	 * Take the lock, even though this handle is impossible to share, so
+	 * that we can make global assertions about locking
+	 */
+	rw_init(&hdl.ih_rwlock, NULL, RW_DRIVER, NULL);
+	rw_enter(&hdl.ih_rwlock, RW_WRITER);
+
 	ret = i_ddi_intr_ops(dip, dip, DDI_INTROP_NINTRS, &hdl,
 	    (void *)nintrsp);
+
+	rw_exit(&hdl.ih_rwlock);
 
 	DDI_INTR_APIDBG((CE_CONT, "ddi_intr_get_nintrs:: nintrs %x\n",
 	    *nintrsp));

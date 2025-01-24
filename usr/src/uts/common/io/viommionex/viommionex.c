@@ -253,9 +253,9 @@ viommionex_bus_config(dev_info_t *dip, uint_t flags,
 	int *reg;
 	uint_t reg_cells;
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "reg", &reg, &reg_cells) == DDI_SUCCESS) {
-		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, rdip, "reg", reg,
-		    reg_cells) != DDI_PROP_SUCCESS) {
+	    OBP_REG, &reg, &reg_cells) == DDI_SUCCESS) {
+		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, rdip,
+		    OBP_REG, reg, reg_cells) != DDI_PROP_SUCCESS) {
 			(void) ndi_devi_offline(rdip, NDI_DEVI_REMOVE);
 			ddi_prop_free(reg);
 			ndi_devi_exit(dip);
@@ -267,9 +267,9 @@ viommionex_bus_config(dev_info_t *dip, uint_t flags,
 	int *intr;
 	uint_t intr_cells;
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dip, DDI_PROP_DONTPASS,
-	    "interrupts", &intr, &intr_cells) == DDI_SUCCESS) {
-		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, rdip, "interrupts", intr,
-		    intr_cells) != DDI_PROP_SUCCESS) {
+	    OBP_INTERRUPTS, &intr, &intr_cells) == DDI_SUCCESS) {
+		if (ndi_prop_update_int_array(DDI_DEV_T_NONE, rdip,
+		    OBP_INTERRUPTS, intr, intr_cells) != DDI_PROP_SUCCESS) {
 			(void) ndi_devi_offline(rdip, NDI_DEVI_REMOVE);
 			ddi_prop_free(intr);
 			ndi_devi_exit(dip);

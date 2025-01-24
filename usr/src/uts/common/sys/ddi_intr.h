@@ -133,8 +133,8 @@ int	ddi_intr_get_supported_types(dev_info_t *dip, int *typesp);
 /*
  * ddi_intr_get_nintrs:
  *
- * 	Return as an integer in the integer pointed to by the argument
- * 	*nintrsp*, the number of interrupts the device supports for the
+ *	Return as an integer in the integer pointed to by the argument
+ *	*nintrsp*, the number of interrupts the device supports for the
  *	given interrupt type.
  */
 int	ddi_intr_get_nintrs(dev_info_t *dip, int type, int *nintrsp);
@@ -142,8 +142,8 @@ int	ddi_intr_get_nintrs(dev_info_t *dip, int type, int *nintrsp);
 /*
  * ddi_intr_get_navail:
  *
- * 	Return as an integer in the integer pointed to by the argument
- * 	*navailp*, the number of interrupts currently available for the
+ *	Return as an integer in the integer pointed to by the argument
+ *	*navailp*, the number of interrupts currently available for the
  *	given interrupt type.
  */
 int	ddi_intr_get_navail(dev_info_t *dip, int type, int *navailp);

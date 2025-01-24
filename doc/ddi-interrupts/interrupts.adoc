@@ -100,7 +100,7 @@ number of problems.
 . The interrupt hierarchy is nothing like the device hierarchy
 . There are a variety of low-level hardware implementations of multi-processor
   support, which does not officially yet exist from Intel.  These necessarily
-  include different interrupt implementations, CPU interfaces, etc. 
+  include different interrupt implementations, CPU interfaces, etc.
 
 [sidebar]
 .The _Kernel Binary Interface_ (KBI)
@@ -384,7 +384,7 @@ NOTE: it is incorrect -- but not asserted -- to return `DDI_SUCCESS` but store
 
 WARNING: this is different from <<ddi-introp-navail, `DDI_INTROP_NAVAIL`>>
 although only for MSI/X.  Even then we can't find an implementation that acts
-differently. 
+differently.
 
 [#ddi-introp-alloc]
 ===== `DDI_INTROP_ALLOC`
@@ -419,7 +419,7 @@ modify `hdlp` but it does not survive.
 Return the interrupt priority level of the interrupt described by `hdlp`.
 `ih_pri` may be invalid -- 0 -- and need to be established by the
 implementation, which should also set `ih_pri`.  The framework may or may not
-call this while `ih_pri` is already non-0. 
+call this while `ih_pri` is already non-0.
 
 WARNING: `ih_dip`, `ih_type`, `ih_inum` and fields set by <<ddi-introp-alloc,
 `DDI_INTROP_ALLOC`>> are valid, others are not (this is used in the
@@ -468,7 +468,7 @@ book-keeping (SPARC PCIe), to as much as adding the ISR and
 programming the interrupt-controller (the i86 root nexus, i86 PCI).
 
 `hdlp` can be assumed to be valid, and that <<ddi-introp-addisr,
-`DDI_INTROP_ADDISR`>> has been succeeded at least once. 
+`DDI_INTROP_ADDISR`>> has been succeeded at least once.
 
 if `ih_cap` includes `DDI_INTR_FLAG_BLOCK` this operation is not used and
 <<ddi-introp-blockenable, `DDI_INTROP_BLOCKENABLE`>> is.
@@ -1537,7 +1537,7 @@ Information about the APIC hardware.
 | <<ddi-introp-settarget, `DDI_INTROP_SETTARGET`>>
 
 | <<psm-intr-op-get-intr, `PSM_INTR_OP_GET_INTR`>>
-| <<ddi-introp-gettarget, `DDI_INTROP_GETTARGET`>> (in effect) 
+| <<ddi-introp-gettarget, `DDI_INTROP_GETTARGET`>> (in effect)
 
 | <<psm-intr-op-grp-set-cpu, `PSM_INTR_OP_GRP_SET_CPU`>>
 | **???** (requires a new interface to preserve the atomicity of the PSM interface)
@@ -2077,7 +2077,7 @@ some additional fields
   ACPI.  This is opaque (actually, impossible to correctly interpret) to
   anyone not the interrupt-controller currently processing `hdlp` and the DDI
   implementation.  This is used in place of `ih_vector` which cannot represent
-  an interrupt completely. 
+  an interrupt completely.
 
 == References
 
@@ -2139,7 +2139,7 @@ sense of progression through time of the code we're left with.
 - link:https://www.kernel.org/doc/Documentation/devicetree/bindings/pci/pci-msi.txt[Devicetree PCI MSI binding]
 
 [#arm-sbsa]
-- link:https://developer.arm.com/documentation/den0029/latest/[ARM Server Base System Architecture] 
+- link:https://developer.arm.com/documentation/den0029/latest/[ARM Server Base System Architecture]
 
 [#uefi-acpi]
 - link:https://uefi.org/htmlspecs/ACPI_Spec_6_4_html[Advanced Configuration and Power Interface (ACPI)]
